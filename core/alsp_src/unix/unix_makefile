@@ -21,7 +21,7 @@ STATIC_OBJECTS = $(STATIC_SOURCE:.c=.o)
 SHARED_SOURCE = unix_shared.c
 SHARED_OBJECTS = $(SHARED_SOURCE:.c=.o)
 
-ALS_BUILD_SUPPORT = /apache/als_build_support/unix
+ALS_BUILD_SUPPORT = /home/als_build_support/unix
 ALS_BUILD_SUPPORT_INCLUDES = -isystem $(ALS_BUILD_SUPPORT)/include
 
 ALSDEV_OS_SOURCE = unix_alsdev.c

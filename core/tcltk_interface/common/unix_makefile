@@ -3,7 +3,7 @@
 #    LINK - linker directives to create shared library
 
 ALSP_SOURCE = ../../alsp_src/generic
-ALS_BUILD_SUPPORT = /apache/als_build_support/unix
+ALS_BUILD_SUPPORT = /home/als_build_support/unix
 CC = gcc
 LD = gcc
 
