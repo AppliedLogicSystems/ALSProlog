@@ -1095,6 +1095,7 @@ spy(Pred,Arity) :-
 	findall(M, all_ntbl_entries(M,Pred,Arity,R), Modules),
 	Modules \= [], 
 	!,
+	ensure_db_showing,
 	dbg_spyoff,
 	install_spypoints(Modules, Pred, Arity),
 	setPrologInterrupt(spying),
@@ -1107,6 +1108,7 @@ spy(Pred,Arity) :-
 spy(Pred,Arity) :-
     findall((M:(Pred/OtherArity)),
 	 		all_ntbl_entries(M,Pred,OtherArity,R),Options),
+	ensure_db_showing,
 	printf(debugger_output,
 		   '%t not defined in any module.\n', [Pred/Arity]),
     (   Options \= [] ->  
@@ -1137,6 +1139,7 @@ spy_pat(Module,Pred,Arity)
     findall(Module:Pred/Arity, all_ntbl_entries(Module,Pred,Arity,_), SpyList),
     SpyList \= [],
     !,
+	ensure_db_showing,
     dbg_spyoff,
     install_spypoints(SpyList),
     setPrologInterrupt(spying),
@@ -1146,6 +1149,7 @@ spy_pat(Module,Pred,Arity)
 
 spy_pat(Module,Pred,Arity) 
 	:-
+	ensure_db_showing,
     printf(debugger_output,'No predicates match pattern %t.\n',[Module:Pred/Arity]).
 
 install_spypoints([], Pred, Arity) :- !.
@@ -1193,6 +1197,7 @@ spy(Module,Predicate,Arity) :-
     functor(CallForm,Predicate,Arity),
     clause(spying_on(CallForm,Module),true),
     !,
+	ensure_db_showing,
     printf(debugger_output,
 		   'Already spying on %t\n', [Predicate/Arity]),
 	flush_output(debugger_output).
@@ -1212,6 +1217,7 @@ spy(Module,Predicate,Arity) :-
     builtins:dbg_spy(Module,Predicate,Arity),
     setPrologInterrupt(spying),
     setDebugInterrupt(spying),
+	ensure_db_showing,
 	printf(debugger_output,
 		   'Spy point set on %t',[Module:Predicate/Arity]),
     (UMod=Module ->  
@@ -1225,6 +1231,7 @@ spy(Module,Predicate,Arity) :-
 spy(Module,Predicate,Arity) :-
     setof(OtherArity,
 		  R^all_ntbl_entries(Module,Predicate,OtherArity,R),Arities),
+	ensure_db_showing,
 	printf(debugger_output,
 		   '%t not defined in module %t or any modules it uses.\n',
 		   [Predicate/Arity, Module]),
@@ -1279,6 +1286,7 @@ spyWhen(Module:WhenExpr)
 		true;
 		Call = WhenExpr, Condition = true
 	),
+	ensure_db_showing,
     install_when_spypoints([Module],Call,Condition).
 
 spyWhen(WhenExpr) 
@@ -1291,6 +1299,7 @@ spyWhen(WhenExpr)
 	functor(Call, Pred, Arity),
 	findall(M, all_ntbl_entries(M,Pred,Arity,R), Modules),
 	Modules \= [], !,
+	ensure_db_showing,
 	install_when_spypoints(Modules,Call,Condition).
 
 spyWhen(Module,Call) 
@@ -1531,9 +1540,13 @@ setup_debug(nowins, Module, Predicate, Arity, _, [])
 	:-!.
 setup_debug(DebugIOChannel, Module, Predicate, Arity, CGsSetup, NextCGsSetup)
 	:-
-%	change_source_level_debugging(on),
 	get_fcg(Module,Predicate,Arity,CG,DefiningMod),
+	!,
 	fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, NextCGsSetup).
+
+setup_debug(DebugIOChannel, Module, Predicate, Arity, CGsSetup, NextCGsSetup)
+	:-
+	ensure_db_showing.
 
 fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, CGsSetup)
 	:-
@@ -1543,12 +1556,20 @@ fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, CGsSetup)
 fin_setup_debug(ClauseGroup, Module, Predicate, Arity, 
 					CGsSetup, [ClauseGroup | CGsSetup])
 	:-
-	check_file_setup(Module, Predicate, Arity, 
-			 SrcFilePath, BaseFileName, DebugType, ClauseGroup,
-					ALSMgr, SrcMgr),
+	check_file_setup(Module, Predicate, Arity, SrcFilePath, BaseFileName, 
+						DebugType, ClauseGroup, ALSMgr, SrcMgr),
 	reload_debug(BaseFileName, SrcFilePath, DebugType, ClauseGroup, Flag),
 	!,
-	start_src_trace(Flag,BaseFileName, SrcFilePath, ClauseGroup, ALSMgr, SrcMgr).
+	(builtins:clause(alsdev_running,_) ->
+		(current_prolog_flag(debug,on) ->
+			start_src_trace(Flag,BaseFileName, SrcFilePath, 
+								ClauseGroup, ALSMgr, SrcMgr)
+			;
+			ensure_db_showing
+		)
+		;
+		true
+	).
 
 fin_setup_debug(ClauseGroup, _, _, _, CGsSetup, [ClauseGroup | CGsSetup]).
 	
@@ -1571,8 +1592,8 @@ check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, Claus
 check_file_setup(+, +, +, -, -,-, -)
  *---------------------------------------------------------------------*/
 
-check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, ClauseGroup,
-					ALSMgr, SrcMgr)
+check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,
+					DebugType, ClauseGroup, ALSMgr, SrcMgr)
 	:-
 	builtins:file_clause_group(BaseFileName, ClauseGroup),
 	builtins:get_primary_manager(ALSMgr),
@@ -1583,6 +1604,9 @@ check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, Claus
 	file_extension(SrcFilePath,_,Ext),
 	Ext \= obp,
 	send(SrcMgr, get_value(consult_mode, DebugType)).
+
+check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,
+					DebugType, ClauseGroup, ALSMgr, SrcMgr).
 
 reload_debug(user,_, _,CG,nofile(user)) :-!.
 reload_debug(BaseFileName,SrcFilePath, normal,CG,file)
