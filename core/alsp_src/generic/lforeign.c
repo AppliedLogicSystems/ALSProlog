@@ -706,14 +706,10 @@ int prolog_load_plugin(void)
 #if defined(MacOS)
 #include <Errors.h>
 #include <CodeFragments.h>
-#elif defined(unix)
-	#if defined(HAVE_DL_H)
-	#include <dl.h>
-	#elif defined(HAVE_DLFCN_H)
-	#include <dlfcn.h>
-	#else
-	#error
-	#endif
+#elif defined(HAVE_DL_H)
+#include <dl.h>
+#elif defined(HAVE_DLFCN_H)
+#include <dlfcn.h>
 #endif
 
 static plugin_error os_load_plugin(const char *lib_name,
@@ -830,8 +826,7 @@ static plugin_error os_load_plugin(const char *lib_name,
 
     return result;
 }
-#elif defined(unix)
-#if defined(HAVE_DL_H)
+#elif defined(HAVE_DL_H)
 {
     shl_t object;
     void *sym_addr = NULL;
@@ -948,9 +943,6 @@ static plugin_error os_load_plugin(const char *lib_name,
 
     return result;
 }
-#else
-#error
-#endif /* HAVE_DL_H, HAVE_DLFCN_H */
 #else
 {
     plugin_error result = {unknown_error, 0, NULL};

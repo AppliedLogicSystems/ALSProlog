@@ -1495,7 +1495,7 @@ ss_restore_state(filename,offset)
     long offset;
 {
     int ssfd, gnum;
-#if defined(HAVE_MMAP) || defined(MSWin32)
+#if defined(HAVE_MMAP) || defined(MSWin32) || defined(MACH_SUBSTRATE)
     int  bnum;
 #endif
     struct am_header hdr;
