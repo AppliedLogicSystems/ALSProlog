@@ -56,10 +56,6 @@ rm -f $2/bld-wins/mswin32/do_c2pro.bat
 ln -s $1/wins/build/mswin32/do_c2pro.bat $2/bld-wins/mswin32
 rm -f $2/bld-wins/mswin32/do_p2intf.bat
 ln -s $1/wins/build/mswin32/do_p2intf.bat $2/bld-wins/mswin32
-rm -f $2/bld-wins/mswin32/c2p_cmd.lst
-ln -s $1/wins/build/mswin32/c2p_cmd.lst $2/bld-wins/mswin32
-rm -f $2/bld-wins/mswin32/p2i_cmd.lst
-ln -s $1/wins/build/mswin32/p2i_cmd.lst $2/bld-wins/mswin32
 
 rm -f $2/bld-wins/mswin32/winpack.bat
 ln -s $1/wins/build/mswin32/winpack.bat $2/bld-wins/mswin32
