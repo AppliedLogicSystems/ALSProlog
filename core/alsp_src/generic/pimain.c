@@ -89,6 +89,19 @@ tSIOUXSettings  SIOUXSettings =
 
 #ifdef MSWin32
 #include <winsock.h>
+
+#if defined (WIN32)
+	#define IS_WIN32 TRUE
+#else
+	#define IS_WIN32 FALSE
+#endif
+#define IS_NT      IS_WIN32 && (BOOL)(GetVersion() < 0x80000000)
+#define IS_WIN32S  IS_WIN32 && (BOOL)(!(IS_NT) && ((GetVersion() & 0xFF)<4))
+#define IS_WIN95 (BOOL)(!(IS_NT) && !(IS_WIN32S)) && IS_WIN32
+
+
+
+
 #ifdef __MWERKS__
 /* I'm not sure whose bug this is, but I suspect it's a MetroWerks problem.
    When a Console UI MSWin32 program is launched from Windows95, the program
@@ -183,19 +196,8 @@ main(int argc, char ** argv)
 #ifdef MSWin32
 #ifdef __MWERKS__
     FixArguments(argc, argv);
-#if defined (WIN32)
-	#define IS_WIN32 TRUE
-#else
-	#define IS_WIN32 FALSE
-#endif
-#define IS_NT      IS_WIN32 && (BOOL)(GetVersion() < 0x80000000)
-#define IS_WIN32S  IS_WIN32 && (BOOL)(!(IS_NT) && ((GetVersion() & 0xFF)<4))
-#define IS_WIN95 (BOOL)(!(IS_NT) && !(IS_WIN32S)) && IS_WIN32
-
-
-    win32s_system = IS_WIN32S;
     
-    if (!win32s_system) {
+    if (!(IS_WIN32S)) {
 	if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE))
 	    PI_app_printf(PI_app_printf_warning, "SetConsoleCtrlHandler failed !\n");
     }
@@ -358,7 +360,7 @@ PI_app_printf(messtype,va_alist)
 	    break;
     }
     
-    if (win32s_system) {
+    if (IS_WIN32S) {
 	MessageBox(GetFocus(), s, "ALS Prolog", 0);
     } else {
     	fprintf(f, "%s", s);

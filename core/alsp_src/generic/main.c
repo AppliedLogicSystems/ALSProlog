@@ -107,6 +107,15 @@ char  imagedir[IMAGEDIR_MAX];
 static char alsdir[IMAGEDIR_MAX];	/* directory where ALS system resides */
 
 #ifdef MSWin32
+#if defined (WIN32)
+	#define IS_WIN32 TRUE
+#else
+	#define IS_WIN32 FALSE
+#endif
+#define IS_NT      IS_WIN32 && (BOOL)(GetVersion() < 0x80000000)
+#define IS_WIN32S  IS_WIN32 && (BOOL)(!(IS_NT) && ((GetVersion() & 0xFF)<4))
+#define IS_WIN95 (BOOL)(!(IS_NT) && !(IS_WIN32S)) && IS_WIN32
+
 char *MinorOSStr = "mswindows";
 int win32s_system = 0;
 #endif
@@ -200,6 +209,10 @@ Exiting ALS Prolog.\n\
 	);
 	exit(1);
     }    
+#endif
+
+#ifdef MSWin32
+    win32s_system = IS_WIN32S;
 #endif
 
 	/* Put arg and argv in globals so they can be used by the builtin get_argc_argv/2 */
@@ -484,14 +497,6 @@ Exiting ALS Prolog.\n\
      
 #ifdef MSWin32
 
-#if defined (WIN32)
-	#define IS_WIN32 TRUE
-#else
-	#define IS_WIN32 FALSE
-#endif
-#define IS_NT      IS_WIN32 && (BOOL)(GetVersion() < 0x80000000)
-#define IS_WIN32S  IS_WIN32 && (BOOL)(!(IS_NT) && ((GetVersion() & 0xFF)<4))
-#define IS_WIN95 (BOOL)(!(IS_NT) && !(IS_WIN32S)) && IS_WIN32
 
     if (IS_NT) MinorOSStr = "mswinnt";
     else if (IS_WIN32S) MinorOSStr = "mswin32s";
