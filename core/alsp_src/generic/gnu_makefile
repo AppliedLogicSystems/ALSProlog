@@ -159,7 +159,7 @@ lib: $(GETDIR)/getDirectory.tcl $(GETDIR)/unix_pkgIndex.tcl $(GETFILES)/getFiles
 
 ALSDEV_LIBS = -litcl3.0 -litk3.0 -ltcl8.0 -ltk8.0
 alsdev :  alsdir alsdir/images alsdir/shared alspro_b libalspro.a $(ALSDEV_OBJECTS) $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
-	$(CC) -o alsdev_b  $(ALSDEV_OBJECTS) libalspro.a $(LIBS) -L$(ALS_BUILD_SUPPORT)/$(SUBOS)/lib -litcl3.0 -litk3.0 -ltcl8.0 -ltk8.0 -lX11
+	$(CC) $(CFLAGS) -o alsdev_b  $(ALSDEV_OBJECTS) libalspro.a $(LIBS) -L$(ALS_BUILD_SUPPORT)/$(SUBOS)/lib -litcl3.0 -litk3.0 -ltcl8.0 -ltk8.0 -lX11
 	rm -f alsdir/builtins/*.obp
 	rm -f alsdir/library/*.obp
 	rm -f $(SUBOS)/*.obp
