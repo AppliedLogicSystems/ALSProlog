@@ -100,24 +100,6 @@ MPW Tools:
 {blddir}bld-port:alspro_b (Duplicate of mpw_alspro_b for use in scripts)
 {blddir}bld-port:alspro (Duplicate of mpw_alspro for use in scripts)
 
-MacOS Interface Libraries:
-
-{blddir}bld-wins:macos:macosinterf.ppc.lib
-{blddir}bld-wins:macos:macosinterf.68k.lib
-
-{blddir}bld-wins:macos:macos.pro
-
-{blddir}bld-wins:macos:alspro_macos0_ppc
-{blddir}bld-wins:macos:alspro_macos0_68k
-
-{blddir}bld-wins:macos:alspro_macos0 (Fat Binary)
-{blddir}bld-wins:macos:alspro_macos (Packaged Fat Binary)
-
-{blddir}bld-wins:macos:demo_alspro_macos0 (Fat Binary)
-{blddir}bld-wins:macos:demo_alspro_macos (Packaged Fat Binary)
-
-
-
 Programming Eve3 Hardware Keys
 ------------------------------
 

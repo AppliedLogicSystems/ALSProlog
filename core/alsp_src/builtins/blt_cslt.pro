@@ -892,6 +892,32 @@ attempt_load_source_object(SPath,OPath) :-
 attempt_load_source_object(SPath,OPath) :-
 	prolog_system_error(ld_fail, [SPath]).
 
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% LOWEST-LEVEL SLIB LOADING
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+export load_slib/1.
+load_slib(File) :-
+	load_plugin(File, PluginInfo, Result, NativeResult),
+	check_plugin_result(Result, File, NativeResult, builtins:load_slib(File)).
+
+check_plugin_result(no_error, _, _, _).
+check_plugin_result(type_error, File, NativeResult, _) :-
+	system_error(c_level_needs_exceptions).
+check_plugin_result(file_not_found_error, File, NativeResult, Goal) :-
+	existence_error(shared_library, File, Goal).
+check_plugin_result(permission_error, File, NativeResult, _) :-
+	permission_error(execute, shared_library, File, Goal).
+check_plugin_result(not_plugin_error, File, NativeResult, Goal) :-
+	system_error(not_shared_library(File)).
+check_plugin_result(memory_error, File, NativeResult, _) :-
+	resource_error(shared_library_memory, [os_code(NativeResult)]).
+check_plugin_result(init_error, File, NativeResult, _) :-
+	system_error(shared_library_init_error(File, os_code(NativeResult))).
+check_plugin_result(_, File, NativeResult, _) :-
+	system_error(shared_library_error(File, os_code(NativeResult))).
+
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% FILE CLAUSE GROUP MANIPULATION
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

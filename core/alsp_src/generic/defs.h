@@ -138,7 +138,7 @@
 
 /* Hack in the proper defines until config can be updated. */
 #ifndef KERNAL
-#if defined(MSWin32) && !defined(DLL)
+#if defined(MSWin32)
 #define SIMPLE_MICS 1
 #endif
 #ifdef __hp9000s800
@@ -471,6 +471,7 @@ extern	int	isdir			PARAMS((CONST char * ));
 extern	int	absolute_pathname	PARAMS((CONST char *name));
 extern	char *	re_comp			PARAMS((CONST char *pattern));
 extern	int	re_exec			PARAMS((CONST char *s));
+extern unsigned char *c2pstrcpy(unsigned char *ps, const char *cs);
 
 
 #ifndef HAVE_GUSI

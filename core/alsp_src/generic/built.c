@@ -387,6 +387,9 @@ static struct blt_struct {
 	    "_pbi_save_app_with_obp"),
 #endif /* MacOS */
 #ifndef KERNAL
+#ifndef PURE_ANSI
+	BLT("load_plugin", 4, prolog_load_plugin, "_prolog_load_plugin"),
+#endif
 	BLT("sio_mkstream", 2, sio_mkstream, "_sio_mkstream"),
 	BLT("sio_errcode", 2, sio_errcode, "_sio_errcode"),
 	BLT("sio_set_errcode", 2, sio_set_errcode, "_sio_set_errcode"),
@@ -818,6 +821,7 @@ int pbi_uncaught_interrupt(void)
 {
   fprintf(stderr, "Uncaught Interrupt!\n");
   exit(1);
+  PI_SUCCEED;
 }
 
 void

@@ -573,6 +573,26 @@ DEFS="$DEFS -D_POSIX_SOURCE=1"
   fi
 fi
 
+###################################################################
+# BEGIN HAND MODIFICATION: Check for Solaris
+###################################################################
+
+test -n "$silent" || echo "checking for Solaris"
+
+if test "`(uname) 2>/dev/null`" = SunOS \
+   && uname -r | grep '^5' >/dev/null; then
+{
+test -n "$verbose" && \
+echo "	defining SOLARIS"
+echo "#define" SOLARIS "1" >> confdefs.h
+DEFS="$DEFS -DSOLARIS=1"
+}
+fi
+
+###################################################################
+# END HAND MODIFICATION: Check for Solaris
+###################################################################
+
 test -n "$silent" || echo "checking for minix/config.h"
 cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
@@ -869,12 +889,16 @@ if test -n "$XENIX"; then
   esac
 fi
 
+###################################################################
+# BEGIN HAND MODIFICATION: Added dl.h and dlfcn.h to below
+###################################################################
+
 for ac_hdr in fcntl.h ldfcn.h libc.h libgen.h \
 		machine/param.h memory.h netdb.h regex.h \
                 select.h sgtty.h stdarg.h stddef.h stdlib.h string.h \
 		sys/mman.h sys/param.h sys/select.h sys/socket.h sys/stat.h \
 		sys/time.h sys/times.h sys/wait.h \
-		termios.h termio.h ucontext.h unistd.h
+		termios.h termio.h ucontext.h unistd.h dl.h dlfcn.h
 do
 ac_tr_hdr=HAVE_`echo $ac_hdr | tr '[a-z]./' '[A-Z]__'`
 test -n "$silent" || echo "checking for ${ac_hdr}"
@@ -1701,6 +1725,41 @@ DEFS="$DEFS -DHAVE_LIBSOCKET=1"
 
    LIBS="-lsocket ${LIBS}"
 fi
+
+###################################################################
+# BEGIN HAND MODIFICATION: Check for dld library
+###################################################################
+ac_save_LIBS="${LIBS}"
+LIBS="-ldld ${LIBS}"
+ac_have_lib=""
+test -n "$silent" || echo "checking for -ldld"
+cat > conftest.${ac_ext} <<EOF
+#include "confdefs.h"
+
+int main() { return 0; }
+int t() { main();; return 0; }
+EOF
+if eval $ac_compile; then
+  rm -rf conftest*
+  ac_have_lib="1"
+
+fi
+rm -f conftest*
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
+   
+{
+test -n "$verbose" && \
+echo "	defining HAVE_LIBDLD"
+echo "#define" HAVE_LIBDLD "1" >> confdefs.h
+DEFS="$DEFS -DHAVE_LIBDLD=1"
+}
+
+   LIBS="-ldld ${LIBS}"
+fi
+###################################################################
+# END HAND MODIFICATION: Check for dld library
+###################################################################
 
 ###################################################################
 # BEGIN HAND MODIFICATION: Check for elf library

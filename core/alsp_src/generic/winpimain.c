@@ -1,8 +1,8 @@
 /*=====================================================================*
- |		pimain.c
+ |		winpimain.c
  |	Copyright (c) 1988-1995, Applied Logic Systems, Inc.
  |
- |		-- default main() that initializes prolog and starts
+ |		-- default WinMain() that initializes prolog and starts
  |			the development shell.
  |
  *=====================================================================*/
@@ -56,10 +56,12 @@ static int ConsoleIO(int port, char *buf, size_t size)
     
 }
 
+#ifdef __MWERKS__
 extern char **__argv;
 extern int __argc;
 
 void _SetupArgsFix();
+#endif
 
 extern HINSTANCE WinMain_Instance;
 extern HINSTANCE WinMain_PrevInstance;
@@ -70,20 +72,17 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 {
     int   exit_status;
 
+#ifdef __MWERKS__
     /* Parse the command line via patched version of MWCRTL's _SetupArgsFix.
        This will setup __argc and __argv. */ 
     _SetupArgsFix();
-   
+ #endif
+  
     WinMain_Instance = hInstance;
     WinMain_PrevInstance = hPrevInstance;
     WinMain_CmdLine = lpCmdLine;
     WinMain_CmdShow = nCmdShow;
     
-
-#ifdef APP_PRINTF_CALLBACK 
-    PI_set_app_printf_callback(app_printf);
-#endif
-
     if (!AllocConsole()) exit(EXIT_FAILURE);
     PI_set_console_callback(ConsoleIO);
 

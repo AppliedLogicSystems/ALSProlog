@@ -321,7 +321,7 @@ int pbi_signal_name(void)
     if (t1 != PI_INT) PI_FAIL;
     
     if (v1 >= 0 && v1 < MAX_ALS_SIG && signal_name[v1]) {
-	PI_makesym(&s, &st, signal_name[v1]); 
+	PI_makesym(&s, &st, signal_name[v1]);
         if (PI_unify(v2, t2, s, st)) PI_SUCCEED;
 	else PI_FAIL;
     } else PI_FAIL;

@@ -266,7 +266,7 @@ void
 PI_makesym(val_ptr, val_type, buf_ptr)
     PWord *val_ptr;
     int  *val_type;
-    char *buf_ptr;
+    const char *buf_ptr;
 {
     *val_ptr = find_token((UCHAR *)buf_ptr);
     if (val_type)
@@ -277,7 +277,7 @@ void
 PI_makeuia(val_ptr, val_type, buf_ptr)
     PWord *val_ptr;
     int  *val_type;
-    char *buf_ptr;
+    const char *buf_ptr;
 {
     if ((*val_ptr = probe_token((UCHAR *)buf_ptr)) == 0)
 	w_mk_uia(val_ptr, val_type, (UCHAR *)buf_ptr);
@@ -302,25 +302,30 @@ PI_allocuia(val_ptr, val_type, size)
  */
 
 /*VARARGS0 */
+int PI_printf(const char *fmt, ...)
+{
+    va_list l;
+    int result;
+    
+    va_start(l, fmt);
+    result = PI_vprintf(fmt, l);
+    va_end(l);
+    
+    return result;
+}
+
 int
 #ifdef HAVE_STDARG_H
-PI_printf(char *fmt, ...)
+PI_vprintf(const char *fmt, va_list args)
 #else
-PI_printf(fmt, va_alist)
+PI_vprintf(fmt, args)
     char *fmt;
-    va_dcl
+    va_list args;
 #endif
 {
-    va_list args;
     char *buf;
     PWord vArg, vFunctor, vStruct, vSIO;
     int   tArg, tFunctor, tStruct, tSIO;
-
-#ifdef HAVE_STDARG_H
-    va_start(args, fmt);
-#else
-    va_start(args);
-#endif
 
     buf = malloc(MAXPRINTFBUF);
     vsprintf(buf, fmt, args);
@@ -341,26 +346,31 @@ PI_printf(fmt, va_alist)
  */
 
 /*VARARGS0 */
+int PI_aprintf(const char *alias, const char *fmt, ...)
+{
+    va_list l;
+    int result;
+    
+    va_start(l, fmt);
+    result = PI_vaprintf(alias, fmt, l);
+    va_end(l);
+    
+    return result;
+}
+
 int
 #ifdef HAVE_STDARG_H
-PI_aprintf(char *alias, char *fmt, ...)
+PI_vaprintf(const char *alias, const char *fmt, va_list args)
 #else
-PI_aprintf(alias, fmt, va_alist)
+PI_vaprintf(alias, fmt, args)
     char *alias;
     char *fmt;
-    va_dcl
+    va_list args;
 #endif
 {
-    va_list args;
     char *buf;
     PWord vArg, vFunctor, vStruct, vSIO;
     int   tArg, tFunctor, tStruct, tSIO;
-
-#ifdef HAVE_STDARG_H
-    va_start(args, fmt);
-#else
-    va_start(args);
-#endif
 
     buf = malloc(MAXPRINTFBUF);
     vsprintf(buf, fmt, args);
@@ -383,12 +393,20 @@ void PI_set_app_printf_callback(void (*callback)(int, va_list))
     PI_app_printf_callback = callback;
 }
 
+void PI_vapp_printf(int messtype, va_list args)
+{
+    if (PI_app_printf_callback) {
+    	PI_app_printf_callback(messtype, args);
+    }    	
+}
+
 void PI_app_printf(int messtype, ...)
 {
     if (PI_app_printf_callback) {
 	va_list args;
     	va_start(args, messtype);
     	PI_app_printf_callback(messtype, args);
+    	va_end(args);
     }
 }
 #endif

@@ -15,10 +15,7 @@
 #define _ALSPI_H_INCLUDED_
 
 #include <stddef.h>
-
-#ifdef APP_PRINTF_CALLBACK
 #include <stdarg.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -118,11 +115,13 @@ extern	void	PI_getuiasize	PARAMS(( PWord, int * ));
 extern	void	PI_makedouble	PARAMS(( PWord *, int *, double ));
 extern	void	PI_makelist	PARAMS(( PWord *, int * ));
 extern	void	PI_makestruct	PARAMS(( PWord *, int *, PWord, int ));
-extern	void	PI_makesym	PARAMS(( PWord *, int *, char * ));
-extern	void	PI_makeuia	PARAMS(( PWord *, int *, char * ));
+extern	void	PI_makesym	PARAMS(( PWord *, int *, CONST char * ));
+extern	void	PI_makeuia	PARAMS(( PWord *, int *, CONST char * ));
 extern	void	PI_allocuia	PARAMS(( PWord *, int *, int ));
-extern	int	PI_printf	PARAMS(( char *, ... ));
-extern	int	PI_aprintf	PARAMS(( char *, char *, ... ));
+extern	int	PI_printf	PARAMS(( CONST char *, ... ));
+extern	int	PI_aprintf	PARAMS(( CONST char *, CONST char *, ... ));
+extern  int     PI_vprintf	PARAMS(( CONST char *, va_list ));
+extern  int     PI_vaprintf	PARAMS(( CONST char *, CONST char *, va_list ));
 extern	int	PI_rungoal	PARAMS(( PWord, PWord, int ));
 extern	int	PI_rungoal_with_update	PARAMS(( PWord, PWord *, int * ));
 extern	int	PI_unify	PARAMS(( PWord , int, PWord , int ));
@@ -135,6 +134,7 @@ extern	int	PI_prolog_init	PARAMS((int, char ** ));
 extern	void	PI_set_app_printf_callback(void (*callback)(int, va_list));
 #endif
 extern	void	PI_app_printf	PARAMS(( int, ... ));
+extern  void    PI_vapp_printf  PARAMS(( int, va_list ));
 extern	const char *	PI_get_options	PARAMS(( void ));
 
 enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};

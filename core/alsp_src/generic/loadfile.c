@@ -516,16 +516,6 @@ f_load(fname)
 }
 
 #ifdef MacOS
-static unsigned char *c2pstrcpy(unsigned char *ps, const char *cs)
-{
-	size_t l = strlen(cs);
-	if (l > 255) l = 255;
-	ps[0] = l;
-	memcpy(ps+1, cs, l);
-	
-	return ps;
-}
-
 static const char *strip_path(const char *name)
 {
     const char *p;
