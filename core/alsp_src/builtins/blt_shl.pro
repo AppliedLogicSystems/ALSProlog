@@ -42,8 +42,6 @@ start_shell(DefaultShellCall)
 
 start_shell0(DefaultShellCall)
 	:-
-%	setup_debugger_stubs,
-
 	make_clinfo(CLInfo, DefaultShellCall, false),	% verbosity = verbose
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,alsshell,CLInfo),
 
@@ -52,9 +50,7 @@ start_shell0(DefaultShellCall)
 	assert(save_clinfo(CLInfo)),
 	output_system_banner(CLInfo),
 
-	setup_als_shl_mgr(Mgr),
-	make_gv('_primary_manager'),
-	set_primary_manager(Mgr),
+	init_als_shl_mgr,
 
 	sys_searchdir(ALSDIRPath),
 	split_path(ALSDIRPath, ALSDIRPathList),
@@ -71,6 +67,12 @@ start_shell0(DefaultShellCall)
 	user:ShellCall.
 
 start_shell0(_).
+
+init_als_shl_mgr
+	:-
+	setup_als_shl_mgr(Mgr),
+	make_gv('_primary_manager'),
+	set_primary_manager(Mgr).
 
 setup_als_shl_mgr(MgrObject)
 	:-
