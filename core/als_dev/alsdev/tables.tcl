@@ -19,7 +19,7 @@ proc load_table_package {DirsList} {
 		set Flag 0
 		set DirNum 0
 		set Result 1
-		while {[expr $DirNum<$NumDirs] && [expr $Flag==0]} {
+		while {[expr $DirNum<$NumDirs] && [expr $Flag == 0]} {
 			set Where [eval file join [concat [lindex $DirsList $DirNum] $TkTFile]]
 			set Result [catch {load $Where }]
 			incr DirNum
@@ -60,7 +60,7 @@ proc build_table {BaseName InfoArrayName List} {
 	set IA(colstretch) all
 	set IA(flashmode) on
 
-	while { "$List"!= "" } {
+	while {$List != ""} {
 		set IA([lindex $List 0]) [lindex $List 1]
 		set List [lrange $List 2 end]
 	}
@@ -69,13 +69,13 @@ proc build_table {BaseName InfoArrayName List} {
 	global array $DataArrayName
 
 	upvar #0 $IA(array) ff
-	if {"$IA(colheadings)"!=""} {
+	if {$IA(colheadings) != ""} {
 		set ll [llength $IA(colheadings)]
 		for {set i 0} { $i < $ll } {incr i} { 
 			set ff(-1,$i) [lindex $IA(colheadings) $i] 
 		}
 	}
-	if {"$IA(rowheadings)"!=""} {
+	if {$IA(rowheadings) != ""} {
 		set ll [llength $IA(rowheadings)]
 		for {set i 0} { $i < $ll } {incr i} { 
 			set ff($i,-1) [lindex $IA(rowheadings) $i] 
@@ -216,10 +216,10 @@ proc sweep_to_array {SI TgtArray InitColNum} {
     set CCnt [gets $SI Line]
 	while { "$CCnt" >= 1 } {
 		set Col $InitColNum
-		while {$Line!=""} {
+		while {$Line != ""} {
 			incr Col
 			set Pos [string first "\t" $Line]
-			if { $Pos==-1 } then { set Pos [ string length $Line ] }
+			if {$Pos == -1} then { set Pos [ string length $Line ] }
 			set Item [ string range $Line 0 [ expr $Pos-1 ] ]
 			set TA($Row,$Col) $Item
 			set Line [string range $Line [ expr $Pos+1 ] end]
@@ -247,17 +247,17 @@ proc sweep_to_array_select {SI TgtArray InitColNum SrcColNumList} {
 		set TableCol $InitColNum
 		set II 0
 		set SCC 0
-		while {($Line!="") && ($II<$NumSrcCols)} {
+		while {($Line != "") && ($II<$NumSrcCols)} {
 			set SrcColNum [lindex $SrcColNumList $II]
-			if {$SCC==$SrcColNum} then {
+			if {$SCC == $SrcColNum} then {
 				set Pos [string first "\t" $Line]
-				if { $Pos==-1 } then { 
+				if {$Pos == -1} then { 
 					set Pos [llength $Line]
 				}
 			} elseif {$SCC < $SrcColNum } then  {
 				while {$SCC < $SrcColNum} {
 					set Pos [string first "\t" $Line]
-					if { $Pos==-1 } then { 
+					if {$Pos == -1} then { 
 						set II $NumSrcCols
 						break
 					} 
@@ -265,7 +265,7 @@ proc sweep_to_array_select {SI TgtArray InitColNum SrcColNumList} {
 					incr SCC
 				}
 				set Pos [string first "\t" $Line]
-				if { $Pos==-1 } then { 
+				if {$Pos == -1} then { 
 					set Pos [llength $Line]
 				}
 			} else {
@@ -273,7 +273,7 @@ proc sweep_to_array_select {SI TgtArray InitColNum SrcColNumList} {
 				set Line $SaveLine
 				while {$SCC < $SrcColNum} {
 					set Pos [string first "\t" $Line]
-					if { $Pos==-1 } then { 
+					if {$Pos == -1} then { 
 						set II $NumSrcCols
 						break
 					} 
@@ -281,7 +281,7 @@ proc sweep_to_array_select {SI TgtArray InitColNum SrcColNumList} {
 					incr SCC
 				}
 				set Pos [string first "\t" $Line]
-				if { $Pos==-1 } then { 
+				if {$Pos == -1} then { 
 					set Pos [llength $Line]
 				}
 			}
