@@ -827,46 +827,58 @@ build_primitive_closures(_)
 
 load_builtins(File) 
 	:-
+	sys_env(OS,_,_),
+	(OS = macos, !, Sepr = ':'; Sepr = '/'),
+	'$atom_concat'('builtins',Sepr, BDir),
+	load_builtins(BDir, File).
+
+load_builtins(BDir, File) 
+	:-
 	sys_searchdir(Path),
-	'$atom_concat'('builtins/',File, BltFile),
+        '$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
-%%pbi_write(FileAndPath),pbi_nl,
-	'$load'(FileAndPath, 0),
-	!.
+%%pbi_write(FileAndPath),pbi_nl,pbi_ttyflush,
+	'$load'(FileAndPath, 0).
 
 :-	auto_use(sio).
 :-	auto_use(debugger).
 :-	auto_use(xconsult).
+		%% Make this a conditional:
+:-	auto_use(rel_arith).
 
 :- 	command_line(CL), 
 	dmember('-nobuilt',CL),!	% ,pbi_write(nobuilts), pbi_nl
 	;
-    	%% pbi_write(loading_builts),pbi_nl,
-	load_builtins(sio_rt),		%% for getting op declarations
-	load_builtins(blt_evt),		%% need error checking code early
-	load_builtins(blt_term),
-	load_builtins(blt_db),		%% must come before blt_sys
-	load_builtins(filepath),	%% also must come before blt_sys
-	load_builtins(blt_io),
-	load_builtins(blt_ctl),
-	load_builtins(blt_sys),
-	load_builtins(blt_std),
-	load_builtins(blt_stk),
-	load_builtins(blt_als),
-	load_builtins(blt_atom),
-	load_builtins(cutils),
-	load_builtins(sio),
-	load_builtins(sio_wt),
-	load_builtins(sio_d10),
-	load_builtins(blt_lib), 
-	load_builtins(blt_msg),
-	load_builtins(blt_brk),
-	load_builtins(xconsult),
-	load_builtins(fs_cmn),
-	load_builtins(dcgs),
-	load_builtins(blt_pckg),
-	load_builtins(blt_frez),
-	load_builtins(blt_shl).
+		%%pbi_write(loading_builts),pbi_nl,pbi_ttyflush,
+	sys_env(OS,_,_),
+	(OS = macos, !, Sepr = '\\'; Sepr = '/'),
+	'$atom_concat'('builtins',Sepr, BDir),
+
+	load_builtins(BDir, sio_rt),		%% for getting op declarations
+	load_builtins(BDir, blt_evt),		%% need error checking code early
+	load_builtins(BDir, blt_term),
+	load_builtins(BDir, blt_db),		%% must come before blt_sys
+	load_builtins(BDir, filepath),		%% also must come before blt_sys
+	load_builtins(BDir, blt_io),
+	load_builtins(BDir, blt_ctl),
+	load_builtins(BDir, blt_sys),
+	load_builtins(BDir, blt_std),
+	load_builtins(BDir, blt_stk),
+	load_builtins(BDir, blt_als),
+	load_builtins(BDir, blt_atom),
+	load_builtins(BDir, cutils),
+	load_builtins(BDir, sio),
+	load_builtins(BDir, sio_wt),
+	load_builtins(BDir, sio_d10),
+	load_builtins(BDir, blt_lib), 
+	load_builtins(BDir, blt_msg),
+	load_builtins(BDir, blt_brk),
+	load_builtins(BDir, xconsult),
+	load_builtins(BDir, fs_cmn),
+	load_builtins(BDir, dcgs),
+	load_builtins(BDir, blt_pckg),
+	load_builtins(BDir, blt_frez),
+	load_builtins(BDir, blt_shl).
 
 %%--------------------------------------------
 %% set up the operators (stream io stuff needs to be 
@@ -921,6 +933,14 @@ ld_wins
 	ld_fs, 
 	ld_mth, 
 	ld_wins.
+
+:- dynamic(intconstr/0).
+
+:-  intconstr, !, 
+	load_builtins(ra_basis),
+	load_builtins(int_cstr)
+	;
+	true.
 
 /*----------------------------------------------------------------
  | Part 5: Starting a shell or an entry point.

@@ -70,7 +70,7 @@
    %% for macros:
 :- op(925,fx,``).
 :- op(930,fx,`).
-:- op(1200,xfx,'=>').
+:- op(600,xfx,'=>').
 :- op(1190,xfx,when).
 :- op(1180,xfx,where).
 :- op(1170,xfx,with).
@@ -131,7 +131,7 @@
 	[general_os/3,general_os/4,lib_extension/2,
 	 winsystems_for/2, winsystems_for/3, ws_vars/3,ws_vars/5,
 	 flatten_ws_lists/2,  flatten_to_atom/2, cat_together_seplines/2,
-	 cat_together_spaced/2, prefix_dir/3,
+	 system_dir_root/2, cat_together_spaced/2, prefix_dir/3,
 	 determine_default_ws/1, known_ws/1,
 	 specif_winsystems_for/3 ], [] ).
 

@@ -13,89 +13,97 @@ schema([
 	dep(all),
 	cmnt(2),
 	'CPPFLAGS',
-	irule(c),
+	case(&(context_name), [
+		  (mac: [irule(c,'68k.o'), irule(c,'ppc.o')]),
+		  (_:irule(c) )
+	] ),
 	cmnt(3),
-	gforfiles_c  = ext(gforfiles,c)  qual one_per_line,
-	gpckgfiles_c = ext(gpckgfiles,c) qual one_per_line,
-	glibfiles_c  = ext(glibfiles,c)  qual one_per_line,
+	case(&(context_name),[
+		 (mac:[
+			 gforfiles_68k_o  = ext(gforfiles,'68k.o')  qual one_per_line,
+			 gpckgfiles_68k_o = ext(gpckgfiles,'68k.o') qual one_per_line,
+			 glibfiles_68k_o  = ext(glibfiles,'68k.o')  qual one_per_line,
+			 gfiles_68k_o 	= ['{gforfiles_68k_o} {gpckgfiles_68k_o} {glibfiles_68k_o}'],
+			 gforfiles_ppc_o  = ext(gforfiles,'ppc.o')  qual one_per_line,
+			 gpckgfiles_ppc_o = ext(gpckgfiles,'ppc.o') qual one_per_line,
+			 glibfiles_ppc_o  = ext(glibfiles,'ppc.o')  qual one_per_line,
+			 gfiles_ppc_o 	= ['{gforfiles_ppc_o} {gpckgfiles_ppc_o} {glibfiles_ppc_o}']
+			  ] ),
+		 (_:[
+			 gforfiles_c  = ext(gforfiles,c)  qual one_per_line,
+			 gpckgfiles_c = ext(gpckgfiles,c) qual one_per_line,
+			 glibfiles_c  = ext(glibfiles,c)  qual one_per_line,
+			 gfiles_c 	= ['$(gforfiles_c) $(gpckgfiles_c) $(glibfiles_c)'],
+			 gfiles_o = '$(gfiles_c:.c=.' + &(context_name) + ')' 
+			] ) ] ),
 
-	gfiles_c 	= ['$(gforfiles_c) $(gpckgfiles_c) $(glibfiles_c)'],
-
-	gfiles_o = '$(gfiles_c:.c=.' + &(object) + ')' ,
 
 	~gfiles_h = ext(gfiles_h,h) qual one_per_line,
+
+
 	~'OTHERFILES' = ext('OTHERFILES',c),
 
 	case(&(context_name),[
 		(msw31:noop),
+		(mac:noop),
+		(os2:noop),
 		(_:[
-	cmnt(4),
-	~'GENFILES' = ext('GENFILES',h),
-	'LEXRUN',
-	'SIORUN',
-	'ICODERUN',
-	'MAGICRUN',
-	'BLDTRUN',
-	generated,
-	rule('magic.h'),
-	dep('tokini2.h'),
-	rule('tokens.h'),
-	rule('lexinit.h'),
-	rule('siolex.h'),
-	rule('icode.h')
+			cmnt(4),
+			~'GENFILES' = ext('GENFILES',h),
+			'LEXRUN',
+			'SIORUN',
+			'ICODERUN',
+			'MAGICRUN',
+			'BLDTRUN',
+			generated,
+			rule('magic.h'),
+			dep('tokini2.h'),
+			rule('tokens.h'),
+			rule('lexinit.h'),
+			rule('siolex.h'),
+			rule('icode.h')
 		])
 		]),
 
 	cmnt(gen_dep),
 	~defs_h = ext(defs_h,h) qual one_per_line,
-	'$(gfiles_' + &(object) + ')' : '$(defs_h)',
-	(ext(&(gen_h_dep),&(object)) qual single_line) : ext([module,wintcode,wntbl,wci], h) qual single_line,
-	ext(bdb,      &(object))	: ext([icodegen,cutmacro,compile],h),
-	ext(bdbg,     &(object))	: ext([wintcode],h),
-	ext(bio,      &(object))	: ext([icom,wintcode],h),
-	ext([built,bmeta],&(object)): ext([icodegen,icom],h),
-	ext(bmisc,    &(object))	: ext([wintcode,compile],h),
-	ext(bpckg,    &(object))	: ext([wintcode,coerce,pckg,rinfo,pckgcoff],h),
-	ext(bsio,     &(object))	: ext([bsio,siolex],h),
-	ext(cinterf,  &(object))	: ext([cinterf],h),
-	ext(compile,  &(object))	: ext([varproc,cutmacro,compile,icode,icodegen,icom],h),
-	ext(compmath, &(object))	: ext([varproc,compile,icode,icodegen,icom],h),
-	ext(expand,   &(object))	: ext([varproc,parsstak,compile,icodegen,icom,main],h),
-	ext(freeze,   &(object))	: ext([icodegen,cutmacro,compile,module,wintcode,wntbl,wci],h),
-	ext(gc,       &(object))	: ext([machinst,wintcode],h),
-	ext(index,    &(object))	: ext([icodegen,icom],h),
-	ext(lexan,    &(object))	: ext([lexan,lexinit],h),
-	ext(loadfile, &(object))	: ext([wintcode,icodegen,magic,version],h),
-	ext(main,     &(object))	: ext([main,version,pckg,rinfo],h),
-	ext(mem,      &(object))	: ext([version,sig,alsmem],h),
-	ext(module,   &(object))	: ext([cutmacro,main,icodegen,icom],h),
-	ext(newpckgcoff,  &(object))	: ext([coerce,pckgcoff,rinfo],h),
-	ext(parser,   &(object))	: ext([lexan,parsstak,icodegen,icom],h),
-	ext(pckgcoff, &(object))	: ext([coerce,pckgcoff,rinfo],h),
-	ext(pckgload, &(object))	: ext([pckg],h),
-	ext(pckgmake, &(object))	: ext([pckg,pckgcoff,pckgmake,rinfo,compile],h),
-	ext(pimain,   &(object))	: ext([config,alspi,pi_cfg],h) appnd ext([pi_init],&(object)),
-	ext(rinfo,    &(object))	: ext([rinfo],h),
-	ext(sig,      &(object))	: ext([sig],h),
-	ext(symtab,   &(object))	: ext([pckg,pckgcoff,tokini2],h),
-	ext(varproc,  &(object))	: ext([varproc],h),
-	ext(wintcode, &(object))	: ext([cutmacro,main,rinfo,icodegen],h),
-	ext(winter,   &(object))	: ext([winter],h),
-	cmnt(mics),
-	case(&(context_name),
-		 [(unix:(exeformat := '$(shell ($(CC) -o /tmp/which-exe $(srcdir)/utils/which-exe.c >/dev/null 2>&1) ; /tmp/which-exe ; rm -f /tmp/which-exe)')),
-		  (djgpp:(exeformat = coff)),
-		  (_:(exeformat = zipper))
-		 ]),
 
-	alsmics_c = '$(exeformat)mics.c',
+	case(&(context_name),[
+		 (mac: [
+				'{gfiles_' + '68k_o' + '}' : '{defs_h}',
+				(ext(&(gen_h_dep),'68k.o') qual single_line) : ext([module,wintcode,wntbl,wci], h) qual single_line,
+				depends_list('68k.o'),
+				'{gfiles_' + 'ppc_o' + '}' : '{defs_h}',
+				(ext(&(gen_h_dep),'ppc.o') qual single_line) : ext([module,wintcode,wntbl,wci], h) qual single_line,
+				depends_list('ppc.o') ]),
+		 ( _ :[ 
+			'$(gfiles_' + &(object) + ')' : '$(defs_h)',
+			(ext(&(gen_h_dep),&(object)) qual single_line) : ext([module,wintcode,wntbl,wci], h) qual single_line,
+			depends_list(&(object))] )]),
 
-	case(&(context_name),
-		[(unix:shell(['ifeq (elf,$(exeformat))','micsflags	= -lelf','endif'])),
-		 (_:noop)]),
+	case(&(context_name),[
+		(msw31:noop),
+		(mac:noop),
+		(_:[
+			cmnt(mics),
+			case(&(context_name),
+		 		[(unix:(exeformat := '$(shell ($(CC) -o /tmp/which-exe $(srcdir)/utils/which-exe.c\
+					 >/dev/null 2>&1) ; /tmp/which-exe ; rm -f /tmp/which-exe)')),
+		  		 (djgpp:(exeformat = coff)),
+		  		 (os2:(exeformat = coff)),
+		  		 (_:(exeformat = unknown))
+		 		]),
 
-	rule(alsmics),
-	rule(alstest)
+			alsmics_c = '$(exeformat)mics.c',
+
+			case(&(context_name),
+				[(unix:shell(['ifeq (elf,$(exeformat))','micsflags	= -lelf','endif'])),
+		 		(_:noop)]),
+
+			rule(alsmics),
+			rule(alstest)
+		])
+		])
 
 ]).
 
@@ -105,7 +113,8 @@ cmnt(0)		= ['        generic.mkf',
  			   '    Copyright (c) 1994-95 Applied Logic Systems, Inc.',
 			   '  ',
                'Makefile fragment to be included by each Makefile ',
-               'for building ALS-Prolog on ' + &(context_name),
+			   ' ',
+               'For building ALS-Prolog on >>' + &(context_name) + '<<',
 			   '  ',
 			   'Generated by abs2make from generic.abs: '+date+' - '+time].
 
@@ -116,14 +125,25 @@ all 	depends_on  [alsdir, setup, alspro_b, alsmics, alspro, alstest].
 cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 					'C source files to object files'].
 
-&(cpp_includes)	= '-I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(srcdir)/$(ARCH)/$(SOS) '.
+&(cpp_includes)	= case(&(context_name),
+		[
+		 (mac:
+			'-i : -i :: -i {srcdir}:generic -i {srcdir}:{ARCH} -i {srcdir}:{ARCH}:{SOS} ' ),
+		 (_:
+			'-I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(srcdir)/$(ARCH)/$(SOS) ' ) ] ).
 
-&(cpp_defines)		= '-DHAVE_CONFIG_H'.
+&(cpp_defines)		= 
+	case(&(context_name),[
+		(mac: ' -D HAVE_CONFIG_H'),
+		(_: ' -DHAVE_CONFIG_H')]).
 
 'CPPFLAGS'			= &(cpp_includes) + &(cpp_defines).
 
+irule(c,'68k.o') = irule(c, '68k.o', [' {CC68k} {CPPFLAGS}  {CFLAGS68k}  {DepDir}{Default}.c -o {TargDir}{Default}.68k.o']).
+irule(c,'ppc.o') = irule(c, 'ppc.o', [' {CCppc} {CPPFLAGS}  {CFLAGSppc}  {DepDir}{Default}.c -o {TargDir}{Default}.ppc.o']).
+
 irule(c) = 
-	irule(c,&(object),
+	irule(c,&(context_name),
 		['$(CC) -c $(CPPFLAGS) $(CFLAGS) $(X_CFLAGS) $<']).
 
 cmnt(3)			= ['C-defined files making up common part of system'].
@@ -238,6 +258,7 @@ gfiles_h =
 
 'OTHERFILES' = [alsglue].
 
+/*
 cmnt(4) = ['These items must generate themselves from other files'].
 
 'GENFILES' = [tokens, tokini2, lexinit, siolex, magic].
@@ -287,6 +308,7 @@ rule('icode.h') =
 		['$(CC) $(CPPFLAGS) -o icode $(srcdir)/generic/generate/icode.c',
 		 '$(ICODERUN)',
 		 '-rm -rf ./icode']).
+*/
 
 cmnt(gen_dep) = ['generic dependencies',
 				 ' ',
@@ -316,14 +338,21 @@ rule(alsmics,
 		 	 '-cp alsmics ' + alsdir/'als-mics',
 			 'coff2exe alsmics',
 			 '-cp alsmics.exe ' + alsdir/'als-mics.exe' ] ),
+		 (os2:
+			['echo exeformat=$(exeformat)',
+		 	 '$(CC) -o alsmics ' + '$(srcdir)'/utils/'$(alsmics_c) ' + '$(CPPFLAGS) $(micsflags)',
+		 	 '-cp alsmics ' + alsdir/'als-mics'] ),
 		 (msw31:
 			['echo exeformat=$(exeformat)',
 		 	 '$(CC) -o alsmics ' + '$(srcdir)'/utils/'$(alsmics_c) ' + '$(CPPFLAGS) $(micsflags)',
 		 	 '-cp alsmics ' + alsdir/'als-mics'] ),
+		 (mac:noop)
+/*
 		 (mac:
-			['echo exeformat=$(exeformat)',
+			[ 'echo exeformat=$(exeformat)',
 		 	 '$(CC) -o alsmics ' + '$(srcdir)'/utils/'$(alsmics_c) ' + '$(CPPFLAGS) $(micsflags)',
 		 	 '-cp alsmics ' + alsdir/'als-mics'] )
+*/
 		] ) ).
 
 
@@ -336,3 +365,38 @@ rule(alstest) =
 		 '$(srcdir)/bin/alsnrevt $(srcdir)',
 		 'cat nrev_rcd' ] ).
 
+depends_list(_) = 
+	depends_list(EXT,
+			[
+			ext(bdb,      EXT)	: ext([icodegen,cutmacro,compile],h),
+			ext(bdbg,     EXT)	: ext([wintcode],h),
+			ext(bio,      EXT)	: ext([icom,wintcode],h),
+			ext([built,bmeta],EXT): ext([icodegen,icom],h),
+			ext(bmisc,    EXT)	: ext([wintcode,compile],h),
+			ext(bpckg,    EXT)	: ext([wintcode,coerce,pckg,rinfo,pckgcoff],h),
+			ext(bsio,     EXT)	: ext([bsio,siolex],h),
+			ext(cinterf,  EXT)	: ext([cinterf],h),
+			ext(compile,  EXT)	: ext([varproc,cutmacro,compile,icode,icodegen,icom],h),
+			ext(compmath, EXT)	: ext([varproc,compile,icode,icodegen,icom],h),
+			ext(expand,   EXT)	: ext([varproc,parsstak,compile,icodegen,icom,main],h),
+			ext(freeze,   EXT)	: ext([icodegen,cutmacro,compile,module,wintcode,wntbl,wci],h),
+			ext(gc,       EXT)	: ext([machinst,wintcode],h),
+			ext(index,    EXT)	: ext([icodegen,icom],h),
+			ext(lexan,    EXT)	: ext([lexan,lexinit],h),
+			ext(loadfile, EXT)	: ext([wintcode,icodegen,magic,version],h),
+			ext(main,     EXT)	: ext([main,version,pckg,rinfo],h),
+			ext(mem,      EXT)	: ext([version,sig,alsmem],h),
+			ext(module,   EXT)	: ext([cutmacro,main,icodegen,icom],h),
+			ext(newpckgcoff,  EXT)	: ext([coerce,pckgcoff,rinfo],h),
+			ext(parser,   EXT)	: ext([lexan,parsstak,icodegen,icom],h),
+			ext(pckgcoff, EXT)	: ext([coerce,pckgcoff,rinfo],h),
+			ext(pckgload, EXT)	: ext([pckg],h),
+			ext(pckgmake, EXT)	: ext([pckg,pckgcoff,pckgmake,rinfo,compile],h),
+			ext(pimain,   EXT)	: ext([config,alspi,pi_cfg],h) appnd ext([pi_init],EXT),
+			ext(rinfo,    EXT)	: ext([rinfo],h),
+			ext(sig,      EXT)	: ext([sig],h),
+			ext(symtab,   EXT)	: ext([pckg,pckgcoff,tokini2],h),
+			ext(varproc,  EXT)	: ext([varproc],h),
+			ext(wintcode, EXT)	: ext([cutmacro,main,rinfo,icodegen],h),
+			ext(winter,   EXT)	: ext([winter],h)
+			] ).

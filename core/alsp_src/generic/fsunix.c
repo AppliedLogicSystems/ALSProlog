@@ -2,7 +2,7 @@
  |              fsunix.c
  |      Copyright (c) 1991-1994 Applied Logic Systems, Inc.
  |
- |      -- File System Access & Manipulation -- Unix
+ |      -- File System Access & Manipulation -- Unix/DJGPP/OS2(emx)?
  |
  |  This is one of a group of files providing file system access:
  |		fsunix.c, fsdos.c, fsmac.c, ..., etc.,...
@@ -13,7 +13,7 @@
  *===========================================================================*/
 #include "defs.h"
 
-#if defined(UNIX) && !defined(__GO32__)
+#if defined(UNIX) && !defined(__GO32__) && !defined(OS2)
 
 #include <sys/param.h>
 
@@ -977,4 +977,4 @@ init_fsutils()
     PI_INIT;
 }
 
-#endif /* UNIX */
+#endif /* defined(UNIX) && !defined(__GO32__)  && !defined(OS2) */

@@ -238,7 +238,7 @@ pbi_c_set()
 		*(double *) (ptr + offset) = doubleval;
 		break;
 
-#if defined(DOS) && !defined(__GO32__)
+#if defined(DOS) && !defined(__GO32__) && !defined(OS2)
 	    case 14:		/* far pointer type */
 		if (datatype != WTP_STRUCTURE)
 		    FAIL;

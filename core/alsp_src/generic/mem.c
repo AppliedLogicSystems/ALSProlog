@@ -29,6 +29,12 @@
 #include <fcntl.h>
 #endif
 
+#ifdef __MWERKS__
+#include <unix.h>
+/* MetroWerks does not define the EINTR error code. */
+#define EINTR           4
+#endif
+
 #include <errno.h>
 
 #ifndef O_BINARY

@@ -16,14 +16,7 @@
 module builtins.
 
 export date/1.
-%export date_less/2.
-%export date_pattern/4.
-%export set_date_pattern/1.
-%export valid_date/1.
-%export valid_date/3.
 export time/1.
-%export time_less/2.
-%export datetime_less/2.
 
 export get_cwd/1.
 export change_cwd/1.
@@ -37,7 +30,7 @@ export files/2.
 export files/3.
 export subdirs/1.
 export subdirs_red/1.
-export collect_files/3.
+%export collect_files/3.
 export directory/3.
 %export canon_path/2.
 
@@ -61,92 +54,6 @@ date(Date)
 	MM is Month + 1,
 	date_pattern(YY,MM,DD,Date).
 
-%/*******************************
-/*!--------------------------------------------------------------
- |	date_less/2
- |	date_less(Date0, Date1)
- |	date_less(+,+)
- |
- |	 - tests two terms representing dates for ordering
- |
- |	If Date0 and Date1 are date terms of the form YY/MM/DD, succeeds
- |	if and only if Date0 represents a date earlier than Date1.
- *!--------------------------------------------------------------*/
-date_less(YY0/MM0/DD0, YY1/MM1/DD1)
-	:-
-	(YY0 < YY1,!;
-		(YY0 = YY1, 
-			(MM0 < MM1,!; (MM0 = MM1, DD0 < DD1)))).
-
-/*!--------------------------------------------------------------
- *!--------------------------------------------------------------*/
-set_date_pattern(AA/BB/CC)
-	:-
-	name(AA, [AChar | _]),
-	dmember(AChar, "ymd"),
-	name(BB, [BChar | _]),
-	dmember(BChar, "ymd"),
-	name(CC, [CChar | _]),
-	dmember(CChar, "ymd"),
-	ACharU is AChar - 32,
-	BCharU is BChar - 32,
-	CCharU is CChar - 32,
-	sort([ACharU,BCharU,CCharU],YMD_Var_Chars0),
-	dreverse(YMD_Var_Chars0, YMD_Var_Chars1),
-	insert_comma_chars(YMD_Var_Chars1, YMD_Var_Chars2),
-	append([0'[ | YMD_Var_Chars2], [ACharU,0'/,BCharU,0'/,CCharU,0']], PatternChars),
-	bufread(PatternChars, PatternArgsList),
-	DatePattern =.. [date_pattern | PatternArgsList],
-	abolish(date_pattern,4),
-	assert(DatePattern).
- 
-insert_comma_chars([], []).
-insert_comma_chars([C | RestCs], [C, 0', | RestICs])
-	:-
-	insert_comma_chars(RestCs, RestICs).
-
-	%% Default:
-date_pattern(YY,MM,DD,YY/MM/DD).
-
-/*!--------------------------------------------------------------
- *!--------------------------------------------------------------*/
-valid_date(YY-MM-DD)
-	:-
-	valid_date(YY/MM/DD).
-valid_date(Date)
-	:-
-	date_pattern(YY,MM,DD,Date),
-	valid_date(YY,MM,DD).
-
-valid_date(YY,MM,DD)
-	:-
-	integer(YY), YY >= 0,
-	integer(MM), 1 =< MM, MM =< 12,
-	integer(DD), 1 =< DD, DD =< 31,
-	(DD =< 28 ->
-	    true
-	    ;
-	    end_of_month(DD,MM,YY)
-	).
-
-end_of_month(29,2,YY)
-	:-
-	0 is YY mod 4.
-
-end_of_month(29,2,YY)
-	:-!,
-	fail.
-end_of_month(29,MM,YY).
-
-end_of_month(30,MM,YY)
-	:-
-	MM \= 2.
-
-end_of_month(31,MM,YY)
-	:-
-	dmember(MM, [1,3,5,7,8,10,12]).
-%*************************/
-
 /*!--------------------------------------------------------------
  |	time/1
  |	time(HH:MM:SS)
@@ -160,40 +67,6 @@ end_of_month(31,MM,YY)
 time(HH:MM:SS)
 	:-
 	'$time'(SS,MM,HH,_,_,_,_,_,_).
-
-%/*******************************
-/*!--------------------------------------------------------------
- |	time_less/2
- |	time_less(Time0, Time1)
- |	time_less(+,+)
- |
- |	 - tests two terms representing time for ordering
- |
- |	If Time0 and Time1 are time terms of the form HH:MM:SS, succeeds
- |	if and only if Time0 represents a time earlier than Time1.
- *!--------------------------------------------------------------*/
-time_less(HH0:MM0:SS0, HH1:MM1:SS1)
-	:-
-	(HH0 < HH1,!;
-		(HH0 = HH1, 
-			(MM0 < MM1,!; (MM0 = MM1, SS0 < SS1)))).
-
-/*!--------------------------------------------------------------
- |	datetime_less/2
- |	datetime_less(Time0, Time1)
- |	datetime_less(+,+)
- |
- |	 - tests two terms representing datetime for ordering
- |
- |	If DateTime0 and DateTime1 are time terms of the form 
- |		(Date0,Time0), (Date1,Time1),
- |	succeeds iff DateTime0 preceeds or equals DateTime1.
- *!--------------------------------------------------------------*/
-datetime_less((Date0,Time0), (Date1,Time1))
-	:-
-	date_less(Date0, Date1),!;
-		Date0 = Date1, time_less(Time0, Time1).
-%*************************/
 
 /*!--------------------------------------------------------------
  |	change_cwd/1
@@ -386,7 +259,7 @@ files(Directory, Pattern, List)
  *!----------------------------------------------------------------*/
 subdirs(SubdirList)
 	:-
-	directory('*',1,SubdirList).
+	directory('./*',1,SubdirList).
 
 /*!----------------------------------------------------------------
  |	subdirs_red/1
@@ -404,6 +277,7 @@ subdirs_red(SubdirList)
 	list_delete(SubdirList0, '.', SubdirList1),
 	list_delete(SubdirList1, '..', SubdirList).
 
+/***************************************************************
 /*!----------------------------------------------------------------
  |	collect_files/3
  |	collect_files(PatternList,FileType,FileList)
@@ -433,6 +307,7 @@ collect_files0([Pattern | RestPatterns], InternalType,
 	:-
 	directory(Pattern, InternalType, FileList),
 	collect_files0(RestPatterns, InternalType, RestFileList).
+***************************************************************/
 
 /*---------------------------------------------------------------
  |	File types/attributes:
@@ -483,8 +358,6 @@ file_status(FileName, Status) :-
 	ownerPermissionsCoding(OwnerPermiss, Permissions),
 	Status = [type=FileType, permissions=Permissions,
 			  mod_time=ModTime, size=ByteSize].
-
-
 
 /*!------------------------------------------------------------------
  |	directory/3
@@ -588,9 +461,7 @@ fflt_ck(ThisFileType, FileType, FullFile)
 	read_link(FullFile, LinkTarget),
 	'$getFileStatus'(LinkTarget, LinkStatusTerm),
 	arg(1, LinkStatusTerm, LinkFileType),
-%	fflt_ck(LinkFileType, FileType, FullFile).
 	fflt_ck(LinkFileType, FileType, LinkTarget).
-
 
 export disj_to_string/2.
 disj_to_string((Pattern1 ; Pattern2), PatternChars)

@@ -207,6 +207,35 @@ static struct blt_struct {
 	BLT("$bind_vars", 2, pbi_bind_vars, "_pbi_bind_vars"),
 #endif /* FREEZE */
 
+#ifdef INTCONSTR
+	BLT("equal",	  3, i_equal, "_i_equal"),
+	BLT("greatereq",  3, i_greatereq, "_i_greatereq"),
+	BLT("higher",	  3, i_higher, "_i_higher"),
+	BLT("unequal",	  3, i_unequal, "_i_unequal"),
+
+	BLT("add",	  4, i_add, "_i_add"),
+	BLT("begin_tog",  3, i_begin_tog, "_i_begin_tog"),
+	BLT("cos",	  3, i_cos, "_i_cos"),
+	BLT("finish_tog", 3, i_finish_tog, "_i_finish_tog"),
+	BLT("inf",	  4, i_inf, "_i_inf"),
+	BLT("j_less",	  4, i_j_less, "_i_j_less"),
+	BLT("k_equal",	  4, i_k_equal, "_i_k_equal"),
+	BLT("lub",	  4, i_lub, "_i_lub"),
+	BLT("mul",	  4, i_mul, "_i_mul"),
+	BLT("narrower",	  3, i_narrower, "_i_narrower"),
+	BLT("or",	  4, i_or, "_i_or"),
+	BLT("pow_odd",	  4, i_pow_odd, "_i_pow_odd"),
+	BLT("qpow_even",  4, i_qpow_even, "_i_qpow_even"),
+	BLT("rootsquare", 3, i_rootsquare, "_i_rootsquare"),
+	BLT("sin",	  3, i_sin, "_i_sin"),
+	BLT("tan",	  3, i_tan, "_i_tan"),
+	BLT("vabs",	  3, i_vabs, "_i_vabs"),
+	BLT("wrap",	  4, i_wrap, "_i_wrap"),
+	BLT("xp",	  3, i_xp, "_i_xp"),
+
+	BLT("fuzz_float",  3, pbi_fuzz, "_pbi_fuzz"),
+#endif /* INTCONSTR */
+
 #ifdef SCO_UNIX			/* procedure names must be < 32 chars */
 	BLT("massively_abolish_clausegroup", 1, pbi_massively_abolish_clausegroup,
 	    "_pbi_massively_abolish_clausegro"),

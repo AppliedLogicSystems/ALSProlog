@@ -337,7 +337,7 @@ pbi_alarm()
     int   t1, t2;
     double dval, dinterval;
 
-#ifdef __GO32__
+#if defined(__GO32__)
     PI_FAIL;
 #else
 

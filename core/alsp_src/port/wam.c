@@ -1906,13 +1906,13 @@ int     pbi_bind_vars           PARAMS(( void ));
 int
 pbi_bind_vars()
 {
-        PWord *r,  g;
+        PWord r,  g;
         int   rt, gt;
 
     w_get_An(&r, &rt, 1);
     w_get_An(&g, &gt, 2);
 
-    *(r) = g;
+    *PWPTR(r) = g;
     PLAINTRAIL(r);
 
     SUCCEED;

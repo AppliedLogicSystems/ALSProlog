@@ -344,15 +344,19 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH,BDList,
 	append(SubGrlHeaderLines, WSHeaderLines, SubHeaderLines0),
 
 	cfg('LIBS', LIBS),
-	cfg('X_CFLAGS', X_CFLAGS),
-	cfg('X_LIBS', X_LIBS),
-	cfg('X_EXTRA_LIBS', X_EXTRA_LIBS), 
+	cfg('X_CFLAGS', INI_X_CFLAGS),
+	cfg('X_LIBS', INI_X_LIBS),
+	cfg('X_EXTRA_LIBS', INI_X_EXTRA_LIBS), 
+
+	xx_cfg(Subdir, 'X_CFLAGS', INI_X_CFLAGS, X_CFLAGS),
+	xx_cfg(Subdir, 'X_LIBS', INI_X_LIBS, X_LIBS),
+	xx_cfg(Subdir, 'X_EXTRA_LIBS', INI_X_EXTRA_LIBS, X_EXTRA_LIBS), 
 
 	SubHeaderLines = [
 		'LIBS' = LIBS,
 		'X_CFLAGS' = X_CFLAGS,
 		'X_LIBS' = X_LIBS,
-		'X_EXTRA_LIBS' = X_EXTRA_LIBS,
+		'X_EXTRA_LIBS' = X_EXTRA_LIBS,		
 		'BDINCS' = BDINCS
 		|  SubHeaderLines0 ],
 
@@ -365,11 +369,8 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH,BDList,
 		;
 		extendPath(BldPathAtm, 'mf-cmn.in', SrcMKFTail)
 	),
-
-	pathPlusFile(Subdir,'tconfig.h',TCONFIG),
-	open(TCONFIG,write, TCStr, []),
-	printf(TCStr, '/*   tconfig.h - default  */\n',[]),
-	close(TCStr),
+	catenate('cp ../bld-port/tconfig.h ', Subdir, CpCmd),
+	system(CpCmd),
 
 	pathPlusFile(Subdir,'makefile',SubdirMakefile),
 	trans_xtnd_makefile(SrcMKFTail, SubHeaderLines, SubdirMakefile, GOS), 
@@ -401,6 +402,78 @@ add_depth(N, BP, BNSP)
 	:-
 	M is N-1,
 	add_depth(M, ['..' | BP], BNSP).
+
+xx_cfg(Subdir, 'X_CFLAGS', INI_X_CFLAGS, X_CFLAGS)
+	:-!,
+	search_includes(Subdir,MotifIncs),
+	Initial = [INI_X_CFLAGS |  MotifIncs],
+	interleave(Initial, ' ', Second),
+	catenate(Second, X_CFLAGS).
+
+xx_cfg(Subdir, 'X_LIBS', INI_X_LIBS, X_LIBS)
+	:-!,
+	search_libs(Subdir,Libs),
+	Initial = [INI_X_LIBS | Libs],
+	interleave(Initial, ' ', Second),
+	catenate(Second, X_LIBS).
+
+xx_cfg(_, _, X_EXTRA_LIBS, X_EXTRA_LIBS).
+
+search_includes(x,[]) :-!.
+search_includes(Subdir,Incs)
+	:-
+	system_dir_root(Subdir,Atom),
+	getcwd(CurDir),
+	change_cwd('/usr/include'),
+	subdirs(IncSUBDirs),
+	change_cwd(CurDir),
+	filt_for_atom(IncSUBDirs, Atom, InitBaseIncs),
+	sort(InitBaseIncs, InterBaseIncs1),
+	dreverse(InterBaseIncs1, BaseIncs),
+	!,
+	bagof(IF, [F,FP]^(member(F,BaseIncs),
+			pathPlusFile('/usr/include',F,FP),
+			catenate('-I',FP,IF) ),
+		Incs).
+
+search_includes(_,[]).
+
+search_libs(x,[]) :-!.
+search_libs(Subdir,Libs)
+	:-
+	system_dir_root(Subdir,Atom),
+	getcwd(CurDir),
+	change_cwd('/usr/lib'),
+	subdirs(LibSUBDirs),
+	change_cwd(CurDir),
+	filt_for_atom(LibSUBDirs, Atom, InitBaseLibs),
+	sort(InitBaseLibs, InterBaseLibs1),
+	dreverse(InterBaseLibs1, InterBaseLibs2),
+	InterBaseLibs2 = [Choice | _],
+	!,
+	pathPlusFile('/usr/lib',Choice,FP),
+	catenate('-L',FP, LibElt),
+	Libs = [LibElt].
+
+search_libs(_,[]).
+
+filt_for_atom(InList, Atom, OutList)
+	:-
+	atom_length(Atom, AtomLen),
+	filt_for_atom(InList, Atom, AtomLen, OutList).
+
+filt_for_atom([], _, _, []).
+
+filt_for_atom([Item | InList], Atom, AtomLen, [Item | OutList])
+	:-
+	sub_atom(Item, 1, AtomLen, Atom),
+	!,
+	filt_for_atom(InList, Atom, OutList).
+
+filt_for_atom([Item | InList], Atom, OutList)
+	:-
+	filt_for_atom(InList, Atom, OutList).
+
 
 mk_bd_incs(BDList, BDINCS)
 	:-
@@ -457,18 +530,15 @@ install_alsdir(Subdir, BLD_NATV_SRC_PATH, GOS)
 
 		%% Copy C interface generator to alsdir:
 	adjust_path_depth(BLD_NATV_SRC_PATH, 2, ShallowPath),
-%	append(ShallowPath, ['cinterf'], CINTPathList),
 	append(BLD_NATV_SRC_PATH, ['cinterf'], CINTPathList),
 	subPath(CINTPathList, CIPATH),
 
 	extendPath(CIPATH, c2pro, C2PPath),
-%	catenate(['trans_c2pro_',GOS,'.pro'],Tc2p),
 	catenate(['tc2p',GOS,'.pro'],Tc2p),
 	pathPlusFile(C2PPath, Tc2p, TC2P),
 	pathPlusFile(ALSDIRPATH, Tc2p, ADTC2P),
 
 	extendPath(CIPATH, pro2intf, Pro2IntPath),
-%	Tp2i = 'tpro2intf.pro',
 	Tp2i = 'tp2intf.pro',
 	pathPlusFile(Pro2IntPath, Tp2i, P2IP),
 	pathPlusFile(ALSDIRPATH, Tp2i, ADP2IP),
@@ -594,12 +664,10 @@ grl_vars(ARCH_NATV, OS, BLD_NATV_SRC_PATH , GrlHeaderLines)
 	((exists_file('../bld-natv/alspro') ; exists_file('../bld-natv/alspro_b')) 
 		->
 		ProLibPath = '../../bld-natv/alspro.a',
-%		PrologPath = '../../bld-natv/alspro',
 		PrologPath = '../../bld-natv/$(ALSPRO)',
 		ARCH = ARCH_NATV
 		;
 		ProLibPath = '../../bld-port/alspro.a',
-%		PrologPath = '../../bld-port/alspro',
 		PrologPath = '../../bld-port/$(ALSPRO)',
 		ARCH = port
 	),
@@ -620,11 +688,7 @@ grl_vars(ARCH_NATV, OS, BLD_NATV_SRC_PATH , GrlHeaderLines)
 		'OS'     	= OS,
 		'SOS'     	= SOS,
 		'GOS'     	= GOS,
-		'CC'     	= CC,
-		'LIBS'		= LIBS,
-		'X_CFLAGS'	= X_CFLAGS,
-		'X_LIBS'	= X_LIBS,
-		'X_EXTRA_LIBS'	= X_EXTRA_LIBS
+		'CC'     	= CC
 	].
 
 write_makefile(HeaderLines,IStrm,OStrm,GOS)
