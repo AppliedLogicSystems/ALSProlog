@@ -283,7 +283,9 @@ static int standard_console_io(int port, char *buf, size_t size)
 
 static int standard_console_io(int port, char *buf, size_t size)
 {
+#ifdef MacOS
     extern int MPW_Tool;
+#endif
     switch(port) {
     case CONSOLE_READ:
 #ifdef MacOS
@@ -3665,7 +3667,7 @@ decimal(pp, ty)
 	(((sio_chtb[*(p + 1)] & SIOC_PLUSMINUS)
 	  && (sio_chtb[*(p + 2)] & SIOC_DECIMAL))
 	 || (sio_chtb[*(p + 1)] & SIOC_DECIMAL))) {
-	int   exp = 0;
+	int   expnt = 0;
 	int   neg = 0;
 	double m, z;
 
@@ -3677,18 +3679,18 @@ decimal(pp, ty)
 	    p++;
 
 	while (sio_chtb[*p] & SIOC_DECIMAL)
-	    exp = 10 * exp + (*p++) - '0';
+	    expnt = 10 * expnt + (*p++) - '0';
 
 	m = 1.0;
 	z = 10.0;
-	while (exp != 0) {
-	    if (exp & 1) {
+	while (expnt != 0) {
+	    if (expnt & 1) {
 		m *= z;
-		exp -= 1;
+		expnt -= 1;
 	    }
 	    else {
 		z *= z;
-		exp >>= 1;
+		expnt >>= 1;
 	    }
 	}
 	if (neg)
@@ -3740,7 +3742,7 @@ decimal(UCHAR **pp, UCHAR *lim, double *dval, int *ty)
     	if (((sio_chtb[*(p + 1)] & SIOC_PLUSMINUS)
 	  && (sio_chtb[*(p + 2)] & SIOC_DECIMAL))
 	 || (sio_chtb[*(p + 1)] & SIOC_DECIMAL)) {
-	    int   exp = 0;
+	    int   expnt = 0;
 	    int   neg = 0;
 	    double m, z;
 
@@ -3752,18 +3754,18 @@ decimal(UCHAR **pp, UCHAR *lim, double *dval, int *ty)
 		p++;
 
 	    while (sio_chtb[*p] & SIOC_DECIMAL)
-		exp = 10 * exp + (*p++) - '0';
+		expnt = 10 * expnt + (*p++) - '0';
 
 	    m = 1.0;
 	    z = 10.0;
-	    while (exp != 0) {
-		if (exp & 1) {
+	    while (expnt != 0) {
+		if (expnt & 1) {
 		    m *= z;
-		    exp -= 1;
+		    expnt -= 1;
 		}
 		else {
 		    z *= z;
-		    exp >>= 1;
+		    expnt >>= 1;
 		}
 	    }
 	    if (neg)
@@ -4811,7 +4813,6 @@ sio_put_atom()
     PWord v1, v2;
     int   t1, t2;
     UCHAR *buf, *atom;
-    CONST UCHAR *eoln_str;
     register UCHAR *a, *b, *l;
     int   newlineseen;
 
