@@ -31,7 +31,7 @@ listing(X) :-
 	'$source'(DBref, Structure),
 	write_out(Structure),
 	fail.
-listing(X).
+listing(X).  
 
 %%%%------ listing support predicates ----------
 

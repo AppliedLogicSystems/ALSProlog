@@ -24,6 +24,10 @@
 
 #include <limits.h>
 
+#ifdef MacOS
+#include <Errors.h>
+#include <Processes.h>
+#endif
 #if defined(KERNAL) && defined(__MWERKS__) && defined(macintosh)
 #include <console.h>
 #endif

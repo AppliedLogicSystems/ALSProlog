@@ -772,13 +772,17 @@ do_shell_query2(Mod,Goal)
 showanswers(N,V,InStream,OutStream) 
 	:-
 	N = [_|_],
-	write_substs(OutStream,N,V),
+	write_substs(OutStream,N,V,NonAnonNames),
 	flush_output(OutStream),
 	!,
 	flush_input(InStream),
-	sio:get_user_prompt(UsersPrompt),
-	sio:set_user_prompt(''),
-	sa_cont(InStream,UsersPrompt,OutStream).
+	(NonAnonNames \= [] -> 
+		sio:get_user_prompt(UsersPrompt),
+		sio:set_user_prompt(''),
+		sa_cont(InStream,UsersPrompt,OutStream)
+		;
+		print_yes(OutStream)
+	).
 
 showanswers(_,_,InStream,OutStream) 
 	:-

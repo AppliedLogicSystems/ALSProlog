@@ -162,6 +162,7 @@ extern	int	pbi_swp_tr		PARAMS(( void ));
 extern	int	pbi_walk_cps		PARAMS(( void ));
 extern	int	pbi_delay		PARAMS(( void ));
 extern  int	pbi_is_delay_var	PARAMS(( void ));
+extern  int	pbi_kill_freeze	PARAMS(( void ));
 extern	int 	pbi_clct_tr 		PARAMS(( void ));
 extern	int 	pbi_del_tm_for		PARAMS(( void ));
 extern	int	pbi_bind_vars		PARAMS(( void ));

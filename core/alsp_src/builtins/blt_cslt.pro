@@ -246,6 +246,9 @@ local_consult_options(File, BaseFile, COpts, FCOpts)
  |	attached to an individual file
  *-----------------------------------------------------------*/
 
+cslt_info_recon( user, _, source, _, 0, FileDesc) :-!.
+cslt_info_recon(-user, _, source, _, 1, FileDesc) :-!.
+
 cslt_info_recon(source(InFile), CurNature, Nature, CurRecon, Recon, FileDesc)
 	:-!,
 	cslt_info_recon(InFile, source, Nature, CurRecon, Recon, FileDesc).
@@ -333,7 +336,10 @@ cleanup_cslt.
  *-------------------------------------------------------------*/ 
 exec_consult(user, FCOpts)
 	:-!,
-	load_source(user,_).
+	adjust_recon_flag(FCOpts),
+	load_source(user,_),
+	mangle(12, FCOpts, user),
+	set_reconsult_flag(1).
 
 exec_consult(BaseFile, FCOpts)
 	:-

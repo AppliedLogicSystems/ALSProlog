@@ -189,6 +189,14 @@ default_prolog_flag_value(windows_system, wxwins)
 */
 default_prolog_flag_value(windows_system, nowins).
 
+	%%---------------------------------
+	%%	anonymous solution reporting
+	%%---------------------------------
+prolog_flag_value_check(anonymous_solutions, true).
+prolog_flag_value_check(anonymous_solutions, false).
+
+default_prolog_flag_value(anonymous_solutions, false).
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% limits_info(MinInteger,MaxInteger,MaxArity)

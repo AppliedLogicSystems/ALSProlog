@@ -212,6 +212,7 @@ static struct blt_struct {
 	BLT("clct_tr", 1, pbi_clct_tr, "_pbi_clct_tr"),
 	BLT("$delay", 4, pbi_delay, "_pbi_delay"),
 	BLT("$is_delay_var", 1, pbi_is_delay_var, "_pbi_is_delay_var"),
+	BLT("$kill_freeze", 1, pbi_kill_freeze, "_pbi_kill_freeze"),
 	BLT("$delay_term_for", 2, pbi_del_tm_for, "_pbi_del_tm_for"),
 	BLT("$bind_vars", 2, pbi_bind_vars, "_pbi_bind_vars"),
 #endif /* FREEZE */

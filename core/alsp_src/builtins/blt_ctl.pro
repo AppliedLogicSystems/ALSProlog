@@ -25,14 +25,15 @@ module builtins.
 %	compiletime,
 	op(200,xfy,^),
 	module_closure(findall,3,findall),
+	module_closure(b_findall,4,b_findall),
 	module_closure(setof,3,setof),
 	module_closure(bagof,3,bagof),
 	module_closure(once,1,once).
 
 export once/1.
-once(Goal)
+once(Module,Goal)
 	:-
-	Goal,
+	Module:Goal,
 	!.
 
 export findall/3.
@@ -52,6 +53,46 @@ fa_(Module,Template,Goal,S) :-
 	fail.
 fa_(_,_,_,_).
 
+	%%% Bounded findall: get at most Bnd solutions:
+
+b_findall(Module,Template,Goal,Bag,Bnd) 
+	:-
+	nonvar(Goal),
+	integer(Bnd),
+	Bnd > 0,
+	S = [[]],
+	NN = n(0),
+	get_vars(Template,[],Vars),
+	b_fa_(Module,Template,Goal,S,Vars,NN,Bnd),
+	arg(1,S,Bag).
+
+b_fa_(Module,Template,Goal,S, Vars,NN,Bnd) 
+	:-
+	fa_call(Module,Goal),
+	copy_term(Template,Copy),
+	builtins:fa_add(S,Copy),
+	b_fa_incr(NN,Bnd,Vars),
+	!.
+
+b_fa_(_,_,_,_,_,_,_).
+
+b_fa_incr(NN,Bnd,Vars)
+	:-
+	arg(1,NN,CN),
+	NxtN is CN+1,
+	NxtN < Bnd,
+	!,
+	mangle(1,NN,NxtN),
+	kill_freeze_list(Vars),
+	fail.
+
+b_fa_incr(_,_,_).
+
+kill_freeze_list([]).
+kill_freeze_list([Var | Vars])
+	:-
+	'$kill_freeze'(Var),
+	kill_freeze_list(Vars).
 
 /*-----------------------------------------------------------------------*
  | fa_call(Module,Goal) calls the goal Goal in module Module.  It was
@@ -75,7 +116,25 @@ export copy_term/2.
 copy_term(In,Out) :-
 	fa_copy(In,Out,_).
 
-fa_copy(VIn,VOut,VAssoc) :-
+:-  intconstr, !, 
+	asserta( ( 
+		fa_copy(VIn,VOut,VAssoc) :-
+			'$is_delay_var'(VIn), 
+			!,
+			fa_vassoc(VAssoc,VIn,VOut),
+			(eq(VIn, VOut) ->
+				true
+				;
+				'$delay_term_for'(VIn, VInDelT),
+				arg(3, VInDelT, Mod),
+				arg(4, VInDelT, InDelayedExpr),
+				fa_copy(InDelayedExpr, OutDelayedExpr, VAssoc),
+				'$delay'(VOut,Mod,OutDelayedExpr,_)
+			)
+			) ).
+
+fa_copy(VIn,VOut,VAssoc) 
+	:-
 	var(VIn),
 	!,
 	fa_vassoc(VAssoc,VIn,VOut).

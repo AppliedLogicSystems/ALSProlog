@@ -10,14 +10,18 @@ module builtins.
 export deleteNth/3.
 export change_nth/3.
 export subst_nth/4.
-%export nth/3. %% -- moved to simplio.pro in builtins
 export nth_tail/4.
 export at_most_n/3.
-%export position/3.	%% -- moved to simplio.pro in builtins
-%export position/4.	%% -- moved to simplio.pro in builtins
 export get_list_tail/3.
 export sublist/4.
 export last/2.
+export delete_1st/3.
+export nonmember/2.
+
+%% -- moved to simplio.pro in builtins:
+%export nth/3. 
+%export position/3.
+%export position/4.
 
 /*!---------------------------------------------------------------------
  | deleteNth/3
@@ -165,5 +169,41 @@ last([Item],Item)
 last([_|Tail],Item)
 	:-
 	last(Tail, Item).
+
+/*!---------------------------------------------------------------------
+ |	delete_1st/3.
+ |	delete_1st(List, Item, Result)
+ |	delete_1st(+, +, -)
+ |
+ |	- deletes the left-most entry of Item in List
+ |
+ |	If Item occurs on List, deletes the left-most entry of Item on
+ |	List, returning in Result; fails if Item is not on List.
+ *!--------------------------------------------------------------------*/
+
+delete_1st([Item | Result], Item, Result)
+	:-!.
+delete_1st([Skip | List], Item, [Skip | Result])
+	:-
+	delete_1st(List, Item, Result).
+
+/*!---------------------------------------------------------------------
+ |	nonmember/2
+ |	nonmember(List, Item)
+ |	nonmember(+, +)
+ |
+ |	-	tests for the failure of membership
+ |
+ |	Succeeds iff member(List, Item) fails
+ *!--------------------------------------------------------------------*/
+nonmember([], _).
+
+nonmember([Item | _], Item)
+	:-!,
+	fail.
+
+nonmember([_ | Tail], Item)
+	:-
+	nonmember(Tail, Item).
 
 endmod.
