@@ -312,7 +312,8 @@ gen_project_mgrAction(save_to_file, State)
 	dump_object(State, Forbidden, Eqns),
 	open(FilePath, write, OS, []),
 	write_clauses(OS, Eqns, [quoted(true)]),
-	close(OS).
+	close(OS),
+	tcl_eval(shl_tcli, ['file attributes', FilePath, '-creator ALS4 -type ALSP'], _).
 
 dump_object(State, Forbidden, Eqns)
 	:-
