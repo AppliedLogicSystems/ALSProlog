@@ -52,10 +52,10 @@ decode_instr(inst)
     Code inst;
 {
     enum AbstractMachineOps i;
-    for (i=0; i<W_NUM_OPS; i++)
+    for (i=W_FIRST_OP; i<W_NUM_OPS; i++)
 	if (abinst(i) == inst)
 	    return i;
-    return -1;
+    return W_ILLEGAL_OP;
 }
 
 

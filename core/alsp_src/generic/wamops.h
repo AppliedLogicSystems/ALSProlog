@@ -15,6 +15,8 @@
 #define ABMOP(op,p1,p2,p3,p4) op,
 
 enum AbstractMachineOps {
+    W_FIRST_OP = 0,
+    W_ILLEGAL_OP = -1,
 #include "wamops0.h"
     W_NUM_OPS		/* not an opcode, but a convenient 
 			 * way to know how many there are */
