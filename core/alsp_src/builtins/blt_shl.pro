@@ -27,7 +27,7 @@ use sio.
 
 start_shell(DefaultShellCall) :-
 	catch(start_shell0(builtins:prolog_shell), E,
-	(shell_exception(E), fail)).
+	(shell_exception(E), throw(E))).
 
 start_shell0(DefaultShellCall)
 	:-

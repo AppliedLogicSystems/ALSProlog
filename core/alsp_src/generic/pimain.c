@@ -74,6 +74,7 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     if (als_opts) {
 	char *opt, *val;
 	int i;
+	
 	als_opts = strdup(als_opts);
 	if (als_opts == NULL)
 	    fatal_error(FE_ALS_OPTIONS, 0);
@@ -232,9 +233,16 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 #if defined (MacOS) && defined(__MWERKS__)
     if (!MPW_Tool) printf("Exiting ALS Prolog.\n");
 #endif
-       
-    if (success) return(EXIT_SUCCESS);
-    else return(EXIT_FAILURE);
+     
+    switch (success) {
+    case 0:
+    	return EXIT_FAILURE;
+    case 1:
+    	return EXIT_SUCCESS;
+    case 2:
+    default:
+    	return EXIT_ERROR;
+	}
 }
 
 #if 1
