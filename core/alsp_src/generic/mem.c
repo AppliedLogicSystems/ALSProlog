@@ -18,10 +18,12 @@
 #include "version.h"
 #include "sig.h"
 
-/* CHANGE THIS TO UNIX_HPUX ifdef when we move to configless world. */
-#ifdef __hp9000s800
+#ifdef UNIX_HPUX
 #undef __harg
 #define __harg int
+#elif UNIX_SUNOS
+#undef SIG_DFL
+#define SIG_DFL (void (*)(int))0
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -110,7 +112,9 @@ static	int	bottom_stack_page_is_protected = 0;
 
 #define	NPROTECTED	1
 
+#if defined(HAVE_SIGACTION) || defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
 static long signal_stack[SIGSTKSIZE];
+#endif
 
 #if defined(HAVE_MPROTECT) && defined(MISSING_EXTERN_MPROTECT)
 extern	int	mprotect	PARAMS(( caddr_t, size_t, int ));
@@ -1223,6 +1227,94 @@ static unsigned long image_end(int image_file)
 }
 
 #endif /* HP_AOUT_800 */
+
+#if defined(SUNOS_AOUT)
+
+#include <a.out.h>
+#include <stab.h>
+
+static unsigned long image_end(int image_file)
+{
+    size_t r;
+    off_t sr, string_off;
+    unsigned long str_size;
+    struct exec head;
+    struct stat info;
+    
+    r = fstat(image_file, &info);
+    if (r == -1) return 0;
+
+    r = read(image_file, &head, sizeof(head));
+    if (r != sizeof(head)) return 0;
+    
+    if (head.a_syms == 0) {
+        return N_SYMOFF(head);
+    } else {
+        string_off = N_STROFF(head);
+
+	sr = lseek(image_file, string_off, SEEK_SET);
+	if (sr == -1) return 0;
+
+	r = read(image_file, &str_size, sizeof(str_size));
+	if (r != sizeof(str_size)) return 0;
+
+	return round_up(string_off + str_size, PAGSIZ);
+    }
+}
+
+#endif /* SUNOS_AOUT */
+
+
+#if defined(AIX_XCOFF)
+
+/* These two macros are defined in xcoff.h */
+#undef TP_INT
+#undef TP_DOUBLE
+
+#include <xcoff.h>
+#include <filehdr.h>
+#include <scnhdr.h>
+
+static unsigned long image_end(int image_file)
+{
+    size_t r;
+    off_t sr, string_off, end;
+    int i;
+    unsigned long str_size;
+    FILHDR head;
+    
+    r = read(image_file, &head, FILHSZ);
+    if (r != sizeof(head)) return 0;
+
+    if (head.f_nsyms == 0) {
+        SCNHDR *scnhdrs;
+        scnhdrs = (SCNHDR *)malloc(head.f_nscns*SCNHSZ);
+	if (!scnhdrs) return 0;
+	
+	sr = lseek(image_file, FILHSZ + head.f_opthdr, SEEK_SET);
+	r = read(image_file, scnhdrs, head.f_nscns*SCNHSZ);
+
+        for (end = 0, i = 0; i < head.f_nscns; i++) {
+	  if (scnhdrs[i].s_scnptr)
+	      end = max(end, scnhdrs[i].s_scnptr + scnhdrs[i].s_size);
+	}
+
+	free(scnhdrs);
+	return end;
+    } else {
+        string_off = head.f_symptr + head.f_nsyms * SYMESZ; 
+
+	sr = lseek(image_file, string_off, SEEK_SET);
+	if (sr == -1) return 0;
+
+	r = read(image_file, &str_size, sizeof(str_size));
+	if (r != sizeof(str_size)) return 0;
+
+	return round_up(string_off + str_size, 1);
+    }
+}
+
+#endif /* AIX_XCOFF */
 
 #define IMAGENAME_MAX	64
 #define IMAGEDIR_MAX	1024
