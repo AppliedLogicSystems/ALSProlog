@@ -26,11 +26,21 @@ copy ..\als_dev\alsdev\*.tcl alsdir\shared
 mkdir alsdir\images
 xcopy ..\als_dev\alsdev\images\*.gif alsdir\images
 set DEV_ALSDIR=..\alsp_src
+del %DEV_ALSDIR%\builtins\*.obp
+del %DEV_ALSDIR%\library\*.obp
 alspro_b -b -g "(consult('..\\als_dev\\alsdev\\ldr_dvsh'),consult('..\\tcltk_interface\\common\\tcltk_util'), attach_image('ALS Prolog.exe'))"
+del %DEV_ALSDIR%\builtins\*.obp
+del %DEV_ALSDIR%\library\*.obp
 alspro_b -b -g "(consult('..\\als_dev\\alsdev\\ldr_dvsh'),consult('..\\tcltk_interface\\common\\tcltk_util'),builtins:abolish(save_image,1),builtins:abolish(save_image,2),sio:abolish(open_socket_stream,4),attach_image('ALS Student Prolog.exe'))"
+del %DEV_ALSDIR%\builtins\*.obp
+del %DEV_ALSDIR%\library\*.obp
 alspro_b -b -g "save_image(alspro)"
 copy "ALS Prolog Stub.exe" "ALS Prolog Demo.exe"
 set DEV_ALSDIR=..\alsp_src
-alspro_b -b -g "(consult('..\\als_dev\\alsdev\\ldr_dvsh'),consult('..\\tcltk_interface\\common\\tcltk_util'), consult('..\\als_dev\\alsdev\\demo_ldr'), attach_image('ALS Prolog Demo.exe'))"
+del %DEV_ALSDIR%\builtins\*.obp
+del %DEV_ALSDIR%\library\*.obp
+alspro_b -b -g "((builtins:assert(dvf)),consult('..\\als_dev\\alsdev\\ldr_dvsh'),consult('..\\tcltk_interface\\common\\tcltk_util'), consult('..\\als_dev\\alsdev\\demo_ldr'), attach_image('ALS Prolog Demo.exe'))"
+del %DEV_ALSDIR%\builtins\*.obp
+del %DEV_ALSDIR%\library\*.obp
 alspro_b -b -g "(consult('..\\als_dev\\alsdev\\demo_ldr'),save_image(alspro_demo))"
 endlocal
