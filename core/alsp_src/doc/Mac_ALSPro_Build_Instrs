@@ -73,13 +73,26 @@ and execute "MakeIt testrun".
 Files generated:
 ----------------
 
-Alspro libararies:
+Static extensable development system libraries:
+
+{blddir}bld-port:alspro_d.ppc.lib
+{blddir}bld-port:alspro_d.68k.lib
+
+{blddir}bld-port:demo_alspro_d.ppc.lib
+{blddir}bld-port:demo_alspro_d.68k.lib
+
+Static embedable prolog engine libraries:
 
 {blddir}bld-port:alspro.ppc.lib
 {blddir}bld-port:alspro.68k.lib
 
 {blddir}bld-port:demo_alspro.ppc.lib
 {blddir}bld-port:demo_alspro.68k.lib
+
+Dynamic embedable prolog engine libraries:
+
+{blddir}bld-port:ALSProLib
+{blddir}bld-port:demo_ALSProLib
 
 Stand alone TTY applications:
 
