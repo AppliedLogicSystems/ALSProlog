@@ -1,0 +1,13 @@
+#!/bin/sh
+
+dir=`pwd`
+echo $dir
+rsh calder "cd $dir/hpux ; make -s -j 2" > hpux.log &
+rsh hilbert "cd $dir/solaris ; make -s -j 2" > solaris.log &
+rsh jarrett "cd $dir/sunos ; make -s -j 2" > sunos.log &
+rsh rgshaw "cd $dir/aix ; make -s -j 2" > aix.log &
+rsh matisse "cd $dir/linux ; make -s -j 2" > linux.log &
+
+
+
+
