@@ -432,6 +432,7 @@ static struct blt_struct {
 	BLT("sio_nsocket_accept", 5, sio_nsocket_accept, "_sio_nsocket_accept"),
 	BLT("sio_nsocket_close", 2, sio_nsocket_close, "_sio_nsocket_close"),
 	BLT("sio_nsocket_select", 9, sio_nsocket_select, "_sio_nsocket_select"),
+	BLT("sio_nsocketpair", 3, sio_nsocketpair, "_sio_nsocketpair"),
 
 	BLT("sio_nsocket_open", 6, sio_nsocket_open, "_sio_nsocket_open"),
 

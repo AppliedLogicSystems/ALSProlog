@@ -1287,6 +1287,18 @@ nsocket_select(ReadList, WriteList, ExceptionList, ReadMark, WriteMark, Exceptio
 	sio_nsocket_select(RSList, WSList, ESList, ReadMark, WriteMark, ExceptionMark, Sec, USec, Result),
 	nsocket_check_result(Result).
 
+export nsocketpair/2.
+nsocketpair(S0, S1) :-
+	check_var(S0),
+	check_var(S1),
+	sio_nsocketpair(D0, D1, Result),
+	nsocket_check_result(Result),
+	% A little White Lie:
+	% The family is actually unix, but unix isn't supported yet,
+	% so make fake internet sockets.
+	S0 = nsocket(internet, stream, 0, D0),
+	S1 = nsocket(internet, stream, 0, D1).
+
 
 open_nsocket_stream(Socket,Mode,Options,Stream) :-
 	initialize_stream(nsocket,Socket,Options,Stream),
