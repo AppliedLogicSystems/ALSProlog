@@ -627,6 +627,10 @@ proc tkIconList_Reset {w} {
 #
 #----------------------------------------------------------------------
 
+proc getDirectory {args} {
+	eval tkFDialog $args
+}
+
 # tkFDialog --
 #
 #	Implements the TK file selection dialog. This dialog is used when
@@ -1462,3 +1466,4 @@ proc tkFDialog_Done {w {selectFilePath ""}} {
 	}
 }
 
+package provide getDirectory 1.0
