@@ -1781,10 +1781,6 @@ static OSErr DuplicateThisApplication(ConstStr255Param newAppName)
     Str255 AppName;
     FSSpec AppSpec, NewAppSpec, DirSpec;
     extern const int MPW_Tool;
-    #define IMAGENAME_MAX	64
-    #define IMAGEDIR_MAX	1024
-    extern char  imagename[IMAGENAME_MAX];
-    extern char  imagedir[IMAGEDIR_MAX];
     
     if (MPW_Tool) {
     	char name[256];
