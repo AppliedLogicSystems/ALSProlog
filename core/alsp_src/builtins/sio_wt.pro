@@ -1625,7 +1625,6 @@ show_substs_ext([N|Ns],[S|Ss],VPairs,Stream)
 	%%   -- defined in blt_frez.pro
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-/*
 wr_subs3(N,S,VPairs,Stream)
 	:-
 	'$is_delay_var'(S),
@@ -1636,7 +1635,7 @@ wr_subs3(N,S,VPairs,Stream)
 		;
 		show_delay_binding(N,S, VPairs, Stream)
 	).
-*/
+
 /*
 wr_subs3(N,S,VPairs,Stream)
 	:-
