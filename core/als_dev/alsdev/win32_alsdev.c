@@ -91,12 +91,21 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     }
 
 	pi_init();
-	
-	term = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "consult"),
-				1, AP_NewSymbolFromStr(w, "blt_dvsh"));
-		
-    AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
 
+	/* Only load blt_dvsh when there is no saved state.
+	   Since blt_dvsh is part of the state, reconsulting
+	   does not work correctly. */
+{
+	extern char executable_path[1000];
+	extern long ss_image_offset(const char *image_name);
+
+	if (!ss_image_offset(executable_path)) {
+		term = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "consult"),
+					1, AP_NewSymbolFromStr(w, "blt_dvsh"));
+			
+	    AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
+	}
+}
     term = AP_NewSymbolFromStr(w, "start_alsdev");
     {
     	AP_Result r;
