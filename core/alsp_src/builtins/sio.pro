@@ -47,9 +47,14 @@ use windows.
 
 :- als_system(L),
    dmember(os=OS, L),
-   (OS=macos ->
-   	(assert(default_read_eoln_type(cr)),
-   	 assert(default_write_eoln_type(cr)))
+   (
+	OS=msw95 ->
+	   	(assert(default_read_eoln_type(universal)),
+	   	 assert(default_write_eoln_type(crlf)))
+	;
+	OS=macos ->
+	   	(assert(default_read_eoln_type(cr)),
+	   	 assert(default_write_eoln_type(cr)))
 	;
    	(OS=unix ->
    		dmember(os_variation=OSM, L),
@@ -58,10 +63,11 @@ use windows.
    			 assert(default_write_eoln_type(crlf)))
    			;
    			(assert(default_read_eoln_type(lf)),
-   			 assert(default_write_eoln_type(lf))))
-   		;
+   			 assert(default_write_eoln_type(lf)))))
+	;
    		(assert(default_read_eoln_type(crlf)),
-   		 assert(default_write_eoln_type(crlf))))).
+   		 assert(default_write_eoln_type(crlf)))
+    ).
 
 
 /*

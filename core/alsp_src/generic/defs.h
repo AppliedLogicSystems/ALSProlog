@@ -124,20 +124,6 @@
  *---------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------*
- | Macros concerned with constraints, intervals, freeze, etc.
- |
- | INTCONSTR -- support interval constraints
- |
- | FREEZE -- suport freeze/delay
- |
- *---------------------------------------------------------------------*/
-
-#ifdef INTCONSTR
-#define FREEZE 1
-#define TRAILVALS 1
-#endif
-
-/*---------------------------------------------------------------------*
  | Include the architecture and machine specific configuration files.  The
  | machine specific file is included after the architecture specific file so
  | that it may override certain architecture defined parameters in much the
@@ -149,6 +135,27 @@
 #include "aconfig.h"
 #include "oconfig.h"
 #include "config.h"
+
+/*---------------------------------------------------------------------*
+ | Macros concerned with constraints, intervals, freeze, etc.
+ |
+ | INTCONSTR -- support interval constraints
+ |
+ | FREEZE -- suport freeze/delay
+ |
+ *---------------------------------------------------------------------*/
+
+#if (defined(INTCONSTR) && !defined(FREEZE))
+#define FREEZE 1
+#endif
+
+#if (defined(INTCONSTR) && !defined(TRAILVALS))
+#define TRAILVALS 1
+#endif
+
+/*---------------------------------------------------------------------*
+ | 
+ *---------------------------------------------------------------------*/
 
 #ifdef Bytecode
 #undef Threaded

@@ -24,8 +24,7 @@
 #endif
 
 #ifdef WIN32
-#include <io.h>
-#include <direct.h>
+#include "fswin32.h"
 #endif
 
 int
@@ -210,3 +209,40 @@ pbi_get_image_dir_and_name()
     else
 	FAIL;
 }
+
+int   argcount = 0;	/* global copies of main's argc and argv */
+char **argvector = NULL;
+
+int pbi_command_line(void)
+{
+    PWord v1, list, newlist;
+    int   t1, i, listt, newlistt;
+
+    PI_getan(&v1, &t1, 1);
+
+	/* Create the list of arguments from the argv array.
+	   The list is generated backwards - this makes list construction
+	   easy because arguments are just pushed onto the front of the list.
+	   Also "list" always points to a valid list - a useful invariant.
+	*/
+	for (i = argcount-1, PI_makesym(&list, &listt, "[]");
+		      i >= 0; i--, list = newlist, listt = newlistt) {
+		PWord head, tail, arg;
+		int headt, tailt, argt;
+		
+		PI_makelist(&newlist, &newlistt);
+		PI_gethead(&head, &headt, newlist);
+		PI_gettail(&tail, &tailt, newlist);
+		
+		PI_makeuia(&arg, &argt, argvector[i]);
+		if (!PI_unify(head, headt, arg, argt)) PI_FAIL;
+		
+		if (!PI_unify(tail, tailt, list, listt)) PI_FAIL;
+	}
+	
+	if (!PI_unify(v1, t1, list, listt)) PI_FAIL;
+	
+	PI_SUCCEED;
+}
+
+

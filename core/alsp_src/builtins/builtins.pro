@@ -57,6 +57,7 @@ use debugger.
 export als_system/1.
 export command_line/1.
 
+
 /*--------------------------------------------------------------------*
  | Part 2:	Operating System / Machine independent stuff.
  *--------------------------------------------------------------------*/
@@ -807,7 +808,9 @@ build_primitive_closures(_)
 load_builtins(File) 
 	:-
 	sys_env(OS,_,_),
-	(OS = macos, !, Sepr = ':'; Sepr = '/'),
+	(  OS = macos, !, Sepr = ':'
+	 ; OS = msw95, !, Sepr = '\\'
+	 ; Sepr = '/'),
 	'$atom_concat'('builtins',Sepr, BDir),
 	load_builtins(BDir, File).
 
@@ -825,11 +828,17 @@ load_builtins(BDir, File)
 		%% Make this a conditional:
 :-	auto_use(rel_arith).
 
+/*
 :- 	command_line(CL), 
 	dmember('-nobuilt',CL),!	
 	;
+*/
+:-
 	sys_env(OS,_,_),
-	(OS = macos, !, Sepr = ':'; Sepr = '/'),
+	(   OS = macos, !, Sepr = ':'
+	;   OS = msw95, !, Sepr = '\\'
+	;	Sepr = '/'
+	),
 	'$atom_concat'('builtins',Sepr, BDir),
 
 	load_builtins(BDir, sio_rt),		%% for getting op declarations
@@ -882,6 +891,7 @@ ld_fs
 	sys_env(OS,_,_),
 	(   OS = unix -> load_builtins(fsunix)
 	;   OS = dos  -> load_builtins(fsdos)
+	;   OS = msw95  -> load_builtins(fsmsw95)
 	;	OS = macos -> load_builtins(fsmac)
 	;   true		%% Extend to other OS's
 	).
@@ -907,9 +917,12 @@ ld_wins
 	).
 
 
+/*
 :-  command_line(CL), 
 	dmember('-nobuilt',CL),!	
 	;
+*/
+:-
 	nops, 
 	ld_is, 
 	ld_fs, 
@@ -954,11 +967,16 @@ ld_wins
  | '$start' is the initial (shell) goal which is run by the prolog system.
  *------------------------------------------------------------------------*/
 		%% This starts the tty shell:
+/*
 '$start' 
 	:-
  	command_line(CL), 
 	dmember('-nobuilt',CL),!
 	;
+	start_shell(builtins:prolog_shell).
+*/
+'$start' 
+	:-
 	start_shell(builtins:prolog_shell).
 
 endmod.		%% builtins.pro -- Main File for builtins

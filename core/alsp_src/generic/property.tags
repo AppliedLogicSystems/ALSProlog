@@ -22,13 +22,13 @@ LIBBRK - prolog library mechanism code
 
 INTCONSTR - specific interval constraint code
 
-TRAILVALS - trail values (set by trailed_mangle)
+CONSTRDEBUG - debug interval constraint code
+
+TRAILVALS - trail values - reset vars to previous vals (trailed_mangle only);
 
 FREEZE - specific freeze code
 
 DEBUGFREEZE - debugging messages for freeze support code
-
-TRAILVALS - support trail resetting to previous vals;
 
 DynamicForeign - dynamic loading of foreign (C) code
 

@@ -477,7 +477,7 @@ int	isdir(const char *fname)
  *                   filetype, and then mapped accordingly in fsmac.pro
  */
 
-static int getFileStatus(void)
+int getFileStatus(void)
 {
     PWord v1, v2, vtime;
     int   t1, t2, ttime;
@@ -733,8 +733,7 @@ int chdir(const char *dirname)
     else return 0;
 }
 
-
-static int pgetpid(void)
+int pgetpid(void)
 {
     PWord v1, vpid;
     int   t1, tpid;
@@ -782,7 +781,7 @@ static OSErr FileModTime(const char *pathName, unsigned long *modTime)
     return noErr;
 }
 
-static int
+int
 pcmp_fs(void)
 {
     PWord v1, v2;

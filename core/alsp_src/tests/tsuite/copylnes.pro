@@ -35,15 +35,7 @@ test :-
 	copylines('/etc/termcap','copylines.out').
 */
 test :-
-	als_system(SysVars),
-	dmember(os=OS, SysVars),
-	OS=unix ->
-		copylines(['/usr/include/stdio.h','/etc/termcap', '/etc/sendmail.cf'],
-			  'copylines.out') ;
-		copylines(['mailbox3:alsp_src:tests:tsuite:testmath.pro',
-			   'mailbox3:alsp_src:tests:tsuite:compare.pro',
-			   'mailbox3:alsp_src:tests:tsuite:timeio.pro'],
-			  'copylines.out').
+	copylines(['testmath.pro', 'compare.pro', 'timeio.pro'], 'copylines.out').
 
 
 
@@ -60,10 +52,22 @@ copylines(InFile,OutFile)
 	:-
 	printf('copylines: no input files exist!!\n', []).
 
-select_test_file([File | InFileList], File)
+find_file(Name, Name) :-
+	exists_file(Name).
+
+find_file(Name, FullName) :-
+	builtins:searchdir(SDir),
+	pathPlusFile(SDir, Name, FullName),	
+	exists_file(FullName).
+
+find_file(Name, _) :-
+	printf('File Not Found: %t\n', [Name]),
+	fail.
+
+select_test_file([File | InFileList], FullName)
 	:-
-	exists_file(File),
-		!.
+	find_file(File, FullName),
+	!.
 
 select_test_file([_ | InFileList], File)
 	:-
