@@ -954,8 +954,8 @@ objectProcessFile(FileName, Records)
 			filePlusExt(FN,ppo,TargetFile)
 		)
 		;
-		filePlusExt(FileName, '.oop', SourceFile),
-		filePlusExt(FileName, '.pro', TargetFile)
+		filePlusExt(FileName, 'oop', SourceFile),
+		filePlusExt(FileName, 'pro', TargetFile)
 	),
 	objectProcessFile(SourceFile, TargetFile, Records).
 
