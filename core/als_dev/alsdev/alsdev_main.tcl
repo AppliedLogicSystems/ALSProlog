@@ -43,7 +43,6 @@ proc vTclWindow.topals {args} {
 	add_edit_menu .topals.mmenb listener .topals
 	add_prolog_menu .topals.mmenb listener .topals
 	add_tools_menu .topals.mmenb listener .topals
-	add_windows_menu .topals.mmenb listener .topals
 	menu .topals.mmenb.windows -tearoff 0 -title Windows
 	.topals.mmenb add cascade -label "Windows" -menu .topals.mmenb.windows -underline 0
 	add_help_menu .topals.mmenb
