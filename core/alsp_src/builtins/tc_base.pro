@@ -42,6 +42,7 @@ do_defStruct(Mod,TypeName,SpecsList)
 export do_type_comp/3.
 do_type_comp(TypeName,SpecsList,Mod)
 	:-
+	compiletime,
 	do_type_comp(defStruct(TypeName,SpecsList),Mod, CodeList,MacList,ErrList),
 	finish_type_comp(ErrList,TypeName,SpecsList,Mod, CodeList,MacList).
 
