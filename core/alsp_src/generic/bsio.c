@@ -237,11 +237,31 @@ static	int	next_token0	PARAMS(( UCHAR *, PWord *, int *, PWord *, int * ));
 static	int	format_type	PARAMS(( UCHAR * ));
 static  int int_or_float    PARAMS((int, PWord));
 
+#ifdef MacOS
+static int corrected_read(int fn, char *buffer, int count)
+{
+    int result;
+    
+    result = read(fn, buffer, count);
+    
+    if (fn == 0 && result > 0) {
+	int i;
+	for (i = 0; i < result; i++) if (buffer[i] == 5) result = 0;
+    }
+	
+    return result;
+}
+#endif
+
 static int standard_console_io(int port, char *buf, size_t size)
 {
     switch(port) {
     case CONSOLE_READ:
+#ifdef MacOS
+    	return corrected_read(STDIN_FILENO, buf, size);
+#else
     	return read(STDIN_FILENO, buf, size);
+#endif
     	break;
     case CONSOLE_WRITE:
 	return write(STDOUT_FILENO, buf, size);
