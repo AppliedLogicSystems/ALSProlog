@@ -12,6 +12,7 @@ cp $1/cfgs/maketop.dj $2/makefile
 cp $1/generic/generate/generic.dj $2/generic.mkf
 cp $1/port/port.dj $2/port.mkf
 cp $1/port/djgpp/config.h $2
+cp $1/port/djgpp/oconfig.h $2
 cp $1/doconfig.bat $2
 
 echo - bld-port:

@@ -89,6 +89,7 @@ save_image(NewImageName)
  | mics_cmd_fmt(MicsCmdFmt),
  | mics_cmd_fmt(-),
  *---------------------------------------------------------------*/
+	%% Note the djgpp2 uses the default:
 mics_cmd_fmt('go32 %sals-mics %s%s %s %s')
 	:-
 	als_system(SystemList),

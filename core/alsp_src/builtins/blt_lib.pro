@@ -11,7 +11,7 @@
 :-libactivate(builtins,['library',listutl2],
     [deleteNth/3,change_nth/3,nth/3,nth_tail/4,at_most_n/3,position/3,
         position/4,get_list_tail/3,list_delete/3,sublist/4,
-	subst_nth/4],[]).
+		subst_nth/4,last/2],[]).
 
 :-libactivate(builtins,['library',listutl3],
     [nobind_member/2,output_prolog_list/1,output_prolog_list/4,
@@ -35,8 +35,9 @@
         insert_spaces/2,catenate/2,catenate/3,string_to_uia/2,cnvrt_to_UIA/2,
         string_to_uia/3,sized_string_to_uia/3,copy_to_uia/3,atomic_to_uia/2,
         make_uc/2,make_lc/2,make_uc_sym/2,make_lc_sym/2,change_case_sym/2,
-        convert_to_uc/2,same_uc/2,truncate/3,
-	strip_white/2, strip_tail_white/2 ],[]).
+        convert_to_uc/2,same_uc/2,truncate/3,strip_white/2, strip_tail_white/2,
+		read_to/5,read_to_blank/3
+		],[]).
 
 :-libactivate(avl,['library',avl],
     [avl_create/1,avl_inorder/2,avl_inorder_wdata/2,avl_insert/4,avl_search/3],[]).
@@ -146,3 +147,6 @@
 		 strip_prefix/3,prefix_undefs_basis/2,
 		 prefix_undefs_basis_filt/1], [] ).
 
+:-libactivate(cref,['library',miscatom], 
+		[atm_tail/3, trim_atoms/3
+		], [] ).

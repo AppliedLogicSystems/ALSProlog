@@ -51,12 +51,12 @@ echo - library
 cp -r ./library $1
 u2d $1/library/*.pro
 
-#echo - cinterf
-#cp -r ./cinterf $1
-#u2d $1/cinterf/readme
-#u2d $1/cinterf/c2pro/*
-#u2d $1/cinterf/pro2intf/*
-#u2d $1/cinterf/deps/*
+echo - cinterf
+cp -r ./cinterf $1
+u2d $1/cinterf/readme
+u2d $1/cinterf/c2pro/*
+u2d $1/cinterf/pro2intf/*
+u2d $1/cinterf/deps/*
 
 echo - generic
 cp -r ./generic $1
@@ -68,7 +68,7 @@ u2d $1/generic/*.txt
 u2d $1/generic/generate/*
 u2d $1/generic/generate/tok.h/*
 
-mv $1/generic/generate/tok.h/* $1/generic
+cp $1/generic/generate/tok.h/* $1/generic
 
 echo - i386
 cp -r ./i386 $1

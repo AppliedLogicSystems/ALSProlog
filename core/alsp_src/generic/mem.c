@@ -475,7 +475,9 @@ allocate_prolog_heap_and_stack(size)
 
 /* These signals are not available on the Mac. */
 #ifndef MacOS
+#ifdef SIGBUS
     (void) signal(SIGBUS, coredump_cleanup);
+#endif
     (void) signal(SIGSEGV, coredump_cleanup);
 #endif
     return retval;
@@ -1010,11 +1012,26 @@ ss_restore_state(filename,offset)
     int ssfd;
     int  bnum, gnum;
     struct am_header hdr;
+#if (defined(__GO32__) || defined(__DJGPP__))
+	unsigned char dos_exe[6];
+#endif
 
     /* Open the file */
     ssfd = open(filename, O_RDONLY|O_BINARY);
     if (ssfd < 0)
 	fatal_error(FE_SS_OPENERR,(long)filename);
+
+#if (defined(__GO32__) || defined(__DJGPP__))
+	read(ssfd, dos_exe, sizeof(dos_exe));
+	if (dos_exe[0] == 'M' && dos_exe[1] == 'Z') /* skip stub */
+	{
+		int blocks = (unsigned int)dos_exe[4] + (unsigned int)dos_exe[5] * 256;
+		int partial = (unsigned int)dos_exe[2] + (unsigned int)dos_exe[3] * 256;
+		offset += blocks * 512;
+		if (partial)
+			offset += partial - 512;
+	}
+#endif
 
     /* Seek to header, get header, and seek back to header */
     if (lseek(ssfd, offset, 0) < 0)

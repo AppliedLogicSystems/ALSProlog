@@ -43,6 +43,9 @@ export truncate/3.
 export strip_tail_white/2.
 export strip_white/2.
 
+export read_to/5.
+export read_to_blank/3.
+
 /*!---------------------------------------------------------------------
  |	asplit/4
  |	asplit(Atom,Splitter,LeftPart,RightPart) 
@@ -376,9 +379,6 @@ truncate(InField, MaxSize, OutField)
  |
  |	- strips leading white space chars from a prolog string
  *!--------------------------------------------------------------------*/
-
-export strip_white/2.
-
 strip_white([], []).
 strip_white([C | Tail], Result)
 	:-
@@ -394,14 +394,65 @@ strip_white(Tail, Tail).
  |
  |	- strips trailing white space chars from a prolog string
  *!--------------------------------------------------------------------*/
-export strip_tail_white/2.
-
 strip_tail_white(String, Result)
 	:-
 	dreverse(String, RString),
 	strip_white(RString, RResult),
 	dreverse(RResult, Result).
 
+
+/*!-----------------------------------------------------------------------------
+ |	read_to/5.
+ |	read_to(Chars, Stoppers, Head, Tail,Stopper)
+ |	read_to(+, +, -, -,-)
+ |
+ |	-splits a string according to one of several possible chars
+ |
+ |	If:
+ |	-Chars is a prolog string;
+ |	-Stoppers is a list of codes of chars
+ |		and if intersect(Chars,Stoppers) \= [], 
+ |	Then:
+ |		Stopper is the element of Stopper with leftmost occurrence in Chars,
+ |		Head is the portion of Chars to the left of the occurrence of Stopper,
+ |	and
+ |		Tail is the portion of Chars to the right of the occurrence of Stopper.
+ *!----------------------------------------------------------------------------*/
+read_to([], _, [], [],-1).
+
+read_to([C | Chars], Stoppers, [], Chars,C)
+	:-
+	dmember(C, Stoppers),
+	!.
+			 
+read_to([C | Chars], Stoppers, [C | Head], Tail,Stopper)
+	:-
+	read_to(Chars, Stoppers, Head, Tail,Stopper).
+
+/*!---------------------------------------------------------------------
+ |	read_to_blank/3
+ |	read_to_blank(Chars, Head, Tail)
+ |	read_to_blank(+, -, -)
+ |
+ |	- splits a string around the leftmost occurrence of blank
+ |
+ |	If:
+ |	-Chars is a prolog string containing at least one blank,
+ |	Then:
+ |		Head is the portion of Chars to the left of the first occurrence
+ |			 of a blank, and
+ |		Tail is the portion of Chars to the right of the first occurrence 
+ |		of a blank
+ *!--------------------------------------------------------------------*/
+
+read_to_blank([], [], []).
+ 
+read_to_blank([0'  | Chars], [], Chars)
+	:-!.
+	  
+read_to_blank([C | Chars], [C | Head], Tail)
+	:-
+	read_to_blank(Chars, Head, Tail).
 
 
 endmod.

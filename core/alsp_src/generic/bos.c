@@ -137,7 +137,7 @@ pbi_system()
 
 #ifdef OSACCESS
 /*
- * ptmpnam calls either tmpnam or tempnam to obtain the name of a temporary
+ * pbi_tmpnam calls either tmpnam or tempnam to obtain the name of a temporary
  * file.  tmpnam is pretty lame, but unfortunately tempnam (note the 'e') is
  * not universally available.  So we will use HAVE_TEMPNAM to control this.
  *

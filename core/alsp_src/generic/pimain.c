@@ -38,6 +38,11 @@
 
 #endif /* !HAVE_CONFIG_H */
 
+#ifdef __DJGPP__
+#include <crt0.h>
+/* int_crt0_startup_flags = _CRT0_FLAG_DROP_EXE_SUFFIX | _CRT0_FLAG_DROP_DRIVE_SUFFIX; */
+#endif
+
 extern	void	main	PARAMS(( int, char ** ));
 
 #include "pi_init.h"

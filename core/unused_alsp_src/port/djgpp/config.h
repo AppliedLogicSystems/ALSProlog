@@ -1,4 +1,4 @@
-#define MinorOSStr		"djgpp"
+#define MinorOSStr		"djgpp1"
 
 #undef  STDC_HEADERS
 #define STDC_HEADERS		1

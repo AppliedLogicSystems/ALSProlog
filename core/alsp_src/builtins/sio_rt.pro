@@ -1792,8 +1792,8 @@ tp_eval_if(EvTerm,Stream) :-
 %%
 %% tp_if_false(Toks,Stream,OutToks)
 %%
-%%	skip over body of #if (or #elif) code and look for #elif, #else, or
-%%		#endif
+%%	skip over body of #if (or #elif) code and look for 
+%%	#elif, #else, or #endif
 %%
 
 tp_if_false([],Stream,OutToks) :-

@@ -13,11 +13,13 @@ all: all-generic all-port all-maketop
 #
 #	All versions of ...
 #
-all-generic: generic.unix generic.djgpp generic.msw31 generic.mac generic.os2
+all-generic: generic.unix generic.dj1 generic.dj2 generic.msw31 \
+			generic.mac generic.os2
 
-all-port: port.unix port.djgpp port.msw31 port.mac port.os2
+all-port: port.unix port.dj1 port.dj2 port.msw31 port.mac port.os2
 
-all-maketop: maketop.unix maketop.djgpp maketop.msw31 maketop.mac maketop.os2
+all-maketop: maketop.unix maketop.dj1 maketop.dj2 maketop.msw31 \
+			maketop.mac maketop.os2
 
 #
 #	All makefiles for version ...
@@ -26,7 +28,9 @@ msw31: generic.msw31 port.msw31 maketop.msw31
 
 unix: generic.unix port.unix maketop.unix
 
-djgpp: generic.djgpp port.djgpp maketop.djgpp
+djgpp1: generic.dj1 port.dj1 maketop.dj1
+
+djgpp2: generic.dj2 port.dj2 maketop.dj2
 
 os2: generic.os2 port.os2 maketop.os2
 
@@ -44,10 +48,16 @@ generic.unix: ../generic/generate/generic.abs
 
 
 
-generic.dj generic.djgpp: ../generic/generate/generic.abs
+generic.dj1: ../generic/generate/generic.abs
 	$(ALSPRO) $(A2M)  -g abs2make_cl \
 		-p -src ../generic/generate/generic.abs \
-		-tgt ../generic/generate/generic.dj -ctx djgpp
+		-tgt ../generic/generate/generic.dj -ctx djgpp1
+
+generic.dj2: ../generic/generate/generic.abs
+	$(ALSPRO) $(A2M)  \
+		-g abs2make_cl \
+		-p -src ../generic/generate/generic.abs \
+		-tgt ../generic/generate/generic.dj2 -ctx djgpp2
 
 
 generic.os2: ../generic/generate/generic.abs
@@ -77,13 +87,21 @@ port.unix: ../bld-port/makefile.abs ../port/port.abs
                 -tgt ../port/port.unix -ctx unix
 
 
-port.djgpp: ../bld-port/makefile.abs ../port/port.abs
+port.dj1: ../bld-port/makefile.abs ../port/port.abs
 	$(ALSPRO) $(A2M)  -g abs2make_cl -p \
                 -src ../bld-port/makefile.abs \
-                -tgt ../bld-port/makefile.dj -ctx djgpp
+                -tgt ../bld-port/makefile.dj1 -ctx djgpp1
 	$(ALSPRO) $(A2M)  -g abs2make_cl -p \
                 -src ../port/port.abs \
-                -tgt ../port/port.dj -ctx djgpp
+                -tgt ../port/port.dj1 -ctx djgpp1
+
+port.dj2: ../bld-port/makefile.abs ../port/port.abs
+	$(ALSPRO) $(A2M)  -g abs2make_cl -p \
+                -src ../bld-port/makefile.abs \
+                -tgt ../bld-port/makefile.dj2 -ctx djgpp2
+	$(ALSPRO) $(A2M)  -g abs2make_cl -p \
+                -src ../port/port.abs \
+                -tgt ../port/port.dj2 -ctx djgpp2
 
 
 port.os2: ../bld-port/makefile.abs ../port/port.abs
@@ -119,9 +137,13 @@ maketop.unix: maketop.abs
 	$(ALSPRO) $(A2M) -g abs2make_cl \
 		-p -src maketop.abs -tgt maketop.unix -ctx unix
 
-maketop.djgpp: maketop.abs
+maketop.dj1: maketop.abs
 	$(ALSPRO) $(A2M) -g abs2make_cl \
-		-p -src maketop.abs -tgt maketop.dj -ctx djgpp
+		-p -src maketop.abs -tgt maketop.dj1 -ctx djgpp1
+
+maketop.dj2: maketop.abs
+	$(ALSPRO) $(A2M) -g abs2make_cl \
+		-p -src maketop.abs -tgt maketop.dj2 -ctx djgpp2
 
 maketop.os2: maketop.abs
 	$(ALSPRO) $(A2M) -g abs2make_cl \

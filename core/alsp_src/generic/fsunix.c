@@ -21,37 +21,46 @@
 
 #ifdef HAVE_LIBGEN_H
 #include <libgen.h>
+
 #elif defined(HAVE_REGEX_H)
 #include <regex.h>
-#endif					/* HAVE_LIBGEN_H */
+
+#endif	/* --- HAVE_LIBGEN_H --- */
 
 #include <errno.h>
 
 /* unistd.h defines _POSIX_VERSION on POSIX.1 systems.  */
+
 #if defined(DIRENT) || defined(_POSIX_VERSION)
 #include <dirent.h>
 #define NLENGTH(dirent) (strlen((dirent)->d_name))
-#else /* not (DIRENT or _POSIX_VERSION) */
+
+#else /* --- not (DIRENT or _POSIX_VERSION) --- */
 #define dirent direct
 #define NLENGTH(dirent) ((dirent)->d_namlen)
+
 #ifdef SYSNDIR
 #include <sys/ndir.h>
 #endif /* SYSNDIR */
 #ifdef SYSDIR
 #include <sys/dir.h>
 #endif /* SYSDIR */
+
 #ifdef NDIR
 #include <ndir.h>
 #endif /* NDIR */
-#endif /* not (DIRENT or _POSIX_VERSION) */
+
+#endif /* --- DIRENT or _POSIX_VERSION) --- */
 
 
 #ifndef S_IRUSR
 #define S_IRUSR  S_IREAD
 #endif
+
 #ifndef S_IWUSR
 #define S_IWUSR  S_IWRITE
 #endif
+
 #ifndef S_IXUSR
 #define S_IXUSR  S_IEXEC
 #endif

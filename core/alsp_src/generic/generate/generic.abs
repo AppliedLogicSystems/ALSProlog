@@ -109,7 +109,8 @@ schema([
 			case(&(context_name),
 		 		[(unix:(exeformat := '$(shell ($(CC) -o /tmp/which-exe $(srcdir)/utils/which-exe.c\
 					 >/dev/null 2>&1) ; /tmp/which-exe ; rm -f /tmp/which-exe)')),
-		  		 (djgpp:(exeformat = coff)),
+		  		 (djgpp1:(exeformat = coff)),
+		  		 (djgpp2:(exeformat = coff)),
 		  		 (os2:(exeformat = coff)),
 		  		 (_:(exeformat = unknown))
 		 		]),
@@ -155,7 +156,8 @@ cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 		[
 		 (mac:
 			'-i : -i :: -i {srcdir}generic: -i {srcdir}generic:generate:tok.h: -i {srcdir}{ARCH} -i {srcdir}{ARCH}:{SOS} -i {GUSIIncludes}' ),
-		 (djgpp: &(basic_unix_includes)+' -I$(srcdir)/i386/djgpp '),
+		 (djgpp1: &(basic_unix_includes)+' -I$(srcdir)/i386/djgpp '),
+		 (djgpp2: &(basic_unix_includes)+' -I$(srcdir)/i386/djgpp '),
 		 (_: &(basic_unix_includes) ) 
 		] ).
 
@@ -298,13 +300,13 @@ cmnt(4) = ['These items must generate themselves from other files'].
 				(unix: [tokens, tokini2, lexinit, siolex, magic, icode] ),
 				(_ : [ magic ] ) ]).
 
-'LEXRUN'	= &(invoke) + './lexinit > lexinit.h' .
-'SIORUN'	= &(invoke) + './sioinit > siolex.h' .
-'ICODERUN'	= &(invoke) + './icode > icode.h' .
+'LEXRUN'	= &(invoke) + ' lexinit > lexinit.h' .
+'SIORUN'	= &(invoke) + ' sioinit > siolex.h' .
+'ICODERUN'	= &(invoke) + ' icode > icode.h' .
 'MAGICRUN'	= case(&(context_name), [
 				(mac: 'magic'),
-				(_: &(invoke) + './magic')]).
-'BLDTRUN'	= &(invoke) + './bldtok' .
+				(_: &(invoke) + ' magic')]).
+'BLDTRUN'	= &(invoke) + ' bldtok' .
 
 generated depends_on case(&(context_name), [
 			(mac: ['{GENFILES}']),
@@ -344,21 +346,21 @@ rule('lexinit.h') =
 			[generate/'lexinit.c', 'lexan.h'],
 			['$(CC) $(CPPFLAGS) -o lexinit $(srcdir)/generic/generate/lexinit.c',
 			 '$(LEXRUN)',
-			 '-rm ./lexinit']).
+			 '-rm  lexinit']).
 
 rule('siolex.h') = 
 	rule('siolex.h',
 			[generate/'sioinit.c', 'bsio.h'],
 			['$(CC) $(CPPFLAGS) -o sioinit $(srcdir)/generic/generate/sioinit.c',
 			 '$(SIORUN)',
-			 '-rm ./sioinit']).
+			 '-rm  sioinit']).
 
 rule('icode.h') = 
 	rule('icode.h',
 		['icodedef.h', generate/'icode.c'],
 		['$(CC) $(CPPFLAGS) -o icode $(srcdir)/generic/generate/icode.c',
 		 '$(ICODERUN)',
-		 '-rm -rf ./icode']).
+		 '-rm -rf  icode']).
 
 cmnt(gen_dep) = ['generic dependencies',
 				 ' ',
@@ -382,7 +384,13 @@ rule(alsmics,
 			['echo exeformat=$(exeformat)',
 		 	 '-$(CC) -o alsmics ' + '$(srcdir)'/utils/'$(alsmics_c) ' + '$(CPPFLAGS) $(micsflags)',
 		 	 '-cp alsmics ' + alsdir/'als-mics'] ),
-		 (djgpp:
+		 (djgpp1:
+			['echo exeformat=$(exeformat)',
+		 	 '$(CC) -o alsmics ' + '$(srcdir)'/utils/'$(alsmics_c) ' + '$(CPPFLAGS) $(micsflags)',
+		 	 '-cp alsmics ' + alsdir/'als-mics',
+			 'coff2exe alsmics',
+			 '-cp alsmics.exe ' + alsdir/'als-mics.exe' ] ),
+		 (djgpp2:
 			['echo exeformat=$(exeformat)',
 		 	 '$(CC) -o alsmics ' + '$(srcdir)'/utils/'$(alsmics_c) ' + '$(CPPFLAGS) $(micsflags)',
 		 	 '-cp alsmics ' + alsdir/'als-mics',
@@ -416,7 +424,7 @@ rule(alstest) =
 		 'catenate nrev_rcd']),
 		(_: [
 		 'echo >> nrev_rcd',
-		 &(invoke) + ' ./alspro_b -obp $(srcdir)/tests/snrev -g snrev >> nrev_rcd',
+		 &(invoke) + '  alspro_b -obp $(srcdir)/tests/snrev -g snrev >> nrev_rcd',
 		 'cat nrev_rcd' ] )])).
 
 depends_list(_) = 

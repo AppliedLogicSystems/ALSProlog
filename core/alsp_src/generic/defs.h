@@ -392,8 +392,10 @@ extern	int	canonicalize_pathname PARAMS(( void ));
 extern	int	pgetpid		PARAMS(( void ));
 #endif /* FSACCESS */
 
+#if (!defined(__DJGPP__) && !defined(__GO32__))
 extern	long	get_file_modified_time	PARAMS((CONST char * ));
 extern	int	isdir			PARAMS((CONST char * ));
+#endif
 
 #if MacOS
 extern	int	absolute_pathname	PARAMS((CONST char *name));

@@ -28,7 +28,8 @@ start_shell(DefaultShellCall)
 	%% Setup debugger entries (needs to be done early because
 	%% ss_parse_command_line can cause debugger to be called
 	%% [if it sees switch -nwd] )
-	alarm(0,0),
+		%% Conditional handles systems without alarm/2:
+	(alarm(0,0) -> true ; true),
 	builtins:libhide(debugger, [builtins,debugger],
 				[ (trace)/0, (trace)/2, toggle_mod_show/1, leash/1,
 		  		  (spy)/0, (spy)/1, (spy)/2, (spy_pat)/3, (spyWhen)/1,
@@ -338,11 +339,22 @@ init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	set_shell_prompts( [(Prompt1,Prompt2) | CurPromptsStack] ),
 	print_banner(OutStream,SysList),
 	dmember(wins=InitWins, SysList),
+	dmember(os=OS, SysList),
+	dmember(os_variation=OSMinor, SysList),
 	(InitWins = nowins ->
 			Wins = nowins
 			;
 			(windows:'$toplevel$'(_) ->
+/*
 				Wins = InitWins
+*/
+				((OS=macos ; OSMinor = djgpp ; OSMinor = djgpp2)
+					->
+					Wins = InitWins/0
+					;
+					Wins = InitWins
+				)
+
 				;
 				Wins = nowins
 			)
@@ -605,6 +617,7 @@ pbi_write(setting_alarm_clock(Goal0,AlarmIntrv)),pbi_nl,pbi_ttyflush,
 	alarm(AlarmIntrv,AlarmIntrv).
 set_alarm_clock(_,_) :-!.
 
+unset_alarm(0) :-!.
 unset_alarm(AlarmIntrv)
 	:-
 	alarm(0,0).
@@ -614,9 +627,9 @@ unset_alarm(AlarmIntrv)
 	!,
 	fail.
 
-do_shell_query(Goal,VarNames,Vars,Alarm,InStream,OutStream) 
+do_shell_query(Goal,VarNames,Vars,AlarmIntrv,InStream,OutStream) 
 	:-
-	alarm(0,0),
+	unset_alarm(AlarmIntrv),
 	dbg_notrace,
 	dbg_spyoff,
 	print_no(OutStream).

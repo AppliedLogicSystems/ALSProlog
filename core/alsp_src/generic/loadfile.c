@@ -319,6 +319,10 @@ obp_open(fname)
 	return (0);
     }
 
+#if defined(MacOS) && defined(HAVE_GUSI)
+    fsetfileinfo(fname, 'ALS4', 'OBPT');
+#endif
+
     push_symmap();		/* push current symbol table map */
     /* and allocate a new one */
 
@@ -554,7 +558,7 @@ obp_pop()
 
 #endif	/* OBP */
 
-#if 0
+#if (defined(__DJGPP__) || defined(__GO32__))
 
 #ifndef MacOS
 

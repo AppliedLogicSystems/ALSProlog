@@ -21,6 +21,7 @@ export position/4.
 export get_list_tail/3.
 export list_delete/3.
 export sublist/4.
+export last/2.
 
 /*!---------------------------------------------------------------------
  | deleteNth/3
@@ -216,5 +217,23 @@ sublist1([Char|Rest],Cur,[Char|RRest])
 	:-
 	Now is Cur-1,
 	sublist1(Rest,Now,RRest).
+
+/*!---------------------------------------------------------------------
+ |	last/2
+ |	last(List, Item)
+ |	last(+, -)
+ |
+ |	- returns last element of a list
+ |
+ |	If List is a non-empty list, Item is the last (right-most) element
+ |	of List.
+ *!--------------------------------------------------------------------*/
+
+last([Item],Item)
+	:-!.
+
+last([_|Tail],Item)
+	:-
+	last(Tail, Item).
 
 endmod.

@@ -962,6 +962,16 @@ process_fcn_decl(all_except(Excl),FDeclt,Rest,DSpec,State)
 	),
 	process_declts(Rest,DSpec,FcnFilter,State).
 
+process_fcn_decl(all_xcpt(Pat),FDeclt,Rest,DSpec,State)
+	:-!,
+	FDeclt = func(ident(FID),Params), 
+	(xcld_fcn_pat(Pat, FID) ->
+		true
+		;
+		output_func_gvar(DSpec, FDeclt, State)
+	),
+	process_declts(Rest,DSpec,FcnFilter,State).
+
 process_fcn_decl(List,FDeclt,Rest,DSpec,State)
 	:-
 	FDeclt = func(ident(FID),Params), 
@@ -979,6 +989,23 @@ process_fcn_decl(List,FDeclt,Rest,DSpec,State)
 process_fcn_decl(FcnFilter,_,Rest,DSpec,State)
 	:-
 	process_declts(Rest,DSpec,FcnFilter,State).
+
+
+xcld_fcn_pat([Pat | Pats], FID)
+	:-
+	sub_atom(FID,1,_,Pat),
+	!.
+
+xcld_fcn_pat([_ | Pats], FID)
+	:-
+	xcld_fcn_pat(Pats, FID).
+
+xcld_fcn_pat(Pat, FID)
+	:-
+	atom(Pat),
+	sub_atom(FID,1,_,Pat).
+
+
 
 %-----------------------------------------------------------
 %	adeclt_to_str/2
