@@ -860,8 +860,10 @@ mark(val)
 {
     register long *ptr, *bptr;
     register long tag, btag;
-    int   arity;
-	long	xval;
+    int arity;
+#ifdef FREEZE
+    long xval;
+#endif
 
     bptr = (long *) 0;
     btag = 0;

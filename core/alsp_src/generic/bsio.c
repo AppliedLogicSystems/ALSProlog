@@ -4072,6 +4072,9 @@ char_constant(pp, lim, inc, endc)
     int   inc;
     int   endc;
 {
+#if !defined(SIO_ENDCHAR_REQUIRED_FOR_CHAR_CONSTS) && defined(__MWERKS__)
+#pragma unused(endc)
+#endif
     int   val;
 
     *pp += inc;			/* skip over initial segment */
