@@ -108,42 +108,38 @@ ss_parse_command_line(['-a', Expr | T], L, Mod,CLInfo)
 	%% -obp: Keep obp files in directory where image is running:
 ss_parse_command_line(['-obp' | T], L, Mod,CLInfo)
 	:-!,
-%	generated_in_cur,
-	assert(global_obp_location(gic)),
+	set_prolog_flag(obp_location, gic),
 	ss_parse_command_line(T, L, Mod,CLInfo).
 
 	%% "Generated In Current directory:"	
 	%% -gic: Keep generated files in directory where image is running:
 ss_parse_command_line(['-gic' | T], L, Mod,CLInfo)
 	:-!,
-%	generated_in_cur,
-	assert(global_obp_location(gic)),
+	set_prolog_flag(obp_location, gic),
 	ss_parse_command_line(T, L, Mod,CLInfo).
 
 	%% "Generated In Source directory:"	
 	%% -gis: Keep generated files in directory where sources reside:
 ss_parse_command_line(['-gis' | T], L, Mod,CLInfo)
 	:-!,
-%	generated_with_src,
-	assert(global_obp_location(gis)),
+	set_prolog_flag(obp_location, gis),
 	ss_parse_command_line(T, L, Mod,CLInfo).
 
 	%% "Generated In Architecture sub-directory of Sources directory:"	
 	%% -gias: Keep generated files in arch subdirectory where sources reside:
 ss_parse_command_line(['-gias' | T], L, Mod,CLInfo)
 	:-!,
-%	generated_in_arch(src),
-	assert(global_obp_location(gias)),
+	set_prolog_flag(obp_location, gias),
 	ss_parse_command_line(T, L, Mod,CLInfo).
 
 	%% "Generated In Architecture sub-directory of Current directory:"	
 	%% -giac: Keep generated files in arch subdirectory of current dir:
 ss_parse_command_line(['-giac' | T], L, Mod,CLInfo)
 	:-!,
-%	generated_in_arch(cur),
-	assert(global_obp_location(gias)),
+	set_prolog_flag(obp_location, giac),
 	ss_parse_command_line(T, L, Mod,CLInfo).
 
+/*
 	%% "Generated In exlicipt Location:"
 	%% -gil: Keep generated files in explict Path dir:
 ss_parse_command_line(['-gil', Path | T], L, Mod,CLInfo)
@@ -151,14 +147,13 @@ ss_parse_command_line(['-gil', Path | T], L, Mod,CLInfo)
 %	generated_in_locn(Path),
 	assert(global_obp_location(gil(Path))),
 	ss_parse_command_line(T, L, Mod,CLInfo).
+*/
 
 	%% -no_obp: Don't generate obp files:
-ss_parse_command_line(['-no_obp', Path | T], L, Mod,CLInfo)
+ss_parse_command_line(['-no_obp' | T], L, Mod,CLInfo)
 	:-!,
-%	generated_in_locn(Path),
-	assert(global_obp_location(no_obp)),
+	set_prolog_flag(obp_location, no_obp),
 	ss_parse_command_line(T, L, Mod,CLInfo).
-
 
 	%% -nwd: Set debugger to "nowins"
 ss_parse_command_line(['-nwd' | T], L, Mod,CLInfo)
