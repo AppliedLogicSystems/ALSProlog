@@ -717,14 +717,23 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 	   bounds and kind in this new UIA: 
 	 *-------------------------------------------------------------*/
 
+	/* CHANGED BY SPIRO BELOW */ 
+#if 1
+	if (0) {
+#else
 	if ((long)IntrvTm > (long)chpt_SPB(wm_B) ) {
-printf("CASE#1\n");
+#endif
+#if 0
+		printf("CASE#1\n");
+#endif
 		w_get_argn(&IntUIA, &IntUIA_t, IntrvTm, UIA_POSITION);
 		w_uia_poke(IntUIA, (int) UIA_FIRST_POS,  (UCHAR *) &L, sizeof (double));
 		w_uia_poke(IntUIA, (int) UIA_SECOND_POS, (UCHAR *) &H, sizeof (double));
 
 	} else {
-printf("CASE#2\n");
+#if 0
+		printf("CASE#2\n");
+#endif
 		w_uia_alloc(&IntUIA, &IntUIA_t, (size_t)UIA_DIMENSION);
 		w_uia_poke(IntUIA, (int) UIA_FIRST_POS,  (UCHAR *) &L, sizeof (double));
 		w_uia_poke(IntUIA, (int) UIA_SECOND_POS, (UCHAR *) &H, sizeof (double));
@@ -734,6 +743,7 @@ printf("CASE#2\n");
 			Now trailed-mangle the new UIA into the UIA position in
 			the interval structure:
 	 	 *-------------------------------------------------------------*/
+/* printf("SPIRO: trailed mangle\n"); */
 		trailed_mangle0(UIA_POSITION, IntrvTm, WTP_STRUCTURE, IntUIA, WTP_UIA); 
 	}
 
