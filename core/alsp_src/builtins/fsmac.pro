@@ -270,8 +270,7 @@ filterForFileType([FileName | Files], Dir, FileType, List)
 
 filter_file(FileName, Dir, FileType, [FileName | ListTail], ListTail)
 	:-
-%	pathPlusFile(Dir, FileName, FullFile),
-	join_file([Dir, FileName], FullFile),
+	join_path([Dir, FileName], FullFile),
 	'$getFileStatus'(FullFile, StatusTerm),
 	arg(1, StatusTerm, ThisFileType),
 	fflt_ck(ThisFileType, FileType, FullFile),
