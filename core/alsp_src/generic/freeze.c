@@ -46,7 +46,7 @@ int pbi_kill_freeze		PARAMS(( void ));
 int
 pbi_delay()
 {
-	PWord *dv,m,g,vv,rdt,*one,*two, *HHH ;
+	PWord *dv,m,g,vv,rdt,*one,*two;
 	int dvt,mt,gt,vvt,rdtt;
 
 #ifdef DEBUGFREEZE
@@ -94,7 +94,6 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 	w_install(one,(int)one,MTP_UNBOUND); 
 	two = (PWord *)((PWord *)wm_H + 2); 
 	w_install(two,(int)two,MTP_UNBOUND);
-HHH = wm_H;
 		/* make the delay term: */
 	w_mk_term(&vv, &vvt, TK_DELAY, 4);
 		/* the 2nd arg (=two) is ok -- it's unbound;
@@ -102,7 +101,6 @@ HHH = wm_H;
 	w_install_argn(vv, 3, m,mt);
 	w_install_argn(vv, 4, g,gt);  
 
-printf("    - *wm_H=%x funct(*wm_H)=%x arity(*wm_H)=%d\n", (int)*HHH, (int)MFUNCTOR_TOKID(*HHH),(int)MFUNCTOR_ARITY(*HHH) );
 	/* ------------------------------------------------------*
 	   Next, we have to trail the binding we will install
 	   in dv, so that if we backtrack over this, it will
