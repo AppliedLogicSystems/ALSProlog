@@ -23,6 +23,7 @@ Build Instructions:
    
 2. Modify the the prefix.h file to include any build options.
 
-3. Open the base.mcp project, select the "Build All" target, and make it.
+3. Open the base.mcp project, select desired target (Mac Fat, Win x86, or All),
+   and make it.
 
 4. On Windows, run the make_image.bat batch file.
