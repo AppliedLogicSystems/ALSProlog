@@ -16,6 +16,7 @@ AP_API(AP_Obj) AP_NewUIAFromStr(AP_World *w, const char *s);
 AP_API(AP_Obj) AP_NewNumberFromLong(AP_World *w, long n);
 AP_API(AP_Obj) AP_NewFloatFromDouble(AP_World *w, double d);
 AP_API(AP_Obj) AP_NullList(AP_World *w);
+AP_API(AP_Obj) AP_NewList(AP_World *w);
 AP_API(AP_Obj) AP_NewInitList(AP_World *w, AP_Obj head, AP_Obj tail);
 AP_API(AP_Type) AP_ObjType(AP_World *w, AP_Obj obj);
 AP_API(long) AP_GetLong(AP_World *w, AP_Obj obj);

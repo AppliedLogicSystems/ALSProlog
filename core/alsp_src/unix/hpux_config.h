@@ -9,6 +9,7 @@
 #define HAVE_MMAP_ZERO 1
 
 #define MISSING_EXTERN_REALPATH
+#define MISSING_EXTERN_H_ERRNO
 
 /* wam.c won't compile with threading when using -fpic. Docs suggest
   that GCC 2.7 fixes this problem. */

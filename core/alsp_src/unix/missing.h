@@ -328,5 +328,8 @@ extern int getrusage(int, struct rusage *);
 extern int gettimeofday(struct timeval *tp, void *tzp);
 #endif
 
+#ifdef MISSING_EXTERN_H_ERRNO
+extern int h_errno;
+#endif
 
 #endif /* _MISSING_H_INCLUDED_ */

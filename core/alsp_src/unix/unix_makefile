@@ -34,8 +34,10 @@ CPPFLAGS = -DUNIX -DCONFIGLESS $(BUILD_FLAGS) \
 #-Waggregate-return - We use aggregate types.
 #-Wredundant-decls - Most redundant declarations are in system header files,
 #		     but there is some in out code, too. Fix someday.
+# -Wstrict-prototypes - Complains about arg-less function pointer like:
+#                       int (*func)(), which I think are legal.
 
-CFLAGS = -O -fpic -MMD -Wall -Wstrict-prototypes -Wmissing-prototypes -Wwrite-strings -Wnested-externs -Wpointer-arith -Werror -fwritable-strings
+CFLAGS = -O -fpic -MMD -Wall -Wmissing-prototypes -Wwrite-strings -Wnested-externs -Wpointer-arith -Werror -fwritable-strings
 
 VPATH = $(SOURCE_DIR)/unix:$(SOURCE_DIR)/generic:$(SOURCE_DIR)/port:$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins
 
@@ -57,7 +59,7 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	pckgmake.c rinfo.c sig.c symtab.c \
 	varproc.c vprintf.c wdisp.c wintcode.c \
 	winter.c security.c nopckg.c \
-	ieeemath.c pimain.c
+	ieeemath.c pimain.c new_alspi.c
 
 UNIX_SOURCE = unixio.c missing.c
 

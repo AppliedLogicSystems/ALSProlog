@@ -352,6 +352,9 @@ extern	int	sio_nsocket_select	PARAMS(( void ));
 
 extern	int	sio_nsocket_open	PARAMS(( void ));
 
+extern int pbi_gethostbyname(void);
+extern int pbi_gethostbyaddr(void);
+
 extern	int	sio_gethostname	PARAMS(( void ));
 extern	int	sio_socket_open	PARAMS(( void ));
 extern	int	sio_is_server_socket	PARAMS(( void ));

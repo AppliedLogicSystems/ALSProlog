@@ -51,16 +51,28 @@ AP_API(AP_Obj) AP_NullList(AP_World *w)
 	return r;
 }
 
+AP_API(AP_Obj) AP_NewList(AP_World *w)
+{
+	AP_Obj r;
+	
+	PI_makelist(&r.p, &r.t);
+	
+	return r;
+}
+
 AP_API(AP_Obj) AP_NewInitList(AP_World *w, AP_Obj head, AP_Obj tail)
 {
 	AP_Obj r, car, cdr;
 	
 	PI_makelist(&r.p, &r.t);
-	PI_gethead(&car.p, &car.t, r.p);
-	PI_unify(car.p, car.t, head.p, head.t);
-	PI_gettail(&cdr.p, &cdr.t, r.p);
-	PI_unify(cdr.p, cdr.t, tail.p, tail.t);
-	
+	if (head.p != AP_UNBOUND_OBJ.p || head.t != AP_UNBOUND_OBJ.t) {
+		PI_gethead(&car.p, &car.t, r.p);
+		PI_unify(car.p, car.t, head.p, head.t);
+	}
+	if (tail.p != AP_UNBOUND_OBJ.p || tail.t != AP_UNBOUND_OBJ.t) {
+		PI_gettail(&cdr.p, &cdr.t, r.p);
+		PI_unify(cdr.p, cdr.t, tail.p, tail.t);
+	}
 	return r;
 }
 
@@ -115,6 +127,9 @@ AP_API(const char *) AP_GetAtomStr(AP_World *w, AP_Obj obj)
 		break;
 	case PI_UIA:
 		s = PI_getuianame(NULL, obj.p, obj.t);
+		break;
+	default:
+		s = NULL;
 		break;
 	}
 
@@ -333,11 +348,12 @@ int AP_OldToNewCall(AP_Result (*new_func)(), int arity)
 {
 	AP_Obj arg[10];
 	int i;
-	AP_Result r;
-	call0 c0;
-	call1 c1;
-	call2 c2;
-	call3 c3;
+	AP_Result r = AP_EXCEPTION;
+	call0 c0 = NULL;
+	call1 c1 = NULL;
+	call2 c2 = NULL;
+	call3 c3 = NULL;
+	call4 c4 = NULL;
 
 	
 	for (i = 0; i < arity; i++)
@@ -348,6 +364,7 @@ int AP_OldToNewCall(AP_Result (*new_func)(), int arity)
 	case 1: c1 = new_func; break;
 	case 2: c2 = new_func; break;
 	case 3: c3 = new_func; break;
+	case 4: c4 = new_func; break;
 	}
 
 	switch (arity) {
@@ -355,6 +372,7 @@ int AP_OldToNewCall(AP_Result (*new_func)(), int arity)
 	case 1: r = c1(NULL, arg[0]); break;
 	case 2: r = c2(NULL, arg[0], arg[1]); break;
 	case 3: r = c3(NULL, arg[0], arg[1], arg[2]); break;
+	case 4: r = c4(NULL, arg[0], arg[1], arg[2], arg[3]); break;
 	}
 	
 	if (r == AP_SUCCESS) PI_SUCCEED;

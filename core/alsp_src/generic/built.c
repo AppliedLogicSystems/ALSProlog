@@ -435,6 +435,9 @@ static struct blt_struct {
 
 	BLT("sio_nsocket_open", 6, sio_nsocket_open, "_sio_nsocket_open"),
 
+	BLT("gethostbyname", 4, pbi_gethostbyname, "_pbi_gethostbyname"),
+	BLT("gethostbyaddr", 4, pbi_gethostbyaddr, "_pbi_gethostbyaddr"),
+
 	BLT("sio_gethostname",1,sio_gethostname,"_sio_gethostname"),
 	BLT("sio_socket_open", 10, sio_socket_open, "_sio_socket_open"),
 	BLT("sio_is_server_socket", 1, sio_is_server_socket,
