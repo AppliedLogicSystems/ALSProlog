@@ -47,7 +47,7 @@ test :-
 	point(b),
 
 	stream_position(foo, _, 10),
-	pn(long, 0x98765432),	%% 10-13
+	pn(ulong, 0x98765432),	%% 10-13
 	gn(long, 0x10203040),	%% 14-17
 	gn(byte, 21),		%% 18
 	pn(double, 123e-12),	%% 19-26
@@ -58,7 +58,7 @@ test :-
 	stream_position(foo, _, 0),
 	gn(double,19.3),	%% 0-7
 	gn(short, 20),		%% 8-9
-	gn(long, 0x98765432),	%% 10-13
+	gn(ulong, 0x98765432),	%% 10-13
 	gn(long, 0x10203040),	%% 14-17
 	gn(byte, 21),		%% 18
 	gn(double, 123e-12),	%% 19-26
@@ -70,7 +70,7 @@ test :-
 	pn(float, 3.25),	%% 47-50
 	pn(float, 9.125),	%% 51-54
 	pn(byte, 95),		%% 55
-	pn(long, 0xabcdef01),	%% 56-59
+	pn(ulong, 0xabcdef01),	%% 56-59
 	pn(long, 0x00112233),	%% 60-63
 	pn(byte, 22),		%% 64
 	pn(double, 123.45e12),	%% 65-72
@@ -80,11 +80,11 @@ test :-
 
 	stream_position(foo, _, 39),
 	pn(float, 33.75),	%% 39-42
-	pn(long, 0x87654321),	%% 43-46
+	pn(ulong, 0x87654321),	%% 43-46
 	gn(float, 3.25),	%% 47-50
 	gn(float, 9.125),	%% 51-54
 	gn(byte, 95),		%% 55
-	gn(long, 0xabcdef01),	%% 56-59
+	gn(ulong, 0xabcdef01),	%% 56-59
 	gn(long, 0x00112233),	%% 60-63
 	gn(byte, 22),		%% 64
 	gn(double, 123.45e12),	%% 65-72
@@ -95,7 +95,7 @@ test :-
 	stream_position(foo, _, 31),
 	gn(double, 123.456),	%% 31-38
 	gn(float, 33.75),	%% 39-42
-	gn(long, 0x87654321),	%% 43-46
+	gn(ulong, 0x87654321),	%% 43-46
 	gn(float, 3.25),	%% 47-50
 	pn(long, 0x11002200),	%% 51-54
 	pn(byte, 98),		%% 55
@@ -109,7 +109,7 @@ test :-
 	pn(short, 789),		%% 93-94
 	pn(double, 101010.65),	%% 95-102
 	pn(byte, 11),		%% 103
-	pn(long, 0xacbacbaa),	%% 104-107
+	pn(ulong, 0xacbacbaa),	%% 104-107
 
 	point(g),
 
@@ -117,11 +117,11 @@ test :-
 	gn(long, 0x11223344),	%% 27-30
 	gn(double, 123.456),	%% 31-38
 	gn(float, 33.75),	%% 39-42
-	gn(long, 0x87654321),	%% 43-46
+	gn(ulong, 0x87654321),	%% 43-46
 	gn(float, 3.25),	%% 47-50
 	gn(long, 0x11002200),	%% 51-54
 	gn(byte, 98),		%% 55
-	gn(long, 0xabcdef01),	%% 56-59
+	gn(ulong, 0xabcdef01),	%% 56-59
 	gn(long, 0x00112233),	%% 60-63
 	gn(byte, 22),		%% 64
 	gn(double, 123.45e12),	%% 65-72
@@ -132,7 +132,7 @@ test :-
 	gn(short, 789),		%% 93-94
 	gn(double, 101010.65),	%% 95-102
 	gn(byte, 11),		%% 103
-	gn(long, 0xacbacbaa),	%% 104-107
+	gn(ulong, 0xacbacbaa),	%% 104-107
 
 	point(f),
 
