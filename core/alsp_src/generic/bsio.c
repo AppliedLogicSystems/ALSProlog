@@ -2101,19 +2101,19 @@ sio_simple_select()
 	int   arity, d_argt;
 	int   i;
 	double vvv;
-		w_get_arity(&arity, v2);
-		w_get_functor(&functor, v2);
+	w_get_arity(&arity, v2);
+	w_get_functor(&functor, v2);
 
-		if (arity == 4 && functor == TK_DDOUBLE) {
-			for (i = 0; i < 4; i++) {
-		    	w_get_argn(&d_arg, &d_argt, v2, i + 1);
-		    	*(((short *) &vvv) + i) = d_arg;
-			}
-			wait_val = (int) vvv;
-		}
-		else
-	    	FAIL;
-   	}
+	if (arity == 4 && functor == TK_DDOUBLE) {
+	  for (i = 0; i < 4; i++) {
+	    w_get_argn(&d_arg, &d_argt, v2, i + 1);
+	    *(((short *) &vvv) + i) = d_arg;
+	  }
+	  wait_val = (int) vvv;
+	}
+	else
+	  FAIL;
+    }
 #endif
     else if (t2 == WTP_INTEGER)
 		wait_val = v2;
