@@ -33,7 +33,6 @@ export filePlusExt/3.
 export pathPlusFile/3.
 export subPath/2.
 export extendPath/3.
-export subPath0/2.
 export rootPlusPath/3.
 export rootPlusPath0/3.
 export rootPathFile/4. 
@@ -164,6 +163,31 @@ atom_split(Atom, Splitter, Left, Right) :-
 	RightPos is SplitPos + SplitLen,
 	RightLen is AtomLen - RightPos + 1,
 	sub_atom(Atom, RightPos, RightLen, Right).
+
+%% atom_rsplit/4 -- like atom_split, except it starts from the right.
+
+export atom_rsplit/4.
+
+atom_rsplit(Atom, Splitter, Left, Right) :-
+	atom_split(Atom, Splitter, L, R),
+	atom_rsplit(R, Splitter, LL, Right),
+	atom_split(Left, Splitter, L, LL).
+atom_rsplit(Atom, _, '', Atom).
+
+/*!--------------------------------------------------------
+	dirFilePath/3
+	dirFilePath(Directory, File, FullFilePath).
+	dirFilePath(+, +, -)
+	
+	- decomposes a full path name into a file and
+	  directory.
+ *!-------------------------------------------------------*/
+
+export dirFilePath/3.
+
+dirFilePath(Dir, File, Path) :-
+	directory_separator(S),
+	atom_rsplit(Path, S, Dir, File).
 
 /*!--------------------------------------------------------
 	filePlusExt/3.
