@@ -1429,10 +1429,10 @@ get_st_rec_by_fcg(FCGNum, Rec)
 start_src_trace(Flag,BaseFileName, SrcFilePath, CG, ALSMgr, SrcMgr)
 	:-
 	send(ALSMgr, get_value(debugger_mgr, DbgrMgr)),
-write(ensure_Db_showing),nl,flush_output,
 	send(DbgrMgr, ensure_db_showing),
 	send(DbgrMgr, insert_by_fcg(CG, SrcMgr)),
 	send(DbgrMgr, set_value(mrfcg, CG)),
+	!,
 	send(SrcMgr, start_src_trace(BaseFileName, SrcFilePath, CG)).
 
 
@@ -1742,7 +1742,6 @@ showGoalToUserWin(_,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug, DBG
 	%%---------------------------------------------------
 showGoalToUserWin_other(Port,Box,Depth, Module, XGoal, Response, MRFCG, DBGMGR, SrcMgr)
 	:-
-write(sG(Port,Box,Depth, Module, XGoa, mr=MRFCG)),nl,flush_output,
 	printf(debugger_output,'(%d) %d %t: ', [Box,Depth,Port]), 
 
 %% should not be necessary, but there is a bug somewhere
@@ -1752,20 +1751,14 @@ write(sG(Port,Box,Depth, Module, XGoa, mr=MRFCG)),nl,flush_output,
 	flush_output(debugger_output),
 
 	re_color_port(Port, MRFCG, SrcMgr),
-write(after_recolor),nl,flush_output,
 %	send(DBGMGR, show_stack_list),
 	!,
-%	(((Port = exit; Port = fail), Box = 1, Depth=1) ->
-%write(call_dbg_boundary(MRFCG,Box,Depth,general,Port,XGoal,DBGMGR, SrcMgr)),nl,flush_output,
-write(yyyyy),nl,flush_output,
-		(dbg_boundary(MRFCG,Box,Depth,general,Port,XGoal,DBGMGR, SrcMgr) ->
+	(dbg_boundary(MRFCG,Box,Depth,general,Port,XGoal,DBGMGR, SrcMgr) ->
 		nl(debugger_output),
 		Response = debug
 		;
-write(xxxxx(Port,Box,Depth)),nl,flush_output,
 		tcl_call(shl_tcli, [set_status_debugwin,Port,Box,Depth], _),
 		getResponse(tcltk,Port,Box,Depth, Module, XGoal, Response)
-,write(got_resp=Response),nl,flush_output
 	),
 	!.
 
