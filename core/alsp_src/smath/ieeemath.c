@@ -19,8 +19,9 @@
 #include "smath.h"
 #include "ieeemath.h"
 
-double  tmpIE,tmpxIE,tmpyIE; /* these are used in the min/max macros,
-                             which therefore can't be nested */
+// THREAD - don't seem to be used.
+//double  tmpIE,tmpxIE,tmpyIE; /* these are used in the min/max macros,
+//                             which therefore can't be nested */
 
 
   /* these defs may vary from machine to machine */

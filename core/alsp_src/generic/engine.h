@@ -18,8 +18,6 @@ typedef struct prolog_database_ {
 
     long builtins_initialized;
 
-	long pegvnum;
-
 
     int  *top_module;
 
@@ -55,6 +53,8 @@ typedef struct prolog_database_ {
 
     unsigned long ts_next;
 
+//	MUTEX symtab_mutex;
+	
     tkentry *toktable;
 
     tkentry **hashtable;
@@ -428,7 +428,10 @@ typedef struct {
 struct prolog_engine_struct {
 /* Prolog logic */
 	
+	MUTEX db_write_mutex;
 	prolog_database *db;
+
+	long pegvnum;
 	
 /* Prolog Control */
 	
@@ -527,7 +530,7 @@ void realloc_prolog_memory(prolog_engine *pe, size_t new_stack_size, size_t new_
 #define als_mem ((long *)hpe->db->als_mem)
 
 #define builtins_initialized (hpe->db->builtins_initialized)
-#define pegvnum (hpe->db->pegvnum)
+#define pegvnum (hpe->pegvnum)
 #define top_module (hpe->db->top_module)
 #define module_stack (hpe->db->module_stack)
 #define top_clausegroup (hpe->db->top_clausegroup)

@@ -210,6 +210,7 @@ int als_stat(const char *path, struct als_stat *buf)
 	return result;
 }
 
+
 char * als_getenv(const char * name)
 {
 	// THREAD
@@ -222,6 +223,7 @@ char * als_getenv(const char * name)
 	if (result <= 0 || result > VAL_MAX) return NULL;
 	else return value;
 }
+
 
 int als_system(const char * command)
 {

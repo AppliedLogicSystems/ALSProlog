@@ -43,12 +43,6 @@ isopt(const char *opt, char *str)
 
 /* static prolog_engine my_engine;*/
 
-#if 0
-static void my_thread(PE)
-{
-	
-}
-#endif
 
 EXPORT ALSPI_API(struct prolog_engine_struct *)	PI_new_engine(void)
 {

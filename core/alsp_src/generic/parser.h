@@ -22,7 +22,9 @@ typedef struct tkentry_ {
 	unsigned short binop;	/* binary op precedence and assoc */
 } tkentry;
 
-extern tkentry *toktable;	/* note: although I am exporting the toktable,
+// THREAD not needed
+//extern tkentry *toktable;
+/* note: although I am exporting the toktable,
 				 *       it should not be accessed by modules
 				 *       other than parser.c except through
 				 *       the macros provided here in parser.h
@@ -36,7 +38,8 @@ extern tkentry *toktable;	/* note: although I am exporting the toktable,
 #define TOKBINOP(t) (toktable[(t)].binop)
 
 #define N_TOK_CHARS 256
-extern long *char_to_tok_map;
+// THREAD - not needed
+//extern long *char_to_tok_map;
 #define char_to_tok(ch) (char_to_tok_map[UCHARC(ch)])
 #define tok_to_char(tok) (*TOKNAME(tok))
 #define is_char_tok(tok) ((tok) == (char_to_tok(tok_to_char(tok))))
@@ -90,7 +93,7 @@ extern long *char_to_tok_map;
 #define PREC_RIGHT(ap) ((ap)&0xfff1)
 #define PREC_LEFT(ap) ((ap)&0xfff2)
 
-
+// THREAD old bootstap parser, but check on used
 extern char tokstr[];		/* defined in lexan.c */
 
 

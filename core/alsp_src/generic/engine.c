@@ -123,8 +123,14 @@ void init_prolog_engine(prolog_engine *pe, size_t stack_size, size_t heap_size)
 	
 	//	init_db(pe->db);
 	
+	pe->pegvnum = -5;
+
 	alloc_prolog_memory(pe, stack_size, heap_size);
 
+	INIT_MUTEX(pe->db_write_mutex);
+	gensym_init();
+	init_bsio();
+	
 	pe->reg_stack_base = pe->reg_stack_top = pe->register_stack;
 
 
@@ -156,7 +162,6 @@ void init_prolog_engine(prolog_engine *pe, size_t stack_size, size_t heap_size)
 void init_db(prolog_database *db)
 {
 	db->builtins_initialized = 0;
-	db->pegvnum = -5;
 #if 0
     //no init int  *top_module;
     //no init int *module_stack;

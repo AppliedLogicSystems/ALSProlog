@@ -12,4 +12,4 @@
  *=================================================================*/
 
 extern int system_debugging;
-extern int fail_message;
+// THREAD not used, right? extern int fail_message;

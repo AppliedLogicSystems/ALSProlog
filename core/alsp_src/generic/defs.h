@@ -325,6 +325,19 @@
  | Include commonly needed Generic include files
  *---------------------------------------------------------------------*/
 
+// THREAD defines
+
+void gensym_init(void);
+
+#ifdef UNIX
+#error
+#elif WIN32
+#define MUTEX CRITICAL_SECTION
+#define INIT_MUTEX(m)	InitializeCriticalSection(&m)
+#define LOCK_MUTEX(m)	EnterCriticalSection(&m);
+#define UNLOCK_MUTEX(m)	LeaveCriticalSection(&m);
+#endif
+
 struct prolog_engine_struct;
 
 #define PE struct prolog_engine_struct *hpe
@@ -491,6 +504,7 @@ extern void close_memory_file(mem_file_info *info);
 extern long standard_console_read(char *buf, long n);
 extern long standard_console_write(char *buf, long n);
 extern long standard_console_error(char *buf, long n);
+extern void init_bsio(void);
 
 /* ----------   sig.c ----------   */
 extern	void	init_sigint	( void );
@@ -548,5 +562,8 @@ max(x, y)
 #define CRSTR	"\x0d"
 #define LFSTR	"\x0a"
 #define CRLFSTR	"\x0d\x0a"
+
+
+
 
 #endif /* _DEFS_H_INCLUDED_ */

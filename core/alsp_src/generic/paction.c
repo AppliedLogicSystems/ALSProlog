@@ -30,7 +30,7 @@
 LM_CODE(code, ENCRYPTION_CODE_1, ENCRYPTION_CODE_2,
 	VENDOR_KEY1, VENDOR_KEY2, VENDOR_KEY3);
 
-static char feature[64] = "alspro_";
+static const char feature[64] = "alspro_";
 
 #endif /* FLEX */
 

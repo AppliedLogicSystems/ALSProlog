@@ -898,6 +898,7 @@ typedef struct {
 } fdrefcnt;
 
 // THREAD
+MUTEX fdrefcnts_mutex;
 static fdrefcnt *fdrefcnts = NULL;
 static int fdrefcnts_size;
 
@@ -954,6 +955,8 @@ static int next_prime(int n)
 static void
 incr_fdrefcnt(int fd)
 {
+	LOCK_MUTEX(fdrefcnts_mutex);
+
     if (fdrefcnts == NULL) {
 #ifdef MSWin32
 	openmax = 255;
@@ -977,20 +980,32 @@ incr_fdrefcnt(int fd)
     }
 
     fdrefcnts[refcnt_index(fd)].refcnt++;
+
+	UNLOCK_MUTEX(fdrefcnts_mutex);
 }
 
 static int
 decr_fdrefcnt(int fd)
 {
+	int result;
+
+	LOCK_MUTEX(fdrefcnts_mutex);
+
     if (--fdrefcnts[refcnt_index(fd)].refcnt <= 0)
-	return 1;
+	result = 1;
     else
-	return 0;
+	result = 0;
+
+	UNLOCK_MUTEX(fdrefcnts_mutex);
+
+	return result;
 }
 
 #else /* not MacOS */
 
 // THREAD
+MUTEX fdrefcnts_mutex;
+
 static unsigned short *fdrefcnts = NULL;
 static int openmax = 0;
 #define OPEN_MAX_GUESS 256
@@ -998,6 +1013,8 @@ static int openmax = 0;
 static void
 incr_fdrefcnt(int fd)
 {
+	LOCK_MUTEX(fdrefcnts_mutex);
+
     if (fdrefcnts == NULL) {
 #if defined(_SC_OPEN_MAX)
 	if ( (openmax = sysconf(_SC_OPEN_MAX)) < 0)
@@ -1018,16 +1035,25 @@ incr_fdrefcnt(int fd)
     
     if (fd < 0 || fd >= openmax) fatal_error(FE_FDREFOVERFLOW, 0);
     fdrefcnts[fd]++;
+    
+	UNLOCK_MUTEX(fdrefcnts_mutex);
 }
 
 static int
 decr_fdrefcnt(int fd)
 {
+	int result;
+	
+	LOCK_MUTEX(fdrefcnts_mutex);
+
     if (fd < 0 || fd >= openmax) fatal_error(FE_FDREFOVERFLOW, 0);
     if (--fdrefcnts[fd] <= 0)
-	return 1;
+	result = 1;
     else
-	return 0;
+	result = 0;
+
+	LOCK_MUTEX(fdrefcnts_mutex);
+	return result;
 }
 
 #endif
@@ -6501,4 +6527,9 @@ sio_position_in_line(PE)
 	SUCCEED;
     else
 	FAIL;
+}
+
+void init_bsio(void)
+{
+	INIT_MUTEX(fdrefcnts_mutex);
 }

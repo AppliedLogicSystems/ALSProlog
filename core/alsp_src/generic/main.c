@@ -68,9 +68,11 @@
 #define R_OK 1
 #endif
 
+// THREAD - should these be moved to engine state?
 int   system_debugging = 0;	/* -D to set it to 1 */
 int   gcbeep = 0;		/* -B to set it to 1 */
 
+// THREAD all these are setup at start time - so no thread safety needed.
 static int noautoload = 0;
 static int pckgloaded = 0;
 
@@ -110,9 +112,10 @@ const char *version[2] = {
   };
 #endif
 
-static char versionNum[] = VERSION_STRING;	/* from version.h */
+static const char versionNum[] = VERSION_STRING;	/* from version.h */
 /* static char systemName[] = SysName;		from version.h */
 static int exit_status = 0;
+//THREAD - what's this for?
 static jmp_buf exit_return; 
 
 static	void	panic_fail	( void );
@@ -926,7 +929,7 @@ extern	char *	copyright	( void );
 char *
 copyright(void)
 {
-    static char copyright_[] = "Copyright (c) 1994-6 Applied Logic Systems, Inc";
+    static const char copyright_[] = "Copyright (c) 1994-6 Applied Logic Systems, Inc";
     return copyright_;
 }
 

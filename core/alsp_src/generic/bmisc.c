@@ -409,12 +409,20 @@ pbi_hashN(PE)
 
 #ifdef GENSYM
 // THREAD
+MUTEX gensym_mutex;
 static long gensym_start_time = 0;
 static long gensym_counter = 0;
+
+void gensym_init(void)
+{
+	INIT_MUTEX(gensym_mutex);
+}
 
 static void
 als_gensym(UCHAR *buffer, UCHAR *prefix)
 {
+	LOCK_MUTEX(gensym_mutex);
+	
     if (!gensym_start_time) gensym_start_time = time(NULL);
 
     sprintf((char *)buffer, "%c%s_%ld_%ld",
@@ -422,6 +430,8 @@ als_gensym(UCHAR *buffer, UCHAR *prefix)
 	    (char *)prefix,
 	    gensym_start_time,
 	    gensym_counter++);
+
+	UNLOCK_MUTEX(gensym_mutex);
 }
 
 

@@ -17,6 +17,7 @@
  * The following variable is for debugging purposes.
  */
 
+// THREAD - maybe add to engine?
 static int collisions;
 static int nsearches;
 
@@ -247,7 +248,12 @@ probe_token(
 {
     tkentry **pos;
 
+   	LOCK_MUTEX(hpe->db_write_mutex);
+
     pos = lookup(hpe, s, 0);		/* perform lookup */
+
+   	UNLOCK_MUTEX(hpe->db_write_mutex);
+
     if (*pos)
 	return *pos - toktable;	/* token is present */
     else
@@ -267,10 +273,14 @@ find_token_pe(PE, const UCHAR *cs)
     tkentry **pos;
     UCHAR *s = (UCHAR *)cs;
 
+	LOCK_MUTEX(hpe->db_write_mutex);
+	
     pos = lookup(hpe, s, &len);
 
-    if (*pos)
+    if (*pos) {
+    	UNLOCK_MUTEX(hpe->db_write_mutex);
 		return *pos - toktable;	/* already in table */
+	}
     else {			/* must add to table */
 	if (ts_next > ts_cutoff) {
 	    increase_table_size(hpe);	/* increase size and rehash */
@@ -289,6 +299,8 @@ find_token_pe(PE, const UCHAR *cs)
 	toktable[ts_next].binop = 0;
 
 	while ( (*strings++ = *s++) ) ;	/* copy the string over */
+
+   	UNLOCK_MUTEX(hpe->db_write_mutex);
 
 	return ts_next++;	/* return while advancing next token */
 	/* index */

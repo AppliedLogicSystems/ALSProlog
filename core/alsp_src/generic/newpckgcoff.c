@@ -8,6 +8,8 @@
  * Date  : 6/4/1990
  */
 
+// THREAD not used
+
 #include "defs.h"
 
 #ifdef PACKAGE

@@ -29,10 +29,10 @@
 #include "smath.h"
 #include "ieeemath.h"
 
-extern NEWDOUBLE 
+extern const NEWDOUBLE 
   PI_OVER_2_A;
 
-extern NEWINTERVAL
+extern const NEWINTERVAL
   PNINF,
   TWOPI, PIOVER2, PIOVER2B;
 

@@ -10,8 +10,7 @@
 
 #include "defs.h"
 
-
-long *system_pckg = (long *) -1;
+const long *system_pckg = (long *) -1;
 
 #ifdef PACKAGE
 

@@ -21,6 +21,7 @@
 #define Q 127773			/* M div A (M / A) */
 #define R 2836				/* M mod A (M % A) */
 
+// THREAD = is this sys global or engine?
 static long seed = 1;		/* initialize with rand_init() */
 
 

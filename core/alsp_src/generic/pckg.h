@@ -8,7 +8,7 @@
  */
 
 
-extern long *system_pckg; 		/* currently loaded package */
+extern const long *system_pckg; 		/* currently loaded package */
 extern	void	pckg_run_init_goal	( PE );
 
 #ifdef PACKAGE
