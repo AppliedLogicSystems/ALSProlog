@@ -477,8 +477,8 @@ proc document.close {w} {
 	global array proenv	
 	if {[save_check $w]} then {
 		prolog call $proenv(dflt_mod) send -number $proenv($w,src_handler) -atom close_edit_win
-			## the prolog side does this:
-			#		dispose_document_window $w
+			## the prolog side used to do this, but moved back here:
+		dispose_document_window $w
 		return true
 	} else {
 		return false
