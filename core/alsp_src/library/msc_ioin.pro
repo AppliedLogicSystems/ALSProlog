@@ -370,6 +370,32 @@ probe_delim(Cur,Size,Source,Delim,Len,After)
 	After is B0 +1,
 	Len is B0 -Cur.
 
+/*!-------------------------------------------------------------
+ *!------------------------------------------------------------*/
+export read_n/3.
+export read_all/2.
+
+read_n(0, [], _) 
+	:- !.
+read_n(_, [], Stream)
+	:-
+	at_end_of_stream(Stream),
+	!.
+read_n(N, [TmN | Tms], Stream)
+	:-
+	read(Stream, TmN),
+	M is N-1,
+	read_n(M, Tms, Stream).
+
+read_all([], Stream)
+	:-
+	at_end_of_stream(Stream),
+	!.
+read_all([TmN | Tms], Stream)
+	:-
+	read(Stream, TmN),
+	read_all(Tms, Stream).
+
 
 
 endmod.
