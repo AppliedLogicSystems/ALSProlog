@@ -493,7 +493,7 @@ w_uia_clip(uia, clipsize)
     if (clipsize > size)
 	return (0);
 
-    if (clipsize < (size - sizeof (PWord))) {
+    if (clipsize < (size - (int) sizeof (PWord))) {
 
 	/* Clip the UIA */
 	tend = t + clipsize;
@@ -509,7 +509,7 @@ w_uia_clip(uia, clipsize)
 	/* Clean rest of the UIA */
 	t2start = tend + sizeof (PWord);
 	t2end = t + size;
-	if ((t2end - t2start) > sizeof (PWord)) {
+	if ((t2end - t2start) > (int) sizeof (PWord)) {
 	    /* Make another uia */
 	    i = (int) ((PWord *) t2end - (PWord *) t2start);	/* fence
 								 * value

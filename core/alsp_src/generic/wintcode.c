@@ -45,7 +45,7 @@ extern	int	memctl		PARAMS(( void *, int, int ));
 #undef round
 #define round(x,s) (((((long) x)-1) & ~(long)((s)-1)) + (s))
 
-extern system_debugging;
+extern int system_debugging;
 
 /*-----------------------------------------------------------------*
  * wm_aborted indicates whether an abort was done or not.
@@ -1014,7 +1014,7 @@ cbsffa(addr)
 
     for (i = 20; i > 0; i--, ret--) {
 	size = *ret;		/* get supposed size field */
-	if (size < 0 && size > -(MAX_ICBUFSIZE * sizeof (Code) / sizeof (long)) &&
+	if (size < 0 && size > (signed) -(MAX_ICBUFSIZE * sizeof (Code) / sizeof (long)) &&
 	*(ret - size - 1) == size && sizeCode(ret) <= -size - WC_OVERHEAD) {
 	    return ret;
 	}
@@ -1972,7 +1972,7 @@ w_validate_dbref(addr, nid, cid)
     size = *(addr + WCI_SIZE);
 
     if (size < 0 &&				/* see if size is in bounds */
-		size > -(MAX_ICBUFSIZE * sizeof (Code) / sizeof (long)) &&
+		size > (signed) -(MAX_ICBUFSIZE * sizeof (Code) / sizeof (long)) &&
 		(*(addr + WCI_PROCIDX) & 0xffff) == nid &&	/* see if has same name */
 		*(addr + WCI_CLAUSEID) == cid &&		/* and same clause id   */
 		*(addr - size - 1) == size) {			/* see if end is valid  */
@@ -2454,7 +2454,7 @@ mark_clause(c)
      */
 
     size = sizeUsedBlock(c);
-    if (size < WC_EPSILON || size > (MAX_ICBUFSIZE * sizeof (Code) / sizeof (long)))
+    if (size < WC_EPSILON || size > (signed) (MAX_ICBUFSIZE * sizeof (Code) / sizeof (long)))
 	return;			/* return on invalid size */
 
     if (size != -*(c + size - 1))

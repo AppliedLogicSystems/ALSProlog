@@ -83,11 +83,11 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 	while (opt) {
 	    if ( (val = isopt("heap_size:",opt)) ) {
 	        i = atoi(val);
-		if (i < 0 || i > ULONG_MAX/256) fatal_error(FE_ALS_OPTIONS, 0);
+		if (i < 0 || i > (signed)(ULONG_MAX/256)) fatal_error(FE_ALS_OPTIONS, 0);
 		setup.heap_size = i * 256;
 	    } else if ( (val = isopt("stack_size:",opt)) ) {
 	        i = atoi(val);
-		if (i < 0 || i > ULONG_MAX/256) fatal_error(FE_ALS_OPTIONS, 0);
+		if (i < 0 || i > (signed)(ULONG_MAX/256)) fatal_error(FE_ALS_OPTIONS, 0);
 		setup.stack_size = i * 256;
 	    } else if ( (val = isopt("saved_state:",opt)) ) {
 		setup.saved_state = strdup(val);
@@ -126,7 +126,7 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     	    	break;
     	    case heap_scan:
     	    	value = strtoul(argv[i], &arg_end, 10);
-    	    	if ((*arg_end && !isspace(*arg_end))
+    	    	if ((*arg_end && !isspace((int)*arg_end))
 		    || value == 0 || value > ULONG_MAX/256) {
     	    	    fprintf(stderr, "Usage: -heap N\n");
     	    	    exit(EXIT_ERROR);
@@ -137,7 +137,7 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     	    	break;
     	    case stack_scan:
     	    	value = strtoul(argv[i], &arg_end, 10);
-    	    	if ((*arg_end && !isspace(*arg_end))
+    	    	if ((*arg_end && !isspace((int)*arg_end))
 		    || value == 0 || value > ULONG_MAX/256) {
     	    	    fprintf(stderr, "Usage: -stack N\n");
     	    	    exit(EXIT_ERROR);

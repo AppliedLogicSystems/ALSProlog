@@ -7,7 +7,9 @@
 
 
 #define MISSING_EXTERN_TEMPNAM
-
+#define MISSING_EXTERN_GETHOSTNAME
+#define MISSING_EXTERN_REXEC
+#define MISSING_EXTERN_REALPATH
 
 /*---------------------*/
 #define DIRENT	1
@@ -24,7 +26,6 @@
 #define HAVE_TERMIOS_H	1
 #define HAVE_TERMIO_H	1
 #define HAVE_UNISTD_H	1
-#define HAVE_DLFCN_H	1
 #define RETSIGTYPE	void
 #define SIGT	RETSIGTYPE
 #define SIGRET	/*do nothing*/
@@ -35,7 +36,6 @@
 #define HAVE_LONG_FILE_NAMES	1
 #define HAVE_LIBDL	1
 #define HAVE_LIBM	1
-#define HAVE_LIBELF	1
 #define HAVE_DEV_ZERO	1
 #define HAVE_BCOPY	1
 #define HAVE_DLOPEN	1
