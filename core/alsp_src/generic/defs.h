@@ -395,7 +395,7 @@ extern size_t strcspn PARAMS(( const char *s1, const char *s2 ));
 extern	unsigned long AddressHiBit;
 extern	unsigned long ReversedHiBit;
 #endif
-extern	int	als_mem_init	PARAMS(( char *file, long offset ));
+extern	int	als_mem_init	PARAMS(( CONST char *file, long offset ));
 extern	long *	ss_pmalloc	PARAMS(( size_t size, int fe_num, long *asizep ));
 extern	long *	ss_malloc	PARAMS(( size_t size, int fe_num ));
 extern	void	ss_register_global PARAMS(( long *addr ));
@@ -416,6 +416,9 @@ extern	long *	ss_fmalloc	PARAMS(( size_t ));
 #ifdef MSWin32
 extern	char	*MinorOSStr;
 extern	int	win32s_system;
+#endif
+#ifdef MacOS
+extern	int	MPW_Tool;
 #endif
 
 extern	void	als_exit	PARAMS(( int ));
@@ -480,6 +483,7 @@ extern	int	absolute_pathname	PARAMS((CONST char *name));
 extern	char *	re_comp			PARAMS((CONST char *pattern));
 extern	int	re_exec			PARAMS((CONST char *s));
 extern unsigned char *c2pstrcpy(unsigned char *ps, const char *cs);
+extern char *p2cstrcpy(char *cs, const unsigned char *ps);
 
 
 #ifndef HAVE_GUSI
