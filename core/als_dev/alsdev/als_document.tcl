@@ -499,8 +499,7 @@ proc document.save {w} {
 	if {[info exists proenv($w,file)]} then {
 		store_text $w.text $proenv($w,file)
 		set proenv($w,dirty) false
-#		return true
-		return 1
+		return true
 	} else {
 		set file [tk_getSaveFile -initialfile [wm title $w] \
 			-defaultextension .pro ]
@@ -514,15 +513,13 @@ proc document.save {w} {
 			set proenv(document,$file) $w
 			post_open_document $file_name $w
 		} else {
-#			return false
-			return 0
+			return false
 		}
 	}
 	if {[info exists proenv($w,src_handler)]} then {
 		prolog call alsdev send -number $proenv($w,src_handler) -atom clear_errors_display
 	}
-#	return true
-	return 1
+	return true
 }
 
 proc document.save_as {w} {
@@ -617,7 +614,7 @@ proc document.consult {w} {
 			$icon \
 			1 "Cancel" "Save"]
 		if { $answer == 1 } then {
-			if [ document.save $w ] then {
+			if {[document.save $w]} then {
 				set file $proenv($w,file)
 			} else { return }
 		} else { return }
