@@ -854,7 +854,7 @@ static plugin_error os_load_plugin(const char *lib_name,
 
     object = shl_load(full_name, BIND_IMMEDIATE, 0);
     if (object == NULL && errno == ENOENT) {
-    	strcat(full_name, ".so");
+    	strcat(full_name, ".sl");
 	object = shl_load(full_name, BIND_IMMEDIATE, 0);
     }
     if (object == NULL) err = errno;
