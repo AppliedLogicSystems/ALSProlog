@@ -626,6 +626,8 @@ pmkdir()
 #define CPN_CACHE_MASK 0xff
 #define CPN_CACHE_SIZE (CPN_CACHE_MASK+1)
 
+#ifdef CCANONP
+
 #if !defined(HAVE_SETITIMER) || !defined(HAVE_SIGACTION)
 #define STAT stat
 #else /* !defined(HAVE_SETITIMER) */
@@ -687,7 +689,6 @@ stat_with_timeout(path, statbuf)
 }
 #endif /* !defined(HAVE_SETITIMER) */
 
-#ifdef CCANONP
 static char *
 canonical_pathname(path_name,file_namep)
     char *path_name;
