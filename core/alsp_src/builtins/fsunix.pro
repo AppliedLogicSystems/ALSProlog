@@ -311,8 +311,12 @@ ownerPermissionsCoding(6,[read,write]).
 ownerPermissionsCoding(7,[read,write,execute]).
 
 /*!------------------------------------------------------------------
+ |	file_status/2
+ |	file_status(FileName, Status) 
+ |	file_status(+, -) 
  *!-----------------------------------------------------------------*/
-file_status(FileName, Status) :-
+file_status(FileName, Status) 
+	:-
 	'$getFileStatus'(FileName,
 			 fileStatus(FileTypeCode, ModTime, OwnerPermiss,
 					ByteSize,NBlocks)),
