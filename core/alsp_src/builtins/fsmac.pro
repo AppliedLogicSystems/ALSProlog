@@ -15,13 +15,9 @@ module builtins.
 
 export date/1.
 export time/1.
-
-export change_cwd/1.
-export get_cwd/1.
 export make_subdir/1.
 export make_subdir/2.
 export remove_subdir/1.
-export remove_file/1.
 export file_status/2.
 
 export files/2.
@@ -65,35 +61,6 @@ time(HH:MM:SS)
 	'$time'(SS,MM,HH,_,_,_,_,_,_).
 
 /*!--------------------------------------------------------------
- |	change_cwd/1
- |	change_cwd(NewDir)
- |	change_cwd(+)
- |
- |	- change the current working directory
- |
- |	Changes the current working directory being used by the program
- |	to become NewDir (which must be an atom). Under DOS, this won't 
- |	change the drive.
- *!--------------------------------------------------------------*/
-change_cwd(Path)
-	:-
-	chdir(Path).
-
-/*!--------------------------------------------------------------
- |	get_cwd/1
- |	get_cwd(Path) 
- |	get_cwd(-) 
- |
- |	- returns the current working directory
- |
- |	Returns the current working directory being used by the program
- |	as a quoted atom.  Under DOS, the drive is included.
- *!--------------------------------------------------------------*/
-get_cwd(Path)
-	:-
-	getcwd(Path).
-
-/*!--------------------------------------------------------------
  |	make_subdir/1
  |	make_subdir(NewDir)
  |	make_subdir(+)
@@ -125,12 +92,16 @@ make_subdir(NewDir)
 	:-
 	make_subdir(NewDir,511).
 
+
 make_subdir(NewDir,Permissions)
 	:-
 	integer(Permissions),
 	!,
 	0 =< Permissions, Permissions =< 512,
-	mkdir(NewDir,Permissions).
+	mkdir(NewDir,Permissions), !.
+make_subdir(NewDir,Permissions)
+	:-
+	system_error([make_subdir(NewDir,Permissions)]).
 
 
 /*!--------------------------------------------------------------
@@ -146,23 +117,11 @@ make_subdir(NewDir,Permissions)
  
  remove_subdir(SubDir)
 	:-
-	rmdir(SubDir).
- 
-/*!--------------------------------------------------------------
- |	remove_file/1
- |	remove_file(FileName)
- |	remove_file(+)
- |
- |	- removes a file from the current working directory
- |
- |	If FileName is an atom (possibly quoted) naming a file in
- |	the current working directory, removes that file.
- *!--------------------------------------------------------------*/
-
-remove_file(FileName)
+	rmdir(SubDir), !.
+ remove_subdir(SubDir)
 	:-
-	unlink(FileName).
-
+	system_error([rmdir(SubDir)]).
+ 
  /*!----------------------------------------------------------------
  |	files/2
  |	files(Pattern,FileList)
@@ -194,9 +153,8 @@ files(Pattern, FileList)
 	:-
 	'$getDirEntries'(Directory, Pattern, FirstResult),
 	!,
-	rootPlusPath(Disk, PathList, Directory),
 	fixFileType(regular, InternalFileType),
-	filterForFileType(FirstResult, Disk, PathList, InternalFileType, List).
+	filterForFileType(FirstResult, Directory, InternalFileType, List).
 
 /*!----------------------------------------------------------------
  |	subdirs/1
@@ -303,21 +261,25 @@ directory([ Pattern1 | Patterns ], FileType, List)
 
 directory([], FileType, []) :-!.
 
-directory(Pattern, FileType, List) 
+directory(PathPattern, FileType, List) 
 	:-
-	atom(Pattern), 
-	rootPathFile(Disk, PathList, FilePattern, Pattern),
-	subPath(PathList,ThePath),
-	exists_file(ThePath),
-	!,
-
-	subPath(PathList, InitPath),
-	(InitPath = '' -> Path = ':' ; Path = InitPath),
-
-	'$getDirEntries'(Path, FilePattern, FirstResult),
+	atom(PathPattern),
+	dirFilePath(Dir, FilePattern, PathPattern),
+	correctGetDirEntries(Dir, FilePattern, FirstResult),
 	!,
 	fixFileType(FileType, InternalFileType),
-	filterForFileType(FirstResult, Disk, PathList, InternalFileType, List).
+	filterForFileType(FirstResult, Dir, InternalFileType, List).
+
+must_exists_file(File)
+	:- exists_file(File), !.
+must_exists_file(_) :- throw(must_exist_threw).
+
+correctGetDirEntries(Path, FilePattern, FirstResult)
+	:-
+	'$getDirEntries'(Path, FilePattern, FirstResult), !.
+correctGetDirEntries(Path, FilePattern, FirstResult)
+	:-
+	throw(get_dir_entry_failed(Path, FilePattern)).
 
 %% If no match was found for the file pattern, return no elements:
 directory(_,_,[]).
@@ -338,26 +300,26 @@ fixFileType(FileType, InternalFileType)
 	:-
 	fileTypeCode(InternalFileType, FileType).
 
-filterForFileType([], _, _, _, []).
-filterForFileType([FileName | Files], Disk, PathList, FileType, List)
+filterForFileType([], _, _, []).
+filterForFileType([FileName | Files], Dir, FileType, List)
 	:-
-	filter_file(FileName, Disk, PathList, FileType, List, ListTail),
-	filterForFileType(Files, Disk, PathList, FileType, ListTail).
+	filter_file(FileName, Dir, FileType, List, ListTail),
+	filterForFileType(Files, Dir, FileType, ListTail).
 
 	%% Need this error case since '$getFileStatus'/2 can fail when given
 	%% a symbolic link to a non-existent file:
-filterForFileType([FileName | Files], Disk, PathList, FileType, List)
+filterForFileType([FileName | Files], Dir, FileType, List)
 	:-
-	filterForFileType(Files, Disk, PathList, FileType, List).
+	filterForFileType(Files, Dir, FileType, List).
 
-filter_file(FileName, Disk, PathList, FileType, [FileName | ListTail], ListTail)
+filter_file(FileName, Dir, FileType, [FileName | ListTail], ListTail)
 	:-
-	rootPathFile(Disk, PathList, FileName, FullFile),
+	atom_concat(Dir, FileName, FullFile),
 	'$getFileStatus'(FullFile, StatusTerm),
 	arg(1, StatusTerm, ThisFileType),
 	fflt_ck(ThisFileType, FileType, FullFile),
 	!.
-filter_file(FileName, Disk, PathList, FileType, List, List).
+filter_file(FileName, Dir, FileType, List, List).
 
 fflt_ck(FileType, FileType, FullFile) :-!.
 fflt_ck(ThisFileType, FileType, FullFile)
