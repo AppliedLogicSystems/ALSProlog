@@ -10,7 +10,7 @@ proc vTclWindow.defstr {base} {
         set base .defstr
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base; return
     }
     ###################
     # CREATING WIDGETS

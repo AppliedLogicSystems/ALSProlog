@@ -12,7 +12,7 @@ proc vTclWindow.topals {args} {
 
     set base .topals
     if {[winfo exists .topals]} {
-        wm deiconify .topals ; return
+        wm deiconify .topals ; raise .topals ; return
     }
     ###################
     # CREATING WIDGETS
@@ -31,7 +31,6 @@ proc vTclWindow.topals {args} {
     wm deiconify .topals
     wm title .topals "ALS Prolog Environment"
 
-#	wm protocol $base WM_DELETE_WINDOW {wm iconify .topals ; unmap_alsdev_main }
 	wm protocol $base WM_DELETE_WINDOW {exit_prolog}
 		##------------------
 		## Main menubar:
@@ -109,7 +108,7 @@ proc vTclWindow.dyn_flags {base} {
 
     set base .dyn_flags
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base ; return
     }
     ###################
     # CREATING WIDGETS
@@ -151,7 +150,7 @@ proc vTclWindow.about {base} {
         set base .about
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base; return
     }
     ###################
     # CREATING WIDGETS
@@ -165,11 +164,11 @@ proc vTclWindow.about {base} {
     wm overrideredirect $base 0
     wm resizable $base 1 1
     wm deiconify $base
-    wm title $base "About alsdev"
+    wm title $base "About ALS Prolog"
 	wm protocol .about WM_DELETE_WINDOW {wm withdraw .about}
 
     label $base.alsdev \
-        -font {helvetica 14 {bold italic}} -text alsdev 
+        -font {helvetica 14 {bold italic}} -text {ALS Prolog} 
     frame $base.f1 \
         -borderwidth 1 -height 3 -relief sunken -width 30 
     label $base.alspro \
@@ -227,8 +226,6 @@ proc vTclWindow.about {base} {
         -anchor center -expand 0 -fill none -side top -pady 0 -ipady 0
     pack $base.developers_4 \
         -anchor center -expand 0 -fill none -side top -pady 0 -ipady 0
-
-    wm geometry $base ""
 }
 
 proc vTclWindow.break_choices {base} {
@@ -236,7 +233,7 @@ proc vTclWindow.break_choices {base} {
         set base .break_choices
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base ; return
     }
     ###################
     # CREATING WIDGETS
@@ -299,30 +296,33 @@ proc vTclWindow.break_choices {base} {
 
 proc vTclWindow.static_flags {base} {
     if {$base == ""} {
-        set base .break_choices
+        set base .static_flags
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
-    wm focusmodel $base passive
-    wm geometry $base 255x260+109+214
-    wm maxsize $base 1137 870
-    wm minsize $base 1 1
-    wm overrideredirect $base 0
-    wm resizable $base 1 1
-    wm deiconify $base
+    toplevel $base
+
     wm title $base "Static Prolog Flags"
 	wm protocol .static_flags WM_DELETE_WINDOW {wm withdraw .static_flags}
 
-    ###################
-    # SETTING GEOMETRY
-    ###################
+	prolog call builtins static_flags_info -var InfoList
+	foreach info $InfoList {
+		create_static_flag_entry $info
+	}
 }
 
+proc create_static_flag_entry { info } {
+	global array proenv
+
+	set flgg [lindex $info 0]
+	label .static_flags.$flgg -borderwidth 0 -relief flat -anchor w \
+		-text [format "%s  =  %s" $flgg [lindex $info 1]]
+	pack .static_flags.$flgg -anchor w -expand 0 -fill x -side top 
+}
 
 
 proc init_prj_spec \
@@ -444,7 +444,7 @@ proc init_prj_spec \
     pack $base.buttons.load \
         -anchor center -expand 0 -fill none -padx 10 -side right 
 
-	wm geometry $base ""
+	#wm geometry $base ""
 }
 
 proc find_pair_value { Tag PairList } {
@@ -795,7 +795,7 @@ proc vTclWindow.ide_settings {base} {
         set base .ide_settings
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base; return
     }
     ###################
     # CREATING WIDGETS
@@ -908,7 +908,7 @@ proc vTclWindow.ide_settings {base} {
     pack $base.spacer2 \
         -in .ide_settings -anchor center -expand 0 -fill x -side top 
 
-    wm geometry $base ""
+    #wm geometry $base ""
 }
 
 proc slider_change_ide_printdepth { Value } {
@@ -978,7 +978,7 @@ proc vTclWindow.find_repl {base} {
         set base .find_repl
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base; return
     }
     ###################
     # CREATING WIDGETS
@@ -1132,7 +1132,7 @@ proc vTclWindow.find_repl {base} {
         -in $base.wintgt -anchor center -expand 0 -fill none \
         -side right  -padx 10
 
-	wm geometry $base ""
+	#wm geometry $base ""
     wm resizable $base 1 0
 }
 
@@ -1146,7 +1146,7 @@ proc vTclWindow.syn_errors {base} {
         set base .syn_errors
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base; return
     }
     ###################
     # CREATING WIDGETS

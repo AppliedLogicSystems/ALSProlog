@@ -23,7 +23,7 @@ proc add_default_menus {menubar} {
 
 	if {$tcl_platform(platform) == "macintosh"} {
 		menu $menubar.apple -tearoff 0
-		$menubar.apple add command -label "About ALS Prolog…" -command {Window show .about ; raise .about}
+		$menubar.apple add command -label "About ALS Prolog…" -command {Window show .about}
 		$menubar add cascade -menu $menubar.apple
 	}
 }
@@ -33,7 +33,7 @@ proc add_file_menu {menubar type window} {
 	global mod
 	global elipsis
 	
-	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
+	set TearOff 0
 	menu $menubar.file -tearoff $TearOff -title File
 	
     $menubar.file add command -label New -underline 0 -accelerator "$mod-N" -command {re document.new}
@@ -68,7 +68,7 @@ proc add_edit_menu {menubar type window} {
 	global elipsis
 	global proenv
 
-	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
+	set TearOff 0
 	menu $menubar.edit -tearoff $TearOff -title Edit
 	
     $menubar.edit add command \
@@ -87,14 +87,14 @@ proc add_edit_menu {menubar type window} {
         -label {Select All} -underline 8 -accelerator "$mod-A" -command "re {$type.select_all $window}"
     $menubar.edit add separator
     $menubar.edit add command \
-        -label {Find} -underline 0 -accelerator "$mod-F" -command "re {$type.find $window}"
+        -label "Find$elipsis" -underline 0 -accelerator "$mod-F" -command "re {$type.find $window}"
     $menubar.edit add separator
     $menubar.edit add command \
 		-label "Preferences$elipsis" -underline 3 -command "re {fonts_and_colors $window}"
 ## Temp:
 #    $menubar.edit add separator
 #    $menubar.edit add command \
-#        -label {Goto Line} -command "re {$type.goto_line $window}"
+#        -label "Goto Line$elipsis" -command "re {$type.goto_line $window}"
 
 	$menubar add cascade -menu $menubar.edit -label "Edit" -underline 0
 }
@@ -104,19 +104,19 @@ proc add_prolog_menu {menubar type window} {
 	global mod
 	global elipsis
 
-	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
+	set TearOff 0
 	menu $menubar.prolog -tearoff $TearOff -title Prolog
 
-    $menubar.prolog add command -label "Consult" -underline 0 -accelerator "$mod-K" -command "re {$type.consult $window}"
+    $menubar.prolog add command -label "Consult$elipsis" -underline 0 -accelerator "$mod-K" -command "re {$type.consult $window}"
 	$menubar.prolog add command \
 		-label "Clear Workspace" -underline 2 -command {re clear_workspace}
 
 	if {"$type"=="listener"} then { 
     	$menubar.prolog add separator
     	$menubar.prolog add command \
-        	-label "Load Project" -underline 0 -command {re load_project} 
+        	-label "Load Project$elipsis" -underline 0 -command {re load_project} 
     	$menubar.prolog add command \
-        	-label "Open Project" -underline 0 -command {re open_project} 
+        	-label "Open Project$elipsis" -underline 0 -command {re open_project} 
     	$menubar.prolog add command \
         	-label "Close Project" -underline 0 -command {re close_project} 
     	$menubar.prolog add command \
@@ -127,11 +127,11 @@ proc add_prolog_menu {menubar type window} {
 
     	$menubar.prolog add separator
 		$menubar.prolog add command \
-			-label "IDE Settings" -underline 0 -command {re show_ide_settings}
+			-label "IDE Settings$elipsis" -underline 0 -command {re show_ide_settings}
 		$menubar.prolog add command \
-			-label "Dynamic Flags" -underline 0 -command {re show_dynamic_flags}
+			-label "Dynamic Flags$elipsis" -underline 0 -command {re show_dynamic_flags}
 		$menubar.prolog add command \
-			-label "Static Flags" -underline 1 -command {re show_static_flags}
+			-label "Static Flags$elipsis" -underline 1 -command {re show_static_flags}
 
 #    	$menubar.prolog add separator
 #		$menubar.prolog add command \
@@ -155,7 +155,7 @@ proc add_tools_menu {menubar type window} {
 
 	if {"$type"=="document"} then { return }	
 
-	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
+	set TearOff 0
 	menu $menubar.tools -tearoff $TearOff -title Tools
 
 	if {"$type"=="listener"} then {
@@ -164,12 +164,12 @@ proc add_tools_menu {menubar type window} {
 		$menubar.tools add separator 
     	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} 
     	$menubar.tools add command -label "Tcl Debugger$elipsis" -underline 0 -command {re tcl_debugger} -state disabled
-    	$menubar.tools add command -label "Kill Tcl  Interps" -underline 0 -command {re kill_tcl_interps} 
-#    	$menubar.tools add command -label "Tcl Shell" -underline 0 -command {re tcl_shell} 
+    	$menubar.tools add command -label "Kill Tcl Interps" -underline 0 -command {re kill_tcl_interps} 
+#    	$menubar.tools add command -label "Tcl Shell$elipsis" -underline 0 -command {re tcl_shell} 
 
 		$menubar.tools add separator 
 		## Cref
-    	$menubar.tools add command -label "Cref" -underline 0 \
+    	$menubar.tools add command -label "Cref$elipsis" -underline 0 \
 			-command {re run_cref} -state disabled
 	} else {
 	##  must be debugger:
@@ -177,9 +177,9 @@ proc add_tools_menu {menubar type window} {
 		$menubar.tools add command  -label "Spy$elipsis" \
 			-underline 0 -command {re show_pred_info } 
 		$menubar.tools add separator
-		$menubar.tools add command  -label {Debug Settings } \
+		$menubar.tools add command  -label "Debug Settings$elipsis" \
 			-underline 0 -command {re show_debug_settings}
-		$menubar.tools add command  -label {System Modules } \
+		$menubar.tools add command  -label "System Modules$elipsis" \
 			-underline 0 -command {re {set_system_modules_showing}}
 	}
 	$menubar add cascade -label "Tools" -menu $menubar.tools -underline 0
@@ -194,7 +194,7 @@ proc add_help_menu {menubar} {
 		menu $menubar.help
 		
 		$menubar.help add command -label "About ALS Prolog$elipsis" \
-			-underline 0 -command {Window show .about ; raise .about}
+			-underline 0 -command {Window show .about}
 		
 		$menubar add cascade -label "Help" -underline 0 -menu $menubar.help
 	}

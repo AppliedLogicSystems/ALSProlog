@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.55 1998/10/04 22:09:51 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.56 1998/10/14 20:40:48 choupt Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -222,7 +222,7 @@ proc main {argc argv} {
 
 proc Window {args} {
 	global array proenv
-global vTcl
+	global vTcl
 
     set cmd [lindex $args 0]
     set name [lindex $args 1]
@@ -230,7 +230,7 @@ global vTcl
     if {$name == "" || $cmd == ""} {return}
     set exists [winfo exists $name]
     switch $cmd {
-        show { eval "vTclWindow$name $name" ; raise $name }
+        show 	{vTclWindow$name $name}
         hide    { if $exists {wm withdraw $name; return} }
         iconify { if $exists {wm iconify $name; return} }
         destroy { if $exists {destroy $name; return} }
@@ -717,8 +717,9 @@ proc clear_workspace { } {
 		# file menu:
 proc listener.new {}   { document.new }
 proc listener.open {}  { document.open }
-proc listener.close {w} { bell }
-proc listener.save {w}  { bell }
+proc listener.close {w} { exit_prolog }
+proc listener.save {w}  { listener.save_as $w }
+proc listener.save_as {w}  { bell }
 
 proc debugwin.new {}   { document.new }
 proc debugwin.open {}  { document.open }
@@ -934,27 +935,7 @@ proc change_prolog_flags {} {
 #################################################
 
 proc show_static_flags {} {
-	global array proenv
-
-	if {[winfo exists .static_flags]} then {
-		Window show .static_flags
-	} else {
-		Window show .static_flags
-		prolog call builtins static_flags_info -var InfoList
-		foreach info $InfoList {
-			create_static_flag_entry $info
-		}
-	}
-	wm geometry .static_flags ""
-}
-
-proc create_static_flag_entry { info } {
-	global array proenv
-
-	set flgg [lindex $info 0]
-	label .static_flags.$flgg -borderwidth 0 -relief flat -anchor w \
-		-text [format "%s  =  %s" $flgg [lindex $info 1]]
-	pack .static_flags.$flgg -anchor w -expand 0 -fill x -side top 
+	Window show .static_flags
 }
 
 #################################################
@@ -1600,12 +1581,6 @@ if {$tcl_platform(platform) == "macintosh"} {
 
 Window show .topals
 
-Window show .alsdev_settings
-Window hide .alsdev_settings
-
-Window show .ide_settings
-Window hide .ide_settings
-
 # update idletasks seems to push .topals behind other windows on
 # Windows, so just call update.
 
@@ -1627,4 +1602,3 @@ focus .topals.text
 if {$tcl_platform(platform) == "windows"} {
 	AttachOpenDocumentHandler
 }
-
