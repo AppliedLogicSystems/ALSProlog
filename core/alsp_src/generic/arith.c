@@ -276,7 +276,7 @@ rint(d)
 }
 #endif
 *******/
-double
+static double
 rint0(d)
     double d;
 {
