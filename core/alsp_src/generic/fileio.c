@@ -18,8 +18,8 @@
 #ifdef OLDFIO
 
 static	void	fio_nxln	PARAMS(( lxi_but * ));
-static	int	fio_syntax_err	PARAMS(( lxi_but *, char * ));
-static	void	file_error	PARAMS(( char * ));
+static	int	fio_syntax_err	PARAMS(( lxi_but *, const char * ));
+static	void	file_error	PARAMS(( const char * ));
 
 sefldsc seetbl[MAXSEE] =
 { {
@@ -53,7 +53,7 @@ long  curtok = 0;
 int   curtkty = 0;
 FILE *curfd;
 
-char *curprompt;
+const char *curprompt;
 
 #ifdef MacOS
 pptinfo prompts[3] =
@@ -178,7 +178,7 @@ readit:
 static int
 fio_syntax_err(lbp, errstring)
     lxi_but *lbp;
-    char *errstring;
+    const char *errstring;
 {
     char  b[SEEBFSZ];
     char *bp, *sp;
@@ -335,7 +335,7 @@ fio_seeing()
 
 static void
 file_error(s)
-    char *s;
+    const char *s;
 {
     PI_oprintf("%s\n", s);
 }

@@ -57,7 +57,7 @@ typedef struct _lex_buf {
             char *tokpos;	/* pointer to start of current token    */
             void (*nextbuf) PARAMS(( struct _lex_buf * ));   
 	    					/* fnc responsible for getting next buffer */
-            int (*err_rec) PARAMS(( struct _lex_buf *, char * ));
+            int (*err_rec) PARAMS(( struct _lex_buf *, const char * ));
 	    					/* fnc responsible for error message/recovery */
             int see_idx;	/* index into see table (if applicable) */
          } lxi_but;

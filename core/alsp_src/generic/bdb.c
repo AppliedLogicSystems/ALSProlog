@@ -127,7 +127,7 @@ pbi_asserta()
 }
 
 int
-pbi_assertz()
+pbi_assertz(void)
 {				/* assertz(Module,Clause,Ref,ReconsultFlag) */
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;

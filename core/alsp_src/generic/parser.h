@@ -96,7 +96,7 @@ extern char tokstr[];		/* defined in lexan.c */
 
 /* symtab.c */
 extern	void	symtab_init	PARAMS(( void ));
-extern	long	find_token	PARAMS(( UCHAR * ));
+extern	long	find_token	PARAMS(( const UCHAR * ));
 extern	long	probe_token	PARAMS(( UCHAR * ));
 extern	int	tknamelen	PARAMS(( long ));
 extern	int	tok_table_size	PARAMS((void));
@@ -108,7 +108,7 @@ extern	int	find_var	PARAMS(( char * ));
 extern	void	push_rator	PARAMS(( long, long ));
 extern	void	bld_clause	PARAMS(( void ));
 extern	void	nt_query	PARAMS(( void ));
-extern	void	parser_error	PARAMS(( char * ));
+extern	void	parser_error	PARAMS(( const char * ));
 extern	void	read_loop	PARAMS(( void (*) PARAMS((void)), int ));
 extern	pword	bld_strl	PARAMS(( char * ));
 extern	pword	bld_vlst	PARAMS(( void ));

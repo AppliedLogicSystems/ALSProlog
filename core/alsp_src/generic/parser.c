@@ -111,11 +111,11 @@ static	void	nt_listexpr	PARAMS(( void ));
 static	void	nt_args		PARAMS(( void ));
 static	void	nt_uselist	PARAMS(( void ));
 static	void	nt_exportlist	PARAMS(( void ));
-static	void	check_sym	PARAMS(( char * ));
+static	void	check_sym	PARAMS(( const char * ));
 static	void	nt_toplevel	PARAMS(( void ));
-static	int	bottomRead	PARAMS(( char *, char * ));
+static	int	bottomRead	PARAMS(( const char *, const char * ));
 static	void	buf_nextline	PARAMS(( lxi_but * ));
-static	int	buf_syntaxerror	PARAMS(( lxi_but *, char * ));
+static	int	buf_syntaxerror	PARAMS(( lxi_but *, const char * ));
 
 
 /*
@@ -680,7 +680,7 @@ nt_exportlist()
 
 static void
 check_sym(errstr)
-    char *errstr;
+    const char *errstr;
 {
     if (curtkty == TKTP_OTHER || curtkty == TKTP_OP || curtkty == TKTP_CONST)
 	return;
@@ -756,7 +756,7 @@ nt_query()
 
 void
 parser_error(errstring)
-    char *errstring;
+    const char *errstring;
 {
     errcount++;
 
@@ -902,7 +902,7 @@ consult(f)
 /* This is what actually does a read */
 static int
 bottomRead(pprompt, sprompt)
-    char *pprompt, *sprompt;
+    const char *pprompt, *sprompt;
 {
     int   retval;
 
@@ -1000,7 +1000,7 @@ buf_nextline(lbp)
 static int
 buf_syntaxerror(lbp, errstring)
     lxi_but *lbp;
-    char *errstring;
+    const char *errstring;
 {
     return (0);
 }

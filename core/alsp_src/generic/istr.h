@@ -5,7 +5,7 @@
  |		-- icode command instruction names
  *===============================================================*/
 
-char *negic[] = {
+const char *negic[] = {
 	"IC_INIT",
 	"IC_ENDCLAUSE",
 	"IC_ASSERTZ",
@@ -36,7 +36,7 @@ char *negic[] = {
 
 #define ICODE(code,str,a,s)	str,
 
-char *posic[] = {
+const char *posic[] = {
 
 #include "icodedef.h"
 
