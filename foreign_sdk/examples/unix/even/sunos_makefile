@@ -8,7 +8,7 @@ all: even.psl even_alspro
 even.psl: even.c
 	gcc -c -I$(SDK_DIR)/include even.c 
 	gcc -c -I$(SDK_DIR)/include $(SDK_DIR)/source/alspi_slib.c
-	ld -o even.psl even.o alspi_slib.o -lc 
+	ld -o even.psl even.o alspi_slib.o
 
 even_alspro: even.c
 	gcc -o even_alspro -I$(SDK_DIR)/include \
