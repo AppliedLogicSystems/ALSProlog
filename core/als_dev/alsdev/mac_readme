@@ -42,7 +42,7 @@ Open mac_alsdev.mcp, and make "Build All" to create "ALS Prolog PPC"
 Attach an image to "ALS Prolog PPC" using "ALS Prolog Shell PPC" with the
 following command:
 
-[ldr_dvsh], attach_image('ALS Prolog PPC', [select_lib(builtins, [debugger]), select_lib(library,[miscterm,msc_ioin,strctutl,strings,tcl_sppt,tk_alslib, listutl1])]).
+[mac_make].
 
 Runtime Setup
 -------------
