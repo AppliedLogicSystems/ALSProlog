@@ -136,7 +136,6 @@ static	void	abolish_predicate PARAMS(( char *, char *, int ));
 static	void	assert_sys_searchdir PARAMS(( char * ));
 static	void	assert_als_system PARAMS(( char *, char *, char *, char *,
 				    char *));
-static	void	assert_command_line PARAMS(( int, char ** ));
 static	void	assert_atom_in_module PARAMS(( char*, char * ));
 #ifndef MacOS
 static	int	absolute_pathname PARAMS((CONST char * ));
@@ -184,9 +183,7 @@ isopt(opt,str)
  *---------------------------------*/
 
 static int
-PI_prolog_init0(argc, argv)
-    int   argc;
-    char **argv;
+PI_prolog_init0(int argc, char **argv)
 {
     unsigned long heapsize;
     unsigned long stacksize;
@@ -319,6 +316,59 @@ PI_prolog_init0(argc, argv)
 	free(als_opts);
     }
 
+    /* Scan for -heap and -stack command line arguments. */ 
+    {
+    	int i, r;
+    	unsigned long value;
+    	enum {arg_scan, heap_scan, stack_scan, finished} state;
+    	
+    	for (state = arg_scan, i = 0; state != finished && i < argc; i++) {
+    	    switch (state) {
+    	    case arg_scan:
+    	    	if      (strcmp(argv[i], "-p") == 0)     state = finished;
+    	    	else if (strcmp(argv[i], "-heap") == 0)  state = heap_scan;
+    	    	else if (strcmp(argv[i], "-stack") == 0) state = stack_scan;
+    	    	break;
+    	    case heap_scan:
+    	    	r = sscanf(argv[i], "%lu", &value);
+    	    	if (r != 1) {
+    	    	    fprintf(stderr, "Usage: -heap N\n");
+    	    	    exit(EXIT_FAILURE);
+    	    	} else {
+    	    	    heapsize = value * 1024 / 4;
+    	    	    state = arg_scan;
+    	    	}
+    	    	break;
+    	    case stack_scan:
+    	    	r = sscanf(argv[i], "%lu", &value);
+    	    	if (r != 1) {
+    	    	    fprintf(stderr, "Usage: -stack N\n");
+    	    	    exit(EXIT_FAILURE);
+    	    	} else {
+    	    	    stacksize = value * 1024 / 4;
+    	    	    state = arg_scan;
+    	    	}
+    	    	break;
+    	    case finished:
+    	    	break;
+    	    }
+    	}
+    	
+    	/* Check for incomplete scanning of arguments. */
+    	switch (state) {
+    	case heap_scan:
+	    fprintf(stderr, "Usage: -heap N\n");
+	    exit(EXIT_FAILURE);
+    	    break;
+    	case stack_scan:
+    	    fprintf(stderr, "Usage: -stack N\n");
+    	    exit(EXIT_FAILURE);
+    	    break;
+    	default:
+    	    break;
+    	}
+    }
+    
     /*
      * get the image directory; the call to whereami will initialize it and
      * the image name;
@@ -753,60 +803,6 @@ absolute_pathname(name)
 
 #endif
 
-#if 0 /* MSWin32 */
-static const int num_ext = 2;
-static const char *program_extension[num_ext] = {".exe", ".com"};
-
-static int caseless_equal(const char *s1, const char *s2)
-{
-    while (*s1 && *s2 && tolower(*s1) == tolower(*s2)) {s1++; s2++;}
-    
-    return (*s1 == 0 && *s2 == 0);
-}
-static int has_program_extension(const char *path)
-{
-    int i, r = 0, pathlen = strlen(path);
-    for (i = 0; i < num_ext && !r; i++) {
-    	int extlen = strlen(program_extension[i]);
-	r = caseless_equal(path + pathlen - extlen, program_extension[i]);
-    }
-    
-    return r; 
-}
-#endif
-
-/* access_program() return 1 if path leads to an accessable (readable) program
-   file, otherwise 0.  For Operating Systems that have program file name extensions
-   (MS DOS/Windows), extensions are added if necessary. */
-static int access_program(const char *path)
-{
-#if 0 /* defined(MSWin32) */
-    /* Under Microsoft Windows NT, the argv[0] passed from the command prompt
-       does not have an extension unless it is explicit.
-       
-       For Example, "C:\>foo" results in argv[0] = "foo".  The full name of foo
-       could be "foo.exe" or "foo.com".
-       
-       This code checks for .exe and .com extensions if they are not explicit.
-     */
-    int r = 0, i;
-    char extpath[FILENAME_MAX];
-    
-    r = (access(path, R_OK) == 0);
-    
-    if (!r && !has_program_extension(path)) {
-    	for (i = 0; i < num_ext && !r; i++) {
-    	    strncpy(extpath, path, FILENAME_MAX-1);
-    	    strncat(extpath, program_extension[i], FILENAME_MAX-strlen(extpath)-1);
-    	    r = (access(extpath, R_OK) == 0);
-    	}
-    }
-    
-    return r;
-#else
-    return (access(path, R_OK) == 0);
-#endif
-}
 /*--------------------------------------------------------------------*
  | whereami is given a filename f in the form:  whereami(argv[0])
  | It returns the directory in which the executable file (containing 
@@ -830,7 +826,7 @@ whereami(name)
     l = GetModuleFileName(dll, imagedir, IMAGEDIR_MAX);
 #else
     l = GetModuleFileName(NULL, imagedir, IMAGEDIR_MAX);
-#endif
+#endif /* DLL */
     if (l == 0 || l >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
     imagedir[l] = 0;
     endpath = strrchr(imagedir, '\\');
@@ -863,7 +859,7 @@ whereami(name)
      * or through an absolute path.
      */
 
-    if (access_program(name)) {
+    if (access(name, R_OK) == 0) {
 
 	/*-------------------------------------------------------------*
 	 * The file was accessible without any other work.  But the current
@@ -873,15 +869,7 @@ whereami(name)
 
 	t = imagedir;
 	if (!absolute_pathname(name)) {
-#if 0 /* defined(MSWin32) */
-	    if (*(name+1) == ':') {
-	    	if (getdcwd(toupper(*name)-'A'+1, imagedir, 1024) == NULL)
-		    fatal_error(FE_GETCWD, 0);
-		name += 2;
-	    } else {
-	    	if (getcwd(imagedir, 1024) == NULL) fatal_error(FE_GETCWD, 0);
-	    }
-#elif defined(DOS) && !defined(__DJGPP__)
+#if defined(DOS) && !defined(__DJGPP__)
 	    int   drive;
 	    char *newrbuf;
 
@@ -903,7 +891,7 @@ whereami(name)
 	    if (getcwd(newrbuf, drive) == 0) {
 		fatal_error(FE_GETCWD, 0);
 	    }
-#else  /* not MSWin32 or DOS */
+#else  /* not  DOS */
 #ifdef HAVE_GETWD
 	    if (getwd(imagedir) == 0) {
 		fatal_error(FE_GETCWD, 0);
@@ -978,7 +966,7 @@ whereami(name)
 		*t++ = DIR_SEPARATOR;	/* put in the slash */
 	    cutoff = t - 1;	/* set cutoff */
 	    strcpy(t, name);
-	    if (access_program(imagedir))
+	    if (access(imagedir, R_OK) == 0)
 		break;
 
 	    if (*s)
