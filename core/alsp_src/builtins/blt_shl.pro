@@ -43,11 +43,13 @@ start_shell0(DefaultShellCall)
 
 	assertz(command_line(ResidualCommandLine)),
 	setup_search_dirs(CLInfo),
+	assert(save_clinfo(CLInfo)),
 	output_system_banner(CLInfo),
 	library_setup,
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	!,
+		%% 
 	ss_load_dot_alspro(CLInfo),
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.

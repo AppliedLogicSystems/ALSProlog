@@ -1540,9 +1540,17 @@ setup_debug(DebugIOChannel, Module, Predicate, Arity)
 check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType)
 	:-
 	all_procedures(Module, Pred, Arity, DBRef),
+	DBRef \= 0,
+	!,
 	'$clauseinfo'(DBRef,_,_,ClauseGroup),
 	builtins:file_clause_group(BaseFileName, ClauseGroup),
-	!,
+	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options).
+
+check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType)
+	:-
+	all_procedures(M, Pred, Arity, DBRef),
+	'$clauseinfo'(DBRef,_,_,ClauseGroup),
+	builtins:file_clause_group(BaseFileName, ClauseGroup),
 	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options).
 
 reload_debug(user,_, _) :-!.

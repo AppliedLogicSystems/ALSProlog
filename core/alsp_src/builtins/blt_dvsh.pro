@@ -135,7 +135,6 @@ alsdev(Shared)
 	 ['$stream_identifier'(-5), alias(error_stream),
 	 	buffering(line),type(text)]),
 
-
     %% Establish additional aliases
 
 	cancel_alias(warning_input),
