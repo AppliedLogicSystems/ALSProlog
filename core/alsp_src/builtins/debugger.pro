@@ -1552,6 +1552,7 @@ setup_debug(DebugIOChannel, Module, Predicate, Arity, CGsSetup, NextCGsSetup)
 	:-
 	change_source_level_debugging(on),
 	get_fcg(Module,Predicate,Arity,CG,DefiningMod),
+write(get_fcg(Module,Predicate,Arity,CG,DefiningMod)),nl,flush_output,
 	fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, NextCGsSetup).
 
 fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, CGsSetup)
@@ -1562,11 +1563,11 @@ fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, CGsSetup)
 fin_setup_debug(ClauseGroup, Module, Predicate, Arity, CGsSetup, [ClauseGroup | CGsSetup])
 	:-
 	check_file_setup(Module, Predicate, Arity, 
-					 SrcFilePath, BaseFileName, DebugType, ClauseGroup,
+			 SrcFilePath, BaseFileName, DebugType, ClauseGroup,
 					ALSMgr, SrcMgr),
-	reload_debug(BaseFileName, SrcFilePath, DebugType, ClauseGroup),
+	reload_debug(BaseFileName, SrcFilePath, DebugType, ClauseGroup, Flag),
 	!,
-	start_src_trace(BaseFileName, SrcFilePath, ClauseGroup, ALSMgr, SrcMgr).
+	start_src_trace(Flag,BaseFileName, SrcFilePath, ClauseGroup, ALSMgr, SrcMgr).
 	
 get_fcg(Module,Predicate,Arity,ClauseGroup,Module)
 	:-
@@ -1593,19 +1594,21 @@ check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, Claus
 	builtins:file_clause_group(BaseFileName, ClauseGroup),
 	builtins:get_primary_manager(ALSMgr),
 	send(ALSMgr, obtain_src_mgr(BaseFileName, SrcMgr)),
-%write(srcmgr),nl,
+write(check_file_setup(BaseFileName)),nl,
 %write_term(user_output, SrcMgr, [maxdepth(3)]),
 %nl(user_output), flush_output,
 	send(SrcMgr, get_value(base_file, BaseFileName)),
 	send(SrcMgr, get_value(source_file, SrcFilePath)),
 	send(SrcMgr, get_value(consult_mode, DebugType)).
 
-reload_debug(user,_, _,CG) :-!.
-reload_debug(BaseFileName,SrcFilePath, normal,CG)
+reload_debug(user,_, _,CG,nofile(user)) :-!.
+reload_debug(BaseFileName,SrcFilePath, normal,CG,file)
 	:-
-%write(reload_debug(BaseFileName,SrcFilePath, normal,CG)),nl,flush_output,
+write(reload_debug_2(BaseFileName,SrcFilePath, normal,CG)),nl,flush_output,
 	(filePlusExt(NoSuff,_,SrcFilePath),!; NoSuff = SrcFilePath),
 			%% Need to pass CG into consult:
+	exists_file(SrcFilePath),
+	!,
 	(current_prolog_flag(debug, off) ->
 		set_prolog_flag(debug, on),
 		consult(source(NoSuff),[quiet(true)])
@@ -1613,6 +1616,9 @@ reload_debug(BaseFileName,SrcFilePath, normal,CG)
 		true
 	),
 	ensure_db_showing.
+reload_debug(BaseFileName,SrcFilePath, normal,CG,nofile(BaseFileName))
+	:-
+write(reload_debug_3(BaseFileName,SrcFilePath, normal,CG)),nl,flush_output.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%    I/O Hooks    %%%%%%%%%%%%%%%%%%%%%%%%
