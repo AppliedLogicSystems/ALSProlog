@@ -352,8 +352,9 @@ proc document.new {} {
 	global array proenv
 
 	incr proenv(untitled_counter) 
-	set w [create_document_window "Untitled #$proenv(untitled_counter)"]
-	send_prolog_t als_ide_mgr [list open_non_file_edit_win $w] list
+	set Title "Untitled #$proenv(untitled_counter)"
+	set w [create_document_window $Title]
+	send_prolog_t als_ide_mgr [list open_non_file_edit_win $w $Title] list
 }
 
 proc document.open args {
@@ -437,7 +438,18 @@ proc document.save {w} {
 		set proenv($w,dirty) false
 		return true
 	} else {
-		return [document.save_as $w]
+		set file [tk_getSaveFile -initialfile [wm title $w] \
+			-defaultextension .pro ]
+		if {$file != ""} then {
+			prolog call alsdev rename_anon_doc -atom $w -atom $file \
+				-number $proenv($w,src_handler) -var RenameFlag
+			if {"$RenameFlag"=="ok"} then {
+				save_as_core $w $file
+				return true
+			} else {
+				return false
+			}
+		}
 	}
 }
 
@@ -448,19 +460,28 @@ proc document.save_as {w} {
 	set file [tk_getSaveFile -initialfile [wm title $w] \
 		-defaultextension .pro ]
 	if {$file != ""} then {
-		if {[info exists proenv($w,file)]} then {
-			unset proenv(document,$proenv($w,file))
-		}
-		set proenv($w,file) $file
-		set proenv(document,$file) $w
-		wm title $w [lindex [file split $file] end]
-		store_text $w.text $file
-		set proenv($w,dirty) false
-		if {$tcl_platform(platform) == "macintosh"} then { file attributes $file -creator ALS4 -type TEXT }
+		save_as_core $w $file
 		send_prolog_t als_ide_mgr [list save_doc_as $w $file] list
 		return true
 	} else {
 		return false
+	}
+}
+
+proc save_as_core {w file} {
+	global array proenv
+	global tcl_platform
+
+	if {[info exists proenv($w,file)]} then {
+		unset proenv(document,$proenv($w,file))
+	}
+	set proenv($w,file) $file
+	set proenv(document,$file) $w
+	wm title $w [lindex [file split $file] end]
+	store_text $w.text $file
+	set proenv($w,dirty) false
+	if {$tcl_platform(platform) == "macintosh"} then { 
+		file attributes $file -creator ALS4 -type TEXT 
 	}
 }
 
