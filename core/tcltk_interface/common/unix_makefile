@@ -5,12 +5,17 @@
 ALSP_SOURCE = ../../alsp_src/generic
 
 CC = gcc
+LD = gcc
 
 VPATH = ../common:$(ALSP_SOURCE)
 
 CPPFLAGS = -I ../common -I $(ALSP_SOURCE) $(SUBOS_INCLUDE) -I /usr/include/X11R5 -DUNIX -DUNIX_NAME='"$(UNIX_NAME)"'
 
 CFLAGS = -Wall -MD -fPIC
+
+LDFLAGS = -shared
+
+LIBS = -ltcl8.0 -ltk8.0 -lX11 -lc
 
 source = alspi_slib.c new_alspi.c tcl_interface.c
 
@@ -19,11 +24,10 @@ objects = $(source:.c=.o)
 all: tclintf.psl
 
 tclintf.psl: $(objects)
-	$(CC) $(LINK) -L/usr/local/lib $(objects) \
-		-ltcl8.0 -ltk8.0 -lX11 -lm -lc -o tclintf.psl
+	$(LD) $(LDFLAGS) $(objects) -L/usr/local/lib $(LIBS) -o tclintf.psl
 
 alsprolog.so: $(objects)
-	$(CC) $(LINK) tcl_interface.o -ltk8.0 -lX11 -lalspro -lc -lm -o alsprolog.so
+	$(LD) $(LDFLAGS) tcl_interface.o -ltk8.0 -lX11 -lalspro -lc -lm -o alsprolog.so
 
 $(objects) : makefile unix_makefile
 
