@@ -13,6 +13,10 @@
  *================================================================*/
 module builtins.
  
+export halt/0.
+halt :-
+	pbi_halt.
+
 /*-------------------------------------------------------------------*
  | 	curmod/1          (returns the name of the current module)
  |	curmod(Mod)

@@ -15,6 +15,11 @@ module builtins.
 use tcltk.
 use tk_alslib.
 
+:- abolish(halt,0).
+export halt/0.
+halt :-
+	tcl_call(shl_tcli, [exit_prolog], _),
+	pbi_halt.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% 			TCLTK-BASED SHELL STARTUP			%%%%%
@@ -32,11 +37,14 @@ start_alsdev
 	assert(save_clinfo(CLInfo)),
 	library_setup,
 	init_tk_alslib(shl_tcli,Shared),
-builtins:sys_searchdir(ALSDIRPath),
-path_elements(ALSDIRPath, Elements),
-append(Elements, [images], ImagesList),
-join_path(ImagesList, ImagesPath),
-alsdev_splash(ImagesPath),
+
+	builtins:sys_searchdir(ALSDIRPath),
+	path_elements(ALSDIRPath, Elements),
+	append(Elements, [shared], ImagesList),
+	pbi_write(path=ImagesList),pbi_nl,pbi_ttyflush,
+	join_path(ImagesList, ImagesPath),
+	alsdev_splash(ImagesPath),
+
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	alsdev(Shared).
@@ -249,15 +257,46 @@ module alsdev.
 use tcltk.
 use tk_alslib.
 
-alsdev_default_setup(SystemDefaults)
+alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom)
 	:-
 	find_alsdev_ini(Items),
-	window_defaults_setup('.topals',	Items,SystemDefaults),
-	window_defaults_setup('.debugwin',	Items,SystemDefaults),
-	window_defaults_setup('.document',	Items,SystemDefaults).
+	(dmember(window_settings('.topals', TopIniSettings0), Items) -> 
+		strip_tags(TopIniSettings0, TopIniSettings) 
+		; 
+		TopIniSettings = []
+	),
+	(dmember(window_settings('.debugwin', DebugIniSettings0), Items) -> 
+		strip_tags(DebugIniSettings0, DebugIniSettings) 
+		; 
+		DebugIniSettings = []
+	),
+	(dmember(window_settings('.document', DocIniSettings0), Items) -> 
+		strip_tags(DocIniSettings0, DocIniSettings) 
+		; 
+		DocIniSettings = []
+	),
+	DefaultVals = [TopIniSettings, DebugIniSettings, DocIniSettings],
+	(dmember(window_position('.topals', TopGeom), Items) ->
+		true ; TopGeom = [] ),
+	(dmember(window_position('.debugwin', DebugGeom), Items) ->
+		true ; DebugGeom = [] ),
+	(dmember(prolog_value(prolog_flags,FlagsList),Items) ->
+		set_flags_values(FlagsList)
+		;
+		true
+	).
+
+strip_tags([], []). 
+strip_tags([(_ = V0) | TVs], [V | Vs])
+	:-
+	(V0 = '' -> 
+		V = [] 
+		; 
+		V = V0
+	),
+	strip_tags(TVs, Vs).
 
 :- dynamic(alsdev_ini_path/1).
-
 find_alsdev_ini(Items)
 	:-
 	sys_env(unix,_,_),
@@ -266,7 +305,6 @@ find_alsdev_ini(Items)
 	split_path(HomeDir, HomeDirList),
 	PrefsFile = '.alsdev',
 	append(HomeDirList, [PrefsFile], PrefsFileList),
-
 	fin_find_alsdev_ini(PrefsFileList, Items).
 
 find_alsdev_ini(Items)
@@ -282,7 +320,6 @@ find_alsdev_ini(Items)
 		PrefsFile = 'alsdev_prefs'
 	),
 	append(ImageDirList, [PrefsFile], PrefsFileList),
-
 	fin_find_alsdev_ini(PrefsFileList, Items).
 
 fin_find_alsdev_ini(PrefsFileList, Items)
@@ -303,48 +340,14 @@ fin_find_alsdev_ini(PrefsFileList, [])
 	close(S),
 	assert(alsdev_ini_path(PrefsFilePath)).
 
-window_defaults_setup(WinGroup,Items,SystemDefaults)
+alsdev_default_setup(SystemDefaults)
 	:-
-	(dmember(window_settings(WinGroup,IniSettings), Items) -> 
-		true 
-		; 
-		IniSettings = []),
-	establish_window_defaults(IniSettings, SystemDefaults, WinGroup).
+	find_alsdev_ini(Items),
+	window_defaults_setup('.topals',	Items,SystemDefaults),
+	window_defaults_setup('.debugwin',	Items,SystemDefaults),
+	window_defaults_setup('.document',	Items,SystemDefaults).
 
-establish_window_defaults(Ini, SystemDefaults, WinGroup)
-	:-
-	setup_win_default(background,Back,Ini,SystemDefaults),
-	setup_win_default(foreground,Fore,Ini,SystemDefaults),
-	setup_win_default(selectbackground,SelectBack,Ini,SystemDefaults),
-	setup_win_default(selectforeground,SelectFore,Ini,SystemDefaults),
-	setup_win_default(font,Font,Ini,SystemDefaults),
-	setup_win_default(tabs,Tabs,Ini,SystemDefaults),
-
-	tcl_call(shl_tcli, [set_proenv,WinGroup,background,Back], _),
-	tcl_call(shl_tcli, [set_proenv,WinGroup,foreground,Fore], _),
-	tcl_call(shl_tcli, [set_proenv,WinGroup,selectbackground,SelectBack], _),
-	tcl_call(shl_tcli, [set_proenv,WinGroup,selectforeground,SelectFore], _),
-	tcl_call(shl_tcli, [set_proenv,WinGroup,font,Font], _),
-	tcl_call(shl_tcli, [set_proenv,WinGroup,tabs,Tabs], _).
-
-
-setup_win_default(What,Var,Ini,SystemDefaults)
-	:-
-	dmember(What = Var, Ini),
-	!.
-setup_win_default(What,Var,Ini,SystemDefaults)
-	:-
-	dmember([What,Var], SystemDefaults),
-	Var \= '',
-	!.
-setup_win_default(background,'#d9d9d9', _,_).
-setup_win_default(foreground,'Black', _,_).
-setup_win_default(selectbackground,'#c3c3c3', _,_).
-setup_win_default(selectforeground,'Black', _,_).
-setup_win_default(font,'user 10 normal', _,_).
-setup_win_default(tabs,'', _,_).
-
-change_settings(WinSettingsVals, WinGroup)
+change_window_settings(WinSettingsVals, WinGroup)
 	:-
 	WinSettingsVals = [Back, Fore, SelectBack, SelectFore, Font, Tabs],
 	WinSettings = 
@@ -363,11 +366,13 @@ modify_settings(NewTerm, Functor, Arity, Arg1)
 	write_clauses(OutS, NewTerms, [quoted(true)]),
 	close(OutS).
 
+/*
 modify_settings(NewTerm, Functor, Arity, Arg1)
 	:-
 	open('alsdev.ini', write, OutS, []),
 	write_clauses(OutS, [NewTerm]),
 	close(OutS).
+*/
 
 replace_items([],  NewTerm, Functor, Arity, Arg1,  [NewTerm]).
 replace_items([Old | OldTerms],  NewTerm, Functor, Arity, Arg1,  [NewTerm | OldTerms])
@@ -385,7 +390,23 @@ setup_defaults([Tag=Value | TextSettings], Group)
 	tcl_call(shl_tcli, [set_proenv,text,Tag,Value], _),
 	setup_defaults(TextSettings, Group).
 
+win_positions_for_exit(TopGeom, DebugGeom)
+	:-
+	modify_settings(window_position('.topals',TopGeom), 
+						window_position, 2, '.topals'),
+	modify_settings(window_position('.debugwin',DebugGeom), 
+						window_position, 2, '.debugwin').
 
+save_prolog_flags
+	:-
+	changable_flags_info(FlagsList),
+	modify_settings(prolog_value(prolog_flags,FlagsList),prolog_value, 2, prolog_flags).
+
+set_flags_values([]).
+set_flags_values([[Flag,_,Val] | FlagsList])
+	:-
+	set_prolog_flag(Flag,Val),
+	set_flags_values(FlagsList).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			RECONSULT ETC.						%%%%%

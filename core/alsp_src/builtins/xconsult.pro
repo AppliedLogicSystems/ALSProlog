@@ -58,6 +58,7 @@ export xconsult/2.
 xconsult(File,NErrs) 
 	:- 
 	nonvar(File),
+%Start is cputime,
 	( exists_file(File),
 	    open(File,read,Stream)
 		;   File = user,
@@ -66,6 +67,9 @@ xconsult(File,NErrs)
 	readFile(Stream, File, []),
 	sio:stream_syntax_errors(Stream,NErrs),	%% get the number of errors
 	close(Stream).
+%Finish is cputime,
+%TimeSpent is Finish - Start,
+%write(xconsult_time=TimeSpent),nl,flush_output.
 
 xconsult(File,0) 
 	:-
@@ -76,7 +80,7 @@ readFile(Stream, File, ModStack)
 	:-
 	readvnv(Stream,Term,Names,Vars),
 	!,
-	gc,
+%	gc,
 	process(Term,Names,Vars,Stream, File, ModStack).
 
 readvnv(Stream,Term,Names,Vars) 
