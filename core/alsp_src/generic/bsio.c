@@ -3514,11 +3514,13 @@ makesym:
 		if (*p == '0') {
 		    if (*(p + 1) == 'x' && (sio_chtb[*(p + 2)] & SIOC_HEXADECIMAL)) {
 			p += 2;
-			make_number(vpTokVal, tpTokVal, (double) hexadecimal(&p));
+/*			make_number(vpTokVal, tpTokVal, (double) hexadecimal(&p)); */
+			make_numberx(vpTokVal, tpTokVal, (double) hexadecimal(&p), WTP_DOUBLE);
 		    }
 		    else if (*(p + 1) == 'o' && (sio_chtb[*(p + 2)] & SIOC_OCTAL)) {
 			p += 2;
-			make_number(vpTokVal, tpTokVal, (double) octal(&p));
+/*			make_number(vpTokVal, tpTokVal, (double) octal(&p)); */
+			make_numberx(vpTokVal, tpTokVal, (double) octal(&p), WTP_DOUBLE);
 		    }
 #ifdef	SIO_ZERO_QUOTE_FOR_CHAR_CONSTS
 		    else if (*(p + 1) == '\'') {
@@ -3539,7 +3541,8 @@ makesym:
 			make_number(vpTokVal, tpTokVal, decimal(&p));
 		}
 		else
-		    make_number(vpTokVal, tpTokVal, decimal(&p));
+/*		    make_number(vpTokVal, tpTokVal, decimal(&p)); */
+		    make_numberx(vpTokVal, tpTokVal, decimal(&p), WTP_DOUBLE);
 		CHECK_FOR_POSSIBLE_SPLIT(*p ? p+1 : p);
 		break;
 	    case SIOC_SPECIAL:
@@ -3959,10 +3962,12 @@ sio_get_number()
 	    make_number(&vNum, &tNum, (double) (unsigned long) longval);
 	    break;
 	case TK_FLOAT:
-	    make_number(&vNum, &tNum, (double) floatval);
+/*	    make_number(&vNum, &tNum, (double) floatval);   */
+	    make_numberx(&vNum, &tNum, (double) floatval, WTP_DOUBLE);
 	    break;
 	case TK_DOUBLE:
-	    make_number(&vNum, &tNum, doubleval);
+/*	    make_number(&vNum, &tNum, doubleval);   */
+	    make_numberx(&vNum, &tNum, doubleval, WTP_DOUBLE);
 	    break;
     }
 
@@ -4415,6 +4420,7 @@ format_type(s)
     if (*s == '\0')
 	return FMT_NONE;
 
+
     for (s++;; s++) {
 	switch (*s) {
 	    case 0:
@@ -4467,7 +4473,6 @@ sio_sprintf()
 	FAIL;
 
     buf = (UCHAR *) (wm_H + 1);
-
     fmt_type = format_type(fmt);
 
     switch (t2) {

@@ -19,6 +19,7 @@ module builtins.
  *  
  */
 
+
 :-
 	compiletime,
 	module_closure(abolish,2,abolish).

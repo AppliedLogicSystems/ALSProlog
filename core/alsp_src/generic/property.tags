@@ -65,6 +65,8 @@ OLDLEXAN - old (C-based) lexical analysis code
 
 OLDCLOAD - old (C-based) file (pro/obp) loading code
 
+COERCE2INTS - coerce reals to ints when possible (old mode; new undef this)
+
 
 
 UNDERLYING SYSTEM-LEVEL FEATURE TAGS

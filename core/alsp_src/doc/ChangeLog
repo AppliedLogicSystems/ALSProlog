@@ -1,3 +1,11 @@
+Mon May 29 1995 Ken Bowen
+
+	* Modified to no longer coerce "integral floats" (e.g., 2.0)
+	  to integers.  Detailed commentary in file coerce.doc in this
+	  directory.
+
+	  Tagged as v1-74
+
 Tue May 23 1995 Ken Bowen
 
 	* Modified save_image/2, process_option/1 in blt_pckg.pro

@@ -401,4 +401,19 @@ extern	void	init_parser_data	PARAMS(( void ));
 extern	void	init_math		PARAMS(( void ));
 #endif
 
+#ifdef MaxFunc
+/*
+ * max returns the greater of its two parameters
+ * 	-- We are using a macro for "max" -- Ilyas, Raman 5/17/90 
+ */
+
+int
+max(x, y)
+    int   x, y;
+{
+    return (x < y) ? y : x;
+}
+#else  /* MaxFunc */
+#define max(a,b) ((a)<(b) ? (b) : (a))
+#endif /* MaxFunc */
 #endif /* _DEFS_H_INCLUDED_ */

@@ -67,7 +67,7 @@ extern	double	rint		PARAMS(( double ));
 #ifndef HAVE_EXP10
 extern	double	exp10		PARAMS(( double ));
 #endif
-static	double	do_is		PARAMS(( PWord, int, int * ));
+static	double	do_is		PARAMS(( PWord, int ));
 
 long  gensym_start_time;	/* starting time for gensym facility */
 static double start_time;
@@ -298,45 +298,21 @@ gamma(x)
 /*
  * do_is recursively descends the expression to evaluate and returns
  * the value of the tree at each stage.   If an error is encountered, a long
- * jump is performed back to the original caller. 
- | In the implementations with no coercion (#ifndef COERCE2INT), the third argument 
- | is a pointer to an int variable which is used to return the computed
- | type of the expression, primarily either WTP_INT or WTP_STRUCTURE 
- | (= representation of doubles in most of the implementations; WTP_DOUBLE
- | in the implementations which support it: #ifdef DoubleType).  The
- | int type and float type are kept separate, but the "contaigon" model of
- | arithmetic is adoped: If any component of an arithmetic expression is a
- | float, then the entire result is a float; the result is an int (for normal
- | arithmetic expressions) only if every component is an int.  Consequently,
- | a float component recursively deep in the expression being evaluated could
- | force the entire expression to become a float.  But since do_is only returns
- | C data types, it uses a double for the return, and so we cannot distinguish
- | between a "true" double being returned and an "int as double" being returned.
- | [Under coercion, it didn't matter.]  
- |     The model is that the type of the returned value is assumed to be
- | int unless it is contaminted at some point by a float.  Thus, it is the
- | responsibility of the routines calling do_is/3 to allocate the variable ty,
- | and to initialize it to WTP_INTEGER. At this time (5/28/95), the only calls
- | to do_is/3 are:
- | 		pbi_is
- |		name
- |		recursive calls on itself by do_is;
- | These are all contained in this file, since they are so few, we leave the
- | responsibility for allocation and initialization of ty to them; should this
- | situation change, a wrapper function should be used.
+ * jump is performed back to the original caller.
  */
 
 static double
-do_is(v, t, ty)
+do_is(v, t)
     PWord v;
     int   t;
-    int   *ty;
 {
     int   arity;
     PWord functor;
     PWord v1, v2;
     int   t1, t2;
     double rv;
+
+printf("do_is: t=%d\n",t);
 
     errno = 0;
 
@@ -366,7 +342,7 @@ do_is(v, t, ty)
 	    if (t2 != WTP_SYMBOL && v2 != TK_NIL)
 		longjmp(is_error, 1);
 	    else
-		return do_is(v1, t1, ty);
+		return do_is(v1, t1);
 
 	case WTP_INTEGER:
 	    return (double) (v);
@@ -374,23 +350,16 @@ do_is(v, t, ty)
 	case WTP_STRUCTURE:
 	    w_get_arity(&arity, v);
 	    w_get_functor(&functor, v);
-	    if (arity == 1) 
-		{
-		int ty1;
-
+	    if (arity == 1) {
 		w_get_argn(&v1, &t1, v, 1);
-		ty1 = WTP_INTEGER;
-		rv = do_is(v1, t1, &ty1);
+		rv = do_is(v1, t1);
 		errno = 0;
-		*ty = WTP_DOUBLE;
 		switch ((int) functor) {
-		    case TK_PLUS: 
-			*ty = ty1;
-			return (rv); 
-		    case TK_MINUS: 
-			*ty = ty1; 
-			rv = -rv; 
-			break; 
+		    case TK_PLUS:
+			return (rv);
+		    case TK_MINUS:
+			rv = -rv;
+			break;
 		    case TK_BACKSLASH:
 		    case TK_NOT:
 			rv = (double) ~(long) rv;
@@ -425,16 +394,13 @@ do_is(v, t, ty)
 		    case TK_ATAN:
 			rv = atan(rv);
 			break;
-		    case TK_ROUND: 
-			*ty = WTP_INTEGER; 
+		    case TK_ROUND:
 			rv = rint(rv);
 			break;
-		    case TK_TRUNC: 
-			*ty = WTP_INTEGER; 
+		    case TK_TRUNC:
 			rv = aint(rv);
 			break;
-		    case TK_FLOOR: 
-			*ty = WTP_INTEGER; 
+		    case TK_FLOOR:
 			rv = floor(rv);
 			break;
 		    case TK_SQRT:
@@ -452,65 +418,52 @@ do_is(v, t, ty)
 		    return (rv);
 		else
 		    longjmp(is_error, 1);
-	    }	/**** Arith 1 *****/
-	    else if (arity == 2) 
-		{
+	    }
+	    else if (arity == 2) {
 		double rv1, rv2;
-		int ty1, ty2;
 
 		w_get_argn(&v1, &t1, v, 1);
-		ty1 = WTP_INTEGER;
-		rv1 = do_is(v1, t1, &ty1);
+printf("do_is_arity_2_A  ");
+		rv1 = do_is(v1, t1);
 		w_get_argn(&v2, &t2, v, 2);
-		ty2 = WTP_INTEGER;
-		rv2 = do_is(v2, t2, &ty2);
+printf("do_is_arity_2_B  ");
+		rv2 = do_is(v2, t2);
+printf("do_is_arity_2_C  ");
 
 		switch ((int) functor) {
-		    case TK_PLUS: 
-			*ty = max(ty1, ty2); 
+		    case TK_PLUS:
 			return rv1 + rv2;
-		    case TK_MINUS: 
-			*ty = max(ty1, ty2); 
+		    case TK_MINUS:
 			return rv1 - rv2;
 		    case TK_STAR:
-			*ty = max(ty1, ty2); 
 			return rv1 * rv2;
 		    case TK_BAND:
-			*ty = max(ty1, ty2); 
 			return (double) ((long) rv1 & (long) rv2);
 		    case TK_BOR:
-			*ty = max(ty1, ty2); 
 			return (double) ((long) rv1 | (long) rv2);
 		    case TK_BXOR:
-			*ty = max(ty1, ty2); 
 			return (double) ((long) rv1 ^ (long) rv2);
 		    case TK_LSHFT:
-			*ty = max(ty1, ty2); 
 			return (double) ((long) rv1 << (long) rv2);
 		    case TK_RSHFT:
-			*ty = max(ty1, ty2); 
 			return (double) ((long) rv1 >> (long) rv2);
 		    case TK_SLASH:
 			if (rv2 == 0)
 			    longjmp(is_error, 1);
 			else
-				*ty = WTP_DOUBLE;
 			    return rv1 / rv2;
 		    case TK_SLASHSLASH:
 		    case TK_DIV:
 			if (rv2 == 0)
 			    longjmp(is_error, 1);
 			else
-				*ty = WTP_INTEGER;
 			    return aint(rv1 / rv2);
 		    case TK_MOD:
 			if (rv2 == 0)
 			    longjmp(is_error, 1);
 			else
-				*ty = WTP_INTEGER;
 			    return rv1 - aint(rv1 / rv2) * rv2;
 		    case TK_HAT:
-			*ty = max(ty1, ty2); 
 			rv = pow(rv1, rv2);
 			if (errno == EDOM)
 			    longjmp(is_error, 1);
@@ -528,7 +481,6 @@ do_is(v, t, ty)
 		    w_get_argn(&v1, &t1, v, i + 1);
 		    *(((short *) &rv) + i) = v1;
 		}
-		*ty = WTP_DOUBLE;
 		return rv;
 	    }
 #endif /* DoubleType */
@@ -538,7 +490,6 @@ do_is(v, t, ty)
 
 #ifdef DoubleType
 	case WTP_DOUBLE:
-		ty = WTP_DOUBLE;
 	    w_get_double(&rv, v);
 	    return (rv);
 #endif /* DoubleType */
@@ -562,60 +513,34 @@ make_number(v, t, d)
     int  *t;
     double d;
 {
-	make_numberx(v,t,d,WTP_INTEGER);
-}
-
-/*---------------------------------------------------------------
- | make_numberx(v, t, d, TP)
- | 
- | If TP == WTP_INTEGER and floor(d) == d
- |		and (MINPROLOGINT <= floor(d) <= MAXPROLOGINT),
- |		set: v -> floor(d); t --> WTP_INTEGER;
- | Else
- |		set:	v-> double repr. of d; 
- |				t -> correct type for v (depends on #ifdef DoubleType)
- *--------------------------------------------------------------*/
-
-void
-make_numberx(v, t, d, TP)
-    PWord *v;
-    int  *t, TP;
-    double d;
-{
-	int fl;
-
-if (TP == WTP_INTEGER) {
-	fl = floor(d);
-    if ((fl == d) && MINPROLOGINT <= fl && fl <= MAXPROLOGINT) {
-		*v = (PWord) floor(d);
-		*t = WTP_INTEGER;
-    }
-	else /* d cannot be represented as an integer, so return it as a double */
-		goto return_as_double;
-	}
-else	/* TP != WTP_INTEGER */
-	{
+printf("make_num: d=%0g\n",d);
 #ifndef DoubleType
+#ifdef COERCE2INTS
+    if (floor(d) == d && MINPROLOGINT <= d && d <= MAXPROLOGINT) {
+	*v = (PWord) floor(d);
+	*t = WTP_INTEGER;
+    }
+    else 
+#endif
+	{
 	int   i;
 
-return_as_double:
 	w_mk_term(v, t, (PWord) TK_DDOUBLE, 4);
 	for (i = 0; i < 4; i++)
 	    w_install_argn(*v, i + 1, (PWord) (*(((short *) &d) + i)), WTP_INTEGER);
+    }
 #else
-return_as_double:
     w_mk_double(v, t, d);
 #endif
-    }
 }
+
 
 
 int
 pbi_is()
 {
     PWord v1, v2;
-    int   t1, t2, ty;
-	double is_res;
+    int   t1, t2;
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
@@ -623,13 +548,9 @@ pbi_is()
     if (setjmp(is_error)) {
 	FAIL;
     }
+printf("enter_pbi_is\n");
 
-	ty = WTP_INTEGER;
-	is_res = do_is(v2, t2, &ty);
-
-/*    make_number(&v2, &t2, do_is(v2, t2)); */
-
-    make_numberx(&v2, &t2, is_res, ty);
+    make_number(&v2, &t2, do_is(v2, t2));
 
     if (w_unify(v1, t1, v2, t2))
 	SUCCEED;
@@ -640,30 +561,26 @@ pbi_is()
 
 
 
-#define NUMCOMP(name,rel)		\
+#define NUMCOMP(name,rel)					\
 int								\
-name()						  	\
+name()							  	\
 {							   	\
-    PWord v1,v2;				\
-    int t1,t2;					\
-    int ty1,ty2;				\
+    PWord v1,v2;						\
+    int t1,t2;							\
 								\
-    w_get_An(&v1,&t1,1);		\
-    w_get_An(&v2,&t2,2);		\
+    w_get_An(&v1,&t1,1);					\
+    w_get_An(&v2,&t2,2);					\
 								\
-    if (setjmp(is_error)) {		\
-	FAIL;						\
-    }							\
+    if (setjmp(is_error)) {					\
+	FAIL;							\
+    }								\
 								\
-	ty1 = WTP_INTEGER;			\
-	ty2 = WTP_INTEGER;			\
-								\
-    if (do_is(v1,t1,&ty1) rel do_is(v2,t2,&ty2)) {			\
-	SUCCEED;					\
-    }							\
-    else {						\
-	FAIL;						\
-    }							\
+    if (do_is(v1,t1) rel do_is(v2,t2)) {			\
+	SUCCEED;						\
+    }								\
+    else {							\
+	FAIL;							\
+    }								\
 }
 
 

@@ -128,9 +128,13 @@ extern	int	wm_trust_fail	PARAMS(( void ));
 #define WTP_INTEGER     4               /* Signed integer   */
 #define WTP_UIA	        5               /* UnInterned Atom	*/
 
-#ifdef	DoubleType
+	/*--------------------------------------------------------------
+	 |  This is defined even when DoubleType is undefined, for used
+	 |	in the third arg of do_is/3 and 4th arg of make_numberx/4.
+	 *-------------------------------------------------------------*/
+/* #ifdef	DoubleType */
 #define WTP_DOUBLE      6               /* Floating point number */
-#endif /* DoubleType */
+/* #endif  DoubleType */
 
 
 /*
@@ -183,7 +187,8 @@ extern	int	w_rungoal PARAMS(( PWord, PWord, int ));
  */
 
 	/* from arith.c */
-extern	void	make_number	PARAMS( (PWord *, int *, double) );
+extern	void	make_number		PARAMS( (PWord *, int *, double) );
+extern	void	make_numberx	PARAMS( (PWord *, int *, double, int) );
 	/* from gv.c */
 extern	PWord	gv_alloc	PARAMS( (void) );
 extern	int	gv_alloc_gvnum	PARAMS( (int) );

@@ -153,9 +153,12 @@ mk_double(dbl)
 {
     register pword d;
 
+#ifdef COERCE2INTS
     if (dbl == floor(dbl) && MINPROLOGINT <= dbl && dbl <= MAXPROLOGINT)
 	d = MK_INT(floor(dbl));
-    else {
+    else 
+#endif
+	{
 #ifndef DoubleType
 	register int i;
 	d = MK_TERM(4);

@@ -1,6 +1,6 @@
 :-libactivate(builtins,['library',misc_io],
-    [read_terms/1,read_terms/2, read_terms_pos/1,read_terms_pos/2,
-		read_as_list/3,
+    [read_terms/1,read_terms/2, read_terms_pos/1,
+	 read_terms_pos/2, read_terms_vn/2, read_as_list/3,
         colwrite/4, putc_n_of/3,
 		gen_file_header/3,gen_file_header/4],[]).
 

@@ -36,9 +36,11 @@ extern	int	memctl		PARAMS(( void *, int, int ));
 
 #endif /* HAVE_MMAP */
 
+#ifdef 0
 #ifndef MaxFunc
 #define max(a,b) ((a) < (b) ? (b) : (a))
 #endif /* MaxFunc */
+#endif
 
 #undef round
 #define round(x,s) (((((long) x)-1) & ~(long)((s)-1)) + (s))
