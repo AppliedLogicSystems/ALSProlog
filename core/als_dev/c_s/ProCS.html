@@ -1,0 +1,60 @@
+
+ProCS - Prolog-Based Client-Server Framework
+
+A ProCS client-server implementation consists of Prolog-defined
+servers and Prolog (or other language)-defined clients, all 
+communicating via TCP/IP sockets. The ProCS package provides a 
+conceptual framework together with frameworks and supporting library 
+which make possible a rapid implementation of a ProCS-based system 
+on any combinations of platforms supported by ALS Prolog.
+
+A ProCS server runs in an infinite loop, listening on a 
+collection of sockets, and serving the requests that it
+receives on those sockets. The principal server loop predicate
+carries around a Prolog term which encodes it's entire state.
+Each particular implementation of a ProCS server will normally
+utilize different versions of this data structure, according to
+the particular application which they implement.  A particular
+ProCS implementation is created by specifying this data structure,
+the format of the initialization file, and supplying the prolog
+predicates which define the application-specific services 
+to be provided by the server.
+
+The data structure is specified as a defStruct, with the minimal 
+defStruct specification being as follows (file: sktsrvtp.typ):
+
+module socket_comms.
+
+defStruct(server_info, [
+		propertiesList = [
+				%% all applications should have the following:
+			log_warnings/false,     %% {true,false (default)}
+			log_info/false,         %% {true,false (default)}
+			log_file/nil,			%% file name for logging
+			log_stream/nil,         %% stream to log file (when logging)
+			polling_timeout/10000,	%% timeout for polling streams
+			ports_list/[]			%% list of basic port numbers
+			],
+		accessPred = access_server_info,
+		setPred =    set_server_info,
+		makePred =   make_server_info,
+		structLabel = server_info
+	] ).
+
+endmod.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+start_server/0
+- starts the server process
