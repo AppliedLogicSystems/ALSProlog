@@ -180,6 +180,7 @@ extern int reset_cstr_ctrs		PARAMS (( void ));
 extern int get_cstr_ctrs_vals	PARAMS (( void ));
 extern int set_max_iters_val	PARAMS (( void ));
 extern int run_grteq_cstrs		PARAMS (( void ));
+extern int  x_int_op			PARAMS((void));
 
 #endif /* INTCONSTR */
 
