@@ -303,7 +303,7 @@ win32_split_relpath(Path, [Head | Tail]) :-
 win32_split_relpath(Path, [Path]).
 
 win32_join_path([], '').
-win32_join_path([Path], Path).
+win32_join_path([Path], Path) :-!.
 win32_join_path([A, B], Path) :-
 	!,
 	win32_join_path(A, B, Path).
