@@ -201,14 +201,16 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     if (!MPW_Tool) printf("Exiting ALS Prolog.\n");
 #endif
        
-    if (success) exit(EXIT_SUCCESS);
-    else exit(EXIT_FAILURE);
+    if (success) return(EXIT_SUCCESS);
+    else return(EXIT_FAILURE);
 }
 
+#if 1
 int main(int argc, char *argv[])
 {
     return PI_main(argc, argv, NULL);
 }
+#endif
 
 #ifdef MacOS
 int shlib_found;
