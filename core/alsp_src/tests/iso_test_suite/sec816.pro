@@ -186,7 +186,7 @@ test_a_chars :-
 
 test_atom_codes :-
 	test_val(atom_codes('', L), L, []),
-        test_val(atom_codes([], M), M, [0'[, 0'[]),
+        test_val(atom_codes([], M), M, [0'[, 0']]),
         test_true(atom_codes('ant', [0'a, 0'n, 0't])),
         test_false(atom_chars('soap', [0's, 0'o, 0'p])).
 
@@ -205,7 +205,7 @@ test_atom_codes_errors :-
 %
 
 test_a_codes :-	
-        defined(atom_codes/3)
+        defined(atom_codes/2)
         ->
         (test_atom_codes,test_atom_codes_errors)
         ;
