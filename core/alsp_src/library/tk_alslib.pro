@@ -48,6 +48,8 @@ init_tk_alslib(Shared)
 	:-
 	init_tk_alslib(tcli, Shared).
 
+:-dynamic(tcl_interp_created/1).
+
 init_tk_alslib(Interp,Shared)
 	:-
 	(all_procedures(tcltk,read_eval_results,2,_) ->
@@ -63,11 +65,43 @@ init_tk_alslib(Interp,Shared)
 	sys_env(OS, _, _),
 	(OS = macos ->
 		tcl_call(Interp, 'source -rsrc als_tklib', _)
-	;
-	(
-		pathPlusFile(Shared, 'als_tklib.tcl', ALSTKLIB),
-		tcl_call(Interp, [source, ALSTKLIB], _)
-	)).
+		;
+		( pathPlusFile(Shared, 'als_tklib.tcl', ALSTKLIB),
+		  tcl_call(Interp, [source, ALSTKLIB], _)
+		)
+	),
+	(tcl_interp_created(Interp) ->
+		true
+		;
+		(Interp \= shl_tcli -> 
+			assert(tcl_interp_created(Interp))
+			;
+			true
+		)
+	).
+
+export destroy_all_tcl_interpreters/0.
+destroy_all_tcl_interpreters
+	:-
+	findall(Interp, (tcl_interp_created(Interp),
+						Interp \= shl_tcli),		Interps),
+	destroy_all_tcl_interpreters(Interps),
+	abolish(tcl_interp_created,1),
+	dynamic(tcl_interp_created/1).
+
+destroy_all_tcl_interpreters([]).
+destroy_all_tcl_interpreters([I | Interps])
+	:-
+	tcl_delete(I),
+	unrecord_packages(I),
+	destroy_all_tcl_interpreters(Interps).
+
+:- dynamic(packages_loaded/2).
+unrecord_packages(I)
+	:-
+	retract(packages_loaded(I,_)),
+	fail.
+unrecord_packages(_).
 
 /*------------------------------------------------------------*
  |	fixup_for_tkwin_path/2
@@ -365,6 +399,8 @@ cont_file_select(save_as, DefaultName, Ext, IDir, Title, FileName, FileTypes, In
 				'-defaultextension', Ext, '-initialfile', DefaultName,
 				'-initialdir', IDir, '-filetypes', FileTypes], 
 				FileName).
+
+
 /*------------------------------------------------------------*
  |	create_image/2
  |	create_image(ImagePath, ImageName)

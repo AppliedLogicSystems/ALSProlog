@@ -1,5 +1,6 @@
 libactivate(tk_alslib,[library,tk_alslib],
     [ init_tk_alslib/0, init_tk_alslib/1, init_tk_alslib/2, 
+	   destroy_all_tcl_interpreters/0,
 	  popup_select_items/2, popup_select_items/3, popup_select_items/4,
 	  extend_main_menubar/2, extend_main_menubar/3, extend_main_menubar/4, 
 	  extend_menubar_cascade/2, extend_menubar_cascade/4 ], 

@@ -29,7 +29,7 @@ export init_nil/2.
 export accessObjStruct/3.
 export setObjStruct/3.
 export (':=')/2.
-export set_slots0/4.
+%% export set_slots0/4.
 export deref_val/3.
 export standardObject/2.
 export genericObjects/2.
@@ -38,6 +38,30 @@ export clone/2.
 			/*=================================
 			 |   MESSAGE SENDING
 			 *================================*/
+
+:- make_gv('_GONs'), 
+	set_GONs([]).		%% cheap initial impl;
+
+get_globalObjectName(ObjectName, Object)
+	:-
+	get_GONs(List),
+	dmember(g(ObjectName, Object), List).
+
+set_globalObjectName(ObjectName, Object)
+	:-
+	get_GONs(List),
+	fin_set_globalObjectName(List, ObjectName, Object).
+
+fin_set_globalObjectName(List, ObjectName, Object)
+	:-
+	member(G, List),
+	G = g(ObjectName, _),
+	!,
+	mangle(2, G, Object).
+fin_set_globalObjectName(List, ObjectName, Object)
+	:-
+	set_GONs([g(ObjectName, Object) | List]).
+
 /*!-----------------------------------------------------------------------
  |	send/2
  |	send(Object, Message)
@@ -49,77 +73,31 @@ send('$no$Object$', Message)
 	:-!,
 	send(builtins,null_object,Message).
 
-send(builtins, Message)
-	:-!,
-	send(builtins,null_object,Message).
+send(ObjectName, Message)
+	:-
+	atom(ObjectName),
+	!,
+	get_globalObjectName(ObjectName, Object),
+	send(Object, Message).
 
-send(anyone, Message)
-	:-!,
-	queue_oop_event(Message).
-
-send(any_object, Message)
-	:-!,
-	queue_oop_event(Message).
-
-send(Object, Message)
+send(ObjectName^SlotDescrip, Message)
 	:-
 	atom(Object),
 	!,
-	objects:objectModule(Object, Module),
-	send(Module, Object, Message).
+	get_globalObjectName(ObjectName, Object),
+	send(Object^SlotDescrip, Message).
 
-send(Object^SlotDescrip, Message)
+send(ObjectName^SlotDescrip, Message)
 	:-!,
-	(atom(Object) ->
-		send(Object,your_state(ObjectState));
-		ObjectState = Object
-	),
 	accessObjStruct(SlotDescrip, ObjectState, SubObject),
-	!,
 	send(SubObject, Message).
 
 send(Object, Message)
 	:-
-	accessObjStruct(myName, Object, ObjectName),
-	!,
-	send(ObjectName, Message).
-
-/*!-----------------------------------------------------------------------
- |	send/3
- |	send(Module, Object, Message)
- |	send(+, +)
- |
- |	- sends a message to an object
- *-----------------------------------------------------------------------*/
-send(Module, null_object, Message)
-	:-!.
-
-send(Module, debugger_object, Message)
-	:-!,
-	debugger:debugger_object(Message).
-
-send(Module, debug_4_port_object, Message)
-	:-!,
-	debugger:debug_4_port_object(Message).
-
-send(Module, source_trace_object, Message)
-	:-!,
-	debugger:source_trace_object(Message).
-
-send(Module, debug_controls_object, Message)
-	:-!,
-	debugger:debug_controls_object(Message).
-
-send(Module, debug_graph_object, Message)
-	:-!,
-	debugger:debug_graph_object(Message).
-
-send(Module, Object, Message)
-	:-
-	atom(Object),!,
-	TheCall =.. [Object , Message],
-	objects:do_object_goal(Module,TheCall),
-	!.
+	accessObjStruct(myClassPred, Object, ClassPred),
+	ActionCall =.. [ClassPred, Message, Object],
+	accessObjStruct(myClassModule, Object, ClassModule),
+	call(ClassModule:ActionCall).
 
 /*!-----------------------------------------------------------------------
  |	send_self/2
@@ -160,23 +138,6 @@ finish_send_self(ObjectName,Message,ObjState)
 	objects:objectModule(ObjectName, Module),
 	objects:do_object_goal(Module,Call),
 	!.
-
-/*!-----------------------------------------------------------------------
- |	toggle_null_send_notify/0
- |	toggle_null_send_notify
- |	toggle_null_send_notify
- |
- |	- toggles (on/off) notifications of sends to the null object
- *-----------------------------------------------------------------------*/
-:- dynamic(notify_null_send_flag/0).
-
-toggle_null_send_notify
-	:-
-	notify_null_send_flag,!,
-	abolish(notify_null_send_flag,0).
-toggle_null_send_notify
-	:-
-	assert(notify_null_send_flag).
 
 /*!-----------------------------------------------------------------------
  |	send_all/2
@@ -473,6 +434,7 @@ Value := Struct^SlotExpr
 	:-
 	accessObjStruct(SlotExpr, Struct, Value).
 
+/******************
 /*!-------------------------------------------------------
  |	set_slots0/4
  |	set_slots0(Vals,Code,State,Mod)
@@ -538,6 +500,8 @@ deref_val(defineObject(SpecList), ObjectState,Mod)
 	Mod:call(GetCall).
 deref_val(Val, Val,_).
 
+******************/
+
 /*!-------------------------------------------------------
  |	standardObject/2
  |	standardObject(OName, Class)
@@ -589,14 +553,25 @@ standardObject(ObjectName,ClassName)
 
 classModule(genericObjects,objects).
 make_pred(genericObjects,'makegenericObjectsStruct').
-slot_num(genericObjects,myName,1).
-slot_num(genericObjects,myDBRefs,2).
+
+slot_num(genericObjects,myClassPred,1).
+slot_num(genericObjects,myClassModule,2).
+slot_num(genericObjects,myName,3).
+
+%slot_num(genericObjects,myDBRefs,2).
+
 makegenericObjectsStruct(_1554) 
 	:-
     functor(_1554,genericObjects,2), 
 	init_nil(1,_1554),
 	init_nil(2,_1554).
-slots_for(genericObjects,[myName,myDBRefs]).
+
+slots_for(genericObjects,[myClassPred,myClassModule,myName]).
+
+%slots_for(genericObjects,[myName,myClassPred]).
+%slots_for(genericObjects,[myName,myDBRefs]).
+
+
 genericObjects(_1595,_1593) 
 	:- 
 	genObjs(_1595,_1593).
@@ -637,6 +612,10 @@ genObjs(lookup(Slot,Pattern),State)
 	accessObjStruct(Slot,State,CurSlotValue),
 	dmember(Pattern, CurSlotValue),!.
 
+genObjs(send_self(Message),State)
+	:-
+	send(State, Message).
+
 genObjs(your_state(State),State).
 
 genObjs(insert_oop_event_request(Event),State)
@@ -652,38 +631,12 @@ genObjs(queue_oop_event(Event),State)
 	:-
 	queue_oop_event(Event).
 
-genObjs(remove_self, State)
-	:-
-	genObjs(hari_kari, State).
-genObjs(hari_kari, State)
-	:-
-	accessObjStruct(myName,State,ObjName),
-	accessObjStruct(myDBRefs,State,ObjDBRefs),
-	catenate('get_',ObjName,GVAccessPred),
-	functor(GetCall, GVAccessPred, 1),
-	catenate('set_',ObjName,GVSetPred),
-
-	objects:retract(objectModule(ObjName,ObjModule)),
-	objects:retract(objectClass(ObjName,ObjClass)),
-
-	ObjModule:clause(GetCall,gv_get(GVNum,_)),
-	ObjModule:abolish(GVAccessPred,1),
-	ObjModule:abolish(GVSetPred,1),
-	gv_free(GVNum),
-
-	dispose_obj_code(ObjDBRefs, ObjName, ObjModule).
-
-dispose_obj_code(ObjDBRefs, ObjName, ObjModule)
-	:-
-	ObjDBRefs = [_|_],
-	!,
-	erase_all(ObjDBRefs).
-dispose_obj_code(ObjDBRefs, ObjName, ObjModule)
-	:-
-	ObjModule:abolish(ObjName,1),
-	catenate(dispatch_,ObjName,DispPred),
-	ObjModule:abolish(DispPred,2).
 		
+
+
+
+
+
 /*!-------------------------------------------------------
  |	clone/2
  |	clone(Obj1, Obj2)

@@ -71,7 +71,8 @@ load_table_package
 :- dynamic(table_package_loaded/0).
 load_table_package(Interp)
 	:-
-	table_package_loaded,
+	% table_package_loaded(Interp),
+	packages_loaded(Interp,table_package),
 	!.
 
 load_table_package(Interp)
@@ -84,7 +85,8 @@ load_table_package(Interp)
 	join_path(TablesTclList, TablesTclPath),
 	tcl_call(Interp, [source,TablesTclPath], _),
 	tcl_call(Interp, [load_table_package, [SharedList]], X),
-	assert(table_package_loaded).
+%	assert(table_package_loaded(Interp)).
+	assert(packages_loaded(Interp,table_package)).
 
 :- compiletime, module_closure( create_table, 2, create_table3).
 :- compiletime, module_closure( create_table, 3, create_table4).

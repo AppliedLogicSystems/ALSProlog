@@ -1,1 +1,4 @@
-libactivate(builtins,[library,miscatom],[atm_tail/3,trim_atoms/3],[]).
+libactivate(builtins,[library,miscatom],
+			[atm_tail/3,trim_atoms/3,
+        		cat_together_seplines/2,cat_together_spaced/2
+				],[]).
