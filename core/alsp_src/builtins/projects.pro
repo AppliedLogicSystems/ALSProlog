@@ -327,8 +327,8 @@ gen_project_mgrAction(save_to_file, State)
 	open(FilePath, write, OS, []),
 	write_clauses(OS, Eqns, [quoted(true)]),
 	close(OS),
-	sys_env(OS,_,_),
-	(OS = macos ->
+	sys_env(Platform,_,_),
+	(Platform = macos ->
 		tcl_eval(shl_tcli, ['file attributes', FilePath, '-creator ALS4 -type ALSP'], _)
 		;
 		true
@@ -444,6 +444,19 @@ cont_open_another_project([FileName, PathListIn], ALSIDEObject, ProjectMgr)
 	),
 	append(PathList, [FileName], FileList),
 	join_path(FileList, File),
+	exists_file(File),
+	!,
+	fin_open_proj(File, PathList, ALSIDEObject, ProjectMgr).
+
+cont_open_another_project([FileName, PathListIn], ALSIDEObject, ProjectMgr)
+	:-
+	append(PathList, [FileName], FileList),
+	join_path(FileList, File),
+	sprintf(atom(Msg), 'Can\'t find project file %t!', [FileName]),
+	info_dialog(shl_tcli, Msg, 'Missing File').
+
+fin_open_proj(File, PathList, ALSIDEObject, ProjectMgr)
+	:-
 	grab_terms(File, Eqns),
 	alsdev:create_object(
 		[instanceOf=project_mgr,
@@ -457,6 +470,7 @@ cont_open_another_project([FileName, PathListIn], ALSIDEObject, ProjectMgr)
 	setObjStruct(cur_project,ALSIDEObject,ProjectMgr),
 	join_path(PathList, ProjectDir),
 	setObjStruct(primary_project_dir,ProjectMgr,ProjectDir),
+	change_cwd(ProjectDir),
 	send(ProjectMgr, init_gui),
 
 	accessObjStruct(title,ProjectMgr,ProjectTitle),
@@ -586,7 +600,7 @@ add_mult_files(PrevFiles, ListBoxWin)
 gen_project_mgrAction([prj_slot_focus, prolog_files, RootFileName], State)
 	:-
 	accessObjStruct(search_dirs, State, SearchList),
-%write(pro_prj_slot_focus(RootFileName,SearchList)),nl,flush_output,
+write(pro_prj_slot_focus(RootFileName,SearchList)),nl,flush_output,
 	builtins:get_primary_manager(ALSMgr),
 	send(ALSMgr, open_edit_win_by_root(RootFileName,SearchList)).
 
