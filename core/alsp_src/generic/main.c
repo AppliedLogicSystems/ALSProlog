@@ -40,24 +40,12 @@
 #include <fcntl.h>
 #endif
 
-#if 0			/* FIXME:  Can we get rid of this stuff? */
-#ifdef BSDUNIX
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <fcntl.h>
-#endif
-
-#ifdef SysV
-#include <unistd.h>
-#include <fcntl.h>
-#ifdef arch_m88k
-#include <sys/m88kbcs.h>
-#endif /* arch_m88k */
-#endif /* SysV */
-#endif /* 0 */
-
 #ifdef MacOS
 #include <TextUtils.h>
+#include <Processes.h>
+#include <Errors.h>
+
+#include <FullPath.h>
 #ifdef MPW_TOOL
 #else
 #include <unix.h>
@@ -133,7 +121,6 @@ static	void	panic_fail	PARAMS(( void ));
 #ifdef arch_m88k
 static	void	panic_continue	PARAMS(( void ));
 #endif
-static	char *	isopt		PARAMS(( char *, char * ));
 static	void	abolish_predicate PARAMS(( char *, char *, int ));
 static	void	assert_sys_searchdir PARAMS(( char * ));
 static	void	assert_als_system PARAMS(( char *, char *, char *, char *,
@@ -143,7 +130,8 @@ static	void	assert_atom_in_module PARAMS(( char*, char * ));
 static	int	absolute_pathname PARAMS((CONST char * ));
 #endif
 #ifndef PURE_ANSI
-static	void	whereami	PARAMS(( char * ));
+static	void	locate_executable(int argc, char *argv[]);
+static	void	command_line_locate_executable(int argc, char *argv[]);
 #endif /* PURE_ANSI */
 static	void	autoload	PARAMS(( char * ));
 static	void	chpt_init	PARAMS(( void ));
@@ -162,35 +150,20 @@ panic_continue()
 }
 #endif /* arch_m88k */
 
-static char *
-isopt(opt,str)
-    char *opt;
-    char *str;
-{
-    size_t len = strlen(opt);
-    if (strncmp(opt,str,len) == 0)
-	return str+len;
-    else
-	return 0;
-}
 
 /*---------------------------------*
  * Prolog initialization
  *---------------------------------*/
 
-static int
-PI_prolog_init0(int argc, char **argv)
+/* ALS Prolog Command Line Development Evnvironment */
+
+static int PI_prolog_init0(const PI_system_setup *setup)
 {
     unsigned long heapsize;
     unsigned long stacksize;
     unsigned long icbufsize;
-    char *saved_state_filename;
-    char *als_opts;
+    const char *saved_state_filename;
     int  saved_state_loaded;
-
-#ifdef Portable
-    extern Code *wm_panic;
-#endif /* Portable */
 
 #ifdef MSWin32
     win32s_system = IS_WIN32S;
@@ -199,8 +172,8 @@ PI_prolog_init0(int argc, char **argv)
     /* Put arg and argv in globals so they can be used by the
        builtin get_argc_argv/2 */
 
-    argcount = argc;
-    argvector = argv;
+    argcount = setup->argc;
+    argvector = setup->argv;
 
     /*-------------------------------------------------------------------*
      * malloc and then free an area at the outset so that the malloc
@@ -271,113 +244,19 @@ PI_prolog_init0(int argc, char **argv)
     init_parser_data();
 #endif
 
-    heapsize = DEFAULT_HEAP_SIZE;
-    stacksize = DEFAULT_STACK_SIZE;
-    icbufsize = MIN_ICBUFSIZE;
-    saved_state_filename = (char *) 0;
+	heapsize = setup->heap_size ? setup->heap_size : DEFAULT_HEAP_SIZE;
+    stacksize = setup->stack_size ? setup->stack_size :DEFAULT_STACK_SIZE;
+    icbufsize = setup->icbuf_size ? setup->icbuf_size : MIN_ICBUFSIZE;
+    saved_state_filename = setup->saved_state;
     
-#ifdef MacOS
-    als_opts = (char *) PI_get_options();
-#else
-    als_opts = getenv("ALS_OPTIONS");
-#endif
-
-    if (als_opts) {
-	char *opt, *val;
-	int i;
-	als_opts = strdup(als_opts);
-	if (als_opts == NULL)
-	    fatal_error(FE_ALS_OPTIONS, 0);
-
-	opt = strtok(als_opts, " ,");
-	while (opt) {
-	    if ( (val = isopt("heap_size:",opt)) ) {
-	        i = atoi(val);
-		if (i < 0 || i > ULONG_MAX/256) fatal_error(FE_ALS_OPTIONS, 0);
-		heapsize = i * 256;
-	    } else if ( (val = isopt("stack_size:",opt)) ) {
-	        i = atoi(val);
-		if (i < 0 || i > ULONG_MAX/256) fatal_error(FE_ALS_OPTIONS, 0);
-		stacksize = i * 256;
-	    } else if ( (val = isopt("saved_state:",opt)) ) {
-		saved_state_filename = strdup(val);
-		if (saved_state_filename == 0)
-		    fatal_error(FE_ALS_OPTIONS, 0);
-	    }
-	    else if ( (val = isopt("icbuf_size:",opt)) )
-		icbufsize = atoi(val) * 1024;
-	    else if ( (val = isopt("debug_shell", opt)) && *val == 0)
-		noautoload = 1;
-	    else
-		PI_app_printf(PI_app_printf_warning,
-			      "unrecognized option: %s\n", opt);
-	    opt = strtok(NULL, " ,");
-	}
-
-	free(als_opts);
-    }
-
-    /* Scan for -heap and -stack command line arguments. */ 
-    {
-    	int i, r;
-    	unsigned long value;
-    	enum {arg_scan, heap_scan, stack_scan, finished} state;
-    	
-    	for (state = arg_scan, i = 0; state != finished && i < argc; i++) {
-    	    switch (state) {
-    	    case arg_scan:
-    	    	if      (strcmp(argv[i], "-p") == 0)     state = finished;
-    	    	else if (strcmp(argv[i], "-heap") == 0)  state = heap_scan;
-    	    	else if (strcmp(argv[i], "-stack") == 0) state = stack_scan;
-    	    	break;
-    	    case heap_scan:
-    	    	r = sscanf(argv[i], "%lu", &value);
-    	    	if (r != 1 || value > ULONG_MAX/256) {
-    	    	    fprintf(stderr, "Usage: -heap N\n");
-    	    	    exit(EXIT_ERROR);
-    	    	} else {
-    	    	    heapsize = value * 256;
-    	    	    state = arg_scan;
-    	    	}
-    	    	break;
-    	    case stack_scan:
-    	    	r = sscanf(argv[i], "%lu", &value);
-    	    	if (r != 1 || value > ULONG_MAX/256) {
-    	    	    fprintf(stderr, "Usage: -stack N\n");
-    	    	    exit(EXIT_ERROR);
-    	    	} else {
-    	    	    stacksize = value * 256;
-    	    	    state = arg_scan;
-    	    	}
-    	    	break;
-    	    case finished:
-    	    	break;
-    	    }
-    	}
-    	
-    	/* Check for incomplete scanning of arguments. */
-    	switch (state) {
-    	case heap_scan:
-	    fprintf(stderr, "Usage: -heap N\n");
-	    exit(EXIT_ERROR);
-    	    break;
-    	case stack_scan:
-    	    fprintf(stderr, "Usage: -stack N\n");
-    	    exit(EXIT_ERROR);
-    	    break;
-    	default:
-    	    break;
-    	}
-    }
     
     /*
-     * get the image directory; the call to whereami will initialize it and
+     * get the image directory; the call to locate_executable() will initialize it and
      * the image name;
      */
 
 #ifndef PURE_ANSI
-    if (argc >= 1) whereami(argv[0]);
-    else whereami(NULL);
+    locate_executable(setup->argc, setup->argv);
 #endif /* PURE_ANSI */
 
 #ifdef SIMPLE_MICS 
@@ -409,24 +288,8 @@ PI_prolog_init0(int argc, char **argv)
      * to find the builtins.
      */
 #ifndef PURE_ANSI
-#ifdef MacOS
-    {
-	const char *s;
-	s = getenv("ALSDirectory");
-	if (s)
-	{
-	    strcpy(alsdir, s);
-	} else {
-	    strcpy(alsdir, imagedir);
-	    strcat(alsdir, "alsdir");
-	}
-    }
     strcpy(alsdir, imagedir);
     strcat(alsdir, "alsdir");
-#else
-    strcpy(alsdir, imagedir);
-    strcat(alsdir, "alsdir");
-#endif /* MacOS */
 
 #ifdef VMS
     strcat(alsdir, ".dir");
@@ -461,9 +324,7 @@ PI_prolog_init0(int argc, char **argv)
 
     /* Perform some initial allocations */
 
-#if 1
     wm_stackbot = allocate_prolog_heap_and_stack(stacksize + heapsize);
-#endif 
 
     wm_heapbase = wm_stackbot + stacksize;
 #ifdef MacOS
@@ -805,15 +666,13 @@ absolute_pathname(name)
 #endif
 
 /*--------------------------------------------------------------------*
- | whereami is given a filename f in the form:  whereami(argv[0])
+ | locate_executable is given a filename f in the form:  locate_executable(argc, argv)
  | It returns the directory in which the executable file (containing 
  | this code [main.c] ) may be found.  A dot will be returned to indicate 
  | the current directory.
  *--------------------------------------------------------------------*/
 
-static void
-whereami(name)
-    char *name;
+static void locate_executable(int argc, char *argv[])
 {
 #ifdef MSWin32
     DWORD l;
@@ -836,10 +695,65 @@ whereami(name)
     if (strlen(endpath) >= IMAGENAME_MAX) fatal_error(FE_INFND, 0);
     strcpy(imagename, endpath);
     *endpath = 0;
+#elif MacOS
+    if (MPW_Tool) {
+    	command_line_locate_executable(argc, argv);
+    } else {
+    	/* FIX Shared Libraries need to be handled in a different way. */
+	OSErr err;
+	ProcessSerialNumber PSN;
+	ProcessInfoRec info;
+	FSSpec AppSpec, DirSpec;
+	short DirPathLength;
+	Handle DirPathHandle;
+	
+    	
+    	/* Get the FSSpec for this application. */    
+	PSN.highLongOfPSN = 0;
+	PSN.lowLongOfPSN = kCurrentProcess;
+	
+	info.processInfoLength = sizeof(ProcessInfoRec);
+	info.processName = NULL;
+	info.processAppSpec = &AppSpec;
+	
+	err = GetProcessInformation(&PSN, &info);
+	if (err != noErr) fatal_error(FE_INFND, 0);
+	
+	p2cstrcpy(imagename, AppSpec.name);
+	
+	err = FSMakeFSSpec(AppSpec.vRefNum, AppSpec.parID, "\p", &DirSpec);
+	if (err != noErr && err != fnfErr)  fatal_error(FE_INFND, 0);
+
+	err = FSpGetFullPath(&DirSpec, &DirPathLength, &DirPathHandle);
+	if (err != noErr) fatal_error(FE_INFND, 0);
+	
+	if (DirPathLength >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
+	
+	HLock(DirPathHandle);
+	if (MemError() != noErr) fatal_error(FE_INFND, 0);
+
+	strncpy(imagedir, *DirPathHandle, DirPathLength);
+	imagedir[DirPathLength] = ':';
+	imagedir[DirPathLength+1] = 0;
+
+	DisposeHandle(DirPathHandle);
+	if (MemError() != noErr) fatal_error(FE_INFND, 0);
+    }
+#elif unix
+    command_line_locate_executable(argc, argv);
 #else
+#error
+#endif
+}
+
+/* FIX this should be revised to use realpath(), which is a standard
+   SunOS-style unix library call. */
+static void command_line_locate_executable(int argc, char *argv[])
+{
     register char *cutoff = NULL;	/* stifle -Wall */
     register char *s;
     register char *t;
+    char *name;
 #ifdef HAVE_SYMLINK
     int   cc;
 #endif
@@ -850,17 +764,19 @@ whereami(name)
      * When this is not available, it is a fatal error.
      */
 
-    if (name == NULL) {
+    if (argc == 0 || argv[0] == NULL) {
         fatal_error(FE_INFND, 0);
 	return;
     }
+    
+    name = argv[0];
 
     /*
      * See if the file is accessible either through the current directory
      * or through an absolute path.
      */
 
-    if (access(name, R_OK) == 0) {
+    if (access(argv[0], R_OK) == 0) {
 
 	/*-------------------------------------------------------------*
 	 * The file was accessible without any other work.  But the current
@@ -902,7 +818,7 @@ whereami(name)
 		fatal_error(FE_GETCWD, 0);
 	    }
 #endif /* !HAVE_GETWD */
-#endif /* MSWin32, DOS */
+#endif /* DOS */
 
 	    for (; *t; t++)	/* Set t to end of buffer */
 		;
@@ -1007,7 +923,6 @@ whereami(name)
 
     strcpy(imagename, cutoff + 1);	/* keep the image name */
     *(cutoff + 1) = 0;		/* chop off the filename part */
-#endif
 }
 #endif /* PURE_ANSI */
 
@@ -1047,7 +962,7 @@ autoload(f)
     }
 }
 
-int
+ALSPI_API(int)
 PI_toplevel(int *result)
 {
 #ifndef KERNAL
@@ -1302,7 +1217,6 @@ copyright()
 #include <GUSI.h>
 #endif
 
-#include <Processes.h>
 #include <CursorCtl.h>
 
 int MPW_Tool;
@@ -1368,8 +1282,32 @@ void app_printf(int messtype, va_list args);
 #include <console.h>
 #endif
 
-int
-PI_prolog_init(int argc, char **argv)
+ALSPI_API(int)
+PI_prolog_init(int argc, char *argv[])
+{
+  PI_system_setup setup;
+
+    /* Fill setup struct with defaults */
+    setup.heap_size = 0;
+    setup.stack_size = 0;
+    setup.icbuf_size = 0;
+    setup.alsdir = NULL;
+    setup.saved_state = NULL;
+    setup.argc = argc;
+    setup.argv = argv;
+#ifdef WIN32
+    setup.hInstance = NULL;
+    setup.hPrevInstance = NULL;
+    setup.lpCmdLine = NULL;
+    setup.nCmdShow = 1;
+#endif
+  
+    return PI_startup(&setup);
+}
+
+
+ALSPI_API(int)
+PI_startup(const PI_system_setup *setup)
 {
 
 #ifdef MacOS
@@ -1402,9 +1340,12 @@ PI_prolog_init(int argc, char **argv)
     GUSISetup(GUSIwithPPCSockets);
     GUSISetup(GUSIwithUnixSockets);
     if (!MPW_Tool) GUSISetup(GUSIwithSIOUXSockets);
+
+    GUSISetHook(GUSI_SpinHook, NULL);
 #endif
 
-    if (!MPW_Tool) argc = ccommand(&argv);
+   InstallConsole(0);
+   SIOUXSetTitle("\pALS Prolog");
 
 #endif /* MacOS */
 
@@ -1454,10 +1395,10 @@ PI_prolog_init(int argc, char **argv)
     /* Initilize copy-protection security. */
     init_security();
 
-    return PI_prolog_init0(argc, argv);
+    return PI_prolog_init0(setup);
 }
 
-void
+ALSPI_API(void)
 PI_shutdown(void)
 {
 
@@ -1588,7 +1529,7 @@ int metrowerks_open_patch(const char *filename, int mode)
 #ifdef APP_PRINTF_CALLBACK
 void app_printf(int messtype, va_list args)
 #else
-void
+ALSPI_API(void)
 #ifdef HAVE_STDARG_H
 PI_app_printf(int messtype, ...)
 #else
@@ -1667,7 +1608,8 @@ PI_app_printf(messtype,va_alist)
    Usually this string comes from getenv(), except on the Mac where it
    is stored in a preferences file.
 */
-const char *PI_get_options(void)
+ALSPI_API(const char *)
+PI_get_options(void)
 {
 #ifdef MacOS
     if (MPW_Tool) {
