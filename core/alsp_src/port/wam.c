@@ -2139,6 +2139,7 @@ bind_int_unfreeze(r,t,d)
 {
 	PWord *vl;
 
+printf("bind_int_unfreeze(%x,%d,%g)\n"r,t,d);
 		/* make the int: */
 	vl = wm_H++;
 	make_number(vl, t, d);
