@@ -106,10 +106,16 @@ alsdir/library : $(SOURCE_DIR)/library
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.pro .
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
 
-testrun : alspro
+testrun : command_line_test iso_test_suite test_suite
+
+command_line_test: alspro
 	-sh $(TEST_DIR)/tsuite/test_command_line.sh ./alspro
+
+test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/autotest $(TEST_DIR)/atest_db -g run_tests -p -srcdir $(SOURCE_DIR)
-	
+
+iso_test_suite: alspro
+	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
 
 clean :
 	rm -f *.o rm *.d
