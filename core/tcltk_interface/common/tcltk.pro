@@ -1,6 +1,6 @@
 module tcltk.
 
-:- consult(tclintf).
+:- consult('tclintf.psl').
 
 export tcl_new/1.
 export tk_new/1.
