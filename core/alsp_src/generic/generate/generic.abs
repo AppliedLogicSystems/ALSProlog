@@ -144,7 +144,8 @@ cmnt(1) 		= ['How to build everything'].
 
 all 	depends_on  [alsdir, setup, generated, alspro_b, alsmics, alspro, alstest].
 
-macall	depends_on	[generated, mpw_alspro_b_ppc, sioux_alspro_b_68k, sioux_alspro_b_ppc, sioux_alspro_b, alspro_b, alstest].
+macall	depends_on	[generated, mpw_alspro_b_ppc, sioux_alspro_b_68k, sioux_alspro_b_ppc, sioux_alspro_b,
+			 alspro_b, alspro, sioux_alspro, mpw_alspro, alstest].
 
 cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 					'C source files to object files'].
@@ -155,7 +156,7 @@ cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 &(cpp_includes)	= case(&(context_name),
 		[
 		 (mac:
-			'-i : -i :: -i {srcdir}generic: -i {srcdir}generic:generate:tok.h: -i {srcdir}{ARCH} -i {srcdir}{ARCH}:{SOS} -i {GUSIIncludes}' ),
+			'-i : -i :: -i {srcdir}generic: -i {srcdir}generic:generate:tok.h: -i {srcdir}{ARCH} -i {srcdir}{ARCH}:{SOS} -i {GUSIIncludes} -i {MoreFilesIncludes}' ),
 		 (djgpp1: &(basic_unix_includes)+' -I$(srcdir)/i386/djgpp '),
 		 (djgpp2: &(basic_unix_includes)+' -I$(srcdir)/i386/djgpp '),
 		 (_: &(basic_unix_includes) ) 
@@ -418,11 +419,11 @@ rule(alsmics,
 
 rule(alstest) =
 	rule(alstest,
-		[alspro_b],
+		[alspro],
 		case(&context_name, [
 		(mac: [
 		 'echo >> nrev_rcd',
-		 'alspro_b -obp {srcdir}tests:snrev -g snrev >> nrev_rcd',
+		 'alspro -obp {srcdir}tests:snrev -g snrev >> nrev_rcd',
 		 'catenate nrev_rcd']),
 		(_: [
 		 'echo >> nrev_rcd',
