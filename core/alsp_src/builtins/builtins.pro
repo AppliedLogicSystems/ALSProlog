@@ -403,11 +403,11 @@ export getPrologInterrupt/1.
 
 '$interrupt'(3,M,G) 
 	:-!,
-pbi_write('--------$interrupt-3------'(M,G)), pbi_nl, pbi_ttyflush,
+%pbi_write('--------$interrupt-3------'(M,G)), pbi_nl, pbi_ttyflush,
 	clct_tr(ActiveDelays),
-pbi_write(active_delays=ActiveDelays), pbi_nl, pbi_ttyflush,
+%pbi_write(active_delays=ActiveDelays), pbi_nl, pbi_ttyflush,
 	delay_handler(ActiveDelays),
-pbi_write('--------$interrupt-3---delay_handler-DONE'), pbi_nl, pbi_ttyflush,
+%pbi_write('--------$interrupt-3---delay_handler-DONE'), pbi_nl, pbi_ttyflush,
 	M:G.
 
 		%% -------------------------------------
@@ -1179,7 +1179,6 @@ ld_fs(OS)
 	consult_builtins(BDir, debugger).
 
 
-
 %%--------------------------------------------
 %% set up the operators (stream io stuff needs to be 
 %% loaded in order to set up the operators)
@@ -1189,7 +1188,6 @@ nops
 	:-
 	op(900,fy,not),
 	op(900,fy,\+).
-
 
 ld_is
 	:-	
@@ -1259,6 +1257,7 @@ ld_wins
 
 '$initialize' 
 	:-
+%pbi_debug('$initialize_starting'),
 	pckg_init.
 
 
@@ -1268,6 +1267,7 @@ ld_wins
 		%% This starts the tty shell:
 '$start' 
 	:-
+%pbi_debug('$start_starting'),
 	start_shell(builtins:prolog_shell).
 
 endmod.		%% builtins.pro -- Main File for builtins
