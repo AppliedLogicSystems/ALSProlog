@@ -281,7 +281,7 @@ int pbi_command_line(void)
 	PI_SUCCEED;
 }
 
-#ifdef UNIX
+#if defined(UNIX) && !defined(UNIX_CYGWIN32) /* _XOPEN_CRYPT */
 int pbi_crypt(void)
 {
     PWord v1, v2, v3, u;
