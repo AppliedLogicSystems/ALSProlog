@@ -723,11 +723,14 @@ static void locate_library_executable(int argc, char *argv[])
     if (l == 0 || l >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
 
 #ifdef DLL
+	{
+	HANDLE dll;
     dll = GetModuleHandle(DLL_NAME);
     if (dll == NULL) fatal_error(FE_INFND, 0);
     
     l = GetModuleFileName(dll, library_path, IMAGEDIR_MAX);
     if (l == 0 || l >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
+    }
 #else
 	strcpy(library_path, executable_path);
 #endif /* DLL */
