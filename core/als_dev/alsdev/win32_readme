@@ -13,18 +13,15 @@ build-tree
 Build
 -----
 
-Make "alspro x86.lib" in the mwbuild directory.
+Make "alspro_b.exe" and "alspro x86.lib" in the mwbuild directory,
+and copy "alspro_b.exe" to the alsdev directory.
 
 In alsdev, setup an alsdir with the folders "builtins" and "library".  Add
 "shared" and "image" as described in the Runtime section below.
 
-Open win32_alsdev.mcp, and make "Win32 Build" to create "ALS Prolog Base.exe"
+Open win32_alsdev.mcp, and make "Build All" to create "ALS Prolog Base.exe"
 
-Create a new image from "ALS Prolog Base.exe" with the following command:
-
-save_image('ALS Prolog', [select_lib(builtins, [debugger]),
-	select_lib(library,[miscterm,msc_ioin,strctutl,strings,tcl_sppt,tk_alslib, listutl1])]).
-
+Create "ALS Prolog.exe" by running the batch script "makealsdev.bat".
 
 Runtime Setup
 -------------
@@ -38,21 +35,8 @@ cw3215.dll
 lib // The Tcl/Tk lib folder
 alsdir
 	shared
-		debugwin.tcl
-		als_menu.tcl
-		als_settings.tcl
-		als_tklib.tcl
-		alsdev.tcl
-		alsdev_main.tcl
-		als_document.tcl
-		defstr.tcl
-		als_tkfbox.tcl
+		All the .tcl files from the alsdev directory.
 		tcltk.pro
 	image
-		als_splash.tcl
-		down-arrow-blue.gif
-		left-arrow-blue.gif
-		right-arrow-blue.gif
-		turnstile_splash.gif
-		up-arrow-blue.gif
+		All the .gif files from the image directory.
 
