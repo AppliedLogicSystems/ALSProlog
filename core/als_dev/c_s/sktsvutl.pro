@@ -168,6 +168,9 @@ server_info_msg(worker_connect, 'Worker on %t at port %t connecting...\n').
 	%% server_info_out(worker_connect_done, NewRS, [WHost,WPort], SInfo),
 server_info_msg(worker_connect_done, 'Worker on %t at port %t handshake complete.\n').
 
+	%% server_info_out(obm_response, RS, [Response], SInfo),
+server_info_msg(obm_response, 'OBM repsonse = $t.\n').
+
         %%---------------------
 		%% server_info_out/4
         %%---------------------

@@ -231,7 +231,6 @@ check_master_connect(CmdLine, QueueTail, QueueTail, SInfo).
 	%%------------------------------------------------------
 special_connect_job(Host, Port, PID, JobRec, SInfo)
 	:-
-%printf('>1-special_connect(%t,%t,%t)\n',[Host, Port, PID]),flush_output,
 	catch(open(socket(inet_stream,Host,Port),read,MRS,
 						[read_eoln_type(lf),snr_action(snr_code)]),
 			_,
@@ -251,10 +250,8 @@ special_connect_job(Host, Port, PID, JobRec, SInfo)
 	set_login_connection_info(ip_num, InitState, Host),
 
 	gethostbyaddr(Host,_,[HostName | _],_),
-%printf('>2-special_connect-HostName=%t\n',[HostName]),flush_output,
 	set_login_connection_info(hostname, InitState, HostName),
 	set_login_connection_info(pid, InitState, PID),
-%printf('>3-special_connect\n',[]),flush_output,
 	open(null_stream(foobar),write,LogS, []),
 	set_login_connection_info(user_log_stream, InitState, LogS).
 
@@ -571,6 +568,21 @@ handle_task(_,current_queue,[Q],Mod,TaskEnv,SInfo)
 	access_tsk_env(state, TaskEnv, State),
 	mangle(1, State, add_to_queue(current_queue(Q))).
 
+
+	%disp_service_request(check_batch_status(UserName, JobID, Status),
+	%% serve_ready_stream( obm(SR,SW,Atom,ResultVar,JobID,State), QT, NewQT, Flag, SInfo) 
+handle_task(_,check_batch_status,[UserName, JobID, Status],Mod,TaskEnv,SInfo)
+	:-!,
+	access_tsk_env(state, TaskEnv, State),
+	access_tsk_env(read_s, TaskEnv, SR),
+	access_tsk_env(write_s, TaskEnv, SW),
+	mangle(1, State, 
+		add_to_queue(
+			check_batch_status(UserName, JobID, SR, SW, State, Status)
+		)
+		).
+
+
 :-dynamic(localhost_situation/0).
 handle_task(no_worker,Task,TaskArgs,Mod,TaskEnv,SInfo)
 	:-
@@ -680,6 +692,15 @@ setup_respond_args_pat(NArgs, ['@%t' | TailPat])
 	MArgs is NArgs - 1,
 	setup_respond_args_pat(MArgs, TailPat).
 
+
+batch_outfile_exists(State, UserName, JobID)
+	:-
+	access_login_connection_info(user_area, State, UserAreaPath),
+	file_extension(JobID,bo,BaseBOFile),
+	path_elements(UserAreaPath, DirPathElts),
+	append(DirPathElts, [BaseBOFile], FilePathElts),
+	path_elements(FilePath, FilePathElts),
+	exists_file(FilePath).
 
 
 

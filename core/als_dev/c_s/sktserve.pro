@@ -24,7 +24,9 @@ export date_time_seg/4.
 	%% (by a worker process) to process incoming messages during
 	%% a deep computation:
 
-:- make_gv('_MainQ').
+	%% set_mrq_channel(qc(SR,SW,State,SInfo))
+:-	make_gv('_mrq_channel').
+:-	make_gv('_process_status').
 
 	/*!------------------------------------------------------------*
 	 |	start_server/0.
@@ -177,13 +179,169 @@ service_loop([local_job(Job) | RestQ], QT, SInfo)
 	%% Send back the current queue:
 service_loop([current_queue(RestQ) | RestQ], QT, SInfo)
 	:-!,
-	disp_service_loop(Flag, S, QT, QT, RestQ, SInfo).
+	disp_service_loop(done, S, QT, QT, RestQ, SInfo).
+
+service_loop([check_batch_status(UserName, JobID, SR, SW, State, Status) | RestQ], 
+				QT, SInfo)
+	:-!,
+	handle_batch_status_request(UserName, JobID, SR, SW, State, Status,
+									RestQ, QT, NewQT, SInfo),
+	disp_service_loop(done, S, QT, NewQT, RestQ, SInfo).
 
 	%% Try to serve a stream:
 service_loop([S | RestQ], QT, SInfo)
 	:-
 	serve_stream(S, QT, NewQT, Flag, SInfo),
 	disp_service_loop(Flag, S, QT, NewQT, RestQ, SInfo).
+
+	%%--------------------------------------------------------
+	%%	Request for checking batch status
+	%%--------------------------------------------------------
+
+	%% Case: there is an entry for JobID in JobConnects; query Worker:
+handle_batch_status_request(UserName, JobID, SR, SW, State, Status,
+									RestQ, QT, NewQT, SInfo)
+	:-
+	access_login_connection_info(job_connects,State,JobConnects),
+	dmember(JobID-Worker, JobConnects),
+	!,
+	perform_status_query(current_status, Status, UserName, JobID, 
+						 Worker, SR,SW,State,login,QT,NewQT,SInfo).
+
+	%% Case: no entry for JobID in JobConnects; see if out file exists:
+handle_batch_status_request(UserName, JobID, SR, SW, State, Status,
+									RestQ, QT, NewQT, SInfo)
+	:-
+	batch_outfile_exists(State, UserName, JobID),
+	Status = finished,
+	!,
+	QT = [c(SR,SW,State,ConnType) | NewQT].
+
+	%% Case: no info found for JobID:
+handle_batch_status_request(UserName, JobID, SR, SW, State, Status,
+									RestQ, QT, NewQT, SInfo)
+	:-
+	Status = no_info,
+	QT = [c(SR,SW,State,ConnType) | NewQT].
+
+perform_status_query(Atom, ResultVar, UserName, JobID, Worker,
+						 SR,SW,State,ConnType,QT,NewQT,SInfo)
+	:-
+	Worker = c(WR,WW,WState,WConn),
+	add_to_expect(obm(Atom,ResultVar), WState),
+	QT = [c(SR,SW,State,ConnType) | NewQT],
+	printf(WW, '%t.\n', [Atom],[quoted(true)]),
+	flush_output(WW).
+
+	/*!-------------------------------------------------------------
+		Routines to manipulate the "expect" slot of State records;
+		Note that the "expect" slot is slot #2: clogintp.typ
+	 *-------------------------------------------------------------*/
+
+non_empty_expect(State)
+	:-
+	arg(2, State, [_ |_ ]).
+
+no_ready_expect(State)
+	:-
+	arg(2, State, Expect),
+	no_ready_terms(Expect).
+
+no_ready_terms([]).
+no_ready_terms([Head | Tail])
+	:-
+	arg(1, Head, Var),
+	var(Var),
+	no_ready_terms(Tail).
+
+some_ready_expect(State)
+	:-
+	arg(2, State, Expect),
+	some_ready_term(Expect).
+
+some_ready_term([Term | _])
+	:-
+	arg(1, Term, Var),
+	nonvar(Var), !.
+
+some_ready_term([_ | Tail])
+	:-
+	some_ready_term(Tail).
+
+add_to_expect(Item, State)
+	:-
+	arg(2,    State, PrevExpect),
+	mangle(2, State, [Item | PrevExpect]).
+
+remove_expecting(Item, State)
+	:-
+	arg(2,    State, Expecting),
+	start_find_and_delete(Expecting, Item, EH, EH, State).
+
+start_find_and_delete([], _, _, _, _)
+	:-!,
+	fail.
+
+start_find_and_delete([Item | TailExpecting], Item, ExpHead, ExpHeadTail, State)
+	:-!,
+	ExpHeadTail = TailExpecting,
+	mangle(2, State, ExpHead).
+
+start_find_and_delete(Expecting, Item, [Skip | RestEH], EHT, State)
+	:-
+	Expecting = [Skip | TailExpecting],
+	find_and_delete(TailExpecting, Expecting, Item, RestEH, EHT, State).
+
+find_and_delete([Item | TailExpecting], PrevExpecting, Item, EH, EHT, State)
+	:-!,
+	EHT = TailExpecting,
+	mangle(2, PrevExpecting, EH).
+
+find_and_delete(Expecting, PrevExpecting, Item, [Skip | RestEH], EHT, State)
+	:-
+	Expecting = [Skip | TailExpecting],
+	find_and_delete(TailExpecting, Expecting, Item, RestEH, EHT, State).
+
+%% Note: No case for arg 1 = [] because we want it to fail then.
+
+remove_ready_expecting(State, Item)
+	:-
+	arg(2, State, Expecting),
+	start_find_and_delete_ready(Expecting, Item, EH, EH, State).
+
+start_find_and_delete_ready([], _, _, _, _)
+	:-!,
+	fail.
+
+start_find_and_delete_ready([Head | TailExpecting], Item, EH, EHT, State)
+	:-!,
+	arg(1, Head, VV),
+	nonvar(VV),
+	Item = Head,
+	EHT = TailExpecting,
+	mangle(2, State, EH).
+
+start_find_and_delete_ready(Expecting, Item, [Skip | RestEH], EHT, State)
+	:-
+	Expecting = [Skip | TailExpecting],
+	find_and_delete_ready(TailExpecting, Expecting, Item, RestEH, EHT, State).
+
+find_and_delete_ready([Head | TailExpecting], PrevExpecting, Item, EH, EHT, State)
+	:-!,
+	arg(1, Head, VV),
+	nonvar(VV),
+	Item = Head,
+	EHT = TailExpecting,
+	mangle(2, PrevExpecting, EH).
+
+find_and_delete_ready(Expecting, PrevExpecting, Item, [Skip | RestEH], EHT, State)
+	:-
+	Expecting = [Skip | TailExpecting],
+	find_and_delete(TailExpecting, Expecting, Item, RestEH, EHT, State).
+
+
+
+
 
 	/*!-------------------------------------------------------------
 	 |	streams_from/2
@@ -207,12 +365,15 @@ streams_from([m(_) | Queue], QS)
 					   
 streams_from([Item | Queue], [Stream | QS])
 	:-
+/*
 	not (Item = c(_,_,State,_),
 			(arg(2, State, expect(Var, _)) ;
 			 	arg(2, State, list_expect(Var, _))
 			),
 			nonvar(Var)
 		),
+*/
+	(Item = c(_,_,State,_) -> no_ready_expect(State) ; true),
 	get_stream_to_poll(Item, Stream),
 	streams_from(Queue, QS).
 
@@ -282,13 +443,18 @@ serve_stream(S, QT, NewQT, Flag, SInfo)
 serve_stream(S, QT, NewQT, Flag, SInfo) 
 	:-
 	S = c(SR,SW,State,ConnType),
+/*
 	( (arg(2, State, expect(Var, Goal)), nonvar(Var) ) ;
 	 	(arg(2, State, list_expect(ListOfVars, Goal)), all_instantiated(ListOfVars) )
 	),
+*/
+	some_ready_expect(State),
+	
 	catch(serve_ready_stream(wc(SR,SW,State,ConnType), QT, NewQT, Flag, SInfo),
 			Anything, 
 			fail),
 	!.
+
 
 	%% Nothing is ready on S; in this case, push S onto the _END_ of the 
 	%% queue by instantiating QT to [S | NewQT], and returning NewQT 
@@ -363,6 +529,48 @@ serve_ready_stream(c(SR,SW,State,ConnType), QT, NewQT, Flag, SInfo)
 	service_request(SR,SW, State, ConnType, QT,NewQT, SInfo),
 	!,
 	arg(1, State, Flag).
+
+/*
+		%% receive an out-of-band message response:
+serve_ready_stream( obm(SR,SW,Atom,ResultVar,JobID,State), QT, NewQT, Flag, SInfo) 
+	:-
+	read(SR, Request),
+	(Request \= stream_not_ready ->
+		server_info_out(obm_response, S, [Response], SInfo),
+		ResultVar = Request,
+		QT = NewQT
+		;
+		QT = [ obm(SR,SW,Atom,ResultVar,JobID,State) | NewQT]
+	),
+	!,
+	arg(1, State, Flag).
+*/
+
+/*
+serve_ready_stream( Rec, QT, NewQT, Flag, SInfo) 
+	:-
+	try_obm(Rec, QT, NewQT, Flag, SInfo),
+	!.
+
+try_obm(Rec, QT, NewQT, Flag, SInfo)
+	:-
+	Rec = obm(SR,SW,Atom,ResultVar,JobID,State),
+	read(SR, Request),
+	(Request \= stream_not_ready ->
+		server_info_out(obm_response, S, [Response], SInfo),
+		ResultVar = Request,
+		QT = NewQT
+		;
+		QT = [ obm(SR,SW,Atom,ResultVar,JobID,State) | NewQT]
+	),
+	!,
+	arg(1, State, Flag).
+*/
+
+
+
+
+
 
 		%% Couldn't service the request on a socket,
 		%% so respond to that by closing the socket:
@@ -464,19 +672,22 @@ disp_service_request(done,SR,SW,State,ConnType,QT,QT,SInfo)
 	%% Stream is not ready; push it on the end of the queue:
 disp_service_request(stream_not_ready,SR,SW,State,ConnType,QT,NewQT,SInfo)
 	:-!,
+s_nr_break,
 	QT = [c(SR,SW,State,ConnType) | NewQT].
+
+s_nr_break.
 
 	%% Receiving return value from job submitted to remote worker:
 disp_service_request(Request,SR,SW, State,ConnType,QT,NewQT,SInfo) 
 	:-
 	functor(Request,worker_done,_),
-%	arg(2, State, XXXX),
-	arg(2, State, worker_wait(Value)),
+%	arg(2, State, worker_wait(Value)),
+	remove_expecting(worker_wait(V1, Values), State),
 	server_info_out(continue(clone), SR, [ConnectAddr], SInfo),
 	!,
 		%% unify return value with the waiting variable 'Value':
-	Request = worker_done(Value),
-	mangle(2, State, nil),
+	Request = worker_done([V1 | Values]),
+%	mangle(2, State, nil),
 	push_idle_worker(c(SR,SW,State,ConnType)),
 
 		%% Get the invoking client info from the worker's State:
@@ -501,21 +712,43 @@ disp_service_request(Request,SR,SW, State,ConnType,QT,NewQT,SInfo)
 		NewQT = QT
 	).
 
+	%% Receiving return value from obm message to worker:
+disp_service_request(Request,SR,SW, State,ConnType,QT,NewQT,SInfo) 
+	:-
+	functor(Request,obm,_),
+	!,
+obm_trace_point,
+	Request = obm(Atom,Value),
+	remove_expecting(obm(Atom,Value), State),
+	server_info_out(continue(clone), SR, [ConnectAddr], SInfo),
+	QT = [c(SR,SW,State,ConnType) | NewQT].
+
+obm_trace_point.
+
+
+
 
 	%% Explicit delaying of jobs by the queue manager; wake-up here:
 	%% This is is the single-variable case:
 disp_service_request(wake_job,SR,SW, State,ConnType,QT,NewQT,SInfo) 
 	:-
 		%% State is REQUIRED to have slot #2 = the "expect" slot:
-	arg(2, State, expect(Var,Goal)),
-	nonvar(Var),
+%	arg(2, State, expect(Var,Goal)),
+%	nonvar(Var),
+
+%	arg(2, State, Exp),
+%write(user_output,wake_job_disp=Exp),nl(user_output),flush_output(user_output), 
+	functor(Item, expect, 3),
+	remove_ready_expecting(State, Item),
+	Item = expect(Var,Vs, Goal),
 	!,
-		%% Immediately reset the expect slot:
-	mangle(2, State, nil),
+		%% Immediately reset the expect slot (now done by remove_ready_expecting/2)
+%	mangle(2, State, nil),
 		%% should melt the freeze:
 	call(Goal),
 	finish_server_request(wake_job,SR,SW,State,ConnType,QT,NewQT,SInfo).
 
+/*****************
 	%% Explicit delaying of jobs by the queue manager; wake-up here:
 	%% This is is the list-of-variables case:
 disp_service_request(wake_job,SR,SW, State,ConnType,QT,NewQT,SInfo) 
@@ -535,6 +768,7 @@ all_instantiated([Var | ListOfVars])
 	:-
 	nonvar(Var),
 	all_instantiated(ListOfVars).
+*****************/
 
 /***********
 	%% Attempt to do our delays using a frozen Var:
@@ -636,11 +870,20 @@ disp_service_request(Request,SR,SW,IState,IConnType,QT,NewQT,SInfo)
 		task_intf:assert(use_workers)
 	).
 
+	%%--------------------------------------------------------
+	%%	Request from master to slave to do some work;
+	%%	reqest is sent by the master; this clause implements 
+	%%	the worker response:
+	%%	[ master server --> independent slave worker ]:
+	%%
+	%%	Request = sibling_job(OrigRequest, UserID, JobID),
+	%%--------------------------------------------------------
 disp_service_request(Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
 	:-
 		%% 'sibling_job(%t,%t,%t).\n', [OrigRequest,UserID,JobID],
 	functor(Request,sibling_job,_),
 	!,
+	set_mrq_channel(qc(SR,SW,State,SInfo)),
 	Request = sibling_job(OrigRequest, UserID, JobID),
 	set_login_connection_info(logged_in, State, UserID),
 	xmake_tsk_env(TaskEnv, [no_worker,JobID,UserID,SR,SW,State]),
@@ -694,6 +937,99 @@ setup_remote_script(OrigRequest,TaskEnv,ReqScript)
 			respond('worker_done(%t).',[[V1 | RestVs]],[quoted(true)])],
 	append(ScriptHead, NewTail, ReqScript).
 
+
+/************
+	%%--------------------------------------------------------
+	%%	Request for checking batch status
+	%%--------------------------------------------------------
+
+	%% Case: there is an entry for JobID in JobConnects; query Worker:
+disp_service_request(check_batch_status(UserName, JobID, Status),
+								SR,SW,State,ConnType,QT,NewQT,SInfo)
+	:-
+	access_login_connection_info(job_connects,State,JobConnects),
+	dmember(JobID-Worker, JobConnects),
+	!,
+	SQ = current_status,
+	perform_status_query(current_status, Status, UserName, JobID, 
+						 SR,SW,State,ConnType,QT,NewQT,SInfo).
+
+	%% Case: no entry for JobID in JobConnects; see if out file exists:
+disp_service_request(check_batch_status(UserName, JobID, finished),
+								SR,SW,State,ConnType,QT,NewQT,SInfo)
+	:-
+	batch_outfile_exists(State, UserName, JobID),
+	!,
+	QT = [c(SR,SW,State,ConnType) | NewQT].
+
+	%% Case: no info found for JobID:
+disp_service_request(check_batch_status(UserName, JobID, no_info),
+								SR,SW,State,ConnType,QT,NewQT,SInfo)
+	:-!,
+	QT = [c(SR,SW,State,ConnType) | NewQT].
+
+
+perform_status_query(Atom, ResultVar, UserName, JobID, 
+						 SR,SW,State,ConnType,QT,NewQT,SInfo)
+	:-
+	OBM = obm(SR,SW,Atom,ResultVar,JobID,State),
+	QT = [OBM, c(SR,SW,State,ConnType) | NewQT],
+	printf(SW, '%t.\n', [Atom],[quoted(true)]),
+	flush_output(SW).
+	
+**********/
+
+
+
+
+/****************-------**************
+	%%--------------------------------------------------------
+	%%	Request for checking multiple batch status
+	%%--------------------------------------------------------
+disp_service_request(check_batch_status(UserName, StatusList),
+								SR,SW,State,ConnType,QT,NewQT,SInfo)
+	:-!,
+	access_login_connection_info(job_connects,State,JobConnects),
+	setup_worker_requests(JobConnects, Requests, ListOfResponses),
+	mangle(2, State, list_expect(ListOfResponses, 
+									bind_equal(ListOfResponses,StatusList)), 
+	add_list_to_queue(Requests, QT,NewQT,SInfo).
+	
+bind_equal(X,X).
+setup_worker_requests([], _, [], []).
+setup_worker_requests([JobID-Worker | JobConnects], 
+						[Req | Requests], [RV | Responses])
+	:-
+	Worker = c(WR,WW,WState,WConn),
+	setup_worker_requests(JobConnects, Requests, Responses).
+	
+/*
+	set_login_connection_info(job_connects,State,[JobID-Worker | PrevCJobConnects]),
+	Worker = c(WR,WW,WState,WConn),
+*/
+
+
+/*
+	S = c(SR,SW,State,ConnType),
+	( (arg(2, State, expect(Var, Goal)), nonvar(Var) ) ;
+	 	(arg(2, State, list_expect(ListOfVars, Goal)), all_instantiated(ListOfVars) )
+*/
+/*
+do_fin_server_req(add_to_queue(current_queue(Q)),Request,
+					SR,SW,State,ConnType,QT,NewQT,SInfo)
+	:-
+	QT = [c(SR,SW,State,ConnType), current_queue(Q)  | NewQT],
+	mangle(1, State, continue).
+*/
+
+add_list_to_queue([], NewQT,NewQT,SInfo).
+add_list_to_queue([Req | Requests], QT,NewQT,SInfo)
+	:-
+	QT = [Req | InterQT],
+	add_list_to_queue(Requests, InterQT,NewQT,SInfo).
+
+****************-------**************/
+
 		%%+++++++++++++++++++++++++++++++++++++++++++++++
 		%% Attempt to send request for remote processing:
 		%%+++++++++++++++++++++++++++++++++++++++++++++++
@@ -727,7 +1063,7 @@ fin_disp_service_request(non_login,Request,SR,SW,State,QT,QT,SInfo)
 
 fin_disp_service_request(login,Request,SR,SW,State,QT,NewQT,SInfo)
 	:-!,
-	set_MainQ(q(QT,SInfo)),
+%	set_MainQ(q(QT,SInfo)),
 	act_on_server_request(Request,SR,SW,State,SInfo),
 	finish_server_request(Request,SR,SW,State,login,QT,NewQT,SInfo).
 
@@ -797,9 +1133,6 @@ fin_remote_proc(TaskName,TaskArgs,Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
 
 	Client = c(SR,SW,State,ConnType), 
 	Worker = c(WR,WW,WState,WConn),
-	mangle(2, WState, worker_wait(Value)),
-	QT = [Worker,Client | NewQT],
-
 		%% Enter the worker record in the invoking client's State:
 	access_login_connection_info(job_connects,State,PrevCJobConnects),
 	set_login_connection_info(job_connects,State,[JobID-Worker | PrevCJobConnects]),
@@ -807,7 +1140,15 @@ fin_remote_proc(TaskName,TaskArgs,Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
 		%% Enter the invoking client's record in the worker's State:
 	set_login_connection_info(job_connects,WState,[JobID-Client]),
 
-	setup_fin_remote_proc(Request, TaskEnv, Value, State, SInfo, Mod, Prelude),
+	QT = [Worker,Client | NewQT],
+
+	setup_fin_remote_proc(Request, TaskEnv, V1, Values, State, SInfo, Mod, Prelude),
+
+%	Value = [V1 | Values],
+	add_to_expect( worker_wait(V1, Values), WState),
+%	mangle(2, WState, worker_wait(Value)),
+
+
 	run_script(Prelude, Mod, TaskEnv, SInfo),
 	printf(WW, 'sibling_job(%t,%t,%t).\n', 
 				[Request,UserID,JobID],[quoted(true)]),
@@ -828,6 +1169,7 @@ fin_remote_proc(TaskName,TaskArgs,Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
 
 
 
+/*
 setup_fin_remote_proc(Request, TaskEnv, Value, State, SInfo, Mod, Prelude)
 	:-
 	task_intf:get_csp_script(Request, [], TaskEnv, Mod,  
@@ -846,19 +1188,26 @@ setup_fin_remote_proc(Request, TaskEnv, Value, State, SInfo, Mod, Prelude)
 			expect(true, run_script(RespondScript, user, TaskEnv,SInfo))
 			  )
 	).
+*/
 
-setup_fin_remote_proc(Request, TaskEnv, Value, State, SInfo, Mod, [])
+setup_fin_remote_proc(Request, TaskEnv, V1, Vs, State, SInfo, Mod, [])
 	:-
 	task_intf:get_csp_script(Request, [], TaskEnv, Mod, ReqScript0),
 	ReqScript0 = ScriptHead+ScriptTail,
 	ScriptTail = RespondVars^RespondScript,
 	RespondVars = [V1 | Vs],
+
+	add_to_expect( expect(V1, Vs,
+					([V1 | Vs] = RespondVars,
+						run_script(RespondScript, Mod, TaskEnv,SInfo))), State).
+/*
 	mangle(2, 
 		State, 
 		expect(Value, 
 				(Value=RespondVars,
-					run_script(RespondScript, Mod, TaskEnv,SInfo))
-			  )).
+					run_script(RespondScript, Mod, TaskEnv,SInfo)))
+			  ).
+*/
 
 
 
