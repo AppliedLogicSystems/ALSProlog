@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+#   Builds and initializes the distribution directory, such as:
+#
+#			sparc_solaris2.4-N.NN
+#
+#	where:		$1 = alsp_src directory and $2 = N.NN 
+#	Assumes:
+#	A. Running in the main dist dir: als_dist
+#	B. Running on a system with ALS Prolog packaged (e.g. hilbert)
+#	C. The paths are as follows:
+#
+#		path to main build dir			= ../builds
+#		path to main source dir			= ../alsp_src
+#		path to main windows source dir = ../windows
+#
+
+alspro -b $1/bin/mkdstdir.pro -g mkdstdir -p -ver $2
