@@ -614,7 +614,7 @@ const alspi_func_ptrs alspi_funcs = {
     PI_getball,
     PI_interrupt,
     library_dir,
-    executable_path,
+    executable_path
 #ifdef macintosh
     ,
     SIOUXIsAppWindow,
