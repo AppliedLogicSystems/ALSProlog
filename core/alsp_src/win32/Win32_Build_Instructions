@@ -1,0 +1,128 @@
+Microsoft Win32 x86 ALS Prolog Build Instructions
+=================================================
+Author: Chuck Houpt Date: 4-June-1997
+
+These instructions assume that the ALS Prolog source directory exists, and all of
+its generated files are up to date. The ALS Prolog source directory is refered
+to as $SRCDIR, %SRCDIR% or {blddir} in this document.
+
+Build Materials:
+----------------
+
+- Macintosh (68k or PowerPC) with at least 15 MB of available memory
+and at least 150 MB of available disk space.
+
+- x86 Windows95 or WindowsNT machine with at least X MB of memory and
+at least Y MB of available disk space.
+
+- Unix system.
+
+- Metrowerk's Code Warrior Gold 10 with the following options and
+modifications:
+    - Install with at least this option: Metrowerks x86 C/C++ Compiler
+      and the Other Metrowerks Tools folder (for the Metrowerks Standard Library).
+    - ALS modifications to the Metrowerks Standard Library.
+    - ALS modifications to the Metrowerks C Runtime Library.
+    - 
+- Software Security Inc.'s UniKey Library
+	- Put a "UniKey Library" folder with ssicm32n.lib and ssi_cw32.h in
+	  the Win32/x86 Support folder.
+
+Build Instructions:
+-------------------
+
+A note on source tree location:
+
+All the projects and scripts assume that the alsp_src directory is a
+sibling of the win32 build directory.
+
+A note on access paths:
+
+The Metrowerks projects will need to have their access paths adjusted if 
+the name of the ALS Prolog source directory has changed.
+
+To change the access paths for a project, select "Preferences..." from
+the Edit menu to open the preferences dialog.  In the preferences dialog,
+click on the access paths icon, and to see the current paths.
+
+Only the User paths that reference the ALS Prolog source tree will need
+adjusting.  To change a path, click-select it and press the "Change"
+button.  Use the standard file dialog box to navigate to the correct
+directory.
+
+Build Steps:
+------------
+
+1. From Unix, run the win32_setup shell script to create a directory named
+   win32 for the build. The win32_setup script take two arguments:
+       - source directory
+       - C preprocessor define
+       
+   Example: % ../alsp_src/win32/win32_setup ../alsp_src "#define INTCONSTR"
+	
+2. On the Mac, decode and extract the project files in the build directory
+using Stuffit Expander.  The following projects need expanding:
+
+	alspro_lib.prj.sit.hqx
+	alspro_b.prj.sit.hqx
+	alspro_dll.prj.sit.hqx
+	testdll.x86.prj.sit.hqx
+	Build_Win32.sit.hqx
+	
+3. On the Mac, run the AppleScript Application "Build_Win32" to build
+all the projects.
+
+Each project may need to have its access paths adjusted, see the note above.
+The projects assume that the alsp_src directory a sibling of the build
+directory.
+
+4. From Bash on Win95/NT, run the package.sh script.
+
+   Example: % ./package.sh
+   
+Testing
+-------
+
+- To test the portable version, from Bash on Win95/NT, run the testrun.sh
+  script.
+  
+  Example: % ./testrun.sh
+  
+   with the change the directory to
+
+- To test the demo version, run demo_alspro_b and demo_alspro, both with
+  and without the hardware key - the demo should not run without the
+  hardware key.  Also test by removing the hardware key while in the
+  prolog shell, and execute a query - this should cause the program to
+  halt when it cannot detect the hardware key.
+
+- To test the DLL, run testdll.exe. Successfully running testdll.exe is enough to
+  test the DLL. Repeat this test for demo_testdll.exe, testing both with and
+  without the hardware key.
+
+Files generated:
+----------------
+
+Static embedable prolog engine libraries:
+
+{blddir}bld-port:alspro.lib
+
+Dynamic embedable prolog engine libraries:
+
+{blddir}bld-port:alspro.dll
+{blddir}bld-port:alspro.dll.lib
+
+Console application:
+
+{blddir}bld-port:alspro_b.exe
+{blddir}bld-port:alspro.exe
+
+Programming Sentinel UniKey Hardware Keys
+-----------------------------------------
+
+Both simple and 30-Day demo keys need programming. To program the keys, use the
+prog_ssikey program.
+
+The prog_ssikey program is stored in the archive {srcdir}bin:SSI Key
+Programmer.sit.hqx.  Unpack the archive and run prog_ssikey.exe.  This will
+display usage information.
