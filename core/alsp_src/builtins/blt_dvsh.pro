@@ -845,10 +845,14 @@ fin_save_as(FileName,WinName,State,PrevEditFiles,PrevEdits)
 rename_anon_doc(TclWin, File, SrcHandlerHandle, Flag)
 	:-
 	builtins:get_primary_manager(State),
+%(var(State) -> write(state_is_a_var) ; write(state_nonvar) ),nl,flush_output,
+%write_term(user_output, state=State, [maxdepth(3)]),nl,flush_output,
 	accessObjStruct(source_mgrs, State, PrevMgrsList),
+%write_term(user_output, pml=PrevMgrsList, [maxdepth(3)]),nl,flush_output,
 	split_path(File, PathElts),
 	dreverse(PathElts, [RootFile | _]),
 	(file_extension(BaseFile, Ext, RootFile) -> true ; BaseFile = RootFile, Ext=''),
+%write(base=BaseFile),nl,flush_output,
 	fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,State).
 
 fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,State)
@@ -857,14 +861,44 @@ fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,
 	!,
 	Flag = not_ok.
 
+/******
 fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,State)
 	:-
+
+write(fin_rename_anon_doc_2),nl,
+
+write(source_file = Source_file),nl,
+
+	send(SrcHandlerHandle, get_value(source_type, file)),
+	send(SrcHandlerHandle, get_value(source_file, SrcFile)),
+	SrcFile \= nil, SrcFile \= '',
+	!,
+
+	%%% REPAIR THIS (or throw it away):
+
 	send(SrcHandlerHandle, get_value(base_file, PrevName)),
+write( prevname_2=PrevName), nl,flush_output,
 	list_delete(PrevMgrsList, fm(PrevName, FileMgr), NewEdits),
+%(var(FileMgr) -> write(filemgr_is_a_var) ; write(filemgr_nonvar) ),nl,flush_output,
+
 	setObjStruct(source_mgrs, State, [fm(BaseFile, FileMgr) | NewEdits]),
 	setObjStruct(base_file, FileMgr, BaseFile),
 	setObjStruct(source_file, FileMgr, File),
 	setObjStruct(ext, FileMgr, Ext),
+	Flag = ok.
+*****/
+
+fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,State)
+	:-
+write(fin_rename_anon_doc(pml,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,state)),nl,flush_output,
+	send(SrcHandlerHandle, get_value(source_type, file)),
+	send(SrcHandlerHandle, get_value(source_file, SrcFile)),
+	(SrcFile = nil ; SrcFile = ''),
+	!,
+	send(SrcHandlerHandle, create_file_from_win(BaseFile,Ext,File,TclWin)),
+	send(SrcHandlerHandle, get_value(myName,FileMgr)),
+			%% Primary ide mgr:
+	send_self(State, record_src_mgr(BaseFile, FileMgr)),
 	Flag = ok.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1968,7 +2002,7 @@ reset_the_spypoints([Mod-MList | SpyList])
 	:-
 	reset_module_spypoints(MList, Mod),
 	printf(debugger_output,
-			'Spypoints set in module %t on:\n\t%t\n',
+			'Spypoints reset in module %t on:\n\t%t\n',
 			[Mod, MList]),
 	reset_the_spypoints(SpyList).
 
@@ -1976,9 +2010,16 @@ reset_the_spypoints([Mod-MList | SpyList])
 reset_module_spypoints([], _).
 reset_module_spypoints([Pred/Arity | MList], Mod)
 	:-
-	dbg_spy(Mod,Pred,Arity), 
+	reset_this_spypoint(Mod,Pred,Arity), 
 	reset_module_spypoints(MList, Mod).
 
+reset_this_spypoint(Mod,Pred,Arity)
+	:-
+	get_fcg(Mod,Pred,Arity,CG,DefiningMod),
+	builtins:get_primary_manager(ALSMgr),
+	send(ALSMgr, obtain_src_mgr_by_cg(CG, FileMgr)),
+	send(FileMgr, ensure_window_open),
+	dbg_spy(Mod,Pred,Arity).
 
 endmod.
 
@@ -2392,6 +2433,17 @@ shl_source_handlerAction(close_and_reopen, State)
 	accessObjStruct(tcl_doc_path, State, TclWin),
 	tcl_call(shl_tcli, [close_and_reopen, TclWin], _).
 
+/*
+shl_source_handlerAction(create_file_from_win(BaseFile,Ext,File,TclWin), State)
+	:-
+	setObjStruct(source_file, State, FileName),
+	setObjStruct(ext, State, Ext),
+
+	tcl_call(shl_tcli, [load_document, FileName], TclWin),
+	setObjStruct(tcl_doc_path, State, TclWin),
+	accessObjStruct(myHandle, State, MyHandle),
+	tcl_call(shl_tcli, [set_tcl_ga2,proenv,TclWin,src_handler,MyHandle], _).
+*/
 
 
 shl_source_handlerAction(unmap_win, State)

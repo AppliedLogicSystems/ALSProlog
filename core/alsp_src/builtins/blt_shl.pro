@@ -79,7 +79,12 @@ init_als_shl_mgr
 	:-
 	setup_als_shl_mgr(Mgr),
 	make_gv('_primary_manager'),
+	!,
 	set_primary_manager(Mgr).
+
+init_als_shl_mgr
+	:-
+	write(init_als_shl_mgr_failed),nl,flush_output.
 
 complete_init_als_shl_mgr(0)
 	:-!,

@@ -328,7 +328,8 @@ source_trace_mgrAction(start_src_trace, State)
 	accessObjStruct(source_file, State, SrcFilePath),
 	send_self(State, complete_open_edit_win(SrcFilePath,TclWin)),
 	tcl_call(shl_tcli, [add_left_col, TclWin, 1], _),
-	tcl_call(shl_tcli, [line_index_file,SrcFilePath],LoadRes),
+	tcl_call(shl_tcli, [line_index_file,SrcFilePath],LoadRes0),
+	adjust_char_line_count(LoadRes0, LoadRes),
 	LoadRes = [NumLines, LineIndex],
 	setObjStruct(num_lines, State, NumLines),
 	setObjStruct(linesizes, State, LineIndex),
@@ -348,7 +349,20 @@ inverted_index([NLCs | LineIndex], CurCharCount, [CurCharCount | List])
 	NxtCharCount is CurCharCount + NLCs + 1,
 	inverted_index(LineIndex, NxtCharCount, List).
 
+adjust_char_line_count(LoadRes0, LoadRes)
+	:-
+	sys_env(OS, _, _),
+	adjust_char_line_count(OS, LoadRes0, LoadRes).
 
+adjust_char_line_count(mswin32, LoadRes0, LoadRes)
+	:-!,
+	sub1_all(LoadRes0, LoadRes).
+adjust_char_line_count(_, LoadRes, LoadRes).
 
+sub1_all([], []).
+sub1_all([N | LoadRes0], [N1 | LoadRes])
+	:-
+	N1 is N - 1,
+	sub1_all(LoadRes0, LoadRes).
 
 endmod.
