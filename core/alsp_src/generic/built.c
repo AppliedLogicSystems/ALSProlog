@@ -333,6 +333,8 @@ static struct blt_struct {
 	BLT("obp_load", 2, pbi_obp_load, "_pbi_obp_load"),
 	BLT("obp_push_stop", 0, pbi_obp_push_stop, "_pbi_obp_push_stop"),
 	BLT("obp_pop", 0, pbi_obp_pop, "_pbi_obp_pop"),
+	BLT("resource_load", 1, pbi_resource_load, "_pbi_resource_load"),
+	
 #endif /* SYS_OBP */
 #ifdef OLDCONSULT
 	BLT("old_consult", 2, pbi_old_consult, "_pbi_old_consult"),
@@ -341,6 +343,9 @@ static struct blt_struct {
 	BLT("save_image_with_state_to_file", 1, pbi_save_image_with_state_to_file, "_pbi_save_image_with_state_to_file"),
 #endif
 	BLT("save_state_to_file", 1, pbi_save_state_to_file, "_pbi_save_state_to_file"),
+#ifdef MacOS
+	BLT("save_app_with_obp", 5, pbi_save_app_with_obp, "_pbi_save_app_with_obp"),
+#endif
 	BLT("sio_mkstream", 2, sio_mkstream, "_sio_mkstream"),
 	BLT("sio_errcode", 2, sio_errcode, "_sio_errcode"),
 	BLT("sio_set_errcode", 2, sio_set_errcode, "_sio_set_errcode"),
