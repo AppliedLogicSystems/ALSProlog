@@ -330,7 +330,7 @@ proc post_open_document {Title Win} {
 	.topals.mmenb.file delete last
 	.topals.mmenb.file delete last
 	.topals.mmenb.file add command \
-		-label $Title -command [list raise $Win]
+		-label $Title -font {Helvetica 10 italic} -command [list bringup $Win]
     .topals.mmenb.file add separator
 	if {$tcl_platform(platform) == "windows"} {
     	.topals.mmenb.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_prolog}

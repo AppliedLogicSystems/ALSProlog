@@ -49,8 +49,10 @@ proc add_file_menu {menubar type window} {
 #    $menubar.file add command -label "Print$elipsis" -accelerator "$mod-P"\
 #		-command "re {$type.print $window}" -state disabled
 
-    $menubar.file add separator
-    $menubar.file add separator
+	if {"$type"=="listener"} then { 
+    	$menubar.file add separator
+    	$menubar.file add separator
+	}
 	if {$tcl_platform(platform) == "windows"} {
     	$menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_prolog}
     } else {
@@ -130,9 +132,11 @@ proc add_prolog_menu {menubar type window} {
 			-label "Dynamic Flags" -underline 0 -command {re show_dynamic_flags}
 		$menubar.prolog add command \
 			-label "Static Flags" -underline 1 -command {re show_static_flags}
-    	$menubar.prolog add separator
-		$menubar.prolog add command \
-			-label "Active Project:" 
+
+#    	$menubar.prolog add separator
+#		$menubar.prolog add command \
+#			-label "Active Project:" -font {user 10 italic} 
+
 	} elseif {"$type"=="debugwin"} then {
     	$menubar.prolog add separator
     	$menubar.prolog add command -label {Abort} -underline 0 \

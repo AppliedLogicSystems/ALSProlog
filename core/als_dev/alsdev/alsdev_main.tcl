@@ -381,15 +381,12 @@ proc init_prj_spec \
     ###################
     # Search Paths 
     ###################
-	create_ls_toggle  $base search_dirs \
+	create_sd_toggle  $base search_dirs \
 		{Search Individual Directories:} \
 		[list add_search_dirs $base.search_dirs.listbox] \
-		[list del_search_dirs $base.search_dirs.listbox] 
-
-#	create_ls_toggle  $base search_trees \
-#		{Search Directory Subtrees:} \
-#		[list add_search_dirs $base.search_trees.listbox] \
-#		[list del_search_dirs $base.search_trees.listbox] 
+		[list del_search_dirs $base.search_dirs.listbox] \
+		[list move_selection_up $base.search_dirs.listbox] \
+		[list move_selection_down $base.search_dirs.listbox]
 
     ###################
     # Lists of Files 
@@ -403,7 +400,9 @@ proc init_prj_spec \
 		create_lofs_toggle $base $FS $XFN $FTs \
 			[list add_to_files_list $FS $base.$FS.listbox $FTs $FN $DfltD ] \
 			[list add_to_files_list_mult $FS $base.$FS.listbox $FTs $FN $DfltD ] \
-			[list del_from_files_list $FS $base.$FS.listbox $FTs $FN] 
+			[list del_from_files_list $base.$FS.listbox] \
+			[list move_selection_up $base.$FS.listbox] \
+			[list move_selection_down $base.$FS.listbox]
 	}
     ###################
     # Lists of Items
@@ -411,7 +410,9 @@ proc init_prj_spec \
 	foreach LS $ListSlots {
 		create_ls_toggle $base $LS [find_pair_value $LS $SlotNames] \
 		[list add_to_list_$LS $base.$LS.listbox] \
-		[list del_from_list_$LS $base.$LS.listbox] 
+		[list del_from_list_$LS $base.$LS.listbox] \
+		[list move_selection_up $base.$LS.listbox] \
+		[list move_selection_down $base.$LS.listbox]
 	}
 
     ###################
@@ -482,7 +483,7 @@ proc show_list_slot {GuiPath Slot ValueList PrjMgrHandle} {
 		[list prj_slot_focus $Slot $GuiPath.$Slot.listbox $PrjMgrHandle]
 }
 
-proc create_ls_toggle { Win Which Title Add Del } {
+proc create_ls_toggle { Win Which Title Add Del Up Down} {
 	global proenv
 
     ###################
@@ -518,6 +519,11 @@ proc create_ls_toggle { Win Which Title Add Del } {
     button $Win.$Which.buttons.del \
         -command $Del -padx 11 -pady 4 -text {Delete} 
 
+    button $Win.$Which.buttons.up \
+        -command $Up -padx 11 -pady 4 -text {} -image up_arrow_gif
+    button $Win.$Which.buttons.down \
+        -command $Down -padx 11 -pady 4 -text {} -image down_arrow_gif
+
 	set proenv($Which) closed
     ###################
     # SETTING GEOMETRY
@@ -545,10 +551,115 @@ proc create_ls_toggle { Win Which Title Add Del } {
     pack $Win.$Which.buttons.add \
         -anchor w -expand 0 -fill none -padx 10 -side left 
     pack $Win.$Which.buttons.del \
-        -anchor center -expand 0 -fill none -padx 10 -side right 
+        -anchor center -expand 0 -fill none -padx 10 -side left 
+
+    pack $Win.$Which.buttons.down \
+        -anchor center -expand 0 -fill none -padx 2 -side right 
+    pack $Win.$Which.buttons.up \
+        -anchor center -expand 0 -fill none -padx 2 -side right 
+
 	pack forget $Win.$Which
 }
 
+proc create_sd_toggle { Win Which Title Add Del Up Down} {
+	global proenv
+
+    ###################
+    # CREATING WIDGETS
+    ###################
+    frame $Win.sep_$Which \
+        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
+    frame $Win.ctl_$Which \
+        -borderwidth 1 -height 30 -relief sunken -width 30 
+    button $Win.ctl_$Which.open_btn \
+        -command "toggle_files_list $Win $Which" -image closed_ptr -padx 11 -pady 4 \
+        -text button 
+    label $Win.ctl_$Which.label \
+        -text $Title
+    frame $Win.$Which \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    frame $Win.$Which.prefs \
+        -borderwidth 1 -relief raised 
+    frame $Win.$Which.prefs.pathtype \
+        -borderwidth 0 -relief flat 
+    radiobutton $Win.$Which.prefs.pathtype.rel \
+        -padx 10 -text relative -value relative -variable proenv(ppj_pathtype) 
+    radiobutton $Win.$Which.prefs.pathtype.abs \
+        -padx 10 -text absolute -value absolute -variable proenv(ppj_pathtype) 
+	set proenv(ppj_pathtype) relative
+    listbox $Win.$Which.listbox \
+        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
+        -xscrollcommand "$Win.$Which.02 set" \
+        -yscrollcommand "$Win.$Which.03 set" \
+		-height 0
+    scrollbar $Win.$Which.02 \
+        -borderwidth 1 -command "$Win.$Which.listbox xview" \
+        -orient horiz -width 10 
+    scrollbar $Win.$Which.03 \
+        -borderwidth 1 -command "$Win.$Which.listbox yview" \
+        -orient vert -width 10 
+    frame $Win.$Which.buttons \
+        -borderwidth 1 -height 30 -relief sunken -width 30 
+
+    button $Win.$Which.buttons.add \
+        -command "add_search_dirs $Win.$Which.listbox \"\$proenv(ppj_pathtype)\"" \
+		-padx 11 -pady 4 -text {Add}
+    button $Win.$Which.buttons.del \
+        -command $Del -padx 11 -pady 4 -text {Delete} 
+
+    button $Win.$Which.buttons.up \
+        -command $Up -padx 11 -pady 4 -text {} -image up_arrow_gif
+    button $Win.$Which.buttons.down \
+        -command $Down -padx 11 -pady 4 -text {} -image down_arrow_gif
+
+	set proenv($Which) closed
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $Win.sep_$Which \
+        -anchor center -expand 0 -fill x -side top 
+    pack $Win.ctl_$Which \
+        -anchor center -expand 0 -fill x -side top 
+    pack $Win.ctl_$Which.open_btn \
+        -anchor center -expand 0 -fill none -side left 
+    pack $Win.ctl_$Which.label \
+        -anchor w -expand 0 -fill none -side left 
+    pack $Win.$Which \
+        -anchor center -expand 0 -fill x -side top 
+
+    pack $Win.$Which.prefs.pathtype \
+        -anchor center -expand 0 -fill x -side top 
+    pack $Win.$Which.prefs.pathtype.rel \
+        -in $Win.$Which.prefs.pathtype -anchor center -expand 0 -fill none \
+        -side left 
+    pack $Win.$Which.prefs.pathtype.abs \
+        -in $Win.$Which.prefs.pathtype -anchor center -expand 0 -fill none \
+        -side left 
+
+    grid columnconf $Win.$Which 0 -weight 1
+    grid rowconf $Win.$Which 1 -weight 1
+    grid $Win.$Which.prefs \
+        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky ew 
+    grid $Win.$Which.listbox \
+        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky nesw 
+    grid $Win.$Which.02 \
+        -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky ew 
+    grid $Win.$Which.03 \
+        -column 1 -row 1 -columnspan 1 -rowspan 1 -sticky ns 
+    grid $Win.$Which.buttons \
+        -column 0 -row 3 -columnspan 1 -rowspan 1 -sticky ew 
+    pack $Win.$Which.buttons.add \
+        -anchor w -expand 0 -fill none -padx 10 -side left 
+    pack $Win.$Which.buttons.del \
+        -anchor center -expand 0 -fill none -padx 10 -side left 
+
+    pack $Win.$Which.buttons.down \
+        -anchor center -expand 0 -fill none -padx 2 -side right 
+    pack $Win.$Which.buttons.up \
+        -anchor center -expand 0 -fill none -padx 2 -side right 
+
+	pack forget $Win.$Which
+}
 
 proc toggle_files_list {Win Which} {
 	global proenv 
@@ -568,7 +679,7 @@ proc toggle_files_list {Win Which} {
 
 
 
-proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del } {
+proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
 	global proenv
 
     ###################
@@ -606,6 +717,11 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del } {
     button $Win.$Which.buttons.del \
         -command $Del -padx 11 -pady 4 -text {Delete} 
 
+    button $Win.$Which.buttons.up \
+        -command $Up -padx 11 -pady 4 -text {} -image up_arrow_gif
+    button $Win.$Which.buttons.down \
+        -command $Down -padx 11 -pady 4 -text {} -image down_arrow_gif
+
 	set proenv($Which) closed
     ###################
     # SETTING GEOMETRY
@@ -634,8 +750,15 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del } {
         -anchor w -expand 0 -fill none -padx 10 -side left 
     pack $Win.$Which.buttons.add_mult \
         -anchor w -expand 0 -fill none -padx 10 -side left 
+
+    pack $Win.$Which.buttons.down \
+        -anchor center -expand 0 -fill none -padx 2 -side right 
+    pack $Win.$Which.buttons.up \
+        -anchor center -expand 0 -fill none -padx 2 -side right 
+
     pack $Win.$Which.buttons.del \
         -anchor center -expand 0 -fill none -padx 10 -side right 
+
 	pack forget $Win.$Which
 }
 
