@@ -28,6 +28,7 @@ export canon_path/2.
 export get_cwd/1.
 export change_cwd/1.
 export remove_file/1.
+export filename_equal/2.
 
 export getDirEntries/3.
 export must_exist_file/1.
@@ -269,6 +270,40 @@ remove_file(FileName)
 remove_file(FileName)
 	:-
 	system_error([unlink(FileName)]).
+
+/*!--------------------------------------------------------------
+  |	filename_equal/2
+  |	filename_equal(Name1, Name2)
+  |	filename_equal(+, +)
+ *!--------------------------------------------------------------*/
+filename_equal(Name1, Name2)
+	:-
+	sys_env(OS,_,_),
+	(OS = unix ->
+		Name1 = Name2
+		;
+		atom_codes(Name1, N1Cs),
+		atom_codes(Name2, N2Cs),
+		lc_equal_codes(N1Cs, N2Cs)
+	).
+
+lc_equal_codes([], []).
+lc_equal_codes([C1 | N1Cs], [C2 | N2Cs])
+	:-
+	mod_lc_eq_chrs(C1, C2),
+	lc_equal_codes(N1Cs, N2Cs).
+
+mod_lc_eq_chrs(C, C) :-!.
+mod_lc_eq_chrs(C1, C2)
+	:-
+	0'A =< C1, C1 =< 0'Z, 
+	C2 is C1 + 32, 
+	!.
+mod_lc_eq_chrs(C1, C2)
+	:-
+	0'a =< C1, C1 =< 0'z, 
+	C2 is C1 - 32, 
+	!.
 
 getDirEntries(Path, FilePattern, FirstResult)
 	:-
