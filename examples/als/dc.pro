@@ -1,8 +1,7 @@
 /*============================================================*
- |		dc.pro
- |	Copyright (c) 1986, 1988 by Applied Logic Systems
+ |	A Desk Calculator
  |
- |		A desk calculator
+ |	Copyright (c) 1986, 1988 by Applied Logic Systems
  |
  | Author:  Kevin A. Buettner
  | Creation:  12/03/86
@@ -87,7 +86,7 @@ module desk_calc.
    readin(-1,"stop") :- !.		/* end of file */
    readin(0'\n,[]) :- !.
    readin(0'\r,[]) :- !.
-   readin(~\,[C|T]) :- !, get0(C), get0(NextC), readin(NextC,T).
+   readin(0'\\,[C|T]) :- !, get0(C), get0(NextC), readin(NextC,T).
    readin(C,[C|T]) :- get0(NextC), readin(NextC,T).
 
 
@@ -132,9 +131,9 @@ module desk_calc.
    alphabetic(0'_).
 
    white_space(0' ) :- !.		/* space */
-   white_space(0'\	) :- !.		/* tab */
-   white_space(0'\n) :- !.		/* carriage return */
-   white_space(0'\r) :- !.		/* line feed */
+   white_space(0'\t) :- !.		/* tab */
+   white_space(0'\r) :- !.		/* carriage return */
+   white_space(0'\n) :- !.		/* line feed */
 
    read_number(L,RestL,Number) :-
       read_integer(L,IntRest,Int),
