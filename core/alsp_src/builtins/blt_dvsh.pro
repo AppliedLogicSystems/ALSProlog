@@ -1448,11 +1448,11 @@ source_trace_closedown(STWin)
 	:-
 	debugger_abort.
 
-set_debugwin_width(M5Size, MainWinSize)
+set_debugwin_width(MSize, MainWinSize)
 	:-
-	M1 is M5Size//5,
-	NChars is (MainWinSize - 3*M1)//M1,
-	set_line_length(debugger_output, NChars).
+	NChars is floor(1.6 * (MainWinSize)//MSize ),
+	sio:is_stream(debugger_output, DS),
+	set_line_length(DS, NChars).
 
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
