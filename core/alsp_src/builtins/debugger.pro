@@ -1593,16 +1593,27 @@ showGoalToUserTTY(Port,Box,Depth, Module, XGoal, Response)
 		%% Items for debugger menu (menu/4 in Library: iolayer.pro)
 		%% Compare usage in break package (blt_brk.pro)
 deb_listOfCodes([
-	a,					b,					c,
-	d,					e,					f,
-	i, 			j,					l,					m,
-	n,					'N',				r,
-	s,					t,					'?'
+	a,					
+	b,					
+	c,
+	d,					
+	e,					
+	f,
+	i, 			
+	j,					
+	l,					
+	m,
+	n,					
+	'N',				
+	r,
+	s,					
+	t,					
+	'?'
 		]).
 
 deb_choiceItems([
 	    'Abort computation',
-	    'Break to Prolog shell', 
+	    'Break to Prolog shell',
 	    'Creep to next port', 
 	    'Set print depth', 
 	    'Exit Prolog',
@@ -1619,11 +1630,22 @@ deb_choiceItems([
 	    '?'			]).
 
 deb_responses([
-	abort,			break,			creep,
-	set_print_depth,	exit,			fail,
-	jump,			leap,			change_print_mode,
-	trace_off,		break_trace_off,	retry,
-	skip,			statistics,		help
+	abort,			
+	break,			
+	creep,
+	set_print_depth,	
+	exit,			
+	fail,
+	statistics,		
+	jump,			
+	leap,			
+	change_print_mode,
+	trace_off,		
+	break_trace_off,	
+	retry,
+	skip,			
+	stack_trace,
+	help
 	]).
 
 deb_Options([		codes		= ListOfCodes,
@@ -1637,17 +1659,26 @@ deb_Options([		codes		= ListOfCodes,
 
 		%% short form, used for non-menu interaction:
 short_deb_resps([
-	end_of_line-creep,  c-creep,
-	a-abort,            b-break, 			
-	d-set_print_depth,	e-exit,			
-	f-fail,             j-jump,
-	l-leap,             m-change_print_mode,
-	n-trace_off,		'N'-break_trace_off,	
-	r-retry,            s-skip,
-	i-statistics,       t-stack_trace,
-	'?'-'$badInput$', % = help
+	end_of_line-creep,  
+	a-abort,            
+	b-break, 			
+	c-creep,
+	d-set_print_depth,	
+	e-exit,			
+	f-fail,             
+	i-statistics,       
+	j-jump,
+	l-leap,             
+	m-change_print_mode,
+	n-trace_off,		
+	'N'-break_trace_off,	
+	r-retry,            
+	s-skip,
+	t-stack_trace,
+	'?'-'$badInput$', 		% = help
 	_-'$badInput$'		%% default for all other input
 		]).
+
 
 %% === Handle the interaction:
 
@@ -1671,9 +1702,12 @@ disp_getresponse2('$badInput$', Port,Box,Depth,Module,Goal,Resps,Response)
 	:-
 	deb_choiceItems(DebItems),
 	deb_Options(Options),
-	menu(_,DebItems, R, Options),
+	deb_listOfCodes(ListOfCodes),
+	simple_menu(DebItems, R,
+				[codes=ListOfCodes,return_code=true]),
+	dmember(R-Resp0,Resps),
 	!,
-	disp_getresponse2(R, Port,Box,Depth,Module,Goal,Resps,Response).
+	disp_getresponse2(Resp0, Port,Box,Depth,Module,Goal,Resps,Response).
 
 disp_getresponse2(Response,Port,Box,Depth,Module,Goal,Resps,Response).
 
