@@ -246,7 +246,7 @@ extern	int	shutdown	PARAMS(( int, int) );
 #endif /* HAVE_SOCKET */
 
 #include "bsio.h"
-#include "siolex.h"
+#include "newsiolex.h"
 
 static	UCHAR *	get_stream_buffer PARAMS(( PWord, int ));
 static	void	incr_fdrefcnt	PARAMS(( int ));

@@ -8,6 +8,7 @@
 
 enum {
 #include "icodedef.h"
+    _ICODE_END
 };
 
 #undef ICODE
