@@ -33,8 +33,11 @@
  | script instead, and configure appropriately inside the sources.
  *---------------------------------------------------------------------*/
 
+/***********
 #define UNIX     1
 #define OSStr "unix"
+ ***********/
+
 /* #define SysName "ALS Prolog" -- now computed in blt_shl.pro */
 #define SysManufacturer "generic"
 
@@ -125,6 +128,7 @@
 
 #include "tconfig.h"
 #include "aconfig.h"
+#include "oconfig.h"
 #include "config.h"
 
 #if defined(HAVE_VM_ALLOCATE) && defined(HAVE_VM_PROTECT)
@@ -269,7 +273,7 @@
  | Include commonly needed Generic include files
  *---------------------------------------------------------------------*/
 
-#include "wd_size.h"	
+/* #include "wd_size.h"	 */
 #include "mtypes.h"	/* not generic, but every platform has one */
 #include "alstypes.h"
 #include "alloc.h"

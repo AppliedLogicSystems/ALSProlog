@@ -323,7 +323,7 @@ echo Configuring for $arch_mach_os ...
 echo
 
 ARCH=`echo $arch_mach_os | sed -e 's/-.*//'`
-#OS=`echo $arch_mach_os | sed -e 's/.*-//' -e 's/\..*$//'`
+SOS=`echo $arch_mach_os | sed -e 's/.*-//' -e 's/\..*$//'`
 OS=`echo $arch_mach_os | sed -e 's/.*-//'`
 
 
@@ -2412,6 +2412,7 @@ done
 trap 'rm -f makefile bld-port/makefile bld-natv/makefile config.d; exit 1' 1 2 15
 ARCH='$ARCH'
 OS='$OS'
+SOS='$SOS'
 LN_S='$LN_S'
 CC='$CC'
 CPP='$CPP'
@@ -2436,7 +2437,7 @@ cat >> config.status <<\EOF
 
 ac_given_srcdir=$srcdir
 
-CONFIG_FILES=${CONFIG_FILES-"makefile bld-port/makefile bld-natv/makefile config.d"}
+CONFIG_FILES=${CONFIG_FILES-"makefile bld-port/makefile bld-port/tconfig.h bld-natv/makefile bld-natv/tconfig.h config.d"}
 for ac_file in .. ${CONFIG_FILES}; do if test "x$ac_file" != x..; then
   # Remove last slash and all that follows it.  Not all systems have dirname.
   ac_dir=`echo $ac_file|sed 's%/[^/][^/]*$%%'`
@@ -2473,6 +2474,7 @@ $ac_vpsub
 $extrasub
 s%@ARCH@%$ARCH%g
 s%@OS@%$OS%g
+s%@SOS@%$SOS%g
 s%@LN_S@%$LN_S%g
 s%@CC@%$CC%g
 s%@CPP@%$CPP%g

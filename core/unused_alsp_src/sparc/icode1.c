@@ -1,4 +1,4 @@
-*===================================================================*
+/*===================================================================*
  |		icode1.c
  |	Copyright (c) 1990-95 Applied Logic Systems, Inc.
  |
@@ -12,7 +12,7 @@
 
 #include "defs.h"
 #include "icom.h"
-/* #include "icode.h" */
+#include "icode.h"
 #include "compile.h"
 #include "varproc.h"
 #include "module.h"

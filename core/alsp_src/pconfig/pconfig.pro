@@ -137,7 +137,7 @@ export xtr_cfg_info/2.
 xtr_cfg_info(BLD_Dir,Info)
 	:-
 	xtr_cfg_info(BLD_Dir, 
-			["ARCH","OS","srcdir","CC","LIBS" ,
+			["ARCH","OS","SOS","srcdir","CC","LIBS" ,
 			 "X_CFLAGS","X_LIBS", "X_EXTRA_LIBS"], 
 	 		Info).
 
@@ -296,6 +296,12 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, BldPathAtm, BldSubdirP
 		;
 		extendPath(BldPathAtm, 'mf-cmn.in', SrcMKFTail)
 	),
+
+	pathPlusFile(Subdir,'tconfig.h',TCONFIG),
+	open(TCONFIG,write, TCStr, []),
+	printf(TCStr, '/*   tconfig.h - default  */\n',[]),
+	close(TCStr),
+	
 
 	pathPlusFile(Subdir,'makefile',SubdirMakefile),
 	trans_xtnd_makefile(SrcMKFTail, SubHeaderLines, SubdirMakefile, GOS), 
@@ -515,17 +521,16 @@ grl_vars(ARCH_NATV, OS, BLD_NATV_SRC_PATH , GrlHeaderLines)
 	cfg('X_CFLAGS', X_CFLAGS),
 	cfg('X_LIBS', X_LIBS),
 	cfg('X_EXTRA_LIBS', X_EXTRA_LIBS),
+	cfg('SOS', SOS),
 
 	GrlHeaderLines =
 	[
 		srcdir		= BLD_NATV_SRC_PATHAtm,
-%		'VPATH'		= VPATH,
-%		'CINTDIR' 	= CINTPath,
-%		'WSRCD'   	= WISPath,
 		'PROLIB'  	= ProLibPath,
 		'PROLOG'  	= PrologPath,
 		'ARCH'     	= ARCH,
 		'OS'     	= OS,
+		'SOS'     	= SOS,
 		'GOS'     	= GOS,
 		'CC'     	= CC,
 		'LIBS'		= LIBS,

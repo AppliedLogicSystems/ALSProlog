@@ -1,3 +1,18 @@
+Fri Mar 31 1995 Ken Bowen
+
+	* Added two new configuration files overall in the system: (1) oconfig.h
+	  which lives in the various .../OS directories;  this entailed
+ 	  adding new OS subdirs in ../port and in the wins/build/WS subdirs;
+	  this handles OS-specific configuration aspects;
+	  (2) tconfig.h, which is expected to be found in the dir where the
+	  build is being carried out. This handles configuration parameters
+	  controlling this specific build.
+
+Sun Mar 26 1995 Ken Bowen
+
+	* Finished merging m68k sources from Mac/Native;
+ 	* Committed as version 1-71
+
 Sat Mar 25 1995 Ken Bowen
 	
 	* Finished bug fixes resulting from mac merges in generic and port;

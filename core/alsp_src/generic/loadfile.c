@@ -37,7 +37,7 @@
 #include <stat.h>
 #include <file.h>
 
-#else	!defined(MacOS) /* must be unix */
+#elif	!defined(MacOS) /* must be unix */
 #include <errno.h>
 #include <sys/file.h>
 #endif			/* OS includes */

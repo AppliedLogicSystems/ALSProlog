@@ -1,11 +1,12 @@
 #
-# mh-sparc
+# sparc.mkf
+#
 #	architecture specific makefile fragment for ALS Prolog on sparcs
 #
 
 acfiles_c =	cmp.c disassem.c icmath.c icode1.c icode2.c int.c uia.c
 acfiles_o =	$(acfiles_c:.c=.o)
-acfiles_h =	aconfig.h codegen.h machint.h mtypes.h
+acfiles_h =	oconfig.h aconfig.h codegen.h machint.h mtypes.h
 
 $(acfiles_o):	$(defs_h)
 
