@@ -17,6 +17,16 @@
 #|	This is hard-coded in the following.
 ##=================================================================================
 
+proc xpe { What } {
+	global array proenv
+	return $proenv($What)
+}
+
+proc xpe2 { What1 What2 } {
+	global array proenv
+	return $proenv($What1,$What2)
+}
+
 set argc 0
 set argv ""
 
@@ -513,7 +523,8 @@ proc exit_prolog { } {
 	} else {
 		if {[document.close_all]} then {
 			save_window_positions
-			set WaitForLine -3
+			exit
+#			set WaitForLine -3
 		}
 	}
 }
@@ -597,21 +608,25 @@ proc careful_withdraw {Win} {
 proc choose_background_color {Window} {
 	global array proenv
 
+	grab release .alsdev_settings
 	set COLOR [tk_chooseColor \
 		-title "Choose Background Color" -initialcolor $proenv(.topals,background)]
 	if {"$COLOR" == ""} then {return}
 	.alsdev_settings.background configure -background $COLOR
 	$Window.text configure -background $COLOR
+	grab set -global .alsdev_settings
 }
 
 proc choose_foreground_color {Window} {
 	global array proenv
 
+	grab release .alsdev_settings
 	set COLOR [tk_chooseColor \
 		-title "Choose Foreground Color" -initialcolor $proenv(.topals,foreground)]
 	if {"$COLOR" == ""} then {return}
 	.alsdev_settings.foreground configure -foreground $COLOR
 	$Window.text configure -foreground $COLOR
+	grab set -global .alsdev_settings
 }
 
 proc font_family_choice { Family Window } {
@@ -1101,14 +1116,13 @@ if {$tcl_platform(platform) == "macintosh"} {
 	# Make .topals.mmenb the default menu for all windows.
 	. configure -menu .topals.mmenb
 }
-Window show .topals
-wm geometry .topals $proenv(.topals,geometry)
-
 Window show .debug_settings
 Window hide .debug_settings
 
 Window show .alsdev_settings
 Window hide .alsdev_settings
+
+Window show .topals
 
 update idletasks
 raise .topals

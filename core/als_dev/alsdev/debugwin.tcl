@@ -29,7 +29,7 @@ proc vTclWindow.debugwin {base} {
     ###################
     toplevel $base -class Toplevel
     wm focusmodel $base passive
-    wm geometry $base 553x391+323+175
+    wm geometry $base $proenv(.debugwin,geometry)
     wm maxsize $base 1137 870
     wm minsize $base 1 1
 	if {$tcl_platform(platform) != "macintosh"} {
