@@ -971,6 +971,10 @@ pgetpid()
 #include <sys/mman.h>
 #include <fcntl.h>
 
+#ifdef MACH_SUBSTRATE
+#include <mach/mach.h>
+#endif
+
 #ifndef MAP_FAILED
 #define MAP_FAILED -1
 #endif
@@ -980,6 +984,9 @@ unsigned char *open_memory_file(const char *file_name, mem_file_info *info)
     int file, r;
     struct stat s;
     unsigned char *mem;
+#ifdef MACH_SUBSTRATE
+    kern_return_t kr;
+#endif
     
     file = open(file_name,  O_RDONLY);
     if (file == -1) goto error;
@@ -990,6 +997,9 @@ unsigned char *open_memory_file(const char *file_name, mem_file_info *info)
 #ifdef HAVE_MMAP_ZERO
     mem = mmap(NULL, s.st_size, PROT_READ, MAP_FILE | MAP_VARIABLE | MAP_PRIVATE, file, 0);
     if (mem == (unsigned char *)-1) goto close_error;
+#elif defined(MACH_SUBSTRATE)
+    kr = map_fd(file, 0, (vm_offset_t *)&mem, TRUE, s.st_size);
+    if (kr != KERN_SUCCESS) goto close_error;
 #else
     mem = mmap(NULL, s.st_size, PROT_READ, MAP_PRIVATE, file, 0);
     if (mem == MAP_FAILED) goto close_error;
@@ -1011,7 +1021,11 @@ error:
 
 void close_memory_file(mem_file_info *info)
 {
+#ifdef MACH_SUBSTRATE
+    (void) vm_deallocate(task_self(), (vm_address_t)info->start, info->length);
+#else
     munmap(info->start, info->length);
+#endif
 }
 #endif
 
