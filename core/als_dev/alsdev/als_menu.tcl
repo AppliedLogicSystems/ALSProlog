@@ -163,7 +163,7 @@ proc add_tools_menu {menubar type window} {
 			-label Debugger -underline 0 -command exec_toggle_debugwin -variable proenv(debugwin)
 		$menubar.tools add separator 
     	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} 
-    	$menubar.tools add command -label "Tcl Debugger$elipsis" -underline 0 -command {re tcl_debugger} 
+    	$menubar.tools add command -label "Tcl Debugger$elipsis" -underline 0 -command {re tcl_debugger} -state disabled
     	$menubar.tools add command -label "Kill Tcl  Interps" -underline 0 -command {re kill_tcl_interps} 
 #    	$menubar.tools add command -label "Tcl Shell" -underline 0 -command {re tcl_shell} 
 
@@ -175,10 +175,10 @@ proc add_tools_menu {menubar type window} {
 	##  must be debugger:
 		# Spy
 		$menubar.tools add command  -label "Spy$elipsis" \
-			-underline 0 -command {re {Window show .pred_info }} 
+			-underline 0 -command {re show_pred_info } 
 		$menubar.tools add separator
 		$menubar.tools add command  -label {Debug Settings } \
-			-underline 0 -command {re {show_debug_settings}}
+			-underline 0 -command {re show_debug_settings}
 		$menubar.tools add command  -label {System Modules } \
 			-underline 0 -command {re {set_system_modules_showing}}
 	}

@@ -69,8 +69,6 @@ proc vTclWindow.debugwin {base} {
         -padx 4 -text leap -underline 0 \
 		-command { send_prolog debugger_mgr clear_for_leap ; set DebugResponse Bl }
 
-#		-command { prolog call debugger clear_source_traces ; set DebugResponse Bl }
-
     button $base.buttons.retry \
         -background $proenv(debugwin_button,background) \
         -padx 0 -text retry -underline 0 \
@@ -86,6 +84,16 @@ proc vTclWindow.debugwin {base} {
     button $base.buttons.stack_trace \
         -padx 2 -text stack \
 		-command { set DebugResponse Bt }
+
+    frame $base.buttons.sep1 \
+        -borderwidth 1 -relief flat -width 4 -background black
+
+    button $base.buttons.abort \
+        -padx 2 -text Abort \
+		-command { set DebugResponse Ba }
+    button $base.buttons.break \
+        -padx 2 -text Break \
+		-command { set DebugResponse Bb }
 
     button $base.buttons.interrupt \
         -font {lucida 10 bold} \
@@ -150,10 +158,7 @@ proc vTclWindow.debugwin {base} {
 	grid rowconf $base 1 -weight 0
 	grid rowconf $base 2 -weight 1
 	grid rowconf $base 3 -weight 0
-	grid rowconf $base 4 -weight 1
-
-#    pack $base.buttons \
-#        -anchor center -expand 0 -fill x -side top 
+#	grid rowconf $base 4 -weight 1
 
     grid $base.buttons -in $base \
         -column 0 -row 0 -columnspan 2 -rowspan 1 -sticky ew
@@ -172,11 +177,14 @@ proc vTclWindow.debugwin {base} {
         -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.stack_trace \
         -anchor center -expand 0 -fill none -side left 
+    pack $base.buttons.sep1 \
+        -anchor center -expand 0 -fill y -side left -padx 4
+    pack $base.buttons.abort \
+        -anchor center -expand 0 -fill none -side left 
+    pack $base.buttons.break \
+        -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.interrupt \
         -anchor center -expand 0 -fill none -side right 
-
-#    pack $base.debug_status \
-#        -anchor center -expand 0 -fill x -side top 
 
     grid $base.debug_status \
         -column 0 -row 1 -columnspan 2 -rowspan 1 -sticky ew
@@ -194,22 +202,19 @@ proc vTclWindow.debugwin {base} {
     pack $base.debug_status.call_num \
         -anchor center -expand 0 -fill none -side left 
 
-#	pack $base.vsb -side right -fill both
-#	pack $base.text -fill both -expand 1 -side left
-
 	grid $base.text \
         -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky nesw
 	grid $base.vsb \
         -column 1 -row 2 -columnspan 1 -rowspan 1 -sticky ns
 
-    grid $base.stacklabel \
-        -column 0 -row 3 -columnspan 2 -rowspan 1 -sticky ew
-    pack $base.stacklabel.label \
-        -anchor center -expand 0 -fill none -side left -padx 15
-	grid $base.stacklist \
-        -column 0 -row 4 -columnspan 1 -rowspan 1 -sticky nesw
-    grid $base.stacklist_vsb \
-        -column 1 -row 4 -columnspan 1 -rowspan 1 -sticky ns
+#    grid $base.stacklabel \
+#        -column 0 -row 3 -columnspan 2 -rowspan 1 -sticky ew
+#    pack $base.stacklabel.label \
+#        -anchor center -expand 0 -fill none -side left -padx 15
+#	grid $base.stacklist \
+#        -column 0 -row 4 -columnspan 1 -rowspan 1 -sticky nesw
+#    grid $base.stacklist_vsb \
+#        -column 1 -row 4 -columnspan 1 -rowspan 1 -sticky ns
 
 	bind .debugwin <Unmap> {unmap_alsdev_debug}
 	bind .debugwin <Map>   {map_alsdev_debug}
@@ -302,14 +307,14 @@ proc vTclWindow.debug_settings {base} {
     ###################
     toplevel $base -class Toplevel
     wm focusmodel $base passive
-    wm geometry $base 284x51+152+178
-    wm maxsize $base 1137 870
-    wm minsize $base 1 1
+#    wm geometry $base 284x51+152+178
+#    wm maxsize $base 1137 870
+#    wm minsize $base 1 1
     wm overrideredirect $base 0
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Debugger Settings"
-	wm protocol .debug_settings WM_DELETE_WINDOW {wm withdraw .debug_settings}
+	wm protocol .debug_settings WM_DELETE_WINDOW {unpost_debug_subwin .debug_settings}
 
     frame $base.depth \
         -borderwidth 1 -relief sunken 
@@ -377,9 +382,9 @@ proc vTclWindow.debug_settings {base} {
         -anchor center -expand 0 -fill none -side left 
 
     wm geometry $base ""
+	update
     wm resizable $base 0 0
 }
-
 
 
 proc vTclWindow.pred_info {base} {
@@ -394,14 +399,12 @@ proc vTclWindow.pred_info {base} {
     ###################
     toplevel $base -class Toplevel
     wm focusmodel $base passive
-    wm geometry $base 495x373+364+202
     wm maxsize $base 1137 870
-    wm minsize $base 1 1
     wm overrideredirect $base 0
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Predicate Information"
-
+	wm protocol .pred_info WM_DELETE_WINDOW { unpost_debug_subwin .pred_info }
 
     frame $base.preds \
         -borderwidth 1 -relief sunken  
@@ -436,13 +439,13 @@ proc vTclWindow.pred_info {base} {
     frame $base.buttons \
         -borderwidth 1 -relief sunken  
     frame $base.buttons.f0 \
-        -borderwidth 0 -relief flat -height 15
+        -borderwidth 0 -relief flat -height 10
     label $base.buttons.label1 \
         -relief flat -text {Action On} 
     label $base.buttons.label2 \
         -relief flat -text {Selection} 
     frame $base.buttons.f1 \
-        -borderwidth 0 -relief flat -height 20
+        -borderwidth 0 -relief flat -height 10
     frame $base.buttons.spy \
         -borderwidth 0 -relief flat  
     button $base.buttons.spy.b1 \
@@ -451,6 +454,16 @@ proc vTclWindow.pred_info {base} {
     button $base.buttons.spy.b2 \
         -padx 11 -pady 2 -text arrow -image right_gif \
         -command move_to_spying_list
+
+    frame $base.buttons.spywhen \
+        -borderwidth 0 -relief flat  
+    button $base.buttons.spywhen.b1 \
+        -padx 11 -pady 2 -text {Spy When} \
+        -command spywhen_move_to_spying_list -state disabled
+    button $base.buttons.spywhen.b2 \
+        -padx 11 -pady 2 -text arrow -image right_gif \
+        -command spywhen_move_to_spying_list -state disabled
+
     frame $base.buttons.nospy \
         -borderwidth 0 -relief flat  
     button $base.buttons.nospy.b1 \
@@ -539,6 +552,7 @@ proc vTclWindow.pred_info {base} {
     grid $base.mods.vscrollbar \
         -column 1 -row 2 -columnspan 1 -rowspan 1 -sticky nse 
 
+		#### Center column buttons:
     grid $base.buttons \
         -column 1 -row 0 -columnspan 1 -rowspan 2 -padx 2 -sticky ns 
 
@@ -556,6 +570,13 @@ proc vTclWindow.pred_info {base} {
     pack $base.buttons.spy.b2 \
 		-anchor w -expand 0 -fill none -side right
     pack $base.buttons.spy.b1 \
+		-anchor w -expand 0 -fill none -side right
+
+    pack $base.buttons.spywhen \
+		 -anchor center -expand 0 -fill x -side top -pady 6
+    pack $base.buttons.spywhen.b2 \
+		-anchor w -expand 0 -fill none -side right
+    pack $base.buttons.spywhen.b1 \
 		-anchor w -expand 0 -fill none -side right
 
     pack $base.buttons.nospy \
@@ -603,10 +624,17 @@ proc vTclWindow.pred_info {base} {
 	bind $base.spying.label <Configure> {refresh_spy_win}
 	bind $base.spying.label <Map> {refresh_spy_win}
 
-
     bind $base.preds.listbox <Double-Button-1> {move_to_spying_list}
     bind $base.spying.listbox <Double-Button-1> {remove_from_spying_list}
 
+	wm geometry $base ""
+	update
+	set BaseGeom [wm geometry .pred_info]
+	set XPlace [string first "x" $BaseGeom]
+	set WinWidth [string range $BaseGeom 0 [expr $XPlace - 1]]
+	set WinHeight [string range $BaseGeom [expr $XPlace + 1] \
+					[expr [string first "+" $BaseGeom] -1] ]
+    wm minsize .pred_info $WinWidth $WinHeight
 }
 
 
@@ -807,7 +835,6 @@ proc module_choose {ModsList} {
 
 	bind $base.listbox <Double-Button-1> "wm withdraw $base ; spy_preds_choice2 \
 			\[$base.listbox get \[lindex \[$base.listbox curselection \] 0 \] \]"
-
 }
 
 ##########################################################
@@ -833,6 +860,7 @@ proc vTclWindow.sys_mods {base} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Modules:"
+	wm protocol .sys_mods WM_DELETE_WINDOW {unpost_debug_subwin .sys_mods}
     ###################
     # SETTING GEOMETRY
     ###################
