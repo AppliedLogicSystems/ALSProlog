@@ -433,6 +433,22 @@ var_or_integer_ok(Int) :-
 var_or_integer_ok(Other) :-
 	type_error(integer,Other,2).
 
+export var_or_nonneg_integer_ok/1.
+
+var_or_nonneg_integer_ok(Var) :-
+	var(Var),
+	!.
+var_or_nonneg_integer_ok(Int) :-
+	integer(Int),
+	Int >= 0,
+	!.
+var_or_nonneg_integer_ok(Other) :-
+	integer(Other),
+	domain_error(not_less_than_zero, Other, 2).
+var_or_nonneg_integer_ok(Other) :-
+	integer(Other),
+	type_error(integer,Other,2).
+
 export var_ok/1.
 var_ok(Var) :-
 	var(Var),
