@@ -607,14 +607,11 @@ shared_lib_exts(Exts)
  *-------------------------------------------------------------*/ 
 exec_consult(user, FCOpts, ALSMgr, FileMgr)
 	:-!,
-	load_source(user,user,_,FCOpts,FCG, FileMgr),
-	mangle(12, FCOpts, user),
-	set_reconsult_flag(1),
-
-	sio:stream_or_alias_ok(user_input, Stream),
-	sio:set_stream_token_list(Stream,[]),
-	sio:set_stream_extra(Stream,''),
-	sio:sio_reset_eof(Stream).
+	access_cslt_opts(tgt_mod, FCOpts, TgtMod),
+	access_cslt_opts(debug_type, FCOpts, DebugMode),
+	access_cslt_opts(cg_flag, FCOpts, CGFlag),
+	load_file_source(user,user,TgtMod,no_reconsult,DebugMode,_,CGFlag,CG,ErrsList),
+	fin_load_from_file([],user,user,CG,FCOpts,FileMgr).
 
 exec_consult(BaseFile, FCOpts, ALSMgr, FileMgr)
 	:-
