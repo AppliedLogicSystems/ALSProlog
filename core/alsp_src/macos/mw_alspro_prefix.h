@@ -1,3 +1,4 @@
+#include <MacHeaders.h>
 #include <ansi_prefix.mac.h>
 #pragma once off
 #define HAVE_CONFIG_H
