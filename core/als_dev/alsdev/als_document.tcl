@@ -21,6 +21,8 @@ set proenv(document_index) 0
 
 proc create_document_window {title} {
 	global array proenv
+	global mod
+
 
 	# Create a unique window name
 
@@ -60,13 +62,37 @@ proc create_document_window {title} {
 		-font $proenv(.document,font) \
 		-tabs $proenv(.document,tabs) 
 
+	# accelerators
+	bind_accelerators $w $mod document
+
 	focus $w.text
 
 	# Init document fields
-	
 	set proenv($w,dirty) false
 
 	return $w
+}
+
+proc bind_accelerators {w mod type} {
+	if {"$mod"=="Ctrl"} then { set MMD Control } else { set MMD $mod }
+
+		# file menu:
+	bind $w.text <$MMD-n> "$type.new"
+	bind $w.text <$MMD-o> "$type.open"
+	bind $w.text <$MMD-w> "$type.close $w"
+	bind $w.text <$MMD-s> "$type.save $w"
+	bind $w.text <$MMD-q> "exit_prolog"
+
+		# edit menu:
+#	 bind $w.text <$MMD-z> "$type.undo $w"
+
+	 bind $w.text <$MMD-x> "$type.cut $w"
+	 bind $w.text <$MMD-c> "$type.copy $w"
+	 bind $w.text <$MMD-v> "$type.paste $w"
+	 bind $w.text <$MMD-a> "$type.select_all $w"
+
+		# prolog menu:
+	bind $w.text <$MMD-k> "$type.consult $w"
 }
 
 proc dispose_document_window {w} {

@@ -19,6 +19,7 @@ proc vTclWindow.debugwin {base} {
 	global array proenv
 	global tcl_platform
 	global DebugResponse
+	global mod
 
     set base .debugwin
     if {[winfo exists $base]} {
@@ -65,7 +66,7 @@ proc vTclWindow.debugwin {base} {
     button $base.buttons.leap \
         -background $proenv(debugwin_button,background) \
         -padx 4 -text leap -underline 0 \
-		-command { set DebugResponse Bl }
+		-command { prolog call debugger clear_source_traces ; set DebugResponse Bl }
     button $base.buttons.retry \
         -background $proenv(debugwin_button,background) \
         -padx 0 -text retry -underline 0 \
@@ -164,6 +165,9 @@ proc vTclWindow.debugwin {base} {
 
 	bind .debugwin <Unmap> {unmap_alsdev_debug}
 	bind .debugwin <Map>   {map_alsdev_debug}
+
+	# accelerators
+	bind_accelerators .topals $mod debugwin
 }
 
 proc vTclWindow.spywin {base} {

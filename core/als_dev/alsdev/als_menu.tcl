@@ -88,23 +88,25 @@ proc add_edit_menu {menubar type window} {
     	-menu $menubar.edit.preferences
     $menubar.edit.preferences add command \
 		-label {Fonts & Colors} -command "fonts_and_colors $window"
-	menu $menubar.edit.preferences.generate -relief raised -tearoff 0
-	set proenv(obplcn) gias
-    $menubar.edit.preferences add cascade \
-		-menu $menubar.edit.preferences.generate -label {Generated Files}
-	$menubar.edit.preferences.generate add radiobutton \
-		-variable proenv(obplcn) -value gic \
-		-label {Generated in Current (gic)}
-	$menubar.edit.preferences.generate add radiobutton \
-		-variable proenv(obplcn) -value gis \
-		-label {Generated in Source(gis)}
-	$menubar.edit.preferences.generate add radiobutton \
-		-variable proenv(obplcn) -value gias \
-		 -label {Generated in Arch/Source(gias)}
-	$menubar.edit.preferences.generate add radiobutton \
-		-variable proenv(obplcn) -value giac \
-		-label {Generated in Arch/Current (giac)}
 
+	if {"$type"!="document"} then {
+		menu $menubar.edit.preferences.generate -relief raised -tearoff 0
+		set proenv(obplcn) gias
+    	$menubar.edit.preferences add cascade \
+			-menu $menubar.edit.preferences.generate -label {Generated Files}
+		$menubar.edit.preferences.generate add radiobutton \
+			-variable proenv(obplcn) -value gic \
+			-label {Generated in Current (gic)}
+		$menubar.edit.preferences.generate add radiobutton \
+			-variable proenv(obplcn) -value gis \
+			-label {Generated in Source(gis)}
+		$menubar.edit.preferences.generate add radiobutton \
+			-variable proenv(obplcn) -value gias \
+		 	-label {Generated in Arch/Source(gias)}
+		$menubar.edit.preferences.generate add radiobutton \
+			-variable proenv(obplcn) -value giac \
+			-label {Generated in Arch/Current (giac)}
+	}
 	$menubar add cascade -menu $menubar.edit -label "Edit"
 }
 

@@ -480,13 +480,44 @@ proc consult_file {} {
 		-filetypes {{"Prolog Files" {.pro .pl } } {{All Files} {*} } } ]
 	if { "$file"== "" } then { return }
 	prolog call alsdev do_reconsult -atom $file
-#	insert_prompt  .topals.text "\n?-" 
 }
 
 proc clear_workspace { } {
 	prolog call alsdev clear_workspace 
-#	insert_prompt  .topals.text "\n?-" 
 }
+
+		# file menu:
+proc listener.new {}   { document.new }
+proc listener.open {}  { document.open }
+proc listener.close {w} { bell }
+proc listener.save {w}  { bell }
+
+proc debugwin.new {}   { document.new }
+proc debugwin.open {}  { document.open }
+proc debugwin.close {w} { bell }
+proc debugwin.save {w}  { bell }
+
+		# edit menu:
+proc listener.undo {w}  { bell }
+proc listener.cut {w}   { bell }
+proc listener.copy {w} { 
+}
+proc listener.paste {w} {
+}
+proc listener.select_all {w} {
+}
+
+proc debugwin.undo {w}  { bell }
+proc debugwin.cut {w}   { bell }
+proc debugwin.copy {w} { 
+}
+proc debugwin.paste {w} {
+}
+proc debugwin.select_all {w} {
+}
+
+
+
 
 #################################################
 #####	Utilities & Environment Settings       ##
@@ -1034,4 +1065,4 @@ if {$tcl_platform(platform) == "macintosh"} {
 }
 update idletasks
 raise .topals
-
+focus .topals.text
