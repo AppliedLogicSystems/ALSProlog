@@ -1509,7 +1509,7 @@ int sio_nsocket_connect(void)
 {
     PWord family, descriptor, address, port, result;
     int family_t, descriptor_t, address_t, port_t, result_t;
-    int family_const, error = 0;
+    int /* family_const, */ error = 0;
     char *host;
     double sd;
     struct sockaddr_in sockname_in;
@@ -1563,7 +1563,7 @@ int sio_nsocket_bind(void)
 {
     PWord family, descriptor, port, result;
     int family_t, descriptor_t, port_t, result_t;
-    int family_const, error = 0;
+    int /* family_const, */ error = 0;
     double sd;
     struct sockaddr_in sockport;
 
@@ -1599,7 +1599,7 @@ int sio_nsocket_listen(void)
 {
     PWord family, descriptor, backlog, result;
     int family_t, descriptor_t, backlog_t, result_t;
-    int family_const, error = 0;
+    int /* family_const, */ error = 0;
     double sd;
 
     PI_getan(&family, &family_t, 1);
@@ -1630,7 +1630,7 @@ int sio_nsocket_accept(void)
 {
     PWord family, descriptor, peer, new_descriptor, result, addr;
     int family_t, descriptor_t, peer_t, new_descriptor_t, result_t, addr_t;
-    int family_const, error = 0;
+    int /* family_const, */ error = 0;
     double sd;
     struct sockaddr_in cli_addr;
     int cli_len, newfd;
@@ -1725,11 +1725,14 @@ int sio_nsocket_select(void)
     	timeout.tv_sec = sec;
     	timeout.tv_usec = usec;
     	timeout_ptr = &timeout;
-    } else error = SOCKET_ERROR;
+    } else {
+        error = SOCKET_ERROR;
+	timeout_ptr = NULL;
+    }
     
     
     if (error != SOCKET_ERROR) {
-    	r = select(max_sd+1, &read_set, &write_set, &exception_set, timeout_ptr); 
+    	r = selectsocket(max_sd+1, &read_set, &write_set, &exception_set, timeout_ptr); 
     
     	if (r >= 0) {
     	    /* Make the mark lists */
