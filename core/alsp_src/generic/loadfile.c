@@ -49,7 +49,6 @@
 #endif
 #elif defined(UNIX)
 #include <errno.h>
-#include <sys/file.h>
 #elif defined(MSWin32)
 #include <windows.h>
 #include "fswin32.h"

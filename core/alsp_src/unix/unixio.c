@@ -18,43 +18,18 @@
 
 #include <math.h>
 
-#if (defined(UNIX) || defined(MSWin32) || (defined(MacOS) && defined(HAVE_GUSI))) && !defined(__GO32__) && !defined(OS2)
-
-#if defined(UNIX)
-
-#include <sys/param.h>
-
-#if   defined(USE_RE_COMP)
-#elif defined(USE_REGCMP)
-#include <libgen.h>
+#include <limits.h>
+#ifdef MISSING_GLOB
+#include "compat_glob.h"
 #else
-#include <regex.h>
+#include <glob.h>
 #endif
-
 #include <errno.h>
 
 /* unistd.h defines _POSIX_VERSION on POSIX.1 systems.  */
 
-#if defined(DIRENT) || defined(_POSIX_VERSION)
 #include <dirent.h>
 #define NLENGTH(dirent) (strlen((dirent)->d_name))
-
-#else /* --- not (DIRENT or _POSIX_VERSION) --- */
-#define dirent direct
-#define NLENGTH(dirent) ((dirent)->d_namlen)
-
-#ifdef SYSNDIR
-#include <sys/ndir.h>
-#endif /* SYSNDIR */
-#ifdef SYSDIR
-#include <sys/dir.h>
-#endif /* SYSDIR */
-
-#ifdef NDIR
-#include <ndir.h>
-#endif /* NDIR */
-
-#endif /* --- DIRENT or _POSIX_VERSION) --- */
 
 
 #ifndef S_IRUSR
@@ -101,49 +76,19 @@
 #define S_ISFIFO(m) (((m)& S_IFMT) == S_IFIFO)
 #endif
 
-#define HAVE_DIRENT	1
-
-#elif defined(MacOS) && defined(HAVE_GUSI)
-#include <ctype.h>
-#include <GUSI.h>
-
-#define HAVE_DIRENT	1
-
-#elif defined(MSWin32)
-#include "fswin32.h"
-
-#else
-#error
-#endif
-
-#ifndef MAXPATHLEN
-#ifdef PATHSIZE
-#define MAXPATHLEN  PATHSIZE
-#else
-#define MAXPATHLEN  1024
-#endif
-#endif
-
 int
 pgetcwd(void)
 {
     PWord v1, sym;
     int   t1, symType;
-    char  pathName[MAXPATHLEN];
+    char  pathName[PATH_MAX];
 
     PI_getan(&v1, &t1, 1);
 
-#ifdef	HAVE_GETWD
-    if (getwd(pathName) == 0)
+    if (getcwd(pathName, PATH_MAX) == 0)
 {
 	PI_FAIL;
 }
-#else	/* HAVE_GETWD */
-    if (getcwd(pathName, MAXPATHLEN) == 0)
-{
-	PI_FAIL;
-}
-#endif	/* !HAVE_GETWD */
 
     PI_makeuia(&sym, &symType, pathName);
 
@@ -206,8 +151,6 @@ punlink(void)
     PI_SUCCEED;
 }
 
-#ifdef FSACCESS
-#ifdef HAVE_DIRENT
 /*
  * $getDirEntries/3 (--> getDirEntries/3 )
  * $getDirEntries(DirName, FilePattern, List)
@@ -228,17 +171,11 @@ getDirEntries()
     PWord v1, v2, v3;
     int   t1, t2, t3;
     char *dirName, *pattern;
-    DIR  *dirp;
-    struct dirent *dirEntry;
-    PWord consCell, head, sym, pnil;
-    int   consType, headType, symType, nilType;
-
-#if   defined(USE_RE_COMP)
-#elif defined(USE_REGCMP)
-    char *regexComp;
-#else
-    regex_t regstruct;
-#endif
+    char path[PATH_MAX], *p;
+    PWord list, newlist, head, tail, sym;
+    int   listType, newlistType, headType, tailType, symType;
+    glob_t gd;
+    int i, r;
 
     PI_getan(&v1, &t1, 1);
     PI_getan(&v2, &t2, 2);
@@ -249,81 +186,30 @@ getDirEntries()
      || !getstring((UCHAR **)&pattern, v2, t2))
 	PI_FAIL;
 
-#if   defined(USE_RE_COMP)
-    if (re_comp(pattern) != NULL)
-#elif defined(USE_REGCMP)
-    if ((regexComp = regcmp(pattern, (char *) 0)) == NULL)
-#else
-    if (regcomp(&regstruct, pattern, REG_ICASE | REG_NOSUB) )
-#endif
-		PI_FAIL;
+    strcpy(path, dirName);
+    strcat(path, "/");
+    strcat(path, pattern);
 
-    dirp = opendir(dirName);
-    if (dirp == NULL) {
-#if   defined(USE_RE_COMP)
-#elif defined(USE_REGCMP)
-      free(regexComp);
-#else
-      regfree(&regstruct);
-#endif
-      PI_FAIL;
-    }
-
-    for (dirEntry = readdir(dirp); dirEntry != NULL; dirEntry = readdir(dirp)) {
-#if   defined(USE_RE_COMP)
-      if (re_exec(dirEntry->d_name) == 1)
-#elif defined(USE_REGCMP)
-      if (regex(regexComp, dirEntry->d_name) != NULL)
-#else
-      if ((regexec(&regstruct, dirEntry->d_name, 0, 0, 0)) == 0)
-#endif
-	{
-	  {
-	  PI_makelist(&consCell, &consType);
-	  if (!PI_unify(v3, t3, consCell, consType)) {
-#if   defined(USE_RE_COMP)
-#elif defined(USE_REGCMP)
-	    free(regexComp);
-#else
-	    regfree(&regstruct);
-#endif
-    		closedir(dirp);
-		PI_FAIL;
-	    }
-	    PI_gethead(&head, &headType, consCell);
-	    PI_makeuia(&sym, &symType, dirEntry->d_name);
-	    if (!PI_unify(head, headType, sym, symType)) {
-#if   defined(USE_RE_COMP)
-#elif defined(USE_REGCMP)
-	      free(regexComp);
-#else
-	      regfree(&regstruct);
-#endif
-    		closedir(dirp);
-		PI_FAIL;
-	    }
-	    PI_gettail(&v3, &t3, consCell);
-	}
-      }
-      }
-    closedir(dirp);
-
-#if   defined(USE_RE_COMP)
-#elif defined(USE_REGCMP)
-    free(regexComp);
-#else
-    regfree(&regstruct);
-#endif
-
-    PI_makesym(&pnil, &nilType, "[]");
-
-    if (!PI_unify(v3, t3, pnil, nilType))
-	PI_FAIL;
+    r = glob(path, 0, NULL, &gd);
+    if (r != 0 && r != GLOB_NOMATCH) PI_FAIL;
 
 
-    PI_SUCCEED;
+    for (i = gd.gl_pathc, PI_makesym(&list, &listType, "[]"); i;
+	 i--, list=newlist, listType=newlistType) {
+      p = strrchr(gd.gl_pathv[i-1], '/');
+      PI_makeuia(&sym, &symType, p ? p+1 : gd.gl_pathv[i]);
+      PI_makelist(&newlist, &newlistType);
+      PI_gethead(&head, &headType, newlist);
+      PI_gettail(&tail, &tailType, newlist);
+      PI_unify(head, headType, sym, symType);
+      PI_unify(tail, tailType, list, listType);
+    };
+
+    globfree(&gd);
+
+    return PI_unify(v3, t3, list, listType);
 }
-#endif
+
 
 
 /*
@@ -425,8 +311,6 @@ getFileStatus(void)
 }
 
 
-#ifdef HAVE_SYMLINK
-
 /*
  * read_link/2
  * read_link(SourcePath, ResultPath)
@@ -510,7 +394,6 @@ make_symlink(void)
     else
 	PI_FAIL;
 }
-#endif /* HAVE_SYMLINK */
 
 
 /*
@@ -597,11 +480,7 @@ pmkdir()
 		t2 != PI_INT)
 	PI_FAIL;
 
-#if defined(MacOS) || defined(MSWin32)
-    if (mkdir(pathName) == -1)
-#else
     if (mkdir(pathName, (mode_t) v2) == -1)
-#endif
 	PI_FAIL;
 
     PI_SUCCEED;
@@ -970,7 +849,6 @@ isdir(fname)
     return (buf.st_mode & S_IFDIR);
 }
 
-#ifndef MacOS
 int
 pgetpid()
 {
@@ -984,10 +862,7 @@ pgetpid()
     else
 	PI_FAIL;
 }
-#endif
-#endif /* FSACCESS */
 
-#ifdef UNIX
 #include <sys/mman.h>
 #include <fcntl.h>
 
@@ -1047,10 +922,8 @@ void close_memory_file(mem_file_info *info)
     munmap(info->start, info->length);
 #endif
 }
-#endif
 
 
-#endif /* (defined(UNIX) || (defined(MacOS) && defined(HAVE_GUSI) && !defined(__GO32__) && !defined(OS2) */
 
 /* *INDENT-OFF* */
 PI_BEGIN

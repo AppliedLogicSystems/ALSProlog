@@ -9,6 +9,9 @@
 #define MISSING_EXTERN_GETHOSTNAME
 #define MISSING_EXTERN_GETIMEOFDAY
 
+#define MISSING_GLOB 1
+
+
 /* define __EXTENSIONS__ to get crypt() prototype */
 #define __EXTENSIONS__
 

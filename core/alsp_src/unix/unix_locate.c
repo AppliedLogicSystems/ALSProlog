@@ -2,7 +2,7 @@
 
 extern const int is_shared_library;
 
-#include <sys/param.h>
+#include <limits.h>
 
 static char *which(const char *path_list, const char *name, char *path)
 {
@@ -44,7 +44,7 @@ static void command_line_locate_executable(int argc, char *argv[])
       exec_path = argv[0];
     } else {
       const char *path_list;
-      char path[MAXPATHLEN];
+      char path[PATH_MAX];
 
       path_list = getenv("PATH");
       if (!path_list) path_list = "/bin:/usr/bin:";
@@ -65,7 +65,7 @@ static void command_line_locate_executable(int argc, char *argv[])
 static void locate_library(void)
 {
   const char *path_list, *lib_path;
-  char path[MAXPATHLEN];
+  char path[PATH_MAX];
 
   /* what to do about /etc/ld.so.cache? */
   /* What to do about -rdynamic paths? */

@@ -110,7 +110,6 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	    #include <netinet/in.h>
 	    #include <arpa/inet.h>
 	    #include <netdb.h>
-	    #include <sys/param.h>
 	    #ifndef MISSING_UNIX_DOMAIN_SOCKETS
 	       #include <sys/un.h>
 	    #endif /* MISSING_UNIX_DOMAIN_SOCKETS */
@@ -193,10 +192,6 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
     #endif /* BERKELEY_SOCKETS, PCFTP_SOCKETS */
 
 #endif /* HAVE_SOCKET */
-
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
 
 #ifndef SEEK_SET
 #define SEEK_SET 0		/* for lseek call */

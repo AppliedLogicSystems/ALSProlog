@@ -23,9 +23,6 @@
 #include <unistd.h>
 #endif
 
-#ifdef __GO32__
-#include <process.h>
-#endif
 
 #ifdef MacOS
 #include <Errors.h>

@@ -159,11 +159,7 @@ files(Pattern, FileList)
  *!----------------------------------------------------------------*/
 files(Directory, Pattern, List) 
 	:-
-	name(Pattern, PatternChars),
-	make_reg_exp(PatternChars, RegexChars0),
-	append(RegexChars0, "$", RegexChars),
-	name(Regex, [0'^ | RegexChars]),
-	getDirEntries(Directory, Regex, FirstResult),
+	getDirEntries(Directory, Pattern, FirstResult),
 	!,
 	fixFileType(regular, InternalFileType),
 	filterForFileType(FirstResult, Directory, InternalFileType, List).
@@ -288,13 +284,8 @@ directory(Pattern, FileType, List)
 	path_directory_tail(Pattern, InitPath, FilePattern),
 	(InitPath = '', !; must_exists_file(InitPath)),
 	!,
-	name(FilePattern, PatternChars),
-	make_reg_exp(PatternChars, RegexChars0),
-	append(RegexChars0, "$", RegexChars),
-	name(Regex, [0'^ | RegexChars]),
-
 	(InitPath = '' -> Path = '.' ; Path = InitPath),
-	getDirEntries(Path, Regex, FirstResult),
+	getDirEntries(Path, FilePattern, FirstResult),
 	!,
 	fixFileType(FileType, InternalFileType),
 	filterForFileType(FirstResult, Path, InternalFileType, List).
