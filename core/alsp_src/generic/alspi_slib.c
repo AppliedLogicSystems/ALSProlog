@@ -19,7 +19,7 @@ EXPORT int alspi_dlib_init(const alspi_func_ptrs *a_f,
   strcpy(library_dir, a_f->library_dir);
   strcpy(executable_path, a_f->executable_path);
   lib_funcs->pi_init = pi_init;
-  lib_funcs->pi_shutdown = NULL;
+  lib_funcs->pi_shutdown = (void (*)())NULL;
 
   return 0;
 }

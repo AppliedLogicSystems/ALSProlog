@@ -1,5 +1,9 @@
 #include <stdarg.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define ALSPI_DLIB_VERSION 3
 
 typedef struct {
@@ -59,3 +63,7 @@ typedef int (*alspi_init_func)(const alspi_func_ptrs *, library_func_ptrs *);
 #endif
 
 EXPORT int alspi_dlib_init(const alspi_func_ptrs *, library_func_ptrs *);
+
+#ifdef __cplusplus
+}
+#endif
