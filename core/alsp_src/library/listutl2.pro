@@ -10,11 +10,11 @@ module builtins.
 export deleteNth/3.
 export change_nth/3.
 export subst_nth/4.
-export nth/3. %% -- moved to simplio.pro in builtins
+%export nth/3. %% -- moved to simplio.pro in builtins
 export nth_tail/4.
 export at_most_n/3.
-export position/3.	%% -- moved to simplio.pro in builtins
-export position/4.	%% -- moved to simplio.pro in builtins
+%export position/3.	%% -- moved to simplio.pro in builtins
+%export position/4.	%% -- moved to simplio.pro in builtins
 export get_list_tail/3.
 export list_delete/3.
 export sublist/4.

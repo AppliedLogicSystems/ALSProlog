@@ -582,6 +582,7 @@ goalFix('$dbg_apg'(_,_,_),_,hide_pp) :- !, fail.
 goalFix(callWithDelayedInterrupt(M,G,_),callWithDelayedInterrupt(M,G),Mode) :- !.
 goalFix(freeze_list_ground(_,_,Goal),'{}'(Goal),Mode) :-!.
 goalFix(freeze_list_ground(_,Goal),'{}'(Goal),Mode) :-!.
+goalFix(clp(Goal),'{}'(Goal),Mode) :-!.
 goalFix(SemiGoal,SemiFixed,Mode)
 	:-
 	functor(SemiGoal,P,A),
@@ -990,6 +991,7 @@ ld_fs(OS)
 	consult_builtins(BDir, blt_frez),
 	consult_builtins(BDir, simplio),
 	consult_builtins(BDir, blt_flgs),
+	consult_builtins(BDir, blt_misc),
 	consult_builtins(BDir, blt_shl).
 
 %%--------------------------------------------

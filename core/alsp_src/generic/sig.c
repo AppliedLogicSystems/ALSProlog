@@ -251,12 +251,18 @@ static struct {int signal; const char *name;} signal_name_list[] = {
     {SIGTTIN, "sigttin"},
     {SIGTTOU, "sigttou"},
     {SIGIO, "sigio"},
-    /*{SIGXCPU, "sigxcpu"},*/
-    /*{SIGXFSZ, "sigxfsz"},*/
+#ifdef SIGXCPU
+    {SIGXCPU, "sigxcpu"},
+#endif
+#ifdef SIGXFSZ
+    {SIGXFSZ, "sigxfsz"},
+#endif
     {SIGVTALRM, "sigvtalrm"},
     {SIGPROF, "sigprof"},
     {SIGWINCH, "sigwinch"},
+#ifdef SIGLOST
     {SIGLOST, "siglost"},
+#endif
     {SIGUSR1, "sigusr1"},
     {SIGUSR2, "sigusr2"},    
 #endif /* unix */

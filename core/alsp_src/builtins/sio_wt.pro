@@ -1505,7 +1505,7 @@ cont_write_substs(Names,Substs,Stream)
 	:-
 	subst_orig_toplevel_names(Names,Substs),
 	subst_gen_letter_names(Substs,Substs0),
-	wr_subs2(Names,Substs0,Stream).
+	show_substs_ext(Names,Substs0,Stream).
 
 subst_orig_toplevel_names([],[]).
 
@@ -1580,20 +1580,21 @@ subst_gen_letter_names(InStruct,InCtr,OutStruct,OutCtr)
 	subst_gen_letter_names(InArgs, InCtr,OutArgs, OutCtr),
 	OutStruct =.. [Functor | OutArgs].
 
-wr_subs2(Ns, Ss, Stream)
+export show_substs_ext/3.
+show_substs_ext(Ns, Ss, Stream)
 	:-
 		%% VPairs is for printing delay terms:
 	rpairs_list(Ns, Ss, VPairs),
-	wr_subs2(Ns, Ss, VPairs, Stream).
+	show_substs_ext(Ns, Ss, VPairs, Stream).
 
-wr_subs2([],[],_,Stream) 
+show_substs_ext([],[],_,Stream) 
 	:- !.
 
-wr_subs2([N|Ns],[S|Ss],VPairs,Stream) 
+show_substs_ext([N|Ns],[S|Ss],VPairs,Stream) 
 	:-
 	wr_subs3(N,S,VPairs,Stream),
 	!,
-	wr_subs2(Ns,Ss,VPairs,Stream).
+	show_substs_ext(Ns,Ss,VPairs,Stream).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% show_[delay,interval]_binding/4

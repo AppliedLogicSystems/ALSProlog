@@ -9,7 +9,7 @@
  | 12/90 - K.Buettner -- reorganization to handle cutmacros differently
  *===================================================================*/
 
-	/*
+	/*------------------------------------------------------------------*
 	 * The following tokens and operators are cutmacros.
 	 * TK_CUT must be the last token which is a cutmacro.  There must
 	 * not be any tokens which are not cutmacros appearing before
@@ -17,7 +17,7 @@
 	 *
 	 * If it is necessary to change this, then cutmacro.h and cutmacro.c
 	 * must also be changed.
-	 */
+	 *------------------------------------------------------------------*/
 	
 	TK(TK_CALL,"call"),
 	TK(TK_OCALL,"callWithDelayedInterrupt"),
@@ -36,10 +36,10 @@
 	 * Finished with the cutmacros
 	 */
 	
-	/*
+	/*------------------------------------------------------------------*
 	 * The following tokens are arithmetic predicates.  We expect
 	 * TK_IS to be the first and TK_ZEBRA2 to be the last.
-	 */
+	 *------------------------------------------------------------------*/
 	
         OP(TK_IS,"is",0, OP_XFX(700)),
         OP(TK_LESS,"<",0,OP_XFX(700)),
@@ -49,25 +49,25 @@
         OP(TK_ZEBRA,"=:=",0,OP_XFX(700)),
         OP(TK_ZEBRA2,"=\\=",0,OP_XFX(700)),
 
-	/*
+	/*------------------------------------------------------------------*
 	 * The following tokens appear as symbols in arithmetic expressions
 	 * TK_HEAPUSED is the first and TK_RANDOM is the last.
 	 * 
 	 * If the order of these are changed or any new arithmetic tokens
 	 * added, the table of icode numbers in compmath.c must be changed.
-	 */
+	 *------------------------------------------------------------------*/
 
 	TK(TK_HEAPUSED,"heapused"),
 	TK(TK_CPUTIME,"cputime"),
 	TK(TK_REALTIME,"realtime"),
 	TK(TK_RANDOM,"random"),
 
-	/*
+	/*------------------------------------------------------------------*
 	 * The following tokens appear as unary operators or functions in
 	 * arithmetic expressions.  Note that there is an overlap between
 	 * these and the binary operators.  The first is TK_NOT and
 	 * the last is TK_TRUNC.
-	 */
+	 *------------------------------------------------------------------*/
 
         OP(TK_NOT,"not",OP_FY(900),0),
 	TK(TK_BACKSLASH,"\\"),
@@ -99,19 +99,19 @@
 
 	TK(TK_TRUNC,"trunc"),
 
-	/*
+	/*------------------------------------------------------------------*
 	 * TK_PLUS and TK_MINUS may appear as both unary an binary operators
 	 * in arithmetic expressions.
-	 */
+	 *------------------------------------------------------------------*/
 	
         OP(TK_PLUS,"+",OP_FX(100),OP_YFX(500)),
         OP(TK_MINUS,"-",OP_FX(100),OP_YFX(500)),
 
-	/*
+	/*------------------------------------------------------------------*
 	 * The following tokens appear as binary operators in arithmetic
 	 * expressions.  This list begins with TK_PLUS above and ends with
 	 * TK_HAT.
-	 */
+	 *------------------------------------------------------------------*/
 
     	TK(TK_ATAN2,"atan2"),
 	TK(TK_FMOD,"fmod"),
@@ -146,9 +146,9 @@
         OP(TK_2ST, "**", 0, OP_XFY(200)),
         OP(TK_HAT, "^",  0, OP_XFY(200)),
 
-	/*
+	/*------------------------------------------------------------------*
 	 * Rest of the tokens
-	 */
+	 *------------------------------------------------------------------*/
 
 	TK(TK_XFX,"xfx"),
 	TK(TK_XFY,"xfy"),
@@ -203,7 +203,9 @@
 	TK(TK_LONG_SYMBOL,"long_symbol"),
 	TK(TK_LONG_QSYMBOL,"long_qsymbol"),
 	TK(TK_VAR,"var"),
+	TK(TK_REAL,"real"),
 	TK(TK_INTEGER,"integer"),
+	TK(TK_BOOLEAN,"boolean"),
 	TK(TK_UINTEGER,"uinteger"),
 	TK(TK_FULLSTOP,"fullstop"),
 	TK(TK_LEXERR,"lexerr"),
@@ -292,11 +294,11 @@
 	TK(TK_NUMBER_CODES,"number_codes"),
 	TK(TK_SNR,"stream_not_ready"),
 
-		/* Tokens specifically added for the
-		   primitive operators of the
-		   interval constraint subsystem;
-		   TK_COS, TK_SIN, TK_TAN are defined above;
-		 */
+		/*------------------------------------------------------------------*
+		 |	Tokens specifically added for the primitive operators of the
+		 |	interval constraint subsystem;
+		 |  	TK_COS, TK_SIN, TK_TAN are defined above;
+		 *------------------------------------------------------------------*/
 
 	TK(TK_UNEQUAL, "unequal"),
 	TK(TK_EQUAL, "equal"),
@@ -319,12 +321,25 @@
 	TK(TK_WRAP, "wrap"),
 	TK(TK_XP, "xp"),
 /*        OP(TK_IDCL, "::", 0, OP_XFX(700)), */
+
+		/*------------------------------------------------------------------*
+		 |	Tokens specifically added for representing real number
+		 |	constants for the interval constraint subsystem;
+		 |	These are passed down symbolically as far as possible, and
+		 |	then are given explicit floating point values as accurately
+		 |	as possible (at the "last possible minute").  For each such
+		 |	token added, there should be an entry in symbolic_constant/2
+		 |	in the builtins file ra_basis.pro.
+		 *------------------------------------------------------------------*/
+	TK(TK_PI,  "cnst_pi"),
+	TK(TK_PI2, "cnst_pi_half"),
+	TK(TK_E,   "cnst_e"),
 	
-	/*
+	/*------------------------------------------------------------------*
 	 * TK_EOF is the last token and must remain so.  If adding a token
 	 * is necessary, it should be done before this point.  If it is
 	 * absolutely necessary to add tokens beyond TK_EOF, then symtab.c
 	 * must be changed as appropriate.  (Look at declaration of ts_next).
-	 */
+	 *------------------------------------------------------------------*/
 
 	TK(TK_EOF,"end_of_file")

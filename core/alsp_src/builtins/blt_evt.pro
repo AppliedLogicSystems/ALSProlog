@@ -225,33 +225,31 @@ throw_cntrl_c(sigint,Goal,Context) :-
 throw_cntrl_c(Event,Goal,Context) :-
 	propagate_event(Event,Goal,Context).
 
-prolog_error(_,_,_) :-
+prolog_error(_,_,_) 
+	:-
 	getPrologError(PE),
 	throw(PE).
 
-undefined_predicate(_,Goal,_) :-
+undefined_predicate(_,Goal,_) 
+	:-
 	get_PROLOG_flag(unknown,Val),
 	undefined_predicate(Val,Goal).
 
-undefined_predicate_fail(_,Goal,_) :-
+undefined_predicate_fail(_,Goal,_) 
+	:-
 	fail.
 
-undefined_predicate(fail,Goal) :-
-	!,
+undefined_predicate(fail,Goal) 
+	:-!,
 	fail.
-undefined_predicate(error, Goal) :-
-	!,
+undefined_predicate(error, Goal) 
+	:-!,
 	existence_error(procedure,Goal,Goal).
-undefined_predicate(warning, M:G) :-
-	!,
+undefined_predicate(Kind, M:G) 
+	:-
 	functor(G,P,A),
-	als_advise('\nWarning: Undefined procedure %s:%s/%d called.\n',[M,P,A]),
-	fail.
-undefined_predicate(break, M:G) :-
-	!,
-	functor(G,P,A),
-	als_advise('\nWarning: Undefined procedure %s:%s/%d called.\n',[M,P,A]),
-	breakhandler(M,G).
+	prolog_system_warning( error(existence_error(procedure,(M:P/A)),[M:G]),0),
+	(Kind = break -> breakhandler(M,G) ; fail).
 
 /*---------------------------------------------------------------*
  | Application controlled interrupts of procedures.

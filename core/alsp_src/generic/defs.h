@@ -150,7 +150,6 @@
 #define MIPS_IRIX53 1
 #endif
 
-
 /*---------------------------------------------------------------------*
  | Macros concerned with constraints, intervals, freeze, etc.
  |
@@ -307,6 +306,14 @@
 #elif
 #error
 
+#endif
+
+/*---------------------------------------------------------------------*
+ |	System-Level Debugging 
+ *---------------------------------------------------------------------*/
+
+#ifdef DEBUGSYS
+#include "debugsys.h"
 #endif
 
 #if defined(HAVE_LIBDL) || defined(HAVE_LIBLD)

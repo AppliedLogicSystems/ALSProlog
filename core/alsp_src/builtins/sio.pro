@@ -1384,12 +1384,13 @@ data_ready(Stream)
 :-dynamic(setStreamId/2).
 :-dynamic(getStreamId/2).
 
+/******************** MOVED TO blt_misc ***********************
 :-
 	/* For the moment, make this code assume nowins - we need to
 	   reorganize the loading order of the builtins in order to
 	   get flags working by the time sio is loaded. */
-	%%current_prolog_flag(windows_system, WinSys),
-	WinSys = nowins,
+	current_prolog_flag(windows_system, WinSys),
+%	WinSys = nowins,
 	(WinSys = motif ->
 		assert_at_load_time(
 			( winsGetTextInsertionPosition(WinID, WinInsertPos) :-
@@ -1456,6 +1457,7 @@ data_ready(Stream)
 	;	%% OpenLook %%
 	true
 	).
+******************** MOVED TO blt_misc ***********************/
 
 wait_data(sysV_queue, Stream, Call) :-
 	loop_for_data(sysV_queue, Stream),

@@ -300,26 +300,73 @@ subst_var(Term, V, W, Term).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% For showanswers:
+%%% For showanswers, and relatives:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+export show_v_list/1.
+export show_v_list/2.
+
+show_v_list([],[]).
+show_v_list([X | L],[VN | LNs])
+	:-
+	show_variable(VN,X),
+	show_v_list(L,LNs).
+			 
+show_v_list([]).
+show_v_list([X | L])
+	:-
+	show_variable(X),
+	show_v_list(L).
+
+
+export show_variable/2.
+show_variable(VName,Var)
+	:-
+	var(Var),
+	!,
+	sio:get_current_output_stream(Stream),
+	(show_interval_binding(VName,Var,[],Stream) -> 
+		true 
+		;
+		printf(Stream, '\n%t = %t', [VName])
+	).
+		
+show_variable(VName,Var)
+	:-
+	sio:get_current_output_stream(Stream),
+	printf(Stream, '\n%t = %t', [VName,Var]).
 
 :-rel_arith:dynamic('$domain_term'/2).
 
+export show_interval_binding/4.
 show_interval_binding(N,S,VPairs,Stream)
 	:-
+	var(S),
 	rel_arith:'$domain_term'(S, DomainTerm),
-	rel_arith:valid_domain(DomainTerm, Type, LArg, UArg),
+	rel_arith:valid_domain(DomainTerm, Type, LArg0, UArg0),
 	!,
 			%% show the associated domain; ignore
 			%% any other constraints;
+	(dmember(Type, [integer,boolean]) ->
+		LArg is floor(LArg0),
+		UArg is floor(UArg0)
+		;
+		LArg = LArg0, UArg = UArg0
+	),
 	epsilon_show(Eps),
 	Width is abs(UArg - LArg),
 	(Width < Eps ->
-		SPrt is (UArg + LArg)/2
+		SPrt0 is (UArg + LArg)/2,
+		(dmember(Type, [integer,boolean]) ->
+			SPrt is floor(SPrt0)
+			; 
+			SPrt is SPrt0
+		)
 		;
 		SPrt = [LArg, UArg]
 	),
 	nl(Stream),
+	!,
 	write_term(Stream,'%lettervar%'(N)=SPrt,[]).
 
 show_interval_binding(N,S,VPairs,Stream)
@@ -329,6 +376,7 @@ show_interval_binding(N,S,VPairs,Stream)
 :-dynamic(freeze_disp_vns/0).
 %freeze_disp_vns.
 
+export show_delay_binding/4.
 show_delay_binding(N, S, VPairs, Stream)
 	:-
 	'$delay_term_for'(S, VarDelayTerm),
@@ -344,6 +392,7 @@ show_delay_binding(N, S, VPairs, Stream)
 	),
 	write_term(Stream,'->',[]),
 	exact_merge(VPairs, [(S, N)], XVPairs),
+	!,
 	w_d_t(VarDelayTerm, Stream, XVPairs, Subsids).
 		%% Need to recursively go on & display te
 		%% var(pairs) on Subsids....
@@ -388,7 +437,7 @@ w_d_t([], Stream, _, [])
 	write_term(Stream, [], []).
 
 w_d_t([FT | FTs], Stream, XVPairs, Subsids)
-	:-
+	:-!,
 	put_char(Stream, '['),
 	w_d_t_seq([FT | FTs], Stream, XVPairs, Subsids),
 	put_char(Stream, ']').
@@ -443,7 +492,8 @@ exact_merge([(V,I) | LeftPairs], RightPairs, [(V,I) | OutPairs])
 
 exact_mem([(W, _) | _], V)
 	:-
-	W == V, !.	
+	W == V, 
+	!.	
 exact_mem([ _ | RightPairs], V)
 	:-
 	exact_mem(RightPairs, V).

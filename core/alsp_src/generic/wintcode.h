@@ -214,6 +214,8 @@ extern ntbl_entry **w_nametable;
 #define clsRInfo(item) 	 		(*((long *)(item) + WCI_RINFO))
 #define clsRInfoBuf(item) 		((long *)((long *)(item) + clsRInfo(item)))
 
+#define backChoiceCode(item)    (long *)((long *)(item) - WCI_CHOICECODE)
+
 /*-----------------------------------------------------------------*
  | Clause group id info
  |

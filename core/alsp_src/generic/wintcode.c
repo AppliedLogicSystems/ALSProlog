@@ -1360,7 +1360,7 @@ w_addclause(p, a, cg_id,
     else if (cg_id != CGI_ASSERTA && cg_id >= cgId(ent->last_clause)) {
 
 	/*
-	 * The clause which we want add should come after all existing clauses
+	 * The clause which we want to add should come after all existing clauses
 	 * in the procedure.  The first thing we do is determine the clause id
 	 * for the clause we are adding.
 	 */

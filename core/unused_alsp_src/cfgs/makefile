@@ -6,7 +6,7 @@ A2M = ../generate/abs2make
 
 ALSPRO = alspro
 
-all: all-generic all-port all-maketop install.unix
+all: all-generic all-port all-maketop
 
 #
 #	All versions of ...

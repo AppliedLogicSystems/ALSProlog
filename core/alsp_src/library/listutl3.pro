@@ -11,6 +11,7 @@ export nobind_member/2.
 export output_prolog_list/1.
 export output_prolog_list/6.
 export flatten/2.
+export is_length/2.
 export n_of/3.
 export number_list/2.
 export number_list/3.
@@ -38,41 +39,6 @@ nobind_member(X, [Y | _])
 nobind_member(X, [_ | T])
 	:-
 	nobind_member(X, T).
-
-/*************
-/*!---------------------------------------------------------------------
- |	output_prolog_list/1
- |	output_prolog_list(List)
- |	output_prolog_list(+)
- |
- |	- outputs items on a list, one to a line
- |
- |	Outputs (to the current output stream) each item on List, one item
- |	to a line, followed by a period.
- *!--------------------------------------------------------------------*/
-output_prolog_list(List)
-	:-
-	current_output(Stream),
-	output_prolog_list(Stream, List,'','.',' - ','').
-
-output_prolog_list(List,Indent,Term,Spacer,DefaultContent)
-	:-
-	current_output(Stream),
-	output_prolog_list(Stream,List,Indent,Term,Spacer,DefaultContent).
-
-output_prolog_list(Stream,[],Indent,Term,Spacer,DefaultContent).
-output_prolog_list(Stream,[Item | RestList],Indent,Term,Spacer,DefaultContent)
-	:-
-	(Item = (Code-Content) ->
-		printf(Stream,"%t%t%t%t%t",[Indent,Code,Spacer,Content,Term]),
-		(Content=DefaultContent -> put_code(Stream,0'*);true)
-		;
-		printf(Stream,"%t%t%t",[Indent,Item,Term]),
-		(Iterm=DefaultContent -> put_code(Stream,0'*);true)
-	),
-	nl(Stream),
-	output_prolog_list(Stream,RestList,Indent,Term,Spacer,DefaultContent).
-*************/
 
 /*!---------------------------------------------------------------------
  |	flatten/2
@@ -109,6 +75,30 @@ n_of(N, Item, [Item | RestItems])
    :-
    M is N -1,
    n_of(M, Item, RestItems).
+
+/*!---------------------------------------------------------------------
+ |	is_length/2
+ |	is_length(List, N)
+ |	is_length(?, ?)
+ |	
+ |	- invertible length predicate
+ |	
+ |	List is of length N - works in both directions.
+ *!--------------------------------------------------------------------*/
+is_length([], 0) :-!.
+is_length([_ | Tail], N)
+	:-
+	integer(N),
+	N > 0,
+	!,
+	N1 is N - 1,
+	is_length(Tail, N1).
+
+is_length([_ | Tail], N)
+	:-
+	var(N),
+	is_length(Tail, N1),
+	N is N1 + 1.
 
 /*!---------------------------------------------------------------------
  |	number_list/2

@@ -21,14 +21,9 @@
 #include "freeze.h"
 #endif
 
-/*
-#define DEBUGFREEZE 1
-#define GCDEBUG 1
-*/
-
-#ifdef GCDEBUG
+#ifdef DEBUGSYS /*--------------------------------------------------*/
 #include <time.h>
-#endif
+#endif /* ---------------------------------------------- DEBUGSYS --*/
 
 #undef mask
 
@@ -140,8 +135,10 @@ static long *heap_low;
 static long *heap_high;
 static long nmarked;
 
+#ifdef DEBUGSYS /*--------------------------------------------------*/
 static int gccallcount;		/* number of times gc has been called */
 extern int gcbeep;
+#endif /* ---------------------------------------------- DEBUGSYS --*/
 
 static	long *	mark_args	PARAMS(( long *, Code * ));
 static	void	mark_from	PARAMS(( long * ));
@@ -164,7 +161,7 @@ gc()
     long *b;
     long *ap;
     long *apb;
-    long *tr /*, *tr2 */;
+    long *tr;
     long *oldest_ap;
     Code *ra;			/* return address */
     register int i;
@@ -172,9 +169,9 @@ gc()
     register unsigned long *mp;
     register unsigned long m;
     int   compactionbit;
-#ifdef GCDEBUG
+#ifdef DEBUGSYS /*--------------------------------------------------*/
     unsigned long start_tick, finish_tick;
-#endif
+#endif /* ---------------------------------------------- DEBUGSYS --*/
 
 	/* For demos and hardware-key protected versions, check copy protection. */
     check_security();
@@ -188,7 +185,8 @@ gc()
     wm_H -= BIAS;
     wm_E -= BIAS;
 
-    if (gcbeep) {
+#ifdef DEBUGSYS /*--------------------------------------------------*/
+	if (debug_system[GCBEEP]) {
 	    putchar(007);
 #ifdef MacOS
 	    putchar(007);
@@ -198,14 +196,17 @@ gc()
 #endif
 	    fflush(stdout);
     }
-
     gccallcount++;
 
-#ifdef GCDEBUG
-    printf("\nStarting GC: %d  ", gccallcount);
-    fflush(stdout);
-    start_tick = clock();
-#endif /* GCDEBUG */
+	if (debug_system[GCINFO]) {
+    	printf("\nStarting GC: %d  \n", gccallcount);
+		pbi_cptx();
+/*		pbi_walk_cps(); */
+/*		pbi_swp_tr();  */
+    	fflush(stdout);
+    	start_tick = clock();
+	}
+#endif /* ---------------------------------------------- DEBUGSYS --*/
 
     /*-------------------------------------------------------------------------*
      | Phase 1: Set mrccp, heap_high, heap_low, initialize nmarks and the mark
@@ -235,6 +236,10 @@ gc()
 #endif
     mrccp = wm_B;
 
+			/*-------------------------------------------------------------------*
+			 | If any global variable has been set since the last gc, set mrccp
+			 | to be the very oldest choice point.
+			 *-------------------------------------------------------------------*/
     if (gv_setcnt) {
 		while (chpt_B(mrccp) != (long *) 0) {
 	    	mrccp = chpt_B(mrccp);
@@ -243,8 +248,13 @@ gc()
 	compactionbit = 0;
 	gv_setcnt = 0;
     }
-    else 
+    else 	/* !gv_setcnt */
 	{
+			/*-------------------------------------------------------------------*
+			 | If no global variable has been set since the last gc, set mrccp
+			 | to be the most recent choice point which has been compacted
+			 | (which, of course, could turn out to be the very oldest cp)
+			 *-------------------------------------------------------------------*/
 		while (chpt_B(mrccp) != (long *) 0 && !chpt_COMPACTED(mrccp)) {
 #ifdef ChptAfterTrail
 	    	b = mrccp;
@@ -287,10 +297,6 @@ gc()
     b =  wm_B;
     tr = wm_TR;
 
-/*
-printf("GC-p2:b=wm_B=%x mrccp=%x\n",b,mrccp);
-*/
-
     while (b <= mrccp) {
 			/* nuke the compaction bit */
 		apb = (long *) (((long) chpt_SPB(b)) & ~1);
@@ -325,11 +331,39 @@ printf("GC-p2:b=wm_B=%x mrccp=%x\n",b,mrccp);
 	    	}  /* while (e < apb)  */
 		}      /* if (apb <= e)-else */
 
+#ifdef TRAILVALS
+		/*------------------------------------------------------------------*
+		 | mark_from(L) expects L to be (an ordinary C) pointer to a location
+		 | holding a Prolog (heap) value; since tr points at a trail location,
+		 | then *tr is such a value for the ordinary (non-TRAILVALS) sitiutation;
+		 | However, in the TRAILVALS case, this is only true for the (upper)
+		 | one of each pair of entries on the trail.  In the lower member
+		 | of a trail pair, we have copied the contents of a heap location into
+		 | that trail position; hence *tr is incorrect for such a location;
+		 | instead, we want to just pass tr to mark_from in that case.
+		 |     Now, tr is sweeping from lower (more recent) to upper locations
+		 | on the trail; thus it encounters the lower member (copied value
+		 | to be reset) first, then the upper regular type of trail location
+		 | second.  Note that any of these copied (2nd pair member) values
+		 | might be needed on backtracking, and so must be preserved under
+		 | gc.
+		 *------------------------------------------------------------------*/
+		for (; tr < b; tr++) {
+				/* mark the copied (2nd pair element) value): */
+	/*		mark_from(tr);    */
+    		mark(val_at(tr));
+				/* move up one element; now an "ordinary" trail value: */ 
+	    	ap = (long *) *++tr;	/* tr is not biased */
+	    	if (oldest_ap <= ap && ap < heap_low)
+				mark_from(ap);
+		}
+#else /* no-TRAILVALS */
 		for (; tr < b; tr++) {
 	    	ap = (long *) *tr;	/* tr is not biased */
 	    	if (oldest_ap <= ap && ap < heap_low)
 				mark_from(ap);
 		}
+#endif    /* TRAILVALS */
 
 		ap = apb;
 
@@ -352,26 +386,35 @@ printf("GC-p2:b=wm_B=%x mrccp=%x\n",b,mrccp);
 		mark_from(ap - BIAS);
 
     /*-----------------------------------------------------------------------*
-     * Phase 3: Now everything should be marked.  We need to traverse the
-     *          choice point chain and locate new positions for the HB
-     *          values.  Due to the way that global variables work, trail
-     *          entries which point into regions of the uncompacted heap
-     *          can also be garbaged.  So we must compact the trail at the
-     *          same time.  Unfortunately, we must also perform the usual
-     *          trail compaction in cut to get rid of garbaged trail entries
-     *          which point at the stack.  These cannot always be determined
-     *          in the garbage collector.
-     *
-     *          In the following code:
-     *             b is the lead pointer.
-     *             tr is the follow pointer.
-     *             apb is use to keep track of where the previous chpt is
+     | Phase 3: Now everything should be marked.  We need to traverse the
+     |          choice point chain and locate new positions for the HB
+     |          values.  Due to the way that global variables work, trail
+     |          entries which point into regions of the uncompacted heap
+     |          can also be garbaged.  So we must compact the trail at the
+     |          same time.  Unfortunately, we must also perform the usual
+     |          trail compaction in cut to get rid of garbaged trail entries
+     |          which point at the stack.  These cannot always be determined
+     |          in the garbage collector.
+     |
+     |          In the following code:
+     |             b is the lead pointer.
+     |             tr is the follow pointer.
+     |             apb is use to keep track of where the previous chpt is
+	 |
+	 |	The primary for loop steps from choice point to choice point, working
+	 |	its way down from mrccp to the most recent (topmost) choice point.
+	 |  At each step of the loop, b initially points to the lowest (start)
+	 |  point of a cp, so we can do things like apply chpt_HB() to b;
+	 |  During the course of one interation, we decrement b (-- or two --'s)
+	 |  until it hits the top of the next choice point (or steps off the
+	 |  cp_stack/trail.
      *-----------------------------------------------------------------------*/
 
     b = tr = mrccp;
     apb = chpt_B(b);
 
 #ifdef ChptBeforeTrail
+/* printf("Fake chpt_B entry: wmTR-1=%0x mrccp=%0x\n",wm_TR - 1,mrccp); */
     *(wm_TR - 1) = (PWord) mrccp;	/* Fake chpt_B entry */
 #else
     if (apb != (long *) 0) {
@@ -382,7 +425,7 @@ printf("GC-p2:b=wm_B=%x mrccp=%x\n",b,mrccp);
 
     for (;;) {
 
-		/* -- Update the choice point */
+		/* -- Update the (current) choice point */
 
 		h = chpt_HB(b);				/* get hb */
 		chpt_B(tr) = apb;			/* update the b value */
@@ -421,29 +464,42 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 #endif
 
 			/* -- Process trail entries until we detect the bottom of a chpt */
-    		/* long *b;  */
-    		/* long *tr, *tr2; */
+    		/* long *b,  *tr */
 
+			/*---------------------------------------------------------------*
+			 | The pair (b, tr) sweep down from the bottom of one cp to the
+			 | top of the next (younger) cp; at each step, b is advanced
+			 | first, and then tr.
+			 *---------------------------------------------------------------*/
 #ifdef TRAILVALS
-		while ((ap = (long *) *--b) < b) {		/* while ap is a trail entry */
+			/*---------------------------------------------------------------*
+			 | Since we are moving physically down the cp_stack/trail, b
+			 | encounters the ordinary trail entry part of a pair first; then
+			 | the copied value part lies below that.
+			 *---------------------------------------------------------------*/
+		while ((ap = (long *) *--b) < b) {		/* while b not the top word in next cp */
 	    	if (heap_low <= ap && ap <= heap_high) {
 				if (MARKED(ap)) {
 		    		*--tr = (long) ap;			/* copy the trail entry */
 		    		REV(tr - BIAS);				/* and reverse it 		*/
-		    		*--tr = (long) *--b;		/* copy the trail value entry */
+					b -= 1;
+		    		*--tr = (long) *b;			/* copy the trail value entry */
 		    		REV(tr - BIAS);				/* and reverse it 		*/
 				}
+				else
+					b -= 1;
 	    	}
 	    	else {								/* else in compacted heap or on stack */
 				*--tr = (long) ap;				/* copy the trail entry */
-		    	*--tr = (long) (long *) *--b;		/* copy the trail value entry */
+				b -= 1;
+		    	*--tr = (long) (long *) *b;		/* copy the trail value entry */
 	    	}
 		}	/* while((ap = ...)) */
 
 
 #else /* no-TRAILVALS */
 
-		while ((ap = (long *) *--b) < b) {		/* while ap is a trail entry */
+		while ((ap = (long *) *--b) < b) {		/* while b not the top word in next cp */
 	    	if (heap_low <= ap && ap <= heap_high) {
 				if (MARKED(ap)) {
 		    		*--tr = (long) ap;			/* copy the trail entry */
@@ -472,7 +528,9 @@ chpt_after_trail_entry:	/* entry point into for-loop */
     wm_B  = apb;		/* update B */
     wm_TR = tr;			/* update TR */
 
-    	/* -- Begin block for phases 4, 5, and 6 */
+		/* ---------------------------------------- */
+    	/* -- Begin block for phases 4, 5, and 6 -- */
+		/* ---------------------------------------- */
     {
 	register unsigned long *mstop;
 	register long *nh;
@@ -568,12 +626,17 @@ chpt_after_trail_entry:	/* entry point into for-loop */
     wm_E += BIAS;
     wm_heapbase += BIAS;
 
-#ifdef GCDEBUG
-    finish_tick = clock();
-    printf("Compaction complete: nmarked=%d time=%lu ticks\n", nmarked, finish_tick - start_tick);
-    fflush(stdout);
-    
-#endif /* GCDEBUG */
+#ifdef DEBUGSYS /*--------------------------------------------------*/
+	if (debug_system[GCINFO]) {
+    	finish_tick = clock();
+    	printf("Compaction complete: nmarked=%d time=%lu ticks\n", 
+					nmarked, finish_tick - start_tick);
+		pbi_cptx();
+/*		pbi_walk_cps(); */
+/*		pbi_swp_tr();  */
+    	fflush(stdout);
+	}
+#endif /* ---------------------------------------------- DEBUGSYS --*/
 
     return 1;
 
@@ -807,16 +870,20 @@ mark_top:
 				 */
 		if (CHK_DELAY((PWord *)val))
 			{
-#ifdef DEBUGFREEZE
-    		printf("\ngc: Delay-val=%x tag=%d..",(int)val,(int)tag);
-    		fflush(stdout);
-#endif /* DBGFR */
+#ifdef DEBUGSYS /*--------------------------------------------------*/
+								if (debug_system[FREEZEINFO]) {
+    								printf("\ngc: Delay-val=%x tag=%d..",(int)val,(int)tag);
+    								fflush(stdout);
+								}
+#endif /* ---------------------------------------------- DEBUGSYS --*/
 			xval = (long) MMK_STRUCTURE( ((PWord *)val)-1 );
 			mark(xval);   
-#ifdef DEBUGFREEZE
-    		printf("--xval=%x marked\n",(int)xval);
-    		fflush(stdout);
-#endif /* DBGFR */
+#ifdef DEBUGSYS /*--------------------------------------------------*/
+								if (debug_system[FREEZEINFO]) {
+    								printf("--xval=%x marked\n",(int)xval);
+    								fflush(stdout);
+								}
+#endif /* ---------------------------------------------- DEBUGSYS --*/
 			}
 #endif /* FREEZE */
 
@@ -899,44 +966,3 @@ mark_backup:
     }
 }	/* mark(val) */
 
-
-#ifdef PRIM_DBG
-void ppwrite PARAMS ((PWord));
-
-void
-ppwrite(PWord pv)
-{
-    PWord v;
-    int t;
-
-    w_get(&v, &t, pv);
-    printf("\n");
-    prolog_writeq(v, t);
-    printf("\n");
-}
-
-int gcstats PARAMS ((void));
-
-int
-gcstats()
-{
-    return gccallcount;
-}
-
-void print_chpts PARAMS ((register long *));
-
-void
-print_chpts(register long *b)
-/*    register long *b;   */
-{
-    while (b) {
-	printf("%lx:%10lx%10lx%10lx%10lx\n",
-	       (long) b,
-	       (long) chpt_NextClause(b),
-	       (long) chpt_HB(b),
-	       (long) chpt_SPB(b),
-	       (long) chpt_B(b));
-	b = chpt_B(b);
-    }
-}
-#endif

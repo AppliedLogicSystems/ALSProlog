@@ -14,7 +14,9 @@ OS2
 
 PROLOG-LEVEL (more or less) PROPERTY TAGS
 -----------------------------------------
-PRIM_DBG -  primitive low-level (system development) debugging code.
+DEBUGSYS -  system-level development debugging code.
+
+PRIM_DBG -  primitive low-level (system development) debugging code - old-dropped
 
 BCINTER - extended C interface code
 
@@ -22,13 +24,13 @@ LIBBRK - prolog library mechanism code
 
 INTCONSTR - specific interval constraint code
 
-CONSTRDEBUG - debug interval constraint code
+CONSTRDEBUG - debug interval constraint code -- to be dropped
 
 TRAILVALS - trail values - reset vars to previous vals (trailed_mangle only);
 
 FREEZE - specific freeze code
 
-DEBUGFREEZE - debugging messages for freeze support code
+DEBUGFREEZE - debugging messages for freeze support code -- to be dropped
 
 DynamicForeign - dynamic loading of foreign (C) code
 

@@ -873,22 +873,30 @@ overflow_check0:
 #ifdef DEBUG
 		if ((unsigned long) mr_SP < (unsigned long) wm_stackbot_safety)
 			stack_overflow();
-#endif
+#endif	/* DEBUG */
 		yield_counter -= 1;
 	    if (yield_counter == 0) {
 	    	PI_yield_time();
 	    	yield_counter = yield_interval;
 	    }
-#endif
+#endif	/* MacOS */
 	    if (((unsigned long) mr_TR - (unsigned long) mr_H) 
 				>= (unsigned long) wm_safety) {
 			DISPATCH;
 	    }
 	    if ((unsigned long) wm_safety <= (unsigned long) wm_normal) {
-			/* gc interrupt */
+				/* gc interrupt */
+#ifdef DEBUGSYS	/*--------------------------------------------------*/
+								if (debug_system[GCINTR]) 
+									printf("-<<Start GC interrupt\n");
+#endif /* ---------------------------------------------- DEBUGSYS --*/
 			UNSHADOW_REGS;
 			gc();
 			SHADOW_REGS;
+#ifdef DEBUGSYS	/*--------------------------------------------------*/
+								if (debug_system[GCINTR]) 
+									printf("-<<Return from GC interrupt\n");
+#endif /* ---------------------------------------------- DEBUGSYS --*/
 			DISPATCH;
 	    }
 	    else {
@@ -2093,6 +2101,8 @@ _w_unify(f1, f2)
     return (retval);
 }
 
+#ifdef FREEZE
+
 /*---------------------------------------------------------------*
  |  Function call to bind vars without invoking any
  |  interrupt or vvbind constraint mechanisms; used in
@@ -2103,58 +2113,69 @@ _w_unify(f1, f2)
  |
  |		installs a reference to G into R (R --> G)
  *---------------------------------------------------------------*/
-
 int     pbi_bind_vars           PARAMS(( void ));
 
 int
 pbi_bind_vars()
 {
-        PWord r,  g;
-        int   rt, gt;
+	PWord r,  g;
+	int   rt, gt;
 
-    w_get_An(&r, &rt, 1);
-    w_get_An(&g, &gt, 2);
+	w_get_An(&r, &rt, 1);
+	w_get_An(&g, &gt, 2);
 
-/* printf("++bind_vars (wm_H=%x wm_HB=%x)left:%x[_%lu] right:%x[_%lu]\n", 
-		wm_H, wm_HB,(int)r, (long)(((PWord *) r) - wm_heapbase),
-		(int)g, (long)(((PWord *) g) - wm_heapbase));
-*/
+#ifdef DEBUGSYS
+	if (debug_system[FREZBV])
+		printf("++bind_vars (wm_H=%x wm_HB=%x)left:%x[_%lu] right:%x[_%lu]\n", 
+				wm_H, wm_HB,(int)r, (long)(((PWord *) r) - wm_heapbase),
+				(int)g, (long)(((PWord *) g) - wm_heapbase));
+#endif
 
-    *PWPTR(r) = g;
-    PLAINTRAIL(r);
-
-    SUCCEED;
-
+	*PWPTR(r) = g;
+	PLAINTRAIL(r);
+	SUCCEED;
 }
 
-/* THis assumes that
-	FREEZE = 1 and TRAILVALS = 1
- */
+#if defined(INTCONSTR)
+#include "intrv.h"
 
-static void
-bind_int_unfreeze(r,t,d)
+void
+bind_point_unfreeze(r,t,pv,k)
 	PWord *r;
-	int *t;
-	double d;
+	int *t,k;
+	double pv;
 {
 	PWord *vl;
 
-printf("bind_int_unfreeze(%x,%d,%g)\n",r,t,d);
-		/* make the int: */
+#ifdef DEBUGSYS
+	if (debug_system[CSTRBPUF])
+		printf("bind_point_unfreeze(r=%x,t=%d,pv=%e,k=%d)\n",r,t,pv,k); 
+#endif
+		/* make the number: */
 	vl = wm_H++;
-	make_number(vl, t, d);
-	w_install(vl, *vl, *t);
+	if ((k == INTEGERKIND) || (k == BOOLEANKIND))
+		make_numberx(vl, t, pv, WTP_INTEGER);
+	else
+		make_numberx(vl, t, pv, WTP_DOUBLE);
 
-/*  #define BIND(r,f)     { TRAIL(r,0); *(r) = PWORD(f); } */
+	/*  -------------------------------------------------------- *
+		#define BIND(r,f)     { TRAIL(r,0); *(r) = PWORD(f); }  
+		#define PLAINTRAIL(r)                             \
+  			{ if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) \
+				*--mr_TR = PWORD(r);                        \
+				*--mr_TR = *((PWord *)r); }
+	 *  -------------------------------------------------------- */
 
 	if( PWPTR(r) < wm_HB  &&  PWPTR(r) >= wm_SPB) {
 	  *(PWord *)--wm_TR = PWORD(r);
 	  *(PWord *)--wm_TR = *PWPTR(r);
 	}
+	w_install(r, *vl, *t);
 
-	*((PWord *)r +1) = (PWord)((PWord *)r + 1); 				  \
 	wm_safety = -2; 
 	wm_interrupt_caught = 3; 
-	
-
 } 
+	
+#endif /* defined(INTCONSTR) */
+#endif /* FREEZE */
+

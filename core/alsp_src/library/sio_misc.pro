@@ -69,6 +69,7 @@ iseoln(0'\r).
 
 isspace(S) :- S =< 32, not(iseoln(S)).
 
+/*********************************************************
 /*
  * get_atomic_nonblank_char(Char)
  *
@@ -121,6 +122,7 @@ first_nonblank_char([Char | Rest], Char) :-
 first_nonblank_char([_ | Rest], Char) :-
 	first_nonblank_char(Rest, Char).
 
+*********************************************************/
 
 /*
  * put_byte(Byte)
