@@ -595,7 +595,9 @@ load_source(_,_) :-
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 attempt_load_source_object(SPath,OPath) :-
+pbi_write(trying-attempt_load_source_object(SPath,OPath)),pbi_nl,pbi_ttyflush,
 	exists_file(SPath),
+pbi_write(after-exists_file(SPath)),pbi_nl,pbi_ttyflush,
 	prolog_system_error(atmpt_cmp, [SPath]),
 	load_source_object(SPath,OPath).
 attempt_load_source_object(SPath,OPath) :-
@@ -660,14 +662,25 @@ get_fcg(Path,CG) :-
 
 :- dynamic(searchdir/1).
 
-possibleLocation(FileName, FileName) :-
+possibleLocation(FileName, FileName) 
+	:-
 	is_absolute_pathname(FileName),
 	!.
+
 possibleLocation(FileName, FileName).
-possibleLocation(FileName, Path) :-
+
+possibleLocation(FileName, Path) 
+	:-
 	searchdir(Dir),
 	pathPlusFile(Dir, FileName, Path).
 
+possibleLocation(FileName, Path) 
+	:-
+ 	sys_searchdir(Dir),
+	(extendPath(Dir,builtins,XDir) ;
+		extendPath(Dir,library,XDir)
+	),
+	pathPlusFile(XDir, FileName, Path).
 
 /*-----------------------------------------------------------------------*
  * make_file_name(FileStruct, FileName, Type)
