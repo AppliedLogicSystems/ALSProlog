@@ -15,14 +15,16 @@ complete_prologdoc(Data, ModsPredsLists, General, Groups, CurDir, OneLiners)
 	dmember(doctitle=DocTitle, General),
 	dmember(datetime=DateTime, General),
 	get_mods_dir_list(Data, ModsDirList),
-	modules_focus_files(ModsPredsLists, ModsDirList, DocTitle, KeyWords, DateTime, ModsEntries),
+	modules_focus_files(
+		ModsPredsLists, ModsDirList, DocTitle, KeyWords, DateTime, ModsEntries),
 	append(ModsEntries, AllModsEntries),
 	sort(AllModsEntries, SortedAllModsEntries),
 	dmember(destdir=DestDir, General),
 	sprintf(atom(PLPath), '%t/predicateslist-frame.html', [DestDir]),
 	open(PLPath, write, PLOS),
 	unwind_protect(
-	    write_predicateslist_frame(SortedAllModsEntries, DocTitle, KeyWords, DateTime, PLOS), 
+	    write_predicateslist_frame(
+	    	SortedAllModsEntries, DocTitle, KeyWords, DateTime, PLOS), 
 	    close(PLOS)),
 	get_mods_files_list(Data, ModsFilesLists),
 	close_off_all(ModsFilesLists, ResultModsFilesLists),
@@ -31,15 +33,17 @@ complete_prologdoc(Data, ModsPredsLists, General, Groups, CurDir, OneLiners)
 	dmember(modulenames=ModuleNames, General),
 	get_mods_dir_list(Data, ModsDirList),
 	build_mods_descs(ModuleNames, ResultModsInfoList, ResultModsFilesLists, 
-				ModsDirList, ModsPredsLists, General, Data, ModsDescs),
-	overall_view(Data, General, Groups, ModsDescs),
+				ModsDirList, ModsPredsLists, General, Data, ModsDescs, ''),
+
+        get_files_list(Data, FilesInfoList),
 	printf(user_output, '>>> Creating standard index ... \n', []),
 	build_standard_index(Data, General, ModsDescs, SortedAllModsEntries, OneLiners),
 	printf(user_output, '>>> Creating KWIC index ... \n', []),
 	build_kwic_index(Data, General, OneLiners),
 	printf(user_output, '>>> Creating files description ... \n', []),
-	build_files_desc(Data, General),
-	printf(user_output, '>>> Finished creating PrologDoc. \n', []).
+	build_files_desc(Data, General, FileDescLines),
+	printf(user_output, '>>> Finished creating PrologDoc. \n', []),
+	overall_view(Data, General, Groups, ModsDescs, FilesInfoList, FileDescLines).
 
 modules_focus_files([], _, _, _, _, []).
 modules_focus_files([Mod-ModPreds | ModsPredsLists], ModsDirList, DocTitle, KeyWords, DateTime, [ModEntries | RestModsEntries])
@@ -341,8 +345,9 @@ all_predicates_frame_entries([Triple | RestTriples], OS)
 		 | MODULE DESCRIPTIONS
 		 *----------------------------------------*/
 
-build_mods_descs([], _, _, _, _, _, _, []).
-build_mods_descs([Mod | ModuleNames], ModsInfoList, ModsFilesList, ModsDirList, ModsPredsLists, General, Data, [Mod-ShortModDesc | RestModDescs])
+build_mods_descs([], _, _, _, _, _, _, [], _).
+build_mods_descs([Mod | ModuleNames], ModsInfoList, ModsFilesList, ModsDirList, ModsPredsLists, General, 
+			Data, [Mod-ShortModDesc | RestModDescs], LastModSummary)
 	:-
 	dmember(Mod-ModDir, ModsDirList),
 	(dmember(Mod-ModInfo, ModsInfoList) ->
@@ -360,18 +365,29 @@ build_mods_descs([Mod | ModuleNames], ModsInfoList, ModsFilesList, ModsDirList, 
 		;
 		NumModPreds = 0
 	),
-	create_mod_desc(Mod, ModDir, ModInfo, ModFiles, NumModPreds, General, ShortModDesc),
-	build_mods_descs(ModuleNames, ModsInfoList, ModsFilesList, ModsDirList, ModsPredsLists, General, Data, RestModDescs).
+	(ModuleNames = [] ->
+		NextModSummary = ''
+		;
+		ModuleNames = [NextMod | _],
+		NextFilePathElts = ['..',NextMod,'module-summary.html'],
+		path_elements(NextModSummary, NextFilePathElts)
+	),
+	create_mod_desc(Mod, ModDir, ModInfo, ModFiles, NumModPreds, General, LastModSummary, NextModSummary, ShortModDesc, ThisModSummary),
+	build_mods_descs(ModuleNames, ModsInfoList, ModsFilesList, ModsDirList, ModsPredsLists, General, Data, RestModDescs, ThisModSummary).
 
-create_mod_desc(Mod, ModDir, ModInfo, ModFiles, NumModPreds, General, ShortModDesc)
+create_mod_desc(Mod, ModDir, ModInfo, ModFiles, NumModPreds, General, LastModSummary, NextModSummary, ShortModDesc, ThisModSummary)
 	:-
+	ThisModPathElts = ['..',Mod,'module-summary.html'],
+	path_elements(ThisModSummary, ThisModPathElts),
 	path_elements(ModDir, ModDirElts),
 	append(ModDirElts, ['module-summary.html'], FilePathElts),
 	path_elements(FilePath, FilePathElts),
 	open(FilePath, write, OS),
-	unwind_protect(write_mod_desc(Mod, ModDir, ModInfo, ModFiles, NumModPreds, General, OS, ShortModDesc), close(OS)).
+	unwind_protect(
+		write_mod_desc(Mod, ModDir, ModInfo, ModFiles, NumModPreds, General, OS, LastModSummary, NextModSummary, ShortModDesc), 
+		close(OS)).
 
-write_mod_desc(Mod, ModDir, ModInfo, ModFiles, NumModPreds, General, OS, ShortModDesc)
+write_mod_desc(Mod, ModDir, ModInfo, ModFiles, NumModPreds, General, OS, LastModSummary, NextModSummary, ShortModDesc)
 	:-
 	dmember(keywords=KeyWords, General),
 	dmember(doctitle=DocTitle, General),
@@ -410,8 +426,8 @@ write_mod_desc(Mod, ModDir, ModInfo, ModFiles, NumModPreds, General, OS, ShortMo
 	'  <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Module</B></FONT>&nbsp;</TD>',
 	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>',
 	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <A HREF="../index-all.html"><FONT CLASS="NavBarFont1"><B>Index</B></FONT></A>&nbsp;</TD>',
-	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <A HREF="index-kwic.html"><FONT CLASS="NavBarFont1"><B>KWIC Index</B></FONT></A>&nbsp;</TD>',
-	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <A HREF="files-desc.html"><FONT CLASS="NavBarFont1"><B>Files</B></FONT></A>&nbsp;</TD>',
+	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <A HREF="../index-kwic.html"><FONT CLASS="NavBarFont1"><B>KWIC Index</B></FONT></A>&nbsp;</TD>',
+	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <A HREF="../files-desc.html"><FONT CLASS="NavBarFont1"><B>Files</B></FONT></A>&nbsp;</TD>',
 	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <A HREF="../help-prologdoc.html"><FONT CLASS="NavBarFont1"><B>Help</B></FONT></A>&nbsp;</TD>',
 	'  </TR>',
 	'</TABLE>',
@@ -422,9 +438,21 @@ write_mod_desc(Mod, ModDir, ModInfo, ModFiles, NumModPreds, General, OS, ShortMo
 	'</TR>',
 
 	'<TR>',
-	'<TD BGCOLOR="white" CLASS="NavBarCell2"><FONT SIZE="-2">',
-	'&nbsp;PREV MODULE&nbsp;',
-	'&nbsp;<A HREF="../atwb/bpd/positions/package-summary.html"><B>NEXT MODULE</B></A></FONT></TD>',
+	'<TD BGCOLOR="white" CLASS="NavBarCell2"><FONT SIZE="-2">'
+	  	], OS),
+	(LastModSummary = '' ->
+		L1 = '&nbsp;PREV MODULE&nbsp;'
+		;
+		L1 = '&nbsp;<A HREF="%t"><B>PREV MODULE</B></A></FONT></TD>' + [LastModSummary]
+	),
+	(NextModSummary = '' ->
+		L2 = '&nbsp;NEXT MODULE&nbsp;'
+		;
+		L2 = '&nbsp;<A HREF="%t"><B>NEXT MODULE</B></A></FONT></TD>' + [NextModSummary]
+	),
+	codesweep([
+	L1,
+	L2,
 	'<TD BGCOLOR="white" CLASS="NavBarCell2"><FONT SIZE="-2">',
 	'  <A HREF="../index.html" target="_top"><B>FRAMES</B></A>  &nbsp;',
 	'&nbsp;<A HREF="package-summary.html" target="_top"><B>NO FRAMES</B></A>  &nbsp;',
@@ -486,9 +514,7 @@ write_mod_desc(Mod, ModDir, ModInfo, ModFiles, NumModPreds, General, OS, ShortMo
 	'<P>'
 	  	], OS),
 
-%	'Key top-level conceptual classes including Security and Market.',
-
-	write_mod_desc(ModInfo, OS),
+	write_mod_descrip(ModInfo, OS),
 	codesweep([
 	'<P>',
 	'<P>',
@@ -506,8 +532,8 @@ write_mod_desc(Mod, ModDir, ModInfo, ModFiles, NumModPreds, General, OS, ShortMo
 	'  <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Module</B></FONT>&nbsp;</TD>',
 	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>',
 	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <A HREF="../index-all.html"><FONT CLASS="NavBarFont1"><B>Index</B></FONT></A>&nbsp;</TD>',
-	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <A HREF="index-kwic.html"><FONT CLASS="NavBarFont1"><B>KWIC Index</B></FONT></A>&nbsp;</TD>',
-	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <A HREF="files-desc.html"><FONT CLASS="NavBarFont1"><B>Files</B></FONT></A>&nbsp;</TD>',
+	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <A HREF="../index-kwic.html"><FONT CLASS="NavBarFont1"><B>KWIC Index</B></FONT></A>&nbsp;</TD>',
+	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <A HREF="../files-desc.html"><FONT CLASS="NavBarFont1"><B>Files</B></FONT></A>&nbsp;</TD>',
 	'  <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1">    <A HREF="../help-prologdoc.html"><FONT CLASS="NavBarFont1"><B>Help</B></FONT></A>&nbsp;</TD>',
 	'  </TR>',
 	'</TABLE>',
@@ -553,11 +579,11 @@ short_mod_desc(_, '') :-!.
 
 get_first_textline(IS, ShortModDesc)
 	:-
-	skip_to_next(Stream, NextLineUIA),
+	skip_to_next(IS, NextLineUIA),
 	strip_white(NextLineUIA, StrippedLine),
-	disp_get_first_textline(StippedLine, IS, ShortModDesc).
+	disp_get_first_textline(StrippedLine, IS, ShortModDesc).
 
-disp_get_first_textline(StippedLine, IS, ShortModDesc)
+disp_get_first_textline(StrippedLine, IS, ShortModDesc)
 	:-
 	sub_atom(StrippedLine, 0, 1, _, '<'),
 	!,
@@ -572,24 +598,24 @@ disp_get_first_textline(FirstTextLine, IS, FirstTextLine).
 write_mod_files([], OS).
 write_mod_files([File], OS)
 	:-!,
-	printf(OS, '%t  <BR>', [File]).
+	printf(OS, '<A HREF="../files-desc.html#_%t_">%t</A>  <BR>', [File,File]).
 write_mod_files([File | ModFiles], OS)
 	:-
-	printf(OS, '%t, ', [File]),
+	printf(OS, '<A HREF="../files-desc.html#_%t_">%t</A>, ', [File,File]),
 	write_mod_files(ModFiles, OS).
 
-write_mod_desc([], OS).
-write_mod_desc([InfoFile | ModInfo], OS)
+write_mod_descrip([], OS).
+write_mod_descrip([InfoFile | _], OS)
 	:-
-	sweep_in(InfoFile, OS),
-	write_mod_desc(ModInfo, OS).
+	sweep_in(InfoFile, OS).
 
-sweep_in(InfoFile, OS)
+sweep_in(ModInfo, OS)
 	:-
-	exists_file(InfoFile),
+	ModInfo = (FileName, FilePath),
+	exists_file(FilePath),
 	!,
-	open(InfoFile, read, IS),
-	unwind_protect(sweep_over(IS, OS), (close(OS), close(IS))).
+	open(FilePath, read, IS),
+	unwind_protect(sweep_over(IS, OS), close(IS)).
 sweep_in(_, _).
 
 sweep_over(IS, OS)
@@ -605,16 +631,19 @@ sweep_over(_, _).
 		 | OVERALL/GROUP SUMMARY VIEW
 		 *----------------------------------------*/
 
-overall_view(Data, General, Groups, ModsDescs)
+overall_view(Data, General, Groups, ModsDescs, FilesInfoList, FilesDescLines)
 	:-
 	dmember(destdir=DestDir, General),
 	path_elements(DestDir, DestDirElts),
 	append(DestDirElts, [ 'overview-summary.html'], FilePathElts),
 	path_elements(FilePath, FilePathElts),
 	open(FilePath, write, OS),
-	unwind_protect( write_overall_view(Data, General, Groups, ModsDescs, OS), close(OS)).
+	unwind_protect( 
+		write_overall_view(
+			Data, General, Groups, ModsDescs, FilesInfoList, FilesDescLines, OS), 
+			close(OS)).
 
-write_overall_view(Data, General, Groups, ModsDescs, OS)
+write_overall_view(Data, General, Groups, ModsDescs, FilesInfoList, FilesDescLines, OS)
 	:-
 	dmember(keywords=KeyWords, General),
 	dmember(doctitle=DocTitle, General),
@@ -692,7 +721,7 @@ write_overall_view(Data, General, Groups, ModsDescs, OS)
 	'</H1>',
 	'</CENTER>'
 	  	], OS),
-	write_groups(Groups, ModsDescs, OS),
+	write_groups(Groups, ModsDescs, FilesInfoList, FilesDescLines, OS),
 	codesweep([
 	'<!-- ======= START OF BOTTOM NAVBAR ====== -->',
 	'<A NAME="navbar_bottom"><!-- --></A>',
@@ -748,13 +777,13 @@ write_overall_view(Data, General, Groups, ModsDescs, OS)
 	'</HTML>'
 	  	], OS).
 
-write_groups([], _, _).
-write_groups([Group | Groups], ModsDescs, OS)
+write_groups([], _, _, FilesDescLines, _).
+write_groups([Group | Groups], ModsDescs, FilesInfoList, FilesDescLines, OS)
 	:-
-	write_one_group(Group, ModsDescs, OS),
-	write_groups(Groups, ModsDescs, OS).
+	write_one_group(Group, ModsDescs, FilesInfoList, FilesDescLines, OS),
+	write_groups(Groups, ModsDescs, FilesInfoList, FilesDescLines, OS).
 
-write_one_group(Group, ModsDescs, OS)
+write_one_group(Group, ModsDescs, FilesInfoList, FilesDescLines, OS)
 	:-
 	Group = group(GroupDesc, GroupSourceDesc),
 	codesweep([
@@ -765,7 +794,7 @@ write_one_group(Group, ModsDescs, OS)
 	'</TR>',
 	'<TR BGCOLOR="white" CLASS="TableRowColor">'
 	  	], OS),
-	group_elts_desc(GroupSourceDesc, ModsDescs, OS),
+	group_elts_desc(GroupSourceDesc, ModsDescs, FilesInfoList, FilesDescLines, OS),
 	codesweep([
 	'</TR>',
 	'</TABLE>',
@@ -773,13 +802,30 @@ write_one_group(Group, ModsDescs, OS)
 	'<P>',
 	'&nbsp;'
 	  	], OS).
-/*
-group_elts_desc(GroupSourceDesc, ModsDescs, OS)
+
+group_elts_desc(GroupSourceDesc, ModsDescs, FilesInfoList, FilesDescLines, OS)
 	:-
-	dmember(modules=GroupMods, GroupSourceDesc),
+	(dmember(files=GroupFiles, GroupSourceDesc), !; GroupFiles = []),
+	codesweep([
+	'<TR><TD WIDTH="20\%" COLSPAN="2" ALIGN="CENTER"><B>Files</B></TD></TR>'
+	  	], OS),
+	group_files(GroupFiles, FilesInfoList, FilesDescLines, OS),
+	codesweep([
+	'<TR><TD WIDTH="20\%" COLSPAN="2" ALIGN="CENTER"><B>Modules</B></TD></TR>'
+	  	], OS),
+	(dmember(modules=GroupMods, GroupSourceDesc),!; GroupMods = []),
 	group_modules(GroupMods, ModsDescs, OS).
 
-*/
+group_files([], FilesInfoList, FilesDescLines, OS).
+group_files([File | GroupFiles], FilesInfoList, FilesDescLines, OS)
+	:-
+	catenate(['files-desc.html', '#_', File, '_'], FileRef),
+	dmember(File-FileDesc, FilesDescLines),
+	codesweep([
+	'<TR><TD WIDTH="20\%"><B><A HREF="%t">%t</A></B></TD>'	+ ['',FileRef, File],
+	'<TD>%t</TD></TR>'						+ [FileDesc]
+	  	], OS),
+	group_files(GroupFiles, FilesInfoList, FilesDescLines, OS).
 
 group_modules([], _, OS).
 group_modules([Mod | GroupMods], ModsDescs, OS)
@@ -792,30 +838,6 @@ group_modules([Mod | GroupMods], ModsDescs, OS)
 	'<TD>%t</TD></TR>'						+ [ModDesc]
 	  	], OS),
 	group_modules(GroupMods, ModsDescs, OS).
-
-group_elts_desc(GroupSourceDesc, ModsDescs, OS)
-	:-
-	(dmember(files=GroupFiles, GroupSourceDesc), !; GroupFiles = []),
-	codesweep([
-	'<TR><TD WIDTH="20\%" COLSPAN="2" ALIGN="CENTER"><B>Files</B></TD></TR>'
-	  	], OS),
-	group_files(GroupFiles, [], OS),
-	codesweep([
-	'<TR><TD WIDTH="20\%" COLSPAN="2" ALIGN="CENTER"><B>Modules</B></TD></TR>'
-	  	], OS),
-	(dmember(modules=GroupMods, GroupSourceDesc),!; GroupMods = []),
-	group_modules(GroupMods, ModsDescs, OS).
-
-group_files([], _, OS).
-group_files([File | GroupFiles], _, OS)
-	:-
-	FileSummary = 'fileref',
-	FileDesc = 'File Description',
-	codesweep([
-	'<TR><TD WIDTH="20\%"><B><A HREF="%t">%t</A></B></TD>'	+ ['',FileSummary, File],
-	'<TD>%t</TD></TR>'						+ [FileDesc]
-	  	], OS),
-	group_files(GroupFiles, _, OS).
 
 
 		/*-----------------------------------------
