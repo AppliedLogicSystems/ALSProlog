@@ -5294,7 +5294,6 @@ sio_sprintf()
     UCHAR *buf;
     double dblval;
     int   fmt_type;
-	int fl;
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
@@ -5336,10 +5335,6 @@ sio_sprintf()
 	    else
 			FAIL;
 
-		fl = floor(dblval);
-		if (fl == dblval) 
-			fmt = "%3.1f";
-
 	    if (fmt_type == FMT_DBL)
 			sprintf((char *)buf, (char *)fmt, dblval);
 	    else if (fmt_type == FMT_INT) {
@@ -5352,9 +5347,6 @@ sio_sprintf()
 #else
 	case WTP_DOUBLE:
 	    w_get_double(&dblval, v2);
-		fl = floor(dblval);
-		if (fl == dblval) 
-			fmt = "%3.1f";
 
 	    if (fmt_type == FMT_DBL)
 			sprintf((char *)buf, (char *)fmt, dblval);
