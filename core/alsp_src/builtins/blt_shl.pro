@@ -40,10 +40,9 @@ start_shell(DefaultShellCall)
 	%% Get the raw command line and assert it.
 	abolish(command_line,1),
 	pbi_get_command_line(RawCommandLine),
-	assertz(command_line(RawCommandLine)),
 
 	%% get the command line, but ignore the image name
-	retract(command_line([ImageName|CommandLine])),
+	(RawCommandLine = [Image | CommandLine] ; CommandLine = []),
 	!,
 	CLInfo = clinfo(true,				/* -g: goal to run */
 					false,				/* -v/-q: verbosity */
@@ -547,12 +546,20 @@ shell_read(InStream,OutStream,G,N,V)
 
 shell_read0(Prompt1,Prompt2,InStream,G,N,V) 
 	:-
-	sio:get_user_prompt(OldPrompt),
-	sio:set_user_prompt(Prompt1),
-	sio:skip_layout(InStream),
 	!,
-	sio:set_user_prompt(Prompt2),
-	read_term(InStream,G,[vars_and_names(V,N)]),
+	sio:get_user_prompt(OldPrompt),
+	catch((
+		sio:set_user_prompt(Prompt1),
+		sio:skip_layout(InStream),
+		!,
+		sio:set_user_prompt(Prompt2),
+		read_term(InStream,G,[vars_and_names(V,N)])
+	), Exception, (
+		pbi_debug(Exception),
+		sio:set_user_prompt(OldPrompt),
+		throw(Exception)
+	)),
+		
 	sio:set_user_prompt(OldPrompt).
 
 shell_read0(Prompt1,Prompt2,InStream,stream_not_ready,[],[]).
