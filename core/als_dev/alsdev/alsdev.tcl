@@ -193,11 +193,15 @@ if {$tcl_platform(platform) == "macintosh"} {
 	source -rsrc {als_settings}
 	source -rsrc {debugwin}
 	source -rsrc {defstr}
+	source -rsrc {als_menu}
+	source -rsrc {als_document}
 } else {
 	source [file join $ALSTCLPATH alsdev_main.tcl]
 	source [file join $ALSTCLPATH als_settings.tcl]
 	source [file join $ALSTCLPATH debugwin.tcl]
 	source [file join $ALSTCLPATH defstr.tcl]
+	source [file join $ALSTCLPATH als_menu.tcl]
+	source [file join $ALSTCLPATH als_document.tcl]
 }
 
 	## source any other needed files here.....
@@ -953,7 +957,10 @@ proc save_win_to_file {TextWinName FileName} {
 	set SI [open $FileName w]
 	save_stream_to_win $SI $TextWinName
 	close $SI
+	file attributes $FileName -creator ALS4 -type TEXT
 }
+
+
 
 proc load_stream_to_win {Stream TextWinName} {
 	set LineCount 1
@@ -968,11 +975,6 @@ proc load_stream_to_win {Stream TextWinName} {
 		}
 	}
 	return [list [expr $LineCount - 1] $LineCsList]
-}
-
-proc save_stream_to_win {Stream TextWinName} {
-	set text [$TextWinName get 1.0 end]
-	puts $Stream $text
 }
 
 proc assign_tag {TextWinName TagName StartLine StartChar EndLine EndChar} {
@@ -1027,63 +1029,11 @@ proc alsdev_jedit {} {
 	jedit:jedit -embedded 1 -window .jedit_w1 -mode prolog
 }
 
-proc open_file {} {
-	set file [tk_getOpenFile \
-		-defaultextension pro \
-		-title "Open File" \
-		-filetypes {{"Prolog Files" {.pro .pl } } {{All Files} {*} } } ]
-	if { "$file"== "" } then { return }
-	new_edit_window $file
-}
 
-global edit_index
-set edit_index 0
-
-proc new_edit_window {file} {
-	global edit_index
-	global tcl_platform
-	incr edit_index
-	set w ".edit$edit_index"
-	toplevel $w
-	wm title $w $file
-
-	menu $w.menubar -tearoff 0 -relief sunken
-
-	if {$tcl_platform(platform) == "macintosh"} {
-		menu $w.menubar.apple -tearoff 0
-		$w.menubar.apple add command -label "About ALS Prolog…" -command {Window show .about ; raise .about}
-		$w.menubar add cascade -menu $w.menubar.apple
+proc tkOpenDocument args {
+	foreach file $args {
+		document.open $file
 	}
-	$w.menubar add cascade -menu .topals.mmenb.file -label "File"
-	$w.menubar add cascade -menu .topals.mmenb.edit -label "Edit"
-	$w.menubar add cascade -menu .topals.mmenb.project -label "Project"
-	$w.menubar add cascade -menu .topals.mmenb.tools -label "Tools"
-
-	text $w.text -yscrollcommand "$w.sb set" -setgrid true
-	scrollbar $w.sb -command "$w.text yview"
-	$w configure -menu $w.menubar
-	pack $w.sb -side right -fill both
-	pack $w.text -fill both -expand 1 -side left
-	$w.text configure -font {Monaco 9 normal} -highlightthickness 0
-	load_file_to_win $file $w.text
-	focus $w.text
-}
-
-proc front_window {} {
-	return [lindex [winfo children .] end]
-}
-
-proc save_file {} {
-	set w [front_window]
-	save_win_to_file $w.text [wm title $w]
-}
-
-proc consult_file {} {
-	set w [front_window]
-	set file [wm title $w]
-	catch { prolog call alsdev do_reconsult -atom $file }
-	insert_prompt  .topals.txwin.text "\n?-" 
-
 }
 
 ###############________________________________##################
