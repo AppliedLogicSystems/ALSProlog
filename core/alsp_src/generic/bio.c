@@ -389,7 +389,6 @@ pbi_old_consult()
     w_get_An(&v2, &t2, 2);
 
     if (getstring(&name, v1, t1)
-/*     && (ec = consult(find_token((char *) name))) != -1) { */
 	   && (ec = consult(find_token(name))) != -1) {	
 	if (w_unify(v2, t2, ec, WTP_INTEGER))
 	    SUCCEED;

@@ -1,26 +1,29 @@
-/*
- * missing.h	-- things which should be in system include files but which
- *		   sometimes aren't
- *
- * Author: Kevin A. Buettner with the help of man pages and include files
- * 	on systems which have these things defined.
- *
- * Our strategy here is to define MISSING_EXTERN_foo in mconfig.h if foo is
- * a C library function which ought to have been declared in a system
- * include file, but which for some inexplicable reason isn't.
- *
- * Why don't we just declare everything ourselves and forget all this
- * MISSING_ crap?  The reason is that if we do, we will often be in conflict
- * with the declarations on systems which _do_ declare the things that they
- * are supposed to.  We can make our declarations match one system, but they
- * may not match all others.  Therefore, it is only safe to declare those
- * things which are actually missing from a system include file.
- *
- * With the growing use of ANSI C, only really old systems should have to
- * make very many MISSING_ definitions in their mconfig.h file.  And
- * eventually (soon, hopefully) we will have a configuration mechanism which
- * will determine all of this stuff for us.
- */
+/*=======================================================================*
+ *		missing.h
+ |	Copyright (c) 1989-95 Applied Logic Systems, Inc.
+ |
+ |		-- things which should be in system include files but which
+ |		   sometimes aren't
+ |
+ | Author: Kevin A. Buettner with the help of man pages and include files
+ | 	on systems which have these things defined.
+ |
+ | Our strategy here is to define MISSING_EXTERN_foo in mconfig.h if foo is
+ | a C library function which ought to have been declared in a system
+ | include file, but which for some inexplicable reason isn't.
+ |
+ | Why don't we just declare everything ourselves and forget all this
+ | MISSING_ crap?  The reason is that if we do, we will often be in conflict
+ | with the declarations on systems which _do_ declare the things that they
+ | are supposed to.  We can make our declarations match one system, but they
+ | may not match all others.  Therefore, it is only safe to declare those
+ | things which are actually missing from a system include file.
+ |
+ | With the growing use of ANSI C, only really old systems should have to
+ | make very many MISSING_ definitions in their mconfig.h file.  And
+ | eventually (soon, hopefully) we will have a configuration mechanism which
+ | will determine all of this stuff for us.
+ *=======================================================================*/
 
 #ifndef _MISSING_H_INCLUDED_
 #define _MISSING_H_INCLUDED_ 1

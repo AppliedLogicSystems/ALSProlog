@@ -903,7 +903,7 @@ pbi_atom_concat()
 
     p1 = str1;
     p2 = str2;
-    w_uia_alloc(&vConcat, &tConcat, (size_t)(strlen(p1) + strlen(p2)));
+    w_uia_alloc(&vConcat, &tConcat, (size_t)(strlen((char *)p1) + strlen((char *)p2)));
     pConcat = (UCHAR *) M_FIRSTUIAWORD(vConcat);
     while ( (*pConcat++ = *p1++) ) ;
     pConcat--;

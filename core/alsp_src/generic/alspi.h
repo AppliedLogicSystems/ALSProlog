@@ -121,4 +121,9 @@ extern	int	PI_toplevel	PARAMS(( void ));
 extern	int	PI_prolog_init	PARAMS(( char *, int, char ** ));
 extern	void	PI_app_printf	PARAMS(( int, ... ));
 
+#ifdef MacOS
+extern long yield_interval;
+extern	void	PI_yield_time	PARAMS(( void ));
+#endif
+
 #endif /* _ALSPI_H_INCLUDED_ */

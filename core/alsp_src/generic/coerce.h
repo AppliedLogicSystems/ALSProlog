@@ -1,16 +1,16 @@
-/*
- * coerce.h
- *	Copyright (c) 1988-1993, Applied Logic Systems, Inc.
- *
- * Handle type conversions in a functional syntax.
- *
- * This is done for two reasons. I hate the current method for
- * doing pointer coercions and second, C++ allows functional
- * syntax for coercions and the system should be converted
- * someday.
- *
- * Written by Keith Hughes 12/13/88
- */
+/*===================================================================*
+ |		coerce.h
+ |	Copyright (c) 1988-1995, Applied Logic Systems, Inc.
+ |
+ |		- Handle type conversions in a functional syntax.
+ |
+ | This is done for two reasons. I hate the current method for
+ | doing pointer coercions and second, C++ allows functional
+ | syntax for coercions and the system should be converted someday.
+ |
+ | Author: Keith Hughes 
+ | Date: 12/13/88
+ *===================================================================*/
 
 #define IntPtr(p)	(*(int **)&(p))
 #define CharPtr(p)	(*(char **)&(p))

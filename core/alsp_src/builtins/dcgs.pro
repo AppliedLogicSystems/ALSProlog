@@ -1,21 +1,15 @@
-
-/*
- * dcgs.pro     -- dcg expander for ALS-Prolog
- *
- * Copyright (c) 1986-1992 Applied Logic Systems, Inc.
- *
- * Author: Kenneth A. Bowen
- * Creation: 4/28/86
- *
- * Revision History:
- *      Revised: 5/29/86        -- Kevin Buettner
- *                                 incorporated into the builtins
- *      Revised: 7/31/86        -- Kevin Buettner
- *                                 for efficiency reasons
- *      Revised: 3/18/87        -- Kevin Buettner
- *                                 switched Module argument for SUN port
- */
-
+/*=====================================================================*
+ |			dcgs.pro     
+ |	Copyright (c) 1986-1995 Applied Logic Systems, Inc.
+ |
+ |			-- dcg expander for ALS-Prolog
+ |
+ | Author: Kenneth A. Bowen
+ | Creation: 4/28/86
+ | Revision History:
+ | 05/29/86 - K. Buettner - incorporated into the builtins
+ | 03/18/87 - K. Buettner - switched Module argument for SUN port
+ *=====================================================================*/
 module builtins.
 
 expand(Module,Pat,VL) :-

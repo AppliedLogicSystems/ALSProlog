@@ -1,17 +1,21 @@
-/*
- * cinterf.h
- */
-
+/*=====================================================================*
+ |		 cinterf.h
+ |		Copyright (c) 1992-95, Applied Logic Systems Inc.
+ |
+ |			-- defines for support routines for C interface
+ |
+ | Author : Prabhakaran Raman
+ | Creation : 2/1/92
+ *=====================================================================*/
 #ifndef CINTERF_INCLUDED
 #define CINTERF_INCLUDED  1
 
-
-/*
+/*---------------------------------------------------------------------
  * Information on the fields of a C-structure/C-union is kept in
  * an array (one per structure/union) that has the following layout.
  * (The array is initialized with the structure information by the
  * interface generator ).
- */
+ *--------------------------------------------------------------------*/
 
 typedef struct {
   char *fname;
@@ -36,13 +40,12 @@ typedef struct {
 
 #define CI_ENDARRAY  };
 
-
-/*
+/*-----------------------------------------------------------------------*
  * The C interface maintains its own symbol table for
  * storing C-constants, C-type and C-structure information.
  * The following tags are used to identify the nature of
  * entries in the symbol table
- */
+ *-----------------------------------------------------------------------*/
 
 #define CI_LONGTYPE		0
 #define CI_PTRTYPE		1
@@ -56,14 +59,13 @@ typedef struct {
 #define CI_STRUCTTYPE	9
 #define CI_CTYPE		10
 
-
-/* 
+/*-----------------------------------------------------------------------* 
  * The following macros are used to load up the symbol table at
  * interface initialization time with info on C-constants,
  * C-types, and C-structures (the initialization routine as
  * well as each of the macro invocation code are output by
  * interface generator ).
- */
+ *-----------------------------------------------------------------------*/
 
 extern	int	sym_insert_2long PARAMS(( char *, int, long, long ));
 extern	int	sym_insert_dbl	PARAMS(( char *, int, double ));
@@ -98,8 +100,6 @@ extern	int	CI_get_double	PARAMS(( double *, unsigned long, unsigned long ));
 
 #define CI_STRUCT(name,cname,defnptr)	\
   sym_insert_2long(name,CI_STRUCTTYPE,sizeof(cname),(long)defnptr);
-/*  sym_insert_2long(name,CI_STRUCTTYPE,sizeof(cname),defnptr); */
-/*  sym_insert_2long(name,CI_STRUCTTYPE,sizeof(cname),(long)(defnptr)); */
 
 #define CI_CTYPEDEF(name,ctype,typeid) \
   sym_insert_2long(name,CI_CTYPE,sizeof(ctype),typeid);

@@ -1,10 +1,12 @@
-/*
- * cutmacro.c   -- table of arities for the cutmacros
- *      Copyright (c) 1992-1993 Applied Logic Systems, Inc.
- *
- * Author:      Kevin A. Buettner
- * Creation:    4/17/92
- */
+/*================================================================*
+ |		cutmacro.c   
+ |	Copyright (c) 1992-1995 Applied Logic Systems, Inc.
+ |
+ |		-- table of arities for the cutmacros
+ |
+ | Author:		Kevin A. Buettner
+ | Creation:    4/17/92
+ *================================================================*/
 
 short cut_macro_arities[] =
 {

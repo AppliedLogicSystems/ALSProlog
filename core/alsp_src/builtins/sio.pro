@@ -332,6 +332,7 @@ stream_or_alias_ok(user, Stream) :-
 stream_or_alias_ok(Culprit, _) :-
 	stream_or_alias_error(Culprit, _).
 
+
 /*
  * input_stream_alias_ok(S_or_a,Stream)
  *
@@ -1008,6 +1009,7 @@ socket_params(socket(inet_stream, HostName, Port),
 socket_params(socket(inet_dgram, HostName, Port),
 	      HostName, Port, inet, dgram, 0) :-
 	!.
+
 
 
 %%
@@ -2430,19 +2432,15 @@ export put_code/2.
 
 put_code(Stream, Char) 
 	:-
-%pbi_write(p_c1),pbi_ttyflush,
 	sio_put_byte(Stream,Char),
 	!.
 put_code(Alias, Char) 
 	:-
-%pbi_write(p_c2),pbi_ttyflush,
 	is_output_alias(Alias, Stream),
-%pbi_write(p_c2b=Stream),pbi_ttyflush,
 	sio_put_byte(Stream,Char),
 	!.
 put_code(Stream_or_alias,Code) 
 	:-
-%pbi_write(p_c3(Code)),pbi_ttyflush,
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	sio_errcode(Stream,FailCode),
 	put_failure(FailCode,Stream,Char,put_code(Stream_or_alias,Char)).
@@ -3319,6 +3317,7 @@ sio_pckg_init :-
     %% Establish additional aliases
     set_alias(warning_input, InDStream),
     set_alias(warning_output, OutDStream).
+
 
 :- sio_pckg_init.
 

@@ -2454,10 +2454,11 @@ static int corrected_read(int fn, char *buffer, int count)
 
 #elif defined(__MWERKS__)
 
-/* MetroWerk's read() does not do CR/LF conversion, nor does it recognize
+/*-----------------------------------------------------------------*
+   MetroWerk's read() does not do CR/LF conversion, nor does it recognize
    Control-D as EOF.  This function works around these problems.
    Control-D's must be on a blank line to work.
-*/
+ *-----------------------------------------------------------------*/
 static int corrected_read(int fn, char *buffer, int count)
 {
     int result;
@@ -2466,14 +2467,14 @@ static int corrected_read(int fn, char *buffer, int count)
     result = read(fn, buffer, count);
     	
     if (result != EOF) {
-    	if (result > 0 && *buffer == '\004') result = 0;
+    	if (result > 0 && *buffer == '#') result = 0; 
     	for (p = buffer + result - 1; p >= buffer; p--)
     	   if (*p == '\r') *p = '\n';
     }
     	
     return result;
 }
-#endif
+#endif  /* defined(THINK_C) || defined(__MWERKS__)*/
 
 /*
  * sio_readbuffer(SD)

@@ -1,24 +1,20 @@
-/*
- * icode1.c		-- clause code generator for SPARC
- *	Copyright (c) 1990-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 8/29/90
- * Revision History:
- *
- * Note:
- *	The 68k, 88k, and Vax versions of icode1.c were used to help construct
- *	this file.
- */
+*===================================================================*
+ |		icode1.c
+ |	Copyright (c) 1990-95 Applied Logic Systems, Inc.
+ |
+ |		-- clause code generator for SPARC
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 8/29/90
+ *===================================================================*/
 
 #include <stdio.h>
 
 #include "defs.h"
 #include "icom.h"
-#include "icode.h"
+/* #include "icode.h" */
 #include "compile.h"
 #include "varproc.h"
-/* #include "wintcode.h" */
 #include "module.h"
 #include "machinst.h"
 #include "codegen.h"
@@ -152,7 +148,7 @@ int makeobp;
  */
 
 Code *icode_buf;
-/*
+/* Now declared in icodegen.h; 
 Code *ic_ptr;
 */
 ic_uptr_type ic_uptr;

@@ -1,13 +1,12 @@
-/*
- * wam.c                -- interpreter for wam instructions
- *
- * Copyright (c) 1992, Applied Logic Systems, Inc.
- *
- * Author: Prabhakaran Raman
- * Creation: 5/26/92
- * Revision History:
- *   Revised: mm/dd/yy  Name            Reason
- */
+/*===========================================================================*
+ |		wam.c                
+ | Copyright (c) 1992-95, Applied Logic Systems, Inc.
+ |
+ | 		-- interpreter for wam instructions
+ |
+ | Author: Prabhakaran Raman
+ | Creation: 5/26/92
+ *===========================================================================*/
 
 #include "defs.h"
 #include "coerce.h"

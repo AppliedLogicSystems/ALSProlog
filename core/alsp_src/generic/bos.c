@@ -96,7 +96,6 @@ pbi_system()
     w_get_An(&v, &t, 1);
     if (getstring(&str, v, t)
 	|| (t == WTP_LIST 
-/*	    && list_to_string((str = (char *) wm_H + 1), v, wm_normal - 256))) {   */
 	    && list_to_string((str = (UCHAR *) wm_H + 1), v, wm_normal - 256))) {
 #if defined(DOS) || defined(__GO32__)
       char *cp;

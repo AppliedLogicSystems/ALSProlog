@@ -1,13 +1,13 @@
 /*===========================================================*
- |			wintcode.c
- |		Copyright (c) 1986-1995 Applied Logic Systems
+ |		wintcode.c
+ |	Copyright (c) 1986-1995 Applied Logic Systems
  |
- |			-- Functions for manipulating the code area & relatives
+ |		-- Functions for manipulating the code area & relatives
  |
  | Author: Kevin A. Buettner
  | Creation Date: 8/14/86
  | 10/26/94 - C. Houpt -- Added prototypes for alignSystemStack() and
- |			fixSystemStack().  Also Various UCHAR* casts.
+ |				fixSystemStack().  Also Various UCHAR* casts.
  |		 	-- Added pragmas to force some pointer returning functions
  |		 	   to use DO instead of A0 register under MetroWerks.
  *===========================================================*/
@@ -22,16 +22,19 @@
 
 #ifdef MacOS
 #include <OSUtils.h>		/* For the FlushInstructionCache function */
-#endif
+#endif /* MacOS */
 
 #ifdef	HAVE_MMAP
 #include <sys/mman.h>
+
 #if defined(HAVE_MPROTECT) && defined(MISSING_EXTERN_MPROTECT)
 extern	int	mprotect	PARAMS(( caddr_t, size_t, int ));
-#endif
-#elif	defined(arch_m88k)
+#endif /* HAVE_MPROTECT && MISSING_EXTERN_MPROTECT */
+
+#elif	defined(arch_m88k)  /* !HAME_MMAP */
 extern	int	memctl		PARAMS(( void *, int, int ));
-#endif
+
+#endif /* HAVE_MMAP */
 
 #ifndef MaxFunc
 #define max(a,b) ((a) < (b) ? (b) : (a))
@@ -42,25 +45,25 @@ extern	int	memctl		PARAMS(( void *, int, int ));
 
 extern system_debugging;
 
-/*
+/*-----------------------------------------------------------------*
  * wm_aborted indicates whether an abort was done or not.
- */
+ *-----------------------------------------------------------------*/
 
 PWord wm_aborted = 0;
 
 long *aib_clause_addr;		/* used by assertz */
 
-/*
+/*-----------------------------------------------------------------*
  * w_nametable is allocated to be an array of pointers to procedure entries
- */
+ *-----------------------------------------------------------------*/
 
 ntbl_entry **w_nametable = (ntbl_entry **) 0;
 
-/*
- * w_freeptr points to a chain of free code space blocks.
- * w_totspace keeps track of the total amount of space available for allocation.
- *      At present, this is used only for statistics.
- */
+/*-----------------------------------------------------------------*
+ | w_freeptr points to a chain of free code space blocks.
+ | w_totspace keeps track of the total amount of space available
+ | for allocation.  At present, this is used only for statistics.
+ *-----------------------------------------------------------------*/
 
 static long *w_freeptr = (long *) 0;
 static long  w_totspace = 0;
@@ -89,13 +92,13 @@ static	long *	clause_start_from_retaddr PARAMS(( Code *, long * ));
 static	void	mark_fromretaddr PARAMS(( Code * ));
 static	void	mark_clause	PARAMS(( long * ));
 
-/*
- * code_alloc
- *
- * This function allocates a block of aligned memory and keeps track of
- * the starting address and the amount of space allocated in the block
- * so that makerunable and makewritable calls will be able to run.
- */
+/*-----------------------------------------------------------------*
+ | code_alloc
+ |
+ | This function allocates a block of aligned memory and keeps track of
+ | the starting address and the amount of space allocated in the block
+ | so that makerunable and makewritable calls will be able to run.
+ *-----------------------------------------------------------------*/
 
 static long *
 code_alloc(size, fe_num)
@@ -135,14 +138,15 @@ pckg_addto_codeblocks(addr, len)
 }
 #endif /* PACKAGE */
 
-/*
+/*-----------------------------------------------------------------*
  * makerunable calls memctl on each code block to make it executable.
- */
+ *-----------------------------------------------------------------*/
 
 static void
 makerunable()
 {
-#if !defined(Portable) && !defined(arch_sparc)	/* Portable doesn't need any of this stuff */
+#if !defined(Portable) && !defined(arch_sparc)	
+			/* Portable doesn't need any of this stuff */
 #if	defined(HAVE_MMAP) || defined(arch_m88k)
     register struct codeblock *cbp;
 
@@ -177,14 +181,15 @@ makerunable()
 #endif 						/* not Portable and not arch_sparc */
 }
 
-/*
- * makewritable calls memctl on each code block to make it writable
- */
+/*-----------------------------------------------------------------*
+ | makewritable calls memctl on each code block to make it writable
+ *-----------------------------------------------------------------*/
 
 static void
 makewritable()
 {
-#if !defined(Portable) && !defined(arch_sparc)	/* Portable doesn't need any of this stuff */
+#if !defined(Portable) && !defined(arch_sparc)	
+			/* Portable doesn't need any of this stuff */
 #if	defined(HAVE_MMAP) || defined(arch_m88k)
     register struct codeblock *cbp;
 
@@ -195,15 +200,15 @@ makewritable()
 	    fprintf(stderr, "makewritable: mprotect error\n");
 	    perror("mprotect");
 	}
-#else	/* HAVE_MMAP */
+#else	/* !HAVE_MMAP */
 	if (memctl(cbp->addr, cbp->size, 2) != 0) {
 	    fprintf(stderr, "makewritable: memctl error\n");
 	    perror("mctl");
 	}
 #endif 	/* HAVE_MMAP */
     }
-#endif								/* HAVE_MMAP || arch_m88k */
-#endif 								/* not Portable and not arch_sparc */
+#endif						/* HAVE_MMAP || arch_m88k */
+#endif 						/* not Portable and not arch_sparc */
 }
 
 
@@ -229,9 +234,9 @@ w_dbprotect(newstate)
     return oldstate;
 }
 
-/*
- * alloc_name_entry returns a pointer to a new (uninitialized) name entry.
- */
+/*-----------------------------------------------------------------*
+ | alloc_name_entry returns a pointer to a new (uninitialized) name entry.
+ *-----------------------------------------------------------------*/
 
 #define NENT_ALLOCQUANT 1024
 static ntbl_entry *ane_entbase = (ntbl_entry *) 0;
@@ -252,14 +257,13 @@ alloc_name_entry()
     return (--ane_entptr);
 }
 
-/*
- *      Look up an entry in the name table. If the entry is there, the index
- *      into the name table is returned and the user can use that to get the
- *      pointer to the name table entry. An index is returned if the item
- *      was not found, and this is the place to put a new entry. If a
- *      -1 is returned, it is not there and there is no room for anything
- *      else.
- */
+/*-----------------------------------------------------------------*
+ | Look up an entry in the name table. If the entry is there, the index
+ | into the name table is returned and the user can use that to get the
+ | pointer to the name table entry. An index is returned if the item
+ | was not found, and this is the place to put a new entry. If a -1 
+ | is returned, it is not there and there is no room for anything else.
+ *-----------------------------------------------------------------*/
 
 int
 nameprobe(modid, tokid, arity)
@@ -286,14 +290,14 @@ nameprobe(modid, tokid, arity)
     return i;
 }
 
-/*
- *      w_namelookup(modid,tokid,arity)
- *      int modid, tokid, arity;
- *
- *      Looks up and returns the procedure table index for the given
- *      module, token index, and arity.  If an entry is not present,
- *      one is created.
- */
+/*-----------------------------------------------------------------*
+ | w_namelookup(modid,tokid,arity)
+ | int modid, tokid, arity;
+ |
+ | Looks up and returns the procedure table index for the given
+ | module, token index, and arity.  If an entry is not present,
+ | one is created.
+ *-----------------------------------------------------------------*/
 
 int
 w_namelookup(modid, tokid, arity)
@@ -337,14 +341,13 @@ w_namelookup(modid, tokid, arity)
     return (i);
 }
 
-
-/*
- * w_nameprobe
- *
- * Performs a similar function as w_namelookup, but will not create an entry
- * if the given procedure is not present.  It also returns the entry pointer
- * if the procedure was found, a null pointer if not.
- */
+/*-----------------------------------------------------------------*
+ | w_nameprobe
+ |
+ | Performs a similar function as w_namelookup, but will not create
+ | an entry if the given procedure is not present.  It also returns
+ | the entry pointer if the procedure was found, a null pointer if not.
+ *-----------------------------------------------------------------*/
 
 ntbl_entry *
 w_nameprobe(modid, tokid, arity)
@@ -375,10 +378,10 @@ w_nameentry(modid, tokid, arity)
     return w_nametable[w_namelookup(modid, tokid, arity)];
 }
 
-/*
- * w_initcode builds the header block and initializes w_freeptr to point to
- * it.
- */
+/*-----------------------------------------------------------------*
+ | w_initcode builds the header block and initializes w_freeptr
+ | to point to it.
+ *-----------------------------------------------------------------*/
 
 #define WC_HEADERSIZE 4
 
@@ -423,7 +426,6 @@ w_initcode()
     }
 }
 
-
 void
 w_freecount(tot, used)
     long *tot, *used;
@@ -444,14 +446,14 @@ w_freecount(tot, used)
     *used = (*tot - 4 * f);
 }
 
-/*
- * w_alloccode(size)
- *
- *      Allocates a block of at least size+WC_OVERHEAD longwords using
- *      first fit rover.  A pointer to the beginning of the block is returned.
- *      Care should be taken to avoid overwriting the memory management
- *      longwords at the beginning and end of the block.
- */
+/*-----------------------------------------------------------------*
+ | w_alloccode(size)
+ |
+ | Allocates a block of at least size+WC_OVERHEAD longwords using
+ | first fit rover.  A pointer to the beginning of the block is returned.
+ | Care should be taken to avoid overwriting the memory management
+ | longwords at the beginning and end of the block.
+ *-----------------------------------------------------------------*/
 
 long *
 w_alloccode(size)
@@ -544,9 +546,9 @@ w_alloccode(size)
     return p;
 }
 
-/*
- * w_freecode returns a block to the pool of free blocks.
- */
+/*-----------------------------------------------------------------*
+ | w_freecode returns a block to the pool of free blocks.
+ *-----------------------------------------------------------------*/
 
 void
 w_freecode(p)
@@ -580,22 +582,23 @@ w_freecode(p)
     *(p + WCI_SIZE) = *(p + s - 1) = s;
 }
 
-
-/*
- * w_installcode grabs some space for the code in the icode buffer and
- *      moves the contents of the icode buffer to this area.  The pointer
- *      to the start of the area allocated for the code is returned.  Thus
- *      the actual code may be found at WCI_CLAUSECODE longwords into the
- *      area.
- *
- *      The extra parameter is the amount of space to allocate in addition
- *      to the space required by the clause code.  This space is used by
- *      the query code.
- *
- *      The actual size of the allocated buffer is stored in the memory
- *      location pointed at by the parameter actualsize (if this parameter
- *      is non-zero).
- */
+/*-----------------------------------------------------------------*
+ | w_installcode 
+ |
+ | grabs some space for the code in the icode buffer and
+ | moves the contents of the icode buffer to this area.  The pointer
+ | to the start of the area allocated for the code is returned.  Thus
+ | the actual code may be found at WCI_CLAUSECODE longwords into the
+ | area.
+ |
+ | The extra parameter is the amount of space to allocate in addition
+ | to the space required by the clause code.  This space is used by
+ | the query code.
+ |
+ | The actual size of the allocated buffer is stored in the memory
+ | location pointed at by the parameter actualsize (if this parameter
+ | is non-zero).
+ *-----------------------------------------------------------------*/
 
 long *
 w_installcode(buffer, bufsize, extra, actualsize)
@@ -645,9 +648,9 @@ w_installcode(buffer, bufsize, extra, actualsize)
 
 #ifdef arch_m88k
 
-/*
- * copy_code procedure for the 88k.
- */
+/*-----------------------------------------------------------------*
+ | copy_code procedure for the 88k.
+ *-----------------------------------------------------------------*/
 
 extern	void	wm_g_uia	PARAMS(( void ));
 extern	void	wm_p_uia	PARAMS(( void ));
@@ -724,9 +727,9 @@ extern	void	wm_g_uia	PARAMS(( void ));
 extern	void	wm_p_uia	PARAMS(( void ));
 extern	void	mth_pushdbl0	PARAMS(( void ));
 
-/*
+/*-----------------------------------------------------------------*
  * copy_code procedure for the Sparc.
- */
+ *-----------------------------------------------------------------*/
 
 void
 copy_code(buffer, to, bufsize)
@@ -797,19 +800,20 @@ copy_code(buffer, to, bufsize)
     }
 }
 
-#else  /* arch_sparc */
+#else  /* otherwise */
 
-/*
- * Generic copy_code procedure.  This is the procedure to use on machines
- * which don't require the use of relative branches to get outside of the
- * clause.  (When possible, we should strive to generate relative branches
- * for targets within the clause and absolute branches for targets outside
- * of the clause.)
- *
- * If we do another machine which requires the sort of fixups that the 88k
- * requires, we would probably be better off putting copy_code into a file
- * of its own in each of the system specific directories.
- */
+/*-----------------------------------------------------------------*
+ | Generic copy_code procedure.  
+ |
+ | This is the procedure to use on machines which don't require the use 
+ | of relative branches to get outside of the clause.  (When possible, 
+ | we should strive to generate relative branches for targets within 
+ | the clause and absolute branches for targets outside of the clause.)
+ |
+ | If we do another machine which requires the sort of fixups that the 88k
+ | requires, we would probably be better off putting copy_code into a file
+ | of its own in each of the system specific directories.
+ *-----------------------------------------------------------------*/
 
 void
 copy_code(from, to, count)
@@ -824,15 +828,17 @@ copy_code(from, to, count)
 #endif /* arch_sparc */
 #endif /* arch_m88k */
 
-/*
- * w_nukeindexing is used to wipe out the indexing code for a procedure
- *      if it exists and replace it with the jump to the naive chain of
- *      choice points.  This procedure also checks the time stamp to see if
- *      all of the clauses should be thrown away (in the case of a reconsult
- *      operation).  If w_reconstamp is bigger than the entries timestamp,
- *      all clauses currently associated with the procedure are trashed
- *      and the entry is made undefined.
- */
+/*-----------------------------------------------------------------*
+ | w_nukeindexing 
+ |
+ | is used to wipe out the indexing code for a procedure
+ | if it exists and replace it with the jump to the naive chain of
+ | choice points.  This procedure also checks the time stamp to see
+ | if all of the clauses should be thrown away (in the case of a 
+ | reconsult operation).  If w_reconstamp is bigger than the 
+ | entry's timestamp, all clauses currently associated with the 
+ | procedure are trashed and the entry is made undefined.
+ *-----------------------------------------------------------------*/
 
 void
 w_nukeindexing(ent)
@@ -882,44 +888,43 @@ w_nukeindexing(ent)
     }
 }
 
-/*
- * w_fixchoicepoints: called by w_nukeindexing (above) to fix up the next
- *      clause addresses in each choice point.
- *
- * If a next clause address points into an index block, we expect the code
- * there to take the following form:
- *
- * i386:
- *      Size    What
- *      ----    ----
- *      1       mov eax,
- *      4               wm_retry or wm_trust
- *      2       call eax
- *      1       nop
- *      4       pointer to start of clause code or pointer to something else
- *              in this block
- *
- * m68k:
- *      2       nop
- *      2       jsr
- *      4       wm_retry or wm_trust
- *      4       pointer to start of clause code or pointer to something else
- *              in this block
- *
- * m88k:
- *      4       bsr.n   wm_trustN or wm_trust_uN
- *      4       addu    E, SPB, 0
- *      4       br.n    offset to the start of clause code or offset to
- *                      something else in this block
- *      4       addu    SP, E, 0
- *
- *
- * Fortunately, the macros provided by chpt.h (IDXPATCH_) make the code for
- * each of these three schemes the same.
- *
- *
- *
- */
+/*-----------------------------------------------------------------*
+ | w_fixchoicepoints: 
+ |
+ | called by w_nukeindexing (above) to fix up the next clause 
+ | addresses in each choice point.
+ |
+ | If a next clause address points into an index block, we expect the code
+ | there to take the following form:
+ |
+ | i386:
+ |      Size    What
+ |      ----    ----
+ |      1       mov eax,
+ |      4               wm_retry or wm_trust
+ |      2       call eax
+ |      1       nop
+ |      4       pointer to start of clause code or pointer to something else
+ |              in this block
+ |
+ | m68k:
+ |      2       nop
+ |      2       jsr
+ |      4       wm_retry or wm_trust
+ |      4       pointer to start of clause code or pointer to something else
+ |              in this block
+ |
+ | m88k:
+ |      4       bsr.n   wm_trustN or wm_trust_uN
+ |      4       addu    E, SPB, 0
+ |      4       br.n    offset to the start of clause code or offset to
+ |                      something else in this block
+ |      4       addu    SP, E, 0
+ |
+ |
+ | Fortunately, the macros provided by chpt.h (IDXPATCH_) make the code for
+ | each of these three schemes the same.
+ *-----------------------------------------------------------------*/
 
 void
 w_fixchoicepoints(ib)
@@ -994,10 +999,9 @@ w_fixchoicepoints(ib)
 }
 
 
-/*
- * cbsffa       -- clause block start from failure address
- *
- */
+/*-----------------------------------------------------------------*
+ | cbsffa       -- clause block start from failure address
+ *-----------------------------------------------------------------*/
 
 static long *
 cbsffa(addr)
@@ -1025,9 +1029,9 @@ cbsffa(addr)
 }
 
 
-/*
+/*-----------------------------------------------------------------*
  * w_abolish abolishes the procedure corresponding to ent.
- */
+ *-----------------------------------------------------------------*/
 
 void
 w_abolish(ent)
@@ -1036,9 +1040,9 @@ w_abolish(ent)
     w_abolish_cg(ent, 0, 0);
 }
 
-/*
+/*-----------------------------------------------------------------*
  * w_erase erases the clause in procedure number n with address a
- */
+ *-----------------------------------------------------------------*/
 
 int
 w_erase(n, a)
@@ -1161,11 +1165,11 @@ w_erase(n, a)
     return 1;			/* And return a success */
 }
 
-/*
+/*-----------------------------------------------------------------*
  * w_freeclause is called by w_erase and w_nukeindexing to free up clauses.
  * If code space garbage collection is implemented, it will put the clause
  * on the tofree list.  Otherwise, w_freecode is called immediately.
- */
+ *-----------------------------------------------------------------*/
 
 void
 w_freeclause(a)
@@ -1194,34 +1198,36 @@ w_freeclause(a)
 }
 
 
-/*
- * w_assertz takes the given procedure name and arity and asserts the
- *      contents of the icode buffer to the end of the clauses associated
- *      with the procedure.
- *
- * Parameters:
- *      p               -- token id of the procedure
- *      a               -- arity of the procedure
- *      buffer          -- buffer holding the clause code
- *      bufsize         -- amount of stuff in the buffer in units of Code
- *      firstargkey     -- key of the first argument; this parameter is
- *                         used by the indexer.
- *      fstartoffset    -- offset with respect to the start of the clause code
- *                         for the indexer to cause code to branch to which
- *                         can bypass the dereference loop (because it has
- *                         been done already).
- *      dstartoffset    -- offset with respect to the start of the clause code
- *                         to branch to when we know that things are
- *                         determinate (so far).  In fact, it is an error to
- *                         not use the offset when the procedure has has a
- *                         choice point.
- *      envsavemask     -- mask corresponding to the frame position of registers
- *                         to save on the frame.  Bit 0 is set to indicate that
- *                         the OldE register should be stored.  Bit 1
- *                         will be set to indicate that the CP register should
- *                         be stored.  Bits 2-4 correspond to A1, A2, and A3
- *                         respectively.
- */
+/*-----------------------------------------------------------------*
+ | w_assertz 
+ |
+ | takes the given procedure name and arity and asserts the
+ | contents of the icode buffer to the end of the clauses associated
+ | with the procedure.
+ |
+ | Parameters:
+ | p               -- token id of the procedure
+ | a               -- arity of the procedure
+ | buffer          -- buffer holding the clause code
+ | bufsize         -- amount of stuff in the buffer in units of Code
+ | firstargkey     -- key of the first argument; this parameter is
+ |                    used by the indexer.
+ | fstartoffset    -- offset with respect to the start of the clause code
+ |                    for the indexer to cause code to branch to which
+ |                    can bypass the dereference loop (because it has
+ |                    been done already).
+ | dstartoffset    -- offset with respect to the start of the clause code
+ |                    to branch to when we know that things are
+ |                    determinate (so far).  In fact, it is an error to
+ |                    not use the offset when the procedure has has a
+ |                    choice point.
+ | envsavemask     -- mask corresponding to the frame position of registers
+ |                    to save on the frame.  Bit 0 is set to indicate that
+ |                    the OldE register should be stored.  Bit 1
+ |                    will be set to indicate that the CP register should
+ |                    be stored.  Bits 2-4 correspond to A1, A2, and A3
+ |                    respectively.
+ *-----------------------------------------------------------------*/
 
 void
 w_assertz(p, a, buffer, bufsize, firstargkey, fstartoffset, dstartoffset, envsavemask)
@@ -1244,14 +1250,15 @@ w_assertz(p, a, buffer, bufsize, firstargkey, fstartoffset, dstartoffset, envsav
 		   envsavemask);
 }
 
-
-/*
- * w_asserta takes the given procedure name and arity and asserts the
- *      contents of the icode buffer to the end of the clauses associated
- *      with the procedure.
- *
- * See the comment for w_assertz for a description of the parameters.
- */
+/*-----------------------------------------------------------------*
+ | w_asserta 
+ |
+ | takes the given procedure name and arity and asserts the
+ | contents of the icode buffer to the end of the clauses associated
+ | with the procedure.
+ |
+ | See the comment for w_assertz for a description of the parameters.
+ *-----------------------------------------------------------------*/
 
 void
 w_asserta(p, a, buffer, bufsize, firstargkey, fstartoffset, dstartoffset, envsavemask)
@@ -1820,15 +1827,14 @@ nextproc(n, f)
     return (PWord) (-1);	/* no applicable procedures found */
 }
 
-
-
-/*
- * first_clause is given the index of a procedure and returns the address of
- *      the first clause in the procedure if any.  If anything goes wrong
- *      in finding the clause (like the procedure not existing), a coerced
- *      0 is returned.
- */
-
+/*-----------------------------------------------------------------*
+ | first_clause 
+ |
+ | is given the index of a procedure and returns the address of
+ | the first clause in the procedure if any.  If anything goes wrong
+ | in finding the clause (like the procedure not existing), a coerced
+ | 0 is returned.
+ *-----------------------------------------------------------------*/
 
 long *
 first_clause(n)
@@ -1850,12 +1856,13 @@ first_clause(n)
     }
 }
 
-
-/*
- * next_clause is given the address of a clause and returns the address
- *      of the next clause in the chain.  A coerced zero is returned if
- *      the given clause is the last.
- */
+/*-----------------------------------------------------------------*
+ | next_clause 
+ |
+ | is given the address of a clause and returns the address
+ | of the next clause in the chain.  A coerced zero is returned if
+ | the given clause is the last.
+ *-----------------------------------------------------------------*/
 
 long *
 next_clause(a)
@@ -1877,20 +1884,21 @@ next_clause(a)
 	return nextClauseAddr(a);
 }
 
-
-/*
- * make_dbref is given the address of a clause to make a data base reference
- *      for.  It builds a structure on the Prolog heap and returns the
- *      address of this structure (as a long).  The structure is $dbref/4 where
- *      each argument is an integer.  The first argument is the low 16 bits
- *      of the address of the clause.  The second argument is the high 16 bits
- *      of this address.  This address will not alway be sufficient to find
- *      a clause since the clause may move.  The third argument is the
- *      procedure index which the clause belongs to.  Finally the last argument
- *      is the clause id.  When the clause moves, it can still be located
- *      in validate_dbref by scanning the clauses in the given procedure
- *      until the unique clause id is found.
- */
+/*-----------------------------------------------------------------*
+ | make_dbref 
+ |
+ | is given the address of a clause to make a data base reference
+ | for.  It builds a structure on the Prolog heap and returns the
+ | address of this structure (as a long).  The structure is $dbref/4 where
+ | each argument is an integer.  The first argument is the low 16 bits
+ | of the address of the clause.  The second argument is the high 16 bits
+ | of this address.  This address will not alway be sufficient to find
+ | a clause since the clause may move.  The third argument is the
+ | procedure index which the clause belongs to.  Finally the last argument
+ | is the clause id.  When the clause moves, it can still be located
+ | in validate_dbref by scanning the clauses in the given procedure
+ | until the unique clause id is found.
+ *-----------------------------------------------------------------*/
 
 void
 make_dbref(a, res, restype)
@@ -1917,13 +1925,14 @@ make_dbref(a, res, restype)
     }
 }
 
-
-/*
- * w_validate_dbref is called by validate_dbref and by some assembly defined
- *      builtins to validate a database reference.  The procedure takes
- *      three parameters, the last known address of the clause, the procedure
- *      name index, and the clause id.
- */
+/*-----------------------------------------------------------------*
+ | w_validate_dbref 
+ |
+ | is called by validate_dbref and by some assembly defined
+ | builtins to validate a database reference.  The procedure takes
+ | three parameters, the last known address of the clause, the 
+ | procedure name index, and the clause id.
+ *-----------------------------------------------------------------*/
 
 long *
 w_validate_dbref(addr, nid, cid)
@@ -1956,15 +1965,16 @@ w_validate_dbref(addr, nid, cid)
     return (long *) 0;
 }
 
-
-/*
- * validate_dbref is called by some of the C defined builtins to check on
- *      the validity of a database reference.  The actual clause id is returned
- *      as the value of the function if found.  Otherwise, a coerced zero is
- *      returned to indicate that the database reference is invalid.  nameid
- *      is the address of a location to receive the procedure name index of
- *      the procedure which the clause belongs to.
- */
+/*-----------------------------------------------------------------*
+ | validate_dbref 
+ |
+ | is called by some of the C defined builtins to check on
+ | the validity of a database reference.  The actual clause id is returned
+ | as the value of the function if found.  Otherwise, a coerced zero is
+ | returned to indicate that the database reference is invalid.  nameid
+ | is the address of a location to receive the procedure name index of
+ | the procedure which the clause belongs to.
+ *-----------------------------------------------------------------*/
 
 long *
 validate_dbref(ref, reftype, nameid)
@@ -2001,14 +2011,16 @@ validate_dbref(ref, reftype, nameid)
     return (long *) 0;
 }
 
-/*
- * jump_validate_dbref is called by jump/2 to check on
- *      the validity of a database reference.  The actual clause id is returned
- *      as the value of the function if found.  Otherwise, a coerced zero is
- *      returned to indicate that the database reference is invalid.  nameid
- *      is the address of a location to receive the procedure name index of
- *      the procedure which the clause belongs to.
- */
+/*-----------------------------------------------------------------*
+ | jump_validate_dbref 
+ |
+ | is called by jump/2 to check on
+ | the validity of a database reference.  The actual clause id is returned
+ | as the value of the function if found.  Otherwise, a coerced zero is
+ | returned to indicate that the database reference is invalid.  nameid
+ | is the address of a location to receive the procedure name index of
+ | the procedure which the clause belongs to.
+ *-----------------------------------------------------------------*/
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_D0
 #endif
@@ -2074,9 +2086,11 @@ jump_validate_dbref(ref, term)
 #pragma pointers_in_A0
 #endif
 
-/*
- *      gen_indexing: Generate indexing for all procedures.
- */
+/*-----------------------------------------------------------------*
+ | gen_indexing: 
+ | 
+ | Generate indexing for all procedures.
+ *-----------------------------------------------------------------*/
 
 void
 gen_indexing()
@@ -2098,11 +2112,12 @@ gen_indexing()
 #endif /* Indexing */
 }
 
-
-/*
- * decr_icount decrements the icount field and, if zero, attempts to
- * generate indexing
- */
+/*-----------------------------------------------------------------*
+ | decr_icount 
+ |
+ | decrements the icount field and, if zero, attempts to
+ | generate indexing
+ *-----------------------------------------------------------------*/
 
 void
 decr_icount(addr)
@@ -2121,11 +2136,12 @@ decr_icount(addr)
     (void) w_dbprotect(odbrs);
 }
 
-/*
- * seticount is called to set the icount field to it initial value and
- * possible put the icount decrement code in the codeg field of the entry
- */
-
+/*-----------------------------------------------------------------*
+ | seticount 
+ |
+ | is called to set the icount field to it initial value and
+ | possible put the icount decrement code in the codeg field of the entry
+ *-----------------------------------------------------------------*/
 
 void
 seticount(ent)
@@ -2140,14 +2156,15 @@ seticount(ent)
 #endif /* AutoIndexing */
 }
 
-
 #ifdef CodeGC
-/*
- * next_choice_in_a_deleted_clause is called by wm_nciadc with the address of
- * the choice entry of a deleted clause.  This function finds the next active
- * clause which comes after (or would have come after) the deleted clause and
- * returns the address at which to continue execution.
- */
+/*-----------------------------------------------------------------*
+ | next_choice_in_a_deleted_clause is 
+ |
+ | called by wm_nciadc with the address of
+ | the choice entry of a deleted clause.  This function finds the next active
+ | clause which comes after (or would have come after) the deleted clause and
+ | returns the address at which to continue execution.
+ *-----------------------------------------------------------------*/
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_D0
 #endif
@@ -2172,9 +2189,9 @@ next_choice_in_a_deleted_clause(addr)
 #pragma pointers_in_A0
 #endif
 
-/*
+/*-----------------------------------------------------------------*
  * w_collect attempts to really free some of the blocks on the tofree list.
- */
+ *-----------------------------------------------------------------*/
 
 void
 w_collect()
@@ -2429,13 +2446,13 @@ mark_clause(c)
 }
 #endif /* CodeGC */
 
-/*
- * f is a pointer to a prolog stack frame.  The next stack frame is returned.
- * The location that ca points to is set to point at the clause block to
- * which this frame belongs.  mp is a pointer to the gc mask.  This mask
- * tells us which arguments are still valid and therefore safe to get when
- * building a term representing the frame.
- */
+/*-----------------------------------------------------------------*
+ | f is a pointer to a prolog stack frame.  The next stack frame is returned.
+ | The location that ca points to is set to point at the clause block to
+ | which this frame belongs.  mp is a pointer to the gc mask.  This mask
+ | tells us which arguments are still valid and therefore safe to get when
+ | building a term representing the frame.
+ *-----------------------------------------------------------------*/
 
 PWord *
 w_frame_info(f,ca,mp)
@@ -2456,15 +2473,17 @@ w_frame_info(f,ca,mp)
 }
 
 
-/*
- * w_relink is given a procedure entry.  If the entry is exported, then all
- *      procedures in other modules with the same procedure name and arity
- *      are examined.  If these entries are imported, the resolve ref code
- *      is replaced. w_relink is called from places where either a procedure
- *      is defined (where none existed), or the last clause of the procedure
- *      is erased.  Note that very little work is done when the procedure
- *      entry is not exported.
- */
+/*-----------------------------------------------------------------*
+ | w_relink 
+ |
+ | is given a procedure entry.  If the entry is exported, then all
+ | procedures in other modules with the same procedure name and arity
+ | are examined.  If these entries are imported, the resolve ref code
+ | is replaced. w_relink is called from places where either a procedure
+ | is defined (where none existed), or the last clause of the procedure
+ | is erased.  Note that very little work is done when the procedure
+ | entry is not exported.
+ *-----------------------------------------------------------------*/
 
 void
 w_relink(ent)
@@ -2486,12 +2505,13 @@ w_relink(ent)
     }
 }
 
-
-/*
- * w_relinkall relinks all of the procedures (see above).  It is called after
- * a file has been consulted.
- *
- */
+/*-----------------------------------------------------------------*
+ | w_relinkall 
+ |
+ | relinks all of the procedures (see above).  It is called after
+ | a file has been consulted.
+ |
+ *-----------------------------------------------------------------*/
 
 void
 w_relinkall()
@@ -2507,16 +2527,17 @@ w_relinkall()
     }
 }
 
-
-/*
- * w_getnamestring is given an address and attempts to return a string
- * representing the procedure pointed to by addr.  This function is used by
- * the disassembler.
- *
- * buf is the address of a buffer to put the string into.  The return value
- * of this function is important. buf is used when a name entry could be
- * found, zero is returned otherwise.
- */
+/*-----------------------------------------------------------------*
+ | w_getnamestring 
+ |
+ | is given an address and attempts to return a string
+ | representing the procedure pointed to by addr.  This function is used by
+ | the disassembler.
+ |
+ | buf is the address of a buffer to put the string into.  The return value
+ | of this function is important. buf is used when a name entry could be
+ | found, zero is returned otherwise.
+ *-----------------------------------------------------------------*/
 
 char *
 w_getnamestring(addr, buf)

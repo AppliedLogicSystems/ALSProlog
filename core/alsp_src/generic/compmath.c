@@ -1,12 +1,12 @@
-
-/*
- * compmath.c                   -- arithmetic compiler
- *      Copyright (c) 1987-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 3/22/87
- * Revision History:
- */
+/*================================================================*
+ |		compmath.c                   
+ |	Copyright (c) 1987-1995 Applied Logic Systems, Inc.
+ |
+ |		-- arithmetic compiler
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 3/22/87
+ *================================================================*/
 
 #include "defs.h"
 #include "varproc.h"

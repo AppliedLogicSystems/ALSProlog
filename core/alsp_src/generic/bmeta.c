@@ -1,18 +1,16 @@
-/*
- * bmeta.c   -- prolog builtins defined in C.
- *
- * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986-1993 by Applied Logic Systems
- *
- * Program Author:  Kevin A. Buettner
- * Creation:  11/14/84
- * Revision History: (fixes, not addition of new builtins)
- *      06/28/85,       K. Buettner -- Conversion to wam and compiled prolog
- *      09/12/85,       K. Buettner -- arithmetic predicates moved to
- *                                     separate file.
- *      01/28/86,       K. Buettner -- IBM PC conversion
- */
-
+/*===================================================================*
+ |		bmeta.c   
+ |	Copyright (c) 1985 by Kevin A. Buettner
+ |	Copyright (c) 1986-1993 by Applied Logic Systems
+ |
+ |		-- prolog builtins defined in C.
+ |
+ | Program Author:  Kevin A. Buettner
+ | Creation:  11/14/84
+ | 06/28/85 - K. Buettner -- Conversion to wam and compiled prolog
+ | 09/12/85 - K. Buettner -- arithmetic predicates moved to separate file.
+ | 01/28/86 - K. Buettner -- IBM PC conversion
+ *===================================================================*/
 #include "defs.h"
 #include "module.h"
 #include "icodegen.h"
@@ -24,7 +22,6 @@ pbi_true()
 {
     SUCCEED;
 }
-
 
 int
 pbi_equal()
@@ -40,7 +37,6 @@ pbi_equal()
     else
 	FAIL;
 }
-
 
 int
 pbi_arg()
@@ -89,8 +85,6 @@ pbi_arg()
     else
 	FAIL;
 }
-
-
 
 #ifndef BigStruct
 #define w_get_argaddr(addr,s,argn,arity)  (addr = (PWord *)s + argn)
@@ -181,7 +175,6 @@ pbi_mangle()
     SUCCEED;
 
 }
-
 
 int
 pbi_functor()
@@ -485,7 +478,6 @@ pbi_atomic()
 }
 
 #endif /* CMeta */
-
 
 /*
  * pbi_findterm was written for Keith Hughes so that the boss wouldn't

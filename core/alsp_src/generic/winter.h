@@ -80,6 +80,9 @@ extern PWord *wm_regs[][NumWAMRegs];
 extern PWord *wm_heapbase;
 extern PWord *wm_trailbase;
 extern PWord *wm_stackbot;
+#ifdef MacOS
+extern PWord *wm_stackbot_safety;
+#endif
 
 extern PWord *wm_gvfreelist;
 extern PWord *wm_gvbase;
@@ -111,7 +114,6 @@ extern Code *wm_trust_fail;
 extern	int	wm_fail		PARAMS(( void ));
 extern	int	wm_trust_fail	PARAMS(( void ));
 #endif /* Portable */
-
 
 /*@[3.1]@------------------------------------------------------------------
  * To the builtins, we wish to present a machine independent representation

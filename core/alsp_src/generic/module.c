@@ -1,6 +1,7 @@
-/*=========================================================*
+/*=====================================================================*
  |			module.c                    
- |		Copyright (c) 1985-1993 by Kevin A. Buettner
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-95 Applied Logic Systems, Inc.
  |
  |			-- module management code
  |
@@ -10,7 +11,7 @@
  | 10/26/94, C. Houpt -- Various UCHAR* casts.
  |		-- Added pragmas to force some pointer returning functions
  |		   to use DO instead of A0 register under MetroWerks.
- *=========================================================*/
+ *=====================================================================*/
 #include "defs.h"
 #include "module.h"
 #include "wintcode.h"
@@ -140,7 +141,7 @@ call_resolve_reference(m, p, a, i)
     dbprot_t odbrs;
 
     if (M_ISUIA(m))
-	m = find_token((UCHAR *) (M_FIRSTUIAWORD(MUIA(m))));
+	m = find_token((UCHAR *)(M_FIRSTUIAWORD(MUIA(m))));
     else
 	m = MFUNCTOR_TOKID(m);
 
@@ -535,7 +536,6 @@ pckg_add_default_proc(tokid, arity)
     int   i;
 
     if (default_procmax >= MAXDEFPROCS)
-/* fatal_error(FE_FULL_DEFPROC, 0); */
 	fatal_error(FE_FULL_DEFPROC);
 
     /*

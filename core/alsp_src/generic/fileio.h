@@ -1,16 +1,14 @@
-/*
- * fileio.h             -- include file for prolog file operations
- *      Copyright (c) 1985 by Kevin A. Buettner
- *	Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
- * 
- * Author:  Kevin A. Buettner
- * Creation: 11/24/84
- * Revision History:
- *      Revised: 07/12/93,  Kev         -- Phasing out this package
- *      Revised: mm/dd/yy,  Name        -- Reason
- *
- */
-
+/*===================================================================*
+ |		fileio.h
+ |	Copyright (c) 1985 by Kevin A. Buettner
+ |	Copyright (c) 1986-1995 by Applied Logic Systems, Inc.
+ | 
+ |		-- include file for prolog file operations
+ | 
+ | Author:  Kevin A. Buettner
+ | Creation: 11/24/84
+ | 07/12/93,  Kev         -- Phasing out this package
+ *===================================================================*/
 #include <stdio.h>
 #include "lexan.h"
 
@@ -33,13 +31,11 @@ typedef struct {
             char buffer[SEEBFSZ];	/* line buffer          */
          } sefldsc;
 
-
 typedef struct {
             int inuse;		/* in use flag                  */
             int tkidx;		/* token table index            */
             FILE *fd;		/* file descriptor              */
          } tlfldsc;
-
 
 #define outfd           (telltbl[cur_ti].fd)
 
@@ -52,7 +48,6 @@ extern long curtok;
 extern int curtkty;
 extern FILE *curfd;
 extern int linenum;
-
 
 typedef struct {
             char *pprompt;	/* primary prompt string        */

@@ -116,7 +116,6 @@ alloc(size, to_free_ptr)
 	fatal_error(FE_MAPSYM, 0);
     }
 
-/*    aligned = (long *) ((long) unaligned & ~3);  */
     {
     	unsigned long al, ua = (unsigned long) unaligned;
     	

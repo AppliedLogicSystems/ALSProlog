@@ -336,9 +336,10 @@ extern	void	make_dbref	PARAMS(( long *, PWord *, int * ));
 extern	long *	w_validate_dbref PARAMS(( long *, int nid, long cid ));
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_D0
-#endifextern	long *	validate_dbref	PARAMS(( PWord, int, PWord * ));
+#endif
+extern	long *	validate_dbref	PARAMS(( PWord, int, PWord * ));
 extern	Code *	jump_validate_dbref PARAMS(( PWord ref, PWord term ));
-ifdef POINTERS_IN_A0
+#ifdef POINTERS_IN_A0
 #pragma pointers_in_A0
 #endif
 extern	void	gen_indexing	PARAMS(( void ));

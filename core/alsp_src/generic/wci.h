@@ -1,27 +1,22 @@
-/*
- * wci.h	-- machine specific clause index information
- *	Copyright (c) 1989-1993 by Applied Logic Systems, Inc.
- *
- * Author: Keith Hughes and Kevin Buettner
- * Creation Date: 5/5/89
- *
- * Revision History:
- *   Revised:	mm/dd/yy	Who		What and Why
- *   Revised:	mm/dd/yy	Who		What and Why
- *
- *
- *
- * This file is included in wintcode.h.  It completes the clause header
- * index information.
- *
- * WCI_CHOICEENTRY is the index into the clause giving the entry point
- *	for the choice point instruction.  Often this is simply where
- *	the choice point code starts.
- *
- * WCI_CLAUSECODE is the index into the clause giving the actual start
- *	of the clause code.
- *
- */
+/*=====================================================================*
+ |		wci.h	
+ |	Copyright (c) 1989-1995 Applied Logic Systems, Inc.
+ |
+ |		-- machine specific clause index information
+ |
+ | Author: Keith Hughes and Kevin Buettner
+ | Creation Date: 5/5/89
+ |
+ | This file is included in wintcode.h.  It completes the clause header
+ | index information.
+ |
+ | WCI_CHOICEENTRY is the index into the clause giving the entry point
+ |	for the choice point instruction.  Often this is simply where
+ |	the choice point code starts.
+ |
+ | WCI_CLAUSECODE is the index into the clause giving the actual start
+ |	of the clause code.
+ *=====================================================================*/
 
 #ifdef Portable
 

@@ -19,61 +19,71 @@
 #ifndef _DEFS_H_INCLUDED_
 #define _DEFS_H_INCLUDED_ 1
 
-/*
- * Operating System:
- *
- * Assume that some variant of unix is the operating system.  Override
- * in mconfig.h or aconfig.h if this is not the case.
- *
- * We now longer distiguish between variants of unix.  We test for specific
- * features in the configuration script instead.
- */
+/*---------------------------------------------------------------------*
+ | Environment & Operating System:
+ |
+ | We start from the assumption HERE that some variant of unix is the 
+ | operating system.  One modifies or overides this this assumption 
+ | or any of its details in an architecture-specific configuration
+ | file(s) aconfig.h, or (even more refined control) in a machine-
+ | specific configuration file mconfig.h.
+ |
+ | We now longer explicitly distiguish inside the sources between variants 
+ | of unix.  Instead, we test for specific features in the configuration 
+ | script instead, and configure appropriately inside the sources.
+ *---------------------------------------------------------------------*/
 
 #define UNIX     1
 #define OSStr "unix"
+/* #define SysName "ALS Prolog" -- now computed in blt_shl.pro */
+#define SysManufacturer "generic"
 
 /* Like UNIX and OSStr above, assume that the OS has a brk() call. */
 
+#ifdef MacOS
+#define HAVE_BRK
+#else
 /*** #define HAVE_BRK  ***/
+#endif
 
-/*
- * SlowCut needs to be defined at the present time in order for our interrupt
- * mechanism to work properly.  It is unfortunate that this is the case.
- * SlowCut indicates that code for performing cut is not expanded inline;
- * that is, it is a goal like any other goal.  There are some ways to
- * properly get cut inlined and also allow interrupts to work which might
- * be explored in the future.
- */
+/*---------------------------------------------------------------------*
+ | SlowCut needs to be defined at the present time in order for our interrupt
+ | mechanism to work properly.  It is unfortunate that this is the case.
+ | SlowCut indicates that code for performing cut is not expanded inline;
+ | that is, it is a goal like any other goal.  There are some ways to
+ | properly get cut inlined and also allow interrupts to work which might
+ | be explored in the future.
+ *---------------------------------------------------------------------*/
 
 #define SlowCut 1
 
-/*
- * NewMath indicates that goals performing arithmetic are totally expanded.
- * InMath and FMath must also be defined if NewMath is defined.
- * Define NewMath if math code totally expanded; InMath and FMath must also
- * be defined if NewMath is defined.
- */
+/*---------------------------------------------------------------------*
+ | NewMath indicates that goals performing arithmetic are totally expanded.
+ | InMath and FMath must also be defined if NewMath is defined.
+ | Define NewMath if math code totally expanded; InMath and FMath must also
+ | be defined if NewMath is defined.
+ *---------------------------------------------------------------------*/
 
 #define NewMath 1
 #define InMath 1	/* Inline math */
 #define FMath 1		/* Inline floating math */
 
-/* 
- * It may be useful to turn off the following configuration parameters when
- * porting to a new platform.  Otherwise, they should be left alone.
- *
- * CodeGC	-- code space garbage collection
- * AutoIndexing	-- stable procedures generate indexing for themselves
- * SPY		-- support for spy points
- * OBP		-- support for .obp files
- * Indexing	-- generate first argument indexing
- * BigStruct	-- structures with arities larger than ESCAPE_ARITY are 
- *		   supported.  ESCAPE_ARITY is 255 on most platforms (see
- *		   mtypes.h).  Assembly versions of functor, arg, mangle,
- *		   and the unifier need to be modified in order to support
- *		   big structures.  The garbage collector and other C code
- *		   should use ifdef BigStruct to handle big structures.
- */
+/*---------------------------------------------------------------------* 
+ | It may be useful to turn off the following configuration parameters when
+ | porting to a new platform.  Otherwise, they should be left alone.
+ |
+ | CodeGC	-- code space garbage collection
+ | AutoIndexing	-- stable procedures generate indexing for themselves
+ | SPY		-- support for spy points
+ | OBP		-- support for .obp files
+ | Indexing	-- generate first argument indexing
+ | BigStruct	-- structures with arities larger than ESCAPE_ARITY are 
+ |		   supported.  ESCAPE_ARITY is 255 on most platforms (see
+ |		   mtypes.h).  Assembly versions of functor, arg, mangle,
+ |		   and the unifier need to be modified in order to support
+ |		   big structures.  The garbage collector and other C code
+ |		   should use ifdef BigStruct to handle big structures.
+ *---------------------------------------------------------------------*/
 
 #define CodeGC		1
 #define AutoIndexing	1
@@ -82,37 +92,38 @@
 #define Indexing	1
 #define BigStruct	1
 
-/*
- * Other Parameters which are not defined by default; these should be defined
- * in either mconfig.h or aconfig.h if needed.
- *
- * DoubleType	-- floating point types are implemented in a direct fashion
- *		(similar to UIA's).  They are more compact and more easily
- *		decoded.  If DoubleType is not defined, floats and doubles
- *		are represented as '$double'(D1,D2,D3,D4) where D1-D4 are
- *		sixteen bit pieces of the double.
- *
- * MotorolaMath	-- defined if the Motorola math builtins implemented by
- *		Sam Daniel's group are supported.
- *
- * PACKAGE	-- defined if the application packaging system is to be
- *		included
- *
- * CMeta	-- certain meta-builtins are written in C
- *
- * SIO_ASM 	-- certain of the stream I/O primitives are implemented
- *		in assembly language
- *
- */
+/*---------------------------------------------------------------------*
+ | Other Parameters which are not defined by default; these should be defined
+ | in either mconfig.h or aconfig.h if needed.
+ |
+ | DoubleType	-- floating point types are implemented in a direct fashion
+ |		(similar to UIA's).  They are more compact and more easily
+ |		decoded.  If DoubleType is not defined, floats and doubles
+ |		are represented as '$double'(D1,D2,D3,D4) where D1-D4 are
+ |		sixteen bit pieces of the double.
+ |
+ | MotorolaMath	-- defined if the Motorola math builtins implemented by
+ |		Sam Daniel's group are supported.
+ |
+ | PACKAGE	-- defined if the application packaging system is to be
+ |		included
+ |
+ | CMeta	-- certain meta-builtins are written in C
+ |
+ | SIO_ASM 	-- certain of the stream I/O primitives are implemented
+ |		in assembly language
+ |
+ *---------------------------------------------------------------------*/
 
-/*
- * Include the architecture and machine specific configuration files.  The
- * machine specific file is included after the architecture specific file so
- * that it may override certain architecture defined parameters in much the
- * same manner in which both of these files may override the paramters defined
- * in this file before this point.
- */
+/*---------------------------------------------------------------------*
+ | Include the architecture and machine specific configuration files.  The
+ | machine specific file is included after the architecture specific file so
+ | that it may override certain architecture defined parameters in much the
+ | same manner in which both of these files may override the paramters defined
+ | in this file before this point.
+ *---------------------------------------------------------------------*/
 
+#include "tconfig.h"
 #include "aconfig.h"
 #include "config.h"
 
@@ -155,9 +166,9 @@
 #endif		/* HAVE_STRINGS_H */
 #endif /* not STDC_HEADERS and not HAVE_STRING_H */
 
-/*
- * Set up some macros for dealing with prototypes and other ANSI C features.
- */
+/*---------------------------------------------------------------------*
+ | Set up some macros for dealing with prototypes and other ANSI C features.
+ *---------------------------------------------------------------------*/
 
 #ifndef PARAMS
 #if defined(__STDC__)
@@ -189,9 +200,9 @@
 #endif		/* HAVE_UNISTD_H */
 #include <signal.h>
 
-/*
- * Don't use sigaction if implementation of sigaction is immature.
- */
+/*---------------------------------------------------------------------*
+ | Don't use sigaction if implementation of sigaction is immature.
+ *---------------------------------------------------------------------*/
 #if defined(HAVE_SIGACTION) && !defined(SA_SIGINFO)
 #undef HAVE_SIGACTION
 #endif	/* HAVE_SIGACTION && !SA_SIGINFO */
@@ -199,14 +210,14 @@
 #include "missing.h"		/* extern decls missing from header files */
 #endif	/* UNIX */
 
-/*
- * Define the system dependent directory and path separators for parsing path
- * lists
- *
- *			UNIX	VMS	DOS	Atari	Mac
- * Path Separator:	:	,	;	,	,
- * Dir Separator:	/	]	\	\	:
- */
+/*---------------------------------------------------------------------*
+ | Define the system dependent directory and path separators for parsing path
+ | lists
+ |
+ |			UNIX	VMS	DOS	Atari	Mac
+ | Path Separator:	:	,	;	,	,
+ | Dir Separator:	/	]	\	\	:
+ *---------------------------------------------------------------------*/
 
 #if	defined(UNIX)
 #ifdef __GO32__
@@ -235,28 +246,28 @@
 #endif
 
 #if defined(HAVE_LIBDL) || defined(HAVE_LIBLD)
-/*
- * DynamicForeign indicates that dynamic loading of foreign code is
- * supported.
- */
+/*---------------------------------------------------------------------*
+ | DynamicForeign indicates that dynamic loading of foreign code is
+ | supported.
+ *---------------------------------------------------------------------*/
 
 #define DynamicForeign 1
 #endif	/* HAVE_LIBDL || HAVE_LIBLD */
 
-/*
- * Stuff from memory.h:
- *
- * Some systems still use bcopy so define memmove in terms of bcopy if
- * we have to.
- */
+/*---------------------------------------------------------------------*
+ | Stuff from memory.h:
+ |
+ | Some systems still use bcopy so define memmove in terms of bcopy if
+ | we have to.
+ *---------------------------------------------------------------------*/
 
 #if !defined(HAVE_MEMMOVE) && defined(HAVE_BCOPY)
 #define memmove(s1,s2,n) bcopy(s2,s1,n)
 #endif
 
-/*
- * Include commonly needed Generic include files
- */
+/*---------------------------------------------------------------------*
+ | Include commonly needed Generic include files
+ *---------------------------------------------------------------------*/
 
 #include "wd_size.h"	
 #include "mtypes.h"	/* not generic, but every platform has one */
@@ -270,26 +281,26 @@
 #include "alspi.h"
 #include "chpt.h"
 #include "built.h"
-
-/* If string.h doesn't exist or is lacking certain functions, we provide our
- * own replacements for the functions declared therein...
- */
+/*---------------------------------------------------------------------*
+ | If string.h doesn't exist or is lacking certain functions, we provide
+ | our own replacements for the functions declared therein...
+ *---------------------------------------------------------------------*/
 #ifndef HAVE_STRTOK
 extern char *strtok PARAMS(( char *s1, const char *s2 ));
-#endif /* HAVE_STRTOK */
+#endif 		/* HAVE_STRTOK */
 #ifndef HAVE_STRDUP
 extern char *strdup PARAMS(( const char *s1 ));
-#endif /* HAVE_STRDUP */
+#endif 		/* HAVE_STRDUP */
 #ifndef HAVE_STRSPN
 extern size_t strspn PARAMS(( const char *s1, const char *s2 ));
-#endif /* HAVE_STRSPN */
+#endif 		/* HAVE_STRSPN */
 #ifndef HAVE_STRCSPN
 extern size_t strcspn PARAMS(( const char *s1, const char *s2 ));
-#endif /* HAVE_STRCSPN */
+#endif 		/* HAVE_STRCSPN */
 
-/*
- * Declare the als memory allocation function and associated helpers
- */
+/*---------------------------------------------------------------------*
+ | Declare the als memory allocation function and associated helpers
+ *---------------------------------------------------------------------*/
 
 extern	int	als_mem_init	PARAMS(( char *file, long offset ));
 extern	long *	ss_pmalloc	PARAMS(( size_t size, int fe_num, long *asizep ));
@@ -300,18 +311,18 @@ extern	void	protect_bottom_stack_page PARAMS(( void ));
 extern	long *	ss_fmalloc_start PARAMS(( void ));
 extern	long *	ss_fmalloc	PARAMS(( size_t ));
 
-/*
- * Declare prototypes of other functions which have no obvious header file.
- */
+/*---------------------------------------------------------------------*
+ | Declare prototypes of other functions which have no obvious header file.
+ *---------------------------------------------------------------------*/
 
-/* main.c */
+/* ----------   main.c ----------   */
 extern	void	als_exit	PARAMS(( int ));
 extern	void	heap_overflow	PARAMS(( void ));
 
-/* disassem.c */
+/* ----------   disassem.c ----------   */
 extern	void	list_asm	PARAMS(( Code *, int ));
 
-/* loadfile.c */
+/* ----------   loadfile.c ----------   */
 extern	void	fix_MAGIC	PARAMS(( void ));
 extern	void	f_icode		PARAMS(( int, long, long, long, long ));
 extern	int	obp_open	PARAMS(( char * ));
@@ -321,15 +332,15 @@ extern	int	load_file	PARAMS(( char *, int ));
 extern	void	obp_push	PARAMS(( void ));
 extern	void	obp_pop		PARAMS(( void ));
 
-/* sig.c */
+/* ----------   sig.c ----------   */
 extern	void	deathwatch	PARAMS(( void ));
 extern	void	reissue_cntrlc	PARAMS(( void ));
 
-/* vprintf.c */
+/* ----------   vprintf.c ----------   */
 extern	void	PI_oprintf	PARAMS(( char *, ... ));
 extern	void	PI_oputchar	PARAMS(( int ));
 
-/* fsdos.c, fsmac.c, fsunix.c, or fsvms.c */
+/* ----------   fsdos.c, fsmac.c, fsunix.c, or fsvms.c ----------   */
 extern	void	init_fsutils	PARAMS(( void ));
 #if MacOS
 extern	int	access		PARAMS((CONST char *, int x));
@@ -340,22 +351,22 @@ extern	int	isdir			PARAMS((CONST char * ));
 extern	int	absolute_pathname	PARAMS((CONST char *name));
 #endif
 
-/* sig.c */
+/* ----------   sig.c ----------   */
 extern	void	init_sigint	PARAMS(( void ));
 extern	void	reset_sigint	PARAMS(( void ));
 
-/* cinterf.c */
+/* ----------   cinterf.c ----------   */
 extern	void	cinterf_init	PARAMS(( void ));
 
-/* from either assembly code or wam.c */
+/* ----------   from either assembly code or wam.c ----------   */
 extern	void	wm_exec		PARAMS(( Code * ));
 extern	int	wm_rungoal	PARAMS(( PWord, PWord ));
 
-/* foreign.c */
+/* ----------   foreign.c ----------   */
 extern	int	load_foreign	PARAMS(( char *, char *, char * ));
 
 #ifdef DynamicForeign
-		/* lforeign.c */
+/* ----------   lforeign.c ----------   */
 extern	void (*	load_object	PARAMS(( char *, char *, char * )) ) PARAMS((void));
 extern	void	foreign_shutdown PARAMS(( void ));
 #endif /* DynamicForeign */
@@ -364,11 +375,11 @@ extern	void	foreign_shutdown PARAMS(( void ));
 extern	void	wam_init	PARAMS(( void ));
 #endif /* Portable */
 
-/* icode1.c */
+/* ----------   icode1.c ----------   */
 extern	int	init_icode_buf	PARAMS(( int ));
 
 #ifdef NO_FAR_DATA
-/* Global array allocation functions. */
+/* ----------   Global array allocation functions. ----------   */
 extern	void	init_capturestructs	PARAMS(( void ));
 extern	void	init_compiler_data	PARAMS(( void ));
 extern	void	init_cinterf_data	PARAMS(( void ));

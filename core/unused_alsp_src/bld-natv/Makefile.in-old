@@ -37,7 +37,7 @@ PROLOG		= ../bld-port/alspro
 
 include $(srcdir)/generic/generic.mkf
 include $(srcdir)/$(ARCH)/$(ARCH).mkf
-include $(srcdir)/$(ARCH)/$(OS)/$(OS).mkf
+include $(srcdir)/$(ARCH)/$(basename $(basename $(OS)))/$(basename $(basename $(OS))).mkf
 
 objects = $(gfiles_o) $(afiles_o)
 
@@ -57,7 +57,7 @@ alspro.a: setup $(objects)
 alspro_basis: pimain.o alspro.a 
 	$(CC) -o alspro_basis $^ $(LDFLAGS) $(LIBS)
 
-IMGOPTS = select_lib([debugger])
+IMGOPTS = select_lib(builtins,[debugger])
 
 alspro: alspro_basis
 	alspro_basis -obp -g 'save_image(alspro,[$(IMGOPTS)])'

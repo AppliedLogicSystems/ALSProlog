@@ -37,15 +37,6 @@
 #include <stat.h>
 #include <file.h>
 
-/*
-#elif	defined(MacOS)
-#include <StdDef.h>
-#include <errno.h>
-#include <Types.h>
-#include <Files.h>
-#include <ToolUtils.h>
-*/
-
 #else	!defined(MacOS) /* must be unix */
 #include <errno.h>
 #include <sys/file.h>
@@ -151,13 +142,10 @@ static unsigned short format_tab[] =
     FR(U, U, U, U)		/* last       */
 };
 
-static	long	get_file_modified_time	PARAMS(( char * ));
-static	int		isdir					PARAMS(( char * ));
-
-/*
- * fix_magic is called at initialization time to replaces the X's with
- * the processor string and the Y's with the minor os string
- */
+/*-----------------------------------------------------------------------*
+ | fix_magic is called at initialization time to replaces the X's with
+ | the processor string and the Y's with the minor os string
+ *-----------------------------------------------------------------------*/
 
 void
 fix_MAGIC()
@@ -179,8 +167,6 @@ fix_MAGIC()
     while (*m == 'Y' && *o)	/* replaces Y's */
 	*m++ = *o++;
 }
-
-
 
 #ifdef DOS
 /*
@@ -555,9 +541,12 @@ obp_pop()
 
 #endif	/* OBP */
 
+static	long	get_file_modified_time	PARAMS(( char * ));
+static	int	isdir			PARAMS(( char * ));
+
 #ifndef MacOS
 
-static long
+static long 
 get_file_modified_time(fname)
     char *fname;
 {
@@ -694,7 +683,7 @@ load_file(fname, options)
 	else 
 #endif /* OBP */
 	{
-	    errorcount = consult(find_token(fname));
+	    errorcount = consult(find_token((UCHAR *)fname));
 	    LOAD_RETURN(1)
 	}
     }
@@ -818,19 +807,3 @@ load_file(fname, options)
 
     LOAD_RETURN(0)
 }
-
-
-/******
-int
-load_file(fname, options)
-    char *fname;
-    int   options;
-{
-    if (options)
-	w_reconstamp = w_timestamp;
-    consult(find_token((UCHAR *)fname));
-}
-
-*********/
-
-

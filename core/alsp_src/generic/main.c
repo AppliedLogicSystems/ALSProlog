@@ -22,8 +22,8 @@
  |			-- Made "builtins/builtins" general w.r.t. directory separator.
  *=============================================================*/
 #include "defs.h"
-/* #include "winter.h" */
 #include <setjmp.h>
+/* #include "winter.h" */
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -49,8 +49,14 @@
 #endif /* 0 */
 
 #ifdef MacOS
-#include <Traps.h>
-#include <OSUtils.h>
+#ifdef THINK_C
+#include <LoMem.h>
+#else
+#include <LowMem.h>
+#endif
+#if defined(THINK_C) || defined(applec)
+#define LMSetStackLowPoint(value) ((* (Ptr *) 0x0110) = (value))
+#endif
 #endif
 
 #include "main.h"
@@ -67,27 +73,19 @@
 #define R_OK 4
 #endif
 
-/*************
-#ifdef MacOS
-pascal void debugger() extern 0xa9ff;
-#endif
- *************/
-
-
 int   system_debugging = 0;	/* -D to set it to 1 */
 int   gcbeep = 0;		/* -B to set it to 1 */
 
 static int noautoload = 0;
 static int pckgloaded = 0;
 
-/*
- * saved_state_image_offset is the offset to the saved state information
- * in the image file.  If this value is zero, there is no saved state
- * information and the builtins should be loaded from the standard place.
- * It is the responsiblity of the utility which merges saved states and
- * images to set this value appropriately in the resulting image.
- */
-
+/*------------------------------------------------------------------------*
+ | saved_state_image_offset is the offset to the saved state information
+ | in the image file.  If this value is zero, there is no saved state
+ | information and the builtins should be loaded from the standard place.
+ | It is the responsiblity of the utility which merges saved states and
+ | images to set this value appropriately in the resulting image.
+ *------------------------------------------------------------------------*/
 long  saved_state_image_offset = 0;
 
 char  imagename[64];
@@ -95,15 +93,9 @@ char  imagedir[1024];
 static char alsdir[1024];	/* directory where ALS system resides */
 
 static char versionNum[] = SysVersionNum;	/* from version.h */
-static char systemName[] = SysName;		/* from version.h */
+/* static char systemName[] = SysName;		from version.h */
 static int exit_status = 0;
-static jmp_buf exit_return;
-
-/*********
-#ifdef MacOS
-extern char *alloca();
-#endif
-***********/
+static jmp_buf exit_return; 
 
 static	void	panic_fail	PARAMS(( void ));
 #ifdef arch_m88k
@@ -112,8 +104,12 @@ static	void	panic_continue	PARAMS(( void ));
 static	char *	isopt		PARAMS(( char *, char * ));
 static	void	abolish_predicate PARAMS(( char *, char *, int ));
 static	void	assert_sys_searchdir PARAMS(( char * ));
+/*
 static	void	assert_als_system PARAMS(( char *, char *, char *, char *,
 				    char *, char *, char * ));
+*/
+static	void	assert_als_system PARAMS(( char *, char *, char *, char *,
+				    char *, char * ));
 static	void	assert_command_line PARAMS(( int, char ** ));
 #ifndef MacOS
 static	int	absolute_pathname PARAMS((CONST char * ));
@@ -136,13 +132,11 @@ panic_continue()
 }
 #endif /* arch_m88k */
 
-
 void
 heap_overflow()
 {
     fatal_error(FE_OVER_HEAP, 0);
 }
-
 
 static char *
 isopt(opt,str)
@@ -155,52 +149,10 @@ isopt(opt,str)
     else
 	return 0;
 }
-#ifdef MacOS
 
-void (*SysErrorAddress)(void);
-
-void PatchedSysError(void);
-#if 0
-#ifndef applec
-#if defined(__MWERKS__)
-void asm PatchedSysError(void)
-#elif defined(THINK_C)
-void PatchedSysError(void)
-{ asm
-#else
-#error "missing case"
-#endif
-{
-    	cmp.l #28, d0
-#if defined(THINK_C)
-    	beq.s @DoNothing
-#elif defined(__MWERKS__)
-    	beq.s DoNothing
-#else
-#error "missing case"
-#endif
-
-    	movem.l d0/a5, -(a7)
-    	dc.w 0x200D, 0x2A78, 0x0904  /* SetCurrentA5 */
-    	move.l SysErrorAddress, 8(a7)
-    	movem.l (a7)+, d0/a5
-    DoNothing:
-#if defined(THINK_C)
-}
-}
-#elif defined(__MWERKS__)
-    	rts
-}
-#else
-#error "missing case"
-#endif
-#endif
-#endif
-#endif /* MacOS */
-
-/*
+/*---------------------------------*
  * Prolog initialization
- */
+ *---------------------------------*/
 
 int
 PI_prolog_init(win_str, argc, argv)
@@ -212,36 +164,37 @@ PI_prolog_init(win_str, argc, argv)
     unsigned long stacksize;
     unsigned long icbufsize;
     char *saved_state_filename;
-    int  saved_state_loaded;
     char *als_opts;
+    int  saved_state_loaded;
+
 #ifdef Portable
     extern Code *wm_panic;
 #endif /* Portable */
 
-    /*
+    /*-------------------------------------------------------------------*
      * malloc and then free an area at the outset so that the malloc
      * allocator will have some space to work with.  The hope is that
      * the brk (on systems that have such a thing) will get moved at
      * this point and then will not get moved again until after we've
      * called als_mem_init.
-     */
+     *-------------------------------------------------------------------*/
 
     free(malloc(8192));
 
 #ifdef MacOS
 	{
-/*    extern PWord *wm_regs[][];   */
     char *punchaddr, *punchee;
 	extern void rts_end(void);
     extern wm_fail(), wm_trust_fail();
 
-    /* The unusual nature of the way the Mac addresses C functions (via a
+    /*-------------------------------------------------------------------*
+	 * The unusual nature of the way the Mac addresses C functions (via a
      * Jump Table, we must bypass the normal mechanism and get at the real
      * machine address of wm_fail().
-     */
+     *-------------------------------------------------------------------*/
 
 	/* call rts_end(), which does nothing, to insure that the jump
-	 table entries for its segment are loaded. */
+	   table entries for its segment are loaded. */
 	rts_end();
 
     punchaddr = (char *) wm_trust_fail;
@@ -252,20 +205,14 @@ PI_prolog_init(win_str, argc, argv)
     *(long *) punchaddr = (long) punchee;
     }
 
-#if 0
-    /* Install a trap patch to disable stack overflow error.  The trap patch
-       disables all SysError() calls with error number 28. */
-       
-    SysErrorAddress = (void (*)(void))NGetTrapAddress(_SysError, ToolTrap);
-#if defined(THINK_C) || defined(applec)
-    NSetTrapAddress((long)PatchedSysError, _SysError, ToolTrap);
-#elif defined(__MWERKS__)
-    NSetTrapAddress((UniversalProcPtr)PatchedSysError, _SysError, ToolTrap);
-#else
-#error "missing case"
-#endif
-#endif
+    /* Disable stack overflow checking. */
+    
+    LMSetStackLowPoint((Ptr)0);
+
+    /* Initilize math dispatch tables. */
+
     init_math();
+
 #endif /* MacOS */
 
 #if defined(DOS)
@@ -361,8 +308,25 @@ PI_prolog_init(win_str, argc, argv)
      * just use the image directory.  It is this directory which we search
      * to find the builtins.
      */
+#ifdef MacOS
+    {
+	const char *s;
+	s = getenv("ALSDirectory");
+	if (s)
+	{
+	    strcpy(alsdir, s);
+	} else {
+	    strcpy(alsdir, imagedir);
+	    strcat(alsdir, "alsdir");
+	}
+    }
     strcpy(alsdir, imagedir);
     strcat(alsdir, "alsdir");
+#else
+    strcpy(alsdir, imagedir);
+    strcat(alsdir, "alsdir");
+#endif /* MacOS */
+
 #ifdef VMS
     strcat(alsdir, ".dir");
 #endif
@@ -397,6 +361,10 @@ PI_prolog_init(win_str, argc, argv)
     wm_stackbot = allocate_prolog_heap_and_stack(stacksize + heapsize);
 #endif 
     wm_heapbase = wm_stackbot + stacksize;
+
+#ifdef MacOS
+    wm_stackbot_safety = wm_stackbot + 50;
+#endif
 
 #ifdef	arch_m88k
     wm_CP = (long *) panic_continue;
@@ -471,15 +439,16 @@ PI_prolog_init(win_str, argc, argv)
     assert_command_line(argc, argv);
     assert_sys_searchdir(alsdir);
 
-    /*
+    /*---------------------------------------*
      * Set up the als_system fact.
-     */
+     *---------------------------------------*/
     assert_als_system(OSStr, MinorOSStr, ProcStr,
-		      SysManufacturer, versionNum, win_str,systemName);
+		      SysManufacturer, versionNum, win_str);
+/*		      SysManufacturer, versionNum, win_str,systemName); */
 
-    /*
+    /*---------------------------------------*
      * Load the builtins
-     */
+     *---------------------------------------*/
     if (!noautoload && !saved_state_loaded)
 #ifdef MacOS
 	{
@@ -496,9 +465,9 @@ PI_prolog_init(win_str, argc, argv)
 			/*	OLD: autoload("builtins");   */
 	autoload("builtins/builtins");  
 #endif
-    /*
+    /*---------------------------------------*
      * Establish the Control/C (or Control/BREAK) handler
-     */
+     *---------------------------------------*/
     init_sigint();
 
     return (0);
@@ -565,8 +534,12 @@ assert_sys_searchdir(name)
  * system in the database prior to loading the builtins file.
  */
 static void
+/*
 assert_als_system(os, os_var, proc, man, ver, winstype, sysname)
     char *os, *os_var, *proc, *man, *ver, *winstype, *sysname;
+*/
+assert_als_system(os, os_var, proc, man, ver, winstype)
+    char *os, *os_var, *proc, *man, *ver, *winstype;
 {
     char  command[2048];
 
@@ -574,14 +547,15 @@ assert_als_system(os, os_var, proc, man, ver, winstype, sysname)
 	return;
 
     sprintf(command,
-	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s',wins='%s',prologName='%s']),_,0)",
+/*	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s',wins='%s',prologName='%s']),_,0)", */
+	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s',wins='%s']),_,0)",
 	    os,
 	    os_var,
 	    proc,
 	    man,
 	    ver,
-	    winstype,
-	    sysname);
+	    winstype);
+/*	    sysname);  */
     if (!exec_query_from_buf(command)) {
 	fatal_error(FE_ASSERT_SYS, 0);
     }
@@ -689,16 +663,17 @@ static int
 absolute_pathname(name)
     const char *name;
 {
-    return (*name == DIR_SEPARATOR);
+    return ( *name == DIR_SEPARATOR);
 }
 
 #endif
 
 
-/*
- * whereami is given a filename f and returns the directory in which this file
- *      may be found.  A dot will be returned to indicate the current directory.
- */
+/*--------------------------------------------------------------------*
+ | whereami is given a filename f and returns the directory in which 
+ | the executable file (containing this code) may be found.  A dot will be 
+ | returned to indicate the current directory.
+ *--------------------------------------------------------------------*/
 
 static void
 whereami(name)
@@ -717,11 +692,11 @@ whereami(name)
 
     if (access(name, R_OK) == 0) {
 
-	/*
+	/*-------------------------------------------------------------*
 	 * The file was accessible without any other work.  But the current
 	 * working directory might change on us, so if it was accessible
 	 * through the cwd, then we should get it for later accesses.
-	 */
+	 *-------------------------------------------------------------*/
 
 	t = imagedir;
 	if (!absolute_pathname(name)) {
@@ -765,12 +740,12 @@ whereami(name)
 	    }
 	}
 
-	/*
+	/*-------------------------------------------------------------*
 	 * Copy the rest of the string and set the cutoff if it was not
 	 * already set.  If the first character of name is a slash, cutoff
 	 * is not presently set but will be on the first iteration of the
 	 * loop below.
-	 */
+	 *-------------------------------------------------------------*/
 
 	for (s = name;;) {
 	    if (*s == DIR_SEPARATOR)
@@ -782,10 +757,10 @@ whereami(name)
     }
     else {
 
-	/*
+	/*-------------------------------------------------------------*
 	 * Get the path list from the environment.  If the path list is
 	 * inaccessible for any reason, leave with fatal error.
-	 */
+	 *-------------------------------------------------------------*/
 
 #ifdef MacOS
 	if ((s = getenv("Commands")) == (char *) 0)
@@ -823,12 +798,12 @@ whereami(name)
 
     }
 
-    /*
-     * At this point the full pathname should exist in imagedir and
-     * cutoff should be set to the final slash.  We must now determine
-     * whether the file name is a symbolic link or not and chase it down
-     * if it is.  Note that we reuse ebuf for getting the link.
-     */
+    /*-------------------------------------------------------------*
+     | At this point the full pathname should exist in imagedir and
+     | cutoff should be set to the final slash.  We must now determine
+     | whether the file name is a symbolic link or not and chase it down
+     | if it is.  Note that we reuse ebuf for getting the link.
+     *-------------------------------------------------------------*/
 
 #ifdef HAVE_SYMLINK
     while ((cc = readlink(imagedir, ebuf, 512)) != -1) {
@@ -854,13 +829,11 @@ whereami(name)
     *(cutoff + 1) = 0;		/* chop off the filename part */
 }
 
-
-
-/*
- * autoload will attempt to load the named file from
- * the alsdir directory.  It will print a warning if
- * unable to do so.
- */
+/*-------------------------------------------------------------*
+ | autoload will attempt to load the named file from
+ | the alsdir directory.  It will print a warning if
+ | unable to do so, and exit with a fatal error.
+ *-------------------------------------------------------------*/
 
 static void
 autoload(f)
@@ -877,6 +850,7 @@ autoload(f)
     if (!status) {
 	PI_app_printf(PI_app_printf_warning,
 		      "autoload: unable to load '%s'\n", f);
+/*	fatal_error(FE_PANIC_FAIL, 0);    */
     }
 }
 
@@ -904,7 +878,6 @@ PI_toplevel()
     return (exit_status);
 }
 
-
 void
 als_exit(status)
     int   status;
@@ -913,7 +886,6 @@ als_exit(status)
 
     longjmp(exit_return, 1);
 }
-
 
 void
 PI_shutdown()
@@ -931,7 +903,6 @@ PI_shutdown()
 }
 
 #ifdef DOS
-
 extern int _access();
 
 int
@@ -960,18 +931,17 @@ chpt_init()
     wm_B = wm_TR;
 }
 
-
-/*
- * string.h replacements for some of the functions which are not
- * universally available.
- */
+/*-------------------------------------------------------------------*
+ | string.h replacements for some of the functions which are not
+ | universally available.
+ *-------------------------------------------------------------------*/
 
 #ifndef HAVE_STRDUP
-/*
- * strdup returns a pointer to a new string which is a duplicate of the
- * string pointed to by s1.  The space for the new string is obtained using
- * malloc.  If the new string can not be created, a NULL pointer is returned.
- */
+/*-------------------------------------------------------------------*
+ | strdup returns a pointer to a new string which is a duplicate of the
+ | string pointed to by s1.  The space for the new string is obtained using
+ | malloc.  If the new string can not be created, a NULL pointer is returned.
+ *-------------------------------------------------------------------*/
 
 char *
 strdup(s1)
@@ -992,10 +962,10 @@ strdup(s1)
 #endif	/* HAVE_STRDUP */
 
 #ifndef HAVE_STRSPN
-/*
- * strspn returns the length of the initial segment of string s1 which
- * consists entirely of characters from string s2.
- */
+/*-------------------------------------------------------------------*
+ | strspn returns the length of the initial segment of string s1 which
+ | consists entirely of characters from string s2.
+ *-------------------------------------------------------------------*/
 
 size_t
 strspn(s1, s2)
@@ -1021,10 +991,10 @@ done:
 #endif /* HAVE_STRSPN */
 
 #ifndef HAVE_STRCSPN
-/*
- * strcspn returns the length of the initial segment of string s1 which
- * consists entirely of characters not from string s2.
- */
+/*-------------------------------------------------------------------*
+ | strcspn returns the length of the initial segment of string s1 which
+ | consists entirely of characters not from string s2.
+ *-------------------------------------------------------------------*/
 
 size_t strcspn(s1, s2)
     CONST char *s1;
@@ -1049,19 +1019,19 @@ done:
 #endif /* HAVE_STRCSPN */
 
 #ifndef HAVE_STRTOK
-/*
- * strtok considers the string s1 to consist of a sequence of zero or more
- * text tokens separated by spans of one or more characters from the
- * separator string s2.  The first call (with pointer s1 specified) returns
- * a pointer to the first character of the first token, and will have written
- * a null character into s1 immediately following the returned token.  The
- * function keeps track of its position in the string between separate calls,
- * so that subsequent calls (which must be makde with the first argument a
- * NULL pointer) will work throught the string s1 immediately following that
- * token.  In this way subsequent calls will work through the string s1 until
- * no tokens remain.  The separator string s2 may be different from call to
- * call.  When no token remains in s1, a NULL pointer is returned.
- */
+/*-------------------------------------------------------------------*
+ | strtok considers the string s1 to consist of a sequence of zero or more
+ | text tokens separated by spans of one or more characters from the
+ | separator string s2.  The first call (with pointer s1 specified) returns
+ | a pointer to the first character of the first token, and will have written
+ | a null character into s1 immediately following the returned token.  The
+ | function keeps track of its position in the string between separate calls,
+ | so that subsequent calls (which must be makde with the first argument a
+ | NULL pointer) will work throught the string s1 immediately following that
+ | token.  In this way subsequent calls will work through the string s1 until
+ | no tokens remain.  The separator string s2 may be different from call to
+ | call.  When no token remains in s1, a NULL pointer is returned.
+ *-------------------------------------------------------------------*/
 
 char *
 strtok(s1,s2)
@@ -1093,17 +1063,17 @@ strtok(s1,s2)
 #endif	/* HAVE_STRTOK */
 
 
-/*
- * copyright is not called anywhere, but defining it this way will put a
- * copyright string into the executable in addition to getting -Wall off our
- * backs.  Who knows, maybe someday we will want to call it.
- */
+/*-------------------------------------------------------------------*
+ | copyright is not called anywhere, but defining it this way will put a
+ | copyright string into the executable in addition to getting -Wall off our
+ | backs.  Who knows, maybe someday we will want to call it.
+ *-------------------------------------------------------------------*/
 
 extern	char *	copyright	PARAMS(( void ));
 
 char *
 copyright()
 {
-    static char copyright_[] = "Copyright (c) 1994 Applied Logic Systems, Inc";
+    static char copyright_[] = "Copyright (c) 1994-5 Applied Logic Systems, Inc";
     return copyright_;
 }

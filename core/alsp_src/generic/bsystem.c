@@ -16,6 +16,11 @@
 #include "defs.h"
 #include "module.h"
 
+#ifdef MacOS
+/* For the Debugger trap. */
+#include <Types.h>
+#endif
+
 static	void	abortmessage	PARAMS(( void ));
 
 int
