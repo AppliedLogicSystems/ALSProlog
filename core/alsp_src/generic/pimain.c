@@ -59,7 +59,11 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     setup.icbuf_size = 0;
     setup.alsdir = getenv("DEV_ALSDIR");
     setup.saved_state = NULL;
+#ifdef DLL
+    setup.load_executable_state = 0;
+#else
     setup.load_executable_state = 1;
+#endif
     setup.argc = argc;
     setup.argv = argv;
 #ifdef WIN32
