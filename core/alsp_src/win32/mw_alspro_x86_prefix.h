@@ -1,4 +1,4 @@
-#include <Win32Headers>
+#include <Win32Headers.mch>
 #define HAVE_CONFIG_H
 #define PORT 1
 #define MSWIN32 1

@@ -10,7 +10,6 @@
 #ifdef MacOS
 #include <fp.h>
 #elif defined(MSWin32)
-#include <fdlibm.h>
 #endif
 
 int is_ieee_nan PARAMS( (double) );
@@ -36,9 +35,9 @@ is_ieee_inf(v)
 	default:
 		return(0);
 	}
-#elif defined(WIN32) || defined(AIX)
+#elif defined(AIX)
 	return !finite(v);
-#elif defined(MacOS)
+#elif defined(WIN32) || defined(MacOS)
 	return !isfinite(v);
 #elif (defined(__sgi) && defined(__mips))
 	return(!finite(v));
