@@ -33,6 +33,10 @@
 #include "cinterf.h"
 #include "fpbasis.h"
 
+#ifdef CW_PLUGIN
+#include <DropInCompilerLinker.h>
+#endif
+
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -78,6 +82,7 @@
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
+
 
 /* These should be in sys/ipc.h or sys/msg.h, but some systems have really
  * lame include files.
@@ -5112,6 +5117,13 @@ sio_next_tokens()
 
     if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
 	FAIL;
+
+#ifdef CW_PLUGIN
+{
+	extern CompilerLinkerParameterBlockPtr gCPB;
+	CWDisplayLines(gCPB, SIO_LINENUM(buf));
+}
+#endif
 
     w_install(&a2, v2, t2);
     w_install(&a3, v3, t3);
