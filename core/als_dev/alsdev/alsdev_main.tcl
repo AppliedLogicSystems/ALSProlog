@@ -620,8 +620,6 @@ proc create_ls_toggle { Win Which Title Add Del Up Down} {
     pack $Win.$Which.buttons.up \
         -anchor center -expand 0 -fill none -padx 2 -side right 
 
-	bind $Win.ctl_$Which.entry <Return> "add_file_entry_to_list $Win.ctl_$Which.entry $Win.$Which.listbox"
-
 	pack forget $Win.$Which
 }
 
@@ -760,6 +758,7 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
         -text $Title
 	
     entry $Win.ctl_$Which.entry 
+	bind $Win.ctl_$Which.entry <Return> "add_file_entry_to_list $Win.ctl_$Which.entry $Win.$Which.listbox"
 
     frame $Win.$Which \
         -borderwidth 1 -height 30 -relief raised -width 30 
@@ -779,8 +778,6 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
 
     button $Win.$Which.buttons.add \
         -command $Add -padx 11 -pady 4 -text {Add} 
-#    button $Win.$Which.buttons.add_mult \
-#        -command $AddMult -padx 11 -pady 4 -text {Add Mult} 
     button $Win.$Which.buttons.del \
         -command $Del -padx 11 -pady 4 -text {Delete} 
 
@@ -818,8 +815,6 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
         -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky ew 
     pack $Win.$Which.buttons.add \
         -anchor w -expand 0 -fill none -padx 10 -side left 
-#    pack $Win.$Which.buttons.add_mult \
-#        -anchor w -expand 0 -fill none -padx 10 -side left 
 
     pack $Win.$Which.buttons.down \
         -anchor center -expand 0 -fill none -padx 2 -side right 
