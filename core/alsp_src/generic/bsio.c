@@ -3395,7 +3395,7 @@ skip_layout(buf)
 		        else {
 			    p += nl;
 			    SIO_LINENUM(buf)++;
-			    startpos = p + 1;
+			    startpos = p;
 			    SIO_COLUMN(buf) = 0;
 			}
 		    }
@@ -3409,7 +3409,7 @@ skip_layout(buf)
 		        else {
 		            p += nl;
 			    SIO_LINENUM(buf)++;
-			    startpos = p + nl;
+			    startpos = p;
 			    SIO_COLUMN(buf) = 0;
 			}
 		    }
