@@ -2543,6 +2543,32 @@ sio_accept_socket_connection()
 #endif /* HAVE_SOCKET */
 
 #ifdef REXEC
+/*
+ * sio_fork(ID)
+ */
+int
+sio_fork()
+{
+    PWord v1;
+    int   t1;
+
+    w_get_An(&v1, &t1, 1);
+
+    if (t1 != WTP_INTEGER && t1 != WTP_UNBOUND) {
+	FAIL;
+	}
+    if ( (pid = fork()) < 0) {
+	FAIL;			/* Can't fork anymore */
+    }
+	/* Just unify pid with v1; 
+	   let prolog upstairs figure out about parent and child 
+	*/
+    if (w_unify(v1, t1, (PWord) pid, WTP_INTEGER))
+		SUCCEED;
+	else
+		FAIL;
+}
+
 
 /*
  * sio_rexec(Host, Command, User, Password, RS, WS, ES)
