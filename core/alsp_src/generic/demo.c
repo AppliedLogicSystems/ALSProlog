@@ -286,16 +286,15 @@ static int valid_demo_key(const char *key)
 	struct tm start_tm = {0};
 	time_t start_time;
 	double diff;
-	
+		
 	sscanf(key, "%d-%d-%d-%d", &a, &b, &c, &d);
 
 	if (d != calculate_checksum(a ^ b ^ c)) return 0;
 
-	a = rotate(a, 4935);
-	b = rotate(b, 6723);
-	c = rotate(c, 2385); 
+	a = rotate(a, 6175 /*4935*/);
+	b = rotate(b, 4387 /*6723*/);
+	c = rotate(c, 8725 /*2385*/); 
 	
-
 	start_tm.tm_mon = (a/100)%100 - 1;
 	start_tm.tm_mday = a%100;
 	start_tm.tm_year = (b/100)%100 + 98;
