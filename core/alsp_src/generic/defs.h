@@ -388,6 +388,12 @@ extern	int	win32s_system;
 extern	void	als_exit	PARAMS(( int ));
 extern	void	heap_overflow	PARAMS(( void ));
 
+#ifdef HARDWARE_KEY
+extern void	init_hardware_key PARAMS(( void ));
+extern void	shutdown_hardware_key PARAMS(( void ));
+extern void	check_hardware_key PARAMS(( void ));
+#endif
+
 /* ----------   disassem.c ----------   */
 extern	void	list_asm	PARAMS(( Code *, int ));
 
