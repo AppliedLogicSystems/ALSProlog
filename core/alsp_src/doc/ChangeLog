@@ -1,3 +1,10 @@
+Fri May 12 1995 Ken Bowen
+
+	* Misc structural changes to accomodate DJGPP on DesqView/X
+	* Misc fixes to freeze mechanism
+	* Added {}-processing a'la BNR Prolog
+	* Tagged as 1.72B
+
 Sat May 6 1995 Ken Bowen
 
 	* Added delayed evaluation (freeze) mechanism in byte/threaded

@@ -1,0 +1,94 @@
+# Copies appropriate portions of the source tree
+# to a "DOS" source tree;
+# Expects to wake up in the top-level of alsp_src,
+# or an exported (cvs) directory);
+# Expects $1 to be a path to the target directory.
+# Copies the appropriate directories from the
+# current dir to the target dir (using cp -r),
+# and then applies u2d to *.c *.h and other files
+# Usage: xprt2dos <target dir>
+
+echo Target dir = $1
+cp configur.bat $1
+cp makefile.in $1
+cp readme $1
+bin/u2d $1/makefile.in
+bin/u2d $1/readme
+
+cp -r ./bin $1
+bin/u2d $1/bin/*.c
+
+cp -r ./bld-port $1
+bin/u2d $1/bld-port/*.in
+
+cp -r ./bld-natv $1
+bin/u2d $1/bld-natv/*.in
+
+cp -r ./builtins $1
+bin/u2d $1/builtins/*.pro
+
+cp -r ./cfgs $1
+
+cp -r ./cinterf $1
+bin/u2d $1/cinterf/readme
+bin/u2d $1/cinterf/c2pro/*
+bin/u2d $1/cinterf/pro2intf/*
+bin/u2d $1/cinterf/deps/*
+
+cp -r ./generate $1
+bin/u2d $1/generate/atrans/*
+
+cp -r ./generic $1
+bin/u2d $1/generic/*.c
+bin/u2d $1/generic/*.h
+bin/u2d $1/generic/*.tags
+bin/u2d $1/generic/*.mkf
+bin/u2d $1/generic/*.txt
+bin/u2d $1/generic/generate/*
+
+cp -r ./i386 $1
+rm -r $1/i386/work
+rm -r $1/i386/tgtmach
+rm -r $1/i386/sysv
+rm -r $1/i386/sunos
+rm -r $1/i386/os2
+rm -r $1/i386/oldstuff
+bin/u2d $1/i386/*.m4
+bin/u2d $1/i386/*.c
+bin/u2d $1/i386/*.h
+bin/u2d $1/i386/djgpp/*.h
+bin/u2d $1/i386/djgpp/*.sed
+bin/u2d $1/i386/djgpp/*.in
+bin/u2d $1/i386/dosphar/*
+bin/u2d $1/i386/mswins/*
+
+cp -r ./library $1
+bin/u2d $1/library/*.pro
+
+cp -r ./pconfig $1
+bin/u2d $1/pconfig/*.pro
+bin/u2d $1/pconfig/*.in
+
+cp -r ./port $1
+bin/u2d $1/port/*.c
+bin/u2d $1/port/*.h
+bin/u2d $1/port/*.mkf
+bin/u2d $1/port/djgpp/*.h
+bin/u2d $1/port/msw31/*.h
+bin/u2d $1/port/msw95/*.h
+
+cp -r ./tests $1
+bin/u2d $1/tests/*.pro
+bin/u2d $1/tests/als_exmp/*.pro
+bin/u2d $1/tests/systests/*.pro
+bin/u2d $1/tests/tsuite/*.pro
+
+cp -r ./utils $1
+bin/u2d $1/utils/*
+
+cp -r ./wins $1
+bin/u2d $1/wins/build/*.in
+bin/u2d $1/wins/build/x/*
+bin/u2d $1/wins/build/motif/*
+bin/u2d $1/wins/build/mswins/*
+bin/u2d $1/wins/src/*
