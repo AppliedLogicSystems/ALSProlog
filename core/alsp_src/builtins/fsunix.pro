@@ -393,14 +393,15 @@ directory(Pattern, FileType, List)
 	:-
 	atom(Pattern), 
 	rootPathFile(Disk, PathList, FilePattern, Pattern),
-	subPath(PathList,ThePath),
-	exists_file(ThePath),
+%	subPath(PathList,ThePath),
+%	exists_file(ThePath),
+	subPath(PathList, InitPath),
+	(InitPath = '', !; exists_file(InitPath)),
 	!,
 	name(FilePattern, PatternChars),
 	make_reg_exp(PatternChars, RegexChars),
 	name(Regex, [0'^ | RegexChars]),
 
-	subPath(PathList, InitPath),
 	(InitPath = '' -> Path = '.' ; Path = InitPath),
 
 	'$getDirEntries'(Path, Regex, FirstResult),

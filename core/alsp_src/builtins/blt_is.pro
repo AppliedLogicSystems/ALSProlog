@@ -23,7 +23,7 @@ is_eval(X+Y, Res)	:- Res is X+Y.
 is_eval(X-Y, Res) 	:- Res is X-Y.
 is_eval(X*Y, Res) 	:- Res is X*Y.
 is_eval(X/Y, Res) 	:- Res is X/Y.
-is_eval(X^Y, Res) 	:- Res is X^Y.
+%is_eval(X^Y, Res) 	:- Res is X^Y.
 is_eval(X /\ Y, Res)	:- Res is X/\Y.
 is_eval(X \/ Y, Res)	:- Res is X\/Y.
 is_eval(X xor Y, Res)	:- Res is X xor Y.

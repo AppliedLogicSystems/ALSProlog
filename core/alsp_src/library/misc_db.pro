@@ -36,7 +36,7 @@ assert_all(Module,ClauseList)
 assert_all0([],_).
 assert_all0([Clause | RestClauseList],Module)
 	:-
-	Module:assert(Clause),
+	builtins:'$assertz'(Module,Clause),
 	assert_all0(RestClauseList,Module).
 
 assert_all_refs(Module,ClauseList, RefsList)
@@ -66,7 +66,7 @@ assert_all_refs0([(':-' Goal) | RestClauseList], Modules, RestRefs)
 assert_all_refs0([Clause | RestClauseList],Modules, [Ref | RestRefs])
 	:-
 	Modules = [Module | _],
-	Module:assertz(Clause,Ref),
+	builtins:'$assertz3'(Module,Clause,Ref),
 	assert_all_refs0(RestClauseList,Modules,RestRefs).
 
 erase_all([]).

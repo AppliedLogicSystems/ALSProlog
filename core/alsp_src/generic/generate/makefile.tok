@@ -1,0 +1,42 @@
+
+
+CC = gcc
+
+#GENFILES = tokens.h tokini2.h lexinit.h siolex.h magic.h
+
+GENFILES = tokens.h tokini2.h lexinit.h siolex.h
+
+generated: ${GENFILES}
+
+magic.h: magic.c ../defs.h aconfig.h oconfig.h config.h tconfig.h
+	${CC} $(CPPFLAGS) -o magic magic.c
+	./magic > magic.h
+	-rm magic
+
+tokini2.h: tokens.h
+
+tokens.h: bldtok.c ../tokini.h ../parser.h
+	${CC} $(CPPFLAGS) -o bldtok bldtok.c
+	./bldtok
+	-rm bldtok
+
+
+lexinit.h:  lexinit.c ../lexan.h
+	$(CC) $(CPPFLAGS) -o lexinit lexinit.c
+	./lexinit > lexinit.h
+	-rm ./lexinit
+
+
+siolex.h:  sioinit.c ../bsio.h
+	$(CC) $(CPPFLAGS) -o sioinit sioinit.c
+	./sioinit > siolex.h
+	-rm ./sioinit
+
+
+icode.h:  ../icodedef.h icode.c
+	$(CC) $(CPPFLAGS) -o icode icode.c
+	./icode > icode.h
+	-rm -rf ./icode
+
+
+

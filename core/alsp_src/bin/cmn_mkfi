@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Extracts common makefile info from the 
+# principal makefiles (in bld-port and bld-natv)
+# and writes it into the file cmn_info.mkf
+#
+tgtfile=cmn_info.mkf
+
+echo "#" > $tgtfile
+echo "# Common makefile information " >> $tgtfile
+echo "#" >> $tgtfile
+
+grep '^OS' makefile >> $tgtfile
+grep '^SOS' makefile >> $tgtfile
+grep '^CC' makefile >> $tgtfile
+grep '^LINK' makefile >> $tgtfile
+grep '^INSTALL' makefile >> $tgtfile
+grep '^INSTALL_PROGRAM' makefile >> $tgtfile
+grep '^INSTALL_DATA' makefile >> $tgtfile
+grep '^LN_S' makefile >> $tgtfile
+grep '^SHELL' makefile >> $tgtfile
+grep '^CFLAGS' makefile >> $tgtfile
+grep '^LDFLAGS' makefile >> $tgtfile
+grep '^LIBS' makefile >> $tgtfile
+grep '^X_CFLAGS' makefile >> $tgtfile
+grep '^X_LIBS' makefile >> $tgtfile
+grep '^X_EXTRA_LIBS' makefile >> $tgtfile
+grep '^TARGET' makefile >> $tgtfile
+grep '^prefix' makefile >> $tgtfile
+grep '^exec_prefix' makefile >> $tgtfile

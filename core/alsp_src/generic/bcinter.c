@@ -349,7 +349,7 @@ pbi_c_examine()
 
 	switch (type) {
 	    case 1:		/* int type */
-		make_number(&v, &t, (double) *(int *) (ptr + offset));
+		make_number(&v, &t, (double)( *(int *) (ptr + offset)));
 		if (!w_unify(data, datatype, v, t))
 		    FAIL;
 		break;

@@ -370,9 +370,6 @@ extern	void	PI_oputchar	PARAMS(( int ));
 /* ----------   fsdos.c, fsmac.c, fsunix.c, or fsvms.c ----------   */
 extern	void	init_fsutils	PARAMS(( void ));
 #if MacOS
-extern	int	access		PARAMS((CONST char *, int x));
-extern	int	chdir		PARAMS((CONST char *dirname));
-extern	char *	getcwd		PARAMS((char *, size_t));
 extern	long	get_file_modified_time	PARAMS((CONST char * ));
 extern	int	isdir			PARAMS((CONST char * ));
 extern	int	absolute_pathname	PARAMS((CONST char *name));

@@ -1,0 +1,131 @@
+#!/bin/sh
+# Copies appropriate portions of the source tree
+# to a "DOS" source tree;
+# Expects to wake up in the top-level of alsp_src,
+# or an exported (cvs) directory);
+# Expects $1 to be a path to the target directory.
+# Copies the appropriate directories from the
+# current dir to the target dir (using cp -r),
+# and then applies u2d to *.c *.h and other files
+# Usage: xprt2dos <target dir>
+
+echo Target dir = $1
+echo Copying:
+echo - top level directory...
+cp cfgs/configur.msw31 $1/configur.bat
+cp makefile.in $1
+cp readme $1
+bin/u2d $1/makefile.in
+bin/u2d $1/readme
+
+echo - bin
+cp -r ./bin $1
+bin/u2d $1/bin/*.c
+
+echo - bld-port
+cp -r ./bld-port $1
+bin/u2d $1/bld-port/*.in
+
+echo - bld-natv
+cp -r ./bld-natv $1
+bin/u2d $1/bld-natv/*.in
+
+echo - builtins
+cp -r ./builtins $1
+bin/u2d $1/builtins/*.pro
+
+#echo - cfgs
+#cp -r ./cfgs $1
+
+#echo - cinterf
+#cp -r ./cinterf $1
+#bin/u2d $1/cinterf/readme
+#bin/u2d $1/cinterf/c2pro/*
+#bin/u2d $1/cinterf/pro2intf/*
+#bin/u2d $1/cinterf/deps/*
+
+#echo - generate
+#cp -r ./generate $1
+#bin/u2d $1/generate/atrans/*
+
+echo - generic
+cp -r ./generic $1
+bin/u2d $1/generic/*.c
+bin/u2d $1/generic/*.h
+bin/u2d $1/generic/*.tags
+bin/u2d $1/generic/*.mkf
+bin/u2d $1/generic/*.txt
+bin/u2d $1/generic/generate/*
+
+echo - i386
+cp -r ./i386 $1
+rm -r $1/i386/work
+rm -r $1/i386/tgtmach
+rm -r $1/i386/sysv
+rm -r $1/i386/sunos
+rm -r $1/i386/os2
+rm -r $1/i386/oldstuff
+rm -r $1/i386/mswins
+bin/u2d $1/i386/*.m4
+bin/u2d $1/i386/*.c
+bin/u2d $1/i386/*.h
+bin/u2d $1/i386/djgpp/*.h
+bin/u2d $1/i386/djgpp/*.sed
+bin/u2d $1/i386/djgpp/*.in
+#bin/u2d $1/i386/dosphar/*
+bin/u2d $1/i386/msw31/*
+#bin/u2d $1/i386/mswins/*
+
+echo - library
+cp -r ./library $1
+bin/u2d $1/library/*.pro
+
+#echo - pconfig
+#cp -r ./pconfig $1
+#bin/u2d $1/pconfig/*.pro
+#bin/u2d $1/pconfig/*.in
+
+echo - port
+cp -r ./port $1
+bin/u2d $1/port/*.c
+bin/u2d $1/port/*.h
+bin/u2d $1/port/*.mkf
+bin/u2d $1/port/djgpp/*.h
+bin/u2d $1/port/msw31/*.h
+bin/u2d $1/port/msw95/*.h
+
+echo - tests
+cp -r ./tests $1
+bin/u2d $1/tests/*.pro
+bin/u2d $1/tests/als_exmp/*.pro
+bin/u2d $1/tests/systests/*.pro
+bin/u2d $1/tests/tsuite/*.pro
+
+#echo - utils
+#cp -r ./utils $1
+#bin/u2d $1/utils/*
+
+#echo - wins
+#cp -r ./wins $1
+#bin/u2d $1/wins/build/*.in
+#bin/u2d $1/wins/build/x/*
+#bin/u2d $1/wins/build/motif/*
+#bin/u2d $1/wins/build/mswins/*
+#bin/u2d $1/wins/src/*
+
+echo Removing any copied CVS directories...
+rm -r $1/CVS
+rm -r $1/*/CVS
+rm -r $1/*/*/CVS
+rm -r $1/port/HIDE
+rm -r $1/wins/build/*/CVS
+
+echo Setting up MSWindows 3.1 makefile templates...
+cp cfgs/maketop.w31 $1/makefile.in
+cp bld-port/makefile.w31 $1/bld-port/makefile.in
+cp bld-natv/makefile.w31 $1/bld-natv/makefile.in
+cp generic/generate/generic.w31 $1/generic/generic.mkf
+cp port/port.w31 $1/port/port.mkf
+# Later: something for i386 dir
+
+

@@ -1,0 +1,3 @@
+#!/bin/sh
+# Returns the most recently applied CVS/RCS tag from file $1 in generic:
+cvs log -h /mailbox3/alsp_src/generic/$1 | grep '	v' | head -n 1 | sed -e 's/	v//' | sed -e 's/:.*$//'

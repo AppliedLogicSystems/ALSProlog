@@ -1,0 +1,18 @@
+#!/bin/sh
+echo Target dir = $1
+cp /mailbox3/bldtests/hp5/bld-port/icode.h $1/bld-port
+unix2mac $1/bld-port/icode.h
+cp /mailbox3/bldtests/hp5/bld-port/lexinit.h $1/bld-port
+unix2mac $1/bld-port/lexinit.h
+cp /mailbox3/bldtests/hp5/bld-port/siolex.h $1/bld-port
+unix2mac $1/bld-port/siolex.h
+cp /mailbox3/bldtests/hp5/bld-port/tokens.h $1/bld-port
+unix2mac $1/bld-port/tokens.h
+cp /mailbox3/bldtests/hp5/bld-port/tokini2.h $1/bld-port
+unix2mac $1/bld-port/tokini2.h
+cp /mailbox3/alsp_src/generic/pi_cfg.in $1/bld-port/pi_cfg.h
+unix2mac $1/bld-port/pi_cfg.h
+cp /mailbox3/alsp_src/port/macos/mw_alspro_prefix.h $1/bld-port
+unix2mac $1/bld-port/mw_alspro_prefix.h
+cp /mailbox3/alsp_src/port/macos/config.h $1/bld-port
+unix2mac $1/bld-port/config.h

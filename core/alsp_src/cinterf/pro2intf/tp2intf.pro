@@ -236,6 +236,10 @@ dispatch_option(['-t' ,UserPred], State)
 	:-!,
 	setP2I(tPred, State, UserPred).
 
+dispatch_option(['-T' ,TranslateExpr], State) 
+	:-!,
+	setup_translate(TranslateExpr, State).
+
 dispatch_option(['-d' ,DupPred], State) 
 	:-!,
 	setP2I(dPred, State, DupPred).
@@ -279,6 +283,18 @@ check_defaults(CmdLine,State)
 		setP2I(hincs, State, [BaseName])
 	).
 		%% Add more here as necessary
+
+setup_translate(InExpr, State)
+	:-
+	atomread(InExpr, Expr),
+	(Expr = (Head :- Body) ->
+		THead = Head
+		;
+		THead = Expr
+	),
+	assert(Expr),
+	functor(THead, UserPred, _),
+	setP2I(tPred, State, UserPred).
 
 %%----------------------------------------------
 %%	TOP LEVEL OF COMPACT INTERFACE GENERATOR

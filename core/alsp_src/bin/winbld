@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ -f ./bld-port/alspro ] ;
+then
+	echo Running ./bld-port/alspro
+	./bld-port/alspro $1/pconfig/pconfig -g pconfig
+	echo $2 -C bld-wins ALSPRO=alspro all
+	$2 -C bld-wins ALSPRO=alspro all
+else
+	echo Running ./bld-port/alspro_b
+	./bld-port/alspro_b $1/pconfig/pconfig -g pconfig
+	echo $2 -C bld-wins ALSPRO=alspro_b all
+	$2 -C bld-wins ALSPRO=alspro_b MAKE=$2 all
+fi

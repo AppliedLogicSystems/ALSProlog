@@ -306,7 +306,11 @@
 #endif	/* SSBQ */
 
 #ifdef HAVE_SOCKET
+#ifdef MacOS
+#define SIO_SOCKET_ADDRESS(b)   (SIO_AUX2(b))
+#else
 #define SIO_SOCKET_ADDRESS(b)	((char *) SIO_AUX2(b))
+#endif
 								/* ptr to address structure */
 #define SIO_SOCKET_ADDRESS_LEN(b) SIO_AUX3(b)	/* length of above */
 #define ALS_STREAM	1

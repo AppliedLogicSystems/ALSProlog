@@ -672,7 +672,8 @@ make_hash_framework(Mod,Name,VN)
  * Prolog flags
  */
 
-init_prolog_flags :-
+init_prolog_flags 
+	:-
 	make_hash_table('_PROLOG_flag'),
 	set_PROLOG_flag(undefined_predicate, warning).
 

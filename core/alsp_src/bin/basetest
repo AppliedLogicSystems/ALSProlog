@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ -f ./alspro ] ;
+then
+	echo Running ./alspro
+	./alspro $1/tests/snrev -g snrev >> nrev_rcd
+else
+	echo Running ./alspro_b
+	./alspro_b $1/tests/snrev -g snrev >> nrev_rcd
+fi

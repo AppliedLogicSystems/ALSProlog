@@ -1,0 +1,4 @@
+#!/bin/sh
+# this tars the entire alsp_src tree to: /mailbox3/tmp/alsp_out.tar
+#
+tar -cvf /mailbox3/tmp/alsp_out.tar  /mailbox3/alsp_src

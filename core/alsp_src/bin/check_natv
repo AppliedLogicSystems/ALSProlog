@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+#  Runs in top level of a build dir.
+#  Checks whether native code version was made by looking 
+#  alspro_b in bld-natv, and echos (>>) the line
+#      BLDTYPE=[natv/port]
+#  to cmn_info.mkf in the top level of the build dir.
+#
+
+if [ -f bld-natv/alspro_b ] ;
+then
+	echo BLDTYPE=natv >> cmn_info.mkf
+else 
+	echo BLDTYPE=port >> cmn_info.mkf
+fi
+

@@ -28,7 +28,7 @@ callbackfunc(w, client_data, call_data)
   PWord arg; int argtype;
   PWord v; int t;
 
-/* printf("Enter callbackfunc\n"); */
+/* printf("Enter callbackfunc\n");  */
 
   PI_makesym(&mod,&modtype,"user");
 
@@ -47,9 +47,9 @@ callbackfunc(w, client_data, call_data)
   PI_makedouble(&v,&t,(double)(long)call_data);
   PI_unify(arg,argtype,v,t);
 
-/* printf("callbackfunc before PI_rungoal\n"); */
+/* printf("callbackfunc before PI_rungoal\n");  */
 
-/*  PI_rungoal(mod,&goal,&goaltype);  */
+/*  PI_rungoal(mod,&goal,&goaltype); */ 
   PI_rungoal_with_update(mod,&goal,&goaltype);
 }
 
@@ -65,6 +65,8 @@ actionfunc(w,event,params,num_params)
   PWord func; int functype;
   PWord arg; int argtype;
   PWord v; int t;
+
+ printf("Enter actionfunc\n"); 
 
   PI_makesym(&mod,&modtype,"user");
 
@@ -85,6 +87,8 @@ actionfunc(w,event,params,num_params)
 
   PI_getargn(&arg,&argtype,goal,4);
   PI_unify(arg,argtype,num_params,PI_INT);
+
+ printf("actionfunc before rungoal \n"); 
 
 /*  PI_rungoal(mod,&goal,&goaltype);  */
   PI_rungoal_with_update(mod,&goal,&goaltype);

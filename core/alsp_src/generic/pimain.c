@@ -22,6 +22,10 @@
 #include "alspi.h"
 #include <stdio.h>
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #ifndef NO_STDARG_H
 #define HAVE_STDARG_H
 #endif
@@ -40,6 +44,7 @@ extern	void	main	PARAMS(( int, char ** ));
 #include "pi_cfg.h"
 
 #ifdef MacOS
+#include <GUSI.h>
 
 #if THINK_C
 #include <console.h>
@@ -47,6 +52,10 @@ extern	void	main	PARAMS(( int, char ** ));
 #if __MWERKS__
 #include <console.h>
 #include <SIOUX.h>
+
+tSIOUXSettings  SIOUXSettings =
+        {1, 1, 1, 0, 0, 0, 4, 80, 24, 0, 0, 22, 12, 0};
+
 #endif			/* __MWERKS__ */
 #ifdef MPW_TOOL
 #include <CursorCtl.h>
@@ -56,13 +65,12 @@ extern	void	main	PARAMS(( int, char ** ));
 #endif	/* MacOS */
 
 void
-main(argc, argv)
-    int   argc;
-    char **argv;
+main(int argc, char ** argv)
 {
     int   exit_status;
 
 #ifdef MacOS
+        GUSIDefaultSetup();
 
 #if (defined(THINK_C) || defined(__MWERKS__)) && !defined(MPW_TOOL)	
     argc = ccommand(&argv);
@@ -99,6 +107,9 @@ main(argc, argv)
     }
 
     PI_shutdown();
+#if defined(__MWERKS__) && !defined(MPW_TOOL)
+    printf("Exiting ALS Prolog.\n");
+#endif
     exit(0);
 
 

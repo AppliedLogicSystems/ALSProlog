@@ -25,8 +25,9 @@ GNU make and gcc.  Theoretically, other tools might work,
 but none have yet been brought to our attention.  The construction process
 is more or less automatic, following closely the approach utilized in most
 GNU tool packages.  When all goes well, it is as simple as the following
-(on Unix; almost this easy with DJGPP on DOS; more handcrafted using
-MetrWerks on the Mac):
+on Unix (even easier with DOS-corrupted systems (DJGPP,Wins,OS/2), and the 
+Mac {MetrWerks,MPW}, since the build-dir/tree is pre-constructed; no running
+of configure -- just skip to step #4.  See notes on utilities below).
 
 0.	Make sure the following GNU tools have been installed on your system:
 
@@ -300,6 +301,55 @@ are kept to small bite-size chunks.  Not only does this lessen the pain,
 but it makes it more likely that changes to common source files will be
 tested on a range of architectures, and problems discovered.  [We need to
 learn to use the GNU patch tool, but haven't gotten that far yet.]
+
+UTILITIES
+=========
+Most utilities are shell scripts or simple C files; they live in alsp_src/bins.
+A number of the "utilities" in bin are simple shell scripts to make for the
+apparent inability of make to test on the existence of dynamically created
+files.  For example, if, after doing the basic build, we want to test on
+whether a packaged version (alspro) exists or not, we don't seem to be able
+to do it.  So in a number of occurrences, we have a simple shell script to
+handle the problem.   Here, for example, is "alsnrevt" which handles running
+the nrev test (file tests/snrev.pro), using alspro or alspro_b as 
+appropriate:
+
+#!/bin/sh
+
+if [ -f ./alspro ] ;
+then
+        echo Running ./alspro
+        ./alspro $1/tests/snrev -g snrev >> nrev_rcd
+else
+        echo Running ./alspro_b
+        ./alspro_b $1/tests/snrev -g snrev >> nrev_rcd
+fi
+
+Overview of utilities:
+---------------------
+alsnrevt		-- runs the snrev test with alspro or alspro_b
+d2u.c			-- converts dos end-of-lines to unix
+fix-rdiff		-- fixes up the ouput of cvs rdiff
+gen2mac			-- moves & cvrts "generated" files to a target mac dir;
+mac2unix.c		-- converts mac end-of-lines to unix
+mkdist.bat
+mkvers			-- creates the file alsp_src/generic/version.h
+outtar			-- tars alsp_src tree to: /mailbox3/tmp/alsp_out.tar
+setup_dosdir	-- calls xprt2dos to setup /mailbox3/alsp_dos.src
+setup_macdir	-- calls xprt2mac to setup /mailbox/mac/alsp_mac.src
+mkd_os2			-- calls bd_os2 alsp_dos.src i386_os2_3.0
+bd_os2			-- setup os2 build tree rel. to "dos"-style source tree
+mkd_dos			-- calls bd_dos alsp_dos.src i386_dos
+bd_dos			-- setup dos build tree rel. to "dos"-style source tree
+sharbld*
+sharme*
+u2d.c			-- converts unix end-of-lines to dos
+unix2mac.c		-- converts unix end-of-lines to mac
+vers			-- returns the als version of a(ny) file in alsp_src/generic
+whichals		-- find an alspro to run (see doc in file)
+winbld			-- runs pconfig with an appropriate alspro?? (makes wins dir)
+xprt2dos		-- "exports" a dos-style subtree to a target dir;
+xprt2mac		-- "exports" a mac-style subtree to a target dir;
 
 PROBLEMS
 ========

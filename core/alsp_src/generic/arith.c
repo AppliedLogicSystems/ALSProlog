@@ -28,8 +28,8 @@
 
 #else  /* VMS */
 #ifdef MacOS
+#include <GUSI.h>
 #include <errno.h>
-#include <Events.h>
 
 #else  /* MacOS */
 #include <errno.h>
@@ -588,10 +588,14 @@ make_numberx(v, t, d, TP)
 	int fl;
 
 if (TP == WTP_INTEGER) {
-	fl = floor(d);
-    if ((fl == d) && MINPROLOGINT <= fl && fl <= MAXPROLOGINT) {
-		*v = (PWord) floor(d);
-		*t = WTP_INTEGER;
+    if (MINPROLOGINT <= d && d <= MAXPROLOGINT) {
+		fl = floor(d);
+		if (fl == d) {
+			*v = (PWord) floor(d);
+			*t = WTP_INTEGER;
+		}
+		else /* d is not an integer, so return it as a double */
+			goto return_as_double;
     }
 	else /* d cannot be represented as an integer, so return it as a double */
 		goto return_as_double;

@@ -235,14 +235,15 @@ cmnt_out([CLine | CL], Out)
 
 abs_w(irule(ID,Tgt), SrcTerms, Context, Out)
 	:-
-	dmember(context_name=mac, Context),
-	!,
 	lookup( (irule(ID,Tgt) = irule(Src,Tgt,Action)), SrcTerms, Context),
 	abs_eval(Src, SrcTerms, Context, RuleSrc),
 	abs_eval(Tgt, SrcTerms, Context, RuleTgt),
 	xabs_eval(Action, SrcTerms, Context, RuleAction, ActionQuals),
-%	printf(Out, '%%.%t:%%.%t\n', [RuleTgt,RuleSrc]),
-	printf(Out, '.%t %c .%t\n', [RuleTgt,0xC4,RuleSrc]),
+	(dmember(context_name=mac, Context),
+		printf(Out, '.%t %c .%t\n', [RuleTgt,0xC4,RuleSrc])
+		;
+		printf(Out, '%%.%t: %%.%t\n', [RuleTgt,RuleSrc])
+	),
 	list_body(RuleAction, [rule_body | ActionQuals], Context, Out).
 
 abs_w(irule(ID), SrcTerms, Context,Out)
