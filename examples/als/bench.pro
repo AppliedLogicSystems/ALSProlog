@@ -1,30 +1,18 @@
 /*----------------------------------------------------------------*
- | 		bench.pro  
+ |	A Symbolic Equation Solver
+ |
+ |      Author:  Keith Hughes
+ |
  |	Copyright (c) 1987, 1988 by Applied Logic Systems
  |	Distribution rights per Copying ALS
  |
- |		A symbolic equation solver
+ | Examples:
  |
- | Author:  Keith Hughes
+ | ?- solve(y=m*x+b, x, Answer).
  |
- | To run this program, submit the following goal:
+ | ?- solve(((2^(cos(x)^2)*2^(sin(x)^2))^sin(x))^cos(x)=2^(1/4), x, Answer).
  |
- |	?- main.
  *----------------------------------------------------------------*/
-
-
-main :-
-   Y is cputime,
-   solve0(((2^ (cos(x)^2)*2^ (sin(x)^2))^sin(x))^cos(x)=2^ (1/4),x,Ans),
-   Z is cputime,
-   write(Ans),nl.
-
-a :- call(X).
-
-%
-% press: prolog equation solving system
-%  an attempt by keith hughes to do what bundy did
-%
 
 contains(X,X) :- !.
 
