@@ -1,1 +1,15 @@
-/* Kernal32 Filter. */all_except([	/* Obsolete or unnecessary functions. */	'SetVoiceAccent', 'SetVoiceSound', 'SetVoiceEnvelope', 'SetVoiceNote',	'SetVoiceThreshold', 'SetVoiceQueueSize', 'SetSoundNoise', 'StopSound',	'StartSound', 'CloseSound', 'OpenSound', 'GetThresholdStatus',	'GetThresholdEvent', 'SyncAllVoices', 'CountVoiceNotes', 'WaitSoundState',	'WinMain',	/*QUERYHANDLER is a strange function typedef. */	'QUERYHANDLER',		/* a wierd struct typedef that has no public elements. */	'IMAGE_RESOURCE_DIRECTORY_ENTRY'	]).
+/* Kernal32 Filter. */
+all_except([
+	/* Obsolete or unnecessary functions. */
+	'SetVoiceAccent', 'SetVoiceSound', 'SetVoiceEnvelope', 'SetVoiceNote',
+	'SetVoiceThreshold', 'SetVoiceQueueSize', 'SetSoundNoise', 'StopSound',
+	'StartSound', 'CloseSound', 'OpenSound', 'GetThresholdStatus',
+	'GetThresholdEvent', 'SyncAllVoices', 'CountVoiceNotes', 'WaitSoundState',
+	'WinMain',
+
+	/*QUERYHANDLER is a strange function typedef. */
+	'QUERYHANDLER',
+	
+	/* a wierd struct typedef that has no public elements. */
+	'IMAGE_RESOURCE_DIRECTORY_ENTRY'
+]).

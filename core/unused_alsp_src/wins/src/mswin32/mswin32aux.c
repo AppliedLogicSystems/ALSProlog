@@ -8,24 +8,35 @@
 #include "alspi.h"
 #include "cinterf.h"
 
-HINSTANCE WindowInstance;
+HINSTANCE WinMain_Instance;
+HINSTANCE WinMain_PrevInstance;
+LPSTR WinMain_CmdLine;
+int WinMain_CmdShow;
 
-static int getInstance(void)
+static int winmain_arguments(void)
 {
-	PWord arg1, rval;
-	int type1, rtype;
+	PWord arg1, arg2, arg3, arg4, rval;
+	int type1, type2, type3, type4, rtype;
 		
 	PI_getan(&arg1,&type1,1);
-	PI_makedouble(&rval,&rtype,(double) (long) WindowInstance);
-	if (PI_unify(arg1,type1,rval,rtype))
-		PI_SUCCEED;
-	else PI_FAIL;
+	PI_getan(&arg2,&type2,2);
+	PI_getan(&arg3,&type3,3);
+	PI_getan(&arg4,&type4,4);
+	
+	PI_makedouble(&rval,&rtype,(double) (long) WinMain_Instance);
+	if (!PI_unify(arg1,type1,rval,rtype)) PI_FAIL;
+	PI_makedouble(&rval,&rtype,(double) (long) WinMain_PrevInstance);
+	if (!PI_unify(arg2,type2,rval,rtype)) PI_FAIL;
+	PI_makedouble(&rval,&rtype,(double) (long) WinMain_CmdLine);
+	if (!PI_unify(arg3,type3,rval,rtype)) PI_FAIL;
+	PI_makedouble(&rval,&rtype,(double) (long) WinMain_CmdShow);
+	if (!PI_unify(arg4,type4,rval,rtype)) PI_FAIL;
+	
+	PI_SUCCEED;
 }
 
-
-
 PI_BEGIN
-	PI_PDEFINE("getInstance", 1, getInstance, "_getInstance")
+	PI_PDEFINE("winmain_arguments", 4, winmain_arguments, "_winmain_arguments")
 PI_END
 
 
@@ -58,7 +69,7 @@ static LRESULT CALLBACK WindowProcCallback(HWND hWnd, UINT message, WPARAM wPara
 	    PI_getargn(&arg5, &type5, struc, 5);
 	    if (type5 != PI_INT)
 		if (!CI_get_integer((unsigned long *)&arg5,type5))
-		    PI_FAIL;
+		    arg5 = 0;
 	    
 	    return arg5;
 	}

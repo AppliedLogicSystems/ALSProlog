@@ -1,1 +1,44 @@
-all_except([	/* Preprocessor symbols that are not needed. */		/* Obsolete functions. */	'SetVoiceAccent', 'SetVoiceSound', 'SetVoiceEnvelope', 'SetVoiceNote',	'SetVoiceThreshold', 'SetVoiceQueueSize', 'SetSoundNoise', 'StopSound',	'StartSound', 'CloseSound', 'OpenSound', 'GetThresholdStatus',	'GetThresholdEvent', 'SyncAllVoices', 'CountVoiceNotes', 'WaitSoundState',	'WinMain',	'ToUnicode', 'ToUnicodeEx',	'wglCreateContext',	'wglDeleteContext',	'wglGetCurrentContext',	'wglGetCurrentDC',	'wglGetProcAddress',	'wglMakeCurrent',	'wglShareLists',	'wglUseFontBitmapsA',	'wglUseFontBitmapsW',	'wglUseFontOutlinesA',	'wglUseFontOutlinesW',	'NdrClientCall', /* Returns a structure - which we don't handle yet. */		/* Some wierd typedef to ignore. Some are function typedefs, which cannot	   be used in a sizeof() statement - because their size is undefined. */	'QUERYHANDLER',	'MENUTEMPLATE', 'MENUTEMPLATEW', 'MENUTEMPLATEA',	'IMAGE_RESOURCE_DIRECTORY_ENTRY',	'_Cmpfun',	'RPC_CLIENT_FREE', 'RPC_CLIENT_ALLOC',	'PM_OPEN_PROC', 'PM_CLOSE_PROC', 'PM_COLLECT_PROC',	'RPC_FORWARD_FUNCTION',	'RPC_OBJECT_INQ_FN',	'MMIOPROC',	'TIMECALLBACK',	'MIDICALLBACK',	'WAVECALLBACK',	'DRVCALLBACK',	'FNCALLBACK']).
+all_except([
+	/* Preprocessor symbols that are not needed. */
+	
+	/* Obsolete functions. */
+	'SetVoiceAccent', 'SetVoiceSound', 'SetVoiceEnvelope', 'SetVoiceNote',
+	'SetVoiceThreshold', 'SetVoiceQueueSize', 'SetSoundNoise', 'StopSound',
+	'StartSound', 'CloseSound', 'OpenSound', 'GetThresholdStatus',
+	'GetThresholdEvent', 'SyncAllVoices', 'CountVoiceNotes', 'WaitSoundState',
+	'WinMain',
+	'ToUnicode', 'ToUnicodeEx',
+
+
+	'wglCreateContext',
+	'wglDeleteContext',
+	'wglGetCurrentContext',
+	'wglGetCurrentDC',
+	'wglGetProcAddress',
+	'wglMakeCurrent',
+	'wglShareLists',
+	'wglUseFontBitmapsA',
+	'wglUseFontBitmapsW',
+	'wglUseFontOutlinesA',
+	'wglUseFontOutlinesW',
+
+	'NdrClientCall', /* Returns a structure - which we don't handle yet. */
+
+	
+	/* Some wierd typedef to ignore. Some are function typedefs, which cannot
+	   be used in a sizeof() statement - because their size is undefined. */
+	'QUERYHANDLER',
+	'MENUTEMPLATE', 'MENUTEMPLATEW', 'MENUTEMPLATEA',
+	'IMAGE_RESOURCE_DIRECTORY_ENTRY',
+	'_Cmpfun',
+	'RPC_CLIENT_FREE', 'RPC_CLIENT_ALLOC',
+	'PM_OPEN_PROC', 'PM_CLOSE_PROC', 'PM_COLLECT_PROC',
+	'RPC_FORWARD_FUNCTION',
+	'RPC_OBJECT_INQ_FN',
+	'MMIOPROC',
+	'TIMECALLBACK',
+	'MIDICALLBACK',
+	'WAVECALLBACK',
+	'DRVCALLBACK',
+	'FNCALLBACK'
+]).
