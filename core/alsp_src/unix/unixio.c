@@ -13,6 +13,9 @@
  *===========================================================================*/
 #include "defs.h"
 
+#include <sys/time.h>
+#include <sys/resource.h>
+
 #if (defined(UNIX) || defined(MSWin32) || (defined(MacOS) && defined(HAVE_GUSI))) && !defined(__GO32__) && !defined(OS2)
 
 #if defined(UNIX)
@@ -1078,3 +1081,94 @@ init_fsutils()
     PI_INIT;
 }
 
+
+int os_copy_file(const char *from_file, const char *to_file)
+{
+    unsigned char *buf;
+    int f, c, r;
+    struct stat s; 
+    
+    f = open(from_file, O_RDONLY);
+    if (f == -1) return 0;
+    
+    r = fstat(f, &s);
+    if (r != 0) {
+    	close(f);
+        return 0;
+    }
+    
+    buf = malloc((size_t)s.st_size);
+    if (buf == NULL) {
+    	close(f);
+        return 0;
+    }
+    
+    r = read(f, buf, (size_t)s.st_size);
+    if (r != s.st_size) {
+    	free(buf);
+    	close(f);
+        return 0;
+    }
+
+    close(f);
+    
+    c = open(to_file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+    if (c == -1) {
+    	free(buf);
+    	return 0;
+    }
+    
+    r = write(c, buf, (size_t)s.st_size);
+    if (r != s.st_size) {
+    	free(buf);
+        close(f);
+        return 0;
+    }
+    
+    close(c);
+    
+    free(buf);
+    
+    return 1;
+}
+
+
+static double clock_ticks_per_second;
+static double process_start_time;
+
+#define TV2SEC(x) ((double) x.tv_sec + (double) x.tv_usec * 0.000001)
+
+void os_init_time(void)
+{
+	struct timeval time;
+	
+	gettimeofday(&time, NULL);
+	process_start_time = TV2SEC(time);
+	clock_ticks_per_second = sysconf(_SC_CLK_TCK);
+}
+
+double os_cputime(void)
+{
+#ifdef USE_GETRUSAGE
+	struct rusage usage;
+
+	if (getrusage(RUSAGE_SELF, &usage) == 0)
+		return TV2SEC(usage.ru_utime) + TV2SEC(usage.ru_stime);
+	else return 0;
+#else
+	struct tms buf;
+
+	if (times(&buf) != -1)
+		return ((double) buf.tms_utime + (double) buf.tms_stime)
+			/ clock_ticks_per_second;
+	else return 0;
+#endif
+}
+
+double os_realtime(void)
+{
+	struct timeval time;
+	
+	gettimeofday(&time, NULL);
+	return TV2SEC(time) - process_start_time;
+}

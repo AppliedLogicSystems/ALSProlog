@@ -74,8 +74,6 @@
 	    FAIL;						\
 	} while (0)
 
-/* arith.c */
-extern	void	init_time	PARAMS( (void) );
 /* bparser.c */
 extern	int	get_number	PARAMS( (PWord, int, double *) );
 

@@ -18,6 +18,7 @@
 #include "compile.h"		/* for value of NAREGS */
 
 #include <stdio.h>
+#include <time.h>
 
 static	unsigned long hashN	PARAMS(( PWord, int, int ));
 static	void	als_gensym	PARAMS(( UCHAR *, UCHAR * ));
@@ -403,13 +404,15 @@ pbi_hashN()
 #endif /* HASH */
 
 #ifdef GENSYM
-extern long gensym_start_time;
+static long gensym_start_time = 0;
 static long gensym_counter = 0;
 
 static void
 als_gensym(buffer, prefix)
     UCHAR *buffer, *prefix;
 {
+    if (!gensym_start_time) gensym_start_time = time(NULL);
+
     sprintf((char *)buffer, "%c%s_%ld_%ld",
 	    Generated_Symbol_Starting_Character,
 	    (char *)prefix,

@@ -849,7 +849,7 @@ int pbi_uncaught_interrupt(void)
 void
 time_cut_interrupt_init()
 {
-    init_time();
+    os_init_time();
 
     wm_cutaddr = w_nameprobe((PWord) MODULE_BUILTINS, (PWord) TK_CUT, 0)->call_entry;
     /* Set the default interrupt handler to be uncaught_interrupt */
