@@ -184,7 +184,7 @@ gc()
     register unsigned long m;
     int   compactionbit;
 #ifdef DEBUGSYS /*--------------------------------------------------*/
-    unsigned long start_tick, finish_tick;
+    unsigned long start_tick = 0, finish_tick;
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 
 	/* For demos and hardware-key protected versions, check copy protection. */
@@ -651,12 +651,12 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 #ifdef DEBUGSYS /*--------------------------------------------------*/
 	if (debug_system[GCINFO]) {
     	finish_tick = clock();
-    	printf("Compaction complete: nmarked=%d time=%lu ticks\n", 
+    	printf("Compaction complete: nmarked=%ld time=%lu ticks\n", 
 					nmarked, finish_tick - start_tick);
 		pbi_cptx();
 /*		pbi_walk_cps(); */
 /*		pbi_swp_tr();  */
-    	printf("new_gap=%d normal_safety = %d\n",(wm_TR - wm_H),wm_normal);
+    	printf("new_gap=%d normal_safety = %ld\n",(wm_TR - wm_H),wm_normal);
     	fflush(stdout);
 	}
 #endif /* ---------------------------------------------- DEBUGSYS --*/
@@ -918,7 +918,7 @@ mark_top:
 		if (CHK_DELAY((PWord *)val))
 			{
 #ifdef DEBUGSYS /*--------------------------------------------------*/
-				if (debug_system[FREEZEINFO]) {
+				if (debug_system[GCFREEZEINFO]) {
     				printf("\ngc: Delay-val=%x tag=%d..",(int)val,(int)tag);
     				fflush(stdout);
 				}
@@ -926,7 +926,7 @@ mark_top:
 				xval = (long) MMK_STRUCTURE( ((PWord *)val)-1 );
 				mark(xval);   
 #ifdef DEBUGSYS /*--------------------------------------------------*/
-				if (debug_system[FREEZEINFO]) {
+				if (debug_system[GCFREEZEINFO]) {
     				printf("--xval=%x marked\n",(int)xval);
     				fflush(stdout);
 				}

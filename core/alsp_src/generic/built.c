@@ -179,6 +179,8 @@ static struct blt_struct {
 	BLT("$time", 9, pbi_time, "_pbi_time"),
 #endif /* HAVE_TIME */
 	BLT("srandom", 1, pbi_srandom, "_pbi_srandom"),
+	BLT("fpconst_val", 2, pbi_fpconst_val, "_pbi_fpconst_val"),
+	BLT("uia_poke_fpconst", 4, pbi_uia_poke_fpconst, "_pbi_uia_poke_fpconst"),
 	BLT("$clauseinfo", 4, pbi_clauseinfo, "_pbi_clauseinfo"),
 	BLT("$firstargkey", 2, pbi_firstargkey, "_pbi_firstargkey"),
 	BLT("$resolve_module", 4, pbi_resolve_module, "_pbi_resolve_module"),
@@ -218,11 +220,14 @@ static struct blt_struct {
 #endif /* FREEZE */
 
 #ifdef INTCONSTR
-	BLT("fuzz_float",  3, pbi_fuzz, "_pbi_fuzz"),
+	BLT("fuzz_float",  4, pbi_fuzz, "_pbi_fuzz"),
 	BLT("$iter_link_net",  5, ilinknet, "_ilinknet"),
 	BLT("reset_cstr_ctrs",  0, reset_cstr_ctrs, "_reset_cstr_ctrs"),
 	BLT("get_cstr_ctrs",    2, get_cstr_ctrs_vals, "_get_cstr_ctrs_vals"),
 	BLT("set_max_iters",    1, set_max_iters_val, "_set_max_iters_val"),
+#if 0
+	BLT("$run_grteq_cstrs",    5, run_grteq_cstrs, "_run_grteq_cstrs"),
+#endif
 #endif /* INTCONSTR */
 
 #ifdef CONSTRDEBUG

@@ -328,6 +328,25 @@ gamma(x)
 
 #endif
 
+/*------------------------------------------------------------------------------*
+ |	Symbolic floating point constants (also used in interval arithmetic)
+ *------------------------------------------------------------------------------*/
+double sym_f_cnst[] = {
+	M_PI,			/* pi         */
+	M_PI_2,    		/* pi/2       */ 
+	M_E,       		/* e          */ 
+	M_PI_4, 		/* pi/4       */ 
+	M_1_PI,  		/* 1/pi       */
+	M_2_PI,  		/* 2/pi       */
+	M_2_SQRTPI,		/* 2/sqrt(pi) */
+	M_LOG2E, 		/* log2(e)    */
+	M_LOG10E,		/* log10(e)   */
+	M_LN2,  		/* ln(2)      */
+	M_LN10,			/* ln(10)     */
+	M_SQRT2,        /* sqrt(2)    */
+	M_SQRT1_2       /* sqrt(1/2)  */
+};
+
 /*--------------------------------------------------------------------------------*
  | do_is recursively descends the expression to evaluate and returns
  | the value of the tree at each stage.   If an error is encountered, a long
@@ -389,8 +408,12 @@ do_is(v, t, ty)
 		    return (double) (currentTime - start_time);
 		case TK_RANDOM:
 		    return als_random();
-		default:
-		    longjmp(is_error, 1);
+		case TK_PI:
+		    return M_PI;
+		case TK_E:
+		    return M_E;
+		default: 
+		   	longjmp(is_error, 1);
 	    }
 
 	case WTP_LIST:
@@ -733,3 +756,60 @@ NUMCOMP(pbi_equalorless, <=)
 NUMCOMP(pbi_greaterorequal, >=)
 NUMCOMP(pbi_arithequal, ==)
 NUMCOMP(pbi_arithnotequal, !=)
+
+
+
+int pbi_fpconst_val	PARAMS(( void ));
+
+int
+pbi_fpconst_val()
+{
+    PWord cnst, value, fv;
+    int   cnst_t, value_t, fv_t;
+	double the_val = 0;
+
+    w_get_An(&cnst, &cnst_t, 1);
+    w_get_An(&value, &value_t, 2);
+
+	if (cnst_t != WTP_SYMBOL) 
+		FAIL;
+
+	switch ((int)cnst) {
+		FPCCASE(the_val)
+	}
+	make_number(&fv, &fv_t, the_val);
+
+	if (w_unify(value, value_t, fv, fv_t))
+		SUCCEED;
+	else
+		FAIL;
+}
+
+int pbi_uia_poke_fpconst 	PARAMS (( void ));
+
+int
+pbi_uia_poke_fpconst()
+{ 			/* uia_poke_fpconst(V,Sgn,UIA,Off) */
+    PWord Val, Sgn, UIABuf, Off;
+    int   Val_t, Sgn_t, UIABuf_t, Off_t;
+	double the_val;
+
+    w_get_An(&Val,		&Val_t, 1);
+    w_get_An(&Sgn,		&Sgn_t, 2);
+    w_get_An(&UIABuf,	&UIABuf_t, 3);
+    w_get_An(&Off,		&Off_t, 4);
+
+    if (UIABuf_t == WTP_UIA && Off_t == WTP_INTEGER && Sgn_t == WTP_INTEGER) {
+		switch ((int)Val) {
+			FPCCASE(the_val)
+		}
+		if ((int)Sgn < 0) { the_val = -the_val; }
+	
+		if (w_uia_poke(UIABuf, (int) Off, (UCHAR *) &the_val, sizeof (double)))
+			SUCCEED;
+		else
+			FAIL;
+	}
+	else
+		FAIL;
+}

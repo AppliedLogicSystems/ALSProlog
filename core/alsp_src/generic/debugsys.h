@@ -23,7 +23,7 @@
 typedef enum {
 	GCBEEP,			/* gcbeep 		(0)		*/
 	GCINFO,			/* gcinfo		(1)		*/
-	FREEZEINFO,		/* freezeinfo	(2)		*/
+	GCFREEZEINFO,	/* gcfreezeinfo	(2)		*/
 	CSTRPRIM,		/* cstrprim		(3)		*/
 	CSTRCHNG,		/* cstrchng		(4)		*/
 	CSTRUPDT,		/* cstrupdt		(5)		*/
@@ -35,6 +35,8 @@ typedef enum {
 	FREZBV,			/* frezbv 		(11)	*/
 	CUT_RSB,		/* cut_rsb		(12)	*/
 	CUT_CPCTR,		/* cut_cpctr	(13)	*/
+	FRZDELAY,		/* frzdelay		(14) 	*/
+	INTVBIND,		/* intvbind		(15) 	*/
 	MAX_DEBUG_FEATS
 	} debug_feats;
 
