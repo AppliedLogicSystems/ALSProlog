@@ -438,8 +438,8 @@ change_ide_stream_depth(NewMaxDepth)
     set_stream_wt_opts(Stream,NewWO).
 
 export change_ide_depth_type/1.
-change_ide_depth
-	:-_type.(NewType)
+change_ide_depth_type(NewType)
+	:-
  	stream_or_alias_ok(shl_tk_out_win, Stream),
     stream_wt_opts(Stream,WO),
     WO = wt_opts(LineLength,MaxDepth,_),	
