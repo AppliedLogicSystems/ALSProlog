@@ -1,5 +1,7 @@
 # Generic GNU Make file for ALS Prolog
 
+default : binaries
+
 include $(SOURCE_DIR)/$(OS)/$(OS)_makefile
 include $(SOURCE_DIR)/$(PROC)/$(PROC)_makefile
 
@@ -64,7 +66,7 @@ BUILTINS = blt_frez.pro  blt_std.pro   filepath.pro   ra_basis.pro \
    blt_evt.pro   blt_shl.pro   dcgs.pro      math88k.pro \
    blt_flgs.pro   blt_shlr.pro   debugger.pro  module.pro
 
-default : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro
+binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro
 
 all : default testrun
 
@@ -117,3 +119,4 @@ superclean : clean
 	rm -fr alsdir alspro alspro_b libalspro.a libalspro.$(OS_SL_EXT)
 
 -include *.d
+
