@@ -25,7 +25,6 @@
 #define APP_PRINTF_CALLBACK	1
 //#undef FSACCESS
 
-#define SIMPLE_MICS	1
 #if 0
 
 #define MISSING_EXTERN_ACCESS	1
