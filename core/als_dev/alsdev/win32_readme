@@ -46,6 +46,8 @@ alsdir
 		alsdev_main.tcl
 		als_document.tcl
 		defstr.tcl
+		als_tkfbox.tcl
+		tcltk.pro
 	image
 		als_splash.tcl
 		down-arrow-blue.gif
