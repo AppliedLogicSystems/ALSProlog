@@ -719,10 +719,23 @@ set_debugging_state(debug_state(Int,Call,Depth,Retry,DInt))
 	%% prompts to be displayed.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+make_shell_prompts(alsdev, 1,'?- ','?-_').
+
+make_shell_prompts(alsdev, N,Prompt1,Prompt2)
+	:-
+	N > 1,
+	!,
+	sprintf(PL1,'Break (%d) ?- ',[N]),
+	sprintf(PL2,'          ?-_',[]),
+	name(Prompt1,PL1),
+	name(Prompt2,PL2).
+
 :-user:dynamic(make_shell_prompts/4).
 make_prompts(ID, N,Prompt1,Prompt2) 
 	:-
-	user:make_shell_prompts(ID, N, Prompt1, Prompt2),
+	(user:make_shell_prompts(ID, N, Prompt1, Prompt2), ! ;
+		make_shell_prompts(ID, N, Prompt1, Prompt2)
+	),
 	!.
 
 make_prompts(_, N,Prompt1,Prompt2) 

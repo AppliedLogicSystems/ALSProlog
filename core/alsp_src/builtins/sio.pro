@@ -1453,7 +1453,7 @@ simple_select(StreamList, Timeout)
 	:-
 	integer(Timeout),
 	no_immed_streams(StreamList),
-	sio_simple_select(StreamList, Timeout).
+	try_select(StreamList, Timeout).
 
 no_immed_streams([]).
 no_immed_streams([S | Streams])
@@ -1467,6 +1467,30 @@ always_ready(file).
 always_ready(string).
 always_ready(atom).
 always_ready(console).
+
+try_select(StreamList, Timeout)
+	:-
+	sio_simple_select(StreamList, Timeout, Return),
+write(select_return=Return),nl,flush_output,
+	disp_try_select(Return, StreamList, Timeout).
+
+	%% Arg#3 = 0 (timeout) or > 0: # of events triggered:
+disp_try_select(Return, StreamList, Timeout)
+	:-
+	Return >= 0,
+	!.
+
+	%% EINTR = 4 (signal delivered before selected events or timeout):
+	%% Arg#3 = negative of error return code (-4);
+	%% Go back into select:
+disp_try_select(Return, StreamList, Timeout)
+	:-!,
+	try_select(StreamList, Timeout).
+
+/* Other errors: should raise appropriate exception:
+disp_try_select(Return, StreamList, Timeout)
+	:-
+*/
 
 		/*------------*
 		 |   REXEC    |
@@ -3238,8 +3262,19 @@ flush_input(Stream_or_alias) :-
 	!,
 	sio_lpos(Stream, NumCs),
 	sio_set_position(Stream, NumCs, NumCs),
+	check_special_in_flush(Stream),
 	sio_reset_eof(Stream).
 
+check_special_in_flush(Stream)
+	:-
+	stream_type(Stream, tk_window),
+	!,
+	stream_name(Stream,WinName),
+	stream_addl2(Stream, Interp),
+	tcl_call(Interp, [WinName,mark,set,lastPrompt,[end,-1,chars]], _).
+
+
+check_special_in_flush(Stream).
 
 
 /*
