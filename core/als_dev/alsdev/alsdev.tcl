@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.56 1998/10/14 20:40:48 choupt Exp $"
+#|		"$Id: alsdev.tcl,v 1.57 1998/10/16 02:36:16 choupt Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -284,8 +284,8 @@ proc establish_defaults {} {
 	prolog call alsdev alsdev_ini_defaults  \
 		-var DefaultVals -var TopGeom -var DebugGeom
 	reset_default_values $DefaultVals
-	if {"$TopGeom"!=""} then { set proenv(.topals,geometry) $TopGeom }
-	if {"$DebugGeom"!=""} then { set proenv(.debugwin,geometry) $DebugGeom }
+	if {$TopGeom != ""} then { set proenv(.topals,geometry) $TopGeom }
+	if {$DebugGeom != ""} then { set proenv(.debugwin,geometry) $DebugGeom }
 }
 
 proc reset_default_values { DefaultValsList } {
@@ -293,9 +293,9 @@ proc reset_default_values { DefaultValsList } {
 	set DebugVals [lindex $DefaultValsList 1] 
 	set EditVals [lindex $DefaultValsList 2] 
 
-	if {"$TopVals"!=""} then { reset_def_vals .topals $TopVals }
-	if {"$DebugVals"!=""} then { reset_def_vals .debugwin $DebugVals }
-	if {"$EditVals"!=""} then { reset_def_vals .document $EditVals }
+	if {$TopVals != ""} then { reset_def_vals .topals $TopVals }
+	if {$DebugVals != ""} then { reset_def_vals .debugwin $DebugVals }
+	if {$EditVals != ""} then { reset_def_vals .document $EditVals }
 }
 
 proc reset_def_vals { Which ValsList } {
@@ -343,13 +343,13 @@ proc map_alsdev_main {} {
 proc unmap_alsdev_debug {} {
 	global array proenv
 	if {[winfo exists .debugwin]} then {
-		if {"$proenv(debugwin)"==1} then { hide_debugwin }
+		if {$proenv(debugwin) == 1} then { hide_debugwin }
 	}
 }
 proc map_alsdev_debug {} {
 	global array proenv
 	if {[winfo exists .debugwin]} then {
-		if {"$proenv(debugwin)"==0} then { 
+		if {$proenv(debugwin) == 0} then { 
 			wm geometry .debugwin $proenv(.debugwin,geometry)
 			show_debugwin 
 		}
@@ -486,7 +486,7 @@ proc xmit_line { TxtWin StreamAlias } {
 #proc wait_for_line0 { } {
 #	global WaitForLine
 #
-#	while { "$WaitForLine"==0 } { dooneevent wait }
+#	while {$WaitForLine == 0} { dooneevent wait }
 #	set ReturnValue $WaitForLine
 #	set WaitForLine 0
 #	return $ReturnValue
@@ -495,7 +495,7 @@ proc xmit_line { TxtWin StreamAlias } {
 proc wait_for_line1 { WaitVar } {
 	upvar #0 $WaitVar TheWaitVar
 
-	while { "$TheWaitVar"==0 } { dooneevent wait }
+	while {$TheWaitVar == 0} { dooneevent wait }
 	set ReturnValue $TheWaitVar
 	set TheWaitVar 0
 	return $ReturnValue
@@ -516,7 +516,7 @@ proc xmit_line_plain { TxtWin StreamAlias WaitVarName} {
 	set EndIndex [$TxtWin index end]
 	set EndLine [string range $EndIndex 0 [expr [string first "." $EndIndex] - 1 ]]
 
-	if { $EndLine == $InsertLine } then {
+	if {$EndLine == $InsertLine} then {
 		set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -1 chars} ]
 		set WaitForLine 1
 		prolog call builtins add_to_stream_buffer -atom $StreamAlias -atom $ThisLine\n
@@ -539,14 +539,14 @@ proc wake_up_look_around { } {
 	set CountDown 100
 	set NEvnt [dooneevent dont_wait]
 	while {$CountDown>0} {
-		if {$WakeUpLookAround!=0} then {
+		if {$WakeUpLookAround != 0} then {
 			set SaveIt $WakeUpLookAround
 			set WakeUpLookAround 0
 #puts "wake_up_look_around return = $SaveIt"
 
 			return $SaveIt
 		}
-		if {$NEvnt==0} then {
+		if {$NEvnt == 0} then {
 			set SaveIt $WakeUpLookAround
 			set WakeUpLookAround 0
 #puts "wake_up_look_around return = $WakeUpLookAround"
@@ -607,10 +607,10 @@ proc source_tcl { } {
 		-defaultextension tcl \
 		-title "Source File" \
 		-filetypes {{"Tcl/Tk Files" {.tcl} TEXT} {{All Files} {*} TEXT} } ]
-	if { "$file"== "" } then { bell ; return }
+	if {$file == ""} then { return }
 	set TclInterp [do_popup_input "Input the name of the Tcl interpreter:" "Tcl Interp?"]
-	if { "$TclInterp"== "" } then { bell ; return }
-	if {[interp exists $TclInterp]==0} then {
+	if {$TclInterp == ""} then { bell ; return }
+	if {[interp exists $TclInterp] == 0} then {
 		prolog call alsdev do_source_tcl -atom $TclInterp -atom $file
 	} else { bell }
 }
@@ -618,8 +618,8 @@ proc source_tcl { } {
 proc tcl_debugger {} {
 	global ALSTCLPATH
 	set TclInterp [do_popup_input "Input the name of the Tcl interpreter:" "Tcl Interp?"]
-	if { "$TclInterp"== "" } then { bell ; return }
-	if {[interp exists $TclInterp]==0} then {
+	if {$TclInterp == ""} then { bell ; return }
+	if {[interp exists $TclInterp] == 0} then {
 		prolog call alsdev init_tcl_debugger -atom $TclInterp -atom $ALSTCLPATH
 	} else { bell }
 }
@@ -636,7 +636,7 @@ proc kill_tcl_interps  { } {
 proc set_directory { } {
 	set CWD [pwd]
 	set NewDir [getDirectory]
-	if { "$NewDir" !="" } {
+	if {$NewDir != ""} {
 		cd $NewDir
 		show_dir_on_main $NewDir
 	}
@@ -649,23 +649,24 @@ proc show_dir_on_main { Dir } {
 proc exit_prolog { } {
 	global WaitForLine
 
-	set ans [tk_dialog .quit_dialog "Exit Prolog?" \
-		"Really Exit ALS Prolog?" "" 0 Yes No ]
-	if {"$ans"==1} then {
-		return 0
-	} else {
+	set ans [tk_messageBox -icon warning -parent .topals \
+				-title "Exit Prolog?" -message "Really Exit ALS Prolog?" \
+				-type yesno -default yes]
+	if {$ans == "yes"} then {
 		if {[document.close_all]} then {
 			save_window_positions
 			exit
 #			set WaitForLine -3
 		}
+	} else {
+		return 0
 	}
 }
 
 proc save_window_positions {} {
 	global proenv
 	set TopGeom [wm geometry .topals]	
-	if {[winfo exists .debugwin]==1} then {
+	if {[winfo exists .debugwin] == 1} then {
 		set DebugGeom [wm geometry .debugwin]	
 	} else {
 		set DebugGeom $proenv(.debugwin,geometry)
@@ -706,7 +707,7 @@ proc consult_file {} {
 		-defaultextension pro \
 		-title "Consult File" \
 		-filetypes {{"Prolog Files" {.pro .pl } } {{All Files} {*} } } ]
-	if { "$file"== "" } then { return }
+	if {$file == ""} then { return }
 	prolog call alsdev do_reconsult -atom $file
 }
 
@@ -742,25 +743,21 @@ proc careful_withdraw {Win} {
 proc choose_background_color {Window} {
 	global array proenv
 
-	grab release .alsdev_settings
 	set COLOR [tk_chooseColor \
 		-title "Choose Background Color" -initialcolor $proenv(.topals,background)]
-	if {"$COLOR" == ""} then {return}
+	if {$COLOR == ""} then {return}
 	.alsdev_settings.background configure -background $COLOR
 	$Window.text configure -background $COLOR
-	grab set -global .alsdev_settings
 }
 
 proc choose_foreground_color {Window} {
 	global array proenv
 
-	grab release .alsdev_settings
 	set COLOR [tk_chooseColor \
 		-title "Choose Foreground Color" -initialcolor $proenv(.topals,foreground)]
-	if {"$COLOR" == ""} then {return}
+	if {$COLOR == ""} then {return}
 	.alsdev_settings.foreground configure -foreground $COLOR
 	$Window.text configure -foreground $COLOR
-	grab set -global .alsdev_settings
 }
 
 proc font_family_choice { Family Window } {
@@ -790,11 +787,11 @@ proc font_style_choice { Style Window } {
 proc text_front_win {} {
 	set Kids [winfo children .]
 	set FrontWin [lindex $Kids end]
-	if {"$FrontWin"==".alsdev_settings"} then {
+	if {$FrontWin == ".alsdev_settings"} then {
 		set FrontWin \
 			[lindex $Kids [expr [llength $Kids] - 2]]
 	}
-	if {"$FrontWin"=="" } then {
+	if {$FrontWin == ""} then {
 		bell ; return ""
 	} else {
 		return $FrontWin
@@ -812,7 +809,7 @@ proc fonts_and_colors { Window } {
 	set proenv(text,family)  [lindex $Font 0]
 	set proenv(text,size)  [lindex $Font 1]
 	set proenv(text,style)  [lindex $Font 2]
-	if {"$proenv(text,style)"==""} then {set proenv(text,style) normal}
+	if {$proenv(text,style) == ""} then {set proenv(text,style) normal}
 	set Tabs [$Window.text cget -tabs]
 
 	Window show .alsdev_settings
@@ -822,11 +819,9 @@ proc fonts_and_colors { Window } {
     .alsdev_settings.background configure -background [$Window.text cget -background ]
     .alsdev_settings.foreground configure -foreground [$Window.text cget -foreground ]
 
-	grab set -global .alsdev_settings
 }
 
 proc cancel_fonts_and_colors { } {
-	grab release .alsdev_settings
 	Window hide .alsdev_settings
 }
 
@@ -854,7 +849,6 @@ proc save_fonts_and_colors { Window } {
 	set proenv($Grp,font)               $Font
 	set proenv($Grp,tabs)               $Tabs
 
-	grab release .alsdev_settings
 	Window hide .alsdev_settings
 
 	prolog call alsdev change_window_settings -list $Vals -atom $Grp
@@ -872,63 +866,9 @@ proc show_ide_settings {} {
 }
 
 proc show_dynamic_flags {} {
-	global array proenv
-
-	if {[winfo exists .dyn_flags]} then {
-		Window show .dyn_flags
-	} else {
-		Window show .dyn_flags
-		prolog call builtins changable_flags_info -var InfoList
-		foreach info $InfoList {
-			create_dyn_flag_entry $info
-		}
-	}
+	Window show .dyn_flags
 }
 
-proc create_dyn_flag_entry { info } {
-	global array proenv
-
-	set FlagName [lindex $info 0]
-	set PosVals [lindex $info 1]
-	set CurVal [lindex $info 2]
-
-	set ff [frame .dyn_flags.$FlagName -borderwidth 1 -relief sunken]
-	label $ff.label -borderwidth 0 \
-        -relief flat -width 18 -justify right \
-        -text $FlagName
-
-	set Cmd [concat tk_optionMenu "$ff.opts_menu" proenv($FlagName) $PosVals]
-	set proenv($FlagName) $CurVal  
-	set MM [eval $Cmd]
-
-	pack $ff  \
-        -anchor center -expand 0 -fill x -side top 
-	pack $ff.label  \
-        -anchor center -expand 0 -fill none -side left 
-	pack $ff.opts_menu  \
-        -anchor center -expand 0 -fill x -side left 
-
-	set Last [$MM index end]
-	for {set ii 0} {$ii <= $Last} {incr ii} {
-		set Cmd [list prolog call builtins \
-			set_prolog_flag -atom $FlagName -atom [lindex $PosVals $ii] ]
-		$MM entryconfigure $ii -command $Cmd
-	}
-
-}
-
-proc change_prolog_flags {} {
-	global array proenv
-
-	prolog call builtins changable_flags_info -var InfoList
-	foreach info $InfoList {
-		set FlagName [lindex $info 0]
-		if {[lindex $info 2]!=$proenv($FlagName)} then {
-			prolog call builtins set_prolog_flag \
-				-atom $FlagName -atom $proenv($FlagName)
-		}
-	}
-}
 
 #################################################
 #####			STATIC FLAGS				#####
@@ -951,10 +891,10 @@ proc toggle_debugwin {} {
 
 proc exec_toggle_debugwin {} {
 	global array proenv
-	if {"$proenv(debugwin)"==0} then {
+	if {$proenv(debugwin) == 0} then {
 		hide_debugwin
 	} else {
-		if {[winfo exists .debugwin]==0} then {
+		if {[winfo exists .debugwin] == 0} then {
 			vTclWindow.debugwin ""
 		}
 		show_debugwin
@@ -965,7 +905,7 @@ proc exec_toggle_debugwin {} {
 proc ensure_db_showing {} {
 	global array proenv
 		
-	if {[winfo exists .debugwin]==0} then { 
+	if {[winfo exists .debugwin] == 0} then { 
 		Window show .debugwin 
 	}
 	show_debugwin
@@ -1002,7 +942,7 @@ proc exit_debugger {} {
 
 proc switch_debug_setup {Which} {
 	global array proenv
-	if {"$Which"=="on"} then {
+	if {$Which == "on"} then {
 		if {"$proenv(debugwin)"==0} then { toggle_debugwin }
 	} else {
 		if {"$proenv(debugwin)"==1} then { toggle_debugwin }
@@ -1047,7 +987,7 @@ proc refresh_mods_list {}  {
 		.pred_info.mods.listbox insert end $Module
 	}
 	set PrevFocus [get_module_focus]
-	if {[llength $SortedNonSysMods]==1} then {
+	if {[llength $SortedNonSysMods] == 1} then {
 		set_module_focus user
 	} elseif { [lsearch -exact $SortedNonSysMods $PrevFocus] < 0 } then {
 		set_module_focus [lindex $SortedNonSysMods 0]
@@ -1100,7 +1040,7 @@ proc refresh_preds_list {Mod} {
 proc refresh_spy_win {} {
 	refresh_mods_list
 	set MF [get_module_focus]
-	if  { "$MF" != "" } then { refresh_preds_list $MF }
+	if  {$MF != ""} then { refresh_preds_list $MF }
 }
 
 proc move_to_spying_list {} {
@@ -1189,11 +1129,11 @@ proc carry_out_listing {} {
 	set Mod [get_module_focus]
 	set IXs [.pred_info.spying.listbox curselection]
 
-	if {"$IXs"!=""} then {
+	if {$IXs != ""} then {
 		set Pred [.pred_info.spying.listbox get [lindex $IXs 0] ]
 	} else {
 		set IXs [.pred_info.preds.listbox curselection]
-		if {"$IXs"!=""} then {
+		if {$IXs != ""} then {
 			set Pred [.pred_info.preds.listbox get [lindex $IXs 0] ]
 		} else {
 			set SelOwner [selection own]
@@ -1208,11 +1148,11 @@ proc carry_out_listasm {} {
 	set Mod [get_module_focus]
 	set IXs [.pred_info.spying.listbox curselection]
 
-	if {"$IXs"!=""} then {
+	if {$IXs != ""} then {
 		set Pred [.pred_info.spying.listbox get [lindex $IXs 0] ]
 	} else {
 		set IXs [.pred_info.preds.listbox curselection]
-		if {"$IXs"!=""} then {
+		if {$IXs != ""} then {
 			set Pred [.pred_info.preds.listbox get [lindex $IXs 0] ]
 		} else {
 			set SelOwner [selection own]
@@ -1300,7 +1240,7 @@ proc wait_for_debug_response {} {
 		###############################
 
 proc win_exists {WinName} {
-	if {[winfo exists $WinName]==1} then {
+	if {[winfo exists $WinName] == 1} then {
 		return true
 	} else {
 		return false
@@ -1328,7 +1268,7 @@ proc line_index_file {FileName } {
 proc line_index_stream {Stream } {
 	set LineCount 1
 	set LineCsList ""
-	while {  [eof $Stream]==0 } {
+	while {[eof $Stream] == 0} {
 		set NumCs [gets $Stream Line]
 		if { $NumCs >= 0 } then {
 			lappend LineCsList $NumCs
@@ -1365,7 +1305,7 @@ proc source_trace_closedown {STWin} {
 }
 
 proc debugwin_configure_event {Win Ht Wd WW} {
-	if {"$WW"==".debugwin.text"} then {
+	if {$WW == ".debugwin.text"} then {
 		set FD [.debugwin.text cget -font]
 		set FM [font measure .debugwin.text mmmmm]
 		set WWD [.debugwin.text cget -width]
@@ -1478,10 +1418,10 @@ proc edit_find_next {} {
 	global proenv
 	set w [.find_repl.f1.whichwin cget -text]
 	set Pattern [.find_repl.search.entry get]
-	if {"$Pattern"==""} then {
+	if {$Pattern == ""} then {
 		bell
-		tk_dialog .quit_dialog "Bad Pattern" \
-			"Can't search for the empty string!" "" 0 OK 
+		tk_messageBox -icon info -parent .find_repl -title "Bad Pattern" \
+			-message "Can't search for the empty string!" -type ok
 		return
 	}
 	set proenv(searchdirect) $proenv($w,searchdirect)
@@ -1489,12 +1429,12 @@ proc edit_find_next {} {
 	set Nature -$proenv($w,searchnature)
 	set StartIndex $proenv($w,searchpos)
 
-	if {"$proenv($w,searchdirect)"=="forward"} then {
+	if {$proenv($w,searchdirect) == "forward"} then {
 		set sresult [$w.text search $Direct $Nature -count MLen --  $Pattern $StartIndex ]
 	} else {
 		set sresult [$w.text search $Direct $Nature -count MLen --  $Pattern $StartIndex ]
 	}
-	if {"$sresult"==""} then {
+	if {$sresult == ""} then {
 		bell
 		set proenv($w,searchpos) 1.0
 	} else {
@@ -1505,7 +1445,7 @@ proc edit_find_next {} {
 		$w.text tag remove sel 1.0 end 
 		$w.text tag add sel $sresult $MLNum.$MatchEnd
 		$w.text mark set insert $sresult
-		if {$proenv($w,searchdirect)=="forward"} then {
+		if {$proenv($w,searchdirect) == "forward"} then {
 			set proenv($w,searchpos) $MLNum.$MatchEnd
 		} else {
 			if { $MLCharStart > 0 } then {
