@@ -13,6 +13,7 @@ module pconfig.
 use sconfig.
 use  mkdist.
 
+/*********************************
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% System-specific knowledge:
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -75,6 +76,7 @@ ws_vars(motif, ARCH, OS, WSHeaderLines)
 			ToggleB ToggleBG Vendor VendorE \
 			VirtKeys Xm ../x/x'
 	].
+***********************/
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Top-level entry to the prolog-level configuration process
@@ -86,7 +88,6 @@ pconfig
 	:-
 	build_base_config,
 	setup_wins.
-%	setup_lmgr.
 
 build_base_config
 	:-
@@ -318,19 +319,25 @@ create_makefiles_and_subdirs( [Subdir | Subdirs], ARCH, OS, BLD_NATV_SRC_PATH)
 	:-
 	append(BLD_NATV_SRC_PATH,[wins,build,Subdir], BldSubdirPath),
 	subPath(BldSubdirPath, BldSubdirPathAtm),
+
+	append(BLD_NATV_SRC_PATH,[wins,build], BldPath),
+	subPath(BldPath, BldPathAtm),
+
 	general_os(ARCH,OS,GOS),
 
-	create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, BldSubdirPathAtm, GOS),
+	create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, 
+				BldPathAtm, BldSubdirPathAtm, GOS),
 
 	create_makefiles_and_subdirs( Subdirs, ARCH, OS, BLD_NATV_SRC_PATH).
 
-create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, BldSubdirPathAtm, GOS)
+create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, BldPathAtm, BldSubdirPathAtm, GOS)
 	:-
 	adjust_path_depth(BLD_NATV_SRC_PATH,1,BNSP1),
 		%% General header vars:
 	grl_vars(ARCH, OS, BNSP1, SubGrlHeaderLines),
 		%% Specific header vars:
-	ws_vars(Subdir, ARCH, OS, WSHeaderLines),
+	ws_vars(Subdir, ARCH, OS, WSHeaderItems),
+	flatten_ws_lists(WSHeaderItems, WSHeaderLines),
 	append(SubGrlHeaderLines, WSHeaderLines, SubHeaderLines0),
 
 	cfg('LIBS', LIBS),
@@ -345,8 +352,14 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, BldSubdirPathAtm, GOS)
 		'X_EXTRA_LIBS' = X_EXTRA_LIBS
 		|  SubHeaderLines0 ],
 
-		%% Handle the primary (including .a library) Makefile:
-	pathPlusFile(BldSubdirPathAtm, '/Makefile.in', SrcMKFTail),
+		%% Handle the  Makefile:
+	extendPath(BldSubdirPathAtm, 'Makefile.in', SubDirMakefile),
+	(exists_file(SubDirMakefile) ->
+		SrcMKFTail = SubDirMakefile
+		;
+		extendPath(BldPathAtm, 'mf-cmn.in', SrcMKFTail)
+	),
+%	pathPlusFile(BldSubdirPathAtm, '/Makefile.in', SrcMKFTail),
 
 	pathPlusFile(Subdir,'Makefile',SubdirMakefile),
 	trans_xtnd_makefile(SrcMKFTail, SubHeaderLines, SubdirMakefile, GOS), 
@@ -568,6 +581,25 @@ install_sharbld
 	get_cwd(CurDir),
 	cp_txt( SRC_Dir/sharbld 				> CurDir ),
 	cp_txt( SRC_Dir/pconfig/'sharalsp.pro'	> CurDir ).
+
+/***********
+flatten_ws_lists([], []).
+flatten_ws_lists([Tag=Value | WSHeaderItems], [Tag = FlatValue | WSHeaderLines])
+	:-
+	Value = [_|_],
+	!,
+	flatten_to_atom(Value, FlatValue),
+	flatten_ws_lists(WSHeaderItems, WSHeaderLines).
+flatten_ws_lists([Tag=Value | WSHeaderItems], [Tag = Value | WSHeaderLines])
+	:-
+	flatten_ws_lists(WSHeaderItems, WSHeaderLines).
+
+flatten_to_atom([], ' \n').
+flatten_to_atom([Atom | List], FlatValue)
+	:-
+	flatten_to_atom(List, ListFlatValue),
+	catenate([Atom,' \\\n',ListFlatValue], FlatValue).
+***********/
 
 endmod.
 

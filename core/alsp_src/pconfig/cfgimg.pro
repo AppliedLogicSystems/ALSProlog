@@ -17,10 +17,17 @@ use sconfig.
 
 export tci/0.
 tci :-
-	cfg_img(hitk,	[[name=accsys]],
+	cfg_img(hitk, [[name=accsys],
+				[name=tiff,
+				 libs = ['/mailbox3/Tiff/tiff/libtiff/libtiff.a'],
+				 ofiles = ['/mailbox3/Tiff/intf/showTIFF.o']
+				],
+				[name=motif]
+				  ],
+
 			[
 				default_top = '/mailbox3',
-				img_path	= '/mailbox3/hi_app', 
+				img_path = '/mailbox3', 
 				srcdir	= '/mailbox3/alsp_src',
 		 		libsdir	= '/mailbox3/als_libs',
 		 		probld	= '/mailbox3/builds',
@@ -34,8 +41,8 @@ tci :-
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 /*!---------------------------------------------------------------
- | cfg_img/5
- | cfg_img(ImgName, ImgDirPath, LinkLibs, Options)
+ | cfg_img/3
+ | cfg_img(ImgName, LinkLibs, Options)
  | cfg_img(+, +, +, +, +)
  |
  |	-- create a directory for linking an extended ALS Prolog image
@@ -68,8 +75,8 @@ tci :-
  |			  or in subdir pconfig in the source tree.
  *!--------------------------------------------------------------*/
 
-export cfg_img/4.
-cfg_img(ImgName, IMPath, LinkLibs, Options)
+export cfg_img/3.
+cfg_img(ImgName, LinkLibs, Options)
 	:-
 	get_cwd(OrigDir),
 	check_default(Options, default_top, OrigDir, DefltTop),
@@ -78,7 +85,6 @@ cfg_img(ImgName, IMPath, LinkLibs, Options)
 		fail),
 
 	check_default(Options, img_path, DefltTop, IMPath), 
-
 	(exists_file(IMPath) -> true ;
 		als_advise('Error: Path %t does not exist.\n', [IMPath]),
 		fail),
@@ -93,16 +99,24 @@ cfg_img(ImgName, IMPath, LinkLibs, Options)
 					OSVar^dmember(os_variation=OSVar, SysVals), OSVar),
 
 	catenate([Arch,'_',OSVar], ArchOS),
+	general_os(Arch, OSVar, _, GOS), 
 	existsmake_subdir(ArchOS,IMPath/ImgName),
 	change_cwd(ArchOS),
 
 	check_default(Options, protype, port, PROTYPE),
 	check_default(Options, probld, 
 					PROBLD^extendPath(DefltTop, builds, PROBLD), PROBLD),
+	catenate('bld-',PROTYPE,PROSYSNAME),
+	extendPath(PROBLD,ArchOS,AOSDir),
+	extendPath(AOSDir,PROSYSNAME,PROSYSDir),
+	pathPlusFile(PROSYSDir, 'alspro.a', PROLIB),
 
-				srcdir	= '/mailbox3/alsp_src',
-		 		libsdir	= '/mailbox3/als_libs',
+		%% Make this "link or copy: -- and independent of OS:"
+	catenate(['ln -s ',PROBLD,'/',Arch,'_',OSVar,'/bld-',PROTYPE,'/alsdir .'], 
+				LNBLDALSDIR),
+	system(LNBLDALSDIR),
 
+		%% Directory where component libs are (generally) kept:
 	check_default(Options, libsdir, 
 					LIBSDIR^extendPath(DefltTop, als_libs, LIBSDIR), LIBSDIR),
 
@@ -114,19 +128,20 @@ cfg_img(ImgName, IMPath, LinkLibs, Options)
 		builtins:sys_searchdir(ALSDIRPath),
 		extendPath(ALSDIRPath,linking,LinkingPath),
 		pathPlusFile(LinkingPath, 'makeimg.in', InitImgMakefile),
-		Extra = []
+		(exists_file(InitImgMakefile) ->
+			Extra = [linking=LinkingPath]
+			;
+			extendPath(DefltTop, alsp_src, ALSSRC), 
+			extendPath(ALSSRC,pconfig,PCONFIGPath),
+			pathPlusFile(PCONFIGPath, 'makeimg.in', InitImgMakefile),
+			Extra = [srcdir=ALSSRC]
+		)
 	),
 
-/*
-	ilsrcd(Options, ISDIR, LSRCDIR, LSRCSRC),
-	change_cwd(lib),
-
-	pathPlusFile(LSRCSRC, 'libspc.pro', LibSPEC),
-	consult(LibSPEC),
-*/
 	open('Makefile',write,OutS,[]),
 	printf(OutS,'#\n# Makefile for the %t image\n#\n\n',[ImgName]),
-	general_os(Arch, OSVar, GOS), 
+
+StdLibs = ' -lnsl -lm',
 
 	write_make_eqns([
 		'ARCH'			= Arch,
@@ -134,92 +149,213 @@ cfg_img(ImgName, IMPath, LinkLibs, Options)
 		'GOS' 			= GOS,
 		probld 			= PROBLD,
 		protype			= PROTYPE,
-		'TSYSN' 		= ImgName
+		prolib			= PROLIB,
+		'TSYSN' 		= ImgName,
+		'STDLIBS'		= StdLibs
 		| Extra   ], OutS),
 
-	img_makefile(LinkLibs,0,Arch,OSVar,LIBSDIR,Options,OutS, LinkList, Inits),
+append(Extra, Options, XOpts),
+
+	img_makefile(LinkLibs,0,ArchOS,PROBLD,LIBSDIR,XOpts,OutS, 
+			LinkList, Lib_ls, TopOFILES, Inits, Cfgs, Profls, XLines),
+
+	make_list_var(LinkList, 'CPTLIBS', OutS),
+	make_list_var(TopOFILES, 'XOBJS', OutS),
+	make_list_var(Profls, 'PROFLS', OutS),
+	make_list_var(Lib_ls, 'SysLibs', OutS),
 
 	open(InitImgMakefile, read, MSrc, []),
 	copy_stream_nl(MSrc, OutS, GOS),
 	close(MSrc),
 
+	printf(OutS,'\n$(TSYSN)_basis : $(TOPOBJS) $(PROLIB) $(CPTLIBS)\n',[]),
+	printf(OutS,'\techo starting $(TSYSN)_basis\n', 	[]),
+	printf(OutS,'\t$(CC) -o $(TSYSN)_basis $(TOPOBJS) \\\n', 	[]),
+	printf(OutS,'\t\t$(PROLIB)   \\\n', 			[]),
+
 	write_link_elts(LinkList, OutS),
-	printf(OutS,'\t\t$(CLIBS)\n\n',[]),
+	printf(OutS,'\t\t$(SysLibs) \\\n',[]),
+	printf(OutS,'\t\t$(STDLIBS)\n\n',[]),
+
+	printf_list(XLines, OutS),
 	close(OutS),
 
-	open('pi_init.c',write,PISt,[]),
-	write_inits(Inits, PISt),
-	close(PISt),
-
-	open('pi_cfg.h',write,PICFGSt,[]),
-	printf(PICFGSt,'\n',[]),
-	close(PICFGSt),
+	pi_files(Inits, Cfgs),
 
 	change_cwd(OrigDir).
 
+	/*---------------------------------------------------------------------------
+	 | img_makefile/13
+	 | img_makefile(LinkLibs,Cntr,ArchOS,PROBLD,LIBSDIR,Options,OutS, 
+	 |				LinkList, Lib_ls, TopOFiles, Inits, Cfgs, XLines)
+	 | img_makefile(+,+,+,+,+,+,+, -, -, -, -)
+	 |
+	 | - writes comp lib info into Makefile and creates LinkList & Inits
+	 |
+	 |	+LinkLibs:	List of component library descriptions;
+	 |	+Cntr:		Counter used in generated output;
+	 |	+ArchOS:	Architecture+OS;
+	 |	+PROBLD:	ALS Prolog builds directory;
+	 |	+LIBSDIR:	Directory containing (prev. built) libraries & interfaces;
+	 |	+Options:	The original input options list
+	 |	+OutS:		The output stream (to the Makefile)
+	 |	-LinkList:	List of lists of (paths to) (C) libs to be linked into image;
+	 |	-Lib_ls:	List of lists of system (-lxxx) libraries to include;
+	 |	-TopOFiles:	List of lists of (paths to) .o files to be linked into image;
+	 |	-Inits:		List of init expressions for libraries to be put in pimain.c
+	 |	-Cfgs:		List of lists of misc expressions for inclusion in pimain by pi_cfg.h
+	 |	-Profls:	List of lists of prolog files needed to be loaded in final image
+	 |	-XLines:	List of lists of misc extra Makefile lines
+	 *--------------------------------------------------------------------------*/
 
-
-img_makefile([],_,_,_,_,_,_, [], []).
-img_makefile([CompLib | LinkLibs], CurN,Arch,OS, LIBSDIR, Options, OutS, 
-				[CLI | LinkList], [CLInit | Inits])
+img_makefile([],_,_,_,_,_,_,_, [], [], [], [], [], []).
+img_makefile([CompLib | LinkLibs], CurN,ArchOS, PROBLD, LIBSDIR, Options, OutS, 
+				[CLI | LinkList], [L_ll | Lib_ls], [ OFs | OFList], [CLInit | Inits], 
+				[CLCfg | Cfgs], [CLPfls | Profls], [XLines | RestXLines])
 	:-
-	img_cmp_make(CompLib, CurN,Arch,OS, LIBSDIR, Options, OutS, CLI, CLInit),
+	img_cmp_make(CompLib, CurN,ArchOS, PROBLD, LIBSDIR, Options, OutS, 
+					CLI, L_ll, OFs, CLInit, CLCfg, CLPfls, XLines),
 	NextN is CurN + 1,
-	img_makefile(LinkLibs,NextN,Arch,OS,LIBSDIR, Options,OutS, LinkList, Inits).
+	img_makefile(LinkLibs,NextN,ArchOS,PROBLD, LIBSDIR, Options,OutS, 
+					LinkList, Lib_ls, OFList, Inits, Cfgs, Profls, RestXLines).
 
-img_cmp_make(CompLib, CurN, Arch,OS, LIBSDIR, Options, OutS, CLI, CLInit)
+	/*---------------------------------------------------------------------------
+	 |	img_cmp_make/11
+	 |	img_cmp_make(CompLib, Cntr, ArchOS, PROBLD, LIBSDIR, Options, OutS, 
+	 |				 CLI, L_ll, OFs, CLInit, CLCfg, Profls, XLines)
+	 |	img_cmp_make(+, +, +,+, +, +, +, -, -, -)
+	 |
+	 |	+CompLib:	Component library description;
+	 |	+Cntr:		Counter used in generated output;
+	 |	+ArchOS:	Architecture+OS;
+	 |	+PROBLD:	ALS Prolog builds directory;
+	 |	+LIBSDIR:	Directory containing (prev. built) libraries & interfaces;
+	 |	+Options:	The original input options list
+	 |	+OutS:		The output stream (to the Makefile)
+	 |	-CLI:		List of full names, with paths, of the Clibs in this component, 
+	 |					to be linked into image;
+	 |	-L_ll:		List of atoms describing system libraries (-lxxx) to be included;
+	 |	-OFs:		List of (paths to) .o files to be linked into image;
+	 |	-CLInit:	Init expression for pimain.c for this library;
+	 |	-Cfgs:		List of (possible) misc expressions for inclusion in pimain by pi_cfg.h
+	 |	-Profls:	List of (possible) prolog files needed to be loaded in final image
+	 |	-XLines:	List of misc extra Makefile lines
+	 *--------------------------------------------------------------------------*/
+	%% Explicit description of what to include & where to get it:
+img_cmp_make(CompLib, CurN, ArchOS, PROBLD, LIBSDIR, Options, OutS, 
+				CLI, L_ll, OFs, CLInit, CLCfg, Profls, XLines)
+	:-
+	dmember(libs=CLI, CompLib),
+	!,
+	check_default(CompLib,syslibs,[], L_ll),
+	dmember(name=CmpLibName, CompLib),
+	check_default(CompLib,init,CLInit^catenate(CmpLibName,'_init();',CLInit), CLInit),
+	check_default(CompLib, ofiles, [], OFs),
+	check_default(CompLib, profls, [], Profls),
+	check_default(CompLib, cfg, [], CLCfg),
+	check_default(CompLib, xlines, [], XLines).
+
+	%% Lib comp. is a window system library
+img_cmp_make(CompLib, CurN, ArchOS, PROBLD, LIBSDIR, Options, OutS, 
+				CLI, L_ll, OFs, CLInit, CLCfg, Profls, XLines)
 	:-
 	dmember(name=CmpLibName, CompLib),
-	catenate(['LIB', CurN, '_NM'], LNameName),
+	winsystems_for(ArchOS, WSL),
+	dmember(CmpLibName, WSL),
+	!,
+	extendPath(PROBLD,ArchOS, AOSDir),
+	extendPath(AOSDir,'bld-wins',BWinsDir),
+	extendPath(BWinsDir, CmpLibName, WSDir),
+	catenate(CmpLibName,'interf.a',WSLibName),
+	pathPlusFile(WSDir,WSLibName,CmpLib),
 
+	ws_vars(CmpLibName, ArchOS, WSHeaderLines),
+	dmember('$(WIN)LIBS' = LibsLine, WSHeaderLines),
+	dmember('ADDL_LIBS' = AddlLibsList, WSHeaderLines),
+	prefix_dir(AddlLibsList, WSDir, XAddlLibsList),
+	flatten_to_atom(XAddlLibsList, AddlLibsListAtom),
+
+%	extendPath(WSDir, AddlLibsLine, FullAddlLibs),
+	L_ll = [LibsLine],
+
+
+%	CLI = [CmpLib, FullAddlLibs],
+	CLI = [CmpLib, AddlLibsListAtom],
+
+
+	dmember('ADDL_CS' = ACsList0, WSHeaderLines),
+	catenate(CmpLibName, 'aux.c', AuxFile),
+	ACsList = [AuxFile | ACsList0],
+	(dmember(srcdir=SRCDIR, Options) ->
+		extendPath(SRCDIR,wins,BWDir),
+		extendPath(BWDir,src,WinSrcDir)
+		;
+		dmember(linking=WinSrcDir, Options)
+	),
+	deps_and_ofs(ACsList, WinSrcDir, AddlCOFs, AddlCODeps),
+	XLines = AddlCODeps,
+
+	dmember('ADDL_INITS' = AInitsList0, WSHeaderLines),
+
+	check_default(CompLib,init,CLInit0^catenate(CmpLibName,'_init();',CLInit0), CLInit0),
+	CLInit1 = [CLInit0 | AInitsList0],
+	cat_together_seplines(CLInit1, CLInit),
+
+
+
+	check_default(CompLib, ofiles, AddlCOFs, OFs),
+
+	dmember('CFG' = DefaultCfg, WSHeaderLines),
+	check_default(CompLib, cfg, DefaultCfg, CLCfg),
+
+	dmember('ADDL_PROFS' = AddlProfsList, WSHeaderLines),
+	extendPath(WSDir,'*.pro',AProfls),
+		%% BProfls will be an atom (quoted), and
+		%% Any necessary paths will be included, and
+		%% Addl profs is normally only one file:
+	check_default(CompLib, profls, '', BProfls),
+
+	prefix_dir(AddlProfsList, WSDir, XAddlProfList),
+	cat_together_spaced([AProfls, BProfls | XAddlProfList], ProflsStr),
+	Profls = [ProflsStr].
+
+
+	%% Lib comp. is built using "standard" ALS machinery & organization:
+img_cmp_make(CompLib, CurN, ArchOS, PROBLD, LIBSDIR, Options, OutS, 
+				CLI, L_ll, OFs, CLInit, CLCfg, Profls, XLines)
+	:-
+	dmember(name=CmpLibName, CompLib),
 	extendPath(LIBSDIR, CmpLibName, LibBld),
-	pathPlusFile(LibBld,info,LibInfoFile),
-	open(LibInfoFile,read,LIS,[]),
-	read_term(LIS,LIList,[]),
-	close(LIS),
-	dmember(isdir=SRCDIR,LIList),
-	catenate(['LIB', CurN, sd], LsdName),
-
-	catenate([Arch,'_',OS], ArchOS),
 	extendPath(LibBld,ArchOS,LBAOS),
 	extendPath(LBAOS,lib,LBAOSl),
 	lib_extension(OS,LExt),
 	filePlusExt(CmpLibName,LExt,RawLibFileName),
 	pathPlusFile(LBAOSl,RawLibFileName,RawLibFile),
-	catenate(['LIB', CurN, '_rl'], RLNameName),
 	
 	extendPath(LBAOS,intf,LBAOSi),
 	catenate(CmpLibName,interf,LIF),
 	filePlusExt(LIF,LExt,IntfFileName),
 	pathPlusFile(LBAOSi,IntfFileName,IntfLibFile),
-	catenate(['LIB', CurN, '_il'], ILNameName),
-
-	write_make_eqns([
-		LNameName	= CmpLibName,
-		LsdName		= SRCDIR,
-		RLNameName	= RawLibFile,
-		ILNameName	= IntfLibFile ], OutS),
 
 	CLI = [IntfLibFile, RawLibFile],
-	catenate(CmpLibName,'_init();',CLInit).
-		
-
+	check_default(CompLib,syslibs,[], L_ll),
+	check_default(CompLib,init,CLInit^catenate(CmpLibName,'_init();',CLInit), CLInit),
+	check_default(CompLib, ofiles, [], OFs),
+	check_default(CompLib, profls, Profls^files(LBAOSl,'*.pro',Profls), Profls),
+	check_default(CompLib, cfg, [], CLCfg),
+	check_default(CompLib, xlines, [], XLines).
 
 write_link_elts([], OutS).
 write_link_elts([CLL | LinkList], OutS)
 	:-
-	printf(OutS,'\t\t',[]),
 	write_cl_elts(CLL,OutS),
-	printf(OutS,'\\\n',[]),
 	write_link_elts(LinkList, OutS).
 
 write_cl_elts([],OutS).
 write_cl_elts([L | CLL],OutS)
 	:-
-	printf(OutS,'%t ',[L]),
+	printf(OutS,'\t\t%t \\\n',[L]),
 	write_cl_elts(CLL,OutS).
-
-
 
 write_inits([], PISt).
 write_inits([Init | Inits], PISt)
@@ -227,155 +363,19 @@ write_inits([Init | Inits], PISt)
 	printf(PISt,'\t%t\n',[Init]),
 	write_inits(Inits, PISt).
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-lib_link_makefile(ImgName,Arch,OSVar,ISDIR,InitLibMakefile)
+pi_files(Inits, Cfgs)
 	:-
-	open('Makefile',write,OutS,[]),
-	printf(OutS,'#\n# Makefile for the %t library\n#\n\n',[ImgName]),
+	open('pi_init.c',write,PISt,[]),
+	printf(PISt,'pi_init()\n{\n',[]),
+	write_inits(Inits, PISt),
+	printf(PISt,'}\n',[]),
+	close(PISt),
 
-	protoflags(PROTOFLAGS),
-	x_cflags(X_CFLAGS),
-	xlibs(X_LIBS),
-	x_extra_libs(X_EXTRA_LIBS),
-	xincludes(XINCLUDES),
-	write_make_eqns([
-		'ARCH'			= Arch,
-		'OS' 			= OSVar,
-		'INTF_NM'		= ImgName,
-		isdir			= ISDIR,
-		'PROTOFLAGS'		= PROTOFLAGS,
-		'X_CFLAGS'		= X_CFLAGS,
-		'X_LIBS'		= X_LIBS,
-		'X_EXTRA_LIBS'		= X_EXTRA_LIBS,
-		'XINCLUDES'		= XINCLUDES],  OutS),
-
-	general_os(Arch, OSVar, GOS), 
-	open(InitLibMakefile, read, SrcS, []),
-	copy_stream_nl(SrcS, OutS, GOS),
-	close(SrcS),
-
-	lib_source_files(FileNamesList),
-	printf(OutS,'BASEOBJS\t= ',[]),
-	writeout_ofiles(FileNamesList, OutS),
-
-	printf(OutS,'\n$(BASELIB): $(BASEOBJS)\n',[]),
-	printf(OutS,'\techo BASEOBJS=$(BASEOBJS)\n',[]),
-	printf(OutS,'\tar ruv $(BASELIB) $(BASEOBJS)\n',[]),
-	printf(OutS,'\tranlib $(BASELIB)\n\n',[]),
-
-	printf(OutS,'\n# Dependencies:\n\n',[]),
-	writeout_deps(FileNamesList, OutS),
-	close(OutS).
-
-lib_intf_makefile(ImgName,Arch,OSVar,ALSSRC,ISDIR,InitIntfMakefile,Options)
-	:-
-	open('Makefile',write,OutS,[]),
-	printf(OutS,'#\n# Makefile for the interface to the %t library\n#\n\n',[ImgName]),
-
-	general_os(Arch, OSVar, GOS), 
-	(dmember(fprefix=FPrefix, Options) ->
-		true ; 
-		FPrefix = ImgName),
-	(dmember(protype=PROTYPE, Options) ->
-		true ; 
-		PROTYPE = port),
-	(dmember(probld=PROBLD, Options) ->
-		true 
-		; 
-		builtins:sys_searchdir(PROBLD)),
-	(dmember(srcmake=true, Options) ->
-		extendPath(ALSSRC,cinterf,CINTDIR),
-		extendPath(CINTDIR,c2pro,C2PDIR),
-		extendPath(CINTDIR,pro2intf,P2IDIR)
-		; 
-		builtins:sys_searchdir(CINTDIR),
-		C2PDIR = CINTDIR,
-		P2IDIR = CINTDIR
-	),
-
-	intf_cflags(INTF_CFLAGS),
-	intf_c2pflags(INTF_C2PFLAGS),
-	intf_p2iflags(INTF_P2IFLAGS),
-	intf_includes(INTF_INCLUDES),
-	intf_defines(INTF_DEFINES),
-
-	prolog_lcns(Options,Arch,OSVar,PROTYPE,PrologStuff),
-
-	write_make_eqns([
-		'ARCH'			= Arch,
-		'OS' 			= OSVar,
-		'GOS' 			= GOS,
-		'INTF_NM'		= ImgName,
-		isdir			= ISDIR,
-		protype			= PROTYPE,
-		'FPREFIX'		= FPrefix,
-		srcdir			= ALSSRC,
-		'CINTDIR'		= CINTDIR,
-		'C2PDIR'		= C2PDIR,
-		'P2IDIR'		= P2IDIR,
-		'INTF_CFLAGS'		= INTF_CFLAGS,
-		'INTF_C2PFLAGS'		= INTF_C2PFLAGS,
-		'INTF_P2IFLAGS'		= INTF_P2IFLAGS,
-		'INTF_INCLUDES'		= INTF_INCLUDES,
-		'INTF_DEFINES'		= INTF_DEFINES 
-		| PrologStuff ],  OutS),
-
-	open(InitIntfMakefile, read, SrcS, []),
-	copy_stream_nl(SrcS, OutS, GOS),
-	close(SrcS).
-
-
-prolog_lcns(Options,Arch,OS,PROTYPE,PrologStuff)
-	:-
-	dmember(prolib=PROLIB, Options),
-	dmember(prolog=PROLOG, Options),
-	!,
-	PrologStuff = [ 'PROLIB' = PROLIB, 'PROLOG' = PROLOG ].
-
-prolog_lcns(Options,Arch,OS,PROTYPE,PrologStuff)
-	:-
-	dmember(probld=PROBLD, Options),
-	!,
-	catenate([Arch,'_',OS],ArchOS),
-	catenate('bld-',PROTYPE,WHATTYPE),
-	extendPath(PROBLD,ArchOS,IP1),
-	extendPath(IP1,WHATTYPE, PROBLDD),
-	pathPlusFile(PROBLDD,'alspro.a',PROLIB),
-	pathPlusFile(PROBLDD,alspro,PROLOG),
-	PrologStuff = [ 
-		'PROBLD' = PROBLD, 
-		'PROBLDD' = PROBLDD, 
-		'PROLIB' = PROLIB, 
-		'PROLOG' = PROLOG 
-		].
-
-	%% NEED a case to get everything out of an
-	%% INSTALL setup [i.e., from the ALSDIR associated with
-	%% the current running image.]
-/*
-prolog_lcns(Options,Arch,OS,PROTYPE,PrologStuff)
-	:-
-*/
+	append(Cfgs, Cfgs0),
+	cat_together_seplines(Cfgs0, CfgAtm),
+	open('pi_cfg.h',write,PICFGSt,[]),
+	printf(PICFGSt,'%t\n',[CfgAtm]),
+	close(PICFGSt).
 
 existsmake_subdir(Name,Path)
 	:-
@@ -388,43 +388,69 @@ existsmake_subdir(Name,Path)
 	als_advise('Creating %t ...\n', [Path/Name]),
 	make_subdir(Name, 511).
 
-ilsrcd(Options, ISDIR, LSRCDIR, LSRCSRC)
-	:-
-	dmember(isdir=ISDIR, Options),
-	!,
-	extendPath(ISDIR,lib,LSRCDIR),
-	extendPath(ISDIR,src,LSRCSRC).
-ilsrcd(Options, ISDIR, LSRCDIR, LSRCSRC)
-	:-
-	als_advise('Cant determine library source directories!\n',[]),
-	fail.
-
 write_make_eqns([], OutS).
 write_make_eqns([Left=Right | RestEqns], OutS)
 	:-
 	printf(OutS,'%t\t= %t\n',[Left,Right]),
 	write_make_eqns(RestEqns, OutS).
 
-
-writeout_ofiles([], OutS).
-writeout_ofiles([File], OutS)
-	:-!,
-	printf(OutS,'%t.o \n',[File]).
-writeout_ofiles([File | FileNamesList], OutS)
+	%% Assume ListList is a list of lists:
+make_list_var([], VarName, OutS) :-!.
+make_list_var(ListList, VarName, OutS)
 	:-
-	printf(OutS,'%t.o \\\n',[File]),
-	writeout_ofiles(FileNamesList, OutS).
+	append(ListList, FlatList),
+	FlatList = [First| Rest],
+	printf(OutS, '\n%t = %t ', [VarName, First]),
+	make_dep_var(Rest, OutS).
 
-writeout_deps([], OutS).
-writeout_deps([File], OutS)
-	:-!,
-	printf(OutS,'%t.o : %t.c \n',[File,File]).
-writeout_deps([File | FileNamesList], OutS)
+make_dep_var([], OutS)
 	:-
-	printf(OutS,'%t.o : %t.c \n',[File,File]),
-	writeout_deps(FileNamesList, OutS).
+	printf(OutS, '\n\n', [Lib]).
+make_dep_var([Lib | LinkList], OutS)
+	:-
+	printf(OutS, '\\\n\t%t ', [Lib]),
+	make_dep_var(LinkList, OutS).
 
+cat_together_seplines([], '').
+cat_together_seplines([Item | Rest], Result)
+	:-
+	cat_together_seplines(Rest, RestResult),
+	catenate([Item, '\n', RestResult], Result).
 
+cat_together_spaced([], '').
+cat_together_spaced([Item | Rest], Result)
+	:-
+	cat_together_spaced(Rest, RestResult),
+	catenate([Item, ' ', RestResult], Result).
 
+prefix_dir([], _, []).
+prefix_dir([Item | List], WSDir, [XItem | XList])
+	:-
+	extendPath(WSDir, Item, XItem),
+	prefix_dir(List, WSDir, XList).
+
+deps_and_ofs([], WinSrcDir, [], []).
+deps_and_ofs([CFl | ACsList], SrcDir, [OFl | AddlCOFs], [Dep1,Dep2 | AddlCODeps])
+	:-
+	extendPath(SrcDir, CFl, FullCF),
+	asplit(CFl, 0'., File, Ext),
+	filePlusExt(File, o, OFl),
+	catenate([OFl,': ',FullCF], Dep1),
+	catenate('\t$(CC) -c $(CPPFLAGS) $(CFLAGS) $(INTF_CFLAGS) ',
+		  FullCF, Dep2),
+	deps_and_ofs(ACsList, SrcDir, AddlCOFs, AddlCODeps).
+
+printf_list([], _).
+printf_list([[] | XLines], OutS)
+	:-!,
+	printf_list(XLines, OutS).
+printf_list([Line | XLines], OutS)
+	:-
+	(Line = [_|_] ->
+		printf_list(Line, OutS)
+		;
+		printf(OutS, '%t\n',[Line])
+	),
+	printf_list(XLines, OutS).
 
 endmod.

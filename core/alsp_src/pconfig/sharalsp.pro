@@ -97,7 +97,11 @@ setup_shar_dirs(InitArchDirsList,ALSPDIR,SharArgs)
 	(dmember(all, InitArchDirsList) ->
 		UseArchDirs = AllADirs
 		;
-		UseArchDirs = InitArchDirsList
+		(dmember(port, InitArchDirsList) ->
+			UseArchDirs = InitArchDirsList
+			;
+			UseArchDirs = [port | InitArchDirsList]
+		)
 	),
 	append(L1,UseArchDirs,SharArgs).
 
