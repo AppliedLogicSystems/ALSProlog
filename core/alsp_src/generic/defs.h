@@ -131,6 +131,24 @@
  | in this file before this point.
  *---------------------------------------------------------------------*/
 
+#ifdef CONFIGLESS
+#if   defined(UNIX)
+#include "unix_config.h"
+#elif defined(MACOS)
+#include "macos_config.h"
+#elif defined(MSWIN32)
+#include "mswin32_config.h"
+#else
+#error
+#endif
+
+#if   defined(PORT)
+#include "port_config.h"
+#else
+#error
+#endif
+
+#else
 #include "tconfig.h"
 #include "aconfig.h"
 #include "oconfig.h"
@@ -155,6 +173,7 @@
 #define USE_ELF_SECTION_FOR_IMAGE 1
 #endif
 #endif /* KERNAL */
+#endif
 
 /*---------------------------------------------------------------------*
  | Macros concerned with constraints, intervals, freeze, etc.
@@ -197,51 +216,27 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <string.h>
-#define HAVE_STDARG_H
 #define HAVE_STRCSPN
 #define HAVE_STRTOK
 #define HAVE_STRSPN
 #else
-#if	defined(HAVE_STDLIB_H)
 #include <stdlib.h>
-#endif	/* HAVE_STDLIB_H */
 
-/* SunOS fails to define EXIT_FAILURE and EXIT_SUCCESS */
-#ifndef EXIT_FAILURE
-#define EXIT_FAILURE 1
-#endif
-
-#ifndef EXIT_SUCCESS
-#define EXIT_SUCCESS 0
-#endif
 
 /* Defined EXIT_ERROR for reporting invalid options, etc. */
 #define EXIT_ERROR 2
 
 #include <stdio.h>
 
-#if defined(HAVE_STDARG_H)
 #include <stdarg.h>
-#else 
-#include <varargs.h>
-#endif /* HAVE_STDARG_H */
 
-#if defined(HAVE_STDDEF_H)
 #include <stddef.h>
-#endif /* HAVE_STDDEF_H */
 
-#if STDC_HEADERS || HAVE_STRING_H
 #include <string.h>
-  /* An ANSI string.h and pre-ANSI memory.h might conflict.  */
-#if !STDC_HEADERS && HAVE_MEMORY_H
-#include <memory.h>
-#endif 		/* not STDC_HEADERS and HAVE_MEMORY_H */
-#else /* not STDC_HEADERS and not HAVE_STRING_H */
 #if HAVE_STRINGS_H
 #include <strings.h>
   /* memory.h and strings.h conflict on some systems */
 #endif		/* HAVE_STRINGS_H */
-#endif /* not STDC_HEADERS and not HAVE_STRING_H */
 
 #endif /* PURE_ANSI */
 
@@ -349,16 +344,6 @@
 #ifdef DEBUGSYS
 #include "debugsys.h"
 #endif
-
-#if defined(HAVE_LIBDL) || defined(HAVE_LIBLD)
-/*---------------------------------------------------------------------*
- | DynamicForeign indicates that dynamic loading of foreign code is
- | supported.
- *---------------------------------------------------------------------*/
-
-/*#define DynamicForeign 1   */
-#undef DynamicForeign
-#endif	/* HAVE_LIBDL || HAVE_LIBLD */
 
 /*---------------------------------------------------------------------*
  | Stuff from memory.h:
