@@ -313,8 +313,8 @@ Tcl_ALS_Prolog_Call(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_O
 static int
 Tcl_ALS_Prolog_ObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
 {
-	enum {PROLOG_CALL, PROLOG_READ_CALL};
-	char *prologOptions[] = {"call", "read_call", NULL};
+	enum {PROLOG_CALL, PROLOG_READ_CALL, PROLOG_INTERRUPT};
+	char *prologOptions[] = {"call", "read_call", "interrupt", NULL};
 	int option;
 
 	if (objc < 2) {
@@ -334,6 +334,10 @@ Tcl_ALS_Prolog_ObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl
 		break;
 	case PROLOG_READ_CALL:
 		return Tcl_ALS_Prolog_Read_Call(prolog_world, interp, objc, objv);
+		break;
+	case PROLOG_INTERRUPT:
+		PI_interrupt();
+		return TCL_OK;
 		break;
 	}
 }
@@ -382,7 +386,7 @@ static int interp_count = 0;
 
 /* From tclMacInt.h */
 typedef int (*TclMacConvertEventPtr) _ANSI_ARGS_((EventRecord *eventPtr));
-void 	TclMacSetEventProc _ANSI_ARGS_((TclMacConvertEventPtr procPtr));
+void 	Tcl_MacSetEventProc _ANSI_ARGS_((TclMacConvertEventPtr procPtr));
 
 /* From tkMacInt.h */
 extern int		TkMacConvertEvent _ANSI_ARGS_((EventRecord *eventPtr));
@@ -430,8 +434,8 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 	pre_named = (type == AP_ATOM);
 
 #ifdef macintosh
-	TclMacSetEventProc(MyConvertEvent);
-	SIOUXSetEventVector(MyHandleOneEvent);
+//	Tcl_MacSetEventProc(MyConvertEvent);
+//	SIOUXSetEventVector(MyHandleOneEvent);
 #endif
 
 	interp = Tcl_CreateInterp();
@@ -517,7 +521,7 @@ static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 		TkMacInitAppleEvents(interp);
 		TkMacInitMenus(interp);
 
-		Tcl_SetVar(interp, "tcl_rcRsrcName", "tclshrc", TCL_GLOBAL_ONLY);
+		//Tcl_SetVar(interp, "tcl_rcRsrcName", "tclshrc", TCL_GLOBAL_ONLY);
 	#endif		
 	}
 	
@@ -747,7 +751,7 @@ void pi_init(void)
 {
 
 #ifdef macintosh
-	tcl_macQdPtr = GetQD();
+	tcl_macQdPtr = &qd /*GetQD()*/;
 #endif
 
 	Tcl_InitHashTable(&tcl_interp_name_table, TCL_STRING_KEYS);
