@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.21 1999/02/25 17:23:19 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.22 1999/03/08 15:40:29 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -84,6 +84,22 @@ proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
 		}
 	}
 }
+
+proc add_file_entry_to_list { Entry Listbox } {
+	global tcl_platform
+
+    set NewFile [$Entry get]
+
+	if {$NewFile != ""} then {
+		set Prev [$Listbox get 0 end]
+		set BaseNewFile [file tail $NewFile]
+			if {[lsearch -exact $Prev $BaseNewFile] == -1} then {
+				$Listbox insert end $BaseNewFile
+			}
+	}
+}
+
+
 
 #proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir} {
 #	global tcl_platform
