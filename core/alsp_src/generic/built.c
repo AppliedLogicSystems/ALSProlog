@@ -163,10 +163,10 @@ extern	int	lsplit2		PARAMS(( void ));
 #define BLT(n,a,b,c) {n,a,b,c}
 
 static struct blt_struct {
-    char *name;
+    const char *name;
     int   arity;
     int   (*blt) PARAMS(( void ));
-    char *bltname;
+    const char *bltname;
 } blt_tab[] = {
 	BLT("<", 2, pbi_less, "_pbi_less"),
 	BLT("=:=", 2, pbi_arithequal, "_pbi_arithequal"),
@@ -523,6 +523,7 @@ static struct blt_struct {
 	BLT("arg", 3, pbi_arg, "_pbi_arg"),
 	BLT("atom", 1, pbi_atom, "_pbi_atom"),
 	BLT("atomic", 1, pbi_atomic, "_pbi_atomic"),
+	BLT("compound", 1, pbi_compound, "_pbi_compound"),
 	BLT("float", 1, pbi_float, "_pbi_float"),
 	BLT("functor", 3, pbi_functor, "_pbi_functor"),
 	BLT("integer", 1, pbi_integer, "_pbi_integer"),
@@ -635,11 +636,11 @@ extern	int	wm_sio_gbyte	PARAMS(( void ));
 
 
 static struct blt2_struct {
-    char *name;
+    const char *name;
     int   arity;
     void  (*installer) PARAMS(( ntbl_entry *, PWord, PWord ));
     int   (*p1) PARAMS(( void )), (*p2) PARAMS(( void ));
-    char *bltname;
+    const char *bltname;
 } blt2_tab[] = {
 
 #ifdef Portable

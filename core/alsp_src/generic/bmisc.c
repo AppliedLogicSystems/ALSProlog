@@ -24,12 +24,8 @@ static	void	als_gensym	PARAMS(( UCHAR *, UCHAR * ));
 
 #ifdef CMeta
 
-static	int	termcmp		PARAMS(( PWord, int, PWord, int ));
-
-int
-termcmp(v1, t1, v2, t2)
-    PWord v1, v2;
-    int   t1, t2;
+static int
+termcmp(PWord v1, int t1, PWord v2, int t2)
 {
     int   r;
     PWord av1, av2;
@@ -37,140 +33,152 @@ termcmp(v1, t1, v2, t2)
     PWord f1, f2;
     int   a1, a2, i;
     double dv1, dv2;
+    const char *sym1 = NULL, *sym2 = NULL;
 
     /*
-     * Check whether any of arguments is a variable
+     * Do some conversion to simplify comparison.
+     * - Convert double structures to a fake double-type.
+     * - Convert lists to '.'/2 structures.
+     * - Extract string pointer from symbols and UIAs
      */
-    if (t1 == WTP_UNBOUND) {
-	if (t2 == WTP_UNBOUND) {
-	    if (v1 < v2)
-		return -1;
-	    else if (v1 > v2)
-		return 1;
-	    else
-		return 0;
-	}
-	else
-	    return -1;
-    }
-    else if (t2 == WTP_UNBOUND)
-	return 1;
-
-    /*
-     * At this point, both arguments are ground
-     * Check whether any of them is a number or not.
-     * If they are numbers set their types to WTP_INTEGER and put their
-     * values in dv1 and dv2 (double values);
-     */
-    if (t1 == WTP_INTEGER)
-	dv1 = (double) v1;
-    else if (t1 == WTP_STRUCTURE) {
-	w_get_functor(&f1, v1);
+ 
+    switch (t1) {
+    case WTP_STRUCTURE:
+    	w_get_functor(&f1, v1);
 	w_get_arity(&a1, v1);
-	if (a1 == 4 && f1 == TK_DDOUBLE) {
+	if (f1 == TK_DDOUBLE && a1 == 4) {
 	    for (i = 0; i < 4; i++) {
 		w_get_argn(&av1, &at1, v1, i + 1);
 		*(((short *) &dv1) + i) = av1;
 	    }
-	    t1 = WTP_INTEGER;
+	    t1 = WTP_DOUBLE;
 	}
-    }
-
-    if (t2 == WTP_INTEGER)
-	dv2 = (double) v2;
-    else if (t2 == WTP_STRUCTURE) {
-	w_get_functor(&f2, v2);
-	w_get_arity(&a2, v2);
-	if (a2 == 4 && f2 == TK_DDOUBLE) {
-	    for (i = 0; i < 4; i++) {
-		w_get_argn(&av2, &at2, v2, i + 1);
-		*(((short *) &dv2) + i) = av2;
-	    }
-	    t2 = WTP_INTEGER;
-	}
-    }
-
-    if (t1 == WTP_INTEGER) {
-	if (t2 == WTP_INTEGER) {
-	    if (dv1 < dv2)
-		return -1;
-	    else if (dv1 > dv2)
-		return 1;
-	    else
-		return 0;
-	}
-	else
-	    return -1;
-    }
-    else if (t2 == WTP_INTEGER)
-	return 1;
-
-    /*
-     * At this point, both arguments are ground and none of them is a number.
-     * Check whether they are a symbol or an uia
-     */
-    if (t1 == WTP_SYMBOL) {
-	if (t2 == WTP_SYMBOL)
-	    return strcmp((char *)TOKNAME(v1), (char *)TOKNAME(v2));
-	else if (t2 == WTP_UIA) {
-	    return strcmp((char *)TOKNAME(v1), (char *)M_FIRSTUIAWORD(v2));
-	}
-	else
-	    return -1;
-    }
-    else if (t1 == WTP_UIA) {
-	if (t2 == WTP_SYMBOL)
-	    return strcmp((char *) M_FIRSTUIAWORD(v1), (char *)TOKNAME(v2));
-	else if (t2 == WTP_UIA) {
-		return strcmp((char *)M_FIRSTUIAWORD(v1),
-			(char *)M_FIRSTUIAWORD(v2));
-	}
-	else
-	    return -1;
-    }
-    else if (t2 == WTP_SYMBOL || t2 == WTP_UIA)
-	return 1;
-
-    /*
-     * At this point, both arguments are a list or a structure.
-     */
-    if (t1 == WTP_LIST) {
+	break;
+    case WTP_LIST: 
 	f1 = TK_DOT;
 	a1 = 2;
 	t1 = WTP_STRUCTURE;
 	v1 -= sizeof (PWord);	/* see list as a structure */
+	break;
+    case WTP_SYMBOL:
+    	sym1 = TOKNAME(v1);
+    	break;
+    case WTP_UIA:
+    	t1 = WTP_SYMBOL;
+    	sym1 = (char *)M_FIRSTUIAWORD(v1);
+    	break;
     }
 
-    if (t2 == WTP_LIST) {
+    switch (t2) {
+    case WTP_STRUCTURE:
+    	w_get_functor(&f2, v2);
+	w_get_arity(&a2, v2);
+	if (f2 == TK_DDOUBLE && a2 == 4) {
+	    for (i = 0; i < 4; i++) {
+		w_get_argn(&av2, &at2, v2, i + 1);
+		*(((short *) &dv2) + i) = av2;
+	    }
+	    t2 = WTP_DOUBLE;
+	}
+	break;
+    case WTP_LIST: 
 	f2 = TK_DOT;
 	a2 = 2;
 	t2 = WTP_STRUCTURE;
-	v2 -= sizeof (PWord);	/* see list as a structure */
+	v2 -= sizeof (PWord);
+	break;
+    case WTP_SYMBOL:
+    	sym2 = TOKNAME(v2);
+    	break;
+    case WTP_UIA:
+    	t2 = WTP_SYMBOL;
+    	sym2 = (char *)M_FIRSTUIAWORD(v2);
+    	break;
     }
-
-    /*
-     * At this point, both arguments are a structure.
-     * If they are structures their functors are in f1 and f2 and
-     * their arities in a1 and a2.
-     */
-    if (t1 == WTP_STRUCTURE && t2 == WTP_STRUCTURE) {
-	if (a1 < a2)
-	    return -1;
-	else if (a2 < a1)
-	    return 1;
-	if ( (r = strcmp((char *)TOKNAME(f1), (char *)TOKNAME(f2))) )
-	    return r;
-	for (i = 1; i <= a1; i++) {
-	    w_get_argn(&av1, &at1, v1, i);
-	    w_get_argn(&av2, &at2, v2, i);
-	    if ( (r = termcmp(av1, at1, av2, at2)) )
+    
+    /* The big compare switch */
+    
+    switch (t1) {
+    case WTP_UNBOUND:
+    	switch (t2) {
+    	case WTP_UNBOUND:
+	    if (v1 < v2) return -1;
+	    else if (v1 > v2) return 1;
+	    else return 0;
+    	    break;
+    	default:
+    	    return -1; break;
+    	}
+    case WTP_DOUBLE:
+    	switch (t2) {
+    	case WTP_UNBOUND:
+    	    return 1; break;
+    	case WTP_DOUBLE:
+	    if (dv1 < dv2) return -1;
+	    else if (dv1 > dv2) return 1;
+	    else return 0;
+	    break;
+	default:
+	    return -1; break;
+    	}
+        break;
+    case WTP_INTEGER:
+    	switch (t2) {
+    	case WTP_UNBOUND:
+	case WTP_DOUBLE:
+    	    return 1; break;
+    	case WTP_INTEGER:
+	    if (v1 < v2) return -1;
+	    else if (v1 > v2) return 1;
+	    else return 0;
+	    break;
+	default:
+	    return -1; break;
+    	}
+        break;
+    case WTP_SYMBOL:
+    	switch (t2) {
+    	case WTP_UNBOUND:
+	case WTP_DOUBLE:
+    	case WTP_INTEGER:
+    	    return 1; break;
+    	case WTP_SYMBOL:
+    	    return strcmp(sym1, sym2);
+    	    break;
+	default:
+	    return -1; break;
+    	}
+        break;
+    case WTP_STRUCTURE:
+    	switch (t2) {
+    	case WTP_UNBOUND:
+	case WTP_DOUBLE:
+    	case WTP_INTEGER:
+    	case WTP_SYMBOL:
+    	    return 1; break;
+    	case WTP_STRUCTURE:
+	    if (a1 < a2)
+		return -1;
+	    else if (a2 < a1)
+		return 1;
+	    if ( (r = strcmp((char *)TOKNAME(f1), (char *)TOKNAME(f2))) )
 		return r;
-	}
-	return 0;
-    }
-    else {
-	fatal_error(FE_IN_TERMCMP, 0);
+	    for (i = 1; i <= a1; i++) {
+		w_get_argn(&av1, &at1, v1, i);
+		w_get_argn(&av2, &at2, v2, i);
+		if ( (r = termcmp(av1, at1, av2, at2)) )
+		    return r;
+	    }
+	    return 0;
+    	    break;
+	default:
+	    return -1; break;
+    	}
+        break;
+    default:
+    	fatal_error(FE_IN_TERMCMP, 0);
 	return 0;	/* this statement not reached */
+	break;
     }
 }
 
@@ -472,7 +480,7 @@ pbi_isgensym()
  * is printed out.  This is a primitive debugging predicate.
  *
  */
-static char *typestrings[] =
+static const char *typestrings[] =
 {
     "unbound",
     "list",

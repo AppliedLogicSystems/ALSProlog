@@ -194,7 +194,7 @@ comp_exp(e)
 		    case TK_ROUND:
 			icode(I_MTH_ROUND, 0, 0, 0);
 			break;
-		    case TK_TRUNC:
+		    case TK_TRUNCATE:
 			icode(I_MTH_TRUNC, 0, 0, 0);
 			break;
 #endif
@@ -463,7 +463,7 @@ comp_exp(e)
 	    id = FUNCTOR_TOKID(TERM_FUNCTOR(e));
 
 	    if (arity == 1) {
-		if (TK_NOT <= id && id <= TK_TRUNC) {
+		if (TK_NOT <= id && id <= TK_TRUNCATE) {
 		    comp_exp(TERM_ARGN(e, 1));
 		    icode(icm(id), 0, 0, 0, 0);
 		}

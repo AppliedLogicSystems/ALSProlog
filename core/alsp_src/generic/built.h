@@ -53,9 +53,9 @@
 	    FAIL;						\
 	} while (0)
 
-#define PERR_CALCULATION(namtok,arity,errsym)			\
+#define PERR_EVALUATION(namtok,arity,errsym)			\
 	do {							\
-	    set_prolog_error(namtok,arity, TK_CALCULATION_ERROR,1, \
+	    set_prolog_error(namtok,arity, TK_EVALUATION_ERROR,1, \
 			     errsym, 0,0, 0,0);			\
 	    FAIL;						\
 	} while (0)
@@ -259,6 +259,7 @@ extern	int	pbi_float	PARAMS(( void ));
 extern	int	pbi_number	PARAMS(( void ));
 extern	int	pbi_atom	PARAMS(( void ));
 extern	int	pbi_atomic	PARAMS(( void ));
+extern	int	pbi_compound	PARAMS(( void ));
 #endif	/* CMeta */
 extern	int	pbi_findterm	PARAMS(( void ));
 
