@@ -19,7 +19,7 @@ MAN=$ALS_PROLOG/manual
 
 if test $# -ne 1
 then
-    echo "Usage: $0 [student | standard]" 1>&2
+    echo "Usage: $0 [student | standard | demo]" 1>&2
     exit 2
 fi
 
@@ -29,7 +29,8 @@ case $EDITION in
 student)
 DISTNAME=als-student-prolog
 DISTDIR=$ARCH/$DISTNAME ;
-EXE="studalsdev" ;
+EXE=studalsdev ;
+EXET="studalsdev" ;
 EXAMPLE_SET="als pxs chat80" ;
 WELCOME=welcome_student.als ;
 MANUAL=student_man.pdf ;
@@ -40,6 +41,18 @@ standard)
 DISTNAME=als-prolog
 DISTDIR=$ARCH/$DISTNAME ;
 EXE=alsdev ;
+EXET=alsdev ;
+EXAMPLE_SET="als pxs more objectpro visual chat80 Prolog1000" ;
+WELCOME=welcome_standard.als ;
+MANUAL=als_man.pdf ; # standard manual is missing.
+MANUALNAME=als-prolog-manual.pdf ;
+HELP="alshelp" ;
+;;
+demo)
+DISTNAME=als-prolog-demo
+DISTDIR=$ARCH/$DISTNAME ;
+EXE=alsdev_demo ;
+EXET=alsdev ;
 EXAMPLE_SET="als pxs more objectpro visual chat80 Prolog1000" ;
 WELCOME=welcome_standard.als ;
 MANUAL=als_man.pdf ; # standard manual is missing.
@@ -51,10 +64,10 @@ esac
 rm -rf "$DISTDIR"
 mkdir -p "$DISTDIR"
 
-cp -pr "$BIN/$EXE" "$DISTDIR"
+cp -pr "$BIN/$EXE" "$DISTDIR/$EXET"
 if test -f "$BIN/$EXE.pst"
 then
-    cp -pr "$BIN/$EXE.pst" "$DISTDIR"
+    cp -pr "$BIN/$EXE.pst" "$DISTDIR/$EXET.pst"
 fi
 cp -pr "$BIN/alsdir" "$DISTDIR"
 cp -pr "$BIN/lib" "$DISTDIR"
@@ -82,6 +95,18 @@ then
 	if test -f "$BIN/alspro.pst"
 	then
 		cp -pr "$BIN/alspro.pst" "$DISTDIR"
+	fi
+	cp -pr "$BIN/libalspro.a" "$DISTDIR"
+	cp -pr "$BIN/libalspro.so" "$DISTDIR"
+fi
+
+if test $EDITION = demo
+then
+	cp -pr "$ALS_PROLOG/foreign_sdk/unix/ALS_Prolog_Foreign_SDK" "$DISTDIR"
+	cp -pr "$BIN/alspro_demo" "$DISTDIR/alspro"
+	if test -f "$BIN/alspro.pst"
+	then
+		cp -pr "$BIN/alspro_demo.pst" "$DISTDIR/alspro.pst"
 	fi
 	cp -pr "$BIN/libalspro.a" "$DISTDIR"
 	cp -pr "$BIN/libalspro.so" "$DISTDIR"
