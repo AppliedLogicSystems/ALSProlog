@@ -150,3 +150,13 @@
 #define M_UIASIZE(v)      ((int)(MFENCE_VAL(*((PWord *)((char *)wm_heapbase + \
                                           (int)(v)))) - 1) * sizeof(PWord))
 
+#ifdef SUBTYPES
+
+/*-----------------------------------------------------------------------
+ | Sub-UIA types.
+ *-----------------------------------------------------------------------*/
+
+	/* Full long integers  */
+#define SUT_INT		    1
+
+#endif /* SUBTYPES */

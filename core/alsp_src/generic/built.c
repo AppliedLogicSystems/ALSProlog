@@ -577,8 +577,18 @@ static struct blt_struct {
 	BLT("dbg_spying", 0, pbi_dbg_spying, "_pbi_dbg_spying"),
 	BLT("alarm", 2, pbi_alarm, "_pbi_alarm"),
 #endif /* KERNAL */
+
+#ifdef SUBTYPES
+	BLT("less_sut_int", 2, pbi_less_sut_int, "_less_sut_int"),
+	BLT("eq_sut_int", 2, pbi_eq_sut_int, "_eq_sut_int"),
+	BLT("mk_sut_int", 2, pbi_mk_sut_int, "_mk_sut_int"),
+	BLT("pos_atom", 2, pbi_pos_atom, "_mk_pos_atom"),
+	BLT("t_sut_int", 0, pbi_t_sut_int, "_t_sut_int"),
+#endif /* SUBTYPES */
+
 	BLT("signal_name", 2, pbi_signal_name, "_pbi_signal_name"),
 	BLT("resize_memory", 2, pbi_resize_memory, "_pbi_resize_memory")
+
 };
 	/* blt_tab[] */
 

@@ -3771,21 +3771,22 @@ sio_writebuffer()
 	FAIL;
 }
 
-/*
- * sio_getpos(Stream,Pos)
- *
- *      sio_getpos is used to get the current file position.  This could be
- *      implemented from Prolog with sio_seek (see below), but is much faster
- *      and will work on non-seekable streams.
- */
+/*-------------------------------------------------------------------------*
+ | sio_getpos(Stream,Pos)
+ |
+ |   sio_getpos is used to get the current file position.  This could be
+ |   implemented from Prolog with sio_seek (see below), but is much faster
+ |   and will work on non-seekable streams.
+ *-------------------------------------------------------------------------*/
 
 int
 sio_getpos()
 {
-    PWord v1, v2;
-    int   t1, t2;
+    PWord v1, v2, v3;
+    int   t1, t2, t3;
     UCHAR *buf;
     int   curpos;
+
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
@@ -3795,10 +3796,14 @@ sio_getpos()
 
     curpos = SIO_BUFPOS(buf) + SIO_CPOS(buf);
 
-    if (w_unify(v2, t2, (PWord) curpos, WTP_INTEGER))
-	SUCCEED;
+	make_numberx(&v3, &t3, curpos, WTP_INTEGER);
+
+/*    if (w_unify(v2, t2, (PWord) curpos, WTP_INTEGER)) */
+
+    if (w_unify(v2, t2, (PWord) v3, t3))
+		SUCCEED;
     else
-	FAIL;
+		FAIL;
 }
 
 static long
@@ -3820,16 +3825,16 @@ stream_end(buf)
     return endpos;
 }
 
-/*
- * sio_seek(Stream,OldPos,NewPos,Whence)
- *
- *      Stream  is a file stream to get/set the position of
- *      OldPos  will be unified with the current stream position
- *      NewPos  is the position to be set
- *      Whence  is the value used by lseek (0,1,2) to either
- *              set the absolute position, set from current position, or
- *              to set from end-of-file
- */
+/*-------------------------------------------------------------------*
+ | sio_seek(Stream,OldPos,NewPos,Whence)
+ |
+ |   Stream  is a file stream to get/set the position of
+ |   OldPos  will be unified with the current stream position
+ |   NewPos  is the position to be set
+ |   Whence  is the value used by lseek (0,1,2) to either
+ |           set the absolute position, set from current position,
+ |           or to set from end-of-file
+ *-------------------------------------------------------------------*/
 
 int
 sio_seek()
@@ -3840,6 +3845,10 @@ sio_seek()
     long  pos;
     long  curpos;
 
+	PWord functor, v0;
+	int   arity, t0;
+	double rv;
+
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
@@ -3849,14 +3858,50 @@ sio_seek()
 	FAIL;
 
     if (NONSEEKABLE(SIO_TYPE(buf))) {
-	SIO_ERRCODE(buf) = SIOE_ILLSEEK;
-	FAIL;
+		SIO_ERRCODE(buf) = SIOE_ILLSEEK;
+		FAIL;
     }
 
-    if ((t2 != WTP_INTEGER && t2 != WTP_UNBOUND) || t3 != WTP_INTEGER ||
-	t4 != WTP_INTEGER) {
-	SIO_ERRCODE(buf) = SIOE_INARG;
-	FAIL;
+    if (t2 != WTP_INTEGER && t2 != WTP_UNBOUND) 
+	{
+		if (t3 != WTP_STRUCTURE) {
+			SIO_ERRCODE(buf) = SIOE_INARG;
+			FAIL;
+		}
+    	else {
+			w_get_arity(&arity, v3);
+			w_get_functor(&functor, v3);
+			if (arity != 4 || functor != TK_DDOUBLE) {
+				SIO_ERRCODE(buf) = SIOE_INARG;
+				FAIL;
+			}
+		}
+    }
+    if (t3 != WTP_INTEGER) {
+		if (t3 != WTP_STRUCTURE) {
+			SIO_ERRCODE(buf) = SIOE_INARG;
+			FAIL;
+		}
+    	else {
+			w_get_arity(&arity, v3);
+			w_get_functor(&functor, v3);
+			if ((arity == 4 && functor == TK_DDOUBLE)) {
+				int i;
+				for (i = 0; i < 4; i++) {
+					w_get_argn(&v0, &t0, v3, i + 1);
+					*(((short *) &rv) + i) = v0;
+				}
+				v3 = (PWord)floor(rv);
+			}
+    		else {
+				SIO_ERRCODE(buf) = SIOE_INARG;
+				FAIL;
+			}
+		}
+    }
+    if (t4 != WTP_INTEGER) {
+		SIO_ERRCODE(buf) = SIOE_INARG;
+		FAIL;
     }
 
     curpos = SIO_BUFPOS(buf) + SIO_CPOS(buf);
@@ -3906,11 +3951,12 @@ sio_seek()
 
     SIO_ERRCODE(buf) = SIOE_NORMAL;
 
-    if (w_unify(curpos, WTP_INTEGER, v2, t2))
+	make_numberx(&v0, &t0, curpos, WTP_INTEGER);
+/*    if (w_unify(curpos, WTP_INTEGER, v2, t2)) */
+    if (w_unify(v0, t0, v2, t2))
 	SUCCEED;
     else
 	FAIL;
-
 }
 
 /*
