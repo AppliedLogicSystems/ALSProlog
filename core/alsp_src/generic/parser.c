@@ -569,8 +569,11 @@ nt_listexpr()
 }
 
 static void
-nt_args()
+nt_args(void)
 {
+// Special metrowerks 4 bug.  If the second call to nt_term uses 999
+// instead of i, compiler crashes
+	int i = 999;
     nt_term(999);
 
     while (!(curtkty == TKTP_OTHER && curtok == TK_RPAREN)) {
@@ -585,7 +588,7 @@ nt_args()
 	     curtok == TK_RCURLY || curtok == TK_VBAR))
 	    parser_error("Term expected after comma in argument list.");
 
-	nt_term(999);
+	nt_term(i);
     }
 
     if (curtkty != TKTP_OTHER || curtok != TK_RPAREN)

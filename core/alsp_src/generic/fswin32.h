@@ -40,12 +40,20 @@ int als_stat(const char *path, struct als_stat *buf);
 
 #define EINTR	3001
 
-#define S_IFBLK	0
-#define S_IFIFO	0
+#ifndef S_IFBLK
+#define S_IFBLK		0
+#endif
+#ifndef S_IFIFO
+#define S_IFIFO		0
+#endif
 
 #define S_IRUSR	0
 #define S_IWUSR	0
 #define S_IXUSR	0
+
+#ifndef S_ISBLK
+#define S_ISBLK(m) 0
+#endif
 
 char * als_getenv(const char * name);
 int als_system(const char * command);
