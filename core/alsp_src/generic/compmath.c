@@ -507,9 +507,11 @@ comp_exp(e)
 
 		for (i = 0; i < 4; i++)
 		    ((short *) &dbl)[i] = (short) INT_VAL(TERM_ARGN(e, i + 1));
+#ifdef COERCE2INTS
 		if (dbl == (double) (long) dbl)
 		    icode(I_MTH_PUSHINT, (long) dbl, 0, 0, 0);
 		else
+#endif
 		    icode(I_MTH_PUSHDBL, ((long *) &dbl)[0],
 			  ((long *) &dbl)[1], 0, 0);
 	    }
@@ -530,9 +532,11 @@ comp_exp(e)
 	case TP_DOUBLE:{
 		double dbl = double_val(e);
 
+#ifdef COERCE2INTS
 		if (dbl == (double) (long) dbl)
 		    icode(I_MTH_PUSHINT, (long) dbl, 0, 0, 0);
 		else
+#endif
 		    icode(I_MTH_PUSHDBL, DOUBLE_VAL1(e), DOUBLE_VAL2(e), 0, 0);
 	    }
 	    break;

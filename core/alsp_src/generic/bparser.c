@@ -254,6 +254,8 @@ pbi_name()
 	    double d;
 
 	    if (string_to_number(str, &d))
+			/*!!!!!!!!!!!!!!!!!!!!!!!*/
+			/* MAY NEED MODIFICATION */
 		make_number(&v, &t, d);
 #ifdef AllUIAConsts
 	    else {
@@ -578,6 +580,7 @@ pbi_uia_peekl()
 
     if (t1 == WTP_UIA && t2 == WTP_INTEGER &&
 	w_uia_peek(v1, (int) v2, (UCHAR *) &pval, sizeof (long))) {
+		/* Should return integer (long) */
 	make_number(&val, &valtype, (double) pval);
 	if (w_unify(v3, t3, val, valtype))
 	    SUCCEED;
@@ -628,7 +631,8 @@ pbi_uia_peekd()
 
     if (t1 == WTP_UIA && t2 == WTP_INTEGER &&
 	w_uia_peek(v1, (int) v2, (UCHAR *) &pval, sizeof (double))) {
-	make_number(&val, &valtype, (double) pval);
+/*	make_number(&val, &valtype, (double) pval); */
+	make_numberx(&val, &valtype, (double) pval, WTP_DOUBLE);
 	if (w_unify(v3, t3, val, valtype))
 	    SUCCEED;
 	else

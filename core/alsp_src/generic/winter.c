@@ -607,11 +607,14 @@ w_mk_double(rval, rtag, dbl)
     int  *rtag;
     double dbl;
 {
+#ifdef COERCE2INTS
     if (dbl == floor(dbl) && MINPROLOGINT <= dbl && dbl <= MAXPROLOGINT) {
 	*rval = (int) floor(dbl);
 	*rtag = WTP_INTEGER;
     }
-    else {
+    else 
+#endif
+	{
 	long *h;
 
 	*rval = (long) wm_H;

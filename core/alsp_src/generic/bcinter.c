@@ -422,13 +422,13 @@ pbi_c_examine()
 		break;
 
 	    case 12:		/* float type */
-		make_number(&v, &t, (double) *(float *) (ptr + offset));
+		make_numberx(&v, &t, (double) *(float *) (ptr + offset), WTP_DOUBLE);
 		if (!w_unify(data, datatype, v, t))
 		    FAIL;
 		break;
 
 	    case 13:		/* double type */
-		make_number(&v, &t, *(double *) (ptr + offset));
+		make_numberx(&v, &t, *(double *) (ptr + offset), WTP_DOUBLE);
 		if (!w_unify(data, datatype, v, t))
 		    FAIL;
 		break;

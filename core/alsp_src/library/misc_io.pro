@@ -11,6 +11,7 @@ export read_terms/1.
 export read_terms/2.
 export read_terms_pos/1.
 export read_terms_pos/2.
+export read_terms_vn/2.
 export read_as_list/3.
 export colwrite/4.
 export putc_n_of/3.
@@ -121,6 +122,54 @@ dispatch_read_terms_pos(Next_Term, StartPos, LastPos, Term_List, Stream)
 	Term_List = [(Next_Term,StartPos,LastPos) | List_Tail],
 	!,
 	read_terms_pos(Stream, List_Tail).
+
+
+/*!-------------------------------------------------------------
+ |	read_terms_vn/2
+ |	read_terms_vn(Stream,Term_List)
+ |	read_terms_vn(+,-)
+ |
+ |	-	reads list of terms from stream Stream, with vars instatiated
+ |
+ |	Reads a list (Term_List)  of all terms which can be read from
+ |	the stream Stream, with all the variables in each term instatiated
+ |	to their names.
+ *!------------------------------------------------------------*/
+
+read_terms_vn(Stream,Term_List)
+	:-
+	read_terms_vn0(Term_List, Term_List,Stream).
+
+read_terms_vn0(Term_List, List_Tail,Stream)
+	:-
+	read_term(Stream, Next_Term, [ vars_and_names(Vars,Names) ]),
+	Vars = Names,
+	!,
+	dispatch_read_terms_vn0(Next_Term, Term_List, List_Tail,Stream).
+
+dispatch_read_terms_vn0(Next_Term, Term_List, List_Tail,Stream)
+	:-
+	var(Next_Term),!,
+	List_Tail = [Next_Term | New_List_Tail],
+	!,
+	read_terms_vn0(Term_List, New_List_Tail,Stream).
+
+dispatch_read_terms_vn0(end_of_file, _, [],_) :-!.
+
+dispatch_read_terms_vn0(Next_Term, Term_List, List_Tail,Stream)
+	:-
+	List_Tail = [Next_Term | New_List_Tail],
+	!,
+	read_terms_vn0(Term_List, New_List_Tail,Stream).
+
+
+
+
+
+
+
+
+
 
 
 /*!-------------------------------------------------------------

@@ -222,7 +222,8 @@ PI_makedouble(v, t, n)
     int  *t;
     double n;
 {
-    make_number(v, t, n);
+/*    make_number(v, t, n); */
+    make_numberx(v, t, n, WTP_DOUBLE);
 #ifndef DoubleType
     fixTag(v, t);
 #endif
