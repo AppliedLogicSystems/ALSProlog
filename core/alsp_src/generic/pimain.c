@@ -21,6 +21,11 @@
 #include <SIOUX.h>
 #endif
 
+/* temp to fix getenv() problem */
+#ifdef MSWin32
+#include "fswin32.h"
+#endif
+
 static char *
 isopt(const char *opt, char *str)
 {
