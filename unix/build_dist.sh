@@ -62,7 +62,7 @@ for E in $EXAMPLE_SET ; do
 	cp -pr "$EXAMPLES/$E" "$DISTDIR/examples"
 done
 
-cp -p $MAN/$WELCOME "$DISTDIR/REAME"
+cp -p $MAN/$WELCOME "$DISTDIR/README"
 cp -p $MAN/copying.als "$DISTDIR/copying-als"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
 
