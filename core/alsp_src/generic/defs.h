@@ -421,6 +421,11 @@ extern	int	win32s_system;
 extern	void	als_exit	PARAMS(( int ));
 extern	void	heap_overflow	PARAMS(( void ));
 
+#define IMAGENAME_MAX	64
+#define IMAGEDIR_MAX	1024
+extern char imagename[];	/* name of image we are running - initial path */
+extern char imagedir[];		/* directory containing image with final slash */
+
 /* ----------   disassem.c ----------   */
 extern	void	list_asm	PARAMS(( Code *, int ));
 
