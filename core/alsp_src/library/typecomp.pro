@@ -79,10 +79,14 @@ comptype(InputFileDescrip)
 		filePlusExt(FileName,Ext,SourceFile),
 		filePlusExt(FileName,pro,TargetFile),
 		filePlusExt(FileName,mac,MacFile),
-		ct_message("Generating type definitions for: %t\n",[SourceFile]),
-		finish_comptype(TargetFile,MacFile,SourceFile),
-		ct_message("Type generation complete for: %t\n",[SourceFile]),
-		ct_message("Generated code written to: %t\n",[TargetFile])
+		(exists_file(SourceFile) ->
+			ct_message("Generating type definitions for: %t\n",[SourceFile]),
+			finish_comptype(TargetFile,MacFile,SourceFile),
+			ct_message("Type generation complete for: %t\n",[SourceFile]),
+			ct_message("Generated code written to: %t\n",[TargetFile])
+			;
+			ct_message("Error: File: %t does not exist!\n",[SourceFile])
+		)
 	).
 
 /*--------------------------------------------------------------------------*
@@ -332,12 +336,7 @@ build_cstr_args(CurNum, Limit, Defaults, [ThisArg | ArgsList])
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 flattenProps([], []).
-flattenProps([Item/Synonyms | PropertiesList], FullPropertiesList)
-	:-
-	Synonyms = [_|_], !,
-	append([Item | Synonyms], RestFullList, FullPropertiesList),
-	flattenProps(PropertiesList, RestFullList).
-flattenProps([Item/Synonym | PropertiesList], [Item,Synonym | RestFullList])
+flattenProps([Item/DefVal | PropertiesList], [Item | RestFullList])
 	:-!,
 	flattenProps(PropertiesList, RestFullList).
 flattenProps([Item | PropertiesList], [Item | RestFullList])
