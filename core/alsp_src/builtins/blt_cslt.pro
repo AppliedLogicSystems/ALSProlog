@@ -448,7 +448,6 @@ do_consult(BaseFile, FCOpts)
 	:-
 	builtins:get_primary_manager(ALSMgr),
 	send(ALSMgr, obtain_src_mgr(BaseFile, FileMgr)),
-tsss(1,FileMgr),
 	send(ALSMgr, get_value(cslt_ctxt, PrevCntxts)),
 	(PrevCntxts = [ParentFCOpts | _] ->
 		merge_search_paths(FCOpts, ParentFCOpts)
@@ -461,18 +460,10 @@ tsss(1,FileMgr),
 			Ball,
 			consult_except_resp(Ball,FCOpts,FileMgr,FinalMsg)
 	     ),
-tsss('END',FileMgr),
 	send(ALSMgr, set_value(cslt_ctxt, PrevCntxts)),
 	record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr),
 	!,
 	consult_msg(FinalMsg, FCOpts).
-
-tsss(N,FileMgr) :-
-(alsdev:accessObjStruct(tcl_doc_path, FileMgr, EditWin) ->
-	write(csult(N,EditWin)),nl,flush_output
-	;
-	true
-).
 
 consult_msg(_, FCOpts)
 	:-
@@ -551,11 +542,9 @@ consult_except_resp( failed_xxconsult(Path), FCOpts,FileMgr,fail_consult)
 
 consult_except_resp(Ball,FCOpts,FileMgr,partial_consult)
 	:-
-tsss(4,FileMgr),
 	Ball = error(consult_load, [src_load, SrcFilePath, ErrList] ),
 	!,
 	length(ErrList, NErrs),
-tsss(5,FileMgr),
 	send(FileMgr, display_file_errors(NErrs, SrcFilePath, ErrList)).
 
 consult_except_resp(Ball,FCOpts,FileMgr,error_consult)
@@ -641,7 +630,6 @@ exec_consult(user, FCOpts, ALSMgr, FileMgr)
 	access_cslt_opts(debug_type, FCOpts, DebugMode),
 	access_cslt_opts(cg_flag, FCOpts, CGFlag),
 	load_file_source(user,user,TgtMod,no_reconsult,DebugMode,_,CGFlag,CG,ErrsList),
-tsss(2,FileMgr),
 	fin_load_from_file([],user,user,CG,FCOpts,FileMgr).
 
 exec_consult(BaseFile, FCOpts, ALSMgr, FileMgr)
@@ -994,7 +982,6 @@ fin_load_from_file([],CanonSrcPath,OPath,CG,FCOpts,FileMgr)
 
 fin_load_from_file(ErrsList,CanonSrcPath,OPath,CG,FCOpts,FileMgr)
 	:-
-tsss(3,FileMgr),
 	copy_term(ErrsList, CErrsList),
 	throw(error(consult_load, [src_load,CanonSrcPath,CErrsList])).
 
