@@ -31,6 +31,7 @@ module builtins.
 
 export file_extension/3.
 export path_elements/2.
+export path_directory_tail/3.
 export is_absolute_path/1.
 export is_absolute_path/2.
 export path_type/2.
@@ -42,20 +43,7 @@ export join_path/3.
 export tilda_expand/2.
 export directory_self/2.
 export directory_self/3.
-export file_directory/2.
 
-/*
-file_extension(Name, Ext, FullName) :-
-	nonvar(FullName),
-	!,
-	once((
-		rev_sub_atom(FullName, Before, 1, After, '.')
-		;
-		(atom_length(FullName, Before), After = 0)
-	)),
-	sub_atom(FullName, 0, Before, _, Name),
-	sub_atom(FullName, _, After, 0, Ext).
-*/
 file_extension(Name, Ext, FullName) :-
 	nonvar(FullName),
 	!,
@@ -75,12 +63,15 @@ file_extension(FileName,Ext,FullName) :-
 	atom_concat(FileName,'.',FileNameDot),
 	atom_concat(FileNameDot, Ext, FullName).
 
-file_directory(FilePath, Directory)
-	:-
-	split_path(FilePath, PathElts),
-	dreverse(PathElts, [_ | RevDirElts]),
-	dreverse(RevDirElts, DirElts),
-	join_path(DirElts, Directory).
+path_directory_tail(Path, Directory, Tail) :-
+	var(Path),
+	!,
+	join_path([Directory, Tail], Path).
+path_directory_tail(Path, Directory, Tail) :-
+	split_path(Path, Elements),
+	dreverse(Elements, [Tail | RevDirElements]),
+	dreverse(RevDirElements, DirElements),
+	(DirElements = [] -> directory_self(Directory) ; join_path(DirElements, Directory)).
 
 path_elements(Path, Elements) :-
 	var(Path),
@@ -90,10 +81,6 @@ path_elements(Path, Elements) :-
 	split_path(Path, Elements).
 
 
-/*
-is_absolute_path(Path) :-
-	not(path_type(Path, relative)).
-*/
 is_absolute_path(Path) :-
 	path_type(Path, PathType),
 	PathType \= relative.
