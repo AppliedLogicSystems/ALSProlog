@@ -66,7 +66,6 @@ start_alsdev
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,alsdev,CLInfo),
 	assertz(command_line(ResidualCommandLine)),
 
-%	setup_debugger_stubs,
 	setup_search_dirs(CLInfo),
 	assert(save_clinfo(CLInfo)),
 
@@ -83,7 +82,6 @@ start_alsdev
 	join_path(ImagesList, ImagesPath),
 	alsdev_splash(ImagesPath),
 
-%	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	alsdev(Shared,ALS_IDE_Mgr).
 
@@ -93,13 +91,28 @@ start_alsdev
 
 setup_init_ide_classes(ALS_IDE_Mgr)
 	:-
+
+	pre_existing_srcmgrs(PreSM),
 		%% For ALS IDE Project system:
+	clone_stm_all(PreSM, InitSM),
 	alsdev:setup_als_ide_mgr(ALS_IDE_Mgr),
 		%% Since we're starting cold:
-	make_gv('_primary_manager'),
+	(clause(get_primary_manager(_), _) ->
+		true
+		;
+		make_gv('_primary_manager')
+	),
 	set_primary_manager(ALS_IDE_Mgr),
+	setObjStruct(source_mgrs, ALS_IDE_Mgr, InitSM),
 	send(ALS_IDE_Mgr, set_value(shell_module, alsdev)).
 
+pre_existing_srcmgrs(PreSM)
+	:-
+	clause(get_primary_manager(_), _),
+	get_primary_manager(OldMgr),
+	accessObjStruct(source_mgrs, OldMgr, PreSM),
+	!.
+pre_existing_srcmgrs([]).
 
 :- defineClass(
 	[   name=als_ide_mgr,
@@ -156,6 +169,37 @@ setup_init_ide_classes(ALS_IDE_Mgr)
 			]
 	]).
 
+clone_stm(SSH, STM)
+	:-
+	accessObjStruct(source_file,  SSH, SourceFile),
+	accessObjStruct(base_file,    SSH, BaseFileName),
+	accessObjStruct(ext,	 	  SSH, Ext),
+	accessObjStruct(obp_file, 	  SSH, ObpFile),
+	accessObjStruct(fcg, 	 	  SSH, FCG),
+	accessObjStruct(consult_mode, SSH, ConsultMode),
+	accessObjStruct(last_consult, SSH, LastConsult),
+	alsdev:create_object(
+		[instanceOf = source_trace_mgr,
+		 handle = true,
+		 values =
+			[ 	source_type = file,
+				base_file = BaseFileName,
+				source_file = SourceFile,
+				ext = 	Ext,
+				obp_file =  ObpFile,
+				fcg =  	FCG,
+				consult_mode =  ConsultMode,
+				last_consult =  LastConsult
+			]
+		],
+		STM ).
+
+clone_stm_all([], []).
+clone_stm_all([fm(ID,SSH) | Input], [fm(ID,STM) | Output])
+	:-
+	clone_stm(SSH, STM),
+	clone_stm_all(Input, Output).
+
 %%%%%%%%%%----------------------------------------------------
 export disp_ide/0.
 disp_ide :-
@@ -193,12 +237,13 @@ export alsdev/0.
 alsdev
 	:-
 		%% For ALS IDE Project system:
-	alsdev:setup_als_ide_mgr(ALS_IDE_Mgr),
+%	alsdev:setup_als_ide_mgr(ALS_IDE_Mgr),
+	setup_init_ide_classes(ALS_IDE_Mgr),
 		%% Since we're starting warm:
 		% make_gv('_primary_manager'),
 	set_primary_manager(ALS_IDE_Mgr),
 
-	consultmessage(CurValue),
+%	consultmessage(CurValue),
 	init_tk_alslib(shl_tcli,Shared),
 	alsdev(Shared, ALS_IDE_Mgr).
 
@@ -1387,11 +1432,11 @@ v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
 	:-
 	functor(Goal, FF, 3),
 	dmember(FF, ['$dbg_aph', '$dbg_aphe', '$dbg_apf', '$dbg_apg', '$dbg_apge']),
-	!,
 	arg(1, Goal, CG),
 	builtins:get_primary_manager(ALSIDEMGR),
 	send(ALSIDEMGR, get_value( debugger_mgr, DBGMGR)),
 	send(DBGMGR,  mgr_by_cg(CG, SrcMgr)),
+	send(SrcMgr,  ensure_window_open),
 	accessObjStruct(mrfcg, DBGMGR, MRFCG),
 	check_win_cleanup(Port, MRFCG, CG, SrcMgr, DBGMGR),
 	!,
@@ -1402,6 +1447,7 @@ v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
 	builtins:get_primary_manager(ALSIDEMGR),
 	send(ALSIDEMGR, get_value( debugger_mgr, DBGMGR)),
 	send(DBGMGR,  get_mrfcg(CG, SrcMgr)),
+	send(SrcMgr,  ensure_window_open),
 	!,
 	showGoalToUserWin_other(Port,Box,Depth, Module, Goal, Response, CG, DBGMGR, SrcMgr).
 
@@ -1417,8 +1463,6 @@ check_win_cleanup(Port, MRFCG, ClsGrp, SrcMgr, DBGMGR)
 	dmember(Port, [call, redo]),
 	!,
 	check_presence_and_cleanup(SrcMgr, MRFCG, DBGMGR).
-
-		%% Now we have just switched between files; if Port is
 
 check_win_cleanup(_, _, _, _, _).
 
@@ -2051,6 +2095,7 @@ endmod.
 module builtins.
 
 
+/*****
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% ERROR OUTPUT PREDICATES
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2215,7 +2260,9 @@ als_advise(Stream, FormatString, Args)
 	printf(Stream, FormatString, Args),
 	flush_output(Stream).
 
+*********/
 endmod.
+
 
 module alsdev.
 
@@ -2320,10 +2367,26 @@ shl_source_handlerAction(close_edit_win, State)
 			%%		send_self(close_source_trace, State),
 	setObjStruct(tcl_doc_path, State, nil).
 
+shl_source_handlerAction(ensure_window_open, State)
+	:-
+	accessObjStruct(tcl_doc_path, State, TclDocPath),
+	fin_ensure_window_open(TclDocPath, State).
+
+fin_ensure_window_open(nil, State)
+	:-!,
+	accessObjStruct(source_file, State, FileName),
+	send_self(State, complete_open_edit_win(FileName,TclWin)).
+
+fin_ensure_window_open(TclWin, State)
+	:-
+	tcl_call(shl_tcli, [wm, deiconify, TclWin], _).
+
+
 shl_source_handlerAction(close_and_reopen, State)
 	:-
 	accessObjStruct(tcl_doc_path, State, TclWin),
 	tcl_call(shl_tcli, [close_and_reopen, TclWin], _).
+
 
 
 shl_source_handlerAction(unmap_win, State)

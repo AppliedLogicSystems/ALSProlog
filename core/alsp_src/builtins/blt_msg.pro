@@ -18,22 +18,24 @@ prolog_system_error(ErrorCode, Args)
 	:-
 	alsdev_running,
 	!,
-	alsdev:ide_prolog_system_error(ErrorCode, Args).
+%	alsdev:ide_prolog_system_error(ErrorCode, Args).
+	prolog_system_error(ErrorCode, alsdev, Args).
 
 prolog_system_error(ErrorCode, Args)
 	:-
-	alsshell:tty_prolog_system_error(ErrorCode, Args).
+	prolog_system_error(ErrorCode, alsshell, Args).
 
 export prolog_system_warning/2.
 prolog_system_warning(ErrorCode, Args) 
 	:-
 	alsdev_running,
 	!,
-	alsdev:ide_prolog_system_warning(ErrorCode, Args).
+%	alsdev:ide_prolog_system_warning(ErrorCode, Args).
+	prolog_system_warning(ErrorCode, alsdev, Args).
 
 prolog_system_warning(ErrorCode, Args) 
 	:-
-	alsshell:tty_prolog_system_warning(ErrorCode, Args).
+	prolog_system_warning(ErrorCode, alsshell, Args).
 
 export expand_code/3.
 expand_code(EWCode, Pattern, '\nError: ')
@@ -50,82 +52,108 @@ expand_code(EWCode, Pattern, '')
 	info_code(EWCode, Pattern).
 
 
-/**************
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% ERROR OUTPUT PREDICATES
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-export prolog_system_error/2.
+export prolog_system_error/3.
+prolog_system_error(ErrorCode, Env, Args)
+	:-
+	prolog_system_error(ErrorCode, Env, Args, error_stream).
 
-	%% New rt_ reader:
+export prolog_system_error/4.
+
+	%% For new rt_ reader:
 prolog_system_error(
-	error(syntax_error,[_,syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream)]), [])
+	error(syntax_error,[_,syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream)]),
+	Env, [], OutS )
 	:-
-	prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), []).
+	prolog_system_error(
+		syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), 
+		Env, [], OutS).
 
-prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), _) 
+prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), 
+					Env, _, OutS) 
 	:-
-write(syntax_pos_info=p(P1,P2,P3)),nl,flush_output,
+%write(syntax_pos_info=p(P1,P2,P3)),nl,flush_output,
 	sio:is_stream(Stream,Stream0),
 	sio:is_input_stream(Stream0),
 	!,
-
-write(doing_syntax_error),nl,flush_output,
 	EType = 'Syntax error ',
 	sio:stream_type(Stream0,StreamType),
 	sio:stream_name(Stream0,StreamName),
 	(StreamType = file ->
-%		pathPlusFile(_,File,StreamName)
 		split_path(StreamName, PathElts),
-		dreverse(PathElts, [File | _]
+		dreverse(PathElts, [File | _])
 		;	
 		File = StreamName
 	),
+	fin_prolog_syntax_error(Env,Context,File,LineNumber,
+							ErrorMessage,EType,OutPattern, OutArgs, OutS).
+
+fin_prolog_syntax_error(alsshell,Context,File,LineNumber,ErrorMessage,EType,
+							OutPattern, OutArgs, OutS)
+	:-
 	printf(error_stream,'\n%s',[Context]),
 	OutPattern = '\n\t%t, line %d: %s\n',
 	OutArgs = [File,LineNumber,ErrorMessage],
 	pse_out(error_stream, EType, OutPattern, OutArgs),
 	flush_output(error_stream).
 
-prolog_system_error(s(ErrorCode,Stream), Args) 
+fin_prolog_syntax_error(alsshell,Context,File,LineNumber,ErrorMessage,EType,
+							OutPattern, OutArgs, OutS)
+	:-
+	sprintf(atom(EMsg), '%s\n%t: %t, line %d:\n%s\n',
+			[Context,EType,File,LineNumber,ErrorMessage]),
+	info_dialog(shl_tcli, EMsg, 'Syntax Error:').
+
+
+prolog_system_error(s(ErrorCode,Stream), Env, Args, OutS) 
 	:-
 	expand_code(ErrorCode, Pattern, EType),
 	!,
 	sio:stream_type(Stream,StreamType),
-	sio_linenumber(Stream,LineNumber),
 	sio:stream_name(Stream,StreamName),
+	Args = [LineNumber],
 
-	OutPattern = '%t: %t stream %t,line %d:\n     ',
+	OutPattern = '%t stream: %t : line %d:\n     ',
 	OutArgs = [StreamType,StreamName,LineNumber],
-	pse_out(error_stream, EType, OutPattern, OutArgs),
-	printf(error_stream,Pattern, Args),
-	flush_output(error_stream).
+	pse_out(OutS, EType, OutPattern, OutArgs),
+	printf(OutS,Pattern, Args),
+	flush_output(OutS).
 
-prolog_system_error(qc_failed(ErrorCode,Name,LineNumber),Args) 
+prolog_system_error(qc_failed(ErrorCode,Name,LineNumber), Env, Args, OutS) 
 	:-
 	expand_code(ErrorCode, Pattern, EType),
 	!,
 	catenate('%t,line %t: ', Pattern, OutPattern),
 	OutArgs = [Name,LineNumber | Args],
-	pse_out(error_stream, EType, OutPattern, OutArgs),
-	flush_output(error_stream).
+	pse_out(OutS, EType, OutPattern, OutArgs),
+	flush_output(OutS).
 
-prolog_system_error(error(W,L),_) 
+prolog_system_error(error(W,L),Env, _, OutS) 
 	:-
 	decode_error(W, L, Pattern, Args),
 	!,
-	pse_out(error_stream, 'Error: ', Pattern, Args),
-	print_error_goal_attributes(L),
-	printf(error_stream,'- %-14s %t\n',
+	pse_out(OutS, 'Error: ', Pattern, Args),
+	print_error_goal_attributes(L, OutS),
+	printf(OutS,'- %-14s %t\n',
 		['Throw pattern:',error(W,L)],
 		[quoted(true),maxdepth(4),indent(17)]),
-	flush_output(error_stream).
+	flush_output(OutS).
 	
-prolog_system_error(ErrorCode, Args) 
+prolog_system_error(ErrorCode, Env, Args, OutS) 
 	:-
 	expand_code(ErrorCode, Pattern, EType),
-	pse_out(error_stream, EType, Pattern, Args),
-	flush_output(error_stream).
+	!,
+	pse_out(OutS, EType, Pattern, Args),
+	flush_output(OutS).
+
+prolog_system_error(ErrorCode, Env, Args, OutS)
+	:-
+	decode_error(ErrorCode, Args, Pattern, MArgs),
+	pse_out(OutS, '', Pattern, MArgs),
+	flush_output(OutS).
 
 expand_code(EWCode, Pattern, '\nError: ')
 	:-
@@ -145,38 +173,38 @@ pse_out(Stream, EType, Pattern, Args)
 	printf(Stream, '%t',[EType]),
 	printf(Stream, Pattern, Args, [quoted(true), maxdepth(6)]).
 
-print_error_goal_attributes([]) :- !.
-print_error_goal_attributes([H|T]) 
+print_error_goal_attributes([], OutS) :- !.
+print_error_goal_attributes([H|T], OutS) 
 	:-
-	print_error_goal_attribute(H),
-	print_error_goal_attributes(T).
-print_error_goal_attributes(Other) 
+	print_error_goal_attribute(H, OutS),
+	print_error_goal_attributes(T, OutS).
+print_error_goal_attributes(Other, OutS) 
 	:-
-	print_error_goal_attribute(Other).
+	print_error_goal_attribute(Other, OutS).
 
-print_error_goal_attribute(M:G) 
+print_error_goal_attribute(M:G, OutS) 
 	:-!,
-	printf(error_stream,'- %-14s %t\n',
+	printf(OutS,'- %-14s %t\n',
 		['Goal:',M:G],[quoted(true),maxdepth(5),indent(17)]),
-	flush_output(error_stream).
+	flush_output(OutS).
 
-print_error_goal_attribute(Huh) 
+print_error_goal_attribute(Huh, OutS) 
 	:-
 	functor(Huh,AttribName0,1),
 	!,
 	arg(1,Huh,AttribValue),
 	atom_concat(AttribName0,':',AttribName),
-	printf(error_stream,'- %-14s %t\n',
+	printf(OutS,'- %-14s %t\n',
 			[AttribName,AttribValue], 
 			[quoted(true),maxdepth(5),indent(17)]),
-	flush_output(error_stream).
+	flush_output(OutS).
 
-print_error_goal_attribute(Other) 
+print_error_goal_attribute(Other, OutS) 
 	:-
-	printf(error_stream,'- %-14s %t\n',
+	printf(OutS,'- %-14s %t\n',
 			['Error Attribute:', Other],
 			[quoted(true),maxdepth(10),indent(17)]),
-	flush_output(error_stream).
+	flush_output(OutS).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% WARNING OUTPUT PREDICATES
@@ -185,22 +213,26 @@ print_error_goal_attribute(Other)
  	%% Print all advisory and warning messages to
  	%% warning_output stream.
 
-export prolog_system_warning/2.
+export prolog_system_warning/3.
+prolog_system_warning(ErrorCode, Env, Args)
+	:-
+	prolog_system_warning(ErrorCode, Env, Args, error_stream).
 
-prolog_system_warning(error(W,L),_) 
+export prolog_system_warning/4.
+prolog_system_warning(error(W,L), Env, _, OutS) 
 	:-
 	decode_error(W, L, Pattern, Args),
 	!,
-	pse_out(error_stream, 'Warning: ', Pattern, Args),
-	print_error_goal_attributes(L),
-	flush_output(error_stream).
+	pse_out(OutS, 'Warning: ', Pattern, Args),
+	print_error_goal_attributes(L, OutS),
+	flush_output(OutS).
 
-prolog_system_warning(ErrorCode, Args) 
+prolog_system_warning(ErrorCode, Env, Args, OutS) 
 	:-
 	expand_code(ErrorCode, Pattern, EType),
-	printf(warning_output, '%t',[EType]),
-	printf(warning_output, Pattern, Args, [quoted(true), maxdepth(9)]),
-	flush_output(warning_output).
+	printf(OutS, '%t',[EType]),
+	printf(OutS, Pattern, Args, [quoted(true), maxdepth(9)]),
+	flush_output(OutS).
 
 
 export als_advise/1.
@@ -218,7 +250,6 @@ als_advise(Stream, FormatString, Args)
 	:-
 	printf(Stream, FormatString, Args),
 	flush_output(Stream).
-***********/
 
 %%%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%
 %%%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%

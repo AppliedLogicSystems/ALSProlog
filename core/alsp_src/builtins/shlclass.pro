@@ -76,8 +76,6 @@ module builtins.
 	%% GETTING A SOURCE MANAGER
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- make_gv('_my_global'), set_my_global(0).
-
 als_shl_mgrAction(obtain_src_mgr(BaseFileName, FileMgr), State) 
 	:-!,
 	accessObjStruct(source_mgrs, State, PrevMgrsList),
