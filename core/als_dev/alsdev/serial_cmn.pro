@@ -41,7 +41,7 @@ key_types(56, permanent-stud).
 key_types(55, day30-prof).
 key_types(54, day30-stud).
 
-key_info(day30-_, G1,G2,G3,G4, KeyInfo)
+key_info(_-_, G1,G2,G3,G4, KeyInfo)
 	:-
 	G1 = [C0,C1,C2,_],
 	Y is C1 - 0'A +1995,
@@ -52,9 +52,6 @@ key_info(day30-_, G1,G2,G3,G4, KeyInfo)
 		D is (0'Z - C0) + 6
 	),
 	KeyInfo = Y/M/D.
-
-key_info(permanent-_, G1,G2,G3,G4, '')
-	:-!.
 
 krspnd([C1,C2,C3,C4],[D1,D2,D3,D4])
 	:-

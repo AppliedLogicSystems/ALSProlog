@@ -16,7 +16,7 @@
 #include "defs.h"
 
 #ifdef	HAVE_UNISTD_H
-#ifdef UNIX_IRIX
+#if defined(UNIX_IRIX) || defined(UNIX_CYGWIN32)
 /* On Irix, crypt() is not defined in unistd.h */
 #include <crypt.h>
 #endif
@@ -278,7 +278,7 @@ int pbi_command_line(void)
 	PI_SUCCEED;
 }
 
-#if defined(UNIX) && !defined(UNIX_CYGWIN32) /* _XOPEN_CRYPT */
+#if defined(UNIX) /* _XOPEN_CRYPT */
 int pbi_crypt(void)
 {
     PWord v1, v2, v3, u;

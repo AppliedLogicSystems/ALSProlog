@@ -1,0 +1,8 @@
+JDK_ROOT = /usr/java/jdk1.3.1_02
+PROC = i386/client
+OS=linux
+
+PSL_LINK = -Xlinker -rpath-link -Xlinker $(JDK_ROOT)/jre/lib/i386/ -Xlinker -rpath -Xlinker $(JDK_ROOT)/jre/lib/i386/client/
+
+include generic_makefile
+

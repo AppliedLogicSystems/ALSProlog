@@ -386,6 +386,17 @@ static DWORD ms_pecoff_end(HANDLE image_file)
     return end;
 }
 
+#ifdef EXTERNAL_STATE
+long ss_image_offset(const char *imagepath)
+{
+  char statepath[IMAGEDIR_MAX];
+
+  strcpy(statepath, imagepath);
+  strcat(statepath, ".pst");
+  if (access(statepath, R_OK) != -1) return -1;
+  else return 0;
+}
+#else
 long ss_image_offset(const char *image_name)
 {
     DWORD image_size, pecoff_size;
@@ -406,6 +417,7 @@ long ss_image_offset(const char *image_name)
     if (image_size > pecoff_size) return pecoff_size;
     else return 0;
 }
+#endif
 
 int ss_save_image_with_state(const char * new_image_name)
 {

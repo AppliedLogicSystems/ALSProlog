@@ -671,7 +671,7 @@ pmkdir()
 		t2 != PI_INT)
 	PI_FAIL;
 
-#if defined(MacOS) || defined(MSWin32)
+#if (defined(__MWERKS__) || defined(__GNUC__)) && (defined(MacOS) || defined(MSWin32))
     if (mkdir(pathName) == -1)
 #else
     if (mkdir(pathName, (mode_t) v2) == -1)
@@ -1082,7 +1082,7 @@ unsigned char *open_memory_file(const char *file_name, mem_file_info *info)
     kern_return_t kr;
 #endif
     
-    file = open(file_name,  O_RDONLY);
+    file = open(file_name,  O_RDONLY|O_BINARY);
     if (file == -1) goto error;
 
     r = fstat(file, &s);

@@ -1,7 +1,6 @@
 # Generic GNU Make file for ALS Prolog
 ALSDEVDIR=$(CORE)/als_dev/alsdev
 CORE=$(SOURCE_DIR)/..
-ALS_BUILD_SUPPORT = /apache/als_build_support/unix
 VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins:$(SOURCE_DIR)/library:$(ALSDEVDIR):$(CORE)/tcltk_interface/common
 
 
@@ -18,13 +17,15 @@ CPPFLAGS = $(BUILD_FLAGS) \
 	-I $(SOURCE_DIR)/$(OS) \
 	-I $(SOURCE_DIR)/generic \
 	-I $(SOURCE_DIR)/smath \
-	-isystem $(ALS_BUILD_SUPPORT)/include
+	$(ALS_BUILD_SUPPORT_INCLUDES)
+# Note: Darwin's cc won't recognize -isystem if there is a space before
+#       the path.
 
 MAIN_SOURCE = topmain.c
 
 MAIN_OBJECTS = $(MAIN_SOURCE:.c=.o)
 
-ALSDEV_SOURCE = unix_alsdev.c tcl_interface.c
+ALSDEV_SOURCE = $(ALSDEV_OS_SOURCE) tcl_interface.c
 
 ALSDEV_OBJECTS = $(ALSDEV_SOURCE:.c=.o)
 
@@ -99,28 +100,6 @@ libalspro.$(OS_SL_EXT) : alspro_b alsdir  $(SHARED_OBJECTS) $(LIB_OBJECTS) $(MAK
 so_test : libalspro.$(OS_SL_EXT) $(MAKEFS)
 	$(CC) -o so_test $(MAIN_OBJECTS) libalspro.so $(LIB)
 
-alsdir : alsdir/builtins alsdir/library
-
-alsdir/builtins : $(SOURCE_DIR)/builtins $(MAKEFS)
-	mkdir -p alsdir/builtins
-	rm -f alsdir/builtins/*.pro
-	cd alsdir/builtins ; ln -s ../../$(SOURCE_DIR)/builtins/*.pro .
-
-alsdir/library : $(SOURCE_DIR)/library $(MAKEFS)
-	mkdir -p alsdir/library
-	rm -f alsdir/library/*.pro alsdir/library/*.alb
-	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.pro .
-	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
-
-alsdir/shared : $(MAKEFS)
-	mkdir -p alsdir/shared
-	rm -f alsdir/shared/*.pro alsdir/shared/*.psl alsdir/shared/*.tcl
-	cd alsdir/shared ; ln -s ../../$(CORE)/als_dev/alsdev/*.tcl .
-				 
-alsdir/images : $(CORE)/als_dev/alsdev $(MAKEFS)
-	mkdir -p alsdir/images
-	rm -f alsdir/images/*.*
-	cd alsdir/images ; ln -s ../../$(CORE)/als_dev/alsdev/images/*.gif .
 
 TEST_DIR = $(SOURCE_DIR)/tests
 

@@ -88,7 +88,7 @@ setup_demo_examples
 demo15_year_check
 	:-
 	date(Today),
-	date_less(Today, 2001/1/1).
+	date_less(Today, 2002/1/1).
 
 demo_done_msg
 	:-
@@ -245,21 +245,29 @@ export demo_chat_80/0.
 demo_chat_80
 	:-
 	examples_dir(ED),
-	join_path([ED,'Chat80'], C80Path),
-	sprintf(atom(Msg),'%t\n%t\n%t',[
+	join_path([ED,'chat80'], C80Path),
+	get_cwd(CurDir),
+	change_cwd(C80Path),
+	sprintf(atom(Msg),'%t\n%t\n%t\n%t',[
 		'This is the original Pereira & Warren Chat 80 program.',
-		'Start the program by typing the goal:   hi.',
-		'Exit the program by typing   bye.  to the Question: prompt.'
+		'Start the program by typing the goal:\n        hi.',
+		'Exit the program by typing\n        bye.\nto the "Question:" prompt.',
+		'Use\n    File > Open (All Files)\nto open file "demo" for a list of questions Chat80 understands.'
 		]),
-	tcl_call(shl_tcli,
-		[tk_dialog,'.ddtop', 'ALS Prolog Demo',Msg,'',0,'OK'],_),
+	tcl_call(shl_tcli, [tk_dialog,'.ddtop', 'Chat80 Demo',Msg,'',0,'OK'],_),
+
 	write('Consulting the Chat 80 files...'),nl,nl,
 	join_path([C80Path, 'als_chat'], F1),
 	consult(F1),
 	join_path([C80Path, 'load'], F2),
 	consult(F2),
+join_path([C80Path, 'Chat80_Questions.txt'], Qs),
+tcl_call(shl_tcli, [load_document, Qs], DocID),
+	nl,nl,
 	user:hi,
 	nl, alsdev:clear_workspace, nl, 
+tcl_call(shl_tcli, ['document.close', DocID], _),
+	change_cwd(CurDir),
 	flush_input(user_input), flush_output.
 
 demo_nrev 
@@ -398,7 +406,7 @@ demo_vnim
 about_demos
 	:-
 	examples_dir(ED), 
-	join_path([ED,'about.txt'], AboutPath),
+	join_path([ED,'about_examples.txt'], AboutPath),
 	grab_lines(AboutPath, Lines),
 	write_lines(Lines).
 

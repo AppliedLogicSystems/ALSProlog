@@ -1,0 +1,7 @@
+libactivate(app_gui_gen,[library,app_gui_gen],
+    [
+	app_gg/0,
+	start_app_gui_gen/1, start_app_gui_gen/3, 
+	create_new_app/1, create_new_app/2, create_new_app/5
+    ],
+    []).

@@ -37,6 +37,7 @@ export same_uc/2.
 export truncate/3.
 export strip_tail_white/2.
 export strip_white/2.
+export strip_both_white/2.
 
 export read_to/5.
 export read_to_blank/3.
@@ -48,6 +49,8 @@ export replace_char_string/4.
 export strip_prefix/3.
 export prefix_dir/3.
 export prefix_to/3.
+
+export underbarUpperCrazyKap/2.
 
 /*!---------------------------------------------------------------------
  |	asplit/4
@@ -493,6 +496,19 @@ strip_tail_white(String, Result)
 	strip_white(RString, RResult),
 	dreverse(RResult, Result).
 
+/*!---------------------------------------------------------------------
+ |	strip_both_white/2
+ |	strip_both_white(String, Result)
+ |	strip_both_white(+, -)
+ |
+ |	- strips leading and trailing white space chars from a prolog string
+ *!--------------------------------------------------------------------*/
+strip_both_white(String, Result)
+	:-
+	strip_white(String, Result0),
+	dreverse(Result0, RString),
+	strip_white(RString, RResult),
+	dreverse(RResult, Result).
 
 /*!-----------------------------------------------------------------------------
  |	read_to/5.
@@ -682,5 +698,47 @@ replace_char_string([C | InString], OrigCharNum, NewCharNum, [C | OutString])
 	:-
 	replace_char_string(InString, OrigCharNum, NewCharNum, OutString).
 
+
+/*!-----------------------------------------------------------------------
+ *-----------------------------------------------------------------------*/
+underbarUpperCrazyKap(In, Out)
+	:-
+	atom_codes(In, InCs),
+	InCs = [InC0 | RestInCs],
+	to_uc_c(InC0, OutC0),
+	ubCrzyK(RestInCs, RestOutCs),
+	OutCs = [OutC0 | RestOutCs],
+	atom_codes(Out, OutCs).
+
+to_lc_c(InC, OutC)
+	:-
+	0'A =< InC, InC =< 0'Z,
+	!,
+	OutC is InC + 32.
+to_lc_c(InC, InC).
+
+to_uc_c(InC, OutC)
+	:-
+	0'a =< InC, InC =< 0'z,
+	!,
+	OutC is InC - 32.
+to_uc_c(InC, InC).
+
+ubCrzyK([], []).
+ubCrzyK([0'_], [0'_])
+	:-!.
+ubCrzyK([0' ], [])
+	:-!.
+ubCrzyK([0'	], [])	% tab
+	:-!.
+ubCrzyK([X, C | InCs], [UC | OutCs])
+	:-
+	dmember(X, [0'_, 0' , 0'	]),  % _, space, tab
+	!,
+	to_uc_c(C, UC),
+	ubCrzyK(InCs, OutCs).
+ubCrzyK([C | InCs], [C | OutCs])
+	:-
+	ubCrzyK(InCs, OutCs).
 
 endmod.

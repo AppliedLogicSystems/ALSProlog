@@ -1,3 +1,5 @@
+#include <windows.h>
+
 #include "getFiles.h"
 
 #include <string.h>
@@ -5,11 +7,9 @@
 /* Tk_GetHWND proto is from tkWin.h */
 HWND Tk_GetHWND(Window window);
 
-
 int GetFiles(Tcl_Interp *interp, Tcl_DString *initdir,
 	Tk_Window parent, const char *title)
 {
-#pragma unused(initdir)
 
 	OPENFILENAME of;
 	Tcl_Obj *result;
@@ -26,7 +26,7 @@ int GetFiles(Tcl_Interp *interp, Tcl_DString *initdir,
 	of.lpstrFile = file_list;
 	of.nMaxFile = MAX_PATH*100;
 	of.lpstrFileTitle = NULL;
-	of.lpstrInitialDir = NULL;
+	of.lpstrInitialDir = Tcl_DStringValue(initdir);
 	of.lpstrTitle = title ? title : "";;
 	of.Flags = OFN_ALLOWMULTISELECT | OFN_EXPLORER;
 	of.nFileOffset = 0;

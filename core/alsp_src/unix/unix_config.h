@@ -49,6 +49,10 @@
 #define SIGT	RETSIGTYPE
 #define TIME_WITH_SYS_TIME	2
 
+#ifndef UNIX_CYGWIN32
+#define O_BINARY 0
+#endif
+
 #if   defined(UNIX_AIX)
 #include "aix_config.h"
 #define UNIX_NAME "AIX"
@@ -70,6 +74,9 @@
 #elif defined(UNIX_CYGWIN32)
 #include "cygwin32_config.h"
 #define UNIX_NAME "CygWin32"
+#elif defined(UNIX_DARWIN)
+#include "darwin_config.h"
+#define UNIX_NAME "Darwin"
 #else
 #error
 #endif

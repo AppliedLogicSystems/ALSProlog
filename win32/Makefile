@@ -7,11 +7,15 @@ core:
 odbc:
 	cd ../extensions/odbc/i386_mswin32 ; ./build.bat
 	
+python:
+	cd ../extensions/python/i386_mswin32 ; ./build.bat
+	
 student: core
-	build_dist.sh student
+	./build_dist.sh student
 
-standard: core odbc
-	build_dist.sh standard
+#standard: core odbc python
+standard: core odbc 
+	./build_dist.sh standard
 
-demo: core odbc
-	build_dist.sh demo
+demo: core odbc # python
+	./build_dist.sh demo

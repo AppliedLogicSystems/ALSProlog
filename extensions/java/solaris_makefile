@@ -1,0 +1,10 @@
+JDK_ROOT = /usr/j2se
+PROC = sparc
+OS=solaris
+
+# In order to avoid unwanted runtime linking with the main ALS Prolog
+# executable, use the -B symbolic switch.
+PSL_LINK = -Xlinker -B -Xlinker symbolic -Xlinker -s -Xlinker -R$(JDK_ROOT)/jre/lib/sparc/
+
+include generic_makefile
+

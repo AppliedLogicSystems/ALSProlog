@@ -11,6 +11,13 @@
 #include <fp.h>
 #elif defined(MSWin32)
 #include <math.h>
+#ifdef __GNUC__
+/* Define missing prototypes */
+int _isnan(double);
+int _finite(double);
+#define isnan _isnan
+#define isinf(x) (!_finite(x))
+#endif
 #endif
 
 int is_ieee_nan PARAMS( (double) );
@@ -38,7 +45,7 @@ is_ieee_inf(v)
 	}
 #elif defined(AIX)
 	return !finite(v);
-#elif defined(WIN32) || defined(MacOS)
+#elif defined(__MWERKS__) && (defined(WIN32) || defined(MacOS))
 	return !isfinite(v);
 #elif (defined(__sgi) && defined(__mips))
 	return(!finite(v));
@@ -46,5 +53,3 @@ is_ieee_inf(v)
 	return isinf(v);
 #endif
 }
-
-

@@ -21,6 +21,11 @@ STATIC_OBJECTS = $(STATIC_SOURCE:.c=.o)
 SHARED_SOURCE = unix_shared.c
 SHARED_OBJECTS = $(SHARED_SOURCE:.c=.o)
 
+ALS_BUILD_SUPPORT = /apache/als_build_support/unix
+ALS_BUILD_SUPPORT_INCLUDES = -isystem $(ALS_BUILD_SUPPORT)/include
+
+ALSDEV_OS_SOURCE = unix_alsdev.c
+
 # Definitions and rules for the specific Unix OS
 
 include $(SOURCE_DIR)/unix/$(SUBOS)_makefile
@@ -73,3 +78,26 @@ installer: alspro
 #		if [ -f ../libalspro.a ] then ln -s ../libalspro.a . endif; \
 #				ln -s $(ODBCLIBS)/* . ; \
 #				ln -s $(WINDOWLIBS)/* . ; \
+
+alsdir : alsdir/builtins alsdir/library
+
+alsdir/builtins : $(SOURCE_DIR)/builtins $(MAKEFS)
+	mkdir -p alsdir/builtins
+	rm -f alsdir/builtins/*.pro
+	cd alsdir/builtins ; ln -s ../../$(SOURCE_DIR)/builtins/*.pro .
+
+alsdir/library : $(SOURCE_DIR)/library $(MAKEFS)
+	mkdir -p alsdir/library
+	rm -f alsdir/library/*.pro alsdir/library/*.alb
+	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.pro .
+	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
+
+alsdir/shared : $(MAKEFS)
+	mkdir -p alsdir/shared
+	rm -f alsdir/shared/*.pro alsdir/shared/*.psl alsdir/shared/*.tcl
+	cd alsdir/shared ; ln -s ../../$(CORE)/als_dev/alsdev/*.tcl .
+				 
+alsdir/images : $(CORE)/als_dev/alsdev $(MAKEFS)
+	mkdir -p alsdir/images
+	rm -f alsdir/images/*.*
+	cd alsdir/images ; ln -s ../../$(CORE)/als_dev/alsdev/images/*.gif .

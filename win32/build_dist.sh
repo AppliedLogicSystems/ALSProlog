@@ -9,8 +9,9 @@ LIB=$ALS_PROLOG/core/alsp_src/library
 BUILTINS=$ALS_PROLOG/core/alsp_src/builtins
 EXAMPLES=$ALS_PROLOG/examples
 MAN=$ALS_PROLOG/manual
-EXTRAS=\\\\JARRETT\\apache\\als_addl_software
+EXTRAS=\\als_addl_software
 ODBC=$ALS_PROLOG/extensions/odbc
+PYTHON=$ALS_PROLOG/extensions/python
 
 if test $# -ne 1
 then
@@ -133,6 +134,14 @@ then
 	cp -pr "$ALS_PROLOG/core/tcltk_interface/mswin32/tclintf.psl" "$DISTDIR/alsdir/shared"
 	cp -pr "$ALS_PROLOG/core/tcltk_interface/common/tcltk.pro" "$DISTDIR/alsdir/shared"
 	cp -pr "$ALS_PROLOG/core/tcltk_interface/common/tcltk_util.pro" "$DISTDIR/alsdir/shared"
+
+	mkdir "$DISTDIR/python"
+
+#	cp -pr "$PYTHON/i386_mswin32/python.psl" "$DISTDIR/alsdir/shared"
+#	cp -pr "$PYTHON/common/als_python_guide.html" "$DISTDIR/python"
+#	cp -pr "$PYTHON/common/py_test.pro" "$DISTDIR/python"
+#	cp -pr "$PYTHON/common/test_util.py" "$DISTDIR/python"
+
 fi
 
 

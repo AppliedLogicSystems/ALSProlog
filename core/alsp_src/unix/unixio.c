@@ -195,7 +195,11 @@ getDirEntries()
     strcat(path, pattern);
 
     r = glob(path, 0, NULL, &gd);
+#if UNIX_DARWIN /* Darwin is POSIX.1 */
+    if (r != 0) PI_FAIL;
+#else /* Most others are POSIX.2 */
     if (r != 0 && r != GLOB_NOMATCH) PI_FAIL;
+#endif
 
 
     for (i = gd.gl_pathc, PI_makesym(&list, &listType, "[]"); i;
@@ -882,12 +886,12 @@ unsigned char *open_memory_file(const char *file_name, mem_file_info *info)
 {
     int file, r;
     struct stat s;
-    unsigned char *mem;
+    void *mem;
 #ifdef MACH_SUBSTRATE
     kern_return_t kr;
 #endif
     
-    file = open(file_name,  O_RDONLY);
+    file = open(file_name,  O_RDONLY | O_BINARY);
     if (file == -1) goto error;
 
     r = fstat(file, &s);
@@ -967,7 +971,7 @@ int os_copy_file(const char *from_file, const char *to_file)
     int f, c, r;
     struct stat s; 
     
-    f = open(from_file, O_RDONLY);
+    f = open(from_file, O_RDONLY | O_BINARY);
     if (f == -1) return 0;
     
     r = fstat(f, &s);
@@ -991,7 +995,7 @@ int os_copy_file(const char *from_file, const char *to_file)
 
     close(f);
     
-    c = open(to_file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+    c = open(to_file, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0777);
     if (c == -1) {
     	free(buf);
     	return 0;

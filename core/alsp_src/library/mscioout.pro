@@ -26,6 +26,10 @@ export write_lines_opt/3.
 export write_lines_nl/3.
 export write_lines_nl/4.
 
+export printf_multiargs/3.
+
+export codesweep/2.
+
 /*!-------------------------------------------------------------
  |	colwrite/4
  |	colwrite(AtomList,ColPosList,CurPos,Stream)
@@ -299,15 +303,97 @@ write_items([Item | List], Spacer, EOL, Options, Stream)
 	(EOL = nl -> nl(Stream) ; true),
 	write_items(List, Spacer, EOL, Options, Stream).
 
-printf_list1(ArgsList, Pattern)
+export printf_multiargs/2.
+export printf_multiargs/3.
+export printf_multiargs/4.
+printf_multiargs(ArgsList, Pattern)
 	:-
 	sio:get_current_output_stream(Stream),
-	printf_list1(ArgsList, Pattern, [], Stream).
+	printf_multiargs(ArgsList, Pattern, [], Stream).
 
-printf_list1([], Pattern, Options, Stream).
-printf_list1([Arg | ArgsList], Pattern, Options, Stream)
+printf_multiargs(ArgsList, Pattern, Stream)
+	:-
+	printf_multiargs(ArgsList, Pattern, [], Stream).
+
+printf_multiargs([], Pattern, Options, Stream).
+printf_multiargs([Arg | ArgsList], Pattern, Options, Stream)
 	:-
 	printf(Stream, Pattern ,[Arg], Options),
-	printf_list1(ArgsList, Pattern, Options, Stream).
+	printf_multiargs(ArgsList, Pattern, Options, Stream).
+
+export printf_list/1.
+export printf_list/2.
+export printf_list/3.
+export printf_list_nl/2.
+export printf_list_nl/3.
+printf_list(PatternsAndArgs)
+	:-
+	sio:get_current_output_stream(Stream),
+	printf_list(PatternsAndArgs, [], false, Stream).
+
+printf_list(PatternsAndArgs, Stream)
+	:-
+	printf_list(PatternsAndArgs, [], false, Stream).
+
+printf_list_nl(PatternsAndArgs, Stream)
+	:-
+	printf_list(PatternsAndArgs, [], true, Stream).
+
+printf_list_nl(PatternsAndArgs, Options, Stream)
+	:-
+	printf_list(PatternsAndArgs, Options, true, Stream).
+
+printf_list([], _, _, _).
+printf_list([PatternPlusArgs | PatternsAndArgs], Options, NL, Stream)
+	:-
+	printf_list_patargs(PatternPlusArgs, Options, Stream),
+	(NL=true -> nl(Stream) ; true),
+	printf_list(PatternsAndArgs, Options, NL, Stream).
+
+printf_list_patargs(Pattern+Args, Options, Stream)
+	:-!,
+	printf(Stream, Pattern, Args, Options).
+printf_list_patargs(Pattern, Options, Stream)
+	:-
+	printf(Stream, Pattern, [], Options).
+
+/*!-------------------------------------------------------------
+ |	codesweep/2
+ |	codesweep(CodeLineList, OS)
+ |	codesweep(+, +)
+ |
+ |	Treats CodeLineList as a list of items to be written out
+ |	to the stream OS, each atom followed by newline;  the
+ |	elements of CodeLineList must be of the following forms:
+ |
+ |    -  the atom nl:   
+ |             outputs two newlines;
+ |
+ |    -  any other atom A: 
+ |             outputs A followed by a newline;
+ |
+ |    -  a term Expr + Args, where Args is a list:
+ |             executes printf(OS, Expr, Args)
+ *!------------------------------------------------------------*/
+
+codesweep([], _).
+codesweep([Item | CL], OS)
+	:-
+	codeout(Item, OS),
+	codesweep(CL, OS).
+
+codeout(nl, OS)
+	:-!,
+	nl(OS).
+
+codeout(Item + Args, OS)
+	:-!,
+	printf(OS, Item, Args),
+	nl(OS).
+
+codeout(Item, OS)
+	:-
+	printf(OS, Item, []),
+	nl(OS).
 
 endmod.

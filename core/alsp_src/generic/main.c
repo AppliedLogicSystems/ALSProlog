@@ -99,7 +99,7 @@ static char alsdir[IMAGEDIR_MAX];	/* directory where ALS system resides */
 #define IS_WIN32S  IS_WIN32 && (BOOL)(!(IS_NT) && ((GetVersion() & 0xFF)<4))
 #define IS_WIN95 (BOOL)(!(IS_NT) && !(IS_WIN32S)) && IS_WIN32
 
-char *MinorOSStr = "mswindows";
+const char *MinorOSStr = "mswindows";
 int win32s_system = 0;
 #endif
 
@@ -961,7 +961,9 @@ int MPW_Tool;
 #endif	/* MacOS */
 
 #ifdef MSWin32
+#ifdef HAVE_SOCKET
 #include <winsock.h>
+#endif
 
 #if defined (WIN32)
 	#define IS_WIN32 TRUE
@@ -1101,6 +1103,7 @@ PI_startup(const PI_system_setup *setup)
     
     InteruptCompleteEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     
+#ifdef HAVE_SOCKET
     {
 	WORD wVersionRequested = MAKEWORD(1, 1);
 	WSADATA wsaData;
@@ -1119,6 +1122,7 @@ PI_startup(const PI_system_setup *setup)
 	    PI_app_printf(PI_app_printf_warning, "WinSock init failed !\n");
 	}
     }
+#endif
     
 #endif
 
@@ -1150,9 +1154,11 @@ PI_shutdown(void)
     shutdown_security();
 
 #ifdef MSWin32
+#ifdef HAVE_SOCKET
     if (WSACleanup() != 0) {
 	PI_app_printf(PI_app_printf_warning, "WinSock cleanup failed !\n");
     }
+#endif
 #endif
 
 #ifdef MacOS

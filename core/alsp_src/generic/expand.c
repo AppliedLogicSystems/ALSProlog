@@ -115,7 +115,12 @@ expand_expand(nvars, r)
 
     t = MK_TERM(3);
     TERM_FUNCTOR(t) = MK_FUNCTOR(TK_EXPAND, 3);
+#ifdef UNIX_DARWIN
+    /* Work around a problem in Darwin's preprocessor. */
+    TERM_ARGN(t, 1) = MK_FUNCTOR((*top_module), 0);
+#else
     TERM_ARGN(t, 1) = MK_SYM(cur_mod);
+#endif
     TERM_ARGN(t, 2) = r;
     TERM_ARGN(t, 3) = bld_vlst();
 

@@ -18,7 +18,7 @@
 
 #if defined(macintosh)
 #define ALS_BIG_ENDIAN
-#elif defined(WIN32) || defined(UNIX_CYGWIN32)
+#elif defined(WIN32)
 #define ALS_LITTLE_ENDIAN
 #elif defined(UNIX)
     #if defined(UNIX_LINUX)
@@ -37,7 +37,7 @@
         #else
         #error
         #endif
-    #elif defined(UNIX_HPUX) || defined(UNIX_IRIX)
+    #elif defined(UNIX_HPUX) || defined(UNIX_IRIX) || defined(UNIX_DARWIN)
         #define ALS_BIG_ENDIAN
     #elif defined(UNIX_CYGWIN32)
         #define ALS_LITTLE_ENDIAN

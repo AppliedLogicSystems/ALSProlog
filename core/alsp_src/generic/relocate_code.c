@@ -56,7 +56,7 @@ relocate_code(Code *addr, int n, prolog_database *db, block_info old_blocks[])
 
     for (ip = addr; ip < stopaddr; ) {
 
-      instr = *ip; /* always byte code */
+      instr = (enum AbstractMachineOps)*ip; /* always byte code */
       /*instr = (enum AbstractMachineOps)*ip;*/
       if (instr < 0 || instr > ICNUM) 
 	{

@@ -63,6 +63,9 @@ static void command_line_locate_executable(int argc, char *argv[])
       return;
     }
   }
+#ifdef UNIX_CYGWIN32
+  strcat(executable_path, ".exe");
+#endif
 }
 
 static void locate_library(void)

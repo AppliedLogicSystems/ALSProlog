@@ -819,7 +819,12 @@ int special_overflow = 0;
 
     if (startaddr == (Code *) 0) {
 #ifdef Threaded
+//#define RelativeThreaded 1
+#ifdef RelativeThreaded
+#define ABMOP(op,p1,p2,p3,p4) wam_instrs[op] = (Code) (&&l##op - &&lW_MOVE_ES_m2_m4);
+#else
 #define ABMOP(op,p1,p2,p3,p4) wam_instrs[op] = (Code) &&l##op;
+#endif
 #include "wamops0.h"
 #undef ABMOP
 #endif /* Threaded */
@@ -843,7 +848,11 @@ int special_overflow = 0;
 		
 #ifdef Threaded
 #define CASE(op) l##op DO_PROFILE(op)
+#if RelativeThreaded
+#define DISPATCH goto *(&&lW_MOVE_ES_m2_m4 + *P)
+#else
 #define DISPATCH goto **(void **)P
+#endif
 
     DISPATCH;
 #else

@@ -101,7 +101,12 @@ then
 		cp -pr "$BIN/alspro.pst" "$DISTDIR"
 	fi
 	cp -pr "$BIN/libalspro.a" "$DISTDIR"
-	cp -pr "$BIN/libalspro.so" "$DISTDIR"
+	if test $ARCH = hpux
+	then
+		cp -pr "$BIN/libalspro.sl" "$DISTDIR"
+	else
+		cp -pr "$BIN/libalspro.so" "$DISTDIR"
+	fi
 fi
 
 if test $EDITION = demo
@@ -113,7 +118,12 @@ then
 		cp -pr "$BIN/alspro_demo.pst" "$DISTDIR/alspro.pst"
 	fi
 	cp -pr "$BIN/libalspro.a" "$DISTDIR"
-	cp -pr "$BIN/libalspro.so" "$DISTDIR"
+	if test $ARCH = hpux
+	then
+		cp -pr "$BIN/libalspro.sl" "$DISTDIR"
+	else
+		cp -pr "$BIN/libalspro.so" "$DISTDIR"
+	fi
 fi
 
 tar -C $ARCH -czf $DISTNAME-$ARCH.tgz $DISTNAME

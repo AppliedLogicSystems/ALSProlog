@@ -44,7 +44,8 @@ export pckg_init/0.
 fix_image_name(Name, FixedName) :-
 	als_system(SystemList),
 	dmember(os = OS, SystemList),
-	(OS = mswin32 ->
+        dmember(os_variation = OSVar, SystemList),
+	((OS = mswin32 ; OSVar = cygwin32) ->
 		((sub_atom(Name, _, _, 0, '.exe')
 		 ; sub_atom(Name, _, _, 0, '.EXE')) ->
 			FixedName = Name

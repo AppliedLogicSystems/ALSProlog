@@ -1,5 +1,9 @@
 /* The New Interface */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {AP_FAIL, AP_SUCCESS, AP_EXCEPTION} AP_Result;
 typedef void AP_World;
 typedef struct {long p; int t;} AP_Obj;
@@ -39,3 +43,7 @@ AP_API(AP_Result) AP_SetStandardError(AP_World *w, AP_StandardError error_type, 
 AP_API(int) AP_OldToNewCall(AP_Result (*new_func)(), int arity);
 AP_API(int) AP_GetStructureArity(AP_World *w, AP_Obj struc);
 AP_API(AP_Obj) AP_GetStructureFunctor(AP_World *w, AP_Obj struc);
+
+#ifdef __cplusplus
+}
+#endif

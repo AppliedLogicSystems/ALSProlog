@@ -407,7 +407,7 @@ int os_set_timer(double initial, double interval);
 
 /* ----------   main.c ----------   */
 #ifdef MSWin32
-extern	char	*MinorOSStr;
+extern	const char	*MinorOSStr;
 extern	int	win32s_system;
 #endif
 #ifdef MacOS

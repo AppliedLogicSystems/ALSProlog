@@ -331,7 +331,7 @@ static struct blt_struct {
 	BLT("$protect_bottom_stack_page", 0, pbi_protect_bottom_stack_page,
 	    "_pbi_protect_bottom_stack_page"),
 	BLT("pbi_get_command_line", 1, pbi_command_line, "_pbi_command_line"),
-#if defined(UNIX) && !defined(UNIX_CYGWIN32) /* _XOPEN_CRYPT */
+#if defined(UNIX) /* _XOPEN_CRYPT */
 	BLT("crypt", 3, pbi_crypt, "_pbi_crypt"),
 #endif
 #ifndef PURE_ANSI
