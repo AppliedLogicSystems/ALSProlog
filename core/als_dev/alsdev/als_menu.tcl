@@ -102,6 +102,7 @@ proc add_edit_menu {menubar type window} {
 
 proc add_prolog_menu {menubar type window} {
 	global tcl_platform
+	global proenv
 	global mod
 	global elipsis
 	global proenv
@@ -115,14 +116,15 @@ proc add_prolog_menu {menubar type window} {
 
 	if {$type == "listener"} then { 
     	$menubar.prolog add separator
-    	$menubar.prolog add command -label "Load Project$elipsis" \
-			-underline 0 -command {re load_project} -state $proenv(production)
-    	$menubar.prolog add command -label "Open Project$elipsis" \
-			-underline 0 -command {re open_project} -state $proenv(production)
-    	$menubar.prolog add command -label "Close Project" \
-			-underline 0 -command {re close_project} -state $proenv(production)
-    	$menubar.prolog add command -label "New Project" \
-			-underline 0 -command {re new_project} -state $proenv(production)
+    	$menubar.prolog add command \
+        	-label "Load Project$elipsis" -underline 0 -command {re load_project} -state $proenv(edition)
+    	$menubar.prolog add command \
+        	-label "Open Project$elipsis" -underline 0 -command {re open_project} -state $proenv(edition)
+    	$menubar.prolog add command \
+        	-label "Close Project" -underline 0 -command {re close_project} -state $proenv(edition)
+    	$menubar.prolog add command \
+        	-label "New Project" -underline 0 -command {re new_project} -state $proenv(edition)
+
     	$menubar.prolog add separator
     	$menubar.prolog add command \
         	-label "Set Directory$elipsis" -underline 0 -command {re set_directory} 

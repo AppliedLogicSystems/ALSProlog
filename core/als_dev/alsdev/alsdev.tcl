@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.74 1999/02/06 15:26:09 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.75 1999/02/06 17:53:58 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -144,8 +144,7 @@ global array proenv
 #	proenv(spywin)			Spypoint Win showing/not (1/0) 
 #	proenv(defstr_ld)		Defstruct loaded/not [true/false]
 
-		## set this to "disabled" for the student version:
-set proenv(production) 			normal
+set proenv(edition) 			normal
 set proenv(cwd) 				[pwd]
 set proenv(debugger_ld)			false
 set	proenv(debugwin)			0
@@ -1655,10 +1654,6 @@ raise_patch .topals
 wm positionfrom .topals user
 wm geometry .topals $proenv(.topals,geometry)
 focus .topals.text
-
-#tk_dialog .quit_dialog "CHECK DEBUG" "BEFORE ensure_db" "" 0 "OK"
-#if {$proenv(debugwin) == 1} then { ensure_db_showing }
-#tk_dialog .quit_dialog "CHECK DEBUG" "AFTER ensure_db" "" 0 "OK"
 
 # Call AttachOpenDocumentHandler from the OpenDocument package to
 # install a custom window procedure on .topals window for handling
