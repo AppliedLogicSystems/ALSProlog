@@ -20,6 +20,7 @@ at least Y MB of available disk space.
 
 - Metrowerk's Code Warrior Gold 8 with the following options and
 modifications:
+	- Set the CodeWarrior IDE 1.4 minimum memory requirement to 6000K
 	- Install with at least this package: Metrowerks x86 C/C++ Compiler
 	- Put a copy of Microsoft Visual C++ 2.0's LIBC.LIB in the
 	  Win32/x86 Support:Libraries folder.
