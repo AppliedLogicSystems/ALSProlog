@@ -94,7 +94,7 @@ findUserFile(PathName,ExpandedName,State)
 	PathType1 \= abs,
 	possiblePath(Disk2,CompList2,PathType2),
 	dappend(CompList2,CompList1,CompList),
-	pathListToName(Disk2,CompList,PathType2,ExpandedName),
+	pathListToName(Disk2,CompList,PathType2,OS,ExpandedName),
 	exists_file(ExpandedName),
 	!.
 
@@ -111,18 +111,21 @@ findUserFile(File,ExpandedName,State)
 %---------------------------------------------------------------
 
 	%% absolute pathname, or exists in cur directory:
-findSysFile(Disk,CompList,abs,AbsName) 
+	
+findSysFile(Disk,CompList,abs,AbsName, State) 
 	:-
 	!,
-	pathListToName(Disk,CompList,abs,AbsName),
+	accessC2P(tgt_os, State, OS),
+	pathListToName(Disk,CompList,abs,OS,AbsName),
 	exists_file(AbsName).
 
 	%% Not in cur dir, or absolute, but doesn't exist:
-findSysFile(Disk1,CompList1,rel,AbsName) 
+findSysFile(Disk1,CompList1,rel,AbsName, State) 
 	:-
 	CompList1 \= [],
 	resolve_sys_paths(Disk1,CompList1,Disk2,CompList,PathType),
-	pathListToName(Disk2,CompList,PathType,AbsName),
+	accessC2P(tgt_os, State, OS),
+	pathListToName(Disk2,CompList,PathType,OS,AbsName),
 	exists_file(AbsName),
 	!.
 
@@ -214,7 +217,7 @@ diskOfPathTokList('')   --> [].
 	%----------------------------------------------------
 
 typeOfPathStr(unix,Disk, [0'/ |_], abs) :- !.
-typeOfPathStr(mac, Disk, CompStr,  abs) :- Disk \= '', !.
+typeOfPathStr(macos, Disk, CompStr,  abs) :- Disk \= '', !.
 typeOfPathStr(dos, Disk, [0'\ |_], abs) :- !.
 typeOfPathStr(vms, Disk, [0'/ |_], abs) :- !.
 typeOfPathStr(_,   Disk, CompStr,  rel).
@@ -224,7 +227,7 @@ typeOfPathStr(_,   Disk, CompStr,  rel).
 	%----------------------------------------------------
 
 typeOfPathTokList(unix,Disk,[slash|_],    abs) :- !.
-typeOfPathTokList(mac, Disk,CompTokList,  abs) :- Disk \= '', !.
+typeOfPathTokList(macos, Disk,CompTokList,  abs) :- Disk \= '', !.
 typeOfPathTokList(dos, Disk,[backslash|_],abs) :- !.
 typeOfPathTokList(vms, Disk,[slash|_],    abs) :- !.
 typeOfPathTokList(_,   Disk,CompTokList,  rel).
@@ -241,24 +244,26 @@ typeOfPathTokList(_,   Disk,CompTokList,  rel).
 	%%-----------------------------------
 
 compsOfPathStr(unix, Comps)		  --> [0'/ ], !,    compsOfPathStr(unix,Comps).
-compsOfPathStr(mac, ['::'|Comps]) --> [0': ,0': ],!,compsOfPathStr(mac, Comps).
-compsOfPathStr(mac, [':'|Comps])  --> [0': ], !,    compsOfPathStr(mac, Comps).
+compsOfPathStr(macos, ['::'|Comps]) --> [0': ,0': ],!,compsOfPathStr(macos, Comps).
+compsOfPathStr(macos, [':'|Comps])  --> [0': ], !,    compsOfPathStr(macos, Comps).
 compsOfPathStr(dos, Comps) 		  --> [0'\ ], !,    compsOfPathStr(dos, Comps).
 compsOfPathStr(vms, Comps) 		  --> [0'/ ], !,    compsOfPathStr(vms, Comps).
 
 compsOfPathStr( _, _ )			  --> [0'* ], !.
 compsOfPathStr(OS, [_|Comps])	  --> [0'? ], !,            moreComps(OS,Comps).
+%%compsOfPathStr(OS, [Comp|Comps])  --> compOfPathStr(Comp),{OS=macos,Comp\=''},!,moreComps(macos,Comps).
 compsOfPathStr(OS, [Comp|Comps])  --> compOfPathStr(Comp),!,moreComps(OS,Comps).
 compsOfPathStr( _, [])			  --> [].
 
 moreComps(unix,Comps)		 --> [0'/ ], !,    compsOfPathStr(unix,Comps).
-moreComps(mac, ['::'|Comps]) --> [0': ,0': ],!,compsOfPathStr(mac, Comps).
-moreComps(mac, Comps)		 --> [0': ], !,    compsOfPathStr(mac, Comps).
+moreComps(macos, ['::'|Comps]) --> [0': ,0': ],!,compsOfPathStr(macos, Comps).
+moreComps(macos, Comps)		 --> [0': ], !,    compsOfPathStr(macos, Comps).
 moreComps(dos, Comps)		 --> [0'\ ], !,    compsOfPathStr(dos, Comps).
 moreComps(vms, Comps)		 --> [0'/ ], !,    compsOfPathStr(vms, Comps).
 moreComps( _,  [])		 	 --> [].
 
-compOfPathStr(File)  --> compStr(FileStr), {name(File,FileStr)}.
+compOfPathStr(File)  --> compStr(FileStr), {name(File,FileStr),File\=''}.
+%%compOfPathStr(File)  --> compStr(FileStr), {name(File,FileStr)}.
 
 compStr([Char|Rest]) --> [Char], {isAlphaNumeric(Char)}, !, compStr(Rest).
 compStr([0'. |Rest]) --> [0'. ], !, compStr(Rest).
@@ -274,8 +279,8 @@ endQuote([Char|Rest]) --> [Char], endQuote(Rest).
 	%%-----------------------------------
 
 compsOfPathTokList(unix,Comps) 		  --> [slash],     !,compsOfPathTokList(unix,Comps).
-compsOfPathTokList(mac, ['::'|Comps]) --> [coloncolon],!,compsOfPathTokList(mac,Comps).
-compsOfPathTokList(mac, [':' |Comps]) --> [colon],     !,compsOfPathTokList(mac,Comps).
+compsOfPathTokList(macos, ['::'|Comps]) --> [coloncolon],!,compsOfPathTokList(macos,Comps).
+compsOfPathTokList(macos, [':' |Comps]) --> [colon],     !,compsOfPathTokList(macos,Comps).
 compsOfPathTokList(dos, Comps)        --> [backslash], !,compsOfPathTokList(dos,Comps).
 compsOfPathTokList(vms, Comps)        --> [slash],     !,compsOfPathTokList(vms,Comps).
 
@@ -304,11 +309,11 @@ compTokList([]) 		 --> [].
 	% convert a ground file list to a pathname
 	%-------------------------------------------
 
-pathListToName(Disk,Comps,Type,Name) 
+pathListToName(Disk,Comps,Type, OS, Name) 
 	:-
 	diskSym(Disk,DiskList),
-	absMark(Type,TypeList),
-	addPathSep(Comps,NList),
+	absMark(OS, Type,TypeList),
+	addPathSep(Comps,NList, OS),
 	append(DiskList,TypeList,List1),
 	append(List1,NList,List2),
 	catenate(List2,Name).
@@ -316,15 +321,18 @@ pathListToName(Disk,Comps,Type,Name)
 diskSym('',[]) :- !.
 diskSym(X,[X,':']).
 
-absMark(abs,['/']).
-absMark(rel,[]).
+absMark(macos, abs,['']).
+absMark(unix, abs,['/']).
+absMark(macos, rel,[':']).
+absMark(unix, rel,[]).
 
-addPathSep([],[]).
-addPathSep([File|IList],[File|OList]) :-
-	possPathSep(IList,OList,NList),
-	addPathSep(IList,NList).
+addPathSep([],[], _).
+addPathSep([File|IList],[File|OList], OS) :-
+	possPathSep(IList,OList,NList, OS),
+	addPathSep(IList,NList, OS).
 
-possPathSep([],L,L).
-possPathSep([_|_],['/'|L],L).
+possPathSep([],L,L, _).
+possPathSep([_|_],['/'|L],L, unix).
+possPathSep([_|_],[':'|L],L, macos).
 
 endmod.

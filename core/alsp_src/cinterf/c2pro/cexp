@@ -303,6 +303,7 @@ e1(Val,State) --> unop_exp(Val,State).
 %
 
 primary_exp(Num,State) --> [number(Num)], !.
+primary_exp(Num,State) --> [char(Num)], !.
 primary_exp(Exp,State) --> [lparen], !, expression(Exp,State), [rparen].
 primary_exp(Val,State) --> [ident(Id)], 		% enum constant
 	{ 
@@ -321,13 +322,33 @@ cast_exp(Val,State) --> [lparen], type_spec(State,_),
 %
 
 sizeof_exp(32,State) --> 
-	[fident(sizeof),lparen], !, type_spec(State,_), [rparen].
+	[fident(sizeof),lparen], !, sizeof_type_spec(State,_), [rparen].
 
 sizeof_exp(32,State) --> 
 	[ident(sizeof), lparen], !, e1(_,State), [rparen].
 
 sizeof_exp(32,State) --> 
 	[ident(sizeof)], e1(_,State).
+
+%
+% Accept various type patterns.  Can't use type_spec/2 because
+% it doesn't understand constructs like "void *".
+%
+
+sizeof_type_spec(State,Spec) -->
+	[ident(struct), ident(X), star], 
+	!.
+sizeof_type_spec(State,Spec) -->
+	[ident(struct), ident(X)], 
+	!.
+sizeof_type_spec(State,Spec) -->
+	[ident(X), star, star], 
+	!.
+sizeof_type_spec(State,Spec) -->
+	[ident(X), star], 
+	!.
+sizeof_type_spec(State,Spec) -->
+	[ident(X)].
 
 %
 

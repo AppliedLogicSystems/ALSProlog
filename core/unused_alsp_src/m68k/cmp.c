@@ -1,26 +1,38 @@
-/*
- * cmp.c		-- support routines for compare/3
- *	Copyright (c) 1988-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 2/29/88
- * Revision History:
- * 11/16/94	C. Houpt	Added pointer type pragmas for MetroWerks.
- */
+/*=================================================================*
+ |			cmp.c
+ |		Copyright (c) 1988-1995 Applied Logic Systems, Inc.
+ |
+ |			-- support routines for compare/3
+ |
+ |		Routines:
+ |
+ |		cmp_gettokstring(tok)
+ |		cmp_int_double(i,da)
+ |		cmp_double_double(a1,a2)
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 2/29/88
+ | Revision History:
+ | 11/16/94	C. Houpt	Added pointer type pragmas for MetroWerks.
+ *=================================================================*/
 
 #include "defs.h"
 
-/*
- * cmp_gettokstring is called by the code which implements compare/3 to get
- * the string corresponding to a token.  The entire prolog word representing
- * the token (complete with tag and arity) is passed in.  These are stripped
- * off and the TOKNAME macro is used to return the string.
- */
+extern	UCHAR *	cmp_gettokstring	PARAMS(( long ));
+extern	int	cmp_int_double		PARAMS(( int, long ));
+extern	int	cmp_double_double	PARAMS(( long, long ));
+
+/*-----------------------------------------------------------------------*
+ | cmp_gettokstring is called by the code which implements 
+ | compare/3 to get the string corresponding to a token.  The entire 
+ | prolog word representing the token (complete with tag and arity) 
+ | is passed in.  These are stripped off and the TOKNAME macro is used 
+ | to return the string.
+ *-----------------------------------------------------------------------*/
 
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_D0
 #endif
-extern	UCHAR *	cmp_gettokstring	PARAMS(( long ));
 
 UCHAR *
 cmp_gettokstring(tok)
@@ -34,11 +46,10 @@ cmp_gettokstring(tok)
 
 #define DBLARG(d,p,a) ((short *)&(d))[(a)-1] = (short) ((*(((long *) (p))+a))>>4)
 
-/*
- * cmp_int_double is called to compare a Prolog integer and a Prolog double.
- */
+/*-----------------------------------------------------------------------------*
+ | cmp_int_double is called to compare a Prolog integer and a Prolog double.
+ *-----------------------------------------------------------------------------*/
 
-extern	int	cmp_int_double		PARAMS(( int, long ));
 int
 cmp_int_double(i,da)
     int i;
@@ -62,12 +73,11 @@ cmp_int_double(i,da)
 	return 1;
 }
 
-/*
- * cmp_double_double is called to compare two doubles.  -1, 0, or 1 is returned
- *	to indicate the result
- */
+/*-----------------------------------------------------------------------------*
+ | cmp_double_double is called to compare two doubles.  -1, 0, or 1 is returned
+ |	to indicate the result
+ *-----------------------------------------------------------------------------*/
 
-extern	int	cmp_double_double	PARAMS(( long, long ));
 int
 cmp_double_double(a1,a2)
     long a1, a2;

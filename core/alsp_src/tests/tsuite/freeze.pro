@@ -82,7 +82,7 @@ disp(_,T)
 	 *------------------------------------*/
 
 pc2 :- 
-	cptx,
+%	cptx,
 	freeze(S, produce2(0,S)), consume2(S).
 
 produce2(N, [N | T])
@@ -94,8 +94,6 @@ produce2(N, [N | T])
 consume2([N | T])
 	:-
 	write(n=N),nl,
-%	free_thawed,
 	((N > 3, 0 is N mod 3) -> gc; true),
-	cptx,
-	(N < 800 ->
+	(N < 300 ->
 		consume2(T) ; true).

@@ -564,7 +564,7 @@ mark_args(e, ra)
     }
 
 #else  /* GCMASK */
-#ifdef MacOS
+#if defined(MacOS) && defined(arch_m68k)
     if ((*ra != GCMAGIC) && (*ra != 0x303c)) {
 		fprintf(stderr, "gc: Return address doesn't point at GCMAGIC\n");
 		als_exit(1);

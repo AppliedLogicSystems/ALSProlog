@@ -115,7 +115,11 @@ e7(Val) -->	e6(V1),	e7s(Val,V1).
 e7s(Val,V1) -->	[and], !, e6(V2), {eval_and(V1,V2,V3)}, e7s(Val,V3).
 e7s(V,V) -->	[].
 
-eval_and(N1,N2,V) :- number(N1), number(N2), V is N1 /\ N2, !.
+eval_and(N1,N2,V) 
+	:- 
+	number(N1), number(N2), 
+	V is N1 /\ N2, 
+	!.
 eval_and(N1,N2,and(N1,N2)).
 
 
@@ -249,7 +253,12 @@ isUnary(not).
 e1_eval(minus,N,Val) :- number(N), Val is -N, !.
 e1_eval(minus,E,-E).
 e1_eval(lnot,E,Val) :- !, eval_lnot(E,Val).
-e1_eval(not,N,Val) :- number(N), Val is \(N), !.
+
+e1_eval(not,N,Val) 
+	:- 
+	number(N), 
+	Val is \(N), 
+	!.
 e1_eval(not,N,not(N)).
 
 /*

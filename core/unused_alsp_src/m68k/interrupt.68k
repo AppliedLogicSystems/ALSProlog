@@ -245,9 +245,9 @@ huh:
 
 ;
 ; The following code is entered when an interrupt has occurred.  d7 has
-; a negative value.  Our goal here is to restore the normal value to d7, build
-; a structure representing the frame on the stack and then execute whatever
-; wm_overcode points at.
+; a negative value.  Our goal here is to restore the normal value to d7,
+; build a structure representing the frame on the stack and then execute
+; whatever wm_overcode points at.
 ;
 ;
 

@@ -63,3 +63,4 @@ xaux_init()
     CI_RCONST("afterfunc",(long)afterfunc)
     CI_RCONST("errorfunc",(long)errorfunc)
 }
+

@@ -2340,7 +2340,7 @@ clause_start_from_retaddr(ra,mp)
 
     if (!ra)
 	return 0;
-#ifdef MacOS
+#if defined(MacOS) && defined(arch_m68k)
     if ((*ra != GCMAGIC) && (*ra != 0x303c))
 #else
     if (*ra != GCMAGIC)

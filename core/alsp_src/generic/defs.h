@@ -304,6 +304,7 @@
 #include "fileio.h"	/* candidate for eventual elimination */
 #include "parser.h"
 #include "tokens.h"
+#include "sig.h"
 #include "winter.h"
 #include "fatal.h"
 #include "alspi.h"

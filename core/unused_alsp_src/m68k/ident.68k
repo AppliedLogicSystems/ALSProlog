@@ -178,10 +178,10 @@ idconst:
 	; we have and branch accordingly.
 	;
 
-	subq.w	#MTP_SYM & ~ MTP_TAGMASK, d0
+	subq.w	#MTP_SYM & ~MTP_TAGMASK, d0
 					; see if 1st is a symbol
 	bne.s	iduia
-	subq.w	#MTP_SYM & ~ MTP_TAGMASK, d1
+	subq.w	#MTP_SYM & ~MTP_TAGMASK, d1
 					; see if 2nd is a symbol
 	beq	idfail			; fail if both were symbols
 
@@ -196,7 +196,7 @@ idret2:	move.l	(SP)+, d1		; restore d1
 	move.l	(SP)+, a1		; restore a1
 	rts
 
-iduia:	subq.w	#MTP_SYM & ~ MTP_TAGMASK, d1
+iduia:	subq.w	#MTP_SYM & ~MTP_TAGMASK, d1
 					; see if 2nd is a symbol
 	beq.s	iduiasym
 	callC2	cmp_uia_uia, a1, a0

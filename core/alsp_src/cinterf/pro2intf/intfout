@@ -59,7 +59,7 @@ openOutputFile(OutStream,State)
 	gen_file_header(OutStream,InFile,File,
 			printf(OutStream,'\t\t--by ALS Interface Generator\n\n',[])
 			),
-	printf(OutStream,'#include "alspi.h"\n',[]),
+	printf(OutStream,'#include "defs.h"\n',[]),
 	printf(OutStream,'#include "cinterf.h"\n',[]),
 	accessP2I(hincs,State,Hincs),
 	print_incs(Hincs,OutStream),
@@ -94,7 +94,7 @@ write_type_footer(SetupList,OutStream,State)
 	accessP2I(baseName,State,BaseName),
 	accessP2I(curONum,State,Count),
 	accessP2I(initFcns, State, OldInitFcns),
-	printf(OutStream,'%t%t_init()\n{\n',[BaseName,Count]),
+	printf(OutStream,'void %t%t_init(void)\n{\n',[BaseName,Count]),
 	catenate([BaseName,Count,'_init'],InitFcn),
 	append(OldInitFcns, [InitFcn], NewInitFcns),
 	setP2I(initFcns, State, NewInitFcns),
@@ -119,7 +119,7 @@ write_const_header(OutStream, State) :-
 	accessP2I(baseName, State, BaseName),
 	accessP2I(curONum, State, Count),
 	accessP2I(initFcns, State, OldInitFcns),
-	printf(OutStream,'%t%t_init()\n{\n',[BaseName,Count]),
+	printf(OutStream,'void %t%t_init(void)\n{\n',[BaseName,Count]),
 	catenate([BaseName,Count,'_init'],InitFcn),
 	append(OldInitFcns, [InitFcn], NewInitFcns),
 	setP2I(initFcns, State, NewInitFcns).

@@ -273,6 +273,7 @@ install_option(['-master', MasterName], Defines, Defines, State)
  	% option:	 -os OS
 install_option(['-os', OS], Defines, Defines, State)
 	:-
+	assert(tgt_os(OS)),
 	setC2P(tgt_os, State, OS).
 
 install_option([Opt], Defines, Defines, State)
@@ -560,10 +561,10 @@ c2pro([FirstFile | Rest], Defines)
 	:-
 	sourcePath(SrcPath),
 	setup_the_input_file(FirstFile, SrcPath, InName, BaseName),
-	outSuffix(OS),
-	filePlusExt(BaseName,OS,OutName),
-
-	init_state(InName, OutName, State),
+	outSuffix(OutSufx),
+	filePlusExt(BaseName,OutSufx,OutName),
+	tgt_os(OS),
+	init_state(InName, OutName, OS, State),
 	fcn_filter(FcnFilter),
 	setC2P(fcn_filter, State, FcnFilter),
 	do_c2pro(InName, State, Defines),
@@ -630,11 +631,12 @@ input_file_setup(File, SrcPath, InName, File)
 	%  init_state/3
 	%---------------------------------
 
-init_state(InName, OutName, State)
+init_state(InName, OutName, OS, State)
 	:-
 	makeC2P(State),
 	setC2P(inFile, State, InName),
 	setC2P(outFile, State, OutName),
+	setC2P(tgt_os, State, OS),
 	open(OutName,write,OutStream,[]),
 	setC2P(outStream, State, OutStream),
 	gen_file_header(OutStream,InName,OutName),

@@ -102,7 +102,7 @@ import(PathSpec,State)
 	:-
 	accessC2P(tgt_os, State, OS),
 	parsePathTokList(PathSpec,OS,Disk,CompList,PathType),   % #include foo
-	findSysFile(Disk,CompList,PathType,FileName),
+	findSysFile(Disk,CompList,PathType,FileName, State),
 	!,
 	dispatch_import(FileName,State).
 import(Whatever,State) 
@@ -125,7 +125,7 @@ sys_import(PathSpec,State)
 	accessC2P(tgt_os, State, OS),
 	parsePathTokList(PathSpec,OS,Disk,CompList,PathType),
 	CompList \= [],
-	findSysFile(Disk,CompList,PathType,FileName),
+	findSysFile(Disk,CompList,PathType,FileName, State),
 	!,
 	dispatch_import(FileName,system,State).
 

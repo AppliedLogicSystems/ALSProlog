@@ -2092,6 +2092,7 @@ read_buffer(window,Stream)
 	stream_extra(Stream,Tail),
 	Tail == [],
 	!,
+	alarm(0,0),
 	stream_pgoals(Stream,PromptGoal),
 	call(PromptGoal),
 	sio_set_errcode(Stream,14),		%% 14 =  SIOE_NOTREADY
@@ -2100,6 +2101,11 @@ read_buffer(window,Stream)
 read_buffer(window,Stream) 
 	:- !,
 		%% get the queue of raw lines:
+	(builtins:obtain_alarm_interval(Intrv) -> 
+%		write(read_buffer_resetting_alarm(Intrv,Intrv)),nl,flush_output,
+		alarm(Intrv, Intrv) 
+		; 
+		true),
 	stream_extra(Stream,CurQueue),
 	sio_buf_params(Stream, BufStart, BufSize),
 	stream_buffer(Stream,SD),

@@ -1,13 +1,19 @@
-/*
- * uia.c		-- uia routines
- *	Copyright (c) 1987-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 6/25/87
- * Revision History:
- *
- */
-
+/*===================================================================*
+ |			uia.c
+ |		Copyright (c) 1987-1995 Applied Logic Systems, Inc.  
+ | 
+ |			-- uia routines 
+ | 
+ |		Routines: 
+ | 
+ |		cmp_sym_uia(sym,uia) 
+ |		cmp_uia_uia(uia1,uia2) 
+ |		cmp_obj_str(obj,str)
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 6/25/87
+ | Revision History:
+ *===================================================================*/
 
 #include "defs.h"
 

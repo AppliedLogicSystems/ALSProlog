@@ -37,8 +37,8 @@ extern	void	fatal_error	PARAMS( (int, long) );
 #define FE_ICODEBUFINIT	13	/* Error allocating icode buffer */
 #define FE_ICODEBUFOVER	14	/* Icode buffer overflow */
 #define FE_XMEM_NTBL	15	/* Memory exhausted while allocating
-				 			 * procedure entry
-				 			 */
+	 			 * procedure entry
+	 			 */
 #define FE_FULL_NTBL	16	/* Procedure table full */
 #define FE_XMEM_CLAUSE	17	/* Memory exhausted while allocating
 				 			 * clause space
@@ -102,6 +102,7 @@ extern	void	fatal_error	PARAMS( (int, long) );
 #define FE_SS_OPENERR	68	/* Cannot open saved state file */
 #define FE_SS_FMALLOC	69	/* Problem with fmalloc */
 #define FE_ALS_OPTIONS	70	/* Problem getting ALS_OPTIONS */
+#define FE_AUTOLOAD	71	/* Problem autoloading file */
 
 #endif /* _FATAL_H_INCLUDED_ */
 

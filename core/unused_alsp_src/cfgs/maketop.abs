@@ -34,9 +34,9 @@ rule(all,
 	case(&(context_name),
 		[
 		 (mac:([
-			'$(MAKE) -C bld-port all',
-			'-$(MAKE) -C bld-natv all',
-			'$(MAKE) wins'] )),
+			'SetDirectory :bld-port; MakeIt all; SetDirectory ::',
+			'#-$(MAKE) -C bld-natv all',
+			'#$(MAKE) wins'] )),
 		 (_:([
 			'$(MAKE) -C bld-port all',
 			'$(MAKE) -C bld-port mi',
@@ -88,7 +88,7 @@ rule(super_clean,
 	[],
 	case(&(context_name),
 		[(mac:( [
-			'cd ./bld-port; $(MAKE) super_clean',
+			'SetDirectory :bld-port; $(MAKE) super_clean',
 			'cd ./bld-natv; $(MAKE) super_clean',
 			'cd ./bld-wins; $(MAKE) super_clean'])),
 		 (_:([

@@ -1,21 +1,23 @@
-/*
- * icode1.c		-- stuff to emit instructions
- *	Copyright (c) 1987-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 2/12/87
- * Revision History:
- * 03/22/87 - K.Buettner -- icode.c split into icode1.c,
- *						    icode2.c, and icode.h
- * 10/26/94 - C. Houpt	-- Redefined the Instruction Pointer as
- *						   a union so that it can be used as both a
- *						   short and long pointer.  This avoid the
- *						   need to casting l-values, which is not ANSI.
- *						   Fixed similar problem in ic_uiastr().
- *						-- Put some obp code under control of OBP.
- *						-- Allocate large global arrays with malloc() for
- *						   Mac compilers that can't handle them.
- */
+/*=============================================================================*
+ |			icode1.c
+ |		Copyright (c) 1987-1995 Applied Logic Systems, Inc.
+ |
+ |			-- stuff to emit instructions: M68k
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 2/12/87
+ | Revision History:
+ | 03/22/87 - K.Buettner -- icode.c split into icode1.c,
+ |						    icode2.c, and icode.h
+ | 10/26/94 - C. Houpt	-- Redefined the Instruction Pointer as
+ |						   a union so that it can be used as both a
+ |						   short and long pointer.  This avoid the
+ |						   need to casting l-values, which is not ANSI.
+ |						   Fixed similar problem in ic_uiastr().
+ |						-- Put some obp code under control of OBP.
+ |						-- Allocate large global arrays with malloc() for
+ |						   Mac compilers that can't handle them.
+ *=============================================================================*/
 
 #include <stdio.h>
 
@@ -26,20 +28,21 @@
 #include "varproc.h"
 #include "module.h"
 #include "machinst.h"
+#include "codegen.h"
 #include "rinfo.h"
 
 
-/*
- * READMODE, WRITEMODE, CAPTUREMODE, MACROMODE, and ALLOCMODE are the
- * potential values which the variable capturemode may take on.
- */
+/*--------------------------------------------------------------------*
+ | READMODE, WRITEMODE, CAPTUREMODE, MACROMODE, and ALLOCMODE are the
+ | potential values which the variable capturemode may take on.
+ *--------------------------------------------------------------------*/
 
-#define READMODE 0		/* in read mode			*/
+#define READMODE 0		/* in read mode					*/
 #define WRITEMODE 1		/* in write mode (the default)	*/
-#define CAPTUREMODE 2		/* capturing unify instrs for	*/
-				/* read/write mode expansion	*/
-#define MACROMODE 3		/* loading a macro expansion	*/
-#define ALLOCMODE 4		/* emitting allocation code	*/
+#define CAPTUREMODE 2	/* capturing unify instrs for	
+						   read/write mode expansion 	*/
+#define MACROMODE 3		/* loading a macro expansion 	*/
+#define ALLOCMODE 4		/* emitting allocation code	 	*/
 
 /*
  * MAXCALLS is the maximum number of goals which a clause can have.  This

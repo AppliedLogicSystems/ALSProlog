@@ -30,8 +30,12 @@ new_copy0(C,FromStream,ToStream) :-
 	new_copy0(NC,FromStream,ToStream).
 
 testnew :-
+	als_system(SysVars),
+	dmember(os=OS,SysVars),
 	X is cputime,
-	new_copy('/etc/termcap',foonew),
+	(OS = unix ->
+		new_copy('/etc/termcap',foonew) ;
+		new_copy('mailbox3:alsp_src:tests:tsuite:testmath.pro',foonew)),
 	Y is cputime-X,
 	write('Elapsed Time'=Y),nl.
 

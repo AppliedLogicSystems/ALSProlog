@@ -161,10 +161,10 @@ pbi_addclause()
     w_get_An(&v2, &t2, 2);
 
     if (xform_uia(&v1, &t1) &&
-	doassert(IC_ADDCLAUSE, v1, cvt_term_to_rule(v2, t2), 0))
-	SUCCEED;
+		doassert(IC_ADDCLAUSE, v1, cvt_term_to_rule(v2, t2), 0))
+			SUCCEED;
     else
-	FAIL;
+			FAIL;
 }
 
 int
@@ -196,33 +196,33 @@ doassert(which, mod, rule, reconsult_flag)
     dbprot_t odbrs;
 
     if (rule == NIL_VAL)
-	return 0;
+		return 0;
 
     if (reconsult_flag) {
-	old_reconstamp = w_reconstamp;
-	w_reconstamp = 0;
+		old_reconstamp = w_reconstamp;
+		w_reconstamp = 0;
     }
 
     odbrs = w_dbprotect(DBRS_WRITABLE);
 
     icode(IC_INIT, 0, 0, 0, 0);
     if (mod == cur_mod)
-	popmod = 0;
+		popmod = 0;
     else {
-	popmod = 1;
-	icode(IC_NEWMODULE, mod, 0, 0, 0);
+		popmod = 1;
+		icode(IC_NEWMODULE, mod, 0, 0, 0);
     }
 
     if ( (status = compile_clause(rule, 0)) )
-	icode(which, 0, 0, 0, 0);
+		icode(which, 0, 0, 0, 0);
 
     if (popmod)
-	icode(IC_ENDMODULE, 0, 0, 0, 0);
+		icode(IC_ENDMODULE, 0, 0, 0, 0);
 
     (void) w_dbprotect(odbrs);
 
     if (reconsult_flag) {
-	w_reconstamp = old_reconstamp;
+		w_reconstamp = old_reconstamp;
     }
 
     return status;

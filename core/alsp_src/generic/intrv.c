@@ -1,7 +1,7 @@
 /*================================================================
           intrv.c
           --Generated from: pseudoc.ode
-          Date: 95/9/12   Time: 18:12:55
+          Date: 95/10/6   Time: 12:6:20
 		  -- by genC_ie(make_C)
 
     Interval Primitives: May 3 95 Version of make_C_interval_engine
@@ -1109,7 +1109,7 @@ i_j_less()
 	deact();
 	goto g_j_Exit;
    g_j_Exit:
-	}
+	; }
 	if (yl LT 0)  iaerror();
 	if (yh LT 0)  iaerror();
 	if (yh EQ 0) {
@@ -1129,7 +1129,7 @@ i_j_less()
 	deact();
 	goto h_j_Exit;
    h_j_Exit:
-	}
+	; }
 	if (xh LE zl)  goto j_True;
 	if (zh LT xl)  goto j_False;
 	goto j_Exit;
@@ -1266,7 +1266,7 @@ i_k_equal()
 	xhchng();
 	goto e_k_Exit;
    e_k_Exit:
-	}
+	; }
 	if (yl LT 0)  iaerror();
 	if (yh LT 0)  iaerror();
 	if (yh EQ 0) {
@@ -1309,7 +1309,7 @@ i_k_equal()
 	deact();
 	goto u_k_Exit;
    u_k_Exit:
-	}
+	; }
 	if (zl GT xh)  goto k_Un;
 	if (zl EQ xh)  goto k_Tryeq;
 	if (xl LE zh)  goto k_Exit;

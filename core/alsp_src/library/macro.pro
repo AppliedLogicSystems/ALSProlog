@@ -1,25 +1,184 @@
 /*==========================================================================
- |			macro.pro
+ |			macrmain.pro
  |		Copyright (c) 1990-92 Applied Logic Systems, Inc.
  |
  |		Macro Expansion Tool for ALS Prolog
+ |		-- Outer shell portion
  |
  |		Based on Sei-Ich Kondoh & Takaski Chikayama, "Macro processing 
  |		in Prolog", in Logic Programming, Proc. 5th Intl Symposium &
  |		Conference, Kowalski & Bowen, eds, pp 466-480.
  |
- |	Author: Mitanu Paul;  revisions by KA Bowen
+ |	Original Author: Mitanu Paul;  
+ |  Revisions by KA Bowen
+ |		
  *=========================================================================*/
 
-/*
-:- op(925,fx,``).
-:- op(930,fx,`).
-:- op(1200,xfx,=>).
-:- op(1190,xfx,when).
-:- op(1180,xfx,where).
-:- op(1170,xfx,with).
-:- op(1160,xfx,if).
-*/
+module macroxp.
+
+		/*----------------------------------------
+		 |	File Processing
+		 *---------------------------------------*/
+
+export mx_cl/0.
+mx_cl :-
+	set_prolog_flag(undefined_predicate, fail),
+	builtins:command_line(CL),
+	dappend(_,['-s',Source|_],CL),
+	(filePlusExt(SourceName,SourceExt,Source) ->
+		SourceFile = Source
+		;
+		filePlusExt(Source,pro,SourceFile)
+	),
+	(dappend(_,['-t',Target|_],CL) ->
+		TargetFile = Target
+		;
+		(filePlusExt(SourceName,SourceExt,Source) ->
+			(SourceExt \= pro ->
+				filePlusExt(SourceName,pro,TargetFile)
+				;
+				filePlusExt(SourceName,ppo,TargetFile)
+			)
+			;
+			filePlusExt(Source,pro,TargetFile)
+		)
+	),
+	(dappend(_,['-m',Macro|_],CL) ->
+		MacroFile = Macro
+		;
+		(filePlusExt(SourceName,SourceExt,Source) ->
+			filePlusExt(SourceName,mac,MacroFile)
+			;
+			filePlusExt(Source,mac,MacroFile)
+		)
+	),
+	macro_expand_files(SourceFile, TargetFile, MacroFile).
+			
+export mx/0.
+mx :-
+	macro_expand.
+
+export macro_expand/0.
+macro_expand
+	:-
+	set_prolog_flag(undefined_predicate, fail),
+	write('source='),read(Source),
+	write('target='),read(Target),
+	macro_expand_files(Source, Target).
+
+
+export mx/1.
+mx(FileName)
+	:-
+	filePlusExt(BaseFile,Ext,FileName),
+	!,
+	(exists_file(FileName) ->
+		mxx(Ext,BaseFile,FileName)
+		;
+		printf('MacroX: Can\'t find file: %t\n',[FileName])
+	).
+
+mx(FileName)
+	:-
+	filePlusExt(FileName,pl,PLFile),
+	exists_file(PLFile),
+	!,
+	mxx(pl,BaseFile,PLFile).
+
+mx(FileName)
+	:-
+	filePlusExt(FileName,pro,PLFile),
+	exists_file(PLFile),
+	!,
+	mxx(pro,BaseFile,PLFile).
+
+mxx(Ext, BaseFileName,SourceFile)
+	:-
+	filePlusExt(BaseFileName,pro,ProFile),
+	(exists_file(ProFile) ->
+		save_copy(ProFile,BaseFileName)
+		;
+		true),
+	filePlusExt(BaseFileName,tmc,TgtFile),
+	macro_expand_files(SourceFile, TgtFile),
+	!,
+	move_file(TgtFile, ProFile).
+
+save_copy(ProFile,BaseFileName)
+	:-
+	filePlusExt(BaseFileName,sav,SaveCopy),
+	move_file(ProFile, SaveCopy).
+
+
+
+
+
+
+
+
+
+
+export macro_expand_files/2.
+macro_expand_files(Source, Target)
+	:-
+		% see(Source),
+	open(Source,read,SourceStream,[]),
+		% tell(Target),
+	open(Target,write,TargetStream,[]),
+	macro_expand(SourceStream, TargetStream),
+	!,
+	close(SourceStream), close(TargetStream).
+
+
+
+
+
+
+export macro_expand_files/3.
+macro_expand_files(SourceFile, TargetFile, MacroFile)
+	:-
+	macroxp:abolish(macro_defn,6),
+	consult_to(macroxp, -MacroFile),
+	macro_expand_files(SourceFile, TargetFile),
+	macroxp:abolish(macro_defn,6).
+
+export macro_expand/2.
+macro_expand(SourceStream, TargetStream)
+	:-
+	read_term(SourceStream, Item, [vars_and_names(Vars,VNames)]),
+	dispatch_macro_expand(Item, Vars,VNames, SourceStream, TargetStream).
+
+dispatch_macro_expand(end_of_file, _,_,_,_) :-!.
+dispatch_macro_expand(Item, Vars,VNames,SourceStream, TargetStream)
+	:-
+	expand_macros(Item, XItem),
+	Vars = VNames,
+	(macro_show_source ->
+		printf(TargetStream, "   % %t.\n", [Item])
+		;
+		true
+	),
+	printf(TargetStream, "%t.\n", [XItem]),
+	macro_expand(SourceStream, TargetStream).
+
+macro_show_source.
+
+endmod.
+
+/*==========================================================================
+ |			macroexp.pro
+ |		Copyright (c) 1990-92 Applied Logic Systems, Inc.
+ |
+ |		Macro Expansion Tool for ALS Prolog
+ |		-- core expansion
+ |
+ |		Based on Sei-Ich Kondoh & Takaski Chikayama, "Macro processing 
+ |		in Prolog", in Logic Programming, Proc. 5th Intl Symposium &
+ |		Conference, Kowalski & Bowen, eds, pp 466-480.
+ |
+ | Author: Mitanu Paul;  
+ | Revisions by KA Bowen
+ *=========================================================================*/
 
 module macroxp.
 
@@ -341,97 +500,6 @@ define_macro((Pattern => Replacement))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,true,true,[],true)),
 	!.
-
-		/*----------------------------------------
-		 |	File Processing
-		 *---------------------------------------*/
-
-
-export mx_cl/0.
-mx_cl :-
-	set_prolog_flag(undefined_predicate, fail),
-	builtins:command_line(CL),
-	dappend(_,['-s',Source|_],CL),
-	(filePlusExt(SourceName,SourceExt,Source) ->
-		SourceFile = Source
-		;
-		filePlusExt(Source,pro,SourceFile)
-	),
-	(dappend(_,['-t',Target|_],CL) ->
-		TargetFile = Target
-		;
-		(filePlusExt(SourceName,SourceExt,Source) ->
-			(SourceExt \= pro ->
-				filePlusExt(SourceName,pro,TargetFile)
-				;
-				filePlusExt(SourceName,ppo,TargetFile)
-			)
-			;
-			filePlusExt(Source,pro,TargetFile)
-		)
-	),
-	(dappend(_,['-m',Macro|_],CL) ->
-		MacroFile = Macro
-		;
-		(filePlusExt(SourceName,SourceExt,Source) ->
-			filePlusExt(SourceName,mac,MacroFile)
-			;
-			filePlusExt(Source,mac,MacroFile)
-		)
-	),
-	macro_expand_files(SourceFile, TargetFile, MacroFile).
-			
-export mx/0.
-mx :-
-	macro_expand.
-
-export macro_expand/0.
-macro_expand
-	:-
-	set_prolog_flag(undefined_predicate, fail),
-	write('source='),read(Source),
-	write('target='),read(Target),
-	macro_expand_files(Source, Target).
-
-export macro_expand_files/2.
-macro_expand_files(Source, Target)
-	:-
-		% see(Source),
-	open(Source,read,SourceStream,[]),
-		% tell(Target),
-	open(Target,write,TargetStream,[]),
-	macro_expand(SourceStream, TargetStream),
-	!,
-	close(SourceStream), close(TargetStream).
-
-export macro_expand_files/3.
-macro_expand_files(SourceFile, TargetFile, MacroFile)
-	:-
-	macroxp:abolish(macro_defn,6),
-	consult_to(macroxp, -MacroFile),
-	macro_expand_files(SourceFile, TargetFile),
-	macroxp:abolish(macro_defn,6).
-
-export macro_expand/2.
-macro_expand(SourceStream, TargetStream)
-	:-
-	read_term(SourceStream, Item, [vars_and_names(Vars,VNames)]),
-	dispatch_macro_expand(Item, Vars,VNames, SourceStream, TargetStream).
-
-dispatch_macro_expand(end_of_file, _,_,_,_) :-!.
-dispatch_macro_expand(Item, Vars,VNames,SourceStream, TargetStream)
-	:-
-	expand_macros(Item, XItem),
-	Vars = VNames,
-	(macro_show_source ->
-		printf(TargetStream, "   % %t.\n", [Item])
-		;
-		true
-	),
-	printf(TargetStream, "%t.\n", [XItem]),
-	macro_expand(SourceStream, TargetStream).
-
-macro_show_source.
 
 endmod.
 

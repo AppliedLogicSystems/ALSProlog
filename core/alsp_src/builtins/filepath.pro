@@ -56,6 +56,8 @@ identify_case(dos).
 %%				has any meaning).
 %%	path_separator/1	-- character which separates paths such as 
 %%				are found on the PATH environment variable.
+%%	directory_self/1	-- character which stands for the current
+%%				directory.
 %%
 
 :- 
@@ -72,7 +74,8 @@ identify_case(dos).
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 directory_separator(DS),
-					 sub_atom(Path,1,_,DS), !) )
+					 sub_atom(Path,1,_,DS), !) ),
+		addclause(builtins,directory_self('.'))
 
 	; OS = macos, !,	%% Mac
 		addclause(builtins,file_separator('.')),
@@ -83,10 +86,12 @@ identify_case(dos).
 					(is_absolute_pathname(Path) :-
 					 sub_atom(Path,1,1,C1), 
 					 C1 \= ':',atom_split(Path,':',_,_),!) ),
+		addclause(builtins,directory_self(':'))
+/*
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 atom_split(Path,':',_,_)))
-
+*/
 	; OS = unix, !,		%% Unix
 		addclause(builtins,file_separator('.')),
 		addclause(builtins,directory_separator('/')),
@@ -95,7 +100,8 @@ identify_case(dos).
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 directory_separator(DS),
-					 sub_atom(Path,1,_,DS), !) )
+					 sub_atom(Path,1,_,DS), !) ),
+		addclause(builtins,directory_self('.'))
 
 	; OS = vms, !,		%% VMS -- FIXME: not correct
 		addclause(builtins,file_separator('.')),
@@ -105,7 +111,8 @@ identify_case(dos).
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 directory_separator(DS),
-					 sub_atom(Path,1,_,DS), !) )
+					 sub_atom(Path,1,_,DS), !) ),
+		addclause(builtins,directory_self('.'))
 	; true ).
 
 %%

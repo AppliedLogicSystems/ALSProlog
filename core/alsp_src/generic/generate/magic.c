@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include "defs.h"
 
+int fix_MAGIC(void);
+
 		/* Note: Unslashed length must be kept = 120: see mod_header in loadfile.c */
 static char MAGIC[] =
 "ALS-Prolog Loadable Object Module\\r\\nFormat 1.21(XXXXXXXXXX,YYYYYYYYYY)\\r\\n\\032\\004\\019\\026";
@@ -31,7 +33,7 @@ main()
 }
 
 int
-fix_MAGIC()
+fix_MAGIC(void)
 {
     char *m = MAGIC;
     char *p = ProcStr;

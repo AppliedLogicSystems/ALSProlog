@@ -49,7 +49,10 @@
 #endif /* 0 */
 
 #ifdef MacOS
+#ifdef MPW_TOOL
+#else
 #include <unix.h>
+#endif
 #ifdef THINK_C
 #include <LoMem.h>
 #else
@@ -242,8 +245,12 @@ PI_prolog_init(win_str, argc, argv)
     stacksize = DEFAULT_STACK_SIZE;
     icbufsize = MIN_ICBUFSIZE;
     saved_state_filename = (char *) 0;
-
+    
+#ifdef MacOS
+    als_opts = (char *) PI_get_options();
+#else
     als_opts = getenv("ALS_OPTIONS");
+#endif
 
     if (als_opts) {
 	char *opt, *val;
@@ -752,7 +759,7 @@ whereami(name)
 	 * loop below.
 	 *-------------------------------------------------------------*/
 
-	for (s = name;;) {
+	for ((*name == DIR_SEPARATOR ? (s = name+1) : (s = name));;) {
 	    if (*s == DIR_SEPARATOR)
 		cutoff = t;
 	    if (!(*t++ = *s++))
@@ -857,9 +864,11 @@ autoload(f)
     status = load_file(fext, 0);  
 
     if (!status) {
+/*
 	PI_app_printf(PI_app_printf_warning,
 		      "autoload: unable to load '%s'\n", f);
-/*	fatal_error(FE_PANIC_FAIL, 0);    */
+*/
+	fatal_error(FE_AUTOLOAD, (long)f);
     }
 }
 

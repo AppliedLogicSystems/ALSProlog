@@ -35,7 +35,8 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef __MWERKS__
+
+#if !defined(MPW_TOOL) && defined(__MWERKS__)
 #include <unix.h>
 /* MetroWerks does not define the EINTR error code. */
 #define EINTR           4
@@ -676,11 +677,13 @@ incr_fdrefcnt(fd)
     int fd;
 {
     if (fdrefcnts == NULL) {
-#if !defined(MacOS) && defined(_SC_OPEN_MAX)
+#if defined(_SC_OPEN_MAX)
 	if ( (openmax = sysconf(_SC_OPEN_MAX)) < 0)
 	    openmax = OPEN_MAX_GUESS;
 #elif defined(OPEN_MAX)
 	openmax = OPEN_MAX;
+#elif defined(FOPEN_MAX)
+	openmax = FOPEN_MAX;
 #else
 	openmax = OPEN_MAX_GUESS;
 #endif /* OPEN_MAX */
@@ -819,7 +822,7 @@ sio_file_open()
 #ifdef THINK_C
 	    /* Open files as text files to insure CR/NL conversion. */
 	    if ((SIO_FD(buf) = open((char *)filename, flags | O_TEXT)) == -1) {	/* } */
-#elif defined(__MWERKS__)
+#elif defined(__MWERKS__) && !__POWERPC__
 	    extern int metrowerks_open_patch(const char *filename, int mode);
 	    if ((SIO_FD(buf) = metrowerks_open_patch((char *)filename, flags)) == -1) {/* } */
 #else
@@ -2567,30 +2570,22 @@ static int corrected_read(int fn, char *buffer, int count)
     	
     return result;
 }
-
 #elif defined(__MWERKS__)
 
-/*-----------------------------------------------------------------*
-   MetroWerk's read() does not do CR/LF conversion, nor does it recognize
-   Control-D as EOF.  This function works around these problems.
-   Control-D's must be on a blank line to work.
- *-----------------------------------------------------------------*/
 static int corrected_read(int fn, char *buffer, int count)
 {
     int result;
-    char *p;
-    	
+    
     result = read(fn, buffer, count);
-    	
-    if (result != EOF) {
-    	if (result > 0 && *buffer == '#') result = 0; 
-    	for (p = buffer + result - 1; p >= buffer; p--)
-    	   if (*p == '\r') *p = '\n';
+    
+    if (fn == 0 && result > 0) {
+	int i;
+	for (i = 0; i < result; i++) if (buffer[i] == 5) result = 0;
     }
-    	
+	
     return result;
 }
-#endif  /* defined(THINK_C) || defined(__MWERKS__)*/
+#endif  /* defined(THINK_C) */
 
 /*
  * sio_readbuffer(SD)
