@@ -10,12 +10,12 @@ proc vTclWindow.defstr {base} {
         set base .defstr
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 499x365+375+178
     wm maxsize $base 1137 870

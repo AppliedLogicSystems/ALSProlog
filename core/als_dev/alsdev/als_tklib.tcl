@@ -138,13 +138,13 @@ proc vTclWindow.input_popup {base} {
         set base .input_popup
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
 
-    toplevel $base -class Toplevel 
+    toplevel_patch $base -class Toplevel 
     wm focusmodel $base passive
     wm geometry $base 407x130+50+317
     wm maxsize $base 1265 994
@@ -204,7 +204,7 @@ proc do_popup_input {Prompt Title} {
 
 	set proenv(.input_popup) ""
 	Window show .input_popup
-	raise .input_popup
+	raise_patch .input_popup
 	wm title .input_popup $Title
     .input_popup.input_p.input_popup_head configure -text $Prompt
     focus .input_popup.input_p.input_popup_entry
@@ -258,13 +258,13 @@ proc vTclWindow.popup_select_widget {base} {
         set base .popup_select_widget
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
 
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 188x382+401+165
     wm maxsize $base 1137 870
@@ -321,7 +321,7 @@ proc vTclWindow.popup_select_widget {base} {
 
 proc display_file_image {ImageDir ImageFile ImageBase Win Width Height BorderWidth} {
 	set ImagePath [file join $ImageDir $ImageFile]
-	toplevel $Win -bd $BorderWidth -relief flat
+	toplevel_patch $Win -bd $BorderWidth -relief flat
 	wm withdraw $Win
 	set screen_width  [winfo screenwidth .]
 	set screen_height [winfo screenheight .]
@@ -337,7 +337,7 @@ proc display_file_image {ImageDir ImageFile ImageBase Win Width Height BorderWid
 }
 
 proc display_image {ImageName Win Width Height X Y BorderWidth } {
-	toplevel $Win -bd $BorderWidth -relief flat
+	toplevel_patch $Win -bd $BorderWidth -relief flat
 	wm withdraw $Win
 	wm overrideredirect $Win 1
 	label $Win.label -image $ImageName -bd 1 -relief flat

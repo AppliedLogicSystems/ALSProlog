@@ -93,7 +93,7 @@ proc table_object {InfoArrayName } {
 
 	append YSB $IA(tabletop) ".sy"
 	append XSB $IA(tabletop) ".sx"
-	toplevel $IA(tabletop)
+	toplevel_patch $IA(tabletop)
 	wm title $IA(tabletop) $IA(title)
 
 	table $IA(table) \

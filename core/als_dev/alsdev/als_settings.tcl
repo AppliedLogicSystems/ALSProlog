@@ -7,12 +7,12 @@ proc vTclWindow.alsdev_settings {base} {
         set base .alsdev_settings
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 233x142+199+212
     wm maxsize $base 1137 870

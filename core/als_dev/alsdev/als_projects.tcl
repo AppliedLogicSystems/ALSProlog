@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.13 1998/10/16 02:35:03 choupt Exp $"
+#|		"$Id: als_projects.tcl,v 1.14 1998/10/19 20:41:45 choupt Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -23,7 +23,7 @@ proc post_open_project {ProjTitle Win} {
 	.topals.mmenb.prolog add command \
 			-label "Active Project:" -font {Helvetica 10 italic} 
 	.topals.mmenb.prolog add command \
-		-label $ProjTitle -font {Helvetica 10 italic} -command [list bringup $Win]
+		-label $ProjTitle -font {Helvetica 10 italic} -command "show_window $Win"
 }
 
 proc unpost_open_project {ProjTitle} {
