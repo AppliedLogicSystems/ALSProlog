@@ -3120,6 +3120,10 @@ write_buffer(tk_win,Stream) :-
 	stream_name(Stream, WinID),
 	sio_set_position(Stream, 0, 0),
 	catch(tcl_call(Interp, [WinID,insert,end,BufUIA], _),_,true),
+
+%	catch(tcl_call(Interp, [WinID,insert,end,'\\n?-'], _),_,true),
+%	catch(tcl_call(Interp, [WinID,mark,set,lastPrompt,[end,-1,chars]], _),_,true),
+
 	catch(tcl_call(Interp, [WinID,see,end], _),_,true),
 	catch(tcl_call(Interp, [update], _),_,true).
 
@@ -3218,7 +3222,7 @@ tk_setmark(Stream)
 	stream_name(Stream, WinID),
 	stream_addl2(Stream, Interp),
 	!,
-	catch(tcl_call(Interp, [WinID,mark,set,lastPrompt,[end,-1,chars]], _),_,true).
+	catch(tcl_call(Interp, [WinID,mark,set,lastPrompt,[end,-2,chars]], _),_,true).
 
 tk_setmark(Stream).
 
