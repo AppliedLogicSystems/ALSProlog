@@ -928,6 +928,7 @@ ld_fs(OS)
 	load_builtins(BDir, blt_io),
 	load_builtins(BDir, xconsult),
 	ld_fs(OS),
+	load_builtins(BDir, blt_atom),
 	load_builtins(BDir, sio),
 
 	consult_builtins(BDir, blt_ctl) ,
@@ -935,7 +936,6 @@ ld_fs(OS)
 	consult_builtins(BDir, blt_std),
 	consult_builtins(BDir, blt_stk),
 	consult_builtins(BDir, blt_als),
-	consult_builtins(BDir, blt_atom),
 	consult_builtins(BDir, cutils),
 	consult_builtins(BDir, sio_wt),
 	consult_builtins(BDir, sio_d10),
@@ -994,6 +994,10 @@ ld_wins
 	ld_wins.
 
 :- dynamic(intconstr/0).
+
+:-
+	consult_builtins(ra_basis),
+	consult_builtins(int_cstr).
 
 :-  intconstr, !, 
 	consult_builtins(ra_basis),

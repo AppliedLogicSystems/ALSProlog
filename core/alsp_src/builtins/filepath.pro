@@ -71,11 +71,11 @@ identify_case(dos).
 		addclause(builtins,path_separator(';')),
 		addclause(builtins, 
 			  (is_absolute_pathname(Path) :- 
-				sub_atom(Path,2,1,':'),!) ),
+				sub_atom(Path,2,1,':'),!) ),  
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 directory_separator(DS),
-					 sub_atom(Path,1,_,DS), !) ),
+					 sub_atom(Path,1,_,DS), !) ),  
 		addclause(builtins,directory_self('.'))
 		
     ; OS = mswin32, !,		%% Microsoft Win32
@@ -85,11 +85,11 @@ identify_case(dos).
 		addclause(builtins,path_separator(';')),
 		addclause(builtins, 
 			  (is_absolute_pathname(Path) :- 
-				sub_atom(Path,2,1,':'),!) ),
+				sub_atom(Path,2,1,':'),!) ),    
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 directory_separator(DS),
-					 sub_atom(Path,1,_,DS), !) ),
+					 sub_atom(Path,1,_,DS), !) ),   
 		addclause(builtins,directory_self('.'))
 
 	; OS = macos, !,	%% Mac
@@ -99,7 +99,7 @@ identify_case(dos).
 		addclause(builtins,path_separator(';')),
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
-					 sub_atom(Path,1,1,C1), 
+					 sub_atom(Path,1,1,C1),    
 					 C1 \= ':',atom_split(Path,':',_,_),!) ),
 		addclause(builtins,directory_self(':'))
 /*
@@ -117,7 +117,7 @@ identify_case(dos).
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 directory_separator(DS),
-					 sub_atom(Path,1,_,DS), !) ),
+					 sub_atom(Path,1,_,DS), !) ),    
 		addclause(builtins,directory_self('.'))
 
 	; OS = vms, !,		%% VMS -- FIXME: not correct
@@ -128,7 +128,7 @@ identify_case(dos).
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 directory_separator(DS),
-					 sub_atom(Path,1,_,DS), !) ),
+					 sub_atom(Path,1,_,DS), !) ),   
 		addclause(builtins,directory_self('.'))
 	; true ).
 

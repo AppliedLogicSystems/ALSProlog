@@ -5,6 +5,10 @@
  * Created: 6/22/94
  */
 
+#include <stdio.h>
+#ifdef WIN32
+#include "fswin32.h"
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>

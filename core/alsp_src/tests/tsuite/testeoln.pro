@@ -62,10 +62,12 @@ test_size(Pred, Type, FileType, Size, Results) :-
 	C =.. [Pred, S, NewResults],
 	C,
 	close(S),
+/*
 	heap_status(HeapFree),
 	printf('File: %t read_eoln_type: %t Buffer Size: %d HFree: %d\n',
 	       [FullName, Type, Size, HeapFree]),
 	ttyflush,
+*/
 	check(Type, FullName, Size, Results, NewResults).
 
 check(Type, Name, Size, Results, Results) :- !.

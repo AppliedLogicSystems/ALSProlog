@@ -24,4 +24,5 @@
 /EXPORT:PI_toplevel
 /EXPORT:PI_prolog_init
 /EXPORT:PI_app_printf
+/EXPORT:PI_set_app_printf_callback
 /EXPORT:pi_init

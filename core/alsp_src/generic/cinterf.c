@@ -841,6 +841,115 @@ c_convertCstrPstr()
 
     PI_SUCCEED;
 }
+
+#define CB_TABLE_SIZE 257
+
+struct {
+    void *func, *object;
+    const char *term;    
+} callback_table[CB_TABLE_SIZE];
+
+static void init_callback_table(void)
+{
+    int i;
+    
+    i = SYMLONGVAL1(1);
+    
+    for (i = 0; i < CB_TABLE_SIZE; i++) callback_table[i].func = NULL;
+}
+
+static int lookup_callback(void *func, void *object)
+{
+    int firstkey, key;
+    
+    firstkey = key = ((unsigned long)func + (unsigned long)object) % CB_TABLE_SIZE;
+    
+    while (1) {
+    	if (callback_table[key].func == NULL
+    	    || (callback_table[key].func == func && callback_table[key].object == object)) break;
+    	key = (key+1) % CB_TABLE_SIZE;
+    	if (key == firstkey) {key = -1; break;}
+    }
+
+    return key;
+}
+
+static void add_callback(void *func, void *object, const char *term)
+{
+    int i;
+    
+    if ((i = lookup_callback(func, object)) >= 0) {
+        callback_table[i].func = func;
+        callback_table[i].object = object;
+        callback_table[i].term = term;
+    }
+}
+
+static void remove_callback(void *func, void *object, const char *term)
+{
+    int i;
+
+    if ((i = lookup_callback(func, object)) >= 0) {
+        callback_table[i].func = NULL;
+    }
+}
+
+const char *find_callback(void *func, void *object)
+{
+    int i;
+
+    if ((i = lookup_callback(func, object)) >= 0) {
+        return callback_table[i].term;
+    } else return NULL;
+}
+
+/* Warning: when binding and unbinding symbols to (callback, object) pairs, I assume
+   that the C string pointer to the symbol will never move. Is this true? */
+static int c_bind_callback(void)
+{
+	PWord arg1, arg2, arg3;
+	int type1, type2, type3;
+	
+	PI_getan(&arg1,&type1,1);
+	if (type1 != PI_INT)
+		if (!CI_get_integer((unsigned long *)&arg1,type1))
+			PI_FAIL;
+	PI_getan(&arg2,&type2,2);
+	if (type2 != PI_INT)
+		if (!CI_get_integer((unsigned long *)&arg2,type2))
+			PI_FAIL;
+			
+	PI_getan(&arg3,&type3,3);
+	if (type3 == PI_SYM)
+		arg3 = (unsigned long) PI_getsymname(0,arg3,0);
+	else PI_FAIL;
+	
+	add_callback((void *)arg1, (void *)arg2, (const char *)arg3);
+	PI_SUCCEED;
+}
+
+static int c_unbind_callback(void)
+{
+	PWord arg1, arg2, arg3;
+	int type1, type2, type3;
+	
+	PI_getan(&arg1,&type1,1);
+	if (type1 != PI_INT)
+		if (!CI_get_integer((unsigned long *)&arg1,type1))
+			PI_FAIL;
+	PI_getan(&arg2,&type2,2);
+	if (type2 != PI_INT)
+		if (!CI_get_integer((unsigned long *)&arg2,type2))
+			PI_FAIL;
+	PI_getan(&arg3,&type3,3);
+	if (type3 == PI_SYM)
+		arg3 = (unsigned long) PI_getsymname(0,arg3,0);
+	else PI_FAIL;
+	
+	remove_callback((void *)arg1, (void *)arg2, (const char *)arg3);
+	PI_SUCCEED;
+}
+
 /* *INDENT-OFF* */
 PI_BEGIN
     PI_PDEFINE("$c_structinfo", 3, c_structinfo, "_c_structinfo")
@@ -850,6 +959,9 @@ PI_BEGIN
     PI_PDEFINE("$c_call", 3, c_call, "_c_call")
     PI_PDEFINE("$c_makeuia", 3, c_makeuia, "_c_makeuia")
     PI_PDEFINE("$c_convertcstrpstr", 2, c_convertCstrPstr, "_c_convertCstrPstr")
+
+    PI_PDEFINE("$c_bind_callback", 3, c_bind_callback, "_c_bind_callback")
+    PI_PDEFINE("$c_unbind_callback", 3, c_unbind_callback, "_c_unbind_callback")
 PI_END
 /* *INDENT-ON* */
 
@@ -860,6 +972,8 @@ cinterf_init()
     PI_makesym(&nil, &niltype, "[]");	/* make a nil symbol */
     PI_makesym(&farsym, &farsymtype, "$farptr");
     PI_makesym(&constsym, &constsymtype, "c");
+
+    init_callback_table();
 
     PI_INIT;
 }

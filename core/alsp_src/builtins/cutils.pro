@@ -186,6 +186,9 @@ export pstr2str/2.
 export cstr2pstr/1.
 export pstr2cstr/1.
 
+export c_bind_callback/3.
+export c_unbind_callback/3.
+
 /*============================================*/
 
 
@@ -548,5 +551,12 @@ cstr2pstr(CString) :-
 % Convert (in place) from Pascal String to C String.
 pstr2cstr(PString) :-
 	'$c_convertcstrpstr'(1,PString).
+	
+%
+%	Callback Facility
+%
+
+c_bind_callback(Func, Object, Term) :- '$c_bind_callback'(Func, Object, Term).
+c_unbind_callback(Func, Object, Term) :- '$c_unbind_callback'(Func, Object, Term).
 
 endmod.
