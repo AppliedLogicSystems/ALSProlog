@@ -1,11 +1,10 @@
-/*
- * fsdos.c
- *      Copyright (c) 1991-1993 Applied Logic Systems, Inc.
- *
- *      File System Access & Manipulation -- DOS
- *
- */
-
+/*=================================================================*
+ |			fsdos.c
+ |	Copyright (c) 1991-1995 Applied Logic Systems, Inc.
+ |
+ |		File System Access & Manipulation -- DOS
+ |
+ *=================================================================*/
 #include "defs.h"
 
 #if defined(DOS) || defined(__GO32__) || defined(OS2)
@@ -15,6 +14,11 @@
 
 #ifndef MAXPATHLEN
 #define MAXPATHLEN FILENAME_MAX
+#endif
+
+#ifdef HAVE_REGCMP
+#include <sys/types.h>
+#include <regex.h>
 #endif
 
 /*
@@ -40,8 +44,11 @@ getDirEntries()
     struct dirent *dirEntry;
     PWord consCell, head, sym, tail, nil;
     int   consType, headType, symType, tailType, nilType;
-    char *regexComp;
+/*    char *regexComp;   */
     int   regexVal;
+#ifdef HAVE_REGCMP
+	regex_t regstruct;
+#endif
 
     PI_getan(&v1, &t1, 1);
     PI_getan(&v2, &t2, 2);
@@ -56,29 +63,26 @@ getDirEntries()
     /* printf("dirName=%s pattern=%s \n",dirName,pattern); */
 
 #ifdef HAVE_REGCMP
-    if ((regexComp = regcomp(pattern, 0)) != NULL)
-	PI_FAIL;
+    if (regcomp(&regstruct, pattern, REG_ICASE | REG_NOSUB) )
+		PI_FAIL;
 #else
     if (re_comp(pattern) != NULL)
-	PI_FAIL;
+		PI_FAIL;
 #endif
-
-    /* printf("pattern compiled\n"); */
 
     dirp = opendir(dirName);
 
-    /* printf("directory %s opened\n",dirName); */
-
     for (dirEntry = readdir(dirp); dirEntry != NULL; dirEntry = readdir(dirp)) {
+
 #ifdef HAVE_REGCMP
-	if ((regexVal = regexec(dirEntry->d_name)) == 1) {
+	if ((regexVal = regexec(&regstruct, dirEntry->d_name, 0, 0, 0)) == 0) {
 #else
 	if ((regexVal = re_exec(dirEntry->d_name)) == 1) {
 #endif
 	    PI_makelist(&consCell, &consType);
 	    if (!PI_unify(v3, t3, consCell, consType)) {
 #ifdef HAVE_REGCMP
-	        free(regexComp);
+    		regfree(&regstruct);
 #endif
 		PI_FAIL;
 		}
@@ -86,7 +90,7 @@ getDirEntries()
 	    PI_makeuia(&sym, &symType, dirEntry->d_name);
 	    if (!PI_unify(head, headType, sym, symType)){
 #ifdef HAVE_REGCMP
-	        free(regexComp);
+    		regfree(&regstruct);
 #endif
 		PI_FAIL;
 		}
@@ -99,7 +103,7 @@ getDirEntries()
     }
 
 #ifdef HAVE_REGCMP
-    free(regexComp);
+    regfree(&regstruct);
 #endif
     PI_makesym(&nil, &nilType, "[]");
 

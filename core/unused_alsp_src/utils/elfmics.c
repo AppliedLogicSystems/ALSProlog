@@ -30,6 +30,7 @@
 static void
 fe(char *mess, char *arg)
 {
+    fprintf(stderr,">>>>");
     if (arg)
 	fprintf(stderr,mess,arg);
     else
@@ -68,6 +69,8 @@ main(int argc,char **argv)
     struct stat statbuf;
     char buf[MISSBUFSIZE];
 
+int extra;
+
 #   define iiname argv[1]
 #   define ssname argv[2]
 #   define oiname argv[3]
@@ -103,11 +106,12 @@ main(int argc,char **argv)
      * Step 2:  Open the save state file and stat it for future processing
      */
     
+printf("Step2: opening %s\n",ssname);
     ssfd = open(ssname, O_RDONLY);
     if (ssfd < 0)
-	fe("Error opening saved state file %s for read access", ssname);
+		fe("Error opening saved state file %s for read access", ssname);
     if (fstat(ssfd, &statbuf) < 0)
-	fe("Cannot fstat file descriptor associated with %s", ssname);
+		fe("Cannot fstat file descriptor associated with %s", ssname);
     
     
     /*
@@ -119,18 +123,19 @@ main(int argc,char **argv)
      */
     
     if (elf_version(EV_CURRENT) == EV_NONE)
-	fe("Out of date elf library",0);
+		fe("Out of date elf library",0);
     
     elf = elf_begin(oifd, ELF_C_RDWR, 0);
+printf("Step3: ELF_K_ELF=%x elf_kind(elf)=%x\n",ELF_K_ELF,elf_kind(elf));
     if (elf_kind(elf) != ELF_K_ELF)
-	fe("Image file not of right type",0);
+		fe("Image file not of right type",0);
     
     ehdr = elf32_getehdr(elf);
     if (ehdr == 0)
-	fe("Unable to read elf header",0);
+		fe("Unable to read elf header",0);
     
     /*
-     * Step 4:  Search for the "als_data" section.  This exist only when
+     * Step 4:  Search for the "als_data" section.  This exists only when
      * the input image is itself a saved state.  In this case, we want
      * to replace the old saved state with the new one.
      */
@@ -139,7 +144,7 @@ main(int argc,char **argv)
     while ((scn = elf_nextscn(elf,scn)) != 0) {
         char *name = 0;
         if ((shdr = elf32_getshdr(scn)) != 0) {
-	    name = elf_strptr(elf,ehdr->e_shstrndx,shdr->sh_name);
+	    	name = elf_strptr(elf,ehdr->e_shstrndx,shdr->sh_name);
 	}
 	if (name && strcmp(name,als_data_name) == 0)
 	    break;
@@ -151,23 +156,23 @@ main(int argc,char **argv)
      */
     
     if (scn) {
-	als_scn = scn;
-	als_shdr = elf32_getshdr(als_scn);
+		als_scn = scn;
+		als_shdr = elf32_getshdr(als_scn);
     }
     else {
-	Elf_Data *newname;
-	scn = elf_getscn(elf, (size_t)ehdr->e_shstrndx);
-	newname = elf_newdata(scn);
-	newname->d_buf = als_data_name;
-	newname->d_type = ELF_T_BYTE;
-	newname->d_size = sizeof als_data_name;
-	elf_update(elf, ELF_C_NULL);
-	als_scn = elf_newscn(elf);
-	als_shdr = elf32_getshdr(als_scn);
-	als_shdr->sh_name = newname->d_off;
-	als_shdr->sh_type = SHT_LOUSER;
-	als_shdr->sh_flags = 0;
-	elf_update(elf, ELF_C_NULL);
+		Elf_Data *newname;
+		scn = elf_getscn(elf, (size_t)ehdr->e_shstrndx);
+		newname = elf_newdata(scn);
+		newname->d_buf = als_data_name;
+		newname->d_type = ELF_T_BYTE;
+		newname->d_size = sizeof als_data_name;
+		elf_update(elf, ELF_C_NULL);
+		als_scn = elf_newscn(elf);
+		als_shdr = elf32_getshdr(als_scn);
+		als_shdr->sh_name = newname->d_off;
+		als_shdr->sh_type = SHT_LOUSER;
+		als_shdr->sh_flags = 0;
+		elf_update(elf, ELF_C_NULL);
     }
 
     /*
@@ -175,13 +180,20 @@ main(int argc,char **argv)
      */
     
     if ((als_data = elf_getdata(als_scn, 0)) == 0)
-	als_data = elf_newdata(als_scn);
+		als_data = elf_newdata(als_scn);
+/*printf("calling: als_data->d_buf = malloc(%x)\n",statbuf.st_size);*/
     als_data->d_buf = malloc(statbuf.st_size);
+	if ( als_data->d_buf <= 0 )
+		fe("Error: Cannot malloc required number of bytes",0);
+/* printf("als_data->d_buf = %x\n",als_data->d_buf); */
     als_data->d_type = ELF_T_BYTE;
     als_data->d_size = statbuf.st_size;
     als_data->d_align = sysconf(_SC_PAGESIZE);
-    if (statbuf.st_size != read(ssfd,als_data->d_buf,statbuf.st_size))
-	fe("Error reading saved state file",0);
+/*    if (statbuf.st_size != read(ssfd,als_data->d_buf,statbuf.st_size))  */
+extra = read(ssfd,als_data->d_buf,statbuf.st_size);
+printf("Step6: statbuf.st_size=%x read=%x\n",statbuf.st_size,extra);
+    if (statbuf.st_size != extra)
+		fe("Error reading saved state file",0);
     close(ssfd);
     
 

@@ -51,6 +51,7 @@ cur_debug_level(1).
 :-dynamic(sysPathPrefix/1).
 :-dynamic(imported/1).
 :-dynamic(trace_enter_file/1).
+:-dynamic(tgt_os/1).
 
 :- make_gv("InfoTable").
 
@@ -352,6 +353,17 @@ sbis(BItms)
  |		all  			 -	(default) include all functions from the library;
  |		all_except(List) -	include all functions from the library
  |							except the members of List
+ | - New - being added:
+ |		all_xcpt_pat(String) -	include all functions from the library
+ |							except those for which String is an
+ |
+ |		all_xcpt_pat(SL) - SL is a Prolog list of atoms;
+ |							include all functions from the library
+ |							except those matching (initial seg) any
+ |							atom on list SL; ie, exclude Name if 
+ |							_any_ atom on SL is an initial seg of Name.
+ |
+ |							an initial segment of their name
  |		List 			 - 	include just the elements of List
  |
  |	Here list consists of atoms naming functions, or expressions F/N,
@@ -405,10 +417,10 @@ sbis(BItms)
  |	...
  |	#endif % BFi
  |
- |	The -A command line switch is used to pass a compound filter which
+ |	The -a command line switch is used to pass a compound filter which
  |	an image is being made:
  |
- |	alspro -A	'BF1+BF2+...+BFn'
+ |	alspro -a	'BF1+BF2+...+BFn'
  |
  |	This causes each of the following facts to be asserted:
  |
@@ -454,6 +466,11 @@ calc_filters(all)
 calc_filters(all_except(Excl))
 	:-
 	assert(fcn_filter(all_except(Excl))).
+
+	%% Incoming is all_xcpt_pat(Pat):
+calc_filters(all_xcpt_pat(Pat))
+	:-
+	assert(fcn_filter(all_xcpt_pat(Pat))).
 
 	%% Incoming is explicit list of fcns to include:
 calc_filters(FiltExpr)
@@ -563,7 +580,7 @@ c2pro([FirstFile | Rest], Defines)
 	setup_the_input_file(FirstFile, SrcPath, InName, BaseName),
 	outSuffix(OutSufx),
 	filePlusExt(BaseName,OutSufx,OutName),
-	tgt_os(OS),
+	(tgt_os(OS) -> true ; OS = unix),
 	init_state(InName, OutName, OS, State),
 	fcn_filter(FcnFilter),
 	setC2P(fcn_filter, State, FcnFilter),

@@ -111,7 +111,7 @@ static	void	assert_sys_searchdir PARAMS(( char * ));
 static	void	assert_als_system PARAMS(( char *, char *, char *, char *,
 				    char *, char * ));
 static	void	assert_command_line PARAMS(( int, char ** ));
-static	void	assert_atom_in_builtins PARAMS(( char * ));
+static	void	assert_atom_in_module PARAMS(( char*, char * ));
 #ifndef MacOS
 static	int	absolute_pathname PARAMS((CONST char * ));
 #endif
@@ -449,12 +449,25 @@ PI_prolog_init(win_str, argc, argv)
     assert_als_system(OSStr, MinorOSStr, ProcStr,
 		      SysManufacturer, versionNum, win_str);
 
-    /*---------------------------------------*
-     | Set up any conditional configuration
-     | controls:
-     *---------------------------------------*/
+    /*-------------------------------------------*
+     | Set up conditional configuration controls:
+     *-------------------------------------------*/
+
+
+#if defined(__DJGPP__)
+    assert_atom_in_module("syscfg","djgpp2");
+
+#elif defined(__GO32__)
+    assert_atom_in_module("syscfg","djgpp2");
+
+#elif defined(MacOS)
+    assert_atom_in_module("syscfg","macos");
+
+#endif
+
+
 #ifdef INTCONSTR 
-    assert_atom_in_builtins("intconstr");
+    assert_atom_in_module("builtins","intconstr");
 #endif
 
     /*---------------------------------------*
@@ -536,21 +549,27 @@ assert_sys_searchdir(name)
 }
 
 /*-----------------------------------------------------------------------------*
+ |	assert_atom_in_module(mod_name,atom_name)
+ |	-- called to various 0-ary facts in the database prior to loading the 
+ | 	builtins file; primarily used for modules builtins and syscfg.
  *-----------------------------------------------------------------------------*/
 static void
-assert_atom_in_builtins(atom_name)
+assert_atom_in_module(mod_name,atom_name)
+    char *mod_name;
     char *atom_name;
 {
     char  command[2048];
-    sprintf(command, "assertz(builtins,%s,_,0)", atom_name);
+
+    sprintf(command, "assertz(%s,%s,_,0)", mod_name,atom_name);
     if (!exec_query_from_buf(command)) {
-	fatal_error(FE_ASSERT_SYS, 0);
-    }
+		fatal_error(FE_ASSERT_SYS, 0);
+    	}
 }
 
 /*-----------------------------------------------------------------------------*
- * assert_als_system is called to place certain information about the
- * system in the database prior to loading the builtins file.
+ | assert_als_system 
+ |	-- called to create the als_system/1 fact in the database prior to 
+ |	loading the builtins file.
  *-----------------------------------------------------------------------------*/
 static void
 assert_als_system(os, os_var, proc, man, ver, winstype)
@@ -559,7 +578,7 @@ assert_als_system(os, os_var, proc, man, ver, winstype)
     char  command[2048];
 
     if (noautoload && !pckgloaded)
-	return;
+		return;
 
     sprintf(command,
 	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s',wins='%s']),_,0)",
@@ -570,8 +589,8 @@ assert_als_system(os, os_var, proc, man, ver, winstype)
 	    ver,
 	    winstype);
     if (!exec_query_from_buf(command)) {
-	fatal_error(FE_ASSERT_SYS, 0);
-    }
+		fatal_error(FE_ASSERT_SYS, 0);
+    	}
 }
 
 
@@ -717,6 +736,7 @@ whereami(name)
 	    char *newrbuf;
 
 	    newrbuf = imagedir;
+#ifndef __DJGPP__
 	    if (*(name + 1) == ':') {
 		if (*name >= 'a' && *name <= 'z')
 		    drive = (int) (*name - 'a' + 1);
@@ -731,6 +751,9 @@ whereami(name)
 		*newrbuf++ = DIR_SEPARATOR;
 	    }
 	    if (getcwd(newrbuf, drive) == 0) {	/* } */
+#else
+	    if (getcwd(newrbuf, 1024) == 0) {	/* } */
+#endif
 #else  /* DOS */
 #ifdef HAVE_GETWD
 	    if (getwd(imagedir) == 0) {		/* } */
@@ -751,7 +774,7 @@ whereami(name)
 		*t++ = DIR_SEPARATOR;
 	    }
 	}
-#ifndef MacOS
+#if (!defined(MacOS) && !defined(_DJGPP__) && !defined(__GO32__) )
 	else
 		(*t++ = DIR_SEPARATOR);
 #endif

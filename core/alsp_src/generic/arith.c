@@ -90,8 +90,10 @@ extern	double	drand48		PARAMS(( void ));
 
 #elif defined(HAVE_SRANDOM)
 #define RANDRANGE 0x7fffffff
+#ifndef __DJGPP__
 extern	long	random		PARAMS(( void ));
 extern	void	srandom		PARAMS(( int ));
+#endif
 
 #elif defined(HAVE_SRAND)
 #define random rand

@@ -96,6 +96,7 @@ main(int argc,char **argv)
     struct stat ss_statbuf;
     long ss_offset;
     long ss_size;
+	off_t coff_start = 0;
 
 #ifndef __GO32__
     struct filehdr fhdr;
@@ -172,7 +173,32 @@ fprintf(stderr,"Done Step 2: %s\n",ssname);
      * Step 3:  Read the file header and a.out header
      */
     
-    if (   lseek(oifd, 0, 0) < 0
+    if (   lseek(oifd, 0, 0) < 0)
+	while (1)
+	{
+	  unsigned char buf[6];
+	  lseek(oifd, coff_start, 0);
+	  read(oifd, buf, 6);
+	  if (buf[0] == 'M' && buf[1] == 'Z') /* stubbed already, skip stub */
+	  {
+		int blocks = (unsigned char)buf[4] + (unsigned char)buf[5] * 256;
+		int partial = (unsigned char)buf[2] + (unsigned char)buf[3] * 256;
+		coff_start += blocks * 512;
+		if (partial)
+	  		coff_start += partial - 512;
+	   }
+	   else if (buf[0] == 0x4c && buf[1] == 0x01) /* it's a COFF */
+	   {
+			break;
+	   }
+	   else
+	   {
+			fprintf(stderr, "Warning: input file is not COFF or stubbed COFF\n");
+			break;
+	   }
+   }
+	   
+	   if (   lseek(oifd, coff_start, 0) < 0
 #ifndef __GO32__
 	|| read(oifd, &fhdr, sizeof (struct filehdr)) < 0
 	|| read(oifd, &ehdr, sizeof (struct aouthdr)) < 0 )
@@ -208,7 +234,7 @@ fprintf(stderr,"Step 4:fhdr.f_nsyms=%d SYMESZ=%d nbytes=%d symtab=%d\n",
     if (!symtab)
 	fe("Unable to allocate sufficient space for symbol table", 0);
     
-    if (lseek(oifd, fhdr.f_symptr, 0) < 0)
+    if (lseek(oifd, fhdr.f_symptr + coff_start, 0) < 0)
 	fe("Unable to seek to symbol table",0);
     
     if (read(oifd, (char *) symtab, nbytes) != nbytes)
@@ -251,7 +277,7 @@ fprintf(stderr,"Step 4:fhdr.f_nsyms=%d SYMESZ=%d nbytes=%d symtab=%d\n",
 
     if (lseek(oifd,
               sizeof fhdr + fhdr.f_opthdr 
-			  + sizeof shdr * (sym->n_scnum - 1),
+			  + sizeof shdr * (sym->n_scnum - 1) + coff_start,
 	      0) < 0)
 	fe("Can not seek to section for symbol %s", ss_symname);
     
@@ -262,7 +288,7 @@ fprintf(stderr,"Step 4:fhdr.f_nsyms=%d SYMESZ=%d nbytes=%d symtab=%d\n",
 	  && sym->n_value < shdr.s_vaddr + shdr.s_size))
 	fe("Integrity check between symbol value and section failed", 0);
 
-    if (lseek(oifd, sym->n_value - shdr.s_vaddr + shdr.s_scnptr, 0) < 0)
+    if (lseek(oifd, sym->n_value - shdr.s_vaddr + shdr.s_scnptr + coff_start, 0) < 0)
 	fe("Unable to seek to value associated with symbol %s",ss_symname);
     
     if (read(oifd, &ss_offset, 4) != 4)
@@ -282,7 +308,7 @@ fprintf(stderr,"Step 4:fhdr.f_nsyms=%d SYMESZ=%d nbytes=%d symtab=%d\n",
 		fe("Unable to write padding to end of file %s", oiname);
 	}
 
-	if (lseek(oifd, sym->n_value - shdr.s_vaddr + shdr.s_scnptr, 0) < 0)
+	if (lseek(oifd, sym->n_value - shdr.s_vaddr + shdr.s_scnptr + coff_start, 0) < 0)
 	    fe("Unable to seek to value associated with symbol %s",ss_symname);
 	
 	if (write(oifd, &ss_offset, 4) != 4)
@@ -294,7 +320,7 @@ fprintf(stderr,"Step 4:fhdr.f_nsyms=%d SYMESZ=%d nbytes=%d symtab=%d\n",
      * to store the size of the section in the first four bytes followed
      * by the information that we wish to store
      */
-    if (lseek(oifd, ss_offset - 4, 0) < 0)
+    if (lseek(oifd, ss_offset - 4 + coff_start, 0) < 0)
 	fe("Unable to seek to start of saved state area in %s", oiname);
     
     ss_size = ss_statbuf.st_size + 4;

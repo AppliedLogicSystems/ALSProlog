@@ -12,7 +12,7 @@
 :-op(400, xfy, depends_on).
 :-op(400, xfy, appnd).
 :-op(120, fx, '&').
-:-op(120, fx, '~').
+%:-op(120, fx, '~').
 
 module abs2make.
 
@@ -654,6 +654,17 @@ context(djgpp,
 			object = o,
 			invoke = 'go32 '
 		]).
+
+context(djgpp2, 
+		[
+			context_name = djgpp2,
+			path_sep = '/',
+			local_sep = '\\',
+			search_path_sep = ';',
+			object = o,
+			invoke = ''
+		]).
+
 
 context(os2, 
 		[
