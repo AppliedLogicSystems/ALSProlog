@@ -29,6 +29,9 @@
 #define wm_SP	28
 
 	data
+#ifdef MacOS
+	globaldata saved_sp
+#endif
 saved_sp:
 	long	0
 	text

@@ -79,9 +79,16 @@ newSuffix(X,X).
 db_mod(global,[abs(Label)],InTab,OutTab) :-
     !,
     global_label(Label,InTab,OutTab).
+
+db_mod(externcode, [abs(Label)], InTab, OutTab) :-
+	!,
+	extern_label(Label,InTab,OutTab).
+
+db_mod(externdata, [abs(Label)], InTab, OutTab) :-
+	!,
+	extern_label(Label,InTab,OutTab).
+
 db_mod(_,_,T,T).
-
-
 
 %% Pseudo-ops
 instr(text,pseudo,[],text).

@@ -5,8 +5,8 @@
  * Author: Kevin A. Buettner
  * Creation: 2/12/87
  * Revision History:
- * 03/22/87 - K.Buettne -- icode.c split into icode1.c,
- *						   icode2.c, and icode.h
+ * 03/22/87 - K.Buettner -- icode.c split into icode1.c,
+ *						    icode2.c, and icode.h
  * 10/26/94 - C. Houpt	-- Redefined the Instruction Pointer as
  *						   a union so that it can be used as both a
  *						   short and long pointer.  This avoid the
@@ -215,7 +215,6 @@ static	void	ic_end_macro		PARAMS(( long, long, long, long ));
 
 Code *icode_buf;
 
-/*  Code *ic_ptr;  */
 /* Define the Instruction Pointer (uip) as a union so that it can be used
    as both a short and long pointer.
 */
@@ -678,7 +677,6 @@ ic_uiastr(s)
     ic_put(l);				/* put down number of longwords-1 */
     ic_putl(MMK_FENCE(l));		/* put down the first fence	*/
     for (i=1; i<l; i++)
-/*	ic_putl(*((long *) s)++);	* put down the string		*/  
     {
 	ic_putl(*((long *) s));	/* put down the string		*/
 	s += sizeof(long);
