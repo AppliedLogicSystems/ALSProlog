@@ -7,9 +7,9 @@ del temp.bat
 echo %CWD%
 "%CWPATH%\bin\ide.exe" /b /t "Build All" "%CWD%\CWP4_win32_alsdev.mcp"
 copy "ALS Prolog Stub.exe" "ALS Prolog.exe"
-copy %TCLTKPATH%\bin\tcl80.dll .
-copy %TCLTKPATH%\bin\tk80.dll .
-xcopy /e /i %TCLTKPATH%\lib lib
+copy "%TCLTKPATH%\bin\tcl80.dll" .
+copy "%TCLTKPATH%\bin\tk80.dll" .
+xcopy /e /i "%TCLTKPATH%\lib" lib
 mkdir alsdir
 mkdir alsdir\shared
 copy ..\als_dev\alsdev\*.tcl alsdir\shared
