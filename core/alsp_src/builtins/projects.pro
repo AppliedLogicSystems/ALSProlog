@@ -600,7 +600,6 @@ add_mult_files(PrevFiles, ListBoxWin)
 gen_project_mgrAction([prj_slot_focus, prolog_files, RootFileName], State)
 	:-
 	accessObjStruct(search_dirs, State, SearchList),
-write(pro_prj_slot_focus(RootFileName,SearchList)),nl,flush_output,
 	builtins:get_primary_manager(ALSMgr),
 	send(ALSMgr, open_edit_win_by_root(RootFileName,SearchList)).
 
