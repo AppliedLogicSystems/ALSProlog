@@ -2,15 +2,11 @@
 			 |		Test Info Database
 			 *------------------------------------*/
 
+%%	test_info(TestID, TestFile, TestMod, TestStartCall, TestDescrip),
+
 module als_testing.
 
 	%% Standard ALS examples:
-
-/*
-test_info(testeoln, testeoln, user, test,
-'test of all eoln modes for all builtin predicates\n\
- involved with eolns and a test of stream buffer sizes.').
-*/
 
 test_info(bench, bench, user, main, 'The benchpress example.').
 
@@ -70,5 +66,9 @@ test_info(par3, par3, user, main,
 
 test_info(par4, par4, user, main,
 			'  Producers and consumers (for primes) with added buffering.').
+
+test_info(testeoln, testeoln, user, test,
+'test of all eoln modes for all builtin predicates\n\
+ involved with eolns and a test of stream buffer sizes.').
 
 endmod.

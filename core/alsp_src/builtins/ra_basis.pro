@@ -108,7 +108,6 @@ show_variable(VName, Var)
 	   '$domain_term'(Var, DomainTerm),
 	   valid_domain(DomainTerm, Type, LArg, UArg),
 	   access_used_by(DomainTerm, NL),
-	%  arg(3, DomainTerm, NL),
    
 	    printf_opt('\n%t[%t] = %t: [%t, %t]\n', [VName,Var,Type,LArg,UArg],
 					[lettervars(false) ,line_length(100)]),
@@ -327,7 +326,7 @@ restrict_interval(Type,X)
 	:-
 	new_type_interval(Type,XX),
 	!,
-	X = XX.
+	'$iterate'(equal(X,XX)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -996,7 +995,7 @@ solve( X, Bnd, RelErr )
 	:- 
 	var(X),
 	!,
-			%% What is this about? (Making sur it's an interval???):
+			%% What is this about? (Making sure it's an interval???):
 %	$interval_type(X,_), 
 	Bnd>=0, 
 	'$domain'(X, _, L, U),
@@ -1030,13 +1029,29 @@ pointlike( X, RelErr)
 	Midpoint is (U + L)/2,
 	Delta < (RelErr * Midpoint).
 
+/*------------------------------------------------------------------------------*
+ |	i_solve/3
+ |	i_solve(Bnd, X, Eps)
+ |	i_solve(+, +, +)
+ |
+ |	Iteratively attempt to "bisect" X and seek a solution in each of the
+ |	two resulting halves.
+ |	Bnd	= limit in the depth of bisection;
+ |	X	= the interval
+ |	Eps = the error tolerance
+ *------------------------------------------------------------------------------*/
 		%% split if possible:
 i_solve(Bnd, X, Eps)
 	:- 
 	0 < Bnd ,  		
 	Bnd1 is Bnd - 1,
 	choose_split(X, M, Eps),
+
+'$domain'(X, _, XL, XU),
+'$domain'(X, _, ML, MU),
+printf('i_solve:bnd=%t X=[%t,%t] M=[%t,%t]\n',[Bnd,XL,XU,ML,MU]),
 	!,
+		%% Force 
 	('$iterate'( greatereq(M, X) ) ; '$iterate'( greatereq(X, M) ) ),
 	i_solve(Bnd1, X, Eps).
 

@@ -76,6 +76,20 @@ identify_case(dos).
 					 directory_separator(DS),
 					 sub_atom(Path,1,_,DS), !) ),
 		addclause(builtins,directory_self('.'))
+		
+    ; OS = msw95, !,		%% Microsoft Windows95
+		addclause(builtins,file_separator('.')),
+		addclause(builtins,directory_separator('\\')),
+		addclause(builtins,disk_separator(':')),
+		addclause(builtins,path_separator(';')),
+		addclause(builtins, 
+			  (is_absolute_pathname(Path) :- 
+				sub_atom(Path,2,1,':'),!) ),
+		addclause(builtins,
+					(is_absolute_pathname(Path) :-
+					 directory_separator(DS),
+					 sub_atom(Path,1,_,DS), !) ),
+		addclause(builtins,directory_self('.'))
 
 	; OS = macos, !,	%% Mac
 		addclause(builtins,file_separator('.')),
@@ -95,7 +109,9 @@ identify_case(dos).
 	; OS = unix, !,		%% Unix
 		addclause(builtins,file_separator('.')),
 		addclause(builtins,directory_separator('/')),
-		addclause(builtins,(disk_separator(_) :- !,fail)),
+/*		addclause(builtins,(disk_separator(_) :- !,fail)),  */
+			%% Use this for intel-based systems (djgpp2, mswins-xxx):
+		addclause(builtins,disk_separator(':')),
 		addclause(builtins,path_separator(':')),
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
@@ -304,14 +320,14 @@ rootPlusPath(Disk, PathList, DiskPlusPath) :-
 	!,
 	subPath(PathList, Path).
 %rootPlusPath(Disk, [File], File) :-!.
+rootPlusPath('', PathList, Path) :-
+	subPath(PathList, Path).
 rootPlusPath(Disk, PathList, DiskPlusPath) :-
 	var(DiskPlusPath),
 	disk_separator(DS),
 	subPath(PathList, Path),
 	!,
 	atom_split(DiskPlusPath,DS,Disk,Path).
-rootPlusPath('', PathList, Path) :-
-	subPath(PathList, Path).
 
 
 /*!-------------------------------------------------------*

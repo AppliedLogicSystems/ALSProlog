@@ -215,6 +215,9 @@ typedef struct {
 
 #define USED_BY_POSITION	3
 #define UIA_POSITION		4
+#define UIA_DIMENSION		16
+#define UIA_FIRST_POS		0
+#define UIA_SECOND_POS		8
 
 typedef struct {
 	long    pad;

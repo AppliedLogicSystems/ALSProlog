@@ -29,13 +29,23 @@ new_copy0(C,FromStream,ToStream) :-
 	get_byte(FromStream,NC),
 	new_copy0(NC,FromStream,ToStream).
 
+
+find_file(Name, Name) :-
+	exists_file(Name).
+
+find_file(Name, FullName) :-
+	builtins:searchdir(SDir),
+	pathPlusFile(SDir, Name, FullName),	
+	exists_file(FullName).
+
+find_file(Name, _) :-
+	printf('File Not Found: %t\n', [Name]),
+	fail.
+
 testnew :-
-	als_system(SysVars),
-	dmember(os=OS,SysVars),
 	X is cputime,
-	(OS = unix ->
-		new_copy('/etc/termcap',foonew) ;
-		new_copy('mailbox3:alsp_src:tests:tsuite:testmath.pro',foonew)),
+	find_file('testmath.pro', FullName),
+	new_copy(FullName, foonew),
 	Y is cputime-X,
 	write('Elapsed Time'=Y),nl.
 

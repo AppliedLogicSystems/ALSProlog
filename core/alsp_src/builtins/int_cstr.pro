@@ -41,7 +41,8 @@ type_and_bounds(boolean,      boolean, 0, 1).
 	%% should make this (24) more accurate:
 uia_space(_,UIA)
 	:-
-	'$uia_alloc'(24,UIA).
+%	'$uia_alloc'(24,UIA).
+	'$uia_alloc'(16,UIA).
 
 new_type_interval(Type,X)
 	:-
@@ -52,18 +53,8 @@ new_type_interval(Type,X)
 	'$uia_poked'(UIA,0,L1),
 	'$uia_poked'(UIA,8,U1),
 	freeze_goal_for(BareType, X, L1, U1, UIA, FreezeGoal),
-%display_item_addr(FreezeGoal),
 	freeze(X, FreezeGoal).
 
-
-%printf_opt('  -+- freezing [%t] ', [X],[lettervars(false)]), 
-%printf_opt('freeze: %t -> %t\n',[X, FreezeGoal], [lettervars(false),line_length(100)]).
-
-/*
-freeze_goal_for(real,    X, L1, U1, UIA, intvl(real,   X,[],L1,U1,UIA) ).
-freeze_goal_for(integer, X, L1, U1, UIA, intvl(integer,X,[],L1,U1,UIA) ).
-freeze_goal_for(boolean, X, L1, U1, UIA, intvl(boolean,X,[],L1,U1,UIA) ).
-*/
 freeze_goal_for(real,    X, L1, U1, UIA, intvl(real,   X,[],UIA) ).
 freeze_goal_for(integer, X, L1, U1, UIA, intvl(integer,X,[],UIA) ).
 freeze_goal_for(boolean, X, L1, U1, UIA, intvl(boolean,X,[],UIA) ).
@@ -116,12 +107,6 @@ access_used_by(Intvl, NewVal)
 update_used_by(Intvl, NewVal)
 	:-
 	trailed_mangle(3, Intvl, NewVal).
-
-/*
-set_used_by(Intvl, NewVal)
-	:-
-	mangle(3, Intvl, NewVal).
-*/
 
 /*---------------------------------------------------------------
  *--------------------------------------------------------------*/
@@ -187,8 +172,13 @@ show_used_by([VN-Var | VarList])
 	!,
 	'$domain_term'(Var, DomainTerm),
 	access_used_by(DomainTerm, UsedByList),
-	printf_opt('%t used_by=%t   ',[VN,UsedByList],
-					[lettervars(false) ,line_length(100)]),
+	printf_opt('%t[%t] used_by=%t   ',[VN,Var,UsedByList],
+					[lettervars(false) ,line_length(180)]),
+	show_used_by(VarList).
+
+show_used_by([VN-Var | VarList])
+	:-
+	printf_opt('%t[%t]-nd  ',[VN,Var], [lettervars(false) ,line_length(180)]),
 	show_used_by(VarList).
 
 show_used_by([_ | VarList])
@@ -299,6 +289,7 @@ valid_domain(( A, B ), Type, LB, UB)
 valid_domain(Intrv, Type, LB, UB)
 	:-
 	functor(Intrv,intvl,4),
+	arg(1,Intrv,Type),
 	arg(4,Intrv,UIA),
 	'$uia_peekd'(UIA,0,LB),
 	'$uia_peekd'(UIA,8,UB).
@@ -329,20 +320,19 @@ new_node(Node)
 	:-
 	'$iterate'(Node).
 
-%printf_opt('>==>new_node(%t)\n',[N], [lettervars(false),line_length(100)]),
-
-
 export '$iterate'/1.
-
 '$iterate'(Goal)
 	:-
-printf_opt('Goal= %t\n',[Goal], [lettervars(false) ,line_length(100)]),
+%printf_opt('Goal= %t\n',[Goal], [lettervars(false) ,line_length(100)]),
 	Goal =.. [OP | Args],
 	prim_op_code(OP,OpCd),
-	fixup_iter(Args, Z,X,Y,XFGoal),
+
 	XFGoal =.. [pop, OpCd,Z,X,Y,LinkArg],
-%printf_opt('XFGoal= %t\n',[XFGoal], [lettervars(false) ,line_length(100)]),
+	fixup_iter(Args, Z,X,Y,XFGoal),
+
+%printf_opt('%t--XFGoal= %t\n',[Goal,XFGoal], [lettervars(false) ,line_length(100)]),
 %show_used_by(['Z'-Z,'X'-X,'Y'-Y]),
+
 	'$iter_link_net'(OpCd,Z,X,Y,XFGoal).
 
 fixup_iter([Z,X], Z,X,0,XFGoal)
@@ -390,6 +380,7 @@ cadj( = ,  @= ).
 cadj( < ,  @< ).
 cadj( > ,  @> ).
 
+/***********************
 :-dynamic(it_debug_cq/0).
 :-dynamic(it_debug_gl/0).
 
@@ -403,8 +394,10 @@ export '$iterate'/1.
 	!,
 	'$iter_link_net'(OpCd,Z,X,Y,Goal).
 
+/*
 fixup_iter([Z,X], Z,X,0).
 fixup_iter([Z,X,Y], Z,X,Y).
+*/
 
 prim_op_code(unequal, 0).
 prim_op_code(equal, 1).
@@ -429,5 +422,6 @@ prim_op_code(xp, 19).
 prim_op_code(cos, 20).
 prim_op_code(sin, 21).
 prim_op_code(tan, 22).
+*************************/
 
 endmod.		%% rel_arith

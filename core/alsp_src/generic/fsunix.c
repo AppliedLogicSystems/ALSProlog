@@ -97,16 +97,19 @@
 #define S_ISFIFO(m) (((m)& S_IFMT) == S_IFIFO)
 #endif
 
+#define HAVE_DIRENT	1
+
 #elif defined(MacOS) && defined(HAVE_GUSI)
 #include <ctype.h>
 #include <GUSI.h>
 
+#define HAVE_DIRENT	1
 
-#endif /* MacOS-GUSI, defined(UNIX) && !defined(__GO32__)  && !defined(OS2) */
+#elif defined(WIN32)
+#include "fswin32.h"
 
-#if defined(WIN32)
-#include <io.h>
-#include <direct.h>
+#else
+#error
 #endif
 
 #ifndef MAXPATHLEN
@@ -200,6 +203,7 @@ punlink(void)
 }
 
 #ifdef FSACCESS
+#ifdef HAVE_DIRENT
 /*
  * $getDirEntries/3 (--> getDirEntries/3 )
  * $getDirEntries(DirName, FilePattern, List)
@@ -299,6 +303,7 @@ getDirEntries()
 
     PI_SUCCEED;
 }
+#endif
 
 
 /*
@@ -573,7 +578,7 @@ pmkdir()
 		t2 != PI_INT)
 	PI_FAIL;
 
-#ifdef MacOS
+#if defined(MacOS) || defined(WIN32)
     if (mkdir(pathName) == -1)
 #else
     if (mkdir(pathName, v2) == -1)

@@ -40,7 +40,7 @@
 #endif
 
 #ifdef WIN32
-#include <io.h>
+#include "fswin32.h"
 #endif
 
 #include <errno.h>

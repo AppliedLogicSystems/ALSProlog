@@ -1595,7 +1595,7 @@ wr_subs3(N,S,VPairs,Stream)
 	'$is_delay_var'(S),
 	!,
 		%% inconstrs/0 is defined (or not) in main.c
-	(intconstrs ->
+	(intconstr ->
 		show_interval_binding(N,S, VPairs, Stream)
 		;
 		show_delay_binding(N,S, VPairs, Stream)

@@ -49,8 +49,7 @@
 #include <errno.h>
 #include <sys/file.h>
 #elif defined(WIN32)
-#include <windows.h>
-#include <io.h>
+#include "fswin32.h"
 #else
 #error
 #endif			/* OS includes */
@@ -315,7 +314,7 @@ obp_open(fname)
     /*
      * Are we able to open .OBP file?
      */
-#if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(MacOS) || defined(OS2)
+#if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(MacOS) || defined(OS2) || defined(WIN32)
     if ((obp_fp = fopen(fname, "w+b")) == NULL) {
 #else
     if ((obp_fp = fopen(fname, "w+")) == NULL) {	/* } for vi */
@@ -418,7 +417,7 @@ f_load(fname)
     unsigned short strsize;
     unsigned short binop, unop;
 
-#if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(MacOS) || defined(OS2)
+#if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(MacOS) || defined(OS2) || defined(WIN32)
     if ((fp = fopen(fname, "rb")) != NULL) {
 #else
     if ((fp = fopen(fname, "r")) != NULL) {	/* } for vi */
@@ -562,16 +561,14 @@ obp_pop()
 
 #endif	/* OBP */
 
-#if (defined(__DJGPP__) || defined(__GO32__) || defined(WIN32))
-
-#ifndef MacOS
+#if (defined(__DJGPP__) || defined(__GO32__))
 
 static	long	get_file_modified_time	PARAMS(( CONST char * ));
 static	int	isdir			PARAMS((CONST char * ));
 
 static long 
 get_file_modified_time(fname)
-    char *fname;
+    CONST char *fname;
 {
 #if defined(DOS)
 
@@ -619,7 +616,7 @@ get_file_modified_time(fname)
  */
 static int
 isdir(fname)
-    char *fname;
+    CONST char *fname;
 {
 #if defined(DOS)
 
@@ -652,15 +649,9 @@ isdir(fname)
 #endif /* DOS */
 }
 
-#endif /* not MacOS */
-
 #endif /* 0000 */
 
 
-
-#ifndef R_OK
-#define R_OK 4
-#endif
 
 #ifdef OLDCLOAD
 

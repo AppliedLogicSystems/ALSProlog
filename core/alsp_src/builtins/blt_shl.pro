@@ -36,7 +36,12 @@ start_shell(DefaultShellCall)
 		  		  (spyWhen)/2, (nospy)/0, (nospy)/1, (nospy)/3,
 		  		  spying/0, debugging/0, list_spypoints/0 ]),
 
-		%% get the command line, but ignore the image name
+	%% Get the raw command line and assert it.
+	abolish(command_line,1),
+	pbi_get_command_line(RawCommandLine),
+	assertz(command_line(RawCommandLine)),
+
+	%% get the command line, but ignore the image name
 	retract(command_line([ImageName|CommandLine])),
 	!,
 	CLInfo = clinfo(DefaultShellCall,	/* -g: goal to run */

@@ -57,7 +57,7 @@
 #endif /* DOS */
 
 #ifdef WIN32
-#include <io.h>
+#include "fswin32.h"
 #endif
 
 #ifdef SysVIPC		/* For System V Message Queues: */
@@ -196,7 +196,7 @@ static	long	stream_end	PARAMS(( UCHAR * ));
 static	int	skip_layout	PARAMS(( UCHAR * ));
 static	int	octal		PARAMS(( UCHAR ** ));
 static	int	hexadecimal	PARAMS(( UCHAR ** ));
-static	double	decimal		PARAMS(( UCHAR **, int *));
+static	int	decimal		PARAMS(( UCHAR **, double *, int *));
 static	int	escaped_char	PARAMS(( UCHAR ** ));
 static	void	quoted_atom	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *lim, UCHAR *buf));
 static	int	quoted_string	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *, UCHAR * ));
@@ -252,7 +252,7 @@ sio_mkstream()
     /* Is this the correct default for DJPP? */
     SIO_EOLNTYPE(buf) = SIOEOLN_READ_LF | SIOEOLN_WRITE_LF;
 #elif defined(WIN32)
-    SIO_EOLNTYPE(buf) = SIOEOLN_READ_CRLF | SIOEOLN_WRITE_CRLF;
+    SIO_EOLNTYPE(buf) = SIOEOLN_READ_UNIV | SIOEOLN_WRITE_CRLF;
 #else
 #error
 #endif   
@@ -688,7 +688,9 @@ sio_lpos()
  * returned if it should be left open.
  */
 
-#ifdef MacOS
+#ifdef __MWERKS__
+/* This is a problem common to all systems that use MetroWerks ANSI Libraries open. */
+/* Currently MacOS and Win32 */
 
 /* Merge the Mac and Unix versions of this someday. */
 
@@ -939,8 +941,8 @@ sio_file_open()
     else if (strcmp((char *)filename, "$stderr") == 0)
 	SIO_FD(buf) = STDERR_FILENO;
     else {
-#if	defined(DOS)
-	if ((SIO_FD(buf) = open(filename, flags, (S_IWRITE | S_IREAD))) == -1)
+#if	defined(DOS) || defined(WIN32)
+	if ((SIO_FD(buf) = open(filename, flags | O_BINARY, (S_IWRITE | S_IREAD))) == -1)
 #elif	defined(MacOS)
 #if	0 && defined(__MWERKS__) && !__POWERPC__ 
 	/* This is for use with Non-GUSI libraries. */
@@ -1620,8 +1622,10 @@ sio_rexec()
     w_get_An(&v6, &t6, 6);
     w_get_An(&v7, &t7, 7);
 
-    if (!getstring(&command, v2, t2))
+    if (!(getstring(&command, v2, t2)))
+	{
 	FAIL;
+	}
     
     if (!getstring(&hostname, v1, t1))
 	hostname = NULL;
@@ -3300,6 +3304,7 @@ hexadecimal(pp)
     return val;
 }
 
+/*
 static double
 decimal(pp, ty)
     UCHAR **pp;
@@ -3308,7 +3313,7 @@ decimal(pp, ty)
     register UCHAR *p;
     double d, frac;
 
-	*ty = WTP_INTEGER;
+    *ty = WTP_INTEGER;
     p = *pp;
     d = *p++ - '0';
     frac = 0;
@@ -3371,6 +3376,85 @@ decimal(pp, ty)
 
     *pp = p;
     return d;
+}
+*/
+static int
+decimal(UCHAR **pp, double *dval, int *ty)
+{
+    register UCHAR *p;
+    double d, frac;
+    int success = 1;
+
+    *ty = WTP_INTEGER;
+    p = *pp;
+    d = *p++ - '0';
+    frac = 0;
+
+    while (sio_chtb[*p] & SIOC_DECIMAL) {
+	d = 10.0 * d + (*p++) - '0';
+    }
+	
+    if (*p == '.') {
+    	if ((sio_chtb[*(p + 1)] & SIOC_DECIMAL)) {
+	    UCHAR *s;
+	
+	    *ty = WTP_DOUBLE;
+
+	    p++;
+	    while (sio_chtb[*p] & SIOC_DECIMAL)
+		p++;
+	    s = p - 1;
+
+	    frac = *s-- - '0';
+	    while (*s != '.')
+		frac = frac / 10.0 + *s-- - '0';
+
+	    d += frac / 10;
+	} else if (*(p+1) == 0) success = 0;
+    }
+
+    if ((sio_chtb[*p] & SIOC_E)) {
+    	if (((sio_chtb[*(p + 1)] & SIOC_PLUSMINUS)
+	  && (sio_chtb[*(p + 2)] & SIOC_DECIMAL))
+	 || (sio_chtb[*(p + 1)] & SIOC_DECIMAL)) {
+	    int   exp = 0;
+	    int   neg = 0;
+	    double m, z;
+
+	    if (*++p == '-') {
+		neg = 1;
+		p++;
+	    }
+	    else if (*p == '+')
+		p++;
+
+	    while (sio_chtb[*p] & SIOC_DECIMAL)
+		exp = 10 * exp + (*p++) - '0';
+
+	    m = 1.0;
+	    z = 10.0;
+	    while (exp != 0) {
+		if (exp & 1) {
+		    m *= z;
+		    exp -= 1;
+		}
+		else {
+		    z *= z;
+		    exp >>= 1;
+		}
+	    }
+	    if (neg)
+		d /= m;
+	    else
+		d *= m;
+    	} else if (*(p+1) == 0 || *(p+2) == 0) success = 0;
+    }
+
+    if (success) {
+	*pp = p;
+	*dval = d;
+	return 1;
+    } else return 0;
 }
 
 static int
@@ -3895,14 +3979,24 @@ makesym:
 #endif /* SIO_ZERO_QUOTE_FOR_CHAR_CONSTS */
 		    else
 			{
-				dec_val = decimal(&p, &ty);
-				make_numberx(vpTokVal, tpTokVal, dec_val,ty);
+				if (decimal(&p, &dec_val, &ty)) {
+				    make_numberx(vpTokVal, tpTokVal, dec_val,ty);
+				} else {
+				    SIO_CPOS(buf) = tokstart - SIO_BUFFER(buf);
+				    SIO_ERRCODE(buf) = SIOE_READ;
+				    return 0;
+				}
 			}
 		}
 		else
 		{
-			dec_val = decimal(&p, &ty);
-			make_numberx(vpTokVal, tpTokVal, dec_val,ty);
+			if (decimal(&p, &dec_val, &ty)) {
+			    make_numberx(vpTokVal, tpTokVal, dec_val,ty);
+			} else {
+			    SIO_CPOS(buf) = tokstart - SIO_BUFFER(buf);
+			    SIO_ERRCODE(buf) = SIOE_READ;
+			    return 0;
+			}
 		}
 		CHECK_FOR_POSSIBLE_SPLIT(*p ? p+1 : p);
 		break;

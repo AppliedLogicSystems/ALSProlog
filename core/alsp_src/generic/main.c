@@ -64,8 +64,7 @@
 #endif
 
 #ifdef WIN32
-#include <io.h>
-#include <direct.h>
+#include "fswin32.h"
 #endif
 
 #include "main.h"
@@ -77,9 +76,6 @@
 #ifdef DOS
 #define X_OK 0
 #define R_OK 1
-#elif !defined(R_OK)
-#define X_OK 1
-#define R_OK 4
 #endif
 
 int   system_debugging = 0;	/* -D to set it to 1 */
@@ -100,6 +96,7 @@ long  saved_state_image_offset = 0;
 char  imagename[64];
 char  imagedir[1024];
 static char alsdir[1024];	/* directory where ALS system resides */
+
 
 static char versionNum[] = SysVersionNum;	/* from version.h */
 /* static char systemName[] = SysName;		from version.h */
@@ -176,6 +173,10 @@ PI_prolog_init(win_str, argc, argv)
 #ifdef Portable
     extern Code *wm_panic;
 #endif /* Portable */
+
+	/* Put arg and argv in globals so they can be used by the builtin get_argc_argv/2 */
+	argcount = argc;
+	argvector = argv;
 
     /*-------------------------------------------------------------------*
      * malloc and then free an area at the outset so that the malloc
@@ -438,14 +439,12 @@ PI_prolog_init(win_str, argc, argv)
     cinterf_init();		/* see cinterf.c */
 
     if (system_pckg != (long *) -1 || saved_state_loaded) {
-	abolish_predicate("builtins", "command_line", 1);
 	abolish_predicate("builtins", "als_system", 1);
 #if 0	/* should leave original sys_searchdir since image may be moved */
 	abolish_predicate("builtins", "sys_searchdir", 1);
 #endif
     }
 
-    assert_command_line(argc, argv);
     assert_sys_searchdir(alsdir);
 
     /*---------------------------------------*
@@ -598,66 +597,6 @@ assert_als_system(os, os_var, proc, man, ver, winstype)
 		fatal_error(FE_ASSERT_SYS, 0);
     	}
 }
-
-
-/*-----------------------------------------------------------------------------*
- * assert_command is called to place the fact
- *      command_line(ListofCommandLineArgs)
- * in the Prolog database (builtins module). Since the builtins have not yet
- * been loaded, it is necessary to use the most primitive version of assert.
- *-----------------------------------------------------------------------------*/
-
-static void
-assert_command_line(count, args)
-    int   count;
-    char **args;
-{
-    int   c;
-    register char *from, *to;
-    char  command[4096];
-
-    if (noautoload && !pckgloaded)
-	return;
-
-    /*
-     * Construct a prolog command for asserting the new command line
-     */
-
-    from = "assertz(builtins,command_line([";
-    to = command;
-
-    while ( (*to++ = *from++) ) /* copy initial part of command */
-	;
-
-    to--;			/* back up over the null terminator */
-
-    while (count--) {
-		from = *args;
-		*args++ = (char *) 0;
-		*to++ = '\'';
-		while ( (c = *from++) ) {
-	    	if (c == '\'') {
-				*to++ = '\'';
-	    	}
-	    	*to++ = c;
-		}
-		*to++ = '\'';
-		if (count) {
-	    	*to++ = ',';
-		}
-    }
-
-    from = "]),_,0)";
-    while ( (*to++ = *from++) )    /* copy trailing part of command */
-	;
-
-    	/* Assert the new command line */
-
-    if (!exec_query_from_buf(command)) {
-		fatal_error(FE_ASSERT_COM, 0);
-    }
-}
-
 
 /*-----------------------------------------------------------------------------*
  * absolute_pathname tests to see if we have an absolute pathname or not

@@ -19,7 +19,7 @@ main
 	:-
 	als_system(SysVars),
 	dmember(os=OS,SysVars),
-	not(OS = macos),
+	not(OS = macos), not(OS = msw95),
 	trap(main0,alarm_handler).	%% call main0/0 and establish handler
 
 main0 

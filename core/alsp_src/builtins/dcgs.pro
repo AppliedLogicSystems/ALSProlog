@@ -52,6 +52,9 @@ expand_body( Var, (call(Var),InV=OutV), InV,OutV) :-
    var(Var), 
    !.
 expand_body( [], true, OutV, OutV) :- !.
+expand_body('$$'(String), true, InV, OutV) :-
+   !,
+   append(String, OutV, InV).
 expand_body([ListHead | ListTail], true, InV, OutV) :-
    !,
    append([ListHead | ListTail], OutV, InV).

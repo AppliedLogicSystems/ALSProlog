@@ -15,7 +15,7 @@
 main :-	
 	als_system(SysVars),
 	dmember(os=OS,SysVars),
-	not(OS = macos),
+	not(OS = macos), not(OS = msw95),
 	consume(100,L) & ints_from(0,L).
 
 primes(N) :-
