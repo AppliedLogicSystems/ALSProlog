@@ -3,6 +3,7 @@ ARCH = ${shell 	case `uname -rs` in \
 	"SunOS 5"*) 	echo solaris 	;; \
 	Linux*) 	echo linux 	;; \
 	"HP-UX"*)	echo hpux	;; \
+	"IRIX"*)	echo irix	;; \
 	*) 		echo "Unknown machine type..."; exit 1 ;; \
 	esac}
 
@@ -16,7 +17,9 @@ student:
 	rm -fr $(SHIP)
 	mkdir -p $(SHIP)
 	cp -pr $(BUILD)/alspro $(SHIP)
+	-cp -pr $(BUILD)/alspro.pst $(SHIP)
 	cp -pr $(BUILD)/alsdev $(SHIP)
+	-cp -pr $(BUILD)/alsdev.pst $(SHIP)
 	cp -pr $(BUILD)/lib $(SHIP)
 	mkdir $(SHIP)/alsdir
 	cp -pr $(BUILD)/alsdir/library $(SHIP)/alsdir
