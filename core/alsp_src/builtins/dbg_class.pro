@@ -66,6 +66,8 @@ flip_true_fail(fail, true).
 
 debugger_mgrAction(insert_by_fcg(ClauseGroup, SrcTrMgr), State)
 	:-
+	integer(ClauseGroup),
+	!,
 	accessObjStruct(fcg_index_size, State, FCG_Index_Size),
 	accessObjStruct(src_trace_mgrs_by_fcg, State, CurIndex),
 	(ClauseGroup =< FCG_Index_Size ->
@@ -74,6 +76,9 @@ debugger_mgrAction(insert_by_fcg(ClauseGroup, SrcTrMgr), State)
 		debugger_mgrAction(expand_st_ix(CurIndex,NewIndex), State),
 		mangle(ClauseGroup, NewIndex, SrcTrMgr)
 	).
+
+	%% psl's and other things can produce ClauseGroup = '' ::
+debugger_mgrAction(insert_by_fcg(ClauseGroup, SrcTrMgr), State).
 
 debugger_mgrAction(expand_st_ix(CurIndex,NewIndex), State)
 	:-
@@ -92,7 +97,6 @@ copy_entries(Cur, Final, Source, Target)
 	:-
 	arg(Cur, Source, Val),
 	arg(Cur, Target, Val).
-
 
 debugger_mgrAction( get_mrfcg(CG, SrcMgr), State)
 	:-
@@ -211,7 +215,6 @@ exit_debugger
 		%%		-- This is actually executed in alsdev.pro
 		%%		   at run-time in the predicate setup_init_ide_classes/0:
 		%% ---------------------------------------------------------------
-
 :- defineClass(
 	[   name=source_trace_mgr,
 		subClassOf=shl_source_handler,
@@ -247,10 +250,43 @@ source_trace_mgrAction(note_loaded(CG, Path), State)
 	accessObjStruct(debugger_mgr, State, DBGMGR),
 	send( DBGMGR, insert_by_fcg(CG, State) ).
 
+
+source_trace_mgrAction( clear_errors_display, State)
+	:-
+	setObjStruct(errors_display, State, []).
+
+source_trace_mgrAction( update_errors_wins(Ball), State)
+	:-
+	accessObjStruct(errors_display, State, ErrsList),
+	cslt_reload(ErrsList, Ball, State).
+
+	%% No previous errors, and no errors this time:
+cslt_reload(nil, _, State)
+	:- !.
+
+cslt_reload([], _, State)
+	:- !.
+
+	%% There were previous errors:
+cslt_reload(ErrsList, Ball, State)
+	:-
+	(var(Ball) ->
+		send(State, close_and_reopen)
+		;
+		true
+	).
+		
+
+
+
+
+
 source_trace_mgrAction(raise, State)
 	:-
 	accessObjStruct(tcl_doc_path, State, TclWin),
 	(TclWin \= nil -> tcl_call(shl_tcli, [raise,TclWin], _) ; true).
+
+
 
 source_trace_mgrAction(clear_decorations, State)
 	:-

@@ -477,7 +477,7 @@ do_consult(BaseFile, FCOpts)
 			 ) 
 		),
 	send(ALSMgr, set_value(cslt_ctxt, PrevCntxts)),
-	record_consult(BaseFile, FCOpts, FileMgr),
+	record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr),
 	!,
 	consult_msg(end_consult, FCOpts).
 
@@ -501,18 +501,23 @@ consult_msg(loaded_builtins_file(File,Dir), FCOpts)
 	printf(user_output, 'System file %t in %t already loaded.\n', [File, Dir]).
 
 
-record_consult(BaseFile, FCOpts, FileMgr)
+record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr)
 	:-
 	access_cslt_opts(fcg, FCOpts, FCG), 
-	send(FileMgr, set_value(fcg,FCG)),
+	send(ALSMgr, insert_src_mgr_by_cg(FCG, FileMgr)),
+
 	access_cslt_opts(srcfilepath, FCOpts, SourceFilePath), 
-	send(FileMgr, set_value(source_file,SourceFilePath)),
+	send(FileMgr, note_loaded(FCG, SourceFilePath)),
+
 	access_cslt_opts(obp_path, FCOpts, ObpFilePath), 
 	(ObpFilePath \= '' ->
 		send(FileMgr, set_value(obp_file,SourceFilePath))
 		;
 		true
-	).
+	),
+	send(FileMgr, update_errors_wins(Ball)).
+
+
 
 consult_except_resp(loaded_builtins_file(File,Dir),FCOpts,FileMgr)
 	:-

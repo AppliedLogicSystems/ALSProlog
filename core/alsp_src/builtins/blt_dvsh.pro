@@ -254,6 +254,7 @@ alsdev(Shared, ALS_IDE_Mgr)
 
 		%% For ALS IDE Project system:
 	alsdev:setup_ide_project_globals(ALS_IDE_Mgr),
+	tcl_call(shl_tcli, [do_main_als_bindings],_),
 
 	alsdev:check_alsdev_flags,
 
@@ -726,17 +727,28 @@ als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State)
 	send_self(State, obtain_src_mgr(BaseFileName, FileMgr)),
 	send(FileMgr, open_edit_win(FileName, BaseFileName, Ext)).
 
-/***
-als_ide_mgrAction([close_edit_win], State)
+als_ide_mgrAction(map_edit_wins, State)
 	:-
-	als_ide_mgrAction(close_edit_win, State).
+	accessObjStruct(source_mgrs, State, SrcMgrsList),
+	map_all_wins(SrcMgrsList).
 
-als_ide_mgrAction(close_edit_win, State)
+map_all_wins([]).
+map_all_wins([fm(_, FileMgr) | SrcMgrsList])
 	:-
-	accessObjStruct(edit_files, State, PrevEditFiles),
-	list_delete(PrevEditFiles, e(FileName,WinName), NewEditFiles),
-	setObjStruct(edit_files, State, NewEditFiles).
-***/
+	send(FileMgr, map_win),
+	map_all_wins(SrcMgrsList).
+
+
+als_ide_mgrAction(unmap_edit_wins, State)
+	:-
+	accessObjStruct(source_mgrs, State, SrcMgrsList),
+	unmap_all_wins(SrcMgrsList).
+
+unmap_all_wins([]).
+unmap_all_wins([fm(_, FileMgr) | SrcMgrsList])
+	:-
+	send(FileMgr, unmap_win),
+	unmap_all_wins(SrcMgrsList).
 
 als_ide_mgrAction([open_non_file_edit_win, WinName, Title], State)
 	:-
@@ -1374,9 +1386,8 @@ v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
 	builtins:get_primary_manager(ALSIDEMGR),
 	send(ALSIDEMGR, get_value( debugger_mgr, DBGMGR)),
 	send(DBGMGR,  mgr_by_cg(CG, SrcMgr)),
-
 	accessObjStruct(mrfcg, DBGMGR, MRFCG),
-	check_win_cleanup(MRFCG, CG, Port, DBGMGR),
+	check_win_cleanup(Port, MRFCG, CG, SrcMgr, DBGMGR),
 	!,
 	showGoalToUserWin(Port,Box,Depth, Module, Goal, Response, DBGMGR, SrcMgr).
 
@@ -1388,30 +1399,30 @@ v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
 	!,
 	showGoalToUserWin_other(Port,Box,Depth, Module, Goal, Response, CG, DBGMGR, SrcMgr).
 
-
 		%% Staying in the same file; nothing to do:
-check_win_cleanup(CG, CG, _, _) :-!.
+check_win_cleanup(_, CG, CG, _, _) :-!.
 
 		%% Now we have just switched between files; if Port is
 		%% call or redo, need to remove trace coloring, etc., 
 		%% from window we are leaving; if Port is exit or fail, 
 		%% nothing to do:
-check_win_cleanup(MRFCG, ClsGrp, call, DBGMGR)
-	:-!,
+check_win_cleanup(Port, MRFCG, ClsGrp, SrcMgr, DBGMGR)
+	:-
+	dmember(Port, [call, redo]),
+	!,
+	check_presence_and_cleanup(SrcMgr, MRFCG, DBGMGR).
+
+		%% Now we have just switched between files; if Port is
+
+check_win_cleanup(_, _, _, _, _).
+
+check_presence_and_cleanup(SrcMgr, MRFCG, DBGMGR)
+	:-
+
 	send(DBGMGR, mgr_by_cg(MRFCG, MRSrcMgr)),
 	send(MRSrcMgr, clear_decorations),
-	send(DBGMGR, mgr_by_cg(ClsGrp, SrcMgr)),
+	send( SrcMgr, start_src_trace),
 	send(SrcMgr, raise).
-
-
-check_win_cleanup(MRFCG, ClsGrp, redo, DBGMGR)
-	:-!,
-	send(DBGMGR, mgr_by_cg(MRFCG, MRSrcMgr)),
-	send(MRSrcMgr, clear_decorations),
-	send(DBGMGR, mgr_by_cg(ClsGrp, SrcMgr)),
-	send(SrcMgr, raise).
-
-check_win_cleanup(_, _, _, _).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Handle hidden debugging goals:
@@ -1428,12 +1439,12 @@ check_win_cleanup(_, _, _, _).
 	%%    of the clause.
 	%%---------------------------------------------------
 
-/*----- For debugging:
+%/*----- For debugging:
 showGoalToUserWin(Port,Box,Depth, Module, Goal, debug, DBGMGR, SrcMgr)
 	:-
 printf('%t-%t(%t) %t \n',[Box,Depth,Port,Goal]),flush_output,
 	fail.
-*/
+%*/
 
 	%% '$dbg_aph' ::
 
@@ -1876,6 +1887,43 @@ debug_dump(PA)
 	fail.
 debug_dump(_).
 
+export reset_all_spypoints/0.
+reset_all_spypoints
+	:-
+    dbg_spyoff,
+	findall(Mod-List, mspylist(Mod,List), SpyList),
+	reset_the_spypoints(SpyList),
+    dbg_spyon.
+
+mspylist(Mod,List)
+	:-
+	has_spypoint(Mod),
+	findall(Pred/Arity,
+			(debugger:spying_on(CallForm,Mod), 
+			 functor(CallForm,Pred,Arity) ),
+			List).
+
+has_spypoint(Mod)
+	:-
+	debugger:spying_on(_,Mod),
+	!.
+
+reset_the_spypoints([]).
+reset_the_spypoints([Mod-MList | SpyList])
+	:-
+	reset_module_spypoints(MList, Mod),
+	printf(debugger_output,
+			'Spypoints set in module %t on:\n\t%t\n',
+			[Mod, MList]),
+	reset_the_spypoints(SpyList).
+
+
+reset_module_spypoints([], _).
+reset_module_spypoints([Pred/Arity | MList], Mod)
+	:-
+	dbg_spy(Mod,Pred,Arity), 
+	reset_module_spypoints(MList, Mod).
+
 
 endmod.
 
@@ -2264,6 +2312,30 @@ shl_source_handlerAction(close_edit_win, State)
 			%%		send_self(close_source_trace, State),
 	setObjStruct(tcl_doc_path, State, nil).
 
+shl_source_handlerAction(close_and_reopen, State)
+	:-
+	accessObjStruct(tcl_doc_path, State, TclWin),
+	tcl_call(shl_tcli, [close_and_reopen, TclWin], _).
+
+
+shl_source_handlerAction(unmap_win, State)
+	:-
+	accessObjStruct(tcl_doc_path, State, TclWin),
+	(TclWin \= nil ->
+		tcl_call(shl_tcli, ['Window', iconify, TclWin], _)
+		;
+		true
+	).
+
+shl_source_handlerAction(map_win, State)
+	:-
+	accessObjStruct(tcl_doc_path, State, TclWin),
+	(TclWin \= nil ->
+		tcl_call(shl_tcli, [wm, deiconify, TclWin], _)
+		;
+		true
+	).
+
 
 shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 	:-
@@ -2280,6 +2352,17 @@ shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 		%% Here, ErrsList \= []:
 shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 	:-
+	accessObjStruct(errors_display, State, PrevErrsList),
+	(PrevErrsList \= [] ->
+		accessObjStruct(tcl_doc_path, State, InitTclWin),
+		(TclWin \= nil ->
+			tcl_call(shl_tcli, [close_and_reopen, InitTclWin], _)
+			;
+			true
+		)
+		;
+		true
+	),
 	setObjStruct(errors_display, State, ErrsList),
 	SourceFile = SPath,
 	setObjStruct(source_file, State, SourceFile),

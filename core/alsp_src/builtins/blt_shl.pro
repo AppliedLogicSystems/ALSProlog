@@ -759,7 +759,8 @@ shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 display_file_errors(SPath, ErrsList, FileMgr)
 	:-
 	printf(error_stream, '\nFile %t contained errors:\n', [SPath]),
-	spit_errors(ErrsList, error_stream).
+	spit_errors(ErrsList, error_stream),
+	nl(error_stream).
 
 spit_errors([], _).
 spit_errors([Error | ErrsList], Stream)
@@ -767,14 +768,14 @@ spit_errors([Error | ErrsList], Stream)
 	spit_the_error(Error, Stream),
 	spit_errors(ErrsList, Stream).
 
-spit_the_error( error(syntax_error,[_,syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,FS)]),
-				Stream)
+spit_the_error( 
+	error(syntax_error, [_,syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,FS)]),
+	Stream)
 	:-!,
-	EType = 'Syntax error',
+	EType = ' Syntax error',
 	printf(error_stream,'\n%s',[Context]),
-	OutPattern = '%t, line %d: %s\n',
-	OutArgs = [File,LineNumber,ErrorMessage],
-
+	OutPattern = '\n   - line %d: %s\n',
+	OutArgs = [LineNumber,ErrorMessage],
 	printf(Stream, '%t',[EType]),
 	printf(Stream, OutPattern, OutArgs, [quoted(true), maxdepth(6)]),
 	flush_output(Stream).

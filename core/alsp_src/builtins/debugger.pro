@@ -1174,14 +1174,17 @@ install_spypoint(Mod,Pred,Arity)
     assert(spying_on(CallForm,Mod)),
     builtins:dbg_spy(Mod,Pred,Arity).
 
+/****
 export reset_all_spypoints/0.
 reset_all_spypoints
 	:-
 	spying_on(CallForm,Mod), 
+write(user_output, spying_on(CallForm,Mod)),nl(user_output),flush_output(user_output),
 	functor(CallForm,Pred,Arity),
 	dbg_spy(Mod,Pred,Arity), 
 	fail.
 reset_all_spypoints.
+****/
 
 
 /*-------------------------------------------------------------------------*
