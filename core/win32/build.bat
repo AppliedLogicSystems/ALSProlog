@@ -12,6 +12,8 @@ copy "%TCLTKPATH%\bin\msvcrt.dll" .
 copy "%TCLTKPATH%\bin\tclpip80.dll" .
 copy "%TCLTKPATH%\bin\tcl80.dll" .
 copy "%TCLTKPATH%\bin\tk80.dll" .
+copy "%TCLTKPATH%\bin\itcl30.dll" .
+copy "%TCLTKPATH%\bin\itk30.dll" .
 xcopy /e /i "%TCLTKPATH%\lib\tcl8.0" lib\tcl8.0
 mkdir lib\tk8.0
 copy  "%TCLTKPATH%\lib\tk8.0\*" lib\tk8.0

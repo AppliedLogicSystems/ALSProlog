@@ -14,6 +14,12 @@ include "Tk8.0.shlb" 'MENU';
 include "Tk8.0.shlb" 'PICT';
 include "Tk8.0.shlb" 'SICN';
 
+/* Itcl/Itk/Iwidgets resources */
+
+include "itcl30.shlb" 'TEXT';
+include "itk30.shlb" 'TEXT';
+include "iwidgets30.rsrc";
+
 /* Tcl source files */
 
 /* Loaded in bld_dvsh.pro */
