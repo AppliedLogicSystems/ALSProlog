@@ -7,7 +7,7 @@ proc vTclWindow.alsdev_settings {base} {
         set base .alsdev_settings
     }
     if {[winfo exists $base]} {
-        wm deiconify $base ; return
+        wm deiconify $base; raise $base; return
     }
     ###################
     # CREATING WIDGETS
@@ -18,7 +18,7 @@ proc vTclWindow.alsdev_settings {base} {
     wm maxsize $base 1137 870
     wm minsize $base 0 0
     wm overrideredirect $base 0
-    wm resizable $base 1 1
+    wm resizable $base 0 0
     wm deiconify $base
     wm title $base "Fonts & Colors"
 	wm protocol .alsdev_settings WM_DELETE_WINDOW  {grab release .alsdev_settings ; wm withdraw .alsdev_settings }
@@ -111,8 +111,5 @@ proc vTclWindow.alsdev_settings {base} {
 		 -anchor center -expand 0 -fill none -side right -padx 8
     pack $base.buttons.cancel \
 		 -anchor center -expand 0 -fill none -side left -padx 8
-
-    wm geometry $base ""
-    wm resizable $base 0 0
 }
 

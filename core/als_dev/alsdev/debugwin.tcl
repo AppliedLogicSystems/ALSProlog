@@ -22,7 +22,7 @@ proc vTclWindow.debugwin {base} {
 
     set base .debugwin
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base; return
     }
     ###################
     # CREATING WIDGETS
@@ -236,7 +236,7 @@ proc vTclWindow.debug_source_trace {base Title} {
         set Title "Source Trace: Unknown File"
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base; return
     } 
 	lappend proenv(debugwin,visible) $base
 
@@ -300,7 +300,7 @@ proc vTclWindow.debug_settings {base} {
         set base .debug_settings
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base; return
     }
     ###################
     # CREATING WIDGETS
@@ -392,7 +392,7 @@ proc vTclWindow.pred_info {base} {
         set base .pred_info
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base; return
     }
     ###################
     # CREATING WIDGETS
@@ -846,7 +846,7 @@ proc vTclWindow.sys_mods {base} {
         set base .sys_mods
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base; raise $base; return
     }
     ###################
     # CREATING WIDGETS
