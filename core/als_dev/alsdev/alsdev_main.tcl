@@ -7,6 +7,7 @@
 
 proc vTclWindow.topals {args} {
 	global array proenv
+	global tcl_platform
 
     set base .topals
     if {[winfo exists .topals]} {
@@ -21,7 +22,10 @@ proc vTclWindow.topals {args} {
     wm geometry .topals 559x567+149+178
     wm maxsize .topals 1265 994
     wm minsize .topals 1 1
-    wm overrideredirect .topals 0
+    if {$tcl_platform(platform) != "macintosh"} {
+    	# This command removes the zoom box from Macintosh windows.
+    	wm overrideredirect .topals 0
+    }
     wm resizable .topals 1 1
     wm deiconify .topals
     wm title .topals "ALS Prolog Environment"
@@ -31,6 +35,61 @@ proc vTclWindow.topals {args} {
 		##------------------
 		## Main menubar:
 		##------------------
+
+if {$tcl_platform(platform) == "macintosh"} {
+	menu .topals.mmenb -tearoff 0
+	menu .topals.mmenb.apple -tearoff 0
+		.topals.mmenb.apple add command -label "About ALS Prolog…" -command {Window show .about ; raise .about}
+	menu .topals.mmenb.file
+		.topals.mmenb.file add command -label "New" -accelerator "Meta-N" -state disabled 
+		.topals.mmenb.file add command -label "New Project" -state disabled
+		.topals.mmenb.file add command -label "Open…" -accelerator "Meta-O" -state disabled
+		.topals.mmenb.file add command -label "Close" -accelerator "Meta-W" -state disabled
+		.topals.mmenb.file add separator
+		.topals.mmenb.file add command -label "Save" -accelerator "Meta-S" -state disabled
+		.topals.mmenb.file add command -label "Save As…" -state disabled
+		.topals.mmenb.file add separator
+		.topals.mmenb.file add command -label "Consult…" -command reconsult
+		.topals.mmenb.file add command -label "Set Directory…" -command set_directory
+		.topals.mmenb.file add command -label "Source Tcl…" -state disabled
+		.topals.mmenb.file add separator
+		.topals.mmenb.file add command -label "Page Setup…" -state disabled
+		.topals.mmenb.file add command -label "Print…" -accelerator "Meta-P" -state disabled
+		.topals.mmenb.file add separator
+		.topals.mmenb.file add command -label "Quit" -accelerator "Meta-Q" -command exit_prolog
+	menu .topals.mmenb.edit
+		.topals.mmenb.edit add command -label "Undo" -accelerator "Meta-Z" -state disabled
+		.topals.mmenb.edit add separator
+		.topals.mmenb.edit add command -label "Cut" -accelerator "Meta-X" -command {testitall}
+		.topals.mmenb.edit add command -label "Copy" -accelerator "Meta-C" -command {copy_text .topals.txwin.text}
+		.topals.mmenb.edit add command -label "Paste" -accelerator "Meta-V" -command {paste_text .topals.txwin.text}
+		.topals.mmenb.edit add command -label "Clear" -state disabled
+		.topals.mmenb.edit add separator
+		.topals.mmenb.edit add command -label "Select All" -accelerator "Meta-A" -state disabled
+	menu .topals.mmenb.project
+		.topals.mmenb.project add command -label "Add File" -state disabled
+		.topals.mmenb.project add command -label "Remove File" -state disabled
+		.topals.mmenb.project add separator
+		.topals.mmenb.project add command -label "Consult" -accelerator "Meta-K" -state disabled
+		.topals.mmenb.project add command -label "Clear Workspace" -command clear_workspace
+	menu .topals.mmenb.settings
+		.topals.mmenb.settings add command -label "Dynamic Flags…" -command show_dynamic_flags
+		.topals.mmenb.settings add command -label "Static Flags…" -command show_static_flags
+		.topals.mmenb.settings add separator
+		.topals.mmenb.settings add command -label "Other Settings…" -command {Window show .alsdev_settings}
+	menu .topals.mmenb.tools
+		.topals.mmenb.tools add checkbutton -label "Debugger" -command exec_toggle_debugwin -variable proenv(debugwin)
+		.topals.mmenb.tools add cascade -label "Tcl Shell" -menu .topals.mmenb.tools.tclshell -state disabled
+	menu .topals.mmenb.tools.tclshell
+		
+	.topals.mmenb add cascade -menu .topals.mmenb.apple
+	.topals.mmenb add cascade -menu .topals.mmenb.file -label "File"
+	.topals.mmenb add cascade -menu .topals.mmenb.edit -label "Edit"
+	.topals.mmenb add cascade -menu .topals.mmenb.project -label "Project"
+	.topals.mmenb add cascade -menu .topals.mmenb.settings -label "Settings"
+	.topals.mmenb add cascade -menu .topals.mmenb.tools -label "Tools"
+	
+} else {
 
     menu .topals.mmenb -relief sunken -tearoff 0
 
@@ -128,6 +187,7 @@ proc vTclWindow.topals {args} {
     .topals.mmenb add cascade -label Help -menu .topals.mmenb.help
     .topals.mmenb.help add command \
         -label About -command {Window show .about ; raise .about}
+}
 
 		##------------------------------------
 		## Directory notif & Interrupt button:
@@ -148,8 +208,13 @@ proc vTclWindow.topals {args} {
 		##------------------
 		## Text Window:
 		##------------------
-    frame .topals.txwin \
-		-borderwidth 1 -height 30 -relief raised 
+	if {$tcl_platform(platform) == "macintosh"} {
+	    frame .topals.txwin \
+			-borderwidth 0 -height 30 -relief raised
+	} else {
+	    frame .topals.txwin \3
+			-borderwidth 1 -height 30 -relief raised 
+	}
     scrollbar .topals.txwin.02 \
 		-command {.topals.txwin.text yview} \
         -orient vert 
@@ -164,6 +229,10 @@ proc vTclWindow.topals {args} {
         -yscrollcommand {.topals.txwin.02 set} \
 		-exportselection true
 
+    if {$tcl_platform(platform) == "macintosh"} {
+        .topals.txwin.text configure -highlightthickness 0
+    }
+
 #		-font {system 10 normal} \
 		
 
@@ -171,7 +240,8 @@ proc vTclWindow.topals {args} {
     # SETTING GEOMETRY
     ###################
 
-	.topals configure -menu .topals.mmenb
+	.topals configure -menu .topals.mmenb	
+	
 
     pack .topals.cpd19 \
         -anchor center -expand 0 -fill x -side top 
