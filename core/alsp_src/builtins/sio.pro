@@ -46,22 +46,24 @@ use windows.
  * Define the default end-of-line types.
  */
 
+default_read_eoln_type(_, universal).
+default_write_eoln_type(socket, crlf).
+
 :- als_system(L),
-   assert(default_read_eoln_type(universal)),
    dmember(os=OS, L),
    (
-	OS=mswin32 -> assert(default_write_eoln_type(crlf))
+	OS=mswin32 -> assert(default_write_eoln_type(_, crlf))
 	;
-	OS=macos -> assert(default_write_eoln_type(cr))
+	OS=macos -> assert(default_write_eoln_type(_, cr))
 	;
    	(OS=unix ->
    		dmember(os_variation=OSM, L),
    		((OSM=djgpp1 ; OSM=djgpp2) ->
-   			assert(default_write_eoln_type(crlf))
+   			assert(default_write_eoln_type(_, crlf))
    			;
-   			assert(default_write_eoln_type(lf))))
+   			assert(default_write_eoln_type(_, lf))))
 	;
-   		assert(default_write_eoln_type(crlf))
+   		assert(default_write_eoln_type(_, crlf))
     ).
 
 
@@ -879,7 +881,7 @@ open_null_stream(Source_sink,Mode,Options,Stream)
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	eoln_modes(Options, NEoln),
+	eoln_modes(null_stream, Options, NEoln),
 	sio_generic_open(0,Stream,NMode,NBuffering,NEoln).
 
 		/*---------*
@@ -892,7 +894,7 @@ open_file_stream(Source_sink,Mode,Options,Stream)
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	eoln_modes(Options, NEoln),
+	eoln_modes(file, Options, NEoln),
 	sio_file_open(Source_sink,Stream,NMode,NBuffering,NEoln),
 	!.
 
@@ -1062,7 +1064,7 @@ open_socket_stream(Description,Mode,Options,Stream) :-
 	read_write_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	eoln_modes(Options, NEoln),
+	eoln_modes(socket, Options, NEoln),
 	get_socket_connects(QLen,Options),
 	socket_codes(Domain,Dom, Type, Typ),
 	sio_socket_open(HostOrPath,Port,Dom,Typ,NMode,NBuffering,NEoln,QLen,
@@ -1261,7 +1263,7 @@ rexec_open0(s(Stream,Opts), Mode, Stream, Alias) :-
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Opts,NBuffering),
-	eoln_modes(Options, NEoln),
+	eoln_modes(socket, Options, NEoln),
 	sio_generic_open(0,Stream,NMode,NBuffering,NEoln).
 
 
@@ -1284,7 +1286,7 @@ open_string_stream(Source_sink,read,Options,Stream) :-
 	file_modes(read,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	eoln_modes(Options, NEoln),
+	eoln_modes(string, Options, NEoln),
 	sio_generic_open(0,Stream,NMode,NBuffering,NEoln),
 	!.
 open_string_stream(Source_sink,write,Options,Stream) :-
@@ -1294,7 +1296,7 @@ open_string_stream(Source_sink,write,Options,Stream) :-
 	file_modes(write,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	eoln_modes(Options, NEoln),
+	eoln_modes(string, Options, NEoln),
 	sio_generic_open(0,Stream,NMode,NBuffering,NEoln),
 	!.
 open_string_stream(Source_sink,Mode,Options,Stream) :-
@@ -1328,7 +1330,7 @@ open_atom_stream(Atom,read,Options,Stream) :-
 	file_modes(read,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	eoln_modes(Options, NEoln),
+	eoln_modes(atom, Options, NEoln),
 	sio_generic_open(0,Stream,NMode,NBuffering,NEoln),
 	!.
 open_atom_stream(Source_sink,write,Options,Stream) :-
@@ -1338,7 +1340,7 @@ open_atom_stream(Source_sink,write,Options,Stream) :-
 	file_modes(write,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	eoln_modes(Options, NEoln),
+	eoln_modes(atom, Options, NEoln),
 	sio_generic_open(0,Stream,NMode,NBuffering,NEoln),
 	!.
 open_atom_stream(Source_sink,Mode,Options,Stream) :-
@@ -1355,7 +1357,7 @@ open_console_stream(Source_sink, Mode, ErrorMode, Options, Stream)
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	eoln_modes(Options, NEoln),
+	eoln_modes(console, Options, NEoln),
 	sio_console_open(Source_sink,Stream,NMode,NBuffering,NEoln,ErrorMode),
 	!.
 open_console_stream(Source_sink,Mode,ErrorMode,Options,Stream) :-
@@ -1626,11 +1628,11 @@ blocking_numbers(snr_code, 4).		%% also non-blocking
  * code to pass to the C primitive.
  */
 
-eoln_modes(Options, Code) :-
-	default_read_eoln_type(RDef),
+eoln_modes(StreamType, Options, Code) :-
+	default_read_eoln_type(StreamType, RDef),
 	get_option(Options, read_eoln_type, RDef, RType),
 	eoln_type_number(RType, RCode),
-	default_write_eoln_type(WDef),
+	default_write_eoln_type(StreamType, WDef),
 	get_option(Options, write_eoln_type, WDef, WType),
 	eoln_type_number(WType, WCode),
 	Code is RCode \/ WCode << 2.
