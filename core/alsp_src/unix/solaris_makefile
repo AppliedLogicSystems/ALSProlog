@@ -1,2 +1,2 @@
-OS_CPPFLAGS = -DUNIX_SOLARIS
+SUBOS_CPPFLAGS=-DUNIX_SOLARIS
 OS_LIBS = -lsocket -ldl -lnsl -lgen -lelf

@@ -14,6 +14,8 @@
 #include "linux_config.h"
 #elif defined(UNIX_IRIX)
 #include "linux_config.h"
+#elif defined(UNIX_CYGWIN32)
+#include "cygwin32_config.h"
 #else
 #error
 #endif
