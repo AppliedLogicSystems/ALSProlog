@@ -571,17 +571,17 @@ special_ss_parse_command_line(File, Tail, [], CLInfo)
 
 special_file_type(File, prolog_project, NoSuffixFile, ppj)
 	:-
-	file_extension(File, NoSuffixFile, ppj),
+	(file_extension(File, NoSuffixFile, ppj) ; file_extension(File, NoSuffixFile, 'PPJ')),
 	!.
 
 special_file_type(File, prolog_source, NoSuffixFile, pro)
 	:-
-	(file_extension(File, NoSuffixFile, pro) ; file_extension(File, NoSuffixFile, PRO)),
+	(file_extension(File, NoSuffixFile, pro) ; file_extension(File, NoSuffixFile, 'PRO')),
 	!.
 
 special_file_type(File, prolog_source, NoSuffixFile, pl)
 	:-
-	(file_extension(File, NoSuffixFile, pl) ; file_extension(File, NoSuffixFile, PL)),
+	(file_extension(File, NoSuffixFile, pl) ; file_extension(File, NoSuffixFile, 'PL')),
 	!.
 
 special_file_type(File, prolog_script, NoSuffixFile, prs)
