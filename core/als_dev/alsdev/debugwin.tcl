@@ -41,16 +41,18 @@ proc vTclWindow.debugwin {base} {
     wm title $base "ALS Prolog Debugger"
 	wm protocol $base WM_DELETE_WINDOW unmap_alsdev_debug
 
+
 	bind $base <Configure> "debugwin_configure_event $base %h %w %W"
 
 	menu $base.menubar -tearoff 0 -relief sunken
 
-	add_default_menus .$base.menubar
+	add_default_menus $base.menubar
 	add_file_menu $base.menubar debugwin $base
 	add_edit_menu $base.menubar debugwin $base
 	add_prolog_menu $base.menubar debugwin $base
 	add_tools_menu $base.menubar debugwin $base
 	add_help_menu $base.menubar
+
 
     frame $base.buttons \
         -borderwidth 1 -relief sunken

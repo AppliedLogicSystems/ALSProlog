@@ -23,6 +23,9 @@ set argv ""
 if {[info exists ALSTCLPATH]==0} then { set ALSTCLPATH . }
 #puts "LOADING ALSDEV.TCL: ALSTCLPATH=$ALSTCLPATH"
 
+if {$tcl_platform(platform) == "macintosh"} {
+	load {} {appleevents}
+}
 #################################
 # GLOBAL VARIABLES
 #--------------------------------
@@ -49,10 +52,17 @@ set proenv(defstr_ld)			false
 
 set proenv(debugwin_button,background)	#cee8e6
 set proenv(interrupt_button,foreground)	#ff0000
-set proenv(.topals,background)       #d9d9d9
-set proenv(.topals,font) {user 10 normal}
-set proenv(debugwin,font)   {user 10 normal}
-set proenv(edit,font)       {user 10 normal}
+if {$tcl_platform(platform) == "macintosh"} {
+	set proenv(.topals,background)       #ffffff
+	set proenv(.topals,font) {Monaco 9 normal}
+	set proenv(debugwin,font)   {Monaco 9 normal}
+	set proenv(edit,font)       {Monaco 9 normal}
+} else {
+	set proenv(.topals,background)       #d9d9d9	
+	set proenv(.topals,font) {user 10 normal}
+	set proenv(debugwin,font)   {user 10 normal}
+	set proenv(edit,font)       {user 10 normal}
+}
 
 set	proenv(edit,visible)		{}
 
@@ -432,8 +442,8 @@ proc copy_paste_text { TxtWin } {
 proc source_tcl { } {
 	set file [tk_getOpenFile \
 		-defaultextension tcl \
-		-title "Consult File" \
-		-filetypes {{"Tcl/Tk Files" {.tcl } } {{All Files} {*} } } ]
+		-title "Source File" \
+		-filetypes {{"Tcl/Tk Files" {.tcl} TEXT} {{All Files} {*} TEXT} } ]
 	if { "$file"== "" } then { bell ; return }
 	set TclInterp [do_popup_input "Input the name of the Tcl interpreter:" "Tcl Interp?"]
 	if { "$TclInterp"== "" } then { bell ; return }
