@@ -1,5 +1,5 @@
 setlocal
-set CWPATH=\Program Files\Metrowerks\CodeWarrior
+set CWPATH=C:\Program Files\Metrowerks\CodeWarrior
 set TCLTKPATH=%CWPATH%\ALS Build Support\Tcl-Tk Support
 copy setcwd.bat temp.bat
 cd >> temp.bat
