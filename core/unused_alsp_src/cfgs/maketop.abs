@@ -12,7 +12,7 @@ schema([
 	cmnt(0),
 	srcdir 		= '@srcdir@',
 	'BUILDS'	= ['bld-port','bld-natv'],
-	'.PHONY': all,
+	'PHONY': all,
 	rule(all),
 	rule(wins),
 	rule(testrun),
@@ -34,9 +34,8 @@ rule(all,
 	case(&(context_name),
 		[
 		 (mac:([
-			'SetDirectory :bld-port; MakeIt all; SetDirectory ::',
-			'#-$(MAKE) -C bld-natv all',
-			'#$(MAKE) wins'] )),
+			'MakeIt -C :bld-port: macall',
+			'MakeIt -C :bld-wins:macos: all'] )),
 		 (_:([
 			'$(MAKE) -C bld-port all',
 			'$(MAKE) -C bld-port mi',
@@ -54,8 +53,7 @@ rule(wins,
 			'echo Using $(srcdir) to make bld-wins',
 			'$(srcdir)/bin/winbld $(srcdir) $(MAKE)' ] )),
 		 (mac:([
-			'echo Using $(srcdir) to make bld-wins',
-			'$(srcdir)/bin/winbld $(srcdir) $(MAKE)' ] ))
+			'MakeIt -C :bld-wins:macos: all'] ))
 		] ) ).
 
 rule(testrun,
@@ -63,8 +61,7 @@ rule(testrun,
 	case(&(context_name),
 		[
 		 (mac:( [
-			'cd ./bld-port; $(MAKE) testrun',
-			'cd ./bld-natv; $(MAKE) testrun'])),
+			'MakeIt -C :bld-port: testrun'])),
 		 (_:([
 			'$(MAKE) -C ./bld-port testrun',
 			'$(MAKE) -C ./bld-natv testrun']))
@@ -75,9 +72,8 @@ rule(cleanup,
 	case(&(context_name),
 		[
 		 (mac:([
-			'cd ./bld-port; $(MAKE) cleanup',
-			'cd ./bld-natv; $(MAKE) cleanup',
-			'cd ./bld-wins; $(MAKE) cleanup'])),
+			'MakeIt -C :bld-port: cleanup',
+			'MakeIt -C :bld-wins:macos: cleanup'])),
 		 (_:([
 			'$(MAKE) -C ./bld-port cleanup',
 			'$(MAKE) -C ./bld-natv cleanup',
@@ -88,9 +84,8 @@ rule(super_clean,
 	[],
 	case(&(context_name),
 		[(mac:( [
-			'SetDirectory :bld-port; $(MAKE) super_clean',
-			'cd ./bld-natv; $(MAKE) super_clean',
-			'cd ./bld-wins; $(MAKE) super_clean'])),
+			'MakeIt -C :bld-port: super_clean',
+			'MakeIt -C :bld-wins:macos: super_clean'])),
 		 (_:([
 			'$(MAKE) -C ./bld-port super_clean',
 			'$(MAKE) -C ./bld-natv super_clean',
