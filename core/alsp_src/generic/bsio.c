@@ -273,33 +273,33 @@ static  int int_or_float    PARAMS((int, PWord));
 enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
 #ifdef PURE_ANSI
-static long standard_console_read(char *buf, long n)
+long standard_console_read(char *buf, long n)
 {
     return fread(buf, sizeof(char), n, stdin);
 }
 
-static long standard_console_write(char *buf, long n)
+long standard_console_write(char *buf, long n)
 {
     return fwrite(buf, sizeof(char), n, stdout);
 }
 
-static long standard_console_error(char *buf, long n)
+long standard_console_error(char *buf, long n)
 {
     return fwrite(buf, sizeof(char), n, stderr);
 }
 #else
 
-static long standard_console_read(char *buf, long n)
+long standard_console_read(char *buf, long n)
 {
     return read(STDIN_FILENO, buf, n);
 }
 
-static long standard_console_write(char *buf, long n)
+long standard_console_write(char *buf, long n)
 {
     return write(STDOUT_FILENO, buf, n);
 }
 
-static long standard_console_error(char *buf, long n)
+long standard_console_error(char *buf, long n)
 {
     return write(STDERR_FILENO, buf, n);
 }

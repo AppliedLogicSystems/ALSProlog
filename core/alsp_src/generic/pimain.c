@@ -171,6 +171,10 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 
     InstallConsole(0);
     SIOUXSetTitle("\pALS Prolog");
+    
+    PI_set_console_functions(standard_console_read, standard_console_write,
+    				standard_console_error);
+    
 #endif
 
 
