@@ -901,12 +901,13 @@ mark_backup:
 
 
 #ifdef PRIM_DBG
-void ppwrite PARAMS ((long));
+void ppwrite PARAMS ((PWord));
 
 void
-ppwrite(long pv)
+ppwrite(PWord pv)
 {
-    long  v, t;
+    PWord v;
+    int t;
 
     w_get(&v, &t, pv);
     printf("\n");
