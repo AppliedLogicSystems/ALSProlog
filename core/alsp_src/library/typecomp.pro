@@ -8,9 +8,9 @@
  |
  |	Author: Ken Bowen
  |	Date:	March, 1990
- |	Revision: August, 1990: Add uniform "note" generation
- |	Revision: February, 1992: Restructuring for clarity &
- |							  & add *.mac generation
+ |	Revision: Aug, 1990: Add uniform "note" generation
+ |	Revision: Feb, 1992: Restructuring; & add *.mac generation
+ |	Revision: Jun, 1996: Add include facility
  |	User documentation in ..manual/Tools/Structs/defstruct.tex
  * ===========================================================*/
 
@@ -29,6 +29,7 @@
 		structLabel=wi
 		]).
  *-------------------------------------------------------------------------*/
+
 
 module builtins.
 use windows.
@@ -173,8 +174,10 @@ type_comp(defStruct(TypeName,SpecsList),Mod,Mod,Extras,TgtStream,MacStream)
 	dmember(accessPred=AccessPred, SpecsList),
 	dmember(setPred=SetPred, SpecsList),
 	dmember(makePred=MakePred, SpecsList),
-	dmember(propertiesList=PropertiesList, SpecsList),
 	dmember(structLabel=StructLabel, SpecsList),
+	dmember(propertiesList=InitPropertiesList, SpecsList),
+	expand_includes(InitPropertiesList, PropertiesList, Tail),
+	Tail = [],
 
 	makeStructDefs(TypeName, AccessPred, SetPred, MakePred, 
 					PropertiesList, StructLabel,Extras,TgtStream,MacStream).
@@ -343,6 +346,53 @@ flattenProps([Item | PropertiesList], [Item | RestFullList])
 	:-
 	flattenProps(PropertiesList, RestFullList).
 
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
+
+expand_includes([], Tail, Tail).
+expand_includes([include(File,Name) | RestPropertiesList], PropertiesList, FinalTail)
+	:-
+	fetch_included_props(File, Name, PropertiesList, InterPropsListTail),
+	!,
+	expand_includes(RestPropertiesList, InterPropsListTail, FinalTail).
+
+expand_includes([include(File,Name) | RestPropertiesList], PropertiesList, FinalTail)
+	:-
+	expand_includes(RestPropertiesList, PropertiesList, FinalTail).
+
+expand_includes([Item | InitPropertiesList], [Item | PropertiesList], FinalTail)
+	:-
+	expand_includes(InitPropertiesList, PropertiesList, FinalTail).
+
+fetch_included_props(File, Name, PropertiesList, InterPropsListTail)
+	:-
+	(filePlusExt(BaseFile,typ,File) ->
+		FullFile = File ; filePlusExt(File,typ,FullFile)
+	),
+	exists(FullFile),
+	open(FullFile, read, InStr, []),
+	!,
+	read_terms(InStr, FTerms),
+	close(InStr),
+	fin_fetch_included_props(FTerms, File, Name, PropertiesList, InterPropsListTail).
+
+fetch_included_props(File, Name, In, In)
+	:-
+	ct_message('!Warning: Can\'t find included type file >> %t.typ << ...skipping.\n',
+				[File]).
+
+fin_fetch_included_props(FTerms, File, Name, PropertiesList, InterPropsListTail)
+	:-
+	dmember(defStruct(Name, FSpecs), FTerms),
+	dmember(propertiesList=FProps, FSpecs),
+	!,
+	expand_includes(FProps, PropertiesList, InterPropsListTail).
+
+fin_fetch_included_props(FTerms, File, Name, In, In)
+	:-
+	ct_message('!Warning: Can\'t find included type >> %t << in file %t...skipping.\n',
+				[Name,File]).
+
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
@@ -360,7 +410,6 @@ pp_all(Extras,Stream, Options)
 		TheOptions = [quoted(true) | Options]
 	),
 	write_term(Stream,Extras,TheOptions),
-%	put_char(Stream,0'.),
 	put_code(Stream,0'.),
 	nl(Stream).
 
