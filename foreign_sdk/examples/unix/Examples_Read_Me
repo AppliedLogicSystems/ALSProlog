@@ -31,6 +31,6 @@ Running Examples
 To load .psl (Prolog Shared Library) files you will need to have ALS Prolog
 installed.
 
-To run the embeding and static foreign predicate examples, you will need to
-have the ALS Prolog shared object/library and the alsdir directory installed
-on the system.
+To build and run the embeding and static foreign predicate examples, you will
+need to have the ALS Prolog shared object/library and the alsdir directory
+installed on the system.

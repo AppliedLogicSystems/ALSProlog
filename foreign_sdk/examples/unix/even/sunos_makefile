@@ -1,19 +1,18 @@
 # GCC under SunOS 4.1 cannot create shared objects.
 # The work around is to link directly with ld.
 
-SDK_DIR = ../../..
+SDK_DIR = ../..
 
-all: even.psl even_alspro_b
+all: even.psl even_alspro
 
 even.psl: even.c
 	gcc -c -I$(SDK_DIR)/include even.c 
 	gcc -c -I$(SDK_DIR)/include $(SDK_DIR)/source/alspi_slib.c
 	ld -o even.psl even.o alspi_slib.o -lc 
 
-even_alspro_b: even.c
-	gcc -o even_alspro_b -I$(SDK_DIR)/include \
-	    even.c -L$(SDK_DIR)/lib -lalspro -lc
+even_alspro: even.c
+	gcc -o even_alspro -I$(SDK_DIR)/include \
+	    even.c -lalspro -lc
 
 clean:
-	rm -f *.o even.psl even_alspro_b
-	
+	rm -f *.o even.psl even_alspro

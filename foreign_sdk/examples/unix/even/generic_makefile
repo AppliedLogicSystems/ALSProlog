@@ -1,16 +1,16 @@
 SDK_DIR = ../..
 
-all: even.psl even_alspro_b
+all: even.psl even_alspro
 
 even.psl: even.c
 	gcc -fpic -shared $(PSL_LINK) \
 	-o even.psl -I$(SDK_DIR)/include \
 	    even.c $(SDK_DIR)/source/alspi_slib.c -lc
 
-even_alspro_b: even.c
+even_alspro: even.c
 	gcc $(RUNTIME_LINK) \
-	-o even_alspro_b -I$(SDK_DIR)/include \
-	    even.c -L$(SDK_DIR)/lib -lalspro -lc
+	-o even_alspro -I$(SDK_DIR)/include \
+	    even.c -lalspro -lc
 
 clean:
-	rm -f even.psl even_alspro_b
+	rm -f even.psl even_alspro
