@@ -1056,7 +1056,8 @@ ld_fs(OS)
 		%% ALS shell stuff starts here:
 	consult_builtins(BDir, blt_shlr),			
 	consult_builtins(BDir, blt_cslt),			
-	consult_builtins(BDir, blt_shl).
+	consult_builtins(BDir, blt_shl),
+	consult_builtins(BDir, blt_dvsh).
 
 %%--------------------------------------------
 %% set up the operators (stream io stuff needs to be 

@@ -1640,6 +1640,7 @@ wr_subs3(N,S,VPairs,Stream)
 
 wr_subs3(N,S,_,Stream)
 	:-
+%pbi_write(nl_for_wr_subs3(N)),pbi_nl,pbi_ttyflush,
 	nl(Stream),
 	write_term(Stream,'%lettervar%'(N)=S,[]).
 

@@ -38,20 +38,23 @@ curmod(M,M).
  *------------------------------------------------------------------*/
 export modules/2.
 
-modules(Module,UseList) :-
+modules(Module,UseList) 
+	:-
 	'$next_module'(-1,N,FirstModule,FirstUseList),  % first module
 	next_modules(N,FirstModule,FirstUseList,Module,UseList).
 
 next_modules(_,Module,UseList,Module,UseList).
-next_modules(N,_,_,Module,UseList) :-
+next_modules(N,_,_,Module,UseList) 
+	:-
 	'$next_module'(N,NN,NextModule,NextUseList),
 	next_modules(NN,NextModule,NextUseList,Module,UseList).
 
 /*------------------------------------------------------------------*
- * procedures/4
- * all_procedures/3
- * all_procedures/4
- * all_ntbl_entries/4
+ | procedures/4
+ | all_procedures/3
+ | all_procedures/4
+ | all_ntbl_entries/4
+ | current_predicate/1
  *------------------------------------------------------------------*/
 
 export procedures/4.
@@ -60,28 +63,31 @@ export all_procedures/4.
 export all_ntbl_entries/4.
 
 /*------------------------------------------------------------------*
- * Procedures written in Prolog.
+ | Procedures written in Prolog.
  *------------------------------------------------------------------*/
-procedures(M,P,A,DBRef) :-
+procedures(M,P,A,DBRef) 
+	:-
 	procedures(M,P,A,DBRef,0).
 
 /*------------------------------------------------------------------*
- * Procedures written in both Prolog and C.
+ | Procedures written in both Prolog and C.
  *------------------------------------------------------------------*/
-all_procedures(M,P,A) :-
+all_procedures(M,P,A) 
+	:-
 	procedures(M,P,A,_,1).
 
-all_procedures(M,P,A,DBRef) :-
+all_procedures(M,P,A,DBRef) 
+	:-
 	procedures(M,P,A,DBRef,1).
 
 /*------------------------------------------------------------------*
- * All name table entries
+ | All name table entries
  *------------------------------------------------------------------*/
 all_ntbl_entries(M,P,A,DBRef) :-
 	procedures(M,P,A,DBRef,2).
 
 /*------------------------------------------------------------------*
- * Basic access to procedure info:
+ | Basic access to procedure info:
  *------------------------------------------------------------------*/
     	% Directly access the name table entry
 procedures(M,P,A,DBRef,F) 
@@ -108,12 +114,27 @@ procedures(CurProc,F,M,P,A,DBRef)
 	procedures(NextProc,F,M,P,A,DBRef).
 
 /*------------------------------------------------------------------*
- * clauses/4
+ | current_predicate/1
+ | current_predicate(PredicateIndicator)
+ | current_predicate(+/-)
+ |
+ |	Module closure of current_predicate/2:
+ *------------------------------------------------------------------*/
+:- module_closure(current_predicate,1).
+
+current_predicate(M, P/A)
+	:-
+	procedures(M,P,A,_,1).
+
+
+/*------------------------------------------------------------------*
+ | clauses/4
  *------------------------------------------------------------------*/
 
 export clauses/4.
 
-clauses(M,P,A,DBRef) :-
+clauses(M,P,A,DBRef) 
+	:-
 	procedures(M,P,A,First,0),
 	clauses(First,DBRef).
 

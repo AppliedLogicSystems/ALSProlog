@@ -12,193 +12,264 @@
 
 module builtins.
 
-/*
- * abolish/2.
- *  
- * This procedure is defined in terms of abolish/3 which is a C-defined
- * builtin.  abolish/3 takes a module, procedure name, and arity.
- *  
- */
+/*------------------------------------------------------------------------*
+ | abolish/2.
+ | abolish(Pred, Arity)
+ |  
+ |	Defined in terms of abolish/3 which, is a C-defined builtin:
+ |	abolish/3
+ |	abolish(Mod, Pred, Arity)
+ |
+ | abolish/1
+ | abolish(Pred, Arity)
+ | 
+ | Required by the standard.
+ *------------------------------------------------------------------------*/
 
-
-:-
-	compiletime,
+:-	compiletime,
 	module_closure(abolish,2,abolish).
 
-/*
- * clause/2, clause/3
- *
- * Starting with the SUN implementation, the ability to get something
- * like
- *           clause(foo:f(X),B)
- * has been completely phased out.  The proper way to do the above is to
- * call clause from within module foo as
- *           foo:clause(f(X),B)
- *
- * This has simplified the resulting code greatly.  If you have
- * compatibility problems with either ported PC code (because the code was
- * written badly) or with Columbus code (because that was the only way to
- * it), you can write your own version of clause or, better still, modify
- * the source to work properly.
- *
- * See the listing/0 and listing/1  code for definitions of next_clause/2
- * and rest_clauses/3.
- */
+:-	compiletime,
+	module_closure(abolish,1,abolish1_aux).
 
-:-
-	compiletime,
+abolish1_aux(Mod, P/A)
+	:-!,
+	abolish(Mod, P, A).
+
+abolish1_aux(Mod, Expr)
+	:-
+	atom(Expr),
+	abolish(Mod, P, 0).
+
+/*------------------------------------------------------------------------*
+ |	remove_clauses/2
+ |	remove_clauses(Pred, Arity)
+ |
+ |	Similar to abolish/2, but does not delete the name table entry
+ |	for Pred/Arity, and hence does not kill any dynamic(Pred/Arity)
+ |	declaration.
+ |		To be more efficiently defined at the C-level later.
+ *------------------------------------------------------------------------*/
+:-	compiletime,
+	module_closure(remove_clauses,2,remove_clauses).
+
+remove_clauses(Mod, Pred, Arity)
+	:-
+	abolish(Mod, Pred, Arity),
+	Mod:dynamic(Pred/Arity).
+
+/*------------------------------------------------------------------------*
+ | clause/2, clause/3
+ |
+ |	The proper way to perform clause retrieval relative to a module foo is:
+ |
+ |           foo:clause(f(X),B)
+ |
+ |	However, as a concession to the ISO standard, the following will be
+ |	allowed to be equivalent to the above:
+ |
+ |           clause(foo:f(X),B)
+ |
+ | See the listing/0 and listing/1  code for definitions of next_clause/2
+ | and rest_clauses/3.
+ *------------------------------------------------------------------------*/
+
+:-	compiletime,
 	module_closure(clause,2,'$clause'),
 	module_closure(clause,3,clause).
    
-'$clause'(Module,Head,Body) :-
+'$clause'(_, (Module:Head), Body) 
+	:-!,
 	clause(Module,Head,Body,_).
 
-	% DBRef is ground.
-clause(Module,Head,Body,DBRef) :-
+'$clause'(Module,Head,Body) 
+	:-
+	clause(Module,Head,Body,_).
+
+	%% DBRef is ground:
+clause(Module,Head,Body,DBRef) 
+	:-
 	nonvar(DBRef),
 	!,
 	$source(DBRef,Clause),		%% decompile the DBRef
 	clauseParts(Clause,Head,Body).
 
-	% Don't have a DBRef yet.
-clause(Module,Head,Body,DBRef) :-
+	%% Don't have a DBRef yet:
+clause(Module,Head,Body,DBRef) 
+	:-
 	nonvar(Head),
 	(atom(Head) ; compound(Head)),
 	!,
 	functor(Head,F,A),
 	get_firstarg(A,Head,FirstArg),
-			% Get the first clause of the procedure.
+		%% Get the first clause of the procedure:
 	$procinfo(_,Module,F,A,First,_),!,
-			% Cycle through DBRefs until find one that works.
+		%% Cycle through DBRefs until find one that works:
 	get_clauses(First,DBRef,FirstArg),
 	$source(DBRef,Clause),
 	clauseParts(Clause,Head,Body).
-clause(Module,Head,Body,DBRef) :-
+
+clause(Module,Head,Body,DBRef) 
+	:-
 	var(Head),
 	instantiation_error(clause(Head,Body)).
-clause(Module,Head,Body,DBRef) :-
-	nonvar(Head), not(atom(Head)), not(compound(Head)),
+
+clause(Module,Head,Body,DBRef) 
+	:-
+	nonvar(Head), 
+	not(atom(Head)), 
+	not(compound(Head)),
 	type_error(callable, Head, clause(Head,Body)).
-clause(Module,Head,Body,DBRef) :-
+
+clause(Module,Head,Body,DBRef) 
+	:-
 	permission_error(access, private_procedure, Head, clause(Head,Body)).
 
-clauseParts((Head :- Body),Head,Body) :- !.
+clauseParts((Head :- Body),Head,Body) 
+	:- !.
 clauseParts(Head,Head,true).
 
-/*
- * clauses/2
- *
- *       Recursively get all database references of clauses starting
- *       from the given first clause.
- */
+/*------------------------------------------------------------------------*
+ |	clauses/2
+ |
+ |       Recursively get all database references of clauses starting
+ |       from the given first clause.
+ *------------------------------------------------------------------------*/
 
-clauses(0,_) :-
-        !,
+clauses(0,_) 
+	:-!,
 	fail.
-clauses(FirstDBRef,DBRef) :-
-        '$clauseinfo'(FirstDBRef,NextDBRef,_,_),
-        clauses(FirstDBRef,NextDBRef,DBRef).
 
-clauses(0,_,_) :-
-	!,
+clauses(FirstDBRef,DBRef) 
+	:-
+	'$clauseinfo'(FirstDBRef,NextDBRef,_,_),
+	clauses(FirstDBRef,NextDBRef,DBRef).
+
+clauses(0,_,_) 
+	:-!,
 	fail.
+
 clauses(DBRef,Next,DBRef).
-clauses(Previous,Current,DBRef) :-
-        '$clauseinfo'(Current,Next,_,_),
-        clauses(Current,Next,DBRef).
 
+clauses(Previous,Current,DBRef) 
+	:-
+	'$clauseinfo'(Current,Next,_,_),
+	clauses(Current,Next,DBRef).
 
-/*
- * Filter clauses whose first arguments don't match the first argument
- * of the template while their data base references are collected.
- * If the first argument of the template is a variable, cycle all clauses.
- * Otherwise, get clauses whose first arguments match with the first argument
- * of the template.
- */
+/*------------------------------------------------------------------------*
+ | Filter clauses whose first arguments don't match the first argument
+ | of the template while their data base references are collected.
+ | If the first argument of the template is a variable, cycle all clauses.
+ | Otherwise, get clauses whose first arguments match with the first argument
+ | of the template.
+ *------------------------------------------------------------------------*/
 
-get_clauses(First,DBRef,FirstArg) :-
-	nonvar(FirstArg), !,
+get_clauses(First,DBRef,FirstArg) 
+	:-
+	nonvar(FirstArg), 
+	!,
 	filter_clauses(First,DBRef,FirstArg).
-get_clauses(First,DBRef,FirstArg) :-
+
+get_clauses(First,DBRef,FirstArg) 
+	:-
 	clauses(First,DBRef).
 
-get_firstarg(0,_,_) :- !.
-get_firstarg(_,Head,FirstArg) :- arg(1,Head,FirstArg).
+get_firstarg(0,_,_) 
+	:- !.
 
-/*
- * filter_clauses/2
- * 
- * 	 The function of this procedure is same as the function of clauses/2
- *	 except that this procedure filters out clauses whose first arguments
- *  	 don't match with the given first argument.
- */ 
+get_firstarg(_,Head,FirstArg) 
+	:- 
+	arg(1,Head,FirstArg).
 
-filter_clauses(0,_,_) :-
-	!,fail.
-filter_clauses(FirstDBRef,DBRef,FirstArg) :-
+/*------------------------------------------------------------------------*
+ | filter_clauses/2
+ | 
+ |	The function of this procedure is same as the function of clauses/2
+ |	except that this procedure filters out clauses whose first arguments
+ |  don't match with the given first argument.
+ *------------------------------------------------------------------------*/ 
+
+filter_clauses(0,_,_) 
+	:- !,
+	fail.
+
+filter_clauses(FirstDBRef,DBRef,FirstArg) 
+	:-
 	'$clauseinfo'(FirstDBRef,NextDBRef,_,_),
 	filter_clauses(FirstDBRef,NextDBRef,DBRef,FirstArg).
 
-filter_clauses(0,_,_,_) :- !,fail.
-filter_clauses(DBRef,Next,DBRef,FirstArg) :- 
+filter_clauses(0,_,_,_) 
+	:- 
+	!,fail.
+
+filter_clauses(DBRef,Next,DBRef,FirstArg) 
+	:- 
 	'$firstargkey'(DBRef,FirstArg).
-filter_clauses(Previous,Current,DBRef,FirstArg) :-
+
+filter_clauses(Previous,Current,DBRef,FirstArg) 
+	:-
 	'$clauseinfo'(Current,Next,_,_),
 	filter_clauses(Current,Next,DBRef,FirstArg).
 
-/*
- * retract/1, retract/2
- */
+/*------------------------------------------------------------------------*
+ | retract/1, retract/2
+ *------------------------------------------------------------------------*/
 
-:- 
-	compiletime,
+:-	compiletime,
 	module_closure(retract,2,retract),
 	module_closure(retract,1,$retract).
 
-$retract(Module,X) :-
+$retract(Module,X) 
+	:-
 	retract(Module,X,_).
 
-retract(Module,Clause,DBRef) :-
-	nonvar(DBRef),!,
-		% Decompile and delete if necessary.
+	%% DBRef is non-variable:
+retract(Module,Clause,DBRef) 
+	:-
+	nonvar(DBRef),
+	!,
+		%% Decompile and delete if necessary:
 	$source(DBRef,Clause),
 	erase(DBRef).
 
-	% DBRef is variable. Must do some searching.
-retract(Module,Clause,DBRef) :-
-		% Get the head, take it apart, and find the first clause.
+	%% DBRef is variable. Must do some searching:
+retract(Module,Clause,DBRef) 
+	:-
+		%% Get the head, take it apart, & find first clause:
 	clauseParts(Clause,Head,_),
 	functor(Head,F,A),
 	$procinfo(_,Module,F,A,First,_),
-		% Start searching for retraction
+		%% Start searching for retraction:
 	get_firstarg(A,Head,FirstArg),
 	get_clauses(First,DBRef,FirstArg),
 	$source(DBRef,Clause),
 	erase(DBRef).
 
-/*--------------------------------------------
- * 		Predicates for manipulating modules
- *--------------------------------------------*/
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%%%%	Predicates for manipulating modules 	%%%%%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-/*
- * Create a new module (no effect if already exists)
- */
+/*----------------------------------------------------------------------*
+ | Create a new module (no effect if module already exists)
+ *----------------------------------------------------------------------*/
 
 export create_new_module/1.
 create_new_module(Mod)
 	:-
 	'$icode'(-10,Mod,0,0,0).
 
-/*
- * Export predicates from a module
- */
+/*----------------------------------------------------------------------*
+ | Export predicates from a module
+ *----------------------------------------------------------------------*/
 
 export doexport/1.
-doexport((P1,P2)) :-
+doexport((P1,P2)) 
+	:-
 	doexport(P1),
 	doexport(P2).
 
-doexport(P/A) :- 
+doexport(P/A) 
+	:- 
 	atom(P),
 	integer(A),
 	A >= 0,
@@ -206,17 +277,22 @@ doexport(P/A) :-
 	functor(PP,P,0),		/* intern the predicate name */
 	$icode(-11, PP, A, 0, 0).	/* export the predicate name */
 
-doexport(Pat) :-
+	%%%% Needs to be made into proper error exceptions
+			%% e.g., instantiation_error(clause(Head,Body)),
+			%%  	type_error(callable, Head, clause(Head,Body)).
+
+doexport(Pat) 
+	:-
 	write(error_stream,'Invalid P/A in export list.  Ignoring it.'),
 	nl(error_stream).
 
-
-/*
- * Set use declarations in a module
- */
+/*----------------------------------------------------------------------*
+ | Set use declarations in a module
+ *----------------------------------------------------------------------*/
 
 export douse/1.
-douse((M1,M2)) :-
+douse((M1,M2)) 
+	:-
 	douse(M1),
 	douse(M2).
 
@@ -225,6 +301,8 @@ douse(M) :-
 	!,
 	functor(MM,M,0),		/* intern the module name */
 	$icode(-8, MM, 0, 0, 0).	/* add to module use list */
+
+	%% Need error exceptions....
 
 /*---------------------------------------------------------------------
  | 				Hash table (expandable) predicates
@@ -370,9 +448,6 @@ hash_insert(Bucket,Array,Index,Key,Value,Table)
 	NewRehashCount is RehashCount-1,
 	hash_rehash(NewRehashCount,Table).
 
-/*
- * hash_insert_multi(Key,Value,Table)
- */
 /*---------------------------------------------------------------*
  |	hash_insert_multi/3
  |	hash_insert_multi(Key,Value,Table)
@@ -413,7 +488,6 @@ hash_insert_multi(Bucket,Array,Index,Key,Value,Table)
 	%% Note that [Key,Value] = [Key | [Value] ]
 hash_insert_multi(Bucket,Array,Index,Key,Value,Table) 
 	:-
-%	mangle(Index,Array,[[Key|Value]|Bucket]),
 	mangle(Index,Array,[ [Key,Value] | Bucket]),
 	arg(3,Table,RehashCount),
 	NewRehashCount is RehashCount-1,
