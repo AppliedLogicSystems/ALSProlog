@@ -883,7 +883,7 @@ load_slib(File) :-
 	check_plugin_result(Result, File, NativeResult,
 	                    builtins:load_slib(File)).
 
-check_plugin_result(no_error, _, _, _).
+check_plugin_result(no_error, _, _, _) :- !.
 check_plugin_result(file_not_found_error, File, NativeResult, Goal) :-
 	existence_error(shared_library, File, Goal).
 check_plugin_result(permission_error, File, NativeResult, _) :-
