@@ -481,37 +481,21 @@ wd('$VAR'(Num), Lev, Depth, _, nospace,[VarAtom|Hole],Hole,BP,WInfo)
 	sio_lettervar(Num,VarAtom),
 	!.
 
-    %% == Handle negative integers.
+    %% == Handle negative numbers
 wd(Neg, Lev, Depth, SpaceIn, nospace,List,Hole,BP,WInfo) 
 	:-
-	integer(Neg),
+	number(Neg),
 	Neg < 0,
 	!,
 	wd_space(SpaceIn,List,[NegAtom|Hole]),
-	sio_sprintf('%d',Neg,NegAtom,_).
+	sio_sprintf_number(Neg,NegAtom,_).
 
-    %% == Handle non-negative integers
-wd(Int, Lev, Depth, _, nospace,[IntAtom|Hole],Hole,BP,WInfo) 
+    %% == Handle non-negative numbers
+wd(Num, Lev, Depth, _, nospace,[NumAtom|Hole],Hole,BP,WInfo) 
 	:-
-	integer(Int),
+	number(Num),
 	!,
-	sio_sprintf('%d',Int,IntAtom,_).
-
-    %% == Handle negative floats
-wd(Flt, Lev, Depth, SpaceIn, nospace,List,Hole,BP,WInfo) 
-	:-
-	float(Flt),
-	Flt < 0,
-	!,
-	wd_space(SpaceIn,List,[NegAtom|Hole]),
-	sio_sprintf('%1.10g',Flt,NegAtom,_).
-
-    %% == Handle non-negative floats
-wd(Flt, Lev, Depth, _, nospace,[FltAtom|Hole],Hole,BP,WInfo) 
-	:-
-	float(Flt),
-	!,
-	sio_sprintf('%1.10g',Flt,FltAtom,_).
+	sio_sprintf_number(Num,NumAtom,_).
 
     %% == Handle atoms
 wd(Atom, Lev, Depth, SpaceIn, SpaceOut,List,Hole,BP,WInfo) 
