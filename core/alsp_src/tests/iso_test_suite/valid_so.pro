@@ -31,9 +31,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-:- reconsult(utils_so).
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %    load all the tests.
@@ -42,28 +39,30 @@
 %  predicate validate/0.
 %
 
-:- reconsult(sec74).
-:- reconsult(sec78).
-:- reconsult(sec82).
-:- reconsult(sec83).
-:- reconsult(sec84).
-:- reconsult(sec85).
-:- reconsult(sec86).
-:- reconsult(sec87).
-:- reconsult(sec88).
-:- reconsult(sec89).
-:- reconsult(sec810).
-:- reconsult(sec811).
-:- reconsult(sec812).
-:- reconsult(sec813).
-:- reconsult(sec814).
-:- reconsult(sec815).
-:- reconsult(sec816).
+init_files :-
+	consult('utils_so.pro'),
+	consult('sec74.pro'),
+	consult('sec78.pro'),
+	consult('sec82.pro'),
+	consult('sec83.pro'),
+	consult('sec84.pro'),
+	consult('sec85.pro'),
+	consult('sec86.pro'),
+	consult('sec87.pro'),
+	consult('sec88.pro'),
+	consult('sec89.pro'),
+	consult('sec810.pro'),
+	consult('sec811.pro'),
+	consult('sec812.pro'),
+	consult('sec813.pro'),
+	consult('sec814.pro'),
+	consult('sec815.pro'),
+	consult('sec816.pro'),
 
-:- reconsult(sec91).
-:- reconsult(maxint).
-:- reconsult(sec93).
-:- reconsult(sec94).
+	consult('sec91.pro'),
+	consult('maxint.pro'),
+	consult('sec93.pro'),
+	consult('sec94.pro').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -72,6 +71,7 @@
 %
 
 run_all_tests :-
+	init_files,
          start_log,
         all_tests,
         end_log.
