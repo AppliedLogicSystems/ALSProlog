@@ -116,8 +116,8 @@ extern	void	srandom		PARAMS(( int ));
 int
 pbi_time()
 {				/* real system time */
-    PWord vsec, vmin, vhour, vmday, vmon, vyear, vwday, vyday, visdst;
-    int   tsec, tmin, thour, tmday, tmon, tyear, twday, tyday, tisdst;
+    PWord vsec, vmin, vhour, vmday, vmon, vyear, vwday, vyday, visdst, vkind;
+    int   tsec, tmin, thour, tmday, tmon, tyear, twday, tyday, tisdst, tkind;
     time_t tv;
     struct tm *tp;
 
@@ -130,9 +130,20 @@ pbi_time()
     w_get_An(&vwday, &twday, 7);
     w_get_An(&vyday, &tyday, 8);
     w_get_An(&visdst, &tisdst, 9);
+    w_get_An(&vkind, &tkind, 10);
+
+	if (tkind != WTP_INTEGER) 
+	FAIL;
 
     tv = time(0L);
-    tp = localtime(&tv);
+	if (vkind == 0)
+    	tp = localtime(&tv);
+	else {
+		if (vkind == 1)
+    		tp = gmtime(&tv);
+		else
+			FAIL;
+	}
 
     if (w_unify(vsec, tsec, (PWord) tp->tm_sec, WTP_INTEGER) &&
 	w_unify(vmin, tmin, (PWord) tp->tm_min, WTP_INTEGER) &&
@@ -594,7 +605,6 @@ return_as_double:
 	make_ieee_inf(v, t)
  *--------------------------------------------------------------*/
 
-#ifdef CONFIGLESS
 /* Taken from "ieeemath.h" */
 typedef union newdouble {
   unsigned short int usi[4];
@@ -618,29 +628,6 @@ make_ieee_inf(v, t)
 {
     w_mk_double(v, t, POS_INF.d);
 }
-#else
-
-void
-make_ieee_nan(v, t)
-    PWord *v;
-    int  *t;
-{
-    double d;
-    d = 0.0/0.0;
-    w_mk_double(v, t, d);
-}
-
-void
-make_ieee_inf(v, t)
-    PWord *v;
-    int  *t;
-{
-	double d;
-	d = 1.0/0.0;
-    w_mk_double(v, t, d);
-}
-
-#endif
 
 /*---------------------------------------------------------------
  *--------------------------------------------------------------*/

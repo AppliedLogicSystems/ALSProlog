@@ -232,7 +232,7 @@ icIndexPatch(place, choiceInstr, where)
  *      then appropriate code will be emitted for failure.
  */
 
-extern Code *wm_fail;
+/*//extern Code *wm_fail;*/
 
 void
 ic_install_switch_on_term(nameEntry, varaddr, straddr, lisaddr, conaddr, emask)
@@ -268,7 +268,7 @@ ic_install_switch_on_term(nameEntry, varaddr, straddr, lisaddr, conaddr, emask)
  * as the value from ic_install_no
  */
 
-extern Code *wm_return_success;
+/*//extern Code *wm_return_success;*/
 
 Code *
 ic_install_no(buf, clausestart, nocatcher)

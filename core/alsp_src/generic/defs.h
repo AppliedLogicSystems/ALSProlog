@@ -131,7 +131,6 @@
  | in this file before this point.
  *---------------------------------------------------------------------*/
 
-#ifdef CONFIGLESS
 #if   defined(UNIX)
 #include "unix_config.h"
 #elif defined(MACOS)
@@ -146,33 +145,6 @@
 #include "port_config.h"
 #else
 #error
-#endif
-
-#else
-#include "tconfig.h"
-#include "aconfig.h"
-#include "oconfig.h"
-#include "config.h"
-
-/* Hack in the proper defines until config can be updated. */
-#ifndef KERNAL
-#if defined(MSWin32)
-#define SIMPLE_MICS 1
-#endif
-#ifdef __hp9000s800
-#define SIMPLE_MICS 1
-#define HP_AOUT_800 1
-#define HAVE_MMAP_ZERO 1
-#endif
-#if (defined(__sgi) && defined(__mips)) || defined(__linux__)
-#define SIMPLE_MICS 1
-#define HAVE_LIBELF 1
-#endif
-#ifdef SOLARIS
-#define SIMPLE_MICS 1
-#define USE_ELF_SECTION_FOR_IMAGE 1
-#endif
-#endif /* KERNAL */
 #endif
 
 #if defined(__MWERKS__) && defined(WIN32)
@@ -379,6 +351,10 @@
 #include "chpt.h"
 #include "built.h"
 
+#include "engine.h"
+#include "cexception.h"
+#include "cassert.h"
+
 #include "security.h"
 /*---------------------------------------------------------------------*
  | If string.h doesn't exist or is lacking certain functions, we provide
@@ -400,19 +376,13 @@ extern size_t strcspn PARAMS(( const char *s1, const char *s2 ));
 /*---------------------------------------------------------------------*
  | Declare the als memory allocation function and associated helpers
  *---------------------------------------------------------------------*/
-#ifdef PARAMREVBIT
-extern	unsigned long AddressHiBit;
-extern	unsigned long ReversedHiBit;
-#endif
 extern	int	als_mem_init	PARAMS(( CONST char *file, long offset ));
 extern	long *	ss_pmalloc	PARAMS(( size_t size, int fe_num, long *asizep ));
 extern	long *	ss_malloc	PARAMS(( size_t size, int fe_num ));
 extern	void	ss_register_global PARAMS(( long *addr ));
-#ifdef SIMPLE_MICS
 extern	long	ss_image_offset	PARAMS((const char *));
 extern	int	ss_save_image_with_state PARAMS((CONST char * ));
 extern	int	ss_attach_state_to_file PARAMS((const char *file_name));
-#endif
 extern	int	ss_save_state	PARAMS((CONST char *, long ));
 extern	void	protect_bottom_stack_page PARAMS(( void ));
 extern	long *	ss_fmalloc_start PARAMS(( void ));
@@ -451,6 +421,8 @@ extern	void	heap_overflow	PARAMS(( void ));
 extern char library_path[IMAGEDIR_MAX];
 extern char library_dir[IMAGEDIR_MAX];
 extern char executable_path[IMAGEDIR_MAX];
+
+void	locate_library_executable(int argc, char *argv[]);
 
 /* ----------   arith.c ----------   */
 void make_ieee_nan PARAMS( (PWord *, int *) );
@@ -556,16 +528,6 @@ extern	void	wam_init	PARAMS(( void ));
 
 /* ----------   icode1.c ----------   */
 extern	int	init_icode_buf	PARAMS(( int ));
-
-#ifdef NO_FAR_DATA
-/* ----------   Global array allocation functions. ----------   */
-extern	void	init_capturestructs	PARAMS(( void ));
-extern	void	init_compiler_data	PARAMS(( void ));
-extern	void	init_cinterf_data	PARAMS(( void ));
-extern	void	init_varproc_data	PARAMS(( void ));
-extern	void	init_expand_data	PARAMS(( void ));
-extern	void	init_parser_data	PARAMS(( void ));
-#endif
 
 #ifdef MacOS
 extern	void	init_math		PARAMS(( void ));

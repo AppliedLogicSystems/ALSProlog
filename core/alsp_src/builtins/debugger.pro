@@ -24,6 +24,7 @@
 module debugger. 		%% debugger segment
 use windows.
 use objects.
+use alsshell.
 
 /*-------------------------------------------------------------------------*
  |	trace/0, trace/1, and trace/2.
@@ -265,7 +266,9 @@ module builtins.
 	!,
 	dbg_spyoff,
 	setPrologInterrupt(debug_user),
+debugger:ensure_db_showing,
 	debugger:dogoal(spying,Module,Goal).
+
 '$int'(spying,Module,Goal) :-
 	!,
 	dbg_call(Module,Goal).
@@ -278,6 +281,7 @@ module builtins.
 	!,
 	dbg_spyoff,
 	setPrologInterrupt(debug_user),
+debugger:ensure_db_showing,
 	debugger:dogoal(jumping,Module,Goal).
 '$int'(jumping,Module,Goal) :-
 	!,
@@ -812,6 +816,7 @@ noshow_module(sio).
 noshow_module(tcltk).
 noshow_module(tk_alslib).
 noshow_module(xconsult).
+%noshow_module(object_classes).
 
 	%% Add any others (or can mtfapi go away now?):
 noshow_module(alsdev).
@@ -819,7 +824,6 @@ noshow_module(alsshell).
 noshow_module(avl).
 noshow_module(cref).
 noshow_module(macroxp).
-noshow_module(objects).
 noshow_module(pgm_info).
 noshow_module(shellmak).
 noshow_module(syscfg).
@@ -828,6 +832,7 @@ noshow_module(utilities).
 noshow_module(windows).
 
 
+/****
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Skip any sends in these modules:
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -860,6 +865,7 @@ noshow( _, send(_,TgtMsg))
 	excluded_message(TgtMsg),
 	!.
 excluded_message(newlineAction(_,_,_)).
+****/
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Skip the following goals in any module:
@@ -1508,82 +1514,86 @@ list_spypoints :-
 list_spypoints :-
 	printf(debugger_output, "No spypoints.\n", []).
 
-/***********************
-close_under_use([], Final, Final).
-
-close_under_use([user | Mods], Seen, UsedMods)
-	:-!,
-	close_under_use(Mods, Seen, UsedMods).
-
-close_under_use([M | Mods], Seen, UsedMods)
-	:-
-	noshow(M,_),
-	!,
-	close_under_use(Mods, Seen, UsedMods).
-
-close_under_use([M | Mods], Seen, UsedMods)
-	:-
-	dmember(M, Seen),
-	!,
-	close_under_use(Mods, Seen, UsedMods).
-
-close_under_use([M | Mods], Seen, UsedMods)
-	:-
-	modules(M, MUses),
-	!,
-	close_under_use(MUses, [M | Seen], MUsesClosed),
-	close_under_use(Mods, MUsesClosed, UsedMods).
-
-close_under_use([M | Mods], Seen, UsedMods)
-	:-
-	close_under_use(Mods, [M | Seen ], UsedMods).
-***********************/
-
 export setup_debug/2.
-export setup_debug/3.
 setup_debug(Module, Call)
 	:-
 	functor(Call, Predicate, Arity),
 	setup_debug(Module, Predicate, Arity).
 
+export setup_debug/3.
 setup_debug(Module, Predicate, Arity)
 	:-
 	debug_io(DebugIOChannel),
 	setup_debug(DebugIOChannel, Module, Predicate, Arity).
 
-setup_debug(nowins, Module, Predicate, Arity) 
-	:-!.
 setup_debug(DebugIOChannel, Module, Predicate, Arity)
 	:-
-	change_source_level_debugging(on),
-	check_file_setup(Module, Predicate, Arity, SrcFilePath, BaseFileName,DebugType),
-	reload_debug(BaseFileName, SrcFilePath, DebugType),
-	!,
-	start_src_trace(BaseFileName, SrcFilePath).
+	setup_debug(DebugIOChannel, Module, Predicate, Arity, [], _).
 
-check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType)
+
+setup_debug(nowins, Module, Predicate, Arity, _, []) 
+	:-!.
+setup_debug(DebugIOChannel, Module, Predicate, Arity, CGsSetup, NextCGsSetup)
 	:-
-	all_procedures(Module, Pred, Arity, DBRef),
+	change_source_level_debugging(on),
+	get_fcg(Module,Predicate,Arity,CG,DefiningMod),
+	fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, NextCGsSetup).
+
+fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, CGsSetup)
+	:-
+	dmember(CG, CGsSetup),
+	!.
+
+fin_setup_debug(ClauseGroup, Module, Predicate, Arity, CGsSetup, [ClauseGroup | CGsSetup])
+	:-
+	check_file_setup(Module, Predicate, Arity, 
+					 SrcFilePath, BaseFileName, DebugType, ClauseGroup,
+					ALSMgr, SrcMgr),
+	reload_debug(BaseFileName, SrcFilePath, DebugType, ClauseGroup),
+	!,
+	start_src_trace(BaseFileName, SrcFilePath, ClauseGroup, ALSMgr, SrcMgr).
+	
+get_fcg(Module,Predicate,Arity,ClauseGroup,Module)
+	:-
+	nonvar(Module),
+	all_procedures(Module, Predicate, Arity, DBRef), 
 	DBRef \= 0,
 	!,
-	'$clauseinfo'(DBRef,_,_,ClauseGroup),
-	builtins:file_clause_group(BaseFileName, ClauseGroup),
-	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options).
+	'$clauseinfo'(DBRef,_,_,ClauseGroup).
 
-check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType)
+get_fcg(Module,Predicate,Arity,ClauseGroup,DefiningMod)
 	:-
-	all_procedures(M, Pred, Arity, DBRef),
-	'$clauseinfo'(DBRef,_,_,ClauseGroup),
-	builtins:file_clause_group(BaseFileName, ClauseGroup),
-	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options).
+	all_procedures(DefiningMod, Predicate, Arity, DBRef), 
+	DBRef \= 0,
+	'$clauseinfo'(DBRef,_,_,ClauseGroup).
 
-reload_debug(user,_, _) :-!.
-reload_debug(BaseFileName,SrcFilePath, normal)
+/*---------------------------------------------------------------------*
+check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, ClauseGroup)
+check_file_setup(+, +, +, -, -,-, -)
+ *---------------------------------------------------------------------*/
+
+check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, ClauseGroup,
+					ALSMgr, SrcMgr)
+	:-
+	builtins:file_clause_group(BaseFileName, ClauseGroup),
+	builtins:get_primary_manager(ALSMgr),
+	send(ALSMgr, obtain_src_mgr(BaseFileName, SrcMgr)),
+	send(SrcMgr, get_value(base_file, BaseFileName)),
+	send(SrcMgr, get_value(source_file, SrcFilePath)),
+	send(SrcMgr, get_value(consult_mode, DebugType)).
+
+reload_debug(user,_, _,CG) :-!.
+reload_debug(BaseFileName,SrcFilePath, normal,CG)
 	:-
 	(filePlusExt(NoSuff,_,SrcFilePath),!; NoSuff = SrcFilePath),
-	consult(source(NoSuff),[quiet(true)]),
-	als_advise(debugger_output,"Reloaded (debug) files = %t\n",[SrcFilePath]).
-
+			%% Need to pass CG into consult:
+	(current_prolog_flag(debug, off) ->
+		set_prolog_flag(debug, on),
+		consult(source(NoSuff),[quiet(true)])
+		;
+		true
+	),
+	ensure_db_showing.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%    I/O Hooks    %%%%%%%%%%%%%%%%%%%%%%%%
@@ -1632,7 +1642,8 @@ showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 
 showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 	:-
-	showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response).
+	% showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response).
+	v_showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%% COMMOND I/O STUFF %%%%%%%%%%%%%%%%%%%%%%
@@ -1909,6 +1920,17 @@ act_on_response(statistics, Port,Box,Depth, Module,Goal,Wins,Response) :-
 	show_again(Port,Box,Depth,Module,Goal,Wins,Response).
 
 %% === Print stack trace
+act_on_response(stack_trace, Port,Box,Depth, Module,Goal,Wins,Response) 
+	:-
+	builtins:clause(alsdev_running,_),
+	!,
+	builtins:get_primary_manager(ALSMgr),
+	alsdev:accessObjStruct(debugger_mgr, ALSMgr,DebuggerMgr),
+%	send(DebuggerMgr, show_stack),
+	send(DebuggerMgr, show_stack_list),
+%	show_again(Port,Box,Depth,Module,Goal,Wins,Response).
+	getresponse2(Wins,Port,Box,Depth, Module, Goal, Response).
+
 act_on_response(stack_trace, Port,Box,Depth, Module,Goal,Wins,Response) :-
 	!,
 	printf(debugger_output,'----begin stack trace----\n', []),
@@ -1934,6 +1956,7 @@ writeGoal(Box,Depth,Port,Module,Goal)
 	write_term(debugger_output, Module:Goal,	[lettervars(false)]),
 	flush_output(debugger_output).
 
+/*******8
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%% Windows I/O Hooks %%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%  - in vdebug.pro  %%%%%%%%%%%%%%%%%%%%%%
@@ -1979,6 +2002,7 @@ alsdev_step(What)
 	:-
 	printf('alsdev_step = %t\n', [What]),
 	flush_output.
+*****/
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%  PBI I/O HOOKS    %%%%%%%%%%%%%%%%%%%%%%

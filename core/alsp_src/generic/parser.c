@@ -33,15 +33,11 @@
  *      a file being read.
  */
 
-#ifdef NO_FAR_DATA
-static jmp_buf *prs_erc;	/* buffers for error recovery   */
-#else
 #ifdef KERNAL
 static jmp_buf prs_erc[10];	/* buffers for error recovery   */
 #else
 static jmp_buf prs_erc[30];	/* buffers for error recovery   */
 #endif /* KERNAL */
-#endif
 static int   prs_erc_index = -1; /* index into the above         */
 
 /*
@@ -49,15 +45,11 @@ static int   prs_erc_index = -1; /* index into the above         */
  *
  */
 
-#ifdef NO_FAR_DATA
-static pword *vtable;	/* variable name table          */
-#else
 #ifdef KERNAL
 static pword vtable[64];	/* variable name table          */
 #else
 static pword vtable[240];	/* variable name table          */
 #endif /* KERNAL */
-#endif
 
 static int   nxtvar;		/* next free space in var table */
 
@@ -75,24 +67,8 @@ static int   nxtvar;		/* next free space in var table */
 struct rator *pst_rator;	/* parser stack top -- rator */
 pword *pst_rand;		/* parser stack top -- rand */
 
-#ifdef NO_FAR_DATA
-static struct rator *ps_rator;
-static pword *ps_rand;
-void init_parser_data(void)
-{
-    prs_erc = malloc(30*sizeof(*prs_erc));
-    if (prs_erc == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
-    vtable = malloc(240*sizeof(*vtable));
-    if (vtable == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
-    ps_rator = malloc(PSTKSZ*sizeof(*ps_rator));
-    if (ps_rator == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
-    ps_rand = malloc(PSTKSZ*sizeof(*ps_rand));
-    if (ps_rand == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
-}
-#else
 static struct rator ps_rator[PSTKSZ];
 static pword ps_rand[PSTKSZ];
-#endif
 
 /*
  * errcount is the number of errors encountered so far in the parse.  Care

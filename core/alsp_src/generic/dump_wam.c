@@ -46,7 +46,7 @@ static void name_heap_loc(const wam_task_state *s, PWord *c)
 {
 	size_t i;
 	i = ((size_t)(c) - (size_t)(s->stack_limit))/4;
-	//printf("c: %p i: %u stacklimit: %p\n", c, i, s->stack_limit);
+	/*//printf("c: %p i: %u stacklimit: %p\n", c, i, s->stack_limit);*/
 	if (i < 0 || i > name_space_size) dump_fail("Heap range error");
 	if (name_space[i] == -1) name_space[i] = next_name++;
 }

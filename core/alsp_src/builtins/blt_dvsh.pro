@@ -8,22 +8,23 @@
  |	Author: Ken Bowen
  |	Creation Date: 1997
  *=============================================================*/
- %% Loaded directly - see end of file:
-%:-[db_srctr].
 
 mkw32 :-
 	reconsult(projects),
+	reconsult(dbg_class),
 	save_image('ALS Prolog',[select_lib(builtins, [debugger]),
 		select_lib(library,[listutl1,miscterm,msc_ioin,objects,strctutl,strings,
 					tcl_sppt,tk_alslib,typecomp])]).
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%% 		PORTIONS OF IDE IN MODULE BUILTINS		%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 module builtins.
 use tcltk.
 use tk_alslib.
-
-	%% Used by some routines in builtins
-	%% to  detect presence  of alsdev:
-alsdev_running.
 
 :- abolish(halt,0).
 export halt/0.
@@ -55,38 +56,238 @@ continue_prolog_loop(Status).
 export start_alsdev/0.
 start_alsdev
 	:-
+		%% Used by some routines in builtins
+		%% to  detect presence  of alsdev:
+	assert(alsdev_running),
 	abolish(save_clinfo,1),
 	make_clinfo(CLInfo, alsdev, true), 	% verbosity = quiet
-	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,CLInfo),
+	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,alsdev,CLInfo),
 	assertz(command_line(ResidualCommandLine)),
+
 	setup_debugger_stubs,
 	setup_search_dirs(CLInfo),
 	assert(save_clinfo(CLInfo)),
-	library_setup,
-	init_tk_alslib(shl_tcli,Shared),
 
 	builtins:sys_searchdir(ALSDIRPath),
-	path_elements(ALSDIRPath, Elements),
-	append(Elements, [shared], ImagesList),
+	split_path(ALSDIRPath, ALSDIRPathList),
+	dappend(ALSDIRPathList, [library,'objects.pro'], ObjPathList),
+	join_path(ObjPathList, ObjectsPath),
+
+/*
+	xconsult:pushmod(object_classes),
+	obp_push_stop,
+	xconsult(ObjectsPath,_),
+	obp_pop,
+	xconsult:popmod,
+	setup_init_ide_classes(ALS_IDE_Mgr),
+	abolish_module(object_classes),
+*/
+
+	setup_init_ide_classes(ALS_IDE_Mgr),
+
+	library_setup,
+	init_tk_alslib(shl_tcli,Shared),
+	append(ALSDIRPathList, [shared], ImagesList),
 	join_path(ImagesList, ImagesPath),
 	alsdev_splash(ImagesPath),
 
-	load_cl_files(CLInfo),
+%	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
-	alsdev(Shared).
+	alsdev(Shared,ALS_IDE_Mgr).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%       ALS_IDE  ObjectPro CLASS DEFINITIONS    %%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+/*************
+	/*--------------------------------------------
+	 |	setup_init_ide_classes/1
+	 |	setup_init_ide_classes(ALS_IDE_Mgr)
+	 |	setup_init_ide_classes(-)
+	 *-------------------------------------------*/
+
+setup_init_ide_classes(ALS_IDE_Mgr)
+	:-
+        %%   ALS_IDE_MGR:
+	object_classes:defineClass(
+	[   name=als_ide_mgr,
+		subClassOf=als_shl_mgr,
+		module = alsdev,
+		addl_slots=
+			[ 
+				debugger_mgr,   %% debugger state object
+				cur_project,    %% current project manager object    
+				edit_files,     %% list of files open for editing
+				non_file_edits  %% list of non-file (new) windows open for editing
+			],
+		defaults= [ 
+			edit_files = [], 
+			non_file_edits = [] 
+		]
+	]),
+
+		%% For ALS IDE Project system:
+	alsdev:setup_als_ide_mgr(ALS_IDE_Mgr),
+		%% Since we're starting cold:
+	make_gv('_primary_manager'),
+	set_primary_manager(ALS_IDE_Mgr),
+	send(ALS_IDE_Mgr, set_value(shell_module, alsdev)),
+
+        %%   SHL_SOURCE_HANDLER:
+	object_classes:defineClass(alsdev,
+	[   name=shl_source_handler,
+		subClassOf=source_handler,
+		export = yes,
+		addl_slots= [ 
+			tcl_doc_path,		%% Tcl id of edit window
+			errors_display		%% nil / non-empty errs list
+		],
+		defaults= [ 
+			tcl_doc_path		= nil,
+			errors_display 		= nil
+		]
+	]),
+
+        %%   SOURCE_TRACE_MGR:
+	object_classes:defineClass(alsdev,
+	[   name=source_trace_mgr,
+		subClassOf=shl_source_handler,
+		addl_slots=
+			[
+				debugger_mgr,		%% home to daddy...
+				last_visual_load,	%% Time of last load of file text widget
+				num_lines,			%% num lines in the file
+				linesizes,			%% list of num chars in each line
+				invlineindex,		%% list of char offsets to start of each line
+				head_tag,			%% i(S,E) = last colored "matching head (aph)tag" lcn
+				call_tag			%% i(S,E) = last colored "matching_call (apg)tag" lcn
+			],
+		defaults= [ 
+			visible				= false,
+			last_visual_load 	= 0,
+			num_lines			= 0,
+			head_tag			= 0,
+			call_tag			= 0
+			]
+	]).
+*************/
+
+setup_init_ide_classes(ALS_IDE_Mgr)
+	:-
+		%% For ALS IDE Project system:
+	alsdev:setup_als_ide_mgr(ALS_IDE_Mgr),
+		%% Since we're starting cold:
+	make_gv('_primary_manager'),
+	set_primary_manager(ALS_IDE_Mgr),
+	send(ALS_IDE_Mgr, set_value(shell_module, alsdev)).
+
+
+:- defineClass(
+	[   name=als_ide_mgr,
+		subClassOf=als_shl_mgr,
+		module = alsdev,
+		addl_slots=
+			[ 
+				debugger_mgr,   %% debugger state object
+				cur_project,    %% current project manager object    
+				edit_files,     %% list of files open for editing
+				non_file_edits  %% list of non-file (new) windows open for editing
+			],
+		defaults= [ 
+			edit_files = [], 
+			non_file_edits = [] 
+		]
+	]).
+
+        %%   SHL_SOURCE_HANDLER:
+:- defineClass(alsdev,
+	[   name=shl_source_handler,
+		subClassOf=source_handler,
+		export = yes,
+		addl_slots= [ 
+			tcl_doc_path,		%% Tcl id of edit window
+			errors_display		%% nil / non-empty errs list
+		],
+		defaults= [ 
+			tcl_doc_path		= nil,
+			errors_display 		= nil
+		]
+	]).
+
+        %%   SOURCE_TRACE_MGR:
+:- defineClass(alsdev,
+	[   name=source_trace_mgr,
+		subClassOf=shl_source_handler,
+		addl_slots=
+			[
+				debugger_mgr,		%% home to daddy...
+				last_visual_load,	%% Time of last load of file text widget
+				num_lines,			%% num lines in the file
+				linesizes,			%% list of num chars in each line
+				invlineindex,		%% list of char offsets to start of each line
+				head_tag,			%% i(S,E) = last colored "matching head (aph)tag" lcn
+				call_tag			%% i(S,E) = last colored "matching_call (apg)tag" lcn
+			],
+		defaults= [ 
+			visible				= false,
+			last_visual_load 	= 0,
+			num_lines			= 0,
+			head_tag			= 0,
+			call_tag			= 0
+			]
+	]).
+
+%%%%%%%%%5----------------------------------------------------
+export disp_ide/0.
+disp_ide :-
+	builtins:get_primary_manager(ALSMgr),
+	write_term(user_output, ALSMgr, [maxdepth(3)]),
+	nl(user_output),
+	flush_output.
+
+export disp_dbg_mgr/0.
+disp_dbg_mgr :-
+	builtins:get_primary_manager(ALSMgr),
+	send(ALSMgr, get_value(debugger_mgr, Mgr)),
+	write_term(user_output, Mgr, [maxdepth(3)]),
+	nl(user_output),
+	flush_output.
+
+export disp_src_mgr/1.
+disp_src_mgr(BN)
+	:-
+	builtins:get_primary_manager(ALSMgr),
+	send(ALSMgr, get_value(source_mgrs, SML)),
+	dmember(fm(BN, Mgr), SML),
+	write_term(user_output, Mgr, [maxdepth(3)]),
+	nl(user_output),
+	flush_output.
+
+
+
+%%%%%%%%%5----------------------------------------------------
+
+
 
 	%% Warm startup (given that tty start_shell(prolog_shell) has run):
 export alsdev/0.
 alsdev
 	:-
+		%% For ALS IDE Project system:
+	alsdev:setup_als_ide_mgr(ALS_IDE_Mgr),
+		%% Since we're starting warm:
+		% make_gv('_primary_manager'),
+	set_primary_manager(ALS_IDE_Mgr),
+
 	consultmessage(CurValue),
 	set_consult_messages(true),
 	init_tk_alslib(shl_tcli,Shared),
 	set_consult_messages(CurValue),
-	alsdev(Shared).
+	alsdev(Shared, ALS_IDE_Mgr).
 
-export alsdev/1.
-alsdev(Shared)
+export alsdev/2.
+alsdev(Shared, ALS_IDE_Mgr)
 	:-
 	sys_env(OS, _, _),
 	(OS = macos ->
@@ -98,9 +299,7 @@ alsdev(Shared)
 	  )
 	),
 		%% At this point, the windows have been created;
-
 	tcl_call(shl_tcli, [destroy,'.als_splash_screen'], _),
-
 
 	open(tk_win(shl_tcli, '.topals.text'), read, ISS, 
 		[alias(shl_tk_in_win)
@@ -120,28 +319,6 @@ alsdev(Shared)
     sio:set_input(ISS),
     sio:set_output(OSS),
 
-    %% Debugger streams: Initially regular debug io to console window:
-
-
-/*****
-		%	open(console('debugger output'),write, OutDStream,
-	cancel_alias(debugger_output),
-    open(tk_win(shl_tcli, '.topals.text'),write, OutDStream,
-	 ['$stream_identifier'(-4), % alias(debugger_output),
-	 	buffering(line),type(text), alias(console_debugger_output),
-	 	maxdepth(8), line_length(76),
-	 	depth_computation(nonflat)]),
-	assign_alias(debugger_output, OutDStream),
-
-		%	open(console('debugger input'), read, InDStream,
-	cancel_alias(debugger_input),
-    open(tk_win(shl_tcli, '.topals.text'), read, InDStream,
-	 ['$stream_identifier'(-3), % alias(debugger_input),
-	  	blocking(true), alias(console_debugger_input),
-	 	prompt_goal(flush_output(debugger_output))]),
-	assign_alias(debugger_input, InDStream),
-*****/
-
     %% Debugger streams: The debugger window text window:
 	%% Initially these don't have the debugger_[input,output] aliases;
 	%% we cancel_alias & set_alias between the two pairs of streams,
@@ -153,8 +330,10 @@ alsdev(Shared)
     open(tk_win(shl_tcli, '.debugwin.text'),write, OutGuiDStream,
 	 ['$stream_identifier'(-8), alias(gui_debugger_output),
 	 	buffering(line),type(text),
-	 	maxdepth(8), line_length(76),
-	 	depth_computation(nonflat)]),
+		line_length(76), 
+%		maxdepth(8), depth_computation(nonflat)
+		maxdepth(4), depth_computation(flat)
+		]),
 	assign_alias(debugger_output, OutGuiDStream),
 
 		%	open(console('debugger input'), read, InGuiDStream,
@@ -163,6 +342,7 @@ alsdev(Shared)
 	 ['$stream_identifier'(-7), blocking(true),alias(gui_debugger_input),
 	 	prompt_goal(flush_output(debugger_output))]),
 	assign_alias(debugger_input, InGuiDStream),
+
     %% Error stream
 		%	open(console_error('error output'),write,OutEStream,
 	cancel_alias(error_stream),
@@ -180,22 +360,25 @@ alsdev(Shared)
 	sio:reset_user(ISS,OSS),
 
 	set_prolog_flag(windows_system, tcltk),
-	set_consult_messages(false),
+%	set_consult_messages(false),
 	alsdev:check_alsdev_flags,
+
+		%% For ALS IDE Project system:
+	alsdev:setup_ide_project_globals(ALS_IDE_Mgr),
 
 	retract(save_clinfo(CLInfo)),
 	ss_load_dot_alspro(CLInfo),
 
+	arg(3, CLInfo, SpecFiles),
+	alsdev:do_special_processing(SpecFiles),
+
 	install_alarm_handler,
 	shell_alarm_interval(AlarmIntrv),
 	alarm(AlarmIntrv,AlarmIntrv),
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, heartbeat, AlarmIntrv], _),
 
-	debugger:init_visual_debugger,
 	change_debug_io(debugwin),
-
-		%% For ALS IDE Project system:
-	alsdev:setup_ide_project_globals,
-
+	set_prolog_flag(debug, on),
 	get_cwd(CurDir),
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
 
@@ -219,6 +402,12 @@ push_prompt(tcltk,OutStream,Prompt1)
 	nl(OutStream),
 	flush_output(OutStream),
 	tcl_call(shl_tcli, [set_prompt_mark, '.topals.text'], _).
+
+export listener_prompt/0.
+listener_prompt
+	:-
+	write(shl_tk_out_win, '?- '), 
+	flush_output(shl_tk_out_win).
 
 
 
@@ -252,33 +441,184 @@ disp_alarm_handler(_, ModuleAndGoal)
 shell_alarm_interval(1.05).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%			MISC
+	%%%%%			MISC INTERFACE PREDICATES
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+export change_heartbeat/1.
+change_heartbeat(NewValue)
+	:-
+	abolish(shell_alarm_interval,1),
+	assert(shell_alarm_interval(NewValue)).
+
+change_ide_stream_depth(NewMaxDepth)
+	:-
+ 	stream_or_alias_ok(shl_tk_out_win, Stream),
+    stream_wt_opts(Stream,WO),
+    WO = wt_opts(LineLength,_,DepthComputation),	
+    NewWO = wt_opts(LineLength,NewMaxDepth,DepthComputation),	
+    set_stream_wt_opts(Stream,NewWO).
+
+change_ide_depth_type(NewType)
+	:-
+ 	stream_or_alias_ok(shl_tk_out_win, Stream),
+    stream_wt_opts(Stream,WO),
+    WO = wt_opts(LineLength,MaxDepth,_),	
+    NewWO = wt_opts(LineLength,MaxDepth,NewType),	
+    set_stream_wt_opts(Stream,NewWO).
+
 endmod.   % builtins
+
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%% 		PORTIONS OF IDE IN MODULE ALSDEV		%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+module alsdev.
+use tcltk.
+use tk_alslib.
+use objects.
+
+	%%------------------------------------------
+	%% Command line processing
+	%%------------------------------------------
+
+special_ss_parse_command_line(File, Tail, [], CLInfo)
+	:-
+	insert_spaces([File | Tail], SpacedList),
+	catenate(SpacedList, TheFile),
+	special_file_type(TheFile, FileType, NoSuffixFile, Ext),
+	!,
+	store_special_file(FileType, TheFile, NoSuffixFile, Ext, CLInfo).
+
+special_file_type(File, prolog_project, NoSuffixFile, ppj)
+	:-
+	file_extension(NoSuffixFile, ppj, File),
+	!.
+
+special_file_type(File, prolog_source, NoSuffixFile, pro)
+	:-
+	file_extension(NoSuffixFile, pro, File),
+	!.
+
+special_file_type(File, prolog_source, NoSuffixFile, pl)
+	:-
+	file_extension(NoSuffixFile, pl, File),
+	!.
+
+special_file_type(File, prolog_script, NoSuffixFile, prs)
+	:-
+	file_extension(NoSuffixFile, prs, File),
+	!.
+
+special_file_type(File, other, NoSuffixFile, Ext)
+	:-
+	file_extension(NoSuffixFile, Ext, File),
+	!.
+
+store_special_file(FileType, File, NoSuffixFile, Ext, CLInfo)
+	:-
+	arg(3, CLInfo, SFiles),
+	append(SFiles, [s(FileType, File, NoSuffixFile, Ext)], NewSFiles),
+	mangle(3, CLInfo, NewSFiles).
+
+do_special_processing([]).
+do_special_processing([s(FileType, File, NoSuffixFile, Ext) | SFiles])
+	:-
+	special_cl_processing(FileType, File, NoSuffixFile, Ext),
+	!,
+	do_special_processing(SFiles).
+do_special_processing([s(FileType, File, NoSuffixFile, Ext) | SFiles])
+	:-
+	printf(user_output,
+		   'There was an error processing the %t command line file: %t\n',
+		   [FileType, File]),
+	do_special_processing(SFiles).
+
+special_cl_processing(prolog_project, File, NoSuffixFile, Ext)
+	:-!,
+	canon_path(File, CanonSrcPath),
+	exists_file(CanonSrcPath),
+	builtins:get_primary_manager(ALSIDEMGR),
+	send(ALSIDEMGR, open_project_file(CanonSrcPath)).
+
+special_cl_processing(prolog_source, File, NoSuffixFile, Ext)
+	:-!,
+	canon_path(File, CanonSrcPath),
+	exists_file(CanonSrcPath),
+	builtins:get_primary_manager(ALSIDEMGR),
+	send(ALSIDEMGR, open_edit_win(CanonSrcPath)).
+
+special_cl_processing(prolog_script, File, NoSuffixFile, Ext)
+	:-!,
+	canon_path(File, CanonSrcPath),
+	exists_file(CanonSrcPath),
+	builtins:simple_load(NoSuffixFile, CanonSrcPath).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%	ALS IDE MANAGER CLASS & OBJECT 				%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+als_ide_mgrAction([Functor | Args], State)
+	:-
+	Msg =.. [Functor | Args],
+	send_self(State, Msg).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-module alsdev.
-use tcltk.
-use tk_alslib.
-
-listener_prompt
-	:-
-	write(shl_tk_out_win, '?- '), 
-	flush_output(shl_tk_out_win).
-%	sio:tk_setmark(shl_tk_out_win).
-
-
 		%% For ALS IDE Project system; called at 
 		%% boot time:
-setup_ide_project_globals
+setup_als_ide_mgr(ALSIDEObject)
 	:-
-	make_gv('_curProject'), 
-	set_curProject([]).
+		%% Get values for initial values in create_object:
+	get_cwd(InitialDir),
+
+	builtins:sys_searchdir(SSD),
+	split_path(SSD,SSDL),
+	append(SSDL, [library], LLL),
+	join_path(LLL, LibPath),
+
+	findall(searchdir(SD), (builtins:searchdir(SD)), SDList),
+
+	create_object(
+		[instanceOf=als_ide_mgr,
+		 handle=true,
+		 values = [
+			initial_dir = InitialDir,
+			prolog_library = LibPath,
+			initial_search_dirs = SDList
+		 ]
+		], 
+		ALSIDEObject),
+
+	FCG_Index_Size = 50,		%% initial default; expandable later...
+	functor(FCG_Index, fcgix, FCG_Index_Size),
+	set_all_args(1, FCG_Index_Size, FCG_Index, nil),
+	create_object(
+		[instanceOf=debugger_mgr,
+		 handle = true,
+		 values = [
+			fcg_index_size			= FCG_Index_Size,
+			src_trace_mgrs_by_fcg	= FCG_Index
+		 ]
+		], 
+		DebuggerObject),
+	setObjStruct(debugger_mgr, ALSIDEObject, DebuggerObject).
+
+
+setup_ide_project_globals(ALSIDEObject)
+	:-
+	send( ALSIDEObject, get_value(myHandle, ALSIDEHandle) ),
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, als_ide_mgr, ALSIDEHandle], _),
+	accessObjStruct(debugger_mgr, ALSIDEObject, DebuggerObject),
+	send( DebuggerObject, get_value(myHandle, DebuggerHandle) ),
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, debugger_mgr, DebuggerHandle], _).
 
 alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom)
 	:-
@@ -364,13 +704,6 @@ fin_find_alsdev_ini(PrefsFileList, [])
 	close(S),
 	assert(alsdev_ini_path(PrefsFilePath)).
 
-alsdev_default_setup(SystemDefaults)
-	:-
-	find_alsdev_ini(Items),
-	window_defaults_setup('.topals',	Items,SystemDefaults),
-	window_defaults_setup('.debugwin',	Items,SystemDefaults),
-	window_defaults_setup('.document',	Items,SystemDefaults).
-
 change_window_settings(WinSettingsVals, WinGroup)
 	:-
 	WinSettingsVals = [Back, Fore, SelectBack, SelectFore, Font, Tabs],
@@ -405,7 +738,8 @@ replace_items([Old | OldTerms],  NewTerm, Functor, Arity, Arg1,  [Old | NewTerms
 setup_defaults([], _).
 setup_defaults([Tag=Value | TextSettings], Group)
 	:-
-	tcl_call(shl_tcli, [set_proenv,text,Tag,Value], _),
+%	tcl_call(shl_tcli, [set_proenv,text,Tag,Value], _),
+	tcl_call(shl_tcli, [set_tcl_ga2,proenv,text,Tag,Value], _),
 	setup_defaults(TextSettings, Group).
 
 win_positions_for_exit(TopGeom, DebugGeom)
@@ -432,6 +766,93 @@ check_alsdev_flags
 	:-
 	current_prolog_flag(debug, DebugFlag),
 		switch_debugging_setup(DebugFlag).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%			EDIT (FILE) WINDOWS					%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		%		edit_files,     %% list of files open for editing
+		%		non_file_edits, %% list of non-file (new) windows open for editing
+
+als_ide_mgrAction(open_edit_win(FileName), State)
+	:-
+	split_path(FileName, PathCmpts),
+	dreverse(PathCmpts, [TF | _]),
+	file_extension(BaseFileName, Ext, TF),
+	als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State).
+
+als_ide_mgrAction(open_edit_win_by_root(RootFileName,SearchList), State)
+	:-
+	file_extension(BaseFileName, Ext, RootFileName),
+	accessObjStruct(edit_files, State, PrevEditFiles),
+	send_self(State, obtain_src_mgr(BaseFileName, FileMgr)),
+	send(FileMgr, open_edit_win_by_base(BaseFileName, Ext, SearchList)).
+
+als_ide_mgrAction([open_edit_win, FileName, BaseFileName, Ext ], State)
+	:-
+	als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State).
+
+als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State)
+	:-
+	accessObjStruct(edit_files, State, PrevEditFiles),
+	send_self(State, obtain_src_mgr(BaseFileName, FileMgr)),
+	send(FileMgr, open_edit_win(FileName, BaseFileName, Ext)).
+
+/***
+als_ide_mgrAction([close_edit_win], State)
+	:-
+	als_ide_mgrAction(close_edit_win, State).
+
+als_ide_mgrAction(close_edit_win, State)
+	:-
+	accessObjStruct(edit_files, State, PrevEditFiles),
+	list_delete(PrevEditFiles, e(FileName,WinName), NewEditFiles),
+	setObjStruct(edit_files, State, NewEditFiles).
+
+als_ide_mgrAction([open_non_file_edit_win, WinName], State)
+	:-
+	accessObjStruct(non_file_edits, State, PrevEdits),
+	setObjStruct(non_file_edits, State, [WinName | PrevEdits]).
+***/
+
+als_ide_mgrAction([close_non_file_edit_win, WinName], State)
+	:-
+	accessObjStruct(non_file_edits, State, PrevEdits),
+	list_delete(PrevEdits, WinName, NewEdits),
+	setObjStruct(non_file_edits, State, NewEdits).
+
+als_ide_mgrAction([save_doc_as, WinName], State)
+	:-
+	accessObjStruct(edit_files, State, PrevEditFiles),
+	accessObjStruct(non_file_edits, State, PrevEdits),
+	fin_save_as(FileName,WinName,State,PrevEditFiles,PrevEdits).
+
+fin_save_as(FileName,WinName,State,PrevEditFiles,PrevEdits)
+	:-
+	dmember( e(OtherFileName,WinName), PrevEditFiles),
+	!,
+	list_delete(PrevEditFiles, e(OtherFileName,WinName), InterEditFiles),
+	setObjStruct(edit_files, State, [e(FileName,WinName) | InterEditFiles]).
+
+fin_save_as(FileName,WinName,State,PrevEditFiles,PrevEdits)
+	:-
+	list_delete(PrevEdits, WinName, NewEdits),
+	setObjStruct(non_file_edits, State, NewEdits),
+	setObjStruct(edit_files, State, [e(FileName,WinName) | PrevEditFiles]).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%											%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+als_ide_mgrAction( change_prolog_flag(Flag,Value), State)
+	:-
+	tcl_call(shl_tcli, [set_tcl_ga,proenv,Flag,Value], _).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%		PROJECTS								%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+/* ... see als_ide_mgrAction/2 clauses in projects.pro ... */
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			RECONSULT ETC.						%%%%%
@@ -469,7 +890,7 @@ repair_path(PathAtomIn, PathAtomOut)
 
 repair_path0([], []).
 repair_path0([0'/ | PAInCs], [0'\\ | PAOutCs])
-	:-
+	:-!,
 	repair_path0(PAInCs, PAOutCs).
 repair_path0([C | PAInCs], [C | PAOutCs])
 	:-
@@ -481,14 +902,14 @@ clear_workspace
 	clear_each_module(UserMods),
 	close_down_nonsystem_streams,
 	destroy_all_tcl_interpreters,
+%pbi_write(tcl_interpreters_killed),pbi_nl,pbi_flush_output,
 	listener_prompt.
 
 clear_each_module([]).
 clear_each_module([M | UserMods])
 	:-
 	printf(shl_tk_out_win, 'Module %t cleared.\n',[M]),
-	findall(P/A, procedures(M,P,A,_), ML),
-	M:abolish_list(ML),
+	abolish_module(M),
 	clear_each_module(UserMods).
 
 non_system_module(M)
@@ -658,6 +1079,15 @@ edit_defstruct
 	%%%%% 		
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+	%% Set up the connection to the TclPro debugger for
+	%% interpreter TclInterp; assumes that prodebug.tcl can 
+	%% be found in ALSTCLPATH:
+init_tcl_debugger(TclInterp, ALSTCLPATH)
+	:-
+	tcl_call(TclInterp, [file,join,ALSTCLPATH,'prodebug.tcl'], PDFPath),
+	tcl_call(TclInterp, [source, PDFPath], _),
+	tcl_call(TclInterp, [debugger_init], _).
+
 setup_for_debugging(Which)
 	:-
 	xconsult:change_source_level_debugging(Which),
@@ -669,14 +1099,15 @@ switch_debugging_setup(Which)
 
 endmod.   % alsdev.
 
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% 		VISUAL DEBUGGER ROUTINES				%%%%%
-	%%%%% 		  -- portions in module builtins		%%%%% 
+	%%%%% 		  -- portions in module BUILTINS		%%%%% 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 module builtins.
-
 
 change_debug_io(console)
 	:-
@@ -732,11 +1163,6 @@ sys_modules([
 export non_sys_modules/1.
 non_sys_modules(Mods)
 	:-
-/*
-	findall(M, modules(M,_),L),
-	sys_modules(SysMs),
-	list_diff(L, SysMs, Mods).
-*/
 	findall(M, (modules(M,_), (debugger:not(noshow_module(M)))), Mods).
 
 export module_preds/2.
@@ -828,16 +1254,36 @@ annotate_showing([M | SysMs], [[M, S] | SMs])
 	annotate_showing(SysMs, SMs).
 
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%% LIBRARY LOAD RECORDING:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+:- abolish(record_lib_load, 1).
+	%% Needs to be expanded:
+record_lib_load(File).
+
 endmod.	%% builtins
 
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% 		VISUAL DEBUGGER ROUTINES				%%%%%
-	%%%%% 		  -- portions in module builtins		%%%%% 
+	%%%%% 		  -- portions in module debugger		%%%%% 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 module debugger.
 use tcltk.
 
+:- abolish(ensure_db_showing, 0).
+ensure_db_showing
+	:-
+ 	tcl_call(shl_tcli, [ensure_db_showing], _).
+
+
+
+
+/*
 init_visual_debugger
 	:- 
 	clause(get_db_file_recs(_),B),
@@ -851,6 +1297,7 @@ init_visual_debugger
 	set_all_args(1,100,DBFRTBL,0),
 	set_dbfr_tbl(DBFRTBL),
 	make_gv('_mrfcg'), set_mrfcg(0).
+*/
 
 get_src_trace_rec(FileName, Rec)
 	:-
@@ -876,37 +1323,16 @@ get_st_rec_by_fcg(FCGNum, Rec)
 	arg(FCGNum, DBFRTBL, Rec).
 
 
-start_src_trace(BaseFileName, SrcFilePath)
+start_src_trace(BaseFileName, SrcFilePath, CG, ALSMgr, SrcMgr)
 	:-
-%	init_visual_debugger,
-	set_mrfcg(0),
-	tcl_call(shl_tcli, [ensure_db_showing], _),
-		%% Old Rec exists, but window has been destroyed, so
-		%% remove old rec, and start over:
-	!,
-	continue_start_src_trace(BaseFileName, SrcFilePath).
+	send(ALSMgr, get_value(debugger_mgr, DbgrMgr)),
+	send(DbgrMgr, ensure_db_showing),
+	send(DbgrMgr, insert_by_fcg(CG, SrcMgr)),
+	send(DbgrMgr, set_value(mrfcg, CG)),
+	send(SrcMgr, start_src_trace(BaseFileName, SrcFilePath, CG)).
 
-continue_start_src_trace(BaseFileName, SrcFilePath)
-	:-
-%write(continue_start_src_trace(BaseFileName, SrcFilePath)),nl,flush_output,
-	(get_src_trace_rec(SrcFilePath, OldRec) ->
-		access_dbstr(winname, OldRec, OldWinName),
-		tcl_call(shl_tcli, [careful_withdraw,OldWinName], _),
-		remove_src_trace_rec(OldRec)
-		;
-		true),
-	create_src_trace(SrcFilePath, WinName, TextWinName, BaseFileName, 
-					 NumLines, LineIndex),
-	inverted_index(LineIndex, InvertedLineIndex),
-	builtins:file_clause_group(BaseFileName, FCG),
-	xmake_dbstr(Rec,
-		[SrcFilePath,FCG,WinName, TextWinName,NumLines, 
-			LineIndex,InvertedLineIndex,0,0]),
-	add_src_trace_rec(Rec),
-	get_dbfr_tbl(DBFRTBL),
-	mangle(FCG, DBFRTBL, Rec),
-	!,
-	tcl_call(shl_tcli, [wm,deiconify,WinName], _).
+
+
 
 inverted_index(LineIndex, InvertedLineIndex)
 	:-
@@ -923,7 +1349,7 @@ create_src_trace(SrcFilePath, WinName, TextWinName, BaseFileName,
 				 NumLines, LineIndex)
 	:-
 	tcl_call(shl_tcli, [load_document,SrcFilePath],WinName),
-	catenate(WinName,'.text',TextWinName),
+	catenate(WinName, '.text', TextWinName),
 	(BaseFileName = user -> 
 		LoadRes = [0, []]
 		;
@@ -960,6 +1386,65 @@ set_debugwin_width(M5Size, MainWinSize)
 	set_line_length(debugger_output, NChars).
 
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% THIS IS THE ACTUAL CALL FROM THE LOW-LEVEL DEBUGGER
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	/*---
+	'$dbg_aph'(ClsGrp,Start,End)
+	'$dbg_aphe'(ClsGrp,Start,End)
+	'$dbg_apf'(ClsGrp,Start,End)
+	'$dbg_apg'(ClsGrp,Start,End)
+	'$dbg_apge'(ClsGrp,Start,End)
+	 *---*/
+export v_showGoalToUserWin/6.
+v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
+	:-
+	functor(Goal, FF, 3),
+	dmember(FF, ['$dbg_aph', '$dbg_aphe', '$dbg_apf', '$dbg_apg', '$dbg_apge']),
+	!,
+	arg(1, Goal, CG),
+	builtins:get_primary_manager(ALSIDEMGR),
+	send(ALSIDEMGR, get_value( debugger_mgr, DBGMGR)),
+	send(DBGMGR,  mgr_by_cg(CG, SrcMgr)),
+
+	accessObjStruct(mrfcg, DBGMGR, MRFCG),
+	check_win_cleanup(MRFCG, CG, Port, DBGMGR),
+
+	showGoalToUserWin(Port,Box,Depth, Module, Goal, Response, DBGMGR, SrcMgr).
+
+v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
+	:-
+	builtins:get_primary_manager(ALSIDEMGR),
+	send(ALSIDEMGR, get_value( debugger_mgr, DBGMGR)),
+	send(DBGMGR,  get_mrfcg(CG, SrcMgr)),
+	showGoalToUserWin_other(Port,Box,Depth, Module, Goal, Response, CG, DBGMGR, SrcMgr).
+
+
+		%% Staying in the same file; nothing to do:
+check_win_cleanup(CG, CG, _, _) :-!.
+
+		%% Now we have just switched between files; if Port is
+		%% call or redo, need to remove trace coloring, etc., 
+		%% from window we are leaving; if Port is exit or fail, 
+		%% nothing to do:
+check_win_cleanup(MRFCG, ClsGrp, call, DBGMGR)
+	:-!,
+	send(DBGMGR, mgr_by_cg(MRFCG, MRSrcMgr)),
+	send(MRSrcMgr, clear_decorations),
+	send(DBGMGR, mgr_by_cg(ClsGrp, SrcMgr)),
+	send(SrcMgr, raise).
+
+
+check_win_cleanup(MRFCG, ClsGrp, redo, DBGMGR)
+	:-!,
+	send(DBGMGR, mgr_by_cg(MRFCG, MRSrcMgr)),
+	send(MRSrcMgr, clear_decorations),
+	send(DBGMGR, mgr_by_cg(ClsGrp, SrcMgr)),
+	send(SrcMgr, raise).
+
+check_win_cleanup(_, _, _, _).
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Handle hidden debugging goals:
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -975,59 +1460,61 @@ set_debugwin_width(M5Size, MainWinSize)
 	%%    of the clause.
 	%%---------------------------------------------------
 
-/*
-showGoalToUserWin(Port,Box,Depth, Module, Goal, debug)
+/*----- For debugging:
+showGoalToUserWin(Port,Box,Depth, Module, Goal, debug, DBGMGR, SrcMgr)
 	:-
-	get_mrfcg(ClsGrp),
-printf('%t-%t(%t) %t <%t>\n',[Box,Depth,Port,Goal,ClsGrp]),flush_output,
+printf('%t-%t(%t) %t \n',[Box,Depth,Port,Goal]),flush_output,
 	fail.
 */
 
 	%% '$dbg_aph' ::
 
-showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
+showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-
-	color_my_port(ClsGrp,Start,End,call,head_tag),
+	color_my_port(ClsGrp,Start,End,call,head_tag, DBGMGR, SrcMgr),
 	!.
 
 	%% The call to color_my_port could fail on the very first call to
 	%% a predicate defined in a file which has not yet been set up for
 	%% debugging; this alternate clause tries to get the file set up:
-showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
-	:-!,
-	builtins:file_clause_group(BaseFileName, ClsGrp),
-	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options),
-	continue_start_src_trace(BaseFileName, SrcFilePath),
-	!,
-	color_my_port(ClsGrp,Start,End,call,head_tag).
 
-showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
+showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!,
-	color_my_port(ClsGrp,Start,End,fail,head_tag).
+	send(DBGMGR,  mgr_by_cg(ClsGrp, SrcMgr)),
+
+	send(DBGMGR,  mgr_by_cg(ClsGrp, NewSrcMgr)),
+	send(DBGMGR,  set_value(mrfcg, ClsGrp)),
+	send(NewSrcMgr, start_src_trace),
+	!,
+	color_my_port(ClsGrp,Start,End,call,head_tag, DBGMGR, NewSrcMgr).
+
+showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
+	:-!,
+	color_my_port(ClsGrp,Start,End,fail,head_tag, DBGMGR, SrcMgr).
 	
-showGoalToUserWin(redo,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
+showGoalToUserWin(redo,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!,
-	color_my_port(ClsGrp,Start,End,redo,head_tag).
+	color_my_port(ClsGrp,Start,End,redo,head_tag, DBGMGR, SrcMgr).
 	
-showGoalToUserWin(exit,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
+showGoalToUserWin(exit,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!,
-	fcg_change(Port,'$dbg_aph',ClsGrp,Start,End).
+	fcg_change(Port,'$dbg_aph',ClsGrp,Start,End, DBGMGR).
 
 	%% '$dbg_aphe' ::
 
 	% "call" here is successful exit from the clause:
-showGoalToUserWin(call,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
+showGoalToUserWin(call,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!,
-	color_my_port(ClsGrp,Start,End,exit,head_tag).
+	color_my_port(ClsGrp,Start,End,exit,head_tag, DBGMGR, SrcMgr).
 
-showGoalToUserWin(redo,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
+showGoalToUserWin(redo,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!,
-	color_my_port(ClsGrp,Start,End,redo,head_tag).
+	color_my_port(ClsGrp,Start,End,redo,head_tag, DBGMGR, SrcMgr).
 
-showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
+showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!.
 
-showGoalToUserWin(exit,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
+showGoalToUserWin(exit,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!.
 
 	%%---------------------------------------------------
@@ -1041,14 +1528,33 @@ showGoalToUserWin(exit,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 	%%    head.
 	%%---------------------------------------------------
 
-showGoalToUserWin(call,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
-	:-!,
-	color_my_port(ClsGrp,Start,End,exit,head_tag).
+showGoalToUserWin(call,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
+	:-
+	color_my_port(ClsGrp,Start,End,exit,head_tag, DBGMGR, SrcMgr),
+	!.
 
-showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
+	%% The call to color_my_port could fail on the very first call to
+	%% a predicate defined in a file which has not yet been set up for
+	%% debugging; this alternate clause tries to get the file set up:
+
+showGoalToUserWin(call,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
+	:-!,
+	builtins:file_clause_group(BaseFileName, ClsGrp),
+%	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options),
+%	continue_start_src_trace(BaseFileName, SrcFilePath),
+	send(SrcMgr, start_src_trace),
+	!,
+	color_my_port(ClsGrp,Start,End,exit,head_tag, DBGMGR, SrcMgr).
+
+
+
+
+
+
+showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!.
 
-showGoalToUserWin(Port,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
+showGoalToUserWin(Port,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!.
 
 	%%--------------------------------------------------------------------
@@ -1074,57 +1580,80 @@ showGoalToUserWin(Port,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
 	%% '$dbg_apg' ::
 
 	%% This is real call: first entry to the goal
-showGoalToUserWin(call,Box,Depth, Module, '$dbg_apg'(ClsGrp,Start,End), debug)
+showGoalToUserWin(call,Box,Depth, Module, '$dbg_apg'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!,
-	color_my_port(ClsGrp,Start,End,call,call_tag),
+	color_my_port(ClsGrp,Start,End,call,call_tag, DBGMGR, SrcMgr),
 	!.
 
 	%% "redo" here is actually failure of the acutal goal:
-showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apg'(ClsGrp,Start,End), debug)
+showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apg'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!,
-	color_my_port(ClsGrp,Start,End,fail,call_tag).
+	color_my_port(ClsGrp,Start,End,fail,call_tag, DBGMGR, SrcMgr).
 
-showGoalToUserWin(Port,Box,Depth, Module, '$dbg_apg'(ClsGrp,Start,End), debug)
+showGoalToUserWin(Port,Box,Depth, Module, '$dbg_apg'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!.
 
 	%% '$dbg_apge' ::
 
 	%% "call" here is really exit for the acutal goal:
-showGoalToUserWin(call,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug)
+showGoalToUserWin(call,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
+	:-
+	color_my_port(ClsGrp,Start,End,exit,call_tag, DBGMGR, SrcMgr).
+
+	%% The call to color_my_port could fail on the a return (=dbg_apge, here) to
+	%% a predicate defined in a file for which the window has not yet been set up for
+	%% debugging; this alternate clause tries to get the file set up:
+	%% {This can happen if we spy on predicate defined in File#2, but we
+	%% start by running a predicate in File#1 which leads to File#2}
+
+showGoalToUserWin(call,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!,
-	color_my_port(ClsGrp,Start,End,exit,call_tag).
+	send(DBGMGR,  mgr_by_cg(ClsGrp, SrcMgr)),
+
+	send(DBGMGR,  mgr_by_cg(ClsGrp, NewSrcMgr)),
+	send(DBGMGR,  set_value(mrfcg, ClsGrp)),
+	send(NewSrcMgr, start_src_trace),
+	!,
+	color_my_port(ClsGrp,Start,End,exit,call_tag, DBGMGR, NewSrcMgr).
+
+
+
+
+
+
 
 	%% "redo" here is really redo for the acutal goal:
-showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug)
+showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!,
-	color_my_port(ClsGrp,Start,End,redo,call_tag).
+	color_my_port(ClsGrp,Start,End,redo,call_tag, DBGMGR, SrcMgr).
 
-showGoalToUserWin(_,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug)
+showGoalToUserWin(_,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!.
 
 	%%---------------------------------------------------
 	%%		ALL OTHERS
 	%%---------------------------------------------------
-showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
+showGoalToUserWin_other(Port,Box,Depth, Module, XGoal, Response, MRFCG, DBGMGR, SrcMgr)
 	:-
-	printf(debugger_output,'(%d) %d %t: ', [Box,Depth,Port]),
+	printf(debugger_output,'(%d) %d %t: ', [Box,Depth,Port]), 
 
 %% should not be necessary, but there is a bug somewhere
 %% in printf which allows it to be re-satisfied::!!::
 	!,
+	write_term(debugger_output, Module:XGoal, [lettervars(false)]),
 
-	get_mrfcg(MRFCG),
-	write_term(debugger_output, Module:XGoal,    [lettervars(false)]),
 	flush_output(debugger_output),
 	(MRFCG = 0 -> true
 		;
 		((Port=call; Port=redo) -> true
 			;
-			re_color_port(Port, MRFCG, STRec)
+			re_color_port(Port, MRFCG, SrcMgr)
 		)
 	),
+%	send(DBGMGR, show_stack_list),
+
 	(((Port = exit; Port = fail), Box = 1, Depth=1) ->
-		db_boundary(Box,Depth,general,Port,XGoal,MRFCG),
+		dbg_boundary(Box,Depth,general,Port,XGoal,MRFCG,DBGMGR, SrcMgr),
 		nl(debugger_output),
 		Response = debug
 		;
@@ -1133,48 +1662,44 @@ showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
 	),
 	!.
 
-/*
-color_my_port(ClsGrp,Start,End,Port,TagName)
+color_my_port(ClsGrp,Start,End,Port,TagName, DBGMGR, SrcMgr)
 	:-
-	TagName = head_tag,
-	!,
-	tktxt_info(ClsGrp,TextWin,Start,End,STRec,
-				StartLine,StartChar,EndLine,EndChar),
-	display_st_record(StartLine,StartChar,EndLine,EndChar, 
-						Color,TextWin, TagName, STRec).
-*/
+	tktxt_info(SrcMgr, ClsGrp,TextWin,Start,End,StartLine,StartChar,EndLine,EndChar),
+	accessObjStruct(TagName, SrcMgr, LastCallTag),
 
-color_my_port(ClsGrp,Start,End,Port,TagName)
-	:-
-	tktxt_info(ClsGrp,TextWin,Start,End,STRec,
-				StartLine,StartChar,EndLine,EndChar),
-	access_dbstr(TagName, STRec, LastCallTag),
 	restore_remove(LastCallTag, TextWin, TagName),
 	tcl_call(shl_tcli,
 			[assign_tag,TextWin,TagName,StartLine,StartChar,EndLine,EndChar],
 			_),
+	accessObjStruct(tcl_doc_path, SrcMgr, Win),
+	catenate(Win, '.ltext', LTextWin),
+	(TagName = head_tag ->
+		(dmember(Port, [call,exit]) ->
+			accessObjStruct(head_tag, SrcMgr, PrevHT),
+			(PrevHT = i(PSL,_,_,_) ->
+				catenate(PSL, '.0', PSLI),
+				tcl_call(shl_tcli, [LTextWin, insert, PSLI, ' '], _)
+				;
+				true
+			),
+			catenate(StartLine, '.0', SLE),
+			tcl_call(shl_tcli, [LTextWin, insert, SLE, '>'], _)
+			; 
+			true
+		)
+		;
+		true
+	),
 	port_color(Port, Color),
-	fcg_change(Port,'??',ClsGrp,Start,End),
-	set_mrfcg(ClsGrp),
+	fcg_change(Port,'??',ClsGrp,Start,End, DBGMGR),
+	send(DBGMGR, set_value(mrfcg, ClsGrp)),
 	!,
-	display_st_record(StartLine,StartChar,EndLine,EndChar, 
-						Color,TextWin, TagName, STRec).
+	display_st_record(StartLine,StartChar,EndLine,EndChar,Color,TextWin,LTextWin,TagName,SrcMgr).
 
-clear_my_tag(ClsGrp,Start,End,TagName)
+re_color_port(Port, MRFCG, SrcMgr)
 	:-
-	tktxt_info(ClsGrp,TextWin,Start,End,STRec,
-				StartLine,StartChar,EndLine,EndChar),
-	access_dbstr(TagName, STRec, LastCallTag),
-	restore_remove(LastCallTag, TextWin, TagName),
-	tcl_call(shl_tcli,
-			[assign_tag,TextWin,TagName,StartLine,StartChar,EndLine,EndChar],
-			_),
-	clear_tag(TagName,TextWin).
-
-re_color_port(Port, MRFCG, STRec)
-	:-
-	get_st_rec_by_fcg(MRFCG, STRec),
-	access_dbstr(textwin, STRec, TextWin),
+	accessObjStruct(tcl_doc_path, SrcMgr, Win),
+	catenate(Win, '.text', TextWin),
 	port_color(Port, Color),
 	configure_tag(call_tag, TextWin,['-background',Color]).
 
@@ -1185,42 +1710,36 @@ port_color(exit, green).
 port_color(fail, '#fe0076').
 port_color(redo, yellow).
 
-db_boundary(Box,Depth,Desc,Port,XGoal,MRFCG)
+dbg_boundary(Box,Depth,Desc,Port,XGoal,MRFCG,DBGMGR, SrcMgr)
 	:-
 	Box=1,
 	Depth=1,
 	!,
-	((Port = exit; Port = fail) -> clean_up_src_win(MRFCG) ; true).
+	((Port = exit; Port = fail) -> 
+		clean_up_src_win(MRFCG, SrcMgr) 
+		; 
+		true
+	).
 
-db_boundary(Box,Depth,Desc,Port,XGoal,MRFCG).
+dbg_boundary(Box,Depth,Desc,Port,XGoal,MRFCG,DBGMGR, SrcMgr).
 
-fcg_change(Port,DBG,ClsGrp,Start,End)
+fcg_change(Port,DBG,ClsGrp,Start,End, DBGMGR)
 	:-
-	get_mrfcg(MRFCG),
+	send(DBGMGR, get_value(mrfcg, ClsGrp)),
 	MRFCG \= ClsGrp,
 	!,
 	flush_output,
 	((Port = exit; Port = fail) -> 
-		clean_up_src_win(MRFCG) 
+		clean_up_src_win(MRFCG, SrcMgr) 
 		; 
 		true).
 
-fcg_change(Port,DBG,ClsGrp,Start,End).
+fcg_change(Port,DBG,ClsGrp,Start,End, DBGMGR).
 
-clean_up_src_win(MRFCG)
+
+clean_up_src_win(MRFCG, SrcMgr)
 	:-
-	get_st_rec_by_fcg(MRFCG, Rec),
-	Rec \= 0,
-	!,
-	access_dbstr(textwin, Rec, TextWin),
-		% clear_tag(call_tag,TextWin),
-	tcl_call(shl_tcli, [clear_tag, call_tag, TextWin], _),
-	tcl_call(shl_tcli, [TextWin,tag, delete, call_tag], _),
-		% clear_tag(head_tag,TextWin),
-	tcl_call(shl_tcli, [clear_tag, head_tag, TextWin], _),
-	tcl_call(shl_tcli, [TextWin,tag, delete, head_tag], _).
-
-clean_up_src_win(MRFCG).
+	send(SrcMgr, clear_decorations).
 
 getresponse2(tcltk,Port,Box,Depth,Module,Goal,Response)
 	:-
@@ -1252,14 +1771,13 @@ set_chosen_spypoints([PredDesc | TclPAList], Mod)
 	gui_spy(Mod, PredDesc),
 	set_chosen_spypoints(TclPAList, Mod).
 
-tktxt_info(ClsGrp,TextWin,Start,End,Rec,
-			StartLine,StartChar,EndLine,EndChar)
+tktxt_info(SrcMgr,ClsGrp,TextWin,Start,End,StartLine,StartChar,EndLine,EndChar)
 	:-
-	get_st_rec_by_fcg(ClsGrp, Rec),
-	Rec \= 0,
-	access_dbstr(textwin, Rec, TextWin),
-	access_dbstr(numlines, Rec, NumLines),
-	access_dbstr(invlineindex, Rec, InvLineIndex),
+	accessObjStruct(tcl_doc_path, SrcMgr, Win),
+	Win \= nil,
+	catenate(Win, '.text', TextWin),
+	accessObjStruct(num_lines, SrcMgr, NumLines),
+	accessObjStruct(invlineindex, SrcMgr, InvLineIndex),
 	find_line_pos(1,NumLines,Start,InvLineIndex,StartLine),
 	arg(StartLine,InvLineIndex,SLOffset),
 	StartChar is Start - SLOffset,
@@ -1270,16 +1788,16 @@ tktxt_info(ClsGrp,TextWin,Start,End,Rec,
 
 
 display_st_record(StartLine,StartChar,EndLine,EndChar, 
-						Color,TextWin, TagName, Rec)
+						Color,TextWin, LTextWin,TagName, SrcMgr)
 	:-
 	(TagName = call_tag ->
 		configure_tag(TagName, TextWin,['-background',Color])
 		;
 		true
 	),
-	tcl_call(shl_tcli,[see_text,TextWin,StartLine,StartChar,EndLine,EndChar],_),
+	tcl_call(shl_tcli,[see_text,TextWin,LTextWin,StartLine,StartChar,EndLine,EndChar],_),
 	!,
-	set_dbstr(TagName, Rec, i(StartLine,StartChar,EndLine,EndChar)).
+	setObjStruct(TagName, SrcMgr, i(StartLine,StartChar,EndLine,EndChar)).
 
 restore_remove(i(StartLine,StartChar,EndLine,EndChar), TextWin, TagName)
 	:-!,
@@ -1329,19 +1847,6 @@ disp_find_line_pos(MidStart,MidLN,LowLN,HighLN,Offset,ILI,LN)
 	:-
 	find_line_pos(LowLN,MidLN,Offset,ILI,LN).
 
-clear_source_traces
-	:-
-	get_db_file_recs(RecsList),
-	clear_source_trace_wins(RecsList),
-	set_mrfcg(0).
-
-clear_source_trace_wins([]).
-clear_source_trace_wins([Rec | RecsList])
-	:-
-	access_dbstr(fcg_num,Rec,FCG),
-	clean_up_src_win(FCG),
-	clear_source_trace_wins(RecsList).
-
 	%%-------------------------------------------------
 	%		SPYPOINTS
 	%%-------------------------------------------------
@@ -1350,7 +1855,8 @@ install_new_spypoints(NewSpyListIn, Module)
 	:-
 	fixup_tcltk_pa_descs(NewSpyListIn, NewSpyList),
     dbg_spyoff,
-	install_spypoints_in_mod(NewSpyList, Module),
+	debug_io(DebugIOChannel),
+	install_spypoints_in_mod(NewSpyList, DebugIOChannel, [], Module),
     setPrologInterrupt(spying),
     setDebugInterrupt(spying),
 	printf(debugger_output,
@@ -1365,11 +1871,12 @@ fixup_tcltk_pa_descs([Desc | ListIn], [P/A | List])
 	atomread(Desc,P/A), 
 	fixup_tcltk_pa_descs(ListIn, List).
 
-install_spypoints_in_mod([], Module).
-install_spypoints_in_mod([P/A | NewSpyList], Module)
+install_spypoints_in_mod([], _, _, Module).
+install_spypoints_in_mod([P/A | NewSpyList], DebugIOChannel, CGsSetup, Module)
 	:-
+	setup_debug(DebugIOChannel, Module, P, A, CGsSetup, NextCGsSetup),
     install_spypoint(Module,P,A),
-	install_spypoints_in_mod(NewSpyList, Module).
+	install_spypoints_in_mod(NewSpyList, DebugIOChannel, NextCGsSetup, Module).
 
 remove_old_spypoints(OldSpyListIn, Module)
 	:-
@@ -1386,7 +1893,6 @@ remove_spypoints_in_mod([P/A | NewNoSpyList], Module)
 remove_all_spypoints
 	:-
 	nospy.
-
 
 	%% dumps procedure clauses with complete info, 
 	%% including hidden debug calls:
@@ -1500,4 +2006,329 @@ typeProperties(dbstr,
 noteOptionValue(dbstr,_A,_B,_C) :- set_dbstr(_A,_C,_B).
 endmod.
 
+module alsdev.
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%			SYNTAX ERROR REPORTING				%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+export ide_rt_err_report/2.
+ide_rt_err_report(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), [])
+	:-
+	write(shl_tk_out_win,'----------------------'),nl(shl_tk_out_win),
+	write(shl_tk_out_win,ErrorMessage), nl(shl_tk_out_win),
+	write(shl_tk_out_win,'----------------------'),nl(shl_tk_out_win).
+
+endmod.
+
+
+module builtins.
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% ERROR OUTPUT PREDICATES
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+export ide_prolog_system_error/2.
+
+	%% New rt_ reader:
+ide_prolog_system_error(
+	error(syntax_error,[_,syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream)]), [])
+	:-
+	ide_prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), []).
+
+ide_prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), _) 
+	:-
+%write(user_output,syntax_pos_info=p(P1,P2,P3)),nl,flush_output,
+	sio:is_stream(Stream,Stream0),
+	sio:is_input_stream(Stream0),
+	!,
+	EType = 'Syntax error',
+	sio:stream_type(Stream0,StreamType),
+	sio:stream_name(Stream0,StreamName),
+	(StreamType = file ->
+		pathPlusFile(_,File,StreamName)
+		;	
+		File = StreamName
+	),
+	sprintf(atom(EMsg), '%s\n%t: %t, line %d:\n%s\n',
+		[Context,EType,File,LineNumber,ErrorMessage]),
+	info_dialog(shl_tcli, EMsg, 'Syntax Error:').
+
+
+
+ide_prolog_system_error(s(ErrorCode,Stream), Args) 
+	:-
+	expand_code(ErrorCode, Pattern, EType),
+	!,
+	sio:stream_type(Stream,StreamType),
+	sio_linenumber(Stream,LineNumber),
+	sio:stream_name(Stream,StreamName),
+
+	OutPattern = '%t: %t stream %t,line %d:\n     ',
+	OutArgs = [StreamType,StreamName,LineNumber],
+	pse_out(error_stream, EType, OutPattern, OutArgs),
+	printf(error_stream,Pattern, Args),
+	flush_output(error_stream).
+
+ide_prolog_system_error(qc_failed(ErrorCode,Name,LineNumber),Args) 
+	:-
+	expand_code(ErrorCode, Pattern, EType),
+	!,
+	catenate('%t,line %t: ', Pattern, OutPattern),
+	OutArgs = [Name,LineNumber | Args],
+	pse_out(error_stream, EType, OutPattern, OutArgs),
+	flush_output(error_stream).
+
+ide_prolog_system_error(error(W,L),_) 
+	:-
+	decode_error(W, L, Pattern, Args),
+	!,
+	pse_out(error_stream, 'Error: ', Pattern, Args),
+	print_error_goal_attributes(L),
+	printf(error_stream,'- %-14s %t\n',
+		['Throw pattern:',error(W,L)],
+		[quoted(true),maxdepth(4),indent(17)]),
+	flush_output(error_stream).
+	
+ide_prolog_system_error(ErrorCode, Args) 
+	:-
+	expand_code(ErrorCode, Pattern, EType),
+	pse_out(error_stream, EType, Pattern, Args),
+	flush_output(error_stream).
+
+expand_code(EWCode, Pattern, '\nError: ')
+	:-
+	error_code(EWCode, Pattern),
+	!.
+
+expand_code(EWCode, Pattern, '\nWarning: ')
+	:-
+	warning_code(EWCode, Pattern).
+
+expand_code(EWCode, Pattern, '')
+	:-
+	info_code(EWCode, Pattern).
+
+pse_out(Stream, EType, Pattern, Args)
+	:-
+	printf(Stream, '%t',[EType]),
+	printf(Stream, Pattern, Args, [quoted(true), maxdepth(6)]).
+
+print_error_goal_attributes([]) :- !.
+print_error_goal_attributes([H|T]) 
+	:-
+	print_error_goal_attribute(H),
+	print_error_goal_attributes(T).
+print_error_goal_attributes(Other) 
+	:-
+	print_error_goal_attribute(Other).
+
+print_error_goal_attribute(M:G) 
+	:-!,
+	printf(error_stream,'- %-14s %t\n',
+		['Goal:',M:G],[quoted(true),maxdepth(5),indent(17)]),
+	flush_output(error_stream).
+
+print_error_goal_attribute(Huh) 
+	:-
+	functor(Huh,AttribName0,1),
+	!,
+	arg(1,Huh,AttribValue),
+	atom_concat(AttribName0,':',AttribName),
+	printf(error_stream,'- %-14s %t\n',
+			[AttribName,AttribValue], 
+			[quoted(true),maxdepth(5),indent(17)]),
+	flush_output(error_stream).
+
+print_error_goal_attribute(Other) 
+	:-
+	printf(error_stream,'- %-14s %t\n',
+			['Error Attribute:', Other],
+			[quoted(true),maxdepth(10),indent(17)]),
+	flush_output(error_stream).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% WARNING OUTPUT PREDICATES
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ 	%% Print all advisory and warning messages to
+ 	%% warning_output stream.
+
+export ide_prolog_system_warning/2.
+
+ide_prolog_system_warning(error(W,L),_) 
+	:-
+	decode_error(W, L, Pattern, Args),
+	!,
+	pse_out(error_stream, 'Warning: ', Pattern, Args),
+	print_error_goal_attributes(L),
+	flush_output(error_stream).
+
+ide_prolog_system_warning(ErrorCode, Args) 
+	:-
+	expand_code(ErrorCode, Pattern, EType),
+	printf(warning_output, '%t',[EType]),
+	printf(warning_output, Pattern, Args, [quoted(true), maxdepth(9)]),
+	flush_output(warning_output).
+
+
+export als_advise/1.
+als_advise(FormatString) 
+	:-
+	als_advise(warning_output, FormatString, []).
+
+export als_advise/2.
+als_advise(FormatString, Args) 
+	:-
+	als_advise(warning_output, FormatString, Args).
+
+export als_advise/3.
+als_advise(Stream, FormatString, Args) 
+	:-
+	printf(Stream, FormatString, Args),
+	flush_output(Stream).
+
+endmod.
+
+module alsdev.
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% ACTIONS FOR shl_source_handler
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+/*----------------------------------------
+	object_classes:defineClass(builtins,
+	[   name=source_handler,
+		subClassOf=genericObjects,
+		export = yes,
+		addl_slots=
+			[ 
+				source_file, 		%% OS path to the ...
+				base_file,			%% underlying file name
+				obp_file,			%% OS path to obp file if exists, or nil
+				fcg, 				%% File clause group # for this (consulted) file
+				consult_mode,		%% normal/debug
+				last_consult		%% Time of last consult,
+			],
+		defaults= [ 
+			fcg				= 0,
+			consult_mode	= normal,
+			last_consult	= 0
+			]
+	])
+
+        %%   SHL_CONSULTED_FILE_MGR  --- in ALSDEV:
+	object_classes:defineClass(alsdev,
+	[   name=shl_source_handler,
+		subClassOf=source_handler,
+		export = yes,
+		addl_slots= [ 
+			tcl_doc_path,
+			errors_display		%% nil / non-empty errs list
+		],
+		defaults= [ 
+			tcl_doc_path		= nil,
+			errors_display 		= nil
+		]
+	])
+ *---------------------------------------*/
+
+/*
+shl_source_handlerAction(open_edit_win(FileName), State)
+	:-
+*/
+
+
+shl_source_handlerAction(open_edit_win(FileName), State)
+	:-
+	split_path(FileName, PathCmpts),
+	dreverse(PathCmpts, [TF | _]),
+	file_extension(BaseFileName, Ext, TF),
+	shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext), State).
+
+shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext), State)
+	:-
+	setObjStruct(source_file, State, FileName),
+	setObjStruct(ext, State, Ext),
+	shl_source_handlerAction(complete_open_edit_win(FileName,_), State).
+
+shl_source_handlerAction(open_edit_win_by_base(BaseFileName, Ext, SearchList), State)
+	:-
+	accessObjStruct(source_file, State, FileName),
+	FileName \= nil, FileName \='',
+	!,
+	shl_source_handlerAction(complete_open_edit_win(FileName,TclWin), State).
+
+shl_source_handlerAction(open_edit_win_by_base(BaseFileName, Ext, SearchList), State)
+	:-
+	file_extension(BaseFileName, Ext, FileDesc),
+	path_to_try_from_desc(SearchList, FileDesc, FileTryPath),
+%	exists_file(FileTryPath),
+	!,
+	shl_source_handlerAction(complete_open_edit_win(FileTryPath,TclWin), State),
+	setObjStruct(source_file, State, FileTryPath),
+	setObjStruct(ext, State, Ext).
+
+shl_source_handlerAction(complete_open_edit_win(FileName,TclWin), State)
+	:-
+	tcl_call(shl_tcli, [load_document, FileName], TclWin),
+	setObjStruct(tcl_doc_path, State, TclWin),
+	accessObjStruct(myHandle, State, MyHandle),
+	tcl_call(shl_tcli, [set_tcl_ga2,proenv,TclWin,src_handler,MyHandle], _).
+
+shl_source_handlerAction(close_edit_win, State)
+	:-
+	accessObjStruct(tcl_doc_path, State, TclWin),
+	tcl_call(shl_tcli, [dispose_document_window, TclWin], _),
+			%% MUST close down any source trace stuff later:::
+			%%		send_self(close_source_trace, State),
+	setObjStruct(tcl_doc_path, State, nil).
+
+
+shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
+	:-
+	ErrsList = [],
+	!,
+	accessObjStruct(tcl_doc_path, State, TclWin),
+	(TclWin \= nil ->
+		send_self(State, clear_decorations),
+		tcl_call(shl_tcli, [close_error_annotations, TclWin], _)
+		;
+		true
+	).
+
+		%% Here, ErrsList \= []:
+shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
+	:-
+	setObjStruct(errors_display, State, ErrsList),
+	SourceFile = SPath,
+	setObjStruct(source_file, State, SourceFile),
+	shl_source_handlerAction(open_edit_win(SourceFile), State),
+	accessObjStruct(tcl_doc_path, State, TclWin),
+	send_self(State, clear_decorations),
+	tcl_call(shl_tcli, [add_line_numbers_and_syn_errs,TclWin],_),
+	catenate([TclWin,'.listbox'], ErrListWin),
+	indicate_errors(ErrsList, TclWin, ErrListWin).
+
+indicate_errors([], DocID, _).
+indicate_errors([Error | ErrsList], DocID, ErrWin)
+	:-
+	indic_err(Error, DocID, ErrWin),
+	indicate_errors(ErrsList, DocID, ErrWin).
+
+	%% P1: StartPos - char offset in file
+	%% P2: CaratPos - char offset on line for error
+	%% P3: Pos3
+indic_err( error(syntax_error,
+				[_,syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,FS)]),
+			DocID, ErrWin)
+	:-!,
+	tcl_call(shl_tcli, [syn_err_msg,ErrWin,LineNumber,ErrorMessage,DocID],_),
+	tcl_call(shl_tcli, [err_indic,DocID,LineNumber,P1,P2,P3],_).
+
+indic_err(Error, DocID, ErrWin).
+
+
+
+endmod.

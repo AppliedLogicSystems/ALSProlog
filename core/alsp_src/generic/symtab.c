@@ -57,7 +57,7 @@ struct ts {
 };
 
 
-static int ts_allocidx = 0;	/* index to look at in doing next allocation */
+/*//static int ts_allocidx = 0;*/	/* index to look at in doing next allocation */
 
 #ifdef arch_m88k
 #define TS_LASTIDX 4		/* Last valid index in table */
@@ -71,10 +71,10 @@ static int ts_allocidx = 0;	/* index to look at in doing next allocation */
  * at which point a larger table will be allocated (if possible).
  */
 
-static long ts_allocated = 2048;	/* number of entries allocated */
-static unsigned long ts_prime = 2039;		/* actual size (the prime number) */
-static unsigned long ts_cutoff = 1712;		/* the cutoff point */
-static unsigned long ts_next = TK_EOF + 1;	/* the next token index */
+/*//static long ts_allocated = 2048;*/	/* number of entries allocated */
+/*//static unsigned long ts_prime = 2039;*/		/* actual size (the prime number) */
+/*//static unsigned long ts_cutoff = 1712;*/		/* the cutoff point */
+/*//static unsigned long ts_next = TK_EOF + 1;*/	/* the next token index */
 
 int tok_table_size(void)
 {
@@ -90,29 +90,15 @@ int tok_table_size(void)
  * areas like the token table be put into a common piece of memory.
  */
 
-/* MetroWerks has a bug in their ANSI C compiler that incorrectly flags
- * array initilizers of the form "abc"+1, as illegal.  The ANSI Standard
- * says that these are legal.  The work around is to briefly turn on the
- * C++ option, which permits "abc"+1.
- *
- */
-#ifdef __MWERKS__
-#pragma cplusplus on
-#endif
-#define TK(ppsym, name) {(UCHAR *) "\0" ## name + 1, 0, 0}
-#define OP(ppsym, name, a, b) {(UCHAR *) "\0" ## name + 1, a, b}
+#define TK(ppsym, name) {sizeof(name)-1, (UCHAR *) name, 0, 0}
+#define OP(ppsym, name, a, b) {sizeof(name)-1, (UCHAR *) name, a, b}
 static tkentry initial_table[] =
 {
-    {(UCHAR *) "\0\0used up entry" + 1, 0, 0},
+    {0, (UCHAR *) "used up entry", 0, 0},
 #include "newtokini.h"            /* initial definitions of tokens */
 };
 #undef TK
 #undef OP
-
-#ifdef __MWERKS__
-#pragma cplusplus reset
-#endif
-
 
 /*-@[5.1]@-------------------------------------------------------------
  * toktable is accessible to the world.  It is a pointer to the array of
@@ -121,28 +107,28 @@ static tkentry initial_table[] =
  *
  *---------------------------------------------------------------------*/
 
-tkentry *toktable = (tkentry *) 0;
+/*//tkentry *toktable = (tkentry *) 0;*/
 
 /*---------------------------------------------------------------------
  * hashtable is accessible only to this module.  It points to an array of
  * pointers to the tokens.
  *---------------------------------------------------------------------*/
 
-static tkentry **hashtable;
+/*//static tkentry **hashtable;*/
 
 /*---------------------------------------------------------------------
  * Variable strings points to the next character position which may be
  * allocated for a token string.
  *---------------------------------------------------------------------*/
 
-static UCHAR *strings;
+/*//static UCHAR *strings;*/
 
 /*---------------------------------------------------------------------
  * strings_last points to the last character in the area in which strings
  * points to.
  *---------------------------------------------------------------------*/
 
-static UCHAR *strings_last;
+/*//static UCHAR *strings_last;*/
 
 /*
  * strings_next is a pointer to future areas to be used by strings.  The first
@@ -158,14 +144,14 @@ static UCHAR *strings_last;
  * to keep up with this growth.
  */
 
-static long *strings_next = 0;
+/*//static long *strings_next = 0;*/
 
 /*
  * char_to_tok_map is an array of which maps characters to their
  * corresponding tokens.
  */
 
-long *char_to_tok_map;
+/*//long *char_to_tok_map;*/
 
 /* Prototypes */
 static	tkentry ** lookup		PARAMS(( UCHAR *, size_t * ));
@@ -289,19 +275,11 @@ find_token(const UCHAR *cs)
 
 	*pos = toktable + ts_next;
 
-	if (len >= 255) {
-	    if ((int)(len + 3) > strings_last - strings)
-		new_string_space(len + 3);	/* get more string space */
 
-	    *(*(unsigned short **) &strings)++ = (unsigned short) len;
-	    *(*(UCHAR **) &strings)++ = 255;
-	}
-	else {
-	    if ((int)(len + 1) > strings_last - strings)
+	if ((int)(len + 1) > strings_last - strings)
 		new_string_space(len + 1);	/* get more string space */
-
-	    *(*(UCHAR **) &strings)++ = (unsigned short) len;
-	}
+	
+	toktable[ts_next].length = len;
 	toktable[ts_next].tkname = strings;
 	toktable[ts_next].unop = 0;
 	toktable[ts_next].binop = 0;
@@ -360,7 +338,7 @@ increase_table_size()
     register unsigned int i;
 
 #ifdef DEBUG
-    printf("tablesize = %d, collisions/searches=%g\n",
+    printf("tablesize = %ld, collisions/searches=%g\n",
 	   ts_prime,
 	   (double) collisions / (double) nsearches);
     collisions = 0;
@@ -417,10 +395,6 @@ symtab_init()
     register unsigned int i;
     char chtokstr[2];
 
-    /* Adjust the symbol length bytes */
-    for (i = 1; i < sizeof(initial_table)/sizeof(tkentry); i++)
-	initial_table[i].tkname[-1] = strlen(initial_table[i].tkname);
-
     if (!toktable) {
 	/* allocate space for the token table */
 	toktable = (tkentry *) ss_malloc(sizeof (tkentry) * ts_allocated,
@@ -460,6 +434,9 @@ symtab_init()
 	ss_register_global((long *) &strings_last);
 	ss_register_global((long *) &strings_next);
 	ss_register_global((long *) &char_to_tok_map);
+    } else {
+    	/* Copy initial_table to toktable */
+		memcpy((char *) toktable, (char *) initial_table, sizeof initial_table);
     }
 }
 
@@ -602,17 +579,3 @@ save_toktbl()
 }
 
 #endif /* PACKAGE */
-
-
-int
-tknamelen(i)
-    long  i;
-{
-    int   len;
-
-    len = *(UCHAR *) (toktable[i].tkname - 1);
-    if (len != 255)
-	return len;
-    else
-	return (*(unsigned short *) (toktable[i].tkname - 3));
-}

@@ -1,6 +1,0 @@
-/* 
- * config.d.in is a template file used by configure to produce config.d.
- * config.d is then transformed (by configure) into the header file config.h.
- */
-
-@DEFS@

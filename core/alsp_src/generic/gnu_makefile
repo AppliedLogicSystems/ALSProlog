@@ -1,20 +1,18 @@
 # Generic GNU Make file for ALS Prolog
 
+VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins:$(SOURCE_DIR)/library
+
 default : binaries
 
-include $(SOURCE_DIR)/$(OS)/$(OS)_makefile
-include $(SOURCE_DIR)/$(PROC)/$(PROC)_makefile
+MAKEFILES = Makefile gnu_makefile $(OS)_makefile
 
 CC = gcc
 
-CPPFLAGS = -DCONFIGLESS $(BUILD_FLAGS) $(OS_CPPFLAGS) $(PROC_CPPFLAGS) \
+CPPFLAGS = $(BUILD_FLAGS) \
 	-I $(SOURCE_DIR)/$(PROC) \
 	-I $(SOURCE_DIR)/$(OS) \
 	-I $(SOURCE_DIR)/generic \
 	-I $(SOURCE_DIR)/smath
-
-# -fwritable-strings is a temporary work-around until I have a static
-# initial symbol table.
 
 # Unused warning options and why:
 
@@ -28,10 +26,8 @@ CPPFLAGS = -DCONFIGLESS $(BUILD_FLAGS) $(OS_CPPFLAGS) $(PROC_CPPFLAGS) \
 # -Wstrict-prototypes - Complains about arg-less function pointer like:
 #                       int (*func)(), which I think are legal.
 
-CFLAGS = -O -MMD -Wall -Werror -Wmissing-prototypes -Wwrite-strings \
-		 -Wnested-externs -Wpointer-arith -fwritable-strings $(OS_CFLAGS)
-
-VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins:$(SOURCE_DIR)/library
+CFLAGS = -O3 -MMD -Wall -Werror -Wmissing-prototypes -Wwrite-strings \
+		 -Wnested-externs -Wpointer-arith
 
 MAIN_SOURCE = topmain.c
 
@@ -51,7 +47,8 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	pckgmake.c rinfo.c sig.c symtab.c \
 	varproc.c vprintf.c wdisp.c wintcode.c \
 	winter.c security.c nopckg.c \
-	ieeemath.c pimain.c new_alspi.c
+	ieeemath.c pimain.c new_alspi.c engine.c \
+	relocate_code.c cexception.c cassert.c
 
 LIB_SOURCE = $(GENERIC_SOURCE) $(PROC_SOURCE) $(OS_SOURCE)
 
@@ -68,49 +65,66 @@ BUILTINS = blt_frez.pro  blt_std.pro   filepath.pro   ra_basis.pro \
    blt_flgs.pro   blt_shlr.pro   debugger.pro  module.pro \
    objs_run.pro
 
+# OS and Proccessor definitions and rules
+
+include $(SOURCE_DIR)/$(OS)/$(OS)_makefile
+include $(SOURCE_DIR)/$(PROC)/$(PROC)_makefile
+
+# Generic rules
+
+$(MAIN_OBJECTS) : $(MAKEFILES)
+
+$(LIB_OBJECTS) : $(MAKEFILES)
+
 binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro
 
 all : default testrun
 
-alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a
+alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a $(MAKEFILES)
 	$(CC) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LIBS)
 
-alspro :  alsdir alspro_b $(BUILTINS)
+alspro :  alsdir alspro_b $(BUILTINS) $(MAKEFILES)
 	./alspro_b -q -b -obp \
 	-g 'save_image(alspro,[select_lib(builtins,[debugger])])'
 
 ifndef NO_STATIC_LIB
-libalspro.a : alsdir $(LIB_OBJECTS)
-	$(OS_AR) libalspro.a $(LIB_OBJECTS)
+libalspro.a : alsdir $(STATIC_OBJECTS) $(LIB_OBJECTS) $(MAKEFILES)
+	$(OS_AR) libalspro.a $(STATIC_OBJECTS) $(LIB_OBJECTS)
 	$(OS_RANLIB) libalspro.a
 endif
 
-libalspro.$(OS_SL_EXT) : alsdir $(LIB_OBJECTS)
-	$(OS_SL_LINK) -o libalspro.$(OS_SL_EXT) $(LIB_OBJECTS) $(SL_LINK_LIBS)
+libalspro.$(OS_SL_EXT) : alspro_b alsdir  $(SHARED_OBJECTS) $(LIB_OBJECTS) $(MAKEFILES)
+	$(OS_SL_LINK) -o libalspro.$(OS_SL_EXT) $(SHARED_OBJECTS) \
+	    $(LIB_OBJECTS) $(SL_LINK_LIBS)
+	./alspro_b -q -b -obp -g "attach_image('libalspro.$(OS_SL_EXT)')"
+
+so_test : libalspro.$(OS_SL_EXT)
+	$(CC) -o so_test $(MAIN_OBJECTS) libalspro.so $(LIB)
 
 alsdir : alsdir/builtins alsdir/library
 
-alsdir/builtins : $(SOURCE_DIR)/builtins
+alsdir/builtins : $(SOURCE_DIR)/builtins $(MAKEFILES)
 	mkdir -p alsdir/builtins
 	rm -f alsdir/builtins/*.pro
 	cd alsdir/builtins ; ln -s ../../$(SOURCE_DIR)/builtins/*.pro .
 
-alsdir/library : $(SOURCE_DIR)/library
+alsdir/library : $(SOURCE_DIR)/library $(MAKEFILES)
 	mkdir -p alsdir/library
 	rm -f alsdir/library/*.pro alsdir/library/*.alb
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.pro .
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
 
-alsdir/shared : ../tcltk_interface  ../als_dev/alsdev
+alsdir/shared : ../tcltk_package  ../als_dev/alsdev
 	mkdir -p alsdir/shared
 	rm -f alsdir/shared/*.pro alsdir/shared/*.psl alsdir/shared/*.tcl
-	cd alsdir/shared ; ln -s ../../../tcltk_interface/$(SUBOS)/tclintf.psl .
+	cd alsdir/shared ; ln -s ../../../tcltk_package/$(SUBOS)/tclintf.psl .
+	cd alsdir/shared ; ln -s ../../../tcltk_package/$(SUBOS)/tcltk.pro .
 	cd alsdir/shared ; ln -s ../../../als_dev/alsdev/*.tcl .
-
+				 
 alsdir/images : ../als_dev/alsdev
 	mkdir -p alsdir/images
 	rm -f alsdir/images/*.*
-	cd alsdir/images ; ln -s ../../../als_dev/alsdev/images/*.gif . 
+	cd alsdir/images ; ln -s ../../../als_dev/alsdev/images/*.gif .
 
 TEST_DIR = $(SOURCE_DIR)/tests
 
@@ -125,15 +139,14 @@ test_suite: alspro
 iso_test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
 
-
-ALSDEVFILES = blt_dvsh.pro db_srctr.pro projects.pro
-ALSDEVLIBS=listutl1,miscterm,msc_ioin,objects,strctutl,strings,tcl_sppt,tk_alslib,typecomp
-ALSDEVLIBPS =listutl1.pro miscterm.pro msc_ioin.pro objects.pro strctutl.pro strings.pro \
+ALSDEVFILES = blt_dvsh.pro dbg_class.pro projects.pro
+ALSDEVLIBS=listutl1,miscterm,msc_ioin,strctutl,strings,tcl_sppt,tk_alslib,typecomp
+ALSDEVLIBPS =listutl1.pro miscterm.pro msc_ioin.pro strctutl.pro strings.pro \
 			tcl_sppt.pro tk_alslib.pro typecomp.pro
-alsdev :  alsdir alspro_b alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS)
+alsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS)
 	./alspro_b -q -b -obp -no_dot_alspro \
 	-g 'save_image(alsdev,[start_goal((builtins:start_alsdev)), \
-	select_lib(builtins, [debugger,blt_dvsh,projects]), \
+	select_lib(builtins, [debugger,blt_dvsh,dbg_class,projects]), \
 	select_lib(library,[$(ALSDEVLIBS)])])'
 
 clean :

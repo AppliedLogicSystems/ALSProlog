@@ -106,7 +106,11 @@ void  signal_handler(signum)
     int   signum;
 #endif 		/* defined(HAVE_UCONTEXT_H) */
 {
-    if (wm_regidx != 0) {
+#if 0
+    //if (wm_regidx != 0)
+#endif
+    if (current_engine.reg_stack_top != current_engine.reg_stack_base)
+    {
 #if !defined(arch_i386) && !defined(Portable)
 	if (wm_in_Prolog) {
 #ifdef arch_m88k
@@ -209,7 +213,11 @@ void  signal_handler(signum)
 void
 reissue_cntrlc()
 {
-    if (wm_regidx != 0) {
+#if 0
+    //if (wm_regidx != 0)
+#endif
+    if (current_engine.reg_stack_top != current_engine.reg_stack_base)
+    {
 	wm_safety = -1;
 	wm_interrupt_caught = ALSSIG_REISS_CNTRLC;
     }

@@ -29,9 +29,6 @@ export save_image/1.
 
 export pckg_init/0.
 
-export save_package/5.
-export save_base_package/1.
-
 /*!--------------------------------------------------------------*
  |	save_image/2
  |	save_image(ImageName, Options)
@@ -69,6 +66,10 @@ save_image(ImageName, Options) :-
 	(dmember(preserve(all), Options) -> DevelopFlag=develop ; DevelopFlag=production),
 	attach_image(OptionedName, DevelopFlag).
 	
+
+attach_image(ImageName) :-
+	attach_image(ImageName, []).
+
 attach_image(ImageName, DevelopFlag)
 	:-
 		%% Save initial state of '$start' and '$initialize'
@@ -137,12 +138,17 @@ attach_image0(NewImageName, DevelopFlag)
 		abolish(file_clause_group,2),
 		dynamic(file_clause_group/2),
 
+/*
 		(bagof( consulted(A,B,C,D,E), 
 				consulted(A,B,C,D,E), 
 				SDList3) 
 	  	-> true ; SDList3 = []),
 		abolish(consulted,5),
 		dynamic(consulted/5)
+*/
+		(get_primary_manager(ALSMgr),
+			set_primary_manager(0) ; 
+			ALSMgr = nil)
 		;
 		true   	%% DevelopFlag = develop
 	),
@@ -163,6 +169,7 @@ attach_image0(NewImageName, DevelopFlag)
 
 %	(ADIP=no_path -> true ; assert(alsdev_ini_path(ADIP))),
 %	(CLInfo=no_info -> true ; assert(save_clinfo(CLInfo))),
+	(ALSMgr \= nil -> set_primary_manager(ALSMgr) ; true),
 	assert(command_line(CmdLine)).
 
 save_image_develop(NewImageName)
@@ -275,81 +282,6 @@ pckg_init
 	initialize_global_variables,
 	sio_pckg_init.
 
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%% MAC OS RESOURCE PACKAGING %%%%%%%%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-/*!--------------------------------------------------------------*
- |	save_package/5.
- |	save_package(NewName, OBPList, LoadList, Init, Start)
- |	save_package(+,+,+,+,+)
- |  
- |	- create Mac applications with parameters
- |
- |  Creates a new application or MPW Tool which contains all
- |  the OBP files in OBPList.  When the new application is 
- |  launched it will load the files in LoadList and then
- |  call Init and Start.
- *-------------------------------------------------------------------*/
-
-save_package(NewName, OBPList, LoadList, Init, Start) :-
-	save_app_with_obp(NewName, OBPList, LoadList, Init, Start).
-
-base_obp_list([
-    ':alsdir:builtins:blt_als.obp',
-    ':alsdir:builtins:blt_atom.obp',
-    ':alsdir:builtins:blt_brk.obp',
-    ':alsdir:builtins:blt_cslt.obp',
-    ':alsdir:builtins:blt_ctl.obp',
-    ':alsdir:builtins:blt_db.obp',
-    ':alsdir:builtins:blt_evt.obp',
-    ':alsdir:builtins:blt_flgs.obp',
-    ':alsdir:builtins:blt_frez.obp',
-    ':alsdir:builtins:blt_io.obp',
-    ':alsdir:builtins:blt_msg.obp',
-    ':alsdir:builtins:blt_misc.obp',
-    ':alsdir:builtins:blt_pckg.obp',
-    ':alsdir:builtins:blt_shl.obp',
-    ':alsdir:builtins:blt_shlr.obp',
-    ':alsdir:builtins:blt_std.obp',
-    ':alsdir:builtins:blt_stk.obp',
-    ':alsdir:builtins:blt_sys.obp',
-    ':alsdir:builtins:blt_term.obp',
-    ':alsdir:builtins:builtins.obp',
-    ':alsdir:builtins:cutils.obp',
-    ':alsdir:builtins:dcgs.obp',
-    ':alsdir:builtins:filepath.obp',
-    ':alsdir:builtins:fsmac.obp',
-    ':alsdir:builtins:fs_cmn.obp',
-    ':alsdir:builtins:simplio.obp',
-    ':alsdir:builtins:sio.obp',
-    ':alsdir:builtins:sio_d10.obp',
-    ':alsdir:builtins:sio_rt.obp',
-    ':alsdir:builtins:sio_wt.obp',
-    ':alsdir:builtins:xconsult.obp',  
-    ':alsdir:builtins:debugger.obp'
-  ]).
-
-/*!--------------------------------------------------------------*
- |	save_base_package/1.
- |	save_base_package(NewName)
- |	save_base_package(+)
- |	
- |	- copy Mac application with builtins in resources
- |
- |	Creates a copy of the application with all the builtins
- |  stored as resources.
- *---------------------------------------------------------------*/
-save_base_package(NewName) :-
-	add_lib_qual(['debugger'],builtins,QualFilesList),
-	force_libload_all(QualFilesList),
-	base_obp_list(BList),
-	save_app_with_obp(NewName, BList, [], '', '').
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%% END - MAC OS RESOURCE PACKAGING %%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*---------------------------------------------------------------*
  | mics_cmd_fmt/1

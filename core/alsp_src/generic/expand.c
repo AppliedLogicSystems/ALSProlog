@@ -269,20 +269,11 @@ parser_action(nvars, t)
  *
  */
 
-#ifdef NO_FAR_DATA
-static long *vtable;
-void init_expand_data(void)
-{
-    vtable = malloc(4096*sizeof(*vtable));
-    if (vtable == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
-}
-#else
 #ifdef KERNAL
 static long vtable[512];
 #else
 static long vtable[4096];
 #endif /* KERNAL */
-#endif
 static int vtp;
 
 

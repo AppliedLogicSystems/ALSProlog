@@ -83,39 +83,17 @@ static unsigned long *marks;
 
 #endif /* MTP_CONST */
 
+/* Reverse pointers are tagged by having their most significant bit inverted.
+   In order for this to work correctly, heap memory must completely reside in
+   either the lower or upper half of address space.
+ */
 
-#ifdef PARAMREVBIT
-#define ADDR_MASK	0x7FFFFFFF
-
-#define REVERSEIT(targ, v)	((((targ) | ((v) & MTP_TAGMASK)) & ADDR_MASK) | ReversedHiBit);
-#define ISNORMAL(v)		(((v) & ~ADDR_MASK) ^ ReversedHiBit)
-#define UNREVERSEIT(v)		(((v) & ADDR_MASK) | AddressHiBit)
-
-#else
-
-#if !defined(AmigaUNIX)
-#define LOWMEMORY 1
-#endif
-
-
-#ifdef LOWMEMORY
-#define REVERSEIT(targ,v) (((targ) | ((v)&MTP_TAGMASK)) | REVBIT)
-#define ISNORMAL(v)	   (!(v & REVBIT))
-#define UNREVERSEIT(v)	((v) & ~REVBIT)
-
-
-#else  /* not-LOWMEMORY */
-    /*-------------------------------------------------------*
-     | If the heap and the environment are in the high memory,
-     | i.e the first bit of an address is always one,
-     | Following macros should be used. -- Ilyas 10/25/89
-     *-------------------------------------------------------*/
-#define REVERSEIT(targ,v) ((targ | (v&MTP_TAGMASK)) & ~REVBIT)
-#define ISNORMAL(v)	      (v <= 0)
-#define UNREVERSEIT(v)	  (v | REVBIT)
-
-#endif /* LOWMEMORY */
-#endif /* PARAMREVBIT */
+#define HIBIT_MASK 0x80000000
+#define ADDR_MASK  0x7FFFFFFF
+#define REVERSEIT(targ, v) (~((targ) | ADDR_MASK) | ((targ) & ADDR_MASK) | ((v) & MTP_TAGMASK))
+#define ISNORMAL(ptr, v) ((((unsigned long)ptr) & HIBIT_MASK) == ((v) & HIBIT_MASK))
+/*#define ISNORMAL(ptr, v) (!(~(((unsigned long)ptr) | ADDR_MASK) & v))*/
+#define UNREVERSEIT(v) (~((v) | ADDR_MASK) | ((v) & ADDR_MASK))
 
 #define ISNORMALUIA(v)	(!(v & REVBIT))
 
@@ -189,7 +167,7 @@ gc()
 
 	/* For demos and hardware-key protected versions, check copy protection. */
     check_security();
-    
+
     /*---------------------------------------------------------------*
      | Force certain external variables to be biased for gc purposes.
      | These will be unbiased on exit from gc.
@@ -661,9 +639,14 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 	}
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 
-
 	if ((wm_TR - wm_H) < wm_normal)
-		heap_overflow();
+	  {
+	    printf("expanding heap from: %ld cells\nto: %ld cells\n",
+		   current_engine.heap_size, current_engine.heap_size+0x40000);
+
+	    if (!size_prolog_engine(&current_engine, current_engine.stack_size,
+			       current_engine.heap_size+0x40000)) heap_overflow();
+	  }
 
 #ifdef undef 
 		/**** WARNING!!!!!
@@ -814,7 +797,7 @@ rev_update(loc, targ)
     long  v, tags, *ptr, temp;
 
     v = val_at(loc);					/* get initial value out of loc */
-    for (;;) {
+    for (ptr = loc;;) {
 		tags = v & MTP_TAGMASK;			/* get the tags                 */
 #ifndef MTP_CONST
 		if (ISCONST(tags) && !(ISUIA(tags))) {
@@ -830,7 +813,8 @@ rev_update(loc, targ)
 		}
 #endif /* MTP_CONST */
 		else {
-	    	if (ISNORMAL(v))
+		  /* if (ISNORMAL(v)) */
+		  if (ISNORMAL(ptr, v))
 				break;					/* break if not reversed        */
 	    	temp = UNREVERSEIT(v);		/* strip reverse bits and tags  */
 	    	ptr = TOPTR(temp);			/* off of v and put in ptr      */
@@ -853,7 +837,11 @@ init_marks()
 {
     register unsigned long *m;
 
-    marks = (unsigned long *) prs_area;
+#if 0
+    //marks = (unsigned long *) prs_area;
+#endif
+
+    marks = (unsigned long *) current_engine.mark_area;
     m = marks + ((wm_H - wm_heapbase) / 32) + 1;
 
     while (m > marks) {

@@ -169,6 +169,7 @@ clauses(M,P,A,DBRef)
 	procedures(M,P,A,First,0),
 	clauses(First,DBRef).
 
+
 /*------------------------------------------------------------------*
  * make_det_gv/1
  *
@@ -404,12 +405,10 @@ heap_status(Hleft) :-
 cslt_lib_ld(FileName, FilePathPro,FilePathObp)
 	:-
 	get_fcg(FilePathPro,CG),
-	load_canon_reconsult(1,CG),
+	(clause(file_clause_groups(true),_) ->
+		massively_abolish_clausegroup(CG) ; true ),
 	push_clausegroup(CG),
-	get_reconsult_flag(OldRFlag),
-	set_reconsult_flag(1),
 	cslt_blts_ld(FileName, FilePathPro,FilePathObp),
-	set_reconsult_flag(OldRFlag),
 	pop_clausegroup(_).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -438,6 +437,7 @@ lib_load(FileName, Module, P,A, Module,Call)
 		; load(FileName,1,_,obp,_,_)
 		; existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) ),
 	!,
+	record_lib_load(FileName),
 	Module:call(Call).
 
 lib_load(FileName, Module, P,A, Module,Call)
@@ -456,6 +456,7 @@ lib_load(FileName, Module, P,A, Module,Call)
 		existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) 
 	),
 	!,
+	record_lib_load(FileName),
 	Module:call(Call).
 
 /*	--- old code prior to cslt_lib_ld:
@@ -473,6 +474,7 @@ lib_load(FileName, Module, P,A, Module,Call)
 export force_libload_all/0.
 export force_libload_all/1.
 export force_libload_all/2.
+export force_libload_all_lib/2.
 
 force_libload_all 
 	:-
@@ -484,6 +486,12 @@ force_libload_all(Files)
 	:-
 	sys_searchdir(ALSDIR),
 	force_libload_all(Files,ALSDIR).
+
+force_libload_all_lib(Files,Library) 
+	:-
+	sys_searchdir(ALSDIR),
+	extendPath(ALSDIR,Library,LibPath),
+	force_libload_all(Files,LibPath).
 
 force_libload_all([],_).
 force_libload_all([File|Files],DirDC) 

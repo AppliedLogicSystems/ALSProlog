@@ -15,6 +15,7 @@
 #define __parser_h_
 
 typedef struct tkentry_ {
+	unsigned short length;
 	unsigned char *tkname;	/* pointer to string which is name of token */
 	unsigned short unop;	/* unary operator precedence and assoc */
 	unsigned short binop;	/* binary op precedence and assoc */
@@ -29,7 +30,7 @@ extern tkentry *toktable;	/* note: although I am exporting the toktable,
 extern int errcount;
 
 #define TOKNAME(t)  (toktable[(t)].tkname)
-#define TOKNAMELEN(t) (tknamelen(t))
+#define TOKNAMELEN(t) (toktable[(t)].length)
 #define TOKUNOP(t)  (toktable[(t)].unop)
 #define TOKBINOP(t) (toktable[(t)].binop)
 
@@ -98,7 +99,6 @@ extern char tokstr[];		/* defined in lexan.c */
 extern	void	symtab_init	PARAMS(( void ));
 extern	long	find_token	PARAMS(( const UCHAR * ));
 extern	long	probe_token	PARAMS(( UCHAR * ));
-extern	int	tknamelen	PARAMS(( long ));
 extern	int	tok_table_size	PARAMS((void));
 
 /* parser.c */

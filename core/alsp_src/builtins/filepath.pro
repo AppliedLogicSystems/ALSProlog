@@ -32,11 +32,17 @@ module builtins.
 
 export file_extension/3.
 export path_elements/2.
+export is_absolute_path/1.
+export is_absolute_path/2.
+export path_type/2.
+export path_type/3.
 export split_path/2.
 export split_path/3.
 export join_path/2.
 export join_path/3.
 export tilda_expand/2.
+export directory_self/2.
+export directory_self/3.
 
 file_extension(Name, Ext, FullName) :-
 	nonvar(FullName),
@@ -58,6 +64,47 @@ path_elements(Path, Elements) :-
 	join_path(Elements, Path).
 path_elements(Path, Elements) :-
 	split_path(Path, Elements).
+
+
+/*
+is_absolute_path(Path) :-
+	not(path_type(Path, relative)).
+*/
+is_absolute_path(Path) :-
+	path_type(Path, PathType),
+	PathType \= relative.
+
+path_type(Path, Type) :-
+	sys_env(OS, _, _),
+	!,
+	path_type(OS, Path, Type).
+
+path_type(unix, Path, Type) :- unix_path_type(Path, Type).
+path_type(macos, Path, Type) :- macos_path_type(Path, Type).
+path_type(mswin32, Path, Type) :- win32_path_type(Path, Type).
+path_type(win32, Path, Type) :- win32_path_type(Path, Type).
+
+unix_path_type(Path, absolute) :-
+	sub_atom(Path, 0, 1, _, '/'),
+	!.
+unix_path_type(Path, relative).
+
+macos_path_type(Path, absolute) :-
+	once(sub_atom(Path, Before, 1, _, ':')),
+	Before > 0,
+	!.
+macos_path_type(Path, relative).
+
+win32_path_type(Path, absolute) :-
+	(find_sub(Path, 1, _, [':/', ':\\'])
+	; find_sub(Path, 0, _, ['//', '\\\\', '/\\', '\\/'])),
+	!.
+win32_path_type(Path, volume_relative) :-
+	(sub_atom(Path, 1, 1, _, ':')
+	; find_sub(Path, 0, _, ['/', '\\'])),
+	!.
+win32_path_type(Path, relative).
+
 
 split_path(Path, List) :-
 	sys_env(OS, _, _),
@@ -298,6 +345,17 @@ tilda_expand(TildaPath, Path) :-
 	(Home = '' -> Path = TildaPath ; join_path([Home | Rest], Path)).
 tilda_expand(Path, Path).
 
+directory_self(Self) :-
+	sys_env(OS, _, _),
+	!,
+	directory_self(OS, Self).
+
+directory_self(unix, '.').
+directory_self(macos, ':').
+directory_self(mswin32, '.').
+directory_self(win32, '.').
+
+
 % BELOW IS OBSOLETE 
 
 
@@ -328,9 +386,6 @@ identify_case(dos).
 %%				has any meaning).
 %%	path_separator/1	-- character which separates paths such as 
 %%				are found on the PATH environment variable.
-%%	directory_self/1	-- character which stands for the current
-%%				directory.
-%%
 
 :- 
 	compiletime,
@@ -346,8 +401,7 @@ identify_case(dos).
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 directory_separator(DS),
-					 sub_atom(Path,1,_,DS), !) ),  
-		addclause(builtins,directory_self('.'))
+					 sub_atom(Path,1,_,DS), !) )
 		
     ; OS = mswin32, !,		%% Microsoft Win32
 		addclause(builtins,file_separator('.')),
@@ -360,8 +414,7 @@ identify_case(dos).
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 directory_separator(DS),
-					 sub_atom(Path,1,_,DS), !) ),   
-		addclause(builtins,directory_self('.'))
+					 sub_atom(Path,1,_,DS), !) )
 
 	; OS = macos, !,	%% Mac
 		addclause(builtins,file_separator('.')),
@@ -372,8 +425,7 @@ identify_case(dos).
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 sub_atom(Path,1,1,C1),    
-					 C1 \= ':',atom_split(Path,':',_,_),!) ),
-		addclause(builtins,directory_self(':'))
+					 C1 \= ':',atom_split(Path,':',_,_),!) )
 /*
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
@@ -389,8 +441,7 @@ identify_case(dos).
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 directory_separator(DS),
-					 sub_atom(Path,1,_,DS), !) ),    
-		addclause(builtins,directory_self('.'))
+					 sub_atom(Path,1,_,DS), !) )
 
 	; OS = vms, !,		%% VMS -- FIXME: not correct
 		addclause(builtins,file_separator('.')),
@@ -400,8 +451,7 @@ identify_case(dos).
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 directory_separator(DS),
-					 sub_atom(Path,1,_,DS), !) ),   
-		addclause(builtins,directory_self('.'))
+					 sub_atom(Path,1,_,DS), !) )
 	; true ).
 
 %%

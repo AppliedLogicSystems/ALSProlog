@@ -100,17 +100,7 @@ typedef struct {
     dbl_or_twolongs val;
 } SymTblEntry;
 
-#ifdef NO_FAR_DATA
-SymTblEntry *symtable;
-
-void init_cinterf_data(void)
-{
-    symtable = malloc(SYMTBLSZ*sizeof(*symtable));
-    if (symtable == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
-}
-#else
 SymTblEntry symtable[SYMTBLSZ];
-#endif
 
 #define SYMNAME(i)  symtable[(i)].name
 #define SYMTYPE(i)  symtable[(i)].type

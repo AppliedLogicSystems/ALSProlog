@@ -17,6 +17,10 @@
  *===========================================================================*/
 module builtins.
 
+export date/1.
+export time/1.
+export datetime/2.
+export gm_datetime/2.
 export date_less/2.
 export date_pattern/4.
 export set_date_pattern/1.
@@ -32,6 +36,71 @@ export filename_equal/2.
 
 export getDirEntries/3.
 export must_exist_file/1.
+
+/*!--------------------------------------------------------------
+ |	date/1
+ |	date(Date)
+ |	date(-)
+ |
+ |	 -	gets the current local date
+ |
+ |	Unifies the input with the current date which is represented
+ |	by a term of the form ??/??/??.  The exact pattern (e.g.,
+ |	YY/MM/DD or MM/DD/YY or ....) is determined by date_pattern/4.
+ *!--------------------------------------------------------------*/
+date(Date)
+	:-
+	'$time'(_,_,_,DD,Month,YY,_,_,_,0),
+	MM is Month + 1,
+	date_pattern(YY,MM,DD,Date).
+
+/*!--------------------------------------------------------------
+ |	time/1
+ |	time(HH:MM:SS)
+ |	time(-)
+ |
+ |	 - gets the current local time
+ |
+ |	Unifies the input with the current time which is represented
+ |	by a term of the form HH:MM:SS.
+ *!--------------------------------------------------------------*/
+time(HH:MM:SS)
+	:-
+	'$time'(SS,MM,HH,_,_,_,_,_,_,0).
+
+/*!--------------------------------------------------------------
+ |	datetime/2
+ |	datetime(Date, Time)
+ |	datetime(-, -)
+ |
+ |	 -	gets the current local date and time from the same 
+ |		call to the OS clock
+ |
+ |	Unifies the input with the current date which is represented
+ |	by a term of the form ??/??/??.  The exact pattern (e.g.,
+ |	YY/MM/DD or MM/DD/YY or ....) is determined by date_pattern/4.
+ *!--------------------------------------------------------------*/
+datetime(Date, HH:MM:SS)
+	:-
+	'$time'(SS,MM,HH,DD,Month,YY,_,_,_,0),
+	Mos is Month + 1,
+	date_pattern(YY,Mos,DD,Date).
+
+/*!--------------------------------------------------------------
+ |	gm_datetime/2
+ |	gm_datetime(Date, Time)
+ |	gm_datetime(-, -)
+ |
+ |	 -	gets the current Greenwich UTC date and time from the same 
+ |		call to the OS clock
+ |
+ |	Formats as for datetime/2
+ *!--------------------------------------------------------------*/
+gm_datetime(Date, HH:MM:SS)
+	:-
+	'$time'(SS,MM,HH,DD,Month,YY,_,_,_,1),
+	Mos is Month + 1,
+	date_pattern(YY,Mos,DD,Date).
 
 /*!--------------------------------------------------------------
  |	date_less/2

@@ -318,6 +318,9 @@ check_rt_option(singletons(Vars,Names), Stream, OptStruct, VT,
 check_rt_option(debugging, Stream, OptStruct, VT, G, G) :-
 	!,
 	mangle(1,OptStruct,pvt([])).
+		%% Companion to the above:
+check_rt_option(no_debugging, Stream, OptStruct, VT, G, G) :-
+	!.
 check_rt_option(blocking(NewBlocking), Stream, OptStruct, VT, G,OG) :-
 	!,
 	stream_blocking(Stream,OldBlocking),
@@ -408,7 +411,25 @@ read_term(Stream,Term,ErrMech,VT,FinalToks)
 	tp_get_token_list(Stream,[Tok1|TokRest]),
 	catch(	rt_readclause(Tok1,TokRest,VT,Term, FinalToks),
 		syntax_error(Token,Message),
-		rt_err(ErrMech,Token,Message,[Tok1|TokRest],Stream,VT,Term)).
+		init_rt_err(ErrMech,Token,Message,[Tok1|TokRest],Stream,VT,Term)).
+
+/*-----------------------------------------------------------------*
+ |	rt_err/7
+ |	rt_err(ErrMech,Token,Message,Tokens,Stream,VT,Term)
+ |	rt_err(+,+,+,+,+,+,+)
+ *-----------------------------------------------------------------*/
+
+	%% ALS IDE case:
+init_rt_err(ErrMech,Token,Message,Tokens,Stream,VT,Term)
+	:-
+	builtins:clause(alsdev_running,_),
+	!,
+ 	ide_rt_err(ErrMech,Token,Message,Tokens,Stream,VT,Term).
+
+	%% TTY shell case:
+init_rt_err(ErrMech,Token,Message,Tokens,Stream,VT,Term)
+	:-
+ 	rt_err(ErrMech,Token,Message,Tokens,Stream,VT,Term).
 
 /*-----------------------------------------------------------------*
  |	rt_err/7
@@ -438,7 +459,8 @@ rt_err(error,Token,ErrorMessage,Tokens,Stream,VT,Term) :-
 	builtins:setPrologError(error(syntax_error,[FI,Info])),
 	forcePrologError.
 
-rt_err(throw(FF),Token,ErrorMessage,Tokens,Stream,VT,Term) :-
+rt_err(throw(FF),Token,ErrorMessage,Tokens,Stream,VT,Term) 
+	:-
 	inc_error_count(Stream),
 	frame_info(3,FI),
 	rt_err_info(Token,ErrorMessage,Tokens,Stream, Info),
@@ -446,10 +468,65 @@ rt_err(throw(FF),Token,ErrorMessage,Tokens,Stream,VT,Term) :-
 	Rock =.. [FF,[FI,Info]],
 	throw(Rock).
 
+/*-----------------------------------------------------------------*
+ |	ide_rt_err/7
+ |	ide_rt_err(ErrMech,Token,Message,Tokens,Stream,VT,Term)
+ |	ide_rt_err(+,+,+,+,+,+,+)
+ *-----------------------------------------------------------------*/
+ide_rt_err(quiet,Token,ErrorMessage,Tokens,Stream,VT,Term)
+	:-
+	inc_error_count(Stream),
+	!,
+	fail.
+
+ide_rt_err(fail,Token,ErrorMessage,Tokens,Stream,VT,Term) 
+	:-
+	inc_error_count(Stream),
+	alsdev:ide_rt_err_report(Token,ErrorMessage,Tokens,Stream),
+	!,
+	fail.
+
+ide_rt_err(dec10,Token,ErrorMessage,Tokens,Stream,VT,Term) :-
+	inc_error_count(Stream),
+	rt_err_info(Token,ErrorMessage,Tokens,Stream, Info),
+	ide_prolog_system_error(Info, _),
+	!,
+	mangle(1,VT,[]),	/* reset variable table to empty list */
+	read_term(Stream,Term,dec10,VT).
+
+ide_rt_err(error,Token,ErrorMessage,Tokens,Stream,VT,Term) 
+	:-
+	inc_error_count(Stream),
+	frame_info(3,FI),
+	rt_err_info(Token,ErrorMessage,Tokens,Stream, Info),
+	!,
+	builtins:setPrologError(error(syntax_error,[FI,Info])),
+	forcePrologError.
+ide_rt_err(throw(FF),Token,ErrorMessage,Tokens,Stream,VT,Term) 
+	:-
+	inc_error_count(Stream),
+	frame_info(3,FI),
+	rt_err_info(Token,ErrorMessage,Tokens,Stream, Info),
+	!,
+	Rock =.. [FF,[FI,Info]],
+	throw(Rock).
+
+/*-----------------------------------------------------------------*
+ |	rt_err_print/4
+ |	rt_err_print(Token,ErrorMessage,Tokens,Stream)
+ |	rt_err_print(+,+,+,+)
+ |
+ |	- for the TTY shell
+ *-----------------------------------------------------------------*/
 rt_err_print(Token,ErrorMessage,Tokens,Stream) :-
 	rt_err_info(Token,ErrorMessage,Tokens,Stream, Info),
 	prolog_system_error(Info, []).
 
+/*-----------------------------------------------------------------*
+ |	rt_err_info/5
+ |	rt_err_info(Token,ErrorMessage,Tokens,Stream, SyntaxStruct)
+ |	rt_err_info(+,+,+,+, -)
+ *-----------------------------------------------------------------*/
 rt_err_info(Token,ErrorMessage,Tokens,Stream, SyntaxStruct) :-
 %	SyntaxStruct = syntax(0,ErrorMessage,LineNumber,Stream),
 	SyntaxStruct = syntax(0,0,0,0,ErrorMessage,LineNumber,Stream),
@@ -471,8 +548,6 @@ rt_err_info(Token,ErrorMessage,Tokens,Stream, SyntaxStruct) :-
 	mangle(2,SyntaxStruct,StartPos),
 	mangle(3,SyntaxStruct,CaratPos),
 	mangle(4,SyntaxStruct,Pos3).
-
-
 
 %%
 %% rt_isolate_error(L,E,OL1,OL2,I)

@@ -37,7 +37,6 @@
 #define HAVE_STDLIB_H	1
 #define HAVE_STRING_H	1
 #define HAVE_SYS_SELECT_H	1
-#define HAVE_UCONTEXT_H	1
 #define HAVE_DLFCN_H	1
 #define HAVE_LIBDL	1
 #define HAVE_LIBPW	1
@@ -58,10 +57,7 @@
 #define HAVE_RE_COMP	1
 #define HAVE_REGCMP	1
 #define HAVE_RINT	1
-#define HAVE_SIGACTION	1
-#define HAVE_SIGALTSTACK	1
 #define HAVE_SIGSTACK	1
-#define HAVE_SIGVEC	1
 #define HAVE_SRANDOM	1
 #define HAVE_WAIT3	1
 

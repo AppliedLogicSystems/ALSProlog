@@ -60,7 +60,7 @@ resource 'BNDL' (128) {
 
 resource 'open' (128)
 {
-	'ALS4', { }
+	'ALS4', {'TEXT', 'ALSP'}
 };
 
 /* ftApplicationName should be defined in Types.r, but it isn't.

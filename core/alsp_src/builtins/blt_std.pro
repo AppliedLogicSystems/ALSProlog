@@ -33,6 +33,14 @@ listing(X) :-
 	fail.
 listing(X).  
 
+export xlisting/1.
+xlisting(X) :-
+	clauses_for_listing(X,DBref),
+	'$source'(DBref, Structure,show_pp),
+	write_out(Structure),
+	fail.
+xlisting(X).  
+
 %%%%------ listing support predicates ----------
 
 clauses_for_listing(M:P/A,DBref) :-
@@ -76,6 +84,7 @@ showmod(M).
 
 /*
  * noshowmod gives the modules which we don't wish to see with listing.
+ *		-- NEEDS TO BE COMBINED/COORDINATED WITH DEBUGGER.PRO
  */
 
 noshowmod(builtins).
@@ -88,7 +97,7 @@ noshowmod(debugger).
 noshowmod(rel_arith).
 noshowmod(pgm_info).
 noshowmod(sys_maint).
-noshowmod(objects).
+%noshowmod(object_classes).
 noshowmod(utilities).
 noshowmod(windows).
 noshowmod(tcltk).

@@ -5,10 +5,95 @@
  |		Creation and manipulation of rectangular tables --
  |			Interfaces to tkTable
  |
+ | External API:
+ | ------------
+ |
+ |	load_table_package/0.
+ |			load_table_package :- load_table_package(tcli).
+ |	load_table_package/1.
+ |	load_table_package(Interp)
+ |	load_table_package(+)
+ |		-- loads the TkTable package; checks whether already loaded, etc.
+ |
+ |	create_table/2
+ |	create_table(TableName, Options)
+ |	create_table(+, +)
+ |
+ |		create_table(TableName, Options) 
+ |			:- create_table(TableName, Options, tcli).
+ |
+ |	create_table/3
+ |	create_table(TableName, Options, Interp)
+ |	create_table(+, +, +)
+ |
+ |		create_table(TableName, Options, Interp)
+ |			:- create_table_r(TableName, Options, Interp, _).
+ |
+ |	create_table_r/3
+ |	create_table_r(TableName, Options, R)
+ |	create_table_r(+, +, -)
+ |
+ |		create_table_r(TableName, Options, R)
+ |			:- create_table_r(TableName, Options, tcli, R).
+ |
+ |	create_table_r/4
+ |	create_table_r(TableName, Options, Interp, R)
+ |	create_table_r(+, +, +, -)
+ |
+ |		In Interp: 
+ |			- creates a table named TableName, with the following
+ |			  options (passed to the TkTable package):
+ |		numcols,		colheadings, 	titlerows,	roworigin,	
+ |		numrows, 		rowheadings,	titlecols,	colorigin,	
+ |		title,			tablefont,		foreground,	background, 
+ |		selectmode,		rowstretch,		colstretch,	flashmode,	
+ |
+ |			- returns TableArrayName in R
+ |
+ |----------------------
+ |	table_tag_region/3.
+ |	table_tag_region(TableName, TagName, Region)
+ |	table_tag_region(+, +, +)
+ |
+ |			table_tag_region(TableName, TagName, Region)
+ |				:- table_tag_region(TableName, TagName, Region, tcli).
+ |
+ | table_tag_region/4.
+ | table_tag_region(TableName, TagName, Region, Interp)
+ | table_tag_region(+, +, +, +)
+ |
+ |	Under Interp:  Applied tag TagName to region Region in table TableName,
+ |	where regions can be specified:
+ |		cell(R,C) - cell at row R, col C
+ |		row(R)	  - all of row R
+ |		col(C)	  - all of col C
+ |		colsblock(C1,C2)	- all cols from col C1 to col C2, C1 =< C2;
+ |		rowsblock(R1,R2)	- all rows from row R1 to row R2, R1 =< R2;
+ |
+ |----------------------
+ | table_set_tag/3.
+ | table_set_tag(TableName, TagName, Properties)
+ | table_set_tag(+, +, +)
+ |
+ | 		table_set_tag(TableName, TagName, Properties)
+ |			:- table_set_tag(TableName, TagName, Properties, tcli).
+ |
+ | table_set_tag/4.
+ | table_set_tag(TableName, TagName, Properties, Interp)
+ | table_set_tag(+, +, +, +)
+ |
+ |	Given: 
+ |	+ TagName is a tag which has been applied to one or more
+ |	regions in table TableName under Interp ; 
+ |	+ Properties is a list of Prop=Value equations such as
+ |			background = black
+ |	Then table_set_tag/4 sets these properties for all the tagged regions.
  *========================================================================*/
 
 
+/*--------------------
 module tt.
+
 use tk_alslib.
 use tcltk.
 
@@ -56,11 +141,14 @@ tbl1r
 	write(r=R),nl.
 
 endmod.
+*--------------------*/
 
 module tk_alslib.
 use tcltk.
 
 
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 export load_table_package/0.
 export load_table_package/1.
 
@@ -88,6 +176,8 @@ load_table_package(Interp)
 %	assert(table_package_loaded(Interp)).
 	assert(packages_loaded(Interp,table_package)).
 
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 :- compiletime, module_closure( create_table, 2, create_table3).
 :- compiletime, module_closure( create_table, 3, create_table4).
 
@@ -106,6 +196,8 @@ create_table3_r(Mod, TableName, Options, R)
 	:-
 	create_table4_r(Mod, TableName, Options, tcli, R).
 
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 create_table4_r(Mod, TableName, Options, Interp, TableArrayName)
 	:-
 	((dmember(colheadings=ColHeadings, Options),
@@ -194,6 +286,8 @@ create_table4_r(Mod, TableName, Options, Interp, TableArrayName)
 		tcl_call(Interp, [write_table_col,TableArrayName,ColN,RowStart,Lim,ValsList], _)
 		) ).
 
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 export table_set_tag/3.
 export table_set_tag/4.
 table_set_tag(TableName, TagName, Properties)
@@ -262,6 +356,8 @@ check_font([Family,Size,Style], [Family,Size,Style]).
 colorname(Val).
 
 
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
 cell_index(R,C,Index)
 	:-
 	number_codes(R,RCs),
@@ -309,6 +405,17 @@ apply_region_tag(colsblock(C1,C2), TablePath, TagName, Interp)
 	tcl_call(Interp,[TablePath,tag,col,TagName,C1], _),
 	C1N is C1 + 1,
 	apply_region_tag(colsblock(C1N,C2), TablePath, TagName, Interp).
+
+apply_region_tag(rowsblock(R,R), TablePath, TagName, Interp)
+	:-!,
+	tcl_call(Interp,[TablePath,tag,row,TagName,R], _).
+
+apply_region_tag(rowsblock(R1,R2), TablePath, TagName, Interp)
+	:-
+	R1 < R2,
+	tcl_call(Interp,[TablePath,tag,row,TagName,R1], _),
+	R1N is R1 + 1,
+	apply_region_tag(rowsblock(R1N,R2), TablePath, TagName, Interp).
 
 
 endmod.

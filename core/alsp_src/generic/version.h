@@ -5,9 +5,9 @@
  *          Version number - Thu Apr 4 09:28:36 EST 1996
  *===============================================================*/
 
-#define VERSION_STRING "3.0beta"
+#define VERSION_STRING "3.1 Development--alpha-1"
 #define VERSION_MAJOR 3
-#define VERSION_MINOR 0
+#define VERSION_MINOR 1
 #define VERSION_PATCH 0
 
 /* 
@@ -32,4 +32,4 @@ beta
 final
 */
 
-#define VERSION_MACOS_RELEASE_STAGE alpha
+#define VERSION_MACOS_RELEASE_STAGE development

@@ -25,6 +25,9 @@ then
     exit 2
 fi
 
+# Install the link to the source directory (for windows and mac builds):
+ln -s $source_dir .
+
 # Check for correct OS
 case $os in
 aix|hpux|sunos|solaris|linux|irix|cygwin32|all) ;;

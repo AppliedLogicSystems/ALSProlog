@@ -11,8 +11,6 @@
 #define MSWin32 1
 #define OSStr "mswin32"
 
-#define SIMPLE_MICS 1
-
 #define HAVE_STDARG_H	1
 #define HAVE_STDLIB_H	1
 #define HAVE_FCNTL_H	1
@@ -24,8 +22,6 @@
 #define HAVE_SOCKET		1
 #define BERKELEY_SOCKETS	1
 #define HAVE_SELECT		1
-
-#define PARAMREVBIT 1
 
 #define APP_PRINTF_CALLBACK	1
 

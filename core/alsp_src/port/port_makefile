@@ -1,2 +1,2 @@
-PROC_CPPFLAGS = -DPORT
+CPPFLAGS += -DPORT
 PROC_SOURCE = disassem.c icode1.c icode2.c wam.c

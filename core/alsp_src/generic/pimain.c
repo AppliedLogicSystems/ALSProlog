@@ -37,6 +37,10 @@ isopt(const char *opt, char *str)
 	return 0;
 }
 
+#ifdef macintosh
+#pragma export on
+#endif
+
 EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 {
     int   exit_status, success;
@@ -59,11 +63,7 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     setup.icbuf_size = 0;
     setup.alsdir = getenv("DEV_ALSDIR");
     setup.saved_state = NULL;
-#ifdef DLL
     setup.load_executable_state = 0;
-#else
-    setup.load_executable_state = 1;
-#endif
     setup.argc = argc;
     setup.argv = argv;
 #ifdef WIN32
@@ -187,7 +187,7 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 	if (err != noErr) exit(EXIT_ERROR);
     
         /* Based on 7MB partition with 0x40000 word heap */
-	setup.heap_size = setup.stack_size = info.processSize/28;
+	//setup.heap_size = setup.stack_size = info.processSize/28;
     }
 
     InstallConsole(0);
@@ -248,6 +248,10 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     	return EXIT_ERROR;
 	}
 }
+
+#ifdef macintosh
+#pragma export reset
+#endif
 
 #ifdef MacOS
 int shlib_found;

@@ -19,28 +19,28 @@
 #include "main.h"
 #include "icodegen.h"
 
-int  *top_module;
-static int *module_stack;
+/*//int  *top_module;*/
+/*//static int *module_stack;*/
 
-int  *top_clausegroup;
-static int *clausegroup_stack;
+/*//int  *top_clausegroup;*/
+/*//static int *clausegroup_stack;*/
 
 struct mtbl_entry {
     PWord modid;
     short nextuse;
 }; 
 
-static struct mtbl_entry *module_table;
+/*//static struct mtbl_entry *module_table;*/
 
 struct use_entry {
     PWord modid;
     short nextuse;
 }; 
 
-static struct use_entry *use_table;
+/*//static struct use_entry *use_table;*/
 
-static int nmods;
-static int nuses;
+/*//static int nmods;*/
+/*//static int nuses;*/
 
 /*
  * resolve_reference is called by wm_resolve_ref with the name address. It
@@ -73,7 +73,7 @@ resolve_reference(entfrom)
 	int   usage = entto->flags & NMSK_USAGE;
 
 	dbprot_t odbrs = w_dbprotect(DBRS_WRITABLE);
-	if (usage == NFLG_BUILTIN || usage == NFLG_IMPORTED)
+	if ((usage == NFLG_BUILTIN || usage == NFLG_IMPORTED) && entto->code[0] != W_FOREIGN_JUMP)
 	    copy_code((long *) entto->code, (long *) entfrom->code,
 		      (int)(NTBL_CODESIZE * sizeof (Code) / sizeof (long)));
 	else
@@ -296,16 +296,16 @@ modprobe_id(tk)
  */
 
 
-static long *default_uses;
-static long default_usemax;
+/*//static long *default_uses;*/
+/*//static long default_usemax;*/
 
 struct defprocs {
     PWord tokid;
     short arity;
 };
 
-static struct defprocs *default_procs;
-static long default_procmax;
+/*//static struct defprocs *default_procs;*/
+/*//static long default_procmax;*/
 
 #define WARN_WHEN_REDEFINED_NUM 4
 

@@ -11,6 +11,46 @@
 
 module builtins.
 
+:-dynamic(alsdev_running/0).
+
+export prolog_system_error/2.
+prolog_system_error(ErrorCode, Args)
+	:-
+	alsdev_running,
+	!,
+	alsdev:ide_prolog_system_error(ErrorCode, Args).
+
+prolog_system_error(ErrorCode, Args)
+	:-
+	alsshell:tty_prolog_system_error(ErrorCode, Args).
+
+export prolog_system_warning/2.
+prolog_system_warning(ErrorCode, Args) 
+	:-
+	alsdev_running,
+	!,
+	alsdev:ide_prolog_system_warning(ErrorCode, Args).
+
+prolog_system_warning(ErrorCode, Args) 
+	:-
+	alsshell:tty_prolog_system_warning(ErrorCode, Args).
+
+export expand_code/3.
+expand_code(EWCode, Pattern, '\nError: ')
+	:-
+	error_code(EWCode, Pattern),
+	!.
+
+expand_code(EWCode, Pattern, '\nWarning: ')
+	:-
+	warning_code(EWCode, Pattern).
+
+expand_code(EWCode, Pattern, '')
+	:-
+	info_code(EWCode, Pattern).
+
+
+/**************
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% ERROR OUTPUT PREDICATES
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -25,7 +65,7 @@ prolog_system_error(
 
 prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), _) 
 	:-
-write(syntax_pos_info=p(P1,P2,P3)),nl,flush_output,
+%write(syntax_pos_info=p(P1,P2,P3)),nl,flush_output,
 	sio:is_stream(Stream,Stream0),
 	sio:is_input_stream(Stream0),
 	!,
@@ -174,6 +214,7 @@ als_advise(Stream, FormatString, Args)
 	:-
 	printf(Stream, FormatString, Args),
 	flush_output(Stream).
+***********/
 
 %%%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%
 %%%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%
@@ -226,6 +267,7 @@ error_code(xsyms_2big,	'Too many external symbols! Package=%t\n').
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+export decode_error/4.
 	%%-------------------------
 	%% Instantiation Error:
 	%%-------------------------

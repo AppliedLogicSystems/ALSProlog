@@ -196,7 +196,10 @@ pbi_printwarning()
 	/* If we are at the top level, print message;
 	 * otherwise be silent.
 	 */
-	if (wm_regidx == 1)
+#if 0
+	//if (wm_regidx == 1)
+#endif
+	if (current_engine.reg_stack_top == current_engine.reg_stack_base+1)
 	    abortmessage();
     }
     else if (curfd == stdin)

@@ -80,9 +80,14 @@ next_stream_identifier(Options,Id) :-
 	dmember('$stream_identifier'(Id), Options),
 	nonvar(Id),
 	!.
+
 next_stream_identifier(Options,Id) :-
 	get_next_stream_identifier(Id),
-	NextId is (Id+1) /\ 0xffffff,
+%	NextId is (Id+1) /\ 0xffffff,
+	NextId is (Id+1),
+%(integer(Id) -> JKK=int ; JKK = real),
+%(integer(NextId) -> KK=int ; KK = real),
+%pbi_write(next_stream_identifier(JKK,Id,NextId,KK)),pbi_nl, pbi_ttyflush,
 	set_next_stream_identifier(NextId).
 
 
@@ -521,6 +526,12 @@ reset_user(InStream,OutStream)
 	:-
 	stream_identifier(InStream, OldInID),
 	stream_identifier(OutStream, OldOutID),
+
+%(integer(OldInID) -> pbi_write(int(OldInID)) ;  pbi_write(real(OldInID))),
+%pbi_nl,pbi_ttyflush,
+%(integer(OldOutID) -> pbi_write(int(OldOutID)) ;  pbi_write(real(OldOutID))),
+%pbi_nl,pbi_ttyflush,
+
 	del_stream_table(OldInID,_),
 	del_stream_table(OldOutID,_),
 	set_stream_identifier(InStream,-1),

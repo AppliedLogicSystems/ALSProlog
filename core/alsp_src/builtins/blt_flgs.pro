@@ -228,7 +228,7 @@ default_prolog_flag_value(syntax_errors, error).
 changeable(syntax_errors, yes).
 
 	%%---------------------------------
-	%%	default syntax error behavior:
+	%%	location of generated obp files:
 	%%---------------------------------
 prolog_flag_value_check(obp_location, gic).
 prolog_flag_value_check(obp_location, gis).
@@ -313,15 +313,10 @@ check_for_alsdev_impact(Flag, Value)
 	:-
 	alsdev_running,
 	!,
-	check_for_alsdev(Flag, Value).
+	builtins:get_primary_manager(ALSIDEmgr),
+	send(ALSIDEmgr, change_prolog_flag(Flag,Value)).
 
 check_for_alsdev_impact(_, _).
-
-check_for_alsdev(debug, Which)
-	:-!,
-	alsdev:switch_debugging_setup(Which).
-
-check_for_alsdev(_, _).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% ACTUALLY INITIALIZE THE FLAGS:

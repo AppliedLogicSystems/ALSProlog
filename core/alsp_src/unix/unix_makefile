@@ -1,6 +1,8 @@
 # Generic Unix Definitions for GNU Make file for ALS Prolog
 
-# Common defaults for most unix systems. May be overiden by $(SUBOS)_makefile
+# Common defaults for most unix systems. May be overidden/modified
+# in $(SUBOS)_makefile.
+
 OS_AR = ar rusc
 OS_RANLIB = true
 OS_SL_EXT = so
@@ -8,13 +10,24 @@ OS_SL_LINK = $(CC) -shared
 LIBS = $(OS_LIBS) -lc -lm
 SL_LINK_LIBS = $(LIBS)
 
+MAKEFILES += $(SUBOS)_makefile
+
+CPPFLAGS += -DUNIX
+
+CFLAGS += -fpic
+
+OS_SOURCE = unixio.c missing.c unix_engine.c unix_locate.c
+
+STATIC_SOURCE = unix_static.c
+STATIC_OBJECTS = $(STATIC_SOURCE:.c=.o)
+SHARED_SOURCE = unix_shared.c
+SHARED_OBJECTS = $(SHARED_SOURCE:.c=.o)
+
+# Definitions and rules for the specific Unix OS
+
 include $(SOURCE_DIR)/unix/$(SUBOS)_makefile
 
-OS_CPPFLAGS=-DUNIX $(SUBOS_CPPFLAGS)
-
-OS_CFLAGS = -fpic
-
-OS_SOURCE = unixio.c missing.c
+# Installer rules
 
 -include ../install_components
 
@@ -34,7 +47,7 @@ installer: alspro
 	@echo
 	rm -fr ALS_Prolog
 	mkdir -p ALS_Prolog
-	
+
 	cd ALS_Prolog ; \
 		ln -s ../alspro . ; \
 		ln -s ../alspro_b . ; \

@@ -1,3 +1,4 @@
+
 /*===========================================================================*
  |		wam.c                
  | Copyright (c) 1992-96, Applied Logic Systems, Inc.
@@ -37,7 +38,7 @@
 extern	int tracewam	PARAMS(( Code * ));
 #endif
 
-static	int	run_wam		PARAMS(( Code * ));
+	int	run_wam		PARAMS(( Code * ));
 static	int	wam_unify	PARAMS(( PWord *, PWord * ));
 
 #ifdef	Threaded
@@ -102,13 +103,13 @@ PWord *gr_SPB, *gr_HB, *gr_TR;
  * Special purpose WAM code patches
  *-----------------------------------*/
 
-Code *wm_fail;
-Code *wm_trust_fail;
-Code *wm_return_success;
-Code *wm_special;
-Code *wm_rungoal_code;
-Code *wm_panic;
-PWord *rungoal_modpatch, *rungoal_goalpatch;
+/*//Code *wm_fail;*/
+/*//Code *wm_trust_fail;*/
+/*//Code *wm_return_success;*/
+/*//Code *wm_special;*/
+/*//Code *wm_rungoal_code;*/
+/*//Code *wm_panic;*/
+/*//PWord *rungoal_modpatch, *rungoal_goalpatch;*/
 
 /*-----------------------------------*
  *  type macros and utilities
@@ -731,6 +732,8 @@ wam_init()
     wm_panic = ic_ptr;
     ic_puti(W_PANIC);
 
+    ic_putl(-1); /* mark end of code, begin of gc info */
+
     /* lay down the magic values */
 
     for (i = 0; i < magic_idx; i++) {
@@ -774,7 +777,7 @@ wm_exec(startaddr)
  | or by wm_exec to run a regular Prolog query.
  *---------------------------------------------------------------*/
 
-static int
+int
 run_wam(startaddr)
     Code *startaddr;		/* pointer to clause to execute wam on */
 {
@@ -816,11 +819,15 @@ int special_overflow = 0;
     mr_B = wm_B;
     mr_HB = mr_H = wm_H;
 
-    if (++wm_regidx >= 100) {
-	fprintf(stderr, "Too many nested levels\n");
-	als_exit(1);
-    }
+#if 0
+//    if (++wm_regidx >= 100) {
+//	fprintf(stderr, "Too many nested levels\n");
+//	als_exit(1);
+//    }
+#endif
 
+	push_register_stack(&current_engine);
+		
 #ifdef Threaded
 #define CASE(op) l##op DO_PROFILE(op)
 #define DISPATCH goto **(void **)P
@@ -1068,7 +1075,13 @@ overflow_check0:
 	    }
 
 
-	    if ((unsigned long) wm_safety <= (unsigned long) wm_normal) {
+#if 0
+		ghit = (ghit+1) % 50;
+	    if (ghit == 0 || ((unsigned long) wm_safety <= (unsigned long) wm_normal))
+#else
+	    if ((unsigned long) wm_safety <= (unsigned long) wm_normal)
+#endif
+	    {
 				/* --------- ORDINARY GC INTERRUPT --------- */
 
 #ifdef DEBUGSYS	/*..................................................*/
@@ -2046,8 +2059,11 @@ CASE(W_CATCH22):
 	    DISPATCH;
 
 CASE(W_THROW):
-	    oldB = wm_regs[wm_regidx-1][wm_B_idx];
-
+#if 0
+	    //oldB = wm_regs[wm_regidx-1][wm_B_idx];
+#endif
+	    oldB = ((PWord *)((current_engine.reg_stack_top-1)->B.ptr));
+	    
 	    for (;;) {
 		if (c22dat == cp_NC(mr_B))
 		    DOFAIL;
@@ -2098,7 +2114,10 @@ CASE(W_NOP):			/* nop -- should not need this */
 get_out:
 
     /* Prologue */
-    wm_regidx--;
+#if 0
+    //wm_regidx--;
+#endif
+    pop_register_stack(&current_engine);
 
 #if 0 /* ----------old code ----------*/
     if (untrail) {

@@ -245,6 +245,38 @@ retract(Module,Clause,DBRef)
 	$source(DBRef,Clause),
 	erase(DBRef).
 
+export abolish_module/1.
+abolish_module(Mod)
+	:-
+	all_procedures(Mod, P, A, _),
+	Mod:abolish(P,A),
+	fail.
+abolish_module(Mod).
+
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%%%%	Predicates for lists of clauses 		%%%%%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/*!---------------------------------------------------------------
+ |	assert_each/2
+ |	assert_each(ClauseList,Module)
+ |	assert_each(+,+)
+ |	
+ |	- asserts each clause on ClauseList in module Module
+ |	
+ |	If ClauseList is a list of clauses, asserts each of these clauses
+ |	in module Module.
+ *!--------------------------------------------------------------*/
+
+export assert_each/2.
+
+assert_each([],_).
+assert_each([Clause | RestClauseList],Module)
+	:-
+	builtins:assertz(Module,Clause,_,0),
+	assert_each(RestClauseList,Module).
+
+
+
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		%%%%%	Predicates for manipulating modules 	%%%%%
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
