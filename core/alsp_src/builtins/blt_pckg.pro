@@ -74,6 +74,11 @@ save_image(ImageName, Options)
 	
 get_base_image_path(Options,BaseImage)
 	:-
+	dmember(console_app, Options),
+	!,
+	get_current_image(BaseImage).
+get_base_image_path(Options,BaseImage)
+	:-
 	dmember(stub(BaseImage), Options),
 	exists_file(BaseImage),
 	!.
@@ -399,6 +404,9 @@ process_image_options([Option | Options], CurImageName, FinalImageName)
  |	process_image_option(+)
  *---------------------------------------------------------------*/
 process_image_option(preserve(all))
+	:-!.
+
+process_image_option(console_app)
 	:-!.
 
 process_image_option(init_goals(NewGoals))
