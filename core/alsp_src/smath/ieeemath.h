@@ -28,7 +28,8 @@
         #else
         #define ALS_BIG_ENDIAN
         #endif
-    #elif defined(SOLARIS_LINUX)
+    #elif defined(UNIX_SOLARIS)
+        #include <sys/param.h>
         #if defined(_BIG_ENDIAN)
         #define ALS_BIG_ENDIAN
         #elif defined(_LITTLE_ENDIAN)
@@ -36,7 +37,7 @@
         #else
         #error
         #endif
-    #elif defined(HPUX_LINUX) || defined(IRIX_LINUX)
+    #elif defined(UNIX_HPUX) || defined(UNIX_IRIX)
     #define ALS_BIG_ENDIAN
     #else
     #error
