@@ -80,17 +80,34 @@ do_type_comp(defStruct(TypeName,SpecsList),Mod,
 			EL2 =[bad_missing(propertiesList) | EL3]
 	),
 
-	expand_includes(InitPropertiesList, PropertiesList, PLTail,Mod,EL3,ErrListTail),
+	expand_includes(InitPropertiesList, PropertiesList, PLTail,Mod,EL3,EL4),
 	PLTail = [],
 
-	ErrListTail = [],
-	(ErrList \= [] ->
+	((nonvar(ErrList),ErrList \= []) ->
 		CodeListTail=CodeList,MacListTail=MacList
 		;
 		makeStructDefs(TypeName, AccessPred, SetPred, MakePred, 
-				PropertiesList, StructLabel,Mod,
-				CodeList,CodeListTail, MacList,MacListTail)
+			PropertiesList, StructLabel,Mod,
+			CodeList,CodeListTail0, MacList,MacListTail),
+		(dmember(xfwrite=DelaySlots, SpecsList) ->
+			dreverse(PropertiesList, [LastPP | _]),
+			(LastPP = LastP/_ -> true ; LastPP = LastP),
+			(member(LastP, DelaySlots) ->
+				gen_xfwrite(TypeName,DelaySlots,LastP,PropertiesList,StructLabel,
+							Mod, SpecsList, CodeListTail0, CodeListTail)
+				;
+				EL4 = [xfwrite_req(last_prop(LastP),'not_last_in_property_list')
+							| ErrListTail],
+				CodeListTail = CodeListTail0
+			)
+			;
+			EL4 = ErrListTail,
+			CodeListTail = CodeListTail0
+		),
+		ErrListTail = []
 	).
+
+
 
 
 
@@ -296,67 +313,69 @@ expand_includes([Item | InitPropertiesList], [Item | PropertiesList],
 	:-
 	expand_includes(InitPropertiesList, PropertiesList, FinalTail, Mod,ErrIn,ErrOut).
 
-/**********
-fetch_included_props(File, Name, PropertiesList, InterPropsListTail, Quiet)
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
+
+gen_xfwrite(TypeName,DelaySlots,LastP,PropertiesList,StructLabel,
+			Mod, SpecsList, CodeList, CodeListTail)
 	:-
-	(filePlusExt(BaseFile,typ,File) ->
-		FullFile = File ; filePlusExt(File,typ,FullFile)
+	catenate('xfwrite_',TypeName, WPred),
+	findall(P, 
+		(member(P, PropertiesList), not(member(P, DelaySlots))),
+		NonDelaySlots),
+	Head =.. [WPred, FileName, TaggedNonDelays, DelayOffsets, Stream],
+	Dummy = '                ',
+	setup_matchup(PropertiesList,DelaySlots,Dummy,NDSlotsVars,AllButLast,DelayOffsets),
+	Clause1 = dslm([], _),
+	Clause2 = ( dslm([Tag=Var |Rest],TgdVals) :- 
+		dmember(Tag=Var,TgdVals),dslm(Rest,TgdVals) ),
+	Clause3 = (Head :-
+		dslm(NDSlotsVars, TaggedNonDelays),
+		open(FileName, read_write, Stream),
+		printf(Stream, '%t(\n',[StructLabel],[quoted(true)]),
+		xfwrite_slots(AllButLast,DelayOffsets,Stream),
+		write(Stream, '['),nl(Stream)
 	),
-	locate_include_file(FullFile, FullIncludeFile),
-	open(FullIncludeFile, read, InStr, []),
+	Clause4 = xfwrite_slots([],_,_),
+	Clause5 = ( xfwrite_slots([P5=D5 | AllButLast5],[P5=V5 | DelayOffsets5],Stream5) :-!,
+			stream_property(Stream5,position(V5)),
+			write_term(Stream5, D5, [quoted(true)]),put_code(Stream5,0',),
+			xfwrite_slots(AllButLast5,DelayOffsets5,Stream5) ),
+	Clause6 = ( xfwrite_slots([P6=V6 | AllButLast6],DelayOffsets6,Stream6) :-
+			write_term(Stream6, V6, [quoted(true)]),put_code(Stream6,0',),
+			xfwrite_slots(AllButLast6,DelayOffsets6,Stream6) ),
+	CodeList = [Clause1, Clause2, Clause3, Clause4, Clause5, Clause6
+		| CodeListTail].
+		
+setup_matchup([],DelaySlots,Dummy,[],[],[]).
+setup_matchup([Last],DelaySlots,Dummy,[],[],[])
+	:-!.
+setup_matchup([PP | PropertiesList],DelaySlots,Dummy,
+				NDSlotsVars,[P=Dummy | AllButLast],[P=Off | DelayOffsets])
+	:-
+	(PP=P/_ -> true ; PP=P),
+	dmember(P, DelaySlots),
 	!,
-	read_terms(InStr, FTerms),
-	close(InStr),
-	fin_fetch_included_props(FTerms, File, Name, PropertiesList, InterPropsListTail, Quiet, FTerms).
+	setup_matchup(PropertiesList,DelaySlots,Dummy,NDSlotsVars,AllButLast,DelayOffsets).
 
-fetch_included_props(File, Name, In, In, Quiet)
+setup_matchup([PP | PropertiesList],DelaySlots,Dummy,
+				[P=PVal | NDSlotsVars],[P=PVal | AllButLast],DelayOffsets)
 	:-
-	ct_message(Quiet,'!Warning: Can\'t find included type file >> %t.typ << ...skipping.\n',
-				[File]).
-
-fin_fetch_included_props(FTerms, File, Name, PropertiesList, InterPropsListTail, Quiet, FTerms)
+	(PP=P/_ -> true ; PP=P),
+	setup_matchup(PropertiesList,DelaySlots,Dummy,NDSlotsVars,AllButLast,DelayOffsets).
+	
+	
+/*
+xfwrite_slots([],_,_).
+xfwrite_slots([P=D | AllButLast],[P=V | DelayOffsets],Stream)
+	:-!,
+	stream_property(Stream,position(V)),
+	write(Stream, D, [quoted(true)]),
+	xfwrite_slots(AllButLast,DelayOffsets,Stream).
+xfwrite_slots([P=V | AllButLast],DelayOffsets,Stream)
 	:-
-	dmember(defStruct(Name, FSpecs), FTerms),
-	dmember(propertiesList=FProps, FSpecs),
-	!,
-	expand_includes(FProps, PropertiesList, InterPropsListTail, Quiet, FTerms).
-
-fin_fetch_included_props(FTerms, File, Name, In, In, Quiet, FTerms)
-	:-
-	ct_message(Quiet,
-			   '!Warning: Can\'t find included type >> %t << in file %t...skipping.\n',
-				[Name,File]).
-
-
-locate_include_file(FullFile, FullFile)
-	:-
-	exists(FullFile),
-	!.
-
-locate_include_file(FullFile, FullIncludeFile)
-	:-
-	include_dir(Path),
-	pathPlusFile(Path, FullFile, FullIncludeFile),
-	exists(FullIncludeFile),
-	!.
-
-locate_include_file(FullFile, FullIncludeFile)
-	:-
-	builtins:searchdir(Path),
-	pathPlusFile(Path, FullFile, FullIncludeFile),
-	exists(FullIncludeFile),
-	!.
-
-locate_include_file(FullFile, FullIncludeFile)
-	:-
-	builtins:sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, includes, SysIncludes),
-	pathPlusFile(SysIncludes, FullFile, FullIncludeFile),
-	exists(FullIncludeFile),
-	!.
-************/
-
-
+	write(Stream, V, [quoted(true)]),
+	xfwrite_slots(AllButLast,DelayOffsets,Stream).
+*/
 endmod.
-
 
