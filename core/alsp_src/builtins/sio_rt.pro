@@ -1303,7 +1303,7 @@ binop( **,	200,	199,	199).
 %% Nonstandard infix operators
 %%
 
-%% binop( ::,	400,	400,	399).			%% CLP
+%%binop( ::,	700,	699,	699).			%% CLP
 binop( :,	950,	949,	950).
 binop( ^,	200,	199,	200).
 

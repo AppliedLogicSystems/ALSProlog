@@ -131,6 +131,10 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 
 #define BIND3(r,f,w)  { TRAIL(r,w); *(r) = PWORD(f); }
 
+/*
+#define BIND3X(r,f,w)  { TRAILBX(r,w,f); *(r) = PWORD(f); }
+*/
+
 #ifdef FREEZE
 
 #ifdef DEBUGFREEZE
@@ -138,8 +142,17 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 	/*-------------------------------------------------*
 	 |  Arg 2 of TRAIL is a line number -- used for
 	 |  informational purposes only; eliminated from
-     |  code in non-DEBUGFREEZE case.
+	 |  code in non-DEBUGFREEZE case.
 	 *-------------------------------------------------*/
+
+/*
+#define TRAILBX(r,l,f) \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *--mr_TR = PWORD(r); \
+	  if ( CHK_DELAY(r) ) { \
+			printf("@@@ [ln=%d] r=%x  f=%x mr_TR=%x\n",l,(int)r,(int)f,(int)mr_TR-1); \
+	    	wm_safety = -2; wm_interrupt_caught = 3; } } } 
+*/
 
 #define TRAIL(r,l) \
   { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
@@ -1755,7 +1768,7 @@ wam_unify(f1, f2)
 	    }
 	}
 	else {
-	    BIND(f1, f2);
+	    BIND3(f1, f2, 202001);
 	}
 	return (1);
     }
