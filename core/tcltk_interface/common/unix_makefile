@@ -16,12 +16,15 @@ source = alspi_slib.c new_alspi.c tcl_interface.c
 
 objects = $(source:.c=.o)
 
-all: tclintf.psl test
+all: tclintf.psl alsprolog.so test
 
 tclintf.psl: $(objects)
 	$(CC) $(LINK) -L/usr/local/lib $(objects) \
 		-ltcl8.0 -ltk8.0 -lX11 -lm -lc -o tclintf.psl
-	
+
+alsprolog.so: $(objects)
+	$(CC) $(LINK) tcl_interface.o -ltk8.0 -lX11 -lalspro -lc -lm -o alsprolog.so
+
 $(objects) : makefile unix_makefile
 
 test : unix_makefile tclintf.psl
