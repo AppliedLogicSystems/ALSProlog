@@ -610,6 +610,7 @@ setup_basic_framework(XArchOS, ArchOS, DHD, Ver, SwitchVals, WSL, TLIn,TLOut)
 		univ_make_subdir(path(relative, [examples])),
 		univ_make_subdir(path(relative, [examples,als])),
 		univ_make_subdir(path(relative, [examples,pxs])),
+		univ_make_subdir(path(relative, [examples,objectpro])),
 		univ_make_subdir(path(relative, [examples,more])),
 		printf('examples created...\n',[])
 		;
@@ -699,6 +700,10 @@ copy_basic_sourcefiles(XArchOS, ArchOS, DHD, Ver, SwitchVals, WSL, GOS, NewUp)
 	extendPath(ExamplesPath, pxs, PXSExamplesPath),
 	extendPath(ExSubDir, pxs, TgtPXSExamples),
 	copy_dir_files_nl(PXSExamplesPath, TgtPXSExamples, OS, NewUp),
+		%% examples/objectpro:
+	extendPath(ExamplesPath, objectpro, OBJPExamplesPath),
+	extendPath(ExSubDir, objectpro, TgtOBJPExamples),
+	copy_dir_files_nl(OBJPExamplesPath, TgtOBJPExamples, OS, NewUp),
 		%% examples/more:
 	extendPath(ExamplesPath, more, MOREExamplesPath),
 	extendPath(ExSubDir, more, TgtMOREExamples),

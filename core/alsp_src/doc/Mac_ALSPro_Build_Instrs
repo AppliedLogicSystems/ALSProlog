@@ -47,11 +47,15 @@ assign creator and types to all files.
 
 2. Launch MPW, and run the bd_mac script with the command line below:
 
-{srcdir}bin:bd_mac {srcdir} {blddir}
+    {srcdir}bin:bd_mac {srcdir} {blddir}
 
 Here is a description of bd_mac:
 
-bd_mac source_director build_directory
+    bd_mac source_director build_directory
+
+Example:
+
+	apache:alsp_src:bin:bd_mac apache:alsp_src: apache:builds:all_macos7.5:
 
 bd_mac is a MPW script that takes two directories as arguments. source_directory
 is the ALS Prolog source directory ({srcdir}) and build_directory is the build

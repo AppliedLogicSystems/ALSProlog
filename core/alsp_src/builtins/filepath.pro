@@ -35,7 +35,6 @@ export subPath/2.
 export subPath/3.
 export extendPath/3.
 export rootPlusPath/3.
-export rootPlusPath0/3.
 export rootPathFile/4. 
 export pathPlusFilesList/3.
 
@@ -445,7 +444,6 @@ rootPlusPath(Disk, PathList, DiskPlusPath)
 	subPath(PathList, Path),
 	!,
 	atom_concat(DiskWithSep, Path, DiskPlusPath).
-
 
 /*!-------------------------------------------------------*
 	rootPathFile/4

@@ -657,9 +657,19 @@ check_source_sink_and_mode(console(_),Mode) :-
 check_source_sink_and_mode(console_error(_),Mode) :-
 	!,
 	check_mode(Mode,read_write_modes(Mode,_,_)).
+check_source_sink_and_mode(tk_win(_,_),Mode) :-
+	!,
+	check_mode(Mode,read_write_modes(Mode,_,_)).
+check_source_sink_and_mode(tk_window(_,_),Mode) :-
+	!,
+	check_mode(Mode,read_write_modes(Mode,_,_)).
 check_source_sink_and_mode(window(_),Mode) :-
 	!,
 	check_mode(Mode,read_write_modes(Mode,_,_)).
+check_source_sink_and_mode(tcl_transfer(_,_),Mode) :-
+	!,
+	check_mode(Mode,read_write_modes(Mode,_,_)).
+
 check_source_sink_and_mode(Source_sink,Mode) :-
 	domain_error(source_sink, Source_sink, 2).
 
@@ -855,6 +865,14 @@ open_stream(window(WinName),Mode,Options,Stream)
 	:- !,
 	open_window_stream(WinName,Mode,Options,Stream).
 
+open_stream(tk_win(Interp,WinName),Mode,Options,Stream) 
+	:- !,
+	open_tk_window_stream(WinName,Interp,Mode,Options,Stream).
+
+open_stream(tk_window(Interp,WinName),Mode,Options,Stream) 
+	:- !,
+	open_tk_window_stream(WinName,Interp,Mode,Options,Stream).
+
 open_stream(console(Name), Mode, Options, Stream) 
 	:- !,
 	open_console_stream(Name, Mode, 0, Options, Stream).
@@ -862,6 +880,10 @@ open_stream(console(Name), Mode, Options, Stream)
 open_stream(console_error(Name), Mode, Options, Stream) 
 	:- !,
 	open_console_stream(Name, Mode, 1, Options, Stream).
+
+open_stream(tcl_transfer(Interp,CmdTemplate),Mode,Options,Stream) 
+	:- !,
+	open_tcl_transfer_stream(CmdTemplate,Interp,Mode,Options,Stream).
 
 %%
 %% This is the place to put in clauses for dealing with other types of streams
@@ -929,9 +951,11 @@ initialize_stream(StreamType,Source_sink,Options,Stream)
 	set_stream_blocking(Stream,Blocking).
 
 default_snr(window, snr_code).
+default_snr(tk_window, snr_code).
 default_snr(StreamType, wait).
 
 default_blocking(window, false) :-!.
+default_blocking(tk_window, false) :-!.
 default_blocking(Type, false) :- functor(Type, socket,_), !.
 default_blocking(_, true).
 
@@ -1462,9 +1486,21 @@ wait_data(sysV_queue, Stream, Call) :-
 	!,
 	call(Call).
 
+wait_data(tk_window, Stream, Call) 
+	:-
+%	stream_pgoals(Stream,PromptGoal),
+%	call(PromptGoal),
+%	stream_identifier(Stream,StreamId),
+%	prolog_xt_stream_mainLoop(StreamId),
+%	read_buffer(window,Stream), !,
+	stream_addl2(Stream, Interp),
+	tcl_eval(Interp, 'after 1000 ; update', _),
+			%% restart call:
+	call(Call).
+
 wait_data(socket, Stream, Call) :-
-%	sio_poll(Stream, 100000),	% 1 sec  - restore when 2nd arg fixed
-	sio_poll(Stream, 10000),	% 0.1 sec
+	sio_poll(Stream, 100000),	% 1 sec  - restore when 2nd arg fixed
+%	sio_poll(Stream, 10000),	% 0.1 sec
 	!,
 	call(Call).
 
@@ -1490,7 +1526,8 @@ loop_for_data(Type, Stream)
 	loop_for_data(Type, Stream).
 
 
-open_window_stream(Window,Mode,Options,Stream) :- 
+open_window_stream(Window,Mode,Options,Stream) 
+	:- 
 	getWinID(Window,WinID),
 	getWinGV(WinID,WinPosGV),
 	initialize_stream(window,Window,Options,Stream),
@@ -1544,6 +1581,51 @@ getWinGV(WinID,WinPosGV) :-
 getWinGV(WinID,WinPosGV) :-      %% allocate a gvar for WinID if not previously alloced
 	gv_alloc(WinPosGV),
 	assert('$text_winGV$'(WinID,WinPosGV)). 
+
+
+
+
+open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
+	:-
+	(atom(WinName) -> WinID = WinName ; 
+		sprintf(atom(WinID), '%t', [WinName]) ),
+	initialize_stream(tk_window,WinName,Options,Stream),
+	set_stream_addl2(Stream, Interp),
+	set_stream_addl3(Stream, WinID),
+	file_modes(Mode,NMode,SMode),
+	set_stream_mode(Stream,SMode),
+	buffering(Options,NBuffering),
+	sio_tk_win_open(WinID,Stream,NMode,NBuffering),
+	TextBuffer = [],
+	set_stream_extra(Stream,TextBuffer),	%% the Prolog side window buffer
+	set_stream_addl1(Stream,TextBuffer),	%% the window insertion position
+	    %% Note: extra/addl1 together maintain the text buffer as an
+	    %% extensible list; addl1 points at the last cons pair in the
+	    %% list and new entries are made by mangling the tail pointer,
+	    %% so as to avoid any problems with resetting a normal extensible
+	    %% list tail variable on backtracking; this initial value for
+	    %% TextBuffer is a single entry of an empty line, which doesn't
+	    %% cause a new line to go out.
+	!.
+
+open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
+	:-
+	permission_error(open,source_sink,Source_sink,2).
+
+open_tcl_transfer_stream(CmdPattern,Interp,Mode,Options,Stream)
+	:-
+	atom(CmdPattern),
+	atom(Interp),
+	catenate([Interp,CmdPattern],ID),
+	initialize_stream(tcl_transfer,ID,Options,Stream),
+	set_stream_addl2(Stream, Interp),
+	set_stream_addl3(Stream, CmdPattern),
+	file_modes(Mode,NMode,SMode),
+	set_stream_mode(Stream,SMode),
+	buffering(Options,NBuffering),
+	sio_tk_win_open(ID,Stream,NMode,NBuffering).
+
+
 
 
 /*
@@ -1751,6 +1833,20 @@ close_stream(string,Stream) :-
 	stream_extra(Stream,List),
 	stream_name(Stream,string(List)).
 close_stream(string,_) :-
+	!.
+
+close_stream(tk_window,Stream) :-
+	is_output_stream(Stream),
+	!,
+	write_buffer(tk_window,Stream).
+close_stream(tk_window,_) :-
+	!.
+
+close_stream(tcl_transfer,Stream) :-
+	is_output_stream(Stream),
+	!,
+	write_buffer(tcl_transfer,Stream).
+close_stream(tcl_transfer,_) :-
 	!.
 
 
@@ -2364,7 +2460,7 @@ read_window(Stream) :-
  |	move_lines_to_buffer(CurQueue,BufSize,BufStart,SD,CurNum,NumCs,NewQueue)
  |	move_lines_to_buffer(+,+,+,+,+,-,-)
  |	
- |	Fills (as much as possible) of the buffer ins stream descriptor SD
+ |	Fills (as much as possible) of the buffer in stream descriptor SD
  |	from the source CurQueue;  
  |
  |	CurQueue -- the initial raw lines queue (see below for details);
@@ -2583,7 +2679,6 @@ put_atom(Atom) :-
 
 export put_atom/2.
 
-
 put_atom(Stream, Atom) :-
 	sio_put_atom(Stream,Atom),
 	!.
@@ -2595,7 +2690,6 @@ put_atom(Stream_or_alias,Atom) :-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	sio_errcode(Stream,FailCode),
 	put_failure(FailCode,Stream,Atom,put_atom(Stream_or_alias,Atom)).
-
 
 /*
  * put_number(Stream_or_alias,OutputType,Number)
@@ -2654,6 +2748,66 @@ endpos_2_readstream(ReadStreamAlias,EndPos)
 	:-
 	current_alias(ReadStreamAlias, ReadStream),
 	set_window_insert_pos(ReadStream,EndPos).
+
+write_buffer(tk_window,Stream) :-
+	sio_buf_params(Stream, BufStart, BufSize),
+	stream_buffer(Stream,SD),
+	sio_lpos(Stream, NumCs),
+	NumCs > 0,
+	!,
+%	sio_fd(Stream, WinID),
+	'$uia_peeks'(SD,BufStart,NumCs,BufUIA),
+	stream_mode(Stream, [_|OutType]),
+	stream_addl2(Stream, Interp),
+	stream_addl3(Stream, WinID),
+	sprintf(atom(Cmd), '%t insert end {%t} ; update', [WinID, BufUIA]),
+	sio_set_position(Stream, 0, 0),
+	catch( tcl_eval(Interp, Cmd, _), _, true).
+
+write_buffer(tk_window,Stream) :-!.
+
+/*
+write_buffer(tcl_transfer,Stream) :-
+	sio_buf_params(Stream, BufStart, BufSize),
+	stream_buffer(Stream,SD),
+	sio_lpos(Stream, NumCs),
+	NumCs > 0,
+	!,
+%	sio_fd(Stream, ID),
+	'$uia_peeks'(SD,BufStart,NumCs,BufUIA),
+%	stream_mode(Stream, [_|OutType]),
+	stream_addl2(Stream, Interp),
+	stream_addl3(Stream, CmdPattern),
+	sprintf(atom(Cmd), CmdPattern, [BufUIA]),
+%	catch( tcl_eval(Interp, Cmd, _), _, true),
+	tcl_eval(Interp, Cmd, _),
+	sio_set_position(Stream, 0, 0).
+
+*/
+
+write_buffer(tcl_transfer,Stream) 
+	:-!,
+	write_buffer_tcl_tr(Stream).
+
+write_buffer_tcl_tr(Stream)
+	:-
+	sio_buf_params(Stream, BufStart, BufSize),
+	stream_buffer(Stream,SD),
+	sio_lpos(Stream, NumCs),
+	NumCs > 0,
+	!,
+	'$uia_peeks'(SD,BufStart,NumCs,BufUIA),
+	stream_addl2(Stream, Interp),
+	stream_addl3(Stream, CmdPattern),
+	sprintf(atom(Cmd), CmdPattern, [BufUIA]),
+	sio_set_position(Stream, 0, 0),
+	tcl_eval(Interp, Cmd, _).
+
+write_buffer_tcl_tr(Stream).
+
+
+
+
 
 write_buffer(atom,Stream) 
 	:-
@@ -2716,6 +2870,7 @@ write_buffer(Stream) :-
 	sio_errcode(Stream,16),			%% 16 = SIOE_INTERRUPTED
 	!,
 	write_buffer(Stream).
+
 
 
 %%
@@ -2902,6 +3057,15 @@ export nl/1.
 nl(Stream) :-
 	nl0(Stream),
 	flush_output(Stream).
+
+nl0(Stream) 
+	:-
+	stream_type(Stream,tk_window),
+	!,
+	stream_addl2(Stream, Interp),
+	stream_addl3(Stream, WinName),
+	sprintf(atom(Cmd), '%t insert end "\n" ; update', [WinName]), 
+	tcl_eval(Interp, Cmd, _).
 
 nl0(Stream) 
 	:-

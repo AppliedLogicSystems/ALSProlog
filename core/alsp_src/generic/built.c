@@ -439,6 +439,8 @@ static struct blt_struct {
 	BLT("sio_window_open", 6, sio_window_open, "_sio_window_open"),
 #endif /* WINIOBASIS */
 
+	BLT("sio_tk_win_open", 4, sio_tk_win_open, "_sio_tk_win_open"),
+
 	BLT("sio_generic_open", 5, sio_generic_open, "_sio_generic_open"),
 	BLT("sio_close", 1, sio_close, "_sio_close"),
 #ifndef SIO_ASM

@@ -1712,7 +1712,10 @@ disp_getresponse2(Response,Port,Box,Depth,Module,Goal,Resps,Response).
 
 %% === User wants to break to subsidiary Prolog shell.
 act_on_response(break,Port,Box,Depth, Module,Goal,Response) :- !,
+	telling(CurOut),
+	tell(user_output),
 	builtins:prolog_shell,
+	tell(CurOut),
 	show_again(Port,Box,Depth,Module,Goal,Response).
 
 %% === User wants to exit.

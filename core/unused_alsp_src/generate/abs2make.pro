@@ -193,6 +193,14 @@ abs_m([shell(Entry) | Scheme], SrcTerms, Context, Out)
 	),
 	abs_m(Scheme, SrcTerms, Context, Out).
 
+abs_m([make_cond(Expr) | Scheme], SrcTerms, Context, Out)
+	:-!,
+	abs_w(make_cond(Expr), SrcTerms, Context, Out),
+	abs_m(Scheme, SrcTerms, Context, Out).
+abs_m([#(Hash) | Scheme], SrcTerms, Context, Out)
+	:-!,
+	abs_w(#(Hash), SrcTerms, Context, Out),
+	abs_m(Scheme, SrcTerms, Context, Out).
 abs_m([Entry | Scheme], SrcTerms, Context, Out)
 	:-
 	schema_abs_eval(Entry, SrcTerms, Context, EntryVal),
@@ -228,6 +236,40 @@ cmnt_out([CLine | CL], Out)
 	:-
 	printf(Out,'#\t%s\n',[CLine]),
 	cmnt_out(CL, Out).
+
+	%%%%%%%%%%%%%%%%%%%%%
+	%% Hash
+	%%%%%%%%%%%%%%%%%%%%%
+
+abs_w('#'(ifdef(What)), SrcTerms, Context,Out)
+	:-!,
+	printf(Out,'#ifdef %t\n',[What]).
+
+abs_w('#'(endif), SrcTerms, Context,Out)
+	:-!,
+	printf(Out,'#endif\n\n',[]).
+
+abs_w('#'(Arg), SrcTerms, Context,Out)
+	:-!,
+	printf(Out,'#%t\n',[Arg]).
+
+	%%%%%%%%%%%%%%%%%%%%%
+	%% Make Conditionals
+	%%%%%%%%%%%%%%%%%%%%%
+
+	%% Default:
+	%% Gnu Make:  (Other Contexts (mac,...) separate above):
+abs_w(make_cond(ifeq(Var,Value)), SrcTerms, Context,Out)
+	:-!,
+	printf(Out,'ifeq ($(%t),%t)\n',[Var,Value]).
+
+abs_w(make_cond(endif), SrcTerms, Context,Out)
+	:-!,
+	printf(Out,'endif\n\n',[]).
+
+abs_w(make_cond(Arg), SrcTerms, Context,Out)
+	:-!,
+	printf(Out,'%t\n',[Arg]).
 
 	%%%%%%%%%%%%%%%%%%%%%
 	%% Implicit Rule

@@ -275,11 +275,11 @@ cmnt(top) = ['        makefile.in',
 
 &(vpath_val)  = 
 	case(&(context_name),[
-		(unix: ('$(srcdir)'/generic;'$(srcdir)'/port;'$(srcdir)'/port/'@SOS@';'..' )),
+		(unix: ('$(srcdir)'/generic;'$(srcdir)'/port;'$(srcdir)'/port/'@SOS@';'$(srcdir)'/smath;'..' )),
 		(os2:  ('$(srcdir)'/generic;'$(srcdir)'/port;'$(srcdir)'/port/os2;'..' )),
 		(djgpp1: ('$(srcdir)'/generic;'$(srcdir)'/port;'$(srcdir)'/port/djgpp1;'..' )),
 		(djgpp2: ('$(srcdir)'/generic;'$(srcdir)'/port;'$(srcdir)'/port/djgpp2;'..' )),
-		(_: ('$(srcdir)'/generic;'$(srcdir)'/port;'$(srcdir)'/port/'@SOS@';'..' )) 
+		(_: ('$(srcdir)'/generic;'$(srcdir)'/port;'$(srcdir)'/port/'@SOS@';'$(srcdir)'/smath;'..' )) 
 			  ]).
 
 rule(':', ['{srcdir}generic:', '{srcdir}{ARCH}:'], []). 

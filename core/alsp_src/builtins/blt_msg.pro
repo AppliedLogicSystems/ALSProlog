@@ -402,7 +402,10 @@ warning_code(loc_alslib, 	'Can\'t locate ALS library in ALSDIR: %t\n').
 warning_code(nyi, 			'%t not yet implemented on %t.\n').
 
 
-info_code(start_consult,	'Consulting %t ...').
+info_code(start_consult,	'Attempting to consult %t ...').
 info_code(end_consult,	'%t consulted\n').
+
+info_code(start_shared_load,	'Attemping to load shared object %t ...').
+info_code(end_shared_load,	'shared object %t loaded\n').
 
 endmod.
