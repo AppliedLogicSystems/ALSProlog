@@ -52,18 +52,25 @@
 
 #if   defined(UNIX_AIX)
 #include "aix_config.h"
+#define UNIX_NAME "AIX"
 #elif defined(UNIX_SUNOS)
 #include "sunos_config.h"
+#define UNIX_NAME "SunOS"
 #elif defined(UNIX_SOLARIS)
 #include "solaris_config.h"
+#define UNIX_NAME "Solaris"
 #elif defined(UNIX_HPUX)
 #include "hpux_config.h"
+#define UNIX_NAME "HPUX"
 #elif defined(UNIX_LINUX)
 #include "linux_config.h"
+#define UNIX_NAME "Linux"
 #elif defined(UNIX_IRIX)
 #include "irix_config.h"
+#define UNIX_NAME "Irix"
 #elif defined(UNIX_CYGWIN32)
 #include "cygwin32_config.h"
+#define UNIX_NAME "CygWin32"
 #else
 #error
 #endif

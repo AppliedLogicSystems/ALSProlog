@@ -933,7 +933,7 @@ als_mem_init(file,offset)
 	amheader.integ_als_mem = &als_mem;
 	amheader.integ_als_mem_init = als_mem_init;
 	amheader.integ_w_unify = w_unify;
-	strcpy(amheader.integ_version_num, SysVersionNum);
+	strcpy(amheader.integ_version_num, VERSION_STRING);
 	strcpy(amheader.integ_processor, ProcStr);
 	strcpy(amheader.integ_minor_os, MinorOSStr);
 
@@ -1808,7 +1808,7 @@ ss_restore_state(filename,offset)
     if (hdr.integ_als_mem != &als_mem ||
 		hdr.integ_als_mem_init != als_mem_init ||
 		hdr.integ_w_unify != w_unify ||
-		strcmp(hdr.integ_version_num, SysVersionNum) != 0 ||
+		strcmp(hdr.integ_version_num, VERSION_STRING) != 0 ||
 		strcmp(hdr.integ_processor, ProcStr) != 0 ||
 		strcmp(hdr.integ_minor_os, MinorOSStr) != 0)
 	fatal_error(FE_SS_INTEGRITY,0);
