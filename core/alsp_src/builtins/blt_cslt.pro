@@ -1026,6 +1026,7 @@ attempt_load_source_object(CanonSrcPath,BaseFile,OPath,FCOpts,FileMgr)
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/ 
 :- module_closure(simple_load,1).
+export simple_load/2.
 simple_load(Mod, FullPath)
 	:-
 	path_directory_tail(FullPath,Dir,FileTail),
