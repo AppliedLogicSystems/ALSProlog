@@ -64,7 +64,9 @@ BUILTINS = blt_frez.pro  blt_std.pro   filepath.pro   ra_basis.pro \
    blt_evt.pro   blt_shl.pro   dcgs.pro      math88k.pro \
    blt_flgs.pro   blt_shlr.pro   debugger.pro  module.pro
 
-all : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro testrun
+default : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro
+
+all : default testrun
 
 alspro_b : alsdir $(MAIN_OBJECTS) $(LIB_OBJECTS)
 	$(CC) -o alspro_b $(MAIN_OBJECTS) $(LIB_OBJECTS) $(LIBS)
