@@ -1193,42 +1193,36 @@ sw_common:
 		DOFAIL;
 	    }
 
-CASE(W_TRY_ME):		/* try_me_else [align],addr    */
-	    mr_TR -= 4;		/* create a choice point */
+CASE(W_TRY_ME):					/* try_me_else [align],addr    */
+	    mr_TR -= 4;				/* create a choice point */
 	    cp_B(mr_TR) = mr_B;
 	    cp_SPB(mr_TR) = mr_SPB = mr_SP;
 	    cp_HB(mr_TR) = mr_HB = mr_H;
-	    cp_NC(mr_TR) = getaddr(DATASIZE);	/* save addr as next clause
-						 * addr
-						 */
+	    cp_NC(mr_TR) = getaddr(DATASIZE);	/* save addr as next clause addr */
 
 	    mr_B = mr_TR;
 	    P += 2 * DATASIZE;
 	    DISPATCH;
 
 CASE(W_TRY_ME_JUMP):
-	    mr_TR -= 4;		/* create a choice point */
+	    mr_TR -= 4;				/* create a choice point */
 	    cp_B(mr_TR) = mr_B;
 	    cp_SPB(mr_TR) = mr_SPB = mr_SP;
 	    cp_HB(mr_TR) = mr_HB = mr_H;
-	    cp_NC(mr_TR) = getaddr(DATASIZE);	/* save addr as next clause
-						 * addr
-						 */
+	    cp_NC(mr_TR) = getaddr(DATASIZE);	/* save addr as next clause addr */
 
 	    P = getaddr(2*DATASIZE);
 	    mr_B = mr_TR;
 	    DISPATCH;
 
-CASE(W_RETRY_ME):		/* retry_me_else  [align],L */
+CASE(W_RETRY_ME):				/* retry_me_else  [align],L */
 	    for (reg1 = mr_TR; reg1 < mr_B; reg1++) {	/* unwind trail */
 		*PWPTR(*reg1) = MMK_VAR(*reg1);
 	    }
-	    mr_TR = mr_B;	/* reset trail */
+	    mr_TR = mr_B;			/* reset trail */
 	    mr_H = mr_HB;
 	    mr_SP = mr_E = mr_SPB;
-	    cp_NC(mr_B) = getaddr(DATASIZE);	/* modify nextclause addr in
-						 * choice pt
-						 */
+	    cp_NC(mr_B) = getaddr(DATASIZE);	/* modify nextclause addr in choice pt */
 	    P += 2 * DATASIZE;
 	    DISPATCH;
 

@@ -165,7 +165,6 @@ PI_prolog_init(win_str, argc, argv)
     extern Code *wm_panic;
 #endif /* Portable */
 
-
     /*
      * malloc and then free an area at the outset so that the malloc
      * allocator will have some space to work with.  The hope is that
@@ -572,7 +571,7 @@ assert_command_line(count, args)
  * absolute_pathname tests to see if we have an absolute pathname or not
  */
 
-#if defined(DOS) || defined(AtariOS)
+#if defined(DOS) || defined(AtariOS) || defined(__GO32__)
 
 static int
 absolute_pathname(name)

@@ -120,11 +120,11 @@ a pointer to a heap object (structure or list)
 Some simple tag checks.
 */
 
-#define M_ISVAR(v)	(!MTP_TAG(v))
+#define M_ISVAR(v)		(!MTP_TAG(v))
 #define M_ISLIST(v)     (MTP_TAG(v) == MTP_LIST)
 #define M_ISSTRUCT(v)   (MTP_TAG(v) == MTP_STRUCT)
-#define M_ISSYM(v)	(MTP_CONSTTAG(v) == MTP_SYM)
-#define M_ISUIA(v)	(MTP_CONSTTAG(v) == MTP_UIA)
+#define M_ISSYM(v)		(MTP_CONSTTAG(v) == MTP_SYM)
+#define M_ISUIA(v)		(MTP_CONSTTAG(v) == MTP_UIA)
 
 /*
 Some misc macros.

@@ -14,7 +14,7 @@
 
 #include "defs.h"
 
-#ifdef UNIX
+#if defined(UNIX) && !defined(__GO32__)
 
 #include <sys/param.h>
 

@@ -1,16 +1,15 @@
-/*
- * disassem.c           -- byte / threaded code disassembler
+/*========================================================================*
+ * 				disassem.c           
  *      Copyright (c) 1987-94 Applied Logic Systems, Inc.
  *
+ *		-- byte / threaded code disassembler
+ *
  * Author: Kevin A. Buettner
- * Creation: 2/17/87
+ * Creation: 2/17/87 -- for 680x0 architecture
  * Revision History:
- * 	1/11/88 : Keith Hughes -- Munged beyond all recognition to make
- *                                into a 386 disassembler.
  *	5/26/92 : Prabhakaran Raman -- byte code version
  *	9/15/93 : Kevin Buettner -- Threaded code and small improvements
- *
- */
+ *========================================================================*/
 
 #include "defs.h"
 #include "coerce.h"
@@ -26,6 +25,7 @@
 #define T  7			/* table */
 #define O  8			/* opsize data */
 #define P  9			/* procedure name */
+#define S  10			/* skip over (1) */
 
 #define ABMOP(op,p1,p2,p3,p4) {#op,{p1,p2,p3,p4}},
 
@@ -73,12 +73,27 @@ list_asm(addr, n)
     long  i, ilength, need_comma;
     enum AbstractMachineOps instr;
 
+	printf("startaddr=%x  stopaddr=%x  codelen=%d\n",addr,stopaddr,n),
+	fflush(stdout);
+
     for (ip = addr; ip < stopaddr; ) {
 
 	instr = decode_instr(*ip);
 	ilength = 1;
 
-	printf("%x: %-16s", (long) ip, ic_array[instr].instr_name);
+/*	printf(">%08.0o %08.0o %08.0o %08.0o %08.0o %08.0o %08.0o %08.0o \n",
+		*ip,*(ip+1),*(ip+2),*(ip+3),*(ip+4),*(ip+5),*(ip+6),*(ip+7) );
+*/
+
+	if ((instr < 0) || (instr > ICNUM)) 
+	{
+		printf("[%03.0d]%x: BAD INSTRUCTION: Content=%08.0o\n", (int)(ip-addr), ip, *ip);
+		break;
+	}
+
+/*	printf("[%02.0d]%x[%03.0o|% 3.0d]: %-16s",(int)(ip-addr),ip,instr,instr,ic_array[instr].instr_name); */
+	printf("[%02.0d]%x: %-16s",(int)(ip-addr),ip,ic_array[instr].instr_name); 
+	fflush(stdout);
 
 #define COMMA if (need_comma++) printf(",\t")
 
@@ -149,6 +164,11 @@ list_asm(addr, n)
 		    printf("%s",w_getnamestring((Code *) *(ip + ilength),buf));
 		    ilength += sizeof (long) / sizeof (Code);
 		    break;
+
+		case S:	/* Skip: Padding */
+		    ilength += sizeof (long) / sizeof (Code);
+		    break;
+		
 		}
 
 		default:

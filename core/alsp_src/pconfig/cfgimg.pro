@@ -694,6 +694,12 @@ add_pfls(SpecPath+InitFilesSpec, DefltTop, WSName, AccumProfls, NewAccumProfls)
 	obtain_comp_files(FilesSpec, InitPath, Path, AddlFiles),
 	NewAccumProfls = [AddlFiles | AccumProfls]. 
 	
+add_pfls(DirectFileSpec, DefltTop, WSName, AccumProfls, NewAccumProfls)
+	:-
+	atom(DirectFileSpec),
+	extendPath(DefltTop, DirectFileSpec, FileSpec),
+	NewAccumProfls = [[FileSpec] | AccumProfls]. 
+
 organize_path(SpecPath/ContPath, DefltTop, WSName, Path)
 	:-!,
 	organize_path(SpecPath, DefltTop, WSName, InitPath),

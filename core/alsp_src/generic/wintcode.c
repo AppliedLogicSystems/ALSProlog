@@ -1,12 +1,12 @@
-/*
- * wintcode.c           -- code area interface
+/*===========================================================*
+ * wintcode.c
  *      Copyright (c) 1986-1994 Applied Logic Systems
+ *
+ *		-- Functions for manipulating the code area & relatives
  *
  * Author: Kevin A. Buettner
  * Creation Date: 8/14/86
- * Revision History:
- *      Revised: mm/dd/yy
- */
+ *===========================================================*/
 
 #include "defs.h"
 

@@ -121,12 +121,12 @@
 #if defined(HAVE_VM_ALLOCATE) && defined(HAVE_VM_PROTECT)
 #define MACH_SUBSTRATE 1
 #undef HAVE_MMAP
-#endif
+#endif /* HAVE_VM_ALLOCATE && HAVE_VM_PROTECT */
 
 
 #if HAVE_LIBC_H		/* NeXT has this */
 #include <libc.h>	/* Get prototypes for C library */
-#endif
+#endif /* HAVE_LIBC_H */
 
 #if	defined(HAVE_STDLIB_H)
 #include <stdlib.h>
@@ -136,25 +136,25 @@
 
 #if defined(HAVE_STDARG_H)
 #include <stdarg.h>
-#else
+#else 
 #include <varargs.h>
-#endif
+#endif /* HAVE_STDARG_H */
 
 #if defined(HAVE_STDDEF_H)
 #include <stddef.h>
-#endif
+#endif /* HAVE_STDDEF_H */
 
 #if STDC_HEADERS || HAVE_STRING_H
 #include <string.h>
   /* An ANSI string.h and pre-ANSI memory.h might conflict.  */
 #if !STDC_HEADERS && HAVE_MEMORY_H
 #include <memory.h>
-#endif /* not STDC_HEADERS and HAVE_MEMORY_H */
+#endif 		/* not STDC_HEADERS and HAVE_MEMORY_H */
 #else /* not STDC_HEADERS and not HAVE_STRING_H */
 #if HAVE_STRINGS_H
 #include <strings.h>
   /* memory.h and strings.h conflict on some systems */
-#endif
+#endif		/* HAVE_STRINGS_H */
 #endif /* not STDC_HEADERS and not HAVE_STRING_H */
 
 
@@ -166,27 +166,28 @@
 #if defined(__STDC__)
 #define CONST const
 #define PARAMS(arglist) arglist
-#else
+#else 		/* !__STDC__ */
 #define CONST
 #define PARAMS(arglist) ()
-#endif
+#endif		/* __STDC__ */
 #endif /* PARAMS */
 
 #ifdef UNIX
-/* include some standard files */
+			/* include some standard files */
 #include <sys/types.h>
+
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
+#endif		/* HAVE_SYS_TIME_H */
 #ifdef HAVE_SYS_TIMES_H
 #include <sys/times.h>
-#endif
+#endif		/* HAVE_SYS_TIMES_H */
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
+#endif		/* HAVE_SYS_STAT */
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
+#endif		/* HAVE_UNISTD_H */
 #include <signal.h>
 
 /*
@@ -194,11 +195,10 @@
  */
 #if defined(HAVE_SIGACTION) && !defined(SA_SIGINFO)
 #undef HAVE_SIGACTION
-#endif
+#endif	/* HAVE_SIGACTION && !SA_SIGINFO */
 
 #include "missing.h"		/* extern decls missing from header files */
-#endif
-
+#endif	/* UNIX */
 
 /*
  * Define the system dependent directory and path separators for parsing path
@@ -210,7 +210,11 @@
  */
 
 #if	defined(UNIX)
+#ifdef __GO32__
+#define PATH_SEPARATOR	';'
+#else
 #define PATH_SEPARATOR	':'
+#endif	/* __GO32__ */
 #define DIR_SEPARATOR	'/'
 
 #elif	defined(VMS)
@@ -231,7 +235,6 @@
 
 #endif
 
-
 #if defined(HAVE_LIBDL) || defined(HAVE_LIBLD)
 /*
  * DynamicForeign indicates that dynamic loading of foreign code is
@@ -239,9 +242,7 @@
  */
 
 #define DynamicForeign 1
-#endif
-
-
+#endif	/* HAVE_LIBDL || HAVE_LIBLD */
 
 /*
  * Stuff from memory.h:
@@ -277,17 +278,16 @@
  */
 #ifndef HAVE_STRTOK
 extern char *strtok PARAMS(( char *s1, const char *s2 ));
-#endif
+#endif /* HAVE_STRTOK */
 #ifndef HAVE_STRDUP
 extern char *strdup PARAMS(( const char *s1 ));
-#endif
+#endif /* HAVE_STRDUP */
 #ifndef HAVE_STRSPN
 extern size_t strspn PARAMS(( const char *s1, const char *s2 ));
-#endif
+#endif /* HAVE_STRSPN */
 #ifndef HAVE_STRCSPN
 extern size_t strcspn PARAMS(( const char *s1, const char *s2 ));
-#endif
-
+#endif /* HAVE_STRCSPN */
 
 /*
  * Declare the als memory allocation function and associated helpers
@@ -349,7 +349,7 @@ extern	int	wm_rungoal	PARAMS(( PWord, PWord ));
 extern	int	load_foreign	PARAMS(( char *, char *, char * ));
 
 #ifdef DynamicForeign
-/* lforeign.c */
+		/* lforeign.c */
 extern	void (*	load_object	PARAMS(( char *, char *, char * )) ) PARAMS((void));
 extern	void	foreign_shutdown PARAMS(( void ));
 #endif /* DynamicForeign */

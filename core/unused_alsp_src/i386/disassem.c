@@ -1,11 +1,15 @@
-/*
- * disassem.c   -- Disassembler for 386 System 
+/*=====================================================================*
+ *			disassem.c
+ *	Copyright (c) 1987 Applied Logic Systems, Inc.
  *
- * Copyright (c) 1987 Applied Logic Systems, Inc.
+ *		-- disassembler for Intel 80x86 systems (x > 2)
  *
- * Author: Ilyas Cicekli
+ * History:
+ * 	1/11/88 : Keith Hughes 
+ *			-- Original version created from 680x0 version
+ * Revised: Ilyas Cicekli
  * Date  : 4/20/89  
- */
+ *=====================================================================*/
 
 #include "config.h"
 

@@ -8,7 +8,14 @@
 
 #include "defs.h"
 
-#ifdef DOS
+#if defined(DOS) || defined(__GO32__)
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+
+#ifndef MAXPATHLEN
+#define MAXPATHLEN FILENAME_MAX
+#endif
 
 /*
  * $getDirEntries/3 (--> getDirEntries/3 )
@@ -48,8 +55,13 @@ getDirEntries()
 
     /* printf("dirName=%s pattern=%s \n",dirName,pattern); */
 
+#ifdef HAVE_REGCMP
+    if ((regexComp = regcomp(pattern, 0)) != NULL)
+	PI_FAIL;
+#else
     if (re_comp(pattern) != NULL)
 	PI_FAIL;
+#endif
 
     /* printf("pattern compiled\n"); */
 
@@ -58,14 +70,26 @@ getDirEntries()
     /* printf("directory %s opened\n",dirName); */
 
     for (dirEntry = readdir(dirp); dirEntry != NULL; dirEntry = readdir(dirp)) {
+#ifdef HAVE_REGCMP
 	if ((regexVal = re_exec(dirEntry->d_name)) == 1) {
+#else
+	if ((regexVal = re_exec(dirEntry->d_name)) == 1) {
+#endif
 	    PI_makelist(&consCell, &consType);
-	    if (!PI_unify(v3, t3, consCell, consType))
+	    if (!PI_unify(v3, t3, consCell, consType)) {
+#ifdef HAVE_REGCMP
+	        free(regexComp);
+#endif
 		PI_FAIL;
+		}
 	    PI_gethead(&head, &headType, consCell);
 	    PI_makeuia(&sym, &symType, dirEntry->d_name);
-	    if (!PI_unify(head, headType, sym, symType))
+	    if (!PI_unify(head, headType, sym, symType)){
+#ifdef HAVE_REGCMP
+	        free(regexComp);
+#endif
 		PI_FAIL;
+		}
 	    PI_gettail(&v3, &t3, consCell);
 
 	    /* printf("regexVal=%d ok-dirEntry=%d dirEntry->d_name=%s\n",
@@ -74,6 +98,9 @@ getDirEntries()
 	}
     }
 
+#ifdef HAVE_REGCMP
+    free(regexComp);
+#endif
     PI_makesym(&nil, &nilType, "[]");
 
     /*
@@ -139,10 +166,12 @@ getFileStatus()
 	fileType = 4;
 #ifndef	MOT_DELTA68k
 #ifndef SCO_UNIX
+#ifndef __GO32__
     else if (S_ISLNK(fileMode))
 	fileType = 5;
     else if (S_ISSOCK(fileMode))
 	fileType = 6;
+#endif __GO32__
 #endif /* SCO_UNIX */
 #endif /* MOT_DELTA68k */
     else if (S_ISFIFO(fileMode))
@@ -177,7 +206,7 @@ getFileStatus()
 
     /* File Blocks Allocated: */
     PI_getargn(&arg, &argType, pstructure, 5);
-    if (!PI_unify(arg, argType, fileStats.st_blocks, PI_INT))
+    if (!PI_unify(arg, argType, (fileStats.st_size+511)/512, PI_INT))
 	PI_FAIL;
 
     PI_SUCCEED;
@@ -412,9 +441,55 @@ punlink()
     PI_SUCCEED;
 }
 
+int
+canonicalize_pathname()
+{
+    PWord v1, v2, vp;
+    int   t1, t2, tp;
+    char *inpath;
+    char *outpath;
+    char *filename;
+    char filbuf[100];
+
+    PI_getan(&v1, &t1, 1);
+    PI_getan(&v2, &t2, 2);
+
+    if (getstring((UCHAR **)&inpath, v1, t1))
+    {
+      _fixpath(inpath, filbuf);
+      outpath = strdup(filbuf);
+      strcat(filbuf, "/.");
+      if (access(filbuf, 0))
+      {
+	filename = strrchr(outpath, '/');
+	*filename++ = 0;
+      }
+    }
+    else
+      fprintf(stderr, "dj: no getstring\n");
+
+    if (filename) {
+	int plen = strlen(outpath);
+	char *hs;
+	PI_allocuia(&vp, &tp, (int)(plen+strlen(filename)+1));
+	hs = PI_getuianame(0,vp,0);
+	memcpy(hs,outpath,(size_t)plen);
+	hs[plen] = '/';
+	strcpy(hs+plen+1,filename);
+    }
+    else
+	PI_makeuia(&vp, &tp, outpath);
+
+    if (PI_unify(v2, t2, vp, tp))
+	PI_SUCCEED;
+    else
+	PI_FAIL;
+}
+
 pgetpid()
 {
     PWord v1, vpid;
+    int t1;
     if (PI_unify(v1, t1, 0, PI_INT))
 	PI_SUCCEED;
     else
@@ -435,10 +510,11 @@ PI_PDEFINE("chdir", 1, pchdir, "_pchdir")
 PI_PDEFINE("read_link", 2, read_link, "_read_link")
 PI_PDEFINE("make_symlink", 2, make_symlink, "_make_symlink")
 #endif /* HAVE_SYMLINK */
+    PI_PDEFINE("canonicalize_pathname", 2, canonicalize_pathname, "_canonicalize_pathname")
     PI_PDEFINE("getpid",1,pgetpid,"_pgetpid")
 PI_END
 /* *INDENT-ON* */
-
+void
 init_fsutils()
 {
     PI_INIT;

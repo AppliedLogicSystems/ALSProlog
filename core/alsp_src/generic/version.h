@@ -48,8 +48,8 @@
 #ifdef Portable
 #ifdef Threaded
 #define SysName "ALS-Prolog (Threaded)"
-#else	/* Threaded */
-#define SysName "ALS-Prolog (Portable)"
+#else	/* !Threaded  -> Byte */
+#define SysName "ALS-Prolog (Byte)"
 #endif	/* Threaded */
 #define SysManufacturer "generic"
 #endif

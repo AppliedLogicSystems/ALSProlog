@@ -1,19 +1,50 @@
-/*
- * bdb.c   -- Database Prolog builtins defined in C.
- *
+/*=============================================================*
+ *		bdb.c   
  * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986 by Applied Logic Systems
+ * Copyright (c) 1986-94 by Applied Logic Systems
+ *
+ *		-- Database Prolog builtins defined in C.
  *
  * Program Author:  Kevin A. Buettner
  * Creation:  11/14/84
  * Revision History: (fixes, not addition of new builtins)
- *      06/28/85,       K. Buettner     -- Conversion to wam and compiled prolog
- *      09/12/85,       K. Buettner     -- arithmetic predicates moved to
- *                                         separate file.
- *      01/28/86,       K. Buettner     -- IBM PC conversion
- *      5/4/89,         K. Hughes and K. Buettner
- *                                      -- split off from built.c
- */
+ *   06/28/85: K. Buettner  -- Conversion to wam and compiled prolog
+ *   09/12/85: K. Buettner  -- arithmetic predicates moved to separate file.
+ *   01/28/86: K. Buettner  -- IBM PC conversion
+ *   05/04/89: K. Hughes and K. Buettner -- split off built.c
+ *=============================================================*/
+
+/*-------------------------------------------
+	Contents:
+		pbi_abolish()
+		pbi_abolish_clausegroup()
+		pbi_asserta()
+		pbi_assertz()
+		pbi_addclause()
+		pbi_execcommand()
+		pbi_erase()
+		pbi_icode()
+		pbi_index_proc()
+		pbi_massively_abolish_clausegroup()
+		pbi_nextproc()
+		pbi_procinfo()
+		pbi_clauseinfo()
+		pbi_dynamic()
+		pbi_exported_proc()
+		pbi_next_module()
+		pbi_listasm_clause()
+		pbi_listasm_ntblentry()
+		pbi_firstargkey()
+		pbi_resolve_module()
+		pbi_push_clausegroup()
+		pbi_pop_clausegroup()
+		pbi_collectcode()
+		pbi_libbreak()
+ *------------------------------------------*/
+/*-------------------------------------------
+	Special:
+		pbi_cptx()
+ *------------------------------------------*/
 
 #include "defs.h"
 #include "wintcode.h"
@@ -21,7 +52,6 @@
 #include "icodegen.h"
 #include "cutmacro.h"
 #include "compile.h"
-
 
 int
 pbi_abolish()
@@ -46,7 +76,6 @@ pbi_abolish()
     else
 	FAIL;
 }
-
 
 int
 pbi_abolish_clausegroup()
@@ -73,7 +102,6 @@ pbi_abolish_clausegroup()
     else
 	FAIL;
 }
-
 
 
 extern long *aib_clause_addr;
@@ -510,13 +538,14 @@ pbi_listasm_clause()
     int   t1;
     PWord na;
     long *ca;
+    int   codesize;
 
     w_get_An(&v1, &t1, 1);
 
     if ((ca = validate_dbref(v1, t1, &na)) != 0) {
+	codesize = (int) ((sizeCode(ca) + (WCI_CLAUSECODE - WCI_CHOICECODE)) * (sizeof (long) / sizeof (Code)));
 	list_asm(choiceCode(ca),
-		 (int) ((sizeCode(ca) + (WCI_CLAUSECODE - WCI_CHOICECODE)) *
-		        (sizeof (long) / sizeof (Code))));
+		     (int) ((sizeCode(ca) + (WCI_CLAUSECODE - WCI_CHOICECODE)) * (sizeof (long) / sizeof (Code))));
 	SUCCEED;
     }
     else
@@ -719,4 +748,96 @@ pbi_libbreak()
     }
     else
 	FAIL;
+}
+
+/*------------- SPECIAL -----------------------*/
+
+int
+pbi_cptx()
+{
+	printf("Tr_b=%x\nB=   %x\nTR=  %x\nH=   %x\nHB=  %x\nH_b= %x\n",
+			(int)wm_trailbase,(int)wm_B,(int)wm_TR,
+			(int)wm_H,(int)wm_HB,(int)wm_heapbase);
+	SUCCEED;
+}
+
+int
+pbi_swp_tr()
+{
+  PWord **CurT;
+  PWord BStop, Tagg, CTagg,*STRADDR;
+  int FID;
+  char *FSt;
+
+	BStop = (PWord) wm_B;
+	printf("BStop (=B) =%x\n",BStop);
+
+	for (CurT = (PWord **)wm_TR; CurT < BStop; CurT += 1)
+	{
+    	Tagg =  MTP_TAG( **CurT );
+		printf("%x->%x - (%x)", (int)CurT,(int)*CurT,(int)**CurT);
+    	switch (Tagg) {
+		case MTP_UNBOUND:
+			printf("unbound\n");
+			break;
+		case MTP_STRUCT:
+			STRADDR = MSTRUCTADDR(**CurT);
+			FID = MFUNCTOR_TOKID(*STRADDR);
+			FSt = toktable[FID].tkname;
+			printf("structure(%x)-fctr=tokid(%d) %s/%d\n",STRADDR,
+							FID,FSt,MFUNCTOR_ARITY(*STRADDR));
+			
+			break;
+		case MTP_LIST:
+			printf("list\n");
+			break;
+		case MTP_CONST:
+		{
+			CTagg = (int)MTP_CONSTTAG( (**CurT ) );
+			printf("constant: (%d)",CTagg);
+			switch (CTagg) {
+			case MTP_INT:
+				printf("-integer=%d\n",MINTEGER(**CurT));
+				break;
+			case MTP_SYM:
+				printf("-symbol=%d\n",MSYMBOL((**CurT)));
+				break;
+			case MTP_FENCE:
+				printf("-fence\n");
+				break;
+			case MTP_UIA:
+				printf("-uia\n");
+				break;
+			default:
+				printf("-unknown constant\n");
+			}
+		}
+			break;
+		default:
+			printf("unknown quantity: %d\n",Tagg);
+		}
+	}
+	SUCCEED;
+  
+}
+
+int
+pbi_walk_cps()
+{
+  PWord *CurP, *Stop;
+
+	CurP = (PWord) wm_B;
+	Stop = (PWord *)wm_trailbase;
+	printf("wm_TR=%x  Init CurP (=B) =%x  wm_TRbase=%x\n",CurP,wm_TR,Stop);
+
+		/* see chpt.h for choice-point macros */
+	while (CurP != 0) {
+		printf("curP=%x  prevB=%x  spb=%x  hb=%x  nxtc= %x\n",
+				(int)CurP, (int)chpt_B(CurP), (int)chpt_SPB(CurP),
+				(int)chpt_HB(CurP), (int)chpt_NextClause(CurP)  );
+
+	CurP = (PWord *)chpt_B(CurP);
+	}
+	SUCCEED;
+
 }

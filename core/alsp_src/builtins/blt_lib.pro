@@ -120,3 +120,4 @@
 
 :-builtins:libhide(builtins,['library',cmpdirs], [cmpdirs/3] ).
 
+:-builtins:libhide(builtins,['library',cref], [cref/1,cref/2] ).

@@ -524,7 +524,7 @@ pckg_add_default_proc(tokid, arity)
     int   i;
 
     if (default_procmax >= MAXDEFPROCS)
-	fatal_error(FE_FULL_DEFPROC);
+	fatal_error(FE_FULL_DEFPROC, 0);
 
     /*
      * Check whether it is already there or not.

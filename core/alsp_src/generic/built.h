@@ -150,6 +150,10 @@ extern	int	pbi_listasm_ntblentry	PARAMS(( void ));
 extern	int	pbi_push_clausegroup	PARAMS(( void ));
 extern	int	pbi_pop_clausegroup	PARAMS(( void ));
 extern	int	pbi_collectcode	PARAMS(( void ));
+	/* SPECIAL */
+extern	int	pbi_cptx	PARAMS(( void ));
+extern	int	pbi_swp_tr	PARAMS(( void ));
+extern	int	pbi_walk_cps	PARAMS(( void ));
 
 /* bdbg.c */
 extern	int	pbi_dbg_nospy	PARAMS(( void ));

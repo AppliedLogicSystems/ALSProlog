@@ -19,6 +19,9 @@
 #include <unistd.h>
 #endif
 
+#ifdef __GO32__
+#include <process.h>
+#endif
 
 int
 pbi_access()
@@ -94,6 +97,34 @@ pbi_system()
     if (getstring(&str, v, t)
 	|| (t == WTP_LIST 
 	    && list_to_string((str = (char *) wm_H + 1), v, wm_normal - 256))) {
+#if defined(DOS) || defined(__GO32__)
+      char *cp;
+      int switching=1, switched=0;
+      for (cp=str; *cp; cp++)
+      {
+	switch (*cp)
+	{
+	case ' ':
+	case '\t':
+	case '\\':
+	  if (switched)
+	    switching = 0;
+	  break;
+	case '>':
+	case '<':
+	case '|':
+	  switching = 1;
+	  switched = 0;
+	  break;
+	case '/':
+	  if (switching)
+	    *cp = '\\';
+	default:
+	  switched = 1;
+	  break;
+	}
+      }
+#endif
 	system((char *) str);
 	SUCCEED;
     }

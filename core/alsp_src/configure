@@ -1,5 +1,5 @@
 #!/bin/sh
-# Guess values for system-dependent variables and create Makefiles.
+# Guess values for system-dependent variables and create makefiles.
 # Generated automatically using autoconf version 1.11 
 # Copyright (C) 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
@@ -379,7 +379,7 @@ rm -f conftest*
 test -n "$silent" || echo "checking how to run the C preprocessor"
 if test -z "$CPP"; then
   # This must be in double quotes, not single quotes, because CPP may get
-  # substituted into the Makefile and ``${CC-cc}'' will simply confuse
+  # substituted into the makefile and ``${CC-cc}'' will simply confuse
   # make.  It must be expanded now.
   CPP="${CC-cc} -E"
   cat > conftest.${ac_ext} <<EOF
@@ -1718,7 +1718,7 @@ if mkdir conftestdir; then
 acfindx:
 	@echo 'ac_im_incroot="${INCROOT}"; ac_im_usrlibdir="${USRLIBDIR}"; ac_im_libdir="${LIBDIR}"'
 EOF
-  if (xmkmf) >/dev/null 2>/dev/null && test -f Makefile; then
+  if (xmkmf) >/dev/null 2>/dev/null && test -f makefile; then
     no_x=
     # GNU make sometimes prints "make[1]: Entering...", which would confuse us.
     eval `make acfindx 2>/dev/null | grep -v make`
@@ -2002,7 +2002,7 @@ test -n "$verbose" && echo "	extra X libraries: $X_EXTRA_LIBS"
 findstddefs:
 	@echo 'im_std_defines="${STD_DEFINES}"'
 EOF
-		  if (xmkmf) >/dev/null 2>/dev/null && test -f Makefile; then
+		  if (xmkmf) >/dev/null 2>/dev/null && test -f makefile; then
 		    # GNU make sometimes prints "make[1]: Entering...", which
 		    # would confuse us.
 		    eval `make findstddefs 2>/dev/null | grep -v make`
@@ -2349,7 +2349,7 @@ rm -f conftest*
 done
 
 
-###	output Makefile and config.h
+###	output makefile and config.h
 
 # The preferred way to propogate these variables is regular @ substitutions.
 if test -n "$prefix"; then
@@ -2408,7 +2408,7 @@ do
   esac
 done
 
-trap 'rm -f Makefile bld-port/Makefile bld-natv/Makefile config.d; exit 1' 1 2 15
+trap 'rm -f makefile bld-port/makefile bld-natv/makefile config.d; exit 1' 1 2 15
 ARCH='$ARCH'
 OS='$OS'
 LN_S='$LN_S'
@@ -2435,7 +2435,7 @@ cat >> config.status <<\EOF
 
 ac_given_srcdir=$srcdir
 
-CONFIG_FILES=${CONFIG_FILES-"Makefile bld-port/Makefile bld-natv/Makefile config.d"}
+CONFIG_FILES=${CONFIG_FILES-"makefile bld-port/makefile bld-natv/makefile config.d"}
 for ac_file in .. ${CONFIG_FILES}; do if test "x$ac_file" != x..; then
   # Remove last slash and all that follows it.  Not all systems have dirname.
   ac_dir=`echo $ac_file|sed 's%/[^/][^/]*$%%'`

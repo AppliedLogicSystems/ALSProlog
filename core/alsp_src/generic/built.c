@@ -193,6 +193,11 @@ static struct blt_struct {
 	BLT("$procinfo", 6, pbi_procinfo, "_pbi_procinfo"),
 	BLT("abolish", 3, pbi_abolish, "_pbi_abolish"),
 	BLT("abolish_clausegroup", 4, pbi_abolish_clausegroup, "_pbi_abolish_clausegroup"),
+		/* SPECIAL */
+	BLT("cptx", 0, pbi_cptx, "_pbi_cptx"),
+	BLT("swp_tr", 0, pbi_swp_tr, "_pbi_swp_tr"),
+	BLT("walk_cps", 0, pbi_walk_cps, "_pbi_walk_cps"),
+
 #ifdef SCO_UNIX			/* procedure names must be < 32 chars */
 	BLT("massively_abolish_clausegroup", 1, pbi_massively_abolish_clausegroup,
 	    "_pbi_massively_abolish_clausegro"),

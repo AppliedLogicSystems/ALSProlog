@@ -15,7 +15,7 @@
 /* Define Threaded to be 1 if threaded code interpreter is desired -- must
  * use gcc to get threaded code interpreter
  */
-#if __GNUC__ >= 2
+#if __GNUC__ >= 2 && !defined(Bytecode)
 #define Threaded	1
 #endif
 

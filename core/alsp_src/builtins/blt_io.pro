@@ -321,7 +321,6 @@ load(FileName,Type,CanonPath,Nature)
 	      %% Propogate failure
 	    fail
 	),
-%write( load_canon(CanonPath,Type,Nature) ),nl, flush_output,
 	load_canon(CanonPath,Type,Nature),
 	!,
 	set_current_consult_directory(OldCCD).
@@ -384,7 +383,6 @@ load_canon(Path,Type,Nature)
 	RFlag1 is RFlag0 \/ Type,
 	set_reconsult_flag(RFlag1),
 	load_canon_reconsult(RFlag1,CG),
-%write(load3(Ext,Path,Type,Nature)),nl,flush_output,
 	load3(Ext,Path,Type,Nature),
 	set_reconsult_flag(RFlag0),
 	pop_clausegroup(_).
@@ -469,6 +467,8 @@ load3(obp,OPath,Type,Nature)
 load3(no(extension),Path,Type,Nature) 
 	:-
 	exists_file(Path),
+	file_status(Path,Status),
+	dmember(type=regular,Status),
 	!,
 	load_source(Path,Type).
 
@@ -480,7 +480,6 @@ load3(no(extension),Path,Type,Nature)
 	:- !,
 	filePlusExt(Path,pro,SPath),
 	obpPath(Path,OPath),
-%	filePlusExt(Path,obp,OPath),
 	load4(SPath,OPath,Type,Nature).
 
 	%% The requested path explicity ended in a 'pro' extension, so 
@@ -513,6 +512,8 @@ load4(SPath,OPath,Type,_)
 load4(SPath,OPath,Type,_) 
 	:-
 	exists_file(SPath),
+	file_status(Path,Status),
+	dmember(type=regular,Status),
 	!,
 	load_source_object(SPath,OPath).
 
@@ -544,7 +545,6 @@ load4_checkstatus(2,SPath,OPath) :-	%% FLOAD_ILLOBP
  *-----------------------------------------------------------------------*/
 load_source(Path,Type) :-
 	obp_push_stop,
-%write(calling_consult_source(Path,NErrs)),nl,flush_output,
 	consult_source(Path,NErrs),
 	obp_pop,
 	!.
@@ -585,7 +585,6 @@ load_source_object(SPath,OPath)
  *-----------------------------------------------------------------------*/
 consult_source(Path,NErrs) 
 	:- 
-%	xconsult:xconsult(Path,NErrs).
 	xconsult(Path,NErrs).
 
 /*-----------------------------------------------------------------------*
@@ -724,16 +723,12 @@ printf_opt(Format,ArgList,Options) :-
 printf(Stream_or_alias,Format,ArgList) :-
 	sio:output_stream_or_alias_ok(Stream_or_alias, Stream),
 	printf_check_format(Format, FormatList),
-%pbi_write(	printf0(FormatList,Stream,ArgList) ),
-%pbi_nl,pbi_ttyflush,
 	printf0(FormatList,Stream,ArgList,[]).
 
 printf(Stream_or_alias,Format,ArgList,Options) :-
 	sio:output_stream_or_alias_ok(Stream_or_alias, Stream),
 	printf_check_format(Format, FormatList),
 	!,
-%pbi_write(	printf0(FormatList,Stream,ArgList,Options) ),
-%pbi_nl,pbi_ttyflush,
 	printf0(FormatList,Stream,ArgList,Options).
 
 printf_check_format(Var, _) :-
@@ -796,11 +791,7 @@ printf0([0'% | Format], Stream, [Arg | ArgList],Options) :-
 %%%%		Write any other character as is
 printf0([Char |Format], Stream, ArgList,Options) 
 	:-
-%pbi_write(pf0(Char)),pbi_ttyflush,
 	put_code(Stream,Char),
-%pbi_write('-pc-'),pbi_ttyflush,
-%flush_output(Stream),
-%pbi_write('+fo'),pbi_nl,pbi_ttyflush,
 	printf0(Format,Stream,ArgList,Options).
 
 

@@ -305,6 +305,7 @@ display_stats(Stream) :-
 
 :- make_hash_table('_libinfo').
 
+
 lib_load(Module,Call) 
 	:-
 	functor(Call,P,A),
@@ -334,18 +335,38 @@ force_libload_all(Files)
 force_libload_all([],_).
 force_libload_all([File|Files],DirDC) 
 	:-
-	'$atom_concat'(DirDC,File,FileName),
+	force_libload_file(File,DirDC),
+	force_libload_all(Files,DirDC).
+
+force_libload_file(File,DirDC)
+	:-
+	lib_path_rec(LibHeader,LibList),
+	dmember(File,LibList),
+	subPath(DirDCList,DirDC),
+	append(DirDCList,[LibHeader,File],XDirDCList),
+	subPath(XDirDCList,FileName),
 	als_advise('Loading %s\n',[FileName]),
 	(load(FileName,1,_,obp) ->
 		(pdel_libinfo(_,File), fail ; true),
 		als_advise('...loaded\n',[])
 		;
 		als_advise('\n!!WARNING File %s NOT LOADED!\n',[FileName])
-	),
-	force_libload_all(Files,DirDC).
+	).
+
+:-dynamic(lib_path_rec/2).
+
+lib_recording(LH,LT)
+	:-
+	lib_path_rec(LH,LT),
+	!.
+
+lib_recording(LH,LT)
+	:-
+ 	assert_at_load_time(lib_path_rec(LH,LT)).
 
 libhide(M,[LH|LT],PredList) 
 	:-
+	lib_recording(LH,LT),
 	directory_separator(DS),
 	mklibpath(LT,DS,LH,LibFileName),
 	libhide0(PredList,M,LibFileName).

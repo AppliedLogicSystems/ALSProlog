@@ -10,10 +10,12 @@
  *                                         WAM compiler parsing
  *	Revised:  11/14/90, kev		-- separation of unary and binary ops
  */
+#ifndef __parser_h_
+#define __parser_h_
 
 typedef struct tkentry_ {
-	unsigned char *tkname;	/* pointer to string which name of token */
-	unsigned short unop;	/* unary operator precedenc and assoc */
+	unsigned char *tkname;	/* pointer to string which is name of token */
+	unsigned short unop;	/* unary operator precedence and assoc */
 	unsigned short binop;	/* binary op precedence and assoc */
 } tkentry;
 
@@ -126,3 +128,5 @@ extern	void	parser_action	PARAMS(( int, pword ));
 extern	pword	cvt_term_to_rule PARAMS(( PWord, int ));
 
 #endif /* PARAMS */
+
+#endif /* __parser_h_ */

@@ -18,7 +18,7 @@
 #include <math.h>
 
 #ifdef DOS
-#include <stdefs.h>
+#include <stdef.h>
 #include <errno.h>
 #else  /* DOS */
 #ifdef VMS

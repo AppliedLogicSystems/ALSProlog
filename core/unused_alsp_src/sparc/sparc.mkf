@@ -1,0 +1,23 @@
+#
+# mh-sparc
+#	architecture specific makefile fragment for ALS Prolog on sparcs
+#
+
+acfiles_c =	cmp.c disassem.c icmath.c icode1.c icode2.c int.c uia.c
+acfiles_o =	$(acfiles_c:.c=.o)
+acfiles_h =	aconfig.h codegen.h machint.h mtypes.h
+
+$(acfiles_o):	$(defs_h)
+
+asfiles_sprc =	atomic.sprc call.sprc chpt.sprc compare.sprc cut.sprc \
+		domath.sprc functor.sprc \
+		ident.sprc interface.sprc interrupt.sprc \
+		sio.sprc unify.sprc
+
+asfiles_o =	$(asfiles_sprc:.sprc=.o)
+
+afiles_o =	$(acfiles_o) $(asfiles_o)
+
+asrcext = 	.sprc
+
+$(asfiles_o) :	atrans assembly.sprc

@@ -324,6 +324,10 @@ pbi_alarm()
     int   t1, t2;
     double dval, dinterval;
 
+#ifdef __GO32__
+    PI_FAIL;
+#else
+
 #ifdef HAVE_SETITIMER
     struct itimerval itv;
 
@@ -387,9 +391,9 @@ pbi_alarm()
     alarm((unsigned long) dval);
     (void) signal(SIGALRM, signal_handler);
 #endif /* HAVE_SETITIMER */
-
 #endif /* #ifndef DOS */
     PI_SUCCEED;
+#endif /* __GO32__ */
 }
 
 #if defined(SIGCHLD) || defined (SIGCLD)

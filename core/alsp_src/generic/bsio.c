@@ -1513,6 +1513,7 @@ sio_accept_socket_connection()
 int
 sio_rexec()
 {
+#ifndef __GO32__
     PWord v1, v2, v3, v4, v5, v6, v7;
     int   t1, t2, t3, t4, t5, t6, t7;
     char *rbuf, *wbuf, *ebuf;
@@ -1699,7 +1700,7 @@ sio_rexec()
 	SIO_FD(ebuf) = efd;
 	incr_fdrefcnt(efd);
     }
-
+#endif /* GO32 */
     SUCCEED;
 }
 

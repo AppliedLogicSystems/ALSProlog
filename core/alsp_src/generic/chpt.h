@@ -1,14 +1,13 @@
-/*
- * chpt.h
- *	Copyright (c) 1987-1993, Applied Logic Systems, Inc.
+/*====================================================================*
+ *			chpt.h
+ *	Copyright (c) 1987-1994, Applied Logic Systems, Inc.
  *
  * Author: Kevin A. Buettner
  * Created: 9/23/87 (out of a piece of gc.c)
  *
  * Note:  This file should probably be split up and put into the system
  * specific directories.
- *
- */
+ *====================================================================*/
 
 #ifndef _CHPT_H_INCLUDED_
 #define _CHPT_H_INCLUDED_ 1

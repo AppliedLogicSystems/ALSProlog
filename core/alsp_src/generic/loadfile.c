@@ -295,7 +295,7 @@ obp_open(fname)
     /*
      * Are we able to open .OBP file?
      */
-#if defined(DOS) || defined(AtariOS)
+#if defined(DOS) || defined(AtariOS) || defined(__GO32__)
     if ((obp_fp = fopen(fname, "w+b")) == NULL) {
 #else
     if ((obp_fp = fopen(fname, "w+")) == NULL) {	/* } for vi */
@@ -384,7 +384,7 @@ f_load(fname)
     unsigned short strsize;
     unsigned short binop, unop;
 
-#if defined(DOS) || defined(AtariOS)
+#if defined(DOS) || defined(AtariOS) || defined(__GO32__)
     if ((fp = fopen(fname, "rb")) != NULL) {
 #else
     if ((fp = fopen(fname, "r")) != NULL) {	/* } for vi */
