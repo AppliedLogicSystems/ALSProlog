@@ -1504,7 +1504,18 @@ CASE(W_P_UNSAFE):		/* put_unsafe_value src, dst  */
 	    DEREF(reg1);
 	    if (M_ISVAR(reg1) && reg1 < mr_SPB) {
 		TRAIL(reg1,1116);
+#if CW_INTEL_REGISTER_COLOR_BUG
+{
+	PWord *temp;
+	
+	temp = getreg(OPSIZE + REGSIZE);
+	*mr_H = MMK_VAR(mr_H);
+	*reg1 = *mr_H;
+	*temp = *reg1;
+}
+#else
 		*getreg(OPSIZE + REGSIZE) = *reg1 = *mr_H = MMK_VAR(mr_H);
+#endif
 		mr_H++;
 	    }
 	    else
@@ -1554,7 +1565,17 @@ CASE(W_P_YVAR_SE):
 	    DISPATCH;
 
 CASE(W_P_XVAR):		/* put_xvar dst      */
+#if CW_INTEL_REGISTER_COLOR_BUG
+{
+	PWord *temp;
+	
+	temp = getreg(OPSIZE);
+	*mr_H = MMK_VAR(mr_H);
+	*temp = *mr_H;
+}
+#else
 	    *getreg(OPSIZE) = *mr_H = MMK_VAR(mr_H);
+#endif
 	    mr_H++;
 	    P += OPSIZE + REGSIZE;
 	    DISPATCH;
