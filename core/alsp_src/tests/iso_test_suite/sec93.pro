@@ -70,7 +70,7 @@ test_93 :-
    log_nl, log('testing power  functor'),
    log_nl, log_nl,
    test_pow,
-   log('test pwer done, testing trig functors '),
+   log('test power done, testing trig functors '),
    log_nl,
    test_trig,
    log_nl, log('Done testing trig functors'), 
