@@ -48,7 +48,7 @@ use windows.
 
 default_read_eoln_type(_, universal).
 
-default_write_eoln_type(socket, crlf) :-!.
+default_write_eoln_type(socket, crlf) :- !.
 :-	als_system(L),
 	dmember(os=OS, L),
 	(OS=mswin32 -> assert(default_write_eoln_type(_, crlf))
@@ -630,6 +630,9 @@ check_source_sink_and_mode(sysV_queue(_),Mode) :-
 check_source_sink_and_mode(ssbq(_),Mode) :-
 	!,
 	check_mode(Mode,read_write_modes(Mode,_,_)).
+check_source_sink_and_mode(nsocket(_),Mode) :-
+	!,
+	check_mode(Mode,read_write_modes(Mode,_,_)).
 check_source_sink_and_mode(socket(_),Mode) :-
 	!,
 	check_mode(Mode,read_write_modes(Mode,_,_)).
@@ -835,6 +838,10 @@ open_stream(ssbq(Q_Name),Mode,Options,Stream)
 	:- !,
 	open_ssbq_stream(Q_Name,Mode,Options,Stream).
 
+open_stream(nsocket(Socket),Mode,Options,Stream) 
+	:- !,
+	open_nsocket_stream(Socket, Mode, Options, Stream).
+	
 open_stream(Socket,Mode,Options,Stream) 
 	:-
 	functor(Socket,socket,_),
@@ -1078,6 +1085,154 @@ target_node(write,Options,TargetNode) :-
 		/*------------*
 		 |   SOCKETS  |
 		 *------------*/
+
+/* Error checking */
+		 
+check_instantiation(Object) :- nonvar(Object).
+check_instantiation(Object) :- instantiation_error(2).
+
+check_var(V) :- var(V).
+check_var(V) :- type_error(variable, V, 2).
+
+check_atom(A) :- atom(A).
+check_atom(A) :- type_error(atom, A, 2).
+
+check_integer(I) :- integer(I).
+check_integer(I) :- type_error(integer, I, 2).
+
+atom_const_error(Object, Domain) :- atomic(Object), domain_error(Domain, Object, 2).
+atom_const_error(Object, Domain) :- type_error(atomic, Object, 2).
+
+check_family(Family, _) :- not check_instantiation(Family).
+check_family(internet, 0).
+%%check_family(unix, 1).
+%%check_family(appletalk, 2).
+check_family(Family, _) :- atom_const_error(Family, nsocket_family).
+
+check_type(Type, _) :- not check_instantiation(Type).
+check_type(stream, 0).
+check_type(Type, _) :- atom_const_error(Type, nsocket_type).
+
+check_protocol(Protocol, _) :- not check_instantiation(Protocol).
+check_protocol(0, 0).
+check_protocol(Protocol, _) :- atom_const_error(Type, nsocket_protocol).
+
+nsocket_check_result(Result) :- nonvar(Result), Result = 0.
+nsocket_check_result(Error) :- system_error(Error). % system error.
+
+is_nsocket(S) :- nonvar(S), S = nsocket(_, _, _, _).
+
+check_nsocket(nsocket(_, _, _, _)).
+check_nsocket(Object) :- type_error(nsocket, Object, 2).
+
+/* nsocket data access predicates.
+   Note: assumes check_socket has been called. */
+nsocket_family_code(nsocket(FamilyCode, _, _, _), FamilyCode).
+
+nsocket_type_code(nsocket(_, TypeCode, _, _), TypeCode).
+
+nsocket_descriptor(nsocket(_, _, _, SocketDescriptor), SocketDescriptor).
+
+/* Public predicates. */
+
+export nsocket/4.
+nsocket(Family, Type, Protocol, Socket) :-
+	check_family(Family, FamilyCode),
+	check_type(Type, TypeCode),
+	check_protocol(Protocol, ProtocolCode),
+	check_var(Socket),
+	sio_nsocket(FamilyCode, TypeCode, ProtocolCode, SocketDescriptor, Result),
+	nsocket_check_result(Result),
+	Socket = nsocket(FamilyCode, TypeCode, ProtocolCode, SocketDescriptor).
+
+export nsocket_connect/3.
+nsocket_connect(Socket, Address, Port) :-
+	check_nsocket(Socket),
+	check_atom(Address),
+	check_integer(Port),
+	nsocket_family_code(Socket, FamilyCode),
+	nsocket_descriptor(Socket, SocketDescriptor),
+	sio_nsocket_connect(FamilyCode, SocketDescriptor, Address, Port, Result),
+	nsocket_check_result(Result).
+	
+export nsocket_bind/2.
+nsocket_bind(Socket, Port) :-
+	check_nsocket(Socket),
+	check_integer(Port),
+	nsocket_family_code(Socket, FamilyCode),
+	nsocket_descriptor(Socket, SocketDescriptor),
+	sio_nsocket_bind(FamilyCode, SocketDescriptor, Port, Result),
+	nsocket_check_result(Result).
+
+export nsocket_listen/2.
+nsocket_listen(Socket, Backlog) :-
+	check_nsocket(Socket),
+	check_integer(Backlog),
+	nsocket_family_code(Socket, FamilyCode),
+	nsocket_descriptor(Socket, SocketDescriptor),
+	sio_nsocket_listen(FamilyCode, SocketDescriptor, Backlog, Result),
+	nsocket_check_result(Result).
+	
+export nsocket_accept/3.
+nsocket_accept(Socket, Peer, NewSocket) :-
+	check_nsocket(Socket),
+	check_var(Peer),
+	check_var(NewSocket),
+	Socket = nsocket(FamilyCode, TypeCode, ProtocolCode, SocketDescriptor),
+	sio_nsocket_accept(FamilyCode, SocketDescriptor, Peer, NewSocketDescriptor, Result),
+	nsocket_check_result(Result),
+	NewSocket = nsocket(FamilyCode, TypeCode, ProtocolCode, NewSocketDescriptor).
+
+export nsocket_close/1.
+nsocket_close(Socket) :-
+	check_nsocket(Socket),
+	nsocket_descriptor(Socket, SocketDescriptor),
+	sio_nsocket_close(SocketDescriptor, Result),
+	nsocket_check_result(Result).
+	
+extract_descriptor([], []).
+extract_descriptor([Socket | SRest], [D | DRest]) :-
+	is_nsocket(Socket),
+	nsocket_descriptor(Socket, D),
+	extract_descriptor(SRest, DRest).
+extract_descriptor([Stream_or_alias | SRest], [D | DRest]) :-
+	is_stream(Stream_or_alias, Stream),
+	stream_name(Stream, Socket),
+	is_nsocket(Socket),
+	nsocket_descriptor(Socket, D),
+	extract_descriptor(SRest, DRest).
+extract_descriptor([Object | _], _) :-
+	type_error(nsocket_stream, Object, 2).
+
+calc_time(Sec:USec, Sec, USec).
+calc_time(off, off, off).
+calc_time(X, _, _) :- domain_error(select_time, X, 2).
+
+export nsocket_select/7.
+nsocket_select(ReadList, WriteList, ExceptionList, ReadMark, WriteMark, ExceptionMark, Time) :-
+	extract_descriptor(ReadList, RSList),
+	extract_descriptor(WriteList, WSList),
+	extract_descriptor(ExceptionList, ESList),
+	calc_time(Time, Sec, USec),
+	sio_nsocket_select(RSList, WSList, ESList, ReadMark, WriteMark, ExceptionMark, Sec, USec, Result),
+	nsocket_check_result(Result).
+
+
+open_nsocket_stream(Socket,Mode,Options,Stream) :-
+	initialize_stream(nsocket,Socket,Options,Stream),
+	read_write_modes(Mode,NMode,SMode),
+	set_stream_mode(Stream,SMode),
+	buffering(Options,NBuffering),
+	eoln_modes(socket, Options, NEoln),
+	nsocket_descriptor(Socket, SocketDescriptor),
+	nsocket_type_code(Socket, TypeCode),
+	sio_nsocket_open(SocketDescriptor,TypeCode,NMode,NBuffering,NEoln,Stream),
+	!.
+%% FIXME: Needs to be expanded to more accurately report errors.
+open_nsocket_stream(Socket,Mode,Options,Stream) :-
+	permission_error(open,source_sink,Socket,2).
+
+	
 
 open_socket_stream(Description,Mode,Options,Stream) :-
 	socket_params(Description,HostOrPath,Port,Domain,Type,SDescr),
