@@ -1,0 +1,105 @@
+# Generic Unix GNU Make file for ALS Prolog
+
+# Common defaults for most unix systems. May be overiden by $(OS)_makefile
+OS_AR = ar rus
+OS_RANLIB = true
+OS_SL_EXT = so
+OS_SL_LINK = $(CC) -shared
+LIBS = $(OS_LIBS) -lc -lm
+SL_LINK_LIBS = $(LIBS)
+
+TEST_DIR = $(SOURCE_DIR)/tests
+
+include $(SOURCE_DIR)/unix/$(OS)_makefile
+include $(SOURCE_DIR)/unix/$(PROC)_makefile
+
+CC = gcc
+
+CPPFLAGS = -DUNIX $(OS_CPPFLAGS) $(PROC_CPPFLAGS) \
+	-I $(SOURCE_DIR)/unix \
+	-I $(SOURCE_DIR)/generic \
+	-I $(SOURCE_DIR)/smath \
+	-I $(SOURCE_DIR)/$(PROC)
+
+# add -W sometime
+CFLAGS = -O $(DEBUGFLAG) -fpic -MMD -Wall -Wstrict-prototypes -Wmissing-prototypes -Wwrite-strings -Werror
+
+VPATH = $(SOURCE_DIR)/unix:$(SOURCE_DIR)/generic:$(SOURCE_DIR)/port:$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins
+
+SHELL_SOURCE = pimain.c
+
+SHELL_OBJECTS = $(SHELL_SOURCE:.c=.o)
+
+GENERIC_SOURCE = alloc.c arith.c bcinter.c bdb.c \
+	bdbg.c bgv.c bio.c bmeta.c \
+	bmisc.c bos.c bparser.c bpckg.c \
+	bsio.c bsystem.c built.c butil.c \
+	cinterf.c compile.c compmath.c cutmacro.c \
+	debugsys.c expand.c fatal.c fileio.c \
+	foreign.c fpbasis.c freeze.c gc.c \
+	gv.c index.c intaux.c intrv.c \
+	int_net.c lexan.c lforeign.c loadfile.c \
+	main.c mapsym.c mem.c \
+	module.c parser.c pckgcoff.c pckgload.c \
+	pckgmake.c rinfo.c sig.c symtab.c \
+	varproc.c vprintf.c wdisp.c wintcode.c \
+	winter.c pi_init.c security.c nopckg.c \
+	ieeemath.c pimain.c
+
+UNIX_SOURCE = unixio.c
+
+LIB_SOURCE = $(GENERIC_SOURCE) $(UNIX_SOURCE) $(PROC_SOURCE)
+
+LIB_OBJECTS = $(LIB_SOURCE:.c=.o)
+
+BUILTINS = blt_frez.pro  blt_std.pro   filepath.pro   ra_basis.pro \
+   blt_als.pro   blt_io.pro    blt_stk.pro   fs_cmn.pro     simplio.pro \
+   blt_atom.pro   blt_is.pro    blt_sys.pro   fsdos.pro      sio.pro \
+   blt_brk.pro   blt_lib.pro   blt_term.pro  fsmac.pro     sio_d10.pro \
+   blt_cslt.pro  blt_misc.pro   builtins.pro  fsunix.pro     sio_rt.pro \
+   blt_ctl.pro   blt_msg.pro    comp_d10.pro  fswin32.pro    sio_wt.pro \
+   blt_db.pro    blt_pckg.pro  cutils.pro    int_cstr.pro  xconsult.pro \
+   blt_evt.pro   blt_shl.pro   dcgs.pro      math88k.pro \
+   blt_flgs.pro   blt_shlr.pro   debugger.pro  module.pro
+
+all : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro
+
+alspro_b : alsdir $(SHELL_OBJECTS) $(LIB_OBJECTS)
+	$(CC) -o alspro_b $(SHELL_OBJECTS) $(LIB_OBJECTS) $(LIBS)
+
+alspro :  alsdir alspro_b $(BUILTINS)
+	./alspro_b -b -obp \
+	-g 'save_image(alspro,[select_lib(builtins,[debugger])])'
+
+ifndef NO_STATIC_LIB
+libalspro.a : alsdir $(LIB_OBJECTS)
+	$(OS_AR) libalspro.a $(LIB_OBJECTS)
+	$(OS_RANLIB) libalspro.a
+endif
+
+libalspro.$(OS_SL_EXT) : alsdir $(LIB_OBJECTS)
+	$(OS_SL_LINK) -o libalspro.$(OS_SL_EXT) $(LIB_OBJECTS) $(SL_LINK_LIBS)
+
+alsdir : alsdir/builtins alsdir/library
+
+alsdir/builtins : $(SOURCE_DIR)/builtins
+	mkdir -p alsdir/builtins
+	rm -f alsdir/builtins/*.pro
+	cd alsdir/builtins ; ln -s ../../$(SOURCE_DIR)/builtins/*.pro .
+
+alsdir/library : $(SOURCE_DIR)/library
+	mkdir -p alsdir/library
+	rm -f alsdir/library/*.pro alsdir/library/*.alb
+	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.pro .
+	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
+
+testrun : 
+	./alspro -giac -b $(TEST_DIR)/autotest $(TEST_DIR)/atest_db -g run_tests -p -srcdir $(SOURCE_DIR)
+
+clean :
+	rm -f *.o rm *.d
+
+superclean : clean
+	rm -fr alsdir alspro alspro_b libalspro.a libalspro.$(OS_SL_EXT)
+
+-include *.d
