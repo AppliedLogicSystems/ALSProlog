@@ -231,7 +231,7 @@ directory([], FileType, []) :-!.
 directory(PathPattern, FileType, List) 
 	:-
 	atom(PathPattern),
-	dirFilePath(Dir, FilePattern, PathPattern),
+	path_directory_tail(PathPattern, Dir, FilePattern),
 	getDirEntries(Dir, FilePattern, FirstResult),
 	!,
 	fixFileType(FileType, InternalFileType),
