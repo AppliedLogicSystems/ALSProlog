@@ -263,6 +263,32 @@ hash_insert(Bucket,Array,Index,Key,Value,Table) :-
 	NewRehashCount is RehashCount-1,
 	hash_rehash(NewRehashCount,Table).
 
+/*
+ * hash_insert_multi(Key,Value,Table)
+ */
+
+export hash_insert_multi/3.
+
+hash_insert_multi(Key,Value,Table) :-
+	arg(1,Table,Depth),
+	arg(2,Table,Size),
+	arg(4,Table,Array),
+	hashN(Key,Size,Depth,Index),
+	arg(Index,Array,Bucket),
+	hash_insert_multi(Bucket,Array,Index,Key,Value,Table).
+
+hash_insert_multi(Bucket,Array,Index,Key,Value,Table) :-
+	hash_member(Key,Bucket,E),
+	!,
+	arg(2,E,CurValue),
+	mangle(2,E,[Value | CurValue]).
+hash_insert_multi(Bucket,Array,Index,Key,Value,Table) :-
+	mangle(Index,Array,[[Key|Value]|Bucket]),
+	arg(3,Table,RehashCount),
+	NewRehashCount is RehashCount-1,
+	hash_rehash(NewRehashCount,Table).
+
+
 hash_rehash(Count,Table) :-
 	Count > 0,
 	!,
@@ -390,9 +416,33 @@ make_hash_table(Mod,Name) :-
 	!,
 	name(Name,NameList),
 	make_hash_table(Mod,NameList).
-make_hash_table(Mod,Name) :-
+
+
+
+	%% see if already present:
+make_hash_table(Mod,Name) 
+	:-
+	name(ResetFunc,	[0'r, 0'e, 0's, 0'e, 0't | Name]),
+	functor(ResetHead, ResetFunc, 0),
+	Mod:clause(ResetHead,_), 		
+	name(SetFunc,	[0's, 0'e, 0't | Name]),
+	functor(SetHead,   SetFunc,   2),
+	Mod:clause(SetHead,_),
+	!.
+
+	%% not already present:
+make_hash_table(Mod,Name) 
+	:-
+	make_hash_framework(Mod,Name,VN),
+	hash_create(InitialHashTable),
+	gv_set(VN,InitialHashTable).
+
+export make_hash_framework/3.
+make_hash_framework(Mod,Name,VN)
+	:-
 	name(ResetFunc,	[0'r, 0'e, 0's, 0'e, 0't | Name]),
 	name(SetFunc,	[0's, 0'e, 0't | Name]),
+	name(SetMFunc,	[0's, 0'e, 0't, 0'm | Name]),
 	name(GetFunc,	[0'g, 0'e, 0't | Name]),
 	name(PGetFunc,	[0'p, 0'g, 0'e, 0't | Name]),
 	name(DelFunc,	[0'd, 0'e, 0'l | Name]),
@@ -400,38 +450,35 @@ make_hash_table(Mod,Name) :-
 
 	functor(ResetHead, ResetFunc, 0),
 	functor(SetHead,   SetFunc,   2),
+	functor(SetMHead,  SetMFunc,  2),
 	functor(GetHead,   GetFunc,   2),
 	functor(PGetHead,  PGetFunc,  2),
 	functor(DelHead,   DelFunc,   2),
 	functor(PDelHead,  PDelFunc,  2),
 
 	arg(1,SetHead, Key),	arg(2,SetHead, Val),
+	arg(1,SetMHead, Key),	arg(2,SetMHead, Val),
 	arg(1,GetHead, Key),	arg(2,GetHead, Val),
 	arg(1,PGetHead,Key),	arg(2,PGetHead,Val),
 	arg(1,DelHead, Key),	arg(2,DelHead, Val),
 	arg(1,PDelHead,Key),	arg(2,PDelHead,Val),
 
-	(   Mod:clause(ResetHead,_), 		%% see if already present
-	    Mod:clause(SetHead,_),
-	    !
-	;   gv_alloc(VN),
+	gv_alloc(VN),
 
-	    Mod:assert_at_load_time(
-		(ResetHead :- hash_create(TB), gv_set(VN,TB))),
-	    Mod:assert_at_load_time(
-		(SetHead  :- gv_get(VN,TB), hash_insert(Key,Val,TB))),
-	    Mod:assert_at_load_time(
-		(GetHead  :- gv_get(VN,TB), hash_lookup(Key,Val,TB))),
-	    Mod:assert_at_load_time(
+	Mod:assert_at_load_time(
+			(ResetHead :- hash_create(TB), gv_set(VN,TB))),
+	Mod:assert_at_load_time(
+			(SetHead  :- gv_get(VN,TB), hash_insert(Key,Val,TB))),
+	Mod:assert_at_load_time(
+			(SetMHead :- gv_get(VN,TB), hash_insert_multi(Key,Val,TB))),
+	Mod:assert_at_load_time(
+			(GetHead  :- gv_get(VN,TB), hash_lookup(Key,Val,TB))),
+	Mod:assert_at_load_time(
 	        (PGetHead :- gv_get(VN,TB), hash_elements(Key,Val,TB))),
-	    Mod:assert_at_load_time(
-		(DelHead  :- gv_get(VN,TB), hash_delete(Key,Val,TB))),
-	    Mod:assert_at_load_time(
-		(PDelHead :- gv_get(VN,TB), hash_delete_pattern(Key,Val,TB))),
-
-	    hash_create(InitialHashTable),
-	    gv_set(VN,InitialHashTable)
-	).
+	Mod:assert_at_load_time(
+			(DelHead  :- gv_get(VN,TB), hash_delete(Key,Val,TB))),
+	Mod:assert_at_load_time(
+			(PDelHead :- gv_get(VN,TB), hash_delete_pattern(Key,Val,TB))).
 
 /*
  * Prolog flags

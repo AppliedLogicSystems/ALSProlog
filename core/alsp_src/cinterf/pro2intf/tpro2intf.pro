@@ -27,80 +27,83 @@ setP2I(inStream,_A,_B) :- mangle(2,_A,_B).
 accessP2I(baseName,_A,_B) :- arg(3,_A,_B).
 setP2I(baseName,_A,_B) :- mangle(3,_A,_B).
 
-accessP2I(fPrefix,_A,_B) :- arg(4,_A,_B).
-setP2I(fPrefix,_A,_B) :- mangle(4,_A,_B).
+accessP2I(hincs,_A,_B) :- arg(4,_A,_B).
+setP2I(hincs,_A,_B) :- mangle(4,_A,_B).
 
-accessP2I(dPred,_A,_B) :- arg(5,_A,_B).
-setP2I(dPred,_A,_B) :- mangle(5,_A,_B).
+accessP2I(fPrefix,_A,_B) :- arg(5,_A,_B).
+setP2I(fPrefix,_A,_B) :- mangle(5,_A,_B).
 
-accessP2I(tPred,_A,_B) :- arg(6,_A,_B).
-setP2I(tPred,_A,_B) :- mangle(6,_A,_B).
+accessP2I(dPred,_A,_B) :- arg(6,_A,_B).
+setP2I(dPred,_A,_B) :- mangle(6,_A,_B).
 
-accessP2I(curONum,_A,_B) :- arg(7,_A,_B).
-setP2I(curONum,_A,_B) :- mangle(7,_A,_B).
+accessP2I(tPred,_A,_B) :- arg(7,_A,_B).
+setP2I(tPred,_A,_B) :- mangle(7,_A,_B).
 
-accessP2I(curDispNum,_A,_B) :- arg(8,_A,_B).
-setP2I(curDispNum,_A,_B) :- mangle(8,_A,_B).
+accessP2I(curONum,_A,_B) :- arg(8,_A,_B).
+setP2I(curONum,_A,_B) :- mangle(8,_A,_B).
 
-accessP2I(initFcns,_A,_B) :- arg(9,_A,_B).
-setP2I(initFcns,_A,_B) :- mangle(9,_A,_B).
+accessP2I(curDispNum,_A,_B) :- arg(9,_A,_B).
+setP2I(curDispNum,_A,_B) :- mangle(9,_A,_B).
 
-accessP2I(outFile,_A,_B) :- arg(10,_A,_B).
-setP2I(outFile,_A,_B) :- mangle(10,_A,_B).
+accessP2I(initFcns,_A,_B) :- arg(10,_A,_B).
+setP2I(initFcns,_A,_B) :- mangle(10,_A,_B).
 
-accessP2I(outStream,_A,_B) :- arg(11,_A,_B).
-setP2I(outStream,_A,_B) :- mangle(11,_A,_B).
+accessP2I(outFile,_A,_B) :- arg(11,_A,_B).
+setP2I(outFile,_A,_B) :- mangle(11,_A,_B).
 
-accessP2I(cFileList,_A,_B) :- arg(12,_A,_B).
-setP2I(cFileList,_A,_B) :- mangle(12,_A,_B).
+accessP2I(outStream,_A,_B) :- arg(12,_A,_B).
+setP2I(outStream,_A,_B) :- mangle(12,_A,_B).
 
-accessP2I(pFileList,_A,_B) :- arg(13,_A,_B).
-setP2I(pFileList,_A,_B) :- mangle(13,_A,_B).
+accessP2I(cFileList,_A,_B) :- arg(13,_A,_B).
+setP2I(cFileList,_A,_B) :- mangle(13,_A,_B).
 
-accessP2I(pfStreams,_A,_B) :- arg(14,_A,_B).
-setP2I(pfStreams,_A,_B) :- mangle(14,_A,_B).
+accessP2I(pFileList,_A,_B) :- arg(14,_A,_B).
+setP2I(pFileList,_A,_B) :- mangle(14,_A,_B).
 
-accessP2I(module,_A,_B) :- arg(15,_A,_B).
-setP2I(module,_A,_B) :- mangle(15,_A,_B).
+accessP2I(pfStreams,_A,_B) :- arg(15,_A,_B).
+setP2I(pfStreams,_A,_B) :- mangle(15,_A,_B).
 
-accessP2I(fmax,_A,_B) :- arg(16,_A,_B).
-setP2I(fmax,_A,_B) :- mangle(16,_A,_B).
+accessP2I(module,_A,_B) :- arg(16,_A,_B).
+setP2I(module,_A,_B) :- mangle(16,_A,_B).
 
-accessP2I(smax,_A,_B) :- arg(17,_A,_B).
-setP2I(smax,_A,_B) :- mangle(17,_A,_B).
+accessP2I(fmax,_A,_B) :- arg(17,_A,_B).
+setP2I(fmax,_A,_B) :- mangle(17,_A,_B).
 
-accessP2I(cmax,_A,_B) :- arg(18,_A,_B).
-setP2I(cmax,_A,_B) :- mangle(18,_A,_B).
+accessP2I(smax,_A,_B) :- arg(18,_A,_B).
+setP2I(smax,_A,_B) :- mangle(18,_A,_B).
+
+accessP2I(cmax,_A,_B) :- arg(19,_A,_B).
+setP2I(cmax,_A,_B) :- mangle(19,_A,_B).
 
 export makeP2I/1.
 makeP2I(_A) :-
         _A=..
-            [p2i,nil,nil,nil,nil,nil,nil,0,0,[],nil,nil,[],[],[],builtins,
+            [p2i,nil,nil,nil,[],nil,nil,nil,0,0,[],nil,nil,[],[],[],builtins,
                 100000,100000,100000].
 
 export makeP2I/2.
 makeP2I(_A,_B) :-
         struct_lookup_subst(
-            [inFile,inStream,baseName,fPrefix,dPred,tPred,curONum,curDispNum,
-                initFcns,outFile,outStream,cFileList,pFileList,pfStreams,
-                module,fmax,smax,cmax],
-            [nil,nil,nil,nil,nil,nil,0,0,[],nil,nil,[],[],[],builtins,100000,
-                100000,100000],
+            [inFile,inStream,baseName,hincs,fPrefix,dPred,tPred,curONum,
+                curDispNum,initFcns,outFile,outStream,cFileList,pFileList,
+                pfStreams,module,fmax,smax,cmax],
+            [nil,nil,nil,[],nil,nil,nil,0,0,[],nil,nil,[],[],[],builtins,
+                100000,100000,100000],
             _B,_C),
         _A=..[p2i|_C].
 
 export xmakeP2I/2.
-xmakeP2I(p2i(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L,_M,_N,_O,_P,_Q,_R),
-    [_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L,_M,_N,_O,_P,_Q,_R]).
+xmakeP2I(p2i(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L,_M,_N,_O,_P,_Q,_R,_S),
+    [_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L,_M,_N,_O,_P,_Q,_R,_S]).
 
 endmod.
 
 module utilities.
 typeProperties(p2i,
-    [inFile,nil,inStream,nil,baseName,nil,fPrefix,nil,dPred,nil,tPred,nil,
-        curONum,0,curDispNum,0,initFcns,[],outFile,nil,outStream,nil,
-        cFileList,[],pFileList,[],pfStreams,[],module,builtins,fmax,100000,
-        smax,100000,cmax,100000]).
+    [inFile,nil,inStream,nil,baseName,nil,hincs,[],fPrefix,nil,dPred,nil,
+        tPred,nil,curONum,0,curDispNum,0,initFcns,[],outFile,nil,outStream,
+        nil,cFileList,[],pFileList,[],pfStreams,[],module,builtins,fmax,
+        100000,smax,100000,cmax,100000]).
 noteOptionValue(p2i,_A,_B,_C) :- setP2I(_A,_C,_B).
 endmod.
 /*=======================================================================*
@@ -185,6 +188,7 @@ pro2intf
 	makeP2I(State),
 	get_cmdline_vals(CmdLine),
 	process_options(CmdLine,State),
+	check_defaults(CmdLine,State),
 	gen_compact_interf(State).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -255,11 +259,26 @@ dispatch_option([Switch], State)
 	!,
 	assert(Flag).
 
+dispatch_option(['-hinc', HIncs], State) 
+	:-!,
+	atomread(HIncs, TheHIncs),
+	setP2I(hincs, State, TheHIncs).
+
 dispatch_option(Switch, State) 
 	:-
 	printf(error_stream,
 		'pro2intf: Unknown command line switch: %t .. skipping\n',
 		[Switch]).
+
+check_defaults([],State) :-!.
+check_defaults(CmdLine,State)
+	:-
+	(dmember(['-hinc', _], CmdLine) -> 
+		true ;
+		accessP2I(baseName, State, BaseName),
+		setP2I(hincs, State, [BaseName])
+	).
+		%% Add more here as necessary
 
 %%----------------------------------------------
 %%	TOP LEVEL OF COMPACT INTERFACE GENERATOR
@@ -275,7 +294,7 @@ gen_compact_interf(State)
 	:-
 	accessP2I(baseName,State,BaseName),
 	printf(error_stream,
-		'>>>gen_compact_interf/3 on base name = %t failed<<<\n',error_stream,
+		'>>>gen_compact_interf/3 on base name = %t failed<<<\n',
 		[BaseName]).
 	
 gen_compact_interf(FList,TList,CList,GVList,State)
@@ -1113,7 +1132,7 @@ make_lower(LowerChar,LowerChar).
 
 switchToProFile(FileName,FileStream, State)
 	:-
-	get_pro_filename(FileName,File),
+	get_pro_filename(FileName,File,State),
 	accessP2I(pfStreams, State, ProStreamStack),
 	fin_switchProFile(File,ProStreamStack,FileStream, State).
 
@@ -1138,19 +1157,24 @@ fin_switchProFile(File,ProStreamStack,FileStream, State)
 */
 
 %---------------------------------------------------------------------
-%	get_pro_filename/2:	Generate the name of the appropriate .pro
-%						file given the name of the C header file it
-%						corresponds to.
+%	get_pro_filename/2:	Generate the name of the appropriate .pro file 
+%		Previously: given the name of the C header file it corresponds to.
+%	Now: use BaseName
 %---------------------------------------------------------------------
 
-get_pro_filename(CFile,ProFile)
+get_pro_filename(CFile,ProFile,State)
 	:-
+	accessP2I(baseName, State, BaseName),
+	filePlusExt(BaseName,pro,ProFile).
+
+/*
 	(filePlusExt(CFN,_,CFile) -> 
 		true 
 		; 
 		CFN = CFile
 	),
 	filePlusExt(CFN,pro,ProFile).
+*/
 
 %-----------------------------------------------------------------
 %	close_dot_pro_files/0:	Closes all .pro files left open.
@@ -1274,8 +1298,8 @@ gen_gv_cfunc_header(Prefix,OutStream)
 	printf(OutStream, '%t_gv_dispatch()\n',[Prefix]),
 	printf(OutStream, '{\n',[]),
 	printf(OutStream, '\tPWord dispatchVal,dispatchType;\n',[]),
-	printf(OutStream, '\tPWord argVal,argType;\n',[]),
-	printf(OutStream, '\tPWord retVal,retType;\n\n',[]),
+	printf(OutStream, '\tPWord argVal; int argType;\n',[]),
+	printf(OutStream, '\tPWord retVal; int retType;\n\n',[]),
 	printf(OutStream, '\tPI_getan(&dispatchVal,&dispatchType,1);\n',[]),
 	printf(OutStream, '\tPI_getan(&argVal,&argType,2);\n\n',[]),
 	printf(OutStream, '\tif (dispatchType != PI_INT)  PI_FAIL;\n\n',[]),
@@ -1639,7 +1663,7 @@ openInputFile(State, InStream) :-
 	debug("Reading from file %t ...",[InFile]).
 
 closeInputFile(State) 
-	:- 
+	:-
 	accessP2I(inStream, State, InStream),
 	close(InStream),
 	accessP2I(inFile, State, InFile),
@@ -1673,7 +1697,15 @@ openOutputFile(OutStream,State)
 			),
 	printf(OutStream,'#include "alspi.h"\n',[]),
 	printf(OutStream,'#include "cinterf.h"\n',[]),
-	printf(OutStream,'#include "%t.h"\n\n',[BaseName]).
+	accessP2I(hincs,State,Hincs),
+	print_incs(Hincs,OutStream),
+	nl(OutStream).
+
+print_incs([],OutStream).
+print_incs([HFile | Hincs],OutStream)
+	:-
+	printf(OutStream,'#include "%t.h"\n\n',[HFile]),
+	print_incs(Hincs,OutStream).
 
 switchOutputFile(State)
 	:-

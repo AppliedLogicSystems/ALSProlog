@@ -80,6 +80,7 @@ pro2intf
 	makeP2I(State),
 	get_cmdline_vals(CmdLine),
 	process_options(CmdLine,State),
+	check_defaults(CmdLine,State),
 	gen_compact_interf(State).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -150,11 +151,26 @@ dispatch_option([Switch], State)
 	!,
 	assert(Flag).
 
+dispatch_option(['-hinc', HIncs], State) 
+	:-!,
+	atomread(HIncs, TheHIncs),
+	setP2I(hincs, State, TheHIncs).
+
 dispatch_option(Switch, State) 
 	:-
 	printf(error_stream,
 		'pro2intf: Unknown command line switch: %t .. skipping\n',
 		[Switch]).
+
+check_defaults([],State) :-!.
+check_defaults(CmdLine,State)
+	:-
+	(dmember(['-hinc', _], CmdLine) -> 
+		true ;
+		accessP2I(baseName, State, BaseName),
+		setP2I(hincs, State, [BaseName])
+	).
+		%% Add more here as necessary
 
 %%----------------------------------------------
 %%	TOP LEVEL OF COMPACT INTERFACE GENERATOR
@@ -1008,7 +1024,7 @@ make_lower(LowerChar,LowerChar).
 
 switchToProFile(FileName,FileStream, State)
 	:-
-	get_pro_filename(FileName,File),
+	get_pro_filename(FileName,File,State),
 	accessP2I(pfStreams, State, ProStreamStack),
 	fin_switchProFile(File,ProStreamStack,FileStream, State).
 
@@ -1033,19 +1049,24 @@ fin_switchProFile(File,ProStreamStack,FileStream, State)
 */
 
 %---------------------------------------------------------------------
-%	get_pro_filename/2:	Generate the name of the appropriate .pro
-%						file given the name of the C header file it
-%						corresponds to.
+%	get_pro_filename/2:	Generate the name of the appropriate .pro file 
+%		Previously: given the name of the C header file it corresponds to.
+%	Now: use BaseName
 %---------------------------------------------------------------------
 
-get_pro_filename(CFile,ProFile)
+get_pro_filename(CFile,ProFile,State)
 	:-
+	accessP2I(baseName, State, BaseName),
+	filePlusExt(BaseName,pro,ProFile).
+
+/*
 	(filePlusExt(CFN,_,CFile) -> 
 		true 
 		; 
 		CFN = CFile
 	),
 	filePlusExt(CFN,pro,ProFile).
+*/
 
 %-----------------------------------------------------------------
 %	close_dot_pro_files/0:	Closes all .pro files left open.

@@ -254,6 +254,7 @@ EOF
   esac
 done
 
+
 if test -n "$ac_prev"; then
   echo "configure: missing argument to --`echo $ac_prev | sed 's/_/-/g'`" >&2; exit 1
 fi
@@ -345,7 +346,6 @@ then
 else
   LN_S=ln
 fi
-
 
 if test -z "$CC"; then
   # Extract the first word of `gcc', so it can be a program name with args.

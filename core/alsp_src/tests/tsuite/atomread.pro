@@ -13,6 +13,6 @@ test :-
 
 test(A,T) :-
 	atom(A),
-	open(atom(A),read,[bufsize(16)],S),
+	open(atom(A),read,S,[bufsize(16)]),
 	read_term(S,T,[attach_fullstop(true)]),
 	close(S).

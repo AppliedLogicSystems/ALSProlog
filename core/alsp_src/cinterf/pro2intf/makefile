@@ -4,6 +4,8 @@
 #
 TYPFILES= p2i.typ
 
+all: tpro2intf.pro
+
 types: $(TYPFILES)
 	alspro -g comptype_cl -p $(TYPFILES)
 
@@ -15,6 +17,5 @@ P2IFiles=p2i.pro pro2intf intfout
 tpro2intf.pro: $(P2IFiles)
 	cat $(P2IFiles) > tpro2intf.pro
 
-all: tpro2intf.pro
 
 

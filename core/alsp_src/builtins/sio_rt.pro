@@ -154,7 +154,9 @@ do_rt_opt_singletons([_ | VL], InVNL, OutVNL) :-
 
 rt_defaults(rt_opts(vt([]),dec10, linestuff(FinalToks,S,E))).
 
+%%%%%%%%%%%%%%%%%%
 %% check_rt_options(Options,Stream,OptStruct,VT,InGoals,OutGoals)
+%%%%%%%%%%%%%%%%%%
 
 check_rt_options(Var, _,_,_,_,_) :-
 	var(Var),
@@ -255,9 +257,18 @@ check_rt_options(Other, _,_, _, _,_) :-
  |	added to the tokens comprising a the term to be read.  It is most
  |	useful when used in conjunction with atom or list streams.
  |
- |	line_info(Start, End)
- |
- |
+ |	line_info(Start, Len)
+ |		
+ |		-- In this option, Start is the offset from the beginning of 
+ |	the stream at which the first character occurrs when the attempt
+ |	is begun to read the term; note that this might NOT be the first
+ |	character of the term to be read, since white space and/or comments
+ |	may have to be traversed first;
+ |	Len is the number of characters making up the term read; in case
+ |	that the stream offset cannot be obtained, Start is set to -1;
+ |	Executing sio_getpos AFTER the read_term call accurately gives
+ |	the offset of the following character position (if this can be
+ |	calculated); combining this info with 
  *---------------------------------------------------------------------*/
 
 check_rt_option(Var, _,_, _, _,_) :-
@@ -310,6 +321,7 @@ blocking_switch(true, false, Stream, G, (set_stream_blocking(Stream,false), G)) 
 blocking_switch(false, true, Stream, G, (set_stream_blocking(Stream,true), G)) :-
 	set_stream_blocking(Stream,false).
 
+ending_line([],S,E).
 ending_line([lineinfo(_,E,_) |_],S,E) 
 	:-!.
 ending_line([_ | Toks],S,E)

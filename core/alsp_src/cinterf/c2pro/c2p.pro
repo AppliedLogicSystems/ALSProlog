@@ -39,31 +39,34 @@ setC2P(fd_stack,_A,_B) :- mangle(6,_A,_B).
 accessC2P(info_table,_A,_B) :- arg(7,_A,_B).
 setC2P(info_table,_A,_B) :- mangle(7,_A,_B).
 
-accessC2P(outFile,_A,_B) :- arg(8,_A,_B).
-setC2P(outFile,_A,_B) :- mangle(8,_A,_B).
+accessC2P(fcn_filter,_A,_B) :- arg(8,_A,_B).
+setC2P(fcn_filter,_A,_B) :- mangle(8,_A,_B).
 
-accessC2P(outStream,_A,_B) :- arg(9,_A,_B).
-setC2P(outStream,_A,_B) :- mangle(9,_A,_B).
+accessC2P(outFile,_A,_B) :- arg(9,_A,_B).
+setC2P(outFile,_A,_B) :- mangle(9,_A,_B).
+
+accessC2P(outStream,_A,_B) :- arg(10,_A,_B).
+setC2P(outStream,_A,_B) :- mangle(10,_A,_B).
 
 export makeC2P/1.
-makeC2P(_A) :- _A=..[c2p,nil,nil,nil,0,[[]],[],[],nil,nil].
+makeC2P(_A) :- _A=..[c2p,nil,nil,nil,0,[[]],[],[],all,nil,nil].
 
 export makeC2P/2.
 makeC2P(_A,_B) :-
         struct_lookup_subst(
             [inFile,inStream,curLine,curLineNum,ifdef_stack,fd_stack,
-                info_table,outFile,outStream],
-            [nil,nil,nil,0,[[]],[],[],nil,nil],_B,_C),
+                info_table,fcn_filter,outFile,outStream],
+            [nil,nil,nil,0,[[]],[],[],all,nil,nil],_B,_C),
         _A=..[c2p|_C].
 
 export xmakeC2P/2.
-xmakeC2P(c2p(_A,_B,_C,_D,_E,_F,_G,_H,_I),[_A,_B,_C,_D,_E,_F,_G,_H,_I]).
+xmakeC2P(c2p(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J),[_A,_B,_C,_D,_E,_F,_G,_H,_I,_J]).
 
 endmod.
 
 module utilities.
 typeProperties(c2p,
     [inFile,nil,inStream,nil,curLine,nil,curLineNum,0,ifdef_stack,[],
-        fd_stack,[],info_table,[],outFile,nil,outStream,nil]).
+        fd_stack,[],info_table,[],fcn_filter,all,outFile,nil,outStream,nil]).
 noteOptionValue(c2p,_A,_B,_C) :- setC2P(_A,_C,_B).
 endmod.

@@ -148,17 +148,10 @@ generated: ${GENFILES}
 
 tokini2.h:	tokens.h
 
-#tokens.h:	generate/bldtok.c generate/prebldtok.c tokini.h parser.h
-#	${CC} $(CPPFLAGS) -o prebldtok $(srcdir)/generic/generate/prebldtok.c
-#	${CC} $(CPPFLAGS) -o bldtok `./prebldtok` $(srcdir)/generic/generate/bldtok.c
-#	./bldtok
-#	rm prebldtok bldtok
-
-tokens.h:	generate/bldtok.c generate/prebldto.c tokini.h parser.h
-	${CC} $(CPPFLAGS) -o prebldto $(srcdir)/generic/generate/prebldto.c
-	${CC} $(CPPFLAGS) -o bldtok `./prebldto` $(srcdir)/generic/generate/bldtok.c
+tokens.h:	generate/bldtok.c tokini.h parser.h
+	${CC} $(CPPFLAGS) -o bldtok $(srcdir)/generic/generate/bldtok.c
 	./bldtok
-	rm prebldto bldtok
+	rm bldtok
 
 lexinit.h:	generate/lexinit.c lexan.h
 	$(CC) $(CPPFLAGS) -o lexinit $(srcdir)/generic/generate/lexinit.c

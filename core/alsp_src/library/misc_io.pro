@@ -2,168 +2,20 @@
  * 			misc_io.pro		
  *		Copyright (c) 1990 Applied Logic Systems, Inc.
  *
- *		Various I/O utilities for the library
+ *		Various I/O utilities 
  *====================================================================*/
 
 module builtins.
 
-%export copyFiles/2.
-%export copy_file/2.
-export readline/1.
-export readline/2.
 export read_terms/1.
 export read_terms/2.
-export writeListNl/1.
+export read_terms_pos/1.
+export read_terms_pos/2.
+export read_as_list/3.
 export colwrite/4.
 export putc_n_of/3.
 export gen_file_header/3.
 export gen_file_header/4.
-
-/**************************************************
-/*!---------------------------------------------------------------
- |	copyFiles/2
- |	copyFiles(SourceFilesList, TargetSubDirPath)
- |	copyFiles(+, +)
- |	
- |	- copies files to a directory	
- |	
- |	If SourceFilesList is a list of file names, and TargetSubDirPath
- |	is either an atom or an internal form naming a directory,
- |	copies all of the indicated files to files with the same 
- |	names in TargetSubDirPath.
- *!--------------------------------------------------------------*/
-%%% Needs to be changed to just recursively call copy_file/2.
-%%% Also, change to use filepath.pro routines for building the file names
-copyFiles(SourceFilesList, TargetSubDirPath)
-	:-
-	name(TargetSubDirPath, TargetSubDirPathChars),
-	copyFiles0(SourceFilesList, TargetSubDirPathChars).
-
-copyFiles0([], _).
-copyFiles0([File | SourceFilesList], TargetSubDirPathChars)
-	:-
-	name(File, FileChars),
-	append(TargetSubDirPathChars," > bucket.bit",Tmp1),
-	append(FileChars, [0' | Tmp1], Tmp2),
-	append("copy ",Tmp2,CmdChars),
-	system(CmdChars),
-	!,
-	copyFiles0(SourceFilesList, TargetSubDirPathChars).
-
-%%% Needs to be changed under Merge3 (new io) to open the
-%%% source & sink, and just pass the (C) file descriptors
-%%% to a little C routine which just copies chars over until
-%%% eof is reached.
-
-/*!---------------------------------------------------------------
- |	copy_file/2
- |	copy_file(SourceFile,TargetFile)
- |	copy_file(+,+)
- |
- |	-	copies one file to another
- |
- |	If SourceFile and TargetFile are names of files, copies
- |	contents of SourceFile to TargetFile, overwriting the latter.
- *!--------------------------------------------------------------*/
-copy_file(SourceFile,TargetFile)
-	 :-
-	 see(SourceFile),
-	 tell(TargetFile),
-	 pump_chars,
-	 !,
-	 told, seen.
-copy_file(SourceFile,TargetFile)
-	 :-
-	 told, seen.
-
-pump_chars
-	 :-
-	 get0(C),
-	 disp_pump_chars(C).
-
-disp_pump_chars(C)
-	 :-
-	 eof_char(C),!.
-disp_pump_chars(C)
-	 :-
-	 put(C),
-	 pump_chars.
-
-eof_char(-1).
-eoln_char(13).
-eoln_char(10).
-
-/*!---------------------------------------------------------------
- |	readline/1
- |	readline(Result)
- |	readline(-)
- |
- |	-	reads a line of characters
- |
- |	Reads a line of characters from the current input; if end
- |	of file is encountered, the "list tail" for the list of
- |	characters is end_of_file.
- *!--------------------------------------------------------------*/
-readline(Result)
-	 :-
-	readline(Result,0).
-
-/*!---------------------------------------------------------------
- |	readline/2
- |	readline(Result,CharConv)
- |	readline(-,+)
- |
- |	-	reads a line of character, with case conversion
- |
- |	Reads a line of characters from the current input, converting
- |	the case of alphabetic characters according to the following:
- |		1	- 	convert lower to upper
- |		0	-	no conversion
- |		-1	-	convert upper to lower
- |	If end of file is encountered, the "list tail" for the list of
- |	characters is end_of_file.
- *!--------------------------------------------------------------*/
-readline(Result,CharConv)
-	 :-
-	dmember(CharConv, [0,1,-1]),
-	 get0(C),
-	 (eof(C) ->
-	     Result = end_of_file;
-	     disp_readline_tail(C, Result, CharConv)
-	 ).
-
-readline_tail(CurTail, CharConv)
-	 :-
-	 get0(C),
-	 disp_readline_tail(C, CurTail, CharConv).
-
-disp_readline_tail(C, CurTail, CharConv)
-	 :-
-	 eof_char(C),!, CurTail = end_of_file.
-
-disp_readline_tail(C, CurTail, CharConv)
-	 :-
-	 eoln_char(C),!, CurTail = [].
-
-disp_readline_tail(C, [TheC | NextTail], CharConv)
-	 :-
-	conv_case(CharConv,C,TheC),
-	 readline_tail(NextTail, CharConv).
-
-conv_case(-1,C,TheC)
-	:-!,
-	(0'A =< C, C =< 0'Z  ->
-		TheC is C+32;
-		TheC = C
-	).
-conv_case(1,C,TheC)
-	:-!,
-	(0'a =< C, C =< 0'z  ->
-		TheC is C-32;
-		TheC = C
-	).
-conv_case(_,C,C).
-**************************************************/
 
 /*!-------------------------------------------------------------
  |	read_terms/1
@@ -215,24 +67,118 @@ dispatch_read_terms0(Next_Term, Term_List, List_Tail,Stream)
 	!,
 	read_terms0(Term_List, New_List_Tail,Stream).
 
-/*************************************************
 /*!-------------------------------------------------------------
- |	writeListNl/1
- |	writeListNl(Term_List)
- |	writeListNl(+)
+ |	read_terms_pos/1
+ |	read_terms_pos(Term_List)
+ |	read_terms_pos(-)
  |
- |	-	writes out a list, one element per line
+ |	-	reads list of terms, with positions, from default input stream
  |
- |	If Term_List is a list of Prolog terms, writes out Term_List
- |	to the default output stream, placing one term on each line.
+ |	Reads a list (Term_List)  of all terms which can be read from
+ |	the default input stream, with their positions;
  *!------------------------------------------------------------*/
 
-writeListNl([]).
-writeListNl([Term | RestTerm_List])
+read_terms_pos(Term_List)
 	:-
-	write(Term), nl,
- 	writeListNl(RestTerm_List).
-***************************************/
+	current_default_stream(input, Stream),
+	read_terms_pos(Term_List, Stream).
+
+/*!-------------------------------------------------------------
+ |	read_terms_pos/2
+ |	read_terms_pos(Stream,Term_List)
+ |	read_terms_pos(+,-)
+ |
+ |	-	reads list of terms, with positions, from stream Stream
+ |
+ |	Reads a list (Term_List)  of all terms, with positions  which 
+ |	can be read from the stream Stream; the elements of Term_List
+ |	are of the form (Term, Start, End), where:
+ |	- Start is the offset in Stream of the first character of Term;
+ |		if the offset cannot be meaninfully calculated, Start = -1;
+ |	- End is the offset of the first character position following
+ |		Term in Stream;
+ *!------------------------------------------------------------*/
+
+read_terms_pos(Stream,Term_List)
+	:-
+	sio:skip_layout(Stream),
+	sio_getpos(Stream,StartPos),
+	read_term(Stream, Next_Term, []),
+	sio_getpos(Stream,LastPos),
+	dispatch_read_terms_pos(Next_Term, StartPos, LastPos, Term_List, Stream).
+
+dispatch_read_terms_pos(Next_Term, StartPos, LastPos, Term_List,Stream)
+	:-
+	var(Next_Term),
+	!,
+	Term_List = [(Next_Term,StartPos,LastPos) | List_Tail],
+	read_terms_pos(Stream, List_Tail).
+
+dispatch_read_terms_pos(end_of_file, _, _, [],_) :-!.
+
+dispatch_read_terms_pos(Next_Term, StartPos, LastPos, Term_List, Stream)
+	:-
+	Term_List = [(Next_Term,StartPos,LastPos) | List_Tail],
+	!,
+	read_terms_pos(Stream, List_Tail).
+
+
+/*!-------------------------------------------------------------
+ |	read_as_list/3
+ |	read_as_list(Atom,List,Options)	
+ |	read_as_list(+,-,+)
+ |
+ |	- process an input atom into a list, if possible	
+ |
+ |	Atom is a an atom, normally quoted; Options is a list of
+ |	equations; currently the only supported element is
+ |		delimiter=Cd,
+ |	where Cd is the code of a character C.  If Atom actually appears
+ |	as a sequence of readable Prolog terms separated by one or
+ |	more occurrences of C, then List is the corresponding list
+ |	of those terms.  Example:
+ |		Atom = 'foo.bar zip.go  silly.jam'
+ |		Options = [delimiter = 0' ],
+ |		List = ['foo.bar','zip.go','silly.jam']
+ *!------------------------------------------------------------*/
+
+read_as_list(FLine,Fs,Options)
+	:-
+	atom_length(FLine,FLen),
+	(dmember(delimiter=DelimCode, Options) -> true ; DelimCode = 0' ),
+	atom_codes(Delim,[DelimCode]),
+	read_as_list(1,FLen,FLine,Delim,Fs,Options).
+
+read_as_list(Cur,Size,Source,Delim,[],Options)
+	:-
+	Cur > Size,
+	!.
+
+read_as_list(Cur,Size,Source,Delim,[Next | Rest],Options)
+	:-
+	read_item(Cur,Size,Source,Delim,Next,After),
+	AfterAnother is After + 1,
+	read_as_list(AfterAnother,Size,Source,Delim,Rest,Options).
+	
+read_item(Cur,Size,Source,Delim,Next,After)
+	:-
+	probe_delim(Cur,Size,Source,Delim,After),
+	ALen is After - Cur,
+	sub_atom(Source,Cur,ALen,Next).
+
+probe_delim(Cur,Size,Source,Delim,Cur)
+	:-
+	Cur > Size,		%% really: Cur = Size + 1
+	!.
+probe_delim(Cur,Size,Source,Delim,Cur)
+	:-
+	sub_atom(Source,Cur,1,Delim),
+	!.
+
+probe_delim(Cur,Size,Source,Delim,After)
+	:-
+	NPos is Cur + 1,
+	probe_delim(NPos,Size,Source,Delim,After).
 
 
 /*!-------------------------------------------------------------
@@ -301,7 +247,6 @@ putc_n_of(Num, Char, Stream)
     put_char(Stream,Char),
     NextNum is Num-1,
     putc_n_of(NextNum, Char, Stream).
-
 
 /*!-------------------------------------------------------------
  |	gen_file_header/[3,4]

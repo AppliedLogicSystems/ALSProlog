@@ -1,6 +1,6 @@
 /VPATH.*=/ s/:/;/g
 s/@srcdir@/pathsrc/g
-s/@ARCH@/tgtarch/g
+s/@ARCH@/i386/g
 s/@CC@/gcc -Ipathsrc\/i386\/djgpp/
 s/@MACH_OS@/djgpp/
 s/@OS@/djgpp/
@@ -20,3 +20,5 @@ s/include $(srcdir)\/generic\/mh-generic/include ..\/generic.dos/
 s/^	.\//	go32 /
 s/^	alspro/	go32 alspro/
 s/.h.proto//g
+
+s/^include.*generic\.mkf/include \.\.\/generic\.mkf/

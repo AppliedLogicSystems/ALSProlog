@@ -127,7 +127,8 @@ cfg_process(LCs,Line).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Extract configuration information from 
-	%% the Makefile in bld-natv
+	%% the Makefile in bld-natv (this should be there, even
+	%% when the native version doesn't exist.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 export xtr_cfg_info/2.
@@ -143,7 +144,7 @@ xtr_cfg_info(BLD_Dir,TagsList, Info)
 	:-
 	slash2list(BLD_Dir, BLDDirList),
 	append(BLDDirList,['bld-natv'],NTVDirList),
-	rootPathFile('', NTVDirList, 'Makefile', MakefileAtm),
+	rootPathFile('', NTVDirList, 'makefile', MakefileAtm),
 	open(MakefileAtm,read,MFStrm,[]),
 	xtr_cfgi(TagsList, MFStrm, Info),
 	close(MFStrm).
@@ -209,7 +210,7 @@ setup_wins
 		cfg(srcdir,BLD_NATV_SRC_PATH_Atm),
 
 		extendPath(BLD_NATV_SRC_PATH_Atm,'wins/build',WINBLD ),
-		pathPlusFile(WINBLD, 'Makefile.in', WINMKPATH),
+		pathPlusFile(WINBLD, 'makefile.in', WINMKPATH),
 
 		general_os(ARCH,OS,GOS),
 		interleave(SubdirList, ' ', TL),
@@ -217,7 +218,7 @@ setup_wins
 		clean_lines(SubdirList, CleanLines),
 		trans_xtnd_makefile(WINMKPATH, 
 				    [Header | CleanLines], 
-				    './Makefile', GOS),
+				    './makefile', GOS),
 
 		subPath(BLD_NATV_SRC_PATH,BLD_NATV_SRC_PATH_Atm),
 		create_makefiles_and_subdirs(SubdirList, ARCH, OS, BLD_NATV_SRC_PATH),
@@ -244,7 +245,8 @@ check_make_subdir(Subdir)
 	printf(user,'Subdir %t exists\n',[Subdir]).
 check_make_subdir(Subdir)
 	:-
-	make_subdir(Subdir,511),
+%	make_subdir(Subdir,511),
+	make_subdir(Subdir),
 	printf(user,'   Created subdir %t \n',[Subdir]).
 
 create_makefiles_and_subdirs( [], _, _, _ ).
@@ -286,15 +288,15 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, BldPathAtm, BldSubdirP
 		'X_EXTRA_LIBS' = X_EXTRA_LIBS
 		|  SubHeaderLines0 ],
 
-		%% Handle the  Makefile:
-	extendPath(BldSubdirPathAtm, 'Makefile.in', SubDirMakefile),
+		%% Handle the  makefile:
+	extendPath(BldSubdirPathAtm, 'makefile.in', SubDirMakefile),
 	(exists_file(SubDirMakefile) ->
 		SrcMKFTail = SubDirMakefile
 		;
 		extendPath(BldPathAtm, 'mf-cmn.in', SrcMKFTail)
 	),
 
-	pathPlusFile(Subdir,'Makefile',SubdirMakefile),
+	pathPlusFile(Subdir,'makefile',SubdirMakefile),
 	trans_xtnd_makefile(SrcMKFTail, SubHeaderLines, SubdirMakefile, GOS), 
 
 		%% Handle pi_cfg.h:
@@ -365,23 +367,25 @@ install_alsdir(Subdir, BLD_NATV_SRC_PATH, GOS)
 	change_cwd(CurDir),
 
 		%% copy als-mics:
-	pathPlusFile(ALSDIRPATH, 'als-mics', NewALSMICSPATH),
-	OldMICS = '../bld-port/alsdir/als-mics',
-	catenate(['cp ',OldMICS,' ',NewALSMICSPATH],Cmd),
-	system(Cmd),
+	mics_copy(ALSDIRPATH),
 
 		%% Copy C interface generator to alsdir:
 	adjust_path_depth(BLD_NATV_SRC_PATH, 2, ShallowPath),
-	append(ShallowPath, ['cinterf'], CINTPathList),
+%	append(ShallowPath, ['cinterf'], CINTPathList),
+	append(BLD_NATV_SRC_PATH, ['cinterf'], CINTPathList),
 	subPath(CINTPathList, CIPATH),
 
 	extendPath(CIPATH, c2pro, C2PPath),
-	catenate(['trans_c2pro_',GOS,'.pro'],Tc2p),
+%	catenate(['trans_c2pro_',GOS,'.pro'],Tc2p),
+	catenate(['tc2p',GOS,'.pro'],Tc2p),
 	pathPlusFile(C2PPath, Tc2p, TC2P),
+	pathPlusFile(ALSDIRPATH, Tc2p, ADTC2P),
 
 	extendPath(CIPATH, pro2intf, Pro2IntPath),
-	Tp2i = 'tpro2intf.pro',
+%	Tp2i = 'tpro2intf.pro',
+	Tp2i = 'tp2intf.pro',
 	pathPlusFile(Pro2IntPath, Tp2i, P2IP),
+	pathPlusFile(ALSDIRPATH, Tp2i, ADP2IP),
 
 	get_cwd(CurDir),
 	( '#define'('HAVE_SYMLINK',1) ->
@@ -389,11 +393,47 @@ install_alsdir(Subdir, BLD_NATV_SRC_PATH, GOS)
 		create_sym_link(GOS, TC2P, Tc2p),
 		create_sym_link(GOS, P2IP, Tp2i)
 		;
-		copy_file_nl(TC2P, ALSDIRPATH, GOS),
-		copy_file_nl(P2IP, ALSDIRPATH, GOS)
+		copy_file_nl(TC2P, ADTC2P, GOS),
+		copy_file_nl(P2IP, ADP2IP, GOS)
 	),
 	change_cwd(CurDir).
 	
+copy_command('copy ')
+	:-
+	sys_env(unix,djgpp,_),
+	!.
+copy_command('cp ').
+
+mics_copy(ALSDIRPATH)
+	:-
+	sys_env(unix,djgpp,_),
+	!,
+	pathPlusFile(ALSDIRPATH, 'als-mics', NewALSMICSPATH0),
+	sl2sl(NewALSMICSPATH0, NewALSMICSPATH),
+	OldMICS = '..\\bld-port\\alsdir\\als-mics',
+	catenate(['copy ',OldMICS,' ',NewALSMICSPATH],Cmd),
+	system(Cmd).
+
+mics_copy(ALSDIRPATH)
+	:-
+	pathPlusFile(ALSDIRPATH, 'als-mics', NewALSMICSPATH),
+	OldMICS = '../bld-port/alsdir/als-mics',
+	catenate(['cp ',OldMICS,' ',NewALSMICSPATH],Cmd),
+	system(Cmd).
+
+sl2sl(In, Out)
+	:-
+	name(In, InCs),
+	s2s(InCs,OutCs),
+	name(Out, OutCs).
+
+s2s([],[]).
+s2s([0'/ | InCs], [92 | OutCs])
+	:-!,
+	s2s(InCs,OutCs).
+s2s([C | InCs], [C | OutCs])
+	:-
+	s2s(InCs,OutCs).
 
 install_tests(Subdir, BLD_NATV_SRC_PATH, GOS)
 	:-
@@ -719,7 +759,8 @@ setup_subdirs([Dir | DirsPathList], PathAccum, PathTail, StartDir)
 	:-
 	not(not(( PathTail = Dir,
 			  printf(user,'Making %t\n',[PathAccum]) ) )),
-	make_subdir(Dir,511),
+%	make_subdir(Dir,511),
+	make_subdir(Dir),
 	change_cwd(Dir),
 	PathTail = Dir/NewPathTail,
 	setup_subdirs(DirsPathList, PathAccum, NewPathTail, StartDir).

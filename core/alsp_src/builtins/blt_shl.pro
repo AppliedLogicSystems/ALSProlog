@@ -51,7 +51,7 @@ start_shell(DefaultShellCall)
 
 	(arg(2,CLInfo,true) -> consultmessage(on) ; consultmessage(off)),
 	ss_load_files(Files),
-	consultmessage(on),
+	(arg(2,CLInfo,quiet) -> consultmessage(off) ; consultmessage(on)),
 	!,
 	user:ShellCall.
 
@@ -94,11 +94,16 @@ ss_parse_command_line(['-v' | T], L, CLInfo)
 	mangle(2, CLInfo, true),
 	ss_parse_command_line(T, L, CLInfo).
 
-	%% -d: Force tty-style debugger to be loaded:
-		%% This is probably not correct at present (11/1/94)
-ss_parse_command_line(['-d' | T], L, CLInfo)
+	%% -q: Turn on verbose mode:
+ss_parse_command_line(['-q' | T], L, CLInfo)
 	:-!,
-	mangle(5, CLInfo, nowins),
+	mangle(2, CLInfo, quiet),
+	ss_parse_command_line(T, L, CLInfo).
+
+	%% -A: Atom - Assert Atom in module user.
+ss_parse_command_line(['-A', Expr | T], L, CLInfo)
+	:-!,
+	cmd_line_A(Expr),
 	ss_parse_command_line(T, L, CLInfo).
 
 	%% -obp: Keep obp files in directory where image is running:
@@ -115,6 +120,26 @@ ss_parse_command_line([File | T], L, CLInfo)
 	mangle(3, CLInfo, NewFiles),
 	ss_parse_command_line(T, L, CLInfo).
 
+cmd_line_A(Expr)
+	:-
+	atomread(Expr,Mod:AX),
+		%% Must intern the module:
+	functor(FF,Mod,0), functor(FF,SMod,0),
+	create_new_module(SMod),
+	in_assrt(AX, SMod).
+	
+cmd_line_A(Expr)
+	:-
+	user:assert(Expr).
+
+in_assrt((AX,BX), SMod)
+	:-!,
+	in_assrt(AX, SMod),
+	in_assrt(BX, SMod).
+
+in_assrt(AX, SMod)
+	:-
+	SMod:assert(AX).
 /*---------------------------------------
  |	ss_init_searchdir/0
  |

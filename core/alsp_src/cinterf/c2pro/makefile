@@ -8,7 +8,8 @@ MACH=Sun
 
 ARCHMACH=$(ARCH)/$(MACH)
 
-ALSPRO=$(PRODIR)/$(ARCHMACH)/obj/alspro
+#ALSPRO=$(PRODIR)/$(ARCHMACH)/obj/alspro
+ALSPRO=alspro
 
 TYPFILES= c2p.typ
 

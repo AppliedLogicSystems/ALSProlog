@@ -271,6 +271,7 @@ pbi_icode()
     w_get_An(&v4, &t4, 4);
     w_get_An(&v5, &t5, 5);
 
+
     if (t1 == WTP_INTEGER && t3 == WTP_INTEGER && t5 == WTP_INTEGER &&
 	(t4 == WTP_INTEGER || t4 == WTP_SYMBOL) &&
 	(t2 == WTP_INTEGER || t2 == WTP_SYMBOL)) {

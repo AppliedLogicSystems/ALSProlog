@@ -145,45 +145,6 @@ write_canonical(Stream_or_alias,Term) :-
 	!,
 	write_term0(Stream,Term,WInfo).
 
-export write_clause/1.
-export write_clause/2.
-export write_clause/3.
-export write_clauses/1.
-export write_clauses/2.
-export write_clauses/3.
-
-write_clause(Clause) :-
-	get_current_output_stream(Stream),
-	write_clause(Stream, Clause).
-
-write_clause(Stream, Clause) :-
-	write_clause(Stream, Clause, []).
-
-write_clause(Stream, Clause, Options) :-
-	write_term(Stream,Clause, Options),
-	put_code(Stream, 0'.),
-	nl(Stream).
-
-write_clauses(Clauses) :-
-	get_current_output_stream(Stream),
-	write_clauses(Stream,Clauses).
-
-write_clauses(Stream, Clauses) :-
-	write_clauses(Stream,Clauses,[]).
-
-write_clauses(Stream, Clauses, Options) :-
-	write_clauses0(Clauses, Stream, Options).
-
-write_clauses0([], Stream, Options).
-write_clauses0([nl | Clauses], Stream, Options) :-
-	!,
-    	nl(Stream),
-    	write_clauses0(Clauses, Stream, Options).
-write_clauses0([Clause | Clauses], Stream, Options) :-
-	write_clause(Stream, Clause, Options),
-	write_clauses0(Clauses, Stream, Options).
-
-
 export print/1.
 export print/2.
 

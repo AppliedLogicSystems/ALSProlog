@@ -13,17 +13,14 @@
 |		-- library version: 11/91
 |
 *=======================================================================*/
-
-library_key(filesys).
-
 module builtins.
 
 export date/1.
-export date_less/2.
-export date_pattern/4.
-export set_date_pattern/1.
+%export date_less/2.
+%export date_pattern/4.
+%export set_date_pattern/1.
 export time/1.
-export time_less/2.
+%export time_less/2.
 
 export get_cwd/1.
 export change_cwd/1.
@@ -33,6 +30,7 @@ export remove_file/1.
 export file_status/2.
 
 export files/2.
+export files/3.
 export subdirs/1.
 export subdirs_red/1.
 export collect_files/3.
@@ -41,14 +39,24 @@ export directory/3.
 export get_current_drive/1.
 export change_current_drive/1.
 
-/*---------------------------------------------------------------------
- *---------------------------------------------------------------------*/
+/*!--------------------------------------------------------------
+ |	date/1
+ |	date(Date)
+ |	date(-)
+ |
+ |	 -	gets the current date
+ |
+ |	Unifies the input with the current date which is represented
+ |	by a term of the form ??/??/??.  The exact pattern (e.g.,
+ |	YY/MM/DD or MM/DD/YY or ....) is determined by date_pattern/4.
+ *!--------------------------------------------------------------*/
 date(Date) 				% get current date
 	:-
 	'$time'(_,_,_,DD,Month,YY,_,_,_),
 	MM is Month + 1,
 	date_pattern(YY,MM,DD,Date).
 
+/************************
 /*!--------------------------------------------------------------
  |	date_less/2
  |	date_less(Date0, Date1)
@@ -95,13 +103,24 @@ insert_comma_chars([C | RestCs], [C, 0', | RestICs])
     %% Default:
 date_pattern(YY,MM,DD,YY/MM/DD).
 
-/*---------------------------------------------------------------------
- *---------------------------------------------------------------------*/
+******************/
+
+/*!--------------------------------------------------------------
+ |	time/1
+ |	time(HH:MM:SS)
+ |	time(-)
+ |
+ |	 - gets the current time
+ |
+ |	Unifies the input with the current time which is represented
+ |	by a term of the form HH:MM:SS.
+ *!--------------------------------------------------------------*/
 time(HH:MM:SS) 				% get current time
 	:-
 	'$time'(SS,MM,HH,_,_,_,_,_,_).
 
 
+/***********************
 /*!--------------------------------------------------------------
  |	time_less/2
  |	time_less(Time0, Time1)
@@ -118,6 +137,7 @@ time_less(HH0:MM0:SS0, HH1:MM1:SS1)
 		(HH0 = HH1, 
 			(MM0 < MM1,!; (MM0 = MM1, SS0 < SS1)))).
 
+***************/
 
 /*---------------------------------------------------------------------
  |	Change the current working directory being used by the program. 
@@ -184,10 +204,83 @@ remove_file(FileName)
 	:-
 	'$unlink'(FileName).
 
+/*!----------------------------------------------------------------
+ |	files/2
+ |	files(Pattern,FileList)
+ |	files(+,-)
+ |
+ |	- returns a list of files matching a pattern
+ |
+ |	Returns the list (FileList) of all ordinary files in the 
+ |	current directory which match Pattern, which can include
+ |	the usual '*' and '?' wildcard characters.
+ *!----------------------------------------------------------------*/
+files(Pattern, FileList)
+	:-
+	directory(Pattern, regular, FileList1),
+	directory(Pattern, read_only, FileList2),
+    sorted_merge([FileList1,FileList2], FileList).
 
-/*---------------------------------------------------------------------
- *--------------------------------------------------------------------*/
 
+/*!----------------------------------------------------------------
+ |	subdirs/1
+ |	subdirs(SubdirList)
+ |	subdirs(-)
+ |
+ |	- returns a list of subdirectories 
+ |
+ |	Returns the list of all subdirectories of the current 
+ |	working directory.
+ *!----------------------------------------------------------------*/
+subdirs(SubdirList)
+	:-
+	directory('*',directory,SubdirList).
+
+/*!----------------------------------------------------------------
+ |	subdirs_red/1
+ |	subdirs_red(SubdirList)
+ |	subdirs_red(-)
+ |
+ |	- returns a list of subdirectories, omitting '.' and '..'
+ |
+ |	Returns the list of all subdirectories of the current 
+ |	working directory, omitting '.' and '..'
+ *!----------------------------------------------------------------*/
+subdirs_red(SubdirList)
+	:-
+	directory('*',directory,SubdirList0),
+	list_delete(SubdirList0, '.', SubdirList1),
+	list_delete(SubdirList1, '..', SubdirList).
+
+/*!----------------------------------------------------------------
+ |	collect_files/3
+ |	collect_files(PatternList,FileType,FileList)
+ |	collect_files(+,+,-)
+ |
+ |	- returns a list of files meeting conditions
+ |
+ |	If PatternList is a list of file name patterns, possibly
+ |	including the usual wildcard characters '*' and '?', and
+ |	if FileType is a standard FileType (see below), then FileList
+ |	is a sorted list of all files in the current working directory
+ |	which are of type FileType, and which match at least one of
+ |	the patterns on PatternList.  Works by recursively working down 
+ |	PatternList and calling directory/3 on each element, and then
+ |	doing a sorted merge on the resulting lists.
+ *!----------------------------------------------------------------*/
+collect_files([],FileType,[]).
+collect_files([Pattern | RestPatterns],FileType,FileList)
+	:-
+	fileTypeCode(InternalType, FileType),
+	collect_files0([Pattern | RestPatterns],InternalType,FileListList),
+	sorted_merge(FileListList, FileList).
+
+collect_files0([], _, []).
+collect_files0([Pattern | RestPatterns], InternalType,
+				[FileList | RestFileList])
+	:-
+	directory(Pattern, InternalType, FileList),
+	collect_files0(RestPatterns, InternalType, RestFileList).
 
 /*----------------------------------------------------------------
  | DOS file status/type codes returned from a call to $getFileStatus
@@ -214,7 +307,6 @@ ownerPermissionsCoding(7,[read,write,execute]).
 
 /*---------------------------------------------------------------------
  *---------------------------------------------------------------------*/
-
 file_status(FileName,Status)
 	:-
 	'$getFileStatus'(FileName,
@@ -224,72 +316,6 @@ file_status(FileName,Status)
 	ownerPermissionsCoding(OwnerPermiss, Permissions),
 	Status = [type=FileType, permissions=Permissions,
 			  mod_time=ModTime, size=ByteSize].
-
-
-/*!----------------------------------------------------------------
- |	files/2
- |	files(Pattern,FileList)
- |	files(+,-)
- |
- |	- returns a list of files matching a pattern
- |
- |	Returns the list (FileList) of all ordinary files in the 
- |	current directory which match Pattern, which can include
- |	the usual '*' and '?' wildcard characters.
- *!----------------------------------------------------------------*/
-files(Pattern, FileList)
-	:-
-	directory(Pattern, regular, FileList1),
-	directory(Pattern, read_only, FileList2),
-        sorted_merge([FileList1,FileList2], FileList).
-
-/*!----------------------------------------------------------------
- |	subdirs/1
- |	subdirs(SubdirList)
- |	subdirs(-)
- |
- |	- returns a list of subdirectories 
- |
- |	Returns the list of all subdirectories of the current 
- |	working directory.
- *!----------------------------------------------------------------*/
-subdirs(SubdirList)
-	:-
-	directory('*',directory,SubdirList).
-
-
-/*!----------------------------------------------------------------
- |	subdirs_red/1
- |	subdirs_red(SubdirList)
- |	subdirs_red(-)
- |
- |	- returns a list of subdirectories, omitting '.' and '..'
- |
- |	Returns the list of all subdirectories of the current 
- |	working directory, omitting '.' and '..'
- *!----------------------------------------------------------------*/
-subdirs_red(SubdirList)
-	:-
-	directory('*',directory,SubdirList0),
-	list_delete(SubdirList0, '.', SubdirList1),
-	list_delete(SubdirList1, '..', SubdirList).
-
-/*---------------------------------------------------------------------
- *---------------------------------------------------------------------*/
-
-collect_files([],FileType,[]).
-collect_files([Pattern | RestPatterns],FileType,FileList)
-        :-
-        collect_files0([Pattern | RestPatterns],FileType,FileListList),
-        sorted_merge(FileListList, FileList).
-
-collect_files0([], _, []).
-collect_files0([Pattern | RestPatterns], FileType,
-                                [FileList | RestFileList])
-        :-
-        directory(Pattern, FileType, FileList),
-        collect_files0(RestPatterns, FileType, RestFileList).
-
 
 /*!-------------------------------------------------------------------
  * 			directory(Pattern,Attribute,List)
@@ -313,10 +339,19 @@ collect_files0([Pattern | RestPatterns], FileType,
  *--------------------------------------------------------------------*/
 
 	% If no pattern has been give, assume a wildcard is wanted.
-directory(Pattern,FileType,List) :- 
+directory(Pattern,FileType,List) 
+	:- 
 	var(Pattern),
 	!,
 	directory('*.*',FileType,List).
+
+directory([ Pattern1 | Patterns ], FileType, List) 
+	:-!,
+	directory(Pattern1, FileType, List1),
+	directory(Patterns, FileType, RestList),
+	dappend(List1, RestList, List).
+
+directory([], FileType, []) :-!.
 
 directory(FileNamePattern, FileType, List) 
 	:-
@@ -334,6 +369,20 @@ fileTypeToAttr(volid,      8).
 fileTypeToAttr(directory, 16).
 fileTypeToAttr(archive,   32).
 
+/*!----------------------------------------------------------------
+ |	file_size/2
+ |	file_size(FileName,Size)
+ |	file_size(+,-)
+ |
+ |	- returns the size of a file
+ |
+ |	If File is an atom (possibly quoted) which is the name of a
+ |	file in the current working directory, Size is the size of
+ |	that file in bytes.
+ *!----------------------------------------------------------------*/
+file_size(_,0)
+	:-
+	prolog_system_error(nyi, ['file_size/2',dos_djgpp]).
 
 
 /*---------------------------------------------------------------------

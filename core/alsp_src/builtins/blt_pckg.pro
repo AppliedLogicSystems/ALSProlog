@@ -52,12 +52,20 @@ save_image(NewImageName) :-
 	save_state(SSName),
 	get_image_dir_and_name(ImageDir,ImageName),
 	sys_searchdir(ALSDIR),
-	sprintf(CMD, '%sals-mics %s%s %s %s',
+	mics_cmd_fmt(MicsCmdFmt),
+	sprintf(CMD, MicsCmdFmt,
 		      [ALSDIR, ImageDir, ImageName, SSName, NewImageName]),
 	atom_codes(ACMD,CMD),
 	printf('Executing %s\n', [ACMD]),
 	system(ACMD),
 	unlink(SSName).
+
+mics_cmd_fmt('go32 %sals-mics %s%s %s %s')
+	:-
+	als_system(SystemList),
+	dmember(os_variation=djgpp, SystemList),
+	!.
+mics_cmd_fmt('%sals-mics %s%s %s %s').
 
 export save_image/2.
 

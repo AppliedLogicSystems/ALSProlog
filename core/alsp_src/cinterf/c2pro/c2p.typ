@@ -20,7 +20,8 @@ defStruct(c2p,
 		fd_stack/[],		%% stack for file contexts
 
 		info_table/[],		%% avl_tree for storing info
-
+		fcn_filter/all,		%% selective function filtering:
+							%% 	values:	all, all_except(List), List
 		outFile/nil,		%% current output file being processed
 		outStream/nil		%% stream to output file
 

@@ -790,11 +790,13 @@ process_decln(DSpec,Declts,State) :-
 	check_tagged_structdef(DSpec,InTable,OutTable),
 	setC2P(info_table, State, OutTable),
 	process_typedef_declts(Declts,DSpec,State).
+
 process_decln(DSpec,Declts,State) :-
 	accessC2P(info_table, State, InTable),
 	check_tagged_structdef(DSpec,InTable,OutTable),
 	setC2P(info_table, State, OutTable),
-	process_declts(Declts,DSpec,State).
+	accessC2P(fcn_filter, State, FcnFilter),
+	process_declts(Declts,DSpec,FcnFilter,State).
 
 check_tagged_structdef(DSpec,InTab,OutTab) :-
 	is_tagged_structdef(DSpec),
@@ -813,29 +815,87 @@ process_typedef_declts([Declt|Rest],DSpec,State) :-
 	output_type(Name,DSpec,Declt,State),
 	process_typedef_declts(Rest,DSpec,State).
 
-%
+%---------------
 
-process_declts( [] ,DSpec,State).
+process_declts( [] ,DSpec,_,State).
 
-process_declts( [ Declt | Rest ] ,DSpec,State) 
+		%% debugging:
+process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
+	:-
+%	printf('process_decl: %t \n',[Declt]),
+	fail.
+
+process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
+	:-
+	Declt = func(paren(ptr([],func(ident(_),[]))),[]),
+	!,
+	process_declts(Rest,DSpec,FcnFilter,State).
+
+process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
+	:-
+	Declt = func(ident(FID),[]),
+	not(member(FID, ['XCreateRegion','XrmInitialize',
+				 'XrmUniqueQuark','XUniqueContext' ]) ), 
+	!,
+	process_declts(Rest,DSpec,FcnFilter,State).
+
+process_declts( [ func(ident(FID),Params) | Rest ] ,DSpec,FcnFilter,State) 
+	:-
+%printf('process fcn decl: %t -- filter = %t\n',[FID,FcnFilter]),
+	!,
+			%% This handles the recursive call to process_declts:
+	process_fcn_decl(FcnFilter,func(ident(FID),Params),Rest,DSpec,State).
+
+
+process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
 	:-
 	(Declt = ptr([],func(ident(_),[]));
-	  Declt = func(paren(ptr([],func(ident(_),[]))),[]);
-	   (Declt = func(ident(FID),[]),
-		not(member(FID, ['XCreateRegion','XrmInitialize',
-				 'XrmUniqueQuark','XUniqueContext' ]) ) 
-	    ) ;
 	    Declt = ptr([],ptr([],func(ident(_),[])))
 	),
-%pbi_write(skip_this(Declt)),pbi_nl,pbi_ttyflush,
 	!,
-	process_declts(Rest,DSpec,State).
+	process_declts(Rest,DSpec,FcnFilter,State).
 
-process_declts( [ Declt | Rest ] ,DSpec,State) 
+process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
 	:-
 	output_func_gvar(DSpec,Declt,State),
-	process_declts(Rest,DSpec,State).
+	process_declts(Rest,DSpec,FcnFilter,State).
 
+process_fcn_decl(all,FDeclt,Rest,DSpec,State)
+	:-!,
+	output_func_gvar(DSpec, FDeclt, State),
+	process_declts(Rest,DSpec,FcnFilter,State).
+
+process_fcn_decl(all_except(Excl),FDeclt,Rest,DSpec,State)
+	:-!,
+	FDeclt = func(ident(FID),Params), 
+	(dmember(FID, Excl) ->
+		true
+		;
+		(dmember(FID/_, Excl) ->
+			true
+			;
+			output_func_gvar(DSpec, FDeclt, State)
+		)
+	),
+	process_declts(Rest,DSpec,FcnFilter,State).
+
+process_fcn_decl(List,FDeclt,Rest,DSpec,State)
+	:-
+	FDeclt = func(ident(FID),Params), 
+	(dmember(FID, List) ->
+		output_func_gvar(DSpec, FDeclt, State)
+		;
+		(dmember(FID/_, List) ->
+			output_func_gvar(DSpec, FDeclt, State)
+			;
+			true
+		)
+	),
+	process_declts(Rest,DSpec,FcnFilter,State).
+
+process_fcn_decl(FcnFilter,_,Rest,DSpec,State)
+	:-
+	process_declts(Rest,DSpec,FcnFilter,State).
 
 %
 %	adeclt_to_str/2
