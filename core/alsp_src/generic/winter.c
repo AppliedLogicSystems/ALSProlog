@@ -497,11 +497,13 @@ w_uia_alloc(rval, rtag, size)
 
     i = (PWord *) t - wm_H;
 
+/*
 	if ( ((unsigned long)wm_TR - (unsigned long)((unsigned long)wm_H +i +1))
 			< (unsigned long) wm_normal ) {
 	printf("w_uia_alloc: wm_TR=%x wm_H=%x wm_safety=%x wm_normal=%x\n",
 				(int)wm_TR, (int)wm_H, (int)wm_safety, (int)wm_normal);
 	}
+*/
 
     *wm_H = MMK_FENCE(i);
     wm_H += i;
