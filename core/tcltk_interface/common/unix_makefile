@@ -5,11 +5,11 @@
 #SRCDIR = /apache/choupt/alsp_src
 SRCDIR = /apache/alsp_src
 
-VPATH = ../common:$(SRCDIR)/generic
-
 CC = gcc
 
-CPPFLAGS = -I $(SRCDIR)/generic -I /usr/include/X11R5
+VPATH = ../common:$(SRCDIR)/generic
+
+CPPFLAGS = -I ../common -I $(SRCDIR)/generic -I /usr/include/X11R5
 
 CFLAGS = -Wall -MD -fPIC
 
