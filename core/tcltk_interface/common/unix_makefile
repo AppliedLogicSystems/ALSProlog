@@ -3,13 +3,13 @@
 #    LINK - linker directives to create shared library
 
 ALSP_SOURCE = ../../alsp_src/generic
-
+ALS_BUILD_SUPPORT = /apache/als_build_support/unix
 CC = gcc
 LD = gcc
 
 VPATH = ../common:$(ALSP_SOURCE)
 
-CPPFLAGS = -I ../common -I $(ALSP_SOURCE) $(SUBOS_INCLUDE) -I /usr/include/X11R5 -DUNIX -DUNIX_NAME='"$(UNIX_NAME)"'
+CPPFLAGS = -I ../common -I $(ALSP_SOURCE) -isystem $(ALS_BUILD_SUPPORT)/include -I /usr/include/X11R5 -DUNIX -DUNIX_NAME='"$(UNIX_NAME)"'
 
 CFLAGS = -Wall -MD -fPIC
 
@@ -24,7 +24,7 @@ objects = $(source:.c=.o)
 all: tclintf.psl
 
 tclintf.psl: $(objects)
-	$(LD) $(LDFLAGS) $(objects) -L/usr/local/lib $(LIBS) -o tclintf.psl
+	$(LD) $(LDFLAGS) $(objects) -L$(ALS_BUILD_SUPPORT)/$(SUB_OS)/lib $(LIBS) -o tclintf.psl
 
 alsprolog.so: $(objects)
 	$(LD) $(LDFLAGS) tcl_interface.o -ltk8.0 -lX11 -lalspro -lc -lm -o alsprolog.so

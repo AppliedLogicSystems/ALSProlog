@@ -2,9 +2,11 @@
 
 VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins:$(SOURCE_DIR)/library
 
+CORE=$(SOURCE_DIR)/..
+
 default : binaries
 
-MAKEFILES = Makefile gnu_makefile $(OS)_makefile $(CCOMP)_makefile
+MAKEFS = Makefile gnu_makefile $(OS)_makefile $(CCOMP)_makefile
 
 ifndef CCOMP
 CCOMP=gcc
@@ -60,60 +62,66 @@ include $(SOURCE_DIR)/$(OS)/$(CCOMP)_makefile
 
 # Generic rules
 
-$(MAIN_OBJECTS) : $(MAKEFILES)
+$(MAIN_OBJECTS) : $(MAKEFS)
 
-$(LIB_OBJECTS) $(STATIC_OBJECTS) $(SHARED_OBJECTS) : $(MAKEFILES)
+$(LIB_OBJECTS) $(STATIC_OBJECTS) $(SHARED_OBJECTS) : $(MAKEFS)
 
-binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro
+binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro alsdev
 
-all : default testrun
+all : default
 
-alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a $(MAKEFILES)
+alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a $(MAKEFS)
 	$(CC) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LIBS)
 
-alspro :  alsdir alspro_b $(BUILTINS) $(MAKEFILES)
+alspro :  alsdir alspro_b $(BUILTINS) $(MAKEFS)
 	./alspro_b -q -b -obp -g 'save_image(alspro,[])'
 
 ifndef NO_STATIC_LIB
-libalspro.a : alsdir $(STATIC_OBJECTS) $(LIB_OBJECTS) $(MAKEFILES)
+libalspro.a : alsdir $(STATIC_OBJECTS) $(LIB_OBJECTS) $(MAKEFS)
 	$(OS_AR) libalspro.a $(STATIC_OBJECTS) $(LIB_OBJECTS)
 	$(OS_RANLIB) libalspro.a
 endif
 
-libalspro.$(OS_SL_EXT) : alspro_b alsdir  $(SHARED_OBJECTS) $(LIB_OBJECTS) $(MAKEFILES)
+libalspro.$(OS_SL_EXT) : alspro_b alsdir  $(SHARED_OBJECTS) $(LIB_OBJECTS) $(MAKEFS)
 	$(OS_SL_LINK) -o libalspro.$(OS_SL_EXT) $(SHARED_OBJECTS) \
 	    $(LIB_OBJECTS) $(SL_LINK_LIBS)
 	./alspro_b -q -b -obp -g "attach_image('libalspro.$(OS_SL_EXT)')"
 
-so_test : libalspro.$(OS_SL_EXT)
+so_test : libalspro.$(OS_SL_EXT) $(MAKEFS)
 	$(CC) -o so_test $(MAIN_OBJECTS) libalspro.so $(LIB)
 
 alsdir : alsdir/builtins alsdir/library
 
-alsdir/builtins : $(SOURCE_DIR)/builtins $(MAKEFILES)
+alsdir/builtins : $(SOURCE_DIR)/builtins $(MAKEFS)
 	mkdir -p alsdir/builtins
 	rm -f alsdir/builtins/*.pro
 	cd alsdir/builtins ; ln -s ../../$(SOURCE_DIR)/builtins/*.pro .
 
-alsdir/library : $(SOURCE_DIR)/library $(MAKEFILES)
+alsdir/library : $(SOURCE_DIR)/library $(MAKEFS)
 	mkdir -p alsdir/library
 	rm -f alsdir/library/*.pro alsdir/library/*.alb
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.pro .
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
 
-alsdir/shared : ../tcltk_package  ../als_dev/alsdev
+tclintf.psl: $(MAKEFS)
+	$(MAKE) -C $(CORE)/tcltk_interface/$(SUBOS)/
+
+alsdir/shared : $(CORE)/tcltk_interface/common/tcltk.pro $(CORE)/tcltk_interface/common/tcltk_util.pro tclintf.psl $(MAKEFS)
 	mkdir -p alsdir/shared
 	rm -f alsdir/shared/*.pro alsdir/shared/*.psl alsdir/shared/*.tcl
-	cd alsdir/shared ; ln -s ../../../tcltk_package/$(SUBOS)/tclintf.psl .
-	cd alsdir/shared ; ln -s ../../../tcltk_package/$(SUBOS)/tcltk.pro .
-	cd alsdir/shared ; ln -s ../../../als_dev/alsdev/*.tcl .
+	cd alsdir/shared ; ln -s ../../$(CORE)/tcltk_interface/$(SUBOS)/tclintf.psl .
+	cd alsdir/shared ; ln -s ../../$(CORE)/tcltk_interface/common/tcltk.pro .
+	cd alsdir/shared ; ln -s ../../$(CORE)/tcltk_interface/common/tcltk_util.pro .
+	cd alsdir/shared ; ln -s ../../$(CORE)/als_dev/alsdev/*.tcl .
 				 
-alsdir/images : ../als_dev/alsdev
+alsdir/images : $(CORE)/als_dev/alsdev $(MAKEFS)
 	mkdir -p alsdir/images
 	rm -f alsdir/images/*.*
-	cd alsdir/images ; ln -s ../../../als_dev/alsdev/images/*.gif .
+	cd alsdir/images ; ln -s ../../$(CORE)/als_dev/alsdev/images/*.gif .
 
 TEST_DIR = $(SOURCE_DIR)/tests
+
+test: testrun
 
 testrun : command_line_test iso_test_suite test_suite
 
@@ -130,7 +138,20 @@ ALSDEVFILES = blt_dvsh.pro dbg_class.pro projects.pro
 ALSDEVLIBS=listutl1,miscterm,msc_ioin,mscioout,strctutl,strings,tcl_sppt,tk_alslib,typecomp
 ALSDEVLIBPS =listutl1.pro miscterm.pro msc_ioin.pro mscioout.pro strctutl.pro strings.pro \
 			tcl_sppt.pro tk_alslib.pro typecomp.pro
-alsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS)
+
+GETDIR=$(CORE)/als_dev/alsdev/getDirectory
+GETFILES=$(CORE)/als_dev/alsdev/getFiles
+
+lib: $(GETDIR)/getDirectory.tcl $(GETDIR)/unix_pkgIndex.tcl $(GETFILES)/getFiles.tcl $(GETFILES)/unix_pkgIndex.tcl $(MAKEFS)
+	cp -pr /apache/als_build_support/unix/lib .
+	mkdir -p lib/tk8.0/getDirectory
+	cp -pr $(GETDIR)/getDirectory.tcl lib/tk8.0/getDirectory
+	cp -pr $(GETDIR)/unix_pkgIndex.tcl lib/tk8.0/getDirectory/pkgIndex.tcl
+	mkdir -p lib/tk8.0/getFiles
+	cp -pr $(GETFILES)/getFiles.tcl lib/tk8.0/getFiles
+	cp -pr $(GETFILES)/unix_pkgIndex.tcl lib/tk8.0/getFiles/pkgIndex.tcl
+
+alsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
 	./alspro_b -q -b -obp -no_dot_alspro \
 	-g 'save_image(alsdev,[start_goal((builtins:start_alsdev)), \
 	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
@@ -138,6 +159,8 @@ alsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES)
 
 clean :
 	rm -f *.o rm *.d
+
+distclean: superclean
 
 superclean : clean
 	rm -fr alsdir alspro alspro_b libalspro.a libalspro.$(OS_SL_EXT)
