@@ -48,6 +48,10 @@ extern	void	main	PARAMS(( int, char ** ));
 #include "pi_init.h"
 #include "pi_cfg.h"
 
+#ifdef APP_PRINTF_CALLBACK
+void app_printf(int messtype, va_list args);
+#endif
+
 #ifdef MacOS
 #ifdef HAVE_GUSI
 #include <GUSI.h>
@@ -116,10 +120,21 @@ static void FixArguments(int argc, char **argv)
 	}
 }
 
-static BOOL CtrlHandler(DWORD fdwCtrlType)
+#include <signal.h>
+
+BOOL CtrlHandler(DWORD fdwCtrlType);
+BOOL CtrlHandler(DWORD fdwCtrlType)
 {
+    switch (fdwCtrlType) {
+    case CTRL_C_EVENT:    
 	raise(SIGINT);
 	return TRUE;
+    case CTRL_BREAK_EVENT:
+   	raise(SIGABRT);
+	return TRUE;
+    default:
+    	return FALSE;
+    }
 }
 
 #endif
@@ -155,9 +170,13 @@ main(int argc, char ** argv)
 
 #endif /* MacOS */
 
+#ifdef APP_PRINTF_CALLBACK 
+    PI_set_app_printf_callback(app_printf);
+#endif
+
 #ifdef WIN32
 #ifdef __MWERKS__
-    FixArguments(argc, argv);
+    //FixArguments(argc, argv);
     if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE))
     	PI_app_printf(PI_app_printf_warning, "SetConsoleCtrlHandler failed !\n");
 #endif
@@ -177,6 +196,7 @@ main(int argc, char ** argv)
     }
     
 #endif
+
 
     if ((exit_status = PI_prolog_init(WIN_STR, argc, argv)) != 0) {
 	PI_app_printf(PI_app_printf_error, "Prolog init failed !\n");
@@ -264,6 +284,9 @@ const char *PI_get_options(void)
 
 
 /*VARARGS0 */
+#ifdef APP_PRINTF_CALLBACK
+void app_printf(int messtype, va_list args)
+#else
 void
 #ifdef HAVE_STDARG_H
 PI_app_printf(int messtype, ...)
@@ -272,15 +295,20 @@ PI_app_printf(messtype,va_alist)
     int messtype;
     va_dcl
 #endif
+#endif
 {
+#ifndef APP_PRINTF_CALLBACK
     va_list args;
+#endif
     char *fmt;
 
+#ifndef APP_PRINTF_CALLBACK
 #ifdef HAVE_STDARG_H
     va_start(args, messtype);
 #else
     va_start(args);
 #endif
+#endif /* APP_PRINTF_CALLBACK */
 
     fmt = va_arg(args, char *);
 

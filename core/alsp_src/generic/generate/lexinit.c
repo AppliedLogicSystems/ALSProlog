@@ -39,7 +39,8 @@ main()
 	for (i='0'; i<='9'; i++)
 		lx_chtb[i] = LX_NUM;
 
-	lx_chtb['\n'] = LX_NL;
+	lx_chtb[CR] = LX_NL;
+	lx_chtb[LF] = LX_NL;
 	lx_chtb['{'] = LX_SNGL;
 	lx_chtb['}'] = LX_SNGL;
 	lx_chtb['('] = LX_SNGL;
@@ -61,14 +62,15 @@ main()
 	lx_chtb[255] = LX_EOF;
 	lx_chtb[4] = LX_EOF;
 
-	printf("#ifndef MacOS\n");
+	/* printf("#ifndef MacOS\n"); */
 	printf("char lx_chtb[256] = {\n");
 	for (i=0; i < 255; i++)
 		printf("\t%d,\n",(int)lx_chtb[i]);
 
 	printf("\t%d\n};\n",(int)lx_chtb[255]);
-	printf("\n#else\n");
+	/* printf("\n#else\n"); */
 	
+#if 0
 	/* On the Mac, the newline character is 13 */
 	lx_chtb[13] = LX_NL;
 
@@ -76,5 +78,6 @@ main()
 	for (i=0; i < 255; i++)
 	    printf("\t%d,\n", (int)lx_chtb[i]);
 	printf("\t%d\n};\n#endif /* MacOS */\n", (int)lx_chtb[255]);
+#endif
 	exit(0);
 }

@@ -24,6 +24,7 @@ module builtins.
 export mode/1, public/1, multifile/1.
 :- 	op(1150,fx,mode),
 	op(1150,fx,public),
+	op(1150,fx,dynamic),
 	op(1150,fx,multifile).
 
 mode(_).

@@ -296,6 +296,10 @@ display_stats(Stream) :-
 	printf(Stream,'             : HB=%#x H=%#x TR=%#x B=%#x\n',[HB,H,TR,B],[]),
 	flush_output(Stream).
 
+export heap_status/1.
+heap_status(Hleft) :-
+	statistics(Stat),		% C - builtin
+	dmember(heap(Hleft,Hused,Tused,GValloced,Halloced),Stat).
 
 /*---------------------------------------------------------------------
  * Library loading facilities

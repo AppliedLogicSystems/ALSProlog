@@ -47,27 +47,21 @@ use windows.
  */
 
 :- als_system(L),
+   assert(default_read_eoln_type(universal)),
    dmember(os=OS, L),
    (
-	OS=msw95 ->
-	   	(assert(default_read_eoln_type(universal)),
-	   	 assert(default_write_eoln_type(crlf)))
+	OS=msw95 -> assert(default_write_eoln_type(crlf))
 	;
-	OS=macos ->
-	   	(assert(default_read_eoln_type(universal)),
-	   	 assert(default_write_eoln_type(cr)))
+	OS=macos -> assert(default_write_eoln_type(cr))
 	;
    	(OS=unix ->
    		dmember(os_variation=OSM, L),
    		((OSM=djgpp1 ; OSM=djgpp2) ->
-   			(assert(default_read_eoln_type(crlf)),
-   			 assert(default_write_eoln_type(crlf)))
+   			assert(default_write_eoln_type(crlf))
    			;
-   			(assert(default_read_eoln_type(lf)),
-   			 assert(default_write_eoln_type(lf)))))
+   			assert(default_write_eoln_type(lf))))
 	;
-   		(assert(default_read_eoln_type(crlf)),
-   		 assert(default_write_eoln_type(crlf)))
+   		assert(default_write_eoln_type(crlf))
     ).
 
 
@@ -1130,6 +1124,41 @@ poll(CPOS, LPOS, _, _) :-
 poll(_,_,Stream,TimeOut) :-
 	sio_poll(Stream, TimeOut).
 
+/*--------------------------------------------------------------*
+ |  simple_select/2
+ |  simple_select(List, Timeout)
+ |  simple_select(+, +)
+ |
+ |	List is a list of read streams, and Timeout is an integer 
+ |	(indicating a number of milliseconds).  
+ |
+ |	Implements the functionality of unix select for these read
+ |	streams without telling what streams are actually ready.
+ *--------------------------------------------------------------*/
+
+	%% FIXup needed -  Handle window streams correctly.
+
+export simple_select/2.
+simple_select([], _) :-!.
+
+simple_select(StreamList, Timeout)
+	:-
+	integer(Timeout),
+	no_immed_streams(StreamList),
+	sio_simple_select(StreamList, Timeout).
+
+no_immed_streams([]).
+no_immed_streams([S | Streams])
+	:-
+	is_input_stream(S),
+	stream_type(S, ST),
+	not(always_ready(ST)),
+	no_immed_streams(Streams).
+
+always_ready(file).
+always_ready(string).
+always_ready(atom).
+
 		/*------------*
 		 |   REXEC    |
 		 *------------*/
@@ -2010,11 +2039,13 @@ get_codes(_, [], SS).
  *	otherwise.
  */
 
+/*
 export get_nonblank_char/1.
 
 get_nonblank_char(Char) :-
 	get_current_input_stream(Stream),
 	get_nonblank_char(Stream,Char).
+*/
 
 /*
  * FIXME:  Move to library.
@@ -2030,6 +2061,7 @@ get_nonblank_char(Char) :-
  *	otherwise.
  */
 
+/*
 export get_nonblank_char/2.
 
 get_nonblank_char(Stream, Char) :-
@@ -2056,12 +2088,14 @@ consume_til_end(C, Stream) :-
 consume_til_end(_, Stream) :-
 	get_code(Stream, C),
     consume_til_end(C, Stream).
+*/
 
+/*
 iseoln(0'\n).
 iseoln(0'\r).
 
 isspace(S) :- S =< 32, not(iseoln(S)).
-
+*/
 
 /*
  * FIXME:  Move to library.
@@ -2095,6 +2129,7 @@ get_atomic_nonblank_char(Char) :-
 
 export get_atomic_nonblank_char/2.
 
+/*
 get_atomic_nonblank_char(Stream,Char)
 	:-
 	get_nonblank_char(Stream,Char0),
@@ -2103,7 +2138,20 @@ get_atomic_nonblank_char(Stream,Char)
 		;
 		name(Char, [Char0])
 	).
+*/
 
+get_atomic_nonblank_char(Stream,Char)
+	:-
+	get_line(Stream, Line),
+	atom_codes(Line, CharList),
+	first_nonblank_char(CharList, Char0),
+	atom_codes(Char, [Char0]).
+get_atomic_nonblank_char(Stream, end_of_line).
+
+first_nonblank_char([Char | Rest], Char) :-
+	Char > 32.
+first_nonblank_char([_ | Rest], Char) :-
+	first_nonblank_char(Rest, Char).
 
 /*
  * peek_code(Char)

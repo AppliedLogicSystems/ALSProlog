@@ -304,6 +304,7 @@ e1(Val,State) --> unop_exp(Val,State).
 
 primary_exp(Num,State) --> [number(Num)], !.
 primary_exp(Num,State) --> [char(Num)], !.
+primary_exp(S,State) --> [string(S)], !.
 primary_exp(Exp,State) --> [lparen], !, expression(Exp,State), [rparen].
 primary_exp(Val,State) --> [ident(Id)], 		% enum constant
 	{ 

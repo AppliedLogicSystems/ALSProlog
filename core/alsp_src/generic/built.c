@@ -366,6 +366,7 @@ static struct blt_struct {
 	BLT("sio_is_server_socket", 1, sio_is_server_socket, "_sio_is_server_socket"),
 	BLT("sio_accept_socket_connection", 1, sio_accept_socket_connection, "_sio_accept_socket_connection"),
 	BLT("sio_poll",2,sio_poll,"_sio_poll"),
+	BLT("sio_simple_select", 2, sio_simple_select, "_sio_simple_select"),
 #endif /* HAVE_SOCKET */
 
 #ifdef REXEC

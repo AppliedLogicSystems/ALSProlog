@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-main(argc, argv)
+int main(argc, argv)
 int argc;
 char *argv[];
 
@@ -12,7 +12,7 @@ char *argv[];
 
 	if (argc == 1)
 		return 0;
-	else
+	else {
 		while (--argc > 0)
 			if ((fpi = fopen(*++argv, "r")) == NULL) 
 			{
@@ -56,6 +56,8 @@ char *argv[];
 					}
 				}
 			}
+		return 0;
+	      }
 }
 
 m2u(fpi,fpo)

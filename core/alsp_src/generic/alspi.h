@@ -14,13 +14,17 @@
 #ifndef _ALSPI_H_INCLUDED_
 #define _ALSPI_H_INCLUDED_
 
-/*
- * Set up some macros for dealing with prototypes and other ANSI C features.
- */
+#ifdef APP_PRINTF_CALLBACK
+#include <stdarg.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ * Set up some macros for dealing with prototypes and other ANSI C features.
+ */
 
 #ifndef PARAMS
 #if defined(__STDC__) || defined(__cplusplus)
@@ -125,6 +129,9 @@ extern	void	PI_shutdown	PARAMS(( void ));
 extern	int	PI_toplevel	PARAMS(( void ));
 extern	int	PI_prolog_init	PARAMS(( char *, int, char ** ));
 
+#ifdef APP_PRINTF_CALLBACK
+extern	void	PI_set_app_printf_callback(void (*callback)(int, va_list));
+#endif
 extern	void	PI_app_printf	PARAMS(( int, ... ));
 extern	const char *	PI_get_options	PARAMS(( void ));
 

@@ -2131,7 +2131,7 @@ pbi_bind_vars()
 	FREEZE = 1 and TRAILVALS = 1
  */
 
-void
+static void
 bind_int_unfreeze(r,t,d)
 	PWord *r;
 	int *t;

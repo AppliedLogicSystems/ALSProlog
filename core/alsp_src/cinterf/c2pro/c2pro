@@ -445,6 +445,7 @@ set_filter_expr(FiltExpr)
 	:-
 	assert(raw_filter_expr(FiltExpr)).
 	
+:- dynamic(raw_filter_expr/1).
 
 calc_filters
 	:-
@@ -455,6 +456,12 @@ calc_filters
 									 syntax_errors(quiet)]),
 	calc_filters(FiltExpr).
 
+calc_filters
+	:-
+	filter_file(Path),
+	get_filter_info(Path,[FiltExpr]),
+	calc_filters(FiltExpr).
+	
 calc_filters.
 
 	%% Incoming is 'all':

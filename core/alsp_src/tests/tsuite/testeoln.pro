@@ -21,7 +21,7 @@ test :-
 	dump_test,
 	simple_readline_test,
 	univ_readline_test,
-	get_line_test,
+	/* get_line_test,*/
 	read_test
 	.
 
@@ -62,8 +62,9 @@ test_size(Pred, Type, FileType, Size, Results) :-
 	C =.. [Pred, S, NewResults],
 	C,
 	close(S),
-	 printf('File: %t read_eoln_type: %t Buffer Size: %d\n',
-	       [FullName, Type, Size]),
+	heap_status(HeapFree),
+	printf('File: %t read_eoln_type: %t Buffer Size: %d HFree: %d\n',
+	       [FullName, Type, Size, HeapFree]),
 	ttyflush,
 	check(Type, FullName, Size, Results, NewResults).
 

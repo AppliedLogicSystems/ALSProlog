@@ -40,6 +40,9 @@ process_line(Line, OutLine, State)
 macro_statement0(ident(Id),Rest,State) 
 	:-!,
 	macro_statement(Id,Rest,State).
+macro_statement0(fident(Id),Rest,State) 
+	:-!,
+	macro_statement(Id,Rest,State).
 macro_statement0(Tok,Rest,State) 
 	:-
 	error('Unknown directive: %t\n',[Tok],State).
@@ -269,7 +272,8 @@ check_const(Id,Defn,State)
 check_const(Id,Defn,State).
 
 const_type(Val,int) :- integer(Val), !.
-const_type(Val,double) :- float(Val).
+const_type(Val,double) :- float(Val), !.
+const_type(Val,str) :- atom(Val).
 
 /*---------------------------------------------------------------------*
  | addToTable(Key,Defn,State,InTab,OutTab)
@@ -469,6 +473,12 @@ skipLines([pound,ident(endif) | _],State,endif) :- !.
 skipLines([pound,ident(else) | _],State,else) :- !.
 skipLines([pound,ident(elif) | Exp],State,elif(Exp)) :- !.
 skipLines([pound,ident(Cond) | _],State,RetTok) :-
+	conditional(Cond),
+	!,
+	skipLines(State,What),
+	skipMore(What,State),
+	skipLines(State,RetTok).
+skipLines([pound,fident(Cond) | _],State,RetTok) :-
 	conditional(Cond),
 	!,
 	skipLines(State,What),

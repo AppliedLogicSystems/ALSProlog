@@ -93,6 +93,26 @@ fio_init()
     curfd = stdin;
 }
 
+static char *univ_fgets(char *s, int n, FILE *stream)
+{
+    int c;
+    char *p = s, *ends = s + n;
+
+    if (s == NULL || n <= 0 || stream == NULL) return NULL;
+
+    while ((c = fgetc(stream)) != EOF && p < ends) {
+        *p++ = c; n--;
+	if (c == CR || c == LF) break;
+    }
+
+    if (p == s) {
+        return NULL;
+    } else {
+        *p = 0;
+	return s;
+    }
+}
+
 /*
  * The following macro is used to define the functions seeidx and tellidx,
  * both of which take a token as an argument and return the index into
@@ -138,7 +158,7 @@ fio_nxln(lbp)
     lbp->bufptr = b;
     lbp->curpos = b;
 readit:
-    if (fgets(b, SEEBFSZ, seetbl[(lbp->see_idx)].fd) == NULL || *b == 0) {
+    if (univ_fgets(b, SEEBFSZ, seetbl[(lbp->see_idx)].fd) == NULL || *b == 0) {
 	if (wm_interrupt_caught && wm_regidx == 0) {
 	    /* Ignore control-C's at top level */
 	    wm_interrupt_caught = 0;
