@@ -907,15 +907,22 @@ static plugin_error os_load_plugin(const char *lib_name,
     	return result;
     }
 
-#if SOLARIS
-    /* Solaris does not look in the current directory for shared objects. */
+    /* Solaris and Linux both have a funny rule about
+       finding shared object libraries.  When the path
+       is just a filename (i.e. "foo.so"), dlopen() will
+       NOT look in the current directory.  Absolute and
+       relative paths with at least one "/" work as
+       expected.
+
+       To get consistent behaviour across platforms,
+       I'll prepend a "./" to filenames to force Solaris
+       and Linux to look in the current directory.
+     */
+
     if (!strchr(lib_name, '/')) {
     	strcpy(full_name, "./");
     	strcat(full_name, lib_name);
     }
-#else
-    strcpy(full_name, lib_name);
-#endif /* SOLARIS */
 
     object = dlopen(full_name, RTLD_LAZY);
     if (object == NULL) {
