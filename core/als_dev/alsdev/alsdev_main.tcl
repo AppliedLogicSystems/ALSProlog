@@ -880,7 +880,7 @@ proc vTclWindow.ide_settings {base} {
         -borderwidth 1 -text {sec.   0.0} 
     label $base.heartbeat.hl \
         -borderwidth 1 -text 5.0 
-    scale $base.heartbeat.scale17 \
+    scale $base.heartbeat.scale \
         -orient horiz -resolution 0.05 -showvalue 0 -from 0.0 -to 5.0 \
 		-command slider_change_ide_heartbeat \
 		-variable proenv(heartbeat)
@@ -932,7 +932,7 @@ proc vTclWindow.ide_settings {base} {
     pack $base.heartbeat.hl \
         -in .ide_settings.heartbeat -anchor center -expand 0 -fill none \
         -side right 
-    pack $base.heartbeat.scale17 \
+    pack $base.heartbeat.scale \
         -in .ide_settings.heartbeat -anchor center -expand 1 -fill x \
         -side right 
     pack $base.spacer1 \
@@ -1010,13 +1010,13 @@ proc entry_change_ide_heartbeat { } {
 		set Value $InitValue 
 		prolog call builtins change_heartbeat -number $Value
 	}
-	.ide_settings.heartbeat.slider set $Value 
+	.ide_settings.heartbeat.scale set $Value 
 }
 
 proc set_heartbeat { Value } {
 	.ide_settings.heartbeat.entry delete 0 end
 	.ide_settings.heartbeat.entry insert end $Value
-	.ide_settings.heartbeat.slider set $Value 
+	.ide_settings.heartbeat.scale set $Value 
 }
 
 proc change_ide_depth_type { } {
