@@ -76,7 +76,7 @@ delay_handler('$delay'(_,Next,Module,Goal))
 '$combine_dvars'(R,F)
 	:-
 		%% F is the senior var;
-%		pbi_write('-----Combine delay vars: '-(R,F)),pbi_nl,pbi_ttyflush,
+		pbi_write('-----Combine delay vars: '-(R,F)),pbi_nl,pbi_ttyflush,
 
 	'$delay_term_for'(R, R_DelayTerm),
 	arg(4, R_DelayTerm, R_ConstrTerm),
@@ -203,11 +203,22 @@ cmbn(F_Intv, F_Constr, F, nil, R_Constr, R)
 		%% Both have intvls:
 cmbn(F_Intv, F_Constr, F, R_Intv, R_Constr, R)
 	:-
-%		pbi_write('Both intvl case'),pbi_nl,pbi_ttyflush,
-%		pbi_write(calling-add_relation(==, R, F)),pbi_nl,pbi_ttyflush,
-
+		pbi_write('Both intvl case'),pbi_nl,pbi_ttyflush,
+		pbi_write(f_intv=F_Intv),pbi_nl,pbi_ttyflush,
+		pbi_write(r_intv=R_Intv),pbi_nl,pbi_ttyflush,
+		pbi_write(calling-add_relation(==, R, F)),pbi_nl,pbi_ttyflush,
 		%% Impose constraint equality between the vars:
 	rel_arith:add_relation(==, R, F).
+/*
+cmbn(F_Intv, F_Constr, F, R_Intv, R_Constr, R)
+	:-
+	F_Intv = intvl(FType,FVar,_, FL,FU),
+	R_Intv = intvl(RType,RVar,_, RL,RU),
+	min(FL,RL,GL),
+	max(FU,RU,GU),
+	G_Intv = intvl(GType,GVar,_, GL,GU),
+*/
+	
 
 
 subst_var(Term, V, W, W)

@@ -61,9 +61,11 @@ module c2pro.
 read_file(InitInFile, State, Defines) 
 	:-
 	openFile(InitInFile,State),
-	accessC2P(info_table,State,Table),
+%	accessC2P(info_table,State,Table),
+	getInfoTable(Table),
 	load_defines(Defines, State, Table, LoadedTable),
-	setC2P(info_table,State,LoadedTable),
+%	setC2P(info_table,State,LoadedTable),
+	setInfoTable(LoadedTable),
 	read_lines([], State).
 
 	%---------------------------------------------
@@ -251,7 +253,8 @@ als_statement(State) -->
 	[fident('als$ctype'),lparen,ident(Name),rparen,semicolon], 
 	!,
 	{ 
-	  accessC2P(info_table,State,Table),
+%	  accessC2P(info_table,State,Table),
+	  getInfoTable(Table),
 	  find_type(Name,Table,DSpec,Declt),
 	  output_type(Name,DSpec,Declt,State)
 	}.
@@ -260,7 +263,8 @@ als_statement(State) -->
 	[fident('als$const'),lparen,string(CName),rparen,semicolon],
 	!,
 	{ 
-	  accessC2P(info_table,State,Table),
+%	  accessC2P(info_table,State,Table),
+	  getInfoTable(Table),
 	  avl_search(CName,Data,Table),
 	  check_const(CName,Data,State)
 	}.
@@ -291,10 +295,12 @@ objc_statement(State) -->
 	superclass_opt,
 	instance_variables_opt(State,Public),
 	{ 
-	  accessC2P(info_table,State,Table),
+%	  accessC2P(info_table,State,Table),
+	  getInfoTable(Table),
 	  insert_type(ident(Class),
 		[type=struct([fields=Public])],ident('0none'),Table,OutTab),
-	  setC2P(info_table,State,OutTab)
+%	  setC2P(info_table,State,OutTab)
+	  setInfoTable(OutTab)
 	},
 	check_for_end([at_end,stk_bot],_).
 
@@ -310,9 +316,11 @@ process_class_decln([],State).
 process_class_decln([Declt|Rest],State) 
 	:-
 	scan_declt(Declt,ident(Name),_,_),
-	accessC2P(info_table,State,Table),
+%	accessC2P(info_table,State,Table),
+	getInfoTable(Table),
 	insert_type(ident(Name),[type=int],Declt,Table,OutTable),
-	setC2P(info_table,State,OutTable),
+%	setC2P(info_table,State,OutTable),
+	setInfoTable(OutTable),
 	process_class_decln(Rest,State).
 
 interfaceOrProtocol(interface).
@@ -471,9 +479,11 @@ enum_const(State) -->
 enum_exp_opt(Item,State) --> [equal], !, 
 	expression(Val,State),
 	{ 
-	  accessC2P(info_table, State, InTable),
+%	  accessC2P(info_table, State, InTable),
+	  getInfoTable(InTable),
 	  avl_insert(assign(Item),val(Val),InTable,OutTable),
-	  setC2P(info_table, State, OutTable)
+%	  setC2P(info_table, State, OutTable)
+	  setInfoTable(OutTable)
 	}.
 enum_exp_opt( _, State) --> [].
 
@@ -529,7 +539,9 @@ struct_or_union_type_spec(State,[fields=List|TagList]) -->	% Obj-C
 	[lcurly,at,Tok,lparen,ident(Class),rparen,rcurly],
 	{ is_identifier(Tok,defs) },
 	!,
-	{ accessC2P(info_table, State, Tab),
+	{ 
+%	  accessC2P(info_table, State, Tab),
+	  getInfoTable(Tab),
 	  find_type(ident(Class),Tab,[type=struct([fields=List])],_) }.
 
 struct_or_union_type_spec(State,[fields=List|TagList]) --> 
@@ -586,7 +598,8 @@ comp_declt_rest(State,Declt,Declt) --> [].
 typedef_name(State,ident(Tok)) --> 
 	[Token], 
 	{ is_identifier(Token,Tok),
-	  accessC2P(info_table, State, Table),
+%	  accessC2P(info_table, State, Table),
+	  getInfoTable(Table),
 	  find_type(ident(Tok),Table,_,_) 
 	}.
 
@@ -830,16 +843,20 @@ process_decln(DSpec,Declts,State)
 	:-
 	is_typedef(DSpec),
 	!,
-	accessC2P(info_table, State, InTable),
+%	accessC2P(info_table, State, InTable),
+	getInfoTable(InTable),
 	check_tagged_structdef(DSpec,InTable,OutTable),
-	setC2P(info_table, State, OutTable),
+%	setC2P(info_table, State, OutTable),
+	setInfoTable(OutTable),
 	process_typedef_declts(Declts,DSpec,State).
 
 process_decln(DSpec,Declts,State) 
 	:-
-	accessC2P(info_table, State, InTable),
+%	accessC2P(info_table, State, InTable),
+	getInfoTable(InTable),
 	check_tagged_structdef(DSpec,InTable,OutTable),
-	setC2P(info_table, State, OutTable),
+%	setC2P(info_table, State, OutTable),
+	setInfoTable(OutTable),
 	accessC2P(fcn_filter, State, FcnFilter),
 	process_declts(Declts,DSpec,FcnFilter,State).
 
@@ -858,9 +875,11 @@ process_typedef_declts([],_,State).
 process_typedef_declts([Declt|Rest],DSpec,State) 
 	:-
 	scan_declt(Declt,ident(Name),_,_),
-	accessC2P(info_table, State, InTable),
+%	accessC2P(info_table, State, InTable),
+	getInfoTable(InTable),
 	insert_type(ident(Name),DSpec,Declt,InTable,OutTable),
-	setC2P(info_table, State, OutTable),
+%	setC2P(info_table, State, OutTable),
+	setInfoTable(OutTable),
 	output_type(Name,DSpec,Declt,State),
 	process_typedef_declts(Rest,DSpec,State).
 

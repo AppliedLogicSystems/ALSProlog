@@ -58,7 +58,7 @@ actionfunc(w,event,params,num_params)
      Widget w;
      XButtonEvent *event;
      String *params;
-     Cardinal num_params;
+     Cardinal *num_params;
 {
   PWord mod; int modtype;
   PWord goal; int goaltype;
@@ -66,7 +66,7 @@ actionfunc(w,event,params,num_params)
   PWord arg; int argtype;
   PWord v; int t;
 
- printf("Enter actionfunc\n"); 
+/* printf("Enter actionfunc \n"); */
 
   PI_makesym(&mod,&modtype,"user");
 
@@ -86,9 +86,9 @@ actionfunc(w,event,params,num_params)
   PI_unify(arg,argtype,v,t);
 
   PI_getargn(&arg,&argtype,goal,4);
-  PI_unify(arg,argtype,num_params,PI_INT);
+  PI_unify(arg,argtype,*num_params,PI_INT);
 
- printf("actionfunc before rungoal \n"); 
+/* printf("actionfunc before rungoal \n"); */
 
 /*  PI_rungoal(mod,&goal,&goaltype);  */
   PI_rungoal_with_update(mod,&goal,&goaltype);

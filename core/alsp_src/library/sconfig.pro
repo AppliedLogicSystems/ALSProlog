@@ -89,7 +89,7 @@ export determine_default_ws/1.
 determine_default_ws(WS)
 	:-
 	builtins:als_system(SysProps),
-	dmember(wins=WS0,SysProps).
+	dmember(wins=WS,SysProps).
 
 export known_ws/1.
 
@@ -197,7 +197,8 @@ ws_vars(motif, ARCH, OS, SwitchInfo, WSHeaderLines)
 		'ADDL_LIBS' 	= ['../x/xinterf.a'] ,
 		'CFG' 		= ['#define WIN_STR MOTIF_WIN_STR'],
 		'ADDL_INITS' 	= ['x_init();', 'xtaux_init();'] ,
-		'ADDL_PROFS' 	= ['../x/*.pro']
+		'ADDL_PROFS' 	= ['../x/*.pro'],
+		'XDEFINES' = '-DXTSTRINGDEFINES -DXMSTRINGDEFINES'
 		| VARIABLE_LINES ],
 	(dmember(tgtws=TGTWS, SwitchInfo) -> 
 		true ; TGTWS = unix),

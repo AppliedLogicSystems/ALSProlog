@@ -40,6 +40,9 @@
 #include <Xm/SeparatoG.h>		/* Separator Gadget	*/
 #include <Xm/ToggleB.h>			/* ToggleButton		*/
 #include <Xm/ToggleBG.h>		/* ToggleButtonGadget	*/
+#ifdef Motif12
+#include <Xm/XmStrDefs.h>		/* StringDefines	*/
+#endif
 
 #include <Mrm/MrmPublic.h>
 #include <Xm/CutPaste.h>

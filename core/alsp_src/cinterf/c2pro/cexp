@@ -305,7 +305,9 @@ e1(Val,State) --> unop_exp(Val,State).
 primary_exp(Num,State) --> [number(Num)], !.
 primary_exp(Exp,State) --> [lparen], !, expression(Exp,State), [rparen].
 primary_exp(Val,State) --> [ident(Id)], 		% enum constant
-	{ accessC2P(info_table, State, Table),
+	{ 
+%	  accessC2P(info_table, State, Table),
+	  getInfoTable(Table),
 	  avl_search(assign(Id),val(Val),Table) }, ! .
 % primary_exp(ident(Id),State) --> [ident(Id)].
 

@@ -26,6 +26,8 @@ FREEZE - specific freeze code
 
 DEBUGFREEZE - debugging messages for freeze support code
 
+TRAILVALS - support trail resetting to previous vals;
+
 DynamicForeign - dynamic loading of foreign (C) code
 
 DoubleType - supports native double number type

@@ -278,12 +278,15 @@ allocate_prolog_heap_and_stack(size)
      * is that it will much easier to implement saved states.
      *-------------------------------------------------------------*/
 
+printf("About to call mmap.....\n");
+
     retval = (PWord *) mmap((caddr_t) STACKSTART,
 			    size * sizeof (PWord) + NPROTECTED * pgsize,
 			    PROT_READ | PROT_WRITE,
 			    MAP_PRIVATE | MAP_FIXED,
 			    fd,
 			    0);
+
 
     close(fd);			/* close /dev/zero */
 

@@ -433,6 +433,7 @@ filterForFileType([], _, _, _, []).
 filterForFileType([FileName | Files], Disk, PathList, FileType, List)
 	:-
 	filter_file(FileName, Disk, PathList, FileType, List, ListTail),
+	!,
 	filterForFileType(Files, Disk, PathList, FileType, ListTail).
 
 	%% Need this error case since '$getFileStatus'/2 can fail when given
@@ -455,14 +456,30 @@ fflt_ck(ThisFileType, FileType, FullFile)
 	:-
 	dmember(ThisFileType, FileType),
 	!.
-	%% Incoming file is a symbolic link; dereference and try again:
-fflt_ck(ThisFileType, FileType, FullFile)
+	%% See if incoming file is a symbolic link; dereference and check type:
+fflt_ck(ThisFileType, GoalFileType, FullFile)
 	:-
-	fileTypeCode(ThisFileType, symbolic_link),
-	read_link(FullFile, LinkTarget),
-	'$getFileStatus'(LinkTarget, LinkStatusTerm),
-	arg(1, LinkStatusTerm, LinkFileType),
-	fflt_ck(LinkFileType, FileType, LinkTarget).
+	follow_link(FullFile, FinalFile, FinalFileTypeCode),
+	(FinalFileTypeCode = GoalFileType, !; 
+		dmember(FinalFileTypeCode, GoalFileType)).
+
+follow_link(File, FinalFile, FinalTypeCode)
+	:-
+	'$getFileStatus'(File, FileStatusTerm),
+	arg(1, FileStatusTerm, FileTypeCode),
+	fileTypeCode(FileTypeCode, FileType),
+	disp_follow_link(FileType, File, FileTypeCode, FinalFile, FinalTypeCode).
+
+disp_follow_link(symbolic_link, File, _, FinalFile, FinalTypeCode)
+	:-!,
+	get_cwd(CWD),
+	read_link(File, LinkTarget),
+	pathPlusFile(Path,TFile,LinkTarget),
+	change_cwd(Path),
+	(follow_link(LinkTarget, FinalFile, FinalTypeCode),!; true),
+	change_cwd(CWD).
+
+disp_follow_link(FinalType, File, FileTypeCode, File, FileTypeCode).
 
 export disj_to_string/2.
 disj_to_string((Pattern1 ; Pattern2), PatternChars)
