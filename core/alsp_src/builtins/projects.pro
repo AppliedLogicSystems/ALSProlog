@@ -286,6 +286,20 @@ als_ide_mgrAction(save_project(Flag), ALSIDEObject)
 		true
 	).
 
+possible_save_project
+	:-
+	builtins:get_primary_manager(ALSIDEObject),
+	accessObjStruct(cur_project,ALSIDEObject,CurProject),
+	CurProject \= nil,
+	!,
+	yes_no_dialog(shl_tcli, 'Save Project First?', 'Save??', 'Yes', 'No', Answer),
+	(Answer = 'Yes' ->
+		als_ide_mgrAction(save_project(SaveFlag), ALSIDEObject)
+		;
+		true
+	).
+possible_save_project.
+
 gen_project_mgrAction(update_check_complete(ok), State)
 	:-
 	gen_project_mgrAction(read_gui_spec, State),
@@ -313,7 +327,12 @@ gen_project_mgrAction(save_to_file, State)
 	open(FilePath, write, OS, []),
 	write_clauses(OS, Eqns, [quoted(true)]),
 	close(OS),
-	tcl_eval(shl_tcli, ['file attributes', FilePath, '-creator ALS4 -type ALSP'], _).
+	sys_env(OS,_,_),
+	(OS = macos ->
+		tcl_eval(shl_tcli, ['file attributes', FilePath, '-creator ALS4 -type ALSP'], _)
+		;
+		true
+	).
 
 dump_object(State, Forbidden, Eqns)
 	:-
