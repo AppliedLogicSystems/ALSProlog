@@ -30,8 +30,9 @@ static int py_call(void)
 		PI_FAIL;
 	}
 	d = PyModule_GetDict(m);
-	r = PyRun_String(command, Py_eval_input, d, d);
+	r = PyRun_String(command, Py_single_input, d, d);
 	if (r == NULL) {
+		PyErr_Print();
 		PyErr_Clear();
 		PI_FAIL;
 	}
