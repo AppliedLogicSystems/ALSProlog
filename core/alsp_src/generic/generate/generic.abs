@@ -18,7 +18,9 @@ schema([
 	'CPPFLAGS',
 	case(&(context_name), [
 		  (mac: [irule(c,'68k.o'),
-			 irule(c,'ppc.o')]),
+			 irule(c,'ppc.o'),
+			 irule(c,'demo.68k.o'),
+			 irule(c,'demo.ppc.o')]),
 		  (_:irule(c) )
 	] ),
 	cmnt(3),
@@ -31,7 +33,9 @@ schema([
 			 gforfiles_ppc_o  = ext(gforfiles,'ppc.o')  qual one_per_line,
 			 gpckgfiles_ppc_o = ext(gpckgfiles,'ppc.o') qual one_per_line,
 			 glibfiles_ppc_o  = ext(glibfiles,'ppc.o')  qual one_per_line,
-			 gfiles_ppc_o 	= ['{gforfiles_ppc_o} {gpckgfiles_ppc_o} {glibfiles_ppc_o}']
+			 gfiles_ppc_o 	= ['{gforfiles_ppc_o} {gpckgfiles_ppc_o} {glibfiles_ppc_o}'],
+			 gdemofiles_68k_o = ['main.demo.68k.o', 'gc.demo.68k.o'],
+			 gdemofiles_ppc_o = ['main.demo.ppc.o', 'gc.demo.ppc.o']
 			  ] ),
 		 (_:[
 			 gforfiles_c  = ext(gforfiles,c)  qual one_per_line,
@@ -144,8 +148,8 @@ cmnt(1) 		= ['How to build everything'].
 
 all 	depends_on  [alsdir, setup, generated, alspro_b, alsmics, alspro, alstest].
 
-macall	depends_on	[generated, mpw_alspro_b_ppc, sioux_alspro_b_68k, sioux_alspro_b_ppc, sioux_alspro_b,
-			 alspro_b, alspro, sioux_alspro, mpw_alspro, alstest].
+macall	depends_on	[generated, mpw_alspro_b_ppc, sioux_alspro_b_68k, sioux_alspro_b_ppc, sioux_alspro_b, demo_sioux_alspro_b,
+			 alspro_b, alspro, sioux_alspro, demo_sioux_alspro, mpw_alspro, alstest].
 
 cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 					'C source files to object files'].
@@ -171,6 +175,8 @@ cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 
 irule(c,'68k.o') = irule(c, '68k.o', ['{CC68k} -o {TargDir}{Default}.68k.o {CPPFLAGS} {CFLAGS} {CFLAGS68k} {DepDir}{Default}.c']).
 irule(c,'ppc.o') = irule(c, 'ppc.o', ['{CCppc} -o {TargDir}{Default}.ppc.o {CPPFLAGS} {CFLAGS} {CFLAGSppc} {DepDir}{Default}.c']).
+irule(c,'demo.68k.o') = irule(c, 'demo.68k.o', ['{CC68k} -o {TargDir}{Default}.demo.68k.o {CPPFLAGS} {CFLAGS} -D HARDWARE_KEY -i {EveIncludes} {CFLAGS68k} {DepDir}{Default}.c']).
+irule(c,'demo.ppc.o') = irule(c, 'demo.ppc.o', ['{CCppc} -o {TargDir}{Default}.demo.ppc.o {CPPFLAGS} {CFLAGS} -D HARDWARE_KEY -i {EveIncludes} {CFLAGSppc} {DepDir}{Default}.c']).
 
 irule(c,w31) = 
 	irule(c,&(object),
@@ -423,7 +429,7 @@ rule(alstest) =
 		case(&context_name, [
 		(mac: [
 		 'echo >> nrev_rcd',
-		 'alspro -obp {srcdir}tests:snrev -g snrev >> nrev_rcd',
+		 'alspro -b -obp {srcdir}tests:snrev -g snrev >> nrev_rcd',
 		 'catenate nrev_rcd']),
 		(_: [
 		 'echo >> nrev_rcd',
