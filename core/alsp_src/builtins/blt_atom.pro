@@ -97,6 +97,7 @@ enumerate_ints(I,Start,Stop) :-
 	NStart is Start+1,
 	enumerate_ints(I,NStart,Stop).
 
+/*******************************************************************
 /*
  * sub_atom/4
  *
@@ -138,6 +139,7 @@ sub_atom(Atom, Start, Length, SubAtom) :-
 	MaxLen is MaxStart-Start,
 	enumerate_ints(Length, 0, MaxLen),
 	'$sub_atom'(Atom, Start, Length, SubAtom).
+*******************************************************************/
 
 
 /*

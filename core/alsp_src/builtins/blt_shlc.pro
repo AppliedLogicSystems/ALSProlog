@@ -299,8 +299,10 @@ export setup_libraries/0.
 setup_libraries
 	:-
 	sys_searchdir(ALSDIRPath),
-	pathPlusFile(ALSDIRPath, '*', ALSDIRPattern),
+%	pathPlusFile(ALSDIRPath, '*', ALSDIRPattern),
+	join_path([ALSDIRPath, '*'], ALSDIRPattern),
 	directory(ALSDIRPattern,1,SubdirList0),
+
 	list_delete(SubdirList0, '.', SubdirList1),
 	list_delete(SubdirList1, '..', SubdirList2),
 	list_delete(SubdirList2, builtins, SubdirList),
@@ -318,7 +320,8 @@ setup_libraries
 setup_local_libraries([], _).
 setup_local_libraries([Lib | LibsList], DirPath)
 	:-
-	pathPlusFile(DirPath, Lib, LibPath),
+%	pathPlusFile(DirPath, Lib, LibPath),
+	join_path([DirPath, Lib], LibPath),
 	setup_lib(LibPath),
 	setup_local_libraries(LibsList, DirPath).
 
@@ -337,7 +340,11 @@ setup_lib(LibPath)
 	:-
 	exists_file(LibPath),
 	!,
-	pathPlusFile(PathHead,LibDirName,LibPath),
+%	pathPlusFile(PathHead,LibDirName,LibPath),
+	split_path(LibPath, LibPathElts),
+	dreverse(LibPathElts,[LibDirName | RevPathHeadElts]),
+	dreverse(RevPathHeadElts, PathHeadElts),
+	join_path(PathHeadElts, PathHead),
 	disp_setup_lib(LibDirName,LibPath,PathHead).
 
 disp_setup_lib(library,LibPath,PathHead)
@@ -348,7 +355,8 @@ disp_setup_lib(library,LibPath,PathHead)
 disp_setup_lib(LibDirName,LibPath,PathHead)
 	:-
 	lib_extension(LibExt),
-	filePlusExt('*',LibExt,Pattern),
+%	filePlusExt('*',LibExt,Pattern),
+	file_extension('*',LibExt,Pattern),
 	files(LibPath, Pattern, LibFileHeaders),
 	install_lib_files(LibFileHeaders, LibPath),
 	(filename_equal(LibDirName, library) ->
@@ -370,7 +378,8 @@ install_lib_files([LibFileHd | LibFileHeaders], LibPath)
 
 install_lib_f(LibFileHd, LibDirPath)
 	:-
-	pathPlusFile(LibDirPath, LibFileHd, HeaderFile),
+%	pathPlusFile(LibDirPath, LibFileHd, HeaderFile),
+	join_path([LibDirPath, LibFileHd], HeaderFile),
 	open(HeaderFile, read, IS, []),
 	read(IS, LHTerm0),
 	close(IS),

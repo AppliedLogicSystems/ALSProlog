@@ -976,7 +976,8 @@ xform_file_list(File,_,consult(File)).
 export exists_file/1.
 exists_file([Head | Tail])
 	:-!,
-	subPath([Head | Tail], Path),
+%	subPath([Head | Tail], Path),
+	join_path([Head | Tail], Path),
 	'$access'(Path,0).
 
 exists_file(Path) 

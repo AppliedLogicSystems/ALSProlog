@@ -253,7 +253,8 @@ alsdev(Shared, ALS_IDE_Mgr)
 		tcl_call(shl_tcli, 'source -rsrc alsdev', _)
 	  ;
 	  (
-	    pathPlusFile(Shared, 'alsdev.tcl', ALSDEVTCL),
+%	    pathPlusFile(Shared, 'alsdev.tcl', ALSDEVTCL),
+		join_path([Shared, 'alsdev.tcl'], ALSDEVTCL),
 	    tcl_call(shl_tcli, [source, ALSDEVTCL], _)
 	  )
 	),
@@ -334,7 +335,8 @@ alsdev_splash(Path)
 		tcl_call(shl_tcli, 'source -rsrc als_splash', _)
 		;
 		(
-			pathPlusFile(Path, 'als_splash.tcl', SplashFile),
+%			pathPlusFile(Path, 'als_splash.tcl', SplashFile),
+			join_path([Path, 'als_splash.tcl'], SplashFile),
 			tcl_call(shl_tcli, [source, SplashFile], _)			
 		)
 	),
@@ -1860,9 +1862,9 @@ getresponse2(tcltk,Port,Box,Depth,Module,Goal,Response)
 	:-
 	short_deb_resps(Resps),
 	tcl_call(shl_tcli, [wait_for_debug_response],RawResponse),
-	(sub_atom(RawResponse,1,1,'B') ->
+	(sub_atom(RawResponse,1,1,_,'B') ->
 		nl(debugger_output),flush_output(debugger_output),
-		sub_atom(RawResponse, 2, 1, RR)
+		sub_atom(RawResponse, 2, 1, _,RR)
 		;
 		RR=RawResponse
 	),
@@ -2238,7 +2240,9 @@ ide_prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream),
 	sio:stream_type(Stream0,StreamType),
 	sio:stream_name(Stream0,StreamName),
 	(StreamType = file ->
-		pathPlusFile(_,File,StreamName)
+%		pathPlusFile(_,File,StreamName)
+		split_path(StreamName, PathElts),
+		dreverse(PathElts, [File | _]),
 		;	
 		File = StreamName
 	),
