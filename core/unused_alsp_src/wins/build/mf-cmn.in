@@ -31,10 +31,20 @@ PROFLAGS= -b
 # create .src from .spc
 #
 TRFLAGS = -debug $(XTRFLAGS)
+C2PFiles = c2p.pro c2pro cexp cfiles cmacro cout cparse ctoken
+C2PFS = $(addprefix $(CINTDIR)/c2pro/,$(C2PFiles))
 
-$(WIN).src : $(WIN).spc $(WIN).h
-	$(PROLOG) $(PROFLAGS) $(CINTDIR)/c2pro/tc2p$(GOS) -g c2pro \
-		-p -filter $(C2PFILT) -srcpath $(WSRCD) $(WIN) $(TRFLAGS) $(XINCLUDES) $(XDEFINES) $(X_CFLAGS)
+c2prolcl.pro: $(C2PFS)
+	cat $(C2PFS) > c2prolcl.pro
+
+$(WIN).src : $(WIN).spc $(WIN).h c2prolcl.pro
+	$(PROLOG) $(PROFLAGS) c2prolcl.pro -g c2pro \
+		-p -os $(GOS) -filter $(C2PFILT) -srcpath $(WSRCD) $(WIN) \
+			$(TRFLAGS) $(XINCLUDES) $(XDEFINES) $(X_CFLAGS)
+
+#$(WIN).src : $(WIN).spc $(WIN).h
+#	$(PROLOG) $(PROFLAGS) $(CINTDIR)/c2pro/tc2p$(GOS) -g c2pro \
+#		-p -filter $(C2PFILT) -srcpath $(WSRCD) $(WIN) $(TRFLAGS) $(XINCLUDES) $(XDEFINES) $(X_CFLAGS)
 
 #
 # create .c files from .src files
@@ -42,10 +52,20 @@ $(WIN).src : $(WIN).spc $(WIN).h
 FPREFIX	= $(WIN)
 CGFLAGS = -Ddebug -t mytrans $(XCGFLAGS)
 
-$(WIN)0.c $(WIN)1.c $(WIN)2.c $(WIN)3.c $(WIN)4.c : $(WIN).src
-	$(PROLOG) $(PROFLAGS) $(CINTDIR)/pro2intf/tpro2intf \
-	$(CINTDIR)/pro2intf/mytrans \
+P2IFiles= p2i.pro pro2intf intfout mytrans
+P2IFS = $(addprefix $(CINTDIR)/pro2intf/,$(P2IFiles))
+
+p2intlcl.pro: $(P2IFS)
+	cat $(P2IFS) > p2intlcl.pro
+
+$(WIN)0.c $(WIN)1.c $(WIN)2.c $(WIN)3.c $(WIN)4.c : $(WIN).src p2intlcl.pro
+	$(PROLOG) $(PROFLAGS) p2intlcl.pro \
 	-g pro2intf -p $(WIN) -fpre $(FPREFIX) $(CGFLAGS)
+
+#$(WIN)0.c $(WIN)1.c $(WIN)2.c $(WIN)3.c $(WIN)4.c : $(WIN).src
+#	$(PROLOG) $(PROFLAGS) $(CINTDIR)/pro2intf/tpro2intf \
+#	$(CINTDIR)/pro2intf/mytrans \
+#	-g pro2intf -p $(WIN) -fpre $(FPREFIX) $(CGFLAGS)
 
 #
 #	Linking the library:

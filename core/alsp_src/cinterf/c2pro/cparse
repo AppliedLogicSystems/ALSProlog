@@ -1,31 +1,32 @@
 /*========================================================================
  | 			cparse.pro
- |	Copyright (c) 1990-4 Applied Logic Systems, Inc.
+ |	Copyright (c) 1990-5 Applied Logic Systems, Inc.
  |
  |		Parsing phase for C language translator
  |
  | Author: Kevin A. Buettner
  | Creation: 4/1/90
- | Revision History:
- | 		10/22/91 -- P. Raman -- modified (extensively) to parse subset of C
+ | 10/22/91 - P. Raman -- modified (extensively) to parse subset of C
+ | 04/94 - K.Bowen - use streams; c2p typedef;
+ | 05/95 - K.Bowen - consolidate os-specific info
  |
- | Majro predicates :
- |
- | read_file/3		-- top level goal for C translator
- | push_file_stack/3	-- push a new file info frame onto a stack
- | type_spec/6		-- parses a type specifier (used by cexp)
- | abstract_declt/6	-- parses an abstarct declarator (used by cexp)
- | adeclt_to_str/2	-- converts an abstract declarator to string
- | scan_declt/4		-- construct an abstract declarator and type-list
- | dspec_to_str/2	-- convert a declaration specifier to string
- | deref/5			-- derefernce a declaration specifier
- | get_type/2		-- extract the type from a declaration specifier
- | get_struct/3		-- explode a structure or union declarator
- | get_tag/2		-- get the tag of a struct/union/enum specification
- | get_fields/2		-- get the fields of a strcut/union specification
- | get_structdef/4	-- get the structure definition of named structure
- | is_identifier/2	-- check whether a token is an identifier
- | getStatements/1	-- test for extracting C statements from input file
+ | Major predicates :
+ | -----------------
+ | read_file/3		 -- top level goal for C translator
+ | push_file_stack/3 -- push a new file info frame onto a stack
+ | type_spec/6		 -- parses a type specifier (used by cexp)
+ | abstract_declt/6	 -- parses an abstarct declarator (used by cexp)
+ | adeclt_to_str/2	 -- converts an abstract declarator to string
+ | scan_declt/4		 -- construct an abstract declarator and type-list
+ | dspec_to_str/2	 -- convert a declaration specifier to string
+ | deref/5			 -- derefernce a declaration specifier
+ | get_type/2		 -- extract the type from a declaration specifier
+ | get_struct/3		 -- explode a structure or union declarator
+ | get_tag/2		 -- get the tag of a struct/union/enum specification
+ | get_fields/2		 -- get the fields of a strcut/union specification
+ | get_structdef/4	 -- get the structure definition of named structure
+ | is_identifier/2	 -- check whether a token is an identifier
+ | getStatements/1	 -- test for extracting C statements from input file
  |
  | Special input constructs :
  | ------------------------
@@ -51,11 +52,12 @@
 
 module c2pro.
 
-	%
+	%---------------------------------------------------------------------
 	% read_file/3
 	%	parses a file (stream) containing C statements and emits prolog
 	%	specifications.  "Defines" is a list of symbol-value initializers 
 	%	specified in the command line.
+	%---------------------------------------------------------------------
 
 read_file(InitInFile, State, Defines) 
 	:-
@@ -67,7 +69,7 @@ read_file(InitInFile, State, Defines)
 
 	%---------------------------------------------
 	% load -Ddefine_constants into global table
-	%
+	%---------------------------------------------
 
 load_defines([],State,Tab,Tab).
 load_defines([define(Id,Val)|Rest],State,ITab,OTab) :-
@@ -76,7 +78,7 @@ load_defines([define(Id,Val)|Rest],State,ITab,OTab) :-
 
 	%---------------------------------------------
 	% read_lines/2
-	%
+	%---------------------------------------------
 
 read_lines(Line, State) :-
 	get_statement(Line, Stmt, State),
@@ -99,7 +101,7 @@ read_lines(Line,State) :-
 %%--------------------------------------------------------------
 	%-----------------------
 	% get_statement/3
-	%
+	%-----------------------
 
 get_statement(RemL,Stmt,State)
 	:-
@@ -107,7 +109,7 @@ get_statement(RemL,Stmt,State)
 
 	%-----------------------
 	% get_statement1/4
-	%
+	%-----------------------
 
 get_statement1([],Line,Line,State).		% empty stack (done)
 
@@ -117,7 +119,7 @@ get_statement1([S|SS],Rem,Stmt,State)
 
 	%-----------------------
 	% get_statement2/4
-	%
+	%-----------------------
 
 get_statement2([],Stmt,Stk,State)
 	:-	% get more input
@@ -133,7 +135,7 @@ get_statement2([Tok|Toks],Stmt,Stk,State)
 
 	%-----------------------
 	% get_next_line/2
-	%
+	%-----------------------
 
 get_next_line(Line,State)
 	:-
@@ -145,13 +147,14 @@ get_next_line(Line,State) 				% eof
 	pop_context(State),
 	get_next_line(Line,State).
 
-	%
+	%---------------------------------------------------------
 	% check_for_end/4
 	% 	check for top level semicolon (or @end for Obj-C)
+	%---------------------------------------------------------
 
 check_for_end(Stk,Stk,[],[]) :- !.		% empty input
 check_for_end([],[]) --> !.				% empty stack
-check_for_end([stk_bot],[]) -->		% pop stack
+check_for_end([stk_bot],[]) -->			% pop stack
 	[semicolon], !.
 check_for_end([at_end,stk_bot],[]) -->	% (Obj-C)
 	[at,ident(end)], !.
@@ -182,11 +185,11 @@ matched_pair(lcurly,rcurly).
 matched_pair(ident(inline),inline).
 
 
-%%-------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %%	parse statements that can be seen in a .spc file
 %%
-%%-------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	
 % parse_statement/5
 
@@ -218,12 +221,14 @@ consume_semicolon(State,Toks,[]) :-
 %%
 %%-------------------------------------------------------
 
+%-----------------------------------------------------------
 % als_statement/4
 %	recognizes the following statements in the source file
 %	als$begin_silent;
 %	als$end_silent;
 %	als$ctype(Type);
 %	als$const('Name');
+%-----------------------------------------------------------
 
 als_statement(State) -->
 	[ident('als$begin_silent'),semicolon], !,
@@ -248,13 +253,14 @@ als_statement(State) -->
 	  check_const(CName,Data,State)
 	}.
 
-%
+%-----------------------------------------------------------
 % objc_statement/5
 %	recognizes following Obj-C constructs
 %	@{interface/protocol} Name(Category) .... @end
 %	@{interface/protocol} Name [:SuperClass]
 %		[{ [@public fields] [@private fields]}] @end
 %	@class Declts;
+%-----------------------------------------------------------
 
 objc_statement(State) -->
 	[ident(Type),Tok,lparen,ident(Category),rparen],
@@ -279,8 +285,7 @@ objc_statement(State) -->
 objc_statement(State) -->
 	[ident(class)],
 	declt_list(State,DecltList),
-%	{ consume_semicolon(State,[at,ident(class)],DecltList),
-	 consume_semicolon(State),
+	consume_semicolon(State),
 	{  process_class_decln(DecltList,State) }.
 
 
@@ -319,8 +324,6 @@ other_field_lists_opt(State) -->
 	field_list(State,_),
 	!.
 other_field_lists_opt(State) --> [].
-	
-
 
 %%-------------------------------------------------------------
 %%
@@ -328,7 +331,9 @@ other_field_lists_opt(State) --> [].
 %%
 %%-------------------------------------------------------------
 
-% decln_specs/6
+%%----------------------------------
+%% decln_specs/6
+%%----------------------------------
 
 decln_specs(State,DeclnSpec) -->
 	storage_class_spec(StorageSpec),
@@ -342,13 +347,13 @@ decln_specs(State,DeclnSpec) -->
 	decln_specs_more(State,OtherSpec).
 decln_specs(State,[]) --> [].
 
-%
+%-----------------------------------------------------------
 % decln_spec_more/6  (non deterministic)
 %	there is no ! in the first clause because
 %	we want to allow for the possiblity that the tokens
 %	we parsed as being additional declaration specifiers
 %	may in fact be part of the declarator.
-%
+%-----------------------------------------------------------
 
 decln_specs_more(State,Spec) -->
 	type_spec(State,TypeSpec),			
@@ -357,9 +362,9 @@ decln_specs_more(State,Spec) -->
 decln_specs_more(State,[]) --> [].				
 
 
-%
+%-----------------------------
 % storage_class_spec/3
-%
+%-----------------------------
 
 storage_class_spec([storageClass=Class]) --> 
 	[ident(Class)], {storage_spec(Class)}.
@@ -371,9 +376,9 @@ storage_spec(register).
 storage_spec(auto).
 storage_spec(pascal).			% Mac specific
 
-%
+%-----------------------------
 % type_spec/2
-%
+%-----------------------------
 
 type_spec(State,[]) --> 				% const
 	[ident(const)], 
@@ -406,17 +411,17 @@ type_spec(State,[type=void]) --> 				% void
 type_spec(State,[]) --> 						% volatile
 	[ident(volatile)].
 
-%
+%-----------------------------
 %	optional long qualifier for float/double
-%
+%-----------------------------
 
 long_opt --> [ident(long)], !.
 long_opt --> [].
 
-%
+%-----------------------------
 % enum_type_spec/5
 % 	enumeration type specifier
-%
+%-----------------------------
 
 enum_type_spec(State) --> 
 	enum_tag_opt,
@@ -459,18 +464,17 @@ enum_def_rest(State) --> [Tok],
 	{ error('Expecting , or } in enum declaration, instead found %t\n',
 		[Tok],State) }.
 
-%
+%-----------------------------
 % float_type_spec/3
-%
-
+%-----------------------------
 
 float_type_spec([type=float]) --> [ident(float)], !.
 float_type_spec([type=double]) --> [ident(double)], !.
 float_type_spec([type=extended]) --> [ident(extended)].
 
-%
+%-----------------------------
 % int_type_spec/3
-%
+%-----------------------------
 
 int_type_spec(Spec) --> [ident(signed)], !, signed_type(Spec).
 int_type_spec(Spec) --> [ident(unsigned)], !, unsigned_type(Spec).
@@ -495,9 +499,9 @@ unsigned_type([type=unsigned_int]) --> [].
 int_opt --> [ident(int)], !.
 int_opt --> [].
 
-%
+%-----------------------------
 % struct_or_union_type_spec/6
-%
+%-----------------------------
 
 struct_or_union_type_spec(State,[fields=List|TagList]) -->	% Obj-C
 	struct_tag_opt(TagList),
@@ -554,9 +558,9 @@ comp_declt_rest(State,Declt,bit(Declt,Width)) -->
 	expression(Width,State).
 comp_declt_rest(State,Declt,Declt) --> [].
 
-%
+%-----------------------------
 % typedef_name/5
-%
+%-----------------------------
 
 typedef_name(State,ident(Tok)) --> 
 	[Token], 
@@ -565,45 +569,52 @@ typedef_name(State,ident(Tok)) -->
 	  find_type(ident(Tok),Table,_,_) 
 	}.
 
-%%------------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %%	rules defining a declarator
 %%
-%%------------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%-----------------
 % declt/6
+%-----------------
 
 declt(State,XDeclt) -->
 	declt1(State,Declt), 
 	declt_rest(State,Declt,XDeclt).
 
 declt1(State,qual(Qual,QualID,Declt)) -->			% near/far
-	[ident(Qual)],											% pascal/huge
+	[ident(Qual)],									% pascal/huge
 	{ qualifier(Qual,QualID) },
 	!,
 	declt(State,Declt).
+
 declt1(State,paren(Declt)) --> [lparen], !, 		% ( declt )
 	declt(State,Declt),
 	[rparen].
-declt1(State,Declt) --> [star], !,				% * declt
+
+declt1(State,Declt) --> [star], !,					% * declt
 	ptr_declt(State,Declt).
+
 declt1(State,Declt) -->								% simple declt
 	simple_declt(Declt).
 
 
-declt_rest(State,Declt,func(Declt,Params)) -->	% func declt
+declt_rest(State,Declt,func(Declt,Params)) -->		% func declt
 	[lparen],
 	!,
 	param_type_list(State,Params),
 	after_func.
-declt_rest(State,Declt,RDeclt) --> [lbrac], !,			% array declt
+
+declt_rest(State,Declt,RDeclt) --> [lbrac], !,		% array declt
 	array_bounds([lbrac],Toks),
 	after_array(array(Declt,[lbrac|Toks]),RDeclt).			
-declt_rest(State,Declt,Declt) --> [].					% other declt
 
-%
+declt_rest(State,Declt,Declt) --> [].				% other declt
+
+%---------------------
 % qualifier/2
-%
+%---------------------
 
 qualifier('_Far', far).
 qualifier('_far', far).
@@ -617,11 +628,12 @@ qualifier(near, near).
 qualifier(huge,huge).
 qualifier(pascal,pascal).
 
-%
+%-----------------------------------------------------
 % things that can follow a function declarator
 %	= num
 %	= name
 %	= { num, ... }
+%-----------------------------------------------------
 
 after_func --> [equal, number(_)], !.
 after_func --> [equal, ident(_)], !.
@@ -632,10 +644,10 @@ numlist --> [number(_)], !, numlist.
 numlist --> [comma], !, numlist.
 numlist --> [].
 
-%
+%-------------------------------------------------------------------
 % things that can follow an array declarator
 %	another array bounds declaration as in a mult-dimensional array
-%
+%-------------------------------------------------------------------
 
 after_array(Declt,RDeclt) -->  [lbrac], !,
 	array_bounds([lbrac],Toks),
@@ -643,7 +655,9 @@ after_array(Declt,RDeclt) -->  [lbrac], !,
 after_array(Declt,Declt) --> [].
 
 
+%-------------------------------------------------------------------
 % collect tokens between [ and ], taking care of nesting
+%-------------------------------------------------------------------
 
 array_bounds([],[]) --> !.					% done
 array_bounds([lbrac|Rest],[rbrac|Toks]) -->	% pop lbrac
@@ -658,9 +672,9 @@ array_bounds(Stack,[Tok|Toks]) -->			% collect toks
 	[Tok],
 	array_bounds(Stack,Toks).
 
-%
+%-------------------------
 % declt_list/6
-%
+%-------------------------
 
 declt_list(State,[Declt|Rest]) -->
 	declt(State,Declt),
@@ -672,10 +686,11 @@ declt_list_rest(State,Rest) --> [comma], !,
 	declt_list(State,Rest).
 declt_list_rest(State,[]) --> [].
 
-
+%-------------------------------------------------------
 % simple_declt/3
 % 	allow single or double quoted strings to be used
 % 	as identifiers as an escape from macro expansion
+%-------------------------------------------------------
 
 simple_declt(ident(Id)) --> [ident(Id)].
 simple_declt(ident(Id)) --> [fident(Id)].
@@ -683,9 +698,9 @@ simple_declt(ident(Id)) --> [string(Id)].
 simple_declt(ident(Id)) --> [char(Id)].
 
 
-%
+%-------------------------
 % param_type_list/6
-%
+%-------------------------
 
 param_type_list(State,[]) --> [rparen], !.
 param_type_list(State,[Param|Rest]) -->
@@ -710,11 +725,11 @@ declt_or_abstract(State,Declt) -->
 declt_or_abstract(State,Declt) --> 
 	abstract_declt(State,Declt).
 
-%
+%-------------------------
 % abstract_declt/6
 %	( declt )
 %	* declt
-%	
+%-------------------------	
 
 abstract_declt(State,Declt) --> 
 	neabstract_declt(State,Declt),
@@ -755,21 +770,23 @@ neabstract_rest(State,func(Declt,Params), func(Declt,Params)) -->  !.
 neabstract_rest(State,array(Declt,Toks),array(Declt,Toks)) --> !.
 neabstract_rest(State,ptr(Type,Declt),ptr(Type,Declt)) --> [].
 
-%
+%-------------------------
 % ptr_declt/6
 %	pointer declarator
-%
+%-------------------------
 
 ptr_declt(State,ptr(Type,Declt)) -->
 	type_spec_list_opt(State,Type),
 	declt(State,Declt),
 	!.
 
+%---------------------------------------------------------
 % type_spec_list_opt/5 (non-deterministic)
 % 	no cut in first clause because what looks like a
 %	a type could have been an identifier
 %	e.g  typedef char batty;
 %		 int * batty coda; (ANSI proposed standard)
+%---------------------------------------------------------
 
 type_spec_list_opt(State,TypeL) -->
 	type_spec(State,Type), 	
@@ -777,16 +794,16 @@ type_spec_list_opt(State,TypeL) -->
 	type_spec_list_opt(State,Rest).
 type_spec_list_opt(State,[]) --> [].
 
-
-%%-----------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %%	process a complete declaration 
 %%		type_spec declt, declt...
 %%
-%%-----------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-% process_decln/3.
+%%-------------------------------------
+%% process_decln/3.
+%%-------------------------------------
 
 process_decln(DSpec,Declts,State) :-
 	is_typedef(DSpec),
@@ -809,7 +826,9 @@ check_tagged_structdef(DSpec,InTab,OutTab) :-
 	!.
 check_tagged_structdef(_,Tab,Tab).
 
-%
+%%-------------------------------------
+%% process_typedef_declts/3
+%%-------------------------------------
 
 process_typedef_declts([],_,State).
 process_typedef_declts([Declt|Rest],DSpec,State) :-
@@ -820,7 +839,9 @@ process_typedef_declts([Declt|Rest],DSpec,State) :-
 	output_type(Name,DSpec,Declt,State),
 	process_typedef_declts(Rest,DSpec,State).
 
-%---------------
+%%-------------------------------------
+%% process_declts/4
+%%-------------------------------------
 
 process_declts( [] ,DSpec,_,State).
 
@@ -865,6 +886,10 @@ process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State)
 	output_func_gvar(DSpec,Declt,State),
 	process_declts(Rest,DSpec,FcnFilter,State).
 
+%%-------------------------------------
+%% process_fcn_decl/5
+%%-------------------------------------
+
 process_fcn_decl(all,FDeclt,Rest,DSpec,State)
 	:-!,
 	output_func_gvar(DSpec, FDeclt, State),
@@ -902,11 +927,11 @@ process_fcn_decl(FcnFilter,_,Rest,DSpec,State)
 	:-
 	process_declts(Rest,DSpec,FcnFilter,State).
 
-%
+%-----------------------------------------------------------
 %	adeclt_to_str/2
 %	declt_to_str/2
 %		returns a string representation of a declarator
-%
+%-----------------------------------------------------------
 
 adeclt_to_str(Var,"") :- var(Var), !.
 adeclt_to_str(ident('0none'),"") :- !.
@@ -928,7 +953,6 @@ adeclt_to_str(ptr(Type,Declt),[0'* |Str]) :-
 	type_specs_to_str(Type,Str1),
 	append(Str1,Str2,Str),
 	adeclt_to_str(Declt,Str2).
-
 
 declt_to_str(ident('0none'),"") :- !.
 declt_to_str(ident(Name),Str) :-
@@ -970,14 +994,14 @@ toks_to_str([Tok|Toks],Str) :-
 	append(Str1,RestStr,Str),
 	toks_to_str(Toks,RestStr).
 
-%
+%---------------------------------------------------------------------
 %	scan_declt/4.
 %		traverses a declarator, first arg, until it matches with
 %		pattern, second arg, and builds a term identical with
 %		first arg up to the match, except that it leaves a variable
 %		at the match. It also builds a in-to-out list of declarators
 %		encountered eg. for **foo[] we construct [array,ptr,ptr]
-%		
+%---------------------------------------------------------------------		
 
 scan_declt( Declt,Declt,X,[]) :- !.
 scan_declt( qual(Qual,ID,Declt),Pat,qual(Qual,ID,X),[ID|PDeclt]) :-
@@ -1002,19 +1026,18 @@ scan_declt( bit(Declt,Width), Pat, bit(X,Width), PDeclt) :-
 	scan_declt(Declt, Pat,X, PDeclt1 ),
 	append( PDeclt1, [bit(Width)], PDeclt).
 
-
 fixup_array_size('',0) :- !.
 fixup_array_size(X,X).
 
-%
+%---------------------------------------------------------------------
 % dspec_to_str/2.
 %	get the type string for a type
+%---------------------------------------------------------------------
 
 dspec_to_str(DSpec,TypeStr) :-
 	get_type(DSpec, Type),
 	type_to_str(Type, TypeStr).
 
-	
 type_to_str(int,"int").
 type_to_str(char,"char").
 type_to_str(short,"short").
@@ -1049,7 +1072,6 @@ type_to_str(union(Spec), Str) :-	% untagged union
 	append("union {",Str1, Str2),
 	append(Str2,"}", Str).
 
-
 fields_to_str([],[]).
 fields_to_str([field(DSpec,Declts)|Rest], Str) :-
 	dspec_to_str(DSpec,Str1),
@@ -1069,12 +1091,13 @@ declts_to_str([Declt|Rest],Str) :-
 add_comma_cond([],Tail,Tail).
 add_comma_cond([_|_],[0', |Tail],Tail).
 
-%
+%-----------------------------------------------------------------------
 % deref/5.
 %	Dereference a declaration specifier (arg 1) using a
 %	symbol table (arg 2) and return the final declaration
 %	specifier (arg 3) and the list of operators (symbols)
 %	encountered (arg 4).
+%-----------------------------------------------------------------------
 
 deref(DSpec,Tab,DSpec,ident('0none'),[PType]) :-
 	get_type(DSpec, Type),
@@ -1094,7 +1117,6 @@ deref(DSpec,Tab,RSpec,RDeclt,PSpec) :-
 	append(PDeclt,PType,PSpec),
 	deref(DSpec1,Tab,RSpec1,RDeclt1,PType).
 
-
 terminal_deref_type(Type, Type) :-	terminal_type(Type), !.
 terminal_deref_type(Type,What) :- get_struct(Type,_,What).
 
@@ -1112,36 +1134,35 @@ terminal_type(extended).
 terminal_type(comp).		% 64 bit int Mac
 terminal_type(void).
 
-
-%
+%-----------------------------------
 % get_type/2.
-%
+%-----------------------------------
 
 get_type(DSpec,Type) :- dmember(type=Type,DSpec), !.
 get_type(DSpec,void).
 
-%
+%-----------------------------------
 % get_struct/3.
-%
+%-----------------------------------
 
 get_struct(struct(Spec),Spec,struct).
 get_struct(union(Spec),Spec,union).
 
-%
+%-----------------------------------
 % get_tag/2.
-%
+%-----------------------------------
 
 get_tag(Spec,Tag) :- dmember(tag=Tag,Spec).
 
-%
+%-----------------------------------
 % get_fields/2.
-%
+%-----------------------------------
 
 get_fields(Spec,Fields) :- dmember(fields=Fields,Spec).
 
-%
+%-----------------------------------
 % get_structdef/4.
-%
+%-----------------------------------
 
 get_structdef(SSpec,What,Tab,Fields) :- 
 	get_fields(SSpec,Fields), 
@@ -1153,15 +1174,15 @@ get_structdef(SSpec,What,Tab,Fields) :-
 	get_struct(Type,SDefSpec,What),
 	get_fields(SDefSpec,Fields).
 
-%
+%-----------------------------------
 % is_typedef/1.
-%
+%-----------------------------------
 
 is_typedef(DeclnSpec) :- dmember(storageClass=typedef,DeclnSpec).
 
-%
+%-----------------------------------
 % is_tagged_structdef/1.
-%
+%-----------------------------------
 
 is_tagged_structdef(DSpec) :- 
 	get_type(DSpec,Type),
@@ -1169,36 +1190,35 @@ is_tagged_structdef(DSpec) :-
 	get_tag(SSpec,_),
 	get_fields(SSpec,_).
 
-%
+%-----------------------------------
 % is_structdef/1.
-%
+%-----------------------------------
 
 is_structdef(DSpec) :-
 	get_type(DSpec,Type),
 	get_struct(Type,SSpec,_),
 	get_fields(SSpec,_).
 
-
+%------------------------------------------------------------------
+% is_identifer/2
+% is_identifer(Token,Id)	
 %
-% is_identifer(Token,Id)	succeeds if Token is an identifier
-% and returns the name in Id.
-%
+% succeeds if Token is an identifier, and returns the name in Id.
+%------------------------------------------------------------------
 
 is_identifier(ident(Id),Id) :- !.
 is_identifier(fident(Id),Id).
 
-
-
-%%---------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %%  procedures to add types into the global table
 %%	and search for a given type in the global table
 %%
-%%---------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%
+%-----------------------
 % insert_tagref/3
-%
+%-----------------------
 
 insert_tagref(DSpec,InTab,OutTab) :-
 	get_type(DSpec,Type),
@@ -1207,37 +1227,34 @@ insert_tagref(DSpec,InTab,OutTab) :-
 	TagRef =.. [What,[tag=Tag]],
 	insert_type(TagRef,DSpec,ident('0none'),InTab,OutTab).
 
-%
+%-----------------------
 % find_tagref/4.
-%
+%-----------------------
 
 find_tagref(What,Tag,Tab,DSpec) :-
 	TagRef =.. [What,[tag=Tag]],
 	find_type(TagRef,Tab,DSpec,_).
 
-%
+%-----------------------
 % insert_type/5.
-%
+%-----------------------
 
 insert_type(Name,DSpec,Declt,InTab,OutTab) :-
 %pbi_write(avli=type(Name)),pbi_nl,
 	avl_insert(type(Name),def(DSpec,Declt),InTab,OutTab).
 
-
-%
+%-----------------------
 % find_type/3.
-%
+%-----------------------
 
 find_type(Type,Tab,DSpec,Declt) :-
 	avl_search(type(Type),def(DSpec,Declt),Tab), !.
 
-
-%%---------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% debugging hooks
 %%
-%%---------------------------------------------------------
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 getStatements(FileName) :-
 	newTable(Tab),

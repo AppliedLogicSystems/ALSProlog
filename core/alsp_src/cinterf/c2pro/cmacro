@@ -1,20 +1,21 @@
 /*===============================================================*
  | 		cmacro.pro
- |	Copyright (c) 1990-94 Applied Logic Systems, Inc.
+ |	Copyright (c) 1990-95 Applied Logic Systems, Inc.
  |
  |		C macro processor
  |
  | Author: Kevin A. Buettner
  | Creation: 4/1/90
- | Revision History:
- | 	10/22/91 -- raman -- modified to parse subset of C
+ | 10/22/91 - P.Raman -- modified to parse subset of C
+ |	04/94 - K.Bowen - use streams; c2p typedef;
+ |	05/95 - K.Bowen - consolidate os-specific info
  *===============================================================*/
 
 module c2pro.
 
 	%-------------------------------------------------------
 	% process_line(InLine,OutLine,InFD,OutFD,InTab,OutTab)
-	%
+	%-------------------------------------------------------
 
 process_line([],[],State) :- !.
 process_line([pound, Tok | Rest ],[],State) :-
@@ -69,49 +70,56 @@ macro_statement(ident, Rest,State) :- !.		% SCCS tags
 macro_statement(Tok,Rest,State) :- !,
 	error('Unknown directive: %t\n',[Tok],State).
 
-/*
- * import/2
- *	same as include except each imported file is imported
- *  exactly once
- */
+/*------------------------------------------------------------
+ | import/2
+ |	same as include except each imported file is imported
+ |  exactly once
+ *-----------------------------------------------------------*/
 
-import([string(FileName)],State) :-  	% #include "foo"
-	!,
+import([string(FileName)],State) 	% #include "foo"
+	:-!,
 	user_import(FileName,State).
-import([langle|PathSpec],State) :-	% #include <foo>
-	!,
+import([langle|PathSpec],State) 	% #include <foo>
+	:-!,
 	sys_import(PathSpec,State).
-import(PathSpec,State) :-
-	parsePathTokList(PathSpec,Disk,CompList,PathType),   % #include foo
+import(PathSpec,State) 
+	:-
+	accessC2P(tgt_os, State, OS),
+	parsePathTokList(PathSpec,OS,Disk,CompList,PathType),   % #include foo
 	findSysFile(Disk,CompList,PathType,FileName),
 	!,
 	dispatch_import(FileName,State).
-import(Whatever,State) :-
+import(Whatever,State) 
+	:-
 	error('Bad #include or #import: %t\n',[Whatever],State).
 
-
-user_import(FileName,State) :-
-	findUserFile(FileName,NFileName),
+user_import(FileName,State) 
+	:-
+	findUserFile(FileName,NFileName,State),
 	!,
 	dispatch_import(NFileName,user,State).
-user_import(FileName,State) :-
+user_import(FileName,State) 
+	:-
 	error('Bad #include or #import: %t\n',[FileName],State).
 
-
-sys_import(PathSpec,State) :-
-	parsePathTokList(PathSpec,Disk,CompList,PathType),
+sys_import(PathSpec,State) 
+	:-
+	accessC2P(tgt_os, State, OS),
+	parsePathTokList(PathSpec,OS,Disk,CompList,PathType),
 	CompList \= [],
 	findSysFile(Disk,CompList,PathType,FileName),
 	!,
 	dispatch_import(FileName,system,State).
-sys_import(Whatever,State) :-
+sys_import(Whatever,State) 
+	:-
 	error('Bad #include or #import: %t\n',[Whatever],State).
 
-
-dispatch_import(FileName,IType,State) :-
+dispatch_import(FileName,IType,State) 
+	:-
 	imported(FileName),
 	!.
-dispatch_import(FileName,IType,State) :-
+dispatch_import(FileName,IType,State) 
+	:-
 	assert(imported(FileName)),
 	(trace_enter_file(FileName) ->
 	trace
@@ -120,52 +128,58 @@ dispatch_import(FileName,IType,State) :-
 	),
 	openFile(FileName,State).
 
-/*
- * exclude/2  
- *
- *	#exclude FileSpec/TypeSpec
- *
- *	where FielSpec can be "Pathname" or <Pathname>, and
- *	PathName can have wild-cards "?" to match single pathh
- *	component or a "*" to match any trailing components.
- *	/TypeSpec is optional, and can be either a single group
- *	from func,const,gvar,ctype or all to indicate all groups,
- *	or it can be a list [group,...] that specifies the groups.
- *
- *	Output is suppressed for the specified groups from files
- *	that match FileSpec.
- */
+/*-------------------------------------------------------------------------*
+ | exclude/2  
+ |
+ |	#exclude FileSpec/TypeSpec
+ |
+ |	where FielSpec can be "Pathname" or <Pathname>, and
+ |	PathName can have wild-cards "?" to match single pathh
+ |	component or a "*" to match any trailing components.
+ |	/TypeSpec is optional, and can be either a single group
+ |	from func,const,gvar,ctype or all to indicate all groups,
+ |	or it can be a list [group,...] that specifies the groups.
+ |
+ |	Output is suppressed for the specified groups from files
+ |	that match FileSpec.
+ *-------------------------------------------------------------------------*/
 
-exclude([string(FileName)|Rest],State) :-
+exclude([string(FileName)|Rest],State) 
+	:-
 	name(FileName,FileStr),
-	parsePathStr(FileStr,Disk,Comps,PathType),
+	accessC2P(tgt_os, State, OS),
+	parsePathStr(FileStr,OS,Disk,Comps,PathType),
 	!,
 	dispatch_exclude(user,Disk,Comps,PathType,Rest,State).
-exclude([langle|PathSpec],State) :-			% #exclude <foo>
-	parsePathTokList(PathSpec,Disk,Comps,PathType,[rangle|Rest]),	
+exclude([langle|PathSpec],State) 		% #exclude <foo>
+	:-			
+	accessC2P(tgt_os, State, OS),
+	parsePathTokList(PathSpec,OS,Disk,Comps,PathType,[rangle|Rest]),	
 	!,
 	dispatch_exclude(system,Disk,Comps,PathType,Rest,State).
-exclude(Whatever,State) :-
+exclude(Whatever,State) 
+	:-
 	error('Bad #exclude : %t\n',[Whatever],State).
 
-dispatch_exclude(ExclType,Disk,Comps,PathType,Rest,State) :-
+dispatch_exclude(ExclType,Disk,Comps,PathType,Rest,State) 
+	:-
 	after_exclude(Rest,What),
 	output_exclude(ExclType,Disk,Comps,PathType,What).
 
-
 after_exclude([slash,ident(What)], [What]) :- !.
-after_exclude([slash,lbrac|Rest], What) :- !,
+after_exclude([slash,lbrac|Rest], What) 
+	:- !,
 	exclude_list(Rest,What).
 after_exclude( _, all).
 
 exclude_list([rbrac|_],[]) :- !.
-exclude_list([ident(What)|Rest],[What|TypeL]) :- 
+exclude_list([ident(What)|Rest],[What|TypeL]) 
+	:- 
 	exclude_list(Rest,TypeL).
 
-
-/*
- * undef/4		-- handle #undef
- */
+/*-----------------------------------------------*
+ | undef/4		-- handle #undef
+ *-----------------------------------------------*/
 
 undef([ident(Id)],State) :- 
 	accessC2P(info_table, State, InTable),
@@ -178,10 +192,9 @@ undef([ident(_)],State) :- !.
 undef(Whatever,State) :-
 	error('Illegal #undef argument : %t\n',[Whatever],State).
 
-
-/*
- * define/4		-- handle #defines
- */
+/*-----------------------------------------------*
+ | define/4		-- handle #defines
+ *-----------------------------------------------*/
 
 define([ident(Id)|Defn],State) :- !,
 	check_const(Id,Defn,State),
@@ -198,9 +211,9 @@ define([fident(Id)|ArgsAndDefn],State) :-
 define(Whatever,State) :-
 	error('Bad #define : %t\n',[Whatever],State).
 
-%
+%-------------------------------
 % check_const/4
-%
+%-------------------------------
 
 check_const(Id,[string(_)|_],State) :-
 	!,
@@ -216,15 +229,15 @@ check_const(Id,Defn,State).
 const_type(Val,int) :- integer(Val), !.
 const_type(Val,double) :- float(Val).
 
-/*
- * addToTable(Key,State,Defn,InTab,OutTab)
- *
- *		Tests for the presence of Key in the macro defn table.  If
- *		Key is already in the macro definition table, an error is
- *		reported using LineNum.  Otherwise, the macro name and the
- *		definition are added to the macro definition table (InTab)
- *		to produce OutTab.
- */
+/*---------------------------------------------------------------------*
+ | addToTable(Key,State,Defn,InTab,OutTab)
+ |
+ |		Tests for the presence of Key in the macro defn table.  If
+ |		Key is already in the macro definition table, an error is
+ |		reported using LineNum.  Otherwise, the macro name and the
+ |		definition are added to the macro definition table (InTab)
+ |		to produce OutTab.
+ *---------------------------------------------------------------------*/
 
 addToTable(Key,Defn,State,Table,Table) :-
 %(Key = ident('XEvent') -> trace ; true),
@@ -236,10 +249,9 @@ addToTable(Key,Defn,State,InTable,OutTable) :-
 %pbi_write(avli=Key),pbi_nl,
 	avl_insert(Key,Defn,InTable,OutTable).
 
-
-/*
- * getArgs/3	-- dcg rules for getting #define formal parameters
- */
+/*-------------------------------------------------------------------*
+ | getArgs/3	-- dcg rules for getting #define formal parameters
+ *-------------------------------------------------------------------*/
 
 getArgs([Arg|MoreArgs]) --> [lparen,ident(Arg)],!,moreArgs(MoreArgs).
 getArgs([]) --> [lparen,rparen].
@@ -247,16 +259,15 @@ getArgs([]) --> [lparen,rparen].
 moreArgs([]) --> [rparen],!.
 moreArgs([Arg|MoreArgs]) --> [comma,ident(Arg)],moreArgs(MoreArgs).
 
+/*-------------------------------------------------------------------*
+ | ifdef(Rest,State)
+ |
+ |	-- handle ifdefs
+ *-------------------------------------------------------------------*/		
 
-/*
- * ifdef(Rest,State)
- *
- *	-- handle ifdefs
- */		
-
-%
+%-----------------
 % ifdef/5
-%
+%-----------------
 
 ifdef([Token|_],State) :-
 	is_identifier(Token,Id),
@@ -267,9 +278,9 @@ ifdef(_,State) :-
 	skipLines(State,What),
 	check_elif(What,State).
 
-%
+%-----------------
 % ifndef/5
-%
+%-----------------
 
 ifndef([Token|_],State) :-
 	is_identifier(Token,Id),
@@ -280,9 +291,9 @@ ifndef(_,State) :-
 	skipLines(State,What),
 	check_elif(What,State).
 
-%
+%-----------------
 % if/5
-%
+%-----------------
 
 if(Exp,State) :-
 	replace_defined(Exp, Exp1, State),
@@ -295,9 +306,9 @@ if(_,State) :-
 	error('Ill formed #if, assume test fails\n',State),
 	do_if(0,State).
 
-%
+%-------------------------------
 % endif_else_or_elif/5
-%
+%-------------------------------
 
 endif_else_or_elif(Which,State) :-
 	skipMore(Which,State),
@@ -307,9 +318,9 @@ endif_else_or_elif(Which,State) :-
 endif_else_or_elif(Which,State) :-
 	error('Unmatched #endif\n',State).
 
-%
+%-------------------------------
 % do_ifdef/5
-%
+%-------------------------------
 
 do_ifdef(Id,State) :-
 	accessC2P(info_table, State, InTable),
@@ -323,9 +334,9 @@ do_ifdef(Id,State) :-
 	skipLines(State,What),
 	check_elif(What,State).
 
-%
+%-------------------------------
 % do_ifndef/5
-%
+%-------------------------------
 
 do_ifndef(Id,State) :-
 	accessC2P(info_table, State, InTable),
@@ -340,9 +351,9 @@ do_ifndef(Id,State)
 	setC2P(ifdef_stack, State, [[_|LevList] | Prev]).
 	
 /*
-%
+%-------------------------------
 % check_else/5
-%
+%-------------------------------
 
 check_else(else,State)
 	:-
@@ -351,10 +362,9 @@ check_else(else,State)
 check_else(endif,State).
 */
 
-
-%
+%-------------------------------
 % do_if/5
-%
+%-------------------------------
 
 do_if(0,State) :-
 	!,
@@ -365,9 +375,9 @@ do_if(_,State)
 	accessC2P(ifdef_stack, State, [LevList | Prev]),
 	setC2P(ifdef_stack, State, [[_|LevList] | Prev]).
 
-%
+%-------------------------------
 % check_elif/5
-%
+%-------------------------------
 
 check_elif(else,State)
 	:-
@@ -387,9 +397,9 @@ check_elif(elif(_),State) :-
 	check_elif(What,State).
 check_elif(endif,State).
 
-%
+%-------------------------------
 % skip_lines/3
-%
+%-------------------------------
 
 skipLines(State,RetTok) :-
 	getLine(Line,State),
@@ -414,9 +424,10 @@ conditional(if).
 conditional(ifdef).
 conditional(ifndef).
 
-%
+%----------------------------------------------------------------
 % skipMore/3
 %	called when we've discovered a nested ifdef, ifndef or if
+%----------------------------------------------------------------
 
 skipMore(endif,State).
 skipMore(elif(_),State) :- 
@@ -426,12 +437,11 @@ skipMore(else,State) :-
 	skipLines(State,What),
 	skipMore(What,State).
 
-
-/*
- * replace_defined/4
- * 	replace defined(Id) tokens by number(0) or number(1)
- *	depending on whether Id is defined or not.
- */
+/*---------------------------------------------------------------*
+ | replace_defined/4
+ | 	replace defined(Id) tokens by number(0) or number(1)
+ |	depending on whether Id is defined or not.
+ *---------------------------------------------------------------*/
 
 replace_defined( [],[],_).
 replace_defined( [Tok,lparen,ident(Id),rparen | IL],[number(N)|OL],State) :-
@@ -446,7 +456,6 @@ replace_defined( [ident(defined),ident(Id) | IL],[number(N)|OL],State) :-
 replace_defined( [ Tok | IL ], [ Tok | OL ], State) :-
 	replace_defined(IL,OL,State).
 
-
 defined_val(Id,State,1) :- 
 	accessC2P(info_table, State, Table),
 	avl_search(Id,Data,Table),
@@ -454,10 +463,10 @@ defined_val(Id,State,1) :-
 	!.
 defined_val(_,_,0).
 
-/*
- * replace_ident_with0/2
- * 	replace all ident(Id) tokens by number(0)
- */
+/*---------------------------------------------------------*
+ | replace_ident_with0/2
+ | 	replace all ident(Id) tokens by number(0)
+ *---------------------------------------------------------*/
 
 replace_ident_with0([], []).
 replace_ident_with0( [ Tok | ILine], [ number(0) | OLine]) :-
@@ -467,18 +476,17 @@ replace_ident_with0( [ Tok | ILine], [ number(0) | OLine]) :-
 replace_ident_with0( [ Tok | ILine], [ Tok | OLine]) :-
 	replace_ident_with0(ILine,OLine).
 
-
-/*
- * macro_expand(Mode,Line,OutLine,State)
- *
- *	Takes a Line as the input and produces OutLine as the
- *	output.  Mode is either single or multiple which determines
- *  whether actual arguments of a macro should be found entirely
- *	in the input line (#if and #include processing), or more lines can
- *  be scanned (normal processing). IFD is the input file decriptor
- *	and OFD is the final file descriptor. Tab is the macro expansion
- *	symbol table.
- */
+/*----------------------------------------------------------------------*
+ | macro_expand(Mode,Line,OutLine,State)
+ |
+ |	Takes a Line as the input and produces OutLine as the
+ |	output.  Mode is either single or multiple which determines
+ |  whether actual arguments of a macro should be found entirely
+ |	in the input line (#if and #include processing), or more lines can
+ |  be scanned (normal processing). IFD is the input file decriptor
+ |	and OFD is the final file descriptor. Tab is the macro expansion
+ |	symbol table.
+ *----------------------------------------------------------------------*/
 
 macro_expand(Mode,ILine,OLine,State) :- var(ILine), !, OLine = [].
 macro_expand(Mode,[],[],State) :- !.
@@ -500,7 +508,6 @@ macro_expand(Mode,Token1,Rest,[Token|ER],State) :-  /* (##) concatenation */
 macro_expand(Mode,Token,Rest,[Token|ER],State) :-
 	macro_expand(Mode,Rest,ER,State).
 
-
 concat_tokens(TokList,Token) :-
 	concat_tokens(TokList,[],Str,What),
 	name(Name,Str),
@@ -515,9 +522,9 @@ concat_tokens([Tok|Rest],InStr,OutStr,What) :-
 	append(InStr,Str,Str1),
 	concat_tokens(Rest,Str1,OutStr,What).
 
-%
+%---------------------
 % do_expand/8
-%
+%---------------------
 
 do_expand(Mode,d(Repl),_,Rest,EL,State) :-            % macro without arguments
 	!,
@@ -531,10 +538,9 @@ do_expand(Mode,da(FArgs,Defn),Token,Rest,EL,State) :- % macro with args
 do_expand(Mode,_,Token,Rest,[Token|EL],State) :-      % undef'ed symbol
 	macro_expand(Mode,Rest,EL,State).
 
-
-%
+%---------------------
 % do_expand1/11
-%
+%---------------------
 
 do_expand1(Mode,FArgs,AArgs,Defn,Token,RestOT,EndMark,EL,State) :-
 	length(FArgs,NArgs),
@@ -549,23 +555,22 @@ do_expand1(Mode,_, _, _, Token, Rest, Tail, [Token|ER],State) :-
 %	error('Mismatched arity in macro : %t\n',[Token],IFD),
 	macro_expand(Mode,Rest,ER,State).
    
-
-%
+%---------------------------------------------------------------------
 % do_expand_args/4
 %	prescan the actual arguments of a macro for macro substitutions
+%---------------------------------------------------------------------
 
 do_expand_args([],[],_).
 do_expand_args([Arg|IArgs],[EArg|OArgs],State) :-
 	macro_expand(single,Arg,EArg,STate),
 	do_expand_args(IArgs,OArgs,State).
 	
-
-/*
- * getMArgs(Mode,Args,InList,RestList,State)
- *
- *	Called to get the left paren, the actual arguments, and the right paren
- *	for a macro defined with a #define statement.
- */
+/*-------------------------------------------------------------------------*
+ | getMArgs(Mode,Args,InList,RestList,State)
+ |
+ |	Called to get the left paren, the actual arguments, and the right paren
+ |	for a macro defined with a #define statement.
+ *-------------------------------------------------------------------------*/
 
 getMArgs(Mode,Args,ILine,RLine,State) :-
 	getmInput(Mode,ILine,State),
@@ -583,9 +588,9 @@ getMArgs2(Mode,[FA|RA],IL,RL,State) :-
 	getmInput(Mode,L1,State),
 	moreMArgs(Mode,RA,L1,RL,State).
 
-%
+%--------------------
 % getMArg/6
-%
+%--------------------
 
 getMArg(Mode,[],[rparen|T],[rparen|T],State) :- 
 	!.
@@ -601,9 +606,9 @@ getMArg(Mode,[Any|More],[Any|IL],OL,State) :-
 	getmInput(Mode,IL,State),
 	getMArg(Mode,More,IL,OL,State).
 
-%
+%--------------------
 % moreMArgs/6
-%
+%--------------------
 
 moreMArgs(Mode,[],[rparen|L],L,State) :-
 	!.
@@ -613,12 +618,11 @@ moreMArgs(Mode,[FA|RA],[comma|IL],OL,State) :-
 	getmInput(Mode,L1,State),
 	moreMArgs(Mode,RA,L1,OL,State).
 
-/*
- * consumeThruRight/7 is used to consume all characters up to a right
- *	paren (handling the case of nested left, right paren pairs) in
- *	getMArgs and getIArgs above.
- *
- */
+/*-------------------------------------------------------------------------*
+ | consumeThruRight/7 is used to consume all characters up to a right
+ |	paren (handling the case of nested left, right paren pairs) in
+ |	getMArgs and getIArgs above.
+ *-------------------------------------------------------------------------*/
 
 consumeThruRight(Mode,[rparen|Tail],Tail,[rparen|Line],Line,State) :- !.
 consumeThruRight(Mode,[lparen|More],Tail,[lparen|IL],OL,State) :-
@@ -631,11 +635,10 @@ consumeThruRight(Mode,[Any|More],Tail,[Any|IL],OL,State) :-
 	getmInput(Mode,IL,State),
 	consumeThruRight(Mode,More,Tail,IL,OL,State).
 
-
-%
+%-------------------------------------------------------------------------
 % getmLines/3
 %	get more lines until we have a nonempty list of tokens
-%
+%-------------------------------------------------------------------------
 
 getmLines(Line,State) :-
 	var(Line),
@@ -657,37 +660,36 @@ openTail([Item | Rest], [Item | Tail])
 	:-
 	openTail(Rest, Tail).
 
-%
+%-------------------------
 % getmInput/4
-%
+%-------------------------
 
 getmInput(single,Line,State) :- var(Line), !, Line = [].
 getmInput(single,Line,State).
 getmInput(multiple,Line,State) :-
 	getmLines(Line,State).
 
-
-/*
- * do_substs(InLines,FArgs,AArgs,OutLines)
- *
- *	Called to perform substitions in a list of lines where FArgs is
- *	a list of the formal arguments and AArgs is a list (of same length)
- *	of the actual arguments
- */
+/*---------------------------------------------------------------------------*
+ | do_substs(InLines,FArgs,AArgs,OutLines)
+ |
+ |	Called to perform substitions in a list of lines where FArgs is
+ |	a list of the formal arguments and AArgs is a list (of same length)
+ |	of the actual arguments
+ *---------------------------------------------------------------------------*/
 
 do_substs([],_,_,[]) :- !.
 do_substs([Line|Lines],FArgs,AArgs,[OutLine|OutLines]) :-
 	do_subst(Line,FArgs,AArgs,OutLine),
 	do_substs(Lines,FArgs,AArgs,OutLines).
 
-/*
- * do_subst(InLine,FArgs,AArgs,OutLine)
- *
- *	Called to perform substitions within a single line where FArgs is
- *	a list of formal Arguments and AArgs is a list (of same length) of
- *	the actual arguments.  The input line is InLine; the output line
- *	is OutLine.
- */
+/*--------------------------------------------------------------------------*
+ | do_subst(InLine,FArgs,AArgs,OutLine)
+ |
+ |	Called to perform substitions within a single line where FArgs is
+ |	a list of formal Arguments and AArgs is a list (of same length) of
+ |	the actual arguments.  The input line is InLine; the output line
+ |	is OutLine.
+ *--------------------------------------------------------------------------*/
 
 do_subst([],_,_,[]) :- !.
 do_subst(Line,[],_,Line) :- !.
@@ -715,9 +717,9 @@ concat_adj_strings([string(Tok1),string(Tok2)|Rest],Result) :-
 concat_adj_strings([Tok|Rest],[Tok|Result]) :-
 	concat_adj_strings(Rest,Result).
 
-/*
- * assoc/4			-- associate a value with a key.
- */
+/*--------------------------------------------------------------------------*
+ | assoc/4			-- associate a value with a key.
+ *--------------------------------------------------------------------------*/
 
 assoc(Key,[Key|_],[RVal|_],RVal) :- 
 	!.

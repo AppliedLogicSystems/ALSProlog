@@ -129,7 +129,7 @@
 
 :-libactivate(builtins,['library',sconfig],
 	[general_os/3,general_os/4,lib_extension/2,
-	 winsystems_for/2, winsystems_for/3, ws_vars/3,ws_vars/4,
+	 winsystems_for/2, winsystems_for/3, ws_vars/3,ws_vars/5,
 	 flatten_ws_lists/2,  flatten_to_atom/2, cat_together_seplines/2,
 	 cat_together_spaced/2, prefix_dir/3,
 	 determine_default_ws/1, known_ws/1,
