@@ -1,0 +1,56 @@
+defineClass([name=vehicle,
+				subclassOf=[genericObjects],
+				addl_slots=[locomotionType, powerSource] ]).
+defineClass([name=wheeledVehicle,
+				subclassOf=[vehicle],
+				addl_slots=[numWheels] ]).
+defineClass([name=automobile,
+				subclassOf=[wheeledVehicle],
+				addl_slots=[engine,autoClass,manufacturer] ]).
+defineClass([name=engine,
+				subclassOf=[genericObjects],
+				addl_slots=[powerType,fuel,engineClass,cur_rpm,running,temp],
+				constrs=[engineClass<[internalCombustion,steam,electric]]
+				]).
+defineClass([name=iC_Engine,
+				subclassOf=[engine],
+				addl_slots=[manuf],
+				constrs = [engineClass = internalCombustion]
+				]).
+
+defineObject([name=engine1, instanceOf=iC_Engine ]).
+defineObject([name=auto1,
+				 instanceOf=automobile,
+				 values=[engine='$object'(engine1)]
+				]).
+defineObject([name=auto2,
+				 instanceOf=automobile,
+				 values=[engine=
+   						   defineObject([%% name=engine2,
+										 instanceOf=iC_Engine
+										])]
+				]).
+
+engineAction(start,State) 
+	:-
+	State^running := yes.
+
+engineAction(stop, State) 
+	:-
+	State^running := no.
+
+automobileAction(start,State)
+	:-
+	send(State^engine,start).
+
+automobileAction(stop,State)
+	:-
+	send(State^engine,stop).
+
+automobileAction(status(Status),State)
+	:-
+	send(State^engine,get_value(running,EngineStatus)),
+	(EngineStatus = yes ->
+		Status = running;
+		Status = off
+	).

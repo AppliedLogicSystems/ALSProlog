@@ -1,0 +1,35 @@
+defineClass([name=stacker,
+			 subclassOf=[genericObjects],
+			 addl_slots=[theStack, depth] 
+			]).
+
+defineObject([name=stack, 
+			  instanceOf=stacker,
+			  values=[theStack=[], depth=0] 
+			 ]).
+
+
+stackerAction(push(Item),State)
+	:-
+	accessObjStruct(theStack, State, CurStack),
+	setObjStruct(theStack, State, [Item | CurStack]),
+	accessObjStruct(depth, State, CurDepth),
+	NewDepth is CurDepth + 1,
+	setObjStruct(depth, State, NewDepth).
+
+stackerAction(pop(Item),State)
+	:-
+	accessObjStruct(theStack, State, [Item | RestStack]),
+	setObjStruct(theStack, State, RestStack),
+	accessObjStruct(depth, State, CurDepth),
+	NewDepth is CurDepth - 1,
+	setObjStruct(depth, State, NewDepth).
+
+stackerAction(cur_stack(Stack),State)
+	:-
+	accessObjStruct(theStack, State, Stack).
+
+stackerAction(cur_depth(Depth),State)
+	:-
+	accessObjStruct(depth, State, Depth).
+

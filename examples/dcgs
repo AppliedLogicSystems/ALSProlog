@@ -1,0 +1,41 @@
+Elementary introductions to DCGs can be found in:
+
++ Clocksin & Mellish, Programming in Prolog, Springer, 1981
+
++ Bowen, Prolog & Expert Systems, McGraw-Hill, 1991
+
++ Covington, Nute & Vellino, Prolog Programming in Depth, Scott Foresman, 1988
+
+Serious logic grammar technology is presented in:
+
++ Abramson & Dahl, Logic Grammars, Springer, 1989
+
++ Pereira & Shieber, Prolog and Natural-Language Analysis, CSLI(Stanford) 1987
+
+Code from Bowen and from Covington et al. can be found on the NALP server:
+[From Bowen, the relevant DCG file is grammr.pro.]
+
+* By anonymous ftp:
+
+Login to ftp.als.com as ftp (use your email address as password), and
+go to /pub/texts  (see notes below for Web for discussion of files):
+
+* From a Web server:
+
+The Web page 
+	http://www.als.com/ftp/pub/texts/texts.html
+provides a discussion of the textbook code files available in this directory
+You can retrieve the code from your web server using the following URLs:
+
+For Bowen:
+
+ftp://ftp.als.com/pub/texts/pxs.tar.gz  [Unix: gzip]
+ftp://ftp.als.com/pub/texts/pxs.zip     [DOS: gzip]
+ftp://ftp.als.com/pub/texts/pxs.sit     [MAC: stuffit]
+
+For Covington et al:
+
+ftp://ftp.als.com/pub/texts/ppidals.tar.gz  [Unix: gzip]
+ftp://ftp.als.com/pub/texts/ppidals.zip     [DOS: pkzip]
+
+[This site is open for uploading of code from _ALL_ prolog-related texts.]
