@@ -1050,8 +1050,7 @@ overflow_check:
 	    reg1 = (PWord *) P;
 	    P += OPSIZE;
 overflow_check0:
-#if 0
-//#ifdef MacOS
+#ifdef MacOS
 #ifdef DEBUG
 		if ((unsigned long) mr_SP < (unsigned long) wm_stackbot_safety)
 			stack_overflow();

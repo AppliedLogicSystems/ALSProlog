@@ -161,6 +161,7 @@ extern	ALSPI_API(int)	PI_startup	PARAMS(( CONST PI_system_setup *));
 extern	ALSPI_API(void)	PI_throw	PARAMS((PWord obj, int objt));
 extern	ALSPI_API(void)	PI_getball	PARAMS((PWord *obj, int *objt));
 extern	ALSPI_API(int)	PI_main		PARAMS((int argc, char *argv[], void (*init)(void)));
+extern	ALSPI_API(void)	PI_interrupt	PARAMS((void));
 
 
 #ifdef APP_PRINTF_CALLBACK
@@ -175,10 +176,11 @@ typedef long (*console_func)(char *, long);
 extern ALSPI_API(void)	PI_set_console_functions(console_func readf,
 								console_func writef, console_func error);
 
-#ifdef MacOS
+#ifdef macintosh
 extern	long	yield_interval;
 extern  long	yield_counter;
 extern	void	PI_yield_time	PARAMS(( void ));
+extern	ALSPI_API(void)	PI_set_yield_proc(void (*p)(void));
 #endif
 
 #ifdef macintosh
