@@ -73,7 +73,7 @@ defStruct(basic_client, [
                 %% supporting remote batch jobs:
 			job_connects/[],
                 %% submitted jobs waiting for execution:
-			waiting_jobs/(X,X),
+			waiting_jobs/[],
 
 				%% "secure" applications might use the following:
 			magic_cookie/nil		%% client magic cookie after connect & login
