@@ -64,6 +64,9 @@ pbi_abolish()
 	if ( (ent = w_nameprobe(m, p, (int) a)) ) {
 	    dbprot_t odbrs = w_dbprotect(DBRS_WRITABLE);
 	    w_abolish(ent);
+	    if (ent->flags & NMSK_DYNAMIC) {
+			ic_install_fail(ent);
+		}
 	    (void) w_dbprotect(odbrs);
 	}
 	SUCCEED;
