@@ -10,6 +10,47 @@
  | This file contains both the client and the server.  It uses inet stream
  | sockets for the communication.  This type of socket is connected, and
  | as such, requires a queue to maintain contact with the clients.
+ |-------------------Example Usage --------------------
+ |[This example ran on two unix machines, but either or both could have
+ | been Windows 95/NT or Macintosh machines.]
+ |
+ | hilbert% alspro mathserv1
+ | ALS Prolog (Threaded) Version 2.01 [solaris2.4] (Nowins)
+ |	 Copyright (c) 1987-95 Applied Logic Systems, Inc.
+ |
+ |                       calder% alspro mathserv1
+ |                       ALS Prolog (Threaded) Version 2.02 [hpux9.05] (Nowins)
+ |                       Copyright (c) 1987-95 Applied Logic Systems, Inc.
+ |
+ | ?- start_server.
+ | Server started on host hilbert, port 4321
+ | Accepting a new connection.
+ |
+ |                       ?- start_client(hilbert).
+ |                       yes.
+ |                       ?- sr(4).
+ | Servicing a request.
+ | Request: 4
+ |                       Answer is 4
+ |                       yes.
+ |                       ?- sr(4+5).
+ | Servicing a request.
+ | Request: 4+5
+ |                       Answer is 9
+ |                       ?- sr(hi).
+ | Servicing a request.
+ | Request: hi
+ |                       Answer is malformed_expression(hi)
+ |                       yes.
+ |                       ?- stop_server.
+ | Servicing a request.
+ | Request: stop_yourself
+ | yes.
+ | ?- 
+ |                       yes.
+ |                       ?- stop_client.
+ |                       yes.
+ |                       ?- 
  *======================================================================*/
 
 portnum(4321).

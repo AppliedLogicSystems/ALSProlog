@@ -48,7 +48,7 @@
         string_to_uia/3,sized_string_to_uia/3,copy_to_uia/3,atomic_to_uia/2,
         make_uc/2,make_lc/2,make_uc_sym/2,make_lc_sym/2,change_case_sym/2,
         convert_to_uc/2,same_uc/2,truncate/3,strip_white/2, strip_tail_white/2,
-		read_to/5,read_to_blank/3
+		read_to/5,read_to_blank/3,char_in/3
 		],[]).
 
 :-libactivate(avl,['library',avl],
@@ -144,7 +144,8 @@
 	 write_lines_opt/2,write_lines_opt/3,
 	 write_clause/1, write_clause/2, write_clause/3,
 	 write_clauses/1, write_clauses/2, write_clauses/3,
-	 get_lines/2, grab_lines/2
+	 get_lines/2, grab_lines/2,
+	 remove_files/1
 	 ], [] ).
 
 :-libactivate(builtins,['library',sconfig],

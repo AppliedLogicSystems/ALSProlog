@@ -160,4 +160,17 @@ install_links0([File | FileList],SrcDir)
 	make_symlink(SrcFile,LinkFile),
 	install_links0(FileList,SrcDir).
 
+export remove_files/1.
+remove_files([]) :-!.
+remove_files(Pattern)
+	:-
+	atom(Pattern),
+	!,
+	files(Pattern, FileList),
+	remove_files(FileList).
+remove_files([File | FileList])
+	:-
+	remove_file(File),
+	remove_files(FileList).
+
 endmod.

@@ -47,6 +47,8 @@ export strip_white/2.
 export read_to/5.
 export read_to_blank/3.
 
+export char_in/3.
+
 /*!---------------------------------------------------------------------
  |	asplit/4
  |	asplit(Atom,Splitter,LeftPart,RightPart) 
@@ -455,5 +457,29 @@ read_to_blank([C | Chars], [C | Head], Tail)
 	:-
 	read_to_blank(Chars, Head, Tail).
 
+
+/*!---------------------------------------------------------------------
+ |	char_in/3
+ |	char_in(Atom, Char, Pos)
+ |	char_in(+, +, -)
+ *!--------------------------------------------------------------------*/
+
+char_in(Atom, Char, Pos)
+	:-
+	atom_length(Atom, AtomLen),
+	char_in(1,AtomLen,Atom,Char,Pos).
+			 
+char_in(Pos,AtomLen,Atom,Char,Pos)
+	:-
+	Pos > AtomLen, !, fail.
+					  
+char_in(Pos,AtomLen,Atom,Char,Pos)
+	:-
+	sub_atom(Atom, Pos, 1, Char), !.
+							   
+char_in(CurPos,AtomLen,Atom,Char,Pos)
+	:-
+	NextPos is CurPos + 1,
+	char_in(NextPos,AtomLen,Atom,Char,Pos).
 
 endmod.

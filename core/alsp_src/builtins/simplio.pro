@@ -20,16 +20,46 @@ query_user(FmtString,Args,Answer)
 	:-
 	sio:get_current_output_stream(OutStream),
 	sio:get_current_input_stream(InStream),
-	query_user(InStream,OutStream,FmtString,Args,Answer).
+	query_user(InStream,OutStream,FmtString,Args,[],Answer).
+
+export query_user/4.
+query_user(FmtString,Args,Options,Answer)
+	:-
+	sio:get_current_output_stream(OutStream),
+	sio:get_current_input_stream(InStream),
+	query_user(InStream,OutStream,FmtString,Args,Options,Answer).
 
 export query_user/5.
 query_user(InStream,OutStream,FmtString,Args,Answer)
 	:-
-	catenate(FmtString,' (yes/no)?',XFmtString),
+	query_user(InStream,OutStream,FmtString,Args,[],Answer).
+
+export query_user/6.
+query_user(InStream,OutStream,FmtString,Args,Options,Answer)
+	:-
+	dmember(io_config=ansi_screen,Options),
+	!,
+	dmember(screen_locn=dca(N,M),Options),
+	catenate(FmtString,' (y/n):',XFmtString),
+	dca(N,M),
+	sprintf(OutputStream,XFmtString,Args),
+	flush_output(OutputStream),
+			%	get_line(InStream,Line),
+			%	atomread(Line,InitAnswer),
+%	get_key(InitAnswer),
+	get_char(InStream, InitAnswer),
+	!,
+	q_acton(InitAnswer,Answer).
+
+query_user(InStream,OutStream,FmtString,Args,Options,Answer)
+	:-
+	catenate(FmtString,' (y/n):',XFmtString),
 	printf(OutStream,XFmtString,Args),
 	get_line(InStream,Line),
 	atomread(Line,InitAnswer),
+	!,
 	q_acton(InitAnswer,Answer).
+
 
 q_acton(yes,yes).
 q_acton(y,yes).
@@ -52,7 +82,7 @@ simple_menu(List, Choice, Options,InS,OutS)
 	encode_list(List, ListOfCodes, CodedList),
 	themenu(CodedList, ChoiceNum, Options,InS,OutS),
 	(dmember(return_code=true, Options) ->
-		Choice = ChoiceNum
+		fin_simple_menu_codes(ChoiceNum, CodedList, Options, Choice)
 		;
 		fin_simple_menu_num(ChoiceNum, CodedList, Options, Choice)
 	).
@@ -70,6 +100,16 @@ simple_menu(List, Choice, Options,InS,OutS)
 	number_list(List, 1, NumberedList),
 	themenu(NumberedList, ChoiceNum, Options,InS,OutS),
 	fin_simple_menu_num(ChoiceNum, NumberedList, Options, Choice).
+
+fin_simple_menu_codes(default, CodedList, Options, Choice)
+	:-
+	dmember(default=DefaultContent,Options),
+	dmember(Choice-DefaultContent,CodedList),
+	!.		
+fin_simple_menu_codes(default, [_-Choice | CodedList], Options, Choice)
+	:-!.
+
+fin_simple_menu_codes(Choice, CodedList, Options, Choice).
 
 fin_simple_menu_num(default, NumberedList, Options, Choice)
 	:-
@@ -221,5 +261,15 @@ position([_ | ListTail], Item, Current, Nth)
 	Next is Current+1,
 	position(ListTail, Item, Next, Nth).
 
+
+export dca/2.
+dca(X,Y)
+	:-
+	put_code(user_output,27),		%% escape
+	put_code(user_output,0'[),
+	write_term(user_output,X,[]),
+	put_code(user_output,0';),
+	write_term(user_output,Y,[]),
+	put_code(user_output,0'H).
 
 endmod.

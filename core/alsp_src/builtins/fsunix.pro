@@ -201,7 +201,6 @@ remove_subdir(SubDir)
  *!--------------------------------------------------------------*/
 remove_file(FileName)
 	:-
-%	prolog_system_error(nyi, ['remove_file/1',unix]).
 	unlink(FileName).
 
 /*!----------------------------------------------------------------

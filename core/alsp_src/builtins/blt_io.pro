@@ -420,7 +420,8 @@ load_canon_reconsult(0,_).
 export obp_with_pro/0.
 obp_with_pro 
 	:-
-	abolish(obpLocation,2).
+	abolish(obpLocation,2),
+	dynamic(obpLocation/2).
 
 export obp_in_cur/0.
 obp_in_cur 
@@ -595,11 +596,10 @@ load_source(_,_) :-
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 attempt_load_source_object(SPath,OPath) :-
-pbi_write(trying-attempt_load_source_object(SPath,OPath)),pbi_nl,pbi_ttyflush,
 	exists_file(SPath),
-pbi_write(after-exists_file(SPath)),pbi_nl,pbi_ttyflush,
 	prolog_system_error(atmpt_cmp, [SPath]),
 	load_source_object(SPath,OPath).
+
 attempt_load_source_object(SPath,OPath) :-
 	prolog_system_error(ld_fail, [SPath]).
 

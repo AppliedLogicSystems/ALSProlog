@@ -855,7 +855,12 @@ present_dep(Lines, TgtFile, BaseName, SrcFile)
 
 present_dep0([Line | Lines], BaseName, TgtExt, SrcExt)
 	:-
-	atomread(Line, ([BaseName | TgtExt]:[BaseName | SrcExt]) ),
+%	atomread(Line, ([BaseName | TgtExt]:[BaseName | SrcExt]) ),
+	asplit(Line, 0':, Left, Right),
+	atomread(Left, [BaseName | TgtExt]),
+ 	read_as_list(Right, DepsList,[]),
+	filePlusExt(BaseName, SrcExt, FileName),
+	dmember(FileName, DepsList),
 	!.
 
 present_dep0([_ | Lines], BaseName, TgtExt, SrcExt)
