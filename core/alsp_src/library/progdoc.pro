@@ -478,7 +478,7 @@ io_line(Line)
 
 io_line(Line,Start,Size,Stop,SubAtom)
 	:-
-	sub_atom(Line,Start,Size,SubAtom),!.
+	sub_atom(Line,Start,Size,_, SubAtom),!.
 
 io_line(Line,Start,Size,Stop,SubAtom)
 	:-

@@ -34,7 +34,7 @@ split_ll_at_start([], _, [], [], '').
 
 split_ll_at_start([Line | Tail], Init, [], Tail, Line)
 	:-
-	sub_atom(Line, 1, _, Init),
+	sub_atom(Line, 1, _, _, Init),
 	!.
 
 split_ll_at_start([Line | Lines], Init, [Line | Head], Tail, Splitter)

@@ -41,7 +41,7 @@ install_lib
 find_file_names([],[]).
 find_file_names([One, Two | CmdLine], FileNames)
 	:-
-	sub_atom(One, 1, 1, '-'),
+	sub_atom(One, 1, 1, _, '-'),
 	!,
 	find_file_names(CmdLine,FileNames).
 find_file_names([File | CmdLine], [File FileNames])

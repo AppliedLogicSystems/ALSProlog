@@ -364,7 +364,7 @@ read_item(Cur,Size,Source,Delim,Next,After)
 	:-
 	probe_delim(Cur,Size,Source,Delim,After),
 	ALen is After - Cur,
-	sub_atom(Source,Cur,ALen,Next).
+	sub_atom(Source,Cur,ALen,_, Next).
 
 probe_delim(Cur,Size,Source,Delim,Cur)
 	:-
