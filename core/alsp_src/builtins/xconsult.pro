@@ -57,8 +57,8 @@ change_source_level_debugging(Value,Prev)
 	%% xconsult/2
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-export xxconsult/3.
-xxconsult(Stream, SDMode, FinalErrs)
+export xxconsult/4.
+xxconsult(Stream, File, SDMode, FinalErrs)
 	:- 
 	readFile(Stream, File, SDMode, [], [], InitFinalErrs),
 	dreverse(InitFinalErrs, FinalErrs).
