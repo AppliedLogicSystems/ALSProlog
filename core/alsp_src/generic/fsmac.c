@@ -975,6 +975,8 @@ static OSErr ChangeVolume(const char *pathname)
     return SetVol(volname, 0);
 }
 
+/* What is this old stuff!!!! */
+#if 0
 static OSErr SetDirectoryFromPath(const char *path)
 {
     CInfoPBRec pb;
@@ -1010,6 +1012,73 @@ static OSErr SetDirectoryFromPath(const char *path)
     
     return err;
 }
+#endif
+static OSErr	GetDirID(short vRefNum,
+						 long dirID,
+						 StringPtr name,
+						 long *theDirID,
+						 Boolean *isDirectory)
+{
+	CInfoPBRec pb;
+	OSErr error;
+
+	pb.hFileInfo.ioNamePtr = name;
+	pb.hFileInfo.ioVRefNum = vRefNum;
+	pb.hFileInfo.ioDirID = dirID;
+	pb.hFileInfo.ioFDirIndex = 0;	/* use ioNamePtr and ioDirID */
+	error = PBGetCatInfoSync(&pb);
+	*theDirID = pb.hFileInfo.ioDirID;
+	*isDirectory = (pb.hFileInfo.ioFlAttrib & ioDirMask) != 0;
+	return ( error );
+}
+
+static	OSErr	DirIDFromFSSpec(const FSSpec *spec,
+								long *theDirID,
+								Boolean *isDirectory)
+{
+	return ( GetDirID(spec->vRefNum, spec->parID, (StringPtr)spec->name,
+			 theDirID, isDirectory) );
+}
+
+static OSErr SetDirectoryFromPath(const char *path)
+{
+	Str255 ppath;
+    OSErr err;
+    WDPBRec pb;
+    long newWDDirID;
+    Boolean isDirectory;
+	FSSpec spec;
+	
+	
+	pb.ioCompletion = NULL;
+	pb.ioNamePtr = ppath;
+	err = PBHGetVol(&pb, false);
+	if (err != noErr) goto fail;
+
+	cpy_c2pstr(ppath, path);
+	err = FSMakeFSSpec(pb.ioWDVRefNum, pb.ioWDDirID, ppath, &spec);
+	if (err != noErr) goto fail;
+	
+	err = DirIDFromFSSpec(&spec, &newWDDirID, &isDirectory);
+	if (err != noErr) goto fail;
+	
+	if (!isDirectory) {
+		err = fnfErr;
+		goto fail;
+	}
+	
+	pb.ioCompletion = NULL;
+	pb.ioNamePtr = NULL;
+	pb.ioVRefNum = spec.vRefNum;
+	pb.ioWDDirID = newWDDirID;
+	err = PBHSetVol(&pb, false);
+	if (err != noErr) goto fail;
+	
+fail:
+	
+	return err;
+}
+
 
 int chdir(const char *dirname)
 {
