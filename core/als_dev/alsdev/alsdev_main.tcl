@@ -17,7 +17,7 @@ proc vTclWindow.topals {args} {
     # CREATING WIDGETS
     ###################
     toplevel .topals -class Toplevel \
-		-background $proenv(win_general,background) 
+		-background $proenv(topals,background) 
     wm focusmodel .topals passive
     wm geometry .topals 559x567+149+178
     wm maxsize .topals 1265 994
@@ -31,7 +31,6 @@ proc vTclWindow.topals {args} {
     wm title .topals "ALS Prolog Environment"
 
 	wm protocol $base WM_DELETE_WINDOW {wm iconify .topals ; unmap_alsdev_main }
-
 		##------------------
 		## Main menubar:
 		##------------------
@@ -55,53 +54,34 @@ proc vTclWindow.topals {args} {
 		## Directory notif & Interrupt button:
 		##------------------------------------
     frame .topals.cpd19 \
-		-borderwidth 1 -height 30 -relief raised -width 30 
-
-#    label .topals.cpd19.01 -relief flat -text "Directory:"
-
-#    entry .topals.cpd19.02 \
-#		-textvariable proenv(cwd) \
-#		-highlightthickness 0 
-
-    label .topals.cpd19.02 -relief flat -text {}
-
+		-borderwidth 1 -relief raised 
+    label .topals.cpd19.02 -relief flat -pady 0 -text {}
     button .topals.cpd19.03 \
         -font {lucida 10 bold} \
         -foreground $proenv(interrupt_button,foreground) \
-		-padx 11 -pady 4 \
-		-text Interrupt \
+		-padx 11 -pady 0 -text Interrupt \
         -command interrupt_action
 
 		##------------------
 		## Text Window:
 		##------------------
-	if {$tcl_platform(platform) == "macintosh"} {
-	    frame .topals.txwin \
-			-borderwidth 0 -height 30 -relief raised
-	} else {
-	    frame .topals.txwin \
-			-borderwidth 1 -height 30 -relief raised 
-	}
-    scrollbar .topals.txwin.02 \
-		-command {.topals.txwin.text yview} \
+    scrollbar .topals.vsb \
+		-command {.topals.text yview} \
         -orient vert 
-    text .topals.txwin.text \
+    text .topals.text \
         -height 26 -width 8 \
-		-background $proenv(win_general,background) \
-		-foreground $proenv(win_general,foreground) \
-		-selectbackground $proenv(win_general,selectbackground) \
-		-selectforeground $proenv(win_general,selectforeground) \
-		-font $proenv(win_general,font) \
-		-tabs $proenv(win_general,tabs) \
-        -yscrollcommand {.topals.txwin.02 set} \
+		-background $proenv(topals,background) \
+		-foreground $proenv(topals,foreground) \
+		-selectbackground $proenv(topals,selectbackground) \
+		-selectforeground $proenv(topals,selectforeground) \
+		-font $proenv(topals,font) \
+		-tabs $proenv(topals,tabs) \
+        -yscrollcommand {.topals.vsb set} \
 		-exportselection true
 
     if {$tcl_platform(platform) == "macintosh"} {
-        .topals.txwin.text configure -highlightthickness 0
+        .topals.text configure -highlightthickness 0
     }
-
-#		-font {system 10 normal} \
-		
 
     ###################
     # SETTING GEOMETRY
@@ -111,27 +91,16 @@ proc vTclWindow.topals {args} {
 
     pack .topals.cpd19 \
         -anchor center -expand 0 -fill x -side top 
-
-#    pack .topals.cpd19.01 \
-#        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
-
     pack .topals.cpd19.02 \
-        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side left 
+        -anchor center -expand 1 -fill x -padx 2 -side left 
     pack .topals.cpd19.03 \
-        -anchor center -expand 0 -fill x -padx 2 -pady 2 -side right 
+        -anchor center -expand 0 -fill x -padx 2 -side right 
 
-    pack .topals.txwin \
-        -anchor nw -expand yes -fill both -side top 
-    grid columnconf .topals.txwin 0 -weight 1
-    grid rowconf .topals.txwin 0 -weight 1
-    grid .topals.txwin.02 \
-        -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
-    grid .topals.txwin.text \
-        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
+    pack .topals.vsb -side right -fill both
+    pack .topals.text -fill both -expand 1 -side left
 
 	bind .topals <Unmap> {unmap_alsdev_main}
 	bind .topals <Map> {map_alsdev_main}
-
 }
 
 proc vTclWindow.dyn_flags {base} {
@@ -159,61 +128,6 @@ proc vTclWindow.dyn_flags {base} {
     ###################
 
 }
-
-#proc vTclWindow.settings {base} {
-#	global array proenv
-#
-#    set base .settings
-#    if {[winfo exists $base]} {
-#        wm deiconify $base; return
-#    }
-#    ###################
-#    # CREATING WIDGETS
-#    ###################
-#    toplevel $base -class Toplevel
-#    wm focusmodel $base passive
-#    wm geometry $base 412x121+326+186
-#    wm maxsize $base 1137 870
-#    wm minsize $base 1 1
-#    wm overrideredirect $base 0
-#    wm resizable $base 1 1
-#    wm deiconify $base
-#    wm title $base "ALSDEV Settings"
-#	wm protocol .settings WM_DELETE_WINDOW {wm withdraw .settings}
-#
-#    frame $base.obps \
-#        -borderwidth 1 -relief sunken 
-#    label $base.obps.label \
-#        -borderwidth 0 -padx 6 -text {*.obp locations:} 
-#	set OBPMenu [tk_optionMenu $base.obps.optmenu proenv(obplcn) \
-#		{Generated in Current (gic)} {Generated in Source(gis)} \
-#		{Generated in Arch/Current (giac)} {Generated in Arch/Source(gias)}  ]
-#	set proenv(obplcn) {Generated in Arch/Source(gias)}
-#
-#    frame $base.event_intv \
-#        -borderwidth 1 -height 30 -relief sunken -width 30 
-#    label $base.event_intv.label \
-#        -padx 6 -text {Event interval (ms):} 
-#    scale $base.event_intv.scale \
-#        -font {Helvetica -10 bold} -orient horiz -to 1000.0 \
-#        -variable EventInterval -width 10 
-#    ###################
-#    # SETTING GEOMETRY
-#    ###################
-#    pack $base.obps \
-#        -anchor center -expand 0 -fill x -side top 
-#    pack $base.obps.label \
-#        -anchor e -expand 0 -fill none -side left 
-#    pack $base.obps.optmenu \
-#        -anchor center -expand 0 -fill none -side top 
-#    pack $base.event_intv \
-#        -anchor center -expand 0 -fill x -side top 
-#    pack $base.event_intv.label \
-#        -anchor center -expand 0 -fill none -side left 
-#    pack $base.event_intv.scale \
-#        -anchor center -expand 0 -fill x -side top 
-#}
-
 
 proc vTclWindow.about {base} {
     if {$base == ""} {

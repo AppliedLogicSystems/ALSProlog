@@ -81,6 +81,8 @@ proc vTclWindow.debugwin {base} {
 	$base.menubar add cascade -label Settings -menu $base.menubar.settings
     $base.menubar.settings add command \
         -label {Set Print Depth} 
+	$base.menubar.settings add command \
+		-label {Toggle Flat Print} -command { set DebugResponse Bm }
     $base.menubar.settings add cascade \
         -label {Leashing}  \
 		-menu $base.menubar.settings.leashing
@@ -137,9 +139,6 @@ set DBBpady 2
         -padx 4 -text fail -underline 0 \
 		-command { set DebugResponse Bf }
 
-    checkbutton $base.buttons.flat_print \
-        -relief raised -text {print flat} -variable flat_print -padx 2 \
-        -command { set DebugResponse Bm }
     button $base.buttons.statistics \
         -padx 2 -text statistics \
 		-command { set DebugResponse Bi }
@@ -173,24 +172,20 @@ set DBBpady 2
         -padx 4 -relief ridge -text {         } 
 
 	if {$tcl_platform(platform) == "macintosh"} {
-	    frame $base.textwin \
-	        -borderwidth 0 -relief raised 
-	    scrollbar $base.textwin.02 \
-	        -borderwidth 0 -command {.debugwin.textwin.text yview} -orient vert 
+	    scrollbar $base.vsb \
+	        -borderwidth 0 -command {.debugwin.text yview} -orient vert 
 	} else {
-	    frame $base.textwin \
-	        -borderwidth 1 -relief raised 
-	    scrollbar $base.textwin.02 \
-	        -borderwidth 1 -command {.debugwin.textwin.text yview} -orient vert 
+	    scrollbar $base.vsb \
+	        -borderwidth 1 -command {.debugwin.text yview} -orient vert 
 	}
-    text $base.textwin.text \
-		-background $proenv(win_general,background) \
-		-foreground $proenv(win_general,foreground) \
-		-font $proenv(win_general,font) \
-        -width 40 -yscrollcommand {.debugwin.textwin.02 set} 
+    text $base.text \
+		-background $proenv(debugwin,background) \
+		-foreground $proenv(debugwin,foreground) \
+		-font $proenv(debugwin,font) \
+        -width 40 -yscrollcommand {.debugwin.vsb set} 
 
     if {$tcl_platform(platform) == "macintosh"} {
-        $base.textwin.text configure -highlightthickness 0
+        $base.text configure -highlightthickness 0
     }
 
     ###################
@@ -211,8 +206,6 @@ set DBBpady 2
         -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.fail \
         -anchor center -expand 0 -fill none -side left 
-    pack $base.buttons.flat_print \
-        -anchor center -expand 0 -fill y -padx 4 -side left 
     pack $base.buttons.statistics \
         -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.stack_trace \
@@ -238,14 +231,8 @@ set DBBpady 2
     pack $base.debug_status.call_num \
         -anchor center -expand 0 -fill none -side left 
 
-    pack $base.textwin \
-        -anchor center -expand 1 -fill both -side top 
-    grid columnconf $base.textwin 0 -weight 1
-    grid rowconf $base.textwin 0 -weight 1
-    grid $base.textwin.02 \
-        -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
-    grid $base.textwin.text \
-        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
+	pack $base.vsb -side right -fill both
+	pack $base.text -fill both -expand 1 -side left
 
 	bind .debugwin <Unmap> {unmap_alsdev_debug}
 	bind .debugwin <Map>   {map_alsdev_debug}
@@ -373,9 +360,9 @@ proc vTclWindow.debug_source_trace {base Title} {
 	        -orient vert 
 	}
     text $base.textwin.text \
-		-background $proenv(win_general,background) \
-		-foreground $proenv(win_general,foreground) \
-		-font $proenv(win_general,font) \
+		-background $proenv(debugwin,background) \
+		-foreground $proenv(debugwin,foreground) \
+		-font $proenv(debugwin,font) \
         -width 8 -yscrollcommand [list $base.textwin.vsb set] 
 
     if {$tcl_platform(platform) == "macintosh"} {

@@ -67,10 +67,10 @@ proc vTclWindow.alsdev_settings {base} {
     label $base.color_desc.color_label \
         -text {Color: } 
     button $base.color_desc.background \
-		-background $proenv(win_general,background) \
+		-background $proenv(topals,background) \
         -command choose_background_color -padx 11 -pady 4 -text Background 
     button $base.color_desc.foreground \
-		-foreground $proenv(win_general,foreground) \
+		-foreground $proenv(topals,foreground) \
         -command choose_foreground_color -padx 11 -pady 4 -text Foreground 
 
 		# Generated Files Locations:

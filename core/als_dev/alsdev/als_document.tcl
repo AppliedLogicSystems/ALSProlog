@@ -198,5 +198,5 @@ proc document.consult {w} {
 	}
 	
 	catch { prolog call alsdev do_reconsult -atom $file }
-	insert_prompt  .topals.txwin.text "\n?-" 
+	insert_prompt  .topals.text "\n?-" 
 }
