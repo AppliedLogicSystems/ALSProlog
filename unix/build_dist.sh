@@ -78,6 +78,7 @@ then
 	then
 		cp -pr "$BIN/alspro.pst" "$DISTDIR"
 	fi
+	cp -pr "$BIN/libalspro.a" "$DISTDIR"
 	cp -pr "$BIN/libalspro.so" "$DISTDIR"
 fi
 
