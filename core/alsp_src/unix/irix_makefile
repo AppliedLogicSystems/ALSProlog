@@ -1,2 +1,3 @@
 CPPFLAGS += -DUNIX_IRIX
-OS_LIBS = -lelf
+OS_LIBS = -lm
+

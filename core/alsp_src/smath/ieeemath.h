@@ -41,6 +41,7 @@
 #include <math.h>
 
 #else
+#include <stddef.h>
 #include <math.h>
 #if HAVE_IEEEFP
 #include <ieeefp.h>
