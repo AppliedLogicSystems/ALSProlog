@@ -1022,30 +1022,27 @@ gc()
      | Create the string of delay terms before running normal gc
      *-----------------------------------------------------------------------*/
 #ifdef FREEZE
-    int dtgv;
-    long *dthead, *last_dt, *this_dt;
+    long *this_dt;
     long *oldestcp;
     long *b;
     long *ap;
     long *tr;
-
-    dtgv = gv_alloc();
-    dthead = (PWord *)(wm_gvbase - dtgv);
-    last_dt = (PWord *)MMK_INT(0);
-						/* printf("INIT: dtgv=%d dthead=%x *dthead=%x last_dt=%x\n",
-									dtgv,(int)dthead,(int)*dthead,(int)last_dt);   */
+printf("Start new GC\n");
+				/* printf("Tr_b= %x  B= %x  TR= %x  H= %x  HB= %x  H_b= %x\n",
+					(int)wm_trailbase,(int)wm_B,(int)wm_TR,
+					(int)wm_H,(int)wm_HB,(int)wm_heapbase);  */
     b =  wm_B;
     tr = wm_TR;
     oldestcp = wm_B;
 
-	while (chpt_B(oldestcp) != (long *) 0) {
-	   	oldestcp = chpt_B(oldestcp);
-	}
-						/* printf("Before stringing delays\n");
-						   printf("Tr_b= %x  B= %x  TR= %x  H= %x  HB= %x  H_b= %x\n",
-								   (int)wm_trailbase,(int)wm_B,(int)wm_TR,
-								   (int)wm_H,(int)wm_HB,(int)wm_heapbase);  */
+	/* Locate the oldest choicepoint */
+    while (chpt_B(oldestcp) != (long *) 0) {
+        oldestcp = chpt_B(oldestcp);
+    }
+				/* printf("oldestcp= %x\n", (int)oldestcp);  */
+	/* walk the choicepoints */
     while (b <= oldestcp) {
+				/* printf("walk b=%x oldestcp=%x\n", (int)b, (int)oldestcp);  */
 #ifdef ChptAfterTrail
 		tr =  b + chpt_SIZE;	/* get tr and b set up for next iteration */
 		b =   chpt_B(b);
@@ -1053,44 +1050,36 @@ gc()
 	    	break;
 #endif /* ChptAfterTrail */
 
+	/* walk trail entries between choicepoints */
 #ifdef TRAILVALS
-		for (; tr < b; tr++) {
-			/* move up one element; now an "ordinary" trail value: */ 
-	    ap = (long *) *++tr;	/* tr is not biased */
+        for (; tr < b; tr++) {
+				/* printf("    tr= %x  ", (int)tr); */
+                    /* move up one element; tr is now an "ordinary" trail value: 
+                       tr points at trail locations; so ap = *++tr is a heap variable */ 
+            ap = (long *) *++tr;	/* tr is not biased */
+				/* printf("    ap= %x\n", (int)ap); */
 
-		if (M_ISVAR(*ap) && CHK_DELAY(*ap)) {
-			this_dt = (PWord *)((PWord *)(*ap) -1);
-								/* printf(" - threading delay term: this_dt=%x *dthead=%x\n", 
-											(int)this_dt, (int)*dthead);
-								   printf("   *this_dt=%x funct(*this_dt)=%x arity(*this_dt)=%d     \n",
-											(int)*this_dt, (int)MFUNCTOR_TOKID(*this_dt), 
-											(int)MFUNCTOR_ARITY(*this_dt));  */
-
-			if (*dthead == MMK_INT(0))
-				gv_set((PWord)this_dt, WTP_STRUCTURE, dtgv);
-			else  /* install this_dt in 2nd arg of last_dt: */
-				w_install_argn((PWord)last_dt, 2, (PWord)this_dt, WTP_STRUCTURE);
-			last_dt = this_dt;	
-							/* printf("after threading: dthead=%x *dthead=%x last_dt=%x **dthead=%x\n", 
-								(int)dthead, (int)*dthead, (int)last_dt, (int)*((PWord *)*dthead) ); */
-		}
-  		}
+                    /* does the heap variable (location) ap contain a pointer (*ap) 
+                       to a delay thing variable ? */
+            if (M_ISVAR(*ap) && CHK_DELAY(*ap)) {
+                    /* this_dt is a C pointer to the TK_DELAY word of the delay thing structure */
+                this_dt = (PWord *)((PWord *)(*ap) -1);
+							/* printf(" - delay term: this_dt=%x ap=%x *ap=%x\n", 
+									(int)this_dt, (int)ap, (int)*ap ); */
+                    /* convert the contents *ap of location ap to be a prolog struct pointer to this_dt */
+                    /* w_install(addr, val, tag) PWord *addr; PWord val; int   tag;  */
+                w_install(ap, (PWord)this_dt, WTP_STRUCTURE);
+            }
+        }
 
 #else /* no-TRAILVALS */
 
-		for (; tr < b; tr++) {
-	    	ap = (long *) *tr;			/* tr is not biased */
-		if (M_ISVAR(*ap) && CHK_DELAY(*ap)) {
-			this_dt = (PWord *)((PWord *)(*ap) -1);
-									/* printf("threading delay term: this_dt=%x *dthead=%x\n", 
-													(int)this_dt, (int)*dthead);    */
-			if (*dthead == MMK_INT(0))
-				gv_set((PWord)this_dt, WTP_STRUCTURE, dtgv);
-			else  /* install this_dt in 2nd arg of last_dt: */
-				w_install_argn((PWord)last_dt, 2, (PWord)this_dt, WTP_STRUCTURE);
-			last_dt = this_dt;	
-		}
-		}
+        for (; tr < b; tr++) {
+            ap = (long *) *tr;			/* tr is not biased */
+            if (M_ISVAR(*ap) && CHK_DELAY(*ap)) {
+            this_dt = (PWord *)((PWord *)(*ap) -1);
+            }
+        }
 #endif    /* TRAILVALS */
 
 
@@ -1104,48 +1093,92 @@ gc()
 
 #endif   /* FREEZE */
 
-
-									/* printf("CALL core_gc\n"); */
-
+						/* printf("CALL core_gc  "); */
 core_gc();
-
-									/* printf("EXIT core_gc\n"); */
-
+						/* printf("EXIT core_gc\n"); */
 
 #ifdef FREEZE
+	/* walk the choicepoints, undoing the previous conversions;
+           since the trail and CP's may have moved, we have to recacl
+           from the beginning */
+    b =  wm_B;
+    tr = wm_TR;
+    oldestcp = wm_B;
+				/* printf("Tr_b= %x  B= %x  TR= %x  H= %x  HB= %x  H_b= %x\n",
+					(int)wm_trailbase,(int)wm_B,(int)wm_TR,
+					(int)wm_H,(int)wm_HB,(int)wm_heapbase);  */
 
+	/* Locate the oldest choicepoint */
+    while (chpt_B(oldestcp) != (long *) 0) {
+        oldestcp = chpt_B(oldestcp);
+    }
+				/* printf("oldestcp= %x\n", (int)oldestcp);  */
+	/* walk the choicepoints */
+    while (b <= oldestcp) {
+				/* printf("walk b=%x oldestcp=%x\n", (int)b, (int)oldestcp);  */
+#ifdef ChptAfterTrail
+		tr =  b + chpt_SIZE;	/* get tr and b set up for next iteration */
+		b =   chpt_B(b);
+		if (b == (long *) 0)	/* exit early if necessary */
+	    	break;
+#endif /* ChptAfterTrail */
 
-		/* Undo the threaded string of delay terms */
-	if (*dthead != MMK_INT(0)) 
-	{ 								
-	  	PWord *lrval=0, *lcl2, *lcl3=0;
-		int *lcl3t=0;
-									/* printf("Before undoing delay chain:dthead=%x *dthead=%x\n",
-												(int)dthead, (int)*dthead);  */
-	  	lcl2 = (PWord *)*dthead;
+	/* walk trail entries between choicepoints */
+#ifdef TRAILVALS
+        for (; tr < b; tr++) {
+				/* printf("    tr= %x  ", (int)tr); */
+                    /* move up one element; tr is now an "ordinary" trail value: 
+                       tr points at trail locations; so ap = *++tr is a heap variable */ 
+            ap = (long *) *++tr;	/* tr is not biased */
+				/* printf("    ap= %x\n", (int)ap); */
 
-		while ( M_ISVAR(lcl2) ) {
-						/* printf("lcl2=%x  *lcl2=%x  funct(*lcl2)=%x arit(*lcl2)=%d Arg#2 of lcl2=%x\n", 
-												(int)lcl2,(int)*lcl2, (int)MFUNCTOR_TOKID(*lcl2), 
-												(int)MFUNCTOR_ARITY(*lcl2), 
-												(int)*(((PWord *) lcl2) + 2));    */
-			w_get_argn(lcl3, lcl3t, (PWord)lcl2, 2);
-			lrval = MSTRUCTADDR(lcl3);
+                    /* does the heap variable (location) ap contain a prolog structure pointer (*ap) 
+                       to the funct/arity word (**ap) of a delay thing? */
+            if ( M_ISSTRUCT(*ap) ) {
+                this_dt = MSTRUCTADDR(*ap);
+                if ((MFUNCTOR_TOKID(*(PWord *)this_dt) == TK_DELAY) && (MFUNCTOR_ARITY(*(PWord *)this_dt) == 4)) 
+                {
+                        /* So one word up is the original var of the delay thing to which *ap should point */
+                    this_dt = (PWord *)((PWord *)this_dt + 1);
+							/* printf(" # delay term: this_dt=%x ap=%x *ap=%x\n", 
+									(int)this_dt, (int)ap, (int)*ap ); */
+                        /* convert the contents *ap of location ap to be a prolog var-var pointer to this_dt */
+                        /* w_install(addr, val, tag) PWord *addr; PWord val; int   tag;  */
 
-									/* printf("lcl3=%x  lrval=*lcl3=%x\n",(int)lcl3,(int)lrval); */
-			*lcl3 = (long)(PWord *)MMK_VAR(lcl3);
-									/* printf(">>lcl3=%x  *lcl3=%x\n",(int)lcl3,(int)*lcl3); */
-			lcl2 = lrval;
-									/* printf("BOTTOM loop: lcl2=%x  \n",(int)lcl2); */
-		}
-									/* printf("After loop\n"); */
-		*dthead = MMK_INT(0);
-									/* printf("After undoing delay chain\n"); */
-		}
-		gv_free(dtgv);
-									/* printf("Ran gv_free: %d\n",(int)dtgv); */
+                    w_install(ap, (PWord)this_dt, WTP_REF);
+                }
+            }
+        }
+
+#else /* no-TRAILVALS */
+
+        for (; tr < b; tr++) {
+            ap = (long *) *tr;			/* tr is not biased */
+            if ( M_ISSTRUCT(*ap) ) {
+                this_dt = MSTRUCTADDR(*ap);
+                if ((MFUNCTOR_TOKID(*(PWord *)this_dt) == TK_DELAY) && (MFUNCTOR_ARITY(*(PWord *)this_dt) == 4)) 
+                {
+                    this_dt = (PWord *)((PWord *)this_dt + 1);
+                    w_install(ap, (PWord)this_dt, WTP_REF);
+                }
+
+            }
+        }
+
+#endif    /* TRAILVALS */
+
+#ifdef ChptBeforeTrail
+		tr = b + chpt_SIZE;	/* get tr and b set up for next iteration */
+		b =  chpt_B(b);
+		if (b == (long *) 0)	/* exit early if necessary */
+	    	break;
+#endif /* ChptBeforeTrail */
+
+    }	/* while (b <= oldestcp) */
+
+printf("End new GC\n");
 	return 1;
-	}
+}
 #endif    /* FREEZE */
 
 
