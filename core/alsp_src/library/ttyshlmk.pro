@@ -654,7 +654,7 @@ gen_type_spec(XSpcTerms, MakePred)
 	dmember(base_type_file=BaseTypeFile, XSpcTerms),
 	filePlusExt(BaseTypeFile,pro,ProTypeFile),
 	sprintf(atom(DepLine),'%t: %t',[ProTypeFile,TypeFile]),
-	open('makefile.typ',write,MTOS,[]),
+	open('makefile.typ',read_write,MTOS,[]),
 	(locate_line(DepLine, MTOS) ->
 		close(MTOS) 		%% nothing to do
 		;

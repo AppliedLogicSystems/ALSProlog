@@ -804,7 +804,7 @@ opf(FileName) :-
 
 export opf/0.
 opf :-
-	set_prolog_flag(undefined_predicate, fail),
+	set_prolog_flag(unknown, fail),
 	get_source_file(FileName),
 	disp_opf(FileName).
 
@@ -827,7 +827,7 @@ disp_opf(FileName)
 export objectProcessFile_cl/0.
 objectProcessFile_cl
 	:-
-	set_prolog_flag(undefined_predicate, fail),
+	set_prolog_flag(unknown, fail),
 	get_cmdline_vals(SwitchVals),
 	oop_switches_and_files(SwitchVals,Files,Xtras),
 	!,

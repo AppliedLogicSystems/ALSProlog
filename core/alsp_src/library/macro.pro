@@ -23,7 +23,7 @@ module macroxp.
 
 export mx_cl/0.
 mx_cl :-
-	set_prolog_flag(undefined_predicate, fail),
+	set_prolog_flag(unknown, fail),
 	builtins:command_line(CL),
 	dappend(_,['-s',Source|_],CL),
 	(filePlusExt(SourceName,SourceExt,Source) ->
@@ -62,7 +62,7 @@ mx :-
 export macro_expand/0.
 macro_expand
 	:-
-	set_prolog_flag(undefined_predicate, fail),
+	set_prolog_flag(unknown, fail),
 	write('source='),read(Source),
 	write('target='),read(Target),
 	macro_expand_files(Source, Target).
