@@ -166,8 +166,7 @@ files(Directory, Pattern, List)
 	getDirEntries(Directory, Regex, FirstResult),
 	!,
 	fixFileType(regular, InternalFileType),
-	path_elements(Directory, PathElts),
-	filterForFileType(FirstResult, PathElts, InternalFileType, List).
+	filterForFileType(FirstResult, Directory, InternalFileType, List).
 
 /*!----------------------------------------------------------------
  |	subdirs/1
@@ -298,8 +297,7 @@ directory(Pattern, FileType, List)
 	getDirEntries(Path, Regex, FirstResult),
 	!,
 	fixFileType(FileType, InternalFileType),
-	path_elements(Path, PathElts),
-	filterForFileType(FirstResult, PathElts, InternalFileType, List).
+	filterForFileType(FirstResult, Path, InternalFileType, List).
 
 	%% If no match was found for the file pattern, return no elements:
 directory(_,_,[]).
@@ -321,22 +319,21 @@ fixFileType(FileType, InternalFileType)
 	fileTypeCode(InternalFileType, FileType).
 
 filterForFileType([], _, _, []).
-filterForFileType([FileName | Files], PathList, FileType, List)
+filterForFileType([FileName | Files], Path, FileType, List)
 	:-
-	filter_file(FileName, PathList, FileType, List, ListTail),
+	filter_file(FileName, Path, FileType, List, ListTail),
 	!,
-	filterForFileType(Files, PathList, FileType, ListTail).
+	filterForFileType(Files, Path, FileType, ListTail).
 
 	%% Need this error case since '$getFileStatus'/2 can fail when given
 	%% a symbolic link to a non-existent file:
-filterForFileType([FileName | Files], PathList, FileType, List)
+filterForFileType([FileName | Files], Path, FileType, List)
 	:-
-	filterForFileType(Files, PathList, FileType, List).
+	filterForFileType(Files, Path, FileType, List).
 
-filter_file(FileName, PathList, FileType, [FileName | ListTail], ListTail)
+filter_file(FileName, Path, FileType, [FileName | ListTail], ListTail)
 	:-
-	dappend(PathList, [FileName], L0),
-	join_path(L0, FullFile),
+	join_path([Path, FileName], FullFile),
 	'$getFileStatus'(FullFile, StatusTerm),
 	arg(1, StatusTerm, ThisFileType),
 	fflt_ck(ThisFileType, FileType, PathList, FullFile),
