@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# Check for correct number of arguments
+if test $# -lt 1
+then
+    echo 'Usage: macos_setup source_dir [prefix defines...]' 1>&2
+    echo 'Example:' 1>&2
+    echo '    macos_setup ../alsp_src "#define INTCONSTR"' 1>&2
+    exit 2
+fi
+
+# Extract arguments
+source_dir=../$1
+shift 1
+defines=$*
+
+# Check for relative source directory
+if echo $source_dir | grep -s '^/'
+then
+    echo "Invalid source directory ($source_dir)" 1>&2
+    echo "Source directory must be relative" 1>&2
+    exit 2
+fi
+
+mkdir macos
+cd macos
+
+# Build the prefix file
+echo "$defines" > prefix.h
+
+cp $source_dir/macos/alspro_lib.prj.sit.hqx .
+cp $source_dir/macos/alspro_b.prj.sit.hqx .
+cp $source_dir/macos/alspro.prj.sit.hqx .
+cp $source_dir/macos/alspro_slib.prj.sit.hqx .
+cp $source_dir/macos/Build_MacOS.sit.hqx .
+
+mkdir alsdir
+mkdir alsdir/builtins
+rm -f alsdir/builtins/*.pro
+cd alsdir/builtins
+ln -s ../../$source_dir/builtins/*.pro .
+cd ../..
+mkdir alsdir/library
+rm -f alsdir/library/*.pro
+rm -f alsdir/library/*.alb
+cd alsdir/library
+ln -s ../../$source_dir/library/*.pro .
+ln -s ../../$source_dir/library/*.alb .
+cd ../..
+cd ..
