@@ -979,22 +979,23 @@ ld_mth
 	;   true
 	).
 
+/* Old
 ld_wins
 	:-	
 	als_system(Sys),
-	dmember(wins=WinSys,Sys),
+	current_prolog_flag(windows_system, WinSys),
 	(WinSys = mswins -> 
 		consult_builtins(windows), 
 		consult_builtins(win_sh)
 		;   
 		true
 	).
-
+*/
 :-
 	nops, 
 	ld_is, 
-	ld_mth, 
-	ld_wins.
+	ld_mth.
+	/* Old: ld_wins. */
 
 :- dynamic(intconstr/0).
 

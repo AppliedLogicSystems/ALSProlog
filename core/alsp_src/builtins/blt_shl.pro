@@ -41,17 +41,15 @@ start_shell(DefaultShellCall)
 	%% Get the raw command line and assert it.
 	abolish(command_line,1),
 	pbi_get_command_line(RawCommandLine),
-	
-	%% Strip off the image name if it exists.
-	(RawCommandLine = [_ | CommandLine]
-         ;
-         CommandLine = []),
+	assertz(command_line(RawCommandLine)),
 
+	%% get the command line, but ignore the image name
+	retract(command_line([ImageName|CommandLine])),
 	!,
 	CLInfo = clinfo(true,				/* -g: goal to run */
 					false,				/* -v/-q: verbosity */
 					[],					/* files to consult */
-					'', /* old ImageName */ 
+					ImageName,
 					default,			/* -nwd: debugger to set up */
 					[],					/* -s init search list */
 					DefaultShellCall,	/* shell/or not */
@@ -103,12 +101,11 @@ ss_parse_command_line([], [], CLInfo)
 ss_parse_command_line(['-p' | T], T, CLInfo)
 	:-!.
 
-	%% -P: Start application part of command line, pushing on image name:
-/* No longer used
+	%% -p: Start application part of command line, pushing on image name:
 ss_parse_command_line(['-P' | T], [ImageName | T], CLInfo)
 	:-!,
 	arg(4,CLInfo,ImageName).
-*/
+
 	%% -ind: "Indirect" file: open, read 1 line, process the line, & continue:
 ss_parse_command_line(['-ind', File | T], L, CLInfo)
 	:-!,
@@ -294,14 +291,13 @@ print_banner(OutS,L)
 	system_name(L, Name),
 	dmember(os_variation = OSVar, L),
 	dmember(prologVersion = Version, L),
-%	dmember(wins=WinsName, L),
 	current_prolog_flag(windows_system, WinsName),
 	name(WinsName, [InC | WNCs]),
 	UInC is InC - 32,
 	name(WBan, [UInC | WNCs]),
 	!,
 	printf(OutS,'%s Version %s [%s] (%s)\n',[Name,Version,OSVar,WBan]),
-	printf(OutS,'   Copyright (c) 1987-95 Applied Logic Systems, Inc.\n\n',[]).
+	printf(OutS,'   Copyright (c) 1987-96 Applied Logic Systems, Inc.\n\n',[]).
 
 system_name(L, Name)
 	:-
@@ -374,7 +370,7 @@ init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	get_shell_prompts( CurPromptsStack ),
 	set_shell_prompts( [(Prompt1,Prompt2) | CurPromptsStack] ),
 	print_banner(OutStream,SysList),
-	dmember(wins=InitWins, SysList),
+	current_prolog_flag(windows_system, InitWins),
 	dmember(os=OS, SysList),
 	dmember(os_variation=OSMinor, SysList),
 	(InitWins = nowins ->
