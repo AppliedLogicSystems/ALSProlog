@@ -1073,6 +1073,17 @@ showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
 	),
 	!.
 
+/*
+color_my_port(ClsGrp,Start,End,Port,TagName)
+	:-
+	TagName = head_tag,
+	!,
+	tktxt_info(ClsGrp,TextWin,Start,End,STRec,
+				StartLine,StartChar,EndLine,EndChar),
+	display_st_record(StartLine,StartChar,EndLine,EndChar, 
+						Color,TextWin, TagName, STRec).
+*/
+
 color_my_port(ClsGrp,Start,End,Port,TagName)
 	:-
 	tktxt_info(ClsGrp,TextWin,Start,End,STRec,
@@ -1201,7 +1212,11 @@ tktxt_info(ClsGrp,TextWin,Start,End,Rec,
 display_st_record(StartLine,StartChar,EndLine,EndChar, 
 						Color,TextWin, TagName, Rec)
 	:-
-	configure_tag(TagName, TextWin,['-background',Color]),
+	(TagName = call_tag ->
+		configure_tag(TagName, TextWin,['-background',Color])
+		;
+		true
+	),
 	tcl_call(shl_tcli,[see_text,TextWin,StartLine,StartChar,EndLine,EndChar],_),
 	!,
 	set_dbstr(TagName, Rec, i(StartLine,StartChar,EndLine,EndChar)).
