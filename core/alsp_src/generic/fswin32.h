@@ -14,6 +14,7 @@
 #define F_OK 8
 
 int als_access(const char *path, int mode);
+#undef access
 #define access als_access
 
 
@@ -35,6 +36,7 @@ struct als_stat
 };
 
 int als_stat(const char *path, struct als_stat *buf);
+#undef stat
 #define stat als_stat
 
 #define EINTR	3001
