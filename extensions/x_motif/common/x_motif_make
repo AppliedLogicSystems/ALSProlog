@@ -1,0 +1,19 @@
+# make_x_motif makes the X and Motif ALS Prolog interface files.
+
+all:
+	make -f ../common/interface_make WIN=x
+	make -f ../common/library_make WIN=x
+	make -f ../common/interface_make WIN=motif
+	make -f ../common/library_make WIN=motif
+
+clean:
+	make -f ../common/interface_make WIN=x clean
+	make -f ../common/library_make WIN=x clean
+	make -f ../common/interface_make WIN=motif clean
+	make -f ../common/library_make WIN=motif clean
+
+superclean:
+	make -f ../common/interface_make WIN=x superclean
+	make -f ../common/library_make WIN=x superclean
+	make -f ../common/interface_make WIN=motif superclean
+	make -f ../common/library_make WIN=motif superclean
