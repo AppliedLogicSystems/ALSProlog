@@ -347,6 +347,8 @@
 #include "alspi.h"
 #include "chpt.h"
 #include "built.h"
+
+#include "security.h"
 /*---------------------------------------------------------------------*
  | If string.h doesn't exist or is lacking certain functions, we provide
  | our own replacements for the functions declared therein...
@@ -396,12 +398,6 @@ extern	int	win32s_system;
 
 extern	void	als_exit	PARAMS(( int ));
 extern	void	heap_overflow	PARAMS(( void ));
-
-#ifdef HARDWARE_KEY
-extern void	init_hardware_key PARAMS(( void ));
-extern void	shutdown_hardware_key PARAMS(( void ));
-extern void	check_hardware_key PARAMS(( void ));
-#endif
 
 /* ----------   disassem.c ----------   */
 extern	void	list_asm	PARAMS(( Code *, int ));

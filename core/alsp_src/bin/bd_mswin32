@@ -68,6 +68,7 @@ ln -s $1/wins/build/mswin32/wintests.pro $2/bld-wins/mswin32
 
 cp $1/wins/build/mswin32/mswin32intf_lib.prj.sit.hqx $2/bld-wins/mswin32
 cp $1/wins/build/mswin32/alspro_mswin320.prj.sit.hqx $2/bld-wins/mswin32
+cp $1/wins/build/mswin32/demo_alspro_mswin320.prj.sit.hqx $2/bld-wins/mswin32
 
 rm -f $2/bld-wins/mswin32/alsdir
 ln -s $2/bld-port/alsdir $2/bld-wins/mswin32/alsdir

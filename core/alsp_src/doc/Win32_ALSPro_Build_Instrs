@@ -1,6 +1,6 @@
 Microsoft Win32 x86 ALS Prolog Build Instructions
 =================================================
-Author: Chuck Houpt Date: 3-April-1996
+Author: Chuck Houpt Date: 3-June-1996
 
 These instructions assume that the ALS Prolog source directory exists,
 and all of its generated files are up to date (for example: generated
@@ -58,8 +58,8 @@ A note on making x86 Metrowerks projects:
 
 In CW8 there is a bug that causes Metrowerks to crash when a large project
 is completely recompiled.  The work around is to compile some of the files
-before compiling the rest.  In all the ALS projects, compiling wam.c before
-compiling the rest of the project seems to work around the bug.
+before compiling the rest.  In all the ALS projects, compiling wam.c (or
+kernal0.c) before compiling the rest of the project seems to work around the bug.
 
 Build Steps:
 ------------
@@ -84,6 +84,7 @@ Expander.  The following projects need expanding:
 	
 	{blddir}bld-wins:mswin32:mswin32intf_lib.prj.sit.hqx
 	{blddir}bld-wins:mswin32:alspro_mswin320.prj.sit.hqx
+	{blddir}bld-wins:mswin32:demo_alspro_mswin320.prj.sit.hqx
 
 3. On the Mac, build the portable libriaries and executables.
 
@@ -114,7 +115,9 @@ run the batch file make_interf.bat.
 
 7.1 Open mswin32intf_lib.prj, adjust access paths, Make.
 
-7.2 Open alspro_mswin320.prj, adjust access paths, Make.
+7.2 Open alspro_mswin320.prj, adjust access paths, compile kernal0.c, Make.
+
+7.3 Open demo_alspro_mswin320.prj, adjust access paths, compile kernal0.c, Make.
 
 8.0 From MS-DOS, in the directory %BLDDIR%\bld-wins\mswin32, run the
 batch file winpack.bat.
@@ -165,6 +168,9 @@ Win32 Interface Libraries:
 {blddir}bld-wins:mswin32:alspro_mswin320.exe
 {blddir}bld-wins:mswin32:alspro_mswin32.exe
 
+{blddir}bld-wins:mswin32:demo_alspro_mswin320.exe
+{blddir}bld-wins:mswin32:demo_alspro_mswin32.exe
+
 {blddir}bld-wins:mswin32:kernal32.pro
 {blddir}bld-wins:mswin32:user32.pro
 {blddir}bld-wins:mswin32:gdi32.pro
@@ -173,3 +179,14 @@ Win32 Interface Libraries:
 {blddir}bld-wins:mswin32:comdlg32.pro
 
 
+
+Programming Sentinel UniKey Hardware Keys
+-----------------------------------------
+
+Both simple and 30-Day demo keys need programming.
+To program the keys, use the prog_ssikey program.
+
+The prog_ssikey program is stored in the archive
+{srcdir}bin:SSI Key Programmer.sit.hqx.  Unpack the
+archive and run prog_ssikey.exe.  This will display
+usage information.
