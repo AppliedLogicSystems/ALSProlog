@@ -27,7 +27,7 @@ wintest :-
 	c_create_abs(str, 'wintests.rsrc', ResFileStr),
 	cstr2pstr(ResFileStr), 
 	m_OpenResFile(ResFileStr, RefNum),
-	RefNum =:= -1 ->
+	RefNum =:= 4294967295 ->
 		(
 			m_ResError(ErrCode),
 			printf('Error (%t) opening resource file "wintests.rsrc".\n', [ErrCode]),
