@@ -998,7 +998,7 @@ load_builtins(BDir, File)
 	'$atom_concat'(Path,BltFile,FileAndPath),
 %pbi_write(load-FileAndPath), pbi_nl,pbi_ttyflush,
 	(resource_load(File) ; '$load'(FileAndPath, 0)),
-	assertz(loaded_builtins_file(File,builtins)).
+	assertz_at_load_time(loaded_builtins_file(File,builtins)).
 
 	%%% Use the new Prolog-based consult mechanism:
 consult_builtins(File) 
@@ -1019,7 +1019,7 @@ consult_builtins(BDir, File)
 	'$atom_concat'(FileAndPath,'.pro',FilePathPro),
 	'$atom_concat'(FileAndPath,'.obp',FilePathObp),
 	cslt_blts_ld(File, FilePathPro,FilePathObp),
-	assertz(loaded_builtins_file(File,builtins)).
+	assertz_at_load_time(loaded_builtins_file(File,builtins)).
 
 	/*---------------------------------------------------------*
 	 |	Note: Basic builtins loaded by this procedures

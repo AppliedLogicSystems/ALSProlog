@@ -459,14 +459,6 @@ lib_load(FileName, Module, P,A, Module,Call)
 	record_lib_load(FileName),
 	Module:call(Call).
 
-/*	--- old code prior to cslt_lib_ld:
-	(resource_load(FileName)
-		; load(FullFileName,1,_,obp,_,_)
-		; existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) ),
-*/
-
-
-
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Force one or more library files to be 
 	%% loaded (for use when packaging):

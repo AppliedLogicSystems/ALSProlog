@@ -1625,12 +1625,6 @@ showGoalToUserWin(call,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug, 
 	!,
 	color_my_port(ClsGrp,Start,End,exit,call_tag, DBGMGR, NewSrcMgr).
 
-
-
-
-
-
-
 	%% "redo" here is really redo for the acutal goal:
 showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!,
