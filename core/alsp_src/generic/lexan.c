@@ -431,10 +431,10 @@ escape_char(bpp)
 	    return '\f';
 	case 'n':
 	    (*bpp)++;
-	    return '\n';
+	    return LF;
 	case 'r':
 	    (*bpp)++;
-	    return '\r';
+	    return CR;
 	case 't':
 	    (*bpp)++;
 	    return '\t';

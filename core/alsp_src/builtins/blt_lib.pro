@@ -1,7 +1,7 @@
 :-libactivate(builtins,['library',misc_io],
     [read_terms/1,read_terms/2, read_terms_pos/1,
-	 read_terms_pos/2, read_terms_vn/2, read_as_list/3,
-        colwrite/4, putc_n_of/3,
+	 read_terms_pos/2, read_terms_vn/2, read_lines/2,
+	 read_as_list/3, colwrite/4, putc_n_of/3,
 		gen_file_header/3,gen_file_header/4],[]).
 
 :-libactivate(builtins,['library',listutl1],
@@ -18,8 +18,8 @@
     	output_prolog_list/5,
 	flatten/2,n_of/3,number_list/2, number_list/3,encode_list/3,
 	struct_lookup_subst/4,check_default/4,check_default_del/5,
-	remove_tagged/3, merge_plists/3, mangle_change_tagged/3,
-	subst_tagged/4, merge_in_list/3 ],[]).
+	remove_tagged/3, merge_plists/3, merge_tagged_lists/3, 
+	mangle_change_tagged/3, subst_tagged/4, merge_in_list/3 ],[]).
 
 %:-libactivate(builtins,['library',lib_ctl],
 %	[bagOf/3, bagOf/4,setOf/4, setOf/3, max/3, min/3]).
@@ -140,6 +140,9 @@
 
 :-libactivate(cref,['library',cref], 
 			[cref/1,cref/2,cref_shell/0], [] ).
+
+:-libactivate(ttyshlmk,['library',ttyshlmk], 
+			[mk_tty_shell_cl/0,mk_tty_shell_list/1,mk_tty_shell/1,ttyshlmk/1], [] ).
 
 :-libactivate(cref,['library',crefxtra], 
 		[union_files_calls/2,

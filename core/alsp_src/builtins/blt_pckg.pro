@@ -65,9 +65,13 @@ save_image(NewImageName)
 	abolish(sys_searchdir,1),
 	(bagof(searchdir(SD), searchdir(SD), SDList) -> true ; SDList = []),
 	abolish(searchdir,1),
-		%% Need to kill other stuff from the shell;
-	tmpnam(SSName),
-	    printf(user_output,'Saving state to: %s...',[SSName]),
+	(tmpnam(SSName) ->
+	    printf(user_output,'Saving state to: %s...',[SSName])
+		;
+	    printf(user_output,'Can''t allocate temporary file for saving state!\n',[]),
+	    printf(user_output,'Check available space on /tmp or /var/tmp, etc.\n',[]),
+	    printf(user_output,'If tempnam() runs on this system, consider setting TMPDIR.\n',[])
+	),
 	save_state(SSName),
 	    printf(user_output,'saved.\n',[]),
 

@@ -198,6 +198,7 @@ static struct blt_struct {
 #ifdef FREEZE
 	BLT("cptx", 0, pbi_cptx, "_pbi_cptx"),
 	BLT("display_heap", 2, disp_heap, "_disp_heap"),
+	BLT("display_item_addr", 1, disp_item, "_disp_item"),
 	BLT("swp_tr", 0, pbi_swp_tr, "_pbi_swp_tr"),
 	BLT("clct_tr", 1, pbi_clct_tr, "_pbi_clct_tr"),
 	BLT("walk_cps", 0, pbi_walk_cps, "_pbi_walk_cps"),
@@ -370,7 +371,7 @@ static struct blt_struct {
 	BLT("sio_buf_params", 3, sio_buf_params, "_sio_buf_params"),
 	BLT("sio_increment_bufpos", 1, sio_increment_bufpos, "_sio_increment_bufpos"),
 	BLT("sio_set_position", 3, sio_set_position, "_sio_set_position"),
-	BLT("sio_file_open", 4, sio_file_open, "_sio_file_open"),
+	BLT("sio_file_open", 5, sio_file_open, "_sio_file_open"),
 	BLT("window_insert_pos", 2, win_insert_pos, "_win_insert_pos"),
 	BLT("set_window_insert_pos", 2, set_win_insert_pos, "_set_win_insert_pos"),
 	BLT("sio_set_eof", 1, sio_set_eof, "_sio_set_eof"),
@@ -384,7 +385,7 @@ static struct blt_struct {
 	BLT("sio_ssbq_open", 6, sio_ssbq_open, "_sio_ssbq_open"),
 #endif /* SSBQ */
 #ifdef HAVE_SOCKET
-	BLT("sio_socket_open", 9, sio_socket_open, "_sio_socket_open"),
+	BLT("sio_socket_open", 10, sio_socket_open, "_sio_socket_open"),
 	BLT("sio_is_server_socket", 1, sio_is_server_socket, "_sio_is_server_socket"),
 	BLT("sio_accept_socket_connection", 1, sio_accept_socket_connection, "_sio_accept_socket_connection"),
 	BLT("sio_poll",2,sio_poll,"_sio_poll"),
@@ -398,7 +399,7 @@ static struct blt_struct {
 	BLT("sio_window_open", 6, sio_window_open, "_sio_window_open"),
 #endif /* WINIOBASIS */
 
-	BLT("sio_generic_open", 4, sio_generic_open, "_sio_generic_open"),
+	BLT("sio_generic_open", 5, sio_generic_open, "_sio_generic_open"),
 	BLT("sio_close", 1, sio_close, "_sio_close"),
 #ifndef SIO_ASM
 	BLT("sio_get_byte", 2, sio_get_byte, "_sio_get_byte"),
@@ -422,6 +423,7 @@ static struct blt_struct {
 	BLT("sio_lettervar", 2, sio_lettervar, "_sio_lettervar"),
 	BLT("sio_sprintf", 4, sio_sprintf, "_sio_sprintf"),
 	BLT("sio_isgraphicatom", 1, sio_isgraphicatom, "_sio_isgraphicatom"),
+	BLT("sio_nl", 1, sio_nl, "_sio_nl"),
 	BLT("sio_readln", 3, sio_readln, "_sio_readln"),
 	BLT("sio_position_in_line", 3, sio_position_in_line, "_sio_position_in_line"),
 

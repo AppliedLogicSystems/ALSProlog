@@ -263,14 +263,14 @@ pbi_icode()
     w_get_An(&v5, &t5, 5);
 
     if (t1 == WTP_INTEGER && t3 == WTP_INTEGER && t5 == WTP_INTEGER &&
-	(t4 == WTP_INTEGER || t4 == WTP_SYMBOL) &&
-	(t2 == WTP_INTEGER || t2 == WTP_SYMBOL)) {
-	dbprot_t odbrs = w_dbprotect(DBRS_WRITABLE);
-	icode(v1, v2, v3, v4, v5);
-	(void) w_dbprotect(odbrs);
+			(t4 == WTP_INTEGER || t4 == WTP_SYMBOL) &&
+			(t2 == WTP_INTEGER || t2 == WTP_SYMBOL) )   {
+		dbprot_t odbrs = w_dbprotect(DBRS_WRITABLE);
+		icode(v1, v2, v3, v4, v5);
+		(void) w_dbprotect(odbrs);
     }
     else
-	FAIL;
+		FAIL;
 
     SUCCEED;
 }

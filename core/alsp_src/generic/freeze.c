@@ -533,4 +533,21 @@ printf("Heap display: %x --> %x\n",(int)start,(int)stop);
 
 	SUCCEED;
 }
+
+
+void disp_item	PARAMS((void));
+
+void
+disp_item()
+{
+    PWord v1;
+    int   t1;
+
+    w_get_An(&v1, &t1, 1);
+
+	printf("item= %x t= %d\n",v1,t1);
+
+}
+
+
 #endif /* FREEZE */

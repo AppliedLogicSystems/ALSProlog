@@ -43,30 +43,29 @@ simple_menu(List, Choice, Options)
 	dmember(codes=ListOfCodes,Options),
 	!,
 	encode_list(List, ListOfCodes, CodedList),
-	themenu(CodedList, ChoiceNum, Options, char),
-	fin_simple_menu_code(ChoiceNum, ListOfCodes, Options, Choice).
+	themenu(CodedList, ChoiceNum, Options),
+	fin_simple_menu_num(ChoiceNum, CodedList, Options, Choice).
 
 simple_menu(List, Choice, Options) 
 	:-
 	dmember(0-ZeroChoice, Options),
 	!,
 	number_list([ZeroChoice | List], 0, NumberedList),
-	themenu(NumberedList, ChoiceNum, Options, term),
+	themenu(NumberedList, ChoiceNum, Options),
 	fin_simple_menu_num(ChoiceNum, NumberedList, Options, Choice).
 
 simple_menu(List, Choice, Options) 
 	:-
 	number_list(List, 1, NumberedList),
-	themenu(NumberedList, ChoiceNum, Options, term),
+	themenu(NumberedList, ChoiceNum, Options),
 	fin_simple_menu_num(ChoiceNum, NumberedList, Options, Choice).
 
 fin_simple_menu_num(default, NumberedList, Options, Choice)
 	:-
 	dmember(default=Choice,Options),
 	!.		
-fin_simple_menu_num(default, NumberedList, Options, Choice)
-	:-!,
-	fin_simple_menu_num(0, NumberedList, Options, '$noChoice').
+fin_simple_menu_num(default, [_-Choice | NumberedList], Options, Choice)
+	:-!.		
 
 fin_simple_menu_num(0, NumberedList, Options, '$noChoice') :-!.
 fin_simple_menu_num(ChoiceNum, NumberedList, Options, Choice)
@@ -74,33 +73,7 @@ fin_simple_menu_num(ChoiceNum, NumberedList, Options, Choice)
 	dmember(ChoiceNum-Choice, NumberedList),!.
 fin_simple_menu_num(ChoiceNum, NumberedList, Options, '$badInput$'(ChoiceNum)).
 
-
-fin_simple_menu_code(ChoiceCode, ListOfCodes, Options, Choice)
-	:-
-	(dmember(responses=Responses, Options) ->
-		true
-		;
-		Responses = ListOfCodes
-	),
-	(dmember(default=DefaultCode, Options) ->
-		position(ListOfCodes, DefaultCode, Num),
-		nth(Num, Responses, DefaultChoice)
-		;
-		Responses = [DefaultChoice | _]
-	),
-	fin_simple_menu_code0(ChoiceCode, ListOfCodes, Responses, DefaultChoice, Choice).
-
-export fin_simple_menu_code0/5.
-
-fin_simple_menu_code0(end_of_line, _, _, Choice, Choice) :-!.
-fin_simple_menu_code0(ChoiceCode, ListOfCodes, Responses, _, Choice)
-	:-
-	position(ListOfCodes, ChoiceCode, Num),
-	!,
-	nth(Num, Responses, Choice).
-fin_simple_menu_code0(ChoiceNum, _, _, _, '$badInput$'(ChoiceNum)).
-
-themenu(List, ChoiceNum, Options, Flag)
+themenu(List, ChoiceNum, Options)
 	:-
 	(dmember(default=DefaultContent,Options) ->
 		true
@@ -134,22 +107,16 @@ themenu(List, ChoiceNum, Options, Flag)
 		Prompt = ' Choice = '
 	),
 	write(Prompt),
-	(Flag = term ->
-		get_line(Line),
-		(Line = '' ->
-			ChoiceNum = default
-			;
-			atomread(Line,ChoiceNum)
-		)
+	get_line(Line),
+	((Line = ''; Line = end_of_line) ->
+		ChoiceNum = default
 		;
-		get_nonblank_char(ChoiceNumInt),
-		(ChoiceNumInt = end_of_line ->
-			ChoiceNum = end_of_line
-			;
-			name(ChoiceNum, [ChoiceNumInt])
-		)
+		atomread(Line,ChoiceNum,[vars_and_names(Vars,Names)]),
+		Vars = Names
 	).
 
+
+/*
 export writeWindow/2.
 writeWindow(_,Item)
 	:-
@@ -199,5 +166,6 @@ readGroundWindow(_,InterfMod)
 
 export clearWindow/1.
 clearWindow(_).
+*/
 
 endmod.

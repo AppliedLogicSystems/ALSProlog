@@ -378,6 +378,38 @@ w_mk_uia(rval, rtag, str)
 
 
 /*
+ * w_mk_len_uia(rval, rtag, str, len)
+ *
+ *      This function is defined from w_mk_uia() above.  The only difference is that
+ *      the length of str is explicitly passed, so str does not have to be 0 terminated.
+ */
+void
+w_mk_len_uia(rval, rtag, str, len)
+    PWord *rval;
+    int  *rtag;
+    register UCHAR *str;
+    register size_t len;
+{
+    register UCHAR *t;
+    register int i = len;
+
+    *rval = (PWord) MMK_UIAVAL(wm_H);
+    *rtag = WTP_UIA;
+
+    t = (UCHAR *) (wm_H + 1);
+    while (len--) *t++ = *str++;
+    i = sizeof (PWord) - (i % sizeof (PWord));
+    while (i--)
+	*t++ = (UCHAR) 0;
+    i = (PWord *) t - wm_H;
+
+    *wm_H = MMK_FENCE(i);
+    wm_H += i;
+    *wm_H++ = MMK_FENCE(i);
+}
+
+
+/*
  * w_mk_uia_in_place(rval, rtag, str)
  *
  * same as w_mk_uia except that the uia string is already

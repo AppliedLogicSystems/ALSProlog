@@ -154,6 +154,7 @@ extern	int	pbi_collectcode	PARAMS(( void ));
 	/* freeze.c */
 extern	int	pbi_cptx		PARAMS(( void ));
 extern	int	disp_heap		PARAMS(( void ));
+extern	void disp_item		PARAMS((void));
 extern	int	pbi_swp_tr		PARAMS(( void ));
 extern	int	pbi_walk_cps		PARAMS(( void ));
 extern	int	pbi_delay		PARAMS(( void ));
@@ -371,6 +372,7 @@ extern	int	sio_lettervar	PARAMS(( void ));
 extern	int	sio_sprintf	PARAMS(( void ));
 extern	int	sio_isgraphicatom	PARAMS(( void ));
 extern	int	sio_readln	PARAMS(( void ));
+extern	int	sio_nl	PARAMS(( void ));
 extern	int	sio_position_in_line	PARAMS(( void ));
 
 /* bsystem.c */

@@ -40,6 +40,30 @@ use windows.
 	make_gv("_user_prompt"),
 	make_gv("_next_stream_identifier").
 
+
+/*
+ * Define the default end-of-line types.
+ */
+
+:- als_system(L),
+   dmember(os=OS, L),
+   (OS=macos ->
+   	(assert(default_read_eoln_type(cr)),
+   	 assert(default_write_eoln_type(cr)))
+	;
+   	(OS=unix ->
+   		dmember(os_variation=OSM, L),
+   		((OSM=djgpp1 ; OSM=djgpp2) ->
+   			(assert(default_read_eoln_type(crlf)),
+   			 assert(default_write_eoln_type(crlf)))
+   			;
+   			(assert(default_read_eoln_type(lf)),
+   			 assert(default_write_eoln_type(lf))))
+   		;
+   		(assert(default_read_eoln_type(crlf)),
+   		 assert(default_write_eoln_type(crlf))))).
+
+
 /*
  * next_stream_identifier/2 is used to retrieve the next stream identifier
  * unless one has been provided in the open options in which case that
@@ -315,6 +339,8 @@ is_not_stream_or_alias(NSA).
  *
  */
 
+export stream_or_alias_ok/2.
+
 stream_or_alias_ok(Var,_) :-
 	var(Var),
 	!,
@@ -325,7 +351,8 @@ stream_or_alias_ok(Stream, Stream) :-
 	!.
 stream_or_alias_ok(Alias, Stream) :-
 	get_alias(Alias,Stream),
-	!.
+	!,
+	stream_open_status(Stream,open).
 stream_or_alias_ok(user, Stream) :-
 	!,
 	get_alias(user_output, Stream).
@@ -669,7 +696,10 @@ check_open_options(Options) :-
 		 perms(_), perms(_,_,_),
 		 target_node(_),			%% ssbq
 		 connects(_), 				%% sockets
-		 address(_),address(_,_)
+		 address(_),address(_,_),
+		 write_eoln_type(cr), write_eoln_type(lf), write_eoln_type(crlf),
+		 read_eoln_type(cr), read_eoln_type(lf), read_eoln_type(crlf),
+		 read_eoln_type(universal)
 		]).
 
 
@@ -816,7 +846,8 @@ open_file_stream(Source_sink,Mode,Options,Stream)
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	sio_file_open(Source_sink,Stream,NMode,NBuffering),
+	eoln_modes(Options, NEoln),
+	sio_file_open(Source_sink,Stream,NMode,NBuffering,NEoln),
 	!.
 
 open_file_stream(Source_sink,Mode,Options,Stream) 
@@ -985,9 +1016,10 @@ open_socket_stream(Description,Mode,Options,Stream) :-
 	read_write_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
+	eoln_modes(Options, NEoln),
 	get_socket_connects(QLen,Options),
 	socket_codes(Domain,Dom, Type, Typ),
-	sio_socket_open(HostOrPath,Port,Dom,Typ,NMode,NBuffering,QLen,
+	sio_socket_open(HostOrPath,Port,Dom,Typ,NMode,NBuffering,NEoln,QLen,
 				SDescr,Stream),
 	!,
 	mangle(1,SN,HostOrPath),	%% Fill these in in case of vars
@@ -1016,6 +1048,10 @@ socket_params(socket(inet_dgram, HostName, Port),
 	      HostName, Port, inet, dgram, 0) :-
 	!.
 
+export socket_stream_info/5.
+socket_stream_info(Stream, HostOrPath,Port,Domain,Type)
+	:-
+	stream_name(Stream, socket(HostOrPath,Port,Domain,Type) ).
 
 
 %%
@@ -1043,6 +1079,8 @@ socket_codes(Domain,Dom, Type, Typ) :-
 
 socket_domain_codes(unix, 1).
 socket_domain_codes(inet, 2).
+socket_domain_codes(ppc,  5).
+socket_domain_codes(appletalk, 16).
 
 socket_type_codes(stream, 1).
 socket_type_codes(dgram, 2).
@@ -1141,7 +1179,8 @@ rexec_open0(s(Stream,Opts), Mode, Stream, Alias) :-
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Opts,NBuffering),
-	sio_generic_open(0,Stream,NMode,NBuffering).
+	eoln_modes(Options, NEoln),
+	sio_generic_open(0,Stream,NMode,NBuffering,NEoln).
 
 
 
@@ -1163,7 +1202,8 @@ open_string_stream(Source_sink,read,Options,Stream) :-
 	file_modes(read,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	sio_generic_open(0,Stream,NMode,NBuffering),
+	eoln_modes(Options, NEoln),
+	sio_generic_open(0,Stream,NMode,NBuffering,NEoln),
 	!.
 open_string_stream(Source_sink,write,Options,Stream) :-
 	initialize_stream(string,string(Source_sink),Options,Stream),
@@ -1172,7 +1212,8 @@ open_string_stream(Source_sink,write,Options,Stream) :-
 	file_modes(write,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	sio_generic_open(0,Stream,NMode,NBuffering),
+	eoln_modes(Options, NEoln),
+	sio_generic_open(0,Stream,NMode,NBuffering,NEoln),
 	!.
 open_string_stream(Source_sink,Mode,Options,Stream) :-
 	permission_error(open,source_sink,Source_sink,2).
@@ -1205,7 +1246,8 @@ open_atom_stream(Atom,read,Options,Stream) :-
 	file_modes(read,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	sio_generic_open(0,Stream,NMode,NBuffering),
+	eoln_modes(Options, NEoln),
+	sio_generic_open(0,Stream,NMode,NBuffering,NEoln),
 	!.
 open_atom_stream(Source_sink,write,Options,Stream) :-
 	initialize_stream(atom,atom(Source_sink),Options,Stream),
@@ -1214,7 +1256,8 @@ open_atom_stream(Source_sink,write,Options,Stream) :-
 	file_modes(write,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	sio_generic_open(0,Stream,NMode,NBuffering),
+	eoln_modes(Options, NEoln),
+	sio_generic_open(0,Stream,NMode,NBuffering,NEoln),
 	!.
 open_atom_stream(Source_sink,Mode,Options,Stream) :-
 	permission_error(open,source_sink,Source_sink,2).
@@ -1476,7 +1519,24 @@ blocking_numbers(wait, 0).		%% blocking I/O
 blocking_numbers(error, 4).		%% non-blocking
 blocking_numbers(snr_code, 4).		%% also non-blocking
 
+/*
+ * eoln_modes/2 determines the end-of-line type and returns the numeric
+ * code to pass to the C primitive.
+ */
 
+eoln_modes(Options, Code) :-
+	default_read_eoln_type(RDef),
+	get_option(Options, read_eoln_type, RDef, RType),
+	eoln_type_number(RType, RCode),
+	default_write_eoln_type(WDef),
+	get_option(Options, write_eoln_type, WDef, WType),
+	eoln_type_number(WType, WCode),
+	Code is RCode \/ WCode << 2.
+
+eoln_type_number(crlf, 0).
+eoln_type_number(cr, 1).
+eoln_type_number(lf, 2).
+eoln_type_number(universal, 3).
 
 
 /*
@@ -2788,8 +2848,8 @@ at_end_of_line :-
 export at_end_of_line/1.
 
 at_end_of_line(Stream_or_alias) :-
-	peek_code(Stream_or_alias,0'\n).
-
+	input_stream_or_alias_ok(Stream_or_alias,Stream),
+	sio_at_end_of_line(Stream).
 
 /*
  * skip_line
@@ -2812,16 +2872,8 @@ skip_line :-
 export skip_line/1.
 
 skip_line(Stream) :-
-	get_code(Stream,Char),
-	skip_line0(Char,Stream).
-
-skip_line0(0'\n,_) :-
-	!.
-skip_line0(-1,_) :-
-	!.
-skip_line0(_,Stream) :-
-	get_code(Stream,Char),
-	skip_line0(Char,Stream).
+	input_stream_or_alias_ok(Stream_or_alias,Stream),
+	sio_skip_line(Stream).
 
 /*
  * nl
@@ -2844,8 +2896,23 @@ nl :-
 export nl/1.
 
 nl(Stream) :-
-	put_code(Stream,0'\n),
+	nl0(Stream),
 	flush_output(Stream).
+
+nl0(Stream) 
+	:-
+	sio_nl(Stream),
+	!.
+nl0(Alias) 
+	:-
+	is_output_alias(Alias, Stream),
+	sio_nl(Stream),
+	!.
+nl0(Stream_or_alias) 
+	:-
+	output_stream_or_alias_ok(Stream_or_alias,Stream),
+	sio_errcode(Stream,FailCode),
+	put_failure(FailCode,Stream,Code,nl0(Stream_or_alias)).
 
 /*
  * set_stream_position(Stream_or_alias, Position)

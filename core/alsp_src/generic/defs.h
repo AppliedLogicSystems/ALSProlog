@@ -198,7 +198,7 @@
  *---------------------------------------------------------------------*/
 
 #ifndef PARAMS
-#if defined(__STDC__)
+#if defined(__STDC__) || defined(__cplusplus)
 #define CONST const
 #define PARAMS(arglist) arglist
 #undef OldStrs
@@ -466,4 +466,13 @@ max(x, y)
 #else  /* MaxFunc */
 #define max(a,b) ((a)<(b) ? (b) : (a))
 #endif /* MaxFunc */
+
+/* Define the ASCII values for carrage returns and line feeds.
+   We cannot use '\r' and '\n' because these values are compiler dependant. */
+#define CR	0x0d
+#define LF	0x0a
+#define CRSTR	"\x0d"
+#define LFSTR	"\x0a"
+#define CRLFSTR	"\x0d\x0a"
+
 #endif /* _DEFS_H_INCLUDED_ */
