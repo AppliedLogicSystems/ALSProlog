@@ -204,7 +204,7 @@ default_prolog_flag_value(windows_system, nowins).
 	%%  when run here (?)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%:- init_prolog_flags.
+:- init_prolog_flags.
 
 endmod.		%% blt_flts.pro: Prolog Flags Builtins File
 

@@ -70,7 +70,6 @@ start_shell(DefaultShellCall)
 	(arg(2,CLInfo,quiet) -> consultmessage(off) ; consultmessage(on)),
 	!,
 	setup_init_goal(CLInfo, ShellCall),
-	init_prolog_flags,
 	user:ShellCall.
 
 start_shell(_).
