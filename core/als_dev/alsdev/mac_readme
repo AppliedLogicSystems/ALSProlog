@@ -19,7 +19,7 @@ Make alspro_b in the mwbuild directory and move it to the alsdev folder.
 
 In alsdev, setup an alsdir with the folders "builtins" and "library".
 
-Copy the file tcltk.pro into the alsdev folder.
+Copy the file tcltk.pro into the alsdev folder. Remove consult of "tclintf".
 
 Run alspro_b and consult "mac_make.pro" to build all necessary obp files.
 
