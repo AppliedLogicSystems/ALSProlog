@@ -5,21 +5,23 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.6 1998/08/17 00:54:39 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.7 1998/08/17 20:29:45 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
-	prolog call alsdev load_project
+	send_prolog als_ide_mgr load_project
 }
 
+#	prolog call alsdev load_project
+
 proc load_this_project {} {
-	prolog call alsdev load_this_project
+	send_prolog als_ide_mgr load_this_project
 }
+
+#	prolog call alsdev load_this_project
 
 proc open_project {} {
 	send_prolog als_ide_mgr open_project
-
-#	prolog call alsdev open_project
 }
 
 proc select_project_file {} {
@@ -33,8 +35,6 @@ proc select_project_file {} {
 		return [list $File [file split $Dir ]]
 	} else { return "" }
 }
-
-#		return [list $File [file split $Dir] ]
 
 proc save_project {} {
 	prolog call alsdev save_project
