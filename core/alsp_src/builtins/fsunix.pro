@@ -336,9 +336,11 @@ filter_file(FileName, Path, FileType, [FileName | ListTail], ListTail)
 	join_path([Path, FileName], FullFile),
 	'$getFileStatus'(FullFile, StatusTerm),
 	arg(1, StatusTerm, ThisFileType),
-	fflt_ck(ThisFileType, FileType, PathList, FullFile),
+	fflt_ck(ThisFileType, FileType, Path, FullFile),
 	!.
-filter_file(FileName, PathList, FileType, List, List).
+filter_file(FileName, PathList, FileType, Path, FullFile)
+	:-
+	join_path([Path, FileName], FullFile).
 
 fflt_ck(FileType, FileType, SrcPathList, FullFile) :-!.
 fflt_ck(ThisFileType, FileType, SrcPathList, FullFile)
@@ -347,63 +349,39 @@ fflt_ck(ThisFileType, FileType, SrcPathList, FullFile)
 	!.
 
 	%% See if incoming file is a symbolic link; dereference and check type:
-fflt_ck(ThisFileType, GoalFileType, SrcPathList, FullFile)
+fflt_ck(ThisFileType, GoalFileType, SrcPath, FullFile)
 	:-
-	follow_link(FullFile, FinalFile, SrcPathList, FinalFileTypeCode),
+	follow_link(FullFile, FinalFile, SrcPath, FinalFileTypeCode),
 	(FinalFileTypeCode = GoalFileType, !; 
 		dmember(FinalFileTypeCode, GoalFileType)).
 
-follow_link(File, FinalFile, SrcPathList, FinalTypeCode)
+follow_link(File, FinalFile, SrcPath, FinalTypeCode)
 	:-
 	'$getFileStatus'(File, FileStatusTerm),
 	arg(1, FileStatusTerm, FileTypeCode),
 	fileTypeCode(FileTypeCode, FileType),
-	disp_follow_link(FileType, File, FileTypeCode, SrcPathList, FinalFile, FinalTypeCode).
+	disp_follow_link(FileType, File, FileTypeCode, SrcPath, FinalFile, FinalTypeCode).
 
-disp_follow_link(symbolic_link, File, _, SrcPathList, FinalFile, FinalTypeCode)
+disp_follow_link(symbolic_link, File, _, SrcPath, FinalFile, FinalTypeCode)
 	:-!,
 	get_cwd(CWD),
 	read_link(File, LinkTarget),
-%	pathPlusFile(Path,TFile,LinkTarget),
-	split_path(LinkTarget,LinkTgtElts),
-	dreverse(LinkTgtElts, [TFile | RevPathElts]),
-	dreverse(RevPathElts, PathElts),
-	join_path(PathElts, Path),
-
-/*
+	path_directory_tail(LinkTarget, Path, TFile), 
 	(Path \= '' -> 
-		subPath(PathList, Path),
-		(is_absolute_pathname(Path) ->
-			change_cwd(Path),
-			NextPathList = PathList 
-			;
-			append(SrcPathList,PathList,NextPathList),
-			subPath(NextPathList,NextPath),
-			change_cwd(NextPath)
-		)
-		; 
-		NextPathList = SrcPathList
-	),
-*/
-	(Path \= '' -> 
-%		subPath(PathList, Path),
 		(is_absolute_path(Path) ->
 			change_cwd(Path),
 			NextPathList = PathElts 
 			;
-			append(SrcPathList,PathElts,NextPathList),
-%			subPath(NextPathList,NextPath),
-			join_path(NextPathList, NextPath),
+			join_path([SrcPath,Path], NextPath),
 			change_cwd(NextPath)
 		)
 		; 
-		NextPathList = SrcPathList
+		NextPath = SrcPath
 	),
+	fin_disp_follow_link(TFile, FinalFile, CWD, NextPath, FinalTypeCode).
 
-	fin_disp_follow_link(TFile, FinalFile, CWD, NextPathList, FinalTypeCode).
 
-
-disp_follow_link(FinalType, File, FileTypeCode, SrcPathList, File, FileTypeCode).
+disp_follow_link(FinalType, File, FileTypeCode, SrcPath, File, FileTypeCode).
 
 fin_disp_follow_link(TFile, FinalFile, CWD, NextPathList, FinalTypeCode)
 	:-
