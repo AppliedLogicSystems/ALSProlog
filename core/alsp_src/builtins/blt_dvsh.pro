@@ -332,7 +332,7 @@ alsdev(Shared, ALS_IDE_Mgr)
 	 	buffering(line),type(text),
 		line_length(76), 
 %		maxdepth(8), depth_computation(nonflat)
-		maxdepth(4), depth_computation(flat)
+		maxdepth(4), depth_computation(nonflat)
 		]),
 	assign_alias(debugger_output, OutGuiDStream),
 
@@ -1606,7 +1606,8 @@ showGoalToUserWin(Port,Box,Depth, Module, '$dbg_apg'(ClsGrp,Start,End), debug, D
 	%% "call" here is really exit for the acutal goal:
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-
-	color_my_port(ClsGrp,Start,End,exit,call_tag, DBGMGR, SrcMgr).
+	color_my_port(ClsGrp,Start,End,exit,call_tag, DBGMGR, SrcMgr),
+	!.
 
 	%% The call to color_my_port could fail on the a return (=dbg_apge, here) to
 	%% a predicate defined in a file for which the window has not yet been set up for
