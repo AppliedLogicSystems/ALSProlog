@@ -396,8 +396,7 @@ proc init_prj_spec \
     ###################
     toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
-    #wm geometry $base 318x686+290+82
-    wm maxsize $base 1137 870
+    wm maxsize $base [expr - [winfo screenwidth .] - 80] [expr [winfo screenheight .] - 80]
     wm minsize $base 1 1
     wm overrideredirect $base 0
     wm resizable $base 1 0
@@ -621,6 +620,8 @@ proc create_ls_toggle { Win Which Title Add Del Up Down} {
     pack $Win.$Which.buttons.up \
         -anchor center -expand 0 -fill none -padx 2 -side right 
 
+	bind $Win.ctl_$Which.entry <Return> "add_file_entry_to_list $Win.ctl_$Which.entry $Win.$Which.listbox"
+
 	pack forget $Win.$Which
 }
 
@@ -757,6 +758,9 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
         -text button 
     label $Win.ctl_$Which.label \
         -text $Title
+	
+    entry $Win.ctl_$Which.entry 
+
     frame $Win.$Which \
         -borderwidth 1 -height 30 -relief raised -width 30 
     listbox $Win.$Which.listbox \
@@ -797,6 +801,9 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
         -anchor center -expand 0 -fill none -side left 
     pack $Win.ctl_$Which.label \
         -anchor w -expand 0 -fill none -side left 
+    pack $Win.ctl_$Which.entry \
+        -anchor w -expand 1 -fill x -side left 
+
     pack $Win.$Which \
         -anchor center -expand 0 -fill x -side top 
     grid columnconf $Win.$Which 0 -weight 1
