@@ -509,7 +509,26 @@ do_logout(SR,SW,State,SInfo, ID, Date, Time)
 	set_login_connection_info(logout_date, State, Date),
 	set_login_connection_info(logout_time, State, Time),
 	log_server_notify('%t %t %t %t\n', [ID,Date,Time,Cookie], 'Logout: ', SInfo),
-	accounting(logout, State, SInfo).
+	access_login_connection_info(user_area, State, ThisUserArea),
+	pathPlusFile(ThisUserArea, '*.bo', BOPattern),
+	get_cwd(CurrentDir),
+	change_cwd(ThisUserArea),
+	remove_all_files(BOPattern),
+	change_cwd(CurrentDir),
+	accounting(logout, State, SInfo),
+	!.
+
+	%% Move to builtins:
+remove_all_files(Pattern)
+	:-
+	directory(Pattern, regular, FileList),
+	remove_each_file(FileList).
+
+remove_each_file([]).
+remove_each_file([File | FileList])
+	:-
+	remove_file(File),
+	remove_each_file(FileList).
 
 /*!--------------------------------------------------------------------*
  |	record_batch_jobs/6
