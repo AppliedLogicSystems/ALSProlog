@@ -7,8 +7,8 @@
 #define SIMPLE_MICS 1
 #define HAVE_LIBELF	1
 #define USE_ELF_SECTION_FOR_IMAGE 1
-
-#define MISSING_EXTERN_GETHOSTNAME	1
+#define MISSING_EXTERN_GETHOSTNAME
+#define MISSING_EXTERN_GETIMEOFDAY
 
 /* define __EXTENSIONS__ to get crypt() prototype */
 #define __EXTENSIONS__

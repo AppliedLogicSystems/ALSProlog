@@ -310,67 +310,6 @@ int pbi_crypt(void)
 #endif
 }
 
-#ifndef PURE_ANSI
-static int copy_file(const char *from_file, const char *to_file)
-{
-#if defined(MSWin32)
-
-    if (CopyFile(from_file, to_file, FALSE)) return 1;
-    else return 0;
-
-#elif defined(UNIX)
-
-    unsigned char *buf;
-    int f, c, r;
-    struct stat s; 
-    
-    f = open(from_file, O_RDONLY);
-    if (f == -1) return 0;
-    
-    r = fstat(f, &s);
-    if (r != 0) {
-    	close(f);
-        return 0;
-    }
-    
-    buf = malloc((size_t)s.st_size);
-    if (buf == NULL) {
-    	close(f);
-        return 0;
-    }
-    
-    r = read(f, buf, (size_t)s.st_size);
-    if (r != s.st_size) {
-    	free(buf);
-    	close(f);
-        return 0;
-    }
-
-    close(f);
-    
-    c = open(to_file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
-    if (c == -1) {
-    	free(buf);
-    	return 0;
-    }
-    
-    r = write(c, buf, (size_t)s.st_size);
-    if (r != s.st_size) {
-    	free(buf);
-        close(f);
-        return 0;
-    }
-    
-    close(c);
-    
-    free(buf);
-    
-    return 1;
-#else
-#error
-#endif
-}
-
 
 int pbi_copy_file(void)
 {
@@ -384,7 +323,7 @@ int pbi_copy_file(void)
     if (!getstring((UCHAR **)&from_file, v1, t1)
         || !getstring((UCHAR **)&to_file, v2, t2))
 	FAIL;
-    if (copy_file(from_file, to_file)) SUCCEED;
+    if (os_copy_file(from_file, to_file)) SUCCEED;
 	else FAIL;
 }
 
@@ -399,8 +338,6 @@ int pbi_get_current_image(void)
 	
 	return PI_unify(v1, t1, s, st);
 }
-
-#endif
 
 
 

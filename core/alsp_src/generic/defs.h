@@ -427,6 +427,12 @@ extern	long *	ss_fmalloc	PARAMS(( size_t ));
 void make_ieee_nan PARAMS( (PWord *, int *) );
 void make_ieee_inf PARAMS( (PWord *, int *) );
 
+/* os routines. */
+int os_copy_file(const char *from_file, const char *to_file);
+void os_init_time(void);
+double os_cputime(void);
+double os_realtime(void);
+
 /* ----------   main.c ----------   */
 #ifdef MSWin32
 extern	char	*MinorOSStr;

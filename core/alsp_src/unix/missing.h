@@ -55,7 +55,7 @@ extern	int	atoi		PARAMS(( const char * ));
 extern	int	brk		PARAMS(( void * ));
 #endif
 
-#if HAVE_BCOPY && MISSING_EXTERN_BCOPY
+#ifdef MISSING_EXTERN_BCOPY
 extern	void	bcopy		PARAMS(( const void *, void *, int ));
 #endif
 
@@ -100,15 +100,15 @@ extern	pid_t	fork		PARAMS(( void ));
 extern	int	fprintf		PARAMS(( FILE *, const char *, ... ));
 #endif
 
-#if MISSING_EXTERN_FPUTC
+#ifdef MISSING_EXTERN_FPUTC
 extern	int	fputc		PARAMS(( int, FILE * ));
 #endif
 
-#if MISSING_EXTERN_FGETC
+#ifdef MISSING_EXTERN_FGETC
 extern	int	fgetc		PARAMS(( FILE * ));
 #endif
 
-#if MISSING_EXTERN_FREAD
+#ifdef MISSING_EXTERN_FREAD
 extern	int	fread		PARAMS(( void *, size_t, int, FILE * ));
 #endif
 
@@ -116,11 +116,11 @@ extern	int	fread		PARAMS(( void *, size_t, int, FILE * ));
 extern	void	free		PARAMS(( void * ));
 #endif
 
-#if MISSING_EXTERN_FSEEK
+#ifdef MISSING_EXTERN_FSEEK
 extern	int	fseek		PARAMS(( FILE *, long, int ));
 #endif
 
-#if MISSING_EXTERN_FWRITE
+#ifdef MISSING_EXTERN_FWRITE
 extern	int	fwrite		PARAMS(( const void *, size_t, size_t, FILE * ));
 #endif
 
@@ -132,7 +132,7 @@ extern	char *	getcwd		PARAMS(( char *, size_t ));
 extern	char *	getenv		PARAMS(( char * ));
 #endif
 
-#if HAVE_GETHOSTNAME && MISSING_EXTERN_GETHOSTNAME
+#ifdef MISSING_EXTERN_GETHOSTNAME
 extern	int	gethostname 	PARAMS(( char *, int ));
 #endif
 
@@ -144,7 +144,7 @@ extern	int	getpagesize	PARAMS(( void ));
 extern	pid_t	getpid		PARAMS(( void ));
 #endif
 
-#if HAVE_GETWD && MISSING_EXTERN_GETWD
+#ifdef MISSING_EXTERN_GETWD
 extern	char *	getwd		PARAMS(( char * ));
 #endif
 
@@ -184,7 +184,7 @@ extern	void	perror		PARAMS(( const char * ));
 extern	int	pipe		PARAMS(( int [2] ));
 #endif
 
-#if MISSING_EXTERN_PRINTF
+#ifdef MISSING_EXTERN_PRINTF
 extern	int	printf		PARAMS(( const char *, ... ));
 #endif
 
@@ -232,11 +232,11 @@ extern	int	rmdir		PARAMS(( const char * ));
 extern	void *	sbrk		PARAMS(( int ));
 #endif
 
-#if HAVE_SELECT && MISSING_EXTERN_SELECT
+#ifdef MISSING_EXTERN_SELECT
 extern	int	select		PARAMS(( int, fd_set *, fd_set *, fd_set *, struct timeval * ));
 #endif
 
-#if defined(HAVE_SETITIMER) && defined(MISSING_EXTERN_SETITIMER)
+#ifdef MISSING_EXTERN_SETITIMER
 extern	int	setitimer	PARAMS(( int, struct itimerval *, struct itimerval * ));
 #endif
 
@@ -248,19 +248,19 @@ extern	int	setpgrp		PARAMS(( void ));
 #endif
 #endif
 
-#if MISSING_EXTERN_SETVBUF
-#if SETVBUF_REVERSED
+#ifdef MISSING_EXTERN_SETVBUF
+#ifdef SETVBUF_REVERSED
 extern	int	setvbuf 	PARAMS(( FILE *, int, char *, size_t ));
 #else
 extern	int	setvbuf		PARAMS(( FILE *, char *, int, size_t ));
 #endif
 #endif
 
-#if defined(HAVE_SIGVEC) && defined(MISSING_EXTERN_SIGVEC)
+#ifdef MISSING_EXTERN_SIGVEC
 extern	int	sigvec		PARAMS(( int, struct sigvec *, struct sigvec * ));
 #endif
 
-#if defined(HAVE_SIGSTACK) && defined(MISSING_EXTERN_SIGSTACK)
+#ifdef MISSING_EXTERN_SIGSTACK
 extern	int	sigstack	PARAMS(( struct sigstack *, struct sigstack * ));
 #endif
 
@@ -276,7 +276,7 @@ extern	int	lstat		PARAMS(( const char *, struct stat * ));
 extern	int	symlink		PARAMS(( const char *, const char * ));
 #endif
 
-#if MISSING_EXTERN_SYSTEM
+#ifdef MISSING_EXTERN_SYSTEM
 extern	int	system		PARAMS(( const char * ));
 #endif
 
@@ -284,7 +284,7 @@ extern	int	system		PARAMS(( const char * ));
 extern	long	time		PARAMS(( long * ));
 #endif
 
-#if HAVE_TIMES && MISSING_EXTERN_TIMES
+#ifdef MISSING_EXTERN_TIMES
 extern	int	times		PARAMS(( struct tms * ));
 #endif
 
@@ -292,11 +292,11 @@ extern	int	times		PARAMS(( struct tms * ));
 extern	int	unlink		PARAMS(( const char * ));
 #endif
 
-#if MISSING_EXTERN_VFPRINTF
+#ifdef MISSING_EXTERN_VFPRINTF
 extern	int	vfprintf	PARAMS(( FILE *, const char *, va_list ));
 #endif
 
-#if MISSING_EXTERN_VSPRINTF
+#ifdef MISSING_EXTERN_VSPRINTF
 extern	int	vsprintf	PARAMS(( char *, const char *, va_list ));
 #endif
 
@@ -319,5 +319,14 @@ extern unsigned long int strtoul(const char *, char **, int base);
 #ifdef MISSING_EXTERN_REALPATH
 extern char *realpath(const char *path, char resolved_path[]);
 #endif
+
+#ifdef MISSING_EXTERN_GETRUSAGE
+extern int getrusage(int, struct rusage *);
+#endif
+
+#ifdef MISSING_EXTERN_GETIMEOFDAY
+extern int gettimeofday(struct timeval *tp, void *tzp);
+#endif
+
 
 #endif /* _MISSING_H_INCLUDED_ */

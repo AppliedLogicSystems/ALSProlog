@@ -1,5 +1,3 @@
-
-
 /*===================================================================*
  |			arith.c   
  |		Copyright (c) 1985 by Kevin A. Buettner
@@ -61,8 +59,6 @@
 
 #include "random.h"
 
-extern	double	als_cputime	PARAMS(( void ));
-extern	double	als_realtime	PARAMS(( void ));
 extern	double	als_random	PARAMS(( void ));
 #ifndef HAVE_AINT
 extern	double	aint		PARAMS(( double ));
@@ -77,9 +73,6 @@ extern	double	exp10		PARAMS(( double ));
 #endif
 static	double	do_is		PARAMS(( PWord, int, int * ));
 
-long  gensym_start_time;	/* starting time for gensym facility */
-static double start_time;
-static int clock_ticks_per_second;	/* for times() */
 static jmp_buf is_error;
 
 enum {
@@ -116,66 +109,6 @@ extern	void	srandom		PARAMS(( int ));
 #define RANDRANGE 0x7fffffff
 #endif
 
-
-#ifdef DOS
-#define currentTime (double)((double)clock() / CLOCKS_PER_SEC)
-#else
-#ifdef MacOS
-/*
- * The MPW C 3.1 compiler has some problems emitting proper code for
- * certain operations involving floating point arithmetic.  The Mac version
- * should be very similar to the DOS version in that the "clock" function
- * (TickCount) returns the number of machine cycles ("ticks") since the
- * system was last booted.  A tick is approximately 1/60 second.  However,
- * defining currentTime in a similar way to the DOS version caused the
- * C-compiler to generate faulty code.  To get around this, I had to define
- * currentTime to be a function , defined below:
- */
-#define currentTime (double)(((double)TickCount()) / ((double)CLOCKS_PER_SEC))
-#if 0
-#define currentTime current_time()
-static double
-current_time(void)
-{
-    double double_ticks;
-    long  long_ticks;
-
-    long_ticks = TickCount();
-    double_ticks = (double) long_ticks;
-    double_ticks = double_ticks / 60.0;
-    return (double) (double_ticks - start_time);
-}
-#endif
-#else
-#define currentTime time(0L)
-#endif /* MacOS */
-#endif /* DOS */
-
-void
-init_time()
-{
-    start_time = currentTime;
-#ifdef PURE_ANSI
-    srand(start_time);
-#else
-    srandom((long) start_time);
-#endif /* PURE_ANSI */
-    gensym_start_time = (long) time(0L);
-    
-#ifdef PURE_ANSI
-    clock_ticks_per_second = CLOCKS_PER_SEC;
-#else
-#ifdef	_SC_CLK_TCK
-    clock_ticks_per_second = sysconf(_SC_CLK_TCK);
-#else	/* HAVE_UNISTD_H */
-#if defined(MacOS) || defined(MSWin32)
-    clock_ticks_per_second = CLOCKS_PER_SEC;
-#else	/* MacOS */
-    clock_ticks_per_second = HZ;
-#endif	/* MacOS */
-#endif	/* HAVE_UNISTD_H */
-#endif  /* PURE_ANSI */
-}
 
 
 
@@ -215,45 +148,6 @@ pbi_time()
 	FAIL;
 }
 #endif /* HAVE_TIME */
-
-
-#ifdef HAVE_TIMES
-double
-als_cputime()
-{
-#ifdef VMS
-    tbuffer_t t;
-
-    times(&t);
-    return (double) (t.proc_user_time) / 100;
-#else  /* VMS */
-    struct tms t;
-
-    times(&t);
-    return (double) (t.tms_utime + t.tms_stime) 
-			/ (double) clock_ticks_per_second;
-#endif /* VMS */
-}
-#else /* HAVE_TIMES */
-double
-als_cputime()
-{
-    return (double) (currentTime - start_time);
-}
-#endif /* HAVE_TIMES */
-
-
-double
-als_realtime()
-{
-    return (double) (currentTime - start_time);
-}
-
-double
-als_random(void)
-{
-    return minimal_standard_random();
-}
 
 int
 pbi_srandom()
@@ -399,13 +293,11 @@ do_is(v, t, ty)
 		case TK_HEAPUSED:
 		    return (double) (((long) wm_H) - ((long) wm_heapbase));
 		case TK_CPUTIME:
-#ifdef HAVE_TIMES
-		    return als_cputime();
-#endif /* HAVE_TIMES */
+		    return os_cputime();
 		case TK_REALTIME:
-		    return (double) (currentTime - start_time);
+		    return os_realtime();
 		case TK_RANDOM:
-		    return als_random();
+		    return minimal_standard_random();
 		case TK_PI:
 		    return D_PI;
 		case TK_E:
