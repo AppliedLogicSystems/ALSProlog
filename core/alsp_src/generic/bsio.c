@@ -2781,7 +2781,10 @@ stream_is_ready(buf, usec_to_wait)
 	    if (selectsocket(SIO_FD(buf)+1, &rfds, &wfds, &efds, &wait_time) > 0)
 		return 1;
 	    else
-		return 0;
+		{
+			printf("sel=%d\n",errno);
+		   return 0;
+		}
 #else
 	    return 1;
 #endif
