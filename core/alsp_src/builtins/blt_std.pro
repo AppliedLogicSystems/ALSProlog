@@ -55,42 +55,77 @@ dblisting(X) :-
 	sio:get_current_output_stream(Stream),
 	listing(X, Stream, show_pp).
 
+
+export dblisting/0.
+dblisting :-
+	sio:get_current_output_stream(Stream),
+	dblisting_to(Stream).
+
+dblisting_to(Stream) :-
+	clauses_for_listing(_:_/_,DBref, Stream),
+	'$source'(DBref, Structure, show_pp),
+	write_out(Stream, Structure),
+	fail.
+dblisting_to(_).
+
+export db_dump/1.
+db_dump(Mod)
+	:-
+	sio:get_current_output_stream(Stream),
+	procedures(Mod,P,A,_,0),
+	clauses_for_listing(Mod:P/A,DBRef, Stream, show_pp),
+	'$source'(DBRef, Structure, show_pp),
+	write_out(Stream, Structure),
+	fail.
+db_dump(Mod).
+
 %%%%------ listing support predicates ----------
 
 clauses_for_listing(X, DBref)
 	:-
 	sio:get_current_output_stream(Stream),
-	clauses_for_listing(X, DBref, Stream).
+	clauses_for_listing(X, DBref, Stream, hide_pp).
 
-clauses_for_listing(M:P/A, DBref, Stream) :-
+clauses_for_listing(MPA, DBref, Stream) :-
+	clauses_for_listing(MPA, DBref, Stream, hide_pp).
+
+clauses_for_listing(M:P/A, DBref, Stream, Mode) :-
 	var(M),
 	!,
 	procedures(M,P,A,First),
 	showmod(M),
+	fin_clauses_for_listing(Mode,M,P,A,First,DBref,Stream).
+
+clauses_for_listing(M:P/A, DBref, Stream, Mode) :-
+	nonvar(M),
+	!,
+	procedures(M,P,A,First),
+	fin_clauses_for_listing(Mode,M,P,A,First,DBref,Stream).
+
+clauses_for_listing(P/A, DBref, Stream, Mode) :-
+	!,
+	clauses_for_listing(_:P/A, DBref, Stream, Mode).
+
+clauses_for_listing(P, DBref, Stream, Mode) :-
+	!,
+	clauses_for_listing(_:P/_, DBref, Stream, Mode).
+ 
+fin_clauses_for_listing(hide_pp,M,P,A,First,DBref,Stream)
+	:-
 	nonsemi(P),
 	printf(Stream, '\n%% %t',[M:P/A]), 
 	check_exported(M,P,A,Stream),
 	nl(Stream),
 	clauses(First,DBref).
 
-clauses_for_listing(M:P/A, DBref, Stream) :-
-	nonvar(M),
-	!,
-	procedures(M,P,A,First),
-	nonsemi(P),
+fin_clauses_for_listing(show_pp,M,P,A,First,DBref,Stream)
+	:-
 	printf(Stream, '\n%% %t',[M:P/A]), 
-	check_exported(M,P,A, Stream),
+	check_exported(M,P,A,Stream),
 	nl(Stream),
 	clauses(First,DBref).
 
-clauses_for_listing(P/A, DBref, Stream) :-
-	!,
-	clauses_for_listing(_:P/A, DBref, Stream).
 
-clauses_for_listing(P, DBref, Stream) :-
-	!,
-	clauses_for_listing(_:P/_, DBref, Stream).
- 
 
 check_exported(M,P,A, Stream) :-
 	'$exported_proc'(M,P,A),
