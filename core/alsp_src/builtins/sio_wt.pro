@@ -1502,8 +1502,9 @@ delete_anon_vars([N|N1],[S|S1],[N|N2],[S|S2])
 	:-
 	delete_anon_vars(N1,S1,N2,S2).
 
-cont_write_substs(Names,Substs,Stream) 
+cont_write_substs(Names,Substs,StreamOrAlias) 
 	:-
+	stream_or_alias_ok(StreamOrAlias,Stream),
 	stream_wt_maxdepth(Stream, MaxDepth),
 	subst_orig_toplevel_names(Names,Substs),
 	subst_gen_letter_names(Substs,MaxDepth,Substs0),

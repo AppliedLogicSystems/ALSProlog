@@ -214,7 +214,7 @@ consult_file(File, COpts)
 	%% options or consult options:
 file_clause_groups(true).
 global_verbosity(noisy).
-global_obp_location(giac).
+%global_obp_location(giac).
 
 	%% Standard subdirs of alsdir:
 system_subdir(shared).
@@ -229,7 +229,8 @@ consult_global_options(Options, COpts)
 		;
 		true
 	),
-	(clause(global_obp_location(GlobalObpLocn),_) ->
+%	(clause(global_obp_location(GlobalObpLocn),_) ->
+	(current_prolog_flag(obp_location, GlobalObpLocn) ->
 		set_cslt_opts(obp_locn, COpts, GlobalObpLocn)
 		;
 		true

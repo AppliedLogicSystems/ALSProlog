@@ -234,8 +234,9 @@ prolog_flag_value_check(obp_location, gic).
 prolog_flag_value_check(obp_location, gis).
 prolog_flag_value_check(obp_location, giac).
 prolog_flag_value_check(obp_location, gias).
+prolog_flag_value_check(obp_location, no_obp).
 
-default_prolog_flag_value(obp_location, gias).
+default_prolog_flag_value(obp_location, giac).
 
 changeable(obp_location, yes).
 
