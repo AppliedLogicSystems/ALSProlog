@@ -21,7 +21,7 @@ proc vTclWindow.alsdev_settings {base} {
     wm resizable $base 0 0
     wm deiconify $base
     wm title $base "Fonts & Colors"
-	wm protocol .alsdev_settings WM_DELETE_WINDOW  {grab release .alsdev_settings ; wm withdraw .alsdev_settings }
+	wm protocol .alsdev_settings WM_DELETE_WINDOW  {wm withdraw .alsdev_settings }
 
 		# Text Font Description:
     label $base.font_label -text {Fonts} 
