@@ -165,10 +165,9 @@ files(Directory, Pattern, List)
 	name(Regex, [0'^ | RegexChars]),
 	getDirEntries(Directory, Regex, FirstResult),
 	!,
-%	rootPlusPath(Disk, PathList, Directory),
-	split_path(Directory, [Disk | PathList]),
 	fixFileType(regular, InternalFileType),
-	filterForFileType(FirstResult, Disk, [Disk | PathList], InternalFileType, List).
+	path_elements(Directory, PathElts),
+	filterForFileType(FirstResult, PathElts, InternalFileType, List).
 
 /*!----------------------------------------------------------------
  |	subdirs/1
@@ -287,12 +286,7 @@ directory([], FileType, []) :-!.
 directory(Pattern, FileType, List) 
 	:-
 	atom(Pattern), 
-%	rootPathFile(Disk, PathList, FilePattern, Pattern),
-	split_path(Pattern, [Disk | PatternElts]),
-	dreverse(PatternElts, [FilePattern | RevPathElts]),
-	dreverse(RevPathElts, PathElts),
-%	subPath(PathList, InitPath),
-	join_path([Disk | PathElts], InitPath),
+	path_directory_tail(Pattern, InitPath, FilePattern),
 	(InitPath = '', !; must_exists_file(InitPath)),
 	!,
 	name(FilePattern, PatternChars),
@@ -301,12 +295,11 @@ directory(Pattern, FileType, List)
 	name(Regex, [0'^ | RegexChars]),
 
 	(InitPath = '' -> Path = '.' ; Path = InitPath),
-
 	getDirEntries(Path, Regex, FirstResult),
 	!,
 	fixFileType(FileType, InternalFileType),
-%	filterForFileType(FirstResult, Disk, PathList, InternalFileType, List).
-	filterForFileType(FirstResult, Disk, [Disk | PathElts], InternalFileType, List).
+	path_elements(Path, PathElts),
+	filterForFileType(FirstResult, PathElts, InternalFileType, List).
 
 	%% If no match was found for the file pattern, return no elements:
 directory(_,_,[]).
@@ -327,29 +320,28 @@ fixFileType(FileType, InternalFileType)
 	:-
 	fileTypeCode(InternalFileType, FileType).
 
-filterForFileType([], _, _, _, []).
-filterForFileType([FileName | Files], Disk, PathList, FileType, List)
+filterForFileType([], _, _, []).
+filterForFileType([FileName | Files], PathList, FileType, List)
 	:-
-	filter_file(FileName, Disk, PathList, FileType, List, ListTail),
+	filter_file(FileName, PathList, FileType, List, ListTail),
 	!,
-	filterForFileType(Files, Disk, PathList, FileType, ListTail).
+	filterForFileType(Files, PathList, FileType, ListTail).
 
 	%% Need this error case since '$getFileStatus'/2 can fail when given
 	%% a symbolic link to a non-existent file:
-filterForFileType([FileName | Files], Disk, PathList, FileType, List)
+filterForFileType([FileName | Files], PathList, FileType, List)
 	:-
-	filterForFileType(Files, Disk, PathList, FileType, List).
+	filterForFileType(Files, PathList, FileType, List).
 
-filter_file(FileName, Disk, PathList, FileType, [FileName | ListTail], ListTail)
+filter_file(FileName, PathList, FileType, [FileName | ListTail], ListTail)
 	:-
-%	rootPathFile(Disk, PathList, FileName, FullFile),
 	dappend(PathList, [FileName], L0),
 	join_path(L0, FullFile),
 	'$getFileStatus'(FullFile, StatusTerm),
 	arg(1, StatusTerm, ThisFileType),
 	fflt_ck(ThisFileType, FileType, PathList, FullFile),
 	!.
-filter_file(FileName, Disk, PathList, FileType, List, List).
+filter_file(FileName, PathList, FileType, List, List).
 
 fflt_ck(FileType, FileType, SrcPathList, FullFile) :-!.
 fflt_ck(ThisFileType, FileType, SrcPathList, FullFile)
