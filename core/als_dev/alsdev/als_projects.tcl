@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.23 1999/03/09 01:25:37 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.24 1999/03/09 12:08:18 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -94,6 +94,7 @@ proc add_file_entry_to_list { Entry Listbox } {
 				$Listbox insert end $BaseNewFile
 			}
 	}
+    $Entry delete 0 end
 }
 
 
