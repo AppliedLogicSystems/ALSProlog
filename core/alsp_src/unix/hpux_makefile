@@ -1,4 +1,4 @@
-CFLAGS += -fpic
-CPPFLAGS += -DUNIX_HPUX
+CFLAGS += -fPIC
+CPPFLAGS += -DUNIX_HPUX -I /usr/include/X11R5
 OS_LIBS = -lm -ldld -Xlinker +b -Xlinker .
 OS_SL_EXT = sl
