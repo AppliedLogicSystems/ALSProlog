@@ -174,7 +174,7 @@ extern ALSPI_API(void)	PI_set_console_functions(console_func readf,
 extern	long	yield_interval;
 extern  long	yield_counter;
 extern	void	PI_yield_time	( void );
-extern	ALSPI_API(void)	PI_set_yield_proc(void (*p)(void);
+extern	ALSPI_API(void)	PI_set_yield_proc(void (*p)(void));
 #endif
 
 #ifdef macintosh

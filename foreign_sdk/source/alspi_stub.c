@@ -268,11 +268,12 @@ EXPORT ALSPI_API(const char *) find_callback(void *func, void *object)
 
 }
 
-
+#ifdef WIN32
 BOOL WINAPI DllMain ( HINSTANCE hInst, DWORD wDataSeg, LPVOID lpvReserved );
 BOOL WINAPI DllMain( HINSTANCE hInst, DWORD wDataSeg, LPVOID lpReserved )
 {
 }
+#endif
 
 #ifdef macintosh
 #pragma export off
