@@ -38,7 +38,7 @@ static int dev_zero_fd = -1; /* Cached file descriptor for /dev/zero. */
 #else
 
 #define MMAP(start, length, flags) \
-     (mmap((start), (length), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|(flags), -1, 0))
+     (mmap((start), (length), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|(flags), -1, 0))
 
 #endif
 
