@@ -450,6 +450,18 @@ static char unixInitScript[] =
 tclInit";
 #endif
 
+static int ALSProlog_Package_Init(Tcl_Interp *interp, AP_World *w)
+{
+  if (!Tcl_PkgRequire(interp, "Tcl", "8.0", 0)
+      || !Tcl_CreateObjCommand(interp, "prolog", Tcl_ALS_Prolog_ObjCmd, w, NULL)
+      || !Tcl_CreateObjCommand(interp, "dooneevent", Tcl_DoOneEventCmd, w, NULL))
+    {
+      return TCL_ERROR;
+    }
+  
+  return Tcl_PkgProvide(interp, "ALSProlog", VERSION_STRING);
+}
+
 static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *interp_name)
 {
 	Tcl_Interp *interp;
@@ -515,12 +527,8 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 	
 	Tcl_SetHashValue(entry, interp);
 
-	if (!Tcl_CreateObjCommand(interp, "prolog", Tcl_ALS_Prolog_ObjCmd, w, NULL)) {
-		AP_SetError(w, AP_NewSymbolFromStr(w, "tcl_create_command_error"));
-		goto error_delete;
-	}
 
-	if (!Tcl_CreateObjCommand(interp, "dooneevent", Tcl_DoOneEventCmd, w, NULL)) {
+	if (!ALSProlog_Package_Init(interp, w)) {
 		AP_SetError(w, AP_NewSymbolFromStr(w, "tcl_create_command_error"));
 		goto error_delete;
 	}
@@ -810,4 +818,14 @@ void pi_init(void)
 	tcltk_module = AP_NewSymbolFromStr(NULL, "tcltk");
 	
 	PI_INIT;
+}
+
+int Alsprolog_Init(Tcl_Interp *interp);
+int Alsprolog_Init(Tcl_Interp *interp)
+{
+  printf("about to pi_prolog_init\n");
+  PI_prolog_init(0, NULL);
+  printf("about to pi_init\n");
+  //pi_init();
+  return ALSProlog_Package_Init(interp, NULL);
 }
