@@ -13,6 +13,7 @@
 #define SUNOS_AOUT 1
 #define MISSING_EXTERN_CRYPT
 #define MISSING_EXTERN_STRTOUL
+#define MISSING_STRTOUL
 
 #define MinorOSStr	"sunos4.1.3"
 #define DIRENT	1
