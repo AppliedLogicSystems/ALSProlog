@@ -57,7 +57,7 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     setup.heap_size = 0;
     setup.stack_size = 0;
     setup.icbuf_size = 0;
-    setup.alsdir = NULL;
+    setup.alsdir = getenv("DEV_ALSDIR");
     setup.saved_state = NULL;
     setup.load_executable_state = 1;
     setup.argc = argc;
@@ -244,13 +244,6 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     	return EXIT_ERROR;
 	}
 }
-
-#if 1
-int main(int argc, char *argv[])
-{
-    return PI_main(argc, argv, NULL);
-}
-#endif
 
 #ifdef MacOS
 int shlib_found;
