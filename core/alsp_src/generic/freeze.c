@@ -62,6 +62,7 @@ if (debug_system[FRZDELAY]) {
 				(int)wm_H,TK_DELAY);
 }
 #endif
+
     w_get_An((PWord *)&dv, &dvt, 1);
     w_get_An(&m, &mt, 2);
     w_get_An(&g, &gt, 3);
@@ -374,6 +375,10 @@ update_chpt_slots(hval)
 	 |
 	 |  '$combine_dvars'/2 is defined in builtins/blt_frez.pro
 	 |  Note that f should be the senior (older) of the two vars.
+	 |
+	 | Note 2: We shouldn't have to do any gc checking here because
+	 |	we only enter this via a call from Prolog, so the
+	 |	gc check will have been done just as we enter....
 	 *--------------------------------------------------------------*/
 void
 combin_dels(r,f)

@@ -853,7 +853,7 @@ static plugin_error os_load_plugin(const char *lib_name,
     int err = 0;
     plugin_error result = {no_error, 0, NULL};
     
-    object = shl_load(lib_name, BIND_IMMEDIATE, 0);
+    object = shl_load(lib_name, BIND_IMMEDIATE | BIND_VERBOSE, 0);
     if (object == NULL) err = errno;
 
     if (err == 0) {

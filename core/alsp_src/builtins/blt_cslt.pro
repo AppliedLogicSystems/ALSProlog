@@ -344,11 +344,6 @@ revise_cslt_msg_code(end_consult, Ext, FCOpts, end_shared_load)
 	!.
 revise_cslt_msg_code(MsgCode, Ext, _, MsgCode).
 
-/*
-shared_file_ext(so).
-shared_file_ext(sl).
-shared_file_ext(dll).
-*/
 shared_file_ext(psl).
 
 shared_lib_exts(Exts)

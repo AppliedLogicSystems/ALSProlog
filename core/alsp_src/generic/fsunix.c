@@ -488,7 +488,7 @@ make_symlink(void)
     if (symlink(pathName1, pathName2))
     	PI_SUCCEED;
     else
-	PI_FAIL;
+		PI_FAIL;
 }
 #endif /* HAVE_SYMLINK */
 
