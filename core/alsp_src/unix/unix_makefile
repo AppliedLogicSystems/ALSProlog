@@ -22,14 +22,26 @@ CPPFLAGS = -DUNIX -DCONFIGLESS $(BUILD_FLAGS) \
 	-I $(SOURCE_DIR)/smath \
 	-I $(SOURCE_DIR)/$(PROC)
 
-# add -W sometime
-CFLAGS = -O -fpic -MMD -Wall -Wstrict-prototypes -Wmissing-prototypes -Wwrite-strings -Werror -fwritable-strings
+# -fwritable-strings is a temporary work-around until I have a static
+# initial symbol table.
+
+# Unused warning options and why:
+
+#-Wshadow - We use shadow variables - should be fixed someday.
+#-Wcast-qual - We force some cast qualifiers - should be fixed someday.
+#-Wcast-align - This reports many, many warnings. Is this a real problem?
+#-Wconversion - We always have prototypes, so this is not a concern.
+#-Waggregate-return - We use aggregate types.
+#-Wredundant-decls - Most redundant declarations are in system header files,
+#		     but there is some in out code, too. Fix someday.
+
+CFLAGS = -O -fpic -MMD -Wall -Wstrict-prototypes -Wmissing-prototypes -Wwrite-strings -Wnested-externs -Wpointer-arith -Werror -fwritable-strings
 
 VPATH = $(SOURCE_DIR)/unix:$(SOURCE_DIR)/generic:$(SOURCE_DIR)/port:$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins
 
-SHELL_SOURCE = 
+MAIN_SOURCE = topmain.c 
 
-SHELL_OBJECTS = $(SHELL_SOURCE:.c=.o)
+MAIN_OBJECTS = $(SHELL_SOURCE:.c=.o)
 
 GENERIC_SOURCE = alloc.c arith.c bcinter.c bdb.c \
 	bdbg.c bgv.c bio.c bmeta.c \
@@ -44,12 +56,12 @@ GENERIC_SOURCE = alloc.c arith.c bcinter.c bdb.c \
 	module.c parser.c pckgcoff.c pckgload.c \
 	pckgmake.c rinfo.c sig.c symtab.c \
 	varproc.c vprintf.c wdisp.c wintcode.c \
-	winter.c pi_init.c security.c nopckg.c \
+	winter.c security.c nopckg.c \
 	ieeemath.c pimain.c
 
 UNIX_SOURCE = unixio.c
 
-LIB_SOURCE = $(GENERIC_SOURCE) $(UNIX_SOURCE) $(PROC_SOURCE)
+LIB_SOURCE = $(GENERIC_SOURCE) $(PROC_SOURCE) $(UNIX_SOURCE)
 
 LIB_OBJECTS = $(LIB_SOURCE:.c=.o)
 
@@ -63,10 +75,10 @@ BUILTINS = blt_frez.pro  blt_std.pro   filepath.pro   ra_basis.pro \
    blt_evt.pro   blt_shl.pro   dcgs.pro      math88k.pro \
    blt_flgs.pro   blt_shlr.pro   debugger.pro  module.pro
 
-all : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro
+all : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro testrun
 
-alspro_b : alsdir $(SHELL_OBJECTS) $(LIB_OBJECTS)
-	$(CC) -o alspro_b $(SHELL_OBJECTS) $(LIB_OBJECTS) $(LIBS)
+alspro_b : alsdir $(MAIN_OBJECTS) $(LIB_OBJECTS)
+	$(CC) -o alspro_b $(MAIN_OBJECTS) $(LIB_OBJECTS) $(LIBS)
 
 alspro :  alsdir alspro_b $(BUILTINS)
 	./alspro_b -q -b -obp \
@@ -94,8 +106,8 @@ alsdir/library : $(SOURCE_DIR)/library
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.pro .
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
 
-testrun : 
-	$(TEST_DIR)/tsuite/test_unix_command_line ./alspro
+testrun : alspro
+	sh $(TEST_DIR)/tsuite/test_command_line.sh ./alspro
 	./alspro -giac -b $(TEST_DIR)/autotest $(TEST_DIR)/atest_db -g run_tests -p -srcdir $(SOURCE_DIR)
 	
 
