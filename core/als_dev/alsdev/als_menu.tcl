@@ -108,10 +108,12 @@ proc add_prolog_menu {menubar type window} {
 
     	$menubar.prolog add separator
 		$menubar.prolog add command \
-			-label "Dynamic Flags" \
-			-command show_dynamic_flags
-		menu $menubar.prolog.static -cursor {} -title "Static Flags"
-		$menubar.prolog add cascade -label "Static Flags" -menu $menubar.prolog.static 
+			-label "Dynamic Flags" -command show_dynamic_flags
+		$menubar.prolog add command \
+			-label "Static Flags" -command show_static_flags
+
+#		menu $menubar.prolog.static -cursor {} -title "Static Flags"
+#		$menubar.prolog add cascade -label "Static Flags" -menu $menubar.prolog.static 
 
 	} elseif {"$type"=="debugwin"} then {
     	$menubar.prolog add separator

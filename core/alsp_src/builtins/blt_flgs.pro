@@ -307,13 +307,6 @@ changeable(iters_max_exceeded, yes).
 
 :- init_prolog_flags.
 
-export static_flags_info/1.
-static_flags_info(List)
-	:-
-	findall(Flag = Value, 
-			(changeable(Flag, no), current_prolog_flag(Flag, Value)), 
-			List).
-
 export changable_flags_info/1.
 changable_flags_info(List)
 	:-
@@ -324,6 +317,14 @@ changable_flag_info([Flag,PossVals,Value])
 	changeable(Flag, yes),
 	findall(V, prolog_flag_value_check(Flag, V), PossVals),
 	current_prolog_flag(Flag, Value).
+
+export static_flags_info/1.
+static_flags_info(List)
+	:-
+	findall([Flag,Value], 
+			(changeable(Flag, no),
+				current_prolog_flag(Flag,Value)), 
+			List).
 
 endmod.		%% blt_flts.pro: Prolog Flags Builtins File
 
