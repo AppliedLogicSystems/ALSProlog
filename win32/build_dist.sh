@@ -31,7 +31,7 @@ DISTDIR="ALS Prolog" ;
 EXE="ALS Prolog.exe" ;
 EXAMPLE_SET="als pxs more objectpro tcltk" ;
 WELCOME=welcome_standard.als ;
-MANUAL=standard_man.pdf ;
+MANUAL=student_man.pdf ; # standard manual is missing.
 MANUALNAME="ALS Prolog Manual.pdf" ;
 ;;
 esac
