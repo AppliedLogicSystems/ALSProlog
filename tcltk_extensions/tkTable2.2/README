@@ -53,6 +53,9 @@ BUILDING AND INSTALLING THE WIDGET
    ON WINDOWS:
 	use something like WinZip to unpack the archive.
 
+   ON MACINTOSH:
+	use StuffIt Expander to unstuff the archive.
+    
    This will create a subdirectory tkTable<version> with all the files in it.
 
 2. Configure
@@ -71,6 +74,11 @@ BUILDING AND INSTALLING THE WIDGET
    wish from a path with a space in it, but the DLL builds just fine.
    A DLL should be available where you found this archive.
 
+   ON MACINTOSH:
+   
+   Hack the CodeWarrior project mac_tkTable.mcp until it works and compile.
+   The access path to the Tcl/Tk source tree will probably need adjusting.
+   
 3. Make and Install
 
    ON UNIX:
@@ -81,6 +89,9 @@ BUILDING AND INSTALLING THE WIDGET
 	nmake -f makefile.vc
 	nmake -f makefile.vc test (OPTIONAL)
 	nmake -f makefile.vc install
+
+   ON MACINTOSH:
+	Make the tkTable Fat target
 
    tkTable is built to comply to the latest tcl package conventions.
    There is also a specific "make static" for those who need it.
