@@ -70,6 +70,10 @@ then
     cp -pr "$BIN/$EXE.pst" "$DISTDIR/$EXET.pst"
 fi
 cp -pr "$BIN/alsdir" "$DISTDIR"
+rm -f "$BIN/alsdir/builtins/blt_shl.pro"
+rm -f "$BIN/alsdir/builtins/blt_dvsh.pro"
+rm -f "$BIN/alsdir/builtins/ra_basis.pro"
+rm -f "$BIN/alsdir/builtins/int_cstr.pro"
 cp -pr "$BIN/lib" "$DISTDIR"
 
 mkdir "$DISTDIR/examples"
