@@ -3601,46 +3601,50 @@ set_stream_position(Stream_or_alias, Position) :-
  * an earlier version of the draft standard.
  */
 
-/*
- * stream_position(Stream_or_alias, Position)
- *
- *	Unifies Position with the current stream position of the stream
- *	denoted by Stream_or_alias.  Note that we call sio_getpos (so long
- *  as we have a valid stream or alias).  These means that we can get
- *  positions even for streams which aren't seekable.
- */
+/*-------------------------------------------------------------------*
+ | stream_position(Stream_or_alias, Position)
+ |
+ |	Unifies Position with the current stream position of the stream
+ |	denoted by Stream_or_alias.  Note that we call sio_getpos (so long
+ |  as we have a valid stream or alias).  These means that we can get
+ |  positions even for streams which aren't seekable.
+ *-------------------------------------------------------------------*/
 
 export stream_position/2.
 
 stream_position(Stream_or_alias, Position) :-
     stream_or_alias_ok(Stream_or_alias,Stream),
-    var_or_integer_ok(Position),
+%   var_or_integer_ok(Position),
+    var_or_number_ok(Position),
     !,
     sio_getpos(Stream,Position).
 
-
-/*
- * stream_position(Stream_or_alias, Current_position, New_position)
- *
- *	Unifies Position with the current stream position of the stream
- *	denoted by Stream_or_alias.  As a side effect, also sets the
- *	stream position of said stream to the position represented by
- *	New_position.   New_position may be one of the following values:
- *
- *	An absolute integer position into the stream.
- *	The atom beginning_of_stream.
- *	The term beginning_of_stream(N), N >= 0.
- *	The atom end_of_stream.
- *	The term end_of_stream(N), N =< 0
- *	The atom current_position.
- *	The term current_position(N), N an integer.
- *
- *	These have the intuitive meanings.
- */
+/*-------------------------------------------------------------------*
+ | stream_position(Stream_or_alias, Current_position, New_position)
+ |
+ |	Unifies Position with the current stream position of the stream
+ |	denoted by Stream_or_alias.  As a side effect, also sets the
+ |	stream position of said stream to the position represented by
+ |	New_position.   New_position may be one of the following values:
+ |
+ |	An absolute integer position into the stream.
+ |	A whole number float position into the stream.
+ |	The atom beginning_of_stream.
+ |	The term beginning_of_stream(N), N >= 0.
+ |	The atom end_of_stream.
+ |	The term end_of_stream(N), N =< 0
+ |	The atom current_position.
+ |	The term current_position(N), N an integer or whole number float
+ |
+ |	These have the intuitive meanings.
+ |
+ |	Non-whole number floats F as positions will be truncated to floor(F).
+ *-------------------------------------------------------------------*/
 
 export stream_position/3.
 
-stream_position(Stream_or_alias, Current_position, New_position) :-
+stream_position(Stream_or_alias, Current_position, New_position) 
+	:-
 	stream_position(Stream_or_alias,Current_position),
 	set_stream_position(Stream_or_alias, New_position).
 
@@ -3648,14 +3652,19 @@ positions_for_file_streams(beginning_of_stream,0,0).
 positions_for_file_streams(end_of_stream,0,2).
 positions_for_file_streams(current_position,0,1).
 positions_for_file_streams(beginning_of_stream(Pos),Pos,0) :-
-	integer(Pos),
+%	integer(Pos),
+	number(Pos),
 	Pos >= 0.
 positions_for_file_streams(end_of_stream(Pos),Pos,2) :-
-	integer(Pos),
+%	integer(Pos),
+	number(Pos),
 	Pos =< 0.
 positions_for_file_streams(current_position(Pos),Pos,1) :-
-	integer(Pos).
-positions_for_file_streams(Position,Position,0) :- integer(Position).
+%	integer(Pos).
+	number(Pos).
+positions_for_file_streams(Position,Position,0) :- 
+%	integer(Position).
+	number(Position).
 
 %%
 %% stream_position/4 should be extended for different stream types

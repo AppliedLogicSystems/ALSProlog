@@ -189,16 +189,17 @@ consult_files([], _)
 consult_files([File | Files], COpts) 
 	:-!,
 	consult_file(File, COpts),
+	!,
 	consult_files(Files, COpts).
 
 consult_files(File, COpts) 
 	:-
-	atom(File),
 	consult_file(File, COpts).
 
 consult_file(File, COpts) 
 	:- 
 	local_consult_options(File, BaseFile, COpts, FCOpts),
+	!,
 	do_consult(BaseFile, FCOpts).
 
 /*-----------------------------------------------------------*
@@ -1090,7 +1091,7 @@ load_file_source(Path,BaseFile,TgtMod,Recon,DebugMode,OPath,CGFlag,CG,ErrsList)
 		open(Path, read, Stream, [])
 	),
 	establish_fcg(CGFlag, BaseFile, Recon, CG),
-	catch( try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,ErrsList),
+	catch( try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,Path,ErrsList),
 			Ball,
 			( (OPath = '' -> true ;
 				(unlink(OPath) ->  
@@ -1115,9 +1116,9 @@ load_file_source(Path,BaseFile,TgtMod,Recon,DebugMode,OPath,CGFlag,CG,ErrsList)
 		)
 	).
 
-try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,ErrsList)
+try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,Path,ErrsList)
 	:-
-	catch( load_source0(Stream, TgtMod, DebugMode, OPath, ErrsList),
+	catch( load_source0(Stream, TgtMod, DebugMode, OPath, Path,ErrsList),
 			Ball,
 			(	reset_fcg(_),
 				(CGFlag -> massively_abolish_clausegroup(CG) ; true),
@@ -1128,13 +1129,13 @@ try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,ErrsList)
 	close(Stream),
 	reset_fcg(_).
 
-try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,ErrsList)
+try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,Path,ErrsList)
 	:-
 	close(Stream),
 	pop_clausegroup(CG),
 	(CGFlag -> massively_abolish_clausegroup(CG) ; true),
 		%% ld_src_err: "Internal error in load_source for file %t\n"
-	prolog_system_error(ld_src_err, []).
+	prolog_system_error(ld_src_err, [Path]).
 
 
 /*-------------------------------------------------------------*
@@ -1175,15 +1176,15 @@ obp_mode_end(OPath)
 /*-------------------------------------------------------------*
  | For loading source (.pro) files 
  |
- |	load_source0/5
- |	load_source0(Stream, TgtMod, DebugMode, OPath, ErrsList) 
- |	load_source0(+, +, +, +, -) 
+ |	load_source0/6
+ |	load_source0(Stream, TgtMod, DebugMode, OPath, Path,ErrsList) 
+ |	load_source0(+, +, +, +, +, -) 
  |
  | 	-	if OPath = '',  -- without writing the .obp file
  | 	-	if OPath \= '', -- writes the .obp file to OPath
  *-------------------------------------------------------------*/ 
-export load_source0/5.
-load_source0(Stream, TgtMod, DebugMode, OPath, ErrsList) 
+export load_source0/6.
+load_source0(Stream, TgtMod, DebugMode, OPath, Path,ErrsList) 
 	:-
 	obp_mode_start(OPath),
 	xconsult:pushmod(TgtMod),
@@ -1197,13 +1198,13 @@ load_source0(Stream, TgtMod, DebugMode, OPath, ErrsList)
 	xconsult:popmod,
 	obp_mode_end(OPath).
 
-load_source0(_,_,_,OPath,_) 
+load_source0(_,_,_,OPath,Path,_) 
 	:-
 	xconsult:popmod,
 	obp_mode_end(OPath),
 	!,
 		%% ld_src_err: "Internal error in load_source for file %t\n"
-	prolog_system_error(ld_src_err, []).
+	prolog_system_error(ld_src_err, [Path]).
 
 
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -2081,18 +2081,3 @@ tp_increment_ifdef_nesting_counter(Stream).	%% define later
 
 endmod.
 
-module builtins.
-
-export '$dbg_apg'/3.
-export '$dbg_aph'/3.
-export '$dbg_apge'/3.
-export '$dbg_aphe'/3.
-export '$dbg_apf'/3.
-
-'$dbg_apg'(_,_,_).
-'$dbg_aph'(_,_,_).
-'$dbg_apge'(_,_,_).
-'$dbg_aphe'(_,_,_).
-'$dbg_apf'(_,_,_).
-
-endmod.
