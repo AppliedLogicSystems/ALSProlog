@@ -141,7 +141,8 @@ pckg_addto_codeblocks(addr, len)
 static void
 makerunable()
 {
-#ifndef Portable	/* Portable doesn't need any of this stuff */
+#if !defined(Portable) && !defined(arch_sparc)	/* Portable doesn't need any of this stuff */
+
 #if	defined(HAVE_MMAP) || defined(arch_m88k)
     register struct codeblock *cbp;
 
@@ -152,28 +153,29 @@ makerunable()
 	    fprintf(stderr, "makerunable: mprotect error\n");
 	    perror("mprotect");
 	}
-#else	/* HAVE_MMAP */
+#else	/* inner HAVE_MMAP */
 	if (memctl(cbp->addr, cbp->size, 1) != 0) {
 	    fprintf(stderr, "makerunable: memctl error\n");
 	    perror("mctl");
 	}
-#endif 	/* HAVE_MMAP */
+#endif 	/* inner HAVE_MMAP */
     }
 #elif	defined(arch_m68k)
-#ifdef NeXT		/* m68k OS's */
+#ifdef NeXT					/* m68k OS's */
     /* Note: NeXT (if defined) will be predefined by the C-compiler. */
     asm("trap #2");
-#elif defined(MacOS)	/* m68k OS's */
+#elif defined(MacOS)		/* m68k OS's */
     FlushInstructionCache();
-#else 			/* m68k OS's */
+#else 						/* m68k OS's */
     flush_cache();
-#endif			/* m68k OS's */
+#endif						/* m68k OS's */
 #elif	defined(arch_i386)
 #ifdef DOS
     refresh_code_window();
-#endif /* DOS */
-#endif /* arch_i386 */
-#endif /* Portable */
+#endif						/* DOS */
+#endif						/* arch_i386 */
+
+#endif /* Portable && arch_sparc */
 }
 
 /*
@@ -183,7 +185,8 @@ makerunable()
 static void
 makewritable()
 {
-#ifndef Portable	/* Portable doesn't need any of this stuff */
+#if !defined(Portable) && !defined(arch_sparc)	/* Portable doesn't need any of this stuff */
+
 #if	defined(HAVE_MMAP) || defined(arch_m88k)
     register struct codeblock *cbp;
 
@@ -202,7 +205,8 @@ makewritable()
 #endif 	/* HAVE_MMAP */
     }
 #endif	/* HAVE_MMAP || arch_m88k */
-#endif /* Portable */
+
+#endif /* Portable && arch_sparc */
 }
 
 

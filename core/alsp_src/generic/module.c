@@ -383,8 +383,6 @@ pop_clausegroup()
     return cg;
 }
 
-
-
 /*
  * add_default_use is called by a function of a similar name in
  *      builtins.c  It adds the given module id to the default use
