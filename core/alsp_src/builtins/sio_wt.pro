@@ -275,7 +275,11 @@ write_option(Culprit, WInfo)
  |			Varcounter,
  |			Quoted_strings,			true
  |			Wt_opts,
-			LineEnd
+ |			LineEnd,
+ |			ShowDelay,				<Flag>
+#if (all_procedures(syscfg,intconstr,0,_))
+ |			ShowInterval			<Flag>
+#endif
  |		 )
  |
  |	Wt_opts is a term of the form:
@@ -339,6 +343,14 @@ set_winfo_depth_computation(WInfo,Value) :- arg(11,WInfo,WO), mangle(3,WO,Value)
 winfo_line_end(WInfo,Value)				:-	arg(12,WInfo,Value).
 set_winfo_line_end(WInfo,Value)			:-	mangle(12,WInfo,Value).
 
+winfo_show_delay(WInfo,Value)				:-	arg(13,WInfo,Value).
+set_winfo_show_delay(WInfo,Value)			:-	mangle(13,WInfo,Value).
+
+#if (all_procedures(syscfg,intconstr,0,_))
+winfo_show_interval(WInfo,Value)				:-	arg(14,WInfo,Value).
+set_winfo_show_interval(WInfo,Value)			:-	mangle(14,WInfo,Value).
+#endif
+
 	/*------------------------------------------------------------------------*
 	 | Default winfos 
 	 | - several alternate winfo structures for different default contexts.
@@ -346,7 +358,11 @@ set_winfo_line_end(WInfo,Value)			:-	mangle(12,WInfo,Value).
  	 | 	winfo(	Quoted, Ignore_ops, Portrayed, Numbervars,
  	 |			Maxdepth_atom, Listtail, Indent,
  	 |			Lettervars, Varcounter, Quoted_strings, 
- 	 |			wt_opts(Line_len, MaxDepth, Depth_computation), LineEnd)
+ 	 |			wt_opts(Line_len, MaxDepth, Depth_computation), LineEnd,
+	 |			ShowDelay,
+#if (all_procedures(syscfg,intconstr,0,_))
+	 |			ShowInterval
+#endif
  	 |		 )
 	 | Distinguished/presented by:
  	 |
@@ -356,42 +372,94 @@ set_winfo_line_end(WInfo,Value)			:-	mangle(12,WInfo,Value).
 	 |	winfo_write_canonical(Stream, Winfo)
 	 |	winfo_write_print(Stream, Winfo)
 	 *-------------------------------------------------------------------------*/
-
+#if (all_procedures(syscfg,intconstr,0,_))
 		%% Quoted, Lettervars, Quoted_strings
 winfo_write_term( Stream,
-%			winfo(true, false,false,false,'*','...',0,true,0,true,WO,true)) 
-			winfo(false, false,false,false,'*','...',0,true,0,true,WO,true)) 
+			winfo(false, false,false,false,'*','...',0,true,0,true,WO,true,SD,SI)) 
 	:-
     WO = wt_opts(_,_,_),
-    stream_wt_opts(Stream,WO).
+    stream_wt_opts(Stream,WO),
+	current_prolog_flag(show_delay, SD), 
+	current_prolog_flag(show_interval, SI). 
 
 		%% No quoting, Numbervars, No Lettervars, No Quoted_strings,
 		%% Very long lines 
 winfo_write( Stream,
-			winfo(false,false,false,true,'*','...',0,false,0,false,WO,true)) 
+			winfo(false,false,false,true,'*','...',0,false,0,false,WO,true,SD,SI)) 
 	:-
     WO = wt_opts(2047,Depth,DepthComputation),	%% override default length
     stream_wt_maxdepth(Stream,Depth),
-    stream_wt_depth_computation(Stream,DepthComputation).
+    stream_wt_depth_computation(Stream,DepthComputation),
+	current_prolog_flag(show_delay, SD),
+	current_prolog_flag(show_interval, SI). 
 
 winfo_writeq( Stream,
-			winfo(true, false,false,true, '*','...',0,true,0,true,WO,true)) 
+			winfo(true, false,false,true, '*','...',0,true,0,true,WO,true,SD,SI)) 
 	:-
     WO = wt_opts(_,_,_),
-    stream_wt_opts(Stream,WO).
+    stream_wt_opts(Stream,WO),
+	current_prolog_flag(show_delay, SD),
+	current_prolog_flag(show_interval, SI). 
 
 winfo_write_canonical( Stream,
-			winfo(true, true, false,false,'*','...',0,true,0,false,WO,true)) 
+			winfo(true, true, false,false,'*','...',0,true,0,false,WO,true,SD,SI)) 
 	:-
     WO = wt_opts(_,_,_),
-    stream_wt_opts(Stream,WO).
+    stream_wt_opts(Stream,WO),
+	current_prolog_flag(show_delay, SD),
+	current_prolog_flag(show_interval, SI). 
 
 winfo_print( Stream,
-			winfo(false,false,true, true, '*','...',0,false,0,false,WO,true)) 
+			winfo(false,false,true, true, '*','...',0,false,0,false,WO,true,SD,SI)) 
 	:-
     WO = wt_opts(2047,Depth,DepthComputation),	%% override default length
     stream_wt_maxdepth(Stream,Depth),
-    stream_wt_depth_computation(Stream,DepthComputation).
+    stream_wt_depth_computation(Stream,DepthComputation),
+	current_prolog_flag(show_delay, SD),
+	current_prolog_flag(show_interval, SI). 
+
+#else
+
+		%% Quoted, Lettervars, Quoted_strings
+winfo_write_term( Stream,
+			winfo(false, false,false,false,'*','...',0,true,0,true,WO,true,SD)) 
+	:-
+    WO = wt_opts(_,_,_),
+    stream_wt_opts(Stream,WO),
+	current_prolog_flag(show_delay, SD). 
+
+		%% No quoting, Numbervars, No Lettervars, No Quoted_strings,
+		%% Very long lines 
+winfo_write( Stream,
+			winfo(false,false,false,true,'*','...',0,false,0,false,WO,true,SD)) 
+	:-
+    WO = wt_opts(2047,Depth,DepthComputation),	%% override default length
+    stream_wt_maxdepth(Stream,Depth),
+    stream_wt_depth_computation(Stream,DepthComputation),
+	current_prolog_flag(show_delay, SD). 
+
+winfo_writeq( Stream,
+			winfo(true, false,false,true, '*','...',0,true,0,true,WO,true,SD)) 
+	:-
+    WO = wt_opts(_,_,_),
+    stream_wt_opts(Stream,WO),
+	current_prolog_flag(show_delay, SD). 
+
+winfo_write_canonical( Stream,
+			winfo(true, true, false,false,'*','...',0,true,0,false,WO,true,SD)) 
+	:-
+    WO = wt_opts(_,_,_),
+    stream_wt_opts(Stream,WO),
+	current_prolog_flag(show_delay, SD). 
+
+winfo_print( Stream,
+			winfo(false,false,true, true, '*','...',0,false,0,false,WO,true,SD)) 
+	:-
+    WO = wt_opts(2047,Depth,DepthComputation),	%% override default length
+    stream_wt_maxdepth(Stream,Depth),
+    stream_wt_depth_computation(Stream,DepthComputation),
+	current_prolog_flag(show_delay, SD). 
+#endif
 
 
     /*---------------------------------------------------------------------*
@@ -440,6 +508,27 @@ wd(Exp,Depth,L1,Hole,WInfo)
      | write depth, whether it is flat or non flat characters to write out
      | in the event that the write depth is exceeded etc.
      *----------------------------------------------------------------------------*/
+
+#if (all_procedures(syscfg,intconstr,0,_))
+wd(Var, Lev, Depth, SpaceIn, nospace, L1, Hole,BP,WInfo) 
+	:-
+	'$is_delay_var'(Var),
+	winfo_show_interval(WInfo,true),
+	reified_interval(Var, SPrt),
+	!,
+	wd(SPrt, Lev, Depth, SpaceIn, nospace, L1, Hole,BP,WInfo).
+#endif
+
+wd(Var, Lev, Depth, SpaceIn, nospace, L1, Hole,BP,WInfo) 
+	:-
+	'$is_delay_var'(Var),
+	winfo_show_delay(WInfo,true),
+	'$delay_term_for'(Var, VarDelayTerm),
+	!,
+	VarDelayTerm = '$delay'(_,_,_,Goal),
+	functor(Goal,F,A),
+	sio_var_to_atom(Var,VarAtom),
+	wd('$delay'(VarAtom,F/A), Lev, Depth, SpaceIn, nospace, L1, Hole,BP,WInfo).
 
 wd(Var, Lev, Depth, _, nospace,[VarAtom|Hole],Hole,BP,WInfo) 
 	:-
@@ -1426,6 +1515,8 @@ eat_space([' ' | T], T) :- !.
 eat_space([0'   | T],T) :- !.
 eat_space(L,L).
 
+endmod.		%% sio
+
 
 module builtins.
 use sio.
@@ -1625,7 +1716,6 @@ show_substs_ext([N|Ns],[S|Ss],VPairs,Stream)
 	%%   -- defined in blt_frez.pro
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-/*
 wr_subs3(N,S,VPairs,Stream)
 	:-
 	'$is_delay_var'(S),
@@ -1636,31 +1726,9 @@ wr_subs3(N,S,VPairs,Stream)
 		;
 		show_delay_binding(N,S, VPairs, Stream)
 	).
-*/
-/*
-wr_subs3(N,S,VPairs,Stream)
-	:-
-	intconstr,
-	show_interval_binding(N,S, VPairs, Stream),
-	!.
-
-wr_subs3(N,S,VPairs,Stream)
-	:-
-	show_delay_binding(N,S, VPairs, Stream),
-	!,
-	show_delay_binding(N,S, VPairs, Stream).
-*/
 	
-
 wr_subs3(N,S,_,Stream)
 	:-
-/*
-%put_atom(Stream,'+'),
-	nl(Stream),flush_output(Stream),
-%put_atom(Stream,'@'),
-	write_term(Stream,'%lettervar%'(N)=S,[]).
-*/
-%	printf(Stream, '\n%t=%t ', ['%lettervar%'(N), S]).
 	printf(Stream, '\n%t=%t ', ['%lettervar%'(N), S], [quoted(true)]).
 
 rpairs_list([],[],[]).
@@ -1686,4 +1754,3 @@ exact_lookup([ _ | DVarAtmsList], Term, Item)
 
 endmod.		%% builtins
 
-endmod.		%% sio

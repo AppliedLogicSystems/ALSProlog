@@ -91,6 +91,7 @@ start_alsdev :-
 	catch(start_alsdev0, Error, report_error(Error)).
 start_alsdev0
 	:-
+
 		%% Used by some routines in builtins
 		%% to  detect presence  of alsdev:
 	assert(alsdev_running),
@@ -110,12 +111,15 @@ start_alsdev0
 	setup_init_ide_classes(ALS_IDE_Mgr),
 
 	library_setup,
-	 sys_env(OS, _, _),
-%	init_tk_alslib(shl_tcli,Shared),
+
+#if (all_procedures(syscfg,intconstr,0,_))
+		rel_arith:set_ics(cs(0,0,0))
+#endif
+	sys_env(OS, _, _),
 	join_path([ALSDIRPath,shared], Shared),
-	 catch(tk_new(shl_tcli),Ball1,fail),
-	 tcl_call(shl_tcli, [wm,withdraw,'.'], _),
-	 tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
+	catch(tk_new(shl_tcli),Ball1,fail),
+	tcl_call(shl_tcli, [wm,withdraw,'.'], _),
+	tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
 	(OS = macos ->
 		tcl_call(shl_tcli, 'source -rsrc als_tklib', _)
 		;
@@ -789,7 +793,11 @@ find_alsdev_ini(Items)
 	!,
 	getenv('HOME', HomeDir),
 	split_path(HomeDir, HomeDirList),
+#if (all_procedures(syscfg,intconstr,0,_))
+	PrefsFile = '.clpbnr',
+#else
 	PrefsFile = '.alsdev',
+#endif
 	append(HomeDirList, [PrefsFile], PrefsFileList),
 	fin_find_alsdev_ini(PrefsFileList, Items).
 

@@ -36,6 +36,7 @@ do_set_prolog_flag(Flag, Value)
 		;   
 		domain_error(flag_value, Flag+Value, 1) 
 	),
+	apply_requisites(Flag,Value),
 	!,
 	set_PROLOG_flag(Flag, Value).
 
@@ -257,6 +258,24 @@ default_prolog_flag_value(freeze, Value)
 	).
 changeable(freeze, no).
 
+	%%-----------------------------------------------------
+	%%    show_delay - control write[_term]/_:
+	%% Options are:
+	%%     -- true - prints the delay structure
+	%%     -- false - prints _$_NNNN form
+	%%-----------------------------------------------------
+
+prolog_flag_value_check(show_delay, true).
+prolog_flag_value_check(show_delay, false).
+default_prolog_flag_value(show_delay, true).
+changeable(show_delay, yes).
+#if (all_procedures(syscfg,intconstr,0,_))
+apply_requisites(show_delay,false)
+	:-
+	set_PROLOG_flag(show_interval, false).
+
+#endif
+
 	%%---------------------------------
 	%%	constraints
 	%%
@@ -264,13 +283,13 @@ changeable(freeze, no).
 	%%  false otherwise.
 	%%---------------------------------
 prolog_flag_value_check(constraints, true).
-prolog_flag_value_check(constraints, false).
+prolog_flag_value_check(constraints, fail).
 default_prolog_flag_value(constraints, Value)
 	:-
 	(all_procedures(_,'$iter_link_net',5,_) ->
 		Value = true
 		; 
-		Value = false
+		Value = fail
 	).
 changeable(constraints, no).
 
@@ -301,7 +320,29 @@ prolog_flag_value_check(iters_max_exceeded, exception).
 default_prolog_flag_value(iters_max_exceeded, succeed).
 changeable(iters_max_exceeded, yes).
 
+	%%-----------------------------------------------------
+	%% For CLP(BNR): 
+	%%    show_interval - control write[_term]/_:
+	%% Options are:
+	%%     -- true - prints the interval
+	%%     -- false - prints _$_NNNN form
+	%%-----------------------------------------------------
+
+prolog_flag_value_check(show_interval, true).
+prolog_flag_value_check(show_interval, false).
+default_prolog_flag_value(show_interval, true).
+changeable(show_interval, yes).
+apply_requisites(show_interval,true)
+	:-
+	set_PROLOG_flag(show_delay, true).
+
 #endif
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% DEFAULT VALUE:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+apply_requisites(_,_).
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Handle interations of flag
@@ -318,6 +359,16 @@ check_for_alsdev_impact(Flag, Value)
 	send(ALSIDEmgr, change_prolog_flag(Flag,Value)),
 	((Flag = debug, Value = on) ->
 		alsdev:check_reload_consults
+		;
+		true
+	),
+	((Flag = show_interval, Value = true) ->
+		send(ALSIDEmgr, change_prolog_flag(show_delay,true))
+		;
+		true
+	),
+	((Flag = show_delay, Value = false) ->
+		send(ALSIDEmgr, change_prolog_flag(show_interval,false))
 		;
 		true
 	).
