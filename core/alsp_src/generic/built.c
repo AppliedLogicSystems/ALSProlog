@@ -731,7 +731,8 @@ builtin_init()
     }
 }
 
-#ifdef NewMath
+/* #ifdef NewMath  */
+#if defined(NewMath) && !defined(Portable)
 Code *mth_is_addr;
 Code *mth_lt_addr;
 Code *mth_gt_addr;
@@ -751,7 +752,8 @@ time_cut_interrupt_init()
     wm_overcode = w_nameentry((PWord) MODULE_BUILTINS,
 			   (PWord) find_token((UCHAR *)"$interrupt"), 3)->exec_entry;
 
-#ifdef NewMath
+/* #ifdef NewMath  */
+#if defined(NewMath) && !defined(Portable)
     mth_is_addr = w_nameentry((PWord) MODULE_BUILTINS, (PWord) TK_IS, 2)
 	->call_entry;
     mth_lt_addr = w_nameentry((PWord) MODULE_BUILTINS, (PWord) TK_LESS, 2)

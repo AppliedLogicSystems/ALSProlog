@@ -12,6 +12,7 @@
  | Fixups for windows: Ken Bowen
  *=====================================================================*/
 
+
 module sio.
 use windows.
 
@@ -1583,6 +1584,21 @@ close_stream(string,_) :-
 close_stream(_,Stream) :-
 	sio_close(Stream).
 
+%%
+%% close code for other stream types should be placed here.
+%%
+
+export close_down_streams/1.
+close_down_streams(Type)
+	:-
+	pget_stream_table(Num,Stream),
+	stream_type(Stream,Type),
+	close(Stream),
+	fail.
+
+close_down_streams(_).
+	
+
 
 %%
 %% Remove aliases associated with a given stream.
@@ -2092,7 +2108,7 @@ read_buffer(window,Stream)
 	stream_extra(Stream,Tail),
 	Tail == [],
 	!,
-	alarm(0,0),
+%	alarm(0,0),
 	stream_pgoals(Stream,PromptGoal),
 	call(PromptGoal),
 	sio_set_errcode(Stream,14),		%% 14 =  SIOE_NOTREADY
@@ -2101,11 +2117,13 @@ read_buffer(window,Stream)
 read_buffer(window,Stream) 
 	:- !,
 		%% get the queue of raw lines:
+/*
 	(builtins:obtain_alarm_interval(Intrv) -> 
 %		write(read_buffer_resetting_alarm(Intrv,Intrv)),nl,flush_output,
 		alarm(Intrv, Intrv) 
 		; 
 		true),
+*/
 	stream_extra(Stream,CurQueue),
 	sio_buf_params(Stream, BufStart, BufSize),
 	stream_buffer(Stream,SD),
@@ -2463,7 +2481,7 @@ put_code(Stream_or_alias,Code)
 	:-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	sio_errcode(Stream,FailCode),
-	put_failure(FailCode,Stream,Char,put_code(Stream_or_alias,Char)).
+	put_failure(FailCode,Stream,Code,put_code(Stream_or_alias,Code)).
 
 
 /*
@@ -3344,3 +3362,4 @@ sio_pckg_init :-
 :- sio_pckg_init.
 
 endmod.
+

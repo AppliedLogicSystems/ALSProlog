@@ -668,6 +668,103 @@ sio_lpos()
  * returned if it should be left open.
  */
 
+#ifdef MacOS
+
+/* Merge the Mac and Unix versions of this someday. */
+
+typedef struct {
+	int fd;
+	unsigned short refcnt;
+} fdrefcnt;
+
+static fdrefcnt *fdrefcnts = NULL;
+static int fdrefcnts_size;
+
+static int openmax = 0;
+#define OPEN_MAX_GUESS 256
+
+static int refcnt_index(int fd)
+{
+	int first_key, last_key, key;
+	
+	first_key = fd % fdrefcnts_size;
+	last_key = (first_key + fdrefcnts_size - 1) % fdrefcnts_size;
+	for (key = first_key; key != last_key ; key = (key + 1) % fdrefcnts_size) {
+		if (fdrefcnts[key].fd == fd) return key;
+	}
+	
+	for (key = first_key; key != last_key; key = (key + 1) % fdrefcnts_size) {
+		if (fdrefcnts[key].refcnt == 0) {
+			fdrefcnts[key].fd = fd;
+			return key;
+		}
+	}
+	
+	fatal_error(FE_FDREFOVERFLOW, 0);
+}
+
+#define PRIME_TABLE_MAX	55
+
+int prime[PRIME_TABLE_MAX] = {
+	2,	3,	5,	7,	11,	13,	17,	19,	23,	29,	31,	37,
+	41,	43,	47,	53,	59,	61,	67,	71,	73,	79,	83,	89,
+	97,	101,	103,	107,	109,	113,
+	127,	131,	137,	139,	149,	151,
+	157,	163,	167,	173,	179,	181,
+	191,	193,	197,	199,	211,	223,
+	227,	229,	233,	239,	241,	251,
+	257,
+};
+
+static int next_prime(int n)
+{
+	int i;
+	
+	for (i = 0; i < PRIME_TABLE_MAX && prime[i] < n; i++) ;
+	
+	if (i >= PRIME_TABLE_MAX) fatal_error(FE_FDREFCNTS, 0);
+	else return prime[i];
+}
+	
+static void
+incr_fdrefcnt(fd)
+    int fd;
+{
+    if (fdrefcnts == NULL) {
+#if defined(_SC_OPEN_MAX)
+	if ( (openmax = sysconf(_SC_OPEN_MAX)) < 0)
+	    openmax = OPEN_MAX_GUESS;
+#elif defined(OPEN_MAX)
+	openmax = OPEN_MAX;
+#elif defined(FOPEN_MAX)
+	openmax = FOPEN_MAX;
+#else
+	openmax = OPEN_MAX_GUESS;
+#endif /* OPEN_MAX */
+
+	fdrefcnts_size = next_prime(openmax);
+	
+	if ( (fdrefcnts = (fdrefcnt *) 
+			  malloc(fdrefcnts_size * sizeof(*fdrefcnts))) == NULL)
+	    fatal_error(FE_FDREFCNTS, 0);
+	memset(fdrefcnts, 0, fdrefcnts_size * sizeof(*fdrefcnts));
+    }
+
+    fdrefcnts[refcnt_index(fd)].refcnt++;
+}
+
+static int
+decr_fdrefcnt(fd)
+    int fd;
+{
+    if (--fdrefcnts[refcnt_index(fd)].refcnt <= 0)
+	return 1;
+    else
+	return 0;
+}
+
+#else /* not MacOS */
+
 static unsigned short *fdrefcnts = NULL;
 static int openmax = 0;
 #define OPEN_MAX_GUESS 256
@@ -693,7 +790,8 @@ incr_fdrefcnt(fd)
 	    fatal_error(FE_FDREFCNTS, 0);
 	memset(fdrefcnts, 0, openmax * sizeof *fdrefcnts);
     }
-
+    
+    if (fd < 0 || fd >= openmax) fatal_error(FE_FDREFOVERFLOW, 0);
     fdrefcnts[fd]++;
 }
 
@@ -701,11 +799,14 @@ static int
 decr_fdrefcnt(fd)
     int fd;
 {
+    if (fd < 0 || fd >= openmax) fatal_error(FE_FDREFOVERFLOW, 0);
     if (--fdrefcnts[fd] <= 0)
 	return 1;
     else
 	return 0;
 }
+
+#endif
 
 /*
  * compute_flags examines the file modes and buffering value and sets the
@@ -2439,22 +2540,22 @@ sio_put_byte()
     w_get_An(&v2, &t2, 2);
 
     if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
-	FAIL;
+		FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_WRITE)) {
-	SIO_ERRCODE(buf) = SIOE_ILLWRITE;
-	FAIL;
+		SIO_ERRCODE(buf) = SIOE_ILLWRITE;
+		FAIL;
     }
 
     if ((SIO_FLAGS(buf) & (SIOF_READ | SIOF_EOF)) == SIOF_READ &&
 	SIO_LPOS(buf) == 0) {
-	SIO_ERRCODE(buf) = SIOE_READ;
-	FAIL;
+		SIO_ERRCODE(buf) = SIOE_READ;
+		FAIL;
     }
 
     if (t2 != WTP_INTEGER) {
-	SIO_ERRCODE(buf) = SIOE_INARG;
-	FAIL;
+		SIO_ERRCODE(buf) = SIOE_INARG;
+		FAIL;
     }
 
     pos = SIO_CPOS(buf);
@@ -2462,14 +2563,14 @@ sio_put_byte()
     pos++;
     SIO_CPOS(buf) = pos;
     if (pos > SIO_LPOS(buf))
-	SIO_LPOS(buf) = pos;
+		SIO_LPOS(buf) = pos;
     SIO_FLAGS(buf) |= SIOF_DIRTY;
 
     if ((SIO_FLAGS(buf) & SIOF_BBYTE) ||
 	((SIO_FLAGS(buf) & SIOF_BLINE) && v2 == '\n') ||
 	(SIO_LPOS(buf) == SIO_BFSIZE(buf))) {
-	SIO_ERRCODE(buf) = SIOE_WRITE;
-	FAIL;
+		SIO_ERRCODE(buf) = SIOE_WRITE;
+		FAIL;
     }
 
     SIO_ERRCODE(buf) = SIOE_NORMAL;

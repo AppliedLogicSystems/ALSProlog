@@ -30,7 +30,6 @@
 	[module_closure(bagOf,3,bagOf), 
 	 module_closure(setOf,3,setOf)]).
 
-
 :-libactivate(builtins,['library',strings],
     [asplit/4,head/4,alower/2,asub/4,asplit0/4,asplit00/4,head0/4,alower0/2,
         insert_spaces/2,catenate/2,catenate/3,string_to_uia/2,cnvrt_to_UIA/2,
@@ -146,3 +145,4 @@
 		 prefix_undefs/2,
 		 strip_prefix/3,prefix_undefs_basis/2,
 		 prefix_undefs_basis_filt/1], [] ).
+

@@ -1,6 +1,7 @@
 
 #--------- Static portion of makefile
 WLD=../$(WIN)
+WINIDIR=$(srcdir)/../windows
 
 WSRCD = $(srcdir)/wins/src
 #### WARNING::
@@ -100,13 +101,21 @@ $(IMAGE)0: pimain.o pi_init.o $(PROLIB) $(WINTLIB)
 		$(LIBS)	\
 		$(X_EXTRA_LIBS)
 
-$(IMAGE): $(IMAGE)0 
+$(IMAGE)1: $(IMAGE)0 
 	ALSPATH=$(WLD); export ALSPATH; \
 	$(IMAGE)0 *.pro $(ADDL_PROFS) \
-		-g 'save_image($(IMAGE),[libload(true)])'
+		-g 'save_image($(IMAGE)1,[libload(true)])'
+
+$(IMAGE): $(IMAGE)1 
+	ALSPATH=$(WLD); export ALSPATH; \
+	$(IMAGE)1 $(WINIDIR/$(WIN)/$(WIN)_ld \
+		$(WINIDIR/guilib/cmn_ld $(WINIDIR/guilib/$(WIN)/cmnguild \
+		-g 'save_image($(IMAGE),[])'
 
 all: library image
 	echo library and image made for: motif
+
+
 
 cleanup:
 	-rm *.o

@@ -84,6 +84,11 @@ consultq(File) :-
 	consult(File),
 	consultmessage(on), !.
 
+consult([]) :-!.
+consult([File | Files]) :- !,
+	consult(File),
+	consult(Files).
+
 consult(-source(File)) :- !,
 	nonvar_ok(File),
 	consult(source(-File)).

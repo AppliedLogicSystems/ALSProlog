@@ -178,6 +178,7 @@ pbi_mangle()
 
 extern void	disp_heap_item	PARAMS(( PWord * ));
 
+#ifdef TRAILVALS
 int
 pbi_trailed_mangle(void)
 {				/* trailed_mangle(ArgN,Struct,Arg) */
@@ -275,11 +276,7 @@ disp_heap_item(argaddr);
     SUCCEED;
 
 }
-
-
-
-
-
+#endif
 
 int
 pbi_functor()

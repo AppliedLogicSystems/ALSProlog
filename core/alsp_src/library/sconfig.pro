@@ -94,6 +94,7 @@ determine_default_ws(WS)
 export known_ws/1.
 
 known_ws(motif).
+known_ws(macos).
 known_ws(nextstep).
 known_ws(dvx).
 

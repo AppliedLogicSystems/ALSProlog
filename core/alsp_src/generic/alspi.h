@@ -123,6 +123,7 @@ extern	void	PrologInit	PARAMS(( PSTRUCT * ));
 extern	void	PI_shutdown	PARAMS(( void ));
 extern	int	PI_toplevel	PARAMS(( void ));
 extern	int	PI_prolog_init	PARAMS(( char *, int, char ** ));
+
 extern	void	PI_app_printf	PARAMS(( int, ... ));
 extern	const char *	PI_get_options	PARAMS(( void ));
 
