@@ -173,7 +173,14 @@ write_index_contents([], CurLetterCode, OneLiners, OS)
 write_index_contents([Item | IdxList], CurLetterCode, OneLiners, OS)
 	:-
 	write_idx_item(Item, CurLetterCode, NextLetterCode, OneLiners, OS),
+	!,
 	write_index_contents(IdxList, NextLetterCode, OneLiners, OS).
+
+write_index_contents([Item | IdxList], CurLetterCode, OneLiners, OS)
+	:-
+	printf(user_output, '!!Error: Bad index item: %t\n', [Item]),
+	write_index_contents(IdxList, NextLetterCode, OneLiners, OS).
+
 
 write_idx_item(Entry-Details, CurLetterCode, FinalLetterCode, OneLiners, OS)
 	:-
@@ -215,7 +222,10 @@ finish_idx_entry(module(ModDesc), Mod, OneLiners, OS)
 finish_idx_entry(pred(PEText, Mod), PredArity, OneLiners, OS)
 	:-
 	dmember(Mod-ModOneLiners, OneLiners),
-	dmember(PEText-ShortDesc, ModOneLiners),
+	(dmember(PEText-ShortDesc, ModOneLiners),!;
+		ShortDesc = '???',
+		printf(user_output, '!!Warning: [Mod=%t] Missing one-line description: %t[%t]\n', [Mod,PredArity, PEText])
+		),
 	codesweep([
 	'<DT><A HREF="%t/%t.html"><B>%t</B></A> - '			+ [ Mod, PEText, PredArity ],
 	'Predicate in module <A HREF="%t/module-summary.html">%t</A>'	+ [ Mod, Mod ],
@@ -442,7 +452,11 @@ write_kwic_contents([], CurLetter, OS)
 
 write_kwic_contents([Entry | SortedAbKw], CurLetter, OS)
 	:-
-	write_kwic_entry(Entry, CurLetter, NextLetter, OS),
+	catch( 
+		write_kwic_entry(Entry, CurLetter, NextLetter, OS),
+		Ball,
+		printf(user_output, '!!write_kwic_contents: error processing: %t\n', [Entry])
+	),
 	write_kwic_contents(SortedAbKw, NextLetter, OS).
 
 write_kwic_entry(Entry, CurLetter, NextLetter, OS)
@@ -506,7 +520,9 @@ skip_word(Word)
 
 skip_word_chars([C1 | _])
 	:-
-	0'A =< C1, C1 =< 0'Z, !.
+	0'A =< C1, C1 =< 0'Z, !;
+	C1 =< 32.
+
 skip_word_chars(WordCs)
 	:-
 	dmember(0',, WordCs), ! ; 
@@ -523,7 +539,11 @@ skip_word_chars(WordCs)
 	dmember(0'8, WordCs), ! ;
 	dmember(0'9, WordCs), ! ;
 	dmember(0'[, WordCs), ! ;
-	dmember(0'], WordCs), ! .
+	dmember(0'], WordCs), ! ;
+	dmember(0'(, WordCs), ! ;
+	dmember(0'), WordCs), ! ;
+	dmember(0'), WordCs), ! ;
+	dmember(0'., WordCs), ! .
 
 words_with_space([], OS).
 words_with_space([Word | Words], OS)
