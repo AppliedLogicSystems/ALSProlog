@@ -23,7 +23,7 @@ CPPFLAGS = -DUNIX -DCONFIGLESS $(BUILD_FLAGS) \
 	-I $(SOURCE_DIR)/$(PROC)
 
 # add -W sometime
-CFLAGS = -O -fpic -MMD -Wall -Wstrict-prototypes -Wmissing-prototypes -Wwrite-strings -Werror
+CFLAGS = -O -fpic -MMD -Wall -Wstrict-prototypes -Wmissing-prototypes -Wwrite-strings -Werror -fwritable-strings
 
 VPATH = $(SOURCE_DIR)/unix:$(SOURCE_DIR)/generic:$(SOURCE_DIR)/port:$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins
 
@@ -69,7 +69,7 @@ alspro_b : alsdir $(SHELL_OBJECTS) $(LIB_OBJECTS)
 	$(CC) -o alspro_b $(SHELL_OBJECTS) $(LIB_OBJECTS) $(LIBS)
 
 alspro :  alsdir alspro_b $(BUILTINS)
-	./alspro_b -b -obp \
+	./alspro_b -q -b -obp \
 	-g 'save_image(alspro,[select_lib(builtins,[debugger])])'
 
 ifndef NO_STATIC_LIB
@@ -95,7 +95,9 @@ alsdir/library : $(SOURCE_DIR)/library
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
 
 testrun : 
+	$(TEST_DIR)/tsuite/test_unix_command_line ./alspro
 	./alspro -giac -b $(TEST_DIR)/autotest $(TEST_DIR)/atest_db -g run_tests -p -srcdir $(SOURCE_DIR)
+	
 
 clean :
 	rm -f *.o rm *.d
