@@ -36,4 +36,6 @@
 #define ALSSIG_ERROR			68
 #define ALSSIG_UNDEFINED_PRED	69
 
+#define MAX_ALS_SIG 70
+
 #endif /* _ALSSIG_H_INCLUDED_ */

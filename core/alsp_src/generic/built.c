@@ -494,7 +494,8 @@ static struct blt_struct {
 	BLT("dbg_spyoff", 0, pbi_dbg_spyoff, "_pbi_dbg_spyoff"),
 	BLT("dbg_spyon", 0, pbi_dbg_spyon, "_pbi_dbg_spyon"),
 	BLT("dbg_spying", 0, pbi_dbg_spying, "_pbi_dbg_spying"),
-	BLT("alarm", 2, pbi_alarm, "_pbi_alarm")
+	BLT("alarm", 2, pbi_alarm, "_pbi_alarm"),
+	BLT("signal_name", 2, pbi_signal_name, "_pbi_signal_name")
 };
 	/* blt_tab[] */
 
@@ -714,20 +715,8 @@ builtin_init()
 	i = sizeof blt2_tab / sizeof (struct blt2_struct);
 	p2 = blt2_tab + i - 1;
 	for (; i > 0; i--, p2--) {
-#if defined(__MWERKS__) && defined(MSWin32) && defined(Portable)
-		/* There is a bug in MetroWerk's CodeWarrior 8 which doesn't properly
-		   initilize p2->p1 when an enum is being caste to a function pointer.
-		   This evil big of code works around the problem. */
-		long lp1;
-		
-		if ((((long)p2->p1) & 0xFFFFFF) == 0) lp1 = (((long)p2->p1) & 0xFF000000) >> 24;
-		else lp1 = (long) p2->p1;
-	    w_assert_built2(p2->name, p2->arity, p2->installer,
-			    (long) lp1, (long) p2->p2);		
-#else
 	    w_assert_built2(p2->name, p2->arity, p2->installer,
 			    (long) p2->p1, (long) p2->p2);
-#endif
 	}
 
 	builtins_initialized = 1;

@@ -390,6 +390,7 @@ extern	int	gc		PARAMS(( void ));
 
 /* sig.c */
 extern	int	pbi_alarm	PARAMS(( void ));
+extern	int	pbi_signal_name	PARAMS(( void ));
 
 /* wam.c -- byte only */
 #ifdef TRACEBWAM

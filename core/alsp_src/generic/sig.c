@@ -218,10 +218,113 @@ reissue_cntrlc()
     }
 }
 
+/* signal_name_list[] is an array of paired signal numbers and their
+   prolog names. Used to initilize the signal_name table. */
+
+static struct {int signal; const char *name;} signal_name_list[] = {
+/* ANSI C Signals */
+    {SIGABRT, "sigabrt"},
+    {SIGFPE, "sigfpe"},
+    {SIGILL, "sigill"},
+    {SIGINT, "sigint"},
+    {SIGSEGV, "sigsegv"},
+    {SIGTERM, "sigterm"},
+    
+/* Other unix signals - The following is a reasonable default set
+   based on SunOS, but there are other signals in different
+   flavors of unix. */
+#ifdef unix
+    {SIGHUP, "sighup"},
+    {SIGQUIT, "sigquit"},
+    {SIGTRAP, "sigtrap"},
+    {SIGEMT, "sigemt"},
+    {SIGKILL, "sigkill"},
+    {SIGBUS, "sigbus"},
+    {SIGSYS, "sigsys"},
+    {SIGPIPE, "sigpipe"},
+    {SIGALRM, "sigalrm"},
+    {SIGURG, "sigurg"},
+    {SIGSTOP, "sigstop"},
+    {SIGTSTP, "sigtstp"},
+    {SIGCONT, "sigcont"},
+    {SIGCHLD, "sigchld"},
+    {SIGTTIN, "sigttin"},
+    {SIGTTOU, "sigttou"},
+    {SIGIO, "sigio"},
+    /*{SIGXCPU, "sigxcpu"},*/
+    /*{SIGXFSZ, "sigxfsz"},*/
+    {SIGVTALRM, "sigvtalrm"},
+    {SIGPROF, "sigprof"},
+    {SIGWINCH, "sigwinch"},
+    {SIGLOST, "siglost"},
+    {SIGUSR1, "sigusr1"},
+    {SIGUSR2, "sigusr2"},    
+#endif /* unix */
+
+/* ALS signals */
+    {ALSSIG_REISS_CNTRLC, "reisscntrl_c"},
+    {ALSSIG_STACK_OVERFLOW, "stack_overflow"},
+    {ALSSIG_LIBLOAD, "libload"},
+    {ALSSIG_HEAP_OVERFLOW, "heap_overflow"},
+    {ALSSIG_ERROR, "prolog_error"},
+    {ALSSIG_UNDEFINED_PRED, "undefined_predicate"},
+
+/* List end */
+    {0, ""}
+};
+
+/* signal_name[] is an array that maps from signal numbers
+   to their prolog name.  Initilized in init_signal_name
+   and used in pbi_signal_name. */
+static const char *signal_name[MAX_ALS_SIG];
+
+/* Initilize the signal_name array. */
+static void init_signal_names(void)
+{
+    int i;
+    
+    /* Set all names to NULL, so that un-named symbols are detected. */
+    for (i = 0; i < MAX_ALS_SIG; i++) signal_name[i] = NULL;
+    
+    /* Load signal_name[] from signal_name_list[]. */
+    for (i = 0; signal_name_list[i].signal; i++) {
+	signal_name[signal_name_list[i].signal] = signal_name_list[i].name;
+    }
+}
+
+/* pbi_signal_name/2 
+   pbi_signal_name(SigNum, SigName)
+   pbi_signal_name(-, +)
+   
+   Returns the prolog name for the signal number SigNum in SigName.
+   Fails if there is no coresponding name for the signal number.
+*/
+
+int pbi_signal_name(void)
+{
+    PWord v1, v2, s;
+    int   t1, t2, st;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+    
+    if (t1 != PI_INT) PI_FAIL;
+    
+    if (v1 >= 0 && v1 < MAX_ALS_SIG && signal_name[v1]) {
+	PI_makesym(&s, &st, signal_name[v1]); 
+        if (PI_unify(v2, t2, s, st)) PI_SUCCEED;
+	else PI_FAIL;
+    } else PI_FAIL;
+}
 
 void
 init_sigint()
 {
+    /*
+     * Initilize the signal name table.
+     */
+    init_signal_names();
+
     /*
      * Establish the control C handler
      */
@@ -475,3 +578,4 @@ deathwatch()
 }
 
 #endif /* SIGCHLD or SIGCLD */
+
