@@ -21,9 +21,14 @@ module builtins.
 	%%%%   Version B
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+export attach_image/2.
+export attach_image/1.
+
 export save_image/2.
 export save_image/1.
+
 export pckg_init/0.
+
 export save_package/5.
 export save_base_package/1.
 
@@ -39,14 +44,38 @@ export save_base_package/1.
  |	named ImageName (per Options); Applies Options.
  *---------------------------------------------------------------*/
 
-save_image(ImageName, Options)
+fix_image_name(Name, FixedName) :-
+	als_system(SystemList),
+	dmember(os = OS, SystemList),
+	(OS = mswin32 ->
+		((sub_atom(Name, _, _, 0, '.exe')
+		 ; sub_atom(Name, _, _, 0, '.EXE')) ->
+			FixedName = Name
+			;
+			atom_concat(Name, '.exe', FixedName)
+		)
+		;
+		FixedName = Name
+	).
+
+save_image(ImageName) :-
+	save_image(ImageName, []).
+	
+save_image(ImageName, Options) :-
+	get_current_image(ThisImage),
+	fix_image_name(ImageName, FixedImageName),
+	process_image_options(Options, FixedImageName, OptionedName),
+	pbi_copy_file(ThisImage, OptionedName),
+	attach_image(OptionedName).
+	
+attach_image(ImageName)
 	:-
 		%% Save initial state of '$start' and '$initialize'
 		%% in case there is an error in processing options,
 		%% so that we need to restore them:
 	builtins:clause('$initialize',OldInit),	
 	builtins:clause('$start',OldStart),	
-	catch( save_image0(ImageName, Options),
+	catch(attach_image0(ImageName),
 			se(Error),
 			restore_si(Error, OldInit, OldStart) ).
 
@@ -71,7 +100,8 @@ save_image0(ImageName, Options)
  |	named ImageName.
  *---------------------------------------------------------------*/
 
-save_image(NewImageName)
+	
+attach_image0(NewImageName)
 	:-
 	adjust_sys_search_for_save(ALSDIR, OrigALSDIR),
 
@@ -102,21 +132,8 @@ save_image(NewImageName)
 	abolish(consulted,5),
 	dynamic(consulted/5),
 
-		%% Save the new image based on OS
-	als_system(SystemList),
-	dmember(os = OS, SystemList),
-	dmember(os_variation = OSVariation, SystemList),
-	image_type(OS, OSVariation, Type),
-	(OS = mswin32 ->
-		(filePlusExt(_,_,NewImageName) ->
-			IMN = NewImageName
-			;
-			filePlusExt(NewImageName,exe,IMN)
-		)
-		;
-		IMN = NewImageName
-	),
-	save_image_type(Type, IMN, OrigALSDIR),
+	% attach the state
+	attach_state(NewImageName),
 	
 		%% Re-install the search dir info:
 	assert(sys_searchdir(OrigALSDIR)),
@@ -185,54 +202,6 @@ adjust_sys_search_for_save(ALSDIR,OrigALSDIR)
 	abolish(sys_searchdir,1),
 	builtins:dynamic(sys_searchdir/1).
 
-/*!--------------------------------------------------------------*
- |	save_image_type/3
- |	save_image_type(Type, NewImageName, ALSDIR)
- |	save_image_type(+, +, +)
- |
- |	- applies the appropriate image-saving method
- |
- |	Type = {simple_mics/complex_mics}
- *---------------------------------------------------------------*/
-save_image_type(simple_mics, NewImageName, _)
-	:-
-	!,
-	printf(user_output,'Saving new image to: %s...',[NewImageName]),
-	save_image_with_state(NewImageName),
-	printf(user_output,'saved.\n',[]).
-	
-save_image_type(complex_mics, NewImageName, ALSDIR)
-	:-
-	!,
-	(tmpnam(SSName) ->
-	    printf(user_output,'Saving state to: %s...',[SSName])
-		;
-		printf(user_output,'Can''t allocate temporary file for saving state!\n',[]),
-		printf(user_output,'Check available space on /tmp or /var/tmp, etc.\n',[]),
-		printf(user_output,'If tempnam() runs on this system, consider setting TMPDIR.\n',[])
-
-	),
-	save_state(SSName),
-	    printf(user_output,'saved.\n',[]),
-	    
-	get_image_dir_and_name(ImageDir,ImageName),
-	mics_cmd_fmt(MicsCmdFmt),
-	sprintf(CMD, MicsCmdFmt,
-		      [ALSDIR, ImageDir, ImageName, SSName, NewImageName]),
-	atom_codes(ACMD,CMD),
-	    printf('Executing %s\n', [ACMD]),
-	system(ACMD),
-	unlink(SSName).
-
-image_type(_, _, simple_mics).
-/*
-image_type(mswin32, _, simple_mics) :- !.
-image_type(unix, 'hpux9.05', simple_mics) :- !.
-image_type(unix, 'irix5.3', simple_mics) :- !.
-image_type(unix, 'linux', simple_mics) :- !.
-image_type(unix, 'solaris2.4', simple_mics) :- !.
-image_type(_, _, complex_mics) :- !.
-*/
 
 /*!--------------------------------------------------------------*
  |	save_state/1.
@@ -253,6 +222,15 @@ save_state(FileName)
 
 /*!--------------------------------------------------------------*
  *---------------------------------------------------------------*/
+attach_state(NewImageName)
+	:-
+	get_shell_level(CurLev),
+	set_shell_level(0),
+	package_global_variables,	%% create initialization pred
+	set_shell_level(CurLev),
+		%% Defined at C level:
+	attach_state_to_file(NewImageName).
+
 save_image_with_state(NewImageName)
 	:-
 	get_shell_level(CurLev),
