@@ -6,3 +6,4 @@ UNIX_NAME=Solaris
 include ../common/unix_makefile
 
 LDFLAGS += -lsocket -lnsl -lm -ldl
+CFLAGS += -fPIC
