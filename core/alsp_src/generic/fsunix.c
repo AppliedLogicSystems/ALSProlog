@@ -338,7 +338,6 @@ getFileStatus(void)
 
     if (lstat(pathName, &fileStats) == -1)
 	PI_FAIL;
-
     fileMode = fileStats.st_mode;
 
     PI_makesym(&sTag, &sTagType, "fileStatus");
@@ -581,7 +580,7 @@ pmkdir()
 #if defined(MacOS) || defined(MSWin32)
     if (mkdir(pathName) == -1)
 #else
-    if (mkdir(pathName, v2) == -1)
+    if (mkdir(pathName, (mode_t) v2) == -1)
 #endif
 	PI_FAIL;
 
