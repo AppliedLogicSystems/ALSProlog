@@ -699,11 +699,19 @@ export unwind_protect/2.
 	%% "Always do B":
 unwind_protect(A, B) 
 	:-
-	catch(A, 
-		  Exception, 
-		  (catch(B, _, true), throw(Exception))
-		),
+	catch(A, Exception, handle_unwind_exception(B, Exception)),
+	!,
 	call(B).
+unwind_protect(A, B) 
+	:-
+	call(B), !, fail.
+
+handle_unwind_exception(B, Exception)
+	:-
+	catch(B, _, true), !, throw(Exception).
+handle_unwind_exception(B, Exception)
+	:-
+	throw(Exception).
 
 /*------------------------------------------------------------*
  * Some predicates needed for the rest of the initialization.
