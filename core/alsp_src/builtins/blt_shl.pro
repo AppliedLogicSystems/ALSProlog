@@ -436,7 +436,9 @@ export shell_read_execute/4.
 shell_read_execute(InStream,OutStream,Wins,Status)
 	:-
 	shell_read(InStream,OutStream,InitGoal,NamesOfVars,Vars),
+pbi_write('After_shell_read '),pbi_nl,cptx,
 	shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status),
+pbi_write('After_shell_execute '),pbi_nl,cptx,
 	!.
 
 continue_prolog_loop(halt) 
@@ -680,6 +682,7 @@ do_shell_query2(Mod,Goal)
 
 showanswers(N,V,InStream,OutStream) 
 	:-
+	N = [_|_],
 	write_substs(OutStream,N,V),
 	flush_output(OutStream),
 	!,

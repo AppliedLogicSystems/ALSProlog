@@ -1454,8 +1454,10 @@ write_out(Term) :-
  |	The corresponding item on Substs is really the original variable
  |	assigned to N, now (possibly) bound to some item;
  |
- |		If there are no substituitions to write out, then write_substs/3 
- |	will fail.  Otherwise, it will write out the substitutions, each
+ |	WARNING: Assumes that Names \= [].  This is guaranteed by the only
+ |	call to write_substs blt_shl.pro, which is in showanswers/4.
+ |
+ |	write_substs/[2,4] will write out the substitutions, each
  |	on its own line, without emitting a newline for the last line of the 
  |	last substitution.  This permits the calling procedure (showanswers)
  |	to look for a response on the same line.  Variables are handled as 
@@ -1472,6 +1474,8 @@ write_out(Term) :-
  |  12 Sept 1995 -- KAB: Modifications to avoid binding delay variables during 
  |				printing, and to provide appropriate representations of interval 
  |				terms, and of other non-instantiated frozen variables.
+ |  14 April 1996 -- KAB: Mofications to eliminate use of failure and use
+ |				of mangle.
  *-----------------------------------------------------------------------*/
 
 :- dynamic('$is_delay_var'/1).
@@ -1481,8 +1485,7 @@ write_substs(Stream,Names,Substs)
 	delete_anon_vars(Names,Substs,NewNames,NewSubsts),
 	cont_write_substs(NewNames,NewSubsts,Stream).
 
-delete_anon_vars([],[],[],[]) 
-	:- !.
+delete_anon_vars([],[],[],[]).
 
 delete_anon_vars(['_'|N1],[_|S1],N2,S2) 
 	:- !,
@@ -1492,21 +1495,13 @@ delete_anon_vars([N|N1],[S|S1],[N|N2],[S|S2])
 	:-
 	delete_anon_vars(N1,S1,N2,S2).
 
-cont_write_substs([],[],Stream) 
-	:- !,
-	fail.
-
 cont_write_substs(Names,Substs,Stream) 
 	:-
 	subst_orig_toplevel_names(Names,Substs),
-	subst_gen_letter_names(Substs,c(0)),
-	wr_subs2(Names,Substs,Stream),
-	fail.
+	subst_gen_letter_names(Substs,Substs0),
+	wr_subs2(Names,Substs0,Stream).
 
-cont_write_substs(_,_,_).
-
-subst_orig_toplevel_names([],[]) 
-	:- !.
+subst_orig_toplevel_names([],[]).
 
 subst_orig_toplevel_names([N|Ns],[S|Ss]) 
 	:- 
@@ -1516,7 +1511,7 @@ subst_orig_toplevel_names([N|Ns],[S|Ss])
 	subst_orig_toplevel_names(Ns,Ss).
 
 subst_orig_toplevel_names([N|Ns],['%lettervar%'(N)|Ss]) 
-	:- !,
+	:-
 	subst_orig_toplevel_names(Ns,Ss).
 
 subst_orig_toplevel_names([_|Ns],[_|Ss]) 
@@ -1531,45 +1526,53 @@ set_eps_show(V)
 	abolish(epsilon_show,1),
 	assert(epsilon_show(V)).
 
-subst_gen_letter_names(Var,Counter) 
+/*-------------------------------------------------------------
+ |	subst_gen_letter_names/2
+ |	subst_gen_letter_names(InTerm,OutTerm) 
+ |	subst_gen_letter_names(+,-) 
+ |
+ |	subst_gen_letter_names/4
+ |	subst_gen_letter_names(InTerm,InCounter,OutTerm,OutCounter) 
+ |	subst_gen_letter_names(+,+,-,-) 
+ |
+ |	Substitutes generated letter names for any variables
+ |	occurring in Term; recurses through the structure of Term
+ *-------------------------------------------------------------*/
+
+subst_gen_letter_names(InTerm,OutTerm) 
+	:-
+	subst_gen_letter_names(InTerm,0,OutTerm,_). 
+
+subst_gen_letter_names(Var,Ctr,Var,Ctr) 
 	:-
 	var(Var),
 	'$is_delay_var'(Var),
 	!.
 
-subst_gen_letter_names(Var,Counter) 
+subst_gen_letter_names(Var,VarNum,'%lettervar%'(VarAtom),NextVarNum)
 	:-
 	var(Var),
 	!,
-	arg(1,Counter,VarNum),
 	sio_lettervar(VarNum,VarAtom0),
 	'$atom_concat'('_',VarAtom0,VarAtom),
 	Var = '%lettervar%'(VarAtom),
-	NextVarNum is VarNum+1,
-	mangle(1,Counter,NextVarNum).
+	NextVarNum is VarNum+1.
 
-subst_gen_letter_names(Atomic,Counter) 
+subst_gen_letter_names(Atomic,Ctr,Atomic,Ctr) 
 	:-
 	atomic(Atomic),
 	!.
 
-subst_gen_letter_names(Struct,Counter) 
-	:-
-	functor(Struct,_,N),
-	subst_gen_letter_names(1,N,Struct,Counter).
+subst_gen_letter_names([InHead | InTail], InCtr, [OutHead | OutTail], OutCtr) 
+	:-!,
+	subst_gen_letter_names(InHead, InCtr, OutHead, InterCtr),
+	subst_gen_letter_names(InTail, InterCtr, OutTail, OutCtr).
 
-subst_gen_letter_names(N,M,_,_) 
+subst_gen_letter_names(InStruct,InCtr,OutStruct,OutCtr) 
 	:-
-	N>M,
-	!.
-
-subst_gen_letter_names(N,M,S,C) 
-	:-
-	arg(N,S,A),
-	subst_gen_letter_names(A,C),
-	NN is N+1,
-	subst_gen_letter_names(NN,M,S,C).
-
+	InStruct =.. [Functor | InArgs],
+	subst_gen_letter_names(InArgs, InCtr,OutArgs, OutCtr),
+	OutStruct =.. [Functor | OutArgs].
 
 wr_subs2(Ns, Ss, Stream)
 	:-
