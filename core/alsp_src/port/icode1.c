@@ -1132,6 +1132,8 @@ icode(iidx, w, x, y, z)
 	switch (iidx) {
 	    case IC_INIT:
 		ic_ptr = icode_buf;
+		
+		memset(icode_buf, -1, ICBUFSIZE);
 
 		callidx = 0;
 
@@ -1157,6 +1159,8 @@ icode(iidx, w, x, y, z)
 		if (firstargptr < dstart)
 		    firstargptr = dstart;
 
+		ic_putl(-1);
+		
 		for (i = 0; i < callidx; i++) {
 		    *((BigOffset *) (callinfo[i].patchaddr + 1)) =
 			ic_ptr - callinfo[i].patchaddr;

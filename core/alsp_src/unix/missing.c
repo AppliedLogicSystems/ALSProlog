@@ -186,3 +186,17 @@ strtoul(string, endPtr, base)
     return result;
 }
 #endif
+
+#ifdef MISSING_STRERROR
+#ifdef UNIX_SUNOS
+#include <errno.h>
+extern char *sys_errlist[];
+
+char *strerror(int errnum)
+{
+  return sys_errlist[errnum];
+}
+#endif
+#endif
+
+

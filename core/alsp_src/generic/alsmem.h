@@ -21,11 +21,7 @@
 #define AM_MAXGLOBALS		64
 #else
 /* AM_BLOCKSIZE is the default block size to allocate */
-#if defined(_AIX) || defined(UNIX_IRIX)
-#define AM_BLOCKSIZE		(0x00200000*0x10)	/* about 2 meg */
-#else
 #define AM_BLOCKSIZE		0x00200000	/* about 2 meg */
-#endif
 
 /* AM_MALLOCSPACE is the space we attempt to leave malloc with at 
    initialization */
@@ -80,5 +76,8 @@ struct am_header {
 	    long value;
 	} globals[AM_MAXGLOBALS];
 };
+
+#define FB_SIZE(p)  (* (long *) p)
+#define FB_NEXT(p)  (* ((long **) p + 1))
 
 #endif /* ALSMEM_H_INCLUDED */

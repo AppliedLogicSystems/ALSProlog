@@ -27,12 +27,7 @@ module builtins.
 
 :-	make_hash_table("_object_handle"), set_object_handle(counter, 0).
 export get_object_handle/2.
-
-next_object_handle(N)
-	:-
-	get_object_handle(counter, Prev),
-	N is Prev + 1,
-	set_object_handle(counter, N).
+export set_object_handle/2.
 
 export object_handle/2.
 object_handle(Object, Handle)
@@ -41,15 +36,16 @@ object_handle(Object, Handle)
 	(integer(IH) ->
 		Handle = IH
 		;
-		next_object_handle(Handle),
+			% next_object_handle(Handle),
+		get_object_handle(counter, Prev),
+		Handle is Prev + 1,
+		set_object_handle(counter, Handle),
 		mangle(3, Object, Handle)
 	).
-
 
 			/*=================================
 			 |   MESSAGE SENDING
 			 *================================*/
-
 
 /*!-----------------------------------------------------------------------
  |	send/2
@@ -80,8 +76,9 @@ send(Object^SlotDescrip, Message, Module)
 send(Object, Message, Module)
 	:-
 	Module:accessObjStruct(myClassPred, Object, ClassPred),
+	Module:accessObjStruct(myModule, Object, MyModule),
 	ActionCall =.. [ClassPred, Message, Object],
-	call(Module:ActionCall).
+	call(MyModule:ActionCall).
 
 /*!-----------------------------------------------------------------------
  *-----------------------------------------------------------------------*/
@@ -128,7 +125,8 @@ send_parent(Object, Msg)
 	arg(2, Object, MyModule),
 	MyModule:subClassOf(MyClass, ParentClass),
 	ParentCall =.. [ParentClass, Msg, Object],
-	call(ParentCall).
+	MyModule:parentClassModule(MyClass, ParentModule),
+	ParentModule:ParentCall.
 
 /*!-------------------------------------------------------
  |	accessObjStruct/3
@@ -206,6 +204,12 @@ satisfy_slot_constrs(Class,SlotName,Module,Value)
 
 satisfy_slot_constrs(_,_,_,_).
 
+export all_setObjStruct/2.
+all_setObjStruct([], _).
+all_setObjStruct([Tag = Value | TagEqns], State)
+	:-
+	setObjStruct(Tag, State, Value),
+	all_setObjStruct(TagEqns, State).
 
 /*!-------------------------------------------------------
  |	':='/2.
@@ -293,7 +297,8 @@ makegenericObjectsStruct(Obj)
 	arg(1,Obj,nil),
 	arg(2,Obj,user),
 	arg(3,Obj,nil),
-	arg(4,Obj,nil).
+	arg(4,Obj,nil),
+	arg(5,Obj,nil).
 
 slots_for(genericObjects,[myClassPred,myModule,myName,myHandle]).
 
@@ -303,13 +308,16 @@ genericObjects(_1595,_1593)
 	:- 
 	genObjs(_1595,_1593).
 
-/*----*
-		%% necessary for testing when modifying defineClass:
-		%% commented out when defineClass works:
-slots_for(genericObjects,[myName,myModule,myDBRefs]).
-%classModule(genericObjects,objects).
-classModule(genericObjects,builtins).
- *----*/
+export set_all_args/4.
+set_all_args(Cur,Size,FF,ArgVal)
+	:-
+	Cur > Size, !.
+set_all_args(Cur,Size,FF,ArgVal)
+	:-
+	arg(Cur,FF,ArgVal),
+	Next is Cur +1,
+	set_all_args(Next,Size,FF,ArgVal).
+
 
 genObjs(get_value(Slot,Value),State)
 	:-
@@ -431,7 +439,9 @@ create_object(Module, SpecList, Object)
 
 	Module:setObjStruct(myClassPred, Object, ObjectClass),
 		%% get any class slot initialization values:
-	bagOf(Slot=Value, Module:slot_default(ObjectClass,Slot,Value), ClassValues),
+	(bagof(Slot=Value, Module:slot_default(ObjectClass,Slot,Value), ClassValues), !;
+		ClassValues = []),
+		
 		%% merge them:
 	merge_values(ClassValues, LocalValues, Values),
 	class_constr_init(ObjectClass,Module,ClassInitVals),
@@ -444,6 +454,11 @@ create_object(Module, SpecList, Object)
 	(dmember( handle=true, SpecList) ->
 		object_handle(Object, Handle),
 		set_object_handle(Handle, Object)
+		;
+		true
+	),
+	(dmember( name=GlobalHandle, SpecList) ->
+		set_object_handle(GlobalHandle, Object)
 		;
 		true
 	).
@@ -478,9 +493,9 @@ class_default_init(ObjectClass,Module,ClassDefaultVals)
 
 object_values_init(Values, InitVals)
 	:-
-	setOf(s(Slot,Constant),
+	(setof(s(Slot,Constant),
 			member(Slot=Constant,Values),
-			InitVals).
+			InitVals), !; InitVals = []).
 
 		%% Arg 2 values have precedence over Arg 1 values:
 merge_init_vals([], HigherVals, HigherVals).

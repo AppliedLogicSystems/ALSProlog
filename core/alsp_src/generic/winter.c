@@ -27,7 +27,9 @@ PWord wm_normal = DEFAULT_SAFETY;
 PWord wm_safety = DEFAULT_SAFETY;
 #endif	/* WM_SAFETY_REG_HOOK */
 PWord wm_trigger = -1;
-int   wm_regidx = 0;
+#if 0
+//int   wm_regidx = 0;
+#endif
 PWord wm_interrupt_caught = 0;
 
 
@@ -36,14 +38,14 @@ PWord wm_in_Prolog = 0;
 PWord wm_spying = 0;
 
 
-Code *wm_cutaddr;
-Code *wm_overcode;		/* This is the Prolog code run during an
-				 * exception
-				 */
+/*//Code *wm_cutaddr;*/
+/*//Code *wm_overcode;*/	/* This is the Prolog code run during an*/
+/*//				 * exception*/
+/*//				 */
 #ifdef KERNAL
 PWord *wm_regs[10][NumWAMRegs];
 #else
-PWord *wm_regs[100][NumWAMRegs];
+/*//PWord *wm_regs[100][NumWAMRegs];*/
 #endif /* KERNAL */
 
 #ifdef MacOS
@@ -55,20 +57,39 @@ long *Fail;
 
 #endif /* MacOS */
 
-PWord *wm_heapbase;
-PWord *wm_trailbase;
-PWord *wm_stackbot;
+#if 0
+//PWord *wm_heapbase;
+//PWord *wm_trailbase;
+//PWord *wm_stackbot;
 #ifdef MacOS
-PWord *wm_stackbot_safety;
+//PWord *wm_stackbot_safety;
 #endif /* MacOS */
 
-PWord *wm_gvfreelist;
-PWord *wm_gvbase;
-int   gv_setcnt;		/* number of times gv_set run since last gc */
+//PWord *wm_gvfreelist;
+//PWord *wm_gvbase;
+//int   gv_setcnt;		/* number of times gv_set run since last gc */
+#endif
 
 #define round(x,s) ((((x)-1) & ~(long)((s)-1)) + (s))
 
 PWord	deref		PARAMS(( PWord ));
+
+#ifdef DEBUG
+static int valid_pword(PWord p)
+{
+	switch (MTP_TAG(p)) {
+	case MTP_UNBOUND:
+	case MTP_STRUCT:
+	case MTP_LIST:
+		if (((long *)p > wm_SP && (long *)p < wm_H)) return 1;
+		else return 0;
+		break;
+	default:
+		return 1;
+		break;
+	}
+}
+#endif
 
 /*
  * Assumption: PWords are 32 bits wide
@@ -79,8 +100,12 @@ deref(PWord w)
 {
     PWord x;
 
-    while (M_ISVAR(w) && (x = M_VARVAL(w)) != w)
-	w = x;
+	ASSERT(valid_pword(w));
+
+    while (M_ISVAR(w) && (x = M_VARVAL(w)) != w) {
+		w = x;
+		ASSERT(valid_pword(w));
+	}
 
     return w;
 }
@@ -91,6 +116,7 @@ w_get(vp, tp, in)
     int  *tp;
     PWord in;
 {
+
     in = deref(in);
     switch ((int) MTP_TAG(in)) {
 	case MTP_UNBOUND:
@@ -173,6 +199,8 @@ w_install(addr, val, tag)
 	default:
 	    fatal_error(FE_IN_WINSTALL, tag);
     }
+
+	ASSERT(valid_pword(*addr));
 }
 
 void

@@ -216,7 +216,7 @@ call2(M,G) :- M:G.
  |
  | assert_at_load_time/1 uses the ICRESET facility to remove asserted
  | clauses from .obp files.  It may be used in settings where it is
- | inappropriate to perform the assert at load time due to environmental
+ | inappropriate to perform the assert at compile time due to environmental
  | considerations.
  *----------------------------------------------------------------------*/
  
@@ -980,6 +980,7 @@ export exists/1.
 exists(FileName) :-
 	'$access'(FileName,0).
 
+	%%% Use the old C-based consult mechanism for booting:
 load_builtins(File) 
 	:-
 	sys_env(OS,_,_),
@@ -995,9 +996,10 @@ load_builtins(BDir, File)
 	sys_searchdir(Path),
 	'$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
-%pbi_write(FileAndPath), pbi_nl,pbi_ttyflush,
+%pbi_write(load-FileAndPath), pbi_nl,pbi_ttyflush,
 	(resource_load(File) ; '$load'(FileAndPath, 0)).
 
+	%%% Use the new Prolog-based consult mechanism:
 consult_builtins(File) 
 	:-
 	sys_env(OS,_,_),
@@ -1036,7 +1038,7 @@ cslt_blts_ld(File, FilePathPro,FilePathObp)
 cslt_blts_ld(File, FilePathPro,FilePathObp)
 	:-
 	obp_open(FilePathObp),
-	xconsult(FilePathPro, NErrs),
+	xconsult(FilePathPro, NErrs, ErrList),
 	obp_close,
 	(NErrs = 0, !; unlink(FilePathObp), fail).
 
@@ -1044,7 +1046,7 @@ cslt_blts_ld(File, FilePathPro,FilePathObp)
 :-	auto_use(debugger).
 :-	auto_use(xconsult).
 		%% Make this a conditional:
-:-	auto_use(rel_arith).
+%:-	auto_use(rel_arith).
 
 ld_fs(OS)
 	:-	
@@ -1092,12 +1094,16 @@ ld_fs(OS)
 	consult_builtins(BDir, blt_flgs),
 	consult_builtins(BDir, blt_misc),
 	consult_builtins(BDir, objs_run),
+
 		%% ALS shell stuff starts here:
+	consult_builtins(BDir, tc_base),
+	consult_builtins(BDir, objects),
+	consult_builtins(BDir, shlclass),
+	consult_builtins(BDir, blt_shlc),			
+
 	consult_builtins(BDir, blt_shlr),			
 	consult_builtins(BDir, blt_cslt),			
 	consult_builtins(BDir, blt_shl).
-
-%	consult_builtins(BDir, blt_dvsh).
 
 
 %%--------------------------------------------

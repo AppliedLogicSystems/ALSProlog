@@ -27,10 +27,6 @@
 #if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
 #include <sys/mman.h>
 
-#if defined(HAVE_MPROTECT) && defined(MISSING_EXTERN_MPROTECT)
-extern	int	mprotect	PARAMS(( caddr_t, size_t, int ));
-#endif /* HAVE_MPROTECT && MISSING_EXTERN_MPROTECT */
-
 #elif	defined(arch_m88k)  /* !HAME_MMAP */
 extern	int	memctl		PARAMS(( void *, int, int ));
 
@@ -59,7 +55,7 @@ long *aib_clause_addr;		/* used by assertz */
  * w_nametable is allocated to be an array of pointers to procedure entries
  *-----------------------------------------------------------------*/
 
-ntbl_entry **w_nametable = (ntbl_entry **) 0;
+/*//ntbl_entry **w_nametable = (ntbl_entry **) 0;*/
 
 /*-----------------------------------------------------------------*
  | w_freeptr points to a chain of free code space blocks.
@@ -67,23 +63,19 @@ ntbl_entry **w_nametable = (ntbl_entry **) 0;
  | for allocation.  At present, this is used only for statistics.
  *-----------------------------------------------------------------*/
 
-static long *w_freeptr = (long *) 0;
-static long  w_totspace = 0;
+/*//static long *w_freeptr = (long *) 0;*/
+/*//static long  w_totspace = 0;*/
 
-unsigned long w_timestamp = 0;
-unsigned long w_reconstamp = 0;
+/*//unsigned long w_timestamp = 0;*/
+/*//unsigned long w_reconstamp = 0;*/
 
-static long *w_tofreelist = (long *) 0;	/* list of blocks to be freed */
-static long  w_tofreesize = 0;	/* size (in longwords) of the blocks on the
+/*//static long *w_tofreelist = (long *) 0;*/	/* list of blocks to be freed */
+/*//static long  w_tofreesize = 0;*/
+				/* size (in longwords) of the blocks on the
 				 * tofreelist
 				 */
-struct codeblock {
-    long *addr;
-    long size;
-    struct codeblock *next;
-};
 
-static struct codeblock *codeblock_list = (struct codeblock *) 0;
+/*//static struct codeblock *codeblock_list = (struct codeblock *) 0;*/
 
 static	long *	code_alloc	PARAMS(( size_t, int ));
 static	void	makerunable	PARAMS(( void ));
@@ -115,7 +107,8 @@ code_alloc(size, fe_num)
     codeblock_list = newcb;
     
     newcb->addr = ss_pmalloc(size, fe_num, &newcb->size);
-
+	
+	memset(newcb->addr, -1, newcb->size);
     return newcb->addr;
 }
 
@@ -247,8 +240,8 @@ w_dbprotect(newstate)
 #else
 #define NENT_ALLOCQUANT 1024
 #endif /* KERNAL */
-static ntbl_entry *ane_entbase = (ntbl_entry *) 0;
-static ntbl_entry *ane_entptr = (ntbl_entry *) 0;
+/*//static ntbl_entry *ane_entbase = (ntbl_entry *) 0;*/
+/*//static ntbl_entry *ane_entptr = (ntbl_entry *) 0;*/
 
 static ntbl_entry *
 alloc_name_entry()
@@ -259,6 +252,7 @@ alloc_name_entry()
 	ane_entbase = (ntbl_entry *) 
 		code_alloc(NENT_ALLOCQUANT * sizeof (ntbl_entry), FE_XMEM_NTBL);
 
+	memset((char *) ane_entbase, -1 , NENT_ALLOCQUANT * sizeof (ntbl_entry));
 	ane_entptr = ane_entbase + NENT_ALLOCQUANT;
     }
 
@@ -943,6 +937,9 @@ w_fixchoicepoints(ib)
     /* While there are choice points to look at */
     while (b != 0) {
 	/* Get the next clause address */
+	if (b < wm_heapbase || b > wm_trailbase) {
+		printf("b problem\n");
+	}
 	ptr = (long *) chpt_NextClause(b);
 
 	/* If the clause address points into the indexing block, there is
@@ -1252,8 +1249,8 @@ w_assertz(p, a, buffer, bufsize, firstargkey, fstartoffset, dstartoffset, envsav
  | w_asserta 
  |
  | takes the given procedure name and arity and asserts the
- | contents of the icode buffer to the end of the clauses associated
- | with the procedure.
+ | contents of the icode buffer to the beginning of the clauses 
+ | associated with the procedure.
  |
  | See the comment for w_assertz for a description of the parameters.
  *-----------------------------------------------------------------*/
@@ -1682,7 +1679,10 @@ w_exec(buffer, bufsize, nocatcher)
      * are being executed, reissue Control-C interrupt.
      */
 
-    if (wm_aborted && (wm_regidx != 0))
+#if 0
+    //if (wm_aborted && (wm_regidx != 0))
+#endif
+    if (wm_aborted && (current_engine.reg_stack_top != current_engine.reg_stack_base))
 	reissue_cntrlc();
     else
 	wm_aborted = 0;
@@ -2303,7 +2303,11 @@ w_collect()
      * Step 3: Mark from next clause addresses and continuation pointers.
      */
 
-    if (wm_regidx) {
+#if 0
+    //if (wm_regidx)
+#endif
+    if (current_engine.reg_stack_top != current_engine.reg_stack_base)
+    {
 	register PWord *e, *b, *spb;
 
 	e = wm_E;

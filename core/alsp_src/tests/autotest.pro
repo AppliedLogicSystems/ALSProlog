@@ -59,6 +59,10 @@ configure_testing(TDs, CmdLineVs)
 	append(SDList, [tests,tsuite], TSPList),
 	subPath(TSPList, TSUITE_Path),
 	add_search_dirs([ALSEXMP_Path,TSUITE_Path]).
+
+configure_testing(_, _)
+	:-
+	add_search_dirs([als_exmp,tsuite]).
 	
 add_search_dirs([]).
 add_search_dirs([D | Ds])

@@ -12,7 +12,6 @@
  |  Major revisions: 1995-96
  *=============================================================*/
 
-
 module builtins.
 use sio.
  
@@ -24,6 +23,13 @@ use sio.
  | loading files, etc. prior to the starting a shell.  DefaultShellCall
  | is the shell call to make.
  *-------------------------------------------------------------------------------*/
+
+:- defineClass(alsshell,
+	[   name=shl_source_handler,
+		subClassOf=source_handler,
+		export = yes,
+		addl_slots= [ ]
+	]).
 
 start_shell(DefaultShellCall) 
 	:-
@@ -39,12 +45,22 @@ start_shell0(DefaultShellCall)
 	setup_debugger_stubs,
 
 	make_clinfo(CLInfo, DefaultShellCall, false),	% verbosity = verbose
-	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,CLInfo),
+	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,alsshell,CLInfo),
 
 	assertz(command_line(ResidualCommandLine)),
 	setup_search_dirs(CLInfo),
 	assert(save_clinfo(CLInfo)),
 	output_system_banner(CLInfo),
+
+	setup_als_shl_mgr(Mgr),
+	make_gv('_primary_manager'),
+	set_primary_manager(Mgr),
+
+	sys_searchdir(ALSDIRPath),
+	split_path(ALSDIRPath, ALSDIRPathList),
+	dappend(ALSDIRPathList, [library,'objects.pro'], ObjPathList),
+	join_path(ObjPathList, ObjectsPath),
+
 	library_setup,
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
@@ -55,6 +71,30 @@ start_shell0(DefaultShellCall)
 	user:ShellCall.
 
 start_shell0(_).
+
+setup_als_shl_mgr(MgrObject)
+	:-
+		%% Get values for initial values in create_object:
+	get_cwd(InitialDir),
+
+	builtins:sys_searchdir(SSD),
+	split_path(SSD,SSDL),
+	append(SSDL, [library], LLL),
+	join_path(LLL, LibPath),
+
+	findall(searchdir(SD), (builtins:searchdir(SD)), SDList),
+
+	create_object(
+		[instanceOf=als_shl_mgr,
+		 handle=true,
+		 values = [
+			initial_dir = InitialDir,
+			prolog_library = LibPath,
+			initial_search_dirs = SDList
+		 ]
+		], 
+		MgrObject).
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% "Early" shell setup support routines
@@ -84,267 +124,6 @@ make_clinfo( CLInfo, DefaultShellCall, Verbosity)
 					true				/* Load .alspro: true = do it */
 					). 				
 
-get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,CLInfo)
-	:-
-	%% Get the raw command line and assert it.
-	abolish(command_line,1),
-	pbi_get_command_line(RawCommandLine),
-
-	%% get the command line, but ignore the image name
-	(RawCommandLine = [Image | CommandLine] ; CommandLine = []),
-	!,
-	ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo).
-
-setup_search_dirs(CLInfo)
-	:-
-	arg(6, CLInfo, RevCmdLineSearch),
-	dreverse(RevCmdLineSearch, CmdLineSearch),
-	ss_init_searchdir(CmdLineSearch).
-
-output_system_banner(CLInfo)
-	:-
-	arg(2,CLInfo,ConsultNoise),
-	OutputStream = user_output,
-	als_system(SysList),
-	(ConsultNoise = true -> 
-		true ; 
-		print_banner(OutputStream,SysList)
-	).
-
-library_setup
-	:-
-	(ConsultNoise = true -> true ;
-		als_advise(OutputStream, 'Setting up library indicies...may take a moment...',[])),
-	setup_libraries,
-	(ConsultNoise = true -> true ; 
-		als_advise(OutputStream, 'Done.\n',[]),
-		nl(OutputStream),
-		flush_output(OutputStream)
-	).
-
-load_cl_files(CLInfo)
-	:-
-	arg(2, CLInfo, Verbosity),
-	arg(3, CLInfo, Files),
-	set_consult_messages(Verbosity),
-	ss_load_files(Files).
-
-process_cl_asserts(CLInfo)
-	:-
-	arg(8, CLInfo, CLAsserts),
-	ss_cl_asserts(CLAsserts, OutputStream).
-
-	%%%%%%%
-
-setup_init_goal(CLInfo, ShellCall)
-	:-
-	arg(7, CLInfo, CLShellCall),
-	arg(1, CLInfo, CmdLineGoal),
-	(CmdLineGoal = true ->	
-		ShellCall = CLShellCall
-		;
-		ShellCall = 
-			catch(CmdLineGoal, _, CLShellCall)
-	).
-
-/*-----------------------------------------------------------------*
- | ss_parse_command_line/3
- | ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo),
- | ss_parse_command_line(+, -, +/-),
- *-----------------------------------------------------------------*/
-
-	%% Empty/end of command line:
-ss_parse_command_line([], [], CLInfo)
-	:-!.
-
-	%% -p: Start application part of command line:
-ss_parse_command_line(['-p' | T], T, CLInfo)
-	:-!.
-
-	%% -P: Start application part of command line, pushing on image name:
-ss_parse_command_line(['-P' | T], [ImageName | T], CLInfo)
-	:-!,
-	arg(4,CLInfo,ImageName).
-
-/*
-	%% -ind: "Indirect" file: open, read 1 line, process the line, & continue:
-ss_parse_command_line(['-ind', File | T], L, CLInfo)
-	:-!,
-	open(File,read,IS,[]),
-	get_line(IS, Line),
-	close(IS),
-	atomread(Line, IndCmdLine),
-	append(IndCmdLine, T, RestCL),
-	ss_parse_command_line(RestCL, L, CLInfo).
-*/
-
-	%% -g <Goal>: Start up goal:
-ss_parse_command_line(['-g', GoalAtom | T], L, CLInfo)
-	:-!,
-	atom_codes(GoalAtom, GoalCodes),
-	term_codes(Goal, GoalCodes),	%% FIXME: Catch syntax errors
-	mangle(1,CLInfo,Goal),
-	ss_parse_command_line(T,L,CLInfo).
-
-	%% -b: "Batch" mode: exit after running -g startup goal (don't run default shell):
-ss_parse_command_line(['-b' | T], L, CLInfo)
-	:-!,
-	mangle(7, CLInfo, true),
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% -v: Turn on verbose mode:
-ss_parse_command_line(['-v' | T], L, CLInfo)
-	:-!,
-	mangle(2, CLInfo, false),
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% -q: Turn off verbose mode: (set = "true": be quiet)
-ss_parse_command_line(['-q' | T], L, CLInfo)
-	:-!,
-	mangle(2, CLInfo, true),
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% -s: Atom - File to add to search list;
-	%% in reverse order; later reverse it:
-ss_parse_command_line(['-s', File | T], L, CLInfo)
-	:-!,
-	arg(6, CLInfo, PrevSL),
-	mangle(6, CLInfo, [File | PrevSL]),
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% -a: Atom - Assert Atom in module user.
-	%% -A: Atom - Assert Atom in module user.
-ss_parse_command_line(['-A', Expr | T], L, CLInfo)
-	:-!,
-	ss_parse_command_line(['-a', Expr | T], L, CLInfo).
-
-ss_parse_command_line(['-a', Expr | T], L, CLInfo)
-	:-!,
-	arg(8, CLInfo, PrevCmdLineAsserts),
-	mangle(8, CLInfo, [Expr | PrevCmdLineAsserts]),
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% For historical compatability:
-	%% -obp: Keep obp files in directory where image is running:
-ss_parse_command_line(['-obp' | T], L, CLInfo)
-	:-!,
-	generated_in_cur,
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% "Generated In Current directory:"	
-	%% -gic: Keep generated files in directory where image is running:
-ss_parse_command_line(['-gic' | T], L, CLInfo)
-	:-!,
-	generated_in_cur,
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% "Generated In Source directory:"	
-	%% -gis: Keep generated files in directory where sources reside:
-ss_parse_command_line(['-gis' | T], L, CLInfo)
-	:-!,
-	generated_with_src,
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% "Generated In Architecture sub-directory of Sources directory:"	
-	%% -gias: Keep generated files in arch subdirectory where sources reside:
-ss_parse_command_line(['-gias' | T], L, CLInfo)
-	:-!,
-	generated_in_arch(src),
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% "Generated In Architecture sub-directory of Current directory:"	
-	%% -giac: Keep generated files in arch subdirectory of current dir:
-ss_parse_command_line(['-giac' | T], L, CLInfo)
-	:-!,
-	generated_in_arch(cur),
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% "Generated In exlicipt Location:"
-	%% -gil: Keep generated files in explict Path dir:
-ss_parse_command_line(['-gil', Path | T], L, CLInfo)
-	:-!,
-	generated_in_locn(Path),
-	ss_parse_command_line(T, L, CLInfo).
-
-
-	%% -nwd: Set debugger to "nowins"
-ss_parse_command_line(['-nwd' | T], L, CLInfo)
-	:-!,
-	debugger:nospy,
-	(debugger:set_debug_io(nowins),!;true),
-	ss_parse_command_line(T, L, CLInfo).
-
-	/* Skip -heap and -stack arguments because they 
-       must be handled at the C level. */
-ss_parse_command_line(['-heap', _ | T], L, CLInfo)
-	:-!,
-	ss_parse_command_line(T, L, CLInfo).
-
-ss_parse_command_line(['-stack', _ | T], L, CLInfo)
-	:-!,
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% Specify non-default shell:
-	%% -shell Shell : Use shell (alsdev only known):
-ss_parse_command_line(['-shell', ShellName | T], L, CLInfo)
-	:-!,
-	mangle(7, CLInfo, ShellName),
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% -no_dot_alspro: suppress loading .alspro (or alspro.pro):
-ss_parse_command_line(['-no_dot_alspro' | T], L, CLInfo)
-	:-!,
-	mangle(9, CLInfo, false),
-	ss_parse_command_line(T, RestL, CLInfo).
-
-	%% Otherwise: should be a file to be loaded:
-ss_parse_command_line([File | T], L, CLInfo)
-	:-
-	arg(3, CLInfo, Files),
-	append(Files, [File], NewFiles),
-	mangle(3, CLInfo, NewFiles),
-	ss_parse_command_line(T, L, CLInfo).
-
-ss_cl_asserts([], OutputStream).
-ss_cl_asserts([Expr | CLAsserts], OutputStream)
-	:-
-	catch( ss_cl_assert(Expr),
-			_,
-			ss_cl_assert_error(Expr, OutputStream)
-		),
-	ss_cl_asserts(CLAsserts, OutputStream).
-
-
-ss_cl_assert(Expr)
-	:-
-	atomread(Expr, CLAssrt, [syntax_errors(quiet)]),
-	ss_cl_assert0(CLAssrt).
-
-ss_cl_assert_error(Expr, OutputStream)
-	:-
-	als_advise(OutputStream, 'Error reading command-line assert: %s', [Expr]),
-	nl(OutputStream),
-	flush_output(OutputStream).
-
-ss_cl_assert0((Mod:AX))
-	:-
-	(modules(Mod,_) -> true ; create_new_module(Mod)),
-	!,
-	ss_cl_assert1(AX, Mod),
-	'$icode'(-9,0,0,0,0).
-
-ss_cl_assert0(AX)
-	:-
-	ss_cl_assert1(AX, user).
-
-ss_cl_assert1((AX, BX), Mod)
-	:-!,
-	ss_cl_assert1(AX, Mod),
-	ss_cl_assert1(BX, Mod).
-
-ss_cl_assert1(AX, Mod)
-	:-
-	Mod:assertz(AX).
 
 /*---------------------------------------
  |	ss_init_searchdir/1
@@ -462,7 +241,8 @@ print_banner(OutS,L)
 #else
 	printf(OutS,'%s Version %s \[%s\]\n',[Name,Version,OSVar]),
 #endif
-	printf(OutS,'   Copyright (c) 1987-96 Applied Logic Systems, Inc.\n\n',[]).
+	printf(OutS,'   Copyright (c) 1987-96 Applied Logic Systems, Inc.\n\n',[]),
+	flush_output(OutS).
 
 system_name(L, Name)
 	:-
@@ -930,135 +710,214 @@ abort
 	:- 
 	throw(abort).
 
+endmod.  %% builtins
 
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% General library setup (called when shell
-	%% starts up; blt_lib.pro is (to be) no 
-	%% longer loaded as part of builtins:
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%  ALSSHELL COMPONENTS
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-export setup_libraries/0.
-setup_libraries
+module alsshell.
+
+	%%------------------------------------------
+	%% Command line processing
+	%%------------------------------------------
+
+special_ss_parse_command_line(File, Tail, Tail, CLInfo)
 	:-
-	sys_searchdir(ALSDIRPath),
-	pathPlusFile(ALSDIRPath, '*', ALSDIRPattern),
-	directory(ALSDIRPattern,1,SubdirList0),
-	list_delete(SubdirList0, '.', SubdirList1),
-	list_delete(SubdirList1, '..', SubdirList2),
-	list_delete(SubdirList2, builtins, SubdirList),
-	setup_local_libraries(SubdirList, ALSDIRPath),
+	arg(3, CLInfo, Files),
+	append(Files, [File], NewFiles),
+	mangle(3, CLInfo, NewFiles).
 
-	(getenv('ALS_LIBS', EnvLibsString) ->
-		atom_codes(EnvLibsString, ELSCs),
-		asplit0_all(ELSCs, 0',, EnvLibsStrings),
-		all_to_atoms(EnvLibsStrings, EnvLibsList),
-		setup_remote_libraries(EnvLibsList)
-		;
-		true
-	).
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% ERROR OUTPUT PREDICATES
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-setup_local_libraries([], _).
-setup_local_libraries([Lib | LibsList], DirPath)
+%:- dynamic(shl_source_handlerAction/2).
+
+shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 	:-
-	pathPlusFile(DirPath, Lib, LibPath),
-	setup_lib(LibPath),
-	setup_local_libraries(LibsList, DirPath).
+	display_file_errors(SPath, ErrsList, FileMgr).
 
-setup_remote_libraries([]).
-setup_remote_libraries([LibPath | LibsList])
+display_file_errors(SPath, ErrsList, FileMgr)
 	:-
-	setup_lib(LibPath),
-	setup_remote_libraries(LibsList).
+	printf(error_stream, '\nFile %t contained errors:\n', [SPath]),
+	spit_errors(ErrsList, error_stream).
 
-lib_extension(alb).
-
-:- dynamic(als_lib_lcn/1).
-
-export setup_lib/1.
-setup_lib(LibPath)
+spit_errors([], _).
+spit_errors([Error | ErrsList], Stream)
 	:-
-	exists_file(LibPath),
+	spit_the_error(Error, Stream),
+	spit_errors(ErrsList, Stream).
+
+spit_the_error( error(syntax_error,[_,syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,FS)]),
+				Stream)
+	:-!,
+	EType = 'Syntax error',
+	printf(error_stream,'\n%s',[Context]),
+	OutPattern = '%t, line %d: %s\n',
+	OutArgs = [File,LineNumber,ErrorMessage],
+
+	printf(Stream, '%t',[EType]),
+	printf(Stream, OutPattern, OutArgs, [quoted(true), maxdepth(6)]),
+	flush_output(Stream).
+
+spit_the_error(error(Error, Args), Stream)
+	:-
+	prolog_system_error(Error, Args).
+
+spit_the_error(prolog_system_error(Error, Args), Stream)
+	:-
+	prolog_system_error(Error, Args).
+
+export tty_prolog_system_error/2.
+
+	%% New rt_ reader:
+tty_prolog_system_error(
+	error(syntax_error,[_,syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream)]), [])
+	:-
+	tty_prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), []).
+
+tty_prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), _) 
+	:-
+%write(syntax_pos_info=p(P1,P2,P3)),nl,flush_output,
+	sio:is_stream(Stream,Stream0),
+	sio:is_input_stream(Stream0),
 	!,
-	pathPlusFile(PathHead,LibDirName,LibPath),
-	disp_setup_lib(LibDirName,LibPath,PathHead).
+	EType = 'Syntax error',
+	sio:stream_type(Stream0,StreamType),
+	sio:stream_name(Stream0,StreamName),
+	(StreamType = file ->
+		pathPlusFile(_,File,StreamName)
+		;	
+		File = StreamName
+	),
+	printf(error_stream,'\n%s',[Context]),
+	OutPattern = '%t, line %d: %s\n',
+	OutArgs = [File,LineNumber,ErrorMessage],
+	pse_out(error_stream, EType, OutPattern, OutArgs),
+	flush_output(error_stream).
 
-disp_setup_lib(library,LibPath,PathHead)
+tty_prolog_system_error(s(ErrorCode,Stream), Args) 
 	:-
-	als_lib_lcn(_),
-	!.
-
-disp_setup_lib(LibDirName,LibPath,PathHead)
-	:-
-	lib_extension(LibExt),
-	filePlusExt('*',LibExt,Pattern),
-	files(LibPath, Pattern, LibFileHeaders),
-	install_lib_files(LibFileHeaders, LibPath),
-	(filename_equal(LibDirName, library) ->
-		assert(als_lib_lcn(PathHead)) 
-		; 
-		true
-	).
-
-setup_lib(LibPath)
-	:-
-	write(setup_lib_file_bad_path=LibPath),nl, flush_output,!,
-	prolog_system_warning(lib_pth, [LibPath] ).
-
-install_lib_files([], LibPath).
-install_lib_files([LibFileHd | LibFileHeaders], LibPath)
-	:-
-	install_lib_f(LibFileHd, LibPath),
-	install_lib_files(LibFileHeaders, LibPath).
-
-install_lib_f(LibFileHd, LibDirPath)
-	:-
-	pathPlusFile(LibDirPath, LibFileHd, HeaderFile),
-	open(HeaderFile, read, IS, []),
-	read(IS, LHTerm0),
-	close(IS),
-	(LHTerm0 = (:- LHTerm) ->
-		call(builtins:LHTerm)
-		;
-		call(builtins:LHTerm0)
-	).
-
-/*!---------------------------------------------------------------------
- |	asplit0/4
- |	asplit0(AtomCs,Splitter,LeftPartCs,RightPartCs) 
- |	asplit0(+,+,-,-) 
- |
- |	- divides a list of character codes as determined by a character code
- |
- |	If AtomCs is a list of character codes, and if Splitter is the character 
- |	code of of a character, then, if the character with code Splitter occurs in
- |	AtomCs, LeftPart is the list consisting of that part of AtomCs from the
- |	left up to and including the leftmost occurrence of Splitter,
- |	and RightPart is the atom consisting of that part of AtomCs extending 
- |	from immediately after the end of LeftPart to the end of AtomCs.
- *!--------------------------------------------------------------------*/
-export asplit0/4.
-asplit0([Char|Rest],Splitter,[Char|R1],String2) 
-	:-
-	Char \= Splitter,!,
-	asplit0(Rest,Splitter,R1,String2).
-
-asplit0([Splitter|Rest],Splitter,[],Rest).
-
-export asplit0_all/3.
-asplit0_all(Chars, Splitter, [Head | List])
-	:-
-	asplit0(Chars, Splitter, Head, Tail),
+	expand_code(ErrorCode, Pattern, EType),
 	!,
-	asplit0_all(Tail, Splitter, List).
+	sio:stream_type(Stream,StreamType),
+	sio_linenumber(Stream,LineNumber),
+	sio:stream_name(Stream,StreamName),
 
-asplit0_all(Chars, Splitter, [Chars]).
+	OutPattern = '%t: %t stream %t,line %d:\n     ',
+	OutArgs = [StreamType,StreamName,LineNumber],
+	pse_out(error_stream, EType, OutPattern, OutArgs),
+	printf(error_stream,Pattern, Args),
+	flush_output(error_stream).
 
-export all_to_atoms/2.
-all_to_atoms([], []).
-all_to_atoms([String | Strings], [Atom | Atoms])
+tty_prolog_system_error(qc_failed(ErrorCode,Name,LineNumber),Args) 
 	:-
-	atom_codes(Atom, String),
-	all_to_atoms(Strings, Atoms).
+	expand_code(ErrorCode, Pattern, EType),
+	!,
+	catenate('%t,line %t: ', Pattern, OutPattern),
+	OutArgs = [Name,LineNumber | Args],
+	pse_out(error_stream, EType, OutPattern, OutArgs),
+	flush_output(error_stream).
+
+tty_prolog_system_error(error(W,L),_) 
+	:-
+	decode_error(W, L, Pattern, Args),
+	!,
+	pse_out(error_stream, 'Error: ', Pattern, Args),
+	print_error_goal_attributes(L),
+	printf(error_stream,'- %-14s %t\n',
+		['Throw pattern:',error(W,L)],
+		[quoted(true),maxdepth(4),indent(17)]),
+	flush_output(error_stream).
+	
+tty_prolog_system_error(ErrorCode, Args) 
+	:-
+	expand_code(ErrorCode, Pattern, EType),
+	pse_out(error_stream, EType, Pattern, Args),
+	flush_output(error_stream).
+
+pse_out(Stream, EType, Pattern, Args)
+	:-
+	printf(Stream, '%t',[EType]),
+	printf(Stream, Pattern, Args, [quoted(true), maxdepth(6)]).
+
+print_error_goal_attributes([]) :- !.
+print_error_goal_attributes([H|T]) 
+	:-
+	print_error_goal_attribute(H),
+	print_error_goal_attributes(T).
+print_error_goal_attributes(Other) 
+	:-
+	print_error_goal_attribute(Other).
+
+print_error_goal_attribute(M:G) 
+	:-!,
+	printf(error_stream,'- %-14s %t\n',
+		['Goal:',M:G],[quoted(true),maxdepth(5),indent(17)]),
+	flush_output(error_stream).
+
+print_error_goal_attribute(Huh) 
+	:-
+	functor(Huh,AttribName0,1),
+	!,
+	arg(1,Huh,AttribValue),
+	atom_concat(AttribName0,':',AttribName),
+	printf(error_stream,'- %-14s %t\n',
+			[AttribName,AttribValue], 
+			[quoted(true),maxdepth(5),indent(17)]),
+	flush_output(error_stream).
+
+print_error_goal_attribute(Other) 
+	:-
+	printf(error_stream,'- %-14s %t\n',
+			['Error Attribute:', Other],
+			[quoted(true),maxdepth(10),indent(17)]),
+	flush_output(error_stream).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% WARNING OUTPUT PREDICATES
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ 	%% Print all advisory and warning messages to
+ 	%% warning_output stream.
+
+export tty_prolog_system_warning/2.
+
+tty_prolog_system_warning(error(W,L),_) 
+	:-
+	decode_error(W, L, Pattern, Args),
+	!,
+	pse_out(error_stream, 'Warning: ', Pattern, Args),
+	print_error_goal_attributes(L),
+	flush_output(error_stream).
+
+tty_prolog_system_warning(ErrorCode, Args) 
+	:-
+	expand_code(ErrorCode, Pattern, EType),
+	printf(warning_output, '%t',[EType]),
+	printf(warning_output, Pattern, Args, [quoted(true), maxdepth(9)]),
+	flush_output(warning_output).
+
+
+
+
 
 endmod.		%% blt_shl.pro: Development shell
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%% TTY vs IDE SHELL HOOKS
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+module debugger.
+
+:- abolish(ensure_db_showing, 0).
+ensure_db_showing.
+
+endmod.
+
+module builtins.
+
+:- abolish(record_lib_load, 1).
+record_lib_load(File).
+
+endmod.

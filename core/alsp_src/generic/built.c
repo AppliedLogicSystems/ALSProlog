@@ -44,7 +44,7 @@
 #include "module.h"
 #include "icodegen.h"
 
-extern Code *wm_cutaddr;
+/*//extern Code *wm_cutaddr;*/
 
 /* FIXME: Nuke PACKAGE stuff. */
 #ifdef PACKAGE
@@ -176,7 +176,7 @@ static struct blt_struct {
 	BLT(">=", 2, pbi_greaterorequal, "_pbi_greaterorequal"),
 	BLT("is", 2, pbi_is, "_pbi_is"),
 #ifdef HAVE_TIME
-	BLT("$time", 9, pbi_time, "_pbi_time"),
+	BLT("$time", 10, pbi_time, "_pbi_time"),
 #endif /* HAVE_TIME */
 	BLT("srandom", 1, pbi_srandom, "_pbi_srandom"),
 	BLT("fpconst_val", 2, pbi_fpconst_val, "_pbi_fpconst_val"),
@@ -380,18 +380,16 @@ static struct blt_struct {
 #ifdef OLDCONSULT
 	BLT("old_consult", 2, pbi_old_consult, "_pbi_old_consult"),
 #endif /* OLDCONSULT */
-#ifdef SIMPLE_MICS
 	BLT("save_image_with_state_to_file", 1,
 	    pbi_save_image_with_state_to_file,
 	    "_pbi_save_image_with_state_to_file"),
 	BLT("attach_state_to_file", 1, pbi_attach_state_to_file, ""),
 	BLT("get_current_image", 1, pbi_get_current_image, ""),
-#endif /* SIMPLE_MICS */
 #ifndef PURE_ANSI
 	BLT("save_state_to_file", 1, pbi_save_state_to_file,
 	    "_pbi_save_state_to_file"),
 #endif /* PURE_ANSI */
-#ifdef MacOS
+#if 0
 	BLT("save_app_with_obp", 5, pbi_save_app_with_obp,
 	    "_pbi_save_app_with_obp"),
 #endif /* MacOS */
@@ -579,7 +577,8 @@ static struct blt_struct {
 	BLT("dbg_spying", 0, pbi_dbg_spying, "_pbi_dbg_spying"),
 	BLT("alarm", 2, pbi_alarm, "_pbi_alarm"),
 #endif /* KERNAL */
-	BLT("signal_name", 2, pbi_signal_name, "_pbi_signal_name")
+	BLT("signal_name", 2, pbi_signal_name, "_pbi_signal_name"),
+	BLT("resize_memory", 2, pbi_resize_memory, "_pbi_resize_memory")
 };
 	/* blt_tab[] */
 
@@ -786,9 +785,9 @@ BLT2("$comma", 3, ic_install_bref, INTF("$comma"), INTF(4), (char *) -1),
 void
 builtin_init()
 {
-    static long builtins_initialized=0;
+    /*//static long builtins_initialized=0;*/
 
-    if (!builtins_initialized) {
+    /*//if (!builtins_initialized) {*/
 	register int i;
 	register struct blt_struct *p;
 	struct blt2_struct *p2;
@@ -807,7 +806,7 @@ builtin_init()
 
 	builtins_initialized = 1;
 	ss_register_global(&builtins_initialized);
-    }
+    /*//}*/
 }
 
 /* #ifdef NewMath  */

@@ -21,8 +21,8 @@
 #define cur_mod (*top_module)		/* id of current module (used
 					   					by parser and code generator) */
 
-extern int *top_module;				/* pointer to top of module stack */
-extern int *top_clausegroup;
+/*//extern int *top_module;*/				/* pointer to top of module stack */
+/*//extern int *top_clausegroup;*/
 
 #define MODULE_GLOBAL	TK_USER		/* id of the global module      */
 #define MODULE_BUILTINS TK_BUILTINS	/* id of the builtins module	*/

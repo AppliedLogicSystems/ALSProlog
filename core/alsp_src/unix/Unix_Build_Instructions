@@ -16,7 +16,18 @@ Build for a single platform
 
    Example: % make
 
+	This will build alspro_b and alspro.
+
+3. To build alsdev:
+
+	- Perform cvs checkout alsdev (or equivalent) at same level as these build dirs;
+
+	- Link /netwk/dakota/ALS_Software/ALS_Packages/Tcl-Tk_Interface/Tcl-Tk_Interface_1.03/
+		(or equivalent) to "tcltk_interface" at the same level as these build dirs; 
    
+	- In the build dir(s), perform:
+
+		make alsdev
 
 
 Build for multiple platforms at the ALS Office

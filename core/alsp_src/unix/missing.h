@@ -340,4 +340,12 @@ extern char *tempnam(const char *dir, const char *pfx);
 extern int setsockopt(int s, int level, int optname, char *optval, int optlen);
 #endif
 
+#ifdef MISSING_EXTERN_STRERROR
+char *strerror(int errnum);
+#endif
+
+#ifdef MISSING_EXTERN_MPROTECT
+int mprotect(void *addr, size_t len, int prot);
+#endif
+
 #endif /* _MISSING_H_INCLUDED_ */

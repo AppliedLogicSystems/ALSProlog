@@ -1,2 +1,2 @@
-SUBOS_CPPFLAGS = -DUNIX_IRIX
+CPPFLAGS += -DUNIX_IRIX
 OS_LIBS = -lelf -Xlinker -rpath -Xlinker .

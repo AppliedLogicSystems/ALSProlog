@@ -151,6 +151,8 @@ narrow_xor(INTERVAL *x, INTERVAL *y, INTERVAL *z)
     else if (z->lo==1.0)                                   /* z = 1 */
          return(narrow_not(x,y));
 
+	// what should be return here?
+	return TRUE;
 }
 
 

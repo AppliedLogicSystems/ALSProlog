@@ -1,6 +1,6 @@
 /*==============================================================
- |		blt_cslt.pro
- | Copyright (c) 1986-96 Applied Logic Systems, Inc.
+ |		new_cslt.pro
+ | Copyright (c) 1986-98 Applied Logic Systems, Inc.
  |		Distribution rights per Copying ALS
  |
  | Consult, viewed as a development shell facility
@@ -14,15 +14,103 @@
 module builtins.
 use xconsult.
 
+/* Some definitions for the ISO standard */
+
+export multifile/1.
+multifile(_).
+
+export discontiguous/1.
+discontiguous(_).
+
+export include/1.
+include(F) :- consult(F).
+
+export ensure_loaded/1.
+ensure_loaded(F) :- consult(F, [ensure_loaded(true)]).
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% DYNAMIC PREDICATS AND GLOBAL VARIABLES FOR CONSULT
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- dynamic(consulted/5).
 :- dynamic(searchdir/1).
-:- dynamic(obpLocation/2).
-:- dynamic(src2srcLocation/3).
 
+		%%%%%%%%%%%%%%%%%%%
+		%% CONSULT OPTIONS
+		%%%%%%%%%%%%%%%%%%%
+/*------------------------------------------------------------*
+ |	Options structure for consult processing:
+ |
+ |	co(Nature, BaseFile, SrcPath, Ext, Recon, Quiet, TgtMod, SearchPath
+ |
+ |	Nature	 - source = forced load from source), or
+ |			   obp  	 = forced load from obp), or 
+ |			   default - check (by date/time) if obp can be loaded
+ |	ObpPath  - the actual path to the obp file either written or read, if any.
+ |	Recon	 - 1/0 (default = reconsult)
+ |	BaseFile - the pure (no path, no ext) file name
+ |	OrigDir	 - the path (if any) passed on the filename 
+ |	Ext	 	 - the extension (if any) passed on the filename
+ |	Quiet	 - true/false - suppress messages (true) or not (false)
+ |	TgtMod	 - module into which non-module qualified 
+ |			   code is loaded (default = user)
+ |	SearchPath	- search path (list), including passed as an option
+ |				  in the consult goal, and global stuff
+ |	SrcFilePath	- path to actual source file, if any, used in date/time
+ |				  comparison against obp file
+ |	LoadedPath	- path to actual file loaded
+ |	DebugType	- normal (=default) / debug (consult with debug info)
+ |	
+ *------------------------------------------------------------*/
+
+:-  '$icode'(-18,0,0,0,0), 
+	defStruct(cslt_opts, [
+	  propertiesList = [
+		nature/default,		%%	- Nature: source/default/obp/ensure_loaded
+		obp_path/'',		%%	- ObpPath
+		recon/reconsult,	%%	- Reconsult flag: reconsult/no_reconsult
+		base_file/'',		%%	- BaseFile 
+		orig_dir/'',		%%	- OrigDir 
+		ext/'',				%%	- Ext 
+		verbosity/noisy,	%%	- quiet/noisy
+		tgt_mod/user,		%%	- TgtMod 
+		searchpath/[],		%%	- Search List for Directory Paths
+		origfile/'',		%%	- OrigFileDesc 
+		srcfilepath/'',		%%	- SrcFilePath - complete path
+		loadedpath/'',		%%	- Path actually loaded (obp, etc)
+		debug_type/no_debugging,	%%	- DebugType: debugging/no_debugging
+		cg_flag/true,		%%  - true/false Whether CGs are being used
+		obp_locn/giac,		%%  - Obp location: gis/gic/gias/giac/no_obp
+		fcg/''				%%  - FCG: File Clause Group (for return to caller)
+	],
+	accessPred =    access_cslt_opts,
+	setPred =       set_cslt_opts,
+	makePred =      make_cslt_opts,
+	structLabel =   cslt_opts
+  ]).
+
+
+/* %% Create new consult opts structure, with defaults:
+cgo_struct(
+	co(
+		default,	%%	1		- Nature 
+		'',			%%	2		- ObpPath
+		1,			%%	3		- Recon 
+		'',			%%	4		- BaseFile 
+		'',			%%	5		- OrigDir 
+		'',			%%	6		- Ext 
+		Quiet,		%%	7		- Quiet 
+		user,		%%	8		- TgtMod 
+		[],			%%	9		- SearchPath 
+		'',			%%	10		- OrigFileDesc 
+		'',			%%	11		- SrcFilePath
+		'',			%%	12		- LoadedPath 
+		normal		%%	13		- DebugType 
+		))
+	:-
+	consultmessage(Quiet).
+*/
+	
 /*-----------------------------------------------------------------*
  | 	Create access methods to get at the global variable 
  | 	'_current_consult_directory'.  Primarily needed because consult
@@ -33,25 +121,25 @@ use xconsult.
  |	We could use the Prolog database, but using global variables
  |	should be cleaner, and a tiny bit faster.
  *-----------------------------------------------------------------*/
+		%% This is a stack of copt structures:
+:-  make_gv('_current_copts'), set_current_copts([]).
 
-:-  make_gv('_current_consult_directory'),
-			%% use default drive and dir path list:
-    set_current_consult_directory(''+[]).	
-
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
-:-	make_gv('_next_clause_group'), set_next_clause_group(1).
-
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
-:-	make_gv('_reconsult_flag'), set_reconsult_flag(1).
-
-adjust_recon_flag(FCOpts)
+push_copt(Copt)
 	:-
-	arg(3, FCOpts, LocalRecon),		%%	3		- Recon 
-	get_reconsult_flag(RFlag0),
-	RFlag1 is RFlag0 /\ LocalRecon,
-	set_reconsult_flag(RFlag1).
+	get_current_copts(PrevStack),
+	set_current_copts([Copt | PrevStack]).
+
+pop_copt(Copt)
+	:-
+	get_current_copts([Copt | RestStack]),
+	set_current_copts(PrevStack).
+
+peek_copt(Copt)
+	:-
+	get_current_copts([Copt | _]).
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% TOP LEVEL OF CONSULT: consult/[1,2]
@@ -92,98 +180,68 @@ reconsult(What)
 
 consult(What, Options)
 	:-
-	cslt_init(MsgValue,ReconFlg, FCGValue),
 	consult_global_options(Options, COpts),
-	consult_files(What, COpts),
-	cslt_cleanup(MsgValue,ReconFlg, FCGValue).
+	consult_files(What, COpts).
 
 consult_files([], _) 
 	:-!.
 
 consult_files([File | Files], COpts) 
-	:- 
-	consult_files(File, COpts),
-	!,
+	:-!,
+	consult_file(File, COpts),
 	consult_files(Files, COpts).
 
 consult_files(File, COpts) 
+	:-
+	atom(File),
+	consult_file(File, COpts).
+
+consult_file(File, COpts) 
 	:- 
 	local_consult_options(File, BaseFile, COpts, FCOpts),
 	do_consult(BaseFile, FCOpts).
 
-cslt_init(MessageValue,ReconFlg, FCGValue)
-	:-
-	consultmessage(MessageValue),
-	file_clause_groups(FCGValue),
-	get_reconsult_flag(ReconFlg).
-
-cslt_cleanup(MessageValue,ReconFlg, FCGValue)
-	:-
-	set_consult_messages(MessageValue),
-	set_file_clause_groups(FCGValue),
-	set_reconsult_flag(ReconFlg).
-
-		%%%%%%%%%%%%%%%%%%%
-		%% CONSULT OPTIONS
-		%%%%%%%%%%%%%%%%%%%
-
-/*------------------------------------------------------------*
- |	Options structure for consult processing:
- |
- |	co(Nature, BaseFile, SrcPath, Ext, Recon, Quiet, TgtMod, SearchPath
- |
- |	Nature	 - source = forced load from source), or
- |			   obp  	 = forced load from obp), or 
- |			   default - check (by date/time) if obp can be loaded
- |	ObpPath  - the actual path to the obp file either written or read, if any.
- |	Recon	 - 1/0 (default = reconsult)
- |	BaseFile - the pure (no path, no ext) file name
- |	OrigDir	 - the path (if any) passed on the filename 
- |	Ext	 	 - the extension (if any) passed on the filename
- |	Quiet	 - true/false - suppress messages (true) or not (false)
- |	TgtMod	 - module into which non-module qualified 
- |			   code is loaded (default = user)
- |	SearchPath	- search path (list), including passed as an option
- |				  in the consult goal, and global stuff
- |	SrcFilePath	- path to actual source file, if any, used in date/time
- |				  comparison against obp file
- |	LoadedPath	- path to actual file loaded
- |	DebugType	- normal (=default) / debug (consult with debug info)
- |	
- *------------------------------------------------------------*/
-	%% Create new consult opts structure, with defaults:
-cgo_struct(
-	co(
-		default,	%%	1		- Nature 
-		'',			%%	2		- ObpPath
-		1,			%%	3		- Recon 
-		'',			%%	4		- BaseFile 
-		'',			%%	5		- OrigDir 
-		'',			%%	6		- Ext 
-		Quiet,		%%	7		- Quiet 
-		user,		%%	8		- TgtMod 
-		[],			%%	9		- SearchPath 
-		'',			%%	10		- OrigFileDesc 
-		'',			%%	11		- SrcFilePath
-		'',			%%	12		- LoadedPath 
-		normal		%%	13		- DebugType 
-		))
-	:-
-	consultmessage(Quiet).
-	
 /*-----------------------------------------------------------*
  |	Process the incoming options list from consult/2 into
- |	the co() consult information struct
+ |	the consult information struct
  *-----------------------------------------------------------*/
+	%% Global defaults: can be over-ridden by command-line
+	%% options or consult options:
+file_clause_groups(true).
+global_verbosity(noisy).
+global_obp_location(giac).
+
+	%% Standard subdirs of alsdir:
+system_subdir(shared).
+system_subdir(builtins).
+system_subdir(library).
+
 consult_global_options(Options, COpts)
 	:-
-	cgo_struct(COpts),
-	(xconsult:source_level_debugging(on) ->
-		XOptions = [source(true) | Options]
+	make_cslt_opts(COpts),
+	(clause(global_verbosity(GlobalVerbosity),_) ->
+		set_cslt_opts(verbosity, COpts, GlobalVerbosity)
+		;
+		true
+	),
+	(clause(global_obp_location(GlobalObpLocn),_) ->
+		set_cslt_opts(obp_locn, COpts, GlobalObpLocn)
+		;
+		true
+	),
+	(clause(file_clause_groups(true),_) ->
+		set_cslt_opts(cg_flag, COpts, true)
+		;
+		true
+	),
+	(current_prolog_flag(debug, on) ->
+		XOptions = [source(true) | Options],
+		set_cslt_opts(debug_type, COpts, debugging)
 		;
 		XOptions = Options
 	),
-	proc_cgo(XOptions, COpts).
+	proc_cgo(XOptions, COpts),
+	check_for_searchdirs(Options, COpts).
 
 proc_cgo([], _).
 proc_cgo([Opt | Options], COpts)
@@ -193,78 +251,169 @@ proc_cgo([Opt | Options], COpts)
 
 proc_copt(source(true), COpts)
 	:-!,
-	mangle(1, COpts, source).
+	set_cslt_opts(nature, COpts, source).
 
 proc_copt(source(false), COpts)
 	:-!,
-	mangle(1, COpts, default).
+	set_cslt_opts(nature, COpts, default).
+
+proc_copt(ensure_loaded(true), COpts)
+	:-!,
+	set_cslt_opts(nature, COpts, ensure_loaded).
 
 proc_copt(consult(true), COpts)
 	:-!,
-	mangle(3, COpts, 0).
+	set_cslt_opts(recon, COpts, no_reconsult).
 
 proc_copt(consult(false), COpts)
 	:-!,
-	mangle(3, COpts, 1).
+	set_cslt_opts(recon, COpts, reconsult).
 
 proc_copt(quiet(Value), COpts)
 	:-
 	dmember(Value, [true,false]),
 	!,
-	mangle(7, COpts, Value),
-	set_consult_messages(Value).
+	(Value = true ->
+		set_cslt_opts(verbosity, COpts, quiet)
+		;
+		set_cslt_opts(verbosity, COpts, noisy)
+	).
+proc_copt(verbosity(Value), COpts)
+	:-
+	dmember(Value, [quiet,noisy]),
+	!,
+	set_cslt_opts(verbosity, COpts, Value).
 
 proc_copt(tgtmod(TgtMod), COpts)
 	:-
 	atom(TgtMod),
 	!,
-	mangle(8, COpts, TgtMod).
+	set_cslt_opts(tgt_mod, COpts, TgtMod).
 
-proc_copt(s(DirPath), COpts)
+	%% "Weak" spec; we'll prepend (append) "./" (syssearchdir)
+	%% if they aren't included; this is the "immediate"
+	%% one-directory atom case:
+proc_copt(search_path(DirPath), COpts)
 	:-
 	atom(DirPath),
 	!,
-	rootPlusPath(Drive, DirPathList, DirPath),
-	arg(9, COpts, PrevSearchList), 	%%	9		- SearchPath 
-	append(PrevSearchList, [Drive+DirPathList], NewSearchList),
-	mangle(9, COpts, NewSearchList).
+	proc_copt(search_path([DirPath]), COpts).
 
-proc_copt(ensure_loaded(true), COpts)
+	%% "Weak" spec; we'll prepend (append) "./" (syssearchdir)
+	%% if they aren't included; this is the list case:
+proc_copt(search_path(DirPath), COpts)
+	:-
+	DirPath = [_ | _],
+	!,
+	access_cslt_opts(searchpath, COpts, PrevSearchList),
+	directory_self(Self),	
+	(dmember(Self,  PrevSearchList) ->
+		SL0 = DirPath ; SL0 = [Self | DirPath]
+	),
+	(dmember(sys_searchdir(_),  PrevSearchList) ->
+		SL1 = SL0
+		;
+		builtins:sys_searchdir(SysSearchdir),
+		append(SL0, [sys_searchdir(SysSearchdir)], SL1) 
+	),
+	append(PrevSearchList, SL1, NewSearchList),
+	set_cslt_opts(searchpath, COpts, NewSearchList). 	
+
+	%% "strict" spec; no additon of standard directories
+	%% if they aren't included - immediate atom case:
+proc_copt(strict_search_path(DirPath), COpts)
 	:-!,
-	mangle(1, COpts, ensure_loaded).
+	access_cslt_opts(searchpath, COpts, PrevSearchList), 	
+	(atom(DirPath) -> 
+		append(PrevSearchList, [DirPath], NewSearchList)
+		;
+		append(PrevSearchList, DirPath, NewSearchList)
+	),
+	set_cslt_opts(searchpath, COpts, NewSearchList). 	
 
 proc_copt(Opt, _)
 	:-
 	prolog_system_warning(bad_consult_opt, [Opt]).
 
+check_for_searchdirs(Options, COpts)
+	:-
+	(dmember(search_path(_), Options) ;
+		dmember(strict_search_path(_), Options) ),
+	!.
+
+check_for_searchdirs(_, COpts)
+	:-
+	findall(SD, builtins:searchdir(SD), SDs),
+	builtins:sys_searchdir(SysSearchdir),
+	split_path(SysSearchdir, SSDElts),
+	dreverse(SSDElts, RSSDElts),
+	findall( SubDirPath, ( system_subdir(SubD), 
+					dreverse([SubD | RSSDElts], SubDElts),
+					join_path(SubDElts, SubDirPath)  ),
+				SSubDs),
+	append(SDs, SSubDs, NewSearchList),
+	directory_self(Self),
+	set_cslt_opts(searchpath, COpts, [Self | NewSearchList]). 	
+
 /*-----------------------------------------------------------*
  |	Process the information from an individual file
  |	consult into the co() consult information struct
  *-----------------------------------------------------------*/
-
 	%% source(_) forces loading from source:
 local_consult_options(File, BaseFile, COpts, FCOpts) 
 	:- !,
-	arg(1,COpts,GlobalNature), 
-	arg(3,COpts,GlobalRecon),
+	access_cslt_opts(nature, COpts,GlobalNature), 
+	access_cslt_opts(recon,  COpts,GlobalRecon),
 	cslt_info_recon(File, GlobalNature, Nature, GlobalRecon, Recon, FileDesc),
-	cslt_path_x(FileDesc, SrcPath, BaseFile, Ext),
+
+	file_extension(FF,Ext,FileDesc),
+	split_path(FF,FileElts),
+	dreverse(FileElts, [BaseFile | RDirElts]),
+	dreverse(RDirElts, DirElts),
+	join_path(DirElts, OrigDir),
 
 	copy_term(COpts, FCOpts),
-	mangle(1,FCOpts,Nature), 
-	mangle(3,FCOpts,Recon),
-	mangle(5,FCOpts,SrcPath),
-	mangle(4,FCOpts,BaseFile),
-	mangle(6,FCOpts,Ext),
-	mangle(10,FCOpts,FileDesc).
+	set_cslt_opts(nature,   FCOpts,Nature), 
+	set_cslt_opts(recon,    FCOpts,Recon),
+	set_cslt_opts(base_file,FCOpts,BaseFile),
+	set_cslt_opts(orig_dir, FCOpts,OrigDir),
+	set_cslt_opts(ext,      FCOpts,Ext),
+	set_cslt_opts(origfile, FCOpts,FileDesc),
+
+	check_for_shared(BaseFile, FCOpts).
+
+check_for_shared(BaseFile, FCOpts)
+	:-
+	file_extension(_, Ext, BaseFile),
+	cont_check_for_shared(Ext, BaseFile, FCOpts).
+
+cont_check_for_shared(Ext, BaseFile, FCOpts)
+	:-
+	shared_file_ext(Ext),
+	!,
+	check_for_sys_shared_first(FCOpts).
+
+cont_check_for_shared(_, _, _).
+
+check_for_sys_shared_first(FCOpts)
+	:-
+	access_cslt_opts(searchpath, COpts, PrevSearchList), 	
+	sys_searchdir(SysSearchdir),
+	split_path(SysSearchdir, SSDElts),
+	dreverse(SSDElts, RSSDElts),
+	dreverse([shared | RSSDElts], SubDElts),
+	join_path(SubDElts, SubDirPath),
+		%% Probably should make sure it is also deleted from
+		%% previous path...
+	set_cslt_opts(searchpath, COpts, [SubDirPath | PrevSearchList]). 	
 
 /*-----------------------------------------------------------*
  |	Process the source & reconsult information possibly 
  |	attached to an individual file
  *-----------------------------------------------------------*/
 
-cslt_info_recon( user, _, source, _, 0, FileDesc) :-!.
-cslt_info_recon(-user, _, source, _, 1, FileDesc) :-!.
+cslt_info_recon( user, _, source, _, no_reconsult, user) :-!.
+cslt_info_recon(-user, _, source, _, reconsult, user) :-!.
 
 cslt_info_recon(source(InFile), CurNature, Nature, CurRecon, Recon, FileDesc)
 	:-!,
@@ -276,22 +425,14 @@ cslt_info_recon(obp(InFile), CurNature, Nature, CurRecon, Recon, FileDesc)
 
 cslt_info_recon(+InFile, CurNature, Nature, CurRecon, Recon, FileDesc)
 	:-!,
-	cslt_info_recon(InFile, CurNature, Nature, 0, Recon, FileDesc).
+	cslt_info_recon(InFile, CurNature, Nature, no_reconsult, Recon, FileDesc).
 
 cslt_info_recon(-InFile, CurNature, Nature, CurRecon, Recon, FileDesc)
 	:-!,
-	cslt_info_recon(InFile, CurNature, Nature, 1, Recon, FileDesc).
+	cslt_info_recon(InFile, CurNature, Nature, reconsult, Recon, FileDesc).
 
 cslt_info_recon(FileDesc, Nature, Nature, Recon, Recon, FileDesc).
 
-cslt_path_x(user, ''+[], user, no(extension)) :-!.
-cslt_path_x(FileDesc, Drive+SrcPathList, BaseFile, Ext)
-	:-
-	rootPathFile(Drive,SrcPathList,File,FileDesc),
-	(filePlusExt(BaseFile,Ext,File),!
-		; 
-		BaseFile = File, Ext = no(extension)
-	).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% MESSAGE LEVEL OF CONSULT 
@@ -305,56 +446,61 @@ cslt_path_x(FileDesc, Drive+SrcPathList, BaseFile, Ext)
  *-------------------------------------------------------------*/ 
 do_consult(BaseFile, FCOpts)
 	:-
-	get_current_consult_directory(OldCCD),
-	catch( exec_consult(BaseFile, FCOpts),
+	builtins:get_primary_manager(ALSMgr),
+	send(ALSMgr, obtain_src_mgr(BaseFile, FileMgr)),
+	catch( exec_consult(BaseFile, FCOpts, ALSMgr, FileMgr),
 			Ball,
-			( set_current_consult_directory(OldCCD),
-				set_reconsult_flag(1),
-				throw(Ball)
-			) ),
-
-	record_consult(BaseFile, FCOpts),
-	cleanup_cslt,
+			( pop_copt(_), 
+			  consult_except_resp(Ball,FileMgr)
+			 ) 
+		),
+	record_consult(BaseFile, FCOpts, FileMgr),
 	!,
-	arg(7, FCOpts, Quiet),		%%	7		- Quiet 
-	arg(6, FCOpts, Ext),		%%	7		- Extension 
-	consult_msg(Quiet, Ext, BaseFile, end_consult, FCOpts).
+	consult_msg(end_consult, FCOpts).
 
-		%% true = "be quiet"
-consult_msg(true, _, BaseFile, FCOpts, MsgCode) :-!.
-
-		%% false = "write messages"
-consult_msg(false, Ext, BaseFile, MsgCode, FCOpts)
+consult_msg(_, FCOpts)
 	:-
-	consult_msg_args(MsgCode, Ext, FCOpts, Args),
-	revise_cslt_msg_code(MsgCode, Ext, FCOpts, RevMsgCode),
-	prolog_system_warning(RevMsgCode, Args),
-	(BaseFile = user -> als_advise('\n') ; true).
-
-consult_msg_args(start_consult, Ext, FCOpts, [OrigFileDesc])
-	:-
-	arg(10, FCOpts, OrigFileDesc).
-
-consult_msg_args(end_consult, Ext, FCOpts, [LoadedPath])
-	:-
-	arg(12, FCOpts, LoadedPath).
-
-cleanup_cslt.
-
-revise_cslt_msg_code(start_consult, Ext, FCOpts, start_shared_load)
-	:-
-	(shared_file_ext(Ext); Ext=share),
+	access_cslt_opts(verbosity, FCOpts, quiet), 
 	!.
-revise_cslt_msg_code(end_consult, Ext, FCOpts, end_shared_load)
+
+consult_msg(start_consult, FCOpts)
+	:-!,
+	access_cslt_opts(origfile, FCOpts, OrigFileDesc), 
+	printf(user_output, 'Attempting to consult %t...\n', [OrigFileDesc]).
+
+consult_msg(end_consult, FCOpts)
+	:-!,
+	access_cslt_opts(loadedpath, FCOpts, LoadedPath), 
+	printf(user_output, '... consulted %t\n', [LoadedPath]).
+
+
+record_consult(BaseFile, FCOpts, FileMgr)
 	:-
-	(shared_file_ext(Ext); Ext=share;
-		Ext=no(extension),
-		arg(12, FCOpts, LoadedPath),
-		filePlusExt(_,LoadedExt,LoadedPath),
-		shared_file_ext(LoadedExt)
-	),
-	!.
-revise_cslt_msg_code(MsgCode, Ext, _, MsgCode).
+	access_cslt_opts(fcg, FCOpts, FCG), 
+	send(FileMgr, set_value(fcg,FCG)),
+	access_cslt_opts(srcfilepath, FCOpts, SourceFilePath), 
+	send(FileMgr, set_value(source_file,SourceFilePath)),
+	access_cslt_opts(obp_path, FCOpts, ObpFilePath), 
+	(ObpFilePath \= '' ->
+		send(FileMgr, set_value(obp_file,SourceFilePath))
+		;
+		true
+	).
+
+consult_except_resp(Ball,FileMgr)
+	:-
+	Ball = error(consult_load, [src_load, SrcFilePath, ErrList] ),
+	!,
+	length(ErrList, NErrs),
+	send(FileMgr, display_file_errors(NErrs, SrcFilePath, ErrList)).
+
+consult_except_resp(Ball,FileMgr)
+	:-
+	throw(Ball).
+
+
+
+
 
 shared_file_ext(psl).
 
@@ -367,16 +513,15 @@ shared_lib_exts(Exts)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*-------------------------------------------------------------*
- | exec_consult/2
- | exec_consult(BaseFile, FileConsultOpts)
- | exec_consult(+, +)
+ | exec_consult/4
+ | exec_consult(BaseFile, FileConsultOpts, ALSMgr, FileMgr)
+ | exec_consult(+, +, +, +)
  |
  |	- decides whether consult is from user or otherwise,
  *-------------------------------------------------------------*/ 
-exec_consult(user, FCOpts)
+exec_consult(user, FCOpts, ALSMgr, FileMgr)
 	:-!,
-	adjust_recon_flag(FCOpts),
-	load_source(user,user,_,FCOpts),
+	load_source(user,user,_,FCOpts,FCG, FileMgr),
 	mangle(12, FCOpts, user),
 	set_reconsult_flag(1),
 
@@ -385,17 +530,15 @@ exec_consult(user, FCOpts)
 	sio:set_stream_extra(Stream,''),
 	sio:sio_reset_eof(Stream).
 
-exec_consult(BaseFile, FCOpts)
+exec_consult(BaseFile, FCOpts, ALSMgr, FileMgr)
 	:-
-	arg(1, FCOpts, Nature),
-	arg(5, FCOpts, Drive+PathList),		%%	5		- OrigDir 
-	arg(6, FCOpts, SrcExt),
-	exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts).
+	access_cslt_opts(origfile, FCOpts, OrigFileDesc),
+	exec_consult(OrigFileDesc, BaseFile, FCOpts, ALSMgr, FileMgr).
 
 /*-------------------------------------------------------------*
- |	exec_consult/6
- |	exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts).
- |	exec_consult(+, +, +, +, +, +)
+ |	exec_consult/8
+ |	exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts, ALSMgr, FileMgr).
+ |	exec_consult(+, +, +, +, +, +, +)
  |
  |	- dispatches non-user consults:
  |
@@ -410,599 +553,571 @@ exec_consult(BaseFile, FCOpts)
  |	drive+directory to attempt, and calls cont_consult/5.
  *-------------------------------------------------------------*/ 
 
-exec_consult(PathList, Drive, BaseFile, ensure_loaded, SrcExt, FCOpts)
+exec_consult(OrigFileDesc, BaseFile, FCOpts, ALSMgr, FileMgr)
 	:-
-% 	consulted(BaseFile, SrcPath, ObpPath, _, _),
+	access_cslt_opts(nature, FCOpts, ensure_loaded), 
+	!,
  	consulted(BaseFile, _, ObpPath, _, _),
+	send(FileMgr, get_value(obp_file, ObpPath)),
+	ObpPath \= nil,
 	!,
 	note_paths(FCOpts, SrcPath, ObpPath, ObpPath).
 
+		%%--------------------------------
 		%% Incoming pathlist is absolute:
 		%%--------------------------------
-exec_consult(['' | RestPathList], Drive, BaseFile, Nature, SrcExt, FCOpts)
-	:-!,
-	(cont_consult(SrcExt, Nature, Drive, ['' | RestPathList], BaseFile, FCOpts) ->
+exec_consult(OrigFileDesc, BaseFile, FCOpts, ALSMgr, FileMgr)
+	:-
+	is_absolute_path(OrigFileDesc),
+	!,
+	(cont_consult(OrigFileDesc, BaseFile, FCOpts, FileMgr) ->
 		true
 		;
 			%% Can't find file -- Throw exception:
-		arg(10, FCOpts, OrigFileDesc), 		%%	10		- OrigFileDesc 
+		send(ALSMgr, remove_mgr(BaseFile, FileMgr)),
 		existence_error(file,OrigFileDesc,OrigFileDesc)
 	).
 		%%--------------------------------
 		%% Incoming pathlist is NOT absolute:
 		%%--------------------------------
 
-exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
+exec_consult(OrigFileDesc, BaseFile, FCOpts, ALSMgr, FileMgr)
 	:-
-	path_to_try(SrcExt,PathList, Drive,BaseFile,Nature,FCOpts,TryDrive,TryPath),
-	cont_consult(SrcExt, Nature, TryDrive, TryPath, BaseFile, FCOpts).
+	access_cslt_opts(searchpath, FCOpts, SearchList),
+	split_path(OrigFileDesc, PathList),
+	path_to_try(SearchList, PathList, TryPath),
+	cont_consult(TryPath, BaseFile, FCOpts, FileMgr),
+	!.
 
-
-:-dynamic(searchdir/1).
-:-dynamic(searchdir/2).
-
-
-	%% Try the local search path list:
-path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
+		%%--------------------------------
+		%% Can't find file -- Throw exception:
+		%%--------------------------------
+exec_consult(OrigFileDesc, BaseFile, FCOpts, ALSMgr, FileMgr)
 	:-
-	arg(9, FCOpts, LocalSearchPathLists),		%%	9		- SearchPath 
-	directory_self(SelfDir),
-	subPath(SelfDirPathList, SelfDir),
-	member(DD+PL, [Drive+SelfDirPathList | LocalSearchPathLists]), 
-	append(PL,PathList,SrcPathList),
-	prepend_current_consult_directory(Drive,PathList,TryDrive,TryPath).
-
-		%% SrcExt is a shared library extension;
-		%% Try loading from ALSDIR\shared first:
-path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
-	:-
-	(SrcExt = share; shared_file_ext(SrcExt)),
-	sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, shared, SharedLibDir),
-	rootPlusPath(TryDrive,TryPath,SharedLibDir).
-
-		%% Try the global search path list, abstract form:
-path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
-	:-
-	searchdir(TryDrive, TryPath),
-	SDPathList = [_|_].
-
-		%% Try the global search path list, old form:
-path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
-	:-
-	searchdir(SearchDir),
-	rootPlusPath(TryDrive,SDPathList,SearchDir),
-	append(SDPathList,PathList,TryPath).
-
-		%% Try the system builtins directory:
-path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
-	:-
-	sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, builtins, BuiltinsDir),
-	rootPlusPath(TryDrive,TryPath,BuiltinsDir).
-
-		%% Try the system shared directory (incoming had no extension):
-path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
-	:-
-	sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, shared, BuiltinsDir),
-	rootPlusPath(TryDrive,TryPath,BuiltinsDir).
-
-		%% Try the original system builtins directory (for packages):
-path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
-	:-
-	orig_sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, shared, SharedDir),
-	rootPlusPath(TryDrive,TryPath,SharedDir).
-
-		%% Can't find file
-		%% Throw exception:
-path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
-	:-
-	arg(10, FCOpts, OrigFileDesc), 		%%	10		- OrigFileDesc 
+	send(ALSMgr, remove_mgr(BaseFile, FileMgr)),
 	existence_error(file,OrigFileDesc,OrigFileDesc).
 
 /*-------------------------------------------------------------*
- |	- Determine real source file path, and setup global
- |	  information for this specific consult;
- |	- Do the loading with load_from_file/6
- |	- Restore appropriate global information.
+ |	path_to_try_from_desc/3
+ |	path_to_try_from_desc(SearchList, Desc, TryPath)
+ |	path_to_try_from_desc(+, +, +)
+ |
+ |	SearchList = list of directories
+ |	Desc = a file description, either basic, or relative path
+ |	TryPath = combination of an element of SearchList with Desc
+ |
+ |	Resatisfiable...
+ |	
+ |	Convenience, for use by routines outside blt_cslt.pro
  *-------------------------------------------------------------*/ 
-path_src_check(no(extension), BaseFile, NewDrive, NewPathList, SrcFilePath)
+export path_to_try_from_desc/3.
+path_to_try_from_desc([], Desc, TryPath)
 	:-!,
-	rootPathFile(NewDrive,NewPathList,BaseFile,SrcFilePath).
+	builtins:sys_searchdir(DirPath),
+	directory_self(Self),
+	SearchList = [Self,sys_searchdir(DirPath)],
+	split_path(Desc, PathList),
+	path_to_try(SearchList, PathList, TryPath0),
+	exists_file(TryPath0),
+	canon_path(TryPath0, TryPath).
 
-path_src_check(SrcExt, BaseFile, NewDrive, NewPathList, SrcFilePath)
+path_to_try_from_desc(SearchList, Desc, TryPath)
 	:-
-	filePlusExt(BaseFile, SrcExt, SrcFileName),
-	rootPathFile(NewDrive,NewPathList,SrcFileName,SrcFilePath).
-
-cont_consult(SrcExt, Nature, NewDrive, NewPathList, BaseFile, FCOpts)
-	:-
-	path_src_check(SrcExt, BaseFile, NewDrive, NewPathList, SrcFilePath),
-	s2s_ext(Exts2Try),
-	check_existence(SrcFilePath, Exts2Try,ExistingSrcFilePath, WorkingExt),
-			%% ExistingSrcFilePath is a complete path, including
-			%% extension, if appropriate; hence, so it CanonSrcPath:
-	canon_path(ExistingSrcFilePath, CanonSrcPath),
-		%%% Change the Drive+Path current_consult global variable:
-	arg(7, FCOpts, Quiet),		%%	7		- Quiet 
-	arg(6, FCOpts, Ext),		%%	7		- Extension 
-	consult_msg(Quiet, Ext, CanonSrcPath, start_consult, FCOpts),
-	get_current_consult_directory(OldCCD),
-	(   
-	    set_current_consult_directory(NewDrive+NewPathList)
-		;   
-	      %% Set the CCD back to what it used to be in case if load_canon fails
-	      %% FIXME: We should determine if load_canon ever can fail, if not
-	      %% this code can be removed -- BETTER, pack this into exception
-		  %% handling & cleanup:
-	    set_current_consult_directory(OldCCD),
-	      %% Propogate failure
-	    fail
-	),
-		%%% Handle reconsult flag here............
-	adjust_recon_flag(FCOpts),
-
-	(shared_file_ext(WorkingExt) ->
-		load_slib(CanonSrcPath),
-		mangle(12, FCOpts, CanonSrcPath)
-		;
-		load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WorkingExt,FCOpts)
-	),
-
-		%%% Undo CCD global change here...................
-	set_current_consult_directory(OldCCD),
-		%%% Undo reconsult flag here............
-	set_reconsult_flag(1).
+	split_path(Desc, PathList),
+	path_to_try(SearchList, PathList, TryPath).
 
 /*-------------------------------------------------------------*
- |	load_from_file/6
- |	load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WkExt,FCOpts)
- |	load_from_file(+,+,+,+,+,+)
- |
- |	Branches on combination of SrcExt + Nature + WkExt;
- |	Implements rules governing loading of source vs. obp
+ |	path_to_try_from_base(SearchList, BaseFile, TryPath)
  *-------------------------------------------------------------*/ 
-		%% SrcExt = obp => force (attempted) loading from .obp:
-load_from_file(obp,_,BaseFile,CanonSrcPath,_,FCOpts)
+export path_to_try/3.
+path_to_try([sys_searchdir(DirPath) | RestSearchList], PathList, TryPath)
+	:-
+	split_path(DirPath, DirPathList),
+	findall(TryPath, 
+				( system_subdir(SubD),
+				  append(DirPathList,[SubD],SrcPathList),
+				  join_path(SrcPathList, TryPath)
+				),
+			TPs),
+	!,
+	path_to_try(TPs, PathList, TryPath).
+
+
+path_to_try([DirPath | RestSearchList], PathList, TryPath)
+	:-
+	DirPath \= sys_searchdir(_),
+	split_path(DirPath, DirPathList),
+	append(DirPathList,PathList,SrcPathList),
+	join_path(SrcPathList, TryPath).
+
+path_to_try([_ | RestSearchList], PathList, TryPath)
+	:-
+	path_to_try(RestSearchList, PathList, TryPath).
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/ 
+cont_consult(Path, BaseFile, FCOpts, FileMgr)
+	:-
+	access_cslt_opts(ext, FCOpts, OrigExt),
+	access_cslt_opts(obp_locn, FCOpts, ObpLocn),
+	src_setup(OrigExt, BaseFile, ObpLocn, FCOpts, Path, SrcPath, ObpPath),
+	cont_consult(SrcPath, ObpPath, Path, BaseFile, FCOpts, FileMgr).
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/ 
+src_setup(obp, BaseFile, ObpLocn, FCOpts, Path, SrcPath, Path)
 	:-!,
-	obp_load_file(CanonSrcPath, BaseFile, FCOpts).
+	SrcPath = Path.
+
+src_setup(pro, BaseFile, ObpLocn, FCOpts, Path, Path, OPath)
+	:-!,
+	file_extension(FP,pro,Path),
+	make_obp_locn(ObpLocn, FP, BaseFile, FCOpts, OPath).
+
+src_setup(pl, BaseFile, ObpLocn, FCOpts, Path, Path, OPath)
+	:-!,
+	file_extension(FP,pl,Path),
+	file_extension(FP,obp,OPath).
+
+src_setup('', BaseFile, ObpLocn, FCOpts, Path, Path, '').
+
+src_setup('', BaseFile, ObpLocn, FCOpts, Path, SrcPath, OPath)
+	:-
+	member(Ext, [pro, pl]), 
+	file_extension(Path,obp,OPath),
+	file_extension(Path,Ext,SrcPath).
+
+src_setup(Ext, BaseFile, ObpLocn, FCOpts, Path, Path, '')
+	:-
+	Ext \= ''.
+
+make_obp_locn(no_obp, _, BaseFile, FCOpts, '')
+	:-!.
+
+make_obp_locn(gis, FP, BaseFile, FCOpts, OPath)
+	:-
+	file_extension(FP,obp,OPath).
+
+make_obp_locn(gic, FP, BaseFile, FCOpts, OPath)
+	:-
+	file_extension(RootName,_,BaseFile),
+	file_extension(RootName,obp,BaseObp),
+	directory_self(Self),
+	join_path([Self,BaseObp], OPath).
+
+make_obp_locn(gias, FP, BaseFile, FCOpts, OPath)
+	:-
+	split_path(FP, FPElts),
+	dreverse(FPElts, [BaseName | RDirElts]),
+	sys_env(_,MinorOS,_),
+	dreverse([MinorOS | RDirElts], XDirElts),
+	join_path(XDirElts, XDir),
+	fin_arch_subdir(XDir, BaseName, MinorOS, RDirElts, OPath).
+
+fin_arch_subdir(XDir, BaseName, MinorOS, RDirElts, OPath)
+	:-
+	(exists_file(XDir) -> true ; make_subdir(XDir)),
+	!,
+	dreverse([BaseName, MinorOS | RDirElts], XFPElts),
+	join_path(XFPElts, XFP),
+	file_extension(XFP,obp,OPath).
+
+fin_arch_subdir(XDir, BaseName, MinorOS, RDirElts, '').
+
+make_obp_locn(giac, FP, BaseFile, FCOpts, OPath)
+	:-
+	file_extension(BaseName,_,BaseFile),
+	sys_env(_,MinorOS,_),
+	directory_self(Self),
+	join_path([Self,MinorOS], XDir),
+	fin_arch_subdir(XDir, BaseName, MinorOS, [Self], OPath).
+
+
+make_obp_locn(gil(ExplPath), FP, BaseFile, FCOpts, OPath)
+	:-
+	file_extension(RootName,_,BaseFile),
+	file_extension(RootName,obp,BaseObp),
+	split_path(ExplPath, XPathElts),
+	append(XPathElts, [BaseObp], ObpPathElts),
+	join_path(ObpPathElts, OPath).
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/ 
+cont_consult(SrcPath, OPath, Path, BaseFile, FCOpts, FileMgr)
+	:-
+	exists_file(SrcPath),
+	canon_path(SrcPath, CanonSrcPath),
+
+	consult_msg(start_consult, FCOpts),
+
+	access_cslt_opts(ext, FCOpts, Ext), 	
+	access_cslt_opts(nature, FCOpts, Nature), 	
+
+
+	(push_copt(FCOpts) ; pop_copt(FCOpts), fail),
+
+ 	load_from_file(Ext,Nature,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr),
+
+	pop_copt(FCOpts).
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/ 
+load_from_file(Ext,_,BaseFile,CanonSrcPath,_,FCOpts,FileMgr)
+	:-
+	shared_file_ext(Ext),
+	!,
+	catch( ( load_slib(CanonSrcPath),
+				ErrsList = [] ),
+		   Ball,
+		   ErrsList = [Ball]
+		 ),
+	fin_load_from_file(ErrsList,CanonSrcPath,'','',FCOpts,FileMgr).
+
+		%% SrcExt = obp => force (attempted) loading from .obp:
+load_from_file(obp,_,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr)
+	:-!,
+	(exists_file(OPath) ->
+		access_cslt_opts(recon, FCOpts, Recon), 	
+		access_cslt_opts(cg_flag, FCOpts, CGFlag), 	
+		obp_load_from_path(OPath, CanonSrcPath, BaseFile,  Recon, CGFlag, CG, Status)
+		;
+		Status = 0
+	),
+	fin_obp_load_from_path(Status, OPath, CanonSrcPath, BaseFile, CG,FCOpts,FileMgr).
 
 		%% Nature = obp => force (attempted) loading from .obp:
-load_from_file(_,obp,BaseFile,CanonSrcPath,_,FCOpts)
+load_from_file(_,obp,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr)
 	:-!,
-	obp_load_file(CanonSrcPath, BaseFile, FCOpts).
+	(exists_file(OPath) ->
+		access_cslt_opts(recon, FCOpts, Recon), 	
+		access_cslt_opts(cg_flag, FCOpts, CGFlag), 	
+		obp_load_from_path(OPath, CanonSrcPath, BaseFile,  Recon, CGFlag, CG, Status)
+		;
+		Status = 0
+	),
+	fin_obp_load_from_path(Status, OPath, CanonSrcPath, BaseFile, CG,FCOpts,FileMgr).
 
 		%% Nature = source => force (attempted) loading from .pro:
-load_from_file(_,source,BaseFile,CanonSrcPath,_,FCOpts)
+load_from_file(_,source,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr)
 	:-!,
-	outFilePath(obp, CanonSrcPath, BaseFile, ObpPath),
-	load_source(CanonSrcPath,BaseFile,ObpPath,FCOpts),
-	note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath).
+	access_cslt_opts(tgt_mod, FCOpts, TgtMod), 	
+	access_cslt_opts(recon, FCOpts, Recon), 	
+	access_cslt_opts(debug_type, FCOpts, DebugMode), 	
+	access_cslt_opts(cg_flag, FCOpts, CGFlag), 	
+	load_file_source(CanonSrcPath,BaseFile,TgtMod,Recon,DebugMode,OPath,CGFlag,CG,ErrsList),
+	fin_load_from_file(ErrsList,CanonSrcPath,OPath,CG,FCOpts,FileMgr).
 
-load_from_file(no(extension),_,BaseFile,CanonSrcPath,no(extension),FCOpts)
+		%% No extension:
+load_from_file('',_,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr)
 	:-!,
-	outFilePath(obp, CanonSrcPath, BaseFile, OutFilePath),
-	default_load(CanonSrcPath,BaseFile,OutFilePath,FCOpts).
+	default_load(CanonSrcPath,BaseFile,OPath,FCOpts,FileMgr).
 
-load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WkExt,FCOpts)
+		%% Extension is pro or pl:
+load_from_file(Ext,Nature,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr)
 	:-
-			%% Found in blt_shlr.pro:
-	transformer_db(WkExt, GenExt, DelFlag, ExtOpts), 
+	dmember(Ext, [pro, pl]),
 	!,
-	outFilePath(GenExt, CanonSrcPath, BaseFile, OutFilePath),
-	fin_load_from_file(GenExt,Nature,BaseFile,CanonSrcPath,
-						OutFilePath,WkExt,ExtOpts,DelFlag,FCOpts).
+	access_cslt_opts(tgt_mod, FCOpts, TgtMod), 	
+	access_cslt_opts(recon, FCOpts, Recon), 	
+	access_cslt_opts(debug_type, FCOpts, DebugMode), 	
+	access_cslt_opts(cg_flag, FCOpts, CGFlag), 	
+	load_file_source(CanonSrcPath,BaseFile,TgtMod,Recon,DebugMode,OPath,CGFlag,CG,ErrsList),
+	fin_load_from_file(ErrsList,CanonSrcPath,OPath,CG,FCOpts,FileMgr).
 
-load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WkExt,FCOpts)
+		%% Any other extension:
+load_from_file(_,_,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr)
 	:-
-	ObpPath = none,
-	load_source(CanonSrcPath,BaseFile,ObpPath,FCOpts),
-	note_paths(FCOpts, CanonSrcPath, ObpPath, CanonSrcPath).
-
-
-
-fin_load_from_file(obp,Nature,BaseFile,CanonSrcPath,OutFilePath,
-					WkExt,ExtOpts,DelFlag,FCOpts)
-	:-!,
-	default_load(CanonSrcPath,BaseFile,OutFilePath,FCOpts).
-
-fin_load_from_file(GenExt,Nature,BaseFile,CanonSrcPath,OutFilePath,
-					WkExt,ExtOpts,DelFlag,FCOpts)
-	:-
-	comp_file_times(CanonSrcPath, OutFilePath),
-	!,
-	load_from_file(GenExt,Nature,BaseFile,OutFilePath,GenExt,FCOpts).
-
-fin_load_from_file(GenExt,Nature,BaseFile,SrcPath,OutFilePath,
-					WkExt,ExtOpts,DelFlag,FCOpts)
-	:-
-	extract_opts(FCOpts, FCOptions),
-	dappend(ExtOpts, FCOptions, Options),
-			%% Found in blt_shlr.pro:
-%	pathPlusFile(SrcPath,_,SrcPathDir),
-	pathPlusFile(SrcPathDir,_,SrcPath),
-	src2src_inv(WkExt, BaseFile, SrcPath, OutFilePath, Options),
-	load_from_file(GenExt,Nature,BaseFile,OutFilePath,GenExt,FCOpts),
-	(DelFlag = no_del ->
-		true 
-		;
-		unlink(OutFilePath)
-	).
-
-/*-------------------------------------------------------------*
- |	Load from the obp file
- *-------------------------------------------------------------*/ 
-obp_load_file(CanonSrcPath, BaseFile, FCOpts)
-	:-
-% 	consulted(BaseFile, CanonSrcPath, ObpPath, _, _),
- 	consulted(BaseFile, _, ObpPath, _, _),
-	obp_load_from_path(BaseFile,ObpPath, CanonSrcPath,FCOpts),
-	!,
-	note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath).
-
-obp_load_file(CanonSrcPath, BaseFile, FCOpts)
-	:-
-	(filePlusExt(_, Ext, CanonSrcPath) ->
-		(Ext = obp ->
-			ObpFile = CanonSrcPath
-			;
-			fail %% change to exception
-		)
-		;
-		filePlusExt(CanonSrcPath, obp, ObpFile)
-	),
-	obp_load_from_path(BaseFile,ObpPath, CanonSrcPath,FCOpts),
-	!,
-	note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath).
-
-obp_load_from_path(BaseFile,ObpPath, CanonSrcPath,FCOpts)
-	:-
-	establish_fcg(BaseFile),
-	full_obp_load(CanonSrcPath, BaseFile, ObpPath,FCOpts),
-	reset_fcg(_).
+	access_cslt_opts(tgt_mod, FCOpts, TgtMod), 	
+	access_cslt_opts(recon, FCOpts, Recon), 	
+	access_cslt_opts(debug_type, FCOpts, DebugMode), 	
+	access_cslt_opts(cg_flag, FCOpts, CGFlag), 	
+	load_file_source(CanonSrcPath,BaseFile,TgtMod,Recon,DebugMode,'',CGFlag,CG,ErrsList),
+	fin_load_from_file(ErrsList,CanonSrcPath,OPath,CG,FCOpts,FileMgr).
 
 /*-------------------------------------------------------------*
  |	Load from either the source file or the .obp file,
  |	depending on date/time.
  *-------------------------------------------------------------*/ 
-default_load(CanonSrcPath,BaseFile,ObpPath,FCOpts)
+default_load(CanonSrcPath,BaseFile,ObpPath,FCOpts,FileMgr)
 	:-
-	(comp_file_times( CanonSrcPath, ObpPath) ->
-		obp_load_from_path(BaseFile,ObpPath, CanonSrcPath,FCOpts),
-		note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath)
-		;
-		load_source_object(CanonSrcPath,BaseFile,ObpPath,FCOpts),
-		!,
-		note_paths(FCOpts, CanonSrcPath, ObpPath, CanonSrcPath)
-	),
-	! ; true.
+	comp_file_times( CanonSrcPath, ObpPath),
+			%% obp file exists & is newer; load it:
+	access_cslt_opts(recon, FCOpts, Recon), 	
+	access_cslt_opts(cg_flag, FCOpts, CGFlag), 	
+	obp_load_from_path(ObpPath, CanonSrcPath, BaseFile,  Recon, CGFlag, CG, Status),
+	fin_obp_load_from_path(Status, ObpPath, CanonSrcPath, BaseFile, CG,FCOpts,FileMgr).
 
+default_load(CanonSrcPath,BaseFile,OPath,FCOpts,FileMgr)
+	:-
+			%% load source:
+	access_cslt_opts(tgt_mod, FCOpts, TgtMod), 	
+	access_cslt_opts(recon, FCOpts, Recon), 	
+	access_cslt_opts(debug_type, FCOpts, DebugMode), 	
+	access_cslt_opts(cg_flag, FCOpts, CGFlag), 	
+	load_file_source(CanonSrcPath,BaseFile,TgtMod,Recon,DebugMode,OPath,CGFlag,CG,ErrsList),
+	fin_load_from_file(ErrsList,CanonSrcPath,OPath,CG,FCOpts,FileMgr).
 
 /*-------------------------------------------------------------*
- |	Record source/obp/loaded path information in the 
- |	FCOpts options structure
  *-------------------------------------------------------------*/ 
-note_paths(FCOpts, SrcFilePath, ObpPath, LoadedPath)
+fin_load_from_file([],CanonSrcPath,OPath,CG,FCOpts,FileMgr)
+	:-!,
+	set_cslt_opts(loadedpath, FCOpts, CanonSrcPath),
+	set_cslt_opts(srcfilepath, FCOpts, CanonSrcPath),
+	set_cslt_opts(fcg, FCOpts, CG).
+
+fin_load_from_file(ErrsList,CanonSrcPath,OPath,CG,FCOpts,FileMgr)
 	:-
-	mangle(11, FCOpts, SrcFilePath),		%%  11      - SrcFilePath
-	mangle(2, FCOpts, ObpPath),  			%%	2		- ObpPath
-	mangle(12, FCOpts, LoadedPath). 		%%	12		- LoadedPath 
+	throw(error(consult_load, [src_load,CanonSrcPath,ErrsList])).
 
 /*-------------------------------------------------------------*
- |	Low-level load from .obp file, with check on status
- |	afterwards:
  *-------------------------------------------------------------*/ 
-full_obp_load(SrcPath, BaseFile,ObpPath,FCOpts)
-	:-
-	obp_load(ObpPath,Status),
-	obp_load_checkstatus(Status,SrcPath,BaseFile,ObpPath,FCOpts).
 
-/*-----------------------------------------------------------------------*
- |	obp_load_checkstatus/3
- |	obp_load_checkstatus(Status,SPath,OPath)
- |	obp_load_checkstatus(Status,SPath,OPath)
- *-----------------------------------------------------------------------*/
 	%% FLOAD_FAIL
-obp_load_checkstatus(0,SPath,BaseFile,OPath,FCOpts) 
-	:-!,	
+fin_obp_load_from_path(0, OPath, CanonSrcPath, BaseFile, CG,FCOpts,FileMgr)
+	:-
 		%% obpload_er: "Error loading Prolog obp file %t.\n"
 	prolog_system_error(obpload_er, [OPath]),
-	attempt_load_source_object(SPath,BaseFile,OPath,FCOpts).
+	attempt_load_source_object(CanonSrcPath,BaseFile,OPath,FCOpts,FileMgr).
 
 	%% FLOAD_SUCCESS
-obp_load_checkstatus(1,SPath,BaseFile,OPath,FCOpts) 
-	:-!.
+fin_obp_load_from_path(1, OPath, CanonSrcPath, BaseFile, CG,FCOpts,FileMgr)
+	:-
+	canon_path(OPath, CanonObpPath),
+	set_cslt_opts(obp_path, FCOpts, CanonObpPath), 	
+	set_cslt_opts(loadedpath, FCOpts, CanonObpPath),
+	set_cslt_opts(srcfilepath, FCOpts, CanonSrcPath),
+	set_cslt_opts(fcg, FCOpts, CG).
 
 	%% FLOAD_ILLOBP
-obp_load_checkstatus(2,SPath,BaseFile,OPath,FCOpts) 
-	:-	
+fin_obp_load_from_path(2, OPath, CanonSrcPath, BaseFile, CG,FCOpts,FileMgr)
+	:-
 		%% old_obp: "%t in old or unrecognized .obp format.\n"
 	prolog_system_error(old_obp, [OPath]),
-	attempt_load_source_object(SPath,BaseFile,OPath,FCOpts).
-
-/*-----------------------------------------------------------------------*
- | prepend_current_consult_directory/4
- | prepend_current_consult_directory(Drive,PathList,NewDrive,NewPathList)
- | prepend_current_consult_directory(+,+,-,-)
- |
- |	-- fix up incoming drive & pathlist for locating file
- *-----------------------------------------------------------------------*/
-
-	%% no drive or path specified. Use default.
-prepend_current_consult_directory('',[],NewDrive,NewPathList) 
-	:-!, 		
-	get_current_consult_directory(InitNewDrive+InitNewPathList),
-	check_default_local(InitNewDrive,InitNewPathList,NewDrive,NewPathList).
-
-	%% not an absolute path (i.e., relative),
-	%% but using the same drive:
-prepend_current_consult_directory(Drive,PathList,NewDrive,NewPathList) 
-	:-
-	PathList \= ['' | _],
-	!,
-	get_current_consult_directory(InitDrive+InitCurrentPath),
-	check_default_local(InitDrive,InitCurrentPath,NewDrive,CurrentPath),
-	dappend(CurrentPath,PathList,NewPathList).
-
-	%% Pathlist is complete (i.e., absolute):
-prepend_current_consult_directory(Drive,PathList,Drive,PathList).
-
-check_default_local('',[],NewDrive,NewPathList)
-	:-!,
-	get_cwd(NewPath),
-	rootPlusPath(InitNewDrive, NewPathList, NewPath),
-	(InitNewDrive = root -> NewDrive = '' ; NewDrive = InitNewDrive).
-
-check_default_local(Drive,PathList,Drive,PathList).
-
-/*-----------------------------------------------------------------------*
- |	check_existence/4
- |	check_existence(InPath,ExtList,OutPath,OutExt)
- |	check_existence(+,+,-,-)
- |
- |	- determine whether a (generalized) path is a valid clause source
- |
- |	Valid sources:  
- |		- the user (keyboard) stream;
- |		- a regular file which (by defn) exists;
- |		- the path plus a 'pro' or 'obp' extension is an existing regular file
- *-----------------------------------------------------------------------*/
-export check_existence/4.
-
-check_existence(user,_,user,no(extension)) :- !.
-
-check_existence(Path,_,Path,Ext) 
-	:-
-	exists_file(Path),
-	check_for_regular(Path),
-	!,
-	(filePlusExt(_,Ext,Path) -> true ; Ext=no(extension)).
-
-check_existence(Path,ExtsList,PathPlusSuffix,Suffix) 
-	:-
-	member(Suffix, ExtsList),
-	filePlusExt(Path,Suffix,PathPlusSuffix),
-	exists_file(PathPlusSuffix),
-	!,
-	check_for_regular(PathPlusSuffix).
-
-check_for_regular(Path)
-	:-
-	file_status(Path,Status),
-	(member(type=regular,Status) -> 
-		true
-		;
-		member(type=symbolic_link, Status),
-			%% Must give follow_link/4 the correct directory context:
-		pathPlusFile(DirPath,_,Path),
-		subPath(DirPathSrcList, DirPath),
-		follow_link(Path, _, DirPathSrcList, FinalTypeCode),
-		fileTypeCode(FinalTypeCode, regular)
-	).
-
-
-/*-----------------------------------------------------------*
- |	Databse structure for recording information about
- |	consulted files:
- |
- |	consulted/5
- |	consulted(File, SrcPath, ObpPath, DbgType, Options)
- |	consulted(+, +, +, +, +)
- |
- |	-records information about loaded files
- |
- |	Asserted in module builtins by consult process.
- |
- |	File	= the unadorned file name (myfile), with any extension
- |			  which was passed in the original description (e.g.,
- |			  foo.pro, foo.obp, foo.oop, etc.), all as an atom
- |	SrcPath = complete path (e.g., /foa/bar/foo.pro,  or foa/bar/foo.oop)
- |            to source code which was (at some point) loaded, and used
- |			  to generate the obp file (if any) in ObpPath; '' otherwise
- |	ObpPath = path (eg, /foa/bar/foo.obp ) where the relevant 
- |			  *.obp file was located, if any; if none such
- |			  was involved,  use '' in this arg; this may
- |			  be either the path the obp file which was loaded,
- |			  or the path to the obp file which was written
- |	DbgType = {normal/debug}; default = normal
- |	Options	  = options structure, or '' if none used
- *-----------------------------------------------------------*/
-
-record_consult(File, FCOpts)
-	:-
-	arg(2, FCOpts, ObpPath), 
-	arg(5,  FCOpts, OrigDir),
-	arg(13, FCOpts, DebugType),
-	arg(11, FCOpts, SrcFilePath),
- 	fin_record_consult(File, SrcFilePath, ObpPath, DebugType, '').
-
-fin_record_consult(File, SrcFilePath, ObpPath, DebugType, Options)
-	:-
- 	consulted(File, OrigDir, A, B, C),
-	!,
- 	retract(consulted(File, OrigDir, A, B, C)),
- 	assert_at_load_time(consulted(File, SrcFilePath, ObpPath, DebugType, Options)).
-
-	%% Not previously recorded:
-fin_record_consult(File, SrcFilePath, ObpPath, DebugType, Options)
-	:-
- 	assert_at_load_time(consulted(File, SrcFilePath, ObpPath, DebugType, Options)).
-
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		%% CONTROLLING MESSAGES
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-/*-----------------------------------------------------------------*
- |	consultmessage/1
- |	consultmessage(Ctrl)
- |	consultmessage(+)
- |
- |	- Control whether messages are printed during consulting.
- |
- |	Ctrl is true/false (false = print messages)
- *-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*
- |	set_consult_messages/1
- |	set_consult_messages(Setting),
- |	set_consult_messages(+),
- |
- |	- Change consultmessage/1 setting
- *-----------------------------------------------------------------*/
-consultmessage(false).
-
-export set_consult_messages/1.
-
-set_consult_messages(Value)
-	:-
-	consultmessage(Value),
-	!.
-
-set_consult_messages(Value)
-	:-
-	retract( consultmessage(_) ),
-	assert( consultmessage(Value) ).
-
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		%% LOWEST-LEVEL FILE LOADING
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	attempt_load_source_object(CanonSrcPath,BaseFile,OPath,FCOpts,FileMgr).
 
 /*-------------------------------------------------------------*
- | For loading source (.pro) files without writing the .obp file:
  *-------------------------------------------------------------*/ 
-load_source(Path,BaseFile,Type,FCOpts) :-
-	establish_fcg(BaseFile),
 
-	check_set_tgt_mod(FCOpts,TgtModFlag),
+attempt_load_source_object(CanonSrcPath,BaseFile,OPath,FCOpts,FileMgr)
+	:-
+	load_from_file('',source,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr).
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/ 
+simple_load(NoSuffixFile,Path)
+	:-
+	get_reconsult_flag(RFlag),
+	establish_fcg(NoSuffixFile,RFlag,CG),
 	obp_push_stop,
-	xconsult(Path,NErrs),
+	catch(xconsult(Path,_,_),_, reset_fcg(_)),
 	obp_pop,
-	check_unset_tgt_mod(TgtModFlag),
+	reset_fcg(_).
 
-	reset_fcg(_),
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% FILE CLAUSE GROUP MANIPULATION
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+:-  make_gv('_next_clause_group'), 
+	set_next_clause_group(1).
+
+/*-------------------------------------------------------------*
+ | establish_fcg/4
+ | establish_fcg(CGFlag, NoSuffixPath, ReconsultFlag, CG)
+ | establish_fcg(+,+,+,-)
+ *-------------------------------------------------------------*/ 
+establish_fcg(false, _, _, _).
+
+establish_fcg(true, NoSuffixPath, ReconsultFlag, CG)
+	:-
+	get_fcg(NoSuffixPath,CG),
+	push_clausegroup(CG),
+	check_abolish_cg(ReconsultFlag, CG).
+
+reset_fcg(_)
+	:-
+	pop_clausegroup(_).
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/ 
+
+check_abolish_cg(reconsult,CG) 
+	:- !,
+	massively_abolish_clausegroup(CG).
+
+check_abolish_cg(no_reconsult,_).
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/ 
+:- dynamic(file_clause_group/2).
+
+get_fcg(Path,CG) :-
+	file_clause_group(Path,CG),
 	!.
+get_fcg(Path,CG) :-
+	get_next_clause_group(CG),
+	CG1 is CG+1,
+	set_next_clause_group(CG1),
+	assertz_at_load_time(file_clause_group(Path,CG)).
 
-load_source(_,_,_,_) :-
-	obp_pop,
-	pop_clausegroup(FCG),
-	massively_abolish_clausegroup(FCG),
+/*-------------------------------------------------------------*
+ |	For loading source (.pro) files with/or/without writing the .obp file:
+ |
+ |	load_file_source/9
+ |	load_file_source(Path,BaseFile,TgtMod,Recon,DebugMode,OPath,CGFlag,CG,ErrsList) 
+ |	load_file_source(+,+,+,+,+,+,+,-,-) 
+ |
+ |	Path		- path to appropriate source file (MUST exist), or user
+ |	BaseFile	- tail of Path, or user
+ |	TgtMod		- atom naming module into which non-module code will go
+ |	Recon		- reconsult / no_reconsult
+ |	DebugMode	- debugging / no_debugging
+ |	OPath		- '' / path to *.obp file in which to write OBP code
+ |	CGFlag		- true / false (use CGs, or not)
+ |	CG			- integer; the clause group # used
+ |	ErrsList 	- (possible empty) list of (syntax) errors encountered
+ |
+ |	Assumptions: Path leads to an appropriate source file which exists,
+ |					or else, Path = BaseFile = user
+ |
+ |	OPath is meaningless if Path = user
+ |	If Path \= user, but OPath = '', signifies to NOT create *.obp file
+ |
+ |	Cannot fail: Either succeeds or raises an exception.
+ *-------------------------------------------------------------*/ 
+export load_file_source/9.
+load_file_source(Path,BaseFile,TgtMod,Recon,DebugMode,OPath,CGFlag,CG,ErrsList) 
+	:-
+	(Path = user ->
+		current_alias(user_input,Stream)
+		;
+		open(Path, read, Stream, [])
+	),
+	establish_fcg(CGFlag, BaseFile, Recon, CG),
+	catch( try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,ErrsList),
+			Ball,
+			( (OPath = '' -> true ;
+				(unlink(OPath) ->  
+					prolog_system_error(obp_removed,[Path,OPath])
+					;   
+					prolog_system_error(obp_not_removed,[Path,OPath])
+				)
+			   ),
+			throw(Ball)  )
+		 ),
+	(ErrsList = [] ->  
+		true
+		;  
+		(OPath = '' ->
+			true
+			;
+			(unlink(OPath) ->  
+				prolog_system_error(obp_removed,[Path,OPath])
+				;   
+				prolog_system_error(obp_not_removed,[Path,OPath])
+			)
+		)
+	).
+
+try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,ErrsList)
+	:-
+	catch( load_source0(Stream, TgtMod, DebugMode, OPath, ErrsList),
+			Ball,
+			(	reset_fcg(_),
+				(CGFlag -> massively_abolish_clausegroup(CG) ; true),
+				throw(Ball)
+			)
+		  ),
+	!,
+	close(Stream),
+	reset_fcg(_).
+
+try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,ErrsList)
+	:-
+	close(Stream),
+	pop_clausegroup(CG),
+	(CGFlag -> massively_abolish_clausegroup(CG) ; true),
 		%% ld_src_err: "Internal error in load_source for file %t\n"
 	prolog_system_error(ld_src_err, []).
 
-/*
-check_set_tgt_mod(FCOpts,true)
-	:-
-	arg(8, FCOpts, TgtMod),
-	atom(TgtMod),
-	TgtMod \= user,
-write(check_set_tgt_mod=TgtMod),nl,
-	!,
-	functor(MM,TgtMod,0),		/* intern it */
-	'$icode'(-10,MM,0,0,0).		/* new module */
-*/
-
-check_set_tgt_mod(FCOpts,true)
-	:-
-	arg(8, FCOpts, TgtMod),
-	xconsult:pushmod(TgtMod).
-
-check_set_tgt_mod(FCOpts,false).
-
-/*
-check_unset_tgt_mod(true)
-	:-!,
-	'$icode'(-9,0,0,0,0).		/* end module */
-*/
-
-check_unset_tgt_mod(true)
-	:-!,
-	xconsult:popmod.
-
-check_unset_tgt_mod(_).
 
 /*-------------------------------------------------------------*
- |	For loading source (.pro) files AND writing the .obp file:
  *-------------------------------------------------------------*/ 
-load_source_object(SPath,BaseFile,OPath,FCOpts) :-
-	establish_fcg(BaseFile),
-	check_set_tgt_mod(FCOpts,TgtModFlag),
-	obp_open(OPath),
-	!,
-	catch(xconsult(SPath,NErrs), _, obp_close_cleanup(SPath,OPath)),
-	obp_close,
-	check_unset_tgt_mod(TgtModFlag),
-	reset_fcg(_),
-	(NErrs = 0 ->  
-		true
-		;  
-		(unlink(OPath) ->  
-			prolog_system_error(obp_removed,[SPath,OPath])
-			;   
-			prolog_system_error(obp_not_removed,[SPath,OPath])
-		)
-	).
-	
-
-load_source_object(SPath,BaseFile,OPath,FCOpts)
+obp_load_from_path(OPath, CanonSrcPath, BaseFile,  Recon, CGFlag, CG, Status)
 	:-
-	prolog_system_error(no_open_fil, [OPath]),
-	prolog_system_error(no_obp, [OPath]),
-	xconsult(SPath,NErrs).
+	establish_fcg(CGFlag, BaseFile, Recon, CG),
+	obp_load(OPath, Status),
+	reset_fcg(_).
 
-obp_close_cleanup(SPath,OPath)
-	:-
-	obp_close,
-	pop_clausegroup(FCG),
-	massively_abolish_clausegroup(FCG),
-	(unlink(OPath) ->  
-			prolog_system_error(obp_removed,[SPath,OPath])
-			;   
-			prolog_system_error(obp_not_removed,[SPath,OPath])
-	),
-	fail.
+
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% LOWEST-LEVEL FILE LOADING
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*-------------------------------------------------------------*
- |	For loading source (.pro) files AND writing the .obp file,
- |	BUT make sure the file exists, and give a warning message:
  *-------------------------------------------------------------*/ 
-attempt_load_source_object(SPath,BaseFile,OPath,FCOpts) :-
-	exists_file(SPath),
-	prolog_system_error(atmpt_cmp, [SPath]),
-	load_source_object(SPath,BaseFile,OPath,FCOpts).
+	%% NO OBP: OPath = ''
+obp_mode_start('')
+	:-!,
+	obp_push_stop.
 
-attempt_load_source_object(SPath,BaseFile,OPath,FCOpts) :-
-	prolog_system_error(ld_fail, [SPath]).
+obp_mode_end('')
+	:-!,
+	obp_pop.
+
+	%% Generate OBPs: OPath \= ''
+obp_mode_start(OPath)
+	:-
+	obp_open(OPath).
+
+obp_mode_end(OPath)
+	:-
+	obp_close.
+
+/*-------------------------------------------------------------*
+ | For loading source (.pro) files 
+ |
+ |	load_source0/5
+ |	load_source0(Stream, TgtMod, DebugMode, OPath, ErrsList) 
+ |	load_source0(+, +, +, +, -) 
+ |
+ | 	-	if OPath = '',  -- without writing the .obp file
+ | 	-	if OPath \= '', -- writes the .obp file to OPath
+ *-------------------------------------------------------------*/ 
+export load_source0/5.
+load_source0(Stream, TgtMod, DebugMode, OPath, ErrsList) 
+	:-
+	obp_mode_start(OPath),
+	xconsult:pushmod(TgtMod),
+	catch(xxconsult(Stream, DebugMode, ErrsList),
+			Ball, 
+			( xconsult:popmod, 
+			  obp_mode_end(OPath),
+			  throw(Ball)   )
+		),
+	!,
+	xconsult:popmod,
+	obp_mode_end(OPath).
+
+load_source0(_,_,_,OPath,_) 
+	:-
+	xconsult:popmod,
+	obp_mode_end(OPath),
+	!,
+		%% ld_src_err: "Internal error in load_source for file %t\n"
+	prolog_system_error(ld_src_err, []).
+
 
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		%% LOWEST-LEVEL SLIB LOADING
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-/*
+/*----------------------------------------------------------------------*
 
 load_slib/1
 
 Description
+-----------
 
 load_slib(File) is true.
 
@@ -1013,10 +1128,12 @@ a) The shared c-prolog library File is loaded.
 b) The goal succeeds.
 
 Templates and modes
+-------------------
 
 load_slib(+File)
 
 Errors
+------
 
 a) File is a variable.
    - instantiation_error.
@@ -1046,7 +1163,7 @@ Note - Some errors return os_code/1 term that contains the
 numerical error code or string generated by the local operating
 system.
 
-*/
+ *----------------------------------------------------------------------*/
 
 export load_slib/1.
 
@@ -1072,231 +1189,5 @@ check_plugin_result(init_error, File, NativeResult, _) :-
 	system_error(shared_library_init_error(File, os_code(NativeResult))).
 check_plugin_result(Error, File, NativeResult, _) :-
 	system_error(shared_library_error(Error, File, os_code(NativeResult))).
-
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% FILE CLAUSE GROUP MANIPULATION
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/ 
-load_canon_reconsult(1,CG) 
-	:- !,
-	(file_clause_groups(true) ->
-		massively_abolish_clausegroup(CG)
-		;
-		true
-	).
-
-load_canon_reconsult(0,_).
-
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/ 
-:- dynamic(file_clause_group/2).
-
-get_fcg(Path,CG) :-
-	file_clause_group(Path,CG),
-	!.
-get_fcg(Path,CG) :-
-	get_next_clause_group(CG),
-	CG1 is CG+1,
-	set_next_clause_group(CG1),
-	assertz_at_load_time(file_clause_group(Path,CG)).
-
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/ 
-
-:- dynamic(file_clause_groups/1).
-
-file_clause_groups(true).
-
-set_file_clause_groups(Value)
-	:-
-	file_clause_groups(Value),
-	!.
-
-set_file_clause_groups(Value)
-	:-
-	retract(file_clause_groups(_)),
-	assert(file_clause_groups(Value)).
-
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/ 
-establish_fcg(NoSuffixPath)
-	:-
-	get_fcg(NoSuffixPath,CG),
-	push_clausegroup(CG),
-	get_reconsult_flag(RFlag),
-	load_canon_reconsult(RFlag,CG).
-
-reset_fcg(_)
-	:-
-	pop_clausegroup(_).
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% HOOKS FOR INVOKING TRANSFORMERS
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-	/*--------------------------------------------------*
-	 |	These all assume that the ALS Prolog development
-	 |	shell is running, so that the library setup
-	 |	in blt_shl.pro has been carried out.
-	 |
-	 |	Location of generated files is controlled
-	 |	by genFileLocn/3.  The default is put generated
-	 |	files with their various source files.
-	 *--------------------------------------------------*/
-
-extract_opts(FCOpts, [quiet(Value)])
-	:-
-	arg(7, FCOpts, Value). 	%%	7		- Quiet 
-
-	/*--------------------------------------------------*
-	 |	src2src_inv/3
-	 |	src2src_inv(Ext, CanonSrcPath, OutProPath)
-	 |	src2src_inv(+, +, +)
-	 |
-	 |	This is the direct hook between the consult
-	 |	machinery and the individual source to source
-	 |	transformers.  This 
-	 *--------------------------------------------------*/
-
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		%% GENERATED FILE LOCATION CONTROL (INCLUDING OBP)
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-/*-----------------------------------------------------------------------*
- *-----------------------------------------------------------------------*/
-:- dynamic(genFileLocn/3).
-
-outFilePath(GenExt, CanonSrcPath, BaseFile, OutFilePath)
-	:-
-	genFileLocn(CanonSrcPath, OutDir, OutDisk),
-	!,
-	fin_o_f_path(OutDir, OutDisk, GenExt, CanonSrcPath, BaseFile, OutFilePath).
-
-outFilePath(GenExt, CanonSrcPath, BaseFile, OutFilePath)
-	:-
-	fin_o_f_path('', '', GenExt, CanonSrcPath, BaseFile, OutFilePath).
-
-/*-----------------------------------------------------------------------*
- *-----------------------------------------------------------------------*/
-fin_o_f_path(subdir(cur), OutDisk, GenExt, CanonSrcPath, 
-				BaseFile, OutFilePath)
-	:-!,
-	filePlusExt(BaseFile, GenExt, OutFile),
-	get_cwd(CurDir),
-	extendPath(CurDir,OutFile,OutFilePath).
-
-fin_o_f_path(subdir(arch,Where), OutDisk, GenExt, CanonSrcPath, 
-				BaseFile, OutFilePath)
-	:-!,
-	filePlusExt(BaseFile, GenExt, OutFile),
-	rootPathFile(OrigDisk,OrigPathList,_,CanonSrcPath),
-	sys_env(OS,MinorOS,Proc),
-	SubDir = MinorOS,
-	(Where = src ->
-		(GenExt = obp ->
-			append(OrigPathList, [SubDir], NewPathList)
-			;
-			NewPathList = OrigPathList
-		)
-		;
-				%% take Where to be = cur (subdir of current):
-		get_cwd(CurDir),
-		rootPlusPath(OutDisk,OutDirList,CurDir),
-		append(OutDirList, [SubDir], NewPathList)
-	),
-	rootPlusPath(OutDisk, NewPathList, OutDir),
-	(exists_file(OutDir) -> true ; make_subdir(OutDir) ),
-	rootPathFile(OutDisk, NewPathList, OutFile, OutFilePath).
-
-fin_o_f_path(OutDir, OutDisk, GenExt, CanonSrcPath, BaseFile, OutFilePath)
-	:-
-	is_absolute_pathname(OutDir),
-	!,
-	filePlusExt(BaseFile, GenExt, OutFile),
-	rootPathFile(OutDisk, OutDir, OutFilePath).
-
-	%% OutDir is a relative path; paste onto CanonSrc..:
-fin_o_f_path(OutDir, OutDisk, GenExt, CanonSrcPath, BaseFile, OutFilePath)
-	:-
-	filePlusExt(BaseFile, GenExt, OutFile),
-	rootPathFile(OrigDisk,OrigPathList,_,CanonSrcPath),
-	subPath(OutDirList, OutDir),
-	append(OrigPathList, OutDirList, NewPathList),
-	rootPathFile(OrigDisk, NewPathList, OutFile, OutFilePath).
-
-/*!----------------------------------------------------------------------*
- |	generated_with_src/0.
- |	generated_with_src
- |	generated_with_src
- |
- |	-	store generated files in same directory with source files
- *!----------------------------------------------------------------------*/
-	%%  genFileLocn(CanonSrcPath, OutDir, OutDisk),
-
-export generated_with_src/0.
-generated_with_src 
-	:-
-	abolish(genFileLocn,3),
-	dynamic(genFileLocn/3).
-
-/*!----------------------------------------------------------------------*
- |	generated_in_cur/0.
- |	generated_in_cur
- |	generated_in_cur
- |
- |	-	store generated files in the current directory
- *!----------------------------------------------------------------------*/
-export generated_in_cur/0.
-generated_in_cur 
-	:-
-	abolish(genFileLocn,3),
-	asserta(genFileLocn(_,subdir(cur), '')).
-
-/*!----------------------------------------------------------------------*
- |	generated_in_locn/1
- |	generated_in_locn(DirPath)
- |	generated_in_locn(+)
- |
- |	-	store generated files in the directory DirPath
- *!----------------------------------------------------------------------*/
-export generated_in_locn/1.
-generated_in_locn(DirPath) 
-	:-
-	rootPlusPath(Disk, PathList, DirPath),
-	subPath(PathList, Path),
-	abolish(genFileLocn,3),
-	asserta(genFileLocn(_,Path, Disk)).
-
-/*!----------------------------------------------------------------------*
- |	generated_in_arch/1
- |	generated_in_arch(Which)
- |	generated_in_arch(+)
- |
- |	-	store generated files in an architcture subdirectory 
- |
- |	Which = {src/cur}; any input \= src is interpred as cur.
- *!----------------------------------------------------------------------*/
-
-export generated_in_arch/1.
-generated_in_arch(Which)
-	:-
-	abolish(genFileLocn,3),
-	(Which = src -> Place = src ; Place = cur),
-	asserta(genFileLocn(_,subdir(arch,Place), '')).
-
-/* Some definitions for standard */
-
-export multifile/1.
-multifile(_).
-
-export discontiguous/1.
-discontiguous(_).
-
-export include/1.
-include(F) :- consult(F).
-
-export ensure_loaded/1.
-ensure_loaded(F) :- consult(F, [ensure_loaded(true)]).
 
 endmod.		%% blt_cslt.pro: Consult 

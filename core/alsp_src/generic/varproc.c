@@ -19,16 +19,7 @@
 
 #define PERMOFFSET	1
 
-#ifdef NO_FAR_DATA
-varinf *vtbl;	/* variable table               */
-void init_varproc_data(void)
-{
-    vtbl = malloc((VTBLSIZE + 2)*sizeof(*vtbl));
-    if (vtbl == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
-}
-#else
 varinf vtbl[VTBLSIZE + 2];	/* variable table               */
-#endif
 
 int   call_env_sizes[MAXGLS];
 

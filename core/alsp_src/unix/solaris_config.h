@@ -22,7 +22,9 @@
 
 #define HAVE_SGTTY_H	1
 #define HAVE_SYS_SELECT_H	1
+#if 0
 #define HAVE_UCONTEXT_H	1
+#endif
 #define HAVE_DLFCN_H	1
 #define HAVE_LIBDL	1
 #define HAVE_LIBGEN	1
@@ -35,6 +37,8 @@
 #define HAVE_POLL	1
 #define HAVE_REGCMP	1
 #define HAVE_RINT	1
+#if 0
 #define HAVE_SIGACTION	1
 #define HAVE_SIGALTSTACK	1
+#endif
 

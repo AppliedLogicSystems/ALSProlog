@@ -55,652 +55,8 @@
 #define O_BINARY 0
 #endif
 
-#ifndef PURE_ANSI
-static	void	coredump_cleanup	PARAMS(( int ));
-#endif /* PURE_ANSI */
-
-static	int	current_page_size = 8192;	/* A guess at the page size */
-
 /* MAX_PAGE_SIZE is the largest possible page size of the OS */
 #define MAX_PAGE_SIZE 0x10000
-
-#ifdef PARAMREVBIT
-unsigned long AddressHiBit = 0x0;
-unsigned long ReversedHiBit = 0x80000000;
-#endif
-
-#define SIGSTKSIZE 8192		/* Size to use for a signal stack */
-
-/* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
-
-#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) \
-	|| defined(MACH_SUBSTRATE) || defined(MSWin32)
-
-static	int	bottom_stack_page_is_protected = 0;
-
-#endif	/* defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
-
-/* #ifdef HAVE_MMAP */
-#if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
-/*----------------- Operating systems with mmap ---------------*/
-
-#include <sys/mman.h>
-
-#ifdef	HAVE_UCONTEXT_H
-#include <ucontext.h>
-#endif /* HAVE_UCONTEXT_H */
-
-/* FIXME: Either put a test into configure.in to handle the following or
- * make the code which calls mmap more generic in that it will try a number
- * of addresses. 
- */
-#ifdef _AIX
-#define	STACKSTART	0x30000000
-#define CODESTART	0x38000000
-#elif __hp9000s800
-/* On HP-UX the first Gigabyte of low memory is used for the program
-   code (text).  These locations seem to work on 700 series machines
-   but the memory map is slightly different under 800 - so there could
-   be problems.
-*/
-#define	STACKSTART	0x48000000
-#define CODESTART	0x4d000000
-#else
-#define	STACKSTART	0x01000000
-#define CODESTART	0x05000000
-#endif
-
-#define	NPROTECTED	1
-
-#if defined(HAVE_SIGACTION) || defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
-static long signal_stack[SIGSTKSIZE];
-#endif
-
-#if defined(HAVE_MPROTECT) && defined(MISSING_EXTERN_MPROTECT)
-extern	int	mprotect	PARAMS(( caddr_t, size_t, int ));
-#endif
-static	void	release_bottom_stack_page	PARAMS(( void ));
-
-/*-------------------------------------------------------------------*
- * stack_overflow is a signal handler for catching stack overflows.
- *
- * With the memory allocated with the mmap call (see
- * allocate_prolog_heap_and_stack below), we make the bottom-most stack
- * page read/write protected.  At the time that this comment was written,
- * on SunOS, using the mprotect call, this will cause delivery of a SIGBUS
- * signal when a write is made to the protected region. If the region is
- * protected by remapping it (with the mmap call), the SIGSEGV signal is
- * delivered.
- *
- * We will release the bottom stack page for read/write access (if this
- * has not already been done), indicate to the Prolog environment that
- * a signal has been caught, and permit execution to continue.  Then
- * at the next inference, the prolog system should process the interrupt,
- * reduce the stack requirements (via an abort or throw probably) and
- * reprotect the bottom page so that a future stack overflow will be
- * caught.
- *-------------------------------------------------------------------*/
-
-#if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
-void stack_overflow(int, siginfo_t *, ucontext_t *);
-void stack_overflow(int signum, siginfo_t *siginf, ucontext_t *sigcon)
-
-#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
-void	stack_overflow	PARAMS(( int, int, struct sigcontext *, caddr_t ));
-void
-stack_overflow(int signum, int code, struct sigcontext *scp, caddr_t addr)
-#elif defined(Portable)
-void   stack_overflow  PARAMS(( int ));
-void
-stack_overflow(int signum)
-
-#else
-#error
-#endif
-
-{
-
-    if (bottom_stack_page_is_protected) {
-
-	/*-------------------------------------------------------------*
-	 * Make bottom stack page readable/writable so execution may
-	 * continue for a little ways (enough to run Prolog's interrupt
-	 * handler)
-	 *-------------------------------------------------------------*/
-
-	release_bottom_stack_page();
-
-	/*-------------------------------------------------------------*
-	 * Inform the prolog system that a signal has occurred. Note
-	 * that SunOS and SysVR4 have different signal mechanisms. In
-	 * a few years from now, these versions should be combined
-	 * well enough that we can replace it with a single piece of
-	 * code.  But for now, it is just plain ugly.
-	 *-------------------------------------------------------------*/
-
-#if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
-	signal_handler(ALSSIG_STACK_OVERFLOW, siginf, sigcon);
-#elif defined (HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
-	signal_handler(ALSSIG_STACK_OVERFLOW, code, scp, addr);
-#elif defined(Portable)
-   signal_handler(ALSSIG_STACK_OVERFLOW);
-#else
-#error
-#endif
-
-    }
-    else {
-
-	/*-------------------------------------------------------------*
-	 * Let error occur again and core dump normally.  This could
-	 * happen if we have some other problem with our code which
-	 * causes a bus error.  In this case, we would like to be
-	 * able to examine the core file produced by the system.
-	 *-------------------------------------------------------------*/
-
-
-#ifdef HAVE_SIGACTION
-	struct sigaction act;
-
-	act.sa_handler = SIG_DFL;
-	act.sa_flags = SA_ONSTACK;
-	(void) sigaction(signum, &act, 0);
-#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
-	struct sigvec v;
-
-	v.sv_handler = SIG_DFL;
-	v.sv_mask = 0;
-	v.sv_flags = SV_ONSTACK;
-#ifdef HAVE_SIGVECTOR
-	sigvector(signum, &v, 0);
-#else
-	sigvec(signum, &v, 0);
-#endif
-
-#elif defined(Portable)
-	signal(signum, SIG_DFL);
-#else
-#error
-#endif
-
-	coredump_cleanup(-1);
-
-    }
-}
-
-
-PWord *
-allocate_prolog_heap_and_stack(size)
-    size_t size;		/* number of PWords to allocate */
-{
-#ifndef HAVE_MMAP_ZERO
-    int   fd;
-#endif
-    PWord *retval;
-
-#if defined(HAVE_SIGACTION)
-    stack_t si;
-    struct sigaction act;
-
-    si.ss_sp = (void *) (signal_stack + SIGSTKSIZE - 2);
-    si.ss_size = SIGSTKSIZE - 2;
-    si.ss_flags = 0;
-    sigaltstack(&si, 0);	/* set up the signal stack */
-
-    act.sa_handler = stack_overflow;
-    act.sa_flags = SA_ONSTACK;
-    (void) sigaction(SIGBUS, &act, 0);	/* establish signal handler */
-    (void) sigaction(SIGSEGV, &act, 0);
-    /*-------------------------------------------------------------*
-     * Note: We might have to catch SIGSEGV in the above call to sigaction.
-     * I don't know what the behavior will be for SVR4.
-     *                                  Kev, 12/18/92
-     *-------------------------------------------------------------*/
-#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
-    struct sigstack si;
-    struct sigvec v;
-
-    si.ss_sp = (char *) (signal_stack + SIGSTKSIZE - 2);
-    si.ss_onstack = 0;
-    sigstack(&si, 0);		/* set up the signal stack */
-
-    v.sv_handler = stack_overflow;
-    v.sv_mask = 0;
-    v.sv_flags = SV_ONSTACK;
-#ifdef HAVE_SIGVECTOR
-    sigvector(SIGBUS, &v, 0);	/* establish stack overflow */
-    sigvector(SIGSEGV, &v, 0);	/* signal handlers      */
-#else
-    sigvec(SIGBUS, &v, 0);	/* establish stack overflow */
-    sigvec(SIGSEGV, &v, 0);	/* signal handlers      */
-#endif
-#endif /* HAVE_SIGACTION, HAVE_SIGVEC */
-
-
-    /*-------------------------------------------------------------*
-     * Set current_page_size to the page size of the current machine.
-     * Having the current_page_size variable
-     * will let us write our code without having to call getpagesize over
-     * and over again.  
-     *-------------------------------------------------------------*/
-
-#ifdef _SC_PAGESIZE
-    current_page_size = sysconf(_SC_PAGESIZE);
-#elif defined(_SC_PAGE_SIZE)
-    current_page_size = sysconf(_SC_PAGE_SIZE);
-#elif defined(HAVE_GETPAGESIZE)
-    current_page_size = getpagesize();
-#endif  /* _SC_PAGESIZE */
-
-    /*-------------------------------------------------------------*
-     * Open /dev/zero for read/write access.  /dev/zero is essentially a
-     * file of infinitely (or at least as many as we need) zeros.
-     *-------------------------------------------------------------*/
-
-#ifndef HAVE_MMAP_ZERO
-    if ((fd = open("/dev/zero", O_RDWR)) == -1)
-	fatal_error(FE_DEVZERO, 0);
-#endif
-
-    /*-------------------------------------------------------------*
-     * Call mmap to allocate the memory and map it to /dev/zero.  Note
-     * that we are using the MAP_PRIVATE flag or'd with the MAP_FIXED
-     * flag.
-     *
-     * The reason that we use the MAP_FIXED flag is because during my
-     * tests on the SPARC, I noticed that if we let the system choose
-     * the address to use, it gave us an address that was unacceptable
-     * for use with the garbage compactor. (The most significant bit
-     * was set).  I therefore specify where I want this region to start
-     * via STACKSTART.  I see this as a potential problem on some
-     * OS's.  We may have to ifdef this code (or the STACKSTART define) to
-     * get the result that we want for all machines.
-     *
-     * One advantage of having a fixed location for this region of memory
-     * is that it will much easier to implement saved states.
-     *-------------------------------------------------------------*/
-#ifdef HAVE_MMAP_ZERO
-    retval = (PWord *) mmap((caddr_t) STACKSTART,
-			    size * sizeof (PWord) + NPROTECTED * current_page_size,
-			    PROT_READ | PROT_WRITE,
-			    MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
-			    -1,
-			    0);
-#else
-    retval = (PWord *) mmap((caddr_t) STACKSTART,
-			    size * sizeof (PWord) + NPROTECTED * current_page_size,
-			    PROT_READ | PROT_WRITE,
-			    MAP_PRIVATE | MAP_FIXED,
-			    fd,
-			    0);
-
-
-    close(fd);			/* close /dev/zero */
-#endif
-
-    /*
-     * Error out if something went wrong with mmap call above
-     */
-
-    if (retval == (PWord *) - 1)
-	fatal_error(FE_BIGSTACK, 0);
-
-    /*-------------------------------------------------------------*
-     * Protect the bottom stack page.  Note that we allocated extra space
-     * for this page in the mmap call above.
-     *-------------------------------------------------------------*/
-
-    protect_bottom_stack_page();
-
-    return retval;
-}
-
-void
-protect_bottom_stack_page()
-{
-    int result;
-    result = mprotect((caddr_t) STACKSTART,
-		      (size_t)(NPROTECTED * current_page_size), PROT_NONE);
-    if (result == -1)
-        fatal_error(FE_BIGSTACK, 0);
-    bottom_stack_page_is_protected = 1;
-}
-
-static void
-release_bottom_stack_page()
-{
-    mprotect((caddr_t) STACKSTART,
-             (size_t)(NPROTECTED * current_page_size),
-	     PROT_READ | PROT_WRITE);
-    bottom_stack_page_is_protected = 0;
-}
-
-#elif defined(MSWin32)
-
-/* These fixed memory locations are very problematic.  There is no
-   way to guarantee they will work.  All we know is that these numbers
-   work at ALS and Customer sites.
-
-   Previously STACKSTART was set 0x01000000, which worked fine for Win95
-   and WinNT 3.51, but under WinNT 4.0 that location is in use.
-*/
-
-#define STACKSTART	0x02000000
-#define CODESTART	0x06000000
-#define NPROTECTED	5
-
-
-static void release_bottom_stack_page(void)
-{
-    DWORD OldProtection;
-
-    if (!VirtualProtect((void *)STACKSTART, NPROTECTED * current_page_size, PAGE_READWRITE, &OldProtection)) {
-	fatal_error(FE_STKOVERFLOW, 0);
-    }
-    
-    bottom_stack_page_is_protected = 0;
-}
-
-static LONG WINAPI stack_overflow(struct _EXCEPTION_POINTERS *lpexpExceptionInfo)
-{
-    if (lpexpExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION
-        && bottom_stack_page_is_protected) {
-	release_bottom_stack_page();
-	signal_handler(ALSSIG_STACK_OVERFLOW);
-	return EXCEPTION_CONTINUE_EXECUTION;
-    } else {
-    	return EXCEPTION_CONTINUE_SEARCH;
-    }	    
-}
-
-void
-protect_bottom_stack_page()
-{
-    DWORD OldProtection;
-
-    if (!VirtualProtect((void *)STACKSTART, NPROTECTED * current_page_size, PAGE_NOACCESS /*PAGE_READWRITE | PAGE_GUARD*/, &OldProtection)) {
-	fatal_error(FE_STKOVERFLOW, 0);
-    }
-
-    bottom_stack_page_is_protected = 1;
-}
-
-PWord *
-allocate_prolog_heap_and_stack(size)
-    size_t size;				/* number of PWords to allocate */
-{
-    if (win32s_system) {
-    PWord *retval = (PWord *) malloc(sizeof (PWord) * size);
-
-    if (retval == 0)
-	fatal_error(FE_BIGSTACK, 0);
-
-	AddressHiBit = (((unsigned long)retval) & 0x80000000);
-	ReversedHiBit = (~AddressHiBit & 0x80000000);
-	if (AddressHiBit != ((((unsigned long)retval) + size) & 0x80000000))
-	fatal_error(FE_TAGERR, 0);
-
-
-/* These signals are not available on the Mac. */
-#ifndef MacOS
-#ifdef SIGBUS
-    (void) signal(SIGBUS, coredump_cleanup);
-#endif
-    (void) signal(SIGSEGV, coredump_cleanup);
-#endif
-    return retval;
-
-    
-    } else {
-    LPVOID stack;
-    
-    SetUnhandledExceptionFilter(stack_overflow);
-    
-    stack = VirtualAlloc((LPVOID)STACKSTART,
-    			 size * sizeof(PWord) + NPROTECTED * current_page_size,
-    		         MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-    
-    if (stack != (LPVOID)STACKSTART)
-	fatal_error(FE_BIGSTACK, 0);
-
-    protect_bottom_stack_page();
-
-    return (PWord *)STACKSTART;
-    }
-}
-
-
-
-
-#elif defined(MACH_SUBSTRATE)
-	/*------- Operating systems with Mach as the substrate -------*/
-
-#include <mach/mach.h>
-
-#define STACKSTART	0x01000000
-#define CODESTART	0x06000000
-#define NPROTECTED	1
-
-#if defined(HAVE_SIGACTION) || defined(HAVE_SIGVEC)
-static long signal_stack[SIGSTKSIZE];
-#endif
-
-static	void	release_bottom_stack_page	PARAMS(( void ));
-
-void
-stack_overflow(signum, code, scp, addr)
-    int   signum, code;
-    struct sigcontext *scp;
-    caddr_t addr;
-{
-    if (bottom_stack_page_is_protected) {
-	release_bottom_stack_page();
-	signal_handler(ALSSIG_STACK_OVERFLOW, code, scp, addr);
-    }
-    else {
-	struct sigvec v;
-
-	v.sv_handler = SIG_DFL;
-	v.sv_mask = 0;
-	v.sv_flags = SV_ONSTACK;
-#ifdef HAVE_SIGVECTOR
-	sigvector(signum, &v, 0);
-#else
-	sigvec(signum, &v, 0);
-#endif
-
-	coredump_cleanup(-1);
-    }
-}
-
-PWord *
-allocate_prolog_heap_and_stack(size)
-    size_t size;				/* number of PWords to allocate */
-{
-    PWord *retval;
-    kern_return_t stat;
-    struct sigstack si;
-    struct sigvec v;
-
-    si.ss_sp = (char *) (signal_stack + SIGSTKSIZE - 2);
-    si.ss_onstack = 0;
-    sigstack(&si, 0);		/* set up the signal stack */
-
-    v.sv_handler = stack_overflow;
-    v.sv_mask = 0;
-    v.sv_flags = SV_ONSTACK;
-#ifdef HAVE_SIGVECTOR
-    sigvector(SIGBUS, &v, 0);	/* establish stack overflow signal handler */
-#else
-    sigvec(SIGBUS, &v, 0);	/* establish stack overflow signal handler */
-#endif
-
-    current_page_size = vm_page_size;
-    retval = (PWord *) STACKSTART;
-
-    stat = vm_allocate(task_self(),
-		       (vm_address_t *) &retval,
-		       size * sizeof (PWord) + NPROTECTED * current_page_size,
-		       FALSE);
-    
-    if (stat != KERN_SUCCESS || retval != (PWord *) STACKSTART)
-	fatal_error(FE_BIGSTACK, 0);
-    
-    protect_bottom_stack_page();
-
-    return retval;
-}
-
-void
-protect_bottom_stack_page()
-{
-    kern_return_t stat;
-
-    stat = vm_protect(task_self(),
-		      (vm_address_t) STACKSTART,
-	              NPROTECTED * current_page_size,
-	              FALSE,
-	              VM_PROT_NONE );
-    /* FIXME: Check stat */
-    bottom_stack_page_is_protected = 1;
-}
-
-static void
-release_bottom_stack_page()
-{
-    kern_return_t stat;
-
-    stat = vm_protect(task_self(),
-		      (vm_address_t) STACKSTART,
-	              NPROTECTED * current_page_size,
-	              FALSE,
-	              VM_PROT_READ | VM_PROT_WRITE );
-    /* FIXME: Check stat */
-    bottom_stack_page_is_protected = 0;
-}
-
-#else
-/*------ All other operating systems and architectures --------*/
-
-#if	defined(Portable) || defined(arch_m88k) || defined(arch_m68k)
-void stack_overflow PARAMS((int));
-
-void
-stack_overflow(signum)
-	int signum;
-{
-    fatal_error(FE_STKOVERFLOW, 0);
-}
-
-#endif /* arch_m88k */
-
-PWord *
-allocate_prolog_heap_and_stack(size)
-    size_t size;			/* number of PWords to allocate */
-{
-    PWord *retval = (PWord *) malloc(sizeof (PWord) * size);
-
-    if (retval == 0)
-	fatal_error(FE_BIGSTACK, 0);
-
-#ifdef PARAMREVBIT
-	AddressHiBit = (((unsigned long)retval) & 0x80000000);
-	ReversedHiBit = (~AddressHiBit & 0x80000000);
-	if (AddressHiBit != ((((unsigned long)retval) + size) & 0x80000000))
-	fatal_error(FE_TAGERR, 0);
-#else
-#ifdef arch_m88k
-    if (((long) (retval + size) & MTP_TAGMASK) != 0)
-#else  /* arch_m88k */
-    if (((long) (retval + size) & 0x80000000) != 0)
-#endif /* arch_m88k */
-	fatal_error(FE_TAGERR, 0);
-#endif
-
-#ifdef arch_m88k
-    (void) signal(SIGFPE, stack_overflow);
-#endif
-
-/* These signals are not available on the Mac. */
-#ifndef PURE_ANSI
-#ifndef MacOS
-#ifdef SIGBUS
-    (void) signal(SIGBUS, coredump_cleanup);
-#endif
-    (void) signal(SIGSEGV, coredump_cleanup);
-#endif
-#endif /* PURE_ANSI */
-    return retval;
-}
-
-void
-protect_bottom_stack_page()
-{
-    /* do nothing */
-}
-
-#endif
-
-/*
- * coredump_cleanup is called to perform those cleanup actions needed just
- * before a core dump occurs.  The way it works is this:
- *
- *      coredump_cleanup is installed as the signal handler for those signals
- *      which might core dump (SIGSEGV and SIGBUS are the most common).
- *
- *      Should the appropriate signal be delivered, we set the handler to
- *      SIG_DFL which will cause the core dump to occur (if this is in
- *      fact the default handler)
- *
- *      We perform the cleanup actions required.
- *
- *      We return from the coredump_cleanup function.  The system will attempt
- *      to reexecute the instruction which caused the signal, thus causing it
- *      again.  With no handler, the system will take the default action which
- *      is to core dump (presumably).
- */
-
-#ifndef PURE_ANSI
-#ifdef SIG_DFL
-
-static void
-coredump_cleanup(signum)
-    int   signum;
-{
-    static char message[] =
-    "Memory access violation detected. Attempting to core dump\r\n";
-
-    /*
-     * The reason that we are core dumping might be because the I/O buffers
-     * are messed up, or at the very least became messed up in the process.
-     * (This actually occurs on the 88k, SVR3).  Therefore we use the primitive
-     * write to write the message out.
-     */
-
-    write(2, message, sizeof (message) - 1);
-
-
-    /*
-     * We call signal to set the SIG_DFL.  If signum is less than zero, this
-     * means that somebody else has already performed the work for us.  See
-     * stack_overflow (SunOS and SysVR4 versions) above.
-     */
-
-    if (signum > 0)
-	(void) signal(signum, SIG_DFL);
-
-#ifdef DynamicForeign
-    /*
-     * remove files associated with dynamic foreign interface if they
-     * exist
-     */
-    foreign_shutdown();
-#endif /* DynamicForeign */
-
-}
-
-#endif /* SIG_DFL */
-#endif /* PURE_ANSI */
 
 
 /*
@@ -721,6 +77,12 @@ coredump_cleanup(signum)
  * the internal type information available to the rest of the program
  * is quite repulsive.
  *
+ 
+ BZZZZZZ!  Wrong! Just because C doesn't allow proper data hidding doesn't mean
+ you should make everything static globals.  Static globals just make threads,
+ position independent code, etc harder to implement.
+ 
+ 
  * What we do instead is register our global variables with these routines.
  * This means that globals should be either longs or pointers (I'm assuming
  * that the space required by these two types are equivalent).  Then prior
@@ -742,9 +104,9 @@ coredump_cleanup(signum)
 
 #include "alsmem.h"
 
-static long *als_mem;
+/*//static long *als_mem;*/
 
-static	long *	alloc_big_block		PARAMS(( size_t, int ));
+long *	alloc_big_block		PARAMS(( size_t, int ));
 static	long *	ss_malloc0		PARAMS(( size_t, int, int, long * ));
 #ifndef PURE_ANSI
 static	void	ss_restore_state	PARAMS(( const char *, long ));
@@ -753,8 +115,6 @@ static	int	ss_saved_state_present	PARAMS(( void ));
 
 #define amheader (* (struct am_header *) als_mem)
 
-#define FB_SIZE(p)  (* (long *) p)
-#define FB_NEXT(p)  (* ((long **) p + 1))
 
 #undef round
 #define round(x,s) ((((long) (x) - 1) & ~(long)((s)-1)) + (s))
@@ -762,20 +122,11 @@ static	int	ss_saved_state_present	PARAMS(( void ));
 #define round_up(x,s) (((size_t)(x)) + (((size_t)(s)) - ((size_t)(x))%((size_t)(s)))%((size_t)(s)))
 #define round_down(x,s) (((size_t)(x)) - (((size_t)(x))%((size_t)(s))))
 
-/* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
-#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) \
-	|| defined(MACH_SUBSTRATE) || defined(MSWin32)
-/*
- * next_big_block_addr is the location at which we will attempt to allocate
- * the next big block of memory that our prolog system requests.  Note that
- * this variable is only used on systems having mmap or similar facilities.
- */
+#ifdef UNIX
+#include <sys/mman.h>
+#endif
 
-static long next_big_block_addr;
-
-#endif	/* defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
-
-static long *
+long *
 alloc_big_block(size, fe_num)
     size_t size;
     int fe_num;
@@ -784,99 +135,10 @@ alloc_big_block(size, fe_num)
 
     size = round(size, MAX_PAGE_SIZE);
 
-/* #if defined(HAVE_MMAP) && defined(HAVE_DEV_ZERO) */
-#if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
-    {
-#ifdef HAVE_MMAP_ZERO
-	np = (long *) mmap((caddr_t) next_big_block_addr,
-				size,
-				PROT_READ | PROT_WRITE,
-				MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
-				-1,
-				0);
-#else
-	int fd;
-	/*
-	 * Open /dev/zero for read/write access.  /dev/zero is essentially a
-	 * file of infinitely (or at least as many as we need) zeros.
-	 */
-
-	if ((fd = open("/dev/zero", O_RDWR|O_BINARY)) == -1)
-	    fatal_error(FE_DEVZERO, 0);
-
-	/*
-	 * Call mmap to allocate the memory and map it to /dev/zero.  Note
-	 * that we are using the MAP_PRIVATE flag or'd with the MAP_FIXED
-	 * flag.
-	 */
-
-	np = (long *) mmap((caddr_t) next_big_block_addr,
-				size,
-#if defined(arch_sparc)
-				PROT_EXEC |
-#endif  /* arch_sparc */
-				PROT_READ | PROT_WRITE,
-				MAP_PRIVATE | MAP_FIXED,
-				fd,
-				0);
-
-	close(fd);			/* close /dev/zero */
-#endif
-	/*
-	 * Error out if something went wrong with mmap call above
-	 */
-
-	if (np == (long *) - 1)
-	    fatal_error(fe_num, 0);
-	
-	next_big_block_addr += size;
-    }
-#elif defined(MACH_SUBSTRATE)
-    np = (long *) next_big_block_addr;
-    if (KERN_SUCCESS != vm_allocate(task_self(), (vm_address_t *) &np,
-				    size, FALSE)
-	|| np != (long *) next_big_block_addr)
-	fatal_error(fe_num, 0);
-    next_big_block_addr += size;
-#elif defined(HAVE_BRK) 
-    {
-	long *bp = (long *) sbrk(0);
-
-	if (bp == (long *) -1)
-	    fatal_error(fe_num,0);
-	
-	np = (long *) round(bp, MAX_PAGE_SIZE);
-    
-	if (np != bp && brk(np) != 0)
-	    fatal_error(fe_num, 0);
-    
-	if (sbrk((int)size) == (char *) -1)
-	    fatal_error(fe_num, 0);
-    }
-#elif defined(MSWin32)
-    
-    if (win32s_system) {
 	np = (long *)malloc(size);
-	
+
 	if (np == NULL)
-	    fatal_error(fe_num, 0);
-    
-    } else {
-    np = VirtualAlloc((void *)next_big_block_addr, size, MEM_RESERVE | MEM_COMMIT,
-    			PAGE_READWRITE);
-    
-    if (np == NULL)
-        fatal_error(fe_num, 0);
- 
-    next_big_block_addr += size;
-    }
-#else /* HAVE_BRK */
-	np = (long *)malloc(size);
-	
-	if (np == NULL)
-	    fatal_error(fe_num, 0);
-#endif /* HAVE_MMAP */
-    
+	    fatal_error(fe_num, 0);    
     return np;
 }
 
@@ -886,34 +148,15 @@ als_mem_init(file,offset)
     long offset;
 {
 
-    /*
-     * Try to get an honest value for current_page_size
-     */
-
-#ifdef _SC_PAGESIZE
-    current_page_size = sysconf(_SC_PAGESIZE);
-#elif defined(_SC_PAGE_SIZE)
-    current_page_size = sysconf(_SC_PAGE_SIZE);
-#elif defined(HAVE_GETPAGESIZE)
-    current_page_size = getpagesize();
-#endif  /* _SC_PAGESIZE */
-
     if (ss_saved_state_present())
 	return 1;	/* saved state loaded */
 
     else if (!file) {	/* no file specified */
-/* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
-#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) \
-	|| defined(MACH_SUBSTRATE) || defined(MSWin32)
-	next_big_block_addr = CODESTART;
-#else 
-	/* Leave malloc and friends some space to work with */
 	char *mp = malloc(AM_MALLOCSPACE);
 	if (mp)
 	    free(mp);
 	else
 	    fatal_error(FE_ALS_MEM_INIT,0);
-#endif /* defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
 
 	als_mem = alloc_big_block(AM_BLOCKSIZE, FE_ALS_MEM_INIT);
 
@@ -930,18 +173,12 @@ als_mem_init(file,offset)
 	FB_NEXT(amheader.freelist) = (long *) 0;
 
 	/* Set integrity information in case saved state is created */
-	amheader.integ_als_mem = &als_mem;
+	/*//amheader.integ_als_mem = &als_mem;*/
 	amheader.integ_als_mem_init = als_mem_init;
 	amheader.integ_w_unify = w_unify;
 	strcpy(amheader.integ_version_num, VERSION_STRING);
 	strcpy(amheader.integ_processor, ProcStr);
 	strcpy(amheader.integ_minor_os, MinorOSStr);
-
-/* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
-#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || \
-	defined(MACH_SUBSTRATE) || defined(MSWin32)
-	ss_register_global(&next_big_block_addr);
-#endif	/* defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
 
 	return 0;	/* no saved state */
     }
@@ -1050,6 +287,7 @@ ss_malloc(size,fe_num)
     return ss_malloc0(size,0,fe_num,(long *) 0);
 }
 
+#if 0
 /*
  * The following two functions are for use with the dynamic foreign
  * interface.
@@ -1094,6 +332,7 @@ ss_fmalloc(size)
     amheader.nblocks++;
     return newblock;
 }
+#endif
 
 void
 ss_register_global(addr)
@@ -1105,7 +344,6 @@ ss_register_global(addr)
     amheader.nglobals++;
 }
 
-#ifdef SIMPLE_MICS
 #ifdef MSWin32
 /* ms_pecoff_end calculated the offset to the end of a
    Microsoft Portable-Executable/Common-Object-File-Format file.
@@ -1646,22 +884,24 @@ int ss_attach_state_to_file(const char *image_name)
 
 #endif /* UNIX */
 
-#endif /* SIMPLE_MICS */
 
 #ifndef PURE_ANSI
 int
 ss_save_state(const char *filename, long offset)
 {
+	os_store_db(&current_engine.db, filename, offset);
+	return 1;
+}
+
+#if 0
+{
     int   ssfd;
     int   bnum = 0, gnum;
-#if defined(SIMPLE_MICS)
     long delta_offset;
-#endif
 
     /*
      * Open the saved state file.
      */
-#if defined(SIMPLE_MICS)
 #ifdef UNIX
     ssfd = open(filename, O_WRONLY);
     if (ssfd == -1)
@@ -1670,21 +910,14 @@ ss_save_state(const char *filename, long offset)
     ssfd = open(filename, O_WRONLY | O_BINARY);
     if (ssfd == -1) ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY);
 #endif
-#elif defined(__MWERKS__)
-    ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC);
-#else
-    ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0777);
-#endif
     if (ssfd < 0)
 	return 0;
 
-#if defined(SIMPLE_MICS)    
     if (lseek(ssfd, offset, 0) != offset) goto ss_err;
     
     delta_offset = round_up(offset+sizeof(offset), MAX_PAGE_SIZE) - offset;
     if (write(ssfd, (char *)&delta_offset, sizeof(delta_offset)) < 0) goto ss_err;
     offset += delta_offset;
-#endif
 
     if (lseek(ssfd, offset, 0) != offset) goto ss_err;
     
@@ -1746,19 +979,21 @@ ss_err:
     unlink((char *)filename);
     return 0;
 }
+#endif
 
 #define SS_MALLOCQUANT	4096
 #define SS_MALLOCDIST	16384
 
 static void
-ss_restore_state(filename,offset)
-    const char *filename;
-    long offset;
+ss_restore_state(const char *filename,long offset)
+{
+	os_load_db(&current_engine.db, filename, offset);
+}
+
+#if 0
 {
     int ssfd, gnum;
-#ifdef SIMPLE_MICS
     long delta_offset;
-#endif
 #if defined(HAVE_MMAP) || defined(MSWin32) || defined(MACH_SUBSTRATE)
     int  bnum;
 #endif
@@ -1785,13 +1020,11 @@ ss_restore_state(filename,offset)
 	}
 #endif
 
-#if defined(SIMPLE_MICS)
     if (lseek(ssfd, offset, 0) < 0)
 	goto ss_err;
 
     if (read(ssfd, (char *)&delta_offset, sizeof(delta_offset)) < 0) goto ss_err;
     offset += delta_offset;
-#endif
 
     /* Seek to amheader, get amheader, and seek back to amheader */
     if (lseek(ssfd, offset, 0) < 0)
@@ -1808,9 +1041,9 @@ ss_restore_state(filename,offset)
     if (hdr.integ_als_mem != &als_mem ||
 		hdr.integ_als_mem_init != als_mem_init ||
 		hdr.integ_w_unify != w_unify ||
-		strcmp(hdr.integ_version_num, VERSION_STRING) != 0 ||
-		strcmp(hdr.integ_processor, ProcStr) != 0 ||
-		strcmp(hdr.integ_minor_os, MinorOSStr) != 0)
+		strncmp(hdr.integ_version_num, VERSION_STRING, 12) != 0 ||
+		strncmp(hdr.integ_processor, ProcStr, 12) != 0 ||
+		strncmp(hdr.integ_minor_os, MinorOSStr, 12) != 0)
 	fatal_error(FE_SS_INTEGRITY,0);
 
 /* #if	defined(HAVE_MMAP) && defined(HAVE_DEV_ZERO) */
@@ -1989,6 +1222,7 @@ ss_err:
     fatal_error(FE_ALS_MEM_INIT,0);
 }
 #endif /* PURE_ANSI */
+#endif
 
 /*
  * ss_saved_state_present will test to see if the saved state is already
@@ -2033,49 +1267,7 @@ ss_saved_state_present()
 #endif	/* MACH_SUBSTRATE */
 }
 
-#ifdef MacOS
-
-static OSErr DuplicateThisApplication(ConstStr255Param newAppName)
-{
-    OSErr err;
-    Str255 AppName;
-    FSSpec AppSpec, NewAppSpec, DirSpec;
-    
-    if (MPW_Tool) {
-    	c2pstrcpy(AppName, executable_path);
-    	
-    	err = FSMakeFSSpec(0, 0, AppName, &AppSpec);
-    	if (err != noErr) return err;
-    } else {
-	ProcessSerialNumber PSN;
-	ProcessInfoRec info;
-	
-	/* Get the FSSpec for this application. */    
-	PSN.highLongOfPSN = 0;
-	PSN.lowLongOfPSN = kCurrentProcess;
-	
-	info.processInfoLength = sizeof(ProcessInfoRec);
-	info.processName = AppName;
-	info.processAppSpec = &AppSpec;
-	
-	err = GetProcessInformation(&PSN, &info);
-	if (err != noErr) return err;
-    }
-
-    /* Create a FSSpec for the new app and destination directory. */
-    err = FSMakeFSSpec(0, 0, newAppName, &NewAppSpec);
-    if (err != noErr && err != fnfErr) return err;
-    
-    if (err == noErr) {
-    	err = FSpDelete(&NewAppSpec);
-    	if (err != noErr) return err;
-    }
-    
-    err = FSMakeFSSpec(NewAppSpec.vRefNum, NewAppSpec.parID, "\p", &DirSpec);
-    if (err != noErr && err != fnfErr) return err;
-
-    return FSpFileCopy(&AppSpec, &DirSpec, (StringPtr) newAppName, NULL, 0, 1);
-}
+#if 0
 
 int pbi_save_app_with_obp(void)
 {
@@ -2301,7 +1493,11 @@ void heap_overflow(void)
 
     /* raise a prolog interupt - there must be a cleaner way! */
 
-    if (wm_regidx != 0) {
+#if 0
+    //if (wm_regidx != 0)
+#endif
+    if (current_engine.reg_stack_top != current_engine.reg_stack_base)
+    {
 	wm_safety = -1;
     }
     wm_interrupt_caught = ALSSIG_HEAP_OVERFLOW;

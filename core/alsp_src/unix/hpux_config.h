@@ -27,9 +27,11 @@
 #define HAVE_GAMMA	1
 #define HAVE_MEMMOVE	1
 #define HAVE_POLL	1
+#if 0
 #define HAVE_SIGACTION	1
 #define HAVE_SIGSTACK	1
 #define HAVE_SIGVECTOR	1
+#endif
 #define HAVE_WAIT3	1
 #define MISSING_EXTERN__FILBUF	1
 #define MISSING_EXTERN__FLSBUF	1

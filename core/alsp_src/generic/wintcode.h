@@ -67,6 +67,12 @@ typedef struct {
 
 extern ntbl_entry **w_nametable;
 
+struct codeblock {
+    long *addr;
+    long size;
+    struct codeblock *next;
+};
+
 /*-----------------------------------------------------------------*
  | Name Entry Flag Masks
  *-----------------------------------------------------------------*/

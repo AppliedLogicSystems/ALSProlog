@@ -37,11 +37,7 @@ static int nargsmatched;
 			/* number of arguments matched in head so far.
 			 */
 
-#ifdef NO_FAR_DATA
-static int *to_do;
-#else
 static int to_do[TODOSIZE];
-#endif
 
 		/*-----------------------------------------------*
 		 * the "to_do" stack.  We use this stack when
@@ -63,21 +59,7 @@ static int to_do_top = 0;
 #define TDT_SET(tdt,n) tdt = to_do_top; to_do_top += n
 #define TDT_RESET(tdt) to_do_top = tdt
 
-#ifdef NO_FAR_DATA
-static pword *model;
-#else
 static pword model[MODELSIZE];
-#endif
-
-#ifdef NO_FAR_DATA
-void init_compiler_data(void)
-{
-    to_do = malloc(TODOSIZE*sizeof(*to_do));
-    if (to_do == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
-    model = malloc(MODELSIZE*sizeof(*model));
-    if (model == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
-}
-#endif
 
 		/*----------------------------------------------*
 		 * stack model of argument blocks and environment.
@@ -729,7 +711,8 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
 	if (TYPEOF(model[model_Adst - 1]) == TP_VO &&
 	    !vtbl[v = VO_VAL(model[model_Adst - 1])].unsafe &&
 	    vtbl[v].home == model_Adst - 1) {
-	    if ( (t = find_temp_in_reg(vtbl[v].target)) ) {
+	    t = find_temp_in_reg(vtbl[v].target);
+	    if ( t ) {
 		move(model_Adst - 1, t);
 		model[t] = model[model_Adst - 1];
 		vtbl[v].home = t;
@@ -743,7 +726,8 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
 	if (TYPEOF(model[model_Adst - 2]) == TP_VO &&
 	    !vtbl[v = VO_VAL(model[model_Adst - 2])].unsafe &&
 	    vtbl[v].home == model_Adst - 2) {
-	    if ( (t = find_temp_in_reg(vtbl[v].target)) ) {
+	    t = find_temp_in_reg(vtbl[v].target);
+	    if (t) {
 		move(model_Adst - 2, t);
 		model[t] = model[model_Adst - 2];
 		vtbl[v].home = t;

@@ -12,13 +12,15 @@
 
 #define GV_SHIFT 32
 
-static	void	fixptrs		PARAMS(( int ));
+static	void	fixptrs	(prolog_engine *);
 
 PWord
 gv_alloc()
 {
     register int i;
     PWord vn;
+
+prolog_engine_invariant(&current_engine);
 
     if (wm_gvfreelist != (PWord *) MMK_INT(-1)) {
 	vn = (PWord) (wm_gvbase - wm_gvfreelist);
@@ -27,6 +29,7 @@ gv_alloc()
     else {
 	long *tr;
 	long  trval;
+
 
 	/*
 	 * Shift the trail.
@@ -39,27 +42,35 @@ gv_alloc()
 	    else
 		*(tr - GV_SHIFT) = trval;
 	}
-
+	
+	
 	/*
 	 * Fix up the pointers from the C area into the trail
 	 */
 
-	fixptrs(wm_regidx);
+#if 0
+	//fixptrs(wm_regidx);
+#endif
+
+	fixptrs(&current_engine);
 
 	/*
 	 * Initialize the new batch of variables;
 	 */
 
 	wm_trailbase -= GV_SHIFT;
+	current_engine.heap_size -= GV_SHIFT;
+	
 	for (i = 0; i < GV_SHIFT - 1; i++) {
 	    *(long **) (wm_trailbase + i) = wm_gvfreelist;
 	    wm_gvfreelist = wm_trailbase + i;
 	}
 
 	vn = (PWord) (wm_gvbase - (wm_trailbase + i));
-    }
+   }
 
     *(wm_gvbase - vn) = MMK_INT(0);
+prolog_engine_invariant(&current_engine);
     return vn;
 }
 
@@ -139,17 +150,33 @@ gv_isfree(gvnum)
  * wm_TR and wm_B.
  */
 
-static void
-fixptrs(wm_regidx)
-    int   wm_regidx;
+#if 0
+//static void
+//fixptrs(wm_regidx)
+//    int   wm_regidx;
+//{
+//    while (wm_regidx >= 0) {
+//	if (wm_B)
+//	    wm_B -= GV_SHIFT;
+//	if (wm_TR)
+//	    wm_TR -= GV_SHIFT;
+//	wm_regidx--;
+//    }
+//}
+#endif
+
+static void fixptrs(prolog_engine *pe)
 {
-    while (wm_regidx >= 0) {
-	if (wm_B)
-	    wm_B -= GV_SHIFT;
-	if (wm_TR)
-	    wm_TR -= GV_SHIFT;
-	wm_regidx--;
-    }
+	register_set *s;
+	
+	if (pe->reg.B.ptr) pe->reg.B.ptr -= GV_SHIFT;
+	if (pe->reg.TR.ptr) pe->reg.TR.ptr -= GV_SHIFT;
+	
+	
+	for (s = pe->reg_stack_base; s < pe->reg_stack_top; s++) {
+		if (s->B.ptr) s->B.ptr -= GV_SHIFT;
+		if (s->TR.ptr) s->TR.ptr -= GV_SHIFT;
+	}
 }
 
 void

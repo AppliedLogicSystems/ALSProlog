@@ -1,3 +1,0 @@
-libactivate(objects,[library,objects],
-    [defineClass/1, defineClass/3],
-    [ module_closure(defineClass,1,defineClass) ]).

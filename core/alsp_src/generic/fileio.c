@@ -155,7 +155,11 @@ fio_nxln(lbp)
     lbp->curpos = b;
 readit:
     if (univ_fgets(b, SEEBFSZ, seetbl[(lbp->see_idx)].fd) == NULL || *b == 0) {
-	if (wm_interrupt_caught && wm_regidx == 0) {
+#if 0
+	//if (wm_interrupt_caught && wm_regidx == 0)
+#endif
+	if (wm_interrupt_caught && current_engine.reg_stack_top == current_engine.reg_stack_base)
+	{
 	    /* Ignore control-C's at top level */
 	    wm_interrupt_caught = 0;
 

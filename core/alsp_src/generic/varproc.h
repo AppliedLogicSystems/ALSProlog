@@ -31,13 +31,7 @@ typedef struct {
             short unsafe;    	/* used for unify_local_value			*/
          } varinf;
 
-#ifdef NO_FAR_DATA
-extern varinf *vtbl;           /* variable information table   			*/
-
-#else
 extern varinf vtbl[];          /* variable information table   			*/
-
-#endif
 
 extern int call_env_sizes[];	/* size of environment for each call (goal) in body */
 #define IS_VO(s) (TYPEOF(s) == TP_VO)

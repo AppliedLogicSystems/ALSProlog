@@ -25,6 +25,7 @@ assert_all(Module,ClauseList)
 	:-
 	assert_all_refs0(ClauseList, [Module], _).
 
+/***************
 /*!---------------------------------------------------------------
  |	assert_all0/2
  |	assert_all0(ClauseList,Module)
@@ -41,6 +42,7 @@ assert_all0([Clause | RestClauseList],Module)
 	:-
 	builtins:'$assertz'(Module,Clause),
 	assert_all0(RestClauseList,Module).
+***************/
 
 /*!---------------------------------------------------------------
  |	assert_all_refs/2

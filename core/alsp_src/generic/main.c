@@ -44,19 +44,11 @@
 #include <Processes.h>
 #include <Errors.h>
 
-#include <FullPath.h>
 #ifdef MPW_TOOL
 #else
 #include <unix.h>
 #endif
-#ifdef THINK_C
-#include <LoMem.h>
-#else
 #include <LowMem.h>
-#endif
-#if defined(THINK_C) || defined(applec)
-#define LMSetStackLowPoint(value) ((* (Ptr *) 0x0110) = (value))
-#endif
 #endif
 
 #ifdef MSWin32
@@ -116,7 +108,7 @@ int win32s_system = 0;
 #endif
 
 #ifdef UNIX
-char *version[2] = {
+const char *version[2] = {
   "@(#)(c) 1997 Applied Logic Systems, Inc.",
   "@(#)ALS Prolog " VERSION_STRING " for " UNIX_NAME,
   };
@@ -138,12 +130,6 @@ static	void	assert_als_system PARAMS((const char *, const char *,
 					  const char *));
 static	void	assert_atom_in_module PARAMS(( const char*, const char * ));
 
-#ifndef PURE_ANSI
-static	void	locate_library_executable(int argc, char *argv[]);
-#ifndef MSWin32
-static	void	command_line_locate_executable(const char *argv0);
-#endif
-#endif /* PURE_ANSI */
 
 static	void	autoload	PARAMS(( char * ));
 static	void	chpt_init	PARAMS(( void ));
@@ -166,6 +152,10 @@ panic_continue()
 /*---------------------------------*
  * Prolog initialization
  *---------------------------------*/
+
+#ifdef Threaded
+extern int run_wam(Code *startaddr);
+#endif
 
 /* ALS Prolog Command Line Development Evnvironment */
 
@@ -247,16 +237,6 @@ static int PI_prolog_init0(const PI_system_setup *setup)
     if (setjmp(exit_return))
 	return (exit_status);
 
-#ifdef NO_FAR_DATA
-    /* Initilize global arrays that are too big for Think's compiler. */
-    init_capturestructs();
-    init_compiler_data();
-    init_cinterf_data();
-    init_varproc_data();
-    init_expand_data();
-    init_parser_data();
-#endif
-
 	heapsize = setup->heap_size ? setup->heap_size : DEFAULT_HEAP_SIZE;
     stacksize = setup->stack_size ? setup->stack_size :DEFAULT_STACK_SIZE;
     icbufsize = setup->icbuf_size ? setup->icbuf_size : MIN_ICBUFSIZE;
@@ -278,7 +258,6 @@ static int PI_prolog_init0(const PI_system_setup *setup)
      * we have a saved state.
      */
 
-#ifdef SIMPLE_MICS
     if (setup->saved_state) {
     	state_path = setup->saved_state;
     	offset = 0;
@@ -287,12 +266,10 @@ static int PI_prolog_init0(const PI_system_setup *setup)
     	if (offset) state_path = executable_path;
     	else state_path = NULL;
     } else {
-    	state_path = NULL;
-    	offset = 0;
-    }
-#endif
-    
-    saved_state_loaded = als_mem_init(state_path, offset);
+      offset = ss_image_offset(library_path);
+      if (offset) state_path = library_path;
+      else state_path = NULL;
+    }    
     	
     /*
      * Set up the alsdir variable.  First use the image directory and
@@ -331,38 +308,52 @@ static int PI_prolog_init0(const PI_system_setup *setup)
     }
 #endif /* PURE_ANSI */
 
-    if (heapsize * 4 < DEFAULT_SAFETY * 2)
-	fatal_error(FE_SMALLHEAP, 0);
+#ifdef Threaded
+    /* make sure that wam_instr is setup */
+    run_wam(0);
+#endif
 
-#ifndef KERNAL
-    if (stacksize * 4 < 65536)
-	fatal_error(FE_SMALLSTACK, 0);
-#endif /* KERNAL */
+	init_prolog_globals();
+	init_prolog_engine(&current_engine, stacksize, heapsize);
+    saved_state_loaded = als_mem_init(state_path, offset);
+
+#if 0
+//    if (heapsize * 4 < DEFAULT_SAFETY * 2)
+//	fatal_error(FE_SMALLHEAP, 0);
+
+//#ifndef KERNAL
+//    if (stacksize * 4 < 65536)
+//	fatal_error(FE_SMALLSTACK, 0);
+//#endif /* KERNAL */
 
     /* Perform some initial allocations */
 
-    wm_stackbot = allocate_prolog_heap_and_stack(stacksize + heapsize);
+//    wm_stackbot = allocate_prolog_heap_and_stack(stacksize + heapsize);
 
-    wm_heapbase = wm_stackbot + stacksize;
-#ifdef MacOS
-    wm_stackbot_safety = wm_stackbot + 50;
+//    wm_heapbase = wm_stackbot + stacksize;
+//#ifdef MacOS
+//    wm_stackbot_safety = wm_stackbot + 50;
+//#endif
 #endif
 
 #ifdef	arch_m88k
     wm_CP = (long *) panic_continue;
 #endif /* arch_m88k */
 
-    wm_H = wm_HB = wm_SPB = wm_E = wm_SP = wm_heapbase;
-    wm_B = (long *) 0;
-    wm_gvbase = wm_trailbase = wm_TR = wm_heapbase + heapsize - 1;
-    wm_gvfreelist = (PWord *) MMK_INT(-1);
+#if 0
+//    wm_H = wm_HB = wm_SPB = wm_E = wm_SP = wm_heapbase;
+//    wm_B = (long *) 0;
+//    wm_gvbase = wm_trailbase = wm_TR = wm_heapbase + heapsize - 1;
+//    wm_gvfreelist = (PWord *) MMK_INT(-1);
 #ifndef Portable
-    wm_FAIL = (long *) panic_fail;
+//    wm_FAIL = (long *) panic_fail;
 #else
-    wm_FAIL = (long *) wm_panic;
+//    wm_FAIL = (long *) wm_panic;
 #endif
 
-    prs_area_init(heapsize / 8);
+//    prs_area_init(heapsize / 8);
+#endif
+    prs_area_init(0);
 
 #if	defined(arch_i386) || defined(arch_sparc) || defined(arch_m68k)
     if (icbufsize < MIN_ICBUFSIZE || !init_icode_buf(icbufsize))
@@ -499,6 +490,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 #endif /* KERNAL */
     }
 
+#if 0
 #ifdef MacOS
 #ifndef CW_PLUGIN
     /* load the autoload files, call the initilize routine. */
@@ -530,6 +522,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 	    PI_rungoal(mv, gv, gt);
 	}	
     }
+#endif
 #endif
 #endif
 
@@ -644,202 +637,6 @@ assert_als_system(os, os_var, proc, man, ver)
     	}
 }
 
-/*-----------------------------------------------------------------------------*
- * absolute_pathname tests to see if we have an absolute pathname or not
- *-----------------------------------------------------------------------------*/
-
-#ifndef PURE_ANSI
-#if 0
-#if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(OS2) || defined(MSWin32)
-
-static int
-absolute_pathname(name)
-    const char *name;
-{
-    return (
-	       (*name == DIR_SEPARATOR) ||
-	 (((*name >= 'a' && *name <= 'z') || (*name >= 'A' && *name <= 'Z'))
-	  && *(name + 1) == ':' && *(name + 2) == DIR_SEPARATOR)
-	);
-}
-
-#elif defined(VMS)
-
-static int
-absolute_pathname(name)
-    const char *name;
-{
-    char *n;
-
-    for (n = name; *n && *n != ':'; n++) ;
-
-    return (*n);
-
-}
-
-#elif defined(MacOS)
-
-/* Moved to fsmac.c */
-
-#endif
-#endif
-
-/*--------------------------------------------------------------------*
- | locate_executable is given a filename f in the form:  locate_executable(argc, argv)
- | It returns the directory in which the executable file (containing 
- | this code [main.c] ) may be found.  A dot will be returned to indicate 
- | the current directory.
- *--------------------------------------------------------------------*/
-
-#ifdef MacOS
-static void full_path(char *s, const FSSpec *spec)
-{
-	OSErr err;
-	short PathLength;
-	Handle PathHandle;
-
-	err = FSpGetFullPath(spec, &PathLength, &PathHandle);
-	if (err != noErr) fatal_error(FE_INFND, 0);
-		
-	if (PathLength >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
-		
-	HLock(PathHandle);
-	if (MemError() != noErr) fatal_error(FE_INFND, 0);
-
-	strncpy(s, *PathHandle, PathLength);
-
-	DisposeHandle(PathHandle);
-	if (MemError() != noErr) fatal_error(FE_INFND, 0);
-}
-#endif
-
-static void locate_library_executable(int argc, char *argv[])
-{
-#ifdef MSWin32
-    DWORD l;
-    char *endpath;
-    
-    l = GetModuleFileName(NULL, executable_path, IMAGEDIR_MAX);
-    if (l == 0 || l >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
-
-#ifdef DLL
-	{
-	HANDLE dll;
-    dll = GetModuleHandle(DLL_NAME);
-    if (dll == NULL) fatal_error(FE_INFND, 0);
-    
-    l = GetModuleFileName(dll, library_path, IMAGEDIR_MAX);
-    if (l == 0 || l >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
-    }
-#else
-	strcpy(library_path, executable_path);
-#endif /* DLL */
-
-	strcpy(library_dir, library_path);
-
-    endpath = strrchr(library_dir, '\\');
-    if (endpath == NULL) fatal_error(FE_INFND, 0);
-    endpath++;  /* include the \ */
-    *endpath = 0;
-#elif MacOS
-    if (MPW_Tool) {
-		//command_line_locate_executable(argv[0]);
-    } else {
-		OSErr err;
-		ProcessSerialNumber PSN;
-		ProcessInfoRec info;
-		FSSpec AppSpec, DirSpec;
-		const FSSpec *LibrarySpec;
-		
-		extern shlib_found;
-		extern FSSpec shlib_location;
-		
-
-	    /* Get the FSSpec for this application. */    
-		PSN.highLongOfPSN = 0;
-		PSN.lowLongOfPSN = kCurrentProcess;
-		
-		info.processInfoLength = sizeof(ProcessInfoRec);
-		info.processName = NULL;
-		info.processAppSpec = &AppSpec;
-		
-		err = GetProcessInformation(&PSN, &info);
-		if (err != noErr) fatal_error(FE_INFND, 0);
-		
-		full_path(executable_path, &AppSpec);
-		
-		if (shlib_found) LibrarySpec = &shlib_location;
-		else LibrarySpec = &AppSpec;
-		
-		full_path(library_path, LibrarySpec);
-
-		err = FSMakeFSSpec(LibrarySpec->vRefNum, LibrarySpec->parID, "\p", &DirSpec);
-		if (err != noErr && err != fnfErr)  fatal_error(FE_INFND, 0);
-
-		full_path(library_dir, &DirSpec);
-	}
-#elif UNIX
-    char *endpath;
-
-    command_line_locate_executable(argv[0]);
-    strcpy(library_path, executable_path);
-
-    strcpy(library_dir, library_path);
-
-    endpath = strrchr(library_dir, '/');
-    if (endpath == NULL) fatal_error(FE_INFND, 0);
-    endpath++;  /* include the \ */
-    *endpath = 0;
-#else
-#error
-#endif
-}
-
-#ifdef UNIX
-static void command_line_locate_executable(const char *argv0)
-{
-  const char *exec_path = NULL;
-
-  if (strchr(argv0, '/')) {
-    exec_path = argv0;
-  } else {
-    const char *path_list, *p, *endp;
-    char path[MAXPATHLEN];
-    size_t length;
-    struct stat stat_buf;
-
-    path_list = getenv("PATH");
-    if (!path_list) path_list = "/bin:/usr/bin:";
-
-    for (p = path_list; *p; *endp ? (p = endp+1) : (p = endp)) {
-      for (endp = p; *endp && *endp != ':'; endp++) ;
-      length = endp-p;
-      strncpy(path, p, length);
-      path[length] = 0;
-      if (length && path[length-1] != '/') strcat(path, "/");
-      strcat(path, argv0);
-
-      if ((access(path, X_OK) == 0)
-	  && (stat(path, &stat_buf) == 0)
-	  && S_ISREG(stat_buf.st_mode)) {
-	exec_path = path;
-	break;
-      }
-    }
-    
-    if (!exec_path) exec_path = argv0;
-  }
-
-  /* Cast exec_path to char *, because realpath isn't always defined
-     with const char * */
-  if (!realpath((char *)exec_path, executable_path)) {
-    fatal_error(FE_INFND, 0);
-    return;
-  }
-}
-
-#endif /* PURE_ANSI */
-#endif
 
 /*-------------------------------------------------------------*
  | autoload will attempt to load the named file from
@@ -1214,6 +1011,10 @@ void app_printf(int messtype, va_list args);
 #include <console.h>
 #endif
 
+#ifdef macintosh
+#pragma export on
+#endif
+
 EXPORT ALSPI_API(int)
 PI_prolog_init(int argc, char *argv[])
 {
@@ -1225,11 +1026,7 @@ PI_prolog_init(int argc, char *argv[])
     setup.icbuf_size = 0;
     setup.alsdir = NULL;
     setup.saved_state = NULL;
-#ifdef DLL
-	setup.load_executable_state = 0;
-#else
-	setup.load_executable_state = 1;
-#endif
+    setup.load_executable_state = 0;
     setup.argc = argc;
     setup.argv = argv;
 #ifdef WIN32
@@ -1358,6 +1155,11 @@ PI_shutdown(void)
 #endif
 
 }
+
+#ifdef macintosh
+#pragma export reset
+#endif
+
 
 #ifdef MacOS
 /* PI_yield_time() is called periodically during the execution of prolog code to

@@ -13,8 +13,6 @@
 
 module builtins.
 
-export date/1.
-export time/1.
 export make_subdir/1.
 export make_subdir/2.
 export remove_subdir/1.
@@ -28,37 +26,6 @@ export directory/3.
 
 export get_current_drive/1.
 export change_current_drive/1.
-
-/*!--------------------------------------------------------------
- |	date/1
- |	date(Date)
- |	date(-)
- |
- |	 -	gets the current date
- |
- |	Unifies the input with the current date which is represented
- |	by a term of the form ??/??/??.  The exact pattern (e.g.,
- |	YY/MM/DD or MM/DD/YY or ....) is determined by date_pattern/4.
- *!--------------------------------------------------------------*/
-date(Date)
-	:-
-	'$time'(_,_,_,DD,Month,YY,_,_,_),
-	MM is Month + 1,
-	date_pattern(YY,MM,DD,Date).
-
-/*!--------------------------------------------------------------
- |	time/1
- |	time(HH:MM:SS)
- |	time(-)
- |
- |	 - gets the current time
- |
- |	Unifies the input with the current time which is represented
- |	by a term of the form HH:MM:SS.
- *!--------------------------------------------------------------*/
-time(HH:MM:SS)
-	:-
-	'$time'(SS,MM,HH,_,_,_,_,_,_).
 
 /*!--------------------------------------------------------------
  |	make_subdir/1

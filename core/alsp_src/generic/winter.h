@@ -29,10 +29,8 @@ extern "C" {
 #else		/* ----------- NON-KERNAL --------------------------*/
 #define DEFAULT_SAFETY		98304		/* bytes	*/
 
-/* #define DEFAULT_HEAP_SIZE	0x040000	long words (1 MBytes) */
-#define DEFAULT_HEAP_SIZE	0x400000	/* long words (16 MBytes) */
-/* #define DEFAULT_STACK_SIZE	0x040000	 long words (1 MBytes) */
-#define DEFAULT_STACK_SIZE	0x200000	/* long words (8 MBytes) */
+#define DEFAULT_HEAP_SIZE	0x040000	/* long words (1 MBytes) */
+#define DEFAULT_STACK_SIZE	0x040000	/* long words (1 MBytes) */
 
 #define	MIN_ICBUFSIZE		0x010000	/* 64k code words */
 #define MAX_ICBUFSIZE		0x100000	/* 1M code words */
@@ -86,51 +84,56 @@ WM_SAFETY_REG_HOOK;
 
 extern PWord wm_safety;
 extern PWord wm_trigger;
-extern int   wm_regidx;
+#if 0
+/*//extern int   wm_regidx;*/
+#endif
 extern PWord wm_interrupt_caught;
 
 extern PWord wm_in_Prolog;
 
-extern Code *wm_overcode;
+/*//extern Code *wm_overcode;*/
 
 extern PWord wm_spying;
 
-extern PWord *wm_regs[][NumWAMRegs];
+#if 0
+/*//extern PWord *wm_regs[][NumWAMRegs];*/
 
-extern PWord *wm_heapbase;
-extern PWord *wm_trailbase;
-extern PWord *wm_stackbot;
+/*//extern PWord *wm_heapbase;*/
+/*//extern PWord *wm_trailbase;*/
+/*//extern PWord *wm_stackbot;*/
 #ifdef MacOS
-extern PWord *wm_stackbot_safety;
+/*//extern PWord *wm_stackbot_safety;*/
 #endif
 
-extern PWord *wm_gvfreelist;
-extern PWord *wm_gvbase;
-extern int  gv_setcnt;
+/*//extern PWord *wm_gvfreelist;*/
+/*//extern PWord *wm_gvbase;*/
+/*//extern int  gv_setcnt;*/
+#endif
 
-extern Code *wm_cutaddr;
+/*//extern Code *wm_cutaddr;*/
 
 
 #include "wintidx.h"
 
-#define wm_B	(wm_regs[wm_regidx][wm_B_idx])
-#define wm_HB	(wm_regs[wm_regidx][wm_HB_idx])
-#define wm_SPB	(wm_regs[wm_regidx][wm_SPB_idx])
-#define wm_E	(wm_regs[wm_regidx][wm_E_idx])
-#define wm_TR	(wm_regs[wm_regidx][wm_TR_idx])
-#define wm_H	(wm_regs[wm_regidx][wm_H_idx])
-#define wm_SP	(wm_regs[wm_regidx][wm_SP_idx])
-#define wm_FAIL (wm_regs[wm_regidx][wm_FAIL_idx])
-
+#if 0
+//#define wm_B	(wm_regs[wm_regidx][wm_B_idx])
+//#define wm_HB	(wm_regs[wm_regidx][wm_HB_idx])
+//#define wm_SPB	(wm_regs[wm_regidx][wm_SPB_idx])
+//#define wm_E	(wm_regs[wm_regidx][wm_E_idx])
+//#define wm_TR	(wm_regs[wm_regidx][wm_TR_idx])
+//#define wm_H	(wm_regs[wm_regidx][wm_H_idx])
+//#define wm_SP	(wm_regs[wm_regidx][wm_SP_idx])
+//#define wm_FAIL (wm_regs[wm_regidx][wm_FAIL_idx])
+#endif
 
 /*
  * The following are not functions.
  */
 
 #ifdef Portable
-extern Code *wm_fail;
-extern Code *wm_trust_fail;
-extern Code *wm_panic;
+/*//extern Code *wm_fail;*/
+/*//extern Code *wm_trust_fail;*/
+/*//extern Code *wm_panic;*/
 #else
 extern	int	wm_fail		PARAMS(( void ));
 extern	int	wm_trust_fail	PARAMS(( void ));

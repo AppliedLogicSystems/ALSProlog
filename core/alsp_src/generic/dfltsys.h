@@ -30,4 +30,4 @@
 
 #undef OLDCONSULT
 
-#define FREEZE 1
+#define FREEZE 0

@@ -199,6 +199,8 @@ asub(Atom,Start,Length,Result)
  |
  *!--------------------------------------------------------------------*/
 insert_spaces([], []).
+insert_spaces([Item], [Item])
+	:-!.
 insert_spaces([Item | RestIn_List], [Item, ' ' | RestOut_List])
 	:-
 	insert_spaces(RestIn_List, RestOut_List).

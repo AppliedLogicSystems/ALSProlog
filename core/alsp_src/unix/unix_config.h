@@ -47,7 +47,6 @@
 #define RETSIGTYPE	void
 #define SIGRET	/*do nothing*/
 #define SIGT	RETSIGTYPE
-#define SIMPLE_MICS 2
 #define TIME_WITH_SYS_TIME	2
 
 #if   defined(UNIX_AIX)

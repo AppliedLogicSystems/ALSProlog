@@ -359,7 +359,7 @@ set_prolog_error(namtok,arity,rfunc,rarity,rsym,v2,t2,v3,t3)
     PWord namtok, rfunc, rsym, v2, v3;
     int arity, rarity, t2, t3;
 {
-    static long pegvnum = -5;	/* something other than -1 */
+    /*//static long pegvnum = -5;*/	/* something other than -1 */
     if (pegvnum < 0) {
 	if (pegvnum == -5)
 	    ss_register_global(&pegvnum);
@@ -381,9 +381,9 @@ set_prolog_error(namtok,arity,rfunc,rarity,rsym,v2,t2,v3,t3)
 	else {
 	    w_mk_term(&rv, &rt, rfunc, rarity);
 	    w_install_argn(rv,1,rsym,WTP_SYMBOL);
-	    if (arity >= 2)
+	    if (rarity >= 2)
 		w_install_argn(rv,2,v2,t2);
-	    if (arity >= 3)
+	    if (rarity >= 3)
 		w_install_argn(rv,3,v3,t3);
 	}
 
@@ -448,6 +448,10 @@ set_prolog_error(namtok,arity,rfunc,rarity,rsym,v2,t2,v3,t3)
     }
 }
 
+#ifdef macintosh
+#pragma export on
+#endif
+
 EXPORT ALSPI_API(void)
 PI_throw(PWord obj, int objt)
 {
@@ -462,3 +466,7 @@ PI_getball(PWord *obj, int *objt)
 {
 	gv_get(obj, objt, get_gv_number((UCHAR *)"PrologError"));
 }
+
+#ifdef macintosh
+#pragma export reset
+#endif

@@ -3,11 +3,481 @@
  |		Copyright (c) 1998 Applied Logic Systems, Inc.
  |
  |			Prolog Project Management
- |			"$Id: projects.pro,v 1.6 1998/06/20 13:18:32 ken Exp $"
+ |			"$Id: projects.pro,v 1.7 1998/09/04 14:18:17 choupt Exp $"
  *=============================================================*/
 
 module alsdev.
 use tk_alslib.
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%% 		NEW PROJECT			%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	%%% Called from "New Project" button:
+
+als_ide_mgrAction(start_new_project, ALSIDEObject)
+	:-
+	accessObjStruct(cur_project,ALSIDEObject,PrevProject),
+	start_new_project(PrevProject, ALSIDEObject).
+
+start_new_project(nil, ALSIDEObject)
+	:-!,
+	proceed_start_new_project(ALSIDEObject).
+
+start_new_project(PrevProject, ALSIDEObject)
+	:-
+	accessObjStruct(title,PrevProject,ProjName),
+	sprintf(atom(Msg), 'Close project %t ?', [ProjName]),
+	yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer),
+	close_old_start_new_project(Answer, PrevProject, ALSIDEObject).
+
+close_old_start_new_project('No', PrevProject, ALSIDEObject)
+	:-!.
+close_old_start_new_project(Answer, PrevProject, ALSIDEObject)
+	:-
+	close_project(PrevProject, ALSIDEObject),
+	proceed_start_new_project(ALSIDEObject).
+
+proceed_start_new_project(ALSIDEObject)
+	:-
+	create_object(
+		[instanceOf=project_mgr,
+		 handle=true ], 
+		ProjectMgr),
+	setObjStruct(cur_project,ALSIDEObject,ProjectMgr),
+	send(ProjectMgr, init_gui).
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%  Project Manager ObjectPro CLASS DEFINITIONS  %%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		%% Note: Only one project can be open at a time;
+		%% The manager for the project is read in from
+		%% the project file when the (existing) project is
+		%% opened, and is written back out to the project
+		%% file when the project is closed.
+
+:- defineClass(
+	[   name=gen_project_mgr,
+		subClassOf=genericObjects,
+		addl_slots=
+			[
+				internal_name,
+				title,
+				project_file,
+				primary_project_dir,	% normally where project_file is
+				list_of_files_slots,
+				list_slots,
+				text_slots,
+				search_dirs,
+%				search_trees,
+				gui_spec,
+				slot_names
+			], 
+		defaults=
+			[
+				list_of_files_slots = [],
+				list_slots = [],
+				text_slots = [],
+				search_dirs = [],
+%				search_trees = [],
+				slot_names = []
+			] 
+	]).
+
+		%% The manager for a prolog/tcl/c project:
+:- defineClass(
+	[   name=project_mgr,
+		subClassOf=gen_project_mgr,
+		addl_slots=
+			[
+%				production_goal,
+%				debug_goal,
+				executable_name,
+				prolog_files,
+%				library_files,
+%				tcltk_files,
+%				tcltk_interpreters,
+%				c_files,
+				file_types,
+				default_dirs,
+				project_loaded			%% true/fail
+			], 
+		defaults=
+			[
+				project_loaded = fail,
+				list_of_files_slots = [
+					prolog_files
+%					,library_files,
+%					tcltk_files,
+%					c_files
+					],
+				list_slots = [ 
+%					tcltk_interpreters 
+					],
+				text_slots = [
+%					production_goal,
+%					debug_goal
+					],
+				production_goal = start_,
+				debug_goal = debug_start_,
+				prolog_files = [],
+%				library_files = [],
+%				tcltk_files = [],
+%				tcltk_interpreters = [tcli],
+%				c_files = [],
+				file_types =  [ 
+					[prolog_files, ['.pro', '.pl'] ]
+%					,[prolog_library_files, ['.pro'] ],
+%					[tcltk_files, ['.tcl'] ],
+%					[c_files, ['.c'] ] 
+				],
+				default_dirs = [],
+				slot_names = [
+					[production_goal,	'Startup Goal:'],
+					[debug_goal, 		'Debug Goal:'],
+					[executable_name, 	'Image Name:'],
+					[prolog_files, 		'Prolog Files:']
+%					,[library_files, 	'Library Files:'],
+%					[tcltk_files, 		'Tcl/Tk Files:'],
+%					[tcltk_interpreters,'Tcl/Tk Interps:'],
+%					[c_files, 			'C Files:']
+				]
+			]
+	]).
+
+:-dynamic(project_mgrAction/2).
+
+gen_project_mgrAction(init_gui, State)
+	:-
+	gensym(project,X),
+	sub_atom(X,1,_,0,InternalName),
+	gen_project_mgrAction(init_gui(InternalName), State).
+
+gen_project_mgrAction(init_gui(InternalName), State)
+	:-
+	setObjStruct(internal_name, State, InternalName),
+	accessObjStruct(list_of_files_slots, State, ListOfFilesSlots),
+	accessObjStruct(list_slots, State, ListSlots),
+	accessObjStruct(text_slots, State, TextSlots),
+	accessObjStruct(slot_names, State, SlotNames),
+	accessObjStruct(file_types, State, FileTypes),
+	accessObjStruct(default_dirs, State, DfltDirs),
+	catenate('.', InternalName, GuiPath),
+	setObjStruct(gui_spec, State, GuiPath),
+	tcl_call(shl_tcli, 
+		[init_prj_spec, GuiPath, 
+			TextSlots, ListOfFilesSlots, ListSlots, 
+			SlotNames, FileTypes, XDfltDirs], _),
+	send(State, display_state).
+
+
+gen_project_mgrAction(display_state, State)
+	:-
+	accessObjStruct(gui_spec, State, GuiPath),
+	accessObjStruct(list_of_files_slots, State,  ListOfFilesSlots),
+	accessObjStruct(list_slots, State, ListSlots),
+	accessObjStruct(text_slots, State, TextSlots),
+	display_text_slots([title, project_file | TextSlots], GuiPath, State),
+%	display_list_slots( [search_dirs, search_trees | ListOfFilesSlots], GuiPath, State),
+	display_list_slots( [search_dirs | ListOfFilesSlots], GuiPath, State),
+	display_list_slots(ListSlots, GuiPath, State).
+
+display_text_slots([TextSlot | TextSlots], GuiPath, State)
+	:-
+	accessObjStruct(TextSlot, State, SlotValue),
+	tcl_call(shl_tcli, [show_text_slot,GuiPath,TextSlot,SlotValue], _),
+	display_text_slots(TextSlots, GuiPath, State).
+display_text_slots([_ | TextSlots], GuiPath, State)
+	:-!,
+	display_text_slots(TextSlots, GuiPath, State).
+display_text_slots(_, GuiPath, State).
+
+display_list_slots([ListSlot | ListSlots], GuiPath, State)
+	:-
+	accessObjStruct(ListSlot, State, SlotValueList),
+	accessObjStruct(myHandle, State, PrjMgrHandle),
+	tcl_call(shl_tcli, [show_list_slot,GuiPath,ListSlot,SlotValueList,PrjMgrHandle], _),
+	display_list_slots(ListSlots, GuiPath, State).
+display_list_slots([_ | ListSlots], GuiPath, State)
+	:-!,
+	display_list_slots(ListSlots, GuiPath, State).
+display_list_slots(X, GuiPath, State).
+
+gen_project_mgrAction(read_gui_spec, State)
+	:-
+	accessObjStruct(gui_spec, State, GuiPath),
+	accessObjStruct(list_of_files_slots, State, ListOfFilesSlots),
+	accessObjStruct(list_slots, State, ListSlots),
+	accessObjStruct(text_slots, State, TextSlots),
+	tcl_call(shl_tcli, 
+		[rd_prj_spec, GuiPath, TextSlots, ListOfFilesSlots, ListSlots],
+		InitResult),
+	InitResult = [OutTextSlots, OutListSlots],
+	findall(T=V, member([T, V], OutTextSlots), CleanTextSlots),
+	forbidden_slots(Forbidden),
+	weak_all_setObjStruct(CleanTextSlots, Forbidden, State),
+	findall(Tag=CleanValue,
+			(member([Tag,Value], OutListSlots), 
+				cleanup_value(Value, CleanValue) ),
+			CleanListSlots),
+	weak_all_setObjStruct(CleanListSlots, Forbidden, State).
+
+cleanup_value('', []) :-!.
+cleanup_value(Value, CleanValue)
+	:-
+	atom_codes(Value, VCs),
+	asplit0_all(VCs, 0' , Chunks),
+	all_to_atoms(Chunks, CleanValue).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%% 		CLOSE PROJECT		%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+als_ide_mgrAction(close_project, ALSIDEObject)
+	:-
+	yes_no_dialog(shl_tcli, 'Save Project First?', 'Save??', 'Yes', 'No', Answer),
+	(Answer = 'Yes' ->
+		als_ide_mgrAction(save_project, ALSIDEObject)
+		;
+		true
+	),
+	accessObjStruct(cur_project,ALSIDEObject,CurProject),
+	send(CurProject, close_project),
+	setObjStruct(cur_project,ALSIDEObject,nil),
+	accessObjStruct(initial_dir, ALSIDEObject, InitialDir),
+	change_cwd(InitialDir).
+/*
+	accessObjStruct(initial_search_dirs, ALSIDEObject, SDList),
+	builtins:abolish(searchdir,1),
+	builtins:assert_all(SDList).
+*/
+
+gen_project_mgrAction(close_project, State)
+	:-
+	gen_project_mgrAction(save_to_file, State),
+	accessObjStruct(gui_spec, State, GuiPath),
+	tcl_call(shl_tcli, [destroy, GuiPath], _).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%% 		SAVE PROJECT		%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+als_ide_mgrAction(save_project, ALSIDEObject)
+	:-
+	accessObjStruct(cur_project,ALSIDEObject,CurProject),
+	send(CurProject, save_to_file).
+
+gen_project_mgrAction(save_to_file, State)
+	:-
+	gen_project_mgrAction(read_gui_spec, State),
+	check_ppj(State, FilePath),
+	forbidden_slots(Forbidden),
+	dump_object(State, Forbidden, Eqns),
+	open(FilePath, write, OS, []),
+	write_clauses(OS, Eqns, [quoted(true)]),
+	close(OS).
+
+dump_object(State, Forbidden, Eqns)
+	:-
+	functor(State, Class, _),
+	arg(2, State, Module),
+	findall(SlotName=Value,
+			  ( Module:slot_num(Class, SlotName, Offset),
+				arg(Offset, State, Value),
+				not(dmember(SlotName, Forbidden)) ),
+			Eqns).
+
+
+
+
+check_ppj(State, FilePath)
+	:-
+	accessObjStruct(project_file, State, InitFilePath),
+	check_ppj(InitFilePath, FilePath, State).
+
+check_ppj(nil, 'default.ppj', State)
+	:-!.
+
+check_ppj('', 'default.ppj', State)
+	:-!.
+
+check_ppj(FilePath, FilePath, State)
+	:-
+	file_extension(_, ppj, FilePath),
+	!.
+
+check_ppj(InitFilePath, FilePath, State)
+	:-
+	file_extension(InitFilePath, ppj, FilePath),
+	setObjStruct(project_file, State, FilePath).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%% 		OPEN PROJECT		%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+als_ide_mgrAction(open_project, ALSIDEObject)
+	:-
+	accessObjStruct(cur_project,ALSIDEObject,PrevProject),
+	open_project(PrevProject, ALSIDEObject).
+
+open_project(nil, ALSIDEObject)
+	:-!,
+	proceed_open_another_project(ALSIDEObject).
+
+open_project(PrevProject, ALSIDEObject)
+	:-
+	accessObjStruct(title,PrevProject,ProjName),
+	sprintf(atom(Msg), 'Close project %t ?', [ProjName]),
+	yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer),
+	close_old_open_another_project(Answer, PrevProject, ALSIDEObject).
+
+close_old_open_another_project('No', PrevProject, ALSIDEObject)
+	:-!.
+
+close_old_open_another_project(Answer, PrevProject, ALSIDEObject)
+	:-
+	send(PrevProject, close_project),
+	proceed_open_another_project(ALSIDEObject).
+
+proceed_open_another_project(ALSIDEObject)
+	:-
+	tcl_call(shl_tcli, [select_project_file], FileSpec),
+	cont_open_another_project(FileSpec, ALSIDEObject, _).
+
+
+als_ide_mgrAction(open_project_file(FilePath), ALSIDEObject)
+	:-
+	split_path(FilePath, PathList),
+	dreverse(PathList, [File | RDirL]),
+	dreverse(RDirL, DirList),
+	cont_open_another_project([File, DirList], ALSIDEObject, _).
+
+cont_open_another_project('', ALSIDEObject, _)
+	:-!.
+cont_open_another_project(nil, ALSIDEObject, _)
+	:-!.
+
+cont_open_another_project([FileName, PathListIn], ALSIDEObject, ProjectMgr)
+	:-
+	sys_env(OS,MinorOS,Proc),
+	(OS = mswin32 ->
+		PathListIn = [PathHead | RestPL],
+		repair_path(PathHead, RepairedPathHead),
+		PathList = [RepairedPathHead | RestPL]
+		;
+		PathList = PathListIn
+	),
+	append(PathList, [FileName], FileList),
+	join_path(FileList, File),
+	grab_terms(File, Eqns),
+	alsdev:create_object(
+		[instanceOf=project_mgr,
+		 handle=true ], 
+		ProjectMgr),
+	accessObjStruct(myHandle, ProjectMgr, MyHandle),
+	forbidden_slots(Forbidden),
+	weak_all_setObjStruct(Eqns, Forbidden, ProjectMgr),
+
+	setObjStruct(project_loaded, ProjectMgr, fail),
+	setObjStruct(cur_project,ALSIDEObject,ProjectMgr),
+	join_path(PathList, ProjectDir),
+	setObjStruct(primary_project_dir,ProjectMgr,ProjectDir),
+
+/*
+	accessObjStruct(prolog_library, ALSIDEObject, LibPath),
+	accessObjStruct(default_dirs,ProjectMgr,OrigDfltDirs),
+	(dmember([prolog_library_files,LibPath], OrigDfltDirs) ->
+		true
+		;
+		list_delete(OrigDfltDirs, [prolog_library_files,_], RedDfltDirs),
+		XDfltDirs = [[prolog_library_files,LibPath] | RedDfltDirs],
+		setObjStruct(default_dirs,ProjectMgr,XDfltDirs)
+	),
+*/
+
+	send(ProjectMgr, init_gui).
+
+/*
+	accessObjStruct(search_dirs, ProjectMgr, SDs),
+	findall(searchdir(X), member(X, SDs), ExistingSDList),
+	append(SDs, ExistingSDList, SDList),
+	builtins:abolish(searchdir,1),
+	builtins:assert_all(SDList).
+*/
+
+forbidden_slots([myHandle,internal_name,gui_spec,project_loaded]).
+
+weak_all_setObjStruct([], Forbidden, State).
+weak_all_setObjStruct([Tag = Value | Eqns], Forbidden, State)
+	:-
+	not(dmember(Tag, Forbidden)),
+	setObjStruct(Tag, State, Value),
+	!,
+	weak_all_setObjStruct(Eqns, Forbidden, State).
+weak_all_setObjStruct([_ | Eqns], Forbidden, State)
+	:-
+	weak_all_setObjStruct(Eqns, Forbidden, State).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%% 		LOAD PROJECT		%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+als_ide_mgrAction(load_project, ALSIDEObject)
+	:-
+	accessObjStruct(cur_project,ALSIDEObject,PrevProject),
+	load_project(PrevProject, ALSIDEObject).
+
+load_project(nil, ALSIDEObject)
+	:-!,
+	proceed_load_project(ALSIDEObject).
+
+load_project(PrevProject, ALSIDEObject)
+	:-
+	accessObjStruct(title,PrevProject,ProjName),
+	sprintf(atom(Msg), 'Close project %t ?', [ProjName]),
+	yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer),
+	close_old_load_another_project(Answer, PrevProject, ALSIDEObject).
+
+close_old_load_another_project('No', PrevProject, ALSIDEObject)
+	:-!.
+
+close_old_load_another_project('Yes', PrevProject, ALSIDEObject)
+	:-
+	send(PrevProject, close_project),
+	proceed_load_project(ALSIDEObject).
+
+proceed_load_project(ALSIDEObject)
+	:-
+	tcl_call(shl_tcli, [select_project_file], FileName),
+	cont_load_project(FileName, ALSIDEObject).
+
+
+cont_load_project('', ALSIDEObject)
+	:-!.
+
+cont_load_project([FileName, PathList], ALSIDEObject)
+	:-
+	cont_open_another_project([FileName, PathList], ALSIDEObject, ProjectObj),
+	gen_project_mgrAction(load_project, ProjectObj).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%% 	LOAD THIS PROJECT		%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+als_ide_mgrAction(load_this_project, ALSIDEObject)
+	:-
+	accessObjStruct(cur_project,ALSIDEObject,ThisProject),
+	gen_project_mgrAction(load_project, ThisProject).
+
+gen_project_mgrAction(load_project, ProjectMgr)
+	:-
+	accessObjStruct(primary_project_dir,ProjectMgr,ProjectDir),
+	change_cwd(ProjectDir),
+	tcl_call(shl_tcli, [show_dir_on_main,ProjectDir], _),
+	load_the_project(ProjectMgr),
+	setObjStruct(project_loaded, ProjectMgr, true),
+	listener_prompt.
 
 check_root([], '.') :-!.
 check_root([Head | Elts], ProjectDirList)
@@ -20,86 +490,12 @@ check_root([Head | Elts], ProjectDirList)
 	),
 	ProjectDirList = [FixedHead | Elts].
 
-check_dir_root(Head, Head)
+load_the_project(ProjectMgr)
 	:-
-	sub_atom(Head,K,1,0,'/'),
-	!,
-	'$uia_pokeb'(Head,K,0'\\).
-check_dir_root(Head, Head).
-
-
-export load_project_file/2.
-load_project_file(InProjectDir, BaseFile)
-	:-
-	check_root(InProjectDir, ProjectDirList),
-	join_path(ProjectDirList, ProjectDir),
-	file_extension(FF,XX,BaseFile),
-	file_extension(FF,XX,RedoneFile),
-
-	change_cwd(ProjectDir),
-	printf('Loading project from file %t \n', [BaseFile]),
-	get_curProject(OldProject),
-	close_previous_project(OldProject),
-	set_curProject([]),
-	append(ProjectDirList, [RedoneFile], FileList),
-	join_path(FileList, TheFile),
-	printf('Loading project from file %t \n', [TheFile]),
-
-%% Ought to be able to use:
-%	grab_terms(TheFile, CurProject),
-%% But it has problems (??), so:
-	open(TheFile, read, SS, []),
-	read_terms(SS, CurProject),
-	close(SS),
-
-	set_curProject(CurProject),
-	load_the_project(CurProject, BaseFile),
-	listener_prompt.
-
-	/*-----------------------------------------------------------*
-	 |	name = project name
-	 |	search_dirs  = list of dirs to search
-	 |	search_trees = list of roots of dirs to search as trees
-	 |
-	 |	prolog_files = list of prolog files (no extensions)
-	 |	typ_files    = list of *.typ files
-	 |  
-	 |	initialization_goal    = 0-ary application initialization call
-	 *-----------------------------------------------------------*/
-load_the_project(ProjList, BaseFile)
-	:-
-	check_default(ProjList, name,  BaseFile, ProjName),
-	check_default(ProjList, search_dirs,  [], SearchDirs),
-	check_default(ProjList, search_trees,  [], SearchTrees),
-	check_default(ProjList, prolog_files,  [], PrologFiles),
-	check_default(ProjList, typ_files,  [], TypFiles),
-	check_default(ProjList, initialization_goal,  true, InitGoal),
-
-	assert_searchdirs(SearchDirs),
-	consult_files(PrologFiles),
-	consult_files(TypFiles),
-
-	printf('Project %t loaded.\n', [ProjName]),
-	printf('Initialization goal is \n\t%t\n\n', [InitGoal]).
-
-close_previous_project(OldProject).
-
-
-assert_searchdirs([]).
-assert_searchdirs([DirList | SearchDirs])
-	:-
-	join_path(DirList, Dir),
-	builtins:assertz(searchdir(Dir)),
-	assert_searchdirs(SearchDirs).
-	%% Probably should drop this:
-assert_searchdirs(DirList)
-	:-
-	DirList = [First | _],
-	atom(First),
-	join_path(DirList, Dir),
-	builtins:assertz(searchdir(Dir)).
-
-consult_files(L) :- consult(L).
+	accessObjStruct(prolog_files, ProjectMgr, PrologFiles),
+	accessObjStruct(search_dirs, ProjectMgr, SearchDirs),
+	consult(PrologFiles, [search_path(SearchDirs)]),
+	setObjStruct(project_loaded, ProjectMgr, true).
 
 add_mult_files(PrevFiles, ListBoxWin)
 	:-
@@ -112,93 +508,24 @@ add_mult_files(PrevFiles, ListBoxWin)
 	popup_select_items(shl_tcli, ChoiceFiles, Options, ChoiceList),
 	tcl_call(shl_tcli, [merge_into_listbox, ChoiceList, ListBoxWin], _).
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%% OPEN FILE FOR EDITING AFTER DOUBLE-CLICK %%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-	%% 
-save_project(Title, ProjFile, Start, ProFiles, SDirs, LibFiles)
+gen_project_mgrAction([prj_slot_focus, prolog_files, RootFileName], State)
 	:-
-	(file_extension(BaseName, _, ProjFile) ->
-		true
-		;
-		BaseName = ProjFile
-	),
-	file_extension(BaseName, ppj, OutputFile),
+	accessObjStruct(search_dirs, State, SearchList),
+write(pro_prj_slot_focus(RootFileName,SearchList)),nl,flush_output,
+	builtins:get_primary_manager(ALSMgr),
+	send(ALSMgr, open_edit_win_by_root(RootFileName,SearchList)).
 
-		%% do check & query user:
-	(exists_file(OutputFile) ->
-		catenate(['File ',OutputFile,' already exists! Continue?'], Msg),
-		yes_no_dialog(shl_tcli, Msg, 'File Exists', Answer),
-write(save_project_ans=Answer),nl,flush_output,
-		(Answer = 'Yes' ->
-			fin_save_project(OutputFile,Title, ProjFile, Start, ProFiles, SDirs)
-			;
-			true
-		)
-		;
-		fin_save_project(OutputFile,Title, ProjFile, Start, ProFiles, SDirs, LibFiles)
-	).
-
-fin_save_project(OutputFile,Title, ProjFile, Start, ProFiles, SDirs, LibFiles)
+gen_project_mgrAction([prj_slot_focus, _, Item], State)
 	:-
-	open(OutputFile, write, OStr, []),
-	write_clause(OStr, name=Title),
-	write_clause(OStr, search_dirs=SDirs),
-	write_clause(OStr, prolog_files=ProFiles),
-	write_clause(OStr, lib_files=LibFiles),
-	write_clause(OStr, initialization_goal=Start),
-	close(OStr).
+	true.
 
-get_library_dir(LibPath)
-	:-
-	builtins:sys_searchdir(SSD),
-	path_elements(SSD,SSDEs),
-	append(SSDEs, [library], LPEs),
-	join_path(LPEs, LibPath).
-
-
-export open_project_file/2.
-
-open_project_file(InProjectDir, BaseFile)
-	:-
-	check_root(InProjectDir, ProjectDirList),
-	join_path(ProjectDirList, ProjectDir),
-	file_extension(FF,XX,BaseFile),
-	file_extension(FF,XX,RedoneFile),
-
-	change_cwd(ProjectDir),
-	printf('Opening project from file %t \n', [BaseFile]),
-	get_curProject(OldProject),
-	close_previous_project(OldProject),
-	set_curProject([]),
-	append(ProjectDirList, [RedoneFile], FileList),
-	join_path(FileList, TheFile),
-	printf('Opening project from file %t \n', [TheFile]),
-
-%% Ought to be able to use:
-%	grab_terms(TheFile, CurProject),
-%% But it has problems (??), so:
-	open(TheFile, read, SS, []),
-	read_terms(SS, CurProject),
-	close(SS),
-
-	set_curProject(CurProject),
-	open_the_project(CurProject, BaseFile),
-	listener_prompt.
-
-open_the_project(ProjList, BaseFile)
-	:-
-	check_default(ProjList, name,  BaseFile, ProjName),
-	check_default(ProjList, search_dirs,  [], SearchDirs),
-	check_default(ProjList, search_trees,  [], SearchTrees),
-	check_default(ProjList, prolog_files,  [], PrologFiles),
-	check_default(ProjList, typ_files,  [], TypFiles),
-	check_default(ProjList, lib_files,  [], LibFiles),
-	check_default(ProjList, initialization_goal,  true, InitGoal),
-	sys_env(OS,MinorOS,Proc),
-	bld_skel(OS, BldCmd),
-	tcl_call(shl_tcli, [display_project, ProjName, BaseFile, InitGoal, 
-						PrologFiles, SearchDirs, LibFiles, OS, MinorOS, BldCmd], _).
-
-
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%% 	BUILD THE PROJECT		%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 export build_project/0.
 build_project
@@ -278,5 +605,23 @@ add_search_dirs_cl([DirList | SearchDirs], OS, BSt)
 	add_search_dirs_cl(SearchDirs, OS, BSt).
 
 temp_file_name(_, 'A19ztmp').
+
+export choose_mult_files/3.
+choose_mult_files(FileTypes, Descriptor, DfltDir, ChoiceList)
+	:-
+	(DefltDir = '' -> true
+		;
+		change_cwd(DfltDir)
+	),
+	patterns_from_types(FileTypes, FilePatterns),
+	directory(FilePatterns, regular, FilesList),
+	Options = [mode = multiple, title = Descriptor],
+	popup_select_items(shl_tcli, FilesList, Options, ChoiceList).
+
+patterns_from_types([], []).
+patterns_from_types([FType | FileTypes], [Pat | FilePatterns])
+	:-
+	catenate('*', FType, Pat),
+	patterns_from_types(FileTypes, FilePatterns).
 
 endmod.

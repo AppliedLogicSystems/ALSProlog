@@ -239,7 +239,10 @@ pbi_tmpnam()
 int
 pbi_protect_bottom_stack_page()
 {				/* $protect_bottom_stack_page */
+#if 0
     protect_bottom_stack_page();
+#endif
+	protect_stack(&current_engine);
     SUCCEED;
 }
 

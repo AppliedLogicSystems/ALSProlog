@@ -245,6 +245,11 @@ printf_intv(Stream, Fmt, Item, Options)
 export sprintf/3.
 sprintf(Output,Format,Args) 
 	:-
+	sprintf(Output,Format,Args,[]).
+
+export sprintf/4.
+sprintf(Output,Format,Args,Opts) 
+	:-
 	nonvar(Output),
 	!,
 	(Output = atom(A) ->
@@ -256,13 +261,13 @@ sprintf(Output,Format,Args)
 			fail
 		)
 	),
-	printf(Stream,Format,Args),
+	printf(Stream,Format,Args,Opts),
 	close(Stream).
 
-sprintf(Output,Format,Args) 
+sprintf(Output,Format,Args,Opts) 
 	:-
 	open(string(Output),write,Stream),
-	printf(Stream,Format,Args),
+	printf(Stream,Format,Args,Opts),
 	close(Stream).
 
 /*
