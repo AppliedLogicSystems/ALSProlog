@@ -41,6 +41,7 @@ export comptype/0.
 export comptype/1.
 export comptype/2.
 export xcomptype/2.
+export xcomptype/3.
 export comptype/3.
 export comptype_cl/0.
 
@@ -135,6 +136,19 @@ comptype(InputFileDescrip)
 
 /*!----------------------------------------------------------
  *-----------------------------------------------------------*/
+
+xcomptype(SourceFile, OutFilePath, Options)
+	:-
+%	pathPlusFile(SrcFileDir,SrcFile,SourceFile),
+%	filePlusExt(BaseSrcFile,typ,SrcFile),
+	!,
+	filePlusExt(BaseTgtFile,_,OutFilePath),
+	filePlusExt(BaseTgtFile,pro,TgtFile),
+	comptype(SourceFile, TgtFile, Options).
+
+xcomptype(SourceFile, _, Options)
+	:-
+	ct_error('TypeComp: source file must have extension .typ \n').
 
 xcomptype(SourceFile, Options)
 	:-
