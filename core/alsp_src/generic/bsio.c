@@ -920,7 +920,9 @@ incr_fdrefcnt(fd)
     int fd;
 {
     if (fdrefcnts == NULL) {
-#if defined(_SC_OPEN_MAX)
+#ifdef MSWin32
+	openmax = 255;
+#elif defined(_SC_OPEN_MAX)
 	if ( (openmax = sysconf(_SC_OPEN_MAX)) < 0)
 	    openmax = OPEN_MAX_GUESS;
 #elif defined(OPEN_MAX)
