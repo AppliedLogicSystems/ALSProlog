@@ -3,11 +3,13 @@
  |		Copyright (c) 1998 Applied Logic Systems, Inc.
  |
  |			Prolog Project Management
- |			"$Id: projects.pro,v 1.3 1998/03/14 02:36:54 ken Exp $"
+ |			"$Id: projects.pro,v 1.4 1998/05/08 22:35:29 ken Exp $"
  *=============================================================*/
 
 module alsdev.
+use tk_alslib.
 
+/*********
 	%% Temporary: Remove when projects are made visible:
 export ppj/0.
 ppj
@@ -15,11 +17,17 @@ ppj
 	extend_main_menubar('Projects',
 		[ 'Open Project' + tcl(open_project) ]
 	).
+*********/
 
 check_root([], '.') :-!.
 check_root([Head | Elts], ProjectDirList)
 	:-
-	check_dir_root(Head, FixedHead),
+	sys_env(OS,MinorOS,Proc),
+	(OS = mswin32 ->
+		repair_path(Head, FixedHead)
+		;
+		Head = FixedHead
+	),
 	ProjectDirList = [FixedHead | Elts].
 
 check_dir_root(Head, Head)
@@ -61,7 +69,8 @@ open_project_file(InProjectDir, BaseFile)
 	close(SS),
 
 	set_curProject(CurProject),
-	open_the_project(CurProject, BaseFile).
+	open_the_project(CurProject, BaseFile),
+	listener_prompt.
 
 	/*-----------------------------------------------------------*
 	 |	name = project name
@@ -105,7 +114,9 @@ assert_searchdirs(Dir)
 	Dir \= [],
 	builtins:assertz(searchdir(Dir)).
 
+consult_files(L) :- consult(L).
 
+/*
 consult_files([]).
 consult_files([File | PrologFiles])
 	:-
@@ -120,6 +131,7 @@ consult_files(File)
 	atom(File),
 	File \= [],
 	consult(File).
+*/
 
 
 endmod.

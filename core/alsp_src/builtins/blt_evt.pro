@@ -216,6 +216,7 @@ decompose_handler(P,M,M,P).
 default_cntrl_c_handler(_,M:G,_) 
 	:-
 %pbi_write(default_cntrl_c_handler(M:G)),pbi_nl,pbi_ttyflush,
+%statistics,
 	breakhandler(M,G).
 
 silent_abort(_,_,_) :-

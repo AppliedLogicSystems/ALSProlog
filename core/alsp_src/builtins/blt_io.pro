@@ -89,8 +89,9 @@ printf_check_format(Culprit,_) :-
 	type_error(list,Culprit,2).
 
 printf0([],Stream,_,_) 
-	:- !,
-	sio:tk_setmark(Stream).
+	:- !.
+
+%	sio:tk_setmark(Stream).
 
 %%%%		%t -- print Prolog term
 printf0([0'%,0't |Format], Stream, [Term|ArgList],Options) :-
