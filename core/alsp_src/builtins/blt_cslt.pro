@@ -839,6 +839,9 @@ make_obp_locn(gil(ExplPath), FP, BaseFile, FCOpts, OPath)
 cont_consult(SrcPath, OPath, Path, BaseFile, FCOpts, FileMgr)
 	:-
 	exists_file(SrcPath),
+	file_status(SrcPath, Status),
+	dmember(type = FileType, Status),
+	(FileType = regular ; FileType = symbolic_link),
 		%% This can raise an exception:
 	check_for_system_file(BaseFile, SrcPath),
 	canon_path(SrcPath, CanonSrcPath),
