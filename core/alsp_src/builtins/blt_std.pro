@@ -13,6 +13,24 @@
 module builtins.
 
 /*------------------------------------*
+ |	Support predicates for expanded
+ |	DCG clauses:
+ *------------------------------------*/
+strip_module((M:G), M, G) :-!.
+strip_module(G, _, G).
+
+export dcg_phrase/3.
+dcg_phrase(A, InVar, OutVar)
+	:-
+	strip_module(A, _, G),
+	( (G = [_|_] ; G = []) ->
+		append(G, OutVar, InVar)
+		;
+		call(A), 
+		InVar = OutVar
+	).
+
+/*------------------------------------*
  |	listing/[0,1,2] and listing_to/1.
  |	dblisting/[1,2].
  *------------------------------------*/

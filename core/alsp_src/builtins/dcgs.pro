@@ -53,7 +53,9 @@ install_args(N,S1,S2) :-
    install_args(NP,S1,S2).
 
 
-expand_body( Var, (call(Var),InV=OutV), InV,OutV) :- 
+%expand_body( Var, (call(Var),InV=OutV), InV,OutV) :- 
+expand_body( Var, dcg_phrase(Var, InV, OutV), InV,OutV) 
+	:- 
    var(Var), 
    !.
 expand_body( [], true, OutV, OutV) :- !.
