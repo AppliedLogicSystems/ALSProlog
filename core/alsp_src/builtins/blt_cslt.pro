@@ -89,7 +89,7 @@ ensure_loaded(F) :- consult(F, [ensure_loaded(true)]).
 		srcfilepath/'',		%%	- SrcFilePath - complete path
 		loadedpath/'',		%%	- Path actually loaded (obp, etc)
 		debug_type/no_debugging,	%%	- DebugType: debugging/no_debugging
-		cg_flag/true,		%%  - true/false Whether CGs are being used
+		cg_flag/true,		%%  - true/fail Whether CGs are being used
 		obp_locn/giac,		%%  - Obp location: gis/gic/gias/giac/no_obp
 		fcg/''				%%  - FCG: File Clause Group (for return to caller)
 	],
@@ -278,6 +278,16 @@ proc_copt(consult(true), COpts)
 proc_copt(consult(false), COpts)
 	:-!,
 	set_cslt_opts(recon, COpts, reconsult).
+
+proc_copt(clause_groups(fail), COpts)
+	:-!,
+	set_cslt_opts(cg_flag, COpts, fail),
+	set_cslt_opts(nature, COpts, source).
+
+proc_copt(clause_groups(false), COpts)
+	:-!,
+	set_cslt_opts(cg_flag, COpts, fail),
+	set_cslt_opts(nature, COpts, source).
 
 proc_copt(quiet(Value), COpts)
 	:-
@@ -1040,12 +1050,12 @@ simple_load3(NoSuffixFile, Path, Mod,CG)
 	establish_fcg(true, NoSuffixFile, no_reconsult, CG),
 	obp_push_stop,
 	open(Path, read, Stream, []),
-	catch(load_source0(Stream, Mod, no_debugging, '', Path, ErrsList),
+	catch(load_source0(Stream, Mod, no_debugging, '', Path, true, ErrsList),
 			_, 
-			(reset_fcg(_),close(Stream))),
+			(reset_fcg(true,_),close(Stream))),
 	close(Stream),
 	obp_pop,
-	reset_fcg(_).
+	reset_fcg(true,_).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% FILE CLAUSE GROUP MANIPULATION
@@ -1057,6 +1067,7 @@ simple_load3(NoSuffixFile, Path, Mod,CG)
  | establish_fcg(CGFlag, NoSuffixPath, ReconsultFlag, CG)
  | establish_fcg(+,+,+,-)
  *-------------------------------------------------------------*/ 
+establish_fcg(fail, _, _, 0).
 establish_fcg(false, _, _, _).
 
 establish_fcg(true, NoSuffixPath, ReconsultFlag, CG)
@@ -1065,7 +1076,8 @@ establish_fcg(true, NoSuffixPath, ReconsultFlag, CG)
 	push_clausegroup(CG),
 	check_abolish_cg(ReconsultFlag, CG).
 
-reset_fcg(_)
+reset_fcg(fail,_).
+reset_fcg(true,_)
 	:-
 	pop_clausegroup(_).
 
@@ -1152,16 +1164,16 @@ load_file_source(Path,BaseFile,TgtMod,Recon,DebugMode,OPath,CGFlag,CG,ErrsList)
 
 try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,Path,ErrsList)
 	:-
-	catch( load_source0(Stream, TgtMod, DebugMode, OPath, Path,ErrsList),
+	catch( load_source0(Stream, TgtMod, DebugMode, OPath, Path, CGFlag, ErrsList),
 			Ball,
-			(	reset_fcg(_),
+			(	reset_fcg(CGFlag,_),
 				(CGFlag -> massively_abolish_clausegroup(CG) ; true),
 				throw(Ball)
 			)
 		  ),
 	!,
 	close(Stream),
-	reset_fcg(_).
+	reset_fcg(CGFlag,_).
 
 try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,Path,ErrsList)
 	:-
@@ -1177,7 +1189,7 @@ obp_load_from_path(OPath, CanonSrcPath, BaseFile,  Recon, CGFlag, CG, Status)
 	:-
 	establish_fcg(CGFlag, BaseFile, Recon, CG),
 	obp_load(OPath, Status),
-	reset_fcg(_).
+	reset_fcg(CGFlag,_).
 
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1208,19 +1220,19 @@ obp_mode_end(OPath)
 /*-------------------------------------------------------------*
  | For loading source (.pro, .pl) files 
  |
- |	load_source0/6
- |	load_source0(Stream, TgtMod, DebugMode, OPath, Path,ErrsList) 
- |	load_source0(+, +, +, +, +, -) 
+ |	load_source0/7
+ |	load_source0(Stream, TgtMod, DebugMode, OPath, Path, CGFlag, ErrsList) 
+ |	load_source0(+, +, +, +, +, +, -) 
  |
  | 	-	if OPath = '',  -- without writing the .obp file
  | 	-	if OPath \= '', -- writes the .obp file to OPath
  *-------------------------------------------------------------*/ 
 export load_source0/6.
-load_source0(Stream, TgtMod, DebugMode, OPath, Path,ErrsList) 
+load_source0(Stream, TgtMod, DebugMode, OPath, Path, CGFlag, ErrsList) 
 	:-
 	obp_mode_start(OPath),
 	xconsult:pushmod(TgtMod),
-	catch(xxconsult(Stream, Path, DebugMode, ErrsList),
+	catch(xxconsult(Stream, Path, DebugMode, CGFlag, ErrsList),
 			Ball, 
 			( xconsult:popmod, 
 			  obp_mode_end(OPath),
@@ -1230,7 +1242,7 @@ load_source0(Stream, TgtMod, DebugMode, OPath, Path,ErrsList)
 	xconsult:popmod,
 	obp_mode_end(OPath).
 
-load_source0(_,_,_,OPath,Path,_) 
+load_source0(_,_,_,OPath,Path, CGFlag, _) 
 	:-
 	xconsult:popmod,
 	obp_mode_end(OPath),

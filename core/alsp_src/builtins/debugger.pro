@@ -212,6 +212,7 @@ module builtins.
 	!,
 	dbg_call(Module,Goal).
 
+
 %% === debug_user is the normal interrupt when stepping through user goals
 '$int'(debug_user,Module,dbg_notrace) :- 
 	!.
@@ -551,6 +552,7 @@ continue_debug :-
 continue_debug :-
 	setPrologInterrupt(debug_user),
 	forcePrologInterrupt.
+
 
 /*-------------------------------------------------------------------------*
  | fail/2
