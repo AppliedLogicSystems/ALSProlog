@@ -1,5 +1,6 @@
 #include <alspi.h>
 #include <new_alspi.h>
+#include <crtl.h>
 
 extern void panic(const char *);
 
@@ -75,8 +76,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     setup.alsdir = getenv("DEV_ALSDIR");
     setup.saved_state = NULL;
     setup.load_executable_state = 1;
-    setup.argc = 0;
-    setup.argv = NULL;
+    setup.argc = __argc;
+    setup.argv = __argv;
     setup.hInstance = hInstance;
     setup.hPrevInstance = hPrevInstance;
     setup.lpCmdLine = lpCmdLine;
