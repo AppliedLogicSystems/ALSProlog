@@ -59,7 +59,7 @@ VOID CmdDebugService(int argc, char **argv);
 BOOL WINAPI ControlHandler ( DWORD dwCtrlType );
 LPTSTR GetLastErrorText( LPTSTR lpszBuf, DWORD dwSize );
 
-static int prolog_consult(const char *file_name)
+static int prolog_consult(PE, const char *file_name)
 {
 	PWord u, cs, fn, s, a;
 	int ut, cst, fnt, st, at;
@@ -74,7 +74,7 @@ static int prolog_consult(const char *file_name)
     return PI_rungoal(u, s, st);
 }
 
-static BOOL get_string(PWord p, int t, char *s, int max_len)
+static BOOL get_string(PE, PWord p, int t, char *s, int max_len)
 {
 	switch (t) {
 	case PI_SYM:
@@ -90,7 +90,7 @@ static BOOL get_string(PWord p, int t, char *s, int max_len)
 	return TRUE;
 }
 
-static BOOL get_win32_service(void)
+static BOOL get_win32_service(PE)
 {
 	PWord u, cs, s, r1, r2, r3;
 	int ut, cst, st, rt1, rt2, rt3;
@@ -105,19 +105,19 @@ static BOOL get_win32_service(void)
 	PI_getargn(&r2, &rt2, s, 2);
 	PI_getargn(&r3, &rt3, s, 3);
 
-	if (!get_string(r1, rt1, szServiceName, 256)) return FALSE;
-	if (!get_string(r2, rt2, szServiceDisplayName, 256)) return FALSE;
-	if (!get_string(r3, rt3, szServiceMainPredicate, 256)) return FALSE;
+	if (!get_string(hpe, r1, rt1, szServiceName, 256)) return FALSE;
+	if (!get_string(hpe, r2, rt2, szServiceDisplayName, 256)) return FALSE;
+	if (!get_string(hpe, r3, rt3, szServiceMainPredicate, 256)) return FALSE;
 	
 	return TRUE;
 }
 
-static int is_win32_service(void)
+static int is_win32_service(PE)
 {
 	PI_SUCCEED;
 }
 
-static int report_event(void)
+static int report_event(PE)
 {
 	PWord a1, a2, a3;
 	int t1, t2, t3;
@@ -130,9 +130,9 @@ static int report_event(void)
 	PI_getan(&a2, &t2, 2);
 	PI_getan(&a3, &t3, 3);
 
-	if (!get_string(a1, t1, source, 256)) PI_FAIL;
-	if (!get_string(a2, t2, type, 256)) PI_FAIL;
-	if (!get_string(a3, t3, message, 256)) PI_FAIL;
+	if (!get_string(hpe, a1, t1, source, 256)) PI_FAIL;
+	if (!get_string(hpe, a2, t2, type, 256)) PI_FAIL;
+	if (!get_string(hpe, a3, t3, message, 256)) PI_FAIL;
 	
 	if (!strcmp(type, "information")) event_type = EVENTLOG_INFORMATION_TYPE;
 	else if (!strcmp(type, "warning")) event_type = EVENTLOG_WARNING_TYPE;
@@ -171,6 +171,7 @@ static BOOL InitPrologService(void)
 	TCHAR szPrologAppName[MAX_PATH];
 	TCHAR *dot;
 	PI_system_setup setup;
+	PE;
 	
 	// Get the application name
 	module = GetModuleHandle(NULL);
@@ -198,6 +199,8 @@ static BOOL InitPrologService(void)
     setup.lpCmdLine = NULL;
     setup.nCmdShow = 1;
 
+	hpe = PI_new_engine();
+
 	if (PI_startup(&setup) != 0) {
 		AddToMessageLog(TEXT("Prolog initilization failed."));
 		goto error;
@@ -217,14 +220,14 @@ static BOOL InitPrologService(void)
 	strcat(szPrologAppName, ".pro");
 	
 	// Consult the Prolog service code.
-	if (!prolog_consult(szPrologAppName)) {
+	if (!prolog_consult(hpe, szPrologAppName)) {
 		AddToMessageLog(TEXT("Prolog consult failed."));
 		goto error;
 	}
 #endif
 
 	// Get the service name, display name and start predicate.
-	if (!get_win32_service()) {
+	if (!get_win32_service(hpe)) {
 		AddToMessageLog(TEXT("win32_service/3 failed."));
 		goto error;
 	}

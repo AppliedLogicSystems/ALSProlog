@@ -24,6 +24,9 @@ static DWORD WINAPI PrologServiceThread(LPVOID lpParam)
 {
 	PWord u, cs, s, p;
 	int ut, cst, st, pt;
+	PE;
+	
+	hpe = lpParam;
 
 	PI_makesym(&u, &ut, "user");
 	PI_makesym(&cs, &cst, szServiceMainPredicate);
