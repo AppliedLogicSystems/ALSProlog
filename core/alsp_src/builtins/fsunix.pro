@@ -357,9 +357,13 @@ files(Directory, Pattern, List)
 	name(Regex, [0'^ | RegexChars]),
 	'$getDirEntries'(Directory, Regex, FirstResult),
 	!,
-	name(Directory, DirCs),
-	filterForFileType(FirstResult, DirCs, 4, List).
+	rootPlusPath(Disk, PathList, Directory),
+	fixFileType(regular, InternalFileType),
+	filterForFileType(FirstResult, Disk, PathList, InternalFileType, List).
 
+%	name(Directory, DirCs),
+%	filterForFileType(FirstResult, DirCs, 4, List).
+%	fixFileType(FileType, InternalFileType),
 /*!----------------------------------------------------------------
  |	subdirs/1
  |	subdirs(SubdirList)

@@ -112,7 +112,9 @@
 	 write_lines_nl/4 ] ).
 
 :-builtins:libhide(builtins,['library',sconfig],
-	[general_os/3,general_os/4,lib_extension/2] ).
+	[general_os/3,general_os/4,lib_extension/2,
+	 winsystems_for/2, winsystems_for/3, ws_vars/3,ws_vars/4,
+	 flatten_ws_lists/2,  flatten_to_atom/2 ] ).
 
 :-builtins:libhide(builtins,['library',cmpdirs], [cmpdirs/3] ).
 
