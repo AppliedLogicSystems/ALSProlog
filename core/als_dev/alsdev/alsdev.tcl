@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.54 1998/10/04 01:28:01 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.55 1998/10/04 22:09:51 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -474,23 +474,23 @@ proc xmit_line { TxtWin StreamAlias } {
 	$TxtWin mark set lastPrompt {insert -1 chars}
 }
 
-proc xmit_line0 { TxtWin StreamAlias WaitVar DataVar} {
-	global $WaitVar 
+#proc xmit_line0 { TxtWin StreamAlias WaitVar DataVar} {
+#	global $WaitVar 
+#
+#	set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -2 chars} ]
+#	prolog call builtins add_to_stream_buffer -atom $StreamAlias -atom $ThisLine\n
+#	$TxtWin mark set lastPrompt {insert -1 chars}
+#	set WaitVar 1
+#}
 
-	set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -2 chars} ]
-	prolog call builtins add_to_stream_buffer -atom $StreamAlias -atom $ThisLine\n
-	$TxtWin mark set lastPrompt {insert -1 chars}
-	set WaitVar 1
-}
-
-proc wait_for_line0 { } {
-	global WaitForLine
-
-	while { "$WaitForLine"==0 } { dooneevent wait }
-	set ReturnValue $WaitForLine
-	set WaitForLine 0
-	return $ReturnValue
-}
+#proc wait_for_line0 { } {
+#	global WaitForLine
+#
+#	while { "$WaitForLine"==0 } { dooneevent wait }
+#	set ReturnValue $WaitForLine
+#	set WaitForLine 0
+#	return $ReturnValue
+#}
 
 proc wait_for_line1 { WaitVar } {
 	upvar #0 $WaitVar TheWaitVar
@@ -1005,12 +1005,10 @@ proc show_debugwin {} {
 
 proc hide_debugwin {} {
 	global array proenv
-
 	foreach Win  $proenv(debugwin,visible) {
 		Window hide $Win
 	}
-	Window hide .debugwin
-	Window hide .pred_info
+	Window iconify .debugwin
 	set proenv(debugwin) 0
 }
 
@@ -1028,6 +1026,24 @@ proc switch_debug_setup {Which} {
 	} else {
 		if {"$proenv(debugwin)"==1} then { toggle_debugwin }
 	}
+}
+
+proc post_debug_subwin {Win} {
+	global array proenv
+
+	if {[lsearch -exact $proenv(debugwin,visible) $Win] < 0 } then {
+		set proenv(debugwin,visible) [concat $Win $proenv(debugwin,visible)]
+	}
+}
+
+proc unpost_debug_subwin {Win} {
+	global array proenv
+
+	set Idx [lsearch -exact $proenv(debugwin,visible) $Win]
+	if {$Idx >= 0} then {
+		set proenv(debugwin,visible) [lreplace $proenv(debugwin,visible) $Idx $Idx]
+	}
+	Window hide $Win
 }
 
 		###############################
@@ -1156,8 +1172,6 @@ proc remove_from_spying_list {} {
 		.pred_info.preds.listbox insert end $PD
 	}
 }
-
-
 
 proc reset_all_spypoints {} {
 	set Spying [.pred_info.spying.listbox get 0 end]
@@ -1387,7 +1401,15 @@ proc show_debug_settings {} {
 	prolog call debugger get_depth_computation -atom debugger_output -var DC
 	set proenv(db_flatness) $DC
 
-	Window show .debug_settings
+	Window show .debug_settings 
+	post_debug_subwin .debug_settings
+}
+
+proc show_pred_info {} {
+	global array proenv
+
+	Window show .pred_info 
+	post_debug_subwin .pred_info
 }
 
 proc reset_print_depth {} {
@@ -1417,6 +1439,14 @@ proc set_system_modules_showing {} {
 	 	pack .sys_mods.$Mod  -side top -anchor w -expand 0 -fill x 
 	}
 	wm geometry .sys_mods ""
+	update
+	set BaseGeom [wm geometry .sys_mods]
+	set XPlace [string first "x" $BaseGeom]
+	set WinWidth [string range $BaseGeom 0 [expr $XPlace - 1]]
+	set WinHeight [string range $BaseGeom [expr $XPlace + 1] \
+					[expr [string first "+" $BaseGeom] -1] ]
+    wm minsize .sys_mods $WinWidth $WinHeight
+	post_debug_subwin .sys_mods
 }
 
 ##############################
@@ -1567,10 +1597,8 @@ if {$tcl_platform(platform) == "macintosh"} {
 	# Make .topals.mmenb the default menu for all windows.
 	. configure -menu .topals.mmenb
 }
-Window show .topals
 
-Window show .debug_settings
-Window hide .debug_settings
+Window show .topals
 
 Window show .alsdev_settings
 Window hide .alsdev_settings
