@@ -41,7 +41,7 @@ general_error               A general error occured.
 device_name_error           Device is not an atom.
 device_permisson_error      Insufficient permission to access Device.
 hardware_key_error          Missing or incorrect hardware key.
-system_service_error		Hardware key system services are not
+system_service_error        Hardware key system services are not
                             correctly installed (Windows only).
 
 
