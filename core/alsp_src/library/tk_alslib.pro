@@ -423,18 +423,18 @@ fselect_modes(Options, DefaultName, Ext, Mode, Title, IDir, FileTypes)
 		)
 	),
 	(dmember(defaultname=InitDefaultName, Options) -> 
-		(file_extension(_, _, InitDefaultName) ->
+		(file_extension(InitDefaultName,_, _) ->
 			DefaultName = InitDefaultName
 			;
 			(dmember(ext=DfltExt, Options) ->
-				file_extension(InitDefaultName,DfltExt,DefaultName)
+				file_extension(DefaultName,InitDefaultName,DfltExt)
 				;
 				DefaultName = InitDefaultName
 			)
 		)
 		; 
 		(dmember(ext=DfltExt, Options) -> 
-			file_extension(default,DfltExt,DefaultName)
+			file_extension(DefaultName,default,DfltExt)
 			;
 			DefaultName = default
 		)
@@ -509,8 +509,7 @@ create_image(Interp, ImagePath, ImageName)
 %		pathPlusFile(_, ImageFile, ImagePath),
 		split_path(ImagePath, ImagePathElts),
 		dreverse(ImagePathElts, [ImageFile | _]),
-%		(file_extension(ImageBase, ImgExt, ImageFile) ->
-		((file_extension(ImageBase, ImgExt, ImageFile), ImgExt \= '') ->
+		((file_extension(ImageFile, ImageBase, ImgExt), ImgExt \= '') ->
 			true
 			;
 			ImgExt = img,

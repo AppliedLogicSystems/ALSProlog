@@ -55,31 +55,31 @@ mx_cl :-
 	set_prolog_flag(unknown, fail),
 	builtins:command_line(CL),
 	dappend(_,['-s',Source|_],CL),
-	(file_extension(SourceName,SourceExt,Source) ->
+	(file_extension(Source,SourceName,SourceExt) ->
 		SourceFile = Source
 		;
-		file_extension(Source,pro,SourceFile)
+		file_extension(SourceFile,Source,pro)
 	),
 	(dappend(_,['-t',Target|_],CL) ->
 		TargetFile = Target
 		;
-		(file_extension(SourceName,SourceExt,Source) ->
+		(file_extension(Source,SourceName,SourceExt) ->
 			(SourceExt \= pro ->
-				file_extension(SourceName,pro,TargetFile)
+				file_extension(TargetFile,SourceName,pro)
 				;
-				file_extension(SourceName,ppo,TargetFile)
+				file_extension(TargetFile,SourceName,ppo)
 			)
 			;
-			file_extension(Source,pro,TargetFile)
+			file_extension(TargetFile,Source,pro)
 		)
 	),
 	(dappend(_,['-m',Macro|_],CL) ->
 		MacroFile = Macro
 		;
-		(file_extension(SourceName,SourceExt,Source) ->
-			file_extension(SourceName,mac,MacroFile)
+		(file_extension(Source,SourceName,SourceExt) ->
+			file_extension(MacroFile,SourceName,mac)
 			;
-			file_extension(Source,mac,MacroFile)
+			file_extension(MacroFile,Source,mac)
 		)
 	),
 	macro_expand_files(SourceFile, TargetFile, MacroFile).
@@ -117,7 +117,7 @@ macro_expand
  *-----------------------------------------------------------*/
 mx(FileName)
 	:-
-	file_extension(BaseFile,Ext,FileName),
+	file_extension(FileName,BaseFile,Ext),
 	!,
 	(exists_file(FileName) ->
 		mxx(Ext,BaseFile,FileName)
@@ -127,33 +127,33 @@ mx(FileName)
 
 mx(FileName)
 	:-
-	file_extension(FileName,pl,PLFile),
+	file_extension(PLFile,FileName,pl),
 	exists_file(PLFile),
 	!,
 	mxx(pl,BaseFile,PLFile).
 
 mx(FileName)
 	:-
-	file_extension(FileName,pro,PLFile),
+	file_extension(PLFile,FileName,pro),
 	exists_file(PLFile),
 	!,
 	mxx(pro,BaseFile,PLFile).
 
 mxx(Ext, BaseFileName,SourceFile)
 	:-
-	file_extension(BaseFileName,pro,ProFile),
+	file_extension(ProFile,BaseFileName,pro),
 	(exists_file(ProFile) ->
 		save_copy(ProFile,BaseFileName)
 		;
 		true),
-	file_extension(BaseFileName,tmc,TgtFile),
+	file_extension(TgtFile,BaseFileName,tmc),
 	macro_expand_files(SourceFile, TgtFile),
 	!,
 	move_file(TgtFile, ProFile).
 
 save_copy(ProFile,BaseFileName)
 	:-
-	file_extension(BaseFileName,sav,SaveCopy),
+	file_extension(SaveCopy,BaseFileName,sav),
 	move_file(ProFile, SaveCopy).
 
 /*!----------------------------------------------------------

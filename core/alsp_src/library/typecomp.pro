@@ -121,7 +121,7 @@ comptype :-
  *-----------------------------------------------------------*/
 comptype(InputFileDescrip)
 	:-
-	(file_extension(FileName, Ext, InputFileDescrip) ->
+	(file_extension(InputFileDescrip, FileName, Ext) ->
 		true
 		;
 		FileName = InputFileDescrip, Ext = typ
@@ -129,8 +129,8 @@ comptype(InputFileDescrip)
 	(Ext \= typ ->
 		ct_error('Source file must have extension .typ \n')
 		;
-		file_extension(FileName,Ext,SourceFile),
-		file_extension(FileName,pro,TargetFile),
+		file_extension(SourceFile,FileName,Ext),
+		file_extension(TargetFile,FileName,pro),
 		comptype(SourceFile, TargetFile, [])
 	).
 
@@ -142,8 +142,8 @@ xcomptype(SourceFile, OutFilePath, Options)
 %	pathPlusFile(SrcFileDir,SrcFile,SourceFile),
 %	file_extension(BaseSrcFile,typ,SrcFile),
 	!,
-	file_extension(BaseTgtFile,_,OutFilePath),
-	file_extension(BaseTgtFile,pro,TgtFile),
+	file_extension(OutFilePath,BaseTgtFile,_),
+	file_extension(TgtFile,BaseTgtFile,pro),
 	comptype(SourceFile, TgtFile, Options).
 
 xcomptype(SourceFile, _, Options)
@@ -157,9 +157,9 @@ xcomptype(SourceFile, Options)
 	dreverse(SFElts, [SrcFile | RevSFDElts]),
 	dreverse(RevSFDElts, SFDElts),
 	join_path(SFDElts, SrcFileDir),
-	file_extension(BaseSrcFile,typ,SrcFile),
+	file_extension(SrcFile,BaseSrcFile,typ),
 	!,
-	file_extension(BaseSrcFile,pro,BasicTgtFile),
+	file_extension(BasicTgtFile,BaseSrcFile,pro),
 %	pathPlusFile(SrcFileDir,BasicTgtFile,TgtFile),
 	dappend(SFDElts, [BasicTgtFile], TFElts),
 	join_path(TFElts, TgtFile),
@@ -203,8 +203,8 @@ comptype(SourceFile, TgtFile, Options)
 do_comptype(SourceFile, TgtFile, Options)
 	:-
 	(dmember(quiet(Quiet), Options),!; Quiet=false),
-	file_extension(NoSuffixPath, _, TgtFile),
-	file_extension(NoSuffixPath, mac, MacFile),
+	file_extension(TgtFile,NoSuffixPath, _),
+	file_extension(MacFile, NoSuffixPath, mac),
 	cont_comptype(TgtFile,MacFile,SourceFile, Quiet).
 
 cont_comptype(TgtFile,MacFile,SourceFile, Quiet)
@@ -504,8 +504,8 @@ expand_includes([Item | InitPropertiesList], [Item | PropertiesList],
 
 fetch_included_props(File, Name, PropertiesList, InterPropsListTail, Quiet)
 	:-
-	(file_extension(BaseFile,typ,File) ->
-		FullFile = File ; file_extension(File,typ,FullFile)
+	(file_extension(File,BaseFile,typ) ->
+		FullFile = File ; file_extension(FullFile,File,typ)
 	),
 	locate_include_file(FullFile, FullIncludeFile),
 	open(FullIncludeFile, read, InStr, []),

@@ -121,7 +121,7 @@ prefix_undefs_basis_filt(Prefix)
 	getShellStruct(Struct),
 	accessCRSH(suite,Struct,SuiteName),
 %	filePlusExt(SuiteName,flt,FiltFile),
-	file_extension(SuiteName,flt,FiltFile),
+	file_extension(FiltFile,SuiteName,flt),
 	open(FiltFile,write,OutS,[]),
 	write_clause(OutS, SuiteName=PUndefs),
 	close(OutS).
