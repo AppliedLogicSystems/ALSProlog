@@ -1,0 +1,10 @@
+/* shell32 Filter. */
+all_except([
+	/* Non existant functions. */
+	'FindEnvironmentStringW',
+	'FindEnvironmentStringA',
+	'WinExecErrorA',
+	'WinExecErrorW',
+	'SHGetNewLinkInfoW',
+	'SHGetNewLinkInfoA'
+]).

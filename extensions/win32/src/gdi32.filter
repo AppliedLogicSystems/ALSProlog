@@ -1,0 +1,19 @@
+/* gdi32 Filter. */
+all_except([
+	/* Functions from winspool.lib */
+	'DeviceCapabilitiesW',
+	'DeviceCapabilitiesA',
+
+	/* OpenGL functions. */	
+	'wglCreateContext',
+	'wglDeleteContext',
+	'wglGetCurrentContext',
+	'wglGetCurrentDC',
+	'wglGetProcAddress',
+	'wglMakeCurrent',
+	'wglShareLists',
+	'wglUseFontBitmapsA',
+	'wglUseFontBitmapsW',
+	'wglUseFontOutlinesA',
+	'wglUseFontOutlinesW'
+]).
