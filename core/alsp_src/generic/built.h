@@ -400,6 +400,7 @@ extern	int	sio_position_in_line	PARAMS(( void ));
 
 /* bsystem.c */
 extern	int	pbi_ouch		PARAMS(( void ));
+extern	int	pbi_forceCtlC		PARAMS(( void ));
 extern	int	pbi_forcePrologError	PARAMS(( void ));
 extern	int	pbi_reset_wm_normal	PARAMS(( void ));
 extern	int	pbi_showanswers		PARAMS(( void ));

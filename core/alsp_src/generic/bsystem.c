@@ -32,6 +32,14 @@ pbi_ouch()
 }
 
 int
+pbi_forceCtlC()
+{
+    wm_interrupt_caught = SIGINT;
+    wm_safety = wm_trigger;
+    SUCCEED;
+}
+
+int
 pbi_forcePrologError()
 {
     wm_interrupt_caught = ALSSIG_ERROR;

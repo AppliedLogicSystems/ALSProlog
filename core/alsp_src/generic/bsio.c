@@ -3804,21 +3804,21 @@ sio_readbuffer()
 	FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_READ)) {
-	SIO_ERRCODE(buf) = SIOE_ILLREAD;
-	FAIL;
+		SIO_ERRCODE(buf) = SIOE_ILLREAD;
+		FAIL;
     }
 
     if (SIO_FLAGS(buf) & SIOF_EOF) {
-	SIO_ERRCODE(buf) = SIOE_EOF;
-	FAIL;
+		SIO_ERRCODE(buf) = SIOE_EOF;
+		FAIL;
     }
 
     if (SIO_FLAGS(buf) & SIOF_DIRTY)
-	write_buf(v1,buf);
+		write_buf(v1,buf);
 
     if ((SIO_FLAGS(buf) & SIOF_DONTBLOCK) && !stream_is_ready((char *)buf,0)) {
-	SIO_ERRCODE(buf) = SIOE_NOTREADY;
-	return 0;
+		SIO_ERRCODE(buf) = SIOE_NOTREADY;
+		return 0;
     }
 
     shift_buffer(buf);
@@ -3931,20 +3931,20 @@ sio_readbuffer()
     }
 
     if (nchars < 0) {
-	if (errno == EINTR)
-	    SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
-	else {
-	    SIO_ERRCODE(buf) = SIOE_SYSCALL;
-	    SIO_ERRNO(buf) = errno;
-	}
-	FAIL;
+		if (errno == EINTR)
+	    	SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
+		else {
+	    	SIO_ERRCODE(buf) = SIOE_SYSCALL;
+	    	SIO_ERRNO(buf) = errno;
+		}
+		FAIL;
     }
     else {
-	SIO_ERRCODE(buf) = SIOE_NORMAL;
-	SIO_LPOS(buf) += nchars;
-	if (nchars == 0)
-	    SIO_FLAGS(buf) |= SIOF_EOF;
-	SUCCEED;
+		SIO_ERRCODE(buf) = SIOE_NORMAL;
+		SIO_LPOS(buf) += nchars;
+		if (nchars == 0)
+	    	SIO_FLAGS(buf) |= SIOF_EOF;
+		SUCCEED;
     }
 }
 
