@@ -143,13 +143,13 @@ GETDIR=$(CORE)/als_dev/alsdev/getDirectory
 GETFILES=$(CORE)/als_dev/alsdev/getFiles
 
 lib: $(GETDIR)/getDirectory.tcl $(GETDIR)/unix_pkgIndex.tcl $(GETFILES)/getFiles.tcl $(GETFILES)/unix_pkgIndex.tcl $(MAKEFS)
-	cp -pr /apache/als_build_support/unix/lib .
+	cp -r /apache/als_build_support/unix/lib .
 	mkdir -p lib/tk8.0/getDirectory
-	cp -pr $(GETDIR)/getDirectory.tcl lib/tk8.0/getDirectory
-	cp -pr $(GETDIR)/unix_pkgIndex.tcl lib/tk8.0/getDirectory/pkgIndex.tcl
+	cp -r $(GETDIR)/getDirectory.tcl lib/tk8.0/getDirectory
+	cp -r $(GETDIR)/unix_pkgIndex.tcl lib/tk8.0/getDirectory/pkgIndex.tcl
 	mkdir -p lib/tk8.0/getFiles
-	cp -pr $(GETFILES)/getFiles.tcl lib/tk8.0/getFiles
-	cp -pr $(GETFILES)/unix_pkgIndex.tcl lib/tk8.0/getFiles/pkgIndex.tcl
+	cp -r $(GETFILES)/getFiles.tcl lib/tk8.0/getFiles
+	cp -r $(GETFILES)/unix_pkgIndex.tcl lib/tk8.0/getFiles/pkgIndex.tcl
 
 alsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
 	./alspro_b -q -b -obp -no_dot_alspro \
