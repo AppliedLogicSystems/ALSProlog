@@ -234,10 +234,14 @@ define([ident(Id),ident(RefKey)],State)
 define([ident(Id)|Defn],State) 
 	:- !,
 %pbi_write(define(Id,Defn)),pbi_nl,pbi_ttyflush,
+(xxcc(Id) ->
+write(user_output,xcluded_define=Id),nl(user_output)
+;
 	check_const(Id,Defn,State),
 	getInfoTable(InTable),
 	addToTable(Id,d(Defn),State,InTable,OutTable),
-	setInfoTable(OutTable).
+	setInfoTable(OutTable)
+).
 
 define([fident(Id)|ArgsAndDefn],State) 
 	:-

@@ -888,13 +888,17 @@ process_typedef_declts([],_,FcnFilter,State).
 process_typedef_declts([Declt|Rest],DSpec,FcnFilter,State) 
 	:-
 	scan_declt(Declt,ident(Name),_,_),
+(xxcc(Name) ->
+write(user_output,xcluded_typef=Name),nl(user_output)
+;
 %	accessC2P(info_table, State, InTable),
 	getInfoTable(InTable),
 	insert_type(ident(Name),DSpec,Declt,InTable,OutTable),
 %	setC2P(info_table, State, OutTable),
 	setInfoTable(OutTable),
 	process_typedef_decl(FcnFilter, Name, DSpec, Declt, State),
-	process_typedef_declts(Rest,DSpec,FcnFilter,State).
+	process_typedef_declts(Rest,DSpec,FcnFilter,State)
+).
 
 
 process_typedef_decl(all, Name, DSpec, Declt, State)
@@ -953,17 +957,26 @@ process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State)
 process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
 	:-
 	Declt = func(ident(FID),[]),
-	not(member(FID, ['XCreateRegion','XrmInitialize',
-				 'XrmUniqueQuark','XUniqueContext' ]) ), 
+(xxcc(FID) ->
+write(user_output, xclded_fcn=FID),nl(user_output)
+;
+%	not(member(FID, ['XCreateRegion','XrmInitialize',
+%				 'XrmUniqueQuark','XUniqueContext' ]) ), 
 	!,
-	process_declts(Rest,DSpec,FcnFilter,State).
+	process_declts(Rest,DSpec,FcnFilter,State)
+).
 
 process_declts( [ func(ident(FID),Params) | Rest ] ,DSpec,FcnFilter,State) 
 	:-
 %printf('process fcn decl: %t -- filter = %t\n',[FID,FcnFilter]),
+
+(xxcc(FID) ->
+write(user_output, xclded_fcn=FID),nl(user_output)
+;
 	!,
 			%% This handles the recursive call to process_declts:
-	process_fcn_decl(FcnFilter,func(ident(FID),Params),Rest,DSpec,State).
+	process_fcn_decl(FcnFilter,func(ident(FID),Params),Rest,DSpec,State)
+).
 
 
 process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
