@@ -81,6 +81,9 @@ proc set_top_bindings { WinPath StreamAlias WaitVar DataVar } {
 	bind $WinPath <Control-u> \
 		"ctl-u_action $WinPath"
 	bindtags $WinPath "Text $WinPath .topals all"
+
+	bind Text <ButtonRelease-2> {} 
+	bind $WinPath <ButtonRelease-2> [list copy_paste_text $WinPath]
 }
 
 	## Variable on which we execute 'tkwait variable ...' when we really
@@ -144,9 +147,19 @@ proc wait_for_line0 { } {
 proc xmit_line_plain { TxtWin StreamAlias } {
 	global WaitForLine
 
-	set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -2 chars} ]
-	set WaitForLine 1
-	prolog call builtins add_to_stream_buffer -atom $StreamAlias -atom $ThisLine\n
+	set InsertIndex [$TxtWin index insert]
+	set InsertLine [string range $InsertIndex 0 [expr [string first "." $InsertIndex] - 1 ]]
+	incr InsertLine
+	set EndIndex [$TxtWin index end]
+	set EndLine [string range $EndIndex 0 [expr [string first "." $EndIndex] - 1 ]]
+
+	if { $EndLine == $InsertLine } then {
+		set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -1 chars} ]
+		set WaitForLine 1
+		prolog call builtins add_to_stream_buffer -atom $StreamAlias -atom $ThisLine\n
+	} 
+	$TxtWin see end
+	$TxtWin mark set insert end
 }
 
 proc ctl-c_action_during_read { WinPath StreamAlias WaitVar } {
@@ -221,7 +234,15 @@ proc copy_text { TxtWin } {
 
 proc paste_text { TxtWin } {
 	global LocalClipboard
-	$TxtWin insert insert $LocalClipboard 
+	$TxtWin insert end $LocalClipboard 
+}
+
+proc copy_paste_text { TxtWin } {
+	if { [ $TxtWin tag nextrange sel 1.0 end ]!= "" } then {
+		$TxtWin insert end [ $TxtWin get sel.first sel.last ]
+		$TxtWin see end
+		$TxtWin mark set insert end
+	}
 }
 
 proc reconsult { } {
@@ -637,17 +658,15 @@ proc load_stream_to_win {Stream TextWinName} {
 }
 
 proc assign_tag {TextWinName TagName StartLine StartChar EndLine EndChar} {
-
 	$TextWinName tag add $TagName $StartLine.$StartChar $EndLine.$EndChar
-#puts "TCL: $TextWinName tag add $TagName StartLine.StartChar EndLine.EndChar"
 }
 
 proc clear_tag { TagName TextWinName } {
 	$TextWinName tag configure $TagName -background [$TextWinName cget -background]
 }
 
-
-proc testitall {} {
-	prolog call builtins non_sys_modules -var Mods
-	puts "got $Mods"
+proc see_text {TextWin StartLine StartChar EndLine EndChar} {
+	$TextWin see $StartLine.$StartChar
+	$TextWin see $EndLine.$EndChar
 }
+

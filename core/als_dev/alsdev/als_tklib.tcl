@@ -252,3 +252,34 @@ proc vTclWindow.popup_select_widget {base} {
         -anchor center -expand 0 -fill none -padx 10 -side right 
 }
 
+
+
+
+
+proc display_file_image {ImageDir ImageFile ImageBase Win Width Height BorderWidth} {
+	set ImagePath [file join $ImageDir $ImageFile]
+	toplevel $Win -bd $BorderWidth -relief flat
+	wm withdraw $Win
+	set screen_width  [winfo screenwidth .]
+	set screen_height [winfo screenheight .]
+	image create photo $ImageBase -file $ImagePath
+	wm overrideredirect $Win 1
+	label $Win.label -image $ImageBase -bd 1 -relief flat
+	pack $Win.label -side top -expand 1 -fill both
+	set X [expr ($screen_width - $Width)/4]
+	set Y [expr ($screen_width - $Height)/4]
+	wm geometry $Win +$X+$Y
+	wm deiconify $Win
+	update idletasks
+}
+
+proc display_image {ImageName Win Width Height X Y BorderWidth } {
+	toplevel $Win -bd $BorderWidth -relief flat
+	wm withdraw $Win
+	wm overrideredirect $Win 1
+	label $Win.label -image $ImageName -bd 1 -relief flat
+	pack $Win.label -side top -expand 1 -fill both
+	wm geometry $Win +$X+$Y
+	wm deiconify $Win
+	update idletasks
+}
