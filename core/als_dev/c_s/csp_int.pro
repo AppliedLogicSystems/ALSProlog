@@ -516,20 +516,34 @@ run_script(Script,Mod,TaskEnv,SInfo)
 fin_run_script([], Script,Mod,TaskEnv,SInfo)
 	:-!.
 
-fin_run_script(Result, Script,Mod,TaskEnv,SInfo)
-	:-
-	Result = [delay_on(Var, Call) | RestScript],
-	NewScript = [Call | RestScript],
-	access_tsk_env(state, TaskEnv, State),
-	mangle(2, State, expect(Var)),
-	freeze(Var, run_script(NewScript,Mod,TaskEnv,SInfo)).
-
 fin_run_script(Result, Script,Mod, TaskEnv,SInfo)
 	:-
 	Result = [full_delay_on(Var, Call) | RestScript],
 	NewScript = [Call | RestScript],
 	access_tsk_env(state, TaskEnv, State),
-	mangle(2, State, expect(Var, run_script(NewScript,Mod,TaskEnv,SInfo))).
+%	mangle(2, State, expect(Var, run_script(NewScript,Mod,TaskEnv,SInfo))).
+	add_to_expect(expect(Var, [], run_script(NewScript,Mod,TaskEnv,SInfo)), State).
+
+/****
+fin_run_script(Result, Script,Mod, TaskEnv,SInfo)
+	:-
+	Result = [full_delay_on_list(ListOfVars, Call) | RestScript],
+	NewScript = [Call | RestScript],
+	access_tsk_env(state, TaskEnv, State),
+	mangle(2, State, list_expect(ListOfVars, run_script(NewScript,Mod,TaskEnv,SInfo))).
+******/
+
+
+/*****
+fin_run_script(Result, Script,Mod,TaskEnv,SInfo)
+	:-
+	Result = [delay_on(Var, Call) | RestScript],
+	!,
+	NewScript = [Call | RestScript],
+	access_tsk_env(state, TaskEnv, State),
+	mangle(2, State, expect(Var)),
+	freeze(Var, run_script(NewScript,Mod,TaskEnv,SInfo)).
+*****/
 
 
 

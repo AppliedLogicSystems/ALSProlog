@@ -614,8 +614,13 @@ break_connection(Reason,Args,SR,SW,State,SInfo)
 export install_worker_alarm_handler/0.
 install_worker_alarm_handler
 	:-
-	asserta(global_handler(sigalrm,socket_comms,worker_alarm_handler)).
+	builtins:global_handler(sigalrm,socket_comms,worker_alarm_handler),
+	!.
+install_worker_alarm_handler
+	:-
+	builtins:asserta(global_handler(sigalrm,socket_comms,worker_alarm_handler)).
 
+export worker_alarm_handler/3.
 worker_alarm_handler(EventId, Goal, Context) 
 	:-
 	EventId \== sigalrm,
@@ -635,15 +640,62 @@ disp_worker_alarm_handler(_, ModuleAndGoal)
 	:-
 	ModuleAndGoal.
 
-shell_alarm_interval(1.05).
+export worker_alarm_interval/1.
+worker_alarm_interval(5.05).
 
-/*
+export set_worker_alarm_interval/1.
+set_worker_alarm_interval(I)
+	:-
+	abolish(worker_alarm_interval,1),
+	assert(worker_alarm_interval(I)).
+
+export process_some_incoming_messages/1.
 process_some_incoming_messages(WW)
 	:-
-	get_MainQ(q(QT,SInfo)),
+pbi_write('WAKEUP!'),pbi_nl,pbi_ttyflush,
+	get_mrq_channel(qc(SR,SW,State,SInfo)),
+	poll(SR, 0),
+	!,
+	read(SR, Request),
+pbi_write(wakeup_got_request=Request),pbi_nl,pbi_ttyflush,    
+	dispatch_process_some_incoming_messages(Request,WW,SR,SW,State,SInfo).
+
+process_some_incoming_messages(0).
+
+dispatch_process_some_incoming_messages(stream_not_ready,0,_,_,_,_)
+	:-!.
+
+dispatch_process_some_incoming_messages(current_status,0,SR,SW,State,SInfo)
+	:-!,
+pbi_write(disp_wakeup_request=current_status),pbi_nl,pbi_ttyflush,    
+	get_process_status(Status),
+pbi_write(responding_current_status=Status),pbi_nl,pbi_ttyflush,    
+
+	(stream_open_status(SW, open) ->
+			printf(SW, 'obm(current_status,%t).\n', [Status], [quoted(true),line_length(500000)]),
+			flush_output(SW)
+			;
+				%% replace this with an abort of the whole worker:
+			true
+	).
+
+/*
+dispatch_process_some_incoming_messages(Request,WW,SR,SW,State,SInfo)
+	:-
+pbi_write(disp_wakeup_request=Request),pbi_nl,pbi_ttyflush,    
 */
 
+dispatch_process_some_incoming_messages(Request,0,SR,SW,State,SInfo)
+	:-
+pbi_write('SKIPPING_wakeup_request'=Request),pbi_nl,pbi_ttyflush.
+
+
+
 endmod.		%% socket_comms
+
+
+
+
 
 /*!----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/

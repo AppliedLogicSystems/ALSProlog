@@ -21,7 +21,7 @@ defStruct(base_connection_info, [
 				%% continue MUST be the very first slot, and
 				%% expect   MUST be the second slot:
 			continue/continue,		%% continue/done
-			expect/nil,				%% nil/expect(What) or busy(...)
+			expect/[],				%% nil/expect(What) or busy(...)
             ip_num/0,               %% source machine IP number
 			hostname/'noname',		%% source machine internet name
 			port/0,                 %% port number
