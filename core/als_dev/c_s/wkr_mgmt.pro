@@ -46,6 +46,12 @@ add_worker(Worker)
 	get_worker_dbs(CurWkrRecs),
 	set_worker_dbs([Worker | CurWkrRecs]).
 
+remove_dead_worker(Worker)
+	:-
+	get_worker_dbs(WkrRecs),
+	list_delete(WkrRecs,Worker,NewWkrRecs),
+	set_worker_dbs(NewWkrRecs).
+
 	%%-----------------------------------------------------
 	%% List of all currently available (idle) workers:
 	%%-----------------------------------------------------
@@ -53,8 +59,15 @@ add_worker(Worker)
 
 pop_idle_worker(Worker)
 	:-
-	get_idle_workers([Worker | RestWkrRecs]),
-	set_idle_workers(RestWkrRecs).
+	get_idle_workers([Worker1 | RestWkrRecs]),
+	Worker1 = c(SR,_,_,_),
+	(stream_open_status(SR, open) ->
+		set_idle_workers(RestWkrRecs),
+		Worker = Worker1
+		;
+		remove_dead_worker(Worker1),
+		pop_idle_worker(Worker)
+	).
 
 push_idle_worker(Worker)
 	:-
@@ -62,35 +75,37 @@ push_idle_worker(Worker)
 	set_idle_workers([Worker | CurWkrRecs]).
 
 	%%-----------------------------------------------------
-	%% Queue of submitted jobs not yet sent to any worker (and
-	%% not being performed by the master server):
+	%% Queue of Main Queue records which have submitted jobs 
+	%% not yet sent to any worker (and not being performed by 
+	%% the master server):
 	%%-----------------------------------------------------
 %% :- make_gv('_waiting_job_queue'), set_waiting_job_queue((Var,Var)).
 
-pop_next_job(Job)
+pop_next_job(RecWithJob)
 	:-
 	get_waiting_job_queue(JobQueue),
 	JobQueue = (Head, Tail),
 	nonvar(Head),
-	Head = [Job | RestHead],
-	!,
+	Head = [RecWithJob | RestHead],
 	set_waiting_job_queue(RestHead, Tail).
 							 
-pop_next_job(job_queue_empty).
+%pop_next_job(job_queue_empty).
 							  
-push_next_job(Job)
+push_next_job(RecWithJob)
 	:-
 	get_waiting_job_queue(JobQueue),
 	JobQueue = (Head, Tail),
-	Tail = [Job | NewTail],
+	Tail = [RecWithJob | NewTail],
 	set_waiting_job_queue(Head, NewTail).
 												   
+/*
 queue_up_job_req(QJ, State)
 	:-
 	get_job_queue((GQHead, GQTail)),
 	Tail = [QJ | NewGQTail],
 	set_job_queue((GQHead, NewGQTail)),
 	add_job_rec(QJ, State).
+*/
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% STARTING WORKERS
@@ -589,18 +604,19 @@ handle_task(worker_job,Task,TaskArgs,Mod,TaskEnv,SInfo)
 
 add_job_rec(Job, State)
 	:-
-	access_login_connection_info(waiting_jobs, State, CurJobList),
-	CurJobList = (Head, Tail),
-	Tail = [Job | NewTail],
-	set_login_connection_info(waiting_jobs, State, (Head, NewTail)).
+	access_login_connection_info(waiting_jobs, State, CurJobsList),
+%	CurJobList = (Head, Tail),
+%	Tail = [Job | NewTail],
+	append(CurJobsList, [Job], NewJobsList),
+	set_login_connection_info(waiting_jobs, State, NewJobsList).
 
 pop_job_rec(Job, State)
 	:-
-	access_login_connection_info(waiting_jobs, State, CurJobList),
-	CurJobList = (Head, Tail),
-	nonvar(Head),
-	Head = [Job | NewHead],
-	set_login_connection_info(waiting_jobs, State, (NewHead, Tail)).
+	access_login_connection_info(waiting_jobs, State, [Job | RestJobsList]),
+%	CurJobList = (Head, Tail),
+%	nonvar(Head),
+%	Head = [Job | NewHead],
+	set_login_connection_info(waiting_jobs, State, RestJobsList).
 
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/

@@ -459,7 +459,7 @@ disp_service_request(stream_not_ready,SR,SW,State,ConnType,QT,NewQT,SInfo)
 	QT = [c(SR,SW,State,ConnType) | NewQT].
 
 	%% Receiving return value from job submitted to remote worker:
-disp_service_request(Request,SR,SW, State,ConnType,QT,QT,SInfo) 
+disp_service_request(Request,SR,SW, State,ConnType,QT,NewQT,SInfo) 
 	:-
 	functor(Request,worker_done,_),
 	arg(2, State, worker_wait(Value)),
@@ -467,7 +467,16 @@ disp_service_request(Request,SR,SW, State,ConnType,QT,QT,SInfo)
 		%% unify return value with the waiting variable 'Value':
 	Request = worker_done(Value),
 	mangle(2, State, nil),
-	push_idle_worker(c(SR,SW,State,ConnType)).
+	push_idle_worker(c(SR,SW,State,ConnType)),
+
+		%% Now see if there are waiting jobs:
+	(pop_next_job(ClientRec) ->
+		ClientRec = c(NSR,NSW,NState,NConnType),
+		pop_job_rec(Request, NState),
+		remote_proc(Request,NSR,NSW,NState,NConnType,QT,NewQT,SInfo)
+		;
+		NewQT = QT
+	).
 
 
 	%% Explicit delaying of jobs by the queue manager; wake-up here:
@@ -604,14 +613,6 @@ disp_service_request(Request,SR,SW,IState,IConnType,QT,NewQT,SInfo)
 		task_intf:assert(use_workers)
 	).
 
-		%%+++++++++++++++++++++++++++++++++
-		%% 
-		%%+++++++++++++++++++++++++++++++++
-
-disp_service_request(Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
-	:-
-	remote_proc(Request,SR,SW,State,ConnType,QT,NewQT,SInfo).
-
 disp_service_request(Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
 	:-
 		%% 'sibling_job(%t,%t,%t).\n', [OrigRequest,UserID,JobID],
@@ -669,6 +670,14 @@ setup_remote_script(OrigRequest,TaskEnv,ReqScript)
 		[full_delay(V1)^
 			respond('worker_done(%t).',[[V1 | RestVs]],[quoted(true)])],
 	append(ScriptHead, NewTail, ReqScript).
+
+		%%+++++++++++++++++++++++++++++++++++++++++++++++
+		%% Attempt to send request for remote processing:
+		%%+++++++++++++++++++++++++++++++++++++++++++++++
+
+disp_service_request(Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
+	:-
+	remote_proc(Request,SR,SW,State,ConnType,QT,NewQT,SInfo).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% GENERAL REQUESTS
@@ -749,9 +758,15 @@ remote_proc(Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
 	:-
 	task_intf:use_workers,
 	Request =.. [TaskName | TaskArgs],
-		%% Policy for this is set by application:
+		%% Policy for remote processing is set by application:
 	task_intf:allow_remote(TaskName),
+	fin_remote_proc(TaskName,TaskArgs,Request,SR,SW,State,ConnType,QT,NewQT,SInfo).
+
+fin_remote_proc(TaskName,TaskArgs,Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
+	:-
+		%% There is a worker which can perform the request:
 	pop_idle_sibling_worker(Worker,SInfo),
+	!,
 	access_login_connection_info(logged_in,State,UserID),
 	assign_job_id(Request, UserID, JobID),
 	xmake_tsk_env(TaskEnv, [worker_job,JobID,UserID,SR,SW,State]),
@@ -767,6 +782,17 @@ remote_proc(Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
 				[Request,UserID,JobID],[quoted(true)]),
 	flush_output(WW).
 
+	%% No workers available, but ' task_intf:use_workers' above states that
+	%% application policy wants to use workers; so need to queue the
+	%% request for later processing when a worker becomes available:
+fin_remote_proc(TaskName,TaskArgs,Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
+	:-
+		%% Remove client (requesting) Rec from main queue:
+	NewQT = QT,
+		%% add Request to client Rec's waiting_job list:
+	add_job_rec(Request, State),
+		%% push client Rec onto global queue of rec's with waiting jobs:
+	push_next_job(c(SR,SW,State,ConnType)).
 
 setup_fin_remote_proc(Request, TaskEnv, Value, State, SInfo, Mod, Prelude)
 	:-
