@@ -32,7 +32,7 @@ modifications:
 Build Instructions:
 -------------------
 
-A note of access and command paths:
+A note of access paths:
 
 The Metrowerks projects will need to have their access paths adjusted if 
 the name of the ALS Prolog source directory has changed.
@@ -53,6 +53,13 @@ is set to the ALS Prolog source directory. Execute the following command
 before running any of the batch files:
 
 set ALSP_SRC=x:\yyyyy\zzzz
+
+A note on making x86 Metrowerks projects:
+
+In CW8 there is a bug that causes Metrowerks to crash when a large project
+is completely recompiled.  The work around is to compile some of the files
+before compiling the rest.  In all the ALS projects, compiling wam.c before
+compiling the rest of the project seems to work around the bug.
 
 Build Steps:
 ------------
@@ -80,20 +87,20 @@ Expander.  The following projects need expanding:
 
 3. On the Mac, build the portable libriaries and executables.
 
-Each project may need to have its access paths or command file adjusted,
+Each project may need to have its access paths adjusted,
 see the note above.
 
-3.1 Open alspro_lib.prj, adjust access paths, Make.
+3.1 Open alspro_lib.prj, adjust access paths, compile wam.c, Make.
 
-3.2 Open alspro_b.prj, adjust access paths, Make.
+3.2 Open alspro_b.prj, adjust access paths, compile wam.c, Make.
 
-3.3 Open alspro_dll.prj, adjust access paths, Make.
+3.3 Open alspro_dll.prj, adjust access paths, compile wam.c, Make.
 
-3.4 Open demo_alspro_lib.prj, adjust access paths, Make.
+3.4 Open demo_alspro_lib.prj, adjust access paths, compile wam.c, Make.
 
 3.5 Open demo_alspro_b.prj, adjust access paths, Make.
 
-3.6 Open deno_alspro_dll.prj, adjust access paths, Make.
+3.6 Open deno_alspro_dll.prj, adjust access paths, compile wam.c, Make.
 
 4. From MS-DOS, set the ALSP_SRC environment variable.
 
