@@ -401,7 +401,8 @@ void SetupALSProlog(void)
 	}
 }
 
-    term = AP_NewSymbolFromStr(w, "$start");
+//    term = AP_NewSymbolFromStr(w, "$start");
+    term = AP_NewSymbolFromStr(w, "start_alsdev");
     {
     	AP_Result r;
     	r = AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
