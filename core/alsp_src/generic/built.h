@@ -216,6 +216,7 @@ extern	int	pbi_obp_load	PARAMS(( void ));
 extern	int	pbi_obp_push_stop	PARAMS(( void ));
 extern	int	pbi_obp_pop	PARAMS(( void ));
 extern	int	pbi_old_consult	PARAMS(( void ));
+extern	int	pbi_save_image_with_state_to_file	PARAMS(( void ));
 extern	int	pbi_save_state_to_file	PARAMS(( void ));
 #ifdef DynamicForeign
 extern	int	pbi_load_foreign	PARAMS(( void ));

@@ -337,6 +337,9 @@ static struct blt_struct {
 #ifdef OLDCONSULT
 	BLT("old_consult", 2, pbi_old_consult, "_pbi_old_consult"),
 #endif /* OLDCONSULT */
+#ifdef SIMPLE_MICS
+	BLT("save_image_with_state_to_file", 1, pbi_save_image_with_state_to_file, "_pbi_save_image_with_state_to_file"),
+#endif
 	BLT("save_state_to_file", 1, pbi_save_state_to_file, "_pbi_save_state_to_file"),
 	BLT("sio_mkstream", 2, sio_mkstream, "_sio_mkstream"),
 	BLT("sio_errcode", 2, sio_errcode, "_sio_errcode"),

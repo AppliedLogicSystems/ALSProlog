@@ -6,12 +6,7 @@
  */
 
 #include <stdio.h>
-#ifdef WIN32
-#include "fswin32.h"
-#endif
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
+
 #define BSIZE 256
 
 struct aout_hdr {
@@ -31,15 +26,20 @@ main(argc, argv)
     int argc;
     char **argv;
 {
-    int fd;
+    FILE *f;
     static unsigned char buf[BSIZE];
-    fd = open(argv[0], O_RDONLY);
-    if (fd < 0)
+    
+    f = fopen(argv[argc-1], "rb");
+    if (f == NULL) {
+    	fprintf(stderr, "which-exe: Couldn't open file: %s\n", argv[argc-1]);
 	goto unknown;
-    if (read(fd, buf, BSIZE) <= 0)
+    }
+    if (fread(buf, 1, BSIZE, f) <= 0) {
+    	fprintf(stderr, "which-exe: Couldn't read file: %s\n", argv[argc-1]);
 	goto unknown;
-    close(fd);
-
+    }
+    fclose(f);
+    
     if (buf[0] == 0x7f && buf[1] == 'E' && buf[2] == 'L' && buf[3] == 'F')
 	printf("elf\n");
     else if (((unsigned long *) buf)[0] == 0xfeedface)
@@ -81,6 +81,10 @@ main(argc, argv)
           || ((unsigned short *) buf)[0] == 0x6201
           || ((unsigned short *) buf)[0] == 0x0183	/* dec alpha */
 	  || ((unsigned short *) buf)[0] == 0x01DF	/* AIX xcoff */
+#ifdef MSWIN
+	  || ((unsigned short *) buf)[0] == IMAGE_DOS_SIGNATURE
+	  || ((unsigned short *) buf)[0] == IMAGE_NT_SIGNATURE
+#endif
 	  						)
 	printf("coff\n");
     else

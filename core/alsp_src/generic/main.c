@@ -301,6 +301,10 @@ PI_prolog_init(win_str, argc, argv)
      */
     whereami(argv[0]);
 
+#ifdef SIMPLE_MICS 
+    saved_state_image_offset = ss_image_offset();
+#endif
+
     /*
      * Initialize space for ss_malloc.  This should be done fairly early
      * on before other space is allocated.  If we wait until the
