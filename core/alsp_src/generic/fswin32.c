@@ -266,4 +266,40 @@ int als_system(const char * command)
 
 #endif
 
+unsigned char *open_memory_file(const char *file_name, mem_file_info *info)
+{
+    HANDLE file, file_map;
+    unsigned char *mem;
+    
+    file = CreateFile(file_name, GENERIC_READ, FILE_SHARE_READ,
+    		      NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (file == INVALID_HANDLE_VALUE) goto error;
+    
+    file_map = CreateFileMapping(file, NULL, PAGE_READONLY, 0, 0, NULL);
+    if (file_map == INVALID_HANDLE_VALUE) goto close_error;
+    
+    mem = MapViewOfFile(file_map, FILE_MAP_READ, 0, 0, 0);
+    if (mem == NULL) goto close_close_error;
+    
+    CloseHandle(file_map);
+    CloseHandle(file);
+    
+    info->start = mem;
+    info->length = 0;
+    
+    return mem;
+    
+close_close_error:
+    CloseHandle(file_map);
+close_error:
+    CloseHandle(file);
+error:
+    return NULL;
+}
+
+void close_memory_file(mem_file_info *info)
+{
+    UnmapViewOfFile(info->start);
+}
+
 #endif

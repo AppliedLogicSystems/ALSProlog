@@ -390,158 +390,16 @@ obp_close()
 }
 
 
-
-/*
- * f_load: Load a .OBP file
- */
-
 #define CBUFSIZ 1024
 
-int
-f_load(fname)
-    char *fname;
-{
-    char  cbuf[CBUFSIZ];	/* character buffer */
-    char *cbp;
-    mod_header header;
-    long  i, j;
-    long *tokmap;
-    int   opcode;
-    long  args[4];
-    register int format;
-    register long data;
-    FILE *fp;
-    unsigned short strsize;
-    unsigned short binop, unop;
-
-    if ((fp = fopen(fname, "rb")) != NULL) {
-	if (fread((char *) (&header), sizeof header, 1, fp) == 0 ||
-	    strcmp(header.magic, MAGIC) != 0) {
-	    fclose(fp);
-	    return (FLOAD_ILLOBP);
-	}
-    }
-    else
-	return (FLOAD_FAIL);
-
-    fseek(fp, header.symtab_start, 0);
-
-    tokmap = (long *) malloc(header.symtab_size * sizeof (long));
-
-    for (i = 0; i < header.symtab_size; i++) {
-	fread((char *) (&strsize), sizeof strsize, 1, fp);
-	fread(cbuf, (size_t) strsize, 1, fp);
-	j = find_token((UCHAR *)cbuf);
-	*(tokmap + i) = j;
-	fread(&unop, sizeof (unsigned short), 1, fp);
-	fread(&binop, sizeof (unsigned short), 1, fp);
-	if (unop) {
-	    if (TOKUNOP(j) && TOKUNOP(j) != unop) {
-		fprintf(stderr,
-		 "Warning: Unary operator conflict for '%s' in file '%s'\n",
-			TOKNAME(j), fname);
-	    }
-	    TOKUNOP(j) = unop;
-	}
-	if (binop) {
-	    if (TOKBINOP(j) && TOKBINOP(j) != binop) {
-		fprintf(stderr,
-		"Warning: Binary operator conflict for '%s' in file '%s'\n",
-			TOKNAME(j), fname);
-	    }
-	    TOKBINOP(j) = binop;
-	}
-    }
-
-    fseek(fp, header.icode_start, 0);
-    i = header.icode_size;
-
-    while (i--) {
-	cbp = cbuf;
-	opcode = getc(fp);
-	opcode = char_to_int(opcode);
-	format = format_tab[(opcode - (LAST_IC))];
-
-	for (j = 0; j < 4; j++, format >>= 4) {
-	    switch (format & 0xf) {
-		case FT_UNUSED:
-		    data = 0;
-		    break;
-		case FT_BYTE:
-		    data = getc(fp);
-		    data = char_to_int(data);
-		    break;
-		case FT_WORD:
-		    data = getc(fp) & 0xff;
-		    data |= getc(fp) << 8;
-		    if (data & 0x8000)
-			data |= ~(long) 0xffff;
-		    break;
-		case FT_LONG:
-		    data = getc(fp) & 0xff;
-		    data |= (getc(fp) & 0xff) << 8;
-		    data |= ((long) (getc(fp) & 0xff)) << 16;
-		    data |= ((long) getc(fp)) << 24;
-		    break;
-		case FT_XWORD:
-		    data = getc(fp) & 0xff;
-		    data |= (getc(fp) & 0xff) << 8;
-		    data = tokmap[data];
-		    break;
-		case FT_STRING:
-		    data = (long) cbp;
-		    while ( (*cbp++ = getc(fp)) ) ;
-		    break;
-		default:
-		    data = 0;
-		    break;
-	    }
-
-	    args[j] = data;
-	}
-
-	icode(opcode, args[0], args[1], args[2], args[3]);
-    }
-
-    free(tokmap);
-    fclose(fp);
-
-#ifdef Indexing
-    gen_indexing();
+#if defined(sparc) || defined(__hp9000s800)
+#define USHORT(p) (*(p) << 8 | *(p+1)) 
+#else
+#define USHORT(p) (*((unsigned short *)(p)))
 #endif
 
-    w_relinkall();		/* relink all procedures */
-
-    return (FLOAD_SUCCESS);
-}
-
-#ifdef MacOS
-static const char *strip_path(const char *name)
-{
-    const char *p;
-    size_t l;
-    
-    l = strlen(name);
-    
-    if (l == 0) return name;
-    
-    p = name + l;
-    
-    while(1) {
-    	p--;
-    	if (*p == ':') {p++; break;}
-    	if (p == name) break;
-    }
-    
-    return p;
-}
-
-
-/*
- * obpres_load: Load a OBPT resource
- */
-
-int obpres_load(const char *fname)
+static int
+mem_load(unsigned char *startrp)
 {
     char  cbuf[CBUFSIZ];	/* character buffer */
     char *cbp;
@@ -552,53 +410,37 @@ int obpres_load(const char *fname)
     long  args[4];
     register int format;
     register long data;
-    unsigned char *startrp, *rp, *rplim;
+    unsigned char *rp;
     unsigned short strsize;
     unsigned short binop, unop;
-    char **obp_handle;
-    Str255 pfname;
-
-    fname = strip_path(fname);
-    c2pstrcpy(pfname, fname);
-    PLstrcat(pfname, "\p.obp");
-
-    if (obp_handle = GetNamedResource('OBPT', pfname)) {
-    	HLock(obp_handle);
-    	startrp = rp = *obp_handle;
-    	rplim = rp + GetHandleSize(obp_handle);
-    	headerp = (mod_header *)rp;
-    	rp += sizeof(mod_header);
-    	if (rp >= rplim || strcmp(headerp->magic, MAGIC) != 0) {
-    	   HUnlock(obp_handle);
-    	   ReleaseResource(obp_handle);
-    	   return (FLOAD_ILLOBP);
-    	}
-    	
-    } else return (FLOAD_FAIL);
+    
+    headerp = (mod_header *)startrp;
+    
+    if (strcmp(headerp->magic, MAGIC) != 0) return (FLOAD_ILLOBP);
     
     rp = startrp + headerp->symtab_start;
 
     tokmap = (long *) malloc(headerp->symtab_size * sizeof (long));
 
     for (i = 0; i < headerp->symtab_size; i++) {
-    	strsize = *(unsigned short *)rp; rp += sizeof(strsize);
+    	strsize = USHORT(rp); rp += sizeof(strsize);
     	j = find_token((UCHAR *) rp); rp += strsize;
     	*(tokmap + i) = j;
-    	unop = *(unsigned short *)rp; rp += sizeof(unop);
-    	binop = *(unsigned short *)rp; rp += sizeof(binop);
+    	unop = USHORT(rp); rp += sizeof(unop);
+    	binop = USHORT(rp); rp += sizeof(binop);
 	if (unop) {
 	    if (TOKUNOP(j) && TOKUNOP(j) != unop) {
 		fprintf(stderr,
-		 "Warning: Unary operator conflict for '%s' in file '%s'\n",
-			TOKNAME(j), fname);
+		 "Warning: Unary operator conflict for '%s'\n",
+			TOKNAME(j));
 	    }
 	    TOKUNOP(j) = unop;
 	}
 	if (binop) {
 	    if (TOKBINOP(j) && TOKBINOP(j) != binop) {
 		fprintf(stderr,
-		"Warning: Binary operator conflict for '%s' in file '%s'\n",
-			TOKNAME(j), fname);
+		"Warning: Binary operator conflict for '%s'\n",
+			TOKNAME(j));
 	    }
 	    TOKBINOP(j) = binop;
 	}
@@ -656,9 +498,6 @@ int obpres_load(const char *fname)
 
     free(tokmap);
     
-    HUnlock(obp_handle);
-    ReleaseResource(obp_handle);
-
 #ifdef Indexing
     gen_indexing();
 #endif
@@ -666,6 +505,79 @@ int obpres_load(const char *fname)
     w_relinkall();		/* relink all procedures */
 
     return (FLOAD_SUCCESS);
+}
+
+/*
+ * f_load: Load a .OBP file
+ */
+
+int
+f_load(const char *fname)
+{
+    unsigned char *p;
+    mem_file_info i;
+    int result;
+    
+    p = open_memory_file(fname, &i);
+    
+    if (p) {
+    	result = mem_load(p);
+	close_memory_file(&i);
+    } else result = FLOAD_FAIL;
+    
+    return result;
+}
+
+
+#ifdef MacOS
+static const char *strip_path(const char *name)
+{
+    const char *p;
+    size_t l;
+    
+    l = strlen(name);
+    
+    if (l == 0) return name;
+    
+    p = name + l;
+    
+    while(1) {
+    	p--;
+    	if (*p == ':') {p++; break;}
+    	if (p == name) break;
+    }
+    
+    return p;
+}
+
+
+/*
+ * obpres_load: Load a OBPT resource
+ */
+
+int obpres_load(const char *fname)
+{
+    char **obp_handle;
+    Str255 pfname;
+    int result;
+
+    fname = strip_path(fname);
+    c2pstrcpy(pfname, fname);
+    PLstrcat(pfname, "\p.obp");
+
+    obp_handle = GetNamedResource('OBPT', pfname);
+    
+    if (obp_handle) {
+    	HLock(obp_handle);
+    
+    	result = mem_load(*obp_handle);
+    	
+	HUnlock(obp_handle);
+	ReleaseResource(obp_handle);
+    	
+    } else result = FLOAD_FAIL;
+    
+    return result;
 }
 #endif /* MacOS */
 
