@@ -1,0 +1,37 @@
+#!/bin/sh
+
+function package_ok () {
+    rpm -q compat-binutils-5.2 compat-libs-5.2 \
+           compat-egcs-5.2 compat-glibc-5.2 > /dev/null 2>&1 ;
+}
+
+function path_ok () {
+    test `which cc` = /usr/i386-glibc20-linux/bin/cc
+}
+
+if rpm --quiet -q redhat-release-6.0 > /dev/null 2>&1 &&
+   (! package_ok || ! path_ok)
+then
+    echo "Linux glibc20 Compatibility Error" >&2
+    echo "Cannot build RedHat 5 compatible binary." >&2
+    echo >&2
+    if ! package_ok
+    then
+        echo "Please install the following compatiblity packages:" >&2
+        echo "    compat-binutils-5.2 compat-libs-5.2" >&2
+        echo "    compat-egcs-5.2 compat-glibc-5.2" >&2
+        echo >&2
+    fi
+    if ! path_ok
+    then
+        echo "Please modify the environment variable PATH to" >&2
+        echo "include /usr/i386-glibc20-linux/bin as the first" >&2
+        echo "bin directory." >&2
+        echo >&2
+    fi
+    echo "Once these changes have been made, you must" >&2
+    echo "completely rebuild all targets." >&2
+    exit 1
+fi
+
+cc $*
