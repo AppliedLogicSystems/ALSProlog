@@ -26,7 +26,7 @@
 % some tests:
 al :-
 prologdoc(
-    [ modulenames=[sio,builtins,prologdoc],
+    [ modulenames=[builtins,prologdoc,sio],
       destdir='als-lib-test',
       overwrite=true,
       windowtitle='ALS Prolog Library Components',
@@ -45,7 +45,7 @@ prologdoc(
       windowtitle='ALS Prolog Builtins Components',
       doctitle= 'ALS Prolog Builtins Components',
       failonerror=true                        ],
-    [  files( dir='../../alspro/alsdir/builtins', all) ],
+    [  files( dir='../alspro/alsdir/builtins', all) ],
     [  group('String Manipulation', [modules=[builtins], files=['strings.pro']]),
        group('Tk Library Interface', [modules=[tk_alslib]]) ]
     ).
@@ -58,11 +58,11 @@ prologdoc(
       windowtitle='Test1 Components',
       doctitle= 'Test1 Components',
       failonerror=true                        ],
-    [  files( dir='../../alspro/alsdir/library', all) ],
+    [  files( dir='../alspro/alsdir/library', all) ],
 /*
  [
       files( dir='.', ['pd.pro'])
-      ,files( dir='../../alspro/alsdir/library', ['sio_misc.pro', 'strings.pro']),
+      ,files( dir='../alspro/alsdir/library', ['sio_misc.pro', 'strings.pro']),
       files( dir='testfiles2', ['control.pro', 'arithx1.pro'])                
       ],
 */
@@ -162,12 +162,11 @@ prologdoc(General, Files, Groups)
 	setup_output(XGeneral),
 	printf(user_output, '>>> Finished setting up output directory\n', []),
 	change_cwd(CurDir),
+
 		%% process all files into the Data struct:
 	doc_process(Files, XGeneral, CurDir, Data),
-		%% close off the xlists:
 
-%	get_mods_preds_list(Data, ModLists),
-%	close_off_all(ModLists, ResultModLists),
+		%% close off the xlists:
 	close_off_everything(Data, ResultModLists, FilesList),
 
 	printf(user_output, '>>> Finished gathering information\n', []),
@@ -226,7 +225,8 @@ doc_process_fd(files(dir=SrcDir, WhichFiles), ModuleNames, General, DateTime, To
 	doc_process_files(WhichFiles, SrcDir, ModuleNames, General, DateTime, TopDir, Data).
 doc_process_fd(files(dir=SrcDir, WhichFiles), ModuleNames, General, DateTime, TopDir, Data)
 	:-
-	sprintf(atom(Msg), 'Directory %t does not exist!', [SrcDir]),
+	sprintf(atom(Msg), '!! Directory %t does not exist! .. Aborting processing!\n', [SrcDir]),
+	printf(user_output, Msg, []),
 	throw(exception(Msg)).
 
 doc_process_files([], SrcDir, ModuleNames, General, DateTime, TopDir, Data) :-!.
@@ -361,7 +361,7 @@ check_add_mod_info0([Mod | ModuleNames], SrcDirElts, Data)
 		;
 		true
 	),
-	check_add_mod_info0(ModuleNames, SrcDir, Data).
+	check_add_mod_info0(ModuleNames, SrcDirElts, Data).
 
 
 		/*----------------------------------------------------
@@ -377,7 +377,8 @@ prolog_doc_file(SourcePath, ModuleList, DateTime, TopDir, File, Data)
         group_by_mod(FirstDocList, GroupedDocList),
 	findall(M, member(M-X, GroupedDocList), CurModList),
 	add_file_to_mods(CurModList, File, Data),
-	add_file_info(File, FileDesc, Data),
+	strip_mod_prefix(FirstDocList, FileDocList),
+	add_file_info(File, FileDesc, FileDocList, Data),
 	!,
 	insert_mod_preds_list(GroupedDocList, Data).
 
@@ -403,6 +404,10 @@ group_by_mod([Mod-PDesc | DocList], Accum, GroupedDocList)
 	:-
 	group_by_mod(DocList, [Mod-([PDesc | Tail], t(Tail)) | Accum], GroupedDocList).
 	
+strip_mod_prefix([], []).
+strip_mod_prefix([_-PredInfo | FirstDocList], [PredInfo | FileDocList])
+	:-
+	strip_mod_prefix(FirstDocList, FileDocList).
 
 /*!-----------------------------------------------------------------------------
  *!----------------------------------------------------------------------------*/
@@ -712,10 +717,20 @@ disp_get_extended_descrip(StrippedNextLineCs,
 		 | INDEX DATA STRUCTURE DEFINITION
 		 *----------------------------------------*/
 
-start_index_datastruct(ModuleNames, DestDir, id(ModsDirList,ModPredsLists,ModFilesLists,ModsInfoLists, (FF,p(FF))))
+start_index_datastruct(
+		ModuleNames, 
+		DestDir, 
+		id(  ModsDirList,	% modules and directories
+		     ModPredsLists, 	% per-module predicates
+		     ModFilesLists, 	% per-module files
+		     ModsInfoLists, 	% per-module misc info
+		     (FF,p(FF))         % per-file information
+		  )
+		)
 	:-
 	path_elements(DestDir, DDElts),
 	st_i_datas(ModuleNames, DDElts, ModsDirList, ModPredsLists, ModFilesLists, ModsInfoLists).
+
 st_i_datas([], DDElts, [], [], [], []).
 st_i_datas([Mod | ModuleNames], DDElts, 
 		[Mod-ModDir | ModsDirList], 
@@ -840,11 +855,11 @@ close_off_everything(Data, ResultModLists, FilesList)
 	FilesTail = [].
 
 
-add_file_info(File, FileDesc, IndexDataStruct)
+add_file_info(File, FileDesc, FileDocList, IndexDataStruct)
 	:-
 	get_files_info_struct(IndexDataStruct, FilesInfoStruct),
 	arg(2, FilesInfoStruct, p(CurTail)),
-	CurTail = [File-FileDesc | NewTail],
+	CurTail = [File-(FileDesc,FileDocList) | NewTail],
 	mangle(2, FilesInfoStruct, p(NewTail)).
 
 get_files_list(IndexDataStruct, FilesList)

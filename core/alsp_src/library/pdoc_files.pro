@@ -10,7 +10,7 @@
 
 module prologdoc.
 
-build_files_desc(Data, General)
+build_files_desc(Data, General, FileDescLines)
 	:-
 	get_files_list(Data, FilesList),
 
@@ -19,10 +19,10 @@ build_files_desc(Data, General)
 	append(DestDirElts, [ 'files-desc.html'], FilePathElts),
 	path_elements(FilePath, FilePathElts),
 	open(FilePath, write, OS),
-	unwind_protect( write_files_desc(Data, General, FilesList, OS), close(OS)).
+	unwind_protect( write_files_desc(Data, General, FilesList, OS, FileDescLines), close(OS)).
 
 
-write_files_desc(Data, General, FilesList, OS)
+write_files_desc(Data, General, FilesList, OS, FileDescLines)
 	:-
 	dmember(keywords=KeyWords, General),
 	dmember(doctitle=DocTitle, General),
@@ -93,7 +93,7 @@ write_files_desc(Data, General, FilesList, OS)
 	'<!-- ========= END OF TOP NAVBAR ========= -->',
 	'<HR><CENTER><H1>Source Files</H1></CENTER>'
 	  	], OS),
-	write_file_desc_contents(FilesList, OS),
+	write_file_desc_contents(FilesList, OS, FileDescLines),
 	codesweep([
 	'<!-- ======= START OF BOTTOM NAVBAR ====== -->',
 	'<A NAME="navbar_bottom"><!-- --></A>',
@@ -147,12 +147,12 @@ write_files_desc(Data, General, FilesList, OS)
 	  	], OS).
 
 
-write_file_desc_contents(FilesList, OS)
+write_file_desc_contents(FilesList, OS, FileDescLines)
 	:-
-	write_files_summary(FilesList, OS),
+	write_files_summary(FilesList, OS, FileDescLines),
 	write_files_details(FilesList, OS).
 
-write_files_summary(FilesList, OS)
+write_files_summary(FilesList, OS, FileDescLines)
 	:-
 	codesweep([
 	'<TABLE BORDER="1" WIDTH="100%" CELLPADDING="3" CELLSPACING="0" SUMMARY="">',
@@ -162,7 +162,7 @@ write_files_summary(FilesList, OS)
 	'</TR>',
 	'<TR BGCOLOR="white" CLASS="TableRowColor">'
 	  	], OS),
-	files_summary(FilesList, OS),
+	files_summary(FilesList, OS, FileDescLines),
 	codesweep([
 	'</TR>',
 	'</TABLE>',
@@ -171,10 +171,10 @@ write_files_summary(FilesList, OS)
 	'&nbsp;'
 	  	], OS).
 
-files_summary([], OS).
-files_summary([FileDesc | FilesList], OS)
+files_summary([], OS, []).
+files_summary([FileDesc | FilesList], OS, [FileName-FileDescLine | RestDescLines])
 	:-
-	FileDesc = FileName - Details,
+	FileDesc = FileName - (Details, FileDocList),
 	sprintf(atom(FileRef), '#_%t_', [FileName]),
 	(Details = [] -> 
 		FileDescLine = ''
@@ -188,7 +188,7 @@ files_summary([FileDesc | FilesList], OS)
 	'<TD>%t</TD></TR>'						+ [FileDescLine]
 	  	], OS),
 
-	files_summary(FilesList, OS).
+	files_summary(FilesList, OS, RestDescLines).
 
 get_file_desc_line([First | RestDetails], FileDescLine)
 	:-
@@ -220,7 +220,7 @@ write_files_details([FileDesc | FilesList], OS)
 
 write_file_detail(FileDesc, OS)
 	:-
-	FileDesc = FileName - Detail,
+	FileDesc = FileName - (Detail, FileDocList),
 
 	codesweep([
 	'<TABLE BORDER="1" WIDTH="100%" CELLPADDING="3" CELLSPACING="0" SUMMARY="">',
