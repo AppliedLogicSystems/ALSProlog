@@ -525,25 +525,6 @@ install_sharbld
 	cp_txt( SRC_Dir/sharbld 				> CurDir ),
 	cp_txt( SRC_Dir/pconfig/'sharalsp.pro'	> CurDir ).
 
-/***********
-flatten_ws_lists([], []).
-flatten_ws_lists([Tag=Value | WSHeaderItems], [Tag = FlatValue | WSHeaderLines])
-	:-
-	Value = [_|_],
-	!,
-	flatten_to_atom(Value, FlatValue),
-	flatten_ws_lists(WSHeaderItems, WSHeaderLines).
-flatten_ws_lists([Tag=Value | WSHeaderItems], [Tag = Value | WSHeaderLines])
-	:-
-	flatten_ws_lists(WSHeaderItems, WSHeaderLines).
-
-flatten_to_atom([], ' \n').
-flatten_to_atom([Atom | List], FlatValue)
-	:-
-	flatten_to_atom(List, ListFlatValue),
-	catenate([Atom,' \\\n',ListFlatValue], FlatValue).
-***********/
-
 endmod.
 
 

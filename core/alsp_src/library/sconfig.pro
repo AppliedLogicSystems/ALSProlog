@@ -126,7 +126,16 @@ winsystems_for(Arch, OSString, WSL)
 		gen_winsystems(GOS, WSL)
 	).
 
-gen_winsystems(unix, [motif, x]).
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%%%     !!!!!! WARNING   !!!!!
+		%%%%  Keep the window systems on the
+		%%%% lists below in the order of
+		%%%% any dependencies;  e.g., 
+		%%%% x __must__ be processed before
+		%%%% motif, since motif processing
+		%%%% loads the x libraries;
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+gen_winsystems(unix, [x, motif]).
 
 specif_winsystems_for(_, nextstep, [nextstep]).
 

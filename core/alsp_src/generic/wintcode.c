@@ -142,7 +142,6 @@ static void
 makerunable()
 {
 #if !defined(Portable) && !defined(arch_sparc)	/* Portable doesn't need any of this stuff */
-
 #if	defined(HAVE_MMAP) || defined(arch_m88k)
     register struct codeblock *cbp;
 
@@ -174,8 +173,7 @@ makerunable()
     refresh_code_window();
 #endif						/* DOS */
 #endif						/* arch_i386 */
-
-#endif /* Portable && arch_sparc */
+#endif 						/* not Portable and not arch_sparc */
 }
 
 /*
@@ -186,7 +184,6 @@ static void
 makewritable()
 {
 #if !defined(Portable) && !defined(arch_sparc)	/* Portable doesn't need any of this stuff */
-
 #if	defined(HAVE_MMAP) || defined(arch_m88k)
     register struct codeblock *cbp;
 
@@ -204,9 +201,8 @@ makewritable()
 	}
 #endif 	/* HAVE_MMAP */
     }
-#endif	/* HAVE_MMAP || arch_m88k */
-
-#endif /* Portable && arch_sparc */
+#endif								/* HAVE_MMAP || arch_m88k */
+#endif 								/* not Portable and not arch_sparc */
 }
 
 

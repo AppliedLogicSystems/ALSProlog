@@ -236,21 +236,23 @@ print_error_goal_attribute(Other) :-
  */
 
 export als_advise/1.
-als_advise(FormatString) :-
+als_advise(FormatString) 
+	:-
 	als_advise(FormatString, []),
 	flush_output.
 
 export als_advise/2.
-als_advise(FormatString, Args) :-
+als_advise(FormatString, Args) 
+	:-
 	printf(warning_output, FormatString, Args),
-	flush_output(warning_output),
-pbi_write(als_advise_done),pbi_nl,pbi_ttyflush.
+	flush_output(warning_output).
 
 /*
  * Print the given consult message if the "consultmessage" flag is on.
  */
 
-consultmessage(Message, ParameterList) :-
+consultmessage(Message, ParameterList) 
+	:-
 	consultmessage,
 	!,
 	als_advise(Message, ParameterList).

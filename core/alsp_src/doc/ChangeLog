@@ -1,4 +1,80 @@
-Sun Sep 18 22:23:18 EDT 1994
+Sun Oct 23 20:09:18 EDT 1994 Ken Bowen
+
+	* Modified Makefile.in in both bld-port and bld-natv so that
+	the immediate linked image (previously called alspro) is now
+	called alspro_basis, and alspro is the result of doing a
+	save_image on alspro_basis, thereby putting the builtins into
+	the images, together with the debugger (tty version); 
+ 	however, the library is still being loaded dynamically.
+
+Sun Oct 23 17:37:37 EDT 1994 Ken Bowen
+
+	* Added setup target and dependency for alspro.a to Makefile.in
+	in bld-port and bld-natv.  This forces generic/pi_cfg.h.proto
+	and generic/pi_init.c to be copied (to pi_cfg.h, pi_init.c) in
+	the generated build directories; the corresponding thing for
+	windows build directories is already taken care of by pconfig.pro.
+
+Wed Oct 19 10:01:10 EDT 1994  Ken Bowen
+
+	* blt_pckg.pro: Modified process_image_option/1 so that
+	save_image/2 will accept as an option
+		select_lib(FilesList)
+	where FilesList is a list of library files to be included
+	in the image; libload(true) still loads the whole library.
+
+	* blt_sys.pro: Modified force_libload_all/[0,1] to make it
+	possible to present a list of library files to be forcibly
+	loaded into the image.
+
+Wed Oct 19 13:41:14 1994  Kevin Buettner
+
+	* wins/build/motif/Makefile.in (XDEFINES): Use += to append
+	-DFUNCPROTO to whatever the existing environment value is.  This
+	gives us a mechanism for building cleanly on the NeXT.
+
+	* bld-port/Makefile.in (testrun): Don't assume that '.' is
+	on the path.
+
+	* bld-port/Makefile.in (alspro): Don't run nrev after linking.  This
+	is done via alstest in generic/mh-generic.
+
+	* wins/build/{x,motif}/Makefile.in ($(IMAGE): Don't assume that 
+	$(IMAGE)0 is on the path when trying to package the image.
+
+Tue Oct 18 10:53:27 1994  Kevin Buettner
+
+	* wins/build/{x,motif}/Makefile.in, wins/build/mf-cmn.in ($(IMAGE)0):
+	Added reference to $(X_LIBS) in the $(CC) statement.
+
+Mon Oct 17 18:20:25 1994  Kevin Buettner
+
+	* generic/mem.c (alloc_big_block, ss_restore_state):  Added PROT_EXEC
+	flag to calls to mmap().
+
+Fri Oct 14 18:26:42 1994  Kevin Buettner
+
+	* cinterf/c2pro/cmacro (check_else/2): Eliminated.  Replaced all
+	previous calls with calls to check_elif/2.
+
+Wed Oct  5 13:39:57 1994  Kevin Buettner
+
+	* utils/mach-mics.c (main): Fixed core dump problem in step 5.
+
+	* Generic/version.h (SysVersionNum):  Now 1.67B.
+
+Tue Oct  4 14:20:25 1994 Kevin Buettner
+
+	* cinterf/c2pro/c2pro (getValueOpt)/2): Added clause for predefining
+	string values as well as numeric.
+
+	* cinterf/c2pro/cmacro (concat_adj_strings/2): Call atom_concat/3
+	instead of concat/2.
+
+	* wins/build/motif/Makefile.in (VPATH): Modified so that the correct
+	pi_init.c is found.
+
+Sun Sep 18 22:23:18 EDT 1994 Ken Bowen
 
 	* builtins:Repaired files/3 in fsunix.pro;  
 	changes in blt_lib.pro reflect library changes.
@@ -14,7 +90,7 @@ Sun Sep 18 22:23:18 EDT 1994
 	* pconfig:massive development of cfgimg -- make it work; changes to 
 	makeimg.in go with this
 
-Wed Sep 14 17:12:21 EDT 1994
+Wed Sep 14 17:12:21 EDT 1994 Ken Bowen
 
 	* generic/pimain.c: Added a feature test NO_STDARG_H to
 	make the default be that HAVE_STDARG_H is defined, and

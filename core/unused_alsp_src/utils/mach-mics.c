@@ -204,7 +204,7 @@ main(int argc,char **argv)
 	cmds[cmdidx0].load = (struct load_command *) rcp;
 	rcp += cmds[cmdidx0].load->cmdsize;
 	if (cmds[cmdidx0].load->cmd == LC_SEGMENT &&
-	    strcmp(cmds[cmdidx].segment->segname, als_data_name) == 0) {
+	    strcmp(cmds[cmdidx0].segment->segname, als_data_name) == 0) {
 	    /* skip this segment */
 	}
 	else

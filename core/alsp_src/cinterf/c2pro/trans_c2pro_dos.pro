@@ -103,6 +103,9 @@ use avl.
 	% Dynamic Declarations:
 	%-------------------------------------
 
+:- dynamic(cur_debug_level/1).
+cur_debug_level(1).
+
 %:-dynamic(debug/0).
 %debug.
 
@@ -196,9 +199,6 @@ parse_options([FirstOpt | RestOpts], Defines, State)
 	%   install_option/4
 	%-------------------------------------
 
-%:-dynamic(cur_debug_level/1).
-cur_debug_level(1).
-
 	%% set debugging level:
 	%% option:  -d Level[=Num]
 install_option(['-d',InitLevel], Defines, Defines, State)
@@ -259,6 +259,10 @@ getValueOpt([0'=|ValStr],[number(Num)])
 	:-
 	name(Num,ValStr),
 	number(Num),
+	!.
+getValueOpt([0'=|ValStr],[string(Val)])
+	:-
+	atom_codes(Val, ValStr),
 	!.
 getValueOpt(_,[number(1)]).		% default value of -D flag is 1
 
@@ -1149,7 +1153,7 @@ ifdef([Token|_],State) :-
 ifdef(_,State) :-
 	error('Ill formed #ifdef, assume test fails\n',State),
 	skipLines(State,What),
-	check_else(What,State).
+	check_elif(What,State).
 
 %
 % ifndef/5
@@ -1162,7 +1166,7 @@ ifndef([Token|_],State) :-
 ifndef(_,State) :-
 	error('Ill formed #ifndef, assume test fails\n',State),
 	skipLines(State,What),
-	check_else(What,State).
+	check_elif(What,State).
 
 %
 % if/5
@@ -1205,7 +1209,7 @@ do_ifdef(Id,State) :-
 	
 do_ifdef(Id,State) :-
 	skipLines(State,What),
-	check_else(What,State).
+	check_elif(What,State).
 
 %
 % do_ifndef/5
@@ -1217,12 +1221,13 @@ do_ifndef(Id,State) :-
 	Data \= unDefined,
 	!,
 	skipLines(State,What),
-	check_else(What,State).
+	check_elif(What,State).
 do_ifndef(Id,State) 
 	:-
 	accessC2P(ifdef_stack, State, [LevList | Prev]),
 	setC2P(ifdef_stack, State, [[_|LevList] | Prev]).
 	
+/*
 %
 % check_else/5
 %
@@ -1232,6 +1237,7 @@ check_else(else,State)
 	accessC2P(ifdef_stack, State, [LevList | Prev]),
 	setC2P(ifdef_stack, State, [[endif|LevList] | Prev]).
 check_else(endif,State).
+*/
 
 
 %
@@ -1592,7 +1598,7 @@ do_subst([Tok|Rest],FArgs,AArgs,[Tok|ResTail]) :-
 concat_adj_strings([],[]).
 concat_adj_strings([string(Tok1),string(Tok2)|Rest],Result) :-
 	!,
-	concat([Tok1,Tok2],Tok3),
+	atom_concat(Tok1,Tok2,Tok3),
 	concat_adj_strings([string(Tok3)|Rest],Result).
 concat_adj_strings([Tok|Rest],[Tok|Result]) :-
 	concat_adj_strings(Rest,Result).

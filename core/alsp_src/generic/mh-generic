@@ -274,5 +274,7 @@ Makefile: $(srcdir)/bld-port/Makefile.in ../config.status
 	(cd ..; ./config.status --recheck)
 
 alstest: ./alspro
+	echo >> nrev_rcd
+	echo $(ARCH) $(OS) $(systype) [`date`] >> nrev_rcd
 	./alspro $(srcdir)/tests/snrev -g snrev >> nrev_rcd
 	cat nrev_rcd

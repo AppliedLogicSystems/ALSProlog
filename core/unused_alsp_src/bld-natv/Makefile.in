@@ -3,6 +3,7 @@
 # Makefile is generated from Makefile.in by running configure.
 #
 
+systype = natv
 srcdir = @srcdir@/..
 VPATH  = @srcdir@/../generic:@srcdir@/../@ARCH@:..
 
@@ -38,12 +39,26 @@ include $(srcdir)/$(ARCH)/$(OS)/mh-$(OS)
 
 objects = $(gfiles_o) $(afiles_o)
 
-alspro.a: $(objects)
+setup: pi_cfg.h pi_init.c
+	echo setup done > setup
+
+pi_cfg.h: $(srcdir)/generic/pi_cfg.h.proto 
+	cp $(srcdir)/generic/pi_cfg.h.proto pi_cfg.h
+
+pi_init.c: $(srcdir)/generic/pi_init.c
+	cp $(srcdir)/generic/pi_init.c  pi_init.c
+
+alspro.a: setup $(objects)
 	ar ruv alspro.a $(objects)
 	-ranlib alspro.a
 
-alspro:	pimain.o alspro.a 
-	$(CC) -o alspro $^ $(LDFLAGS) $(LIBS)
+alspro_basis: pimain.o alspro.a 
+	$(CC) -o alspro_basis $^ $(LDFLAGS) $(LIBS)
+
+IMGOPTS = select_lib([debugger])
+
+alspro: alspro_basis
+	alspro_basis -obp -g 'save_image(alspro,[$(IMGOPTS)])'
 
 testdir	= $(srcdir)/tests
 

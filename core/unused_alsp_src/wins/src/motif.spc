@@ -8,6 +8,8 @@
 */
 #exclude "/usr/include/?"
 #exclude "/usr/include/sys/?"
+#exclude "/usr/include/ansi/?"
+#exclude "/usr/include/bsd/?"
 #exclude <X11/Xlib.h>
 #exclude <X11/Xutil.h>
 #exclude <X11/Xatom.h>

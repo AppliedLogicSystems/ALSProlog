@@ -1,13 +1,12 @@
-/*
- * mem.c                -- memory allocation
- *      Copyright (c) 1992-1993 Applied Logic Systems, Inc.
+/*=================================================================*
+ *			mem.c                
+ *      Copyright (c) 1992-1994 Applied Logic Systems, Inc.
+ *
+ *			-- memory allocation
  *
  * Author: Kevin A. Buettner
  * Creation: 12/17/92
- * Revision History:
- *      Revised:  mm/dd/yy,     who     -- why
- *      Revised:  mm/dd/yy,     who     -- why
- */
+ *=================================================================*/
 
 #include "defs.h"
 #include "version.h"
@@ -582,6 +581,9 @@ alloc_big_block(size, fe_num)
 
 	np = (long *) mmap((caddr_t) next_big_block_addr,
 				size,
+#if defined(arch_sparc)
+				PROT_EXEC |
+#endif
 				PROT_READ | PROT_WRITE,
 				MAP_PRIVATE | MAP_FIXED,
 				fd,
@@ -954,6 +956,9 @@ ss_restore_state(filename,offset)
 
 	if ((long *) mmap((caddr_t) hdr.blocks[bnum].start,
 			    (size_t)hdr.blocks[bnum].fsize,
+#if defined(arch_sparc)
+			    PROT_EXEC |
+#endif 
 			    PROT_READ | PROT_WRITE,
 			    MAP_PRIVATE | MAP_FIXED,
 			    ssfd,
@@ -977,6 +982,9 @@ ss_restore_state(filename,offset)
 	                                  + hdr.blocks[bnum].fsize,
 				(size_t)(hdr.blocks[bnum].asize 
 				         - hdr.blocks[bnum].fsize),
+#if defined(arch_sparc)
+				PROT_EXEC |
+#endif 
 				PROT_READ | PROT_WRITE,
 				MAP_PRIVATE | MAP_FIXED,
 				zfd,
