@@ -187,13 +187,19 @@ proc document.open args {
 }
 
 proc save_check {w} {
+	global tcl_platform
 	global array proenv
 	if {$proenv($w,dirty)} then {
 		raise $w
 		set title [wm title $w]
+		if {$tcl_platform(platform) == "macintosh"} {
+			set icon caution
+		} else {
+			set icon warning
+		}
 		set answer [tk_dialog .document_save_dialog "" \
 			"Save changes to the document \"$title\" before closing?" \
-			caution \
+			$icon \
 			2 "Don't Save" "Cancel" "Save"]
 		if {$answer == 2} then {
 			set result [document.save $w]
