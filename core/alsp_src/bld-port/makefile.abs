@@ -95,6 +95,9 @@ schema([
 			'GUSILibraries'	= '{MPW}Libraries:GUSILibraries:',
 			'MoreFilesIncludes' = '{MPW}Interfaces:MoreFilesIncludes:',
 			'MoreFilesLibraries' = '{MPW}Libraries:MoreFilesLibraries:',
+			'Eve68KLibraries' = '{MPW}Libraries:Eve68KLibraries:',
+			'EvePPCLibraries' = '{MPW}Libraries:EvePPCLibraries:',
+			'EveIncludes' = '{MPW}Interfaces:EveIncludes:',
 
 			'COMMONLIBS68K' = '"{MW68KLibraries}MathLib68K (4i/8d).Lib"  \xB6\n\
 					   "{MW68KLibraries}CPlusPlus.lib" \xB6\n\
@@ -133,12 +136,16 @@ schema([
 					   "{MWPPCLibraries}MWMPWCRuntime.Lib" \xB6\n\
 					   "{MWPPCLibraries}PPCToolLibs.o" \xB6\n\
 					   "{MWPPCLibraries}PLStringFuncsPPC.lib" \xB6\n\
-					   "{MoreFilesLibraries}MoreFiles.PPC"',
+					   "{MoreFilesLibraries}MoreFiles.PPC" \xB6\n\
+					   "{MWPPCLibraries}console.stubs.c.o"',
 
 			'SIOUXLIBSPPC'	= '"{GUSILibraries}GUSI.Lib.PPC" \xB6\n\
 					   "{MWPPCLibraries}MWCRuntime.Lib" \xB6\n\
 					   "{MWPPCLibraries}SIOUX.PPC.Lib" \xB6\n\
-					   {COMMONLIBSPPC}'
+					   {COMMONLIBSPPC}',
+					   
+			'EVE68KLIB' = '"{Eve68KLibraries}E3ITF.o"',
+			'EVEPPCLIB' = '"{EvePPCLibraries}E3ITF.o"'
 			] ),
 		(djgpp1: [
 			'LDFLAGS'		= '',
@@ -200,7 +207,9 @@ schema([
 
 	case(&(context_name), [
 			(mac: [objects_68k = '{gfiles_68k_o} {afiles_68k_o}',
-			       objects_ppc = '{gfiles_ppc_o} {afiles_ppc_o}']),
+			       objects_ppc = '{gfiles_ppc_o} {afiles_ppc_o}',
+			       demo_objects_68k = '{gdemofiles_68k_o}',
+			       demo_objects_ppc = '{gdemofiles_ppc_o}']),
 			(_: objects = '$(gfiles_o) $(afiles_o)')]),
 
 	case(&(context_name), [
@@ -219,17 +228,6 @@ schema([
 			(_: rule('alspro.a'))]),
 
 	case(&(context_name), [
-			(mac:[ rule('mpw_pimain.68k.o'),
-			       rule('mpw_pimain.ppc.o'),
-			       rule('sioux_pimain.68k.o'),
-			       rule('sioux_pimain.ppc.o')
-			       /* ,
-			       rule('SIOUX_EOF_Fix.68k.o'),
-			       rule('SIOUX_EOF_Fix.ppc.o') */
-				]),
-			(_:noop) ]),
-
-	case(&(context_name), [
 			(mac: [
 				rule(mpw_alspro_b_68k),
 				rule(mpw_alspro_b_ppc),
@@ -237,10 +235,12 @@ schema([
 				rule(sioux_alspro_b_ppc),
 				rule(mpw_alspro_b),
 				rule(sioux_alspro_b),
+				rule(demo_sioux_alspro_b),
 				rule(alspro_b),
 				rule(mpw_alspro),
 				rule('builtins.r'),
-				rule(sioux_alspro)
+				rule(sioux_alspro),
+				rule(demo_sioux_alspro)
 			      ]),
 			(_: rule('alspro_b'))]),
 
@@ -299,7 +299,7 @@ rule(mi,[],['$(srcdir)/bin/cmn_mkfi', 'mv cmn_info.mkf ..']).
 rule('pi_cfg.h',
  	['$(srcdir)'/generic/'pi_cfg.in'],
 	case(&(context_name),
-		[(mac:(['Duplicate {srcdir}generic/pi_cfg.in pi_cfg.h'])),
+		[(mac:(['Duplicate -y {srcdir}generic/pi_cfg.in pi_cfg.h'])),
 		 ( _ :(['cp $(srcdir)/generic/pi_cfg.in pi_cfg.h']))]) ).
 
 rule('pi_init.c',
@@ -328,13 +328,6 @@ rule('alspro.ppc.lib',
 	['{objects_ppc}'],
 	['{LINKPPC} -o alspro.ppc.lib {LIBLINKFLAGS} {objects_ppc}']).
 
-rule('mpw_pimain.68k.o',
-	 ['{srcdir}generic:pimain.c'],
-	 ['{CC68K} -o mpw_pimain.68k.o {CPPFLAGS} {CFLAGS} {CFLAGS68K} -D MPW_TOOL {srcdir}generic:pimain.c']).
-
-rule('mpw_pimain.ppc.o',
-	 ['{srcdir}generic:pimain.c'],
-	 ['{CCPPC} -o mpw_pimain.ppc.o {CPPFLAGS} {CFLAGS} {CFLAGSPPC} -D MPW_TOOL {srcdir}generic:pimain.c']).
 
 /*
 rule('SIOUX_EOF_Fix.68k.o',
@@ -342,60 +335,65 @@ rule('SIOUX_EOF_Fix.68k.o',
 	['{CC68K} -o SIOUX_EOF_Fix.68k.o {CPPFLAGS} {CFLAGS} {CFLAGS68K} {srcdir}port:macos:SIOUX_EOF_Fix.c']).
 */
 
-rule('sioux_pimain.68k.o',
-	 ['{srcdir}generic:pimain.c'],
-	 ['{CC68K} -o sioux_pimain.68k.o {CPPFLAGS} {CFLAGS} {CFLAGS68K} {srcdir}generic:pimain.c']).
-
 /*
 rule('SIOUX_EOF_Fix.ppc.o',
 	['{srcdir}port:macos:SIOUX_EOF_Fix.c'],
 	['{CCPPC} -o SIOUX_EOF_Fix.ppc.o {CPPFLAGS} {CFLAGS} {CFLAGSPPC} {srcdir}port:macos:SIOUX_EOF_Fix.c']).
 */
 
-rule('sioux_pimain.ppc.o',
-	 ['{srcdir}generic:pimain.c'],
-	 ['{CCPPC} -o sioux_pimain.ppc.o {CPPFLAGS} {CFLAGS} {CFLAGSPPC} {srcdir}generic:pimain.c']).
-
 %% I can't get it to link under CW8
 rule(mpw_alspro_b_68k,
-	[ext('mpw_pimain.68k',&(object)),'alspro.68k.lib'],
-	['{LINK68K} -o mpw_alspro_b_68k {TOOLLINKFLAGS} {MPWINITLIBS68K} mpw_pimain.68k.o alspro.68k.lib {MPWLIBS68K}']).
+	[ext('pimain.68k',&(object)), 'sioux_stub.68k.o', 'alspro.68k.lib'],
+	['{LINK68K} -o mpw_alspro_b_68k {TOOLLINKFLAGS} {MPWINITLIBS68K} pimain.68k.o alspro.68k.lib sioux_stub.68k.o {MPWLIBS68K}']).
 
 
 rule(mpw_alspro_b_ppc,
-	[ext('mpw_pimain.ppc',&(object)),'alspro.ppc.lib'],
-	['{LINKPPC} -o mpw_alspro_b_ppc {TOOLLINKFLAGS} mpw_pimain.ppc.o alspro.ppc.lib {MPWLIBSPPC}']).
+	[ext('pimain.ppc',&(object)), 'sioux_stub.ppc.o', 'alspro.ppc.lib'],
+	['{LINKPPC} -o mpw_alspro_b_ppc {TOOLLINKFLAGS} pimain.ppc.o alspro.ppc.lib sioux_stub.ppc.o {MPWLIBSPPC}']).
 
 rule('mpw_alspro_b',
-	[/*ext('mpw_pimain.68k',&(object)),'alspro.68k.lib', */
-	 ext('mpw_pimain.ppc',&(object)),'alspro.ppc.lib'],
-	[/*'{LINK68K} -o mpw_alspro_b {TOOLLINKFLAGS} {MPWINITLIBS68K} mpw_pimain.68k.o alspro.68k.lib {MPWLIBS68K}',*/
-	 '{LINKPPC} -o mpw_alspro_b {TOOLLINKFLAGS} mpw_pimain.ppc.o alspro.ppc.lib {MPWLIBSPPC}']).
+	[/*ext('pimain.68k',&(object)),'alspro.68k.lib', */
+	 ext('pimain.ppc',&(object)), 'sioux_stub.ppc.o', 'alspro.ppc.lib'],
+	[/*'{LINK68K} -o mpw_alspro_b {TOOLLINKFLAGS} {MPWINITLIBS68K} pimain.68k.o alspro.68k.lib {MPWLIBS68K}',*/
+	 '{LINKPPC} -o mpw_alspro_b {TOOLLINKFLAGS} pimain.ppc.o alspro.ppc.lib sioux_stub.ppc.o {MPWLIBSPPC}']).
 
 rule(sioux_alspro_b_68k,
-	[ext('sioux_pimain.68k',&(object)),'alspro.68k.lib', /* 'SIOUX_EOF_Fix.68k.o', */
+	[ext('pimain.68k',&(object)),'alspro.68k.lib', /* 'SIOUX_EOF_Fix.68k.o', */
 	 '{srcdir}port:macos:alsres.r'],
-	['{LINK68K} -o sioux_alspro_b_68k {SIOUXLINKFLAGS} sioux_pimain.68k.o alspro.68k.lib {SIOUXLIBS68K}',
+	['{LINK68K} -o sioux_alspro_b_68k {SIOUXLINKFLAGS} pimain.68k.o alspro.68k.lib {SIOUXLIBS68K}',
 	 'Rez -o sioux_alspro_b_68k -a {srcdir}port:macos:alsres.r']).
 
 rule(sioux_alspro_b_ppc,
-	[ext('sioux_pimain.ppc',&(object)),'alspro.ppc.lib', /* 'SIOUX_EOF_Fix.ppc.o', */
+	[ext('pimain.ppc',&(object)),'alspro.ppc.lib', /* 'SIOUX_EOF_Fix.ppc.o', */
 	 '{srcdir}port:macos:alsres.r'],
-	['{LINKPPC} -o sioux_alspro_b_ppc {SIOUXLINKFLAGS} sioux_pimain.ppc.o alspro.ppc.lib {SIOUXLIBSPPC}',
+	['{LINKPPC} -o sioux_alspro_b_ppc {SIOUXLINKFLAGS} pimain.ppc.o alspro.ppc.lib {SIOUXLIBSPPC}',
 	 'Rez -o sioux_alspro_b_ppc -a {srcdir}port:macos:alsres.r']).
 
 rule('sioux_alspro_b',
-	[ext('sioux_pimain.68k',&(object)),'alspro.68k.lib',
-	 ext('sioux_pimain.ppc',&(object)),'alspro.ppc.lib',
+	[ext('pimain.68k',&(object)),'alspro.68k.lib',
+	 ext('pimain.ppc',&(object)),'alspro.ppc.lib',
 	 /* 'SIOUX_EOF_Fix.ppc.o', */
 	 '{srcdir}port:macos:alsres.r'],
-	['{LINK68K} -o sioux_alspro_b {SIOUXLINKFLAGS} sioux_pimain.68k.o alspro.68k.lib {SIOUXLIBS68K}',
-	 '{LINKPPC} -o sioux_alspro_b {SIOUXLINKFLAGS} sioux_pimain.ppc.o alspro.ppc.lib {SIOUXLIBSPPC}',
+	['{LINK68K} -o sioux_alspro_b {SIOUXLINKFLAGS} pimain.68k.o alspro.68k.lib {SIOUXLIBS68K}',
+	 '{LINKPPC} -o sioux_alspro_b {SIOUXLINKFLAGS} pimain.ppc.o alspro.ppc.lib {SIOUXLIBSPPC}',
 	 'Rez -o sioux_alspro_b -a {srcdir}port:macos:alsres.r']).
+
+rule('demo_sioux_alspro_b',
+	[ext('pimain.68k',&(object)),'{demo_objects_68k}','alspro.68k.lib',
+	 ext('pimain.ppc',&(object)),'{demo_objects_ppc}','alspro.ppc.lib',
+	 /* 'SIOUX_EOF_Fix.ppc.o', */
+	 '{srcdir}port:macos:alsres.r'],
+	['{LINK68K} -o demo_sioux_alspro_b {SIOUXLINKFLAGS} pimain.68k.o {demo_objects_68k} alspro.68k.lib {SIOUXLIBS68K} {EVE68KLIB}',
+	 '{LINKPPC} -o demo_sioux_alspro_b {SIOUXLINKFLAGS} pimain.ppc.o {demo_objects_ppc} alspro.ppc.lib {SIOUXLIBSPPC} {EVEPPCLIB}',
+	 'Rez -o demo_sioux_alspro_b -a {srcdir}port:macos:alsres.r']).
 
 rule('sioux_alspro',
 	[sioux_alspro_b, 'builtins.r'],
-	['Duplicate sioux_alspro_b sioux_alspro', 'Rez -o sioux_alspro -a builtins.r']).
+	['Duplicate -y sioux_alspro_b sioux_alspro', 'Rez -o sioux_alspro -a builtins.r']).
+
+rule('demo_sioux_alspro',
+	[demo_sioux_alspro_b, 'builtins.r'],
+	['Duplicate -y demo_sioux_alspro_b demo_sioux_alspro', 'Rez -o demo_sioux_alspro -a builtins.r']).
 	
 rule('builtins.r',
 	[mpw_alspro],
@@ -409,7 +407,7 @@ rule('sioux_alspro',
 rule('mpw_alspro',
 	['mpw_alspro_b'],
 	['Delete -i mpw_alspro',
-	 'mpw_alspro_b -g ''save_base_package(mpw_alspro)''']).
+	 'mpw_alspro_b -b -g ''save_base_package(mpw_alspro)''']).
 
 	%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% ALL Versions %%%
@@ -431,7 +429,7 @@ rule(alspro,
 	[alspro_b],
 	case(&(context_name), [
 		(mac: ['Delete -i mpw_alspro',
-		       'alspro_b -g ''save_base_package(alspro)''']),
+		       'alspro_b -b -g ''save_base_package(alspro)''']),
 		(djgpp1: ['alspro_b -b -obp -g ''save_image(alspro,[$(IMGOPTS)])''',
 				  'coff2exe alspro']),
 		(djgpp2: ['alspro_b --b obp -g ''save_image(alspro,[$(IMGOPTS)])''',
