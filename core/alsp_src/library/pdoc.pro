@@ -477,7 +477,7 @@ get_doc(Stream, Doc, File, ModuleIn, ModuleOut)
 	(dmember(FirstLine, [end_of_file,end_of_comment]) ->
 		Doc = empty_doc
 		;
-		get_pred_doc(Stream, FirstLine, File, Doc)
+		get_pred_doc(Stream, FirstLine, File, ModuleOut, Doc)
 	).
 
 /*------------------------------------------
@@ -631,7 +631,7 @@ strip_leader(Tail,Tail,_).
 
 /*------------------------------------------
  *-----------------------------------------*/
-get_pred_doc(Stream, FirstLine, File, Doc)
+get_pred_doc(Stream, FirstLine, File, Module, Doc)
 	:-
 	get_pred_desc(FirstLine,PredDesc),
 %write('  '),write(PredDesc),nl,
@@ -642,9 +642,11 @@ get_pred_doc(Stream, FirstLine, File, Doc)
 		get_brief_descrip(Stream, BriefDescrip)
 	),
 	(BriefDescrip = end_of_comment ->
-		ExtendedDescrip = end_of_comment
+%		ExtendedDescrip = end_of_comment
+		ExtendedDescrip = [BriefDescrip]
 		;
-		get_extended_descrip(Stream, ExtendedDescrip)
+		get_extended_descrip(Stream, InitExtendedDescrip),
+		ExtendedDescrip = [BriefDescrip | InitExtendedDescrip]
 	),
 	(HeaderDoc = [TextPredDesc |  CallingForm_IOPatterns] ->
 		true
@@ -655,7 +657,8 @@ get_pred_doc(Stream, FirstLine, File, Doc)
 	!,
 	make_doc_info(Doc, PredDesc, TextPredDesc, BriefDescrip, 
 	          	CallingForm_IOPatterns, BriefDescrip, ExtendedDescrip,
-		  	File, []).
+		  	File, [], Module).
+
 get_pred_doc(Stream, FirstLine, File, Doc)
 	:-
 	printf(user_output, '!!WARNING: Failure extracting information for predicate: %t\n', [FirstLine]).
@@ -694,13 +697,51 @@ get_brief_descrip(Stream, BriefDescrip)
 	name(NextLineUIA,NextLineChars),
 	strip_leader(NextLineChars, StrippedNextLine, [0' ,9,0'|,0'*, 0'-]),
 	disp_get_brief_descrip(StrippedNextLine, BriefDescripCs, Stream),
-	atom_codes(BriefDescrip, BriefDescripCs).
+	adjust_first_last_chars(BriefDescripCs, UCAdjustedBriefDescripCs),
+	atom_codes(BriefDescrip, UCAdjustedBriefDescripCs).
 get_brief_descrip(Stream, '??').
 
 disp_get_brief_descrip('', BriefDescrip,Stream)
 	:-!,
 	get_brief_descrip(Stream, BriefDescrip).
 disp_get_brief_descrip(BriefDescrip, BriefDescrip,Stream).
+
+
+
+adjust_first_last_chars(BriefDescripCs, AdjustedBriefDescripCs)
+	:-
+	make_first_char_uc(BriefDescripCs, UCAdjustedBriefDescripCs),
+	check_last_for_period(UCAdjustedBriefDescripCs, AdjustedBriefDescripCs).
+
+make_first_char_uc([C | Cs], [AdjC | Cs])
+	:-
+	uc_adj(C, AdjC).
+
+uc_adj(C, AdjC)
+	:-
+	0'a =< C,  C =< 0'z,
+	!,
+	AdjC is C - 32.
+uc_adj(C, C).
+
+check_last_for_period(Cs, AdjCs)
+	:-
+	dreverse(Cs, InitRCs),
+	strip_white(InitRCs, RCs),
+	RCs = [Last | RestRCs],
+	disp_check_last_for_period(Last, RestRCs, NewRCs),
+	dreverse(NewRCs, AdjCs).
+
+disp_check_last_for_period(0'., RestRCs, [0'. | RestRCs])
+	:-!.
+
+disp_check_last_for_period(Last, RestRCs, [0'. | RestRCs])
+	:-
+	dmember(Last, [ 0';, 0',, 0'- ]),
+	!.
+
+disp_check_last_for_period(Last, RestRCs, [0'., Last | RestRCs]).
+
 
 /*------------------------------------------
  *-----------------------------------------*/
@@ -916,7 +957,7 @@ List:simon=[simple-(_A, p(_A)),simon-([zipper/3,coat/2|_B], p(_B))]
 
 make_doc_info(Doc, PredDesc, TextPredDesc, BriefDescrip, 
           	CallingForm_IOPatterns, BriefDescrip, ExtendedDescrip,
-	  	File, AdditionalInfo)
+	  	File, AdditionalInfo, Module)
 	:-
 	Doc = doc(PredDesc, 
 		  (TextPredDesc, BriefDescrip), 
@@ -924,7 +965,8 @@ make_doc_info(Doc, PredDesc, TextPredDesc, BriefDescrip,
 		  BriefDescrip,
 		  ExtendedDescrip,
 		  File, 
-		  AdditionalInfo  ).
+		  AdditionalInfo, 
+		  Module  ).
 
 get_doc_preddesc(Doc, PredDesc)
 	:-
@@ -962,6 +1004,10 @@ add_addl_info(Doc, Tag, Value)
 	NewAdditionalInfo = [Tag=Value | InitAdditionalInfo],
 	mangle(Doc, 7, NewAdditionalInfo).
 
+
+get_doc_module(Doc, Module)
+	:-
+	arg(8, Doc, Module).
 
 
 endmod.

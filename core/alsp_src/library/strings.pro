@@ -38,6 +38,7 @@ export truncate/3.
 export strip_tail_white/2.
 export strip_white/2.
 export strip_both_white/2.
+export strip_both_white_atom/2.
 
 export read_to/5.
 export read_to_blank/3.
@@ -221,7 +222,8 @@ catenate(Atom1, Atom2, Atom3)
 	name(Atom1, A1Cs),
 	name(Atom2, A2Cs),
 	append(A1Cs, A2Cs, A3Cs),
-	string_to_uia(A3Cs, Atom3).
+%	string_to_uia(A3Cs, Atom3).
+	atom_codes(Atom3, A3Cs).
 
 /*!---------------------------------------------------------------------
  |	catenate/2
@@ -509,6 +511,19 @@ strip_both_white(String, Result)
 	dreverse(Result0, RString),
 	strip_white(RString, RResult),
 	dreverse(RResult, Result).
+
+/*!---------------------------------------------------------------------
+ |	strip_both_white_atom/2.
+ |	strip_both_white_atom(Atom, ResultAtom)
+ |	strip_both_white_atom(+, -)
+ |
+ |	- strips leading and trailing white space chars from a prolog atom
+ *!--------------------------------------------------------------------*/
+strip_both_white_atom(Atom, ResultAtom)
+	:-
+	atom_codes(Atom, AtomCodes),
+	strip_both_white(AtomCodes, ResultString),
+	atom_codes(ResultAtom, ResultString).
 
 /*!-----------------------------------------------------------------------------
  |	read_to/5.
