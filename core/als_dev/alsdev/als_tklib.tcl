@@ -135,6 +135,11 @@ proc get_tcl_ga {Arr Tag } {
 	return $MA($Tag)
 }
 
+proc exists_tcl_ga {Arr Tag } {
+	upvar #0 $Arr MA
+	return [info exists MA($Tag)]
+}
+
 proc set_tcl_ga2 {Arr Tag1 Tag2 Value} {
 	upvar #0 $Arr MA
 	set MA($Tag1,$Tag2) $Value
@@ -143,6 +148,11 @@ proc set_tcl_ga2 {Arr Tag1 Tag2 Value} {
 proc get_tcl_ga2 {Arr Tag1 Tag2 } {
 	upvar #0 $Arr MA
 	return $MA($Tag1,$Tag2)
+}
+
+proc exists_tcl_ga2 {Arr Tag1 Tag2 } {
+	upvar #0 $Arr MA
+	return [info exists MA($Tag1,$Tag2)]
 }
 
 ##################################################################################
