@@ -496,6 +496,8 @@ load3(no(extension),Path,Type,Nature,LoadedPath)
 	%% directly load it:
 load3(_,Path,Type,Nature,Path) 
 	:-
+printf('load3 calling load_source: Path=%t,Type=%t,Nature=%t\n',
+			[Path,Type,Nature]),
 	load_source(Path,Type).
 	
 /*-----------------------------------------------------------------------*
