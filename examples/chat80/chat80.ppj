@@ -1,0 +1,21 @@
+myClassPred = project_mgr.
+myModule = alsdev.
+myName = nil.
+title = 'Chat 80'.
+project_file = 'chat80.ppj'.
+primary_project_dir = 'D:\\ExamplesNew\\chat80'.
+list_of_files_slots = [prolog_files].
+list_slots = [].
+text_slots = [].
+search_dirs = [].
+slot_names =
+    [[production_goal,'Startup Goal:'],[debug_goal,'Debug Goal:'],
+        [executable_name,'Image Name:'],[prolog_files,'Files:']].
+executable_name = nil.
+prolog_files =
+    ['als_chat.pro','xgrun.pl','newg.pl','clotab.pl','newdict.pl','slots.pl',
+        'scopes.pl','templa.pl','qplan.pl','talkr.pl','ndtabl.pl',
+        'readin.pl','ptree.pl','aggreg.pl','world0.pl','rivers.pl',
+        'cities.pl','countries.pl','contain.pl','borders.pl','newtop.pl'].
+file_types = [[prolog_files,['.*']]].
+default_dirs = [].

@@ -12,13 +12,15 @@ Serious logic grammar technology is presented in:
 
 + Pereira & Shieber, Prolog and Natural-Language Analysis, CSLI(Stanford) 1987
 
-Code from Bowen and from Covington et al. can be found on the NALP server:
+Obtaining code:
+--------------
+Code from Bowen and from Covington et al. can be found on the ALS server:
 [From Bowen, the relevant DCG file is grammr.pro.]
 
 * By anonymous ftp:
 
 Login to ftp.als.com as ftp (use your email address as password), and
-go to /pub/texts  (see notes below for Web for discussion of files):
+go to /pub/texts  (see notes below for Web for a discussion of the files):
 
 * From a Web server:
 
