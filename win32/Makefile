@@ -1,4 +1,4 @@
-all: student standard
+all: student standard demo
 
 core:
 	cd ../core/win32 ; build.bat
