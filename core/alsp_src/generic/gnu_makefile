@@ -132,10 +132,10 @@ command_line_test: alspro
 	-sh $(TEST_DIR)/tsuite/test_command_line.sh ./alspro
 
 test_suite: alspro
-	./alspro -giac -b $(TEST_DIR)/autotest $(TEST_DIR)/atest_db -g run_tests -p -srcdir $(SOURCE_DIR)
+	./alspro -giac -b $(TEST_DIR)/autotest.pro $(TEST_DIR)/atest_db.pro -g run_tests -p -srcdir $(SOURCE_DIR)
 
 iso_test_suite: alspro
-	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
+	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro $(TEST_DIR)/iso_test_suite/utils_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
 
 ALSDEVFILES = blt_dvsh.pro dbg_class.pro projects.pro
 ALSDEVLIBS=listutl1,misc_db,miscterm,msc_ioin,mscioout,strctutl,strings,tcl_sppt,tk_alslib,typecomp
