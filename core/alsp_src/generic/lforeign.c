@@ -839,28 +839,11 @@ static plugin_error os_load_plugin(const char *lib_name,
     shl_t object;
     void *sym_addr = NULL;
     int err = 0;
-    char *full_name;
     plugin_error result = {no_error, 0, NULL};
     
-    /* Make a copy of the lib_name, so we can add suffixes. */
-
-    full_name = malloc(strlen(lib_name)+4); /* leave room for ".so" */
-    if (full_name == NULL) {
-    	result.type = memory_error;
-    	return result;
-    }
-
-    strcpy(full_name, lib_name);
-
-    object = shl_load(full_name, BIND_IMMEDIATE, 0);
-    if (object == NULL && errno == ENOENT) {
-    	strcat(full_name, ".sl");
-	object = shl_load(full_name, BIND_IMMEDIATE, 0);
-    }
+    object = shl_load(lib_name, BIND_IMMEDIATE, 0);
     if (object == NULL) err = errno;
 
-    free(full_name);
-    
     if (err == 0) {
     	int r;
 	r = shl_findsym(&object, "alspi_dlib_init", TYPE_PROCEDURE, &sym_addr);
@@ -902,9 +885,9 @@ static plugin_error os_load_plugin(const char *lib_name,
     char *full_name;
     plugin_error result = {no_error, 0, NULL};
     
-    /* Make a copy of the lib_name, so we can add prefixes and suffixes. */
+    /* Make a copy of the lib_name, so we can add prefixes. */
 
-    full_name = malloc(strlen(lib_name)+6); /* leave room for "./" and/or ".so" */
+    full_name = malloc(strlen(lib_name)+3); /* leave room for "./" */
     if (full_name == NULL) {
     	result.type = memory_error;
     	return result;
@@ -922,16 +905,15 @@ static plugin_error os_load_plugin(const char *lib_name,
        and Linux to look in the current directory.
      */
 
+    full_name[0] = 0;
+    
     if (!strchr(lib_name, '/')) {
     	strcpy(full_name, "./");
-    	strcat(full_name, lib_name);
     }
+    
+    strcat(full_name, lib_name);
 
     object = dlopen(full_name, RTLD_LAZY);
-    if (object == NULL) {
-    	strcat(full_name, ".so");
-	object = dlopen(full_name, RTLD_LAZY);
-    }
     if (object == NULL) err = dlerror();
 
     free(full_name);
