@@ -339,6 +339,8 @@ typedef struct {
   int globals;
 } thread_info;
 
+#include <process.h>
+
 static void *prolog_thread(void *data)
 {
   thread_info *info = data;
@@ -356,8 +358,11 @@ static void *prolog_thread(void *data)
   PI_rungoal_pe(info->hpe, builtinsmod, init, PI_SYM);
   PI_rungoal_pe(info->hpe, usermod,  info->goal, info->goalt);
 
+delete_prolog_engine(info->hpe);
+
   free(info);
 
+	_endthreadex(0);
   return NULL;
 }
 
@@ -396,7 +401,11 @@ int pbi_new_thread(PE)
 #elif macintosh
 	id = CreateThread(hpe, prolog_thread, info);
 #elif WIN32
-	CreateThread(NULL, 0, prolog_thread, info, 0, (unsigned long *)&id);
+//	CreateThread(NULL, 0, prolog_thread, info, 0, (unsigned long *)&id);
+	{ HANDLE h;
+	h = (HANDLE)_beginthreadex(NULL, 0, prolog_thread, info, 0, (unsigned int *)&id);
+	CloseHandle(h);
+	}
 #endif
 
 	return PI_unify(v2, t2, id, PI_INT);
