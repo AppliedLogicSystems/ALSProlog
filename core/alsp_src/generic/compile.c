@@ -205,8 +205,8 @@ compile_clause(r, fromparser)
      *--------------------------------------------------------------*/
 
     cd_cmod = cd_gmod = cur_mod;	/* Set the clause module
-					 * appropriately
-					 */
+					 				 * appropriately
+					 				 */
     cd_cutpt = -1;		/* No cutpt info requested yet */
 
     if (!comp_rule(r)) {	/* Generate the code for the clause  */

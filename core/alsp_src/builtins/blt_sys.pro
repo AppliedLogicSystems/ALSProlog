@@ -11,28 +11,31 @@
  |	         Keith Hughes, Ilyas Cicekli
  |	Original Creation Date: 3/20/86
  *================================================================*/
-
 module builtins.
-%use objects.
  
-/*
- * curmod/1          (returns the name of the current module)
- *
- * The following icode command creates a module closure.  In this
- * implementation, the module name is attached as the first argument
- * instead of the last.  (The PC implementation puts the module name
- * in as the last argument).
- */
+/*-------------------------------------------------------------------*
+ | 	curmod/1          (returns the name of the current module)
+ |	curmod(Mod)
+ |	curmod(?)
+ |
+ |	- Mod is the current module context
+ |
+ |	The following icode command creates a module closure, which 
+ |	unifies the module obtained from the module closure with the argument.
+ *-------------------------------------------------------------------*/
 
 :-	compiletime,
 	module_closure(curmod,1,curmod).
 
 curmod(M,M).
 
-/*
- * modules/2
- */
-
+/*------------------------------------------------------------------*
+ |	modules/2
+ |	modules(Module, List)
+ |	modules(+, -)
+ |
+ |	- List is the "use list" of Module
+ *------------------------------------------------------------------*/
 export modules/2.
 
 modules(Module,UseList) :-
@@ -44,42 +47,42 @@ next_modules(N,_,_,Module,UseList) :-
 	'$next_module'(N,NN,NextModule,NextUseList),
 	next_modules(NN,NextModule,NextUseList,Module,UseList).
 
-/*
+/*------------------------------------------------------------------*
  * procedures/4
  * all_procedures/3
  * all_procedures/4
  * all_ntbl_entries/4
- */
+ *------------------------------------------------------------------*/
 
 export procedures/4.
 export all_procedures/3.
 export all_procedures/4.
 export all_ntbl_entries/4.
 
-/*
+/*------------------------------------------------------------------*
  * Procedures written in Prolog.
- */
+ *------------------------------------------------------------------*/
 procedures(M,P,A,DBRef) :-
 	procedures(M,P,A,DBRef,0).
 
-/*
+/*------------------------------------------------------------------*
  * Procedures written in both Prolog and C.
- */
+ *------------------------------------------------------------------*/
 all_procedures(M,P,A) :-
 	procedures(M,P,A,_,1).
 
 all_procedures(M,P,A,DBRef) :-
 	procedures(M,P,A,DBRef,1).
 
-/*
+/*------------------------------------------------------------------*
  * All name table entries
- */
+ *------------------------------------------------------------------*/
 all_ntbl_entries(M,P,A,DBRef) :-
 	procedures(M,P,A,DBRef,2).
 
-/*
+/*------------------------------------------------------------------*
  * Basic access to procedure info:
- */
+ *------------------------------------------------------------------*/
     	% Directly access the name table entry
 procedures(M,P,A,DBRef,F) 
 	:-
@@ -104,9 +107,9 @@ procedures(CurProc,F,M,P,A,DBRef)
 	'$nextproc'(CurProc,F,NextProc),
 	procedures(NextProc,F,M,P,A,DBRef).
 
-/*
+/*------------------------------------------------------------------*
  * clauses/4
- */
+ *------------------------------------------------------------------*/
 
 export clauses/4.
 
@@ -114,7 +117,7 @@ clauses(M,P,A,DBRef) :-
 	procedures(M,P,A,First,0),
 	clauses(First,DBRef).
 
-/*
+/*------------------------------------------------------------------*
  * make_det_gv/1
  *
  * Name should be a string (list of small numbers) with the name of the
@@ -133,7 +136,7 @@ clauses(M,P,A,DBRef) :-
  * uninstantiate portions of the term whose computation was 
  * non-determinate.
  *
- */
+ *------------------------------------------------------------------*/
 
 :-	compiletime,
 	module_closure(make_det_gv,1).
@@ -157,22 +160,35 @@ make_det_gv(Mod,Name) :-
 				copy_term(SetVar,CopySetVar),
 				gv_set(VN,CopySetVar))	).
 
-/*
- * exec_file_command appends a command onto a file string and calls
- * system on the result.
- */
+/*------------------------------------------------------------------*
+ | exec_file_command appends a command onto a file string and calls
+ | system on the result.
+ *------------------------------------------------------------------*/
 
-exec_file_command(Command,FileStruct) :-
+exec_file_command(Command,FileStruct) 
+	:-
 	make_file_name(FileStruct,File,_),
 	atom_concat(Command,' ',CommandPlusSpace),
 	atom_concat(CommandPlusSpace,File,NewCommandName),
 	system(NewCommandName).
 
-/*
- * Editor Interface
- *   vi, edit, editorchange
- *
- */
+/*--------TO LIBRARY ??---------------------------------------------*
+ |	exec_to/3
+ |	exec_to(Module, TargetStream, Code)
+ *------------------------------------------------------------------*/
+export exec_to/3.
+exec_to(Module, TargetStream, Code) 
+	:-
+	telling(CurrentStream),
+	tell(TargetStream),
+	Module:call(Code),
+	tell(CurrentStream).
+
+/*------------------------------------------------------------------*
+ | Editor Interface
+ |   vi, edit, editorchange
+ |
+ *------------------------------------------------------------------*/
 
 export vi/0.
 export vi/1.
@@ -221,9 +237,9 @@ record_edit(File) :-
 	abolish('$editing',1),
 	assert('$editing'(File)).
 
-/*
+/*------------------------------------------------------------------*
  * ls, cd, and dir
- */
+ *------------------------------------------------------------------*/
 
 export ls/0.
 export ls/1.
@@ -285,9 +301,9 @@ ls(Dir) :-
 cd(Dir) :- 
 	change_cwd(Dir).
 
-/*
+/*------------------------------------------------------------------*
  * printing system usage information
- */
+ *------------------------------------------------------------------*/
 
 export statistics/0.
 export display_stats/1.
@@ -327,14 +343,44 @@ heap_status(Hleft) :-
 
 :- make_hash_table('_libinfo').
 
+	/*---------------------------------------------------------*
+	 |	Below, we can almost just use cslt_blts_ld/3 from
+	 |	builtins.pro.  However, that doesn't handle the
+	 |	file clause group, and so the clauses loaded from
+	 |	a library file would be assigned whatever clause group
+	 |	was current.  So we have to put a little wrapper around
+	 |	which assigns the clause group for the library file.
+	 |	Unlike all other (user-defined) files, the library
+	 |	leaves the .pro extension on the path in the record
+	 |	for fcg.  There is nothing significant in this; just
+	 |	expedient.
+	 *---------------------------------------------------------*/
+
+cslt_lib_ld(FileName, FilePathPro,FilePathObp)
+	:-
+	get_fcg(FilePathPro,CG),
+	push_clausegroup(CG),
+	get_reconsult_flag(OldRFlag),
+	set_reconsult_flag(1),
+	cslt_blts_ld(FileName, FilePathPro,FilePathObp),
+	set_reconsult_flag(OldRFlag),
+	pop_clausegroup(_).
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Load an individual library file as
 	%% driven by a given Call (in a Module):
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+/*---------------------------------------------------------------------*
+ |	lib_load/2
+ |	lib_load(Module,Call) 
+ |	lib_load(+,+) 
+ *---------------------------------------------------------------------*/
 lib_load(Module,Call) 
 	:-
 	functor(Call,P,A),
 	get_libinfo(Module:P/A,FileName),
+%functor(Call,CF,CA),pbi_write( lib_load(Module,CF/CA, FileName)  ), pbi_nl, pbi_ttyflush,
 	(pdel_libinfo(_,FileName), fail ; true),
 	lib_load(FileName, Module, P,A, Module,Call).
 
@@ -342,20 +388,38 @@ lib_load(FileName, Module, P,A, Module,Call)
 	:-
 	is_absolute_pathname(FileName),
 	!,
-	(resource_load(FileName); load(FullFileName,1,_,obp,_)
+	(resource_load(FileName)
+		; load(FileName,1,_,obp,_,_)
 		; existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) ),
 	!,
 	Module:call(Call).
-
 
 lib_load(FileName, Module, P,A, Module,Call)
 	:-
 	als_lib_lcn(ALSLibPathHead),
 	extendPath(ALSLibPathHead, FileName, FullFileName),
-	(resource_load(FileName); load(FullFileName,1,_,obp,_)
-		; existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) ),
+%pbi_write( lib_load_6(FullFileName)  ), pbi_nl, pbi_ttyflush,
+	sys_env(OS,_,_),
+	(   OS = macos, !, Sepr = ':'
+		;   OS = mswin32, !, Sepr = '\\'
+		;   Sepr = '/'
+	),
+    '$atom_concat'(FullFileName,'.pro',FilePathPro),
+	'$atom_concat'(FullFileName,'.obp',FilePathObp),
+%pbi_write( lib_load_6(FilePathPro,FilePathObp)  ), pbi_nl, pbi_ttyflush,
+	(cslt_lib_ld(FileName, FilePathPro,FilePathObp)
+		; 
+		existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) 
+	),
 	!,
 	Module:call(Call).
+
+/*	--- old code prior to cslt_lib_ld:
+	(resource_load(FileName)
+		; load(FullFileName,1,_,obp,_,_)
+		; existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) ),
+*/
+
 
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -387,7 +451,10 @@ force_libload_file(File,DirDC)
 	:-
 	extendPath(DirDC,File,FileName),
 	als_advise('Loading %s\n',[FileName]),
-	(load(FileName,1,_,obp,_) ->
+    '$atom_concat'(FileName,'.pro',FilePathPro),
+	'$atom_concat'(FileName,'.obp',FilePathObp),
+%	(load(FileName,1,_,obp,_,_) ->
+	(cslt_lib_ld(File, FilePathPro,FilePathObp) ->
 		(pdel_libinfo(_,File), fail ; true),
 		als_advise('...loaded\n',[])
 		;
@@ -401,10 +468,10 @@ force_libload_file(File,DirDC)
 	%% entry (name table and libinfo hash table):
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 export libactivate/4.
 libactivate(M,[LH|LT],PredList,ModClosures) 
 	:-
-curmod(CurMod),
 	libhide(M,[LH|LT],PredList),
 	mc_all(ModClosures, M, [LH | LT]),
 	!.
@@ -456,20 +523,20 @@ libhide0([P/A | Rest], M, LibFileName)
 :-op(800,fx,spy).
 :-op(800,fx,nospy).
 
-/*
+/*------------------------------------------------------------------*
  * For use by the windowed debugger:
- */
+ *------------------------------------------------------------------*/
 
 sys_exclude(builtins).
 sys_exclude(sio).
 sys_exclude(objects).
 sys_exclude(xconsult).
 
-/*
+/*------------------------------------------------------------------*
  *
  * The following global variable access predicates are for use with the
  * shell and with the debugger.
- */
+ *------------------------------------------------------------------*/
 
 :-	make_gv('_shell_level'), set_shell_level(0).	%% shell level
 
@@ -506,10 +573,10 @@ export setDebugInterrupt/1.
 
 endmod.  % debugger
 
-/* 
+/*------------------------------------------------------------------* 
  * dbg_notrace is used to stop tracing.  It is detected by the debugger
  * explicitly.
- */
+ *------------------------------------------------------------------*/
 
 export dbg_notrace/0.
 dbg_notrace.
@@ -582,56 +649,5 @@ toggle_debug_sys_tag(WhichFeat, Module)
 
 
 
-/*************************
-/*
- * xform_command_or_query(InGoal,OutGoal)
- *
- *	Transforms InGoal to OutGoal, replacing certain input patterns
- *	with different output patterns.  In particular, list forms are
- *	transformed into consults.  This procedure may also be used to
- *	perform other transformations.
- *
- * This procedure is exported as it is used by xconsult.
- */
-
-export xform_command_or_query/2.
-
-xform_command_or_query(VGoal,VGoal) :-
-	var(VGoal),
-	!.
-xform_command_or_query([File|Files],Consults) :-
-	!,
-	xform_file_list(File,Files,Consults).
-xform_command_or_query((G1,G2),(TG1,TG2)) :-
-	!,
-	xform_command_or_query(G1,TG1),
-	xform_command_or_query(G2,TG2).
-xform_command_or_query((G1;G2),(TG1;TG2)) :-
-	!,
-	xform_command_or_query(G1,TG1),
-	xform_command_or_query(G2,TG2).
-xform_command_or_query((G1->G2),(TG1->TG2)) :-
-	!,
-	xform_command_or_query(G1,TG1),
-	xform_command_or_query(G2,TG2).
-xform_command_or_query((G1|G2),(TG1|TG2)) :-
-	!,
-	xform_command_or_query(G1,TG1),
-	xform_command_or_query(G2,TG2).
-xform_command_or_query(call(G),call(TG)) :-
-	!,
-	xform_command_or_query(G,TG).
-xform_command_or_query(M:G,M:TG) :-
-	!,
-	xform_command_or_query(G,TG).
-xform_command_or_query(G,G).
-
-xform_file_list(File1,[File2|Files],(consult(File1),Consults)) :-
-	!,
-	xform_file_list(File2,Files,Consults).
-xform_file_list(File,_,consult(File)).
-
-
-*************************/
 
 endmod.		%% blt_sys.pro: System-type builtins.

@@ -1,13 +1,13 @@
 /*===================================================================*
- | 		builtins.pro         
+ | 		kbuiltins.pro         
  | 	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
  |		Distribution rights per Copying ALS
  |
  |	Builtin predicates for ALS-Prolog -- Principal File
+ |		Version for KERNAL ALS Prolog
  |
- |	Authors: Kevin A. Buettner, Ken Bowen, Chris White, 
- |	         Keith Hughes, Ilyas Cicekli
- |	Original Creation Date: 3/20/86
+ |	Authors: Kevin A. Buettner, Ken Bowen, Chuck Hughes
+ |	Original Creation Date: 3/20/86; this version: Aug 1996 [CH]
  *===================================================================*/
 
 module builtins.

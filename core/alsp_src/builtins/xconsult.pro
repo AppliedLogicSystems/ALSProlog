@@ -211,6 +211,12 @@ process((A->B),Names,Vars,Stream, File, ModStack)
 	prolog_system_error(s(rdef_arrow,Stream),[]),
 	readFile(Stream, File, ModStack).
 
+process((!),Names,Vars,Stream, File, ModStack)
+	:- !,
+		%% rdef_cut: "Attempt to redefine cut - ignored.\n"
+	prolog_system_error(s(rdef_cut,Stream),[]),
+	readFile(Stream, File, ModStack).
+
 process(Fact, Names, Vars,Stream, File, ModStack)
 	:-
 	xform(Fact,true,NewBody,Names,Vars),

@@ -483,8 +483,8 @@ pbi_obp_load()
 #ifdef OBP
 	dbprot_t odbrs;
 	makeobp = 0;		/* don't want to make obp out of loading of
-				 * one
-				 */
+				 		 * one
+				 		 */
 	odbrs = w_dbprotect(DBRS_WRITABLE);
 	status = f_load((char *) name);
 	(void) w_dbprotect(odbrs);
@@ -517,8 +517,8 @@ pbi_resource_load(void)
 
 	dbprot_t odbrs;
 	makeobp = 0;		/* don't want to make obp out of loading of
-				 * one
-				 */
+				 		 * one
+				 		 */
 	odbrs = w_dbprotect(DBRS_WRITABLE);
 	status = obpres_load((char *) name);
 	(void) w_dbprotect(odbrs);

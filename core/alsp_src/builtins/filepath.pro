@@ -438,7 +438,16 @@ rootPlusPath(Disk, PathList, DiskPlusPath) :-
 %rootPlusPath(Disk, [File], File) :-!.
 rootPlusPath('', PathList, Path) :-
 	subPath(PathList, Path).
-rootPlusPath(Disk, PathList, DiskPlusPath) :-
+
+rootPlusPath(root, PathList, DiskPlusPath) 
+	:-
+	var(DiskPlusPath),
+	!,
+	(PathList = ['' | _] -> NPL = PathList ; NPL = ['' | PathList]),
+	rootPlusPath('', NPL, DiskPlusPath).
+
+rootPlusPath(Disk, PathList, DiskPlusPath) 
+	:-
 	var(DiskPlusPath),
 	disk_separator(DS),
 	subPath(PathList, Path),

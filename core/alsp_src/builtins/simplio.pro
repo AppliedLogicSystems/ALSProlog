@@ -195,18 +195,19 @@ themenu(List, ChoiceNum, Options,InS,OutS)
  |	to a line, followed by a period.
  *!--------------------------------------------------------------------*/
 export output_prolog_list/1.
+export output_prolog_list/6.
+export output_prolog_list/7.
+
 output_prolog_list(List)
 	:-
 	current_output(Stream),
-	output_prolog_list(Stream, List,'','.',' - ','',' *').
+	output_prolog_list(List,Stream,'','.',' - ','',' *').
 
-export output_prolog_list/6.
 output_prolog_list(List,Indent,Term,Spacer,DefaultContent,DfltMark)
 	:-
 	current_output(Stream),
 	output_prolog_list(List,Stream,Indent,Term,Spacer,DefaultContent,DfltMark).
 
-export output_prolog_list/7.
 output_prolog_list([],Stream,Indent,Term,Spacer,DefaultContent,DfltMark).
 output_prolog_list([Item | RestList],Stream,Indent,Term,Spacer,DefaultContent,DfltMark)
 	:-

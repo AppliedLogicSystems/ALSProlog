@@ -899,11 +899,44 @@ xform_file_list(File1,[File2|Files],(consult(File1),Consults)) :-
 	xform_file_list(File2,Files,Consults).
 xform_file_list(File,_,consult(File)).
 
-
-
 /*----------------------------------------------------------------
  | Part 4: LOADING THE REST OF THE BUILTINS FILES
  *----------------------------------------------------------------*/
+
+/*!----------------------------------------------------------------
+ | exists_file/1
+ | exists_file(Path)
+ | exists_file(+)
+ |
+ |	-- Determine whether a file or subdir exists.
+ |
+ | If Path is an atom describing a path (possibly relative, possibly
+ | just a FileName itself),  determines whether the file or subdir Path 
+ | exists by calling $accesss/2.
+ | [This calls the the Unix Section 2 access system service].  
+ | Note that access mode 0 is used, which merely checks for the presence
+ | of the file.  The access/2 modes are:
+ |           0 -- test for presence of file
+ |           1 -- test for execute (search) permission
+ |           2 -- test for write permission
+ |           3 -- test for read permission
+ |
+ | Note exists/1 is (temporarily) retained for backwards compatibility.
+ *!----------------------------------------------------------------*/
+export exists_file/1.
+exists_file([Head | Tail])
+	:-!,
+	subPath([Head | Tail], Path),
+	'$access'(Path,0).
+
+exists_file(Path) 
+	:-
+	'$access'(Path,0).
+
+%% Temporary (backwards compat):
+export exists/1.
+exists(FileName) :-
+	'$access'(FileName,0).
 
 load_builtins(File) 
 	:-
@@ -940,7 +973,32 @@ consult_builtins(BDir, File)
 %pbi_write(consult_builtins=FileAndPath), pbi_nl,pbi_ttyflush,
 	'$atom_concat'(FileAndPath,'.pro',FilePathPro),
 	'$atom_concat'(FileAndPath,'.obp',FilePathObp),
-	(resource_load(File) ;load4(FilePathPro,FilePathObp,1,obp,_)).
+	cslt_blts_ld(File, FilePathPro,FilePathObp).
+%	(resource_load(File) ; load4(FilePathPro,FilePathObp,1,obp,_)).
+
+	/*---------------------------------------------------------*
+	 |	Note: Basic builtins loaded by this procedures
+	 |	are assigned file clause group (fcg) = -1, by
+	 |	virtue of the initialization of top_clausegroup.
+	 *---------------------------------------------------------*/
+	 
+cslt_blts_ld(File, FilePathPro,FilePathObp)
+	:-
+	resource_load(File),
+	!.
+
+cslt_blts_ld(File, FilePathPro,FilePathObp)
+	:-
+	comp_file_times(FilePathPro,FilePathObp),
+	obp_load(FilePathObp, 1),
+	!.
+cslt_blts_ld(File, FilePathPro,FilePathObp)
+	:-
+	obp_open(FilePathObp),
+	xconsult(FilePathPro, NErrs),
+%pbi_write(cslt_blts_ld(File,nerrs=NErrs)),pbi_nl,pbi_ttyflush,
+	obp_close,
+	(NErrs = 0, !; unlink(FilePathObp), fail).
 
 :-	auto_use(sio).
 :-	auto_use(debugger).
@@ -970,7 +1028,6 @@ ld_fs(OS)
 	load_builtins(BDir, blt_term),
 	load_builtins(BDir, blt_db),		%% must come before blt_sys
 	load_builtins(BDir, filepath),		%% also must come before blt_sys
-	load_builtins(BDir, blt_io),
 	load_builtins(BDir, xconsult),
 	ld_fs(OS),
 	load_builtins(BDir, blt_atom),
@@ -987,6 +1044,7 @@ ld_fs(OS)
 %	consult_builtins(BDir, blt_lib), 
 	consult_builtins(BDir, blt_msg),
 	consult_builtins(BDir, blt_brk),
+	consult_builtins(BDir, blt_io),				%%%% cleanup <<
 	consult_builtins(BDir, fs_cmn),
 	consult_builtins(BDir, dcgs),
 	consult_builtins(BDir, blt_pckg),
@@ -994,6 +1052,9 @@ ld_fs(OS)
 	consult_builtins(BDir, simplio),
 	consult_builtins(BDir, blt_flgs),
 	consult_builtins(BDir, blt_misc),
+		%% ALS shell stuff starts here:
+	consult_builtins(BDir, blt_shlr),			
+	consult_builtins(BDir, blt_cslt),			
 	consult_builtins(BDir, blt_shl).
 
 %%--------------------------------------------
