@@ -277,8 +277,7 @@ rint(d)
 #endif
 *******/
 static double
-rint0(d)
-    double d;
+rint0(double d)
 {
     return (floor(d + 0.5));
 }
