@@ -84,6 +84,14 @@ static	int	bottom_stack_page_is_protected = 0;
 #ifdef _AIX
 #define	STACKSTART	0x30000000
 #define CODESTART	0x38000000
+#elif __hp9000s800
+/* On HP-UX the first Gigabyte of low memory is used for the program
+   code (text).  These locations seem to work on 700 series machines
+   but the memory map is slightly different under 800 - so there could
+   be problems.
+*/
+#define	STACKSTART	0x48000000
+#define CODESTART	0x4d000000
 #else
 #define	STACKSTART	0x01000000
 #define CODESTART	0x05000000
@@ -332,7 +340,10 @@ allocate_prolog_heap_and_stack(size)
 void
 protect_bottom_stack_page()
 {
+    int result;
     mprotect((caddr_t) STACKSTART, (size_t)(NPROTECTED * pgsize), PROT_NONE);
+    if (result == -1)
+        fatal_error(FE_BIGSTACK, 0);
     bottom_stack_page_is_protected = 1;
 }
 
