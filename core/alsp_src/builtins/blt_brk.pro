@@ -66,7 +66,7 @@ responses( M, G, [
 options(ListOfCodes, Responses, Prompt,
 			[codes		= ListOfCodes,
 			 responses	= Responses,
-			 default	= a,
+			 default	= 'Abort Computation',
 			 title		= 'Break Handler',
 			 indent		= '    ',
 			 prompt		= Prompt ] ).
@@ -82,7 +82,9 @@ breakhandler0(M,G)
 	Options = [io_streams=(warning_input,warning_output) | Options0],
 		%% Note: menu/4 defined in Library in iolayer.pro:
 	menu(break_window,ChoiceItems,Response,Options),
-	break_handler(Response,M,G).
+	position(ChoiceItems, Response, PosN),
+	nth(PosN, Responses, Resp),
+	break_handler(Resp,M,G).
 
 break_handler(abort,M,G) 
 	:-!, 

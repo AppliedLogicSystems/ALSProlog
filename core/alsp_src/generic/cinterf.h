@@ -10,6 +10,10 @@
 #ifndef CINTERF_INCLUDED
 #define CINTERF_INCLUDED  1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*---------------------------------------------------------------------
  * Information on the fields of a C-structure/C-union is kept in
  * an array (one per structure/union) that has the following layout.
@@ -71,7 +75,7 @@ extern	int	sym_insert_2long PARAMS(( char *, int, long, long ));
 extern	int	sym_insert_dbl	PARAMS(( char *, int, double ));
 /* FIXME: Do these need to be extern?? */
 extern	void	CI_makefar	PARAMS(( PWord *, int *, unsigned short * ));
-extern	int	CI_get_integer	PARAMS(( unsigned long *, unsigned long ));
+extern	int	CI_get_integer	PARAMS(( unsigned long  *, unsigned long ));
 extern	int	CI_get_double	PARAMS(( double *, unsigned long, unsigned long ));
 
 #define CI_INTCONST(name,val) 	\
@@ -107,6 +111,9 @@ extern	int	CI_get_double	PARAMS(( double *, unsigned long, unsigned long ));
 #define CI_RCONST(name,val)		\
 	sym_insert_2long(name,CI_RCONSTTYPE,(long)val,0);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* CINTERF_INCLUDED */
 

@@ -282,6 +282,35 @@ merge_plists([Tag=LVal | RestLeft], Right, [Tag=MergeVal | RestResult])
     merge_plists(RestLeft, RestRight, RestResult).
 
 /*!------------------------------------------------------
+ |	merge_tagged_lists/3
+ |	merge_tagged_lists(LeftEqnList, RightEqnList, MergedLists)
+ |	merge_tagged_lists(+, +, -).
+ |
+ |	-	(recursively) merges two tagged equation lists
+ |
+ |	LeftEqnList and RightEqnList are lists of equations of the form
+ |
+ |      tag = value
+ |
+ |	MergedLists consists of all equations occurring in either
+ |	LeftEqnList or RightEqnList, where if the equations
+ |	
+ |		Tag=LVal    and Tag = RVal
+ |
+ |	occur in LeftEqnList and RightEqnList, respectively, 
+ |	MergedLists will contain the equation
+ |
+ |		Tag = LVal
+ *!-----------------------------------------------------*/
+merge_tagged_lists(Left, [], Left) :-!.
+merge_tagged_lists([], Right, Right) :-!.
+
+merge_tagged_lists([Tag=LVal | RestLeft], Right, [Tag=LVal | RestResult])
+    :-
+    list_delete(Right, Tag=RVal, RestRight),
+    merge_tagged_lists(RestLeft, RestRight, RestResult).
+
+/*!------------------------------------------------------
  |	mangle_change_tagged/3.
  |	mangle_change_tagged(PList,Tag,NewValue)
  |	mangle_change_tagged(+,+,+)

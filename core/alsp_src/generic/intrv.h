@@ -2,7 +2,7 @@
  |         intrv.h
  |	Copyright (c) 1995 Applied Logic Systems, Inc.
  |
- |	Include file for the generated file intrv.c
+ |	Include file for the generated file intrv.c and int_net.c
  *===============================================================*/
 
 #include "defs.h"
@@ -82,7 +82,7 @@ ALSO clarify: w_Error (Error) label in wrap:
 #define fp			double
 #define int_fp		fp
 
-	/* Drop following externs if/when intaux.c is included in this file */
+	/* Move/change following externs when defined: */
 extern void iaerror    PARAMS( (void) );
 extern void deact    PARAMS( (void) );
 	/* Dummy */
@@ -105,7 +105,7 @@ typedef union fpoverlay {
 #endif
 
 	/* This may be wrong for SunOS (or others) -- check for iszero defined in include */
-    /* THis may be unused:
+    /* This may be unused:
 #define iszero(x)	       (x EQ -0.0)
 #define int_fp		  fp
     */
@@ -205,18 +205,33 @@ int BNRP_oldRM;
 #endif
 
 
-
-
 /* QUEUE STUFF */
-
 
 typedef struct {
 	int    opcd;
-	double zl,zh,xl,xh,yl,yh;
-	PWord  X,Y,Z,goal;
+	PWord  *z, *x, *y, *goal;
+	int    zt, xt, yt;
 	} primop;
 
+#define USED_BY_POSITION	3
+#define UIA_POSITION		4
 
-
+typedef struct {
+	long    pad;
+	double lower,upper;
+	} uia_dbls;
 
 #endif /* defined(INTCONSTR) */
+
+
+/****************************************************************
+   WORKING OUT THE FEATURES:
+	[Autoconf tests need to be developed]
+
+   For SPARC/Solaris:
+
+   #define HAVE_IEEEFP     1
+   #define HAVE_NEXTAFTER  1
+   #define HAVE_FPSETROUND 1
+
+ ****************************************************************/

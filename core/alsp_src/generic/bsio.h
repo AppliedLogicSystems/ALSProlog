@@ -44,6 +44,7 @@
  |	SIO_COLUMN	--	number of character in current line (this
  |					value will be zero at the start of a line)
  |					This value is valid only on read-only streams
+ |	SIO_EOLNTYPE	--	End of line type.
  |
  | Certain types of streams need a "header" to be written out before the actual
  | data to be written.  SIO_HEADER(buf,index) provides longword access to
@@ -77,8 +78,9 @@
 #define SIO_BFSIZE(b)		(*((long *)(b) + 15))
 #define SIO_TYPE(b)		(*((long *)(b) + 16))
 #define SIO_COLUMN(b)		(*((long *)(b) + 17))
+#define SIO_EOLNTYPE(b)		(*((long *)(b) + 18))
 
-#define SIO_LAST	18
+#define SIO_LAST	19
 
 #define SIO_HDSIZE	8		/* size of header (in long words) */
 
@@ -109,6 +111,7 @@
 #define sio_BFSIZE		60
 #define sio_TYPE		64
 #define sio_COLUMN		68
+#define sio_EOLNTYPE		72
 
 #define sio_BUFFER	4*(SIO_LAST+SIO_HDSIZE)
 		/* ^ Assembly language translator doesn't understand */
@@ -196,6 +199,9 @@
 
 #define SIOF_CLONE	(SIOF_NEEDACCEPT) 	/* flags which need to be cloned */
 
+#define SIOF_GOT_CR	0x10000		/* last byte read was a carriage return */
+#define SIOF_PUT_CR	0x20000		/* last byte written was a carriage return */
+
 /*-------------------------------------------------------------------------*
  | Buffering modes:	These are the numeric codes that sio_open receives
  |			to determine the buffering flags to set (see above)
@@ -205,6 +211,21 @@
 #define SIOB_LINE		1	/* line mode */
 #define SIOB_BYTE		2	/* byte mode */
 #define SIOB_DONTBLOCK	4	/* or'd in with one of the above */
+
+
+/* End-Of-Line Type modes */
+
+#define SIOEOLN_READ_CRLF	0	/* Read DOS/Internet TTY style lines. */
+#define SIOEOLN_READ_CR		1	/* Read Macintosh style lines. */
+#define SIOEOLN_READ_LF		2	/* Read Unix style lines. */
+#define SIOEOLN_READ_UNIV	3	/* Read any end-of-line style. */
+
+#define SIOEOLN_WRITE_CRLF	0	/* Write DOS/Internet TTY style lines. */
+#define SIOEOLN_WRITE_CR	4	/* Write Macintosh style lines. */
+#define SIOEOLN_WRITE_LF	8	/* Write Unix style lines. */
+
+#define SIOEOLN_READ_MASK	3	/* A mask for extracting end-of-line read values. */
+#define SIOEOLN_WRITE_MASK	12	/* A mask for extracting end-of-line write values. */
 
 /*
  * The following defines give the functor and arity for stream descriptors

@@ -161,8 +161,6 @@ cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 		 (_: &(basic_unix_includes) ) 
 		] ).
 
-%		 (_: '-I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(srcdir)/$(ARCH)/$(SOS) ' ) 
-
 &(cpp_defines)		= 
 	case(&(context_name),[
 		(mac: ' -D HAVE_CONFIG_H'),
@@ -172,6 +170,10 @@ cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 
 irule(c,'68k.o') = irule(c, '68k.o', ['{CC68k} -o {TargDir}{Default}.68k.o {CPPFLAGS} {CFLAGS} {CFLAGS68k} {DepDir}{Default}.c']).
 irule(c,'ppc.o') = irule(c, 'ppc.o', ['{CCppc} -o {TargDir}{Default}.ppc.o {CPPFLAGS} {CFLAGS} {CFLAGSppc} {DepDir}{Default}.c']).
+
+irule(c,w31) = 
+	irule(c,&(object),
+		['$(CC) -c @cppflags $(CFLAGS) $<']).
 
 irule(c) = 
 	irule(c,&(object),

@@ -33,10 +33,11 @@ pbi_equal()
     w_get_An(&v2, &t2, 2);
 
     if (w_unify(v1, t1, v2, t2))
-	SUCCEED;
+		SUCCEED;
     else
-	FAIL;
-}
+		FAIL;
+
+}	/* pbi_equal */
 
 int
 pbi_arg()
@@ -53,14 +54,14 @@ pbi_arg()
     w_get_An(&v3, &t3, 3);	/* Get argument to unify with */
 
     if (t1 != WTP_INTEGER)
-	FAIL;
+		FAIL;
 
     switch (t2) {
 	case WTP_STRUCTURE:
 	    w_get_functor(&functor, v2);
 	    w_get_arity(&arity, v2);
 	    if (v1 > arity || v1 < 1)
-		FAIL;
+			FAIL;
 
 	    w_get_argn(&argval, &argtype, v2, (int) v1);
 
@@ -68,11 +69,11 @@ pbi_arg()
 
 	case WTP_LIST:
 	    if (v1 == 1)
-		w_get_car(&argval, &argtype, v2);
+			w_get_car(&argval, &argtype, v2);
 	    else if (v1 == 2)
-		w_get_cdr(&argval, &argtype, v2);
+			w_get_cdr(&argval, &argtype, v2);
 	    else
-		FAIL;
+			FAIL;
 
 	    break;
 
@@ -80,17 +81,20 @@ pbi_arg()
 	    FAIL;
     }
 
-    if (w_unify(argval, argtype, v3, t3))
-	SUCCEED;
-    else
-	FAIL;
-}
+ 	if (w_unify(argval, argtype, v3, t3))
+		SUCCEED;
+   	else
+		FAIL;
+
+} /* pbi_arg */
 
 #ifndef BigStruct
 #define w_get_argaddr(addr,s,argn,arity)  (addr = (PWord *)s + argn)
+
 #else  /* BigStruct */
 #define w_get_argaddr(addr,s,argn,arity)  \
 	{if (arity < ESCAPE_ARITY) addr = (PWord *)s + argn; else addr=(PWord *)s+(argn+1);}
+
 #endif /* BigStruct */
 
 #define w_get_caraddr(addr,list)    (addr = (PWord *)list)
@@ -171,7 +175,6 @@ pbi_mangle()
 	    }
 	}
     }
-
     SUCCEED;
 
 }

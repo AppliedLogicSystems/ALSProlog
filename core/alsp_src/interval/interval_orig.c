@@ -229,6 +229,8 @@ void lowerbd3(long double x, long double *y)
 #endif				/* finish-MPW C on the Macintosh */
 
 #else											/* finish-Macintosh */
+
+
 #ifdef sun										/* SUN SPARCSTATION */
 #ifdef solaris		/* SOLARIS */
 #include <ieeefp.h>

@@ -12,6 +12,10 @@
 #ifndef _WINTER_H_INCLUDED_
 #define _WINTER_H_INCLUDED_ 1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define DEFAULT_SAFETY		98304		/* bytes	*/
 
 #define DEFAULT_HEAP_SIZE	0x040000	/* long words (1 MBytes) */
@@ -168,6 +172,7 @@ extern	void	w_mk_unbound PARAMS(( PWord *, int * ));
 extern	void	w_get_An PARAMS(( PWord *, int *, int ));
 extern	UCHAR *	w_get_uianame PARAMS(( UCHAR *, PWord, int ));
 extern	void	w_mk_uia PARAMS(( PWord *, int *, UCHAR * ));
+extern	void	w_mk_len_uia PARAMS(( PWord *, int *, UCHAR * , size_t));
 extern	void	w_mk_uia_in_place PARAMS(( PWord *, int *, UCHAR * ));
 extern	void	w_uia_alloc PARAMS(( PWord *, int *, size_t ));
 extern	int	w_uia_clip PARAMS(( PWord, int) );
@@ -245,6 +250,9 @@ void stack_overflow PARAMS((void));
 #endif
 */
 
+#ifdef __cplusplus
+}
+#endif
 
 /*
  * The following file contains the als signal numbers

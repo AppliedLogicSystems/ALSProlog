@@ -615,53 +615,75 @@ pbi_uia_pokel()
 	FAIL;
 }
 
+int
+do_pbi_uia_peekd(v1,t1, v2,t2, v3,t3)
+    PWord v1, v2, v3;
+    int   t1, t2, t3;
+{
+    PWord val;
+    int   valtype;
+    double pval;
+
+    if (t1 == WTP_UIA && t2 == WTP_INTEGER &&
+		w_uia_peek(v1, (int) v2, (UCHAR *) &pval, sizeof (double))) 
+	{
+		make_numberx(&val, &valtype, (double) pval, WTP_DOUBLE);
+		if (w_unify(v3, t3, val, valtype))
+	    	SUCCEED;
+		else
+	    	FAIL;
+   	}
+    else
+		FAIL;
+
+}	/* do_pbi_uia_peekd */
 
 int
 pbi_uia_peekd()
 {				/* $uia_peekd(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
-    PWord val;
-    int   valtype;
-    double pval;
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    if (t1 == WTP_UIA && t2 == WTP_INTEGER &&
-	w_uia_peek(v1, (int) v2, (UCHAR *) &pval, sizeof (double))) {
-	make_numberx(&val, &valtype, (double) pval, WTP_DOUBLE);
-	if (w_unify(v3, t3, val, valtype))
-	    SUCCEED;
-	else
-	    FAIL;
+	return(do_pbi_uia_peekd(v1,t1, v2,t2, v3,t3 ));
+
+}	/* pbi_uia_peekd */
+
+
+int
+do_pbi_uia_poked(v1,t1, v2,t2, v3,t3)
+    PWord v1, v2, v3;
+    int   t1, t2, t3;
+{
+    double pval;
+
+    if (t1 == WTP_UIA && t2 == WTP_INTEGER && get_number(v3, t3, &pval)) {
+		if (w_uia_poke(v1, (int) v2, (UCHAR *) &pval, sizeof (double)))
+	    	SUCCEED;
+		else
+	    	FAIL;
     }
     else
 	FAIL;
-}
 
+}	/* do_pbi_uia_poked */
 
 int
 pbi_uia_poked()
 {				/* $uia_poked(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
-    double pval;
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    if (t1 == WTP_UIA && t2 == WTP_INTEGER && get_number(v3, t3, &pval)) {
-	if (w_uia_poke(v1, (int) v2, (UCHAR *) &pval, sizeof (double)))
-	    SUCCEED;
-	else
-	    FAIL;
-    }
-    else
-	FAIL;
-}
+	return( do_pbi_uia_poked(v1,t1, v2,t2, v3,t3) );
+
+}	/* pbi_uia_poked */
 
 
 int

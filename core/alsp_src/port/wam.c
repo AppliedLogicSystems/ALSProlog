@@ -290,9 +290,23 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 /*----------------
     register PWord *reg1 = NULL;
  *----------------*/
+
+/*
+void unwnd_trl	PARAMS(());
+
+void
+unwnd_trl()
+{
+for (reg1 = mr_TR+1; reg1 < mr_B; reg1+=2){ *PWPTR(*reg1) = *((PWord *)reg1-1);}
+}
+#define UNWINDTRAIL unwnd_trl;
+*/
+
+
 #ifdef TRAILVALS
 
 #define UNWINDTRAIL for (reg1 = mr_TR+1; reg1 < mr_B; reg1+=2){ *PWPTR(*reg1) = *((PWord *)reg1-1);}
+
 #else
 
 #define UNWINDTRAIL for (reg1 = mr_TR; reg1 < mr_B; reg1++){ *PWPTR(*reg1) = MMK_VAR(*reg1);}

@@ -13,6 +13,7 @@ export read_terms_pos/1.
 export read_terms_pos/2.
 export read_terms_vn/2.
 export read_as_list/3.
+export read_lines/2.
 export colwrite/4.
 export putc_n_of/3.
 export gen_file_header/3.
@@ -163,14 +164,24 @@ dispatch_read_terms_vn0(Next_Term, Term_List, List_Tail,Stream)
 	read_terms_vn0(Term_List, New_List_Tail,Stream).
 
 
+/*!-------------------------------------------------------------
+ |	read_lines/2
+ |	read_lines(Stream, Lines)
+ |	read_lines(+, -)
+ |
+ |	- read lines from a stream
+ |
+ |	Reads list of Lines (as atoms) from Stream until end of 
+ |	Stream is encountered.
+ *!------------------------------------------------------------*/
 
+read_lines(Stream, [Line | Lines])
+	:-
+	get_line(Stream, Line),
+	!,
+	read_lines(Stream, Lines).
 
-
-
-
-
-
-
+read_lines(Stream, []).
 
 /*!-------------------------------------------------------------
  |	read_as_list/3

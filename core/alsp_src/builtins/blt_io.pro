@@ -121,15 +121,16 @@ consult_to(Mod,File) :-
 	consult(File),
 	xconsult:popmod.
 
-/*-------------------------------------------------------------------------------------*
+/*-------------------------------------------------------------*
  | consult/2
  | consult(Mode,FileName)
  | consult(+,+)
  |
  | Mode will either be consult or reconsult.
  |
- | FileName should be an atom representing the name of the file to consult.
- *-------------------------------------------------------------------------------------*/ 
+ | FileName should be an atom representing the name 
+ | of the file to consult.
+ *-------------------------------------------------------------*/ 
 
 consult(consult,TheFileName) 
 	:- 

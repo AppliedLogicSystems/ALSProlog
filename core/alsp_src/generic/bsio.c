@@ -15,8 +15,8 @@
  |			  HAVE_FCNTL_H. Put sio_poll() under the control of HAVE_SOCKET. 
  |			  Added char* casts for various calls.
  |			  -- Put in corrected version of open() and read() to fix
- |				 various bugs in Unix emulation libraries.
- | ??/??/94,	C. Houpt -- NEED TO ADD SOCKET SUPPORT FOR MAC!
+ |			  various bugs in Unix emulation libraries
+ | 12/11/95 - C. Houpt -- Added end-of-line type system.
  |
  | Configuration parameters (defines, in aconfig.h or mconfig.h):
  |
@@ -242,6 +242,14 @@ sio_mkstream()
     SIO_AUX2(buf) = 0;
     SIO_BFSIZE(buf) = v1;
     SIO_COLUMN(buf) = 0;
+#if defined(MacOS)
+    SIO_EOLNTYPE(buf) = SIOEOLN_READ_CR | SIOEOLN_WRITE_CR;
+#elif defined(unix)
+    /* Is this the correct default for DJPP? */
+    SIO_EOLNTYPE(buf) = SIOEOLN_READ_LF | SIOEOLN_WRITE_LF;
+#else
+#error
+#endif   
 
     w_mk_term(&v3, &t3, SIO_SD_FUNCTOR, SIO_SD_ARITY);
     w_install_argn(v3, 1, v4, t4);
@@ -866,7 +874,7 @@ compute_flags(buf, m, b)
 }
 
 /*
- * sio_file_open(FileName,SD,Mode,Buffering)
+ * sio_file_open(FileName,SD,NMode,NBuffering,NEoln)
  *
  * sio_file_open is called from Prolog to open a file or other device available
  * through the file system.
@@ -876,8 +884,8 @@ compute_flags(buf, m, b)
 int
 sio_file_open()
 {
-    PWord v1, v2, v3, v4;
-    int   t1, t2, t3, t4;
+    PWord v1, v2, v3, v4, v5;
+    int   t1, t2, t3, t4, t5;
     UCHAR *filename;
     UCHAR *buf;
     int   flags = 0;
@@ -886,12 +894,13 @@ sio_file_open()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
     w_get_An(&v4, &t4, 4);
+    w_get_An(&v5, &t5, 5);
 
     if ((buf = get_stream_buffer(v2, t2)) == (UCHAR *) 0)
 	FAIL;
 
     if (!getstring(&filename, v1, t1) || t3 != WTP_INTEGER ||
-	t4 != WTP_INTEGER) {
+	t4 != WTP_INTEGER || t5 != WTP_INTEGER) {
 	SIO_ERRCODE(buf) = SIOE_INARG;
 	FAIL;
     }
@@ -915,6 +924,8 @@ sio_file_open()
     if (compute_flags((char *)buf,v3,v4) < 0)
 	FAIL;
 
+    SIO_EOLNTYPE(buf) = v5;
+
     if (strcmp((char *)filename, "$stdin") == 0)
 	SIO_FD(buf) = STDIN_FILENO;
     else if (strcmp((char *)filename, "$stdout") == 0)
@@ -923,23 +934,21 @@ sio_file_open()
 	SIO_FD(buf) = STDERR_FILENO;
     else {
 #if	defined(DOS)
-	if ((SIO_FD(buf) = open(filename, flags, (S_IWRITE | S_IREAD))) == -1) {
-	    /* } */
+	if ((SIO_FD(buf) = open(filename, flags, (S_IWRITE | S_IREAD))) == -1)
 #elif	defined(MacOS)
-#ifdef THINK_C
-	    /* Open files as text files to insure CR/NL conversion. */
-	    if ((SIO_FD(buf) = open((char *)filename, flags | O_TEXT)) == -1) {	/* } */
-#elif defined(__MWERKS__) && !__POWERPC__ && 0
-	    extern int metrowerks_open_patch(const char *filename, int mode);
-	    if ((SIO_FD(buf) = metrowerks_open_patch((char *)filename, flags)) == -1) {/* } */
+#if	0 && defined(__MWERKS__) && !__POWERPC__ 
+	/* This is for use with Non-GUSI libraries. */
+	extern int metrowerks_open_patch(const char *filename, int mode);
+	if ((SIO_FD(buf) = metrowerks_open_patch((char *)filename, flags)) == -1)
 #else
-	    if ((SIO_FD(buf) = open((char *)filename, flags)) == -1) {	/* } */
+	if ((SIO_FD(buf) = open((char *)filename, flags)) == -1)
 #endif
 #elif defined(__GO32__) || defined(OS2)
-	if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1) {
+	if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1)
 #else  /* default code */
-	if ((SIO_FD(buf) = open(filename, flags, 0777)) == -1) {
+	if ((SIO_FD(buf) = open(filename, flags, 0777)) == -1)
 #endif
+	{
 	    if (errno == EINTR)
 		SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
 	    else {
@@ -1168,8 +1177,8 @@ sio_ssbq_open()
 int
 sio_socket_open()
 {
-    PWord v1, v2, v3, v4, v5, v6, v7, v8, v9;
-    int   t1, t2, t3, t4, t5, t6, t7, t8, t9;
+    PWord v1, v2, v3, v4, v5, v6, v7, v8, v9, v10;
+    int   t1, t2, t3, t4, t5, t6, t7, t8, t9, t10;
     UCHAR *buf, *host_or_path, *clone_buf;
     int   portnum, domain, socktype;
     char myhostname[MAXHOSTNAMELEN];
@@ -1196,11 +1205,12 @@ sio_socket_open()
     w_get_An(&v4, &t4, 4);	/* Socket type */
     w_get_An(&v5, &t5, 5);	/* Stream mode number (read or write) */
     w_get_An(&v6, &t6, 6);	/* Buffering number */
-    w_get_An(&v7, &t7, 7);	/* Queue length for listen */
-    w_get_An(&v8, &t8, 8);	/* Socket Descriptor to clone */
-    w_get_An(&v9, &t9, 9);	/* Stream Descriptor */
+    w_get_An(&v7, &t7, 7);	/* end-of-line type */
+    w_get_An(&v8, &t8, 8);	/* Queue length for listen */
+    w_get_An(&v9, &t9, 9);	/* Socket Descriptor to clone */
+    w_get_An(&v10, &t10, 10);	/* Stream Descriptor */
 
-    if ((buf = get_stream_buffer(v9, t9)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(v10, t10)) == (UCHAR *) 0)
 	FAIL;
     
     SIO_ERRCODE(buf) = SIOE_INARG;
@@ -1243,17 +1253,19 @@ sio_socket_open()
 	FAIL;
     
 
-    if (t5 != WTP_INTEGER || t6 != WTP_INTEGER || t7 != WTP_INTEGER)
+    if (t5 != WTP_INTEGER || t6 != WTP_INTEGER || t7 != WTP_INTEGER || t8 != WTP_INTEGER)
 	FAIL;
 
     if (compute_flags(buf,v5,v6) < 0)
 	FAIL;
 
+    SIO_EOLNTYPE(buf) = v7;
+
     SIO_SOCKET_ADDRESS(buf) = 0;
     SIO_SOCKET_ADDRESS_LEN(buf) = 0;
     SIO_ERRCODE(buf) = SIOE_NORMAL;
 
-    if ( (clone_buf = get_stream_buffer(v8, t8)) ) {
+    if ( (clone_buf = get_stream_buffer(v9, t9)) ) {
 
 	/* clone the file descriptor and increment reference count */
 	SIO_FD(buf) = SIO_FD(clone_buf);
@@ -1344,7 +1356,7 @@ sio_socket_open()
 	case SOCK_STREAM :
 	    SIO_TYPE(buf) = SIO_TYPE_SOCKET_STREAM;
 	    if (isserver) {
-		status = listen(SIO_FD(buf), v7);
+		status = listen(SIO_FD(buf), v8);
 		SIO_FLAGS(buf) |= SIOF_NEEDACCEPT;
 	    }
 	    break;
@@ -2067,25 +2079,28 @@ printf("types ok\n");
 int
 sio_generic_open()
 {
-    PWord v1, v2, v3, v4;
-    int   t1, t2, t3, t4;
+    PWord v1, v2, v3, v4, v5;
+    int   t1, t2, t3, t4, t5;
     UCHAR *buf;
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
     w_get_An(&v4, &t4, 4);
+    w_get_An(&v5, &t5, 5);
 
     if ((buf = get_stream_buffer(v2, t2)) == (UCHAR *) 0)
 	FAIL;
 
-    if (t1 != WTP_INTEGER || t3 != WTP_INTEGER || t4 != WTP_INTEGER) {
+    if (t1 != WTP_INTEGER || t3 != WTP_INTEGER || t4 != WTP_INTEGER || t5 != WTP_INTEGER) {
 	SIO_ERRCODE(buf) = SIOE_INARG;
 	FAIL;
     }
 
     if (compute_flags((char *)buf,v3,v4) < 0)
 	FAIL;
+
+    SIO_EOLNTYPE(buf) = v5;
 
     SIO_TYPE(buf) = SIO_TYPE_PROLOG_MANAGED;
     SIO_FD(buf) = (int) v1;
@@ -2391,6 +2406,71 @@ close_socket:
 } /* sio_close */
 
 
+/*
+ * read_eoln() and write_eoln() return true iff reading/writing the byte b to buf will
+ * input/output an end of line.
+ *
+ * These functions are only used by sio_get_byte() and sio_put_byte().
+ *
+ */
+ 
+static int read_eoln(UCHAR *buf, int b)
+{
+    int new_line;
+    
+    switch(SIO_EOLNTYPE(buf) & SIOEOLN_READ_MASK) {
+    case SIOEOLN_READ_CRLF:
+	new_line = ((b == LF) && (SIO_FLAGS(buf) & SIOF_GOT_CR));
+	break;
+    case SIOEOLN_READ_CR:
+	new_line = (b == CR);
+	break;
+    case SIOEOLN_READ_LF:
+	new_line = (b == LF);
+	break;
+    case SIOEOLN_READ_UNIV:
+    	new_line = ((b == CR) || (b == LF && !(SIO_FLAGS(buf) & SIOF_GOT_CR)));
+    	break;
+    default:
+	SIO_ERRCODE(buf) = SIOE_INVALIDTYPE;
+	new_line = 0;
+	break;
+    }
+
+    SIO_FLAGS(buf) &= ~SIOF_GOT_CR;
+    if (b == CR) SIO_FLAGS(buf) |= SIOF_GOT_CR;
+    
+    return new_line;
+}
+
+static int write_eoln(UCHAR *buf, int b)
+{
+    int new_line;
+    
+    switch(SIO_EOLNTYPE(buf) & SIOEOLN_WRITE_MASK) {
+    case SIOEOLN_WRITE_CRLF:
+	new_line = ((b == LF) && (SIO_FLAGS(buf) & SIOF_PUT_CR));
+	    break;
+    case SIOEOLN_WRITE_CR:
+	new_line = (b == CR);
+	break;
+    case SIOEOLN_WRITE_LF:
+	new_line = (b == LF);
+	break;
+    default:
+	SIO_ERRCODE(buf) = SIOE_INVALIDTYPE;
+	new_line = 0;
+	break;
+    }
+
+    SIO_FLAGS(buf) = (SIO_FLAGS(buf) & ~SIOF_PUT_CR);
+    if (b == CR) SIO_FLAGS(buf) |= SIOF_PUT_CR;
+    
+    return new_line;
+}
+
+
+
 #ifndef SIO_ASM
 
 /*
@@ -2434,7 +2514,12 @@ sio_get_byte()
 
     pos = SIO_BUFFER(buf)[pos];	/* get out byte and put in pos */
 
-    if (pos == '\n') {
+    /* EOLN Question:  The standard says get_byte() can only be used on binary
+       files.  Although ALS Prolog does not make a distinction between text and
+       binary files, should get_byte() really keep track of column and line numbers?
+       Isn't this also inefficient?
+    */
+    if (read_eoln(buf, pos)) {
 	SIO_LINENUM(buf)++;
 	SIO_COLUMN(buf) = 0;
     }
@@ -2489,8 +2574,13 @@ sio_put_byte()
 	SIO_LPOS(buf) = pos;
     SIO_FLAGS(buf) |= SIOF_DIRTY;
 
+    /* EOLN Question:  The standard says put_byte() can only be used on binary
+       files.  Although ALS Prolog does not make a distinction between text and
+       binary files, should put_byte() really keep track of line buffering?
+       Isn't this also inefficient?
+    */
     if ((SIO_FLAGS(buf) & SIOF_BBYTE) ||
-	((SIO_FLAGS(buf) & SIOF_BLINE) && v2 == '\n') ||
+	((SIO_FLAGS(buf) & SIOF_BLINE) && write_eoln(buf, v2)) ||
 	(SIO_LPOS(buf) == SIO_BFSIZE(buf))) {
 	SIO_ERRCODE(buf) = SIOE_WRITE;
 	FAIL;
@@ -2507,6 +2597,11 @@ sio_put_byte()
  *      Backs CPOS up one byte for the given stream.   This function is used
  *      to implement peek_char/1.
  */
+
+/* EOLN Question:  sio_unget_byte() does not update columns and line numbers.
+   Should this be made consistent with sio_get_byte() or should byte-oriented
+   predicates not update text-oriented stream information?
+*/
 
 int
 sio_unget_byte()
@@ -2932,6 +3027,104 @@ sio_seek()
 }
 
 /*
+ * scan_eoln() scans the beginning of a null-terinated string for an end-of-line
+ * using the eoln convension passed in eoln_type.
+ * if an end-of-line is found, the length of the end-of-line chars (1 or 2) is return,
+ * otherwise 0 is returned.
+ *
+ */
+
+static int scan_eoln(CONST char *cs, int eoln_type)
+{
+    int len;
+    
+    switch (eoln_type) {
+    case SIOEOLN_READ_CR:
+	len = (*cs == CR) ? 1 : 0;
+	break;
+    case SIOEOLN_READ_LF:
+	len = (*cs == LF) ? 1 : 0;
+	break;
+    case SIOEOLN_READ_CRLF:
+	len = (*cs == CR && *(cs+1) == LF) ? 2 : 0;
+	break;
+    case SIOEOLN_READ_UNIV:
+	if      (*cs == LF) len = 1;
+	else if (*cs == CR) len = (*(cs+1) == LF) ? 2 : 1;
+	else                len = 0;
+	break;
+    default:
+	len = 0;
+	break;
+    }
+    
+    return len;
+}
+
+/*
+ * get_eoln() scans the stream buffer buf at position p (up to lim) for an end-of-line
+ * using the streams eoln type.
+ * If an end-of-line is found, then the length of the end-of-line chars (1 or 2) is returned.
+ * If there is not end-of-line at p, then 0 is returned.
+ * If there aren't enough chars from p up to lim to detect an end-of-line, then -1 is returned.
+ *
+ */
+
+static int get_eoln(UCHAR *p, UCHAR *lim, UCHAR *buf)
+{
+    int len;
+    
+    switch(SIO_EOLNTYPE(buf) & SIOEOLN_READ_MASK) {
+    case SIOEOLN_READ_CR:
+	len = (p < lim) ? ((*p == CR) ? 1 : 0) : -1;
+	break;
+    case SIOEOLN_READ_LF:
+	len = (p < lim) ? ((*p == LF) ? 1 : 0) : -1;
+	break;
+    case SIOEOLN_READ_CRLF:
+	len = (p < lim-1) ? (((*p == CR) && (*(p+1) == LF)) ? 2 : 0)
+	                  : ((p == lim-1 && (*p != CR || (SIO_FLAGS(buf) & SIOF_EOF))) ? 0 : -1);
+	break;
+    case SIOEOLN_READ_UNIV:
+    	if (p < lim) {
+	    if      (*p == LF) len = 1;
+	    else if (*p == CR) len = (p < lim-1 && *(p+1) == LF) ? 2 : 1;
+	    else               len = 0;
+	} else len = -1;
+	SIO_FLAGS(buf) &= ~SIOF_GOT_CR;
+	SIO_FLAGS(buf) |=  (len == 1 && *p == CR) ? SIOF_GOT_CR : 0;
+    	break;
+    default:
+	SIO_ERRCODE(buf) = SIOE_INVALIDTYPE;
+	len = -1;
+	break;
+    }
+    
+    return len;
+}
+
+/*
+ * skip_trailing_lf() will advance the streams read position over a line-feed, if
+ * the last character read from the stream was a carriage return and the streams
+ * is using the universal end-of-line read type.
+ *
+ * This should only be used when crossing buffer boundries (which might split a
+ * CR,LF pair).
+ *
+ */
+ 
+static void skip_trailing_lf(UCHAR *buf)
+{
+    if ((SIO_EOLNTYPE(buf) & SIOEOLN_READ_MASK) == SIOEOLN_READ_UNIV
+        && SIO_FLAGS(buf) & SIOF_GOT_CR
+        && SIO_CPOS(buf) < SIO_LPOS(buf)
+        && SIO_BUFFER(buf)[SIO_CPOS(buf)] == LF) {
+    	SIO_CPOS(buf)++;
+    	SIO_FLAGS(buf) &= ~SIOF_GOT_CR;
+    }
+}
+
+/*
  * skip_layout will skip over the so called layout text for the lexical
  * analyzer.  Layout text is white space, comments and newlines.
  *
@@ -2946,7 +3139,7 @@ skip_layout(buf)
 {
     register UCHAR *p, *lim;
     UCHAR *startpos;	/* used for determining value of SIO_COLUMN */
-    int   nesting, inlinecomment;
+    int   nesting, inlinecomment, nl;
 
     startpos = p = SIO_BUFFER(buf) + SIO_CPOS(buf);
     lim = SIO_BUFFER(buf) + SIO_LPOS(buf);
@@ -2955,57 +3148,64 @@ skip_layout(buf)
 
 	nesting = SIO_COMMENT(buf);
 	inlinecomment = SIO_FLAGS(buf) & SIOF_LCOMMENT;
+	nl = 0;
 
 	while (p < lim) {
 	    if (inlinecomment) {
-		while (p < lim && *p != '\n')
+		while (p < lim && !(nl = get_eoln(p, lim, buf)))
 		    p++;
 		if (p < lim) {
-		    p++;
+		    if (nl == -1) lim = p;
+		    else {
+			p += nl;
 		    inlinecomment = 0;
 		    SIO_LINENUM(buf)++;
 		    startpos = p;
 		    SIO_COLUMN(buf) = 0;
 		}
 	    }
+	    }
 	    else if (nesting > 0) {
-		lim--;		/* looking ahead two, so decrement lim */
-		while (p < lim && (*p != '*' || *(p + 1) != '/')) {
-		    if (*p == '/' && *(p + 1) == '*') {
-			p++;
-			nesting++;
+		while (p < lim && nesting > 0) {
+		    if (*p == '/') {
+		    	if (p+1 >= lim) lim = p;
+		    	else { 
+		    	    if (*(p + 1) == '*') {
+				p += 2;
+				nesting++;
+			    } else p++;
+			}
 		    }
-		    else if (*p == '\n') {
+		    else if (*p == '*') {
+		    	if (p+1 >= lim) lim = p;
+		    	else {
+		    	    if(*(p+1) == '/') {
+		    		p += 2;
+		    		nesting--;
+		    	    } else p++;
+		    	}
+		    }
+		    else if ((nl = get_eoln(p, lim, buf))) {
+		        if (nl == -1) lim = p;
+		        else {
+			    p += nl;
 			SIO_LINENUM(buf)++;
 			startpos = p + 1;
 			SIO_COLUMN(buf) = 0;
 		    }
-		    p++;
-		}
-		if (p == lim) {
-		    if (*p != '*' && *p != '/') {
-			if (*p == '\n') {
-			    SIO_LINENUM(buf)++;
-			    startpos = p + 1;
-			    SIO_COLUMN(buf) = 0;
-			}
-			lim++;	/* increment lim if last char  */
-			/* not star or slash */
-			p++;	/* advance p in this case also */
 		    }
-		}
-		else {
-		    nesting--;
-		    p += 2;
-		    lim++;
+		    else p++;
 		}
 	    }
 	    else {
 		while (p < lim && (sio_chtb[*p] & SIOC_WHITESPACE)) {
-		    if (*p == '\n') {
-			SIO_LINENUM(buf)++;
-			startpos = p + 1;
-			SIO_COLUMN(buf) = 0;
+		    if ((nl = get_eoln(p, lim, buf))) {
+		        if (nl == -1) lim = p;
+		        else {
+			    SIO_LINENUM(buf)++;
+			    startpos = p + nl;
+			    SIO_COLUMN(buf) = 0;
+			}
 		    }
 		    p++;
 		}
@@ -3186,10 +3386,10 @@ escaped_char(pp)
 	    return '\f';
 	case 'n':
 	    *pp = p + 1;
-	    return '\n';
+	    return LF;
 	case 'r':
 	    *pp = p + 1;
-	    return '\r';
+	    return CR;
 	case 't':
 	    *pp = p + 1;
 	    return '\t';
@@ -3228,7 +3428,7 @@ quoted_atom(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
     register UCHAR *p;
     register int count;
     UCHAR *pmem, *atomstart;
-    int   escapefound, eossave;
+    int   escapefound, eossave, nl;
 
     p = atomstart = *pp + 1;	/* advance over initial quote */
 
@@ -3245,17 +3445,25 @@ quoted_atom(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
 		count--;
 		lim = p;
 	    }
-	    else if (*(p + 1) == '\n') {
-		p += 2;
+	    else if ((nl = get_eoln(p+1, lim, buf))) {
+	    	if (nl == -1) {count--; lim = p;}
+	    	else {
+		    p += 1+nl;
 		count--;
 		escapefound = 1;
+	    }
 	    }
 	    else {
 		pmem = p;
 		(void) escaped_char(&pmem);
+		if (pmem >= lim) {
+		    count--;
+		    lim = p;
+		} else {
 		p = pmem;
 		escapefound = 1;
 	    }
+	}
 	}
 #ifdef DOUBLEQUOTING
 	else if (*p == '\'') {
@@ -3271,12 +3479,15 @@ quoted_atom(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
 		break;		/* break out of the while loop */
 	}
 #endif /* DOUBLEQUOTING */
-	else if (*p == '\n') {
+	else if ((nl = get_eoln(p, lim, buf))) {
+	    if (nl == -1) {count--; lim = p;}
+	    else {
 	    (*pp)++;		/* advance over initial quote */
 	    *vpTokType = TK_LEXERR;
 	    *vpTokVal = SIOL_UNTERM_SYMBOL;
 	    *tpTokVal = WTP_INTEGER;
 	    return;		/* error: newline in atom */
+	}
 	}
 	else
 	    p++;
@@ -3301,9 +3512,9 @@ quoted_atom(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
 	q = (UCHAR *) M_FIRSTUIAWORD(*vpTokVal);
 	while (*p) {
 	    if (*p == '\\') {
-		if (*(p + 1) == '\n') {
+		if ((nl = scan_eoln(p+1, SIO_EOLNTYPE(buf) & SIOEOLN_READ_MASK))) {
 		    SIO_LINENUM(buf)++;
-		    p += 2;
+		    p += 1+nl;
 		}
 		else {
 		    pmem = p;
@@ -3357,27 +3568,24 @@ quoted_string(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
     PWord v1 = 0; 		/* = 0 to appease -Wall */
     PWord v2;
     int   t1, t2;
-    int ccount = 0;
+    int ccount = 0, nl;
 
     p = *pp + 1;		/* advance over initial quote */
 
     SIO_FLAGS(buf) &= ~SIOF_INSTRING;
 
     for (;;) {
-	/* skip over continuation lines */
-	while (p+1 < lim && *p == '\\' && *(p + 1) == '\n') {
-	    p += 2;
-	    SIO_LINENUM(buf)++;
-	}
-
 	if (p >= lim)
 	    break;	/* broken string */
 
 	c = *p;		/* fetch next character */
 
-	if (c == '\n') {
-	    *pp = p+1;
-	    return 0;	/* error: newline in string */
+	if ((nl = get_eoln(p, lim, buf))) {
+	    if (nl == -1) break;
+	    else {
+		*pp = p+nl;
+		return 0;	/* error: newline in string */
+	    }
 	}
 	else if (c == '"') {
 #ifdef DOUBLEQUOTING
@@ -3399,11 +3607,20 @@ quoted_string(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
 	    }
 	}
 	else if (c == '\\') {
+	    if ((nl = get_eoln(p+1, lim, buf))) {
+	        if (nl == -1) break;
+	        else {
+	            p += 1+nl;
+		    SIO_LINENUM(buf)++;
+		    continue;
+	        }
+	    } else { 
 	    pmem = p;
 	    c = escaped_char(&pmem);
 	    if (pmem >= lim)
 		break;
 	    p = pmem;
+	}
 	}
 	else
 	    p++;
@@ -3449,7 +3666,7 @@ char_constant(pp, lim, inc, endc)
     val = **pp;
     if (val == '\\')
 	val = escaped_char(pp);
-    else if (val == '\n')
+    else if (val == LF || val == CR)
 	return -1;
 #ifdef SIO_ENDCHAR_REQUIRED_FOR_CHAR_CONSTS
     else if (val == endc) {
@@ -3500,11 +3717,13 @@ next_token0(buf, vpTokType, tpTokType, vpTokVal, tpTokVal)
     PWord *vpTokVal;
     int  *tpTokVal;
 {
-    UCHAR *p, *lim, *tokstart;
+    UCHAR *p, *lim, *tokstart, *oldp;
     int   eossave;
 	int ty;
 	double dec_val;
 
+    skip_trailing_lf(buf);
+    
     *tpTokType = WTP_SYMBOL;
     if (!skip_layout(buf)) {
 	if (SIO_FLAGS(buf) & SIOF_EOF) {
@@ -3538,10 +3757,16 @@ next_token0(buf, vpTokType, tpTokType, vpTokVal, tpTokVal)
     
 
     if (SIO_FLAGS(buf) & (SIOF_INATOM | SIOF_INSTRING | SIOF_INQATOM)) {
-	CHECK_FOR_POSSIBLE_SPLIT(p+1);
+	CHECK_FOR_POSSIBLE_SPLIT(p);
 	if (SIO_FLAGS(buf) & SIOF_INQATOM) {
+	    oldp = p;
 	    p--;		/* fake out single quote */
 	    quoted_atom(vpTokType, vpTokVal, tpTokVal, &p, lim, buf);
+	    if (p == oldp && *vpTokType != TK_LEXERR) { 
+		SIO_CPOS(buf) = tokstart - SIO_BUFFER(buf);
+		SIO_ERRCODE(buf) = SIOE_READ;
+		return 0;
+	    }
 	}
 	else if (SIO_FLAGS(buf) & SIOF_INSTRING) {
 	    p--;		/* fake out double quote */
@@ -3676,8 +3901,16 @@ makesym:
 		CHECK_FOR_POSSIBLE_SPLIT(*p ? p+1 : p);
 		break;
 	    case SIOC_SPECIAL:
-		if (*p == '\'')
+		if (*p == '\'') {
+		    CHECK_FOR_POSSIBLE_SPLIT(p+1);
+		    oldp = p+1;
 		    quoted_atom(vpTokType, vpTokVal, tpTokVal, &p, lim, buf);
+		    if (p == oldp && *vpTokType != TK_LEXERR) { 
+			SIO_CPOS(buf) = p - SIO_BUFFER(buf);
+			SIO_ERRCODE(buf) = SIOE_READ;
+			return 0;
+		    }
+		}
 #ifdef	SIO_BACKQUOTE_FOR_CHAR_CONSTS
 		else if (*p == '`') {
 		    int   c;
@@ -3695,7 +3928,7 @@ makesym:
 		}
 #endif /* SIO_BACKQUOTE_FOR_CHAR_CONSTS */
 		else if (*p == '\"') {
-		    CHECK_FOR_POSSIBLE_SPLIT(p+1);
+		    /*CHECK_FOR_POSSIBLE_SPLIT(p+1);*/
 		    if (!quoted_string(vpTokType,vpTokVal, tpTokVal, 
 				      &p, lim, buf)) {
 			*vpTokType = TK_LEXERR;
@@ -3705,9 +3938,9 @@ makesym:
 		    if ((SIO_FLAGS(buf) & SIOF_INSTRING)
 		     && *tpTokVal == WTP_SYMBOL
 		     && *vpTokVal == TK_NIL) {
-			SIO_CPOS(buf) = tokstart - SIO_BUFFER(buf);
+			SIO_CPOS(buf) = p /*tokstart*/ - SIO_BUFFER(buf);
 			SIO_ERRCODE(buf) = SIOE_READ;
-			SIO_FLAGS(buf) &= ~SIOF_INSTRING;
+			/*SIO_FLAGS(buf) &= ~SIOF_INSTRING;*/
 			return 0;
 		    }
 		}
@@ -3836,15 +4069,26 @@ sio_next_tokens()
 		preprocessing = 1;
 	    }
 
+#if 0
+	    /* EOLN Question:  is this code really used?  It looks like C's preprocessor '\', but
+	       I don't know how it could be used in Prolog?  In C, its used mostly in large multi-line
+	       defines, but the Prolog preprocessor doesn't support defines.
+	       
+	       I modified the code a little to work with eoln types, but I haven't worked out
+	       how to handle the end-of-buffer cases.
+	     */
 	    if (preprocessing &&
 		vTokType == TK_SYMBOL &&
 		vTokVal == TK_BACKSLASH &&
-		SIO_BUFFER(buf)[SIO_CPOS(buf)] == '\n') {
-		SIO_CPOS(buf)++;
-		SIO_LINENUM(buf)++;
-
-	    }
-	    else {
+		(nl = get_eoln(SIO_BUFFER(buf) + SIO_CPOS(buf), SIO_BUFFER(buf) + SIO_LPOS(buf), buf))) {
+		if (nl == -1) {printf("Preprocessing fatal error\n"); exit(0);}
+		else {
+		    SIO_CPOS(buf) += nl;
+		    SIO_LINENUM(buf)++;
+		}
+	    } else
+#endif
+	    {
 		H = wm_H;
 		T = MMK_STRUCTURE((PWord) H);
 		*H++ = MMK_FUNCTOR(vTokType, 3);
@@ -3929,6 +4173,8 @@ sio_skip_layout()
 	FAIL;
     }
 
+    skip_trailing_lf(buf);
+    
     if (!skip_layout(buf)) {
 	if (SIO_FLAGS(buf) & SIOF_EOF) {
 	    SIO_ERRCODE(buf) = SIOE_NORMAL;
@@ -4106,6 +4352,31 @@ sio_get_number()
 	FAIL;
 }
 
+/*
+ * get_eoln_str() returns a pointer to a string containing the end-of-line characters for
+ * the stream.
+ */
+static CONST char *get_eoln_str(UCHAR *buf)
+{
+    CONST char *eoln_str;
+    
+    switch(SIO_EOLNTYPE(buf) & SIOEOLN_WRITE_MASK) {
+    case SIOEOLN_WRITE_CRLF:
+	eoln_str = CRLFSTR;
+	break;
+    case SIOEOLN_WRITE_CR:
+	eoln_str = CRSTR;
+	break;
+    case SIOEOLN_WRITE_LF:
+	eoln_str = LFSTR;
+	break;
+    default:
+	eoln_str = 0;
+	break;
+    }
+	    
+    return eoln_str;
+}
 
 /*
  * sio_put_atom(Stream,Atom)
@@ -4117,6 +4388,7 @@ sio_put_atom()
     PWord v1, v2;
     int   t1, t2;
     UCHAR *buf, *atom;
+    CONST UCHAR *eoln_str;
     register UCHAR *a, *b, *l;
     int   newlineseen;
 
@@ -4151,10 +4423,20 @@ sio_put_atom()
     a = atom + SIO_AUX(buf);
     newlineseen = 0;
 
+    /* Line Feed ('\n') in an atom is interpreted as a newline. */
     while (b < l && *a) {
-	if (*a == '\n')
+	if (*a == LF) {
 	    newlineseen++;
-	*b++ = *a++;
+	    
+	    eoln_str = get_eoln_str(buf);
+	    
+	    while (b < l && *eoln_str) *b++ = *eoln_str++;
+	    
+	    if (*eoln_str == 0) a++;
+	    
+	} else {
+	    *b++ = *a++;
+	}
     }
 
     if (*a)
@@ -4421,10 +4703,10 @@ sio_qatom()
 		case '\f':
 		    *b++ = 'f';
 		    break;
-		case '\n':
+		case LF:
 		    *b++ = 'n';
 		    break;
-		case '\r':
+		case CR:
 		    *b++ = 'r';
 		    break;
 		case '\t':
@@ -4782,6 +5064,65 @@ pbi_msgctl()
 
 
 /*-----------------------------------------------------------------------------*
+ | sio_nl(Stream) -- writes out a new line to the given stream
+ | Stream is the input argument.  It should contain an open stream.
+ *-----------------------------------------------------------------------------*/
+int
+sio_nl(void)
+{
+    PWord v1;
+    int   t1;
+    UCHAR *buf, *b, *l;
+    CONST UCHAR *s, *eoln_str;
+
+    w_get_An(&v1, &t1, 1);
+
+    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+		FAIL;
+
+    if (!(SIO_FLAGS(buf) & SIOF_WRITE)) {
+	SIO_ERRCODE(buf) = SIOE_ILLWRITE;
+	FAIL;
+    }
+ 
+    if ((SIO_FLAGS(buf) & (SIOF_READ | SIOF_EOF)) == SIOF_READ &&
+	SIO_LPOS(buf) == 0) {
+	SIO_ERRCODE(buf) = SIOE_READ;
+	FAIL;
+    }
+
+    eoln_str = get_eoln_str(buf);
+
+    b = SIO_BUFFER(buf) + SIO_CPOS(buf);
+    l = SIO_BUFFER(buf) + SIO_BFSIZE(buf);
+    s = eoln_str + SIO_AUX(buf);
+    
+    while (b < l && *s) {
+	*b++ = *s++;
+    }
+
+    if (*s)
+	SIO_AUX(buf) = s - eoln_str;
+    else
+	SIO_AUX(buf) = 0;
+
+    SIO_CPOS(buf) = b - SIO_BUFFER(buf);
+    if (SIO_CPOS(buf) > SIO_LPOS(buf))
+	SIO_LPOS(buf) = SIO_CPOS(buf);
+    SIO_FLAGS(buf) |= SIOF_DIRTY;
+
+    if ((SIO_FLAGS(buf) & SIOF_BBYTE) ||
+	(SIO_FLAGS(buf) & SIOF_BLINE) ||
+	(SIO_CPOS(buf) == SIO_BFSIZE(buf))) {
+	SIO_ERRCODE(buf) = SIOE_WRITE;
+	FAIL;
+    }
+
+    SIO_ERRCODE(buf) = SIOE_NORMAL;
+    SUCCEED;
+}
+
+/*-----------------------------------------------------------------------------*
  | sio_readln(Stream,Line,EOLNFlag)
  |
  | Stream is the input argument.  It should contain an open stream.
@@ -4804,7 +5145,7 @@ sio_readln()
     int   t1, t2, t3, tBuf;
     UCHAR *buf;
     int   cpos, lpos, wpos;
-    int   eoln_read;
+    int   eoln_read, read_length, nl;
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
@@ -4823,6 +5164,8 @@ sio_readln()
 		FAIL;
     }
 
+    skip_trailing_lf(buf);
+
     cpos = wpos = SIO_CPOS(buf);
     lpos = SIO_LPOS(buf);
     if (cpos >= lpos) {
@@ -4830,32 +5173,29 @@ sio_readln()
 		FAIL;
     }
 
-		/* read either DOS(\r\n) or UNIX(\n) or Mac(\r) eolns */
-    while (wpos < lpos && 
-			SIO_BUFFER(buf)[wpos] != '\r' &&
-			SIO_BUFFER(buf)[wpos] != '\n' )
-		wpos++;
+    nl = 0;
 
-    if (wpos < lpos) {		/* end of line read */
-		if ((SIO_BUFFER(buf)[wpos] == '\r')  &&
-			  ( SIO_BUFFER(buf)[wpos+1] == '\n') )
-			{
-				SIO_BUFFER(buf)[wpos] = 0;
-				wpos++;
-			}
-		SIO_BUFFER(buf)[wpos] = 0;
-		w_mk_uia(&vBuf, &tBuf, SIO_BUFFER(buf) + cpos);
-		SIO_BUFFER(buf)[wpos] = '\n';
-		SIO_CPOS(buf) = wpos + 1;
+    while (wpos < lpos && !(nl = get_eoln(SIO_BUFFER(buf) + wpos, SIO_BUFFER(buf) + lpos, buf))) wpos++;
+    
+    if (wpos == cpos && !nl) {
+	    SIO_ERRCODE(buf) = SIOE_READ;
+	    FAIL;
+    }
+    	
+    eoln_read = (wpos <= lpos && nl > 0);
+    
+    read_length = wpos - cpos;
+     
+    w_mk_len_uia(&vBuf, &tBuf, SIO_BUFFER(buf) + cpos, (size_t)read_length);
+    
+    if (eoln_read) {		/* end of line read */
+		SIO_CPOS(buf) = wpos + nl;
 		SIO_LINENUM(buf) += 1;
 		SIO_COLUMN(buf) = 0;
-		eoln_read = 1;
     }
     else {					/* end of line not read */
-		SIO_BUFFER(buf)[lpos] = 0;
-		w_mk_uia(&vBuf, &tBuf, SIO_BUFFER(buf) + cpos);
-		SIO_CPOS(buf) = lpos;
-		eoln_read = 0;
+		SIO_CPOS(buf) = wpos;
+		SIO_COLUMN(buf) += read_length;
     }
 
     SIO_ERRCODE(buf) = SIOE_NORMAL;
@@ -4900,7 +5240,7 @@ sio_position_in_line()
     bufstart = SIO_BUFFER(buf);
     bufend = SIO_BUFFER(buf) + SIO_CPOS(buf);
 
-    for (p = bufend; p >= bufstart && *p != '\n'; p--) ;
+    for (p = bufend; p >= bufstart && !scan_eoln(p, SIO_EOLNTYPE(buf) & SIOEOLN_READ_MASK); p--) ;
 
     /* p now points to the start of the line */
 

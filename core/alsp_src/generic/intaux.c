@@ -15,27 +15,29 @@ extern PWord	deref_2		PARAMS(( PWord ));
 PWord *get_intvl_tm		PARAMS((PWord *, int));
 
 /*--------------------------------------------------------
- 	PWord *get_intvl_tm(DelTerm, DelTerm_t)
+ 	PWord *get_intvl_tm(DelVar, DelVar_t)
 
-	IntStruct is a (pointer to) an interval delay structure;
-	extracts the values of the end points of the interval,
-	and binds them to (the vars pointed at by) ZL, ZH
+	DelVar should be a frozen (delay) variable; get_intvl_tm
+	first extracts the delay structure associated with
+	DelVar, and then extracts the interval structure 
+	contained in the delay structure, returning
+	(a pointer to) this interval structure.
  *-------------------------------------------------------*/
-PWord *get_intvl_tm(DelTerm, DelTerm_t)
-	PWord *DelTerm; 
-	int DelTerm_t;
+PWord *get_intvl_tm(DelVar, DelVar_t)
+	PWord *DelVar; 
+	int DelVar_t;
 {
 	PWord DrT, *CstrTm, functor;
 	int *CstrTm_t;
 
-/* printf("in get_intvl_tm:DelTerm=%x\n",DelTerm); */
+/* printf("in get_intvl_tm:DelVar=%x\n",DelVar); */
 
-	if ((DelTerm_t == WTP_UNBOUND) && (CHK_DELAY((PWord *)DelTerm)))
+	if ((DelVar_t == WTP_UNBOUND) && (CHK_DELAY((PWord *)DelVar)))
 	{
-	DrT = deref_2((PWord)DelTerm);
+	DrT = deref_2((PWord)DelVar);
 	w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)((PWord *)DrT-1), 4);
 
-		/* CstrTm is now the delay term from DelTerm;
+		/* CstrTm is now the delay term from DelVar;
 		   but it might be a compound (comma) interval delay
 		   term, so we need to pull out the leftmost component */
 
@@ -45,121 +47,59 @@ PWord *get_intvl_tm(DelTerm, DelTerm_t)
 		w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)CstrTm, 1);
 		w_get_functor(&functor, (PWord)CstrTm);
 	}
-	/* CstrTm should be intvl(Type,Var,_,L,U) */
+	/* CstrTm should be intvl(Type,Var,UsedBy,UIA) */
 
 /* printf("out get_intvl_tm=%x\n",CstrTm); */
 
 	return(CstrTm);
 	}
 	else
-printf("get_intvl_tm:Non-delay: %x \n",DelTerm);
+printf("get_intvl_tm:Non-delay: %x \n",DelVar);
 		FAIL;
 }	/* get_intvl_tm */
 
 
 /*--------------------------------------------------------
- 	extract_bds(DelTerm, ZL, ZH)
+ 	extract_bds(DelVar, DelVar_t, LB, UB)
 
-	DelTerm is a (pointer to) an interval delay structure;
+	DelVar is a (pointer to) an interval variable; if
+	this variable is bound to an integer, returns the
+	integer in both LB, UB (-> integer point interval).
+	If DelVar is an unbound interval variable (it is frozen),
 	extracts the values of the end points of the interval,
-	and binds them to (the vars pointed at by) ZL, ZH
+	and binds them to (the vars pointed at by) LB, UB
  *-------------------------------------------------------*/
+
 int extract_bds	PARAMS( (PWord *, int, fp *, fp *) );
 
 int
-extract_bds(DelTerm, DelTerm_t, ZL, ZH)
-	PWord *DelTerm; 
-	int DelTerm_t;
-	fp *ZL, *ZH;
+extract_bds(DelVar, DelVar_t, LB, UB)
+	PWord *DelVar;
+	int DelVar_t;
+	fp *LB, *UB;
 {
-	PWord *CstrTm;
-	PWord ZLV, ZHV;
-	int ZLV_t, ZHV_t;
-#ifndef DoubleType
-	PWord vv, functor;	/* vars for GET_DBL_VAL */
-	int arity, tt, i;
-#endif
+	PWord *Intvl, *IntUIA; 
+	int IntUIA_t;
+    double pval;
+    int   valtype;
 
-/* printf("!+extract_bds:DelTerm=%x\n",DelTerm);  */
-
-		/* Test that we are really getting a delay var,
-		   or a point (integer) interval: */
-	if ((CHK_DELAY((PWord *)DelTerm)) || (DelTerm_t = WTP_INTEGER))
+	if (DelVar_t == WTP_INTEGER)
+	{ 
+		*LB = (double)(int)DelVar; 
+	  	*UB = (double)(int)DelVar; 
+	  	SUCCEED;
+	}
+	else if ((DelVar_t == WTP_UNBOUND) && (CHK_DELAY(DelVar)))
 	{
-		CstrTm = get_intvl_tm(DelTerm, DelTerm_t);
-		
-		/* CstrTm should be intvl(Type,Var,_,L,U)
-						-- maybe we should test?? */
-             
-		w_get_argn(&ZLV, &ZLV_t, (PWord)CstrTm, 4);
-
-#ifndef DoubleType
-	GET_DBL_VAL(ZLV_t, ZLV, ZL);
-#else
-		if (ZLV_t == WTP_DOUBLE)
-			w_get_double(&ZL, ZLV);
-		else
-			iaerror();
-#endif
-
-		w_get_argn(&ZHV, &ZHV_t, (PWord)CstrTm, 5);
-
-#ifndef DoubleType
-	GET_DBL_VAL(ZHV_t, ZHV, ZH);
-#else
-		if (ZHV_t == WTP_DOUBLE)
-			w_get_double(&ZH, ZHV);
-#endif
-
- printf("extracted: L=%g  H=%g\n",(fp)*ZL, (fp)*ZH); 
-
-	SUCCEED;
+ 		Intvl = get_intvl_tm(DelVar, DelVar_t);
+		w_get_argn(&IntUIA, &IntUIA_t, Intvl, UIA_POSITION);
+		w_uia_peek(IntUIA, 0, (UCHAR *) LB, sizeof (double));
+		w_uia_peek(IntUIA, 8, (UCHAR *) UB, sizeof (double));
 	}
 	else
-			/* Change to exception later */
-		printf("Error: Non-delay var passed to extract_bds\n");
 		FAIL;
-}
 
-#if 0
-void change_bound	PARAMS((PWord *, fp *, int));
-
-void change_bound(IntStruct, PtrFP, Which)
-	PWord *IntStruct;
-	fp *PtrFP;
-	int Which;
-{
-	PWord DrT, *CstrTm, functor, rval;
-	int *CstrTm_t,i,rtag;
-
-		DrT = deref_2((PWord)IntStruct);
-		w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)((PWord *)DrT-1), 4);
-
-			/* CstrTm is now the delay term from IntStruct;
-				but it might be a compound (comma) interval delay
-				term, so we need to pull out the leftmost component */
-
-		w_get_functor(&functor, (PWord)CstrTm);
-		while(TK_COMMA == functor )
-		{
-			w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)CstrTm, 1);
-			w_get_functor(&functor, (PWord)CstrTm);
-		}
-		
-			/* CstrTm should be intvl(Type,Var,_,L,U)
-				-- maybe we should test?? */
-
-#ifndef DoubleType
-	w_mk_term(&rval, &rtag, (PWord) TK_DDOUBLE, 4);
-	for (i = 0; i < 4; i++)
-	    w_install_argn(rval, i + 1, (PWord) (*(((short *) PtrFP) + i)), WTP_INTEGER);
-#else
-		w_mk_double(&rval, &rtag, *PtrFP);
-#endif
-		w_install_argn((PWord)CstrTm, (Which?5:4), rval, rtag);
-
-}
-#endif  /* #ifdef 0 */
+} /* extract_bds */
 
 
 extern fp i_next  PARAMS((fp *));
@@ -311,6 +251,11 @@ fp i_prev(x)
 		}
 	return(*x);
 }
+
+
+
+
+
 
 
 #endif /* defined(INTCONSTR) */

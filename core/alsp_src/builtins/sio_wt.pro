@@ -1583,9 +1583,7 @@ wr_subs2([N|Ns],[S|Ss],Stream)
 wr_subs3(N,S,Stream)
 	:-
 	'$is_delay_var'(S),
-	'$delay_term_for'(S, Var_DelayTerm),
-	arg(4, Var_DelayTerm, ConstraintTerm),
-	rel_arith:domain_term_from_constr(ConstraintTerm, DomainTerm),
+	rel_arith:'$domain_term'(S, DomainTerm),
 	(rel_arith:valid_domain(DomainTerm, Type, LArg, UArg) ->
 		epsilon_show(Eps),
 		Width is abs(UArg - LArg),
