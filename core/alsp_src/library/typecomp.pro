@@ -187,13 +187,6 @@ comptype(SourceFile, TgtFile, Options)
 		true
 		;
 		do_comptype(SourceFile, TgtFile, Options)
-/*
-			%% Either TgtFile doesn't exist or SourceFile is newer:
-		(dmember(quiet(Quiet), Options),!; Quiet=false),
-		filePlusExt(NoSuffixPath, _, TgtFile),
-		filePlusExt(NoSuffixPath, mac, MacFile),
-		cont_comptype(TgtFile,MacFile,SourceFile, Quiet)
-*/
 	).
 
 comptype(SourceFile, TgtFile, Options)
@@ -255,11 +248,12 @@ write_file_headers(TargetFile,MacFile,SourceFile,TStream,MStream)
  *--------------------------------------------------------------------------*/
 typeDefinitions(DefList,TgtStream,MacStream,Quiet) 
 	:-
-	xall(DefList,user,Extras,TgtStream,MacStream,Quiet,DefList),
-
+	xall(DefList,user,Extras,TgtStream,MacStream,Quiet,DefList).
+/*
 	printf(TgtStream,'\nmodule utilities.\n',[]),
 	pp_all(Extras,TgtStream, [quoted(true)]),
 	printf(TgtStream,'endmod.\n',[]).
+*/
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
@@ -334,14 +328,21 @@ makeStructDefs(TypeName, AccessPred, SetPred, Constructor,
 	makeConstructor(Constructor, StructLabel, NumProperties,
 					Defaults,TgtStream,MacStream,PropertiesList),
 	NoteOptionBody =.. [SetPred, Type, Structure, Value],
-	flattenProps(PropertiesList, FullPropertiesList),
+	flattenProps(PropertiesList, FullPropertiesList).
+/*
 	Extras = [ typeProperties(TypeName, FullPropertiesList),
 			   (noteOptionValue(TypeName, Type, Value, Structure) 
 												:- NoteOptionBody )].
+*/
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 makeAccessPreds([],_,_, AccumNum, AccumNum,[],_,_).
+makeAccessPreds([(Item/Default)-Comment | Rest], AccessPred, SetPred,AccumNum,
+				FinalNum,[AccumNum-Default | RestDefaults],TgtStream,MacStream) 
+	:-!,
+	makeAccessPreds([Item/Default | Rest], AccessPred, SetPred,AccumNum,
+				FinalNum,[AccumNum-Default | RestDefaults],TgtStream,MacStream).
 makeAccessPreds([Item/Default | Rest], AccessPred, SetPred,AccumNum,
 				FinalNum,[AccumNum-Default | RestDefaults],TgtStream,MacStream) 
 	:-!,
@@ -350,6 +351,11 @@ makeAccessPreds([Item/Default | Rest], AccessPred, SetPred,AccumNum,
 	makeAccessPreds(Rest, AccessPred, SetPred, NewAccumNum, 
 						FinalNum,RestDefaults,TgtStream,MacStream).
 
+makeAccessPreds([Item - Comment | Rest], AccessPred, SetPred, 
+				AccumNum, FinalNum,Defaults,TgtStream,MacStream) 
+	:-!,
+	makeAccessPreds([Item | Rest], AccessPred, SetPred, 
+				AccumNum, FinalNum,Defaults,TgtStream,MacStream).
 makeAccessPreds([Item | Rest], AccessPred, SetPred, 
 				AccumNum, FinalNum,Defaults,TgtStream,MacStream) 
 	:-
@@ -370,14 +376,6 @@ makeAccessPred(Item, AccessPred, SetPred, AccumNum,TgtStream,MacStream)
 	printf(TgtStream,'%t.\n\n',[(SetHead :- mangle(AccumNum, Struct, Value))],[quoted(true)]),
 	printf(MacStream,'%t.\n\n',
 				[define_macro((SetHead => mangle(AccumNum, Struct, Value)))],[quoted(true)]).
-
-/*--------------------------------------------------------------------------*
- *--------------------------------------------------------------------------*/
-createAccessPreds([], AccessPred, SetPred, AccumNum,TgtStream,MacStream).
-createAccessPreds([Item | Synonyms], AccessPred, SetPred, AccumNum,TgtStream,MacStream)
-	:-
-	makeAccessPred(Item, AccessPred, SetPred, AccumNum,TgtStream,MacStream),
-	createAccessPreds(Synonyms, AccessPred, SetPred, AccumNum,TgtStream,MacStream).
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
@@ -433,25 +431,13 @@ defaults_and_tags([Prop | PropsList], [DefArg | DefArgs], [Tag | OrderedTags])
 	struct_default_and_tag(Prop, DefArg, Tag),
 	defaults_and_tags(PropsList, DefArgs, OrderedTags).
 
+struct_default_and_tag((Tag/DefArg)-Comment, DefArg, Tag) :-!.
 struct_default_and_tag(Tag/DefArg, DefArg, Tag) :-!.
+struct_default_and_tag(Tag-Comment, DefArg, Tag) :-!.
 struct_default_and_tag(Tag, DefArg, Tag).
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
-/*
-build_cstr_args(0, Defaults, [])
-	:-!.
-
-build_cstr_args(CurNum, Defaults, [ThisArg | ArgsList])
-	:-
-	(dmember(CurNum-Val, Defaults) ->
-		ThisArg = Val
-		;
-		ThisArg = VV
-	),
-	NextNum is CurNum - 1,
-	build_cstr_args(NextNum, Defaults, ArgsList).
-*/
 build_cstr_args(Ctr, Limit, Defaults, [])
 	:-
 	Ctr > Limit, !.
@@ -469,9 +455,15 @@ build_cstr_args(CurNum, Limit, Defaults, [ThisArg | ArgsList])
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 flattenProps([], []).
+flattenProps([(Item/DefVal)-Comment | PropertiesList], [Item | RestFullList])
+	:-!,
+	flattenProps([Item/DefVal | PropertiesList], [Item | RestFullList]).
 flattenProps([Item/DefVal | PropertiesList], [Item | RestFullList])
 	:-!,
 	flattenProps(PropertiesList, RestFullList).
+flattenProps([Item-Comment | PropertiesList], [Item | RestFullList])
+	:-!,
+	flattenProps([Item | PropertiesList], [Item | RestFullList]).
 flattenProps([Item | PropertiesList], [Item | RestFullList])
 	:-
 	flattenProps(PropertiesList, RestFullList).

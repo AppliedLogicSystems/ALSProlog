@@ -144,7 +144,7 @@ abolish_list0([P/A | More], Module)
  |
  *!--------------------------------------------------------------*/
 
-:- module_closure(retract_all,1).
+:- module_closure(retract_all,1,retract_all).
 retract_all(Module, PatternList)
 	:-
 	retract_all0(PatternList, Module).
@@ -158,12 +158,16 @@ retract_all(Module, PatternList)
  |
  *!--------------------------------------------------------------*/
 
-retract_all0([], _).
+retract_all0([], _) :-!.
 retract_all0([Pattern| List], Module)
-	:-
+	:-!,
 	retract_each(Pattern, Module),
 	!,
 	retract_all0(List, Module).
+retract_all0(Goal, Module)
+	:-
+	retract_all0([Goal], Module).
+
 
 /*!---------------------------------------------------------------
  |	retract_each/2
