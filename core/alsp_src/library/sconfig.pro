@@ -150,6 +150,7 @@ gen_winsystems(unix, [x, motif, wxwin]).
 
 export specif_winsystems_for/3.
 specif_winsystems_for(i386, mswin32, [mswin32]).
+specif_winsystems_for(_, macos, [macos]).
 specif_winsystems_for(_, nextstep, [nextstep]).
 specif_winsystems_for(_, dvx, [x, motif]).
 
