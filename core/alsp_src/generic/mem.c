@@ -1224,9 +1224,10 @@ static unsigned long image_end(int image_file)
 extern char  imagename[IMAGENAME_MAX];
 extern char  imagedir[IMAGEDIR_MAX];
 
-#ifdef USE_ELF_SECTION_FOR_IMAGE
-
+#ifdef HAVE_LIBELF
 #include <libelf.h>
+
+#ifdef USE_ELF_SECTION_FOR_IMAGE
 
 static Elf_Scn *find_named_section(Elf *elf, const char *name, int create)
 {
@@ -1325,9 +1326,8 @@ long ss_image_offset(void)
 
   return image_offset;
 }
-#else
 
-#include <libelf.h>
+#else
 
 static unsigned long image_end(int image_file)
 {
@@ -1362,12 +1362,15 @@ static unsigned long image_end(int image_file)
     return end;
 }
 
+#endif /* USE_ELF_SECTION_FOR_IMAGE */
+#endif /* HAVE_LIBELF */
+
 long ss_image_offset(void)
 {
     char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
-    unsigned long image_size, elf_size;
-    int image_file, fstat_result;
-    struct stat image_status;
+    unsigned long file_size, image_size;
+    int file, fstat_result;
+    struct stat file_status;
 
     if (imagepath == NULL)
 	return 0;
@@ -1375,28 +1378,27 @@ long ss_image_offset(void)
     strcpy(imagepath,imagedir);
     strcat(imagepath,imagename);
 
-    image_file = open(imagepath, O_RDONLY);
+    file = open(imagepath, O_RDONLY);
     
-    if (image_file == -1)
+    if (file == -1)
 	fatal_error(FE_SS_OPENERR,(long)imagepath);
 
-    elf_size = image_end(image_file);
-    fstat_result = fstat(image_file, &image_status);
+    image_size = image_end(file);
+    fstat_result = fstat(file, &file_status);
         
-    close(image_file);
+    close(file);
 
     if (fstat_result != 0)
 	fatal_error(FE_SS_OPENERR,(long)imagepath);
 
     free(imagepath);
 
-    image_size = image_status.st_size;
+    file_size = file_status.st_size;
  
-    if (image_size > elf_size)
-	return elf_size;
+    if (file_size > image_size)
+	return image_size;
     else return 0;
 }
-#endif
 
 static int copy(const char *filename, const char *copyname)
 {
