@@ -149,12 +149,16 @@ extern  ALSPI_API(int)	PI_vprintf	PARAMS(( CONST char *, va_list ));
 extern  ALSPI_API(int)	PI_vaprintf	PARAMS(( CONST char *, CONST char *, va_list ));
 extern	ALSPI_API(int)	PI_rungoal	PARAMS(( PWord, PWord, int ));
 extern	ALSPI_API(int)	PI_rungoal_with_update	PARAMS(( PWord, PWord *, int * ));
+extern	ALSPI_API(int)	PI_rungoal_with_update_and_catch	PARAMS(( PWord, PWord *, int *, int * ));
 extern	ALSPI_API(int)	PI_unify	PARAMS(( PWord , int, PWord , int ));
 extern	ALSPI_API(void)	PrologInit	PARAMS(( PSTRUCT * ));
 extern	ALSPI_API(void)	PI_shutdown	PARAMS(( void ));
 extern	ALSPI_API(int)	PI_toplevel	PARAMS(( int * ));
 extern	ALSPI_API(int)	PI_prolog_init	PARAMS(( int, char **));
 extern	ALSPI_API(int)	PI_startup	PARAMS(( CONST PI_system_setup *));
+extern	ALSPI_API(void)	PI_throw	PARAMS((PWord obj, int objt));
+extern	ALSPI_API(void)	PI_getball	PARAMS((PWord *obj, int *objt));
+
 
 #ifdef APP_PRINTF_CALLBACK
 extern	ALSPI_API(void)	PI_set_app_printf_callback(void (*callback)(int, va_list));

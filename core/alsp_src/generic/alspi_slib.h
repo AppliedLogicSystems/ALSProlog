@@ -24,6 +24,7 @@ typedef struct {
     ALSPI_API(void)	(*PI_vapp_printf)		( int, va_list );
     ALSPI_API(int)	(*PI_rungoal)			( PWord, PWord, int );
     ALSPI_API(int)	(*PI_rungoal_with_update)	( PWord, PWord *, int * );
+    ALSPI_API(int)	(*PI_rungoal_with_update_catch)	( PWord, PWord *, int *, int * );
     ALSPI_API(int)	(*PI_unify)			( PWord , int, PWord , int );
     ALSPI_API(void)	(*PrologInit)                   ( PSTRUCT * );
     ALSPI_API(int)	(*CI_get_integer)		( PWord *, int );
@@ -31,6 +32,8 @@ typedef struct {
     ALSPI_API(int)	(*sym_insert_2long)		( char *, int, long, long );
     ALSPI_API(int)	(*sym_insert_dbl)		( char *, int, double );
     ALSPI_API(const char *)(*find_callback)		( void *, void * );
+    ALSPI_API(void)	(*PI_throw)			(PWord, int);
+    ALSPI_API(void)	(*PI_getball)			(PWord *, int *);
     		
 } alspi_func_ptrs;
 
