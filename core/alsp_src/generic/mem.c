@@ -1137,7 +1137,7 @@ int ss_save_image_with_state(const char * new_image_name)
     	return 0;
     }
     
-    if (!CopyFile(image_name, new_image_name, TRUE)) {
+    if (!CopyFile(image_name, new_image_name, FALSE)) {
     	printf("ss_save_image: Couldn't copy %s to %s\n", image_name, new_image_name);
     	return 0;
     }
