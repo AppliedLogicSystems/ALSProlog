@@ -14,3 +14,49 @@ OS_CPPFLAGS=-DUNIX $(SUBOS_CPPFLAGS)
 
 OS_SOURCE = unixio.c missing.c
 
+-include ../install_components
+
+installer: alspro
+	if [ -z "$(TCL_DIR)" -o -z "$(ODBC_DIR)" -o -z "$(WINDOW_DIR)" \
+	     -o -z "$(FOREIGN_SDK_DIR)" -o -z "$(EXAMPLES_DIR)" -o -z "$(MANUAL_DIR)" ]; \
+	then \
+	@echo "To create the installer you must define the make variables:\nTCL_DIR ODBC_DIR WINDOW_DIR FOREIGN_SDK_DIR EXAMPLES_DIR MANUAL_DIR\nin the file ../install_components.  See the file Unix_Build_Instructions for details." ; exit 2 ; fi
+	@echo
+	@echo "Creating Installer using the following components:"
+	@echo "  ALS Prolog:   " `pwd`
+	@echo "  TCL Library:  " $(TCL_DIR)
+	@echo "  ODBC Library: " $(ODBC_DIR)
+	@echo "  Foreign Inteface SDK: " $(FOREIGN_SDK_DIR)
+	@echo "  Examples: " $(EXAMPLES_DIR)
+	@echo "  Manual: " $(MANUAL_DIR)
+	@echo
+	rm -fr ALS_Prolog
+	mkdir -p ALS_Prolog
+	
+	cd ALS_Prolog ; \
+		ln -s ../alspro . ; \
+		ln -s ../alspro_b . ; \
+		ln -s ../libalspro.a ; \
+		ln -s ../libalspro.$(OS_SL_EXT) . ; \
+		mkdir alsdir ; \
+		cd alsdir ; \
+			ln -s ../../alsdir/builtins . ; \
+			ln -s ../../alsdir/library . ; \
+			mkdir shared ; \
+			cd shared ; \
+				ln -s $(TCL_DIR)/$(SUBOS)/dist/* . ; \
+			cd .. ; \
+		cd .. ; \
+		ln -s $(FOREIGN_SDK_DIR) . ; \
+		ln -s $(EXAMPLES_DIR) . ; \
+		ln -s $(MANUAL_DIR) manual ; \
+	cd ..
+
+	tar --exclude=.AppleDouble --exclude=*.obp --mode=a+r,u+w,go-w -chf alspro_$(SUBOS).tar ALS_Prolog
+	gzip -f alspro_$(SUBOS).tar
+	rm -fr ALS_Prolog
+
+
+#		if [ -f ../libalspro.a ] then ln -s ../libalspro.a . endif; \
+#				ln -s $(ODBCLIBS)/* . ; \
+#				ln -s $(WINDOWLIBS)/* . ; \
