@@ -1425,6 +1425,7 @@ get_st_rec_by_fcg(FCGNum, Rec)
 start_src_trace(Flag,BaseFileName, SrcFilePath, CG, ALSMgr, SrcMgr)
 	:-
 	send(ALSMgr, get_value(debugger_mgr, DbgrMgr)),
+write(ensure_Db_showing),nl,flush_output,
 	send(DbgrMgr, ensure_db_showing),
 	send(DbgrMgr, insert_by_fcg(CG, SrcMgr)),
 	send(DbgrMgr, set_value(mrfcg, CG)),
@@ -1515,7 +1516,7 @@ v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
 	:-
 	builtins:get_primary_manager(ALSIDEMGR),
 	send(ALSIDEMGR, get_value( debugger_mgr, DBGMGR)),
-
+!,
 	vv_showGoalToUserWin(Port,Box,Depth, Module, Goal, DBGMGR, Response).
 
 vv_showGoalToUserWin(Port,Box,Depth, Module, Goal, DBGMGR, Response)
