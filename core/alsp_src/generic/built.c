@@ -484,7 +484,7 @@ static struct blt_struct {
 	    "_sio_position_in_line"),
 #endif /* KERNAL */
 	BLT("gc", 0, gc, "_gc"),
-	BLT("halt", 0, pbi_halt, "_pbi_halt"),
+	BLT("pbi_halt", 0, pbi_halt, "_pbi_halt"),
 	BLT("setInterruptVector", 1, pbi_set_interrupt_vector,
 	    "_pbi_set_interrupt_vector"),
 	BLT("uncaught_interrupt", 3, pbi_uncaught_interrupt,
