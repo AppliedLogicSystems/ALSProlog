@@ -83,17 +83,40 @@ als_shl_mgrAction(obtain_src_mgr(BaseFileName, FileMgr), State)
 
 finish_obtain_src_mgr(BaseFileName, PrevMgrsList, State, FileMgr)
 	:-
-	dmember(fm(BaseFileName, FileMgr), PrevMgrsList),
+%	dmember(fm(BaseFileName, FileMgr), PrevMgrsList),
+	spec_dmember(PrevMgrsList, BaseFileName, FileMgr),
+alsdev:accessObjStruct(tcl_doc_path, FileMgr, EditWin),
+write(srcmgrFOUND(BaseFileName,EditWin)),nl,flush_output,
 	!.
+
+spec_dmember([fm(FN, FileMgr) | PrevMgrsList], BaseFileName, FileMgr)
+	:-
+	atom_codes(FN, FNCs),
+	atom_codes(BaseFileName, BFNCs),
+writeq(xsame_call(FN, FNCs, BaseFileName, BFNCs)),nl,flush_output,
+%	xsame(FN, BaseFileName),
+	xsame(FNCs, BFNCs),
+	!.
+spec_dmember([_ | PrevMgrsList], BaseFileName, FileMgr)
+	:-
+	spec_dmember(PrevMgrsList, BaseFileName, FileMgr).
+
+xsame(X, X)
+	:- write(xsame_succeed),nl,flush_output,!.
+xsame(_, _)
+	:- write(xsame_FAIL),nl,flush_output.
+
 
 finish_obtain_src_mgr(BaseFileName, PrevMgrsList, State, FileMgr)
 	:-
+write(srcmgrNEED_NEW(BaseFileName)),nl,flush_output,
 	accessObjStruct(shell_module, State, ShellModule),
 	(clause(alsdev_running,true) -> 
 		Class = source_trace_mgr 
 		; 
 		Class = shl_source_handler
 	),
+write(call_create_object(Class)),nl,flush_output,
 	ShellModule:create_object(
 		[instanceOf = Class,
 		 handle = true,
