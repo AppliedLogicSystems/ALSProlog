@@ -52,6 +52,13 @@ init_tk_alslib(Shared)
 
 init_tk_alslib(Interp,Shared)
 	:-
+	tcl_interp_created(Interp),
+	!,
+	builtins:sys_searchdir(ALSDIR),
+	extendPath(ALSDIR, shared, Shared).
+
+init_tk_alslib(Interp,Shared)
+	:-
 	(all_procedures(tcltk,read_eval_results,2,_) ->
 		true
 		;
