@@ -444,7 +444,7 @@ type_spec(State,[type=void]) --> 				% void
 type_spec(State,[]) --> 						% volatile
 	[ident(volatile)].
 
-type_spec(State,[type='HANDLE']) --> 						% volatile
+type_spec(State,[type=handle]) --> 						% volatile
 	[ident('HANDLE')].
 
 %-----------------------------
@@ -458,6 +458,8 @@ long_opt --> [].
 % enum_type_spec/5
 % 	enumeration type specifier
 %-----------------------------
+
+%typedef_name(State,ident(Tok)) --> 
 
 enum_type_spec(State) --> 
 	enum_tag_opt,
@@ -647,6 +649,12 @@ declt1(State,paren(Declt)) --> [lparen], !, 		% ( declt )
 
 declt1(State,Declt) --> [star], !,					% * declt
 	ptr_declt(State,Declt).
+
+declt1(State,Declt) -->								% simple declt
+	simple_declt(Declt),[equal,ValueXp],
+	{ValueXp =.. [FF, _], 
+	 dmember(FF, [ident,number,string,char] )},
+	 !.
 
 declt1(State,Declt) -->								% simple declt
 	simple_declt(Declt).
@@ -1181,6 +1189,9 @@ dspec_to_str(DSpec,TypeStr) :-
 	get_type(DSpec, Type),
 	type_to_str(Type, TypeStr).
 
+type_to_str(bool,"bool").
+type_to_str(handle,"handle").
+
 type_to_str(int,"int").
 type_to_str(char,"char").
 type_to_str(short,"short").
@@ -1276,6 +1287,9 @@ terminal_type(double).
 terminal_type(extended).
 terminal_type(comp).		% 64 bit int Mac
 terminal_type(void).
+
+terminal_type(bool).
+terminal_type(handle).
 
 %-----------------------------------
 % get_type/2.

@@ -787,6 +787,8 @@ classifyFuncArgs([_/ATL|Rest],Accum,TypeList)
 	append(Accum,[ArgType],NewAccum),
 	classifyFuncArgs(Rest,NewAccum,TypeList).
 
+classifyArgType([handle],integer)
+	:- !.
 
 classifyArgType([far,ptr,char],farstr)
 	:- !.
@@ -864,6 +866,10 @@ classifyThisType([unsigned_char|_],integer).
 classifyThisType([short|_],integer).
 classifyThisType([unsigned_short|_],integer).
 classifyThisType([int|_],integer).
+
+classifyThisType([bool|_],integer).
+classifyThisType([handle|_],integer).
+
 classifyThisType([unsigned_int|_],integer).
 classifyThisType([long|_],integer).
 classifyThisType([unsigned_long|_],integer).
