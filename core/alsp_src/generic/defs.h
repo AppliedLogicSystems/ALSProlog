@@ -142,6 +142,11 @@
 #define HP_AOUT_800 1
 #define HAVE_MMAP_ZERO 1
 #endif
+#if defined(__sgi) && defined(__mips)
+#define SIMPLE_MICS 1
+#define MIPS_IRIX53 1
+#endif
+
 
 /*---------------------------------------------------------------------*
  | Macros concerned with constraints, intervals, freeze, etc.
@@ -389,6 +394,9 @@ extern	int	obp_open	PARAMS(( char * ));
 extern	void	obp_close	PARAMS(( void ));
 extern	int	f_load		PARAMS(( char * ));
 extern	int	load_file	PARAMS(( char *, int ));
+#ifdef MacOS
+extern	int	obpres_load	PARAMS((const char *fname));
+#endif
 extern	void	obp_push	PARAMS(( void ));
 extern	void	obp_pop		PARAMS(( void ));
 
