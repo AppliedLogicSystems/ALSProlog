@@ -271,7 +271,6 @@ proc dispose_document_window {w} {
 		unset proenv(document,$proenv($w,file))
 	}
 	if {[info exists proenv($w,title)]} then {
-puts "dispose_document_window: proenv($w,title)=|$proenv($w,title)|"
 		un_post_open_document $proenv($w,title)
 		unset proenv($w,title)
 	}

@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.52 1998/09/28 02:53:24 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.53 1998/09/28 20:32:24 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -1018,7 +1018,6 @@ proc exit_debugger {} {
 
 proc switch_debug_setup {Which} {
 	global array proenv
-
 	if {"$Which"=="on"} then {
 		if {"$proenv(debugwin)"==0} then { toggle_debugwin }
 	} else {
