@@ -57,7 +57,7 @@
 static	void	coredump_cleanup	PARAMS(( int ));
 #endif /* PURE_ANSI */
 
-static	int	pgsize = 8192;	/* A guess at the page size */
+static	int	current_page_size = 8192;	/* A guess at the page size */
 
 /* MAX_PAGE_SIZE is the largest possible page size of the OS */
 #define MAX_PAGE_SIZE 0x10000
@@ -274,17 +274,18 @@ allocate_prolog_heap_and_stack(size)
 
 
     /*-------------------------------------------------------------*
-     * Set pgsize to the page size for the OS.  Having the pgsize variable
+     * Set current_page_size to the page size of the current machine.
+     * Having the current_page_size variable
      * will let us write our code without having to call getpagesize over
      * and over again.  
      *-------------------------------------------------------------*/
 
 #ifdef _SC_PAGESIZE
-    pgsize = sysconf(_SC_PAGESIZE);
+    current_page_size = sysconf(_SC_PAGESIZE);
 #elif defined(_SC_PAGE_SIZE)
-    pgsize = sysconf(_SC_PAGE_SIZE);
+    current_page_size = sysconf(_SC_PAGE_SIZE);
 #elif defined(HAVE_GETPAGESIZE)
-    pgsize = getpagesize();
+    current_page_size = getpagesize();
 #endif  /* _SC_PAGESIZE */
 
     /*-------------------------------------------------------------*
@@ -316,14 +317,14 @@ allocate_prolog_heap_and_stack(size)
      *-------------------------------------------------------------*/
 #ifdef HAVE_MMAP_ZERO
     retval = (PWord *) mmap((caddr_t) STACKSTART,
-			    size * sizeof (PWord) + NPROTECTED * pgsize,
+			    size * sizeof (PWord) + NPROTECTED * current_page_size,
 			    PROT_READ | PROT_WRITE,
 			    MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
 			    -1,
 			    0);
 #else
     retval = (PWord *) mmap((caddr_t) STACKSTART,
-			    size * sizeof (PWord) + NPROTECTED * pgsize,
+			    size * sizeof (PWord) + NPROTECTED * current_page_size,
 			    PROT_READ | PROT_WRITE,
 			    MAP_PRIVATE | MAP_FIXED,
 			    fd,
@@ -354,7 +355,8 @@ void
 protect_bottom_stack_page()
 {
     int result;
-    result = mprotect((caddr_t) STACKSTART, (size_t)(NPROTECTED * pgsize), PROT_NONE);
+    result = mprotect((caddr_t) STACKSTART,
+		      (size_t)(NPROTECTED * current_page_size), PROT_NONE);
     if (result == -1)
         fatal_error(FE_BIGSTACK, 0);
     bottom_stack_page_is_protected = 1;
@@ -364,7 +366,7 @@ static void
 release_bottom_stack_page()
 {
     mprotect((caddr_t) STACKSTART,
-             (size_t)(NPROTECTED * pgsize),
+             (size_t)(NPROTECTED * current_page_size),
 	     PROT_READ | PROT_WRITE);
     bottom_stack_page_is_protected = 0;
 }
@@ -388,7 +390,7 @@ static void release_bottom_stack_page(void)
 {
     DWORD OldProtection;
 
-    if (!VirtualProtect((void *)STACKSTART, NPROTECTED * pgsize, PAGE_READWRITE, &OldProtection)) {
+    if (!VirtualProtect((void *)STACKSTART, NPROTECTED * current_page_size, PAGE_READWRITE, &OldProtection)) {
 	fatal_error(FE_STKOVERFLOW, 0);
     }
     
@@ -412,7 +414,7 @@ protect_bottom_stack_page()
 {
     DWORD OldProtection;
 
-    if (!VirtualProtect((void *)STACKSTART, NPROTECTED * pgsize, PAGE_NOACCESS /*PAGE_READWRITE | PAGE_GUARD*/, &OldProtection)) {
+    if (!VirtualProtect((void *)STACKSTART, NPROTECTED * current_page_size, PAGE_NOACCESS /*PAGE_READWRITE | PAGE_GUARD*/, &OldProtection)) {
 	fatal_error(FE_STKOVERFLOW, 0);
     }
 
@@ -451,7 +453,7 @@ allocate_prolog_heap_and_stack(size)
     SetUnhandledExceptionFilter(stack_overflow);
     
     stack = VirtualAlloc((LPVOID)STACKSTART,
-    			 size * sizeof(PWord) + NPROTECTED * pgsize,
+    			 size * sizeof(PWord) + NPROTECTED * current_page_size,
     		         MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
     
     if (stack != (LPVOID)STACKSTART)
@@ -529,12 +531,12 @@ allocate_prolog_heap_and_stack(size)
     sigvec(SIGBUS, &v, 0);	/* establish stack overflow signal handler */
 #endif
 
-    pgsize = vm_page_size;
+    current_page_size = vm_page_size;
     retval = (PWord *) STACKSTART;
 
     stat = vm_allocate(task_self(),
 		       (vm_address_t *) &retval,
-		       size * sizeof (PWord) + NPROTECTED * pgsize,
+		       size * sizeof (PWord) + NPROTECTED * current_page_size,
 		       FALSE);
     
     if (stat != KERN_SUCCESS || retval != (PWord *) STACKSTART)
@@ -552,7 +554,7 @@ protect_bottom_stack_page()
 
     stat = vm_protect(task_self(),
 		      (vm_address_t) STACKSTART,
-	              NPROTECTED * pgsize,
+	              NPROTECTED * current_page_size,
 	              FALSE,
 	              VM_PROT_NONE );
     /* FIXME: Check stat */
@@ -566,7 +568,7 @@ release_bottom_stack_page()
 
     stat = vm_protect(task_self(),
 		      (vm_address_t) STACKSTART,
-	              NPROTECTED * pgsize,
+	              NPROTECTED * current_page_size,
 	              FALSE,
 	              VM_PROT_READ | VM_PROT_WRITE );
     /* FIXME: Check stat */
@@ -776,7 +778,7 @@ alloc_big_block(size, fe_num)
 {
     long *np;
 
-    size = round(size, pgsize);
+    size = round(size, MAX_PAGE_SIZE);
 
 /* #if defined(HAVE_MMAP) && defined(HAVE_DEV_ZERO) */
 #if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
@@ -839,7 +841,7 @@ alloc_big_block(size, fe_num)
 	if (bp == (long *) -1)
 	    fatal_error(fe_num,0);
 	
-	np = (long *) round(bp, pgsize);
+	np = (long *) round(bp, MAX_PAGE_SIZE);
     
 	if (np != bp && brk(np) != 0)
 	    fatal_error(fe_num, 0);
@@ -881,17 +883,15 @@ als_mem_init(file,offset)
 {
 
     /*
-     * Try to get an honest value for pgsize
+     * Try to get an honest value for current_page_size
      */
 
 #ifdef _SC_PAGESIZE
-    pgsize = sysconf(_SC_PAGESIZE);
-#elif _SC_PAGE_SIZE
-    pgsize = sysconf(_SC_PAGE_SIZE);
-#elif defined (MACH_SUBSTRATE)
-    pgsize = vm_page_size;
+    current_page_size = sysconf(_SC_PAGESIZE);
+#elif defined(_SC_PAGE_SIZE)
+    current_page_size = sysconf(_SC_PAGE_SIZE);
 #elif defined(HAVE_GETPAGESIZE)
-    pgsize = getpagesize();
+    current_page_size = getpagesize();
 #endif  /* _SC_PAGESIZE */
 
     if (ss_saved_state_present())
@@ -967,14 +967,14 @@ ss_malloc0(size, align, fe_num, actual_sizep)
     long *retblock;
 
     if (align)
-	size = round(size, pgsize);
+	size = round(size, MAX_PAGE_SIZE);
     else
 	size = round(size,8);
     
     p_diff = 0;
     for (pp = &amheader.freelist; *pp; pp = &FB_NEXT(*pp)) {
 	if (align)
-	    p_diff = (char *) round(*pp, pgsize) - (char *) *pp;
+	    p_diff = (char *) round(*pp, MAX_PAGE_SIZE) - (char *) *pp;
 	p_size = FB_SIZE(*pp) - p_diff;
 	if (p_size >= 0 && size <= p_size && p_size <= best_size) {
 	    bestp = pp;
@@ -990,7 +990,7 @@ ss_malloc0(size, align, fe_num, actual_sizep)
 	long *newblock;
 	int newsize = AM_BLOCKSIZE;
 	if (size > newsize)
-	    newsize = round(size, pgsize);
+	    newsize = round(size, MAX_PAGE_SIZE);
 
 	if (amheader.nblocks >= AM_MAXBLOCKS)
 	    fatal_error(fe_num, 0);
@@ -1067,7 +1067,7 @@ ss_fmalloc_start()
     retval = (long *) next_big_block_addr;
 #elif defined(HAVE_BRK)
     retval = (long *) sbrk(0);
-    retval = (long *) round((long) retval,pgsize);
+    retval = (long *) round((long) retval,MAX_PAGE_SIZE);
 #else
 	retval = (long *) -1;
 #endif	/* defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
@@ -1082,7 +1082,7 @@ ss_fmalloc(size)
 {
     long * newblock ;
 
-    size = round(size,pgsize);
+    size = round(size,MAX_PAGE_SIZE);
     newblock = alloc_big_block(size,FE_SS_FMALLOC);
 
     amheader.blocks[amheader.nblocks].start = newblock;
@@ -1649,7 +1649,7 @@ ss_save_state(const char *filename, long offset)
 					: amheader.blocks[bnum].asize;
 /* #ifdef HAVE_MMAP */
 #if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
-	amheader.blocks[bnum].fsize = round(amheader.blocks[bnum].fsize, pgsize);
+	amheader.blocks[bnum].fsize = round(amheader.blocks[bnum].fsize, MAX_PAGE_SIZE);
 #endif /* HAVE_MMAP */
 
     }
@@ -1746,30 +1746,24 @@ ss_restore_state(filename,offset)
 #if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
     /* Get the blocks */
     for (bnum = 0; bnum < hdr.nblocks; bnum++) {
-	caddr_t mem_start;
-	size_t mem_len;
-	long file_offset;
-	mem_start = (caddr_t) round_down(hdr.blocks[bnum].start, pgsize);
-	mem_len = hdr.blocks[bnum].fsize + ((size_t)hdr.blocks[bnum].start - (size_t)mem_start);
-	file_offset = round_down(offset, pgsize);
 #ifdef HAVE_MMAP_ZERO
-	if (mmap(mem_start,
-			    mem_len,
-			    PROT_READ | PROT_WRITE,
-			    MAP_FILE | MAP_PRIVATE | MAP_FIXED,
-			    ssfd,
-			    file_offset) != mem_start)
+	if (mmap((caddr_t) hdr.blocks[bnum].start,
+		 hdr.blocks[bnum].fsize,
+		 PROT_READ | PROT_WRITE,
+		 MAP_FILE | MAP_PRIVATE | MAP_FIXED,
+		 ssfd,
+		 offset) != (caddr_t) hdr.blocks[bnum].start)
 	    goto ss_err;
 #else
-	if (mmap(mem_start,
-			    mem_len,
+	if (mmap((caddr_t) hdr.blocks[bnum].start,
+		 hdr.blocks[bnum].fsize,
 #if defined(arch_sparc)
-			    PROT_EXEC |
+		 PROT_EXEC |
 #endif  /* arch_sparc */
-			    PROT_READ | PROT_WRITE,
-			    MAP_PRIVATE | MAP_FIXED,
-			    ssfd,
-			    file_offset) != mem_start)
+		 PROT_READ | PROT_WRITE,
+		 MAP_PRIVATE | MAP_FIXED,
+		 ssfd,
+		 offset) != (caddr_t) hdr.blocks[bnum].start)
 	    goto ss_err;
 #endif
 	offset += hdr.blocks[bnum].fsize;
@@ -1781,40 +1775,35 @@ ss_restore_state(filename,offset)
 	 */
 
 	if (hdr.blocks[bnum].asize != hdr.blocks[bnum].fsize) {
-	    caddr_t np, zmem_start, block_end;
-	    size_t zmem_len;
-	    zmem_start = (caddr_t)round_up(mem_start + mem_len, pgsize);
-	    block_end = (caddr_t)hdr.blocks[bnum].start + hdr.blocks[bnum].asize;
-	    zmem_len = block_end - zmem_start;
-	    if (zmem_start < block_end) {
+	    caddr_t np;
 #ifdef HAVE_MMAP_ZERO
-	    	np = mmap(zmem_start,
-	  			zmem_len,
-				PROT_READ | PROT_WRITE,
-				MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
-				-1,
-				0);
+	    np = mmap((caddr_t)hdr.blocks[bnum].start + hdr.blocks[bnum].fsize,
+		      hdr.blocks[bnum].asize - hdr.blocks[bnum].fsize,
+		      PROT_READ | PROT_WRITE,
+		      MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
+		      -1,
+		      0);
 #else
-	    	int zfd;
-	    	if ((zfd = open("/dev/zero", O_RDWR)) == -1)
-		    goto ss_err;
+	    int zfd;
+	    if ((zfd = open("/dev/zero", O_RDWR)) == -1)
+	      goto ss_err;
 
-	    	np = mmap(zmem_start, zmem_len, 
+	    np = mmap((caddr_t)hdr.blocks[bnum].start + hdr.blocks[bnum].fsize,
+		      hdr.blocks[bnum].asize - hdr.blocks[bnum].fsize,
 #if defined(arch_sparc)
-				PROT_EXEC |
+		      PROT_EXEC |
 #endif  /* arch_sparc */
-				PROT_READ | PROT_WRITE,
-				MAP_PRIVATE | MAP_FIXED,
-				zfd,
-				0);
+		      PROT_READ | PROT_WRITE,
+		      MAP_PRIVATE | MAP_FIXED,
+		      zfd,
+		      0);
 
-	    	close(zfd);			/* close /dev/zero */
+	    close(zfd);			/* close /dev/zero */
 #endif
-	    	if (np != zmem_start)
-		    goto ss_err;
-	    }
-	}
-    }
+	    if (np != (caddr_t)hdr.blocks[bnum].start + hdr.blocks[bnum].fsize)
+	      goto ss_err;
+	  }
+      }
 
 #elif	defined(MACH_SUBSTRATE)
     /* Get the blocks */
@@ -1946,7 +1935,7 @@ ss_saved_state_present()
 
     stat = vm_read( task_self(),
 		    (vm_address_t) CODESTART,
-		    pgsize,
+		    current_page_size,
 		    &dummy_buf,
 		    &dummy_size );
 
