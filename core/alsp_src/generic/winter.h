@@ -128,6 +128,7 @@ extern Code *wm_cutaddr;
 #ifdef Portable
 extern Code *wm_fail;
 extern Code *wm_trust_fail;
+extern Code *wm_panic;
 #else
 extern	int	wm_fail		PARAMS(( void ));
 extern	int	wm_trust_fail	PARAMS(( void ));
