@@ -479,7 +479,7 @@ extern	void	deathwatch	PARAMS(( void ));
 extern	void	reissue_cntrlc	PARAMS(( void ));
 
 /* ----------   vprintf.c ----------   */
-extern	void	PI_oprintf	PARAMS(( char *, ... ));
+extern	void	PI_oprintf	PARAMS(( const char *, ... ));
 extern	void	PI_oputchar	PARAMS(( int ));
 
 /* ----------   fsdos.c, fsmac.c, fsunix.c, or fsvms.c ----------   */
