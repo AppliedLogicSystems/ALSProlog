@@ -1194,7 +1194,7 @@ load_source0(Stream, TgtMod, DebugMode, OPath, Path,ErrsList)
 	:-
 	obp_mode_start(OPath),
 	xconsult:pushmod(TgtMod),
-	catch(xxconsult(Stream, DebugMode, ErrsList),
+	catch(xxconsult(Stream, Path, DebugMode, ErrsList),
 			Ball, 
 			( xconsult:popmod, 
 			  obp_mode_end(OPath),
