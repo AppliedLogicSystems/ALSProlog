@@ -6,18 +6,21 @@
 #
 # proenv indexes
 #
-# proenv(document_index) - Monotoniclly increasing index to create unique window names
+# proenv(document_index) - Monotonically increasing index to create unique window names
+#
+# proenv(document_list)  - List of names of currently open documents
 #
 # proenv(document,$file) - Name of window which contains the file $file
 #
 #
 # Document fields
-# proenv($window, file) - Path to the file for this document. Empty string if untitled.
-# proenv($window, dirty) - true iff document window is dirty.
+# proenv($window,file) - Path to the file for this document. Empty string if untitled.
+# proenv($window,dirty) - true iff document window is dirty.
 #
 ##=================================================================================
 
 set proenv(document_index) 0
+set proenv(document_list) {}
 
 proc create_document_window {title} {
 	global array proenv
@@ -71,7 +74,8 @@ proc create_document_window {title} {
 	
 	# Init document fields
 	set proenv($w,dirty) false
-
+	lappend proenv(document_list) $w
+	
 	return $w
 }
 
@@ -112,13 +116,17 @@ proc bind_accelerators {w mod type} {
 
 proc dispose_document_window {w} {
 	global array proenv
-	catch {
+	if {[info exists proenv($w,file)] && [info exists proenv(document,$proenv($w,file))]} then {
 		unset proenv(document,$proenv($w,file))
-		unset proenv($w,file)
-		unset proenv($w,dirty)
 	}
+	if {[info exists proenv($w,file)]} then {unset proenv($w,file)}
+	if {[info exists proenv($w,dirty)]} then {unset proenv($w,dirty)}
+	set i [lsearch -exact $proenv(document_list) $w]
+	set proenv(document_list) [lreplace $proenv(document_list) $i $i]
+	
 	destroy $w
 }
+
 
 proc load_text {file text} {
 	set s [open $file r]
@@ -174,6 +182,7 @@ proc document.open args {
 proc save_check {w} {
 	global array proenv
 	if {$proenv($w,dirty)} then {
+		raise $w
 		set title [wm title $w]
 		set answer [tk_dialog .document_save_dialog "" \
 			"Save changes to the document \"$title\" before closing?" \
@@ -185,7 +194,7 @@ proc save_check {w} {
 			set result [expr $answer != 1]
 		}
 	} else {
-		set result 1
+		set result true
 	}
 	return $result
 }
@@ -194,7 +203,18 @@ proc save_check {w} {
 proc document.close {w} {
 	if {[save_check $w]} then {
 		dispose_document_window $w
+		return true
+	} else {
+		return false
 	}
+}
+
+proc document.close_all {} {
+	global array proenv	
+	foreach w $proenv(document_list) {
+		if {![document.close $w]} then {return false}
+	}
+	return true
 }
 
 proc document.save {w} {
@@ -202,7 +222,7 @@ proc document.save {w} {
 	if {[info exists proenv($w,file)]} then {
 		store_text $w.text $proenv($w,file)
 		set proenv($w,dirty) false
-		return 1
+		return true
 	} else {
 		return [document.save_as $w]
 	}
@@ -221,7 +241,7 @@ proc document.save_as {w} {
 		wm title $w [lindex [file split $file] end]
 		return [document.save $w]
 	} else {
-		return 0
+		return false
 	}
 }
 

@@ -445,8 +445,9 @@ proc exit_prolog { } {
 	if {"$ans"==1} then {
 		return 0
 	} else {
-		destroy .
-		exit
+		if {[document.close_all]} then {
+			exit
+		}
 	}
 }
 
