@@ -177,7 +177,7 @@ proc add_tools_menu {menubar type window} {
 		$menubar.tools add separator 
 		## Cref
     	$menubar.tools add command -label "Cref$elipsis" -underline 0 \
-			-command {re run_cref} -state disabled
+			-command {re {prolog call cref0 start_cref}} 
 	} else {
 	##  must be debugger:
 		# Spy
