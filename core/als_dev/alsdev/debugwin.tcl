@@ -356,6 +356,7 @@ proc vTclWindow.pred_info {base} {
     wm deiconify $base
     wm title $base "Predicate Information"
 
+
     frame $base.preds \
         -borderwidth 1 -relief sunken  
     label $base.preds.label \
@@ -421,7 +422,8 @@ proc vTclWindow.pred_info {base} {
         -padx 11 -pady 2 -text {WAM Asm} \
 		-command carry_out_listasm
     button $base.buttons.refreshpreds \
-        -padx 1 -pady 2 -text {Refresh Preds}
+        -padx 1 -pady 2 -text {Refresh Preds} \
+		-command refresh_the_preds
     button $base.buttons.refreshmods \
         -padx 1 -pady 2 -text {Refresh Mods} \
 		-command refresh_mods_list
@@ -551,6 +553,14 @@ proc vTclWindow.pred_info {base} {
 
 	bind  $base.mods.listbox <Double-Button-1> \
 		{ set_module_focus [ get_selected_module ] }
+
+	bind $base.spying.label <Configure> {refresh_spy_win}
+	bind $base.spying.label <Map> {refresh_spy_win}
+
+
+    bind $base.preds.listbox <Double-Button-1> {move_to_spying_list}
+    bind $base.spying.listbox <Double-Button-1> {remove_from_spying_list}
+
 }
 
 
@@ -756,4 +766,29 @@ proc module_choose {ModsList} {
 
 ##########################################################
 
+
+
+proc vTclWindow.sys_mods {base} {
+    if {$base == ""} {
+        set base .sys_mods
+    }
+    if {[winfo exists $base]} {
+        wm deiconify $base; return
+    }
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel
+    wm focusmodel $base passive
+    wm geometry $base 144x149+193+203
+    wm maxsize $base 1137 870
+    wm minsize $base 1 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 1
+    wm deiconify $base
+    wm title $base "Modules:"
+    ###################
+    # SETTING GEOMETRY
+    ###################
+}
 

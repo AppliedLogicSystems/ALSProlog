@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.45 1998/05/18 01:37:48 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.46 1998/06/20 13:21:32 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -996,6 +996,10 @@ proc get_selected_module {} {
 }
 
 
+proc refresh_the_preds {} {
+	refresh_preds_list [get_module_focus]
+}
+
 proc refresh_preds_list {Mod} {
 	global array proenv
 
@@ -1012,12 +1016,19 @@ proc refresh_preds_list {Mod} {
 	}
 }
 
+proc refresh_spy_win {} {
+	refresh_mods_list
+	set MF [get_module_focus]
+	if  { "$MF" != "" } then { refresh_preds_list $MF }
+}
+
 proc move_to_spying_list {} {
 	global array proenv
 
 	set PrevSpying [.pred_info.spying.listbox get 0 end]
 	set IXs [.pred_info.preds.listbox curselection]
 	.pred_info.preds.listbox selection clear 0 end
+	set NewSpying {}
 	foreach  Idx $IXs {
 		lappend NewSpying [set Tmp [.pred_info.preds.listbox get $Idx]]
 		lappend PrevSpying $Tmp
@@ -1302,6 +1313,21 @@ proc toggle_debug_flatness {} {
 	prolog call debugger set_depth_computation -atom debugger_output -atom $proenv(db_flatness)
 }
 
+global array sys_mods
+proc set_system_modules_showing {} {
+	global array sys_mods
+	Window show .sys_mods
+	prolog call builtins sys_mods_status -var ML
+	foreach Item $ML {
+		set Mod [lindex $Item 0]
+		set S [lindex $Item 1]
+		set sys_mods($Mod) $S
+		checkbutton .sys_mods.$Mod -text $Mod -variable sys_mods($Mod) \
+			-anchor w -command "prolog call debugger toggle_mod_show -atom $Mod" 
+	 	pack .sys_mods.$Mod  -side top -anchor w -expand 0 -fill x 
+	}
+	wm geometry .sys_mods ""
+}
 
 ##############################
 

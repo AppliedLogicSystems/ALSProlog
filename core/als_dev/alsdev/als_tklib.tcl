@@ -107,6 +107,26 @@ proc xmit_line_plain { TxtWin StreamAlias WaitVarName} {
 }
 }
 
+proc set_tcl_ga {Arr Tag Value} {
+	upvar #0 $Arr MA
+	set MA($Tag) $Value
+}
+
+proc get_tcl_ga {Arr Tag } {
+	upvar #0 $Arr MA
+	return $MA($Tag)
+}
+
+proc set_tcl_ga2 {Arr Tag1 Tag2 Value} {
+	upvar #0 $Arr MA
+	set MA($Tag1,$Tag2) $Value
+}
+
+proc get_tcl_ga2 {Arr Tag1 Tag2 } {
+	upvar #0 $Arr MA
+	return $MA($Tag1,$Tag2)
+}
+
 ##################################################################################
 ######### POPUP INPUT
 ##################################################################################

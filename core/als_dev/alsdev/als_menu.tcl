@@ -177,15 +177,20 @@ proc add_tools_menu {menubar type window} {
 	##  must be debugger:
 		# Spy
 		$menubar.tools add command  -label "Spy$elipsis" \
-			-underline 0 -command {re toggle_spywin} 
-		$menubar.tools add command  -label {NewSpy } \
 			-underline 0 -command {re {Window show .pred_info }} 
 		$menubar.tools add separator
 		$menubar.tools add command  -label {Debug Settings } \
 			-underline 0 -command {re {show_debug_settings}}
+		$menubar.tools add command  -label {System Modules } \
+			-underline 0 -command {re {set_system_modules_showing}}
 	}
 	$menubar add cascade -label "Tools" -menu $menubar.tools -underline 0
 }
+
+#		$menubar.tools add command  -label "Spy$elipsis" \
+#			-underline 0 -command {re toggle_spywin} 
+#		$menubar.tools add command  -label {NewSpy } \
+#			-underline 0 -command {re {Window show .pred_info }} 
 
 proc add_help_menu {menubar} {
 	global tcl_platform

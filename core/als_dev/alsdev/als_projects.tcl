@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.4 1998/05/18 01:37:47 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.5 1998/06/20 13:21:30 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -52,7 +52,7 @@ proc new_project {} {
 
 
 
-proc display_project {Title PFN Start FilesList DirsList OS MinorOS BldCmd } {
+proc display_project {Title PFN Start FilesList DirsList LibFiles OS MinorOS BldCmd } {
 	
 	Window show .ppj_spec
     .ppj_spec.prj_title.entry delete 0 end 
@@ -63,7 +63,6 @@ proc display_project {Title PFN Start FilesList DirsList OS MinorOS BldCmd } {
 
     .ppj_spec.startup.entry delete 0 end 
     .ppj_spec.startup.entry insert end $Start 
-
 
     .ppj_spec.prolog_files.listbox delete 0 end 
 	set SortedFiles [lsort $FilesList]
@@ -77,6 +76,12 @@ proc display_project {Title PFN Start FilesList DirsList OS MinorOS BldCmd } {
 			[eval file join $Dir]
 	}
 
+    .ppj_spec.lib_files.listbox delete 0 end
+	set SortedLibFiles [lsort $LibFiles]
+	foreach File $SortedLibFiles {
+    	.ppj_spec.lib_files.listbox insert end $File 
+	}
+
     .ppj_spec.bld_ctl.os_info.os_label configure -text $OS
     .ppj_spec.bld_ctl.os_info.minor_os_label  configure -text $MinorOS
     .ppj_spec.bld_ctl.bld_cmd.skel delete 0 end 
@@ -84,19 +89,47 @@ proc display_project {Title PFN Start FilesList DirsList OS MinorOS BldCmd } {
 
 }
 
-proc add_new_file {} {
-	set NewFilePath [tk_getOpenFile \
-		-filetypes {{"Prolog Files" {.pro .pl}} {"All Files" {*}} } \
-		-title "Project File to Open" ]
-	set NewFile [file tail $NewFilePath]
-	set List [.ppj_spec.prolog_files.listbox get 0 end]
+proc add_new_proj_file {Kind} {
+	set ID ""
+	switch $Kind {
+	pro {	set FT "-filetypes {{\"Prolog Files\" {.pro .pl}} {\"All Files\" {*}} }"
+			set SubW prolog_files 
+		}
+	oop {	set FT "-filetypes {{\"ObjectPro Files\" {.oop}} {\"All Files\" {*}} }"
+			set SubW oop_files
+		}
+	typ {	set FT "-filetypes {{\"DefStruct Files\" {.typ}} {\"All Files\" {*}} }"
+			set SubW typ_files
+		}
+	lib {	set FT "-filetypes {{\"Library Files\" {.alb}} {\"All Files\" {*}} }"
+			set SubW lib_files
+			prolog call alsdev get_library_dir -var IDP
+			set ID [list -initialdir $IDP]
+		}
+	}
+	set NewFilePath [eval tk_getOpenFile $FT $ID \
+		{-title "Project File to Open"} ]
+	if {"$NewFilePath"==""} then {
+		return
+	}
+	if {"$Kind"=="lib"} then {
+		set NewFile [file rootname [file tail $NewFilePath]]
+	} else {
+		set NewFile [file tail $NewFilePath]
+	}
+	set List [.ppj_spec.$SubW.listbox get 0 end]
 	lappend List $NewFile
 	set NewList [lsort $List]
-	.ppj_spec.prolog_files.listbox delete 0 end
+	.ppj_spec.$SubW.listbox delete 0 end
 	foreach FF $NewList {
-		.ppj_spec.prolog_files.listbox insert end $FF
+		.ppj_spec.$SubW.listbox insert end $FF
 	}
 }
+		
+#		-filetypes {{"Prolog Files" {.pro .pl}} {"All Files" {*}} } \
+#	set List [.ppj_spec.prolog_files.listbox get 0 end]
+#	.ppj_spec.prolog_files.listbox delete 0 end
+#		.ppj_spec.prolog_files.listbox insert end $FF
 
 proc add_mult_files {} {
 	set PrevFiles [.ppj_spec.prolog_files.listbox get 0 end]
@@ -156,9 +189,10 @@ proc save_project {} {
     set Start [.ppj_spec.startup.entry  get]
     set ProFiles [.ppj_spec.prolog_files.listbox get 0 end] 
     set SDirs [.ppj_spec.search_dirs.listbox get 0 end ]
+    set LibFiles [.ppj_spec.lib_files.listbox get 0 end ]
 	Window hide .ppj_spec
 	prolog call alsdev save_project -atom $Title -atom $ProjFile -atom $Start \
-		-list $ProFiles -list $SDirs
+		-list $ProFiles -list $SDirs -list $LibFiles
 }
  
 proc dismiss_project_spec {} {
