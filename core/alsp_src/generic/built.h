@@ -263,7 +263,6 @@ extern	int	pbi_frame_info	PARAMS(( void ));
 
 /* bos.c */
 extern	int	pbi_access	PARAMS(( void ));
-extern	int	pbi_chdir	PARAMS(( void ));
 extern	int	pbi_getenv	PARAMS(( void ));
 extern	int	pbi_system	PARAMS(( void ));
 extern	int	pbi_tmpnam	PARAMS(( void ));
@@ -273,6 +272,7 @@ extern int   argcount;
 extern char **argvector;
 extern	int pbi_command_line	PARAMS((void));
 extern	int pbi_crypt			PARAMS((void));
+extern	int pbi_copy_file		PARAMS((void));
 
 /* bparser.c */
 extern	int	pbi_op		PARAMS(( void ));
