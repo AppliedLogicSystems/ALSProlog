@@ -1,2 +1,2 @@
 CPPFLAGS += -DUNIX_IRIX
-OS_LIBS = -lelf -Xlinker -rpath -Xlinker .
+OS_LIBS = -lelf
