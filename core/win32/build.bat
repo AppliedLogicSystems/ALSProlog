@@ -15,6 +15,9 @@ copy "%TCLTKPATH%\bin\tk80.dll" .
 xcopy /e /i "%TCLTKPATH%\lib\tcl8.0" lib\tcl8.0
 mkdir lib\tk8.0
 copy  "%TCLTKPATH%\lib\tk8.0\*" lib\tk8.0
+xcopy /e /i "%TCLTKPATH%\lib\itcl3.0" lib\itcl3.0
+xcopy /e /i "%TCLTKPATH%\lib\itk3.0" lib\itk3.0
+xcopy /e /i "%TCLTKPATH%\lib\iwidgets3.0" lib\iwidgets3.0
 mkdir alsdir
 mkdir alsdir\shared
 copy ..\als_dev\alsdev\*.tcl alsdir\shared
