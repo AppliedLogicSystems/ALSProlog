@@ -55,20 +55,44 @@ fix_image_name(Name, FixedName) :-
 		FixedName = Name
 	).
 
-save_image(ImageName) :-
+save_image(ImageName) 
+	:-
 	save_image(ImageName, []).
 	
-save_image(ImageName, Options) :-
-	get_current_image(ThisImage),
+save_image(ImageName, Options) 
+	:-
+%	get_current_image(ThisImage),
+	get_base_image_path(Options,ThisImage),
 	fix_image_name(ImageName, FixedImageName),
 	process_image_options(Options, FixedImageName, OptionedName),
 	pbi_copy_file(ThisImage, OptionedName),
-	(dmember(preserve(all), Options) -> DevelopFlag=develop ; DevelopFlag=production),
+	(dmember(preserve(all), Options) -> 
+		DevelopFlag=develop 
+		; 
+		DevelopFlag=production),
 	attach_image(OptionedName, DevelopFlag).
 	
+get_base_image_path(Options,BaseImage)
+	:-
+	dmember(stub(BaseImage), Options),
+	exists_file(BaseImage),
+	!.
+get_base_image_path(Options,BaseImage)
+	:-
+	sys_searchdir(ALSDIR),
+	sys_env(OS,_,_),
+	generic_app_name(OS, GenApp),
+	join_path([ALSDIR,'..',GenApp], BaseImage),
+	exists_file(BaseImage),
+	!.
+get_base_image_path(Options,BaseImage)
+	:-
+	get_current_image(BaseImage).
 
-attach_image(ImageName) :-
-%	attach_image(ImageName, []).
+generic_app_name(mswin32, 'Generic ALS App Stub.exe').
+
+attach_image(ImageName) 
+	:-
 	attach_image(ImageName, production).
 
 attach_image(ImageName, DevelopFlag)
@@ -82,7 +106,7 @@ attach_image(ImageName, DevelopFlag)
 			se(Error),
 			restore_si(Error, OldInit, OldStart) ).
 
-:- dynamic('$dv'/0).
+:- dynamic(dvf/0).
 
 /*
 save_image0(ImageName, Options)
@@ -381,14 +405,13 @@ process_image_option(init_goals(NewGoals))
 	:-!,
 	builtins:clause('$initialize',OldGoals),
 	builtins:abolish('$initialize',0),
-pbi_debug(about_to_assert( ('$initialize' :- OldGoals, user:NewGoals) ) ),
 	builtins:assert( ('$initialize'
 						:- OldGoals, user:NewGoals) ).
 
 process_image_option(start_goal(G))
 	:-!,
 	builtins:abolish('$start',0),
-	('$dv' ->
+	(dvf ->
 		builtins:assertz( ('$start' :-(builtins:qkc), (user:G)) )
 		;
 		builtins:assertz( ('$start' :- user:G) )
