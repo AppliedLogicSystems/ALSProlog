@@ -1,0 +1,19 @@
+myClassPred = project_mgr.
+myModule = alsdev.
+myName = nil.
+title = 'SQL Shell ODBC'.
+project_file = 'sql_shell.ppj'.
+primary_project_dir = 'D:\\databases'.
+list_of_files_slots = [prolog_files].
+list_slots = [].
+text_slots = [].
+search_dirs = [].
+slot_names =
+    [[production_goal,'Startup Goal:'],[debug_goal,'Debug Goal:'],
+        [executable_name,'Image Name:'],[prolog_files,'Files:']].
+executable_name = nil.
+prolog_files =
+    ['sql_shell.pro','odbc.pro','prolog_odbc.pro','meta_odbc.pro',
+        'podbc2.pro'].
+file_types = [[prolog_files,['.*']]].
+default_dirs = [].
