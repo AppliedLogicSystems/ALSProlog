@@ -9,3 +9,6 @@ student: core
 
 standard: core
 	build_dist.sh standard
+
+demo: core
+	build_dist.sh demo
