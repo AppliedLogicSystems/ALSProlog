@@ -3218,14 +3218,17 @@ write_buffer(Stream) :-
 	!,
 	write_buffer(Stream).
 
-tk_setmark(Stream)
+tk_setmark(StreamOrAlias)
 	:-
+	stream_or_alias_ok(StreamOrAlias, Stream),
 	stream_type(Stream, StrmType),
 	StrmType=tk_win,
 	stream_name(Stream, WinID),
 	stream_addl2(Stream, Interp),
 	!,
-	catch(tcl_call(Interp, [WinID,mark,set,lastPrompt,[end,-2,chars]], _),_,true).
+	catch(tcl_call(Interp, [WinID,mark,set,lastPrompt,[end,-2,chars]], _),_,true),
+	catch(tcl_call(Interp, [WinID,mark,set,insert,end], _),_,true),
+	catch(tcl_call(Interp, [focus,WinID], _),_,true).
 
 tk_setmark(Stream).
 

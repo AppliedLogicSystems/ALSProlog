@@ -11,6 +11,12 @@
  %% Loaded directly - see end of file:
 %:-[db_srctr].
 
+mkw32 :-
+	%reconsult(projects),
+	save_image('ALS Prolog',[select_lib(builtins, [debugger]),
+		select_lib(library,[miscterm,msc_ioin,strctutl,strings,
+					tcl_sppt,tk_alslib, listutl1])]).
+
 module builtins.
 use tcltk.
 use tk_alslib.
@@ -170,6 +176,9 @@ alsdev(Shared)
 	debugger:init_visual_debugger,
 	change_debug_io(debugwin),
 
+		%% For ALS IDE Project system:
+	alsdev:setup_ide_project_globals,
+
 	get_cwd(CurDir),
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
 
@@ -239,6 +248,20 @@ endmod.   % builtins
 module alsdev.
 use tcltk.
 use tk_alslib.
+
+listener_prompt
+	:-
+	write(shl_tk_out_win, '?- '), 
+	flush_output(shl_tk_out_win),
+	sio:tk_setmark(shl_tk_out_win).
+
+
+		%% For ALS IDE Project system; called at 
+		%% boot time:
+setup_ide_project_globals
+	:-
+	make_gv('_curProject'), 
+	set_curProject([]).
 
 alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom)
 	:-
@@ -400,7 +423,8 @@ check_alsdev_flags
 do_reconsult(PathAtom)
 	:-
 	sys_env(OS,_,_),
-	perf_reconsult(OS, PathAtom).
+	perf_reconsult(OS, PathAtom),
+	listener_prompt.
 
 perf_reconsult(unix, PathAtom)
 	:-!,
@@ -437,7 +461,8 @@ repair_path0([C | PAInCs], [C | PAOutCs])
 clear_workspace
 	:-
 	findall(MM, non_system_module(MM), UserMods),
-	clear_each_module(UserMods).
+	clear_each_module(UserMods),
+	listener_prompt.
 
 clear_each_module([]).
 clear_each_module([M | UserMods])
@@ -790,7 +815,7 @@ get_st_rec_by_fcg(FCGNum, Rec)
 
 start_src_trace(BaseFileName, SrcFilePath)
 	:-
-	init_visual_debugger,
+%	init_visual_debugger,
 	set_mrfcg(0),
 	tcl_call(shl_tcli, [ensure_db_showing], _),
 		%% Old Rec exists, but window has been destroyed, so
