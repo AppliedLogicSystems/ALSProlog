@@ -9,7 +9,7 @@
  */
 
 #include "getDirectory.h"
-#include "version.h"
+#include "getDir_version.h"
 
 static int
 getDirectory_ObjCmd(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)

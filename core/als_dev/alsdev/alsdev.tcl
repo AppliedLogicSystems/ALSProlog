@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.62 1998/11/06 15:35:05 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.63 1998/11/09 21:27:28 choupt Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -17,9 +17,6 @@
 #|	The main window is:  .topals.text
 #|	This is hard-coded in the following.
 ##=================================================================================
-
-package require getDirectory
-
 
 # Load packages for opening documents from the Finder/Explorer on
 # Macintosh and Windows.  The user provided procedure tkOpenDocument
@@ -36,8 +33,10 @@ if {$tcl_platform(platform) == "windows"} {
 }
 if {$tcl_platform(platform) == "macintosh"} {
 	load {} {appleevents}
+	load {} {getDirectory}
 }
 
+package require getDirectory
 
 proc xpe { What } {
 	global array proenv
