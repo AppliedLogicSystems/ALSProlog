@@ -715,6 +715,7 @@ return_as_double:
 	make_ieee_inf(v, t)
  *--------------------------------------------------------------*/
 
+#ifdef CONFIGLESS
 /* Taken from "ieeemath.h" */
 typedef union newdouble {
   unsigned short int usi[4];
@@ -738,6 +739,29 @@ make_ieee_inf(v, t)
 {
     w_mk_double(v, t, POS_INF.d);
 }
+#else
+
+void
+make_ieee_nan(v, t)
+    PWord *v;
+    int  *t;
+{
+    double d;
+    d = 0.0/0.0;
+    w_mk_double(v, t, d);
+}
+
+void
+make_ieee_inf(v, t)
+    PWord *v;
+    int  *t;
+{
+	double d;
+	d = 1.0/0.0;
+    w_mk_double(v, t, d);
+}
+
+#endif
 
 /*---------------------------------------------------------------
  *--------------------------------------------------------------*/
