@@ -1,11 +1,11 @@
 Microsoft Win32 x86 ALS Prolog Build Instructions
 =================================================
-Author: Chuck Houpt Date: 3-June-1996
+Author: Chuck Houpt Date: 25-June-1996
 
-These instructions assume that the ALS Prolog source directory exists,
-and all of its generated files are up to date (for example: generated
-makefiles, headers, etc).  The ALS Prolog source directory is refered
-to as $SRCDIR, %SRCDIR% or {blddir} in this document.
+These instructions assume that the ALS Prolog source directory exists, and all of
+its generated files are up to date (for example: generated makefiles, headers,
+etc).  The ALS Prolog source directory is refered to as $SRCDIR, %SRCDIR% or
+{blddir} in this document.
 
 Build Materials:
 ----------------
@@ -20,11 +20,11 @@ at least Y MB of available disk space.
 
 - Metrowerk's Code Warrior Gold 8 with the following options and
 modifications:
-	- Set the CodeWarrior IDE 1.4 minimum memory requirement to 6000K
-	- Install with at least this package: Metrowerks x86 C/C++ Compiler
-	- Put a copy of Microsoft Visual C++ 2.0's LIBC.LIB in the
-	  Win32/x86 Support:Libraries folder.
-
+    - Install with at least this option: Metrowerks x86 C/C++ Compiler
+      and the Other Metrowerks Tools folder (for the Metrowerks Standard Library).
+    - ALS modifications to the Metrowerks Standard Library.
+    - ALS modifications to the Metrowerks C Runtime Library.
+    - 
 - Software Security Inc.'s UniKey Library
 	- Put a "UniKey Library" folder with ssicm32n.lib and ssi_cw32.h in
 	  the Win32/x86 Support folder.
@@ -54,13 +54,6 @@ before running any of the batch files:
 
 set ALSP_SRC=x:\yyyyy\zzzz
 
-A note on making x86 Metrowerks projects:
-
-In CW8 there is a bug that causes Metrowerks to crash when a large project
-is completely recompiled.  The work around is to compile some of the files
-before compiling the rest.  In all the ALS projects, compiling wam.c (or
-kernal0.c) before compiling the rest of the project seems to work around the bug.
-
 Build Steps:
 ------------
 
@@ -86,22 +79,12 @@ Expander.  The following projects need expanding:
 	{blddir}bld-wins:mswin32:alspro_mswin320.prj.sit.hqx
 	{blddir}bld-wins:mswin32:demo_alspro_mswin320.prj.sit.hqx
 
-3. On the Mac, build the portable libriaries and executables.
+3. On the Mac, build the portable libriaries and executables using the
+{srcdir}bin:Build_Port_MSWin32 AppleScript. Open the script with the
+Script Editor and adjust the BUILDPATH to point to the build directory and
+run the script.
 
-Each project may need to have its access paths adjusted,
-see the note above.
-
-3.1 Open alspro_lib.prj, adjust access paths, compile wam.c, Make.
-
-3.2 Open alspro_b.prj, adjust access paths, compile wam.c, Make.
-
-3.3 Open alspro_dll.prj, adjust access paths, compile wam.c, Make.
-
-3.4 Open demo_alspro_lib.prj, adjust access paths, compile wam.c, Make.
-
-3.5 Open demo_alspro_b.prj, adjust access paths, Make.
-
-3.6 Open deno_alspro_dll.prj, adjust access paths, compile wam.c, Make.
+Each project may need to have its access paths adjusted, see the note above.
 
 4. From MS-DOS, set the ALSP_SRC environment variable.
 
@@ -111,13 +94,12 @@ batch file package.bat.
 6. From MS-DOS, change the directory to %BLDDIR%\bld-wins\mswin32, and
 run the batch file make_interf.bat.
 
-7. On the Mac, build the the Win32 Interface library and executable.
+7. On the Mac, build the the Win32 Interface library and executable using
+the {srcdir}bin:Build_Wins_MSWin32 AppleScript.  Open the script with the
+Script Editor and adjust the BUILDPATH to point to the build directory and
+run the script.
 
-7.1 Open mswin32intf_lib.prj, adjust access paths, Make.
-
-7.2 Open alspro_mswin320.prj, adjust access paths, compile kernal0.c, Make.
-
-7.3 Open demo_alspro_mswin320.prj, adjust access paths, compile kernal0.c, Make.
+Each project may need to have its access paths adjusted, see the note above.
 
 8.0 From MS-DOS, in the directory %BLDDIR%\bld-wins\mswin32, run the
 batch file winpack.bat.
@@ -137,9 +119,9 @@ set.
   prolog shell, and execute a query - this should cause the program to
   halt when it cannot detect the hardware key.
 
-- To test the DLL, open testdll.x86.prj, adjust access paths, and Make it.
-  Successfully running testdll.exe is enough to test the DLL. Repeat this
-  test for demo_testdll, testing both with and without the hardware key.
+- To test the DLL, run testdll.exe. Successfully running testdll.exe is enough to
+  test the DLL. Repeat this test for demo_testdll.exe, testing both with and
+  without the hardware key.
 
 Files generated:
 ----------------
@@ -183,10 +165,9 @@ Win32 Interface Libraries:
 Programming Sentinel UniKey Hardware Keys
 -----------------------------------------
 
-Both simple and 30-Day demo keys need programming.
-To program the keys, use the prog_ssikey program.
+Both simple and 30-Day demo keys need programming. To program the keys, use the
+prog_ssikey program.
 
-The prog_ssikey program is stored in the archive
-{srcdir}bin:SSI Key Programmer.sit.hqx.  Unpack the
-archive and run prog_ssikey.exe.  This will display
-usage information.
+The prog_ssikey program is stored in the archive {srcdir}bin:SSI Key
+Programmer.sit.hqx.  Unpack the archive and run prog_ssikey.exe.  This will
+display usage information.
