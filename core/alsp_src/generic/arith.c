@@ -16,17 +16,15 @@
  *===================================================================*/
 #include "defs.h"
 #include <math.h>
+#include <errno.h>
 
 #if defined(DOS)
 #include <stdef.h>
-#include <errno.h>
 
 #elif defined(VMS)  /* DOS */
-#include <errno.h>
 #include <types.h>
 
 #elif defined(MacOS)
-#include <errno.h>
 #ifdef HAVE_GUSI
 #include <GUSI.h>
 #else
@@ -37,12 +35,8 @@
 #endif
 
 #elif defined(UNIX)
-#include <errno.h>
 #include <sys/types.h>
 #include <sys/param.h>
-
-#elif defined(WIN32)
-#include <errno.h>
 
 #else
 #error

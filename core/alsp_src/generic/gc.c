@@ -21,6 +21,7 @@
 #include "freeze.h"
 #endif
 
+
 #undef mask
 
 static unsigned long *marks;
@@ -69,14 +70,26 @@ static unsigned long *marks;
 
 #endif /* MTP_CONST */
 
-#ifndef AmigaUNIX
+
+#ifdef PARAMREVBIT
+#define ADDR_MASK	0x7FFFFFFF
+
+#define REVERSEIT(targ, v)	((((targ) | ((v) & MTP_TAGMASK)) & ADDR_MASK) | ReversedHiBit);
+#define ISNORMAL(v)		(((v) & ~ADDR_MASK) ^ ReversedHiBit)
+#define UNREVERSEIT(v)		(((v) & ADDR_MASK) | AddressHiBit)
+
+#else
+
+#if !defined(AmigaUNIX)
 #define LOWMEMORY 1
 #endif
+
 
 #ifdef LOWMEMORY
 #define REVERSEIT(targ,v) (((targ) | ((v)&MTP_TAGMASK)) | REVBIT)
 #define ISNORMAL(v)	   (!(v & REVBIT))
 #define UNREVERSEIT(v)	((v) & ~REVBIT)
+
 
 #else  /* not-LOWMEMORY */
     /*-------------------------------------------------------*
@@ -89,6 +102,7 @@ static unsigned long *marks;
 #define UNREVERSEIT(v)	  (v | REVBIT)
 
 #endif /* LOWMEMORY */
+#endif /* PARAMREVBIT */
 
 #define ISNORMALUIA(v)	(!(v & REVBIT))
 
@@ -150,6 +164,9 @@ gc()
     register unsigned long *mp;
     register unsigned long m;
     int   compactionbit;
+#ifdef GCDEBUG
+    unsigned long start_tick, finish_tick;
+#endif
 
     /*---------------------------------------------------------------*
      | Force certain external variables to be biased for gc purposes.
@@ -176,6 +193,7 @@ gc()
 #ifdef GCDEBUG
     printf("\nStarting GC: %d  ", gccallcount);
     fflush(stdout);
+    start_tick = clock();
 #endif /* GCDEBUG */
 
     /*-------------------------------------------------------------------------*
@@ -536,7 +554,10 @@ chpt_after_trail_entry:	/* entry point into for-loop */
     wm_heapbase += BIAS;
 
 #ifdef GCDEBUG
-    printf("Compaction complete: nmarked=%d \n", nmarked);
+    finish_tick = clock();
+    printf("Compaction complete: nmarked=%d time=%lu ticks\n", nmarked, finish_tick - start_tick);
+    fflush(stdout);
+    
 #endif /* GCDEBUG */
 
     return 1;

@@ -100,7 +100,7 @@ extern	int	CI_get_double	PARAMS(( double *, unsigned long, unsigned long ));
 	sym_insert_dbl(name,CI_FLOATTYPE,(double)val);
 
 #define CI_DOUBLECONST(name,val) 	\
-	sym_insert_dbl(name,CI_DOUBLETYPE,(double)val);
+	sym_insert_dbl(name,CI_DOUBLETYPE,(double)(long)val);
 
 #define CI_STRUCT(name,cname,defnptr)	\
   sym_insert_2long(name,CI_STRUCTTYPE,sizeof(cname),(long)defnptr);

@@ -35,6 +35,8 @@
 #include <fcntl.h>
 #endif
 
+#include <limits.h>
+
 #ifdef MacOS
     #ifdef HAVE_GUSI
 	//#include <GUSI.h>
@@ -1872,6 +1874,75 @@ stream_is_ready(buf, usec_to_wait)
 	    return 1;
     }
 }
+
+/* simple_select
+ */
+
+#if defined(HAVE_SOCKET) && defined(HAVE_SELECT)
+/*------------------------------------------------------------*
+ |	Called by:
+ |		simple_select(SBList, Timeout)
+ |		simple_select(+, +)
+ |
+ |	The Prolog call is:
+ |
+ |		simple_select(List, Int)
+ |	
+ |	where List is a list of streams;  this is converted to
+ |	SBList, which is a list of the corresponding stream buffers.
+ *------------------------------------------------------------*/
+int
+sio_simple_select()
+{
+    PWord v1, v2, st;
+    int t1, t2, stt;
+	fd_set rfds, wfds, efds;
+	struct timeval wait_time;
+	int bfd, nfds = 0;
+    UCHAR *buf;
+	int rrr;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+
+    if (t2 != WTP_INTEGER)
+		FAIL;
+	if (t1 != WTP_LIST)
+		FAIL;
+
+	wait_time.tv_sec = v2 / 1000000;
+	wait_time.tv_usec = v2 % 1000000;
+
+	FD_ZERO(&rfds);
+	FD_ZERO(&wfds);
+	FD_ZERO(&efds);
+
+	while (v1 != TK_NIL) {
+		w_get_car(&st,&stt,&v1);
+    	if ((buf = get_stream_buffer(st, stt)) == (UCHAR *) 0)
+			FAIL;
+		bfd = SIO_FD(buf);
+		FD_SET(bfd, &rfds);
+		nfds = max(nfds, bfd);
+		w_get_cdr(&v1,&t1,v1);
+	}
+
+/*	if (select(nfds+1, &rfds, &wfds, &efds, &wait_time)  >= 0) */
+
+	if (v2 > 0)
+		rrr = select(nfds+1, &rfds, &wfds, &efds, &wait_time);
+	else
+		rrr = select(nfds+1, &rfds, &wfds, &efds, NULL);
+
+printf("v2 = %d nfds=%d rrr=%d\n",v2,nfds,rrr);
+
+	if (rrr  >= 0)
+		SUCCEED;
+	else
+		FAIL;
+}
+
+#endif
 
 #if HAVE_SOCKET
 /*
@@ -5037,9 +5108,11 @@ sio_sprintf()
 		FAIL;
 	    if (fmt_type == FMT_DBL)
 		sprintf((char *)buf, (char *)fmt, dblval);
-	    else if (fmt_type == FMT_INT)
-		sprintf((char *)buf, (char *)fmt, (int) dblval);
-	    else
+	    else if (fmt_type == FMT_INT) {
+	        if (dblval > (double) INT_MAX)
+	            sprintf((char *)buf, (char *)fmt, (unsigned int) dblval);
+		else sprintf((char *)buf, (char *)fmt, (int) dblval);
+	    } else
 		sprintf((char *)buf, "?");
 	    break;
 #else

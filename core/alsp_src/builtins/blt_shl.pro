@@ -93,6 +93,16 @@ ss_parse_command_line(['-P' | T], [ImageName | T], CLInfo)
 	:-!,
 	arg(4,CLInfo,ImageName).
 
+	%% -ind: "Indirect" file: open, read 1 line, process the line, & continue:
+ss_parse_command_line(['-ind', File | T], L, CLInfo)
+	:-!,
+	open(File,read,IS,[]),
+	get_line(IS, Line),
+	close(IS),
+	atomread(Line, IndCmdLine),
+	append(IndCmdLine, T, RestCL),
+	ss_parse_command_line(RestCL, L, CLInfo).
+
 	%% -g <Goal>: Start up goal:
 ss_parse_command_line(['-g', GoalAtom | T], L, CLInfo)
 	:-!,

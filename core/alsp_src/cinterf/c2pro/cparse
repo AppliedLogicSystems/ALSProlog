@@ -222,7 +222,8 @@ consume_semicolon(State) --> [semicolon], !.
 consume_semicolon(State,Toks,[]) 
 	:-
 	error('parse error\nParsed successfully %t\nI don\'t understand %t\nRemaining tokens %t\n\n',
-		   [DSpec,Declt,Toks],State).
+		   [DSpec,Declt,Toks],State),
+	get_line(_).
 
 %%-------------------------------------------------------
 %%
@@ -576,10 +577,11 @@ comp_decln(State,field(DSpec,DecltList)) -->
 	decln_specs(State,DSpec), 
 	comp_declt_list(State,DecltList).
 
+comp_declt_list(State,[]) --> [semicolon], !.
 comp_declt_list(State,[Declt|Rest]) --> 
 	comp_declt(State,Declt),
 	comp_declt_list_rest(State,Rest).
-
+	
 comp_declt_list_rest(State,[]) --> [semicolon], !.
 comp_declt_list_rest(State,Rest) --> [comma], 
 	comp_declt_list(State,Rest).
@@ -855,7 +857,8 @@ process_decln(DSpec,Declts,State)
 	check_tagged_structdef(DSpec,InTable,OutTable),
 %	setC2P(info_table, State, OutTable),
 	setInfoTable(OutTable),
-	process_typedef_declts(Declts,DSpec,State).
+	accessC2P(fcn_filter, State, FcnFilter),
+	process_typedef_declts(Declts,DSpec,FcnFilter, State).
 
 process_decln(DSpec,Declts,State) 
 	:-
@@ -874,12 +877,12 @@ check_tagged_structdef(DSpec,InTab,OutTab) :-
 check_tagged_structdef(_,Tab,Tab).
 
 %%-------------------------------------
-%% process_typedef_declts/3
+%% process_typedef_declts/4
 %%-------------------------------------
 
-process_typedef_declts([],_,State).
+process_typedef_declts([],_,FcnFilter,State).
 
-process_typedef_declts([Declt|Rest],DSpec,State) 
+process_typedef_declts([Declt|Rest],DSpec,FcnFilter,State) 
 	:-
 	scan_declt(Declt,ident(Name),_,_),
 %	accessC2P(info_table, State, InTable),
@@ -887,9 +890,43 @@ process_typedef_declts([Declt|Rest],DSpec,State)
 	insert_type(ident(Name),DSpec,Declt,InTable,OutTable),
 %	setC2P(info_table, State, OutTable),
 	setInfoTable(OutTable),
-	output_type(Name,DSpec,Declt,State),
-	process_typedef_declts(Rest,DSpec,State).
+	process_typedef_decl(FcnFilter, Name, DSpec, Declt, State),
+	process_typedef_declts(Rest,DSpec,FcnFilter,State).
 
+
+process_typedef_decl(all, Name, DSpec, Declt, State)
+	:- 
+	!,
+	output_type(Name,DSpec,Declt,State).
+
+process_typedef_decl(all_except(Excl), Name, DSpec, Declt, State)
+	:-
+	(
+	    dmember(Name, Excl) -> true
+	    ;
+	    output_type(Name,DSpec,Declt,State)
+	).
+
+process_typedef_decl(all_xcpt(Pat), Name, DSpec, Declt, State)
+	:-
+	(
+	    xcld_fcn_pat(Pat, Name) -> true
+	    ;
+	    output_type(Name,DSpec,Declt,State)
+	).
+
+process_typedef_decl(List, Name, DSpec, Declt, State)
+	:-
+	(
+	    dmember(Name, List) -> true
+	    ;
+	    output_type(Name,DSpec,Declt,State)
+	).
+
+process_typedef_decl(_, Name, DSpec, Declt, State)
+	:-
+	output_type(Name,DSpec,Declt,State).
+	
 %%-------------------------------------
 %% process_declts/4
 %%-------------------------------------

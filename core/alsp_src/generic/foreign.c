@@ -372,6 +372,24 @@ PI_aprintf(alias, fmt, va_alist)
     return PI_rungoal(vSIO, vStruct, tStruct);
 }
 
+#ifdef APP_PRINTF_CALLBACK
+void (*PI_app_printf_callback)(int, va_list) = NULL;
+
+void PI_set_app_printf_callback(void (*callback)(int, va_list))
+{
+    PI_app_printf_callback = callback;
+}
+
+void PI_app_printf(int messtype, ...)
+{
+    if (PI_app_printf_callback) {
+	va_list args;
+    	va_start(args, messtype);
+    	PI_app_printf_callback(messtype, args);
+    }
+}
+#endif
+
 int
 PI_rungoal(mod, goal, goaltype)
     PWord mod;

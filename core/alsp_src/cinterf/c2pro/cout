@@ -339,7 +339,7 @@ output_components( [ field(DSpec,Declts) | Rest ] ,Prefix,State)
 	getInfoTable(Tab),
 	deref(DSpec,Tab,_,_,PSpec),
 	output_fields(Declts,DSpec,PSpec,Prefix,State),
-	print_comma_cond(Rest,State),
+	(Declts = [] ; print_comma_cond(Rest,State)),
 	output_components(Rest,Prefix,State).
 	
 output_fields( [] ,_,_,_,_).
@@ -498,7 +498,8 @@ error(Fmt,State)
 
 error(Fmt,Args,0)
 	:-!,
-	printf(error_stream,Fmt,Args).
+%%	printf(error_stream,Fmt,Args).
+	printf(user,Fmt,Args).
 
 error(Fmt,Args,State)
 	:-
@@ -510,7 +511,8 @@ error(Fmt,Args,State)
 	name(NewFmt, NewFmtCs),
 	append([FileName,LineNum],Args,NewArgs),
 
-	printf(error_stream,NewFmt,NewArgs).
+%%	printf(error_stream,NewFmt,NewArgs).
+	printf(user,NewFmt,NewArgs).
 
 /*=================================================================*
  | 		cmisc.pro

@@ -53,6 +53,11 @@ static	void	coredump_cleanup	PARAMS(( int ));
 
 static	int	pgsize = 8192;	/* A guess at the page size */
 
+#ifdef PARAMREVBIT
+unsigned long AddressHiBit = 0x0;
+unsigned long ReversedHiBit = 0x80000000;
+#endif
+
 #define SIGSTKSIZE 8192		/* Size to use for a signal stack */
 
 /* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
@@ -448,8 +453,6 @@ stack_overflow(void)
 
 #endif /* arch_m88k */
 
-
-
 PWord *
 allocate_prolog_heap_and_stack(size)
     size_t size;			/* number of PWords to allocate */
@@ -466,12 +469,19 @@ allocate_prolog_heap_and_stack(size)
     if (retval == 0)
 	fatal_error(FE_BIGSTACK, 0);
 
+#ifdef PARAMREVBIT
+	AddressHiBit = (((unsigned long)retval) & 0x80000000);
+	ReversedHiBit = (~AddressHiBit & 0x80000000);
+	if (AddressHiBit != ((((unsigned long)retval) + size) & 0x80000000))
+	fatal_error(FE_TAGERR, 0);
+#else
 #ifdef arch_m88k
     if (((long) (retval + size) & MTP_TAGMASK) != 0)
 #else  /* arch_m88k */
     if (((long) (retval + size) & 0x80000000) != 0)
 #endif /* arch_m88k */
 	fatal_error(FE_TAGERR, 0);
+#endif
 
 #ifdef arch_m88k
     (void) signal(SIGFPE, stack_overflow);

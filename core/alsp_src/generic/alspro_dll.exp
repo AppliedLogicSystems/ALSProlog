@@ -1,5 +1,3 @@
-/EXPORT:WinsTypeStr
-
 /EXPORT:PI_forceuia
 /EXPORT:PI_getan
 /EXPORT:PI_getargn
@@ -25,6 +23,5 @@
 /EXPORT:PI_shutdown
 /EXPORT:PI_toplevel
 /EXPORT:PI_prolog_init
-
 /EXPORT:PI_app_printf
-/EXPORT:PI_get_options
+/EXPORT:pi_init

@@ -685,6 +685,7 @@ sortByArity([ReturnArg=FuncArgs/File | RestFuncs], Accum, OutLists)
 */
 	functor(FuncArgs,_,Arity),
 	insertInAccum(Arity,ReturnArg=FuncArgs/File,Accum,NewAccum),
+	%%printf('func: %t\n', [FuncArgs]),
 	!,
 	sortByArity(RestFuncs,NewAccum,OutLists).
 	
@@ -866,6 +867,7 @@ classifyThisType([float|_],float).
 classifyThisType([double|_],float).
 classifyThisType([extended|_],float).
 classifyThisType([struct|_],integer).
+classifyThisType([union|_],integer).
 classifyThisType([void|_],void).
 classifyThisType(List,undefined)
 	:- printf(error_stream,'%% UNKNOWN TYPE LIST in classifyType/2:%t\n',[List]).

@@ -343,7 +343,10 @@ extern size_t strcspn PARAMS(( const char *s1, const char *s2 ));
 /*---------------------------------------------------------------------*
  | Declare the als memory allocation function and associated helpers
  *---------------------------------------------------------------------*/
-
+#ifdef PARAMREVBIT
+extern	unsigned long AddressHiBit;
+extern	unsigned long ReversedHiBit;
+#endif
 extern	int	als_mem_init	PARAMS(( char *file, long offset ));
 extern	long *	ss_pmalloc	PARAMS(( size_t size, int fe_num, long *asizep ));
 extern	long *	ss_malloc	PARAMS(( size_t size, int fe_num ));
