@@ -1444,16 +1444,20 @@ PI_prolog_init(int argc, char **argv)
     {
 	WORD wVersionRequested = MAKEWORD(1, 1);
 	WSADATA wsaData;
-	int success = 1;
+	int r, success;
 	
-	success = (WSAStartup(wVersionRequested, &wsaData) == 0);
+	r = WSAStartup(wVersionRequested, &wsaData);
+	
+	success = (r == 0);
 	
 	if (success && wsaData.wVersion != wVersionRequested) {
 	    WSACleanup();
 	    success = 0;
 	}
 
-	if (!success) PI_app_printf(PI_app_printf_warning, "WinSock init failed !\n");
+	if (!success) {
+	    PI_app_printf(PI_app_printf_warning, "WinSock init failed !\n");
+	}
     }
     
 #endif
@@ -1484,7 +1488,8 @@ PI_shutdown(void)
 
 #ifdef MSWin32
     if (WSACleanup() != 0) {
-	PI_app_printf(PI_app_printf_warning, "WinSock cleanup failed !\n");
+    	/* for some reason this is always signalling an error */
+	//PI_app_printf(PI_app_printf_warning, "WinSock cleanup failed !\n");
     }
 #endif
 
