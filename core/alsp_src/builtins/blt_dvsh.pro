@@ -9,6 +9,26 @@
  |	Creation Date: 1997
  *=============================================================*/
 
+		%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++
+		%!%!%! WARNING WARNING WARNING WARNING
+		%  THE RESATISFIABILITY % BUG
+		%  --- Load both debugger.pro and blt_dvsh.pro from source 
+		%	(*.pro after *.obp's removed); 
+		%  The improper restisfiability will occur when tracing 
+		%  ?- p(X) in
+		%
+		%  p(X) :- q(X).
+		%  q(X) :- r(X).
+		%  r(a).
+		%  r(b).
+		%
+		%  ---- remove the *.obp for this file, but make sure the
+		%  the debugger is loaded from debugger.obp.; everything will
+		%  be ok.
+		%
+		%	
+		%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++
+
 /***
 mkw32 :-
 	reconsult(projects),
@@ -83,6 +103,7 @@ start_alsdev
 	alsdev_splash(ImagesPath),
 
 	process_cl_asserts(CLInfo),
+	!,
 	alsdev(Shared,ALS_IDE_Mgr).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -303,8 +324,8 @@ alsdev(Shared, ALS_IDE_Mgr)
 	tcl_call(shl_tcli, [do_main_als_bindings],_),
 
 	initial_flags_settings,
-	alsdev:check_alsdev_flags,
 	initial_misc_settings,
+	alsdev:check_alsdev_flags,
 
 	retract(save_clinfo(CLInfo)),
 	ss_load_dot_alspro(CLInfo),
@@ -328,6 +349,7 @@ alsdev(Shared, ALS_IDE_Mgr)
 
 	get_cwd(CurDir),
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
+
 
 	builtins:prolog_shell(ISS,OSS,alsdev).
 
@@ -536,20 +558,15 @@ module alsdev.
 use tcltk.
 use tk_alslib.
 
-%use objects.
-
-
 	%%------------------------------------------
 	%% Command line processing
 	%%------------------------------------------
 
 special_ss_parse_command_line(File, Tail, [], CLInfo)
 	:-
-	insert_spaces([File | Tail], SpacedList),
-	catenate(SpacedList, TheFile),
-	special_file_type(TheFile, FileType, NoSuffixFile, Ext),
+	special_file_type(File, FileType, NoSuffixFile, Ext),
 	!,
-	store_special_file(FileType, TheFile, NoSuffixFile, Ext, CLInfo).
+	store_special_file(FileType, File, NoSuffixFile, Ext, CLInfo).
 
 special_file_type(File, prolog_project, NoSuffixFile, ppj)
 	:-
@@ -777,8 +794,8 @@ fin_find_alsdev_ini(PrefsFileList, Items)
 	:-
 	join_path(PrefsFileList, PrefsFilePath),
 	exists_file(PrefsFilePath),
-	!,
 	assert(alsdev_ini_path(PrefsFilePath)),
+	!,
 	grab_terms(PrefsFilePath, Items).
 
 fin_find_alsdev_ini(PrefsFileList, [])
@@ -1461,24 +1478,6 @@ ensure_db_showing
  	tcl_call(shl_tcli, [ensure_db_showing], _).
 
 
-
-
-/*
-init_visual_debugger
-	:- 
-	clause(get_db_file_recs(_),B),
-	!.
-
-init_visual_debugger
-	:- 
-	make_gv('_db_file_recs'), set_db_file_recs([]),
-	make_gv('_dbfr_tbl'),
-	functor(DBFRTBL, dbfrt, 100), 
-	set_all_args(1,100,DBFRTBL,0),
-	set_dbfr_tbl(DBFRTBL),
-	make_gv('_mrfcg'), set_mrfcg(0).
-*/
-
 get_src_trace_rec(FileName, Rec)
 	:-
 	get_db_file_recs(RecsList),
@@ -1509,7 +1508,7 @@ start_src_trace(Flag,BaseFileName, SrcFilePath, CG, ALSMgr, SrcMgr)
 	send(DbgrMgr, insert_by_fcg(CG, SrcMgr)),
 	send(DbgrMgr, set_value(mrfcg, CG)),
 	!,
-%write(dvsh_sst),nl,flush_output,
+%write(dvsh_sst-x),nl,flush_output,
 	send(SrcMgr, start_src_trace(BaseFileName, SrcFilePath, CG)).
 
 inverted_index(LineIndex, InvertedLineIndex)
