@@ -31,7 +31,7 @@ isopt(const char *opt, char *str)
 	return 0;
 }
 
-ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
+EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 {
     int   exit_status, success;
     char *als_opts;

@@ -970,7 +970,7 @@ autoload(f)
     }
 }
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 PI_toplevel(int *result)
 {
 #ifndef KERNAL
@@ -1290,7 +1290,7 @@ void app_printf(int messtype, va_list args);
 #include <console.h>
 #endif
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 PI_prolog_init(int argc, char *argv[])
 {
   PI_system_setup setup;
@@ -1318,7 +1318,7 @@ static void StartCoop(void);
 static void EndCoop(void);
 #endif
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 PI_startup(const PI_system_setup *setup)
 {
 
@@ -1411,7 +1411,7 @@ PI_startup(const PI_system_setup *setup)
 
 }
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_shutdown(void)
 {
 
@@ -1584,7 +1584,7 @@ int metrowerks_open_patch(const char *filename, int mode)
 #ifdef APP_PRINTF_CALLBACK
 void app_printf(int messtype, va_list args)
 #else
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_app_printf(int messtype, ...)
 #endif
 {
@@ -1653,7 +1653,7 @@ PI_app_printf(int messtype, ...)
    Usually this string comes from getenv(), except on the Mac where it
    is stored in a preferences file.
 */
-ALSPI_API(const char *)
+EXPORT ALSPI_API(const char *)
 PI_get_options(void)
 {
 #ifdef MacOS
