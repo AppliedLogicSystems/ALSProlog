@@ -650,12 +650,11 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 	}
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 
-#ifdef undef 
 
 	if ((wm_TR - wm_H) < wm_normal)
-/*		heap_overflow();    */
-/*		stack_overflow(ALSSIG_HEAP_OVERFLOW); */
+		heap_overflow();
 
+#ifdef undef 
 		/**** WARNING!!!!!
 		 The 1st 2 #ifdef cases below need work (declarations, etc):::: */
 

@@ -404,7 +404,6 @@ protect_bottom_stack_page()
     bottom_stack_page_is_protected = 1;
 }
 
-
 PWord *
 allocate_prolog_heap_and_stack(size)
     size_t size;				/* number of PWords to allocate */
@@ -2033,3 +2032,16 @@ int pbi_save_app_with_obp(void)
     PI_SUCCEED;
 }
 #endif
+
+void heap_overflow(void)
+{
+    if (wm_normal <= DEFAULT_SAFETY/8) fatal_error(FE_OVER_HEAP, 0);
+    wm_normal = wm_normal/2;
+
+    /* raise a prolog interupt - there must be a cleaner way! */
+
+    if (wm_regidx != 0) {
+	wm_safety = -1;
+    }
+    wm_interrupt_caught = ALSSIG_HEAP_OVERFLOW;
+}
