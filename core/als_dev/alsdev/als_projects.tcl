@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.15 1998/11/18 20:41:43 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.16 1998/11/18 21:50:09 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -93,10 +93,10 @@ if {$tcl_platform(platform) != "unix"} {
 		$Listbox insert end $BaseNewFile
 	}
 	}
-}
-else {
+} else {
 	
 	set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
+	set DFT [list -filetypes $types]
 	set NewFilePath [eval tk_getOpenFile $DFT \
 			{-title "Project File to Open"} \
 			[list "-initialdir" $DfltDir] ]
