@@ -101,7 +101,7 @@ findUserFile(PathName,ExpandedName,State)
 findUserFile(File,ExpandedName,State) 
 	:-		
 	sourcePath(Path),
-	pathPlusFile(Path,File,ExpandedName),
+	path_directory_tail(ExpandedName,Path,File),
 	exists_file(ExpandedName).
 
 %---------------------------------------------------------------

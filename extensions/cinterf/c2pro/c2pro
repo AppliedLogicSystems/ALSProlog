@@ -106,14 +106,16 @@ c2pro
 	),
 */
 		%% parse command line & setup options:
-	get_cmdline_vals(SwitchVals),
-	pull_out_nullswitches(SwitchVals, Files, ReducedSwitchVals),
+%	get_cmdline_vals(SwitchVals),
+%	pbi_get_command_line([_ | ReducedSwitchVals]),
+%	pull_out_nullswitches(SwitchVals, Files, ReducedSwitchVals),
+	command_line(ReducedSwitchVals),
 
 	makeC2P(DummyState),
 	setC2P(inFile, DummyState, command_line),
 	setC2P(curLineNum, DummyState, 0),
 
-	parse_options(ReducedSwitchVals, Defines, DummyState),
+	parse_options(ReducedSwitchVals, Defines, Files, DummyState),
 		%% process the files:
 	recheck_defaults([sourcePath(_)]),
 	calc_filters,
@@ -123,11 +125,23 @@ c2pro
 	%   parse_options/3
 	%-------------------------------------
 
-parse_options([],[],State).
+/*
+parse_options([],[],[], State).
 parse_options([FirstOpt | RestOpts], Defines, State)
 	:-
 	install_option(FirstOpt, Defines, RestDefines, State),
 	parse_options(RestOpts, RestDefines, State).
+*/
+parse_options([],[],[], State).
+parse_options([Switch, Value | RestOpts], Defines, Files, State)
+	:-
+	sub_atom(Switch, 0, 1, _, '-'),
+	!,
+	install_option([Switch, Value], Defines, RestDefines, State),
+	parse_options(RestOpts, RestDefines, Files, State).
+parse_options([File | RestOpts], Defines, [File | Files], State)
+	:-
+	parse_options(RestOpts, RestDefines, Files, State).
 
 /*--------------------------------------------------------------
  |   install_option/4
@@ -169,6 +183,18 @@ parse_options([FirstOpt | RestOpts], Defines, State)
  |		option:  -Flag
  |	
  *-------------------------------------------------------------*/
+:-dynamic(master_name/1).
+:-dynamic(tgt_os/1).
+:-dynamic(cur_debug_level/1).
+:-dynamic(sourcePath/1).
+:-dynamic(trace_enter_file/1).
+:-dynamic(sysPathPrefix/1).
+:-dynamic(info_file/1).
+:-dynamic(decln_break_on/1).
+:-dynamic(filter_file/1).
+:-dynamic(raw_filter_expr/1).
+:-dynamic(fcn_filter/1).
+
 	%% set debugging level:
 	%% option:  -d Level[=Num]
 install_option(['-d',InitLevel], Defines, Defines, State)
@@ -250,14 +276,14 @@ install_option(['-filter', Filter], Defines, Defines, State)
 	%% option: -info File -- must appear rightwards of -srcpath
 install_option(['-info', File], Defines, Defines, State)
 	:-
-	filePlusExt(File,pro,FilePro),
+	file_extension(FilePro,File,pro),
 	((exists_file(File) ; exists_file(FilePro))
 		->
 		FullFile = File
 		;
 		sourcePath(SrcPath),
-		extendPath(SrcPath,File,FullFile),
-		filePlusExt(FullFile,pro,FullFilePro),
+		path_directory_tail(SrcPath, File, FullFile),
+		file_extension(FullFilePro, FullFile, pro),
 		((exists_file(FullFile) ; exists_file(FullFilePro))
 			-> 
 			true ;
@@ -587,7 +613,7 @@ c2pro([FirstFile | Rest], Defines)
 	sourcePath(SrcPath),
 	setup_the_input_file(FirstFile, SrcPath, InName, BaseName),
 	outSuffix(OutSufx),
-	filePlusExt(BaseName,OutSufx,OutName),
+	file_extension(OutName,BaseName,OutSufx),
 	(tgt_os(OS) -> true ; OS = unix),
 	init_state(InName, OutName, OS, State),
 	fcn_filter(FcnFilter),
@@ -613,8 +639,8 @@ setup_the_input_file(FirstFile, SrcPath, InName, BaseName)
 	:-
 	master_name(MasterName),
 	inSuffix(IS), 
-	filePlusExt(MasterName,IS,FileExt),
-	pathPlusFile(SrcPath,FileExt,InName),
+	file_extension(FileWExt,MasterName,IS),
+	path_directory_tail(InName,SrcPath,FileWExt),
 	exists_file(InName),
 	!,
 	BaseName = FirstFile.
@@ -625,32 +651,38 @@ setup_the_input_file(FirstFile, SrcPath, InName, BaseName)
 
 input_file_setup(File, SrcPath, InName, BaseName)
 	:-
-	filePlusExt(BaseName,Ext,File),
+	file_extension(File, BaseName,Ext),
+	Ext \= '',
 	!,
 	inSuffix(IS), 
 	(IS = Ext ->
 		InName = File
 		;
-		error('Bad source file: %t -- skipping\n',[File], 0)
+		(Ext = '' ->
+			file_extension(InName,File,IS)
+			;
+			error('Bad source file: %t -- skipping\n',[File], 0)
+		)
 	).
 
 	%% Finding a path attached to a particular file
 	%% overrides the source path specified with a switch:
 input_file_setup(File, SrcPath, InName, BaseName)
 	:-
-	pathPlusFile(Path,BaseName,File),
+	path_directory_tail(File,Path,BaseName),
+	Path \= '.',
 	Path \= '',
 	!,
 	inSuffix(IS), 
-	filePlusExt(File,IS,InName).
+	file_extension(InName,File,IS).
 
 	%% File is a pure, unadorned name (no path, no ext); 
 	%% use the SrcPath:
 input_file_setup(File, SrcPath, InName, File)
 	:-
 	inSuffix(IS), 
-	filePlusExt(File,IS,FileExt),
-	pathPlusFile(SrcPath,FileExt,InName).
+	file_extension(FileWExt,File,IS),
+	path_directory_tail(InName,SrcPath,FileWExt).
 
 	%---------------------------------
 	%  init_state/3

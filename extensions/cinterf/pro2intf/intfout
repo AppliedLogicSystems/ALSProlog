@@ -45,7 +45,7 @@ openOutputFile(OutStream,State)
 	accessP2I(baseName, State, BaseName),
 	outSuffix(Suffix),
 	catenate([BaseName,Count],NewBase),
-	filePlusExt(NewBase,Suffix,File),
+	file_extension(File, NewBase,Suffix),
 
 	accessP2I(cFileList, State, CFileList),
 	append(CFileList, [File], NewCFileList),

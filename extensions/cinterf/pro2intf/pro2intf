@@ -96,7 +96,7 @@ dispatch_option(['-null_switch' ,BaseName], State)
 	:-!,
 	setP2I(baseName, State, BaseName),
 	inSuffix(Suffix),
-	filePlusExt(BaseName, Suffix, InFile),
+	file_extension(InFile, BaseName, Suffix),
 	setP2I(inFile, State, InFile).
 
 dispatch_option(['-f' ,Str], State) 
@@ -148,10 +148,12 @@ dispatch_option(['-D' ,Flag], State)
 	%% the way it is used in C-land;
 dispatch_option([Switch], State) 
 	:-	
-	sub_atom(Switch,1,2,'-D'),
+%	sub_atom(Switch,1,2,'-D'),
+	sub_atom(Switch,0,2,_,'-D'),
 	atom_length(Switch,LS),
 	LenTail is LS - 2,
-	sub_atom(Switch,3,LenTail,Flag),
+%	sub_atom(Switch,3,LenTail,Flag),
+	sub_atom(Switch,2,LenTail,0,Flag),
 	!,
 	assert(Flag).
 
@@ -1084,16 +1086,7 @@ fin_switchProFile(File,ProStreamStack,FileStream, State)
 get_pro_filename(CFile,ProFile,State)
 	:-
 	accessP2I(baseName, State, BaseName),
-	filePlusExt(BaseName,pro,ProFile).
-
-/*
-	(filePlusExt(CFN,_,CFile) -> 
-		true 
-		; 
-		CFN = CFile
-	),
-	filePlusExt(CFN,pro,ProFile).
-*/
+	file_extension(ProFile,BaseName,pro).
 
 %-----------------------------------------------------------------
 %	close_dot_pro_files/0:	Closes all .pro files left open.
