@@ -1,3 +1,13 @@
+/*
+
+play_sound_file(Path)
+
+Plays the sound file with the path Path.  Only plays AIF files of MacOS.
+Windows plays the sounds that the system can play.
+
+*/
+
+
 #include "alspi.h"
 
 static int play_sound_file(void)
