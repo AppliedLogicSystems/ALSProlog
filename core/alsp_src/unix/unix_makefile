@@ -10,7 +10,7 @@ OS_SL_LINK = $(CC) -shared
 LIBS = $(OS_LIBS)
 SL_LINK_LIBS = $(LIBS)
 
-MAKEFILES += $(SUBOS)_makefile
+MAKEFS += $(SUBOS)_makefile
 
 CPPFLAGS += -DUNIX
 
