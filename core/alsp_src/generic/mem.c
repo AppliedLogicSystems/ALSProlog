@@ -29,6 +29,13 @@
 #include <fcntl.h>
 #endif
 
+#ifdef MacOS
+#include <Processes.h>
+#include <Resources.h>
+#include <Errors.h>
+#include <FileCopy.h> /* From MoreFiles - from Macintosh Sample Code library. */
+#endif
+
 #ifdef MSWin32
 #include <windows.h>
 #include "fswin32.h"
@@ -387,9 +394,31 @@ PWord *
 allocate_prolog_heap_and_stack(size)
     size_t size;				/* number of PWords to allocate */
 {
-    LPVOID stack;
+    if (win32s_system) {
+    PWord *retval = (PWord *) malloc(sizeof (PWord) * size);
 
-       
+    if (retval == 0)
+	fatal_error(FE_BIGSTACK, 0);
+
+	AddressHiBit = (((unsigned long)retval) & 0x80000000);
+	ReversedHiBit = (~AddressHiBit & 0x80000000);
+	if (AddressHiBit != ((((unsigned long)retval) + size) & 0x80000000))
+	fatal_error(FE_TAGERR, 0);
+
+
+/* These signals are not available on the Mac. */
+#ifndef MacOS
+#ifdef SIGBUS
+    (void) signal(SIGBUS, coredump_cleanup);
+#endif
+    (void) signal(SIGSEGV, coredump_cleanup);
+#endif
+    return retval;
+
+    
+    } else {
+    LPVOID stack;
+    
     SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)stack_overflow);
     
     stack = VirtualAlloc((LPVOID)STACKSTART,
@@ -402,6 +431,7 @@ allocate_prolog_heap_and_stack(size)
     protect_bottom_stack_page();
 
     return (PWord *)STACKSTART;
+    }
 }
 
 
@@ -778,6 +808,13 @@ alloc_big_block(size, fe_num)
     }
 #elif defined(MSWin32)
     
+    if (win32s_system) {
+	np = (long *)malloc(size);
+	
+	if (np == NULL)
+	    fatal_error(fe_num, 0);
+    
+    } else {
     np = VirtualAlloc((void *)next_big_block_addr, size, MEM_RESERVE | MEM_COMMIT,
     			PAGE_READWRITE);
     
@@ -785,7 +822,7 @@ alloc_big_block(size, fe_num)
         fatal_error(fe_num, 0);
  
     next_big_block_addr += size;
-   
+    }
 #else /* HAVE_BRK */
 	np = (long *)malloc(size);
 	
@@ -1759,3 +1796,278 @@ ss_saved_state_present()
     return 0;
 #endif	/* MACH_SUBSTRATE */
 }
+
+#ifdef MacOS
+static unsigned char *c2pstrcpy(unsigned char *ps, const char *cs)
+{
+	size_t l = strlen(cs);
+	if (l > 255) l = 255;
+	ps[0] = l;
+	memcpy(ps+1, cs, l);
+	
+	return ps;
+}
+
+
+static OSErr DuplicateThisApplication(ConstStr255Param newAppName)
+{
+    OSErr err;
+    Str255 AppName;
+    FSSpec AppSpec, NewAppSpec, DirSpec;
+    extern const int MPW_Tool;
+    #define IMAGENAME_MAX	64
+    #define IMAGEDIR_MAX	1024
+    extern char  imagename[IMAGENAME_MAX];
+    extern char  imagedir[IMAGEDIR_MAX];
+    
+    if (MPW_Tool) {
+    	char name[256];
+    	
+    	strcpy(name, imagedir);
+    	strcat(name, imagename);
+    	c2pstrcpy(AppName, name);
+    	
+    	err = FSMakeFSSpec(0, 0, AppName, &AppSpec);
+    	if (err != noErr) return err;
+    } else {
+	ProcessSerialNumber PSN;
+	ProcessInfoRec info;
+	
+	/* Get the FSSpec for this application. */    
+	PSN.highLongOfPSN = 0;
+	PSN.lowLongOfPSN = kCurrentProcess;
+	
+	info.processInfoLength = sizeof(ProcessInfoRec);
+	info.processName = AppName;
+	info.processAppSpec = &AppSpec;
+	
+	err = GetProcessInformation(&PSN, &info);
+	if (err != noErr) return err;
+    }
+
+    /* Create a FSSpec for the new app and destination directory. */
+    err = FSMakeFSSpec(0, 0, newAppName, &NewAppSpec);
+    if (err != noErr && err != fnfErr) return err;
+    
+    err = FSMakeFSSpec(NewAppSpec.vRefNum, NewAppSpec.parID, "\p", &DirSpec);
+    if (err != noErr && err != fnfErr) return err;
+
+    return FSpFileCopy(&AppSpec, &DirSpec, (StringPtr) newAppName, NULL, 0, 1);
+}
+
+int pbi_save_app_with_obp(void)
+{
+    PWord v1, v2, v3, v4, v5;
+    int t1, t2, t3, t4, t5;
+    UCHAR *name;
+    Str255 newAppName, OBPName;
+    FSSpec newAppSpec, OBPSpec;
+    OSErr err;
+    short resRef, obpRef;
+    
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+    w_get_An(&v3, &t3, 3);
+    w_get_An(&v4, &t4, 4);
+    w_get_An(&v5, &t5, 5);
+
+    if (!getstring(&name, v1, t1)) PI_FAIL;
+    
+    if (t2 != PI_LIST) PI_FAIL;
+    
+    //if (t3 != PI_LIST) PI_FAIL;
+    
+    c2pstrcpy(newAppName, name);
+    
+    err = DuplicateThisApplication(newAppName);
+    if (err != noErr) PI_FAIL;
+    
+    err = FSMakeFSSpec(0, 0, newAppName, &newAppSpec);
+    if (err != noErr && err != fnfErr) PI_FAIL;
+    
+    resRef = FSpOpenResFile(&newAppSpec, fsRdWrPerm);
+    if (resRef == -1) PI_FAIL;
+
+    while (t2 == PI_LIST) {
+	PWord h; int th;
+    	Handle obpHandle;
+    	int newResource;
+	long length, readLength;
+    	
+	PI_gethead(&h, &th, v2);
+	if (!getstring(&name, h, th)) PI_FAIL;
+	c2pstrcpy(OBPName, name);
+	
+	err = FSMakeFSSpec(0, 0, OBPName, &OBPSpec);
+	if (err != noErr && err != fnfErr) PI_FAIL;
+	
+	err = FSpOpenDF(&OBPSpec, fsRdPerm, &obpRef);
+	if (err != noErr) PI_FAIL;
+
+	err = GetEOF(obpRef, &length);
+	if (err != noErr) PI_FAIL;
+
+	obpHandle = Get1NamedResource('OBPT', OBPSpec.name);
+	if (obpHandle) { 
+	    newResource = 0;
+	    SetHandleSize(obpHandle, length);
+	    if (MemError() != noErr) PI_FAIL;
+	} else {
+	    newResource = 1;
+	    obpHandle = NewHandle(length);
+	    if (obpHandle == NULL) PI_FAIL;
+	}
+		
+	HLock(obpHandle);
+	if (MemError() != noErr) PI_FAIL;
+		
+	readLength = length;
+	err = FSRead(obpRef, &readLength, *obpHandle);
+	if (err != noErr || readLength != length) PI_FAIL;
+		
+	FSClose(obpRef);
+		
+	HUnlock(obpHandle); 
+	if (MemError() != noErr) PI_FAIL;
+	
+	if (newResource) {
+	    AddResource(obpHandle, 'OBPT', Unique1ID('OBPT'), OBPSpec.name);
+	    if (ResError() != noErr) PI_FAIL;
+	} else {
+	    ChangedResource(obpHandle);
+	    if (ResError() != noErr) PI_FAIL;
+	}
+	WriteResource(obpHandle);
+	if (ResError() != noErr) PI_FAIL;
+	
+	ReleaseResource(obpHandle);
+	if (ResError() != noErr) PI_FAIL;
+			
+	PI_gettail(&v2, &t2, v2);
+    }
+    
+    {
+    Handle loadHandle;
+    int newResource;
+    PWord h; int th;
+    long length, hlen;
+    Str255 pname;
+    
+    loadHandle = Get1Resource('STR#', 128);
+    if (loadHandle) {
+    	newResource = 0;
+    } else {
+    	newResource = 1;
+    	loadHandle = NewHandle(sizeof(short));
+    	if (loadHandle == NULL) PI_FAIL;
+    }
+    **((short **)loadHandle) = 0;
+    
+    while (t3 == PI_LIST) {
+    	PI_gethead(&h, &th, v3);
+    	if (!getstring(&name, h, th)) PI_FAIL;
+    	length = strlen(name);
+    	hlen = GetHandleSize(loadHandle);
+	(**((short **)loadHandle))++;
+	SetHandleSize(loadHandle, hlen + length + 1);
+	if (MemError() != noErr) PI_FAIL;
+	c2pstrcpy(pname, name);
+	BlockMove(pname, *loadHandle + hlen, length+1);
+    	PI_gettail(&v3, &t3, v3);
+    }
+    
+    if (newResource) {
+	AddResource(loadHandle, 'STR#', 128, "\pAuto Load Files");
+	if (ResError() != noErr) PI_FAIL;
+    } else {
+	ChangedResource(loadHandle);
+	if (ResError() != noErr) PI_FAIL;
+    }
+    
+    WriteResource(loadHandle);
+    if (ResError() != noErr) PI_FAIL;
+	
+    ReleaseResource(loadHandle);
+    if (ResError() != noErr) PI_FAIL;
+    }
+    
+    {
+	Handle initHandle;
+	int newResource;
+	long len;
+	Str255 pname;
+	
+        if (!getstring(&name, v4, t4)) PI_FAIL;
+	len = strlen(name);
+	c2pstrcpy(pname, name);
+	
+	initHandle = Get1Resource('STR ', 128);
+	if (initHandle) {
+    	    newResource = 0;
+    	    SetHandleSize(initHandle, len+1);
+    	    if (MemError() != noErr) PI_FAIL;
+	} else {
+    	    newResource = 1;
+    	    initHandle = NewHandle(len+1);
+    	    if (initHandle == NULL) PI_FAIL;
+	}
+	
+	BlockMove(pname, *initHandle, len+1);
+
+	if (newResource) {
+	    AddResource(initHandle, 'STR ', 128, "\pInit Predicate");
+	    if (ResError() != noErr) PI_FAIL;
+	} else {
+	    ChangedResource(initHandle);
+	    if (ResError() != noErr) PI_FAIL;
+	}
+	WriteResource(initHandle);
+	if (ResError() != noErr) PI_FAIL;
+	
+	ReleaseResource(initHandle);
+	if (ResError() != noErr) PI_FAIL;
+    }
+ 
+     {
+	Handle startHandle;
+	int newResource;
+	long len;
+	Str255 pname;
+	
+        if (!getstring(&name, v5, t5)) PI_FAIL;
+	len = strlen(name);
+	c2pstrcpy(pname, name);
+	
+	startHandle = Get1Resource('STR ', 129);
+	if (startHandle) {
+    	    newResource = 0;
+    	    SetHandleSize(startHandle, len+1);
+    	    if (MemError() != noErr) PI_FAIL;
+	} else {
+    	    newResource = 1;
+    	    startHandle = NewHandle(len+1);
+    	    if (startHandle == NULL) PI_FAIL;
+	}
+	
+	BlockMove(pname, *startHandle, len+1);
+
+	if (newResource) {
+	    AddResource(startHandle, 'STR ', 129, "\pStart Predicate");
+	    if (ResError() != noErr) PI_FAIL;
+	} else {
+	    ChangedResource(startHandle);
+	    if (ResError() != noErr) PI_FAIL;
+	}
+	WriteResource(startHandle);
+	if (ResError() != noErr) PI_FAIL;
+	
+	ReleaseResource(startHandle);
+	if (ResError() != noErr) PI_FAIL;
+    }
+   
+    
+    CloseResFile(resRef);
+    
+    PI_SUCCEED;
+}
+#endif

@@ -59,7 +59,13 @@ void app_printf(int messtype, va_list args);
 
 #ifdef MPW_TOOL
 #include <CursorCtl.h>
+
+const int MPW_Tool = 1;
+
 #else
+
+const int MPW_Tool = 0;
+
 #if THINK_C
 #include <console.h>
 #endif			/* THINK_C */
@@ -177,8 +183,22 @@ main(int argc, char ** argv)
 #ifdef MSWin32
 #ifdef __MWERKS__
     FixArguments(argc, argv);
-    if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE))
-    	PI_app_printf(PI_app_printf_warning, "SetConsoleCtrlHandler failed !\n");
+#if defined (WIN32)
+	#define IS_WIN32 TRUE
+#else
+	#define IS_WIN32 FALSE
+#endif
+#define IS_NT      IS_WIN32 && (BOOL)(GetVersion() < 0x80000000)
+#define IS_WIN32S  IS_WIN32 && (BOOL)(!(IS_NT) && ((GetVersion() & 0xFF)<4))
+#define IS_WIN95 (BOOL)(!(IS_NT) && !(IS_WIN32S)) && IS_WIN32
+
+
+    win32s_system = IS_WIN32S;
+    
+    if (!win32s_system) {
+	if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE))
+	    PI_app_printf(PI_app_printf_warning, "SetConsoleCtrlHandler failed !\n");
+    }
 #endif
     {
 	WORD wVersionRequested = MAKEWORD(1, 1);
@@ -229,6 +249,7 @@ main(int argc, char ** argv)
 #if defined(__MWERKS__) && !defined(MPW_TOOL)
     printf("Exiting ALS Prolog.\n");
 #endif
+
     exit(0);
 
 
@@ -301,6 +322,10 @@ PI_app_printf(messtype,va_alist)
     va_list args;
 #endif
     char *fmt;
+#ifdef MSWin32
+    FILE *f;
+    char s[500];
+#endif
 
 #ifndef APP_PRINTF_CALLBACK
 #ifdef HAVE_STDARG_H
@@ -312,6 +337,33 @@ PI_app_printf(messtype,va_alist)
 
     fmt = va_arg(args, char *);
 
+#ifdef MSWin32
+    switch (messtype) {
+	case PI_app_printf_banner :
+	case PI_app_printf_informational :
+	    f = stdout;
+	    vsprintf(s, fmt, args);
+	    break;
+	case PI_app_printf_fatal_error :
+	    f = stderr;
+	    sprintf(s,"\nFatal Error: ");
+	    vsprintf(s, fmt, args);
+	    sprintf(s,"\n");
+	    break;
+	case PI_app_printf_warning :
+	case PI_app_printf_error :
+	default :
+	    f = stderr;
+	    vsprintf(s, fmt, args);
+	    break;
+    }
+    
+    if (win32s_system) {
+	MessageBox(GetFocus(), s, "ALS Prolog", 0);
+    } else {
+    	fprintf(f, "%s", s);
+    }
+#else
     switch (messtype) {
 	case PI_app_printf_banner :
 	case PI_app_printf_informational :
@@ -328,6 +380,7 @@ PI_app_printf(messtype,va_alist)
 	    vfprintf(stderr, fmt, args);
 	    break;
     }
+#endif
 }
 
 #ifdef MacOS
