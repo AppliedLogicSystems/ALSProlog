@@ -464,6 +464,8 @@ static int ALSProlog_Package_Init(Tcl_Interp *interp, AP_World *w)
   return Tcl_PkgProvide(interp, "ALSProlog", VERSION_STRING);
 }
 
+extern char library_dir[];
+
 static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *interp_name)
 {
 	Tcl_Interp *interp;
@@ -495,6 +497,25 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 		goto error;
 	}
 
+	{
+		Tcl_DString path;
+		char *elements[3];
+		Tcl_DStringInit(&path);
+		elements[0] = library_dir;
+#ifdef macintosh
+		elements[1] = "Tool Command Language";
+#else
+		elements[1] = "lib";
+#endif
+		elements[2] = "tcl" TCL_VERSION;
+		Tcl_JoinPath(3, elements, &path);
+		Tcl_SetVar(interp, "tcl_library", path.string, TCL_GLOBAL_ONLY);
+		Tcl_JoinPath(2, elements, &path);
+		Tcl_SetVar(interp, "tcl_pkgPath", path.string, TCL_GLOBAL_ONLY);
+		Tcl_SetVar(interp, "autopath", "", TCL_GLOBAL_ONLY);
+		Tcl_DStringFree(&path);
+	}
+	
 #ifdef UNIX	
 	r = Tcl_Eval(interp, unixInitScript);
 #else
@@ -559,6 +580,22 @@ static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 	
 	result = built_interp(w, &interp, &interp_name);
 	
+	{
+		Tcl_DString path;
+		char *elements[3];
+		Tcl_DStringInit(&path);
+		elements[0] = library_dir;
+#ifdef macintosh
+		elements[1] = "Tool Command Language";
+#else
+		elements[1] = "lib";
+#endif
+		elements[2] = "tk" TK_VERSION;
+		Tcl_JoinPath(3, elements, &path);
+		Tcl_SetVar(interp, "tk_library", path.string, TCL_GLOBAL_ONLY);
+		Tcl_DStringFree(&path);
+	}
+
 	if (result == AP_SUCCESS) {
 		int r = Tk_Init(interp);
 		if (r != TCL_OK) {
