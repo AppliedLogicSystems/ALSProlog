@@ -868,15 +868,17 @@ load_builtins(File)
 	 ; OS = mswin32, !, Sepr = '\\'
 	 ; Sepr = '/'),
 	'$atom_concat'('builtins',Sepr, BDir),
-	(resource_load(File) ; load_builtins(BDir, File)).
+%	(resource_load(File) ; load_builtins(BDir, File)).
+	load_builtins(BDir, File).
 
 load_builtins(BDir, File) 
 	:-
 	sys_searchdir(Path),
 	'$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
-%%pbi_write(FileAndPath), pbi_nl,pbi_ttyflush,
-	(resource_load(File) ; '$load'(FileAndPath, 0)).
+%pbi_write(FileAndPath), pbi_nl,pbi_ttyflush,
+%	(resource_load(File) ; '$load'(FileAndPath, 0)).
+	'$load'(FileAndPath, 0).
 
 consult_builtins(File) 
 	:-
@@ -892,10 +894,11 @@ consult_builtins(BDir, File)
 	sys_searchdir(Path),
     '$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
-%%pbi_write(consult_builtins=FileAndPath), pbi_nl,pbi_ttyflush,
+%pbi_write(consult_builtins=FileAndPath), pbi_nl,pbi_ttyflush,
 	'$atom_concat'(FileAndPath,'.pro',FilePathPro),
 	'$atom_concat'(FileAndPath,'.obp',FilePathObp),
-	(resource_load(File) ;load4(FilePathPro,FilePathObp,1,obp,_)).
+%	(resource_load(File) ;load4(FilePathPro,FilePathObp,1,obp,_)).
+	load4(FilePathPro,FilePathObp,1,obp,_).
 
 :-	auto_use(sio).
 :-	auto_use(debugger).
@@ -947,6 +950,7 @@ ld_fs(OS)
 	consult_builtins(BDir, blt_pckg),
 	consult_builtins(BDir, blt_frez),
 	consult_builtins(BDir, simplio),
+	consult_builtins(BDir, blt_flgs),
 	consult_builtins(BDir, blt_shl).
 
 %%--------------------------------------------

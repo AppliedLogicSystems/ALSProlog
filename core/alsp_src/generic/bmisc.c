@@ -21,6 +21,7 @@
 
 static	unsigned long hashN	PARAMS(( PWord, int, int ));
 static	void	als_gensym	PARAMS(( UCHAR *, UCHAR * ));
+
 #ifdef CMeta
 
 static	int	termcmp		PARAMS(( PWord, int, PWord, int ));

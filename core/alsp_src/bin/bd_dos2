@@ -2,38 +2,47 @@
 #  Setup an appropriate DOS build dir relative to an "exported"
 #  DOS-style subtree dir
 #
-#  $1 - source "exported" DOS-style subtree dir -- absolute paths
-#  $2 - target DOS build dir                   -- absolute paths
+#  $1 - target DOS build dir                   -- absolute paths
 #	To Do: Remove absolute paths limitation
 #
-mkdir $2
-echo Making DOS build dir $2 relative to $1
-cp -f  $1/cfgs/maketop.dj2 $2/makefile
-cp -f  $1/generic/generate/generic.dj2 $2/generic.mkf
-cp -f  $1/port/port.dj2 $2/port.mkf
-cp -f  $1/port/djgpp2/config.h $2
-cp -f  $1/port/djgpp2/oconfig.h $2
-cp -f  $1/doconfig.bat $2
+#  source "exported" DOS-style subtree dir -- absolute paths
+
+SRCDIR=/apache/alsp_src
+
+TGTDIR=$1
+
+echo arg1=$1
+
+
+
+echo Making DOS build dir $TGTDIR relative to $SRCDIR
+mkdir $TGTDIR
+cp -f  $SRCDIR/cfgs/maketop.dj2 $TGTDIR/makefile
+cp -f  $SRCDIR/generic/generate/generic.dj2 $TGTDIR/generic.mkf
+cp -f  $SRCDIR/port/port.dj2 $TGTDIR/port.mkf
+cp -f  $SRCDIR/port/djgpp2/config.h $TGTDIR
+cp -f  $SRCDIR/port/djgpp2/oconfig.h $TGTDIR
+cp -f  $SRCDIR/doconfig.bat $TGTDIR
 
 echo - bld-port:
-mkdir $2/bld-port
-mkdir $2/bld-port/alsdir
-mkdir $2/bld-port/alsdir/builtins
-cp -f  $1/builtins/*.pro $2/bld-port/alsdir/builtins
+mkdir $TGTDIR/bld-port
+mkdir $TGTDIR/bld-port/alsdir
+mkdir $TGTDIR/bld-port/alsdir/builtins
+cp -f  $SRCDIR/builtins/*.pro $TGTDIR/bld-port/alsdir/builtins
 echo - builtins done
 
-mkdir $2/bld-port/alsdir/library
-cp -f  $1/library/*.pro $2/bld-port/alsdir/library
+mkdir $TGTDIR/bld-port/alsdir/library
+cp -f  $SRCDIR/library/*.pro $TGTDIR/bld-port/alsdir/library
 echo - library done
 
-cd $2/bld-port
-cp -f  $1/bld-port/makefile.dj2 makefile
-cp -f  $1/bld-port/tconfig.h.in tconfig.h
+cd $TGTDIR/bld-port
+cp -f  $SRCDIR/bld-port/makefile.dj2 makefile
+cp -f  $SRCDIR/bld-port/tconfig.h.in tconfig.h
 echo - bld-port done
 
-/mailbox3/alsp_src/bin/gen2dos $2
+$SRCDIR/bin/gen2dos $SRCDIR $TGTDIR
 
-#cd $2/bld-natv
-#cp -f  $1/bld-natv/makefile.dj2 makefile
-#cp -f  $1/bld-natv/tconfig.h.in tconfig.h
+#cd $TGTDIR/bld-natv
+#cp -f  $SRCDIR/bld-natv/makefile.dj2 makefile
+#cp -f  $SRCDIR/bld-natv/tconfig.h.in tconfig.h
 #echo - bld-natv done

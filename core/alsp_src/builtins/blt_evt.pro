@@ -274,6 +274,7 @@ prolog_error(_,_,_) :-
 
 undefined_predicate(_,Goal,_) :-
 	get_PROLOG_flag(undefined_predicate,Val),
+%	get_PROLOG_flag(unknown,Val),
 	undefined_predicate(Val,Goal).
 
 undefined_predicate_fail(_,Goal,_) :-

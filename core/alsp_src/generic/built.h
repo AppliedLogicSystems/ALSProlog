@@ -379,6 +379,7 @@ extern	int	pbi_debugger		PARAMS(( void ));
 #endif
 extern	int	pbi_printno		PARAMS(( void ));
 extern	int	pbi_printwarning	PARAMS(( void ));
+/* extern	int pbi_limits_info		PARAMS(( void )); */
 #if	defined(Portable) && defined(IProfile)
 extern	int	pbi_init_iprofile	PARAMS(( void ));
 extern	int	pbi_dump_iprofile	PARAMS(( void ));

@@ -1,15 +1,18 @@
 #!/bin/sh
-echo Target dir = $1
-cp /mailbox3/alsp_src/generic/generate/tok.h/icode.h $1/bld-port
-u2d $1/bld-port/icode.h
-cp /mailbox3/alsp_src/generic/generate/tok.h/lexinit.h $1/bld-port
-u2d $1/bld-port/lexinit.h
-cp /mailbox3/alsp_src/generic/generate/tok.h/siolex.h $1/bld-port
-u2d $1/bld-port/siolex.h
-cp /mailbox3/alsp_src/generic/generate/tok.h/tokens.h $1/bld-port
-u2d $1/bld-port/tokens.h
-cp /mailbox3/alsp_src/generic/generate/tok.h/tokini2.h $1/bld-port
-u2d $1/bld-port/tokini2.h
-cp /mailbox3/alsp_src/generic/pi_cfg.in $1/bld-port/pi_cfg.h
-u2d $1/bld-port/pi_cfg.h
+echo Source dir = $1 Target dir = $2
+SRCDIR=$1
+TGTDIR=$2
+
+cp $SRCDIR/generic/generate/tok.h/icode.h $TGTDIR/bld-port
+u2d $TGTDIR/bld-port/icode.h
+cp $SRCDIR/generic/generate/tok.h/lexinit.h $TGTDIR/bld-port
+u2d $TGTDIR/bld-port/lexinit.h
+cp $SRCDIR/generic/generate/tok.h/siolex.h $TGTDIR/bld-port
+u2d $TGTDIR/bld-port/siolex.h
+cp $SRCDIR/generic/generate/tok.h/tokens.h $TGTDIR/bld-port
+u2d $TGTDIR/bld-port/tokens.h
+cp $SRCDIR/generic/generate/tok.h/tokini2.h $TGTDIR/bld-port
+u2d $TGTDIR/bld-port/tokini2.h
+cp $SRCDIR/generic/pi_cfg.in $TGTDIR/bld-port/pi_cfg.h
+u2d $TGTDIR/bld-port/pi_cfg.h
 

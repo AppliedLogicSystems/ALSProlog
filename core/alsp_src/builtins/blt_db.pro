@@ -671,6 +671,7 @@ make_hash_framework(Mod,Name,VN)
 	Mod:assert_at_load_time(
 			(PDelHead :- gv_get(VN,TB), hash_delete_pattern(Key,Val,TB))).
 
+/**********************************************
 /*
  * Prolog flags
  */
@@ -701,5 +702,6 @@ prolog_flag_value_check(undefined_predicate, error).
 prolog_flag_value_check(undefined_predicate, fail).
 prolog_flag_value_check(undefined_predicate, warning).
 prolog_flag_value_check(undefined_predicate, break).
+**********************************************/
 
 endmod.		%% blt_db.pro: Internal Database Builtins File

@@ -4,8 +4,6 @@
 
 A2M = ../generate/abs2make
 
-#ALSPRO = /mailbox3/bldtests/sp1.74B/bld-port/alspro_b
-#ALSPRO = /mailbox3/bldtests/hp1.74B/bld-port/alspro_b
 ALSPRO = alspro
 
 all: all-generic all-port all-maketop
