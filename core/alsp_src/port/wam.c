@@ -898,16 +898,7 @@ overflow_check0:
 #endif /* .............................................. DEBUGSYS ..*/
 
 			UNSHADOW_REGS;
-			{
-			/*
-			wam_task_state s;
-			get_wam_task_state(&s);
-			dump_wam_task_state(&s);*/
 			gc();
-			/*
-			get_wam_task_state(&s);
-			dump_wam_task_state(&s);*/
-			}
 			SHADOW_REGS;
 
 #ifdef DEBUGSYS	/*..................................................*/
