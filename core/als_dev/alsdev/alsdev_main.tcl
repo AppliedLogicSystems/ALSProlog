@@ -8,6 +8,7 @@
 proc vTclWindow.topals {args} {
 	global array proenv
 	global tcl_platform
+	global mod
 
     set base .topals
     if {[winfo exists .topals]} {
@@ -101,6 +102,9 @@ proc vTclWindow.topals {args} {
 
 	bind .topals <Unmap> {unmap_alsdev_main}
 	bind .topals <Map> {map_alsdev_main}
+
+	# accelerators
+	bind_accelerators .topals $mod listener
 }
 
 proc vTclWindow.dyn_flags {base} {
