@@ -56,6 +56,8 @@ set proenv(edit,font)       {user 10 normal}
 
 set	proenv(edit,visible)		{}
 
+
+
 #---------------------------------------------------------------
 
 #################################
@@ -131,6 +133,7 @@ proc grab_defaults {Win} {
 }
 
 proc establish_defaults {} {
+	global array proenv
     text .tmp_test_text -height 2 -width 2 
 	set Window .tmp_test_text
 	set Background [$Window cget -background ]
@@ -163,7 +166,9 @@ proc return_proenv_defaults {} {
 	return $Defs
 }
 
+
 establish_defaults
+
 
 proc unmap_alsdev_main {} {
 	global array proenv
@@ -211,13 +216,23 @@ if {$tcl_platform(platform) == "macintosh"} {
 	source [file join $ALSTCLPATH als_document.tcl]
 }
 
+proc init_photos {base} {
+	image create photo up_arrow_gif \
+		-file [file join $base up-arrow-blue.gif]
+	image create photo down_arrow_gif \
+		-file [file join $base down-arrow-blue.gif]
+	image create photo right_gif \
+		-file [file join $base right-arrow-blue.gif]
+	image create photo left_gif \
+		-file [file join $base left-arrow-blue.gif]
+	}
+
+if {$tcl_platform(platform) == "macintosh"} {
+} else {
+	init_photos [file join $ALSTCLPATH .. images ]
+}
+
 	## source any other needed files here.....
-
-#################################################
-#####										#####
-#################################################
-
-lappend auto_path /usr/local/lib/jstools
 
 #################################################
 #####				MAIN WINDOW				#####
@@ -836,117 +851,35 @@ proc exit_debugger {} {
 		###############################
 		######### SPYPOINTS
 		###############################
-global SpyModule SpyModuleMenu 
-global SpyPred SpyPredMenu
-
 proc toggle_spywin {} {
 	global array proenv
-
-	set proenv(spywin) [expr 1 - $proenv(spywin)]
-	exec_toggle_spywin
+	prolog call builtins non_sys_modules -var NonSysMods
+	module_choose [lsort $NonSysMods]
 }
 
-proc hide_spywin {} {
+proc spy_preds_choice2 {Mod} {
 	global array proenv
 
-	set proenv(spywin) 0
-	Window hide .spywin
+    set base .spy_on_$Mod
+
+	prolog call builtins module_preds -atom $Mod -var Spying -var Rest
+	set proenv(prev_spying,$Mod) $Spying
+	set proenv(prev_notspying,$Mod) $Rest
+	set proenv(spying,$Mod) $Spying
+	set proenv(notspying,$Mod) $Rest
+
+	spy_preds_in_module $base $Mod
+	$base.cols_fr.l.leftlist.lstbx delete 0 end
+	$base.cols_fr.r.rightlist.lstbx delete 0 end
+
+	disp_list $proenv(spying,$Mod)    $base.cols_fr.l.leftlist.lstbx
+	disp_list $proenv(notspying,$Mod) $base.cols_fr.r.rightlist.lstbx
 }
 
-proc exec_toggle_spywin {} {
-	global array proenv
-	global SpyModule SpyModuleMenu SpyPred SpyPredMenu
-	
-	if {"$proenv(spywin)"==0} then {
-		Window hide .spywin
-	} else {
-		if {[winfo exists .spywin]==0} then {
-			Window show .spywin
-		}
-		prolog call builtins non_sys_modules -var NonSysMods
-
-		if {[info exists SpyModuleMenu] > 0} then {
-			if {[winfo exists $SpyModuleMenu] > 0} then {
-				destroy $SpyModuleMenu
-				destroy .spywin.modules.mods
-			}
-		}
-		set SpyModuleMenu \
-			[eval "tk_optionMenu .spywin.modules.mods SpyModule" $NonSysMods]
-
-		set SpyModule user
-		set LL [llength $NonSysMods]
-		for {set LI 0} {$LI < $LL} {incr LI} {
-			$SpyModuleMenu entryconfigure $LI -command chng_spy_preds_menu
-		}
-		pack .spywin.modules.mods \
-			-after .spywin.modules.module_label \
-			-anchor center -expand 1 -fill x -padx 12 -side left
-
-		chng_spy_preds_menu
-
-		Window show .spywin
-		raise .spywin
-	}
-}
-
-proc chng_spy_preds_menu {} {
-	global SpyModule SpyPred SpyPredMenu
-
-	prolog call builtins module_preds -atom $SpyModule -var PredsList
-
-#	destroy .spywin.predicates.preds
-#	destroy $SpyPredMenu
-#	set SpyPred [lindex $PredsList 0]
-#	set SpyPredMenu [eval "tk_optionMenu .spywin.predicates.preds SpyPred" $PredsList]
-
-#	pack .spywin.predicates.preds \
-#		-after .spywin.predicates.pred_label \
-#		-anchor center -expand 1 -fill x -padx 12 -side left
-}
-
-proc popup_spypoint_choice {} {
-	global SpyModule 
-
-	Window show .spychoose
-	.spychoose.modid.module configure -text $SpyModule
-	prolog call builtins module_preds -atom $SpyModule -var PredList
-	.spychoose.slist.listbox delete 0 end
-	foreach P $PredList {
-		.spychoose.slist.listbox insert end $P
-	}
-}
-
-proc do_spychoose {Which} {
-	global SpyModule
-	 
-	Window hide .spychoose
-	if {"$Which"=="cancel"} then { return }
-
-	set SelIndicies [.spychoose.slist.listbox curselection]
-	if {"$SelIndicies"==""} then { return }
-
-	foreach PI $SelIndicies {
-		lappend SelItems [.spychoose.slist.listbox get $PI]
-	}
-	prolog call debugger set_chosen_spypoints -list $SelItems -atom $SpyModule 
-	.spychoose.slist.listbox delete 0 end
-}
-
-
-proc spy_point {Action} {
-	global SpyModule SpyPred 
-
-#	switch $Action {
-#	cancel { toggle_spywin }
-#	ok {
-#		prolog call debugger gui_spy -atom $SpyModule -atom $SpyPred
-#		toggle_spywin
-#	}
-#	}
-
-	toggle_spywin
-
+proc install_spypoints {module base} {
+	set Left [$base.cols_fr.l.leftlist.lstbx get 0 end]
+	set Right [$base.cols_fr.r.rightlist.lstbx get 0 end]
+	prolog call debugger reset_spypoints -atom $module -list $Left -list $Right
 }
 
 proc check_leashing {} {
@@ -1116,6 +1049,12 @@ proc tkOpenDocument args {
 	foreach file $args {
 		document.open $file
 	}
+}
+
+proc do_2col {base} {
+ 	vTclWindow.columns2_select $base
+	window show $base
+
 }
 
 ###############________________________________##################
