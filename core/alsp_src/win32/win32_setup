@@ -10,7 +10,7 @@ then
 fi
 
 # Extract arguments
-source_dir=$1
+source_dir=../$1
 shift 1
 defines=$*
 
@@ -22,6 +22,9 @@ then
     exit 2
 fi
 
+mkdir win32
+cd win32
+
 # Build the prefix file
 echo "$defines" > prefix.h
 
@@ -31,17 +34,22 @@ cp $source_dir/win32/alspro_b.prj.sit.hqx .
 cp $source_dir/win32/testdll.x86.prj.sit.hqx .
 cp $source_dir/win32/Build_Win32.sit.hqx .
 
-rm -f package.bat
-ln -s $source_dir/win32/package.bat .
-rm -f testrun.bat
-ln -s $source_dir/win32/testrun.bat .
+rm -f package.sh
+ln -s $source_dir/win32/package.sh .
+rm -f testrun.sh
+ln -s $source_dir/win32/testrun.sh .
 
 mkdir alsdir
 mkdir alsdir/builtins
 rm -f alsdir/builtins/*.pro
-ln -s ../../$source_dir/builtins/*.pro alsdir/builtins
+cd alsdir/builtins
+ln -s ../../$source_dir/builtins/*.pro .
+cd ../..
 mkdir alsdir/library
 rm -f alsdir/library/*.pro
-ln -s ../../$source_dir/library/*.pro alsdir/library
 rm -f alsdir/library/*.alb
-ln -s ../../$source_dir/library/*.alb alsdir/library
+cd alsdir/library
+ln -s ../../$source_dir/library/*.pro .
+ln -s ../../$source_dir/library/*.alb .
+cd ../..
+cd ..
