@@ -34,7 +34,7 @@ use alsshell.
  |	trace(Goal) or trace(Module,Goal) are called on specific goals.
  |	
  |	trace/1 actually ends up calling trace/2 due to the module closure
- |	created in builtins.pro.
+ |	created in blt_sys.pro.
  |
  *-------------------------------------------------------------------------*/
 export trace/0.

@@ -632,6 +632,10 @@ export setDebugInterrupt/1.
 	compiletime,
 	module_closure(trace,1,trace).
 
+:- 
+	compiletime,
+	module_closure(debug_trace,1,trace).
+
 
 endmod.  % debugger
 
