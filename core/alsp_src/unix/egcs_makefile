@@ -1,0 +1,15 @@
+CC=egcs
+# Unused warning options and why:
+
+#-Wshadow - We use shadow variables - should be fixed someday.
+#-Wcast-qual - We force some cast qualifiers - should be fixed someday.
+#-Wcast-align - This reports many, many warnings. Is this a real problem?
+#-Wconversion - We always have prototypes, so this is not a concern.
+#-Waggregate-return - We use aggregate types.
+#-Wredundant-decls - Most redundant declarations are in system header files,
+#		     but there is some in out code, too. Fix someday.
+# -Wstrict-prototypes - Complains about arg-less function pointer like:
+#                       int (*func)(), which I think are legal.
+
+CFLAGS += -O -MMD -Wall -Werror -Wmissing-prototypes -Wwrite-strings \
+		 -Wnested-externs -Wpointer-arith
