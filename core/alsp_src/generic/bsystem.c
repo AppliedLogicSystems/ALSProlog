@@ -240,7 +240,7 @@ pbi_debugger(void)
 
 #endif /* MacOS */
 
-#ifdef OLDSHELL
+/* #ifdef OLDSHELL */
 int
 pbi_statistics()
 {
@@ -341,7 +341,7 @@ pbi_statistics()
     else
 	FAIL;
 }
-#endif /* OLDSHELL */
+/* #endif  OLDSHELL */
 
 #ifdef	IProfile
 int

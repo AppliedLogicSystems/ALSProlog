@@ -400,8 +400,8 @@ static struct blt_struct {
 #ifdef OLDSHELL
 	BLT("print_no", 0, pbi_printno, "_pbi_printno"),
 	BLT("showanswers", 2, pbi_showanswers, "_pbi_showanswers"),
-	BLT("statistics", 1, pbi_statistics, "_pbi_statistics"),
 #endif /* OLDSHELL */
+	BLT("statistics", 1, pbi_statistics, "_pbi_statistics"),
 
 	BLT("$stack_overflow", 1, pbi_stack_overflow, "_pbi_stack_overflow"),
 	BLT("$stack_info", 1, pbi_stack_info, "_pbi_stack_info"),
