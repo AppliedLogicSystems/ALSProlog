@@ -6,7 +6,9 @@ Fri Mar 31 1995 Ken Bowen
 	  this handles OS-specific configuration aspects;
 	  (2) tconfig.h, which is expected to be found in the dir where the
 	  build is being carried out. This handles configuration parameters
-	  controlling this specific build.
+	  controlling this specific build.  By default, the configure 
+	  process creates a default tconfig.h (emtpy) in the build dirs
+	  from the templates created in bld-natv and bld-port.
 
 Sun Mar 26 1995 Ken Bowen
 

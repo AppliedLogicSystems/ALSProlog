@@ -6,7 +6,7 @@ as a Prolog system is of course in the ALS Prolog Manuals, which, not
 surprisingly, live in the manual directory, not here.  This source tree
 is used to create a number of versions of ALS Prolog, as follows:
 
-	-	The portable version (threaded code); this can be created on
+	-	The portable version (threaded/byte code); this can be created on
 		a wide range of systems;
 
 	-	The native code version on those platforms for which the native
@@ -30,13 +30,18 @@ GNU tool packages.  When all goes well, it is as simple as the following:
 1.	Unpack the source tree, however it has arrived.  If it is a collection
 	of shar archives, they are likely named als.01 ... als.0x   Put them
 	all in a directory where you want the top-level of the source directory
-	to live (at ALS, it is called alsp_src), and simply execute
+	to live (at ALS, it is called alsp_src, and it is at top-level in the
+	filesystem in which it resides), and simply execute
 			unshar als.*
 	Call this directory SOURCE;
 
 2.	Create/select another directory in which the build will take place;
 	This can be anywhere: at the same level as SOURCE, or buried away
-	in other directories.  Call this directory BUILD; locate yourself in
+	in other directories.  [At ALS, we use one top-level directory
+	'builds' on the same filesystem as alsp_src, and then create 
+	directories inside 'build' where the various system-specific
+	builds take place (the filesystem is on our shared file-server).
+	Call this directory BUILD; locate yourself in
 	BUILD;
 
 3.	Let PATH be a path to SOURCE;  It can either be an
@@ -47,22 +52,28 @@ GNU tool packages.  When all goes well, it is as simple as the following:
 
 		PATH/configure
 
+	[If you are building under DJGPP over DOS on a 80x86, you will
+	 use configur.bat, instead of configure;  see the comment at the
+	 beginning of configur.bat on details of its use.]
+
 	[Remember, you are located in BUILD]  When this completes (and it
 	will take a while on most machines), the direcory BUILD will look
 	like this (possibly a few more files):
 
-		Makefile        bld-port/       cfg.pro*        config.h
+		makefile        bld-port/       cfg.pro*        config.h
 		bld-natv/       config.d        config.status*
 
 4.	Now, still at the top level of BUILD, just invoke 
 
 		make
 
-	Unless you have a screamingly fast machine, you can go away for a
-	long (maybe very long) lunch.  Both the configure and make steps
+	Unless you have a screamingly fast machine, you can go away for
+	(maybe a very long) lunch.  Both the configure and make steps
 	generate lots of messages; if you are going away for lunch, you may want
 	to log them with a facility like script, just in case something
 	goes wrong early on, but the process manages to continue.
+	[If you are only building the portable version, things don't take
+ 	 too long.]
 
 	When the process is done,  you will discover that a bld-wins
 	directory has been added, as well as several other top-level files.
@@ -71,14 +82,28 @@ GNU tool packages.  When all goes well, it is as simple as the following:
 
 		bld-port ("portable" threaded code version):
 			alspro.a	- ALS Prolog standard link library: portable version
+			alspro_b	- Portable version of ALS Prolog appropriate to
+						  the OS; this version loads the builtins files
+						  when it starts up, and loads the library files
+						  dynamically, as needed.
 			alspro		- Portable version of ALS Prolog appropriate to
-						  the OS;
+						  the OS; this version has the builtins pre-loaded,
+						  and loads the library files dynamically, as needed;
+						  this version is produced by applying alsmics to
+						  alspro_b.
 
 		bld-natv (if native code is handled for this architecture/os):
 			alspro.a	- ALS Prolog native code link library suitable for
 						  the OS and architecture;
-			alspro		- ALS Prolog native code version appropriate 
-						  to the OS and architecture; 
+			alspro_b	- Portable version of ALS Prolog appropriate to
+						  the OS; this version loads the builtins files
+						  when it starts up, and loads the library files
+						  dynamically, as needed.
+			alspro		- Portable version of ALS Prolog appropriate to
+						  the OS; this version has the builtins pre-loaded,
+						  and loads the library files dynamically, as needed;
+						  this version is produced by applying alsmics to
+						  alspro_b.
 
 		bld-wins:
 			Subdirs, corresponding to the window systems( e.g. motif, x)
@@ -122,7 +147,7 @@ This is a quick tour of the tree structure and the principal files.
 
 Top Level Files:
 ---------------
-	- Makefile.in 	-	Initial Makefile prototype for top-level Makefile
+	- makefile.in 	-	Initial makefile prototype for top-level makefile
 						generated for the build directory
 	- aclocal.m4 	-	local m4 macros for autoconf to use in building
 						the configure shell script;
@@ -131,15 +156,17 @@ Top Level Files:
 						to produce config.d, which is then converted (by
 						configure) to the header file config.h in the build;
 	- config.guess 	-	the GNU guesser for the system name;
-	- configure 	-	the configure script: sets up the initial build
-						directory and Makefiles;
+	- configure 	-	the Unix configure script: sets up the initial
+						build directory and makefiles;
+	- configur.bat 	-	the DOS configure script: sets up the initial
+						build directory and makefiles;
 	- configure.in	-	initial for configure; processed by autoconf to
 						create configure;
 	- install.sh 	-	installation tool;
-	- sharme		-	script which packs the source tree into
-						shar archive files of max 500K size;
-	- sharbld		-	script which packs a build tree into
-						shar archive files of max 500K size;
+	- mkdist 		-	shell script which invokes setup_dist in
+						pconfig/pconfig.pro; used appropriately, this
+						packages up a "distribution directory" from
+						a "build directory" 
 
 Top Level Directories / Non-architecture-specific
 -------------------------------------------------
@@ -148,10 +175,14 @@ Top Level Directories / Non-architecture-specific
 						[combined with various use-specific parts which
 						 appear in "atrans" subdirectories in the 
 						 appropriate part of the tree];
-	- bin 			-	misc executable things
-	- bld-natv 		-	contains the initial Makefile.in prototype for
+	- bin 			-	misc executable things, including:
+			- sharme		-	script which packs the source tree into
+								shar archive files of max 500K size;
+			- sharbld		-	script which packs a build tree into
+								shar archive files of max 500K size;
+	- bld-natv 		-	contains the initial makefile.in prototype for
 						architecture-specific build directories;
-	- bld-port		-	contains the initial Makefile.in prototype for
+	- bld-port		-	contains the initial makefile.in prototype for
 						the portable build directory;
 	- builtins 		-	code for Prolog-defined builtin predicates;
 	- cinterf 		-	code for the C-library interface generator;
@@ -171,7 +202,7 @@ Top Level Directories / Non-architecture-specific
 	- utils 		-	code for various C-defined utils;
 	- wins			-	information guiding the generation of interfaces
 						to various window systesm, together with 
-						prototype Makefile.in's for them;
+						prototype makefile.in's for them;
 
 Top Level Directories / Architecture-specific
 -------------------------------------------------
@@ -183,16 +214,62 @@ architectures correspond to differing operating systems:
 
 	- hppa		-	HP Precision Architecture-based systems;
 	- i386		-	all Intel-based systems
-						dos(pharlap)  sysv(SCO) mswins os2 nextstep
+					  dos(djgpp/pharlap)  sysv(SCO) mswins os2 nextstep
 	- m68k		-	Motorola 68xxx-based systems:
 						sunos  macos  nextstep  sysv
-	- m88k		-	Motorola 88xxx-based systems:
-						dgux  sysv3  sysv4
+	- m88k		-	Motorola 88xxx-based systems: dgux  sysv3  sysv4
 	- mips		-	MIPS-based system;
 	- powerpc	-	Power PC-based systems;
-	- sparc		-	SPARC-based systems;
-						sunos4  solaris2
+	- sparc		-	SPARC-based systems: sunos4  solaris2
 	- vax		-	VAX-based systems (not up to date; may never be);
 
 
+How It Looks At ALS:
+-------------------
+Some of the tools and the decisions behind them may be a bit clearer
+if one reflects on how things are set up at ALS.  We have a file server
+on the local ethernet which all machines (including DOS and Mac) can see.
+The top level of the file system in which everything occurs happens to be 
+called /mailbox3 ; if you actually see this in a script, it is either
+a mistake (likely), or in a few cases, the value of a default setting
+[and we haven't documented all such defaults yet.]
+Thus our picture looks like:
 
+						/mailbox3
+							|
+		-------------------------------------------------
+		|					  |							|
+	alsp_src				builds					als_dist
+	  |						  |							|
+	----------------		----------------		--------------------
+		|		|  ...		|			|			|				  |
+	...generic..port...		|			|	  m68k_nextstep3.3-1.71	  |
+							|			|							  |
+							|			|							  |
+					m68k_nextstep3.3	|				sparc_sunos4.1.3-1.71	
+										|			
+								sparc_sunos4.1.3
+								--------------------
+								|		|		  |
+							bld-port  bld-natv	bld-wins
+												--------
+												x   motif
+
+This distribution directory contains distributions, by 
+
+	<architecture>_<OS>-<ALS Version>
+
+Each such directory contains a set of subdirs and files suitable for shipping
+to a user -- obviously much less than occurs in the corresponding build
+subdir (no .o files, etc;), but also more (examples files, etc.).
+
+alsp_src is managed using CVS to handle version control.  When the tree
+is shipped, we to a complete export to a fresh directory, thereby leaving
+behind all the CVS information.  We also make such exports for truly
+experimental work.  When changes to the source are shipped back, or
+incorporated from an experiment, there is a (painful) process of merging
+the new code into the existing source tree.  It is best if these merges
+are kept to small bite-size chunks.  Not only does this lessen the pain,
+but it makes it more likely that changes to common source files will be
+tested on a range of architectures, and problems discovered.  [We need to
+learn to use the GNU patch tool, but haven't gotten that far yet.]

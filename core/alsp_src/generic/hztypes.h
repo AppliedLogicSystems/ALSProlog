@@ -88,14 +88,16 @@
  | The following provide ways of creating the various low level types.
  *-----------------------------------------------------------------------*/
 
-#define MMK_INT(i) (((i)<<MTP_CONSTSHIFT)|MTP_INT)
-#define MMK_SYM(i) (((i)<<MTP_CONSTSHIFT)|MTP_SYM)
-#define MMK_FUNCTOR(s,a) (MMK_SYM(s) | ((a)<<FCTRSHIFT))
-/*  Using these makes sio.o bomb on sparc (probably atrans is messing up):
+#ifdef Portable
+	/*  Using these makes sio.o bomb on sparc (probably atrans is messing up):*/
 #define MMK_INT(i)       ((((PWord)(i))<<MTP_CONSTSHIFT)|MTP_INT)
 #define MMK_SYM(i)       ((((PWord)(i))<<MTP_CONSTSHIFT)|MTP_SYM)
 #define MMK_FUNCTOR(s,a) (MMK_SYM(s) | (((PWord)(a))<<FCTRSHIFT))
-*/
+#else
+#define MMK_INT(i) (((i)<<MTP_CONSTSHIFT)|MTP_INT)
+#define MMK_SYM(i) (((i)<<MTP_CONSTSHIFT)|MTP_SYM)
+#define MMK_FUNCTOR(s,a) (MMK_SYM(s) | ((a)<<FCTRSHIFT))
+#endif
 
 #define MMK_FENCE(n)     ((((PWord)(n))<<MTP_CONSTSHIFT)|MTP_FENCE)
 #define MMK_UIA(v)       ((((PWord)(v))<<MTP_CONSTSHIFT)|MTP_UIA)
