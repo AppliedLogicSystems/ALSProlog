@@ -4,7 +4,9 @@
 
 void throw_assertion(const char *test, const char *file, int line)
 {
+#ifdef __MWERKS__
 #pragma unused(file,line)
+#endif
 #ifdef macintosh
 	DebugStr(test);
 #else
