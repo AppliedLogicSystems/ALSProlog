@@ -1,10 +1,10 @@
 /*=====================================================================
- * 			misc_io.pro		
- *		Copyright (c) 1990 Applied Logic Systems, Inc.
- *
- *		Various I/O utilities 
+ | 			misc_io.pro		
+ |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |		Various I/O utilities 
  *====================================================================*/
-
 module builtins.
 
 export read_terms/1.

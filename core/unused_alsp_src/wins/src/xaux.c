@@ -1,10 +1,10 @@
-/* 
- * xaux.c -- collection of auxilliary x interface predicates
- *
- * afterfunc() : invokes prolog goal user:$after(display)
- * errrorfunc(): invokes prolog goal user:$error(display,event)
- *
- */
+/*---------------------------------------------------------*
+ |			xaux.c
+ |		Copyright (c) 1992-96 Applied Logic Systems, Inc.
+ |
+ |	 afterfunc() : invokes prolog goal user:$after(display)
+ |	 errrorfunc(): invokes prolog goal user:$error(display,event)
+ *---------------------------------------------------------*/
 
 #include "alspi.h"
 #include "cinterf.h"

@@ -1,6 +1,8 @@
-/*
- * ol.h
- */
+/*---------------------------------------------------------*
+ |			ol.h
+ |		Copyright (c) 1994-96 Applied Logic Systems, Inc.
+ |
+ *---------------------------------------------------------*/
 
 #include <X11/Intrinsic.h>
 #include <Xol/OpenLook.h>

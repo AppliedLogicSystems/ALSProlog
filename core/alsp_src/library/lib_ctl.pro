@@ -1,8 +1,9 @@
 /*========================================================================*
- |						lib_ctl.pro
- |		Copyright (c) 1991 Applied Logic Systems, Inc.
+ |			lib_ctl.pro
+ |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
- |					Miscellaneous control predicates
+ |				Miscellaneous control predicates
  |
  |	Authors:	Ken Bowen, Kevin Buettner
  |	Date:		1986-91

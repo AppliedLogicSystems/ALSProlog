@@ -1,19 +1,13 @@
 /*==========================================================================*
- *==========================================================================*
- *   			objects.pro
- *
- *		Copyright (c) 1990-91 Applied Logic Systems, Inc.
- *
- *		Object-oriented programming in Prolog
- *
- *	Author:	Ken Bowen
- *	Date:	August 1990 --
- *==========================================================================*
+ |   			objects.pro
+ |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |		Object-oriented programming in Prolog
+ |
+ |	Author:	Ken Bowen
+ |	Date:	August 1990 --
  *==========================================================================*/
-
-%% Note: must be consulted at end of file:
-%% No longer consulted in this file since it is already loaded in alsd:
-%:-[objs_run].
 
 module objects.
 use sio.

@@ -1,7 +1,8 @@
-/*
-* macos.spc
- */
-
+/*---------------------------------------------------------*
+ |			macos.spc
+ |		Copyright (c) 1994-96 Applied Logic Systems, Inc.
+ |
+ *---------------------------------------------------------*/
 
 #define GENERATINGPOWERPC	1
 

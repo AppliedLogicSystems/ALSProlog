@@ -1,18 +1,18 @@
-/*
- * xtaux.c   --  collection xt auxilliary foreign predicate defs
- *
- * Author : P.raman
- * Date   : 4/20/92
- *
- * callbackfunc()   -- invokes prolog goal 
- *                     user:$callback(w,client_data,call_data).
- * actionfunc()     -- invokes prolog goal
- *                     user:$action(w,event,params,num_params).
- * workproc()       -- invokes prolog goal
- *                     user:$workproc(client_data)
- * timercallbackproc() -- invokes prolog goal
- *                     user:$timercallbackproc(client_data,interval_id)
- */
+/*---------------------------------------------------------*
+ |			xtaux.c
+ |		Copyright (c) 1992-96 Applied Logic Systems, Inc.
+ |
+ | Author : P.Raman
+ | Date   : 4/20/92
+ | callbackfunc()   -- invokes prolog goal 
+ |            user:$callback(w,client_data,call_data).
+ | actionfunc()     -- invokes prolog goal
+ |            user:$action(w,event,params,num_params).
+ | workproc()       -- invokes prolog goal
+ |            user:$workproc(client_data)
+ | timercallbackproc() -- invokes prolog goal
+ |            user:$timercallbackproc(client_data,interval_id)
+ *---------------------------------------------------------*/
 
 #include "alspi.h"
 #include "cinterf.h"

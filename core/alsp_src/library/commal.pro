@@ -1,8 +1,9 @@
 /*=====================================================================
- * 			commal.pro		
- *		Copyright (c) 1992 Applied Logic Systems, Inc.
- *
- *		Various utilities for dealing with comma lists
+ | 			commal.pro		
+ |	Copyright (c) 1992-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |		Various utilities for dealing with comma lists
  *====================================================================*/
 
 module builtins.

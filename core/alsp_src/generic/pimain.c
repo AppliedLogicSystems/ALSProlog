@@ -77,7 +77,9 @@ tSIOUXSettings  SIOUXSettings =
 #include <Events.h>
 #endif	/* MacOS */
 
-#if defined(WIN32) && defined(__MWERKS__)
+#ifdef WIN32
+#include <winsock.h>
+#ifdef __MWERKS__
 /* I'm not sure whose bug this is, but I suspect it's a MetroWerks problem.
    When a Console UI Win32 program is launched from Windows95, the program
    name on the simulated command line is enclosed in double-quotes because
@@ -113,6 +115,14 @@ static void FixArguments(int argc, char **argv)
 		}
 	}
 }
+
+static BOOL CtrlHandler(DWORD fdwCtrlType)
+{
+	raise(SIGINT);
+	return TRUE;
+}
+
+#endif
 #endif
 
 void
@@ -127,31 +137,45 @@ main(int argc, char ** argv)
     InitCursorCtl(NULL);
 #endif
 
-#ifdef HAVE_GUSI
-        GUSISetup(GUSIwithAppleTalkSockets);
-        GUSISetup(GUSIwithInternetSockets);
-        GUSISetup(GUSIwithPAPSockets);
-        GUSISetup(GUSIwithPPCSockets);
-        GUSISetup(GUSIwithUnixSockets);
-#ifndef MPW_TOOL
-	GUSISetup(GUSIwithSIOUXSockets);
-#endif
-#endif
 
+#ifdef HAVE_GUSI
+    GUSISetup(GUSIwithAppleTalkSockets);
+    GUSISetup(GUSIwithInternetSockets);
+    GUSISetup(GUSIwithPAPSockets);
+    GUSISetup(GUSIwithPPCSockets);
+    GUSISetup(GUSIwithUnixSockets);
+#ifndef MPW_TOOL
+    GUSISetup(GUSIwithSIOUXSockets);
+#endif
+#endif
 
 #if (defined(THINK_C) || defined(__MWERKS__)) && !defined(MPW_TOOL)	
     argc = ccommand(&argv);
 #endif
 
-#if defined(__MWERKS__) && !defined(MPW_TOOL)
-    printf("Please use Control-E (followed by a return) to signal end-of-file.\n");
-    printf("Avoid Control-D, because this will terminate the application.\n\n");
-#endif 
-
 #endif /* MacOS */
 
-#if defined(WIN32) && defined(__MWERKS__)
-	FixArguments(argc, argv);
+#ifdef WIN32
+#ifdef __MWERKS__
+    FixArguments(argc, argv);
+    if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE))
+    	PI_app_printf(PI_app_printf_warning, "SetConsoleCtrlHandler failed !\n");
+#endif
+    {
+	WORD wVersionRequested = MAKEWORD(1, 1);
+	WSADATA wsaData;
+	int success = 1;
+	
+	success = (WSAStartup(wVersionRequested, &wsaData) == 0);
+	
+	if (success && wsaData.wVersion != wVersionRequested) {
+	    WSACleanup();
+	    success = 0;
+	}
+
+	if (!success) PI_app_printf(PI_app_printf_warning, "WinSock init failed !\n");
+    }
+    
 #endif
 
     if ((exit_status = PI_prolog_init(WIN_STR, argc, argv)) != 0) {
@@ -161,7 +185,7 @@ main(int argc, char ** argv)
 
 #ifdef EXP_DATE
     if ((unsigned long) time(0) >= EXP_DATE) {
-	PI_app_printf(PI_app_printf_error, "System validity date passed!\n");
+	PI_app_printf(PI_app_printf_error, "System validity date passed !\n");
 	exit(1);
 	}
 #endif
@@ -174,6 +198,14 @@ main(int argc, char ** argv)
     }
 
     PI_shutdown();
+    
+#ifdef WIN32
+    if (WSACleanup() != 0) {
+	PI_app_printf(PI_app_printf_warning, "WinSock cleanup failed !\n");
+    }
+#endif
+    
+    
 #if defined(__MWERKS__) && !defined(MPW_TOOL)
     printf("Exiting ALS Prolog.\n");
 #endif

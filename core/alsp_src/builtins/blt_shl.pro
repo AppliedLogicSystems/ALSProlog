@@ -54,7 +54,7 @@ start_shell(DefaultShellCall)
 					[],					/* -S init search list */
 					other_flags),		/* room for expansion */
 
-%	debugger:nospy,
+	%%debugger:nospy,
 	ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo),
 	assertz(command_line(ResidualCommandLine)),
 
@@ -247,7 +247,6 @@ ss_load_dot_alspro(AutoFile)
 	exists_file(AutoFile),
 	!,
 	reconsult(AutoFile).
-
 ss_load_dot_alspro(AutoFile)
 	:-
 		%% What about DOS (also Mac, etc.) here?:
@@ -256,7 +255,6 @@ ss_load_dot_alspro(AutoFile)
 	exists_file(File),
 	!,
 	reconsult(File).
-
 ss_load_dot_alspro(_).
 
 /*-------------------------------------------------
@@ -471,12 +469,7 @@ shell_execute(InStream,OutStream,InitGoal,[],[],Wins,continue)
 	InitGoal = stream_not_ready,
 	!.
 
-module alsshell.
-dummy.
-:-dynamic(getTracingFlag/1).
-:-abolish(dummy,0).
-endmod.
-
+%:-alsshell:dynamic(getTracingFlag/1).
 :-dynamic(getTracingFlag/1).
 
 shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,InWins,Status)

@@ -1,6 +1,7 @@
 /*==========================================================================
- |			macrmain.pro
- |		Copyright (c) 1990-92 Applied Logic Systems, Inc.
+ |			macro.pro
+ |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		Macro Expansion Tool for ALS Prolog
  |		-- Outer shell portion

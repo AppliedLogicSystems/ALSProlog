@@ -1,6 +1,8 @@
-/*
- * x.spc
- */
+/*---------------------------------------------------------*
+ |			x.spc
+ |		Copyright (c) 1991-96 Applied Logic Systems, Inc.
+ |
+ *---------------------------------------------------------*/
 
 #exclude "/usr/include/?"
 #exclude "/usr/include/sys/*"

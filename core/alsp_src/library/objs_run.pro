@@ -1,16 +1,14 @@
 /*==========================================================================*
- *==========================================================================*
- *   			objs_run.pro
- *
- *		Copyright (c) 1990-91 Applied Logic Systems, Inc.
- *
- *		Object-oriented programming in Prolog
- *		Run-time support for ObjectPro, not including run-time
- *		definition of objects & classes on the fly;
- *
- *	Author:	Ken Bowen
- *	Date:	August 1990 --
- *==========================================================================*
+ | 			objs_run.pro
+ |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |		Object-oriented programming in Prolog
+ |		Run-time support for ObjectPro, not including run-time
+ |		definition of objects & classes on the fly;
+ |
+ |	Author:	Ken Bowen
+ |	Date:	August 1990 --
  *==========================================================================*/
 
 module objects.

@@ -1,6 +1,9 @@
-/*
- * nextstep.spc
- */
+/*---------------------------------------------------------*
+ |			next.spc
+ |		Copyright (c) 1994-96 Applied Logic Systems, Inc.
+ |
+ |			For NextStep
+ *---------------------------------------------------------*/
 
 #exclude <ansi/ *>
 #exclude <bsd/ *>

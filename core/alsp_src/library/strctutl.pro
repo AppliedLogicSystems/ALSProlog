@@ -1,6 +1,7 @@
 /*============================================================================*
  |			strctutl.pro
- |		Copyright (c) 1994 Applied Logic Systems, Inc.
+ |	Copyright (c) 1994-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		Utilities supporting typedefs/structs manipulation
  |

@@ -1,16 +1,19 @@
-/*
- * par2.pro
- *		Producers and consumers without the timer
- */
+/*=====================================================================*
+ |			par2.pro
+ |		Copyright (c) 1993-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |		Producers and consumers without the timer
+ |
+ | Author: Kevin Buettner
+ *=====================================================================*/
 
 :- make_gv('GoalQueue'), make_gv('SavedGoal'), setSavedGoal(true).
 :- op(990,xfy,&), op(990,xfy,&&).
 
-
 /*
  * main is called to start the consumer / producer off.
  */
-
 
 main :-	
 	als_system(SysVars),
@@ -42,8 +45,6 @@ sieve(IL,OL) :-
 
 sieve0([H|T],[H|OT]) :- sieve(SL,OT) && filter(H,T,SL).
 
-	
-	
 /*
  * ---
  */
@@ -67,7 +68,6 @@ ints_from(N,[N|T]) :-
 	NN is N+1,
 	suspend(ints_from(NN,T)).
 
-
 /*
  * Queue Management:
  *
@@ -75,7 +75,6 @@ ints_from(N,[N|T]) :-
  *	remQueue/1		-- removes an element to the queue
  *	addQueue/1		-- adds an element to the queue
  */
-
 
 initQueue :- setGoalQueue(gq([],[])).
 
@@ -106,12 +105,9 @@ addQueue(Rear,Q,NewRear) :-
 	mangle(2,Rear,NewRear),		%% add the new rear
 	mangle(2,Q,NewRear).		%% new rear is now rear of queue
 
-
-
 /*
  * Process Management
  */
-
 
 alarm_handler(EventId, Goal, Context) :-
 	EventId \== sigalrm,

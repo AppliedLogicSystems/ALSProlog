@@ -806,60 +806,6 @@ build_primitive_closures(_)
  | Part 4: LOADING THE REST OF THE BUILTINS FILES
  *----------------------------------------------------------------*/
 
-/*
- * xform_command_or_query(InGoal,OutGoal)
- *
- *	Transforms InGoal to OutGoal, replacing certain input patterns
- *	with different output patterns.  In particular, list forms are
- *	transformed into consults.  This procedure may also be used to
- *	perform other transformations.
- *
- * This procedure is exported as it is used by xconsult.
- */
-
-export xform_command_or_query/2.
-
-xform_command_or_query(VGoal,VGoal) :-
-	var(VGoal),
-	!.
-xform_command_or_query([File|Files],Consults) :-
-	!,
-	xform_file_list(File,Files,Consults).
-xform_command_or_query((G1,G2),(TG1,TG2)) :-
-	!,
-	xform_command_or_query(G1,TG1),
-	xform_command_or_query(G2,TG2).
-xform_command_or_query((G1;G2),(TG1;TG2)) :-
-	!,
-	xform_command_or_query(G1,TG1),
-	xform_command_or_query(G2,TG2).
-xform_command_or_query((G1->G2),(TG1->TG2)) :-
-	!,
-	xform_command_or_query(G1,TG1),
-	xform_command_or_query(G2,TG2).
-xform_command_or_query((G1|G2),(TG1|TG2)) :-
-	!,
-	xform_command_or_query(G1,TG1),
-	xform_command_or_query(G2,TG2).
-xform_command_or_query(call(G),call(TG)) :-
-	!,
-	xform_command_or_query(G,TG).
-xform_command_or_query(M:G,M:TG) :-
-	!,
-	xform_command_or_query(G,TG).
-xform_command_or_query(G,G).
-
-xform_file_list(File1,[File2|Files],(consult(File1),Consults)) :-
-	!,
-	xform_file_list(File2,Files,Consults).
-xform_file_list(File,_,consult(File)).
-
-
-
-/*----------------------------------------------------------------
- | Part 4: LOADING THE REST OF THE BUILTINS FILES
- *----------------------------------------------------------------*/
-
 load_builtins(File) 
 	:-
 	sys_env(OS,_,_),
@@ -874,7 +820,7 @@ load_builtins(BDir, File)
 	sys_searchdir(Path),
     '$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
-%%pbi_write(FileAndPath), pbi_nl,pbi_ttyflush,
+pbi_write(FileAndPath), pbi_nl,pbi_ttyflush,
 	'$load'(FileAndPath, 0).
 
 consult_builtins(File) 
@@ -891,7 +837,7 @@ consult_builtins(BDir, File)
 	sys_searchdir(Path),
     '$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
-%%pbi_write(consult_builtins=FileAndPath), pbi_nl,pbi_ttyflush,
+pbi_write(consult_builtins=FileAndPath), pbi_nl,pbi_ttyflush,
 	'$atom_concat'(FileAndPath,'.pro',FilePathPro),
 	'$atom_concat'(FileAndPath,'.obp',FilePathObp),
 	load4(FilePathPro,FilePathObp,1,obp,_).
@@ -902,6 +848,17 @@ consult_builtins(BDir, File)
 		%% Make this a conditional:
 :-	auto_use(rel_arith).
 
+/*
+ld_fs
+	:-	
+	sys_env(OS,_,_),
+	(   OS = unix -> load_builtins(fsunix)
+	;   OS = dos  -> load_builtins(fsdos)
+	;   OS = msw95  -> load_builtins(fsmsw95)
+	;	OS = macos -> load_builtins(fsmac)
+	;   true		%% Extend to other OS's
+	).
+*/
 ld_fs(OS)
 	:-	
 	(   OS = unix -> load_builtins(fsunix)
@@ -911,6 +868,11 @@ ld_fs(OS)
 	;   true		%% Extend to other OS's
 	).
 
+/*
+:- 	command_line(CL), 
+	dmember('-nobuilt',CL),!	
+	;
+*/
 :-
 	sys_env(OS,_,_),
 	(   OS = macos, !, Sepr = ':'
@@ -920,15 +882,15 @@ ld_fs(OS)
 	'$atom_concat'('builtins',Sepr, BDir),
 
 	load_builtins(BDir, sio_rt),		%% for getting op declarations
+	ld_fs(OS),
 	load_builtins(BDir, blt_evt),		%% need error checking code early
 	load_builtins(BDir, blt_term),
 	load_builtins(BDir, blt_db),		%% must come before blt_sys
 	load_builtins(BDir, filepath),		%% also must come before blt_sys
 	load_builtins(BDir, blt_io),
 	load_builtins(BDir, xconsult),
-	ld_fs(OS),
-	load_builtins(BDir, sio),
 
+/*
 	consult_builtins(BDir, blt_ctl) ,
 	consult_builtins(BDir, blt_sys),
 	consult_builtins(BDir, blt_std),
@@ -936,6 +898,7 @@ ld_fs(OS)
 	consult_builtins(BDir, blt_als),
 	consult_builtins(BDir, blt_atom),
 	consult_builtins(BDir, cutils),
+	consult_builtins(BDir, sio),
 	consult_builtins(BDir, sio_wt),
 	consult_builtins(BDir, sio_d10),
 	consult_builtins(BDir, blt_lib), 
@@ -946,6 +909,27 @@ ld_fs(OS)
 	consult_builtins(BDir, blt_pckg),
 	consult_builtins(BDir, blt_frez),
 	consult_builtins(BDir, blt_shl).
+*/
+
+	load_builtins(BDir, blt_ctl),
+	load_builtins(BDir, blt_sys),
+	load_builtins(BDir, blt_std),
+	load_builtins(BDir, blt_stk),
+	load_builtins(BDir, blt_als),
+	load_builtins(BDir, blt_atom),
+	load_builtins(BDir, cutils),
+	load_builtins(BDir, sio),
+	load_builtins(BDir, sio_wt),
+	load_builtins(BDir, sio_d10),
+	load_builtins(BDir, blt_lib), 
+	load_builtins(BDir, blt_msg),
+	load_builtins(BDir, blt_brk),
+	load_builtins(BDir, xconsult),
+	load_builtins(BDir, fs_cmn),
+	load_builtins(BDir, dcgs),
+	load_builtins(BDir, blt_pckg),
+	load_builtins(BDir, blt_frez),
+	load_builtins(BDir, blt_shl).
 
 %%--------------------------------------------
 %% set up the operators (stream io stuff needs to be 
@@ -961,7 +945,8 @@ ld_is
 	:-	
 	sys_env(_,_,Proc),
     ( (Proc = sparc ; Proc = m88k; Proc = m68k) ->  
-		consult_builtins(blt_is)
+		load_builtins(blt_is)
+%		consult_builtins(blt_is)
     	;   
 		true
 	).
@@ -971,7 +956,8 @@ ld_mth
 	:-	
 	sys_env(_,_,Proc),
 	(   Proc = m88k
-	->  consult_builtins(math88k)
+	->  load_builtins(math88k)
+%	->  consult_builtins(math88k)
 	;   true
 	).
 
@@ -980,23 +966,38 @@ ld_wins
 	als_system(Sys),
 	dmember(wins=WinSys,Sys),
 	(WinSys = mswins -> 
+		load_builtins(windows), 
+		load_builtins(win_sh)
+/*
 		consult_builtins(windows), 
 		consult_builtins(win_sh)
+*/
 		;   
 		true
 	).
 
+
+/*
+:-  command_line(CL), 
+	dmember('-nobuilt',CL),!	
+	;
+*/
 :-
 	nops, 
 	ld_is, 
+%	ld_fs, 
 	ld_mth, 
 	ld_wins.
 
 :- dynamic(intconstr/0).
 
 :-  intconstr, !, 
+	load_builtins(ra_basis),
+	load_builtins(int_cstr)
+/*
 	consult_builtins(ra_basis),
 	consult_builtins(int_cstr)
+*/
 	;
 	true.
 
@@ -1030,8 +1031,17 @@ ld_wins
  | '$start' is the initial (shell) goal which is run by the prolog system.
  *------------------------------------------------------------------------*/
 		%% This starts the tty shell:
+/*
 '$start' 
 	:-
+ 	command_line(CL), 
+	dmember('-nobuilt',CL),!
+	;
+	start_shell(builtins:prolog_shell).
+*/
+'$start' 
+	:-
+	pbi_write('starting...'), pbi_nl, pbi_ttyflush,
 	start_shell(builtins:prolog_shell).
 
 endmod.		%% builtins.pro -- Main File for builtins

@@ -97,12 +97,42 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	    #ifndef SCO_UNIX
 	       #include <sys/un.h>
 	    #endif /* SCO_UNIX */
-
+	    
 	#elif defined(MacOS) && defined(HAVE_GUSI)
 	    #include <GUSI.h>
+	#elif defined(WIN32)
+	    #include <winsock.h>
+	    #undef AF_UNIX
+	    
 	#else
 	    #error
 	#endif /* UNIX, MacOS-GUSI */
+
+	#if defined(UNIX)
+	#define readsocket(a,b,c)	read((a), (b), (c))
+	#define writesocket(a,b,c)	write((a), (b), (c))
+	#define closesocket(a)		close((a))
+	#define socket_errno		errno
+	#define INVALID_SOCKET	-1
+	#define SOCKET_ERROR	-1
+	#define INADDR_NONE	-1
+	
+	#elif defined(MacOS) && defined(HAVE_GUSI)
+	#define readsocket(a,b,c)	read((a), (b), (c))
+	#define writesocket(a,b,c)	write((a), (b), (c))
+	#define closesocket(a)		close((a))
+	#define socket_errno		errno
+	#define INVALID_SOCKET	-1
+	#define SOCKET_ERROR	-1
+	
+	#elif defined(WIN32)
+	#define readsocket(a,b,c)	recv((a), (b), (c), 0)
+	#define writesocket(a,b,c)	send((a), (b), (c), 0)
+	#define socket_errno		WSAGetLastError()
+	
+	#else
+	#error
+	#endif
 
     #elif defined(PCFTP_SOCKETS)	/* use PC/TCP Developement Kit for DOS */
 	#include <sys/types.h>		/* C compiler header file */
@@ -247,10 +277,9 @@ sio_mkstream()
     SIO_BFSIZE(buf) = v1;
     SIO_COLUMN(buf) = 0;
 #if defined(MacOS)
-    SIO_EOLNTYPE(buf) = SIOEOLN_READ_CR | SIOEOLN_WRITE_CR;
+    SIO_EOLNTYPE(buf) = SIOEOLN_READ_UNIV | SIOEOLN_WRITE_CR;
 #elif defined(UNIX)
-    /* Is this the correct default for DJPP? */
-    SIO_EOLNTYPE(buf) = SIOEOLN_READ_LF | SIOEOLN_WRITE_LF;
+    SIO_EOLNTYPE(buf) = SIOEOLN_READ_UNIV | SIOEOLN_WRITE_LF;
 #elif defined(WIN32)
     SIO_EOLNTYPE(buf) = SIOEOLN_READ_UNIV | SIOEOLN_WRITE_CRLF;
 #else
@@ -941,20 +970,16 @@ sio_file_open()
     else if (strcmp((char *)filename, "$stderr") == 0)
 	SIO_FD(buf) = STDERR_FILENO;
     else {
-#if	defined(DOS) || defined(WIN32)
+#if	defined(DOS) /* || defined(WIN32) */
 	if ((SIO_FD(buf) = open(filename, flags | O_BINARY, (S_IWRITE | S_IREAD))) == -1)
-#elif	defined(MacOS)
-#if	0 && defined(__MWERKS__) && !__POWERPC__ 
-	/* This is for use with Non-GUSI libraries. */
-	extern int metrowerks_open_patch(const char *filename, int mode);
-	if ((SIO_FD(buf) = metrowerks_open_patch((char *)filename, flags)) == -1)
-#else
+#elif	defined(MacOS) || defined(WIN32)
 	if ((SIO_FD(buf) = open((char *)filename, flags)) == -1)
-#endif
 #elif defined(__GO32__) || defined(OS2)
 	if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1)
-#else  /* default code */
+#elif defined(UNIX)
 	if ((SIO_FD(buf) = open(filename, flags, 0777)) == -1)
+#else
+#error
 #endif
 	{
 	    if (errno == EINTR)
@@ -1296,9 +1321,10 @@ sio_socket_open()
 
 #if defined(BERKELEY_SOCKETS)
 
-    if ((SIO_FD(buf) = socket(domain, socktype, 0)) == -1) {
+    if ((SIO_FD(buf) = socket(domain, socktype, 0)) == INVALID_SOCKET)
+    {
 	SIO_ERRCODE(buf) = SIOE_SYSCALL;
-	SIO_ERRNO(buf) = errno;
+	SIO_ERRNO(buf) = socket_errno;
 	FAIL;
     }
 
@@ -1346,8 +1372,8 @@ sio_socket_open()
 #else
 		else if ((sockname_in.sin_addr.s_addr = inet_addr(host_or_path))
 #endif
-				== (unsigned long) -1) {
-		    status = -1;
+				== (unsigned long) INADDR_NONE) {
+		    status = SOCKET_ERROR;
 		    break;	/* break early */
 		}
 
@@ -1447,12 +1473,12 @@ sio_socket_open()
     #error
 #endif /* BERKELEY_SOCKETS, PCFTP_SOCKETS */
 
-    if (status == -1) {
-	if (errno == EINTR)
+    if (status == SOCKET_ERROR) {
+	if (socket_errno == EINTR)
 	    SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
 	else {
 	    SIO_ERRCODE(buf) = SIOE_SYSCALL;
-	    SIO_ERRNO(buf) = errno;
+	    SIO_ERRNO(buf) = socket_errno;
 	}
 	FAIL;
     }
@@ -1532,7 +1558,7 @@ accept_connection(vsd, buf)
 	    if (decr_fdrefcnt(SIO_FD(buf))) {
 		delete_stream_name(vsd);
 		/* close connection descriptor */
-		if (close(SIO_FD(buf)) < 0)
+		if (closesocket(SIO_FD(buf)) == SOCKET_ERROR)
 		    perror("accept_connection");
 	    }
 	    SIO_FD(buf) = newfd;
@@ -1591,7 +1617,7 @@ sio_accept_socket_connection()
 	SUCCEED;
     else {
 	SIO_ERRCODE(buf) = SIOE_SYSCALL;
-	SIO_ERRNO(buf) = errno;
+	SIO_ERRNO(buf) = socket_errno;
 	FAIL;
     }
 }
@@ -1628,13 +1654,17 @@ sio_rexec()
 	}
     
     if (!getstring(&hostname, v1, t1))
-	hostname = NULL;
+		{ hostname = NULL; }
 
     if (!getstring(&username, v3, t3))
+	{
 	username = NULL;
+	}
     
     if (!getstring(&password, v4,t4))
+	{
 	password = NULL;
+	}
     
     rbuf = (char *)get_stream_buffer(v5,t5);
     wbuf = (char *)get_stream_buffer(v6,t6);
@@ -2050,14 +2080,15 @@ printf("types ok\n");
 		w_get_functor(&functor, v1);
 			/* Must have: arity == 4 && functor == TK_DDOUBLE */
 
+		if ((arity != 4) || (functor != TK_DDOUBLE))
+			FAIL;
+
 		for (i = 0; i < 4; i++) {
 		    w_get_argn(&vv, &tt, v1, i + 1);
 			*(((short *) &uu)+ i) = (short) vv;
 
-/*  printf("i=%d vv=%hd uu=%d\n",i,(short)vv,(unsigned long)uu);   */
 		}
     	SIO_FD(buf) = (unsigned long) uu;
-
 	}
 #endif	/* DoubleType */
 
@@ -2239,12 +2270,12 @@ write_buf(vsd,buf)
 #ifdef HAVE_SOCKET
 	case SIO_TYPE_SOCKET_STREAM:
 	    if (accept_connection(vsd, buf)) {
-		writeflg = -1;
+		writeflg = SOCKET_ERROR;
 		break;		/* break early */
 	    }
 
 #if defined(BERKELEY_SOCKETS)
-	    writeflg = write(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
+	    writeflg = writesocket(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
 #elif defined(PCFTP_SOCKETS)
 	    writeflg = net_write(SIO_FD(buf), SIO_BUFFER(buf),
 				 SIO_LPOS(buf), 0);
@@ -2262,7 +2293,7 @@ write_buf(vsd,buf)
 				  (struct sockaddr *) SIO_SOCKET_ADDRESS(buf),
 				  SIO_SOCKET_ADDRESS_LEN(buf));
 	    else
-		writeflg = write(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
+		writeflg = writesocket(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
 #elif defined(PCFTP_SOCKETS)
 	    /* FIXME: SIO_SOCKET_ADDRESS(buf) == 0 */
 	    writeflg = net_writeto(SIO_FD(buf),
@@ -2282,14 +2313,30 @@ write_buf(vsd,buf)
 	    break;
     }
 
-    if (writeflg == -1) {
-	if (errno == EINTR)
-	    SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
-	else {
-	    SIO_ERRCODE(buf) = SIOE_SYSCALL;
-	    SIO_ERRNO(buf) = errno;
+    switch (SIO_TYPE(buf)) {
+    case SIO_TYPE_SOCKET_STREAM:
+    case SIO_TYPE_SOCKET_DGRAM:
+	if (writeflg == SOCKET_ERROR) {
+	    if (socket_errno == EINTR)
+		SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
+	    else {
+		SIO_ERRCODE(buf) = SIOE_SYSCALL;
+		SIO_ERRNO(buf) = socket_errno;
+	    }
+	    return 0;
 	}
-	return 0;
+	break;
+    default:
+	if (writeflg == -1) {
+	    if (errno == EINTR)
+		SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
+	    else {
+		SIO_ERRCODE(buf) = SIOE_SYSCALL;
+		SIO_ERRNO(buf) = errno;
+	    }
+	    return 0;
+	}
+	break;
     }
 
     SIO_FLAGS(buf) &= ~SIOF_DIRTY;
@@ -2374,12 +2421,12 @@ close_socket:
 
 #if defined(BERKELEY_SOCKETS)
 		if (SIO_TYPE(buf) == SIO_TYPE_SOCKET_DGRAM)
-		    closeflg = close(SIO_FD(buf));
+		    closeflg = closesocket(SIO_FD(buf));
 		else {
 /* FIXME: Figure out how to check for broken shutdown */
-#if defined(SysVR3) || (defined(MacOS) && defined(HAVE_GUSI))
+#if defined(SysVR3) || (defined(MacOS) && defined(HAVE_GUSI) || defined(WIN32))
 		    /* shutdown seems to be broken on svr3 */
-		    closeflg = close(SIO_FD(buf));
+		    closeflg = closesocket(SIO_FD(buf));
 #else /* SysVR3, MacOS-GUSI */
 		    closeflg = shutdown(SIO_FD(buf),2);
 #endif /* SysVR3, MacOS-GUSI */
@@ -2401,14 +2448,30 @@ close_socket:
 	    break;
     }
 
-    if (closeflg == -1) {
-	if (errno == EINTR)
-	    SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
-	else {
-	    SIO_ERRCODE(buf) = SIOE_SYSCALL;
-	    SIO_ERRNO(buf) = errno;
+    switch (SIO_TYPE(buf)) {
+    case SIO_TYPE_SOCKET_STREAM:
+    case SIO_TYPE_SOCKET_DGRAM:
+	if (closeflg == SOCKET_ERROR) {
+	    if (socket_errno == EINTR)
+		SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
+	    else {
+		SIO_ERRCODE(buf) = SIOE_SYSCALL;
+		SIO_ERRNO(buf) = socket_errno;
+	    }
+	    FAIL;
 	}
-	FAIL;
+	break;
+    default:
+	if (closeflg == -1) {
+	    if (errno == EINTR)
+		SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
+	    else {
+		SIO_ERRCODE(buf) = SIOE_SYSCALL;
+		SIO_ERRNO(buf) = errno;
+	    }
+	    FAIL;
+	}
+	break;
     }
 
     SIO_ERRCODE(buf) = SIOE_NORMAL;
@@ -2679,43 +2742,6 @@ ssbq_get_msg()
 }
 #endif /* SSBQ */
 
-/* Correct various bugs in different Unix emulation libraries. */
-#if defined(THINK_C)
-
-/* Think C's setvbuf() is broken, so stdin cannot do line buffering,
-   This function works around it by using fgets().
-*/
-static int corrected_read(int fn, char *buffer, int count)
-{
-    int result;
-
-    if (fn == 0) {
-    	char *line;
-	line = fgets(buffer, count, stdin);
-	result = ferror(stdin) ? EOF : ( line == NULL ? 0 : strlen(line));
-    } else {
-	result = read(fn, buffer, count);
-    }
-    	
-    return result;
-}
-#elif defined(__MWERKS__)
-
-static int corrected_read(int fn, char *buffer, int count)
-{
-    int result;
-    
-    result = read(fn, buffer, count);
-    
-    if (fn == 0 && result > 0) {
-	int i;
-	for (i = 0; i < result; i++) if (buffer[i] == 5) result = 0;
-    }
-	
-    return result;
-}
-#endif  /* defined(THINK_C) */
-
 /*
  * sio_readbuffer(SD)
  */
@@ -2757,11 +2783,7 @@ sio_readbuffer()
 
     switch (SIO_TYPE(buf)) {
 	case SIO_TYPE_FILE:
-#if defined(THINK_C) || defined(__MWERKS__)
-		nchars = corrected_read(SIO_FD(buf), (char *)buffer, nchars);
-#else
 	    nchars = read(SIO_FD(buf), (char *)buffer, (size_t)nchars);
-#endif
 	    break;
 #ifdef SysVIPC
 	case SIO_TYPE_SYSVQ: {
@@ -2820,7 +2842,7 @@ sio_readbuffer()
 	    }
 		
 #if defined(BERKELEY_SOCKETS)
-	    nchars = read(SIO_FD(buf), buffer, (size_t)nchars);
+	    nchars = readsocket(SIO_FD(buf), buffer, (size_t)nchars);
 #elif defined(PCFTP_SOCKETS)
 	    /* FIXME! */
 	    nchars = net_read(SIO_FD(buf), buffer, nchars, &a, 0);
@@ -2838,7 +2860,7 @@ sio_readbuffer()
 				  &len);
 	    }
 	    else
-		nchars = read(SIO_FD(buf), buffer, (size_t)nchars);
+		nchars = readsocket(SIO_FD(buf), buffer, (size_t)nchars);
 #elif defined(PCFTP_SOCKETS)
 	    /* FIXME! */
 	    nchars = net_read(SIO_FD(buf), buffer, nchars, &a, 0);
@@ -5277,7 +5299,7 @@ sio_readln()
 
     while (wpos < lpos && !(nl = get_eoln(SIO_BUFFER(buf) + wpos, SIO_BUFFER(buf) + lpos, buf))) wpos++;
     
-    if (wpos == cpos && !nl) {
+    if (wpos == cpos && nl <= 0) {
 	    SIO_ERRCODE(buf) = SIOE_READ;
 	    FAIL;
     }

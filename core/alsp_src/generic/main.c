@@ -65,6 +65,7 @@
 
 #ifdef WIN32
 #include "fswin32.h"
+#include "ctype.h"
 #endif
 
 #include "main.h"
@@ -475,6 +476,11 @@ PI_prolog_init(win_str, argc, argv)
     assert_atom_in_module("syscfg","intconstr");
 #endif
 
+#ifdef FREEZE 
+    assert_atom_in_module("builtins","freeze");
+    assert_atom_in_module("syscfg","freeze");
+#endif
+
     /*---------------------------------------*
      | Load the builtins
      *---------------------------------------*/
@@ -644,11 +650,65 @@ absolute_pathname(name)
 
 #endif
 
+#ifdef WIN32
+static const int num_ext = 2;
+static const char *program_extension[num_ext] = {".exe", ".com"};
 
+static int caseless_equal(const char *s1, const char *s2)
+{
+    while (*s1 && *s2 && tolower(*s1) == tolower(*s2)) {s1++; s2++;}
+    
+    return (*s1 == 0 && *s2 == 0);
+}
+static int has_program_extension(const char *path)
+{
+    int i, r = 0, pathlen = strlen(path);
+    for (i = 0; i < num_ext && !r; i++) {
+    	int extlen = strlen(program_extension[i]);
+	r = caseless_equal(path + pathlen - extlen, program_extension[i]);
+    }
+    
+    return r; 
+}
+#endif
+
+/* access_program() return 1 if path leads to an accessable (readable) program
+   file, otherwise 0.  For Operating Systems that have program file name extensions
+   (MS DOS/Windows), extensions are added if necessary. */
+static int access_program(const char *path)
+{
+#if defined(WIN32)
+    /* Under Microsoft Windows NT, the argv[0] passed from the command prompt
+       does not have an extension unless it is explicit.
+       
+       For Example, "C:\>foo" results in argv[0] = "foo".  The full name of foo
+       could be "foo.exe" or "foo.com".
+       
+       This code checks for .exe and .com extensions if they are not explicit.
+     */
+    int r = 0, i;
+    char extpath[FILENAME_MAX];
+    
+    r = (access(path, R_OK) == 0);
+    
+    if (!r && !has_program_extension(path)) {
+    	for (i = 0; i < num_ext && !r; i++) {
+    	    strncpy(extpath, path, FILENAME_MAX-1);
+    	    strncat(extpath, program_extension[i], FILENAME_MAX-strlen(extpath)-1);
+    	    r = (access(extpath, R_OK) == 0);
+    	}
+    }
+    
+    return r;
+#else
+    return (access(path, R_OK) == 0);
+#endif
+}
 /*--------------------------------------------------------------------*
- | whereami is given a filename f and returns the directory in which 
- | the executable file (containing this code) may be found.  A dot will be 
- | returned to indicate the current directory.
+ | whereami is given a filename f in the form:  whereami(argv[0])
+ | It returns the directory in which the executable file (containing 
+ | this code [main.c] ) may be found.  A dot will be returned to indicate 
+ | the current directory.
  *--------------------------------------------------------------------*/
 
 static void
@@ -666,7 +726,7 @@ whereami(name)
      * or through an absolute path.
      */
 
-    if (access(name, R_OK) == 0) {
+    if (access_program(name)) {
 
 	/*-------------------------------------------------------------*
 	 * The file was accessible without any other work.  But the current
@@ -676,12 +736,20 @@ whereami(name)
 
 	t = imagedir;
 	if (!absolute_pathname(name)) {
-#if defined(DOS) || defined(WIN32)
+#if defined(WIN32)
+	    if (*(name+1) == ':') {
+	    	if (getdcwd(toupper(*name)-'A'+1, imagedir, 1024) == NULL)
+		    fatal_error(FE_GETCWD, 0);
+		name += 2;
+	    } else {
+	    	if (getcwd(imagedir, 1024) == NULL) fatal_error(FE_GETCWD, 0);
+	    }
+#elif defined(DOS) && !defined(__DJGPP__)
 	    int   drive;
 	    char *newrbuf;
 
 	    newrbuf = imagedir;
-#ifndef __DJGPP__
+
 	    if (*(name + 1) == ':') {
 		if (*name >= 'a' && *name <= 'z')
 		    drive = (int) (*name - 'a' + 1);
@@ -695,19 +763,21 @@ whereami(name)
 		drive = 0;
 		*newrbuf++ = DIR_SEPARATOR;
 	    }
-	    if (getcwd(newrbuf, drive) == 0) {	/* } */
-#else
-	    if (getcwd(newrbuf, 1024) == 0) {	/* } */
-#endif
-#else  /* DOS */
-#ifdef HAVE_GETWD
-	    if (getwd(imagedir) == 0) {		/* } */
-#else  /* !HAVE_GETWD */
-	    if (getcwd(imagedir, 1024) == 0) {
-#endif /* !HAVE_GETWD */
-#endif /* DOS */
+	    if (getcwd(newrbuf, drive) == 0) {
 		fatal_error(FE_GETCWD, 0);
 	    }
+#else  /* not WIN32 or DOS */
+#ifdef HAVE_GETWD
+	    if (getwd(imagedir) == 0) {
+		fatal_error(FE_GETCWD, 0);
+	    }
+#else  /* !HAVE_GETWD */
+	    if (getcwd(imagedir, 1024) == 0) {
+		fatal_error(FE_GETCWD, 0);
+	    }
+#endif /* !HAVE_GETWD */
+#endif /* WIN32, DOS */
+
 	    for (; *t; t++)	/* Set t to end of buffer */
 		;
 	    if (*(t - 1) == DIR_SEPARATOR)	/* leave slash if already
@@ -771,7 +841,7 @@ whereami(name)
 		*t++ = DIR_SEPARATOR;	/* put in the slash */
 	    cutoff = t - 1;	/* set cutoff */
 	    strcpy(t, name);
-	    if (access(imagedir, R_OK) == 0)
+	    if (access_program(imagedir))
 		break;
 
 	    if (*s)

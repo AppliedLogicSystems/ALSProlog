@@ -478,8 +478,6 @@ notrace :-
 	dbg_notrace,
 	setDebugInterrupt(spying),
 	setPrologInterrupt(spying).
-
-/*************************
 /*
  * xform_command_or_query(InGoal,OutGoal)
  *
@@ -529,6 +527,5 @@ xform_file_list(File1,[File2|Files],(consult(File1),Consults)) :-
 xform_file_list(File,_,consult(File)).
 
 
-*************************/
 
 endmod.		%% blt_sys.pro: System-type builtins.

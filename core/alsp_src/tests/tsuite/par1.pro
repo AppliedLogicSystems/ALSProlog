@@ -1,6 +1,7 @@
 /*=====================================================================*
  | 			par1.pro
- |		Copyright (c) 1993-95 Applied Logic Systems, Inc.
+ |		Copyright (c) 1993-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |			-- test interaction of global variables, trap mechanism, and
  |		   		alarm.  Also tests out interrupts.
@@ -9,7 +10,6 @@
  *=====================================================================*/
 
 :- make_gv('GoalQueue'), make_gv('SavedGoal'), setSavedGoal(true).
-
 
 /*-------------------------------------------------------*
  | main is called to start the consumer / producer off.
@@ -53,7 +53,6 @@ produce(N,[N|T])
 	NN is N+1,
 	sleep(produce(NN,T)).
 
-
 /*-----------------------------------------------------------*
  | Queue Management:
  |
@@ -61,7 +60,6 @@ produce(N,[N|T])
  |	remQueue/1		-- removes an element to the queue
  |	addQueue/1		-- adds an element to the queue
  *-----------------------------------------------------------*/
-
 
 initQueue 
 	:- 
@@ -100,7 +98,6 @@ addQueue(Rear,Q,NewRear)
 	:-
 	mangle(2,Rear,NewRear),		%% add the new rear
 	mangle(2,Q,NewRear).		%% new rear is now rear of queue
-
 
 
 /*-----------------------------*

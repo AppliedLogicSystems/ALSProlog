@@ -1,15 +1,12 @@
-/*--------------------------------------------------*
+/*---------------------------------------------------------*
  |			motif.spc
+ |		Copyright (c) 1991-96 Applied Logic Systems, Inc.
  |
  |		Specification for the broad interface to 
  |		Motif.  Assumes that interface generation
  |		(and compilation) is done with the define
  |			-D__NO_PROTO
- |
- |	Note: For Motif1.2, we should explore whether or
- |	not it might work better to generate and compile
- |	with -U_NO_PROTO   ???
- *--------------------------------------------------*/
+ *---------------------------------------------------------*/
 
 /*
 #exclude "/jarrett/usr_include/?"

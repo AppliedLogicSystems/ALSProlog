@@ -1,8 +1,9 @@
 /*========================================================================*
- |						strings.pro
- |		Copyright (c) 1988-91 Applied Logic Systems, Inc.
+ |		strings.pro
+ |	Copyright (c) 1988-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
- |					Prolog String and UIA utilities
+ |		Prolog String and UIA utilities
  |
  |	Authors:	Keith Hughes, Ken Bowen, Kevin Buettner
  |	Date:		1986-91

@@ -74,6 +74,7 @@ generic.mac: ../generic/generate/generic.abs
 	$(ALSPRO) $(A2M)  -g abs2make_cl -p \
 		-src ../generic/generate/generic.abs \
 		-tgt ../generic/generate/generic.mac -ctx mac
+	unix2mac ../generic/generate/generic.mac
 
 #---------------------------------------------------------
 #	bld-port/makefile.in
@@ -125,9 +126,11 @@ port.mac: ../bld-port/makefile.abs ../port/port.abs
 	$(ALSPRO) $(A2M)  -g abs2make_cl -p \
                 -src ../port/port.abs \
                 -tgt ../port/port.mac -ctx mac
+	unix2mac ../port/port.mac
 	$(ALSPRO) $(A2M)  -g abs2make_cl -p \
                 -src ../bld-port/makefile.abs \
                 -tgt ../bld-port/makefile.mac -ctx mac
+	unix2mac ../bld-port/makefile.mac
 
 #---------------------------------------------------------
 #	top level makefile.in
@@ -156,6 +159,7 @@ maketop.w31: maketop.abs
 maketop.mac: maketop.abs
 	$(ALSPRO) $(A2M) -g abs2make_cl -p \
 		-p -src maketop.abs -tgt maketop.mac -ctx mac
+	unix2mac maketop.mac
 
 #---------------------------------------------------------
 

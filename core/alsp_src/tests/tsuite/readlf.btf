@@ -1,0 +1,179 @@
+/* This file is for testing interactions between line/token reading and
+ * file buffering.  
+ */
+ 
+/* Some nested comments.
+	/* /* /* /* /* */ */ */ */ */
+ */
+ 
+/* Some line comments. */
+
+%
+%%
+%%%
+
+% comment.
+%% comment.
+%%%%%%%%%%%%%%%%%%% comment.
+			% comment.
+			%% comment.
+			%%%%%%%%%%%%%%%%%%% comment.
+something.  % comment.
+	   
+/* an empty quoted atom. */
+
+''.
+
+/* small quoted atoms. */
+'a'. ''''. '\''. '\\'. '\t'. '\x3f'. '\034'.
+'ab'. 'a'''. '''a'. 'a\''. '\'a'. 'a\\'. '\\a'. 'a\t'. '\ta'.
+'z\x3f'. '\x3fz'. 'a\034'. '\034a'.
+
+/* An example of a long quoted atom with all the special escape characters. */
+
+'a quoted atom with '' and \' and \\ and \a and \b and \f and \n and \r and \t and \v and \x3f and \034 and that''s it'.
+
+/* test quoted atoms written on two lines. */
+
+'a quoted atom that is\
+ on two different lines'.
+
+'\
+'.
+
+'\
+\
+'.
+
+'\
+\
+\
+'.
+
+'a\
+'.
+
+'\
+a'.
+
+'''\
+'.
+
+'\
+'''.
+
+'\\\
+'.
+
+'\
+\\'.
+
+'\t\
+'.
+
+'\
+\t'.
+
+'\x3f\
+'.
+
+'\
+\x3f'.
+
+'\034\
+'.
+
+'\
+\034'.
+
+'abc\
+'.
+
+'\
+abc'.
+
+/* an empty string. */
+
+"".
+
+/* small string. */
+"a". """". "\"". "\\". "\t". "\x3f". "\034".
+"ab". "a""". """a". "a\"". "\"a". "a\\". "\\a". "a\t". "\ta".
+"z\x3f". "\x3fz". "a\034". "\034a".
+
+/* an example of a long string with all the special escape characters. */
+
+"a string with "" and \" and \\ and \a and \b and \f and \n and \r and \t and \v and \x3f and \034 and that's it".
+
+/* test quoted atoms written on two lines. */
+
+"a quoted atom that is\
+ on two different lines".
+
+"\
+".
+
+"\
+\
+".
+
+"\
+\
+\
+".
+
+"a\
+".
+
+"\
+a".
+
+"""\
+".
+
+"\
+""".
+
+"\\\
+".
+
+"\
+\\".
+
+"\t\
+".
+
+"\
+\t".
+
+"\x3f\
+".
+
+"\
+\x3f".
+
+"\034\
+".
+
+"\
+\034".
+
+"abc\
+".
+
+"\
+abc".
+
+/* a dot immediately followed by white space or comments. */
+atom.
+/* These are no longer allowed:
+atom.% comment
+atom./* comment. */
+*/
+
+/* number tests. */
+n(0).
+n(15).
+n(1.23e+20).
+
+/* There should be some end-of-file tests too! */

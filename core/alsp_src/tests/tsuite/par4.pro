@@ -1,16 +1,19 @@
-/*
- * par4.pro
- *
- *	Producers and consumers (for primes) with added buffering to improve
- *	throughput. tp(6) or tp(7) seems to be optimal for SPARC.  Time slices
- *	were removed since it appeared that the heap was being consumed by the
- *	early producers.  Giving each process a time slice might work if a
- *	decent scheduler is written.  For this example, this means that once
- *	ints_from runs for a while initially, it should be suspended until
- *	more integers are needed -- not when its turn comes up again by being
- *	in the queue.
- *
- */
+/*=====================================================================*
+ |			par4.pro
+ |		Copyright (c) 1993-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |	Producers and consumers (for primes) with added buffering to improve
+ |	throughput. tp(6) or tp(7) seems to be optimal for SPARC.  Time slices
+ |	were removed since it appeared that the heap was being consumed by the
+ |	early producers.  Giving each process a time slice might work if a
+ |	decent scheduler is written.  For this example, this means that once
+ |	ints_from runs for a while initially, it should be suspended until
+ |	more integers are needed -- not when its turn comes up again by being
+ |	in the queue.
+ |
+ | Author: Kevin Buettner
+ *=====================================================================*/
 
 :- make_gv('GoalQueue').
 :- op(990,xfy,&), op(990,xfy,&&).

@@ -1,6 +1,7 @@
 /*===================================================================
  |		sconfig.pro
- |	Copyright (c) 1994 Applied Logic Systems, Inc.
+ |	Copyright (c) 1996 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |	General system configuration information
  |
