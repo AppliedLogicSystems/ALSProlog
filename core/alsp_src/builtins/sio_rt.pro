@@ -842,7 +842,8 @@ pp_rt_primary('('(_,Pstrt,_),[W1|WR],VT,Prec,TR,Ans) :-
 	pp_rt_rops(Y1,YR, S,0, VT,Prec, TR,Ans).
 pp_rt_primary('{'(_,Pstrt,_),[W1|WR],VT,Prec,TR,Ans) :-
 	!,
-	pp_rt_primary(W1,WR,VT,1200,[X1|XR],S),
+%	pp_rt_primary(W1,WR,VT,1200,[X1|XR],S),
+	pp_rt_primary(W1,WR,VT,1200,WRR,S),
 	pp_rt_nexttok(WRR,X1,XR),
 	pp_end(X1,Pend),
 	rt_rcurly(X1,XR,[Y1|YR]),
@@ -1660,6 +1661,14 @@ pp_xform_clause(end_of_file,_,end_of_file)
 
 pp_xform_clause(struct((H :- B),_,_),CID, 
 				(XH :- '$dbg_aph'(CID,SH,EH),XB,'$dbg_aphe'(CID,SH,EH))) 
+	:-!,
+	pp_flatten(H,XH),
+	arg(2,H,SH),
+	arg(3,H,EH),
+	pp_xform_body(B,CID,XB).
+
+pp_xform_clause(struct((H --> B),_,_),CID, 
+				(XH --> '$dbg_aph'(CID,SH,EH),XB,'$dbg_aphe'(CID,SH,EH))) 
 	:-!,
 	pp_flatten(H,XH),
 	arg(2,H,SH),

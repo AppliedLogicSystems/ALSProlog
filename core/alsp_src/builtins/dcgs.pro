@@ -101,4 +101,10 @@ untouchable(_=\=_).
 untouchable(_==_).
 untouchable(_\==_).
 
+untouchable('$dbg_aph'(_,_,_)).
+untouchable('$dbg_aphe'(_,_,_)).
+untouchable('$dbg_apg'(_,_,_)).
+untouchable('$dbg_apge'(_,_,_)).
+untouchable('$dbg_apf'(_,_,_)).
+
 endmod.
