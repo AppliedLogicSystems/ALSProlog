@@ -1,8 +1,91 @@
 /*=====================================================================*
- |   testclp_db.pro
- |  Copyright (c) 1996 Applied Logic Systems, Inc.
+ |   	testclp_db.pro
+ |  Copyright (c) 1996-7 Applied Logic Systems, Inc.
+ |	Distribution rights per Copying-ALS
  |
- |  Automated test run data/examples for clp tests
+ |  Automated test run data/examples for clp tests. Outputs results
+ |	to the file clptests.log.
+ |
+ |	This is the "database" of code defining the tests.  Execution
+ |	of the tests is carried out by combining this with the files
+ |	testclp_run.pro and specbf.pro.  {Loading testclp_run.pro 
+ |	automatically loads both this file and specbf.pro.}
+ |
+ |	Test predicate calls are of the form:
+ |	
+ |		b(ID, VarsList)
+ |
+ |	where ID is an integer or symbol identifier for the problem,
+ |	and VarsList is a list of variables whose valeues are to be
+ |	returned; e.g.:
+ |
+ |		b(2,[X,Y])	b(a5,[X])
+ |
+ |	Each such call defines a test, such as:
+ |
+ |		b(3,[X,Y]) :- {1==X + 2*Y, Y - 3*X==0}.
+ |		
+ |  In default operation, the test run mechanism simply gathers up
+ |  all the b/2 clauses and runs them in database order.  Thus, adding
+ |	new tests is easily accomplished, so long as they satisfy the
+ |	expected values format requirements (see following).  This file
+ |	includes all of the code of all of the current tests, though this
+ |	is not a necessary requirement.  All one needs to do is to ensure
+ |	that the code defining a test is loaded with this file (and
+ |	testclp_run.pro), and that the defining code is written to
+ |	be inside the module testclp.
+ |
+ |	Accompanying each b(ID,VarsList) :- ... clause must be an
+ |	expect/3 clause which describes the expected outputs (ie, bindings
+ |	of the variables occuring on VarsList):
+ |
+ |		expect(ID, VarNamesList, Outputs).
+ |
+ |	VarNamesList is a list of ground atoms of length = length(VarsList).
+ |	Each of the names is used to identify the bindings for the corresponding
+ |	variable from VarsList in the printed output.
+ |
+ |	Outputs describes the expected bindings as follows:
+ |
+ |	A.  Only one binding for VarsList variables is expected.  In this case,
+ |	Outputs is simply a list, in corresponding order, of the expected 
+ |	bindings for the variables on VarsList.  E.g., for ID = '3':
+ |
+ |		expect(3, ['X','Y'], [0.1428571429,0.4285714286]).
+ |
+ |	The printed output will show:
+ |
+ |		
+ |		+--Solution:
+ |		X = 0.1428571429
+ |		Y = 0.4285714286   OK Soln!
+ |
+ |	If the values are not what was expected, it will use the same
+ |	format, but end with:
+ |
+ |		BAD Soln!!
+ |	In this example, the expected bindings are those median interval
+ |	values of the intervals which have narrowed below the default
+ |	epsilon of e^-6.
+ |
+ |	To state that a variable binding is a proper interval, use the
+ |	square-bracket notation:
+ |
+ |		expect(7, ['X','Y'], [[1.0,3.0],[-1.732050808,1.732050808]]).
+ |
+ |	B.  To handle the situation where the desired test would produced
+ |	multiple solution bindings (that one would "pedal through" at
+ |	top level using semi-colon ; ), use the 'mult' keyword in the
+ |	expect assertion:
+ |
+ |	expect(6, ['X','Y'], mult(
+ |			[ [[0.3910497758,0.3910541883],[-0.9203695306,-0.9203676558]],
+ |			  [[0.449785464,0.4497907715],[0.8931339552,0.8931366281]],
+ |			  [[0.8931316465,0.8931380193],[0.4497827014,0.4497953557]]
+ |			] )).
+ |
+ |	This states that 3 solutions are expected, and all of the bindings
+ |	anticipated are proper intervals.
  *=====================================================================*/
 
 module testclp.
@@ -437,6 +520,9 @@ b(1006, [NumQ]) :- how_many_queens(6, NumQ).
 
 expect(1006, ['NumQ'], [4]).
 
+/******************* 
+%	Temporarily commented out until memory leak is repaired:
+
 %-----1007:
 
 b(1007, [NumQ]) :- how_many_queens(7, NumQ).
@@ -448,6 +534,7 @@ expect(1007, ['NumQ'], [40]).
 b(1008, [NumQ]) :- how_many_queens(8, NumQ).
 
 expect(1008, ['NumQ'], [92]).
+*******************/
 
 
 

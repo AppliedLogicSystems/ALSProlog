@@ -26,6 +26,7 @@ int	pbi_is_delay_var	PARAMS(( void ));
 int	update_chpt_slots	PARAMS(( PWord ));
 int	pbi_clct_tr		PARAMS(( void ));
 int pbi_del_tm_for		PARAMS(( void ));
+PWord	deref_2		PARAMS(( PWord ));
 
 int pbi_kill_freeze		PARAMS(( void ));
 
@@ -54,6 +55,13 @@ printf("enter delay----wm_H=%x--TK_DELAY=%x-----------------\n",
 			(int)wm_H,TK_DELAY);
 #endif
 
+#ifdef DEBUGSYS
+if (debug_system[FRZDELAY]) {
+	pbi_cptx();
+	printf("enter delay----wm_H=%x--TK_DELAY=%x-----------------\n",
+				(int)wm_H,TK_DELAY);
+}
+#endif
     w_get_An((PWord *)&dv, &dvt, 1);
     w_get_An(&m, &mt, 2);
     w_get_An(&g, &gt, 3);
@@ -63,6 +71,14 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 					(long)(((PWord *) *dv) - wm_heapbase));
 #endif
 	
+#ifdef DEBUGSYS
+if (debug_system[FRZDELAY]) {
+printf("   >incoming var: %x[_%lu]\n",(int)*dv,
+					(long)(((PWord *) *dv) - wm_heapbase));
+}
+#endif
+
+
 /*
 #ifdef	BigStruct
 	one = (PWord *)((PWord *)((PWord *)wm_H + 1) + 1); 
@@ -161,6 +177,14 @@ printf("exit delay---wm_H=%x--real_dv=%x[_%lu]-------\n",
 					(int)wm_H,  (int)one,
 					(long)(((PWord *) one) - wm_heapbase));
 #endif
+
+#ifdef DEBUGSYS
+if (debug_system[FRZDELAY]) {
+	printf("exit delay---wm_H=%x--real_dv=%x[_%lu]-------\n", 
+					(int)wm_H,  (int)one,
+					(long)(((PWord *) one) - wm_heapbase));
+}
+#endif
 		SUCCEED;
 	}
 	else
@@ -171,14 +195,23 @@ int
 pbi_is_delay_var()
 {
     PWord *dv;
+    PWord *rdv;
     int dvt;
 
     w_get_An((PWord *)&dv, &dvt, 1);
 
+
     if (dvt != WTP_UNBOUND)
 		FAIL;
 
-    if (CHK_DELAY(dv))
+    rdv = (PWord *)deref_2((PWord)dv);
+#ifdef DEBUGSYS
+if (debug_system[FRZDELAY]) {
+	printf("is_delay_v-dv=%x[_%lu]--rdv=%x-------\n", 
+			(int)dv, (long)(((PWord *) dv) - wm_heapbase), (int)rdv);
+}
+#endif
+    if (CHK_DELAY(rdv))
 		SUCCEED;
     else
 		FAIL;
@@ -201,12 +234,7 @@ int pbi_kill_freeze()
 }
 
 
-	/*-------------------------------------------------*
-	 | Sweep the trail/cp stack, from top to first choice point,
-	 | collecting the active delay var terms;
-	 *-------------------------------------------------*/
 
-PWord	deref_2		PARAMS(( PWord ));
 
 PWord
 deref_2(w)
@@ -221,6 +249,10 @@ deref_2(w)
     return w2;
 }
 
+	/*-------------------------------------------------*
+	 | Sweep the trail/cp stack, from top to first choice point,
+	 | collecting the active delay var terms;
+	 *-------------------------------------------------*/
 int
 pbi_clct_tr()
 {
@@ -298,6 +330,8 @@ pbi_del_tm_for()
 	int t1,t2;
 
     w_get_An(&v1, &t1, 1);
+	if (t1 != WTP_REF)
+		FAIL;
     w_get_An(&v2, &t2, 2);
 
 	if (CHK_DELAY((PWord *)v1))

@@ -44,3 +44,5 @@ is_ieee_inf(v)
 	return isinf(v);
 #endif
 }
+
+

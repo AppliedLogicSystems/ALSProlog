@@ -44,6 +44,8 @@ static	int	wam_unify	PARAMS(( PWord *, PWord * ));
 Code  wam_instrs[W_NUM_OPS];	/* map from instruction number to label */
 #endif	/* Threaded */
 
+extern int trailed_mangle0 PARAMS((PWord,PWord,int,PWord,int));
+
 #ifdef	IProfile
 
 static long iprofile_counts[W_NUM_OPS];
@@ -120,7 +122,7 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
  |	BIND(r,f): Binds r --> f
  |	Installs pointer to f in r
  |
- |	VVBIND(r,f): Special cases the
+ |	VVBIND(r,f,...): Special cases the
  |	variable-variable bind case, for
  |	the delay mechanism.  If FREEZE is
  |	undefined, VVBIND is identical to BIND;
@@ -150,34 +152,139 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 		*--mr_TR = PWORD(r);               \
 		*--mr_TR = PWORD(r1);              \
 	} }
-#else
+#else /* No-TRAILVALS */
 
-#define PLAINTRAIL(r)                             \
+#define PLAINTRAIL(r)                             	\
 	{ if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) \
 		*--mr_TR = PWORD(r);  }
 
-#define RETRAIL(r,r1) \
-	{ if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB)  \
+#define RETRAIL(r,r1) 								\
+	{ if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB)	\
 		*--mr_TR = PWORD(r);  }
 
-#endif
+#endif /* TRAILVALS */
 
-#define BIND(r,f)     { TRAIL(r,0); *(r) = PWORD(f); }
+    /*-------------------------------------------------*
+	 |  Debug messages from inside Trailing &
+	 |  Binding (with DEBUGFREEZE...)
+	 *-------------------------------------------------*/
 
-#define BIND3(r,f,w)  { TRAIL(r,w); *(r) = PWORD(f); }
+#define DDVVB(WW,lnn,r,f) \
+			printf("%s@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x f=%x[_%lu]\n",		\
+				WW,lnn, 													\
+				(int)r,(long)(((PWord *) r) - wm_heapbase),(int)mr_TR-1,	\
+				(int)f,(long)(((PWord *) f) - wm_heapbase)); 
 
+#define	MMTCH(f) printf("   match is delay [f=%x[_%lu]]\n", 				\
+						  (int)f,(long)(((PWord *) f) - wm_heapbase));	   
+
+void ck_intvl_punch   PARAMS((PWord, PWord, int));
+
+    /*-------------------------------------------------*
+	 |	ck_intvl_punch - used during variable binding,
+	 |	once we know that a variable is a delay var,
+	 |	then we check whether the delayed term is an
+	 |	interval term, and if so, we punch the value
+	 | 	we would have bound to the variable into the
+	 |	5th slot of the intvl/5 term which will wake
+	 |	up and run during the binding interrupt; the
+	 |	code for intvl/5 handles the "simulation" of
+	 |	the binding by creating appropriate constraints
+	 |	which run instead...
+	 *-------------------------------------------------*/
+void
+ck_intvl_punch(r, fv, ft)
+	PWord r,fv;
+	int ft;
+{
+	PWord r3, mf;
+	int r3t, mfa;
+
+/*	w_get(&pr3, &ft, f); */
+
+	w_get_argn(&r3, &r3t, r, 4);
+	w_get_functor(&mf, r3);
+	w_get_arity(&mfa, r3);
+
+#ifdef DEBUGSYS	/*..................................................*/
+	if (debug_system[INTVBIND]) {
+		printf("ck_intvl_punch:mf=%ld TKINTVL=%d mfa = %d\n", mf, TK_INTVL, mfa);
+		printf("fv=%lx ft=%d\n",fv, ft);
+	}
+#endif /* .............................................. DEBUGSYS ..*/
+
+	if ((mf == TK_INTVL) && (mfa == 5)) {
+		w_install_argn(r3, 5, fv, ft);
+	}
+}
 
 #ifdef FREEZE
 
 #ifdef DEBUGFREEZE
 
 	/*-------------------------------------------------*
+	 |	Below: TRAIL is the basic trailing macro;
+	 |
+	 |	VVBIND is a macro for variable-to-variable
+	 |	The _SHDW_ arg controls whether VVBIND makes
+	 |	calls to SHADOW_REGS/UNSHADOW_REGS (REGS)
+	 |	or SHADOW_REGS_S/UNSHADOW_REGS_S (REGS_S)
+	 |
 	 |  Arg 2 of TRAIL is a line number -- used for
 	 |  informational purposes only; eliminated from
 	 |  code in non-DEBUGFREEZE case.
 	 *-------------------------------------------------*/
 
+	/*-------------------------------------------------*
+     | Code (in wam_unify)  where VVBIND is invoked:
+	 |   if (f1 < f2) {	;;;; swap f1 and f2
+	 |	temp = f1;
+	 |	f1 = f2;
+	 |	f2 = temp;
+	 |   }
+	 |	;;;   Guarantee: f1 >= f2 
+ 	 |
+ 	 |   if (f2 >= wm_heapbase) {
+ 	 |	VVBIND(f1, f2, REGS_S, 555);     ;;; f1 >= f2 >= wm_heapbase
+ 	 |   }
+ 	 |  else {
+ 	 |	VVBIND(f2, f1, REGS_S, 666);	;;; f1 >= wm_heapbase > f2
+ 	 |							;;;	because can't bind two stack
+ 	 |							;;;	locations together
+	 |  }
+	 *-------------------------------------------------*/
 #ifdef TRAILVALS
+
+/*
+#define BIND(r,f)     { TRAIL(r,0); *(r) = PWORD(f); }
+
+#define BIND3(r,f,w)  { TRAIL(r,w); *(r) = PWORD(f); }
+*/
+
+#define BIND(r,f)     { BIND3(r,f,0) }
+
+#define BIND3(r,f,w)  { 								\
+  if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 		\
+	if ( CHK_DELAY(r) ) { 								\
+		PWord fv; int ft;								\
+		printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",			\
+						w,(int)r,(int)mr_TR-1);			\
+	  	*(PWord *)--mr_TR = PWORD(r); 					\
+	  	*(PWord *)--mr_TR = *PWPTR(r);					\
+  		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
+		w_get(&fv, &ft, (PWord)f); 							\
+		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\
+		printf("setting interrupt\n");					\
+	    wm_safety = -2; wm_interrupt_caught = 3; 		\
+	} else {											\
+	  *(PWord *)--mr_TR = PWORD(r); 					\
+	  *(PWord *)--mr_TR = *PWPTR(r);					\
+      *(r) = PWORD(f);									\
+	}													\
+  } else {												\
+      *(r) = PWORD(f);									\
+  }														\
+}
 
 #define TRAIL(r,l) 														  \
   { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 					  \
@@ -188,149 +295,215 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
   			*((PWord *)r +1) = (PWord)((PWord *)r + 1); 				  \
 	    	wm_safety = -2; wm_interrupt_caught = 3; } } } 
 
-#define VVBIND(r,f,lnn)   { 						  						   \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 						   \
-	  *(PWord *)--mr_TR = PWORD(r); 										   \
-	  *(PWord *)--mr_TR = *PWPTR(r);										   \
-	  if ( CHK_DELAY(r) ) { 												   \
-			printf("vvb@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x\n",lnn, 			   \
-					(int)r,(long) (((PWord *) r) - wm_heapbase),(int)mr_TR-1); \
-  			*((PWord *)r +1) = (PWord)((PWord *)r +1); 					       \
-	  		if ( CHK_DELAY(f) && r != f ) { 								   \
-			     printf("   match is delay [f=%x[_%lu]]\n", 				   \
-							  (int)f,(long)(((PWord *) f) - wm_heapbase));	   \
-  				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 				   \
-			    UNSHADOW_REGS;												   \
-				combin_dels((PWord)r,(PWord)f); SHADOW_REGS; }  } } }; 		   \
-  *(r) = PWORD(f); }
-
-#define VVBINDX(r,f,lnn)   { 						  						   \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 						   \
-	  *(PWord *)--mr_TR = PWORD(r); 										   \
-	  *(PWord *)--mr_TR = *PWPTR(r);										   \
-	  if ( CHK_DELAY(r) ) { 												   \
-			printf("vvb@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x\n",lnn, 			   \
-					(int)r,(long) (((PWord *) r) - wm_heapbase),(int)mr_TR-1); \
-  			*((PWord *)r +1) = (PWord)((PWord *)r +1); 					       \
-	  		if ( CHK_DELAY(f) && r != f ) { 								   \
-			     printf("   match is delay [f=%x[_%lu]]\n", 				   \
-							  (int)f,(long)(((PWord *) f) - wm_heapbase));	   \
-  				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 				   \
-			    UNSHADOW_REGS_S;												   \
-				combin_dels((PWord)r,(PWord)f); SHADOW_REGS_S; }  } } }; 		   \
-  *(r) = PWORD(f); }
+#define VVBIND(r,f,_SHDW_,lnn)   { 				  				\
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 			\
+	  *(PWord *)--mr_TR = PWORD(r); 							\
+	  *(PWord *)--mr_TR = *PWPTR(r);							\
+	  if ( CHK_DELAY(r) ) { 									\
+			DDVVB("vvbx",lnn,r,f)                               \
+  			*((PWord *)r +1) = (PWord)((PWord *)r +1); 			\
+	  		if ( CHK_DELAY(f) && r != f ) { 					\
+				 MMTCH(f)                                       \
+  				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 	\
+			    UNSHADOW_##_SHDW_;								\
+				combin_dels((PWord)r,(PWord)f); 				\
+				SHADOW_##_SHDW_; 								\
+  				*(r) = PWORD(f);								\
+			} else { /* r >= wm_heapbase; f not delay */		\
+				*(f) = PWORD(r);								\
+	  			*(PWord *)--mr_TR = PWORD(f); 					\
+	  			*(PWord *)--mr_TR = *PWPTR(f);					\
+			}													\
+		} else {												\
+  			*(r) = PWORD(f);									\
+		}														\
+	} else {													\
+  		*(r) = PWORD(f);										\
+  }																\
+  };            												\
+}
 
 #else /* NO TRAILVALS */
 
-#define TRAIL(r,l) \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
-	  *--mr_TR = PWORD(r); \
-	  if ( CHK_DELAY(r) ) { \
-			printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",l,(int)r,(int)mr_TR-1); \
-			*((PWord *)r +1) = (PWord)((PWord *)r + 1);					\
+#define BIND(r,f)     { BIND3(r,f,0) }
+
+#define BIND3(r,f,w)  { 								\
+  if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 		\
+	if ( CHK_DELAY(r) ) { 								\
+		PWord fv; int ft;								\
+		printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",			\
+						w,(int)r,(int)mr_TR-1);			\
+	  	*(PWord *)--mr_TR = PWORD(r); 					\
+	  	*(PWord *)--mr_TR = *PWPTR(r);					\
+  		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
+		w_get(&fv, &ft, (PWord)f); 							\
+		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\
+		printf("setting interrupt\n");					\
+	    wm_safety = -2; wm_interrupt_caught = 3; 		\
+	} else {											\
+	  *(PWord *)--mr_TR = PWORD(r); 					\
+	  *(PWord *)--mr_TR = *PWPTR(r);					\
+      *(r) = PWORD(f);									\
+	}													\
+  } else {												\
+      *(r) = PWORD(f);									\
+  }														\
+}
+
+#define TRAIL(r,l) 															\
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 						\
+	  *--mr_TR = PWORD(r);												 	\
+	  if ( CHK_DELAY(r) ) { 												\
+			printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",l,(int)r,(int)mr_TR-1);	\
+			*((PWord *)r +1) = (PWord)((PWord *)r + 1);						\
 	    	wm_safety = -2; wm_interrupt_caught = 3; } } } 
 
-#define VVBIND(r,f,lnn)   { \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
-	  *--mr_TR = PWORD(r); \
-	  if ( CHK_DELAY(r) ) { \
-			printf("vvb@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x\n",lnn, \
-					(int)r,(long) (((PWord *) r) - wm_heapbase),(int)mr_TR-1); \
-			*((PWord *)r +1) = (PWord)((PWord *)r + 1);						\
-	  		if ( CHK_DELAY(f) && r != f ) { \
-			  printf("   match is delay [f=%x[_%lu]]\n",(int)f,(long)(((PWord *) f) - wm_heapbase)); \
-				*((PWord *)f + 1) = (PWord)((PWord *)f + 1);				\
-			    UNSHADOW_REGS;												   \
-				combin_dels((PWord)r,(PWord)f); SHADOW_REGS; }  } } }; \
-  *(r) = PWORD(f); }
-
-#define VVBINDX(r,f,lnn)   { \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
-	  *--mr_TR = PWORD(r); \
-	  if ( CHK_DELAY(r) ) { \
-			printf("vvb@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x\n",lnn, \
-					(int)r,(long) (((PWord *) r) - wm_heapbase),(int)mr_TR-1); \
-			*((PWord *)r +1) = (PWord)((PWord *)r + 1);						\
-	  		if ( CHK_DELAY(f) && r != f ) { \
-			  printf("   match is delay [f=%x[_%lu]]\n",(int)f,(long)(((PWord *) f) - wm_heapbase)); \
-				*((PWord *)f + 1) = (PWord)((PWord *)f + 1);				\
-			    UNSHADOW_REGS_S;												   \
-				combin_dels((PWord)r,(PWord)f); SHADOW_REGS_S; }  } } }; \
-  *(r) = PWORD(f); }
-
+#define VVBIND(r,f,_SHDW_,lnn)   { 				  				\
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 			\
+	  *(PWord *)--mr_TR = PWORD(r); 							\
+	  if ( CHK_DELAY(r) ) { 									\
+			DDVVB("vvbx",lnn,r,f)                               \
+  			*((PWord *)r +1) = (PWord)((PWord *)r +1); 			\
+	  		if ( CHK_DELAY(f) && r != f ) { 					\
+				 MMTCH(f)                                       \
+  				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 	\
+			    UNSHADOW_##_SHDW_;								\
+				combin_dels((PWord)r,(PWord)f); 				\
+				SHADOW_##_SHDW_; 								\
+  				*(r) = PWORD(f);								\
+			} else { /* r >= wm_heapbase; f not delay */		\
+				*(f) = PWORD(r);								\
+	  			*(PWord *)--mr_TR = PWORD(f); 					\
+	  			*(PWord *)--mr_TR = *PWPTR(f);					\
+			}													\
+		} else {												\
+  			*(r) = PWORD(f);									\
+		}														\
+  *(r) = PWORD(f);									\
+	} else {													\
+  		*(r) = PWORD(f);										\
+  }																\
+  };            												\
+}
 #endif /* TRAILVALS */
 
 #else /*=== no-DEBUGFREEZE ===*/
 
 #ifdef TRAILVALS
 
-#define TRAIL(r,l) \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
-	  *(mr_TR-2) = *r; \
-	  *--mr_TR = PWORD(r); \
-	  mr_TR -= 1;														\
-	  if ( CHK_DELAY(r) ) { \
-  			*((PWord *)r +1) = (PWord)((PWord *)r + 1); 				  \
+#define BIND(r,f)     { BIND3(r,f,0) }
+
+#define BIND3(r,f,w)  { 								\
+  if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 		\
+	if ( CHK_DELAY(r) ) { 								\
+		PWord fv; int ft;								\
+	  	*(PWord *)--mr_TR = PWORD(r); 					\
+	  	*(PWord *)--mr_TR = *PWPTR(r);					\
+  		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
+		w_get(&fv, &ft, (PWord)f); 							\
+		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\
+	    wm_safety = -2; wm_interrupt_caught = 3; 		\
+	} else {											\
+	  *(PWord *)--mr_TR = PWORD(r); 					\
+	  *(PWord *)--mr_TR = *PWPTR(r);					\
+      *(r) = PWORD(f);									\
+	}													\
+  } else {												\
+      *(r) = PWORD(f);									\
+  }														\
+}
+
+#define TRAIL(r,l) 											\
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 		\
+	  *(mr_TR-2) = *r; 										\
+	  *--mr_TR = PWORD(r); 									\
+	  mr_TR -= 1;											\
+	  if ( CHK_DELAY(r) ) { 								\
+  			*((PWord *)r +1) = (PWord)((PWord *)r + 1); 	\
 			wm_safety = -2; wm_interrupt_caught = 3; } } }
 
-#define VVBIND(r,f,lln)   { \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
-	  *(mr_TR-2) = *r; \
-	  *--mr_TR = PWORD(r); \
-	  mr_TR -= 1;														\
-	  if ( CHK_DELAY(r) ) { \
-  			*((PWord *)r +1) = (PWord)((PWord *)r + 1); 				  \
-	  		if ( CHK_DELAY(f) && r != f ) { \
-  				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 				   \
-			    UNSHADOW_REGS;												   \
-				combin_dels((PWord)r,(PWord)f); SHADOW_REGS; }  } } }; \
-  *(r) = PWORD(f); }
+#define VVBIND(r,f,_SHDW_,lnn)   { 				  				\
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 			\
+	  *(PWord *)--mr_TR = PWORD(r); 							\
+	  *(PWord *)--mr_TR = *PWPTR(r);							\
+	  if ( CHK_DELAY(r) ) { 									\
+  			*((PWord *)r +1) = (PWord)((PWord *)r +1); 			\
+	  		if ( CHK_DELAY(f) && r != f ) { 					\
+  				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 	\
+			    UNSHADOW_##_SHDW_;								\
+				combin_dels((PWord)r,(PWord)f); 				\
+				SHADOW_##_SHDW_; 								\
+  				*(r) = PWORD(f);								\
+			} else { /* r >= wm_heapbase; f not delay */		\
+				*(f) = PWORD(r);								\
+	  			*(PWord *)--mr_TR = PWORD(f); 					\
+	  			*(PWord *)--mr_TR = *PWPTR(f);					\
+			}													\
+		} else {												\
+  			*(r) = PWORD(f);									\
+		}														\
+	} else {													\
+  		*(r) = PWORD(f);										\
+  }																\
+  };            												\
+}
 
-#define VVBINDX(r,f,lln)   { \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
-	  *(mr_TR-2) = *r; \
-	  *--mr_TR = PWORD(r); \
-	  mr_TR -= 1;														\
-	  if ( CHK_DELAY(r) ) { \
-  			*((PWord *)r +1) = (PWord)((PWord *)r + 1); 				  \
-	  		if ( CHK_DELAY(f) && r != f ) { \
-  				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 				   \
-			    UNSHADOW_REGS_S;												   \
-				combin_dels((PWord)r,(PWord)f);  SHADOW_REGS_S;}  } } }; \
-  *(r) = PWORD(f); }
+#else /* =========== NO TRAILVALS =========== */
 
-#else /* NO TRAILVALS */
+#define BIND(r,f)     { BIND3(r,f,0) }
 
-#define TRAIL(r,l) \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
-	  *--mr_TR = PWORD(r); \
-	  if ( CHK_DELAY(r) ) { \
-			*((PWord *)r +1) = MMK_VAR((PWord *)r +1); \
+#define BIND3(r,f,w)  { 								\
+  if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 		\
+	if ( CHK_DELAY(r) ) { 								\
+		PWord fv; int ft;								\
+		printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",			\
+						w,(int)r,(int)mr_TR-1);			\
+	  	*(PWord *)--mr_TR = PWORD(r); 					\
+  		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
+		w_get(&fv, &ft, (PWord)f); 							\
+		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\
+		printf("setting interrupt\n");					\
+	    wm_safety = -2; wm_interrupt_caught = 3; 		\
+	} else {											\
+	  *(PWord *)--mr_TR = PWORD(r); 					\
+      *(r) = PWORD(f);									\
+	}													\
+  } else {												\
+      *(r) = PWORD(f);									\
+  }														\
+}
+#define TRAIL(r,l) 											\
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) {			\
+	  *--mr_TR = PWORD(r);									\
+	  if ( CHK_DELAY(r) ) {									\
+			*((PWord *)r +1) = MMK_VAR((PWord *)r +1);		\
 			wm_safety = -2; wm_interrupt_caught = 3; } } }
 
-#define VVBIND(r,f,lln)   { \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
-	  *--mr_TR = PWORD(r); \
-	  if ( CHK_DELAY(r) ) { \
-			*((PWord *)r +1) = (PWord)((PWord *)r + 1);                   \
-	  		if ( CHK_DELAY(f) && r != f ) { \
-				*((PWord *)f + 1) = (PWord)((PWord *)f + 1);                   \
-			    UNSHADOW_REGS;												   \
-				combin_dels((PWord)r,(PWord)f); SHADOW_REGS; }  } } }; \
-  *(r) = PWORD(f); }
+#define VVBIND(r,f,_SHDW_,lnn)   { 				  				\
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 			\
+	  *(PWord *)--mr_TR = PWORD(r); 							\
+	  if ( CHK_DELAY(r) ) { 									\
+  			*((PWord *)r +1) = (PWord)((PWord *)r +1); 			\
+	  		if ( CHK_DELAY(f) && r != f ) { 					\
+  				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 	\
+			    UNSHADOW_##_SHDW_;								\
+				combin_dels((PWord)r,(PWord)f); 				\
+				SHADOW_##_SHDW_; 								\
+  				*(r) = PWORD(f);								\
+			} else { /* r >= wm_heapbase; f not delay */		\
+				*(f) = PWORD(r);								\
+	  			*(PWord *)--mr_TR = PWORD(f); 					\
+			}													\
+		} else {												\
+  			*(r) = PWORD(f);									\
+		}														\
+	} else {													\
+  		*(r) = PWORD(f);										\
+  }																\
+  };            												\
+}
 
-#define VVBINDX(r,f,lln)   { \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
-	  *--mr_TR = PWORD(r); \
-	  if ( CHK_DELAY(r) ) { \
-			*((PWord *)r +1) = (PWord)((PWord *)r + 1);                   \
-	  		if ( CHK_DELAY(f) && r != f ) { \
-				*((PWord *)f + 1) = (PWord)((PWord *)f + 1);                   \
-			    UNSHADOW_REGS_S;												   \
-				combin_dels((PWord)r,(PWord)f);  SHADOW_REGS_S;}  } } }; \
-  *(r) = PWORD(f); }
-
-#endif /* TRAILVALS */
+#endif /* =========== TRAILVALS =========== */
 
 #endif /*=== DEBUGFREEZE ===*/
 
@@ -341,12 +514,19 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 	  *--mr_TR = PWORD(r); }
 
 #define VVBIND(r,f,lln)   { TRAIL(r,0); *(r) = PWORD(f); }
-#define VVBINDX(r,f,lln)  { TRAIL(r,0); *(r) = PWORD(f); }
 
+#define BIND(r,f)     { BIND3(r,f,0) }
+
+#define BIND3(r,f,w)  { 								\
+  if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 		\
+	  *(PWord *)--mr_TR = PWORD(r); 					\
+  } 
+  *(r) = PWORD(f);										\
+}
 #endif /*===== FREEZE =====*/
 
-#define DEREF(v)  \
-  { while( M_ISVAR(PWORD(v)) && (v) != *(PWord **)(v)) \
+#define DEREF(v)  										\
+  { while( M_ISVAR(PWORD(v)) && (v) != *(PWord **)(v))	\
 	  (v) = *(PWord **)(v); }
 
 /*----------------
@@ -355,11 +535,15 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 
 #ifdef TRAILVALS
 
-#define UNWINDTRAIL for (reg1 = mr_TR+1; reg1 < mr_B; reg1+=2){ *PWPTR(*reg1) = *(((PWord *)reg1)-1);}
+#define UNWINDTRAIL 									\
+			for (reg1 = mr_TR+1; reg1 < mr_B; reg1+=2)	\
+				{ *PWPTR(*reg1) = *(((PWord *)reg1)-1);}
 
 #else
 
-#define UNWINDTRAIL for (reg1 = mr_TR; reg1 < mr_B; reg1++){ *PWPTR(*reg1) = MMK_VAR(*reg1);}
+#define UNWINDTRAIL 									\
+			for (reg1 = mr_TR; reg1 < mr_B; reg1++)		\
+				{ *PWPTR(*reg1) = MMK_VAR(*reg1);}
 #endif
 
 /*---------------------------------------------------------------*
@@ -408,7 +592,7 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 
 #define DOFAIL	{P = cp_NC(mr_B) ; DISPATCH;}
 
-#define UNIMPLEMENTED 	\
+#define UNIMPLEMENTED 								\
   fprintf(stderr,"Instruction not implemented.\n"); \
   return;
 
@@ -420,14 +604,14 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 	if( M_ISVAR(f2)){                \
       if( f1 < f2 ){                 \
 	    if( f1 >= wm_heapbase )      \
-	       VVBIND(f2,f1,111)             \
+	       VVBIND(f2,f1,REGS,111)	 \
 	    else                         \
-	       VVBIND(f1,f2,222)             \
+	       VVBIND(f1,f2,REGS,222)	 \
       }else{                         \
 	    if( f2 >= wm_heapbase )      \
-	       VVBIND(f1,f2,333)             \
+	       VVBIND(f1,f2,REGS,333)	 \
 	    else                         \
-	       VVBIND(f2,f1,444)             \
+	       VVBIND(f2,f1,REGS,444)	 \
       }                              \
       DISPATCH;                      \
     }                                \
@@ -455,18 +639,18 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 #define RESOLVE_REF_BDISP NTBL_ENTRYSIZE
 #define OVFLOW_CHECK_BDISP (NTBL_ENTRYSIZE-NTBL_EXECENTRYSIZE)
 
-#define SHADOW_REGS   \
-      mr_E = wm_E; mr_SP = wm_SP; mr_SPB = wm_SPB; \
+#define SHADOW_REGS   									\
+      mr_E = wm_E; mr_SP = wm_SP; mr_SPB = wm_SPB; 		\
       mr_B = wm_B; mr_TR = wm_TR; mr_H = wm_H;  mr_HB = wm_HB;
 
-#define UNSHADOW_REGS  \
-      wm_E = mr_E; wm_SP = mr_SP; wm_SPB = mr_SPB; \
+#define UNSHADOW_REGS  									\
+      wm_E = mr_E; wm_SP = mr_SP; wm_SPB = mr_SPB; 		\
       wm_B = mr_B; wm_TR = mr_TR; wm_H = mr_H; wm_HB = mr_HB;
 
-#define SHADOW_REGS_S   \
+#define SHADOW_REGS_S   								\
       mr_SPB = wm_SPB; mr_TR = wm_TR; mr_HB = wm_HB;
 
-#define UNSHADOW_REGS_S  \
+#define UNSHADOW_REGS_S  								\
       wm_SPB = mr_SPB; wm_TR = mr_TR; wm_HB = mr_HB;
 
 /*-----------------------------------------------------*
@@ -486,12 +670,12 @@ wam_init()
     register int i;
     PWord *try_patchaddr;
 
-#define PUT_MAGIC(mask,nargs,envsize) \
-    magic_info[magic_idx].patchaddr = ic_ptr; \
-	magic_info[magic_idx].argenvsize = (envsize << 16) | nargs; \
-    magic_info[magic_idx].argmask = mask;   \
-	magic_idx++; \
-    ic_puti( W_GCMAGIC ); \
+#define PUT_MAGIC(mask,nargs,envsize) 							\
+    magic_info[magic_idx].patchaddr = ic_ptr; 					\
+	magic_info[magic_idx].argenvsize = (envsize << 16) | nargs;	\
+    magic_info[magic_idx].argmask = mask;   					\
+	magic_idx++; 												\
+    ic_puti( W_GCMAGIC ); 										\
     ic_putl( 0 );
 
     run_wam((Code *) 0);	/* initialize wam_instrs */
@@ -567,17 +751,10 @@ int
 wm_rungoal(a1, a2)		/* module, goal */
     PWord a1, a2;
 {
-/* int rv; */
     *rungoal_modpatch = a1;
     *rungoal_goalpatch = a2;
 
-/* printf("wm_rg-in: wm_H=%x wm_HB=%x wm_B=%x\n", wm_H,wm_HB,wm_B); */
     return (run_wam(wm_rungoal_code));
-/*
-    rv = run_wam(wm_rungoal_code);
-printf("wm_rg-out: wm_H=%x wm_HB=%x wm_B=%x\n", wm_H,wm_HB,wm_B);
-return(rv);
-*/
 }
 
 /*-----------------------------------------------------------------*
@@ -994,7 +1171,7 @@ CASE(W_G_VALUE):		/* get_value arg1, arg2 */
 	    reg1 = PWPTR(*getreg(OPSIZE));
 	    S = PWPTR(*getreg(OPSIZE + REGSIZE));
 	    P += OPSIZE + 2 * REGSIZE;
-	    UNIFY(reg1, S);
+	    UNIFY((PWord*)reg1, (PWord*)S);
 
 CASE(W_G_LIST_SP):		/* get_list Sdisp */
 	    reg1 = PWPTR(mr_SP[getpwrd(OPSIZE)]);
@@ -1629,7 +1806,7 @@ cut_no_ovflow_check:
 			 */
 #ifdef DEBUGSYS
 	if (debug_system[CUT_RSB])
-	{	printf("cut:reset mr_B init=%x \n", mr_B); 
+	{	printf("cut:reset mr_B init=%p \n", mr_B); 
 		fflush(stderr);	}
 #endif
 
@@ -1643,7 +1820,7 @@ cut_no_ovflow_check:
 
 #ifdef DEBUGSYS
 	if (debug_system[CUT_CPCTR])
-	{	fprintf(stderr,"cut:compact trail mr_B=%x mr_TR=%x mr_H=%H mr_HB=%x\n", mr_B,mr_TR,mr_H,mr_HB); 
+	{	fprintf(stderr,"cut:compact trail mr_B=%p mr_TR=%p mr_H=%p mr_HB=%p\n", mr_B,mr_TR,mr_H,mr_HB); 
 		fflush(stderr);	}
 #endif
 
@@ -2032,12 +2209,13 @@ wam_unify(f1, f2)
 		f1 = f2;
 		f2 = temp;
 	    }
+		/*   f2 <= f1 */
 
 	    if (f2 >= wm_heapbase) {
-		VVBINDX(f1, f2,555);
+		VVBIND(f1, f2, REGS_S, 555);    
 	    }
 	    else {
-		VVBINDX(f2, f1,666);
+		VVBIND(f2, f1, REGS_S, 666);	
 	    }
 	}
 	else {
@@ -2172,14 +2350,17 @@ pbi_bind_vars()
 	w_get_An(&r, &rt, 1);
 	w_get_An(&g, &gt, 2);
 
+	if ( rt != WTP_UNBOUND )
+		SUCCEED;
+
 #ifdef DEBUGSYS
 	if (debug_system[FREZBV])
-		printf("++bind_vars (wm_H=%x wm_HB=%x)left:%x[_%lu] right:%x[_%lu]\n", 
+		printf("++bind_vars (wm_H=%p wm_HB=%p)left:%x[_%lu] right:%x[_%lu]\n", 
 				wm_H, wm_HB,(int)r, (long)(((PWord *) r) - wm_heapbase),
 				(int)g, (long)(((PWord *) g) - wm_heapbase));
 #endif
 
-	*PWPTR(r) = g;
+	*PWPTR(r) = *(wm_SP + 3);   
 	PLAINTRAIL(r);
 	SUCCEED;
 }
@@ -2187,6 +2368,19 @@ pbi_bind_vars()
 #if defined(INTCONSTR)
 #include "intrv.h"
 
+void plain_bind	PARAMS((PWord, PWord));
+
+void
+plain_bind(r, v)
+	PWord r,  v;
+{
+	*PWPTR(r) = v;
+	PLAINTRAIL(r);
+}
+
+
+
+void bind_point_unfreeze	PARAMS((PWord *,int *,double,int));
 void
 bind_point_unfreeze(r,t,pv,k)
 	PWord *r;
@@ -2194,17 +2388,18 @@ bind_point_unfreeze(r,t,pv,k)
 	double pv;
 {
 	PWord *vl;
+	int vlt;
 
 #ifdef DEBUGSYS
 	if (debug_system[CSTRBPUF])
-		printf("bind_point_unfreeze(r=%x,t=%d,pv=%e,k=%d)\n",r,t,pv,k); 
+		printf("bind_point_unfreeze(r=%p,t=%p,pv=%e,k=%d)\n",r,t,pv,k); 
 #endif
 		/* make the number: */
 	vl = wm_H++;
 	if ((k == INTEGERKIND) || (k == BOOLEANKIND))
-		make_numberx(vl, t, pv, WTP_INTEGER);
+		make_numberx(vl, &vlt, pv, WTP_INTEGER);
 	else
-		make_numberx(vl, t, pv, WTP_DOUBLE);
+		make_numberx(vl, &vlt, pv, WTP_DOUBLE);
 
 	/*  -------------------------------------------------------- *
 		#define BIND(r,f)     { TRAIL(r,0); *(r) = PWORD(f); }  
@@ -2214,11 +2409,22 @@ bind_point_unfreeze(r,t,pv,k)
 				*--mr_TR = *((PWord *)r); }
 	 *  -------------------------------------------------------- */
 
+/*
 	if( PWPTR(r) < wm_HB  &&  PWPTR(r) >= wm_SPB) {
 	  *(PWord *)--wm_TR = PWORD(r);
 	  *(PWord *)--wm_TR = *PWPTR(r);
 	}
-	w_install(r, *vl, *t);
+*/
+	  *(PWord *)--wm_TR = PWORD(r);
+	  *(PWord *)--wm_TR = *PWPTR(r);
+	  *((PWord *)r +1) = (PWord)((PWord *)r + 1);
+
+
+	  ck_intvl_punch((PWord)(((PWord *)r)-1), *vl, vlt);		
+
+	/*  ck_intvl_punch((((PWord *)r)-1), vl);   */
+	
+	
 
 	wm_safety = -2; 
 	wm_interrupt_caught = 3; 

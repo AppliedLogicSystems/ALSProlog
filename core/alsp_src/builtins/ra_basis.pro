@@ -133,12 +133,62 @@ clp_arithmetic_relation( '=i' ).
  |						 break;
  *--------------------------------------------------------------*/
 
-symbolic_constant(pi, 		cnst_pi).
-symbolic_constant(pi_half,	cnst_pi_half).
-symbolic_constant(pi/2,		cnst_pi_half).
-symbolic_constant(pi_2,		cnst_pi_half).
-symbolic_constant(e,		cnst_e ).
+symbolic_constant(-C, 		-S)
+	:-!, symbolic_constant(C, 		S).
+symbolic_constant(pi, 		pi).
+symbolic_constant(pi_2,		cnst_pi_2).
+symbolic_constant(X/2,		cnst_pi_2)
+	:-
+	nonvar(X), X=pi.
+symbolic_constant(e,		e ).
+symbolic_constant(X/4,		cnst_pi_4)
+	:-
+	nonvar(X), X=pi.
+symbolic_constant(1/X,		cnst_1_pi)
+	:-
+	nonvar(X), X=pi.
+symbolic_constant(2/X,		cnst_2_pi)
+	:-
+	nonvar(X), X=pi.
+symbolic_constant(2*sqrt(X),	cnst_2sqrtpi)
+	:-
+	nonvar(X), X=pi.
+symbolic_constant(log2(X),	cnst_log2e)
+	:-
+	nonvar(X), X=e.
+symbolic_constant(log10(X),	cnst_log10e)
+	:-
+	nonvar(X), X=e.
+symbolic_constant(ln(X),	cnst_ln2)
+	:-
+	nonvar(X), X=2.
+symbolic_constant(ln(X),	cnst_ln10)
+	:-
+	nonvar(X), X=10.
+symbolic_constant(sqrt(X),	cnst_sqrt2)
+	:-
+	nonvar(X), X=2.
+symbolic_constant(sqrt(1/X),	cnst_sqrt1_2)
+	:-
+	nonvar(X), X=2.
 	
+is_symbolic_constant(pi).
+is_symbolic_constant(cnst_pi_2).
+is_symbolic_constant(cnst_pi_2).
+is_symbolic_constant(e ).
+is_symbolic_constant(cnst_pi_4).
+is_symbolic_constant(cnst_2_pi).
+is_symbolic_constant(cnst_2sqrtpi).
+is_symbolic_constant(cnst_log2e).
+is_symbolic_constant(cnst_log10e).
+is_symbolic_constant(cnst_ln2).
+is_symbolic_constant(cnst_ln10).
+is_symbolic_constant(cnst_sqrt2).
+is_symbolic_constant(cnst_sqrt1_2).
+
+
+
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Domain Declarations
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -204,7 +254,8 @@ X :: Type
 check_type_match(real(L,U), X)
 	:-
 	float(X),
-	L =< X, X =< U.
+	(var(L) -> true ; L =< X), 
+	(var(U) -> true ; X =< U).
 
 check_type_match(real, X)
 	:-
@@ -213,7 +264,8 @@ check_type_match(real, X)
 check_type_match(integer(L,U), X)
 	:-
 	integer(X),
-	L =< X, X =< U.
+	(var(L) -> true ; L =< X), 
+	(var(U) -> true ; X =< U).
 
 check_type_match(integer, X)
 	:-
@@ -224,18 +276,16 @@ check_type_match(boolean(_,_), 1).
 check_type_match(boolean, 0).
 check_type_match(boolean, 1).
 
+is_type(0, boolean) :-!.
+is_type(1, boolean) :-!.
 is_type(X, real)
 	:-
 	float(X),
 	!.
-
 is_type(X, integer)
 	:-
 	integer(X),
 	!.
-
-is_type(0, boolean).
-is_type(1, boolean).
 
 /*---------------------------------------------------------------
  |	declare_variable/2
@@ -590,7 +640,7 @@ flatten_expr( wrap(X,N), Res, real)
 	number(N),
 	N1 is N,
 	flatten_expr(X, XE, real),
-	add_fcn_node(wrap, [XE, N1], Res, Type).
+	add_fcn_node(wrap, [XE, N1], Res, real).
 	
 	%% Dyadic expressions - general:
 flatten_expr(Expr, Res, Type)
@@ -618,11 +668,11 @@ odd_even_power_op(N, pow_odd).
 
 flatten_expr1( sin,     X,Y, real ) 
 	:- 
-	trigonometric(sin, X, Y, cnst_pi).
+	trigonometric(sin, X, Y, pi).
 
 flatten_expr1( cos,     X,Y, real ) 
 	:- 
-	trigonometric(cos, X, Y, cnst_pi).
+	trigonometric(cos, X, Y, pi).
 
 flatten_expr1( tan,     X,Y, real ) 
 	:- 
@@ -1053,7 +1103,6 @@ fmap_rel( =<,   X,Y, greatereq(Y,X)).
 fmap_rel( <,    X,Y, higher(X,Y)).
 fmap_rel( >,    X,Y, higher(Y,X)).
 fmap_rel( <>,   X,Y, unequal(X,Y)).
-%fmap_rel( <=,   X,Y, narrower(Y,X)).
 fmap_rel( sub,   X,Y, narrower(Y,X)).
 /*
 fmap_rel( '|=', X,Y, begin_tog(X,Y)).
@@ -1066,7 +1115,7 @@ fmap_rel( '=i', X,Y, finish_tog(X,Y)).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%        solve
+%%%%%%%%%%%%%%%%        SOLVE
 %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1107,8 +1156,11 @@ solve(X)
  |	Tim Hickey's version of solve/2 and friends:
  *----------------------------------------------------------------------*/
 
-solve([A|As],E)
-	:-!,
+solve(X,E)
+	:-
+	nonvar(X),
+	X = [A|As],
+	!,
 	solve_list([A|As],E).
 
 solve(X,E) 
@@ -1176,12 +1228,6 @@ split(X,E)
 	Mid is (Lo+Hi)/2,
 	{ X < Mid }.
 
-/*
-	Mid::real, 
-	{Mid == (Lo+Hi)/2, Eps == Hi-Lo, X<Mid, Eps >= E},
-	'$domain'(Eps,_Type2,LoE,HiE).
-*/
-
 split(X,E) 
 	:-
 	'$domain'(X,_Type,Lo,Hi),
@@ -1190,17 +1236,10 @@ split(X,E)
 	Mid is (Lo+Hi)/2,
 	{ X >= Mid }.
 
-/*
-	'$domain'(X,_Type,Lo,Hi),
-	Mid::real, 
-	{Mid == (Lo+Hi)/2, Eps==Hi-Lo,X>=Mid,Eps >= E},
-	'$domain'(Eps,_Type2,LoE,HiE).
-*/
-
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 %% default:
-solve_epsilon(0.00001).
+solve_epsilon(0.000001).
 
 export set_solve_epsilon/1.
 set_solve_epsilon(Value)

@@ -271,6 +271,7 @@
 	TK(TK_EXCEEDED_MAX_ARITY,"exceeded_max_arity"),
 	TK(TK_FLAG,"flag"),
 	TK(TK_DELAY,"$delay"),
+	TK(TK_INTVL,"intvl"),
 	TK(TK_CMBVARS,"$combine_dvars"),
 	TK(TK_OVERFLOW,"overflow"),
 	TK(TK_UNDERFLOW,"underflow"),
@@ -331,9 +332,19 @@
 		 |	token added, there should be an entry in symbolic_constant/2
 		 |	in the builtins file ra_basis.pro.
 		 *------------------------------------------------------------------*/
-	TK(TK_PI,  "cnst_pi"),
-	TK(TK_PI2, "cnst_pi_half"),
-	TK(TK_E,   "cnst_e"),
+	TK(TK_PI,   		"pi"),
+	TK(TK_PI_2, 		"cnst_pi_half"),
+	TK(TK_E,    		"e"),
+	TK(TK_PI_4, 		"cnst_pi_4"),
+	TK(TK_1_PI,  		"cnst_1_pi"),
+	TK(TK_2_PI,  		"cnst_2_pi"),
+	TK(TK_2_SQRTPI,		"cnst_2sqrtpi"),
+	TK(TK_LOG2E, 		"cnst_log2e"),
+	TK(TK_LOG10E,		"cnst_log10e"),
+	TK(TK_LN2,  		"cnst_ln2"),
+	TK(TK_LN10,			"cnst_ln10"),
+	TK(TK_SQRT2,        "cnst_sqrt2"),
+	TK(TK_SQRT1_2,      "cnst_sqrt1_2"),
 	
 	/*------------------------------------------------------------------*
 	 * TK_EOF is the last token and must remain so.  If adding a token

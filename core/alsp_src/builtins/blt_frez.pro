@@ -37,6 +37,11 @@ freeze(Mod, Var, Goal)
 	:-
 	'$delay'(Var,Mod,Goal,DelayTerm).
 
+
+
+
+
+
 /*!----------------------------------------------------------------------
  *!----------------------------------------------------------------------*/
 
@@ -328,13 +333,28 @@ show_variable(VName,Var)
 	(show_interval_binding(VName,Var,[],Stream) -> 
 		true 
 		;
-		printf(Stream, '\n%t = %t', [VName])
+		printf(Stream, '\n%t = %t', [VName,Var])
 	).
 		
 show_variable(VName,Var)
 	:-
 	sio:get_current_output_stream(Stream),
 	printf(Stream, '\n%t = %t', [VName,Var]).
+
+export show_variable/1.
+show_variable(Var)
+	:-
+	var(Var),
+	!,
+	sio_var_to_atom(Var,VarAtom),
+	show_variable(VarAtom,Var).
+
+show_variable(Var)
+	:-
+	printf(Stream, '\n<Var> = %t', [Var]).
+
+
+
 
 :-rel_arith:dynamic('$domain_term'/2).
 
@@ -398,6 +418,52 @@ extract_interval_list([S | Ss], [I | Is])
 	extract_interval(S, I),
 	extract_interval_list(Ss, Is).
 
+show_delay_variable(VName,Var)
+	:-
+	sio:get_current_output_stream(Stream),
+	printf(Stream, '\n%t = %t', [VName,Var]).
+
+export exhibit_var/1.
+exhibit_var(Var)
+	:-
+	exhibit_var('', Var).
+
+export exhibit_var/2.
+exhibit_var(Name,Var)
+	:-
+	var(Var),
+	!,
+	sio:get_current_output_stream(Stream),
+	sio_var_to_atom(Var,VarAtom),
+	(extract_interval_bounds(Var, LArg, UArg, Type) ->
+		SPrt = [LArg, UArg],
+%		write_term(Stream,'%lettervar%'(VarAtom)=SPrt,[])
+		nl(Stream),
+		(Name \= '' ->
+			put_code(Stream,0'[), write(Stream,Name), put_code(Stream,0'])
+			;
+			true
+		),
+		write_term(Stream,'%lettervar%'(VarAtom)=SPrt,[])
+		;
+		(show_delay_binding(VarAtom, Var, [], Stream) ->
+			true 
+			; 
+			printf(Stream, '\n%t = %t', [VarAtom,Var])
+		)
+	).
+exhibit_var(Name,Var)
+	:-
+	sio:get_current_output_stream(Stream),
+	printf(Stream, '\n[%t] = %t', [Name, Var]).
+
+exhibit_var(Var)
+	:-
+	sio:get_current_output_stream(Stream),
+	printf(Stream, '\n<Var> = %t', [Var]).
+	
+
+
 :-dynamic(freeze_disp_vns/0).
 %freeze_disp_vns.
 
@@ -422,18 +488,6 @@ show_delay_binding(N, S, VPairs, Stream)
 		%% Need to recursively go on & display te
 		%% var(pairs) on Subsids....
 
-w_d_t('$delay'(DVar, _, _, FrozenTerm), Stream, XVPairs, Subsids )
-	:-
-	exact_lookup(XVPairs, DVar, VName),
-	!,
-	w_d_t(FrozenTerm, Stream, XVPairs, Subsids).
-
-w_d_t('$delay'(DVar, _, _, FrozenTerm), Stream, XVPairs, 
-			[(DVar, DVarAtom) | Subsids] )
-	:-!,
-	sio_var_to_atom(DVar,DVarAtom),
-	put_atom(Stream, DVarAtom).
-
 w_d_t(Term, Stream, XVPairs, [])
 	:-
 	var(Term),
@@ -446,6 +500,18 @@ w_d_t(Term, Stream, _, [])
 	var(Term),
 	!,
 	write_term(Stream, Term, []).
+
+w_d_t('$delay'(DVar, _, _, FrozenTerm), Stream, XVPairs, Subsids )
+	:-
+	exact_lookup(XVPairs, DVar, VName),
+	!,
+	w_d_t(FrozenTerm, Stream, XVPairs, Subsids).
+
+w_d_t('$delay'(DVar, _, _, FrozenTerm), Stream, XVPairs, 
+			[(DVar, DVarAtom) | Subsids] )
+	:-!,
+	sio_var_to_atom(DVar,DVarAtom),
+	put_atom(Stream, DVarAtom).
 
 w_d_t(Term, Stream, _, [])
 	:-

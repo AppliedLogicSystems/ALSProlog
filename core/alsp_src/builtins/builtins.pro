@@ -395,7 +395,7 @@ export getPrologInterrupt/1.
 
 '$interrupt'(3,M,G) 
 	:-!,
-%pbi_write('----------$interrupt-3------'(M,G) ), pbi_nl, pbi_ttyflush,
+%pbi_write('--------$interrupt-3------'(M,G,magic=Magic)), pbi_nl, pbi_ttyflush,
 %pbi_write('----------$interrupt-3------'), pbi_nl, pbi_ttyflush,
 	clct_tr(ActiveDelays),
 	delay_handler(ActiveDelays),

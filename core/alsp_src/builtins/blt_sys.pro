@@ -590,10 +590,19 @@ notrace :-
 	setPrologInterrupt(spying).
 
 	/*--------------------------------------------------------
+	 | C-level debug points; for each of these, there must
+	 | be a construct such as 
+	 |		if (debug_system[GCFREEZEINFO]) {
+	 |			printf(........) ; fflush(stdout);
+	 |		}
+	 | somewhere in the C code of the system, and there must
+	 | be an entry in the "debug_feats" enum typedef in
+	 | debugsys.h, such as:
+	 |    GCFREEZEINFO,   /* gcfreezeinfo (2)     */
 	 *-------------------------------------------------------*/
 debug_sys_features(gcbeep,		0).
 debug_sys_features(gcinfo,		1).
-debug_sys_features(freezeinfo,	2).
+debug_sys_features(gcfreezeinfo,2).
 debug_sys_features(cstrprim, 	3).
 debug_sys_features(cstrchng, 	4).
 debug_sys_features(cstrupdt, 	5).
@@ -605,9 +614,28 @@ debug_sys_features(cstrbpuf,	10).
 debug_sys_features(frezbv,		11).
 debug_sys_features(cut_rsb,		12).
 debug_sys_features(cut_cpctr,	13).
+debug_sys_features(frzdelay,	14).
+debug_sys_features(intvbind,	15).
 
+	/*--------------------------------------------------------
+	 | Prolog-level debug points;  format:
+	 |
+	 |	   debug_sys_tag(Tag,  Module).
+	 |
+	 | Module is the module in which the give debug point
+	 | occurs.  For each of these, there should be code
+	 | such as:
+	 |
+	 | ,....,
+	 | (debug_system_on(cstr_ig) ->
+ 	 |	printf_opt('Goal= %t\n',[Goal], [lettervars(false) ,line_length(100)])
+	 |	; true),
+	 | ,....,
+	 |
+	 *-------------------------------------------------------*/
 debug_sys_tag(cstr_ig,  rel_arith).
 debug_sys_tag(cstrislv, rel_arith).
+debug_sys_tag(cstr_isv, rel_arith).
 
 export toggle_system_debug/1.
 
@@ -619,7 +647,11 @@ toggle_system_debug(cstr)
 	toggle_system_debug(cstruptm),
 	toggle_system_debug(cstrupad),
 	toggle_system_debug(cstrupxt),
-	toggle_system_debug(cstrbpuf).
+	toggle_system_debug(cstrbpuf),
+
+	toggle_system_debug(cstr_ig),
+	toggle_system_debug(cstrislv),
+	toggle_system_debug(cstr_isv).
 
 	%% C-level stuff:
 toggle_system_debug(WhichFeat)

@@ -1597,6 +1597,9 @@ show_substs_ext([],[],_,Stream)
 
 show_substs_ext([N|Ns],[S|Ss],VPairs,Stream) 
 	:-
+%pbi_write('----------'),pbi_nl,pbi_ttyflush,
+%trace,
+
 	wr_subs3(N,S,VPairs,Stream),
 	!,
 	show_substs_ext(Ns,Ss,VPairs,Stream).
@@ -1606,6 +1609,7 @@ show_substs_ext([N|Ns],[S|Ss],VPairs,Stream)
 	%%   -- defined in blt_frez.pro
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%/*
 wr_subs3(N,S,VPairs,Stream)
 	:-
 	'$is_delay_var'(S),
@@ -1616,6 +1620,21 @@ wr_subs3(N,S,VPairs,Stream)
 		;
 		show_delay_binding(N,S, VPairs, Stream)
 	).
+%*/
+/*
+wr_subs3(N,S,VPairs,Stream)
+	:-
+	intconstr,
+	show_interval_binding(N,S, VPairs, Stream),
+	!.
+
+wr_subs3(N,S,VPairs,Stream)
+	:-
+	show_delay_binding(N,S, VPairs, Stream),
+	!,
+	show_delay_binding(N,S, VPairs, Stream).
+*/
+	
 
 wr_subs3(N,S,_,Stream)
 	:-

@@ -19,6 +19,8 @@ PARAMS((int,PWord,PWord,int,double,double,int,PWord,int,double,double,int,PWord,
 
 void note_changes	PARAMS((void));
 
+void setup_4_boole	PARAMS((double,double,int,long *));
+
 #ifdef DEBUGSYS
 int debug_constr_flag = 0;
 
@@ -58,6 +60,7 @@ int ilnk_net			PARAMS ((void));
 	/*--- From wam.c ---*/
 extern void bind_point_unfreeze	PARAMS((PWord *,int *,double,int));
 
+int ilinkq	PARAMS ((PWord,PWord,PWord,PWord,PWord,int,int,int,int));
 	/*----------------------------------------------------*
  	 |	GLOBAL VARIABLES
  	 *----------------------------------------------------*/
@@ -108,6 +111,16 @@ ilinknet()
 	w_get_An(&Y, &Yt, 4);
 	w_get_An(&Goal, &Goalt, LINK_POSITION);
 
+	return ilinkq(OpCd, Z, X, Y, Goal, Zt,Xt,Yt,Goalt);
+
+}
+
+
+int
+ilinkq(OpCd, Z, X, Y, Goal, Zt,Xt,Yt,Goalt)
+	PWord OpCd, Z, X, Y, Goal;
+	int Zt,Xt,Yt,Goalt;
+{
 		/* Increment count of # times constraint system was called from outside: */
 	ncstrs += 1; 
 
@@ -198,45 +211,59 @@ ilinknet()
 	 |  V,VT,the underlying variable to a point:
 	 *--------------------------------------------------------*/
 
-#define UPDATE_ITEM(V,VT,VL,VH, VPT) { \
-			if (VL == VH)\
-				bind_point_unfreeze((PWord *)V,&VT,VL,VPT);\
-		 	update_propagate(VL, VH, V, VT, IntrvTm, Goal, VPT);\
-		}
+#define UPDATE_ITEM(V,VT,VL,VH, VPT) { 						\
+	if ((VPT == INTEGERKIND) || (VPT == BOOLEANKIND)) 		\
+			/* Round endpoints of integer/boolean 			\
+			   intervals inward to nearest ints: */			\
+	{	int_fp new_int;										\
+		new_int = ceiling(VL);								\
+		if (VL NE new_int) {								\
+			status |= redonode;								\
+			VL = new_int;									\
+		}													\
+		new_int = floor(VH);								\
+		if (VH NE new_int) {								\
+			status |= redonode;								\
+			VH = new_int;									\
+		} 													\
+	} 		/* VPT == INTEGERKIND */						\
+		if (VL == VH)										\
+			bind_point_unfreeze((PWord *)V,&VT,VL,VPT);		\
+	 	update_propagate(VL, VH, V, VT, IntrvTm, Goal, VPT);\
+	}
 
 #define NCONSTRMACROS 1
 
 #ifndef NCONSTRMACROS
 
-#define DO_UPDATE(V,VT,vv,V_CHANGED,VL,VH,VPT) unflip(vv);\
-		if (V_CHANGED & status) {\
-			if (VL > VH) {\
-				UNLINK_ALL;\
-				FAIL;\
-			}\
-	 		/*If Z is bound (Zt != WTP_UNBOUND), Z must be a point,\
-			  & thus fail here, since if it is a point, it can't change*/\
-			POINT_CHECK(V,VT)\
-			UPDATE_ITEM(V,VT,VL,VH, VPT)\
+#define DO_UPDATE(V,VT,vv,V_CHANGED,VL,VH,VPT) unflip(vv);		\
+		if (V_CHANGED & status) {								\
+			if (VL > VH) {										\
+				UNLINK_ALL;										\
+				FAIL;											\
+			}													\
+	 		/*If Z is bound (Zt != WTP_UNBOUND), Z must be a 	\
+			  point,& thus fail here, since if it is a point, 	\
+			  it can't change*/									\
+			POINT_CHECK(V,VT)									\
+			UPDATE_ITEM(V,VT,VL,VH, VPT)						\
 			}
 
-/*				printf("DO_UPDATE_FAIL:vl=%22.17g vh=%22.17g\n",VL,VH); \   */
-
-#define UPDATE_BOOLEAN(V,VT,VL,VH) { long tt;\
-				switch(status & (VL ## change + VH ## change))\
-					{/* boolean becomes a fixed point.  If both bounds
-change, then fail*/\
-						case (VL ## change):\
-							tt = booleanOne;\
-							break;\
-						case (VH ## change):\
-							tt = booleanZero;\
-							break;\
-						default:\
-							FAIL;\
-					}\
-					bind_point_unfreeze((PWord *)V,&VT,(double)tt,0);\
-					}
+#define UPDATE_BOOLEAN(V,VT,VL,VH) { long tt;					\
+		switch(status & (VL ## change + VH ## change))			\
+			{/* boolean becomes a fixed point.  				\
+				If both bounds change, then fail*/				\
+				case (VL ## change):							\
+					tt = booleanOne;							\
+					break;										\
+				case (VH ## change):							\
+					tt = booleanZero;							\
+					break;										\
+				default:										\
+					FAIL;										\
+			}													\
+			bind_point_unfreeze((PWord *)V,&VT,(double)tt,0);	\
+			}
 
 #else /* not-NCONSTRMACROS------use functions instead, for debugging --------*/
 
@@ -295,21 +322,18 @@ unflip_y()
 	}
 }	/* unflip_y */
 
-#define DO_UPDATE(V,VT,vv,V_CHANGED,VL,VH,VPT) unflip_ ## vv ();\
-		if (V_CHANGED & status) {\
-			if (VL > VH) {\
-				UNLINK_ALL;\
-				FAIL;\
-			}\
-	 		/*If Z is bound (Zt != WTP_UNBOUND), Z must be a point,\
-			  & thus fail here, since if it is a point, it can't change*/\
-			POINT_CHECK(V,VT)\
-			UPDATE_ITEM(V,VT,VL,VH, VPT)\
+#define DO_UPDATE(V,VT,vv,V_CHANGED,VL,VH,VPT) unflip_ ## vv ();	\
+		if (V_CHANGED & status) {									\
+			if (VL > VH) {											\
+				UNLINK_ALL;											\
+				FAIL;												\
+			}														\
+	 		/* If Z is bound (Zt != WTP_UNBOUND), Z must be 		\
+			   a point, & thus fail here, since if it is a point, 	\
+			   it can't change */									\
+			POINT_CHECK(V,VT)										\
+			UPDATE_ITEM(V,VT,VL,VH, VPT)							\
 		}
-
-/*				printf("DO_UPDATE_FAIL:vl=%22.17g vh=%22.17g\n",VL,VH); \   */
-
-/*			printf(">>exit-DO_UPDATE:\n"); \    */
 
 /*----
 #define boolean_z       0x01        ---booleanInput and booleanOutput
@@ -344,7 +368,7 @@ update_boolean_z(Z,Zt,bO,Goal,IntrvTm)
 						FAIL;
 		}
 		IntrvTm = (PWord)get_intvl_tm((PWord *)Z, Zt);
-		update_propagate((double)0, (double)0, Z, Zt, IntrvTm, Goal, BOOLEANKIND);
+		update_propagate((double)tt, (double)tt, Z, Zt, IntrvTm, Goal, BOOLEANKIND);
 		bind_point_unfreeze((PWord *)Z,&Zt,(double)tt,0);
 	}
 	SUCCEED;
@@ -374,7 +398,7 @@ update_boolean_x(X,Xt,bO,Goal,IntrvTm)
 						FAIL;
 		}
 		IntrvTm = (PWord)get_intvl_tm((PWord *)X, Xt);
-		update_propagate((double)0, (double)0, X, Xt, IntrvTm, Goal, BOOLEANKIND);
+		update_propagate((double)tt, (double)tt, X, Xt, IntrvTm, Goal, BOOLEANKIND);
 		bind_point_unfreeze((PWord *)X,&Xt,(double)tt,0);
 	}
 	SUCCEED;
@@ -403,7 +427,7 @@ update_boolean_y(Y,Yt,bO,Goal,IntrvTm)
 						FAIL;
 		}
 		IntrvTm = (PWord)get_intvl_tm((PWord *)Y, Yt);
-		update_propagate((double)0, (double)0, Y, Yt, IntrvTm, Goal, BOOLEANKIND);
+		update_propagate((double)tt, (double)tt, Y, Yt, IntrvTm, Goal, BOOLEANKIND);
 		bind_point_unfreeze((PWord *)Y,&Yt,(double)tt,0);
 	}
 	SUCCEED;
@@ -441,23 +465,38 @@ ilnk_net()
 		w_get_argn(&Y, &Yt, qhead, 4);
 		w_get_argn(&Goal, &Goalt, qhead, LINK_POSITION);
 
-		if ((int)OpCd < FIRSTBOOLEAN) {
+			/*-----------------------------------------------
+			 | Note: This branch simply distinguishes the
+			 | stricly boolean operations (e.g., AND/OR);
+			 | However, some operators < FIRSTBOOLEAN are
+			 | also boolean operations (equal, greatereq,etc),
+			 | and hence appropriate provision for this fact
+			 | must be made in the upper branch here.
+			 |	  In the call,
+			 |	extract_bds(DelVar, DelVar_t, LB, UB, IKind)
+			 | IKind is output, and is bound to the kind of
+			 | the variable: BOOLEANKIND, INTEGERKIND, REALKIND.
+			 *-----------------------------------------------*/
 					/* Setup for real or integer operation */
 			if (!extract_bds((PWord *)Z, Zt, &zl, &zh, &zpt))
-				{
-/*				printf("extract_bds_failed -- z\n");   */
+				{ /* NEED TO MAKE THIS RAISE AN ERROR: */
 				FAIL;
 				}
 			if (!extract_bds((PWord *)X, Xt, &xl, &xh, &xpt))
-				{
-/*				printf("extract_bds_failed -- x\n");   */
+				{ /* NEED TO MAKE THIS RAISE AN ERROR: */
 				FAIL;
 				}
 			if (!extract_bds((PWord *)Y, Yt, &yl, &yh, &ypt))
-				{
-/*				printf("extract_bds_failed -- y\n");   */
+				{ /* NEED TO MAKE THIS RAISE AN ERROR: */
 				FAIL;
 				}
+		if ((int)OpCd >= FIRSTBOOLEAN) {
+			booleanInput  = 0;
+			booleanOutput = 0;
+			setup_4_boole(yl,yh,0,&booleanInput);
+			setup_4_boole(xl,xh,1,&booleanInput);
+			setup_4_boole(zl,zh,2,&booleanInput);
+		}
 
 #ifdef DEBUGSYS
 	if (debug_system[CSTRPRIM])
@@ -524,10 +563,10 @@ ilnk_net()
 		   , and propagate to the operations which use 
 		   these intervals (put those ops on the queue); 
 	 * ---------------------------------------------------------------- */
-		if (status != 0)
+		if (((int)OpCd < FIRSTBOOLEAN) && (status != 0))
 		{
 		if (status & ~link) { /* something changed */
-
+		
 #ifdef DEBUGSYS
 	if (debug_system[CSTRCHNG]) note_changes();
 #endif
@@ -562,24 +601,22 @@ ilnk_net()
 			LINK_POSITION of qhead to 0 (ie, make it WTP_UNBOUND);
 
 		   Note that next/ntextt already holds the (pointer) from
-		   next/ntextt already holds 
+		   the LINK_POSITION of qhead.
          * ------------------------------------------------------ */
-		}	/* status != 0 */
+		}		/* OpCd >= FIRSTBOOLEAN && status != 0 */
+		else if (((int)OpCd >= FIRSTBOOLEAN) && (boolean_chg & booleanOutput)) {
+#ifndef NCONSTRMACROS
+			UPDATE_BOOLEAN(V,VT,VL,VH)
+#else
+			update_boolean_z(Z,Zt,&booleanOutput, Goal, IntrvTm);
+			update_boolean_x(X,Xt,&booleanOutput, Goal, IntrvTm);
+			update_boolean_y(Y,Yt,&booleanOutput, Goal, IntrvTm);
+#endif /* NCONSTRMACROS */
+		}
 
 		w_get_argn(&next, &nextt, qhead, LINK_POSITION);
 
-/*
-		if ((status && redonode) != 0) {
-			if ( nextt != WTP_INTEGER) {
-				w_install_argn(qend, LINK_POSITION, qhead, WTP_STRUCTURE);
-				qend = qhead;
-				w_install_argn(qend, LINK_POSITION, 0, WTP_INTEGER);
-
-				qhead = next;
-				qheadt = nextt;
-			}
-		}
-*/
+			/* Must arrange for redo-testing for booleans: */
 		if (((status && redonode) != 0) && ( nextt != WTP_INTEGER) ) {
 				w_install_argn(qend, LINK_POSITION, qhead, WTP_STRUCTURE);
 				qend = qhead;
@@ -594,72 +631,9 @@ ilnk_net()
 			qheadt = nextt;
 		}
 
-		} 	/* NON-BOOLEAN OPERATIONS */
-		
-		else	/*  (int)OpCd >= FIRSTBOOLEAN) */
-		{		/* Setup for boolean operation: Which: 0 (y), 1 (x), 2 (z)
-				 | Actually acts on booleanInput; 
-				 */
-			booleanInput  = 0;
-			booleanOutput = 0;
+	} /* while */
 
-			if (!extract_bool_bds((PWord *)Y, Yt, 0, &booleanInput))
-					/* NEED TO MAKE THIS RAISE AN ERROR: */
-				FAIL; 
-			if (!extract_bool_bds((PWord *)X, Xt, 1, &booleanInput))
-					/* NEED TO MAKE THIS RAISE AN ERROR: */
-				FAIL; 
-			if (!extract_bool_bds((PWord *)Z, Zt, 2, &booleanInput))
-					/* NEED TO MAKE THIS RAISE AN ERROR: */
-				FAIL; 
-
-#ifdef DEBUGSYS
-	if (debug_system[CSTRPRIM])
-	
-disp_infp(0,OpCd,Z,Zt,zl,zh,BOOLEANKIND,X,Xt,xl,xh,BOOLEANKIND,Y,Yt,yl,yh,BOOLEANKIND);
-#endif
-			/* Increment count of number of primitive constraint operations: */
-/*		nprops += 1;     */
-		niters += 1;
-
-
-		switch ((int)OpCd) {
-			case 23 :	{ booleanOutput=op_conjunction[booleanInput]; break;}
-			case 24 :	{ booleanOutput=op_disjunction[booleanInput]; break;}
-			case 25 :	{ booleanOutput=op_anynot[booleanInput];      break;}
-			case 26 :	{ booleanOutput=op_bothnot[booleanInput];     break;}
-			case 27 :	{ booleanOutput=op_exclusiveor[booleanInput]; break;}
-			case 28 :	{ booleanOutput=op_negation[booleanInput];    break;}
-			default :	break;
-		}
-
-#ifdef DEBUGSYS
-	if (debug_system[CSTRPRIM])
-	
-disp_infp(1,OpCd,Z,Zt,zl,zh,BOOLEANKIND,X,Xt,xl,xh,BOOLEANKIND,Y,Yt,yl,yh,BOOLEANKIND);
-#endif
-
-#ifndef NCONSTRMACROS
-
-			UPDATE_BOOLEAN(V,VT,VL,VH)
-
-#else
-			update_boolean_z(Z,Zt,&booleanOutput, Goal, IntrvTm);
-			update_boolean_x(X,Xt,&booleanOutput, Goal, IntrvTm);
-			update_boolean_y(Y,Yt,&booleanOutput, Goal, IntrvTm);
-
-#endif /* NCONSTRMACROS */
-
-			w_get_argn(&next, &nextt, qhead, LINK_POSITION);
-			w_install_unbound_argn(qhead, LINK_POSITION);
-			qhead = next;
-			qheadt = nextt;
-
-		}	/* BOOLEAN OPERATIONS */
-
-		} /* while */ 
-
-		SUCCEED;
+	SUCCEED;
 
 } /* ilinknet */
 
@@ -685,6 +659,10 @@ disp_infp(1,OpCd,Z,Zt,zl,zh,BOOLEANKIND,X,Xt,xl,xh,BOOLEANKIND,Y,Yt,yl,yh,BOOLEA
  |
  |	Note that Type and IKind are generally quite different.
  *-----------------------------------------------------------------*/
+
+extern void plain_bind PARAMS((PWord, PWord));
+
+
 void
 update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 	double L,H;
@@ -702,27 +680,7 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 						L, H, IKind, Type, (int)IntrvTm);
 #endif /* DEBUGSYS */
 
-
-	if (IKind != BOOLEANKIND) {	
-
-	if (IKind == INTEGERKIND)
-			/* Round endpoints of integer intervals inward to nearest ints: */
-	{	int_fp new_int;
-		new_int = ceiling(L);
-		if (L NE new_int) {
-			status |= redonode;
-			L = new_int;
-		}
-		new_int = floor(H);
-		if (H NE new_int) {
-			status |= redonode;
-			H = new_int;
-		} 
-		if (L == H)
-			bind_point_unfreeze((PWord *)Var,&Type,L,IKind);
-
-	} /* IKind == INTEGERKIND */
-
+/*	if (IKind != BOOLEANKIND) {   */
 	/* ------------------------------------------------------------*
 	   Now update the interval endpoints in the interval structure;
 	   IF (the interval structure) is more recent than
@@ -751,8 +709,7 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 #ifdef DEBUGSYS
 	if (debug_system[CSTRUPTM]) {
 		printf("UPDATE_PROP-TM:[L=%g H=%g K=%d]intuia=%0x wm_H=%0x wm_HB=%0x\n",
-							
-L,H,IKind,(int)IntUIA,(int)wm_H,(int)wm_HB);
+								L,H,IKind,(int)IntUIA,(int)wm_H,(int)wm_HB);
 		pbi_cptx();
 	}
 #endif /* DEBUGSYS */
@@ -763,7 +720,7 @@ L,H,IKind,(int)IntUIA,(int)wm_H,(int)wm_HB);
 	 *-------------------------------------------------------------*/
 	trailed_mangle0(UIA_POSITION, IntrvTm, WTP_STRUCTURE, IntUIA, WTP_UIA);
 
-	}	/* IKind != BOOLEANKIND  */
+/*	}	 IKind != BOOLEANKIND  */
 
 		/*--------------------------------------------------------------* 
 		 |  FROM HERE ON, APPLIES TO ALL OF BOOLEANS, INTEGERS, & REALS: 
@@ -818,10 +775,17 @@ L,H,IKind,(int)IntUIA,(int)wm_H,(int)wm_HB);
 										UList_t,(int)UList); */
 
 	} /* while */
+
+		 			/* The boolean is [0, 1] & L = H (= 0 or 1) */
+/*
+	if ((IKind == BOOLEANKIND) && (Type == 0) && (L == H)) {
+			plain_bind(Var, MMK_INT(L));
+	}
+*/
 #ifdef DEBUGSYS
-						if (debug_system[CSTRUPXT])
-							printf("Exit Updateprop: qhead=%x qend=%x\n",
-												(int)qhead,(int)qend);
+			if (debug_system[CSTRUPXT])
+				printf("Exit Updateprop: qhead=%x qend=%x\n",
+									(int)qhead,(int)qend);
 #endif /* DEBUGSYS */
 
 } /* update_propagate */
@@ -895,7 +859,7 @@ disp_vv(V,Vt,VL,VH,VPT)
 		if (Vt == WTP_UNBOUND)
 			printf("[_%lu][0,1]", (long)(((PWord *) V) - wm_heapbase));
 		else if (Vt == WTP_INTEGER)
-			printf("[i][%d]",V);
+			printf("[i][%ld]",V);
 		else 
 			printf("[?][]");
 	}
@@ -982,7 +946,7 @@ extract_bool_bds(DelVar, DelVar_t, Which, bI)
 	  		SUCCEED;
 		}
 		else if ((int)DelVar == 1)
-			/* Boolean is definite & Value = 0 */
+			/* Boolean is definite & Value = 1 */
 		{
 			switch ((int)Which) {
 			case 0:
@@ -1015,6 +979,53 @@ extract_bool_bds(DelVar, DelVar_t, Which, bI)
 	else
 					/* NEED TO MAKE THIS RAISE AN ERROR: */
 		FAIL;
+}
+
+
+void setup_4_boole(L,H,Which,bI)
+	double L,H;
+	int Which;
+	long *bI;
+{
+	if ((L==0) && (H==0)) {
+			switch ((int)Which) {
+			case 0:
+					/* no change to boolean_y */
+				*bI = *bI + boolean_ydef;
+				break;
+			case 1:
+					/* no change to boolean_x */
+				*bI = *bI + boolean_xdef;
+				break;
+			case 2:
+					/* no change to boolean_z */
+				*bI = *bI + boolean_zdef;
+				break;
+			default:
+					/* NEED TO MAKE THIS RAISE AN ERROR: */
+				/* FAIL; */
+				break;
+			}
+	} else if ((L==1) && (H==1)) {
+			switch ((int)Which) {
+			case 0:
+				*bI += boolean_y;
+				*bI += boolean_ydef;
+				break;
+			case 1:
+				*bI += boolean_x;
+				*bI += boolean_xdef;
+				break;
+			case 2:
+				*bI += boolean_z;
+				*bI += boolean_zdef;
+				break;
+			default:
+					/* NEED TO MAKE THIS RAISE AN ERROR: */
+				/* FAIL; */
+				break;
+			}
+	} /* if ((L==0) && (H==1)) -- nothing to change in bI */
 }
 
 
@@ -1068,4 +1079,104 @@ set_max_iters_val()
 	SUCCEED;
 }
 
+#if 0
+int run_grteq_cstrs PARAMS (( void ));
+
+int
+run_grteq_cstrs()
+{
+    PWord v1, v2, v3, v4, v5;
+    int   t1, t2, t3, t4, t5;
+	PWord *p;
+
+    PWord frzvar,rval, rval2, intvtm, rval3;
+    int   frzvartag,rtag, rtag2, rtag3;
+
+    w_get_An(&v1, &t1, 1);	/* Get result functor  */
+    w_get_An(&v2, &t2, 2);	/* Get VRef term */
+    w_get_An(&v3, &t3, 3);	/* Get point interval var */
+    w_get_An(&v4, &t4, 4);	/* Get UIA  for VRef*/
+    w_get_An(&v5, &t5, 5);	/* Get UsedBy List for VRef */
+
+    if (t1 != WTP_SYMBOL)
+		FAIL;
+	if (t2 != WTP_STRUCTURE) 
+		FAIL;
+	if (t3 != WTP_UNBOUND)
+			FAIL;
+
+	frzvartag = WTP_REF;
+		/* Get delay var out of delayterm: */
+	frzvar = (((PWord *) v2) + 1);
+
+#ifdef DEBUGSYS
+if (debug_system[FRZDELAY]) {
+printf(">+>v2=%x[_%lu] frzvar=%x[_%lu]\n",(int)v2,
+					(long)(((PWord *) v2) - wm_heapbase),
+					(int)frzvar,(long)(((PWord *) frzvar) - wm_heapbase)
+					);
+}
+#endif
+
+		/* Make interval processing queue term: */
+	w_mk_term(&rval, &rtag, v1, 5);
+
+	*((PWord *)((PWord *)rval + 1)) = MMK_INT(2);
+    *((PWord *)((PWord *)rval + 2)) = (PWord) MMK_VAR(frzvar);
+    *((PWord *)((PWord *)rval + 3)) = (PWord) MMK_VAR(v3);
+	*((PWord *)((PWord *)rval + 4)) = MMK_INT(0);		/* Unused Y */
+	*((PWord *)((PWord *)rval + 5)) = MMK_INT(0);		/* Queue Next link */
+
+		/* Get interval (constraint) term out of delayterm: */
+	intvtm = (((PWord *) v2) + 4);
+		/* v5 = old used by list; push rval term on front: */
+	w_mk_list(&rval3, &rtag3);
+	*((PWord *)((PWord *)rval3 + 1)) = MMK_STRUCTURE(rval);
+	*((PWord *)((PWord *)rval3 + 2)) = MMK_LIST(v5);
+		/* trailed mangle the new extended list into the
+		   used-by position in the (original) interval structure: */
+	trailed_mangle0(USED_BY_POSITION, intvtm, WTP_STRUCTURE, 
+						rval3, rtag3);
+
+	if (!ilinkq(2, frzvar, v3, 0, rval, 
+			WTP_REF, WTP_REF, WTP_INTEGER, WTP_STRUCTURE))
+		FAIL;
+
+	w_mk_term(rval2, rtag2, v1, 5);
+	p = (PWord *)rval2 + 1;
+	*(p) = MMK_INT(2);
+    *(p+1) = (PWord) MMK_VAR(v3);
+    *(p+2) = (PWord) MMK_VAR(frzvar);
+	*(p+3) = MMK_INT(0);			/* Unused Y */
+	*(p+4) = MMK_INT(0);            /* Queue Next link */
+
+		/* Get interval (constraint) term out of delayterm: */
+	intvtm = (((PWord *) v2) + 4);
+		/* v5 = old used by list; push rval term on front: */
+	w_mk_list(&rval3, &rtag3);
+	*((PWord *)((PWord *)rval3 + 1)) = MMK_STRUCTURE(rval);
+	*((PWord *)((PWord *)rval3 + 2)) = MMK_LIST(v5);
+		/* trailed mangle the new extended list into the
+		   used-by position in the (original) interval structure: */
+	trailed_mangle0(USED_BY_POSITION, intvtm, WTP_STRUCTURE, 
+						rval3, rtag3);
+
+	return ilinkq(2, v3, frzvar, 0, rval2, 
+			WTP_REF, WTP_REF, WTP_INTEGER, WTP_STRUCTURE);
+}
+#endif
+
 #endif /* defined(INTCONSTR) */
+
+/*
+		if ((status && redonode) != 0) {
+			if ( nextt != WTP_INTEGER) {
+				w_install_argn(qend, LINK_POSITION, qhead, WTP_STRUCTURE);
+				qend = qhead;
+				w_install_argn(qend, LINK_POSITION, 0, WTP_INTEGER);
+
+				qhead = next;
+				qheadt = nextt;
+			}
+		}
+*/

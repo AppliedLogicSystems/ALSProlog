@@ -20,21 +20,62 @@ module rel_arith.
 
 :- dynamic(debug_system_on/1).
 
-intvl(boolean,0, _, _) :-!.
-intvl(boolean,1, _, _) :-!.
-intvl(real,Var,_,UIA)
-	:-
-	'$uia_peekd'(UIA,0,LB),
-	LB =< Var,
-	'$uia_peekd'(UIA,8,UB),
-	Var =< UB.
+export intvl/5.
 
-intvl(integer,Var,_,UIA)
+/*
+intvl(Type,Var,UsedBy,UIA,Punch)
 	:-
-	'$uia_peekd'(UIA,0,ILB), LB is floor(ILB),
-	LB =< Var,
-	'$uia_peekd'(UIA,8,IUB), UB is floor(IUB),
-	Var =< UB.
+	(Type = boolean ->
+		LB = 0, UB = 1
+		;
+		xtract_bnds_uia(Type, UIA, LB, UB)
+	),
+	printf('intvl wakeup:type=%t Var=%t lb=%t ub=%t usedby=%t punch=%t\n',
+				[Type,Var,LB,UB,UsedBy,Punch]),
+%	printf('intvl wakeup:type=%t Var=%t lb=%t ub=%t punch=%t\n',
+%				[Type,Var,LB,UB,Punch]),
+trace,
+	number(Punch),
+	(number(Var) ->
+		printf('Var is NUMBER: (v=%t p=%t)\n',[Var,Punch]),
+		Var =:= Punch
+		;
+		printf('  - trying: %t =< %t\n',[Var,Punch]),
+		{Var =< Punch},
+		printf('  - OK(%t =< %t)\n',[Var,Punch]),
+		printf('  - Trying: %t >= %t\n',[Var,Punch]),
+		( {Var >= Punch} ->
+			printf(" -- OK(%t >= %t)\n", [Punch,Var]),
+			'$bind_vars'(Var, Punch)
+			,printf(" -- =< >= success: bound var (v=%t p=%t)\n", [Var,Punch])
+			;
+			printf("!!!! =< >= FAILURE: var = %t\n", [Var]),
+			fail
+		)
+	),
+	printf('AtEnd:UB=%t\n',[UsedBy]).
+*/
+
+intvl(Type,Var,UsedBy,UIA,Punch)
+	:-
+/*
+		xtract_bnds_uia(Type, UIA, LB, UB),
+		printf('intvl wakeup:type=%t Var=%t lb=%t ub=%t usedby=%t punch=%t\n',
+				[Type,Var,LB,UB,UsedBy,Punch]),
+trace,
+*/
+	number(Punch),
+	(number(Var) ->
+		Var =:= Punch
+		;
+		{Var =< Punch},
+		( {Var >= Punch} ->
+			'$bind_vars'(Var, Punch)
+			;
+			fail
+		)
+	).
+
 
 /*---------------------------------------------------------------
 	type_and_bounds/5
@@ -52,8 +93,8 @@ type_and_bounds(real(R),      real,    L, U, 2)
 type_and_bounds(integer(L,U), integer, L, U, 1).
 type_and_bounds(integer,      integer, L, U, 1).
 
-%type_and_bounds(boolean(L,U), boolean, 0, 1, 0).
-%type_and_bounds(boolean,      boolean, 0, 1, 0).
+type_and_bounds(boolean(L,U), boolean, 0, 1, 0).
+type_and_bounds(boolean,      boolean, 0, 1, 0).
 
 /*---------------------------------------------------------------
  |	new_type_interval/2
@@ -66,7 +107,7 @@ type_and_bounds(integer,      integer, L, U, 1).
  |
  |	The structure of the term bound to X is:
  |
- |		intvl(PrologType,X,UsedBy,L,U,UIA)
+ |		intvl(PrologType,X,UsedBy,UIA,VRef)
  |
  |	where:
  |		type_and_bounds(TypeDescrip, PrologType, L, U, TC) holds
@@ -81,6 +122,17 @@ type_and_bounds(integer,      integer, L, U, 1).
  |		is made to the end point values from the Prolog side, then
  |		the Prolog representations (L,U above) are updated from
  |		the values in UIA.
+ |		VRef = v(X) where X is the variable of the interval freeze;
+ |		This is used to allow a low-level C routine to get at
+ |		the actual variable X even when X has been bound; this
+ |		occurs when X is bound and the intvl/5 goal is woken up;
+ |		we need (at the C level) to in essence add in the constraint
+ |			{ X == V }, 
+ |		where V is the value to which X has been bound. What we
+ |		really do is call '$itbnd'(VRef, X) which is defined in C;
+ |		it essentially does an arg(1,...) on VRef to obtain the
+ |		pointer P to the original variable X, dereferences X to get
+ |		value V, and the uses P,V to effectively add {X==V}.
  *--------------------------------------------------------------*/
 
 uia_space(_,UIA)
@@ -91,42 +143,19 @@ new_type_interval(boolean(L,U),X)
 	:-!,
 	new_type_interval(boolean,X).
 
+/*
 new_type_interval(boolean,X)
 	:-!,
-	FreezeGoal = intvl(boolean,X, [], 1),
+	FreezeGoal = intvl(boolean,X, [], 1, 0),
 	freeze(X, FreezeGoal).
+*/
 
 /*-------------------------------
-		%% This needs reorganization, so as not to create
-		%% the values L1, U1 in prolog, and then push them
-		%% into UIA, but to create UIA first, and then
-		%% combine the decision-making and creation, keeping
-		%% things like the creation of ieee-infinity down in C:
-
-	Something like (this is a sketch):
-new_type_interval(TypeDescrip,X)
-	:-
-	type_and_bounds(TypeDescrip, BareType, L, U, TC),
-		%% create the low-level interval record on the heap:
-	uia_space(BareType,UIA),
-		%% put the type code into the interval record:
-	'$uia_pokel'(UIA,16,TC),
-
-%old:
-%	interval_bound(lower,L,L1,BareType),
-%	interval_bound(upper,U,U1,BareType),
-%	'$uia_poked'(UIA,0,L1),
-%	'$uia_poked'(UIA,8,U1),
-
-		%% put the upper & lower bounds into the interval record:
-	interval_bound_make(lower, L, BareType, UIA),
-	interval_bound_make(upper, U, BareType, UIA),
-
-	freeze_goal_for(BareType, X, UIA, FreezeGoal),
-	freeze(X, FreezeGoal).
-
-freeze_goal_for(real,    X, UIA, intvl(real,   X,[],UIA) ).
-freeze_goal_for(integer, X, UIA, intvl(integer,X,[],UIA) ).
+	 This needs reorganization, so as not to create
+	 the values L1, U1 in prolog, and then push them
+	 into UIA, but to create UIA first, and then
+	 combine the decision-making and creation, keeping
+	 things like the creation of ieee-infinity down in C:
  *-------------------------------*/
 
 new_type_interval(TypeDescrip,X)
@@ -135,14 +164,34 @@ new_type_interval(TypeDescrip,X)
 	interval_bound(lower,L,L1,BareType),
 	interval_bound(upper,U,U1,BareType),
 	uia_space(BareType,UIA),
-	'$uia_poked'(UIA,0,L1),
-	'$uia_poked'(UIA,8,U1),
+%	'$uia_poked'(UIA,0,L1),
+%	'$uia_poked'(UIA,8,U1),
+	uia_poke_float(L1,UIA,0),
+	uia_poke_float(U1,UIA,8),
 	'$uia_pokel'(UIA,16,TC),
-	freeze_goal_for(BareType, X, L1, U1, UIA, FreezeGoal),
+	FreezeGoal = intvl(BareType, X,[],UIA, 0),
 	freeze(X, FreezeGoal).
 
-freeze_goal_for(real,    X, L1, U1, UIA, intvl(real,   X,[],UIA) ).
-freeze_goal_for(integer, X, L1, U1, UIA, intvl(integer,X,[],UIA) ).
+uia_poke_float(-V,UIA,Off)
+	:-!,
+	uia_poke_float(V,-1,UIA,Off).
+
+uia_poke_float(V,UIA,Off)
+	:-
+	uia_poke_float(V,1,UIA,Off).
+
+uia_poke_float(V,Sgn,UIA,Off)
+	:-
+	number(V),
+	!,
+	NV is V*Sgn,
+	'$uia_poked'(UIA,Off,NV).
+
+uia_poke_float(V,Sgn,UIA,Off)
+	:-
+	is_symbolic_constant(V),
+	uia_poke_fpconst(V,Sgn,UIA,Off).
+
 
 	%% NEED::: DEAL WITH BOOLEANS:
 new_combined_interval(TypeDescrip, X)
@@ -165,7 +214,7 @@ pbi_write(new_combined_interval(TypeDescrip)),pbi_nl,pbi_ttyflush,
  |	Accessing and destructive changes to the components of an
  |	interval structure :
  |
- |		intvl(Type, TheVar, UsedByList, L, U, UIA)
+ |		intvl(Type, TheVar, UsedByList, UIA, VRef)
  |
  *--------------------------------------------------------------*/
 
@@ -300,8 +349,7 @@ show_used_by([_ | VarList])
 	show_used_by(VarList).
 
 /*---------------------------------------------------------------
-	%%% INFINITE BOUNDS:
-	%%% -- old code here; new code below:
+	%%% INFINITE BOUNDS handled with ieee infinity
  *--------------------------------------------------------------*/
 
 
@@ -315,6 +363,11 @@ interval_bound(Side,  Quant, Bound, Type)
 
 interval_bound(_,Quant, Bound, _)
 	:-
+	symbolic_constant(Quant, Bound),
+	!.
+
+interval_bound(_,Quant, Bound, _)
+	:-
 	Bound is float(Quant).
 
 #else
@@ -325,13 +378,18 @@ interval_bound(Side,  Quant, Bound, Type)
 	max_bound(Type, MaxBound),
 	interval_bound_decide(Side, MaxBound, Bound).
 
+interval_bound(_,Quant, Bound, _)
+	:-
+	symbolic_constant(Quant, Bound),
+	!.
+
 interval_bound(_,Quant, Quant, boolean)
 	:-!.
-
 
 interval_bound(_,Quant, Bound, _)
 	:-
 	Bound is float(Quant).
+
 
 interval_bound_decide(upper, MaxBound, MaxBound).
 interval_bound_decide(lower, MaxBound, Bound)
@@ -480,12 +538,16 @@ valid_domain(( A, B ), Type, LB, UB)
 
 valid_domain(Intrv, Type, LB, UB)
 	:-
-	functor(Intrv,intvl,4),
+	functor(Intrv,intvl,5),
 	arg(1,Intrv,Type),
 	(Type = boolean ->
 		LB = 0, UB = 1
 		;
 		arg(4,Intrv,UIA),
+		xtract_bnds_uia(Type, UIA, LB, UB)
+	).
+
+/*
 		(Type = real ->
 			'$uia_peekd'(UIA,0,LB),
 			'$uia_peekd'(UIA,8,UB)
@@ -494,8 +556,24 @@ valid_domain(Intrv, Type, LB, UB)
 			'$uia_peekd'(UIA,8,IUB), UB is floor(IUB)
 		)
 	).
+*/
+
+xtract_bnds_uia(real, UIA, LB, UB)
+	:-!,
+	'$uia_peekd'(UIA,0,LB),
+	'$uia_peekd'(UIA,8,UB).
+
+xtract_bnds_uia(Type, UIA, LB, UB)
+	:-
+	'$uia_peekd'(UIA,0,ILB), LB is floor(ILB),
+	'$uia_peekd'(UIA,8,IUB), UB is floor(IUB).
 
 %%%%%%%%%%%%% NODE BUILDING%%%%%%%%%%%%%%%
+
+'$restrict'(X, L, H)
+	:-
+	Y::real(L,H),
+	'$iterate'(equal(X,Y,0)).
 
 point_interval( N,  N)
 	:-
@@ -504,10 +582,18 @@ point_interval( N,  N)
 point_interval( 0.0,0.0)          % dont fuzz 0.0
 	:- !.
 
-point_interval( X, PX)
+point_interval(X, PX)
 	:-
-	fuzz_float(X,XL,XH),
+	fuzz_float(X, XL, XH),
 	PX::real(XL,XH).
+
+fuzz_float(-X, XL, XH)
+	:-!,
+	fuzz_float(X, -1, XL, XH).
+
+fuzz_float(X, XL, XH)
+	:-
+	fuzz_float(X, 1, XL, XH).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -527,6 +613,12 @@ export '$iterate'/1.
 
 	XFGoal =.. [pop, OpCd,Z,X,Y,LinkArg],
 	fixup_iter(Args, Z,X,Y,XFGoal),
+	(debug_system_on(cstr_isv) ->
+		exhibit_var('Z', Z),
+		exhibit_var('X', X),
+		exhibit_var('Y', Y),
+		nl
+		; true),
 
 		%% Put #ifdef wrapper corresponding to DEBUGSYS around this:
 %printf_opt('>>%t--XFGoal= %t\n',[Goal,XFGoal], [lettervars(false) ,line_length(100)]),

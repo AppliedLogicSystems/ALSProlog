@@ -80,16 +80,16 @@ extern	void	init_time	PARAMS( (void) );
 extern	int	get_number	PARAMS( (PWord, int, double *) );
 
 /* butil.c */
-extern	void	heap_copy	PARAMS( (PWord *, int *, pword) );
-extern	int	xform_uia	PARAMS( (PWord *, int *) );
-extern	int	force_uia	PARAMS( (PWord *, int *) );
+extern	void	heap_copy		PARAMS( (PWord *, int *, pword) );
+extern	int	xform_uia			PARAMS( (PWord *, int *) );
+extern	int	force_uia			PARAMS( (PWord *, int *) );
 extern	void	string_to_list	PARAMS( (PWord *, int *, UCHAR *) );
-extern	int	list_to_string	PARAMS( (UCHAR *, PWord, int) );
-extern	int	getstring	PARAMS( (UCHAR **, PWord, int) );
-extern	int	getlong		PARAMS( (long *, PWord, int) );
-extern	int	get_gv_number	PARAMS( (UCHAR *) );
-extern	void	set_prolog_error PARAMS( (PWord, int, PWord, int, PWord, PWord, int, PWord, int) );
-extern	int	getdouble	PARAMS( (double *, PWord, int) );
+extern	int	list_to_string		PARAMS( (UCHAR *, PWord, int) );
+extern	int	getstring			PARAMS( (UCHAR **, PWord, int) );
+extern	int	getlong				PARAMS( (long *, PWord, int) );
+extern	int	get_gv_number		PARAMS( (UCHAR *) );
+extern	void set_prolog_error	PARAMS( (PWord, int, PWord, int, PWord, PWord, int, PWord, int) );
+extern	int	getdouble			PARAMS( (double *, PWord, int) );
 
 /* wdisp.c */
 extern	void	prolog_write	PARAMS( (PWord, int) );
@@ -97,10 +97,10 @@ extern	void	prolog_writeq	PARAMS( (PWord, int) );
 extern	void	prolog_display	PARAMS( (PWord, int) );
 
 /* built.c */
-extern	void	builtin_init	PARAMS( (void) );
-extern	void	time_cut_interrupt_init PARAMS( (void) );
+extern	void	builtin_init			PARAMS( (void) );
+extern	void	time_cut_interrupt_init	PARAMS( (void) );
 extern	int	pbi_set_interrupt_vector	PARAMS((void));
-extern  int     pbi_uncaught_interrupt PARAMS( (void) );
+extern  int     pbi_uncaught_interrupt 	PARAMS( (void) );
 
 /* bmisc.c */
 #ifdef CMeta
@@ -108,51 +108,54 @@ extern	int	wm_identical	PARAMS(( PWord, int, PWord, int ));
 #endif
 
 /* arith.c */
-extern	int	pbi_time	PARAMS(( void ));
-extern	int	pbi_less	PARAMS(( void ));
-extern	int	pbi_greater	PARAMS(( void ));
-extern	int	pbi_equalorless	PARAMS(( void ));
-extern	int	pbi_greaterorequal PARAMS(( void ));
-extern	int	pbi_arithequal	PARAMS(( void ));
-extern	int	pbi_arithnotequal PARAMS(( void ));
-extern	int	pbi_is		PARAMS(( void ));
-extern	int	pbi_srandom	PARAMS(( void ));
+extern	int	pbi_time			PARAMS(( void ));
+extern	int	pbi_less			PARAMS(( void ));
+extern	int	pbi_greater			PARAMS(( void ));
+extern	int	pbi_equalorless		PARAMS(( void ));
+extern	int	pbi_greaterorequal 	PARAMS(( void ));
+extern	int	pbi_arithequal		PARAMS(( void ));
+extern	int	pbi_arithnotequal 	PARAMS(( void ));
+extern	int	pbi_is				PARAMS(( void ));
+extern	int	pbi_srandom			PARAMS(( void ));
+/* fpbasis.c */
+extern	int pbi_fpconst_val			PARAMS( (void) );
+extern	int pbi_uia_poke_fpconst	PARAMS( (void) );
 
 /* from bcinter.c */
 #ifdef DOS
 extern	int	pbi_c_make_farptr PARAMS(( void ));
 #endif
-extern	int	pbi_c_malloc	PARAMS(( void ));
-extern	int	pbi_c_free	PARAMS(( void ));
-extern	int	pbi_c_set	PARAMS(( void ));
-extern	int	pbi_c_examine	PARAMS(( void ));
+extern	int	pbi_c_malloc		PARAMS(( void ));
+extern	int	pbi_c_free			PARAMS(( void ));
+extern	int	pbi_c_set			PARAMS(( void ));
+extern	int	pbi_c_examine		PARAMS(( void ));
 
 /* bdb.c */
-extern	int	pbi_abolish	PARAMS(( void ));
+extern	int	pbi_abolish				PARAMS(( void ));
 extern	int	pbi_abolish_clausegroup	PARAMS(( void ));
-extern	int	pbi_asserta	PARAMS(( void ));
-extern	int	pbi_assertz	PARAMS(( void ));
-extern	int	pbi_addclause	PARAMS(( void ));
-extern	int	pbi_execcommand	PARAMS(( void ));
-extern	int	pbi_erase	PARAMS(( void ));
-extern	int	pbi_dynamic	PARAMS(( void ));
-extern	int	pbi_icode	PARAMS(( void ));
-extern	int	pbi_index_proc	PARAMS(( void ));
+extern	int	pbi_asserta				PARAMS(( void ));
+extern	int	pbi_assertz				PARAMS(( void ));
+extern	int	pbi_addclause			PARAMS(( void ));
+extern	int	pbi_execcommand			PARAMS(( void ));
+extern	int	pbi_erase				PARAMS(( void ));
+extern	int	pbi_dynamic				PARAMS(( void ));
+extern	int	pbi_icode				PARAMS(( void ));
+extern	int	pbi_index_proc			PARAMS(( void ));
 extern	int	pbi_massively_abolish_clausegroup PARAMS(( void ));
-extern	int	pbi_nextproc	PARAMS(( void ));
-extern	int	pbi_procinfo	PARAMS(( void ));
-extern	int	pbi_clauseinfo	PARAMS(( void ));
-extern	int	pbi_firstargkey	PARAMS(( void ));
-extern	int	pbi_resolve_module	PARAMS(( void ));
-extern	int	pbi_exported_proc	PARAMS(( void ));
-extern	int	pbi_next_module	PARAMS(( void ));
-extern	int	pbi_cr_mod_close	PARAMS(( void ));
-extern	int	pbi_libbreak	PARAMS(( void ));
-extern	int	pbi_listasm_clause	PARAMS(( void ));
+extern	int	pbi_nextproc			PARAMS(( void ));
+extern	int	pbi_procinfo			PARAMS(( void ));
+extern	int	pbi_clauseinfo			PARAMS(( void ));
+extern	int	pbi_firstargkey			PARAMS(( void ));
+extern	int	pbi_resolve_module		PARAMS(( void ));
+extern	int	pbi_exported_proc		PARAMS(( void ));
+extern	int	pbi_next_module			PARAMS(( void ));
+extern	int	pbi_cr_mod_close		PARAMS(( void ));
+extern	int	pbi_libbreak			PARAMS(( void ));
+extern	int	pbi_listasm_clause		PARAMS(( void ));
 extern	int	pbi_listasm_ntblentry	PARAMS(( void ));
 extern	int	pbi_push_clausegroup	PARAMS(( void ));
-extern	int	pbi_pop_clausegroup	PARAMS(( void ));
-extern	int	pbi_collectcode	PARAMS(( void ));
+extern	int	pbi_pop_clausegroup		PARAMS(( void ));
+extern	int	pbi_collectcode			PARAMS(( void ));
 
 	/* freeze.c */
 extern	int	pbi_cptx		PARAMS(( void ));
@@ -170,13 +173,14 @@ extern	int	pbi_bind_vars		PARAMS(( void ));
 #ifdef INTCONSTR
 
 	/* intaux.c */
-extern int	pbi_fuzz	PARAMS((void));
+extern int	pbi_fuzz			PARAMS((void));
 
 	/* int_net.c */
-extern int  ilinknet	PARAMS((void));
+extern int  ilinknet			PARAMS((void));
 extern int reset_cstr_ctrs		PARAMS (( void ));
 extern int get_cstr_ctrs_vals	PARAMS (( void ));
 extern int set_max_iters_val	PARAMS (( void ));
+extern int run_grteq_cstrs		PARAMS (( void ));
 
 #endif /* INTCONSTR */
 

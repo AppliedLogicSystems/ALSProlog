@@ -3,6 +3,15 @@
  |		Copyright (c) 1996 Applied Logic Systems, Inc.
  |
  |		Automated test run driver for clp tests
+ |
+ |	Requires both specbf.pro and testclp_db.pro (both automatically
+ |	consulted from this file.)
+ |
+ |	Default full execution:  run_clp_tests/0.
+ |
+ |	Executing a range of tests (see testclp_db.pro) and outputting
+ |	the results to file Outfile:  
+ |			run_clp_tests(OutFile, Start, Stop)
  *=====================================================================*/
 
 r :- run_clp_tests.

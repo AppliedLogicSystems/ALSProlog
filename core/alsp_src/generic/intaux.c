@@ -39,7 +39,7 @@
 
 
 
-
+extern double sym_f_cnst[];
 extern PWord	deref_2		PARAMS(( PWord ));
 
 PWord get_intvl_tm		PARAMS((PWord *, int));
@@ -137,14 +137,7 @@ extract_bds(DelVar, DelVar_t, LB, UB, IKind)
 
 		initfpu();
 		switch ((int)DelVar) {
-		case TK_PI	:	t = M_PI;
-						break; 
-		case TK_PI2	:	t = M_PI_2;
-						break;
-		case TK_E	:	t = M_E;
-						break;
-			default	:	resetfpu(); 
-						FAIL;
+			FPCCASE(t)
 		}
 		prev(t);
 		*UB = t;
@@ -203,9 +196,9 @@ extract_bds(DelVar, DelVar_t, LB, UB, IKind)
 
 } /* extract_bds */
 
-
 extern fp i_next  PARAMS((fp *));
 extern fp i_prev  PARAMS((fp *));
+
 
 	/* Prototypes */
 int	pbi_fuzz	PARAMS((void));
@@ -222,16 +215,17 @@ int	pbi_fuzz	PARAMS((void));
 int 
 pbi_fuzz()
 {
-	PWord fpv, v2, v3, vv, v2o, v3o;
-	int fpvt, t2, t3, tt, t2o, t3o;
+	PWord fpv, Sgn, v2, v3, vv, v2o, v3o;
+	int fpvt, Sgn_t, t2, t3, tt, t2o, t3o;
 	fp ub, lb;
 	int_fp t;
-    	double dblval;
+   	double dblval;
 	int i;
 
     w_get_An(&fpv, &fpvt, 1);
-    w_get_An(&v2, &t2, 2);
-    w_get_An(&v3, &t3, 3);
+    w_get_An(&Sgn,	&Sgn_t, 2);
+    w_get_An(&v2, &t2, 3);
+    w_get_An(&v3, &t3, 4);
 
 /*	ISA_DOUBLE( fpv_in, fpvt )  */
 
@@ -257,9 +251,16 @@ pbi_fuzz()
     	else
 	    FAIL;
     }
+    else if ( fpvt == WTP_SYMBOL ) {
+		switch ((int)fpv) {
+			FPCCASE(dblval)
+		}
+	}
     else
-	FAIL;
+		FAIL;
 #endif /* DoubleType */
+
+	if ((int)Sgn < 0) { dblval = -dblval; }
 
 	initfpu();
 	t = dblval;       /* setup for next(t);  */

@@ -170,6 +170,8 @@ booleanOutput:  |0, disable, ychg, y, xchg, x, zchg, z|
 #define boolean_ydef    0x20        /*booleanInput*/
 #define boolean_ychg    0x20        /*booleanOutput*/
 
+#define boolean_chg    0x2A        /*booleanOutput*/
+
 		/******************************************************
 		 |	END BOOLEAN STUFF
 		 ******************************************************/
