@@ -344,16 +344,22 @@ proc close_and_reopen {w} {
 
 
 proc post_open_document {Title Win} {
-	global array tcl_platform 
-	global mod
-
-	.topals.mmenb.windows add command \
-		-label $Title -font {Helvetica 10 italic} -command "show_window $Win"
+	global proenv 
+	if {[lsearch -exact $proenv(posted_vis) $Title] < 0} then {
+		lappend proenv(posted_vis) $Title
+		.topals.mmenb.windows add command \
+			-label $Title -font {Helvetica 10 italic} -command "show_window $Win"
+	}
 }
 
 proc un_post_open_document {Title} {
-	set PrjIdx [.topals.mmenb.windows index $Title]
-	.topals.mmenb.windows delete $PrjIdx
+	global proenv 
+	set Prev [lsearch -exact $proenv(posted_vis) "$Title"] 
+	if {$Prev >= 0} then {
+		set PrjIdx [.topals.mmenb.windows index $Title]
+		.topals.mmenb.windows delete $PrjIdx
+		set proenv(posted_vis) [lreplace $proenv(posted_vis) $Prev $Prev]
+	}
 }
 
 	########################

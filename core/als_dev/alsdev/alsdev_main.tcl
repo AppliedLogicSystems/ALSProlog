@@ -123,7 +123,7 @@ proc vTclWindow.dyn_flags {base} {
     wm resizable $base 0 0
     wm overrideredirect $base 0
     wm title $base "Changable Prolog Flags"
-	wm protocol .dyn_flags WM_DELETE_WINDOW {wm withdraw .dyn_flags}
+	wm protocol .dyn_flags WM_DELETE_WINDOW {remove_me {Dynamic Flags} .dyn_flags}
 
 	frame $base.buttons \
 		-borderwidth 1 -relief raised 
@@ -219,7 +219,8 @@ proc vTclWindow.about {base} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "About ALS Prolog"
-	wm protocol .about WM_DELETE_WINDOW {wm withdraw .about}
+	wm protocol .about WM_DELETE_WINDOW {remove_me About .about}
+#	wm protocol .about WM_DELETE_WINDOW {wm withdraw .about}
 
     label $base.alsdev \
         -font {helvetica 14 {bold italic}} -text {ALS Prolog} 
@@ -362,7 +363,7 @@ proc vTclWindow.static_flags {base} {
     wm withdraw $base
 
     wm title $base "Static Prolog Flags"
-	wm protocol .static_flags WM_DELETE_WINDOW {wm withdraw .static_flags}
+	wm protocol .static_flags WM_DELETE_WINDOW {remove_me {Static Flags} .static_flags}
 
 	prolog call builtins static_flags_info -var InfoList
 	foreach info $InfoList {
@@ -866,6 +867,8 @@ proc vTclWindow.ide_settings {base} {
     #wm overrideredirect $base 0
     wm resizable $base 1 0
     wm title $base "ALS IDE Settings"
+    wm protocol $base WM_DELETE_WINDOW {remove_me {IDE Settings} .ide_settings}
+
     frame $base.heartbeat \
         -borderwidth 2 -height 75 -relief groove -width 125 
     label $base.heartbeat.label \
@@ -1049,6 +1052,8 @@ proc vTclWindow.find_repl {base} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Find / Replace"
+    wm protocol $base WM_DELETE_WINDOW {remove_me Find .find_repl}
+
     frame $base.f1 \
         -borderwidth 0 -height 5 -relief flat -width 125 
 			## INVISIBLE LABEL:

@@ -322,7 +322,9 @@ alsdev(Shared, ALS_IDE_Mgr)
 		;
 		change_debug_io(debugwin)
 	),
-%	set_prolog_flag(debug, on),
+	(current_prolog_flag(debug, on) ->
+		tcl_call(shl_tcli,[ensure_db_showing],_) ; true
+	),
 	get_cwd(CurDir),
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
 
@@ -924,7 +926,18 @@ fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,
 
 als_ide_mgrAction( change_prolog_flag(Flag,Value), State)
 	:-
-	tcl_call(shl_tcli, [set_tcl_ga,proenv,Flag,Value], _).
+	tcl_call(shl_tcli, [set_tcl_ga,proenv,Flag,Value], _),
+	check_for_debugger_toggle(Flag,Value).
+
+check_for_debugger_toggle(debug,on)
+	:-!,
+	tcl_call(shl_tcli, [set_tcl_ga,proenv,debugwin,1], _),
+	tcl_call(shl_tcli, [catch,exec_toggle_debugwin], _).
+check_for_debugger_toggle(debug,off)
+	:-!,
+	tcl_call(shl_tcli, [set_tcl_ga,proenv,debugwin,0], _),
+	tcl_call(shl_tcli, [catch,exec_toggle_debugwin], _).
+check_for_debugger_toggle(_,_).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%		PROJECTS								%%%%%

@@ -23,10 +23,12 @@ proc add_default_menus {menubar} {
 
 	if {$tcl_platform(platform) == "macintosh"} {
 		menu $menubar.apple -tearoff 0
-		$menubar.apple add command -label "About ALS Prolog…" -command {Window show .about}
+		$menubar.apple add command -label "About ALS Prolog…" -command {display_me About .about}
 		$menubar add cascade -menu $menubar.apple
 	}
 }
+
+#$menubar.apple add command -label "About ALS Prolog…" -command {Window show .about}
 
 proc add_file_menu {menubar type window} {
 	global tcl_platform
@@ -94,10 +96,6 @@ proc add_edit_menu {menubar type window} {
     $menubar.edit add separator
     $menubar.edit add command \
 		-label "Preferences$elipsis" -underline 3 -command "re {fonts_and_colors $window}"
-## Temp:
-#    $menubar.edit add separator
-#    $menubar.edit add command \
-#        -label "Goto Line$elipsis" -command "re {$type.goto_line $window}"
 
 	$menubar add cascade -menu $menubar.edit -label "Edit" -underline 0
 }
@@ -106,6 +104,7 @@ proc add_prolog_menu {menubar type window} {
 	global tcl_platform
 	global mod
 	global elipsis
+	global proenv
 
 	set TearOff 0
 	menu $menubar.prolog -tearoff $TearOff -title Prolog
@@ -116,29 +115,25 @@ proc add_prolog_menu {menubar type window} {
 
 	if {$type == "listener"} then { 
     	$menubar.prolog add separator
-    	$menubar.prolog add command \
-        	-label "Load Project$elipsis" -underline 0 -command {re load_project} -state disabled
-    	$menubar.prolog add command \
-        	-label "Open Project$elipsis" -underline 0 -command {re open_project} -state disabled
-    	$menubar.prolog add command \
-        	-label "Close Project" -underline 0 -command {re close_project} -state disabled
-    	$menubar.prolog add command \
-        	-label "New Project" -underline 0 -command {re new_project} -state disabled
+    	$menubar.prolog add command -label "Load Project$elipsis" \
+			-underline 0 -command {re load_project} -state $proenv(production)
+    	$menubar.prolog add command -label "Open Project$elipsis" \
+			-underline 0 -command {re open_project} -state $proenv(production)
+    	$menubar.prolog add command -label "Close Project" \
+			-underline 0 -command {re close_project} -state $proenv(production)
+    	$menubar.prolog add command -label "New Project" \
+			-underline 0 -command {re new_project} -state $proenv(production)
     	$menubar.prolog add separator
     	$menubar.prolog add command \
         	-label "Set Directory$elipsis" -underline 0 -command {re set_directory} 
 
     	$menubar.prolog add separator
 		$menubar.prolog add command \
-			-label "IDE Settings$elipsis" -underline 0 -command {re "Window show .ide_settings"}
+			-label "IDE Settings$elipsis" -underline 0 -command {re "display_me {IDE Settings} .ide_settings"}
 		$menubar.prolog add command \
-			-label "Dynamic Flags$elipsis" -underline 0 -command {re "Window show .dyn_flags"}
+			-label "Dynamic Flags$elipsis" -underline 0 -command {re "display_me {Dynamic Flags} .dyn_flags"}
 		$menubar.prolog add command \
-			-label "Static Flags$elipsis" -underline 1 -command {re "Window show .static_flags"}
-
-#    	$menubar.prolog add separator
-#		$menubar.prolog add command \
-#			-label "Active Project:" -font {user 10 italic} 
+			-label "Static Flags$elipsis" -underline 1 -command {re "display_me {Static Flags} .static_flags"}
 
 	} elseif {$type == "debugwin"} then {
     	$menubar.prolog add separator
@@ -165,9 +160,9 @@ proc add_tools_menu {menubar type window} {
 		$menubar.tools add checkbutton \
 			-label Debugger -underline 0 -command exec_toggle_debugwin -variable proenv(debugwin)
 		$menubar.tools add separator 
-    	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} -state disabled
+    	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} -state $proenv(production)
     	$menubar.tools add command -label "Tcl Debugger$elipsis" -underline 0 -command {re tcl_debugger} -state disabled
-    	$menubar.tools add command -label "Kill Tcl Interps" -underline 0 -command {re kill_tcl_interps} -state disabled
+    	$menubar.tools add command -label "Kill Tcl Interps" -underline 0 -command {re kill_tcl_interps} -state $proenv(production)
 #    	$menubar.tools add command -label "Tcl Shell$elipsis" -underline 0 -command {re tcl_shell} 
 
 		$menubar.tools add separator 
@@ -213,7 +208,7 @@ proc add_help_menu {menubar} {
 	if {$tcl_platform(platform) != "macintosh"} {
 		menu $menubar.help -tearoff 0
 		$menubar.help add command -label "About ALS Prolog$elipsis" \
-			-underline 0 -command {Window show .about}
+			-underline 0 -command {display_me About .about}
 		$menubar add cascade -label "Help" -underline 0 -menu $menubar.help
 	}
 }
@@ -236,36 +231,14 @@ proc listener.copy {xw} {
 	}
 }
 
-#proc copy_text { TxtWin } {
-#	if {[$TxtWin tag nextrange sel 1.0 end] != ""} then {
-#		clipboard clear
-#		clipboard append [ $TxtWin get sel.first sel.last ]
-#	}
-#}
-
 proc listener.paste {xw} {
 	set w .topals
-#	catch {$w.text delete sel.first sel.last}
 	$w.text insert end [selection get -displayof $w -selection CLIPBOARD]
 	set proenv($w,dirty) true
 	$w.text see end
 	$w.text mark set insert end
 	focus $w.text
 }
-
-#proc paste_text { TxtWin } {
-#	global tcl_platform
-#
-#	if {$tcl_platform(platform) == "windows"} {
-#		$TxtWin insert end [ selection get -selection CLIPBOARD ]
-#	} else {
-#		$TxtWin insert end [ selection get ]
-#	}
-#	$TxtWin see end
-#	$TxtWin mark set insert end
-#	focus $TxtWin
-#}
-
 
 proc listener.clear {xw} {
 	set w .topals
@@ -302,11 +275,11 @@ proc listener.copy_paste { xw } {
 }
 
 proc listener.find {xw} {
-	start_edit_find .topals
+	start_edit_find .topals 
 }
 
 proc debugwin.find {xw} {
-	start_edit_find .topals
+	start_edit_find .debugwin
 }
 
 proc debugwin.clear {xw} {

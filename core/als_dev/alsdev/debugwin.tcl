@@ -39,7 +39,8 @@ proc vTclWindow.debugwin {base} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Debugger for ALS Prolog"
-    wm protocol $base WM_DELETE_WINDOW "wm withdraw $base"
+ #   wm protocol $base WM_DELETE_WINDOW "wm withdraw $base"
+    wm protocol .debugwin WM_DELETE_WINDOW "hide_debugwin"
 
 
     menu $base.menubar -tearoff 0 -relief sunken
@@ -338,7 +339,8 @@ proc vTclWindow.debug_settings {base} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Debugger Settings"
-	wm protocol .debug_settings WM_DELETE_WINDOW {unpost_debug_subwin .debug_settings}
+	wm protocol .debug_settings WM_DELETE_WINDOW \
+					{unpost_debug_subwin {Debug Settings} .debug_settings}
 
     frame $base.depth \
         -borderwidth 1 -relief sunken 
@@ -428,7 +430,8 @@ proc vTclWindow.pred_info {base} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Predicate Information"
-	wm protocol .pred_info WM_DELETE_WINDOW { unpost_debug_subwin .pred_info }
+	wm protocol .pred_info WM_DELETE_WINDOW \
+				{ unpost_debug_subwin {Predicate Info} .pred_info }
 
     frame $base.preds \
         -borderwidth 1 -relief sunken  
@@ -883,7 +886,8 @@ proc vTclWindow.sys_mods {base} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Modules:"
-	wm protocol .sys_mods WM_DELETE_WINDOW {unpost_debug_subwin .sys_mods}
+	wm protocol .sys_mods WM_DELETE_WINDOW \
+					{unpost_debug_subwin {System Modules} .sys_mods}
     ###################
     # SETTING GEOMETRY
     ###################

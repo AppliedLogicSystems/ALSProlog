@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.73 1999/02/05 18:53:33 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.74 1999/02/06 15:26:09 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -144,6 +144,8 @@ global array proenv
 #	proenv(spywin)			Spypoint Win showing/not (1/0) 
 #	proenv(defstr_ld)		Defstruct loaded/not [true/false]
 
+		## set this to "disabled" for the student version:
+set proenv(production) 			normal
 set proenv(cwd) 				[pwd]
 set proenv(debugger_ld)			false
 set	proenv(debugwin)			0
@@ -152,6 +154,7 @@ set	proenv(spywin)				0
 set proenv(defstr_ld)			false
 set proenv(dflt_mod)			alsdev
 set proenv(untitled_counter)	0
+set proenv(posted_vis)			{}
 
 	## window appearance stuff - initial defaults:
 
@@ -691,6 +694,7 @@ proc exit_prolog { } {
 	if {$ans == "yes"} then {
 		if {[document.close_all]} then {
 			save_window_positions
+			prolog call alsdev save_prolog_flags 
 			exit
 #			set WaitForLine -3
 		}
@@ -768,6 +772,16 @@ proc debugwin.save {w}  { bell }
 #################################################
 #####	Utilities & Environment Settings       ##
 #################################################
+
+proc display_me {Title Win} {
+	Window show $Win
+	post_open_document $Title $Win
+}
+
+proc remove_me {Title Win} {
+	wm withdraw $Win
+	un_post_open_document $Title
+}
 
 proc iconify_me {Win} {
 	wm iconify $Win
@@ -855,11 +869,13 @@ proc fonts_and_colors { Window } {
 	wm title .alsdev_settings "Fonts&Colors: $Window"
     .alsdev_settings.background configure -background [$Window.text cget -background ]
     .alsdev_settings.foreground configure -foreground [$Window.text cget -foreground ]
+	post_open_document Preferences .alsdev_settings
 
 }
 
 proc cancel_fonts_and_colors { } {
 	Window hide .alsdev_settings
+	un_post_open_document Preferences 
 }
 
 proc save_fonts_and_colors { Window } {
@@ -887,6 +903,7 @@ proc save_fonts_and_colors { Window } {
 	set proenv($Grp,tabs)               $Tabs
 
 	Window hide .alsdev_settings
+	un_post_open_document Preferences 
 
 	prolog call alsdev change_window_settings -list $Vals -atom $Grp
 }
@@ -961,6 +978,7 @@ proc exec_toggle_debugwin {} {
 	global array proenv
 	if {$proenv(debugwin) == 0} then {
 		hide_debugwin
+		set FlagVal off
 	} else {
 		if {[winfo exists .debugwin] == 0} then {
 			vTclWindow.debugwin ""
@@ -970,8 +988,11 @@ proc exec_toggle_debugwin {} {
 		} else {
 			show_debugwin
 		}
+		set FlagVal on
 	}
 	send_prolog debugger_mgr toggle_visibility
+	prolog call builtins do_set_prolog_flag -atom debug -atom $FlagVal
+	set proenv(debug) $FlagVal
 }
 
 
@@ -982,18 +1003,26 @@ proc ensure_db_showing {} {
 		Window show .debugwin 
 		bind .debugwin.text <Unmap> {unmap_alsdev_debug}
 		bind .debugwin.text <Map>   {map_alsdev_debug}
-	} else {
-    		Window show .debugwin
-		raise .debugwin
 	}
+	show_debugwin
 }
+
+#	} else {
+  #  	Window show .debugwin
+#    	Window show .debugwin
+#	}
 
 proc hide_debugwin {} {
 	global array proenv
+
+	wm withdraw .debugwin
+	wm withdraw .debugwin
+	un_post_open_document Debugger 
+
 	foreach Win  $proenv(debugwin,visible) {
-		Window hide $Win
+		wm withdraw $Win
+		wm withdraw $Win
 	}
-	Window hide .debugwin
 	set proenv(debugwin) 0
 }
 
@@ -1002,6 +1031,7 @@ proc show_debugwin {} {
 	global array proenv
     show_window .debugwin
 	prolog call builtins change_debug_io -atom debugwin
+	post_open_document Debugger .debugwin
 	check_leashing
 	foreach Win  $proenv(debugwin,visible) {
 		wm deiconify $Win
@@ -1025,15 +1055,16 @@ proc switch_debug_setup {Which} {
 	}
 }
 
-proc post_debug_subwin {Win} {
+proc post_debug_subwin {Title Win} {
 	global array proenv
 
 	if {[lsearch -exact $proenv(debugwin,visible) $Win] < 0 } then {
 		set proenv(debugwin,visible) [concat $Win $proenv(debugwin,visible)]
 	}
+	post_open_document $Title $Win
 }
 
-proc unpost_debug_subwin {Win} {
+proc unpost_debug_subwin {Title Win} {
 	global array proenv
 
 	set Idx [lsearch -exact $proenv(debugwin,visible) $Win]
@@ -1041,6 +1072,7 @@ proc unpost_debug_subwin {Win} {
 		set proenv(debugwin,visible) [lreplace $proenv(debugwin,visible) $Idx $Idx]
 	}
 	Window hide $Win
+	un_post_open_document $Title 
 }
 
 		###############################
@@ -1397,14 +1429,14 @@ proc show_debug_settings {} {
 	set proenv(db_flatness) $DC
 
 	Window show .debug_settings 
-	post_debug_subwin .debug_settings
+	post_debug_subwin {Debug Settings} .debug_settings
 }
 
 proc show_pred_info {} {
 	global array proenv
 
 	Window show .pred_info 
-	post_debug_subwin .pred_info
+	post_debug_subwin {Predicate Info} .pred_info
 }
 
 proc reset_print_depth {} {
@@ -1441,7 +1473,7 @@ proc set_system_modules_showing {} {
 	set WinHeight [string range $BaseGeom [expr $XPlace + 1] \
 					[expr [string first "+" $BaseGeom] -1] ]
     wm minsize .sys_mods $WinWidth $WinHeight
-	post_debug_subwin .sys_mods
+	post_debug_subwin {System Modules} .sys_mods
 }
 
 ##############################
@@ -1498,6 +1530,7 @@ proc start_edit_find { w } {
 	Window show .find_repl
 	.find_repl.wintgt.label configure -text [wm title $w]
 	.find_repl.f1.whichwin configure -text $w
+	post_open_document Find .find_repl
 }
 
 proc edit_find_next {} {
@@ -1527,6 +1560,8 @@ proc edit_find_next {} {
 		set MLNum [string range $sresult 0 [expr [string first "." $sresult] -1 ] ]
 		set MLCharStart [string range $sresult [expr [string first "." $sresult] + 1] end]
 		set MatchEnd [expr $MLCharStart + $MLen] 
+		raise $w
+		focus $w.text
 		$w.text see $sresult
 		$w.text tag remove sel 1.0 end 
 		$w.text tag add sel $sresult $MLNum.$MatchEnd
@@ -1621,7 +1656,9 @@ wm positionfrom .topals user
 wm geometry .topals $proenv(.topals,geometry)
 focus .topals.text
 
-if {$proenv(debugwin) == 1} then { ensure_db_showing }
+#tk_dialog .quit_dialog "CHECK DEBUG" "BEFORE ensure_db" "" 0 "OK"
+#if {$proenv(debugwin) == 1} then { ensure_db_showing }
+#tk_dialog .quit_dialog "CHECK DEBUG" "AFTER ensure_db" "" 0 "OK"
 
 # Call AttachOpenDocumentHandler from the OpenDocument package to
 # install a custom window procedure on .topals window for handling
