@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.1 1998/03/13 01:45:53 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.2 1998/03/30 22:11:38 ken Exp $"
 #|==================================================================
 
 proc open_project {} {
@@ -15,7 +15,12 @@ proc open_project {} {
 		-filetypes {{"Prolog Project Files" {.ppj}}} \
 		-title "Prolog Project File to Open"]
 	set File [file tail $Projectfile]
+	set Dir [file dirname $Projectfile]
+puts "CAlling open_project_file"
 	if { "$Projectfile"!="" } then {
-		prolog call alsdev open_project_file -atom $Projectfile -atom $File
+		prolog call test open_project_file  \
+			-list [file split $Dir] -atom $File
+
+#		prolog call alsdev open_project_file  \
 	}
 }
