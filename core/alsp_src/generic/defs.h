@@ -137,6 +137,9 @@
 #include "config.h"
 
 /* Hack in the proper defines until config can be updated. */
+#if defined(MSWin32) && !defined(DLL)
+#define SIMPLE_MICS 1
+#endif
 #ifdef __hp9000s800
 #define SIMPLE_MICS 1
 #define HP_AOUT_800 1

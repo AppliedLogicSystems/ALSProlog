@@ -804,7 +804,16 @@ whereami(name)
 #ifdef MSWin32
     DWORD l;
     char *endpath;
+#ifdef DLL
+    HMODULE dll;
+    
+    dll = GetModuleHandle(DLL_NAME);
+    if (dll == NULL) fatal_error(FE_INFND, 0);
+    
+    l = GetModuleFileName(dll, imagedir, IMAGEDIR_MAX);
+#else
     l = GetModuleFileName(NULL, imagedir, IMAGEDIR_MAX);
+#endif
     if (l == 0 || l >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
     imagedir[l] = 0;
     endpath = strrchr(imagedir, '\\');
