@@ -135,7 +135,9 @@ static	void	rev_update	PARAMS(( long *, long ));
 static	void	init_marks	PARAMS(( void ));
 static	void	mark		PARAMS(( long ));
 
+#ifdef INTCONSTR
 static	int	core_gc		PARAMS(( void ));
+#endif
 
 #include <stdio.h>
 
@@ -143,8 +145,13 @@ static	int	core_gc		PARAMS(( void ));
 	 | core_gc()
 	 *----------------------------------------------------*/
 
+#ifdef INTCONSTR
 int
 core_gc()
+#else
+int
+gc()
+#endif
 {
     long *mrccp;
     long *e;
@@ -1017,6 +1024,8 @@ mark_backup:
 }	/* mark(val) */
 
 
+
+#ifdef INTCONSTR
 int
 gc()
 {
@@ -1184,4 +1193,5 @@ printf("End new GC\n");
 }
 #endif    /* FREEZE */
 
+#endif 		/* INTCONSTR  */
 
