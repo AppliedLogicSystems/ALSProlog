@@ -425,7 +425,7 @@ lib_load(Module,Call)
 	:-
 	functor(Call,P,A),
 	get_libinfo(Module:P/A,FileName),
-%functor(Call,CF,CA),pbi_write( lib_load(Module,CF/CA, FileName)  ), pbi_nl, pbi_ttyflush,
+%functor(Call,CF,CA),write( lib_load(Module,CF/CA, FileName) ),nl,flush_output,
 	(pdel_libinfo(_,FileName), fail ; true),
 	lib_load(FileName, Module, P,A, Module,Call).
 
@@ -450,13 +450,12 @@ lib_load(FileName, Module, P,A, Module,Call)
 		;   Sepr = '/'
 	),
     '$atom_concat'(FullFileName,'.pro',FilePathPro),
-	'$atom_concat'(FullFileName,'.obp',FilePathObp),
+    '$atom_concat'(FullFileName,'.obp',FilePathObp),
 	(cslt_lib_ld(FileName, FilePathPro,FilePathObp)
 		; 
 		existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) 
 	),
 	!,
-
 	record_lib_load(FileName),
 	Module:call(Call).
 
