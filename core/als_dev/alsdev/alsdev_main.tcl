@@ -771,8 +771,8 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
 
     button $Win.$Which.buttons.add \
         -command $Add -padx 11 -pady 4 -text {Add} 
-    button $Win.$Which.buttons.add_mult \
-        -command $AddMult -padx 11 -pady 4 -text {Add Mult} 
+#    button $Win.$Which.buttons.add_mult \
+#        -command $AddMult -padx 11 -pady 4 -text {Add Mult} 
     button $Win.$Which.buttons.del \
         -command $Del -padx 11 -pady 4 -text {Delete} 
 
@@ -807,8 +807,8 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
         -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky ew 
     pack $Win.$Which.buttons.add \
         -anchor w -expand 0 -fill none -padx 10 -side left 
-    pack $Win.$Which.buttons.add_mult \
-        -anchor w -expand 0 -fill none -padx 10 -side left 
+#    pack $Win.$Which.buttons.add_mult \
+#        -anchor w -expand 0 -fill none -padx 10 -side left 
 
     pack $Win.$Which.buttons.down \
         -anchor center -expand 0 -fill none -padx 2 -side right 

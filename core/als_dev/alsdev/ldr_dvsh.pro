@@ -11,3 +11,7 @@
 	force_libload_all([F1,F2,F3,F4,F5,F6,F7,F8,F9]).
 
 :-consult(blt_dvsh), consult(dbg_class), consult(projects).
+
+:- builtins:abolish('$start',0),
+   builtins:assert(('$start' :- builtins:start_alsdev)).
+
