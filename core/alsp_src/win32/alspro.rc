@@ -26,7 +26,7 @@ BEGIN
             VALUE "FileDescription", "ALS Prolog Compiler and Development System\0"
             VALUE "FileVersion", VERSION_STRING "\0"
             VALUE "InternalName", "alspro\0"
-            VALUE "LegalCopyright", "Copyright \251 Applied Logic Systems, Inc. 1997\0"
+            VALUE "LegalCopyright", "Copyright \251 Applied Logic Systems, Inc. 1998\0"
             VALUE "ProductName", "ALS Prolog\0"
             VALUE "ProductVersion", VERSION_STRING "\0"
         END

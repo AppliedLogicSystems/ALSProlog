@@ -5,10 +5,10 @@
  *          Version number - Thu Apr 4 09:28:36 EST 1996
  *===============================================================*/
 
-#define VERSION_STRING "2.08fBETA"
-#define VERSION_MAJOR 2
+#define VERSION_STRING "3.0a1"
+#define VERSION_MAJOR 3
 #define VERSION_MINOR 0
-#define VERSION_PATCH 8
+#define VERSION_PATCH 0
 
 /* 
 Win32 File Flag choices:
@@ -32,4 +32,4 @@ beta
 final
 */
 
-#define VERSION_MACOS_RELEASE_STAGE beta
+#define VERSION_MACOS_RELEASE_STAGE alpha
