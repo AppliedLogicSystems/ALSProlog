@@ -139,8 +139,8 @@ iso_test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
 
 ALSDEVFILES = blt_dvsh.pro dbg_class.pro projects.pro
-ALSDEVLIBS=listutl1,miscterm,msc_ioin,strctutl,strings,tcl_sppt,tk_alslib,typecomp
-ALSDEVLIBPS =listutl1.pro miscterm.pro msc_ioin.pro strctutl.pro strings.pro \
+ALSDEVLIBS=listutl1,miscterm,msc_ioin,mscioout,strctutl,strings,tcl_sppt,tk_alslib,typecomp
+ALSDEVLIBPS =listutl1.pro miscterm.pro msc_ioin.pro mscioout.pro strctutl.pro strings.pro \
 			tcl_sppt.pro tk_alslib.pro typecomp.pro
 alsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS)
 	./alspro_b -q -b -obp -no_dot_alspro \
