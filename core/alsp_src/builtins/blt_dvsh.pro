@@ -15,6 +15,10 @@ module builtins.
 use tcltk.
 use tk_alslib.
 
+	%% Used by some routines in builtins
+	%% to  detect presence  of alsdev:
+alsdev_running.
+
 :- abolish(halt,0).
 export halt/0.
 halt :-
@@ -153,8 +157,8 @@ alsdev(Shared)
 	sio:reset_user(ISS,OSS),
 
 	set_prolog_flag(windows_system, tcltk),
-	current_prolog_flag(windows_system, Which),
 	set_consult_messages(false),
+	alsdev:check_alsdev_flags,
 
 	retract(save_clinfo(CLInfo)),
 	ss_load_dot_alspro(CLInfo),
@@ -381,8 +385,13 @@ save_prolog_flags
 set_flags_values([]).
 set_flags_values([[Flag,_,Val] | FlagsList])
 	:-
-	set_prolog_flag(Flag,Val),
+	builtins:do_set_prolog_flag(Flag,Val),
 	set_flags_values(FlagsList).
+
+check_alsdev_flags
+	:-
+	current_prolog_flag(debug, DebugFlag),
+		switch_debugging_setup(DebugFlag).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			RECONSULT ETC.						%%%%%
@@ -591,61 +600,6 @@ edit_defstruct
 	dmember(defStruct(EditDefStr, EditDefStrBody), OriginalTypDefs).
 
 
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%			PROJECT HANDLING					%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-:- make_gv('ProjectsOpen').
-:- setProjectsOpen([]).
-
-
-open_project(ProjectFile)
-	:-
-printf(user_output, 'Wants to open project file %t\n', [ProjectFile]),
-	getProjectsOpen(OpenProjects),
-		%% can go away when multiple projects can be open:
-	OpenProjects = [],
-	!,
-	read_project_file(ProjectFile, ProjectTerm, ProjectData),
-	setup_project(ProjectTerm, ProjectData),
-	setProjectsOpen([ProjectTerm | OpenProjects]).
-
-open_project(ProjectFile)
-	:-
-	getProjectsOpen([CurProjectTerm | _ ]),
-	project_name(CurProjectTerm, CurProjectName),
-	sprintf(atom(Command),
-			'Project %t still open. Close it first',
-			[CurProjectName]),
-	user_dialog(Command, _, [type=command]).
-
-
-
-new_project
-	:-
-printf(user_output, 'Wants to start new project\n', []),
-	tcl_call(shl_tcli, input_item, ItemIn),
-write(item_gotten=ItemIn),nl.
-
-save_project
-	:-
-printf(user_output, 'Wants to save project\n', []).
-
-save_as_project(ProjectFile)
-	:-
-printf(user_output, 'Wants to save project as file %t\n', [ProjectFile]).
-
-close_project
-	:-
-printf(user_output, 'Wants to close project\n', []).
-
-add_file_to_project(File)
-	:-
-printf(user_output, 'Wants to add file %t to project\n', [File]).
-
-delete_file_from_project
-	:-
-printf(user_output, 'Wants to delete file from project\n', []).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% 		
@@ -653,7 +607,12 @@ printf(user_output, 'Wants to delete file from project\n', []).
 
 setup_for_debugging(Which)
 	:-
-	xconsult:change_source_level_debugging(Which).
+	xconsult:change_source_level_debugging(Which),
+	builtins:do_set_prolog_flag(debug,Which).
+
+switch_debugging_setup(Which)
+	:-
+	tcl_call(shl_tcli, [switch_debug_setup,Which], _).
 
 endmod.   % alsdev.
 
@@ -1395,7 +1354,7 @@ access_dbstr(call_tag,_A,_B) :- arg(9,_A,_B).
 set_dbstr(call_tag,_A,_B) :- mangle(9,_A,_B).
 
 export make_dbstr/1.
-make_dbstr(_A) :- _A'=..'[dbstr,_B,_C,_D,_E,0,[],[],0,0].
+make_dbstr(_A) :- _A =.. [dbstr,_B,_C,_D,_E,0,[],[],0,0].
 
 export make_dbstr/2.
 make_dbstr(_A,_B) :-
@@ -1420,4 +1379,60 @@ noteOptionValue(dbstr,_A,_B,_C) :- set_dbstr(_A,_C,_B).
 endmod.
 
 
+/***************
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%			PROJECT HANDLING					%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+:- make_gv('ProjectsOpen').
+:- setProjectsOpen([]).
+
+
+open_project(ProjectFile)
+	:-
+printf(user_output, 'Wants to open project file %t\n', [ProjectFile]),
+	getProjectsOpen(OpenProjects),
+		%% can go away when multiple projects can be open:
+	OpenProjects = [],
+	!,
+	read_project_file(ProjectFile, ProjectTerm, ProjectData),
+	setup_project(ProjectTerm, ProjectData),
+	setProjectsOpen([ProjectTerm | OpenProjects]).
+
+open_project(ProjectFile)
+	:-
+	getProjectsOpen([CurProjectTerm | _ ]),
+	project_name(CurProjectTerm, CurProjectName),
+	sprintf(atom(Command),
+			'Project %t still open. Close it first',
+			[CurProjectName]),
+	user_dialog(Command, _, [type=command]).
+
+
+
+new_project
+	:-
+printf(user_output, 'Wants to start new project\n', []),
+	tcl_call(shl_tcli, input_item, ItemIn),
+write(item_gotten=ItemIn),nl.
+
+save_project
+	:-
+printf(user_output, 'Wants to save project\n', []).
+
+save_as_project(ProjectFile)
+	:-
+printf(user_output, 'Wants to save project as file %t\n', [ProjectFile]).
+
+close_project
+	:-
+printf(user_output, 'Wants to close project\n', []).
+
+add_file_to_project(File)
+	:-
+printf(user_output, 'Wants to add file %t to project\n', [File]).
+
+delete_file_from_project
+	:-
+printf(user_output, 'Wants to delete file from project\n', []).
+***************/

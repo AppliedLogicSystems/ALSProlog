@@ -22,6 +22,11 @@ current_prolog_flag(Flag, Value)
 export set_prolog_flag/2.
 set_prolog_flag(Flag, Value) 
 	:-
+	do_set_prolog_flag(Flag, Value),
+	check_for_alsdev_impact(Flag, Value).
+
+do_set_prolog_flag(Flag, Value) 
+	:-
 	atom_ok(Flag),
 	(get_PROLOG_flag(Flag, _) -> true
 		;   
@@ -296,6 +301,27 @@ default_prolog_flag_value(iters_max_exceeded, succeed).
 changeable(iters_max_exceeded, yes).
 
 #endif
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Handle interations of flag
+	%% changes with the alsdev
+	%% environment:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+:- dynamic(alsdev_running/0).
+check_for_alsdev_impact(Flag, Value)
+	:-
+	alsdev_running,
+	!,
+	check_for_alsdev(Flag, Value).
+
+check_for_alsdev_impact(_, _).
+
+check_for_alsdev(debug, Which)
+	:-!,
+	alsdev:switch_debugging_setup(Which).
+
+check_for_alsdev(_, _).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% ACTUALLY INITIALIZE THE FLAGS:
