@@ -59,7 +59,7 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	winter.c security.c nopckg.c \
 	ieeemath.c pimain.c
 
-UNIX_SOURCE = unixio.c
+UNIX_SOURCE = unixio.c missing.c
 
 LIB_SOURCE = $(GENERIC_SOURCE) $(PROC_SOURCE) $(UNIX_SOURCE)
 
