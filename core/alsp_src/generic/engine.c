@@ -785,7 +785,7 @@ static int do_offset(PCell *p, long offset)
 	return size;
 }
 
-static void relocate_prolog_memory(prolog_engine *pe, long stack_heap_offset, long trail_offset)
+static void relocate_prolog_memory(prolog_engine *pe, long stack_max_offset, long stack_heap_offset, long trail_offset)
 {
 	register_set *s;
 	PCell *p, *t;
@@ -808,7 +808,7 @@ static void relocate_prolog_memory(prolog_engine *pe, long stack_heap_offset, lo
 	/* Brute force approach! */
 	{
 		for (p = pe->reg.E.ptr; p < pe->stack_base; p++) {
-			if (p->ptr > pe->stack_max - stack_heap_offset && p->ptr < pe->trail_base - trail_offset)
+			if (p->ptr > pe->stack_max - stack_max_offset && p->ptr < pe->trail_base - trail_offset)
 			{
 				do_offset(p, stack_heap_offset);
 			}
@@ -850,7 +850,9 @@ int size_prolog_engine(prolog_engine *pe, size_t new_stack_size, size_t new_heap
 {
 TRY {
 	long diff = (long)(new_stack_size + new_heap_size) - (long)(pe->stack_size + pe->heap_size);
-	PCell *old_heap_base = pe->heap_base, *old_trail_base = pe->trail_base;
+	PCell *old_heap_base = pe->heap_base,
+	      *old_trail_base = pe->trail_base,
+	      *old_stack_max = pe->stack_max;
 	
 	prolog_engine_invariant(pe);
 	
@@ -864,7 +866,7 @@ TRY {
 		resize_prolog_memory(pe, new_stack_size, new_heap_size);
 	}
 	
-	relocate_prolog_memory(pe, pe->heap_base - old_heap_base, pe->trail_base - old_trail_base);
+	relocate_prolog_memory(pe, pe->stack_max - old_stack_max, pe->heap_base - old_heap_base, pe->trail_base - old_trail_base);
 
 	ASSERT(prolog_engine_invariant(pe));
 	
