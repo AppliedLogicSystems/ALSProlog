@@ -1,32 +1,40 @@
-MacOS Build Instructions
-------------------
+Win32 Build Instructions
+========================
 
-Setup:
+Setup
+-----
 
 build-tree
 	alsp_src
-	mwbuild - containing "alspro x86.lib"
+	mwbuild
 	tcltk_interface
 	alsdev
 
-Build:
+Build
+-----
 
-Open win32_alsdev.mcp
-Make "Win32 Build" to create "ALS Prolog IDE.exe"
+Make "alspro x86.lib" in the mwbuild directory.
 
-Run:
+Open win32_alsdev.mcp, and make "Win32 Build" to create "ALS Prolog Base.exe"
 
-ALS Prolog IDE.exe
+Create a new image from "ALS Prolog Base.exe" with the following command:
+
+save_image('ALS Prolog', [select_lib(builtins, [debugger,blt_dvsh]),
+	select_lib(library,[miscterm,strctutl,strings,tcl_sppt,tk_alslib, listutl1])]).
+
+
+Runtime Setup
+-------------
+
+Here is the minimal runtime setup.  Optional additions are alsdir/library, examples, etc.
+
+ALS Prolog.exe
 tcl8.0.dll
 tk8.0.dll
-cw3215mt.dll
+cw3215.dll
+lib // The Tcl/Tk lib folder
 alsdir
-	builtins
-	libraries
 	shared
-		turnstile_splash.gif
-		tk_alslib_samples.pro
-		tcltk.pro
 		debugwin.tcl
 		als_menu.tcl
 		als_settings.tcl
@@ -34,4 +42,12 @@ alsdir
 		alsdev.tcl
 		alsdev_main.tcl
 		als_document.tcl
-		defstr.tcl		
+		defstr.tcl
+	image
+		als_splash.tcl
+		down-arrow-blue.gif
+		left-arrow-blue.gif
+		right-arrow-blue.gif
+		turnstile_splash.gif
+		up-arrow-blue.gif
+

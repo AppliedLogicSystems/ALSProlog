@@ -1,32 +1,35 @@
 MacOS Build Instructions
-------------------
+========================
 
-Setup:
+Setup
+-----
 
 build-tree
 	alsp_src
-	mwbuild - containing "alspro PPC.lib"
+	mwbuild
 	tcltk_interface
 	alsdev
 
-mozart
-	Tcl/Tk Folder
-		tcl8.0
-		tk8.0
+Installed Tcl/Tk.
 
+Build
+-----
 
-Build:
+Make alspro_b in the mwbuild directory and move it to the alsdev folder.
 
-Open mac_alsdev.mcp
-Make "PPC Build" to create "ALS Prolog IDE"
+In alsdev, setup an alsdir with the folders "builtins" and "library".
 
-Run:
+Copy the file tcltk.pro into the alsdev folder.
 
-ALS Prolog IDE
-alsdir
-	builtins
-	libraries
-	shared
-		als_tklib.tcl
-		tcltk.pro
-		turnstile_splash.gif
+Run alspro_b and consult "mac_make.pro" to build all necessary obp files.
+
+Open mac_alsdev.mcp.
+
+Make "PPC Build" to create "ALS Prolog PPC".
+
+Runtime Setup
+-------------
+
+Here is the minimal runtime setup.  Optional additions are alsdir:library, examples, etc.
+
+ALS Prolog PPC
