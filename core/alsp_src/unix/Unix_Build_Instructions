@@ -1,0 +1,16 @@
+1. Create a directory, and change directory to it.
+
+% mkdir hpux
+% cd hpux
+
+2. Run the unix_setup script with the following arguments:
+	- Source directory
+	- OS name
+	- optional gcc compiler flags
+
+% ../alsp_src/unix/unix_setup ../alsp_src hpux -g -DINTCONSTR
+
+3. Make.
+
+% make
+
