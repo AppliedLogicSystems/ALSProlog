@@ -7,6 +7,12 @@
  |	Author: Chuck Houpt
  * ======================================================== */
 
+module odbc.
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%% Environment & Connection Predicates
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 /*!-----------------------------------------------------------*
  |	sql_alloc_env/1
  |	sql_alloc_env(ID)
@@ -71,6 +77,7 @@
  |	- Prolog level binding to shared libraries and DLLs
  *-----------------------------------------------------------*/
 
+export sql_alloc_env/1.
 sql_alloc_env(Environment) 
 	:-
 	check_var(Environment),
@@ -86,6 +93,7 @@ sql_alloc_env(Environment)
  |
  |	-	allocate a Connection for an Environment
  *-----------------------------------------------------------*/
+export sql_alloc_connect/2.
 sql_alloc_connect(Environment, Connection) 
 	:-
 	check_var(Connection),
@@ -101,6 +109,7 @@ sql_alloc_connect(Environment, Connection)
  |
  |	-	attach a Connection to a Data Source
  *-----------------------------------------------------------*/
+export sql_connect/4.
 sql_connect(Connection, DataSourceName, UserID, AuthenticationString) 
 	:-
 	atom_length(DataSourceName, DataSourceNameLength),
@@ -121,6 +130,7 @@ sql_connect(Connection, DataSourceName, UserID, AuthenticationString)
  |
  |	- attach a Connection to a Data Source
  *-----------------------------------------------------------*/
+export sql_driver_connect/6.
 sql_driver_connect(Connection, Window, ConnectionString,
 		   ConnectionStringOutput, OutputLengthMax, DriverCompletion) 
 	:-
@@ -146,6 +156,7 @@ sql_driver_connect(Connection, Window, ConnectionString,
  |
  |	Based on SQLBrowseConnect.
  *-----------------------------------------------------------*/
+export sql_browse_connect/4.
 sql_browse_connect(Connection, ConnectionString,
 		   ConnectionStringOutput, OutputLengthMax) 
 	:-
@@ -160,6 +171,9 @@ sql_browse_connect(Connection, ConnectionString,
 	c_examine(ConStringOutLenPtr, short, ConStringOutputLength),
 	clip_uia(ConnectionStringOutput, ConStringOutputLength).
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%% Drivers and Data Sources
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 /*!-----------------------------------------------------------*
  |	sql_data_sources/6
  |	sql_data_sources(Environment, Direction, DataSourceName, 
@@ -172,6 +186,7 @@ sql_browse_connect(Connection, ConnectionString,
  |	Obtain information about a given Data Source; 
  |	based on SQLDataSource.
  *-----------------------------------------------------------*/
+export sql_data_sources/6.
 sql_data_sources(Environment, Direction, DataSourceName, DataSourceNameMax,
 		 Description, DescriptionMax) 
 	:-
@@ -196,6 +211,7 @@ sql_data_sources(Environment, Direction, DataSourceName, DataSourceNameMax,
  |	sql_drivers(Environment, Direction, DriverDesc, DriverDescMax,
  |		 DriverAttrib, DriverAttribMax) 
  *-----------------------------------------------------------*/
+export sql_drivers/6.
 sql_drivers(Environment, Direction, DriverDesc, DriverDescMax,
 		 DriverAttrib, DriverAttribMax) 
 	:-
@@ -215,6 +231,7 @@ sql_drivers(Environment, Direction, DriverDesc, DriverDescMax,
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_get_info/4.
 sql_get_info(Connection, InfoType, InfoValue, InfoMax) 
 	:-
 	must_c_const(InfoType, InfoTypeNumber),
@@ -224,10 +241,24 @@ sql_get_info(Connection, InfoType, InfoValue, InfoMax)
 	check_sql_result(Result, connection, Connection),
 	c_examine(InfoLenPtr, short, InfoLength),
 	clip_uia(InfoValue, InfoLength).
+
+/*-----------------------------------------------------------------* 
+	ALSO NEED:
+ SQLUINTEGER	 fFuncs;
+
+SQLGetInfo(hdbc,
+           SQL_STRING_FUNCTIONS,
+           (SQLPOINTER)&fFuncs,
+           sizeof(fFuncs),
+           NULL);
+ *-----------------------------------------------------------------*/
 	
-/* sql_get_functions, should probably be made more prolog-y.  have one function to
-   test the existence of a single function, and another to get the full list of
-   functions. */
+/* 
+	sql_get_functions should probably be made more prolog-y.  
+	have one function to test the existence of a single function, 
+	and another to get the full list of functions. 
+*/
+
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 sql_get_functions(Connection, Function, ExistsPtr) 
@@ -245,10 +276,15 @@ sql_get_type_info(Statement, Type)
 	o_SQLGetTypeInfo(Statement, TypeNumber, Result),
 	check_sql_result(Result, statement, Statement).
 
-/* Setting and Retrieving Driver Options */
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%% Setting and Retrieving Driver Options
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-/* sql_set_connection_option should be smarter - take either an int or atom as Param and
-   do the right thing with it. */
+/* 
+	sql_set_connection_option should be smarter - take either an 
+	int or atom as Param and do the right thing with it. 
+*/
+
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 sql_set_connect_option(Connection, Option, Param) 
@@ -257,7 +293,8 @@ sql_set_connect_option(Connection, Option, Param)
 	o_SQLSetConnectOption(Connection, OptionNumber, Param, Result),
 	check_sql_result(Result, connection, Connection).
 
-/* Ditto as above */
+	/* Ditto as above */
+
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 sql_get_connect_option(Connection, Option, ParamPtr) 
@@ -282,11 +319,13 @@ sql_get_stmt_option(Statement, Option, ParamPtr)
 	o_SQLGetStmtOption(Statement, OptionNumber, ParamPtr, Result),
 	check_sql_result(Result, statement, Statement).
 
-
-/* Preparing SQL Requests */
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%% Preparing SQL Requests 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_alloc_stmt/2.
 sql_alloc_stmt(Connection, Statement) 
 	:-
 	c_alloc(ptr, StmtHandle),
@@ -296,6 +335,7 @@ sql_alloc_stmt(Connection, Statement)
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_prepare/2.
 sql_prepare(Statement, String) 
 	:-
 	must_c_const('SQL_NTS', SQL_NTS),
@@ -304,6 +344,7 @@ sql_prepare(Statement, String)
 	
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_bind_parameters/10.
 sql_bind_parameters(Statement, ParamNumber, ParamType, CType, SQLType,
 		    ColDef, Scale, Value, ValueMax, ValueLenPtr) 
 	:-
@@ -316,6 +357,7 @@ sql_bind_parameters(Statement, ParamNumber, ParamType, CType, SQLType,
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_param_options/3.
 sql_param_options(Statement, CRow, RowNumberPtr) 
 	:-
 	o_SQLParamOptions(Statement, CRow, RowNumberPtr, Result),
@@ -323,6 +365,7 @@ sql_param_options(Statement, CRow, RowNumberPtr)
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_get_cursor_name/3.
 sql_get_cursor_name(Statement, CursorName, CursorMax) 
 	:-
 	c_allocn(char, CursorName),
@@ -334,6 +377,7 @@ sql_get_cursor_name(Statement, CursorName, CursorMax)
 	
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_set_cursor_name/2.
 sql_set_cursor_name(Statement, CursorName) 
 	:-
 	must_c_const('SQL_NTS', SQL_NTS),
@@ -344,6 +388,7 @@ sql_set_cursor_name(Statement, CursorName)
    constant or an actual count. */
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_set_scroll_options/4.
 sql_set_scroll_options(Statement, Concurrency, KeysetCount, RowsetCount) 
 	:-
 	must_c_const(Concurrency, ConcurrencyNumber),
@@ -354,6 +399,7 @@ sql_set_scroll_options(Statement, Concurrency, KeysetCount, RowsetCount)
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_execute/1.
 sql_execute(Statement) 
 	:-
 	o_SQLExecute(Statement, Result),
@@ -361,6 +407,7 @@ sql_execute(Statement)
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_exec_direct/2.
 sql_exec_direct(Statement, Query) 
 	:-
 	atom_length(Query, QueryLen),
@@ -369,6 +416,7 @@ sql_exec_direct(Statement, Query)
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_native_sql/4.
 sql_native_sql(Connection, SQLStrIn, SQLStrOut, SQLStrMax) 
 	:-
 	c_allocn(char, SQLStrMax, SQLStrOut),
@@ -380,6 +428,7 @@ sql_native_sql(Connection, SQLStrIn, SQLStrOut, SQLStrMax)
 	
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_describe_param/6.
 sql_describe_param(Statement, ParamMarkerNumber, SQLType, ColDef, Scale, Nullable) 
 	:-
 	c_alloc(short, SQLTypePtr),
@@ -396,6 +445,7 @@ sql_describe_param(Statement, ParamMarkerNumber, SQLType, ColDef, Scale, Nullabl
 	
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_num_params/2.
 sql_num_params(Statement, ParamCount) 
 	:-
 	c_alloc(short, ParamCountPtr),
@@ -405,6 +455,7 @@ sql_num_params(Statement, ParamCount)
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_param_data/2.
 sql_param_data(Statement, ValuePtr) 
 	:-
 	o_SQLParamData(Statement, ValuePtr, Result),
@@ -412,6 +463,7 @@ sql_param_data(Statement, ValuePtr)
 	
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_put_data/2.
 sql_put_data(Statement, Value) 
 	:-
 	atom_length(Value, ValueLength),
@@ -422,6 +474,7 @@ sql_put_data(Statement, Value)
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_row_count/2.
 sql_row_count(Statement, RowCount) 
 	:-
 	c_alloc(long, RowCountPtr),
@@ -431,6 +484,7 @@ sql_row_count(Statement, RowCount)
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_num_result_cols/2.
 sql_num_result_cols(Statement, NumResultCols) 
 	:-
 	c_alloc(short, NumResultColsPtr),
@@ -470,6 +524,7 @@ nullable_type(X,Y) :- throw_error(domain_error(sql_constant, [X,Y])).
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_describe_col/8.
 sql_describe_col(Statement, ColNum, ColName, NameMax, SQLType, Percision, Scale, Nullable) 
 	:-
 	c_allocn(char, NameMax, ColName),
@@ -492,6 +547,7 @@ sql_describe_col(Statement, ColNum, ColName, NameMax, SQLType, Percision, Scale,
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_col_attributes/6.
 sql_col_attributes(Statement, Col, DescType, Desciption, DescMax, DescNumber) 
 	:-
 	must_c_const(DescType, DescTypeNumber),
@@ -507,6 +563,7 @@ sql_col_attributes(Statement, Col, DescType, Desciption, DescMax, DescNumber)
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_bind_col/6.
 sql_bind_col(Statement, ColNum, Type, ValuePtr, ValueMax, ValueLenPtr) 
 	:-
 	must_c_const(Type, TypeNum), 
@@ -515,6 +572,7 @@ sql_bind_col(Statement, ColNum, Type, ValuePtr, ValueMax, ValueLenPtr)
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_fetch/1.
 sql_fetch(Statement) 
 	:-
 	must_c_const('SQL_NO_DATA_FOUND', NoDataFoundResult),
@@ -524,7 +582,26 @@ sql_fetch(Statement)
 	;
 		check_sql_result(Result, statement, Statement)
 	).
-	
+export sql_fetch/2.
+sql_fetch(Statement,Outcome) 
+	:-
+	o_SQLFetch(Statement, Result),
+	(c_const('SQL_NO_DATA_FOUND', Result) ->
+		Outcome = 'SQL_NO_DATA_FOUND'
+		;
+		(c_const('SQL_SUCCESS', Result) ->
+			Outcome = 'SQL_SUCCESS'
+			;
+			(c_const('SQL_SUCCESS_WITH_INFO', Result) ->
+				Outcome = 'SQL_SUCCESS_WITH_INFO'
+				;
+				collect_errors(statement, Statement, Errors),
+				throw_error(sql_error(Result, Errors))
+			)
+		)
+	).
+
+
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 sql_extended_fetch(Statement, FetchType, NumRows, RowsFetched, StatusList) 
@@ -535,24 +612,14 @@ sql_set_pos :- SQLSetPos.
 sql_more_results :- SQLMoreResults.
 sql_error :- SQLError.
 
-/* Obtaining Information about the Data Source's System Tables (Catalog Functions) */
 
-sql_colum_privileges :- SQLColumnPrivileges.
-sql_columns :- SQLColumns.
-sql_foreign_keys :- SQLForeignKeys.
-sql_primary_keys :- SQLPrimaryKeys.
-sql_procedure_columns :- SQLProcedureColumns.
-sql_procedures :- SQLProcedures.
-sql_special_columns :- SQLSpecialColumns.
-sql_statistics :- SQLStatistics.
-sql_table_privileges :- SQLTablePrivileges.
-sql_tables :- SQLTables.
-
-
-/* Terminating a Statement */
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%% Terminating a Statement
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_free_stmt/2.
 sql_free_stmt(Statement, Option) 
 	:-
 	must_c_const(Option, OptionNumber),
@@ -561,6 +628,7 @@ sql_free_stmt(Statement, Option)
 	
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_cancel/1.
 sql_cancel(Statement) 
 	:-
 	o_SQLCancel(Statement, Result),
@@ -568,16 +636,20 @@ sql_cancel(Statement)
 	
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_transact/3.
 sql_transact(Environment, Connection, Type) 
 	:- 
 	must_c_const(Type, TypeNumber),
 	o_SQLTransact(Environment, Connection, TypeNumber, Result),
 	check_sql_result(Result, connection, Connection).
 
-/* Terminating a Connection */
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%% Terminating a Connection
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_disconnect/1.
 sql_disconnect(Connection) 
 	:-
 	o_SQLDisconnect(Connection, Result),
@@ -585,6 +657,7 @@ sql_disconnect(Connection)
 
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_free_connect/1.
 sql_free_connect(Connection) 
 	:-
 	o_SQLFreeConnect(Connection, Result),
@@ -592,19 +665,25 @@ sql_free_connect(Connection)
 	
 /*!-----------------------------------------------------------*
  *-----------------------------------------------------------*/
+export sql_free_env/1.
 sql_free_env(Environment) 
 	:-
 	o_SQLFreeEnv(Environment, Result),
 	check_sql_result(Result, environment, Environment).
 
-/* Utility functions. */
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%% Utility functions
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+export must_c_const/2.
 must_c_const(X, Y) :- c_const(X, Y), !.
 must_c_const(X, Y) :- throw_error(domain_error(sql_constant, X)).
 
+export check_var/1.
 check_var(X) :- var(X), !.
 check_var(X) :- throw_error(type_error(variable, X)).
 
+export check_sql_result/3.
 check_sql_result(Result, _, _) :-
 	c_const('SQL_SUCCESS', Result), !.
 check_sql_result(Result, _, _) :-
@@ -613,6 +692,7 @@ check_sql_result(Result, Type, Object) :-
 	collect_errors(Type, Object, Errors),
 	throw_error(sql_error(Result, Errors)).
 
+export error_params/5.
 error_params(environment, E, E, C, S) :-
 	must_c_const('SQL_NULL_HDBC', C),
 	must_c_const('SQL_NULL_HSTMT', S).
@@ -620,6 +700,7 @@ error_params(connection, C, 0, C, S) :-
 	must_c_const('SQL_NULL_HSTMT', S).
 error_params(statement, S, 0, 0, S).
 
+export collect_errors/3.
 collect_errors(Type, Object, [error(State, NativeError, ErrorMessage) | Rest]) :-
 	error_params(Type, Object, E, C, S),
 	c_allocn(char, 6, State),	
@@ -635,7 +716,13 @@ collect_errors(Type, Object, [error(State, NativeError, ErrorMessage) | Rest]) :
 	collect_errors(Type, Object, Rest).
 collect_errors(_, _, []).
 
+export throw_error/1.
 throw_error(Error) :- throw(error(Error, [])).
 
+export clip_uia/2.
 clip_uia(UIA, 0) :- !.
 clip_uia(UIA, Len) :- '$uia_clip'(UIA, Len).
+
+endmod.
+
+
