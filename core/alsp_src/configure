@@ -573,26 +573,6 @@ DEFS="$DEFS -D_POSIX_SOURCE=1"
   fi
 fi
 
-###################################################################
-# BEGIN HAND MODIFICATION: Check for Solaris
-###################################################################
-
-test -n "$silent" || echo "checking for Solaris"
-
-if test "`(uname) 2>/dev/null`" = SunOS \
-   && uname -r | grep '^5' >/dev/null; then
-{
-test -n "$verbose" && \
-echo "	defining SOLARIS"
-echo "#define" SOLARIS "1" >> confdefs.h
-DEFS="$DEFS -DSOLARIS=1"
-}
-fi
-
-###################################################################
-# END HAND MODIFICATION: Check for Solaris
-###################################################################
-
 test -n "$silent" || echo "checking for minix/config.h"
 cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
