@@ -188,6 +188,15 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 #endif
 
 #ifdef MSWin32
+	/* Set the console mode, in order to disable mouse input.
+	
+	   Mouse input is enabled by default. This causes problems when using
+	   the Windows95 MS-DOS console in full screen mode.  At first no
+	   mouse cursor is visible, but it unexpectedly appears after system/1
+	   calls.
+	  */
+	SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE),
+		ENABLE_PROCESSED_INPUT | ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
     SetConsoleTitle("ALS Prolog");
 #endif
 
