@@ -39,11 +39,14 @@ int Itk_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 #include "version.h"
 
+#if 0
+// This should only be present in the PSL version.
 #ifdef UNIX
 char *version[2] = {
   "@(#)(c) 1997 Applied Logic Systems, Inc.",
   "@(#)ALS Prolog Tcl-Tk Interface " VERSION_STRING " for " UNIX_NAME,
   };
+#endif
 #endif
 
 static Tcl_ObjType *tcl_integer_type, *tcl_double_type, *tcl_list_type;
@@ -118,7 +121,7 @@ static Tcl_Obj *PrologToTclObj(AP_World *w, AP_Obj prolog_obj, Tcl_Interp *inter
 		break;	
 	case AP_ATOM:
 		if (AP_IsNullList(w, prolog_obj)) {
-			tcl_obj = Tcl_NewStringObj("", -1);		
+			tcl_obj = Tcl_NewStringObj((char *)"", -1);		
 		} else {
 			tcl_obj = Tcl_NewStringObj((char *)AP_GetAtomStr(w, prolog_obj), -1);
 		}
@@ -130,11 +133,13 @@ static Tcl_Obj *PrologToTclObj(AP_World *w, AP_Obj prolog_obj, Tcl_Interp *inter
 		}
 		break;
 	case AP_STRUCTURE:
-		tcl_obj = Tcl_NewStringObj("structure", -1);
+		tcl_obj = Tcl_NewStringObj((char *)"structure", -1);
 		break;
 	case AP_VARIABLE:
-		tcl_obj = Tcl_NewStringObj("variable", -1);
+		tcl_obj = Tcl_NewStringObj((char *)"variable", -1);
 		break;
+	default:
+	  tcl_obj = NULL;
 	}
 	
 	return tcl_obj;
@@ -205,7 +210,7 @@ Tcl_ALS_Prolog_Read_Call(ClientData prolog_world, Tcl_Interp *interp, int objc, 
 	AP_Result result;
 
 	if (objc < 3) {
-		Tcl_WrongNumArgs(interp, 1, objv, "termString ?varName ...?");
+		Tcl_WrongNumArgs(interp, 1, objv, (char *)"termString ?varName ...?");
 		return TCL_ERROR;
 	}
 	
@@ -249,7 +254,7 @@ Tcl_ALS_Prolog_Call(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_O
 	AP_Result result;
 
 	if (objc < 4 || (objc%2) != 0) {
-		Tcl_WrongNumArgs(interp, 1, objv, "call module functor ?-type arg ...?");
+		Tcl_WrongNumArgs(interp, 1, objv, (char *)"call module functor ?-type arg ...?");
 		return TCL_ERROR;
 	}
 	
@@ -264,13 +269,13 @@ Tcl_ALS_Prolog_Call(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_O
 		AP_Obj arg;
 		
 		enum {NUMBER, ATOM, LIST, VAR};
-		char *callOptions[] = {"-number", "-atom", "-list", "-var", NULL};
+		const char *callOptions[] = {"-number", "-atom", "-list", "-var", NULL};
 		argc = (objc-4)/2;
 
 		call = AP_NewStructure(w, functor, argc);
 		
 		for (a = 0, i = 4, vars = AP_NullList(w); a < argc; a++, i+=2) {
-			if (Tcl_GetIndexFromObj(NULL, objv[i], callOptions, "", TCL_EXACT, &option) == TCL_OK) {
+			if (Tcl_GetIndexFromObj(NULL, objv[i], (char **)callOptions, (char *)"", TCL_EXACT, &option) == TCL_OK) {
 				switch (option) {
 				case NUMBER:
 					if (Tcl_ConvertToType(interp, objv[i+1], tcl_integer_type) == TCL_OK
@@ -294,7 +299,7 @@ Tcl_ALS_Prolog_Call(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_O
 				}
 			} else {
 				Tcl_WrongNumArgs(interp, 2, objv,
-					"module functor ?-type arg ...?"
+					(char *)"module functor ?-type arg ...?"
 				);
 				return TCL_ERROR;
 			}
@@ -334,15 +339,15 @@ static int
 Tcl_ALS_Prolog_ObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
 {
 	enum {PROLOG_CALL, PROLOG_READ_CALL, PROLOG_INTERRUPT};
-	char *prologOptions[] = {"call", "read_call", "interrupt", NULL};
+	const char *prologOptions[] = {"call", "read_call", "interrupt", NULL};
 	int option;
 
 	if (objc < 2) {
-		Tcl_WrongNumArgs(interp, 1, objv, "option ?arg ...?");
+		Tcl_WrongNumArgs(interp, 1, objv, (char *)"option ?arg ...?");
 		return TCL_ERROR;
 	}
 	
-	if (Tcl_GetIndexFromObj(interp, objv[1], prologOptions, "option", TCL_EXACT, &option)
+	if (Tcl_GetIndexFromObj(interp, objv[1], (char **)prologOptions, (char *)"option", TCL_EXACT, &option)
 		!= TCL_OK) {
 		return TCL_ERROR;
 	}
@@ -370,14 +375,14 @@ Tcl_DoOneEventCmd(ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const 
 	int index, result;
 	
 	enum {EVENT_WAIT, EVENT_DONT_WAIT};
-    static char *eventOptions[] = {"wait", "dont_wait", (char *) NULL};
+	const char *eventOptions[] = {"wait", "dont_wait", NULL};
 
 	if (objc != 2) {
-		Tcl_WrongNumArgs(interp, 1, objv, "option");
+		Tcl_WrongNumArgs(interp, 1, objv, (char *)"option");
 		return TCL_ERROR;
 	}
 	
-    if (Tcl_GetIndexFromObj(interp, objv[1], eventOptions, "option", 0, &index)
+    if (Tcl_GetIndexFromObj(interp, objv[1], (char **)eventOptions, (char *)"option", 0, &index)
 	    != TCL_OK) {
     	return TCL_ERROR;
     }
@@ -389,6 +394,9 @@ Tcl_DoOneEventCmd(ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const 
 	case EVENT_DONT_WAIT:
 		result = Tcl_DoOneEvent(TCL_DONT_WAIT);
 		break;
+	default:
+	  result = 0;
+	  break;
 	}
 	
 	Tcl_SetObjResult(interp, Tcl_NewIntObj(result));
@@ -437,14 +445,14 @@ static short MyHandleOneEvent(EventRecord *)
 
 static int ALSProlog_Package_Init(Tcl_Interp *interp, AP_World *w)
 {
-  if (!Tcl_PkgRequire(interp, "Tcl", "8.0", 0)
-      || !Tcl_CreateObjCommand(interp, "prolog", Tcl_ALS_Prolog_ObjCmd, w, NULL)
-      || !Tcl_CreateObjCommand(interp, "dooneevent", Tcl_DoOneEventCmd, w, NULL))
+  if (!Tcl_PkgRequire(interp, (char *)"Tcl", (char *)"8.0", 0)
+      || !Tcl_CreateObjCommand(interp, (char *)"prolog", Tcl_ALS_Prolog_ObjCmd, w, NULL)
+      || !Tcl_CreateObjCommand(interp, (char *)"dooneevent", Tcl_DoOneEventCmd, w, NULL))
     {
       return TCL_ERROR;
     }
   
-  return Tcl_PkgProvide(interp, "ALSProlog", VERSION_STRING);
+  return Tcl_PkgProvide(interp, (char *)"ALSProlog", (char *)VERSION_STRING);
 }
 
 static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *interp_name)
@@ -480,7 +488,7 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 
 	{
 		Tcl_DString path;
-		char *elements[3];
+		const char *elements[3];
 		Tcl_DStringInit(&path);
 		elements[0] = library_dir;
 #ifdef macintosh
@@ -489,12 +497,12 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 		elements[1] = "lib";
 #endif
 		elements[2] = "tcl" TCL_VERSION;
-		Tcl_JoinPath(3, elements, &path);
-		Tcl_SetVar(interp, "tcl_library", path.string, TCL_GLOBAL_ONLY);
+		Tcl_JoinPath(3, (char **)elements, &path);
+		Tcl_SetVar(interp, (char *)"tcl_library", path.string, TCL_GLOBAL_ONLY);
 		Tcl_DStringSetLength(&path, 0);
-		Tcl_JoinPath(2, elements, &path);
-		Tcl_SetVar(interp, "tcl_pkgPath", path.string, TCL_GLOBAL_ONLY|TCL_LIST_ELEMENT);
-		Tcl_SetVar(interp, "autopath", "", TCL_GLOBAL_ONLY);
+		Tcl_JoinPath(2, (char **)elements, &path);
+		Tcl_SetVar(interp, (char *)"tcl_pkgPath", path.string, TCL_GLOBAL_ONLY|TCL_LIST_ELEMENT);
+		Tcl_SetVar(interp, (char *)"autopath", (char *)"", TCL_GLOBAL_ONLY);
 		Tcl_DStringFree(&path);
 	}
 	
@@ -512,10 +520,10 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 		TclToPrologResult(w, NULL, interp, r);
 		goto error_delete;
 	}
-	Tcl_StaticPackage(interp, "Itcl", Itcl_Init, Itcl_SafeInit);
+	Tcl_StaticPackage(interp, (char *)"Itcl", Itcl_Init, Itcl_SafeInit);
 
 	r = Tcl_Import(interp, Tcl_GetGlobalNamespace(interp),
-		       "::itcl::*", /* allowOverwrite */ 1);
+		       (char *)"::itcl::*", /* allowOverwrite */ 1);
 
 	if (r != TCL_OK) {
 	  TclToPrologResult(w, NULL, interp, r);
@@ -523,7 +531,7 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 	}
 
 	r = Tcl_Eval(interp,
-"auto_mkindex_parser::slavehook { _%@namespace import -force ::itcl::* }");
+(char *)"auto_mkindex_parser::slavehook { _%@namespace import -force ::itcl::* }");
 
 	if (r != TCL_OK) {
 	  TclToPrologResult(w, NULL, interp, r);
@@ -587,7 +595,7 @@ static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 	
 	{
 		Tcl_DString path;
-		char *elements[3];
+		const char *elements[3];
 		Tcl_DStringInit(&path);
 		elements[0] = library_dir;
 #ifdef macintosh
@@ -596,8 +604,8 @@ static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 		elements[1] = "lib";
 #endif
 		elements[2] = "tk" TK_VERSION;
-		Tcl_JoinPath(3, elements, &path);
-		Tcl_SetVar(interp, "tk_library", path.string, TCL_GLOBAL_ONLY);
+		Tcl_JoinPath(3, (char **)elements, &path);
+		Tcl_SetVar(interp, (char *)"tk_library", path.string, TCL_GLOBAL_ONLY);
 		Tcl_DStringFree(&path);
 	}
 
@@ -615,15 +623,15 @@ static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 		  TclToPrologResult(w, NULL, interp, r);
 		  return AP_EXCEPTION;
 		}
-		Tcl_StaticPackage(interp, "Itk", Itk_Init, (Tcl_PackageInitProc *) NULL);
+		Tcl_StaticPackage(interp, (char *)"Itk", Itk_Init, (Tcl_PackageInitProc *) NULL);
 		r = Tcl_Import(interp, Tcl_GetGlobalNamespace(interp),
-			       "::itk::*", /* allowOverwrite */ 1);
+			       (char *)"::itk::*", /* allowOverwrite */ 1);
 		if (r != TCL_OK) {
 		  TclToPrologResult(w, NULL, interp, r);
 		  return AP_EXCEPTION;
 		}
 
-		r = Tcl_Eval(interp, "auto_mkindex_parser::slavehook { _%@namespace import -force ::itcl::* ::itk::* }");
+		r = Tcl_Eval(interp, (char *)"auto_mkindex_parser::slavehook { _%@namespace import -force ::itcl::* ::itk::* }");
 		if (r != TCL_OK) {
 		  TclToPrologResult(w, NULL, interp, r);
 		  return AP_EXCEPTION;
@@ -679,7 +687,7 @@ static AP_Result tcl_eval0(AP_World *w, AP_Obj interp_name, AP_Obj command, AP_O
 	
 	tcl_command = PrologToTclObj(w, command, interp);
 	if (option == arg_list) {
-		eval_string = Tcl_NewStringObj("eval", -1);
+		eval_string = Tcl_NewStringObj((char *)"eval", -1);
 		if (!tcl_command || !eval_string) {
 			return AP_SetStandardError(w, AP_RESOURCE_ERROR, AP_NewSymbolFromStr(w, "tcl_memory"));
 		}
@@ -875,9 +883,9 @@ void pi_init(void)
 	Tcl_InitHashTable(&tcl_interp_name_table, TCL_STRING_KEYS);
 	
 	/* Get pointers to the standard Tcl types. */
-	tcl_integer_type = Tcl_GetObjType("int");
-	tcl_double_type = Tcl_GetObjType("double");
-	tcl_list_type = Tcl_GetObjType("list");
+	tcl_integer_type = Tcl_GetObjType((char *)"int");
+	tcl_double_type = Tcl_GetObjType((char *)"double");
+	tcl_list_type = Tcl_GetObjType((char *)"list");
 		
 	tcltk_module = AP_NewSymbolFromStr(NULL, "tcltk");
 	
