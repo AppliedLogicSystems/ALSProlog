@@ -26,7 +26,7 @@ CPPFLAGS = $(BUILD_FLAGS) \
 # -Wstrict-prototypes - Complains about arg-less function pointer like:
 #                       int (*func)(), which I think are legal.
 
-CFLAGS = -O3 -MMD -Wall -Werror -Wmissing-prototypes -Wwrite-strings \
+CFLAGS = -O -MMD -Wall -Werror -Wmissing-prototypes -Wwrite-strings \
 		 -Wnested-externs -Wpointer-arith
 
 MAIN_SOURCE = topmain.c

@@ -1,5 +1,4 @@
 CPPFLAGS += -DUNIX_SUNOS
-CFLAGS += -O2
 OS_AR = ar ru
 OS_RANLIB = ranlib
 OS_SL_EXT = so.1.0
