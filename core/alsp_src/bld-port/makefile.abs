@@ -416,7 +416,7 @@ rule('demo_sioux_alspro',
 rule(alspro_b,
 	case(&(context_name), [
 		(mac: ['mpw_alspro']),
-		(_: [ext(pimain,&(object)),'alspro.a'])]),
+		(_: [ext(pi_init,&(object)),'alspro.a'])]),
 	case(&(context_name),[
 		(mac: ['duplicate -y mpw_alspro_b alspro_b']),
 		(djgpp1: ['$(CC) -o alspro_b $^ $(LDFLAGS) $(LIBS)',
@@ -426,7 +426,7 @@ rule(alspro_b,
 		(_:['$(CC) -o alspro_b $^ $(LDFLAGS) $(LIBS)'])  ]) ).
 
 rule(key_alspro_b,
-		[ext(pimain,&(object)), 'key_alspro.a'],
+		[ext(pi_init,&(object)), 'key_alspro.a'],
 		['$(CC) -o key_alspro_b $^ $(LDFLAGS) $(LIBS) $(KEYLIBS)']).
 
 rule(alspro,

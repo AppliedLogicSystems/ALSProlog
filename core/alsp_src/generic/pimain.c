@@ -189,6 +189,8 @@ void main(int argc, char *argv[])
 	exit(EXIT_ERROR);
     }
 
+    pi_init();
+
     if ((exit_status = PI_toplevel(&success)) != 0) {
 	PI_app_printf(PI_app_printf_error, "Prolog shell crashed !\n");
 	exit(EXIT_ERROR);
