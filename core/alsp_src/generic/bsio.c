@@ -111,9 +111,9 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	    #include <arpa/inet.h>
 	    #include <netdb.h>
 	    #include <sys/param.h>
-	    #ifndef SCO_UNIX
+	    #ifndef MISSING_UNIX_DOMAIN_SOCKETS
 	       #include <sys/un.h>
-	    #endif /* SCO_UNIX */
+	    #endif /* MISSING_UNIX_DOMAIN_SOCKETS */
 	    #ifdef UNIX_IRIX
             /* Required for definition of bzero(). */
                #include <bstring.h>
@@ -2092,9 +2092,9 @@ sio_socket_open()
     struct sockaddr_in sockname_in;	/* Internet socket addresses */
     struct hostent *hp;
 
-#ifdef AF_UNIX
+#ifndef MISSING_UNIX_DOMAIN_SOCKETS
     struct sockaddr_un sockname_un;	/* Unix socket addresses */
-#endif /* AF_UNIX */
+#endif
 
 #elif defined(PCFTP_SOCKETS)
     struct addr sockname;
@@ -2133,7 +2133,7 @@ sio_socket_open()
 	FAIL;
     
     if (t3 == WTP_INTEGER && (
-#ifdef AF_UNIX
+#ifndef MISSING_UNIX_DOMAIN_SOCKETS
     				v3 == AF_UNIX ||
 #endif
 				v3 == AF_INET ))
@@ -2200,7 +2200,7 @@ sio_socket_open()
     }
 
     switch (domain) {
-#ifdef AF_UNIX
+#ifndef MISSING_UNIX_DOMAIN_SOCKETS
 	case AF_UNIX :
 	    sockname_un.sun_family = AF_UNIX;
 	    strcpy(sockname_un.sun_path, (UCHAR *) host_or_path);
@@ -2217,7 +2217,7 @@ sio_socket_open()
 				      + strlen(sockname_un.sun_path)));
 	    }
 	    break;
-#endif /* AF_UNIX */
+#endif /* MISSING_UNIX_DOMAIN_SOCKETS */
 	case AF_INET :
 	    gethostname(myhostname, MAXHOSTNAMELEN);
 	    memset(&sockname_in, 0, sizeof sockname_in);
@@ -2405,7 +2405,7 @@ static void
 delete_stream_name(vsd)
     PWord vsd;
 {
-#ifdef AF_UNIX
+#ifndef MISSING_UNIX_DOMAIN_SOCKETS
     PWord vns,vn,vd;
     int   tns,tn,td;
     UCHAR  *pathname, *domainname;
@@ -2419,7 +2419,7 @@ delete_stream_name(vsd)
 	    && strcmp(domainname,"unix") == 0 )
 	    unlink(pathname);
     }
-#endif /* AF_UNIX */
+#endif /* MISSING_UNIX_DOMAIN_SOCKETS */
 }
 
 
