@@ -1,5 +1,5 @@
 
-tmp_ld_tmp(Y,X) :- join_path([alsdir,Y,X],Z), simple_load(Z).
+tmp_ld_tmp(Y,X) :- append(Y,[X],PL), join_path(PL,Z), simple_load(Z).
 
 bldit(CorePath, SVIm)
 	:- 
@@ -8,9 +8,10 @@ bldit(CorePath, SVIm)
 	join_path(TcltkUtilList, TcltkUtil),
 	simple_load(TcltkUtil),
 
-	tmp_ld_tmp(builtins,'blt_dvsh.pro'), 
-	tmp_ld_tmp(builtins,'dbg_class.pro'), 
-	tmp_ld_tmp(builtins,'projects.pro'), 
+	append(CPL,[alsp_src,builtins],BPL),
+	tmp_ld_tmp(BPL,'blt_dvsh.pro'), 
+	tmp_ld_tmp(BPL,'dbg_class.pro'), 
+	tmp_ld_tmp(BPL,'projects.pro'), 
 
 	append(CPL,[als_dev,alsdev,'demo15.pro'], Demo15List), 
 	join_path(Demo15List, Demo15),
@@ -19,15 +20,17 @@ bldit(CorePath, SVIm)
 	join_path(SerialList, Serial),
 		simple_load(Serial),
 
-	tmp_ld_tmp(library,'listutl1.pro'),
-	tmp_ld_tmp(library,'miscterm.pro'),
-	tmp_ld_tmp(library,'msc_ioin.pro'),
-	tmp_ld_tmp(library,'mscioout.pro'),
-	tmp_ld_tmp(library,'strctutl.pro'),
-	tmp_ld_tmp(library,'strings.pro'),
-	tmp_ld_tmp(library,'tcl_sppt.pro'),
-	tmp_ld_tmp(library,'tk_alslib.pro'),
-	tmp_ld_tmp(library,'typecomp.pro'),
+	append(CPL,[alsp_src,library],LPL),
+	tmp_ld_tmp(LPL,'listutl1.pro'),
+	tmp_ld_tmp(LPL,'miscterm.pro'),
+	tmp_ld_tmp(LPL,'msc_ioin.pro'),
+	tmp_ld_tmp(LPL,'mscioout.pro'),
+	tmp_ld_tmp(LPL,'strctutl.pro'),
+	tmp_ld_tmp(LPL,'strings.pro'),
+	tmp_ld_tmp(LPL,'tcl_sppt.pro'),
+	tmp_ld_tmp(LPL,'tk_alslib.pro'),
+	tmp_ld_tmp(LPL,'typecomp.pro'),
+
 	call(SVIm),
 	abolish(tmp_ld_tmp, 2),
 	abolish(bldit,2).
