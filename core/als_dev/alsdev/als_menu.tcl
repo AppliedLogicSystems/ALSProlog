@@ -36,12 +36,12 @@ proc add_file_menu {menubar type window} {
 	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
 	menu $menubar.file -tearoff $TearOff -title File
 	
-    $menubar.file add command -label New -accelerator "$mod-N" -command {re document.new}
-    $menubar.file add command -label "Open$elipsis" -accelerator "$mod-O" -command {re document.open}
-    $menubar.file add command -label Close -accelerator "$mod-W" -command "re {$type.close $window}"
+    $menubar.file add command -label New -underline 0 -accelerator "$mod-N" -command {re document.new}
+    $menubar.file add command -label "Open$elipsis" -underline 0 -accelerator "$mod-O" -command {re document.open}
+    $menubar.file add command -label Close -underline 0 -accelerator "$mod-W" -command "re {$type.close $window}"
     $menubar.file add separator
-    $menubar.file add command -label Save -accelerator "$mod-S" -command "re {$type.save $window}"
-    $menubar.file add command -label "Save As$elipsis" -command "re {$type.save_as $window}"
+    $menubar.file add command -label Save -underline 0 -accelerator "$mod-S" -command "re {$type.save $window}"
+    $menubar.file add command -label "Save As$elipsis" -underline 5 -command "re {$type.save_as $window}"
 
 #    $menubar.file add separator
 #    $menubar.file add command -label "Page Setup$elipsis" \
@@ -50,9 +50,14 @@ proc add_file_menu {menubar type window} {
 #		-command "re {$type.print $window}" -state disabled
 
     $menubar.file add separator
-    $menubar.file add command -label "Quit" -accelerator "$mod-Q" -command {re exit_prolog}
+    
+	if {$tcl_platform(platform) == "windows"} {
+    	$menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_prolog}
+    } else {
+    	$menubar.file add command -label "Quit" -accelerator "$mod-Q" -command {re exit_prolog}
+	}
 
-	$menubar add cascade -menu $menubar.file -label "File"
+	$menubar add cascade -menu $menubar.file -label "File" -underline 0
 }
 
 proc add_edit_menu {menubar type window} {
@@ -65,24 +70,24 @@ proc add_edit_menu {menubar type window} {
 	menu $menubar.edit -tearoff $TearOff -title Edit
 	
     $menubar.edit add command \
-        -label Undo -accelerator "$mod-Z" -command "re {$type.undo $window}" -state disabled
+        -label Undo -underline 0 -accelerator "$mod-Z" -command "re {$type.undo $window}" -state disabled
     $menubar.edit add separator
-    $menubar.edit add command -label Cut \
+    $menubar.edit add command -label Cut -underline 2 \
 		-accelerator "$mod-X" -command "re {$type.cut $window}"
     $menubar.edit add command \
-        -label Copy -accelerator "$mod-C" -command "re {$type.copy $window}"
+        -label Copy -underline 0 -accelerator "$mod-C" -command "re {$type.copy $window}"
     $menubar.edit add command \
-        -label Paste -accelerator "$mod-V" -command "re {$type.paste $window}"
+        -label Paste -underline 0 -accelerator "$mod-V" -command "re {$type.paste $window}"
     $menubar.edit add command \
-        -label Clear -command "re {$type.clear $window}"
+        -label Clear -underline 2 -command "re {$type.clear $window}"
     $menubar.edit add separator
     $menubar.edit add command \
-        -label {Select All} -accelerator "$mod-A" -command "re {$type.select_all $window}"
+        -label {Select All} -underline 8 -accelerator "$mod-A" -command "re {$type.select_all $window}"
     $menubar.edit add separator
     $menubar.edit add command \
-		-label "Preferences$elipsis" -command "re {fonts_and_colors $window}"
+		-label "Preferences$elipsis" -underline 3 -command "re {fonts_and_colors $window}"
 
-	$menubar add cascade -menu $menubar.edit -label "Edit"
+	$menubar add cascade -menu $menubar.edit -label "Edit" -underline 0
 }
 
 proc add_prolog_menu {menubar type window} {
@@ -93,28 +98,28 @@ proc add_prolog_menu {menubar type window} {
 	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
 	menu $menubar.prolog -tearoff $TearOff -title Prolog
 
-    $menubar.prolog add command -label "Consult" -accelerator "$mod-K" -command "re {$type.consult $window}"
+    $menubar.prolog add command -label "Consult" -underline 0 -accelerator "$mod-K" -command "re {$type.consult $window}"
 	$menubar.prolog add command \
-		-label "Clear Workspace" -command {re clear_workspace}
+		-label "Clear Workspace" -underline 2 -command {re clear_workspace}
 
 	if {"$type"=="listener"} then { 
     	$menubar.prolog add separator
     	$menubar.prolog add command \
-        	-label "Set Directory$elipsis" -command {re set_directory} 
+        	-label "Set Directory$elipsis" -underline 0 -command {re set_directory} 
 
     	$menubar.prolog add separator
 		$menubar.prolog add command \
-			-label "Dynamic Flags" -command {re show_dynamic_flags}
+			-label "Dynamic Flags" -underline 0 -command {re show_dynamic_flags}
 		$menubar.prolog add command \
-			-label "Static Flags" -command {re show_static_flags}
+			-label "Static Flags" -underline 1 -command {re show_static_flags}
 	} elseif {"$type"=="debugwin"} then {
     	$menubar.prolog add separator
-    	$menubar.prolog add command -label {Abort} \
+    	$menubar.prolog add command -label {Abort} -underline 0 \
         	-command {re { set DebugResponse Ba }}
-    	$menubar.prolog add command -label {Break} \
+    	$menubar.prolog add command -label {Break} -underline 0 \
 			-command {re { set DebugResponse Bb }}
 	}
-	$menubar add cascade -label "Prolog" -menu $menubar.prolog
+	$menubar add cascade -label "Prolog" -underline 0 -menu $menubar.prolog
 }
 
 proc add_tools_menu {menubar type window} {
@@ -130,36 +135,36 @@ proc add_tools_menu {menubar type window} {
 
 	if {"$type"=="listener"} then {
 		$menubar.tools add checkbutton \
-			-label Debugger -command exec_toggle_debugwin -variable proenv(debugwin)
-    	$menubar.tools add command -label "Source Tcl$elipsis" -command {re source_tcl} 
-#    	$menubar.tools add command -label "Tcl Shell" -command {re tcl_shell} 
+			-label Debugger -underline 0 -command exec_toggle_debugwin -variable proenv(debugwin)
+    	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} 
+#    	$menubar.tools add command -label "Tcl Shell" -underline 0 -command {re tcl_shell} 
 
 		$menubar.tools add separator 
 		## DefStructs:
 		menu $menubar.tools.defstr -relief raised -tearoff 0
 		$menubar.tools add cascade \
-			-label {Structs} -menu $menubar.tools.defstr
+			-label {Structs} -underline 1 -menu $menubar.tools.defstr
 		$menubar.tools.defstr add command \
-			-label "Define New" -command {re new_defstruct}
+			-label "Define New" -underline 0 -command {re new_defstruct}
 #		$menubar.tools.defstr add command \
-#			-label "Edit" -command {re edit_defstruct} 
+#			-label "Edit" -underline 0 -command {re edit_defstruct} 
 	} else {
 
 		# Spy
 		$menubar.tools add command  -label "Spy$elipsis" \
-			-command {re toggle_spywin} 
+			-underline 0 -command {re toggle_spywin} 
 #		$menubar.tools add checkbutton  -label {Spy$elipsis} \
 #			-command exec_toggle_spywin -variable proenv(spywin)
 		$menubar.tools add command  -label {NoSpy all } \
-			-command {re {prolog call debugger nospy }} 
+			-underline 0 -command {re {prolog call debugger nospy }} 
 
-#		$menubar.tools add command  -label {Spy When} -state disabled
+#		$menubar.tools add command  -label {Spy When} -underline 4 -state disabled
 
 		$menubar.tools add separator
 		$menubar.tools add command  -label {Debug Settings } \
-			-command {re {show_debug_settings}}
+			-underline 0 -command {re {show_debug_settings}}
 	}
-	$menubar add cascade -label "Tools" -menu $menubar.tools
+	$menubar add cascade -label "Tools" -menu $menubar.tools -underline 0
 }
 
 proc add_help_menu {menubar} {
@@ -171,9 +176,9 @@ proc add_help_menu {menubar} {
 		menu $menubar.help
 		
 		$menubar.help add command -label "About ALS Prolog$elipsis" \
-			-command {Window show .about ; raise .about}
+			-underline 0 -command {Window show .about ; raise .about}
 		
-		$menubar add cascade -label "Help" -menu $menubar.help
+		$menubar add cascade -label "Help" -underline 0 -menu $menubar.help
 	}
 
 }
