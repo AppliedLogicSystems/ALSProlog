@@ -1,0 +1,75 @@
+#!/bin/sh
+# Check for proper function of command line arguments and general
+# unix shell functionality.
+
+# currently only tests error handling for -heap and -stack options
+
+#prolog=/apache/choupt/builds/hp/bld-port/alspro_b
+prolog=alspro
+
+echo "Starting Command Line Tests"
+
+$prolog -heap 2> /dev/null
+case $? in
+    0 | 1) echo "Command Line Test Error: expecting exit status 2." ;;
+    2)     echo "Test Successful."
+esac
+
+$prolog -stack 2> /dev/null
+case $? in
+    0 | 1) echo "Command Line Test Error: expecting exit status 2." ;;
+    2)     echo "Test Successful."
+esac
+
+$prolog -heap -stack 2> /dev/null
+case $? in
+    0 | 1) echo "Command Line Test Error: expecting exit status 2." ;;
+    2)     echo "Test Successful."
+esac
+
+$prolog -stack -heap 2> /dev/null
+case $? in
+    0 | 1) echo "Command Line Test Error: expecting exit status 2." ;;
+    2)     echo "Test Successful."
+esac
+
+$prolog -heap xxx 2> /dev/null
+case $? in
+    0 | 1) echo "Command Line Test Error: expecting exit status 2." ;;
+    2)     echo "Test Successful."
+esac
+
+$prolog -stack xxx 2> /dev/null
+case $? in
+    0 | 1) echo "Command Line Test Error: expecting exit status 2." ;;
+    2)     echo "Test Successful."
+esac
+
+$prolog -heap xxx -stack 1000 2> /dev/null
+case $? in
+    0 | 1) echo "Command Line Test Error: expecting exit status 2." ;;
+    2)     echo "Test Successful."
+esac
+
+$prolog -heap 10000 -stack xxx 2> /dev/null
+case $? in
+    0 | 1) echo "Command Line Test Error: expecting exit status 2." ;;
+    2)     echo "Test Successful."
+esac
+
+$prolog -stack 1000 -heap xxx 2> /dev/null
+case $? in
+    0 | 1) echo "Command Line Test Error: expecting exit status 2." ;;
+    2)     echo "Test Successful."
+esac
+
+$prolog -stack xxx -heap 1000 2> /dev/null
+case $? in
+    0 | 1) echo "Command Line Test Error: expecting exit status 2." ;;
+    2)     echo "Test Successful."
+esac
+
+echo "Finished Command Line Tests"
+
+
+
