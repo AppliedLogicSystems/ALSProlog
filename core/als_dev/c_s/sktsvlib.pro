@@ -267,6 +267,16 @@ process_config_item(ports_list=FilePorts, CmdLine, SInfo, ASIn, AllPorts)
 	set_server_info(ports_list, SInfo, AllPorts),
 	set_server_info(non_login_ports, SInfo, NonLoginPorts).
 
+process_config_item(dynamic_loads=LoadsList, CmdLine, SInfo, ASIn, AllPorts)
+	:-!,
+	load_dynamic_list(LoadsList).
+
+load_dynamic_list([]).
+load_dynamic_list([File | LoadsList])
+	:-
+	consult(File),
+	load_dynamic_list(LoadsList).
+
 	%% Look for application-specific processing:
 :-dynamic(application_config_item/5).
 
