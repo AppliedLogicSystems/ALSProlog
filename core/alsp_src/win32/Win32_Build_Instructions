@@ -73,7 +73,7 @@ using Stuffit Expander.  The following projects need expanding:
 all the projects.
 
 Each project may need to have its access paths adjusted, see the note above.
-The projects assume that the alsp_src directory a sibling of the build
+The projects assume that the alsp_src directory is sibling of the build
 directory.
 
 4. From Bash on Win95/NT, run the package.sh script.
