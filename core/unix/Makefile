@@ -5,6 +5,7 @@ all test clean distclean:
 	Linux*) 	ARCH=linux 	;; \
 	"HP-UX"*)	ARCH=hpux	;; \
 	"IRIX"*)	ARCH=irix	;; \
+	"CYGWIN"*)	ARCH=cygwin ;; \
 	*) 		echo "Unknown machine type..."; exit 1 ;; \
 	esac ; \
 	$(MAKE) -C ./$$ARCH $@
