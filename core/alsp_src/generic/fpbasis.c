@@ -25,7 +25,7 @@ int
 is_ieee_inf(v)
 	double v;
 {
-#ifdef SOLARIS
+#if defined(SOLARIS) || defined(UNIX_SOLARIS)
 	switch (fpclass(v)) {
 	case FP_NINF:
 		return(1);
