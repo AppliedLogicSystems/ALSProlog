@@ -137,10 +137,10 @@ proc bind_accelerators {w mod type} {
 		# edit menu:
 #	 bind $w.text <$MMD-z> "$type.undo $w"
 
-	 bind $w.text <$MMD-x> "$type.cut $w"
-	 bind $w.text <$MMD-c> "$type.copy $w"
-	 bind $w.text <$MMD-v> "$type.paste $w"
-	 bind $w.text <$MMD-a> "$type.select_all $w"
+	 bind $w.text <$MMD-x> "$type.cut $w; break"
+	 bind $w.text <$MMD-c> "$type.copy $w; break"
+	 bind $w.text <$MMD-v> "$type.paste $w; break"
+	 bind $w.text <$MMD-a> "$type.select_all $w; break"
 
 		# prolog menu:
 	bind $w.text <$MMD-k> "$type.consult $w"
