@@ -1,0 +1,79 @@
+atomic.sprc:
+		wm_atomic:
+		wm_number:
+		wm_float:
+		wm_integer:
+		wm_atom:
+		wm_nonvar:
+		wm_var:
+		wm_eq:
+		wm_noneq:
+
+call.sprc:
+		wm_call implements the prolog builtin call/1.  On entry, T1 has the module
+		wm_comma implements ','/2
+		wm_semicolon implements ';'/2
+		wm_arrow implements '->'/2
+		wm_colon implements ':'/2
+		wm_dbg_call implements dbg_call/2 which is essentially call but
+		wm_ocall implements callWithDelayedInterrupt (formerly ocall/2) which is
+		wm_jump implements jump/2
+
+chpt.sprc:
+		wm_try3 is called when there are 3 or more arguments.  Similarly,
+		wm_try2 and wm_try1 are called when there are only 2 or 1 arguments
+		wm_try0 is called when there are no arguments to save.
+		wm_trustN	or wm_trust_uN
+		wm_trust3
+		wm_trust2
+		wm_trust1
+		wm_trust0
+		wm_trust_u3
+		wm_trust_u2
+		wm_trust_u1
+		wm_trust_u0
+		wm_trust_fail	-- trust away a choice point and then fail
+		wm_sw_struct	-- switch on structure (actually functor)
+		wm_sw_const	-- switch on constant
+		wm_nciadc
+		wm_nciadc:
+
+compare.sprc:
+		wm_compare implements compare/3.
+
+cut.sprc:
+		wm_docut	-- performs the cut operation
+		wm_cut performs the cut from within call.  This procedure
+
+functor.sprc:
+		wm_functor	-- implements functor/3
+		wm_arg implements arg/3
+		wm_mangle:
+
+ident.sprc:
+		wm_nonidentical:
+		wm_identical:
+
+interface.sprc:
+		wm_exec is the point at which we enter the Prolog environment from C.
+		wm_rungoal is called by C to run a goal, the structure of which resides
+		wm_exec_builtinN
+		wm_fail is returned by the resolve reference code when it can't
+		wm_resolve_ref	-- this code is called when an undefined procedure
+		wm_overflowN is called when an exception condition is detected prior
+		wm_throw
+		wm_catch22
+
+sio.sprc:
+		wm_sio_gbyte
+
+unify.sprc:
+		wm_unify
+		wm_g_int:
+		wm_u_int:
+		wm_u_sym:
+		wm_g_sym:
+		wm_g_uia:
+		wm_p_uia:
+		wm_u_lval:
+		wm_p_unsafe:

@@ -1,0 +1,338 @@
+From kev@cujo.geg.mot.com Fri Oct 21 20:20:28 1994
+Return-Path: <kev@cujo.geg.mot.com>
+Received: by  alsinc (4.1/SMI-4.1)
+	id AA05259; Fri, 21 Oct 94 20:20:28 EDT
+Received: from motgate.mot.com by uu.psi.com (5.65b/4.0.061193-PSI/PSINet) via SMTP;
+        id AA15300 for ken; Fri, 21 Oct 94 14:10:22 -0400
+Received: from pobox.mot.com ([129.188.137.100]) by motgate.mot.com with SMTP (5.67b/IDA-1.4.4/MOT-3.1 for <ken@als.com>)
+          id AB10101; Fri, 21 Oct 1994 13:10:14 -0500
+Received: from motgeg.geg.mot.com by pobox.mot.com with SMTP (5.67b/IDA-1.4.4/MOT-3.1 for <ken@als.com>)
+          id AA01627; Fri, 21 Oct 1994 13:10:11 -0500
+Received: from cujo.ai.geg.mot.com by motgeg.geg.mot.com (AIX 3.2/UCB 5.64/4.03)
+          id AA23559; Fri, 21 Oct 1994 11:00:41 -0700
+Received: by cujo (5.61/MCDMAIL IR05 [05/05/92 11:19]/1.34)
+	id AA12140; Fri, 21 Oct 94 11:10:02 MST
+From: kev <kev@cujo.geg.mot.com>
+Message-Id: <9410211810.AA12140@cujo>
+Subject: /max4/kev/pk-940913/PROLOG-BUILD-NOTES
+To: ken@als.com, medeiros@cujo.geg.mot.com (Scott Medeiros),
+        sam@darth.geg.mot.com
+Date: Fri, 21 Oct 1994 11:10:02 -0700 (MST)
+X-Mailer: ELM [version 2.4 PL23]
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 8054      
+
+PROLOG-BUILD-NOTES 	-- Notes on how to build ALS-Prolog  on
+			   various platforms
+
+
+Pre-build steps:
+---------------
+
+In bash, do the following prior to doing any build (some systems need it, some
+don't -- largely dependent on the size and number of the system include files
+which must be examined while building the X and Motif interfaces.)
+
+	ALS_OPTIONS=heap_size:8000 ; export ALS_OPTIONS
+
+Create the build directory.  I usually use the name of the packaged suffixed
+with a '-' and then the name of the host.   For example,
+
+	mkdir /max4/pk-max
+
+Then cd to the build directory, e.g,
+
+	cd /max4/pk-max
+
+
+Building ALS-Prolog
+-------------------
+
+Suppose the source resides in /max4/kev/pk-940913.  Issue the following
+commands.
+
+	/max4/kev/pk-940913/configure
+	make
+
+Depending on the system, it may be necessary to set some environment
+variables prior to running either the configure script or the make.  See
+below for actual examples.  On some machines, the above two steps will not
+work flawlessly.  It may be necessary to edit Makefile in one of
+
+	bld-port		(byte-code and threaded code)
+	bld-natv		(native code)
+	bld-wins/x		(bld-port or bld-natv plus X)
+	bld-wins/motif		(bld-port or bld-natv plus X + Motif)
+
+Note that editing one of these makefiles will not affect the original
+source code.  If you wish to effect more permanent changes, you will
+need to modify one of the makefile templates (Makefile.in) or one
+of the makefile headers (mh-*) in the source tree.
+
+If you make permanent changes, then send your changes back to Applied Logic
+Systems (ken@als.com) preferably in the form of diffs, either unidiffs (diff
+-u) or context diffs (diff -c).  You can ask Ken which variety he prefers.
+
+
+Post-build steps:
+----------------
+
+If an image called alsXpro is desired, then do the following:
+
+	cd bld-wins/motif
+	alspro_motif -g "assert(als_motif_loaded), save_image(alsXpro)"
+
+If this works properly, you should be left with an alsXpro image
+which may then be moved to an installation directory, e.g.,
+/usr/local/bin
+
+
+See also:
+--------
+
+Ken has a README file in the prolog source directory.  Take a look at it.
+
+The source code.
+
+
+--------
+
+Host name:		checkers
+Date built:		10/17/94
+Machine:		IBM RISC System/6000 250	(PPC 601)
+Operating System:	AIX 3.2.5
+uname -a output:	AIX checkers 2 3 000152044600
+Source directory:	/max4/kev/pk-940913
+Build directory:	/checkers/kev
+Window system:		X11R5/Motif 1.2
+
+Build commands:
+
+	CC="gcc -V2.5.8" /max4/kev/pk-940913/configure
+	make
+
+Comments:
+
+	Sailed through with no intervention at all :-)
+
+	There is no native code support for this machine.
+
+--------
+
+Host name:		fatalbert
+Date built:		10/18/94
+Machine:		SPARCsever 1000		(I think)
+Operating System:	Solaris 2.3
+uname -a output:	SunOS fatalbert 5.3 Generic sun4d sparc
+Source directory:	/export/home/fatalbert/kev/pk-940913
+Build directory:	/export/home/fatalbert/kev/pk-fatalbert
+Window system:		X11R5/Motif 1.2
+
+Build commands:
+
+	LD_LIBRARY_PATH=/usr2/fatalbert/TeleUSE_3.0.1/TeleUSE/Motif1.2/lib:/usr/openwin/lib
+	export LD_LIBRARY_PATH
+
+	X_CFLAGS=-I/usr2/fatalbert/TeleUSE_3.0.1/TeleUSE/Motif1.2/include \
+	X_LIBS=-L/usr2/fatalbert/TeleUSE_3.0.1/TeleUSE/Motif1.2/lib \
+	../pk-940913/configure
+
+	make
+
+Comments:
+
+	Note that if the Motif include files and library files were to be
+	put in the standard places, most of the above nonsense would not be
+	necessary.  (Hint, hint).
+
+	It will be necessary to have LD_LIBRARY_PATH set properly on this
+	system.
+
+
+--------
+
+Host name:		max
+Date built:		10/18/94
+Machine:		Motorola Delta 88
+Operating System	SVR4
+uname -a output:	UNIX_System_V max 4.0 R40V3 m88k mc88100
+Source directory:	/max4/kev/pk-940913
+Build directory:	/max4/kev/pk-max
+Window system:		X11R5/Motif 1.2
+
+Build commands:
+
+	../pk-940913/configure
+	make
+
+Comments:
+
+	Built cleanly.
+
+
+--------
+
+Host name:		cujo
+Date built:		10/18/94
+Machine:		Motorola Delta 88
+Operating System:	SVR3
+uname -a output:	cujo cujo R32V3 920529 M88100
+Source directory:	/max4/kev/pk-940913
+Build directory:	/u2/kev/pk-cujo
+Window system:		X11R4/Motif 1.1
+
+Build commands:
+
+	/max4/kev/pk-940913/configure
+	make
+
+Comments:
+
+	Built cleanly.
+
+--------
+
+Host name:		darth
+Date built:		10/19/94
+Machine:		NeXT (m68k)
+Operating System:	NeXTStep-??
+uname -a output:	not supported (pretty lame if you ask me)
+Source directory:	/Remotes/max4/kev/pk-940913
+Build directory:	/Vader/Users/pro/pk-darth
+Window system:		X11R5/Motif1.2 (CubX)
+
+Build commands:
+
+	/Remotes/max4/kev/pk-940913/configure
+
+	XDEFINES="-I/usr/include/ansi -I/usr/include/bsd \
+	          -D__ARCHITECTURE__=m68k -D_NEXT_SOURCE" \
+	make
+
+
+Comments:
+
+	The XDEFINES environment variable will cause the specified switches
+	to be passed to the interface generator.  This is (unfortunately)
+	necessary because 1) NeXT put the system include files in
+	non-standard places and 2) NeXT uses a non-standard mechanism for
+	including files.  It could be argued that these approaches are
+	better, but it would be nice if NeXT would have provided a mechanism
+	for determining the initial set of C preprocessor defines.  If this
+	were done, we could automate the above step of setting XDEFINES.
+
+
+--------
+
+Host name:		stimpy
+Date built:		10/19/94
+Machine:		SGI Indigo II ?? (mips)
+Operating System:	IRIX-5.2
+uname -a output:	IRIX stimpy 5.2 02282016 IP22 mips
+Source directory:	/export/home/stimpy/kev/pk-940913
+Build directory:	/export/home/stimpy/kev/pk-stimpy
+Window system:		X11R5/Motif1.2 ??
+
+Build commands:
+
+	../pk-940913/configure
+	XDEFINES="-Dsgi -DSGI_SOURCE -Dmips \
+	          -D_LANGUAGE_C -D_MIPS_SZLONG=32 -DMIPS_SZINT=32" make
+
+Comments:
+
+	The als-mics program does not work (it core dumps) on this platform. 
+	Thus it will be impossible to package the builtins.  This will be
+	a problem until SGI fixes the elf library (/usr/lib/libelf.a).
+
+	Note that we had to play a similar trick with XDEFINES as on the
+	NeXT.  The include files are in the normal places.  The difference
+	is that some of the include files reference some of the predefined
+	macro defns and fail to perform all of the typedefs necessary for
+	the build to succeed without them.
+
+
+--------
+
+Host name:		alf
+Date built:		10/20/94
+Machine:		Sun Sparc or perhaps a Solbourne??
+Operating System:	SunOS 4.1.2
+uname -a output:	SunOS alf 4.1B 4.1.2 sun4
+Source directory:	/home/max4/kev/pk-940913
+Build directory:	/home/max4/kev/pk-alf
+Window system:		X11R4/Motif1.1
+
+Build commands:
+
+		../pk-940913/configure ; make
+
+Comments:
+
+	Smooth sailing.
+
+--------
+
+Host name:
+Date built:		10/20/94
+Machine:		Sparc something
+Operating System:	SunOS 4.1.3
+uname -a output:	SunOS rattler 4.1.3 1 sun4c
+Source directory:	/home/max4/kev/pk-940913
+Build directory:	/home/max4/kev/pk-rattler
+Window system:		X11R5/Motif1.2
+
+Build commands:
+
+		LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH
+		export LD_LIBRARY_PATH
+
+		X_CFLAGS=-I/usr/include X_LIBS=-L/usr/lib \
+		../pk-940913/configure
+
+		make
+
+Comments:
+
+	The X_CFLAGS line is needed for the configure because the
+	system administrators forgot to rebuild the fixed include files
+	for gcc after they'd installed X11R5 and Motif1.2.  Doing this
+	sort of thing is normally not a good idea, but it is necessary
+	here in order to avoid mixing some X11R4 include files (the
+	ones which gcc has fixed) with new X11R5 include files.
+
+	Note that the correct way to fix this problem is to get the
+	system administrators to rebuild gcc's include files.
+
+	The reason for setting X_LIBS on this machine is to force /usr/lib
+	to be looked at first before any other library locations.  This
+	machine is a Sparc running SunOS4.1.3, but (as noted above) has been
+	upgraded to X11R5 and Motif1.2.  There is still a directory which
+	is normally searched first which has Sun's old openwindows libraries
+	in it.  These libraries are X11R4 and are incompatible with the
+	include files located in /usr/include/X11 on this machine.
+
+
+--------
+
+Template
+--------
+
+Host name:
+Date built:
+Machine:
+Operating System:
+uname -a output:
+Source directory:
+Build directory:
+Window system:
+
+Build commands:
+
+Comments:
+
+
+--------
+

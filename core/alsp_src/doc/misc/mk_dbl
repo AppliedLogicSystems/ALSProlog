@@ -1,0 +1,120 @@
+Kev,
+
+The question(s) detailed below are motivated by:
+
+a.  Trying to understand the handling of doubles better;
+b.  Wanting to get the handling of doubles (the ALS double API,
+	if you like) as crisp and small as possible as I move towards
+	really connecting up with the BNR Prolog constraint handling
+	mechanism.
+-----------
+
+We seem to have two closely related versions of a function for making
+doubles in the system.
+
+>>> A.  In alloc.c, we have:
+
+pword
+mk_double(dbl)
+    double dbl;
+{
+    register pword d;
+
+    if (dbl == floor(dbl) && MINPROLOGINT <= dbl && dbl <= MAXPROLOGINT)
+	d = MK_INT(floor(dbl));
+    else {
+#ifndef DoubleType
+	register int i;
+	d = MK_TERM(4);
+	TERM_FUNCTOR(d) = MK_FUNCTOR(TK_DDOUBLE, 4);
+	for (i = 0; i < 4; i++)
+	    TERM_ARGN(d, i + 1) = MK_INT(((short *) &dbl)[i]);
+#else
+	d = allocat(2);
+	d->tag = TP_DOUBLE;
+	d->val = (pword) * (long *) &dbl;
+	(d + 1)->val = (pword) * (((long *) &dbl) + 1);
+#endif
+    }
+
+    return d;
+}
+
+Note that this is defined whether or not DoubleType is defined.
+Here are the places where mk_double appears:
+
+alloc.c:mk_double(dbl)
+alloc.h:#define MK_DOUBLE(v) mk_double((double) (v))
+alloc.h:extern  pword   mk_double       PARAMS(( double ));
+
+And here is where MK_DOUBLE appears:
+
+alloc.h:#define MK_DOUBLE(v) mk_double((double) (v))
+expand.c:    return (MK_DOUBLE(d));
+lexan.c:                    curtok = (long) MK_DOUBLE((double) iv);
+lexan.c:                    curtok = (long) MK_DOUBLE(d);
+parser.c:                   TOP_RAND = MK_DOUBLE((double) -iv);
+parser.c:               TOP_RAND = MK_DOUBLE(-d);
+
+>>> B.  In winter.c, we have
+
+#ifdef DoubleType
+double floor();
+
+void
+w_mk_double(rval, rtag, dbl)
+    PWord *rval;
+    int  *rtag;
+    double dbl;
+{
+    if (dbl == floor(dbl) && MINPROLOGINT <= dbl && dbl <= MAXPROLOGINT) {
+	*rval = (int) floor(dbl);
+	*rtag = WTP_INTEGER;
+    }
+    else {
+	long *h;
+
+	*rval = (long) wm_H;
+	*rtag = WTP_DOUBLE;
+	h = wm_H;
+	wm_H += 4;
+	*h = *(h + 3) = MMK_FENCE(3);
+	*(h + 1) = *(int *) &dbl;
+	*(h + 2) = *(((int *) &dbl) + 1);
+    }
+
+}
+....
+#endif
+
+Here are the places w_mk_double appears (and a spot in m88k of course):
+
+arith.c:    w_mk_double(v, t, d);
+butil.c:            w_mk_double(rval, rtag, DOUBLE_VAL(w));
+winter.c:w_mk_double(rval, rtag, dbl)
+winter.h:extern void    w_mk_double PARAMS(( PWord *, int *, double ));
+
+The appearances in arith.c and butil.c are inside #ifdef DoubleType...
+So w_mk_double is only defined in the DoubleType case.
+
+Queries:
+=======
+
+1.  I'm confused by the MMK_FENCE in w_mk_double which doesn't occur in
+	the DoubleType part of mk_double; 
+
+2.  Besides the obvious structural difference (one returns a value,
+	the other returns thru values passed in by ref), is there a deeper
+	significance to the existence of these two functions (which I'm
+	missing)?  I know the following is not quite right, but why couldn't 
+	w_mk_double be defined more or less by:
+
+		w_mk_double(rval, rtag, dbl)
+		...
+			rval = mk_double(dbl);
+		...
+
+3. (Sort of minor):  Why does the macro MK_DOUBLE exist instead of
+	just calling mk_double ? (Possibly consistency with other MK_...??)
+
+Cheers & thanks ...Ken

@@ -1,0 +1,145 @@
+Notes on als-mics				Sun Oct 30 16:20:44 MST 1994
+						Kevin Buettner
+
+
+1) What does als-mics stand for?
+
+The "als" stands for Applied Logic Systems.  The "mics" stands for Merge
+Image and Code Space.
+
+----
+
+2) What is als-mics used for?
+
+als-mics is used to combine a saved [application Prolog] code state from the 
+ALS-Prolog compiler and the image of the compiler/runtime system.  When 
+these two are combined, a deliverable package is produced.
+
+It is flexible enough that should additional stuff (in the form of consulted
+Prolog code) be added to one of these packages, als-mics may be called again
+in order to produce yet another package, ad infinitum.
+
+----
+
+3) How is it used?
+
+It is normally not very difficult to use als-mics since the ALS-Prolog
+runtime system will call it for you at the appropriate time.
+
+It is normally invoked as a result of running save_image/1 or save_image/2.
+
+save_image/[1,2] will take the entire Prolog code area of the running image
+and any other related memory areas and save these to a file.  als-mics is
+then invoked to combine this saved code state with the ALS-Prolog executable
+(or other package) to form a new package.
+
+----
+
+4) If I wanted to invoke it manually, how would I do so?
+
+Under normal circumstances, you will not want to do this.  For testing
+purposes, however, it may be desirable to invoke it manually.
+
+You will first need a saved code state.  This may be obtained by calling
+save_state/1 from within Prolog with the name of the file into which you
+want the saved code state to be put.
+
+Now for the following discussion, suppose that the name of the saved
+code state to be created is 'scstate' and the name of the prolog image
+is 'alspro'.  Let us further stipulate that the name of the new package
+will be 'newpack'.
+
+Then als-mics may be invoked to create 'newpack' as follows:
+
+	als-mics alspro scstate newpack
+
+If all goes well, you will be able to run newpack.
+
+----
+
+5) On which machines / operating systems will als-mics currently run?
+
+It really depends more on which object / executable file format is used.
+als-mics should presently run on systems which support the following
+formats:
+
+	a.out
+	coff	(including xcoff)
+	elf
+	mach	(or whatever the name of the format used by NeXT is called)
+
+This means that SunOS4.? is supported via a.out.  Solaris and SVR4 are
+supported via elf.  The NeXT is supported via the mach.  SVR3 machines are
+supported via coff.  AIX is also supported with coff.  I think that OSF/1
+might also be coff, but the present code will probably need some tweaking
+to make it work.
+
+----
+
+6) How does als-mics work?
+
+It depends on which object file format is used, but for the time being
+let us speak in generalities.
+
+The idea is to find some way of attaching some arbitrary hunk of data
+to the image (whatever format the image is in) and also subtly modify the 
+resulting image + data so that when invoked, the image will load the data, 
+thus restoring the code state created when save_state/1 was called.
+
+The exact way that this is done depends on the object file format.  For
+a.out and coff, attaching the data is fairly easy.  We simply go to
+the end of the file and tack it on.  Of course, if the image that we
+are adding on to was already added on to, we will want to take the old
+saved state and discard it.
+
+elf and mach formats are somewhat trickier.  With both of these formats
+there is a way to allocate our own sections within the executable for
+placing our data.  Thus other utilities which might act upon executables
+will know about our data, but not necessarily what to do with it.
+
+I mentioned earlier that we also subtly modify the resulting image + data
+so that we will restart properly.  If you look in generic/main.c, you will
+see a global variable called "saved_state_image_offset".  This variable
+contains the offset within the image + data to start loading the saved
+code state at.
+
+The mechanism used for the NeXT is different (but worth studying).  This
+is discussed at the beginning of the file utils/machmics.c.
+
+----
+
+7) I need to write a version of als-mics for some other system.  What
+would be the best way to go about this?
+
+  a) Read this document.
+
+  b) Study the following filesi (from the ALS source tree):
+
+	utils/aoutmics.c
+  	utils/coffmics.c
+	utils/elfmics.c
+	utils/machmics.c
+
+  c) Study the appropriate manual pages and other documents relating
+     to these types of object files.
+
+  d) Make a thorough study of the target executable file format.
+
+  e) Study the code in generic/mem.c.  You may also need to make some
+     modifications to this code.
+
+  f) Write your new module, hopefully using one or more of the existing
+     *mics.c files as a template.
+
+----
+
+8) From the loading standpoint, is there anything else that I should be
+aware of?
+
+Yes.  It is imperative (at this time) that the memory areas that were
+saved via save_state/1 be reloaded starting at exactly the same addresses.
+This is why it is necessary to study generic/mem.c.
+
+At some future date, someone will hopefully write some code to allow these
+memory areas to be relocated.
+

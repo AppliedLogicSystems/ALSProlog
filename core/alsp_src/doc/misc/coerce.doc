@@ -1,0 +1,210 @@
+	  Old (existing: V1-73 and earlier) versions coerced 
+	  "integer" floats to integers (e.g., 2.0 becomes integer 2).
+	  Changed to drop this coercion for two reasons:
+
+	  i)	The ISO standard mandates separate types for int & float;
+	  ii)	Necessary for implementation of BNR constraints.
+
+	  Adding a new feature tag:  COERCE2INTS.  When this is defined
+	  one will get the code as it is now; leaving it undefined will
+	  yield the non-coercion version.
+
+	  File arith.c required major change, since dropping coercion
+	  required significant changes to make_number and do_is, so as
+	  to support the "contaigon" model of the type of the result of
+	  evaluation of an ordinary arithmetic expression:  if all
+	  elements are integral, result is integral (if appropriate);
+	  otherwise, result is double.  Hence, existing arith.c was copied
+	  to arith_co.c, and changes made in arith.c.
+
+	  Have not appropriately modified makefiles to support defining
+	  COERCE2INTS and getting coercion version (one would have to
+	  replace arith.c by arith_co.c by hand).
+
+	  The remaining slightly odd point has to do with output:
+	  The general output of a (positive) float is through the following
+	  case of wd/9 (in /builtins/sio_wt.pro):
+
+	      %% == Handle non-negative floats
+wd(Flt, Lev, Depth, _, nospace,[FltAtom|Hole],Hole,BP,WInfo) :-
+	float(Flt),
+	!,
+	sio_sprintf('%1.10g',Flt,FltAtom,_).
+
+	  The this is effectively a call on the C sprint, and so C's interpretation
+	  of the %...g format is what is used.  This has the effect of printing
+	  "integral" floats (e.g., 2.0) as integers: 2   because this format
+	  suppresses non-significant zeros.  We may want to develop an efficient
+	  way of recognizing this case, so that we can print "integral" floats
+	  the the form   2.0   .
+ 
+	  Other points of change:
+=================================
+>>	  - alloc.c: mk_double(dbl)						[~ line 151]
+-------------------------------------------------
+{
+    register pword d;
+
+#ifdef COERCE2INTS
+    if (dbl == floor(dbl) && MINPROLOGINT <= dbl && dbl <= MAXPROLOGINT)
+	d = MK_INT(floor(dbl));
+    else 
+	{
+#endif
+#ifndef DoubleType
+	register int i;
+	d = MK_TERM(4);
+	TERM_FUNCTOR(d) = MK_FUNCTOR(TK_DDOUBLE, 4);
+	for (i = 0; i < 4; i++)
+	    TERM_ARGN(d, i + 1) = MK_INT(((short *) &dbl)[i]);
+..........
+-------------------------------------------------
+>>	  - compmath.c: comp_exp(e) 
+			{after #ifndef DoubleType}				[~ line 505]
+	    Remove the if (dbl == (double) (long) dbl) case if no coercion???
+-------------------------------------------------
+	    else if (arity == 4 && id == TK_DDOUBLE) {
+		double dbl;
+		int   i;
+
+		for (i = 0; i < 4; i++)
+		    ((short *) &dbl)[i] = (short) INT_VAL(TERM_ARGN(e, i + 1));
+#ifdef COERCE2INTS
+		if (dbl == (double) (long) dbl)
+		    icode(I_MTH_PUSHINT, (long) dbl, 0, 0, 0);
+		else
+#endif
+		    icode(I_MTH_PUSHDBL, ((long *) &dbl)[0],
+			  ((long *) &dbl)[1], 0, 0);
+	    }
+-------------------------------------------------
+>>	  - compmath.c: comp_exp(e) 
+			{after #ifdef DoubleType 				[~ line 529]
+	    Remove the if (dbl == (double) (long) dbl) case if no coercion???
+-------------------------------------------------
+	case TP_DOUBLE:{
+		double dbl = double_val(e);
+
+#ifdef COERCE2INTS
+		if (dbl == (double) (long) dbl)
+		    icode(I_MTH_PUSHINT, (long) dbl, 0, 0, 0);
+		else
+#endif
+		    icode(I_MTH_PUSHDBL, DOUBLE_VAL1(e), DOUBLE_VAL2(e), 0, 0);
+	    }
+	    break;
+-------------------------------------------------
+>>	  - winter.c: w_mk_double(rval, rtag, dbl)		[~ line 605]
+-------------------------------------------------
+double floor();
+
+void
+w_mk_double(rval, rtag, dbl)
+    PWord *rval;
+    int  *rtag;
+    double dbl;
+{
+#ifdef COERCE2INTS
+    if (dbl == floor(dbl) && MINPROLOGINT <= dbl && dbl <= MAXPROLOGINT) {
+	*rval = (int) floor(dbl);
+	*rtag = WTP_INTEGER;
+    }
+    else 
+#endif
+	{
+	long *h;
+
+	*rval = (long) wm_H;
+	*rtag = WTP_DOUBLE;
+	h = wm_H;
+	wm_H += 4;
+	*h = *(h + 3) = MMK_FENCE(3);
+	*(h + 1) = *(int *) &dbl;
+	*(h + 2) = *(((int *) &dbl) + 1);
+    }
+-------------------------------------------------
+
+
+In winter.h:
+	Even if DoubleType is undefined:
+
+#define WTP_DOUBLE 6   
+
+
+
+
+Changes to make_number calls:
+
+bcinter.c:
+
+- pbi_c_examine()
+
+
+	    case 12:		/* float type */
+		make_numberx(&v, &t, (double) *(float *) (ptr + offset), WTP_DOUBLE);
+		.....
+	    case 13:		/* double type */
+		make_numberx(&v, &t, *(double *) (ptr + offset), WTP_DOUBLE);
+		.....
+
+bparser.c:
+- pbi_uia_peekd()
+	make_numberx(&val, &valtype, (double) pval, WTP_DOUBLE);
+
+bsio.c:
+
+static	double	decimal		PARAMS(( UCHAR **, int *));  	<<
+...
+- decimal(pp, ty)						<<
+    UCHAR **pp;
+	int *ty;						<<
+{
+    register UCHAR *p;
+    double d, frac;
+
+	*ty = WTP_INTEGER;				<<
+	...
+    if (*p == '.' && (sio_chtb[*(p + 1)] & SIOC_DECIMAL)) {
+	UCHAR *s;
+	
+	*ty = WTP_DOUBLE;				<<
+	...
+
+- next_token0(buf, vpTokType, tpTokType, vpTokVal, tpTokVal)
+	...
+{
+    UCHAR *p, *lim, *tokstart;
+    int   eossave;
+	int ty;							<<
+		.........
+		    else
+			make_numberx(vpTokVal, tpTokVal, decimal(&p,&ty),ty);	<<
+		}
+		else
+		    make_numberx(vpTokVal, tpTokVal, decimal(&p,&ty), ty);	<<
+		CHECK_FOR_POSSIBLE_SPLIT(*p ? p+1 : p);
+		break;
+	...
+
+- sio_get_number()
+	...
+	case TK_FLOAT:
+	    make_numberx(&vNum, &tNum, (double) floatval, WTP_DOUBLE);	<<
+	    break;
+	case TK_DOUBLE:
+	    make_numberx(&vNum, &tNum, doubleval, WTP_DOUBLE);			<<
+	    break;
+	...
+
+foreign.c:
+- PI_makedouble(v, t, n)
+    PWord *v;
+    int  *t;
+    double n;
+{
+    make_numberx(v, t, n, WTP_DOUBLE);				<<
+#ifndef DoubleType
+    fixTag(v, t);
+#endif
+
+

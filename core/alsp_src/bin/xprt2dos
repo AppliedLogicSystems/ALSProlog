@@ -81,10 +81,10 @@ rm -r $1/i386/generate
 u2d $1/i386/*
 u2d $1/i386/*/*
 
-#echo - pconfig
-#cp -r ./pconfig $1
-#u2d $1/pconfig/*.pro
-#u2d $1/pconfig/*.in
+echo - pconfig
+cp -r ./pconfig $1
+u2d $1/pconfig/*.pro
+u2d $1/pconfig/*.in
 
 echo - port
 cp -r ./port $1
@@ -104,13 +104,13 @@ echo - utils
 cp -r ./utils $1
 u2d $1/utils/*
 
-#echo - wins
-#cp -r ./wins $1
-#u2d $1/wins/build/*.in
-#u2d $1/wins/build/x/*
-#u2d $1/wins/build/motif/*
-#u2d $1/wins/build/mswins/*
-#u2d $1/wins/src/*
+echo - wins
+cp -r ./wins $1
+u2d $1/wins/build/*.in
+u2d $1/wins/build/x/*
+u2d $1/wins/build/motif/*
+u2d $1/wins/build/mswins/*
+u2d $1/wins/src/*
 
 echo Removing any copied CVS directories...
 rm -r $1/CVS

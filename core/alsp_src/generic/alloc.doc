@@ -1,0 +1,82 @@
+
+prs_area_init(marksize) 
+	- only called in main.c
+
+allocat(size) 
+	- only called in alloc.c
+
+alc_rst()
+	- called in:
+		expand.c
+		parser.c
+
+mk_term(arity) - called via MK_TERM:
+	alloc.c
+	expand.c
+	parser.c
+
+mk_functor(tkid, arity) - called via MK_FUNCTOR
+	alloc.c
+	bmeta.c
+	bsio.c
+	expand.c
+	parser.c
+	wintcode.c
+	winter.c
+
+mk_list(car, cdr) - called via MK_LIST:
+	bparser.c
+	bsio.c
+	expand.c
+	parser.c
+	winter.c
+
+mk_int(iv) - called via MK_INT:
+	alloc.c
+	bparser.c
+	bsio.c
+	expand.c
+	gv.c
+	main.c
+	parser.c
+	winter.c
+
+mk_vo(vo) - called via MK_VO:
+	compile.c
+	expand.c
+	parser.c
+
+mk_rule(ng) - called via MK_RULE:
+	expand.c
+	parser.c
+
+mk_double(dbl) - called via MK_DOUBLE:
+	expand.c
+	lexan.c
+	parser.c
+	winter.c
+
+double_val - called via DOUBLE_VAL:
+	alloc.c
+	butil.c
+	compile.c
+	compmath.c
+
+functor_id_of_term(p) - called in:
+	alloc.c
+	compile.c
+
+arity_of_term(p) - called in:
+	alloc.c
+	compile.c
+
+is_double(d, t) - called in:
+	alloc.c
+	parser.c
+
+mk_uia(s) - called via MK_UIA:
+	expand.c
+	gc.c
+	lexan.c
+	parser.c
+	winter.c
