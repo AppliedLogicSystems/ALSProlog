@@ -1425,6 +1425,10 @@ PI_prolog_init(int argc, char **argv)
     FixArguments(argc, argv);    
 #endif
 
+    if (!SetConsoleTitle("ALS Prolog")) {
+    	PI_app_printf(PI_app_printf_warning, "SetConsoleTitle failed !\n");
+    }
+    
     if (!(IS_WIN32S)) {
 	if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE))
 	    PI_app_printf(PI_app_printf_warning, "SetConsoleCtrlHandler failed !\n");
