@@ -1,0 +1,8 @@
+#
+# Info Makefile for the accsys library & interface
+#     ---- for inclusion in lower makefiles
+ARCH = sparc
+OS = solaris2.4
+SOS = solaris2
+GOS = unix
+PROTYPE = port
