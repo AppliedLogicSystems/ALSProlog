@@ -88,7 +88,7 @@ setup_demo_examples
 demo15_year_check
 	:-
 	date(Today),
-	date_less(Today, 2000/1/1).
+	date_less(Today, 2001/1/1).
 
 demo_done_msg
 	:-
