@@ -353,6 +353,7 @@ extern	int	sio_nsocket_listen	PARAMS(( void ));
 extern	int	sio_nsocket_accept	PARAMS(( void ));
 extern	int	sio_nsocket_close	PARAMS(( void ));
 extern	int	sio_nsocket_select	PARAMS(( void ));
+extern	int	sio_nsocketpair	        PARAMS(( void ));
 
 extern	int	sio_nsocket_open	PARAMS(( void ));
 

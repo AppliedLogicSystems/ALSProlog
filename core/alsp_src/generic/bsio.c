@@ -1926,6 +1926,35 @@ int sio_nsocket_close(void)
     SUCCEED;
 }
 
+int sio_nsocketpair(void)
+{
+  int rc, sockfd[2];
+  PWord descriptor0, descriptor1, result, num0, num1;
+  int descriptor0_t, descriptor1_t, result_t, num0_t, num1_t;
+  int error;
+
+  PI_getan(&descriptor0, &descriptor0_t, 1);
+  PI_getan(&descriptor1, &descriptor1_t, 2);
+  PI_getan(&result, &result_t, 3);
+  
+  rc = socketpair(AF_UNIX, SOCK_STREAM, 0, sockfd);
+
+  if (rc == 0) {
+    PI_makedouble(&num0, &num0_t, sockfd[0]);
+    PI_makedouble(&num1, &num1_t, sockfd[1]);
+    (void) PI_unify(descriptor0, descriptor0_t, num0, num0_t);
+    (void) PI_unify(descriptor1, descriptor1_t, num1, num1_t);
+    error = 0;
+  } else {
+    error = errno;
+  }
+
+  (void) PI_unify(result, result_t, error, PI_INT);
+
+  SUCCEED;
+}
+
+
 /* end nsocket stuff */
 
 
