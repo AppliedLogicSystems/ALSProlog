@@ -33,6 +33,7 @@
 #include "cinterf.h"
 #include "fpbasis.h"
 
+#include "new_alspi.h"
 #ifdef CW_PLUGIN
 #include <DropInCompilerLinker.h>
 #endif
@@ -1911,6 +1912,110 @@ sio_nsocket_open()
     incr_fdrefcnt(SIO_FD(buf));
     SUCCEED;
 }
+
+static AP_Result GetHostError(AP_World *w, int error_code, AP_Obj object)
+{
+	switch (error_code) {
+	case HOST_NOT_FOUND:
+		return AP_SetError(w, AP_NewInitStructure(w,
+					AP_NewSymbolFromStr(w, "host_not_found"), 1,
+					object));
+	case NO_DATA:
+		return AP_SetError(w, AP_NewInitStructure(w,
+					AP_NewSymbolFromStr(w, "no_data"), 1,
+					object));
+	case NO_RECOVERY:
+		return AP_SetError(w, AP_NewSymbolFromStr(w, "no_recovery"));
+	case TRY_AGAIN:
+		return AP_SetError(w, AP_NewSymbolFromStr(w, "try_again"));
+	default:
+		return AP_SetStandardError(w, AP_SYSTEM_ERROR);
+	}
+}
+
+static AP_Result UnifyEntity(AP_World *w, struct hostent *entity,
+	AP_Obj official_name, AP_Obj alias_list, AP_Obj address_list)
+{
+	AP_Obj new_alias, new_addr_list, cons, oldcons;
+	int first;
+	char **a;
+	struct in_addr **n;
+	
+	if (entity->h_addrtype != AF_INET || entity->h_length != sizeof(struct in_addr))
+		return AP_SetStandardError(w, AP_SYSTEM_ERROR);
+
+	if (AP_Unify(w, official_name, AP_NewSymbolFromStr(w, entity->h_name))
+		!= AP_SUCCESS) return AP_FAIL;
+	
+	for (first = 1, a = entity->h_aliases; *a; a++, first = 0) {
+		cons = AP_NewInitList(w, AP_NewSymbolFromStr(w, *a), AP_UNBOUND_OBJ);
+		if (first) new_alias = cons;
+		else AP_Unify(w, AP_ListTail(w, oldcons), cons);
+		oldcons = cons;
+	}
+	if (!first) AP_Unify(w, AP_ListTail(w, cons), AP_NullList(w));
+	else new_alias = AP_NullList(w);	
+	
+	if (AP_Unify(w, alias_list, new_alias) != AP_SUCCESS) return AP_FAIL;
+		
+	for (first = 1, n = (struct in_addr **)entity->h_addr_list;
+		 *n;
+		 n++, first = 0) {
+		cons = AP_NewInitList(w, 
+			AP_NewSymbolFromStr(w, inet_ntoa(**n)), AP_UNBOUND_OBJ);
+		if (first) new_addr_list = cons;
+		else AP_Unify(w, AP_ListTail(w, oldcons), cons);
+		oldcons = cons;
+	}
+	if (!first) AP_Unify(w, AP_ListTail(w, cons), AP_NullList(w));
+	else new_addr_list = AP_NullList(w);
+
+	if (AP_Unify(w, address_list, new_addr_list) != AP_SUCCESS) return AP_FAIL;
+	
+	return AP_SUCCESS;
+}
+
+static AP_Result do_gethostbyaddr(AP_World *w, AP_Obj address,
+	AP_Obj official_name, AP_Obj alias_list, AP_Obj address_list)
+{
+	struct hostent *entity;
+	struct in_addr addr;
+	
+	if (AP_ObjType(w, address) != AP_ATOM)
+		return AP_SetStandardError(w, AP_TYPE_ERROR,
+					AP_NewSymbolFromStr(w, "atom"), address);
+
+#ifdef MacOS
+	addr.s_addr = inet_addr((char *)AP_GetAtomStr(w, address)).s_addr;
+#else
+	addr.s_addr = inet_addr((char *)AP_GetAtomStr(w, address));
+#endif
+	entity = gethostbyaddr((char *)&addr, sizeof(struct in_addr), AF_INET);
+	if (!entity) return GetHostError(w, h_errno, address);
+	
+	return UnifyEntity(w, entity, official_name, alias_list, address_list);
+}
+
+static AP_Result do_gethostbyname(AP_World *w, AP_Obj name,
+	AP_Obj official_name, AP_Obj alias_list, AP_Obj address_list)
+{
+	const char *name_string;
+	struct hostent *entity;
+	
+	if (AP_ObjType(w, name) != AP_ATOM)
+		return AP_SetStandardError(w, AP_TYPE_ERROR,
+					AP_NewSymbolFromStr(w, "atom"), name);
+	
+	name_string = AP_GetAtomStr(w, name);
+	entity = gethostbyname((char *)name_string);
+	if (!entity) return GetHostError(w, h_errno, name);
+
+	return UnifyEntity(w, entity, official_name, alias_list, address_list);
+}
+
+int pbi_gethostbyname(void) {return AP_OldToNewCall(do_gethostbyname, 4);}
+int pbi_gethostbyaddr(void) {return AP_OldToNewCall(do_gethostbyaddr, 4);}
+
 
 
 /*

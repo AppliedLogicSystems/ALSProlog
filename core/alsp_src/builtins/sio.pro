@@ -1302,6 +1302,11 @@ open_nsocket_stream(Socket,Mode,Options,Stream) :-
 open_nsocket_stream(Socket,Mode,Options,Stream) :-
 	permission_error(open,source_sink,Socket,2).
 
+
+export gethostbyname/2.
+gethostbyname(Name, Address) :- gethostbyname(Name, _, _, [Address]).
+export gethostbyaddr/2.
+gethostbyaddr(Address, Name) :- gethostbyaddr(Address, Name, _, _).
 	
 
 open_socket_stream(Description,Mode,Options,Stream) :-
