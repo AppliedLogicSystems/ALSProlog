@@ -686,6 +686,8 @@ static AP_Result tcl_eval0(AP_World *w, AP_Obj interp_name, AP_Obj command, AP_O
 	if (!interp) return AP_EXCEPTION;
 	
 	tcl_command = PrologToTclObj(w, command, interp);
+	Tcl_IncrRefCount(tcl_command);
+
 	if (option == arg_list) {
 		eval_string = Tcl_NewStringObj((char *)"eval", -1);
 		if (!tcl_command || !eval_string) {
@@ -695,7 +697,8 @@ static AP_Result tcl_eval0(AP_World *w, AP_Obj interp_name, AP_Obj command, AP_O
 	}
 
 	r = Tcl_EvalObj(interp, tcl_command);
-	/* error check */
+
+	Tcl_DecrRefCount(tcl_command);
 	
 	/* Hack to refresh result */
 	PI_getan(&result.p, &result.t, 3);
