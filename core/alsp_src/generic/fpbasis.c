@@ -9,8 +9,6 @@
 #include "fpbasis.h"
 #ifdef MacOS
 #include <fp.h>
-#elif defined(MSWin32)
-#include <fdlibm.h>
 #endif
 
 int is_ieee_nan PARAMS( (double) );
