@@ -123,10 +123,19 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	#define readsocket(a,b,c)	read((a), (b), (c))
 	#define writesocket(a,b,c)	write((a), (b), (c))
 	#define closesocket(a)		close((a))
-#ifdef __hp9000s800
+#if defined(__hp9000s800) || defined(UNIX_HPUX)
         #define selectsocket(a,b,c,d,e) select(a,(int*)b,(int*)c,(int*)d,e) 
 #else
         #define selectsocket(a,b,c,d,e) select(a,b,c,d,e)
+#endif
+#ifdef UNIX_AIX
+        #define acceptsocket(a,b,c) accept(a,b,(size_t *)c)
+        #define getsocknamesocket(a,b,c) getsockname(a,b,(size_t *)c)
+        #define recvfromsocket(a,b,c,d,e,f) recvfrom(a,b,c,d,e,(size_t*)f)
+#else
+        #define acceptsocket(a,b,c) accept(a,b,c)
+        #define getsocknamesocket(a,b,c) getsockname(a,b,c)
+        #define recvfromsocket(a,b,c,d,e,f) recvfrom(a,b,c,d,e,f)
 #endif
 	#define socket_errno		errno
 	#define INVALID_SOCKET	-1
@@ -140,6 +149,9 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	#define writesocket(a,b,c)	write((a), (b), (c))
 	#define closesocket(a)		close((a))
         #define selectsocket(a,b,c,d,e) select(a,b,c,d,e)
+        #define acceptsocket(a,b,c) accept(a,b,c)
+        #define getsocknamesocket(a,b,c) getsockname(a,b,c)
+        #define recvfromsocket(a,b,c,d,e,f) recvfrom(a,b,c,d,e,f)
 	#define socket_errno		errno
 	#define INVALID_SOCKET	-1
 	#define SOCKET_ERROR	-1
@@ -148,6 +160,9 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	#define readsocket(a,b,c)	recv((a), (b), (c), 0)
 	#define writesocket(a,b,c)	send((a), (b), (c), 0)
         #define selectsocket(a,b,c,d,e) select(a,b,c,d,e)
+        #define acceptsocket(a,b,c) accept(a,b,c)
+        #define getsocknamesocket(a,b,c) getsockname(a,b,c)
+        #define recvfromsocket(a,b,c,d,e,f) recvfrom(a,b,c,d,e,f)
 	#define socket_errno		WSAGetLastError()
 	
 	#else
@@ -255,29 +270,53 @@ static	int	next_token0	PARAMS(( UCHAR *, PWord *, int *, PWord *, int * ));
 static	int	format_type	PARAMS(( UCHAR * ));
 static  int int_or_float    PARAMS((int, PWord));
 
+enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
 #ifdef PURE_ANSI
-static int standard_console_io(int port, char *buf, size_t size)
+static long standard_console_read(char *buf, long n)
 {
-    char *s;
-    switch(port) {
-    case CONSOLE_READ:
-    	s = fgets(buf, size, stdin);
-    	if (s) return strlen(s);
-    	else return 0;
-    	break;
-    case CONSOLE_WRITE:
-	return fwrite(buf, sizeof(char), size, stdout);
-    	break;
-    case CONSOLE_ERROR:
-	return fwrite(buf, sizeof(char), size, stderr);
-    	break;
-    }
+    return fread(buf, sizeof(char), n, stdin);
 }
 
+static long standard_console_write(char *buf, long n)
+{
+    return fwrite(buf, sizeof(char), n, stdout);
+}
+
+static long standard_console_error(char *buf, long n)
+{
+    return fwrite(buf, sizeof(char), n, stderr);
+}
 #else
 
-static int standard_console_io(int port, char *buf, size_t size)
+static long standard_console_read(char *buf, long n)
+{
+    return read(STDIN_FILENO, buf, n);
+}
+
+static long standard_console_write(char *buf, long n)
+{
+    return write(STDOUT_FILENO, buf, n);
+}
+
+static long standard_console_error(char *buf, long n)
+{
+    return write(STDERR_FILENO, buf, n);
+}
+
+#endif /* PURE_ANSI */
+
+#ifdef macintosh
+console_func console_read = NULL,
+	     console_write = NULL,
+	     console_error = NULL;
+#else
+console_func console_read = standard_console_read,
+	     console_write = standard_console_write,
+	     console_error = standard_console_error;
+#endif
+
+static int console_io(int port, char *buf, size_t size)
 {
     switch(port) {
     case CONSOLE_READ:
@@ -286,30 +325,33 @@ static int standard_console_io(int port, char *buf, size_t size)
 	    printf("\n");
 	}
 #endif
-    	return read(STDIN_FILENO, buf, size);
+    	if (console_read) return console_read(buf, size);
+    	else return -1;
     	break;
     case CONSOLE_WRITE:
-	return write(STDOUT_FILENO, buf, size);
+	if (console_write) return console_write(buf, size);
+	else return size;
     	break;
     case CONSOLE_ERROR:
-	return write(STDERR_FILENO, buf, size);
+	if (console_error) return console_error(buf, size);
+	else return size;
     	break;
     default:
 	return -1;
 	break;
     }
 }
-#endif /* PURE_ANSI */
-
-int (*console_io)(int, char *, size_t) = standard_console_io;
 
 #ifdef macintosh
 #pragma export on
 #endif
 
-ALSPI_API(void) PI_set_console_callback(int (*con_io)(int, char *, size_t))
+ALSPI_API(void)	PI_set_console_functions(console_func read,
+				console_func write, console_func error)
 {
-	console_io = con_io;
+	console_read = read;
+	console_write = write;
+	console_error = error;
 }
 
 #ifdef macintosh
@@ -1649,7 +1691,7 @@ int sio_nsocket_accept(void)
     if (!error) {
 
 	cli_len = sizeof(cli_addr);
-	newfd = accept(sd, (struct sockaddr *) &cli_addr, &cli_len);
+	newfd = acceptsocket(sd, (struct sockaddr *) &cli_addr, &cli_len);
 
     	if (newfd != SOCKET_ERROR) {
     	    PWord num; int num_t;
@@ -2173,9 +2215,9 @@ sio_socket_open()
 
     if (t2 == WTP_UNBOUND && domain == AF_INET) {
 	int size = sizeof sockname_in;
-	if (getsockname(SIO_FD(buf),
+	if (getsocknamesocket(SIO_FD(buf),
 		        (struct sockaddr *) &sockname_in,
-			(size_t *) &size) == 0) {
+			&size) == 0) {
 	    (void) w_unify(v2,t2,sockname_in.sin_port,WTP_INTEGER);
 	    /* 
 	     * The above call to w_unify will fail only if the programmer
@@ -2234,7 +2276,7 @@ accept_connection(vsd, buf, sktaddr)
 	c_addr_len = sizeof(c_addr);
     if (SIO_FLAGS(buf) & SIOF_NEEDACCEPT) {
 			/* int newfd = accept(SIO_FD(buf), (struct sockaddr *) 0, (int *) 0);  */
-		int newfd = accept(SIO_FD(buf), (struct sockaddr *)&c_addr, (size_t *)&c_addr_len);
+		int newfd = acceptsocket(SIO_FD(buf), (struct sockaddr *)&c_addr, &c_addr_len);
 		if (newfd < 0) {
 	    	return -1;
 		}
@@ -3731,9 +3773,9 @@ sio_readbuffer()
 #if defined(BERKELEY_SOCKETS)
 	    if (SIO_SOCKET_ADDRESS(buf)) {
 		int len = SIO_SOCKET_ADDRESS_LEN(buf);
-		nchars = recvfrom(SIO_FD(buf), buffer,nchars, 0,
+		nchars = recvfromsocket(SIO_FD(buf), buffer,nchars, 0,
 				  (struct sockaddr *) SIO_SOCKET_ADDRESS(buf),
-				  (size_t *)&len);
+				  &len);
 	    }
 	    else
 		nchars = readsocket(SIO_FD(buf), buffer, (size_t)nchars);
