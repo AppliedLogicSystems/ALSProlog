@@ -246,21 +246,6 @@ static	int	next_token0	PARAMS(( UCHAR *, PWord *, int *, PWord *, int * ));
 static	int	format_type	PARAMS(( UCHAR * ));
 static  int int_or_float    PARAMS((int, PWord));
 
-#ifdef MacOS
-static int corrected_read(int fn, char *buffer, int count)
-{
-    int result;
-    
-    result = read(fn, buffer, count);
-    
-    if (fn == 0 && result > 0) {
-	int i;
-	for (i = 0; i < result; i++) if (buffer[i] == 5) result = 0;
-    }
-	
-    return result;
-}
-#endif
 
 #ifdef PURE_ANSI
 static int standard_console_io(int port, char *buf, size_t size)
@@ -285,19 +270,14 @@ static int standard_console_io(int port, char *buf, size_t size)
 
 static int standard_console_io(int port, char *buf, size_t size)
 {
-#ifdef MacOS
-    extern int MPW_Tool;
-#endif
     switch(port) {
     case CONSOLE_READ:
 #ifdef MacOS
-      if (MPW_Tool) {
-	printf("\n");
-      }
-   	return corrected_read(STDIN_FILENO, buf, size);
-#else
-    	return read(STDIN_FILENO, buf, size);
+	if (MPW_Tool) {
+	    printf("\n");
+	}
 #endif
+    	return read(STDIN_FILENO, buf, size);
     	break;
     case CONSOLE_WRITE:
 	return write(STDOUT_FILENO, buf, size);
@@ -314,10 +294,18 @@ static int standard_console_io(int port, char *buf, size_t size)
 
 int (*console_io)(int, char *, size_t) = standard_console_io;
 
-void PI_set_console_callback(int (*con_io)(int, char *, size_t))
+#ifdef macintosh
+#pragma export on
+#endif
+
+ALSPI_API(void) PI_set_console_callback(int (*con_io)(int, char *, size_t))
 {
 	console_io = con_io;
 }
+
+#ifdef macintosh
+#pragma export off
+#endif
 
 /*
  * sio_mkstream(BufSize,Stream)
