@@ -2122,7 +2122,7 @@ EOF
 # Check for /dev/zero
 #
 test -n "$silent" || echo "checking for dev/zero"
-if test -f /dev/zero -o -h /dev/zero; then
+if test -r /dev/zero ; then
 {
 test -n "$verbose" && echo " defining HAVE_DEV_ZERO"
 echo "#define" HAVE_DEV_ZERO "1" >> confdefs.h
