@@ -29,9 +29,11 @@ export cx/1.
    	 |	Global variables which hold the AVL trees
  	 *--------------------------------------------------------*/
 
+/*
 :-make_gv('CallsTree'),avl_create(T),setCallsTree(T).
 :-make_gv('ShellStruct'), makeCRSH(S), setShellStruct(S).
 :-make_gv('MiscInfo'), makeMI(S), setMiscInfo(S).
+*/
 
 :- dynamic(suite_info/4).
 
