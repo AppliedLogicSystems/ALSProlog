@@ -236,8 +236,7 @@ sym_insert_2long(symbol, type, longval1, longval2)
  *---------------------------------------------------------------------------*/
 
 int
-CI_get_integer(arg, type)
-    unsigned long *arg, type;
+CI_get_integer(PWord *arg, int type)
 {
     double adbl;
 
@@ -245,12 +244,12 @@ CI_get_integer(arg, type)
 	case PI_INT:
 	    return (1);
 	case PI_DOUBLE:
-	    PI_getdouble(&adbl, (PWord) *arg);
+	    PI_getdouble(&adbl, *arg);
 	    *arg = (unsigned long) adbl;
 	    return (1);
 
 	case PI_UIA:
-	    *arg = (unsigned long) PI_getuianame(0, (PWord) *arg, 0);
+	    *arg = (unsigned long) PI_getuianame(0, *arg, 0);
 	    return (1);
 
 	case PI_STRUCT:
@@ -260,12 +259,12 @@ CI_get_integer(arg, type)
 		char *name;
 		int   i;
 
-		PI_getstruct(&func, &arity, (PWord)*arg);
+		PI_getstruct(&func, &arity, *arg);
 
 		if (func != constsym || (arity != 1))
 		    return (0);
 
-		PI_getargn(&val, &valtype, (PWord)*arg, 1);
+		PI_getargn(&val, &valtype, *arg, 1);
 		if (valtype == PI_SYM)
 		    name = PI_getsymname(0, val, 0);
 		else if (valtype == PI_UIA)
@@ -302,9 +301,9 @@ CI_get_integer(arg, type)
 		PWord head, tail;
 		int headtype, tailtype;
 
-		PI_gethead(&head, &headtype, (PWord)*arg);
+		PI_gethead(&head, &headtype, *arg);
 		result = (head & 0xff) << 24;
-		PI_gettail(&tail, &tailtype, (PWord)*arg);
+		PI_gettail(&tail, &tailtype, *arg);
 		if (tailtype != PI_LIST)
 		    return (0);
 		PI_gethead(&head, &headtype, tail);
@@ -681,7 +680,7 @@ c_call()
     PI_getan(&v2, &t2, 2);
     PI_getan(&vret, &tret, 3);
 
-    if (!CI_get_integer((unsigned long *)&v1, (unsigned)t1))
+    if (!CI_get_integer(&v1, t1))
 	PI_FAIL;
     funcptr = (int (*)PARAMS((char *, ...))) v1;
 
@@ -689,7 +688,7 @@ c_call()
 	PI_gethead(&head, &headtype, v2);
 	if (headtype == PI_SYM)
 	    args[nargs++] = PI_getsymname(0, head, 0);
-	else if (CI_get_integer((unsigned long *)&head, (unsigned)headtype))
+	else if (CI_get_integer(&head, headtype))
 	    args[nargs++] = (char *) head;
 	else
 	    PI_FAIL;
@@ -777,7 +776,7 @@ c_makeuia()
 	PI_FAIL;
 
     if (PointerType != PI_INT)
-	if (!CI_get_integer((unsigned long *)&Pointer, (unsigned)PointerType))
+	if (!CI_get_integer(&Pointer, PointerType))
 	    PI_FAIL;
 
     if (PascalFlag) {
@@ -813,7 +812,7 @@ c_convertCstrPstr()
 	PI_FAIL;
 
     if (PointerType != PI_INT)
-	if (!CI_get_integer((unsigned long *)&Pointer, (unsigned)PointerType))
+	if (!CI_get_integer(&Pointer, PointerType))
 	    PI_FAIL;
 
     if (PascalFlag) {
@@ -912,11 +911,11 @@ static int c_bind_callback(void)
 	
 	PI_getan(&arg1,&type1,1);
 	if (type1 != PI_INT)
-		if (!CI_get_integer((unsigned long *)&arg1,type1))
+		if (!CI_get_integer(&arg1,type1))
 			PI_FAIL;
 	PI_getan(&arg2,&type2,2);
 	if (type2 != PI_INT)
-		if (!CI_get_integer((unsigned long *)&arg2,type2))
+		if (!CI_get_integer(&arg2,type2))
 			PI_FAIL;
 			
 	PI_getan(&arg3,&type3,3);
@@ -935,11 +934,11 @@ static int c_unbind_callback(void)
 	
 	PI_getan(&arg1,&type1,1);
 	if (type1 != PI_INT)
-		if (!CI_get_integer((unsigned long *)&arg1,type1))
+		if (!CI_get_integer(&arg1,type1))
 			PI_FAIL;
 	PI_getan(&arg2,&type2,2);
 	if (type2 != PI_INT)
-		if (!CI_get_integer((unsigned long *)&arg2,type2))
+		if (!CI_get_integer(&arg2,type2))
 			PI_FAIL;
 	PI_getan(&arg3,&type3,3);
 	if (type3 == PI_SYM)
