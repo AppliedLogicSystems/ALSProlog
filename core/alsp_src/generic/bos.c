@@ -219,7 +219,7 @@ pbi_tmpnam()
     char *s;
 
     w_get_An(&v1, &t1, 1);
-    s = tempnam(0,"pt");
+    s = tmpnam(NULL);
     w_mk_uia(&vtn, &ttn, (UCHAR *)s);
 
     free(s);
