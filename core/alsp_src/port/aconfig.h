@@ -15,7 +15,9 @@
 /* Define Threaded to be 1 if threaded code interpreter is desired -- must
  * use gcc to get threaded code interpreter
  */
+#if __GNUC__ >= 2
 #define Threaded	1
+#endif
 
 /*
  * Define WAM register model 
