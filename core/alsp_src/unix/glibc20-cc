@@ -6,7 +6,7 @@ function package_ok () {
 }
 
 function path_ok () {
-    test `which cc` = /usr/i386-glibc20-linux/bin/cc
+    test `which ld` = /usr/i386-glibc20-linux/bin/ld
 }
 
 if rpm --quiet -q redhat-release-6.0 > /dev/null 2>&1 &&
