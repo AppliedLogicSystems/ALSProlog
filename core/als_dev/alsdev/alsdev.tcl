@@ -188,10 +188,17 @@ proc map_alsdev_debug {} {
 }
 
 
-source [file join $ALSTCLPATH alsdev_main.tcl]
-source [file join $ALSTCLPATH als_settings.tcl]
-source [file join $ALSTCLPATH debugwin.tcl]
-source [file join $ALSTCLPATH defstr.tcl]
+if {$tcl_platform(platform) == "macintosh"} {
+	source -rsrc {alsdev_main}
+	source -rsrc {als_settings}
+	source -rsrc {debugwin}
+	source -rsrc {defstr}
+} else {
+	source [file join $ALSTCLPATH alsdev_main.tcl]
+	source [file join $ALSTCLPATH als_settings.tcl]
+	source [file join $ALSTCLPATH debugwin.tcl]
+	source [file join $ALSTCLPATH defstr.tcl]
+}
 
 	## source any other needed files here.....
 
@@ -936,6 +943,10 @@ proc alsdev_jedit {} {
 ###############________________________________##################
 
 Window show .topals
+if {$tcl_platform(platform) == "macintosh"} {
+	# Make .topals.mmenb the default menu for all windows.
+	. configure -menu .topals.mmenb
+}
 update idletasks
 raise .topals
 

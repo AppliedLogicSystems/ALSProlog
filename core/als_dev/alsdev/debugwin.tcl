@@ -17,6 +17,7 @@ global widget;
 global DebugResponse
 proc vTclWindow.debugwin {base} {
 	global array proenv
+	global tcl_platform
 
     set base .debugwin
     if {[winfo exists $base]} {
@@ -30,7 +31,10 @@ proc vTclWindow.debugwin {base} {
     wm geometry $base 553x391+323+175
     wm maxsize $base 1137 870
     wm minsize $base 1 1
-    wm overrideredirect $base 0
+	if {$tcl_platform(platform) != "macintosh"} {
+		# This command removes the zoom box from Macintosh windows.
+	    wm overrideredirect $base 0
+	}
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "ALS Prolog Debugger"
@@ -43,6 +47,16 @@ proc vTclWindow.debugwin {base} {
 
 	menu $base.menubar -tearoff 0 -relief sunken
 
+	if {$tcl_platform(platform) == "macintosh"} {
+		menu $base.menubar.apple -tearoff 0
+		$base.menubar.apple add command -label "About ALS Prolog…" -command {Window show .about ; raise .about}
+		$base.menubar add cascade -menu $base.menubar.apple
+		$base.menubar add cascade -menu .topals.mmenb.file -label "File"
+		$base.menubar add cascade -menu .topals.mmenb.edit -label "Edit"
+		$base.menubar add cascade -menu .topals.mmenb.project -label "Project"
+		$base.menubar add cascade -menu .topals.mmenb.settings -label "Settings"
+		$base.menubar add cascade -menu .topals.mmenb.tools -label "Tools"
+	}
 	###########
 	# Spy
 	###########
@@ -91,9 +105,11 @@ proc vTclWindow.debugwin {base} {
 	###########
 	# Help
 	###########
-	menu $base.menubar.help -relief raised
-	$base.menubar add cascade -label Help -menu $base.menubar.help
-
+	if {$tcl_platform(platform) != "macintosh"} {
+		menu $base.menubar.help -relief raised
+		$base.menubar add cascade -label Help -menu $base.menubar.help
+	}
+	
 	global DebugResponse
 
 set DBBpady 2
@@ -156,15 +172,26 @@ set DBBpady 2
     label $base.debug_status.call_num \
         -padx 4 -relief ridge -text {         } 
 
-    frame $base.textwin \
-        -borderwidth 1 -relief raised 
-    scrollbar $base.textwin.02 \
-        -borderwidth 1 -command {.debugwin.textwin.text yview} -orient vert 
+	if {$tcl_platform(platform) == "macintosh"} {
+	    frame $base.textwin \
+	        -borderwidth 0 -relief raised 
+	    scrollbar $base.textwin.02 \
+	        -borderwidth 0 -command {.debugwin.textwin.text yview} -orient vert 
+	} else {
+	    frame $base.textwin \
+	        -borderwidth 1 -relief raised 
+	    scrollbar $base.textwin.02 \
+	        -borderwidth 1 -command {.debugwin.textwin.text yview} -orient vert 
+	}
     text $base.textwin.text \
 		-background $proenv(win_general,background) \
 		-foreground $proenv(win_general,foreground) \
 		-font $proenv(win_general,font) \
         -width 40 -yscrollcommand {.debugwin.textwin.02 set} 
+
+    if {$tcl_platform(platform) == "macintosh"} {
+        $base.textwin.text configure -highlightthickness 0
+    }
 
     ###################
     # SETTING GEOMETRY
@@ -302,6 +329,7 @@ proc vTclWindow.spywin {base} {
 
 proc vTclWindow.debug_source_trace {base Title} {
 	global array proenv
+	global tcl_platform
 
     if {$base == ""} {
         set base .debug_source_trace
@@ -323,22 +351,38 @@ proc vTclWindow.debug_source_trace {base Title} {
     wm geometry $base 467x542+504+47
     wm maxsize $base 1137 870
     wm minsize $base 1 1
-    wm overrideredirect $base 0
+    if {$tcl_platform(platform) != "macintosh"} {
+    	# This command removes the zoom box from Macintosh windows.
+    	wm overrideredirect $base 0
+    }
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base $Title
 	wm protocol $base WM_DELETE_WINDOW "source_trace_closedown $base"
 
-    frame $base.textwin \
-        -borderwidth 1 -relief raised
-    scrollbar $base.textwin.vsb \
-        -borderwidth 1 -command [list $base.textwin.text yview] \
-        -orient vert 
+	if {$tcl_platform(platform) == "macintosh"} {
+	    frame $base.textwin \
+	        -borderwidth 0 -relief raised
+	    scrollbar $base.textwin.vsb \
+	        -borderwidth 0 -command [list $base.textwin.text yview] \
+	        -orient vert 
+	} else {
+	    frame $base.textwin \
+	        -borderwidth 1 -relief raised
+	    scrollbar $base.textwin.vsb \
+	        -borderwidth 1 -command [list $base.textwin.text yview] \
+	        -orient vert 
+	}
     text $base.textwin.text \
 		-background $proenv(win_general,background) \
 		-foreground $proenv(win_general,foreground) \
 		-font $proenv(win_general,font) \
         -width 8 -yscrollcommand [list $base.textwin.vsb set] 
+
+    if {$tcl_platform(platform) == "macintosh"} {
+        $base.textwin.text configure -highlightthickness 0
+    }
+
     ###################
     # SETTING GEOMETRY
     ###################
