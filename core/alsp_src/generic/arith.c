@@ -437,6 +437,9 @@ do_is(v, t, ty)
 			*ty = WTP_INTEGER; 
 			rv = floor(rv);
 			break;
+		    case TK_FLOAT: 
+			*ty = WTP_DOUBLE; 
+			break;
 		    case TK_SQRT:
 			rv = sqrt(rv);
 			break;

@@ -631,7 +631,6 @@ pbi_uia_peekd()
 
     if (t1 == WTP_UIA && t2 == WTP_INTEGER &&
 	w_uia_peek(v1, (int) v2, (UCHAR *) &pval, sizeof (double))) {
-/*	make_number(&val, &valtype, (double) pval); */
 	make_numberx(&val, &valtype, (double) pval, WTP_DOUBLE);
 	if (w_unify(v3, t3, val, valtype))
 	    SUCCEED;

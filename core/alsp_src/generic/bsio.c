@@ -184,7 +184,7 @@ static	long	stream_end	PARAMS(( UCHAR * ));
 static	int	skip_layout	PARAMS(( UCHAR * ));
 static	int	octal		PARAMS(( UCHAR ** ));
 static	int	hexadecimal	PARAMS(( UCHAR ** ));
-static	double	decimal		PARAMS(( UCHAR ** ));
+static	double	decimal		PARAMS(( UCHAR **, int *));
 static	int	escaped_char	PARAMS(( UCHAR ** ));
 static	void	quoted_atom	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *lim, UCHAR *buf));
 static	int	quoted_string	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *, UCHAR * ));
@@ -2974,12 +2974,14 @@ hexadecimal(pp)
 }
 
 static double
-decimal(pp)
+decimal(pp, ty)
     UCHAR **pp;
+	int *ty;
 {
     register UCHAR *p;
     double d, frac;
 
+	*ty = WTP_INTEGER;
     p = *pp;
     d = *p++ - '0';
     frac = 0;
@@ -2989,6 +2991,8 @@ decimal(pp)
 
     if (*p == '.' && (sio_chtb[*(p + 1)] & SIOC_DECIMAL)) {
 	UCHAR *s;
+	
+	*ty = WTP_DOUBLE;
 
 	p++;
 	while (sio_chtb[*p] & SIOC_DECIMAL)
@@ -3377,6 +3381,7 @@ next_token0(buf, vpTokType, tpTokType, vpTokVal, tpTokVal)
 {
     UCHAR *p, *lim, *tokstart;
     int   eossave;
+	int ty;
 
     *tpTokType = WTP_SYMBOL;
     if (!skip_layout(buf)) {
@@ -3514,13 +3519,11 @@ makesym:
 		if (*p == '0') {
 		    if (*(p + 1) == 'x' && (sio_chtb[*(p + 2)] & SIOC_HEXADECIMAL)) {
 			p += 2;
-/*			make_number(vpTokVal, tpTokVal, (double) hexadecimal(&p)); */
-			make_numberx(vpTokVal, tpTokVal, (double) hexadecimal(&p), WTP_DOUBLE);
+			make_number(vpTokVal, tpTokVal, (double) hexadecimal(&p)); 
 		    }
 		    else if (*(p + 1) == 'o' && (sio_chtb[*(p + 2)] & SIOC_OCTAL)) {
 			p += 2;
-/*			make_number(vpTokVal, tpTokVal, (double) octal(&p)); */
-			make_numberx(vpTokVal, tpTokVal, (double) octal(&p), WTP_DOUBLE);
+			make_number(vpTokVal, tpTokVal, (double) octal(&p)); 
 		    }
 #ifdef	SIO_ZERO_QUOTE_FOR_CHAR_CONSTS
 		    else if (*(p + 1) == '\'') {
@@ -3538,11 +3541,10 @@ makesym:
 		    }
 #endif /* SIO_ZERO_QUOTE_FOR_CHAR_CONSTS */
 		    else
-			make_number(vpTokVal, tpTokVal, decimal(&p));
+			make_numberx(vpTokVal, tpTokVal, decimal(&p,&ty),ty);
 		}
 		else
-/*		    make_number(vpTokVal, tpTokVal, decimal(&p)); */
-		    make_numberx(vpTokVal, tpTokVal, decimal(&p), WTP_DOUBLE);
+		    make_numberx(vpTokVal, tpTokVal, decimal(&p,&ty),ty); 
 		CHECK_FOR_POSSIBLE_SPLIT(*p ? p+1 : p);
 		break;
 	    case SIOC_SPECIAL:
@@ -3962,11 +3964,9 @@ sio_get_number()
 	    make_number(&vNum, &tNum, (double) (unsigned long) longval);
 	    break;
 	case TK_FLOAT:
-/*	    make_number(&vNum, &tNum, (double) floatval);   */
 	    make_numberx(&vNum, &tNum, (double) floatval, WTP_DOUBLE);
 	    break;
 	case TK_DOUBLE:
-/*	    make_number(&vNum, &tNum, doubleval);   */
 	    make_numberx(&vNum, &tNum, doubleval, WTP_DOUBLE);
 	    break;
     }
