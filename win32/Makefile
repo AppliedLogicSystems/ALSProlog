@@ -1,8 +1,8 @@
 all: student standard demo
 
 core:
-	cd ../core/win32 ; build.bat
-	cd ../foreign_sdk/win32 ; make.bat
+	cd ../core/win32 ; ./build.bat
+	cd ../foreign_sdk/win32 ; ./make.bat
 	
 student: core
 	build_dist.sh student
