@@ -70,7 +70,7 @@ Expander.  The following projects need expanding:
 	{blddir}bld-port:alspro_dll.prj.sit.hqx
 	
 	{blddir}bld-wins:mswin32:mswin32intf_lib.prj.sit.hqx
-	{blddir}bld-wins:mswin32:alspro_mswin32.prj.sit.hqx
+	{blddir}bld-wins:mswin32:alspro_mswin320.prj.sit.hqx
 
 3. On the Mac, build the portable libriaries and executables.
 
@@ -97,7 +97,10 @@ run the batch file make_interf.bat.
 
 7.1 Open mswin32intf_lib.prj, adjust access paths, Make.
 
-7.2 Open alspro_mswin32.prj, adjust access paths, Make.
+7.2 Open alspro_mswin320.prj, adjust access paths, Make.
+
+8.0 From MS-DOS, in the directory %BLDDIR%\bld-wins\mswin32, run the
+batch file winpack.bat.
 
 Testing
 -------
@@ -125,6 +128,7 @@ Console application:
 Win32 Interface Libraries:
 
 {blddir}bld-wins:mswin32:mswin32intf.lib
+{blddir}bld-wins:mswin32:alspro_mswin320.exe
 {blddir}bld-wins:mswin32:alspro_mswin32.exe
 
 {blddir}bld-wins:mswin32:kernal32.pro
