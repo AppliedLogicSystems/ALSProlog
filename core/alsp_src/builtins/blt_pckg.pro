@@ -174,6 +174,7 @@ image_type(mswin32, _, simple_mics) :- !.
 image_type(unix, 'hpux9.05', simple_mics) :- !.
 image_type(unix, 'irix5.3', simple_mics) :- !.
 image_type(unix, 'linux', simple_mics) :- !.
+image_type(unix, 'solaris2.4', simple_mics) :- !.
 image_type(_, _, complex_mics) :- !.
 
 /*!--------------------------------------------------------------*
