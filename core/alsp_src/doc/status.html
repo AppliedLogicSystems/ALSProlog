@@ -369,6 +369,9 @@ loading to fail returns to command line without message</TD>
 <TR>
 <TD>Control-C doesn't work during consult </TD>
 </TR>
+<TR>
+<TD>['foo.txt'] gives an file-not-found error even when foo.txt exists </TD>
+</TR>
 
 <TR>
 <TD>consult message comes up before system knows it is really consulting
@@ -473,6 +476,18 @@ Possibly the consult *.pro bug (#1)</TD>
 
 <TR>
 <TD>symbol table overflow should be a resource error. </TD>
+</TR>
+
+<TR>
+<TD>Check about ~/.alspro or equivalent on Unix/Win32/Mac </TD>
+</TR>
+
+<TR>
+<TD>Is PI_top_level backwards compatable? </TD>
+</TR>
+
+<TR>
+<TD>Add something like PI_interupt? </TD>
 </TR>
 
 <TR>
@@ -644,15 +659,19 @@ May be the consult bug (#1) </TD>
 </TR>
 
 <TR>
-<TD></TD>
+<TD>When the memory is exausted by the symbol table, the system just aborts.
+It should throw an exception and exit gracefully. </TD>
 </TR>
 
 <TR>
-<TD></TD>
+<TD>Database references have absolute paths in them, which causes
+problems when images are made and moved.  Only file names should be
+used to match compiled clauses with source code.</TD>
 </TR>
 
 <TR>
-<TD></TD>
+<TD>The current implementation of PI_printf can cause problems if
+%t is passed in the control string.</TD>
 </TR>
 
 <TR>
@@ -714,6 +733,11 @@ obp) </TD>
 </TR>
 
 <TR>
+<TD>MacOS won't load foriegn libs unless they end in .psl even
+when they are the correct type</TD>
+</TR>
+
+<TR>
 <TD>MacOS needs splash screen and spinning cursor during startup. </TD>
 </TR>
 
@@ -747,6 +771,15 @@ obp) </TD>
 </TR>
 
 <TR>
+<TD>Q&A crashes when know.pro is missing </TD>
+</TR>
+
+<TR>
+<TD>In Q&A, when know.pro is consulted for the first time
+puts up console window.</TD>
+</TR>
+
+<TR>
 <TD>subPath and rootPathFile may be broken on mac, need test </TD>
 </TR>
 
@@ -760,6 +793,10 @@ obp) </TD>
 
 <TR>
 <TD>Mac file types </TD>
+</TR>
+
+<TR>
+<TD>Mac takes a 14% hit for time slicing, reduce this to <5% </TD>
 </TR>
 
 <TR>
@@ -834,6 +871,29 @@ For CLP(BNR) </TD>
 
 <TR>
 <TD>win32 network file paths don't work </TD>
+</TR>
+
+<TR>
+<TD>win32 should support unix file names</TD>
+</TR>
+
+<TR>
+<TD>win32 network file drag and drop doesn't work </TD>
+</TR>
+
+<TR>
+<TD>There is an optimizer bug under MW CW11 so we use CW10 </TD>
+</TR>
+
+<TR>
+<TD>win32 DLL library tries to load saved state from the app that loads it.
+</TD>
+</TR>
+
+<TR>
+<TD>win32 DLL library changes the title of console window when
+PI_prolog_init is called.
+</TD>
 </TR>
 
 <TR>
@@ -1407,6 +1467,9 @@ code sparc and i386 versions up to running at the V2.1 level</TD>
 <TR>
 <TD>C++ interface </TD>
 </TR>
+<TR>
+<TD>VisualBasic interface </TD>
+</TR>
 
 <TR>
 <TD>AS400 port </TD>
@@ -1418,6 +1481,39 @@ code sparc and i386 versions up to running at the V2.1 level</TD>
 
 <TR>
 <TD>zinc - dropped?? </TD>
+</TR>
+<TR>
+<TD>ALSDIR environment variable?</TD>
+</TR>
+
+<TR>
+<TD>Demo version with serial numbers that define time period </TD>
+</TR>
+
+<TR>
+<TD>for debugging define a directive determinate/1 which tells the compiler to
+perform determinancy check on the specified predicate. example: :- determinate(foo/2).
+</TD>
+</TR>
+
+<TR>
+<TD>
+Do we need an Foreign interface for adding avaluable functors? 
+example X is foo(3.0,2)
+</TD>
+</TR>
+
+<TR>
+<TD>
+Get ride of all the DoubleType ifdef code - make abstract interface.
+</TD>
+</TR>
+
+<TR>
+<TD>
+Fix prolog interupts to be more like standard microprocessor interupts
+ie. push context on stack, not in some fixed global stack.
+</TD>
 </TR>
 
 <TR>
