@@ -2,7 +2,7 @@
 
 static char *args[]= {
 	"alspro_b",
-	"mac_make.pro"
+	"student_make.pro"
 };
 
 int main()
