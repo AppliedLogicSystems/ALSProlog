@@ -8,6 +8,11 @@
 #define HAVE_LIBELF	1
 #define USE_ELF_SECTION_FOR_IMAGE 1
 
+#define MISSING_EXTERN_GETHOSTNAME	1
+
+/* define __EXTENSIONS__ to get crypt() prototype */
+#define __EXTENSIONS__
+
 /* Solaris does not have the standard regcomp() library, so use
    regcmp().
 */
@@ -79,13 +84,4 @@
 #define HAVE_TIMES	1
 #define HAVE_VFPRINTF	1
 #define HAVE_WAITPID	1
-#define MISSING_EXTERN__FILBUF	1
-#define MISSING_EXTERN__FLSBUF	1
-#define MISSING_EXTERN_BCOPY	1
-#define MISSING_EXTERN_BZERO	1
-#define MISSING_EXTERN_GETHOSTNAME	1
-#define MISSING_EXTERN_GETPAGESIZE	1
-#define MISSING_EXTERN_GETWD	1
-#define MISSING_EXTERN_LDOPEN	1
-#define MISSING_EXTERN_SIGSTACK	1
-#define MISSING_EXTERN_SIGVEC	1
+
