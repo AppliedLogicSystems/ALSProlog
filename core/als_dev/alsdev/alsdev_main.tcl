@@ -44,6 +44,8 @@ proc vTclWindow.topals {args} {
 	add_prolog_menu .topals.mmenb listener .topals
 	add_tools_menu .topals.mmenb listener .topals
 	add_windows_menu .topals.mmenb listener .topals
+	menu .topals.mmenb.windows -tearoff 0 -title Windows
+	.topals.mmenb add cascade -label "Windows" -menu .topals.mmenb.windows -underline 0
 	add_help_menu .topals.mmenb
 
 
@@ -101,6 +103,7 @@ proc vTclWindow.topals {args} {
 
 	# accelerators
 	bind_accelerators .topals $mod listener
+	post_open_document Environment .topals 
 
 }
 

@@ -50,6 +50,7 @@ proc vTclWindow.debugwin {base} {
     add_edit_menu $base.menubar debugwin $base
     add_prolog_menu $base.menubar debugwin $base
     add_tools_menu $base.menubar debugwin $base
+	add_windows_menu $base.menubar document $base
     add_help_menu $base.menubar
 
 
