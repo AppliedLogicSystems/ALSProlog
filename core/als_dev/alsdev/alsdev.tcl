@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.39 1998/03/11 02:50:05 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.40 1998/03/13 01:56:12 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -306,6 +306,7 @@ load_source $ALSTCLPATH {defstr}
 load_source $ALSTCLPATH {als_menu}
 load_source $ALSTCLPATH {als_document}
 load_source $ALSTCLPATH {als_tkfbox}
+load_source $ALSTCLPATH {als_projects}
 
 
 proc load_photo {image_name base_name} {
