@@ -165,6 +165,7 @@ extern	int	pbi_delay		PARAMS(( void ));
 extern  int	pbi_is_delay_var	PARAMS(( void ));
 extern  int	pbi_kill_freeze	PARAMS(( void ));
 extern	int 	pbi_clct_tr 		PARAMS(( void ));
+extern	int 	pbi_unset_2nd 		PARAMS(( void ));
 extern	int 	pbi_del_tm_for		PARAMS(( void ));
 extern	int	pbi_bind_vars		PARAMS(( void ));
 

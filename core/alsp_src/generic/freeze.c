@@ -25,6 +25,7 @@ int	pbi_delay		PARAMS(( void ));
 int	pbi_is_delay_var	PARAMS(( void ));
 int	update_chpt_slots	PARAMS(( PWord ));
 int	pbi_clct_tr		PARAMS(( void ));
+int	pbi_unset_2nd		PARAMS(( void ));
 int pbi_del_tm_for		PARAMS(( void ));
 PWord	deref_2		PARAMS(( PWord ));
 
@@ -261,6 +262,7 @@ pbi_clct_tr()
 	PWord **CurT,*Back1,*Forw1;
 	PWord BStop,v1,clctv,DrT;
 	int t1,cvt;
+  	PWord *argaddr;
 
     w_get_An(&v1, &t1, 1);
 	BStop = (PWord) wm_B;
@@ -286,6 +288,11 @@ pbi_clct_tr()
 				printf(" - Active\n");
 				Back1 = (PWord *)DrT-1;
 				w_install_argn((int)Back1, 2, clctv, cvt);
+    w_get_argaddr(argaddr, Back1, (int) 2, 4);
+
+  *(((PWord *)wm_TR)-2) = *argaddr;
+  *(((PWord *)wm_TR)-1) = (PWord)argaddr;
+
 				w_install(&clctv, (int)Back1, WTP_STRUCTURE);
 				cvt = WTP_STRUCTURE;
 				}
@@ -323,6 +330,20 @@ pbi_clct_tr()
 		SUCCEED;
 	else
 		FAIL;
+}
+
+int
+pbi_unset_2nd()
+{
+    PWord v1, s;
+    int t1;
+
+    w_get_An(&v1, &t1, 1);
+    if (t1 != WTP_STRUCTURE)
+        FAIL;
+    s = (PWord)MSTRUCTADDR(v1);
+    w_install_unbound_argn(s, 1);
+    SUCCEED;
 }
 
 int
