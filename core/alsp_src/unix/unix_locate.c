@@ -9,15 +9,17 @@ static char *which(const char *path_list, const char *name, char *path)
   const char *element, *next;
   char *result_path = NULL;
   
-  for (element = path_list, next = strchr(element, ':'); element;
-       element = next ? next+1 : NULL, next = strchr(element, ':'))
+  for (element = path_list; element;
+       element = next ? next+1 : NULL)
   {
     struct stat info;
-    int length = next ? next-element : strlen(element);
+    int length;
 
+    next = strchr(element, ':');
+    length = next ? next-element : strlen(element);
     strncpy(path, element, length);
     path[length] = 0;
-    if (element[length] != '/') strcat(path, "/");
+    if (length > 0 && element[length] != '/') strcat(path, "/");
     strcat(path, name);
 
     if (access(path, X_OK) == 0
