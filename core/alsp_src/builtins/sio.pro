@@ -50,7 +50,7 @@ use tcltk.
 default_read_eoln_type(_, universal).
 
 default_write_eoln_type(socket, crlf) :- !.
-default_write_eoln_type(tk_window, lf) :- !.
+default_write_eoln_type(tk_win, lf) :- !.
 
 :-	als_system(L),
 	dmember(os=OS, L),
@@ -707,10 +707,6 @@ check_source_sink_and_mode(tk_win(_,_),Mode) :-
 	!,
 	(Mode = read_write; Mode = read ; Mode = Write ).
 %	check_mode(Mode,read_write_modes(Mode,_,_)).
-check_source_sink_and_mode(tk_window(_,_),Mode) :-
-	!,
-	(Mode = read_write; Mode = read ; Mode = Write ).
-%	check_mode(Mode,read_write_modes(Mode,_,_)).
 check_source_sink_and_mode(window(_),Mode) :-
 	!,
 	check_mode(Mode,read_write_modes(Mode,_,_)).
@@ -808,7 +804,7 @@ check_list_option(M,ML) :-
  |	Checks for an alias 'Alias' and determines whether or 
  |	not it is a valid alias for a new stream open; 
  |	returns the alias found in the variable 'Alias'.
- |	Under some circumstances (eg, for a tk_window stream),
+ |	Under some circumstances (eg, for a tk_win stream),
  |	will generate an alias if one is not found on Options. 
  |	Normally, if no alias is found, binds Alias to no(alias)
  *----------------------------------------------------------*/
@@ -821,7 +817,7 @@ check_alias(Options, Source_sink, Alias)
 	check_alias(Alias).
 
 	%% No alias; use WinName as one for tk_windows:
-check_alias(Options, tk_window(_,WinName), Alias) 
+check_alias(Options, tk_win(_,WinName), Alias) 
 	:-!,
 	(atom(WinName) -> Alias = WinName ; sprintf(atom(Alias), '%t', [WinName]) ),
 	check_alias(Alias).
@@ -944,10 +940,6 @@ open_stream(tk_win(Interp,WinName),Mode,Options,Stream)
 	:- !,
 	open_tk_window_stream(WinName,Interp,Mode,Options,Stream).
 
-open_stream(tk_window(Interp,WinName),Mode,Options,Stream) 
-	:- !,
-	open_tk_window_stream(WinName,Interp,Mode,Options,Stream).
-
 open_stream(console(Name), Mode, Options, Stream) 
 	:- !,
 	open_console_stream(Name, Mode, 0, Options, Stream).
@@ -1029,13 +1021,11 @@ initialize_stream(StreamType,Source_sink,Options,Stream)
 	set_stream_blocking(Stream,Blocking).
 
 default_snr(window, snr_code).
-default_snr(tk_window, snr_code).
 default_snr(tk_win, snr_code).
 default_snr(StreamType, wait).
 
 default_blocking(window, false) :-!.
-%default_blocking(tk_window, false) :-!.
-default_blocking(tk_window, true) :-!.
+default_blocking(tk_win, true) :-!.
 default_blocking(Type, false) :- functor(Type, socket,_), !.
 default_blocking(_, true).
 
@@ -1663,10 +1653,6 @@ data_ready(Stream)
 :-dynamic(setStreamId/2).
 :-dynamic(getStreamId/2).
 
-wait_data(tk_window, Stream, Call) 
-	:-!,
-	wait_data(tcltk, Stream, Call).
-
 wait_data(tk_win, Stream, Call) 
 	:-!,
 	wait_data(tcltk, Stream, Call).
@@ -1795,7 +1781,7 @@ getWinGV(WinID,WinPosGV) :-      %% allocate a gvar for WinID if not previously 
 open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
 	:-
 	(atom(WinName) -> WinID = WinName ; sprintf(atom(WinID), '%t', [WinName]) ),
-	initialize_stream(tk_window,WinID,Options,Stream),
+	initialize_stream(tk_win,WinID,Options,Stream),
 
 	(dmember(alias(Alias), Options) -> true ; Alias = WinName),
 		%% store the stream alias:
@@ -1807,9 +1793,8 @@ open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	eoln_modes(tk_window, Options, NEoln),
+	eoln_modes(tk_win, Options, NEoln),
  	sio_generic_open(0,Stream,NMode,NBuffering,NEoln),
-%	sio_tk_win_open(WinID,Stream,NMode,NBuffering,NEoln),
 	TextBuffer = '',
 	set_stream_extra(Stream,TextBuffer),	%% the Prolog side window buffer
 	    %% Note: extrar maintains the text buffer;
@@ -1838,7 +1823,7 @@ open_tcl_transfer_stream(CmdPattern,Interp,Mode,Options,Stream)
 	%% open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
 clone_stream(Stream, StreamName, StreamType, Mode, StreamClone)
 	:-
-	initialize_stream(tk_window,StreamName,[],StreamClone),
+	initialize_stream(tk_win,StreamName,[],StreamClone),
 	set_stream_addl1(Stream, ''),
 	stream_addl2(Stream, Interp),
 	set_stream_addl2(StreamClone, Interp),
@@ -2072,11 +2057,11 @@ close_stream(string,Stream) :-
 close_stream(string,_) :-
 	!.
 
-close_stream(tk_window,Stream) :-
+close_stream(tk_win,Stream) :-
 	is_output_stream(Stream),
 	!,
-	write_buffer(tk_window,Stream).
-close_stream(tk_window,_) :-
+	write_buffer(tk_win,Stream).
+close_stream(tk_win,_) :-
 	!.
 
 close_stream(tcl_transfer,Stream) :-
@@ -2261,7 +2246,7 @@ get_failure_read_snr(snr_code, Pred, ArgNum, Stream, Call)
 	stream_blocking(Stream, BLOCK),
 	stream_blocking(Stream, true),
 	stream_type(Stream, StrmType),
-	dmember(StrmType, [socket,tk_window,tk_win,window]),
+	dmember(StrmType, [socket,tk_win,window]),
 	!,
 	wait_data(StrmType, Stream, Call).
 
@@ -2553,24 +2538,15 @@ read_buffer(window,Stream)
 		set_stream_addl1(Stream, [])
 	).
 
-read_buffer(tk_window,Stream) 
+read_buffer(tk_win,Stream) 
 	:- 
-/*
-stream_extra(Stream,XTRA),
-(XTRA=eof(What) ->
-	pbi_write(rb_tk_xtra_1A(What)),pbi_nl,pbi_ttyflush
-	;
-	pbi_write(rb_tk_xtra_1B(XTRA)),pbi_nl,pbi_ttyflush,
-	fail
-),
-*/
 	stream_extra(Stream,eof(_)),
 	!,
 	sio_set_errcode(Stream,8),		%% 8 =  SIOE_EOF
 	sio_set_eof(Stream),		
 	fail.
 
-read_buffer(tk_window,Stream) 
+read_buffer(tk_win,Stream) 
 	:- 
 	stream_extra(Stream,''),
 	!,
@@ -2579,7 +2555,7 @@ read_buffer(tk_window,Stream)
 	sio_set_errcode(Stream,14),		%% 14 =  SIOE_NOTREADY
 	fail.
 
-read_buffer(tk_window,Stream) 
+read_buffer(tk_win,Stream) 
 	:- 
 	stream_extra(Stream,InCurQueue),
 	(InCurQueue = eof(CurQueue) ->
@@ -2606,10 +2582,10 @@ read_buffer(tk_window,Stream)
 	!,
 	set_stream_extra(Stream,OutNewQueue).
 
-read_buffer(tk_window,Stream) :-
+read_buffer(tk_win,Stream) :-
 	sio_errcode(Stream,16),			%% 16 = SIOE_INTERRUPTED
 	!,
-	read_buffer(tk_window,Stream).
+	read_buffer(tk_win,Stream).
 
 set_extra_eof(StreamOrAlias)
 	:-
@@ -2659,7 +2635,7 @@ push_prompt(Stream_or_alias)
  |	add_to_stream_buffer(+, +)
  |	
  |	called by the code implementing read_buffer/2 for
- |	tk_window streams to add the incoming line (which
+ |	tk_win streams to add the incoming line (which
  |	is part of a term) to the queue being accumulated
  |	in the "extra" slot of the stream.
  *----------------------------------------------------------*/
@@ -2921,6 +2897,7 @@ put_failure_write(_,Call) :- call(Call).
 
 export put_char/1.
 
+/*****
 put_char(Char) :-
 	get_current_output_stream(Stream),
 	char_code(Char,Code),
@@ -2930,6 +2907,10 @@ put_char(Char) :-
 	get_current_output_stream(Stream),
 	sio_errcode(Stream,FailCode),
 	put_failure(FailCode,Stream,Char,put_char(Char)).
+*****/
+put_char(Char) :-
+	get_current_output_stream(Stream),
+	put_char(Stream, Char).
 
 /*
  * put_char(Stream_or_alias,Char)
@@ -2944,12 +2925,14 @@ export put_char/2.
 put_char(Stream, Char) :-
 	char_code(Char,Code),
 	sio_put_byte(Stream,Code),
-	!.
+	!,
+	tk_setmark(Stream).
 put_char(Alias, Char) :-
 	is_output_alias(Alias,Stream),
 	char_code(Char,Code),
 	sio_put_byte(Stream,Code),
-	!.
+	!,
+	tk_setmark(Stream).
 put_char(Stream_or_alias,Char) :-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	sio_errcode(Stream,FailCode),
@@ -2963,6 +2946,7 @@ put_char(Stream_or_alias,Char) :-
 
 export put_code/1.
 
+/***********
 put_code(Char) :-
 	get_current_output_stream(Stream),
 	sio_put_byte(Stream,Char),
@@ -2971,6 +2955,10 @@ put_code(Char) :-
 	get_current_output_stream(Stream),
 	sio_errcode(Stream,FailCode),
 	put_failure(FailCode,Stream,Char,put_code(Char)).
+***********/
+put_code(Char) :-
+	get_current_output_stream(Stream),
+	put_code(Stream, Char).
 
 
 /*
@@ -2983,16 +2971,17 @@ put_code(Char) :-
 
 export put_code/2.
 
-
 put_code(Stream, Char) 
 	:-
 	sio_put_byte(Stream,Char),
-	!.
+	!,
+	tk_setmark(Stream).
 put_code(Alias, Char) 
 	:-
 	is_output_alias(Alias, Stream),
 	sio_put_byte(Stream,Char),
-	!.
+	!,
+	tk_setmark(Stream).
 put_code(Stream_or_alias,Code) 
 	:-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
@@ -3047,11 +3036,13 @@ export put_atom/2.
 
 put_atom(Stream, Atom) :-
 	sio_put_atom(Stream,Atom),
-	!.
+	!,
+	tk_setmark(Stream).
 put_atom(Alias, Atom) :-
 	is_output_alias(Alias, Stream),
 	sio_put_atom(Stream,Atom),
-	!.
+	!,
+	tk_setmark(Stream).
 put_atom(Stream_or_alias,Atom) :-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	sio_errcode(Stream,FailCode),
@@ -3077,11 +3068,13 @@ export put_number/3.
 
 put_number(Stream,OutputType,Number) :-
 	sio_put_number(Stream,OutputType,Number),
-	!.
+	!,
+	tk_setmark(Stream).
 put_number(Alias, OutputType,Number) :-
 	is_output_alias(Alias, Stream),
 	sio_put_number(Stream,OutputType,Number),
-	!.
+	!,
+	tk_setmark(Stream).
 put_number(Stream_or_alias,OutputType,Number) :-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	sio_errcode(Stream,FailCode),
@@ -3115,7 +3108,7 @@ endpos_2_readstream(ReadStreamAlias,EndPos)
 	current_alias(ReadStreamAlias, ReadStream),
 	set_window_insert_pos(ReadStream,EndPos).
 
-write_buffer(tk_window,Stream) :-
+write_buffer(tk_win,Stream) :-
 	sio_buf_params(Stream, BufStart, BufSize),
 	stream_buffer(Stream,SD),
 	sio_lpos(Stream, NumCs),
@@ -3130,7 +3123,7 @@ write_buffer(tk_window,Stream) :-
 	catch(tcl_call(Interp, [WinID,see,end], _),_,true),
 	catch(tcl_call(Interp, [update], _),_,true).
 
-write_buffer(tk_window,Stream) :-!.
+write_buffer(tk_win,Stream) :-!.
 
 write_buffer(tcl_transfer,Stream) 
 	:-!,
@@ -3218,7 +3211,16 @@ write_buffer(Stream) :-
 	!,
 	write_buffer(Stream).
 
+tk_setmark(Stream)
+	:-
+	stream_type(Stream, StrmType),
+	StrmType=tk_win,
+	stream_name(Stream, WinID),
+	stream_addl2(Stream, Interp),
+	!,
+	catch(tcl_call(Interp, [WinID,mark,set,lastPrompt,[end,-1,chars]], _),_,true).
 
+tk_setmark(Stream).
 
 %%
 %% uia_to_list(NumChars,UIA,Offset,List)
@@ -3267,7 +3269,7 @@ flush_input(Stream_or_alias) :-
 
 check_special_in_flush(Stream)
 	:-
-	stream_type(Stream, tk_window),
+	stream_type(Stream, tk_win),
 	!,
 	stream_name(Stream,WinName),
 	stream_addl2(Stream, Interp),
@@ -3420,12 +3422,14 @@ nl(Stream_or_alias) :-
 nl0(Stream) 
 	:-
 	sio_nl(Stream),
-	!.
+	!,
+	tk_setmark(Stream).
 nl0(Alias) 
 	:-
 	is_output_alias(Alias, Stream),
 	sio_nl(Stream),
-	!.
+	!,
+	tk_setmark(Stream).
 nl0(Stream_or_alias) 
 	:-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),

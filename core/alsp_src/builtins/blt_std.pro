@@ -83,11 +83,13 @@ noshowmod(sio).
 noshowmod(syscfg).
 noshowmod(xconsult).
 noshowmod(alsdev).
+noshowmod(alsshell).
 noshowmod(debugger).
 noshowmod(rel_arith).
 noshowmod(pgm_info).
 noshowmod(sys_maint).
 noshowmod(objects).
+noshowmod(utilities).
 noshowmod(windows).
 noshowmod(tcltk).
 noshowmod(tk_alslib).

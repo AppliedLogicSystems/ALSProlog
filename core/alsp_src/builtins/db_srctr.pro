@@ -54,7 +54,9 @@ make_dbstr(_A,_B) :-
             [filename,fcg_num,winname,textwin,numlines,linesizes,
                 invlineindex,head_tag,call_tag],
             [_C,_D,_E,_F,0,[],[],0,0],_B,_G),
-        _A'=..'[dbstr|_G].
+        _A '=..' [dbstr|_G].
+
+
 
 export xmake_dbstr/2.
 xmake_dbstr(dbstr(_A,_B,_C,_D,_E,_F,_G,_H,_I),[_A,_B,_C,_D,_E,_F,_G,_H,_I]).

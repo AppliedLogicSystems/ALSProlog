@@ -8,7 +8,7 @@
  |	Author: Ken Bowen
  |	Creation Date: 1997
  *=============================================================*/
- %% Loaded separately:
+ %% Loaded directly - see end of file:
 %:-[db_srctr].
 
 module builtins.
@@ -32,7 +32,7 @@ start_alsdev
 	ss_load_dot_alspro(CLInfo),
 	library_setup,
 	init_tk_alslib(shl_tcli,Shared),
-	%alsdev_splash(Shared),
+%	alsdev_splash(Shared),
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	alsdev(Shared).
@@ -63,21 +63,21 @@ alsdev(Shared)
 
 	tcl_call(shl_tcli, [destroy,'.als_splash_screen'], _),
 
-	open(tk_win(shl_tcli, '.topals.txwin.text'), read, ISS, 
+	open(tk_win(shl_tcli, '.topals.text'), read, ISS, 
 		[alias(shl_tk_in_win)
 			,prompt_goal(user_prompt_goal(shl_tk_out_win))
 		]),
-	open(tk_win(shl_tcli, '.topals.txwin.text'), write, OSS, 
+	open(tk_win(shl_tcli, '.topals.text'), write, OSS, 
 		[alias(shl_tk_out_win),write_eoln_type(lf)
 		]),
 	set_associated_output_alias(shl_tk_in_win, shl_tk_out_win),
-	catenate('WaitForLine','.topals.txwin.text',WaitVar),
-	catenate('DataLine','.topals.txwin.text',DataVar),
+	catenate('WaitForLine','.topals.text',WaitVar),
+	catenate('DataLine','.topals.text',DataVar),
 
 	tcl_call(shl_tcli, [set,WaitVar,0],_),
 	tcl_call(shl_tcli, [set,DataVar,""],_),
 	tcl_call(shl_tcli, 
-		[set_top_bindings,'.topals.txwin.text',shl_tk_in_win,WaitVar,DataVar],_),
+		[set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_),
     sio:set_input(ISS),
     sio:set_output(OSS),
 
@@ -127,7 +127,7 @@ alsdev(Shared)
     %% Error stream
 		%	open(console_error('error output'),write,OutEStream,
 	cancel_alias(error_stream),
-    open(tk_win(shl_tcli, '.topals.txwin.text'),write,OutEStream,
+    open(tk_win(shl_tcli, '.topals.text'),write,OutEStream,
 	 ['$stream_identifier'(-5), alias(error_stream),
 	 	buffering(line),type(text)]),
 
@@ -182,7 +182,7 @@ push_prompt(tcltk,OutStream,Prompt1)
 	:-!,
 	nl(OutStream),
 	flush_output(OutStream),
-	tcl_call(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _).
+	tcl_call(shl_tcli, [set_prompt_mark, '.topals.text'], _).
 
 
 
@@ -226,7 +226,7 @@ setup_prolog_flags
 	!,
 	static_flags_info(StaticEqsList),
 	add_static_items_to_menu(StaticEqsList, 
-				shl_tcli, '.topals.mmenb.project.static').
+				shl_tcli, '.topals.mmenb.prolog.static').
 setup_prolog_flags.
 
 add_static_items_to_menu([], Interp, MenuPath).
@@ -250,9 +250,9 @@ use tk_alslib.
 alsdev_default_setup(SystemDefaults)
 	:-
 	find_alsdev_ini(Items),
-	window_defaults_setup(topals,Items,SystemDefaults),
-	window_defaults_setup(debugwin,Items,SystemDefaults),
-	window_defaults_setup(edit,Items,SystemDefaults).
+	window_defaults_setup('.topals',	Items,SystemDefaults),
+	window_defaults_setup('.debugwin',	Items,SystemDefaults),
+	window_defaults_setup('.document',	Items,SystemDefaults).
 /*
 	(dmember(text_settings(TextSettings), Items) ->
 		setup_defaults(TextSettings, text)
@@ -315,18 +315,11 @@ setup_win_default(tabs,'', _,_).
 
 change_settings(WinSettingsVals, WinGroup)
 	:-
-write(change_settings(WinSettingsVals, WinGroup)),nl,flush_output,
 	WinSettingsVals = [Back, Fore, SelectBack, SelectFore, Font, Tabs],
 	WinSettings = 
 		window_settings(WinGroup, [background=Back, foreground=Fore, 
 					 selectbackground=SelectBack, selectforeground=SelectFore, 
 					 font=Font, tabs=Tabs ]),
-/*
-	TextSettingsVals = [Family, Size, Style],
-	TextSettings = 
-		text_settings([family=Family,size=Size,style=Style]),
-	modify_settings([WinSettings,TextSettings]).
-*/
 	modify_settings(WinSettings,window_settings, 2, WinGroup).
 
 modify_settings(NewTerm, Functor, Arity, Arg1)
@@ -745,7 +738,6 @@ endmod.	%% builtins
 module debugger.
 use tcltk.
 
-
 init_visual_debugger
 	:- 
 	clause(get_db_file_recs(_),B),
@@ -787,6 +779,7 @@ get_st_rec_by_fcg(FCGNum, Rec)
 start_src_trace(BaseFileName, SrcFilePath)
 	:-
 	init_visual_debugger,
+	set_mrfcg(0),
 	tcl_call(shl_tcli, [ensure_db_showing], _),
 		%% Old Rec exists, but window has been destroyed, so
 		%% remove old rec, and start over:
@@ -829,32 +822,16 @@ inverted_index([NLCs | LineIndex], CurCharCount, [CurCharCount | List])
 create_src_trace(SrcFilePath, WinName, TextWinName, BaseFileName, 
 				 NumLines, LineIndex)
 	:-
-/*
-		%% deal with extension, full path completely (later):
-	pathPlusFile(_,FF,FileName),
-	(filePlusExt(BaseFileName,Ext,FF) ->
-		true
-		;
-		BaseFileName = FF
-	),
-*/
-	catenate('.debug_st_',BaseFileName,WinName),
-	catenate(WinName, '.textwin.text', TextWinName),
-%	catenate('Source Trace: ',FF, Title),
-	(BaseFileName = user -> FF = '\[user\]' ; FF = SrcFilePath),
-	catenate('Source Trace: ',FF, Title),
-	tcl_call(shl_tcli, ['vTclWindow.debug_source_trace',WinName,Title],R),
-	tcl_call(shl_tcli, [TextWinName,delete,'1.0',end], _),
+	tcl_call(shl_tcli, [load_document,SrcFilePath],WinName),
+	catenate(WinName,'.text',TextWinName),
 	(BaseFileName = user -> 
 		LoadRes = [0, []]
 		;
-		tcl_call(shl_tcli, [load_file_to_win,SrcFilePath,TextWinName],LoadRes),
+		tcl_call(shl_tcli, [line_index_file,SrcFilePath],LoadRes),
 		LoadRes = [NumLines, LineIndex]
 	),
-%write(cst_done),nl,flush_output,
 	tcl_call(shl_tcli, [TextWinName,configure,'-state',disabled],_),
 	tcl_call(shl_tcli, [raise,'.debugwin',WinName],_).
-
 
 check_leashing(Call,Exit,Redo,Fail)
 	:-
@@ -896,19 +873,20 @@ set_debugwin_width(M5Size, MainWinSize)
 	%% - (Start,End) are the file offsets of the head
 	%%    of the clause.
 	%%---------------------------------------------------
-/*** Test debugging clause:
+/*
 showGoalToUserWin(Port,Box,Depth, Module, Goal, debug)
 	:-
-	write(tRY_showGoalToUserWin(Port,Box,Depth, Module, Goal, debug)),nl,
-	flush_output,
+	get_mrfcg(ClsGrp),
+printf('%t-%t(%t) %t <%t>\n',[Box,Depth,Port,Goal,ClsGrp]),flush_output,
 	fail.
- ***/
+*/
 
 	%% '$dbg_aph' ::
 
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-
 %printf('+#+%t: $dbg_aph(%t,%t,%t)\n',[call,ClsGrp,Start,End]),flush_output,
+%	fcg_change(call,'$dbg_aph',ClsGrp,Start,End),
 	color_my_port(ClsGrp,Start,End,call,head_tag),
 	!.
 
@@ -920,7 +898,7 @@ showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 %write(zero_rec_for_clsgrp=[ClsGrp,BaseFileName,SrcFilePath]),nl,
 	builtins:file_clause_group(BaseFileName, ClsGrp),
 	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options),
-	reload_debug(DebugType, SrcFilePath),
+	reload_debug(BaseFileName, SrcFilePath, DebugType),
 	continue_start_src_trace(BaseFileName, SrcFilePath),
 	!.
 
@@ -928,20 +906,30 @@ showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	
 showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('+#+%t: $dbg_aph(%t,%t,%t)\n',[fail,ClsGrp,Start,End]),flush_output,
+%printf('+#+%t: $dbg_aph(%t,%t,%t,%t,%t)\n',[fail,ClsGrp,Start,End,Box,Depth]),flush_output,
+%	fcg_change(fail,'$dbg_aph',ClsGrp,Start,End),
 	color_my_port(ClsGrp,Start,End,fail,head_tag),
 	fail.
 	
 showGoalToUserWin(redo,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('+#+%t: $dbg_aph(%t,%t,%t)\n',[fail,ClsGrp,Start,End]),flush_output,
+%printf('+#+%t: $dbg_aph(%t,%t,%t)\n',[redo,ClsGrp,Start,End]),flush_output,
+%	fcg_change(redo,'$dbg_aph',ClsGrp,Start,End),
 	color_my_port(ClsGrp,Start,End,redo,head_tag),
 	fail.
 	
 showGoalToUserWin(Port,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-!.
-%printf('+#+%t: $dbg_aph(%t,%t,%t)\n',[Port,ClsGrp,Start,End]),flush_output.
+%	fcg_change(Port,'$dbg_aph',ClsGrp,Start,End).
+%printf('+#+%t: $dbg_aph(%t,%t,%t,%t,%t)\n',[Port,ClsGrp,Start,End,Box,Depth]),flush_output.
 
+fcg_change(Port,DBG,ClsGrp,Start,End)
+	:-
+	get_mrfcg(MRFCG),
+	MRFCG \= ClsGrp,
+%	printf('+fcg_chg(%t): %t prev=%t cur=%t\n',[Port,DBG,MRFCG,ClsGrp]),
+	flush_output.
+fcg_change(Port,DBG,ClsGrp,Start,End).
 
 	%% '$dbg_aphe' ::
 
@@ -953,9 +941,8 @@ showGoalToUserWin(call,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 
 showGoalToUserWin(redo,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('-#-%t: $dbg_aphe(%t,%t,%t)\n',[Port,ClsGrp,Start,End]),flush_output,
+%printf('-#-%t: $dbg_aphe(%t,%t,%t)\n',[redo,ClsGrp,Start,End]),flush_output,
 	color_my_port(ClsGrp,Start,End,redo,head_tag),
-%	clear_my_tag(ClsGrp,Start,End,TagName),
 	fail.
 
 showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
@@ -964,7 +951,7 @@ showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 
 showGoalToUserWin(Port,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 	:-!.
-%printf('-#-%t: $dbg_aphe(%t,%t,%t)\n',[Port,ClsGrp,Start,End]),flush_output.
+%printf('-#-%t: $dbg_aphe(%t,%t,%t,%t,%t)\n',[Port,ClsGrp,Start,End,Box,Depth]),flush_output.
 
 	%%---------------------------------------------------
 	%% 		'$dbg_apf'
@@ -979,15 +966,17 @@ showGoalToUserWin(Port,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('###call: $dbg_apf(%t,%t,%t)\n',[ClsGrp,Start,End]),flush_output,
+%printf('###call: $dbg_apf(%t,%t,%t,%t,%t)\n',[ClsGrp,Start,End,Box,Depth]),flush_output,
 	color_my_port(ClsGrp,Start,End,exit,head_tag).
 
 showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
 	:-!,
+%printf('###redo: $dbg_apf(%t,%t,%t,%t,%t)\n',[ClsGrp,Start,End,Box,Depth]),flush_output,
 	fail.
 
 showGoalToUserWin(_,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
 	:-!.
+%printf('----: $dbg_apf(%t,%t,%t,%t,%t)\n',[ClsGrp,Start,End,Box,Depth]),flush_output.
 
 	%%--------------------------------------------------------------------
 	%% 		'$dbg_apg' and  '$dbg_apge'
@@ -1053,12 +1042,10 @@ showGoalToUserWin(_,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug)
 showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
 	:-
 	printf(debugger_output,'(%d) %d %t: ', [Box,Depth,Port]),
+!,
 	write_term(debugger_output, Module:XGoal,    [lettervars(false)]),
 	flush_output(debugger_output),
 	get_mrfcg(MRFCG),
-
-%printf('AllOthers:Port=%t MRFCG=%t\n',[Port,MRFCG]),
-
 	(MRFCG = 0 -> true
 		;
 		((Port=call; Port=redo) -> true
@@ -1066,9 +1053,27 @@ showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
 			re_color_port(Port, MRFCG, STRec)
 		)
 	),
-	tcl_call(shl_tcli, [set_status_debugwin,Port,Box,Depth], _),
+%printf('++Port=%t %t-%t <%t> %t\n',[Port,Box,Depth,MRFCG,XGoal]),flush_output,
+
+	(((Port = exit; Port = fail), Box = 1, Depth=1) ->
+		db_boundary(Box,Depth,general,Port,XGoal,MRFCG),
+		nl(debugger_output),
+		Response = debug
+		;
+		tcl_call(shl_tcli, [set_status_debugwin,Port,Box,Depth], _),
+		getResponse(tcltk,Port,Box,Depth, Module, XGoal, Response)
+	).
+
+
+db_boundary(Box,Depth,Desc,Port,XGoal,MRFCG)
+	:-
+	Box=1,
+	Depth=1,
 	!,
-	getResponse(tcltk,Port,Box,Depth, Module, XGoal, Response).
+	((Port = exit; Port = fail) -> clean_up_src_win(MRFCG) ; true).
+
+db_boundary(Box,Depth,Desc,Port,XGoal,MRFCG).
+
 
 color_my_port(ClsGrp,Start,End,Port,TagName)
 	:-
@@ -1110,6 +1115,17 @@ port_color(exit, green).
 port_color(fail, '#fe0076').
 port_color(redo, yellow).
 
+clean_up_src_win(MRFCG)
+	:-
+	get_st_rec_by_fcg(MRFCG, Rec),
+	Rec \= 0,
+	access_dbstr(textwin, Rec, TextWin),
+		% clear_tag(call_tag,TextWin),
+	tcl_call(shl_tcli, [clear_tag, call_tag, TextWin], _),
+	tcl_call(shl_tcli, [TextWin,tag, delete, call_tag], _),
+		% clear_tag(head_tag,TextWin),
+	tcl_call(shl_tcli, [clear_tag, head_tag, TextWin], _),
+	tcl_call(shl_tcli, [TextWin,tag, delete, head_tag], _).
 
 getresponse2(tcltk,Port,Box,Depth,Module,Goal,Response)
 	:-
@@ -1217,21 +1233,75 @@ disp_find_line_pos(MidStart,MidLN,LowLN,HighLN,Offset,ILI,LN)
 
 
 
-
-
-export jedit/0.
-jedit :-
-	tcl_call(shl_tcli, [alsdev_jedit], XX).
-
-
-
-%	tcl_call(shl_tcli, ['jedit:jedit','-embedded',1], XX).
-
-
-
 endmod.
 
 
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+module utilities.
+use debugger.
+endmod.
+
+module debugger.
+use utilities.
+
+
+%--- dbstr defStruct ---
+
+export access_dbstr/3.
+export set_dbstr/3.
+access_dbstr(filename,_A,_B) :- arg(1,_A,_B).
+set_dbstr(filename,_A,_B) :- mangle(1,_A,_B).
+
+access_dbstr(fcg_num,_A,_B) :- arg(2,_A,_B).
+set_dbstr(fcg_num,_A,_B) :- mangle(2,_A,_B).
+
+access_dbstr(winname,_A,_B) :- arg(3,_A,_B).
+set_dbstr(winname,_A,_B) :- mangle(3,_A,_B).
+
+access_dbstr(textwin,_A,_B) :- arg(4,_A,_B).
+set_dbstr(textwin,_A,_B) :- mangle(4,_A,_B).
+
+access_dbstr(numlines,_A,_B) :- arg(5,_A,_B).
+set_dbstr(numlines,_A,_B) :- mangle(5,_A,_B).
+
+access_dbstr(linesizes,_A,_B) :- arg(6,_A,_B).
+set_dbstr(linesizes,_A,_B) :- mangle(6,_A,_B).
+
+access_dbstr(invlineindex,_A,_B) :- arg(7,_A,_B).
+set_dbstr(invlineindex,_A,_B) :- mangle(7,_A,_B).
+
+access_dbstr(head_tag,_A,_B) :- arg(8,_A,_B).
+set_dbstr(head_tag,_A,_B) :- mangle(8,_A,_B).
+
+access_dbstr(call_tag,_A,_B) :- arg(9,_A,_B).
+set_dbstr(call_tag,_A,_B) :- mangle(9,_A,_B).
+
+export make_dbstr/1.
+make_dbstr(_A) :- _A'=..'[dbstr,_B,_C,_D,_E,0,[],[],0,0].
+
+export make_dbstr/2.
+make_dbstr(_A,_B) :-
+        struct_lookup_subst(
+            [filename,fcg_num,winname,textwin,numlines,linesizes,
+                invlineindex,head_tag,call_tag],
+            [_C,_D,_E,_F,0,[],[],0,0],_B,_G),
+        _A '=..' [dbstr|_G].
+
+
+
+export xmake_dbstr/2.
+xmake_dbstr(dbstr(_A,_B,_C,_D,_E,_F,_G,_H,_I),[_A,_B,_C,_D,_E,_F,_G,_H,_I]).
+
+endmod.
+
+module utilities.
+typeProperties(dbstr,
+    [filename,fcg_num,winname,textwin,numlines,linesizes,invlineindex,
+        head_tag,call_tag]).
+noteOptionValue(dbstr,_A,_B,_C) :- set_dbstr(_A,_C,_B).
+endmod.
 
 
 
