@@ -17,6 +17,9 @@
 #include "defs.h"
 #include "machinst.h"
 #include "wintcode.h"
+#ifdef FREEZE
+#include "freeze.h"
+#endif
 
 #undef mask
 
@@ -125,6 +128,10 @@ static	void	init_marks	PARAMS(( void ));
 static	void	mark		PARAMS(( long ));
 
 #include <stdio.h>
+
+	/*-----------------------------------------------------
+	 | gc()
+	 *----------------------------------------------------*/
 
 int
 gc()
@@ -512,6 +519,10 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 }	/* gc() */
 
 
+	/*-----------------------------------------------------
+	 | mark_args(e, ra)
+	 *----------------------------------------------------*/
+
 static long *
 mark_args(e, ra)
     long *e;
@@ -563,6 +574,10 @@ mark_args(e, ra)
 }	/* mark_args(e, ra) */
 
 
+	/*-----------------------------------------------------
+	 | mark_from(loc)
+	 *----------------------------------------------------*/
+
 static void
 mark_from(loc)
     long *loc;
@@ -570,8 +585,12 @@ mark_from(loc)
     mark(val_at(loc));
     REV(loc);
 }
+	/*--------------------------*
+	 | #define REV(loc) rev(heap_low,heap_high,(long *)(loc),(long)(loc))
+	 *--------------------------*/
 
 /*-------------------------------------------------------------------------------*
+ | rev(lo, hi, loc, targ)
  | rev takes a parameter, loc, which is assumed to contain a pointer
  | to a marked heap location.  It "reverses" the pointer (provided it falls
  | in between lo and hi inclusive) by transferring the contents of
@@ -673,6 +692,11 @@ init_marks()
     }
 }
 
+
+	/*-----------------------------------------------------
+	 | mark(val)
+	 *----------------------------------------------------*/
+
 static void
 mark(val)
     register long val;
@@ -680,6 +704,7 @@ mark(val)
     register long *ptr, *bptr;
     register long tag, btag;
     int   arity;
+	long	xval;
 
     bptr = (long *) 0;
     btag = 0;
@@ -714,6 +739,24 @@ mark_top:
     switch (tag) {
 
 	case MTP_UNBOUND:
+
+				/* If the var is a delay var, mark the 
+				   whole delay term containing it:
+				 */
+		if (CHK_DELAY((PWord *)val))
+			{
+#ifdef DEBUGFREEZE
+    		printf("\ngc: Delay-val=%x tag=%d..",(int)val,(int)tag);
+    		fflush(stdout);
+#endif
+			xval = (long) MMK_STRUCTURE( ((PWord *)val)-1 );
+			mark(xval);   
+#ifdef DEBUGFREEZE
+    		printf("--xval=%x marked\n",(int)xval);
+    		fflush(stdout);
+#endif
+			}
+
 	    if (MARKED(ptr))
 			goto mark_backup;
 mark_follow:

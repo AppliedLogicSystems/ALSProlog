@@ -1,3 +1,12 @@
+Mon May 22 1995 Ken Bowen
+
+	* Integrated freeze construct with gc. In gc.c:  In function
+	  mark(val), add var xval, and at case MTP_UNBOUND in main 
+	  switch, add check for delay term (back up 1), and mark
+	  whole delay term containing the (to be marked) delay var.
+
+	* Tagged as v1-73
+
 Mon May 15 1995 Ken Bowen
 
 	* More Misc structural changes to accomodate DJGPP on DesqView/X

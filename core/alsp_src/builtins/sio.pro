@@ -451,7 +451,8 @@ cancel_alias(_).
  *	should NOT be exported.
  */
 
-reset_user(InStream,OutStream) :-
+reset_user(InStream,OutStream) 
+	:-
 	stream_identifier(InStream, OldInID),
 	stream_identifier(OutStream, OldOutID),
 	del_stream_table(OldInID,_),
@@ -467,7 +468,7 @@ reset_user(InStream,OutStream) :-
 		retract((getStreamId(OldInID,_) :- gv_get(InGVNum,_))),
 		assert((setStreamId(-1,Vin) :- gv_set(InGVNum,Vin))),
 		assert((getStreamId(-1,Vin) :- gv_get(InGVNum,Vin)))
-	;
+		;
 		true
 	),
 	((clause(setStreamId(OldOutID,_),gv_set(OutGVNum,_))) ->
@@ -475,7 +476,7 @@ reset_user(InStream,OutStream) :-
 		retract((getStreamId(OldOutID,_) :- gv_get(OutGVNum,_))),
 		assert((setStreamId(-1,Vout) :- gv_set(OutGVNum,Vout))),
 		assert((getStreamId(-1,Vout) :- gv_get(OutGVNum,Vout)))
-	;
+		;
 		true
 	),
 	set_alias(user_input,InStream),
@@ -489,7 +490,6 @@ reset_user(InStream,OutStream) :-
  */
 
 export current_alias/2.
-
 current_alias(Alias,Stream) :-
 	nonvar(Alias),
 	!,
@@ -2082,16 +2082,18 @@ read_buffer(string,Stream) :-
 	sio_bufshift(Stream),
 	read_string(Stream).
 
-read_buffer(window,Stream) :-
+read_buffer(window,Stream) 
+	:-
 	stream_extra(Stream,Tail),
 	Tail == [],
 	!,
 	stream_pgoals(Stream,PromptGoal),
+	call(PromptGoal),
 	sio_set_errcode(Stream,14),		%% 14 =  SIOE_NOTREADY
 	fail.
 	
-read_buffer(window,Stream) :-
-	!,
+read_buffer(window,Stream) 
+	:- !,
 		%% get the queue of raw lines:
 	stream_extra(Stream,CurQueue),
 	sio_buf_params(Stream, BufStart, BufSize),
@@ -2103,6 +2105,13 @@ read_buffer(window,Stream) :-
 		true;
 		set_stream_addl1(Stream, [])
 	).
+
+export push_prompt/1.
+push_prompt(Stream_or_alias)
+	:-
+	is_stream(Stream_or_alias,Stream),
+	stream_pgoals(Stream,PromptGoal),
+	call(PromptGoal).
 
 %%
 %% This is the place to add read_buffer definitions for other stream types

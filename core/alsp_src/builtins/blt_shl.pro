@@ -266,11 +266,19 @@ prolog_shell
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 prolog_shell(InStream,OutStream) 
 	:-
-	init_prolog_shell(InStream, OutStream,CurLevel,CurDebuggingState),
-	prolog_shell_loop(InStream,OutStream),
+	init_prolog_shell(InStream, OutStream,alspro,CurLevel,CurDebuggingState,Wins),
+	prolog_shell_loop(InStream,OutStream,Wins),
 	shell_exit(InStream, OutStream,CurLevel,CurDebuggingState).
 
-init_prolog_shell(InStream, OutStream,CurLevel,CurDebuggingState)
+/*-----------------------------------------------------------------------*
+ | init_prolog_shell/6
+ | init_prolog_shell(InStream, OutStream,ID,CurLevel,DebugState,Wins)
+ | init_prolog_shell(+, +,+,-,-,-)
+ |
+ *-----------------------------------------------------------------------*/
+
+export init_prolog_shell/6.
+init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	:-
 	als_system(SysList),
 	dmember(wins=Wins, SysList),
@@ -282,13 +290,22 @@ init_prolog_shell(InStream, OutStream,CurLevel,CurDebuggingState)
 	get_shell_level(CurLevel),
 	NewLevel is CurLevel+1,
 	set_shell_level(NewLevel),
-	make_prompts(Wins, CurLevel,Prompt1,Prompt2),
+	make_prompts(ID, CurLevel,Prompt1,Prompt2),
 		%% store prompts on a stack in a global variable
 		%% because we (may) come and go from X, so we
 		%% can't hold on to them:
 	get_shell_prompts( CurPromptsStack ),
 	set_shell_prompts( [(Prompt1,Prompt2) | CurPromptsStack] ),
-	print_banner(SysList).
+	print_banner(SysList),
+	dmember(wins=Wins, SysList),
+	push_prompt(Wins,OutStream,Prompt1).
+
+push_prompt(nowins,_,_) :-!.
+push_prompt(Wins,OutStream,Prompt1)
+	:-
+	put_atom(OutStream,Prompt1),
+	flush_output(OutStream).
+
 
 shell_exit(InStream, OutStream,Level,DebuggingState)
 	:-
@@ -320,33 +337,35 @@ shell_exit(InStream, OutStream,Level,DebuggingState)
 	%% reflects the need to support this breakup.  It 
 	%% allows us to still have the TTY version loop just
 	%% like it did before, but it allows the X version to
-	%% cleanly call the part (shell_read_execute/3) which reads 
+	%% cleanly call the part (shell_read_execute/4) which reads 
 	%% one term from the input stream and executes it.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-prolog_shell_loop(InStream,OutStream) 
+prolog_shell_loop(InStream,OutStream,Wins) 
 	:-
 		%% Read one term and execute it:
-	shell_read_execute(InStream,OutStream,Status),
+	shell_read_execute(InStream,OutStream,Wins,Status),
 		%% Decide whether to continue or exit:
 	continue_prolog_loop(Status),
 	!,
-	prolog_shell_loop(InStream,OutStream).
+	prolog_shell_loop(InStream,OutStream,Wins).
 
-prolog_shell_loop(_,_).
+prolog_shell_loop(_,_,_).
 
-export shell_read_execute/3.
-shell_read_execute(InStream,OutStream,Status)
+export shell_read_execute/4.
+shell_read_execute(InStream,OutStream,Wins,Status)
 	:-
 	shell_read(InStream,OutStream,InitGoal,NamesOfVars,Vars),
-	shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars, Status),
+	shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status),
 	!.
 
 continue_prolog_loop(halt) 
 	:-!, halt.
-continue_prolog_loop(Status)
+continue_prolog_loop(Status).
+/*
 	:-
 	'set_$delay_terms'([]).
+*/
 
 	%% This is the same as the old shell_read/7, except that 
 	%% instead of carrying the prompts around in variables,
@@ -379,7 +398,7 @@ shell_read0(Prompt1,Prompt2,InStream,stream_not_ready,[],[]).
 
 	%% This contains the guts of the old shell2, following 
 	%% the shell_read:
-shell_execute(InStream,OutStream,InitGoal,[],[], continue)
+shell_execute(InStream,OutStream,InitGoal,[],[],Wins,continue)
 	:-
 	nonvar(InitGoal),
 	InitGoal = stream_not_ready,
@@ -388,7 +407,7 @@ shell_execute(InStream,OutStream,InitGoal,[],[], continue)
 :-alsshell:dynamic(getTracingFlag/1).
 :-dynamic(getTracingFlag/1).
 
-shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars, Status)
+shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status)
 	:-
 	sio:get_user_prompt(UsersPrompt),
 	(alsshell:getTracingFlag(tracing) ->
@@ -405,17 +424,16 @@ shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars, Status)
 		sio:input_stream_or_alias_ok(InStream, RealInStream),
 		stream_blocking(RealInStream,OldBlocking),
 		set_stream_blocking(RealInStream,true),
-%pbi_write(catch(do_shell_query(Goal))),pbi_nl,
 		catch(do_shell_query(Goal,NamesOfVars,Vars,InStream,OutStream),
 	      		Reason,
 	      		( shell_exception(Reason)
 					,set_stream_blocking(RealInStream,OldBlocking))
 			  ),
 		set_stream_blocking(RealInStream,OldBlocking),
+		get_shell_prompts( [(Prompt1,_) | _] ),
+		push_prompt(Wins,OutStream,Prompt1),
 		Status = continue
 	).
-
-
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% get_debugging_state(State)
@@ -446,6 +464,7 @@ set_debugging_state(debug_state(Int,Call,Depth,Retry,DInt))
 	%% prompts to be displayed.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+/*
 make_prompts(nowins, N,Prompt1,Prompt2) 
 	:-
 	N > 0,
@@ -458,6 +477,25 @@ make_prompts(nowins, N,Prompt1,Prompt2)
 make_prompts(nowins, _,'?- ','?-_') 
 	:-!.
 make_prompts(Wins, N,'','').
+*/
+
+:-user:dynamic(make_shell_prompts/4).
+make_prompts(ID, N,Prompt1,Prompt2) 
+	:-
+	user:make_shell_prompts(ID, N, Prompt1, Prompt2),
+	!.
+
+make_prompts(_, N,Prompt1,Prompt2) 
+	:-
+	N > 0,
+	!,
+	sprintf(PL1,'Break (%d) ?- ',[N]),
+	sprintf(PL2,'          ?-_',[]),
+	name(Prompt1,PL1),
+	name(Prompt2,PL2).
+
+make_prompts(_, _,'?- ','?-_') 
+	:-!.
 
 /*-----------------------------------------------------------------------*
  |	do_shell_query/5 executes the query and displays the answers.  The
