@@ -232,7 +232,7 @@ proc debugwin.copy {w} {
 	}
 }
 proc debugwin.paste {xw} { 
-	set w .topals
+	set w .debugwin
 	catch {$w.text delete sel.first sel.last}
 	$w.text insert insert [selection get -displayof $w -selection CLIPBOARD]
 	set proenv($w,dirty) true
