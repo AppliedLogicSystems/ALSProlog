@@ -40,6 +40,7 @@ use windows.
 export comptype/0.
 export comptype/1.
 export comptype/2.
+export xcomptype/2.
 export comptype/3.
 export comptype_cl/0.
 
@@ -81,7 +82,7 @@ comptype :-
 	comptype(FileName).
 
 comptype :-
-	ct_err("Can't see any *.typ files!").
+	ct_err('Can\'t see any *.typ files!').
 
 
 /*!----------------------------------------------------------
@@ -99,12 +100,28 @@ comptype(InputFileDescrip)
 		FileName = InputFileDescrip, Ext = typ
 	),
 	(Ext \= typ ->
-		ct_error("Source file must have extension .typ \n")
+		ct_error('Source file must have extension .typ \n')
 		;
 		filePlusExt(FileName,Ext,SourceFile),
 		filePlusExt(FileName,pro,TargetFile),
 		comptype(SourceFile, TargetFile, [])
 	).
+
+/*!----------------------------------------------------------
+ *-----------------------------------------------------------*/
+
+xcomptype(SourceFile, Options)
+	:-
+	pathPlusFile(SrcFileDir,SrcFile,SourceFile),
+	filePlusExt(BaseSrcFile,typ,SrcFile),
+	!,
+	filePlusExt(BaseSrcFile,pro,BasicTgtFile),
+	pathPlusFile(SrcFileDir,BasicTgtFile,TgtFile),
+	comptype(SourceFile, TgtFile, Options).
+
+xcomptype(SourceFile, Options)
+	:-
+	ct_error('TypeComp: source file must have extension .typ \n').
 
 /*!----------------------------------------------------------
  |	comptype/3
@@ -185,14 +202,14 @@ write_file_headers(TargetFile,MacFile,SourceFile,TStream,MStream)
 	CL2 = ' *-------------------------------------------------------------*/',
 	Spaces15 = '               ',
 	Spaces20 = '                    ',
-	printf(TStream,"%t\n",[CL1]),
-	printf(TStream,"%t%t\n",[Spaces20,TargetFile]),
-	printf(TStream,"%t%t\n",
+	printf(TStream,'%t\n',[CL1]),
+	printf(TStream,'%t%t\n',[Spaces20,TargetFile]),
+	printf(TStream,'%t%t\n',
 				[Spaces15,'defStruct Type definitions generated from file:']),
-	printf(TStream,"%t%t\n",[Spaces20,SourceFile]),
-	printf(TStream,"%t%t\n",[Spaces15,'by ALS defStruct Type Generator']),
-	printf(TStream,"%t%t %t\n",[Spaces15,'Macros written to file:',MacFile]),
-	printf(TStream,"%t\n\n",[CL2]).
+	printf(TStream,'%t%t\n',[Spaces20,SourceFile]),
+	printf(TStream,'%t%t\n',[Spaces15,'by ALS defStruct Type Generator']),
+	printf(TStream,'%t%t %t\n',[Spaces15,'Macros written to file:',MacFile]),
+	printf(TStream,'%t\n\n',[CL2]).
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
@@ -200,9 +217,9 @@ typeDefinitions(DefList,TgtStream,MacStream,Quiet)
 	:-
 	xall(DefList,user,Extras,TgtStream,MacStream,Quiet,DefList),
 
-	printf(TgtStream,"\nmodule utilities.\n",[]),
+	printf(TgtStream,'\nmodule utilities.\n',[]),
 	pp_all(Extras,TgtStream, [quoted(true)]),
-	printf(TgtStream,"endmod.\n",[]).
+	printf(TgtStream,'endmod.\n',[]).
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
@@ -211,7 +228,7 @@ xall([],user,[],_,_,Quiet,DefList)
 	:-!.
 xall([],OtherMod,[],TgtStream,MacStream,Quiet,DefList) 
 	:-!,
-	printf(TgtStream,"endmod.\n",[]).
+	printf(TgtStream,'endmod.\n',[]).
 xall([Def | Defs],CurModule,[Extras | MoreExtras],TgtStream,MacStream,Quiet,DefList) 
 	:-
 	type_comp(Def,CurModule,NewModule,Extras,TgtStream,MacStream,Quiet,DefList),
@@ -221,15 +238,15 @@ xall([Def | Defs],CurModule,[Extras | MoreExtras],TgtStream,MacStream,Quiet,DefL
  *--------------------------------------------------------------------------*/
 type_comp(module(Mod),_,Mod,[],TgtStream,MacStream,Quiet,DefList)
 	:-!,
-	printf(TgtStream, "module utilities.\n",[],[quoted(true)]),
-	printf(TgtStream, "use %t.\n",[Mod],[quoted(true)]),
-	printf(TgtStream, "endmod.\n\n",[],[quoted(true)]),
-	printf(TgtStream, "module %t.\n",[Mod],[quoted(true)]),
-	printf(TgtStream, "use utilities.\n\n",[],[quoted(true)]).
+	printf(TgtStream, 'module utilities.\n',[],[quoted(true)]),
+	printf(TgtStream, 'use %t.\n',[Mod],[quoted(true)]),
+	printf(TgtStream, 'endmod.\n\n',[],[quoted(true)]),
+	printf(TgtStream, 'module %t.\n',[Mod],[quoted(true)]),
+	printf(TgtStream, 'use utilities.\n\n',[],[quoted(true)]).
 
 type_comp(endmod,_,user,[],TgtStream,MacStream,Quiet,DefList)
 	:-!,
-	printf(TgtStream,"endmod.\n",[],[quoted(true)]).
+	printf(TgtStream,'endmod.\n',[],[quoted(true)]).
 
 type_comp((defStruct(TypeName,SpecsList) :- Condition,Quiet,DefList),
 				CurMod,NewMod,Extras,TgtStream,MacStream)

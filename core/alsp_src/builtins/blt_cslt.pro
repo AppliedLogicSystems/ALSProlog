@@ -492,7 +492,8 @@ fin_load_from_file(GenExt,Nature,BaseFile,SrcPath,OutFilePath,
 	extract_opts(FCOpts, FCOptions),
 	dappend(ExtOpts, FCOptions, Options),
 			%% Found in blt_shlr.pro:
-	src2src_inv(WkExt, BaseFile, SrcPath, OutFilePath, Options),
+	pathPlusFile(SrcPath,_,SrcPathDir),
+	src2src_inv(WkExt, BaseFile, SrcPath, Options),
 	load_from_file(GenExt,Nature,BaseFile,OutFilePath,GenExt,FCOpts),
 	(DelFlag = no_del ->
 		true 
@@ -900,10 +901,10 @@ load_canon_reconsult(1,CG)
 
 load_canon_reconsult(0,_).
 
-:- dynamic(file_clause_group/2).
-
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/ 
+:- dynamic(file_clause_group/2).
+
 get_fcg(Path,CG) :-
 	file_clause_group(Path,CG),
 	!.
@@ -1005,7 +1006,11 @@ fin_o_f_path(subdir(arch,Where), OutDisk, GenExt, CanonSrcPath,
 	sys_env(OS,MinorOS,Proc),
 	SubDir = MinorOS,
 	(Where = src ->
-		append(OrigPathList, [SubDir], NewPathList)
+		(GenExt = obp ->
+			append(OrigPathList, [SubDir], NewPathList)
+			;
+			NewPathList = OrigPathList
+		)
 		;
 				%% take Where to be = cur (subdir of current):
 		get_cwd(CurDir),

@@ -44,6 +44,8 @@ export read_to_blank/3.
 export char_in/3.
 
 export strip_prefix/3.
+export prefix_dir/3.
+export prefix_to/3.
 
 /*!---------------------------------------------------------------------
  |	asplit/4
@@ -602,4 +604,29 @@ strip_prefix0([_ | List], Start, Result)
 	:-
 	strip_prefix0(List, Start, Result).
 
+/*!-----------------------------------------------------------------------
+ |	prefix_dir/3
+ |	prefix_dir(List, Dir, XList)
+ |	prefix_dir(+, +, -)
+ |
+ |	- prefix Dir to each (atomic) item on List
+ *-----------------------------------------------------------------------*/
+prefix_dir([], _, []).
+prefix_dir([Item | List], WSDir, [XItem | XList])
+	:-
+	extendPath(WSDir, Item, XItem),
+	prefix_dir(List, WSDir, XList).
+
+/*!-----------------------------------------------------------------------
+ |	prefix_to/3
+ |	prefix_to(List, Atom, XList)
+ |	prefix_to(+, +, -)
+ |
+ |	- catenate Atom to the front of each element on List
+ *-----------------------------------------------------------------------*/
+prefix_to([], _, []).
+prefix_to([Item | List], Atom, [XItem | XList])
+	:-
+	catenate(Atom, Item, XItem),
+	prefix_to(List, Atom, XList).
 endmod.

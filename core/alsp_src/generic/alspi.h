@@ -237,4 +237,7 @@ extern	void	PI_yield_time	PARAMS(( void ));
 #define FE_AUTOLOAD	71	/* Problem autoloading file */
 #define FE_FDREFOVERFLOW	72 /* Overflow/Underflow of file descriptors */
 
+/* Defined EXIT_ERROR for reporting invalid options, etc. */
+#define EXIT_ERROR 2
+
 #endif /* _ALSPI_H_INCLUDED_ */

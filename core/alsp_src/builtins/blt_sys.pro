@@ -359,6 +359,7 @@ heap_status(Hleft) :-
 cslt_lib_ld(FileName, FilePathPro,FilePathObp)
 	:-
 	get_fcg(FilePathPro,CG),
+	load_canon_reconsult(1,CG),
 	push_clausegroup(CG),
 	get_reconsult_flag(OldRFlag),
 	set_reconsult_flag(1),
