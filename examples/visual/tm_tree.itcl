@@ -1,0 +1,47 @@
+# DRAWN FROM:
+# ----------------------------------------------------------------------
+#  EXAMPLE: simple Tree class
+# ----------------------------------------------------------------------
+#     BOOK: Tcl/Tk Extensions for O'Reilly & Associates
+#   AUTHOR: Michael J. McLennan, AT&T Bell Laboratories
+# ======================================================================
+#               Copyright (c) 1996  AT&T Bell Laboratories
+# ======================================================================
+
+package require Iwidgets
+image create photo default -file default.gif
+
+class VisualRep {
+    variable canvas
+    variable icon
+    variable title
+
+    constructor {cwin ival tval} {
+        set canvas $cwin
+        set icon $ival
+        set title $tval
+    }
+    destructor {
+        erase
+    }
+
+    method draw {x y} {
+        erase
+        $canvas create image $x $y -image $icon -anchor c -tags demo
+        set x1 [expr $x + [image width $icon]/2 + 4]
+        $canvas create text $x1 $y -text $title -anchor w -tags demo
+    }
+    method erase {} {
+        $canvas delete $this
+    }
+}
+
+proc init_demo_canvas {Name} {
+	
+	::iwidgets::scrolledcanvas $Name -textbackground white \
+		-height 350 -width 400
+	wm title . "Prolog Term/Tree Demo"
+	pack $Name -in . -side top -anchor center -fill both -expand yes
+	return [$Name childsite]
+}
+
