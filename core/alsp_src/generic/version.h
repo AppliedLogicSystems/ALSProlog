@@ -5,10 +5,10 @@
  *          Version number - Thu Apr 4 09:28:36 EST 1996
  *===============================================================*/
 
-#define VERSION_STRING "3.1.14"
+#define VERSION_STRING "3.1.15"
 #define VERSION_MAJOR 3
 #define VERSION_MINOR 1
-#define VERSION_PATCH 14
+#define VERSION_PATCH 15
 
 /* 
 Win32 File Flag choices:
