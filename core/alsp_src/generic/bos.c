@@ -212,8 +212,6 @@ pbi_protect_bottom_stack_page()
 }
 
 
-extern char imagedir[];
-extern char imagename[];
 int
 pbi_get_image_dir_and_name()
 {
@@ -269,6 +267,7 @@ int pbi_command_line(void)
 int pbi_crypt(void)
 {
 #if defined(UNIX) && defined(HAVE_UNISTD_H) && !defined( __GO32__)
+    extern char *crypt(const char *, const char *);
     PWord v1, v2, v3, u;
     int   t1, t2, t3, ut;
     UCHAR *b1,*b2;
@@ -370,8 +369,8 @@ int pbi_copy_file(void)
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if (!getstring(&from_file, v1, t1)
-        || !getstring(&to_file, v2, t2))
+    if (!getstring((UCHAR **)&from_file, v1, t1)
+        || !getstring((UCHAR **)&to_file, v2, t2))
 	FAIL;
     if (copy_file(from_file, to_file)) SUCCEED;
 	else FAIL;
