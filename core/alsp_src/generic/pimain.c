@@ -111,7 +111,7 @@ ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     	    	break;
     	    case heap_scan:
     	    	r = sscanf(argv[i], "%lu", &value);
-    	    	if (r != 1 || value > ULONG_MAX/256) {
+    	    	if (r != 1 || value == 0 || value > ULONG_MAX/256) {
     	    	    fprintf(stderr, "Usage: -heap N\n");
     	    	    exit(EXIT_ERROR);
     	    	} else {
@@ -121,7 +121,7 @@ ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     	    	break;
     	    case stack_scan:
     	    	r = sscanf(argv[i], "%lu", &value);
-    	    	if (r != 1 || value > ULONG_MAX/256) {
+    	    	if (r != 1 || value == 0 || value > ULONG_MAX/256) {
     	    	    fprintf(stderr, "Usage: -stack N\n");
     	    	    exit(EXIT_ERROR);
     	    	} else {
