@@ -1,3 +1,10 @@
+Sun Apr 09 1995 Ken Bowen
+
+	* Changed generic/pi_cfg.h.proto to pi_cfg.in to cater to DOS, and
+	  made appropriate changes in {bld-port,bld-natv}/makefile.in, and
+	  configure.bat
+	* Tagged as v1-71C and committed
+
 Fri Apr 07 1995 Ken Bowen
 
 	* generic/mem.c and utils/coffmics.c: Added O_BINARY flag to all
