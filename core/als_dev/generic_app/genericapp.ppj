@@ -1,0 +1,23 @@
+myClassPred = project_mgr.
+myModule = alsdev.
+myName = nil.
+title = 'Generic Application'.
+project_file = 'genericapp.ppj'.
+primary_project_dir = 'D:\\tt0'.
+list_of_files_slots = [prolog_files].
+list_slots = [].
+text_slots = [].
+search_dirs = [].
+search_trees = [].
+slot_names =
+    [[production_goal,'Startup Goal:'],[debug_goal,'Debug Goal:'],
+        [executable_name,'Image Name:'],[prolog_files,'Files:']].
+production_goal = start_.
+debug_goal = debug_start_.
+executable_name = nil.
+prolog_files =
+    ['genericapp_top.pro','cmn_utils.pro','genericapp_gui.tcl',
+        'genericapp_gui_funcs.tcl'].
+library_files = [].
+file_types = [[prolog_files,['.*']]].
+default_dirs = [].
