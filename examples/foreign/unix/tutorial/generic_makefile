@@ -1,0 +1,9 @@
+SDK_DIR = ../../..
+
+examples.psl: examples.c
+	gcc -fpic -shared  $(PSL_LINK) \
+	-o examples.psl -I$(SDK_DIR)/include \
+	    examples.c $(SDK_DIR)/source/alspi_slib.c -lc
+
+clean:
+	rm -f examples.psl
