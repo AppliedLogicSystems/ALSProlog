@@ -190,6 +190,15 @@
 #include <stdlib.h>
 #endif	/* HAVE_STDLIB_H */
 
+/* SunOS fails to define EXIT_FAILURE and EXIT_SUCCESS */
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+
 #include <stdio.h>
 
 #if defined(HAVE_STDARG_H)
