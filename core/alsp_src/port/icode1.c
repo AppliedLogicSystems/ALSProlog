@@ -30,7 +30,7 @@ extern int system_debugging;
 #define MAXCALLS    80
 #define ICBUFSIZE  3024
 #else
-#define MAXCALLS    256
+#define MAXCALLS    512
 #define ICBUFSIZE 32768
 #endif /* KERNAL */
 
@@ -236,12 +236,10 @@ ic_callinfo(mask, nargs, envsize, w)
     callinfo[callidx].argmask = mask;
 
     callidx++;
-#ifdef KERNAL
     if (callidx >= MAXCALLS) {
     	fprintf(stderr, "overflowed call buffer\n");
     	exit(-1);
     }
-#endif /* KERNAL */
     ic_puti(W_GCMAGIC);
     ic_putl(0L);
 }
