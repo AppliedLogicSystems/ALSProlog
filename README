@@ -36,10 +36,10 @@ In the als_prolog folder, run the AppleScript Build.
 
 Windows:
 
-In the als_prolog directory, run the Batch script Build.bat.
-Open the installer template installers\win32_installer.wse in Wise
-and view it in the "Instalation Expert" mode.
+In the als_prolog\win32 directory, run GNU Make.
+Open each installer template (standard_installer.wse and student_installer.wse)
+with Wise and view it in the "Instalation Expert" mode.
 Edit the properties of "Installation Files" under the "Application Files"
 attribute.
-Add the contents of "installers\ALS Student Prolog" to the Applications folder.
+Add the contents of "ALS Prolog" or "ALS Student Prolog" to the Applications folder.
 Click on the Distribute button to create the installer.
