@@ -794,7 +794,9 @@ void pi_init(void)
 	tcl_macQdPtr = &qd /*GetQD()*/;
 #endif
 
+#ifdef UNIX
 	Tcl_FindExecutable(executable_path);
+#endif
 
 	Tcl_InitHashTable(&tcl_interp_name_table, TCL_STRING_KEYS);
 	
