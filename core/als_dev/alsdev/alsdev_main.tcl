@@ -257,5 +257,32 @@ proc vTclWindow.break_choices {base} {
 
 
 
+proc vTclWindow.static_flags {base} {
+    if {$base == ""} {
+        set base .break_choices
+    }
+    if {[winfo exists $base]} {
+        wm deiconify $base; return
+    }
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel
+    wm focusmodel $base passive
+    wm geometry $base 255x260+109+214
+    wm maxsize $base 1137 870
+    wm minsize $base 1 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 1
+    wm deiconify $base
+    wm title $base "Static Prolog Flags"
+	wm protocol .static_flags WM_DELETE_WINDOW {wm withdraw .static_flags}
+
+    ###################
+    # SETTING GEOMETRY
+    ###################
+}
+
+
 
 

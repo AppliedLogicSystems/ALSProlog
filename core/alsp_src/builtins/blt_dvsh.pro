@@ -145,7 +145,7 @@ alsdev(Shared)
 	current_prolog_flag(windows_system, Which),
 	set_consult_messages(false),
 
-	setup_prolog_flags,
+%	setup_prolog_flags,
 
 	install_alarm_handler,
 	shell_alarm_interval(AlarmIntrv),
@@ -219,6 +219,7 @@ shell_alarm_interval(1.05).
 	%%%%%			MISC
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+/***********
 setup_prolog_flags
 	:-
 	sys_env(OS, _, _),
@@ -235,6 +236,8 @@ add_static_items_to_menu([Item | List], Interp, MenuPath)
 	sprintf(atom(Label), '%t', [Item]),
 	tcl_call(Interp, [MenuPath,add,command,'-label',Label], _),
 	add_static_items_to_menu(List, Interp, MenuPath).
+
+***********/
 
 endmod.   % builtins
 

@@ -740,6 +740,33 @@ proc change_prolog_flags {} {
 	}
 }
 
+#################################################
+#####			STATIC FLAGS				#####
+#################################################
+
+proc show_static_flags {} {
+	global array proenv
+
+	if {[winfo exists .static_flags]} then {
+		Window show .static_flags
+	} else {
+		Window show .static_flags
+		prolog call builtins static_flags_info -var InfoList
+		foreach info $InfoList {
+			create_static_flag_entry $info
+		}
+	}
+	wm geometry .static_flags ""
+}
+
+proc create_static_flag_entry { info } {
+	global array proenv
+
+	set flgg [lindex $info 0]
+	label .static_flags.$flgg -borderwidth 0 -relief flat -anchor w \
+		-text [format "%s  =  %s" $flgg [lindex $info 1]]
+	pack .static_flags.$flgg -anchor w -expand 0 -fill x -side top 
+}
 
 #################################################
 #####				DEBUGGER				#####
