@@ -34,7 +34,7 @@ VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE
 
 MAIN_SOURCE = topmain.c
 
-MAIN_OBJECTS = $(SHELL_SOURCE:.c=.o)
+MAIN_OBJECTS = $(MAIN_SOURCE:.c=.o)
 
 GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	bdbg.c bgv.c bio.c bmeta.c \
