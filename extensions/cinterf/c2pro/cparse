@@ -978,6 +978,7 @@ process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State)
 (xxcc(FID) ->
 write(user_output, xclded_fcn=FID),nl(user_output)
 ;
+true ),
 %	not(member(FID, ['XCreateRegion','XrmInitialize',
 %				 'XrmUniqueQuark','XUniqueContext' ]) ), 
 	!,
