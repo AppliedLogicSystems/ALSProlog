@@ -39,6 +39,8 @@ use windows.
 
 export comptype/0.
 export comptype/1.
+export comptype/2.
+export comptype/3.
 export comptype_cl/0.
 
 /*!----------------------------------------------------------
@@ -101,20 +103,59 @@ comptype(InputFileDescrip)
 		;
 		filePlusExt(FileName,Ext,SourceFile),
 		filePlusExt(FileName,pro,TargetFile),
-		filePlusExt(FileName,mac,MacFile),
-		(exists_file(SourceFile) ->
-			ct_message("Generating type definitions for: %t\n",[SourceFile]),
-			finish_comptype(TargetFile,MacFile,SourceFile),
-			ct_message("Type generation complete for: %t\n",[SourceFile]),
-			ct_message("Generated code written to: %t\n",[TargetFile])
-			;
-			ct_message("Error: File: %t does not exist!\n",[SourceFile])
-		)
+		comptype(SourceFile, TargetFile, [])
 	).
+
+/*!----------------------------------------------------------
+ |	comptype/3
+ |	comptype(SourceFile, TgtFile, Options)
+ |	comptype(+, +, +)
+ |	
+ |	- invokes defStruct processing on SourceFile, writing to TgtFile
+ |
+ |	Expects TgtFile to be of form <path><sep><name>.<ext>, 
+ |	ususally with <ext> = pro
+ *-----------------------------------------------------------*/
+
+comptype(SourceFile, TgtFile)
+	:-
+	comptype(SourceFile, TgtFile, []).
+
+comptype(SourceFile, TgtFile, Options)
+	:-
+	exists_file(SourceFile),
+	!,
+	(dmember(quiet(Quiet), Options),!; Quiet=false),
+	(comp_file_times(SourceFile, TgtFile) ->
+			%% TgtFile exists & is newer than SourceFile - nothing to do
+		true
+		;
+			%% Either TgtFile doesn't exist or SourceFile is newer:
+		filePlusExt(NoSuffixPath, _, TgtFile),
+		filePlusExt(NoSuffixPath, mac, MacFile),
+		cont_comptype(TgtFile,MacFile,SourceFile, Quiet)
+	).
+
+comptype(SourceFile, TgtFile, Options)
+	:-
+	(dmember(quiet(Quiet), Options),!; Quiet=false),
+	ct_message(Quiet,'\nError: File: %t does not exist!\n',[SourceFile]).
+
+cont_comptype(TgtFile,MacFile,SourceFile, Quiet)
+	:-
+	ct_message(Quiet,'\nGenerating type definitions for: %t\n',[SourceFile]),
+	finish_comptype(TgtFile,MacFile,SourceFile, Quiet),
+	!,
+	ct_message(Quiet,'Type generation complete for: %t\n',[SourceFile]),
+	ct_message(Quiet,'Generated code written to: %t\n',[TgtFile]).
+
+cont_comptype(TgtFile,MacFile,SourceFile, Quiet)
+	:-
+	ct_message(Quiet,'\nError: In type generation for: %t\n',[SourceFile]).
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
-finish_comptype(TargetFile,MacFile,SourceFile)
+finish_comptype(TargetFile,MacFile,SourceFile,Quiet)
 	:-
 	open(SourceFile, read, SourceStream, []),
 	read_terms(SourceStream,DefinitionsList),
@@ -122,7 +163,7 @@ finish_comptype(TargetFile,MacFile,SourceFile)
 	open(TargetFile, write, TargetStream, []),
 	open(MacFile, write, MacStream, []),
 	write_file_headers(TargetFile,MacFile,SourceFile,TargetStream,MacStream),
-	typeDefinitions(DefinitionsList,TargetStream, MacStream),
+	typeDefinitions(DefinitionsList,TargetStream, MacStream,Quiet),
 	close(TargetStream),
 	close(MacStream).
 
@@ -145,9 +186,9 @@ write_file_headers(TargetFile,MacFile,SourceFile,TStream,MStream)
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
-typeDefinitions(DefList,TgtStream,MacStream) 
+typeDefinitions(DefList,TgtStream,MacStream,Quiet) 
 	:-
-	xall(DefList,user,Extras,TgtStream,MacStream),
+	xall(DefList,user,Extras,TgtStream,MacStream,Quiet),
 
 	printf(TgtStream,"\nmodule utilities.\n",[]),
 	pp_all(Extras,TgtStream, [quoted(true)]),
@@ -156,19 +197,19 @@ typeDefinitions(DefList,TgtStream,MacStream)
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-xall([],user,[],_,_) 
+xall([],user,[],_,_,Quiet) 
 	:-!.
-xall([],OtherMod,[],TgtStream,MacStream) 
+xall([],OtherMod,[],TgtStream,MacStream,Quiet) 
 	:-!,
 	printf(TgtStream,"endmod.\n",[]).
-xall([Def | Defs],CurModule,[Extras | MoreExtras],TgtStream,MacStream) 
+xall([Def | Defs],CurModule,[Extras | MoreExtras],TgtStream,MacStream,Quiet) 
 	:-
-	type_comp(Def,CurModule,NewModule,Extras,TgtStream,MacStream),
-	xall(Defs,NewModule,MoreExtras,TgtStream,MacStream).
+	type_comp(Def,CurModule,NewModule,Extras,TgtStream,MacStream,Quiet),
+	xall(Defs,NewModule,MoreExtras,TgtStream,MacStream,Quiet).
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
-type_comp(module(Mod),_,Mod,[],TgtStream,MacStream)
+type_comp(module(Mod),_,Mod,[],TgtStream,MacStream,Quiet)
 	:-!,
 	printf(TgtStream, "module utilities.\n",[],[quoted(true)]),
 	printf(TgtStream, "use %t.\n",[Mod],[quoted(true)]),
@@ -176,50 +217,50 @@ type_comp(module(Mod),_,Mod,[],TgtStream,MacStream)
 	printf(TgtStream, "module %t.\n",[Mod],[quoted(true)]),
 	printf(TgtStream, "use utilities.\n\n",[],[quoted(true)]).
 
-type_comp(endmod,_,user,[],TgtStream,MacStream)
+type_comp(endmod,_,user,[],TgtStream,MacStream,Quiet)
 	:-!,
 	printf(TgtStream,"endmod.\n",[],[quoted(true)]).
 
-type_comp((defStruct(TypeName,SpecsList) :- Condition),
+type_comp((defStruct(TypeName,SpecsList) :- Condition,Quiet),
 				CurMod,NewMod,Extras,TgtStream,MacStream)
 	:-!,
 	call(CurMod:Condition), !,
 	type_comp(defStruct(TypeName,SpecsList),
-				CurMod,NewMod,Extras,TgtStream,MacStream).
+				CurMod,NewMod,Extras,TgtStream,MacStream,Quiet).
 
-type_comp(defStruct(TypeName,SpecsList),Mod,Mod,Extras,TgtStream,MacStream)
+type_comp(defStruct(TypeName,SpecsList),Mod,Mod,Extras,TgtStream,MacStream,Quiet)
 	:-!,
-	ct_message("Transforming type = %t\n",[TypeName]),
-	printf(TgtStream, "\n\%\%--- %t defStruct ---\n\n",[TypeName],[quoted(true)]),
-	printf(MacStream, "\n\%\%--- %t defStruct Macros ---\n\n",[TypeName],[quoted(true)]),
+	ct_message(Quiet,'Transforming type = %t\n',[TypeName]),
+	printf(TgtStream, '\n\%\%--- %t defStruct ---\n\n',[TypeName],[quoted(true)]),
+	printf(MacStream, '\n\%\%--- %t defStruct Macros ---\n\n',[TypeName],[quoted(true)]),
 
 	dmember(accessPred=AccessPred, SpecsList),
 	dmember(setPred=SetPred, SpecsList),
 	dmember(makePred=MakePred, SpecsList),
 	dmember(structLabel=StructLabel, SpecsList),
 	dmember(propertiesList=InitPropertiesList, SpecsList),
-	expand_includes(InitPropertiesList, PropertiesList, Tail),
+	expand_includes(InitPropertiesList, PropertiesList, Tail,Quiet),
 	Tail = [],
 
 	makeStructDefs(TypeName, AccessPred, SetPred, MakePred, 
 					PropertiesList, StructLabel,Extras,TgtStream,MacStream).
 
-type_comp((:- Cmd) ,Mod,Mod,[],TgtStream,MacStream)
+type_comp((:- Cmd) ,Mod,Mod,[],TgtStream,MacStream,Quiet)
 	:-
 	call(Cmd),!.
 
-type_comp(Item,Mod,Mod,[],TgtStream,MacStream)
+type_comp(Item,Mod,Mod,[],TgtStream,MacStream,Quiet)
 	:-
-	ct_message("Unknown item -- skipping\n     %t\n",[Item]),
-	printf(TgtStream,"%% Unknown item -- skipping:\n%%%t\n",[Item],[quoted(true)]).
+	ct_message(Quiet,'Unknown item -- skipping\n     %t\n',[Item]),
+	printf(TgtStream,'%% Unknown item -- skipping:\n%%%t\n',[Item],[quoted(true)]).
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 makeStructDefs(TypeName, AccessPred, SetPred, Constructor, 
 				PropertiesList, StructLabel,Extras,TgtStream,MacStream)
 	:-
-	printf(TgtStream, "export %t/3.\n",[AccessPred],[quoted(true)]),
-	printf(TgtStream, "export %t/3.\n",[SetPred],[quoted(true)]),
+	printf(TgtStream, 'export %t/3.\n',[AccessPred],[quoted(true)]),
+	printf(TgtStream, 'export %t/3.\n',[SetPred],[quoted(true)]),
 	makeAccessPreds(PropertiesList, AccessPred, SetPred, 1, 
 					NumProperties1, Defaults, TgtStream,MacStream),
 	NumProperties is NumProperties1 - 1,
@@ -255,12 +296,12 @@ makeAccessPreds([Item | Rest], AccessPred, SetPred,
 makeAccessPred(Item, AccessPred, SetPred, AccumNum,TgtStream,MacStream) 
 	:-
 	AccessHead =.. [AccessPred, Item, Struct, Value],
-	printf(TgtStream,"%t.\n",[(AccessHead :- arg(AccumNum, Struct, Value))],[quoted(true)]),
-	printf(MacStream,"%t.\n",
+	printf(TgtStream,'%t.\n',[(AccessHead :- arg(AccumNum, Struct, Value))],[quoted(true)]),
+	printf(MacStream,'%t.\n',
 				[define_macro((AccessHead => arg(AccumNum, Struct, Value)))],[quoted(true)]),
 	SetHead =.. [SetPred, Item, Struct, Value],
-	printf(TgtStream,"%t.\n\n",[(SetHead :- mangle(AccumNum, Struct, Value))],[quoted(true)]),
-	printf(MacStream,"%t.\n\n",
+	printf(TgtStream,'%t.\n\n',[(SetHead :- mangle(AccumNum, Struct, Value))],[quoted(true)]),
+	printf(MacStream,'%t.\n\n',
 				[define_macro((SetHead => mangle(AccumNum, Struct, Value)))],[quoted(true)]).
 
 /*--------------------------------------------------------------------------*
@@ -277,23 +318,23 @@ makeConstructor(Constructor, StructLabel, NumProperties,
 				Defaults, TgtStream, MacStream,PropertiesList)
 	:-
 	ConstructorHead =.. [Constructor, Structure],
-	printf(TgtStream, "export %t/1.\n",[Constructor],[quoted(true)]),
+	printf(TgtStream, 'export %t/1.\n',[Constructor],[quoted(true)]),
 	constr_body(Defaults, Structure, StructLabel, NumProperties, Body),
-	printf(TgtStream,"%t.\n\n",[(ConstructorHead :- Body)],[quoted(true)]),
-	printf(MacStream, "%t.\n\n",[define_macro((ConstructorHead => Body))],[quoted(true)]),
+	printf(TgtStream,'%t.\n\n',[(ConstructorHead :- Body)],[quoted(true)]),
+	printf(MacStream, '%t.\n\n',[define_macro((ConstructorHead => Body))],[quoted(true)]),
 
 	ConstructorHead2 =.. [Constructor, Structure2, RunArgsList],
-	printf(TgtStream, "export %t/2.\n",[Constructor],[quoted(true)]),
+	printf(TgtStream, 'export %t/2.\n',[Constructor],[quoted(true)]),
 	constr_body2(PropertiesList,Structure2, StructLabel, RunArgsList, Body2),
-	printf(TgtStream,"%t.\n\n",[(ConstructorHead2 :- Body2)],[quoted(true)]),
-	printf(MacStream, "%t.\n\n",[define_macro((ConstructorHead2 => Body2))],[quoted(true)]),
+	printf(TgtStream,'%t.\n\n',[(ConstructorHead2 :- Body2)],[quoted(true)]),
+	printf(MacStream, '%t.\n\n',[define_macro((ConstructorHead2 => Body2))],[quoted(true)]),
 	
 	catenate(x,Constructor,XConstructor),
 	functor(Structure, StructLabel, NumProperties),
 	Structure =.. [StructLabel | SArgList],
 	ConstructorHead3 =.. [XConstructor, Structure, SArgList],
-	printf(TgtStream, "export %t/2.\n",[XConstructor],[quoted(true)]),
-	printf(TgtStream,"%t.\n\n",[ConstructorHead3],[quoted(true)]).
+	printf(TgtStream, 'export %t/2.\n',[XConstructor],[quoted(true)]),
+	printf(TgtStream,'%t.\n\n',[ConstructorHead3],[quoted(true)]).
 
 
 /*--------------------------------------------------------------------------*
@@ -371,22 +412,22 @@ flattenProps([Item | PropertiesList], [Item | RestFullList])
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-expand_includes([], Tail, Tail).
-expand_includes([include(File,Name) | RestPropertiesList], PropertiesList, FinalTail)
+expand_includes([], Tail, Tail,Quiet).
+expand_includes([include(File,Name) | RestPropertiesList], PropertiesList, FinalTail,Quiet)
 	:-
-	fetch_included_props(File, Name, PropertiesList, InterPropsListTail),
+	fetch_included_props(File, Name, PropertiesList, InterPropsListTail, Quiet),
 	!,
-	expand_includes(RestPropertiesList, InterPropsListTail, FinalTail).
+	expand_includes(RestPropertiesList, InterPropsListTail, FinalTail,Quiet).
 
-expand_includes([include(File,Name) | RestPropertiesList], PropertiesList, FinalTail)
+expand_includes([include(File,Name) | RestPropertiesList], PropertiesList, FinalTail,Quiet)
 	:-
-	expand_includes(RestPropertiesList, PropertiesList, FinalTail).
+	expand_includes(RestPropertiesList, PropertiesList, FinalTail,Quiet).
 
-expand_includes([Item | InitPropertiesList], [Item | PropertiesList], FinalTail)
+expand_includes([Item | InitPropertiesList], [Item | PropertiesList], FinalTail,Quiet)
 	:-
-	expand_includes(InitPropertiesList, PropertiesList, FinalTail).
+	expand_includes(InitPropertiesList, PropertiesList, FinalTail,Quiet).
 
-fetch_included_props(File, Name, PropertiesList, InterPropsListTail)
+fetch_included_props(File, Name, PropertiesList, InterPropsListTail, Quiet)
 	:-
 	(filePlusExt(BaseFile,typ,File) ->
 		FullFile = File ; filePlusExt(File,typ,FullFile)
@@ -396,23 +437,23 @@ fetch_included_props(File, Name, PropertiesList, InterPropsListTail)
 	!,
 	read_terms(InStr, FTerms),
 	close(InStr),
-	fin_fetch_included_props(FTerms, File, Name, PropertiesList, InterPropsListTail).
+	fin_fetch_included_props(FTerms, File, Name, PropertiesList, InterPropsListTail, Quiet).
 
-fetch_included_props(File, Name, In, In)
+fetch_included_props(File, Name, In, In, Quiet)
 	:-
-	ct_message('!Warning: Can\'t find included type file >> %t.typ << ...skipping.\n',
+	ct_message(Quiet,'!Warning: Can\'t find included type file >> %t.typ << ...skipping.\n',
 				[File]).
 
-fin_fetch_included_props(FTerms, File, Name, PropertiesList, InterPropsListTail)
+fin_fetch_included_props(FTerms, File, Name, PropertiesList, InterPropsListTail, Quiet)
 	:-
 	dmember(defStruct(Name, FSpecs), FTerms),
 	dmember(propertiesList=FProps, FSpecs),
 	!,
-	expand_includes(FProps, PropertiesList, InterPropsListTail).
+	expand_includes(FProps, PropertiesList, InterPropsListTail, Quiet).
 
-fin_fetch_included_props(FTerms, File, Name, In, In)
+fin_fetch_included_props(FTerms, File, Name, In, In, Quiet)
 	:-
-	ct_message('!Warning: Can\'t find included type >> %t << in file %t...skipping.\n',
+	ct_message(Quiet,'!Warning: Can\'t find included type >> %t << in file %t...skipping.\n',
 				[Name,File]).
 
 
@@ -448,11 +489,13 @@ ct_err(Message,Values)
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
-ct_message(Message)
+ct_message(Quiet, Message)
 	:-
-	ct_message(Message,[]).
+	ct_message(Quiet, Message,[]).
 
-ct_message(Message,Values)
+ct_message(true, Message,Values) :-!.
+
+ct_message(false, Message,Values)
 	:-
 	printf(Message,Values),
 	flush_output.

@@ -13,28 +13,28 @@
 module builtins.
  
 
-/*
- * List Manipultation Predicates
- *
- *	append/3, dappend/3, member/2, dmember/2, reverse/2, dreverse/2,
- *	length/2
- *
- *	dappend/3 and dmember/2 are defined in builtins.pro since they
- *	are needed for certain initializations.
- */ 
+/*------------------------------------------------------------------*
+ | List Manipultation Predicates
+ |
+ |	append/3, dappend/3, member/2, dmember/2, reverse/2, dreverse/2,
+ |	length/2
+ |
+ |	dappend/3 and dmember/2 are defined in builtins.pro since they
+ |	are needed for certain initializations.
+ *------------------------------------------------------------------*/ 
 
 export append/3.
+export member/2.
+export reverse/2.
+export dreverse/2.
+export length/2.
+export list_delete/3.
 
 append([],L,L).
 append([H|T],L,[H|TL]) :- append(T,L,TL).
     
-export member/2.
-
 member(Item,[Item|_]).
 member(Item,[_|Rest]) :- member(Item,Rest).
-
-export reverse/2.
-export dreverse/2.
 
 reverse(List,Rev) :- reverse(List,[],Rev).
 
@@ -46,14 +46,31 @@ dreverse(List,Rev) :- dreverse(List,[],Rev).
 dreverse([],Rev,Rev) :- !.
 dreverse([A|Rest],SoFar,Rev) :- dreverse(Rest,[A|SoFar],Rev).
 
-export length/2.
-
 length(List,Length) :- length(List,0,Length).
 
 length([],Length,Length) :- !.
 length([_|Rest],Old,Length) :-
     New is Old+1,
     length(Rest,New,Length).
+
+/*!---------------------------------------------------------------------
+ |	list_delete/3
+ |	list_delete(List, Item, ResultList)
+ |	list_delete(+, +, -)
+ |
+ |	- deletes all occurrences of an item from a list
+ |
+ |	If List is a list, and Item is any object, ResultList is obtained
+ |	by deleting all occurrences of Item from List.
+ *!--------------------------------------------------------------------*/
+list_delete(X, _, X) :- var(X),!.
+list_delete([], _, []).
+list_delete([Item | Rest_In_List], Item, Out_List)
+	:-!,
+	list_delete(Rest_In_List, Item, Out_List).
+list_delete([Keep | Rest_In_List], Item, [Keep | Rest_Out_List])
+	:-
+	list_delete(Rest_In_List, Item, Rest_Out_List).
 
 /*
  * Comparison predicates:

@@ -64,7 +64,7 @@ prolog_system_error(error(W,L),_)
 	:-
 	decode_error(W, L, Pattern, Args),
 	!,
-	pse_out(error_stream, 'Error', Pattern, Args),
+	pse_out(error_stream, 'Error: ', Pattern, Args),
 	print_error_goal_attributes(L),
 	printf(error_stream,'- %-14s %t\n',
 		['Throw pattern:',error(W,L)],
@@ -77,18 +77,22 @@ prolog_system_error(ErrorCode, Args)
 	pse_out(error_stream, EType, Pattern, Args),
 	flush_output(error_stream).
 
-expand_code(EWCode, Pattern, 'Error')
+expand_code(EWCode, Pattern, '\nError: ')
 	:-
 	error_code(EWCode, Pattern),
 	!.
 
-expand_code(EWCode, Pattern, 'Warning')
+expand_code(EWCode, Pattern, '\nWarning: ')
 	:-
 	warning_code(EWCode, Pattern).
 
+expand_code(EWCode, Pattern, '')
+	:-
+	info_code(EWCode, Pattern).
+
 pse_out(Stream, EType, Pattern, Args)
 	:-
-	printf(Stream, '\n%t: ',[EType]),
+	printf(Stream, '%t',[EType]),
 	printf(Stream, Pattern, Args, [quoted(true), maxdepth(6)]).
 
 print_error_goal_attributes([]) :- !.
@@ -138,19 +142,14 @@ prolog_system_warning(error(W,L),_)
 	:-
 	decode_error(W, L, Pattern, Args),
 	!,
-	pse_out(error_stream, 'Warning', Pattern, Args),
+	pse_out(error_stream, 'Warning: ', Pattern, Args),
 	print_error_goal_attributes(L),
-/*
-	printf(error_stream,'- %-14s %t\n',
-		['Throw pattern:',error(W,L)],
-		[quoted(true),maxdepth(4),indent(17)]),
-*/
 	flush_output(error_stream).
 
 prolog_system_warning(ErrorCode, Args) 
 	:-
 	expand_code(ErrorCode, Pattern, EType),
-	printf(warning_output, '\n%t: ',[EType]),
+	printf(warning_output, '%t',[EType]),
 	printf(warning_output, Pattern, Args, [quoted(true), maxdepth(9)]),
 	flush_output(warning_output).
 
@@ -166,20 +165,6 @@ als_advise(FormatString, Args)
 	:-
 	printf(warning_output, FormatString, Args),
 	flush_output(warning_output).
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 	%%	Print the given consult message if the 
-	%%	"consultmessage" flag is on.
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-consultmessage(Message, ParameterList) 
-	:-
-	consultmessage,
-	!,
-	als_advise(Message, ParameterList).
-consultmessage(_,_).
-
-
 
 %%%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%
 %%%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%
@@ -210,8 +195,9 @@ error_code(cf, 			'Command failed.\n').
 error_code(rdef_comma,	'Attempt to redefine comma - ignored.\n').
 error_code(rdef_semi,	'Attempt to redefine semicolon - ignored.\n').
 error_code(rdef_arrow,	'Attempt to redefine arrow - ignored.\n').
+error_code(rdef_cut,	'Attempt to redefine cut - ignored.\n').
 error_code(forload_er, 	'Loading foreign file %t.\n').
-error_code(proload_er, 	'Loading Prolog file %t.\n').
+error_code(obpload_er, 	'Loading Prolog obp file %t.\n').
 error_code(ld_src_err, 	'Internal error in load_source for file %t\n').
 error_code(ld_fail, 	'Unable to load %t in either source or object format!\n').
 error_code(no_prev_lev,	'No previous level!!\n').
@@ -302,7 +288,10 @@ decode_error(existence_error(lib_procedure,lib(Module:P/A,FileName)),[Goal],
 	[Goal,Module,P,A,FileName]).
 
 decode_error(existence_error(procedure,(M:P/A)),[Goal],
-	' Undefined procedure %s:%s/%d called.\n',[M,P,A]).
+	'Undefined procedure %s:%s/%d called.\n',[M,P,A]).
+
+decode_error(existence_error(file,(F)),[Goal],
+	'File does not exist: %s.\n',[F]).
 
 decode_error(existence_error(past_end_of_stream,Culprit),_,
 		'Attempt made to read past end of stream.\n',[]).
@@ -397,6 +386,8 @@ warning_code(obp_removed,	'%t contained syntax errors.\n\t%t removed.\n').
 warning_code(obp_not_removed,
 		'%t contained syntax errors.\n\tUnable to remove %t.\n').
 
+warning_code(bad_consult_opt,	'Bad consult options: %t\n').
+
 warning_code(abort_ctlc,	'Aborting from Control-C or Control-Break.\n').
 
 warning_code(exit_ctlc,		'Exiting Prolog from Control-C or Control-Break.\n').
@@ -410,5 +401,9 @@ warning_code(lib_pth,		'Non-existent library path: %t\n').
 warning_code(loc_alslib, 	'Can\'t locate ALS library in ALSDIR: %t\n').
 
 warning_code(nyi, 			'%t not yet implemented on %t.\n').
+
+
+info_code(start_consult,	'Consulting %t ...').
+info_code(end_consult,	'%t consulted\n').
 
 endmod.

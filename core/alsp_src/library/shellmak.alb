@@ -1,0 +1,3 @@
+libactivate(shellmak,[library,shellmak],
+    [ make_shell_cl/0, make_shell/1, make_shell/2, make_shell_list/2, mk_shell/4],
+    []).

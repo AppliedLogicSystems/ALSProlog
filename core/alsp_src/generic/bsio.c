@@ -2105,8 +2105,6 @@ sio_simple_select()
 	else
 		rrr = select(nfds+1, &rfds, &wfds, &efds, NULL);
 
-printf("v2 = %d nfds=%d rrr=%d\n",v2,nfds,rrr);
-
 	if (rrr  >= 0)
 		SUCCEED;
 	else
@@ -5054,6 +5052,10 @@ sio_qatom()
     while (*a && (sio_chtb[*a] & mask)) {
 	if (*a == '\\')
 	    bscnt++;
+	if (*a == '/' && *(a+1) == '*') 
+		break;
+	if (*a == '.') 
+		break;
 	a++;
 	count++;
     }
@@ -5066,6 +5068,9 @@ sio_qatom()
     else if (strcmp((char *)atom, "[]") == 0) {
 	count = 2;
 	mask = 1;
+    }
+    else if (strcmp((char *)atom, ".") == 0) {
+	mask = 0;
     }
     else if (*a || a == atom) {
 	mask = 0;

@@ -13,7 +13,6 @@
  *=============================================================*/
 
 module builtins.
-use objects.
 use sio.
  
 /*-------------------------------------------------------------------------------*
@@ -24,6 +23,7 @@ use sio.
  | loading files, etc. prior to the starting a shell.  DefaultShellCall
  | is the shell call to make.
  *-------------------------------------------------------------------------------*/
+
 
 start_shell(DefaultShellCall)
 	:-
@@ -65,12 +65,16 @@ start_shell(DefaultShellCall)
 	ss_init_searchdir(CmdLineSearch),
 	ss_load_dot_alspro,
 
+	als_advise('Setting up library indicies...may take a moment...'),
 	setup_libraries,
+	als_advise('Done.\n'),
 
 	arg(3, CLInfo, Files),
-	(arg(2,CLInfo,true) -> consultmessage(on) ; consultmessage(off)),
+%	(arg(2,CLInfo,false) -> set_consult_messages(on) ; consultmessage(off)),
+	arg(2,CLInfo,ConsultNoise),
+	set_consult_messages(ConsultNoise),
 	ss_load_files(Files),
-	(arg(2,CLInfo,quiet) -> consultmessage(off) ; consultmessage(on)),
+%	(arg(2,CLInfo,quiet) -> consultmessage(off) ; consultmessage(on)),
 	!,
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
@@ -937,7 +941,7 @@ all_to_atoms([String | Strings], [Atom | Atoms])
 	atom_codes(Atom, String),
 	all_to_atoms(Strings, Atoms).
 
-
+/**********************************
 /*!---------------------------------------------------------------------
  |	list_delete/3
  |	list_delete(List, Item, ResultList)
@@ -957,6 +961,7 @@ list_delete([Keep | Rest_In_List], Item, [Keep | Rest_Out_List])
 	:-
 	list_delete(Rest_In_List, Item, Rest_Out_List).
 
+**********************************/
 
 
 

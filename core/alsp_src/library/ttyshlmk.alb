@@ -1,4 +1,4 @@
 libactivate(ttyshlmk,[library,ttyshlmk],
-    [mk_tty_shell_cl/0,mk_tty_shell_list/1,ttyshlmk/1,mk_tty_shell/1,
-        setup_ttyshl/0,setup_ttyshl/2],
+    [mk_tty_shell_cl/0,mk_tty_shell_list/1,ttyshlmk/1,
+	 mk_tty_shell/1,mk_tty_shell/4,setup_ttyshl/0,setup_ttyshl/2],
     []).

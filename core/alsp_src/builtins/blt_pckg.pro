@@ -17,10 +17,168 @@
 
 module builtins.
 
-	%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%   Version B
-	%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+export save_image/2.
+export save_image/1.
+export pckg_init/0.
+export save_package/5.
+export save_base_package/1.
+
+/*!--------------------------------------------------------------*
+ |	save_image/2
+ |	save_image(ImageName, Options)
+ |	save_image(+, +)
+ |
+ |	- Create saved code state merged with current image, with options
+ |
+ |	Creates a saved code state and merges it with the current 
+ |	(executing) image to make a new extended executable image,
+ |	named ImageName (per Options); Applies Options.
+ *---------------------------------------------------------------*/
+
+save_image(ImageName, Options)
+	:-
+		%% Save initial state of '$start' and '$initialize'
+		%% in case there is an error in processing options,
+		%% so that we need to restore them:
+	builtins:clause('$initialize',OldInit),	
+	builtins:clause('$start',OldStart),	
+	catch( save_image0(ImageName, Options),
+			se(Error),
+			restore_si(Error, OldInit, OldStart) ).
+
+save_image0(ImageName, Options)
+	:-
+	process_image_options(Options, ImageName, FinalImageName),
+	save_image(FinalImageName).
+
+/*!--------------------------------------------------------------*
+ |	save_image/1
+ |	save_image(ImageName)
+ |	save_image(+)
+ |
+ |	- Create saved code state merged with current image 
+ |
+ |	Creates a saved code state and merges it with the current 
+ |	(executing) image to make a new extended executable image,
+ |	named ImageName.
+ *---------------------------------------------------------------*/
+
+save_image(NewImageName)
+	:-
+	%% Must get rid of these so the image can create
+	%% them as it starts up; but don't throw them away...
+	sys_searchdir(ALSDIR),
+	abolish(sys_searchdir,1),
+	builtins:dynamic(sys_searchdir/1),
+
+	(bagof(searchdir(SD0), searchdir(SD0), SDList0) -> true ; SDList0 = []),
+	abolish(searchdir,1),
+	builtins:dynamic(searchdir/1),
+
+	(bagof(als_lib_lcn(SD1), als_lib_lcn(SD1), SDList1) -> true ; SDList1 = []),
+	abolish(als_lib_lcn,1),
+	builtins:dynamic(als_lib_lcn/1),
+
+	append(SDList0,  SDList1, SDList),
+
+	%% Save the new image based on OS
+	als_system(SystemList),
+	dmember(os = OS, SystemList),
+	dmember(os_variation = OSVariation, SystemList),
+	image_type(OS, OSVariation, Type),
+	save_image_type(Type, NewImageName, ALSDIR),
+	
+	%% Re-install the search dir info:
+	assert(sys_searchdir(ALSDIR)),
+	laa(SDList0),
+	laa(SDList1).
+
+	%% This is really just assert_all from the library, but it
+	%% needs to be written here since when it is run, the libary
+	%% is inaccessible:
+
+laa([]).
+laa([Item | Rest])
+	:-
+	builtins:assert(Item),
+	laa(Rest).
+
+/*!--------------------------------------------------------------*
+ |	save_image_type/3
+ |	save_image_type(Type, NewImageName, ALSDIR)
+ |	save_image_type(+, +, +)
+ |
+ |	- applies the appropriate image-saving method
+ |
+ |	Type = {simple_mics/complex_mics}
+ *---------------------------------------------------------------*/
+save_image_type(simple_mics, NewImageName, _)
+	:-
+	!,
+	printf(user_output,'Saving new image to: %s...',[NewImageName]),
+	save_image_with_state(NewImageName),
+	printf(user_output,'saved.\n',[]).
+	
+save_image_type(complex_mics, NewImageName, ALSDIR)
+	:-
+	!,
+	(tmpnam(SSName) ->
+	    printf(user_output,'Saving state to: %s...',[SSName])
+		;
+		printf(user_output,'Can''t allocate temporary file for saving state!\n',[]),
+		printf(user_output,'Check available space on /tmp or /var/tmp, etc.\n',[]),
+		printf(user_output,'If tempnam() runs on this system, consider setting TMPDIR.\n',[])
+
+	),
+	save_state(SSName),
+	    printf(user_output,'saved.\n',[]),
+	    
+	get_image_dir_and_name(ImageDir,ImageName),
+	mics_cmd_fmt(MicsCmdFmt),
+	sprintf(CMD, MicsCmdFmt,
+		      [ALSDIR, ImageDir, ImageName, SSName, NewImageName]),
+	atom_codes(ACMD,CMD),
+	    printf('Executing %s\n', [ACMD]),
+	system(ACMD),
+	unlink(SSName).
+
+image_type(mswin32, _, simple_mics) :- !.
+image_type(unix, 'hpux9.05', simple_mics) :- !.
+image_type(unix, 'irix5.3', simple_mics) :- !.
+image_type(_, _, complex_mics) :- !.
+
+/*!--------------------------------------------------------------*
+ |	save_state/1.
+ |	save_state(FileName)
+ |	save_state(+)
+ |	
+ |	Writes (saves) an version of the current image's code state
+ |	(including global variables) to the file FileName.
+ *---------------------------------------------------------------*/
+save_state(FileName) 
+	:-
+	get_shell_level(CurLev),
+	set_shell_level(0),
+	package_global_variables,	%% create initialization pred
+	set_shell_level(CurLev),
+		%% Defined at C level:
+	save_state_to_file(FileName).
+
+/*!--------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+save_image_with_state(NewImageName)
+	:-
+	get_shell_level(CurLev),
+	set_shell_level(0),
+	package_global_variables,	%% create initialization pred
+	set_shell_level(CurLev),
+		%% Defined at C level:
+	save_image_with_state_to_file(NewImageName).
+	
 /*-------------------------------------------------------------------*
  |	pckg_init/0
  |	pckg_init 
@@ -28,27 +186,29 @@ module builtins.
  |
  |	This goal must be run as a start goal when the package is loaded.
  *-------------------------------------------------------------------*/
-export pckg_init/0.
-
 pckg_init 
 	:-
 	setInterruptVector('$interrupt'),
 	initialize_global_variables,
 	sio_pckg_init.
 
-/* Mac OS Resource Packaging */
 
-/*---------------------------------------------------------------*
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%% MAC OS RESOURCE PACKAGING %%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+/*!--------------------------------------------------------------*
  |	save_package/5.
  |	save_package(NewName, OBPList, LoadList, Init, Start)
  |	save_package(+,+,+,+,+)
  |  
+ |	- create Mac applications with parameters
+ |
  |  Creates a new application or MPW Tool which contains all
  |  the OBP files in OBPList.  When the new application is 
  |  launched it will load the files in LoadList and then
  |  call Init and Start.
  *-------------------------------------------------------------------*/
-export save_package/5.
 
 save_package(NewName, OBPList, LoadList, Init, Start) :-
 	save_app_with_obp(NewName, OBPList, LoadList, Init, Start).
@@ -87,119 +247,25 @@ base_obp_list([
     ':alsdir:builtins:debugger.obp'
   ]).
 
-/*---------------------------------------------------------------*
+/*!--------------------------------------------------------------*
  |	save_base_package/1.
  |	save_base_package(NewName)
  |	save_base_package(+)
  |	
+ |	- copy Mac application with builtins in resources
+ |
  |	Creates a copy of the application with all the builtins
  |  stored as resources.
  *---------------------------------------------------------------*/
-export save_base_package/1.
-
 save_base_package(NewName) :-
 	force_libload_all(
 	  [':builtins:debugger']),
 	base_obp_list(BList),
 	save_app_with_obp(NewName, BList, [], '', '').
 
-/*---------------------------------------------------------------*
- |	save_state/1.
- |	save_state(FileName)
- |	save_state(+)
- |	
- |	Writes (saves) an version of the current image's code state
- |	(including global variables) to the file FileName.
- *---------------------------------------------------------------*/
-export save_state/1.
-
-save_state(FileName) 
-	:-
-	get_shell_level(CurLev),
-	set_shell_level(0),
-	package_global_variables,	%% create initialization pred
-	set_shell_level(CurLev),
-	save_state_to_file(FileName).
-
-save_image_with_state(NewImageName)
-	:-
-	get_shell_level(CurLev),
-	set_shell_level(0),
-	package_global_variables,	%% create initialization pred
-	set_shell_level(CurLev),
-	save_image_with_state_to_file(NewImageName).
-	
-/*---------------------------------------------------------------*
- |	save_image/1
- |	save_image(ImageName)
- |	save_image(+)
- |
- |	Create a saved code state and merge it with the current image 
- |	to make a new extended image.
- *---------------------------------------------------------------*/
-
-export save_image/1.
-
-save_image_type(simple_mics, NewImageName, _)
-	:-
-	!,
-	printf(user_output,'Saving new image to: %s...',[NewImageName]),
-	save_image_with_state(NewImageName),
-	printf(user_output,'saved.\n',[]).
-	
-save_image_type(complex_mics, NewImageName, ALSDIR)
-	:-
-	!,
-	(tmpnam(SSName) ->
-	    printf(user_output,'Saving state to: %s...',[SSName])
-		;
-	    printf(user_output,'Can''t allocate temporary file for saving state!\n',[]),
-	    printf(user_output,'Check available space on /tmp or /var/tmp, etc.\n',[]),
-	    printf(user_output,'If tempnam() runs on this system, consider setting TMPDIR.\n',[])
-	),
-	save_state(SSName),
-	    printf(user_output,'saved.\n',[]),
-	    
-	get_image_dir_and_name(ImageDir,ImageName),
-	mics_cmd_fmt(MicsCmdFmt),
-	sprintf(CMD, MicsCmdFmt,
-		      [ALSDIR, ImageDir, ImageName, SSName, NewImageName]),
-	atom_codes(ACMD,CMD),
-	    printf('Executing %s\n', [ACMD]),
-	system(ACMD),
-	unlink(SSName).
-
-image_type(mswin32, _, simple_mics) :- !.
-image_type(unix, 'hpux9.05', simple_mics) :- !.
-image_type(unix, 'irix5.3', simple_mics) :- !.
-image_type(_, _, complex_mics) :- !.
-
-
-save_image(NewImageName)
-	:-
-	%% Must get rid of these so the image can create
-	%% them as it starts up; but don't throw them away...
-	sys_searchdir(ALSDIR),
-	abolish(sys_searchdir,1),
-	abolish(als_lib_lcn,1),
-	abolish(searchdir,1),
-	(bagof(searchdir(SD0), searchdir(SD0), SDList0) -> true ; SDList0 = []),
-	(bagof(als_lib_lcn(SD1), searchdir(SD1), SDList1) -> true ; SDList1 = []),
-	(bagof(searchdir(SD2), searchdir(SD2), SDList2) -> true ; SDList2 = []),
-	append(SDList0,  SDList1, SDList01),
-	append(SDList01, SDList2, SDList),
-	builtins:dynamic(als_lib_lcn/1),
-
-	%% Save the new image based on OS
-	als_system(SystemList),
-	dmember(os = OS, SystemList),
-	dmember(os_variation = OSVariation, SystemList),
-	image_type(OS, OSVariation, Type),
-	save_image_type(Type, NewImageName, ALSDIR),
-	
-	%% Re-install the search dir info:
-	assert(sys_searchdir(ALSDIR)),
-	assert_all(SDList).
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%% END - MAC OS RESOURCE PACKAGING %%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*---------------------------------------------------------------*
  | mics_cmd_fmt/1
@@ -214,30 +280,7 @@ mics_cmd_fmt('go32 %sals-mics %s%s %s %s')
 	!.
 mics_cmd_fmt('%sals-mics %s%s %s %s').
 
-/*---------------------------------------------------------------*
- |	save_image/2
- |	save_image(ImageName, Options)
- |	save_image(+, +)
- *---------------------------------------------------------------*/
-export save_image/2.
-
-save_image(ImageName, Options)
-	:-
-		%% Save initial state of '$start' and '$initialize'
-		%% in case there is an error in processing options,
-		%% so that we need to restore them:
-	builtins:clause('$initialize',OldInit),	
-	builtins:clause('$start',OldStart),	
-	catch( save_image0(ImageName, Options),
-			se(Error),
-			restore_si(Error, OldInit, OldStart) ).
-
 	
-save_image0(ImageName, Options)
-	:-
-	process_image_options(Options),
-	save_image(ImageName).
-
 restore_si(se(Error), OldInit, OldStart)
 	:-
 	prolog_system_error(bad_pack_opt, [Error]),
@@ -249,16 +292,25 @@ restore_si(se(Error), OldInit, OldStart)
 	builtins:assertz( ('$start' :- OldStart) ).
 
 /*---------------------------------------------------------------*
- |	process_image_options/1
- |	process_image_options(Options)
- |	process_image_options(+)
+ |	process_image_options/3
+ |	process_image_options(Options, OrigImageName, FinalImageName)
+ |	process_image_options(+, +, _)
  *---------------------------------------------------------------*/
-process_image_options([])
+
+process_image_options([], ImageName, ImageName)
 	:-!.
-process_image_options([Option | Options])
+
+process_image_options([tag_name | Options], CurImageName, FinalImageName)
+	:-!,
+	als_system(SysList),
+	dmember(os_variation=Suffix, SysList),
+	sprintf(atom(NextImageName), '%t-%t', [CurImageName, Suffix]),
+	process_image_options(Options, NextImageName, FinalImageName).
+
+process_image_options([Option | Options], CurImageName, FinalImageName)
 	:-
 	process_image_option(Option),
-	process_image_options(Options).
+	process_image_options(Options, CurImageName, FinalImageName).
 
 /*---------------------------------------------------------------*
  |	process_image_option/1
@@ -314,6 +366,14 @@ add_lib_qual([File | FilesList],Library,[QualFile | QualFilesList])
 	:-
 	extendPath(Library,File,QualFile),
 	add_lib_qual(FilesList,Library,QualFilesList).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% END VERSION B %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	%%%%
 	%%%%   Version A

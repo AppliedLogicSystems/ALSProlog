@@ -1,4 +1,25 @@
-Mod 09 Sept 1996 Ken Bowen
+Wed 2 Cot 1996 Ken Bowen
+	* Version 2.08 dev
+
+	* Extension of ttymkshl to support generating socket-based
+	  servers; now in shellmak.pro;
+
+	* Major revision of consult; now supports:
+	  - consult/2 with options list
+	  - default behavior is "reconsult"
+	  - searchlists
+	  - correct interaction with -obp placement of obp files
+	  - auto invocation of comptype on *.tty files, as appropriate
+	  - auto invocation of mk_shell on *.spc files, as appropriate
+	  - addition of blt_shlr.pro to support the interface between
+		the consult machinery and tools such as comptype; intented
+		to be the utlimate home of all shell-specific resources
+		(e.g., error messages, etc.)
+	  - consult machinery viewed as part of the development shell:
+		blt_cslt.pro extracted from blt_io.pro, with very primitive
+		consulting machinery left for primitive loading:
+
+Mon 09 Sept 1996 Ken Bowen
 	* Version 2.07 dev 
 
 	* Includes clp(bnr) working machinery

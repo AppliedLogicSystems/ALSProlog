@@ -14,6 +14,7 @@
 module builtins.
 use xconsult.
 
+/********************************************************************
 /*!----------------------------------------------------------------
  | exists_file/1
  | exists_file(Path)
@@ -136,63 +137,83 @@ consult(consult,TheFileName)
 	:- 
 	consult_nature(TheFileName, FileName, Nature),
 	consultmessage('Consulting %s ...\n',[FileName]),
-	load(FileName, 0, Path, Nature, LoadedPath),
+	load(FileName, 0, Path, Nature, LoadedPath, ObpPath),
 	!,
-	source_debug_record(Path),
+	source_debug_record(Path,ObpPath),
 	consultmessage('%s consulted\n',[LoadedPath]).
 
 consult(reconsult,TheFileName) 
 	:-
 	consult_nature(TheFileName, FileName, Nature),
 	consultmessage('Reconsulting %s ...\n',[FileName]),
-	load(FileName, 1, Path, Nature, LoadedPath),
+	load(FileName, 1, Path, Nature, LoadedPath, ObpPath),
 	!,
-	adjust_source_deb(Path),
+	adjust_source_deb(Path,ObpPath),
 	consultmessage('%s reconsulted\n',[LoadedPath]).
 
 consult(_,FileName) 
 	:-
 	prolog_system_error(no_file,[FileName]).
 
-:- dynamic(consulted/3).
+/*-----------------------------------------------------------*
+ |	consulted/4
+ |	consulted(File, ProPath, ObpPath, ConsultType)
+ |	consulted(+, +, +, +)
+ |
+ |	-records information about loaded files
+ |
+ |	Asserted in module builtins by consult process.
+ |
+ |	File	= the unadorned file name (t)
+ |	ProPath = path (eg, /foa/bar/t ) where the relevant 
+ |			  *.pro file was located, if any; if none such
+ |			  was involved,  uses '' in this arg
+ |	ObpPath = path (eg, /foa/bar/t ) where the relevant 
+ |			  *.obp file was located, if any; if none such
+ |			  was involved,  uses '' in this arg; this may
+ |			  be either the path the obp file which was loaded,
+ |			  or the path to the obp file whcih was written
+ |	ConsultType = {normal/debug}; default = normal
+ *-----------------------------------------------------------*/
+:- dynamic(consulted/4).
 
 consult_nature(source(FileName), FileName, source) 
 	:- !.
 consult_nature(FileName, FileName, obp).
 
-source_debug_record(Path)
+source_debug_record(Path,ObpPath)
 	:-
 	source_level_debugging(on),
 	!,
 	pathPlusFile(_,File,Path),
-	asserta(consulted(Path, File, debug)).
-source_debug_record(Path)
+	asserta(consulted(File, Path, ObpPath, debug)).
+source_debug_record(Path,ObpPath)
 	:-
 	pathPlusFile(_,File,Path),
-	asserta(consulted(Path, File, normal)).
+	asserta(consulted(File, Path, ObpPath, normal)).
 
-adjust_source_deb(Path)
+adjust_source_deb(Path,ObpPath)
 	:-
-	consulted(Path, _, ConsultType),
+	consulted(_, Path, ObpPath, ConsultType),
 	!,
 	source_level_debugging(SLDB),
-	deb_adj_act_on(SLDB, ConsultType, Path).
+	deb_adj_act_on(SLDB, ConsultType, Path,ObpPath).
 
-adjust_source_deb(Path)
+adjust_source_deb(Path,ObpPath)
 	:-
-	source_debug_record(Path).
+	source_debug_record(Path,ObpPath).
 
-deb_adj_act_on(on, debug, _)
+deb_adj_act_on(on, debug, _, _)
 	:-!.
-deb_adj_act_on(on, _, Path)
+deb_adj_act_on(on, _, Path,ObpPath)
 	:-!,
-	retract(consulted(Path, File, ConsultType)),
-	asserta(consulted(Path, File, debug)).
-deb_adj_act_on(off, debug, Path)
+	retract(consulted(File, Path, ObpPath, ConsultType)),
+	asserta(consulted(File, Path, ObpPath, debug)).
+deb_adj_act_on(off, debug, Path,ObpPath)
 	:-
-	retract(consulted(Path, File, ConsultType)),
-	asserta(consulted(Path, File, normal)).
-deb_adj_act_on(off, _, _).
+	retract(consulted(File, Path, ObpPath, ConsultType)),
+	asserta(consulted(File, Path, ObpPath, normal)).
+deb_adj_act_on(off, _, _, _).
 
 /*-----------------------------------------------------------------*
  |	consultmessage/1
@@ -297,13 +318,43 @@ loadfor(FileName,Libs,InitFunction,Pathname) :-
  |	Nature		- source / obp
  *-----------------------------------------------------------------------*/
 
+/*
+load(FileName,Type,CanonPath,Nature,LoadedPath) 
+	:-
+	load(FileName,Type,CanonPath,Nature,LoadedPath, _).
+*/
+
+
 :-	make_gv('_next_clause_group'), set_next_clause_group(0),
 	make_gv('_reconsult_flag'), set_reconsult_flag(0).
 
+/*-----------------------------------------------------------------------*
+ | load/6
+ | load(FileName,Type,CanonPath,Nature,LoadedPath,ObpPath)
+ | load(+,+,-,+,-,-)
+ |
+ | 	- main entry for (re)consulting files
+ |
+ |	FileName 	-	an atom naming a file;
+ |	Type		- 0 (=consult) / 1 (= reconsult);
+ |	CanonPath 	- an uninstantiated variable -- it returns a canoncalized
+ |				  path expression for the file expression that was submitted
+ |				  (so if no extension was there in the original submission, 
+ |					none appears in the cannonicalized path)
+ |				
+ |	Nature		- source / obp
+ |	LoadedPath	- the full path to the file which was loaded; 
+ |	ObpPath		- the full path to the obp file which was either loaded
+ |					or written (in the former case, this must be the
+ |					same as LoadedPath, when the obp file was loaded,
+ |					but when a source file was loaded and and an obp
+ |					file was written, this might be quite different,
+ |					depending on obpLocation/2.
+ *-----------------------------------------------------------------------*/
 	%% File source is the user stream:
-load(user,Type,user,Nature,LoadedPath) 
+load(user,Type,user,Nature,LoadedPath, ObpPath) 
 	:-!,
-	load_canon(user,Type,Nature,LoadedPath).
+	load_canon(user,Type,Nature,LoadedPath, ObpPath).
 
 /*
 	%% Source is a 'normal' file:
@@ -311,7 +362,8 @@ load(FileName,Type,CanonPath,Nature,LoadedPath)
 	:-
 	resource_load(FileName), !.
 */
-load(FileName,Type,CanonPath,Nature,LoadedPath) 
+
+load(FileName,Type,CanonPath,Nature,LoadedPath, ObpPath) 
 	:-
 	possibleLocation(FileName, PathName),
 	rootPathFile(Drive, PathList, File, PathName),
@@ -332,7 +384,7 @@ load(FileName,Type,CanonPath,Nature,LoadedPath)
 	      %% Propogate failure
 	    fail
 	),
-	load_canon(CanonPath,Type,Nature,LoadedPath),
+	load_canon(CanonPath,Type,Nature,LoadedPath, ObpPath),
 	!,
 	set_current_consult_directory(OldCCD).
 
@@ -368,9 +420,9 @@ check_existence(Path)
 	exists_file(PathPlusSuffix).
 
 /*-----------------------------------------------------------------------*
- |	load_canon/4
- |	load_canon(Path,Type,Nature,LoadedPath)
- |	load_canon(+,+,+,-)
+ |	load_canon/5
+ |	load_canon(Path,Type,Nature,LoadedPath,ObpPath)
+ |	load_canon(+,+,+,-,-)
  | 
  |	Type:
  |		0 - consult
@@ -387,7 +439,7 @@ check_existence(Path)
  |	consult/reconsult, abolishing things if necessary;  Then it calls 
  |	load3/4, and afterward cleans up as needed.
  *-----------------------------------------------------------------------*/
-load_canon(Path,Type,Nature,LoadedPath) 
+load_canon(Path,Type,Nature,LoadedPath,ObpPath) 
 	:-
 	(filePlusExt(NoSuff,Ext,Path),
 	 	(Ext = pro ; Ext = obp)
@@ -401,7 +453,7 @@ load_canon(Path,Type,Nature,LoadedPath)
 	RFlag1 is RFlag0 \/ Type,
 	set_reconsult_flag(RFlag1),
 	load_canon_reconsult(RFlag1,CG),
-	load3(Ext,Path,Type,Nature,LoadedPath),
+	load3(Ext,Path,Type,Nature,LoadedPath,ObpPath),
 	set_reconsult_flag(RFlag0),
 	pop_clausegroup(_).
 
@@ -438,6 +490,12 @@ obp_in_locn(DirPath)
 
 obpPath(Path,OPath)
 	:-
+	pathPlusFile(_,File,Path),
+	consulted(File,Path, OPath,_),
+	!.
+
+obpPath(Path,OPath)
+	:-
 	pathPlusFile(PurePath,File,Path),
 	obpLocation(PurePath,Dir),
 	!,
@@ -465,19 +523,19 @@ obpPath(Dir,File,OPath)
 	pathPlusFile(XPath, ObpFile, OPath).
 
 /*-----------------------------------------------------------------------*
- |	load3/5
- |	load3(Ext,Path,Type,Nature,LoadedPath)
- |	load3(+,+,+,+,-)
+ |	load3/6
+ |	load3(Ext,Path,Type,Nature,LoadedPath,ObpPath)
+ |	load3(+,+,+,+,-,-)
  *-----------------------------------------------------------------------*/
 
 	%% Requested source was user; load from it:
-load3(_,user,Type,Nature,user) 
+load3(_,user,Type,Nature,user,'') 
 	:- !,
 	load_source(user,Type).
 
 	%% Requested source had an explicit obp extension; so load it:
 	%% (It has already passed an existence test above):
-load3(obp,OPath,Type,Nature,LoadedPath) 
+load3(obp,OPath,Type,Nature,LoadedPath,OPath) 
 	:- !,
 	filePlusExt(Path,obp,OPath),
 	filePlusExt(Path,pro,SPath),
@@ -486,7 +544,7 @@ load3(obp,OPath,Type,Nature,LoadedPath)
 
 	%% The requested source had no extension, and the explicit path
 	%% exists, so load it as source:
-load3(no(extension),Path,Type,Nature,Path) 
+load3(no(extension),Path,Type,Nature,Path,'') 
 	:-
 	exists_file(Path),
 	file_status(Path,Status),
@@ -495,10 +553,10 @@ load3(no(extension),Path,Type,Nature,Path)
 	load_source(Path,Type).
 
 	%% The requested source had no extension, and (since the clause above
-	%% failed), the explicit path file does not exist; so add on both the
+	%% failed) the explicit path file does not exist; so add on both the
 	%% 'pro' and 'obp' extensions, and try to load from them; this is the
 	%% most common case:
-load3(no(extension),Path,Type,Nature,LoadedPath) 
+load3(no(extension),Path,Type,Nature,LoadedPath,OPath) 
 	:- !,
 	filePlusExt(Path,pro,SPath),
 	obpPath(Path,OPath),
@@ -506,7 +564,7 @@ load3(no(extension),Path,Type,Nature,LoadedPath)
 
 	%% The requested path explicity ended in a 'pro' extension, so 
 	%% directly load it:
-load3(_,Path,Type,Nature,Path) 
+load3(_,Path,Type,Nature,Path,'') 
 	:-
 	load_source(Path,Type).
 	
@@ -673,6 +731,10 @@ possibleLocation(FileName, FileName)
 	is_absolute_pathname(FileName),
 	!.
 
+possibleLocation(FileName, Path) 
+	:-
+	consulted(FileName, Path, _, _).
+
 possibleLocation(FileName, FileName).
 
 possibleLocation(FileName, Path) 
@@ -730,6 +792,7 @@ mfn_fix_slashes(DS_from, DS_to, NameIn, NameOut) :-
 	mfn_fix_slashes(DS_from, DS_to, NameFixed, NameOut).
 mfn_fix_slashes(_, _, Name, Name).
 
+**************************************************************************/
 
 /*---------------------------------------------------------------------------------*
  * printf/1, printf/2, printf/3, printf/4
@@ -1077,6 +1140,7 @@ member_identical(Item,[H1|_],H2,[H2|_]) :-
 member_identical(Item,[_|L1],Item2,[_|L2]) :-
 	member_identical(Item,L1,Item2,L2).
 
+/*********************************************
 :-	compiletime,
 	module_closure(exec_to,2,exec_to).
 
@@ -1086,5 +1150,6 @@ exec_to(Module, TargetStream, Code) :-
 	tell(TargetStream),
 	Module:call(Code),
 	tell(CurrentStream).
+*********************************************/
 
 endmod.		%% blt_io.pro: I/O Builtins File
