@@ -212,8 +212,8 @@ source_list(wins_intf_general,
 
 wins_ex_list(i386_mswin32, ['*.exe', '*.lib', '*.dll']) :-!.
 
-wins_ex_list('all_macos7.5', ['alspro_macos_68k0', 'alspro_macos_ppc0',
-		'alspro_macos_68k', 'alspro_macos_ppc', '*.lib']) :-!.
+wins_ex_list('all_macos7.5', ['alspro_macos', 'alspro_macos0',
+							  'demo_alspro_macos', 'demo_alspro_macos0', '*.lib']) :-!.
 
 wins_ex_list(_, ['*.a', 'alspro*']) :-!.
 
