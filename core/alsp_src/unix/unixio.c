@@ -16,6 +16,8 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
+#include <math.h>
+
 #if (defined(UNIX) || defined(MSWin32) || (defined(MacOS) && defined(HAVE_GUSI))) && !defined(__GO32__) && !defined(OS2)
 
 #if defined(UNIX)
@@ -1173,7 +1175,7 @@ double os_realtime(void)
 	return TV2SEC(time) - process_start_time;
 }
 
-int os_set_timer(double initial, double interval)
+int os_set_timer(double dval, double dinterval)
 {
     struct itimerval itv;
 
