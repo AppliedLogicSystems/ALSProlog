@@ -99,9 +99,10 @@ copy_entries(Cur, Final, Source, Target)
 	arg(Cur, Source, Val),
 	arg(Cur, Target, Val).
 
+	%% debugger_mgrAction( get_mrfcg(CG, SrcMgr), State)
+	%% debugger_mgrAction( get_mrfcg(+, -), State)
 debugger_mgrAction( get_mrfcg(CG, SrcMgr), State)
 	:-
-	accessObjStruct(mrfcg, State, CG),
 	accessObjStruct(src_trace_mgrs_by_fcg, State, CurIndex),
 	arg(CG, CurIndex, SrcMgr).
 

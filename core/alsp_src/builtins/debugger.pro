@@ -1546,7 +1546,8 @@ fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, CGsSetup)
 	dmember(CG, CGsSetup),
 	!.
 
-fin_setup_debug(ClauseGroup, Module, Predicate, Arity, CGsSetup, [ClauseGroup | CGsSetup])
+fin_setup_debug(ClauseGroup, Module, Predicate, Arity, 
+					CGsSetup, [ClauseGroup | CGsSetup])
 	:-
 	check_file_setup(Module, Predicate, Arity, 
 			 SrcFilePath, BaseFileName, DebugType, ClauseGroup,
@@ -1554,6 +1555,8 @@ fin_setup_debug(ClauseGroup, Module, Predicate, Arity, CGsSetup, [ClauseGroup | 
 	reload_debug(BaseFileName, SrcFilePath, DebugType, ClauseGroup, Flag),
 	!,
 	start_src_trace(Flag,BaseFileName, SrcFilePath, ClauseGroup, ALSMgr, SrcMgr).
+
+fin_setup_debug(ClauseGroup, _, _, _, CGsSetup, [ClauseGroup | CGsSetup]).
 	
 get_fcg(Module,Predicate,Arity,ClauseGroup,Module)
 	:-
@@ -1582,6 +1585,9 @@ check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, Claus
 	send(ALSMgr, obtain_src_mgr(BaseFileName, SrcMgr)),
 	send(SrcMgr, get_value(base_file, BaseFileName)),
 	send(SrcMgr, get_value(source_file, SrcFilePath)),
+!,
+	file_extension(_,Ext,SrcFilePath),
+	Ext \= obp,
 	send(SrcMgr, get_value(consult_mode, DebugType)).
 
 reload_debug(user,_, _,CG,nofile(user)) :-!.
