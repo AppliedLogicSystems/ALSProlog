@@ -124,7 +124,7 @@ alsdev :  alsdir alspro_b $(BUILTINS) $(ALSDEVFILES)
 	./alspro_b -q -b -obp -no_dot_alspro \
 	-g 'save_image(alsdev,[start_goal((builtins:start_alsdev)), \
 	select_lib(builtins, [debugger,blt_dvsh]), \
-	select_lib(library,[miscterm,strctutl,strings,tcl_sppt,tk_alslib])])'
+	select_lib(library,[miscterm,msc_ioin,strctutl,strings,tcl_sppt,tk_alslib])])'
 
 clean :
 	rm -f *.o rm *.d
