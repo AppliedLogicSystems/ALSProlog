@@ -22,7 +22,7 @@ test :-
 	simple_readline_test,
 	univ_readline_test,
 	read_test,
-	get_line_test,
+	get_line_test
 	.
 
 /*  The test files have the extension .btf, which stands for
@@ -237,3 +237,4 @@ read_lines(Stream) :-
 	get_line(Stream, L1), writeq(L1), nl,
 	get_line(Stream, L2), writeq(L2), nl,
 	get_line(Stream, L3), writeq(L3), nl, nl.
+
