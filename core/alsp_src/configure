@@ -1,4 +1,14 @@
 #!/bin/sh
+###################################################################
+#
+# NOTE: THIS FILE HAS BEEN HAND MODIFIED, DO NOT OVERWRITE IT
+#       BY RUNNING AUTOCONF.
+#
+#       ALL MODIFIED SECTIONS ARE MARKED WITH "BEGIN HAND MODIFICATION"
+#       and "END HAND MODIFICATION".
+#
+###################################################################
+
 # Guess values for system-dependent variables and create makefiles.
 # Generated automatically using autoconf version 1.11 
 # Copyright (C) 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
@@ -1692,6 +1702,43 @@ DEFS="$DEFS -DHAVE_LIBSOCKET=1"
    LIBS="-lsocket ${LIBS}"
 fi
 
+###################################################################
+# BEGIN HAND MODIFICATION: Check for elf library
+###################################################################
+ac_save_LIBS="${LIBS}"
+LIBS="-lelf ${LIBS}"
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lelf"
+cat > conftest.${ac_ext} <<EOF
+#include "confdefs.h"
+
+int main() { return 0; }
+int t() { main();; return 0; }
+EOF
+if eval $ac_compile; then
+  rm -rf conftest*
+  ac_have_lib="1"
+
+fi
+rm -f conftest*
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
+   
+{
+test -n "$verbose" && \
+echo "	defining HAVE_LIBELF"
+echo "#define" HAVE_LIBELF "1" >> confdefs.h
+DEFS="$DEFS -DHAVE_LIBELF=1"
+}
+
+   LIBS="-lelf ${LIBS}"
+fi
+
+###################################################################
+# END HAND MODIFICATION: Check for elf library
+###################################################################
+
+
 
 
 
@@ -2083,15 +2130,22 @@ fi
 rm -f conftest*
 done
 
-### check for /dev/zero
+###################################################################
+# BEGIN HAND MODIFICATION: check for /dev/zero
+###################################################################
+
 echo checking for /dev/zero...
-if test -f /dev/zero -o -h /dev/zero; then
+if test -r /dev/zero; then
 echo "#define" HAVE_DEV_ZERO "1" >> confdefs.h
 DEFS="$DEFS -DHAVE_DEV_ZERO=1"
 echo yes
 else
 echo no
 fi
+
+###################################################################
+# END HAND MODIFICATION: check for /dev/zero
+###################################################################
 
 ###	checks for missing headers
 for ac_func in \
@@ -2519,6 +2573,14 @@ chmod +x config.status
 # Some shells look in PATH for config.status without the "./".
 test -n "$no_create" || ${CONFIG_SHELL-/bin/sh} ./config.status
 
+
+###################################################################
+# BEGIN HAND MODIFICATION:
+###################################################################
+
 # make alsdir in bld-port and bld-natv
 export srcdir ; export LN_S ; $srcdir/cfgs/unix/malsdunx
 
+###################################################################
+# END HAND MODIFICATION:
+###################################################################
