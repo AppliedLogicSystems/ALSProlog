@@ -1,0 +1,1 @@
+sed '1,$s/:-/%:-/' $1/tcltk.pro > tcltk.pro
