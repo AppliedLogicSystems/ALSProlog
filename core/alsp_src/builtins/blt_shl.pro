@@ -33,15 +33,6 @@ use sio.
  | is the shell call to make.
  *-------------------------------------------------------------------------------*/
 
-:- defineClass(alsshell,
-	[   name=shl_source_handler,
-		subClassOf=source_handler,
-		export = yes,
-		addl_slots= [ ]
-	]).
-
-%:- dynamic(dvf/0).
-
 start_shell(DefaultShellCall) 
 	:-
 	catch(start_shell0(builtins:prolog_shell), 
@@ -121,8 +112,6 @@ setup_als_shl_mgr(MgrObject)
 		 ]
 		], 
 		MgrObject).
-
-:- init_als_shl_mgr.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% "Early" shell setup support routines
@@ -312,6 +301,7 @@ prolog_shell(InStream,OutStream,ID)
  | init_prolog_shell(+, +,+,-,-,-)
  |
  *-----------------------------------------------------------------------*/
+
 export init_prolog_shell/6.
 init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	:-
@@ -736,6 +726,15 @@ abort
 	:- 
 	throw(abort).
 
+
+:- defineClass(alsshell,
+	[   name=shl_source_handler,
+		subClassOf=source_handler,
+		export = yes,
+		addl_slots= [ ]
+	]).
+%:- init_als_shl_mgr.
+
 endmod.  %% builtins
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -785,6 +784,8 @@ spit_the_error(prolog_system_error(Error, Args), Stream)
 spit_the_error(Error, Stream)
 	:-
 	prolog_system_error(Error, alsshell, [], Stream).
+
+
 
 
 endmod.		%% blt_shl.pro: Development shell
