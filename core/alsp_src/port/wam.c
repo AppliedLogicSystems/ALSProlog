@@ -1,6 +1,6 @@
 /*===========================================================================*
  |		wam.c                
- | Copyright (c) 1992-95, Applied Logic Systems, Inc.
+ | Copyright (c) 1992-96, Applied Logic Systems, Inc.
  |
  | 		-- interpreter for wam instructions
  |
@@ -8,6 +8,7 @@
  | Creation: 5/26/92
  |
  | Macroized 'unwind trail' code
+ | Freeze additions - KAB
  *===========================================================================*/
 
 #include "defs.h"
@@ -2126,3 +2127,33 @@ pbi_bind_vars()
 
 }
 
+/* THis assumes that
+	FREEZE = 1 and TRAILVALS = 1
+ */
+
+void
+bind_int_unfreeze(r,t,d)
+	PWord *r;
+	int *t;
+	double d;
+{
+	PWord *vl;
+
+		/* make the int: */
+	vl = wm_H++;
+	make_number(vl, t, d);
+	w_install(vl, *vl, *t);
+
+/*  #define BIND(r,f)     { TRAIL(r,0); *(r) = PWORD(f); } */
+
+	if( PWPTR(r) < wm_HB  &&  PWPTR(r) >= wm_SPB) {
+	  *(PWord *)--wm_TR = PWORD(r);
+	  *(PWord *)--wm_TR = *PWPTR(r);
+	}
+
+	*((PWord *)r +1) = (PWord)((PWord *)r + 1); 				  \
+	wm_safety = -2; 
+	wm_interrupt_caught = 3; 
+	
+
+} 

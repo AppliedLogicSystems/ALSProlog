@@ -1,51 +1,54 @@
 /*=====================================================================
- * avl.pro		-- avl tree program
- *	Copyright (c) 1990 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Created: 4/2/90
- * Revision History:
- *
- * Module Name:	avl
- *
- * Exported Procedures:
- *
- *	avl_create(Tree)	-- create an empty tree, Tree
- *
- *	avl_insert(Key,Data,InTree,OutTree)
- *				-- insert Key and Data into InTree
- *				   producing OutTree; If the Key is already
- *				   present in the tree, then Data replaces the 
- *				   old data value in the tree
- *
- *	avl_search(Key,Data,Tree)
- *				-- search Tree for Key and return Data
- *
- *	avl_inorder(Tree,List)	-- List is a list of the keys in the tree
- *				   found in an inorder traversal.
- *
- *
- * Data Structure:
- *
- *	Note:	The following comments are provided for informational purposes
- *		only.  The user of this module should not count on these
- *		structures being implemented in this manner nor attempt to
- *		access them directly.  Access should be made only thru
- *		the exported procedures.
- *
- *	The tree is represented by a structured term.  
- *
- *	empty denotes the empty tree.
- *
- *	bn(Key,Data,Left,Right) denotes a tree whose left and right subtrees
- *		have the same height.
- *
- *	ln(Key,Data,Left,Right) denotes a tree the height of whose left subtree
- *		is one larger than the height of the right subtree.
- *
- *	rn(Key,Data,Left,Right) denotes a tree the height of whose right
- *		subtree is one larger than the height of the left subtree.
- */
+ |		avl.pro		
+ |	Copyright (c) 1990 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |		-- avl tree program
+ |
+ | Author: Kevin A. Buettner
+ | Created: 4/2/90
+ | Revision History:
+ |
+ | Module Name:	avl
+ |
+ | Exported Procedures:
+ |
+ |	avl_create(Tree)	-- create an empty tree, Tree
+ |
+ |	avl_insert(Key,Data,InTree,OutTree)
+ |				-- insert Key and Data into InTree
+ |				   producing OutTree; If the Key is already
+ |				   present in the tree, then Data replaces the 
+ |				   old data value in the tree
+ |
+ |	avl_search(Key,Data,Tree)
+ |				-- search Tree for Key and return Data
+ |
+ |	avl_inorder(Tree,List)	-- List is a list of the keys in the tree
+ |				   found in an inorder traversal.
+ |
+ |
+ | Data Structure:
+ |
+ |	Note:	The following comments are provided for informational purposes
+ |		only.  The user of this module should not count on these
+ |		structures being implemented in this manner nor attempt to
+ |		access them directly.  Access should be made only thru
+ |		the exported procedures.
+ |
+ |	The tree is represented by a structured term.  
+ |
+ |	empty denotes the empty tree.
+ |
+ |	bn(Key,Data,Left,Right) denotes a tree whose left and right subtrees
+ |		have the same height.
+ |
+ |	ln(Key,Data,Left,Right) denotes a tree the height of whose left subtree
+ |		is one larger than the height of the right subtree.
+ |
+ |	rn(Key,Data,Left,Right) denotes a tree the height of whose right
+ |		subtree is one larger than the height of the left subtree.
+ *==========================================================================*/
 
 module avl.
 

@@ -1,7 +1,8 @@
-/*
- * nextaux.c -- collection of auxilliary next interface predicates
- *
- */
+/*---------------------------------------------------------*
+ |			nextaux.c
+ |		Copyright (c) 1994-96 Applied Logic Systems, Inc.
+ |
+ *---------------------------------------------------------*/
 
 #include "alspi.h"
 #include "cinterf.h"

@@ -1,6 +1,7 @@
 /*========================================================================*
  |			slashes.pro
- |		Copyright (c) 1994-5 Applied Logic Systems, Inc.
+ |	Copyright (c) 1994-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		Converting from slash terms to lists
  |

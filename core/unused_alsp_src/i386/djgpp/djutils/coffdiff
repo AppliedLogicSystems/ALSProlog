@@ -1,0 +1,29 @@
+2c2
+<  * coff-mics.c	-- Merge Image and saved Code State (COFF version)
+---
+>  * coffmics.c	-- Merge Image and saved Code State (COFF version)
+8d7
+< #ifndef __GO32__
+10,13d8
+< #else
+< #include <djcoff.h>
+< #define ISCOFF(x) ((x)==0x14c)
+< #endif
+84,86c79,81
+<     FILHDR fhdr;
+<     AOUTHDR ehdr;
+<     SCNHDR  shdr;
+---
+>     struct filehdr fhdr;
+>     struct aouthdr ehdr;
+>     struct scnhdr  shdr;
+88c83
+<     SYMENT *symtab, *sym;
+---
+>     struct syment *symtab, *sym;
+145,146c140,141
+< 	|| read(oifd, &fhdr, sizeof (FILHSZ)) < 0
+< 	|| read(oifd, &ehdr, sizeof (AOUTSZ)) < 0 )
+---
+> 	|| read(oifd, &fhdr, sizeof (struct filehdr)) < 0
+> 	|| read(oifd, &ehdr, sizeof (struct aouthdr)) < 0 )

@@ -1,6 +1,7 @@
 /* ===========================================================*
  |				typecomp.pro
- |		Copyright (c) 1990-92 Applied Logic Systems, Inc.
+ |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		Transformer to generate data structure code for
  |		"encapsulated structure datatypes".

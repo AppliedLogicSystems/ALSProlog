@@ -1,0 +1,13 @@
+From vellino@bnr.caFri Oct 20 19:48:24 1995
+Date: Fri, 20 Oct 1995 16:59:00 -0400 
+From: "andre (a.n.) vellino" <vellino@bnr.ca>
+To: ken@als.com
+Subject: files to follow 
+
+Ken,
+
+My recollection is that the macros that we were having problems with on
+the HP were defined in interval.c which is why I've included this file
+in the list of files I'm sending as individual emails to follow.
+
+Cheers -- Andre'

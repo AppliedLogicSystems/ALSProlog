@@ -578,6 +578,7 @@ booleanOutput:		|1, 0, 0, 0, 0, 0, 0, 0| -> error
 				switch (status & (x ## lchange | x ## hchange)) { \
 					case x ## lchange: \
 					case x ## hchange: \
+
 /* Flips the xlchange & xhchange*/	status ^= (x ## lchange | x ## hchange); \
 				} \
 			}

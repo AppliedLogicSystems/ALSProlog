@@ -1,8 +1,9 @@
 /*=====================================================================
- * 			miscterm.pro		
- *		Copyright (c) 1990 Applied Logic Systems, Inc.
- *
- *		Term manipulation utilities for the library
+ | 			miscterm.pro		
+ |	Copyright (c) 1990 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |		Term manipulation utilities for the library
  *====================================================================*/
 
 module builtins.

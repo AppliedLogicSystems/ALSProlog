@@ -144,7 +144,7 @@ cmnt(1) 		= ['How to build everything'].
 
 all 	depends_on  [alsdir, setup, generated, alspro_b, alsmics, alspro, alstest].
 
-macall	depends_on	[generated, mpw_alspro_b_ppc, mpw_alspro_b_68k, sioux_alspro_b_68k, sioux_alspro_b_ppc, mpw_alspro_b, sioux_alspro_b, alspro_b, alstest].
+macall	depends_on	[generated, mpw_alspro_b_ppc, sioux_alspro_b_68k, sioux_alspro_b_ppc, sioux_alspro_b, alspro_b, alstest].
 
 cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 					'C source files to object files'].

@@ -5,9 +5,10 @@
  |
  |		Supporting functions for (generated) intrv.c (intrv.h)
  *==================================================================*/
-
+#include "defs.h"
 #include "intrv.h"
 #if defined(INTCONSTR)
+#include "winter.h"
 #include "freeze.h"
 
 extern PWord	deref_2		PARAMS(( PWord ));
@@ -70,7 +71,8 @@ printf("get_intvl_tm:Non-delay: %x \n",DelVar);
 	and binds them to (the vars pointed at by) LB, UB
  *-------------------------------------------------------*/
 
-int extract_bds	PARAMS( (PWord *, int, fp *, fp *) );
+int
+extract_bds	PARAMS( (PWord *, int, fp *, fp *) );
 
 int
 extract_bds(DelVar, DelVar_t, LB, UB)
@@ -89,12 +91,42 @@ extract_bds(DelVar, DelVar_t, LB, UB)
 	  	*UB = (double)(int)DelVar; 
 	  	SUCCEED;
 	}
+#ifdef DoubleType
+	else if (DelVar_t == WTP_DOUBLE)
+	{ 
+		w_get_double(LB, *DelVar);
+		*UB = *LB;
+	  	SUCCEED;
+	}
+#endif
+	else if (DelVar_t == WTP_STRUCTURE)
+	{ 
+		PWord functor, vv;
+		int   arity, tt;
+		double uu=0;
+		int i;
+
+		w_get_arity(&arity, *DelVar);
+		w_get_functor(&functor, *DelVar);
+			/* Must have: arity == 4 && functor == TK_DDOUBLE */
+		if ((arity != 4) || (functor != TK_DDOUBLE))
+			FAIL;
+
+		for (i = 0; i < 4; i++) {
+		    w_get_argn(&vv, &tt, *DelVar, i + 1);
+			*(((short *) &uu)+ i) = (short) vv;
+		}
+    	*LB = uu;
+    	*UB = uu;
+	  	SUCCEED;
+	}
 	else if ((DelVar_t == WTP_UNBOUND) && (CHK_DELAY(DelVar)))
 	{
  		Intvl = (PWord *)get_intvl_tm(DelVar, DelVar_t);
 		w_get_argn((long *)&IntUIA, &IntUIA_t, (long)Intvl, UIA_POSITION);
 		w_uia_peek((long)IntUIA, 0, (UCHAR *) LB, sizeof (double));
 		w_uia_peek((long)IntUIA, 8, (UCHAR *) UB, sizeof (double));
+	  	SUCCEED;
 	}
 	else
 		FAIL;

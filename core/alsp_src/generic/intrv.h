@@ -48,10 +48,43 @@
 #define zflip       (1 << 6)
 #define zlchange    (1 << 7)
 #define zhchange    (1 << 8)
+#define redonode    (1 << 9)
+#define link    	(1 << 10)
+
+
 
 #define x_changed (xflip | xlchange | xhchange)
 #define y_changed (yflip | ylchange | yhchange)
 #define z_changed (zflip | zlchange | zhchange)
+
+#define unflip(T)   if (status & T ## flip) { \
+				int_fp t = T ## l; \
+				status ^= T ## flip; \
+				T ## l = (T ## h NE 0.0) ? (- T ## h) : 0.0; \
+				T ## h = (t NE 0.0) ? (- t) : 0.0; \
+				switch (status & (T ## lchange | T ## hchange)) { \
+					case T ## lchange: \
+					case T ## hchange: \
+	/* Flips the Tlchange & Thchange*/  status ^= (T ## lchange | T ## hchange); \
+			} \
+	}
+
+/******************* Instatiation for T = x *****************************
+unflip(T)::   if (status & xflip) { \
+				int_fp t = xl; \
+				status ^= xflip; \
+				xl = (xh NE 0.0) ? (- xh) : 0.0; \
+				xh = (t NE 0.0) ? (- t) : 0.0; \
+				switch (status & (xlchange | xhchange)) { \
+					case xlchange: \
+					case xhchange: \
+	Flips the xlchange & xhchange:::  status ^= (xlchange | xhchange); \
+			} \
+	}
+ ************************************************************************/
+
+
+
 
 /****************
 	NEED DFNS or EXTERN DECLS:

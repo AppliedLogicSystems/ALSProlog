@@ -1,6 +1,8 @@
-/*
- * motif.h -- include file for the motif interface
- */
+/*---------------------------------------------------------*
+ |			motif.h
+ |		Copyright (c) 1994-96 Applied Logic Systems, Inc.
+ |
+ *---------------------------------------------------------*/
 
 #include <Xm/Xm.h>
 

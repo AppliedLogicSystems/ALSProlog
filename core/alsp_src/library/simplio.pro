@@ -1,11 +1,12 @@
 /*==================================================================
- *            simplio.pro
- *        Copyright (c) 1991  Applied Logic Systems, Inc.
- *
- *	Elementary TTY-style IO for default user interface
- *
- * Author:	Ken Bowen
- * Date:	November, 1991
+ |            simplio.pro
+ |        Copyright (c) 1991-96  Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |	Elementary TTY-style IO for default user interface
+ |
+ | Author:	Ken Bowen
+ | Date:	November, 1991
  *=================================================================*/
 
 module windows.

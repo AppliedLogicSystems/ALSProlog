@@ -1,13 +1,10 @@
 /*======================================================================
  |			listutl3.pro
- |		Copyright (c) 1991 Applied Logic Systems, Inc.
+ |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		Miscellaneous list predicates
  *=====================================================================*/
-%! category(terms).
-%! group(list).
-%! subgroup(miscellaneous).
-
 module builtins.
 
 export nobind_member/2.

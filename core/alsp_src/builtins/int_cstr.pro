@@ -15,13 +15,7 @@
  |              Integration into ALS Prolog
  *================================================================*/
 
-#if (syscfg:intconstr)
-
 module rel_arith.
-
-%% Temporary hack until we get the maxint prolog flag stuff implemented:
-
-maxint(123456789).
 
 intvl(_,_,_,_).
 
@@ -47,6 +41,7 @@ type_and_bounds(boolean,      boolean, 0, 1).
 	%% should make this (24) more accurate:
 uia_space(_,UIA)
 	:-
+%	'$uia_alloc'(24,UIA).
 	'$uia_alloc'(16,UIA).
 
 new_type_interval(Type,X)
@@ -95,11 +90,13 @@ update_intvl_type(Intvl, NewType)
 
 update_lower_bd(Intvl, NewVal)
 	:-
+%	trailed_mangle(4, Intvl, NewVal),
 	arg(4, Intvl, UIA),
 	update_uia_dbl(Intvl,0,NewVal). %% 0 = lower
 
 update_upper_bd(Intvl, NewVal)
 	:-
+%	trailed_mangle(5, Intvl, NewVal),
 	arg(4, Intvl, UIA),
 	update_uia_dbl(Intvl,1,NewVal). %% 1 = upper
 
@@ -188,6 +185,26 @@ show_used_by([_ | VarList])
 	:-
 	show_used_by(VarList).
 
+/*
+init_used_by([], _).
+
+init_used_by([Var | VarList], Node)
+	:-
+	'$is_delay_var'(Var),
+	!,
+	'$domain_term'(Var, DomainTerm),
+	set_used_by(DomainTerm, [Node]),
+	init_used_by(VarList, Node).
+
+init_used_by([_ | VarList], Node)
+	:-
+	init_used_by(VarList, Node).
+
+*/
+
+
+
+
 /*---------------------------------------------------------------
  *--------------------------------------------------------------*/
 interval_bound(Side, Quant, Bound, Type)
@@ -211,6 +228,10 @@ max_bound(integer, Y)
 	:-
 	maxint(X),
 	Y is float(X).
+
+%% Temporary hack until we get the maxint prolog flag stuff implemented:
+
+maxint(123456789).
 
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -299,11 +320,10 @@ new_node(Node)
 	:-
 	'$iterate'(Node).
 
-%%-------------------------
-
 export '$iterate'/1.
 '$iterate'(Goal)
 	:-
+%printf_opt('Goal= %t\n',[Goal], [lettervars(false) ,line_length(100)]),
 	Goal =.. [OP | Args],
 	prim_op_code(OP,OpCd),
 
@@ -312,11 +332,8 @@ export '$iterate'/1.
 
 %printf_opt('%t--XFGoal= %t\n',[Goal,XFGoal], [lettervars(false) ,line_length(100)]),
 %show_used_by(['Z'-Z,'X'-X,'Y'-Y]),
-dbg_show_vars(OpCd,Z,X,Y),
 
 	'$iter_link_net'(OpCd,Z,X,Y,XFGoal).
-
-%%-------------------------
 
 fixup_iter([Z,X], Z,X,0,XFGoal)
 	:-
@@ -325,8 +342,6 @@ fixup_iter([Z,X], Z,X,0,XFGoal)
 fixup_iter([Z,X,Y], Z,X,Y,XFGoal)
 	:-
 	add_to_used_by([Z,X,Y], XFGoal).
-
-%%-------------------------
 
 prim_op_code(unequal, 0).
 prim_op_code(equal, 1).
@@ -352,6 +367,7 @@ prim_op_code(cos, 20).
 prim_op_code(sin, 21).
 prim_op_code(tan, 22).
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	%hack as compare on temporary basis:
@@ -364,82 +380,48 @@ cadj( = ,  @= ).
 cadj( < ,  @< ).
 cadj( > ,  @> ).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%
-%%%%%%  DEBUGGING STUFF
-%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/***********************
+:-dynamic(it_debug_cq/0).
+:-dynamic(it_debug_gl/0).
 
-export debug_constr/0.
-debug_constr :-
-	debug_constr0,
-	(dbg_cstr -> abolish(dbg_cstr,0)
-		;
-		assert(dbg_cstr)).
+export '$iterate'/1.
 
-:- dynamic(dbg_cstr/0).
-
-dbg_show_vars(OpCd, Z,X,Y)
+'$iterate'(Goal)
 	:-
-	dbg_cstr,
+	Goal =.. [OP | Args],
+	prim_op_code(OP,OpCd),
+	fixup_iter(Args, Z,X,Y),
 	!,
-	op_rep(OpCd,OpRep),
-	printf('@[%t]    ',[OpRep]),
-	dbg_show_v('Z',Z),
-	dbg_show_v('X',X),
-	dbg_show_v('Y',Y),
-	nl.
-dbg_show_vars(_,_,_,_).
+	'$iter_link_net'(OpCd,Z,X,Y,Goal).
 
+/*
+fixup_iter([Z,X], Z,X,0).
+fixup_iter([Z,X,Y], Z,X,Y).
+*/
 
-
-dbg_show_v(VarName,Var)
-	:-
-	'$is_delay_var'(Var),
-	!,
-	'$domain'(Var, Type, LB, UB),
-	printf_opt('%t[%t][%t,%t] ',[VarName,Var,LB,UB],
-					[lettervars(false) ,line_length(180)]).
-
-dbg_show_v(VarName,Var)
-	:-
-	nonvar(Var),
-	!,
-	printf('%t[%t] ',[VarName,Var]).
-
-dbg_show_v(VarName,Var)
-	:-
-	printf_opt('%t[%t][unb] ',[VarName,Var],
-					[lettervars(false) ,line_length(180)]).
-
-
-op_rep(0,'!=').
-op_rep(1,'= ').
-op_rep(2,'>=').
-op_rep(3,'hg').
-op_rep(4,'+ ').
-op_rep(5,'bt').
-op_rep(6,'ft').
-op_rep(7,'in').
-op_rep(8,'j<').
-op_rep(9,'k=').
-op_rep(10,'lb').
-op_rep(11,'* ').
-op_rep(12,'nw').
-op_rep(13,'or').
-op_rep(14,'^3').
-op_rep(15,'^2').
-op_rep(16,'rt').
-op_rep(17,'va').
-op_rep(18,'wr').
-op_rep(19,'xp').
-op_rep(20,'cs').
-op_rep(21,'si').
-op_rep(22,'tn').
+prim_op_code(unequal, 0).
+prim_op_code(equal, 1).
+prim_op_code(greatereq, 2).
+prim_op_code(higher, 3).
+prim_op_code(add, 4).
+prim_op_code(begin_tog, 5).
+prim_op_code(finish_tog, 6).
+prim_op_code(inf, 7).
+prim_op_code(j_less, 8).
+prim_op_code(k_equal, 9).
+prim_op_code(lub, 10).
+prim_op_code(mul, 11).
+prim_op_code(narrower, 12).
+prim_op_code(or, 13).
+prim_op_code(pow_odd, 14).
+prim_op_code(qpow_even, 15).
+prim_op_code(rootsquare, 16).
+prim_op_code(vabs, 17).
+prim_op_code(wrap, 18).
+prim_op_code(xp, 19).
+prim_op_code(cos, 20).
+prim_op_code(sin, 21).
+prim_op_code(tan, 22).
+*************************/
 
 endmod.		%% rel_arith
-
-#endif
-

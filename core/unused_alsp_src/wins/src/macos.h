@@ -1,6 +1,9 @@
-/*
- * macos.h
- */
+/*---------------------------------------------------------*
+ |			macos.h
+ |		Copyright (c) 1994-96 Applied Logic Systems, Inc.
+ |
+ *---------------------------------------------------------*/
+
 #define CGLUESUPPORTED	0
 #define OLDROUTINENAMES	0
 #define OLDROUTINELOCATIONS	0

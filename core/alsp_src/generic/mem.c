@@ -934,7 +934,7 @@ ss_save_state(filename)
      * Open the saved state file.
      */
     
-#ifdef MacOS
+#if defined(MacOS) || defined(WIN32)
     ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC);
 #else
     ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0777);

@@ -1,6 +1,13 @@
 /*
- * callout1.pro		-- test callouts with garbage compaction
- *
+ | callout1.pro		-- test callouts with garbage compaction
+ |
+ |	extend_is/3 is defined by:
+ |
+ |	extend_is(Result, Expression, EvalBody) 
+ |		:-
+ |	 	reconsult_assertz_at_load_time(
+ |					(is_eval(Expression,Result) :- EvalBody)).
+ |
  */
 
 :- extend_is(One,one,(gc,One=1)).

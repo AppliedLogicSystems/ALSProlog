@@ -1,14 +1,12 @@
 /*==========================================================================*
- *==========================================================================*
- *   			sockmisc.pro
- *
- *		Copyright (c) 1994 Applied Logic Systems, Inc.
- *
- *		Socket-oriented utilities
- *
- *	Authors: Kevin Buettner, Ken Bowen
- *	Date:	 May 1994
- *==========================================================================*
+ |   			sockmisc.pro
+ |	Copyright (c) 1994 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |		Socket-oriented utilities
+ |
+ |	Authors: Kevin Buettner, Ken Bowen
+ |	Date:	 May 1994
  *==========================================================================*/
 
 module sio.

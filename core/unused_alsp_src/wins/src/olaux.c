@@ -1,8 +1,8 @@
-/* 
- * olaux.c -- collection of auxilliary ol interface predicates
- *
- *
- */
+/*---------------------------------------------------------*
+ |			olaux.c
+ |		Copyright (c) 1994-96 Applied Logic Systems, Inc.
+ |
+ *---------------------------------------------------------*/
 
 #include "alspi.h"
 #include "cinterf.h"

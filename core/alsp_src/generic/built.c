@@ -214,7 +214,7 @@ static struct blt_struct {
 #endif /* INTCONSTR */
 
 #ifdef CONSTRDEBUG
-	BLT("debug_constr",  0, debugconstr, "_debugconstr"),
+	BLT("debug_constr0",  0, debugconstr, "_debugconstr"),
 #endif /* CONSTRDEBUG */
 
 #ifdef SCO_UNIX			/* procedure names must be < 32 chars */

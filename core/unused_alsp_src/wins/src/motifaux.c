@@ -1,7 +1,9 @@
-/*
- * motifaux.c -- collection of auxilliary motif interface predicates
- *
- */
+/*---------------------------------------------------------*
+ |			motifaux.c
+ |		Copyright (c) 1994-96 Applied Logic Systems, Inc.
+ |
+ | 		-- collection of auxilliary motif interface predicates
+ *---------------------------------------------------------*/
 
 #include "alspi.h"
 #include "cinterf.h"

@@ -18,8 +18,6 @@
  |  Formatting note: Tabstops =4
  *================================================================*/
 
-#if (syscfg:intconstr)
-
 module rel_arith.
 
 /* Defined in sio_rt.pro:
@@ -73,7 +71,6 @@ clp_eval( Expr, M )
 	Expr =.. [R, X, Y],
 	clp_arithmetic_relation(R),
 	!,
-display_expr(Expr),
 	ria_relation(X, Y, R).
 
 clp_eval( F, M )
@@ -101,15 +98,6 @@ clp_arithmetic_relation( '=i' ).
 	%%%% Debugging
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-:- dynamic(dbg_cstr/0).
-
-display_expr(Expr)
-	:-
-	dbg_cstr,
-	!,
-	printf_opt('%t\n', [Expr],[lettervars(false),line_length(100)]).
-display_expr(_).
 
 export show_variable/1.
 export show_variable/2.
@@ -215,7 +203,7 @@ pi(PI)
  |		boolean(L,U)
  |		boolean [= boolean(0,1)]
  *--------------------------------------------------------------*/
-export ('::'/2) .
+export '::'/2.
 
 	%% X is a variable; freeze it to a domain:
 X :: Type 
@@ -1226,5 +1214,3 @@ enumerate(List, Exec_on_Backtrack)
 
 
 endmod.
-
-#endif

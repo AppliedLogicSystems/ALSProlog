@@ -1,13 +1,10 @@
 /*======================================================================
  |			listutl2.pro
- |		Copyright (c) 1991 Applied Logic Systems, Inc.
+ |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		Various positional list predicates
  *=====================================================================*/
-%! category(terms).
-%! group(list).
-%! subgroup(positional).
-
 module builtins.
 
 export deleteNth/3.

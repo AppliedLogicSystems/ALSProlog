@@ -29,3 +29,5 @@
 #define PRIM_DBG	1
 
 #undef OLDCONSULT
+
+#define FREEZE 1

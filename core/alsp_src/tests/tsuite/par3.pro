@@ -1,17 +1,19 @@
-/*
- * par3.pro
- *
- *	Consumers and producers with time slices.
- */
+/*=====================================================================*
+ |			par3.pro
+ |		Copyright (c) 1993-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |		Consumers and producers with time slices.
+ |
+ | Author: Kevin Buettner
+ *=====================================================================*/
 
 :- make_gv('GoalQueue'), make_gv('CurrentProc').
 :- op(990,xfy,&), op(990,xfy,&&).
 
-
 /*
  * main is called to start the consumer / producer off.
  */
-
 
 main :-	
 	als_system(SysVars),
@@ -43,8 +45,6 @@ sieve(IL,OL) :-
 
 sieve0([H|T],[H|OT]) :- sieve(SL,OT) && filter(H,T,SL).
 
-	
-	
 /*
  * ---
  */
@@ -67,7 +67,6 @@ ints_from(N,[N|T]) :-
 %	write(p:N),nl,
 	NN is N+1,
 	ints_from(NN,T).
-
 
 /*
  * Queue Management:
@@ -107,12 +106,9 @@ addQueue(Rear,Q,NewRear) :-
 	mangle(2,Rear,NewRear),		%% add the new rear
 	mangle(2,Q,NewRear).		%% new rear is now rear of queue
 
-
-
 /*
  * Process Management
  */
-
 
 set_alarm :-
 	alarm(0.02,0).
@@ -144,7 +140,6 @@ parallelize(M,G1,G2) :-
 	trap(run_processes,context_switcher),
 	clear_alarm.
 
-
 psetup(M, G1 & G2) :-
     	psetup(M,G1),
     	psetup(M,G2).
@@ -171,7 +166,6 @@ run_process(M:G) :-
 %   write('Running '),write(M:P/A),nl,
 	M:G.
 
-
 context_switcher(EventId, Goal, Context) :-
 	EventId \= sigalrm,
 	EventId \= application_interrupt,
@@ -186,4 +180,3 @@ context_switcher(application_interrupt,M:G,_) :-
 	getCurrentProc(M1:P/A),
 	break_off(M1,P,A),
 	suspend(M,G).
-

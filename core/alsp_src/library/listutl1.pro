@@ -1,13 +1,10 @@
 /*======================================================================
  |			listutl1.pro
- |		Copyright (c) 1991 Applied Logic Systems, Inc.
+ |		Copyright (c) 1991-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		Various algebraic list predicates
  *=====================================================================*/
-%! category(terms).
-%! group(list).
-%! subgroup(algebraic).
-
 module builtins.
 
 export append/2.
