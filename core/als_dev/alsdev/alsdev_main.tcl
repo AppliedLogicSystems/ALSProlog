@@ -248,6 +248,8 @@ proc vTclWindow.topals {args} {
         -yscrollcommand {.topals.txwin.02 set} \
 		-exportselection true
 
+		
+
     ###################
     # SETTING GEOMETRY
     ###################
