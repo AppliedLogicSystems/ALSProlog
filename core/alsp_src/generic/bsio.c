@@ -35,6 +35,11 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#ifdef __MWERKS__
+#include <unix.h>
+/* MetroWerks does not define the EINTR error code. */
+#define EINTR           4
+#endif
 
 #ifdef DOS
 #include <types.h>
@@ -820,7 +825,7 @@ sio_file_open()
 #else
 	    if ((SIO_FD(buf) = open((char *)filename, flags)) == -1) {	/* } */
 #endif
-#elif defined(__GO32__)
+#elif defined(__GO32__) || defined(OS2)
 	if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1) {
 #else  /* default code */
 	if ((SIO_FD(buf) = open(filename, flags, 0777)) == -1) {
@@ -1885,7 +1890,7 @@ int_or_float(t,v)
 		return(1);
 	else
 		return(0);
-#else  /* DoubleType */
+#else  /* not-DoubleType */
 	PWord functor;
 	int   arity;
 

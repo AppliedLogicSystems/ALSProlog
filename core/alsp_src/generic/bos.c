@@ -98,7 +98,7 @@ pbi_system()
     if (getstring(&str, v, t)
 	|| (t == WTP_LIST 
 	    && list_to_string((str = (UCHAR *) wm_H + 1), v, wm_normal - 256))) {
-#if defined(DOS) || defined(__GO32__)
+#if defined(DOS) || defined(__GO32__) || defined(OS2)
       char *cp;
       int switching=1, switched=0;
       for (cp=str; *cp; cp++)

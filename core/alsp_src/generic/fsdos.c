@@ -8,7 +8,7 @@
 
 #include "defs.h"
 
-#if defined(DOS) || defined(__GO32__)
+#if defined(DOS) || defined(__GO32__) || defined(OS2)
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
@@ -166,12 +166,12 @@ getFileStatus()
 	fileType = 4;
 #ifndef	MOT_DELTA68k
 #ifndef SCO_UNIX
-#ifndef __GO32__
+#if !defined(__GO32__) && !defined(OS2)
     else if (S_ISLNK(fileMode))
 	fileType = 5;
     else if (S_ISSOCK(fileMode))
 	fileType = 6;
-#endif __GO32__
+#endif /* !__GO32__ && !OS2 */
 #endif /* SCO_UNIX */
 #endif /* MOT_DELTA68k */
     else if (S_ISFIFO(fileMode))

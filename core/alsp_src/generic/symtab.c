@@ -91,19 +91,23 @@ tok_table_size()
  * areas like the token table be put into a common piece of memory.
  */
 
+/* MetroWerks has a bug in their ANSI C compiler that incorrectly flags
+ * array initilizers of the form "abc"+1, as illegal.  The ANSI Standard
+ * says that these are legal.  The work around is to briefly turn on the
+ * C++ option, which permits "abc"+1.
+ *
+ */
+#ifdef __MWERKS__
+#pragma cplusplus on
+#endif
 static tkentry initial_table[] =
 {
-/**    {(UCHAR *) "\0\0used up entry" + 1, 0, 0}, **/
-	/* Used to be:
-	 *
-	 * {(UCHAR *) "\0\0used up entry" + 1, 0, 0},
-	 *
-	 * Removed + 1 increment of string constants because it is
-	 * incompatable with MetroWerks C.
-	 */
-    {(UCHAR *) "\0\0used up entry", 0, 0},
-#include "tokini2.h"		/* initial definitions of tokens */
+    {(UCHAR *) "\0\0used up entry" + 1, 0, 0},
+#include "tokini2.h"            /* initial definitions of tokens */
 };
+#ifdef __MWERKS__
+#pragma cplusplus reset
+#endif
 
 
 /*-@[5.1]@-------------------------------------------------------------
@@ -419,14 +423,6 @@ symtab_init()
 			 							FE_SYMTAB_INIT);
 	/* Copy initial_table to toktable */
 	memcpy((char *) toktable, (char *) initial_table, sizeof initial_table);
-
-#ifdef MacOS
-	/* Fix the initilization table so that tkname points to the second byte of
-	   the initilization string. */
-
-	for (i = 0; i < (sizeof(initial_table)/sizeof(tkentry)); i++)
-		toktable[i].tkname++;
-#endif
 
 	/* malloc space for the hash table */
 	hashtable = (tkentry **) ss_malloc(ts_allocated * sizeof (tkentry **),

@@ -142,7 +142,7 @@ static	pword	get_compiler_directives	PARAMS(( pword ));
 static	void	compiler_directives 	PARAMS(( void ));
 static	void	emit_cd_cutpt			PARAMS(( void ));
 
-#ifdef 0
+#if 0
 #ifdef MaxFunc
 /*
  * max returns the greater of its two parameters

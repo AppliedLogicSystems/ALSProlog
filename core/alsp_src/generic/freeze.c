@@ -75,8 +75,9 @@ printf("enter delay----wm_H=%x--TK_DELAY=%x-----------------\n",
 
 	if (w_unify(rdt, rdtt, vv, vvt))
 	{
-#ifdef DEBUGFREEZE
+pbi_cptx();
 printf("exit delay----wm_H=%x--real_dv=%x---------\n", (int)wm_H,(int)one);
+#ifdef DEBUGFREEZE
 #endif
 		SUCCEED;
 	}

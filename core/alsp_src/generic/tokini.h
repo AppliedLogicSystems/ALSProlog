@@ -113,7 +113,7 @@
 	 * TK_HAT.
 	 */
 
-    TK(TK_ATAN2,"atan2"),
+    	TK(TK_ATAN2,"atan2"),
 	TK(TK_FMOD,"fmod"),
 	TK(TK_HYPOT,"hypot"),
 	TK(TK_JN,"jn"),
@@ -124,12 +124,28 @@
         OP(TK_MOD,"mod",0,OP_YFX(300)),
         OP(TK_BAND,"/\\",0,OP_YFX(500)),
         OP(TK_BOR,"\\/",0,OP_YFX(500)),
-		OP(TK_BXOR,"xor",0,OP_YFX(500)),
+	OP(TK_BXOR,"xor",0,OP_YFX(500)),
         OP(TK_LSHFT,"<<",0,OP_YFX(400)),
         OP(TK_RSHFT,">>",0,OP_YFX(400)),
         OP(TK_SLASH,"/",0,OP_YFX(400)),
-        OP(TK_HAT,"^",0,OP_XFY(200)),
-        OP(TK_IDCL,"::",0,OP_YFX(400)),
+
+		/* Operators specifically added for the
+		   interval constraint subsystem
+		 */
+        OP(TK_IDCL, "::", 0, OP_XFX(700)),
+        OP(TK_INE,  "<>", 0, OP_XFX(700)),
+        OP(TK_IAEQ, "@=", 0, OP_XFX(700)),
+        OP(TK_ISBI, "<=", 0, OP_XFX(600)),
+        OP(TK_IBIP, "=>", 0, OP_XFX(600)),
+
+/*
+        OP(TK_ISTG, "|=", 0, OP_XFX(600)),
+        OP(TK_IETG, "=|", 0, OP_XFX(600)),
+        OP(TK_IBNG, "~",  OP_FX(150), 0),
+*/
+
+        OP(TK_2ST, "**", 0, OP_XFY(200)),
+        OP(TK_HAT, "^",  0, OP_XFY(200)),
 
 	/*
 	 * Rest of the tokens

@@ -36,7 +36,7 @@ extern	int	memctl		PARAMS(( void *, int, int ));
 
 #endif /* HAVE_MMAP */
 
-#ifdef 0
+#if 0
 #ifndef MaxFunc
 #define max(a,b) ((a) < (b) ? (b) : (a))
 #endif /* MaxFunc */
@@ -1638,7 +1638,7 @@ w_exec(buffer, bufsize, nocatcher)
 
     wm_aborted = 0;
     odbrs = w_dbprotect(DBRS_RUNABLE);
-#ifdef MacOS
+#if defined(MacOS) && !defined(Portable)
     /* MPW C does not guarantee that the stack (a7) will be  longword aligned
      * upon each C call, as apparently the Unix C compilers do.  I don't
      * think I've ever seen that documented in the M68000 books, but I could

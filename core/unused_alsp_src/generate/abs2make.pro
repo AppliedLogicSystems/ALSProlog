@@ -3,7 +3,7 @@
  |	Copyright (c) 1995 Applied Logic Systems, Inc.
  |
  |		Transformer from abstract makefiles to
- |		OS/Compiler - specific Makefile templates
+ |		OS+Compiler - specific Makefile templates
  |
  | Author:	Ken Bowen
  | Date:	06/06/95
@@ -18,7 +18,7 @@ module abs2make.
 
 :- dynamic(terminal_output/0).
 
-%%-------------------------------
+%%---------Tests------------------
 t :-
 	abs2make('generic.abs','generic.unix',unix).
 
@@ -45,7 +45,7 @@ bpu :-
  |			Arg format:  <file>.<ext>
  |	
  |	-ctx: The context to use:
- |			unix, djgpp, mac, msw31, ...
+ |			unix, djgpp, os2, mac, msw31, ...
  |
  |	-termout: Ignore -tgt and output to terminal
  *----------------------------------------------*/
@@ -105,6 +105,7 @@ abs2make(SrcFile,TgtFile,ContextName)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Main Loop/Recursion
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 abs_m([], _, Context, _).
 
 abs_m([ noop | Scheme], SrcTerms, Context, Out)
@@ -116,7 +117,7 @@ abs_m([ Left=Right | Scheme], SrcTerms, Context, Out)
 	abs_eval(Left, SrcTerms, Context, LeftVal),
 	xabs_eval(Right, SrcTerms, Context, RightVal, Quals),
 	printf(Out, '%t =  ', [LeftVal]),
-	list_body(RightVal, Quals, Out),
+	list_body(RightVal, Quals, Context, Out),
 	abs_m(Scheme, SrcTerms, Context, Out).
 
 abs_m([ (Left := Right) | Scheme], SrcTerms, Context, Out)
@@ -124,17 +125,22 @@ abs_m([ (Left := Right) | Scheme], SrcTerms, Context, Out)
 	abs_eval(Left, SrcTerms, Context, LeftVal),
 	xabs_eval(Right, SrcTerms, Context, RightVal, Quals),
 	printf(Out, '%t :=  ', [LeftVal]),
-	list_body(RightVal, Quals, Out),
+	list_body(RightVal, Quals, Context, Out),
 	abs_m(Scheme, SrcTerms, Context, Out).
 
 abs_m([ (Left:Right) | Scheme], SrcTerms, Context, Out)
 	:-!,
 	xabs_eval(Left, SrcTerms, Context, LeftVal, LeftQuals),
 	xabs_eval(Right, SrcTerms, Context, RightVal, RightQuals),
-	(RightVal = [_|_] -> RVL = [':' | RightVal] ; RVL = [':', RightVal]),
+	(dmember(context_name=mac, Context) ->
+		DepSep = ' \xC4 '
+		;
+		DepSep = ':'
+	),
+	(RightVal = [_|_] -> RVL = [DepSep | RightVal] ; RVL = [DepSep, RightVal]),
 	(LeftVal = [_|_] -> LVL = LeftVal ; LVL = [LeftVal]),
 	append(LVL, RVL, LIST),
-	list_body(LIST, [single_line], Out),
+	list_body(LIST, [single_line], Context, Out),
 	nl(Out), nl(Out),
 	abs_m(Scheme, SrcTerms, Context, Out).
 
@@ -145,6 +151,33 @@ abs_m([ case(Cond,Actions) | Scheme], SrcTerms, Context, Out)
 	(Action = [_|_] -> 
 		append(Action, Scheme, AScheme) ; AScheme = [Action | Scheme] ),
 	abs_m(AScheme, SrcTerms, Context, Out).
+
+
+
+abs_m([ depends_list(EXT) | Scheme], SrcTerms, Context, Out)
+	:-!,
+	lookup( depends_list(EXTAA)=DependsTerm, SrcTerms, Context),
+	not(not(EXT = EXTAA)),
+	copy_term(DependsTerm, DependsTermCopy),
+	DependsTermCopy = depends_list(EXT, List),
+	append(List, Scheme, AScheme),
+	abs_m(AScheme, SrcTerms, Context, Out).
+
+
+abs_m([include_raw(Path) | Scheme], SrcTerms, Context, Out)
+	:-
+	exists_file(Path),
+	!,
+	open(Path, read, InS, []),
+	copy_stream_nl(InS, Out, unix),
+	close(InS),
+	abs_m(Scheme, SrcTerms, Context, Out).
+
+abs_m([include_raw(Path) | Scheme], SrcTerms, Context, Out)
+	:-
+	printf('Warning!: File %t does not exist!\n',[Path]),
+	abs_m(Scheme, SrcTerms, Context, Out).
+
 
 abs_m([shell(Entry) | Scheme], SrcTerms, Context, Out)
 	:-
@@ -200,16 +233,18 @@ cmnt_out([CLine | CL], Out)
 	%% Implicit Rule
 	%%%%%%%%%%%%%%%%%%%%%
 
-/*
-abs_w(irule(ID), SrcTerms, Context,Out)
-	:-!,
-	lookup( (irule(ID) = irule(Src,Tgt,Action)), SrcTerms, Context),
+abs_w(irule(ID,Tgt), SrcTerms, Context, Out)
+	:-
+	dmember(context_name=mac, Context),
+	!,
+	lookup( (irule(ID,Tgt) = irule(Src,Tgt,Action)), SrcTerms, Context),
 	abs_eval(Src, SrcTerms, Context, RuleSrc),
 	abs_eval(Tgt, SrcTerms, Context, RuleTgt),
 	xabs_eval(Action, SrcTerms, Context, RuleAction, ActionQuals),
-	printf(Out, '.%t.%t:\n', [RuleSrc, RuleTgt]),
-	list_body(RuleAction, [rule_body | ActionQuals], Out).
-*/
+%	printf(Out, '%%.%t:%%.%t\n', [RuleTgt,RuleSrc]),
+	printf(Out, '.%t %c .%t\n', [RuleTgt,0xC4,RuleSrc]),
+	list_body(RuleAction, [rule_body | ActionQuals], Context, Out).
+
 abs_w(irule(ID), SrcTerms, Context,Out)
 	:-!,
 	lookup( (irule(ID) = irule(Src,Tgt,Action)), SrcTerms, Context),
@@ -217,7 +252,7 @@ abs_w(irule(ID), SrcTerms, Context,Out)
 	abs_eval(Tgt, SrcTerms, Context, RuleTgt),
 	xabs_eval(Action, SrcTerms, Context, RuleAction, ActionQuals),
 	printf(Out, '%%.%t:%%.%t\n', [RuleTgt,RuleSrc]),
-	list_body(RuleAction, [rule_body | ActionQuals], Out).
+	list_body(RuleAction, [rule_body | ActionQuals], Context, Out).
 
 	%%%%%%%%%%%%%%%%%%%%%
 	%% Explicit Rule
@@ -233,15 +268,19 @@ abs_w(rule(ID), SrcTerms, Context,Out)
 	abs_eval(Tgt, SrcTerms, Context, RuleTgt),
 	xabs_eval(Dep, SrcTerms, Context, RuleDep, DepQuals),
 	xabs_eval(Action, SrcTerms, Context, RuleAction, ActionQuals),
-	printf(Out, '%t: ', [RuleTgt]),
-	list_body(RuleDep, [one_final | DepQuals], Out),
-	list_body(RuleAction, [rule_body | ActionQuals], Out).
+	(dmember(context_name=mac, Context) ->
+		printf(Out, '%t \xC4 ', [RuleTgt])
+		;
+		printf(Out, '%t: ', [RuleTgt])
+	),
+	list_body(RuleDep, [one_final | DepQuals], Context, Out),
+	list_body(RuleAction, [rule_body | ActionQuals], Context, Out).
 
 	%%%%%%%%%%%%%%%%%%%%%
 	%% Explicit pure dep
 	%%%%%%%%%%%%%%%%%%%%%
 
-abs_w(dep(ID), SrcTerms, Context,Out)
+abs_w(dep(ID), SrcTerms, Context, Out)
 	:-!,
 	(lookup( (ID depends_on Right), SrcTerms, Context) -> 
 		LeftVal = ID
@@ -250,16 +289,20 @@ abs_w(dep(ID), SrcTerms, Context,Out)
 		abs_eval(Left, SrcTerms, Context, LeftVal)
 		),
 	xabs_eval(Right, SrcTerms, Context, RightVal,Quals),
-	printf(Out, '%t: ', [LeftVal]),
-	list_body(RightVal, Quals, Out).
-	
+	(dmember(context_name=mac, Context) ->
+		printf(Out, '%t \xC4 ', [LeftVal])
+		;
+		printf(Out, '%t: ', [LeftVal])
+	),
+	list_body(RightVal, Quals, Context, Out).
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Explicit = : both sides already evaluated
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 abs_w( (Exp1  = Expr2), SrcTerms, Context,Out)
 	:-!,
 	printf(Out, '%t =  ', [Expr1]),
-	list_body(List, Quals, Out).
+	list_body(List, Quals, Context, Out).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% First Default: Implicit dependency: Expr depends_on List
@@ -279,7 +322,7 @@ abs_w(Expr, SrcTerms, Context,Out)
 	lookup( (Expr = ExprRight), SrcTerms, Context),
 	xabs_eval(ExprRight, SrcTerms, Context, ExprRightVal, Quals),
 	printf(Out, '%t =  ', [Expr]),
-	list_body(ExprRightVal, Quals, Out).
+	list_body(ExprRightVal, Quals, Context, Out).
 
 lookup( What, SrcTerms, Context)
 	:-
@@ -289,15 +332,15 @@ lookup( What, SrcTerms, Context)
 	:-
 	dmember(What, Context).
 
-list_body(List, Quals, Out)
+list_body(List, Quals, Context, Out)
 	:-
 	dmember(single_line, Quals),
 	!,
-	one_line_list(List, Quals, Out).
+	one_line_list(List, Quals, Context, Out).
 
-list_body(List, Quals, Out)
+list_body(List, Quals, Context, Out)
 	:-
-	prefix_suffix(Quals, Prefix, Suffix, LastSuffix),
+	prefix_suffix(Quals, Context, Prefix, Suffix, LastSuffix),
 	determine_print_opts(Quals, Opts),
 	list_out(List, Prefix, Suffix, LastSuffix, Out, Opts),
 	(dmember(one_final, Quals) ->
@@ -305,7 +348,7 @@ list_body(List, Quals, Out)
 		nl(Out),nl(Out)
 	).
 
-determine_print_opts(Quals, [line_end(false)])
+determine_print_opts(Quals, [line_length(500),line_end(false)])
 	:-
 	dmember(single_line, Quals),
 	!.
@@ -323,20 +366,26 @@ list_out(Item, Prefix, Suffix, LastSuffix, Out, Opts)
 	:-
 	printf(Out, '%t%t%t', [Prefix,Item,LastSuffix], Opts).
 
-prefix_suffix(Quals, '\t', ' \\\n', '\n')
+prefix_suffix(Quals, Context, '\t', ' \xB6\n', '\n')
+	:-
+	dmember(context_name=mac, Context),
+	dmember(one_per_line, Quals),
+	!.
+prefix_suffix(Quals, _, '\t', ' \\\n', '\n')
 	:-
 	dmember(one_per_line, Quals),
 	!.
-prefix_suffix(Quals, '\t', '\n','\n')
+prefix_suffix(Quals, _, '\t', '\n','\n')
 	:-
 	dmember(rule_body, Quals),
 	!.
-prefix_suffix(_, ' ', '','').
+prefix_suffix(_, _, ' ', '','').
 
-one_line_list(List, Quals, Out)
+one_line_list(List, Quals, Context, Out)
 	:-
 	is_stream(Out, OutStream),
-	stream_wt_line_length(OutStream, LineLength),
+%	stream_wt_line_length(OutStream, LineLength),
+LineLength=1000,
 	oll(List, 0, Quals, LineLength,OutStream).
 
 oll([], Used, Quals, LL, Out).
@@ -396,6 +445,11 @@ abs_eval(cmnt(A), SrcTerms, Context, cmnt(AVal))
 	:-!,
 	abs_eval(A, SrcTerms, Context, AVal).
 
+abs_eval(irule(A,B), SrcTerms, Context, irule(AVal,BVal))
+	:-!,
+	abs_eval(A, SrcTerms, Context, AVal),
+	abs_eval(B, SrcTerms, Context, BVal).
+
 abs_eval(irule(A), SrcTerms, Context, irule(AVal))
 	:-!,
 	abs_eval(A, SrcTerms, Context, AVal).
@@ -418,15 +472,15 @@ abs_eval(~(Xpr), SrcTerms, Context, Xpr)
 
 abs_eval(&(Xpr), SrcTerms, Context, Val)
 	:-!,
-	(dmember(&(Xpr)=Val, SrcTerms) ->
-		true
+	(dmember(&(Xpr)=InitVal, SrcTerms) ->
+		abs_eval(InitVal, SrcTerms, Context, Val)
 		;
 		dmember(Xpr=Val, Context)
 	).
 
-abs_eval([], SrcTerms, Context, []).
+%abs_eval([], SrcTerms, Context, []) :-!.
 abs_eval([Xpr | Xprs], SrcTerms, Context, [XprV | XXprs])
-	:-
+	:-!,
 	abs_eval(Xpr, SrcTerms, Context, XprV),
 	abs_eval(Xprs, SrcTerms, Context, XXprs).
 
@@ -447,19 +501,19 @@ abs_eval(time, SrcTerms, Context, TimeString)
 	sprintf(atom(TimeString), '%t', [Time]).
 
 abs_eval(A appnd B, SrcTerms, Context, Val)
-	:-
+	:-!,
 	abs_eval(A, SrcTerms, Context, AVal),
 	abs_eval(B, SrcTerms, Context, BVal),
 	append(AVal, BVal, Val).
 
 abs_eval( (A + B), SrcTerms, Context, Val)
-	:-
+	:-!,
 	abs_eval(A, SrcTerms, Context, AVal),
 	abs_eval(B, SrcTerms, Context, BVal),
 	sprintf(atom(Val), '%t%t', [AVal, BVal]).
 
 abs_eval( (A ; B), SrcTerms, Context, Val)
-	:-
+	:-!,
 	abs_eval(A, SrcTerms, Context, AVal),
 	abs_eval(B, SrcTerms, Context, BVal),
 	dmember( (search_path_sep = Sep), Context),
@@ -487,6 +541,14 @@ abs_eval(ext(Expr,EXT), SrcTerms, Context, XList)
 	abs_eval(Expr, SrcTerms, Context, ExprList),
 	abs_eval(EXT, SrcTerms, Context, EXTVal),
 	extension(ExprList, EXTVal, XList).
+
+/*
+abs_eval(include_asis(Path), SrcTerms, Context, XList)
+	:-
+	exists_file(Path),
+	!,
+	open(Path, read, InS, []),
+*/
 
 abs_eval(Xpr, SrcTerms, Context, Val)
 	:-
@@ -567,7 +629,7 @@ context(mac,
 			path_sep = ':',
 			local_sep = ':',
 			search_path_sep = ':',
-			object = obj,
+			object = o,
 			invoke = ''
 		]).
 
@@ -590,5 +652,16 @@ context(djgpp,
 			object = o,
 			invoke = 'go32 '
 		]).
+
+context(os2, 
+		[
+			context_name = os2,
+			path_sep = '/',
+			local_sep = '\\',
+			search_path_sep = ';',
+			object = o,
+			invoke = ''
+		]).
+
 
 endmod.

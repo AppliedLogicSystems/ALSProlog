@@ -104,13 +104,10 @@ static	void	panic_continue	PARAMS(( void ));
 static	char *	isopt		PARAMS(( char *, char * ));
 static	void	abolish_predicate PARAMS(( char *, char *, int ));
 static	void	assert_sys_searchdir PARAMS(( char * ));
-/*
-static	void	assert_als_system PARAMS(( char *, char *, char *, char *,
-				    char *, char *, char * ));
-*/
 static	void	assert_als_system PARAMS(( char *, char *, char *, char *,
 				    char *, char * ));
 static	void	assert_command_line PARAMS(( int, char ** ));
+static	void	assert_atom_in_builtins PARAMS(( char * ));
 #ifndef MacOS
 static	int	absolute_pathname PARAMS((CONST char * ));
 #endif
@@ -181,7 +178,7 @@ PI_prolog_init(win_str, argc, argv)
 
     free(malloc(8192));
 
-#ifdef MacOS
+#if defined(MacOS) && !defined(Portable)
 	{
     char *punchaddr, *punchee;
 	extern void rts_end(void);
@@ -439,13 +436,21 @@ PI_prolog_init(win_str, argc, argv)
     assert_sys_searchdir(alsdir);
 
     /*---------------------------------------*
-     * Set up the als_system fact.
+     | Set up the als_system fact.
      *---------------------------------------*/
     assert_als_system(OSStr, MinorOSStr, ProcStr,
 		      SysManufacturer, versionNum, win_str);
 
     /*---------------------------------------*
-     * Load the builtins
+     | Set up any conditional configuration
+     | controls:
+     *---------------------------------------*/
+#ifdef INTCONSTR 
+    assert_atom_in_builtins("intconstr");
+#endif
+
+    /*---------------------------------------*
+     | Load the builtins
      *---------------------------------------*/
     if (!noautoload && !saved_state_loaded)
 	{
@@ -522,16 +527,24 @@ assert_sys_searchdir(name)
     }
 }
 
+/*-----------------------------------------------------------------------------*
+ *-----------------------------------------------------------------------------*/
+static void
+assert_atom_in_builtins(atom_name)
+    char *atom_name;
+{
+    char  command[2048];
+    sprintf(command, "assertz(builtins,%s,_,0)", atom_name);
+    if (!exec_query_from_buf(command)) {
+	fatal_error(FE_ASSERT_SYS, 0);
+    }
+}
 
-/*
+/*-----------------------------------------------------------------------------*
  * assert_als_system is called to place certain information about the
  * system in the database prior to loading the builtins file.
- */
+ *-----------------------------------------------------------------------------*/
 static void
-/*
-assert_als_system(os, os_var, proc, man, ver, winstype, sysname)
-    char *os, *os_var, *proc, *man, *ver, *winstype, *sysname;
-*/
 assert_als_system(os, os_var, proc, man, ver, winstype)
     char *os, *os_var, *proc, *man, *ver, *winstype;
 {
@@ -541,7 +554,6 @@ assert_als_system(os, os_var, proc, man, ver, winstype)
 	return;
 
     sprintf(command,
-/*	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s',wins='%s',prologName='%s']),_,0)", */
 	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s',wins='%s']),_,0)",
 	    os,
 	    os_var,
@@ -549,19 +561,18 @@ assert_als_system(os, os_var, proc, man, ver, winstype)
 	    man,
 	    ver,
 	    winstype);
-/*	    sysname);  */
     if (!exec_query_from_buf(command)) {
 	fatal_error(FE_ASSERT_SYS, 0);
     }
 }
 
 
-/*
+/*-----------------------------------------------------------------------------*
  * assert_command is called to place the fact
  *      command_line(ListofCommandLineArgs)
  * in the Prolog database (builtins module). Since the builtins have not yet
  * been loaded, it is necessary to use the most primitive version of assert.
- */
+ *-----------------------------------------------------------------------------*/
 
 static void
 assert_command_line(count, args)
@@ -615,11 +626,11 @@ assert_command_line(count, args)
 }
 
 
-/*
+/*-----------------------------------------------------------------------------*
  * absolute_pathname tests to see if we have an absolute pathname or not
- */
+ *-----------------------------------------------------------------------------*/
 
-#if defined(DOS) || defined(AtariOS) || defined(__GO32__)
+#if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(OS2)
 
 static int
 absolute_pathname(name)

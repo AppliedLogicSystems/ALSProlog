@@ -162,14 +162,42 @@ extern	int 	pbi_clct_tr 		PARAMS(( void ));
 extern	int 	pbi_del_tm_for		PARAMS(( void ));
 extern	int	pbi_bind_vars		PARAMS(( void ));
 
-/* bdbg.c */
+	/* intrv.c */
+
+extern int		i_equal			PARAMS( (void) );
+extern int		i_greatereq		PARAMS( (void) );
+extern int		i_higher		PARAMS( (void) );
+extern int		i_unequal		PARAMS( (void) );
+extern int      i_add           PARAMS( (void) );
+extern int      i_begin_tog            PARAMS( (void) );
+extern int      i_cos           PARAMS( (void) );
+extern int      i_finish_tog            PARAMS( (void) );
+extern int      i_inf           PARAMS( (void) );
+extern int      i_j_less                PARAMS( (void) );
+extern int      i_k_equal               PARAMS( (void) );
+extern int      i_lub           PARAMS( (void) );
+extern int      i_mul           PARAMS( (void) );
+extern int      i_narrower              PARAMS( (void) );
+extern int      i_or            PARAMS( (void) );
+extern int      i_pow_odd               PARAMS( (void) );
+extern int      i_qpow_even             PARAMS( (void) );
+extern int      i_rootsquare            PARAMS( (void) );
+extern int      i_sin           PARAMS( (void) );
+extern int      i_tan           PARAMS( (void) );
+extern int      i_vabs          PARAMS( (void) );
+extern int      i_wrap          PARAMS( (void) );
+extern int      i_xp            PARAMS( (void) );
+
+extern int	pbi_fuzz	PARAMS((void));
+
+	/* bdbg.c */
 extern	int	pbi_dbg_nospy	PARAMS(( void ));
 extern	int	pbi_dbg_spy	PARAMS(( void ));
 extern	int	pbi_dbg_spyon	PARAMS(( void ));
 extern	int	pbi_dbg_spyoff	PARAMS(( void ));
 extern	int	pbi_dbg_spying	PARAMS(( void ));
 
-/* bgv.c */
+	/* bgv.c */
 extern	int	pbi_gv_alloc	PARAMS(( void ));
 extern	int	pbi_gv_free	PARAMS(( void ));
 extern	int	pbi_gv_get	PARAMS(( void ));
@@ -178,7 +206,7 @@ extern	int	pbi_gv_alloc_init	PARAMS(( void ));
 extern	int	pbi_gv_isfree	PARAMS(( void ));
 extern	int	pbi_gv_maxpossible	PARAMS(( void ));
 
-/* bio.c */
+	/* bio.c */
 extern	int	pbi_display	PARAMS(( void ));
 extern	int	pbi_get	PARAMS(( void ));
 extern	int	pbi_get0	PARAMS(( void ));

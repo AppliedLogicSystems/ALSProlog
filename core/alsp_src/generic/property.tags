@@ -19,7 +19,9 @@ BCINTER - extended C interface code
 
 LIBBRK - prolog library mechanism code
 
-FREEZE - freeze support code
+INTCONSTR - specific interval constraint code
+
+FREEZE - specific freeze code
 
 DEBUGFREEZE - debugging messages for freeze support code
 
@@ -144,6 +146,13 @@ HAVE_UNISTD_H	-	- system has <unistd.h>
 HAVE_VM_PROTECT
 HAVE_WAIT3
 HAVE_WAITPID
+
+HAVE tags added for constraints:
+-------------------------------
+HAVE_NEXTAFTER  - fp function nextafter() exists
+HAVE_FPSETROUND - function fpsetround exists (in <math.h>)
+HAVE_SWAPRM
+
 
 The MISSING tags:
 -----------------

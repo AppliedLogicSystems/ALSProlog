@@ -1211,11 +1211,7 @@ rt_preop_stopper(T) :-			%% prefix operator comes before
 	possible_binary_operator(T,F),	%% binary operator
 	binop(F,_,_,_).
 
-
-%%%%%%%%%%
-%%%%%%%%%%
-
-/*
+/*---------------------------------------------------------------------------*
  * vlookup(Name,VT,Var)
  *
  *	Looks up variable with name Name in the variable table VT, adds it
@@ -1224,7 +1220,7 @@ rt_preop_stopper(T) :-			%% prefix operator comes before
  *	linear time (wrt the number of variables in the clause) to lookup or
  *	add a variable.   Since the number of variables in any given clause
  *	is not that large, however, it is not too bad.
- */
+ *---------------------------------------------------------------------------*/
 
 vlookup('_',VT,V) :-
 	!,
@@ -1240,8 +1236,7 @@ vlookup(Name,VT,V) :-
 	arg(1,VT,L),
 	mangle(1,VT,[[Name|dat(V,single)]|L]).
 
-
-/*
+/*---------------------------------------------------------------------------*
  * binop(Operator,Priority,LeftPri,RightPri)
  *
  *	binop/4 is the interal form in which binary operators are stored in.
@@ -1255,7 +1250,7 @@ vlookup(Name,VT,V) :-
  *		appear to the left of the operator.
  *	RightPri is the priority below or equal to which expressions may
  *		appear on the right hand side.
- */
+ *---------------------------------------------------------------------------*/
 
 binop( (:-),	1200,	1199,	1199).
 binop( (-->),	1200,	1199,	1199).
@@ -1300,15 +1295,23 @@ binop( >>,	400,	400,	399).
 binop( **,	200,	199,	199).
 
 %%
-%% Nonstandard infix operators
+%% Nonstandard infix operators, including
+%% interval constraint operators:
 %%
 
-%%binop( ::,	700,	699,	699).			%% CLP
 binop( :,	950,	949,	950).
 binop( ^,	200,	199,	200).
 
+binop( ::,	700,	699,	699).			%% CLP
+binop( <>,	700,	699,	699).			%% CLP
+binop( @=,	700,	699,	699).			%% CLP
+binop( <=,	600,	599,	599).			%% CLP
+binop( 'i=',	600,	599,	599).			%% CLP
+binop( '=i',	600,	599,	599).			%% CLP
 
-/*
+binop( =>,	600,	599,	599).			%% CLP
+
+/*---------------------------------------------------------------------------*
  * preop(Operator, Priority, RightPri)
  *
  *	preop/3 is the internal form in which prefix operators are stored in.
@@ -1317,23 +1320,25 @@ binop( ^,	200,	199,	200).
  *	Priority is the base priority of the operator
  *	RightPri is the priority of terms which may be to the right of the
  *		 operator.
- */
+ *---------------------------------------------------------------------------*/
 
 preop( (:-),	1200,	1199).
 preop( (?-),	1200,	1199).
-preop( -,	200,	200).
-preop( +,	200,	200).
-preop( \,	200,	200).
+preop( -,	 200,	 200).
+preop( +,	 200,	 200).
+preop( \,	 200,	 200).
 
 %%
-%% Nonstandard prefix operators
+%% Nonstandard prefix operators, including
+%% interval constraint operators:
 %%
 preop( export,	1200,	1199).
 preop( use,	1200,	1199).
 preop( module,	1200,	1199).
 
+%preop( ~,	 150,	 149).
 
-/*
+/*---------------------------------------------------------------------------*
  * postop(Operator, Priority, LeftPri)
  *
  *	postop/3 is the internal form in which postfix operators are stored
@@ -1346,21 +1351,24 @@ preop( module,	1200,	1199).
  *
  * Note: There is no initial set of postfix operators, but we will initially
  *	 define a couple for testing purposes.
- */
+ *---------------------------------------------------------------------------*/
 
+:- dynamic(postop/3).
+
+/**********
 postop( po1,	500,	500).
 postop( po2,	500,	499).
 postop( po3,	400,	400).
 postop( po4,	400,	399).
 postop( po5,	200,	200).
 postop( po6,	200,	199).
+**********/
 
-
-/*
+/*---------------------------------------------------------------------------*
  * op(Priority,Op_specifier,Operator)
  *
  * Adds or deletes an operator from the set of operators.
- */
+ *---------------------------------------------------------------------------*/
 
 export op/3.
 				
@@ -1461,10 +1469,10 @@ is_op_specifier(xf,postfix,1,0).
 is_op_specifier(yf,postfix,0,0).
 
 
-/*
+/*---------------------------------------------------------------------------*
  * current_op(Priority,Op_specifier,Operator)
  *
- */
+ *---------------------------------------------------------------------------*/
 
 export current_op/3.
 
@@ -1492,12 +1500,12 @@ postop_specifier(Pri,Pri,yf) :- !.
 postop_specifier(_,_,xf).
 
 
-/*
+/*---------------------------------------------------------------------------*
  * pp_flatten is given a term produced by the positional parser.  It returns
  * as its second argument, the term with all positional information removed.
  * I.e, it will return what we would have read if we had called the normal
  * parser instead of the positional parser.
- */
+ *---------------------------------------------------------------------------*/
 
 export pp_flatten/2.
 
@@ -1589,12 +1597,12 @@ pp_xform_body(G,CID,('$dbg_apg'(CID,SG,EG),XG)) :-
 	arg(3,G,EG),
 	pp_flatten(G,XG).
 
-/*
+/*---------------------------------------------------------------------------*
  * Token Preprocessor
  *
  *	The following predicates are prefixed with tp_ as they comprise
  *	the token preprocessor.
- */
+ *---------------------------------------------------------------------------*/
 
 export tp_get_token_list/2.
 

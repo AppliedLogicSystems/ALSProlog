@@ -124,6 +124,19 @@
  *---------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------*
+ | Macros concerned with constraints, intervals, freeze, etc.
+ |
+ | INTCONSTR -- support interval constraints
+ |
+ | FREEZE -- suport freeze/delay
+ |
+ *---------------------------------------------------------------------*/
+
+#ifdef INTCONSTR
+#define FREEZE
+#endif
+
+/*---------------------------------------------------------------------*
  | Include the architecture and machine specific configuration files.  The
  | machine specific file is included after the architecture specific file so
  | that it may override certain architecture defined parameters in much the
@@ -233,11 +246,11 @@
  *---------------------------------------------------------------------*/
 
 #if	defined(UNIX)
-#ifdef __GO32__
+#if defined(__GO32__) || defined(OS2)
 #define PATH_SEPARATOR	';'
 #else
 #define PATH_SEPARATOR	':'
-#endif	/* __GO32__ */
+#endif	/* __GO32__||OS2 */
 #define DIR_SEPARATOR	'/'
 
 #elif	defined(VMS)

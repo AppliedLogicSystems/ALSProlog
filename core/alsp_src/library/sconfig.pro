@@ -193,7 +193,7 @@ ws_vars(motif, ARCH, OS, SwitchInfo, WSHeaderLines)
 		'C2PFILT'	= all,
 		'ADDL_CS' 	= ['xtaux.c'] ,
 		'CFLAGS'	= '-D_NO_PROTO' ,
-		'$(WIN)LIBS' 	= '-lXm -lMrm -lXt -lX11' ,
+		'$(WIN)LIBS' 	= '-lMrm -lXm -lXt -lX11' ,
 		'ADDL_LIBS' 	= ['../x/xinterf.a'] ,
 		'CFG' 		= ['#define WIN_STR MOTIF_WIN_STR'],
 		'ADDL_INITS' 	= ['x_init();', 'xtaux_init();'] ,
@@ -221,6 +221,10 @@ ws_vars(nextstep, ARCH, OS, SwitchInfo, WSHeaderLines)
 	(dmember(tgtws=TGTWS, SwitchInfo) -> 
 		true ; TGTWS = unix),
 	ws_vars_variable(TGTWS,motif,ARCH,OS,VARIABLE_LINES).
+
+export system_dir_root/2.
+system_dir_root(x,'X').
+system_dir_root(motif,'Motif').
 
 export flatten_ws_lists/2.
 flatten_ws_lists([], []).
