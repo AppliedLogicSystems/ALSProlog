@@ -18,7 +18,7 @@
 
 #ifdef ITCL
 #include <itcl.h>
-//#include <itk.h>
+/* #include <itk.h> */
 
 /* These prototypes are from tclInt.h */
 int		Tcl_Import _ANSI_ARGS_((Tcl_Interp *interp,
