@@ -363,7 +363,15 @@ release_bottom_stack_page()
 
 #elif defined(MSWin32)
 
-#define STACKSTART	0x01000000
+/* These fixed memory locations are very problematic.  There is no
+   way to guarantee they will work.  All we know is that these numbers
+   work at ALS and Customer sites.
+
+   Previously STACKSTART was set 0x01000000, which worked fine for Win95
+   and WinNT 3.51, but under WinNT 4.0 that location is in use.
+*/
+
+#define STACKSTART	0x02000000
 #define CODESTART	0x06000000
 #define NPROTECTED	5
 
