@@ -3,7 +3,7 @@ module tcltk.
 :- consult(tclintf).
 
 export tcl_new/1.
-export t_new/1.
+export tk_new/1.
 export tcl_delete/1.
 export tcl_delete_all/0.
 
@@ -16,7 +16,6 @@ export tcl_coerce_list/3.
 export tk_main_loop/0.
 
 export setup_tcltk/0.
-
 setup_tcltk
 	:-
 	tk_new(shl_tcli).
