@@ -478,12 +478,12 @@ special_file_type(File, prolog_project, NoSuffixFile, ppj)
 
 special_file_type(File, prolog_source, NoSuffixFile, pro)
 	:-
-	file_extension(NoSuffixFile, pro, File),
+	(file_extension(NoSuffixFile, pro, File) ; file_extension(NoSuffixFile, PRO, File)),
 	!.
 
 special_file_type(File, prolog_source, NoSuffixFile, pl)
 	:-
-	file_extension(NoSuffixFile, pl, File),
+	(file_extension(NoSuffixFile, pl, File) ; file_extension(NoSuffixFile, PL, File)),
 	!.
 
 special_file_type(File, prolog_script, NoSuffixFile, prs)
