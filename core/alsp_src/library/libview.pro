@@ -51,13 +51,13 @@ disp_read_line_list(NextLine, [NextLine | RestLinesList])
 
 displayLibInfo([Names,Forms], Descrip)
 	:-
-	builtins:putString("NAMES"),nl,
+	builtins:put_string("NAMES"),nl,
 	write_string_list(Names),
 
-	builtins:putString("FORMS"),nl,
+	builtins:put_string("FORMS"),nl,
 	write_string_list(Forms),
 
-	builtins:putString("DESCRIPTION"),nl,
+	builtins:put_string("DESCRIPTION"),nl,
 	write_string_list(Descrip).
 
 endmod.
