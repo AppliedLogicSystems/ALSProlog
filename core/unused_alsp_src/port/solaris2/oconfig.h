@@ -7,3 +7,4 @@
 
 #define UNIX	1
 #define OSStr "unix"
+#define SOLARIS	1

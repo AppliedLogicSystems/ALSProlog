@@ -137,7 +137,6 @@ print_error_goal_attribute(Other)
 
 export prolog_system_warning/2.
 
-
 prolog_system_warning(error(W,L),_) 
 	:-
 	decode_error(W, L, Pattern, Args),

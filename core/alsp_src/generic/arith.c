@@ -42,6 +42,8 @@
 
 #endif
 
+#include "fpbasis.h"
+
 #include <time.h>
 #include <setjmp.h>
 
@@ -56,6 +58,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
 
 extern	double	als_cputime	PARAMS(( void ));
 extern	double	als_realtime	PARAMS(( void ));
@@ -647,6 +650,54 @@ return_as_double:
     }
 }
 
+
+/*---------------------------------------------------------------
+	make_ieee_nan(v, t)
+	make_ieee_inf(v, t)
+ *--------------------------------------------------------------*/
+void make_ieee_nan PARAMS( (PWord *, int *) );
+void make_ieee_inf PARAMS( (PWord *, int *) );
+
+void
+make_ieee_nan(v, t)
+    PWord *v;
+    int  *t;
+{
+	double d;
+#ifndef DoubleType
+	int   i;
+
+	d = 0.0/0.0;
+	w_mk_term(v, t, (PWord) TK_DDOUBLE, 4);
+	for (i = 0; i < 4; i++)
+	    w_install_argn(*v, i + 1, (PWord) (*(((short *) &d) + i)), WTP_INTEGER);
+#else
+	d = 0.0/0.0;
+    w_mk_double(v, t, d);
+#endif
+}
+
+void
+make_ieee_inf(v, t)
+    PWord *v;
+    int  *t;
+{
+	double d;
+#ifndef DoubleType
+	int   i;
+
+	d = 1.0/0.0;
+	w_mk_term(v, t, (PWord) TK_DDOUBLE, 4);
+	for (i = 0; i < 4; i++)
+	    w_install_argn(*v, i + 1, (PWord) (*(((short *) &d) + i)), WTP_INTEGER);
+#else
+	d = 1.0/0.0;
+    w_mk_double(v, t, d);
+#endif
+}
+
+/*---------------------------------------------------------------
+ *--------------------------------------------------------------*/
 
 int
 pbi_is()

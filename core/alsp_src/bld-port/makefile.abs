@@ -445,8 +445,8 @@ rule(key_alspro,
 rule(testrun,
 	[],
 	case(&(context_name),[
-		(mac: [':alspro -obp -b {testdir}autotest {testdir}atest_db -g run_tests -p -srcdir {srcdir}']),
-		(_: ['./alspro_b -obp -b $(testdir)/autotest $(testdir)/atest_db -g run_tests -p -srcdir $(srcdir)'])])).
+		(mac: [':alspro -giac -b {testdir}autotest {testdir}atest_db -g run_tests -p -srcdir {srcdir}']),
+		(_: ['./alspro -giac -b $(testdir)/autotest $(testdir)/atest_db -g run_tests -p -srcdir $(srcdir)'])])).
 
 rule(cleanup,
 	[],

@@ -289,6 +289,14 @@
 #endif	/* UNIX */
 
 /*---------------------------------------------------------------------*
+ | IEEEP FP Stuff
+ *---------------------------------------------------------------------*/
+
+#ifdef SOLARIS
+#define HAVE_IEEEFP 1
+#endif
+
+/*---------------------------------------------------------------------*
  | Define the system dependent directory and path separators for parsing path
  | lists
  |

@@ -56,7 +56,9 @@ export comptype_cl/0.
  |	files for defStruct processing.
  *-----------------------------------------------------------*/
 comptype_cl :-
-	builtins:command_line(Files),
+%	builtins:command_line(Files),
+	command_line(CommandLine),
+	parse_cl(CommandLine, Files),
 	set_prolog_flag(unknown, fail),
 	!,
 	comptype_files(Files).
@@ -67,6 +69,30 @@ comptype_files([File | Files])
 	comptype(File),
 	comptype_files(Files).
 
+/*----------------------------------------------------------
+ |	parse_cl/2
+ |	parse_cl(CommandLine, Files)
+ |	parse_cl(+, -)
+ |
+ |	- extracts files and asserts options from command line
+ *----------------------------------------------------------*/
+parse_cl([], []).
+
+parse_cl(['-I', PathAtom | CommandLine], Files)
+	:-!,
+	subPath(PL,PathAtom),
+	(PL = ['' | _] ->
+		Path = PathAtom
+		;
+		get_cwd(CWD),
+		extendPath(CWD,PathAtom,Path)
+	),
+	assert(include_dir(Path)),
+	parse_cl(CommandLine, Files).
+
+parse_cl([File | CommandLine], [File | Files])
+	:-
+	parse_cl(CommandLine, Files).
 
 /*!----------------------------------------------------------
  |	comptype/0
@@ -469,8 +495,8 @@ fetch_included_props(File, Name, PropertiesList, InterPropsListTail, Quiet)
 	(filePlusExt(BaseFile,typ,File) ->
 		FullFile = File ; filePlusExt(File,typ,FullFile)
 	),
-	exists(FullFile),
-	open(FullFile, read, InStr, []),
+	locate_include_file(FullFile, FullIncludeFile),
+	open(FullIncludeFile, read, InStr, []),
 	!,
 	read_terms(InStr, FTerms),
 	close(InStr),
@@ -507,6 +533,27 @@ fetch_local_included_props(DefList, Name, PropertiesList, InterPropsListTail, Qu
 	ct_message(Quiet,
 			   '!Warning: Can\'t find included type >> %t << in file %t...skipping.\n',
 				[Name,'local-file']).
+
+locate_include_file(FullFile, FullFile)
+	:-
+	exists(FullFile),
+	!.
+
+locate_include_file(FullFile, FullIncludeFile)
+	:-
+	include_dir(Path),
+	pathPlusFile(Path, FullFile, FullIncludeFile),
+	exists(FullIncludeFile),
+	!.
+
+locate_include_file(FullFile, FullIncludeFile)
+	:-
+	builtins:sys_searchdir(ALSDIR),
+	extendPath(ALSDIR, includes, SysIncludes),
+	pathPlusFile(SysIncludes, FullFile, FullIncludeFile),
+	exists(FullIncludeFile),
+	!.
+
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/

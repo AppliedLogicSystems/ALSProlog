@@ -454,6 +454,10 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 #endif
 #endif /* KERNAL */
 
+#ifdef USE_IEEE_FP 
+    assert_atom_in_module("syscfg","ieee_fp");
+#endif
+
     /*---------------------------------------*
      | Load the builtins
      *---------------------------------------*/

@@ -271,7 +271,7 @@
  |					   when printed (used in sio_qatom)
  *-------------------------------------------------------------------------*/
 
-#define SIOC_SINGLE		0x0001
+#define SIOC_SINGLE			0x0001
 #define SIOC_GRAPHIC		0x0002
 #define SIOC_UPPERCASE		0x0004
 #define SIOC_LOWERCASE		0x0008
@@ -281,8 +281,8 @@
 #define	SIOC_HEXLOWER		0x0100
 #define SIOC_HEXUPPER		0x0200
 #define SIOC_PLUSMINUS		0x0400
-#define SIOC_E			0x0800
-#define SIOC_OCTAL		0x1000
+#define SIOC_E				0x0800
+#define SIOC_OCTAL			0x1000
 #define SIOC_WHITESPACE		0x2000
 #define SIOC_ESCCHAR		0x4000
 

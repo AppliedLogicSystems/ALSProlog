@@ -1,8 +1,8 @@
 /*===========================================================================*
  |              fsunix.c
- |      Copyright (c) 1991-1994 Applied Logic Systems, Inc.
+ |      Copyright (c) 1991-1997 Applied Logic Systems, Inc.
  |
- |      -- File System Access & Manipulation -- Unix/DJGPP/OS2(emx)?
+ |      -- File System Access & Manipulation -- Unix/DJGPP/
  |
  |  This is one of a group of files providing file system access:
  |		fsunix.c, fsdos.c, fsmac.c, ..., etc.,...
