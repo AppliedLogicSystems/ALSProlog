@@ -477,8 +477,8 @@ do_consult(BaseFile, FCOpts)
 	send(ALSMgr, set_value(cslt_ctxt, [FCOpts | PrevCntxts])),
 	catch( exec_consult(BaseFile, FCOpts, ALSMgr, FileMgr),
 			Ball,
-		    consult_except_resp(Ball,FCOpts,FileMgr)
-		),
+			consult_except_resp(Ball,FCOpts,FileMgr)
+	     ),
 	send(ALSMgr, set_value(cslt_ctxt, PrevCntxts)),
 	record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr),
 	!,
@@ -848,10 +848,12 @@ cont_consult(SrcPath, OPath, Path, BaseFile, FCOpts, FileMgr)
 	access_cslt_opts(ext, FCOpts, Ext), 	
 	access_cslt_opts(nature, FCOpts, Nature), 	
 
-	(push_copt(FCOpts) ; pop_copt(_), fail),
- 	load_from_file(Ext,Nature,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr),
-	!,
-	pop_copt(_).
+
+	push_copt(FCOpts),
+	unwind_protect(
+		load_from_file(Ext,Nature,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr),
+		pop_copt(FCOpts)
+	).
 
 check_for_system_file(BaseFile, SrcPath)
 	:-
