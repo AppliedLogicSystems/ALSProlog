@@ -19,7 +19,6 @@ export make_subdir/1.
 export make_subdir/2.
 export remove_subdir/1.
 export kill_subdir/1.
-export remove_file/1.
 export file_status/2.
 export files/2.
 export files/3.
@@ -163,20 +162,6 @@ kill_subdir(SubDir)
 	:-
 	sprintf(atom(Cmd),'rm -r %t',[SubDir]),
 	system(Cmd).
-
-/*!--------------------------------------------------------------
- |	remove_file/1
- |	remove_file(FileName)
- |	remove_file(+)
- |
- |	- removes a file from the current working directory
- |
- |	If FileName is an atom (possibly quoted) naming a file in
- |	the current working directory, removes that file.
- *!--------------------------------------------------------------*/
-remove_file(FileName)
-	:-
-	unlink(FileName).
 
 /*!----------------------------------------------------------------
  |	files/2
