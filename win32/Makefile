@@ -1,0 +1,11 @@
+all: student standard
+
+core:
+	cd ../core/win32 ; build.bat
+	cd ../foreign_sdk/win32 ; make.bat
+	
+student: core
+	build_dist.sh student
+
+standard: core
+	build_dist.sh standard
