@@ -82,6 +82,8 @@ attach_image(ImageName, DevelopFlag)
 			se(Error),
 			restore_si(Error, OldInit, OldStart) ).
 
+:- dynamic('$dv'/0).
+
 /*
 save_image0(ImageName, Options)
 	:-
@@ -296,6 +298,7 @@ restore_si(se(Error), OldInit, OldStart)
 
 	builtins:abolish('$start',0),
 	builtins:assertz( ('$start' :- OldStart) ).
+	
 
 /*---------------------------------------------------------------*
  |	process_image_options/3
@@ -336,7 +339,11 @@ process_image_option(init_goals(NewGoals))
 process_image_option(start_goal(G))
 	:-!,
 	builtins:abolish('$start',0),
-	builtins:assertz( ('$start' :- user:G) ).
+	('$dv' ->
+		builtins:assertz( ('$start' :-(builtins:qkc), (user:G)) )
+		;
+		builtins:assertz( ('$start' :- user:G) )
+	).
 
 process_image_option(libload(true))
 	:-!,

@@ -32,6 +32,8 @@ use sio.
 		addl_slots= [ ]
 	]).
 
+:- dynamic('$dv'/0).
+
 start_shell(DefaultShellCall) 
 	:-
 	catch(start_shell0(builtins:prolog_shell), 
@@ -57,6 +59,7 @@ start_shell0(DefaultShellCall)
 	process_cl_asserts(CLInfo),
 	!,
 		%% 
+	('$dv' -> qkc ; true),
 	ss_load_dot_alspro(CLInfo),
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.

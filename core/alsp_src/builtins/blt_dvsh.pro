@@ -252,6 +252,7 @@ disp_src_mgr(BN)
 
 %%%%%%%%%%----------------------------------------------------
 
+:- dynamic('$dv'/0).
 
 
 	%% Warm startup (given that tty start_shell(prolog_shell) has run):
@@ -350,8 +351,7 @@ alsdev(Shared, ALS_IDE_Mgr)
 
 	get_cwd(CurDir),
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
-
-
+	('$dv' -> demo_init ; true),
 	builtins:prolog_shell(ISS,OSS,alsdev).
 
 alsdev_splash(Path)
@@ -361,7 +361,6 @@ alsdev_splash(Path)
 		tcl_call(shl_tcli, 'source -rsrc als_splash', _)
 		;
 		(
-%			pathPlusFile(Path, 'als_splash.tcl', SplashFile),
 			join_path([Path, 'als_splash.tcl'], SplashFile),
 			tcl_call(shl_tcli, [source, SplashFile], _)			
 		)
