@@ -444,16 +444,38 @@ cslt_info_recon(FileDesc, Nature, Nature, Recon, Recon, FileDesc).
  | do_consult(+,+)
  |
  *-------------------------------------------------------------*/ 
+
+/***
+	%% Don't reload builtins or library files:
+do_consult(BaseFile, FCOpts)
+	:-
+	builtins:loaded_builtins_file(BaseFile,SysDir),
+	access_cslt_opts(orig_dir, FCOpts,OrigDir),
+	split_path(OrigDir, OrigDirElts),
+	dreverse(OrigDirElts, [SysDir | _]),
+	!,
+	consult_msg(loaded_builtins_file, FCOpts).
+***/
+
+
 do_consult(BaseFile, FCOpts)
 	:-
 	builtins:get_primary_manager(ALSMgr),
 	send(ALSMgr, obtain_src_mgr(BaseFile, FileMgr)),
+	send(ALSMgr, get_value(cslt_ctxt, PrevCntxts)),
+	(PrevCntxts = [ParentFCOpts | _] ->
+		merge_search_paths(FCOpts, ParentFCOpts)
+		;
+		true
+	),
+	send(ALSMgr, set_value(cslt_ctxt, [FCOpts | PrevCntxts])),
 	catch( exec_consult(BaseFile, FCOpts, ALSMgr, FileMgr),
 			Ball,
 			( pop_copt(_), 
-			  consult_except_resp(Ball,FileMgr)
+			  consult_except_resp(Ball,FCOpts,FileMgr)
 			 ) 
 		),
+	send(ALSMgr, set_value(cslt_ctxt, PrevCntxts)),
 	record_consult(BaseFile, FCOpts, FileMgr),
 	!,
 	consult_msg(end_consult, FCOpts).
@@ -473,6 +495,10 @@ consult_msg(end_consult, FCOpts)
 	access_cslt_opts(loadedpath, FCOpts, LoadedPath), 
 	printf(user_output, '... consulted %t\n', [LoadedPath]).
 
+consult_msg(loaded_builtins_file(File,Dir), FCOpts)
+	:-!,
+	printf(user_output, 'System file %t in %t already loaded.\n', [File, Dir]).
+
 
 record_consult(BaseFile, FCOpts, FileMgr)
 	:-
@@ -487,20 +513,80 @@ record_consult(BaseFile, FCOpts, FileMgr)
 		true
 	).
 
-consult_except_resp(Ball,FileMgr)
+consult_except_resp(loaded_builtins_file(File,Dir),FCOpts,FileMgr)
+	:-
+	consult_msg(loaded_builtins_file(File,Dir), FCOpts).
+
+consult_except_resp(Ball,FCOpts,FileMgr)
 	:-
 	Ball = error(consult_load, [src_load, SrcFilePath, ErrList] ),
 	!,
 	length(ErrList, NErrs),
 	send(FileMgr, display_file_errors(NErrs, SrcFilePath, ErrList)).
 
-consult_except_resp(Ball,FileMgr)
+consult_except_resp(Ball,FCOpts,FileMgr)
 	:-
 	throw(Ball).
 
+/*-------------------------------------------------------------*
+ |	If there are any locations in the parent's search path
+ |	which are not on the current search path, add them
+ |	onto the end of the current path; Note that when we
+ |	actually locate a source file to consult (exists_file is
+ |	true), we will move that location to the front of the current
+ |	search path; 
+ |	we move it to the front to implement the traditional 
+ |	"prolog loader" philosophy -- see 
+ |		rotate_locations(SrcPath, FCOpts) below.
+ *-------------------------------------------------------------*/
 
 
+merge_search_paths(FCOpts, ParentFCOpts)
+	:-
+	access_cslt_opts(searchpath, FCOpts, ThisSearchPath),
+	access_cslt_opts(searchpath, ParentFCOpts, ParentSearchPath),
+	merge_sp(ParentSearchPath, ThisSearchPath, XSP),
+	set_cslt_opts(searchpath, FCOpts, XSP).
 
+merge_sp(ParentSearchPath, ThisSearchPath, XSP)
+	:-
+	x_new_places(ParentSearchPath, ThisSearchPath, New),
+	(New = [] ->
+		XSP = ThisSearchPath
+		;
+		dappend(ThisSearchPath, New, XSP)
+	).
+
+x_new_places([], XSP, []).
+x_new_places([Place | ParentSearchPath], ThisSearchPath, New)
+	:-
+	dmember(Place, ThisSearchPath),
+	!,
+	x_new_places(ParentSearchPath, ThisSearchPath, New).
+
+x_new_places([Place | ParentSearchPath], ThisSearchPath, [Place | New])
+	:-
+	x_new_places(ParentSearchPath, ThisSearchPath, New).
+
+/*-------------------------------------------------------------*
+	Path = path to the dir in which we found the source file
+ *-------------------------------------------------------------*/
+rotate_locations(SrcPath, FCOpts)
+	:-
+	access_cslt_opts(searchpath, FCOpts, SP1),
+	split_path(SrcPath, PathElts),
+	dreverse(PathElts, [_ | RevDirPathElts]),
+	dreverse(RevDirPathElts, DirPathElts),
+	join_path(DirPathElts, DirPath),
+	fin_rotate_locations(SP1, DirPath, FCOpts).
+
+fin_rotate_locations(SP1, Path, FCOpts)
+	:-
+	list_delete(SP1, Path, SP2),
+	set_cslt_opts(searchpath, FCOpts, [Path | SP2]).
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
 
 shared_file_ext(psl).
 
@@ -627,7 +713,7 @@ path_to_try_from_desc(SearchList, Desc, TryPath)
 	path_to_try(SearchList, PathList, TryPath).
 
 /*-------------------------------------------------------------*
- |	path_to_try_from_base(SearchList, BaseFile, TryPath)
+ |	path_to_try(SearchList, BaseFile, TryPath)
  *-------------------------------------------------------------*/ 
 export path_to_try/3.
 path_to_try([sys_searchdir(DirPath) | RestSearchList], PathList, TryPath)
@@ -683,9 +769,10 @@ src_setup('', BaseFile, ObpLocn, FCOpts, Path, Path, '').
 
 src_setup('', BaseFile, ObpLocn, FCOpts, Path, SrcPath, OPath)
 	:-
+		%% Path has no extension; try adding .pro or .pl:
 	member(Ext, [pro, pl]), 
-	file_extension(Path,obp,OPath),
-	file_extension(Path,Ext,SrcPath).
+	file_extension(Path,Ext,SrcPath),
+	make_obp_locn(ObpLocn, Path, BaseFile, FCOpts, OPath).
 
 src_setup(Ext, BaseFile, ObpLocn, FCOpts, Path, Path, '')
 	:-
@@ -746,7 +833,10 @@ make_obp_locn(gil(ExplPath), FP, BaseFile, FCOpts, OPath)
 cont_consult(SrcPath, OPath, Path, BaseFile, FCOpts, FileMgr)
 	:-
 	exists_file(SrcPath),
+		%% This can raise an exception:
+	check_for_system_file(BaseFile, SrcPath),
 	canon_path(SrcPath, CanonSrcPath),
+	rotate_locations(SrcPath, FCOpts),
 
 	consult_msg(start_consult, FCOpts),
 
@@ -759,6 +849,17 @@ cont_consult(SrcPath, OPath, Path, BaseFile, FCOpts, FileMgr)
  	load_from_file(Ext,Nature,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr),
 
 	pop_copt(FCOpts).
+
+check_for_system_file(BaseFile, SrcPath)
+	:-
+	loaded_builtins_file(BaseFile,SysDir),
+	split_path(SrcPath, PathElts),
+	dreverse(PathElts, [_, SysDir | _]),
+	!,
+	throw(loaded_builtins_file(BaseFile,SysDir)).
+
+check_for_system_file(_, _).
+
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/ 
 load_from_file(Ext,_,BaseFile,CanonSrcPath,_,FCOpts,FileMgr)
@@ -1191,3 +1292,4 @@ check_plugin_result(Error, File, NativeResult, _) :-
 	system_error(shared_library_error(Error, File, os_code(NativeResult))).
 
 endmod.		%% blt_cslt.pro: Consult 
+

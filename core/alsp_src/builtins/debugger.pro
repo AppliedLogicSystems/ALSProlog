@@ -1954,6 +1954,7 @@ writeGoal(Box,Depth,Port,Module,Goal)
 	:-
 	printf(debugger_output,'(%d) %d %t: ', [Box,Depth,Port]),
 	write_term(debugger_output, Module:Goal,	[lettervars(false)]),
+	!,
 	flush_output(debugger_output).
 
 /*******8

@@ -479,7 +479,10 @@ export force_libload_all_lib/2.
 force_libload_all 
 	:-
 	sys_searchdir(ALSDIR),
-	setof(File,Pred^builtins:pget_libinfo(Pred,File),Files),
+	setof(File,
+			(Pred^builtins:pget_libinfo(Pred,File),
+				File\='builtins/debugger'),
+			Files),
 	force_libload_all(Files,ALSDIR).
 
 force_libload_all(Files) 
