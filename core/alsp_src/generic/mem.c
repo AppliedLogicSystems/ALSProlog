@@ -2042,11 +2042,7 @@ static OSErr DuplicateThisApplication(ConstStr255Param newAppName)
     FSSpec AppSpec, NewAppSpec, DirSpec;
     
     if (MPW_Tool) {
-    	char name[256];
-    	
-    	strcpy(name, imagedir);
-    	strcat(name, imagename);
-    	c2pstrcpy(AppName, name);
+    	c2pstrcpy(AppName, executable_path);
     	
     	err = FSMakeFSSpec(0, 0, AppName, &AppSpec);
     	if (err != noErr) return err;

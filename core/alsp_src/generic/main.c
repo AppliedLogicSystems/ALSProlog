@@ -33,7 +33,6 @@
 #include <limits.h>
 
 #ifdef HAVE_UNISTD_H
-#include <sys/param.h>
 #include <unistd.h>
 #endif
 #ifdef HAVE_FCNTL_H
@@ -64,6 +63,10 @@
 #include <windows.h>
 #include "fswin32.h"
 #include "ctype.h"
+#endif
+
+#ifdef UNIX
+#include <sys/param.h>
 #endif
 
 #include "main.h"
@@ -162,9 +165,9 @@ static int PI_prolog_init0(const PI_system_setup *setup)
     unsigned long heapsize;
     unsigned long stacksize;
     unsigned long icbufsize;
-    const char *state_path;
+    const char *state_path = NULL;
     int  saved_state_loaded;
-    int offset;
+    int offset = 0;
 
 #ifdef MSWin32
     win32s_system = IS_WIN32S;
@@ -265,7 +268,8 @@ static int PI_prolog_init0(const PI_system_setup *setup)
      * heap is allocated, we might not end up in the right place if
      * we have a saved state.
      */
-    
+
+#ifdef SIMPLE_MICS
     if (setup->saved_state) {
     	state_path = setup->saved_state;
     	offset = 0;
@@ -277,6 +281,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
     	state_path = NULL;
     	offset = 0;
     }
+#endif
     
     saved_state_loaded = als_mem_init(state_path, offset);
     	
@@ -677,6 +682,28 @@ absolute_pathname(name)
  | the current directory.
  *--------------------------------------------------------------------*/
 
+#ifdef MacOS
+static void full_path(char *s, const FSSpec *spec)
+{
+	OSErr err;
+	short PathLength;
+	Handle PathHandle;
+
+	err = FSpGetFullPath(spec, &PathLength, &PathHandle);
+	if (err != noErr) fatal_error(FE_INFND, 0);
+		
+	if (PathLength >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
+		
+	HLock(PathHandle);
+	if (MemError() != noErr) fatal_error(FE_INFND, 0);
+
+	strncpy(s, *PathHandle, PathLength);
+
+	DisposeHandle(PathHandle);
+	if (MemError() != noErr) fatal_error(FE_INFND, 0);
+}
+#endif
+
 static void locate_library_executable(int argc, char *argv[])
 {
 #ifdef MSWin32
@@ -705,15 +732,13 @@ static void locate_library_executable(int argc, char *argv[])
     *endpath = 0;
 #elif MacOS
     if (MPW_Tool) {
-		command_line_locate_executable(argv[0]);
+		//command_line_locate_executable(argv[0]);
     } else {
 		OSErr err;
 		ProcessSerialNumber PSN;
 		ProcessInfoRec info;
 		FSSpec AppSpec, DirSpec;
-		const FSSpec *BinSpec;
-		short DirPathLength;
-		Handle DirPathHandle;
+		const FSSpec *LibrarySpec;
 		
 		extern shlib_found;
 		extern FSSpec shlib_location;
@@ -730,27 +755,18 @@ static void locate_library_executable(int argc, char *argv[])
 		err = GetProcessInformation(&PSN, &info);
 		if (err != noErr) fatal_error(FE_INFND, 0);
 		
-		p2cstrcpy(imagename, AppSpec.name);
+		full_path(executable_path, &AppSpec);
 		
-		if (shlib_found) BinSpec = &shlib_location;
-		else BinSpec = &AppSpec;
+		if (shlib_found) LibrarySpec = &shlib_location;
+		else LibrarySpec = &AppSpec;
 		
-		err = FSMakeFSSpec(BinSpec->vRefNum, BinSpec->parID, "\p", &DirSpec);
+		full_path(library_path, LibrarySpec);
+
+		err = FSMakeFSSpec(LibrarySpec->vRefNum, LibrarySpec->parID, "\p", &DirSpec);
 		if (err != noErr && err != fnfErr)  fatal_error(FE_INFND, 0);
 
-		err = FSpGetFullPath(&DirSpec, &DirPathLength, &DirPathHandle);
-		if (err != noErr) fatal_error(FE_INFND, 0);
-		
-		if (DirPathLength >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
-		
-		HLock(DirPathHandle);
-		if (MemError() != noErr) fatal_error(FE_INFND, 0);
-
-		strncpy(imagedir, *DirPathHandle, DirPathLength);
-
-		DisposeHandle(DirPathHandle);
-		if (MemError() != noErr) fatal_error(FE_INFND, 0);
-    }
+		full_path(library_dir, &DirSpec);
+	}
 #elif UNIX
     char *endpath;
 
@@ -768,7 +784,7 @@ static void locate_library_executable(int argc, char *argv[])
 #endif
 }
 
-#ifndef MSWin32
+#ifdef UNIX
 static void command_line_locate_executable(const char *argv0)
 {
   const char *exec_path = NULL;
