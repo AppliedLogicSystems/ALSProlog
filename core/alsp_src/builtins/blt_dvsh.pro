@@ -408,6 +408,7 @@ use tcltk.
 use tk_alslib.
 use objects.
 
+
 	%%------------------------------------------
 	%% Command line processing
 	%%------------------------------------------
@@ -1241,6 +1242,7 @@ module debugger.
 use tcltk.
 
 :- abolish(ensure_db_showing, 0).
+
 ensure_db_showing
 	:-
  	tcl_call(shl_tcli, [ensure_db_showing], _).

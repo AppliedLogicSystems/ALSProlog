@@ -1167,11 +1167,22 @@ install_spypoint(Mod,Pred,Arity)
     !.
 
 :- dynamic(spying_on/2).
+
 install_spypoint(Mod,Pred,Arity) 
 	:-
     functor(CallForm,Pred,Arity),
     assert(spying_on(CallForm,Mod)),
     builtins:dbg_spy(Mod,Pred,Arity).
+
+export reset_all_spypoints/0.
+reset_all_spypoints
+	:-
+	spying_on(CallForm,Mod), 
+	functor(CallForm,Pred,Arity),
+	dbg_spy(Mod,Pred,Arity), 
+	fail.
+reset_all_spypoints.
+
 
 /*-------------------------------------------------------------------------*
  | spy/3
@@ -2053,4 +2064,26 @@ writeGoalPBI(Box,Depth,Port,Module,Goal)
 	pbi_ttyflush.
 
 
+:- dynamic('$dbg_apg_special'/3).
+
 endmod.					%% builtins:  debugger segment
+
+module builtins.
+
+export '$dbg_apg'/3.
+export '$dbg_aph'/3.
+export '$dbg_apge'/3.
+export '$dbg_aphe'/3.
+export '$dbg_apf'/3.
+
+
+'$dbg_apg'(A,B,C) :-  debugger:'$dbg_apg_special'(A,B,C),!.
+'$dbg_apg'(_,_,_).
+'$dbg_aph'(_,_,_).
+'$dbg_apge'(_,_,_).
+'$dbg_aphe'(_,_,_).
+'$dbg_apf'(_,_,_).
+
+
+endmod.
+
