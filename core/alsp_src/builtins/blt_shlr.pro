@@ -11,19 +11,26 @@
 
 module builtins.
 use objects.
-%use ttyshlmk.
 use shellmak.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% INTERFACE BETWEEN CONSULT AND SOURCE TO SOURCE TRANSFORMERS
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%s2s_ext(typ).
-%s2s_ext(spc).
+transformer_db(typ, pro, del,    []).
+transformer_db(ssp, pro, no_del, []).
+transformer_db(spc, pro, no_del, []).
+transformer_db(pl,  obp, no_del, []).
+transformer_db(pro, obp, no_del, []).
 
-s2s_ext([	typ,
-			spc,
-			pro ]).
+:- findall(Ext, transformer_db(Ext, _, _, _), LL),
+	assert_at_load_time(s2s_ext(LL)).
+
+/*---------------------------------------------------*		
+	Command above produces something like:
+		s2s_ext([	typ, spc, pro ]).
+ *---------------------------------------------------*/
+
 
 src2src_inv(typ, BaseFile, SourceFile, TgtFile, Options)
 	:-
