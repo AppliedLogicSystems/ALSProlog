@@ -1,0 +1,1985 @@
+Document Type: WSE
+item: Global
+  Version=5.0
+  Title=ALS Student Prolog 3.1 Installation
+  Flags=00000100
+  Languages=65 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  Japanese Font Name=MS Gothic
+  Japanese Font Size=10
+  Start Gradient=0 0 255
+  End Gradient=0 0 0
+  Windows Flags=00000100000000010010110000001000
+  Log Pathname=%MAINDIR%\INSTALL.LOG
+  Message Font=MS Sans Serif
+  Font Size=8
+  Disk Filename=SETUP
+  Patch Flags=0000000000000001
+  Patch Threshold=85
+  Patch Memory=4000
+  EXE Filename=ALS Student Prolog 3.1 Installer.exe
+  FTP Cluster Size=20
+  Variable Name1=_SYS_
+  Variable Default1=C:\WINNT\System32
+  Variable Flags1=00001000
+  Variable Name2=_ODBC16_
+  Variable Default2=C:\WINNT\System32
+  Variable Flags2=00001000
+  Variable Name3=_ODBC32_
+  Variable Default3=C:\WINNT\System32
+  Variable Flags3=00001000
+  Variable Name4=_WISE_
+  Variable Default4=C:\PROGRA~1\Wise
+  Variable Flags4=00001000
+end
+item: Display Graphic
+  Pathname=alsprosn.bmp
+  X Position=32778
+  Y Position=10
+  Flags=0000000010111000
+end
+item: Open/Close INSTALL.LOG
+  Flags=00000001
+end
+item: Check if File/Dir Exists
+  Pathname=%SYS%
+  Flags=10000100
+end
+item: Set Variable
+  Variable=SYS
+  Value=%WIN%
+end
+item: End Block
+end
+item: Set Variable
+  Variable=APPTITLE
+  Value=ALS Student Prolog 3.1
+end
+item: Set Variable
+  Variable=GROUP
+  Value=ALS Student Prolog
+  Flags=10000000
+end
+item: Set Variable
+  Variable=DISABLED
+  Value=!
+end
+item: Set Variable
+  Variable=MAINDIR
+  Value=ALS Student Prolog
+end
+item: Check Configuration
+  Flags=10111011
+end
+item: Get Registry Key Value
+  Variable=COMMON
+  Key=SOFTWARE\Microsoft\Windows\CurrentVersion
+  Default=C:\Program Files\Common Files
+  Value Name=CommonFilesDir
+  Flags=00000100
+end
+item: Get Registry Key Value
+  Variable=PROGRAM_FILES
+  Key=SOFTWARE\Microsoft\Windows\CurrentVersion
+  Default=C:\Program Files
+  Value Name=ProgramFilesDir
+  Flags=00000100
+end
+item: Set Variable
+  Variable=MAINDIR
+  Value=%PROGRAM_FILES%\%MAINDIR%
+end
+item: Set Variable
+  Variable=EXPLORER
+  Value=1
+end
+item: Else Statement
+end
+item: Set Variable
+  Variable=MAINDIR
+  Value=C:\%MAINDIR%
+end
+item: End Block
+end
+item: Set Variable
+  Variable=BACKUP
+  Value=%MAINDIR%\BACKUP
+end
+item: Set Variable
+  Variable=DOBACKUP
+  Value=A
+end
+item: Set Variable
+  Variable=BRANDING
+  Value=0
+end
+item: If/While Statement
+  Variable=BRANDING
+  Value=1
+end
+item: Read INI Value
+  Variable=NAME
+  Pathname=%INST%\CUSTDATA.INI
+  Section=Registration
+  Item=Name
+end
+item: Read INI Value
+  Variable=COMPANY
+  Pathname=%INST%\CUSTDATA.INI
+  Section=Registration
+  Item=Company
+end
+item: If/While Statement
+  Variable=NAME
+end
+item: Set Variable
+  Variable=DOBRAND
+  Value=1
+end
+item: End Block
+end
+item: End Block
+end
+item: Wizard Block
+  Direction Variable=DIRECTION
+  Display Variable=DISPLAY
+  Bitmap Pathname=C:\Program Files\Wise\DIALOGS\TEMPLATE\Wizard.bmp
+  X Position=9
+  Y Position=10
+  Filler Color=8421440
+  Dialog=Welcome
+  Dialog=Display ReadMe
+  Dialog=Select Destination Directory
+  Dialog=Backup Replaced Files
+  Dialog=Select Backup Directory
+  Dialog=Select Program Manager Group
+  Variable=
+  Variable=
+  Variable=
+  Variable=
+  Variable=DOBACKUP
+  Variable=EXPLORER
+  Value=
+  Value=
+  Value=
+  Value=
+  Value=A
+  Value=1
+  Compare=0
+  Compare=0
+  Compare=0
+  Compare=0
+  Compare=1
+  Compare=0
+  Flags=00000011
+end
+item: Custom Dialog Set
+  Name=Welcome
+  Display Variable=DISPLAY
+  item: Dialog
+    Title=%APPTITLE% Installation
+    Title French=Installation de %APPTITLE%
+    Title German=Installation von %APPTITLE%
+    Title Spanish=Instalación de %APPTITLE%
+    Title Italian=Installazione di %APPTITLE%
+    Width=271
+    Height=224
+    Font Name=Helv
+    Font Size=8
+    item: Static
+      Rectangle=86 8 258 42
+      Create Flags=01010000000000000000000000000000
+      Flags=0000000000000001
+      Name=Times New Roman
+      Font Style=-24 0 0 0 700 255 0 0 0 3 2 1 18
+      Text=Welcome!
+      Text French=Bienvenue !
+      Text German=Willkommen!
+      Text Spanish=¡Bienvenido!
+      Text Italian=Benvenuti!
+    end
+    item: Push Button
+      Rectangle=150 187 195 202
+      Variable=DIRECTION
+      Value=N
+      Create Flags=01010000000000010000000000000001
+      Text=&Next >
+      Text French=&Suite >
+      Text German=&Weiter >
+      Text Spanish=&Siguiente >
+      Text Italian=&Avanti >
+    end
+    item: Push Button
+      Rectangle=105 187 150 202
+      Variable=DISABLED
+      Value=!
+      Create Flags=01010000000000010000000000000000
+      Text=< &Back
+      Text French=< &Retour
+      Text German=< &Zurück
+      Text Spanish=< &Atrás
+      Text Italian=< &Indietro
+    end
+    item: Push Button
+      Rectangle=211 187 256 202
+      Action=3
+      Create Flags=01010000000000010000000000000000
+      Text=&Cancel
+      Text French=&Annuler
+      Text German=&Abbrechen
+      Text Spanish=&Cancelar
+      Text Italian=&Annulla
+    end
+    item: Static
+      Rectangle=86 42 256 131
+      Create Flags=01010000000000000000000000000000
+      Text=This installation program will install the %APPTITLE%.
+      Text=
+      Text=Press the Next button to start the installation. You can press the Cancel button now if you do not want to install the %APPTITLE% at this time.
+      Text French=Ce programme d'installation va installer %APPTITLE%.
+      Text French=
+      Text French=Cliquez sur le bouton Suite pour démarrer l'installation. Vous pouvez cliquer sur le bouton Quitter l'installation si vous ne voulez pas installer %APPTITLE% tout de suite.
+      Text German=Mit diesem Installationsprogramm wird %APPTITLE% installiert.
+      Text German=
+      Text German=Klicken Sie auf "Weiter", um mit der Installation zu beginnen. Klicken Sie auf "Abbrechen", um die Installation von %APPTITLE% abzubrechen.
+      Text Spanish=Este programa de instalación instalará %APPTITLE%.
+      Text Spanish=
+      Text Spanish=Presione el botón Siguiente para iniciar la instalación. Puede presionar el botón Salir de instalación si no desea instalar %APPTITLE% en este momento.
+      Text Italian=Questo programma installerà %APPTITLE%.
+      Text Italian=
+      Text Italian=Per avvviare l'installazione premere il pulsante Avanti. Se non si desidera installare %APPTITLE% ora, premere il pulsante Esci dall'installazione.
+    end
+    item: Static
+      Rectangle=8 180 256 181
+      Action=3
+      Create Flags=01010000000000000000000000000111
+    end
+  end
+end
+item: Custom Dialog Set
+  Name=Select Destination Directory
+  Display Variable=DISPLAY
+  item: Dialog
+    Title=%APPTITLE% Installation
+    Title French=Installation de %APPTITLE%
+    Title German=Installation von %APPTITLE%
+    Title Spanish=Instalación de %APPTITLE%
+    Title Italian=Installazione di %APPTITLE%
+    Width=271
+    Height=224
+    Font Name=Helv
+    Font Size=8
+    item: Push Button
+      Rectangle=150 187 195 202
+      Variable=DIRECTION
+      Value=N
+      Create Flags=01010000000000010000000000000001
+      Text=&Next >
+      Text French=&Suite >
+      Text German=&Weiter >
+      Text Spanish=&Siguiente >
+      Text Italian=&Avanti >
+    end
+    item: Push Button
+      Rectangle=105 187 150 202
+      Variable=DIRECTION
+      Value=B
+      Create Flags=01010000000000010000000000000000
+      Flags=0000000000000001
+      Text=< &Back
+      Text French=< &Retour
+      Text German=< &Zurück
+      Text Spanish=< &Atrás
+      Text Italian=< &Indietro
+    end
+    item: Push Button
+      Rectangle=211 186 256 201
+      Action=3
+      Create Flags=01010000000000010000000000000000
+      Text=&Cancel
+      Text French=&Annuler
+      Text German=&Abbrechen
+      Text Spanish=&Cancelar
+      Text Italian=&Annulla
+    end
+    item: Static
+      Rectangle=8 180 256 181
+      Action=3
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Static
+      Rectangle=86 8 258 42
+      Create Flags=01010000000000000000000000000000
+      Flags=0000000000000001
+      Name=Times New Roman
+      Font Style=-24 0 0 0 700 255 0 0 0 3 2 1 18
+      Text=Select Destination Directory
+      Text French=Sélectionner le répertoire de destination
+      Text German=Zielverzeichnis wählen
+      Text Spanish=Seleccione el directorio de destino
+      Text Italian=Selezionare Directory di destinazione
+    end
+    item: Static
+      Rectangle=86 42 256 82
+      Create Flags=01010000000000000000000000000000
+      Text=Please select the directory where the %APPTITLE% files are to be installed.
+      Text French=Veuillez sélectionner le répertoire dans lequel les fichiers %APPTITLE% doivent être installés.
+      Text German=Geben Sie an, in welchem Verzeichnis die %APPTITLE%-Dateien installiert werden sollen.
+      Text Spanish=Por favor seleccione el directorio donde desee instalar los archivos de %APPTITLE%.
+      Text Italian=Selezionare la directory dove verranno installati i file %APPTITLE%.
+    end
+    item: Static
+      Rectangle=86 98 256 125
+      Action=1
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Push Button
+      Rectangle=208 106 253 121
+      Variable=MAINDIR_SAVE
+      Value=%MAINDIR%
+      Destination Dialog=1
+      Action=2
+      Create Flags=01010000000000010000000000000000
+      Text=B&rowse
+      Text French=Parcourir
+      Text German=Durchsuchen
+      Text Spanish=Buscar
+      Text Italian=Sfoglie
+    end
+    item: Static
+      Rectangle=90 109 206 120
+      Create Flags=01010000000000000000000000000000
+      Text=%MAINDIR%
+      Text French=%MAINDIR%
+      Text German=%MAINDIR%
+      Text Spanish=%MAINDIR%
+      Text Italian=%MAINDIR%
+    end
+  end
+  item: Dialog
+    Title=Select Destination Directory
+    Title French=Sélectionner le répertoire de destination
+    Title German=Zielverzeichnis wählen
+    Title Spanish=Seleccione el directorio de destino
+    Title Italian=Selezionare Directory di destinazione
+    Width=221
+    Height=173
+    Font Name=Helv
+    Font Size=8
+    item: Listbox
+      Rectangle=5 5 163 149
+      Variable=MAINDIR
+      Create Flags=01010000100000010000000101000000
+      Flags=0000110000100010
+      Text=%MAINDIR%
+      Text French=%MAINDIR%
+      Text German=%MAINDIR%
+      Text Spanish=%MAINDIR%
+      Text Italian=%MAINDIR%
+    end
+    item: Push Button
+      Rectangle=167 6 212 21
+      Create Flags=01010000000000010000000000000001
+      Text=OK
+      Text French=OK
+      Text German=OK
+      Text Spanish=Aceptar
+      Text Italian=OK
+    end
+    item: Push Button
+      Rectangle=167 25 212 40
+      Variable=MAINDIR
+      Value=%MAINDIR_SAVE%
+      Create Flags=01010000000000010000000000000000
+      Flags=0000000000000001
+      Text=Cancel
+      Text French=Annuler
+      Text German=Abbrechen
+      Text Spanish=Cancelar
+      Text Italian=Annulla
+    end
+  end
+end
+item: Custom Dialog Set
+  Name=Backup Replaced Files
+  Display Variable=DISPLAY
+  item: Dialog
+    Title=%APPTITLE% Installation
+    Title French=Installation de %APPTITLE%
+    Title German=Installation von %APPTITLE%
+    Title Spanish=Instalación de %APPTITLE%
+    Title Italian=Installazione di %APPTITLE%
+    Width=271
+    Height=224
+    Font Name=Helv
+    Font Size=8
+    item: Push Button
+      Rectangle=150 187 195 202
+      Variable=DIRECTION
+      Value=N
+      Create Flags=01010000000000010000000000000001
+      Text=&Next >
+      Text French=&Suite >
+      Text German=&Weiter >
+      Text Spanish=&Siguiente >
+      Text Italian=&Avanti >
+    end
+    item: Push Button
+      Rectangle=105 187 150 202
+      Variable=DIRECTION
+      Value=B
+      Create Flags=01010000000000010000000000000000
+      Text=< &Back
+      Text French=< &Retour
+      Text German=< &Zurück
+      Text Spanish=< &Atrás
+      Text Italian=< &Indietro
+    end
+    item: Push Button
+      Rectangle=211 187 256 202
+      Action=3
+      Create Flags=01010000000000010000000000000000
+      Text=&Cancel
+      Text French=&Annuler
+      Text German=&Abbrechen
+      Text Spanish=&Cancelar
+      Text Italian=&Annulla
+    end
+    item: Static
+      Rectangle=8 180 256 181
+      Action=3
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Static
+      Rectangle=86 8 258 42
+      Create Flags=01010000000000000000000000000000
+      Flags=0000000000000001
+      Name=Times New Roman
+      Font Style=-24 0 0 0 700 255 0 0 0 3 2 1 18
+      Text=Backup Replaced Files?
+      Text French=Effectuer une copie de sauvegarde des fichiers remplacés ?
+      Text German=Wollen Sie Sicherungskopien der überschriebenen Dateien anfertigen?
+      Text Spanish=¿Desea una copia de seguridad de los archivos reemplazados?
+      Text Italian=Backup dei file sostituiti?
+    end
+    item: Static
+      Rectangle=86 42 256 83
+      Create Flags=01010000000000000000000000000000
+      Text=This installation program can create backup copies of all files replaced during the installation.  Do you want to create backups of the replaced files?
+      Text French=Le programme d'installation peut créer des copies de sauvegarde de tous les fichiers remplacés pendant l'installation. Voulez-vous créer des copies de sauvegarde des fichiers remplacés ?
+      Text German=Mit diesem Installationsprogramm können Sie Sicherungskopien aller Dateien anfertigen, die bei der Installation überschrieben werden. Wollen Sie Sicherungskopien der überschriebenen Dateien anfertigen?
+      Text Spanish=Este programa de instalación puede crear copias de seguridad de todos los archivos reemplazados durante la instalación. ¿Desea crear copias de seguridad de los archivos reemplazados?
+      Text Italian=Questo programma di installazione può eseguire copie di backup di tutti i file sostituiti durante l'installazione. Si desidera creare file di backup per i file sostituiti?
+    end
+    item: Radio Button
+      Rectangle=142 87 169 113
+      Variable=DOBACKUP
+      Create Flags=01010000000000010000000000001001
+      Text=&Yes
+      Text=N&o
+      Text=
+      Text French=&Oui
+      Text French=&Non
+      Text French=
+      Text German=&Ja
+      Text German=N&ein
+      Text German=
+      Text Spanish=&Sí
+      Text Spanish=N&o
+      Text Spanish=
+      Text Italian=&Sì
+      Text Italian=N&o
+      Text Italian=
+    end
+  end
+end
+item: Custom Dialog Set
+  Name=Select Backup Directory
+  Display Variable=DISPLAY
+  item: Dialog
+    Title=%APPTITLE% Installation
+    Title French=Installation de %APPTITLE%
+    Title German=Installation von %APPTITLE%
+    Title Spanish=Instalación de %APPTITLE%
+    Title Italian=Installazione di %APPTITLE%
+    Width=271
+    Height=224
+    Font Name=Helv
+    Font Size=8
+    item: Push Button
+      Rectangle=150 187 195 202
+      Variable=DIRECTION
+      Value=N
+      Create Flags=01010000000000010000000000000001
+      Text=&Next >
+      Text French=&Suite >
+      Text German=&Weiter >
+      Text Spanish=&Siguiente >
+      Text Italian=&Avanti >
+    end
+    item: Push Button
+      Rectangle=105 187 150 202
+      Variable=DIRECTION
+      Value=B
+      Create Flags=01010000000000010000000000000000
+      Flags=0000000000000001
+      Text=< &Back
+      Text French=< &Retour
+      Text German=< &Zurück
+      Text Spanish=< &Atrás
+      Text Italian=< &Indietro
+    end
+    item: Push Button
+      Rectangle=211 187 256 202
+      Action=3
+      Create Flags=01010000000000010000000000000000
+      Text=&Cancel
+      Text French=&Annuler
+      Text German=&Abbrechen
+      Text Spanish=&Cancelar
+      Text Italian=&Annulla
+    end
+    item: Static
+      Rectangle=8 180 256 181
+      Action=3
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Static
+      Rectangle=86 8 258 42
+      Create Flags=01010000000000000000000000000000
+      Flags=0000000000000001
+      Name=Times New Roman
+      Font Style=-24 0 0 0 700 255 0 0 0 3 2 1 18
+      Text=Select Backup Directory
+      Text French=Sélectionner le répertoire des copies de sauvegarde
+      Text German=Verzeichnis für Sicherungskopien wählen.
+      Text Spanish=Seleccione directorio para copias de seguridad
+      Text Italian=Selezionare la Directory di backup
+    end
+    item: Static
+      Rectangle=86 42 256 59
+      Create Flags=01010000000000000000000000000000
+      Text=Please select the directory where the replaced  files will be copied.
+      Text French=Veuillez sélectionner le répertoire dans lequel les fichiers remplacés seront copiés.
+      Text German=Wählen Sie ein Verzeichnis, in das die überschriebenen Dateien kopiert werden sollen.
+      Text Spanish=Por favor, seleccione el directorio en el que desea copiar los archivos reemplazados.
+      Text Italian=Selezionare la Directory dove verranno copiati i file sostituiti.
+    end
+    item: Static
+      Rectangle=86 98 256 125
+      Action=1
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Push Button
+      Rectangle=208 106 253 121
+      Variable=BACKUP_SAVE
+      Value=%BACKUP%
+      Destination Dialog=1
+      Action=2
+      Create Flags=01010000000000010000000000000000
+      Text=B&rowse...
+      Text French=Parcourir
+      Text German=Durchsuchen
+      Text Spanish=Buscar
+      Text Italian=Sfoglia
+    end
+    item: Static
+      Rectangle=90 109 206 120
+      Destination Dialog=2
+      Create Flags=01010000000000000000000000000000
+      Text=%BACKUP%
+      Text French=%BACKUP%
+      Text German=%BACKUP%
+      Text Spanish=%BACKUP%
+      Text Italian=%BACKUP%
+    end
+  end
+  item: Dialog
+    Title=Select Backup Directory
+    Title French=Sélectionner le répertoire des copies de sauvegarde
+    Title German=Verzeichnis für Sicherungskopien wählen.
+    Title Spanish=Seleccione directorio para copias de seguridad
+    Title Italian=Selezionare la Directory di backup
+    Width=221
+    Height=173
+    Font Name=Helv
+    Font Size=8
+    item: Listbox
+      Rectangle=5 5 163 149
+      Variable=BACKUP
+      Create Flags=01010000100000010000000101000000
+      Flags=0000110000100010
+      Text=%BACKUP%
+      Text French=%BACKUP%
+      Text German=%BACKUP%
+      Text Spanish=%BACKUP%
+      Text Italian=%BACKUP%
+    end
+    item: Push Button
+      Rectangle=167 6 212 21
+      Create Flags=01010000000000010000000000000001
+      Text=OK
+      Text French=OK
+      Text German=OK
+      Text Spanish=Aceptar
+      Text Italian=OK
+    end
+    item: Push Button
+      Rectangle=167 25 212 40
+      Variable=BACKUP
+      Value=%BACKUP_SAVE%
+      Create Flags=01010000000000010000000000000000
+      Flags=0000000000000001
+      Text=Cancel
+      Text French=Annuler
+      Text German=Abbrechen
+      Text Spanish=Cancelar
+      Text Italian=Annulla
+    end
+  end
+end
+item: Custom Dialog Set
+  Name=Select Program Manager Group
+  Display Variable=DISPLAY
+  item: Dialog
+    Title=%APPTITLE% Installation
+    Title French=Installation de %APPTITLE%
+    Title German=Installation von %APPTITLE%
+    Title Spanish=Instalación de %APPTITLE%
+    Title Italian=Installazione di %APPTITLE%
+    Width=271
+    Height=224
+    Font Name=Helv
+    Font Size=8
+    item: Push Button
+      Rectangle=150 187 195 202
+      Variable=DIRECTION
+      Value=N
+      Create Flags=01010000000000010000000000000001
+      Text=&Next >
+      Text French=&Suite >
+      Text German=&Weiter >
+      Text Spanish=&Siguiente >
+      Text Italian=&Avanti >
+    end
+    item: Push Button
+      Rectangle=105 187 150 202
+      Variable=DIRECTION
+      Value=B
+      Create Flags=01010000000000010000000000000000
+      Flags=0000000000000001
+      Text=< &Back
+      Text French=< &Retour
+      Text German=< &Zurück
+      Text Spanish=< &Atrás
+      Text Italian=< &Indietro
+    end
+    item: Push Button
+      Rectangle=211 187 256 202
+      Action=3
+      Create Flags=01010000000000010000000000000000
+      Text=&Cancel
+      Text French=&Annuler
+      Text German=&Abbrechen
+      Text Spanish=&Cancelar
+      Text Italian=&Annulla
+    end
+    item: Static
+      Rectangle=8 180 256 181
+      Action=3
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Static
+      Rectangle=86 8 258 42
+      Create Flags=01010000000000000000000000000000
+      Flags=0000000000000001
+      Name=Times New Roman
+      Font Style=-24 0 0 0 700 255 0 0 0 3 2 1 18
+      Text=Select ProgMan Group
+      Text French=Sélectionner le groupe du Gestionnaire de programme 
+      Text German=Bestimmung der Programm-Managergruppe
+      Text Spanish=Seleccione grupo del Administrador de programas
+      Text Italian=Selezionare il gruppo ProgMan 
+    end
+    item: Static
+      Rectangle=86 44 256 68
+      Create Flags=01010000000000000000000000000000
+      Text=Enter the name of the Program Manager group to add the %APPTITLE% icons to:
+      Text French=Entrez le nom du groupe du Gestionnaire de programme dans lequel vous souhaitez ajouter les icônes de %APPTITLE% :
+      Text German=Geben Sie den Namen der Programmgruppe ein, der das Symbol %APPTITLE% hinzugefügt werden soll:
+      Text Spanish=Escriba el nombre del grupo del Administrador de programas en el que desea agregar los iconos de %APPTITLE%:
+      Text Italian=Inserire il nome del gruppo Program Manager per aggiungere le icone %APPTITLE% a:
+    end
+    item: Combobox
+      Rectangle=86 69 256 175
+      Variable=GROUP
+      Create Flags=01010000001000010000001100000001
+      Flags=0000000000000001
+      Text=%GROUP%
+      Text French=%GROUP%
+      Text German=%GROUP%
+      Text Spanish=%GROUP%
+      Text Italian=%GROUP%
+    end
+  end
+end
+item: Custom Dialog Set
+  Name=Start Installation
+  Display Variable=DISPLAY
+  item: Dialog
+    Title=%APPTITLE% Installation
+    Title French=Installation de %APPTITLE%
+    Title German=Installation von %APPTITLE%
+    Title Spanish=Instalación de %APPTITLE%
+    Title Italian=Installazione di %APPTITLE%
+    Width=271
+    Height=224
+    Font Name=Helv
+    Font Size=8
+    item: Push Button
+      Rectangle=150 187 195 202
+      Variable=DIRECTION
+      Value=N
+      Create Flags=01010000000000010000000000000001
+      Text=&Next >
+      Text French=&Suite >
+      Text German=&Weiter >
+      Text Spanish=&Siguiente >
+      Text Italian=&Avanti >
+    end
+    item: Push Button
+      Rectangle=105 187 150 202
+      Variable=DIRECTION
+      Value=B
+      Create Flags=01010000000000010000000000000000
+      Text=< &Back
+      Text French=< &Retour
+      Text German=< &Zurück
+      Text Spanish=< &Atrás
+      Text Italian=< &Indietro
+    end
+    item: Push Button
+      Rectangle=211 187 256 202
+      Action=3
+      Create Flags=01010000000000010000000000000000
+      Text=&Cancel
+      Text French=&Annuler
+      Text German=&Abbrechen
+      Text Spanish=&Cancelar
+      Text Italian=&Annulla
+    end
+    item: Static
+      Rectangle=8 180 256 181
+      Action=3
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Static
+      Rectangle=86 8 258 42
+      Create Flags=01010000000000000000000000000000
+      Flags=0000000000000001
+      Name=Times New Roman
+      Font Style=-24 0 0 0 700 255 0 0 0 3 2 1 18
+      Text=Ready to Install!
+      Text French=Prêt à installer !
+      Text German=Installationsbereit!
+      Text Spanish=¡Preparado para la instalación!
+      Text Italian=Pronto per l'installazione!
+    end
+    item: Static
+      Rectangle=86 42 256 102
+      Create Flags=01010000000000000000000000000000
+      Text=You are now ready to install the %APPTITLE%.
+      Text=
+      Text=Press the Next button to begin the installation or the Back button to reenter the installation information.
+      Text French=Vous êtes maintenant prêt à installer les fichiers %APPTITLE%.
+      Text French=
+      Text French=Cliquez sur le bouton Suite pour commencer l'installation ou sur le bouton Retour pour entrer les informations d'installation à nouveau.
+      Text German=Sie können %APPTITLE% nun installieren.
+      Text German=
+      Text German=Klicken Sie auf "Weiter", um mit der Installation zu beginnen. Klicken Sie auf "Zurück", um die Installationsinformationen neu einzugeben.
+      Text Spanish=Ya está listo para instalar %APPTITLE%.
+      Text Spanish=
+      Text Spanish=Presione el botón Siguiente para comenzar la instalación o presione Atrás para volver a ingresar la información para la instalación.
+      Text Italian=Ora è possibile installare %APPTITLE%.
+      Text Italian=
+      Text Italian=Premere il pulsante Avanti per avviare l'installazione o il pulsante Indietro per reinserire le informazioni di installazione.
+    end
+  end
+end
+item: If/While Statement
+  Variable=DISPLAY
+  Value=Select Destination Directory
+end
+item: Set Variable
+  Variable=BACKUP
+  Value=%MAINDIR%\BACKUP
+end
+item: End Block
+end
+item: End Block
+end
+item: If/While Statement
+  Variable=DOBACKUP
+  Value=A
+end
+item: Set Variable
+  Variable=BACKUPDIR
+  Value=%BACKUP%
+end
+item: End Block
+end
+item: If/While Statement
+  Variable=BRANDING
+  Value=1
+end
+item: If/While Statement
+  Variable=DOBRAND
+  Value=1
+end
+item: Edit INI File
+  Pathname=%INST%\CUSTDATA.INI
+  Settings=[Registration]
+  Settings=NAME=%NAME%
+  Settings=COMPANY=%COMPANY%
+  Settings=
+end
+item: End Block
+end
+item: End Block
+end
+item: Open/Close INSTALL.LOG
+end
+item: Check Disk Space
+  Component=COMPONENTS
+end
+item: Include Script
+  Pathname=%_WISE_%\INCLUDE\uninstal.wse
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\ALS Student Prolog.exe
+  Destination=%MAINDIR%\ALS Student Prolog.exe
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\msvcrt.dll
+  Destination=%MAINDIR%\msvcrt.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\tcl80.dll
+  Destination=%MAINDIR%\tcl80.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\tk80.dll
+  Destination=%MAINDIR%\tk80.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\tclpip80.dll
+  Destination=%MAINDIR%\tclpip80.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\shared\als_projects.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_projects.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\shared\als_settings.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_settings.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\shared\als_tkfbox.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_tkfbox.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\shared\als_tklib.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_tklib.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\shared\alsdev.tcl
+  Destination=%MAINDIR%\alsdir\shared\alsdev.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\shared\alsdev_main.tcl
+  Destination=%MAINDIR%\alsdir\shared\alsdev_main.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\shared\debugwin.tcl
+  Destination=%MAINDIR%\alsdir\shared\debugwin.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\shared\defstr.tcl
+  Destination=%MAINDIR%\alsdir\shared\defstr.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\shared\tables.tcl
+  Destination=%MAINDIR%\alsdir\shared\tables.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\shared\als_splash.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_splash.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\shared\als_document.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_document.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\shared\als_menu.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_menu.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\images\closed_ptr.gif
+  Destination=%MAINDIR%\alsdir\images\closed_ptr.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\images\down-arrow-blue.gif
+  Destination=%MAINDIR%\alsdir\images\down-arrow-blue.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\images\left-arrow-blue.gif
+  Destination=%MAINDIR%\alsdir\images\left-arrow-blue.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\images\open_ptr.gif
+  Destination=%MAINDIR%\alsdir\images\open_ptr.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\images\right-arrow-blue.gif
+  Destination=%MAINDIR%\alsdir\images\right-arrow-blue.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\images\turnstile_splash.gif
+  Destination=%MAINDIR%\alsdir\images\turnstile_splash.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\images\up-arrow-blue.gif
+  Destination=%MAINDIR%\alsdir\images\up-arrow-blue.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\arithx1.pro
+  Destination=%MAINDIR%\alsdir\library\arithx1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\avl.pro
+  Destination=%MAINDIR%\alsdir\library\avl.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\cmdline.pro
+  Destination=%MAINDIR%\alsdir\library\cmdline.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\cmpdirs.pro
+  Destination=%MAINDIR%\alsdir\library\cmpdirs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\commal.pro
+  Destination=%MAINDIR%\alsdir\library\commal.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\control.pro
+  Destination=%MAINDIR%\alsdir\library\control.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\cref.pro
+  Destination=%MAINDIR%\alsdir\library\cref.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\crefxtra.pro
+  Destination=%MAINDIR%\alsdir\library\crefxtra.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\filemisc.pro
+  Destination=%MAINDIR%\alsdir\library\filemisc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\headers.pro
+  Destination=%MAINDIR%\alsdir\library\headers.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\iolayer.pro
+  Destination=%MAINDIR%\alsdir\library\iolayer.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\libmaint.pro
+  Destination=%MAINDIR%\alsdir\library\libmaint.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\listutl1.pro
+  Destination=%MAINDIR%\alsdir\library\listutl1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\listutl2.pro
+  Destination=%MAINDIR%\alsdir\library\listutl2.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\listutl3.pro
+  Destination=%MAINDIR%\alsdir\library\listutl3.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\listutl4.pro
+  Destination=%MAINDIR%\alsdir\library\listutl4.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\macro.pro
+  Destination=%MAINDIR%\alsdir\library\macro.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\misc_db.pro
+  Destination=%MAINDIR%\alsdir\library\misc_db.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\miscatom.pro
+  Destination=%MAINDIR%\alsdir\library\miscatom.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\miscterm.pro
+  Destination=%MAINDIR%\alsdir\library\miscterm.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\msc_ioin.pro
+  Destination=%MAINDIR%\alsdir\library\msc_ioin.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\mscioout.pro
+  Destination=%MAINDIR%\alsdir\library\mscioout.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\progdoc.pro
+  Destination=%MAINDIR%\alsdir\library\progdoc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\sconfig.pro
+  Destination=%MAINDIR%\alsdir\library\sconfig.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\shellmak.pro
+  Destination=%MAINDIR%\alsdir\library\shellmak.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\sio_misc.pro
+  Destination=%MAINDIR%\alsdir\library\sio_misc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\slashes.pro
+  Destination=%MAINDIR%\alsdir\library\slashes.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\srchf.pro
+  Destination=%MAINDIR%\alsdir\library\srchf.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\strctutl.pro
+  Destination=%MAINDIR%\alsdir\library\strctutl.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\strings.pro
+  Destination=%MAINDIR%\alsdir\library\strings.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\tables.pro
+  Destination=%MAINDIR%\alsdir\library\tables.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\tcl_sppt.pro
+  Destination=%MAINDIR%\alsdir\library\tcl_sppt.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\tk_alslib.pro
+  Destination=%MAINDIR%\alsdir\library\tk_alslib.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\ttyshlmk.pro
+  Destination=%MAINDIR%\alsdir\library\ttyshlmk.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\typecomp.pro
+  Destination=%MAINDIR%\alsdir\library\typecomp.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\xlists.pro
+  Destination=%MAINDIR%\alsdir\library\xlists.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\arithx1.alb
+  Destination=%MAINDIR%\alsdir\library\arithx1.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\avl.alb
+  Destination=%MAINDIR%\alsdir\library\avl.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\cmdline.alb
+  Destination=%MAINDIR%\alsdir\library\cmdline.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\cmpdirs.alb
+  Destination=%MAINDIR%\alsdir\library\cmpdirs.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\commal.alb
+  Destination=%MAINDIR%\alsdir\library\commal.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\control.alb
+  Destination=%MAINDIR%\alsdir\library\control.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\cref.alb
+  Destination=%MAINDIR%\alsdir\library\cref.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\crefxtra.alb
+  Destination=%MAINDIR%\alsdir\library\crefxtra.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\filemisc.alb
+  Destination=%MAINDIR%\alsdir\library\filemisc.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\headers.alb
+  Destination=%MAINDIR%\alsdir\library\headers.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\iolayer.alb
+  Destination=%MAINDIR%\alsdir\library\iolayer.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\listutl1.alb
+  Destination=%MAINDIR%\alsdir\library\listutl1.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\listutl2.alb
+  Destination=%MAINDIR%\alsdir\library\listutl2.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\listutl3.alb
+  Destination=%MAINDIR%\alsdir\library\listutl3.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\listutl4.alb
+  Destination=%MAINDIR%\alsdir\library\listutl4.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\macro.alb
+  Destination=%MAINDIR%\alsdir\library\macro.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\misc_db.alb
+  Destination=%MAINDIR%\alsdir\library\misc_db.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\miscatom.alb
+  Destination=%MAINDIR%\alsdir\library\miscatom.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\miscterm.alb
+  Destination=%MAINDIR%\alsdir\library\miscterm.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\msc_ioin.alb
+  Destination=%MAINDIR%\alsdir\library\msc_ioin.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\mscioout.alb
+  Destination=%MAINDIR%\alsdir\library\mscioout.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\sconfig.alb
+  Destination=%MAINDIR%\alsdir\library\sconfig.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\shellmak.alb
+  Destination=%MAINDIR%\alsdir\library\shellmak.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\sio_misc.alb
+  Destination=%MAINDIR%\alsdir\library\sio_misc.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\slashes.alb
+  Destination=%MAINDIR%\alsdir\library\slashes.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\srchf.alb
+  Destination=%MAINDIR%\alsdir\library\srchf.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\strctutl.alb
+  Destination=%MAINDIR%\alsdir\library\strctutl.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\strings.alb
+  Destination=%MAINDIR%\alsdir\library\strings.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\tables.alb
+  Destination=%MAINDIR%\alsdir\library\tables.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\tcl_sppt.alb
+  Destination=%MAINDIR%\alsdir\library\tcl_sppt.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\tk_alslib.alb
+  Destination=%MAINDIR%\alsdir\library\tk_alslib.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\ttyshlmk.alb
+  Destination=%MAINDIR%\alsdir\library\ttyshlmk.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\typecomp.alb
+  Destination=%MAINDIR%\alsdir\library\typecomp.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\alsdir\library\xlists.alb
+  Destination=%MAINDIR%\alsdir\library\xlists.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\opt0.1\pkgIndex.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\opt0.1\pkgIndex.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\opt0.1\optparse.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\opt0.1\optparse.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\http2.0\pkgIndex.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\http2.0\pkgIndex.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\http2.0\http.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\http2.0\http.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\http1.0\pkgIndex.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\http1.0\pkgIndex.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\http1.0\http.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\http1.0\http.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\reg1.0\pkgIndex.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\reg1.0\pkgIndex.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\reg1.0\tclreg80.dll
+  Destination=%MAINDIR%\lib\tcl8.0\reg1.0\tclreg80.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\safe.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\safe.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\history.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\history.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\tclIndex
+  Destination=%MAINDIR%\lib\tcl8.0\tclIndex
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\init.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\init.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\parray.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\parray.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tcl8.0\word.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\word.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\msgbox.tcl
+  Destination=%MAINDIR%\lib\tk8.0\msgbox.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\optMenu.tcl
+  Destination=%MAINDIR%\lib\tk8.0\optMenu.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\clrpick.tcl
+  Destination=%MAINDIR%\lib\tk8.0\clrpick.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\entry.tcl
+  Destination=%MAINDIR%\lib\tk8.0\entry.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\comdlg.tcl
+  Destination=%MAINDIR%\lib\tk8.0\comdlg.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\bgerror.tcl
+  Destination=%MAINDIR%\lib\tk8.0\bgerror.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\obsolete.tcl
+  Destination=%MAINDIR%\lib\tk8.0\obsolete.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\button.tcl
+  Destination=%MAINDIR%\lib\tk8.0\button.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\xmfbox.tcl
+  Destination=%MAINDIR%\lib\tk8.0\xmfbox.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\console.tcl
+  Destination=%MAINDIR%\lib\tk8.0\console.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\listbox.tcl
+  Destination=%MAINDIR%\lib\tk8.0\listbox.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\menu.tcl
+  Destination=%MAINDIR%\lib\tk8.0\menu.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\dialog.tcl
+  Destination=%MAINDIR%\lib\tk8.0\dialog.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\focus.tcl
+  Destination=%MAINDIR%\lib\tk8.0\focus.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\palette.tcl
+  Destination=%MAINDIR%\lib\tk8.0\palette.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\tkfbox.tcl
+  Destination=%MAINDIR%\lib\tk8.0\tkfbox.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\tk.tcl
+  Destination=%MAINDIR%\lib\tk8.0\tk.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\text.tcl
+  Destination=%MAINDIR%\lib\tk8.0\text.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\tearoff.tcl
+  Destination=%MAINDIR%\lib\tk8.0\tearoff.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\tclIndex
+  Destination=%MAINDIR%\lib\tk8.0\tclIndex
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\scrlbar.tcl
+  Destination=%MAINDIR%\lib\tk8.0\scrlbar.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\scale.tcl
+  Destination=%MAINDIR%\lib\tk8.0\scale.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\safetk.tcl
+  Destination=%MAINDIR%\lib\tk8.0\safetk.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\lib\tk8.0\prolog.ps
+  Destination=%MAINDIR%\lib\tk8.0\prolog.ps
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\Cvs\Root
+  Destination=%MAINDIR%\examples\als\Cvs\Root
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\Cvs\Repository
+  Destination=%MAINDIR%\examples\als\Cvs\Repository
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\Cvs\Entries
+  Destination=%MAINDIR%\examples\als\Cvs\Entries
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\Readme
+  Destination=%MAINDIR%\examples\als\Readme
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\bench.pro
+  Destination=%MAINDIR%\examples\als\bench.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\dc.pro
+  Destination=%MAINDIR%\examples\als\dc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\diff.pro
+  Destination=%MAINDIR%\examples\als\diff.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\hickory.pro
+  Destination=%MAINDIR%\examples\als\hickory.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\id.pro
+  Destination=%MAINDIR%\examples\als\id.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\jobs.pro
+  Destination=%MAINDIR%\examples\als\jobs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\mission.pro
+  Destination=%MAINDIR%\examples\als\mission.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\nim.pro
+  Destination=%MAINDIR%\examples\als\nim.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\nrev.pro
+  Destination=%MAINDIR%\examples\als\nrev.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\als\queens.pro
+  Destination=%MAINDIR%\examples\als\queens.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\Cvs\Root
+  Destination=%MAINDIR%\examples\pxs\Cvs\Root
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\Cvs\Repository
+  Destination=%MAINDIR%\examples\pxs\Cvs\Repository
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\Cvs\Entries
+  Destination=%MAINDIR%\examples\pxs\Cvs\Entries
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\Readme
+  Destination=%MAINDIR%\examples\pxs\Readme
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\asking.pro
+  Destination=%MAINDIR%\examples\pxs\asking.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\assoc.pro
+  Destination=%MAINDIR%\examples\pxs\assoc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\circuit.pro
+  Destination=%MAINDIR%\examples\pxs\circuit.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\dirgrph1.pro
+  Destination=%MAINDIR%\examples\pxs\dirgrph1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\drugs.pro
+  Destination=%MAINDIR%\examples\pxs\drugs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\georgew.pro
+  Destination=%MAINDIR%\examples\pxs\georgew.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\grammr.pro
+  Destination=%MAINDIR%\examples\pxs\grammr.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\greeks.pro
+  Destination=%MAINDIR%\examples\pxs\greeks.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\hickgram.pro
+  Destination=%MAINDIR%\examples\pxs\hickgram.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\hickid1.pro
+  Destination=%MAINDIR%\examples\pxs\hickid1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\hickid2.pro
+  Destination=%MAINDIR%\examples\pxs\hickid2.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\jobs.pro
+  Destination=%MAINDIR%\examples\pxs\jobs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\lists.pro
+  Destination=%MAINDIR%\examples\pxs\lists.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\medic1.pro
+  Destination=%MAINDIR%\examples\pxs\medic1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\medic2.pro
+  Destination=%MAINDIR%\examples\pxs\medic2.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\medic3.pro
+  Destination=%MAINDIR%\examples\pxs\medic3.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\medic4.pro
+  Destination=%MAINDIR%\examples\pxs\medic4.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\medic5.pro
+  Destination=%MAINDIR%\examples\pxs\medic5.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\prointrp.pro
+  Destination=%MAINDIR%\examples\pxs\prointrp.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\readsent.pro
+  Destination=%MAINDIR%\examples\pxs\readsent.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\russian2.pro
+  Destination=%MAINDIR%\examples\pxs\russian2.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\russians.pro
+  Destination=%MAINDIR%\examples\pxs\russians.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\solve.pro
+  Destination=%MAINDIR%\examples\pxs\solve.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\solve2.pro
+  Destination=%MAINDIR%\examples\pxs\solve2.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\traits.pro
+  Destination=%MAINDIR%\examples\pxs\traits.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\trees.pro
+  Destination=%MAINDIR%\examples\pxs\trees.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\examples\pxs\xgram.pro
+  Destination=%MAINDIR%\examples\pxs\xgram.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\Welcome.txt
+  Destination=%MAINDIR%\Welcome.txt
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\Copying ALS.txt
+  Destination=%MAINDIR%\Copying ALS.txt
+  Flags=0000000000000010
+end
+item: Install File
+  Source=e:\Chuck\als_prolog\win32\ALS Student Prolog\Student Manual.pdf
+  Destination=%MAINDIR%\Student Manual.pdf
+  Flags=0000000000000010
+end
+item: Set Variable
+  Variable=MAINDIR
+  Value=%MAINDIR%
+  Flags=00010100
+end
+item: Check Configuration
+  Flags=10111011
+end
+item: Get Registry Key Value
+  Variable=GROUPDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%WIN%\Start Menu\Programs
+  Value Name=Programs
+  Flags=00000010
+end
+item: Set Variable
+  Variable=CGROUP_SAVE
+  Value=%GROUP%
+end
+item: Set Variable
+  Variable=GROUP
+  Value=%GROUPDIR%\%GROUP%
+end
+item: Get Registry Key Value
+  Variable=STARTUPDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%WIN%\Start Menu\Programs\StartUp
+  Value Name=StartUp
+  Flags=00000010
+end
+item: Get Registry Key Value
+  Variable=DESKTOPDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%WIN%\Desktop
+  Value Name=Desktop
+  Flags=00000010
+end
+item: Get Registry Key Value
+  Variable=STARTMENUDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%WIN%\Start Menu
+  Value Name=Start Menu
+  Flags=00000010
+end
+item: Get Registry Key Value
+  Variable=CSTARTUPDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%STARTUPDIR%
+  Value Name=Common StartUp
+  Flags=00000010
+end
+item: Get Registry Key Value
+  Variable=CDESKTOPDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%DESKTOPDIR%
+  Value Name=Common Desktop
+  Flags=00000010
+end
+item: Get Registry Key Value
+  Variable=CSTARTMENUDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%STARTMENUDIR%
+  Value Name=Common Start Menu
+  Flags=00000010
+end
+item: Get Registry Key Value
+  Variable=CGROUPDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%GROUPDIR%
+  Value Name=Common Programs
+  Flags=00000010
+end
+item: Create Shortcut
+  Source=%MAINDIR%\ALS Student Prolog.exe
+  Destination=%GROUP%\ALS Student Prolog.lnk
+  Icon Number=0
+end
+item: Create Shortcut
+  Source=%MAINDIR%\Student Manual.pdf
+  Destination=%GROUP%\Student Manual.lnk
+  Icon Number=0
+end
+item: Else Statement
+end
+item: Add ProgMan Icon
+  Group=%GROUP%
+  Icon Name=ALS Student Prolog
+  Command Line="%MAINDIR%\ALS Student Prolog.exe"
+  Flags=01000000
+end
+item: Add ProgMan Icon
+  Group=%GROUP%
+  Icon Name=Student Manual
+  Command Line="%MAINDIR%\Student Manual.pdf"
+  Flags=01000000
+end
+item: End Block
+end
+item: Edit Registry
+  Total Keys=1
+  Key=.ppj
+  New Value=application/prolog
+  Value Name=Content Type
+end
+item: Self-Register OCXs/DLLs
+  Description=Updating System Configuration, Please Wait...
+end
+item: Edit Registry
+  Total Keys=1
+  Key=.ppj
+  New Value=ALS Prolog.Document
+end
+item: Edit Registry
+  Total Keys=3
+  item: Key
+    Key=.pro
+    New Value=ALS Student Prolog.Document
+  end
+  item: Key
+    Key=ALS Student Prolog.Document
+    New Value=ALS Student Prolog Document
+  end
+  item: Key
+    Key=ALS Student Prolog.Document\shell\open\command
+    New Value=%MAINDIR%\ALS Student Prolog.exe %%1
+  end
+end
+item: Wizard Block
+  Direction Variable=DIRECTION
+  Display Variable=DISPLAY
+  Bitmap Pathname=C:\Program Files\Wise\DIALOGS\TEMPLATE\WIZARD.BMP
+  X Position=9
+  Y Position=10
+  Filler Color=8421440
+  Flags=00000011
+end
+item: Custom Dialog Set
+  Name=Finished
+  Display Variable=DISPLAY
+  item: Dialog
+    Title=%APPTITLE% Installation
+    Title French=Installation de %APPTITLE%
+    Title German=Installation von %APPTITLE%
+    Title Spanish=Instalación de %APPTITLE%
+    Title Italian=Installazione di %APPTITLE%
+    Width=271
+    Height=224
+    Font Name=Helv
+    Font Size=8
+    item: Push Button
+      Rectangle=150 187 195 202
+      Variable=DIRECTION
+      Value=N
+      Create Flags=01010000000000010000000000000001
+      Text=&Finish
+      Text French=&Fin
+      Text German=&Weiter
+      Text Spanish=&Terminar
+      Text Italian=&Fine
+    end
+    item: Push Button
+      Rectangle=105 187 150 202
+      Variable=DISABLED
+      Value=!
+      Create Flags=01010000000000010000000000000000
+      Text=< &Back
+      Text French=< &Retour
+      Text German=< &Zurück
+      Text Spanish=< &Atrás
+      Text Italian=< &Indietro
+    end
+    item: Push Button
+      Rectangle=211 187 256 202
+      Variable=DISABLED
+      Value=!
+      Action=3
+      Create Flags=01010000000000010000000000000000
+      Text=&Cancel
+      Text French=&Annuler
+      Text German=&Abbrechen
+      Text Spanish=&Cancelar
+      Text Italian=&Annulla
+    end
+    item: Static
+      Rectangle=8 180 256 181
+      Action=3
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Static
+      Rectangle=86 8 258 42
+      Create Flags=01010000000000000000000000000000
+      Flags=0000000000000001
+      Name=Times New Roman
+      Font Style=-24 0 0 0 700 255 0 0 0 3 2 1 18
+      Text=Installation Completed!
+      Text French=Installation terminée !
+      Text German=Die Installation ist abgeschlossen!
+      Text Spanish=¡Instalación terminada!
+      Text Italian=Installazione completata!
+    end
+    item: Static
+      Rectangle=86 42 256 102
+      Create Flags=01010000000000000000000000000000
+      Text=The %APPTITLE% has been successfully installed.
+      Text=
+      Text=Press the Finish button to exit this installation.
+      Text French=%APPTITLE% est maintenant installé.
+      Text French=
+      Text French=Cliquez sur le bouton Fin pour quitter l'installation.
+      Text German=%APPTITLE% wurde erfolgreich installiert.
+      Text German=
+      Text German=Klicken Sie auf "Weiter", um die Installation zu beenden.
+      Text Spanish=%APPTITLE% se ha instalado con éxito.
+      Text Spanish=
+      Text Spanish=Presione el botón Terminar para salir de esta instalación.
+      Text Italian=L'installazione %APPTITLE% è stata portata a termine con successo.
+      Text Italian=
+      Text Italian=Premere il pulsante Fine per uscire dall'installazione.
+    end
+  end
+end
+item: End Block
+end
+item: New Event
+  Name=Cancel
+end
+item: Include Script
+  Pathname=%_WISE_%\INCLUDE\rollback.wse
+end
