@@ -32,7 +32,7 @@ start_alsdev
 	ss_load_dot_alspro(CLInfo),
 	library_setup,
 	init_tk_alslib(shl_tcli,Shared),
-%alsdev_splash(Shared),
+alsdev_splash(Shared),
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	alsdev(Shared).
@@ -379,18 +379,18 @@ do_reconsult(PathAtom)
 
 perf_reconsult(unix, PathAtom)
 	:-!,
-	consult(PathAtom,[consult(false),source(true)]).
+	reconsult(PathAtom).
 
 perf_reconsult(mswin32, PathAtom0)
 	:-!,
 		%% repair path (G:/ ...)
 	repair_path(PathAtom0, PathAtom),
-	consult(PathAtom,[consult(false),source(true)]).
+	reconsult(PathAtom).
 
 perf_reconsult(macos, PathAtom)
 	:-!,
 		%% any repairs ??
-	consult(PathAtom,[consult(false),source(true)]).
+	reconsult(PathAtom).
 
 repair_path(source(PathAtomIn), source(PathAtomOut))
 	:-!,

@@ -222,6 +222,17 @@ default_prolog_flag_value(syntax_errors, error).
 
 changeable(syntax_errors, yes).
 
+	%%---------------------------------
+	%%	default syntax error behavior:
+	%%---------------------------------
+prolog_flag_value_check(obp_location, gic).
+prolog_flag_value_check(obp_location, gis).
+prolog_flag_value_check(obp_location, giac).
+prolog_flag_value_check(obp_location, gias).
+
+default_prolog_flag_value(obp_location, gias).
+
+changeable(obp_location, yes).
 
 	%%---------------------------------
 	%%	freeze
