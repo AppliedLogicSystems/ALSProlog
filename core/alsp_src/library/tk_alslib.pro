@@ -542,7 +542,7 @@ fext_pat_descs([Ext | Exts], [ [DD,[Pat]] | List])
 fext_pat_d(Ext,Pat,DD)
 	:-
 	atom(Ext),
-	sub_atom(Ext, 0,1,_,'.')
+	sub_atom(Ext, 0,1,_,'.'),
 	!,
 	sub_atom(Ext,1,_,0,FN),
 	catenate('*',Ext,Pat),
