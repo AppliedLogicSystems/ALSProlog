@@ -574,7 +574,7 @@ filter_prolog_files([], []).
 filter_prolog_files([ProjFile | ProjectFiles], [ProjFile | PrologFiles])
 	:-
 	file_extension(ProjFile,_, Ext),
-	dmember(Ext, [pro, pl]),
+	dmember(Ext, [pro, pl, psl]),
 	!,
 	filter_prolog_files(ProjectFiles, PrologFiles).
 
