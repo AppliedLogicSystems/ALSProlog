@@ -490,14 +490,22 @@ do_logout(SR,SW,State,SInfo, ID, Date, Time)
 
 	(var(Date) -> date(Date) ; true),
 	(var(Time) -> time(Time) ; true),
-/*
-	access_login_connection_info(user_log_stream, State, UsrLogFileS),
-	sio:remove_aliases(UsrLogFileS),
-	printf(UsrLogFileS,'logout(%t,%t).\n',[Date,Time]),
-	flush_output(UsrLogFileS),
-	close(UsrLogFileS),
-*/
 
+	access_login_connection_info(user_log_stream, State, UsrLogFileS),
+	(stream_open_status(UsrLogFileS, open) -> 
+		access_login_connection_info(ip_num, State, IPNum),
+		printf(UsrLogFileS,'logout(%t,%t,%t).\n',[Date,Time,IPNum]),
+		flush_output(UsrLogFileS),
+		sio:remove_aliases(UsrLogFileS),
+		close(UsrLogFileS)
+		;
+		catenate(log_file_, ID, UserLogFileAlias),
+		(sio:get_alias(Alias,UsrLogFileS) ->
+			sio:del_alias(Alias,UsrLogFileS)
+			;
+			true
+		)
+	),
 	set_login_connection_info(logout_date, State, Date),
 	set_login_connection_info(logout_time, State, Time),
 	log_server_notify('%t %t %t %t\n', [ID,Date,Time,Cookie], 'Logout: ', SInfo),
