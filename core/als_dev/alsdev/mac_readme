@@ -1,0 +1,33 @@
+MacOS Build Instructions
+------------------
+
+Setup:
+
+build-tree
+	alsp_src
+	mwbuild - containing "alspro PPC.lib"
+	tcltk_interface
+	alsdev
+
+mozart
+	Tcl/Tk Folder
+		tcl8.0
+		tk8.0
+
+
+Build:
+
+Open mac_alsdev.mcp
+Make "PPC Build" to create "ALS Prolog IDE"
+
+Run:
+
+ALS Prolog IDE
+alsdir
+	builtins
+	libraries
+	shared
+		als_tklib.tcl
+		tcltk.pro
+		tk_alslib_samples.pro
+		turnstile_splash.gif

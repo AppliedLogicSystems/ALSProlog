@@ -1,0 +1,31 @@
+MacOS Build Instructions
+------------------
+
+Setup:
+
+build-tree
+	alsp_src
+	mwbuild - containing "alspro x86.lib"
+	tcltk_interface
+	alsdev
+
+Build:
+
+Open win32_alsdev.mcp
+Make "Win32 Build" to create "ALS Prolog IDE.exe"
+
+Run:
+
+ALS Prolog IDE.exe
+tcl8.0.dll
+tk8.0.dll
+cw3215mt.dll
+alsdir
+	builtins
+	libraries
+	shared
+		als_tklib.tcl
+		tcltk.pro
+		tk_alslib_samples.pro
+		turnstile_splash.gif
+		
