@@ -1,1 +1,3 @@
-#include "x86_prefix.h"#define HAVE_CONFIG_H#define DLL#define DLL_NAME "alspro.dll"
+#include "mw_alspro_x86_prefix.h"
+#define DLL
+#define DLL_NAME "alspro.dll"

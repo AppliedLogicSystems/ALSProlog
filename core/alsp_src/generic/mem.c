@@ -38,6 +38,7 @@
 
 #ifdef MSWin32
 #include <windows.h>
+#include <xEXCPT.H>
 #include "fswin32.h"
 #endif
 
@@ -362,10 +363,7 @@ release_bottom_stack_page()
 #define CODESTART	0x06000000
 #define NPROTECTED	5
 
-
-
-static void
-release_bottom_stack_page()
+static void release_bottom_stack_page(void)
 {
     DWORD OldProtection;
 
@@ -376,15 +374,15 @@ release_bottom_stack_page()
     bottom_stack_page_is_protected = 0;
 }
 
-static LONG stack_overflow(struct _EXCEPTION_POINTERS *lpexpExceptionInfo)
+static LONG WINAPI stack_overflow(struct _EXCEPTION_POINTERS *lpexpExceptionInfo)
 {
     if (lpexpExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION
         && bottom_stack_page_is_protected) {
 	release_bottom_stack_page();
 	signal_handler(ALSSIG_STACK_OVERFLOW);
-	return -1; //EXCEPTION_CONTINUE_EXECUTION;
+	return EXCEPTION_CONTINUE_EXECUTION;
     } else {
-    	return 0; //EXCEPTION_CONTINUE_SEARCH;
+    	return EXCEPTION_CONTINUE_SEARCH;
     }	    
 }
 
@@ -430,7 +428,7 @@ allocate_prolog_heap_and_stack(size)
     } else {
     LPVOID stack;
     
-    SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)stack_overflow);
+    SetUnhandledExceptionFilter(stack_overflow);
     
     stack = VirtualAlloc((LPVOID)STACKSTART,
     			 size * sizeof(PWord) + NPROTECTED * pgsize,
@@ -1437,10 +1435,10 @@ ss_save_state(const char *filename, long offset)
     ssfd = open(filename, O_WRONLY);
     if (ssfd == -1) ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0777);
 #else
-    ssfd = open(filename, O_WRONLY);
-    if (ssfd == -1) ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC);
+    ssfd = open(filename, O_WRONLY | O_BINARY);
+    if (ssfd == -1) ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY);
 #endif
-#elif defined(MacOS)
+#elif defined(__MWERKS__)
     ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC);
 #else
     ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0777);
@@ -1516,67 +1514,6 @@ ss_err:
 #define SS_MALLOCQUANT	4096
 #define SS_MALLOCDIST	16384
 
-#ifdef MSWin32
-/* MSWin32 requires a special version of this, because MetroWerks open() does
-   not open with FILE_SHARE_READ. */
-static void
-ss_restore_state(filename,offset)
-    char *filename;
-    long offset;
-{
-    HANDLE ssfd;
-    int  bnum, gnum;
-    struct am_header hdr;
-    DWORD r;
-
-    /* Open the file */
-    ssfd = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
-                            OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-    if (ssfd == INVALID_HANDLE_VALUE) fatal_error(FE_SS_OPENERR,(long)filename);
-
-    r = SetFilePointer(ssfd, offset, NULL, FILE_BEGIN);
-    if (r == 0xFFFFFFFF) goto ss_err;
-    
-    if (!ReadFile(ssfd, &hdr, sizeof (struct am_header), &r, NULL)
-    	|| r != sizeof (struct am_header)) goto ss_err;
-
-    r = SetFilePointer(ssfd, offset, NULL, FILE_BEGIN);
-    if (r == 0xFFFFFFFF) goto ss_err;
-
-    /* Check integrity information */
-    
-    if (hdr.integ_als_mem != &als_mem ||
-		hdr.integ_als_mem_init != als_mem_init ||
-		hdr.integ_w_unify != w_unify ||
-		strcmp(hdr.integ_version_num, SysVersionNum) != 0 ||
-		strcmp(hdr.integ_processor, ProcStr) != 0 ||
-		strcmp(hdr.integ_minor_os, MinorOSStr) != 0)
-	fatal_error(FE_SS_INTEGRITY,0);
-
-    /* Get the blocks */
-    for (bnum=0; bnum < hdr.nblocks; bnum++) {
-
-	if (VirtualAlloc(hdr.blocks[bnum].start, hdr.blocks[bnum].asize,
-	    MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE) == NULL) goto ss_err;
-
-	if (!ReadFile(ssfd, hdr.blocks[bnum].start, hdr.blocks[bnum].fsize, &r, NULL)
-    	    || r != hdr.blocks[bnum].fsize) goto ss_err;
-    }	
-
-    /* Initialize the globals */
-    for (gnum=0; gnum < hdr.nglobals; gnum++)
-	*hdr.globals[gnum].addr = hdr.globals[gnum].value;
-    
-    als_mem = hdr.blocks[0].start;
-    
-    CloseHandle(ssfd);
-    return;
-
-ss_err:
-    CloseHandle(ssfd);
-    fatal_error(FE_ALS_MEM_INIT,0);
-}
-#else /* Non-MSWin32 */
 static void
 ss_restore_state(filename,offset)
     char *filename;
@@ -1712,7 +1649,51 @@ ss_restore_state(filename,offset)
 	    goto ss_err;
 	offset += hdr.blocks[bnum].fsize;
     }
+#elif	defined(MSWin32)
+    {
+        HANDLE file;
+        DWORD r;
+        
+	file = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+                            OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+	if (file == INVALID_HANDLE_VALUE) fatal_error(FE_SS_OPENERR,(long)filename);
+	
+	r = SetFilePointer(file, offset, NULL, FILE_BEGIN);
+    	if (r == 0xFFFFFFFF) goto ss_err;
+
+	for (bnum=0; bnum < hdr.nblocks; bnum++) {
+
+	    if (VirtualAlloc(hdr.blocks[bnum].start, hdr.blocks[bnum].asize,
+		MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE) == NULL) goto ss_err;
+
+	    if (!ReadFile(file, hdr.blocks[bnum].start, hdr.blocks[bnum].fsize, &r, NULL)
+    	    	|| r != hdr.blocks[bnum].fsize) goto ss_err;
+    	}
+    		
+	CloseHandle(file);
+    }
+#if 0
+/* currently broken, make it work someday. */
+{
+    HANDLE file, file_map;
     
+    file = CreateFile(filename, GENERIC_READ | GENERIC_WRITE, 0 /*FILE_SHARE_READ*/, NULL,
+                            OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
+    if (file == INVALID_HANDLE_VALUE) fatal_error(FE_SS_OPENERR,(long)filename);
+printf("created file\n");
+
+    file_map = CreateFileMapping(file, NULL, PAGE_WRITECOPY, 0, hdr.blocks[bnum].asize, NULL);
+    if (file_map == INVALID_HANDLE_VALUE) fatal_error(FE_SS_OPENERR,(long)filename);
+printf("created file mapping\n");    
+    for (bnum=0; bnum < hdr.nblocks; bnum++) {
+
+	if (MapViewOfFileEx(file_map, FILE_MAP_COPY, 0, offset,
+		hdr.blocks[bnum].fsize, hdr.blocks[bnum].start)
+		 == NULL) goto ss_err;
+printf("mapped view\n");
+    }
+}
+#endif
 #elif	defined(HAVE_BRK)
     {
 	long *mchain = (long *) 0;
@@ -1763,7 +1744,6 @@ ss_err:
     close(ssfd);
     fatal_error(FE_ALS_MEM_INIT,0);
 }
-#endif /* MSWin32, Non-MSWin32 */
 
 /*
  * ss_saved_state_present will test to see if the saved state is already

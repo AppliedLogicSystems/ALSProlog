@@ -404,8 +404,8 @@ PI_prolog_init0(argc, argv)
 #if 1
     wm_stackbot = allocate_prolog_heap_and_stack(stacksize + heapsize);
 #endif 
-    wm_heapbase = wm_stackbot + stacksize;
 
+    wm_heapbase = wm_stackbot + stacksize;
 #ifdef MacOS
     wm_stackbot_safety = wm_stackbot + 50;
 #endif
@@ -1315,42 +1315,6 @@ tSIOUXSettings  SIOUXSettings =
 
 
 #ifdef __MWERKS__
-/* I'm not sure whose bug this is, but I suspect it's a MetroWerks problem.
-   When a Console UI MSWin32 program is launched from Windows95, the program
-   name on the simulated command line is enclosed in double-quotes because
-   Win95 file name may have spaces in them.
-   The argv list passed to main is not correctly parsed.  The double-quotes
-   are not stripped and spaces inside the quotes are treated as argument
-   seperators.
-   For example, if you double click on the program "my cui app.exe", you will
-   get the following results:
-   
-   Command Line:  "my cui app.exe"
-   
-   Incorrect Result:
-   argc = 3
-   argv = {"\"my", "cui", "app.exe\""}
-   
-   Correct result:
-   argc = 1
-   argv = {"my cui app.exe"}
-   
-   This simple FixArgument function only deals with double-quote stripping. 
-*/
-
-static void FixArguments(int argc, char **argv)
-{
-	int i, l;
-	
-	for (i = 0; i < argc; i++) {
-		l = strlen(argv[i]);
-		if (argv[i][0] == '"' && argv[i][l-1] == '"') {
-			argv[i][l-1] = 0;
-			memmove(argv[i], argv[i]+1, l-1);
-		}
-	}
-}
-
 #include <signal.h>
 
 BOOL CtrlHandler(DWORD fdwCtrlType);
@@ -1361,7 +1325,7 @@ BOOL CtrlHandler(DWORD fdwCtrlType)
 	raise(SIGINT);
 	return TRUE;
     case CTRL_BREAK_EVENT:
-   	raise(SIGABRT);
+   	abort();
 	return TRUE;
     default:
     	return FALSE;
@@ -1421,11 +1385,7 @@ PI_prolog_init(int argc, char **argv)
 
 #ifdef MSWin32
 
-#ifdef __MWERKS__
-    FixArguments(argc, argv);    
-#endif
-
-    if (!SetConsoleTitle("ALS Prolog")) {
+    if (!(IS_WIN32S) && !SetConsoleTitle("ALS Prolog")) {
     	PI_app_printf(PI_app_printf_warning, "SetConsoleTitle failed !\n");
     }
     
@@ -1705,5 +1665,3 @@ const char *PI_get_options(void)
     return getenv("ALS_OPTIONS");
 #endif
 }
-
-

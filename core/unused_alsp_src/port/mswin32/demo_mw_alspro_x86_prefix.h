@@ -1,3 +1,2 @@
-#include "x86_prefix.h"
-#define HAVE_CONFIG_H
+#include "mw_alspro_x86_prefix.h"
 #define HARDWARE_KEY

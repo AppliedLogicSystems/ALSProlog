@@ -22,7 +22,6 @@
 
 #endif /* !HAVE_CONFIG_H */
 
-#ifdef MSWin32
 
 #include "pi_init.h"
 #include "pi_cfg.h"
@@ -57,33 +56,10 @@ static int ConsoleIO(int port, char *buf, size_t size)
     
 }
 
+extern char **__argv;
+extern int __argc;
 
-static int ProcessCmdLine(HINSTANCE hInstance, LPSTR lpCmdLine, char ***argh)
-{
-	char *line, *w;
-	int s, c;
-	char filename[1000];
-	
-	GetModuleFileName(hInstance, filename, 1000);
-	s = strlen(lpCmdLine) + strlen(filename);
-	line = malloc(s+1);
-	strcpy(line, filename);
-	strcat(line, " ");
-	strcat(line, lpCmdLine);
-	
-	*argh = malloc(50*sizeof(char *));
-	c = 0;
-	w = strtok(line, " ");
-	while (w) {
-	    c++;
-	    *argh = realloc(*argh, c*sizeof(char *));
-	    (*argh)[c-1] = w;
-	    w = strtok(NULL, " ");
-	}
-	
-	return c;
-}
-
+void _SetupArgsFix();
 
 extern HINSTANCE WinMain_Instance;
 extern HINSTANCE WinMain_PrevInstance;
@@ -93,15 +69,16 @@ extern int WinMain_CmdShow;
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
     int   exit_status;
-    int argc;
-    char **argv;
-    
+
+    /* Parse the command line via patched version of MWCRTL's _SetupArgsFix.
+       This will setup __argc and __argv. */ 
+    _SetupArgsFix();
+   
     WinMain_Instance = hInstance;
     WinMain_PrevInstance = hPrevInstance;
     WinMain_CmdLine = lpCmdLine;
     WinMain_CmdShow = nCmdShow;
     
-    argc = ProcessCmdLine(hInstance, lpCmdLine, &argv);
 
 #ifdef APP_PRINTF_CALLBACK 
     PI_set_app_printf_callback(app_printf);
@@ -110,7 +87,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     if (!AllocConsole()) exit(EXIT_FAILURE);
     PI_set_console_callback(ConsoleIO);
 
-    if ((exit_status = PI_prolog_init(argc, argv)) != 0) {
+    if ((exit_status = PI_prolog_init(__argc, __argv)) != 0) {
 	PI_app_printf(PI_app_printf_error, "Prolog init failed !\n");
 	exit(EXIT_FAILURE);
     }
@@ -126,4 +103,3 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     
     exit(EXIT_SUCCESS);
 }
-#endif /* MSWin32 */
