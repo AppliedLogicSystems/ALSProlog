@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.60 1998/11/02 03:19:34 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.61 1998/11/02 19:03:07 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -369,6 +369,9 @@ proc unmap_alsdev_debug {} {
 	if {[winfo exists .debugwin]} then {
 		wm iconify .debugwin
 	}
+	foreach Win  $proenv(debugwin,visible) {
+		wm iconify $Win
+	}
 	send_prolog als_ide_mgr unmap_edit_wins
 }
 
@@ -377,6 +380,9 @@ proc map_alsdev_debug {} {
 	if {[winfo exists .debugwin]} then {
 		wm deiconify .debugwin
 	} 
+	foreach Win  $proenv(debugwin,visible) {
+		wm deiconify $Win
+	}
 	send_prolog als_ide_mgr map_edit_wins
 }
 
@@ -998,7 +1004,6 @@ proc ensure_db_showing {} {
 
 proc show_debugwin {} {
 	global array proenv
-		
     show_window .debugwin
 	prolog call builtins change_debug_io -atom debugwin
 	check_leashing
@@ -1011,7 +1016,7 @@ proc show_debugwin {} {
 proc hide_debugwin {} {
 	global array proenv
 	foreach Win  $proenv(debugwin,visible) {
-		Window hide $Win
+		wm iconify $Win
 	}
 	Window iconify .debugwin
 	set proenv(debugwin) 0
