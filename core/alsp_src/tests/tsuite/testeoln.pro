@@ -21,8 +21,8 @@ test :-
 	dump_test,
 	simple_readline_test,
 	univ_readline_test,
+	read_test,
 	get_line_test,
-	read_test
 	.
 
 /*  The test files have the extension .btf, which stands for
