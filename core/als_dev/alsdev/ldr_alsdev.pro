@@ -23,6 +23,7 @@ bldit(CorePath, SVIm)
 	tmp_ld_tmp(LPL,'tcl_sppt.pro'),
 	tmp_ld_tmp(LPL,'tk_alslib.pro'),
 	tmp_ld_tmp(LPL,'typecomp.pro'),
+	tmp_ld_tmp(LPL,'misc_db.pro'),
 
 	call(SVIm),
 	abolish(tmp_ld_tmp, 2),
