@@ -1,13 +1,13 @@
 :-
 	consult(
-		[debugger, blt_dvsh, tcltk,
+		[debugger, tcltk,
+		 blt_dvsh, dbg_class, projects, 
+		':alsdir:library:listutl1',
+		':alsdir:library:miscterm',
+		':alsdir:library:msc_ioin',
 		':alsdir:library:strctutl',
 		':alsdir:library:strings',
-		':alsdir:library:tk_alslib',
-		':alsdir:library:miscterm',
 		':alsdir:library:tcl_sppt',
-		':alsdir:library:listutl1',
-		':alsdir:library:msc_ioin',
-		':alsdir:library:mscioout'
+		':alsdir:library:tk_alslib'
 		]).
 	
