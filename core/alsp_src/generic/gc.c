@@ -26,7 +26,7 @@
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 
 #if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
-extern void stack_overflow  PARAMS(( int, struct siginfo *, struct ucontext * ));
+extern void stack_overflow  PARAMS(( int, siginfo_t *, ucontext_t * ));
 #elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
 extern void    stack_overflow  PARAMS(( int, int, struct sigcontext *, caddr_t ));
 #elif defined(Portable)

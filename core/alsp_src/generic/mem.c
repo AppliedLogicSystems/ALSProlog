@@ -132,9 +132,8 @@ static	void	release_bottom_stack_page	PARAMS(( void ));
  *-------------------------------------------------------------------*/
 
 #if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
-void	stack_overflow	PARAMS(( int, struct siginfo *, struct ucontext * ));
-void
-stack_overflow(int signum, struct siginfo *siginf, struct ucontext *sigcon)
+void stack_overflow(int, siginfo_t *, ucontext_t *);
+void stack_overflow(int signum, siginfo_t *siginf, uncontext_t *sigcon)
 
 #elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
 void	stack_overflow	PARAMS(( int, int, struct sigcontext *, caddr_t ));

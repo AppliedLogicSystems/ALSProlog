@@ -976,7 +976,7 @@ pgetpid()
 #endif
 
 #ifndef MAP_FAILED
-#define MAP_FAILED -1
+#define MAP_FAILED ((void *)-1)
 #endif
 
 unsigned char *open_memory_file(const char *file_name, mem_file_info *info)

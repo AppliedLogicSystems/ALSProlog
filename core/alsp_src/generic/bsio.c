@@ -1670,7 +1670,7 @@ sio_socket_open()
 	int size = sizeof sockname_in;
 	if (getsockname(SIO_FD(buf),
 		        (struct sockaddr *) &sockname_in,
-			&size) == 0) {
+			(size_t *) &size) == 0) {
 	    (void) w_unify(v2,t2,sockname_in.sin_port,WTP_INTEGER);
 	    /* 
 	     * The above call to w_unify will fail only if the programmer
@@ -1729,7 +1729,7 @@ accept_connection(vsd, buf, sktaddr)
 	c_addr_len = sizeof(c_addr);
     if (SIO_FLAGS(buf) & SIOF_NEEDACCEPT) {
 			/* int newfd = accept(SIO_FD(buf), (struct sockaddr *) 0, (int *) 0);  */
-		int newfd = accept(SIO_FD(buf), (struct sockaddr *)&c_addr, &c_addr_len);
+		int newfd = accept(SIO_FD(buf), (struct sockaddr *)&c_addr, (size_t *)&c_addr_len);
 		if (newfd < 0) {
 	    	return -1;
 		}
@@ -3174,7 +3174,7 @@ sio_readbuffer()
 		int len = SIO_SOCKET_ADDRESS_LEN(buf);
 		nchars = recvfrom(SIO_FD(buf), buffer,nchars, 0,
 				  (struct sockaddr *) SIO_SOCKET_ADDRESS(buf),
-				  &len);
+				  (size_t *)&len);
 	    }
 	    else
 		nchars = readsocket(SIO_FD(buf), buffer, (size_t)nchars);
