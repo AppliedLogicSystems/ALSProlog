@@ -31,7 +31,7 @@ On the Mac, the program "MPack" can be used to create base64 files.
 Build
 -----
 
-Make "alspro_b" "alspro PPC.lib" in the mwbuild directory.
+Make "ALS Prolog Shell PPC" and "alspro PPC.lib" in the mwbuild directory.
 
 In alsdev, setup an alsdir with the folders "builtins" and "library".
 

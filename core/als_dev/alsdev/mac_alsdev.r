@@ -28,9 +28,8 @@ read 'TEXT' (205, "defstr", purgeable, preload) "defstr.tcl";
 read 'TEXT' (206, "als_menu", purgeable, preload) "als_menu.tcl";
 read 'TEXT' (207, "als_document", purgeable, preload) "als_document.tcl";
 read 'TEXT' (208, "als_projects", purgeable, preload) "als_projects.tcl";
-read 'TEXT' (209, "prodebug", purgeable, preload) "prodebug.tcl";
 
-read 'TEXT' (210, "als_tklib", purgeable, preload) "als_tklib.tcl";
+read 'TEXT' (209, "als_tklib", purgeable, preload) "als_tklib.tcl";
 
 
 /* Tcl images in base64 format */
