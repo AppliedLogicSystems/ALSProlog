@@ -542,9 +542,6 @@ PI_prolog_init0(argc, argv)
 #endif
 #endif /* KERNAL */
 
-    /* Initilize any libraries. */
-    /* pi_init(); */
-
     /*---------------------------------------*
      | Load the builtins
      *---------------------------------------*/

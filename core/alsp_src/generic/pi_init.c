@@ -8,11 +8,9 @@
  |	11/16/94, C. Houpt -- Added header file with prototype.
  *=====================================================================*/
 
-#if 0
 #include "pi_init.h"
 
 void pi_init(void)
 {
 
 }
-#endif
