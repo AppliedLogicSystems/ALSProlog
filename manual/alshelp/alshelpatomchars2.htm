@@ -1,0 +1,281 @@
+<HTML>
+<HEAD>
+<TITLE>atom_chars/2</TITLE>
+</HEAD><BODY>
+<A NAME="82df4ec8"></A>atom_chars/2
+<P></P>
+<A NAME="82df4eef"></A><A NAME="a2477995"></A>atom_chars/2 –  convert between atoms and the list of characters representing the atom
+<P></P>
+<A NAME="a247798c"></A><A NAME="84be9897"></A>atom_codes/2 –  convert between atoms and the list of character codes representing the atom
+<P></P>
+<A NAME="a247798d"></A><B>FORMS
+<P></P>
+<A NAME="a247798e"></A></B>atom_chars(Atom,CharList)
+<P></P>
+<A NAME="a2477991"></A>atom_codes(Atom,CodeList)  <A NAME="a247798f"></A><A NAME="a247798f"></A>   <A NAME="a2477990"></A>
+<P></P>
+<A NAME="a2477992"></A><B>DESCRIPTION
+<P></P>
+<A NAME="a2477993"></A></B>atom_chars(Atom,CharList) is true if and only if CharList is a character list whose elements correspond to the characters of the atom Atom.
+<P></P>
+<A NAME="a2477994"></A>atom_codes(Atom,CodeList) is true if and only if CodeList is a character code list whose elements correspond to the character codes of
+the atom Atom.
+<P></P>
+<A NAME="a24779c0"></A><B>EXAMPLES  
+<P></P>
+<A NAME="a24779b7"></A></B>?- atom_chars('the cat in',L).
+<P></P>
+<A NAME="a24779b8"></A>
+<P></P>
+<A NAME="a24779b9"></A>L = [t,h,e,' ',c,a,t,' ',i,n]
+<P></P>
+<A NAME="a24779ba"></A>
+<P></P>
+<A NAME="a24779bb"></A>yes.
+<P></P>
+<A NAME="a24779bc"></A>?- atom_chars(A,[t,h,e,' ',h,a,t,'\n']).
+<P></P>
+<A NAME="a24779bd"></A>
+<P></P>
+<A NAME="a24779be"></A>A = 'the hat\n'
+<P></P>
+<A NAME="a24779bf"></A>
+<P></P>
+<A NAME="a24779eb"></A>yes.
+<P></P>
+<A NAME="a24779e2"></A>
+<P></P>
+<A NAME="a24779e3"></A>?- atom_codes(A,[65,66,67]).
+<P></P>
+<A NAME="a24779e4"></A>
+<P></P>
+<A NAME="a24779e5"></A>A = 'ABC'
+<P></P>
+<A NAME="a24779e6"></A>
+<P></P>
+<A NAME="a24779e7"></A>yes.
+<P></P>
+<A NAME="a24779e8"></A>?- atom_codes(holiday, L).  
+<P></P>
+<A NAME="a24779e9"></A>
+<P></P>
+<A NAME="a24779ea"></A>L = &quot;holiday&quot;
+<P></P>
+<A NAME="a2477a16"></A>
+<P></P>
+<A NAME="a2477a0d"></A>yes.
+<P></P>
+<A NAME="a2477a0e"></A>
+<P></P>
+<A NAME="a2477a0f"></A>
+<P></P>
+<A NAME="a2477a10"></A><B>ERRORS
+<P></P>
+<A NAME="a2477a11"></A></B>Atom and CharList are variables (atom_chars/2)
+<P></P>
+<A NAME="a2477a12"></A>––––&gt; instantiation_error.
+<P></P>
+<A NAME="a2477a13"></A>Atom and CodeList are variables (atom_codes/2)
+<P></P>
+<A NAME="a2477a14"></A>––––&gt; instantiation_error.
+<P></P>
+<A NAME="a2477a15"></A>Atom is neither a variable nor an atom
+<P></P>
+<A NAME="a2477a41"></A>––––&gt; type_error(atom,Atom).
+<P></P>
+<A NAME="a2477a38"></A>CharList is neither a variable nor a list nor a partial list
+<P></P>
+<A NAME="a2477a39"></A>––––&gt; type_error(list,CharList).
+<P></P>
+<A NAME="a2477a3a"></A>CodeList is neither a variable nor a list nor a partial list
+<P></P>
+<A NAME="a2477a3b"></A>––––&gt; type_error(list,CodeList).
+<P></P>
+<A NAME="a2477a3c"></A>CharList is a list but there is a sublist L of CharList whose first element is neither a variable nor a character
+<P></P>
+<A NAME="a2477a3d"></A>––––&gt; domain_error(character_list,L).
+<P></P>
+<A NAME="a2477a3e"></A>CodeList is a list but there is a sublist L of CodeList whose first element is neither a variable nor a character
+<P></P>
+<A NAME="a2477a3f"></A>––––&gt; domain_error(character_code_list, L).
+<P></P>
+<A NAME="a2477a40"></A><B>SEE ALSO  
+<P></P>
+<A NAME="a2477a6c"></A></B>number_chars/2, number_codes/2, term_chars/2, term_codes/2. 
+<P></P>
+<A NAME="82df4f4c"></A>atom_concat/3
+<P></P>
+<A NAME="82df4f48"></A><A NAME="a2477a68"></A>atom_concat/3 –  append two atoms together to form a third
+<P></P>
+<A NAME="a2477a69"></A><B>FORMS
+<P></P>
+<A NAME="a2477a6b"></A></B>atom_concat(Atom1,Atom2,Atom12)  <A NAME="a2477a6a"></A> 
+<P></P>
+<A NAME="a24781d0"></A><B>DESCRIPTION
+<P></P>
+<A NAME="a24781c7"></A></B>If Atom1 and Atom2 are bound to atoms, calling atom_concat/3 will unify Atom12 with the atom formed by concatenating the characters of Atom2 to the end of Atom1.
+<P></P>
+<A NAME="a24781c8"></A>If either or both of Atom1 or Atom2 are unbound, then Atom12 must be bound to an atom.  atom_concat/3 will unify Atom1 and/or Atom2 to atoms such that concatenating Atom2 to Atom1 will form Atom12.
+<P></P>
+<A NAME="a24781c9"></A>atom_concat/3 is non-determinate when only Atom12 is instantiated. Upon backtracking Atom1 and Atom2 will take on all possible instantiations such that Atom2 concatenated to Atom1 will form Atom12.
+<P></P>
+<A NAME="a24781ca"></A><B>EXAMPLES  
+<P></P>
+<A NAME="a24781cb"></A></B>?- atom_concat(cater,pillar,A).
+<P></P>
+<A NAME="a24781cc"></A>
+<P></P>
+<A NAME="a24781cd"></A>A = caterpillar
+<P></P>
+<A NAME="a24781ce"></A>
+<P></P>
+<A NAME="a24781cf"></A>yes.
+<P></P>
+<A NAME="a247804d"></A>?- atom_concat(cater,A,caterpillar).
+<P></P>
+<A NAME="a2478044"></A>
+<P></P>
+<A NAME="a2478045"></A>A = pillar
+<P></P>
+<A NAME="a2478046"></A>
+<P></P>
+<A NAME="a2478047"></A>yes.
+<P></P>
+<A NAME="a2478048"></A>?- atom_concat(A,B,abc).
+<P></P>
+<A NAME="a2478049"></A>
+<P></P>
+<A NAME="a247804a"></A>A = ''
+<P></P>
+<A NAME="a247804b"></A>B = abc;
+<P></P>
+<A NAME="a247804c"></A>
+<P></P>
+<A NAME="a2478078"></A>A = a
+<P></P>
+<A NAME="a247806f"></A>B = bc;
+<P></P>
+<A NAME="a2478070"></A>
+<P></P>
+<A NAME="a2478071"></A>A = ab
+<P></P>
+<A NAME="a2478072"></A>B = c;
+<P></P>
+<A NAME="a2478073"></A>
+<P></P>
+<A NAME="a2478074"></A>A = abc
+<P></P>
+<A NAME="a2478075"></A>B = '';
+<P></P>
+<A NAME="a2478076"></A>no.
+<P></P>
+<A NAME="a2478077"></A>
+<P></P>
+<A NAME="a24780a3"></A>?- atom_concat(1,2,A).
+<P></P>
+<A NAME="a247809a"></A>error(type_error(atom,1),[builtins:atom_concat(1,2,_3282)])
+<P></P>
+<A NAME="a247809b"></A>
+<P></P>
+<A NAME="a247809c"></A>Error: Argument of type atom expected instead of 1.
+<P></P>
+<A NAME="a247809d"></A>- Goal:          builtins:atom_concat(1,2,_A)
+<P></P>
+<A NAME="a247809e"></A>- Throw pattern: error(type_error(atom,1),
+<P></P>
+<A NAME="a247809f"></A>                     [builtins:atom_concat(1,2,_A)])
+<P></P>
+<A NAME="a24780a0"></A><B>ERRORS
+<P></P>
+<A NAME="a24780a1"></A></B>Atom1 and Atom12 are variables
+<P></P>
+<A NAME="a24780a2"></A>––––&gt; instantiation_error.
+<P></P>
+<A NAME="a24780ce"></A>Atom2 and Atom12 are variables
+<P></P>
+<A NAME="a24780c5"></A>––––&gt; instantiation_error.
+<P></P>
+<A NAME="a24780c6"></A>Atom1 is neither a variable nor an atom
+<P></P>
+<A NAME="a24780c7"></A>––––&gt; type_error(atom,Atom1)
+<P></P>
+<A NAME="a24780c8"></A>Atom2 is neither a variable nor an atom
+<P></P>
+<A NAME="a24780c9"></A>––––&gt; type_error(atom,Atom2)
+<P></P>
+<A NAME="a24780ca"></A>Atom12 is neither a variable nor an atom
+<P></P>
+<A NAME="a24780cb"></A>––––&gt; type_error(atom,Atom12)
+<P></P>
+<A NAME="a24780cc"></A><B>SEE ALSO  
+<P></P>
+<A NAME="84bad92a"></A></B>atom_length/2, sub_atom/4, atom_chars/2, atom_codes/2. 
+<P></P>
+<A NAME="82df56d3"></A>atom_length/2
+<P></P>
+<A NAME="84bad951"></A><A NAME="82df56d9"></A>atom_length/2 –  determine the length of an atom
+<P></P>
+<A NAME="84bad952"></A><B>FORMS
+<P></P>
+<A NAME="a24780f7"></A></B>atom_length(Atom,Length)  <A NAME="a24780f6"></A> 
+<P></P>
+<A NAME="a24780f8"></A><B>DESCRIPTION
+<P></P>
+<A NAME="a2478124"></A></B>atom_length/2 must have Atom bound to an atom.  Length is unified with the number of characters in the atom.
+<P></P>
+<A NAME="a247811b"></A><B>EXAMPLES  
+<P></P>
+<A NAME="a247811c"></A></B>?- atom_length(an_atom, L).
+<P></P>
+<A NAME="a247811d"></A>
+<P></P>
+<A NAME="a247811e"></A>L = 7
+<P></P>
+<A NAME="a247811f"></A>
+<P></P>
+<A NAME="a2478120"></A>yes.
+<P></P>
+<A NAME="a2478121"></A>?- atom_length('Another atom\n', L).                        
+<P></P>
+<A NAME="a2478122"></A>
+<P></P>
+<A NAME="a2478123"></A>L = 13
+<P></P>
+<A NAME="a247814f"></A>
+<P></P>
+<A NAME="a2478146"></A>yes.
+<P></P>
+<A NAME="a2478147"></A>?- atom_length(9.5, L).
+<P></P>
+<A NAME="a2478148"></A>error(type_error(atom,9.5),[builtins:atom_length(9.5,_3286)])
+<P></P>
+<A NAME="a2478149"></A>
+<P></P>
+<A NAME="a247814a"></A>Error: Argument of type atom expected instead of 9.5.
+<P></P>
+<A NAME="a247814b"></A>- Goal:          builtins:atom_length(9.5,_A)
+<P></P>
+<A NAME="a247814c"></A>- Throw pattern: error(type_error(atom,9.5),
+<P></P>
+<A NAME="a247814d"></A>                     [builtins:atom_length(9.5,_A)])
+<P></P>
+<A NAME="a247814e"></A><B>ERRORS
+<P></P>
+<A NAME="a247817a"></A></B>Atom is a variable
+<P></P>
+<A NAME="a2478171"></A>––––&gt;  instantiation_error.
+<P></P>
+<A NAME="a2478172"></A>Atom is neither a variable nor an atom
+<P></P>
+<A NAME="a2478173"></A>––––&gt;  type_error(atom,Atom)
+<P></P>
+<A NAME="a2478174"></A>Length is neither a variable nor an integer
+<P></P>
+<A NAME="a2478175"></A>––––&gt;  type_error(integer,Length)
+<P></P>
+<A NAME="a2478176"></A><B>SEE ALSO  
+<P></P>
+<A NAME="a2478177"></A></B>atom_concat/3. 
+<P></P>
+</BODY>
+</HTML>
