@@ -272,8 +272,10 @@ serve_stream(S, QT, NewQT, Flag, SInfo)
 	polling_timeout(Timeout, SInfo),
 	get_stream_to_poll(S, PollStream),
 	poll(PollStream, Timeout),	
-	!,
-	serve_ready_stream(S, QT, NewQT, Flag, SInfo).
+	catch(serve_ready_stream(S, QT, NewQT, Flag, SInfo),
+			Anything, 
+			fail),
+	!.
 
 	%% See if there is a delayed job on S ready to run:
 serve_stream(S, QT, NewQT, Flag, SInfo) 
@@ -282,8 +284,10 @@ serve_stream(S, QT, NewQT, Flag, SInfo)
 	( (arg(2, State, expect(Var, Goal)), nonvar(Var) ) ;
 	 	(arg(2, State, list_expect(ListOfVars, Goal)), all_instantiated(ListOfVars) )
 	),
-	!,
-	serve_ready_stream(wc(SR,SW,State,ConnType), QT, NewQT, Flag, SInfo).
+	catch(serve_ready_stream(wc(SR,SW,State,ConnType), QT, NewQT, Flag, SInfo),
+			Anything, 
+			fail),
+	!.
 
 	%% Nothing is ready on S; in this case, push S onto the _END_ of the 
 	%% queue by instantiating QT to [S | NewQT], and returning NewQT 
@@ -359,7 +363,7 @@ serve_ready_stream(c(SR,SW,State,ConnType), QT, NewQT, Flag, SInfo)
 	!,
 	arg(1, State, Flag).
 
-		%% Try to service a request on a client clone socket:
+		%% Try to service a request on a worker socket:
 serve_ready_stream(QueueRec, QT, NewQT, Flag, SInfo) 
 	:-
 	functor(QueueRec, wkr_rec, _),
@@ -372,23 +376,13 @@ serve_ready_stream(c(SR,SW,State,ConnType), QT, QT,done, SInfo)
 	:-
 	socket_stream_info(SR, Host,Port,Domain,Type),
 	server_warning(service_failure, [Host,Port], SInfo),
-/*
-	(ConnType = login ->
-			access_login_connection_info(logged_in, State, ID),
-			ID \= nil,
-			!,
-			do_logout(SR, SW, State, SInfo, ID, Date, Time)
-			;
-			true
-	),
-*/
 	(ConnType = login,
 		access_login_connection_info(logged_in, State, ID),
 		ID \= nil,
-		!,
-		do_logout(SR, SW, State, SInfo, ID, Date, Time)
+		do_logout(SR, SW, State, SInfo, ID, Date, Time),
+		!
 		;
-	true),
+		true),
 	(stream_open_status(SR, open) -> close(SR) ; true),
 	(stream_open_status(SW, open) -> close(SW) ; true).
 
