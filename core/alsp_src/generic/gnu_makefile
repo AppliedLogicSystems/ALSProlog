@@ -31,7 +31,7 @@ CPPFLAGS = -DCONFIGLESS $(BUILD_FLAGS) $(OS_CPPFLAGS) $(PROC_CPPFLAGS) \
 CFLAGS = -O -MMD -Wall -Werror -Wmissing-prototypes -Wwrite-strings \
 		 -Wnested-externs -Wpointer-arith -fwritable-strings $(OS_CFLAGS)
 
-VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins
+VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins:$(SOURCE_DIR)/library
 
 MAIN_SOURCE = topmain.c
 
@@ -65,7 +65,8 @@ BUILTINS = blt_frez.pro  blt_std.pro   filepath.pro   ra_basis.pro \
    blt_ctl.pro   blt_msg.pro    comp_d10.pro  fswin32.pro    sio_wt.pro \
    blt_db.pro    blt_pckg.pro  cutils.pro    int_cstr.pro  xconsult.pro \
    blt_evt.pro   blt_shl.pro   dcgs.pro      math88k.pro \
-   blt_flgs.pro   blt_shlr.pro   debugger.pro  module.pro
+   blt_flgs.pro   blt_shlr.pro   debugger.pro  module.pro \
+   objs_run.pro
 
 binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro
 
@@ -121,11 +122,16 @@ iso_test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
 
 ALSDEVFILES = blt_dvsh.pro db_srctr.pro projects.pro
-alsdev :  alsdir alspro_b $(BUILTINS) $(ALSDEVFILES)
+ALSDEVLIBS=listutl1,miscterm,msc_ioin,objects,strctutl,strings,tcl_sppt,tk_alslib,typecomp
+ALSDEVLIBPS =listutl1.pro miscterm.pro msc_ioin.pro objects.pro strctutl.pro strings.pro \
+			tcl_sppt.pro tk_alslib.pro typecomp.pro
+alsdev :  alsdir alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS)
 	./alspro_b -q -b -obp -no_dot_alspro \
 	-g 'save_image(alsdev,[start_goal((builtins:start_alsdev)), \
 	select_lib(builtins, [debugger,blt_dvsh,projects]), \
-	select_lib(library,[miscterm,msc_ioin,strctutl,strings,tcl_sppt,tk_alslib])])'
+	select_lib(library,[$(ALSDEVLIBFS)])])'
+
+#select_lib(library,[miscterm,msc_ioin,objects,strctutl,strings,tcl_sppt,tk_alslib])])'
 
 clean :
 	rm -f *.o rm *.d
