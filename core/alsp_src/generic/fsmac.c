@@ -22,6 +22,21 @@
 #include <Processes.h>
 #include <ctype.h>
 #include <limits.h>
+
+void c2pstrcpy(unsigned char *ps, const char *cs)
+{
+	size_t l = strlen(cs);
+	if (l > 255) l = 255;
+	ps[0] = l;
+	memcpy(ps+1, cs, l);
+}
+
+void p2cstrcpy(char *cs, const unsigned char *ps)
+{
+	strncpy(cs, ps+1, ps[0]);
+	cs[ps[0]] = 0;
+}
+
 #ifdef HAVE_GUSI
 #include <GUSI.h>
 
@@ -30,23 +45,7 @@ int absolute_pathname(const char *name)
     return *name != ':' && (strchr(name, ':') != NULL);
 }
 
-unsigned char *c2pstrcpy(unsigned char *ps, const char *cs)
-{
-	size_t l = strlen(cs);
-	if (l > 255) l = 255;
-	ps[0] = l;
-	memcpy(ps+1, cs, l);
-	
-	return ps;
-}
 
-char *p2cstrcpy(char *cs, const unsigned char *ps)
-{
-	strncpy(cs, ps+1, ps[0]);
-	cs[ps[0]] = 0;
-
-	return cs;	
-}
 
 /* ceh - I'm not really sure what cononicalize_pathname does, or wether it really applies
    on the Mac.  This function is a NOP. */
@@ -417,7 +416,6 @@ static OSErr PathNameFromDirID(long DirID, short vRefNum, char *buf, size_t size
     return err;
 }
 
-
 char *getcwd(char *buf, int size)
 {
     OSErr	err;
@@ -743,7 +741,6 @@ fail:
 	
 	return err;
 }
-
 
 int chdir(const char *dirname)
 {

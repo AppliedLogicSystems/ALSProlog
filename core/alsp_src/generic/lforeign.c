@@ -569,6 +569,13 @@ typedef struct {
    library_func_ptrs library_funcs;
 } library_info;
 
+#ifdef macintosh
+static void SIOUXSetEventVector(short (*handler)(EventRecord *))
+{
+
+}
+#endif
+
 const alspi_func_ptrs alspi_funcs = {
     PI_forceuia,
     PI_getan,
@@ -756,37 +763,37 @@ static plugin_error os_load_plugin(const char *lib_name,
     
     if (err == noErr) {
 	err = FindSymbol (connID, "\palspi_dlib_init", &sym_ptr, &sym_class);
-        if (sym_class != kTVectorCFragSymbol) err = fragLibConnErr;
+        if (sym_class != kTVectorCFragSymbol) err = cfragLibConnErr;
     	
     }   	
     
     if (err == noErr) {
-    	*library = connID;
+    	*library = (unsigned long) connID;
     	*library_init = (alspi_init_func)sym_ptr;
     } else {
     	switch (err) {
 	case nsvErr:
 	case fnfErr:
-	case fragLibNotFound:
+	case cfragNoLibraryErr:
 	    result.type = file_not_found_error;
 	    break;
 	case afpAccessDenied:
 	    result.type = permission_error;
 	    break;
-	case fragFormatUnknown:
-	case fragLibConnErr:
+	case cfragFragmentFormatErr:
+	case cfragLibConnErr:
 	    result.type = not_plugin_error;
 	    break;	
-	case fragHadUnresolveds:
-	case fragObjectInitSeqErr:
-	case fragInitLoop:
-	case fragImportTooOld:
-	case fragImportTooNew:
-	case fragUserInitProcErr:
+	case cfragUnresolvedErr:
+	case cfragInitOrderErr:
+	case cfragInitLoopErr:
+	case cfragImportTooOldErr:
+	case cfragImportTooNewErr:
+	case cfragInitFunctionErr:
 	    result.type = init_error;
 	    break;
-	case fragNoMem:
-	case fragNoAddrSpace:
+	case cfragNoPrivateMemErr:
+	case cfragNoClientMemErr:
 	    result.type = memory_error;
 	    break;
 	default:
