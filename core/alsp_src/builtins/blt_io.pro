@@ -305,10 +305,12 @@ load(user,Type,user,Nature,LoadedPath)
 	:-!,
 	load_canon(user,Type,Nature,LoadedPath).
 
+/*
 	%% Source is a 'normal' file:
 load(FileName,Type,CanonPath,Nature,LoadedPath) 
 	:-
 	resource_load(FileName), !.
+*/
 load(FileName,Type,CanonPath,Nature,LoadedPath) 
 	:-
 	possibleLocation(FileName, PathName),

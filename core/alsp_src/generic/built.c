@@ -334,7 +334,6 @@ static struct blt_struct {
 	BLT("obp_push_stop", 0, pbi_obp_push_stop, "_pbi_obp_push_stop"),
 	BLT("obp_pop", 0, pbi_obp_pop, "_pbi_obp_pop"),
 	BLT("resource_load", 1, pbi_resource_load, "_pbi_resource_load"),
-	
 #endif /* SYS_OBP */
 #ifdef OLDCONSULT
 	BLT("old_consult", 2, pbi_old_consult, "_pbi_old_consult"),
@@ -421,6 +420,7 @@ static struct blt_struct {
 	BLT("forcePrologError", 0, pbi_forcePrologError, "_pbi_forcePrologError"),
 	BLT("reset_wm_normal", 0, pbi_reset_wm_normal, "_pbi_reset_wm_normal"),
 	BLT("print_warning", 0, pbi_printwarning, "_pbi_printwarning"),
+/*	BLT("limits_info", 3, pbi_limits_info, "_pbi_limits_info"),  */
 
 #ifdef OLDSHELL
 	BLT("print_no", 0, pbi_printno, "_pbi_printno"),

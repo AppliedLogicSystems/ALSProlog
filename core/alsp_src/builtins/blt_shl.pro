@@ -46,33 +46,45 @@ start_shell(DefaultShellCall)
 	%% get the command line, but ignore the image name
 	retract(command_line([ImageName|CommandLine])),
 	!,
-	CLInfo = clinfo(DefaultShellCall,	/* -g: goal to run */
+	CLInfo = clinfo(true,				/* -g: goal to run */
 					false,				/* -v/-q: verbosity */
 					[],					/* files to consult */
 					ImageName,
 					default,			/* -nwd: debugger to set up */
-					[],					/* -S init search list */
+					[],					/* -s init search list */
+					DefaultShellCall,	/* shell/or not */
 					other_flags),		/* room for expansion */
 
 	%%debugger:nospy,
 	ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo),
 	assertz(command_line(ResidualCommandLine)),
 
-	arg(3, CLInfo, Files),
-	arg(1, CLInfo, ShellCall),
 	arg(6, CLInfo, RevCmdLineSearch),
 	dreverse(RevCmdLineSearch, CmdLineSearch),
-
 	ss_init_searchdir(CmdLineSearch),
 	ss_load_dot_alspro,
 
+	arg(3, CLInfo, Files),
 	(arg(2,CLInfo,true) -> consultmessage(on) ; consultmessage(off)),
 	ss_load_files(Files),
 	(arg(2,CLInfo,quiet) -> consultmessage(off) ; consultmessage(on)),
 	!,
+	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
 
 start_shell(_).
+
+	%%%%%%%
+
+setup_init_goal(CLInfo, ShellCall)
+	:-
+	arg(7, CLInfo, CLShellCall),
+	arg(1, CLInfo, CmdLineGoal),
+	(CmdLineGoal = true ->	
+		ShellCall = CLShellCall
+		;
+		ShellCall = (CmdLineGoal, CLShellCall)
+	).
 
 /*-----------------------------------------------------------------*
  | ss_parse_command_line/3
@@ -114,7 +126,7 @@ ss_parse_command_line(['-g', GoalAtom | T], L, CLInfo)
 	%% -b: "Batch" mode: exit after running -g startup goal (don't run default shell):
 ss_parse_command_line(['-b' | T], L, CLInfo)
 	:-!,
-	mangle(1, CLInfo, true),
+	mangle(7, CLInfo, true),
 	ss_parse_command_line(T, L, CLInfo).
 
 	%% -v: Turn on verbose mode:
@@ -341,6 +353,7 @@ endmod.
 export init_prolog_shell/6.
 init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	:-
+	init_prolog_flags,
 	als_system(SysList),
 	sio:input_stream_or_alias_ok(InStream, RealInStream),
 	set_stream_pgoals(RealInStream, user_prompt_goal(OutStream) ),

@@ -432,11 +432,11 @@ rule(alspro,
 	case(&(context_name), [
 		(mac: ['Delete -i mpw_alspro',
 		       'alspro_b -g ''save_base_package(alspro)''']),
-		(djgpp1: ['alspro_b -obp -g ''save_image(alspro,[$(IMGOPTS)])''',
+		(djgpp1: ['alspro_b -b -obp -g ''save_image(alspro,[$(IMGOPTS)])''',
 				  'coff2exe alspro']),
-		(djgpp2: ['alspro_b -obp -g ''save_image(alspro,[$(IMGOPTS)])''',
+		(djgpp2: ['alspro_b --b obp -g ''save_image(alspro,[$(IMGOPTS)])''',
 				  'coff2exe alspro']),
-		(_:['alspro_b -obp -g ''save_image(alspro,[$(IMGOPTS)])'''])
+		(_:['alspro_b -b -obp -g ''save_image(alspro,[$(IMGOPTS)])'''])
 		])
 	).
 

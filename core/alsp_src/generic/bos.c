@@ -247,7 +247,7 @@ int pbi_command_line(void)
 
 int pbi_crypt(void)
 {
-#if defined(UNIX) && defined(HAVE_UNISTD_H)
+#if defined(UNIX) && defined(HAVE_UNISTD_H) && !defined( __GO32__)
     PWord v1, v2, v3, u;
     int   t1, t2, t3, ut;
     UCHAR *b1,*b2;

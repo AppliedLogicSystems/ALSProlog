@@ -2484,6 +2484,7 @@ write_buf(vsd,buf)
     switch (SIO_TYPE(buf)) {
     case SIO_TYPE_SOCKET_STREAM:
     case SIO_TYPE_SOCKET_DGRAM:
+#ifdef HAVE_SOCKET
 	if (writeflg == SOCKET_ERROR) {
 	    if (socket_errno == EINTR)
 		SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
@@ -2493,6 +2494,7 @@ write_buf(vsd,buf)
 	    }
 	    return 0;
 	}
+#endif
 	break;
     default:
 	if (writeflg == -1) {
@@ -2619,6 +2621,7 @@ close_socket:
     switch (SIO_TYPE(buf)) {
     case SIO_TYPE_SOCKET_STREAM:
     case SIO_TYPE_SOCKET_DGRAM:
+#ifdef HAVE_SOCKET
 	if (closeflg == SOCKET_ERROR) {
 	    if (socket_errno == EINTR)
 		SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
@@ -2628,6 +2631,7 @@ close_socket:
 	    }
 	    FAIL;
 	}
+#endif
 	break;
     default:
 	if (closeflg == -1) {

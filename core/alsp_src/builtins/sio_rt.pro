@@ -1902,7 +1902,6 @@ tp_skip_to_endif([H|T],Stream,OutToks) :-
 tp_decrement_ifdef_nesting_counter(Stream).	%% define later
 tp_increment_ifdef_nesting_counter(Stream).	%% define later
 
-
 endmod.
 
 module builtins.

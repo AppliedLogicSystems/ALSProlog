@@ -865,14 +865,14 @@ load_file(fname, options)
      */
     for (fnp--; fnp != fname && *fnp != DIR_SEPARATOR && *fnp != '.'; fnp--) ;
 
-/*  printf("load_file:fname=%s fnp=%s\n",fname,fnp); */
+/*  printf("load_file:fname=%s fnp=%s\n",fname,fnp);  */
     /*
      *  Try to access the file as specified by making sure that
      *  it is not a directory. If it is accessable, load that file.
      */
     if (access(fname, R_OK) == 0 && !isdir(fname)) 
 	{
-/*  printf("load_file:access ok to fname=%s\n",fname); */
+/*  printf("load_file:access ok to fname=%s\n",fname);  */
 #ifdef OBP
 	if (strcmp(fnp, ".obp") == 0) {
 
@@ -891,7 +891,7 @@ load_file(fname, options)
 	}
     }
 
-/* printf("load_file:access NOT ok to fname=%s\n",fname); */
+/* printf("load_file:access NOT ok to fname=%s\n",fname);  */
     /*
      *  Check whether the file has an extension or not.
      */
@@ -900,9 +900,9 @@ load_file(fname, options)
 	 *      File doesn't have an extension.
 	 *      Get dates for .pro .obp versions (0 if none exists)
 	 */
-/* printf("load_file: no extension--base new_fname=%s\n",new_fname); */
+/* printf("load_file: no extension--base new_fname=%s\n",new_fname);  */
 	strcpy(ext, "pro");
-/* printf("load_file: added pro ext-new_fname=%s\n",new_fname); */
+/* printf("load_file: added pro ext-new_fname=%s\n",new_fname);  */
 	pro_time = get_file_modified_time(new_fname);
 #if OBP
 	strcpy(ext, "obp");
@@ -917,7 +917,7 @@ load_file(fname, options)
 	 */
 	LOAD_RETURN(0)
     }
-/* printf("load_file: pro_time=%d obp_time=%d\n",pro_time,obp_time); */
+/* printf("load_file: pro_time=%d obp_time=%d\n",pro_time,obp_time);  */
 
     /*
      *  Try to load .obp file if it is newer than .pro file

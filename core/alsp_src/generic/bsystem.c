@@ -15,6 +15,7 @@
  *=======================================================================*/
 #include "defs.h"
 #include "module.h"
+#include "limits.h"
 
 #ifdef MacOS
 /* For the Debugger trap. */
@@ -227,6 +228,37 @@ pbi_stack_info()
     else
 	FAIL;
 }
+
+
+
+/*
+int pbi_limits_info()
+{
+    PWord v1,v2,v3;
+    int   t1,t2,t3;
+	int MaxArity, MinInt,MaxInt=1, i,p=1;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+    w_get_An(&v3, &t3, 3);
+
+	for (i=1; i<= 28; ++i)
+		 p = p*2;
+
+	MaxInt = p-1;
+	MinInt = - MaxInt;
+
+printf("Max=%d Min=%d MA=%d\n",MaxInt,-MaxInt,MaxArity);
+
+	if( PI_unify(v1,t1,(PWord)(-MaxInt), WTP_INTEGER) &&
+		PI_unify(v2,t2,(PWord)MaxInt, WTP_INTEGER) &&
+		PI_unify(v3,t3,(PWord)ULONG_MAX, WTP_INTEGER) )
+		SUCCEED;
+	else
+		FAIL;
+}
+*/
+
 
 #ifdef MacOS
 
