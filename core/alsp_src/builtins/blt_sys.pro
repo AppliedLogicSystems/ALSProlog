@@ -30,6 +30,33 @@ module builtins.
 curmod(M,M).
 
 /*------------------------------------------------------------------*
+ |	corrected_sys_searchdir/1
+ |	corrected_sys_searchdir(Dir)
+ |	corrected_sys_searchdir(-)
+ |
+ |	If builtins:sys_searchdir(X) is a path the form
+ |		X = <Path>/alsdir    (or <Path>\alsdir , etc.)
+ |	then Dir = <Path>, else Dir = X  .
+ *------------------------------------------------------------------*/
+export corrected_sys_searchdir/1.
+corrected_sys_searchdir(SSDIR)
+	:-
+	builtins:sys_searchdir(SSDIR0),
+	path_elements(SSDIR0, SSDIRList0),
+	last(SSDIRList0, LL),
+	fin_corrected_sys_searchdir(LL, SSDIRList0, SSDIR).
+
+fin_corrected_sys_searchdir(alsdir, SSDIRList0, SSDIR)
+	:-!,
+	dappend(SSDIRList, [alsdir], SSDIRList0),
+	path_elements(SSDIR, SSDIRList).
+
+fin_corrected_sys_searchdir(_, SSDIRList, SSDIR)
+	:-
+	path_elements(SSDIR, SSDIRList).
+
+
+/*------------------------------------------------------------------*
  |	modules/2
  |	modules(Module, List)
  |	modules(+, -)

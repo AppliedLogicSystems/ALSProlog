@@ -42,6 +42,8 @@ export read_to/5.
 export read_to_blank/3.
 
 export char_in/3.
+export replace_char_atom/4.
+export replace_char_string/4.
 
 export strip_prefix/3.
 export prefix_dir/3.
@@ -629,4 +631,32 @@ prefix_to([Item | List], Atom, [XItem | XList])
 	:-
 	catenate(Atom, Item, XItem),
 	prefix_to(List, Atom, XList).
+
+/*!-----------------------------------------------------------------------
+ |	replace_char_atom/4
+ |	replace_char_atom(AtomIn, OrigCharNum, NewCharNum, AtomOut)
+ |	replace_char_atom(+, +, -)
+ *-----------------------------------------------------------------------*/
+replace_char_atom(AtomIn, OrigCharNum, NewCharNum, AtomOut)
+	:-
+	atom_codes(AtomIn,  AICs),
+	replace_char_string(AICs, OrigCharNum, NewCharNum, AOCs),
+	atom_codes(AtomOut, AOCs).
+
+/*!-----------------------------------------------------------------------
+ |	replace_char_string/4
+ |	replace_char_string(InString, OrigCharNum, NewCharNum, OutString)
+ |	replace_char_string(+, +, -)
+ *-----------------------------------------------------------------------*/
+
+replace_char_string([], _, _, []).
+replace_char_string([OrigCharNum | InString], OrigCharNum, 
+					NewCharNum, [NewCharNum | OutString])
+	:-!,
+	replace_char_string(InString, OrigCharNum, NewCharNum, OutString).
+replace_char_string([C | InString], OrigCharNum, NewCharNum, [C | OutString])
+	:-
+	replace_char_string(InString, OrigCharNum, NewCharNum, OutString).
+
+
 endmod.

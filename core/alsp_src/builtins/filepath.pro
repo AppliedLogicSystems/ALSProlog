@@ -61,6 +61,7 @@ path_elements(Path, Elements) :-
 
 split_path(Path, List) :-
 	sys_env(OS, _, _),
+	!,
 	split_path(OS, Path, List).
 	
 join_path(List, Path) :-
@@ -103,8 +104,10 @@ unix_join_path([Head | Tail], Path) :-
 	unix_join_path(Tail, TailPath),
 	unix_join_path([Head, TailPath], Path).
 
-unix_join_path('/', B, Path) :-
-	atom_concat('/', B, Path).
+unix_join_path('/', B, Path) 
+	:-
+	atom_concat('/', B, Path),
+	!.
 unix_join_path(A, B, Path) :-
 	sub_atom(A, _, 1, 0, '/'),
 	!,

@@ -8,10 +8,12 @@
  |	Author: Ken Bowen
  |	Creation Date: 1997
  *=============================================================*/
+%:-[db_srctr].
 
 module builtins.
 use tcltk.
 use tk_alslib.
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% 			TCLTK-BASED SHELL STARTUP			%%%%%
@@ -679,24 +681,20 @@ non_sys_modules(Mods)
 	list_diff(L, SysMs, Mods).
 
 export module_preds/2.
-module_preds(user,L)
-	:-!,
-	findall(PA, 
-			(all_procedures(user,P,A,R),P\=make_shell_prompts,R\=0,catenate([P,'/',A],PA)), 
-			L0),
-	(L0 = [] ->
-		L = ['No predicates defined in user'] 
-		; L = L0).
-
 module_preds(M,L)
 	:-
 	findall(PA, 
-			(all_procedures(M,P,A,R),R\=0,catenate([P,'/',A],PA)), 
-			L0),
+		(all_procedures(M,P,A,R), R\=0,atom_codes(P,[PC0|_]),
+			PC0<129, catenate([P,'/',A],PA)
+		), 
+		L0),
 	(L0 = [] ->
 		catenate('No predicates defined in ',M,Msg),
 		L = [Msg] 
-		; L = L0).
+		; 
+		sort(L0, L1),
+		L = L1
+	).
 
 endmod.	%% builtins
 
@@ -705,7 +703,6 @@ endmod.	%% builtins
 	%%%%% 		  -- portions in module builtins		%%%%% 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:-[db_srctr].
 
 module debugger.
 use tcltk.
@@ -1079,6 +1076,11 @@ gui_spy(Module, PredDesc)
 		spy(Module, Pred, Arity)
 	).
 
+set_chosen_spypoints([], Mod).
+set_chosen_spypoints([PredDesc | TclPAList], Mod)
+	:-
+	gui_spy(Mod, PredDesc),
+	set_chosen_spypoints(TclPAList, Mod).
 
 tktxt_info(ClsGrp,TextWin,Start,End,Rec,
 			StartLine,StartChar,EndLine,EndChar)
