@@ -78,13 +78,16 @@ Stand alone TTY applications:
 {blddir}bld-port:sioux_alspro_b_ppc
 {blddir}bld-port:sioux_alspro_b_68k
 {blddir}bld-port:sioux_alspro_b (Fat Binary)
+{blddir}bld-port:sioux_alspro (Packaged Fat Binary)
 
 MPW Tools:
 
 {blddir}bld-port:mpw_alspro_b_ppc
 {blddir}bld-port:mpw_alspro_b_68k
 {blddir}bld-port:mpw_alspro_b (Fat Binary)
-{blddir}bld-port:alspro_b (Duplicate of mpw_alspro_b for use in test scripts)
+{blddir}bld-port:mpw_alspro (Packaged Fat Binary)
+{blddir}bld-port:alspro_b (Duplicate of mpw_alspro_b for use in scripts)
+{blddir}bld-port:alspro (Duplicate of mpw_alspro for use in scripts)
 
 MacOS Interface Libraries:
 
