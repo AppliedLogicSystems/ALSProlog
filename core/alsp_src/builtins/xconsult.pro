@@ -98,6 +98,8 @@ readFile(Stream, File, SDMode, ModStack, CurErrs, FinalErrs)
 		   Ball,
 		   Flag = error(Ball) ),
 	!,
+%	statistics,
+%	pbi_debug(Term),
 %	gc,
 	disp_process(Flag, Term,Names,Vars,Stream, File, SDMode, ModStack, CurErrs, FinalErrs).
 
@@ -122,15 +124,15 @@ disp_process(error(Error), Term,Names,Vars,Stream, File, SDMode, ModStack,
 
 disp_process(ok, Term,Names,Vars,Stream, File, SDMode, ModStack, CurErrs, FinalErrs)
 	:-
-	process(Term,Names,Vars,Stream, File, ModStack, NewModStack, CurErrs, NewErrs, Flag),
+	process(Term,Names,Vars,Stream, File, ModStack, NewModStack, CurErrs, NewErrs, Flag), !,
 	fin_process(Flag, Stream, File, SDMode, NewModStack, NewErrs, FinalErrs).
 
 fin_process(ok, Stream, File, SDMode, NewModStack, NewErrs, FinalErrs)
-	:-
+	:- !,
 	readFile(Stream, File, SDMode, NewModStack, NewErrs, FinalErrs).
 
 fin_process(warning, Stream, File, SDMode, NewModStack, NewErrs, FinalErrs)
-	:-
+	:- !,
 	readFile(Stream, File, SDMode, NewModStack, NewErrs, FinalErrs).
 
 fin_process(error, Stream, File, SDMode, NewModStack, FinalErrs, FinalErrs).
