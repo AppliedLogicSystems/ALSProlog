@@ -5,10 +5,12 @@
 		':alsdir:library:listutl1',
 		':alsdir:library:miscterm',
 		':alsdir:library:msc_ioin',
+		':alsdir:library:mscioout',
 		':alsdir:library:strctutl',
 		':alsdir:library:strings',
 		':alsdir:library:tcl_sppt',
-		':alsdir:library:tk_alslib'
+		':alsdir:library:tk_alslib',
+		':alsdir:library:typecomp'
 		]).
 	
 %:- attach_image('ALS Prolog', [select_lib(builtins, [debugger]),
