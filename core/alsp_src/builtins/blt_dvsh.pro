@@ -379,6 +379,9 @@ alsdev(Shared, ALS_IDE_Mgr)
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
 %	(clause(dvf,_) -> demo_init ; true),
 tdvf,
+		%% for use by clear_workspace:
+	findall(GVID, global_gv_info:gvi(GVID,_,_,_),SysGlobals),
+	alsdev:assert(system_global_vars(SysGlobals)),
 	builtins:prolog_shell(ISS,OSS,alsdev).
 
 alsdev_splash(Path)
@@ -1116,6 +1119,7 @@ clear_workspace
 	clear_each_module(UserMods),
 	close_down_nonsystem_streams,
 	destroy_all_tcl_interpreters,
+	remove_non_system_global_vars,
 	listener_prompt.
 
 clear_each_module([]).
@@ -1142,6 +1146,24 @@ do_source_tcl(TclInterp, File)
 	:-
 	tcl_call(TclInterp, [source, File], X),
 	printf(user_output, 'Tcl file %t sourced in Tcl interpreter %t\n', [File,TclInterp]).
+
+
+remove_non_system_global_vars
+	:-
+	system_global_vars(SysGlobals),
+	remove_non_system_global_vars(SysGlobals).
+
+	%% Note that the module Mod has already been wiped out;
+	%% Here we need only remove the  global_gv_info entry:
+remove_non_system_global_vars(SysGlobals)
+	:-
+	global_gv_info:gvi(GVID,N,Mod,Val),
+	not(dmember(GVID, SysGlobals)),
+	global_gv_info:retract(gvi(GVID,N,Mod,Val)),
+	fail.
+remove_non_system_global_vars(SysGlobals).
+
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			DEFSTRUCT HANDLING					%%%%%
