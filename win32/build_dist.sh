@@ -26,14 +26,16 @@ EXAMPLE_SET="als pxs Chat80" ;
 WELCOME=welcome_student.als ;
 MANUAL=student_man.pdf ;
 MANUALNAME="Student Manual.pdf" ;
+HELP="studhelp" ;
 ;;
 standard)
 DISTDIR="ALS Prolog" ;
 EXE="ALS Prolog.exe" ;
 EXAMPLE_SET="als pxs more objectpro visual Prolog1000 Chat80" ;
 WELCOME=welcome_standard.als ;
-MANUAL=student_man.pdf ; # standard manual is missing.
+MANUAL=als_man.pdf ; 
 MANUALNAME="ALS Prolog Manual.pdf" ;
+HELP="alshelp" ;
 ;;
 esac
 
@@ -56,6 +58,8 @@ done
 cp -p $MAN/$WELCOME "$DISTDIR/Welcome.txt"
 cp -p $MAN/copying.als "$DISTDIR/Copying ALS.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
+mkdir "$DISTDIR/help"
+cp -pr $MAN/$HELP/* "$DISTDIR/help"
 
 mkdir "$DISTDIR/alsdir/builtins"
 cp -p $BUILTINS/*.pro "$DISTDIR/alsdir/builtins"
