@@ -1152,9 +1152,19 @@ library_module(ttyshlmk).
 
 do_source_tcl(TclInterp, File)
 	:-
+	init_tk_alslib(TclInterp, _),
 	tcl_call(TclInterp, [source, File], X),
 	printf(user_output, 'Tcl file %t sourced in Tcl interpreter %t\n', [File,TclInterp]).
 
+start_visual_tcl
+	:-
+	builtins:sys_searchdir(SSD),
+	split_path(SSD,SSDElts),
+	parent_path(PP),
+	append(SSDElts,[PP,vtcl,'vt.tcl'],VTPathElts),
+	join_path(VTPathElts, VTPath),
+	init_tk_alslib(vttcli,_),
+	tcl_call(vttcli,[source,VTPath],_).
 
 remove_non_system_global_vars
 	:-

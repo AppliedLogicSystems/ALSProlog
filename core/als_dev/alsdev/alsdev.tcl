@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.87 1999/09/14 16:25:02 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.88 1999/11/15 10:06:10 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -667,6 +667,7 @@ proc source_tcl { } {
 		prolog call alsdev do_source_tcl -atom $TclInterp -atom $file
 	} else { bell }
 }
+
 
 proc tcl_debugger {} {
 	global ALSTCLPATH

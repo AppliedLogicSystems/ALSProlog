@@ -167,6 +167,8 @@ proc add_tools_menu {menubar type window} {
 			-label Debugger -underline 0 -command ensure_db_showing 
 
 		$menubar.tools add separator 
+    	$menubar.tools add command -label "Visual Tcl" -underline 0 \
+			-command {re { prolog call alsdev start_visual_tcl } }
     	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} -state $proenv(edition)
     	$menubar.tools add command -label "Tcl Debugger$elipsis" -underline 0 -command {re tcl_debugger} -state disabled
     	$menubar.tools add command -label "Kill Tcl Interps" -underline 0 -command {re kill_tcl_interps} -state $proenv(edition)
