@@ -445,7 +445,7 @@ static struct blt_struct {
 	    "_sio_accept_socket_connection"),
 	BLT("sio_poll",2,sio_poll,"_sio_poll"),
 #ifdef HAVE_SELECT
-	BLT("sio_simple_select", 2, sio_simple_select, "_sio_simple_select"),
+	BLT("sio_simple_select", 3, sio_simple_select, "_sio_simple_select"),
 #endif /* HAVE_SELECT */
 #endif /* HAVE_SOCKET */
 
