@@ -556,7 +556,7 @@ foreign_shutdown()
 
 #endif /* DynamicForeign */
 
-#include "alspi_dlib.h"
+#include "alspi_slib.h"
 #include "cinterf.h"
 
 typedef unsigned long library_reference;
