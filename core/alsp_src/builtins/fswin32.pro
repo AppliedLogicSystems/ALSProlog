@@ -310,9 +310,10 @@ directory(Pattern, FileType, List)
 	:-
 	atom(Pattern), 
 	rootPathFile(Disk, PathList, FilePattern, Pattern),
-	subPath(PathList, Path),
+	rootPlusPath(Disk,PathList,ThePath),
+	exists_file(ThePath),
 	!,
-	'$getDirEntries'(Path, FilePattern, FirstResult),
+	'$getDirEntries'(ThePath, FilePattern, FirstResult),
 	!,
 	fixFileType(FileType, InternalFileType),
 	filterForFileType(FirstResult, Disk, PathList, InternalFileType, List).
