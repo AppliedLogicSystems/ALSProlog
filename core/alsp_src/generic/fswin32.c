@@ -224,13 +224,13 @@ char * als_getenv(const char * name)
 
 int als_system(const char * command)
 {
-/* Bug - this doesn't work from a network.  It looks like COMMAND.COM is
-   unhappy with working directories like \\machine\share\dir.  I think
-   this is something for MicroSoft to fix. */
+/* Bug - this doesn't work from a network directory.  It looks like COMMAND.COM
+   is unhappy with working directories like \\machine\share\dir.  I think
+   this is something for Microsoft to fix. */
 	#define COM_MAX 1024
 	TCHAR commandLine[COM_MAX] = "COMMAND.COM";
 	TCHAR title[MAX_PATH];
-	DWORD got_title;
+	BOOL got_title;
 	STARTUPINFO startInfo;
 	PROCESS_INFORMATION procInfo;
 	DWORD result;
