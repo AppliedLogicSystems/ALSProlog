@@ -8,7 +8,7 @@ export LIBS = /usr/local/lib/iodbc-2.12.so -lc
 export LIBEXT = so
 
 all:
-	make -f ../src/makefile.unix
+	make -f ../unix/Makefile
 
 superclean:
-	make -f ../src/makefile.unix superclean
+	make -f ../unix/Makefile superclean
