@@ -1472,13 +1472,6 @@ getResponse(Wins,Port,Box,Depth, Module, Goal, Response)
 
 %% === Not a leashed port -- Keep debugging:
 
-/*
-getResponse(pbi,_,Box,Depth,Module,Goal,debug) 
-	:-!,
-    pbi_nl,
-	pbi_ttyflush.
-*/
-
 getResponse(Wins,_,Box,Depth,Module,Goal,debug) 
 	:-
     nl(debugger_output).
@@ -1649,14 +1642,6 @@ showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 	!,
 	showGoalToUserTTY(Port,Box,Depth, Module, XGoal, Response).
 
-/*
-showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
-	:-
-	debug_io(pbi),
-	!,
-	showGoalToUserPBI(Port,Box,Depth, Module, XGoal, Response).
-*/
-
 showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 	:-
 	v_showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response).
@@ -1815,42 +1800,6 @@ disp_getresponse_cont('$badInput$', Port,Box,Depth,Module,Goal,Resps,Response)
 
 disp_getresponse_cont(Response,Port,Box,Depth,Module,Goal,Resps,Response).
 
-/*
-	%%----------------%%
-	%%%%% PBI mode %%%%%
-	%%----------------%%
-getresponse2(pbi,Port,Box,Depth,Module,Goal,Response) 
-	:-!,
-	short_deb_resps(Resps),
-	getresponse_cont_pbi(Port,Box,Depth,Module,Goal,Resps,RR),
-	!,
-    act_on_response(RR,Port,Box,Depth, Module,Goal,pbi,Response).
-
-	%% First try to act without loading the menu code:
-getresponse_cont_pbi(Port,Box,Depth,Module,Goal,Resps,Response)
-	:-
-	pbi_put(0'\?),
-	pbi_ttyflush,
-	pbi_get0(RC), 
-	(RC =< 32 ->
-		R = c
-		;
-		atom_codes(R, [RC])
-	),
-	dmember(R-Resp0,Resps),
-	!,
-	disp_getresponse_cont_pbi(Resp0, Port,Box,Depth,Module,Goal,Resps,Response).
-	
-getresponse_cont_pbi(Port,Box,Depth,Module,Goal,Resps,Response)
-	:-
-	pbi_put(8).
-
-disp_getresponse_cont_pbi('$badInput$', Port,Box,Depth,Module,Goal,Resps,Response)
-	:-
-	pbi_put(8).
-disp_getresponse_cont_pbi(Response,Port,Box,Depth,Module,Goal,Resps,Response).
-*/
-
 	%%------------------%%
 	%%%%% tcltk mode %%%%%
 	%%------------------%%
@@ -1980,100 +1929,8 @@ writeGoal(Box,Depth,Port,Module,Goal)
 	!,
 	flush_output(debugger_output).
 
-/*******8
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%% Windows I/O Hooks %%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%  - in vdebug.pro  %%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-deb_stack_trace(20,_) :- !.
-deb_stack_trace(N,M) 
-	:-
-	frame_info(N,FI),
-	!,
-	deb_disp_stack_trace(FI,N,M).
-
-deb_stack_trace(_,_).
-
-deb_disp_stack_trace((builtins:GG),_,_) 
-	:-
-	functor(GG,do_shell_query,_),
-	!.
-
-deb_disp_stack_trace((debugger:dogoal(_,_,_,Mod,Goal)), N,M)
-	:-!,
-	printf(debugger_output,'(%d) %t:%t\n',[M,Mod,Goal],[quoted(true),maxdepth(8)]),
-	NN is N+1,
-	MM is M+1,
-	deb_stack_trace(NN,MM).
-
-deb_disp_stack_trace(FI, N,M)
-	:-
-	NN is N+1,
-	deb_stack_trace(NN,M).
-
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%			GUI DEBUGGER PROCEDURES			%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-exit_debugger
-	:-
-	nospy.
-
-alsdev_step(What)
-	:-
-	printf('alsdev_step = %t\n', [What]),
-	flush_output.
-*****/
-
-/*
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%  PBI I/O HOOKS    %%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-showGoalToUserPBI(exit,_,_,_,'$dbg_aph'(_,_,_),debug) :-!.
-showGoalToUserPBI(exit,_,_,_,'$dbg_apg'(_,_,_),debug) :-!.
-showGoalToUserPBI(exit,_,_,_,'$dbg_aphe'(_,_,_),debug) :-!.
-showGoalToUserPBI(exit,_,_,_,'$dbg_apge'(_,_,_),debug) :-!.
-showGoalToUserPBI(exit,_,_,_,'$dbg_apf'(_,_,_),debug) :-!.
-
-showGoalToUserPBI(_,_,_,_,'$dbg_aph'(_,_,_),skip) :-!.
-showGoalToUserPBI(_,_,_,_,'$dbg_apg'(_,_,_),skip) :-!.
-showGoalToUserPBI(_,_,_,_,'$dbg_aphe'(_,_,_),skip) :-!.
-showGoalToUserPBI(_,_,_,_,'$dbg_apge'(_,_,_),skip) :-!.
-showGoalToUserPBI(_,_,_,_,'$dbg_apf'(_,_,_),skip) :-!.
-
-showGoalToUserPBI(Port,Box,Depth, Module, XGoal, Response)
-	:-
-					    %% Display the port:
-    writeGoalPBI(Box,Depth,Port,Module,XGoal),
-			   			%% And find out what do do:
-    getResponse(pbi,Port,Box,Depth, Module, XGoal, Response).
-
-
-/*-------------------------------------------------------------------------*
- | writeGoalPBI/5
- | writeGoalPBI(Box,Depth,Port,Module,Goal) 
- *-------------------------------------------------------------------------*/
-
-writeGoalPBI(Box,Depth,Port,Module,Goal) 
-	:-
-%	printf(debugger_output,'(%d) %d %t: ', [Box,Depth,Port]),
-
-	pbi_nl,
-	pbi_put(0'(),
-	pbi_write(Box), pbi_put(32),
-	pbi_write(') '),
-	pbi_write(Depth), pbi_put(32),
-	pbi_write(Port),  pbi_put(58),
-	pbi_write(Module:Goal),
-	pbi_ttyflush.
-*/
-
-
-%:- dynamic('$dbg_apg_special'/3).
+:- dynamic('$dbg_apg_special'/3).
 
 endmod.					%% builtins:  debugger segment
 
@@ -2085,6 +1942,8 @@ export '$dbg_apge'/3.
 export '$dbg_aphe'/3.
 export '$dbg_apf'/3.
 
+
+:- dynamic('$dbg_apg_special'/3).
 
 '$dbg_apg'(A,B,C) :-  debugger:'$dbg_apg_special'(A,B,C),!.
 '$dbg_apg'(_,_,_).

@@ -2650,12 +2650,9 @@ shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 	:-
 	accessObjStruct(errors_display, State, PrevErrsList),
 	SourceFile = SPath,
-accessObjStruct(tcl_doc_path, State, TWW),
-write(sshA(1,TWW,ErrsList)),nl,flush_output,
 	(PrevErrsList \= [] ->
 		accessObjStruct(tcl_doc_path, State, TclWin),
 		(TclWin \= nil ->
-write(sshA(2,TWW,close_and_reopen(TclWin))),nl,flush_output,
 			tcl_call(shl_tcli, [close_and_reopen, TclWin], _),
 			send_self(State, clear_decorations)
 			;
@@ -2665,12 +2662,8 @@ write(sshA(2,TWW,close_and_reopen(TclWin))),nl,flush_output,
 		shl_source_handlerAction(open_edit_win(SourceFile), State),
 		accessObjStruct(tcl_doc_path, State, TclWin)
 	),
-accessObjStruct(tcl_doc_path, State, TWW2),
-write(sshA(3,TWW2)),nl,flush_output,
 	setObjStruct(errors_display, State, ErrsList),
 	setObjStruct(source_file, State, SourceFile),
-accessObjStruct(tcl_doc_path, State, TWW4),
-write(sshA(4,TWW4)),nl,flush_output,
 	tcl_call(shl_tcli, [add_line_numbers_and_syn_errs,TclWin],_),
 	catenate([TclWin,'.listbox'], ErrListWin),
 	indicate_errors(ErrsList, TclWin, ErrListWin).
