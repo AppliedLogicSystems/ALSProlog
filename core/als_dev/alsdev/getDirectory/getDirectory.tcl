@@ -1,6 +1,6 @@
 # getDirectory.tcl --
 #
-#	Derived from the standard tkFDialog/tkfox
+#	Derived from the standard tkFDialog/tkfbox
 #	Probably can be stripped down further.
 #
 # ORIGINAL:
