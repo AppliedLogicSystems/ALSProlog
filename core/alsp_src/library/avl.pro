@@ -235,10 +235,10 @@ preorder(Tree,InL,[Key|OutL]) :-
  * component of the node.
  */
 
-avl_key(Tree,Key) :- arg(1,Tree,Key).
-avl_data(Tree,Data) :- arg(2,Tree,Data).
-avl_left(Tree,Left) :- arg(3,Tree,Left).
-avl_right(Tree,Right) :- arg(4,Tree,Right).
+avl_key(Tree,Key) :- compound(Tree),arg(1,Tree,Key).
+avl_data(Tree,Data) :- compound(Tree),arg(2,Tree,Data).
+avl_left(Tree,Left) :- compound(Tree),arg(3,Tree,Left).
+avl_right(Tree,Right) :- compound(Tree),arg(4,Tree,Right).
 
 
 /*!------------------------------------------------------------------
