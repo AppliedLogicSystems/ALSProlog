@@ -84,8 +84,7 @@ alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a $(MAKEFILES)
 	$(CC) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LIBS)
 
 alspro :  alsdir alspro_b $(BUILTINS) $(MAKEFILES)
-	./alspro_b -q -b -obp \
-	-g 'save_image(alspro,[])'
+	./alspro_b -q -b -obp -g 'save_image(alspro,[])'
 
 ifndef NO_STATIC_LIB
 libalspro.a : alsdir $(STATIC_OBJECTS) $(LIB_OBJECTS) $(MAKEFILES)
