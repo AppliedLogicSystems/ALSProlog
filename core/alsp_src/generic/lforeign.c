@@ -972,7 +972,7 @@ static plugin_error os_load_plugin(const char *lib_name,
     
     strcat(full_name, lib_name);
 
-    object = dlopen(full_name, RTLD_LAZY);
+    object = dlopen(full_name, RTLD_LAZY | RTLD_GLOBAL);
     if (object == NULL) err = dlerror();
 
     if (err == NULL) {
