@@ -40,4 +40,6 @@ read 'GIFf' (203, "right-arrow-blue", purgeable, preload) "right-arrow-blue.b64"
 read 'GIFf' (204, "up-arrow-blue", purgeable, preload) "up-arrow-blue.b64";
 read 'GIFf' (205, "closed_ptr", purgeable, preload) "closed_ptr.b64";
 read 'GIFf' (206, "open_ptr", purgeable, preload) "open_ptr.b64";
+read 'GIFf' (207, "closed_mac", purgeable, preload) "closed_mac.b64";
+read 'GIFf' (208, "open_mac", purgeable, preload) "open_mac.b64";
 
