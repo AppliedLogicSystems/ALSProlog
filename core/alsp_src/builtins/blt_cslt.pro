@@ -365,10 +365,11 @@ check_for_searchdirs(_, COpts)
 	:-
 	findall(SD, builtins:searchdir(SD), SDs),
 	builtins:sys_searchdir(SysSearchdir),
-	findall(SubDirPath, 
-			(system_subdir(SubD), join_path([SysSearchdir,SubD],SubDirPath) ),
-			SSubDs),
-	append(SDs, SSubDs, NewSearchList),
+%	findall(SubDirPath, 
+%			(system_subdir(SubD), join_path([SysSearchdir,SubD],SubDirPath) ),
+%			SSubDs),
+%	append(SDs, SSubDs, NewSearchList),
+	append(SDs, [sys_searchdir(SysSearchdir)], NewSearchList),
 	directory_self(Self),
 	set_cslt_opts(searchpath, COpts, [Self | NewSearchList]). 	
 
@@ -538,7 +539,7 @@ record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr)
 */
 
 	access_cslt_opts(srcfilepath, FCOpts, SourceFilePath), 
-	(FCG > 0 ->
+	((FCG \= '', FCG > 0)->
 		send(ALSMgr, insert_src_mgr_by_cg(FCG, FileMgr)),
 		send(FileMgr, note_loaded(FCG, SourceFilePath))
 		;
@@ -749,7 +750,15 @@ path_to_try_from_desc(SearchList, Desc, TryPath)
 /*-------------------------------------------------------------*
  |	path_to_try(SearchList, BaseFile, TryPath)
  *-------------------------------------------------------------*/ 
+
 export path_to_try/3.
+path_to_try([Head | RestSearchList], PathList, TryPath)
+	:-
+	Head = [_|_],
+	!,
+	(path_to_try(Head, PathList, TryPath) ;
+		path_to_try(RestSearchList, PathList, TryPath) ).
+	
 path_to_try([sys_searchdir(DirPath) | RestSearchList], PathList, TryPath)
 	:-
 	split_path(DirPath, DirPathList),
@@ -760,8 +769,7 @@ path_to_try([sys_searchdir(DirPath) | RestSearchList], PathList, TryPath)
 				),
 			TPs),
 	!,
-	path_to_try(TPs, PathList, TryPath).
-
+	tree_path_to_try(TPs, PathList, TryPath).
 
 path_to_try([DirPath | RestSearchList], PathList, TryPath)
 	:-
@@ -774,6 +782,38 @@ path_to_try([_ | RestSearchList], PathList, TryPath)
 	:-
 	path_to_try(RestSearchList, PathList, TryPath).
 
+tree_path_to_try([DirPath | RestSearchList], PathList, TryPath)
+	:-
+	split_path(DirPath, DirPathList),
+	append(DirPathList,PathList,SrcPathList),
+	join_path(SrcPathList, TryPath).
+
+tree_path_to_try([DirPath | RestSearchList], PathList, TryPath)
+	:-
+	split_path(DirPath, DirPathList),
+	append(DirPathList,['*'],PatternList),
+	join_path(PatternList, Pattern),
+	directory(Pattern,directory,SubdirList0),
+	rem_file_dots(SubdirList0, SubdirList),
+	member(SSD, SubdirList),
+	append(DirPathList, [SSD], SubDirPathList),
+	join_path(SubDirPathList, SubDirPath),
+	tree_path_to_try([SubDirPath], PathList, TryPath).
+
+tree_path_to_try([DirPath | RestSearchList], PathList, TryPath)
+	:-
+	tree_path_to_try(RestSearchList, PathList, TryPath).
+
+rem_file_dots([], []).
+rem_file_dots(['.' | SubdirList0], SubdirList)
+	:-!,
+	rem_file_dots(SubdirList0, SubdirList).
+rem_file_dots(['..' | SubdirList0], SubdirList)
+	:-!,
+	rem_file_dots(SubdirList0, SubdirList).
+rem_file_dots([Item | SubdirList0], [Item | SubdirList])
+	:-
+	rem_file_dots(SubdirList0, SubdirList).
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/ 
 cont_consult(Path, BaseFile, FCOpts, FileMgr)
