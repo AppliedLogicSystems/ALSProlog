@@ -53,6 +53,7 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     setup.icbuf_size = 0;
     setup.alsdir = NULL;
     setup.saved_state = NULL;
+    setup.load_executable_state = 1;
     setup.argc = argc;
     setup.argv = argv;
 #ifdef WIN32
@@ -186,6 +187,9 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     
 #endif
 
+#ifdef MSWin32
+    SetConsoleTitle("ALS Prolog"));
+#endif
 
     if ((exit_status = PI_startup(&setup)) != 0) {
 	PI_app_printf(PI_app_printf_error, "Prolog init failed !\n");

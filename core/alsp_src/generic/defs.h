@@ -409,8 +409,9 @@ extern	long *	ss_pmalloc	PARAMS(( size_t size, int fe_num, long *asizep ));
 extern	long *	ss_malloc	PARAMS(( size_t size, int fe_num ));
 extern	void	ss_register_global PARAMS(( long *addr ));
 #ifdef SIMPLE_MICS
-extern	long	ss_image_offset	PARAMS((void));
+extern	long	ss_image_offset	PARAMS((const char *));
 extern	int	ss_save_image_with_state PARAMS((CONST char * ));
+extern	int	ss_attach_state_to_file PARAMS((const char *file_name));
 #endif
 extern	int	ss_save_state	PARAMS((CONST char *, long ));
 extern	void	protect_bottom_stack_page PARAMS(( void ));
@@ -438,10 +439,10 @@ extern	int	MPW_Tool;
 extern	void	als_exit	PARAMS(( int ));
 extern	void	heap_overflow	PARAMS(( void ));
 
-#define IMAGENAME_MAX	64
 #define IMAGEDIR_MAX	1024
-extern char imagename[];	/* name of image we are running - initial path */
-extern char imagedir[];		/* directory containing image with final slash */
+extern char library_path[IMAGEDIR_MAX];
+extern char library_dir[IMAGEDIR_MAX];
+extern char executable_path[IMAGEDIR_MAX];
 
 /* ----------   arith.c ----------   */
 void make_ieee_nan PARAMS( (PWord *, int *) );

@@ -33,6 +33,7 @@
 #include <limits.h>
 
 #ifdef HAVE_UNISTD_H
+#include <sys/param.h>
 #include <unistd.h>
 #endif
 #ifdef HAVE_FCNTL_H
@@ -91,10 +92,10 @@ static int pckgloaded = 0;
  *------------------------------------------------------------------------*/
 long  saved_state_image_offset = 0;
 
-#define IMAGENAME_MAX	64
-#define IMAGEDIR_MAX	1024
-char  imagename[IMAGENAME_MAX];
-char  imagedir[IMAGEDIR_MAX];
+char library_path[IMAGEDIR_MAX];
+char library_dir[IMAGEDIR_MAX];
+char executable_path[IMAGEDIR_MAX];
+
 static char alsdir[IMAGEDIR_MAX];	/* directory where ALS system resides */
 
 #ifdef MSWin32
@@ -126,13 +127,12 @@ static	void	assert_als_system PARAMS((const char *, const char *,
 					  const char *, const char *,
 					  const char *));
 static	void	assert_atom_in_module PARAMS(( const char*, const char * ));
-#ifndef MacOS
-static	int	absolute_pathname PARAMS((CONST char * ));
-#endif
+
 #ifndef PURE_ANSI
-static	void	locate_executable(int argc, char *argv[]);
-static	void	command_line_locate_executable(int argc, char *argv[]);
+static	void	locate_library_executable(int argc, char *argv[]);
+static	void	command_line_locate_executable(const char *argv0);
 #endif /* PURE_ANSI */
+
 static	void	autoload	PARAMS(( char * ));
 static	void	chpt_init	PARAMS(( void ));
 
@@ -162,8 +162,9 @@ static int PI_prolog_init0(const PI_system_setup *setup)
     unsigned long heapsize;
     unsigned long stacksize;
     unsigned long icbufsize;
-    const char *saved_state_filename;
+    const char *state_path;
     int  saved_state_loaded;
+    int offset;
 
 #ifdef MSWin32
     win32s_system = IS_WIN32S;
@@ -247,7 +248,6 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 	heapsize = setup->heap_size ? setup->heap_size : DEFAULT_HEAP_SIZE;
     stacksize = setup->stack_size ? setup->stack_size :DEFAULT_STACK_SIZE;
     icbufsize = setup->icbuf_size ? setup->icbuf_size : MIN_ICBUFSIZE;
-    saved_state_filename = setup->saved_state;
     
     
     /*
@@ -256,12 +256,8 @@ static int PI_prolog_init0(const PI_system_setup *setup)
      */
 
 #ifndef PURE_ANSI
-    locate_executable(setup->argc, setup->argv);
+    locate_library_executable(setup->argc, setup->argv);
 #endif /* PURE_ANSI */
-
-#ifdef SIMPLE_MICS 
-    saved_state_image_offset = ss_image_offset();
-#endif
 
     /*
      * Initialize space for ss_malloc.  This should be done fairly early
@@ -270,17 +266,20 @@ static int PI_prolog_init0(const PI_system_setup *setup)
      * we have a saved state.
      */
     
-    if (saved_state_image_offset) {
-	char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
-	strcpy(imagepath,imagedir);
-	strcat(imagepath,imagename);
-	if (imagepath == NULL)
-	    fatal_error(FE_ALS_MEM_INIT, 0);
-	saved_state_loaded = als_mem_init(imagepath, saved_state_image_offset);
-	free(imagepath);
+    if (setup->saved_state) {
+    	state_path = setup->saved_state;
+    	offset = 0;
+    } else if (setup->load_executable_state) {
+    	offset = ss_image_offset(executable_path);
+    	if (offset) state_path = executable_path;
+    	else state_path = NULL;
     } else {
-	saved_state_loaded = als_mem_init(saved_state_filename,0);
+    	state_path = NULL;
+    	offset = 0;
     }
+    
+    saved_state_loaded = als_mem_init(state_path, offset);
+    	
     /*
      * Set up the alsdir variable.  First use the image directory and
      * attach alsdir to the path.  If this directory does not exist then
@@ -291,7 +290,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 	if (setup->alsdir) {
 		strcpy(alsdir, setup->alsdir);
     } else {
-    	strcpy(alsdir, imagedir);
+    	strcpy(alsdir, library_dir);
     	strcat(alsdir, "alsdir");
     }
 
@@ -301,7 +300,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
     if (access(alsdir, R_OK | X_OK) == -1) 
 	{
 	/* not accessible; just use image directory */
-	strcpy(alsdir, imagedir);
+	strcpy(alsdir, library_dir);
     }
     else {
 	char *chptr;
@@ -559,26 +558,30 @@ static void
 assert_sys_searchdir(name)
     char *name;
 {
-    char  command[2048];
-#if defined(DOS) || defined(MSWin32)
-    char  tbuf[2048], *tptr, *nptr;
-#endif
+    PWord c, a1, a2, a4, b, s, p;
+    int ct, a1t, a2t, a4t, bt, st, pt;
+	
+    PI_makesym(&c, &ct, "assertz");
+    PI_makestruct(&c, &ct, c, 4);
+	
+    PI_getargn(&a1, &a1t, c, 1);
+    PI_getargn(&a2, &a2t, c, 2);
+    PI_getargn(&a4, &a4t, c, 4);
 
-    if (noautoload && !pckgloaded)
-	return;
-
-#if defined(DOS) || defined(MSWin32)
-    /* replace \ by \\ to make parser happy */
-
-    for (tptr = tbuf, nptr = name; *nptr != '\0'; *tptr++ = *nptr++)
-	if (*nptr == '\\')
-	    *tptr++ = '\\';
-    *tptr = '\0';
-    name = tbuf;
-#endif /* DOS */
-
-    sprintf(command, "assertz(builtins,sys_searchdir('%s'),_,0)", name);
-    if (!exec_query_from_buf(command)) {
+    PI_makesym(&b, &bt, "builtins");
+    PI_unify(b, bt, a1, a1t);
+	
+    PI_makesym(&s, &st, "sys_searchdir");
+    PI_makestruct(&s, &st, s, 1);
+    PI_getargn(&a1, &a1t, s, 1);
+    PI_makeuia(&p, &pt, name);
+    PI_unify(p, pt, a1, a1t);
+    
+    PI_unify(s, st, a2, a2t);
+    
+    PI_unify(0, PI_INT, a4, a4t);
+	
+    if (!PI_rungoal(b, c, ct)) {
 	fatal_error(FE_ASSERT_SSD, (long) name);
     }
 }
@@ -632,6 +635,7 @@ assert_als_system(os, os_var, proc, man, ver)
  *-----------------------------------------------------------------------------*/
 
 #ifndef PURE_ANSI
+#if 0
 #if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(OS2) || defined(MSWin32)
 
 static int
@@ -663,15 +667,7 @@ absolute_pathname(name)
 
 /* Moved to fsmac.c */
 
-#else  /* default is Unix style path specification */
-
-static int
-absolute_pathname(name)
-    const char *name;
-{
-    return ( *name == DIR_SEPARATOR);
-}
-
+#endif
 #endif
 
 /*--------------------------------------------------------------------*
@@ -681,32 +677,35 @@ absolute_pathname(name)
  | the current directory.
  *--------------------------------------------------------------------*/
 
-static void locate_executable(int argc, char *argv[])
+static void locate_library_executable(int argc, char *argv[])
 {
 #ifdef MSWin32
     DWORD l;
     char *endpath;
-#ifdef DLL
     HMODULE dll;
     
+    l = GetModuleFileName(NULL, executable_path, IMAGEDIR_MAX);
+    if (l == 0 || l >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
+
+#ifdef DLL
     dll = GetModuleHandle(DLL_NAME);
     if (dll == NULL) fatal_error(FE_INFND, 0);
     
-    l = GetModuleFileName(dll, imagedir, IMAGEDIR_MAX);
-#else
-    l = GetModuleFileName(NULL, imagedir, IMAGEDIR_MAX);
-#endif /* DLL */
+    l = GetModuleFileName(dll, library_path, IMAGEDIR_MAX);
     if (l == 0 || l >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
-    imagedir[l] = 0;
-    endpath = strrchr(imagedir, '\\');
+#else
+	strcpy(library_path, executable_path);
+#endif /* DLL */
+
+	strcpy(library_dir, library_path);
+
+    endpath = strrchr(library_dir, '\\');
     if (endpath == NULL) fatal_error(FE_INFND, 0);
     endpath++;  /* include the \ */
-    if (strlen(endpath) >= IMAGENAME_MAX) fatal_error(FE_INFND, 0);
-    strcpy(imagename, endpath);
     *endpath = 0;
 #elif MacOS
     if (MPW_Tool) {
-		command_line_locate_executable(argc, argv);
+		command_line_locate_executable(argv[0]);
     } else {
 		OSErr err;
 		ProcessSerialNumber PSN;
@@ -753,191 +752,67 @@ static void locate_executable(int argc, char *argv[])
 		if (MemError() != noErr) fatal_error(FE_INFND, 0);
     }
 #elif UNIX
-    command_line_locate_executable(argc, argv);
+    char *endpath;
+
+    command_line_locate_executable(argv[0]);
+    strcpy(library_path, executable_path);
+
+    strcpy(library_dir, library_path);
+
+    endpath = strrchr(library_dir, '/');
+    if (endpath == NULL) fatal_error(FE_INFND, 0);
+    endpath++;  /* include the \ */
+    *endpath = 0;
 #else
 #error
 #endif
 }
 
-/* FIX this should be revised to use realpath(), which is a standard
-   SunOS-style unix library call. */
-static void command_line_locate_executable(int argc, char *argv[])
+#ifndef MSWin32
+static void command_line_locate_executable(const char *argv0)
 {
-    register char *cutoff = NULL;	/* stifle -Wall */
-    register char *s;
-    register char *t;
-    char *name;
-#ifdef HAVE_SYMLINK
-    int   cc;
-#endif
-    char  ebuf[4096];
+  const char *exec_path = NULL;
 
-    /* Under unix, the only way to determine the location of the
-     * executable file is using the first command line argument.
-     * When this is not available, it is a fatal error.
-     */
+  if (strchr(argv0, '/')) {
+    exec_path = argv0;
+  } else {
+    const char *path_list, *p, *endp;
+    char path[MAXPATHLEN];
+    size_t length;
+    struct stat stat_buf;
 
-    if (argc == 0 || argv[0] == NULL) {
-        fatal_error(FE_INFND, 0);
-	return;
+    path_list = getenv("PATH");
+    if (!path_list) path_list = "/bin:/usr/bin:";
+
+    for (p = path_list; *p; *endp ? (p = endp+1) : (p = endp)) {
+      for (endp = p; *endp && *endp != ':'; endp++) ;
+      length = endp-p;
+      strncpy(path, p, length);
+      path[length] = 0;
+      if (length && path[length-1] != '/') strcat(path, "/");
+      strcat(path, argv0);
+
+      if ((access(path, X_OK) == 0)
+	  && (stat(path, &stat_buf) == 0)
+	  && S_ISREG(stat_buf.st_mode)) {
+	exec_path = path;
+	break;
+      }
     }
     
-    name = argv[0];
+    if (!exec_path) exec_path = argv0;
+  }
 
-    /*
-     * See if the file is accessible either through the current directory
-     * or through an absolute path.
-     */
-
-    if (access(argv[0], R_OK) == 0) {
-
-	/*-------------------------------------------------------------*
-	 * The file was accessible without any other work.  But the current
-	 * working directory might change on us, so if it was accessible
-	 * through the cwd, then we should get it for later accesses.
-	 *-------------------------------------------------------------*/
-
-	t = imagedir;
-	if (!absolute_pathname(name)) {
-#if defined(DOS) && !defined(__DJGPP__)
-	    int   drive;
-	    char *newrbuf;
-
-	    newrbuf = imagedir;
-
-	    if (*(name + 1) == ':') {
-		if (*name >= 'a' && *name <= 'z')
-		    drive = (int) (*name - 'a' + 1);
-		else
-		    drive = (int) (*name - 'A' + 1);
-		*newrbuf++ = *name;
-		*newrbuf++ = *(name + 1);
-		*newrbuf++ = DIR_SEPARATOR;
-	    }
-	    else {
-		drive = 0;
-		*newrbuf++ = DIR_SEPARATOR;
-	    }
-	    if (getcwd(newrbuf, drive) == 0) {
-		fatal_error(FE_GETCWD, 0);
-	    }
-#else  /* not  DOS */
-#ifdef HAVE_GETWD
-	    if (getwd(imagedir) == 0) {
-		fatal_error(FE_GETCWD, 0);
-	    }
-#else  /* !HAVE_GETWD */
-	    if (getcwd(imagedir, 1024) == 0) {
-		fatal_error(FE_GETCWD, 0);
-	    }
-#endif /* !HAVE_GETWD */
-#endif /* DOS */
-
-	    for (; *t; t++)	/* Set t to end of buffer */
-		;
-	    if (*(t - 1) == DIR_SEPARATOR)	/* leave slash if already
-						 * last char
-						 */
-		cutoff = t - 1;
-	    else {
-		cutoff = t;	/* otherwise put one in */
-		*t++ = DIR_SEPARATOR;
-	    }
-	}
-#if (!defined(MacOS) && !defined(_DJGPP__) && !defined(__GO32__) && !defined(MSWin32))
-	else
-		(*t++ = DIR_SEPARATOR);
-#endif
-
-	/*-------------------------------------------------------------*
-	 * Copy the rest of the string and set the cutoff if it was not
-	 * already set.  If the first character of name is a slash, cutoff
-	 * is not presently set but will be on the first iteration of the
-	 * loop below.
-	 *-------------------------------------------------------------*/
-
-	for ((*name == DIR_SEPARATOR ? (s = name+1) : (s = name));;) {
-	    if (*s == DIR_SEPARATOR)
-			cutoff = t;
-	    if (!(*t++ = *s++))
-			break;
-	}
-
-    }
-    else {
-
-	/*-------------------------------------------------------------*
-	 * Get the path list from the environment.  If the path list is
-	 * inaccessible for any reason, leave with fatal error.
-	 *-------------------------------------------------------------*/
-
-#ifdef MacOS
-	if ((s = getenv("Commands")) == (char *) 0)
-#else
-	if ((s = getenv("PATH")) == (char *) 0)
-#endif
-	    fatal_error(FE_PATH, 0);
-
-	/*
-	 * Copy path list into ebuf and set the source pointer to the
-	 * beginning of this buffer.
-	 */
-
-	strcpy(ebuf, s);
-	s = ebuf;
-
-	for (;;) {
-	    t = imagedir;
-	    while (*s && *s != PATH_SEPARATOR)
-		*t++ = *s++;
-	    if (t > imagedir && *(t - 1) == DIR_SEPARATOR) 
-		;		/* do nothing -- slash already is in place */
-	    else
-		*t++ = DIR_SEPARATOR;	/* put in the slash */
-	    cutoff = t - 1;	/* set cutoff */
-	    strcpy(t, name);
-	    if (access(imagedir, R_OK) == 0)
-		break;
-
-	    if (*s)
-		s++;		/* advance source pointer */
-	    else
-		fatal_error(FE_INFND, 0);
-	}
-
-    }
-
-    /*-------------------------------------------------------------*
-     | At this point the full pathname should exist in imagedir and
-     | cutoff should be set to the final slash.  We must now determine
-     | whether the file name is a symbolic link or not and chase it down
-     | if it is.  Note that we reuse ebuf for getting the link.
-     *-------------------------------------------------------------*/
-
-#ifdef HAVE_SYMLINK
-    while ((cc = readlink(imagedir, ebuf, 512)) != -1) {
-	ebuf[cc] = 0;
-	s = ebuf;
-	if (*s == DIR_SEPARATOR) {
-	    t = imagedir;
-	}
-	else {
-	    t = cutoff + 1;
-	}
-	for (;;) {
-	    if (*s == DIR_SEPARATOR)
-		cutoff = t;	/* mark the last slash seen */
-	    if (!(*t++ = *s++))	/* copy the character */
-		break;
-	}
-    }
-
-#endif /* HAVE_SYMLINK */
-
-    strcpy(imagename, cutoff + 1);	/* keep the image name */
-    *(cutoff + 1) = 0;		/* chop off the filename part */
+  /* Cast exec_path to char *, because realpath isn't always defined
+     with const char * */
+  if (!realpath((char *)exec_path, executable_path)) {
+    fatal_error(FE_INFND, 0);
+    return;
+  }
 }
+
 #endif /* PURE_ANSI */
+#endif
 
 /*-------------------------------------------------------------*
  | autoload will attempt to load the named file from
@@ -1306,6 +1181,11 @@ PI_prolog_init(int argc, char *argv[])
     setup.icbuf_size = 0;
     setup.alsdir = NULL;
     setup.saved_state = NULL;
+#ifdef DLL
+	setup.load_executable_state = 0;
+#else
+	setup.load_executable_state = 1;
+#endif
     setup.argc = argc;
     setup.argv = argv;
 #ifdef WIN32
@@ -1326,7 +1206,6 @@ static void EndCoop(void);
 EXPORT ALSPI_API(int)
 PI_startup(const PI_system_setup *setup)
 {
-
 #ifdef MacOS
     /* Determine if we are running under MPW. */
     ProcessSerialNumber PSN;
@@ -1368,10 +1247,7 @@ PI_startup(const PI_system_setup *setup)
 
 #ifdef MSWin32
 
-    if (!(IS_WIN32S) && !SetConsoleTitle("ALS Prolog")) {
-    	PI_app_printf(PI_app_printf_warning, "SetConsoleTitle failed !\n");
-    }
-    
+// This should be moved to the dev system code
     if (!(IS_WIN32S)) {
 	if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE))
 	    PI_app_printf(PI_app_printf_warning, "SetConsoleCtrlHandler failed !\n");

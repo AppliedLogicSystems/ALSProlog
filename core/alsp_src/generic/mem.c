@@ -1148,14 +1148,11 @@ static DWORD ms_pecoff_end(HANDLE image_file)
     return end;
 }
 
-long ss_image_offset(void)
+long ss_image_offset(const char *image_name)
 {
-    char image_name[MAX_PATH];
-    DWORD l, image_size, pecoff_size;
+    DWORD image_size, pecoff_size;
     HANDLE image_file;
     
-    l = GetModuleFileName(NULL, image_name, MAX_PATH);
-    if (l <= 0 || l >= MAX_PATH) return 0;
     
     image_file = CreateFile(image_name, GENERIC_READ, FILE_SHARE_READ, NULL,
                             OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
@@ -1175,8 +1172,7 @@ long ss_image_offset(void)
 int ss_save_image_with_state(const char * new_image_name)
 {
     char image_name[MAX_PATH];
-    DWORD l, state_offset;
-    HANDLE new_image_file;
+    DWORD l;
     
     l = GetModuleFileName(NULL, image_name, MAX_PATH);
     if (l <= 0 || l >= MAX_PATH) {
@@ -1189,23 +1185,31 @@ int ss_save_image_with_state(const char * new_image_name)
     	return 0;
     }
     
-    new_image_file = CreateFile(new_image_name, GENERIC_READ, FILE_SHARE_READ, NULL,
+    return ss_attach_state_to_file(new_image_name);
+}
+
+int ss_attach_state_to_file(const char *image_name)
+{   
+    HANDLE image_file;
+    DWORD state_offset;
+    
+    image_file = CreateFile(image_name, GENERIC_READ, FILE_SHARE_READ, NULL,
                             OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
-    if (new_image_file == INVALID_HANDLE_VALUE) {
-    	printf("ss_save_image: Couldn't open %s\n", new_image_name);
+    if (image_file == INVALID_HANDLE_VALUE) {
+    	printf("ss_save_image: Couldn't open %s\n", image_name);
     	return 0;
     }
    
-    state_offset = ms_pecoff_end(new_image_file);
+    state_offset = ms_pecoff_end(image_file);
 
-    CloseHandle(new_image_file);
+    CloseHandle(image_file);
 
     if (state_offset == 0) {
-    	printf("ss_save_image: Couldn't find end of PE/COFF file %s\n", new_image_name);
+    	printf("ss_save_image: Couldn't find end of PE/COFF file %s\n", image_name);
     	return 0;
     }
         
-    return ss_save_state(new_image_name, state_offset);
+    return ss_save_state(image_name, state_offset);
 }
 
 #endif /* MSWin32 */
@@ -1316,11 +1320,6 @@ static unsigned long image_end(int image_file)
 
 #endif /* AIX_XCOFF */
 
-#define IMAGENAME_MAX	64
-#define IMAGEDIR_MAX	1024
-extern char  imagename[IMAGENAME_MAX];
-extern char  imagedir[IMAGEDIR_MAX];
-
 #ifdef HAVE_LIBELF
 #include <libelf.h>
 
@@ -1380,9 +1379,8 @@ static Elf_Scn *find_named_section(Elf *elf, const char *name, int create)
     } else return NULL;
 }
 
-long ss_image_offset(void)
+long ss_image_offset(const char *imagepath)
 {
-  char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
   int image_file, r;
   Elf *elf;
   Elf_Scn *scn;
@@ -1394,9 +1392,6 @@ long ss_image_offset(void)
 
   if (elf_version(EV_CURRENT) == EV_NONE) return 0;
     
-  strcpy(imagepath,imagedir);
-  strcat(imagepath,imagename);
-
   image_file = open(imagepath, O_RDONLY);
   if (image_file == -1)
     fatal_error(FE_SS_OPENERR,(long)imagepath);
@@ -1404,8 +1399,6 @@ long ss_image_offset(void)
   elf = elf_begin(image_file, ELF_C_READ, NULL);
   if (elf == NULL)
     fatal_error(FE_SS_OPENERR,(long)imagepath);
-
-  free(imagepath);
 
   scn = find_named_section(elf, "ALS Prolog State", 0);
   if (scn == NULL) image_offset = 0;
@@ -1463,9 +1456,8 @@ static unsigned long image_end(int image_file)
 #endif /* HAVE_LIBELF */
 
 #ifndef USE_ELF_SECTION_FOR_IMAGE
-long ss_image_offset(void)
+long ss_image_offset(const char *imagepath)
 {
-    char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
     unsigned long file_size, image_size;
     int file, fstat_result;
     struct stat file_status;
@@ -1473,9 +1465,6 @@ long ss_image_offset(void)
     if (imagepath == NULL)
 	return 0;
     
-    strcpy(imagepath,imagedir);
-    strcat(imagepath,imagename);
-
     file = open(imagepath, O_RDONLY);
     
     if (file == -1)
@@ -1488,8 +1477,6 @@ long ss_image_offset(void)
 
     if (fstat_result != 0)
 	fatal_error(FE_SS_OPENERR,(long)imagepath);
-
-    free(imagepath);
 
     file_size = file_status.st_size;
  
@@ -1552,7 +1539,17 @@ static int copy(const char *filename, const char *copyname)
 #ifdef USE_ELF_SECTION_FOR_IMAGE
 int ss_save_image_with_state(const char * new_image_name)
 {
-    char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
+    
+    if (copy(executable_path, new_image_name) != 0) {
+	printf("ss_save_image: Couldn't copy %s to %s\n", executable_path, new_image_name);
+    	return 0;
+    }
+
+    return ss_attach_state_to_file(new_image_name);
+}
+
+int ss_attach_state_to_file(const char * image_name)
+{
     char tmp_name[L_tmpnam];
     mem_file_info tmp_mmap;
     int fd, r;
@@ -1561,20 +1558,6 @@ int ss_save_image_with_state(const char * new_image_name)
     Elf32_Shdr *shdr;
     Elf_Data *data;
     
-    if (imagepath == NULL)
-	return 0;
-    
-    strcpy(imagepath,imagedir);
-    strcat(imagepath,imagename);
-
-    if (copy(imagepath, new_image_name) != 0) {
-    	free(imagepath);
-	printf("ss_save_image: Couldn't copy %s to %s\n", imagepath, new_image_name);
-    	return 0;
-    }
-    
-    free(imagepath);
-
     tmpnam(tmp_name);
 
     ss_save_state(tmp_name, 0);
@@ -1583,7 +1566,7 @@ int ss_save_image_with_state(const char * new_image_name)
 
     if (elf_version(EV_CURRENT) == EV_NONE) return 0;
 
-    fd = open(new_image_name, O_RDWR);
+    fd = open(image_name, O_RDWR);
     if (fd == -1) return 0;
 
     elf = elf_begin(fd, ELF_C_RDWR, NULL);
@@ -1628,40 +1611,36 @@ int ss_save_image_with_state(const char * new_image_name)
 #else
 int ss_save_image_with_state(const char * new_image_name)
 {
-    char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
-    int new_image_file;
-    long state_offset;
     
-    if (imagepath == NULL)
-	return 0;
-    
-    strcpy(imagepath,imagedir);
-    strcat(imagepath,imagename);
-
-    if (copy(imagepath, new_image_name) != 0) {
-    	free(imagepath);
-	printf("ss_save_image: Couldn't copy %s to %s\n", imagepath, new_image_name);
+    if (copy(executable_path, new_image_name) != 0) {
+	printf("ss_save_image: Couldn't copy %s to %s\n", executable_path, new_image_name);
     	return 0;
     }
-    
-    free(imagepath);
 
-    new_image_file = open(new_image_name, O_RDONLY);
-    if (new_image_file == -1) {
-    	printf("ss_save_image: Couldn't open %s\n", new_image_name);
+    return ss_attach_state_to_file(new_image_name);
+}
+
+int ss_attach_state_to_file(const char *image_name)
+{
+    int image_file;
+    long state_offset;
+
+    image_file = open(image_name, O_RDONLY);
+    if (image_file == -1) {
+    	printf("ss_save_image: Couldn't open %s\n", image_name);
     	return 0;
     }
    
-    state_offset = image_end(new_image_file);
+    state_offset = image_end(image_file);
 
-    close(new_image_file);
+    close(image_file);
 
     if (state_offset == 0) {
-    	printf("ss_save_image: Couldn't find end of image file %s\n", new_image_name);
+    	printf("ss_save_image: Couldn't find end of image file %s\n", image_name);
     	return 0;
     }
         
-    return ss_save_state(new_image_name, state_offset);
+    return ss_save_state(image_name, state_offset);
 }
 #endif
 

@@ -35,8 +35,9 @@
 #include "fswin32.h"
 #endif
 
-#ifdef unix
+#ifdef UNIX
 #include <pwd.h>
+#include <fcntl.h>
 #endif
 
 #ifndef PURE_ANSI
@@ -108,10 +109,10 @@ pbi_getenv()
 	FAIL;
 }
 
-#ifdef unix
 int
 pbi_get_user_home(void)
 {
+#ifdef UNIX
     PWord v1, v2, h;
     int   t1, t2, ht;
     const char *name;
@@ -131,14 +132,10 @@ pbi_get_user_home(void)
     
     if (PI_unify(v2, t2, h, ht)) PI_SUCCEED;
     else PI_FAIL;
-}
 #else
-int
-pbi_get_user_home(void)
-{
-  PI_FAIL;
-}
+    PI_FAIL;
 #endif
+}
 
 #endif /* OSACCESS */
 
@@ -248,24 +245,6 @@ pbi_protect_bottom_stack_page()
     SUCCEED;
 }
 
-
-int
-pbi_get_image_dir_and_name()
-{
-    PWord v1, v2, vd, vn;
-    int t1, t2, td, tn;
-
-    w_get_An(&v1, &t1, 1);
-    w_get_An(&v2, &t2, 2);
-    w_mk_uia(&vd, &td, (UCHAR *)imagedir);
-    w_mk_uia(&vn, &tn, (UCHAR *)imagename);
-
-    if (w_unify(v1, t1, vd, td) && w_unify(v2, t2, vn, tn))
-	SUCCEED;
-    else
-	FAIL;
-}
-
 int   argcount = 0;	/* global copies of main's argc and argv */
 char **argvector = NULL;
 
@@ -334,62 +313,59 @@ int pbi_crypt(void)
 #ifndef PURE_ANSI
 static int copy_file(const char *from_file, const char *to_file)
 {
-#if defined(MacOS)
-    Str255 pfrom_file, pto_file;
-    FSSpec from_file_spec, to_file_spec, to_dir_spec;
-    char cwd[256];
-    Str255 pcwd;
-    OSErr err;
-    CInfoPBRec catInfo; 
-    c2pstrcpy(pfrom_file, from_file);
-    c2pstrcpy(pto_file, to_file);
-    
-	getcwd(cwd, 255);
-	c2pstrcpy(pcwd, cwd);
-	
-	catInfo.dirInfo.ioCompletion = NULL;
-	catInfo.dirInfo.ioNamePtr = pcwd;
-	catInfo.dirInfo.ioVRefNum = 0;
-	catInfo.dirInfo.ioFDirIndex = 0;
-	catInfo.dirInfo.ioDrDirID = 0;
-	err = PBGetCatInfoSync(&catInfo);
-	if (err != noErr) return 0;
-		
-    err = FSMakeFSSpec(catInfo.dirInfo.ioVRefNum, catInfo.dirInfo.ioDrDirID, pfrom_file, &from_file_spec);
-    if (err != noErr) return 0;
-
-    err = FSMakeFSSpec(catInfo.dirInfo.ioVRefNum, catInfo.dirInfo.ioDrDirID, pto_file, &to_file_spec);
-    if (err != noErr && err != fnfErr) return 0;
-    
-    err = FSMakeFSSpec(to_file_spec.vRefNum, to_file_spec.parID, "\p", &to_dir_spec);
-    if (err != noErr) return 0;
-   
-    err = FSpFileCopy(&from_file_spec, &to_dir_spec, to_file_spec.name, NULL, 0, 0);
-    
-    if (err == noErr) return 1;
-    else return 0;
-
-#elif defined(MSWin32)
+#if defined(MSWin32)
 
     if (CopyFile(from_file, to_file, FALSE)) return 1;
     else return 0;
 
 #elif defined(UNIX)
-    /* FIX ME: This should really be done directly as on the Mac and Win32.
-               If cp is not available, this will fail.
-               I wonder if there are any libraries out there that can handle
-               all permisions/dates/symbolic paths/etc? */
 
-    char *copy_command = malloc(strlen(from_file) + strlen(to_file) + 5);
-    int result;
+    unsigned char *buf;
+    int f, c, r;
+    struct stat s; 
     
-    sprintf(copy_command, "cp %s %s", from_file, to_file);
+    f = open(from_file, O_RDONLY);
+    if (f == -1) return 0;
+    
+    r = fstat(f, &s);
+    if (r != 0) {
+    	close(f);
+        return 0;
+    }
+    
+    buf = malloc((size_t)s.st_size);
+    if (buf == NULL) {
+    	close(f);
+        return 0;
+    }
+    
+    r = read(f, buf, (size_t)s.st_size);
+    if (r != s.st_size) {
+    	free(buf);
+    	close(f);
+        return 0;
+    }
 
-    result = system(copy_command);
+    close(f);
     
-    free(copy_command); 
+    c = open(to_file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+    if (c == -1) {
+    	free(buf);
+    	return 0;
+    }
     
-    return (result == 0);
+    r = write(c, buf, (size_t)s.st_size);
+    if (r != s.st_size) {
+    	free(buf);
+        close(f);
+        return 0;
+    }
+    
+    close(c);
+    
+    free(buf);
+    
+    return 1;
 #else
 #error
 #endif
@@ -411,4 +387,21 @@ int pbi_copy_file(void)
     if (copy_file(from_file, to_file)) SUCCEED;
 	else FAIL;
 }
-#endif /* PURE_ANSI */
+
+int pbi_get_current_image(void)
+{
+	PWord v1, s;
+	int t1, st;
+	
+	PI_getan(&v1, &t1, 1);
+	
+	PI_makeuia(&s, &st, executable_path);
+	
+	return PI_unify(v1, t1, s, st);
+}
+
+#endif
+
+
+
+
