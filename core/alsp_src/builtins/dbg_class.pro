@@ -306,7 +306,9 @@ source_trace_mgrAction(start_src_trace(BaseFileName, SrcFilePath, FCG), State)
 	setObjStruct(fcg, State, FCG),
 	send_self(State, complete_open_edit_win(SrcFilePath,TclWin)),
 	tcl_call(shl_tcli, [add_left_col, TclWin, 1], _),
-	tcl_call(shl_tcli, [line_index_file,SrcFilePath],LoadRes),
+	tcl_call(shl_tcli, [line_index_file,SrcFilePath],LoadRes0),
+	LoadRes0 = [NumLines, LineIndex0],
+	adjust_char_line_count(LineIndex0, LineIndex),
 	LoadRes = [NumLines, LineIndex],
 	setObjStruct(num_lines, State, NumLines),
 	setObjStruct(linesizes, State, LineIndex),
@@ -328,8 +330,7 @@ source_trace_mgrAction(start_src_trace, State)
 	accessObjStruct(source_file, State, SrcFilePath),
 	send_self(State, complete_open_edit_win(SrcFilePath,TclWin)),
 	tcl_call(shl_tcli, [add_left_col, TclWin, 1], _),
-	tcl_call(shl_tcli, [line_index_file,SrcFilePath],LoadRes0),
-	adjust_char_line_count(LoadRes0, LoadRes),
+	tcl_call(shl_tcli, [line_index_file,SrcFilePath],LoadRes),
 	LoadRes = [NumLines, LineIndex],
 	setObjStruct(num_lines, State, NumLines),
 	setObjStruct(linesizes, State, LineIndex),
@@ -349,6 +350,7 @@ inverted_index([NLCs | LineIndex], CurCharCount, [CurCharCount | List])
 	NxtCharCount is CurCharCount + NLCs + 1,
 	inverted_index(LineIndex, NxtCharCount, List).
 
+	%% This is a kludge:
 adjust_char_line_count(LoadRes0, LoadRes)
 	:-
 	sys_env(OS, _, _),
@@ -356,13 +358,13 @@ adjust_char_line_count(LoadRes0, LoadRes)
 
 adjust_char_line_count(mswin32, LoadRes0, LoadRes)
 	:-!,
-	sub2_all(LoadRes0, LoadRes).
+	add1_all(LoadRes0, LoadRes).
 adjust_char_line_count(_, LoadRes, LoadRes).
 
-sub1_all([], []).
-sub1_all([N | LoadRes0], [N1 | LoadRes])
+add1_all([], []).
+add1_all([N | LoadRes0], [N1 | LoadRes])
 	:-
-	N1 is N - 2,
-	sub1_all(LoadRes0, LoadRes).
+	N1 is N + 1,
+	add1_all(LoadRes0, LoadRes).
 
 endmod.
