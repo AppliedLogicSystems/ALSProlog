@@ -15,6 +15,11 @@
  | Author: Kevin Buettner
  *=====================================================================*/
 
+main :-	als_system(SysVars),
+	dmember(os=OS,SysVars),
+	not(OS = macos), not(OS = mswin32),
+	fail. /* What tests should be run, and what constitutes succes? */
+
 :- make_gv('GoalQueue').
 :- op(990,xfy,&), op(990,xfy,&&).
 
