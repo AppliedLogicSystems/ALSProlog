@@ -1,7 +1,7 @@
 Document Type: WSE
 item: Global
   Version=5.0
-  Title=ALS Prolog 3.1 Installation
+  Title=ALS Student Prolog 3.1 Installation
   Flags=00000100
   Languages=65 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
   Japanese Font Name=MS Gothic
@@ -16,6 +16,7 @@ item: Global
   Patch Flags=0000000000000001
   Patch Threshold=85
   Patch Memory=4000
+  EXE Filename=ALS Student Prolog 3.1 Installer.exe
   FTP Cluster Size=20
   Variable Name1=_SYS_
   Variable Default1=C:\WINNT\System32
@@ -51,11 +52,11 @@ item: End Block
 end
 item: Set Variable
   Variable=APPTITLE
-  Value=ALS Prolog 3.1
+  Value=ALS Student Prolog 3.1
 end
 item: Set Variable
   Variable=GROUP
-  Value=ALS Prolog
+  Value=ALS Student Prolog
   Flags=10000000
 end
 item: Set Variable
@@ -64,7 +65,7 @@ item: Set Variable
 end
 item: Set Variable
   Variable=MAINDIR
-  Value=ALS Prolog
+  Value=ALS Student Prolog
 end
 item: Check Configuration
   Flags=10111011
@@ -926,27 +927,27 @@ item: Get Registry Key Value
   Flags=00000010
 end
 item: Create Shortcut
-  Source=%MAINDIR%\ALS Prolog.exe
-  Destination=%GROUP%\ALS Prolog.lnk
+  Source=%MAINDIR%\ALS Student Prolog.exe
+  Destination=%GROUP%\ALS Student Prolog.lnk
   Icon Number=0
 end
 item: Create Shortcut
-  Source=%MAINDIR%\student_man.pdf
-  Destination=%GROUP%\student_man.lnk
+  Source=%MAINDIR%\Student Manual.pdf
+  Destination=%GROUP%\Student Manual.lnk
   Icon Number=0
 end
 item: Else Statement
 end
 item: Add ProgMan Icon
   Group=%GROUP%
-  Icon Name=student_man
-  Command Line=%MAINDIR%\student_man.pdf
+  Icon Name=ALS Student Prolog
+  Command Line="%MAINDIR%\ALS Student Prolog.exe"
   Flags=01000000
 end
 item: Add ProgMan Icon
   Group=%GROUP%
-  Icon Name=ALS Prolog
-  Command Line="%MAINDIR%\ALS Prolog.exe"
+  Icon Name=Student Manual
+  Command Line="%MAINDIR%\Student Manual.pdf"
   Flags=01000000
 end
 item: End Block
