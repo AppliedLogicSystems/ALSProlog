@@ -2,18 +2,22 @@
 #  Setup an appropriate DOS build dir relative to an "exported"
 #  DOS-style subtree dir
 #
-#  $1 - target DOS build dir                   -- absolute paths
+#  $1 - source tree			       -- absolute path
+#  $2 - target DOS build dir                   -- absolute path
 #	To Do: Remove absolute paths limitation
 #
-#  source "exported" DOS-style subtree dir -- absolute paths
 
-SRCDIR=/apache/alsp_src
+case $# in
+2)	;;
+*)	echo 'Usage: bd_dos2 srcdir targetdir' 1>&2; exit 2
+esac
 
-TGTDIR=$1
+SRCDIR=$1
+
+TGTDIR=$2
 
 echo arg1=$1
-
-
+echo arg2=$2
 
 echo Making DOS build dir $TGTDIR relative to $SRCDIR
 mkdir $TGTDIR
