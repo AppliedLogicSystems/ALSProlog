@@ -1,3 +1,4 @@
+#undef __int64
 /*  Metrowerks Standard Library  Version 2.2  1997 October 17  */
 
 /*
