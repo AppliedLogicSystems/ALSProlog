@@ -154,7 +154,6 @@ delay_handler('$delay'(_,Next,Module,Goal))
 	'$bind_vars'(F, NewVar),
 	'$bind_vars'(R, NewVar).
 
-
 		%% Compound constraint:
 comb_left_cstr((RC1, Rest_R_C), R, F_Constr, F)
 	:-
