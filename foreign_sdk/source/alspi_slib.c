@@ -1,5 +1,7 @@
 #include "alspi.h"
+#include "cinterf.h"
 #include "alspi_slib.h"
+#include <stdio.h>
 
 #ifdef WIN32
 #define EXPORT __declspec(dllexport)
@@ -9,7 +11,7 @@
 	
 static const alspi_func_ptrs *alspi_funcs;
 extern void pi_init(void);
-const char *library_dir, *executable_path;
+char library_dir[1024], executable_path[1024];
 #ifdef __MWERKS__
 #pragma export on
 #endif
@@ -19,8 +21,8 @@ EXPORT int alspi_dlib_init(const alspi_func_ptrs *a_f,
   if (a_f == NULL && lib_funcs == NULL) return ALSPI_DLIB_VERSION;
 
   alspi_funcs = a_f;
-  library_dir = a_f->library_dir;
-  executable_path = a_f->executable_path;
+  strcpy(library_dir, a_f->library_dir);
+  strcpy(executable_path, a_f->executable_path);
   lib_funcs->pi_init = pi_init;
   lib_funcs->pi_shutdown = NULL;
 
