@@ -1,4 +1,4 @@
-all: student standard
+all: student standard demo
 
 core:
 	$(MAKE) -C ../core/unix
