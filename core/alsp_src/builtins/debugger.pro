@@ -1,10 +1,11 @@
 /*=================================================================
  | 		debugger.pro  
- |	Copyright (c) 1988-94 by Applied Logic Systems, Inc.
+ |	Copyright (c) 1988-94 Applied Logic Systems, Inc.
  |
  |	Non-interpretive debugger for Prolog
  |		- separates debugger core from I/O, and
- |		- includes both TTY and windowed I/O in this file
+ |		- includes TTY 
+ |		- windowed I/O in vdebug.pro [in windows/alsdev]
  |
  | Authors:  Kevin Buettner, Keith Hughes, Ken Bowen
  | Creation:  02/16/88,11/88,5/89
@@ -14,28 +15,25 @@
  |	* retry command with call number permitted -- this will involve
  |		changing the menu package
  |	* set print depth with depth on same line (no prompting)
- |	* spyWhen which undoes unifications.  At present, spyWhen
- |		sometimes messes up the normal search strategy.
  |	Revised window-based version: Begun March, 1992 - Ken Bowen
  |	Revisions: Fall, 1993 Kevin Buettner
- |	Revisions: Marc, 1994 Ken Bowen - Merge TTY & windowed versions
+ |	Revisions: March, 1994 Ken Bowen - Merge TTY & windowed versions
  *================================================================*/
 
 module debugger. 		%% debugger segment
 use windows.
 use objects.
 
-/*
- *	trace/0, trace/1, and trace/2.
- *
- *	trace is called when the user wishes to start the debugger.
- *	trace(Goal) or trace(Module,Goal) are called on specific goals.
- *	
- *	trace/1 actually ends up calling trace/2 due to the module closure
- *	created in builtins.pro.
- *
- */
-
+/*-------------------------------------------------------------------------*
+ |	trace/0, trace/1, and trace/2.
+ |
+ |	trace is called when the user wishes to start the debugger.
+ |	trace(Goal) or trace(Module,Goal) are called on specific goals.
+ |	
+ |	trace/1 actually ends up calling trace/2 due to the module closure
+ |	created in builtins.pro.
+ |
+ *-------------------------------------------------------------------------*/
 export trace/0.
 export trace/1.
 export trace/2.
@@ -66,131 +64,131 @@ trace0(Module,Goal) :-
 	setPrologInterrupt(skipping),
 	fail.
 
-/*
- * dbg_notrace is used to stop tracing.  It is detected by the debugger
- * explicitly.
- *
- * Note: dbg_notrace used to be defined here.  But it is needed by
- * prolog_shell/0 (found in blt_sys.pro).  It is defined as:
- *
- *	export dbg_notrace/0.
- *	dbg_notrace.
- */
+/*-------------------------------------------------------------------------*
+ | dbg_notrace is used to stop tracing.  It is detected by the debugger
+ | explicitly.
+ |
+ | Note: dbg_notrace used to be defined here.  But it is needed by
+ | prolog_shell/0 (found in blt_sys.pro).  It is defined as:
+ |
+ |	export dbg_notrace/0.
+ |	dbg_notrace.
+ *-------------------------------------------------------------------------*/
 
-/*
- * setCall/1, getCall/1, setDepth/1, and getDepth/1 are access predicates
- * for accessing the Call and Depth global variables.  These are built
- * at load time by make_gv (defined in builtins.pro).  All of these
- * predicates take a single argument -- the value to either get or set.
- * The calls for creating these variables occur in blt_sys.pro
- *
- * setRetry/1 and getRetry/1 set and get the contents of the Retry variable.
- * Under normal circumstances, the value of this variable is 0.  When we are
- * retrying a goal, the Retry value is set to the call (box) number of the
- * goal that we wish to retry.  Failure is then forced (with no printing of
- * ports) until a fail port is found with call number less than or equal to
- * the Retry value.  At this point, the call may be easily restarted.  See
- * retryOrFail/6, and showGoal/6 for more details.
- *
- * Note: The above described access predicates used to be created here,
- * but have been moved to blt_sys.pro so that the Prolog shell may be
- * more intelligent about setting and resetting them.
- */
+/*-------------------------------------------------------------------------*
+ | setCall/1, getCall/1, setDepth/1, and getDepth/1 are access predicates
+ | for accessing the Call and Depth global variables.  These are built
+ | at load time by make_gv (defined in builtins.pro).  All of these
+ | predicates take a single argument -- the value to either get or set.
+ | The calls for creating these variables occur in blt_sys.pro
+ |
+ | setRetry/1 and getRetry/1 set and get the contents of the Retry variable.
+ | Under normal circumstances, the value of this variable is 0.  When we are
+ | retrying a goal, the Retry value is set to the call (box) number of the
+ | goal that we wish to retry.  Failure is then forced (with no printing of
+ | ports) until a fail port is found with call number less than or equal to
+ | the Retry value.  At this point, the call may be easily restarted.  See
+ | retryOrFail/6, and showGoal/6 for more details.
+ |
+ | Note: The above described access predicates used to be created here,
+ | but have been moved to blt_sys.pro so that the Prolog shell may be
+ | more intelligent about setting and resetting them.
+ *-------------------------------------------------------------------------*/
 
-/*
- * incDepth increments the Depth variable.
- */
+/*-------------------------------------------------------------------------*
+ | incDepth increments the Depth variable.
+ *-------------------------------------------------------------------------*/
 
 incDepth :-
     getDepth(Depth),
     NewDepth is Depth + 1,
     setDepth(NewDepth).
 
-/*
- * incCall increments the call and returns the new call number
- */
+/*-------------------------------------------------------------------------*
+ | incCall increments the call and returns the new call number
+ *-------------------------------------------------------------------------*/
     
 incCall(NewCall) :-
     getCall(Call),
     NewCall is Call + 1,
     setCall(NewCall).
 
-/*
- * initCallDepth is called to initialize the call and depth global
- * variables.
- */
+/*-------------------------------------------------------------------------*
+ | initCallDepth is called to initialize the call and depth global
+ | variables.
+ *-------------------------------------------------------------------------*/
 
 initCallDepth :-
     setCall(0),
     setDepth(1).
 
-/*
- * '$int'/3:	Interrupt Handler clauses.
- *
- *		We must concern ourselves with debug_init, debug_user,
- *		debug_noshow, and spying.
- *
- *
- *		'$int'(Magic, Module, Goal)
- *
- *		Magic will be one of debug_init, debug_user, debug_noshow,
- *		or spying.  In past versions of the debugger, the magic value
- *		was often a structure with the box number and depth as
- *		arguments. The problem with this approach was that it was
- *		clumsy to modify any one of the three components (the functor
- *		or either of its two arguments).  In addition, the global
- *		variable mechanism is less efficient when dealing with
- *		structures.  Since it is forced to make the heap safe for
- *		backtracking, the entire choice point structure had to be
- *		traversed.  A good deal of garbage would also be unnecessarily
- *		created whenever a global variable would be set (to a
- *		structure) thus forcing the garbage collector to run much
- *		more often.  With these considerations in mind, the
- *		design evolved so that these three components (interrupt tag,
- *		call number, and current depth) were separated. Now access to
- *		any of the three components is simplified and in addition we
- *		can set either of these three components in constant time since
- *		only constants are assigned to them.  These considerations
- *		should be kept in mind when it becomes tempting in the future
- *		to hack some feature into the system by making any one of these
- *		components an object which lives on the heap.
- *
- *		As alluded to in the above discussion, Magic is really an 
- *		interrupt tag.  It tells us when an interrupt occurs what
- *		piece of code should be executed.  
- *
- *		The "debug_init" tag indicates that tracing has been turned on.  
- *		The clauses and other code for '$int'/3 which deal with this tag
- *		maintain some additional choice points to make sure that we
- *		exit and fail properly back to code which isn't being traced.
- *
- *		The "debug_user" tag is the tag that will be normally set when
- *		creeping through user code.
- *
- *		The "debug_noshow" tag on the other hand indicates that we are creeping
- *		through a builtin or some other piece of code for which the
- *		details should not be visible.  When such a tag is encountered,
- *		execution will either continue on with the debug_noshow tag set
- *		or it will change to debug_user when a goal is encountered which
- *		is a user goal.
- *
- *		The "spying" tag indicates that the interrupt mechanism is not
- *		enabled so that the next goal is interrupted (at least not
- *		intentionally), but that we should run the code as normal until
- *		a procedure is run upon which we are spying.  At such a point
- *		an interrupt is generated by virtue of the fact that the
- *		procedure table entry has been modified.
- *
- *		When any one of these tags is encountered and the user decides
- *		to creep for a while, the Magic value will be set to either
- *		debug_noshow or debug_user depending upon whether or not
- *		the goal is a user goal or not.
- *
- *		The other two arguments to '$int'/3 are the module and the goal
- *		which were interrupted and which presumably we wish to trace.
- *
- *
- */
+/*-------------------------------------------------------------------------*
+ | '$int'/3:	Interrupt Handler clauses.
+ |
+ |		We must concern ourselves with debug_init, debug_user,
+ |		debug_noshow, and spying.
+ |
+ |
+ |		'$int'(Magic, Module, Goal)
+ |
+ |		Magic will be one of debug_init, debug_user, debug_noshow,
+ |		or spying.  In past versions of the debugger, the magic value
+ |		was often a structure with the box number and depth as
+ |		arguments. The problem with this approach was that it was
+ |		clumsy to modify any one of the three components (the functor
+ |		or either of its two arguments).  In addition, the global
+ |		variable mechanism is less efficient when dealing with
+ |		structures.  Since it is forced to make the heap safe for
+ |		backtracking, the entire choice point structure had to be
+ |		traversed.  A good deal of garbage would also be unnecessarily
+ |		created whenever a global variable would be set (to a
+ |		structure) thus forcing the garbage collector to run much
+ |		more often.  With these considerations in mind, the
+ |		design evolved so that these three components (interrupt tag,
+ |		call number, and current depth) were separated. Now access to
+ |		any of the three components is simplified and in addition we
+ |		can set either of these three components in constant time since
+ |		only constants are assigned to them.  These considerations
+ |		should be kept in mind when it becomes tempting in the future
+ |		to hack some feature into the system by making any one of these
+ |		components an object which lives on the heap.
+ |
+ |		As alluded to in the above discussion, Magic is really an 
+ |		interrupt tag.  It tells us when an interrupt occurs what
+ |		piece of code should be executed.  
+ |
+ |		The "debug_init" tag indicates that tracing has been turned on.  
+ |		The clauses and other code for '$int'/3 which deal with this tag
+ |		maintain some additional choice points to make sure that we
+ |		exit and fail properly back to code which isn't being traced.
+ |
+ |		The "debug_user" tag is the tag that will be normally set when
+ |		creeping through user code.
+ |
+ |		The "debug_noshow" tag on the other hand indicates that we are creeping
+ |		through a builtin or some other piece of code for which the
+ |		details should not be visible.  When such a tag is encountered,
+ |		execution will either continue on with the debug_noshow tag set
+ |		or it will change to debug_user when a goal is encountered which
+ |		is a user goal.
+ |
+ |		The "spying" tag indicates that the interrupt mechanism is not
+ |		enabled so that the next goal is interrupted (at least not
+ |		intentionally), but that we should run the code as normal until
+ |		a procedure is run upon which we are spying.  At such a point
+ |		an interrupt is generated by virtue of the fact that the
+ |		procedure table entry has been modified.
+ |
+ |		When any one of these tags is encountered and the user decides
+ |		to creep for a while, the Magic value will be set to either
+ |		debug_noshow or debug_user depending upon whether or not
+ |		the goal is a user goal or not.
+ |
+ |		The other two arguments to '$int'/3 are the module and the goal
+ |		which were interrupted and which presumably we wish to trace.
+ |
+ |
+ *-------------------------------------------------------------------------*/
 
 module builtins.
 
@@ -234,7 +232,7 @@ module builtins.
 	debugger:disable_colon_interrupt,
 	callWithDelayedInterrupt(builtins,Goal).
 
-/*
+/*-------------------------------------------------------------------------*
 '$int'(debug_noshow,objects,Goal) :-
 	functor(Goal,'$colon',3),
 	!,
@@ -282,41 +280,44 @@ module builtins.
 
 endmod. %% builtins
 
-/*
- * debug_init/2
- *
- * debug_init(Module,Goal)
- *
- * Handles the initial interrupt which leads us into tracing.  Note
- * that this debug_init is called for each top level goal.  Also note
- * that the call numbers are not reset.  The trace goal has to be
- * run to reset the call numbers.
- *
- */
+/*-------------------------------------------------------------------------*
+ |debug_init/2
+ |
+ | debug_init(Module,Goal)
+ |
+ | Handles the initial interrupt which leads us into tracing.  Note
+ | that this debug_init is called for each top level goal.  Also note
+ | that the call numbers are not reset.  The trace goal has to be
+ | run to reset the call numbers.
+ |
+ *-------------------------------------------------------------------------*/
     
 %% === The following are the stoppers.
 is_stopper(Module, showanswers(_,_)).
 is_stopper(Module, print_no).
 
 %% === See if we got a dbg_notrace and if so shut the tracing off.
-debug_init(Module, dbg_notrace) :-
-    !,
+debug_init(Module, dbg_notrace)
+	:-!,
     setPrologInterrupt(skipping).	%% set Magic back to its default value
-debug_init(Module, Goal) :-
+debug_init(Module, Goal)
+	:-
     is_stopper(Module,Goal),
     !,
     callWithDelayedInterrupt(Module,Goal). %% call the Goal but leave ouch on
-debug_init(Module, Goal) :-
+debug_init(Module, Goal)
+	:-
     dogoal(debug_init,Module,Goal).
 
-/*
- * dogoal/3
- *
- * Get and update call number and depth and call dogoal/5
- *
- */
+/*-------------------------------------------------------------------------*
+ | dogoal/3
+ |
+ | Get and update call number and depth and call dogoal/5
+ |
+ *-------------------------------------------------------------------------*/
     
-dogoal(Magic,Module,Goal) :-
+dogoal(Magic,Module,Goal) 
+	:-
     incCall(CallNum),
     getDepth(Depth),
     incDepth,
@@ -337,37 +338,42 @@ strip_colon(_,'$colon'(M1,G1,_),M2,G2) :-	%% What about the cutpt??
 	strip_colon(M1,G1,M2,G2).
 strip_colon(M,G,M,G).
 
-/*
- * dogoal/5
- *
- * dogoal(CallNumber,Depth,Magic,Module,Goal)
- *
- *		-- The main workhorse of tracing
- *
- * The first clause of the procedure handles the Call port of the trace.
- * This is the first time that we've seen this particular goal with the
- * given call number.
- *
- * The second clause is responsible for handling failure of the goal.  It
- * prints out the fact that we've failed and propogates failure back
- * by failing itself.
- */
+/*-------------------------------------------------------------------------*
+ | dogoal/5
+ |
+ | dogoal(CallNumber,Depth,Magic,Module,Goal)
+ |
+ |		-- The main workhorse of tracing
+ |
+ | The second clause of the procedure handles the Call port of the trace.
+ | This is the first time that we've seen this particular goal with the
+ | given call number.
+ |
+ | The third clause is responsible for handling failure of the goal.  It
+ | prints out the fact that we've failed and propogates failure back
+ | by failing itself.
+ *-------------------------------------------------------------------------*/
 
-%%execute_debug(ResMod,PredName,Arity,Module,Goal) :-
-dogoal(Box,Depth,EMagic,Module,Goal) :-
-	windows:skip_system_pred( Goal ),
-%    ext_noshow(ResMod,PredName,Arity),
+/*
+dogoal(Box,Depth,EMagic,Module,Goal)
+	:-
+	noshow(Module,Goal),
     !,
     setPrologInterrupt(skipping),
     dbg_spyon,
     dbg_call(Module,Goal).
+*/
 
 %% === Handle the Call port
-dogoal(Box,Depth,EMagic,Module,Goal) :-
+dogoal(Box,Depth,EMagic,Module,Goal)
+	:-
+%pbi_write(dogoal(Box,Depth,EMagic,Module,Goal)),pbi_nl,pbi_ttyflush,
 			%% Display the call port:
     showGoal(Box,Depth,call,Module,Goal,UserCommand),
+%pbi_write(userCommand=UserCommand),pbi_nl,pbi_ttyflush,
 			%% And do the call:
     execute(UserCommand,Module,Goal),
+%pbi_write(after_execute),pbi_nl,pbi_ttyflush,
 			%% Don't want to trace after coming out here --
 			%%   that would show parts of the debugger code as
 			%%   if it were part of the user's program!
@@ -381,6 +387,7 @@ dogoal(Box,Depth,EMagic,Module,Goal) :-
 			%% get magic value to use when redoing:
     getPrologInterrupt(RMagic),
 			%% Display the exit and redo ports:
+%pbi_write(before_exitOr),pbi_nl,pbi_ttyflush,
     exitOrRedo(Box,Depth,EMagic,RMagic,Module,Goal).
 
 %% === Goal has failed.
@@ -398,14 +405,21 @@ dogoal(Box,Depth,Magic,Module,Goal) :-
 		Primary control flow subprocedures for dogoal:
  *----------------------------------------------------------------------*/
 
-/*
- *	execute/3
- *	execute(UserCommand,Module,Goal) 
- *
- *	Depending on what the user wants, we either go ahead and trace 
- *	the goal by making sure the interrupt will fire the next time, 
- *	or we just call the goal and watch what happens.
- */
+/*-------------------------------------------------------------------------*
+ |	execute/3
+ |	execute(UserCommand,Module,Goal) 
+ |
+ |	Depending on what the user wants, we either go ahead and trace 
+ |	the goal by making sure the interrupt will fire the next time, 
+ |	or we just call the goal and watch what happens.
+ |
+ |	Note that we need to interpret '$dbg_aph' and '$dbg_apg' because of
+ |	the need to pass these hidden goals to showGoal, where the distinction
+ |	is made between the TTY environment (info is unused; nothing shown),
+ |	and the windowed environment (where it can be used for source trace).
+ *-------------------------------------------------------------------------*/
+execute(_,_,'$dbg_aph'(_,_,_)) :-!.
+execute(_,_,'$dbg_apg'(_,_,_)) :-!.
 
 %% === User said to trace the goal:
 execute(debug,Module,Goal) :- !,
@@ -449,11 +463,11 @@ execute(fail,Module,Goal) :- !,
 	dbg_spyon,
 	callWithDelayedInterrupt(builtins,fail).
 
-/*
- * execute_debug/6 is called when we wish to trace the goal.  But we
- * must decide exactly how to proceed since it is not desirable to
- * see the guts of builtins.
- */
+/*-------------------------------------------------------------------------*
+ | execute_debug/6 is called when we wish to trace the goal.  But we
+ | must decide exactly how to proceed since it is not desirable to
+ | see the guts of builtins.
+ *-------------------------------------------------------------------------*/
     
 %% === See if we have a "special" builtin such as setof or findall
 execute_debug(ResMod,PredName,Arity,Module,Goal) :-
@@ -466,7 +480,7 @@ execute_debug(ResMod,PredName,Arity,Module,Goal) :-
 
 %% === See if we have an ordinary mundane builtin.
 execute_debug(ResMod,PredName,Arity,Module,Goal) :-
-    ext_noshow(ResMod,PredName,Arity),
+	( noshow(ResMod,Goal),! ; noshow(Module,Goal) ),
     !,
     setPrologInterrupt(skipping),
     dbg_spyon,
@@ -477,15 +491,15 @@ execute_debug(_,_,_,Module,Goal) :-
     setPrologInterrupt(debug_user),
     callWithDelayedInterrupt(Module,Goal).
 
-/*
- * continue/1
- * continue(UserCommand)
- *
- * continue/1 decides how the compuation will continue after a 
- * success.  If the debugger is to continue running, then we must
- * restart the debugger for the (real) continuation pointer. If 
- * not, we just want to continue  without resetting things up.
- */
+/*-------------------------------------------------------------------------*
+ | continue/1
+ | continue(UserCommand)
+ |
+ | continue/1 decides how the compuation will continue after a 
+ | success.  If the debugger is to continue running, then we must
+ | restart the debugger for the (real) continuation pointer. If 
+ | not, we just want to continue  without resetting things up.
+ *-------------------------------------------------------------------------*/
 
 %% === Still want the debugger:
 continue(debug) :-
@@ -526,18 +540,18 @@ continue_debug :-
 	setPrologInterrupt(debug_user),
 	forcePrologInterrupt.
 
-/*
- * fail/2
- * fail(UserCommand,Port)
- *
- * fail/2 decides how the compuation will continue after a failure.
- * If the debugger is to continue running after the failure, 
- * then we must restart the debugger for the failure. If not, 
- * we just want to fail without resetting things up.
- *
- * The port of call is necessary for deciding how to handle skip and jump.
- *
- */
+/*-------------------------------------------------------------------------*
+ | fail/2
+ | fail(UserCommand,Port)
+ |
+ | fail/2 decides how the compuation will continue after a failure.
+ | If the debugger is to continue running after the failure, 
+ | then we must restart the debugger for the failure. If not, 
+ | we just want to fail without resetting things up.
+ |
+ | The port of call is necessary for deciding how to handle skip and jump.
+ |
+ *-------------------------------------------------------------------------*/
 
 %% === Still want the debugger:
 fail(debug,_) :-
@@ -592,9 +606,9 @@ fail(jump,redo) :-
 fail(fail,_) :- !, 
 	fail_debug.
 
-/*
- * fail_debug
- */
+/*-------------------------------------------------------------------------*
+ | fail_debug
+ *-------------------------------------------------------------------------*/
 
 fail_debug :-
     getPrologInterrupt(debug_noshow),
@@ -606,15 +620,15 @@ fail_debug :-
     setPrologInterrupt(debug_user),
     callWithDelayedInterrupt(builtins,fail).
 
-/*
- * exitOrRedo/6
- * exitOrRedo(Box,Depth,EMagic,RMagic,Module,Goal)
- *
- * This procedure organizes display of the exit and redo ports. (The
- * actual printing is handled by showGoal). When exitOrRedo is 
- * first called, the exit port is displayed. If failure occurs, a
- * redo port is displayed.
- */
+/*-------------------------------------------------------------------------*
+ | exitOrRedo/6
+ | exitOrRedo(Box,Depth,EMagic,RMagic,Module,Goal)
+ |
+ | This procedure organizes display of the exit and redo ports. (The
+ | actual printing is handled by showGoal). When exitOrRedo is 
+ | first called, the exit port is displayed. If failure occurs, a
+ | redo port is displayed.
+ *-------------------------------------------------------------------------*/
 
 %% === Must treat cut specially for handling choice points:
 exitOrRedo(Box,Depth,EMagic,RMagic,Module,Goal) :-
@@ -639,40 +653,40 @@ exitOrRedo(Box,Depth,EMagic,RMagic,Module,Goal) :-
     fail(UserCommand,RMagic).
     %%redo(UserCommand).			%% Fail as the user requests
 
-/*
- * retryOrFail/6
- *
- * retryOrFail(FailCommand,Box,Depth,Magic,Module,Goal)
- *
- * This procedure is the heart of the retry mechanism.  As stated
- * earlier, the normal value for the Retry variable is zero.  The
- * Retry variable will get a non-zero value as the result of the
- * user requesting a retry.  From that point on, showGoal/6 detects
- * the fact that the Retry variable has a non-zero value and refuses
- * to print anything.  It also returns fail as the user command.
- * This then will force failure at every juncture possible until
- * the failure port is entered.  The failure port is handled by
- * the second clause of dogoal/5 (and this procedure).  When
- * this procedure is entered, the Retry value is obtained.  If the
- * Box number is less than or equal to the Retry value, then
- * we can do the retry by merely calling dogoal again.  Since
- * failure has occurred, the state of the computation should have
- * been restored to a state comparable to that when we first entered
- * the call port (modulo side effects).  Thus it is permissible
- * to simply call dogoal/5 again to rerun the goal.
- *
- * In the event that the Box number is not less than or equal to the
- * Retry value, the second clause will run.  This is what we want
- * to happen most of the time anyway.  All this clause does is
- * reset the Magic value and fail as the user desires.  There are
- * really two reasons for entering this clause.  The first is that
- * we aren't retrying anything and we want to take the normal action.
- * The second possibility is that we are retrying something, but we
- * haven't gotten back to where we need to be yet to do the retry.
- * Thus we still want to fail which again is what this clause does
- * for us.
- *		
- */
+/*-------------------------------------------------------------------------*
+ | retryOrFail/6
+ |
+ | retryOrFail(FailCommand,Box,Depth,Magic,Module,Goal)
+ |
+ | This procedure is the heart of the retry mechanism.  As stated
+ | earlier, the normal value for the Retry variable is zero.  The
+ | Retry variable will get a non-zero value as the result of the
+ | user requesting a retry.  From that point on, showGoal/6 detects
+ | the fact that the Retry variable has a non-zero value and refuses
+ | to print anything.  It also returns fail as the user command.
+ | This then will force failure at every juncture possible until
+ | the failure port is entered.  The failure port is handled by
+ | the second clause of dogoal/5 (and this procedure).  When
+ | this procedure is entered, the Retry value is obtained.  If the
+ | Box number is less than or equal to the Retry value, then
+ | we can do the retry by merely calling dogoal again.  Since
+ | failure has occurred, the state of the computation should have
+ | been restored to a state comparable to that when we first entered
+ | the call port (modulo side effects).  Thus it is permissible
+ | to simply call dogoal/5 again to rerun the goal.
+ |
+ | In the event that the Box number is not less than or equal to the
+ | Retry value, the second clause will run.  This is what we want
+ | to happen most of the time anyway.  All this clause does is
+ | reset the Magic value and fail as the user desires.  There are
+ | really two reasons for entering this clause.  The first is that
+ | we aren't retrying anything and we want to take the normal action.
+ | The second possibility is that we are retrying something, but we
+ | haven't gotten back to where we need to be yet to do the retry.
+ | Thus we still want to fail which again is what this clause does
+ | for us.
+ |		
+ *-------------------------------------------------------------------------*/
 
 %% === Handle the retry if possible
 retryOrFail(FailCommand,Box,Depth,Magic,Module,Goal) :-
@@ -699,11 +713,11 @@ retryOrFail(FailCommand,Box,Depth,Magic,Module,Goal) :-
 				%% execution of the second clause of 
 				%% dogoal/5.
 
-/*
- * enable_colon_interrupt and disable_colon_interrupt are called in order to
- * reenable or disable builtins:'$colon'/3 interrupts for the debug_noshow
- * mode of operation.
- */
+/*-------------------------------------------------------------------------*
+ | enable_colon_interrupt and disable_colon_interrupt are called in order to
+ | reenable or disable builtins:'$colon'/3 interrupts for the debug_noshow
+ | mode of operation.
+ *-------------------------------------------------------------------------*/
 
 enable_colon_interrupt :-
     dbg_spy(builtins,'$colon',3).
@@ -716,13 +730,21 @@ disable_colon_interrupt :-
 %    dbg_nospy(objects,'$colon',3).
 disable_colon_interrupt.
 
-/*
- * showGoal/6
- * showGoal(Box,Depth,Port,Module,Goal,UserResponse)
- *
- * This procedure displays the ports to the user and gets the
- * user's commands.
- */
+/*-------------------------------------------------------------------------*
+ | showGoal/6
+ | showGoal(Box,Depth,Port,Module,Goal,UserResponse)
+ |
+ | This procedure displays the ports to the user and gets the
+ | user's commands.
+ *-------------------------------------------------------------------------*/
+showGoal(Box,Depth,Port,Module,Goal,UserCommand)
+	:-
+	noshow(Module,Goal),
+	!,
+	(dmember(Port, [call,redo]) -> 
+		UserCommand = skip 
+		; 
+		UserCommand = debug).
 
 %% === Don't want to display a port if we are leaping.
 showGoal(Box,Depth,Port,Module,Goal,leap) :-
@@ -738,70 +760,141 @@ showGoal(Box,Depth,Port,Module,Goal,nodebug) :-
 showGoal(Box,Depth,Port,Module,Goal,Response) :-
     getRetry(0),		%% Make sure Retry value is zero
     !,
-    builtins:goalFix(Goal,XGoal),
-    showGoalToUser(Port,Box,Depth, Module, XGoal, Response).
+    builtins:goalFix(Goal,XGoal,show_pp),
+	getPrologInterrupt(CurInt),
+	dbg_spyoff,
+	dbg_notrace,
+    showGoalToUser(Port,Box,Depth, Module, XGoal, Response),
+	dbg_spyon,
+	setPrologInterrupt(CurInt).
     
 %% === Retry value was non-zero.  Force failure.
 showGoal(Box,Depth,Port,Module,Goal,fail).
 
-/*
- *	noshow/3.
- *	noshow(Module,Predicate,Arity)
- *
- *	noshow/3 is used to tell us which predicates are things that we
- *	don't wish to see.  At present, anything in the builtins module
- *	should not be traced.  We should have a way to make this user
- *	extensible.  This means that he wouldn't have to think to hard about
- *	whether to skip or not.
- *	
- */
+/*-------------------------------------------------------------------------
+ |	noshow/2.
+ |	noshow(Module,Goal)
+ |
+ |	noshow/2 specifies those predicates which should not be shown during
+ |	debugging -- by module groups, various sends, and individual predicates.
+ *------------------------------------------------------------------------*/
 
-:- dynamic(noshow/3).
-:- windows:dynamic(skip_system_pred/1).
+export noshow/2.
+:- dynamic(noshow/2).
+:- dynamic(excluded_object/1).
+:- dynamic(excluded_message/1).
 
-ext_noshow(Module,Predicate,Arity)
+:- dynamic(skip_app_pred/2).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Skip these modules entirely:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+noshow(Mod, _)
 	:-
-	noshow(Module,Predicate,Arity), !.
+	noshow_module(Mod),
+	!.
+noshow_module(builtins).
+noshow_module(debugger).
+noshow_module(sio).
+noshow_module(xconsult).
+	%% Add any others (or can mtfapi go away now?):
+noshow_module(mtfapi).
+noshow_module(objects).
+noshow_module(alsshell).
 
-ext_noshow(Module,Predicate,Arity)
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Skip any sends in these modules:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+noshow( Mod, send(_,_)) 
 	:-
-	functor(Call, Predicate, Arity),
-	windows:skip_system_pred( Call ).
+	noshow_send_mod(Mod), 
+	!.
+noshow_send_mod( builtins).
+noshow_send_mod( debugger).
+noshow_send_mod( objects).
+		%% either add others or make a generic thing:
+noshow_send_mod( motif).
 
-:- dynamic(noshow/3).
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Skip sends to excluded objects: 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-noshow(builtins,_,_) :- !.
-noshow(debugger,_,_) :- !.
-noshow(sio,_,_) :- !.
-noshow(xconsult,_,_) :- !.
-	%% Conditional?:
-noshow(mtfapi,_,_) :- !.
-noshow(objects,_,_) :- !.
+noshow( _, send(TgtObj,_))
+	:-
+	excluded_object(TgtObj),
+	!.
+excluded_object(debugger_object).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Skip sends of excluded messages: 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+noshow( _, send(_,TgtMsg))
+	:-
+	excluded_message(TgtMsg),
+	!.
+excluded_message(newlineAction(_,_,_)).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Skip the following goals in any module:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+noshow(_,Goal) 
+	:-
+	noshow_goal(Goal),!.
+
+noshow_goal( textModVerification(_,_,_) ).
+noshow_goal( textModVerification(_,_,_,_) ).
+noshow_goal( set_answer_var(_,_,_,_) ).
+noshow_goal( set_answer_var(_,_,_) ).
+noshow_goal( '$callback'(_,_,_) ).
+noshow_goal( '$action'(_,_,_,_) ).
+
+noshow_goal( run_debug_controls(_,_) ).
+noshow_goal( source_trace(_,_) ).
+noshow_goal( set_spy_point(_,_) ).
+noshow_goal( change_tracing(_,_) ).
+noshow_goal( set_noshow ).
+noshow_goal( debug_graph(_,_) ).
+noshow_goal( toggle_cb_notify ).
+noshow_goal( toggle_action_notify ).
+noshow_goal( toggle_null_send_notify ).
+
+noshow_goal( dev_reconsult(_,_) ).
+noshow_goal( edit_new(_,_) ).
+noshow_goal( change_dir(_,_) ).
+noshow_goal( quit_dialog(_,_,_) ).
+noshow_goal( struct_define(_,_) ).
+noshow_goal( comptype(_,_) ).
+
+noshow_goal( top_dev_controls(_,_) ).
+noshow_goal( open_debug(_,_) ).
 
 export toggle_mod_show/1.
 toggle_mod_show(Mod)
 	:-
-	noshow(Mod,_,_),!,
-	retract((noshow(Mod,_,_) :- _)),
+	noshow_module(Mod),
+	!,
+	retract(noshow_module(Mod)),
 	printf('Debug showing enabled for module %t\n',[Mod]),
 	flush_output.
 toggle_mod_show(Mod)
 	:-
-		%% assert(noshow(Mod,_,_)),
-	assert((noshow(Mod,_,_) :- !)),
+	assert(noshow_module(Mod)),
 	printf('Debug showing disabled for module %t\n',[Mod]),
 	flush_output.
 
-/*
- *	noshow_special/3
- *	noshow_special(Module,Predicate,Arity)
- *
- *	noshow_special/3 is used to tell about those builtins which can
- *	potentially call predicates which should be further traced. When
- *	creeping over these special builtins, it is not sufficient to turn 
- *	off the interrupts and let things go; we must interrupt every call.
- *	This is the purpose of the debug_noshow interrupt.
- */
+/*-------------------------------------------------------------------------*
+ |	noshow_special/3
+ |	noshow_special(Module,Predicate,Arity)
+ |
+ |	noshow_special/3 is used to tell about those builtins which can
+ |	potentially call predicates which should be further traced. When
+ |	creeping over these special builtins, it is not sufficient to turn 
+ |	off the interrupts and let things go; we must interrupt every call.
+ |	This is the purpose of the debug_noshow interrupt.
+ *-------------------------------------------------------------------------*/
     
 noshow_special(_,setof,3) :- !.
 noshow_special(_,bagof,3) :- !.
@@ -821,22 +914,22 @@ noshow_special(_,'\\+',_) :- !.	%% not again
 %noshow_special(_,send,3) :- !.
 %noshow_special(_,send,2) :- !.
 
-/*
- * leash/1
- * leash(Leashing)
- *
- *   Turns on leashing of certain ports.  Also may be called with
- *   a variable to determine the current leashing.
- *
- *   The format of Leashing may be:
- *           all     -- leash all ports
- *           half    -- leash the redo and call ports
- *           redo    -- leash the redo port
- *           call    -- leash the call port
- *           fail    -- leash the fail port
- *           exit    -- leash the exit port
- *           A List  -- leash the ports contained in the list.
- */
+/*-------------------------------------------------------------------------*
+ | leash/1
+ | leash(Leashing)
+ |
+ |   Turns on leashing of certain ports.  Also may be called with
+ |   a variable to determine the current leashing.
+ |
+ |   The format of Leashing may be:
+ |           all     -- leash all ports
+ |           half    -- leash the redo and call ports
+ |           redo    -- leash the redo port
+ |           call    -- leash the call port
+ |           fail    -- leash the fail port
+ |           exit    -- leash the exit port
+ |           A List  -- leash the ports contained in the list.
+ *-------------------------------------------------------------------------*/
 
 :-dynamic(leashed/1).
 
@@ -865,13 +958,13 @@ do_leash([H|T]) :-
    do_leash(H),
    do_leash(T).
 
-/*
- * leashed/1
- * leashed(Port)
- *
- * An enumeration of the ports which, by default, are leashed.
- * This is a dynamic predicate and is subject to change at runtime.
- */
+/*-------------------------------------------------------------------------*
+ | leashed/1
+ | leashed(Port)
+ |
+ | An enumeration of the ports which, by default, are leashed.
+ | This is a dynamic predicate and is subject to change at runtime.
+ *-------------------------------------------------------------------------*/
 
 :- dynamic(leashed/1).
 
@@ -880,25 +973,25 @@ leashed(exit).
 leashed(redo).
 leashed(fail).
 
-/*
- * isport/1
- * isport(Port)
- *
- * An enumeration of all of the ports.
- */
+/*-------------------------------------------------------------------------*
+ | isport/1
+ | isport(Port)
+ |
+ | An enumeration of all of the ports.
+ *-------------------------------------------------------------------------*/
 
 isport(call).
 isport(redo).
 isport(exit).
 isport(fail).
 
-/*
- * spy/0
- * spy
- *
- * Enables all spy points, but makes no changes to WHAT spy points
- * are set.
- */
+/*-------------------------------------------------------------------------*
+ | spy/0
+ | spy
+ |
+ | Enables all spy points, but makes no changes to WHAT spy points
+ | are set.
+ *-------------------------------------------------------------------------*/
 
 export 'spy'/0.
 
@@ -908,15 +1001,15 @@ export 'spy'/0.
     setDebugInterrupt(spying),
     dbg_spyon.
 
-/*
- * spy/1
- * spy(PredPattern)
- *
- * Calls spy/3 to set a spy point on the given predicate, if
- * the module is specified.  If not, calls spy/2 to set spy
- * points on the given predicate in all modules in which
- * a name table entry for the procedure exists.
- */
+/*-------------------------------------------------------------------------*
+ | spy/1
+ | spy(PredPattern)
+ |
+ | Calls spy/3 to set a spy point on the given predicate, if
+ | the module is specified.  If not, calls spy/2 to set spy
+ | points on the given predicate in all modules in which
+ | a name table entry for the procedure exists.
+ *-------------------------------------------------------------------------*/
 
 export 'spy'/1.
 
@@ -948,14 +1041,14 @@ spy([Pat|More]) :-
    spy(Pat),
    spy(More).
 
-/*
- * spy/2
- * spy(Pred,Arity)
- *
- * Installs a spy point on the given procedure in all modules where a
- * new name table entry for the procedure exists.  It then enables spy
- * points by calling dbg_spyon.
- */
+/*-------------------------------------------------------------------------*
+ | spy/2
+ | spy(Pred,Arity)
+ |
+ | Installs a spy point on the given procedure in all modules where a
+ | new name table entry for the procedure exists.  It then enables spy
+ | points by calling dbg_spyon.
+ *-------------------------------------------------------------------------*/
 
 export 'spy'/2.
 
@@ -987,15 +1080,15 @@ spy(Pred,Arity) :-
     ),
 	flush_output(debugger_output).
 
-/*
- * spy_pat/3
- * spy_pat(M,P,A)
- *
- * Generalization of spy/2 in that M, P, or A may be uninstantiated.
- *
- * Note: It would be nice to expand this so that M,P,and A could match
- * arbitrary regular expressions.
- */
+/*-------------------------------------------------------------------------*
+ | spy_pat/3
+ | spy_pat(M,P,A)
+ |
+ | Generalization of spy/2 in that M, P, or A may be uninstantiated.
+ |
+ | Note: It would be nice to expand this so that M,P,and A could match
+ | arbitrary regular expressions.
+ *-------------------------------------------------------------------------*/
 
 export 'spy_pat'/3.
 
@@ -1032,13 +1125,13 @@ install_spypoint(Mod,Pred,Arity) :-
     assert(spying_on(CallForm,Mod)),
     builtins:dbg_spy(Mod,Pred,Arity).
 
-/*
- * spy/3
- * spy(Module,Pred,Arity)
- *
- * Installs a spy point on the given procedure using dbg_spy.  Also
- * enables all spy points by calling dbg_spyon.
- */
+/*-------------------------------------------------------------------------*
+ | spy/3
+ | spy(Module,Pred,Arity)
+ |
+ | Installs a spy point on the given procedure using dbg_spy.  Also
+ | enables all spy points by calling dbg_spyon.
+ *-------------------------------------------------------------------------*/
 
 spy(Module,Predicate,Arity) :-
 	check_debug_io,
@@ -1101,19 +1194,19 @@ procinfo_imported_proc(2).
 procinfo_undefined_proc(3).
 procinfo_unknown_type(-1).
 
-/*
- *	spyWhen/1
- *	spyWhen(Module:Call)  [= spyWhen(Module,Call)]
- *	spyWhen/2
- *	spyWhen(Module,Call)  [= spyWhen(Module,Call,true)]
- *	spyWhen/3
- *	spyWhen(Module,Call,Condition)
- *
- *	Conditional spy points:
- *		In order for a call Goal to trigger spying/tracing,
- *		the Goal called must match the pattern specified in Call,
- *		and Condition must succed when run (by the debugger).
- */
+/*-------------------------------------------------------------------------*
+ |	spyWhen/1
+ |	spyWhen(Module:Call)  [= spyWhen(Module,Call)]
+ |	spyWhen/2
+ |	spyWhen(Module,Call)  [= spyWhen(Module,Call,true)]
+ |	spyWhen/3
+ |	spyWhen(Module,Call,Condition)
+ |
+ |	Conditional spy points:
+ |		In order for a call Goal to trigger spying/tracing,
+ |		the Goal called must match the pattern specified in Call,
+ |		and Condition must succed when run (by the debugger).
+ *-------------------------------------------------------------------------*/
 
 export spyWhen/1.
 export spyWhen/2.
@@ -1193,12 +1286,12 @@ spyWhen(Condition,Module,Call)
 	functor(BCall, Predicate, Arity),
 	assert((spying_on(BCall,Module) :- not(not((BCall = Call,Condition))))).
 
-/*
- *	nospy/3
- *	nospy(Module,Predicate,Arity)
- *
- *	Removes a spy point from the specified predicate.
- */
+/*-------------------------------------------------------------------------*
+ |	nospy/3
+ |	nospy(Module,Predicate,Arity)
+ |
+ |	Removes a spy point from the specified predicate.
+ *-------------------------------------------------------------------------*/
 
 export nospy/3.
 
@@ -1210,47 +1303,37 @@ nospy(Module,Predicate,Arity) :-
     (Condition = true -> retract(spying_on(CallForm,Module))
 		      ;  retract((spying_on(CallForm,Module) :- Condition))),
     check_spyoff,
-/*
-    write(debugger_output,'Spy point removed for '), 
-    write(debugger_output,Module:Predicate/Arity),
-    nl(debugger_output),
-*/
     printf(debugger_output,'Spy point removed for %t:%t/%t\n',
     		[Module,Predicate,Arity]), 
     !.
 
 nospy(Module,Predicate,Arity) :-
-/*
-    write(debugger_output,'Wasn\'t spying on '), 
-    write(debugger_output,Module:Predicate/Arity),
-    nl(debugger_output).
-*/
     printf(debugger_output,'Wasn\'t spying on %t:%t/%t\n',
     		[Module,Predicate,Arity]).
 
 check_spyoff :- clause(spying_on(_,_),_),!.
 check_spyoff :- dbg_spyoff.
 
-/*
- * suppress_spying/0
- * suppress_spying
- *
- * Disables all spy points (using dbg_spyoff) without removing any
- * specific spy points from any predicates.
- */
+/*-------------------------------------------------------------------------*
+ | suppress_spying/0
+ | suppress_spying
+ |
+ | Disables all spy points (using dbg_spyoff) without removing any
+ | specific spy points from any predicates.
+ *-------------------------------------------------------------------------*/
 
 export suppress_spying/0.
 
 suppress_spying :-
     dbg_spyoff.
 
-/*
- * nospy/0
- * nospy
- *
- * Disables all spypoints (by removing them).  This will also remove
- * the spyWhen points.
- */
+/*-------------------------------------------------------------------------*
+ | nospy/0
+ | nospy
+ |
+ | Disables all spypoints (by removing them).  This will also remove
+ | the spyWhen points.
+ *-------------------------------------------------------------------------*/
     
 export nospy/0.
 
@@ -1269,24 +1352,24 @@ remove_spypoints([M:Call-Tail | More]) :-
 retract_spypoint(true,M,Call) :- retract(spying_on(Call,M)), !.
 retract_spypoint(Tail,M,Call) :- retract((spying_on(Call,M):-Tail)), !.
 
-/*
- * spying/0
- * spying
- *
- * Tests to see if we are trapping on spy points.  If we are, it
- * succeeds.  If not, it fails.
- */
+/*-------------------------------------------------------------------------*
+ | spying/0
+ | spying
+ |
+ | Tests to see if we are trapping on spy points.  If we are, it
+ | succeeds.  If not, it fails.
+ *-------------------------------------------------------------------------*/
 
 export spying/0.
 
 spying :- dbg_spying.
 
-/*
- * nospy/1
- * nospy(PredPattern)
- *
- * Calls nospy/3 to remove a spy point on a given predicate.
- */
+/*-------------------------------------------------------------------------*
+ | nospy/1
+ | nospy(PredPattern)
+ |
+ | Calls nospy/3 to remove a spy point on a given predicate.
+ *-------------------------------------------------------------------------*/
 
 export nospy/1.
 
@@ -1311,12 +1394,12 @@ nospy([Pat|More]) :-
 	%% if this cuts things up a bit artificially.
 	%%
 
-/*
- * getResponse/6
- * getResponse(Port,Box,Depth, Module, Goal, Response) 
- *
- * Prompt the user for what to do at this port.
- */
+/*-------------------------------------------------------------------------*
+ | getResponse/6
+ | getResponse(Port,Box,Depth, Module, Goal, Response) 
+ |
+ | Prompt the user for what to do at this port.
+ *-------------------------------------------------------------------------*/
 
 %% === Port is leashed, so interact:
 getResponse(Port,Box,Depth, Module, Goal, Response) :-
@@ -1329,13 +1412,13 @@ getResponse(_,Box,Depth,Module,Goal,debug) :-
     nl(debugger_output).
 
 
-/*
- * debugging/0
- *
- *	Display information about the debugger (spypoints, leasing, etc).
- *	It appears that this is the name that Quintus uses to display
- *	similar information.
- */
+/*-------------------------------------------------------------------------*
+ | debugging/0
+ |
+ |	Display information about the debugger (spypoints, leasing, etc).
+ |	It appears that this is the name that Quintus uses to display
+ |	similar information.
+ *-------------------------------------------------------------------------*/
 
 export debugging/0.
 
@@ -1401,7 +1484,7 @@ close_under_use([user | Mods], Seen, UsedMods)
 
 close_under_use([M | Mods], Seen, UsedMods)
 	:-
-	(builtins:ext_noshow(M,_,_);builtins:sys_exclude(M)),
+	noshow(M,_),
 	!,
 	close_under_use(Mods, Seen, UsedMods).
 
@@ -1449,13 +1532,17 @@ reload_debug([File | Files])
 export toggle_debug_io/0.
 toggle_debug_io
 	:-
-	retract(debug_io(Current)),
+	debug_io(Current),
+	abolish(debug_io,1),
 	dbg_io_opp(Current, Next),
 	assert(debug_io(Next)),
 	printf(debugger_output,'Debugger i/o set to: %t\n',[Next]).
 
 	%% Default:
-debug_io(nowins).
+debug_io(Where)
+	:-
+	als_system(L),
+	dmember(wins=Where, L).
 
 dbg_io_opp(nowins, wins).
 dbg_io_opp(wins, nowins).
@@ -1463,7 +1550,7 @@ dbg_io_opp(wins, nowins).
 export set_debug_io/1.
 set_debug_io(Where)
 	:-
-	retract(debug_io(Current)),
+	abolish(debug_io,1),
 	assert(debug_io(Where)),
 	printf(debugger_output,'Debugger i/o set to: %t\n',[Where]).
 
@@ -1474,7 +1561,6 @@ check_debug_io
 	alsshell:open_debug.
 check_debug_io.
 	
-
 showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 	:-
 	debug_io(nowins),
@@ -1488,6 +1574,12 @@ showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%% TTY I/O Hooks   %%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+showGoalToUserTTY(exit,_,_,_,'$dbg_aph'(_,_,_),debug) :-!.
+showGoalToUserTTY(exit,_,_,_,'$dbg_apg'(_,_,_),debug) :-!.
+
+showGoalToUserTTY(_,_,_,_,'$dbg_aph'(_,_,_),skip) :-!.
+showGoalToUserTTY(_,_,_,_,'$dbg_apg'(_,_,_),skip) :-!.
 
 showGoalToUserTTY(Port,Box,Depth, Module, XGoal, Response)
 	:-
@@ -1654,12 +1746,12 @@ show_again(Port,Box,Depth,Module,Goal,Response) :-
 	writeGoal(Box,Depth,Port,Module,Goal),
 	getresponse2(Port,Box,Depth, Module, Goal, Response).
 
-/*
- * writeGoal/5
- * writeGoal(Box,Depth,Port,Module,Goal) 
- *
- * Actually write the port out in a "nice" standard fashion.
- */
+/*-------------------------------------------------------------------------*
+ | writeGoal/5
+ | writeGoal(Box,Depth,Port,Module,Goal) 
+ |
+ | Actually write the port out in a "nice" standard fashion.
+ *-------------------------------------------------------------------------*/
 
 writeGoal(Box,Depth,Port,Module,Goal) :-
 	printf(debugger_output, 	"(%d) %d %s: ", [Box,Depth,Port]),
@@ -1667,71 +1759,8 @@ writeGoal(Box,Depth,Port,Module,Goal) :-
 	flush_output(debugger_output).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%% Windows I/OHooks %%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%% Windows I/O Hooks %%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%  - in vdebug.pro  %%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
-	:-!,
-%write('###debugger:$dbg_aph'), nl, flush_output,
-	builtins:file_clause_group(File,ClsGrp),
-%	objects:send(debugger_object, '$dbg_aph'(File,Start,End)), !.
-	send(debugger_object, '$dbg_aph'(File,Start,End)), !.
-
-showGoalToUserWin(Port,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
-	:-!.
-
-showGoalToUserWin(call,Box,Depth, Module, '$dbg_apg'(ClsGrp,Start,End), debug)
-	:-!,
-%write('###debugger:$dbg_apg'), nl, flush_output,
-	builtins:file_clause_group(File,ClsGrp),
-%	objects:send(debugger_object, '$dbg_apg'(File,Start,End)), !.
-	send(debugger_object, '$dbg_apg'(File,Start,End)), !.
-
-showGoalToUserWin(Port,Box,Depth, Module, '$dbg_apg'(ClsGrp,Start,End), debug)
-	:-!.
-
-showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
-	:-
-%pbi_write(('###send'(Port,Box,Depth, XGoal)->debugger_object)), pbi_nl, pbi_ttyflush, %% flush_output,
-	dbg_spyoff,
-	dbg_notrace,
-	send(debugger_object,
-		showGoal(Port,Box,Depth,Module,XGoal,InitResponse)),
-%write('###debugger_got_response'=InitResponse), nl, flush_output,
-	dbg_spyon,
-	!,
-	check_action(InitResponse,Response,Port,Box,Depth).
-
-check_action(abort,_,Port,Box,Depth)
-	:-!,
-	als_advise('Exiting debugger..........\n',[]),
-	throw('$trace_catcher$'(abort)).
-
-check_action(halt,_,Port,Box,Depth)
-	:-!,
-	halt.
-check_action(retry,fail,Port,Box,Depth) 
-	:-!,
-	setRetry(Box).
-
-check_action(creep,debug,Port,Box,Depth) :-!.
-
-	%%% check rest of old act_on_response actions;
-	%%% some dispatching on actions should take place
-	%%% on the gui/shell side: 
-	%%%		break, break_trace_off, halt, statistics, print depth & mode
-	%%% also fix gui side so that printing uses the full width of the
-	%%% trace window (relative to the current font); add ability to
-	%%% change font size & weight
-
-check_action(Action,Action,Port,Box,Depth).
-
-
-
-
-
-
-
 
 endmod.					%% builtins:  debugger segment

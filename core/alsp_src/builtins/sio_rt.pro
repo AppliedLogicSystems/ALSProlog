@@ -334,33 +334,41 @@ read(Stream_or_alias,Term) :-
 	!.				%% cut catch in read_term/4
 
 
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-%% read_term(Stream, Term, Options)
-%%
-%%
-
+/*-----------------------------------------------------------------*
+ |	read_term/3
+ |	read_term(Stream, Term, Options)
+ |	read_term(+, -, +)
+ *-----------------------------------------------------------------*/
 export read_term/3.
 
-read_term(Stream_or_alias,Term,Options) :-
+read_term(Stream_or_alias,Term,Options) 
+	:-
 	input_stream_or_alias_ok(Stream_or_alias,Stream),
 	rt_defaults(OptStruct),
-		%% OptGoals are executed on the way out after the read:
+				%% OptGoals are executed on the way out after the read:
+				%% Need later occurrences to preserve
+				%% vars for error reporting code
 	check_rt_options(Options, Stream, OptStruct, VT, true, OptGoals),
-	nonvar(Stream_or_alias),	%% Need later occurrences to preserve
-	nonvar(Options),		%% vars for error reporting code
+	nonvar(Stream_or_alias),	
+	nonvar(Options),			
 	arg(1, OptStruct, VT),
 	arg(2, OptStruct, ErrMech),
 	arg(3, OptStruct, linestuff(FinalToks,S,E)),
 	read_term(Stream,Term,ErrMech,VT,FinalToks),
 	OptGoals,
-	!,	%% cut choice point associated with catch in read_term/4
+	!,			%% <- cut choice point associated with catch in read_term/4
 	set_eof_acceptable_as_fullstop(false).
 
-read_term(Stream,Term,ErrMech,VT) :-
+	%% read_term/4:
+read_term(Stream,Term,ErrMech,VT) 
+	:-
 	read_term(Stream,Term,ErrMech,VT,_).
 
+/*-----------------------------------------------------------------*
+ |	read_term/5
+ |	read_term(Stream, Term, ErrMech, VT, FinalToks)
+ |	read_term(+, -, -, -, -)
+ *-----------------------------------------------------------------*/
 read_term(Stream,Term,ErrMech,VT,FinalToks) 
 	:-
 	tp_get_token_list(Stream,[Tok1|TokRest]),
@@ -368,6 +376,11 @@ read_term(Stream,Term,ErrMech,VT,FinalToks)
 		syntax_error(Token,Message),
 		rt_err(ErrMech,Token,Message,[Tok1|TokRest],Stream,VT,Term)).
 
+/*-----------------------------------------------------------------*
+ |	rt_err/7
+ |	rt_err(ErrMech,Token,Message,Tokens,Stream,VT,Term)
+ |	rt_err(+,+,+,+,+,+,+)
+ *-----------------------------------------------------------------*/
 rt_err(quiet,Token,ErrorMessage,Tokens,Stream,VT,Term) :-
 	inc_error_count(Stream),
 	!,
@@ -534,37 +547,45 @@ rt_werrln([Tok|Toks],ES, PPos, OPos) :-
 %%
 %%
 
-rt_readclause(Tok1,TokRest,VT,Term,FinalToks) :-
+rt_readclause(Tok1,TokRest,VT,Term,FinalToks)
+	:-
 	VT=pvt(_),		%% use positional parser instead
 	!,
 	pp_rt_readclause(Tok1,TokRest,VT,Term,FinalToks).
-rt_readclause(lineinfo(_,_,_),[H|T],VT,Term,FinalToks) :-
-	!,
+
+rt_readclause(lineinfo(_,_,_),[H|T],VT,Term,FinalToks)
+	:- !,
 	rt_readclause(H,T,VT,Term,FinalToks).	%% skip line number info
-rt_readclause(end_of_file(Stream,_,_),_,VT,OutTerm,[]) :-
-	!,
+
+rt_readclause(end_of_file(Stream,_,_),_,VT,OutTerm,[])
+	:- !,
 	stream_eof_action(Stream, EOFAction),
 	rt_readclause_eof(EOFAction,Stream,OutTerm).
-rt_readclause(Tok1,TokRest,VT,OutTerm,FinalToks) :-
+
+rt_readclause(Tok1,TokRest,VT,OutTerm,FinalToks)
+	:-
 	rt_primary(Tok1,TokRest,VT,1200,TokRemain,Term),
 	rt_fullstop(TokRemain,FinalToks),
 	OutTerm=Term.
 
-pp_rt_readclause(lineinfo(_,_,_),[H|T],VT,Term,FinalToks) :-
-	!,
+pp_rt_readclause(lineinfo(_,_,_),[H|T],VT,Term,FinalToks)
+	:- !,
 	pp_rt_readclause(H,T,VT,Term,FinalToks).	%% skip line number info
-pp_rt_readclause(end_of_file(_,_,_),_,VT,OutTerm,[]) :-
-	!,
+
+pp_rt_readclause(end_of_file(Stream,_,_),_,VT,OutTerm,[])
+	:- !,
 	stream_eof_action(Stream, EOFAction),
 	rt_readclause_eof(EOFAction, Stream, OutTerm).
-pp_rt_readclause(Tok1,TokRest,VT,OutTerm,FinalToks) :-
+
+pp_rt_readclause(Tok1,TokRest,VT,OutTerm,FinalToks)
+	:-
 	pp_rt_primary(Tok1,TokRest,VT,1200,TokRemain,Term),
 	rt_fullstop(TokRemain,FinalToks),
 	!,
 	OutTerm=Term.		
 
-rt_readclause_eof(error,Stream,OutTerm) :-
-	!,
+rt_readclause_eof(error,Stream,OutTerm)
+	:- !,
 	existence_error(past_end_of_stream,Stream,3).
 rt_readclause_eof(_, Stream, end_of_file).
 
@@ -1501,7 +1522,7 @@ pp_flatten_struct(A,S,FS) :-
 	pp_flatten_struct(PA,S,FS).
 pp_flatten_struct(_,_,_).
 
-/*
+/*-------------------------------------------------------------------------------*
  * pp_xform_clause is given a term (clause) produced by the positional parser.
  * It returns as its third argument a clause suitably transformed with
  * positional information remaining for head and goals.  The remaining
@@ -1520,7 +1541,7 @@ pp_flatten_struct(_,_,_).
  *	'$dbg_aph'(ClauseGroupId,StartPos,EndPos)
  *
  * A goal will take a similar form except that the functor is '$dbg_apg'.
- */
+ *-------------------------------------------------------------------------------*/
 
 export pp_xform_clause/3.
 

@@ -102,7 +102,7 @@ static unsigned long *marks;
  *      mrccp           -- pointer to the Most Recently Compacted Choice Point
  *                         This variable will have its value set after phase 1.
  *      heap_low        -- pointer to lowest cell in uncompacted region of
- *                         heap.  This cell will not necessarily by marked.
+ *                         heap.  This cell will not necessarily be marked.
  *      heap_high       -- pointer to the highest cell in the uncompacted
  *                         region.  We force this cell to be marked so that
  *                         the HB values may always be updated.

@@ -349,8 +349,8 @@ export getPrologInterrupt/1.
 % Handle the '$source'/2 interrupt.
 %------------------------------------------------
 
-'$int'('$source'(ForReal,CMod,Goals),GMod,Goal) :-
-	!,
+'$int'('$source'(ForReal,CMod,Goals),GMod,Goal) 
+	:-!,
 	'$source0'(ForReal,CMod,Goals,GMod,Goal).
 
 %
@@ -358,16 +358,17 @@ export getPrologInterrupt/1.
 % to identify the end of extraction. This variable is ForReal, and the
 % '$endsource' atom will have this variable as its value when the extracter 
 % is brought to an end. Here we check it. This is done so that we can 
-% extract the extracter.
-%
+% extract the extracter:
 
-'$source0'(ForReal,_,_,_,'$endSource'(Check)) :-
+'$source0'(ForReal,_,_,_,'$endSource'(Check))
+	:-
 	Check == ForReal,
 	!.
 
-% Not at the end.
+% Not at the end:
 
-'$source0'(ForReal,CMod,Goals,GMod,Goal) :-
+'$source0'(ForReal,CMod,Goals,GMod,Goal)
+	:-
 		% Set s/2 interrupt with the latest goal tacked on.
     '$source0_buildgoal'(CMod,GMod,Goal,NewGoal),
     setPrologInterrupt('$source'(ForReal,CMod,[NewGoal|Goals])),
@@ -381,19 +382,38 @@ export getPrologInterrupt/1.
 '$source0_buildgoal'(_,_,'!'(C),'!'(C)) :- !.
 '$source0_buildgoal'(_,GMod,Goal,GMod:Goal).
 
-%
-% The source extracter
-%
+/*------------------------------------------------------------------*
+ |	'$source'/2
+ |	'$source'(DBRef,Clause)
+ |	'$source'(+,-)
+ |
+ |	'$source'/3
+ |	'$source'(DBRef,Clause, Mode)
+ |	'$source'(+,-,+)
+ |
+ |	Mode: show_pp, hide_pp
+ |		-- determines whether the source extractor retains positional
+ |		parser info in the clause (show_pp), or removes it (hide_pp).
+ |		Default is hide_pp.
+ |
+ | The source extracter
+ *------------------------------------------------------------------*/
 
-'$source'(DBRef,Clause) :-
+'$source'(DBRef,Clause)
+	:-
+	'$source'(DBRef,Clause, hide_pp).
+
+'$source'(DBRef,Clause, Mode)
+	:-
 		% Get old magic value so it can be restored when
 		% we are done.
 	getPrologInterrupt(OldMagic),
 		% Source of the ForReal variable used to mark the end
 		% of extraction.
-	'$source'(DBRef,ForReal,Clause,OldMagic).
+	'$source'(DBRef,ForReal,Clause,OldMagic, Mode).
 
-'$source'(DBRef,ForReal,Clause,OldMagic) :-
+'$source'(DBRef,ForReal,Clause,OldMagic, Mode)
+	:-
 		% Create the Head template for the jump. Creating
 		% it here simplifies the failing behaviour of
 		% '$source' by not having anything fail until after
@@ -411,58 +431,62 @@ export getPrologInterrupt/1.
 	'$endSource'(ForReal),
 	getPrologInterrupt('$source'(_,_,Goals)),
 		% Make the clause to be returned.
-	fixBody(Goals,Head,Clause),
+	fixBody(Goals,Head,Clause,Mode),
 		% Reset old magic value.
 	setPrologInterrupt(OldMagic).
 
     % Failed for some reason. Fix interrupt register and really die.
 
-'$source'(DBRef,ForReal,Clause,OldMagic) :-
+'$source'(DBRef,ForReal,Clause,OldMagic,Mode)
+	:-
 		% Reset old magic value.
 	setPrologInterrupt(OldMagic),
 	!,	% And really die.
 	fail.
      
-fixBody([],Head,Head) :- !.
-fixBody(['$dbg_aph'(_,_,_)],Head,Head) :- !.
-fixBody([First|Rest],Head,(Head :- Body)) :-
-	goalFix(First,XFirst),
-	fixBody0(Rest,XFirst,Body).
+fixBody([],Head,Head,Mode)
+	:- !.
+fixBody(['$dbg_aph'(_,_,_)],Head,Head,Mode)
+	:- !.
+fixBody([First|Rest],Head,(Head :- Body),Mode)
+	:-
+	goalFix(First,XFirst,Mode),
+	fixBody0(Rest,XFirst,Body,Mode).
  
-fixBody0([],Last,Last) :- !.
-fixBody0([Current|Rest],SoFar,Body) :-
-	goalFix(Current,XCurrent),
+fixBody0([],Last,Last,Mode)
+	:- !.
+fixBody0([Current|Rest],SoFar,Body,Mode)
+	:-
+	goalFix(Current,XCurrent,Mode),
 	!,
-	fixBody0(Rest,(XCurrent,SoFar),Body).
-fixBody0([_ | More],SoFar,Body) :-
-	fixBody0(More,SoFar,Body).
+	fixBody0(Rest,(XCurrent,SoFar),Body,Mode).
+fixBody0([_ | More],SoFar,Body,Mode)
+	:-
+	fixBody0(More,SoFar,Body,Mode).
 
-goalFix(V,call(V)) :- var(V), !. 
-goalFix(M:G,M:FG) :- !, goalFix(G,FG).
-goalFix('!'(_),!) :- !.
-goalFix(call(A,_),call(A)) :- !.
-goalFix(':'(A,S,_),(A:S)) :- !.
-goalFix('->'(A,S,_),(A->S)) :- !.
-goalFix(';'(A,S,_),(A;S)) :- !.
-goalFix(','(A,S,_),(A,S)) :- !.
-goalFix('|'(A,S,_),(A|S)) :- !.
-goalFix(dbg_call(M,G,_),dbg_call(M,G)) :- !.
-goalFix('$dbg_aph'(A,B,C),'$dbg_aph'(A,B,C)) :- !.
-goalFix('$dbg_apg'(A,B,C),'$dbg_apg'(A,B,C)) :- !.
-goalFix(callWithDelayedInterrupt(M,G,_),callWithDelayedInterrupt(M,G)) :- !.
-goalFix(SemiGoal,SemiFixed) :-
+goalFix(V,call(V),Mode)			:- var(V), !. 
+goalFix(M:G,M:FG,Mode)			:- !, goalFix(G,FG,Mode).
+goalFix('!'(_),!,Mode)			:- !.
+goalFix(call(A,_),call(A),Mode)	:- !.
+goalFix(':'(A,S,_),(A:S),Mode)	:- !.
+goalFix('->'(A,S,_),(A->S),Mode)	:- !.
+goalFix(';'(A,S,_),(A;S),Mode)	:- !.
+goalFix(','(A,S,_),(A,S),Mode)	:- !.
+goalFix('|'(A,S,_),(A|S),Mode)	:- !.
+goalFix(dbg_call(M,G,_),dbg_call(M,G),Mode)		 :- !.
+goalFix('$dbg_aph'(A,B,C),'$dbg_aph'(A,B,C),show_pp) :- !.
+goalFix('$dbg_apg'(A,B,C),'$dbg_apg'(A,B,C),show_pp) :- !.
+goalFix('$dbg_aph'(_,_,_),_,hide_pp) :- !, fail.
+goalFix('$dbg_apg'(_,_,_),_,hide_pp) :- !, fail.
+goalFix(callWithDelayedInterrupt(M,G,_),callWithDelayedInterrupt(M,G),Mode) :- !.
+goalFix(SemiGoal,SemiFixed,Mode)
+	:-
 	functor(SemiGoal,P,A),
 	isgensym(semi,P),
 %	name(P,[~s,~e,~m,~i,~_,~_,~_|_]),
 	!,
-	xconsult:semiFix(SemiGoal,P,A,SemiFixed).
-goalFix('$dbg_aph'(_,_,_),_) :- 
-	!,
-	fail.
-goalFix('$dbg_apg'(_,_,_),_) :- 
-	!,
-	fail.
-goalFix(A,A).
+	xconsult:semiFix(SemiGoal,P,A,SemiFixed,Mode).
+goalFix(A,A,Mode).
 
 /*
  * catch0/3

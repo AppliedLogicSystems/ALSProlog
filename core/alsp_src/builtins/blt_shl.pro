@@ -23,112 +23,169 @@ use sio.
  * is the shell call to make.
  */
 
-start_shell(DefaultShellCall) :-
+start_shell(DefaultShellCall)
+	:-
 	%% get the command line, but ignore the image name
 	retract(command_line([ImageName|CommandLine])),
 	!,
 	CLInfo = clinfo(DefaultShellCall,	/* goal to run */
-			false,			/* verbosity */
-			[],			/* files to consult */
-			ImageName,
-			default,		/* debugger to set up */
-			other_flags),		/* room for expansion */
+					false,				/* verbosity */
+					[],					/* files to consult */
+					ImageName,
+					default,			/* debugger to set up */
+					other_flags),		/* room for expansion */
 	ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo),
 	assertz(command_line(ResidualCommandLine)),
+
 	arg(3, CLInfo, Files),
 	arg(1, CLInfo, ShellCall),
 
-	%% FIXME: Get rid of consultmessage stuff
-	(arg(2,CLInfo,false) -> consultmessage(off) ; consultmessage(on)),
-
 	builtins:libhide(debugger,[builtins,debugger],
-		[ (trace)/0, (trace)/2, toggle_mod_show/1, leash/1,
-		  (spy)/0, (spy)/1, (spy)/2, (spy_pat)/3, (spyWhen)/1,
-		  (spyWhen)/2, (nospy)/0, (nospy)/1, (nospy)/3,
-		  spying/0, debugging/0, list_spypoints/0 ]),
+				[ (trace)/0, (trace)/2, toggle_mod_show/1, leash/1,
+		  		  (spy)/0, (spy)/1, (spy)/2, (spy_pat)/3, (spyWhen)/1,
+		  		  (spyWhen)/2, (nospy)/0, (nospy)/1, (nospy)/3,
+		  		  spying/0, debugging/0, list_spypoints/0 ]),
+
 	ss_init_searchdir,
 	ss_load_dot_alspro,
-	%% FIXME: Instantiate Options with things like the verbosity
+
+	(arg(2,CLInfo,false) -> consultmessage(off) ; consultmessage(on)),
+		Options = [],
 	ss_load_files(Files,Options),
 	consultmessage(on),
 	!,
 	user:ShellCall.
 
-ss_parse_command_line([], [], CLInfo) :-
-	!.
-ss_parse_command_line(['-p' | T], T, CLInfo) :-
-	!.
-ss_parse_command_line(['-P' | T], [ImageName | T], CLInfo) :-
-	!,
+/*------------------------------------------------------------------
+ | ss_parse_command_line/3
+ | ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo),
+ | ss_parse_command_line(+, -, +/-),
+ *-----------------------------------------------------------------*/
+
+	%% Empty/end of command line:
+ss_parse_command_line([], [], CLInfo)
+	:-!.
+
+	%% -p: Start application part of command line:
+ss_parse_command_line(['-p' | T], T, CLInfo)
+	:-!.
+
+	%% -p: Start application part of command line, pushing on image name:
+ss_parse_command_line(['-P' | T], [ImageName | T], CLInfo)
+	:-!,
 	arg(4,CLInfo,ImageName).
-ss_parse_command_line(['-g', GoalAtom | T], L, CLInfo) :-
-	!,
+
+	%% -g <Goal>: Start up goal:
+ss_parse_command_line(['-g', GoalAtom | T], L, CLInfo)
+	:-!,
 	atom_codes(GoalAtom, GoalCodes),
 	term_codes(Goal, GoalCodes),	%% FIXME: Catch syntax errors
 	mangle(1,CLInfo,Goal),
 	ss_parse_command_line(T,L,CLInfo).
-ss_parse_command_line(['-b' | T], L, CLInfo) :-
-	!,
+
+	%% -b: "Batch" mode: exit after running -g startup goal (don't run default shell):
+ss_parse_command_line(['-b' | T], L, CLInfo)
+	:-!,
 	mangle(1, CLInfo, true),
 	ss_parse_command_line(T, L, CLInfo).
-ss_parse_command_line(['-v' | T], L, CLInfo) :-
-	!,
+
+	%% -v: Turn on verbose mode:
+ss_parse_command_line(['-v' | T], L, CLInfo)
+	:-!,
 	mangle(2, CLInfo, true),
 	ss_parse_command_line(T, L, CLInfo).
-ss_parse_command_line(['-d' | T], L, CLInfo) :-
-	!,
+
+	%% -d: Force tty-style debugger to be loaded:
+		%% This is probably not correct at present (11/1/94)
+ss_parse_command_line(['-d' | T], L, CLInfo)
+	:-!,
 	mangle(5, CLInfo, nowins),
 	ss_parse_command_line(T, L, CLInfo).
-ss_parse_command_line(['-obp' | T], L, CLInfo) :-
-	!,
+
+	%% -obp: Keep obp files in directory where image is running:
+ss_parse_command_line(['-obp' | T], L, CLInfo)
+	:-!,
 	obp_in_cur,
 	ss_parse_command_line(T, L, CLInfo).
-ss_parse_command_line([File | T], L, CLInfo) :-
+
+	%% Otherwise: should be a file to be loaded:
+ss_parse_command_line([File | T], L, CLInfo)
+	:-
 	arg(3, CLInfo, Files),
 	append(Files, [File], NewFiles),
 	mangle(3, CLInfo, NewFiles),
 	ss_parse_command_line(T, L, CLInfo).
 
-ss_init_searchdir :-
+/*---------------------------------------
+ |	ss_init_searchdir/0
+ |
+ |	ss_init_searchdir/1
+ |	ss_init_searchdir(Paths)
+ |	ss_init_searchdir(+)
+ *--------------------------------------*/
+ss_init_searchdir
+	:-
 	getenv('ALSPATH',ALSPATH),
 	!,
 	ss_init_searchdir(ALSPATH).
 ss_init_searchdir.
 
-ss_init_searchdir(Paths) :-
+ss_init_searchdir(Paths)
+	:-
 	path_separator(PS),
 	atom_split(Paths,PS,Path,RestPaths),
 	!,
 	assertz(searchdir(Path)),
 	ss_init_searchdir(RestPaths).
-ss_init_searchdir(Path) :-
+ss_init_searchdir(Path)
+	:-
 	assertz(searchdir(Path)).
 	
+/*---------------------------------------
+ |	ss_load_files/2
+ |	ss_load_files(FileList,Options)
+ |	ss_load_files(+,+)
+ *--------------------------------------*/
 
-ss_load_files([],_) :-
-	!.
-ss_load_files([F | T],Options) :-
+ss_load_files([],_) 
+	:-!.
+ss_load_files([F | T],Options)
+	:-
 	reconsult(F),
 	ss_load_files(T,Options).
     
-ss_load_dot_alspro :-
-	exists_file('.alspro'),
+/*---------------------------------------
+ |	ss_load_dot_alspro
+ *--------------------------------------*/
+ss_load_dot_alspro
+	:-
+	als_system(L),
+	(dmember(os=dos,L) ->
+		File = 'alspro.pro' ; File = '.alspro' ),
+	ss_load_dot_alspro(File).
+
+ss_load_dot_alspro(File)
+	:-
+	exists_file(AutoFile),
 	!,
-	reconsult('.alspro').
-ss_load_dot_alspro :-
+	reconsult(AutoFile).
+ss_load_dot_alspro(AutoFile)
+	:-
+		%% What about DOS (also Mac, etc.) here?:
 	getenv('HOME',HOME),
-	pathPlusFile(HOME,'.alspro',File),
+	pathPlusFile(HOME,AutoFile,File),
 	exists_file(File),
 	!,
 	reconsult(File).
-ss_load_dot_alspro.
+ss_load_dot_alspro(_).
 
-/*
- * print_banner prints out the initial banner
- */
+/*-------------------------------------------------
+ | print_banner/1
+ |		- prints out the initial banner
+ *------------------------------------------------*/
 
-print_banner :-
-	als_system(L),
+print_banner(L) 
+	:-
 	dmember(prologName = Name, L),
 	dmember(prologVersion = Version, L),
 	dmember(wins=WinsName, L),
@@ -153,7 +210,8 @@ print_banner :-
 :-	make_gv("_shell_prompts"), 	set_shell_prompts( [('?- ','?-_')] ).
 
 	%% This is the default system tty shell:
-prolog_shell :-
+prolog_shell
+	:-
 	prolog_shell(user_input,user_output).
 
 	%% Used to start both the default system shells, and
@@ -166,6 +224,12 @@ prolog_shell(InStream,OutStream)
 
 init_prolog_shell(InStream, OutStream,CurLevel,CurDebuggingState)
 	:-
+	als_system(SysList),
+	dmember(wins=Wins, SysList),
+
+	(Wins = nowins -> SLD = off ; SLD = on),
+	xconsult:asserta(source_level_debugging(SLD)),
+
 	sio:input_stream_or_alias_ok(InStream, RealInStream),
 	set_stream_pgoals(RealInStream, user_prompt_goal(OutStream) ),
 
@@ -174,21 +238,17 @@ init_prolog_shell(InStream, OutStream,CurLevel,CurDebuggingState)
 	get_shell_level(CurLevel),
 	NewLevel is CurLevel+1,
 	set_shell_level(NewLevel),
-	make_prompts(CurLevel,Prompt1,Prompt2),
+	make_prompts(Wins, CurLevel,Prompt1,Prompt2),
 		%% store prompts on a stack in a global variable
 		%% because we (may) come and go from X, so we
 		%% can't hold on to them:
 	get_shell_prompts( CurPromptsStack ),
 	set_shell_prompts( [(Prompt1,Prompt2) | CurPromptsStack] ),
 
-	als_system(SS),
-	dmember(wins=WinSys, SS),
-%	(ShellCall == DefaultShellCall -> print_banner(WinSys) ; true),
-	print_banner.
+	print_banner(SysList).
 
-	
-
-shell_exit(InStream, OutStream,Level,DebuggingState) :-
+shell_exit(InStream, OutStream,Level,DebuggingState)
+	:-
 	set_shell_level(Level),
 	set_debugging_state(DebuggingState),
 	get_shell_prompts( [_ | CurPromptsStack] ),
@@ -273,18 +333,20 @@ shell_execute(InStream,OutStream,InitGoal,[],[], continue)
 	InitGoal = stream_not_ready,
 	!.
 
+:-alsshell:dynamic(getTracingFlag/1).
+:-dynamic(getTracingFlag/1).
+
 shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars, Status)
 	:-
 	sio:get_user_prompt(UsersPrompt),
-/*
-	getTracingFlag(TracingFlag),
-	(TracingFlag = tracing ->
+%/*
+	(alsshell:getTracingFlag(tracing) ->
 		Goal = (trace InitGoal)
 		;
 		Goal = InitGoal
 	),
-*/
-Goal = InitGoal,
+%*/
+%Goal = InitGoal,
 	flush_input(InStream),
 %	sio:set_user_prompt(UsersPrompt),
 	!,
@@ -329,41 +391,48 @@ set_debugging_state(debug_state(Int,Call,Depth,Retry,DInt)) :-
 
 
 %%
-%% make_prompts(Level,Prompt1,Prompt2)
+%% make_prompts(Wins, Level,Prompt1,Prompt2)
 %%
 %% make_prompts is responsible for building the prompts to be displayed.
 %%
 
-make_prompts(N,Prompt1,Prompt2) :-
+make_prompts(nowins, N,Prompt1,Prompt2) 
+	:-
 	N > 0,
+	!,
 	sprintf(PL1,'Break (%d) ?- ',[N]),
 	sprintf(PL2,'          ?-_',[]),
 	name(Prompt1,PL1),
-	name(Prompt2,PL2),
-	!.
-make_prompts(_,'?- ','?-_').
+	name(Prompt2,PL2).
 
-%%
-%% do_shell_query executes the query and displays the answers.  The
-%% layering is necessary since a top level cut may cut away the top
-%% choice point.  A subsequent failure would then force the whole thing
-%% to fail.
-%%
+make_prompts(nowins, _,'?- ','?-_') :-!.
 
-do_shell_query(Goal0,VarNames,_,InStream,OutStream) :-
+make_prompts(Wins, N,'','').
+
+/*-----------------------------------------------------------------------*
+ |	do_shell_query/5 executes the query and displays the answers.  The
+ |	layering is necessary since a top level cut may cut away the top
+ |	choice point.  A subsequent failure would then force the whole thing
+ |	to fail.
+ *-----------------------------------------------------------------------*/
+
+do_shell_query(Goal0,VarNames,_,InStream,OutStream) 
+	:-
 	var(Goal0),
 	VarNames = [VV | _],
 	!,
 		%% bad_goal:    "Improper Goal: %t\n"
 	prolog_system_error(bad_goal, [VV]).
-do_shell_query(exit,_,_,_,_) :-
-	!,
+do_shell_query(exit,_,_,_,_) 
+	:-!,
 	fail.
-do_shell_query(end_of_file,_,_,InStream,_) :-
+do_shell_query(end_of_file,_,_,InStream,_) 
+	:-
 	flush_input(InStream),      %% reset eof condition
 	!,
 	fail.
-do_shell_query(Goal0,VarNames,Vars,InStream,OutStream) :-
+do_shell_query(Goal0,VarNames,Vars,InStream,OutStream) 
+	:-
 	gc,			%% Let user start fresh
 	getDebugInterrupt(DInt),
 	setPrologInterrupt(DInt),
@@ -376,25 +445,30 @@ do_shell_query(Goal0,VarNames,Vars,InStream,OutStream) :-
 	dbg_spyoff,
 	showanswers(VarNames,Vars,InStream,OutStream),
 	!.
-do_shell_query(Goal,VarNames,Vars,InStream,OutStream) :-
+do_shell_query(Goal,VarNames,Vars,InStream,OutStream) 
+	:-
 	dbg_notrace,
 	dbg_spyoff,
 	print_no(OutStream).
 
 export do_shell_query2/2.
-do_shell_query2(Mod,Goal) :-
+
+do_shell_query2(Mod,Goal) 
+	:-
 	getPrologInterrupt(Int),
 	(Int=debug_user ; Int=debug_init),
 	!,
 	dbg_spyon,
 	callWithDelayedInterrupt(Mod,Mod:Goal).
-do_shell_query2(Mod,Goal) :-
+do_shell_query2(Mod,Goal) 
+	:-
 	getPrologInterrupt(Int),
 	(Int=spying ; Int=jumping),
 	!,
 	dbg_spyon,
 	Mod:Goal.
-do_shell_query2(Mod,Goal) :-
+do_shell_query2(Mod,Goal) 
+	:-
 	Mod:Goal.
 
 showanswers(N,V,InStream,OutStream) :-
@@ -428,39 +502,46 @@ disp_sa_cont(C,InStream,UsersPrompt,OutStream)
 	flush_input(InStream),
 	succeed_or_fail(C,OutStream).
 
-print_no(OutStream) :- 
+print_no(OutStream) 
+	:- 
 	nl(OutStream),
 	write(OutStream,'no.'),
 	nl(OutStream).
 
-print_yes(OutStream) :-
+print_yes(OutStream) 
+	:-
 	nl(OutStream),
 	write(OutStream,'yes.'),
 	nl(OutStream).
 
-succeed_or_fail(0';,_) :- !, fail.
-succeed_or_fail(_,OutStream) :- print_yes(OutStream).
-
+succeed_or_fail(0';,_) 
+	:- !, fail.
+succeed_or_fail(_,OutStream) 
+	:- 
+	print_yes(OutStream).
 
 %shell_exception(What) :- pbi_write(What),pbi_nl,fail. %% debug clause
-shell_exception(abort) :-
-	!,
+shell_exception(abort) 
+	:-!,
 		%% abort:  "Execution aborted.\n"
 	prolog_system_error(abort,[]).
-shell_exception(stack_overflow(Goal)) :-
-	!,
+shell_exception(stack_overflow(Goal)) 
+	:-!,
 	'$protect_bottom_stack_page',
 		%% stack_over:  "Execution aborted due to stack overflow.\n"
 	prolog_system_error(stack_over,[]).
-shell_exception(heap_overflow(Goal)) :-
+shell_exception(heap_overflow(Goal)) 
+	:-
 	!,
 	reset_wm_normal,
 	prolog_system_error(heap_over,[]).
-shell_exception(error(ET,ImpDef)) :-
+shell_exception(error(ET,ImpDef)) 
+	:-
 	!,
 	gc,
 	prolog_system_error(error(ET,ImpDef),[]).
-shell_exception(Reason) :-
+shell_exception(Reason) 
+	:-
 	functor(Reason,EventId,1),
 	!,
 	gc,
@@ -469,7 +550,8 @@ shell_exception(Reason) :-
 	prolog_system_error(no_handler,[EventId,Call]),
 		%% abort:  "Execution aborted.\n"
 	prolog_system_error(abort,[]).
-shell_exception(Reason) :-
+shell_exception(Reason) 
+	:-
 	gc,
 	prolog_system_error(uncaught,[throw(Reason)]).
 

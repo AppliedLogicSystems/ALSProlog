@@ -12,41 +12,7 @@
  *==============================================================*/
 
 module builtins.
-
-/*
- * old_bufread/2
- * bufread/2
- * bufread/3
- */
-
-export old_bufread/2.
-export bufread/2.
-export bufread/3.
-
-old_bufread(String,[Term|VarNames]) :- 
-	open(string(String),read,Stream),
-	read_term(Stream,Term,
-		  [attach_fullstop(true),vars_and_names(_,VarNames)]),
-	close(Stream).
-
-bufread(String,Term) :-
-	bufread(String,Term,[]).
-
-bufread(String,Term,Options) :-
-	open(string(String),read,Stream),
-	read_term(Stream,Term,[attach_fullstop(true)|Options]),
-	close(Stream).
-
-export atomread/2.
-export atomread/3.
-
-atomread(Atom,Term) :-
-	atomread(Atom,Term,[]).
-
-atomread(Atom,Term,Options) :-
-	open(atom(Atom),read,Stream),
-	read_term(Stream,Term,[attach_fullstop(true)|Options]),
-	close(Stream).
+use xconsult.
 
 /*!----------------------------------------------------------------
  | exists_file/1
@@ -84,9 +50,16 @@ exists(FileName) :-
 	'$access'(FileName,0).
 
 /*----------------------------------------------------------------------*
- * Consult, reconsult, consultq, consult_to, consultq_to
- *
- * consultq is a quiet consult.
+ | Consult, reconsult, consultq, consult_to, consultq_to
+ |
+ | consultq - quiet consult: turns off consult messages, this consult;
+ | consultd - source debbugging consult: consults the requested file(s),
+ |			  adding hidden source debugging info;
+ | consult(q)_to - behaves as if the consult were called from within 
+ |				   a given module; specifically, clauses in the file
+ |				   which appear outside of any explicit module declaration
+ |				   are loaded into the specified module, instead of the
+ |				   default behavior of being loaded into module 'user'
  *----------------------------------------------------------------------*/
 
 export consultd/1.
@@ -99,10 +72,12 @@ export consultq_to/2.
 
 consultd(File) :-
 	nonvar_ok(File),
-	xconsult:asserta(source_level_debugging(on)),
+%	xconsult:asserta(source_level_debugging(on)),
+	change_source_level_debugging(on,Prev),
 	consult(File),
-	xconsult:retract(source_level_debugging(on)),
-	!.
+%	xconsult:retract(source_level_debugging(on)),
+	change_source_level_debugging(Prev).
+%	!.
 reconsultd(File) :-
 	consultd(-File).
 
@@ -184,7 +159,7 @@ consult_nature(FileName, FileName, obp).
 
 source_debug_record(Path)
 	:-
-	xconsult:source_level_debugging(on),
+	source_level_debugging(on),
 	!,
 	pathPlusFile(_,File,Path),
 	asserta(consulted(Path, File, debug)).
@@ -197,7 +172,7 @@ adjust_source_deb(Path)
 	:-
 	consulted(Path, _, ConsultType),
 	!,
-	xconsult:source_level_debugging(SLDB),
+	source_level_debugging(SLDB),
 	deb_adj_act_on(SLDB, ConsultType, Path).
 
 adjust_source_deb(Path)
@@ -606,7 +581,10 @@ load_source_object(SPath,OPath) :-
 
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
-consult_source(Path,NErrs) :- xconsult:xconsult(Path,NErrs).
+consult_source(Path,NErrs) 
+	:- 
+%	xconsult:xconsult(Path,NErrs).
+	xconsult(Path,NErrs).
 
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
@@ -902,6 +880,40 @@ bufwriteq(String,Term) :-
 		maxdepth(20000), quoted_strings(false)]),
 	close(Stream).
 
+/*
+ * old_bufread/2
+ * bufread/2
+ * bufread/3
+ */
+
+export old_bufread/2.
+export bufread/2.
+export bufread/3.
+
+old_bufread(String,[Term|VarNames]) :- 
+	open(string(String),read,Stream),
+	read_term(Stream,Term,
+		  [attach_fullstop(true),vars_and_names(_,VarNames)]),
+	close(Stream).
+
+bufread(String,Term) :-
+	bufread(String,Term,[]).
+
+bufread(String,Term,Options) :-
+	open(string(String),read,Stream),
+	read_term(Stream,Term,[attach_fullstop(true)|Options]),
+	close(Stream).
+
+export atomread/2.
+export atomread/3.
+
+atomread(Atom,Term) :-
+	atomread(Atom,Term,[]).
+
+atomread(Atom,Term,Options) :-
+	open(atom(Atom),read,Stream),
+	read_term(Stream,Term,[attach_fullstop(true)|Options]),
+	close(Stream).
 
 %
 % Instantiate the variables in the ThawedTerm with their lexical

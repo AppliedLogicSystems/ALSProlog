@@ -33,7 +33,11 @@ module objects.
 %%export send/2.
 send('$no$Object$', Message)
 	:-!,
-	send_to_null_object(Message).
+	send(builtins,null_object,Message).
+
+send(builtins, Message)
+	:-!,
+	send(builtins,null_object,Message).
 
 send(anyone, Message)
 	:-!,
@@ -48,7 +52,6 @@ send(Object, Message)
 	atom(Object),
 	!,
 	objects:objectModule(Object, Module),
-	!,
 	send(Module, Object, Message).
 
 send(Object^SlotDescrip, Message)
@@ -66,6 +69,9 @@ send(Object, Message)
 	accessObjStruct(myName, Object, ObjectName),
 	!,
 	send(ObjectName, Message).
+
+send(Module, null_object, Message)
+	:-!.
 
 send(Module, debugger_object, Message)
 	:-!,
@@ -140,6 +146,7 @@ finish_send_self(ObjectName,Message,ObjState)
 
 /*!-----------------------------------------------------------------------
  *-----------------------------------------------------------------------*/
+/*
 :-dynamic(notify_null_send_flag/0).
 
 send_to_null_object(Message)
@@ -153,6 +160,7 @@ notify_null_send(Message)
 	:-
 	printf(warning_output,"Send to nullObject: %t\n",[Message]),
 	flush_output(warning_output).
+*/
 
 /*!-----------------------------------------------------------------------
  *-----------------------------------------------------------------------*/

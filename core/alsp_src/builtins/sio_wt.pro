@@ -1,17 +1,18 @@
-/*
- * sio_wt.pro		-- write_term and company
- *	Copyright (c) 1990-1992 Applied Logic Systems, Inc.
- *
- * Authors: 	Ken Bowen
- *		Kevin Buettner
- * Creation:	5/8/90
- *
- * Modules:	sio
- *		builtins
- * Exported Procedures:
- *
- *	write_term(Stream,Term,WriteOptions)
- */
+/*=============================================================*
+ | 		sio_wt.pro
+ |	Copyright (c) 1990-1994 Applied Logic Systems, Inc.
+ |
+ |		write_term and company
+ |
+ | Authors: 	Ken Bowen
+ |		Kevin Buettner
+ | Creation:	5/8/90
+ |
+ | Modules:	sio, builtins
+ |
+ | Exported Procedures:
+ |		write_term(Stream,Term,WriteOptions)
+ *=============================================================*/
 
 module sio.
 
@@ -19,64 +20,77 @@ module sio.
 
 
 
-/*
- * write_term(Term,Options)
- * write_term(Stream,Term,Options)
- *
- *	These predicates write out Term on Stream (current output stream
- *	in the two argument version) with the options Options.  The
- *	options may be any of the following:
- *
- *	quoted(Bool)		-- Bool is true or false; if true forces
- *			symbols to be written out in such a manner that read
- *			may be used to read them back in.  false indicates
- *			that symbols should be written out without any
- *			special quoting. I.e, embedded control characters
- *			will be written out to the output device as is.
- *	ignore_ops(Bool)	-- Bool is true or false; if true operators
- *			will be output in function notation (operators are
- *			ignored.)  If false, operators will be printed out
- *			appropriately.
- *	portrayed(Bool)		-- not implemented yet
- *	numbervars(Bool)	-- if true terms of the form $VAR(N) where N
- *			is an integer will print out as a letter.
- *	lettervars(Bool)	-- if Bool is true, variables will be printed
- *			out as letters.  If false, variables will be printed
- *			as _N where N is computed via the address that the
- *			variable lives at.  This latter mode will be more
- *			suited to debugging purposes where correspondences
- *			between variables in various calls is required.
- *	maxdepth(N,Atom1,Atom2)	-- N is the maximum depth to print to. Atom1
- *			is the atom to output when this depth has been reached.
- *			Atom2 is the atom to output when this depth has been
- *			reached at the tail of a list.
- *	maxdepth(N)		-- same as maxdepth(N,*,...)
- *	line_length(N)		-- N is the length in characters of the output
- *			line.  The pretty printer will attempt to put attempt
- *			to break lines before they exceed the given line length.
- *	indent(N)		-- N is the initial indentation to use.
- *	quoted_strings(Bool)	-- Bool is true or false.  If true, lists of
- *			suitably small integers will print out as a double
- *			quoted string.  If false, these lists will print out
- *			as lists of small numbers.
- *	depth_computation(Val)	-- Val may be either flat or nonflat. This
- *			indicates the manner of depth computation. If Val
- *			is flat, all arguments of a term or list will be
- *			treated as being at the same depth.  If Val is
- *			nonflat, then each subsequent argument in a term
- *			(or each sebsequent element of a list) will be
- *			considered to be at a depth one greater than the 
- *			preceding structure argument (or list element).
- */
+/*---------------------------------------------------------------------*
+ | write_term(Term,Options)
+ | write_term(Stream,Term,Options)
+ |
+ |	These predicates write out Term on Stream (current output stream
+ |	in the two argument version) with the options Options.  The
+ |	options may be any of the following:
+ |
+ |	quoted(Bool)		-- Bool is true or false; 
+ |		If true, forces symbols to be written out in such a manner 
+ |		that read may be used to read them back in.  If false,  symbols 
+ |		will be written out without any special quoting; i.e, embedded 
+ |		control characters will be written out to the output device as is.
+ |
+ |	ignore_ops(Bool)	-- Bool is true or false; 
+ |		If true, operators will be output in function notation (operators 
+ |		are ignored.)  If false, operators will be printed out appropriately.
+ |
+ |	portrayed(Bool)		-- not yet implemented;
+ |
+ |	numbervars(Bool)	-- Bool is true or false;
+ |		If true, terms of the form $VAR(N) where N is an integer will print 
+ |		out as a letter.
+ |
+ |	lettervars(Bool)	-- Bool is true or false;
+ |		If Bool is true, variables will be printed out as letters.  If false, 
+ |		variables will be printed as _N where N is computed via the address 
+ |		that the variable lives at.  This latter mode will be more suited to 
+ |		debugging purposes where correspondences between variables in various 
+ |		calls is required.
+ |
+ |	maxdepth(N,Atom1,Atom2)	-- 
+ |		N is the maximum depth to which to print. Atom1 is the atom to 
+ |		output when this depth has been reached.  Atom2 is the atom to 
+ |		output when this depth has been reached at the tail of a list.
+ |
+ |	maxdepth(N)		-- 
+ |		Same as maxdepth(N,*,...)
+ |
+ |	line_length(N)		-- 
+ |		N is the length in characters of the output line.  The pretty printer 
+ |		will attempt to put attempt to break lines before they exceed the 
+ |		given line length.
+ |
+ |	indent(N)		-- 
+ |		N is the initial indentation to use.
+ |
+ |	quoted_strings(Bool)	-- Bool is true or false;
+ |		If true, lists of suitably small integers will print out as a 
+ |		double quoted string.  If false, these lists will print out
+ |		as lists of small numbers.
+ |
+ |	depth_computation(Val)	-- Val is flat or nonflat;
+ |		This indicates the manner of depth computation. If Val is flat, 
+ |		all arguments of a term or list will be treated as being at the 
+ |		same depth.  If Val is nonflat, then each subsequent argument in 
+ |		a term (or each sebsequent element of a list) will be considered to 
+ |		be at a depth one greater than the preceding structure argument 
+ |		(or list element).
+ *---------------------------------------------------------------------*/
 
 export write_term/2.
 export write_term/3.
 
-write_term(Term,Options) :-
+write_term(Term,Options) 
+	:-
 	get_current_output_stream(Stream),
 	write_term(Stream,Term,Options).
 
-write_term(Stream_or_alias,Term,Options) :-
+write_term(Stream_or_alias,Term,Options) 
+	:-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	winfo_write_term(Stream,WInfo),
 	write_options(Options,WInfo),
@@ -89,11 +103,13 @@ write_term(Stream_or_alias,Term,Options) :-
 export write/1.
 export write/2.
 
-write(Term) :-
+write(Term) 
+	:-
 	get_current_output_stream(Stream),
 	write(Stream,Term).
 
-write(Stream_or_alias,Term) :-
+write(Stream_or_alias,Term) 
+	:-
 	output_stream_or_alias_ok(Stream_or_alias, Stream),
 	nonvar(Stream_or_alias),	%% Preserve var for error reporting
 	winfo_write(Stream,WInfo),
@@ -272,28 +288,43 @@ write_option(indent(N),WInfo) :-
 write_option(Culprit, WInfo) :-
 	domain_error(write_option,Culprit,3).
 
-
-/*
- * winfo structure access predicates
- *
- *	The winfo structure (for write info) is a structure with winfo
- *	as the principal functor.
- *
- *	Arguments of the structure control the manner in which a term is
- *	written out.
- */
+/*-----------------------------------------------------------------------*
+ |		winfo structure
+ |
+ |	The winfo structure (for write info) is a structure with winfo
+ |	as the principal functor.  Arguments of the structure control the 
+ |	manner in which a term is written out.
+ |
+ | 	winfo(	Quoted,
+ |			Ignore_ops,
+ |			Portrayed,
+ |			Numbervars,
+ |			Maxdepth_atom,
+ |			Listtail,
+ |			Indent,
+ |			Lettervars,
+ |			Varcounter,
+ |			Quoted_strings,
+ |			Wt_opts
+ |		 )
+ |
+ |	Wt_opts is a term of the form:
+ |		
+ |		wt_opts(Line_len, MaxDepth, Depth_computation)
+ |			
+ *-----------------------------------------------------------------------*/
 
 winfo_quoted(WInfo,Value) :-		arg(1,WInfo,Value).
-winfo_quoted(WInfo) :-			arg(1,WInfo,true).
+winfo_quoted(WInfo) :-				arg(1,WInfo,true).
 
 winfo_ignore_ops(WInfo,Value) :- 	arg(2,WInfo,Value).
-winfo_ignore_ops(WInfo) :-		arg(2,WInfo,true).
+winfo_ignore_ops(WInfo) :-			arg(2,WInfo,true).
 
 winfo_portrayed(WInfo,Value) :- 	arg(3,WInfo,Value).
-winfo_portrayed(WInfo) :-		arg(3,WInfo,true).
+winfo_portrayed(WInfo) :-			arg(3,WInfo,true).
 
 winfo_numbervars(WInfo,Value) :- 	arg(4,WInfo,Value).
-winfo_numbervars(WInfo) :-		arg(4,WInfo,true).
+winfo_numbervars(WInfo) :-			arg(4,WInfo,true).
 
 winfo_maxdepth_atom(WInfo,Value) :- 	arg(5,WInfo,Value).
 winfo_maxdepth_listtail(WInfo,Value) :- arg(6,WInfo,Value).
@@ -301,7 +332,7 @@ winfo_maxdepth_listtail(WInfo,Value) :- arg(6,WInfo,Value).
 winfo_indent(WInfo,Value) :-		arg(7,WInfo,Value).
 
 winfo_lettervars(WInfo,Value) :-	arg(8,WInfo,Value).
-winfo_lettervars(WInfo) :-		arg(8,WInfo,true).
+winfo_lettervars(WInfo) :-			arg(8,WInfo,true).
 
 winfo_varcounter(WInfo,Value) :-	arg(9,WInfo,Value).
 
@@ -314,18 +345,18 @@ winfo_maxdepth(WInfo,Value) :-		arg(11,WInfo,WO), arg(2,WO,Value).
 winfo_depth_computation(WInfo,Value) :- arg(11,WInfo,WO), arg(3,WO,Value).
 
 
-set_winfo_quoted(WInfo,Value) :-	mangle(1,WInfo,Value).
+set_winfo_quoted(WInfo,Value) :-		mangle(1,WInfo,Value).
 
 set_winfo_ignore_ops(WInfo,Value) :-	mangle(2,WInfo,Value).
 
-set_winfo_portrayed(WInfo,Value) :-	mangle(3,WInfo,Value).
+set_winfo_portrayed(WInfo,Value) :-		mangle(3,WInfo,Value).
 
 set_winfo_numbervars(WInfo,Value) :-	mangle(4,WInfo,Value).
 
 set_winfo_maxdepth_atom(WInfo,Value) :- mangle(5,WInfo,Value).
 set_winfo_maxdepth_listtail(WInfo,Value) :- mangle(6,WInfo,Value).
 
-set_winfo_indent(WInfo,Value) :-	mangle(7,WInfo,Value).
+set_winfo_indent(WInfo,Value) :-		mangle(7,WInfo,Value).
 
 set_winfo_lettervars(WInfo,Value) :-	mangle(8,WInfo,Value).
 
@@ -333,34 +364,57 @@ set_winfo_varcounter(WInfo,Value) :-	mangle(9,WInfo,Value).
 
 set_winfo_quoted_strings(WInfo,Value):-	mangle(10,WInfo,Value).
 
-set_winfo_line_len(WInfo,Value) :-	arg(11,WInfo,WO), mangle(1,WO,Value).
-set_winfo_maxdepth(WInfo,Value) :-	arg(11,WInfo,WO), mangle(2,WO,Value).
-set_winfo_depth_computation(WInfo,Value) :- arg(11,WInfo,WO), mangle(3,WO,Value).
+set_winfo_line_len(WInfo,Value) 
+	:-	
+	arg(11,WInfo,WO), mangle(1,WO,Value).
+set_winfo_maxdepth(WInfo,Value) 
+	:-	
+	arg(11,WInfo,WO), mangle(2,WO,Value).
+set_winfo_depth_computation(WInfo,Value) 
+	:- 
+	arg(11,WInfo,WO), mangle(3,WO,Value).
 
+	/*---------------------------------------------*
+	 | Default winfos
+	 |
+ 	 | 	winfo(	Quoted, Ignore_ops, Portrayed, Numbervars,
+ 	 |			Maxdepth_atom, Listtail, Indent,
+ 	 |			Lettervars, Varcounter, Quoted_strings, 
+ 	 |			wt_opts(Line_len, MaxDepth, Depth_computation)
+ 	 |		 )
+	 *---------------------------------------------*/
 
-/*
- * Default winfos
- */
-
+		%% Quoted, Lettervars, Quoted_strings
 winfo_write_term( Stream,
-	winfo(true, false,false,false,'*','...',0,true,0,true,WO)) :-
+		winfo(true, false,false,false,'*','...',0,true,0,true,WO)) 
+	:-
     WO = wt_opts(_,_,_),
     stream_wt_opts(Stream,WO).
+
+		%% No quoting, Numbervars, No Lettervars, No Quoted_strings,
+		%% Very long lines 
 winfo_write( Stream,
-	winfo(false,false,false,true,'*','...',0,false,0,false,WO)) :-
+		winfo(false,false,false,true,'*','...',0,false,0,false,WO)) 
+	:-
     WO = wt_opts(2047,Depth,DepthComputation),	%% override default length
     stream_wt_maxdepth(Stream,Depth),
     stream_wt_depth_computation(Stream,DepthComputation).
+
 winfo_writeq( Stream,
-	winfo(true, false,false,true, '*','...',0,true,0,true,WO)) :-
+		winfo(true, false,false,true, '*','...',0,true,0,true,WO)) 
+	:-
     WO = wt_opts(_,_,_),
     stream_wt_opts(Stream,WO).
+
 winfo_write_canonical( Stream,
-	winfo(true, true, false,false,'*','...',0,true,0,false,WO)) :-
+		winfo(true, true, false,false,'*','...',0,true,0,false,WO)) 
+	:-
     WO = wt_opts(_,_,_),
     stream_wt_opts(Stream,WO).
+
 winfo_print( Stream,
-	winfo(false,false,true, true, '*','...',0,false,0,false,WO)) :-
+		winfo(false,false,true, true, '*','...',0,false,0,false,WO)) 
+	:-
     WO = wt_opts(2047,Depth,DepthComputation),	%% override default length
     stream_wt_maxdepth(Stream,Depth),
     stream_wt_depth_computation(Stream,DepthComputation).
@@ -1379,47 +1433,70 @@ write_out(Term) :-
 
 
 
-/*
- * write_substs(Stream,Names,Substs)
- *
- * write_substs is called by showanswers to write out a list of substitutions.
- * If there are no substituitions to write out, then write_substs will fail.
- * Otherwise, it will write out the substitutions, each on its own line,
- * without emitting a newline for the last line of the last substitution.
- * This permits the calling procedure (showanswers) to look for a response
- * on the same line.  Variables are handled as intelligently as possible.
- */
+/*-----------------------------------------------------------------------*
+ | write_substs(Stream,Names,Substs)
+ |
+ |	write_substs/3 is called by showanswers to write out a list of 
+ |	substitutions on output Stream.
+ |
+ |	Names and Substs are lists of the same length, with the items
+ |	corresponding pairwise: An item N on Names is the atom which is the
+ |	name of a variable which was typed in in the original top-level query;
+ |	The corresponding item on Substs is really the original variable
+ |	assigned to N, now (possibly) bound to some item;
+ |
+ |		If there are no substituitions to write out, then write_substs/3 
+ |	will fail.  Otherwise, it will write out the substitutions, each
+ |	on its own line, without emitting a newline for the last line of the 
+ |	last substitution.  This permits the calling procedure (showanswers)
+ |	to look for a response on the same line.  Variables are handled as 
+ |	intelligently as possible.
+ |
+ |	A number of opertaions are performed:
+ |	1)	Any anonymous vars (named by '_') and their values are deleted;
+ |	2)	Actual input variable names are substituted for any original
+ |		input variables which remain unbound;
+ |	3)	Letter names are generated and substituted for any unbound variables 
+ |		through out all of the output terms;
+ |	4)	The resulting equations (Name = Value) are actually written out.
+ *-----------------------------------------------------------------------*/
 
-write_substs(Stream,Names,Substs) :-
-	remove_underscores(Names,Substs,NewNames,NewSubsts),
-	wr_subs1(NewNames,NewSubsts,Stream).
+write_substs(Stream,Names,Substs) 
+	:-
+	delete_anon_vars(Names,Substs,NewNames,NewSubsts),
+	cont_write_substs(NewNames,NewSubsts,Stream).
 
+delete_anon_vars([],[],[],[]) 
+	:- !.
+delete_anon_vars(['_'|N1],[_|S1],N2,S2) 
+	:- !,
+	delete_anon_vars(N1,S1,N2,S2).
+delete_anon_vars([N|N1],[S|S1],[N|N2],[S|S2]) 
+	:-
+	delete_anon_vars(N1,S1,N2,S2).
 
-remove_underscores([],[],[],[]) :- !.
-remove_underscores(['_'|N1],[_|S1],N2,S2) :-
-	!,
-	remove_underscores(N1,S1,N2,S2).
-remove_underscores([N|N1],[S|S1],[N|N2],[S|S2]) :-
-	remove_underscores(N1,S1,N2,S2).
-
-wr_subs1([],[],Stream) :-
-	!,
+cont_write_substs([],[],Stream) 
+	:- !,
 	fail.
-wr_subs1(N,S,Stream) :-
-	subst_user_names(N,S),
-	subst_gen_names(S,c(0)),
+cont_write_substs(N,S,Stream) 
+	:-
+	subst_orig_toplevel_names(N,S),
+	subst_gen_letter_names(S,c(0)),
 	wr_subs2(N,S,Stream),
 	fail.
-wr_subs1(_,_,_).
+cont_write_substs(_,_,_).
 
-subst_user_names([],[]) :- !.
-subst_user_names([N|Ns],['%lettervar%'(N)|Ss]) :-
-	!,
-	subst_user_names(Ns,Ss).
-subst_user_names([_|Ns],[_|Ss]) :-
-	subst_user_names(Ns,Ss).
+subst_orig_toplevel_names([],[]) 
+	:- !.
+subst_orig_toplevel_names([N|Ns],['%lettervar%'(N)|Ss]) 
+	:- !,
+	subst_orig_toplevel_names(Ns,Ss).
+subst_orig_toplevel_names([_|Ns],[_|Ss]) 
+	:-
+	subst_orig_toplevel_names(Ns,Ss).
 
-subst_gen_names(Var,Counter) :-
+subst_gen_letter_names(Var,Counter) 
+	:-
 	var(Var),
 	!,
 	arg(1,Counter,VarNum),
@@ -1428,25 +1505,30 @@ subst_gen_names(Var,Counter) :-
 	Var = '%lettervar%'(VarAtom),
 	NextVarNum is VarNum+1,
 	mangle(1,Counter,NextVarNum).
-subst_gen_names(Atomic,Counter) :-
+subst_gen_letter_names(Atomic,Counter) 
+	:-
 	atomic(Atomic),
 	!.
-subst_gen_names(Struct,Counter) :-
+subst_gen_letter_names(Struct,Counter) 
+	:-
 	functor(Struct,_,N),
-	subst_gen_names(1,N,Struct,Counter).
+	subst_gen_letter_names(1,N,Struct,Counter).
 
-subst_gen_names(N,M,_,_) :-
+subst_gen_letter_names(N,M,_,_) 
+	:-
 	N>M,
 	!.
-subst_gen_names(N,M,S,C) :-
+subst_gen_letter_names(N,M,S,C) 
+	:-
 	arg(N,S,A),
-	subst_gen_names(A,C),
+	subst_gen_letter_names(A,C),
 	NN is N+1,
-	subst_gen_names(NN,M,S,C).
+	subst_gen_letter_names(NN,M,S,C).
 
-wr_subs2([],[],Stream) :-
-	!.
-wr_subs2([N|Ns],[S|Ss],Stream) :-
+wr_subs2([],[],Stream) 
+	:- !.
+wr_subs2([N|Ns],[S|Ss],Stream) 
+	:-
 	nl(Stream),
 	write_term(Stream,'%lettervar%'(N)=S,[]),
 	wr_subs2(Ns,Ss,Stream).

@@ -164,11 +164,11 @@ cfg_img(ImgName, LinkLibs, Options)
 	catenate([Arch,'_',OSVar,'_',WSName], ArchOSWS),
 	general_os(Arch, OSVar, _, GOS), 
 	(WSName = no_wins ->
-		existsmake_subdir(ArchOS,IMPath/ImgName)
-		change_cwd(ArchOS),
+		existsmake_subdir(ArchOS,IMPath/ImgName),
+		change_cwd(ArchOS)
 		;
 		existsmake_subdir(ArchOSWS,IMPath/ImgName),
-		change_cwd(ArchOSWS),
+		change_cwd(ArchOSWS)
 	),
 
 	find_als_image(Options, DefltTop, ArchOS, PROTYPE, PROBLD, PROLIB),
@@ -328,7 +328,7 @@ img_cmp_make(CompLib, CurN, ArchOS, PROBLD, LIBSDIR, Options, OutS,
 img_cmp_make(CompLib, CurN, ArchOS, PROBLD, LIBSDIR, Options, OutS, 
 				CLI, L_ll, OFs, CLInit, CLCfg, Profls, [], XLines)
 	:-
-	check_for_windows(CompLib, ArchOS, CmpLibName),
+	check_for_windows(CompLib, ArchOS, Options, CmpLibName),
 	!,
 	extendPath(PROBLD,ArchOS, AOSDir),
 	extendPath(AOSDir,'bld-wins',BWinsDir),
@@ -403,19 +403,34 @@ img_cmp_make(CompLib, CurN, ArchOS, PROBLD, LIBSDIR, Options, OutS,
 	check_default(CompLib, xlines, [], XLines).
 
 
-check_for_windows(CompLib, ArchOS, CmpLibName)
+check_for_windows(CompLib, ArchOS, Options, CmpLibName)
 	:-
 	dmember(name=windows, CompLib),
 	!,
+	(dmember(ws=CmpLibName, Options) ->
+		true
+		;
+		builtins:als_system(SysList),
+		((dmember(wins=CmpLibName, SysList),CmpLibName \= nowins) ->
+			true
+			;
+			winsystems_for(ArchOS, WSL),
+			dmember(CmpLibName, WSL)
+		)
+	).
+	/*
 	builtins:als_system(SysList),
 	((dmember(wins=CmpLibName, SysList),CmpLibName \= nowins) ->
 		true
 		;
-		winsystems_for(ArchOS, WSL),
-		dmember(CmpLibName, WSL)
+			;
+			winsystems_for(ArchOS, WSL),
+			dmember(CmpLibName, WSL)
+		)
 	).
+	*/
 
-check_for_windows(CompLib, ArchOS, CmpLibName)
+check_for_windows(CompLib, ArchOS, Options, CmpLibName)
 	:-
 	dmember(name=CmpLibName, CompLib),
 	winsystems_for(ArchOS, WSL),
