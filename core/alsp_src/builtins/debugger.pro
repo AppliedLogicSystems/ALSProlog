@@ -1049,8 +1049,14 @@ export 'spy'/2.
 
 spy(Pred,Arity) :-
 	check_debug_io,
+	(nonvar(Arity) ->
+		true
+		;
+		all_ntbl_entries(Module,Predicate,Arity,_)
+	),
 	findall(M, all_ntbl_entries(M,Pred,Arity,R), Modules),
-	Modules \= [], !,
+	Modules \= [], 
+	!,
 	dbg_spyoff,
 	install_spypoints(Modules, Pred, Arity),
 	setPrologInterrupt(spying),
@@ -1130,6 +1136,11 @@ install_spypoint(Mod,Pred,Arity) :-
 
 spy(Module,Predicate,Arity) :-
 	check_debug_io,
+	(nonvar(Arity) ->
+		true
+		;
+		all_ntbl_entries(Module,Predicate,Arity,_)
+	),
     functor(CallForm,Predicate,Arity),
     clause(spying_on(CallForm,Module),true),
     !,
@@ -1138,6 +1149,11 @@ spy(Module,Predicate,Arity) :-
 	flush_output(debugger_output).
      
 spy(Module,Predicate,Arity) :-
+	(nonvar(Arity) ->
+		true
+		;
+		all_ntbl_entries(Module,Predicate,Arity,_)
+	),
     check_existence(Module,Predicate,Arity,UMod),
     !,
     dbg_spyoff,
@@ -1691,6 +1707,7 @@ getresponse2(Port,Box,Depth,Module,Goal,Response) :-
 getresponse2(Port,Box,Depth,Module,Goal,Resps,Response)
 	:-
 	put_code(debugger_output,0'\?),
+	flush_output(debugger_output),
 	get_atomic_nonblank_char(debugger_input, R),
 	dmember(R-Resp0,Resps),
 	!,

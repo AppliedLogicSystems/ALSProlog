@@ -133,7 +133,7 @@ process((':-'(Command) :- '$dbg_aph'(_,_,_)),Names,Vars,Stream, File, ModStack)
 process((':-'(Command) :- '$dbg_aph'(_,_,_)),Names,Vars,Stream, File, ModStack)
 	:-!,
 		%% cf: "Command failed.\n"
-	prolog_system_error(s(cf,Stream),[]),
+	prolog_system_error(s(cf,Stream),[Command]),
 	readFile(Stream, File, ModStack).
 
 process(':-'(Command),Names,Vars,Stream, File, ModStack)

@@ -295,6 +295,7 @@ filterForFileType([], _, _, _, []).
 filterForFileType([FileName | Files], Disk, PathList, FileType, List)
 	:-
 	filter_file(FileName, Disk, PathList, FileType, List, ListTail),
+	!,
 	filterForFileType(Files, Disk, PathList, FileType, ListTail).
 
 	%% Need this error case since '$getFileStatus'/2 can fail when given

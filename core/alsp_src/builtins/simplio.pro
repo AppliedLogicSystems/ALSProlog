@@ -176,6 +176,7 @@ themenu(List, ChoiceNum, Options,InS,OutS)
 		Prompt = ' Choice = '
 	),
 	write(OutS,Prompt),
+	flush_output(OutS),
 	get_line(InS,Line),
 	((Line = ''; Line = end_of_line) ->
 		ChoiceNum = default
@@ -218,7 +219,7 @@ output_prolog_list([Item | RestList],Stream,Indent,Term,Spacer,DefaultContent,Df
 		printf(Stream,"%t%t%t",[Indent,Item,Term]),
 		(Iterm=DefaultContent -> write(Stream,DfltMark);true)
 	),
-	nl(Stream),
+	nl(Stream),flush_output(Stream),
 	output_prolog_list(RestList,Stream,Indent,Term,Spacer,DefaultContent,DfltMark).
 
 

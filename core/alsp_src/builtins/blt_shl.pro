@@ -15,6 +15,7 @@
 module builtins.
 use sio.
  
+
 /*-------------------------------------------------------------------------------*
  | start_shell/1
  | start_shell(DefaultShellCall)
@@ -70,16 +71,23 @@ start_shell0(DefaultShellCall)
 
 	als_system(SysList),
 
+	consultmessage(CsltValue),
+	set_consult_messages(true),
+	setup_shell_windows(CLInfo, OutputStream),
+	set_consult_messages(CsltValue),
+
 	arg(2,CLInfo,ConsultNoise),
 	(ConsultNoise = true -> 
 		true ; 
-		print_banner(user_output,SysList)
+		print_banner(OutputStream,SysList)
 	),
-
 	(ConsultNoise = true -> true ;
-		als_advise('Setting up library indicies...may take a moment...')),
+		als_advise(OutputStream, 'Setting up library indicies...may take a moment...',[])),
 	setup_libraries,
-	(ConsultNoise = true -> true ; als_advise('Done.\n')),
+	(ConsultNoise = true -> true ; 
+		als_advise(OutputStream, 'Done.\n',[]),
+		nl(OutputStream),
+		flush_output(OutputStream)),
 
 	arg(3, CLInfo, Files),
 	set_consult_messages(ConsultNoise),
@@ -101,6 +109,62 @@ setup_init_goal(CLInfo, ShellCall)
 		;
 		ShellCall = (CmdLineGoal, CLShellCall)
 	).
+
+setup_shell_windows(CLInfo, OSS)
+	:-
+	arg(7, CLInfo, alsdev),
+	!,
+	setup_tcltk,
+	sys_searchdir(ALSDIR),
+	extendPath(ALSDIR, shared, Shared),
+	pathPlusFile(Shared, 'alsdev.tcl', ALSDEVTCL),
+
+	tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
+	tcl_call(shl_tcli, [source, ALSDEVTCL], _),
+
+	open(tk_win(shl_tcli, '.topals.txwin.text'), read, ISS, [alias(shl_tk_in_win)]),
+	open(tk_win(shl_tcli, '.topals.txwin.text'), write, OSS, [alias(shl_tk_out_win)]),
+
+    set_input(ISS),
+    set_output(OSS),
+
+    %% Debugger streams
+
+%	open(console('debugger output'),write, OutDStream,
+    open(tk_win(shl_tcli, '.topals.txwin.text'),write, OutDStream,
+	 ['$stream_identifier'(-4), alias(debugger_output),
+	 	buffering(line),type(text),
+	 	maxdepth(8), line_length(76),
+	 	depth_computation(nonflat)]),
+
+%	open(console('debugger input'), read, InDStream,
+    open(tk_win(shl_tcli, '.topals.txwin.text'), read, InDStream,
+	 ['$stream_identifier'(-3), alias(debugger_input),blocking(true),
+	 	prompt_goal(flush_output(debugger_output))]),
+
+    %% Error stream
+
+%	open(console_error('error output'),write,OutEStream,
+    open(tk_win(shl_tcli, '.topals.txwin.text'),write,OutEStream,
+	 ['$stream_identifier'(-5), alias(error_stream),
+	 	buffering(line),type(text)]),
+
+    %% Establish additional aliases
+    sio:set_alias(warning_input, ISS),
+    sio:set_alias(warning_output, OSS),
+
+	sio:reset_user(ISS,OSS),
+
+	set_prolog_flag(windows_system, tcltk),
+	current_prolog_flag(windows_system, Which),
+	mangle(7, CLInfo, prolog_shell(ISS,OSS)).
+
+	%% Should be: arg(7, CLInfo, prolog_shell)
+setup_shell_windows(CLInfo, user_output)
+	:-
+	open_addl_std_streams.
+%unneeded	mangle(7, CLInfo, prolog_shell).
+
 
 /*-----------------------------------------------------------------*
  | ss_parse_command_line/3
@@ -251,6 +315,13 @@ ss_parse_command_line(['-stack', _ | T], L, CLInfo)
 	:-!,
 	ss_parse_command_line(T, L, CLInfo).
 
+	%% Specify non-default shell:
+	%% -shell Shell : Use shell (alsdev only known):
+ss_parse_command_line(['-shell', ShellName | T], L, CLInfo)
+	:-!,
+	mangle(7, CLInfo, ShellName),
+	ss_parse_command_line(T, L, CLInfo).
+
 	%% Otherwise: should be a file to be loaded:
 ss_parse_command_line([File | T], L, CLInfo)
 	:-
@@ -378,9 +449,9 @@ print_banner(OutS,L)
 	name(WBan, [UInC | WNCs]),
 	!,
 #if (syscfg:intconstr)
-	printf(OutS,'CLP(BNR)(r) [%s Version %s [%s]]\n',[Name,Version,OSVar]),
+	printf(OutS,'CLP(BNR)(r) \[%s Version %s \[%s\]\]\n',[Name,Version,OSVar]),
 #else
-	printf(OutS,'%s Version %s [%s]\n',[Name,Version,OSVar]),
+	printf(OutS,'%s Version %s \[%s\]\n',[Name,Version,OSVar]),
 #endif
 	printf(OutS,'   Copyright (c) 1987-96 Applied Logic Systems, Inc.\n\n',[]).
 
@@ -456,31 +527,19 @@ init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 		%% can't hold on to them:
 	get_shell_prompts( CurPromptsStack ),
 	set_shell_prompts( [(Prompt1,Prompt2) | CurPromptsStack] ),
-%	(consultmessage(true) -> true ; print_banner(OutStream,SysList)),
-	current_prolog_flag(windows_system, InitWins),
+	current_prolog_flag(windows_system, Wins),
 	dmember(os=OS, SysList),
 	dmember(os_variation=OSMinor, SysList),
-	(InitWins = nowins ->
-			Wins = nowins
-			;
-			(windows:'$toplevel$'(_) ->
-/*
-				Wins = InitWins
-*/
-				((OS=macos ; OSMinor = djgpp ; OSMinor = djgpp2)
-					->
-					Wins = InitWins/0
-					;
-					Wins = InitWins
-				)
-
-				;
-				Wins = nowins
-			)
-	),
 	push_prompt(Wins,OutStream,Prompt1).
 
 push_prompt(nowins,_,_) :-!.
+push_prompt(tcltk,OutStream,Prompt1)
+	:-
+	nl(OutStream),
+	put_atom(OutStream,Prompt1),
+	flush_output(OutStream),
+%	tcl_eval(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _).
+	tcl_call(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _).
 push_prompt(Wins,OutStream,Prompt1)
 	:-
 	put_atom(OutStream,Prompt1),
@@ -520,6 +579,20 @@ shell_exit(InStream, OutStream,Level,DebuggingState)
 	%% cleanly call the part (shell_read_execute/4) which reads 
 	%% one term from the input stream and executes it.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+export als_exec/2.
+als_exec( InputLine, TextWinPath)
+	:-
+	add_to_stream_buffer(shl_tk_in_win, InputLine),
+	shell_read_execute(shl_tk_in_win,shl_tk_out_win,tcltk,Status),
+	continue_prolog_loop(Status).
+
+
+prolog_shell_loop(InStream,OutStream,tcltk) 
+	:-!,
+%	tcl_eval(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _),
+	tcl_call(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _),
+	tk_main_loop.
 
 prolog_shell_loop(InStream,OutStream,Wins) 
 	:-
@@ -612,7 +685,7 @@ shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,InWins,Status)
 		sio:input_stream_or_alias_ok(InStream, RealInStream),
 		stream_blocking(RealInStream,OldBlocking),
 		set_stream_blocking(RealInStream,true),
-		catch(do_shell_query(Goal,NamesOfVars,Vars,Alarm,InStream,OutStream),
+		catch(do_shell_query(Goal,NamesOfVars,Vars,Wins,Alarm,InStream,OutStream),
 	      		Reason,
 	      		( shell_exception(Reason)
 					,set_stream_blocking(RealInStream,OldBlocking))
@@ -690,13 +763,13 @@ make_prompts(_, _,'?- ','?-_')
 	:-!.
 
 /*-----------------------------------------------------------------------*
- |	do_shell_query/5 executes the query and displays the answers.  The
+ |	do_shell_query/6 executes the query and displays the answers.  The
  |	layering is necessary since a top level cut may cut away the top
  |	choice point.  A subsequent failure would then force the whole thing
  |	to fail.
  *-----------------------------------------------------------------------*/
 
-do_shell_query(Goal0,VarNames,_,_,InStream,OutStream) 
+do_shell_query(Goal0,VarNames,_,_,_,InStream,OutStream) 
 	:-
 	var(Goal0),
 	VarNames = [VV | _],
@@ -704,21 +777,21 @@ do_shell_query(Goal0,VarNames,_,_,InStream,OutStream)
 			%% bad_goal: "Improper Goal: %t\n"
 	prolog_system_error(bad_goal, [VV]).
 
-do_shell_query(exit,_,_,_,_,_) 
+do_shell_query(exit,_,_,_,_,_,_) 
 	:-!,
 	fail.
 
-do_shell_query(end_of_file,_,_,_,InStream,_) 
+do_shell_query(end_of_file,_,_,_,_,InStream,_) 
 	:-
 	flush_input(InStream),      %% reset eof condition
 	!,
 	fail.
 
-do_shell_query((?- Goal0),VarNames,Vars,Alarm,InStream,OutStream) 
+do_shell_query((?- Goal0),VarNames,Vars,Wins,Alarm,InStream,OutStream) 
 	:-!,
-	do_shell_query(Goal0,VarNames,Vars,Alarm,InStream,OutStream).
+	do_shell_query(Goal0,VarNames,Vars,Wins,Alarm,InStream,OutStream).
 
-do_shell_query(Goal0,VarNames,Vars,AlarmIntrv,InStream,OutStream) 
+do_shell_query(Goal0,VarNames,Vars,Wins,AlarmIntrv,InStream,OutStream) 
 	:-
 	gc,			%% Let user start fresh
 	getDebugInterrupt(DInt),
@@ -732,10 +805,10 @@ do_shell_query(Goal0,VarNames,Vars,AlarmIntrv,InStream,OutStream)
 %	unset_alarm(AlarmIntrv),
 	dbg_notrace,
 	dbg_spyoff,
-	showanswers(VarNames,Vars,InStream,OutStream),
+	showanswers(VarNames,Vars,Wins,InStream,OutStream),
 	!.
 
-do_shell_query(Goal,VarNames,Vars,AlarmIntrv,InStream,OutStream) 
+do_shell_query(Goal,VarNames,Vars,Wins,AlarmIntrv,InStream,OutStream) 
 	:-
 %	unset_alarm(AlarmIntrv),
 	dbg_notrace,
@@ -784,7 +857,8 @@ do_shell_query2(Mod,Goal)
 	:-
 	Mod:Goal.
 
-showanswers(N,V,InStream,OutStream) 
+
+showanswers(N,V,Wins,InStream,OutStream) 
 	:-
 	N = [_|_],
 	write_substs(OutStream,N,V,NonAnonNames),
@@ -794,29 +868,29 @@ showanswers(N,V,InStream,OutStream)
 	(NonAnonNames \= [] -> 
 		sio:get_user_prompt(UsersPrompt),
 		sio:set_user_prompt(''),
-		sa_cont(InStream,UsersPrompt,OutStream)
+		sa_cont(InStream,UsersPrompt,Wins,OutStream)
 		;
 		print_yes(OutStream)
 	).
 
-showanswers(_,_,InStream,OutStream) 
+showanswers(_,_,Wins,InStream,OutStream) 
 	:-
 	flush_input(InStream),  %% reset eof in event that calling goal set it
 	print_yes(OutStream).
 
-sa_cont(InStream,UsersPrompt,OutStream)
+sa_cont(InStream,UsersPrompt,Wins,OutStream)
 	:-
 	get_code(InStream,C,[blocking(true)]),
-	disp_sa_cont(C,InStream,UsersPrompt,OutStream).
+	disp_sa_cont(C,Wins,InStream,UsersPrompt,OutStream).
 
-disp_sa_cont(-2,InStream,UsersPrompt,OutStream)  %% stream not ready
+disp_sa_cont(-2,tcltk,InStream,UsersPrompt,OutStream)  %% stream not ready
 	:-!,
-	sio:wait_data(window, InStream, get_code(InStream,C)),
+	sio:wait_data(tcltk, InStream, get_code(InStream,C)),
 	sio:set_user_prompt(UsersPrompt),
 	flush_input(InStream),
 	succeed_or_fail(C,OutStream).
 
-disp_sa_cont(C,InStream,UsersPrompt,OutStream)
+disp_sa_cont(C,Wins,InStream,UsersPrompt,OutStream)
 	:-
 	sio:set_user_prompt(UsersPrompt),
 	flush_input(InStream),

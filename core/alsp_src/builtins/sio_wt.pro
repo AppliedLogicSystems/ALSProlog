@@ -15,6 +15,7 @@
  |		write_term(Stream,Term,WriteOptions)
  *=============================================================*/
 
+
 module sio.
 
 :-	make_gv("_depth_computation_constant").

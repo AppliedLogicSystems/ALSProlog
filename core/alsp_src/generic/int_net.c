@@ -106,7 +106,7 @@ ilinknet()
 	int OpCdt,Zt,Xt,Yt,Goalt;
 	int holdme;
 
-printf("Enter ilinknet\n");
+/* printf("Enter ilinknet\n"); */
 
 	w_get_An(&OpCd, &OpCdt, 1);
 	w_get_An(&Z, &Zt, 2);
@@ -116,7 +116,7 @@ printf("Enter ilinknet\n");
 
 	holdme = ilinkq(OpCd, Z, X, Y, Goal, Zt,Xt,Yt,Goalt);
 
-	printf("EXIT ilinknet\n");
+/* printf("EXIT ilinknet\n"); */
 
 	return holdme;
 
@@ -466,7 +466,7 @@ ilnk_net()
 			printf("Iteration bound exceeded: niters=%d\n", niters);
 			FAIL;
 		}
-printf("m=%lx\n",(unsigned long) wm_TR - (unsigned long) wm_H);
+/* printf("m=%lx\n",(unsigned long) wm_TR - (unsigned long) wm_H); */
 
 		status = 0;
 

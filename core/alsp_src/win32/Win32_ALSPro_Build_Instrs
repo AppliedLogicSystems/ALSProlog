@@ -59,7 +59,7 @@ Build Steps:
 1. From Unix, create a directory for the new build. Run the shell script
 win32_setup in the new directory:
 
-	$SRCDIR/win/bd_mswin32 $SRCDIR
+	$SRCDIR/win32/win32_setup $SRCDIR
 	
 2. On the Mac, decode and extract the project files int the build directory
 using Stuffit Expander.  The following projects need expanding:
