@@ -8,7 +8,7 @@
 #include "getFiles.h"
 #include "getDirectory.h"
 
-extern void tcl_interface_init(void);
+extern void tcl_interface_init(PE);
 
 extern void panic(const char *);
 
@@ -259,7 +259,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	setup_alsdev_demo();
 #endif
 
-	if ((exit_status = PI_startup(&setup)) != 0) {
+	w = PI_new_engine();
+
+	if ((exit_status = PI_startup_pe(w, &setup)) != 0) {
 		PI_app_printf(PI_app_printf_error, "Prolog init failed !\n");
 		exit(EXIT_ERROR);
     }
@@ -268,7 +270,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	shutdown_alsdev_demo();
 #endif
 
-	tcl_interface_init();
+	tcl_interface_init(w);
 
 	/* Only load blt_dvsh when there is no saved state.
 	   Since blt_dvsh is part of the state, reconsulting
@@ -300,8 +302,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     	} 
 	}
 	
-    PI_shutdown();
+    PI_shutdown_pe(w);
     
     CloseHandle(mutex);
+    
+    return 0;
 }
 

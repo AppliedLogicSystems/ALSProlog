@@ -375,7 +375,7 @@ gc(PE)
 		for (; tr < b; tr++) {
 	    	ap = (long *) *tr;			/* tr is not biased */
 	    	if (oldest_ap <= ap && ap < heap_low)
-				mark_from(ap);
+				mark_from(hpe, ap);
 		}
 
 #endif    /* TRAILVALS */

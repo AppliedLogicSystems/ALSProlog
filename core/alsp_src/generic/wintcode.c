@@ -110,8 +110,8 @@ code_alloc(PE, size_t size, int fe_num)
     return newcb->addr;
 }
 
-void dump_codespace(void);
-void dump_codespace(void)
+void dump_codespace(PE);
+void dump_codespace(PE)
 {
   struct codeblock *b;
   

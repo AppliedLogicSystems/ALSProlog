@@ -391,7 +391,7 @@ int pbi_new_thread(PE)
 #elif macintosh
 	id = CreateThread(hpe, prolog_thread, info);
 #elif WIN32
-	CreateThread(NULL, 0, prolog_thread, info, 0, &id);
+	CreateThread(NULL, 0, prolog_thread, info, 0, (unsigned long *)&id);
 #endif
 
 	return PI_unify(v2, t2, id, PI_INT);

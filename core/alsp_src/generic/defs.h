@@ -343,8 +343,6 @@ struct prolog_engine_struct;
 #include "cassert.h"
 
 
-#include "fileio.h"	/* candidate for eventual elimination */
-
 #include "sig.h"
 #include "winter.h"
 #include "fatal.h"

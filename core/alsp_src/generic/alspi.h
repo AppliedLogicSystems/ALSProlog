@@ -64,7 +64,7 @@ typedef struct {
 
 #define PI_BEGIN static PSTRUCT pi_init_array[] = {
 #define PI_DEFINE(p,a,f) {p,a,f,((char *) -1)},
-#define PI_MODULE(m) {m,-1,((int (*)(void))) 0),((char *) -1)},
+#define PI_MODULE(m) {m,-1,((int (*)(prolog_engine_struct)) 0),((char *) -1)},
 //#define PI_END {((char *) -1),-1,((int (*)(void)) 0),((char *) -1)} };
 #define PI_END {((char *) -1),-1,NULL,((char *) -1)} };
 
@@ -190,6 +190,7 @@ extern	ALSPI_API(void)	PI_throw_pe	(PE,PWord obj, int objt);
 #define		PI_throw(a,b)	PI_throw_pe(hpe,a,b)
 extern	ALSPI_API(void)	PI_getball_pe	(PE,PWord *obj, int *objt);
 #define		PI_getball(a,b)	PI_getball_pe(hpe,a,b)
+extern	ALSPI_API(struct prolog_engine_struct *)PI_new_engine	(void);
 extern	ALSPI_API(int)	PI_main_pe	(PE,int argc, char *argv[], void (*init)(void));
 #define		PI_main(a,b,c)	PI_main_pe(hpe,a,b,c)
 extern	ALSPI_API(void)	PI_interrupt_pe	(PE);

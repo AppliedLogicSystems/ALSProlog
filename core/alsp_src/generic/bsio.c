@@ -1923,7 +1923,7 @@ int sio_nsocket_close(PE)
     SUCCEED;
 }
 
-int sio_nsocketpair(void)
+int sio_nsocketpair(PE)
 {
 #ifdef MISSING_UNIX_DOMAIN_SOCKETS
    PWord result; int result_t;
@@ -2584,7 +2584,7 @@ sio_accept_socket_connection(PE)
  * sio_fork(ID)
  */
 int
-sio_fork(void)
+sio_fork(PE)
 {
 #ifdef UNIX
     PWord v1;

@@ -334,7 +334,7 @@ pbi_clct_tr(PE)
 }
 
 int
-pbi_unset_2nd()
+pbi_unset_2nd(PE)
 {
     PWord v1, s;
     int t1;

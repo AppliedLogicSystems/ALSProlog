@@ -50,12 +50,24 @@ static void my_thread(PE)
 }
 #endif
 
+EXPORT ALSPI_API(struct prolog_engine_struct *)	PI_new_engine(void)
+{
+	prolog_engine *hpe1;
+
+	hpe1 = malloc(sizeof(prolog_engine));
+	memset(hpe1, 0x00, sizeof(*hpe1));
+	hpe1->db = malloc(sizeof(prolog_database));
+	memset(hpe1->db, 0x00, sizeof(*hpe1->db));
+
+	return hpe1;
+}
+
 EXPORT ALSPI_API(int)	PI_main_pe(PE,int argc, char *argv[], void (*init)(void))
 {
     int   exit_status, success;
     char *als_opts;
     PI_system_setup setup;
-	prolog_engine *hpe1 /*, *hpe2*/;
+	prolog_engine *hpe1;
 
 #ifdef MSWin32
 	TCHAR old_title[MAX_PATH];
@@ -226,12 +238,8 @@ EXPORT ALSPI_API(int)	PI_main_pe(PE,int argc, char *argv[], void (*init)(void))
     SetConsoleTitle("ALS Prolog");
 #endif
 
-	hpe1 = malloc(sizeof(prolog_engine));
-	memset(hpe1, 0x00, sizeof(*hpe1));
-	hpe1->db = malloc(sizeof(prolog_database));
-	memset(hpe1->db, 0x00, sizeof(*hpe1->db));
-	//hpe = &my_engine;
-
+	hpe1 = PI_new_engine();
+	
     if ((exit_status = PI_startup_pe(hpe1, &setup)) != 0) {
 	PI_app_printf(PI_app_printf_error, "Prolog init failed !\n");
 	exit(EXIT_ERROR);

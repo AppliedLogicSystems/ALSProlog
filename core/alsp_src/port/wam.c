@@ -177,7 +177,7 @@ dump_iprofile(void)
 #define	MMTCH(f) printf("   match is delay [f=%x[_%lu]]\n", 				\
 						  (int)f,(long)(((PWord *) f) - wm_heapbase));	   
 
-void ck_intvl_punch   (PE, PWord, PWord, int);
+int ck_intvl_punch   (PE, PWord, PWord, int);
 
     /*-------------------------------------------------*
 	 |	ck_intvl_punch - used during variable binding,
@@ -191,7 +191,7 @@ void ck_intvl_punch   (PE, PWord, PWord, int);
 	 |	the binding by creating appropriate constraints
 	 |	which run instead...
 	 *-------------------------------------------------*/
-void
+int
 ck_intvl_punch(PE, PWord r, PWord fv, int ft)
 {
 	PWord r3, mf;

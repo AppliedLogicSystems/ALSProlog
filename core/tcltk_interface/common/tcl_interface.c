@@ -361,7 +361,7 @@ Tcl_ALS_Prolog_ObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl
 		return Tcl_ALS_Prolog_Read_Call(prolog_world, interp, objc, objv);
 		break;
 	case PROLOG_INTERRUPT:
-		PI_interrupt();
+		PI_interrupt_pe(prolog_world);
 		return TCL_OK;
 		break;
 	}
@@ -698,7 +698,7 @@ static AP_Result tcl_eval0(AP_World *w, AP_Obj interp_name, AP_Obj command, AP_O
 	/* error check */
 	
 	/* Hack to refresh result */
-	PI_getan(&result.p, &result.t, 3);
+	PI_getan_pe(w, &result.p, &result.t, 3);
 
 	return TclToPrologResult(w, &result, interp, r);
 }
@@ -839,16 +839,16 @@ static AP_Result tcl_coerce_list(AP_World *w, AP_Obj interp_name, AP_Obj item, A
 
 /* Glue routines to translate from old to new ALS Prolog C interfaces. */
 
-static int glue_tcl_new(void) {return AP_OldToNewCall(tcl_new, 1);}
-static int glue_tk_new(void) {return AP_OldToNewCall(tk_new, 1);}
-static int glue_tcl_delete(void) {return AP_OldToNewCall(tcl_delete, 1);}
-static int glue_tcl_delete_all(void) {return AP_OldToNewCall(tcl_delete_all, 0);}
-static int glue_tcl_call(void) {return AP_OldToNewCall(tcl_call, 3);}
-static int glue_tcl_eval(void) {return AP_OldToNewCall(tcl_eval, 3);}
-static int glue_tcl_coerce_number(void) {return AP_OldToNewCall(tcl_coerce_number, 3);}
-static int glue_tcl_coerce_atom(void) {return AP_OldToNewCall(tcl_coerce_atom, 3);}
-static int glue_tcl_coerce_list(void) {return AP_OldToNewCall(tcl_coerce_list, 3);}
-static int glue_tk_main_loop(void) {return AP_OldToNewCall(tk_main_loop, 0);}
+static int glue_tcl_new(AP_World *w) {return AP_OldToNewCall(w, tcl_new, 1);}
+static int glue_tk_new(AP_World *w) {return AP_OldToNewCall(w, tk_new, 1);}
+static int glue_tcl_delete(AP_World *w) {return AP_OldToNewCall(w, tcl_delete, 1);}
+static int glue_tcl_delete_all(AP_World *w) {return AP_OldToNewCall(w, tcl_delete_all, 0);}
+static int glue_tcl_call(AP_World *w) {return AP_OldToNewCall(w, tcl_call, 3);}
+static int glue_tcl_eval(AP_World *w) {return AP_OldToNewCall(w, tcl_eval, 3);}
+static int glue_tcl_coerce_number(AP_World *w) {return AP_OldToNewCall(w, tcl_coerce_number, 3);}
+static int glue_tcl_coerce_atom(AP_World *w) {return AP_OldToNewCall(w, tcl_coerce_atom, 3);}
+static int glue_tcl_coerce_list(AP_World *w) {return AP_OldToNewCall(w, tcl_coerce_list, 3);}
+static int glue_tk_main_loop(AP_World *w) {return AP_OldToNewCall(w, tk_main_loop, 0);}
 
 PI_BEGIN
 	PI_MODULE("tcltk")
@@ -870,8 +870,8 @@ PI_BEGIN
 PI_END
 
 
-void tcl_interface_init(void);
-void tcl_interface_init(void)
+void tcl_interface_init(PE);
+void tcl_interface_init(PE)
 {
 #ifdef macintosh
 	tcl_macQdPtr = &qd /*GetQD()*/;

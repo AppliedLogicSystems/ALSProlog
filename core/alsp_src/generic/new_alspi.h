@@ -1,7 +1,7 @@
 /* The New Interface */
 
 typedef enum {AP_FAIL, AP_SUCCESS, AP_EXCEPTION} AP_Result;
-typedef prolog_engine AP_World;
+typedef struct prolog_engine_struct AP_World;
 typedef struct {long p; int t;} AP_Obj;
 typedef enum {AP_VARIABLE, AP_INTEGER, AP_FLOAT, AP_ATOM, AP_LIST, AP_STRUCTURE} AP_Type;
 
