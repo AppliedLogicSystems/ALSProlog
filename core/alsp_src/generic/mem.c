@@ -1365,6 +1365,7 @@ static unsigned long image_end(int image_file)
 #endif /* USE_ELF_SECTION_FOR_IMAGE */
 #endif /* HAVE_LIBELF */
 
+#ifndef USE_ELF_SECTION_FOR_IMAGE
 long ss_image_offset(void)
 {
     char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
@@ -1399,6 +1400,7 @@ long ss_image_offset(void)
 	return image_size;
     else return 0;
 }
+#endif
 
 static int copy(const char *filename, const char *copyname)
 {
