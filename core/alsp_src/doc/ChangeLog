@@ -1,3 +1,37 @@
+Tues 22 Aug 1995 Ken Bowen, Chuck Houpt
+
+	* Extended/modified abs2make (and specifications) to handle
+	  the macintosh; various fixups for the mac (propagations from
+	  1.70B which were missed), etc.
+
+	* Initial *.abs specs for OS/2
+
+July 30 1995 Ken Bowen
+
+	* Added abstract specification machinery for laying out the
+	  makefiles in the various system implementations; 
+	  Files: Generator in: generate/abs2make.pro
+          Specs (+ various gen. files):
+		generic/generate/generic.abs (--> generic.unix, etc.)
+		bld-port/makefile.abs (--> makefile.unix, etc.)
+		port/port.abs (--> port.unix, etc.)
+		{Native code to be handled later}
+		cfgs/maketop.abs (--> maketop.unix, etc.)
+	  Controlling makefile: cfgs/makefile
+
+July 15 1995 Ken Bowen
+
+	* Initial incorporation of constraints machinery from BNR Prolog;
+	  Files: builtins/[int_cstr.pro,ra_basis.pro];
+                 generic/[intaux.c,intrv.{c,h},intrv_pr.h]
+		 generate/interval:
+		    - abstract spec (W.Older) for interval primitives, 
+                      plus generator producing C code: 
+			pseudoc.ode - (revised) spec
+			gprim_c.pro - generator
+          Changes in: generic/tokens.ini {+ generated tok files}
+                      generic/built.{c,h} for new builtins
+
 Fri Jun 29 1995 Ken Bowen
 
 	* Minor bug repair in float/integer input routines; minor
