@@ -60,7 +60,7 @@ openOutputFile(OutStream,State)
 			printf(OutStream,'\t\t--by ALS Interface Generator\n\n',[])
 			),
 	printf(OutStream,'#include "alspi.h"\n',[]),
-	printf(OutStream,'#include "cinterf.h"\n',[]),
+%	printf(OutStream,'#include "cinterf.h"\n',[]),
 	accessP2I(hincs,State,Hincs),
 	print_incs(Hincs,OutStream),
 	nl(OutStream).

@@ -457,11 +457,17 @@ emit_getan([Type|Rest],ArgNum,LastArgNum,OutStream)
 	emit_getan(Rest,NextArg,LastArgNum,OutStream).
 
 emit_type_check(void,_,OutStream).
+/*
 emit_type_check(integer,Num,OutStream)
 	:-
 	printf(OutStream,'\tif (type%d != PI_INT)\n',[Num]),
 	printf(OutStream,'\t\tif (!CI_get_integer((unsigned long *)&arg%d,type%d))\n',[Num,Num]),
 	printf(OutStream,'\t\t\tPI_FAIL;\n',[]).
+*/
+emit_type_check(integer,Num,OutStream)
+	:-
+	printf(OutStream,'\tif (!CI_get_integer((unsigned long *)&arg%d,type%d))\n',[Num,Num]),
+	printf(OutStream,'\t\tPI_FAIL;\n',[]).
 emit_type_check(float,Num,OutStream)
 	:-
 	printf(OutStream,'\tif (!CI_get_double(&float%d,arg%d,type%d))\n',[Num,Num,Num]),
