@@ -22,8 +22,8 @@ student:
 	cp -pr $(BUILD)/alsdir/library $(SHIP)/alsdir
 	cp -pr $(BUILD)/alsdir/images $(SHIP)/alsdir
 	cp -pr $(BUILD)/alsdir/shared $(SHIP)/alsdir
-	cp -pr ../../manual/manual.pdf $(SHIP)
+	cp -pr ../../manual/*.pdf $(SHIP)
 	cp -pr ../../examples $(SHIP)
-	tar czf $(SHIP)-linux.tgz $(SHIP)
+	tar -C $(ARCH)/ -czf als-student-prolog-$(ARCH).tgz  als-student-prolog
 
 standard:
