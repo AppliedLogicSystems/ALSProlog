@@ -1,4 +1,6 @@
 setlocal
+set CORE=..\
+set ALSDEV=%CORE%\als_dev\alsdev
 set CWPATH=C:\Program Files\Metrowerks\CodeWarrior
 set TCLTKPATH=%CWPATH%\ALS Build Support\Tcl-Tk Support
 copy setcwd.bat temp.bat
@@ -28,10 +30,12 @@ xcopy ..\als_dev\alsdev\images\*.gif alsdir\images
 set DEV_ALSDIR=..\alsp_src
 del %DEV_ALSDIR%\builtins\*.obp
 del %DEV_ALSDIR%\library\*.obp
-alspro_b -b -g "(consult('..\\als_dev\\alsdev\\ldr_dvsh'),consult('..\\tcltk_interface\\common\\tcltk_util'), attach_image('ALS Prolog.exe'))"
+REM alspro_b -b -g "(consult('..\\als_dev\\alsdev\\ldr_dvsh'),consult('..\\tcltk_interface\\common\\tcltk_util'), attach_image('ALS Prolog.exe'))"
+alspro_b -b %ALSDEV%\ldr_alsdev.pro -g "bldit('..\\',((builtins:abolish('$start',0)),(builtins:assert(('$start' :-builtins:start_alsdev))),attach_image('ALS Prolog.exe')))"
 del %DEV_ALSDIR%\builtins\*.obp
 del %DEV_ALSDIR%\library\*.obp
-alspro_b -b -g "(consult('..\\als_dev\\alsdev\\ldr_dvsh'),consult('..\\tcltk_interface\\common\\tcltk_util'),builtins:abolish(save_image,1),builtins:abolish(save_image,2),sio:abolish(open_socket_stream,4),attach_image('ALS Student Prolog.exe'))"
+REM alspro_b -b -g "(consult('..\\als_dev\\alsdev\\ldr_dvsh'),consult('..\\tcltk_interface\\common\\tcltk_util'),builtins:abolish(save_image,1),builtins:abolish(save_image,2),sio:abolish(open_socket_stream,4),attach_image('ALS Student Prolog.exe'))"
+alspro_b -b %ALSDEV%\ldr_studalsdev.pro -g "bldit('..\\',((builtins:abolish('$start',0)),(builtins:assert(('$start' :- builtins:start_alsdev))),attach_image('ALS Student Prolog.exe')))"
 del %DEV_ALSDIR%\builtins\*.obp
 del %DEV_ALSDIR%\library\*.obp
 alspro_b -b -g "save_image(alspro)"
@@ -39,8 +43,9 @@ copy "ALS Prolog Stub.exe" "ALS Prolog Demo.exe"
 set DEV_ALSDIR=..\alsp_src
 del %DEV_ALSDIR%\builtins\*.obp
 del %DEV_ALSDIR%\library\*.obp
-alspro_b -b -g "((builtins:assert(dvf)),consult('..\\als_dev\\alsdev\\ldr_dvsh'),consult('..\\tcltk_interface\\common\\tcltk_util'), consult('..\\als_dev\\alsdev\\demo_ldr'), attach_image('ALS Prolog Demo.exe'))"
+REM alspro_b -b -g "((builtins:assert(dvf)),consult('..\\als_dev\\alsdev\\ldr_dvsh'),consult('..\\tcltk_interface\\common\\tcltk_util'), consult('..\\als_dev\\alsdev\\demo_ldr'), attach_image('ALS Prolog Demo.exe'))"
+alspro_b -b %ALSDEV%\ldr_alsdev_demo.pro -g "bldit('..\\',((builtins:abolish('$start',0)),(builtins:assert(('$start' :- builtins:start_alsdev))),attach_image('ALS Prolog Demo.exe')))"
 del %DEV_ALSDIR%\builtins\*.obp
 del %DEV_ALSDIR%\library\*.obp
-alspro_b -b -g "(consult('..\\als_dev\\alsdev\\demo_ldr'),save_image(alspro_demo))"
+alspro_b -b %ALSDEV%\ldr_alspro_demo.pro -g "bldit('..\\',save_image(alspro_demo))"
 endlocal
