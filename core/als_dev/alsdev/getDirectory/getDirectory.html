@@ -1,0 +1,70 @@
+<HTML><HEAD><TITLE>getDirectory</TITLE></HEAD><BODY>
+
+<H1><CENTER>ALS Tk Commands</CENTER></H1>
+
+<H3>NAME</H3>
+
+getDirectory - pop up a dialog box for the user to select a directory.
+
+<H3>SYNOPSIS</H3>
+
+<P><B>package require getDirectory</B>
+<P><B>getDirectory</B> ? <I>option value ...</I> ?
+
+<H3>DESCRIPTION</H3>
+
+<P>
+The procedure <B>getDirectory</B> pops up a dialog box for the user to select a directory.
+The <B>getDirectory</B> command is usually associated with tasks such as setting search
+paths, specifying watch folder, etc.
+
+<P>
+The following <I>option-value</I> pairs are possible as command line arguments to this
+command:
+
+<DL>
+<DT>
+<B>-initialdir</B> <I>directory</I>
+<DD>
+Specifies that the files in <I>directory</I> should be displayed when the dialog pops up. If this parameter is not
+specified, then the files in the current working directory are displayed. This option may not always work
+on the Macintosh. This is not a bug. Rather, the <I>General Controls</I> control panel on the Mac allows the
+end user to override the application default directory. This option is ignored on the Windows platform.
+
+<DT>
+<B>-parent</B> <I>window</I>
+<DD>
+       Makes window the logical parent of the dialog. The dialog is displayed on top of its parent
+       window. This option is ignored on the Macintosh platform.
+<DT>
+<B>-prompt</B> <I>promptString</I>
+<DD>
+       Specifies a string to display as a prompt in the dialog box. If this option is not specified, then a default prompt
+       is displayed. This option is ignored on the Macintosh platform. 
+</DL>
+
+<P>
+If the user selects a directory, <B>getDirectory</B> returns the full pathname of this directory. If the
+user cancels the operation, the command returns the empty string. 
+
+<H3>EXAMPLE</H3>
+
+<BLOCKQUOTE><PRE>
+package require getDirectory
+
+set dirname [getDirectory]
+
+if {$dirname != ""} {
+    # Process the directory ...
+}
+</PRE></BLOCKQUOTE>
+
+<H3>KEYWORDS</H3>
+
+directory selection dialog 
+
+<HR>
+<PRE>
+Copyright &#169; 1998 Applied Logic Systems, Inc.
+</PRE>
+</BODY></HTML>
