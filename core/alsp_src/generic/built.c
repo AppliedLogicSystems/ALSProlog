@@ -202,6 +202,7 @@ static struct blt_struct {
 	BLT("clct_tr", 1, pbi_clct_tr, "_pbi_clct_tr"),
 	BLT("walk_cps", 0, pbi_walk_cps, "_pbi_walk_cps"),
 	BLT("$delay", 4, pbi_delay, "_pbi_delay"),
+	BLT("$delay_term_for", 2, pbi_del_tm_for, "_pbi_del_tm_for"),
 /*	BLT("collect_thawed", 1, pbi_collect_thawed, "_pbi_collect_thawed"),  */
 #endif /* FREEZE */
 

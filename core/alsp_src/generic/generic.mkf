@@ -10,7 +10,8 @@
 # How to build everything
 #
 
-all:	alsdir alsmics alspro alstest
+#all:	alsdir alsmics alspro alstest
+all:	alsdir alspro alstest
 
 #
 # Define CPPFLAGS and the default rule for translating .c files to .o files
