@@ -225,7 +225,8 @@ file_status(FileName,Status) :-
 	'$getFileStatus'(FileName,
 				fileStatus(FileTypeCode,ModTime,OwnerPermiss,ByteSize,NBlocks)),
 	fileTypeCode(FileTypeCode,FileType),
-	ownerPermissionCoding(OwnerPermiss,Permissions),
+%	ownerPermissionCoding(OwnerPermiss,Permissions),
+	ownerPermissionsCoding(OwnerPermiss,Permissions),
 	Status = [type=FileType,permissions=Permissions,mod_time=ModTime,size=ByteSize].
 
 /*!------------------------------------------------------------------

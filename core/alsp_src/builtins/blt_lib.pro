@@ -128,9 +128,6 @@
 		 xlist_append/3, xlist_append/2,
 		 xlist_mem/2,xlist_dmem/2],[]).
 
-:-libactivate(sio,['library',sockmisc],
-	[bread/1,bread/2, bread/3, bread_term/3, bread_term/4], [] ).
-
 :-libactivate(builtins,['library',strctutl],
 	[locate_struct/3, delete_struct/3, delete_struct/4, set_all_args/4], [] ).
 
@@ -158,6 +155,13 @@
 	 specif_winsystems_for/3 ], [] ).
 
 :-libactivate(builtins,['library',cmpdirs], [cmpdirs/3], [] ).
+
+:-libactivate(sio,['library',sio_misc], 
+			[get_nonblank_char/1,get_nonblank_char/2,
+			 get_atomic_nonblank_char/1, get_atomic_nonblank_char/2,
+			 put_byte/1, put_byte/2, get_byte/1, get_byte/2,
+			 read_chars/3, consume_whitespace/1
+			 ], [] ).
 
 :-libactivate(cref,['library',cref], 
 			[cref/1,cref/2,cref_shell/0], [] ).

@@ -1153,9 +1153,15 @@ is_server_socket(Stream_or_alias) :-
  */
 
 export accept_socket_connection/1.
-accept_socket_connection(Stream_or_alias) :-
+accept_socket_connection(Stream_or_alias) 
+	:-
+	accept_socket_connection(Stream_or_alias, _).
+
+export accept_socket_connection/2.
+accept_socket_connection(Stream_or_alias, ConnectionAddr)
+	:-
 	stream_or_alias_ok(Stream_or_alias, Stream),
-	sio_accept_socket_connection(Stream).
+	sio_accept_socket_connection(Stream, ConnectionAddr).
 
 export poll/2.
 poll(Stream_or_alias, TimeOut) :-
@@ -1785,34 +1791,6 @@ remove_aliases(Stream) :-
 remove_aliases(_).
 
 /*
- * get_byte(Byte)
- *
- *	Unifies Byte with the next byte obtained from the default input stream.
- *
- * FIXME: Move to library.
- */
-
-export get_byte/1.
-
-get_byte(Byte) :- get_code(Byte).
-
-
-/*
- * get_byte(Stream_or_alias, Byte)
- *
- *	Unifies Byte with the next byte obtained from the stream associated
- *	with Stream_or_alias.
- *
- * FIXME: Move to library.
- */
-
-export get_byte/2.
-
-get_byte(Stream_or_alias,Byte) :- 
-	get_code(Stream_or_alias,Byte).
-
-
-/*
  * get_failure/3
  *
  *	Handles the failure conditions for input streams.
@@ -2061,165 +2039,6 @@ get_char(Stream_or_alias, Char) :-
 	input_stream_or_alias_ok(Stream_or_alias, Stream),
 	sio_errcode(Stream, FailCode),
 	get_failure(FailCode,Stream,get_char(Stream_or_alias,Char)).
-
-
-/*
- * FIXME:  Rewrite read_chars and move to library.  It does not belong here.
- */
-
-/*
- * read_chars(Stream_or_alias, List, Num)
- *
- *	Num must be a nonnegative integer;
- *	Unifies List with the atom corresponding to the list of characters 
- *	obtained by reading up to Num characters from the stream associated 
- *	with Stream_or_alias.
- */
-
-export read_chars/3.
-
-read_chars(SS, CharAtom, Num)
-    :-
-    get_codes(Num, Chars, SS),
-	name(CharAtom, Chars).
-
-get_codes(0, [], _) :- !.
-get_codes(Num, [CC | Chars], SS)
-    :-
-    get_code(SS, CC),
-    !,
-    NextNum is Num-1,
-    get_codes(NextNum, Chars, SS).
-get_codes(_, [], SS).
-
-
-/*
- * FIXME:  Move to library.
- */
-
-/*
- * get_nonblank_char(Char)
- *
- *	Unifies Char with the next non-whitespace character obtained from the 
- *	default input stream, if that occurs before the next end of line, and
- *	unifies Char with the atom
- *				end_of_line
- *	otherwise.
- */
-
-/*
-export get_nonblank_char/1.
-
-get_nonblank_char(Char) :-
-	get_current_input_stream(Stream),
-	get_nonblank_char(Stream,Char).
-*/
-
-/*
- * FIXME:  Move to library.
- */
-
-/*
- * get_nonblank_char(Stream_or_alias, Char)
- *
- *	Unifies Char with the next non-whitespace character obtained from the 
- *	input stream associated with Stream_or_alias, if that occurs before the 
- *	next end of line, and unifies Char with the atom
- *				end_of_line
- *	otherwise.
- */
-
-/*
-export get_nonblank_char/2.
-
-get_nonblank_char(Stream, Char) :-
-	get_code(Stream, CChar),
-	check_char_input(CChar, Stream, Char).
-
-check_char_input(CC,Stream, end_of_line) :-
-    iseoln(CC),
-    !.
-
-check_char_input(CChar,Stream,Char) :-
-    isspace(CChar),
-    !,
-	get_nonblank_char(Stream, Char).
-
-check_char_input(CChar,Stream,CChar) :-
-	get_code(Stream, C),
-    consume_til_end(C, Stream).
-
-consume_til_end(C, Stream) :-
-    iseoln(C),
-    !.
-
-consume_til_end(_, Stream) :-
-	get_code(Stream, C),
-    consume_til_end(C, Stream).
-*/
-
-/*
-iseoln(0'\n).
-iseoln(0'\r).
-
-isspace(S) :- S =< 32, not(iseoln(S)).
-*/
-
-/*
- * FIXME:  Move to library.
- */
-
-/*
- * get_atomic_nonblank_char(Char)
- *
- *	Unifies Char with the atomic form of the next non-whitespace character 
- *  obtained from the default input stream, if that occurs before the next 
- *	end of line, and unifies Char with the atom
- *				end_of_line
- *	otherwise.
- */
-
-export get_atomic_nonblank_char/1.
-
-get_atomic_nonblank_char(Char) :-
-	get_current_input_stream(Stream),
-	get_atomic_nonblank_char(Stream,Char).
-
-/*
- * get_atomic_nonblank_char(Stream_or_alias, Char)
- *
- *	Unifies Char with the atomic form of the next non-whitespace character 
- *	obtained from the input stream associated with Stream_or_alias, if that 
- *	occurs before the next end of line, and unifies Char with the atom
- *				end_of_line
- *	otherwise.
- */
-
-export get_atomic_nonblank_char/2.
-
-/*
-get_atomic_nonblank_char(Stream,Char)
-	:-
-	get_nonblank_char(Stream,Char0),
-	(Char0 = end_of_line ->
-		Char0 = Char
-		;
-		name(Char, [Char0])
-	).
-*/
-
-get_atomic_nonblank_char(Stream,Char)
-	:-
-	get_line(Stream, Line),
-	atom_codes(Line, CharList),
-	first_nonblank_char(CharList, Char0),
-	atom_codes(Char, [Char0]).
-get_atomic_nonblank_char(Stream, end_of_line).
-
-first_nonblank_char([Char | Rest], Char) :-
-	Char > 32.
-first_nonblank_char([_ | Rest], Char) :-
-	first_nonblank_char(Rest, Char).
 
 /*
  * peek_code(Char)
@@ -2505,31 +2324,6 @@ move_lines_to_buffer(CurQueue,BufSize,BufStart,SD,CurNum,NumCs,NewQueue) :-
 	NumCs is CurNum + NumCopied,
 	NewQueue = RestCurQueue.
 move_lines_to_buffer(CurQueue,_,_,_,CurNum,CurNum,CurQueue).
-
-
-/*
- * put_byte(Byte)
- *
- *	Outputs the byte Byte to the current default output stream.
- *
- * FIXME: Move to library.
- */
-
-export put_byte/1.
-
-put_byte(Byte) :- put_code(Byte).
-
-/*
- * put_byte(Stream_or_alias,Byte)
- *
- *	Outputs the byte Byte to the stream defined by Stream_or_alias.
- *
- * FIXME: Move to library.
- */
-
-export put_byte/2.
-
-put_byte(Stream_or_alias, Byte) :- put_code(Stream_or_alias, Byte).
 
 
 /*

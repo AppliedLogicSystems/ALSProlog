@@ -220,7 +220,7 @@ static	void	incr_fdrefcnt	PARAMS(( int ));
 static	int	decr_fdrefcnt	PARAMS(( int ));
 static	int	compute_flags	PARAMS(( char *, int , int ));
 static	void	delete_stream_name PARAMS(( PWord ));
-static	int	accept_connection PARAMS(( PWord, char * ));
+static	int	accept_connection PARAMS(( PWord, char * , char **));
 static	int	stream_is_ready	PARAMS(( char *, long ));
 static	void	shift_buffer	PARAMS(( UCHAR * ));
 static	int	write_buf	PARAMS(( PWord, UCHAR * ));
@@ -1050,7 +1050,7 @@ sio_console_open()
     PWord v1, v2, v3, v4, v5, v6;
     int   t1, t2, t3, t4, t5, t6;
     UCHAR *buf;
-    int   flags = 0;
+/*    int   flags = 0;  */
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
@@ -1637,27 +1637,34 @@ delete_stream_name(vsd)
  */
 
 static int
-accept_connection(vsd, buf)
+accept_connection(vsd, buf, sktaddr)
     PWord vsd;
     char  *buf;
+    char  **sktaddr;
 {
+		/* Internet socket addresses */
+    struct sockaddr_in c_addr;	
+	int c_addr_len;
+
+	c_addr_len = sizeof(c_addr);
     if (SIO_FLAGS(buf) & SIOF_NEEDACCEPT) {
-	int newfd = accept(SIO_FD(buf),
-			   (struct sockaddr *) 0, (int *) 0);
-	if (newfd < 0) {
-	    return -1;
-	}
-	else {
-	    SIO_FLAGS(buf) &= ~SIOF_NEEDACCEPT;
-	    if (decr_fdrefcnt(SIO_FD(buf))) {
-		delete_stream_name(vsd);
-		/* close connection descriptor */
-		if (closesocket(SIO_FD(buf)) == SOCKET_ERROR)
-		    perror("accept_connection");
-	    }
-	    SIO_FD(buf) = newfd;
-	    incr_fdrefcnt(newfd);
-	}
+			/* int newfd = accept(SIO_FD(buf), (struct sockaddr *) 0, (int *) 0);  */
+		int newfd = accept(SIO_FD(buf), &c_addr, (int *)&c_addr_len);
+		if (newfd < 0) {
+	    	return -1;
+		}
+		else {
+	    	SIO_FLAGS(buf) &= ~SIOF_NEEDACCEPT;
+	    	if (decr_fdrefcnt(SIO_FD(buf))) {
+				delete_stream_name(vsd);
+				/* close connection descriptor */
+				if (closesocket(SIO_FD(buf)) == SOCKET_ERROR)
+		    		perror("accept_connection");
+	    	}
+			*sktaddr = inet_ntoa(c_addr.sin_addr);
+	    	SIO_FD(buf) = newfd;
+	    	incr_fdrefcnt(newfd);
+		}
     }
     return 0;
 }
@@ -1698,21 +1705,28 @@ sio_is_server_socket()
 int
 sio_accept_socket_connection()
 {
-    PWord v1;
-    int t1;
+    PWord v1,v2,v3;
+    int t1,t2,t3;
     UCHAR *buf;
+	char *sktaddr;
 
     w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
 
     if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
-	FAIL;
+		FAIL;
     
-    if (accept_connection(v1, buf) == 0)
-	SUCCEED;
+    if (accept_connection(v1, buf, &sktaddr) == 0) {
+    	w_mk_uia(&v3, &t3, sktaddr);
+    	if (w_unify(v2, t2, v3, t3))
+			SUCCEED;
+    	else
+			FAIL;
+	}
     else {
-	SIO_ERRCODE(buf) = SIOE_SYSCALL;
-	SIO_ERRNO(buf) = socket_errno;
-	FAIL;
+		SIO_ERRCODE(buf) = SIOE_SYSCALL;
+		SIO_ERRNO(buf) = socket_errno;
+		FAIL;
     }
 }
 
@@ -1954,7 +1968,8 @@ stream_is_ready(buf, usec_to_wait)
 	    wait_time.tv_sec = usec_to_wait / 1000000;
 	    wait_time.tv_usec = usec_to_wait % 1000000;
 
-	    if (select(SIO_FD(buf)+1, &rfds, &wfds, &efds, &wait_time)  > 0)
+/* extern int select(size_t, int *, int *, int *, const struct timeval *); */
+	    if (select((size_t)SIO_FD(buf)+1, (int *)&rfds, (int *)&wfds, (int *)&efds, &wait_time)  > 0)
 		return 1;
 	    else
 		return 0;
@@ -2386,6 +2401,7 @@ write_buf(vsd,buf)
     UCHAR *buf;
 {
     int   writeflg = 0;
+	char *sktaddr;
 
 #ifdef SysVIPC
     struct msgbuf *msgp;
@@ -2432,7 +2448,7 @@ write_buf(vsd,buf)
 
 #ifdef HAVE_SOCKET
 	case SIO_TYPE_SOCKET_STREAM:
-	    if (accept_connection(vsd, buf)) {
+	    if (accept_connection(vsd, buf, sktaddr)) {
 		writeflg = SOCKET_ERROR;
 		break;		/* break early */
 	    }
@@ -2925,6 +2941,7 @@ sio_readbuffer()
     int   t1;
     int   nchars;
     UCHAR *buf, *buffer;
+	char *sktaddr;
 
     w_get_An(&v1, &t1, 1);
 
@@ -3003,7 +3020,7 @@ sio_readbuffer()
 
 #ifdef HAVE_SOCKET
 	case SIO_TYPE_SOCKET_STREAM:
-	    if (accept_connection(v1,buf) < 0) {
+	    if (accept_connection(v1,buf,sktaddr) < 0) {
 		nchars = -1;
 		break;			/* break early */
 	    }
