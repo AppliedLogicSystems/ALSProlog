@@ -1928,6 +1928,12 @@ int sio_nsocket_close(void)
 
 int sio_nsocketpair(void)
 {
+#ifdef MISSING_UNIX_DOMAIN_SOCKETS
+   PWord result; int result_t;
+  (void) PI_unify(result, result_t, -1, PI_INT);
+
+  SUCCEED;
+#else
   int rc, sockfd[2];
   PWord descriptor0, descriptor1, result, num0, num1;
   int descriptor0_t, descriptor1_t, result_t, num0_t, num1_t;
@@ -1952,6 +1958,7 @@ int sio_nsocketpair(void)
   (void) PI_unify(result, result_t, error, PI_INT);
 
   SUCCEED;
+#endif
 }
 
 
