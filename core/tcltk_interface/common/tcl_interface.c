@@ -9,6 +9,8 @@
 
 #ifdef macintosh
 #define MAC_TCL 1
+#include <Types.h>
+#include <MacWindows.h>
 #endif
 
 #include <tcl.h>
@@ -16,6 +18,7 @@
 
 #include "alspi.h"
 #include "new_alspi.h"
+
 #include "version.h"
 
 #ifdef UNIX
@@ -335,7 +338,7 @@ Tcl_ALS_Prolog_ObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl
 		return Tcl_ALS_Prolog_Read_Call(prolog_world, interp, objc, objv);
 		break;
 	case PROLOG_INTERRUPT:
-		PI_interrupt();
+		//PI_interrupt();
 		return TCL_OK;
 		break;
 	}
@@ -819,12 +822,19 @@ void pi_init(void)
 	PI_INIT;
 }
 
+#pragma export on
 int Alsprolog_Init(Tcl_Interp *interp);
 int Alsprolog_Init(Tcl_Interp *interp)
+#pragma export reset
 {
+	AP_Obj consult;
   printf("about to pi_prolog_init\n");
   PI_prolog_init(0, NULL);
   printf("about to pi_init\n");
-  //pi_init();
+  pi_init();
+  consult = 
+  	AP_NewInitStructure(NULL, AP_NewSymbolFromStr(NULL, "xconsult"), 1,
+  		AP_NewSymbolFromStr(NULL, "tcltk.pro"), AP_UNBOUND_OBJ);
+  AP_Call(NULL, AP_NewSymbolFromStr(NULL, "builtins"), &consult);
   return ALSProlog_Package_Init(interp, NULL);
 }
