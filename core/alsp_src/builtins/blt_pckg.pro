@@ -110,6 +110,11 @@ attach_image0(NewImageName, DevelopFlag)
 
 	command_line(CmdLine),
 	abolish(command_line,1),
+		%% From alsdev::
+	(alsdev_ini_path(ADIP) ->
+		abolish(alsdev_ini_path,1) ; ADIP=no_path),
+	(save_clinfo(CLInfo) ->
+		abolish(save_clinfo,1) ; CLInfo = no_info),
 
 	(DevelopFlag = production ->
 			%% Must get rid of these so the image can create
@@ -154,6 +159,8 @@ attach_image0(NewImageName, DevelopFlag)
 		true   	%% DevelopFlag = develop
 	),
 
+	(ADIP=no_path -> true ; assert(alsdev_ini_path(ADIP))),
+	(CLInfo=no_info -> true ; assert(save_clinfo(CLInfo))),
 	assert(command_line(CmdLine)).
 
 save_image_develop(NewImageName)

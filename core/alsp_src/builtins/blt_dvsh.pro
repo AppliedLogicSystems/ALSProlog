@@ -344,6 +344,8 @@ modify_settings(NewTerm, Functor, Arity, Arg1)
 	write_clauses(OutS, NewTerms, [quoted(true)]),
 	close(OutS).
 
+modify_settings(NewTerm, Functor, Arity, Arg1).
+
 replace_items([],  NewTerm, Functor, Arity, Arg1,  [NewTerm]).
 replace_items([Old | OldTerms],  NewTerm, Functor, Arity, Arg1,  [NewTerm | OldTerms])
 	:-
