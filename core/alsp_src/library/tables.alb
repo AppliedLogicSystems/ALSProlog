@@ -3,4 +3,7 @@ libactivate(tk_alslib,[library,tables],
 		table_set_tag/3, table_set_tag/4,
 		table_tag_region/3, table_tag_region/4  ],
     [ module_closure( create_table, 2, create_table3),
-		module_closure( create_table, 3, create_table4) ]).
+		module_closure( create_table, 3, create_table4),
+      module_closure( create_table_r, 3, create_table3_r),
+		module_closure( create_table_r, 4, create_table4_r) 
+		]).

@@ -39,10 +39,24 @@ export selective_dump_object_by_name/2.
 export set_obj_profile/2.
 export obj_slots/2.
 
-/****
-		%% To force objs_run.pro (library file) to be loaded:
-:- a := b; true.
- ****/
+:-module_closure(defineObject,1,defineObject).
+:-module_closure(defineClass,1,defineClass).
+
+	%% Test whether objs_run.pro has already been loaded from the library;
+	%% If not present, force the lib_load for it:
+:- clause(send('$no$Object$', Message), (!, send(builtins,null_object,Message))),!;
+	builtins:lib_load('library/objs_run',objects,true,0,objects,true).
+
+:- dynamic(object_counter/1).
+:- dynamic(objectModule/2).
+:- dynamic(subClassOf/2).
+:- dynamic(classModule/2).
+:- dynamic(slot_constraint/4).
+:- dynamic(slot_default/3).
+:- dynamic(object_messages/1).
+:- dynamic(oop_include_dir/1).
+:- dynamic(extension_installed/1).
+:- dynamic(slots_profile_for/2).
 
 			/*=================================
 			 |   OBJECT DEFINITION/CREATION
@@ -252,6 +266,7 @@ defineObject(Module, SpecList, Code)
 			 	(AccessDispatchCall :- var(Exp00),!, 
 										(Exp00 := StateVar^Exp01) ),
 			 	(AccessDispatchCall :- !, (StateVar^Exp00 := Exp01) ),
+				dynamic(ObjectModule,ActionPredicateName,2),
 			 	(DispatchCall :-ActionCall,!),   %% see below(##)
 			 	(DispatchCall :- ClassCall)
 			 	| Code4]
@@ -373,6 +388,7 @@ defineClass(_, SpecList)
 
 defineClass(Module, SpecList)
 	:-
+	dmember(name=ClassName,SpecList),
 	atom(ClassName),
 	(dmember(module=ClassModule, SpecList) ->
 		true
@@ -411,7 +427,8 @@ defineClass(Module, SpecList, ClassInfoIn, ClassInfoOut, Code)
 	),
 
 		%% get the class's superclasses:
-	dmember(subclassOf=ClassList,SpecList),
+	(dmember(subClassOf=ClassList,SpecList) -> true ;
+		dmember(subclassOf=ClassList,SpecList)),
 	assert(subClassOf(ClassName,ClassList)),
 	assert(classModule(ClassName, Module)),
 
@@ -425,7 +442,8 @@ defineClass(Module, SpecList, ClassInfoIn, ClassInfoOut, Code)
 			 classModule(ClassName, Module),
 			 subClassOf(ClassName,ClassList),
 			 endmod(objects),
-			 module(Module)
+			 module(Module),
+			 dynamic(Module,ActionPredicateName,2)
 			 | Code1A ],
 
 	(dmember(export=no,SpecList) ->
@@ -788,9 +806,17 @@ install_code_item(use(Mod),ModStack,ModStack,[uses(CurMod,Mod) | UT], UT)
 install_code_item(export(P/A),ModStack,ModStack,UT,UT)
 	:-!,
 	ModStack = [CurMod | _],
+/*
 	'$icode'(-10,CurMod,0,0,0),
 	'$icode'(-11,P,A,0,0),
 	'$icode'(-9,0,0,0,0).
+*/
+	CurMod:doexport(P/A).
+
+install_code_item(dynamic(Module,P,A), ModStack,ModStack,UT,UT)
+	:-!,
+	builtins:dynamic0(P/A,Module).
+	
 install_code_item((:-Call),ModStack,ModStack,UT,UT)
 	:-!,
 	ModStack = [CurMod | _],
@@ -1128,7 +1154,8 @@ obj_info(SpecList,Mod,Ri,IntRiT)
 
 cls_info(SpecList,Mod,Ri,IntRiT)
 	:-
-	(dmember(subclassOf=SuperClasses,SpecList) ->
+%	(dmember(subclassOf=SuperClasses,SpecList) ->
+	(dmember(subClassOf=SuperClasses,SpecList) ->
 		true;
 		SuperClasses = [genericObjects]
 	),
