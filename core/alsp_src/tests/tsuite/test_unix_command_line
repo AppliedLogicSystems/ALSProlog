@@ -4,181 +4,117 @@
 
 echo "Starting Command Line Tests"
 
-prolog=/apache/choupt/builds/hp/bld-port/alspro
-#prolog=alspro
+prolog=$1
+
+error () {
+	command=$1
+	expected_result=$2
+	result=$3
+	echo
+    echo "Command Line Test Error:"
+    echo "  Command: $command"
+    echo "  Expected Result: $expected_result But got: $result"
+    echo
+}
+
+cl_test () {
+    command=$1
+    expected_result=$2
+
+    eval $command
+    result=$?
+    if test $result -ne $expected_result
+    then
+        error "$command" "$expected_result" "$result"
+    fi
+}
+
+# Test -q (quiet) argument.
+
+command="$prolog -q < /dev/null"
+output=`eval $command`
+
+if test "$output" != "?- "
+then
+	error "$command" "?- " "$output"
+fi
+
+# Test -b (batch) argument.
+
+command="$prolog -b"
+output=`eval $command`
+
+if test "$output" = ""
+then
+	error "$command" "ALS Prolog..." "$output"
+fi
+
+# Test -q and -b together.
+
+command="$prolog -q -b"
+output=`eval $command`
+
+if test "$output" != ""
+then
+	error "$command" "" "$output"
+fi
+
 
 # test success/fail return value for -b -g options
 
-echo "$prolog -q -b -g true"
-$prolog -q -b -g true
-case $? in
-    0) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
-
-echo "$prolog -q -b -g fail"
-$prolog -q -b -g fail
-case $? in
-    1) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
+cl_test "$prolog -q -b -g true" 0
+cl_test "$prolog -q -b -g fail" 1
 
 # currently only tests error handling for -heap and -stack options
 
-echo "$prolog -heap 2> /dev/null"
-$prolog -heap 2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
-
-echo "$prolog -stack 2> /dev/null"
-$prolog -stack 2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
-
-echo "$prolog -heap -stack 2> /dev/null"
-$prolog -heap -stack 2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
-
-echo "$prolog -stack -heap 2> /dev/null"
-$prolog -stack -heap 2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
-
-echo "$prolog -heap xxx 2> /dev/null"
-$prolog -heap xxx 2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
-
-echo "$prolog -stack xxx 2> /dev/null"
-$prolog -stack xxx 2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
-
-echo "$prolog -heap xxx -stack 1000 2> /dev/null"
-$prolog -heap xxx -stack 1000 2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
-
-echo "$prolog -heap 10000 -stack xxx 2> /dev/null"
-$prolog -heap 10000 -stack xxx 2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
-
-echo "$prolog -stack 1000 -heap xxx 2> /dev/null"
-$prolog -stack 1000 -heap xxx 2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
-
-echo "$prolog -stack xxx -heap 1000 2> /dev/null"
-$prolog -stack xxx -heap 1000 2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
+cl_test "$prolog -heap 2> /dev/null" 2
+cl_test "$prolog -stack 2> /dev/null" 2
+cl_test "$prolog -heap -stack 2> /dev/null" 2
+cl_test "$prolog -stack -heap 2> /dev/null" 2
+cl_test "$prolog -heap xxx 2> /dev/null" 2
+cl_test "$prolog -stack xxx 2> /dev/null" 2
+cl_test "$prolog -heap xxx -stack 1000 2> /dev/null" 2
+cl_test "$prolog -heap 10000 -stack xxx 2> /dev/null" 2
+cl_test "$prolog -stack 1000 -heap xxx 2> /dev/null" 2
+cl_test "$prolog -stack xxx -heap 1000 2> /dev/null" 2
 
 # Check error handling of out-of-range -heap and -stack values
 
 extreme_values='-10000000 -1000000 -100000 -10000 -1000 -100 -10 -1 0
-		1 2 3 4 5 6 7 8 9 10 5000000 10000000'
-
-echo $extreme_values
-for i in $extreme_values
-do
-echo "$prolog -heap $i  2> /dev/null"
-$prolog -heap $i 2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
-done
+		1 2 3 4 5 6 7 8 9 10 5000000 10000000 987654321987654321'
 
 for i in $extreme_values
 do
-echo "$prolog -stack $i  2> /dev/null"
-$prolog -stack $i  2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
+    cl_test "$prolog -heap $i 2> /dev/null" 2
 done
+
 
 for i in $extreme_values
 do
-for j in $extreme_values
+    cl_test "$prolog -stack $i 2> /dev/null" 2
+done
+
+
+for i in $extreme_values
 do
-echo "$prolog -heap $i -stack $j  2> /dev/null"
-$prolog -heap $i -stack $j 2> /dev/null
-case $? in
-    2) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status."; exit 1
-esac
+    for j in $extreme_values
+    do
+        cl_test "$prolog -heap $i -stack $j 2> /dev/null" 2
+    done
 done
-done
+
 
 # Check the correct fuctioning of -heap and -stack
 
-echo "$prolog -heap 1000 -b -q -g 'statistics([_,_,heap(_,_,_,_,1024000),_])'"
-$prolog -heap 1000 -b -q -g 'statistics([_,_,heap(_,_,_,_,1024000),_])'
-case $? in
-    0) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status"; exit 1
-esac
+cl_test "$prolog -heap 1000 -b -q -g 'statistics([_,_,heap(_,_,_,_,1024000),_])'" 0
+cl_test "$prolog -heap 2000 -b -q -g 'statistics([_,_,heap(_,_,_,_,2048000),_])'" 0
+cl_test "$prolog -stack 1000 -b -q -g 'statistics([_,stack(_,_,1024000),_,_])'" 0
+cl_test "$prolog -stack 2000 -b -q -g 'statistics([_,stack(_,_,2048000),_,_])'" 0
+cl_test "$prolog -heap 2000 -stack 1000 -b -q -g 'statistics([_,stack(_,_,1024000),heap(_,_,_,_,2048000),_])'" 0
+cl_test "$prolog -heap 1000 -stack 2000 -b -q -g 'statistics([_,stack(_,_,2048000),heap(_,_,_,_,1024000),_])'" 0
 
-echo "$prolog -heap 2000 -b -q -g 'statistics([_,_,heap(_,_,_,_,2048000),_])'"
-$prolog -heap 2000 -b -q -g 'statistics([_,_,heap(_,_,_,_,2048000),_])'
-case $? in
-    0) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status"; exit 1
-esac
+# Check correct functioning of Environment variables
 
-echo "$prolog -stack 1000 -b -q -g 'statistics([_,stack(_,_,1024000),_,_])'"
-$prolog -stack 1000 -b -q -g 'statistics([_,stack(_,_,1024000),_,_])'
-case $? in
-    0) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status"; exit 1
-esac
 
-echo "$prolog -stack 2000 -b -q -g 'statistics([_,stack(_,_,2048000),_,_])'"
-$prolog -stack 2000 -b -q -g 'statistics([_,stack(_,_,2048000),_,_])'
-case $? in
-    0) echo "Test Successful." ;;
-    1) echo "Command Line Test Error: unexpected failure." ;;
-esac
-
-echo "$prolog -heap 2000 -stack 1000 -b -q -g 'statistics([_,stack(_,_,1024000),heap(_,_,_,_,2048000),_])'"
-$prolog -heap 2000 -stack 1000 -b -q -g 'statistics([_,stack(_,_,1024000),heap(_,_,_,_,2048000),_])'
-case $? in
-    0) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status"; exit 1
-esac
-
-echo "$prolog -heap 1000 -stack 2000 -b -q -g 'statistics([_,stack(_,_,2048000),heap(_,_,_,_,1024000),_])'"
-$prolog -heap 1000 -stack 2000 -b -q -g 'statistics([_,stack(_,_,2048000),heap(_,_,_,_,1024000),_])'
-case $? in
-    0) echo "Test Successful." ;;
-    *) echo "Command Line Test Error: unexpected exit status"; exit 1
-esac
 
 echo "Finished Command Line Tests"
-
-
-
