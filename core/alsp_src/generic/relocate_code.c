@@ -76,6 +76,7 @@ relocate_code(Code *addr, int n, prolog_database *db, block_info old_blocks[])
     }
 }
 
+#ifdef Threaded
 static int
 instr_length(enum AbstractMachineOps instr,Code *ip)
 {
@@ -138,7 +139,6 @@ instr_length(enum AbstractMachineOps instr,Code *ip)
 	return(ilength);
 }
 
-#ifdef Threaded
 void
 thread_byte_convert_clause(Code *addr, int n, prolog_database *db, dirtype direction)
 {
