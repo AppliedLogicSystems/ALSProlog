@@ -930,7 +930,18 @@ item: Create Shortcut
   Destination=%GROUP%\ALS Prolog.lnk
   Icon Number=0
 end
+item: Create Shortcut
+  Source=%MAINDIR%\student_man.pdf
+  Destination=%GROUP%\student_man.lnk
+  Icon Number=0
+end
 item: Else Statement
+end
+item: Add ProgMan Icon
+  Group=%GROUP%
+  Icon Name=student_man
+  Command Line=%MAINDIR%\student_man.pdf
+  Flags=01000000
 end
 item: Add ProgMan Icon
   Group=%GROUP%
