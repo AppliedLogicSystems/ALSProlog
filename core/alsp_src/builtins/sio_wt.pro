@@ -369,8 +369,7 @@ winfo_write_term( Stream,
 winfo_write( Stream,
 			winfo(false,false,false,true,'*','...',0,false,0,false,WO,true)) 
 	:-
- %   WO = wt_opts(2047,Depth,DepthComputation),	%% override default length
-    WO = wt_opts(200,Depth,DepthComputation),	%% override default length
+    WO = wt_opts(2047,Depth,DepthComputation),	%% override default length
     stream_wt_maxdepth(Stream,Depth),
     stream_wt_depth_computation(Stream,DepthComputation).
 
@@ -389,8 +388,7 @@ winfo_write_canonical( Stream,
 winfo_print( Stream,
 			winfo(false,false,true, true, '*','...',0,false,0,false,WO,true)) 
 	:-
-%    WO = wt_opts(2047,Depth,DepthComputation),	%% override default length
-    WO = wt_opts(200,Depth,DepthComputation),	%% override default length
+    WO = wt_opts(2047,Depth,DepthComputation),	%% override default length
     stream_wt_maxdepth(Stream,Depth),
     stream_wt_depth_computation(Stream,DepthComputation).
 
