@@ -962,32 +962,22 @@ item: Self-Register OCXs/DLLs
   Description=Updating System Configuration, Please Wait...
 end
 item: Edit Registry
-  Total Keys=3
-  item: Key
-    Key=.pro
-    New Value=ALS Prolog.Document
-  end
-  item: Key
-    Key=ALS Prolog.Document
-    New Value=ALS Prolog Document
-  end
-  item: Key
-    Key=ALS Prolog.Document\shell\open\command
-    New Value=%MAINDIR%\ALS Prolog.exe %%1
-  end
+  Total Keys=1
+  Key=.pro
+  New Value=ALS Prolog.Document
 end
 item: Edit Registry
   Total Keys=3
   item: Key
     Key=.ppj
-    New Value=ALS Prolog.Document
+    New Value=ALS Prolog Project
   end
   item: Key
-    Key=ALS Prolog.Document
-    New Value=ALS Prolog Document
+    Key=ALS Prolog Project
+    New Value=ALS Prolog Project
   end
   item: Key
-    Key=ALS Prolog.Document\shell\open\command
+    Key=ALS Prolog Project\shell\open\command
     New Value=%MAINDIR%\ALS Prolog.exe %%1
   end
 end
