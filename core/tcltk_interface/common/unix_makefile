@@ -16,7 +16,7 @@ source = alspi_slib.c new_alspi.c tcl_interface.c
 
 objects = $(source:.c=.o)
 
-all: tclintf.psl alsprolog.so test
+all: tclintf.psl
 
 tclintf.psl: $(objects)
 	$(CC) $(LINK) -L/usr/local/lib $(objects) \

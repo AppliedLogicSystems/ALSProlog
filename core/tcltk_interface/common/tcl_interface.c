@@ -807,7 +807,7 @@ void pi_init(void)
 #endif
 
 #ifdef UNIX
-	Tcl_FindExecutable(executable_path);
+	Tcl_FindExecutable((char *)executable_path);
 #endif
 
 	Tcl_InitHashTable(&tcl_interp_name_table, TCL_STRING_KEYS);
