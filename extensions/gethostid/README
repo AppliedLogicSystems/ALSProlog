@@ -1,0 +1,13 @@
+Get Host ID PSL
+===============
+
+Chuck Houpt, 9-Sept-99
+
+The gethostid.psl is an extension that allows prolog to determine the
+host id (often a unique hardware serial number) on Unix systems.  The
+current version has been built and tested on Linux, Solaris, and HP-UX.
+The gethostid.psl provides gethostid/1:
+
+gethostid(?id)
+
+Unifies id with the host id number.
