@@ -1,0 +1,774 @@
+/*===========================================================================*
+ |			ctoken
+ |	Copyright (c) 1990-94 Applied Logic Systems, Inc.
+ |
+ |			C language tokenizer
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 3/31/90
+ | 
+ | Revision History :
+ | 	08/29/91 - P.Raman - removed line comment char
+ |	04/94 - K.Bowen - revised to work with new stream I/O and package 
+ |					  pack state & tables, etc., into c2p typedef
+ |
+ | Major Procedures:
+ | ----------------
+ |	getlines/1	-- This procedure is used for testing.  Its single
+ |			   argument is a file name.  It will read the file,
+ |			   tokenize each line and write the tokenized lines
+ |			   out to the current output device.
+ |
+ |	openFile/2	-- This procedure takes a file name as its first
+ |			   argument and builds a structure which describes
+ |			   certain attributes about the tokenization of the
+ |			   file.  This state variable is the second parameter.
+ |
+ |	getLine/3	-- This procedure returns a tokenized line as its
+ |			   first argument.  The second argument is an input
+ |			   argument and is the input state.  The third argument
+ |			   is the state after getting the line in question.
+ |
+ |	fileName/2	-- When given a state variable as the first argument,
+ |			   unifies the second argument with the file name.
+ |
+ |	lineNum/2	-- When given a state variable as the first argument,
+ |			   unifies the second argument with the present line
+ |			   number.  This value may be useful for printing
+ |			   out error messages.
+ *===========================================================================*/
+
+module c2pro.
+
+/*-----------------------------------------------------------------------*
+ |	Primitives which manipulate State and Table
+ *-----------------------------------------------------------------------*/
+
+	%% Assumes a context already exists in state( inFile is \= nil, etc.)
+push_new_context(NewFileName, NewStream, State)
+	:-
+	accessC2P(inFile, State, OldFileName),
+	accessC2P(inStream, State, OldStream),
+	accessC2P(curLine, State, CurLine),
+	accessC2P(curLineNum, State, CurLineNum),
+	accessC2P(ifdef_stack, State, OldifdefStack),
+	accessC2P(fd_stack, State, OldFdStack),
+
+	OldContext = c(OldFileName,OldStream,CurLine,CurLineNum,OldifdefStack),
+	setC2P(fd_stack, State, [OldContext | OldFdStack]),
+
+	setC2P(inFile, State, NewFileName),
+	setC2P(inStream, State, NewStream),
+	setC2P(curLine, State, nil),
+	setC2P(curLineNum, State, 1),
+	setC2P(ifdef_stack, State, [[] | OldifdefStack]).
+
+pop_context(State)
+	:-
+	accessC2P(inFile, State, CurFileName),
+	accessC2P(inStream, State, CurInStream),
+	(is_stream(CurInStream,TheStream) ->
+		close(CurInStream)
+		;
+		true
+	),
+
+	accessC2P(outStream,State,OutStream),
+	output_closeFile(CurFileName, OutStream),
+
+	accessC2P(fd_stack, State, [OldContext | OldFdStack]),
+	setC2P(fd_stack, State, OldFdStack),
+
+	OldContext = c(OldFileName,OldStream,OldLine,OldLineNum,OldifdefStack),
+
+	setC2P(inFile, State, OldFileName),
+	debug(1,'RETURNING TO:%t\n',[OldFileName]),
+	setC2P(inStream, State, OldStream),
+	setC2P(curLine, State, OldLine),
+	setC2P(curLineNum, State, OldLineNum),
+	setC2P(ifdef_stack, State, OldifdefStack).
+
+		%% 4/18/94 (kab): Moved ifdef(level) and fd(stack) usage
+		%% out of the AVL tree and into (mangled) stacks in State
+
+
+check_level([],_) :- !.
+check_level(_,FD) :- error('Missing #endif',FD).
+
+/*-----------------------------------------------------------------------*
+ * openFile builds the starting state
+ *-----------------------------------------------------------------------*/
+
+
+openFile(NewFileName, State)
+	:-
+	open(NewFileName, read, NewStream, []),
+	push_new_context(NewFileName, NewStream, State),
+	accessC2P(outStream,State,OutStream),
+	setup_skips(NewFileName,OutStream,State),
+	addto_searchPath(NewFileName, State),
+	debug(1,'>>OPEN: %t <<\n',[NewFileName]),
+	getInput(_, State).
+
+closeFile(State)
+	:-
+	accessC2P(outStream,State,OutStream),
+	accessC2P(inFile,State,InFile),
+	output_closeFile(InFile,OutStream),
+	close(OutStream).
+	
+/*-----------------------------------------------------------------------*
+ * getLine(TokLine,State) repeatedly calls getToken until an
+ * entire line of input is obtained.  The line of tokenized input is
+ * turned into a list an returned via TokLine.
+ *
+ * getLine will fail after closing the File upon end of file.
+ *-----------------------------------------------------------------------*/
+
+getLine(TokLine,State) :-
+	getToken(Tok,State),
+	getLine1(Tok,TokLine,State).
+
+getLine1(eof,_,State) :-		% fail on eof if it is first token
+	!,
+	fail.
+getLine1(Tok,TokLine,State) :-
+	getLine(Tok,TokLine,State).
+
+getLine2(TokLine,State) :-
+	getToken(Tok,State),
+	getLine(Tok,TokLine,State).
+
+getLine(eof,[],State) :- !.
+getLine(eoln,[],State) :- !.
+getLine(backslash,Line,State) :- !,
+	getToken(Tok,State),
+	getLine_backslash(Tok,Line,State).
+getLine(Tok,[Tok|More],State) :-
+	getLine2(More,State).
+
+%% If backslash comes before end-of-line, then merge lines together
+getLine_backslash(eoln,Line,State) :- !,
+	getLine2(Line,State).
+getLine_backslash(Other,[backslash,Other|More],State) :-
+	getLine2(More,State).
+
+/*-----------------------------------------------------------------*
+ * getToken(Token,State)
+ *
+ * Gets a token from the file stream in the InState variable and unifies
+ * it with Token.  OutState is set to the new output state.
+ *-----------------------------------------------------------------*/
+
+getToken(Token,State)
+	:-
+	accessC2P(curLineNum, State, InitLineNum),
+	skipSpace(State),
+	accessC2P(curLineNum, State, CurLineNum),
+	(InitLineNum \= CurLineNum ->
+		Token = eoln 	%% we have end_of_line when we advance to
+				%% a different line while skipping space
+		;
+		accessC2P(curLine, State, CurLine),
+		getToken(CurLine,ResLine,Token,CurLineNum,OutLineNum,State),
+		setC2P(curLine, State, ResLine)
+	).
+
+/*
+getToken(eoln,Stream,Stream,InLine,Line,State) :-
+	InLine \= Line,		%% we have end_of_line when we advance to
+	!.					%% a different line while skipping space
+*/
+getToken([],[],eof,LineNum,LineNum,State) 
+	:- !.				%% EOF processing
+getToken(InStream, OutStream, Token, _, LineNum, State)
+	:-
+	getInput(InStream,State),
+	getToken1(InStream,Token,OutStream,LineNum,State).
+
+getToken1(InStream, number(Num), OutStream, Line, State) :-
+	getNumber(InStream,OutStream,Num,State),
+	!.
+getToken1( [ 0'' | InStream ], char(ConstName), OutStream, Line, State) :-
+	!,
+	getInput(InStream,State),
+	getCharConst(InStream, Const, OutStream,Line, _, State),
+	name(ConstName,Const).
+getToken1( [ 0'" | InStream], string(StringName), OutStream, Line, State) :-
+	!,
+	getInput(InStream,State),
+	getString(InStream, String, OutStream,Line, State),
+	name(StringName,String).
+getToken1( [ Char1,Char2,Char3 |Stream], Token, Stream, _, State) :-
+	isSpecial3(Char1,Char2,Char3,Token),
+	!,
+	getInput(Stream,State).
+getToken1( [ Char1,Char2 | Stream], Token, Stream, _, State) :-
+	isSpecial2(Char1,Char2,Token),
+	!.
+getToken1( [ Char | Stream],  Token, Stream, _, State) :-
+	isSpecial(Char, Token),
+	!.
+getToken1( [ IdChar | InStream ], Token, OutStream, _, State) :-
+	isAlpha(IdChar),
+	!,
+	getInput(InStream,State),
+	getIdentifier(InStream,IdString,OutStream,State),
+	name(Identifier,[IdChar |IdString]),
+	classifyIdentifier(Identifier,OutStream,Token).
+getToken1( [ Other | Stream], other(Other), Stream, Line,State).
+
+/*---------------------------------------------*
+ | getNumber(InStream,OutStream,Num) 
+ *---------------------------------------------*/
+
+getNumber( [ Char,NChar | InStream], OutStream, Num,State) :-
+	hexMarker(Char,NChar),
+	!,
+	getInput(InStream,State),
+	getHex(InStream, 0, NStream, Num,State),
+	getInput(NStream,State),
+	intMarkerOpt(NStream, OutStream).
+getNumber( [ Char | InStream], OutStream, Num,State) :-
+	isNumeric(Char,Digit),
+	!,
+	getInput(InStream,State),
+	getDecimal(InStream, Digit, NStream, INum,State),
+	getMoreNum(NStream, INum, InStream,OutStream,Num,State).
+getNumber([ 0'. , Char | InStream ], OutStream, Num,State) :-
+	isNumeric(Char,Digit),
+	getInput(InStream,State),
+	Fract is Digit / 10,
+	getFractAndExponent(InStream,Fract,100,OutStream,Mant,Exp,State),
+	Num is Mant * 10^Exp.
+
+%----------------------------------------------------------
+% intMarkerOpt  -- eats sequences [lL][uU] or [uU][lL]
+%----------------------------------------------------------
+
+intMarkerOpt --> [0'l ], !, unsignedMarkerOpt.
+intMarkerOpt --> [0'L ], !, unsignedMarkerOpt.
+intMarkerOpt --> [0'u ], !, longMarkerOpt.
+intMarkerOpt --> [0'U ], !, longMarkerOpt.
+intMarkerOpt --> [].
+
+unsignedMarkerOpt --> [0'u ], !.
+unsignedMarkerOpt --> [0'U ], !.
+unsignedMarkerOpt --> [].
+
+longMarkerOpt --> [0'l ], !.
+longMarkerOpt --> [0'L ], !.
+longMarkerOpt --> [].
+
+%----------------------------------------------------------
+% floatMarkerOpt -- eats [fFlL]
+%----------------------------------------------------------
+
+floatMarkerOpt --> [Char], { floatMarkChar(Char)}, !.
+floatMarkerOpt --> [].
+
+floatMarkChar(0'f).
+floatMarkChar(0'F).
+floatMarkChar(0'l).
+floatMarkChar(0'L).
+
+%----------------------------------------------------------
+% hexMarker
+%----------------------------------------------------------
+
+hexMarker(0'0,0'x).
+hexMarker(0'0,0'X).
+
+%----------------------------------------------------------
+% getHex 
+%----------------------------------------------------------
+
+getHex( [ Char | InStream ], INum, OutStream,Num,State) :-
+	isHex(Char,INum1),
+	!,
+	getInput(InStream,State),
+	INum2 is INum*16+INum1,
+	getHex(InStream, INum2, OutStream, Num,State).
+getHex( Stream, Num, Stream, Num,State).
+
+%---------------------------------------------------------- 
+%
+%----------------------------------------------------------
+
+getOctal( [ Char | InStream ], INum, OutStream,Num,State) :-
+	isOctal(Char,Num1),
+	!,
+	getInput(InStream,State),
+	Num2 is INum*8+Num1,
+	getOctal(InStream, Num2, OutStream, Num,State).
+getOctal(Stream, Num, Stream, Num,State).
+
+%---------------------------------------------------------- 
+%
+%---------------------------------------------------------- 
+
+getDecimal( [ Char | InStream ], INum, OutStream,Num,State) :-
+	isNumeric(Char,INum1),
+	!,
+	getInput(InStream,State),
+	INum2 is INum*10+INum1,
+	getDecimal(InStream, INum2, OutStream, Num,State).
+getDecimal(Stream, Num, Stream, Num,State).
+
+
+%---------------------------------------------------------- 
+%  getMoreNum/5
+%  clause 1 : digit_seq . digit_seq exponent_opt float_marker_opt
+%  clause 2 : digit_seq exponent float_marker_opt
+%  clause 3 : 0 octal number
+%  clause 4 : decimal number
+%---------------------------------------------------------- 
+
+getMoreNum( [ 0'.| InStream ], INum, _,OutStream,Num,State) :-
+	!,
+	getInput(InStream,State),
+	getFractAndExponent(InStream,INum,10,OutStream,Mant,Exp,State),
+	Num is Mant * 10^Exp.
+getMoreNum( [ Char | InStream ], INum, _,OutStream,Num,State) :-
+	exponentChar(Char),
+	!,
+	getInput(InStream,State),
+	getExponent(InStream, NStream, Exp,State),
+	floatMarkerOpt(NStream, OutStream),
+	Num is INum * 10^Exp.
+getMoreNum( InStream, _, [ 0'0 | OldStream ] ,OutStream,Num,State) :-
+	getOctal(OldStream, 0, InStream, Num,State),  % parse the string as octal
+	!,
+	intMarkerOpt(InStream, OutStream).
+getMoreNum( InStream, Num, _, OutStream, Num,State) :-
+	intMarkerOpt(InStream, OutStream).
+
+%---------------------------------------------------------- 
+%
+%---------------------------------------------------------- 
+
+getFractAndExponent(InStream,INum,Mag,OutStream,Fract,Exponent,State) :-
+	getFraction(InStream,INum,Mag,OutStream,Fract,State),
+	getExponentOpt(InStream,OutStream,Exponent,State),
+	floatMarkerOpt(InStream,OutStream).
+
+getFraction( [ Char | InStream ],INum,Mag,OutStream,Num,State) :-
+	isNumeric(Char,Digit),
+	!,
+	getInput(InStream,State),
+	Fract is Digit / Mag + INum,
+	NMag is Mag * 10,
+	getFraction(InStream,Fract,NMag,OutStream,Num,State).
+getFraction( Stream, Num, _, Stream, Num,State).
+
+getExponentOpt( [ Char | InStream ], OutStream, Exponent,State) :-
+	exponentChar(Char),
+	!,
+	getInput(InStream,State),
+	getExponent(InStream, OutStream, Exponent,State).
+getExponentOpt(Stream, Stream, 0,State).
+
+getExponent(InStream,OutStream,Exponent,State) :-
+	getSignOpt(Sign,InStream,NStream),
+	getDecimal(NStream, 0, OutStream, Num,State),
+	Exponent is Num * Sign.
+
+exponentChar(0'e).
+exponentChar(0'E).
+
+getSignOpt(1) --> [0'+], !.
+getSignOpt(-1) --> [0'-], !.
+getSignOpt(1) --> [].
+
+%---------------------------------------------------------- 
+% getCharConst
+%---------------------------------------------------------- 
+
+getCharConst( [ 0'' | Stream ], [], Stream,_,_,State) :- !.
+getCharConst( [ 0'\n | Stream ], [], [0'\n|Stream],Line,FName,State) :- !,
+	writeWarning('Unterminated single quote string',State).
+getCharConst( [ Char | InStream ], [Char|Rest], OutStream,Line,FName,State) :-
+	getInput(InStream,State),
+	getCharConst(InStream, Rest, OutStream, Line,FName,State).
+getCharConst([],[],[],Line,FName,State) :-
+	writeWarning('Unterminated single quote string',State).
+
+/*-----------------------------------------------------------------------*
+ | getString( InStream,String,OutStream,Line, FName)
+ | is used to read the characters up til the next double quote.
+ *-----------------------------------------------------------------------*/
+
+getString( [ 0'" | Stream], [], Stream,_,State) :- !.
+getString( [ 0'\n | Stream], [], [0'\n|Stream],Line,State) :- !,
+	writeWarning('Unterminated double quote string',State).
+getString( [ Char | InStream ], [Char|Rest], OutStream,Line,State) :-
+	getInput(InStream,State),
+	getString(InStream, Rest, OutStream,Line,State).
+getString([],[],[],Line,State) :-
+	writeWarning('Unterminated double quote string',State).
+
+/*-----------------------------------------------------------------------*
+ | getIdentifier(InStream,IdString,OutStream, State)
+ | is used to get an identifier and put it in IdString.
+ *-----------------------------------------------------------------------*/
+
+getIdentifier([Char | InStream],[Char|IdString],OutStream,State) :-
+	isAlpha(Char),
+	!,
+	getInput(InStream,State),
+	getIdentifier(InStream,IdString,OutStream,State).
+getIdentifier([Char | InStream],[Char|IdString],OutStream,State) :-
+	isNumeric(Char,_),
+	!,
+	getInput(InStream,State),
+	getIdentifier(InStream,IdString,OutStream,State).
+getIdentifier(Stream,[],Stream,State).
+
+/*---------------------------------------------------------------------------*
+ | classifyIdentifier(Identifier, InStream, Token)
+ | is used to build a token out of the Identifier based upon the upcoming 
+ | character in InStream.
+ *---------------------------------------------------------------------------*/
+
+classifyIdentifier(Id,[0'( | _],fident(Id)) :- !.
+classifyIdentifier(Id, _, ident(Id)).
+
+/*---------------------------------------------------------------------------*
+ * isSpecial(Char,Tok)
+ | is map between characters which are considered to be tokens by themselves 
+ | and the symbolic name of the token.
+ *---------------------------------------------------------------------------*/
+
+isSpecial(0'(, lparen).
+isSpecial(0'), rparen).
+isSpecial(0'[, lbrac).
+isSpecial(0'], rbrac).
+isSpecial(0'<, langle).
+isSpecial(0'>, rangle).
+isSpecial(0'+, plus).
+isSpecial(0'-, minus).
+isSpecial(0'*, star).
+isSpecial(0'|, or).
+isSpecial(0'&, and).
+isSpecial(0'#, pound).
+isSpecial(0'@, at).
+isSpecial(0'=, equal).
+isSpecial(0':, colon).
+isSpecial(0',, comma).
+isSpecial(0'., dot).
+isSpecial(0'~, not).
+isSpecial(0'!, lnot).
+isSpecial(0'\\, backslash).
+isSpecial(0'/, slash).
+isSpecial(0'?, question).
+isSpecial(0'%, percent).
+isSpecial(0'^, carat).
+isSpecial(0'{, lcurly).
+isSpecial(0'}, rcurly).
+isSpecial(0';, semicolon).
+
+/*---------------------------------------------------------------------------*
+ | isSpecial2(Char1,Char2,Tok)
+ | is a map between 2 character sequences and the tokens which they represent.
+ *---------------------------------------------------------------------------*/
+
+isSpecial2(0'<,0'<,leftshift).
+isSpecial2(0'>,0'>,rightshift).
+isSpecial2(0'!,0'=,notequal).
+isSpecial2(0'<,0'=,lessOrEqual).
+isSpecial2(0'>,0'=,greaterOrEqual).
+isSpecial2(0'=,0'=,equalEqual).
+isSpecial2(0'&,0'&,land).			% logical and
+isSpecial2(0'|,0'|,lor).			% logical or
+isSpecial2(0'+,0'+,plusplus).
+isSpecial2(0'-,0'-,minusminus).
+isSpecial2(0'.,0'.,dotdot).		% parent directory in unix
+isSpecial2(0':,0':,coloncolon).	% parent directory in mac
+isSpecial2(0'#,0'#,poundpound).	% concat operator of C preprocessor
+
+%---------------------
+% isSpecial3/4
+%---------------------
+
+isSpecial3(0'.,0'.,0'.,dotdotdot). % varargs
+
+%-------------------------------------------------------
+% convert a token in a list of characters and also 
+% return the principal functor of the token.
+%-------------------------------------------------------
+
+tok_to_list(ident(Name),Str,ident) :- !, name(Name,Str).
+tok_to_list(fident(Name),Str,fident) :- !, name(Name,Str).
+tok_to_list(number(Num),Str,number) :- !, name(Num,Str).
+tok_to_list(char(Const),Str,str) :- !, name(Const,Str).
+tok_to_list(string(Name),Str,string) :- !,  name(Name,Str).
+tok_to_list(other(Name),Str,other) :- !, name(Name,Str).
+tok_to_list(Tok,[Char],other) :- 
+	isSpecial(Char,Tok),
+	!.
+tok_to_list(Tok,[Char1,Char2],other) :-
+	isSpecial2(Char1,Char2,Tok),
+	!.
+tok_to_list(Tok,[Char1,Char2,Char3],other) :-
+	isSpecial3(Char1,Char2,Char3,Tok),
+	!.
+
+%-------------------------------------------------------
+% convert a token into a C string
+%-------------------------------------------------------
+
+tok_to_str(number(Num),Str) :- !,
+	name(Num,Str).
+tok_to_str(ident(Name),Str) :- !,
+	name(Name,Str).
+tok_to_str(fident(Name),Str) :- !,
+	name(Name,Str).
+tok_to_str(char(Name),[0''|Str]) :- !,
+	name(Name,Str1),
+	append(Str1,"'",Str).	
+tok_to_str(string(Name),[0'"|Str]) :- !,
+	name(Name,Str1),
+	append(Str1,"""",Str).
+tok_to_str(other(Name),[0'',Name,0'']) :- 
+	!.
+tok_to_str(Tok,[Char]) :- 
+	isSpecial(Char,Tok), !.
+tok_to_str(Tok,[Char1,Char2]) :- 
+	isSpecial2(Char1,Char2,Tok), !.
+tok_to_str(Tok,[Char1,Char2,Char3]) :- 
+	isSpecial3(Char1,Char2,Char3,Tok), !.
+
+/*--Unused-------------------------------------*
+ * State manipulation predicates
+ *
+ *	fileStream(State,FileStream)
+ *	lineNum(State,LineNum)
+ *	fileName(State,FileName)
+
+checkState(State) :- functor(State,tokState,3).
+fileStream(State,FileStream) :- checkState(State), arg(1,State,FileStream).
+lineNum(State,LineNum) :- checkState(State), arg(2,State,LineNum).
+fileName(State,Name) :- checkState(State), arg(3,State,Name).
+ *---------------------------------------*/
+
+/*
+ * lineCommentChar(Char)
+ *
+ * Enumerates the characters which denote line comments
+ *
+
+% lineCommentChar(0';).		%% Semicolon is the line comment character
+
+ */
+
+/*-----------------------------------------------------------------
+ | skipSpace(InStream,OutStream,InLine,OutLine,FName,State)
+ | skipSpace(State)
+ |
+ | It is assumed that the InputStream has at least K characters in it.
+ | InLine is the line number of the line we are on before processing any
+ | characters in InputStream.  OutLine is the line number that we get to
+ | after the processing.
+ | 
+ *----------------------------------------------------------------*/
+
+skipSpace(State)
+	:-
+	accessC2P(curLine, State, LineList),
+	accessC2P(curLineNum, State, CurNum),
+	skipSpace(LineList, ResultLine, CurNum, NewNum, State),
+	setC2P(curLine, State, ResultLine),
+	setC2P(curLineNum, State, NewNum).
+
+skipSpace(LineList,ResultLine,CurNum,NewNum, State)
+	:-
+	var(LineList),
+	getInput(LineList,State),
+	!,
+	accessC2P(curLineNum, State, InterNum),
+	skipSpace(LineList,ResultLine,InterNum,NewNum, State).
+skipSpace([],[],Num,Num, State).			%% EOF
+skipSpace(LineList,ResultLine,CurNum,NewNum, State)
+	:-
+	LineList = [First | Rest],
+	skipSpace(First,Rest,ResultLine,CurNum,NewNum, State).
+	
+/* ---old
+skipSpace([],[],Line,Line,_,State) :- !.	%% EOF
+skipSpace([First | Rest],OutStream, InLine,OutLine,FName,State) :-
+	getInput(Rest,State),
+	skipSpace(First,Rest,OutStream, InLine,OutLine,FName,State).
+*/
+
+skipSpace(0'\n, Rest, ResultLine, InNum, OutNum,State)
+	:- !, 						%% NewLine Character
+	MidNum is InNum + 1,		
+	skipSpace(Rest,ResultLine,MidNum,OutNum,State).
+
+skipSpace(SpaceChar, Rest, ResultLine, InNum, OutNum,State)
+	:- 						%% Space Characters
+	SpaceChar =< 32,
+	!,					
+	skipSpace(Rest,ResultLine,InNum,OutNum,State).
+
+skipSpace(0'/, [ 0'/ | Rest], ResultLine, InNum, OutNum,State)
+	:- !,						%% Line Comment
+	skipToEOL(Rest, Rest2, State),
+	MidNum is InNum+1,
+	skipSpace(Rest2,ResultLine,MidNum,OutNum,State).
+
+skipSpace(0'/, [0'* | Rest], ResultLine, InNum,OutNum,State)
+	:- !,						%% C-Style Comments
+	skipToCommentEnd(Rest,Rest2,InNum,MidNum,State),
+	skipSpace(Rest2,ResultLine,MidNum,OutNum,State).
+
+skipSpace(Any, Tail, [Any|Tail], Num, Num, State). 	%% Non-Space char
+
+
+skipToEOL([],[],State) :- !.			%% EOF
+skipToEOL([First | Rest], ResultLine,State)
+	:-
+	getInput(Rest,State),
+	skipToEOL(First,Rest,ResultLine,State).
+
+skipToEOL(0'\n,ResultLine,ResultLine,State)
+	:- !.
+skipToEOL(Any,Rest,ResultLine,State)
+	:-
+	skipToEOL(Rest,ResultLine,State).
+
+skipToCommentEnd([],[],Line,Line,State)
+	:- !,											%% EOF
+	writeWarning('Unclosed C-Style Comment',State).
+
+skipToCommentEnd([First|Rest], ResultLine, InLine, OutLine,State)
+	:-
+	getInput(Rest,State),
+	skipToCommentEnd(First,Rest,ResultLine,InLine,OutLine,State).
+
+skipToCommentEnd(0'\n, Rest, ResultLine, InLine,OutLine,State)
+	:- !,											%% NewLine Character
+	NewLine is InLine+1,
+	skipToCommentEnd(Rest,ResultLine,NewLine,OutLine,State).
+
+skipToCommentEnd(0'/, [0'* | Rest], ResultLine, InLine,OutLine,State)
+	:- !,											%% Nested C-Style Comment
+	skipToCommentEnd(Rest,Rest2,InLine,InLine2,State),
+	skipToCommentEnd(Rest2,ResultLine,InLine2,OutLine,State).
+
+skipToCommentEnd(0'*, [0'/ | Rest], Rest, Line, Line, State)
+	:- !.											%% End of C-Style Comment
+
+skipToCommentEnd(Any, Rest, ResultLine, InLine, OutLine,State)
+	:-
+	skipToCommentEnd(Rest,ResultLine,InLine,OutLine,State).
+
+/*---------------------------------------------------------------------*
+ | getInput(List,State)
+ |
+ | We would like to view the file as one long list of characters.  
+ | We can, of course, read in the file all at once into a long list,
+ | but I find this aesthetically unpleasing as the file may be very 
+ | large.  We only need to look ahead K characters anyway, so we call
+ | getInput(List) to advance the size of the list if possible.
+ *---------------------------------------------------------------------*/
+
+/*
+getInput(List,State) :-
+	getInput(3,List,State).		%% K=3, List will always have 3 chars in it
+
+getInput(0,List,State) :- !.		%% Have enough characters in the list
+getInput(N,List,State) :- 		
+	var(List),				%% Don't have enough characters yet
+	!,
+	get0(C),				%% So get some more
+	eofCheck(C,N,List,State).
+getInput(N,[],State) :- !.		%% At end of file, don't need any more chars
+getInput(N,[_|Tail],State) :-
+	NP is N-1,
+	getInput(NP,Tail,State).
+
+eofCheck(-1,_,[],State) :- !.
+eofCheck(C,N,[C|Tail],State) :-
+	NP is N-1,
+	getInput(NP,Tail,State).
+*/
+/*
+getInput(List,State) 
+	:-
+	accessC2P(curLine, State, RealList),
+	nonvar(RealList), 
+	(RealList = nil ->
+		accessC2P(inStream, State, InStream),
+		getInput(InStream, List,State)
+		;
+		true
+	),
+	!.
+getInput(List,State) 
+	:-
+	accessC2P(inStream, State, InStream),
+	getInput(InStream, List,State).
+*/
+getInput(List,State) 
+	:-
+	var(List),
+	!,
+	accessC2P(inStream, State, InStream),
+	getInput(InStream, List,State).
+
+getInput(nil,State) 
+	:-
+	accessC2P(inStream, State, InStream),
+	getInput(InStream, _,State).
+
+getInput(_,State).
+
+getInput(InStream, List,State)
+	:-
+	get_line(InStream, LineUIA),
+	debug(4,'get_LINE:%t\n',[LineUIA]),
+	!,
+	cont_getInput(LineUIA, InStream, List, State).
+
+cont_getInput('', InStream, List, State)
+	:-!,
+	accessC2P(curLineNum, State, CurLineNum),
+	NextLineNum is CurLineNum + 1,
+	setC2P(curLineNum, State, NextLineNum),
+	getInput(InStream, List,State).
+
+cont_getInput(LineUIA, InStream, List, State)
+	:-
+	name(LineUIA, List0),
+	append(List0, [0'\n | _], List),
+	accessC2P(curLineNum, State, CurLineNum),
+	NextLineNum is CurLineNum + 1,
+	setC2P(curLineNum, State, NextLineNum),
+	setC2P(curLine, State, List).
+
+writeWarning(Warning,State)
+	:-
+	accessC2P(inFile, State, FileName),
+	accessC2P(curLineNum, State, LineNum),
+	printf('File: %t, line %t: %t\n', [FileName,LineNum,Warning]).
+
+/*-UNUSED----------------------------------------------------------------------*
+ * getLines is used for testing.   It tokenizes a file and writes out the
+ * tokenized lines.
+
+getLines(FileName) :-
+	openFile(FileName,State),
+	getLines1(State).
+
+getLines1(State) :-
+	getLine(TokLine,State,NextState),
+	!,
+	write(TokLine),nl,
+	getLines1(NextState).
+getLines1(_).			%% succeed when getLine eventually fails
+						%% upon eof
+ *-----------------------------------------------------------------------*/
+
+
+endmod.		%% tokenizer
