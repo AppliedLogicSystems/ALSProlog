@@ -828,13 +828,12 @@ static char updir_bits[] = {
     # f2: the frame with the OK button and the "file name" field
     #
     set f2 [frame $w.f2 -bd 0]
-    label $f2.lab -text "File name:" -anchor e -width 14 -under 5 -pady 0
+	if ![string compare $data(type) browse] {
+		label $f2.lab -text "Directory name:" -anchor e -width 16 -under 5 -pady 0
+	} else {
+    label $f2.lab -text "File name:" -anchor e -width 24 -under 5 -pady 0
+	}
     set data(ent) [entry $f2.ent]
-
-if [string compare $data(ent) browse] {
-	$data(ent) configure -state disabled
-	$f2.lab configure -text ""
-}
 
     # The font to use for the icons. The default Canvas font on Unix
     # is just deviant.
