@@ -17,7 +17,6 @@ export time/1.
 export make_subdir/1.
 export make_subdir/2.
 export remove_subdir/1.
-export remove_file/1.
 export file_status/2.
 
 export files/2.
@@ -117,21 +116,6 @@ make_subdir(NewDir,Permissions)
 	:-
 	rmdir(SubDir).
  
-/*!--------------------------------------------------------------
- |	remove_file/1
- |	remove_file(FileName)
- |	remove_file(+)
- |
- |	- removes a file from the current working directory
- |
- |	If FileName is an atom (possibly quoted) naming a file in
- |	the current working directory, removes that file.
- *!--------------------------------------------------------------*/
-
-remove_file(FileName)
-	:-
-	unlink(FileName).
-
  /*!----------------------------------------------------------------
  |	files/2
  |	files(Pattern,FileList)

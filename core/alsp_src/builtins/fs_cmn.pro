@@ -27,6 +27,7 @@ export datetime_less/2.
 export canon_path/2.
 export get_cwd/1.
 export change_cwd/1.
+export remove_file/1.
 
 /*!--------------------------------------------------------------
  |	date_less/2
@@ -229,7 +230,7 @@ change_cwd(Path)
 	chdir(Path), !.
 change_cwd(Path)
 	:-
-	permission_error(change_cwd,directory,Path,2).
+	system_error([change_cwd(Path)]).
 
 /*!--------------------------------------------------------------
  |	get_cwd/1
@@ -246,6 +247,25 @@ get_cwd(Path)
 	getcwd(Path), !.
 get_cwd(Path)
 	:-
-	permission_error(get_cwd,directory,Path,2).
+	system_error([get_cwd(Path)]).
+
+/*!--------------------------------------------------------------
+ |	remove_file/1
+ |	remove_file(FileName)
+ |	remove_file(+)
+ |
+ |	- removes a file from the current working directory
+ |
+ |	If FileName is an atom (possibly quoted) naming a file in
+ |	the current working directory, removes that file.
+ *!--------------------------------------------------------------*/
+
+remove_file(FileName)
+	:-
+	unlink(FileName), !.
+remove_file(FileName)
+	:-
+	system_error([unlink(FileName)]).
+
 
 endmod.
