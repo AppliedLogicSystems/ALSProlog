@@ -1,0 +1,116 @@
+<html>
+<head>
+<title>ALS Prolog/Python Guide</title>
+</head>
+<body>
+<h1>ALS Prolog to Python Interface</h1>
+
+<p>
+The ALS Prolog to Python interface is a Prolog Shared Library which
+embeds a Python interpreter within ALS Prolog.  Prolog can execute
+Python command and pass basic data type to and from the Python
+interpreter.
+</p>
+<p>
+The Interface requires that Python 1.52 or better has been installed
+on the system.
+</p>
+
+<h2>Example</h2>
+
+<p>
+A simple example of loading the Python interface and calling
+its predicates.
+<p>
+
+<pre>
+?- [python].
+yes.
+
+% Set the Python variable a to 2.
+
+?- py_exec('a = 2').
+yes.
+
+% Check that the variable a evaluates to 2
+
+?- py_eval('a', X).
+X = 2
+yes.
+
+% Call the atoi function in the string module to
+% convert a hexedicimal string to an integer.
+
+?- py_call(string, atoi('3f0', 16), X).
+X = 1008
+yes.
+</pre>
+
+<h2>Data Type Conversions</h2>
+
+<p>
+</p>
+
+<table>
+<tr><td>Python</td><td>Prolog</td></tr>
+<tr><td>integer</td><td>integer (or float for large integers)</td></tr>
+<tr><td>float</td><td>float</td></tr>
+<tr><td>string</td><td>atom (uninterned)</td></tr>
+<tr><td>lists</td><td>lists</td></tr>
+<tr><td>tuples</td><td>comma lists??</td></tr>
+</table>
+
+<!--
+limitations - maxint on prolog - produces exception
+
+floating point
+
+limitations
+
+strings
+
+limitations
+
+lists
+
+limitations
+
+tuples
+
+limitations
+
+Other types - exception
+-->
+
+<h2>Python Interface Predicates</h2>
+
+<p>
+py_exec(command).
+</p>
+<p>
+Executes the statement <em>command</em> in the Python interpreter.
+</p>
+<p>
+py_eval(expr, result).
+</p>
+<p>
+Evaluates the expression <em>expr</em> in the Pyton interpreter and
+unifies the value of the expression with <em>result</em>. 
+</p>
+
+<p>
+py_call(mod, func(args..), result).
+</p>
+<p>
+Calls the function <em>func</em> in the module <em>mod</em> and unifies
+the result with <em>result</em>.
+</p>
+
+
+<!--
+Limitations of using Python from ALS Prolog
+
+standard out not mapped in IDE.
+-->
+</body>
+</html>
