@@ -132,7 +132,7 @@
 	[bread/1,bread/2, bread/3, bread_term/3, bread_term/4], [] ).
 
 :-libactivate(builtins,['library',strctutl],
-	[locate_struct/3, delete_struct/3, delete_struct/4], [] ).
+	[locate_struct/3, delete_struct/3, delete_struct/4, set_all_args/4], [] ).
 
 :-libactivate(builtins,['library',slashes],
 	[slash2list/2], [] ).
@@ -176,7 +176,10 @@
 		[atm_tail/3, trim_atoms/3
 		], [] ).
 
+
 :-libactivate(builtins,['library',progdoc], 
 		[prog_doc/3, fm_doc/1
 		], [] ).
+
+
 
