@@ -1534,10 +1534,14 @@ toggle_debug_io
 	printf(debugger_output,'Debugger i/o set to: %t\n',[Next]).
 
 	%% Default:
+
+debug_io(nowins).
+/*
 debug_io(Where)
 	:-
 	als_system(L),
 	dmember(wins=Where, L).
+*/
 
 dbg_io_opp(nowins, WhichWins)
 	:-!,

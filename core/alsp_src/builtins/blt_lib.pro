@@ -26,8 +26,8 @@
 		subst_nth/4,last/2],[]).
 
 :-libactivate(builtins,['library',listutl3],
-    [nobind_member/2,output_prolog_list/1,output_prolog_list/4,
-    	output_prolog_list/5,
+    [nobind_member/2,
+%	 output_prolog_list/1,output_prolog_list/4, output_prolog_list/5,
 	flatten/2,n_of/3,number_list/2, number_list/3,encode_list/3,
 	struct_lookup_subst/4,check_default/4,check_default_del/5,
 	remove_tagged/3, merge_plists/3, merge_tagged_lists/3, 

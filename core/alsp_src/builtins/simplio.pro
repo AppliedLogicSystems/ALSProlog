@@ -37,28 +37,34 @@ q_acton(_,no).
 
 
 export simple_menu/3.
-
-simple_menu([Choice], Choice, Options) :-!.
 simple_menu(List, Choice, Options) 
+	:-
+	sio:get_current_output_stream(OutS),
+	sio:get_current_input_stream(InS),
+	simple_menu(List, Choice, Options, InS, OutS).
+
+export simple_menu/5.
+simple_menu([Choice], Choice, Options,InS,OutS) :-!.
+simple_menu(List, Choice, Options,InS,OutS) 
 	:-
 	dmember(codes=ListOfCodes,Options),
 	!,
 	encode_list(List, ListOfCodes, CodedList),
-	themenu(CodedList, ChoiceNum, Options),
+	themenu(CodedList, ChoiceNum, Options,InS,OutS),
 	fin_simple_menu_num(ChoiceNum, CodedList, Options, Choice).
 
-simple_menu(List, Choice, Options) 
+simple_menu(List, Choice, Options,InS,OutS) 
 	:-
 	dmember(0-ZeroChoice, Options),
 	!,
 	number_list([ZeroChoice | List], 0, NumberedList),
-	themenu(NumberedList, ChoiceNum, Options),
+	themenu(NumberedList, ChoiceNum, Options,InS,OutS),
 	fin_simple_menu_num(ChoiceNum, NumberedList, Options, Choice).
 
-simple_menu(List, Choice, Options) 
+simple_menu(List, Choice, Options,InS,OutS) 
 	:-
 	number_list(List, 1, NumberedList),
-	themenu(NumberedList, ChoiceNum, Options),
+	themenu(NumberedList, ChoiceNum, Options,InS,OutS),
 	fin_simple_menu_num(ChoiceNum, NumberedList, Options, Choice).
 
 fin_simple_menu_num(default, NumberedList, Options, Choice)
@@ -74,7 +80,7 @@ fin_simple_menu_num(ChoiceNum, NumberedList, Options, Choice)
 	dmember(ChoiceNum-Choice, NumberedList),!.
 fin_simple_menu_num(ChoiceNum, NumberedList, Options, '$badInput$'(ChoiceNum)).
 
-themenu(List, ChoiceNum, Options)
+themenu(List, ChoiceNum, Options,InS,OutS)
 	:-
 	(dmember(default=DefaultContent,Options) ->
 		true
@@ -97,24 +103,60 @@ themenu(List, ChoiceNum, Options)
 		Spacer = ' - '
 	),
 	(dmember(title=Title, Options) ->
-		printf("%t%t\n%t------------------------\n",[Indent,Title,Indent])
+		printf(OutS,'%t%t\n%t------------------------\n',[Indent,Title,Indent])
 		;
 		true
 	),
-	output_prolog_list(List,Indent,Termin,Spacer,DefaultContent),
+	output_prolog_list(List,OutS,Indent,Termin,Spacer,DefaultContent),
 	(dmember(prompt=Prompt, Options) ->
 		true
 		;
 		Prompt = ' Choice = '
 	),
-	write(Prompt),
-	get_line(Line),
+	write(OutS,Prompt),
+	get_line(InS,Line),
 	((Line = ''; Line = end_of_line) ->
 		ChoiceNum = default
 		;
 		atomread(Line,ChoiceNum,[vars_and_names(Vars,Names)]),
 		Vars = Names
 	).
+
+/*!---------------------------------------------------------------------
+ |	output_prolog_list/[1,5,6]
+ |	output_prolog_list(List)
+ |	output_prolog_list(+)
+ |
+ |	- outputs items on a list, one to a line
+ |
+ |	Outputs (to the current output stream) each item on List, one item
+ |	to a line, followed by a period.
+ *!--------------------------------------------------------------------*/
+export output_prolog_list/1.
+output_prolog_list(List)
+	:-
+	current_output(Stream),
+	output_prolog_list(Stream, List,'','.',' - ','').
+
+export output_prolog_list/5.
+output_prolog_list(List,Indent,Term,Spacer,DefaultContent)
+	:-
+	current_output(Stream),
+	output_prolog_list(List,Stream,Indent,Term,Spacer,DefaultContent).
+
+export output_prolog_list/6.
+output_prolog_list([],Stream,Indent,Term,Spacer,DefaultContent).
+output_prolog_list([Item | RestList],Stream,Indent,Term,Spacer,DefaultContent)
+	:-
+	(Item = (Code-Content) ->
+		printf(Stream,"%t%t%t%t%t",[Indent,Code,Spacer,Content,Term]),
+		(Content=DefaultContent -> put_code(Stream,0'*);true)
+		;
+		printf(Stream,"%t%t%t",[Indent,Item,Term]),
+		(Iterm=DefaultContent -> put_code(Stream,0'*);true)
+	),
+	nl(Stream),
+	output_prolog_list(RestList,Stream,Indent,Term,Spacer,DefaultContent).
 
 
 /*!---------------------------------------------------------------------
