@@ -32,6 +32,8 @@ export directory/3.
 export get_current_drive/1.
 export change_current_drive/1.
 
+export move_file/2.
+
 /*!--------------------------------------------------------------
  |	date/1
  |	date(Date)
@@ -223,9 +225,7 @@ subdirs(SubdirList)
  *!----------------------------------------------------------------*/
 subdirs_red(SubdirList)
 	:-
-	directory('*',1,SubdirList0),
-	list_delete(SubdirList0, '.', SubdirList1),
-	list_delete(SubdirList1, '..', SubdirList).
+	directory('*',directory, SubdirList). 
  
  /*---------------------------------------------------------------
  |	File types/attributes:
@@ -308,8 +308,13 @@ directory(Pattern, FileType, List)
 	:-
 	atom(Pattern), 
 	rootPathFile(Disk, PathList, FilePattern, Pattern),
-	subPath(PathList, Path),
+	subPath(PathList,ThePath),
+	exists_file(ThePath),
 	!,
+
+	subPath(PathList, InitPath),
+	(InitPath = '' -> Path = ':' ; Path = InitPath),
+
 	'$getDirEntries'(Path, FilePattern, FirstResult),
 	!,
 	fixFileType(FileType, InternalFileType),
@@ -438,5 +443,12 @@ change_current_drive(DriveName) :-
 	name(ProperDriveName,ProperDriveList),
 	change_cwd(ProperDriveName).
 	
+/*!----------------------------------------------------------------
+ *!----------------------------------------------------------------*/
+move_file(Source, Target)
+	:-
+	printf(atom(Cmd),'mv %t %t', [Source, Target]),
+	system(Cmd).
+
 
 endmod.

@@ -139,6 +139,7 @@
 
 :-libactivate(builtins,['library',filemisc],
 	[copy_fileslist_nl/4, copy_file_nl/3, copy_dir_files_nl/3,
+	 copy_fileslist_nl/5,copy_dir_files_nl/4,check_copy_file_nl/4,
 	 install_file_links/2, copy_stream_nl/3, 
 	 write_lines/1, write_lines/2, write_lines_nl/3, write_lines_nl/4,
 	 write_lines_opt/2,write_lines_opt/3,
