@@ -29,6 +29,7 @@ halt :-
 export start_alsdev/0.
 start_alsdev
 	:-
+	abolish(save_clinfo,1),
 	make_clinfo(CLInfo, alsdev, true), 	% verbosity = quiet
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,CLInfo),
 	assertz(command_line(ResidualCommandLine)),
@@ -237,6 +238,7 @@ use tk_alslib.
 
 alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom)
 	:-
+	abolish(alsdev_ini_path,1),
 	find_alsdev_ini(Items),
 	(dmember(window_settings('.topals', TopIniSettings0), Items) -> 
 		strip_tags(TopIniSettings0, TopIniSettings) 
