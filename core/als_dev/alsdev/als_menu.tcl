@@ -110,10 +110,6 @@ proc add_prolog_menu {menubar type window} {
 			-label "Dynamic Flags" -command show_dynamic_flags
 		$menubar.prolog add command \
 			-label "Static Flags" -command show_static_flags
-
-#		menu $menubar.prolog.static -cursor {} -title "Static Flags"
-#		$menubar.prolog add cascade -label "Static Flags" -menu $menubar.prolog.static 
-
 	} elseif {"$type"=="debugwin"} then {
     	$menubar.prolog add separator
     	$menubar.prolog add command -label {Abort} \
@@ -160,14 +156,6 @@ proc add_tools_menu {menubar type window} {
 		$menubar.tools add command  -label {Spy When} -state disabled
 
 		$menubar.tools add separator
-
-#		menu $menubar.tools.settings -relief raised
-#		$menubar.tools add cascade -label Settings -menu $menubar.tools.settings
-#    	$menubar.tools.settings add command \
-#        	-label {Set Print Depth} 
-#		$menubar.tools.settings add command \
-#			-label {Toggle Flat Print} -command { set DebugResponse Bm }
-
 		$menubar.tools add command  -label {Debug Settings } \
 			-command {show_debug_settings}
 
