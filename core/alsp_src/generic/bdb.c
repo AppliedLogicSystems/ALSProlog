@@ -296,9 +296,13 @@ pbi_index_proc()
     SUCCEED;
 }
 
+/*---------------------------------------*
+ |	massively_abolish_clausegroup(CG) 
+ *---------------------------------------*/
+
 int
 pbi_massively_abolish_clausegroup()
-{				/* massively_abolish_clausegroup(CG) */
+{				
     PWord v1;
     int   t1;
     int   i;

@@ -1503,6 +1503,25 @@ w_addclause(p, a, cg_id,
     seticount(ent);
 }
 
+	/*--------------------------------------------------*
+	 |	w_abolish_cg(ent, cg_id, cg_mask)
+	 |
+	 |	ent     = name table entry
+	 |	cg_id   = (integer) clause group id
+	 |	cg_mask =
+	 |
+	 |  In the clauses for ent, the clauses identified
+	 |	by cg_id form a block:
+	 |
+	 |	....non-cg_id...|...cg_id...|...non-cg_id...
+	 |
+	 |	Either or both of the head or tail blocks could
+	 |	be empty.  w_abolish_cg wipes out the cg_id block,
+	 |	leaving:
+	 |
+	 |	....non-cg_id...||...non-cg_id...
+	 *--------------------------------------------------*/
+
 void
 w_abolish_cg(ent, cg_id, cg_mask)
     ntbl_entry *ent;
@@ -1516,69 +1535,70 @@ w_abolish_cg(ent, cg_id, cg_mask)
     p = ent->first_clause;
 
     if (!p)
-	return;
+		return;
 
     q = (long *) 0;
 
     /* skip over non-matching clauses */
     while (p && (cgId(p) & cg_mask) != cg_id) {
-	q = p;
-	p = next_clause(p);
+		q = p;
+		p = next_clause(p);
     }
 
     if (!p)
-	return;
+		return;
 
-    eb1 = q;			/* eb1 is end of initial block of clauses to
+    eb1 = q;	/* eb1 is end of initial block of clauses to
 				 * leave
 				 */
 
     /* remove clauses which match cg_id after mask is and'd */
     while (p && (cgId(p) & cg_mask) == cg_id) {
-	q = next_clause(p);
-	w_freeclause(p);
-	p = q;
+		q = next_clause(p);
+		w_freeclause(p);
+		p = q;
     }
 
-    if (eb1) {			/* There are initial clause(s) */
-	nextClauseAddr(eb1) = p;
-	if (p) {		/* There are final clause(s) */
-	    ic_install_retry_me(choiceCode(eb1),
-				(long)choiceEntry(p),
-				ent->nargs,
-				emaskCode(eb1));
-	}
-	else {			/* There are no final clauses */
-	    ent->last_clause = eb1;	/* eb1 is the last clause now */
-	    if (eb1 == ent->first_clause) {	/* eb1 is the only clause */
-		ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_SINGLE;
-		ic_install_jmp(ent,
+    if (eb1) {			/* There are initial clause(s) to stay */
+		nextClauseAddr(eb1) = p;
+
+		if (p) {		/* There are final clause(s) to stay */
+	    	ic_install_retry_me(choiceCode(eb1),
+								(long)choiceEntry(p),
+								ent->nargs,
+								emaskCode(eb1));
+		}
+		else {			/* There are no final clauses */
+	    	ent->last_clause = eb1;	/* eb1 is the last clause now */
+	    	if (eb1 == ent->first_clause) {	/* eb1 is the only clause */
+			ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_SINGLE;
+			ic_install_jmp(ent,
 			       clauseCode(eb1) + dstartCode(eb1),
 			       emaskCode(eb1));
-	    }
-	    else {		/* eb1 is last clause */
-		ic_install_trust_me(choiceCode(eb1),
+	    	}
+	    	else {		/* eb1 is last clause */
+			ic_install_trust_me(choiceCode(eb1),
 				    (PWord) (clauseCode(eb1) + dstartCode(eb1)),
 				    ent->nargs,
 				    emaskCode(eb1));
-	    }
-	}
+	    	}
+		}
     }
     else {			/* There are no initial clauses */
-	ent->first_clause = p;	/* p is now first clause */
-	if (p) {		/* There are final clauses */
-	    if (nextClauseAddr(p) == 0) {	/* p is the only clause */
-		ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_SINGLE;
-		ic_install_jmp(ent,
+		ent->first_clause = p;	/* p is now first clause */
+		if (p) {		/* There are final clauses */
+	    	if (nextClauseAddr(p) == 0) {	/* p is the only clause */
+				ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_SINGLE;
+				ic_install_jmp(ent,
 			       clauseCode(p) + dstartCode(p),
 			       emaskCode(p));
-	    }
-	    else {
-		ic_install_try_me_jmp(ent,
+	    	}
+	    	else {
+			ic_install_try_me_jmp(ent,
 				      clauseCode(p),
 				      (long)choiceEntry(nextClauseAddr(p)));
-	    }
-	}
+	    	}
+		}
 	else {			/* There are no final clauses */
 	    ent->last_clause = (long *) 0;
 	    ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_UNDEFINED;
@@ -1948,14 +1968,12 @@ w_validate_dbref(addr, nid, cid)
 
     size = *(addr + WCI_SIZE);
 
-    if (size < 0 &&		/* see if size is in bounds */
-	size > -(MAX_ICBUFSIZE * sizeof (Code) / sizeof (long)) &&
-	(*(addr + WCI_PROCIDX) & 0xffff) == nid &&	/* see if has same
-							 * name
-							 */
-	*(addr + WCI_CLAUSEID) == cid &&	/* and same clause id   */
-	*(addr - size - 1) == size) {	/* see if end is valid  */
-	return addr;		/* must be ok then */
+    if (size < 0 &&				/* see if size is in bounds */
+		size > -(MAX_ICBUFSIZE * sizeof (Code) / sizeof (long)) &&
+		(*(addr + WCI_PROCIDX) & 0xffff) == nid &&	/* see if has same name */
+		*(addr + WCI_CLAUSEID) == cid &&		/* and same clause id   */
+		*(addr - size - 1) == size) {			/* see if end is valid  */
+			return addr;		/* must be ok then */
     }
 
     /*
@@ -2004,11 +2022,11 @@ validate_dbref(ref, reftype, nameid)
 	    w_get_argn(&cid, &t4, ref, 4);
 
 	    if (t1 == WTP_INTEGER && t2 == WTP_INTEGER &&
-		t3 == WTP_INTEGER && getlong(&clause_id, cid, t4))
+			t3 == WTP_INTEGER && getlong(&clause_id, cid, t4))
 		return w_validate_dbref(
-				      (long *) (caddrlow | (caddrhi << 16)),
-					   (int) *nameid,
-					   (long) clause_id);
+					(long *) (caddrlow | (caddrhi << 16)),
+					(int) *nameid,
+					(long) clause_id);
 	}
     }
 
