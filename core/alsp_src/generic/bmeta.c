@@ -251,182 +251,181 @@ pbi_trailed_mangle(void)
 
 int
 trailed_mangle0(v1,v2,t2,v3,t3)
-	PWord v1, v2, v3;
-	int       t2, t3;
+     PWord v1, v2, v3;
+     int       t2, t3;
 {				
-    int   arity;
-    PWord *argaddr;
-    PWord *b;
-    PWord *newv3 = NULL, oldarg = 0, *newoldarg = NULL;	/* stifle -Wall */
-	int oldargt;
+  int   arity;
+  PWord *argaddr;
+  PWord *b;
+  PWord *newv3 = NULL, oldarg = 0, *newoldarg = NULL;	/* stifle -Wall */
+  int oldargt;
 
-/*
-printf("IN_tm:v1=%0x v2=%0x,t2=%d,v3=%0x,t3=%d\n",(int)v1,(int)v2,(int)t2,(int)v3,(int)t3);
-*/
+  /*
+    printf("IN_tm:v1=%0x v2=%0x,t2=%d,v3=%0x,t3=%d\n",
+    (int)v1,(int)v2,(int)t2,(int)v3,(int)t3);
+    */
 
-    switch (t2) {
-	case WTP_STRUCTURE:
-	    w_get_arity(&arity, v2);
-	    if (v1 > arity || v1 < 1)
-			FAIL;
-		w_get_argn(&oldarg, &oldargt, v2, v1);
-	    w_get_argaddr(argaddr, v2, (int) v1, arity);
-	    break;
+  switch (t2) {
+  case WTP_STRUCTURE:
+    w_get_arity(&arity, v2);
+    if (v1 > arity || v1 < 1)
+      FAIL;
+    w_get_argn(&oldarg, &oldargt, v2, (int) v1);
+    w_get_argaddr(argaddr, v2, (int) v1, arity);
+    w_get(&oldarg, &oldargt, *argaddr);
+    break;
 
-	case WTP_LIST:
-	    if (v1 == 1) {
-			w_get_car(&oldarg, &oldargt, v2);
-			w_get_caraddr(argaddr, v2);
-		}
-	    else if (v1 == 2) {
-			w_get_cdr(&oldarg, &oldargt, v2);
-			w_get_cdraddr(argaddr, v2);
-		}
-	    else
-			FAIL;
-	    break;
-
-	default:
-	    FAIL;
+  case WTP_LIST:
+    if (v1 == 1) {
+      w_get_car(&oldarg, &oldargt, v2);
+      w_get_caraddr(argaddr, v2);
     }
-	/* argaddr is the location to be modified;
-	   Need to trail this location and move its
-       value onto the trail before we modify it
-	 */
+    else if (v1 == 2) {
+      w_get_cdr(&oldarg, &oldargt, v2);
+      w_get_cdraddr(argaddr, v2);
+    }
+    else
+      FAIL;
+    break;
 
-/*
-printf("tr_mg: wm_TR=%0x   \n",(int)wm_TR);
-printf("tr_mg: wm_TR-1=%0x   argaddr=%0x\n",(int)(wm_TR-1),(int)argaddr);
-printf("tr_mg: wm_TR-2=%0x   *argaddr=%0x  ",(int)(wm_TR-2),(int)*argaddr);
-pbi_cptx();
-disp_heap_item(argaddr); 
-*/
+  default:
+    FAIL;
+  }
+  /* argaddr is the location to be modified;
+     Need to trail this location and move its
+     value onto the trail before we modify it
+     */
 
-	/* Copy the old value onto the right place on the trail: */
+  /*
+    printf("tr_mg: wm_TR=%0x   \n",(int)wm_TR);
+    printf("tr_mg: wm_TR-1=%0x   argaddr=%0x\n",(int)(wm_TR-1),(int)argaddr);
+    printf("tr_mg: wm_TR-2=%0x   *argaddr=%0x  ",(int)(wm_TR-2),(int)*argaddr);
+    pbi_cptx();
+    disp_heap_item(argaddr); 
+    */
 
-    	*(((PWord *)wm_TR)-2) = oldarg; 
+  /* Copy the old value onto the right place on the trail: */
 
-/*
-    	*(((PWord *)wm_TR)-2) = *argaddr;
-*/
+  /* CHANGED BY SPIRO (???)
+    Must use *argaddr and NOT oldarg below because 
+    we must preserve the data with tag and all
+    */
+  *(((PWord *)wm_TR)-2) = *argaddr;
 
-/*
-printf("Compare: *argaddr=%0x [%0x]  oldarg=%0x \n",(int)*argaddr, (int)(wm_heapbase + *argaddr), (int)oldarg);
-*/
+  /*
+    printf("Compare: *argaddr=%0x [%0x]  oldarg=%0x \n",
+    (int)*argaddr, (int)(wm_heapbase + *argaddr), (int)oldarg);
+    */
 
+  /* Trail this argument location: */
 
-		/* Trail this argument location: */
+  *(((PWord *)wm_TR)-1) = (PWord)argaddr;
 
-    *(((PWord *)wm_TR)-1) = (PWord)argaddr;
+  /*
+    printf("tr_mg: AFTER TRAIL\n");
+    printf("tr_mg: wm_TR=%0x   \n",(int)wm_TR);
+    printf("tr_mg: wm_TR-1=%0x [%0x]\n",(int)(wm_TR-1),(int)*(wm_TR-1));
+    printf("tr_mg: wm_TR-2=%0x [%0x]\n",(int)(wm_TR-2),(int)*(wm_TR-2));
+    pbi_cptx();
+    */
 
-/*
-printf("tr_mg: AFTER TRAIL\n");
-printf("tr_mg: wm_TR=%0x   \n",(int)wm_TR);
-printf("tr_mg: wm_TR-1=%0x [%0x]\n",(int)(wm_TR-1),(int)*(wm_TR-1));
-printf("tr_mg: wm_TR-2=%0x [%0x]\n",(int)(wm_TR-2),(int)*(wm_TR-2));
-pbi_cptx();
-*/
+  wm_TR = (PWord *)wm_TR - 2;
 
+  w_install(argaddr, v3, t3);	 /* mangle the new argument */
 
+  /*
+    printf("--mangle done --\n");
+    pbi_cptx();
+    disp_heap_item(argaddr); 
+    */
+  /*---------------------------------------------------------------------*
+    | non-TRAILVALS case:
+    | if the object is an integer, or a symbol, we are done, because they
+    | occupy only one word, and so are stored in the location argaddr;
+    | Otherwise the object is a list, a structure, or an uia.
+    | In that case, we have to worry that the new pointer we just have
+    | installed in argaddr will never become a dangling pointer.  This could
+    | happen if: a) the object (a list,struct,uia) pointed at by v3 is above 
+    | (more recent than) the slot (argaddr) in the heap, and
+    | b) at some point under backtracking, the top of heap pointer were
+    | set to a location __BETWEEN__ the location of v3 and the slot argaddr.
+    | This can happen only if the heap backtrack (hb)  value of 
+    | some choicepoint 
+    | points to such an inbetween value.  At the moment, v3 is at the top of
+    | the heap (wm_H).  So we only have to worry about choicepoints whose hb
+    | value points to some point above (more recent than) argaddr, since any
+    | hb value of a cp which points to lower (older than) values than argaddr
+    | is not in between v3 and argaddr.  So we can avoid this happening by
+    | changing all "HB" registers and the hb values in choice points whose
+    | hb value is pointing above argaddr.  We update these to point at the
+    | top of heap, w_H.
+    |
+    | #ifdef TRAILVALS case:
+    | All of the above applies, but we must also assure that the old value
+    | in the arg slot (living at argaddr when we started) is preserved;
+    | again, if it is an integer or symbol, we are ok; but if it is a 
+    | list, structure, or uia, we must also worry about it just like newv3;
+    *---------------------------------------------------------------------*/
 
+  if ((t3 != WTP_INTEGER) && (t3 != WTP_SYMBOL)) {
+    /* The new object v3 is a list, a structure or an uia */
+    switch (t3) {
+    case WTP_LIST:
+    case WTP_STRUCTURE:
+      newv3 = (PWord *) MBIAS(v3);
+      break;
+    case WTP_UIA:
+      newv3 = (PWord *) MBIAS(M_FIRSTUIAWORD(v3));
+      break;
+    }
 
-	
-	wm_TR = (PWord *)wm_TR - 2;
+    if ((oldargt != WTP_INTEGER) && (oldargt != WTP_SYMBOL)) {
+      /* The old object oldarg is a list, a structure or an uia */
+      switch (oldargt) {
+      case WTP_LIST:
+      case WTP_STRUCTURE:
+	newoldarg = (PWord *) MBIAS(oldarg);
+	break;
+      case WTP_UIA:
+	newoldarg = (PWord *) MBIAS(M_FIRSTUIAWORD(oldarg));
+	break;
+      }
+      if ((argaddr < newv3) || (argaddr < newoldarg)) {
+	/* Either the new object v3 or the old object oldarg is above the slot */
+	/*
+	  printf("-*-TM:CPupd:wm_HB(old)=%0x wm_H=%0x [argaddr=%0x newv3=0%x newoldarg=%0x]\n",wm_HB,wm_H,argaddr,newv3,newoldarg);
+	  */
+	gv_setcnt++;
+	wm_HB = wm_H;
+	b = wm_B;
+	while (b != (PWord *) 0 && (PWord) chpt_HB(b) >= (PWord) argaddr) {
+	  chpt_HB(b) = wm_H;
+	  chpt_SPB(b) = (PWord *) (((long) chpt_SPB(b)) & ~3);
+	  b = chpt_B(b);
+	}
+      }
+    } /* oldarg is an integer or symbol */
 
-    w_install(argaddr, v3, t3);	 /* mangle the new argument */
+    else if (argaddr < newv3) {
+      /* The new object v3 is above the slot */
+      /*
+	printf("*TM:CPupd:wm_HB(old)=%0x wm_H=%0x [argaddr=%0x newv3=0%x]\n",wm_HB,wm_H,argaddr,newv3);
+	*/
+      gv_setcnt++;
+      wm_HB = wm_H;
+      b = wm_B;
+      while (b != (PWord *) 0 && (PWord) chpt_HB(b) >= (PWord) argaddr) {
+	chpt_HB(b) = wm_H;
+	chpt_SPB(b) = (PWord *) (((long) chpt_SPB(b)) & ~3);
+	b = chpt_B(b);
+      }
+    }
+  }	/* ((t3 != WTP_INTEGER) && (t3 != WTP_SYMBOL)) */
+  /*
+    printf("Out-TM: wm_H=%0x wm_HB=%0x\n",wm_H,wm_HB);
+    */
 
-/*
-printf("--mangle done --\n");
-pbi_cptx();
-disp_heap_item(argaddr); 
-*/
-    /*--------------------------------------------------------------------------*
-	 | non-TRAILVALS case:
-     | if the object is an integer, or a symbol, we are done, because they
-	 | occupy only one word, and so are stored in the location argaddr;
-     | Otherwise the object is a list, a structure, or an uia.
-     | In that case, we have to worry that the new pointer we just have
-	 | installed in argaddr will never become a dangling pointer.  This could
-	 | happen if: a) the object (a list,struct,uia) pointed at by v3 is above 
-	 | (more recent than) the slot (argaddr) in the heap, and
-	 | b) at some point under backtracking, the top of heap pointer were
-	 | set to a location __BETWEEN__ the location of v3 and the slot argaddr.
-	 | This can happen only if the heap backtrack (hb)  value of some choicepoint 
-	 | points to such an inbetween value.  At the moment, v3 is at the top of
-	 | the heap (wm_H).  So we only have to worry about choicepoints whose hb
-	 | value points to some point above (more recent than) argaddr, since any
-	 | hb value of a cp which points to lower (older than) values than argaddr
-	 | is not in between v3 and argaddr.  So we can avoid this happening by
-     | changing all "HB" registers and the hb values in choice points whose
-	 | hb value is pointing above argaddr.  We update these to point at the
-	 | top of heap, w_H.
-	 |
-	 | #ifdef TRAILVALS case:
-	 | All of the above applies, but we must also assure that the old value
-	 | in the arg slot (living at argaddr when we started) is preserved;
-	 | again, if it is an integer or symbol, we are ok; but if it is a 
-	 | list, structure, or uia, we must also worry about it just like newv3;
-     *--------------------------------------------------------------------------*/
-
-    if ((t3 != WTP_INTEGER) && (t3 != WTP_SYMBOL)) {
-	    	/* The new object v3 is a list, a structure or an uia */
-		switch (t3) {
-	    	case WTP_LIST:
-	    	case WTP_STRUCTURE:
-				newv3 = (PWord *) MBIAS(v3);
-				break;
-	    	case WTP_UIA:
-				newv3 = (PWord *) MBIAS(M_FIRSTUIAWORD(v3));
-				break;
-		}
-
-    	if ((oldargt != WTP_INTEGER) && (oldargt != WTP_SYMBOL)) {
-	    		/* The old object oldarg is a list, a structure or an uia */
-			switch (oldargt) {
-	    		case WTP_LIST:
-	    		case WTP_STRUCTURE:
-					newoldarg = (PWord *) MBIAS(oldarg);
-					break;
-	    		case WTP_UIA:
-					newoldarg = (PWord *) MBIAS(M_FIRSTUIAWORD(oldarg));
-					break;
-			}
-			if ((argaddr < newv3) || (argaddr < newoldarg)) {
-	    		/* Either the new object v3 or the old object oldarg is above the slot */
-/*
-printf("-*-TM:CPupd:wm_HB(old)=%0x wm_H=%0x [argaddr=%0x newv3=0%x newoldarg=%0x]\n",wm_HB,wm_H,argaddr,newv3,newoldarg);
-*/
-	    		gv_setcnt++;
-	    		wm_HB = wm_H;
-	    		b = wm_B;
-	    		while (b != (PWord *) 0 && (PWord) chpt_HB(b) >= (PWord) argaddr) {
-					chpt_HB(b) = wm_H;
-					chpt_SPB(b) = (PWord *) (((long) chpt_SPB(b)) & ~3);
-					b = chpt_B(b);
-	    		}
-			}
-		} /* oldarg is an integer or symbol */
-
-		else if (argaddr < newv3) {
-	    		/* The new object v3 is above the slot */
-/*
-printf("*TM:CPupd:wm_HB(old)=%0x wm_H=%0x [argaddr=%0x newv3=0%x]\n",wm_HB,wm_H,argaddr,newv3);
-*/
-	    	gv_setcnt++;
-	    	wm_HB = wm_H;
-	    	b = wm_B;
-	    	while (b != (PWord *) 0 && (PWord) chpt_HB(b) >= (PWord) argaddr) {
-				chpt_HB(b) = wm_H;
-				chpt_SPB(b) = (PWord *) (((long) chpt_SPB(b)) & ~3);
-				b = chpt_B(b);
-	    	}
-		}
-    }	/* ((t3 != WTP_INTEGER) && (t3 != WTP_SYMBOL)) */
-/*
-printf("Out-TM: wm_H=%0x wm_HB=%0x\n",wm_H,wm_HB);
-*/
-
-    SUCCEED;
+  SUCCEED;
 
 }
 #endif
