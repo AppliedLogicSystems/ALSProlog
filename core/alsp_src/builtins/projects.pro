@@ -134,7 +134,8 @@ proceed_start_new_project(ALSIDEObject)
 %				tcltk_interpreters = [tcli],
 %				c_files = [],
 				file_types =  [ 
-					[prolog_files, ['.pro', '.pl'] ]
+%					[prolog_files, ['.pro', '.pl'] ]
+					[prolog_files, ['.*'] ]
 %					,[prolog_library_files, ['.pro'] ],
 %					[tcltk_files, ['.tcl'] ],
 %					[c_files, ['.c'] ] 
@@ -144,7 +145,7 @@ proceed_start_new_project(ALSIDEObject)
 					[production_goal,	'Startup Goal:'],
 					[debug_goal, 		'Debug Goal:'],
 					[executable_name, 	'Image Name:'],
-					[prolog_files, 		'Prolog Files:']
+					[prolog_files, 		'Files:']
 %					,[library_files, 	'Library Files:'],
 %					[tcltk_files, 		'Tcl/Tk Files:'],
 %					[tcltk_interpreters,'Tcl/Tk Interps:'],
