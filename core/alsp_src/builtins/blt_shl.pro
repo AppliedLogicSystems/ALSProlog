@@ -42,6 +42,7 @@ start_shell(DefaultShellCall)
 
 start_shell0(DefaultShellCall)
 	:-
+	init_als_shl_mgr,
 	make_clinfo(CLInfo, DefaultShellCall, false),	% verbosity = verbose
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,alsshell,CLInfo),
 
@@ -68,9 +69,22 @@ start_shell0(_).
 
 init_als_shl_mgr
 	:-
+	clause(get_primary_manager(_), _),
+	!,
+	get_primary_manager(MM),
+	complete_init_als_shl_mgr(MM).
+
+init_als_shl_mgr
+	:-
 	setup_als_shl_mgr(Mgr),
 	make_gv('_primary_manager'),
 	set_primary_manager(Mgr).
+
+complete_init_als_shl_mgr(0)
+	:-!,
+	setup_als_shl_mgr(Mgr),
+	set_primary_manager(Mgr).
+complete_init_als_shl_mgr(_).
 
 setup_als_shl_mgr(MgrObject)
 	:-
