@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.44 1998/05/08 22:33:35 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.45 1998/05/18 01:37:48 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -329,6 +329,10 @@ load_photo up_arrow_gif up-arrow-blue
 load_photo down_arrow_gif down-arrow-blue
 load_photo right_gif right-arrow-blue
 load_photo left_gif left-arrow-blue
+
+load_photo closed_ptr closed_ptr
+load_photo open_ptr open_ptr
+
 
 	## source any other needed files here.....
 
@@ -951,6 +955,186 @@ proc toggle_spywin {} {
 	module_choose [lsort $NonSysMods]
 }
 
+
+proc refresh_mods_list {}  {
+	global array proenv
+	prolog call builtins non_sys_modules -var NonSysMods
+	.pred_info.mods.listbox delete 0 end 
+	set SortedNonSysMods [lsort $NonSysMods]
+
+	foreach Module $SortedNonSysMods {
+		.pred_info.mods.listbox insert end $Module
+	}
+	set PrevFocus [get_module_focus]
+	if {[llength $SortedNonSysMods]==1} then {
+		set_module_focus user
+	} elseif { [lsearch -exact $SortedNonSysMods $PrevFocus] < 0 } then {
+		set_module_focus [lindex $SortedNonSysMods 0]
+	} else {
+		set_module_focus $PrevFocus
+	}
+}
+
+proc set_module_focus {Mod} {
+	global array proenv
+
+    .pred_info.mods.l2.modfocus configure -text $Mod
+	refresh_preds_list $Mod
+}
+
+proc get_module_focus {} {
+	global array proenv
+
+    return [.pred_info.mods.l2.modfocus cget -text]
+}
+
+proc get_selected_module {} {
+	global array proenv
+
+	return [ .pred_info.mods.listbox get \
+			[lindex [.pred_info.mods.listbox curselection ] 0] ]
+}
+
+
+proc refresh_preds_list {Mod} {
+	global array proenv
+
+	prolog call builtins module_preds -atom $Mod -var Spying -var Rest
+
+	.pred_info.preds.listbox delete 0 end 
+	foreach Pred $Rest {
+		.pred_info.preds.listbox insert end $Pred
+	}
+
+    .pred_info.spying.listbox  delete 0 end
+	foreach Pred $Spying {
+		.pred_info.spying.listbox insert end $Pred
+	}
+}
+
+proc move_to_spying_list {} {
+	global array proenv
+
+	set PrevSpying [.pred_info.spying.listbox get 0 end]
+	set IXs [.pred_info.preds.listbox curselection]
+	.pred_info.preds.listbox selection clear 0 end
+	foreach  Idx $IXs {
+		lappend NewSpying [set Tmp [.pred_info.preds.listbox get $Idx]]
+		lappend PrevSpying $Tmp
+	}
+	set RIXs [lsort -decreasing $IXs]
+	foreach  Idx $RIXs {
+		.pred_info.preds.listbox delete $Idx
+	}
+	prolog call debugger install_new_spypoints \
+							-list $NewSpying \
+							-atom [get_module_focus]
+
+	.pred_info.spying.listbox delete 0 end
+	set SpyingNow [lsort $PrevSpying]
+	foreach PD $SpyingNow {
+		.pred_info.spying.listbox insert end $PD
+	}
+}
+
+proc remove_from_spying_list {} {
+	global array proenv
+
+	set PrevNonSpying [.pred_info.preds.listbox get 0 end]
+	set IXs [.pred_info.spying.listbox curselection]
+	.pred_info.spying.listbox selection clear 0 end
+	foreach  Idx $IXs {
+		lappend NewNonSpying [set Tmp [.pred_info.spying.listbox get $Idx]]
+		lappend PrevNonSpying $Tmp
+	}
+
+	set RIXs [lsort -decreasing $IXs]
+	foreach  Idx $RIXs {
+		.pred_info.spying.listbox delete $Idx
+	}
+	prolog call debugger remove_old_spypoints \
+							-list $NewNonSpying \
+							-atom [get_module_focus]
+	.pred_info.preds.listbox delete 0 end
+	set NonSpyingNow [lsort $PrevNonSpying]
+	foreach PD $NonSpyingNow {
+		.pred_info.preds.listbox insert end $PD
+	}
+}
+
+
+
+proc reset_all_spypoints {} {
+	set Spying [.pred_info.spying.listbox get 0 end]
+	prolog call debugger install_new_spypoints \
+							-list $Spying \
+							-atom [get_module_focus]
+}
+
+proc remove_all_spypoints {} {
+	set Mod [get_module_focus]
+	set ans [tk_dialog .quit_dialog \
+				"Remove Spypoints?" \
+				"Remove spypoints in:" "" 0 \
+				"All Modules" "Module $Mod Only" "No Modules"]
+
+	set Spying [.pred_info.spying.listbox get 0 end]
+
+    switch $ans {
+	0 " prolog call debugger remove_all_spypoints "
+	1 " prolog call debugger remove_old_spypoints -list $Spying -atom $Mod "
+	2 " return "
+	}
+	.pred_info.spying.listbox delete 0 end
+	set NonSpying [.pred_info.preds.listbox get 0 end]
+	.pred_info.preds.listbox delete 0 end
+	lappend NonSpying $Spying
+	set NonSpyingNow [lsort $NonSpying]
+	foreach PD $NonSpyingNow {
+		.pred_info.preds.listbox insert end $PD
+	}
+}
+
+proc carry_out_listing {} {
+	set Mod [get_module_focus]
+	set IXs [.pred_info.spying.listbox curselection]
+
+	if {"$IXs"!=""} then {
+		set Pred [.pred_info.spying.listbox get [lindex $IXs 0] ]
+	} else {
+		set IXs [.pred_info.preds.listbox curselection]
+		if {"$IXs"!=""} then {
+			set Pred [.pred_info.preds.listbox get [lindex $IXs 0] ]
+		} else {
+			set SelOwner [selection own]
+			puts "Must try looking in section owner = $SelOwner"
+			return
+		}
+	}
+	prolog call builtins carry_out_listing -atom "$Mod:$Pred"
+}
+
+proc carry_out_listasm {} {
+	set Mod [get_module_focus]
+	set IXs [.pred_info.spying.listbox curselection]
+
+	if {"$IXs"!=""} then {
+		set Pred [.pred_info.spying.listbox get [lindex $IXs 0] ]
+	} else {
+		set IXs [.pred_info.preds.listbox curselection]
+		if {"$IXs"!=""} then {
+			set Pred [.pred_info.preds.listbox get [lindex $IXs 0] ]
+		} else {
+			set SelOwner [selection own]
+			puts "Must try looking in section owner = $SelOwner"
+			return
+		}
+	}
+puts "calling list_asm on $Mod:$Pred"
+	prolog call builtins carry_out_listasm -atom "$Mod:$Pred"
+}
+
+##################################
 proc spy_preds_choice2 {Mod} {
 	global array proenv
 
@@ -986,6 +1170,7 @@ proc move_to_no_spying {Module Base} {
 #	prolog call debugger reset_spypoints -atom $module -list $Left -list $Right
 #}
 
+##################################
 
 proc check_leashing {} {
 	global array proenv
@@ -1132,6 +1317,9 @@ proc process_oop {} {
 
 
 ##############################
+proc run_cref  {} {
+	prolog call alsdev run_cref
+}
 
 
 proc tkOpenDocument args {

@@ -108,11 +108,21 @@ break_handler(debug(M,G),M,G)
 	catch(trace(M,G),
 		  breakhandler_debug(NewM,NewG),
 		  breakhandler0(NewM,NewG) ).
-break_handler(exit,M,G) 
+break_handler(exit_prolog,M,G) 
 	:-!, 
 		%% exit_ctlc: "Exiting Prolog from Control-C or Control-Break.\n"
 	prolog_system_error(exit_ctlc, []),
 	halt.
+break_handler(exit,M,G) 
+	:-!, 
+	getBreakLevel([b(Level,_,_)|_]),
+	(Level < 0 ->
+			%% exit_ctlc: "Exiting Prolog from Control-C or Control-Break.\n"
+		prolog_system_error(exit_ctlc, []),
+		halt
+		;
+		break_handler(previous,M,G) 
+	).
 break_handler(fail,M,G) 
 	:-!,
 	fail.

@@ -17,7 +17,12 @@ module builtins.
 
 export list_asm/1.
 
-list_asm(X) :- clauses_for_listing(X,C), '$listasm_clause'(C), nl, fail.
+list_asm(X) 
+	:- 
+	clauses_for_listing(X,C), 
+	'$listasm_clause'(C), 
+	nl, 
+	fail.
 list_asm(X).
 
 endmod.
