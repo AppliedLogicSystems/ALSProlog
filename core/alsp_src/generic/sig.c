@@ -275,6 +275,7 @@ static struct {int signal; const char *name;} signal_name_list[] = {
     {ALSSIG_HEAP_OVERFLOW, "heap_overflow"},
     {ALSSIG_ERROR, "prolog_error"},
     {ALSSIG_UNDEFINED_PRED, "undefined_predicate"},
+    {ALSSIG_ALARM, "sigalrm"},
 
 /* List end */
     {0, ""}
@@ -451,24 +452,12 @@ reset_sigint()
     return;
 }
 
-
-int
-pbi_alarm()
-{				/* alarm(value,interval)  */
+int pbi_alarm(void)
+{
     PWord v1, v2;
     int   t1, t2;
     double dval, dinterval;
 
-#if defined(__GO32__)
-    PI_FAIL;
-#else
-
-#ifdef HAVE_SETITIMER
-    struct itimerval itv;
-
-#endif /* HAVE_SETITIMER */
-
-#ifndef DOS
     PI_getan(&v1, &t1, 1);
     PI_getan(&v2, &t2, 2);
 
@@ -487,63 +476,9 @@ pbi_alarm()
     else
 	PI_FAIL;
 
-#ifdef HAVE_SETITIMER
-    itv.it_interval.tv_sec = (long) floor(dinterval);
-    itv.it_interval.tv_usec = (long) (1000000 * (dinterval - floor(dinterval)));
-
-    itv.it_value.tv_sec = (long) floor(dval);
-    itv.it_value.tv_usec = (long) (1000000 * (dval - floor(dval)));
-
-    if (setitimer(ITIMER_REAL, &itv, (struct itimerval *) 0) != 0) {
-	perror("pbi_alarm");
-    }
-
-#if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
-    {
-	struct sigaction act;
-
-	act.sa_handler = signal_handler;
-	act.sa_flags = SA_SIGINFO;
-	(void) sigaction(SIGALRM, &act, 0);
-    }
-#else		  /* not-HAVE_SIGACTION || not-defined(SA_SIGINFO) */
-#if defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
-    {
-	struct sigvec v;
-
-	v.sv_handler = signal_handler;
-	v.sv_mask = 0;
-#ifdef HAVE_SIGVECTOR
-	v.sv_flags = SV_BSDSIG;	/* do not restart certain system calls */
-	sigvector(SIGALRM, &v, 0);
-#else
-	v.sv_flags = SV_INTERRUPT;	/* do not restart certain system calls */
-	sigvec(SIGALRM, &v, 0);
-#endif	/* HAVE_SIGVECTOR */
-    }
-#else				/* !HAVE_SIGVEC && !HAVE_SIGVECTOR */
-    (void) signal(SIGALRM, signal_handler);
-#endif				 /* defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR) */
-
-#endif		  /* HAVE_SIGACTION ... */
-
-#else /* !HAVE_SETITIMER */
-
-#ifdef HAVE_UNISTD_H
-    alarm((unsigned long) dval);
-#endif
-
-#if !defined(PURE_ANSI) && !defined(MacOS) && !defined(MSWin32)
-    (void) signal(SIGALRM, signal_handler);
-#endif /* ndef MacOS */
-
-#endif /* HAVE_SETITIMER */
-
-#endif /* #ifndef DOS */
-
-    PI_SUCCEED;
-#endif /* __GO32__ */
-
+	os_set_timer(dval, dinterval);
+	
+	PI_SUCCEED;	
 }
 
 #if defined(SIGCHLD) || defined (SIGCLD)

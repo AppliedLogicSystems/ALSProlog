@@ -1172,3 +1172,46 @@ double os_realtime(void)
 	gettimeofday(&time, NULL);
 	return TV2SEC(time) - process_start_time;
 }
+
+int os_set_timer(double initial, double interval)
+{
+    struct itimerval itv;
+
+    itv.it_interval.tv_sec = (long) floor(dinterval);
+    itv.it_interval.tv_usec = (long) (1000000 * (dinterval - floor(dinterval)));
+
+    itv.it_value.tv_sec = (long) floor(dval);
+    itv.it_value.tv_usec = (long) (1000000 * (dval - floor(dval)));
+
+    if (setitimer(ITIMER_REAL, &itv, (struct itimerval *) 0) != 0) {
+	perror("pbi_alarm");
+    }
+
+#if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
+    {
+	struct sigaction act;
+
+	act.sa_handler = signal_handler;
+	act.sa_flags = SA_SIGINFO;
+	(void) sigaction(SIGALRM, &act, 0);
+    }
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
+    {
+	struct sigvec v;
+
+	v.sv_handler = signal_handler;
+	v.sv_mask = 0;
+#ifdef HAVE_SIGVECTOR
+	v.sv_flags = SV_BSDSIG;	/* do not restart certain system calls */
+	sigvector(SIGALRM, &v, 0);
+#else
+	v.sv_flags = SV_INTERRUPT;	/* do not restart certain system calls */
+	sigvec(SIGALRM, &v, 0);
+#endif	/* HAVE_SIGVECTOR */
+    }
+#else				/* !HAVE_SIGVEC && !HAVE_SIGVECTOR */
+    (void) signal(SIGALRM, signal_handler);
+#endif				 /* defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR) */
+
+	return 1;
+}
