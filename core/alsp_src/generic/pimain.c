@@ -188,7 +188,7 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 #endif
 
 #ifdef MSWin32
-    SetConsoleTitle("ALS Prolog"));
+    SetConsoleTitle("ALS Prolog");
 #endif
 
     if ((exit_status = PI_startup(&setup)) != 0) {
