@@ -76,13 +76,13 @@ ttyshlmk(InSrcFile)
 mk_tty_shell(InSrcFile)
 	:-
 		%% setup correct file names:
-	(filePlusExt(BaseSrcFile,spc,InSrcFile) ->
+	(file_extension(BaseSrcFile,spc,InSrcFile) ->
 		SrcFile = InSrcFile
 		;
-		filePlusExt(InSrcFile,spc,SrcFile),
+		file_extension(InSrcFile,spc,SrcFile),
 		BaseSrcFile = InSrcFile
 	),
-	filePlusExt(BaseSrcFile,pro,TgtFile),
+	file_extension(BaseSrcFile,pro,TgtFile),
 	mk_tty_shell(SrcFile,TgtFile, BaseSrcFile, []),
 	!,
 	printf('Spc file %t processed.\n',[InSrcFile]).
@@ -117,7 +117,6 @@ do_mk_tty_shell(SrcFile, TgtFile, BaseSrcFile, Options)
 	close(InS),
 
 	pathPlusFile(SrcFileDir,_,SrcFile),
-
 	pathPlusFile(TgtDir, _, TgtFile),
 	synth_shell_units(SpcTerms, SrcFile, TgtFile, SrcFileDir),
 
@@ -257,10 +256,10 @@ synth_unit_dflt(type_file, SpcTerms, Name,
 					[type_file=FullTypeFile, base_type_file=BaseTypeFile | Tail], Tail)
 	:-!,
 	(dmember(type_file=TypeFile,SpcTerms) ->
-		(filePlusExt(BaseTypeFile,typ,TypeFile) ->
+		(file_extension(BaseTypeFile,typ,TypeFile) ->
 			FullTypeFile = TypeFile
 			;
-			filePlusExt(TypeFile,typ,FullTypeFile),
+			file_extension(TypeFile,typ,FullTypeFile),
 			BaseTypeFile = TypeFile
 		)
 		;
@@ -728,7 +727,7 @@ gen_type_spec(XSpcTerms, SrcFileDir, MakePred)
 	close(TFS),
 
 	dmember(base_type_file=BaseTypeFile, XSpcTerms),
-	filePlusExt(BaseTypeFile,pro,ProTypeFile),
+	file_extension(BaseTypeFile,pro,ProTypeFile),
 	sprintf(atom(DepLine),'%t: %t',[ProTypeFile,TypeFile]),
 	open('makefile.typ',read_write,MTOS,[]),
 	(locate_line(DepLine, MTOS) ->
@@ -773,7 +772,7 @@ locate_line(Atom, Stream)
 locate_line(Atom, Len, Stream)
 	:-
 	get_line(Stream, NextLine),
-	(sub_atom(NextLine, 1, Len, _, Atom) ->
+	(sub_atom(NextLine, 0, Len, _, Atom) ->
 		true
 		;
 		locate_line(Atom, Len, Stream)
@@ -932,8 +931,8 @@ spc_makefile(SpcMakefile,SrcFile,BaseSrcFile,TgtFile)
 
 present_dep(Lines, TgtFile, BaseName, SrcFile)
 	:-
-	filePlusExt(_, TgtExt, TgtFile),
-	filePlusExt(_, SrcExt, SrcFile),
+	file_extension(_, TgtExt, TgtFile),
+	file_extension(_, SrcExt, SrcFile),
 	present_dep0(Lines, BaseName, TgtExt, SrcExt).
 
 present_dep0([Line | Lines], BaseName, TgtExt, SrcExt)
@@ -941,7 +940,7 @@ present_dep0([Line | Lines], BaseName, TgtExt, SrcExt)
 	asplit(Line, 0':, Left, Right),
 	atomread(Left, [BaseName | TgtExt]),
  	read_as_list(Right, DepsList,[]),
-	filePlusExt(BaseName, SrcExt, FileName),
+	file_extension(BaseName, SrcExt, FileName),
 	dmember(FileName, DepsList),
 	!.
 
@@ -1053,12 +1052,12 @@ strip_clean(Result0, Result)
 build_tty_spc_files(ValList,OS,IS)
 	:-
 	dmember(name=Name, ValList),
-	filePlusExt(Name,spc,SpecFile),
+	file_extension(Name,spc,SpecFile),
 	dmember(type_file=InitTypeFile, ValList),
-	(filePlusExt(BaseFile,typ,InitTypeFile) ->
+	(file_extension(BaseFile,typ,InitTypeFile) ->
 		TypeFile = InitTypeFile
 		;
-		filePlusExt(InitTypeFile,typ,TypeFile)
+		file_extension(InitTypeFile,typ,TypeFile)
 	),
 	printf(OS, 'Writing %t ...',[TypeFile]),
 	build_type_file(Name,TypeFile,ValList),
@@ -1109,8 +1108,8 @@ build_type_file(Name,TypeFile,ValList)
 
 build_makefiles(Name,TypeFile,SpecFile,ValList)
 	:-
-	filePlusExt(TypeBase,typ,TypeFile),
-	filePlusExt(TypeBase,pro,TypePro), 
+	file_extension(TypeBase,typ,TypeFile),
+	file_extension(TypeBase,pro,TypePro), 
 
 	open('makefile.typ', write, MTOS, []),
 	printf(MTOS, 'TYPES=%t\n\n', [TypePro]),
@@ -1118,8 +1117,8 @@ build_makefiles(Name,TypeFile,SpecFile,ValList)
 	printf(MTOS, '%t: %t\n', [TypePro, TypeFile]),
 	close(MTOS),
 
-	filePlusExt(Name,spc,SpecFile),
-	filePlusExt(Name,pro,SpecProFile),
+	file_extension(Name,spc,SpecFile),
+	file_extension(Name,pro,SpecProFile),
 	open('makefile.spc', write, MSOS, []),
 	printf(MSOS, '%t: %t\n', [SpecProFile, SpecFile]),
 	close(MSOS),

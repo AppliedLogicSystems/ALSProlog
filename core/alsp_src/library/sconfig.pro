@@ -58,13 +58,13 @@ general_os(Arch, String, GOS)
 	%%
 general_os(Arch, String, OS, unix) 
 	:-
-	sub_atom(String,1,3,_,OS), 
+	sub_atom(String,0,3,_,OS), 
 	dmember(OS,[aix,bsd,osf,ptx,sco]), 
 	!.
 
 general_os(Arch, String, OS, unix) 
 	:-
-	sub_atom(String,1,3,_,OS), 
+	sub_atom(String,0,3,_,OS), 
 	dmember(OS,[dj1,dj2]), 
 	!.
 
@@ -73,7 +73,7 @@ general_os(Arch, String, OS, unix)
 	%%
 general_os(Arch, String, OS, unix) 
 	:-
-	sub_atom(String,1,4,_,OS), 
+	sub_atom(String,0,4,_,OS), 
 	dmember(OS,[bosx,dgux,hpux,irix,mach,sysv]), 
 	!.
 
@@ -82,13 +82,13 @@ general_os(Arch, String, OS, unix)
 	%%
 general_os(Arch, String, OS, unix) 
 	:-
-	sub_atom(String,1,5,_,OS), 
+	sub_atom(String,0,5,_,OS), 
 	dmember(OS,[dynix,linux,sunos,djgpp]), 
 	!.
 
 general_os(Arch, String, OS, macos) 
 	:-
-	sub_atom(String,1,5,_,OS), 
+	sub_atom(String,0,5,_,OS), 
 	dmember(OS,[macos]), 
 	!.
 
@@ -97,7 +97,7 @@ general_os(Arch, String, OS, macos)
 	%%
 general_os(Arch, String, OS, unix) 
 	:-
-	sub_atom(String,1,6,_,OS),
+	sub_atom(String,0,6,_,OS),
 	dmember(OS,[hiuxwe,lynxos,netbsd,newsos,riscix,riscos,ultrix,unicos]), 
 	!.
 
@@ -106,13 +106,13 @@ general_os(Arch, String, OS, unix)
 	%%
 general_os(Arch, String, OS, unix) 
 	:-
-	sub_atom(String,1,7,_,OS), 
+	sub_atom(String,0,7,_,OS), 
 	dmember(OS,[solaris]), 
 	!.
 
 general_os(Arch, String, OS, mswin32) 
 	:-
-	sub_atom(String,1,7,_,OS), 
+	sub_atom(String,0,7,_,OS), 
 	dmember(OS,[mswin32]), 
 	!.
 
@@ -121,7 +121,7 @@ general_os(Arch, String, OS, mswin32)
 	%%
 general_os(Arch, String, OS, unix) 
 	:-
-	sub_atom(String,1,8,_,OS), 
+	sub_atom(String,0,8,_,OS), 
 	dmember(OS,[nextstep]), 
 	!.
 

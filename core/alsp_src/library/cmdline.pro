@@ -54,7 +54,7 @@ cmdline_vals([Item | RestCmdLine], SwitchVals)
 
 start_cmdline_vals(Item, RestCmdLine, SwitchVals)
 	:-
-	sub_atom(Item,1,1,_,'-'),
+	sub_atom(Item,0,1,_,'-'),
 	!,
 	xtr_cmdline_vals([Item | RestCmdLine], SwitchVals).
 	
@@ -73,7 +73,7 @@ xtr_cmdline_vals([Item | RestCmdLine], [[Item | ItemArgList] | RestSwitchVals])
 cmd_item_arg([], [], []).
 cmd_item_arg([Arg | TailCmdLine], [Arg], TailCmdLine)
 	:-
-	not(sub_atom(Arg,1,1,_,'-')),
+	not(sub_atom(Arg,0,1,_,'-')),
 	!.
 cmd_item_arg(RestCmdLine, [], RestCmdLine).
 

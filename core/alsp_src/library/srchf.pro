@@ -17,7 +17,10 @@ search_for_file(File, File).
 search_for_file(FileName, File)
 	:-
 	searchdir(SearchDir),
-	pathPlusFile(SearchDir,FileName,File).
+%	pathPlusFile(SearchDir,FileName,File).
+	split_path(SearchDir, SDElts),
+	dappend(SDElts, [FileName], FElts),
+	join_path(FElts, File).
 
 
 endmod.

@@ -41,7 +41,7 @@ install_lib
 find_file_names([],[]).
 find_file_names([One, Two | CmdLine], FileNames)
 	:-
-	sub_atom(One, 1, 1, _, '-'),
+	sub_atom(One, 0, 1, _, '-'),
 	!,
 	find_file_names(CmdLine,FileNames).
 find_file_names([File | CmdLine], [File FileNames])
@@ -127,14 +127,17 @@ install_lib(InputFileName)
 */
 install_lib_file(File, LibPath, BLPath)
 	:-
-	(filePlusExt(FileName, _, File) ->
+	(file_extension(FileName, _, File) ->
 		true
 		;
 		FileName = File
 	),
-	extendPath(LibPath, man, ManPath),
-	filePlusExt(FileName, man, ManFileName),
-	pathPlusFile(ManPath, ManFileName, LibManFile),
+	file_extension(FileName, man, ManFileName),
+%	extendPath(LibPath, man, ManPath),
+%	pathPlusFile(ManPath, ManFileName, LibManFile),
+	split_Path(LibPath, LibPathElts),
+	dappend(LibPathElts, [man,ManFileName], MFElts),
+	join_path(MFElts, LibManFile).
 
 install_lib(FileName,Disk,LibPath,SourceFile,LibManFile,LibInfoFile,BltLibFile)
 	:-
@@ -147,7 +150,7 @@ install_lib(FileName,Disk,LibPath,SourceFile,LibManFile,LibInfoFile,BltLibFile)
 	add_to_libfiles(FileName, LibInfoFile),
 
 			%% get path to blt_lib.pro:
-	filePlusExt(blt_lib,pro,BltLibFileName),
+	file_extension(blt_lib,pro,BltLibFileName),
 	rootPathFile(Disk,ALSDIR_Path,BltLibFileName,BltLibFile),
 
 			%% Save all prev info in blt_lib.pro:
@@ -235,7 +238,7 @@ lib_location(Disk,ALSDIR_Path,LibPath,BltLibFile)
 	builtins:subPath1(ALSDIR_Path,PathCs),
 	dappend(ALSDIR_Path,['Library'],LibPath),
 			%% get path to blt_lib.pro:
-	filePlusExt(blt_lib,pro,BltLibFileName),
+	file_extension(blt_lib,pro,BltLibFileName),
 	rootPathFile(Disk,ALSDIR_Path,BltLibFileName,BltLibFile).
 
 
@@ -249,12 +252,12 @@ full_source_file_path(InputFileName,LibPath,Disk,FileName,
 		true;
 		pathPlusFile(ISPath,SFile,InputFileName)
 	),
-	(filePlusExt(FileName,FileExt,SFile) ->
+	(file_extension(FileName,FileExt,SFile) ->
 		true
 		;
 		FileName = SFile, FileExt = pro
 	),
-	filePlusExt(FileName,FileExt,TheFile),
+	file_extension(FileName,FileExt,TheFile),
 			%% Analyze the path name of the source file:
 	(var(ISDisk) ->
 		get_current_drive(CurrentDrive),
@@ -349,7 +352,7 @@ disp_collect_lib_load(Item, PrevLibInfo)
  *!-----------------------------------------*/
 sys_lib_info_path(LibPath,Disk,FileName,LibInfoFile)
 	:-
-	filePlusExt(libfiles,pro,ListFile),
+	file_extension(libfiles,pro,ListFile),
 	dappend(LibPath, [info],LibInfoPath),
 	rootPathFile(Disk, LibInfoPath, ListFile, LibInfoFile),
 	(exists_file(LibInfoFile) ->
@@ -458,7 +461,7 @@ note_exports([Pred | ExportList],LibraryKey)
 sys_lib_man_path(LibPath,Disk,FileName,LibManFile)
 	:-
 	dappend(LibPath,[man], LibManDirPath),
-	filePlusExt(FileName,man,LibManFileName),
+	file_extension(FileName,man,LibManFileName),
 	rootPathFile(Disk, LibManDirPath, LibManFileName, LibManFile).
 
 create_lib_man_file(SourceFile, LibManFile, LibInfo, GroupsInfo)
@@ -1067,9 +1070,9 @@ lib_analyze_all([], _, [], [],[], []).
 lib_analyze_all([Item,InputFileName | RestCondFilesList], SourceDir,
 			    Exports, ModuleCloseups,Modules, LibraryKeys)
 	:-
-	(filePlusExt(_,_,InputFileName) ->
+	(file_extension(_,_,InputFileName) ->
 		FileName = InputFileName;
-		filePlusExt(InputFileName,pro,FileName)
+		file_extension(InputFileName,pro,FileName)
 	),
     pathPlusFile(SourceDir,FileName,SourceFile),
 	(exists_file(SourceFile) ->

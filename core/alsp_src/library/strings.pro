@@ -556,6 +556,10 @@ read_to_blank([C | Chars], [C | Head], Tail)
 
 char_in(Atom, Char, Pos)
 	:-
+	sub_atom(Atom,Pos0,1,_,Char),
+	Pos is Pos0 + 1.
+
+/****
 	atom_length(Atom, AtomLen),
 	char_in(1,AtomLen,Atom,Char,Pos).
 			 
@@ -571,6 +575,7 @@ char_in(CurPos,AtomLen,Atom,Char,Pos)
 	:-
 	NextPos is CurPos + 1,
 	char_in(NextPos,AtomLen,Atom,Char,Pos).
+****/
 
 /*!---------------------------------------------------------------------
  |	strip_prefix/3
@@ -583,8 +588,24 @@ char_in(CurPos,AtomLen,Atom,Char,Pos)
  |	of atoms which is obtained by obtained by removing the initial
  |	N characters of each element of List, where the length of Prefix = N.
  *!--------------------------------------------------------------------*/
-strip_prefix(List, Prefix, Result)
+strip_prefix([], Prefix, []).
+strip_prefix([P/A | List], Prefix, [Stripped/A | Result])
 	:-
+	sub_atom(P,0,Len,_,Prefix),
+	!,
+	sub_atom(P,Len,_,0,Stripped),
+	strip_prefix(List, Prefix, Result).
+strip_prefix([Item | List], Prefix, [Stripped | Result])
+	:-
+	sub_atom(Item,0,Len,_,Prefix),
+	!,
+	sub_atom(Item,Len,_,0,Stripped),
+	strip_prefix(List, Prefix, Result).
+strip_prefix([Item | List], Prefix, [Item | Result])
+	:-
+	strip_prefix(List, Prefix, Result).
+
+/*
 	atom_length(Prefix, PLen),
 	PLen0 is PLen+1,
 	strip_prefix0(List, PLen0, Result).
@@ -607,6 +628,7 @@ strip_prefix0([P | List], Start, [SP | Result])
 strip_prefix0([_ | List], Start, Result)
 	:-
 	strip_prefix0(List, Start, Result).
+*/
 
 /*!-----------------------------------------------------------------------
  |	prefix_dir/3
