@@ -32,12 +32,14 @@ module builtins.
 				initial_dir,    	  %% initial directory we wake up in
 				initial_search_dirs,  %% initial search list
 				source_mgrs,	   	  %% list of managers for consulted files
-				cslt_ctxt		   	  %% (list) stack of "current source_mgr" 
+				cslt_ctxt,		   	  %% (list) stack of "current source_mgr" 
+				break_level			  %% break shell level (old global BreakLevel)
 			],
 		defaults = [ 
 				shell_module = alsshell,   %% make alsdev reset this...
 				source_mgrs = [],
-				cslt_ctxt	= []
+				cslt_ctxt	= [],
+				break_level = [b(0,user,true)]
 		]
 	]),
 

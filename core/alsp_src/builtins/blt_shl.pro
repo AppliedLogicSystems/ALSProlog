@@ -322,6 +322,7 @@ push_prompt(nowins,_,_) :-!.
 
 shell_exit(InStream, OutStream,Level,DebuggingState)
 	:-
+write(shell_exit-Level),nl,flush_output,
 	set_shell_level(Level),
 	set_debugging_state(DebuggingState),
 	get_shell_prompts( [_ | CurPromptsStack] ),
@@ -374,7 +375,10 @@ prolog_shell_loop(Wins,InStream,OutStream)
 	!,
 	prolog_shell_loop(Wins,InStream,OutStream).
 
-prolog_shell_loop(_,_,_).
+%prolog_shell_loop(_,_,_).
+prolog_shell_loop(Wins,InStream,OutStream) 
+	:-
+write(prolog_shell_loop_2),nl,flush_output.
 
 export shell_read_execute/4.
 shell_read_execute(InStream,OutStream,Wins,Status)
@@ -421,7 +425,6 @@ shell_read0(Prompt1,Prompt2,InStream,G,N,V)
 		sio:set_user_prompt(OldPrompt),
 		throw(Exception)
 	)),
-		
 	sio:set_user_prompt(OldPrompt).
 
 shell_read0(Prompt1,Prompt2,InStream,stream_not_ready,[],[]).

@@ -315,11 +315,11 @@ proc load_document {file} {
 			set proenv($w,file) $file
 			set proenv($w,title) $file_name
 			set proenv(document,$file) $w
+			post_open_document $file_name $w
 		} fail {
 			dispose_document_window $w
 		}
 	}
-	post_open_document $file_name $w
 	return $proenv(document,$file)
 }
 

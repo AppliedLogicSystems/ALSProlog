@@ -43,7 +43,7 @@ continue_prolog_loop(halt)
 
 continue_prolog_loop(exit)
 	:-!,
-	halt.
+	fail.
 
 continue_prolog_loop(Status).
 
@@ -1344,7 +1344,7 @@ v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
 
 	accessObjStruct(mrfcg, DBGMGR, MRFCG),
 	check_win_cleanup(MRFCG, CG, Port, DBGMGR),
-
+	!,
 	showGoalToUserWin(Port,Box,Depth, Module, Goal, Response, DBGMGR, SrcMgr).
 
 v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
@@ -1352,6 +1352,7 @@ v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
 	builtins:get_primary_manager(ALSIDEMGR),
 	send(ALSIDEMGR, get_value( debugger_mgr, DBGMGR)),
 	send(DBGMGR,  get_mrfcg(CG, SrcMgr)),
+	!,
 	showGoalToUserWin_other(Port,Box,Depth, Module, Goal, Response, CG, DBGMGR, SrcMgr).
 
 
@@ -1570,17 +1571,11 @@ showGoalToUserWin_other(Port,Box,Depth, Module, XGoal, Response, MRFCG, DBGMGR, 
 %% in printf which allows it to be re-satisfied::!!::
 	!,
 	write_term(debugger_output, Module:XGoal, [lettervars(false)]),
-
 	flush_output(debugger_output),
-	(MRFCG = 0 -> true
-		;
-		((Port=call; Port=redo) -> true
-			;
-			re_color_port(Port, MRFCG, SrcMgr)
-		)
-	),
-%	send(DBGMGR, show_stack_list),
 
+	re_color_port(Port, MRFCG, SrcMgr),
+%	send(DBGMGR, show_stack_list),
+	!,
 	(((Port = exit; Port = fail), Box = 1, Depth=1) ->
 		dbg_boundary(Box,Depth,general,Port,XGoal,MRFCG,DBGMGR, SrcMgr),
 		nl(debugger_output),
@@ -1625,11 +1620,24 @@ color_my_port(ClsGrp,Start,End,Port,TagName, DBGMGR, SrcMgr)
 	!,
 	display_st_record(StartLine,StartChar,EndLine,EndChar,Color,TextWin,LTextWin,TagName,SrcMgr).
 
+/*
+	(MRFCG = 0 -> true
+		;
+		((Port=call; Port=redo) -> true
+			;
+			re_color_port(Port, MRFCG, SrcMgr)
+		)
+	),
+*/
+re_color_port(_, 0, _) :-!.
+re_color_port(call, _, _) :-!.
+re_color_port(redo, _, _) :-!.
 re_color_port(Port, MRFCG, SrcMgr)
 	:-
 	accessObjStruct(tcl_doc_path, SrcMgr, Win),
 	catenate(Win, '.text', TextWin),
 	port_color(Port, Color),
+	!,
 	configure_tag(call_tag, TextWin,['-background',Color]).
 
 	%blue:
@@ -2193,7 +2201,6 @@ shl_source_handlerAction(open_edit_win_by_base(BaseFileName, Ext, SearchList), S
 	:-
 	file_extension(BaseFileName, Ext, FileDesc),
 	path_to_try_from_desc(SearchList, FileDesc, FileTryPath),
-%	exists_file(FileTryPath),
 	!,
 	shl_source_handlerAction(complete_open_edit_win(FileTryPath,TclWin), State),
 	setObjStruct(source_file, State, FileTryPath),

@@ -1838,8 +1838,13 @@ disp_getresponse_cont_pbi(Response,Port,Box,Depth,Module,Goal,Resps,Response).
 	%%------------------%%
 
 
-
 %% === User wants to break to subsidiary Prolog shell.
+act_on_response(break,Port,Box,Depth, Module,Goal,Wins,debug) 
+	:-
+	builtins:clause(alsdev_running,_),
+	!,
+	builtins:prolog_shell(user_input,user_output,alsdev).
+
 act_on_response(break,Port,Box,Depth, Module,Goal,Wins,Response) :- !,
 	telling(CurOut),
 	tell(user_output),
