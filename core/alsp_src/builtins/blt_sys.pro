@@ -335,9 +335,11 @@ lib_load(Module,Call)
 	sys_searchdir(ALSDIR),
 	'$atom_concat'(ALSDIR,FileName,FullFileName),
 %	Module:abolish(P,A),
-	(resource_load(FileName); load(FullFileName,1,_,obp,_)),
+	(resource_load(FileName); load(FullFileName,1,_,obp,_)
+		; existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) ),
 	!,
 	Module:call(Call).
+
 
 export force_libload_all/0.
 export force_libload_all/1.
