@@ -132,7 +132,7 @@ proc get_tcl_ga2 {Arr Tag1 Tag2 } {
 ##################################################################################
 
 proc vTclWindow.input_popup {base} {
-	global array proenv
+	global array proenv tcl_platform
 
     if {$base == ""} {
         set base .input_popup
@@ -144,7 +144,13 @@ proc vTclWindow.input_popup {base} {
     # CREATING WIDGETS
     ###################
 
-    toplevel_patch $base -class Toplevel 
+#    toplevel_patch $base -class Toplevel 
+
+    toplevel $base -class Toplevel 
+	if {$tcl_platform(platform) == "windows"} {
+		focus -force $base
+	}
+
     wm focusmodel $base passive
     wm geometry $base 407x130+50+317
     wm maxsize $base 1265 994
@@ -200,11 +206,17 @@ proc fin_input_popup {Which base} {
 }
 
 proc do_popup_input {Prompt Title} {
-	global proenv 
+	global proenv  tcl_platform
 
 	set proenv(.input_popup) ""
 	Window show .input_popup
-	raise_patch .input_popup
+
+#	raise_patch .input_popup
+
+	raise .input_popup
+	if {$tcl_platform(platform) == "windows"} {
+		focus -force .input_popup
+	}
 	wm title .input_popup $Title
     .input_popup.input_p.input_popup_head configure -text $Prompt
     focus .input_popup.input_p.input_popup_entry
@@ -254,6 +266,8 @@ proc fin_popup_list_box { Which BaseName} {
 }
 
 proc vTclWindow.popup_select_widget {base} {
+	global tcl_platform
+
     if {$base == ""} {
         set base .popup_select_widget
     }
@@ -264,7 +278,12 @@ proc vTclWindow.popup_select_widget {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+ #   toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
+	if {$tcl_platform(platform) == "windows"} {
+		focus -force $base
+	}
+
     wm focusmodel $base passive
     wm geometry $base 188x382+401+165
     wm maxsize $base 1137 870
@@ -320,8 +339,15 @@ proc vTclWindow.popup_select_widget {base} {
 
 
 proc display_file_image {ImageDir ImageFile ImageBase Win Width Height BorderWidth} {
+	global tcl_platform
 	set ImagePath [file join $ImageDir $ImageFile]
-	toplevel_patch $Win -bd $BorderWidth -relief flat
+
+#	toplevel_patch $Win -bd $BorderWidth -relief flat
+	toplevel $Win -bd $BorderWidth -relief flat
+	if {$tcl_platform(platform) == "windows"} {
+		focus -force $Win
+	}
+
 	wm withdraw $Win
 	set screen_width  [winfo screenwidth .]
 	set screen_height [winfo screenheight .]
@@ -337,7 +363,15 @@ proc display_file_image {ImageDir ImageFile ImageBase Win Width Height BorderWid
 }
 
 proc display_image {ImageName Win Width Height X Y BorderWidth } {
-	toplevel_patch $Win -bd $BorderWidth -relief flat
+	global tcl_platform
+
+#	toplevel_patch $Win -bd $BorderWidth -relief flat
+
+	toplevel $Win -bd $BorderWidth -relief flat
+	if {$tcl_platform(platform) == "windows"} {
+		focus -force $Win
+	}
+
 	wm withdraw $Win
 	wm overrideredirect $Win 1
 	label $Win.label -image $ImageName -bd 1 -relief flat
