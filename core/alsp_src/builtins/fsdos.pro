@@ -17,8 +17,6 @@ module builtins.
 
 export date/1.
 export time/1.
-export get_cwd/1.
-export change_cwd/1.
 export make_subdir/1.
 export remove_subdir/1.
 export remove_file/1.
@@ -62,28 +60,6 @@ date(Date) 				% get current date
 time(HH:MM:SS) 				% get current time
 	:-
 	'$time'(SS,MM,HH,_,_,_,_,_,_).
-
-/*---------------------------------------------------------------------
- |	Change the current working directory being used by the program. 
- |	NewDir has to be an atom. This won't change the disk.
- *---------------------------------------------------------------------*/
-change_cwd(NewDir)
-	:-
-	'$chdir'(NewDir).
-
-/*!--------------------------------------------------------------
- |	get_cwd/1
- |	get_cwd(Path) 
- |	get_cwd(-) 
- |
- |	- returns the current working directory
- |
- |	Returns the current working directory being used by the program
- |	as a quoted atom.  Under DOS, the drive is included.
- *!--------------------------------------------------------------*/
-get_cwd(Path) 
-	:-
-	'$getcwd'(Path).
 
 /*!--------------------------------------------------------------
  |	make_subdir/1
