@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.14 1998/10/19 20:41:45 choupt Exp $"
+#|		"$Id: als_projects.tcl,v 1.15 1998/11/18 20:41:43 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -67,27 +67,46 @@ proc new_project {} {
 proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
 	global tcl_platform
 
-	if {$tcl_platform(platform) == "macintosh"} {
-		set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
-	} else {
-		set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
-		}
+#	if {$tcl_platform(platform) == "macintosh"} {
+#		set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
+#	} else {
+#		set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
+#		}
+#
+#	set DFT [list -filetypes $types]
+###	set ID ""
+#	set NewFilePath [eval tk_getOpenFile $DFT \
+#			{-title "Project File to Open"} \
+#			[list "-initialdir" $DfltDir] ]
 
-#	set DFT "-filetypes [list [list [list $FileKind $FileTypes] {\"All Files\" {*}} ] ]"
+if {$tcl_platform(platform) != "unix"} {
+	set NewFilePaths [eval getFiles  \
+			{-prompt "Project File to Open"} ]
 
-	set DFT [list -filetypes $types]
-	set ID ""
-	set NewFilePath [eval tk_getOpenFile $DFT \
-			{-title "Project File to Open"} \
-			[list "-initialdir" $DfltDir] ]
-	if {$NewFilePath == ""} then {
+	if {$NewFilePaths == ""} then {
 		return
 	}
+	foreach NewFilePath $NewFilePaths {
 	set BaseNewFile [file tail $NewFilePath]
 	set Prev [$Listbox get 0 end]
 	if {[lsearch -exact $Prev $BaseNewFile] == -1} then {
 		$Listbox insert end $BaseNewFile
 	}
+	}
+}
+else {
+	
+	set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
+	set NewFilePath [eval tk_getOpenFile $DFT \
+			{-title "Project File to Open"} \
+			[list "-initialdir" $DfltDir] ]
+	set BaseNewFile [file tail $NewFilePath]
+	set Prev [$Listbox get 0 end]
+	if {[lsearch -exact $Prev $BaseNewFile] == -1} then {
+		$Listbox insert end $BaseNewFile
+	}
+}
+
 }
 
 proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir} {

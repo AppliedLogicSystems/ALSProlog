@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.66 1998/11/18 18:25:44 choupt Exp $"
+#|		"$Id: alsdev.tcl,v 1.67 1998/11/18 20:41:45 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -39,6 +39,7 @@ if {$tcl_platform(platform) == "macintosh"} {
 }
 
 package require getDirectory
+package require getFiles
 
 proc xpe { What } {
 	global array proenv
