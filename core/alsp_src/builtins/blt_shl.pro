@@ -531,16 +531,6 @@ init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	push_prompt(Wins,OutStream,Prompt1).
 
 push_prompt(nowins,_,_) :-!.
-push_prompt(tcltk,OutStream,Prompt1)
-	:-
-	nl(OutStream),
-%	put_atom(OutStream,Prompt1),
-	flush_output(OutStream),
-	tcl_call(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _).
-push_prompt(Wins,OutStream,Prompt1)
-	:-
-	put_atom(OutStream,Prompt1),
-	flush_output(OutStream).
 
 shell_exit(InStream, OutStream,Level,DebuggingState)
 	:-
