@@ -49,6 +49,8 @@ cp -pr "$BIN/tk80.dll" "$DISTDIR"
 cp -pr "$BIN/tclpip80.dll" "$DISTDIR"
 cp -pr "$BIN/alsdir" "$DISTDIR"
 cp -pr "$BIN/lib" "$DISTDIR"
+cp -pr "$BIN/lib/itcl3.0/itcl30.dll" "$DISTDIR"
+cp -pr "$BIN/lib/itk3.0/itk30.dll" "$DISTDIR"
 
 mkdir "$DISTDIR/examples"
 for E in $EXAMPLE_SET ; do
