@@ -112,15 +112,15 @@ proc add_prolog_menu {menubar type window} {
 		-label "Clear Workspace" -underline 2 -command {re clear_workspace}
 
 	if {$type == "listener"} then { 
-    	$menubar.prolog add separator
-    	$menubar.prolog add command \
-        	-label "Load Project$elipsis" -underline 0 -command {re load_project} 
-    	$menubar.prolog add command \
-        	-label "Open Project$elipsis" -underline 0 -command {re open_project} 
-    	$menubar.prolog add command \
-        	-label "Close Project" -underline 0 -command {re close_project} 
-    	$menubar.prolog add command \
-        	-label "New Project" -underline 0 -command {re new_project} 
+#    	$menubar.prolog add separator
+#    	$menubar.prolog add command \
+#        	-label "Load Project$elipsis" -underline 0 -command {re load_project} 
+#    	$menubar.prolog add command \
+#        	-label "Open Project$elipsis" -underline 0 -command {re open_project} 
+#    	$menubar.prolog add command \
+#        	-label "Close Project" -underline 0 -command {re close_project} 
+#    	$menubar.prolog add command \
+#        	-label "New Project" -underline 0 -command {re new_project} 
     	$menubar.prolog add separator
     	$menubar.prolog add command \
         	-label "Set Directory$elipsis" -underline 0 -command {re set_directory} 
