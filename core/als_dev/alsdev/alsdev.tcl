@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.65 1998/11/17 23:32:12 choupt Exp $"
+#|		"$Id: alsdev.tcl,v 1.66 1998/11/18 18:25:44 choupt Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -30,6 +30,7 @@
 
 if {$tcl_platform(platform) == "windows"} {
 	load {} OpenDocument
+	load {} getFiles
 }
 if {$tcl_platform(platform) == "macintosh"} {
 	load {} {appleevents}

@@ -5,6 +5,8 @@
 #include <tcl.h>
 #include <tk.h>
 
+#include "getFiles.h"
+
 extern void panic(const char *);
 
 static char *simple_write(AP_World *w, AP_Obj obj, char *s)
@@ -220,6 +222,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	
 	/* Make the OpenDocument package available to Tcl */
 	Tcl_StaticPackage(NULL, "Opendocument", Opendocument_Init, NULL);
+
+	Tcl_StaticPackage(NULL, "getFiles", Getfiles_Init, NULL);
 
     /* Fill setup struct with defaults */
     setup.heap_size = 0;

@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-int  Getfiles_Init(Tcl_Interp *interp);
+__declspec(dllexport) int  Getfiles_Init(Tcl_Interp *interp);
 int GetFiles(Tcl_Interp *interp, Tcl_DString *initdir,
 	Tk_Window parent, const char *prompt);
 
