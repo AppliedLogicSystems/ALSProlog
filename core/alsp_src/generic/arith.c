@@ -59,6 +59,7 @@
 #include <unistd.h>
 #endif
 
+#include "random.h"
 
 extern	double	als_cputime	PARAMS(( void ));
 extern	double	als_realtime	PARAMS(( void ));
@@ -249,21 +250,9 @@ als_realtime()
 }
 
 double
-als_random()
+als_random(void)
 {
-#ifdef PURE_ANSI
-    return ((double) rand()) / ((double) RAND_MAX);
-#else
-#if MacOS
-    return ((double) random()) / ((double) RAND_MAX);
-#else
-#ifdef	RANDRANGE
-    return ((double) random()) / ((double) RANDRANGE);
-#else	/* RANDRANGE */
-    return drandom();
-#endif	/* RANDRANGE */
-#endif
-#endif /* PURE_ANSI */
+    return minimal_standard_random();
 }
 
 int
@@ -276,11 +265,7 @@ pbi_srandom()
     w_get_An(&v1,&t1,1);
 
     if (get_number(v1,t1,&seed)) {
-#ifdef PURE_ANSI
-	srand(seed);
-#else
-	srandom((long) seed);
-#endif /* PURE_ANSI */
+	minimal_standard_rand_init((long) seed);
 	SUCCEED;
     }
     else
