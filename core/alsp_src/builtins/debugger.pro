@@ -2086,7 +2086,7 @@ export '$dbg_aphe'/3.
 export '$dbg_apf'/3.
 
 
-%'$dbg_apg'(A,B,C) :-  debugger:'$dbg_apg_special'(A,B,C),!.
+'$dbg_apg'(A,B,C) :-  debugger:'$dbg_apg_special'(A,B,C),!.
 '$dbg_apg'(_,_,_).
 '$dbg_aph'(_,_,_).
 '$dbg_apge'(_,_,_).

@@ -404,12 +404,15 @@ heap_status(Hleft) :-
 
 cslt_lib_ld(FileName, FilePathPro,FilePathObp)
 	:-
+	current_prolog_flag(debug, CurDBGFlag), 
+	do_set_prolog_flag(debug, off),
 	get_fcg(FilePathPro,CG),
 	(clause(file_clause_groups(true),_) ->
 		massively_abolish_clausegroup(CG) ; true ),
 	push_clausegroup(CG),
 	cslt_blts_ld(FileName, FilePathPro,FilePathObp),
-	pop_clausegroup(_).
+	pop_clausegroup(_),
+	do_set_prolog_flag(debug, CurDBGFlag).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Load an individual library file as
