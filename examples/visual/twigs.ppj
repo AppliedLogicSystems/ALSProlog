@@ -1,0 +1,17 @@
+myClassPred = project_mgr.
+myModule = alsdev.
+myName = nil.
+title = 'Hickory Trees'.
+project_file = 'twigs.ppj'.
+primary_project_dir = '/netwk/dakota/ken/als_dev/alsdev/examples'.
+list_of_files_slots = [prolog_files].
+list_slots = [].
+text_slots = [].
+search_dirs = [].
+slot_names =
+    [[production_goal,'Startup Goal:'],[debug_goal,'Debug Goal:'],
+        [executable_name,'Image Name:'],[prolog_files,'Files:']].
+executable_name = nil.
+prolog_files = ['id.pro','hickory.pro'].
+file_types = [[prolog_files,['.*']]].
+default_dirs = [].

@@ -19,7 +19,7 @@
 */
 
 :- ['odbcintf.psl'].
-:- [odbc, prolog_odbc, meta_odbc].
+%:- [odbc, prolog_odbc, meta_odbc].
 
 /* sql_shell/0 Prompt the user for a database connection. */
 sql_shell :-

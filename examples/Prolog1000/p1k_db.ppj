@@ -1,0 +1,17 @@
+myClassPred = project_mgr.
+myModule = alsdev.
+myName = nil.
+title = 'Prolog 1000 Database'.
+project_file = 'p1k_db.ppj'.
+primary_project_dir = 'D:\\ExamplesNew\\Prolog1000'.
+list_of_files_slots = [prolog_files].
+list_slots = [].
+text_slots = [].
+search_dirs = [].
+slot_names =
+    [[production_goal,'Startup Goal:'],[debug_goal,'Debug Goal:'],
+        [executable_name,'Image Name:'],[prolog_files,'Files:']].
+executable_name = nil.
+prolog_files = ['p1k_db.pro'].
+file_types = [[prolog_files,['.*']]].
+default_dirs = [].
