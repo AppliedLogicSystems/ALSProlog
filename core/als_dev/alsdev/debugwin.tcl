@@ -168,7 +168,7 @@ proc vTclWindow.debugwin {base} {
 	bind .debugwin <Map>   {map_alsdev_debug}
 
 	# accelerators
-	bind_accelerators .topals $mod debugwin
+	bind_accelerators .debugwin $mod debugwin
 }
 
 #proc vTclWindow.spywin {base} {
