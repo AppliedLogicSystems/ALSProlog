@@ -64,7 +64,7 @@ exit:
 }
 
 
-int Getfiles_Init(Tcl_Interp *interp)
+__declspec(dllexport) int Getfiles_Init(Tcl_Interp *interp)
 {
 	if (!Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 0)
 		|| !Tcl_PkgRequire(interp, "Tk", TK_VERSION, 0))
