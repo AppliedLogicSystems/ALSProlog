@@ -9,6 +9,7 @@ then
     exit 2
 fi
 
+
 # Extract arguments
 source_dir=$1
 os=$2
@@ -26,7 +27,7 @@ fi
 
 # Check for correct OS
 case $os in
-aix|hpux|sunos|solaris|linux|irix) ;;
+aix|hpux|sunos|solaris|linux|irix|all) ;;
 *) echo "Unknown OS ($os)" 1>&2; exit 2;;
 esac
 
@@ -36,9 +37,34 @@ port) ;;
 *) echo "Unknown Processor ($proc)" 1>&2; exit 2;;
 esac
 
-# Build the Makefile
-echo "SOURCE_DIR=$source_dir" > Makefile
-echo "OS=$os" >> Makefile
-echo "PROC=$proc" >> Makefile
-echo "BUILD_FLAGS=$flags" >> Makefile
-echo 'include $(SOURCE_DIR)/unix/unix_makefile' >> Makefile
+setup () {
+    os=$1
+    proc=$2
+    flags=$3
+
+    if test ! -d $os
+    then
+        mkdir $os
+    fi
+
+    echo "SOURCE_DIR=../$source_dir" > $os/Makefile
+    echo "OS=$os" >> $os/Makefile
+    echo "PROC=$proc" >> $os/Makefile
+    echo "BUILD_FLAGS=$flags" >> $os/Makefile
+    echo 'include $(SOURCE_DIR)/unix/unix_makefile' >> $os/Makefile
+}
+
+
+os_list='aix hpux sunos solaris linux irix'
+
+if test $os = all
+then
+    for i in $os_list
+    do
+	setup $i $proc "$flags"
+    done
+else
+    setup $os $proc "$flags"
+fi
+
+
