@@ -43,7 +43,7 @@ MAIN_SOURCE = topmain.c
 
 MAIN_OBJECTS = $(SHELL_SOURCE:.c=.o)
 
-GENERIC_SOURCE = alloc.c arith.c bcinter.c bdb.c \
+GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	bdbg.c bgv.c bio.c bmeta.c \
 	bmisc.c bos.c bparser.c bpckg.c \
 	bsio.c bsystem.c built.c butil.c \
