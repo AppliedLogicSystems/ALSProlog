@@ -21,7 +21,7 @@ test :-
 	dump_test,
 	simple_readline_test,
 	univ_readline_test,
-	/* get_line_test,*/
+	get_line_test,
 	read_test
 	.
 
