@@ -33,7 +33,7 @@ proc create_document_window {title} {
 
 	toplevel $w
 	wm title $w $title
-	wm protocol $w WM_DELETE_WINDOW "dispose_document_window $w"
+	wm protocol $w WM_DELETE_WINDOW "document.close $w"
 
 	# Setup menus
 
@@ -67,10 +67,21 @@ proc create_document_window {title} {
 
 	focus $w.text
 
+	bind $w.text <KeyPress> "dirty_key $w %K"
+	
 	# Init document fields
 	set proenv($w,dirty) false
 
 	return $w
+}
+
+proc dirty_key {w k} {
+	global array proenv
+	#.topals.text insert end $k
+	if {$k!="Home" && $k!="End" && $k!="Prior" && $k!="Next" && $k!="Left" \
+		&& $k!="Right" && $k!="Up" && $k!="Down"} {
+		set proenv($w,dirty) true
+	}
 }
 
 proc bind_accelerators {w mod type} {
@@ -160,12 +171,30 @@ proc document.open args {
 	}
 }
 
-#proc document.new {} {
-#	create_document_window "Untitled"
-#}
+proc save_check {w} {
+	global array proenv
+	if {$proenv($w,dirty)} then {
+		set title [wm title $w]
+		set answer [tk_dialog .document_save_dialog "" \
+			"Save changes to the document \"$title\" before closing?" \
+			warning \
+			2 "Don't Save" "Cancel" "Save"]
+		if {$answer == 2} then {
+			set result [document.save $w]
+		} else {
+			set result [expr $answer != 1]
+		}
+	} else {
+		set result 1
+	}
+	return $result
+}
+
 
 proc document.close {w} {
-	dispose_document_window $w
+	if {[save_check $w]} then {
+		dispose_document_window $w
+	}
 }
 
 proc document.save {w} {
@@ -173,8 +202,9 @@ proc document.save {w} {
 	if {[info exists proenv($w,file)]} then {
 		store_text $w.text $proenv($w,file)
 		set proenv($w,dirty) false
+		return 1
 	} else {
-		document.save_as $w
+		return [document.save_as $w]
 	}
 }
 
@@ -189,7 +219,9 @@ proc document.save_as {w} {
 		set proenv($w,file) $file
 		set proenv(document,$file) $w
 		wm title $w [lindex [file split $file] end]
-		document.save $w
+		return [document.save $w]
+	} else {
+		return 0
 	}
 }
 
@@ -211,10 +243,13 @@ proc document.copy {w} {
 proc document.paste {w} {
 	catch {$w.text delete sel.first sel.last}
 	$w.text insert insert [selection get -displayof $w -selection CLIPBOARD]
+	set proenv($w,dirty) true
 }
 
 proc document.clear {w} {
+	global array proenv
 	catch {$w.text delete sel.first sel.last}
+	set proenv($w,dirty) true
 }
 
 proc document.select_all {w} {
