@@ -7,7 +7,7 @@ copy setcwd.bat temp.bat
 cd >> temp.bat
 call temp.bat
 del temp.bat
-"%CWPATH%\bin\cmdide.exe" /b /t "Build All" "%CWD%\CWP4_win32_alsdev.mcp"
+"%CWPATH%\bin\ide.exe" /b /t "Build All" "%CWD%\CWP4_win32_alsdev.mcp"
 copy "ALS Prolog Stub.exe" "ALS Prolog.exe"
 copy "ALS Prolog Stub.exe" "ALS Student Prolog.exe"
 copy "%TCLTKPATH%\bin\msvcrt.dll" .
