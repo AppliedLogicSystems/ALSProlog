@@ -520,6 +520,11 @@ typedef struct {
 extern unsigned char *open_memory_file(const char *file_name, mem_file_info *info);
 extern void close_memory_file(mem_file_info *info);
 
+/* ----------  bsio.c ------------*/
+extern long standard_console_read(char *buf, long n);
+extern long standard_console_write(char *buf, long n);
+extern long standard_console_error(char *buf, long n);
+
 /* ----------   sig.c ----------   */
 extern	void	init_sigint	PARAMS(( void ));
 extern	void	reset_sigint	PARAMS(( void ));
