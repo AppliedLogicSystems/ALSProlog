@@ -101,12 +101,16 @@ alsdir/library : $(SOURCE_DIR)/library
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.pro .
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
 
-alsdir/shared : $(SOURCE_DIR)/../tcltk_interface  $(SOURCE_DIR)/../als_dev/alsdev
+alsdir/shared : ../tcltk_interface  ../als_dev/alsdev
 	mkdir -p alsdir/shared
 	rm -f alsdir/shared/*.pro alsdir/shared/*.psl alsdir/shared/*.tcl
-	cd alsdir/shared ; ln -s ../../$(SOURCE_DIR)/../tcltk_interface/common/tcltk.pro . ;\
-		ln -s ../../$(SOURCE_DIR)/../tcltk_interface/$(SUBOS)/tclintf.psl .
-	cd alsdir/shared ; ln -s ../../$(SOURCE_DIR)/../als_dev/alsdev/*.tcl .
+	cd alsdir/shared ; ln -s ../../../tcltk_interface/$(SUBOS)/tclintf.psl .
+	cd alsdir/shared ; ln -s ../../../als_dev/alsdev/*.tcl .
+
+alsdir/images : ../als_dev/alsdev
+	mkdir -p alsdir/images
+	rm -f alsdir/images/*.*
+	cd alsdir/images ; ln -s ../../../als_dev/alsdev/images/*.gif . 
 
 TEST_DIR = $(SOURCE_DIR)/tests
 
@@ -121,17 +125,16 @@ test_suite: alspro
 iso_test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
 
+
 ALSDEVFILES = blt_dvsh.pro db_srctr.pro projects.pro
 ALSDEVLIBS=listutl1,miscterm,msc_ioin,objects,strctutl,strings,tcl_sppt,tk_alslib,typecomp
 ALSDEVLIBPS =listutl1.pro miscterm.pro msc_ioin.pro objects.pro strctutl.pro strings.pro \
 			tcl_sppt.pro tk_alslib.pro typecomp.pro
-alsdev :  alsdir alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS)
+alsdev :  alsdir alspro_b alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS)
 	./alspro_b -q -b -obp -no_dot_alspro \
 	-g 'save_image(alsdev,[start_goal((builtins:start_alsdev)), \
 	select_lib(builtins, [debugger,blt_dvsh,projects]), \
 	select_lib(library,[$(ALSDEVLIBS)])])'
-
-#select_lib(library,[miscterm,msc_ioin,objects,strctutl,strings,tcl_sppt,tk_alslib])])'
 
 clean :
 	rm -f *.o rm *.d
