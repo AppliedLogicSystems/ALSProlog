@@ -217,6 +217,7 @@ ALSPI_API(void) PI_getball( PWord *a, int *b )
     alspi_funcs->PI_getball(a,b);
 }
 
+#ifdef macintosh
 Boolean SIOUXIsAppWindow(WindowPtr w)
 {
 	return alspi_funcs->SIOUXIsAppWindow(w);
@@ -236,3 +237,4 @@ QDGlobals *GetQD(void)
 {
     return alspi_funcs->GetQD();
 }
+#endif
