@@ -97,6 +97,7 @@ select_stick(Row, Stick)
 	abolish(cur_pos,1),
 	assert(cur_pos(P)).
 
+:- dynamic(working_row/1).
 check_row_ok(Row)
 	:-
 	working_row(WR),
