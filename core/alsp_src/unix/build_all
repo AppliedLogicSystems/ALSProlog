@@ -46,6 +46,7 @@ remote_make calder hpux &
 remote_make hilbert solaris &
 remote_make jarrett sunos &
 remote_make matisse linux &
+remote_make rgshaw aix &
 wait
 
 
