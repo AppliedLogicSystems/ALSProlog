@@ -92,17 +92,18 @@ reconsult(What)
 
 consult(What, Options)
 	:-
-	cslt_init(CCD,MsgValue,ReconFlg, FCGValue),
+	cslt_init(MsgValue,ReconFlg, FCGValue),
 	consult_global_options(Options, COpts),
 	consult_files(What, COpts),
-	cslt_cleanup(CCD,MsgValue,ReconFlg, FCGValue).
+	cslt_cleanup(MsgValue,ReconFlg, FCGValue).
 
 consult_files([], _) 
 	:-!.
 
 consult_files([File | Files], COpts) 
-	:- !,
+	:- 
 	consult_files(File, COpts),
+	!,
 	consult_files(Files, COpts).
 
 consult_files(File, COpts) 
@@ -110,20 +111,22 @@ consult_files(File, COpts)
 	local_consult_options(File, BaseFile, COpts, FCOpts),
 	do_consult(BaseFile, FCOpts).
 
-cslt_init(CurDrive+CurDirPathList,MessageValue,ReconFlg, FCGValue)
+cslt_init(MessageValue,ReconFlg, FCGValue)
 	:-
+/*
 	get_cwd(CurDir),
 	subPath(CurDirPathList, CurDir),
 	get_current_drive(InitCurDrive),
 	(InitCurDrive = root -> CurDrive = '' ; CurDrive = InitCurDrive),
     set_current_consult_directory(CurDrive+CurDirPathList),	
+*/
 	consultmessage(MessageValue),
 	file_clause_groups(FCGValue),
 	get_reconsult_flag(ReconFlg).
 
-cslt_cleanup(CCD,MessageValue,ReconFlg, FCGValue)
+cslt_cleanup(MessageValue,ReconFlg, FCGValue)
 	:-
-    set_current_consult_directory(CCD),
+%    set_current_consult_directory(CCD),
 	set_consult_messages(MessageValue),
 	set_file_clause_groups(FCGValue),
 	set_reconsult_flag(ReconFlg).
@@ -301,6 +304,7 @@ do_consult(BaseFile, FCOpts)
 
 	record_consult(BaseFile, FCOpts),
 	cleanup_cslt,
+	!,
 	consult_msg(Quiet, BaseFile, end_consult, FCOpts).
 
 		%% true = "be quiet"
@@ -343,12 +347,12 @@ exec_consult(BaseFile, FCOpts)
 	arg(1, FCOpts, Nature),
 	arg(5, FCOpts, Drive+PathList),		%%	5		- OrigDir 
 	arg(6, FCOpts, SrcExt),
-	exec_consult(PathList, BaseFile, Nature, SrcExt, FCOpts).
+	exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts).
 
 /*-------------------------------------------------------------*
- |	exec_consult/5
- |	exec_consult(PathList, BaseFile, Nature, SrcExt, FCOpts).
- |	exec_consult(+, +, +, +, +)
+ |	exec_consult/6
+ |	exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts).
+ |	exec_consult(+, +, +, +, +, +)
  |
  |	- dispatches non-user consults:
  |
@@ -364,31 +368,33 @@ exec_consult(BaseFile, FCOpts)
  *-------------------------------------------------------------*/ 
 
 		%% Incoming pathlist is absolute:
-exec_consult(['' | RestPathList], BaseFile, Nature, SrcExt, FCOpts)
+exec_consult(['' | RestPathList], Drive, BaseFile, Nature, SrcExt, FCOpts)
 	:-!,
-	cont_consult(SrcExt, Nature, Drive+['' | PathList], BaseFile, FCOpts).
+	cont_consult(SrcExt, Nature, Drive+['' | RestPathList], BaseFile, FCOpts).
 
 		%% Incoming pathlist is NOT absolute:
 		%% Try the local search path list:
-exec_consult(PathList, BaseFile, Nature, SrcExt, FCOpts)
+exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
 	:-
 	arg(9, FCOpts, LocalSearchPathLists),		%%	9		- SearchPath 
 	directory_self(SelfDir),
 	subPath(SelfDirPathList, SelfDir),
-	member(SrcPathList, [''+SelfDirPathList | LocalSearchPathLists]), 
-	cont_consult(SrcExt, Nature, SrcPathList, BaseFile, FCOpts).
+	member(DD+PL, [Drive+SelfDirPathList | LocalSearchPathLists]), 
+	append(PL,PathList,SrcPathList),
+	cont_consult(SrcExt, Nature, DD+SrcPathList, BaseFile, FCOpts).
 
 		%% Incoming pathlist is NOT absolute:
 		%% Try the gobal search path list:
-exec_consult(PathList, BaseFile, Nature, SrcExt, FCOpts)
+exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
 	:-
 	searchdir(SearchDir), 
-	rootPlusPath(Drive,SDPathList,SearchDir),
-	cont_consult(SrcExt, Nature, Drive+SDPathList, BaseFile, FCOpts).
+	rootPlusPath(SDDrive,SDPathList,SearchDir),
+	append(SDPathList,PathList,SrcPathList),
+	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
 
 		%% Can't find file
 		%% Throw exception:
-exec_consult(_, BaseFile, Nature, SrcExt, FCOpts)
+exec_consult(_, Drive, BaseFile, Nature, SrcExt, FCOpts)
 	:-
 	arg(10, FCOpts, OrigFileDesc), 		%%	10		- OrigFileDesc 
 	existence_error(file,OrigFileDesc,OrigFileDesc).
@@ -408,7 +414,8 @@ cont_consult(SrcExt, Nature, Drive+PathList, BaseFile, FCOpts)
 		filePlusExt(BaseFile, SrcExt, SrcFileName)
 	),
 	rootPathFile(NewDrive,NewPathList,SrcFileName,SrcFilePath),
-	check_existence(SrcFilePath, ExistingSrcFilePath, WorkingExt),
+	s2s_ext(Exts2Try),
+	check_existence(SrcFilePath, Exts2Try,ExistingSrcFilePath, WorkingExt),
 	canon_path(ExistingSrcFilePath, CanonSrcPath),
 		%%% Change the Drive+Path current_consult global variable:
 	get_current_consult_directory(OldCCD),
@@ -615,23 +622,35 @@ obp_load_checkstatus(2,SPath,OPath)
 	%% no drive or path specified. Use default.
 prepend_current_consult_directory('',[],NewDrive,NewPathList) 
 	:-!, 		
-	get_current_consult_directory(NewDrive+NewPathList).
+	get_current_consult_directory(InitNewDrive+InitNewPathList),
+	check_default_local(InitNewDrive,InitNewPathList,NewDrive,NewPathList).
 
 	%% not an absolute path (i.e., relative),
 	%% but using the same drive:
-prepend_current_consult_directory(Drive,PathList,Drive,NewPathList) 
+prepend_current_consult_directory(Drive,PathList,NewDrive,NewPathList) 
 	:-
 	PathList \= ['' | _],
-	get_current_consult_directory(Drive+CurrentPath),
+	!,
+	get_current_consult_directory(InitDrive+InitCurrentPath),
+	check_default_local(InitDrive,InitCurrentPath,NewDrive,CurrentPath),
 	dappend(CurrentPath,PathList,NewPathList).
 
 	%% Pathlist is complete (i.e., absolute):
 prepend_current_consult_directory(Drive,PathList,Drive,PathList).
 
+check_default_local('',[],NewDrive,NewPathList)
+	:-!,
+	get_cwd(NewPath),
+	subPath(NewPathList, NewPath),
+	get_current_drive(InitNewDrive),
+	(InitNewDrive = root -> NewDrive = '' ; NewDrive = InitNewDrive).
+
+check_default_local(Drive,PathList,Drive,PathList).
+
 /*-----------------------------------------------------------------------*
- |	check_existence/3
- |	check_existence(InPath,OutPath,OutExt)
- |	check_existence(+,-,-)
+ |	check_existence/4
+ |	check_existence(InPath,ExtList,OutPath,OutExt)
+ |	check_existence(+,+,-,-)
  |
  |	- determine whether a (generalized) path is a valid clause source
  |
@@ -640,19 +659,20 @@ prepend_current_consult_directory(Drive,PathList,Drive,PathList).
  |		- a regular file which (by defn) exists;
  |		- the path plus a 'pro' or 'obp' extension is an existing regular file
  *-----------------------------------------------------------------------*/
-check_existence(user,user,no(extension)) :- !.
+export check_existence/4.
 
-check_existence(Path,Path,Ext) 
+check_existence(user,_,user,no(extension)) :- !.
+
+check_existence(Path,_,Path,Ext) 
 	:-
 	exists_file(Path),
 	check_for_regular(Path),
 	!,
 	(filePlusExt(_,Ext,Path) -> true ; Ext=no(extension)).
 
-check_existence(Path,PathPlusSuffix,Suffix) 
+check_existence(Path,ExtsList,PathPlusSuffix,Suffix) 
 	:-
-%	(Suffix=pro;Suffix=obp),
-	(s2s_ext(Suffix) ; Suffix=pro),
+	member(Suffix, ExtsList),
 	filePlusExt(Path,Suffix,PathPlusSuffix),
 	exists_file(PathPlusSuffix),
 	!,
@@ -1110,5 +1130,10 @@ src2srcFullDir(Ext,PurePath,Dir,Dir)
 src2srcFullDir(Ext,PurePath,Dir,OutDir)
 	:-
 	extendPath(PurePath, Dir, OutDir).
+
+
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+
 
 endmod.		%% blt_cslt.pro: Consult 

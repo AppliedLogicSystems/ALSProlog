@@ -805,7 +805,7 @@ synth_unit(actions, XSpcTerms, AppTp, Code, CodeTail)
 synth_unit(info_type, XSpcTerms, AppTp, Code, CodeTail)
 	:-!,
 	gen_type_spec(XSpcTerms, MakePred, AppTp),
-	
+	!,
 	Code = [SetupInfo,nl | CodeTail],
 	(dmember(init = InitCode-InfoVar, XSpcTerms) ->
 		true
@@ -1035,7 +1035,8 @@ gen_type_spec(XSpcTerms, MakePred, AppTp)
 		;
 		dmember(type_name=TypeName, XSpcTerms)
 	),
-	dmember(type_file=TypeFile, XSpcTerms),
+	dmember(type_file=TypeFileName, XSpcTerms),
+	search_for_file(TypeFileName, TypeFile), 
 	exists_file(TypeFile),
 	!,
 	grab_terms(TypeFile, ISTerms),
@@ -1664,5 +1665,14 @@ mk_shell_err_h(mk_shell_error(Pattern,Args), SrcFile,TgtFile, BaseSrcFile, OpStr
 mk_shell_err_h(Ball,SrcFile,TgtFile, BaseSrcFile, OpStr, Options)
 	:-
 	throw(Ball).
+
+/*
+search_for_file(File, File).
+
+search_for_file(FileName, File)
+	:-
+	builtins:searchdir(SearchDir),
+	pathPlusFile(SearchDir,FileName,File).
+*/
 
 endmod.

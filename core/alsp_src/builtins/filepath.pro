@@ -218,6 +218,7 @@ filePlusExt(FileName,Ext,FullName) :-
 	atom_split(FilePlusExt, Sep, FileName0, Ext),
 	!,
 	pathPlusFile(Path,FileName0,FileName).
+
 filePlusExt(FileName,Ext,FullName) :-
 	file_separator(Sep),
 	atom_concat(FileName,Sep,FileName_plus_Sep),
@@ -435,9 +436,11 @@ rootPlusPath(Disk, PathList, DiskPlusPath) :-
 	atom_split(DiskPlusPath,DS,Disk,Path),
 	!,
 	subPath(PathList, Path).
-%rootPlusPath(Disk, [File], File) :-!.
-rootPlusPath('', PathList, Path) :-
-	subPath(PathList, Path).
+
+rootPlusPath('', PathList, Path) 
+	:-
+	subPath(PathList, Path),
+	!.
 
 rootPlusPath(root, PathList, DiskPlusPath) 
 	:-
@@ -450,9 +453,10 @@ rootPlusPath(Disk, PathList, DiskPlusPath)
 	:-
 	var(DiskPlusPath),
 	disk_separator(DS),
+	atom_concat(Disk, DS, DiskWithSep),
 	subPath(PathList, Path),
 	!,
-	atom_split(DiskPlusPath,DS,Disk,Path).
+	atom_concat(DiskWithSep, Path, DiskPlusPath).
 
 
 /*!-------------------------------------------------------*
