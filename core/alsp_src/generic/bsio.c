@@ -3615,8 +3615,7 @@ skip_layout(buf)
 }
 
 static int
-binary(pp)
-    UCHAR **pp;
+binary(UCHAR **pp)
 {
     register UCHAR *p;
     register int val;
@@ -5453,10 +5452,8 @@ int sio_sprintf_number(void)
     PWord functor;
     int arity;
 #endif
-    UCHAR *fmt;
     UCHAR *buf;
     double dblval;
-    int   fmt_type;
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
@@ -5466,7 +5463,7 @@ int sio_sprintf_number(void)
 
     switch (t1) {
 	case WTP_INTEGER:
-	    sprintf((char *)buf, "%d", v1);
+	    sprintf((char *)buf, "%d", (int)v1);
 	    break;
 #ifndef DoubleType
 	case WTP_STRUCTURE:
