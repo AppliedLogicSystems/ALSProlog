@@ -1,4 +1,4 @@
-libactivate(tables,[library,tables],
+libactivate(tk_alslib,[library,tables],
     [ load_table_package/0, load_table_package/1,
 		table_set_tag/3, table_set_tag/4,
 		table_tag_region/3, table_tag_region/4  ],
