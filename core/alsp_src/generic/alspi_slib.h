@@ -1,6 +1,6 @@
 #include <stdarg.h>
 
-#define ALSPI_DLIB_VERSION 2
+#define ALSPI_DLIB_VERSION 3
 
 typedef struct {
     ALSPI_API(char *)	(*PI_forceuia)			( PWord *, int * );
@@ -34,7 +34,9 @@ typedef struct {
     ALSPI_API(const char *)(*find_callback)		( void *, void * );
     ALSPI_API(void)	(*PI_throw)			(PWord, int);
     ALSPI_API(void)	(*PI_getball)			(PWord *, int *);
-
+    ALSPI_API(void)     (*PI_interrupt) (void);
+    const char *library_dir;
+    const char *executable_path;
 #ifdef macintosh
 	Boolean (*SIOUXIsAppWindow)(WindowPtr w);
 	short (*SIOUXHandleOneEvent)(EventRecord *event);

@@ -611,7 +611,10 @@ const alspi_func_ptrs alspi_funcs = {
     sym_insert_dbl,
     find_callback,
     PI_throw,
-    PI_getball
+    PI_getball,
+    PI_interrupt,
+    library_dir,
+    executable_path,
 #ifdef macintosh
     ,
     SIOUXIsAppWindow,
@@ -858,8 +861,23 @@ static plugin_error os_load_plugin(const char *lib_name,
 {
     shl_t object;
     void *sym_addr = NULL;
+    char current_dir[1000];
     int err = 0;
     plugin_error result = {no_error, 0, NULL};
+
+    /* Set the current directory to the library_path, so that shared
+       objects in the executable's directory are loaded first. */
+
+    if (getcwd(current_dir, 1000) == NULL) {
+      result.type = unknown_error;
+      goto exit;
+    }
+
+    if (chdir(library_dir) != 0) {
+      result.type = unknown_error;
+      result.native_code = errno;
+      goto exit;
+    }
     
     object = shl_load(lib_name, BIND_IMMEDIATE | BIND_VERBOSE, 0);
     if (object == NULL) err = errno;
@@ -895,6 +913,10 @@ static plugin_error os_load_plugin(const char *lib_name,
     	}
     	result.native_code = err;
     }
+
+    chdir(current_dir);
+
+ exit:
 
     return result;
 }
