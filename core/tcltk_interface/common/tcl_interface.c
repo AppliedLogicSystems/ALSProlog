@@ -554,7 +554,7 @@ static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 			return AP_EXCEPTION;
 		}
 
-		//Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);	
+		/*Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);*/
 
 	#ifdef macintosh
 		//TkMacInitAppleEvents(interp);
@@ -788,7 +788,7 @@ PI_END
 
 void pi_init(void)
 {
-	extern char executable_path[1024];
+	extern const char *executable_path;
   
 #ifdef macintosh
 	tcl_macQdPtr = &qd /*GetQD()*/;
