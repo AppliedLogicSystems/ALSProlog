@@ -43,6 +43,7 @@ proc vTclWindow.topals {args} {
 	add_edit_menu .topals.mmenb listener .topals
 	add_prolog_menu .topals.mmenb listener .topals
 	add_tools_menu .topals.mmenb listener .topals
+	add_windows_menu .topals.mmenb listener .topals
 	add_help_menu .topals.mmenb
 
 
@@ -210,7 +211,7 @@ proc vTclWindow.about {base} {
     ###################
     toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
-    wm geometry $base 171x205
+    wm geometry $base 171x215
     center $base
     wm maxsize $base 1137 870
     wm minsize $base 1 1

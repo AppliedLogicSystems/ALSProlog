@@ -49,10 +49,13 @@ proc add_file_menu {menubar type window} {
 #    $menubar.file add command -label "Print$elipsis" -accelerator "$mod-P"\
 #		-command "re {$type.print $window}" -state disabled
 
-	if {$type == "listener"} then { 
+#	if {$type == "listener"} then { 
+#    	$menubar.file add separator
+#    	$menubar.file add separator
+#	}
+
     	$menubar.file add separator
-    	$menubar.file add separator
-	}
+
 	if {$tcl_platform(platform) == "windows"} {
     	$menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_prolog}
     } else {
@@ -185,6 +188,23 @@ proc add_tools_menu {menubar type window} {
 	$menubar add cascade -label "Tools" -menu $menubar.tools -underline 0
 }
 
+proc add_windows_menu {menubar type window} {
+	global tcl_platform
+	global mod
+	global elipsis
+	global proenv
+
+	if {$type == "document"} then { return }	
+
+	set TearOff 0
+	menu $menubar.windows -tearoff $TearOff -title Windows
+
+	if {$type == "listener"} then {
+		$menubar.windows add separator 
+	}
+	$menubar add cascade -label "Windows" -menu $menubar.windows -underline 0
+}
+
 proc add_help_menu {menubar} {
 	global tcl_platform
 	global mod
@@ -192,13 +212,10 @@ proc add_help_menu {menubar} {
 
 	if {$tcl_platform(platform) != "macintosh"} {
 		menu $menubar.help -tearoff 0
-		
 		$menubar.help add command -label "About ALS Prolog$elipsis" \
 			-underline 0 -command {Window show .about}
-		
 		$menubar add cascade -label "Help" -underline 0 -menu $menubar.help
 	}
-
 }
 
 		# listener -- edit menu:
