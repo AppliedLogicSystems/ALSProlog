@@ -1,0 +1,9 @@
+#!/bin/sh
+echo $#
+
+case $# in
+1)	;;
+*)	echo 'Usage: finish_setup srcdir' 1>&2; exit 2
+esac
+
+make -C $1/cfgs/
