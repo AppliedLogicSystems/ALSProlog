@@ -33,13 +33,13 @@ transformer_db(pro, obp, no_del, []).
  *---------------------------------------------------*/
 
 
-src2src_inv(typ, BaseFile, SourceFile, Options)
+src2src_inv(typ, BaseFile, SourceFile, OutFilePath, Options)
 	:-
-	xcomptype(SourceFile, Options).
+	xcomptype(SourceFile, OutFilePath, Options).
 
-src2src_inv(spc, BaseFile, SourceFile, Options)
+src2src_inv(spc, BaseFile, SourceFile, OutFilePath, Options)
 	:-
-	mk_shell(SourceFile, BaseFile, Options).
+	mk_shell(SourceFile, BaseFile, Options, OutFilePath).
 
 
 endmod.

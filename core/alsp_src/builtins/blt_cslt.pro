@@ -592,8 +592,9 @@ fin_load_from_file(GenExt,Nature,BaseFile,SrcPath,OutFilePath,
 	extract_opts(FCOpts, FCOptions),
 	dappend(ExtOpts, FCOptions, Options),
 			%% Found in blt_shlr.pro:
-	pathPlusFile(SrcPath,_,SrcPathDir),
-	src2src_inv(WkExt, BaseFile, SrcPath, Options),
+%	pathPlusFile(SrcPath,_,SrcPathDir),
+	pathPlusFile(SrcPathDir,_,SrcPath),
+	src2src_inv(WkExt, BaseFile, SrcPath, OutFilePath, Options),
 	load_from_file(GenExt,Nature,BaseFile,OutFilePath,GenExt,FCOpts),
 	(DelFlag = no_del ->
 		true 
