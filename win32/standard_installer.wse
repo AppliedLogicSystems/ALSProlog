@@ -940,6 +940,12 @@ item: Else Statement
 end
 item: Add ProgMan Icon
   Group=%GROUP%
+  Icon Name=als_help
+  Command Line=%MAINDIR%\als_help.htm
+  Flags=01000000
+end
+item: Add ProgMan Icon
+  Group=%GROUP%
   Icon Name=ALS Prolog
   Command Line="%MAINDIR%\ALS Prolog.exe"
   Flags=01000000
@@ -948,6 +954,12 @@ item: Add ProgMan Icon
   Group=%GROUP%
   Icon Name=ALS Prolog Manual
   Command Line="%MAINDIR%\ALS Prolog Manual.pdf"
+  Flags=01000000
+end
+item: Add ProgMan Icon
+  Group=%GROUP%
+  Icon Name=als_help
+  Command Line="%MAINDIR%\als_help.htm"
   Flags=01000000
 end
 item: End Block
@@ -964,6 +976,11 @@ end
 item: Edit Registry
   Total Keys=1
   Key=.pro
+  New Value=ALS Prolog.Document
+end
+item: Edit Registry
+  Total Keys=1
+  Key=.pl
   New Value=ALS Prolog.Document
 end
 item: Edit Registry
