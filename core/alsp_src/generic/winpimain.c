@@ -22,6 +22,8 @@
 
 #endif /* !HAVE_CONFIG_H */
 
+#ifdef MSWin32
+
 #include "pi_init.h"
 #include "pi_cfg.h"
 
@@ -124,3 +126,4 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     
     exit(EXIT_SUCCESS);
 }
+#endif /* MSWin32 */
