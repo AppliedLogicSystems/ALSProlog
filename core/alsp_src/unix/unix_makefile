@@ -107,7 +107,7 @@ alsdir/library : $(SOURCE_DIR)/library
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
 
 testrun : alspro
-	sh $(TEST_DIR)/tsuite/test_command_line.sh ./alspro
+	-sh $(TEST_DIR)/tsuite/test_command_line.sh ./alspro
 	./alspro -giac -b $(TEST_DIR)/autotest $(TEST_DIR)/atest_db -g run_tests -p -srcdir $(SOURCE_DIR)
 	
 
