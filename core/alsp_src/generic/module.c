@@ -757,8 +757,7 @@ mod_stats(void)
 void
 module_init(PE)
 {
-// don't make assumptions about uninitialzed memory!
-//    if (!module_stack) {
+    if (!module_stack) {
 	module_stack = (int *)
 	    ss_malloc(hpe, MAXMODNESTING * sizeof (int), FE_MODULE_INIT);
 	clausegroup_stack = (int *)
@@ -819,5 +818,5 @@ module_init(PE)
 	ss_register_global(hpe, (long *) &default_usemax);
 	ss_register_global(hpe, (long *) &default_procs);
 	ss_register_global(hpe, (long *) &default_procmax);
-//    }
+    }
 }

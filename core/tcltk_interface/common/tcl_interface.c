@@ -888,7 +888,7 @@ void tcl_interface_init(PE)
 	tcl_double_type = Tcl_GetObjType((char *)"double");
 	tcl_list_type = Tcl_GetObjType((char *)"list");
 		
-	tcltk_module = AP_NewSymbolFromStr(NULL, "tcltk");
+	tcltk_module = AP_NewSymbolFromStr(hpe, "tcltk");
 	
 	PI_INIT;
 }

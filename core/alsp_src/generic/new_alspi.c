@@ -369,11 +369,11 @@ int AP_OldToNewCall(PE, AP_Result (*new_func)(), int arity)
 	}
 
 	switch (arity) {
-	case 0: r = c0(NULL); break;
-	case 1: r = c1(NULL, arg[0]); break;
-	case 2: r = c2(NULL, arg[0], arg[1]); break;
-	case 3: r = c3(NULL, arg[0], arg[1], arg[2]); break;
-	case 4: r = c4(NULL, arg[0], arg[1], arg[2], arg[3]); break;
+	case 0: r = c0(hpe); break;
+	case 1: r = c1(hpe, arg[0]); break;
+	case 2: r = c2(hpe, arg[0], arg[1]); break;
+	case 3: r = c3(hpe, arg[0], arg[1], arg[2]); break;
+	case 4: r = c4(hpe, arg[0], arg[1], arg[2], arg[3]); break;
 	}
 	
 	if (r == AP_SUCCESS) PI_SUCCEED;
