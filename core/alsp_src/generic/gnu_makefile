@@ -70,8 +70,8 @@ binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro
 
 all : default testrun
 
-alspro_b : alsdir $(MAIN_OBJECTS) $(LIB_OBJECTS)
-	$(CC) -o alspro_b $(MAIN_OBJECTS) $(LIB_OBJECTS) $(LIBS)
+alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a
+	$(CC) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LIBS)
 
 alspro :  alsdir alspro_b $(BUILTINS)
 	./alspro_b -q -b -obp \
