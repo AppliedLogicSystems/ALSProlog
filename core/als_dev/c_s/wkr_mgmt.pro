@@ -901,7 +901,7 @@ queue_rep(Item, '?').
  |	known_workers(-)
  *-----------------------------------------------------------------------*/
 export known_workers/1.
-known_workers(WrkrList, PIDList)
+known_workers(WrkrList)
 	:-
 	configs_terms(CfgSrcItems),
 	findall(WI, member(worker_info=WI, CfgSrcItems),  RawWkrs),
@@ -935,7 +935,7 @@ active_inst(WR, AWI, RawWkrs, WRInfo)
 	access_wkr_info(host_ip,AWI,IP),			%% Host IP address
 	access_wkr_info(login_name,AWI,Usr),		%% Name of account to login under
 	access_wkr_info(port,AWI,Port),				%% Port to connect on
-	access_wkr_info(pid,AWI,PID),				%% Port to connect on
+	access_wkr_info(pid,AWI,PID),				%% Process ID
 	access_wkr_rec(state,WR,State),
 	access_wkr_rec(workerID,WR,N),
 
