@@ -101,6 +101,11 @@ defineClass(Module, SpecList, Code)
 		true
 	),
 	append(ParentSlots, LocalSlots, CompleteSlots),
+	(dmember( commonSlots = CommonSlots, SpecList ) ->
+		true
+		;
+		CommonSlots = []
+	),
 
 	Code = [(module ClassModule),
 			 subClassOf(ClassName,ParentClass),
@@ -109,10 +114,14 @@ defineClass(Module, SpecList, Code)
 			 | Code1A ],
 
 	(dmember(export=no,SpecList) ->
-		Code1A = Code1
+		Code1A = Code1B
 		;
-		Code1A = [(export ClassName/2) | Code1]
+		Code1A = [(export ClassName/2) | Code1B]
 	),
+	findall(common_slot(ClassName, SlotName),
+				member(SlotName, CommonSlots), CmnSlotFacts),
+	append(CmnSlotFacts, Code1, Code1B),
+
 	createClassStatePreds(ClassName,ParentList,
 						  CompleteSlots,ClassModule,Code1,Code2),
 

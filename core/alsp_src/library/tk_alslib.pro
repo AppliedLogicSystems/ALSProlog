@@ -693,25 +693,42 @@ display_image(Interp, ImageDir, ImageFile, ImageWidth, ImageHeight)
  *------------------------------------------------------------*/
 extend_main_menubar(Label, MenuEntriesList)
 	:-
-	extend_menubar('.topals.mmenb', Label, MenuEntriesList).
-
-extend_menubar(MenubarPath, Label, MenuEntriesList)
-	:-
-	extend_menubar(MenubarPath, Label, MenuEntriesList, shl_tcli).
+	extend_menubar('.topals.mmenb', Label, MenuEntriesList, shl_tcli).
 
 extend_menubar(MenubarPath, Label, MenuEntriesList, Interp)
 	:-
-	extend_menubar_cascade(MenubarPath, Label, MenuPath, Interp),
+	extend_menubar(replace, MenubarPath, Label, MenuEntriesList, Interp).
+
+extend_menubar(Mode, MenubarPath, Label, MenuEntriesList, Interp)
+	:-
+	extend_menubar_cascade(Mode, MenubarPath, Label, MenuPath, Interp),
 	list_extend_cascade(MenuEntriesList, MenuPath, Interp).
 
-extend_menubar_cascade(MenubarPath, Label, MenuPath, Interp)
+extend_menubar_cascade(Mode, MenubarPath, Label, MenuPath, Interp)
 	:-
 	fixup_for_tkwin_path(Label, TclLabel),
 	catenate([MenubarPath, '.', TclLabel], MenuPath),
-	(tcl_call(Interp, [winfo,exists,MenuPath],'1') ->
-		true
+	tcl_call(Interp, [winfo,exists,MenuPath],Exists),
+	fin_extend_menubar_cascade(Mode, Exists, MenubarPath, MenuPath, Label, Interp).
+
+fin_extend_menubar_cascade(extend, '1', MenubarPath, MenuPath,Label,Interp) :-!.
+fin_extend_menubar_cascade(replace, '1', MenubarPath, MenuPath,Label,Interp) 
+	:-!,
+	tcl_call(Interp, [destroy,MenuPath],_),
+	tcl_call(Interp, [menu,MenuPath,'-relief',raised,'-tearoff',0],_).
+%	create_mb_menu(MenuPath,MenubarPath,Label,Interp).
+fin_extend_menubar_cascade(_, _, MenubarPath, MenuPath,Label,Interp) 
+	:-
+	create_mb_menu(MenuPath,MenubarPath,Label,Interp).
+	
+create_mb_menu(MenuPath,MenubarPath,Label,Interp)
+	:-
+	tcl_call(Interp, [menu,MenuPath,'-relief',raised,'-tearoff',0],_),
+	tcl_call(Interp, [winfo,children,MenubarPath], TopChildren),
+	catenate([MenubarPath, '.help'], HelpPath),
+	(position(TopChildren, HelpPath, HelpIndex) ->
+		tcl_call(Interp, [MenubarPath,insert,HelpIndex,cascade,'-label',Label,'-menu',MenuPath], _)
 		;
-		tcl_call(Interp, [menu,MenuPath,'-relief',raised,'-tearoff',0],_),
 		tcl_call(Interp, [MenubarPath,add,cascade,'-label',Label,'-menu',MenuPath], _)
 	),
 	tcl_call(Interp, [update],_).

@@ -421,6 +421,8 @@ map_states(CurSlot,State1, State2)
  |
  |	- creates an (anonymous) object in specified by SpecList
  *-----------------------------------------------------------------------*/
+:- dynamic(common_slot/2).
+:- dynamic(common_slot_gv/2).
 
 create_object(Module, SpecList, Object)
 	:-
@@ -429,6 +431,20 @@ create_object(Module, SpecList, Object)
 		true;
 		Options = []
 	),
+
+		%% Needs to take place before creation of the object
+		%% so that existence of common slot vector is guaranteed,
+		%% and so that vars in cs vector are older than vars in
+		%% object slots, so when they are bound together, the
+		%% vars in the object slots will point to the vars in
+		%% the cs vector.
+	((Module:clause(common_slot(ObjectClass, CV),_)) ->
+		findall(CV, Module:common_slot(ObjectClass, CV), CommonSlots)
+		;
+		CommonSlots = []
+	),
+	setup_common_slots(CommonSlots, ObjectClass, Module),
+
 	(dmember(values=LocalValues, SpecList) ->
 		true;
 		LocalValues = []
@@ -436,19 +452,22 @@ create_object(Module, SpecList, Object)
 	Module:make_pred(ObjectClass,Object,MakeCall),
 	Module:call(MakeCall),
 	mangle(2, Object, Module),
+	insert_common_slots(CommonSlots, Object, ObjectClass, Module),
 
 	Module:setObjStruct(myClassPred, Object, ObjectClass),
 		%% get any class slot initialization values:
 	(bagof(Slot=Value, Module:slot_default(ObjectClass,Slot,Value), ClassValues), !;
 		ClassValues = []),
-		
+	
 		%% merge them:
 	merge_values(ClassValues, LocalValues, Values),
+	object_values_init(Values, ObjInitVals),
+
 	class_constr_init(ObjectClass,Module,ClassInitVals),
 	class_default_init(ObjectClass,Module,ClassDefaultVals),
-	object_values_init(Values, ObjInitVals),
 	merge_init_vals(ClassDefaultVals, ObjInitVals, InterInitVals),
 	merge_init_vals(InterInitVals, ClassInitVals, InitVals),
+
 	set_all_slots(InitVals, Object),
 
 	(dmember( handle=true, SpecList) ->
@@ -462,6 +481,56 @@ create_object(Module, SpecList, Object)
 		;
 		true
 	).
+
+
+setup_common_slots([], _, _) :-!.
+setup_common_slots(CommonSlots, ObjectClass, Module)
+	:-
+	Module:clause(common_slot_gv(ObjectClass, CS_GV),_),
+	!,
+	common_slot_gv_setup(ObjectClass, CS_GV, CommonSlots).
+setup_common_slots(CommonSlots, ObjectClass, Module)
+	:-
+	gv_alloc(CS_GV),
+	Module:assert( common_slot_gv(ObjectClass, CS_GV) ),
+	common_slot_gv_setup(ObjectClass, CS_GV, CommonSlots).
+
+common_slot_gv_setup(ObjectClass, CS_GV, CommonSlots)
+	:-
+	gv_get(CS_GV, GVVal),
+	fin_common_slot_gv_setup(GVVal, ObjectClass, CS_GV, CommonSlots).
+
+fin_common_slot_gv_setup(GVVal, ObjectClass, CS_GV, CommonSlots)
+	:-
+	integer(GVVal),
+	!,
+	length(CommonSlots, N),
+	functor(NewGVVal, cs, N),
+	gv_set(CS_GV, NewGVVal).
+
+fin_common_slot_gv_setup(GVVal, ObjectClass, CS_GV, CommonSlots)
+	:-
+	functor(GVVal, cs, N),
+	length(CommonSlots, N).
+
+insert_common_slots([], _, _, _) :-!.
+insert_common_slots(CommonSlots, Object, ObjectClass, Module)
+	:-
+	Module:common_slot_gv(ObjectClass, CS_GV),
+	gv_get(CS_GV, CSVector),
+	fin_ins_cs(CommonSlots, 1, Object, CSVector, ObjectClass, Module).
+
+fin_ins_cs([], _, _, _, _, _).
+fin_ins_cs([SlotName | CommonSlots], CSNum, Object, CSVector, ObjectClass, Module)
+	:-
+	Module:slot_num(ObjectClass, SlotName, Offset),
+	arg(Offset, Object, ObjSlotVar),
+	arg(CSNum, CSVector, CSVar),
+	ObjSlotVar = CSVar,
+	NxtCSNum is CSNum + 1,
+	fin_ins_cs(CommonSlots, NxtCSNum, Object, CSVector, ObjectClass, Module).
+
+
 
 set_all_slots([], Object).
 set_all_slots([s(Slot,Val) | InitVals], Object)
@@ -493,7 +562,7 @@ class_default_init(ObjectClass,Module,ClassDefaultVals)
 
 object_values_init(Values, InitVals)
 	:-
-	(setof(s(Slot,Constant),
+	(findall(s(Slot,Constant),
 			member(Slot=Constant,Values),
 			InitVals), !; InitVals = []).
 
