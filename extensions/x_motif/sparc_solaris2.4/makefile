@@ -9,6 +9,7 @@ export CC = gcc
 export LINK = -shared -Xlinker -z -Xlinker defs -Xlinker -s
 export LIBS =	-L/usr/dt/lib \
 		-lc -lX11 -lXm -lXt -lMrm
+export LIBEXT = so
 
 all:
 	make -f ../common/x_motif_make
