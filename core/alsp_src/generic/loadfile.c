@@ -73,6 +73,7 @@
 
 typedef struct {
     char  magic[120];
+    long  endian;
     long  symtab_start;		/* Position in file of symbol table */
     long  symtab_size;		/* Number of symbol table entries */
     long  icode_start;		/* Start of icode records */
@@ -316,6 +317,7 @@ obp_open(fname)
     	0,
     	0,
     	0,
+    	0,
     	0,    
     };
 
@@ -365,6 +367,7 @@ obp_close()
     	0,
     	0,
     	0,
+    	0,
     	0,    
     };
 
@@ -372,6 +375,7 @@ obp_close()
      * Update the header information.
      */
     strcpy(obp_header.magic, MAGIC);
+    obp_header.endian = ENDIAN_MAGIC;
     obp_header.icode_start = sizeof (mod_header);
     obp_header.icode_size = obp_nrecs;
     obp_header.symtab_start = ftell(obp_fp);
@@ -430,7 +434,8 @@ mem_load(unsigned char *startrp)
     
     headerp = (mod_header *)startrp;
     
-    if (strcmp(headerp->magic, MAGIC) != 0) return (FLOAD_ILLOBP);
+    if (strcmp(headerp->magic, MAGIC) != 0 || headerp->endian != ENDIAN_MAGIC)
+    	return (FLOAD_ILLOBP);
     
     rp = startrp + headerp->symtab_start;
 
