@@ -114,12 +114,13 @@ proc vTclWindow.dyn_flags {base} {
     # CREATING WIDGETS
     ###################
     toplevel $base -class Toplevel
+    # Withdraw the window so that it doesn't appear during prolog heartbeat
+    wm withdraw $base
     wm focusmodel $base passive
     wm maxsize $base 1137 870
     wm minsize $base 1 1
     wm resizable $base 0 0
     wm overrideredirect $base 0
-    wm deiconify $base
     wm title $base "Changable Prolog Flags"
 	wm protocol .dyn_flags WM_DELETE_WINDOW {wm withdraw .dyn_flags}
 
@@ -143,6 +144,58 @@ proc vTclWindow.dyn_flags {base} {
     pack $base.buttons.save \
         -anchor center -expand 0 -fill none -padx 2 -side right 
 
+	prolog call builtins changable_flags_info -var InfoList
+	foreach info $InfoList {
+		create_dyn_flag_entry $info
+	}
+	
+	# Make window visible
+	wm deiconify $base
+}
+
+proc create_dyn_flag_entry { info } {
+	global array proenv
+
+	set FlagName [lindex $info 0]
+	set PosVals [lindex $info 1]
+	set CurVal [lindex $info 2]
+
+	set ff [frame .dyn_flags.$FlagName -borderwidth 1 -relief sunken]
+	label $ff.label -borderwidth 0 \
+        -relief flat -width 18 -justify right \
+        -text $FlagName
+
+	set Cmd [concat tk_optionMenu "$ff.opts_menu" proenv($FlagName) $PosVals]
+	set proenv($FlagName) $CurVal  
+	set MM [eval $Cmd]
+
+	pack $ff  \
+        -anchor center -expand 0 -fill x -side top 
+	pack $ff.label  \
+        -anchor center -expand 0 -fill none -side left 
+	pack $ff.opts_menu  \
+        -anchor center -expand 0 -fill x -side left 
+
+	set Last [$MM index end]
+	for {set ii 0} {$ii <= $Last} {incr ii} {
+		set Cmd [list prolog call builtins \
+			set_prolog_flag -atom $FlagName -atom [lindex $PosVals $ii] ]
+		$MM entryconfigure $ii -command $Cmd
+	}
+
+}
+
+proc change_prolog_flags {} {
+	global array proenv
+
+	prolog call builtins changable_flags_info -var InfoList
+	foreach info $InfoList {
+		set FlagName [lindex $info 0]
+		if {[lindex $info 2] != $proenv($FlagName)} then {
+			prolog call builtins set_prolog_flag \
+				-atom $FlagName -atom $proenv($FlagName)
+		}
+	}
 }
 
 proc vTclWindow.about {base} {
@@ -666,7 +719,7 @@ proc create_sd_toggle { Win Which Title Add Del Up Down} {
 proc toggle_files_list {Win Which} {
 	global proenv 
 
-	if {"$proenv($Which)"=="closed"} then {
+	if {$proenv($Which) == "closed"} then {
     	$Win.ctl_$Which.open_btn configure -image open_ptr
 		set proenv($Which) open
     	pack $Win.$Which  \
@@ -800,14 +853,13 @@ proc vTclWindow.ide_settings {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
-    wm focusmodel $base passive
-    wm geometry $base 374x208+269+255
-    wm maxsize $base 1137 870
-    wm minsize $base 275 1
-    wm overrideredirect $base 0
+    toplevel $base
+    #wm focusmodel $base passive
+    #wm geometry $base 374x208+269+255
+    #wm maxsize $base 1137 870
+    #wm minsize $base 275 1
+    #wm overrideredirect $base 0
     wm resizable $base 1 0
-    wm deiconify $base
     wm title $base "ALS IDE Settings"
     frame $base.heartbeat \
         -borderwidth 2 -height 75 -relief groove -width 125 
