@@ -10,7 +10,13 @@
 #if defined(INTCONSTR)
 #include "winter.h"
 #include "freeze.h"
-#include "fpbasis.h"
+
+#if defined(__MWERKS__) && defined(__INTEL__) 
+void noop(void)
+{
+
+}
+#endif
 
 /*--------------------------------------------------------
 	"API" functions for the UIA structure holding the
@@ -310,13 +316,13 @@ void deact()
 
 /* -------------------- ^^ Dummy for now ^^ -------------------- */
 
-double round	PARAMS( (double) );
+fp round	PARAMS( (fp) );
 
 	/* -- Round double to nearest longint -- */
-double round(num)
-	double num;
+fp round(num)
+	fp num;
 {
-	double ffl;
+	fp ffl;
 
 	ffl = floor(num);
 

@@ -212,6 +212,26 @@ typedef union fpoverlay {
 #ifdef REVERSE_ENDIAN
 #define FIRST   1
 #define SECOND  0
+
+/* This is fix for a common interaction between optimizing compilers and
+   the intel floating point instructions.
+  
+   a = <very very small number, for example 0x00000000 00000001>;
+   b = a * a; <* b will have the value 0.0, but underflow and percision
+   		  exception flags are set - this will cause the if statement
+   		  to produce incorrect results *>
+   
+   if (b > 0) printf("greater\n");
+   else if (b < 0) printf("less than\n");
+   else if (b == 0) printf("equal\n");
+   else printf("all compares failed\n");
+  
+   The workaround solution is to insert a noop function call between the
+   calculation and the test.  This will cause the compiler to reload the
+   numbers and clear the exception flags.  
+*/
+void noop(void);
+#define INTEL_CLEAR_EXCEPTIONS noop()
 #else
 #define FIRST   0
 #define SECOND  1
@@ -253,7 +273,8 @@ typedef union fpoverlay {
 #else /* not-HAVE_NEXTAFTER */
 
 				/*------- THIS IS THE COMMON PORTABLE VERSION ---------*/
-#define next(x)	 if (x GE 0.0) { \
+#define next(x)	 INTEL_CLEAR_EXCEPTIONS; \
+			if (x GE 0.0) { \
 				if (++(((fpoverlay *)&x)->l[SECOND]) EQ 0) \
 					++(((fpoverlay *)&x)->l[FIRST]); \
 				} \
@@ -261,7 +282,8 @@ typedef union fpoverlay {
 				if (--(((fpoverlay *)&x)->l[SECOND]) EQ -1) \
 					--(((fpoverlay *)&x)->l[FIRST]); \
 				}
-#define prev(x)	 if (x GT 0.0) { \
+#define prev(x)	 INTEL_CLEAR_EXCEPTIONS; \
+			if (x GT 0.0) { \
 				if (--(((fpoverlay *)&x)->l[SECOND]) EQ -1) \
 					--(((fpoverlay *)&x)->l[FIRST]); \
 				} \
