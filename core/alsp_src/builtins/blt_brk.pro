@@ -92,7 +92,7 @@ break_handler(abort,M,G)
 	setBreakLevel([b(0,user,true)]),
 		%% abort_ctlc: "Aborting from Control-C or Control-Break.\n"
 	prolog_system_error(abort_ctlc, []),
-	abort.
+	throw(abort).
 break_handler(break_shell,M,G) 
 	:-!,
 	prolog_shell,
@@ -101,17 +101,6 @@ break_handler(continue(M,G),M,G)
 	:-!,
 	getBreakLevel([_ | PrevList]),
 	setBreakLevel(PrevList),
-/*
-	shell_alarm_interval(AlarmIntrv),
-	set_alarm_clock((M:G),AlarmIntrv),
-*/
-/*
-	(obtain_alarm_interval(Intrv) -> 
-%		write(breakhandler_resetting_alarm(Intrv,Intrv)),nl,flush_output,
-		alarm(Intrv, Intrv) 
-		; 
-		true),
-*/
 	M:G.
 
 break_handler(debug(M,G),M,G) 

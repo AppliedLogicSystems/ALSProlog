@@ -13,7 +13,6 @@
  | Fixups for windows: Ken Bowen
  *=====================================================================*/
 
-
 module sio.
 use windows.
 use tcltk.
@@ -1461,7 +1460,12 @@ always_ready(console).
 try_select(StreamList, Timeout)
 	:-
 	sio_simple_select(StreamList, Timeout, Return),
+	!,
 	disp_try_select(Return, StreamList, Timeout).
+
+try_select(StreamList, Timeout)
+	:-
+	try_select(StreamList, Timeout).
 
 	%% Return Arg = 0 (timeout) or > 0: # of events triggered:
 disp_try_select(Return, StreamList, Timeout)
@@ -1659,32 +1663,34 @@ wait_data(tk_win, Stream, Call)
 wait_data(tcltk, Stream, Call) 
 	:-!,
 	stream_addl1(Stream, Alias),
+	stream_addl2(Stream, ti(Interp,WaitVarName)),
 	stream_name(Stream, WinID),
-	tcl_call(shl_tcli, [set_prompt_mark, WinID], _),
-
-	tcl_call(shl_tcli, 
-		[bind,WinID,'<Return>', [ xmit_line_plain,WinID,Alias]], _),
-
-	tcl_call(shl_tcli, [set,'WaitForLine',0], _),
-	tcl_call(shl_tcli, [wait_for_line0], WaitRes),
-%pbi_write('Prolog:wait_for_line0'=WaitRes),pbi_nl,pbi_ttyflush,
+	tcl_call(Interp, [set_prompt_mark, WinID], _),
+	tcl_call(Interp, 
+		[bind,WinID,'<Return>', [ xmit_line_plain,WinID,Alias,WaitVarName]], _),
+	tcl_call(Interp, [set,WaitVarName,0], _),
+	tcl_call(Interp, [wait_for_line1, WaitVarName], WaitRes),
 	finish_wait_data_tcltk(WaitRes, Stream, Call).
 
 	%% Returned -1: Got a ^C:
 finish_wait_data_tcltk(-1, Stream, Call)
 	:-!,
 	force_control_c_during_read(Stream).
-	%% Returned -3: User demanded  halt via tcl exit_prolog (ie, menu):
+
+	%% Returned -3: User typed ^D:
 finish_wait_data_tcltk(-3, Stream, Call)
 	:-!,
-	pbi_halt.
+	stream_extra(Stream,XTRA),
+	set_stream_extra(Stream,eof(XTRA)),
+	sio_set_eof(Stream),
+	sio_set_errcode(Stream,8).			% SIO_INTERR
+
 finish_wait_data_tcltk(WaitRes, Stream, Call)
 	:-
 	call(Call).
 
 force_control_c_during_read(StreamAlias)
 	:-
-%pbi_write(force_control_c_during_read(StreamAlias)),pbi_nl,pbi_ttyflush,
 	stream_or_alias_ok(StreamAlias, Stream),
 	sio_set_errcode(Stream,16),			% SIO_INTERR
 	forceCtlC.
@@ -1780,6 +1786,10 @@ getWinGV(WinID,WinPosGV) :-      %% allocate a gvar for WinID if not previously 
 	assert('$text_winGV$'(WinID,WinPosGV)). 
 
 
+export create_wait_var_name/2.
+create_wait_var_name(WinID, WaitVarName)
+	:-
+	catenate('WaitForLine', WinID, WaitVarName).
 
 open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
 	:-
@@ -1790,7 +1800,10 @@ open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
 		%% store the stream alias:
 	set_stream_addl1(Stream, Alias),
 		%% store the tcl/tk interpreter:
-	set_stream_addl2(Stream, Interp),
+%	set_stream_addl2(Stream, Interp),
+	
+	create_wait_var_name(WinID, WaitVarName),
+	set_stream_addl2(Stream, ti(Interp,WaitVarName)),
 		%% store the window id:
 	set_stream_addl3(Stream, ''),
 	file_modes(Mode,NMode,SMode),
@@ -2149,21 +2162,19 @@ get_failure(15, Stream, Call) :-	%% SIOE_PARTNUM
  * get_failure_read/3 is called when the call to read_buffer/2 fails.
  */
 
-get_failure_read(Stream, Call) :-
-%pbi_write(get_failure_read_eof_action2(Call)),pbi_nl,pbi_ttyflush,
+get_failure_read(Stream, Call) 
+	:-
 	stream_type(Stream,Type),
-%pbi_write(gfr2(Type)),pbi_nl,pbi_ttyflush,
 	read_buffer(Type,Stream),
 	stream_eof_action(Stream, EOFAction),
 	get_failure_read_maybe_reset_eof(EOFAction, Stream),
 	!,
 	call(Call).			%% restart call
 
-get_failure_read(Stream, Call) :-
+get_failure_read(Stream, Call) 
+	:-
 	sio_errcode(Stream, Num),
-%pbi_write(get_failure_read_CLAUSE2(Num)),pbi_nl,pbi_ttyflush,
 	get_failure_read(Num, Stream, Call).
-
 
 get_failure_read(8, Stream, Call) :-	%% SIOE_EOF
 	!,
@@ -2176,6 +2187,7 @@ get_failure_read(14, Stream, Call) :-	%% SIOE_NOTREADY
 	stream_snr_action(Stream, SNRAction),
 	functor(Call,Pred,ArgNum),
 	get_failure_read_snr(SNRAction, Pred, ArgNum, Stream, Call).
+
 get_failure_read(_, Stream, Call) :-
 	curmod(Mod),
 	sio_errno(Stream,ErrNo),
@@ -2204,22 +2216,27 @@ get_failure_read_maybe_reset_eof(_,_).
  * handle an end-of-file condition.
  */
 
-get_failure_read_eof(reset, _, _, Stream, Call) :-
-	!,
+get_failure_read_eof(reset, _, _, Stream, Call) 
+	:-!,
 	sio_reset_eof(Stream),
 	call(Call).
-get_failure_read_eof(eof_code, Pred, ArgNum, Stream, Call) :-
+
+get_failure_read_eof(eof_code, Pred, ArgNum, Stream, Call) 
+	:-
 	get_failure_read_eof_code(Pred, EOF_Code),
 	!,
 	arg(ArgNum, Call, EOF_Code).
+
+
 get_failure_read_eof(error, Pred, _, Stream, Call) :-
 	Pred \= skip_layout,
 	Pred \= get_token_list,
 	!,
 	curmod(Mod),
 	existence_error(past_end_of_stream, Stream, Mod:Call).
+
 get_failure_read_eof(_, _, _, _, Call) :-
-	%% This clause handles get_token_list/2 and skip_layout/1.
+		%% This clause handles get_token_list/2 and skip_layout/1.
 	call(Call).
 
 get_failure_read_eof_code(get_char, end_of_file).
@@ -2517,6 +2534,7 @@ read_buffer(console,Stream) :-
 	.
 */
 
+/****
 read_buffer(window,Stream) 
 	:-
 	stream_extra(Stream,Tail),
@@ -2540,13 +2558,15 @@ read_buffer(window,Stream)
 		true;
 		set_stream_addl1(Stream, [])
 	).
+****/
 
 read_buffer(tk_win,Stream) 
 	:- 
-	stream_extra(Stream,eof(_)),
+	stream_extra(Stream,eof(L)),
 	!,
 	sio_set_errcode(Stream,8),		%% 8 =  SIOE_EOF
-	sio_set_eof(Stream),		
+%	sio_set_eof(Stream),		
+	set_stream_extra(Stream,L),
 	fail.
 
 read_buffer(tk_win,Stream) 
@@ -2592,7 +2612,6 @@ read_buffer(tk_win,Stream) :-
 
 set_extra_eof(StreamOrAlias)
 	:-
-%pbi_write(enter_set_extra_eof(StreamOrAlias)),pbi_nl,pbi_ttyflush,
 	stream_or_alias_ok(StreamOrAlias, Stream),
 	stream_token_list(Stream,TL),
 	stream_extra(Stream,CurQueue),
@@ -2928,14 +2947,14 @@ export put_char/2.
 put_char(Stream, Char) :-
 	char_code(Char,Code),
 	sio_put_byte(Stream,Code),
-	!,
-	tk_setmark(Stream).
+	!.
+%	tk_setmark(Stream).
 put_char(Alias, Char) :-
 	is_output_alias(Alias,Stream),
 	char_code(Char,Code),
 	sio_put_byte(Stream,Code),
-	!,
-	tk_setmark(Stream).
+	!.
+%	tk_setmark(Stream).
 put_char(Stream_or_alias,Char) :-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	sio_errcode(Stream,FailCode),
@@ -2977,14 +2996,14 @@ export put_code/2.
 put_code(Stream, Char) 
 	:-
 	sio_put_byte(Stream,Char),
-	!,
-	tk_setmark(Stream).
+	!.
+%	tk_setmark(Stream).
 put_code(Alias, Char) 
 	:-
 	is_output_alias(Alias, Stream),
 	sio_put_byte(Stream,Char),
-	!,
-	tk_setmark(Stream).
+	!.
+%	tk_setmark(Stream).
 put_code(Stream_or_alias,Code) 
 	:-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
@@ -3039,13 +3058,13 @@ export put_atom/2.
 
 put_atom(Stream, Atom) :-
 	sio_put_atom(Stream,Atom),
-	!,
-	tk_setmark(Stream).
+	!.
+%	tk_setmark(Stream).
 put_atom(Alias, Atom) :-
 	is_output_alias(Alias, Stream),
 	sio_put_atom(Stream,Atom),
-	!,
-	tk_setmark(Stream).
+	!.
+%	tk_setmark(Stream).
 put_atom(Stream_or_alias,Atom) :-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	sio_errcode(Stream,FailCode),
@@ -3071,13 +3090,13 @@ export put_number/3.
 
 put_number(Stream,OutputType,Number) :-
 	sio_put_number(Stream,OutputType,Number),
-	!,
-	tk_setmark(Stream).
+	!.
+%	tk_setmark(Stream).
 put_number(Alias, OutputType,Number) :-
 	is_output_alias(Alias, Stream),
 	sio_put_number(Stream,OutputType,Number),
-	!,
-	tk_setmark(Stream).
+	!.
+%	tk_setmark(Stream).
 put_number(Stream_or_alias,OutputType,Number) :-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	sio_errcode(Stream,FailCode),
@@ -3089,6 +3108,7 @@ put_number(Stream_or_alias,OutputType,Number) :-
  * write_buffer/2
  */
 
+/*****
 write_buffer(window,Stream) :-
 	sio_buf_params(Stream, BufStart, BufSize),
 	stream_buffer(Stream,SD),
@@ -3104,6 +3124,7 @@ write_buffer(window,Stream) :-
 	endpos_2_readstream(ReadStreamAlias,EndPos).
 
 write_buffer(window,Stream) :-!.
+*****/
 
 endpos_2_readstream(0,_) :-!.
 endpos_2_readstream(ReadStreamAlias,EndPos)
@@ -3119,16 +3140,19 @@ write_buffer(tk_win,Stream) :-
 	!,
 	'$uia_peeks'(SD,BufStart,NumCs,BufUIA),
 	stream_mode(Stream, [_|OutType]),
-	stream_addl2(Stream, Interp),
+	stream_addl2(Stream, ti(Interp,WaitVarName)),
 	stream_name(Stream, WinID),
 	sio_set_position(Stream, 0, 0),
-	catch(tcl_call(Interp, [WinID,insert,end,BufUIA], _),_,true),
 
-%	catch(tcl_call(Interp, [WinID,insert,end,'\\n?-'], _),_,true),
-%	catch(tcl_call(Interp, [WinID,mark,set,lastPrompt,[end,-1,chars]], _),_,true),
-
-	catch(tcl_call(Interp, [WinID,see,end], _),_,true),
-	catch(tcl_call(Interp, [update], _),_,true).
+	tcl_call(Interp, [WinID,insert,end,BufUIA], _),
+	tcl_call(Interp, [WinID,mark,set,lastPrompt,[end,-2,chars]], _),
+	tcl_call(Interp, [WinID,mark,set,insert,end], _),
+	tcl_call(Interp, [WinID,see,end], _),
+	tcl_call(Interp, [focus,WinID], _),
+	tcl_call(Interp, [update], _).
+/*
+	tcl_call(Interp, [high_tide_flotsam,WinID,BufUIA], _).
+*/
 
 write_buffer(tk_win,Stream) :-!.
 
@@ -3218,19 +3242,27 @@ write_buffer(Stream) :-
 	!,
 	write_buffer(Stream).
 
+/*
 tk_setmark(StreamOrAlias)
 	:-
 	stream_or_alias_ok(StreamOrAlias, Stream),
 	stream_type(Stream, StrmType),
 	StrmType=tk_win,
 	stream_name(Stream, WinID),
-	stream_addl2(Stream, Interp),
+%	stream_addl2(Stream, Interp),
+	stream_addl2(Stream, ti(Interp,WaitVarName)),
 	!,
+/*
 	catch(tcl_call(Interp, [WinID,mark,set,lastPrompt,[end,-2,chars]], _),_,true),
 	catch(tcl_call(Interp, [WinID,mark,set,insert,end], _),_,true),
 	catch(tcl_call(Interp, [focus,WinID], _),_,true).
+*/
+	tcl_call(Interp, [WinID,mark,set,lastPrompt,[end,-2,chars]], _),
+	tcl_call(Interp, [WinID,mark,set,insert,end], _),
+	tcl_call(Interp, [focus,WinID], _).
 
 tk_setmark(Stream).
+*/
 
 %%
 %% uia_to_list(NumChars,UIA,Offset,List)
@@ -3282,7 +3314,8 @@ check_special_in_flush(Stream)
 	stream_type(Stream, tk_win),
 	!,
 	stream_name(Stream,WinName),
-	stream_addl2(Stream, Interp),
+%	stream_addl2(Stream, Interp),
+	stream_addl2(Stream, ti(Interp,WaitVarName)),
 	tcl_call(Interp, [WinName,mark,set,lastPrompt,[end,-1,chars]], _).
 
 
@@ -3432,14 +3465,14 @@ nl(Stream_or_alias) :-
 nl0(Stream) 
 	:-
 	sio_nl(Stream),
-	!,
-	tk_setmark(Stream).
+	!.
+%	tk_setmark(Stream).
 nl0(Alias) 
 	:-
 	is_output_alias(Alias, Stream),
 	sio_nl(Stream),
-	!,
-	tk_setmark(Stream).
+	!.
+%	tk_setmark(Stream).
 nl0(Stream_or_alias) 
 	:-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
@@ -3969,5 +4002,3 @@ sio_pckg_init :-
 :- sio_pckg_init.
 
 endmod.
-
-

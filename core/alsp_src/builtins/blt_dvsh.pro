@@ -28,11 +28,24 @@ alsdev_running.
 :- abolish(halt,0).
 export halt/0.
 halt :-
-	tcl_call(shl_tcli, [exit_prolog], _),
-	pbi_halt.
+	tcl_call(shl_tcli, [exit_prolog], _).
+%	pbi_halt.
 
 :- abolish('$start',0).
 '$start' :- start_alsdev.
+
+:- abolish(continue_prolog_loop,1).
+
+continue_prolog_loop(halt)
+	:-!,
+	halt.
+
+continue_prolog_loop(exit)
+	:-!,
+	halt.
+
+continue_prolog_loop(Status).
+
 	
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% 			TCLTK-BASED SHELL STARTUP			%%%%%
@@ -87,6 +100,7 @@ alsdev(Shared)
 		%% At this point, the windows have been created;
 
 	tcl_call(shl_tcli, [destroy,'.als_splash_screen'], _),
+
 
 	open(tk_win(shl_tcli, '.topals.text'), read, ISS, 
 		[alias(shl_tk_in_win)
@@ -255,8 +269,8 @@ use tk_alslib.
 listener_prompt
 	:-
 	write(shl_tk_out_win, '?- '), 
-	flush_output(shl_tk_out_win),
-	sio:tk_setmark(shl_tk_out_win).
+	flush_output(shl_tk_out_win).
+%	sio:tk_setmark(shl_tk_out_win).
 
 
 		%% For ALS IDE Project system; called at 
@@ -465,6 +479,8 @@ clear_workspace
 	:-
 	findall(MM, non_system_module(MM), UserMods),
 	clear_each_module(UserMods),
+	destroy_all_tcl_interpreters,
+	destroy_all_tcl_interpreters,
 	listener_prompt.
 
 clear_each_module([]).
@@ -497,6 +513,15 @@ do_source_tcl(TclInterp, File)
 	%%%%%			DEFSTRUCT HANDLING					%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+process_typ
+	:-
+	file_select_dialog(shl_tcli,[filetypes=[['typ files',['*.typ']]]],FileName),
+	(FileName = '' ->
+		true
+		;
+		builtins:comptype(FileName)
+	).
+			
 
 install_defstruct(Basic, Elts)
 	:-
@@ -1351,6 +1376,20 @@ col2(B)
 	tcl_call(shl_tcli, [do_2col,B], X).
 
 
+process_oop
+	:-
+	file_select_dialog(shl_tcli,[filetypes=[['oop files',['*.oop']]]],FileName),
+	(FileName = '' ->
+		true
+		;
+		objects:objectProcessFile(FileName,_)
+	).
+			
+
+
+
+
+
 endmod.
 
 
@@ -1422,60 +1461,3 @@ noteOptionValue(dbstr,_A,_B,_C) :- set_dbstr(_A,_C,_B).
 endmod.
 
 
-/***************
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%			PROJECT HANDLING					%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-:- make_gv('ProjectsOpen').
-:- setProjectsOpen([]).
-
-
-open_project(ProjectFile)
-	:-
-printf(user_output, 'Wants to open project file %t\n', [ProjectFile]),
-	getProjectsOpen(OpenProjects),
-		%% can go away when multiple projects can be open:
-	OpenProjects = [],
-	!,
-	read_project_file(ProjectFile, ProjectTerm, ProjectData),
-	setup_project(ProjectTerm, ProjectData),
-	setProjectsOpen([ProjectTerm | OpenProjects]).
-
-open_project(ProjectFile)
-	:-
-	getProjectsOpen([CurProjectTerm | _ ]),
-	project_name(CurProjectTerm, CurProjectName),
-	sprintf(atom(Command),
-			'Project %t still open. Close it first',
-			[CurProjectName]),
-	user_dialog(Command, _, [type=command]).
-
-
-
-new_project
-	:-
-printf(user_output, 'Wants to start new project\n', []),
-	tcl_call(shl_tcli, input_item, ItemIn),
-write(item_gotten=ItemIn),nl.
-
-save_project
-	:-
-printf(user_output, 'Wants to save project\n', []).
-
-save_as_project(ProjectFile)
-	:-
-printf(user_output, 'Wants to save project as file %t\n', [ProjectFile]).
-
-close_project
-	:-
-printf(user_output, 'Wants to close project\n', []).
-
-add_file_to_project(File)
-	:-
-printf(user_output, 'Wants to add file %t to project\n', [File]).
-
-delete_file_from_project
-	:-
-printf(user_output, 'Wants to delete file from project\n', []).
-***************/

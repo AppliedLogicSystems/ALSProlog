@@ -602,6 +602,12 @@ shell_read_execute(InStream,OutStream,Wins,Status)
 continue_prolog_loop(halt) 
 	:-!, 
 	halt.
+continue_prolog_loop(exit) 
+	:-!, 
+	fail.
+continue_prolog_loop(end_of_file) 
+	:-!, 
+	fail.
 continue_prolog_loop(Status).
 
 	%% This is the same as the old shell_read/7, except that 
@@ -666,8 +672,8 @@ shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status)
 	flush_input(InStream),
 	sio:set_user_prompt(UsersPrompt),
 	!,
-	((nonvar(Goal),Goal=halt) ->
-		Status = halt
+	((nonvar(Goal), special_shell_goals(Goal)) -> 
+		Status = Goal 
 		;
 		sio:input_stream_or_alias_ok(InStream, RealInStream),
 		stream_blocking(RealInStream,OldBlocking),
@@ -682,6 +688,10 @@ shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status)
 		push_prompt(Wins,OutStream,Prompt1),
 		Status = continue
 	).
+
+special_shell_goals(halt).
+special_shell_goals(exit).
+special_shell_goals(end_of_file).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% get_debugging_state(State)
@@ -758,6 +768,7 @@ do_shell_query(Goal0,VarNames,_,_,_,InStream,OutStream)
 			%% bad_goal: "Improper Goal: %t\n"
 	prolog_system_error(bad_goal, [VV]).
 
+/*
 do_shell_query(exit,_,_,_,_,_,_) 
 	:-!,
 	fail.
@@ -767,6 +778,12 @@ do_shell_query(end_of_file,_,_,_,_,InStream,_)
 	flush_input(InStream),      %% reset eof condition
 	!,
 	fail.
+do_shell_query(end_of_file,_,_,_,_,InStream,_) 
+	:-
+	flush_input(InStream),      %% reset eof condition
+	!.
+	fail.
+*/
 
 do_shell_query((?- Goal0),VarNames,Vars,Wins,Alarm,InStream,OutStream) 
 	:-!,
