@@ -559,4 +559,13 @@ pstr2cstr(PString) :-
 c_bind_callback(Func, Object, Term) :- '$c_bind_callback'(Func, Object, Term).
 c_unbind_callback(Func, Object, Term) :- '$c_unbind_callback'(Func, Object, Term).
 
+export read_eval_results/2.
+
+read_eval_results(Atom, Results) :-
+	atom(Atom),
+	open(atom(Atom), read, Stream, []),
+	read_term(Stream, Term, [variables(Results)]),
+	close(Stream),
+	call(Term).
+
 endmod.
