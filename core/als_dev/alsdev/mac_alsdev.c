@@ -72,7 +72,7 @@ void main(void)
 {
 	
 	/* Initialize the Macintosh */
-	if (MacintoshInit()  != TCL_OK) {
+	if (MacintoshInit() != TCL_OK) {
 		Tcl_Exit(1);
 	}
 

@@ -23,7 +23,7 @@
 
 proc adjust_Text_bindings {} {
 	global mod
-	if {"$mod"=="Ctrl"} then { set MMD Control } else { set MMD $mod }
+	if {$mod == "Ctrl"} then { set MMD Control } else { set MMD $mod }
 
 	bind Text <$MMD-d> ""
 	bind Text <$MMD-k> ""
@@ -221,14 +221,14 @@ proc add_left_col { w N } {
 proc dirty_key {w k} {
 	global array proenv
 
-	if {$k!="Home" && $k!="End" && $k!="Prior" && $k!="Next" \
-		&& $k!="Left" && $k!="Right" && $k!="Up" && $k!="Down" \
-		&& $k!="Control_L" && $k!="Control_R" \
-		&& $k!="Shift_L" && $k!="Shift_R" \
-		&& $k!="Alt_L" && $k!="Alt_R" \
-		&& $k!="Meta_L" && $k!="Meta_R" \
-		&& $k!="Caps_Lock" && $k!="Num_Lock" && $k!="Help"
-		} {
+	if {$k != "Home" && $k != "End" && $k != "Prior" && $k != "Next"
+		&& $k != "Left" && $k != "Right" && $k != "Up" && $k != "Down"
+		&& $k != "Control_L" && $k != "Control_R"
+		&& $k != "Shift_L" && $k != "Shift_R"
+		&& $k != "Alt_L" && $k != "Alt_R"
+		&& $k != "Meta_L" && $k != "Meta_R"
+		&& $k != "Caps_Lock" && $k != "Num_Lock" && $k != "Help"
+		} then {
 		set proenv($w,dirty) true
 	}
 }
@@ -236,9 +236,9 @@ proc dirty_key {w k} {
 proc bind_accelerators {w mod type} {
 	global tcl_platform
 	
-	if {"$tcl_platform(platform)" == "macintosh"} return;
+	if {$tcl_platform(platform) == "macintosh"} return;
 	
-	if {"$mod"=="Ctrl"} then { set MMD Control } else { set MMD $mod }
+	if {$mod == "Ctrl"} then { set MMD Control } else { set MMD $mod }
 
 		# file menu:
 	bind $w.text <$MMD-n> "$type.new"
@@ -374,7 +374,7 @@ proc document.open args {
 		set file [tk_getOpenFile \
 			-title "Open File" \
 			-filetypes $types ] 
-		if { $file != "" } then {
+		if {$file != ""} then {
 			set file_list [list $file]
 		}
 	}
@@ -430,7 +430,7 @@ proc document.close {w} {
 proc document.close_all {} {
 	global array proenv	
 	foreach w $proenv(document_list) {
-		if {[document.close $w]=="false"} then {return false}
+		if {[document.close $w] == "false"} then {return false}
 	}
 	return true
 }
@@ -448,7 +448,7 @@ proc document.save {w} {
 		if {$file != ""} then {
 			prolog call alsdev rename_anon_doc -atom $w -atom $file \
 				-number $proenv($w,src_handler) -var RenameFlag
-			if {"$RenameFlag"=="ok"} then {
+			if {$RenameFlag == "ok"} then {
 				save_as_core $w $file
 				return true
 			} else {

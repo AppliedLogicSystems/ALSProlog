@@ -168,7 +168,7 @@ proc new_defstruct {} {
 	
 	set SName [do_popup_input "Enter the name of the defStruct:" "Input"]
 
-	if {"$SName"!=""} then {
+	if {$SName != ""} then {
 		display_defstr_win $SName
 	} else { bell }
 }
@@ -206,7 +206,7 @@ proc defstruct_ok {ID} {
 proc defstruct_add {ID} {
 
     set IName [$ID.newentry.field get]
-	if {"$IName"==""} then {
+	if {$IName == ""} then {
 		bell
 		return
 	}
@@ -240,7 +240,7 @@ proc defstruct_add {ID} {
 
 proc defstruct_delete {ID} {
 	set SelectIdx [$ID.list.listbox curselection]
-	if {"$SelectIdx"==""} then {
+	if {$SelectIdx == ""} then {
 		bell
 		return
 	}
