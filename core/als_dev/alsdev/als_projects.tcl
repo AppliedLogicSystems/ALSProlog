@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.8 1998/08/23 18:31:37 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.9 1998/08/25 02:21:35 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -56,15 +56,23 @@ proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
 		return
 	}
 	set BaseNewFile [file tail $NewFilePath]
-	$Listbox insert end $BaseNewFile
+	set Prev [$Listbox get 0 end]
+	if {[lsearch -exact $Prev $BaseNewFile] == -1 } then {
+		$Listbox insert end $BaseNewFile
+	}
 }
 
 proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir} {
 
 	prolog call alsdev choose_mult_files \
 		-list $FileTypes -atom $FileKind -atom $DfltDir -var Choices
-	foreach Entry $Choices {
-		$Listbox insert end $Entry
+	if { "$Choices"!="" } then {
+		set Prev [$Listbox get 0 end]
+		foreach Entry $Choices {
+			if {[lsearch -exact $Prev $Entry] == -1 } then {
+				$Listbox insert end $Entry
+			}
+		}
 	}
 }
 

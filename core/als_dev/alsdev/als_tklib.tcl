@@ -217,6 +217,8 @@ proc do_popup_input {Prompt Title} {
 ##################################################################################
 
 proc do_select_items { BaseName Mode Title SourceItemsList } {
+	global array proenv 
+
 	vTclWindow.popup_select_widget $BaseName
     wm title $BaseName $Title
 
@@ -225,28 +227,29 @@ proc do_select_items { BaseName Mode Title SourceItemsList } {
 	}
 	$BaseName.clist.listbox configure -selectmode $Mode
 
-	append TheVar WaitVar $BaseName
-	global $TheVar
-
 	Window show $BaseName
-	tkwait variable $TheVar
-	set Indicies [$BaseName.clist.listbox curselection]
-	set Result ""
-	foreach Item $Indicies {
-		lappend Result "[$BaseName.clist.listbox get $Item]"
+	tkwait variable proenv(waitvar,$BaseName)
+
+	if {"$proenv(waitvar,$BaseName)"!=""} then {
+		set Indicies [$BaseName.clist.listbox curselection]
+		set Result ""
+		foreach Item $Indicies {
+			lappend Result "[$BaseName.clist.listbox get $Item]"
+		}
+	} else {
+		set Result ""
 	}
 	destroy $BaseName
 	return $Result
 }
 
 proc fin_popup_list_box { Which BaseName} {
-	append TheVar WaitVar $BaseName
-	global $TheVar
+	global array proenv 
 
 	Window hide $BaseName
 	switch $Which {
-	cancel { set $TheVar "" }
-	ok { set $TheVar $BaseName }
+	cancel { set proenv(waitvar,$BaseName) "" }
+	ok     { set proenv(waitvar,$BaseName) $BaseName }
 	}
 }
 
