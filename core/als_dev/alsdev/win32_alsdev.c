@@ -115,11 +115,13 @@ static BOOL CheckInstance(void)
 		if (IsIconic(w)) ShowWindow(w, SW_RESTORE);
 		SetForegroundWindow (w);
 		
-		data.dwData = 0; 
-    	data.cbData = strlen(__argv[1])+1; 
-    	data.lpData = __argv[1]; 
-
-		SendMessage(w, WM_COPYDATA, 0, (long)&data);
+		if (__argc == 2) {
+			data.dwData = 0; 
+	    	data.cbData = strlen(__argv[1])+1; 
+	    	data.lpData = __argv[1]; 
+	
+			SendMessage(w, WM_COPYDATA, 0, (long)&data);
+		}
 		return FALSE;
 	} else return TRUE;
 }
