@@ -323,15 +323,11 @@ proc vTclWindow.static_flags {base} {
 
 
 
+proc init_prj_spec \
+	{base TextSlots ListOfFilesSlots ListSlots SlotNames FileTypes DfltDirs} {
 
-proc vTclWindow.ppj_spec {base} {
+	global array proenv
 
-    if {$base == ""} {
-        set base .ppj_spec
-    }
-    if {[winfo exists $base]} {
-        wm deiconify $base; return
-    }
     ###################
     # CREATING WIDGETS
     ###################
@@ -341,415 +337,741 @@ proc vTclWindow.ppj_spec {base} {
     wm maxsize $base 1137 870
     wm minsize $base 1 1
     wm overrideredirect $base 0
-    wm resizable $base 1 1
+    wm resizable $base 1 0
     wm deiconify $base
-    wm title $base "Prolog Project Specification"
-    frame $base.prj_title \
+    wm title $base "Project Specification"
+
+    frame $base.title \
         -borderwidth 1 -height 30 -relief raised -width 30 
-    label $base.prj_title.01 \
+    label $base.title.label \
         -anchor w -text {Project Title:} 
-    entry $base.prj_title.entry \
+    entry $base.title.entry \
         -cursor {} -highlightthickness 0 
-    frame $base.filename \
+
+    frame $base.project_file \
         -borderwidth 1 -height 30 -relief raised -width 30 
-    label $base.filename.01 \
+    label $base.project_file.label \
         -anchor w -text {Project File Name:} 
-    entry $base.filename.entry \
+    entry $base.project_file.entry \
         -cursor {} -highlightthickness 0 
-    frame $base.startup \
-        -borderwidth 1 -height 30 -relief raised -width 30 
-    label $base.startup.01 \
-        -anchor w -text {Startup Goal:} 
-    entry $base.startup.entry \
-        -cursor {} -highlightthickness 0 
-    frame $base.sep_prolog_files \
-        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
-    frame $base.prolog_files_ctl \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-    label $base.prolog_files_ctl.label \
-        -text {Prolog (*.pro *.pl) Files:} 
-	global prolog_files_list ; set prolog_files_list closed
-    button $base.prolog_files_ctl.open_btn \
-        -command toggle_prolog_files_list -image closed_ptr -padx 11 -pady 4 \
-        -text button 
-    frame $base.prolog_files \
-        -borderwidth 1 -height 30 -relief raised -width 30 
-    listbox $base.prolog_files.listbox \
-        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
-        -xscrollcommand {.ppj_spec.prolog_files.02 set} \
-        -yscrollcommand {.ppj_spec.prolog_files.03 set} \
-		-height 0
-    scrollbar $base.prolog_files.02 \
-        -borderwidth 1 -command {.ppj_spec.prolog_files.listbox xview} -orient horiz \
-        -width 10 
-    scrollbar $base.prolog_files.03 \
-        -borderwidth 1 -command {.ppj_spec.prolog_files.listbox yview} -orient vert \
-        -width 10 
-    frame $base.prolog_files.buttons \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-    button $base.prolog_files.buttons.add_file \
-        -command {add_new_proj_file pro} -padx 11 -pady 4 -text {Add} 
-    button $base.prolog_files.buttons.add_mult_file \
-        -command {add_mult_files} -padx 11 -pady 4 -text {Add Multiple} 
-    button $base.prolog_files.buttons.del_files \
-        -command {delete_proj_files} -padx 11 -pady 4 -text {Delete} 
 
-    frame $base.sep_search_dirs \
-        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
-
-    frame $base.search_dirs_ctl \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-	global search_dirs_list ; set search_dirs_list closed
-    button $base.search_dirs_ctl.open_btn \
-        -command toggle_search_dirs_list -image closed_ptr -padx 11 -pady 4 \
-        -text button 
-    label $base.search_dirs_ctl.label \
-        -text {Search Directory Paths:} 
-    frame $base.search_dirs \
-        -borderwidth 1 -height 30 -relief raised -width 30 
-    listbox $base.search_dirs.listbox \
-        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
-        -xscrollcommand {.ppj_spec.search_dirs.02 set} \
-        -yscrollcommand {.ppj_spec.search_dirs.03 set} \
-		-height 0
-    scrollbar $base.search_dirs.02 \
-        -borderwidth 1 -command {.ppj_spec.search_dirs.listbox xview} \
-        -orient horiz -width 10 
-    scrollbar $base.search_dirs.03 \
-        -borderwidth 1 -command {.ppj_spec.search_dirs.listbox yview} \
-        -orient vert -width 10 
-    frame $base.search_dirs.buttons \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-    button $base.search_dirs.buttons.add_dir \
-        -command add_directory -padx 11 -pady 4 -text {Add} 
-    button $base.search_dirs.buttons.del_dir \
-        -command delete_directory -padx 11 -pady 4 -text {Delete} 
-
-    frame $base.sep_oop_files \
-        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
-    frame $base.oop_files_ctl \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-    label $base.oop_files_ctl.label \
-        -text {ObjectPro (*.oop) Files:} 
-	global oop_files_list ; set oop_files_list closed
-    button $base.oop_files_ctl.open_btn \
-        -command toggle_oop_files_list -image closed_ptr -padx 11 -pady 4 \
-        -text button 
-    frame $base.oop_files \
-        -borderwidth 1 -height 30 -relief raised -width 30 
-    listbox $base.oop_files.listbox \
-        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
-        -xscrollcommand {.ppj_spec.oop_files.02 set} \
-        -yscrollcommand {.ppj_spec.oop_files.03 set} \
-		-height 0
-    scrollbar $base.oop_files.02 \
-        -borderwidth 1 -command {.ppj_spec.oop_files.listbox xview} -orient horiz \
-        -width 10 
-    scrollbar $base.oop_files.03 \
-        -borderwidth 1 -command {.ppj_spec.oop_files.listbox yview} -orient vert \
-        -width 10 
-    frame $base.oop_files.buttons \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-    button $base.oop_files.buttons.add_file \
-        -command {add_new_proj_file oop} -padx 11 -pady 4 -text {Add} 
-    button $base.oop_files.buttons.del_files \
-        -command {delete_proj_files oop} -padx 11 -pady 4 -text {Delete} 
-
-    frame $base.sep_typ_files \
-        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
-    frame $base.typ_files_ctl \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-    label $base.typ_files_ctl.label \
-        -text {TypeDef (*.typ) Files:} 
-	global typ_files_list ; set typ_files_list closed
-    button $base.typ_files_ctl.open_btn \
-        -command toggle_typ_files_list -image closed_ptr -padx 11 -pady 4 \
-        -text button 
-    frame $base.typ_files \
-        -borderwidth 1 -height 30 -relief raised -width 30 
-    listbox $base.typ_files.listbox \
-        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
-        -xscrollcommand {.ppj_spec.typ_files.02 set} \
-        -yscrollcommand {.ppj_spec.typ_files.03 set} \
-		-height 0
-    scrollbar $base.typ_files.02 \
-        -borderwidth 1 -command {.ppj_spec.typ_files.listbox xview} -orient horiz \
-        -width 10 
-    scrollbar $base.typ_files.03 \
-        -borderwidth 1 -command {.ppj_spec.typ_files.listbox yview} -orient vert \
-        -width 10 
-    frame $base.typ_files.buttons \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-    button $base.typ_files.buttons.add_file \
-        -command {add_new_proj_file typ} -padx 11 -pady 4 -text {Add} 
-    button $base.typ_files.buttons.del_files \
-        -command {delete_proj_files typ} -padx 11 -pady 4 -text {Delete} 
-
-    frame $base.sep_lib_files \
-        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
-    frame $base.lib_files_ctl \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-    label $base.lib_files_ctl.label \
-        -text {Prolog Library Files:} 
-	global lib_files_list ; set lib_files_list closed
-    button $base.lib_files_ctl.open_btn \
-        -command toggle_lib_files_list -image closed_ptr -padx 11 -pady 4 \
-        -text button 
-    frame $base.lib_files \
-        -borderwidth 1 -height 30 -relief raised -width 30 
-    listbox $base.lib_files.listbox \
-        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
-        -xscrollcommand {.ppj_spec.lib_files.02 set} \
-        -yscrollcommand {.ppj_spec.lib_files.03 set} \
-		-height 0
-    scrollbar $base.lib_files.02 \
-        -borderwidth 1 -command {.ppj_spec.lib_files.listbox xview} -orient horiz \
-        -width 10 
-    scrollbar $base.lib_files.03 \
-        -borderwidth 1 -command {.ppj_spec.lib_files.listbox yview} -orient vert \
-        -width 10 
-    frame $base.lib_files.buttons \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-    button $base.lib_files.buttons.add_file \
-        -command {add_new_proj_file lib} -padx 11 -pady 4 -text {Add} 
-    button $base.lib_files.buttons.del_files \
-        -command {delete_proj_files lib} -padx 11 -pady 4 -text {Delete} 
-
-    frame $base.sep_bld_ctl \
-        -background #000000 -borderwidth 1 -height 3 -relief sunken 
-    frame $base.bld_ctl_ctl -borderwidth 1 -relief sunken 
-    label $base.bld_ctl_ctl.label -text {Package Build:} 
-	global bld_ctl_list ; set bld_ctl_list closed
-    button $base.bld_ctl_ctl.open_btn \
-        -command toggle_bld_ctl_list -image closed_ptr -padx 11 -pady 4 \
-        -text button 
-    frame $base.bld_ctl -borderwidth 1 -relief sunken 
-    frame $base.bld_ctl.os_info -borderwidth 1 -relief sunken
-    label $base.bld_ctl.os_info.l1 -text { OS:  }
-    label $base.bld_ctl.os_info.os_label -text {   } \
-		-borderwidth 1 -relief sunken
-    label $base.bld_ctl.os_info.l2 -text { Minor OS:  }
-    label $base.bld_ctl.os_info.minor_os_label \
-		-text {   } -borderwidth 1 -relief sunken
-    frame $base.bld_ctl.bld_cmd -borderwidth 1 -relief sunken
-    label $base.bld_ctl.bld_cmd.l1 \
-        -anchor w -text {Build Cmd:}
-    entry $base.bld_ctl.bld_cmd.skel \
-        -cursor {} -highlightthickness 0 
-    frame $base.bld_ctl.buttons -borderwidth 1 -relief sunken
-    button $base.bld_ctl.buttons.build \
-        -command build_the_project -padx 11 -pady 4 -text Build 
-
-
-    frame $base.buttons3 \
-        -borderwidth 1 -height 30 -width 30 
-    button $base.buttons3.save_proj \
-        -command save_project -padx 11 -pady 4 -text Save 
-    button $base.buttons3.load_open_proj \
-        -command load_open_project -padx 11 -pady 4 -text Load 
-    button $base.buttons3.cancel \
-        -command dismiss_project_spec -padx 11 -pady 4 -text Cancel 
     ###################
     # SETTING GEOMETRY
     ###################
-    pack $base.prj_title \
+    pack $base.title \
         -anchor center -expand 0 -fill x -pady 4 -side top 
-    pack $base.prj_title.01 \
+    pack $base.title.label \
         -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
-    pack $base.prj_title.entry \
+    pack $base.title.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
-    pack $base.filename \
+
+    pack $base.project_file \
         -anchor center -expand 0 -fill x -pady 2 -side top 
-    pack $base.filename.01 \
+    pack $base.project_file.label \
         -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
-    pack $base.filename.entry \
-        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
-    pack $base.startup \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.startup.01 \
-        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
-    pack $base.startup.entry \
+    pack $base.project_file.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
 
-    pack $base.sep_prolog_files \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.prolog_files_ctl \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.prolog_files_ctl.open_btn \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.prolog_files_ctl.label \
-        -anchor w -expand 0 -fill none -side left 
-    pack $base.prolog_files \
-        -anchor center -expand 0 -fill x -side top 
-    grid columnconf $base.prolog_files 0 -weight 1
-    grid rowconf $base.prolog_files 0 -weight 1
-    grid $base.prolog_files.listbox \
-        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
-    grid $base.prolog_files.02 \
-        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew 
-    grid $base.prolog_files.03 \
-        -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
-    grid $base.prolog_files.buttons \
-        -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky ew 
-    pack $base.prolog_files.buttons.add_file \
-        -anchor w -expand 0 -fill none -padx 10 -side left 
-    pack $base.prolog_files.buttons.add_mult_file \
-        -anchor w -expand 0 -fill none -padx 10 -side left 
-    pack $base.prolog_files.buttons.del_files \
-        -anchor e -expand 0 -fill none -padx 10 -side right 
-	pack forget $base.prolog_files
+    #########################
+    # Single entry text slots
+    #########################
+	foreach TxtSl $TextSlots {
+		install_text_slot $TxtSl $base [find_pair_value $TxtSl $SlotNames]
+	}
+    ###################
+    # Search Paths 
+    ###################
+	create_ls_toggle  $base search_dirs \
+		{Search Individual Directories:} \
+		[list add_search_dirs $base.search_dirs.listbox] \
+		[list del_search_dirs $base.search_dirs.listbox] 
 
-    pack $base.sep_search_dirs \
+#	create_ls_toggle  $base search_trees \
+#		{Search Directory Subtrees:} \
+#		[list add_search_dirs $base.search_trees.listbox] \
+#		[list del_search_dirs $base.search_trees.listbox] 
+
+    ###################
+    # Lists of Files 
+    ###################
+	foreach FS $ListOfFilesSlots {
+		set FTs	[find_pair_value $FS $FileTypes]
+		set FN	[find_pair_value $FS $SlotNames] 
+		set XFN ""
+		set DfltD [find_pair_value $FS $DfltDirs]
+		append XFN $FN " (" $FTs "):"
+		create_lofs_toggle $base $FS $XFN $FTs \
+			[list add_to_files_list $FS $base.$FS.listbox $FTs $FN $DfltD ] \
+			[list add_to_files_list_mult $FS $base.$FS.listbox $FTs $FN $DfltD ] \
+			[list del_from_files_list $FS $base.$FS.listbox $FTs $FN] 
+	}
+    ###################
+    # Lists of Items
+    ###################
+	foreach LS $ListSlots {
+		create_ls_toggle $base $LS [find_pair_value $LS $SlotNames] \
+		[list add_to_list_$LS $base.$LS.listbox] \
+		[list del_from_list_$LS $base.$LS.listbox] 
+	}
+
+    ###################
+    # CREATING WIDGETS
+    ###################
+    frame $base.sep_buttons \
+        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
+    frame $base.buttons \
+        -borderwidth 1 -relief sunken 
+    button $base.buttons.save \
+        -command "save_project" -padx 11 -pady 4 -text Save 
+    button $base.buttons.close \
+        -command "close_project" -padx 11 -pady 4 -text Close 
+    button $base.buttons.load \
+        -command "load_this_project" -padx 11 -pady 4 -text {(Re)Load}
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.sep_buttons \
         -anchor center -expand 0 -fill x -side top 
-    pack $base.search_dirs_ctl \
+    pack $base.buttons \
         -anchor center -expand 0 -fill x -side top 
-    pack $base.search_dirs_ctl.open_btn \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.search_dirs_ctl.label \
-        -anchor w -expand 0 -fill none -side left 
-    pack $base.search_dirs \
-        -anchor center -expand 0 -fill x -side top 
-    grid columnconf $base.search_dirs 0 -weight 1
-    grid rowconf $base.search_dirs 0 -weight 1
-    grid $base.search_dirs.listbox \
-        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
-    grid $base.search_dirs.02 \
-        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew 
-    grid $base.search_dirs.03 \
-        -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
-    grid $base.search_dirs.buttons \
-        -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky ew 
-    pack $base.search_dirs.buttons.add_dir \
-        -anchor w -expand 0 -fill none -padx 10 -side left 
-    pack $base.search_dirs.buttons.del_dir \
+    pack $base.buttons.save \
+        -anchor center -expand 0 -fill none -padx 5 -side left 
+    pack $base.buttons.close \
+        -anchor center -expand 0 -fill none -padx 5 -side left 
+    pack $base.buttons.load \
         -anchor center -expand 0 -fill none -padx 10 -side right 
-	pack forget $base.search_dirs
 
-    pack $base.sep_oop_files \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.oop_files_ctl \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.oop_files_ctl.open_btn \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.oop_files_ctl.label \
-        -anchor w -expand 0 -fill none -side left 
-    pack $base.oop_files \
-        -anchor center -expand 0 -fill x -side top 
-    grid columnconf $base.oop_files 0 -weight 1
-    grid rowconf $base.oop_files 0 -weight 1
-    grid $base.oop_files.listbox \
-        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
-    grid $base.oop_files.02 \
-        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew 
-    grid $base.oop_files.03 \
-        -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
-    grid $base.oop_files.buttons \
-        -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky ew 
-    pack $base.oop_files.buttons.add_file \
-        -anchor w -expand 0 -fill none -padx 10 -side left 
-    pack $base.oop_files.buttons.del_files \
-        -anchor e -expand 0 -fill none -padx 10 -side right 
-	pack forget $base.oop_files
-
-    pack $base.sep_typ_files \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.typ_files_ctl \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.typ_files_ctl.open_btn \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.typ_files_ctl.label \
-        -anchor w -expand 0 -fill none -side left 
-    pack $base.typ_files \
-        -anchor center -expand 0 -fill x -side top 
-    grid columnconf $base.typ_files 0 -weight 1
-    grid rowconf $base.typ_files 0 -weight 1
-    grid $base.typ_files.listbox \
-        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
-    grid $base.typ_files.02 \
-        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew 
-    grid $base.typ_files.03 \
-        -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
-    grid $base.typ_files.buttons \
-        -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky ew 
-    pack $base.typ_files.buttons.add_file \
-        -anchor w -expand 0 -fill none -padx 10 -side left 
-    pack $base.typ_files.buttons.del_files \
-        -anchor e -expand 0 -fill none -padx 10 -side right 
-	pack forget $base.typ_files
-
-    pack $base.sep_lib_files \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.lib_files_ctl \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.lib_files_ctl.open_btn \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.lib_files_ctl.label \
-        -anchor w -expand 0 -fill none -side left 
-    pack $base.lib_files \
-        -anchor center -expand 0 -fill x -side top 
-    grid columnconf $base.lib_files 0 -weight 1
-    grid rowconf $base.lib_files 0 -weight 1
-    grid $base.lib_files.listbox \
-        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
-    grid $base.lib_files.02 \
-        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew 
-    grid $base.lib_files.03 \
-        -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
-    grid $base.lib_files.buttons \
-        -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky ew 
-    pack $base.lib_files.buttons.add_file \
-        -anchor w -expand 0 -fill none -padx 10 -side left 
-    pack $base.lib_files.buttons.del_files \
-        -anchor e -expand 0 -fill none -padx 10 -side right 
-	pack forget $base.lib_files
-
-    pack $base.sep_bld_ctl \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.bld_ctl_ctl \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.bld_ctl_ctl.open_btn \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.bld_ctl_ctl.label \
-        -anchor w -expand 0 -fill none -side left 
-    pack $base.bld_ctl \
-        -anchor center -expand 0 -fill x -side top 
-
-
-    pack $base.bld_ctl.os_info \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.bld_ctl.os_info.l1 \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.bld_ctl.os_info.os_label  \
-        -anchor center -expand 0 -fill x -side left 
-    pack $base.bld_ctl.os_info.minor_os_label  \
-        -anchor center -expand 0 -fill x -side right 
-    pack $base.bld_ctl.os_info.l2  \
-        -anchor center -expand 0 -fill none -side right 
-    pack $base.bld_ctl.bld_cmd \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.bld_ctl.bld_cmd.l1  \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.bld_ctl.bld_cmd.skel  \
-        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
-    pack $base.bld_ctl.buttons  \
-        -anchor center -expand 0 -fill x -side top 
-    pack $base.bld_ctl.buttons.build  \
-        -anchor center -expand 0 -fill none -padx 15 -side top 
-
-	pack forget $base.bld_ctl
-
-
-    pack $base.buttons3 \
-        -anchor center -expand 0 -fill x -pady 5 -side top 
-    pack $base.buttons3.save_proj \
-        -anchor center -expand 0 -fill none -padx 15 -side left 
-    pack $base.buttons3.load_open_proj \
-        -anchor center -expand 0 -fill none -padx 15 -side left 
-    pack $base.buttons3.cancel \
-        -anchor center -expand 0 -fill none -padx 15 -side right 
-	
 	wm geometry $base ""
 }
 
+proc find_pair_value { Tag PairList } {
+	set Value ""
+	foreach Entry $PairList {
+		if { [lindex $Entry 0] == $Tag } then {
+			return [lindex $Entry 1]
+		} 
+	}
+}
 
+proc install_text_slot { Slot base SlotTitle } {
+    frame $base.$Slot \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    label $base.$Slot.label \
+        -anchor w -text $SlotTitle
+    entry $base.$Slot.entry \
+        -cursor {} -highlightthickness 0 
+
+    pack $base.$Slot \
+        -anchor center -expand 0 -fill x -pady 4 -side top 
+    pack $base.$Slot.label \
+        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.$Slot.entry \
+        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
+}
+
+proc show_text_slot {GuiPath Slot Value} {
+	$GuiPath.$Slot.entry delete 0 end
+	$GuiPath.$Slot.entry insert end $Value
+}
+
+proc show_list_slot {GuiPath Slot ValueList} {
+	$GuiPath.$Slot.listbox delete 0 end
+	eval $GuiPath.$Slot.listbox insert end $ValueList
+}
+
+proc create_ls_toggle { Win Which Title Add Del } {
+	global proenv
+
+    ###################
+    # CREATING WIDGETS
+    ###################
+    frame $Win.sep_$Which \
+        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
+    frame $Win.ctl_$Which \
+        -borderwidth 1 -height 30 -relief sunken -width 30 
+    button $Win.ctl_$Which.open_btn \
+        -command "toggle_files_list $Win $Which" -image closed_ptr -padx 11 -pady 4 \
+        -text button 
+    label $Win.ctl_$Which.label \
+        -text $Title
+    frame $Win.$Which \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    listbox $Win.$Which.listbox \
+        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
+        -xscrollcommand "$Win.$Which.02 set" \
+        -yscrollcommand "$Win.$Which.03 set" \
+		-height 0
+    scrollbar $Win.$Which.02 \
+        -borderwidth 1 -command "$Win.$Which.listbox xview" \
+        -orient horiz -width 10 
+    scrollbar $Win.$Which.03 \
+        -borderwidth 1 -command "$Win.$Which.listbox yview" \
+        -orient vert -width 10 
+    frame $Win.$Which.buttons \
+        -borderwidth 1 -height 30 -relief sunken -width 30 
+
+    button $Win.$Which.buttons.add \
+        -command $Add -padx 11 -pady 4 -text {Add} 
+    button $Win.$Which.buttons.del \
+        -command $Del -padx 11 -pady 4 -text {Delete} 
+
+	set proenv($Which) closed
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $Win.sep_$Which \
+        -anchor center -expand 0 -fill x -side top 
+    pack $Win.ctl_$Which \
+        -anchor center -expand 0 -fill x -side top 
+    pack $Win.ctl_$Which.open_btn \
+        -anchor center -expand 0 -fill none -side left 
+    pack $Win.ctl_$Which.label \
+        -anchor w -expand 0 -fill none -side left 
+    pack $Win.$Which \
+        -anchor center -expand 0 -fill x -side top 
+    grid columnconf $Win.$Which 0 -weight 1
+    grid rowconf $Win.$Which 0 -weight 1
+    grid $Win.$Which.listbox \
+        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
+    grid $Win.$Which.02 \
+        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew 
+    grid $Win.$Which.03 \
+        -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
+    grid $Win.$Which.buttons \
+        -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky ew 
+    pack $Win.$Which.buttons.add \
+        -anchor w -expand 0 -fill none -padx 10 -side left 
+    pack $Win.$Which.buttons.del \
+        -anchor center -expand 0 -fill none -padx 10 -side right 
+	pack forget $Win.$Which
+}
+
+
+proc toggle_files_list {Win Which} {
+	global proenv 
+
+	if {"$proenv($Which)"=="closed"} then {
+    	$Win.ctl_$Which.open_btn configure -image open_ptr
+		set proenv($Which) open
+    	pack $Win.$Which  \
+			-after $Win.ctl_$Which \
+        	-anchor center -expand 0 -fill x -side top 
+	} else {
+    	$Win.ctl_$Which.open_btn configure -image closed_ptr
+		set proenv($Which) closed
+    	pack forget $Win.$Which 
+	}
+}
+
+
+
+proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del } {
+	global proenv
+
+    ###################
+    # CREATING WIDGETS
+    ###################
+    frame $Win.sep_$Which \
+        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
+    frame $Win.ctl_$Which \
+        -borderwidth 1 -height 30 -relief sunken -width 30 
+    button $Win.ctl_$Which.open_btn \
+        -command "toggle_files_list $Win $Which" -image closed_ptr -padx 11 -pady 4 \
+        -text button 
+    label $Win.ctl_$Which.label \
+        -text $Title
+    frame $Win.$Which \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    listbox $Win.$Which.listbox \
+        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
+        -xscrollcommand "$Win.$Which.02 set" \
+        -yscrollcommand "$Win.$Which.03 set" \
+		-height 0
+    scrollbar $Win.$Which.02 \
+        -borderwidth 1 -command "$Win.$Which.listbox xview" \
+        -orient horiz -width 10 
+    scrollbar $Win.$Which.03 \
+        -borderwidth 1 -command "$Win.$Which.listbox yview" \
+        -orient vert -width 10 
+    frame $Win.$Which.buttons \
+        -borderwidth 1 -height 30 -relief sunken -width 30 
+
+    button $Win.$Which.buttons.add \
+        -command $Add -padx 11 -pady 4 -text {Add} 
+    button $Win.$Which.buttons.add_mult \
+        -command $AddMult -padx 11 -pady 4 -text {Add Mult} 
+    button $Win.$Which.buttons.del \
+        -command $Del -padx 11 -pady 4 -text {Delete} 
+
+	set proenv($Which) closed
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $Win.sep_$Which \
+        -anchor center -expand 0 -fill x -side top 
+    pack $Win.ctl_$Which \
+        -anchor center -expand 0 -fill x -side top 
+    pack $Win.ctl_$Which.open_btn \
+        -anchor center -expand 0 -fill none -side left 
+    pack $Win.ctl_$Which.label \
+        -anchor w -expand 0 -fill none -side left 
+    pack $Win.$Which \
+        -anchor center -expand 0 -fill x -side top 
+    grid columnconf $Win.$Which 0 -weight 1
+    grid rowconf $Win.$Which 0 -weight 1
+    grid $Win.$Which.listbox \
+        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
+    grid $Win.$Which.02 \
+        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew 
+    grid $Win.$Which.03 \
+        -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
+    grid $Win.$Which.buttons \
+        -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky ew 
+    pack $Win.$Which.buttons.add \
+        -anchor w -expand 0 -fill none -padx 10 -side left 
+    pack $Win.$Which.buttons.add_mult \
+        -anchor w -expand 0 -fill none -padx 10 -side left 
+    pack $Win.$Which.buttons.del \
+        -anchor center -expand 0 -fill none -padx 10 -side right 
+	pack forget $Win.$Which
+}
+
+proc rd_prj_spec {base TextSlots ListOfFilesSlots ListSlots } {
+	set Result ""
+
+	set TxtSs ""
+    lappend TxtSs [list title [$base.title.entry get] ]
+    lappend TxtSs [list project_file [$base.project_file.entry get] ]
+
+	set LstSs ""
+    lappend LstSs [list search_dirs [$base.search_dirs.listbox get 0 end] ]
+#    lappend LstSs [list search_trees [$base.search_trees.listbox get 0 end] ]
+
+	foreach TS $TextSlots {
+    	lappend TxtSs [list $TS [$base.$TS.entry get] ]
+	}
+	foreach TS $ListOfFilesSlots {
+    	lappend LstSs [list $TS [$base.$TS.listbox get 0 end] ]
+	}
+	foreach TS $ListSlots {
+    	lappend LstSs [list $TS [$base.$TS.listbox get 0 end] ]
+	}
+	lappend Result  $TxtSs $LstSs
+	return $Result
+}
+
+proc vTclWindow.ide_settings {base} {
+	global proenv
+
+    if {$base == ""} {
+        set base .ide_settings
+    }
+    if {[winfo exists $base]} {
+        wm deiconify $base; return
+    }
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel
+    wm focusmodel $base passive
+    wm geometry $base 374x208+269+255
+    wm maxsize $base 1137 870
+    wm minsize $base 275 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 0
+    wm deiconify $base
+    wm title $base "ALS IDE Settings"
+    frame $base.heartbeat \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    label $base.heartbeat.label \
+        -borderwidth 1 -text {Heartbeat: } 
+    entry $base.heartbeat.entry \
+        -width 5 
+    label $base.heartbeat.sec \
+        -borderwidth 1 -text {sec.   0.0} 
+    label $base.heartbeat.hl \
+        -borderwidth 1 -text 5.0 
+    scale $base.heartbeat.scale17 \
+        -orient horiz -resolution 0.05 -showvalue 0 -from 0.0 -to 5.0 \
+		-command slider_change_ide_heartbeat \
+		-variable proenv(heartbeat)
+	bind $base.heartbeat.entry <Return> {entry_change_ide_heartbeat}
+    frame $base.spacer1 \
+        -background #000000 -borderwidth 2 -height 4 -relief groove \
+        -width 125 
+    frame $base.printdepth \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    label $base.printdepth.max \
+        -borderwidth 1 -relief raised -text 500 
+    label $base.printdepth.label \
+        -borderwidth 1 -relief raised -text {Print depth: } 
+    entry $base.printdepth.entry \
+        -width 5 
+    label $base.printdepth.zero \
+        -borderwidth 1 -relief raised -text {       0} 
+    scale $base.printdepth.slider \
+        -orient horiz -showvalue 0 -from 0 -to 500 -resolution 1 \
+		-command slider_change_ide_printdepth \
+		-variable proenv(main_printdepth)
+	bind $base.printdepth.entry <Return> {entry_change_ide_printdepth}
+    frame $base.dcomptype \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    label $base.dcomptype.label \
+        -borderwidth 1 -text {Printing depth type: } 
+    radiobutton $base.dcomptype.radio_flat \
+        -padx 10 -text Flat -value flat -variable proenv(main_depth_type) \
+		-command change_ide_depth_type
+    radiobutton $base.dcomptype.radio_nonflat \
+        -padx 5 -text Non-flat -value nonflat -variable proenv(main_depth_type) \
+		-command change_ide_depth_type
+    frame $base.spacer2 \
+        -background #000000 -borderwidth 2 -height 4 -relief groove \
+        -width 125 
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.heartbeat \
+        -in .ide_settings -anchor center -expand 0 -fill x -side top 
+    pack $base.heartbeat.label \
+        -in .ide_settings.heartbeat -anchor center -expand 0 -fill none \
+        -side left 
+    pack $base.heartbeat.entry \
+        -in .ide_settings.heartbeat -anchor center -expand 0 -fill none \
+        -side left 
+    pack $base.heartbeat.sec \
+        -in .ide_settings.heartbeat -anchor center -expand 0 -fill none \
+        -side left 
+    pack $base.heartbeat.hl \
+        -in .ide_settings.heartbeat -anchor center -expand 0 -fill none \
+        -side right 
+    pack $base.heartbeat.scale17 \
+        -in .ide_settings.heartbeat -anchor center -expand 1 -fill x \
+        -side right 
+    pack $base.spacer1 \
+        -in .ide_settings -anchor center -expand 0 -fill x -side top 
+    pack $base.printdepth \
+        -in .ide_settings -anchor center -expand 0 -fill x -side top 
+    pack $base.printdepth.max \
+        -in .ide_settings.printdepth -anchor center -expand 0 -fill none \
+        -side right 
+    pack $base.printdepth.label \
+        -in .ide_settings.printdepth -anchor center -expand 0 -fill none \
+        -side left 
+    pack $base.printdepth.entry \
+        -in .ide_settings.printdepth -anchor center -expand 0 -fill none \
+        -side left 
+    pack $base.printdepth.zero \
+        -in .ide_settings.printdepth -anchor center -expand 0 -fill none \
+        -side left 
+    pack $base.printdepth.slider \
+        -in .ide_settings.printdepth -anchor center -expand 0 -fill x \
+        -side top 
+    pack $base.dcomptype \
+        -in .ide_settings -anchor center -expand 0 -fill x -side top 
+    pack $base.dcomptype.label \
+        -in .ide_settings.dcomptype -anchor center -expand 0 -fill none \
+        -side left 
+    pack $base.dcomptype.radio_flat \
+        -in .ide_settings.dcomptype -anchor center -expand 0 -fill none \
+        -side left 
+    pack $base.dcomptype.radio_nonflat \
+        -in .ide_settings.dcomptype -anchor center -expand 0 -fill none \
+        -side left 
+    pack $base.spacer2 \
+        -in .ide_settings -anchor center -expand 0 -fill x -side top 
+
+    wm geometry $base ""
+}
+
+proc slider_change_ide_printdepth { Value } {
+	.ide_settings.printdepth.entry delete 0 end
+	.ide_settings.printdepth.entry insert end $Value
+	prolog call builtins change_ide_stream_depth -number $Value
+}
+
+proc entry_change_ide_printdepth { } {
+	set InitValue [.ide_settings.printdepth.entry get]
+	if { $InitValue > 500 } then { 
+		set Value 500 
+		slider_change_ide_printdepth  $Value 
+	} elseif { $InitValue < 0 } then {
+		set Value 0
+		slider_change_ide_printdepth  $Value 
+	} else { 
+		set Value $InitValue 
+		prolog call builtins change_ide_stream_depth -number $Value
+	}
+	.ide_settings.printdepth.slider set $Value 
+}
+
+proc slider_change_ide_heartbeat { Value } {
+	.ide_settings.heartbeat.entry delete 0 end
+	.ide_settings.heartbeat.entry insert end $Value
+	prolog call builtins change_heartbeat -number $Value
+}
+
+proc entry_change_ide_heartbeat { } {
+	set InitValue [.ide_settings.heartbeat.entry get]
+	if { $InitValue > 500 } then { 
+		set Value 500 
+		slider_change_ide_heartbeat  $Value 
+	} elseif { $InitValue < 0 } then {
+		set Value 0
+		slider_change_ide_heartbeat  $Value 
+	} else { 
+		set Value $InitValue 
+		prolog call builtins change_heartbeat -number $Value
+	}
+	.ide_settings.heartbeat.slider set $Value 
+}
+
+proc set_heartbeat { Value } {
+	.ide_settings.heartbeat.entry delete 0 end
+	.ide_settings.heartbeat.entry insert end $Value
+	.ide_settings.heartbeat.slider set $Value 
+}
+
+proc change_ide_depth_type { } {
+	global proenv
+	prolog call builtins change_ide_depth_type -atom $proenv(main_depth_type)
+}
+
+	#############################################
+	######      FIND AND REPLACE
+	#############################################
+
+set proenv(searchdirect) forward
+set proenv(searchnature) exact
+
+proc vTclWindow.find_repl {base} {
+	global proenv
+
+    if {$base == ""} {
+        set base .find_repl
+    }
+    if {[winfo exists $base]} {
+        wm deiconify $base; return
+    }
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel
+    wm focusmodel $base passive
+    wm geometry $base 510x200+140+392
+    wm maxsize $base 1137 870
+    wm minsize $base 1 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 1
+    wm deiconify $base
+    wm title $base "Find / Replace"
+    frame $base.f1 \
+        -borderwidth 0 -height 5 -relief flat -width 125 
+			## INVISIBLE LABEL:
+    label $base.f1.whichwin \
+        -borderwidth 0 -relief flat -text $proenv(current_search_window)
+    frame $base.search \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    label $base.search.label \
+        -borderwidth 1 -relief flat -text {Search for:} 
+    entry $base.search.entry
+    frame $base.replace \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    label $base.replace.label \
+        -borderwidth 1 -relief flat -text {Replace by:} 
+    entry $base.replace.entry 
+    frame $base.buttons \
+        -borderwidth 0 -relief flat -width 125 
+    button $base.buttons.find \
+        -padx 11 -pady 4 -text {Find (Next)} -command edit_find_next
+    button $base.buttons.replace \
+        -padx 11 -pady 4 -text Replace -command edit_replace
+    button $base.buttons.replaceall \
+        -padx 11 -pady 4 -state disabled -text {Replace All} \
+		-command edit_replace_all
+    button $base.buttons.findreplace \
+        -padx 11 -pady 4 -text {Find & Replace} \
+		-command edit_find_replace
+    frame $base.spacer2 \
+        -background #000000 -height 3 -relief groove -width 125 
+    frame $base.options \
+        -borderwidth 2 -height 90 -relief groove -width 125 
+    label $base.options.label \
+        -borderwidth 1 -text {Search Options} 
+    frame $base.options.direction \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    label $base.options.direction.label \
+        -borderwidth 1 -text Direction: 
+
+    radiobutton $base.options.direction.forward \
+        -text Forward -value forward -variable proenv(searchdirect) \
+		-command [list set \
+			proenv([.find_repl.f1.whichwin cget -text],searchdirect) forward]
+    radiobutton $base.options.direction.backward \
+        -text Backward -value backward -variable proenv(searchdirect) \
+		-command [list set \
+			proenv([.find_repl.f1.whichwin cget -text],searchdirect) backward]
+    frame $base.options2 \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    label $base.options2.label \
+        -borderwidth 1 -text {Pattern Type:} 
+    radiobutton $base.options2.exact \
+        -text {Exact Match} -value exact -variable proenv(searchnature) \
+		-command [list set \
+			proenv([.find_repl.f1.whichwin cget -text],searchnature) exact]
+    radiobutton $base.options2.regexp \
+        -text {Regular Expression} -value regexp -variable proenv(searchnature) \
+		-command [list set \
+			proenv([.find_repl.f1.whichwin cget -text],searchnature) regexp]
+    frame $base.wintgt \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    label $base.wintgt.label1 \
+        -borderwidth 1 -text {Target Window:} 
+    label $base.wintgt.label \
+        -borderwidth 1 -text {} 
+
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.f1 \
+        -in $base -anchor center -expand 0 -fill x -side top 
+    pack $base.search \
+        -in $base -anchor center -expand 0 -fill x -pady 5 -side top 
+    pack $base.search.label \
+        -in $base.search -anchor center -expand 0 -fill none -padx 10 \
+        -side left 
+    pack $base.search.entry \
+        -in $base.search -anchor center -expand 1 -fill x -padx 5 \
+        -side top 
+    pack $base.replace \
+        -in $base -anchor center -expand 0 -fill x -pady 5 -side top 
+    pack $base.replace.label \
+        -in $base.replace -anchor center -expand 0 -fill none -padx 10 \
+        -side left 
+    pack $base.replace.entry \
+        -in $base.replace -anchor center -expand 1 -fill x -padx 5 \
+        -side top 
+    pack $base.buttons \
+        -in $base -anchor center -expand 0 -fill x -pady 5 -side top 
+    pack $base.buttons.find \
+        -in $base.buttons -anchor center -expand 0 -fill none -padx 10 \
+        -side left 
+    pack $base.buttons.replace \
+        -in $base.buttons -anchor center -expand 0 -fill none -padx 10 \
+        -side left 
+    pack $base.buttons.replaceall \
+        -in $base.buttons -anchor center -expand 0 -fill none -padx 10 \
+        -side right 
+    pack $base.buttons.findreplace \
+        -in $base.buttons -anchor center -expand 0 -fill none -padx 10 \
+        -side right 
+    pack $base.spacer2 \
+        -in $base -anchor center -expand 0 -fill x -side top 
+    pack $base.options \
+        -in $base -anchor center -expand 0 -fill x -side top 
+    pack $base.options.label \
+        -in $base.options -anchor center -expand 0 -fill none -padx 10 \
+        -side left 
+    pack $base.options.direction \
+        -in $base.options -anchor center -expand 0 -fill none \
+        -side right 
+    pack $base.options.direction.label \
+        -in $base.options.direction -anchor center -expand 0 -fill none \
+        -side left 
+    pack $base.options.direction.forward \
+        -in $base.options.direction -anchor center -expand 0 -fill none \
+        -padx 5 -side left 
+    pack $base.options.direction.backward \
+        -in $base.options.direction -anchor center -expand 0 -fill none \
+        -padx 5 -side left 
+    pack $base.options2 \
+        -in $base -anchor center -expand 0 -fill x -side top 
+    pack $base.options2.label \
+        -in $base.options2 -anchor center -expand 0 -fill none -padx 10 \
+        -side left 
+    pack $base.options2.exact \
+        -in $base.options2 -anchor center -expand 0 -fill none -padx 15 \
+        -side left 
+    pack $base.options2.regexp \
+        -in $base.options2 -anchor center -expand 0 -fill none -padx 15 \
+        -side left 
+
+    pack $base.wintgt \
+        -in $base -anchor center -expand 0 -fill x -side top 
+    pack $base.wintgt.label \
+        -in $base.wintgt -anchor center -expand 0 -fill none \
+        -side right  -padx 10 
+    pack $base.wintgt.label1 \
+        -in $base.wintgt -anchor center -expand 0 -fill none \
+        -side right  -padx 10
+
+	wm geometry $base ""
+    wm resizable $base 1 0
+}
+
+
+
+
+
+
+proc vTclWindow.syn_errors {base} {
+    if {$base == ""} {
+        set base .syn_errors
+    }
+    if {[winfo exists $base]} {
+        wm deiconify $base; return
+    }
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel
+    wm focusmodel $base passive
+    wm geometry $base 521x247+261+300
+    wm maxsize $base 1137 870
+    wm minsize $base 1 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 1
+    wm deiconify $base
+    wm title $base "Syntax Errors"
+    frame $base.headers \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    label $base.headers.lnum \
+        -borderwidth 1 -relief raised -text Line# 
+    label $base.headers.desc \
+        -borderwidth 1 -relief raised -text Description 
+    frame $base.errlist \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    listbox $base.errlist.listbox \
+        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
+        -xscrollcommand [list $base.errlist.xscrollbar set] \
+        -yscrollcommand [list $base.errlist.yscrollbar set] 
+    scrollbar $base.errlist.xscrollbar \
+        -borderwidth 1 -command [list $base.errlist.listbox xview] -orient horiz \
+        -width 10 
+    scrollbar $base.errlist.yscrollbar \
+        -borderwidth 1 -command [list $base.errlist.listbox yview] -orient vert \
+        -width 10 
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.headers \
+        -in $base -anchor center -expand 0 -fill x -side top 
+    pack $base.headers.lnum \
+        -in $base.headers -anchor center -expand 0 -fill none -padx 5 \
+        -side left 
+    pack $base.headers.desc \
+        -in $base.headers -anchor center -expand 0 -fill none -side top 
+    pack $base.errlist \
+        -in $base -anchor center -expand 1 -fill both -side top 
+    grid columnconf $base.errlist 0 -weight 1
+    grid rowconf $base.errlist 0 -weight 1
+    grid $base.errlist.listbox \
+        -in $base.errlist -column 0 -row 0 -columnspan 1 -rowspan 1 \
+        -sticky nesw 
+    grid $base.errlist.xscrollbar \
+        -in $base.errlist -column 0 -row 1 -columnspan 1 -rowspan 1 \
+        -sticky ew 
+    grid $base.errlist.yscrollbar \
+        -in $base.errlist -column 1 -row 0 -columnspan 1 -rowspan 1 \
+        -sticky ns 
+}
 

@@ -67,7 +67,10 @@ proc vTclWindow.debugwin {base} {
     button $base.buttons.leap \
         -background $proenv(debugwin_button,background) \
         -padx 4 -text leap -underline 0 \
-		-command { prolog call debugger clear_source_traces ; set DebugResponse Bl }
+		-command { send_prolog debugger_mgr clear_for_leap ; set DebugResponse Bl }
+
+#		-command { prolog call debugger clear_source_traces ; set DebugResponse Bl }
+
     button $base.buttons.retry \
         -background $proenv(debugwin_button,background) \
         -padx 0 -text retry -underline 0 \
@@ -118,6 +121,19 @@ proc vTclWindow.debugwin {base} {
 		-font $proenv(.debugwin,font) \
         -width 40 -yscrollcommand {.debugwin.vsb set} 
 
+    frame $base.stacklabel \
+        -borderwidth 1 -relief raised 
+    label $base.stacklabel.label \
+        -padx 5 -relief flat -text {Predicate Call Stack} 
+
+	listbox $base.stacklist \
+		-background $proenv(.debugwin,background) \
+		-foreground $proenv(.debugwin,foreground) \
+		-font $proenv(.debugwin,font) \
+        -yscrollcommand "$base.stacklist_vsb set" 
+    scrollbar $base.stacklist_vsb \
+        -borderwidth 1 -command "$base.stacklist yview" -orient vert 
+
     if {$tcl_platform(platform) == "macintosh"} {
         $base.text configure -highlightthickness 0
     }
@@ -128,8 +144,20 @@ proc vTclWindow.debugwin {base} {
 
 	$base configure -menu $base.menubar
 
-    pack $base.buttons \
-        -anchor center -expand 0 -fill x -side top 
+	grid columnconf $base 0 -weight 1
+	grid columnconf $base 1 -weight 0
+	grid rowconf $base 0 -weight 0
+	grid rowconf $base 1 -weight 0
+	grid rowconf $base 2 -weight 1
+	grid rowconf $base 3 -weight 0
+	grid rowconf $base 4 -weight 1
+
+#    pack $base.buttons \
+#        -anchor center -expand 0 -fill x -side top 
+
+    grid $base.buttons -in $base \
+        -column 0 -row 0 -columnspan 2 -rowspan 1 -sticky ew
+
     pack $base.buttons.creep \
         -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.skip \
@@ -147,8 +175,12 @@ proc vTclWindow.debugwin {base} {
     pack $base.buttons.interrupt \
         -anchor center -expand 0 -fill none -side right 
 
-    pack $base.debug_status \
-        -anchor center -expand 0 -fill x -side top 
+#    pack $base.debug_status \
+#        -anchor center -expand 0 -fill x -side top 
+
+    grid $base.debug_status \
+        -column 0 -row 1 -columnspan 2 -rowspan 1 -sticky ew
+
     pack $base.debug_status.port_label \
         -anchor center -expand 0 -fill none -side left 
     pack $base.debug_status.port \
@@ -162,8 +194,22 @@ proc vTclWindow.debugwin {base} {
     pack $base.debug_status.call_num \
         -anchor center -expand 0 -fill none -side left 
 
-	pack $base.vsb -side right -fill both
-	pack $base.text -fill both -expand 1 -side left
+#	pack $base.vsb -side right -fill both
+#	pack $base.text -fill both -expand 1 -side left
+
+	grid $base.text \
+        -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky nesw
+	grid $base.vsb \
+        -column 1 -row 2 -columnspan 1 -rowspan 1 -sticky ns
+
+    grid $base.stacklabel \
+        -column 0 -row 3 -columnspan 2 -rowspan 1 -sticky ew
+    pack $base.stacklabel.label \
+        -anchor center -expand 0 -fill none -side left -padx 15
+	grid $base.stacklist \
+        -column 0 -row 4 -columnspan 1 -rowspan 1 -sticky nesw
+    grid $base.stacklist_vsb \
+        -column 1 -row 4 -columnspan 1 -rowspan 1 -sticky ns
 
 	bind .debugwin <Unmap> {unmap_alsdev_debug}
 	bind .debugwin <Map>   {map_alsdev_debug}

@@ -101,10 +101,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	extern long ss_image_offset(const char *image_name);
 
 	if (!ss_image_offset(executable_path)) {
+#if 0
 		term = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "consult"),
-					1, AP_NewSymbolFromStr(w, "blt_dvsh"));
+					1, AP_NewSymbolFromStr(w, "ldr_dvsh"));
 			
 	    AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
+#endif
+		MessageBox(GetFocus(), "This is just a stub!", "ALS Prolog", 0);
+
 	}
 }
 
@@ -120,5 +124,4 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 	
     PI_shutdown();
-
 }

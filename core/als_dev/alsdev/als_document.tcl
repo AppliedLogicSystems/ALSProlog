@@ -50,22 +50,20 @@ proc create_document_window {title} {
 	global array proenv
 	global mod
 
-
-	# Create a unique window name
+		# Create a unique window name:
 
 	incr proenv(document_index)
 	set w ".document$proenv(document_index)"
 	
-	# Create window
+		# Create window:
 
 	toplevel $w
 	wm title $w $title
 	wm protocol $w WM_DELETE_WINDOW "document.close $w"
 
-	# Setup menus
+		# Setup menus:
 
 	menu $w.menubar -tearoff 0
-
 	add_default_menus $w.menubar
 	add_file_menu $w.menubar document $w
 	add_edit_menu $w.menubar document $w
@@ -75,14 +73,21 @@ proc create_document_window {title} {
 		
 	$w configure -menu $w.menubar		
 
-	# Setup text and scrollbars
-	
-	text $w.text -yscrollcommand "$w.yscrollbar set" -xscrollcommand "$w.xscrollbar set"  -wrap none -setgrid true
+		# Setup text and scrollbars
 	scrollbar $w.yscrollbar -orient vertical -command "$w.text yview"
 	scrollbar $w.xscrollbar -orient horizontal -command "$w.text xview"
-	pack $w.yscrollbar -side right -fill both
-	pack $w.xscrollbar -side bottom -fill both
-	pack $w.text -fill both -expand 1 -side left
+
+	text $w.text -yscrollcommand "$w.yscrollbar set" -xscrollcommand "$w.xscrollbar set"  -wrap none -setgrid true
+
+	grid columnconf $w 0 -weight 1
+	grid columnconf $w 1 -weight 0
+	grid rowconf $w 0 -weight 1
+	grid rowconf $w 1 -weight 0
+
+	grid $w.text -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw
+	grid $w.yscrollbar -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns
+	grid $w.xscrollbar  -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew
+
 	$w.text configure -highlightthickness 0 \
 		-background $proenv(.document,background) \
 		-foreground $proenv(.document,foreground) \
@@ -91,18 +96,121 @@ proc create_document_window {title} {
 		-font $proenv(.document,font) \
 		-tabs $proenv(.document,tabs) 
 
-	# accelerators
+		## setup linenumber pane and syntax error pane, but
+		## don't realize them until they are needed:
+    frame $w.error_headers -borderwidth 2 -relief groove \
+		-background #ec5648
+    label $w.error_headers.lnum \
+        -borderwidth 1 -relief raised -text Line# 
+    label $w.error_headers.desc \
+        -borderwidth 1 -relief raised -text {Syntax Error Description}
+    pack $w.error_headers.lnum \
+        -in $w.error_headers -anchor center -expand 0 -fill none -padx 15 \
+        -side left 
+    pack $w.error_headers.desc \
+        -in $w.error_headers -anchor center -expand 0 -fill none -side top 
+
+	text $w.ltext -yscrollcommand "$w.yscrollbar set" -wrap none -width 5 -setgrid true 
+
+	$w.ltext configure -highlightthickness 0 \
+		-background $proenv(.document,background) \
+		-foreground $proenv(.document,foreground) \
+		-font $proenv(.document,font) 
+
+    listbox $w.listbox \
+        -xscrollcommand [list $w.errlist_xsb set] \
+        -yscrollcommand [list $w.errlist_ysb set] 
+    scrollbar $w.errlist_xsb \
+        -borderwidth 1 -command [list $w.listbox xview] -orient horiz 
+    scrollbar $w.errlist_ysb \
+        -borderwidth 1 -command [list $w.listbox yview] -orient vert 
+	$w.listbox configure -highlightthickness 0 \
+		-background $proenv(.document,background) \
+		-foreground $proenv(.document,foreground) \
+		-font $proenv(.document,font) 
+
+	bind $w.listbox <Double-Button-1> [list error_focus_attn $w]
+
+	## Now finish the principal window:
+
+		# accelerators
 	bind_accelerators $w $mod document
 
 	focus $w.text
-
 	bind $w.text <Key> "dirty_key $w %K"
 
-	# Init document fields
+		# Init document fields
 	set proenv($w,dirty) false
 	lappend proenv(document_list) $w
 	
 	return $w
+}
+
+proc bothscrolly { w args } {
+	eval $w.text yview $args
+	eval $w.ltext yview $args
+}
+
+proc add_line_numbers_and_syn_errs { w } {
+	global array proenv
+
+	$w.yscrollbar configure -command ""
+	$w.yscrollbar configure -command "bothscrolly $w"
+
+	grid columnconf $w 0 -weight 0
+	grid columnconf $w 1 -weight 1
+	grid columnconf $w 2 -weight 0
+	grid rowconf $w 0 -weight 1
+	grid rowconf $w 1 -weight 0
+	grid rowconf $w 2 -weight 0
+	grid rowconf $w 3 -weight 0
+	grid rowconf $w 4 -weight 0
+
+	$w.ltext configure -width 5
+	grid $w.ltext  -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky ns
+	grid $w.text -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky nesw
+	grid $w.yscrollbar -column 2 -row 0 -columnspan 1 -rowspan 1 -sticky ns
+	grid $w.xscrollbar  -column 1 -row 1 -columnspan 1 -rowspan 1 -sticky ew
+
+	grid $w.error_headers  -column 0 -row 2 -columnspan 3 -rowspan 1 -sticky ew
+	$w.listbox delete 0 end
+	grid $w.listbox -column 0 -row 3 -columnspan 2 -rowspan 1 -sticky nesw
+	grid $w.errlist_ysb -column 2 -row 3 -columnspan 1 -rowspan 1 -sticky ns
+	grid $w.errlist_xsb  -column 0 -row 4 -columnspan 2 -rowspan 1 -sticky ew
+
+	set LastIX [$w.text index end]
+	set NL0 [expr [string range $LastIX 0 [expr [string first "." $LastIX] - 1]] - 1]
+	$w.ltext delete 1.0 end
+	for {set linenum 1} {$linenum < $NL0 } {incr linenum} {
+		$w.ltext insert end [format "%s\n" $linenum]
+	}
+	$w.ltext insert end $NL0
+}
+
+proc add_left_col { w N } {
+	global array proenv
+
+	$w.yscrollbar configure -command ""
+	$w.yscrollbar configure -command "bothscrolly $w"
+
+	grid columnconf $w 0 -weight 0
+	grid columnconf $w 1 -weight 1
+	grid columnconf $w 2 -weight 0
+
+	$w.ltext configure -width $N 
+
+	grid $w.ltext  -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky ns
+	grid $w.text -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky nesw
+	grid $w.yscrollbar -column 2 -row 0 -columnspan 1 -rowspan 1 -sticky ns
+	grid $w.xscrollbar  -column 1 -row 1 -columnspan 1 -rowspan 1 -sticky ew
+
+	set LastIX [$w.text index end]
+	set NL0 [expr [string range $LastIX 0 [expr [string first "." $LastIX] - 1]] - 1]
+	$w.ltext delete 1.0 end
+	for {set linenum 1} {$linenum < $NL0 } {incr linenum} {
+		$w.ltext insert end [format " \n" ]
+	}
+	$w.ltext insert end $NL0
 }
 
 proc dirty_key {w k} {
@@ -144,8 +252,17 @@ proc bind_accelerators {w mod type} {
 
 		# prolog menu:
 	bind $w.text <$MMD-k> "$type.consult $w"
+}
 
+proc clear_src_win_decorations {w line} {
+	$w.text tag delete syntax_err_head syntax_err_tail head_tag call_tag
+	$w.ltext insert $line.0 " "
+	update idletasks
+}
 
+proc close_error_annotations {w} {
+	grid remove $w.listbox $w.errlist_ysb $w.errlist_xsb  $w.error_headers  $w.ltext  
+	update idletasks
 }
 
 proc dispose_document_window {w} {
@@ -200,10 +317,13 @@ proc load_document {file} {
 	return $proenv(document,$file)
 }
 
-# Document methods
+	########################
+	# Document methods
+	########################
 
 proc document.new {} {
-	create_document_window "Untitled"
+	set w [create_document_window "Untitled"]
+	send_prolog_t als_ide_mgr [list open_non_file_edit_win $w] list
 }
 
 proc document.open args {
@@ -223,7 +343,12 @@ proc document.open args {
 		}
 	}
 	foreach file $file_list {
-		load_document $file
+		set FT [file tail $file]
+		set BaseFile [file rootname [file tail $file]],
+		set Ext [file extension $file],
+		send_prolog_t als_ide_mgr [list open_edit_win $file $BaseFile $Ext] list
+			## prolog source_handler will call back to do:
+#		load_document $file
 	}
 }
 
@@ -255,8 +380,11 @@ proc save_check {w} {
 
 
 proc document.close {w} {
+	global array proenv	
 	if {[save_check $w]} then {
-		dispose_document_window $w
+		prolog call $proenv(dflt_mod) send -number $proenv($w,src_handler) -atom close_edit_win
+			## the prolog side does this:
+			#		dispose_document_window $w
 		return true
 	} else {
 		return false
@@ -299,6 +427,7 @@ proc document.save_as {w} {
 		store_text $w.text $file
 		set proenv($w,dirty) false
 		if {$tcl_platform(platform) == "macintosh"} then { file attributes $file -creator ALS4 -type TEXT }
+		send_prolog_t als_ide_mgr [list save_doc_as $w $file] list
 		return true
 	} else {
 		return false
@@ -310,6 +439,7 @@ proc document.cut {w} {
 	    clipboard clear -displayof $w
 	    clipboard append -displayof $w $data
 		$w.text delete sel.first sel.last
+		set proenv($w,dirty) true
 	}
 }
 
@@ -334,6 +464,10 @@ proc document.clear {w} {
 
 proc document.select_all {w} {
 	$w.text tag add sel 1.0 end
+}
+
+proc document.find {w} {
+	start_edit_find $w
 }
 
 proc document.preferences {w} {

@@ -15,17 +15,23 @@ include "Tk8.0.shlb" 'PICT';
 include "Tk8.0.shlb" 'SICN';
 
 /* Tcl source files */
+
+/* Loaded in bld_dvsh.pro */
 read 'TEXT' (200, "alsdev", purgeable, preload) "alsdev.tcl";
-read 'TEXT' (201, "alsdev_main", purgeable, preload) "alsdev_main.tcl";
-read 'TEXT' (202, "als_settings", purgeable, preload) "als_settings.tcl";
-read 'TEXT' (203, "als_tklib", purgeable, preload) "als_tklib.tcl";
+read 'TEXT' (201, "als_splash", purgeable, preload) "als_splash.tcl";
+
+/* Loaded in alsdev.tcl */
+read 'TEXT' (202, "alsdev_main", purgeable, preload) "alsdev_main.tcl";
+read 'TEXT' (203, "als_settings", purgeable, preload) "als_settings.tcl";
 read 'TEXT' (204, "debugwin", purgeable, preload) "debugwin.tcl";
 read 'TEXT' (205, "defstr", purgeable, preload) "defstr.tcl";
-read 'TEXT' (206, "als_document", purgeable, preload) "als_document.tcl";
-read 'TEXT' (207, "als_menu", purgeable, preload) "als_menu.tcl";
-read 'TEXT' (208, "als_splash", purgeable, preload) "als_splash.tcl";
-read 'TEXT' (209, "als_tkfbox", purgeable, preload) "als_tkfbox.tcl";
-read 'TEXT' (210, "als_projects", purgeable, preload) "als_projects.tcl";
+read 'TEXT' (206, "als_menu", purgeable, preload) "als_menu.tcl";
+read 'TEXT' (207, "als_document", purgeable, preload) "als_document.tcl";
+read 'TEXT' (208, "als_projects", purgeable, preload) "als_projects.tcl";
+read 'TEXT' (209, "prodebug", purgeable, preload) "prodebug.tcl";
+
+read 'TEXT' (210, "als_tklib", purgeable, preload) "als_tklib.tcl";
+
 
 /* Tcl images in base64 format */
 read 'GIFf' (200, "turnstile_splash", purgeable, preload) "turnstile_splash.b64";
