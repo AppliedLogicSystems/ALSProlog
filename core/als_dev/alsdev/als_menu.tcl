@@ -34,7 +34,7 @@ proc add_file_menu {menubar type window} {
 	global elipsis
 	
 	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
-	menu $menubar.file -tearoff $TearOff
+	menu $menubar.file -tearoff $TearOff -title File
 	
     $menubar.file add command -label New -accelerator "$mod-N" -command document.new
     if {$tcl_platform(platform) == "macintosh"} {
@@ -65,7 +65,7 @@ proc add_edit_menu {menubar type window} {
 	global proenv
 
 	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
-	menu $menubar.edit -tearoff $TearOff
+	menu $menubar.edit -tearoff $TearOff -title Edit
 	
     $menubar.edit add command \
         -label Undo -accelerator "$mod-Z" -command "$type.undo $window" -state disabled
@@ -94,7 +94,7 @@ proc add_prolog_menu {menubar type window} {
 	global elipsis
 
 	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
-	menu $menubar.prolog -tearoff $TearOff
+	menu $menubar.prolog -tearoff $TearOff -title Prolog
 
     $menubar.prolog add command -label "Consult" -accelerator "$mod-K" -command "$type.consult $window"
 	$menubar.prolog add command \
@@ -129,7 +129,7 @@ proc add_tools_menu {menubar type window} {
 	if {"$type"=="document"} then { return }	
 
 	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
-	menu $menubar.tools -tearoff $TearOff
+	menu $menubar.tools -tearoff $TearOff -title Tools
 
 	if {"$type"=="listener"} then {
 		$menubar.tools add checkbutton \
@@ -149,31 +149,18 @@ proc add_tools_menu {menubar type window} {
 	} else {
 
 		# Spy
-		$menubar.tools add checkbutton  -label {Spy/NoSpy} \
-			-command exec_toggle_spywin -variable proenv(spywin)
+		$menubar.tools add command  -label "Spy$elipsis" \
+			-command toggle_spywin 
+#		$menubar.tools add checkbutton  -label {Spy$elipsis} \
+#			-command exec_toggle_spywin -variable proenv(spywin)
 		$menubar.tools add command  -label {NoSpy all } \
 			-command {prolog call debugger nospy } 
-		$menubar.tools add command  -label {Spy When} -state disabled
+
+#		$menubar.tools add command  -label {Spy When} -state disabled
 
 		$menubar.tools add separator
 		$menubar.tools add command  -label {Debug Settings } \
 			-command {show_debug_settings}
-
-		menu $menubar.tools.leashing -relief raised
-    	$menubar.tools add cascade \
-        	-label {Leashing}  -menu $menubar.tools.leashing
-		$menubar.tools.leashing add checkbutton \
-        	-label {call} -variable proenv(leash,call) \
-			-command {exec_toggle_leash call} 
-		$menubar.tools.leashing add checkbutton \
-        	-label {exit} -variable proenv(leash,exit) \
-			-command {exec_toggle_leash exit} 
-		$menubar.tools.leashing add checkbutton \
-        	-label {redo} -variable proenv(leash,redo) \
-			-command {exec_toggle_leash redo} 
-		$menubar.tools.leashing add checkbutton \
-        	-label {fail} -variable proenv(leash,fail) \
-			-command {exec_toggle_leash fail} 
 	}
 	$menubar add cascade -label "Tools" -menu $menubar.tools
 }

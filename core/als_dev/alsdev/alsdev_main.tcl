@@ -17,8 +17,7 @@ proc vTclWindow.topals {args} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel .topals -class Toplevel \
-		-background $proenv(.topals,background) 
+    toplevel .topals -class Toplevel -background $proenv(.topals,background) 
     wm focusmodel .topals passive
     wm geometry .topals 559x567+149+178
     wm maxsize .topals 1265 994
@@ -105,6 +104,7 @@ proc vTclWindow.topals {args} {
 
 	# accelerators
 	bind_accelerators .topals $mod listener
+
 }
 
 proc vTclWindow.dyn_flags {base} {

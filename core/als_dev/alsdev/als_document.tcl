@@ -168,12 +168,11 @@ proc document.open args {
 		set file [tk_getOpenFile \
 			-defaultextension pro \
 			-title "Open File" \
-			-filetypes {{"Prolog Files" {.pro .pl} TEXT}{"Tcl/Tk Files" {.tcl} TEXT}{{All Files} {*} TEXT} } ]
+			-filetypes {{"Prolog Files" {.pro .pl} TEXT} {{Tcl/Tk Files} {.tcl} TEXT} {{All Files} {*} TEXT} } ]
 		if { "$file" != "" } then {
 			set file_list [list $file]
 		}
 	}
-	
 	foreach file $file_list {
 		load_document $file
 	}
