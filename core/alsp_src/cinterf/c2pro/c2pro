@@ -52,7 +52,7 @@ cur_debug_level(1).
 :-dynamic(imported/1).
 :-dynamic(trace_enter_file/1).
 :-dynamic(tgt_os/1).
-:-dynamic(win32funcmacros/0).
+:-dynamic(output:win32funcmacros/0).
 
 :- make_gv("InfoTable").
 

@@ -209,7 +209,7 @@ parse_statement(State) -->		% Obj-C @stmts
 parse_statement(State) -->
 	decln_specs(State,DeclnSpec),
 	declt_list(State,DecltList),
-	consume_semicolon(State),
+	consume_semicolon(State, DeclnSpec, DecltList),
 	!,
 	{	decln_debug(3,DeclnSpec,DecltList,State),
 		process_decln(DeclnSpec,DecltList,State) }.
@@ -218,11 +218,11 @@ parse_statement(State,Toks,[])
 	:-
 	error('parse failed :\nDiscarded tokens %t\n',[Toks],State).
 
-consume_semicolon(State) --> [semicolon], !.
-consume_semicolon(State,Toks,[]) 
+consume_semicolon(State, _, _) --> [semicolon], !.
+consume_semicolon(State,X,Y,Toks,[]) 
 	:-
 	error('parse error\nParsed successfully %t\nI don\'t understand %t\nRemaining tokens %t\n\n',
-		   [DSpec,Declt,Toks],State),
+		   [X, Y, /*DSpec, Declt,*/ Toks],State),
 	get_line(_).
 
 %%-------------------------------------------------------
