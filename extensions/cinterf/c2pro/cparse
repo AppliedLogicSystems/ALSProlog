@@ -396,6 +396,10 @@ decln_specs_more(State,[]) --> [].
 %-----------------------------
 
 storage_class_spec([storageClass=Class]) --> 
+	[ident(Class),string('C'),fident('__declspec'),
+		lparen,ident(dllexport),rparen], {storage_spec(Class),!}.
+
+storage_class_spec([storageClass=Class]) --> 
 	[ident(Class)], {storage_spec(Class)}.
 
 storage_spec(typedef).
@@ -439,6 +443,9 @@ type_spec(State,[type=void]) --> 				% void
 	!.
 type_spec(State,[]) --> 						% volatile
 	[ident(volatile)].
+
+type_spec(State,[type='HANDLE']) --> 						% volatile
+	[ident('HANDLE')].
 
 %-----------------------------
 %	optional long qualifier for float/double
@@ -520,6 +527,9 @@ int_type_spec([type=long]) --> [ident(long)], !, int_opt.
 int_type_spec([type=short]) --> [ident(short)], !, int_opt.
 int_type_spec([type=int]) --> [ident(int)], !.
 int_type_spec([type=char]) --> [ident(char)], !.
+
+int_type_spec([type=bool]) --> [ident(bool)], !.
+
 int_type_spec([type=comp]) --> [ident(comp)].	% 64 bit int for Mac
 
 signed_type([type=long]) --> [ident(long)], !, int_opt.

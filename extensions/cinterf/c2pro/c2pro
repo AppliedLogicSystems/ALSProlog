@@ -33,6 +33,9 @@
 
 %:- [c2p,cparse,ctoken,cexp,cout,cfiles,cmisc,cmacro].
 
+	%% This is old pre-standard code:
+:- set_prolog_flag(unknown, fail).
+
 module c2pro.
 use avl.
 
@@ -69,7 +72,7 @@ os_specific_file(vms,	cvax).
 	% file suffixes.
 	%-------------------------------------
 
-inSuffix('spc').
+inSuffix('spec').
 outSuffix('src').
 
 %%------------------------------------------------------------
