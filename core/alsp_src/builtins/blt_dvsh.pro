@@ -1435,10 +1435,8 @@ start_src_trace(Flag,BaseFileName, SrcFilePath, CG, ALSMgr, SrcMgr)
 	send(DbgrMgr, insert_by_fcg(CG, SrcMgr)),
 	send(DbgrMgr, set_value(mrfcg, CG)),
 	!,
+%write(dvsh_sst),nl,flush_output,
 	send(SrcMgr, start_src_trace(BaseFileName, SrcFilePath, CG)).
-
-
-
 
 inverted_index(LineIndex, InvertedLineIndex)
 	:-
