@@ -3874,11 +3874,8 @@ sio_pckg_init :-
 	 buffering(line), type(text)]),
     open(console('standard input'), read, InStream, 
 	 ['$stream_identifier'(-1), alias(user_input),
-	 prompt_goal(user_prompt_goal(user_output))]). 
+	 prompt_goal(user_prompt_goal(user_output))]),
 
-export open_addl_std_streams/0.
-open_addl_std_streams
-	:-
     %% Debugger streams
 
     open(console('debugger output'),write, OutDStream,
@@ -3909,4 +3906,5 @@ open_addl_std_streams
 :- sio_pckg_init.
 
 endmod.
+
 
