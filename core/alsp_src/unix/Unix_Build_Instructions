@@ -1,14 +1,42 @@
+Build for a single platform
+---------------------------
+
 1. Run the unix_setup script with the following arguments, to create a
    build directory:
 	- Source directory
 	- OS name
 	- optional gcc compiler flags
 
-   Exampe: % ../alsp_src/unix/unix_setup ../alsp_src hpux -g -DINTCONSTR
+   Example: % ../alsp_src/unix/unix_setup ../alsp_src hpux -g -DINTCONSTR
 
    The OS option can also be "all", which creates build directories for
-   all the supported Unix OSs. 
+   all the supported Unix OSs.
 
 2. Enter the created build directory and execute make.
 
    Example: % make
+
+   
+
+
+Build for multiple platforms at the ALS Office
+----------------------------------------------
+
+1. Run the unix_setup script with the following arguments, to create build
+   directories for all the supported Unix OSs:
+	- Source directory
+	- OS name "all"
+	- optional gcc compiler flags
+
+   Example: % ../alsp_src/unix/unix_setup ../alsp_src all -g -DINTCONSTR
+
+2. Run the build_all shell script with the following arguments, to perform
+   makes on all available Unix OSs:
+	-parent of build directories
+	-make options
+
+   Example: % ../alsp_src/unix/build_all /apache/builds alspro.lib
+
+   Error messages printed on the standard error stream will be stored in a
+   files named os.err, where os is the name of the Unix OS.
+

@@ -1,13 +1,51 @@
 #!/bin/sh
+# Build_All is a simple shell script which automatically runs make
+# on several machines at ALS.
 
-dir=`pwd`
-echo $dir
-rsh calder "cd $dir/hpux ; make -s -j 2" > hpux.log &
-rsh hilbert "cd $dir/solaris ; make -s -j 2" > solaris.log &
-rsh jarrett "cd $dir/sunos ; make -s -j 2" > sunos.log &
-rsh rgshaw "cd $dir/aix ; make -s -j 2" > aix.log &
-rsh matisse "cd $dir/linux ; make -s -j 2" > linux.log &
+# Check for correct number of arguments
+if test $# -lt 1
+then
+    echo 'Usage: make_all build-dir [make-options ...]' 1>&2
+    echo 'Example:' 1>&2
+    echo '    make_all /apache/builds clean' 1>&2
+    exit 2
+fi
 
+# HP-UX calls rsh, remsh.
+if test `uname` = HP-UX
+then
+    RSH=remsh
+else
+    RSH=rsh
+fi
 
+# Get the directory and make arguments
+dir=$1
+shift
+make_args=$*
+
+remote_make () {
+    machine=$1
+    os=$2
+    echo "Starting $os build on $machine..."
+    # Unfortunatly rsh does not return the result code of the command
+    # it executes, so the only way to detect an error is to look at the
+    # standard error stream.  Typical Unix lossage!
+    $RSH $machine "cd $dir/$os ; make -ksj 2 $make_args" > /dev/null 2> $os.err
+    if test -s $os.err
+    then
+	echo "ERROR: $os build on $machine failed."
+	echo "       See the file $os.err for details."
+    else
+	echo "Finished $os build on $machine."
+	rm $os.err
+    fi
+}
+
+remote_make calder hpux &
+remote_make hilbert solaris &
+remote_make jarrett sunos &
+remote_make matisse linux &
+wait
 
 
