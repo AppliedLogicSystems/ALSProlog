@@ -2,6 +2,9 @@
 #include <new_alspi.h>
 #include <crtl.h>
 
+#include <tcl.h>
+#include <tk.h>
+
 extern void panic(const char *);
 
 static char *simple_write(AP_World *w, AP_Obj obj, char *s)
@@ -62,12 +65,133 @@ static char *simple_write(AP_World *w, AP_Obj obj, char *s)
     return s;
 }
 
+/* 
+
+Maintaining a Single Instance and Opening Documents from the Explorer
+
+There is no standard way to do these things.  This code implements one
+of the simplest method.
+
+Single Instance
+
+We only want one instance (process) of ALS Prolog running at a time.
+To do this, we check for the ALS Prolog shell window whenever this
+program is launched, and exit if it exists.
+
+Opening Documents
+
+When a document is double-clicked in the Explorer or drag-and-dropped on
+ALS Prolog, a new instance is created.  If another ALS Prolog is running,
+a message (WM_COPYDATA) is sent to the other ALS Prolog to make it open
+the document.
+
+Problems
+
+The current code relies on the main ALS Prolog shell window always being
+open and always being named "ALS Prolog Environment".
+
+Future Directions
+
+The Win32 Knowledge Base suggests using named objects to maintain only
+one instance.   
+
+Tcl 8.1 has some support for DDE.  If possible we should use DDE for
+communicating between instances of ALS Prolog.
+
+*/
+
+/* CheckInstance return TRUE iff there is no other ALS Prolog Application
+   running.  If another copy exists, a copy-data message is sent with
+   the command line for processing.
+ */
+static BOOL CheckInstance(LPSTR lpCmdLine)
+{
+	HWND w;
+	
+	w = FindWindow("TkTopLevel", "ALS Prolog Environment");
+	if (w) {
+		COPYDATASTRUCT data;
+		
+		if (IsIconic(w)) ShowWindow(w, SW_RESTORE);
+		SetForegroundWindow (w);
+		
+		data.dwData = 0; 
+    	data.cbData = strlen(lpCmdLine)+1; 
+    	data.lpData = lpCmdLine; 
+
+		SendMessage(w, WM_COPYDATA, 0, (long)&data);
+		return FALSE;
+	} else return TRUE;
+}
+
+/* TkWindowProc and TkWindowInterp are Globals to hold Tk's window proc, and the Tcl interpreter. */
+
+static WNDPROC TkWindowProc;
+static Tcl_Interp *TkWindowInterp;
+
+/* OpenDocWindowProc() is a window proc that catches and processes copy-data messages.
+   All other messages are passed to Tk's window proc.
+ */
+
+static LRESULT CALLBACK OpenDocWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	if (message == WM_COPYDATA) {
+		if (Tcl_VarEval(TkWindowInterp, "tkOpenDocument ", ((COPYDATASTRUCT *)lParam)->lpData, NULL)
+			!= TCL_OK) Tcl_BackgroundError(TkWindowInterp);
+		return TRUE;
+	} else {
+		return CallWindowProc((void *)TkWindowProc, hWnd, message, wParam, lParam);
+	}
+}
+
+/* The AttachHandler command installs OpenDocWindowProc() as he window proc for the main
+   ALS Prolog shell window.
+ */
+
+static int AttachHandlerObjCmd(ClientData, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
+{
+	HWND w;
+	
+	if (objc != 1) {
+		Tcl_WrongNumArgs(interp, 1, objv, "window");
+		return TCL_ERROR;
+	}
+	
+	w = FindWindow("TkTopLevel", "ALS Prolog Environment");
+	if (!w) return TCL_ERROR;
+	
+	TkWindowInterp = interp;
+	TkWindowProc = (WNDPROC)GetWindowLong(w, GWL_WNDPROC);
+	if (!TkWindowProc) return TCL_ERROR;
+	
+	if (!SetWindowLong(w, GWL_WNDPROC, (long)OpenDocWindowProc)) return TCL_ERROR;
+			
+	return TCL_OK;
+}
+
+/* Initialization routine for the OpenDocument package */
+
+static int Opendocument_Init(Tcl_Interp *interp)
+{
+	if (!Tcl_PkgRequire(interp, "Tcl", "8.0", 0)
+		|| !Tcl_PkgRequire(interp, "Tk", "8.0", 0)
+		|| !Tcl_CreateObjCommand(interp, "AttachOpenDocumentHandler", AttachHandlerObjCmd, 0, NULL))
+		return TCL_ERROR;
+	return Tcl_PkgProvide(interp, "OpenDocument", "1.0");
+}
+
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	int   exit_status;
 	PI_system_setup setup;
 	AP_Obj term;
 	AP_World *w = NULL;
+
+	/* Allow only one instance to run and have it process the command line. */
+	if (!CheckInstance(lpCmdLine)) return FALSE;
+
+	/* Make the OpenDocument package available to Tcl */
+	Tcl_StaticPackage(NULL, "Opendocument", Opendocument_Init, NULL);
 
     /* Fill setup struct with defaults */
     setup.heap_size = 0;
