@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.41 1998/03/14 02:03:59 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.42 1998/03/24 17:14:34 choupt Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -1142,7 +1142,15 @@ Window hide .alsdev_settings
 
 Window show .topals
 
-update idletasks
+# update idletasks seems to push .topals behind other windows on
+# Windows, so just call update.
+
+if {$tcl_platform(platform) == "windows"} then {
+	update
+} else {
+	update idletasks
+}
+
 raise .topals
 wm positionfrom .topals user
 wm geometry .topals $proenv(.topals,geometry)
