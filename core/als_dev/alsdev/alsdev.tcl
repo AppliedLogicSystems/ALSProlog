@@ -702,8 +702,7 @@ proc create_dyn_flag_entry { info } {
 	set CurVal [lindex $info 2]
 
 	set ff [frame .dyn_flags.$FlagName -borderwidth 1 -relief sunken]
-	label $ff.label \
-        -borderwidth 0 -font {lucida 10 bold} \
+	label $ff.label -borderwidth 0 \
         -relief flat -width 18 -justify right \
         -text $FlagName
 

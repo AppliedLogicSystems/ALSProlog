@@ -69,7 +69,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	AP_World *w = NULL;
 
     /* Fill setup struct with defaults */
-    setup.heap_size = 0;
+    setup.heap_size = 8000000;
     setup.stack_size = 0;
     setup.icbuf_size = 0;
     setup.alsdir = getenv("DEV_ALSDIR");
