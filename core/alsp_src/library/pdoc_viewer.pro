@@ -265,13 +265,18 @@ write_module_frame(Mod, PredNames, DocTitle, KeyWords, DateTime, OS, ModEntries)
 
 mod_frame_predicate_entries([], Mod, OS, []).
 mod_frame_predicate_entries([Pred/Arity | PredNames], Mod, OS, [(PredName, Mod, PredText) | ResultTriples])
-	:-
+	:-!,
 	sprintf(atom(PredName), '%t%t', [Pred, Arity]),
 	sprintf(atom(PredText), '%t/%t', [Pred, Arity]),
 	codesweep([
 	'<A HREF="%t.html" title="predicate in %t" target="predicatesFrame">%t</A>'	+ [PredName, Mod, PredText],
 	'<BR>'
 	  	], OS),
+	mod_frame_predicate_entries(PredNames, Mod, OS, ResultTriples).
+
+mod_frame_predicate_entries([X | PredNames], Mod, OS, ResultTriples)
+	:-
+	printf(user_output, '!!Error: Illegal expression for P/A [mod=%t]: %t\n', [Mod, X]),
 	mod_frame_predicate_entries(PredNames, Mod, OS, ResultTriples).
 
 		/*-----------------------------------------
@@ -820,7 +825,10 @@ group_files([], FilesInfoList, FilesDescLines, OS).
 group_files([File | GroupFiles], FilesInfoList, FilesDescLines, OS)
 	:-
 	catenate(['files-desc.html', '#_', File, '_'], FileRef),
-	dmember(File-FileDesc, FilesDescLines),
+	(dmember(File-FileDesc, FilesDescLines),!;
+		FileDesc = '???',
+		printf(user_output, '!!Warning: Missing description line for file: %t\n', [File])
+	),
 	codesweep([
 	'<TR><TD WIDTH="20\%"><B><A HREF="%t">%t</A></B></TD>'	+ ['',FileRef, File],
 	'<TD>%t</TD></TR>'						+ [FileDesc]

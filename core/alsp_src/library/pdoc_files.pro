@@ -12,7 +12,8 @@ module prologdoc.
 
 build_files_desc(Data, General, FileDescLines)
 	:-
-	get_files_list(Data, FilesList),
+	get_files_list(Data, InitFilesList),
+	sort(InitFilesList, FilesList),
 
 	dmember(destdir=DestDir, General),
 	path_elements(DestDir, DestDirElts),

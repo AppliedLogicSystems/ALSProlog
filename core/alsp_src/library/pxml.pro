@@ -161,7 +161,7 @@ read_tokens(S, Tokens)
  | read_tokens(+, +, -, -, -)
  |
  | Input:
- |   FlagIn  = one of: normal, n1, comment
+ |   FlagIn  = one of: normal, n1, comment, comment_eol
  |   S       = input stream
  | Output:
  |   Tokens  = [<list of tokens read from S> | Tail]
@@ -172,6 +172,8 @@ read_tokens(S, Tokens)
  | with Tail = the (uninstantiated) tail of Tokens;  
  | if FlagIn = normal, begins reading in "normal" tokenizing mode;
  | if FlagIn = comment, begins reading in mode appropriate for
+ |    the interior of a comment;
+ | if FlagIn = comment_eol, has encountered end of line while reading
  |    the interior of a comment;
  | if FlagIn = n1, an opening '<' has been read, which __might__
  |    be follwed by '--', starting a comment (or might not);
@@ -187,30 +189,32 @@ read_tokens(comment, S, Tokens, Tail, FlagOut)
 	start_get_comment(C, S, Tokens, InterTail, InterFlagOut),
 	read_tokens(InterFlagOut, S, InterTail, Tail, FlagOut).
 
-
 read_tokens(FlagIn, S, [T | Tokens], Tail, FlagOut)
 	:-
 	cross_white(S, NextNonblankChar),
 	!,
 	next_token(NextNonblankChar, FlagIn, S, T, NxtC, FlagInter),
-%write(T),write(' '),
+	    %% if an 'href' token was encountered, process the stream following
+	    %% in a manner appropriate for the context 'href=..."
 	scoop_href(T, NxtC, S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0),
-%(nonvar(Tokens) -> write(Tokens) ; true), nl,
 	read_tokens(FlagInter0, NxtC0, S, InterTokens, Tail, FlagOut).
+
 read_tokens(Flag, S, Tail, Tail, Flag).
 
 scoop_href(href, 0'=, S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0)
 	:-!,
 	scoop_0(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0).
+
 scoop_href(src, 0'=, S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0)
 	:-!,
-%	scoop_1(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0).
 	scoop_0(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0).
+
 scoop_href(alt, 0'=, S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0)
 	:-!,
-%	scoop_1(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0).
 	scoop_0(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0).
+
 scoop_href(T, NxtC, S, Tokens, Tokens, NxtC, FlagInter, FlagInter).
+
 
 scoop_0(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0)
 	:-
@@ -224,7 +228,6 @@ scoop_0(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0)
 	),
 	atom_codes(StringToken, StringChars),
 	FlagInter0 = FlagInter.
-
 
 
 /*
@@ -277,6 +280,10 @@ disp_read_string_char_list_eol(C, S, [C | StringChars], NxtC)
 	read_string_char_list_eol(S, StringChars, NxtC).
 
 */
+
+
+
+
 read_string_char_list_xtnd(S, StringChars, NxtC0)
 	:-
 	get_code(S, C),
@@ -332,9 +339,7 @@ read_tokens(FlagIn, NxtC, S, Tokens, Tail, FlagOut)
 read_tokens(FlagIn, NxtC, S, [T | Tokens], Tail, FlagOut)
 	:-
 	next_token(NxtC, FlagIn, S, T, NxtNxtC, FlagInter),
-%write(T),write(' '),
 	scoop_href(T, NxtNxtC, S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0),
-%(nonvar(Tokens) -> write(Tokens) ; true), nl,
 	read_tokens(FlagInter0, NxtC0, S, InterTokens, Tail, FlagOut).
 
 cross_white(S, NextNonblankChar)
@@ -397,9 +402,11 @@ next_token(0'<, S, '<',NxtC)
 next_token(0'>, S, '>',NxtC) 
 	:-!,
 	get_code(S,NxtC).
+
 next_token(0'/, S, '/',NxtC) 
 	:-!,
 	get_code(S,NxtC).
+
 next_token(0'=, S, '=',NxtC) 
 	:-!,
 	get_code(S,NxtC).
@@ -460,6 +467,12 @@ next_token(0'', S, '\'',NxtC)
 	:-!,
 	get_code(S,NxtC).
 
+    %% Read a character reference:
+next_token(0'&, S, T, NxtC)
+	:-!,
+	read_to_semi(S, Cs, NxtC),
+	atom_codes(T, [0'& | Cs]).
+
 next_token(C1, S, T,NxtC)
 	:-
 	read_to_terminator(S, Cs, NxtC),
@@ -483,6 +496,21 @@ dispatch_read_to_terminator(C, S, [], C)
 	:-
 	C = 0'=, !.
 	
+
+read_to_semi(S, Cs, NxtC)
+	:-
+	get_code(S, C),
+put_code(C),nl,
+	dispatch_read_to_semi(C, S, Cs, NxtC).
+
+dispatch_read_to_semi(0';, S, [0';], NxtC)
+	:-!,
+	get_code(S, C).
+dispatch_read_to_semi(C, S, [C | Cs], NxtC)
+	:-
+	read_to_semi(S, Cs, NxtC).
+
+
 /*  ADDITION FOR DTDs */
 dispatch_read_to_terminator(C, S, [], C)
 	:-
@@ -853,6 +881,10 @@ end_can_terminate(a, X) :- text_appearance_tag(X).
 end_can_terminate(font, T2) 
 	:-
 	text_appearance_tag(T2).
+
+end_can_terminate(table, span).
+end_can_terminate(tr, span).
+end_can_terminate(td, span).
 
 end_can_terminate(body, X) :-
 	X \= head.

@@ -39,13 +39,32 @@ prologdoc(
 
 ab :-
 prologdoc(
-    [ modulenames=[sio,builtins,prologdoc],
+    [ modulenames=[builtins,sio,xconsult],
       destdir='als-btest',
       overwrite=true,
       windowtitle='ALS Prolog Builtins Components',
       doctitle= 'ALS Prolog Builtins Components',
       failonerror=true                        ],
-    [  files( dir='../alspro/alsdir/builtins', all) ],
+    [  files( dir='../als_prolog/core/alsp_src/builtins', all), 
+       files( dir='../als_prolog/core/alsp_src/library', all)
+    ],
+    [  group('String Manipulation', [modules=[builtins], files=['strings.pro']]),
+       group('Tk Library Interface', [modules=[tk_alslib]]) ]
+    ).
+
+p :-
+prologdoc(
+    [ modulenames=[ alsdev, alsshell, app_gui_gen, app_utils, avl, builtins,
+		cref, debugger, global_gv_info, macroxp, mpml, pgm_info,
+		pml, prologdoc, pxml, rel_arith, shellmak, sio, sys_maint,
+		tk_alslib, ttyshlmk, user, utilities, windows, xconsult     ],
+      destdir='als-all',
+      overwrite=true,
+      windowtitle='ALS Prolog Builtins & Library Components',
+      doctitle= 'ALS Prolog Builtins & Library Components',
+      failonerror=true                        ],
+    [  files( dir='../als_prolog/core/alsp_src/builtins', all), 
+       files( dir='../als_prolog/core/alsp_src/library', all) ],
     [  group('String Manipulation', [modules=[builtins], files=['strings.pro']]),
        group('Tk Library Interface', [modules=[tk_alslib]]) ]
     ).
