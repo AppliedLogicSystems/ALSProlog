@@ -10,6 +10,9 @@ module als_testing.
 
 	%% Standard ALS examples:
 
+test_info(join_split_path, join_split_path_test, user, test,
+		'join_path and split_path tests').
+
 test_info(bench, bench, user, main, 'The benchpress example.').
 
 test_info(jobs, jobs, user, go, 'The jobs example.').
