@@ -1126,7 +1126,8 @@ int ss_save_image_with_state(const char * new_image_name)
 
 #endif /* MSWin32 */
 
-#ifdef HP_AOUT_800
+#ifdef UNIX
+#if defined(HP_AOUT_800)
 struct sys_clock {
     unsigned int secs;
     unsigned int nanosec;
@@ -1182,7 +1183,7 @@ struct foobar {
         unsigned int checksum;
 };
 
-static unsigned long hp_aout800_end(int image_file)
+static unsigned long image_end(int image_file)
 {
     size_t r;
     struct foobar head;
@@ -1193,6 +1194,47 @@ static unsigned long hp_aout800_end(int image_file)
     return head.som_length;
 }
 
+#elif defined(MIPS_IRIX53)
+
+#include <libelf.h>
+
+static unsigned long image_end(int image_file)
+{
+    Elf *elf;
+    Elf_Scn *scn;
+    Elf32_Shdr *shdr;
+    size_t end;
+    
+    if (elf_version(EV_CURRENT) == EV_NONE) return 0;
+
+    elf = elf_begin(image_file, ELF_C_READ, NULL);
+    if (elf_kind(elf) != ELF_K_ELF) return 0;
+
+    scn = NULL;
+    end = 0;
+    while ((scn = elf_nextscn(elf, scn))) {
+        shdr = elf32_getshdr(scn);
+	if (shdr == NULL) return 0;
+
+        if (shdr->sh_type != SHT_NOBITS) {
+/*
+	    printf("sh_type: %u sh_offset: %u sh_size: %u\n",
+		   shdr->sh_type, shdr->sh_offset, shdr->sh_size);
+*/
+	    end = max(end, shdr->sh_offset + shdr->sh_size);
+	}
+    }
+
+    if (elf_end(elf) != 0) return 0;
+
+    /* printf("image_end: %u\n", end); */
+    return end;
+}
+
+#else
+#error
+#endif /* HP_AOUT_800, MIPS_IRIX54 */
+
 #define IMAGENAME_MAX	64
 #define IMAGEDIR_MAX	1024
 extern char  imagename[IMAGENAME_MAX];
@@ -1202,7 +1244,7 @@ long ss_image_offset(void)
 {
 
     char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
-    unsigned long image_size, aout800_size;
+    unsigned long image_size, elf_size;
     int image_file, fstat_result;
     struct stat image_status;
 
@@ -1218,17 +1260,23 @@ long ss_image_offset(void)
     
     if (image_file == -1) return 0;
 
-    aout800_size = hp_aout800_end(image_file);
+    elf_size = image_end(image_file);
     fstat_result = fstat(image_file, &image_status);
     
     close(image_file);
 
     if (fstat_result != 0) return 0;
     image_size = image_status.st_size;
-       pgsize = sysconf(_SC_PAGE_SIZE);
+#ifdef _SC_PAGESIZE
+    pgsize = sysconf(_SC_PAGESIZE);
+#elif defined(_SC_PAGE_SIZE)
+    pgsize = sysconf(_SC_PAGE_SIZE);
+#elif defined(HAVE_GETPAGESIZE)
+    pgsize = getpagesize();
+#endif  /* _SC_PAGESIZE */
  
-    if (image_size > aout800_size)
-      return round(aout800_size, sysconf(_SC_PAGE_SIZE));
+    if (image_size > elf_size)
+      return round(elf_size, pgsize);
     else return 0;
 }
 
@@ -1308,20 +1356,19 @@ int ss_save_image_with_state(const char * new_image_name)
     	return 0;
     }
    
-    state_offset = round(hp_aout800_end(new_image_file), pgsize);
+    state_offset = round(image_end(new_image_file), pgsize);
 
     close(new_image_file);
 
     if (state_offset == 0) {
-    	printf("ss_save_image: Couldn't find end of A.OUT800 file %s\n", new_image_name);
+    	printf("ss_save_image: Couldn't find end of image file %s\n", new_image_name);
     	return 0;
     }
         
     return ss_save_state(new_image_name, state_offset);
 }
 
-#endif
-
+#endif /* UNIX */
 
 #endif /* SIMPLE_MICS */
 
