@@ -11,6 +11,15 @@
 #define MSWin32 1
 #define OSStr "mswin32"
 
+#ifdef __GNUC__
+#define EXTERNAL_STATE	1
+#endif
+
+/* Temp. disable threading until threading GUI stub is fixed */
+#ifdef __GNUC__
+#define Bytecode 1
+#endif
+
 #define HAVE_STDARG_H	1
 #define HAVE_STDLIB_H	1
 #define HAVE_FCNTL_H	1
@@ -31,5 +40,12 @@
 #define HAVE_STRTOK	1
 
 #define REVERSE_ENDIAN 1
+
+/* The windows headers in Cygwin 1.3.4 are missing some prototypes,
+   so define them here to silence the waring messages. */
+#ifdef __GNUC__
+extern __inline__ void* GetCurrentFiber(void);
+extern __inline__ void* GetFiberData(void);
+#endif
 
 #include <windows.h>

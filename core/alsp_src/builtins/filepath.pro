@@ -45,6 +45,7 @@ export directory_self/1.
 export directory_self/2.
 export parent_path/1.
 export parent_path/2.
+export make_change_cwd/1.
 
 file_extension(FullName, Name, Ext) :-
 	nonvar(FullName),
@@ -473,7 +474,29 @@ pathPlusFile(Path, File, PathAndFile)
 	dreverse(RevPathElts, PathElts),
 	join_path(PathElts, Path).
 
+make_change_cwd(P)
+	:-
+	exists_file(P),
+	!,
+	change_cwd(P).
 
+make_change_cwd(P)
+	:-
+	path_elements(P, PElts),
+	make_path_segments(PElts),
+	exists_file(P),
+	change_cwd(P).
 
+make_path_segments(PElts)
+	:-
+	make_path_segments(PElts, []).
+
+make_path_segments([], _).
+make_path_segments([E | PElts], IS)
+	:-
+	dreverse([E | IS], SI),
+	path_elements(SIP, SI),
+	(exists_file(SIP) -> true ; make_subdir(SIP)),
+	make_path_segments(PElts, [E | IS]).
 
 endmod.

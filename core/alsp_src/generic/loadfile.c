@@ -183,7 +183,7 @@ fix_MAGIC()
     while (*m == 'Y' && *o)	/* replaces Y's */
 	*m++ = *o++;
 }
-#endif HIDEME
+#endif /* HIDEME */
 
 #ifdef DOS
 /*

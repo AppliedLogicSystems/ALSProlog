@@ -178,6 +178,12 @@ proc add_tools_menu {menubar type window} {
 		## Cref
     	$menubar.tools add command -label "Cref$elipsis" -underline 0 \
 			-command {re {prolog call cref0 start_cref}} 
+		$menubar.tools add separator 
+		## Application GUI Generator
+    	$menubar.tools add command -label "Application Gui Generator$elipsis" -underline 0 \
+			-command {re do_app_gui_gen_dialog } 
+    	$menubar.tools add command -label "Setup New Application Framework$elipsis" -underline 0 \
+			-command {re do_new_app_top} 
 	} else {
 	##  must be debugger:
 		# Spy

@@ -1,0 +1,19 @@
+SDK_DIR = ../../core/alsp_src/generic
+LIBS= -lc
+
+all: java.psl
+
+java.psl: java_interface.c
+	gcc -fpic -shared $(PSL_LINK) \
+	-o java.psl -I$(SDK_DIR) -I$(JDK_ROOT)/include/ \
+	-I$(JDK_ROOT)/include/$(OS)/ \
+	    java_interface.c \
+	    $(SDK_DIR)/alspi_slib.c \
+	    $(SDK_DIR)/new_alspi.c \
+	    -L $(JDK_ROOT)/jre/lib/$(PROC)/ -ljvm $(LIBS)
+
+test: java.psl test.pro
+	alspro -b test.pro -g t
+
+clean:
+	rm -f java.psl

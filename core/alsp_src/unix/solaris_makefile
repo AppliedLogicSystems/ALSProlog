@@ -1,3 +1,4 @@
 CPPFLAGS += -DUNIX_SOLARIS
-OS_LIBS = -lm -lsocket -ldl -lnsl -Xlinker -Bstatic -lgen -Xlinker -Bdynamic -lelf
+# The thread link is needed to support the Java PSL.
+OS_LIBS = -lm -lsocket -ldl -lnsl -Xlinker -Bstatic -lgen -Xlinker -Bdynamic -lelf -lthread
 CFLAGS += -fPIC

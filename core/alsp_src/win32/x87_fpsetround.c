@@ -15,7 +15,7 @@ fp_rnd fpsetround(fp_rnd mode)
 
     asm (fstcw control);
 
-    old_rounding = control.rounding;
+    old_rounding = (fp_rnd)control.rounding;
 
     control.rounding = mode;
 

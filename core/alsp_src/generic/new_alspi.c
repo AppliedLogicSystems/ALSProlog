@@ -176,7 +176,7 @@ AP_API(AP_Obj) AP_NewInitStructure(AP_World *w, AP_Obj functor, int arity, ...)
 			PI_unify(arg.p, arg.t, arg_value.p, arg_value.t);
 		}
 	}
-	va_end(va);
+	va_end(ap);
 	
 	return r;
 }
@@ -328,7 +328,7 @@ AP_API(AP_Result) AP_SetStandardError(AP_World *w, AP_StandardError error_type, 
 		error = AP_NewSymbolFromStr(w, "system_error");
 		break;
 	}
-	va_end(va);
+	va_end(ap);
 	
 	return AP_SetError(w, error);
 }
@@ -343,6 +343,11 @@ typedef AP_Result (*call1)(AP_World *, AP_Obj);
 typedef AP_Result (*call2)(AP_World *, AP_Obj, AP_Obj);
 typedef AP_Result (*call3)(AP_World *, AP_Obj, AP_Obj, AP_Obj);
 typedef AP_Result (*call4)(AP_World *, AP_Obj, AP_Obj, AP_Obj, AP_Obj);
+typedef AP_Result (*call5)(AP_World *, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj);
+typedef AP_Result (*call6)(AP_World *, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj);
+typedef AP_Result (*call7)(AP_World *, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj);
+typedef AP_Result (*call8)(AP_World *, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj);
+typedef AP_Result (*call9)(AP_World *, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj, AP_Obj);
 
 int AP_OldToNewCall(AP_Result (*new_func)(), int arity)
 {
@@ -354,6 +359,11 @@ int AP_OldToNewCall(AP_Result (*new_func)(), int arity)
 	call2 c2 = NULL;
 	call3 c3 = NULL;
 	call4 c4 = NULL;
+	call5 c5 = NULL;
+	call6 c6 = NULL;
+	call7 c7 = NULL;
+	call8 c8 = NULL;
+	call9 c9 = NULL;
 
 	
 	for (i = 0; i < arity; i++)
@@ -365,6 +375,11 @@ int AP_OldToNewCall(AP_Result (*new_func)(), int arity)
 	case 2: c2 = new_func; break;
 	case 3: c3 = new_func; break;
 	case 4: c4 = new_func; break;
+	case 5: c5 = new_func; break;
+	case 6: c6 = new_func; break;
+	case 7: c7 = new_func; break;
+	case 8: c8 = new_func; break;
+	case 9: c9 = new_func; break;
 	}
 
 	switch (arity) {
@@ -373,6 +388,11 @@ int AP_OldToNewCall(AP_Result (*new_func)(), int arity)
 	case 2: r = c2(NULL, arg[0], arg[1]); break;
 	case 3: r = c3(NULL, arg[0], arg[1], arg[2]); break;
 	case 4: r = c4(NULL, arg[0], arg[1], arg[2], arg[3]); break;
+	case 5: r = c5(NULL, arg[0], arg[1], arg[2], arg[3], arg[4]); break;
+	case 6: r = c6(NULL, arg[0], arg[1], arg[2], arg[3], arg[4], arg[5]); break;
+	case 7: r = c7(NULL, arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6]); break;
+	case 8: r = c8(NULL, arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7]); break;
+	case 9: r = c9(NULL, arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8]); break;
 	}
 	
 	if (r == AP_SUCCESS) PI_SUCCEED;

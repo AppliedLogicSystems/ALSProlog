@@ -3,7 +3,7 @@
 
 
 #define THROW_WIN32_ERROR(n) \
-{ fprintf(stderr, "error: %d\n", (n)); exit(EXIT_ERROR); }
+{ fprintf(stderr, "error: %ld\n", (n)); exit(EXIT_ERROR); }
 
 #define PAGE_SIZE page_size()
 #define PAGE_ROUND(n) (n + PAGE_SIZE - n % PAGE_SIZE)
@@ -30,8 +30,13 @@ static DWORD page_size(void)
 	static DWORD size = 0;
 	
 	if (!size) {
+#ifdef __MWERKS__
 		FIXED_SYSTEM_INFO info;
 		GetSystemInfo((LPSYSTEM_INFO)&info);
+#else
+		SYSTEM_INFO info;
+		GetSystemInfo(&info);
+#endif
 		size = info.dwPageSize;
 	}
 	return size;

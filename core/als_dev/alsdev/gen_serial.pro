@@ -1,5 +1,11 @@
 /*============================================================*
  |		gen_serial.pro
+ |			-- requires serial_cmn.pro, which is contained
+ |				in all images, but its routines are not
+ |				exported from module builtins;
+ |			-- generates serial numbers;
+ |			-- serial_cmn.pro contains common routines 
+ |				together with decoding routines; 
  |
  |	Registration number structure:
  |
@@ -16,45 +22,61 @@
  |	X can be alpha-numeric; alphas are all UC.
  |
  *============================================================*/
-module serial_nums.
-
-dp30(1999/12/DD, 1999/12/31) :-!.
-dp30(1999/11/DD, 1999/12/DD) :-!.
-dp30(1999/10/31, 1999/11/30) :-!.
-dp30(1999/10/DD, 1999/11/DD) :- DD =< 30, !.
-dp30(1999/9/DD, 1999/10/DD) :-!.
-
-
-endmod.
 
 module serial_nums.
 
-/****
-export xt/0.
-xt :-
-	gen_30day(1999/10/29, day30-prof, Key),
-	write(Key),nl.
+	%% Professional 30-day:
+export p30/0.
+p30 :-
+	gen_30day(prof, Key),
+	display_key(user_output,Key).
 
-export xy/0.
-xy :-
-%	gen_30day(1999/10/29, permanent-prof, Key),
-	date(Today),
-	gen_k_1(Today, permanent-prof, G1, G4),
-	krspnd(G1, G2),
-	krspnd(G4, G3),
-	builtins:split4dash(KCs, G1,G2,G3,G4),
-	atom_codes(Key, KCs),
+	%% Professional permanent:
+export pp/0.
+pp :-
+	gen_perm(prof, Key),
+	display_key(user_output,Key).
 
-	write(Key),nl.
-****/
+	%% Student permanent:
+export sp/0.
+sp :-
+	gen_perm(stud, Key),
+	display_key(user_output,Key).
 
-
-gen_30day(Y/M/D, Type, Key)
+display_key(user_output,Key)
 	:-
-dp30(Y/M/D,ND30),
-	gen_k_1(ND30, Type, G1, G4),
-	krspnd(G1, G2),
-	krspnd(G4, G3),
+	printf('key=%t\n',[Key]),
+	builtins:check_key_type(Key,KeyType, KeyInfo, KeyPath),
+	printf('type=%t info=%t path=%t\n',[KeyType, KeyInfo, KeyPath]).
+
+gen_30day(Version, Key)
+	:-
+	date(Today),
+	ddp30(Today, ND30),
+	gen_the_key(ND30, day30-Version, G1, G4, Key).
+
+ddp30(YY/MM/DD, YY30/MM30/DD30)
+	:-
+	epoch_secs(YY, 12, 31, EOY_ESS),
+	epoch_secs(YY, MM, DD, Today_ESS),
+  		%% SECS per DAY = 86400
+	Today_ESS_Plus30 is Today_ESS + 30 * 86400,
+	min(EOY_ESS, Today_ESS_Plus30, ND30ESS ),
+	ess_to_datetime(ND30ESS,YY30,MM30,DD30,_,_,_).
+
+gen_perm(Version, Key)
+	:-
+	date(Today),
+	gen_the_key(Today, permanent-Version, G1, G4, Key).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Common key generation
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+gen_the_key(Date, Type, G1, G4, Key)
+	:-
+	gen_k_1(Date, Type, G1, G4),
+	builtins:krspnd(G1, G2),
+	builtins:krspnd(G4, G3),
 	builtins:split4dash(KCs, G1,G2,G3,G4),
 	atom_codes(Key, KCs).
 
@@ -74,14 +96,6 @@ gen_k_1(Y/M/D, Type, G1, G4)
 	D1 is C1,
 	D2 is C2,
 	D3 is C3 + 20.
-
-krspnd([C1,C2,C3,C4],[D1,D2,D3,D4])
-	:-
-	[J2,J4,J3,J1] = [C1,C2,C3,C4],
-	D1 is  (((J1 - 0'A) + 3) mod 26 ) + 0'A,
-	D2 is  (((J2 - 0'A) + 3) mod 26 ) + 0'A,
-	D3 is  (((J3 - 0'A) + 3) mod 26 ) + 0'A,
-	D4 is  (((J4 - 0'A) + 3) mod 26 ) + 0'A.
 
 endmod.
 

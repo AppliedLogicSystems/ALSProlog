@@ -35,9 +35,9 @@
  */
 
 /* Also defined by Win32 headers. */
-typedef unsigned char byte;
+typedef unsigned char tag_byte;
 typedef struct pwrd_ {
-                  byte tag;
+                  tag_byte tag;
                   struct pwrd_ *val;
                } pwrd;
 typedef pwrd * pword;

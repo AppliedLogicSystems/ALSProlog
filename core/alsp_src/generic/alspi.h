@@ -390,10 +390,11 @@ extern	ALSPI_API(const char *) find_callback(void *func, void *object);
 #define CI_RCONST(name,val)		\
 	sym_insert_2long(name,CI_RCONSTTYPE,(long)val,0);
 
+void pi_init(void);
+
 #ifdef __cplusplus
 }
 #endif
 
-void pi_init(void);
 
 #endif /* _ALSPI_H_INCLUDED_ */

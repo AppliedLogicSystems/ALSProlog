@@ -47,7 +47,7 @@
  */
 
 typedef struct index_str {
-    byte  tag;
+    tag_byte  tag;
     long  key;			/* machine type this node represents or */
     					/* if tag is TOP then number of entries */
     struct index_str *llink;

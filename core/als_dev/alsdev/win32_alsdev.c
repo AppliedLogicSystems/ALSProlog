@@ -1,6 +1,12 @@
 #include <alspi.h>
 #include <new_alspi.h>
+
+/* Includes needed to access C runtime __argc and __argv */
+#if defined(__MWERKS__)
 #include <crtl.h>
+#elif defined(__GNUC__)
+#include <stdlib.h>
+#endif
 
 #include <tcl.h>
 #include <tk.h>
@@ -161,8 +167,12 @@ static LRESULT CALLBACK OpenDocWindowProc(HWND hWnd, UINT message, WPARAM wParam
    ALS Prolog shell window.
  */
 
-static int AttachHandlerObjCmd(ClientData, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
+static int AttachHandlerObjCmd(ClientData c, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
 {
+#ifdef __MWERKS__
+#pragma unused(c)
+#endif
+
 	HWND w;
 	
 	if (objc != 1) {
@@ -237,7 +247,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	Tcl_StaticPackage(NULL, "getFiles", Getfiles_Init, NULL);
 	Tcl_StaticPackage(NULL, "getDirectory", Getdirectory_Init, NULL);
-
+	
     /* Fill setup struct with defaults */
     setup.heap_size = 0;
     setup.stack_size = 0;
@@ -303,5 +313,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     PI_shutdown();
     
     CloseHandle(mutex);
+    
+    return 0;
 }
 

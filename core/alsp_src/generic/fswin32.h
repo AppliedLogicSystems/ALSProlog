@@ -47,10 +47,6 @@ int als_stat(const char *path, struct als_stat *buf);
 #define S_IFIFO		0
 #endif
 
-#define S_IRUSR	0
-#define S_IWUSR	0
-#define S_IXUSR	0
-
 #ifndef S_ISBLK
 #define S_ISBLK(m) 0
 #endif
@@ -60,9 +56,19 @@ int als_system(const char * command);
 #define getenv als_getenv
 #define system als_system
 
+#elif defined(__GNUC__)
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define lstat stat
+pid_t _getpid(void);
+#define getpid _getpid
 #else
 
 #include <sys/stat.h>
 #include <unistd.h>
+
 #endif
 

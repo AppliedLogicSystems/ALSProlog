@@ -257,8 +257,10 @@ static	UCHAR *	get_stream_buffer PARAMS(( PWord, int ));
 static	void	incr_fdrefcnt	PARAMS(( int ));
 static	int	decr_fdrefcnt	PARAMS(( int ));
 static	int	compute_flags	PARAMS(( char *, int , int ));
+#ifdef HAVE_SOCKET
 static	void	delete_stream_name PARAMS(( PWord ));
 static	int	accept_connection PARAMS(( PWord, char * , char **));
+#endif
 static	int	stream_is_ready	PARAMS(( char *, long ));
 static	void	shift_buffer	PARAMS(( UCHAR * ));
 static	int	write_buf	PARAMS(( PWord, UCHAR * ));
@@ -1185,7 +1187,7 @@ sio_file_open()
 #elif defined(__GO32__) || defined(OS2)
     if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1)
 #elif defined(UNIX)
-    if ((SIO_FD(buf) = open(filename, flags, 0777)) == -1)
+    if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1)
 #else
 #error
 #endif
@@ -2739,11 +2741,11 @@ sio_rexec()
 
 	    /* Use /dev/null for input or output as needed */
 	    if (rfdpair[1] == -1) {
-		if ((rfdpair[1] = open("/dev/null",O_WRONLY)) < 0)
+		if ((rfdpair[1] = open("/dev/null",O_WRONLY|O_BINARY)) < 0)
 		    _exit(1);
 	    }
 	    if (wfdpair[0] == -1) {
-		if ((wfdpair[0] = open("/dev/null",O_RDONLY)) < 0)
+		if ((wfdpair[0] = open("/dev/null",O_RDONLY|O_BINARY)) < 0)
 		    _exit(1);
 	    }
 
@@ -3124,7 +3126,9 @@ write_buf(vsd,buf)
     UCHAR *buf;
 {
     int   writeflg = 0;
+#ifdef HAVE_SOCKET
     char *sktaddr;
+#endif
 
 #ifdef SysVIPC
     struct msgbuf *msgp;
@@ -3679,7 +3683,9 @@ sio_readbuffer()
     int   t1;
     int   nchars;
     UCHAR *buf, *buffer;
+#ifdef HAVE_SOCKET
     char *sktaddr;
+#endif
 
     w_get_An(&v1, &t1, 1);
 

@@ -4,8 +4,12 @@
  * config.d is then transformed (by configure) into the header file config.h.
  */
 
-#define HAVE_LIBELF	1
-#define USE_ELF_SECTION_FOR_IMAGE 1
+/* For now, use external state files, because the addition of the threads
+library to the link line for the Java interface produces freezes in the
+libelf save-state code. */
+#define EXTERNAL_STATE 1
+/*#define HAVE_LIBELF	1*/
+/*#define USE_ELF_SECTION_FOR_IMAGE 1*/
 #define MISSING_EXTERN_GETHOSTNAME
 #define MISSING_EXTERN_GETIMEOFDAY
 

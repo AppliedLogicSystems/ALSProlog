@@ -497,6 +497,8 @@ hash_insert(Key,Value,Table)
  |	- inserts key-value pair in hash table bucket
  |
  |	Unitary: overwrites any existing key-value entry 
+ |	FOR Key; NOTE however, that other Key0,Val0 pairs can
+ |	have hashed into the same bucket; they are NOT changed.
  *---------------------------------------------------------------*/
 hash_insert(Bucket,Array,Index,Key,Value,Table) 
 	:-
@@ -632,6 +634,14 @@ hash_delete(Key,Value,Table)
 	hash_delete(Array,Index,Key,Value,Table),
 	!.
 
+/*---------------------------------------------------------------*
+ | hash_delete(Struct,Index,Key,Value,Table) 
+ | Deletes Key,Value pair from bucket with index Index;
+ | Note that this bucket may contain more than one distinct
+ | key-value pair, but that for any given Key, there is only
+ | one pair in the bucket with key = Key.
+ *---------------------------------------------------------------*/
+	%% Case: Key matches key of FIRST pair in the bucket:
 hash_delete(Struct,Index,Key,Value,Table) 
 	:-
 	arg(Index,Struct,EList),		%% get element list
@@ -645,13 +655,45 @@ hash_delete(Struct,Index,Key,Value,Table)
 	NewRehashCount is RehashCount+1,
 	mangle(3,Table,NewRehashCount).		%% update count
 
-/*
+	%% Case: Key does NOT match key of FIRST pair in the bucket;
+	%% Since Key hashed into this bucket, there must be a
+	%% non-empty tail to the bucket:
 hash_delete(Struct,Index,Key,Value,Table) 
 	:-
 	arg(Index,Struct,EList),		%% get element list
-	hash_delete(EList,2,Key,Value,Table).	%% loop
-*/
+	arg(2, EList, EListTail),
+	hash_delete_l(EList,EListTail,Key,Value),
+	arg(3,Table,RehashCount),
+	NewRehashCount is RehashCount+1,
+	mangle(3,Table,NewRehashCount).		%% update count
 
+	%% EListTail must be non-empty:
+hash_delete_l(EList,EListTail,Key,Value)
+	:-
+	arg(1,EListTail,Elem),			%% get first element on list tail
+	arg(1,Elem,Key),			%% match key
+	arg(2,Elem,Value),			%% match value
+	!,
+	arg(2,EListTail,REList),		%% get rest of element list tail
+	mangle(2,EList,REList).			%% delete element off of list tail
+
+	%% Haven't found Key yet, so 
+	%% EListTail must be non-empty:
+hash_delete_l(EList,EListTail,Key,Value)
+	:-
+	EListTail \= [],
+	!,
+	arg(2, EListTail, EListTail2),
+	hash_delete_l(EListTail,EListTail2,Key,Value).
+hash_delete_l(EList,EListTail,Key,Value).
+
+/*---------------------------------------------------------------*
+ | hash_delete(Struct,Index,Key,Value,Table) 
+ | Deletes Key,Value pair from bucket with index Index;
+ | Note that this bucket may contain more than one distinct
+ | key-value pair, but that for any given Key, there is only
+ | one pair in the bucket with key = Key.
+ *---------------------------------------------------------------*/
 export hash_delete_multi/3.
 hash_delete_multi(Key,Value,Table) 
 	:-
@@ -663,24 +705,44 @@ hash_delete_multi(Key,Value,Table)
 	hash_delete_multi(Bucket,Key,Value,Table),
 	!.
 
+	%% Case: Key matches key of first cons in Bucket:
 hash_delete_multi(Bucket,Key,Value,Table) 
 	:-
-	arg(1,Bucket,EList),				%% get first element on list
-	arg(1,EList,Key),				%% match key
+	arg(1,Bucket,EList),		%% get first element on bucket
+	arg(1,EList,Key),		%% match key
 	rip_out(EList, Value),
 	arg(3,Table,RehashCount),
 	NewRehashCount is RehashCount+1,
 	mangle(3,Table,NewRehashCount).		%% update count
 
-/*
-
-	arg(2,Elem,Value),				%% match value
-	!,
-hash_delete_multi(Struct,Index,Key,Value,Table) 
+	%% Case: Key does NOT match key of first cons in Bucket:
+	%% So tail of Bucket must be non-empty:
+hash_delete_multi(Bucket,Key,Value,Table) 
 	:-
-	arg(Index,Struct,EList),		%% get element list
-	hash_delete(EList,2,Key,Value,Table).	%% loop
-*/
+	arg(2, Bucket, BucketTail),
+	hash_delete_multi_l(Bucket,BucketTail,Key,Value),
+	arg(3,Table,RehashCount),
+	NewRehashCount is RehashCount+1,
+	mangle(3,Table,NewRehashCount).		%% update count
+
+	%% Case: Key matches key of first cons in BucketTail:
+hash_delete_multi_l(Bucket,BucketTail,Key,Value)
+	:-
+	arg(1,BucketTail,Elem),		%% match key
+	arg(1,Elem,Key),		%% match key
+	!,
+	rip_out(Elem, Value).
+
+	%% Case: Key does NOT match key of first cons in BucketTail:
+	%% Therefore, haven't found Key in Bucket yet,
+	%% So tail of BucketTail must be non-empty:
+hash_delete_multi_l(Bucket,BucketTail,Key,Value)
+	:-
+	EListTail \= [],
+	!,
+	arg(2, BucketTail, BucketTail2),
+	hash_delete_multi_l(BucketTail,BucketTail2,Key,Value).
+hash_delete_multi_l(Bucket,BucketTail,Key,Value).
 
 rip_out(EList, Value)
 	:-

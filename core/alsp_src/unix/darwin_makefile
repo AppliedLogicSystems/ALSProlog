@@ -1,0 +1,7 @@
+CPPFLAGS += -DUNIX_DARWIN
+OS_AR = ar ru
+OS_RANLIB = ranlib
+CCOMP=cc
+#CFLAGS+= -rdynamic
+#OS_LIBS = -lm -ldl -lcrypt
+#OS_LIBS = -lcompat

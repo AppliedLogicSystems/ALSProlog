@@ -154,7 +154,7 @@ next_stream_identifier(Options,Id) :-
  *  1)  They are non-portable and may change over time.
  *  2)  There is no error checking performed.
  *  3)  The stream argument must be an actual stream descriptor and not
- *      and alias.
+ *      an alias.
  *  4)  The stream I/O package manipulates these fields and depends on
  *      them; if an application program messes them up, we're in trouble.
  */

@@ -71,6 +71,12 @@ image create photo about_genericapp -file [file join "$APPTCLPATH" "images/about
     load_photo_gif down_arrow_gif down-arrow-blue
     load_photo_gif right_gif right-arrow-blue
     load_photo_gif left_gif left-arrow-blue
+
+    load_photo_gif openFolder openfolder
+    load_photo_gif closeFolder closefolder
+    load_photo_gif openFolder2 openfolder2
+    load_photo_gif closeFolder2 closefolder2
+
     switch $tcl_platform(platform) {
     	unix {
     		load_photo_gif closed_ptr closed_unix

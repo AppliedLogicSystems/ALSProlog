@@ -1,0 +1,8 @@
+libactivate(pxml,[library,pxml],
+    [html_form_input/2,html_form_input/2,
+     r_pxml/2, read_tokens_lines/2,
+     read_tokens/2,read_tokens/3,parse_pxml/2,
+     parse_dtd/2, pml2xml/2,mpml2xml/2,fetch_url/2,
+     grab_pxml/2
+    ],
+    [ ] ).

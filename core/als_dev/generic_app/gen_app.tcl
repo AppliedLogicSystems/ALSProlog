@@ -51,13 +51,78 @@ proc exit_app { } {
 		-title "Exit" -message "Really Exit $agv(title)?" \
 		-type yesno -default yes]
 	if {$ans == "yes"} then {
-#		prolog call alsdev possible_save_project
+		if {$agv(settings_file) != "" } then {
+			prolog call app_utils save_settings -atom $agv(settings_file)
+		}
+		save_settings
 		if {[document.close_all]} then {
 #			save_window_positions
 			exit
 			}
 	} else {
 		return 0
+	}
+}
+
+
+proc std_agv_vals { } {
+	global agv
+
+	set VV [list \
+			agv(.document,foreground) $agv(.document,foreground) \
+			agv(.document,background) $agv(.document,background) \
+			agv(.document,selectforeground) $agv(.document,selectforeground) \
+			agv(.document,selectbackground) $agv(.document,selectbackground) \
+			agv(.document,font) $agv(.document,font) \
+			agv(.document,tabs) $agv(.document,tabs) \
+			agv(main,foreground) $agv(main,foreground) \
+			agv(main,background) $agv(main,background) \
+			agv(main,selectforeground) $agv(main,selectforeground) \
+			agv(main,selectbackground) $agv(main,selectbackground) \
+			agv(main,font) $agv(main,font) \
+			agv(main,tabs) $agv(main,tabs)  ]
+	return $VV	
+}
+
+proc save_settings { } {
+	global agv
+
+	set File "$agv(app_name)_settings.tcl"
+	set SS [open $File w]
+			## Standard ones first:
+	puts $SS $agv(version_stamp)
+	puts $SS "set agv(.document,foreground) $agv(.document,foreground)"
+	puts $SS "set agv(.document,background) $agv(.document,background)"
+	puts $SS "set agv(.document,selectforeground) $agv(.document,selectforeground)"
+	puts $SS "set agv(.document,selectbackground) $agv(.document,selectbackground)"
+	puts $SS "set agv(.document,font) \"$agv(.document,font)\""
+	puts $SS "set agv(.document,tabs) \"$agv(.document,tabs)\""
+	puts $SS "set agv(main,foreground) $agv(main,foreground)"
+	puts $SS "set agv(main,background) $agv(main,background)"
+	puts $SS "set agv(main,selectforeground) $agv(main,selectforeground)"
+	puts $SS "set agv(main,selectbackground) $agv(main,selectbackground)"
+	puts $SS "set agv(main,font) \"$agv(main,font)\""
+	puts $SS "set agv(main,tabs) \"$agv(main,tabs)\""
+	puts $SS ""
+	puts $SS "set agv(toplevel,geometry) \"[wm geometry $agv(toplevel)]\""
+
+
+	save_app_settings $SS $agv(app_settings)
+
+	close $SS
+}
+
+
+
+proc save_app_settings { Channel AGVExprsList } {
+	global agv
+	foreach i $AGVExprsList {
+		if {([string first ",path)" $i] >= 0) || ([string first "_dir)" $i] >= 0)} {
+			set IV [eval concat $$i]
+			puts $Channel "set $i [list $IV]  "
+		} else {
+			puts $Channel "set $i \{[eval concat $$i]\}  "
+		}
 	}
 }
 
@@ -206,7 +271,6 @@ proc select_project_file {PFXL DF projectFile} {
 			-initialfile $DF]
 }
 
-
 proc load_existing_project {} {
     set projectFile [tk_getOpenFile \
 		-filetypes {{"Project Files" {.pjm}}} \
@@ -214,3 +278,18 @@ proc load_existing_project {} {
 	prolog call rocker load_project_file -atom $projectFile
 }
 
+		######################################
+		##### File Path Stuff
+		######################################
+
+proc dbl_q_wins_path { Path } {
+	set SplitPath [file split $Path]
+	set Drive [lindex $SplitPath 0]
+	set SplitPathTail [lrange $SplitPath 1 end]
+	set DQPath ""
+	append DQPath [string range $Drive 0 [expr [string length $Drive] - 2]]
+	foreach E $SplitPathTail {
+		append DQPath "\\\\" $E
+	}
+	return $DQPath
+}
