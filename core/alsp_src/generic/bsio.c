@@ -4828,20 +4828,8 @@ sio_put_atom()
     a = atom + SIO_AUX(buf);
     newlineseen = 0;
 
-    /* Line Feed ('\n') in an atom is interpreted as a newline. */
     while (b < l && *a) {
-	if (*a == LF) {
-	    newlineseen++;
-	    
-	    eoln_str = get_eoln_str(buf);
-	    
-	    while (b < l && *eoln_str) *b++ = *eoln_str++;
-	    
-	    if (*eoln_str == 0) a++;
-	    
-	} else {
-	    *b++ = *a++;
-	}
+        *b++ = *a++;
     }
 
     if (*a)
