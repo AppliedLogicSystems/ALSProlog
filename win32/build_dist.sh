@@ -60,10 +60,6 @@ cp -pr "$BIN/tcl80.dll" "$DISTDIR"
 cp -pr "$BIN/tk80.dll" "$DISTDIR"
 cp -pr "$BIN/tclpip80.dll" "$DISTDIR"
 cp -pr "$BIN/alsdir" "$DISTDIR"
-rm -f "$DISTDIR/alsdir/builitins/blt_shl.pro"
-rm -f "$DISTDIR/alsdir/builitins/blt_dvsh.pro"
-rm -f "$DISTDIR/alsdir/builitins/ra_basis.pro"
-rm -f "$DISTDIR/alsdir/builitins/int_cstr.pro"
 cp -pr "$BIN/lib" "$DISTDIR"
 cp -pr "$BIN/lib/itcl3.0/itcl30.dll" "$DISTDIR"
 cp -pr "$BIN/lib/itk3.0/itk30.dll" "$DISTDIR"
@@ -86,6 +82,11 @@ cp -p $BUILTINS/*.pro "$DISTDIR/alsdir/builtins"
 mkdir "$DISTDIR/alsdir/library"
 cp -p $LIB/*.pro "$DISTDIR/alsdir/library"
 cp -p $LIB/*.alb "$DISTDIR/alsdir/library"
+
+rm -f "$DISTDIR/alsdir/builtins/blt_shl.pro"
+rm -f "$DISTDIR/alsdir/builtins/blt_dvsh.pro"
+rm -f "$DISTDIR/alsdir/builtins/ra_basis.pro"
+rm -f "$DISTDIR/alsdir/builtins/int_cstr.pro"
 
 if test $EDITION = standard
 then
