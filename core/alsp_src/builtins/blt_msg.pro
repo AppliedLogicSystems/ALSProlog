@@ -65,20 +65,24 @@ prolog_system_error(
 
 prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), _) 
 	:-
-%write(syntax_pos_info=p(P1,P2,P3)),nl,flush_output,
+write(syntax_pos_info=p(P1,P2,P3)),nl,flush_output,
 	sio:is_stream(Stream,Stream0),
 	sio:is_input_stream(Stream0),
 	!,
-	EType = 'Syntax error',
+
+write(doing_syntax_error),nl,flush_output,
+	EType = 'Syntax error ',
 	sio:stream_type(Stream0,StreamType),
 	sio:stream_name(Stream0,StreamName),
 	(StreamType = file ->
-		pathPlusFile(_,File,StreamName)
+%		pathPlusFile(_,File,StreamName)
+		split_path(StreamName, PathElts),
+		dreverse(PathElts, [File | _]
 		;	
 		File = StreamName
 	),
 	printf(error_stream,'\n%s',[Context]),
-	OutPattern = '%t, line %d: %s\n',
+	OutPattern = '\n\t%t, line %d: %s\n',
 	OutArgs = [File,LineNumber,ErrorMessage],
 	pse_out(error_stream, EType, OutPattern, OutArgs),
 	flush_output(error_stream).

@@ -131,6 +131,16 @@ als_shl_mgrAction(remove_mgr(BaseFileName, FileMgr), State)
 	list_delete(PrevMgrsList, fm(BaseFileName, FileMgr), NewMgrsList),
 	setObjStruct(source_mgrs, State, NewMgrsList).
 
+als_shl_mgrAction(insert_src_mgr_by_cg(CG, FileMgr), State) 
+	:-!,
+	(clause(alsdev_running,true) -> 
+		accessObjStruct(debugger_mgr,  State, DBGMGR),
+		setObjStruct(debugger_mgr,  FileMgr, DBGMGR),
+		send(DBGMGR, insert_by_fcg(CG, FileMgr))
+		;
+		true
+	).
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% RECORDING LOADING INFO (note_loaded)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -139,5 +149,9 @@ source_handlerAction(note_loaded(CG, Path), State)
 	:-
 	setObjStruct(source_file, State, Path),
 	setObjStruct(fcg, State, CG).
+
+source_handlerAction( update_errors_wins(_), State).
+
+source_handlerAction( clear_errors_display, State).
 
 endmod.
