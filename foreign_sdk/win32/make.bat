@@ -3,10 +3,10 @@ rmdir ALS_Prolog_Foreign_SDK /S
 mkdir "ALS_Prolog_Foreign_SDK"
 cd "ALS_Prolog_Foreign_SDK"
 mkdir ALS_Prolog_Support
-copy ..\alspro.dll.lib ALS_Prolog_Support
-copy ..\..\source\alspi.h ALS_Prolog_Support
-copy ..\..\source\alspi_slib.h ALS_Prolog_Support
-copy ..\..\source\alspi_slib.c ALS_Prolog_Support
+copy ..\..\..\core\win32\alspro.lib ALS_Prolog_Support
+copy ..\..\..\core\alsp_src\generic\alspi.h ALS_Prolog_Support
+copy ..\..\..\core\alsp_src\generic\alspi_slib.h ALS_Prolog_Support
+copy ..\..\..\core\alsp_src\generic\alspi_slib.c ALS_Prolog_Support
 mkdir Documentation
 copy ..\..\docs\FI_Manual.pdf "Documentation\Foreign Interface Manual.pdf"
 copy ..\..\docs\FI_Ref.pdf "Documentation\Foreign Interface Reference.pdf"
