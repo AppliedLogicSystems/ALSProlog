@@ -78,8 +78,8 @@ of the simplest method.
 Single Instance
 
 We only want one instance (process) of ALS Prolog running at a time.
-To do this, we check for the ALS Prolog shell window whenever this
-program is launched, and exit if it exists.
+To do this, we check for a mutex whenever this program is launched,
+and exit if it exists.
 
 Opening Documents
 
@@ -93,21 +93,24 @@ Problems
 The current code relies on the main ALS Prolog shell window always being
 open and always being named "ALS Prolog Environment".
 
+Launching ALS Prolog via a multi-file open in the Explorer only opens one
+document.
+
 Future Directions
 
-The Win32 Knowledge Base suggests using named objects to maintain only
-one instance.   
+The Win32 Knowledge Base suggests using named objects to syncronize opening
+multiple documents.
 
 Tcl 8.1 has some support for DDE.  If possible we should use DDE for
 communicating between instances of ALS Prolog.
 
 */
 
-/* CheckInstance return TRUE iff there is no other ALS Prolog Application
-   running.  If another copy exists, a copy-data message is sent with
-   the command line for processing.
+/* ActivateInstance activates another instance of the application and
+   sends a copy-data message with the command line for processing.
  */
-static BOOL CheckInstance(void)
+
+static void ActivateInstance(void)
 {
 	HWND w;
 	
@@ -125,8 +128,7 @@ static BOOL CheckInstance(void)
 	
 			SendMessage(w, WM_COPYDATA, 0, (long)&data);
 		}
-		return FALSE;
-	} else return TRUE;
+	}
 }
 
 /* TkWindowProc and TkWindowInterp are Globals to hold Tk's window proc, and the Tcl interpreter. */
@@ -198,13 +200,20 @@ void shutdown_alsdev_demo(void);
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	int   exit_status;
+	HANDLE mutex;
 	PI_system_setup setup;
 	AP_Obj term;
 	AP_World *w = NULL;
 
 	/* Allow only one instance to run and have it process the command line. */
-	if (!CheckInstance()) return FALSE;
-
+	mutex = CreateMutex(NULL, FALSE, "ALS Prolog Environment Mutex");
+	if (!mutex) return FALSE;
+	
+	if (GetLastError() == ERROR_ALREADY_EXISTS) {
+		ActivateInstance();
+		return FALSE;
+	}
+	
 	{
 		char path[MAX_PATH], dir[MAX_PATH], env[MAX_PATH], *dir_end;
 		
@@ -290,5 +299,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 	
     PI_shutdown();
+    
+    CloseHandle(mutex);
 }
 
