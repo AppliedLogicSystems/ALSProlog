@@ -10,7 +10,7 @@
 
 # Menu accelerator modifier key and elipsis string.
 
-if {"$tcl_platform(platform)" == "macintosh"} {
+if {$tcl_platform(platform) == "macintosh"} {
 	set mod "Cmd"
 	set elipsis "É"
 } else {
