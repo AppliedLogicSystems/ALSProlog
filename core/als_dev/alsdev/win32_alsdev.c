@@ -8,6 +8,8 @@
 #include "getFiles.h"
 #include "getDirectory.h"
 
+extern void tcl_interface_init(void);
+
 extern void panic(const char *);
 
 static char *simple_write(AP_World *w, AP_Obj obj, char *s)
@@ -266,7 +268,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	shutdown_alsdev_demo();
 #endif
 
-	pi_init();
+	tcl_interface_init();
 
 	/* Only load blt_dvsh when there is no saved state.
 	   Since blt_dvsh is part of the state, reconsulting

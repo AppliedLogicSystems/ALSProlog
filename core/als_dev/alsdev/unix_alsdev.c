@@ -1,8 +1,10 @@
 #include "alspi.h"
 
+extern void tcl_interface_init(void);
+
 int main(int argc, char *argv[])
 {
-    return PI_main(argc, argv, pi_init);
+    return PI_main(argc, argv, tcl_interface_init);
 }
 
 #if 0
@@ -101,7 +103,7 @@ int main(int argc, char ** argv)
 		exit(EXIT_ERROR);
     }
 
-	pi_init();
+	tcl_interface_init();
 
 	/* Only load blt_dvsh when there is no saved state.
 	   Since blt_dvsh is part of the state, reconsulting

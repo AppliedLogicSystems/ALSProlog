@@ -870,7 +870,8 @@ PI_BEGIN
 PI_END
 
 
-void pi_init(void)
+void tcl_interface_init(void);
+void tcl_interface_init(void)
 {
 #ifdef macintosh
 	tcl_macQdPtr = &qd /*GetQD()*/;
