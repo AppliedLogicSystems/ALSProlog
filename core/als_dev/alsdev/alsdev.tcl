@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.78 1999/02/08 12:27:23 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.79 1999/02/09 16:48:11 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -1002,8 +1002,6 @@ proc exec_toggle_debugwin {} {
 		if {[winfo exists .debugwin] == 0} then {
 			vTclWindow.debugwin ""
 			show_debugwin
-			bind .debugwin.text <Unmap> {unmap_alsdev_debug}
-			bind .debugwin.text <Map>   {map_alsdev_debug}
 		} else {
 			show_debugwin
 		}
@@ -1020,29 +1018,19 @@ proc ensure_db_showing {} {
 
 	if {[winfo exists .debugwin] == 0} then { 
 		Window show .debugwin 
-		bind .debugwin.text <Unmap> {unmap_alsdev_debug}
-		bind .debugwin.text <Map>   {map_alsdev_debug}
 	}
 	show_debugwin
 }
 
-#	} else {
-  #  	Window show .debugwin
-#    	Window show .debugwin
-#	}
-
 proc hide_debugwin {} {
 	global array proenv
 
-	wm withdraw .debugwin
-	wm withdraw .debugwin
 	un_post_open_document Debugger 
-
 	foreach Win  $proenv(debugwin,visible) {
-		wm withdraw $Win
 		wm withdraw $Win
 	}
 	set proenv(debugwin) 0
+	wm withdraw .debugwin
 }
 
 
