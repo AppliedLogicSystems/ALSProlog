@@ -19,6 +19,30 @@
 #
 ##=================================================================================
 
+## Bindings in class Text to suppress:
+
+proc adjust_Text_bindings {} {
+	global mod
+	if {"$mod"=="Ctrl"} then { set MMD Control } else { set MMD $mod }
+
+	bind Text <$MMD-d> ""
+	bind Text <$MMD-k> ""
+	bind Text <$MMD-o> ""
+	bind Text <$MMD-t> ""
+	bind Text <$MMD-x> ""
+	bind Text <Delete> ""
+	bind Text <Delete> {
+		if {[%W tag nextrange sel 1.0 end] != ""} {
+			%W delete sel.first sel.last
+		} elseif [%W compare insert != 1.0] {
+			%W delete insert-1c
+			%W see insert
+		}
+	}
+}
+
+adjust_Text_bindings
+
 set proenv(document_index) 0
 set proenv(document_list) {}
 
@@ -72,8 +96,8 @@ proc create_document_window {title} {
 
 	focus $w.text
 
-	bind $w.text <KeyPress> "dirty_key $w %K"
-	
+	bind $w.text <Key> "dirty_key $w %K"
+
 	# Init document fields
 	set proenv($w,dirty) false
 	lappend proenv(document_list) $w
@@ -83,9 +107,15 @@ proc create_document_window {title} {
 
 proc dirty_key {w k} {
 	global array proenv
-	#.topals.text insert end $k
-	if {$k!="Home" && $k!="End" && $k!="Prior" && $k!="Next" && $k!="Left" \
-		&& $k!="Right" && $k!="Up" && $k!="Down"} {
+
+	if {$k!="Home" && $k!="End" && $k!="Prior" && $k!="Next" \
+		&& $k!="Left" && $k!="Right" && $k!="Up" && $k!="Down" \
+		&& $k!="Control_L" && $k!="Control_R" \
+		&& $k!="Shift_L" && $k!="Shift_R" \
+		&& $k!="Alt_L" && $k!="Alt_R" \
+		&& $k!="Meta_L" && $k!="Meta_R" \
+		&& $k!="Caps_Lock" && $k!="Num_Lock" && $k!="Help"
+		} {
 		set proenv($w,dirty) true
 	}
 }
@@ -114,6 +144,8 @@ proc bind_accelerators {w mod type} {
 
 		# prolog menu:
 	bind $w.text <$MMD-k> "$type.consult $w"
+
+
 }
 
 proc dispose_document_window {w} {
@@ -310,7 +342,6 @@ proc document.consult {w} {
 		bell
 		return
 	}
-	
 	catch { prolog call alsdev do_reconsult -atom $file }
 	insert_prompt  .topals.text "\n?-" 
 }

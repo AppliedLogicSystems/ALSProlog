@@ -886,11 +886,22 @@ proc spy_preds_choice2 {Mod} {
 	disp_list $proenv(notspying,$Mod) $base.cols_fr.r.rightlist.lstbx
 }
 
-proc install_spypoints {module base} {
-	set Left [$base.cols_fr.l.leftlist.lstbx get 0 end]
-	set Right [$base.cols_fr.r.rightlist.lstbx get 0 end]
-	prolog call debugger reset_spypoints -atom $module -list $Left -list $Right
+proc move_to_spying {Module Base} {
+	set NewSpying [move_col_left $Base]
+	prolog call debugger install_new_spypoints -list $NewSpying -atom $Module
 }
+
+proc move_to_no_spying {Module Base} {
+	set NewNoSpying [move_col_right $Base]
+	prolog call debugger remove_old_spypoints -list $NewNoSpying -atom $Module
+}
+
+#proc install_spypoints {module base} {
+#	set Left [$base.cols_fr.l.leftlist.lstbx get 0 end]
+#	set Right [$base.cols_fr.r.rightlist.lstbx get 0 end]
+#	prolog call debugger reset_spypoints -atom $module -list $Left -list $Right
+#}
+
 
 proc check_leashing {} {
 	global array proenv
@@ -1047,7 +1058,6 @@ proc toggle_debug_flatness {} {
 
 	prolog call debugger set_depth_computation -atom debugger_output -atom $proenv(db_flatness)
 }
-
 
 
 

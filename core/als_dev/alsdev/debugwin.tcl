@@ -84,13 +84,6 @@ proc vTclWindow.debugwin {base} {
         -padx 2 -text stack \
 		-command { set DebugResponse Bt }
 
-#    button $base.buttons.abort \
-#        -text abort -underline 0 -padx 4 \
-#        -command { set DebugResponse Ba }
-#    button $base.buttons.break \
-#        -text break -underline 0 -padx 4 \
-#		-command { set DebugResponse Bb }
-
     frame $base.debug_status \
         -borderwidth 1 -relief sunken 
     label $base.debug_status.port_label \
@@ -171,84 +164,6 @@ proc vTclWindow.debugwin {base} {
 	bind_accelerators .debugwin $mod debugwin
 }
 
-#proc vTclWindow.spywin {base} {
-#	global array proenv
-#
-#    set base .spywin
-#    if {[winfo exists $base]} {
-#        wm deiconify $base; return
-#    }
-#	global SpyModuleMenu SpyModule
-#	global SpyPredMenu SpyPred
-#    ###################
-#    # CREATING WIDGETS
-#    ###################
-#    toplevel $base -class Toplevel
-#    wm focusmodel $base passive
-#    wm geometry $base 421x231+278+184
-#    wm maxsize $base 1137 870
-#    wm minsize $base 1 1
-#    wm overrideredirect $base 0
-#    wm resizable $base 1 1
-#    wm deiconify $base
-#    wm title $base "Spy Point Selection"
-#	wm protocol $base WM_DELETE_WINDOW hide_spywin
-#
-#    label $base.typein_label \
-#        -text {Type in predicate info:} 
-#    entry $base.pred_entry
-#    frame $base.spacer1 \
-#        -borderwidth 1 -height 2 -relief sunken  -background black
-#    label $base.or_label \
-#        -text {Or select by menus:} 
-#    frame $base.modules \
-#        -borderwidth 1 -height 30 -relief flat -width 30 
-#    label $base.modules.module_label \
-#        -text Module: 
-#	set SpyModuleMenu [tk_optionMenu $base.modules.mods SpyModule user]
-#	set proenv(spy_mods_menu) $SpyModuleMenu
-#    frame $base.spacer2 \
-#        -borderwidth 1 -height 2 -relief sunken  -background black
-#	button $base.predicates \
-#        -command popup_spypoint_choice -padx 11 -pady 4 -text Predicates 
-#    frame $base.buttons \
-#        -borderwidth 1 -height 30 -width 30 
-#    button $base.buttons.ok \
-#        -command {spy_point ok} -padx 11 -pady 4 -text OK 
-#    button $base.buttons.cancel \
-#        -command {spy_point cancel} -padx 11 -pady 4 -text Cancel 
-#    ###################
-#    # SETTING GEOMETRY
-#    ###################
-#    pack $base.typein_label \
-#        -anchor w -expand 0 -fill none -pady 4 -side top 
-#    pack $base.pred_entry \
-#        -anchor center -expand 0 -fill x -padx 12 -side top 
-#    pack $base.spacer1 \
-#        -anchor center -expand 0 -fill x -side top -pady 8
-#    pack $base.or_label \
-#        -anchor w -expand 0 -fill none -pady 4 -side top 
-#
-#    pack $base.modules \
-#        -anchor w -expand 0 -fill x -padx 25 -pady 4 -side top 
-#    pack $base.modules.module_label \
-#        -anchor center -expand 0 -fill none -padx 12 -side left 
-#	pack $base.modules.mods \
-#        -anchor center -expand 1 -fill x -padx 12 -side left 
-#    pack $base.predicates \
-#        -anchor w -expand 0 -fill x -pady 4 -padx 35 -side top 
-#
-#    pack $base.spacer2 \
-#        -anchor center -expand 0 -fill x -side top -pady 8
-#    pack $base.buttons \
-#        -anchor center -expand 0 -fill x -padx 65 -pady 8 -side top 
-#    pack $base.buttons.ok \
-#        -anchor center -expand 0 -fill none -side left 
-#    pack $base.buttons.cancel \
-#        -anchor center -expand 0 -fill none -side right 
-#}
-
-
 proc vTclWindow.debug_source_trace {base Title} {
 	global array proenv
 	global tcl_platform
@@ -316,79 +231,6 @@ proc vTclWindow.debug_source_trace {base Title} {
     grid $base.textwin.text \
         -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
 }
-
-#proc vTclWindow.spychoose {base} {
-#    if {$base == ""} {
-#        set base .spychoose
-#    }
-#    if {[winfo exists $base]} {
-#        wm deiconify $base; return
-#    }
-#    ###################
-#    # CREATING WIDGETS
-#    ###################
-#    toplevel $base -class Toplevel
-#    wm focusmodel $base passive
-#    wm geometry $base 172x364+226+178
-#    wm maxsize $base 1137 870
-#    wm minsize $base 1 1
-#    wm overrideredirect $base 0
-#    wm resizable $base 1 1
-#    wm deiconify $base
-#    wm title $base "Spy Points"
-#	wm protocol $base WM_DELETE_WINDOW { hide_spywin }
-#
-#    frame $base.modid \
-#        -borderwidth 1 -height 30 -relief sunken -width 30 
-#    label $base.modid.label \
-#        -text {Module: } 
-#    label $base.modid.module \
-#        -relief groove -text user 
-#    frame $base.slist \
-#        -borderwidth 1 -height 30 -relief raised -width 30 
-#    listbox $base.slist.listbox \
-#		-selectmode multiple \
-#        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
-#        -xscrollcommand {.spychoose.slist.hscroll set} \
-#        -yscrollcommand {.spychoose.slist.vscroll set} 
-#    scrollbar $base.slist.hscroll \
-#        -borderwidth 1 -command {.spychoose.slist.listbox xview} -orient horiz \
-#        -width 10 
-#    scrollbar $base.slist.vscroll \
-#        -borderwidth 1 -command {.spychoose.slist.listbox yview} -orient vert \
-#        -width 10 
-#    frame $base.buttons \
-#        -borderwidth 1 -height 30 -relief sunken -width 30 
-#    button $base.buttons.ok \
-#        -padx 11 -pady 4 -text OK -command {do_spychoose ok}
-#    button $base.buttons.cancel \
-#        -padx 11 -pady 4 -text Cancel -command {do_spychoose cancel}
-#    ###################
-#    # SETTING GEOMETRY
-#    ###################
-#    pack $base.modid \
-#        -anchor center -expand 0 -fill x -side top 
-#    pack $base.modid.label \
-#        -anchor center -expand 0 -fill none -side left 
-#    pack $base.modid.module \
-#        -anchor center -expand 0 -fill x -side top 
-#    pack $base.slist \
-#        -anchor center -expand 1 -fill both -side top 
-#    grid columnconf $base.slist 0 -weight 1
-#    grid rowconf $base.slist 0 -weight 1
-#    grid $base.slist.listbox \
-#        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
-#    grid $base.slist.hscroll \
-#        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew 
-#    grid $base.slist.vscroll \
-#        -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
-#    pack $base.buttons \
-#        -anchor center -expand 0 -fill x -side bottom 
-#    pack $base.buttons.ok \
-#        -anchor center -expand 0 -fill none -padx 2 -side left 
-#    pack $base.buttons.cancel \
-#        -anchor center -expand 0 -fill none -padx 2 -side right 
-#}
 
 proc vTclWindow.debug_settings {base} {
 	global array proenv
@@ -522,10 +364,10 @@ proc spy_preds_in_module {base module} {
 
     frame $base.cols_fr.m -borderwidth 1 -relief sunken 
     button $base.cols_fr.m.mv_left_btn \
-        -padx 11 -pady 4 -text button -command "move_col_left $base" \
+        -padx 11 -pady 4 -text button -command "move_to_spying $module $base" \
 		-image left_gif 
     button $base.cols_fr.m.move_rt_btn \
-        -padx 11 -pady 4 -text button -command "move_col_right $base" \
+        -padx 11 -pady 4 -text button -command "move_to_no_spying $module $base" \
 		-image right_gif 
 
     frame $base.cols_fr.r -borderwidth 1 -relief sunken 
@@ -541,10 +383,10 @@ proc spy_preds_in_module {base module} {
         -orient vert 
 
 	frame $base.btns_fr -borderwidth 1 -relief groove 
-    button $base.btns_fr.ok_btn \
-        -padx 8 -pady 3 -text {Install SpyPoints} \
-		-command "install_spypoints $module $base"
-    button $base.btns_fr.cancel_btn \
+#    button $base.btns_fr.ok_btn \
+#        -padx 8 -pady 3 -text {Install SpyPoints} \
+#		-command "install_spypoints $module $base"
+    button $base.btns_fr.dismiss_btn \
         -padx 8 -pady 3 -text Dismiss -command "wm withdraw $base"
 
     ###################
@@ -610,9 +452,9 @@ proc spy_preds_in_module {base module} {
 
 	grid $base.btns_fr \
         -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky nsew
-    pack $base.btns_fr.ok_btn \
-        -anchor center -expand 0 -fill none -side left -padx 20
-    pack $base.btns_fr.cancel_btn \
+#    pack $base.btns_fr.ok_btn \
+#        -anchor center -expand 0 -fill none -side left -padx 20
+    pack $base.btns_fr.dismiss_btn \
         -anchor center -expand 0 -fill none -side right -padx 20
 }
 
@@ -652,7 +494,7 @@ proc module_choose {ModsList} {
 	frame $base.buttons -borderwidth 1 -relief groove 
     button $base.buttons.ok \
         -padx 4 -pady 3 -text OK \
-		-command "spy_preds_choice2 \
+		-command "wm withdraw $base ; spy_preds_choice2 \
 			\[$base.listbox get \[lindex \[$base.listbox curselection \] 0 \] \]"
     button $base.buttons.cancel \
         -padx 4 -pady 3 -text Dismiss -command "wm withdraw $base"
@@ -673,4 +515,8 @@ proc module_choose {ModsList} {
         -anchor center -expand 0 -fill none -side left -padx 8
     pack $base.buttons.cancel \
         -anchor center -expand 0 -fill none -side right -padx 8
+
+	bind $base.listbox <Double-Button-1> "wm withdraw $base ; spy_preds_choice2 \
+			\[$base.listbox get \[lindex \[$base.listbox curselection \] 0 \] \]"
+
 }
