@@ -220,36 +220,6 @@ extern	int	_w_unify	PARAMS( (PWord, PWord) );
 
 PWord *allocate_prolog_heap_and_stack PARAMS(( size_t ));
 
-
-#if defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
-/*----------------- Operating systems with mmap ---------------*/
-
-#if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
-static  void    stack_overflow  PARAMS(( int, struct siginfo *, struct ucontext * ));
-
-#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
-static  void    stack_overflow  PARAMS(( int, int, struct sigcontext *, caddr_t ));
-
-#else
-void stack_overflow PARAMS((void));
-
-#endif  /* defined(HAVE_SIGACTION) && defined(SA_SIGINFO) */
-
-#elif defined(MACH_SUBSTRATE)
-void stack_overflow		PARAMS((int, int, struct sigcontext *, caddr_t));
-
-#else /* no MMAP */
-
-void stack_overflow PARAMS((void));
-
-#endif /* defined(HAVE_MMAP) .... */
-
-/*
-#ifdef Portable
-void stack_overflow PARAMS((void));
-#endif
-*/
-
 #ifdef __cplusplus
 }
 #endif
