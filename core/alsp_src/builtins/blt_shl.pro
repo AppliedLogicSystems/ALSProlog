@@ -28,6 +28,7 @@ start_shell(DefaultShellCall)
 	%% Setup debugger entries (needs to be done early because
 	%% ss_parse_command_line can cause debugger to be called
 	%% [if it sees switch -nwd] )
+	alarm(0,0),
 	builtins:libhide(debugger, [builtins,debugger],
 				[ (trace)/0, (trace)/2, toggle_mod_show/1, leash/1,
 		  		  (spy)/0, (spy)/1, (spy)/2, (spy_pat)/3, (spyWhen)/1,
@@ -37,11 +38,12 @@ start_shell(DefaultShellCall)
 		%% get the command line, but ignore the image name
 	retract(command_line([ImageName|CommandLine])),
 	!,
-	CLInfo = clinfo(DefaultShellCall,	/* goal to run */
-					false,				/* verbosity */
+	CLInfo = clinfo(DefaultShellCall,	/* -g: goal to run */
+					false,				/* -v/-q: verbosity */
 					[],					/* files to consult */
 					ImageName,
-					default,			/* debugger to set up */
+					default,			/* -nwd: debugger to set up */
+					[],					/* -S init search list */
 					other_flags),		/* room for expansion */
 
 	debugger:nospy,
@@ -50,8 +52,10 @@ start_shell(DefaultShellCall)
 
 	arg(3, CLInfo, Files),
 	arg(1, CLInfo, ShellCall),
+	arg(6, CLInfo, RevCmdLineSearch),
+	dreverse(RevCmdLineSearch, CmdLineSearch),
 
-	ss_init_searchdir,
+	ss_init_searchdir(CmdLineSearch),
 	ss_load_dot_alspro,
 
 	(arg(2,CLInfo,true) -> consultmessage(on) ; consultmessage(off)),
@@ -101,14 +105,27 @@ ss_parse_command_line(['-v' | T], L, CLInfo)
 	mangle(2, CLInfo, true),
 	ss_parse_command_line(T, L, CLInfo).
 
-	%% -q: Turn on verbose mode:
+	%% -q: Turn off verbose mode:
 ss_parse_command_line(['-q' | T], L, CLInfo)
 	:-!,
 	mangle(2, CLInfo, quiet),
 	ss_parse_command_line(T, L, CLInfo).
 
+	%% -S: Atom - File to add to search list;
+	%% in reverse order; later reverse it:
+ss_parse_command_line(['-s', File | T], L, CLInfo)
+	:-!,
+	arg(6, CLInfo, PrevSL),
+	mangle(6, CLInfo, [File | PrevSL]),
+	ss_parse_command_line(T, L, CLInfo).
+
+	%% -a: Atom - Assert Atom in module user.
 	%% -A: Atom - Assert Atom in module user.
 ss_parse_command_line(['-A', Expr | T], L, CLInfo)
+	:-!,
+	ss_parse_command_line(['-a', Expr | T], L, CLInfo).
+
+ss_parse_command_line(['-a', Expr | T], L, CLInfo)
 	:-!,
 	cmd_line_A(Expr),
 	ss_parse_command_line(T, L, CLInfo).
@@ -157,31 +174,44 @@ in_assrt(AX, SMod)
 	:-
 	SMod:assert(AX).
 /*---------------------------------------
- |	ss_init_searchdir/0
- |
  |	ss_init_searchdir/1
- |	ss_init_searchdir(Paths)
+ |	ss_init_searchdir(CmdLinePaths)
  |	ss_init_searchdir(+)
+ |	
+ |	ss_init_searchdir0/1
+ |	ss_init_searchdir0(CmdLinePaths)
+ |	ss_init_searchdir0(+)
+ |	
+ |	split_paths/2
+ |	split_paths(String,PathsList)
+ |	split_paths(+,-)
  *--------------------------------------*/
-ss_init_searchdir
+ss_init_searchdir(CmdLineList)
 	:-
-	getenv('ALSPATH',ALSPATH),
-	!,
-	ss_init_searchdir(ALSPATH).
-ss_init_searchdir.
+	(getenv('ALSPATH',ALSPATH) ->
+		split_paths(ALSPATH, ALSPATHS),
+		append(CmdLineList, ALSPATHS, PATHS)
+		;
+		PATHS = CmdLineList
+	),
+	ss_init_searchdir0(PATHS).
 
-export ss_init_searchdir/1.
-ss_init_searchdir(Paths)
+split_paths(String, [Path | RestPaths])
 	:-
 	path_separator(PS),
-	atom_split(Paths,PS,Path,RestPaths),
+	atom_split(String,PS,Path,RestPaths),
 	!,
-	assertz(searchdir(Path)),
-	ss_init_searchdir(RestPaths).
-ss_init_searchdir(Path)
+	split_paths(RestPaths).
+
+split_paths(Path, [Path]).
+
+
+ss_init_searchdir0([Path | Paths])
 	:-
-	assertz(searchdir(Path)).
-	
+	assertz(searchdir(Path)),
+	ss_init_searchdir0(Paths).
+ss_init_searchdir0([]).
+
 /*---------------------------------------
  |	ss_load_files/1
  |	ss_load_files(FileList)
@@ -233,10 +263,6 @@ print_banner(OutS,L)
 	UInC is InC - 32,
 	name(WBan, [UInC | WNCs]),
 	!,
-/*
-	als_advise('%s Version %s [%s] (%s)\n', [Name,Version,OSVar,WBan]),
-	als_advise('   Copyright (c) 1987-95 Applied Logic Systems, Inc.\n\n',[]).
-*/
 	printf(OutS,'%s Version %s [%s] (%s)\n',[Name,Version,OSVar,WBan]),
 	printf(OutS,'   Copyright (c) 1987-95 Applied Logic Systems, Inc.\n\n',[]).
 
@@ -286,12 +312,16 @@ prolog_shell(InStream,OutStream)
  | init_prolog_shell(+, +,+,-,-,-)
  |
  *-----------------------------------------------------------------------*/
+module windows.
+
+endmod.
+
+:-dynamic(windows:'$toplevel$'/1).
 
 export init_prolog_shell/6.
 init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	:-
 	als_system(SysList),
-	dmember(wins=Wins, SysList),
 	sio:input_stream_or_alias_ok(InStream, RealInStream),
 	set_stream_pgoals(RealInStream, user_prompt_goal(OutStream) ),
 
@@ -306,9 +336,17 @@ init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 		%% can't hold on to them:
 	get_shell_prompts( CurPromptsStack ),
 	set_shell_prompts( [(Prompt1,Prompt2) | CurPromptsStack] ),
-%	print_banner(SysList),
 	print_banner(OutStream,SysList),
-	dmember(wins=Wins, SysList),
+	dmember(wins=InitWins, SysList),
+	(InitWins = nowins ->
+			Wins = nowins
+			;
+			(windows:'$toplevel$'(_) ->
+				Wins = InitWins
+				;
+				Wins = nowins
+			)
+	),
 	push_prompt(Wins,OutStream,Prompt1).
 
 push_prompt(nowins,_,_) :-!.
@@ -371,12 +409,9 @@ shell_read_execute(InStream,OutStream,Wins,Status)
 	!.
 
 continue_prolog_loop(halt) 
-	:-!, halt.
+	:-!, 
+	halt.
 continue_prolog_loop(Status).
-/*
-	:-
-	'set_$delay_terms'([]).
-*/
 
 	%% This is the same as the old shell_read/7, except that 
 	%% instead of carrying the prompts around in variables,
@@ -418,7 +453,7 @@ shell_execute(InStream,OutStream,InitGoal,[],[],Wins,continue)
 :-alsshell:dynamic(getTracingFlag/1).
 :-dynamic(getTracingFlag/1).
 
-shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status)
+shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,InWins,Status)
 	:-
 	sio:get_user_prompt(UsersPrompt),
 	(alsshell:getTracingFlag(tracing) ->
@@ -428,6 +463,7 @@ shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status)
 	),
 	flush_input(InStream),
 	sio:set_user_prompt(UsersPrompt),
+	wins_wakeup(InWins, Wins, Alarm),
 	!,
 	((nonvar(Goal),Goal=halt) ->
 		Status = halt
@@ -435,7 +471,7 @@ shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status)
 		sio:input_stream_or_alias_ok(InStream, RealInStream),
 		stream_blocking(RealInStream,OldBlocking),
 		set_stream_blocking(RealInStream,true),
-		catch(do_shell_query(Goal,NamesOfVars,Vars,InStream,OutStream),
+		catch(do_shell_query(Goal,NamesOfVars,Vars,Alarm,InStream,OutStream),
 	      		Reason,
 	      		( shell_exception(Reason)
 					,set_stream_blocking(RealInStream,OldBlocking))
@@ -445,6 +481,10 @@ shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status)
 		push_prompt(Wins,OutStream,Prompt1),
 		Status = continue
 	).
+
+wins_wakeup(nowins, nowins, 0) :-!.
+wins_wakeup(Wins/AlarmInterval, Wins, AlarmInterval) :-!.
+wins_wakeup(Wins, Wins, 0).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% get_debugging_state(State)
@@ -515,7 +555,7 @@ make_prompts(_, _,'?- ','?-_')
  |	to fail.
  *-----------------------------------------------------------------------*/
 
-do_shell_query(Goal0,VarNames,_,InStream,OutStream) 
+do_shell_query(Goal0,VarNames,_,_,InStream,OutStream) 
 	:-
 	var(Goal0),
 	VarNames = [VV | _],
@@ -523,21 +563,21 @@ do_shell_query(Goal0,VarNames,_,InStream,OutStream)
 			%% bad_goal: "Improper Goal: %t\n"
 	prolog_system_error(bad_goal, [VV]).
 
-do_shell_query(exit,_,_,_,_) 
+do_shell_query(exit,_,_,_,_,_) 
 	:-!,
 	fail.
 
-do_shell_query(end_of_file,_,_,InStream,_) 
+do_shell_query(end_of_file,_,_,_,InStream,_) 
 	:-
 	flush_input(InStream),      %% reset eof condition
 	!,
 	fail.
 
-do_shell_query((?- Goal0),VarNames,Vars,InStream,OutStream) 
+do_shell_query((?- Goal0),VarNames,Vars,Alarm,InStream,OutStream) 
 	:-!,
-	do_shell_query(Goal0,VarNames,Vars,InStream,OutStream).
+	do_shell_query(Goal0,VarNames,Vars,Alarm,InStream,OutStream).
 
-do_shell_query(Goal0,VarNames,Vars,InStream,OutStream) 
+do_shell_query(Goal0,VarNames,Vars,AlarmIntrv,InStream,OutStream) 
 	:-
 	gc,			%% Let user start fresh
 	getDebugInterrupt(DInt),
@@ -545,15 +585,38 @@ do_shell_query(Goal0,VarNames,Vars,InStream,OutStream)
 	setCall(0),		%% Start Call,
 	setDepth(1),            %%    Depth
 	setRetry(0),            %%    and Retry in case of debugging.
+	set_alarm_clock(Goal0,AlarmIntrv),
 	xform_command_or_query(Goal0,Goal1),
 	do_shell_query2(user,Goal1),
+	unset_alarm(AlarmIntrv),
 	dbg_notrace,
 	dbg_spyoff,
 	showanswers(VarNames,Vars,InStream,OutStream),
 	!.
 
-do_shell_query(Goal,VarNames,Vars,InStream,OutStream) 
+set_alarm_clock((trace _),_) :-!.
+set_alarm_clock(_,0) :-!.
+set_alarm_clock(_,AlarmIntrv)
 	:-
+	AlarmIntrv > 0,
+	!,
+pbi_write(setting_alarm_clock(Goal0,AlarmIntrv)),pbi_nl,pbi_ttyflush,
+	windows:set_event_handler(sigalrm,dev_alarm),
+	alarm(AlarmIntrv,AlarmIntrv).
+set_alarm_clock(_,_) :-!.
+
+unset_alarm(AlarmIntrv)
+	:-
+	alarm(0,0).
+unset_alarm(AlarmIntrv)
+	:-
+	alarm(AlarmIntrv,AlarmIntrv),
+	!,
+	fail.
+
+do_shell_query(Goal,VarNames,Vars,Alarm,InStream,OutStream) 
+	:-
+	alarm(0,0),
 	dbg_notrace,
 	dbg_spyoff,
 	print_no(OutStream).

@@ -387,6 +387,8 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 #endif
 
 			/* -- Process trail entries until we detect the bottom of a chpt */
+    		/* long *b;  */
+    		/* long *tr, *tr2; */
 
 #ifdef TRAILVALS
 		while ((ap = (long *) *--b) < b) {		/* while ap is a trail entry */
@@ -394,7 +396,7 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 				if (MARKED(ap)) {
 		    		*--tr = (long) ap;			/* copy the trail entry */
 		    		REV(tr - BIAS);				/* and reverse it 		*/
-		    		*--tr = (long *) *--b;		/* copy the trail value entry */
+		    		*--tr = (long) *--b;		/* copy the trail value entry */
 		    		REV(tr - BIAS);				/* and reverse it 		*/
 				}
 	    	}

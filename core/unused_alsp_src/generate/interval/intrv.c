@@ -1,7 +1,7 @@
 /*================================================================
           intrv.c
           --Generated from: pseudoc.ode
-          Date: 95/10/6   Time: 12:6:20
+          Date: 95/10/30   Time: 15:14:57
 		  -- by genC_ie(make_C)
 
     Interval Primitives: May 3 95 Version of make_C_interval_engine
@@ -29,6 +29,8 @@ i_unequal()
 	PWord z, x;
 	int z_t, x_t;
 	double zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -122,10 +124,51 @@ i_unequal()
    u_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -147,6 +190,8 @@ i_equal()
 	PWord z, x;
 	int z_t, x_t;
 	double zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -221,10 +266,51 @@ i_equal()
    e_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -246,6 +332,8 @@ i_greatereq()
 	PWord z, x;
 	int z_t, x_t;
 	double zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -314,10 +402,51 @@ i_greatereq()
    g_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -339,6 +468,8 @@ i_higher()
 	PWord z, x;
 	int z_t, x_t;
 	double zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -409,10 +540,51 @@ i_higher()
    h_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -434,6 +606,8 @@ i_add()
 	PWord z, x, y;
 	int z_t, x_t, y_t;
 	double vl, vh, zl, zh, xl, xh, yl, yh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval, yl_v, yl_rval, yh_v, yh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag, yl_vt, yl_rtag, yh_vt, yh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -545,12 +719,74 @@ i_add()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 8);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((ylchange & status) || (yhchange & status)) {
+	  w_get_An(&yl_v, &yl_vt, 9);
+#ifndef DoubleType
+	  w_mk_term(&yl_rval, &yl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yl_rval, i + 1, (PWord) (*(((short *) &yl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yl_rval, &yl_rtag, yl);
+#endif
+	  if(!w_unify(yl_v, yl_vt, yl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&yh_v, &yh_vt, 10);
+#ifndef DoubleType
+	  w_mk_term(&yh_rval, &yh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yh_rval, i + 1, (PWord) (*(((short *) &yh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yh_rval, &yh_rtag, yh);
+#endif
+	  if(!w_unify(yh_v, yh_vt, yh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -572,6 +808,8 @@ i_begin_tog()
 	PWord z, x;
 	int z_t, x_t;
 	double zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -636,10 +874,51 @@ i_begin_tog()
    b_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -661,6 +940,8 @@ i_cos()
 	PWord z, x;
 	int z_t, x_t;
 	double vl, vh, ul, uh, zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -766,10 +1047,51 @@ i_cos()
    c_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -791,6 +1113,8 @@ i_finish_tog()
 	PWord z, x;
 	int z_t, x_t;
 	double zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -855,10 +1179,51 @@ i_finish_tog()
    f_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -880,6 +1245,8 @@ i_inf()
 	PWord z, x, y;
 	int z_t, x_t, y_t;
 	double vl, zl, zh, xl, xh, yl, yh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval, yl_v, yl_rval, yh_v, yh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag, yl_vt, yl_rtag, yh_vt, yh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -994,12 +1361,74 @@ i_inf()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 8);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((ylchange & status) || (yhchange & status)) {
+	  w_get_An(&yl_v, &yl_vt, 9);
+#ifndef DoubleType
+	  w_mk_term(&yl_rval, &yl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yl_rval, i + 1, (PWord) (*(((short *) &yl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yl_rval, &yl_rtag, yl);
+#endif
+	  if(!w_unify(yl_v, yl_vt, yl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&yh_v, &yh_vt, 10);
+#ifndef DoubleType
+	  w_mk_term(&yh_rval, &yh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yh_rval, i + 1, (PWord) (*(((short *) &yh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yh_rval, &yh_rtag, yh);
+#endif
+	  if(!w_unify(yh_v, yh_vt, yh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -1021,6 +1450,8 @@ i_j_less()
 	PWord z, x, y;
 	int z_t, x_t, y_t;
 	double zl, zh, xl, xh, yl, yh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval, yl_v, yl_rval, yh_v, yh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag, yl_vt, yl_rtag, yh_vt, yh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -1145,12 +1576,74 @@ i_j_less()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 8);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((ylchange & status) || (yhchange & status)) {
+	  w_get_An(&yl_v, &yl_vt, 9);
+#ifndef DoubleType
+	  w_mk_term(&yl_rval, &yl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yl_rval, i + 1, (PWord) (*(((short *) &yl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yl_rval, &yl_rtag, yl);
+#endif
+	  if(!w_unify(yl_v, yl_vt, yl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&yh_v, &yh_vt, 10);
+#ifndef DoubleType
+	  w_mk_term(&yh_rval, &yh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yh_rval, i + 1, (PWord) (*(((short *) &yh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yh_rval, &yh_rtag, yh);
+#endif
+	  if(!w_unify(yh_v, yh_vt, yh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -1172,6 +1665,8 @@ i_k_equal()
 	PWord z, x, y;
 	int z_t, x_t, y_t;
 	double zl, zh, xl, xh, yl, yh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval, yl_v, yl_rval, yh_v, yh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag, yl_vt, yl_rtag, yh_vt, yh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -1327,12 +1822,74 @@ i_k_equal()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 8);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((ylchange & status) || (yhchange & status)) {
+	  w_get_An(&yl_v, &yl_vt, 9);
+#ifndef DoubleType
+	  w_mk_term(&yl_rval, &yl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yl_rval, i + 1, (PWord) (*(((short *) &yl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yl_rval, &yl_rtag, yl);
+#endif
+	  if(!w_unify(yl_v, yl_vt, yl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&yh_v, &yh_vt, 10);
+#ifndef DoubleType
+	  w_mk_term(&yh_rval, &yh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yh_rval, i + 1, (PWord) (*(((short *) &yh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yh_rval, &yh_rtag, yh);
+#endif
+	  if(!w_unify(yh_v, yh_vt, yh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -1354,6 +1911,8 @@ i_lub()
 	PWord z, x, y;
 	int z_t, x_t, y_t;
 	double vh, zl, zh, xl, xh, yl, yh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval, yl_v, yl_rval, yh_v, yh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag, yl_vt, yl_rtag, yh_vt, yh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -1468,12 +2027,74 @@ i_lub()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 8);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((ylchange & status) || (yhchange & status)) {
+	  w_get_An(&yl_v, &yl_vt, 9);
+#ifndef DoubleType
+	  w_mk_term(&yl_rval, &yl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yl_rval, i + 1, (PWord) (*(((short *) &yl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yl_rval, &yl_rtag, yl);
+#endif
+	  if(!w_unify(yl_v, yl_vt, yl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&yh_v, &yh_vt, 10);
+#ifndef DoubleType
+	  w_mk_term(&yh_rval, &yh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yh_rval, i + 1, (PWord) (*(((short *) &yh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yh_rval, &yh_rtag, yh);
+#endif
+	  if(!w_unify(yh_v, yh_vt, yh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -1495,6 +2116,8 @@ i_mul()
 	PWord z, x, y;
 	int z_t, x_t, y_t;
 	double vl, vh, zl, zh, xl, xh, yl, yh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval, yl_v, yl_rval, yh_v, yh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag, yl_vt, yl_rtag, yh_vt, yh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -1771,12 +2394,74 @@ i_mul()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 8);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((ylchange & status) || (yhchange & status)) {
+	  w_get_An(&yl_v, &yl_vt, 9);
+#ifndef DoubleType
+	  w_mk_term(&yl_rval, &yl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yl_rval, i + 1, (PWord) (*(((short *) &yl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yl_rval, &yl_rtag, yl);
+#endif
+	  if(!w_unify(yl_v, yl_vt, yl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&yh_v, &yh_vt, 10);
+#ifndef DoubleType
+	  w_mk_term(&yh_rval, &yh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yh_rval, i + 1, (PWord) (*(((short *) &yh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yh_rval, &yh_rtag, yh);
+#endif
+	  if(!w_unify(yh_v, yh_vt, yh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -1798,6 +2483,8 @@ i_narrower()
 	PWord z, x;
 	int z_t, x_t;
 	double zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -1861,10 +2548,51 @@ i_narrower()
    n_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -1886,6 +2614,8 @@ i_or()
 	PWord z, x, y;
 	int z_t, x_t, y_t;
 	double zl, zh, xl, xh, yl, yh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval, yl_v, yl_rval, yh_v, yh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag, yl_vt, yl_rtag, yh_vt, yh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -2034,12 +2764,74 @@ i_or()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 8);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((ylchange & status) || (yhchange & status)) {
+	  w_get_An(&yl_v, &yl_vt, 9);
+#ifndef DoubleType
+	  w_mk_term(&yl_rval, &yl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yl_rval, i + 1, (PWord) (*(((short *) &yl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yl_rval, &yl_rtag, yl);
+#endif
+	  if(!w_unify(yl_v, yl_vt, yl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&yh_v, &yh_vt, 10);
+#ifndef DoubleType
+	  w_mk_term(&yh_rval, &yh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yh_rval, i + 1, (PWord) (*(((short *) &yh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yh_rval, &yh_rtag, yh);
+#endif
+	  if(!w_unify(yh_v, yh_vt, yh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -2061,6 +2853,8 @@ i_pow_odd()
 	PWord z, x, y;
 	int z_t, x_t, y_t;
 	double vl, vh, zl, zh, xl, xh, yl, yh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval, yl_v, yl_rval, yh_v, yh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag, yl_vt, yl_rtag, yh_vt, yh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -2230,12 +3024,74 @@ i_pow_odd()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 8);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((ylchange & status) || (yhchange & status)) {
+	  w_get_An(&yl_v, &yl_vt, 9);
+#ifndef DoubleType
+	  w_mk_term(&yl_rval, &yl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yl_rval, i + 1, (PWord) (*(((short *) &yl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yl_rval, &yl_rtag, yl);
+#endif
+	  if(!w_unify(yl_v, yl_vt, yl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&yh_v, &yh_vt, 10);
+#ifndef DoubleType
+	  w_mk_term(&yh_rval, &yh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yh_rval, i + 1, (PWord) (*(((short *) &yh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yh_rval, &yh_rtag, yh);
+#endif
+	  if(!w_unify(yh_v, yh_vt, yh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -2257,6 +3113,8 @@ i_qpow_even()
 	PWord z, x, y;
 	int z_t, x_t, y_t;
 	double vl, vh, uh, zl, zh, xl, xh, yl, yh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval, yl_v, yl_rval, yh_v, yh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag, yl_vt, yl_rtag, yh_vt, yh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -2417,12 +3275,74 @@ i_qpow_even()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 8);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((ylchange & status) || (yhchange & status)) {
+	  w_get_An(&yl_v, &yl_vt, 9);
+#ifndef DoubleType
+	  w_mk_term(&yl_rval, &yl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yl_rval, i + 1, (PWord) (*(((short *) &yl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yl_rval, &yl_rtag, yl);
+#endif
+	  if(!w_unify(yl_v, yl_vt, yl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&yh_v, &yh_vt, 10);
+#ifndef DoubleType
+	  w_mk_term(&yh_rval, &yh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yh_rval, i + 1, (PWord) (*(((short *) &yh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yh_rval, &yh_rtag, yh);
+#endif
+	  if(!w_unify(yh_v, yh_vt, yh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -2444,6 +3364,8 @@ i_rootsquare()
 	PWord z, x;
 	int z_t, x_t;
 	double ul, uh, zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -2575,10 +3497,51 @@ i_rootsquare()
    r_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -2600,6 +3563,8 @@ i_sin()
 	PWord z, x;
 	int z_t, x_t;
 	double vl, vh, ul, uh, zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -2736,10 +3701,51 @@ i_sin()
    s_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -2761,6 +3767,8 @@ i_tan()
 	PWord z, x;
 	int z_t, x_t;
 	double ul, uh, zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -2840,10 +3848,51 @@ i_tan()
    t_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -2865,6 +3914,8 @@ i_vabs()
 	PWord z, x;
 	int z_t, x_t;
 	double ul, zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -2981,10 +4032,51 @@ i_vabs()
    v_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -3006,6 +4098,8 @@ i_wrap()
 	PWord z, x, y;
 	int z_t, x_t, y_t;
 	double vl, vh, ul, zl, zh, xl, xh, yl, yh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval, yl_v, yl_rval, yh_v, yh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag, yl_vt, yl_rtag, yh_vt, yh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -3126,12 +4220,74 @@ i_wrap()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 8);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((ylchange & status) || (yhchange & status)) {
+	  w_get_An(&yl_v, &yl_vt, 9);
+#ifndef DoubleType
+	  w_mk_term(&yl_rval, &yl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yl_rval, i + 1, (PWord) (*(((short *) &yl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yl_rval, &yl_rtag, yl);
+#endif
+	  if(!w_unify(yl_v, yl_vt, yl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&yh_v, &yh_vt, 10);
+#ifndef DoubleType
+	  w_mk_term(&yh_rval, &yh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(yh_rval, i + 1, (PWord) (*(((short *) &yh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&yh_rval, &yh_rtag, yh);
+#endif
+	  if(!w_unify(yh_v, yh_vt, yh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -3153,6 +4309,8 @@ i_xp()
 	PWord z, x;
 	int z_t, x_t;
 	double ul, uh, zl, zh, xl, xh;
+	PWord zl_v, zl_rval, zh_v, zh_rval, xl_v, xl_rval, xh_v, xh_rval;
+	int zl_vt, zl_rtag, zh_vt, zh_rtag, xl_vt, xl_rtag, xh_vt, xh_rtag;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
@@ -3242,10 +4400,51 @@ i_xp()
    x_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if ((zlchange & status) || (zhchange & status)) {
+	  w_get_An(&zl_v, &zl_vt, 4);
+#ifndef DoubleType
+	  w_mk_term(&zl_rval, &zl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zl_rval, i + 1, (PWord) (*(((short *) &zl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zl_rval, &zl_rtag, zl);
+#endif
+	  if(!w_unify(zl_v, zl_vt, zl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&zh_v, &zh_vt, 5);
+#ifndef DoubleType
+	  w_mk_term(&zh_rval, &zh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(zh_rval, i + 1, (PWord) (*(((short *) &zh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&zh_rval, &zh_rtag, zh);
+#endif
+	  if(!w_unify(zh_v, zh_vt, zh_rval, DblRtrnType))
+		FAIL;
+	}
+
+	if ((xlchange & status) || (xhchange & status)) {
+	  w_get_An(&xl_v, &xl_vt, 6);
+#ifndef DoubleType
+	  w_mk_term(&xl_rval, &xl_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xl_rval, i + 1, (PWord) (*(((short *) &xl) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xl_rval, &xl_rtag, xl);
+#endif
+	  if(!w_unify(xl_v, xl_vt, xl_rval, DblRtrnType))
+		FAIL;
+	  w_get_An(&xh_v, &xh_vt, 7);
+#ifndef DoubleType
+	  w_mk_term(&xh_rval, &xh_rtag, (PWord) TK_DDOUBLE, 4);
+	  for (i = 0; i < 4; i++)
+	    w_install_argn(xh_rval, i + 1, (PWord) (*(((short *) &xh) + i)), WTP_INTEGER);
+#else
+	  w_mk_double(&xh_rval, &xh_rtag, xh);
+#endif
+	  if(!w_unify(xh_v, xh_vt, xh_rval, DblRtrnType))
+		FAIL;
+	}
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))

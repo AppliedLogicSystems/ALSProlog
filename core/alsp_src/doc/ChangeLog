@@ -1,3 +1,21 @@
+Mon 30 Oct 1995 Ken Bowen
+
+	* Added a command line switch -S <File> {multiple occurrences
+	  ok} which adds <File> to the builtins:searchdir/1 facts.
+
+Sun 29 Oct 1995 Ken Bowen
+
+	* Checked-in (committed) the changes necessary for:
+	  - Two-word entries on the trail for supporting
+		trailed values (tag = TRAILVALS);
+	  - Changes correcting shortcomings and bugs in freeze;
+	  - Motification to the (intermediate) interval code
+		so that updates to the freeze/interval structures
+		are carried out at the Prolog (rather than C) level
+		so that the trailing values machinery is utilized;
+
+	* Tagged as V1-75
+	
 Tues  12 Sept 1995 Ken Bowen
 
 	* Various modifications to builtins/[ra_basis, int_cstrs]
@@ -13,8 +31,6 @@ Tues  12 Sept 1995 Ken Bowen
 
 	* [Note: Exported systems is now running on: Mac with MPW
 	   and CodeWarrior, both ppc and m68k, and on MS DOS/Intel]
-
-	* [Note: Baby versions of constraints running.]
 
 	* [Note: Baby versions of constraints running.]
 

@@ -105,7 +105,9 @@ static char *errors[] =
 														/* FE_SS_FMALLOC */
   "Error in parsing the ALS_OPTIONS environment variable.",
 														/* FE_ALS_OPTIONS */
-  "Autoload Error: unable to load \"%s\"."	/* FE_AUTOLOAD */
+  "Autoload Error: unable to load \"%s\".",	/* FE_AUTOLOAD */
+  "Overflow/Underflow of file descriptor count array",
+														/* FE_FDREFOVERFLOW */
 
 };
 

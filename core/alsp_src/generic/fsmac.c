@@ -892,6 +892,16 @@ static int getFileStatus(void)
 	ownerPermiss = *(((char *) &fp) + 31) & 6;
     }
     else {
+    
+    /* Hack for the moment.  Need a clean way to check permisions. */
+    ownerPermiss = 6;
+    
+    
+    /*
+    This code does funny things to files with MetroWerks standard C Lib.
+    If a file is open in Metrowerks and you consult it, these fopens seem to
+    damage the file mananager or something, because the file in Metrowerks connot be
+    saved anymore. 
 	if ((f = fopen(cPathName, "r")) == NULL)
 	    ownerPermiss = 0;
 	else {
@@ -903,6 +913,8 @@ static int getFileStatus(void)
 		ownerPermiss = 6;
 	    }
 	}
+	*/
+	
     }
 
     /* File Type */

@@ -1584,8 +1584,8 @@ CASE(W_MOD_CLOSURE):		/* mod_closure addr */
 
 CASE(W_DBG_CALL):		/* implements dbg_call */
 	    skip_ovflow = 1;	/* dont trigger an interrupt for following
-				 * call
-				 */
+				 			 * call
+				 			 */
 	    goto callpart;
 
 CASE(W_OCALL):			/* implements callWithDelayedInterrupt */

@@ -180,7 +180,9 @@ export tidc/0.
 tidc :-
 	it_debug_cq,
 	!,
-	abolish(it_debug_cq,0).
+	abolish(it_debug_cq,0),
+	dynamic(it_debug_cq/0).
+
 tidc :-
 	assert(it_debug_cq).
 
@@ -188,7 +190,8 @@ export tidg/0.
 tidg :-
 	it_debug_gl,
 	!,
-	abolish(it_debug_gl,0).
+	abolish(it_debug_gl,0),
+	dynamic(it_debug_gl/0).
 tidg :-
 	assert(it_debug_gl).
 
@@ -200,6 +203,7 @@ export '$iterate'/1.
 export '$iterate'/2.
 '$iterate'(Goal, link)
 	:-
+%pbi_write(iterate_link([Goal | Tail],Tail,_)),pbi_nl,pbi_ttyflush,
 	iterate_link([Goal | Tail],Tail,_).
 
 iterate_link(Queue, T, T)
@@ -228,7 +232,7 @@ iterate_link([[] | RestQueue], InTail, OutTail)
 	%% Note: InTail is tail of RestQueue;
 iterate_link([InitGoal | RestQueue], InTail, OutTail)
 	:-
-	add_change_flag(InitGoal, Goal, InitArgs, Flag),
+	add_change_flag(InitGoal, Goal, InitArgs, Flag, INArgs),
 		%% Debugging:
 	(it_debug_cq ->
 		printf_opt('->-trying: %t : %t\n', [InitGoal, Goal],[lettervars(false)]),
@@ -240,23 +244,29 @@ iterate_link([InitGoal | RestQueue], InTail, OutTail)
 	),
 	call(Goal),
 	!,
+	changes(Flag, XChange, YChange, ZChange),
+	consis_update_node(ZChange, 1, InitGoal, INArgs, Goal, ChangedNodes, CNT1),
+	consis_update_node(XChange, 2, InitGoal, INArgs, Goal, CNT1, CNT2),
+	consis_update_node(YChange, 3, InitGoal, INArgs, Goal, CNT2, []),
 	(it_debug_cq ->
 		debug_disp_goal('<',Goal)
 		;
 		true
 	),
-	changes(Flag, XChange, YChange, ZChange),
-	consis_update_node(ZChange, 1, InitGoal, ChangedNodes, CNT1),
-	consis_update_node(XChange, 2, InitGoal, CNT1, CNT2),
-	consis_update_node(YChange, 3, InitGoal, CNT2, []),
 
 	queue_nodes(ChangedNodes, [InitGoal | RestQueue], InTail, NewTail),
 	iterate_link(RestQueue, NewTail, OutTail).
 
-add_change_flag(InitGoal, Goal, Args, Flag)
+add_change_flag(InitGoal, Goal, Args, Flag, InitNumArgs)
 	:-
 	InitGoal =.. [Pred | Args],
-	append(Args, [Flag], XArgs),
+	length(Args, InitNumArgs),
+%	append(Args, [Flag], XArgs),
+	(InitNumArgs = 3 ->
+		append(Args, [Flag, ZL,ZH,XL,XH,YL,YH], XArgs)
+		;
+		append(Args, [Flag, ZL,ZH,XL,XH], XArgs)
+	),
 	Goal =.. [Pred | XArgs].
 
 debug_disp_goal(Tag,Goal)
@@ -342,8 +352,10 @@ changes(Flag, XChange, YChange, ZChange)
 	YChange is Flag /\ 24,
 	ZChange is Flag /\ 384.
 
-consis_update_node(CFlg, ArgNum, Goal, ChangedNodes, ChangedNodesTail)
+consis_update_node(CFlg, ArgNum, Goal, INArgs, XGoal, 
+					ChangedNodes, ChangedNodesTail)
 	:-
+	CFlg \= 0,
 	arg(ArgNum,Goal,Arg),
 	'$is_delay_var'(Arg),
 	!,
@@ -352,14 +364,44 @@ consis_update_node(CFlg, ArgNum, Goal, ChangedNodes, ChangedNodesTail)
 	'$delay_term_for'(Arg, ArgDelayTerm),
 	arg(4, ArgDelayTerm, ConstraintTerm),
 	domain_term_from_constr(ConstraintTerm, DomainTerm),
-		%% The interval is consistent, and things
-		%% changed here, so propagate change, and
-		%% make sure Goal Node is on interval's 
+
+		%% The interval is consistent (assured by C leve),
+		%% and things changed here (becuase CFlg \= 0),
+		%% and this is an interval, so: 
+		%% 1. set the new values into the interval;
+		%%     DomainTerm = intvl(Type,Var,UsedBy,L,U)
+	VLnum is 2*ArgNum + INArgs,
+	VHnum is VLnum + 1,
+	arg(VLnum, XGoal, VL),
+	arg(VHnum, XGoal, VH),
+	trailed_mangle(4, DomainTerm, VL),
+	trailed_mangle(5, DomainTerm, VH),
+
+		%% 2. propagate the change, and
+		%% 3. make sure Goal Node is on interval's 
 		%% UsedBy list:
 	arg(3, DomainTerm, UsedByList),
 	fin_cun(CFlg, UsedByList, Goal, DomainTerm, ChangedNodes, ChangedNodesTail).
 
-consis_update_node(_, _, _, ChangedNodes, ChangedNodes).
+consis_update_node(0, ArgNum, Goal, INArgs, XGoal, 
+					ChangedNodes, ChangedNodes)
+	:-
+	arg(ArgNum,Goal,Arg),
+	'$is_delay_var'(Arg),
+	!,
+		%%	'$domain'(Arg, _, LB, UB):
+	'$delay_term_for'(Arg, ArgDelayTerm),
+	arg(4, ArgDelayTerm, ConstraintTerm),
+	domain_term_from_constr(ConstraintTerm, DomainTerm),
+
+		%% make sure Goal Node is on interval's UsedBy list:
+	arg(3, DomainTerm, UsedByList),
+	(check_used(UsedByList, Goal) ->
+		trailed_mangle(3, DomainTerm, [Goal | UsedByList])
+		;
+		true
+	).
+consis_update_node(_, _, _, _, _, ChangedNodes, ChangedNodes).
 
 fin_cun(0, UsedByList, Goal, DomainTerm, ChangedNodes, ChangedNodes)
 	:-!,
@@ -388,6 +430,10 @@ check_used([CNode | UsedByList], Goal)
 	:-
 	check_used(UsedByList, Goal).
 
+
+
+
+
 check_add_make([], Goal, FoundFlag, [Goal], ChgdNodesTl, ChgdNodesTl)
 	:-
 	var(FoundFlag),
@@ -396,6 +442,16 @@ check_add_make([], Goal, FoundFlag, [Goal], ChgdNodesTl, ChgdNodesTl)
 
 check_add_make([], _, _, [], ChangedNodesTail, ChangedNodesTail)
 	:-!.
+
+/*
+check_add_make([equal(V1,V2) | UsedByList], equal(W1,W2), true, 
+					[CNode | NewUsed], [CNode | ChangedNodes], ChangedNodesTail)
+	:-
+	(non_unif_match
+	!,
+	check_add_make(UsedByList, Goal, FoundFlag, NewUsed, 
+					ChangedNodes, ChangedNodesTail).
+*/
 
 check_add_make([CNode | UsedByList], Goal, true, [CNode | NewUsed], 
 					[CNode | ChangedNodes], ChangedNodesTail)
@@ -470,6 +526,7 @@ queue_nodes([Node | ChangedNodes], QHead, [Node | InterTail], NewTail)
 
 
 
+/*
 
 	%%% Temporary Hack:
 trailed_mangle(N, Term, Val)
@@ -486,6 +543,7 @@ tm4(N, Term, Val, OldVal)
 	mangle(N, Term, OldVal),
 	fail.
 	
+*/
 
 
 

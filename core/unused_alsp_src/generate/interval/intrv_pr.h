@@ -1,7 +1,16 @@
 /*================================================================
           intrv_pr.h
           --Generated from: pseudoc.ode
-          Date: 95/10/6   Time: 12:6:20
+          Date: 95/10/30   Time: 15:14:57
+		  -- by genC_ie(make_C)
+
+    Interval Primitives: May 3 95 Version of make_C_interval_engine
+ *===============================================================*/
+
+/*================================================================
+          intrv_pb.h
+          --Generated from: pseudoc.ode
+          Date: 95/10/30   Time: 15:14:57
 		  -- by genC_ie(make_C)
 
     Interval Primitives: May 3 95 Version of make_C_interval_engine

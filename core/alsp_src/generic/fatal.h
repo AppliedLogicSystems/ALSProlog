@@ -103,6 +103,7 @@ extern	void	fatal_error	PARAMS( (int, long) );
 #define FE_SS_FMALLOC	69	/* Problem with fmalloc */
 #define FE_ALS_OPTIONS	70	/* Problem getting ALS_OPTIONS */
 #define FE_AUTOLOAD	71	/* Problem autoloading file */
+#define FE_FDREFOVERFLOW	72	/* Overflow/Underflow of file descriptors */
 
 #endif /* _FATAL_H_INCLUDED_ */
 

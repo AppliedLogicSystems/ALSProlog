@@ -88,7 +88,7 @@ static int pckgloaded = 0;
  | in the image file.  If this value is zero, there is no saved state
  | information and the builtins should be loaded from the standard place.
  | It is the responsiblity of the utility which merges saved states and
- | images to set this value appropriately in the resulting image.
+ | images to set this value appropriately in the resulting image (alsmics)
  *------------------------------------------------------------------------*/
 long  saved_state_image_offset = 0;
 

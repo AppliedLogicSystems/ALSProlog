@@ -41,36 +41,40 @@ module rel_arith.
  | Note: "show" clauses will disappear when 
  | debugging is complete.
  *-----------------------------------------------*/
-export '{}'/1.
-'{}'(Goal) :- clp(Goal).
+:- module_closure('{}',1,clp0).
+:- module_closure(clp,1,clp0).
 
-export clp/1.
-clp( (L, Ls) )
+clp0(M, X)
 	:-
-	clp_eval(L),
-	clp( Ls ).
+	clp(X, M).
 
-clp(G)
-	:- clp_eval(G).
+export clp/2.
+clp( (L, Ls), M)
+	:-
+	clp_eval(L, M),
+	clp( Ls, M).
 
-clp_eval( show(VName, Var) )
+clp(G, M)
+	:- clp_eval(G, M).
+
+clp_eval( show(VName, Var), M )
 	:-
 	show_variable(VName, Var).
 
-clp_eval( show(Var) )
+clp_eval( show(Var), M )
 	:-!,
 	show_variable(Var).
 
-clp_eval( Expr )
+clp_eval( Expr, M )
 	:-
 	Expr =.. [R, X, Y],
 	clp_arithmetic_relation(R),
 	!,
 	ria_relation(X, Y, R).
 
-clp_eval( F )
+clp_eval( F, M )
 	:-
-	call(F).  % escape to Prolog
+	call(M:F).  % escape to Prolog
 
 clp_arithmetic_relation( is ).
 clp_arithmetic_relation( := ).
@@ -941,6 +945,7 @@ fmap_rel( ==,   X,Y, equal(X,Y)).
 fmap_rel( >=,   X,Y, greatereq(X,Y)).
 fmap_rel( =<,   X,Y, greatereq(Y,X)).
 fmap_rel( <,    X,Y, higher(X,Y)).
+fmap_rel( >,    X,Y, higher(Y,X)).
 fmap_rel( <>,   X,Y, unequal(X,Y)).
 fmap_rel( <=,   X,Y, narrower(X,Y)).
 /*

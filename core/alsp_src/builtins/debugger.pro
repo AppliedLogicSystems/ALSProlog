@@ -1759,7 +1759,12 @@ show_again(Port,Box,Depth,Module,Goal,Response) :-
 
 writeGoal(Box,Depth,Port,Module,Goal) 
 	:-
+	printf(debugger_output, 	"(%d) %d %t: ", [Box,Depth,Port]),
+	write_term(debugger_output, Module:Goal,	[lettervars(false)]),
+%% if mac:  nl(debugger_output),
+	flush_output(debugger_output).
 
+/*****
 /*
 	printf(debugger_output, 	"(%d) %d %t: ", [Box,Depth,Port]),
 %	pbi_write(Module:Goal),pbi_nl,pbi_ttyflush,
@@ -1782,6 +1787,8 @@ AAargs = [ BB | BBT],
 	printf(debugger_output, 	"(%d) %d %t: ", [Box,Depth,Port]),
 	flush_output(debugger_output),
 	pbi_write(Module:Goal),pbi_ttyflush.
+	*****/
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%% Windows I/O Hooks %%%%%%%%%%%%%%%%%%%%%%

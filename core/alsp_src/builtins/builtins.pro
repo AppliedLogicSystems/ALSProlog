@@ -870,10 +870,11 @@ nops
 ld_is
 	:-	
 	sys_env(_,_,Proc),
-    	(   (Proc = sparc ; Proc = m88k; Proc = m68k)
-	->  load_builtins(blt_is)
-    	;   true
-        ).
+    ( (Proc = sparc ; Proc = m88k; Proc = m68k) ->  
+		load_builtins(blt_is)
+    	;   
+		true
+	).
 
 ld_fs
 	:-	
@@ -897,8 +898,11 @@ ld_wins
 	:-	
 	als_system(Sys),
 	dmember(wins=WinSys,Sys),
-	(   WinSys = mswins -> load_builtins(windows), load_builtins(win_sh)
-	;   true
+	(WinSys = mswins -> 
+		load_builtins(windows), 
+		load_builtins(win_sh)
+		;   
+		true
 	).
 
 
