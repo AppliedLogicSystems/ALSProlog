@@ -188,11 +188,11 @@ proc_cgo([Opt | Options], COpts)
 
 proc_copt(consult(true), COpts)
 	:-!,
-	mangle(3, COpts, consult).
+	mangle(3, COpts, 0).
 
 proc_copt(consult(false), COpts)
 	:-!,
-	mangle(3, COpts, reconsult).
+	mangle(3, COpts, 1).
 
 proc_copt(quiet(Value), COpts)
 	:-
