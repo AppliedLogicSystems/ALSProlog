@@ -2,31 +2,41 @@ Macintosh ALS Prolog Build Instructions
 =======================================
 Author: Chuck Houpt Date: 3-April-1996
 
-These instructions assume that the ALS Prolog source directory exists,
-and all of its generated files are up to date (for example: generated
-makefiles, headers, etc).  The ALS Prolog source directory is refered
-to as {srcdir} in this document.
+These instructions assume that the ALS Prolog source directory exists, and all of
+its generated files are up to date (for example: generated makefiles, headers,
+etc).  The ALS Prolog source directory is refered to as {srcdir} in this
+document.
 
 Build Materials:
 ----------------
 
-¥ Macintosh (68k or PowerPC) with at least 15 MB of available memory
-and at least 150 MB of available disk space.
+¥ Macintosh (68k or PowerPC) with at least 20 MB of available memory and at least
+150 MB of available disk space.
 
-¥ Metrowerk's Code Warrior Gold 8 with the following options and
-modifications: - Install with at least these two packages: - Macintosh
-Programmer's Workshop - Metrowerks MPW Tools for MacOS - Copy the MPW
-script MakeIt from {srcdir}port:macos: to {MPW}Scripts:
+¥ Metrowerk's Code Warrior Gold 8 with the following options and modifications: -
+Install with at least these two packages: - Macintosh Programmer's Workshop -
+Metrowerks MPW Tools for MacOS - Copy the MPW script MakeIt from
+{srcdir}port:macos: to {MPW}Scripts:
 
-¥ Code Warrior Grand Unified Socket Interface Library (CWGUSI) 1.7
-Freeware by Matthias Neeracher (neeri@iis.ee.ethz.ch) Available from
-http://err.ethz.ch/members/neeri/macintosh.html Install CWGUSI as
-follows: - Create the directories {MPW}Interfaces:GUSIIncludes: and
-{MPW}Libraries:GUSILibraries: - copy :GUSI:include and :GUSI:Lib into
-the two newly created directories.
+¥ Code Warrior Grand Unified Socket Interface Library (CWGUSI) 1.7 Freeware by
+Matthias Neeracher (neeri@iis.ee.ethz.ch) Available from
+http://err.ethz.ch/members/neeri/macintosh.html Install CWGUSI as follows: -
+Create the directories {MPW}Interfaces:GUSIIncludes: and
+{MPW}Libraries:GUSILibraries: - copy :GUSI:include and :GUSI:Lib into the two
+newly created directories.
 
 Build Instructions:
 -------------------
+
+Netatalk note:  If you are building off of a Netatalk volume, then it is
+necessary to enusure that all the files have been assigned a creator and type by
+Netatalk, before MPW uses the files.  This only has to be done once, after the
+source directory is created.
+
+Follow this procedure:  From the Finder open the volume that contains {srcdir}
+and view by name.  Option-Click on the arrow next to {srcdir}.  This will open
+{srcdir} and all its subdirectories, causing Netatalk to assign creator and types
+to all files.
 
 1. Create a build directory, which will be refered to as {blddir}
 
@@ -38,16 +48,22 @@ Here is a description of bd_mac:
 
 bd_mac source_director build_directory
 
-bd_mac is a MPW script that takes two directories as arguments. 
-source_directory is the ALS Prolog source directory ({srcdir}) and
-build_directory is the build directory created in step 1 ({blddir}). 
-bd_mac creates all the necessary directories and files  for a build in
-build_directory.
+bd_mac is a MPW script that takes two directories as arguments. source_directory
+is the ALS Prolog source directory ({srcdir}) and build_directory is the build
+directory created in step 1 ({blddir}). bd_mac creates all the necessary
+directories and files  for a build in build_directory.
 
 3. Set MPW's working directory to {blddir}
 
-4. Execute the MakeIt script.  No Errors should be displayed during the
-build process.
+4. Execute the MakeIt script.  No Errors should be displayed during the build
+process.
+
+Testing
+-------
+
+To test the portable version, set MPW's working directory to {blddir}bld-port:
+and execute "MakeIt testrun".
+
 
 Files generated:
 ----------------

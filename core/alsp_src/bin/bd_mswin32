@@ -36,7 +36,10 @@ mkdir $2/bld-wins/mswin32
 
 cp $1/wins/build/mswin32/make_interf.bat $2/bld-wins/mswin32
 cp $1/wins/build/mswin32/do_c2pro.bat $2/bld-wins/mswin32
-cp $1/wins/build/mswin32/do_p2intrf.bat $2/bld-wins/mswin32
+cp $1/wins/build/mswin32/do_p2intf.bat $2/bld-wins/mswin32
+cp $1/wins/build/mswin32/c2p_cmd.lst $2/bld-wins/mswin32
+cp $1/wins/build/mswin32/p2i_cmd.lst $2/bld-wins/mswin32
+
 cp $1/wins/build/mswin32/mswin32intf_lib.prj.sit.hqx $2/bld-wins/mswin32
 cp $1/wins/build/mswin32/alspro_mswin32.prj.sit.hqx $2/bld-wins/mswin32
 
