@@ -281,7 +281,14 @@ f_icode(opcode, a1, a2, a3, a4)
 	    case FT_STRING:{
 		    register char *s = (char *) arg;
 
-		    while (putc(*s++, obp_fp)) ;
+		    /* Typical unix lossage!
+		     * This was: while (putc(*s++, obp_fp)) ;
+		     * Think about what happens when putc returns EOF. Note that
+		     * EOF is non-zero.
+		     */
+		    do {
+		    	putc(*s, obp_fp);
+		    } while (*s++);
 		}
 		break;
 	    default:
