@@ -444,10 +444,13 @@ export change_ide_depth_type/1.
 change_ide_depth_type(NewType)
 	:-
  	stream_or_alias_ok(shl_tk_out_win, Stream),
+	set_stream_wt_depth_computation(Stream,NewType).
+/*
     stream_wt_opts(Stream,WO),
     WO = wt_opts(LineLength,MaxDepth,_),	
     NewWO = wt_opts(LineLength,MaxDepth,NewType),	
     set_stream_wt_opts(Stream,NewWO).
+*/
 
 endmod.   % builtins
 
@@ -647,6 +650,11 @@ alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom, DebugVis)
 		set_flags_values(FlagsList)
 		;
 		true
+	),
+	(dmember(prolog_value(debug_settings,DebugSettings),Items) ->
+		set_debug_settings_info(DebugSettings)
+		;
+		true
 	).
 
 strip_tags([], []). 
@@ -789,10 +797,16 @@ win_positions_for_exit(TopGeom, DebugGeom)
 		window_position('.debugwin',DebugGeom) ],
 	modify_settings(WinSettings).
 
+	%% Saves other misc info too besides flags
 save_prolog_flags
 	:-
 	changable_flags_info(FlagsList),
-	modify_settings([prolog_value(prolog_flags,FlagsList)]).
+	debug_settings_info(DebugSettings),
+	modify_settings(
+		[prolog_value(prolog_flags,FlagsList),
+		 prolog_value(debug_settings,DebugSettings)
+		]).
+
 
 set_flags_values([]).
 set_flags_values([[Flag,_,Val] | FlagsList])
@@ -1483,6 +1497,26 @@ set_debugwin_width(MSize, MainWinSize)
 	sio:is_stream(debugger_output, DS),
 	set_line_length(DS, NChars).
 
+export debug_settings_info/1.
+debug_settings_info(DebugSettings)
+	:-
+	sio:stream_or_alias_ok(debugger_output, OSS),
+	sio:stream_wt_opts(OSS, DBGOPTs),
+	findall(leashed(Port), leashed(Port), Leashing),
+	DebugSettings = [stream_opts=DBGOPTs | Leashing].
+
+export set_debug_settings_info/1.
+set_debug_settings_info(DebugSettings)
+	:-
+	(dmember( stream_opts=DBGOPTs, DebugSettings) ->
+		sio:stream_or_alias_ok(debugger_output, OSS),
+		sio:set_stream_wt_opts(OSS, DBGOPTs)
+		;
+		true
+	),
+	findall(leashed(Port), member(leashed(Port), DebugSettings), Leashing),
+	abolish(leashed, 1),
+	assert_all(Leashing).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% THIS IS THE ACTUAL CALL FROM THE LOW-LEVEL DEBUGGER

@@ -100,8 +100,7 @@ next_stream_identifier(Options,Id) :-
  *             C routines manage this component for the most
  *             part.
  *  stream_open_status -- either open or closed.
- *  stream_type -- the type of stream.  This will be an atom such
- *             as file, sysV_queue, etc.
+ *  stream_type -- the type of stream.  This will be an atom such as file, etc.
  *  stream_name -- the name of the stream; for files this will simply
  *             be the file name or device name.
  *  stream_mode -- A list cell whose head is either input or noinput
@@ -771,9 +770,7 @@ check_open_options(Options) :-
          	 prompt_goal(_),
 		 maxdepth(_), line_length(_), depth_computation(_),
 		 blocking(_),
-		 msg_type(_),create,			%% sysVq:
 		 perms(_), perms(_,_,_),
-		 target_node(_),			%% ssbq
 		 connects(_), 				%% sockets
 		 address(_),address(_,_),
 		 write_eoln_type(cr), write_eoln_type(lf), write_eoln_type(crlf),
