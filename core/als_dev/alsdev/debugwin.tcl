@@ -39,7 +39,6 @@ proc vTclWindow.debugwin {base} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Debugger for ALS Prolog"
- #   wm protocol $base WM_DELETE_WINDOW "wm withdraw $base"
     wm protocol .debugwin WM_DELETE_WINDOW "hide_debugwin"
 
 
@@ -90,16 +89,9 @@ proc vTclWindow.debugwin {base} {
     button $base.buttons.abort \
         -padx 2 -text Abort \
 		-command { set DebugResponse Ba }
-#    button $base.buttons.break \
-#        -padx 2 -text Break \
-#		-command { set DebugResponse Bb }
     button $base.buttons.respy \
         -padx 2 -text {Re-Spy} \
 		-command reset_all_spypoints
-
-#    button $base.buttons.statistics \
-#        -padx 2 -text statistics \
-#		-command { set DebugResponse Bi }
 #    button $base.buttons.stack_trace \
 #        -padx 2 -text stack \
 #		-command { set DebugResponse Bt }
@@ -123,9 +115,6 @@ proc vTclWindow.debugwin {base} {
 		-variable proenv(debug) -offvalue off -onvalue on \
 		-underline 0  \
 		-command do_the_debug_flag
-
-#	-command "prolog call builtins do_set_prolog_flag -atom debug -atom $proenv(debug)"
-
 
 	if {$tcl_platform(platform) == "macintosh"} {
 	    scrollbar $base.vsb \
@@ -171,7 +160,6 @@ proc vTclWindow.debugwin {base} {
 	grid rowconf $base 1 -weight 0
 	grid rowconf $base 2 -weight 1
 	grid rowconf $base 3 -weight 0
-#	grid rowconf $base 4 -weight 1
 
     grid $base.buttons -in $base \
         -column 0 -row 0 -columnspan 2 -rowspan 1 -sticky ew
@@ -193,12 +181,8 @@ proc vTclWindow.debugwin {base} {
         -anchor center -expand 0 -fill y -side left -padx 4
     pack $base.buttons.abort \
         -anchor center -expand 0 -fill none -side left 
-#    pack $base.buttons.break \
-#        -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.respy \
         -anchor center -expand 0 -fill none -side left 
-#    pack $base.buttons.statistics \
-#        -anchor center -expand 0 -fill none -side left 
 #    pack $base.buttons.stack_trace \
 #        -anchor center -expand 0 -fill none -side left 
 
@@ -251,21 +235,15 @@ proc vTclWindow.debugwin {base} {
 #    grid $base.stacklist_vsb \
 #        -column 1 -row 4 -columnspan 1 -rowspan 1 -sticky ns
 
-#	bind .debugwin.text <Unmap> {unmap_alsdev_debug}
-#	bind .debugwin.text <Map>   {map_alsdev_debug}
 	bind .debugwin.text <KeyPress> {bell; .debugwin.text delete {insert-1 chars} insert}
 	bindtags .debugwin.text {Text .debugwin.text .debugwin all}
 
-	# accelerators
+		# accelerators
 	bind_accelerators .debugwin $mod debugwin
 }
 
 proc do_the_debug_flag {} {
 	global array proenv
-
-#	set VV $proenv(debug)
-#	prolog call builtins do_set_prolog_flag -atom debug -atom $VV
-
 	prolog call builtins do_set_prolog_flag -atom debug -atom $proenv(debug)
 }
 

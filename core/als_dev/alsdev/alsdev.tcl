@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.81 1999/02/24 23:10:56 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.82 1999/03/03 13:37:10 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -437,8 +437,13 @@ load_photo down_arrow_gif down-arrow-blue
 load_photo right_gif right-arrow-blue
 load_photo left_gif left-arrow-blue
 
-load_photo closed_ptr closed_ptr
-load_photo open_ptr open_ptr
+if {$tcl_platform(platform) == "windows" } then {
+	load_photo closed_ptr closed_wins
+	load_photo open_ptr open_wins
+} else {
+	load_photo closed_ptr closed_ptr
+	load_photo open_ptr open_ptr
+}
 
 
 	## source any other needed files here.....
