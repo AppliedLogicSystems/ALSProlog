@@ -814,8 +814,7 @@ check_alsdev_flags
 
 als_ide_mgrAction(open_edit_win(FileName), State)
 	:-
-	split_path(FileName, PathCmpts),
-	dreverse(PathCmpts, [TF | _]),
+	path_directory_tail(FileName, _, TF),
 	file_extension(TF, BaseFileName, Ext),
 	als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State).
 
@@ -901,14 +900,9 @@ fin_save_as(FileName,WinName,State,PrevEditFiles,PrevEdits)
 rename_anon_doc(TclWin, File, SrcHandlerHandle, Flag)
 	:-
 	builtins:get_primary_manager(State),
-%(var(State) -> write(state_is_a_var) ; write(state_nonvar) ),nl,flush_output,
-%write_term(user_output, state=State, [maxdepth(3)]),nl,flush_output,
 	accessObjStruct(source_mgrs, State, PrevMgrsList),
-%write_term(user_output, pml=PrevMgrsList, [maxdepth(3)]),nl,flush_output,
-	split_path(File, PathElts),
-	dreverse(PathElts, [RootFile | _]),
+	path_directory_tail(File, _, RootFile),
 	(file_extension(RootFile, BaseFile, Ext) -> true ; BaseFile = RootFile, Ext=''),
-%write(base=BaseFile),nl,flush_output,
 	fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,State).
 
 fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,State)
@@ -2231,7 +2225,6 @@ ide_prolog_system_error(
 
 ide_prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), _) 
 	:-
-%write(user_output,syntax_pos_info=p(P1,P2,P3)),nl,flush_output,
 	sio:is_stream(Stream,Stream0),
 	sio:is_input_stream(Stream0),
 	!,
@@ -2239,9 +2232,7 @@ ide_prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream),
 	sio:stream_type(Stream0,StreamType),
 	sio:stream_name(Stream0,StreamName),
 	(StreamType = file ->
-%		pathPlusFile(_,File,StreamName)
-		split_path(StreamName, PathElts),
-		dreverse(PathElts, [File | _]),
+		path_directory_tail(StreamName, _, File),
 		;	
 		File = StreamName
 	),
@@ -2432,16 +2423,9 @@ module alsdev.
 	])
  *---------------------------------------*/
 
-/*
 shl_source_handlerAction(open_edit_win(FileName), State)
 	:-
-*/
-
-
-shl_source_handlerAction(open_edit_win(FileName), State)
-	:-
-	split_path(FileName, PathCmpts),
-	dreverse(PathCmpts, [TF | _]),
+	path_directory_tail(FileName, _, TF),
 	file_extension(TF, BaseFileName, Ext),
 	shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext), State).
 
