@@ -216,6 +216,10 @@ proc_copt(s(DirPath), COpts)
 	append(PrevSearchList, [Drive+DirPathList], NewSearchList),
 	mangle(9, COpts, NewSearchList).
 
+proc_copt(ensure_loaded(true), COpts)
+	:-!,
+	mangle(1, COpts, ensure_loaded).
+
 proc_copt(Opt, _)
 	:-
 	prolog_system_warning(bad_consult_opt, [Opt]).
@@ -394,6 +398,12 @@ exec_consult(BaseFile, FCOpts)
  |	drive+directory to attempt, and calls cont_consult/5.
  *-------------------------------------------------------------*/ 
 
+exec_consult(PathList, Drive, BaseFile, ensure_loaded, SrcExt, FCOpts)
+	:-
+ 	consulted(BaseFile, SrcPath, ObpPath, _, _),
+	!,
+	note_paths(FCOpts, SrcPath, ObpPath, ObpPath).
+
 		%% Incoming pathlist is absolute:
 		%%--------------------------------
 exec_consult(['' | RestPathList], Drive, BaseFile, Nature, SrcExt, FCOpts)
@@ -479,81 +489,6 @@ path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
 	arg(10, FCOpts, OrigFileDesc), 		%%	10		- OrigFileDesc 
 	existence_error(file,OrigFileDesc,OrigFileDesc).
 
-/**********************************
-		%% Incoming pathlist is NOT absolute:
-		%% Try the local search path list:
-exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
-	:-
-	arg(9, FCOpts, LocalSearchPathLists),		%%	9		- SearchPath 
-	directory_self(SelfDir),
-	subPath(SelfDirPathList, SelfDir),
-	member(DD+PL, [Drive+SelfDirPathList | LocalSearchPathLists]), 
-	append(PL,PathList,SrcPathList),
-	cont_consult(SrcExt, Nature, DD+SrcPathList, BaseFile, FCOpts).
-
-		%% Incoming pathlist is NOT absolute;
-		%% SrcExt is a shared library extension;
-		%% Try loading from ALSDIR\shared first:
-exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
-	:-
-	(SrcExt = share; shared_file_ext(SrcExt)),
-	sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, shared, SharedLibDir),
-	rootPlusPath(SDDrive,SrcPathList,SharedLibDir),
-	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
-
-		%% Incoming pathlist is NOT absolute:
-		%% Try the global search path list:
-exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
-	:-
-	searchdir(SearchDir),
-	rootPlusPath(SDDrive,SDPathList,SearchDir),
-	append(SDPathList,PathList,SrcPathList),
-	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
-
-exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
-	:-
-%	searchdir(SearchDir),
-%	rootPlusPath(SDDrive,SDPathList,SearchDir),
-	searchdir(SDDrive, SDPathList),
-	SDPathList = [_|_],
-	append(SDPathList,PathList,SrcPathList),
-	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
-
-
-		%% Try the system builtins directory:
-exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
-	:-
-	sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, builtins, BuiltinsDir),
-	rootPlusPath(SDDrive,SrcPathList,BuiltinsDir),
-	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
-
-		%% Try the system shared directory:
-exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
-	:-
-	sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, shared, BuiltinsDir),
-	rootPlusPath(SDDrive,SrcPathList,BuiltinsDir),
-	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
-
-		%% Try the original system builtins directory (for packages):
-exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
-	:-
-	orig_sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, shared, BuiltinsDir),
-	rootPlusPath(SDDrive,SrcPathList,BuiltinsDir),
-	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
-
-		%% Can't find file
-		%% Throw exception:
-exec_consult(_, Drive, BaseFile, Nature, SrcExt, FCOpts)
-	:-
-	arg(10, FCOpts, OrigFileDesc), 		%%	10		- OrigFileDesc 
-	existence_error(file,OrigFileDesc,OrigFileDesc).
-
-**********************************/
-
 /*-------------------------------------------------------------*
  |	- Determine real source file path, and setup global
  |	  information for this specific consult;
@@ -569,14 +504,9 @@ path_src_check(SrcExt, BaseFile, NewDrive, NewPathList, SrcFilePath)
 	filePlusExt(BaseFile, SrcExt, SrcFileName),
 	rootPathFile(NewDrive,NewPathList,SrcFileName,SrcFilePath).
 
-%cont_consult(SrcExt, Nature, Drive+PathList, BaseFile, FCOpts)
 cont_consult(SrcExt, Nature, NewDrive, NewPathList, BaseFile, FCOpts)
 	:-
-%	prepend_current_consult_directory(Drive,PathList,NewDrive,NewPathList),
-%NewDesc = NewDrive+NewPathList,
-path_src_check(SrcExt, BaseFile, NewDrive, NewPathList, SrcFilePath),
-
-
+	path_src_check(SrcExt, BaseFile, NewDrive, NewPathList, SrcFilePath),
 	s2s_ext(Exts2Try),
 	check_existence(SrcFilePath, Exts2Try,ExistingSrcFilePath, WorkingExt),
 			%% ExistingSrcFilePath is a complete path, including
