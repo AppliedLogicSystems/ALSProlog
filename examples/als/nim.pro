@@ -1,9 +1,10 @@
 
 
+
 /*
  * nim.pro  -- a simple two player game
  *
- * Copyright (c) 1986, 1988 by Applied Logic Systems
+ * Copyright (c) 1986-2004 by Applied Logic Systems, Inc.
  *
  */
 
