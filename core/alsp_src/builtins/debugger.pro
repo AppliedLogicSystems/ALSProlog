@@ -932,6 +932,7 @@ noshow_special(_,setof,3) :- !.
 noshow_special(_,bagof,3) :- !.
 noshow_special(_,findall,3) :- !.
 noshow_special(_,catch,_) :- !.
+noshow_special(_,unwind_protect,_) :- !.
 noshow_special(_,catcher,_) :- !.
 noshow_special(_,select_action,_) :- !.
 noshow_special(_,';',_) :- !.	%% Disjunction
