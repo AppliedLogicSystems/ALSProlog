@@ -57,7 +57,7 @@ init_tk_alslib(Interp,Shared)
 		;
 		consult(tcltk)
 	),
-	catch(tk_new(Interp),_,true),
+	catch(tk_new(Interp),Ball1,check_tcl_error(Ball1)),
 	tcl_call(Interp, [wm,withdraw,'.'], _),
 	builtins:sys_searchdir(ALSDIR),
 	extendPath(ALSDIR, shared, Shared),
@@ -79,6 +79,21 @@ init_tk_alslib(Interp,Shared)
 			true
 		)
 	).
+
+check_tcl_error(Ball1)
+	:-
+	write(check_tcl_error(Ball1)),nl,flush_output,
+	fail.
+check_tcl_error(error(permission_error(create,tcl_interpreter,TI),_))
+	:-!,
+%	builtins:prolog_system_warning(error(permission_error(create,tcl_interpreter,TI)),_).
+	printf(user_output,'Warning: Attempting tk_new on existing interpreter: %t\n',
+			[TI]).
+
+
+check_tcl_error(Ball1)
+	:-
+	throw(Ball1).
 
 export destroy_all_tcl_interpreters/0.
 destroy_all_tcl_interpreters
@@ -342,7 +357,7 @@ atomic_input_dialog(Interp, Msg, Title, Atom)
  |	file_select_dialog(+, +, +, -)
  |
  |	Options:
- |		default = <Default file name>
+ |		defaultname = <Default file name>
  |		ext		= Ext to either add, or use for selection
  |		mode	= new/select/save_as (default = select)
  |		initialdir = 	initial dir in which to begin...
@@ -393,7 +408,7 @@ fselect_modes(Options, DefaultName, Ext, Mode, Title, IDir, FileTypes)
 		)
 	),
 	(dmember(defaultname=InitDefaultName, Options) -> 
-		(file_extension(_, _, InitDefaultName) :-
+		(file_extension(_, _, InitDefaultName) ->
 			DefaultName = InitDefaultName
 			;
 			(dmember(ext=DfltExt, Options) ->
