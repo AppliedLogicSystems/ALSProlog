@@ -1,3 +1,9 @@
+Tue May 23 1995 Ken Bowen
+
+	* Modified save_image/2, process_option/1 in blt_pckg.pro
+	  to implement the FIXME in the comment at the end of
+	  the clauses for process_option/1.
+
 Mon May 22 1995 Ken Bowen
 
 	* Integrated freeze construct with gc. In gc.c:  In function

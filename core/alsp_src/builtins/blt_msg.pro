@@ -101,6 +101,8 @@ error_code(no_open_wrt,	'Unable to open file %t for writing!\n').
 error_code(no_open_upd,	'Unable to open file %t for update!\n').
 error_code(endmods,		'Too many endmods.\n').
 
+error_code(bad_pack_opt,'Bad packaging option: %t.\n').
+
 error_code(datax,	'Data areas exhausted! Package=%t\n').
 error_code(xsyms_2big,	'Too many external symbols! Package=%t\n').
 
