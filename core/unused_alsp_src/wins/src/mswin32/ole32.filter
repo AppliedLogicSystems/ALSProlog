@@ -1,0 +1,1 @@
+/* ole32 Filter. */all_except([	'_Cmpfun',	'RPC_CLIENT_FREE',	'RPC_CLIENT_ALLOC',]).
