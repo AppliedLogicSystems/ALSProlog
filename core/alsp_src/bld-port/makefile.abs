@@ -285,7 +285,7 @@ cmnt(top) = ['        makefile.in',
 rule(':', ['{srcdir}generic:', '{srcdir}{ARCH}:'], []). 
 /* Removed -Wconversions, because this produces to many spurious or
    system header warnings. */
-&(gcc_cflags)   = '-MMD -O -g -Wall -Wshadow -Wstrict-prototypes -Wmissing-prototypes'.
+&(gcc_cflags)   = '-MD -O -g -Wall -Wshadow -Wstrict-prototypes -Wmissing-prototypes'.
 &(highC_cflags) = '-Hwin ' .
 &(mpw_cflags)   = '-O ' .
 
