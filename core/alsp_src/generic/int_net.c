@@ -687,15 +687,19 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 	int   IntUIA_t, Linkt; 
 
 #ifdef DEBUGSYS
-	if (debug_system[CSTRUPDT])
+	if (debug_system[CSTRUPDT]) {
 		printf("Enter: update_propagate:L=%g H=%g K=%d Type=%d Intrv=%x \n", 
 						L, H, IKind, Type, (int)IntrvTm);
+		pbi_cptx();
+		printf("CurP(=B)=%0x SPB =%0x\n", (int)wm_B, (int)chpt_SPB(wm_B) );
+/*		pbi_walk_cps(); */
+		}
 #endif /* DEBUGSYS */
 
 /*	if (IKind != BOOLEANKIND) {   */
 	/* ------------------------------------------------------------*
 	   Now update the interval endpoints in the interval structure;
-	   IF (the interval structure) is more recent than
+	   IF (the interval endpoints uia) is more recent than
 		  the latest CP
 	   THEN 
 			update the interval structure destructively in place
@@ -713,24 +717,34 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 	   bounds and kind in this new UIA: 
 	 *-------------------------------------------------------------*/
 
-	w_uia_alloc(&IntUIA, &IntUIA_t, (size_t)UIA_DIMENSION);
-	w_uia_poke(IntUIA, (int) UIA_FIRST_POS,  (UCHAR *) &L, sizeof (double));
-	w_uia_poke(IntUIA, (int) UIA_SECOND_POS, (UCHAR *) &H, sizeof (double));
-	w_uia_poke(IntUIA, (int) UIA_THIRD_POS,  (UCHAR *) &IKind, sizeof (long));
+	if ((long)IntrvTm > (long)chpt_SPB(wm_B) ) {
+printf("CASE#1\n");
+		w_get_argn(&IntUIA, &IntUIA_t, IntrvTm, UIA_POSITION);
+		w_uia_poke(IntUIA, (int) UIA_FIRST_POS,  (UCHAR *) &L, sizeof (double));
+		w_uia_poke(IntUIA, (int) UIA_SECOND_POS, (UCHAR *) &H, sizeof (double));
+
+	} else {
+printf("CASE#2\n");
+		w_uia_alloc(&IntUIA, &IntUIA_t, (size_t)UIA_DIMENSION);
+		w_uia_poke(IntUIA, (int) UIA_FIRST_POS,  (UCHAR *) &L, sizeof (double));
+		w_uia_poke(IntUIA, (int) UIA_SECOND_POS, (UCHAR *) &H, sizeof (double));
+		w_uia_poke(IntUIA, (int) UIA_THIRD_POS,  (UCHAR *) &IKind, sizeof (long));
+
+		/* ------------------------------------------------------------*
+			Now trailed-mangle the new UIA into the UIA position in
+			the interval structure:
+	 	 *-------------------------------------------------------------*/
+		trailed_mangle0(UIA_POSITION, IntrvTm, WTP_STRUCTURE, IntUIA, WTP_UIA); 
+	}
 
 #ifdef DEBUGSYS
 	if (debug_system[CSTRUPTM]) {
-		printf("UPDATE_PROP-TM:[L=%g H=%g K=%d]intuia=%0x wm_H=%0x wm_HB=%0x\n",
-								L,H,IKind,(int)IntUIA,(int)wm_H,(int)wm_HB);
+		printf("UPDATE_PROP-TM:[L=%g H=%g K=%d] intuia=%0x wm_H=%0x wm_HB=%0x\n",
+								L,H,IKind,(int)(PWord)(IntUIA + wm_heapbase),(int)wm_H,(int)wm_HB);
 		pbi_cptx();
 	}
 #endif /* DEBUGSYS */
 
-	/* ------------------------------------------------------------*
-		Now trailed-mangle the new UIA into the UIA position in
-		the interval structure:
-	 *-------------------------------------------------------------*/
-	trailed_mangle0(UIA_POSITION, IntrvTm, WTP_STRUCTURE, IntUIA, WTP_UIA);
 
 /*	}	 IKind != BOOLEANKIND  */
 
