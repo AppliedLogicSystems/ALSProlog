@@ -30,7 +30,7 @@
 #define ABMOP(op,p1,p2,p3,p4) {#op,{p1,p2,p3,p4}},
 
 static struct _icode { 
-    char *instr_name;
+    const char *instr_name;
     int   arg[4];
 } ic_array[] = {
 

@@ -274,7 +274,7 @@ Code *
 ic_install_no(buf, clausestart, nocatcher)
     Code *buf;
     Code *clausestart;
-    char *nocatcher;
+    const char *nocatcher;
 {
     Code *oldptr = ic_ptr;
     Code *startaddr;
@@ -283,7 +283,7 @@ ic_install_no(buf, clausestart, nocatcher)
 
     ic_put_align(W_TRUST_ME);
     ic_putl((PWord) w_nameentry((PWord) MODULE_BUILTINS,
-			        (PWord) find_token(nocatcher), 0)->exec_entry);
+			        (PWord) find_token((UCHAR *)nocatcher), 0)->exec_entry);
 
     startaddr = ic_ptr;
 
