@@ -4002,6 +4002,7 @@ set_depth_computation(Stream_or_alias,DC) :-
  * stream_property/2
  */
 
+
 export stream_property/2.
 
 stream_property(Stream, Property) :-
@@ -4009,14 +4010,14 @@ stream_property(Stream, Property) :-
 	!,
 	pget_stream_table(Id,Stream),
 	stream_property0(Property,Stream).
-stream_property(Stream, Property) :-
+stream_property(Stream_or_alias, Property) :-
 	var(Property),
-	stream_ok(Stream),
+	stream_or_alias_ok(Stream_or_alias, Stream),
 	!,
 	stream_property0(Property, Stream).
 
-stream_property(Stream, Property) :-
-	stream_ok(Stream),
+stream_property(Stream_or_alias, Property) :-
+	stream_or_alias_ok(Stream_or_alias, Stream),
 	stream_property0(Property, Stream),
 	!.
 
