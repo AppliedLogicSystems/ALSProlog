@@ -15,18 +15,19 @@ include $(SOURCE_DIR)/unix/$(PROC)_makefile
 
 CC = gcc
 
-CPPFLAGS = -DUNIX $(OS_CPPFLAGS) $(PROC_CPPFLAGS) \
+CPPFLAGS = -DUNIX -DCONFIGLESS $(BUILD_FLAGS) \
+	$(OS_CPPFLAGS) $(PROC_CPPFLAGS) \
 	-I $(SOURCE_DIR)/unix \
 	-I $(SOURCE_DIR)/generic \
 	-I $(SOURCE_DIR)/smath \
 	-I $(SOURCE_DIR)/$(PROC)
 
 # add -W sometime
-CFLAGS = -O $(DEBUGFLAG) -fpic -MMD -Wall -Wstrict-prototypes -Wmissing-prototypes -Wwrite-strings -Werror
+CFLAGS = -O -fpic -MMD -Wall -Wstrict-prototypes -Wmissing-prototypes -Wwrite-strings -Werror
 
 VPATH = $(SOURCE_DIR)/unix:$(SOURCE_DIR)/generic:$(SOURCE_DIR)/port:$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins
 
-SHELL_SOURCE = pimain.c
+SHELL_SOURCE = 
 
 SHELL_OBJECTS = $(SHELL_SOURCE:.c=.o)
 
