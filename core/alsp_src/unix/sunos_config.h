@@ -14,6 +14,7 @@
 #define MISSING_EXTERN_CRYPT
 #define MISSING_EXTERN_STRTOUL
 #define MISSING_STRTOUL
+#define MISSING_EXTERN_REALPATH
 
 #define MinorOSStr	"sunos4.1.3"
 #define DIRENT	1
