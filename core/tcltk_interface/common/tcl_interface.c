@@ -16,7 +16,9 @@
 #include <tcl.h>
 #include <tk.h>
 
+#ifndef BUILD_PSL
 #define ITCL
+#endif
 
 #ifdef ITCL
 #include <itcl.h>
@@ -873,8 +875,13 @@ PI_BEGIN
 PI_END
 
 
+#ifdef BUILD_PSL
+void pi_init(void);
+void pi_init(void)
+#else
 void tcl_interface_init(void);
 void tcl_interface_init(void)
+#endif
 {
 #ifdef macintosh
 	tcl_macQdPtr = &qd /*GetQD()*/;

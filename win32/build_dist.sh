@@ -129,6 +129,10 @@ then
 	cp -pr "$ODBC/src/prolog_odbc.pro" "$DISTDIR/odbc"
 	cp -pr "$ODBC/i386_mswin32/odbcintf.psl" "$DISTDIR/alsdir/shared"
 	cp -pr "$ODBC/doc/odbc.pdf" "$DISTDIR/odbc"
+	
+	cp -pr "$ALS_PROLOG/core/tcltk_interface/mswin32/tclintf.psl" "$DISTDIR/alsdir/shared"
+	cp -pr "$ALS_PROLOG/core/tcltk_interface/common/tcltk.pro" "$DISTDIR/alsdir/shared"
+	cp -pr "$ALS_PROLOG/core/tcltk_interface/common/tcltk_util.pro" "$DISTDIR/alsdir/shared"
 fi
 
 
