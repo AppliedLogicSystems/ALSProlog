@@ -302,7 +302,9 @@ alsdev(Shared, ALS_IDE_Mgr)
 	alsdev:setup_ide_project_globals(ALS_IDE_Mgr),
 	tcl_call(shl_tcli, [do_main_als_bindings],_),
 
+	initial_flags_settings,
 	alsdev:check_alsdev_flags,
+	initial_misc_settings,
 
 	retract(save_clinfo(CLInfo)),
 	ss_load_dot_alspro(CLInfo),
@@ -323,6 +325,7 @@ alsdev(Shared, ALS_IDE_Mgr)
 	(current_prolog_flag(debug, on) ->
 		tcl_call(shl_tcli,[ensure_db_showing],_) ; true
 	),
+
 	get_cwd(CurDir),
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
 
@@ -478,6 +481,46 @@ set_topals_settings_info(TopALSSettings)
 	tcl_call(shl_tcli, [set_tcl_ga, proenv, heartbeat, AlarmIntrv], _),
 	tcl_call(shl_tcli, [set_tcl_ga, proenv, main_printdepth, PrintDepth], _),
 	tcl_call(shl_tcli, [set_tcl_ga, proenv, main_depth_type, DepthType], _).
+
+	/*-----------------------------------------------------------*
+	 |	Extracts and sets prolog flags info from the info
+	 |	obtained from alsdev.ini
+	 *-----------------------------------------------------------*/
+
+initial_flags_settings
+	:-
+	ini_config_items(Items),
+	(dmember(prolog_value(prolog_flags,FlagsList),Items) ->
+		set_flags_values(FlagsList)
+		;
+		true
+	).
+
+set_flags_values([]).
+set_flags_values([[Flag,_,Val] | FlagsList])
+	:-
+	do_set_prolog_flag(Flag,Val),
+	set_flags_values(FlagsList).
+
+	/*-----------------------------------------------------------*
+	 |	Extracts and sets other misc info such as print depth
+	 |	obtained from alsdev.ini; must ensure that the streams
+	 |	(e.g., debugger win stream) exists, etc., before running
+	 |	this routine.
+	 *-----------------------------------------------------------*/
+initial_misc_settings
+	:-
+	ini_config_items(Items),
+	(dmember(prolog_value(topals_settings,TopALSSettings),Items) ->
+		set_topals_settings_info(TopALSSettings)
+		;
+		true
+	),
+	(dmember(prolog_value(debug_settings,DebugSettings),Items) ->
+		set_debug_settings_info(DebugSettings)
+		;
+		true
+	).
 
 endmod.   % builtins
 
@@ -639,10 +682,17 @@ setup_ide_project_globals(ALSIDEObject)
 	send( DebuggerObject, get_value(myHandle, DebuggerHandle) ),
 	tcl_call(shl_tcli, [set_tcl_ga, proenv, debugger_mgr, DebuggerHandle], _).
 
+	/*-----------------------------------------------------------*
+	 |  1. Locates alsdev.ini (or .alsdev) & records path;
+	 |	2. Asserts all the info it extracts, for later use;
+	 |	3. Extracts basic geometry info for use in initial
+	 |	   creation of .topals and .debugwin;
+	 *-----------------------------------------------------------*/
 alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom, DebugVis)
 	:-
 	abolish(alsdev_ini_path,1),
 	find_alsdev_ini(Items),
+	builtins:assert(ini_config_items(Items)),
 	(dmember(window_settings('.topals', TopIniSettings0), Items) -> 
 		strip_tags(TopIniSettings0, TopIniSettings) 
 		; 
@@ -672,21 +722,6 @@ alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom, DebugVis)
 		; 
 		DebugVis = 0,
 		set_prolog_flag(debug,off)
-	),
-	(dmember(prolog_value(prolog_flags,FlagsList),Items) ->
-		set_flags_values(FlagsList)
-		;
-		true
-	),
-	(dmember(prolog_value(topals_settings,TopALSSettings),Items) ->
-		set_topals_settings_info(TopALSSettings)
-		;
-		true
-	),
-	(dmember(prolog_value(debug_settings,DebugSettings),Items) ->
-		set_debug_settings_info(DebugSettings)
-		;
-		true
 	).
 
 strip_tags([], []). 
@@ -755,6 +790,9 @@ fin_find_alsdev_ini(PrefsFileList, [])
 	put_code(S, 0' ),
 	close(S),
 	assert(alsdev_ini_path(PrefsFilePath)).
+
+
+
 
 change_window_settings(WinSettingsVals, WinGroup)
 	:-
@@ -841,12 +879,6 @@ save_prolog_flags
 		 prolog_value(debug_settings,DebugSettings)
 		]).
 
-
-set_flags_values([]).
-set_flags_values([[Flag,_,Val] | FlagsList])
-	:-
-	builtins:do_set_prolog_flag(Flag,Val),
-	set_flags_values(FlagsList).
 
 check_alsdev_flags
 	:-
