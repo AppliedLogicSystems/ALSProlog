@@ -388,11 +388,11 @@ proc vTclWindow.ppj_spec {base} {
     frame $base.prolog_files.buttons \
         -borderwidth 1 -height 30 -relief sunken -width 30 
     button $base.prolog_files.buttons.add_file \
-        -command add_new_file -padx 11 -pady 4 -text {Add} 
+        -command {add_new_proj_file pro} -padx 11 -pady 4 -text {Add} 
     button $base.prolog_files.buttons.add_mult_file \
-        -command add_mult_files -padx 11 -pady 4 -text {Add Multiple} 
+        -command {add_mult_files} -padx 11 -pady 4 -text {Add Multiple} 
     button $base.prolog_files.buttons.del_files \
-        -command delete_files -padx 11 -pady 4 -text {Delete} 
+        -command {delete_proj_files} -padx 11 -pady 4 -text {Delete} 
 
     frame $base.sep_search_dirs \
         -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
@@ -451,9 +451,9 @@ proc vTclWindow.ppj_spec {base} {
     frame $base.oop_files.buttons \
         -borderwidth 1 -height 30 -relief sunken -width 30 
     button $base.oop_files.buttons.add_file \
-        -command add_new_file -padx 11 -pady 4 -text {Add} 
+        -command {add_new_proj_file oop} -padx 11 -pady 4 -text {Add} 
     button $base.oop_files.buttons.del_files \
-        -command delete_files -padx 11 -pady 4 -text {Delete} 
+        -command {delete_proj_files oop} -padx 11 -pady 4 -text {Delete} 
 
     frame $base.sep_typ_files \
         -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
@@ -481,9 +481,9 @@ proc vTclWindow.ppj_spec {base} {
     frame $base.typ_files.buttons \
         -borderwidth 1 -height 30 -relief sunken -width 30 
     button $base.typ_files.buttons.add_file \
-        -command add_new_file -padx 11 -pady 4 -text {Add} 
+        -command {add_new_proj_file typ} -padx 11 -pady 4 -text {Add} 
     button $base.typ_files.buttons.del_files \
-        -command delete_files -padx 11 -pady 4 -text {Delete} 
+        -command {delete_proj_files typ} -padx 11 -pady 4 -text {Delete} 
 
     frame $base.sep_lib_files \
         -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
@@ -511,9 +511,9 @@ proc vTclWindow.ppj_spec {base} {
     frame $base.lib_files.buttons \
         -borderwidth 1 -height 30 -relief sunken -width 30 
     button $base.lib_files.buttons.add_file \
-        -command add_new_file -padx 11 -pady 4 -text {Add} 
+        -command {add_new_proj_file lib} -padx 11 -pady 4 -text {Add} 
     button $base.lib_files.buttons.del_files \
-        -command delete_files -padx 11 -pady 4 -text {Delete} 
+        -command {delete_proj_files lib} -padx 11 -pady 4 -text {Delete} 
 
     frame $base.sep_bld_ctl \
         -background #000000 -borderwidth 1 -height 3 -relief sunken 
