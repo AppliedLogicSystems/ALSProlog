@@ -21,6 +21,8 @@
 #include "freeze.h"
 #endif
 
+#define DEBUGFREEZE 1
+#define GCDEBUG 1
 
 #undef mask
 
@@ -275,6 +277,8 @@ gc()
     ap = wm_E;
     b =  wm_B;
     tr = wm_TR;
+
+printf("GC-p2:b=wm_B=%x mrccp=%x\n",b,mrccp);
 
     while (b <= mrccp) {
 			/* nuke the compaction bit */

@@ -54,6 +54,10 @@ acquire_options(SwitchInfo)
 	ws_opt_file(SwitchInfo0, SwitchInfo).
 
 parse_switches([], []).
+parse_switches([['-sd', SrcDir] | SwitchVals], SwitchInfo)
+	:-!,
+	assert(cl_srcdir(SrcDir)),
+	parse_switches(SwitchVals, SwitchInfo).
 parse_switches([['-tgtws', TgtWS] | SwitchVals], [tgtws=TgtWS | SwitchInfo])
 	:-!,
 	parse_switches(SwitchVals, SwitchInfo).
@@ -89,7 +93,8 @@ setup_lcl_config
 
 setup_lcl_config
 	:-
-	cfg(srcdir,SRCDIR),
+%	cfg(srcdir,SRCDIR),
+	cl_srcdir(SRCDIR),
 	cfg('ARCH',ARCH),
 	cfg('SOS',SOS),
 	catenate([ARCH,'-',SOS],DN),
@@ -629,7 +634,6 @@ find_possible_dir_for(Subdir,Type,OS,InitIncDir)
 	:-
 	lcl_config(possible_dir_for(Subdir,Type,OS,InitIncDir)).
 	
-
 find_possible_dir_for(Subdir,Type,OS,InitIncDir)
 	:-
 	possible_dir_for(Subdir,Type,OS,InitIncDir).

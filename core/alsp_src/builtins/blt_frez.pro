@@ -127,8 +127,6 @@ delay_handler('$delay'(_,Next,Module,Goal))
 	intconstrs,				%% defined (or not) in main.c
 	!,
 		%% F is the senior var;
-%		pbi_write('-----Combine delay vars: '-(R,F)),pbi_nl,pbi_ttyflush,
-
 	'$delay_term_for'(R, R_DelayTerm),
 	arg(4, R_DelayTerm, R_ConstrTerm),
 
@@ -140,9 +138,6 @@ delay_handler('$delay'(_,Next,Module,Goal))
 '$combine_dvars'(R,F)
 	:-
 		%% F is the senior var;
-%		pbi_write('-----Combine delay vars#2: '-(R,F)),pbi_nl,pbi_ttyflush,
-%		pbi_write('-----Combine delay vars#2:'),pbi_nl,pbi_ttyflush,
-
 	'$delay_term_for'(R, R_DelayTerm),
 	arg(4, R_DelayTerm, R_Constr),
 
@@ -155,33 +150,9 @@ delay_handler('$delay'(_,Next,Module,Goal))
 	arg(3, F_DelayTerm, F_Mod),
 	arg(3, R_DelayTerm, R_Mod),
 
-/*
-pbi_write(new(NewVar)=(NewF_Constr, (R_Mod:NewR_Constr))),
-pbi_nl,pbi_ttyflush,
-*/
-
 	'$delay'(NewVar,F_Mod,(NewF_Constr, (R_Mod:NewR_Constr)),_),
 	'$bind_vars'(F, NewVar),
 	'$bind_vars'(R, NewVar).
-
-%		pbi_write('-----Combine delay vars#2-DONE'),pbi_nl,pbi_ttyflush.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 		%% Compound constraint:
@@ -231,11 +202,6 @@ comb_rt_cstr(F_Constr, F, R_Intv, R_Constr, R)
 		%% No intvls:
 cmbn(nil, F_Constr, F, nil, R_Constr, R)
 	:-
-/*
-	'$delay_term_for'(F, F_DelayTerm),
-	trailed_mangle(4, F_DelayTerm, (F_Constr, R_Constr)),
-	'$bind_vars'(R, F).
-*/
 	subst_var(F_Constr, F, NewVar, NewF_Constr),
 	subst_var(R_Constr, R, NewVar, NewR_Constr),
 
@@ -248,9 +214,6 @@ cmbn(nil, F_Constr, F, nil, R_Constr, R)
 	'$delay'(NewVar,F_Mod,(NewF_Constr, (R_Mod:NewR_Constr)),_),
 	'$bind_vars'(F, NewVar),
 	'$bind_vars'(R, NewVar).
-
-
-
 
 		%% R has intvl, but not F:
 cmbn(nil, F_Constr, F, R_Intv, R_Constr, R)

@@ -89,6 +89,8 @@ library: $(WIN)0.c $(LIBOBJS)
 
 IMAGE		= alspro_$(WIN)
 
+LIB_LIST = []
+
 image: $(IMAGE)
 
 $(IMAGE)0: pimain.o pi_init.o $(PROLIB) $(WINTLIB)
@@ -104,12 +106,15 @@ $(IMAGE)0: pimain.o pi_init.o $(PROLIB) $(WINTLIB)
 $(IMAGE)1: $(IMAGE)0 
 	ALSPATH=$(WLD); export ALSPATH; \
 	$(IMAGE)0 *.pro $(ADDL_PROFS) \
-		-g 'save_image($(IMAGE)1,[libload(true)])'
+		-g 'save_image($(IMAGE)1,[select_lib($(LIB_LIST))])'
+
+SEARCHS=-s $(WINIDIR)/$(WIN) -s $(WINIDIR)/guilib -s $(WINIDIR)/guilib/$(WIN)
 
 $(IMAGE): $(IMAGE)1 
 	ALSPATH=$(WLD); export ALSPATH; \
-	$(IMAGE)1 $(WINIDIR/$(WIN)/$(WIN)_ld \
-		$(WINIDIR/guilib/cmn_ld $(WINIDIR/guilib/$(WIN)/cmnguild \
+	$(IMAGE)1 $(SEARCHS) \
+		$(WINIDIR)/$(WIN)/$(WIN)_ld \
+		$(WINIDIR)/guilib/cmn_ld $(WINIDIR)/guilib/$(WIN)/cmnguild \
 		-g 'save_image($(IMAGE),[])'
 
 all: library image

@@ -98,10 +98,12 @@ cont_mk_tty_shell(InSrcFile,SrcFile,BaseSrcFile)
 tty_shell_items([
 	name,
 	module,
+	use,
 	global_var,
 	banner,
 	type_file,
 	type_root,
+	type_name,
 	start,
 	menu_type,
 	consults
@@ -158,10 +160,12 @@ ssu_defaults([Item | ItemList], SpcTerms, Name, XSpcTerms)
 
 	name,
 	module,
+	use,
 	global_var,
 	banner,
 	type_file,
 	type_root,
+	type_name,
 	start,
 	menu_type,
 	consults
@@ -176,6 +180,14 @@ synth_unit_dflt(module, SpcTerms, Name, [module=ModName | Tail], Tail)
 		true
 		;
 		ModName = Name
+	).
+
+synth_unit_dflt(use, SpcTerms, Name, [use=UseList | Tail], Tail)
+	:-!,
+	(dmember(use=UseList,SpcTerms) ->
+		true
+		;
+		UseList = []
 	).
 
 synth_unit_dflt(global_var, SpcTerms, Name, [global_var=GVarName | Tail], Tail)
@@ -245,6 +257,14 @@ synth_unit_dflt(type_root, SpcTerms, Name, [type_root=Root | Tail], Tail)
 		atom_codes(Root, RootCs)
 	).
 
+synth_unit_dflt(type_name, SpcTerms, _, XTerms, Tail)
+	:-!,
+	(dmember(type_name=TypeName, SpcTerms) ->
+		XTerms =  [type_name = TypeName | Tail]
+		;
+		XTerms = Tail
+	).
+
 synth_unit_dflt(menu_type, SpcTerms, Name, [menu_type=MenuType | Tail], Tail)
 	:-!,
 	(dmember(action(_,_)=_, SpcTerms) ->
@@ -304,6 +324,7 @@ make_type_file(Name,BaseTypeFile,TypeFile)
 	%% Code units to synthesize:
 tty_shell_units([
 	module,
+	use,
 	global_var,
 	start,
 	info_type,
@@ -335,6 +356,21 @@ synth_unit(module, XSpcTerms, Code, CodeTail)
 		recons_fix(Consults, ReConsults),
 		Code = [(:- ReConsults),nl, (module Mod), (use windows),nl | CodeTail]
 	).
+
+%synth_unit(use, XSpcTerms, [(:- make_gv(GVarName)), nl | CodeTail], CodeTail)
+synth_unit(use, XSpcTerms, Code, CodeTail)
+	:-!,
+	dmember(use=UseList, XSpcTerms),
+	(UseList = [] ->
+		Code = CodeTail
+		;
+		mk_uses_items(UseList, Code, CodeTail)
+	).
+
+mk_uses_items([UseItem | UseList], [(use UseItem) | Code], CodeTail)
+	:-
+	mk_uses_items(UseList, Code, CodeTail).
+mk_uses_items([], CodeTail, CodeTail).
 
 synth_unit(global_var, XSpcTerms, [(:- make_gv(GVarName)), nl | CodeTail], CodeTail)
 	:-!,
@@ -548,8 +584,44 @@ build_act(Act,LInfoVar,GInfoVar,Body,LoopName,ActOnName,XSpcTerms,AClause)
 	ALoop =.. [LoopName, LInfoVar].
 
 
-synth_unit(info_type, XSpcTerms, Code, CodeTail)
-	:-!,
+
+gen_type_spec(XSpcTerms, MakePred)
+	:-
+	dmember(type_name=TypeName, XSpcTerms),
+	dmember(type_file=TypeFile, XSpcTerms),
+	exists_file(TypeFile),
+	!,
+	open(TypeFile, read, IS, []),
+	read_terms(IS, ISTerms),
+	close(IS),
+	(dmember(defStruct(TypeName, Props), ISTerms)
+		->
+		(dmember(makePred = MakePred, Props) ->
+			true
+			;
+			printf('Error! - Can''t locate makePred=<> in defStruct(%t,[...])\n', 
+						[TypeName])
+		)
+		;
+		printf('Error! - Can''t locate defStruct(%t,[...]) in file %t\n', 
+					[TypeName,TypeFile])
+	).
+
+gen_type_spec(XSpcTerms, MakePred)
+	:-
+	dmember(type_name=TypeName, XSpcTerms),
+	dmember(type_file=TypeFile, XSpcTerms),
+	!,
+	printf('Error! - File %t does not exist!\n', [TypeFile]).
+
+gen_type_spec(XSpcTerms, foobar)
+	:-
+	dmember(type_name=TypeName, XSpcTerms),
+	!,
+	printf('Error! - Missing type file name (type_file = <name>_\n', []).
+
+gen_type_spec(XSpcTerms, MakePred)
+	:-
 	get_user_info_slots(XSpcTerms, UserInfoSlots),
 	standard_info_slots(SIS),
 	append(UserInfoSlots, SIS, PropsList),
@@ -581,13 +653,22 @@ synth_unit(info_type, XSpcTerms, Code, CodeTail)
 
 	dmember(base_type_file=BaseTypeFile, XSpcTerms),
 	filePlusExt(BaseTypeFile,pro,ProTypeFile),
+	sprintf(atom(DepLine),'%t: %t',[ProTypeFile,TypeFile]),
 	open('makefile.typ',write,MTOS,[]),
-	printf(MTOS,'\n\n%t: %t\n',[ProTypeFile,TypeFile]),
-	printf(MTOS,'\talspro -g comptype_cl -p %t\n',[TypeFile]),
-	close(MTOS),
+	(locate_line(DepLine, MTOS) ->
+		close(MTOS) 		%% nothing to do
+		;
+		close(MTOS),
+		open('makefile.typ',append,MTOS2,[]),
+		printf(MTOS2,'\n\n%t: %t\n',[ProTypeFile,TypeFile]),
+		close(MTOS2)
+	).
 
+synth_unit(info_type, XSpcTerms, Code, CodeTail)
+	:-!,
+	gen_type_spec(XSpcTerms, MakePred),
+	
 	Code = [SetupInfo,nl | CodeTail],
-
 	(dmember(init = InitCode-InfoVar, XSpcTerms) ->
 		true
 		;
@@ -608,6 +689,20 @@ synth_unit(info_type, XSpcTerms, Code, CodeTail)
 		:-
 		SetupBody ).
 	
+locate_line(Atom, Stream)
+	:-
+	atom_length(Atom, Len),
+	locate_line(Atom, Len, Stream).
+
+locate_line(Atom, Len, Stream)
+	:-
+	get_line(Stream, NextLine),
+	(sub_atom(NextLine, 1, Len, Atom) ->
+		true
+		;
+		locate_line(Atom, Len, Stream)
+	).
+
 get_user_info_slots(XSpcTerms, UserInfoSlots)
 	:-
 	dmember(info_slots=UserInfoSlots0, XSpcTerms),

@@ -1,6 +1,101 @@
-This file contains a history of user visible changes made to ALS-Prolog by
-version number.
+This file contains a history of user visible changes made to the ALS-Prolog 
+compiler, by version number.
 ----
+2.0:
+1.78:
+	- Windows 95/NT DLLs working; DLL for Windows 3.1 working (no
+	development env on 3.1)
+
+1.77:
+	- Windows 95 and NT versions running
+	- fixed bug in reading floating point #s when 'e' falls on end of buffer;
+	- moved processing of raw level of command line out of main.c into
+	a builtin (pbi_command_line) which called in blt_shl.pro
+
+1.76:
+	- DJGPP/V2 DOS version running
+	- added command line switch -S <File> {multiple occurrences
+	ok} which adds <File> to the builtins:searchdir/1 facts.
+
+1.75:
+	- Macintosh version (both m68k & ppc) running via Codewarrior
+
+1.74:
+	- removed automatic coercion of "even reals (e.g., 3.0)" to integers;
+	  reals and integers are now distinct data types
+	- added X is float(Y)
+	- integration of freeze with garbage collection modified and
+	free_thawed/0 dropped.
+	- added greater control of end-of-line reading and writing, together
+	with "universal" reading stream mode;
+
+1.73:
+1.72:
+	- added delayed evaluation (freeze) mechanism in byte/threaded version:
+	new file: /builtins/blt_frez.pro
+	new predicates:
+			'$delay'/4, freeze/3, free_thawed/0, delay_handler
+
+1.71C
+	DOS/DJGPP version( byte/threaded) running
+
+1.70B:
+	- builtins/blt_shl.pro: modified ss_load_dot_alspro/0 so that
+	when on DOS, it looks for 'alspro.pro' instead of '.alspro'
+	- modified system images generated so that the defaults are:
+	the immediate linked image (previously called alspro) is now
+	called alspro_basis, and alspro is the result of doing a save_image 
+	on alspro_basis, thereby putting the builtins into the images, together 
+	with the debugger (tty version); however, the library is still being 
+	loaded dynamically.
+	- added window system identity (including nowins) to als_system/1
+	- force_libload_all/[0,1] modified to make it possible to present 
+	a list of library files to be forcibly loaded into the image.
+	- als-mics (packaging) extended to mach
+
+1.67B:
+	- added library file sconfig.pro containing various
+	system-specific configuration system as used in the generation
+	of interfaces to X/Motif, etc.
+	- added line_info(S,E) option in read_term/3
+	- added extended versions of system, supporting predicates 
+	which are linked to the X/Motif windowing functions
+	- added basic capability for programmer to control where
+	the obp files for consulted sources live (primarily via
+	command-line switches)
+	- consolidated exists_file/1 and exists/1
+	- split blt_sys.pro file to blt_sys.pro and blt_shl.pro
+	- modified system organization: builtins and library files
+	now  constitute 2 subdirs of alsdir;
+	- new library file: filmisc.pro
+	- changed mkdir/1 to mkdir/2 to allow user to control permissions 
+	when creating a file; added make_dir/2 
+	- added meta predicates: doexport/1, douse/1; create_new_module/1
+	- date-time predicates added: valid_date/1, valid_date/3, datetime_less/2
+	- hash tables added
+	- added force_libload_all/2 for library loading during packaging
+	- moved debugger loading into library hash table
+	- new library files: cmdline.pro, structutl.pro;
+	- added objectpro files to library: object.pro objs_run.pro
+	- packaging (mics) support extended to coff format
+	- modified internal identifiers from xxxN.M format to xxxN
+	(for als_system/1)
+	- extension/refinement of als-mics application packaging
+	- changed parsing of command line to accumulate files in
+	order given
+	- added support for unix alarm signal as a timer
+	- fixed bug (use of size_t) sometimes causing core dumps in
+	certain arithmetic comparisons
+
+1.66B:
+1.65B:
+	- trial port to IRIX5.1
+
+1.64B:
+	- repaired handling of left-nexted if-then-else
+	- default name table size doubled to 16384
+	- pbi_dynamic accepts UIAs as well as atoms
+
 1.63B:
 	* ALS-Prolog now runs on Solaris.
 
