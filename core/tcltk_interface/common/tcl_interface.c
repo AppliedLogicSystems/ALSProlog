@@ -17,6 +17,15 @@
 #include "alspi.h"
 #include "new_alspi.h"
 
+#ifdef UNIX
+#include "version.h"
+
+char *version[2] = {
+  "@(#)(c) 1997 Applied Logic Systems, Inc.",
+  "@(#)ALS Prolog Tcl-Tk Interface " VERSION_STRING " for " UNIX_NAME,
+  };
+#endif
+
 static Tcl_ObjType *tcl_integer_type, *tcl_double_type, *tcl_list_type;
 
 static AP_Obj TclToPrologObj(Tcl_Interp *interp, Tcl_Obj *tcl_obj, AP_World *w, AP_Obj *vars);
