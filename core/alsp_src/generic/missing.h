@@ -312,4 +312,8 @@ extern	int	write		PARAMS(( int, const void *, unsigned int ));
 extern char    *crypt           PARAMS((char *, char *));
 #endif
 
+#ifdef MISSING_EXTERN_STRTOUL
+extern unsigned long int strtoul(const char *, char **, int base);
+#endif
+
 #endif /* _MISSING_H_INCLUDED_ */
