@@ -638,7 +638,7 @@ obp_load_file(CanonSrcPath, BaseFile, FCOpts)
 	:-
 % 	consulted(BaseFile, CanonSrcPath, ObpPath, _, _),
  	consulted(BaseFile, _, ObpPath, _, _),
-	obp_load_from_path(BaseFile,ObpPath, CanonSrcPath),
+	obp_load_from_path(BaseFile,ObpPath, CanonSrcPath,FCOpts),
 	!,
 	note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath).
 
@@ -653,14 +653,14 @@ obp_load_file(CanonSrcPath, BaseFile, FCOpts)
 		;
 		filePlusExt(CanonSrcPath, obp, ObpFile)
 	),
-	obp_load_from_path(BaseFile,ObpPath, CanonSrcPath),
+	obp_load_from_path(BaseFile,ObpPath, CanonSrcPath,FCOpts),
 	!,
 	note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath).
 
-obp_load_from_path(BaseFile,ObpPath, CanonSrcPath)
+obp_load_from_path(BaseFile,ObpPath, CanonSrcPath,FCOpts)
 	:-
 	establish_fcg(BaseFile),
-	full_obp_load(CanonSrcPath, BaseFile, ObpPath),
+	full_obp_load(CanonSrcPath, BaseFile, ObpPath,FCOpts),
 	reset_fcg(_).
 
 /*-------------------------------------------------------------*
@@ -670,10 +670,10 @@ obp_load_from_path(BaseFile,ObpPath, CanonSrcPath)
 default_load(CanonSrcPath,BaseFile,ObpPath,FCOpts)
 	:-
 	(comp_file_times( CanonSrcPath, ObpPath) ->
-		obp_load_from_path(BaseFile,ObpPath, CanonSrcPath),
+		obp_load_from_path(BaseFile,ObpPath, CanonSrcPath,FCOpts),
 		note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath)
 		;
-		load_source_object(CanonSrcPath,BaseFile,ObpPath),
+		load_source_object(CanonSrcPath,BaseFile,ObpPath,FCOpts),
 		!,
 		note_paths(FCOpts, CanonSrcPath, ObpPath, CanonSrcPath)
 	),
@@ -694,10 +694,10 @@ note_paths(FCOpts, SrcFilePath, ObpPath, LoadedPath)
  |	Low-level load from .obp file, with check on status
  |	afterwards:
  *-------------------------------------------------------------*/ 
-full_obp_load(SrcPath, BaseFile,ObpPath)
+full_obp_load(SrcPath, BaseFile,ObpPath,FCOpts)
 	:-
 	obp_load(ObpPath,Status),
-	obp_load_checkstatus(Status,SrcPath,BaseFile,ObpPath).
+	obp_load_checkstatus(Status,SrcPath,BaseFile,ObpPath,FCOpts).
 
 /*-----------------------------------------------------------------------*
  |	obp_load_checkstatus/3
@@ -705,22 +705,22 @@ full_obp_load(SrcPath, BaseFile,ObpPath)
  |	obp_load_checkstatus(Status,SPath,OPath)
  *-----------------------------------------------------------------------*/
 	%% FLOAD_FAIL
-obp_load_checkstatus(0,SPath,BaseFile,OPath) 
+obp_load_checkstatus(0,SPath,BaseFile,OPath,FCOpts) 
 	:-!,	
 		%% obpload_er: "Error loading Prolog obp file %t.\n"
 	prolog_system_error(obpload_er, [OPath]),
-	attempt_load_source_object(SPath,BaseFile,OPath).
+	attempt_load_source_object(SPath,BaseFile,OPath,FCOpts).
 
 	%% FLOAD_SUCCESS
-obp_load_checkstatus(1,SPath,BaseFile,OPath) 
+obp_load_checkstatus(1,SPath,BaseFile,OPath,FCOpts) 
 	:-!.
 
 	%% FLOAD_ILLOBP
-obp_load_checkstatus(2,SPath,BaseFile,OPath) 
+obp_load_checkstatus(2,SPath,BaseFile,OPath,FCOpts) 
 	:-	
 		%% old_obp: "%t in old or unrecognized .obp format.\n"
 	prolog_system_error(old_obp, [OPath]),
-	attempt_load_source_object(SPath,BaseFile,OPath).
+	attempt_load_source_object(SPath,BaseFile,OPath,FCOpts).
 
 /*-----------------------------------------------------------------------*
  | prepend_current_consult_directory/4
@@ -921,6 +921,7 @@ write(check_set_tgt_mod=TgtMod),nl,
 	functor(MM,TgtMod,0),		/* intern it */
 	'$icode'(-10,MM,0,0,0).		/* new module */
 */
+
 check_set_tgt_mod(FCOpts,true)
 	:-
 	arg(8, FCOpts, TgtMod),
@@ -933,6 +934,7 @@ check_unset_tgt_mod(true)
 	:-!,
 	'$icode'(-9,0,0,0,0).		/* end module */
 */
+
 check_unset_tgt_mod(true)
 	:-!,
 	xconsult:popmod.
@@ -941,14 +943,16 @@ check_unset_tgt_mod(_).
 /*-------------------------------------------------------------*
  |	For loading source (.pro) files AND writing the .obp file:
  *-------------------------------------------------------------*/ 
-load_source_object(SPath,BaseFile,OPath) :-
+load_source_object(SPath,BaseFile,OPath,FCOpts) :-
 %	(filePlusExt(NoSuffixPath, _, SPath),!; NoSuffixPath = SPath),
 %	establish_fcg(NoSuffixPath),
 	establish_fcg(BaseFile),
 	obp_open(OPath),
 	!,
+	check_set_tgt_mod(FCOpts,TgtModFlag),
 	catch(xconsult(SPath,NErrs), _, obp_close_cleanup(SPath,OPath)),
 	obp_close,
+	check_unset_tgt_mod(TgtModFlag),
 	reset_fcg(_),
 	(NErrs = 0 ->  
 		true
@@ -961,7 +965,7 @@ load_source_object(SPath,BaseFile,OPath) :-
 	).
 	
 
-load_source_object(SPath,BaseFile,OPath)
+load_source_object(SPath,BaseFile,OPath,FCOpts)
 	:-
 	prolog_system_error(no_open_fil, [OPath]),
 	prolog_system_error(no_obp, [OPath]),
@@ -983,12 +987,12 @@ obp_close_cleanup(SPath,OPath)
  |	For loading source (.pro) files AND writing the .obp file,
  |	BUT make sure the file exists, and give a warning message:
  *-------------------------------------------------------------*/ 
-attempt_load_source_object(SPath,BaseFile,OPath) :-
+attempt_load_source_object(SPath,BaseFile,OPath,FCOpts) :-
 	exists_file(SPath),
 	prolog_system_error(atmpt_cmp, [SPath]),
-	load_source_object(SPath,BaseFile,OPath).
+	load_source_object(SPath,BaseFile,OPath,FCOpts).
 
-attempt_load_source_object(SPath,BaseFile,OPath) :-
+attempt_load_source_object(SPath,BaseFile,OPath,FCOpts) :-
 	prolog_system_error(ld_fail, [SPath]).
 
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -2293,7 +2293,7 @@ get_failure_read_eof_code(get_line0, -1).
 /*
 get_failure_read_snr(SNRAction, Pred, Arity, Stream, Call)
 	:-
-	pbi_write(gfrs(SNRAction, Pred, Arity, stream, Call)),pbi_nl,pbi_ttyflush,
+	pbi_write(gfrs(SNRAction, Pred, Arity, stream, call)),pbi_nl,pbi_ttyflush,
 	fail.
 */
 
@@ -2435,50 +2435,95 @@ get_char(Stream_or_alias, Char) :-
 	get_failure(FailCode,Stream,get_char(Stream_or_alias,Char)).
 
 /*
- * peek_code(Char)
+ * peek_code(Code)
+ *
+ *	Unifies Code with the next character code obtained from the default
+ *	input stream.  The character (code) is not consumed.
+ */
+
+export peek_code/1.
+
+peek_code(InCode) :-
+	get_current_input_stream(Stream),
+	sio_get_byte(Stream, Byte),
+	sio_unget_byte(Stream),
+	!,
+	InCode = Byte.
+peek_code(Code) :-
+	get_current_input_stream(Stream),
+	sio_errcode(Stream, FailCode),
+	get_failure(FailCode,Stream,peek_code(Code)).
+
+
+/*
+ * peek_code(Stream_or_alias, Code)
+ *
+ *	Unifies Code with the next character code obtained from the stream
+ *	associated with Stream_or_alias.  The character (code) is not consumed.
+ */
+
+export peek_code/2.
+
+peek_code(Stream, InCode) :-
+	sio_get_byte(Stream,Byte),
+	sio_unget_byte(Stream),
+	!,
+	InCode = Byte.
+peek_code(Alias, InCode) :-
+	is_input_alias(Alias, Stream),
+	sio_get_byte(Stream,Byte),
+	sio_unget_byte(Stream),
+	!,
+	InCode = Byte.
+peek_code(Stream_or_alias, Code) :-
+	input_stream_or_alias_ok(Stream_or_alias, Stream),
+	sio_errcode(Stream, FailCode),
+	get_failure(FailCode,Stream,peek_code(Stream_or_alias,Code)).
+
+/*
+ * peek_char(Char)
  *
  *	Unifies Char with the next character obtained from the default
  *	input stream.  The character is not consumed.
  */
 
-export peek_code/1.
+export peek_char/1.
 
-peek_code(InChar) :-
+peek_char(InChar) :-
 	get_current_input_stream(Stream),
-	sio_get_byte(Stream,Char),
+	sio_get_byte(Stream,Byte),
 	sio_unget_byte(Stream),
 	!,
-	InChar = Char.
-peek_code(Char) :-
+	char_code(InChar,Byte).
+peek_char(Char) :-
 	get_current_input_stream(Stream),
 	sio_errcode(Stream, FailCode),
-	get_failure(FailCode,Stream,peek_code(Char)).
-
+	get_failure(FailCode,Stream,peek_char(Char)).
 
 /*
- * peek_code(Stream_or_alias, Char)
+ * peek_char(Stream_or_alias, Char)
  *
  *	Unifies Char with the next character obtained from the stream
  *	associated with Stream_or_alias.  The character is not consumed.
  */
 
-export peek_code/2.
+export peek_char/2.
 
-peek_code(Stream, InChar) :-
-	sio_get_byte(Stream,Char),
+peek_char(Stream, InChar) :-
+	sio_get_byte(Stream,Byte),
 	sio_unget_byte(Stream),
 	!,
-	InChar = Char.
-peek_code(Alias, InChar) :-
+	char_code(InChar,Byte).
+peek_char(Alias, InChar) :-
 	is_input_alias(Alias, Stream),
-	sio_get_byte(Stream,Char),
+	sio_get_byte(Stream,Byte),
 	sio_unget_byte(Stream),
 	!,
-	InChar = Char.
-peek_code(Stream_or_alias, Char) :-
+	char_code(InChar,Byte).
+peek_char(Stream_or_alias, Char) :-
 	input_stream_or_alias_ok(Stream_or_alias, Stream),
 	sio_errcode(Stream, FailCode),
-	get_failure(FailCode,Stream,peek_code(Stream_or_alias,Char)).
+	get_failure(FailCode,Stream,peek_char(Stream_or_alias,Char)).
 
 /*
  * get_atomic_nonblank_char(Char)
@@ -2612,6 +2657,7 @@ read_buffer(tk_win,Stream)
 	stream_pgoals(Stream,PromptGoal),
 	call(PromptGoal),
 	sio_set_errcode(Stream,14),		%% 14 =  SIOE_NOTREADY
+%	wait_data(tcltk, Stream, Call),
 	fail.
 
 read_buffer(tk_win,Stream) 

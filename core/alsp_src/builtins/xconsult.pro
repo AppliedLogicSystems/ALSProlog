@@ -127,6 +127,39 @@ process('?-'(Command),Names,Vars,Stream, File, ModStack)
 	prolog_system_error(s(qf,Stream),[]),
 	readFile(Stream, File, ModStack).
 
+process(':-'(defStruct(Name,Spec)),Names,Vars,Stream, File, ModStack)
+	:-
+	topmod(Module),
+	create_type_def(defStruct(Name,Spec), Module, Result),
+	addclauses(Result,Module),
+	!,
+	readFile(Stream, File, ModStack).
+
+process((':-'(defStruct(Name,Spec)) :- _),Names,Vars,Stream, File, ModStack)
+	:-
+	topmod(Module),
+	create_type_def(defStruct(Name,Spec), Module, Result),
+	addclauses(Result,Module),
+	!,
+	readFile(Stream, File, ModStack).
+
+process(':-'(defineClass(Spec)),Names,Vars,Stream, File, ModStack)
+	:-
+	topmod(Module),
+	objects:defineClass(Module,Spec,Result),
+	addclauses(Result,Module),
+	!,
+	readFile(Stream, File, ModStack).
+
+process((':-'(defineClass(Spec)) :- _), Names,Vars,Stream, File, ModStack)
+	:-
+	topmod(Module),
+	objects:defineClass(Module,Spec,Result),
+	addclauses(Result,Module),
+	!,
+	readFile(Stream, File, ModStack).
+
+
 process((':-'(Command) :- '$dbg_aph'(_,_,_)),Names,Vars,Stream, File, ModStack)
 	:- 
 	topmod(Module),
@@ -234,6 +267,16 @@ process((!),Names,Vars,Stream, File, ModStack)
 		%% rdef_cut: "Attempt to redefine cut - ignored.\n"
 	prolog_system_error(s(rdef_cut,Stream),[]),
 	readFile(Stream, File, ModStack).
+
+/*
+process(defStruct(Name,Spec),Names,Vars,Stream, File, ModStack)
+	:- 
+	topmod(Module),
+	create_type_def(defStruct(Name,Spec), Module, Result),
+	addclauses(Result),
+	!,
+	readFile(Stream, File, ModStack).
+*/
 
 process(Fact, Names, Vars,Stream, File, ModStack)
 	:-
@@ -352,6 +395,48 @@ addrule(true,Head,M)
 addrule(Body,Head,M)
 	:-
 	addclause(M,(Head:-Body)).
+
+addclauses(Cs, M)
+	:-
+	do_addclauses(Cs, M, []).
+
+do_addclauses([], M, MStack).
+
+do_addclauses([(module NewM) | Cs], M, MStack) 
+	:-!,
+	do_addclauses(Cs, NewM, [M | MStack]).
+
+do_addclauses([endmod | Cs], _, MStack) 
+	:-!,
+	(MStack = [M | NewMStack] -> true ; M = user),
+	do_addclauses(Cs, M, NewMStack).
+
+do_addclauses([C | Cs], M, MStack) 
+	:-
+	xaddclause(C, M),
+	do_addclauses(Cs, M, MStack).
+
+xaddclause((export ExportList), M)
+	:-!,
+	doexport(ExportList).
+xaddclause((use UseList), M)
+	:-!,
+	douse(UseList).
+xaddclause(':-'(Command), Module)
+	:-
+	execute_command_or_query(Stream,cf,Module,Command),
+	!.
+xaddclause(':-'(Command), Module)
+	:-!,
+	prolog_system_error(s(cf,Stream),[]).
+xaddclause(dynamic(P,A), M)
+	:-
+	builtins:dynamic0(P/A,M).
+xaddclause(C, M)
+	:-
+	addclause(M, C).
+
+
 
 /*-------------------------------------------------------------------*
  | xform/5
