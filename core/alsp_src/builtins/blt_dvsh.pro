@@ -110,14 +110,18 @@ start_alsdev0
 	setup_init_ide_classes(ALS_IDE_Mgr),
 
 	library_setup,
+	 sys_env(OS, _, _),
 %	init_tk_alslib(shl_tcli,Shared),
 	join_path([ALSDIRPath,shared], Shared),
-	join_path([Shared,'tclintf.psl'], PSL),
-	load_slib(PSL),
+	(OS = unix ->
+		join_path([Shared,'tclintf.psl'], PSL),
+		load_slib(PSL)
+		;
+		true
+	),
 	 catch(tk_new(shl_tcli),Ball1,fail),
 	 tcl_call(shl_tcli, [wm,withdraw,'.'], _),
 	 tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
-	 sys_env(OS, _, _),
 	(OS = macos ->
 		tcl_call(shl_tcli, 'source -rsrc als_tklib', _)
 		;
