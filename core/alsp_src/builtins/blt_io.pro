@@ -542,10 +542,21 @@ deref_file_type(Path,FType)
 disp_deref_file_type(symbolic_link,Path,FType) 
 	:-!,
 	read_link(Path, LinkTarget),
-	deref_file_type(LinkTarget,FType).
+	cont_deref_file_type(LinkTarget,Path,FType).
 
 disp_deref_file_type(FType,Path,FType) :-!.
 
+cont_deref_file_type(LinkTarget,Path,FType)
+	:-
+	is_absolute_pathname(LinkTarget),
+	!,
+	deref_file_type(LinkTarget,FType).
+
+cont_deref_file_type(LinkTarget,Path,FType)
+	:-
+	pathPlusFile(DirPath, _, Path),
+	extendPath(DirPath,LinkTarget,FullLinkTarget),
+	deref_file_type(FullLinkTarget,FType).
 
 /*-----------------------------------------------------------------------*
  |	load4_checkstatus/3

@@ -78,6 +78,8 @@ extern	void	CI_makefar	PARAMS(( PWord *, int *, unsigned short * ));
 extern	int	CI_get_integer	PARAMS(( unsigned long  *, unsigned long ));
 extern	int	CI_get_double	PARAMS(( double *, unsigned long, unsigned long ));
 
+extern	const char *find_callback(void *func, void *object);
+
 #define CI_INTCONST(name,val) 	\
 	sym_insert_2long(name,CI_INTTYPE,(long)val,0);
 

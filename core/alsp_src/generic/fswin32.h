@@ -175,3 +175,7 @@ struct _stat_patch {
 #ifndef S_ISFIFO
 #define S_ISFIFO(m) (0)
 #endif
+
+/* The system call is broken in CW8, so use a patch version. */
+extern int system_patch(const char *command);
+#define system system_patch

@@ -182,7 +182,7 @@ PI_getsymname(buf_ptr, sym_val, size)
 
 
 /*
- * Changed to allow programmar to pass in size. Returns pointer to
+ * Changed to allow programmer to pass in size. Returns pointer to
  * buffer if uia fits in buffer, otherwise it returns 0.
  * Returns pointer to the first word of UIA if given buffer pointer
  * is zero.

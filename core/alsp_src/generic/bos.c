@@ -102,7 +102,7 @@ pbi_system()
     if (getstring(&str, v, t)
 	|| (t == WTP_LIST 
 	    && list_to_string((str = (UCHAR *) wm_H + 1), v, wm_normal - 256))) {
-#if defined(DOS) || defined(__GO32__) || defined(OS2) || defined(MSWin32)
+#if defined(DOS) || defined(__GO32__) || defined(OS2)
       char *cp;
       int switching=1, switched=0;
       for (cp=str; *cp; cp++)
@@ -245,4 +245,32 @@ int pbi_command_line(void)
 	PI_SUCCEED;
 }
 
+int pbi_crypt(void)
+{
+#ifdef	HAVE_UNISTD_H
+    PWord v1, v2, v3, u;
+    int   t1, t2, t3, ut;
+    UCHAR *b1,*b2;
+/*	char ss[36];	*/
+	char *ss;	
 
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+    w_get_An(&v3, &t3, 3);
+
+    if (!getstring(&b1, v1, t1) ||
+         !getstring(&b2, v2, t2))
+	FAIL;
+
+	ss = crypt(b1, b2);
+    w_mk_uia(&u, &ut, (UCHAR *)ss);
+
+    if (w_unify(v3, t3, u, ut))
+		SUCCEED;
+    else
+		FAIL;
+
+#else
+	FAIL;
+#endif
+}

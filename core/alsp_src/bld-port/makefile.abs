@@ -12,7 +12,7 @@ schema([
 
 	case(&(context_name), [
 		(mac: [
-			srcdir 		= 'mailbox3:alsp_src:',
+			srcdir 		= '@srcdir@',
 			'OS'		= 'macos7',
 			'SOS'		= 'macos'
 			] ),

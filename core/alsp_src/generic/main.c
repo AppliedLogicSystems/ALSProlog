@@ -95,13 +95,14 @@ static int pckgloaded = 0;
  *------------------------------------------------------------------------*/
 long  saved_state_image_offset = 0;
 
-char  imagename[64];
-char  imagedir[1024];
-static char alsdir[1024];	/* directory where ALS system resides */
+#define IMAGENAME_MAX	64
+#define IMAGEDIR_MAX	1024
+char  imagename[IMAGENAME_MAX];
+char  imagedir[IMAGEDIR_MAX];
+static char alsdir[IMAGEDIR_MAX];	/* directory where ALS system resides */
 
 #ifdef MSWin32
 char *MinorOSStr = "mswindows";
-
 #endif
 
 static char versionNum[] = SysVersionNum;	/* from version.h */
@@ -673,7 +674,7 @@ absolute_pathname(name)
 
 #endif
 
-#ifdef MSWin32
+#if 0 /* MSWin32 */
 static const int num_ext = 2;
 static const char *program_extension[num_ext] = {".exe", ".com"};
 
@@ -700,7 +701,7 @@ static int has_program_extension(const char *path)
    (MS DOS/Windows), extensions are added if necessary. */
 static int access_program(const char *path)
 {
-#if defined(MSWin32)
+#if 0 /* defined(MSWin32) */
     /* Under Microsoft Windows NT, the argv[0] passed from the command prompt
        does not have an extension unless it is explicit.
        
@@ -738,6 +739,19 @@ static void
 whereami(name)
     char *name;
 {
+#ifdef MSWin32
+    DWORD l;
+    char *endpath;
+    l = GetModuleFileName(NULL, imagedir, IMAGEDIR_MAX);
+    if (l == 0 || l >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
+    imagedir[l] = 0;
+    endpath = strrchr(imagedir, '\\');
+    if (endpath == NULL) fatal_error(FE_INFND, 0);
+    endpath++;  /* include the \ */
+    if (strlen(endpath) >= IMAGENAME_MAX) fatal_error(FE_INFND, 0);
+    strcpy(imagename, endpath);
+    *endpath = 0;
+#else
     register char *cutoff = NULL;	/* stifle -Wall */
     register char *s;
     register char *t;
@@ -759,7 +773,7 @@ whereami(name)
 
 	t = imagedir;
 	if (!absolute_pathname(name)) {
-#if defined(MSWin32)
+#if 0 /* defined(MSWin32) */
 	    if (*(name+1) == ':') {
 	    	if (getdcwd(toupper(*name)-'A'+1, imagedir, 1024) == NULL)
 		    fatal_error(FE_GETCWD, 0);
@@ -904,6 +918,7 @@ whereami(name)
 
     strcpy(imagename, cutoff + 1);	/* keep the image name */
     *(cutoff + 1) = 0;		/* chop off the filename part */
+#endif
 }
 
 /*-------------------------------------------------------------*

@@ -426,6 +426,17 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal)
 } /* update_propagate */
 
 
+void
+bind_int_unfreeze(Z,Zt,zl)
+	PWord *Z;
+	int *Zt;
+	double zl;
+{
+}
+
+
+
+
 
 void disp_vv	PARAMS((PWord,int,double,double));
 

@@ -203,7 +203,9 @@ pi(PI)
  |		boolean(L,U)
  |		boolean [= boolean(0,1)]
  *--------------------------------------------------------------*/
-export '::'/2.
+
+export (::)/2.
+%export '::'/2.
 
 	%% X is a variable; freeze it to a domain:
 X :: Type 

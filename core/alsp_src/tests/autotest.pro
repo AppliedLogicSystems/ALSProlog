@@ -81,7 +81,11 @@ run_tests0.
 
 conduct_test(TestID, TestFile, TestMod, TestStartCall, TestDescrip)
 	:-
-	reconsult(TestFile),
+	/* only load .pro files for the moment until -obp is fixed. */
+	atom_concat(TestFile, '.pro', ProTestFile),
+	printf('Loading %t only, because obp loading with -obp does not check dates correctly.\n',
+		[ProTestFile]),
+	reconsult(ProTestFile),
 	printf(user_output,'--%t\n',[TestID]),
 	record_test_info(TestID, TestDescrip),
 	TestMod:call(TestStartCall),

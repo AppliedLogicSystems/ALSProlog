@@ -37,6 +37,8 @@ test :-
 test :-
 	copylines(['testmath.pro', 'compare.pro', 'timeio.pro'], 'copylines.out').
 
+testclean :-
+	unlink('copylines.out').
 
 
 copylines(InFileList,OutFile) 

@@ -267,6 +267,7 @@ extern	int	pbi_get_image_dir_and_name	PARAMS(( void ));
 extern int   argcount;
 extern char **argvector;
 extern	int pbi_command_line	PARAMS((void));
+extern	int pbi_crypt			PARAMS((void));
 
 /* bparser.c */
 extern	int	pbi_op		PARAMS(( void ));

@@ -4,6 +4,38 @@
 #include "fswin32.h"
 #include <windows.h>
 
+/* A replacement for system until Metrowerks fixes its version!. */
+int system_patch(const char *command)
+{
+    #define COM_MAX 1024
+    TCHAR commandLine[COM_MAX] = "COMMAND.COM";
+    STARTUPINFO startInfo;
+    PROCESS_INFORMATION procInfo;
+    DWORD result;
+    
+    GetEnvironmentVariable("COMSPEC", commandLine, COM_MAX-1);
+    
+    strncat(commandLine, " /C ", COM_MAX-1);
+    
+    strncat(commandLine, command, COM_MAX-1);
+
+    startInfo.cb = sizeof(STARTUPINFO);
+    startInfo.lpReserved = NULL;
+    startInfo.lpDesktop = NULL;
+    startInfo.lpTitle = NULL;
+    startInfo.dwFlags = 0;
+    startInfo.cbReserved2 = 0;
+    startInfo.lpReserved2 = NULL;
+    
+    if (!CreateProcess(NULL, commandLine, NULL, NULL, TRUE, 0, NULL, NULL,
+    			&startInfo, &procInfo)) return 0;
+    
+    if (WaitForSingleObject(procInfo.hProcess, INFINITE) == WAIT_OBJECT_0
+    	&& GetExitCodeProcess(procInfo.hProcess, &result)) return result;
+    else return 0;
+}
+
+
 #if 0
 
 int _stat_patch(const char *fname, struct _stat_patch *newstat)
