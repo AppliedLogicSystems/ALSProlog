@@ -144,6 +144,7 @@ GETFILES=$(CORE)/als_dev/alsdev/getFiles
 
 lib: $(GETDIR)/getDirectory.tcl $(GETDIR)/unix_pkgIndex.tcl $(GETFILES)/getFiles.tcl $(GETFILES)/unix_pkgIndex.tcl $(MAKEFS)
 	cp -r /apache/als_build_support/unix/lib .
+	chmod -R +w lib
 	mkdir -p lib/tk8.0/getDirectory
 	cp -r $(GETDIR)/getDirectory.tcl lib/tk8.0/getDirectory
 	cp -r $(GETDIR)/unix_pkgIndex.tcl lib/tk8.0/getDirectory/pkgIndex.tcl
