@@ -68,7 +68,7 @@ extern void 		TkMacInitMenus (Tcl_Interp 	*interp);
 extern QDGlobalsPtr tcl_macQdPtr;
 extern void panic(const char *);
 
-main(void)
+void main(void)
 {
 	
 	/* Initialize the Macintosh */
@@ -92,7 +92,8 @@ main(void)
 }
 
 
-Boolean SIOUXIsAppWindow(WindowPtr w)
+Boolean SIOUXIsAppWindow(WindowPtr);
+Boolean SIOUXIsAppWindow(WindowPtr)
 {
 return 0;
 }
@@ -206,14 +207,14 @@ RemoveConsole(void)
 }
 
 long 
-WriteCharsToConsole(char *buffer, long n)
+WriteCharsToConsole(char */* buffer */, long n)
 {
 //    TkConsolePrint(gStdoutInterp, TCL_STDOUT, buffer, n);
     return n;
 }
 
 long 
-ReadCharsFromConsole(char *buffer, long n)
+ReadCharsFromConsole(char *, long)
 {
     return 0;
 }
@@ -231,7 +232,7 @@ __ttyname(long fildes)
 }
 
 short
-SIOUXHandleOneEvent(EventRecord *event)
+SIOUXHandleOneEvent(EventRecord *)
 {
     return 0;
 }
