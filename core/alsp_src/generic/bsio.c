@@ -2067,9 +2067,9 @@ sio_poll()
     SIO_ERRCODE(buf) = SIOE_NORMAL;
 
     if (stream_is_ready(buf,v2))
-	SUCCEED;
+		SUCCEED;
     else
-	FAIL;
+		FAIL;
 }
 #endif /* HAVE_SOCKET */
 
