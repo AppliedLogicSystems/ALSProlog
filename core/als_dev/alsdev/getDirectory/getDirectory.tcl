@@ -199,7 +199,9 @@ static char updir_bits[] = {
     #
     set data(icons) [tkIconList $w.icons \
 	-browsecmd "tkDDialog_ListBrowse $w" \
-	-command   "tkDDialog_ListInvoke $w"]
+	-command   "tkDDialog_OkCmd $w"]
+
+#	-command   "tkDDialog_ListInvoke $w"]
 
     # f2: the frame with the OK button and the "file name" field
     #
