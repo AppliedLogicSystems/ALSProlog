@@ -159,9 +159,6 @@ attach_image0(NewImageName, DevelopFlag)
 		;
 		true   	%% DevelopFlag = develop
 	),
-
-%	(ADIP=no_path -> true ; assert(alsdev_ini_path(ADIP))),
-%	(CLInfo=no_info -> true ; assert(save_clinfo(CLInfo))),
 	(ALSMgr \= nil -> set_primary_manager(ALSMgr) ; true),
 	assert(command_line(CmdLine)).
 
@@ -178,11 +175,9 @@ save_image_develop(NewImageName)
 	dmember(os_variation = OSVariation, SystemList),
 	image_type(OS, OSVariation, Type),
 	(OS = mswin32 ->
-%		(filePlusExt(_,_,NewImageName) ->
 		((file_extension(NewImageName,_,Ext), Ext \='') ->
 			IMN = NewImageName
 			;
-%			filePlusExt(NewImageName,exe,IMN)
 			file_extension(IMN,NewImageName,exe)
 		)
 		;
@@ -367,7 +362,6 @@ process_image_option(select_lib(Library,FilesList))
 
 process_image_option(Unknown) 
 	:-
-%	als_advise('Ignoring unknown save image option \`%t\'\n', [Unknown]).
 	throw(se(Unknown)).
 
 /*---------------------------------------------------------------*
@@ -378,12 +372,12 @@ process_image_option(Unknown)
 add_lib_qual([],_,[]) :-!.
 add_lib_qual([File | FilesList],Library,[QualFile | QualFilesList])
 	:-
-	extendPath(Library,File,QualFile),
+	join_path([Library,File],QualFile),
 	add_lib_qual(FilesList,Library,QualFilesList).
 add_lib_qual(File,Library,[QualFile])
 	:-
 	atom(File),
-	extendPath(Library,File,QualFile).
+	join_path([Library,File],QualFile).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
