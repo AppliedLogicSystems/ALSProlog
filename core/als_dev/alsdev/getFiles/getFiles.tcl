@@ -249,7 +249,7 @@ static char updir_bits[] = {
     #
     set data(icons) [tkIconList $w.icons \
 	-browsecmd "tkMFDialog_ListBrowse $w" \
-	-command   "tkFDialog_OkCmd $w"]
+	-command   "tkMFDialog_OkCmd $w"]
 
     # f2: the frame with the OK button and the "file name" field
     #
@@ -350,7 +350,7 @@ static char updir_bits[] = {
     bind $data(ent) <Return>  "tkMFDialog_ActivateEnt $w"
     
     $data(upBtn)     config -command "tkFDialog_UpDirCmd $w"
-    $data(okBtn)     config -command "tkFDialog_OkCmd $w"
+    $data(okBtn)     config -command "tkMFDialog_OkCmd $w"
     $data(okallBtn) config -command "tkMFDialog_OkAllCmd $w"
     $data(removeBtn) config -command "tkMFDialog_RemoveCmd $w"
     $data(removeallBtn) config -command "tkMFDialog_RemoveAllCmd $w"
@@ -377,9 +377,8 @@ static char updir_bits[] = {
     #
     tkFocusGroup_Create $w
     tkFocusGroup_BindIn $w  $data(ent) "tkMFDialog_EntFocusIn $w"
-    tkFocusGroup_BindOut $w $data(ent) "tkFDialog_EntFocusOut $w"
+    tkFocusGroup_BindOut $w $data(ent) "tkMFDialog_EntFocusOut $w"
 }
-
 # tkMFDialog_UpdateWhenIdle --
 #
 #	Creates an idle event handler which updates the dialog in idle
@@ -577,7 +576,7 @@ proc tkMFDialog_EntFocusIn {w} {
     }
 }
 
-proc tkFDialog_EntFocusOut {w} {
+proc tkMFDialog_EntFocusOut {w} {
     upvar #0 [winfo name $w] data
 
     $data(ent) selection clear
@@ -711,6 +710,7 @@ proc tkMFDialog_OkAllCmd {w} {
     }
     
     $data(addList) see end
+    $data(addList) xview 1000
 }
 
 # Gets called when user presses the "Cancel" button
@@ -810,6 +810,7 @@ proc tkMFDialog_Add {w} {
     if {![lbmember $data(addList) $selectFilePath]} {
 	    $data(addList) insert end $selectFilePath
 	    $data(addList) see end
+	    $data(addList) xview 1000
     }
 }
 
