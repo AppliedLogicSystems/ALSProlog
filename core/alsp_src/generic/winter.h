@@ -195,10 +195,8 @@ extern	int	w_uia_peek PARAMS(( PWord, int, UCHAR *, int ));
 extern	int	w_uia_poke PARAMS(( PWord, int, UCHAR *, int ));
 extern	int	w_uia_peeks PARAMS(( PWord, int, UCHAR *, int ));
 extern	int	w_uia_pokes PARAMS(( PWord, int, UCHAR * ));
-#ifdef DoubleType
 extern	void	w_mk_double PARAMS(( PWord *, int *, double ));
 extern	void	w_get_double PARAMS(( double *, PWord ));
-#endif
 extern	int	w_unify PARAMS(( PWord, int, PWord, int ));
 extern	int	w_rungoal PARAMS(( PWord, PWord, int ));
 

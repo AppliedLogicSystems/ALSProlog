@@ -159,17 +159,17 @@ mk_double(dbl)
     else 
 #endif
 	{
-#ifndef DoubleType
+#ifdef DoubleType
+	d = allocat(2);
+	d->tag = TP_DOUBLE;
+	d->val = (pword) * (long *) &dbl;
+	(d + 1)->val = (pword) * (((long *) &dbl) + 1);
+#else
 	register int i;
 	d = MK_TERM(4);
 	TERM_FUNCTOR(d) = MK_FUNCTOR(TK_DDOUBLE, 4);
 	for (i = 0; i < 4; i++)
 	    TERM_ARGN(d, i + 1) = MK_INT(((short *) &dbl)[i]);
-#else
-	d = allocat(2);
-	d->tag = TP_DOUBLE;
-	d->val = (pword) * (long *) &dbl;
-	(d + 1)->val = (pword) * (((long *) &dbl) + 1);
 #endif
     }
 
@@ -186,6 +186,18 @@ double_val(p)
     *(long *) &d = DOUBLE_VAL1(p);
     *(((long *) &d) + 1) = DOUBLE_VAL2(p);
     return d;
+}
+#else
+double
+double_val(pword p)
+{
+	double dblval;
+	int i;
+	
+	for (i = 0; i < 4; i++) {
+	  	*(((short *) &dblval) + i) = (short) TERM_ARGN(p, i + 1);
+	}
+	return dblval;
 }
 #endif
 
@@ -237,18 +249,18 @@ is_double(d, t)
     double *d;
     pword t;
 {
-#ifndef DoubleType
+#ifdef DoubleType
+    if (TYPEOF(t) == TP_DOUBLE) {
+	*d = DOUBLE_VAL(t);
+	return 1;
+    }
+#else
     if (TYPEOF(t) == TP_TERM && TERM_ARITY(t) == 4 &&
 	FUNCTOR_TOKID(TERM_FUNCTOR(t)) == TK_DDOUBLE) {
 	int   i;
 	for (i = 0; i < 4; i++)
 	    ((short *) d)[i] = INT_VAL(TERM_ARGN(t, i + 1));
 
-	return 1;
-    }
-#else
-    if (TYPEOF(t) == TP_DOUBLE) {
-	*d = DOUBLE_VAL(t);
 	return 1;
     }
 #endif

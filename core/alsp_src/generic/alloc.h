@@ -195,9 +195,7 @@ extern	pword	mk_int		PARAMS(( long ));
 extern	pword	mk_vo		PARAMS(( long ));
 extern	pword	mk_rule		PARAMS(( long ));
 extern	pword	mk_double	PARAMS(( double ));
-#ifdef DoubleType
 extern	double	double_val	PARAMS(( pword ));
-#endif
 extern	long	functor_id_of_term PARAMS(( pword ));
 extern	long	arity_of_term	PARAMS(( pword ));
 extern	pword	mk_uia		PARAMS(( char * ));

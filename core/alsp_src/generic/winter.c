@@ -75,10 +75,9 @@ PWord	deref		PARAMS(( PWord ));
  */
 
 PWord
-deref(w)
-    register PWord w;
+deref(PWord w)
 {
-    register PWord x;
+    PWord x;
 
     while (M_ISVAR(w) && (x = M_VARVAL(w)) != w)
 	w = x;
@@ -634,7 +633,6 @@ w_uia_pokes(uia, off, val)
 }
 
 #ifdef DoubleType
-double floor();
 
 void
 w_mk_double(rval, rtag, dbl)
@@ -670,6 +668,28 @@ w_get_double(dbl, ptr)
 {
     *(long *) dbl = *(((PWord *)ptr) + 1);
     *(((long *) dbl) + 1) = *(((PWord *)ptr) + 2);
+}
+#else
+void
+w_mk_double(PWord *rval, int  *rtag, double dbl)
+{
+	int   i;
+
+	w_mk_term(rval, rtag, (PWord) TK_DDOUBLE, 4);
+	for (i = 0; i < 4; i++)
+	    w_install_argn(*rval, i + 1, (PWord) (*(((short *) &dbl) + i)), WTP_INTEGER);
+}
+
+void
+w_get_double(double *dbl, PWord ptr)
+{
+	PWord v;
+	int i,t;
+	
+	for (i = 0; i < 4; i++) {
+	   	w_get_argn(&v, &t, ptr, i + 1);
+	   	*(((short *) dbl) + i) = (short) v;
+	}
 }
 
 #endif /* DoubleType */
