@@ -543,7 +543,7 @@ PI_prolog_init0(argc, argv)
 #endif /* KERNAL */
 
     /* Initilize any libraries. */
-    pi_init();
+    /* pi_init(); */
 
     /*---------------------------------------*
      | Load the builtins
@@ -846,7 +846,9 @@ whereami(name)
     register char *cutoff = NULL;	/* stifle -Wall */
     register char *s;
     register char *t;
+#ifdef HAVE_SYMLINK
     int   cc;
+#endif
     char  ebuf[4096];
 
     /* Under unix, the only way to determine the location of the

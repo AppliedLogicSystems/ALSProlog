@@ -405,3 +405,5 @@ extern	int	pbi_signal_name	PARAMS(( void ));
 extern	int 	toggle_bwam 	PARAMS( ( void ) );
 #endif
 
+/* lforeign.c */
+extern int prolog_load_plugin(void);

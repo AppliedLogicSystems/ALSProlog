@@ -296,18 +296,6 @@ int pbi_crypt(void)
 #endif
 }
 
-#ifdef MacOS
-static unsigned char *c2pstrcpy(unsigned char *ps, const char *cs)
-{
-	size_t l = strlen(cs);
-	if (l > 255) l = 255;
-	ps[0] = l;
-	memcpy(ps+1, cs, l);
-	
-	return ps;
-}
-#endif
-
 #ifndef PURE_ANSI
 static int copy_file(const char *from_file, const char *to_file)
 {

@@ -1657,7 +1657,7 @@ w_exec(buffer, bufsize, nocatcher)
     int   ibufsize;		/* installed buffer size */
     dbprot_t odbrs;
 
-#ifdef MacOS
+#if defined(MacOS) && !defined(Portable)
     long   stackOffBy;
 
     /* See note below on why we need this... */

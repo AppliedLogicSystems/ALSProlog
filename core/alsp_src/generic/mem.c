@@ -1543,8 +1543,10 @@ ss_restore_state(filename,offset)
     char *filename;
     long offset;
 {
-    int ssfd;
-    int  bnum, gnum;
+    int ssfd, gnum;
+#if defined(HAVE_MMAP) || defined(MSWin32)
+    int  bnum;
+#endif
     struct am_header hdr;
 #if (defined(__GO32__) || defined(__DJGPP__))
 	unsigned char dos_exe[6];
@@ -1814,16 +1816,6 @@ ss_saved_state_present()
 }
 
 #ifdef MacOS
-static unsigned char *c2pstrcpy(unsigned char *ps, const char *cs)
-{
-	size_t l = strlen(cs);
-	if (l > 255) l = 255;
-	ps[0] = l;
-	memcpy(ps+1, cs, l);
-	
-	return ps;
-}
-
 
 static OSErr DuplicateThisApplication(ConstStr255Param newAppName)
 {

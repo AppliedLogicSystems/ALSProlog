@@ -555,3 +555,402 @@ foreign_shutdown()
 #endif /* HAVE_LIBLD */
 
 #endif /* DynamicForeign */
+
+#include "alspi_dlib.h"
+#include "cinterf.h"
+
+typedef unsigned long library_reference;
+
+typedef struct {
+   library_reference library;
+   alspi_init_func library_init;
+   library_func_ptrs library_funcs;
+} library_info;
+
+const alspi_func_ptrs alspi_funcs = {
+    PI_forceuia,
+    PI_getan,
+    PI_getargn,
+    PI_gethead,
+    PI_gettail,
+    PI_getdouble,
+    PI_getstruct,
+    PI_getsymname,
+    PI_getuianame,
+    PI_getuiasize,
+    PI_makedouble,
+    PI_makelist,
+    PI_makestruct,
+    PI_makesym,
+    PI_makeuia,
+    PI_allocuia,
+    PI_vprintf,
+    PI_vaprintf,
+#ifdef APP_PRINTF_CALLBACK
+    PI_vapp_printf,
+#else
+    NULL,
+#endif
+    PI_rungoal,
+    PI_rungoal_with_update,
+    PI_unify,
+    PrologInit,
+    CI_get_integer,
+    CI_get_double,
+    sym_insert_2long,
+    sym_insert_dbl,
+    find_callback
+};
+
+typedef enum {
+    no_error,
+    type_error,
+    file_not_found_error,
+    permission_error,
+    not_plugin_error,
+    memory_error,
+    init_error,
+    unknown_error,
+    error_count
+} error_type;
+
+const char *error_type_name[error_count] = {
+    "no_error",
+    "type_error",
+    "file_not_found_error",
+    "permission_error",
+    "not_plugin_error",
+    "memory_error",
+    "init_error",
+    "unknown_error"
+};
+
+typedef struct {
+    error_type type;
+    double native_code;
+    const char *native_message;
+} plugin_error;
+
+static plugin_error os_load_plugin(const char *lib_name,
+			    library_reference *library, alspi_init_func *init);
+
+/* load_plugin(name, lib_info, result_code, os_specific_result) */
+int prolog_load_plugin(void)
+{
+    PWord v1, v2, v3, v4, uia, s, os;
+    int t1, t2, t3, t4, uiat, st, ost;
+    plugin_error result = {no_error, 0, NULL};
+    const char *lib_name;
+    library_info lib_info;
+    
+    PI_getan(&v1, &t1, 1);
+    PI_getan(&v2, &t2, 2);
+    PI_getan(&v3, &t3, 3);
+    PI_getan(&v4, &t4, 4);
+
+    if ((t1 != PI_SYM && t1 != PI_UIA) || t2 != PI_VAR || t3 != PI_VAR || t4 != PI_VAR)
+    	result.type = type_error;
+
+    /* Load the library and initilize the library infomation record. */
+    if (result.type == no_error) {
+    	getstring((UCHAR **)&lib_name, v1, t1);
+
+    	result = os_load_plugin(lib_name, &lib_info.library, &lib_info.library_init);
+    }
+    
+    /* Check the library version. */
+    if (result.type == no_error) {
+    	int version;
+    	version = lib_info.library_init(NULL, NULL);
+    	if (version != ALSPI_DLIB_VERSION) result.type = init_error;
+    }
+    
+    /* Initialize the plugin. */
+    if (result.type == no_error) {
+    	int r;
+    	r = lib_info.library_init(&alspi_funcs, &lib_info.library_funcs);
+    	if (r != 0) result.type = init_error;
+    }
+    
+    /* Initialize the library's prolog by calling pi_init() */
+    if (result.type == no_error) {
+    	lib_info.library_funcs.pi_init();
+    }
+    
+    /* Return the library information in a UIA if no errors were encountered. */
+    if (result.type == no_error) {
+    	PI_allocuia(&uia, &uiat, sizeof(library_info));
+    	/*memcpy((void *)uia, &lib_info, sizeof(lib_info)); */
+    	
+    	PI_unify(v2, t2, uia, uiat); 
+    }
+    
+    /* Return general and OS specific error codes. */
+    
+    PI_makesym(&s, &st, error_type_name[result.type]);
+    	
+    PI_unify(v3, t3, s, st);
+    	
+    if (result.native_message) {
+    	PI_makeuia(&os, &ost, result.native_message);
+    } else {
+        PI_makedouble(&os, &ost, result.native_code);
+    }
+    
+    PI_unify(v4, t4, os, ost);
+
+    PI_SUCCEED;
+}
+
+/* os_load_plugin() handles all the OS specific details of loading plugins.
+   Different OS have different nameing and searching schemes, error reporting, etc.
+*/
+
+#if defined(MacOS)
+#include <Errors.h>
+#include <CodeFragments.h>
+#elif defined(unix)
+	#if defined(HAVE_DL_H)
+	#include <dl.h>
+	#elif defined(HAVE_DLFCN_H)
+	#include <dlfcn.h>
+	#else
+	#error
+	#endif
+#endif
+
+static plugin_error os_load_plugin(const char *lib_name,
+			    library_reference *library, alspi_init_func *library_init)
+#if defined(MacOS)
+{
+    Str255 lib_name_p;
+    FSSpec lib_spec;
+    ConnectionID connID;
+    OSErr err;
+    Ptr mainAddr;
+    Str255 errName;
+    Ptr sym_ptr;
+    SymClass sym_class;
+    plugin_error result = {no_error, noErr, NULL};
+
+    c2pstrcpy(lib_name_p, lib_name);
+    err = FSMakeFSSpec (0, 0, lib_name_p, &lib_spec);
+    
+    if (err == noErr) { 		
+	err = GetDiskFragment (&lib_spec, 0, kWholeFork, lib_name_p,
+			       kLoadLib, &connID, &mainAddr, errName); 
+    }
+    
+    if (err == noErr) {
+	err = FindSymbol (connID, "\palspi_dlib_init", &sym_ptr, &sym_class);
+        if (sym_class != kTVectorCFragSymbol) err = fragLibConnErr;
+    	
+    }   	
+    
+    if (err == noErr) {
+    	*library = connID;
+    	*library_init = (alspi_init_func)sym_ptr;
+    } else {
+    	switch (err) {
+	case nsvErr:
+	case fnfErr:
+	case fragLibNotFound:
+	    result.type = file_not_found_error;
+	    break;
+	case afpAccessDenied:
+	    result.type = permission_error;
+	    break;
+	case fragFormatUnknown:
+	case fragLibConnErr:
+	    result.type = not_plugin_error;
+	    break;	
+	case fragHadUnresolveds:
+	case fragObjectInitSeqErr:
+	case fragInitLoop:
+	case fragImportTooOld:
+	case fragImportTooNew:
+	case fragUserInitProcErr:
+	    result.type = init_error;
+	    break;
+	case fragNoMem:
+	case fragNoAddrSpace:
+	    result.type = memory_error;
+	    break;
+	default:
+    	    result.type = unknown_error;
+    	    break;
+    	}
+    	result.native_code = err;
+    }
+    
+    return result;
+}
+#elif defined(MSWin32)
+{
+    HINSTANCE instance;
+    FARPROC proc_addr;
+    DWORD err = NO_ERROR;
+    plugin_error result = {no_error, NO_ERROR, NULL};
+
+    instance = LoadLibrary(lib_name);
+    if (instance == NULL) err = GetLastError();
+    
+    if (err == NO_ERROR) {
+	proc_addr = GetProcAddress(instance, "alspi_dlib_init");
+    	if (proc_addr == NULL) err = GetLastError();    
+    }
+    
+    if (err == NO_ERROR) {
+    	*library = (unsigned long)instance;
+    	*library_init = (alspi_init_func)proc_addr;
+    } else {
+    	switch (err) {
+	case ERROR_DLL_NOT_FOUND:
+	    result.type = file_not_found_error;
+	    break;
+	case ERROR_ACCESS_DENIED:
+	    result.type = permission_error;
+	    break;
+/*
+	When you try to load a non-DLL file, you get a ERROR_GEN_FAILURE,
+	which seems to broad, but I'll use it for not_plugin_error.
+*/
+	case ERROR_GEN_FAILURE:
+	    result.type = not_plugin_error;
+	    break;
+	case ERROR_DLL_INIT_FAILED:
+	    result.type = init_error;
+	    break;
+	case ERROR_NOT_ENOUGH_MEMORY:
+	    result.type = memory_error;
+	    break;
+	default:
+    	    result.type = unknown_error;
+    	    break;
+    	}
+    	result.native_code = err;
+    }
+
+    return result;
+}
+#elif defined(unix)
+#if defined(HAVE_DL_H)
+{
+    shl_t object;
+    void *sym_addr = NULL;
+    int err = 0;
+    char *full_name;
+    plugin_error result = {no_error, 0, NULL};
+    
+    /* Make a copy of the lib_name, so we can add suffixes. */
+
+    full_name = malloc(strlen(lib_name)+4); /* leave room for ".so" */
+    if (full_name == NULL) {
+    	result.type = memory_error;
+    	return result;
+    }
+
+    strcpy(full_name, lib_name);
+
+    object = shl_load(full_name, BIND_IMMEDIATE, 0);
+    if (object == NULL && errno == ENOENT) {
+    	strcat(full_name, ".so");
+	object = shl_load(full_name, BIND_IMMEDIATE, 0);
+    }
+    if (object == NULL) err = errno;
+
+    free(full_name);
+    
+    if (err == 0) {
+    	int r;
+	r = shl_findsym(&object, "alspi_dlib_init", TYPE_PROCEDURE, &sym_addr);
+    	if (r != 0) err = errno;
+    }
+    
+    if (err == 0) {
+	*library = (unsigned long)object;
+	*library_init = sym_addr;
+    } else {
+    	switch (err) {
+	case ENOENT:
+	    result.type = file_not_found_error;
+	    break;
+	case EACCES:
+	    result.type = permission_error;
+	    break;
+	case ENOEXEC:
+	    result.type = not_plugin_error;
+	    break;	
+	case ENOSYM:
+	    result.type = init_error;
+	    break;
+	case ENOMEM:
+	    result.type = memory_error;
+	    break;
+    	default:
+    	    result.type = unknown_error;
+    	}
+    	result.native_code = err;
+    }
+
+    return result;
+}
+#elif defined(HAVE_DLFCN_H)
+{
+    void *object, *sym_addr = NULL;
+    const char *err = NULL;
+    char *full_name;
+    plugin_error result = {no_error, 0, NULL};
+    
+    /* Make a copy of the lib_name, so we can add prefixes and suffixes. */
+
+    full_name = malloc(strlen(lib_name)+6); /* leave room for "./" and/or ".so" */
+    if (full_name == NULL) {
+    	result.type = memory_error;
+    	return result;
+    }
+
+#if SOLARIS
+    /* Solaris does not look in the current directory for shared objects. */
+    if (!strchr(lib_name, '/')) {
+    	strcpy(full_name, "./");
+    	strcat(full_name, lib_name);
+    }
+#else
+    strcpy(full_name, lib_name);
+#endif /* SOLARIS */
+
+    object = dlopen(full_name, RTLD_LAZY);
+    if (object == NULL) {
+    	strcat(full_name, ".so");
+	object = dlopen(full_name, RTLD_LAZY);
+    }
+    if (object == NULL) err = dlerror();
+
+    free(full_name);
+    
+    if (err == NULL) {
+    	sym_addr = dlsym(object, "alspi_dlib_init");
+    	if (sym_addr == NULL) err = dlerror();
+    }
+    
+    if (err == NULL) {
+	*library = (unsigned long)object;
+	*library_init = sym_addr;
+    } else {
+    	result.type = unknown_error;
+    	result.native_message = err;
+    }
+
+    return result;
+}
+#else
+#error
+#endif /* HAVE_DL_H, HAVE_DLFCN_H */
+#else
+{
+    plugin_error result = {unknown_error, 0, NULL};
+    
+    return result;
+}
+#endif

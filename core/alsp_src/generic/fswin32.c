@@ -86,5 +86,4 @@ getDirEntries()
         
     PI_SUCCEED;     
 }
-
 #endif

@@ -30,6 +30,16 @@ int absolute_pathname(const char *name)
     return *name != ':' && (strchr(name, ':') != NULL);
 }
 
+unsigned char *c2pstrcpy(unsigned char *ps, const char *cs)
+{
+	size_t l = strlen(cs);
+	if (l > 255) l = 255;
+	ps[0] = l;
+	memcpy(ps+1, cs, l);
+	
+	return ps;
+}
+
 /* ceh - I'm not really sure what cononicalize_pathname does, or wether it really applies
    on the Mac.  This function is a NOP. */
 static int canonicalize_pathname(void)
