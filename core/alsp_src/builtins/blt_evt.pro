@@ -106,49 +106,6 @@ signal_handler(SigNum,Module,Goal)
 	get_context(Context),
 	propagate_event(SigName,Module:Goal,Context).
 
-/*--------------------------------------------------------------*
- | signal_name/2 associates signal numbers with signal names.
- *--------------------------------------------------------------*/
-
-signal_name(1,sighup).
-signal_name(2,sigint).		%% interrupt (as in Cntrl-C)
-signal_name(3,sigquit).
-signal_name(4,sigill).
-signal_name(5,sigtrap).
-signal_name(6,sigabrt).
-signal_name(7,sigemt).
-signal_name(8,sigfpe).
-signal_name(9,sigkill).
-signal_name(10,sigbus).
-signal_name(11,sigsegv).
-signal_name(12,sigsys).
-signal_name(13,sigpipe).
-signal_name(14,sigalrm).	%% alarm clock
-signal_name(15,sigterm).
-signal_name(16,sigurg).
-signal_name(17,sigstop).
-signal_name(18,sigtstp).
-signal_name(19,sigcont).
-signal_name(20,sigchld).
-signal_name(21,sigttin).
-signal_name(22,sigttou).
-signal_name(23,sigio).
-signal_name(24,sigxcpu).
-signal_name(25,sigxfsz).
-signal_name(26,sigvtalrm).
-signal_name(27,sigprof).
-signal_name(28,sigwinch).
-signal_name(29,siglost).
-signal_name(30,sigusr1).
-signal_name(31,sigusr2).
-
-signal_name(64,reisscntrl_c).		/* These numbers are from alssig.h */
-signal_name(65,stack_overflow).
-signal_name(66,libload).
-signal_name(67,heap_overflow).
-signal_name(68,prolog_error).
-signal_name(69,undefined_predicate).
-
 /*-----------------------------------------------------*
  | propagate_event/3 is called to propagate events.
  |
