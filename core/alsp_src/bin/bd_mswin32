@@ -11,12 +11,15 @@ esac
 
 echo Making $2
 mkdir $2
-cp $1/port/mswin32/mswin32_config.h $2/config.h
+rm -f $2/config.h
+ln -s $1/port/mswin32/mswin32_config.h $2/config.h
 
 echo Making $2/bld-port
 mkdir $2/bld-port
-cp $1/generic/pi_cfg.in $2/bld-port/pi_cfg.h
-cp $1/bld-port/tconfig.in $2/bld-port/tconfig.h
+rm -f $2/bld-port/pi_cfg.h
+ln -s $1/generic/pi_cfg.in $2/bld-port/pi_cfg.h
+rm -f $2/bld-port/tconfig.h
+ln -s $1/bld-port/tconfig.in $2/bld-port/tconfig.h
 cp $1/port/mswin32/alspro_lib.prj.sit.hqx $2/bld-port/
 cp $1/port/mswin32/alspro_dll.prj.sit.hqx $2/bld-port/
 cp $1/port/mswin32/alspro_b.prj.sit.hqx $2/bld-port/
@@ -27,8 +30,10 @@ cp $1/port/mswin32/demo_alspro_dll.prj.sit.hqx $2/bld-port/
 cp $1/port/mswin32/demo_alspro_b.prj.sit.hqx $2/bld-port/
 cp $1/port/mswin32/demo_testdll.x86.prj.sit.hqx $2/bld-port/
 
-cp $1/port/mswin32/package.bat $2/bld-port/
-cp $1/port/mswin32/testrun.bat $2/bld-port/
+rm -f $2/bld-port/package.bat
+ln -s $1/port/mswin32/package.bat $2/bld-port/
+rm -f $2/bld-port/testrun.bat
+ln -s $1/port/mswin32/testrun.bat $2/bld-port/
 
 mkdir $2/bld-port/alsdir
 mkdir $2/bld-port/alsdir/builtins
@@ -42,14 +47,21 @@ echo Making $2/bld-wins
 mkdir $2/bld-wins
 mkdir $2/bld-wins/mswin32
 
-cp $1/wins/build/mswin32/make_interf.bat $2/bld-wins/mswin32
-cp $1/wins/build/mswin32/do_c2pro.bat $2/bld-wins/mswin32
-cp $1/wins/build/mswin32/do_p2intf.bat $2/bld-wins/mswin32
-cp $1/wins/build/mswin32/c2p_cmd.lst $2/bld-wins/mswin32
-cp $1/wins/build/mswin32/p2i_cmd.lst $2/bld-wins/mswin32
+rm -f $2/bld-wins/mswin32/make_interf.bat
+ln -s $1/wins/build/mswin32/make_interf.bat $2/bld-wins/mswin32
+rm -f $2/bld-wins/mswin32/do_c2pro.bat
+ln -s $1/wins/build/mswin32/do_c2pro.bat $2/bld-wins/mswin32
+rm -f $2/bld-wins/mswin32/do_p2intf.bat
+ln -s $1/wins/build/mswin32/do_p2intf.bat $2/bld-wins/mswin32
+rm -f $2/bld-wins/mswin32/c2p_cmd.lst
+ln -s $1/wins/build/mswin32/c2p_cmd.lst $2/bld-wins/mswin32
+rm -f $2/bld-wins/mswin32/p2i_cmd.lst
+ln -s $1/wins/build/mswin32/p2i_cmd.lst $2/bld-wins/mswin32
 
-cp $1/wins/build/mswin32/winpack.bat $2/bld-wins/mswin32
-cp $1/wins/build/mswin32/wintests.pro $2/bld-wins/mswin32
+rm -f $2/bld-wins/mswin32/winpack.bat
+ln -s $1/wins/build/mswin32/winpack.bat $2/bld-wins/mswin32
+rm -f $2/bld-wins/mswin32/wintests.pro
+ln -s $1/wins/build/mswin32/wintests.pro $2/bld-wins/mswin32
 
 cp $1/wins/build/mswin32/mswin32intf_lib.prj.sit.hqx $2/bld-wins/mswin32
 cp $1/wins/build/mswin32/alspro_mswin320.prj.sit.hqx $2/bld-wins/mswin32
