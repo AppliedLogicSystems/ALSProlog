@@ -26,6 +26,10 @@
 #define GCDEBUG 1
 */
 
+#ifdef GCDEBUG
+#include <time.h>
+#endif
+
 #undef mask
 
 static unsigned long *marks;
