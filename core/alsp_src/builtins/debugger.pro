@@ -1518,24 +1518,23 @@ export setup_debug/2.
 export setup_debug/3.
 setup_debug(Module, Call)
 	:-
-	functor(Call, Pred, Arity),
+	functor(Call, Predicate, Arity),
 	setup_debug(Module, Predicate, Arity).
 
 setup_debug(Module, Predicate, Arity)
 	:-
-	change_source_level_debugging(on),
-	check_file_setup(Module, Predicate, Arity, SrcFilePath, DebugType),
-	reload_debug(DebugType, SrcFilePath),
-	!,
-	(debug_io(tcltk) ->
-%		(pathPlusFile(_,FF,SrcFilePath) -> true ; FF = SrcFilePath),
-%		(filePlusExt(FileName,_,FF) -> true ; FileName = FF),
-		start_src_trace(SrcFilePath)
-		;
-		true
-	).
+	debug_io(DebugIOChannel),
+	setup_debug(DebugIOChannel, Module, Predicate, Arity).
 
-check_file_setup(Module, Pred, Arity, SrcFilePath, DebugType)
+setup_debug(nowins, Module, Predicate, Arity) :-!.
+setup_debug(DebugIOChannel, Module, Predicate, Arity)
+	:-
+	change_source_level_debugging(on),
+	check_file_setup(Module, Predicate, Arity, SrcFilePath, BaseFileName,DebugType),
+	reload_debug(BaseFileName, SrcFilePath, DebugType),
+	start_src_trace(BaseFileName, SrcFilePath).
+
+check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType)
 	:-
 	all_procedures(Module, Pred, Arity, DBRef),
 	'$clauseinfo'(DBRef,_,_,ClauseGroup),
@@ -1543,15 +1542,12 @@ check_file_setup(Module, Pred, Arity, SrcFilePath, DebugType)
 	!,
 	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options).
 
-reload_debug(normal, SrcFilePath)
+reload_debug(user,_, _) :-!.
+reload_debug(BaseFileName,SrcFilePath, normal)
 	:-
-	source_level_debugging(on),
-	!,
 	(filePlusExt(NoSuff,_,SrcFilePath),!; NoSuff = SrcFilePath),
 	consult(source(NoSuff),[quiet(true)]),
 	als_advise(debugger_output,"Reloaded (debug) files = %t\n",[SrcFilePath]).
-
-reload_debug(DebugType, SrcFilePath).
 
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
