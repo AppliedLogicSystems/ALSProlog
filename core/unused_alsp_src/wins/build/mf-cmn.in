@@ -3,7 +3,10 @@
 WLD=../$(WIN)
 
 WSRCD = $(srcdir)/wins/src
-VPATH = $(WSRCD):$(srcdir)/generic
+#### WARNING::
+#### Do NOT change the blank as path separator below to a colon, 
+#### because colon (in this setting) bombs make under DJGPP/DOS!
+VPATH = $(WSRCD) $(srcdir)/generic
 CINTDIR = $(srcdir)/cinterf
 WINTLIB=$(WIN)interf.a
 
@@ -30,7 +33,7 @@ PROFLAGS= -b
 TRFLAGS = -debug $(XTRFLAGS)
 
 $(WIN).src : $(WIN).spc $(WIN).h
-	$(PROLOG) $(PROFLAGS) $(CINTDIR)/c2pro/trans_c2pro_$(GOS) -g c2pro \
+	$(PROLOG) $(PROFLAGS) $(CINTDIR)/c2pro/tc2p$(GOS) -g c2pro \
 		-p -filter $(C2PFILT) -srcpath $(WSRCD) $(WIN) $(TRFLAGS) $(XINCLUDES) $(XDEFINES) $(X_CFLAGS)
 
 #

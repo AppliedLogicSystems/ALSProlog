@@ -20,8 +20,38 @@ export pconfig/0.
 
 pconfig 
 	:-
+	acquire_options(SwitchInfo),
 	build_base_config,
-	setup_wins.
+	setup_wins(SwitchInfo).
+
+acquire_options(SwitchInfo)
+	:-
+	get_cmdline_vals(SwitchVals),
+	parse_switches(SwitchVals, SwitchInfo0),
+	ws_opt_file(SwitchInfo0, SwitchInfo).
+
+parse_switches([], []).
+parse_switches([['-tgtws', TgtWS] | SwitchVals], [tgtws=TgtWS | SwitchInfo])
+	:-!,
+	parse_switches(SwitchVals, SwitchInfo).
+parse_switches([_ | SwitchVals], SwitchInfo)
+	:-
+	parse_switches(SwitchVals, SwitchInfo).
+
+ws_opt_file(SwitchInfo, SwitchInfo)
+	:-
+	dmember(tgtws=_,SwitchInfo),
+	!.
+
+ws_opt_file(SwitchInfo0, [tgtws=TGTWS | SwitchInfo0])
+	:-
+	exists_file('ws.tgt'),
+	open('ws.tgt',read,WSTS,[]),
+	read(WSTS,TGTWS),
+	!,
+	close(WSTS).
+
+ws_opt_file(SwitchInfo, SwitchInfo).
 
 build_base_config
 	:-
@@ -147,9 +177,16 @@ xtr_cfg_info(BLD_Dir,TagsList, Info)
 	slash2list(BLD_Dir, BLDDirList),
 	append(BLDDirList,['bld-natv'],NTVDirList),
 	rootPathFile('', NTVDirList, 'makefile', MakefileAtm),
-	open(MakefileAtm,read,MFStrm,[]),
+	(exists_file(MakefileAtm) ->
+		open(MakefileAtm,read,MFStrm,[])
+		;
+		append(BLDDirList,['bld-port'],PORTDirList),
+		rootPathFile('', PORTDirList, 'makefile', PMakefileAtm),
+		open(PMakefileAtm,read,MFStrm,[])
+	),
 	xtr_cfgi(TagsList, MFStrm, Info),
 	close(MFStrm).
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Extract configuration information from a given Makefile
@@ -219,12 +256,16 @@ get_bld_dirs([BD | ToCheck],BDList)
 	 |	Setting up the bld-wins subdir
 	 *---------------------------------------------------*/
 
-setup_wins
+setup_wins(SwitchInfo)
 	:-
 	check_make_subdir('./bld-wins'),
 	cfg('ARCH',ARCH),
 	cfg('OS',OS),
-	winsystems_for(ARCH, OS, SubdirList),
+	(dmember(tgtws=TGTWS, SwitchInfo) ->
+		builtins:specif_winsystems_for(_,TGTWS,SubdirList)
+		;
+		winsystems_for(ARCH, OS, SubdirList)
+	),
 	(SubdirList = [] ->
 		printf(user,'No win interface dirs to create! \n',[])
 		;
