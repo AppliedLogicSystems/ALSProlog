@@ -448,16 +448,34 @@ rule(cleanup,
 		       'Delete ?*.obp']),
 		(_:[('-rm -f *.' + &(object)),
 		 '-rm -f *.obp',
-		 '-rm -f core'])])).
+		 '-rm -f *.tmp',
+		 '-rm -f *.out',
+		 '-rm -f foo*',
+		 '-rm -f core']) ]  )).
 
 rule(super_clean,
 	[],
-	[('-rm -f *.' + &(object)),
-	 '-rm -f *.obp',
-	 '-mv tconfig.h tconfig.hxh',
-	 '-rm -f *.h',
-	 '-mv tconfig.hxh tconfig.h',
-	 '-rm -f core']).
+	case(&(context_name),[
+		(mac: ['Delete ?*.o',
+		       'Delete ?*.obp']),
+		(_:[('-rm -f *.' + &(object)),
+	 		'-rm -f *.obp',
+	 		'-mv tconfig.h tconfig.hxh',
+	 		'-rm -f *.h',
+	 		'-mv tconfig.hxh tconfig.h',
+		 	'-rm -f *.tmp',
+		 	'-rm -f *.out',
+		 	'-rm -f foo*',
+		 	'-rm -f *.log',
+		 	'-rm -f magic',
+		 	'-rm -f alspro*',
+		 	'-rm -f alsmics*',
+		 	'-rm -f setup',
+		 	'-rm -f cppflags',
+		 	'-rm -f alsdir/*mics*',
+		 	'-rm -f alsdir/builtins/*.obp',
+		 	'-rm -f alsdir/library/*.obp',
+	 		'-rm -f core']) ] )).
 
 %%#### Warning: don't add rm alsdir to super_clean here in bld-port;.
 %%#### We run alspro in bld-port AFTER the super_clean is done in sharbld.
