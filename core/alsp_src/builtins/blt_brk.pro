@@ -16,27 +16,77 @@
 module builtins.
 use windows.
 
-:- make_gv('BreakLevel').
-:- setBreakLevel([b(0,user,true)]).
+	%% now in object als_shl_mgr as:
+	%% break_level			  %% break shell level (old global BreakLevel)
+%:- make_gv('BreakLevel').
+%:- setBreakLevel([b(0,user,true)]).
+
 
 breakhandler(M,G) 
 	:- 
-	getBreakLevel(BreakList),
+		%% getBreakLevel(BreakList),
+	get_primary_manager(ALSIDE),
+	accessObjStruct(break_level, ALSIDE, BreakList),
 	BreakList = [b(OldLevel,_,_) | _],
 	NewLevel is OldLevel+1,
-	setBreakLevel([b(NewLevel,M,G) | BreakList]),
-	catch(breakhandler0(M,G),
+	%% setBreakLevel([b(NewLevel,M,G) | BreakList]),
+	setObjStruct(break_level, ALSIDE, [b(NewLevel,M,G) | BreakList]),
+	catch(breakhandler0(M,G,ALSIDE),
 		  breakhandler(NewM,NewG),
-		  breakhandler0(NewM,NewG) ), !.
+		  breakhandler0(NewM,NewG,ALSIDE) ), !.
 
-breakhandler(M,G) 
+breakhandler(_,_) 
 	:- 
-	getBreakLevel(BreakList),
-	BreakList = [_ | BreakListTail],
-	setBreakLevel(BreakListTail),
+		%% getBreakLevel(BreakList),
+	get_primary_manager(ALSIDE),
+	accessObjStruct(break_level, ALSIDE, BreakList),
 	!,
-	fail.
+	(BreakList = [b(0,user,true)] ->
+		true
+		;
+		BreakList = [_ | BreakListTail],
+			%% setBreakLevel(BreakListTail),
+		setObjStruct(break_level, ALSIDE, BreakListTail),
+		fail
+	).
 	
+hot_break_handler(Resp,M,G)
+	:-
+write(hot_break_handler(Resp,M,G)), nl,flush_output,
+
+		%% getBreakLevel(BreakList),
+	get_primary_manager(ALSIDE),
+	accessObjStruct(break_level, ALSIDE, BreakList),
+	BreakList = [b(OldLevel,_,_) | _],
+	NewLevel is OldLevel+1,
+	%% setBreakLevel([b(NewLevel,M,G) | BreakList]),
+	setObjStruct(break_level, ALSIDE, [b(NewLevel,M,G) | BreakList]),
+
+write(call_catch(break_handler(Resp,M,G,alside))),nl,flush_output,
+
+	catch(break_handler(Resp,M,G,ALSIDE),
+		  breakhandler(NewM,NewG),
+		  breakhandler0(NewM,NewG,ALSIDE) ), !.
+
+hot_breakhandler(_,_,_) 
+	:- 
+		%% getBreakLevel(BreakList),
+	get_primary_manager(ALSIDE),
+	accessObjStruct(break_level, ALSIDE, BreakList),
+	!,
+	(BreakList = [b(0,user,true)] ->
+		true
+		;
+		BreakList = [_ | BreakListTail],
+			%% setBreakLevel(BreakListTail),
+		setObjStruct(break_level, ALSIDE, BreakListTail),
+		fail
+	).
+	
+
+
+
+
 
 listOfCodes([ a, b, c, d, e, f, p, s, t, ?]).
 
@@ -72,9 +122,11 @@ options(ListOfCodes, Responses, Prompt,
 			 indent		= '    ',
 			 prompt		= Prompt ] ).
 
-breakhandler0(M,G) 
+breakhandler0(M,G,ALSIDE) 
 	:- 
-	getBreakLevel([b(Level,_,_)|_]),
+	%% getBreakLevel([b(Level,_,_)|_]),
+	accessObjStruct(break_level, ALSIDE, BreakList),
+	BreakList = [b(Level,_,_)|_],
 	catenate(['Break(',Level,') >'],Prompt),
 	listOfCodes(ListOfCodes),
 	choiceItems(ChoiceItems),
@@ -85,52 +137,67 @@ breakhandler0(M,G)
 	simple_menu(ChoiceItems, Response, [0-'No Choice - Exit menu' | Options]),
 	position(ChoiceItems, Response, PosN),
 	nth(PosN, Responses, Resp),
-	break_handler(Resp,M,G).
+	break_handler(Resp,M,G,ALSIDE).
 
-break_handler(abort,M,G) 
+break_handler(abort,M,G,ALSIDE) 
 	:-!, 
-	setBreakLevel([b(0,user,true)]),
+	%% setBreakLevel([b(0,user,true)]),
+	setObjStruct(break_level, ALSIDE, [b(0,user,true)]),
 		%% abort_ctlc: "Aborting from Control-C or Control-Break.\n"
 	prolog_system_error(abort_ctlc, []),
 	throw(abort).
-break_handler(break_shell,M,G) 
+
+break_handler(alsdev_shell,M,G,ALSIDE) 
+	:-!,
+write(in_break_handler(alsdev_shell,M,G,alside)),nl,flush_output,
+	builtins:prolog_shell(user_input,user_output,alsdev),
+	breakhandler0(M,G,ALSIDE).
+break_handler(break_shell,M,G,ALSIDE) 
 	:-!,
 	prolog_shell,
-	breakhandler0(M,G).
-break_handler(continue(M,G),M,G) 
+	breakhandler0(M,G,ALSIDE).
+break_handler(continue(M,G),M,G,ALSIDE) 
 	:-!,
-	getBreakLevel([_ | PrevList]),
-	setBreakLevel(PrevList),
+	%% getBreakLevel([_ | PrevList]),
+	accessObjStruct(break_level, ALSIDE, BreakList),
+	BreakList = [_ | PrevList],
+	%% setBreakLevel(PrevList),
+	setObjStruct(break_level, ALSIDE, PrevList),
 	M:G.
 
-break_handler(debug(M,G),M,G) 
+break_handler(debug(M,G),M,G,ALSIDE) 
 	:-!,
 	catch(trace(M,G),
 		  breakhandler_debug(NewM,NewG),
-		  breakhandler0(NewM,NewG) ).
-break_handler(exit_prolog,M,G) 
+		  breakhandler0(NewM,NewG,ALSIDE) ).
+break_handler(exit_prolog,M,G,ALSIDE) 
 	:-!, 
 		%% exit_ctlc: "Exiting Prolog from Control-C or Control-Break.\n"
 	prolog_system_error(exit_ctlc, []),
 	halt.
-break_handler(exit,M,G) 
+break_handler(exit,M,G,ALSIDE) 
 	:-!, 
-	getBreakLevel([b(Level,_,_)|_]),
-pbi_write(break_handler(exit,M,G,level=Level)),pbi_nl,pbi_ttyflush,
+	%% getBreakLevel([b(Level,_,_)|_]),
+	accessObjStruct(break_level, ALSIDE, BreakList),
+	BreakList = [b(Level,_,_)|_],
+%pbi_write(break_handler(exit,M,G,level=Level)),pbi_nl,pbi_ttyflush,
 	(Level < 0 ->
 			%% exit_ctlc: "Exiting Prolog from Control-C or Control-Break.\n"
 		prolog_system_error(exit_ctlc, []),
 		halt
 		;
-		break_handler(previous,M,G) 
+		break_handler(previous,M,G,ALSIDE) 
 	).
-break_handler(fail,M,G) 
+break_handler(fail,M,G,ALSIDE) 
 	:-!,
 	fail.
-break_handler(previous,M,G) 
+break_handler(previous,M,G,ALSIDE) 
 	:-!, 
-	getBreakLevel([_ | PrevList]),
-	setBreakLevel(PrevList),
+	%% getBreakLevel([_ | PrevList]),
+	accessObjStruct(break_level, ALSIDE, BreakList),
+	BreakList = [_ | PrevList],
+	%% setBreakLevel(PrevList),
+	setObjStruct(break_level, ALSIDE, PrevList),
 	PrevList = [b(PrevLevel, PrevM, PrevG) | _],
 	(   PrevLevel < 1 ->  
 			%% no_prev_lev: "No previous level!!\n"
@@ -139,20 +206,20 @@ break_handler(previous,M,G)
 		;
 	    throw(breakhandler(PrevM,PrevG))
 	).
-break_handler(show(M,G),M,G) 
+break_handler(show(M,G),M,G,ALSIDE) 
 	:-!,
 	als_advise('Break at: %t:%t\n',[M,G]),
-	breakhandler0(M,G).
-break_handler(stack_trace,M,G) 
+	breakhandler0(M,G,ALSIDE).
+break_handler(stack_trace,M,G,ALSIDE) 
 	:-!,
 	stack_trace,
-	breakhandler0(M,G).
+	breakhandler0(M,G,ALSIDE).
 
-break_handler(Otherwise,M,G) 
+break_handler(Otherwise,M,G,ALSIDE) 
 	:- 
 	als_advise('\n    Bad input! Please re-enter.\n\n',[]),
 	!,
-	breakhandler0(M,G).
+	breakhandler0(M,G,ALSIDE).
 
 stack_trace 
 	:-
