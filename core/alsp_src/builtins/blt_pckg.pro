@@ -1,61 +1,80 @@
 /*=====================================================================
- * 		blt_pckg.pro
- * 		Copyright (c) 1990-92 Applied Logic Systems, Inc.
- *
- *		Packaging predicates to create object modules
- *		in COFF file format.
- *
- * Author : Ilyas Cicekli
- * Date   : 6/1/1990 
- *
- * Modification History :
- *		  : 3/3/93 - P.Raman -- write raw data out to a file
+ | 		blt_pckg.pro
+ | 		Copyright (c) 1990-92 Applied Logic Systems, Inc.
+ |
+ |		Packaging predicates to create object modules
+ |		in COFF file format.
+ |
+ | Author : Ilyas Cicekli - Version A
+ | Date   : 6/1/1990 
+ | Modification History :
+ |		  3/3/93 - P.Raman -- write raw data out to a file
+ |
+ | Author : Kevin Buettner - Version A
+ | Date:    06/01/93
  *=====================================================================*/
-
 
 module builtins.
 
-/*
- * This goal must be run as a start goal when the package is loaded.
- */
+/*-------------------------------------------------------------------*
+ |	pckg_init/0
+ |	pckg_init 
+ |	pckg_init 
+ |
+ |	This goal must be run as a start goal when the package is loaded.
+ *-------------------------------------------------------------------*/
 export pckg_init/0.
 
-pckg_init :-
+pckg_init 
+	:-
 	initialize_global_variables,
 	sio_pckg_init.
-
-/*
- * save_state(FileName)
- * 
- * Creates a saved state.
- */
-
+/*---------------------------------------------------------------*
+ |	save_state/1.
+ |	save_state(FileName)
+ |	save_state(+)
+ |	
+ |	Writes (saves) an version of the current image's code state
+ |	(including global variables) to the file FileName.
+ *---------------------------------------------------------------*/
 export save_state/1.
 
-save_state(FileName) :-
+save_state(FileName) 
+	:-
 	get_shell_level(CurLev),
 	set_shell_level(0),
 	package_global_variables,	%% create initialization pred
 	set_shell_level(CurLev),
 	save_state_to_file(FileName).
 
-/* 
- * Create a saved code state and merge it with the current image to make
- * a new one
- */
-
+/*---------------------------------------------------------------*
+ |	save_image/1
+ |	save_image(ImageName)
+ |	save_image(+)
+ |
+ |	Create a saved code state and merge it with the current image 
+ |	to make a new extended image.
+ *---------------------------------------------------------------*/
 export save_image/1.
 
 save_image(NewImageName)
 	:-
+		%% Must get rid of these so the image can create
+		%% them as it starts up; but don't throw them away...
 	sys_searchdir(ALSDIR),
 	abolish(sys_searchdir,1),
+	(bagof(searchdir(SD), searchdir(SD), SDList) -> true ; SDList = []),
 	abolish(searchdir,1),
 		%% Need to kill other stuff from the shell;
 	tmpnam(SSName),
 	    printf(user_output,'Saving state to: %s...',[SSName]),
 	save_state(SSName),
 	    printf(user_output,'saved.\n',[]),
+
+		%% Re-install the search dir info:
+	assert(sys_searchdir(ALSDIR)),
+	assert_all(SDList),
+
 	get_image_dir_and_name(ImageDir,ImageName),
 	mics_cmd_fmt(MicsCmdFmt),
 	sprintf(CMD, MicsCmdFmt,
@@ -63,13 +82,13 @@ save_image(NewImageName)
 	atom_codes(ACMD,CMD),
 	    printf('Executing %s\n', [ACMD]),
 	system(ACMD),
-		%% Until we find the problem with make/etc under djgpp:
-	(sys_env(unix,djgpp,_) ->	
-		true
-		;
-		unlink(SSName)
-	).
+	unlink(SSName).
 
+/*---------------------------------------------------------------*
+ | mics_cmd_fmt/1
+ | mics_cmd_fmt(MicsCmdFmt),
+ | mics_cmd_fmt(-),
+ *---------------------------------------------------------------*/
 mics_cmd_fmt('go32 %sals-mics %s%s %s %s')
 	:-
 	als_system(SystemList),
@@ -77,13 +96,45 @@ mics_cmd_fmt('go32 %sals-mics %s%s %s %s')
 	!.
 mics_cmd_fmt('%sals-mics %s%s %s %s').
 
+/*---------------------------------------------------------------*
+ |	save_image/2
+ |	save_image(ImageName, Options)
+ |	save_image(+, +)
+ *---------------------------------------------------------------*/
 export save_image/2.
 
 save_image(ImageName, Options)
 	:-
+		%% Save initial state of '$start' and '$initialize'
+		%% in case there is an error in processing options,
+		%% so that we need to restore them:
+	builtins:clause('$initialize',OldInit),	
+	builtins:clause('$start',OldStart),	
+	catch( save_image0(ImageName, Options),
+			se(Error),
+			restore_si(Error, OldInit, OldStart) ).
+
+	
+save_image0(ImageName, Options)
+	:-
 	process_image_options(Options),
 	save_image(ImageName).
 
+restore_si(se(Error), OldInit, OldStart)
+	:-
+	prolog_system_error(bad_pack_opt, [Error]),
+
+	builtins:abolish('$initialize',0),
+	builtins:assert( ('$initialize' :- OldInit) ),
+
+	builtins:abolish('$start',0),
+	builtins:assertz( ('$start' :- OldStart) ).
+
+/*---------------------------------------------------------------*
+ |	process_image_options/1
+ |	process_image_options(Options)
+ |	process_image_options(+)
+ *---------------------------------------------------------------*/
 process_image_options([])
 	:-!.
 process_image_options([Option | Options])
@@ -91,18 +142,22 @@ process_image_options([Option | Options])
 	process_image_option(Option),
 	process_image_options(Options).
 
+/*---------------------------------------------------------------*
+ |	process_image_option/1
+ |	process_image_option(Option)
+ |	process_image_option(+)
+ *---------------------------------------------------------------*/
 process_image_option(init_goals(NewGoals))
 	:-!,
 	builtins:clause('$initialize',OldGoals),
 	builtins:abolish('$initialize',0),
-	builtins:assert(('$initialize'
-	:- OldGoals, user:NewGoals)).
+	builtins:assert( ('$initialize'
+						:- OldGoals, user:NewGoals) ).
 
 process_image_option(start_goal(G))
 	:-!,
 	builtins:abolish('$start',0),
-	builtins:assertz(('$start'
-	:- user:G)).
+	builtins:assertz( ('$start' :- user:G) ).
 
 process_image_option(libload(true))
 	:-!,
@@ -126,16 +181,27 @@ process_image_option(select_lib(Library,FilesList))
 %%	$initialize/0.  Also after successfully saving the image, we
 %%	should restore $start/0 and $initialize/0.
 
-process_image_option(Unknown) :-
-	als_advise('Ignoring unknown save image option \`%t\'\n', [Unknown]).
+process_image_option(Unknown) 
+	:-
+%	als_advise('Ignoring unknown save image option \`%t\'\n', [Unknown]).
+	throw(se(Unkown)).
 
+/*---------------------------------------------------------------*
+ |	add_lib_qual/3
+ |	add_lib_qual(FilesList, Library, QualFilesList)
+ |	add_lib_qual(+,+,-)
+ *---------------------------------------------------------------*/
 add_lib_qual([],_,[]).
 add_lib_qual([File | FilesList],Library,[QualFile | QualFilesList])
 	:-
 	extendPath(Library,File,QualFile),
 	add_lib_qual(FilesList,Library,QualFilesList).
 
-/*
+
+
+
+
+/*-----------Ilyas's packaging starts here -----------------------*
  * package(PckgName)
  * package(PckgName,OptionsList) 
  *
@@ -146,6 +212,7 @@ add_lib_qual([File | FilesList],Library,[QualFile | QualFilesList])
  * table, and other information. (See the documentation
  * about packaging for more details).
  */
+
 
 export package/1.
 export package/2.
