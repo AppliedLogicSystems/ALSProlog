@@ -27,4 +27,3 @@
 /EXPORT:PI_set_app_printf_callback
 /EXPORT:CI_get_integer
 /EXPORT:sym_insert_2long
-/EXPORT:pi_init
