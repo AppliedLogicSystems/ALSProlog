@@ -2460,6 +2460,14 @@ indic_err( error(syntax_error,
 	tcl_call(shl_tcli, [syn_err_msg,ErrWin,LineNumber,ErrorMessage,DocID],_),
 	tcl_call(shl_tcli, [err_indic,DocID,LineNumber,P1,P2,P3],_).
 
+indic_err(prolog_system_error(s(ErrCode,Stream),[LineNumber|_]), DocID, ErrWin)
+	:-
+	builtins:expand_code(ErrCode, ErrorMessage, EType),
+	!,
+	tcl_call(shl_tcli, [syn_err_msg,ErrWin,LineNumber,ErrorMessage,DocID],_),
+	tcl_call(shl_tcli, [err_indic0,DocID,LineNumber],_).
+
+
 indic_err(Error, DocID, ErrWin).
 
 

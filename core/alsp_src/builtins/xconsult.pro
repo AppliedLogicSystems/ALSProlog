@@ -62,7 +62,6 @@ xxconsult(Stream, SDMode, FinalErrs)
 	:- 
 	readFile(Stream, File, SDMode, [], [], InitFinalErrs),
 	dreverse(InitFinalErrs, FinalErrs).
-%pbi_write(exit_xxconsult=FinalErrs),pbi_nl,pbi_ttyflush.
 
 export xconsult/2.
 xconsult(File,NErrs)
@@ -93,7 +92,6 @@ xconsult(File,0)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%		MAIN LOOP			%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%:-dynamic(dingdong/0).
 readFile(Stream, File, SDMode, ModStack, CurErrs, FinalErrs) 
 	:-
 	catch( ( readvnv(Stream,SDMode, Term,Names,Vars), Flag = ok),
@@ -101,9 +99,6 @@ readFile(Stream, File, SDMode, ModStack, CurErrs, FinalErrs)
 		   Flag = error(Ball) ),
 	!,
 %	gc,
-%(dingdong -> 
-%pbi_write(Flag),pbi_nl,pbi_ttyflush 
-%; true),
 	disp_process(Flag, Term,Names,Vars,Stream, File, SDMode, ModStack, CurErrs, FinalErrs).
 
 disp_process(ok, end_of_file, Names,Vars,Stream, File, SDMode, ModStack, CurErrs, FinalErrs)
@@ -161,36 +156,11 @@ top_clausegroup(CID)
  |	process(+, +, +,+, +, +, +, -)
  *-------------------------------------------------------------------*/
 
-/***
-process(end_of_file,Names,Vars,Stream, File, [], [], Errs, Errs)
-	:-!.
-
-process(end_of_file,Names,Vars,Stream, File, ModStack, ModStack, 
-					Errs, [prolog_system_error(mods_open,[File,ModStack]) | Errs])
-	:- !.
-***/
-
 process('?-'(Command),Names,Vars,Stream, File, ModStack, ModStack, Errs, NewErrs, Flag)
 	:- 
 	topmod(Module),
 	!,
 	execute_command_or_query(Stream,qf,Module,Command, Errs, NewErrs, Flag).
-
-/***
-process(':-'(defineClass(Spec)),Names,Vars,Stream, File, ModStack, ModStack, Errs, Errs)
-	:-
-	topmod(Module),
-	defineClass(Module,Spec,Result),
-	!,
-	addclauses(Result,Module).
-
-process((':-'(defineClass(Spec)) :- _), Names,Vars,Stream, File, ModStack, ModStack, Errs, Errs)
-	:-
-	topmod(Module),
-	defineClass(Module,Spec,Result),
-	!,
-	addclauses(Result,Module).
-***/
 
 process((':-'(Command) :- '$dbg_aph'(_,_,_)),Names,Vars,Stream, File, ModStack, ModStack, 
 				Errs, NewErrs, Flag)
@@ -211,11 +181,6 @@ process(':-'(Command),Names,Vars,Stream, File, ModStack, ModStack, Errs, NewErrs
 	topmod(Module),
 	!,
 	execute_command_or_query(Stream,cf,Module,Command, Errs, NewErrs, Flag).
-
-process((Head :- Body),Names,Vars,Stream, File, ModStack, ModStack, Errs, Errs, ok)
-	:- !, 
-	xform(Head,Body,NewBody,Names,Vars), 
-	addrule(Head,NewBody).
 
 process((module M),Names,Vars,Stream, File, ModStack, [M | ModStack], Errs, Errs, ok)
 	:- !,
@@ -250,28 +215,25 @@ process((H --> B), Names, Vars,Stream, File, ModStack, NewStack, Errs, NewErrs, 
 	!,
 	process(OutClause,Names,Vars,Stream, File, ModStack, NewStack, Errs, NewErrs, Flag).
 
-process((A,B),Names,Vars,Stream, File, ModStack, ModStack, 
-			Errs, [prolog_system_error(s(rdef_comma,Stream),[LineNumber]) | Errs], warning)
-	:- !,
-		%% rdef_comma: "Attempt to redefine comma - ignored.\n"
+process((Head :- _),Names,Vars,Stream, File, ModStack, ModStack, 
+			Errs, [prolog_system_error(s(ErrCode,Stream),[LineNumber]) | Errs], warning)
+	:-
+	functor(Head, F, A),
+	illegal_dfn(F, A, ErrCode),
+	!,
 	sio_linenumber(Stream,LineNumber).
 
-process((A;B),Names,Vars,Stream, File, ModStack, ModStack, 
-			Errs, [prolog_system_error(s(rdef_semi,Stream),[LineNumber]) | Errs], warning)
-	:- !,
-		%% rdef_semi: "Attempt to redefine semicolon - ignored.\n"
-	sio_linenumber(Stream,LineNumber).
+process((Head :- Body),Names,Vars,Stream, File, ModStack, ModStack, Errs, Errs, ok)
+	:- !, 
+	xform(Head,Body,NewBody,Names,Vars), 
+	addrule(Head,NewBody).
 
-process((A->B),Names,Vars,Stream, File, ModStack, ModStack, 
-			Errs, [prolog_system_error(s(rdef_arrow,Stream),[LineNumber]) | Errs], warning)
-	:- !,
-		%% rdef_arrow: "Attempt to redefine arrow - ignored.\n"
-	sio_linenumber(Stream,LineNumber).
-
-process((!),Names,Vars,Stream, File, ModStack, ModStack, 
-			Errs, [prolog_system_error(s(rdef_cut,Stream),[LineNumber]) | Errs], warning)
-	:- !,
-		%% rdef_cut: "Attempt to redefine cut - ignored.\n"
+process( Fact, Names,Vars,Stream, File, ModStack, ModStack, 
+			Errs, [prolog_system_error(s(ErrCode,Stream),[LineNumber]) | Errs], warning)
+	:-
+	functor(Fact, F, A),
+	illegal_dfn(F, A, ErrCode),
+	!,
 	sio_linenumber(Stream,LineNumber).
 
 process(Fact, Names, Vars,Stream, File, ModStack, ModStack, Errs, Errs, ok)
@@ -307,56 +269,19 @@ fin_xcmd_q(XCommandOrQuery,ErrTag,Module,LineNumber,Stream,StreamName,Errs,NewEr
 	Error = error(qc_failed(ErrTag,Name,LineNumber),[]),
 	NewErrs = [Error | Errs].
 
-
-/*
-	catch(
-		execcommand(
-			( catch( Module:XCommandOrQuery,
-			  	error(W,L),
-			  	(
-				pbi_write(execerr=error(W,L)),pbi_nl,pbi_ttyflush,
-				prolog_system_error(error(W,L),throw(error(W,L)))
-				)
-			  	)
-			  	;  
-			  	(prolog_system_error(error(qc_failed(ErrTag,Name,LineNumber),[])),
-							throw(qc_failed(ErrTag,Name,LineNumber),[]))
-			)     ),
-		OuterBall,
-		true
-	),
-*/
-
-/*
-	catch(
-		execcommand(
-			( catch( Module:XCommandOrQuery,
-			  	Error,
-			  throw(Error)
-			 )
-			  	;  
-			  	(Error=error(qc_failed(ErrTag,Name,LineNumber),[]),
-							throw(Error)
-				)
-			)     ),
-		OuterBall,
-		true
-	),
-*/
-
-/*
-	fin_Exec(OuterBall, Errs, NewErrs),
-	!.
-*/
-
 fin_Exec(OuterBall, Errs, Errs, ok)
 	:-
 	var(OuterBall),!.
 fin_Exec(OuterBall, Errs, [OuterBall | Errs], error).
 
-/*
- * module stack
- */
+illegal_dfn(',', 2, rdef_comma).
+illegal_dfn(';', 2, rdef_semi).
+illegal_dfn('->', 2, rdef_arrow).
+illegal_dfn('!', 0, rdef_cut).
+
+/*---------------------------*
+ | module stack
+ *---------------------------*/
 
 topmod(user).
 
