@@ -444,10 +444,16 @@ user_pw_input_dialog(Interp,Title,UID, PWD)
  |
  |	Options:
  |		defaultname = <Default file name>
- |		ext		= Ext to either add, or use for selection
+ |		ext		= Ext (atom) to either add, or use for selection
  |		mode	= new/select/save_as (default = select)
  |		initialdir = 	initial dir in which to begin...
  |		title	= <Window title>
+ |		filetypes = FileTypes (see below)
+ |
+ |	Sample FileTypes:
+ |		Filetypes=[
+ | 			['Prolog files & projects', ['.pro','.pl','.ppj'] ],
+ |			['All Files', ['*'] ]   ],
  *------------------------------------------------------------*/
 
 export file_select_dialog/1.
@@ -559,6 +565,31 @@ fext_pat_d(Ext,Pat,DD)
 	atom(Ext),
 	catenate('*.',Ext,Pat),
 	catenate(Ext, ' Files', DD).
+
+/*
+fext_pat_d(ExtL,PatL,DD)
+	:-
+	list_fext_pats(ExtL, PatL),
+	ExtL = [A | _],
+	catenate(A, '... Files', DD).
+
+fext_pat_d(Desc/Ext,Pat,Desc)
+	:-
+	atom(Ext),
+	!,
+	atom(Desc),
+	fext_pat_d(Ext,Pat,_).
+
+fext_pat_d(Desc/ExtL,PatL,Desc)
+	:-
+	list_fext_pats(ExtL, PatL).
+
+list_fext_pats([], []).
+list_fext_pats([Ext | ExtL], [Pat | PatL])
+	:-
+	catenate('*.',Ext,Pat),
+	list_fext_pats(ExtL, PatL).
+*/
 
 cont_file_select(select, DefaultName, Ext, IDir, Title, FileName, FileTypes, Interp)
 	:-!,
