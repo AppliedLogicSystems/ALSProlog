@@ -1472,10 +1472,12 @@ getResponse(Wins,Port,Box,Depth, Module, Goal, Response)
 
 %% === Not a leashed port -- Keep debugging:
 
+/*
 getResponse(pbi,_,Box,Depth,Module,Goal,debug) 
 	:-!,
     pbi_nl,
 	pbi_ttyflush.
+*/
 
 getResponse(Wins,_,Box,Depth,Module,Goal,debug) 
 	:-
@@ -1647,11 +1649,13 @@ showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 	!,
 	showGoalToUserTTY(Port,Box,Depth, Module, XGoal, Response).
 
+/*
 showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 	:-
 	debug_io(pbi),
 	!,
 	showGoalToUserPBI(Port,Box,Depth, Module, XGoal, Response).
+*/
 
 showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 	:-
@@ -1811,6 +1815,7 @@ disp_getresponse_cont('$badInput$', Port,Box,Depth,Module,Goal,Resps,Response)
 
 disp_getresponse_cont(Response,Port,Box,Depth,Module,Goal,Resps,Response).
 
+/*
 	%%----------------%%
 	%%%%% PBI mode %%%%%
 	%%----------------%%
@@ -1844,6 +1849,7 @@ disp_getresponse_cont_pbi('$badInput$', Port,Box,Depth,Module,Goal,Resps,Respons
 	:-
 	pbi_put(8).
 disp_getresponse_cont_pbi(Response,Port,Box,Depth,Module,Goal,Resps,Response).
+*/
 
 	%%------------------%%
 	%%%%% tcltk mode %%%%%
@@ -2022,6 +2028,7 @@ alsdev_step(What)
 	flush_output.
 *****/
 
+/*
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%  PBI I/O HOOKS    %%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2063,9 +2070,10 @@ writeGoalPBI(Box,Depth,Port,Module,Goal)
 	pbi_write(Port),  pbi_put(58),
 	pbi_write(Module:Goal),
 	pbi_ttyflush.
+*/
 
 
-:- dynamic('$dbg_apg_special'/3).
+%:- dynamic('$dbg_apg_special'/3).
 
 endmod.					%% builtins:  debugger segment
 
@@ -2078,7 +2086,7 @@ export '$dbg_aphe'/3.
 export '$dbg_apf'/3.
 
 
-'$dbg_apg'(A,B,C) :-  debugger:'$dbg_apg_special'(A,B,C),!.
+%'$dbg_apg'(A,B,C) :-  debugger:'$dbg_apg_special'(A,B,C),!.
 '$dbg_apg'(_,_,_).
 '$dbg_aph'(_,_,_).
 '$dbg_apge'(_,_,_).

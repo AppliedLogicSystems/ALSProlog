@@ -359,7 +359,8 @@ set_winfo_line_end(WInfo,Value)			:-	mangle(12,WInfo,Value).
 
 		%% Quoted, Lettervars, Quoted_strings
 winfo_write_term( Stream,
-			winfo(true, false,false,false,'*','...',0,true,0,true,WO,true)) 
+%			winfo(true, false,false,false,'*','...',0,true,0,true,WO,true)) 
+			winfo(false, false,false,false,'*','...',0,true,0,true,WO,true)) 
 	:-
     WO = wt_opts(_,_,_),
     stream_wt_opts(Stream,WO).
