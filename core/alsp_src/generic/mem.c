@@ -48,7 +48,9 @@
 #define O_BINARY 0
 #endif
 
+#ifndef PURE_ANSI
 static	void	coredump_cleanup	PARAMS(( int ));
+#endif /* PURE_ANSI */
 
 static	int	pgsize = 8192;	/* A guess at the page size */
 
@@ -593,12 +595,14 @@ allocate_prolog_heap_and_stack(size)
 #endif
 
 /* These signals are not available on the Mac. */
+#ifndef PURE_ANSI
 #ifndef MacOS
 #ifdef SIGBUS
     (void) signal(SIGBUS, coredump_cleanup);
 #endif
     (void) signal(SIGSEGV, coredump_cleanup);
 #endif
+#endif /* PURE_ANSI */
     return retval;
 }
 
@@ -629,6 +633,7 @@ protect_bottom_stack_page()
  *      is to core dump (presumably).
  */
 
+#ifndef PURE_ANSI
 #ifdef SIG_DFL
 
 static void
@@ -668,6 +673,7 @@ coredump_cleanup(signum)
 }
 
 #endif /* SIG_DFL */
+#endif /* PURE_ANSI */
 
 
 /*
@@ -713,7 +719,9 @@ static long *als_mem;
 
 static	long *	alloc_big_block		PARAMS(( size_t, int ));
 static	long *	ss_malloc0		PARAMS(( size_t, int, int, long * ));
+#ifndef PURE_ANSI
 static	void	ss_restore_state	PARAMS(( char *, long ));
+#endif /* PURE_ANSI */
 static	int	ss_saved_state_present	PARAMS(( void ));
 
 #define header (* (struct am_header *) als_mem)
@@ -910,7 +918,9 @@ als_mem_init(file,offset)
 	return 0;	/* no saved state */
     }
     else {		/* need to open specified file and load it */
+#ifndef PURE_ANSI
 	ss_restore_state(file,offset);
+#endif /* PURE_ANSI */
 	return 1;	/* saved state loaded */
     }
 }
@@ -1421,6 +1431,7 @@ int ss_save_image_with_state(const char * new_image_name)
 
 #endif /* SIMPLE_MICS */
 
+#ifndef PURE_ANSI
 int
 ss_save_state(const char *filename, long offset)
 {
@@ -1744,6 +1755,7 @@ ss_err:
     close(ssfd);
     fatal_error(FE_ALS_MEM_INIT,0);
 }
+#endif /* PURE_ANSI */
 
 /*
  * ss_saved_state_present will test to see if the saved state is already

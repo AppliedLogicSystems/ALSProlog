@@ -19,12 +19,15 @@
 #include "defs.h"
 #include "module.h"
 
+#ifdef PURE_ANSI
+#include <stdarg.h>
+#else
 #if HAVE_STDARG_H
 #include <stdarg.h>
 #else
 #include <varargs.h>
 #endif
-
+#endif /* PURE_ANSI */
 
 #ifndef DoubleType
 

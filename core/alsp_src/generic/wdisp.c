@@ -14,6 +14,7 @@
  *=================================================================*/
 #include "defs.h"
 
+#ifndef KERNAL
 /*
  * write and company
  *
@@ -68,7 +69,6 @@ static void (*wr_tbl[]) PARAMS(( PWord, int, int )) = {
 #endif /* DoubleType */
 };
 
-
 #define WQUOTE 0x01		/* for use with writeq */
 #define WDISP  0x02
 
@@ -104,7 +104,6 @@ prolog_display(v, t)
     spaceneeded = 0;
     WRITE(v, t, WDISP | WQUOTE, 0);
 }
-
 
 #define MK_OP(prec) ((long) OP_XFX(prec))
 #define WRITEDEPTH 5000
@@ -423,3 +422,4 @@ craig_get_double(dbl, ptr)
 }
 
 #endif /* DoubleType */
+#endif

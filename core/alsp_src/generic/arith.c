@@ -1,3 +1,5 @@
+
+
 /*===================================================================*
  |			arith.c   
  |		Copyright (c) 1985 by Kevin A. Buettner
@@ -136,8 +138,16 @@ void
 init_time()
 {
     start_time = currentTime;
+#ifdef PURE_ANSI
+    srand(start_time);
+#else
     srandom((long) start_time);
+#endif /* PURE_ANSI */
     gensym_start_time = (long) time(0L);
+    
+#ifdef PURE_ANSI
+    clock_ticks_per_second = CLOCKS_PER_SEC;
+#else
 #ifdef	_SC_CLK_TCK
     clock_ticks_per_second = sysconf(_SC_CLK_TCK);
 #else	/* HAVE_UNISTD_H */
@@ -147,6 +157,7 @@ init_time()
     clock_ticks_per_second = HZ;
 #endif	/* MacOS */
 #endif	/* HAVE_UNISTD_H */
+#endif  /* PURE_ANSI */
 }
 
 
@@ -224,6 +235,9 @@ als_realtime()
 double
 als_random()
 {
+#ifdef PURE_ANSI
+    return ((double) rand()) / ((double) RAND_MAX);
+#else
 #if MacOS
     return ((double) random()) / ((double) RAND_MAX);
 #else
@@ -233,6 +247,7 @@ als_random()
     return drandom();
 #endif	/* RANDRANGE */
 #endif
+#endif /* PURE_ANSI */
 }
 
 int
@@ -245,7 +260,11 @@ pbi_srandom()
     w_get_An(&v1,&t1,1);
 
     if (get_number(v1,t1,&seed)) {
+#ifdef PURE_ANSI
+	srand(seed);
+#else
 	srandom((long) seed);
+#endif /* PURE_ANSI */
 	SUCCEED;
     }
     else

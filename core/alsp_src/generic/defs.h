@@ -137,6 +137,7 @@
 #include "config.h"
 
 /* Hack in the proper defines until config can be updated. */
+#ifndef KERNAL
 #if defined(MSWin32) && !defined(DLL)
 #define SIMPLE_MICS 1
 #endif
@@ -149,6 +150,7 @@
 #define SIMPLE_MICS 1
 #define MIPS_IRIX53 1
 #endif
+#endif /* KERNAL */
 
 /*---------------------------------------------------------------------*
  | Macros concerned with constraints, intervals, freeze, etc.
@@ -185,6 +187,17 @@
 #include <libc.h>	/* Get prototypes for C library */
 #endif /* HAVE_LIBC_H */
 
+#ifdef PURE_ANSI
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <string.h>
+#define HAVE_STDARG_H
+#define HAVE_STRCSPN
+#define HAVE_STRTOK
+#define HAVE_STRSPN
+#else
 #if	defined(HAVE_STDLIB_H)
 #include <stdlib.h>
 #endif	/* HAVE_STDLIB_H */
@@ -222,6 +235,8 @@
   /* memory.h and strings.h conflict on some systems */
 #endif		/* HAVE_STRINGS_H */
 #endif /* not STDC_HEADERS and not HAVE_STRING_H */
+
+#endif /* PURE_ANSI */
 
 /*---------------------------------------------------------------------*
  | Set up some macros for dealing with prototypes and other ANSI C features.
@@ -302,9 +317,6 @@
 #elif	defined(MacOS)
 #define PATH_SEPARATOR	','
 #define DIR_SEPARATOR	':'
-
-#elif
-#error
 
 #endif
 

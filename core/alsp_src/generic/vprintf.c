@@ -48,7 +48,11 @@ PI_oprintf(char *fmt, va_alist)
     va_start(args);
 #endif
 
+#ifdef KERNAL
+    vfprintf(stdout, fmt, args);
+#else
     vfprintf(outfd, fmt, args);
+#endif /* KERNAL */
 }
 
 
@@ -56,7 +60,6 @@ PI_oprintf(char *fmt, va_alist)
  * PI_putchar is called to output a single character to either a file or
  * buffer.
  */
-
 void
 PI_oputchar(c)
     int   c;

@@ -15,8 +15,13 @@
  | 03/7/90 - K.Buettner	-- added in SPARC defns
  *================================================================*/
 
+#ifdef KERNAL
+#define TODOSIZE  2048
+#define MODELSIZE 1024
+#else
 #define TODOSIZE  16384
 #define MODELSIZE 8192
+#endif /* KERNAL */
 
 /*
  * Register Base Numbers

@@ -13,6 +13,8 @@
  | 10/26/94 - C. Houpt	-- Various UCHAR* casts.
  *=============================================================*/
 #include "defs.h"
+
+
 #include <setjmp.h>
 #include "lexan.h"
 #include "parsstak.h"
@@ -34,7 +36,11 @@
 #ifdef NO_FAR_DATA
 static jmp_buf *prs_erc;	/* buffers for error recovery   */
 #else
+#ifdef KERNAL
+static jmp_buf prs_erc[10];	/* buffers for error recovery   */
+#else
 static jmp_buf prs_erc[30];	/* buffers for error recovery   */
+#endif /* KERNAL */
 #endif
 static int   prs_erc_index = -1; /* index into the above         */
 
@@ -46,8 +52,13 @@ static int   prs_erc_index = -1; /* index into the above         */
 #ifdef NO_FAR_DATA
 static pword *vtable;	/* variable name table          */
 #else
+#ifdef KERNAL
+static pword vtable[64];	/* variable name table          */
+#else
 static pword vtable[240];	/* variable name table          */
+#endif /* KERNAL */
 #endif
+
 static int   nxtvar;		/* next free space in var table */
 
 
@@ -118,7 +129,6 @@ parser_init()
     parser_reset();		/* Reset the parser */
 }
 
-
 /*
  * parser_reset resets the parser.
  */
@@ -178,7 +188,6 @@ find_var(s)
 /* HIPREC is defined to be bigger than 1200<<4 */
 #define HIPREC 20000
 
-
 /*
  * push_rator pushs and operator onto the operator stack
  */
@@ -193,7 +202,6 @@ push_rator(tokid, prec)
     pst_rator->token_id = tokid;
     pst_rator++;
 }
-
 
 /*
  * bld_struct takes the top operator on the operator stack and builds a
@@ -230,7 +238,6 @@ bld_struct()
     }
 }
 
-
 /*
  * bld_clause is similar to bld_struct, but is responsible for building
  *      a structure that the compiler knows how to handle rather than a
@@ -246,8 +253,17 @@ bld_clause()
     pst_rator--;		/* pop operator stack */
     n = pst_rand - pst_rator->last_rand - 1;	/* compute number of goals */
 
+#ifdef KERNAL
+    /* I really don't think this is a parser error - it looks like a
+       low-level fatal error. */
+    if (n < 0) {
+    	fprintf(stderr, "Error in bld_clause.");
+    	exit(-1);
+    }
+#else
     if (n < 0)
 	parser_error("Error in bld_clause.");
+#endif /* KERNAL */
 
     r = MK_RULE(n);
 
@@ -811,7 +827,6 @@ bld_vlst()
     }
     return (r);
 }
-
 
 int
 qtok(t)

@@ -177,7 +177,7 @@ static struct blt_struct {
 	BLT("is", 2, pbi_is, "_pbi_is"),
 #ifdef HAVE_TIME
 	BLT("$time", 9, pbi_time, "_pbi_time"),
-#endif
+#endif /* HAVE_TIME */
 	BLT("srandom", 1, pbi_srandom, "_pbi_srandom"),
 	BLT("$clauseinfo", 4, pbi_clauseinfo, "_pbi_clauseinfo"),
 	BLT("$firstargkey", 2, pbi_firstargkey, "_pbi_firstargkey"),
@@ -187,19 +187,25 @@ static struct blt_struct {
 #ifdef LIBBRK
 	BLT("$libbreak", 4, pbi_libbreak, "_pbi_libbreak"),
 #endif /* LIBBRK */
+#ifndef KERNAL
 	BLT("$listasm_clause", 1, pbi_listasm_clause, "_pbi_listasm_clause"),
-	BLT("$listasm_ntblentry", 3, pbi_listasm_ntblentry, "_pbi_listasm_ntblentry"),
+	BLT("$listasm_ntblentry", 3, pbi_listasm_ntblentry,
+	    "_pbi_listasm_ntblentry"),
+#endif /* KERNAL */
 	BLT("$next_module", 4, pbi_next_module, "_pbi_next_module"),
 	BLT("$nextproc", 3, pbi_nextproc, "_pbi_nextproc"),
 	BLT("$procinfo", 6, pbi_procinfo, "_pbi_procinfo"),
 	BLT("abolish", 3, pbi_abolish, "_pbi_abolish"),
-	BLT("abolish_clausegroup", 4, pbi_abolish_clausegroup, "_pbi_abolish_clausegroup"),
+	BLT("abolish_clausegroup", 4, pbi_abolish_clausegroup,
+	    "_pbi_abolish_clausegroup"),
 		/* SPECIAL -- Debugging-related */
+#ifdef DEBUGSYS
 	BLT("cptx", 0, pbi_cptx, "_pbi_cptx"),
 	BLT("display_heap", 2, disp_heap, "_disp_heap"),
 	BLT("display_item_addr", 1, disp_item, "_disp_item"),
 	BLT("swp_tr", 0, pbi_swp_tr, "_pbi_swp_tr"),
 	BLT("walk_cps", 0, pbi_walk_cps, "_pbi_walk_cps"),
+#endif /* DEBUGSYS */
 		/* SPECIAL -- Freeze-related */
 #ifdef FREEZE
 	BLT("clct_tr", 1, pbi_clct_tr, "_pbi_clct_tr"),
@@ -219,12 +225,14 @@ static struct blt_struct {
 #endif /* CONSTRDEBUG */
 
 #ifdef SCO_UNIX			/* procedure names must be < 32 chars */
-	BLT("massively_abolish_clausegroup", 1, pbi_massively_abolish_clausegroup,
+	BLT("massively_abolish_clausegroup", 1,
+	    pbi_massively_abolish_clausegroup,
 	    "_pbi_massively_abolish_clausegro"),
 #else
-	BLT("massively_abolish_clausegroup", 1, pbi_massively_abolish_clausegroup,
+	BLT("massively_abolish_clausegroup", 1,
+	    pbi_massively_abolish_clausegroup,
 	    "_pbi_massively_abolish_clausegroup"),
-#endif
+#endif /* SCO_UNIX */
 	BLT("asserta", 4, pbi_asserta, "_pbi_asserta"),
 	BLT("assertz", 4, pbi_assertz, "_pbi_assertz"),
 	BLT("addclause", 2, pbi_addclause, "_pbi_addclause"),
@@ -232,20 +240,30 @@ static struct blt_struct {
 	BLT("execcommand", 1, pbi_execcommand, "_pbi_execcommand"),
 	BLT("erase", 1, pbi_erase, "_pbi_erase"),
 	BLT("index_proc", 3, pbi_index_proc, "_pbi_index_proc"),
-	BLT("push_clausegroup", 1, pbi_push_clausegroup, "_pbi_push_clausegroup"),
+	BLT("push_clausegroup", 1, pbi_push_clausegroup,
+	    "_pbi_push_clausegroup"),
 	BLT("pop_clausegroup", 1, pbi_pop_clausegroup, "_pbi_pop_clausegroup"),
+#ifndef KERNAL
 	BLT("collectcode", 0, pbi_collectcode, "_pbi_collectcode"),
+#endif /* KERNAL */
 
 #ifdef PACKAGE
 	BLT("$get_pckg_error", 1, pbi_get_pckg_error, "_pbi_get_pckg_error"),
-	BLT("$listasm_clause", 2, pbi_package_listasm_clause, "_pbi_package_listasm_clause"),
-	BLT("$listasm_ntblentry", 4, pbi_package_listasm_ntblentry, "_pbi_package_listasm_ntblentry"),
-	BLT("$package_mark_proc", 3, pbi_package_mark_proc, "_pbi_package_mark_proc"),
-	BLT("$package_unmark_proc", 3, pbi_package_unmark_proc, "_pbi_package_unmark_proc"),
+	BLT("$listasm_clause", 2, pbi_package_listasm_clause,
+	    "_pbi_package_listasm_clause"),
+	BLT("$listasm_ntblentry", 4, pbi_package_listasm_ntblentry,
+	    "_pbi_package_listasm_ntblentry"),
+	BLT("$package_mark_proc", 3, pbi_package_mark_proc,
+	    "_pbi_package_mark_proc"),
+	BLT("$package_unmark_proc", 3, pbi_package_unmark_proc,
+	    "_pbi_package_unmark_proc"),
 	BLT("$package_toktbl", 1, pbi_package_toktbl, "_pbi_package_toktbl"),
-	BLT("$current_package", 1, pbi_current_package, "_pbi_current_package"),
-	BLT("$get_default_proc", 3, pbi_get_default_proc, "_pbi_get_default_proc"),
-	BLT("$get_default_use", 2, pbi_get_default_use, "_pbi_get_default_use"),
+	BLT("$current_package", 1, pbi_current_package,
+	    "_pbi_current_package"),
+	BLT("$get_default_proc", 3, pbi_get_default_proc,
+	    "_pbi_get_default_proc"),
+	BLT("$get_default_use", 2, pbi_get_default_use,
+	    "_pbi_get_default_use"),
 	BLT("$coff_operation", 5, pbi_coff_operation, "_pbi_coff_operation"),
 #endif /* PACKAGE */
 
@@ -254,7 +272,8 @@ static struct blt_struct {
 	BLT("$int86", 10, pbi_int86_10arg, "_pbi_int86_10arg"),
 	BLT("$int86", 16, pbi_int86_16arg, "_pbi_int86_16arg"),
 
-	BLT("$dos_first_match", 7, pbi_dos_first_match, "_pbi_dos_first_match"),
+	BLT("$dos_first_match", 7, pbi_dos_first_match,
+	    "_pbi_dos_first_match"),
 	BLT("$dos_next_match", 5, pbi_dos_next_match, "_pbi_dos_next_match"),
 #endif /* DOS */
 
@@ -286,18 +305,24 @@ static struct blt_struct {
 	BLT("$strlen", 2, pbi_strlen, "_pbi_strlen"),
 	BLT("$atom_concat", 3, pbi_atom_concat, "_pbi_atom_concat"),
 
+#ifndef PURE_ANSI
 	BLT("$access", 2, pbi_access, "_pbi_access"),
 #ifdef OSACCESS
 	BLT("getenv", 2, pbi_getenv, "_pbi_getenv"),
 	BLT("tmpnam", 1, pbi_tmpnam, "_pbi_tmpnam"),
 #endif OSACCESS
+#endif /* KERNAL */
 
 	BLT("system", 1, pbi_system, "_pbi_system"),
-	BLT("$protect_bottom_stack_page", 0, pbi_protect_bottom_stack_page, "_pbi_protect_bottom_stack_page"),
-	BLT("get_image_dir_and_name", 2, pbi_get_image_dir_and_name, "_pbi_get_image_dir_and_name"),
+	BLT("$protect_bottom_stack_page", 0, pbi_protect_bottom_stack_page,
+	    "_pbi_protect_bottom_stack_page"),
+	BLT("get_image_dir_and_name", 2, pbi_get_image_dir_and_name,
+	    "_pbi_get_image_dir_and_name"),
 	BLT("pbi_get_command_line", 1, pbi_command_line, "_pbi_command_line"),
 	BLT("crypt", 3, pbi_crypt, "_pbi_crypt"),
+#ifndef PURE_ANSI
 	BLT("pbi_copy_file", 2, pbi_copy_file, "_pbi_copy_file"),
+#endif /* PURE_ANSI */
 	BLT("enable_security", 0, pbi_enable_security, "_pbi_enable_security"),
 
 	BLT("gv_alloc", 1, pbi_gv_alloc, "_pbi_gv_alloc"),
@@ -308,13 +333,17 @@ static struct blt_struct {
 	BLT("gv_isfree", 1, pbi_gv_isfree, "_pbi_gv_isfree"),
 	BLT("gv_maxpossible", 1, pbi_gv_maxpossible, "_pbi_gv_maxpossible"),
 
+	BLT("pbi_debug", 1, pbi_debug, "_pbi_debug"),
+
+#ifndef KERNAL
 	BLT("$load", 2, pbi_load, "_pbi_load"),
 #ifdef DynamicForeign
 	BLT("$loadforeign", 3, pbi_load_foreign, "_pbi_load_foreign"),
-#endif
+#endif /* DynamicForeign */
 	BLT("pbi_ttyflush", 0, pbi_ttyflush, "_pbi_ttyflush"),
 	BLT("pbi_nl", 0, pbi_nl, "_pbi_nl"),
 	BLT("pbi_write", 1, pbi_write, "_pbi_write"),
+#endif /* KERNAL */
 #ifdef OLDCIO
 	BLT("pbi_display", 1, pbi_display, "_pbi_display"),
 	BLT("pbi_get", 1, pbi_get, "_pbi_get"),
@@ -341,12 +370,19 @@ static struct blt_struct {
 	BLT("old_consult", 2, pbi_old_consult, "_pbi_old_consult"),
 #endif /* OLDCONSULT */
 #ifdef SIMPLE_MICS
-	BLT("save_image_with_state_to_file", 1, pbi_save_image_with_state_to_file, "_pbi_save_image_with_state_to_file"),
-#endif
-	BLT("save_state_to_file", 1, pbi_save_state_to_file, "_pbi_save_state_to_file"),
+	BLT("save_image_with_state_to_file", 1,
+	    pbi_save_image_with_state_to_file,
+	    "_pbi_save_image_with_state_to_file"),
+#endif /* SIMPLE_MICS */
+#ifndef PURE_ANSI
+	BLT("save_state_to_file", 1, pbi_save_state_to_file,
+	    "_pbi_save_state_to_file"),
+#endif /* PURE_ANSI */
 #ifdef MacOS
-	BLT("save_app_with_obp", 5, pbi_save_app_with_obp, "_pbi_save_app_with_obp"),
-#endif
+	BLT("save_app_with_obp", 5, pbi_save_app_with_obp,
+	    "_pbi_save_app_with_obp"),
+#endif /* MacOS */
+#ifndef KERNAL
 	BLT("sio_mkstream", 2, sio_mkstream, "_sio_mkstream"),
 	BLT("sio_errcode", 2, sio_errcode, "_sio_errcode"),
 	BLT("sio_set_errcode", 2, sio_set_errcode, "_sio_set_errcode"),
@@ -356,12 +392,14 @@ static struct blt_struct {
 	BLT("sio_cpos", 2, sio_cpos, "_sio_cpos"),
 	BLT("sio_lpos", 2, sio_lpos, "_sio_lpos"),
 	BLT("sio_buf_params", 3, sio_buf_params, "_sio_buf_params"),
-	BLT("sio_increment_bufpos", 1, sio_increment_bufpos, "_sio_increment_bufpos"),
+	BLT("sio_increment_bufpos", 1, sio_increment_bufpos,
+	    "_sio_increment_bufpos"),
 	BLT("sio_set_position", 3, sio_set_position, "_sio_set_position"),
 	BLT("sio_file_open", 5, sio_file_open, "_sio_file_open"),
 	BLT("sio_console_open", 6, sio_console_open, "_sio_console_open"),
 	BLT("window_insert_pos", 2, win_insert_pos, "_win_insert_pos"),
-	BLT("set_window_insert_pos", 2, set_win_insert_pos, "_set_win_insert_pos"),
+	BLT("set_window_insert_pos", 2, set_win_insert_pos,
+	    "_set_win_insert_pos"),
 	BLT("sio_set_eof", 1, sio_set_eof, "_sio_set_eof"),
 	BLT("sio_reset_eof", 1, sio_reset_eof, "_sio_reset_eof"),
 #ifdef SysVIPC
@@ -374,8 +412,10 @@ static struct blt_struct {
 #endif /* SSBQ */
 #ifdef HAVE_SOCKET
 	BLT("sio_socket_open", 10, sio_socket_open, "_sio_socket_open"),
-	BLT("sio_is_server_socket", 1, sio_is_server_socket, "_sio_is_server_socket"),
-	BLT("sio_accept_socket_connection", 2, sio_accept_socket_connection, "_sio_accept_socket_connection"),
+	BLT("sio_is_server_socket", 1, sio_is_server_socket,
+	    "_sio_is_server_socket"),
+	BLT("sio_accept_socket_connection", 2, sio_accept_socket_connection,
+	    "_sio_accept_socket_connection"),
 	BLT("sio_poll",2,sio_poll,"_sio_poll"),
 #ifdef HAVE_SELECT
 	BLT("sio_simple_select", 2, sio_simple_select, "_sio_simple_select"),
@@ -416,14 +456,22 @@ static struct blt_struct {
 	BLT("sio_isgraphicatom", 1, sio_isgraphicatom, "_sio_isgraphicatom"),
 	BLT("sio_nl", 1, sio_nl, "_sio_nl"),
 	BLT("sio_readln", 3, sio_readln, "_sio_readln"),
-	BLT("sio_position_in_line", 3, sio_position_in_line, "_sio_position_in_line"),
-
+	BLT("sio_position_in_line", 3, sio_position_in_line,
+	    "_sio_position_in_line"),
+#endif /* KERNAL */
 	BLT("gc", 0, gc, "_gc"),
 	BLT("halt", 0, pbi_halt, "_pbi_halt"),
+	BLT("setInterruptVector", 1, pbi_set_interrupt_vector,
+	    "_pbi_set_interrupt_vector"),
+	BLT("uncaught_interrupt", 3, pbi_uncaught_interrupt,
+	    "_pbi_uncaught_interrupt"),
 	BLT("forcePrologInterrupt", 0, pbi_ouch, "_pbi_ouch"),
-	BLT("forcePrologError", 0, pbi_forcePrologError, "_pbi_forcePrologError"),
+	BLT("forcePrologError", 0, pbi_forcePrologError,
+	    "_pbi_forcePrologError"),
 	BLT("reset_wm_normal", 0, pbi_reset_wm_normal, "_pbi_reset_wm_normal"),
+#ifndef KERNAL
 	BLT("print_warning", 0, pbi_printwarning, "_pbi_printwarning"),
+#endif /* KERNAL */
 /*	BLT("limits_info", 3, pbi_limits_info, "_pbi_limits_info"),  */
 
 #ifdef OLDSHELL
@@ -436,7 +484,7 @@ static struct blt_struct {
 	BLT("$stack_info", 1, pbi_stack_info, "_pbi_stack_info"),
 #ifdef MacOS
 	BLT("pbi_debugger", 0, pbi_debugger, "_pbi_debugger"),
-#endif
+#endif /* MacOS */
 	BLT("$findterm", 5, pbi_findterm, "_pbi_findterm"),
 #ifdef CMeta
 	BLT("true", 0, pbi_true, "_pbi_true"),
@@ -454,7 +502,7 @@ static struct blt_struct {
 	BLT("mangle", 3, pbi_mangle, "_pbi_mangle"),
 #ifdef TRAILVALS
 	BLT("trailed_mangle", 3, pbi_trailed_mangle, "_pbi_trailed_mangle"),
-#endif
+#endif /* TRAILVALS */
 	BLT("nonvar", 1, pbi_nonvar, "_pbi_nonvar"),
 	BLT("number", 1, pbi_number, "_pbi_number"),
 	BLT("var", 1, pbi_var, "_pbi_var"),
@@ -471,7 +519,8 @@ static struct blt_struct {
 #endif /* GENSYM */
 
 #ifdef DEBUGSYS
-	BLT("toggle_sys_debug", 1, pbi_toggle_debug_system, "_pbi_toggle_debug_system"),
+	BLT("toggle_sys_debug", 1, pbi_toggle_debug_system,
+	    "_pbi_toggle_debug_system"),
 #endif /* DEBUGSYS */
 
 #ifdef PRIM_DBG
@@ -487,7 +536,7 @@ static struct blt_struct {
 #if	defined(Portable) && defined(IProfile)
 	BLT("init_iprofile", 0, pbi_init_iprofile, "_pbi_init_iprofile"),
 	BLT("dump_iprofile", 0, pbi_dump_iprofile, "_pbi_dump_iprofile"),
-#endif	/* defined(Portable) && defined(IProfile) */
+#endif /* defined(Portable) && defined(IProfile) */
 
 #ifdef BCINTER
 	BLT("$c_malloc", 2, pbi_c_malloc, "_pbi_c_malloc"),
@@ -496,12 +545,14 @@ static struct blt_struct {
 	BLT("$c_examine", 2, pbi_c_examine, "_pbi_c_examine"),
 #endif /* BCINTER */
 
+#ifndef KERNAL
 	BLT("dbg_nospy", 3, pbi_dbg_nospy, "_pbi_dbg_nospy"),
 	BLT("dbg_spy", 3, pbi_dbg_spy, "_pbi_dbg_spy"),
 	BLT("dbg_spyoff", 0, pbi_dbg_spyoff, "_pbi_dbg_spyoff"),
 	BLT("dbg_spyon", 0, pbi_dbg_spyon, "_pbi_dbg_spyon"),
 	BLT("dbg_spying", 0, pbi_dbg_spying, "_pbi_dbg_spying"),
 	BLT("alarm", 2, pbi_alarm, "_pbi_alarm"),
+#endif /* KERNAL */
 	BLT("signal_name", 2, pbi_signal_name, "_pbi_signal_name")
 };
 	/* blt_tab[] */
@@ -544,7 +595,7 @@ extern int wm_call 	PARAMS(( void ));
 extern int wm_eq 	PARAMS(( void ));
 extern int wm_noneq 	PARAMS(( void ));
 
-#endif
+#endif /* CMeta */
 
 #ifdef Portable
 #define INTF(v) ((int (*) PARAMS((void))) (v))
@@ -565,9 +616,9 @@ static struct blt2_struct {
 } blt2_tab[] = {
 
 #ifdef Portable
-    BLT2("$comma", 3, ic_install_bref, INTF("$comma"), INTF(4), (char *) -1),
-	BLT2("$arrow", 3, ic_install_bref, INTF("$arrow"), INTF(4), (char *) -1),
-	BLT2("$semicolon", 3, ic_install_bref, INTF("$semicolon"), INTF(4), (char *) -1),
+BLT2("$comma", 3, ic_install_bref, INTF("$comma"), INTF(4), (char *) -1),
+    BLT2("$arrow", 3, ic_install_bref, INTF("$arrow"), INTF(4), (char *) -1),
+    BLT2("$semicolon", 3, ic_install_bref, INTF("$semicolon"), INTF(4), (char *) -1),
 	BLT2("!", 0, ic_install_instr, INTF(W_MACRO_CUTPROCEED), NULLF, (char *) -1),
 	BLT2("$cut", 1, ic_install_instr, INTF(W_MACRO_CUTPROCEED), NULLF, (char *) -1),
 	BLT2("$colon", 3, ic_install_instr, INTF(W_COLON), NULLF, (char *) -1),
@@ -744,15 +795,36 @@ Code *mth_ne_addr;
 Code *mth_eq_addr;
 #endif /* NewMath */
 
+int pbi_set_interrupt_vector(void)
+{
+    PWord v;
+    int vt;
+    char *s;
+    PI_getan(&v, &vt, 1);
+    if (vt == PI_SYM) s = PI_getsymname(NULL, v, 0);
+    else if (vt == PI_UIA) s = PI_getuianame(NULL, v, 0);
+    else PI_FAIL;
+    
+    wm_overcode = w_nameentry((PWord) MODULE_BUILTINS,
+    			(PWord) find_token(s), 3)->exec_entry;
+    PI_SUCCEED;
+}
+
+int pbi_uncaught_interrupt(void)
+{
+  fprintf(stderr, "Uncaught Interrupt!\n");
+  exit(1);
+}
+
 void
 time_cut_interrupt_init()
 {
     init_time();
 
     wm_cutaddr = w_nameprobe((PWord) MODULE_BUILTINS, (PWord) TK_CUT, 0)->call_entry;
-    /* Set the default interrupt handler to be interrupt */
+    /* Set the default interrupt handler to be uncaught_interrupt */
     wm_overcode = w_nameentry((PWord) MODULE_BUILTINS,
-			   (PWord) find_token((UCHAR *)"$interrupt"), 3)->exec_entry;
+			   (PWord) find_token((UCHAR *)"uncaught_interrupt"), 3)->exec_entry;
 
 /* #ifdef NewMath  */
 #if defined(NewMath) && !defined(Portable)
@@ -770,7 +842,7 @@ time_cut_interrupt_init()
 	->call_entry;
     mth_eq_addr = w_nameentry((PWord) MODULE_BUILTINS, (PWord) TK_ZEBRA, 2)
 	->call_entry;
-#endif
+#endif /* defined(NewMath) && !defined(Portable) */
 
 }
 

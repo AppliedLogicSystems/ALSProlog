@@ -40,8 +40,11 @@ Code *wm_cutaddr;
 Code *wm_overcode;		/* This is the Prolog code run during an
 				 * exception
 				 */
-
+#ifdef KERNAL
+PWord *wm_regs[10][NumWAMRegs];
+#else
 PWord *wm_regs[100][NumWAMRegs];
+#endif /* KERNAL */
 
 #ifdef MacOS
 /* Since the Mac WAM is not allowed to use the A5 register, we store

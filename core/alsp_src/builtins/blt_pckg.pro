@@ -32,6 +32,7 @@ export pckg_init/0.
 
 pckg_init 
 	:-
+	setInterruptVector('$interrupt'),
 	initialize_global_variables,
 	sio_pckg_init.
 

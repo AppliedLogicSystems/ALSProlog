@@ -53,8 +53,6 @@
 #elif defined(MSWin32)
 #include <windows.h>
 #include "fswin32.h"
-#else
-#error
 #endif			/* OS includes */
 
 
@@ -811,6 +809,20 @@ isdir(fname)
 
 #endif /* 0000 */
 
+#ifdef PURE_ANSI
+#define R_OK 0
+static int faccess(char *fname, int mode)
+{
+    FILE *f;
+    f = fopen(fname, "r");
+    if (f == NULL) return 1;
+    else {
+	fclose(f);
+	return 0;
+    }
+}
+#define get_file_modified_time(fname) (!faccess(fname, R_OK))
+#endif /* PURE_ANSI */
 
 
 #ifdef OLDCLOAD
@@ -863,14 +875,22 @@ load_file(fname, options)
     /*
      * Run fnp backwards looking for an extension.
      */
+#ifdef PURE_ANSI
+    for (fnp--; fnp != fname && *fnp != '.'; fnp--) ;
+#else
     for (fnp--; fnp != fname && *fnp != DIR_SEPARATOR && *fnp != '.'; fnp--) ;
+#endif /* PURE_ANSI */
 
 /*  printf("load_file:fname=%s fnp=%s\n",fname,fnp);  */
     /*
      *  Try to access the file as specified by making sure that
      *  it is not a directory. If it is accessable, load that file.
      */
-    if (access(fname, R_OK) == 0 && !isdir(fname)) 
+#ifdef PURE_ANSI
+    if (faccess(fname, R_OK) == 0) 
+#else
+    if (access(fname, R_OK) == 0 && !isdir(fname))
+#endif /* PURE_ANSI */
 	{
 /*  printf("load_file:access ok to fname=%s\n",fname);  */
 #ifdef OBP
@@ -999,7 +1019,11 @@ load_file(fname, options)
 #ifdef	VMS
 		delete(new_fname);
 #else  /* VMS */
+#ifdef PURE_ANSI
+		remove(new_fname);
+#else
 		unlink(new_fname);
+#endif /*PURE_ANSI */
 #endif /* VMS */
 #endif /* DOS */
 	    }

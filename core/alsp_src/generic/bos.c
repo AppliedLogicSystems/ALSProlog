@@ -35,6 +35,7 @@
 #include "fswin32.h"
 #endif
 
+#ifndef PURE_ANSI
 int
 pbi_access()
 {				/* $access(path,mode) */
@@ -57,8 +58,26 @@ pbi_access()
 	FAIL;
 
 }
+#endif /* PURE_ANSI */
 
 #ifdef OSACCESS
+#ifndef PURE_ANSI
+int
+pbi_chdir()
+{
+    PWord v1;
+    int   t1;
+    UCHAR *str;
+
+    w_get_An(&v1, &t1, 1);
+
+    if (getstring(&str, v1, t1) && chdir((char *) str) == 0)
+	SUCCEED;
+    else
+	FAIL;
+}
+#endif /* PURE_ANSI */
+
 int
 pbi_getenv()
 {
@@ -289,6 +308,7 @@ static unsigned char *c2pstrcpy(unsigned char *ps, const char *cs)
 }
 #endif
 
+#ifndef PURE_ANSI
 static int copy_file(const char *from_file, const char *to_file)
 {
 #if defined(MacOS)
@@ -368,4 +388,4 @@ int pbi_copy_file(void)
     if (copy_file(from_file, to_file)) SUCCEED;
 	else FAIL;
 }
-
+#endif /* PURE_ANSI */
