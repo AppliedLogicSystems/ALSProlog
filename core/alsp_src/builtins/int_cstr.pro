@@ -20,38 +20,61 @@ module rel_arith.
 intvl(_,_,_,_).
 
 /*---------------------------------------------------------------
+	type_and_bounds/5
+	type_and_bounds(TypeDescrip, PrologType, Lower, Upper, TypeCode)
+	type_and_bounds(+, -, -, -, -)
+
+	TypeCode: real = 0; integer = 1; boolean = 2
  *--------------------------------------------------------------*/
-type_and_bounds(real(L,U),    real,    L, U).
-type_and_bounds(real,         real,    L, U).
-type_and_bounds(integer(L,U), integer, L, U).
-type_and_bounds(integer,      integer, L, U).
-type_and_bounds(boolean(L,U), boolean, 0, 1).
-type_and_bounds(boolean,      boolean, 0, 1).
+type_and_bounds(real(L,U),    real,    L, U, 0).
+type_and_bounds(real,         real,    L, U, 0).
+type_and_bounds(integer(L,U), integer, L, U, 1).
+type_and_bounds(integer,      integer, L, U, 1).
+type_and_bounds(boolean(L,U), boolean, 0, 1, 2).
+type_and_bounds(boolean,      boolean, 0, 1, 2).
 
 /*---------------------------------------------------------------
  |	new_type_interval/2
- |	new_type_interval(Type,X)
+ |	new_type_interval(TypeDescrip,X)
  |	new_type_interval(+,+)
  |
  |	- makes X into an interval delay var of type Type
  |
  |  This is the only routine which creates interval variables.
+ |
+ |	The structure of the term bound to X is:
+ |
+ |		intvl(PrologType,X,UsedBy,L,U,UIA)
+ |
+ |	where:
+ |		type_and_bounds(TypeDescrip, PrologType, L, U, TC) holds
+ |		UsedBy initially = [] (will be mangled later)
+ |		UIA is 3 8-byte words:
+ |			| L | U | TC |
+ |
+ |		The "correct" values of the endpoints (& the type) are
+ |		what is stored in the UIA (for easy access from C); 
+ |		these are set when the interval is initially created, and
+ |		are typically updated from the C side; whenever an access
+ |		is made to the end point values from the Prolog side, then
+ |		the Prolog representations (L,U above) are updated from
+ |		the values in UIA.
  *--------------------------------------------------------------*/
 
-	%% should make this (24) more accurate:
 uia_space(_,UIA)
 	:-
-%	'$uia_alloc'(24,UIA).
-	'$uia_alloc'(16,UIA).
+	'$uia_alloc'(24,UIA).
+%	'$uia_alloc'(16,UIA).
 
-new_type_interval(Type,X)
+new_type_interval(TypeDescrip,X)
 	:-
-	type_and_bounds(Type, BareType, L, U),
+	type_and_bounds(TypeDescrip, BareType, L, U, TC),
 	interval_bound(lower,L,L1,BareType),
 	interval_bound(upper,U,U1,BareType),
 	uia_space(BareType,UIA),
 	'$uia_poked'(UIA,0,L1),
 	'$uia_poked'(UIA,8,U1),
+	'$uia_poked'(UIA,16,TC),
 	freeze_goal_for(BareType, X, L1, U1, UIA, FreezeGoal),
 	freeze(X, FreezeGoal).
 
@@ -59,14 +82,15 @@ freeze_goal_for(real,    X, L1, U1, UIA, intvl(real,   X,[],UIA) ).
 freeze_goal_for(integer, X, L1, U1, UIA, intvl(integer,X,[],UIA) ).
 freeze_goal_for(boolean, X, L1, U1, UIA, intvl(boolean,X,[],UIA) ).
 
-new_combined_interval(Type, X)
+new_combined_interval(TypeDescrip, X)
 	:-
-	type_and_bounds(Type, BareType, L, U),
+	type_and_bounds(TypeDescrip, BareType, L, U, TC),
 	interval_bound(lower,L,L1,BareType),
 	interval_bound(upper,U,U1,BareType),
 	uia_space(BareType,UIA),
 	'$uia_poked'(UIA,0,L1),
 	'$uia_poked'(UIA,8,U1),
+	'$uia_poked'(UIA,16,TC),
 	freeze_goal_for(BareType, X, L1, U1, UIA,TypeFreezeGoal),
 	'$delay_term_for'(X, DelayTerm),
 	arg(4, DelayTerm, OrigDomainTerm),
@@ -330,7 +354,7 @@ export '$iterate'/1.
 	XFGoal =.. [pop, OpCd,Z,X,Y,LinkArg],
 	fixup_iter(Args, Z,X,Y,XFGoal),
 
-%printf_opt('%t--XFGoal= %t\n',[Goal,XFGoal], [lettervars(false) ,line_length(100)]),
+printf_opt('>>%t--XFGoal= %t\n',[Goal,XFGoal], [lettervars(false) ,line_length(100)]),
 %show_used_by(['Z'-Z,'X'-X,'Y'-Y]),
 
 	'$iter_link_net'(OpCd,Z,X,Y,XFGoal).
@@ -379,49 +403,5 @@ breadth_first_compare(Left, Right, Op)
 cadj( = ,  @= ).
 cadj( < ,  @< ).
 cadj( > ,  @> ).
-
-/***********************
-:-dynamic(it_debug_cq/0).
-:-dynamic(it_debug_gl/0).
-
-export '$iterate'/1.
-
-'$iterate'(Goal)
-	:-
-	Goal =.. [OP | Args],
-	prim_op_code(OP,OpCd),
-	fixup_iter(Args, Z,X,Y),
-	!,
-	'$iter_link_net'(OpCd,Z,X,Y,Goal).
-
-/*
-fixup_iter([Z,X], Z,X,0).
-fixup_iter([Z,X,Y], Z,X,Y).
-*/
-
-prim_op_code(unequal, 0).
-prim_op_code(equal, 1).
-prim_op_code(greatereq, 2).
-prim_op_code(higher, 3).
-prim_op_code(add, 4).
-prim_op_code(begin_tog, 5).
-prim_op_code(finish_tog, 6).
-prim_op_code(inf, 7).
-prim_op_code(j_less, 8).
-prim_op_code(k_equal, 9).
-prim_op_code(lub, 10).
-prim_op_code(mul, 11).
-prim_op_code(narrower, 12).
-prim_op_code(or, 13).
-prim_op_code(pow_odd, 14).
-prim_op_code(qpow_even, 15).
-prim_op_code(rootsquare, 16).
-prim_op_code(vabs, 17).
-prim_op_code(wrap, 18).
-prim_op_code(xp, 19).
-prim_op_code(cos, 20).
-prim_op_code(sin, 21).
-prim_op_code(tan, 22).
-*************************/
 
 endmod.		%% rel_arith

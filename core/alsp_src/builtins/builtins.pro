@@ -996,10 +996,6 @@ ld_wins
 
 :- dynamic(intconstr/0).
 
-:-
-	consult_builtins(ra_basis),
-	consult_builtins(int_cstr).
-
 :-  intconstr, !, 
 	consult_builtins(ra_basis),
 	consult_builtins(int_cstr)
@@ -1038,6 +1034,7 @@ ld_wins
 		%% This starts the tty shell:
 '$start' 
 	:-
+pbi_write(calling_start_shell),pbi_nl,pbi_ttyflush,
 	start_shell(builtins:prolog_shell).
 
 endmod.		%% builtins.pro -- Main File for builtins
