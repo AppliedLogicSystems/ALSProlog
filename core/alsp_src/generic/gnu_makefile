@@ -66,7 +66,8 @@ $(MAIN_OBJECTS) : $(MAKEFS)
 
 $(LIB_OBJECTS) $(STATIC_OBJECTS) $(SHARED_OBJECTS) : $(MAKEFS)
 
-binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro alsdev studalsdev
+binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro alsdev \
+			studalsdev alsdev_demo alspro_demo
 
 all : default
 
@@ -137,12 +138,14 @@ iso_test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
 
 ALSDEVFILES = blt_dvsh.pro dbg_class.pro projects.pro
-ALSDEVLIBS=listutl1,miscterm,msc_ioin,mscioout,strctutl,strings,tcl_sppt,tk_alslib,typecomp
-ALSDEVLIBPS =listutl1.pro miscterm.pro msc_ioin.pro mscioout.pro strctutl.pro strings.pro \
-			tcl_sppt.pro tk_alslib.pro typecomp.pro
+ALSDEVLIBS=listutl1,misc_db,miscterm,msc_ioin,mscioout,strctutl,strings,tcl_sppt,tk_alslib,typecomp
+ALSDEVLIBPS =listutl1.pro misc_db.pro miscterm.pro msc_ioin.pro mscioout.pro strctutl.pro \
+			strings.pro tcl_sppt.pro tk_alslib.pro typecomp.pro
 
 GETDIR=$(CORE)/als_dev/alsdev/getDirectory
 GETFILES=$(CORE)/als_dev/alsdev/getFiles
+ALSDEVDIR=$(CORE)/als_dev/alsdev
+DEMOFILES=$(ALSDEVDIR)/demo15.pro $(ALSDEVDIR)/serial_cmn.pro $(ALSDEVDIR)/ldr_dvsh.pro
 
 lib: $(GETDIR)/getDirectory.tcl $(GETDIR)/unix_pkgIndex.tcl $(GETFILES)/getFiles.tcl $(GETFILES)/unix_pkgIndex.tcl $(MAKEFS)
 	cp -r /apache/als_build_support/unix/lib .
@@ -158,6 +161,7 @@ alsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES)
 	rm -f alsdir/builtins/*.obp
 	rm -f alsdir/library/*.obp
 	rm -f $(SUBOS)/*.obp
+	rm -f *.obp
 	./alspro_b -q -b -obp -no_dot_alspro \
 	alsdir/shared/tcltk_util \
 	-g 'save_image(alsdev,[start_goal((builtins:start_alsdev)), \
@@ -168,6 +172,7 @@ studalsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFI
 	rm -f alsdir/builtins/*.obp
 	rm -f alsdir/library/*.obp
 	rm -f $(SUBOS)/*.obp
+	rm -f *.obp
 	./alspro_b -q -b -obp -no_dot_alspro \
 	alsdir/shared/tcltk_util \
 	-g 'builtins:abolish(save_image,1), \
@@ -175,6 +180,26 @@ studalsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFI
 	save_image(studalsdev,[start_goal((builtins:start_alsdev)), \
 	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
 	select_lib(library,[$(ALSDEVLIBS)])])'
+
+alsdev_demo :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
+	rm -f alsdir/builtins/*.obp
+	rm -f alsdir/library/*.obp
+	rm -f $(SUBOS)/*.obp
+	rm -f *.obp
+	./alspro_b -q -b -obp -no_dot_alspro \
+	alsdir/shared/tcltk_util \
+	../../als_dev/alsdev/demo15 ../../als_dev/alsdev/serial_cmn \
+	-g '((builtins:assert(dvf)),save_image(alsdev_demo,[start_goal((builtins:start_alsdev)), \
+	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
+	select_lib(library,[$(ALSDEVLIBS)])]))'
+
+alspro_demo :  alsdir alspro_b $(BUILTINS) $(MAKEFS) $(DEMOFILES)
+	rm -f alsdir/builtins/*.obp
+	rm -f alsdir/library/*.obp
+	rm -f $(SUBOS)/*.obp
+	rm -f *.obp
+	./alspro_b -q -b -obp $(ALSDEVDIR)/demo_ldr -g '((builtins:assert(dvf)),save_image(alspro_demo,[]))'
+
 
 clean :
 	rm -f *.o rm *.d
