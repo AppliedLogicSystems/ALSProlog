@@ -2011,7 +2011,8 @@ export reset_all_spypoints/0.
 reset_all_spypoints
 	:-
     dbg_spyoff,
-	findall(Mod-List, mspylist(Mod,List), SpyList),
+%	findall(Mod-List, mspylist(Mod,List), SpyList),
+	allspylist(SpyList),
 	reset_the_spypoints(SpyList),
     setPrologInterrupt(spying),
     setDebugInterrupt(spying),
@@ -2024,6 +2025,32 @@ mspylist(Mod,List)
 			(debugger:spying_on(CallForm,Mod), 
 			 functor(CallForm,Pred,Arity) ),
 			List).
+
+allspylist(List)
+	:-
+	findall(Mod/(Pred/Arity),
+			(debugger:spying_on(CallForm,Mod), 
+			 functor(CallForm,Pred,Arity) ),
+			List0),
+	group_mods(List0, List).
+
+group_mods(List0, List)
+	:-
+	group_mods(List0, [], List).
+
+group_mods([], List, List).
+group_mods([M/(P/A) | Rest], CurList, List)
+	:-
+	insert_mp(CurList,M,P/A,NextList),
+	group_mods(Rest, NextList, List).
+
+insert_mp([],M,PA,[M-[PA]]).
+insert_mp([M-ML | CurList],M,PA,[M-[PA | ML] | CurList])
+	:-!.
+insert_mp([Group | CurList],M,PA,[Group | NextList])
+	:-
+	insert_mp(CurList,M,PA,NextList).
+
 
 has_spypoint(Mod)
 	:-

@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.76 1999/02/06 22:23:06 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.77 1999/02/07 10:11:47 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -760,7 +760,26 @@ proc listener.new {}   { document.new }
 proc listener.open {}  { document.open }
 proc listener.close {w} { exit_prolog }
 proc listener.save {w}  { listener.save_as $w }
-proc listener.save_as {w}  { bell }
+
+#proc listener.save_as {w}  { bell }
+
+
+proc listener.save_as {w} {
+	global array proenv
+	global tcl_platform
+	
+	set file [tk_getSaveFile -initialfile prolog_env \
+		-defaultextension .txt ]
+	if {$file != ""} then {
+		store_text $w.text $file
+		return true
+	} else {
+		return false
+	}
+}
+
+
+
 
 proc debugwin.new {}   { document.new }
 proc debugwin.open {}  { document.open }

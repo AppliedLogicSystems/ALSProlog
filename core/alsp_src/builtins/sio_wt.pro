@@ -687,7 +687,6 @@ is_string([H | T], L, Hole) :-
      * Write out a term involving an operator.
      */
 
-
     %% == Parentheses needed
 wdop(Assoc,Lev,OLev,OFunc,Exp,Depth,SpaceIn,nospace, L1,Hole, BP,WInfo) :-
     Lev < OLev,
@@ -1647,7 +1646,8 @@ wr_subs3(N,S,_,Stream)
 %put_atom(Stream,'@'),
 	write_term(Stream,'%lettervar%'(N)=S,[]).
 */
-	printf(Stream, '\n%t=%t ', ['%lettervar%'(N), S]).
+%	printf(Stream, '\n%t=%t ', ['%lettervar%'(N), S]).
+	printf(Stream, '\n%t=%t ', ['%lettervar%'(N), S], [quoted(true)]).
 
 rpairs_list([],[],[]).
 
