@@ -671,6 +671,12 @@ is_string(H,T,[0'\\,H | NewT],Hole) :-
 	!,
 	nonvar(T),
 	is_string(T,NewT,Hole).
+is_string(H,T,[0'\\,H | NewT],Hole) :-
+	nonvar(H),
+	H = 0'\\,
+	!,
+	nonvar(T),
+	is_string(T,NewT,Hole).
 is_string(H,T,[H | NewT],Hole) :-
 	integer(H),
 	nonvar(T),
