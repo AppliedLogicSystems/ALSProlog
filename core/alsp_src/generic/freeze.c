@@ -46,7 +46,7 @@ int pbi_kill_freeze		PARAMS(( void ));
 int
 pbi_delay()
 {
-	PWord *dv,m,g,vv,rdt,*one,*two;
+	PWord *dv,m,g,vv,rdt,*one,*two, *HHH ;
 	int dvt,mt,gt,vvt,rdtt;
 
 #ifdef DEBUGFREEZE
@@ -94,7 +94,7 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 	w_install(one,(int)one,MTP_UNBOUND); 
 	two = (PWord *)((PWord *)wm_H + 2); 
 	w_install(two,(int)two,MTP_UNBOUND);
-
+HHH = wm_H;
 		/* make the delay term: */
 	w_mk_term(&vv, &vvt, TK_DELAY, 4);
 		/* the 2nd arg (=two) is ok -- it's unbound;
@@ -102,6 +102,7 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 	w_install_argn(vv, 3, m,mt);
 	w_install_argn(vv, 4, g,gt);  
 
+printf("    - *wm_H=%x funct(*wm_H)=%x arity(*wm_H)=%d\n", (int)*HHH, (int)MFUNCTOR_TOKID(*HHH),(int)MFUNCTOR_ARITY(*HHH) );
 	/* ------------------------------------------------------*
 	   Next, we have to trail the binding we will install
 	   in dv, so that if we backtrack over this, it will
@@ -173,10 +174,12 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 	if (w_unify(rdt, rdtt, vv, vvt))
 	{
 #ifdef DEBUGFREEZE
-pbi_cptx();
-printf("exit delay---wm_H=%x--real_dv=%x[_%lu]-------\n", 
+pbi_cptx(); 
+printf("exit delay---wm_H=%x--real_dv=%x[_%lu]--*incom=%x -----\n", 
 					(int)wm_H,  (int)one,
-					(long)(((PWord *) one) - wm_heapbase));
+					(long)(((PWord *) one) - wm_heapbase),
+					(int)*dv
+					);
 #endif
 
 #ifdef DEBUGSYS
@@ -277,8 +280,8 @@ pbi_clct_tr()
 			/* Delay term not allowed to be resettable: */
 		if (CHK_DELAY(*CurT))
 		{
-			DrT = deref_2(*CurT);
-			printf("Delay VAR! <%x | %x> ",(int)(**CurT),(int)deref_2(*CurT));
+			DrT = deref_2((PWord)*CurT);
+			printf("Delay VAR! <%x | %x> ",(int)(**CurT),(int)deref_2((PWord)*CurT));
 			Forw1 = (PWord *)DrT + 1;
 			if (M_ISVAR(*Forw1) && (M_VARVAL(*Forw1) == (PWord)Forw1)) 
 				{
@@ -390,7 +393,7 @@ combin_dels(r,f)
 #ifdef DEBUGFREEZE
 printf("combin_dels:r=_%lu f=_%lu wm_H=%x wm_HB=%x wm_B=%x\n",
 			(long)(((PWord *) r) - wm_heapbase),
-			(long)(((PWord *) f) - wm_heapbase), wm_H,wm_HB,wm_B); 
+			(long)(((PWord *) f) - wm_heapbase), (int)wm_H,(int)wm_HB,(int)wm_B); 
 #endif
 
 	w_mk_sym(&mod,&mod_t,TK_BUILTINS);  
