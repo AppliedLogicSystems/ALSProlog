@@ -616,9 +616,7 @@ pbi_uia_pokel()
 }
 
 static int
-do_pbi_uia_peekd(v1,t1, v2,t2, v3,t3)
-    PWord v1, v2, v3;
-    int   t1, t2, t3;
+do_pbi_uia_peekd(PWord v1, int t1, PWord v2, int t2, PWord v3, int t3)
 {
     PWord val;
     int   valtype;
@@ -654,9 +652,7 @@ pbi_uia_peekd()
 
 
 static int
-do_pbi_uia_poked(v1,t1, v2,t2, v3,t3)
-    PWord v1, v2, v3;
-    int   t1, t2, t3;
+do_pbi_uia_poked(PWord v1, int t1, PWord v2, int t2, PWord v3, int t3)
 {
     double pval;
 
