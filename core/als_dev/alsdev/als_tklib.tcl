@@ -389,7 +389,7 @@ proc move_col_left {base} {
 	set RevSelIndicies [lsort -decreasing $SelIndicies]
 	foreach Index $RevSelIndicies {
 		set Hold [$base.cols_fr.r.rightlist.lstbx get $Index]
-puts "mcl: I=$Index H=$Hold"
+#puts "mcl: I=$Index H=$Hold"
 		lappend MovedList $Hold
 		$base.cols_fr.r.rightlist.lstbx delete $Index
 		$base.cols_fr.l.leftlist.lstbx insert end $Hold

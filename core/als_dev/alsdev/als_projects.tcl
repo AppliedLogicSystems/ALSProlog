@@ -5,20 +5,16 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.7 1998/08/17 20:29:45 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.8 1998/08/23 18:31:37 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
 	send_prolog als_ide_mgr load_project
 }
 
-#	prolog call alsdev load_project
-
 proc load_this_project {} {
 	send_prolog als_ide_mgr load_this_project
 }
-
-#	prolog call alsdev load_this_project
 
 proc open_project {} {
 	send_prolog als_ide_mgr open_project
@@ -37,15 +33,15 @@ proc select_project_file {} {
 }
 
 proc save_project {} {
-	prolog call alsdev save_project
+	send_prolog als_ide_mgr save_project
 }
 
 proc close_project {} {
-	prolog call alsdev close_project
+	send_prolog als_ide_mgr close_project
 }
 
 proc new_project {} {
-	prolog call alsdev start_new_project
+	send_prolog als_ide_mgr start_new_project
 }
 
 
@@ -63,15 +59,10 @@ proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
 	$Listbox insert end $BaseNewFile
 }
 
-
-
-
-
 proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir} {
 
 	prolog call alsdev choose_mult_files \
 		-list $FileTypes -atom $FileKind -atom $DfltDir -var Choices
-puts "$Choices"
 	foreach Entry $Choices {
 		$Listbox insert end $Entry
 	}
@@ -88,3 +79,9 @@ proc add_search_dirs {Listbox} {
 	cd $CWD
 }
 
+proc prj_slot_focus { Slot Listbox PrjMgrHandle } {
+	global proenv
+	set Item [$Listbox get [lindex [$Listbox curselection] 0] ]
+	prolog call $proenv(dflt_mod) send \
+		-number $PrjMgrHandle  -list [list prj_slot_focus $Slot $Item]
+}
