@@ -52,3 +52,5 @@ t :-
 	call_test,
 	arg_test.
 
+tt :- t, !, tt.
+
