@@ -100,7 +100,7 @@ INTERVAL two_to_nDI(int n) {
   when fpsetround is not available
 */
 
-double next_fp(double x) {
+static double next_fp(double x) {
   UDOUBLE m;
   if (x >= 0) {
     if (x==POS_INF.d)
@@ -129,7 +129,7 @@ double next_fp(double x) {
   }
 }
 
-double prev_fp(double x) {
+static double prev_fp(double x) {
   return(-next_fp(-x));
 }
 
