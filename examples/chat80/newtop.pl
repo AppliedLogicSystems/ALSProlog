@@ -64,7 +64,7 @@ advance(X,N0,N) :-
       nl,
       N is 0;
    N is M+1,
-      put(" ")).
+      put_char(' ')).
 
 uses(nb(X),N) :- !,
    chars(X,N).
@@ -80,14 +80,16 @@ end(user) :- !.
 end(F) :-
    close(F).
 
-control([bye,'.']) :- !,
+control([W,'.']) :- 
+   (W=bye; W=quit; W=exit; W=done; W=thanks),
+   !,
    display('Cheerio.'),
    nl.
 control([trace,'.']) :- !,
    assert(tracing),
    display('Tracing from now on!'), nl, fail.
 control([do,not,trace,'.']) :-
-   retract(tracing), !,
+   abolish(tracing/0), !,
    display('No longer tracing.'), nl, fail.
 control(U) :-
    process(U),
