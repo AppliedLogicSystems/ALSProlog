@@ -1,3 +1,4 @@
+setlocal
 set CWPATH=\Program Files\Metrowerks\CodeWarrior
 set TCLTKPATH=%CWPATH%\ALS Build Support\Tcl-Tk Support
 copy setcwd.bat temp.bat
@@ -23,3 +24,4 @@ set DEV_ALSDIR=..\alsp_src
 alspro_b -b -g "(consult('..\\als_dev\\alsdev\\ldr_dvsh'),consult('..\\tcltk_interface\\common\\tcltk_util'), attach_image('ALS Prolog.exe'))"
 alspro_b -b -g "(consult('..\\als_dev\\alsdev\\ldr_dvsh'),consult('..\\tcltk_interface\\common\\tcltk_util'),builtins:abolish(save_image,1),builtins:abolish(save_image,2),sio:abolish(open_socket_stream,4),attach_image('ALS Student Prolog.exe'))"
 alspro_b -b -g "save_image(alspro)"
+endlocal
