@@ -3,34 +3,34 @@
 #define ALSPI_DLIB_VERSION 1
 
 typedef struct {
-    char *	(*PI_forceuia)			( PWord *, int * );
-    void	(*PI_getan)			( PWord *, int *, int );
-    void	(*PI_getargn)			( PWord *, int *, PWord, int );
-    void	(*PI_gethead)			( PWord *, int *, PWord );
-    void	(*PI_gettail)			( PWord *, int *, PWord );
-    void	(*PI_getdouble)			( double *, PWord );
-    void	(*PI_getstruct)			( PWord *, int *, PWord );
-    char *	(*PI_getsymname)		( char *, PWord, int );
-    char *	(*PI_getuianame)		( char *, PWord, int );
-    void	(*PI_getuiasize)		( PWord, int * );
-    void	(*PI_makedouble)		( PWord *, int *, double );
-    void	(*PI_makelist)			( PWord *, int * );
-    void	(*PI_makestruct)		( PWord *, int *, PWord, int );
-    void	(*PI_makesym)			( PWord *, int *, const char * );
-    void	(*PI_makeuia)			( PWord *, int *, const char * );
-    void	(*PI_allocuia)			( PWord *, int *, int );
-    int		(*PI_vprintf)			( const char *, va_list );
-    int		(*PI_vaprintf)			( const char *, const char *, va_list );
-    void	(*PI_vapp_printf)		( int, va_list );
-    int		(*PI_rungoal)			( PWord, PWord, int );
-    int		(*PI_rungoal_with_update)	( PWord, PWord *, int * );
-    int		(*PI_unify)			( PWord , int, PWord , int );
-    void	(*PrologInit)                   ( PSTRUCT * );
-    int		(*CI_get_integer)		( PWord *, int );
-    int		(*CI_get_double)		( double *, unsigned long, unsigned long );
-    int		(*sym_insert_2long)		( char *, int, long, long );
-    int		(*sym_insert_dbl)		( char *, int, double );
-    const char *(*find_callback)		( void *, void * );
+    ALSPI_API(char *)	(*PI_forceuia)			( PWord *, int * );
+    ALSPI_API(void)	(*PI_getan)			( PWord *, int *, int );
+    ALSPI_API(void)	(*PI_getargn)			( PWord *, int *, PWord, int );
+    ALSPI_API(void)	(*PI_gethead)			( PWord *, int *, PWord );
+    ALSPI_API(void)	(*PI_gettail)			( PWord *, int *, PWord );
+    ALSPI_API(void)	(*PI_getdouble)			( double *, PWord );
+    ALSPI_API(void)	(*PI_getstruct)			( PWord *, int *, PWord );
+    ALSPI_API(char *)	(*PI_getsymname)		( char *, PWord, int );
+    ALSPI_API(char *)	(*PI_getuianame)		( char *, PWord, int );
+    ALSPI_API(void)	(*PI_getuiasize)		( PWord, int * );
+    ALSPI_API(void)	(*PI_makedouble)		( PWord *, int *, double );
+    ALSPI_API(void)	(*PI_makelist)			( PWord *, int * );
+    ALSPI_API(void)	(*PI_makestruct)		( PWord *, int *, PWord, int );
+    ALSPI_API(void)	(*PI_makesym)			( PWord *, int *, const char * );
+    ALSPI_API(void)	(*PI_makeuia)			( PWord *, int *, const char * );
+    ALSPI_API(void)	(*PI_allocuia)			( PWord *, int *, int );
+    ALSPI_API(int)	(*PI_vprintf)			( const char *, va_list );
+    ALSPI_API(int)	(*PI_vaprintf)			( const char *, const char *, va_list );
+    ALSPI_API(void)	(*PI_vapp_printf)		( int, va_list );
+    ALSPI_API(int)	(*PI_rungoal)			( PWord, PWord, int );
+    ALSPI_API(int)	(*PI_rungoal_with_update)	( PWord, PWord *, int * );
+    ALSPI_API(int)	(*PI_unify)			( PWord , int, PWord , int );
+    ALSPI_API(void)	(*PrologInit)                   ( PSTRUCT * );
+    ALSPI_API(int)	(*CI_get_integer)		( PWord *, int );
+    ALSPI_API(int)	(*CI_get_double)		( double *, unsigned long, unsigned long );
+    ALSPI_API(int)	(*sym_insert_2long)		( char *, int, long, long );
+    ALSPI_API(int)	(*sym_insert_dbl)		( char *, int, double );
+    ALSPI_API(const char *)(*find_callback)		( void *, void * );
     		
 } alspi_func_ptrs;
 

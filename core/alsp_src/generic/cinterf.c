@@ -18,7 +18,7 @@
 #ifdef BCINTER
 
 #include <stdio.h>
-#include "cinterf.h"
+#include "alspi.h"
 
 static	int	lookup_c_sym	PARAMS(( char * ));
 static	int	c_structinfo	PARAMS(( void ));
@@ -40,12 +40,13 @@ static int farsymtype;
 static PWord fieldsym;
 static int fieldsymtype;
 
-static PWord nil;
+static PWord pnil;
 static int niltype;
 
 static PWord constsym;
 static int constsymtype;
 
+#if 0
 /*
  * Convert a DOS far pointer into a prolog structure of
  * the form $farptr(short,short,short).
@@ -71,6 +72,7 @@ CI_makefar(vp, tp, ptr)
     PI_getargn(&arg, &argtype, *vp, 3);
     PI_unify(arg, argtype, (PWord) * (ptr + 2), PI_INT);
 }
+#endif
 
 /*
  * SYMBOL TABLE
@@ -169,12 +171,13 @@ lookup_c_sym(symbol)
 
 }
 
+#ifdef macintosh
+#pragma export on
+#endif
 
-int
-sym_insert_dbl(symbol, type, doubleval)
-    char *symbol;
-    int   type;
-    double doubleval;
+
+ALSPI_API(int)
+sym_insert_dbl(char *symbol, int type,  double doubleval)
 {
     int   idx;
 
@@ -191,11 +194,8 @@ sym_insert_dbl(symbol, type, doubleval)
 }
 
 
-int
-sym_insert_2long(symbol, type, longval1, longval2)
-    char *symbol;
-    int   type;
-    long  longval1, longval2;
+ALSPI_API(int)
+sym_insert_2long(char *symbol, int type, long longval1, long longval2)
 {
     int   idx;
 
@@ -235,7 +235,7 @@ sym_insert_2long(symbol, type, longval1, longval2)
  | PI_VAR            None.  Return 0.
  *---------------------------------------------------------------------------*/
 
-int
+ALSPI_API(int)
 CI_get_integer(PWord *arg, int type)
 {
     double adbl;
@@ -331,10 +331,8 @@ CI_get_integer(PWord *arg, int type)
  * int CI_get_double(double *,unsigned long, unsigned long)
  */
 
-int
-CI_get_double(dbl, arg, type)
-    double *dbl;
-    unsigned long arg, type;
+ALSPI_API(int)
+CI_get_double(double *dbl, unsigned long arg, unsigned long type)
 {
     switch (type) {
 	case PI_INT:
@@ -393,6 +391,9 @@ CI_get_double(dbl, arg, type)
     return (0);
 }
 
+#ifdef macintosh
+#pragma export off
+#endif
 
 /*
  * Interface to structures and other c types
@@ -495,7 +496,7 @@ c_structinfo()
 	PI_gettail(&V3, &T3, list);
     }
 
-    if (!PI_unify(V3, T3, nil, niltype) ||
+    if (!PI_unify(V3, T3, pnil, niltype) ||
 	!PI_unify(V2, T2, size, PI_INT))
 	PI_FAIL;
     PI_SUCCEED;
@@ -893,7 +894,12 @@ static void remove_callback(void *func, void *object, const char *term)
     }
 }
 
-const char *find_callback(void *func, void *object)
+#ifdef macintosh
+#pragma export on
+#endif
+
+ALSPI_API(const char *)
+find_callback(void *func, void *object)
 {
     int i;
 
@@ -901,6 +907,10 @@ const char *find_callback(void *func, void *object)
         return callback_table[i].term;
     } else return NULL;
 }
+
+#ifdef macintosh
+#pragma export off
+#endif
 
 /* Warning: when binding and unbinding symbols to (callback, object) pairs, I assume
    that the C string pointer to the symbol will never move. Is this true? */
@@ -968,7 +978,7 @@ void
 cinterf_init()
 {
     PI_makesym(&fieldsym, &fieldsymtype, "f");
-    PI_makesym(&nil, &niltype, "[]");	/* make a nil symbol */
+    PI_makesym(&pnil, &niltype, "[]");	/* make a nil symbol */
     PI_makesym(&farsym, &farsymtype, "$farptr");
     PI_makesym(&constsym, &constsymtype, "c");
 

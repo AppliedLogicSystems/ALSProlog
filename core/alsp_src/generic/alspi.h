@@ -35,6 +35,14 @@ extern "C" {
 #endif
 #endif /* PARAMS */
 
+#if defined(macintosh)
+#define ALSPI_API(X)	pascal X
+#elif defined(WIN32)
+#define ALSPI_API(X)	X __stdcall
+#else
+#define ALSPI_API(X)    X
+#endif
+
 #ifndef PWordTypeDefined
 typedef long PWord;
 #define PWordTypeDefined 1
@@ -64,18 +72,6 @@ typedef struct {
 
 #define PI_INIT PrologInit(pi_init_array)
 
-extern char *WinsTypeStr;
-
-#define X_WIN_STR   "xwins"
-#define MOTIF_WIN_STR "motif"
-#define OL_WIN_STR    "openlook"
-#define DEC_WIN_STR   "decwins"
-#define NEXT_WIN_STR  "nextstep"
-#define MS_WIN_STR   "mswins"
-#define MAC_WIN_STR   "macwins"
-#define WXWIN_WIN_STR "wxwins"
-#define NO_WIN_STR    "nowins"
-
 /*
  * Added 6/11/88 - chris
  */
@@ -98,57 +94,83 @@ typedef enum {
     PI_app_printf_fatal_error		/* message is fatal error */
 } PI_app_printf_flags;
 
+/* PI_system_setup is a structure containing initilization information
+   for the ALS Prolog engine.
+   
+   Fields set to 0 or NULL will cause the engine to use its default
+   value.
+ */
+
+typedef struct {
+    unsigned long heap_size;   /* Prolog heap size in K long words */
+    unsigned long stack_size;  /* Prolog stack size in K long words */
+    unsigned long icbuf_size;  /* Prolog compiler buffer size in K code words */
+    const char *alsdir;        /* Path to the ALS directory */
+    const char *saved_state;   /* Path to saved state file */
+
+    /* OS Specific setup information */
+    
+    /* ANSI C main() command line argument count and vector */
+    int argc;
+    char **argv;
+    
+#ifdef WIN32
+    /* Win32 WinMain() arguments */
+    HINSTANCE hInstance;
+    HINSTANCE hPrevInstance;
+    LPSTR lpCmdLine;
+    int nCmdShow;
+#endif
+} PI_system_setup;
+
 /*
  * Declarations for foreign interface functions - 6/15/88 - chris
  */
 
-extern	char *	PI_forceuia	PARAMS(( PWord *, int * ));
-extern	void	PI_getan	PARAMS(( PWord *, int *, int ));
-extern	void	PI_getargn	PARAMS(( PWord *, int *, PWord, int ));
-extern	void	PI_gethead	PARAMS(( PWord *, int *, PWord ));
-extern	void	PI_gettail	PARAMS(( PWord *, int *, PWord ));
-extern	void	PI_getdouble	PARAMS(( double *, PWord ));
-extern	void	PI_getstruct	PARAMS(( PWord *, int *, PWord ));
-extern	char *	PI_getsymname	PARAMS(( char *, PWord, int ));
-extern	char *	PI_getuianame	PARAMS(( char *, PWord, int ));
-extern	void	PI_getuiasize	PARAMS(( PWord, int * ));
-extern	void	PI_makedouble	PARAMS(( PWord *, int *, double ));
-extern	void	PI_makelist	PARAMS(( PWord *, int * ));
-extern	void	PI_makestruct	PARAMS(( PWord *, int *, PWord, int ));
-extern	void	PI_makesym	PARAMS(( PWord *, int *, CONST char * ));
-extern	void	PI_makeuia	PARAMS(( PWord *, int *, CONST char * ));
-extern	void	PI_allocuia	PARAMS(( PWord *, int *, int ));
-extern	int	PI_printf	PARAMS(( CONST char *, ... ));
-extern	int	PI_aprintf	PARAMS(( CONST char *, CONST char *, ... ));
-extern  int     PI_vprintf	PARAMS(( CONST char *, va_list ));
-extern  int     PI_vaprintf	PARAMS(( CONST char *, CONST char *, va_list ));
-extern	int	PI_rungoal	PARAMS(( PWord, PWord, int ));
-extern	int	PI_rungoal_with_update	PARAMS(( PWord, PWord *, int * ));
-extern	int	PI_unify	PARAMS(( PWord , int, PWord , int ));
-extern	void	PrologInit	PARAMS(( PSTRUCT * ));
-extern	void	PI_shutdown	PARAMS(( void ));
-extern	int	PI_toplevel	PARAMS(( int * ));
-extern	int	PI_prolog_init	PARAMS((int, char ** ));
+extern	ALSPI_API(char *)	PI_forceuia	PARAMS(( PWord *, int * ));
+extern	ALSPI_API(void)	PI_getan	PARAMS(( PWord *, int *, int ));
+extern	ALSPI_API(void)	PI_getargn	PARAMS(( PWord *, int *, PWord, int ));
+extern	ALSPI_API(void)	PI_gethead	PARAMS(( PWord *, int *, PWord ));
+extern	ALSPI_API(void)	PI_gettail	PARAMS(( PWord *, int *, PWord ));
+extern	ALSPI_API(void)	PI_getdouble	PARAMS(( double *, PWord ));
+extern	ALSPI_API(void)	PI_getstruct	PARAMS(( PWord *, int *, PWord ));
+extern	ALSPI_API(char *)	PI_getsymname	PARAMS(( char *, PWord, int ));
+extern	ALSPI_API(char *)	PI_getuianame	PARAMS(( char *, PWord, int ));
+extern	ALSPI_API(void)	PI_getuiasize	PARAMS(( PWord, int * ));
+extern	ALSPI_API(void)	PI_makedouble	PARAMS(( PWord *, int *, double ));
+extern	ALSPI_API(void)	PI_makelist	PARAMS(( PWord *, int * ));
+extern	ALSPI_API(void)	PI_makestruct	PARAMS(( PWord *, int *, PWord, int ));
+extern	ALSPI_API(void)	PI_makesym	PARAMS(( PWord *, int *, CONST char * ));
+extern	ALSPI_API(void)	PI_makeuia	PARAMS(( PWord *, int *, CONST char * ));
+extern	ALSPI_API(void)	PI_allocuia	PARAMS(( PWord *, int *, int ));
+extern	ALSPI_API(int)	PI_printf	PARAMS(( CONST char *, ... ));
+extern	ALSPI_API(int)	PI_aprintf	PARAMS(( CONST char *, CONST char *, ... ));
+extern  ALSPI_API(int)	PI_vprintf	PARAMS(( CONST char *, va_list ));
+extern  ALSPI_API(int)	PI_vaprintf	PARAMS(( CONST char *, CONST char *, va_list ));
+extern	ALSPI_API(int)	PI_rungoal	PARAMS(( PWord, PWord, int ));
+extern	ALSPI_API(int)	PI_rungoal_with_update	PARAMS(( PWord, PWord *, int * ));
+extern	ALSPI_API(int)	PI_unify	PARAMS(( PWord , int, PWord , int ));
+extern	ALSPI_API(void)	PrologInit	PARAMS(( PSTRUCT * ));
+extern	ALSPI_API(void)	PI_shutdown	PARAMS(( void ));
+extern	ALSPI_API(int)	PI_toplevel	PARAMS(( int * ));
+extern	ALSPI_API(int)	PI_prolog_init	PARAMS(( int, char **));
+extern	ALSPI_API(int)	PI_startup	PARAMS(( CONST PI_system_setup *));
 
 #ifdef APP_PRINTF_CALLBACK
-extern	void	PI_set_app_printf_callback(void (*callback)(int, va_list));
+extern	ALSPI_API(void)	PI_set_app_printf_callback(void (*callback)(int, va_list));
 #endif
-extern	void	PI_app_printf	PARAMS(( int, ... ));
-extern  void    PI_vapp_printf  PARAMS(( int, va_list ));
-extern	const char *	PI_get_options	PARAMS(( void ));
+extern	ALSPI_API(void)	PI_app_printf	PARAMS(( int, ... ));
+extern  ALSPI_API(void)    PI_vapp_printf  PARAMS(( int, va_list ));
+extern	ALSPI_API(const char *)	PI_get_options	PARAMS(( void ));
 
 enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
-extern	void	PI_set_console_callback(int (*con_io)(int, char *, size_t));
+extern	ALSPI_API(void)	PI_set_console_callback(int (*con_io)(int, char *, size_t));
 
 #ifdef MacOS
 extern	long	yield_interval;
 extern  long	yield_counter;
 extern	void	PI_yield_time	PARAMS(( void ));
-#endif
-
-#ifdef __cplusplus
-}
 #endif
 
 /* Error codes */
@@ -239,5 +261,118 @@ extern	void	PI_yield_time	PARAMS(( void ));
 
 /* Defined EXIT_ERROR for reporting invalid options, etc. */
 #define EXIT_ERROR 2
+
+
+/*=====================================================================*
+ |		 cinterf.h
+ |		Copyright (c) 1992-95, Applied Logic Systems Inc.
+ |
+ |			-- defines for support routines for C interface
+ |
+ | Author : Prabhakaran Raman
+ | Creation : 2/1/92
+ *=====================================================================*/
+ 
+/*---------------------------------------------------------------------
+ * Information on the fields of a C-structure/C-union is kept in
+ * an array (one per structure/union) that has the following layout.
+ * (The array is initialized with the structure information by the
+ * interface generator ).
+ *--------------------------------------------------------------------*/
+
+typedef struct {
+  char *fname;
+  unsigned int foffset;
+  short  ftype;    /* integer identifying C type; 0 for struct/union */
+  char *typename;  /* when ftype is 0, typename is set to struct name */
+  int  arraysz;    /* N=0 => not an array, N>0 => array of size N */
+} FieldEntry;      /* For array, currently, this is set to 1000   */
+                   /* Later, when ctrans is modified to recognize */
+                   /* array size, this field with be set correctly*/
+                   /* What about multi-dimensional arrays ?       */
+
+#define CI_BEGARRAY(name) static FieldEntry name[]= {
+
+#define CI_FIELD(fieldstr,field,structname,typeid,typename) \
+  { (fieldstr), ((unsigned int) &(((structname *)0)->field)), \
+	  (typeid), (typename), 0 }
+
+#define CI_ARRAYFIELD(fieldstr,field,structname,typeid,typename,size) \
+  { (fieldstr), ((unsigned int) &(((structname *)0)->field[0])), \
+	  (typeid), (typename), (size) }
+
+#define CI_ENDARRAY  };
+
+/*-----------------------------------------------------------------------*
+ * The C interface maintains its own symbol table for
+ * storing C-constants, C-type and C-structure information.
+ * The following tags are used to identify the nature of
+ * entries in the symbol table
+ *-----------------------------------------------------------------------*/
+
+#define CI_LONGTYPE		0
+#define CI_PTRTYPE		1
+#define CI_INTTYPE		2
+#define CI_STRINGTYPE	3
+#define CI_SHORTTYPE	4
+#define CI_CHARTYPE		5
+#define CI_FLOATTYPE	6
+#define CI_DOUBLETYPE	7
+#define CI_RCONSTTYPE	8
+#define CI_STRUCTTYPE	9
+#define CI_CTYPE		10
+
+/*-----------------------------------------------------------------------* 
+ * The following macros are used to load up the symbol table at
+ * interface initialization time with info on C-constants,
+ * C-types, and C-structures (the initialization routine as
+ * well as each of the macro invocation code are output by
+ * interface generator ).
+ *-----------------------------------------------------------------------*/
+
+extern	ALSPI_API(int)	sym_insert_2long PARAMS(( char *, int, long, long ));
+extern	ALSPI_API(int)	sym_insert_dbl	PARAMS(( char *, int, double ));
+extern	ALSPI_API(int)	CI_get_integer	PARAMS(( PWord *, int ));
+extern	ALSPI_API(int)	CI_get_double	PARAMS(( double *, unsigned long, unsigned long ));
+
+extern	ALSPI_API(const char *) find_callback(void *func, void *object);
+
+#define CI_INTCONST(name,val) 	\
+	sym_insert_2long(name,CI_INTTYPE,(long)val,0);
+
+#define CI_SHORTCONST(name,val) 	\
+	sym_insert_2long(name,CI_SHORTTYPE,(long)val,0);
+
+#define CI_CHARCONST(name,val) 	\
+	sym_insert_2long(name,CI_CHARTYPE,(long)val,0);
+
+#define CI_LONGCONST(name,val) 	\
+	sym_insert_2long(name,CI_LONGTYPE,(long)val,0);
+
+#define CI_PTRCONST(name,val) 	\
+	sym_insert_2long(name,CI_PTRTYPE,(long)val,0);
+
+#define CI_STRINGCONST(name,val) 	\
+	sym_insert_2long(name,CI_STRINGTYPE,(long)val,0);
+
+#define CI_FLOATCONST(name,val) 	\
+	sym_insert_dbl(name,CI_FLOATTYPE,(double)val);
+
+#define CI_DOUBLECONST(name,val) 	\
+	sym_insert_dbl(name,CI_DOUBLETYPE,(double)(long)val);
+
+#define CI_STRUCT(name,cname,defnptr)	\
+  sym_insert_2long(name,CI_STRUCTTYPE,sizeof(cname),(long)defnptr);
+
+#define CI_CTYPEDEF(name,ctype,typeid) \
+  sym_insert_2long(name,CI_CTYPE,sizeof(ctype),typeid);
+
+#define CI_RCONST(name,val)		\
+	sym_insert_2long(name,CI_RCONSTTYPE,(long)val,0);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* _ALSPI_H_INCLUDED_ */

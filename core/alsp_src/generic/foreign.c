@@ -60,6 +60,24 @@ tagFix(v, t)
 }
 #endif
 
+static PI_modid = MODULE_GLOBAL;
+
+int
+load_foreign(filename, libstr, initfcn)
+    char *filename;
+    char *libstr;
+    char *initfcn;
+{
+#ifdef DynamicForeign
+    void (*fptr)PARAMS(( void ));
+    if ( (fptr = load_object(filename, libstr, initfcn)) ) {
+	(*fptr)();
+	return 1;
+    }
+    else
+#endif
+	return 0;
+}
 
 
 /*
@@ -70,10 +88,12 @@ tagFix(v, t)
  *                      chris - 6/8/88
  */
 
-char *
-PI_forceuia(val_ptr, type_ptr)
-    PWord *val_ptr;
-    int  *type_ptr;
+#ifdef macintosh
+#pragma export on
+#endif
+
+ALSPI_API(char *)
+PI_forceuia(PWord *val_ptr, int  *type_ptr)
 {
     if (force_uia(val_ptr, type_ptr))
 	return ((char *) TOKNAME(*val_ptr));
@@ -82,11 +102,8 @@ PI_forceuia(val_ptr, type_ptr)
 }
 
 
-void
-PI_getan(val_ptr, type_ptr, arg_num)
-    PWord *val_ptr;
-    int  *type_ptr;
-    int   arg_num;
+ALSPI_API(void)
+PI_getan(PWord *val_ptr, int  *type_ptr, int arg_num)
 {
     w_get_An(val_ptr, type_ptr, arg_num);
 #ifndef DoubleType
@@ -94,12 +111,8 @@ PI_getan(val_ptr, type_ptr, arg_num)
 #endif
 }
 
-void
-PI_getargn(val_ptr, type_ptr, struct_val, arg_num)
-    PWord *val_ptr;
-    int  *type_ptr;
-    PWord struct_val;
-    int   arg_num;
+ALSPI_API(void)
+PI_getargn(PWord *val_ptr, int  *type_ptr, PWord struct_val, int arg_num)
 {
     w_get_argn(val_ptr, type_ptr, struct_val, arg_num);
 #ifndef DoubleType
@@ -107,11 +120,8 @@ PI_getargn(val_ptr, type_ptr, struct_val, arg_num)
 #endif
 }
 
-void
-PI_gethead(val_ptr, type_ptr, list_val)
-    PWord *val_ptr;
-    int  *type_ptr;
-    PWord list_val;
+ALSPI_API(void)
+PI_gethead(PWord *val_ptr, int  *type_ptr, PWord list_val)
 {
     w_get_car(val_ptr, type_ptr, list_val);
 #ifndef DoubleType
@@ -119,11 +129,8 @@ PI_gethead(val_ptr, type_ptr, list_val)
 #endif
 }
 
-void
-PI_gettail(val_ptr, type_ptr, list_val)
-    PWord *val_ptr;
-    int  *type_ptr;
-    PWord list_val;
+ALSPI_API(void)
+PI_gettail(PWord *val_ptr, int  *type_ptr, PWord list_val)
 {
     w_get_cdr(val_ptr, type_ptr, list_val);
 #ifndef DoubleType
@@ -131,10 +138,8 @@ PI_gettail(val_ptr, type_ptr, list_val)
 #endif
 }
 
-void
-PI_getdouble(num, v)
-    double *num;
-    PWord v;
+ALSPI_API(void)
+PI_getdouble(double *num, PWord v)
 {
 #ifndef DoubleType
     PWord v1;
@@ -150,11 +155,8 @@ PI_getdouble(num, v)
 }
 
 
-void
-PI_getstruct(func_ptr, arity_ptr, struct_val)
-    PWord *func_ptr;
-    int  *arity_ptr;
-    PWord struct_val;
+ALSPI_API(void)
+PI_getstruct(PWord *func_ptr, int  *arity_ptr, PWord struct_val)
 {
     w_get_functor(func_ptr, struct_val);
     w_get_arity(arity_ptr, struct_val);
@@ -169,11 +171,8 @@ PI_getstruct(func_ptr, arity_ptr, struct_val)
  *                              chris - 6/8/88
  */
 
-char *
-PI_getsymname(buf_ptr, sym_val, size)
-    char *buf_ptr;
-    PWord sym_val;
-    int   size;
+ALSPI_API(char *)
+PI_getsymname(char *buf_ptr, PWord sym_val, int size)
 {
     if (buf_ptr == (char *) 0)
 	return ((char *) TOKNAME(sym_val));
@@ -191,11 +190,8 @@ PI_getsymname(buf_ptr, sym_val, size)
  * is zero.
  */
 
-char *
-PI_getuianame(buf_ptr, uia_val, size)
-    char *buf_ptr;
-    PWord uia_val;
-    int   size;
+ALSPI_API(char *)
+PI_getuianame(char *buf_ptr, PWord uia_val, int size)
 {
     if (buf_ptr == NULL)
 	return ((char *) M_FIRSTUIAWORD(uia_val));
@@ -206,10 +202,8 @@ PI_getuianame(buf_ptr, uia_val, size)
 }
 
 
-void
-PI_getuiasize(uia_val, size_ptr)
-    PWord uia_val;
-    int  *size_ptr;
+ALSPI_API(void)
+PI_getuiasize(PWord uia_val, int *size_ptr)
 {
     *size_ptr = (int) M_UIASIZE(uia_val);
 }
@@ -219,11 +213,8 @@ PI_getuiasize(uia_val, size_ptr)
  * need for it to be an address.  - chris 7/15/88
  */
 
-void
-PI_makedouble(v, t, n)
-    PWord *v;
-    int  *t;
-    double n;
+ALSPI_API(void)
+PI_makedouble(PWord *v, int *t, double n)
 {
     make_numberx(v, t, n, WTP_DOUBLE);
 #ifndef DoubleType
@@ -234,10 +225,8 @@ PI_makedouble(v, t, n)
 
 /* Creation of lists and structures is fixed.   -- Ilyas & Raman 5/16/91 */
 
-void
-PI_makelist(val_ptr, val_type)
-    PWord *val_ptr;
-    int  *val_type;
+ALSPI_API(void)
+PI_makelist(PWord *val_ptr, int *val_type)
 {
     w_mk_list(val_ptr, val_type);
 
@@ -246,12 +235,8 @@ PI_makelist(val_ptr, val_type)
 }
 
 
-void
-PI_makestruct(val_ptr, val_type, functor, arity)
-    PWord *val_ptr;
-    int  *val_type;
-    PWord functor;
-    int   arity;
+ALSPI_API(void)
+PI_makestruct(PWord *val_ptr, int *val_type, PWord functor, int arity)
 {
     int   i;
 
@@ -262,22 +247,16 @@ PI_makestruct(val_ptr, val_type, functor, arity)
     }
 }
 
-void
-PI_makesym(val_ptr, val_type, buf_ptr)
-    PWord *val_ptr;
-    int  *val_type;
-    const char *buf_ptr;
+ALSPI_API(void)
+PI_makesym(PWord *val_ptr, int  *val_type,  const char *buf_ptr)
 {
     *val_ptr = find_token((UCHAR *)buf_ptr);
     if (val_type)
 	*val_type = PI_SYM;
 }
 
-void
-PI_makeuia(val_ptr, val_type, buf_ptr)
-    PWord *val_ptr;
-    int  *val_type;
-    const char *buf_ptr;
+ALSPI_API(void)
+PI_makeuia(PWord *val_ptr, int  *val_type, const char *buf_ptr)
 {
     if ((*val_ptr = probe_token((UCHAR *)buf_ptr)) == 0)
 	w_mk_uia(val_ptr, val_type, (UCHAR *)buf_ptr);
@@ -285,11 +264,8 @@ PI_makeuia(val_ptr, val_type, buf_ptr)
 	*val_type = PI_SYM;
 }
 
-void
-PI_allocuia(val_ptr, val_type, size)
-    PWord *val_ptr;
-    int  *val_type;
-    int   size;
+ALSPI_API(void)
+PI_allocuia(PWord *val_ptr, int *val_type, int size)
 {
     w_uia_alloc(val_ptr, val_type, (size_t)size);
 }
@@ -302,7 +278,8 @@ PI_allocuia(val_ptr, val_type, size)
  */
 
 /*VARARGS0 */
-int PI_printf(const char *fmt, ...)
+ALSPI_API(int)
+PI_printf(const char *fmt, ...)
 {
     va_list l;
     int result;
@@ -314,13 +291,11 @@ int PI_printf(const char *fmt, ...)
     return result;
 }
 
-int
+ALSPI_API(int)
 #ifdef HAVE_STDARG_H
 PI_vprintf(const char *fmt, va_list args)
 #else
-PI_vprintf(fmt, args)
-    char *fmt;
-    va_list args;
+PI_vprintf(char *fmt, va_list args)
 #endif
 {
     char *buf;
@@ -346,7 +321,8 @@ PI_vprintf(fmt, args)
  */
 
 /*VARARGS0 */
-int PI_aprintf(const char *alias, const char *fmt, ...)
+ALSPI_API(int)
+PI_aprintf(const char *alias, const char *fmt, ...)
 {
     va_list l;
     int result;
@@ -358,14 +334,11 @@ int PI_aprintf(const char *alias, const char *fmt, ...)
     return result;
 }
 
-int
+ALSPI_API(int)
 #ifdef HAVE_STDARG_H
 PI_vaprintf(const char *alias, const char *fmt, va_list args)
 #else
-PI_vaprintf(alias, fmt, args)
-    char *alias;
-    char *fmt;
-    va_list args;
+PI_vaprintf(char *alias, char *fmt, va_list args)
 #endif
 {
     char *buf;
@@ -388,19 +361,22 @@ PI_vaprintf(alias, fmt, args)
 #ifdef APP_PRINTF_CALLBACK
 void (*PI_app_printf_callback)(int, va_list) = NULL;
 
-void PI_set_app_printf_callback(void (*callback)(int, va_list))
+ALSPI_API(void)
+PI_set_app_printf_callback(void (*callback)(int, va_list))
 {
     PI_app_printf_callback = callback;
 }
 
-void PI_vapp_printf(int messtype, va_list args)
+ALSPI_API(void)
+PI_vapp_printf(int messtype, va_list args)
 {
     if (PI_app_printf_callback) {
     	PI_app_printf_callback(messtype, args);
     }    	
 }
 
-void PI_app_printf(int messtype, ...)
+ALSPI_API(void)
+PI_app_printf(int messtype, ...)
 {
     if (PI_app_printf_callback) {
 	va_list args;
@@ -411,20 +387,14 @@ void PI_app_printf(int messtype, ...)
 }
 #endif
 
-int
-PI_rungoal(mod, goal, goaltype)
-    PWord mod;
-    PWord goal;
-    int   goaltype;
+ALSPI_API(int)
+PI_rungoal(PWord mod, PWord goal, int goaltype)
 {
     return w_rungoal(mod, goal, goaltype);
 }
 
-int
-PI_rungoal_with_update(mod, gvp, gtp)
-    PWord mod;
-    PWord *gvp;
-    int *gtp;
+ALSPI_API(int)
+PI_rungoal_with_update(PWord mod, PWord *gvp, int *gtp)
 {
     int status, handle;
     handle = gv_alloc();
@@ -436,12 +406,8 @@ PI_rungoal_with_update(mod, gvp, gtp)
 }
 
 
-int
-PI_unify(val1, type1, val2, type2)
-    PWord val1;
-    int   type1;
-    PWord val2;
-    int   type2;
+ALSPI_API(int)
+PI_unify(PWord val1, int type1, PWord val2, int type2)
 {
 #ifndef DoubleType
     tagFix(&val1, &type1);
@@ -451,28 +417,9 @@ PI_unify(val1, type1, val2, type2)
 }
 
 
-static PI_modid = MODULE_GLOBAL;
 
-int
-load_foreign(filename, libstr, initfcn)
-    char *filename;
-    char *libstr;
-    char *initfcn;
-{
-#ifdef DynamicForeign
-    void (*fptr)PARAMS(( void ));
-    if ( (fptr = load_object(filename, libstr, initfcn)) ) {
-	(*fptr)();
-	return 1;
-    }
-    else
-#endif
-	return 0;
-}
-
-void
-PrologInit(ap)
-    PSTRUCT *ap;
+ALSPI_API(void)
+PrologInit(PSTRUCT *ap)
 {
 
     for (;;) {
@@ -507,3 +454,8 @@ PrologInit(ap)
 
     PI_modid = MODULE_GLOBAL;	/* set default for next call to PrologInit */
 }
+
+#ifdef macintosh
+#pragma export off
+#endif
+
