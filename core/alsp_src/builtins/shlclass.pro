@@ -83,12 +83,15 @@ als_shl_mgrAction(obtain_src_mgr(BaseFileName, FileMgr), State)
 
 finish_obtain_src_mgr(BaseFileName, PrevMgrsList, State, FileMgr)
 	:-
-%	dmember(fm(BaseFileName, FileMgr), PrevMgrsList),
+	dmember(fm(BaseFileName, FileMgr), PrevMgrsList),
+/*
 	spec_dmember(PrevMgrsList, BaseFileName, FileMgr),
 alsdev:accessObjStruct(tcl_doc_path, FileMgr, EditWin),
 write(srcmgrFOUND(BaseFileName,EditWin)),nl,flush_output,
+*/
 	!.
 
+/*
 spec_dmember([fm(FN, FileMgr) | PrevMgrsList], BaseFileName, FileMgr)
 	:-
 	atom_codes(FN, FNCs),
@@ -106,10 +109,11 @@ xsame(X, X)
 xsame(_, _)
 	:- write(xsame_FAIL),nl,flush_output.
 
+*/
 
 finish_obtain_src_mgr(BaseFileName, PrevMgrsList, State, FileMgr)
 	:-
-write(srcmgrNEED_NEW(BaseFileName)),nl,flush_output,
+%write(srcmgrNEED_NEW(BaseFileName)),nl,flush_output,
 	accessObjStruct(shell_module, State, ShellModule),
 	(clause(alsdev_running,true) -> 
 		Class = source_trace_mgr 
