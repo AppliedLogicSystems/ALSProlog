@@ -231,7 +231,7 @@ proc vTclWindow.about {base} {
     frame $base.f2 \
         -borderwidth 1 -height 3 -relief sunken -width 30 
     label $base.created \
-        -font {helvetica 9 {}} -text {Copyright (c) 1998} 
+        -font {helvetica 9 {}} -text {Copyright (c) 1998-99} 
     label $base.als \
         -text {Applied Logic Systems Inc.} 
     frame $base.f3 \

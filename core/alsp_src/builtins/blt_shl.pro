@@ -262,7 +262,7 @@ print_banner(OutS,L)
 #else
 	printf(OutS,'%s Version %s \[%s\]\n',[Name,Version,OSVar]),
 #endif
-	printf(OutS,'   Copyright (c) 1987-98 Applied Logic Systems, Inc.\n\n',[]),
+	printf(OutS,'   Copyright (c) 1987-99 Applied Logic Systems, Inc.\n\n',[]),
 	flush_output(OutS).
 
 system_name(L, Name)
