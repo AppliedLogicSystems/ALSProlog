@@ -261,4 +261,100 @@ module alsdev.
 			]
 	]).
 
+
+
+:- defineClass(
+	[   name=gen_project_mgr,
+		subClassOf=genericObjects,
+		addl_slots=
+			[
+				internal_name,
+				title,
+				project_file,
+				primary_project_dir,	% normally where project_file is
+				list_of_files_slots,
+				list_slots,
+				text_slots,
+				search_dirs,
+				search_trees,
+				gui_spec,
+				slot_names
+			], 
+		defaults=
+			[
+				title = '',
+				project_file = '',
+				list_of_files_slots = [],
+				list_slots = [],
+				text_slots = [],
+				search_dirs = [],
+				search_trees = [],
+				slot_names = []
+			] 
+	]).
+
+		%% The manager for a prolog/tcl/c project:
+:- defineClass(
+	[   name=project_mgr,
+		subClassOf=gen_project_mgr,
+		addl_slots=
+			[
+%				production_goal,
+%				debug_goal,
+				executable_name,
+				prolog_files,
+%				library_files,
+%				tcltk_files,
+%				tcltk_interpreters,
+%				c_files,
+				file_types,
+				default_dirs,
+				project_loaded			%% true/fail
+			], 
+		defaults=
+			[
+				project_loaded = fail,
+				list_of_files_slots = [
+					prolog_files
+%					,library_files,
+%					tcltk_files,
+%					c_files
+					],
+				list_slots = [ 
+%					tcltk_interpreters 
+					],
+				text_slots = [
+%					production_goal,
+%					debug_goal
+					],
+				production_goal = start_,
+				debug_goal = debug_start_,
+				prolog_files = [],
+%				library_files = [],
+%				tcltk_files = [],
+%				tcltk_interpreters = [tcli],
+%				c_files = [],
+				file_types =  [ 
+%					[prolog_files, ['.pro', '.pl'] ]
+					[prolog_files, ['.*'] ]
+%					,[prolog_library_files, ['.pro'] ],
+%					[tcltk_files, ['.tcl'] ],
+%					[c_files, ['.c'] ] 
+				],
+				default_dirs = [],
+				slot_names = [
+					[production_goal,	'Startup Goal:'],
+					[debug_goal, 		'Debug Goal:'],
+					[executable_name, 	'Image Name:'],
+					[prolog_files, 		'Files:']
+%					,[library_files, 	'Library Files:'],
+%					[tcltk_files, 		'Tcl/Tk Files:'],
+%					[tcltk_interpreters,'Tcl/Tk Interps:'],
+%					[c_files, 			'C Files:']
+				]
+			]
+	]).
+
+
+
 endmod.
