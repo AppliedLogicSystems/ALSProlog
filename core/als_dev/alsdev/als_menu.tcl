@@ -141,7 +141,7 @@ proc add_prolog_menu {menubar type window} {
     	$menubar.prolog add separator
     	$menubar.prolog add command -label {Abort} -underline 0 \
         	-command {re { set DebugResponse Ba }}
-    	$menubar.prolog add command -label {Break} -underline 0 \
+    	$menubar.prolog add command -label {Break Shell} -underline 0 \
 			-command {re { set DebugResponse Bb }}
 	}
 	$menubar add cascade -label "Prolog" -underline 0 -menu $menubar.prolog
@@ -179,6 +179,8 @@ proc add_tools_menu {menubar type window} {
 		$menubar.tools add separator
 		$menubar.tools add command  -label "Debug Settings$elipsis" \
 			-underline 0 -command {re show_debug_settings}
+		$menubar.tools add command  -label "Statistics" \
+			-underline 0 -command {re {set DebugResponse Bi}}
 		$menubar.tools add command  -label "System Modules$elipsis" \
 			-underline 0 -command {re {set_system_modules_showing}} -state disabled
 	}

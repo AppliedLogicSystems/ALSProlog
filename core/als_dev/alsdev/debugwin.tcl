@@ -78,12 +78,11 @@ proc vTclWindow.debugwin {base} {
         -padx 4 -text fail -underline 0 \
 		-command { set DebugResponse Bf }
 
-    button $base.buttons.statistics \
-        -padx 2 -text statistics \
-		-command { set DebugResponse Bi }
-#    button $base.buttons.stack_trace \
-#        -padx 2 -text stack \
-#		-command { set DebugResponse Bt }
+    button $base.buttons.interrupt \
+        -font {lucida 10 bold} \
+        -foreground $proenv(interrupt_button,foreground) \
+		-padx 2 -pady 0 -text Interrupt \
+        -command interrupt_action
 
     frame $base.buttons.sep1 \
         -borderwidth 1 -relief flat -width 4 -background black
@@ -91,18 +90,19 @@ proc vTclWindow.debugwin {base} {
     button $base.buttons.abort \
         -padx 2 -text Abort \
 		-command { set DebugResponse Ba }
-    button $base.buttons.break \
-        -padx 2 -text Break \
-		-command { set DebugResponse Bb }
+#    button $base.buttons.break \
+#        -padx 2 -text Break \
+#		-command { set DebugResponse Bb }
     button $base.buttons.respy \
         -padx 2 -text {Re-Spy} \
 		-command reset_all_spypoints
 
-    button $base.buttons.interrupt \
-        -font {lucida 10 bold} \
-        -foreground $proenv(interrupt_button,foreground) \
-		-padx 11 -pady 0 -text Interrupt \
-        -command interrupt_action
+#    button $base.buttons.statistics \
+#        -padx 2 -text statistics \
+#		-command { set DebugResponse Bi }
+#    button $base.buttons.stack_trace \
+#        -padx 2 -text stack \
+#		-command { set DebugResponse Bt }
 
     frame $base.debug_status \
         -borderwidth 1 -relief sunken 
@@ -178,20 +178,22 @@ proc vTclWindow.debugwin {base} {
         -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.fail \
         -anchor center -expand 0 -fill none -side left 
-    pack $base.buttons.statistics \
-        -anchor center -expand 0 -fill none -side left 
-#    pack $base.buttons.stack_trace \
-#        -anchor center -expand 0 -fill none -side left 
+    pack $base.buttons.interrupt \
+        -anchor center -expand 0 -fill y -side left 
+
     pack $base.buttons.sep1 \
         -anchor center -expand 0 -fill y -side left -padx 4
     pack $base.buttons.abort \
         -anchor center -expand 0 -fill none -side left 
-    pack $base.buttons.break \
-        -anchor center -expand 0 -fill none -side left 
+#    pack $base.buttons.break \
+#        -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.respy \
         -anchor center -expand 0 -fill none -side left 
-    pack $base.buttons.interrupt \
-        -anchor center -expand 0 -fill none -side right 
+#    pack $base.buttons.statistics \
+#        -anchor center -expand 0 -fill none -side left 
+#    pack $base.buttons.stack_trace \
+#        -anchor center -expand 0 -fill none -side left 
+
 
     grid $base.debug_status \
         -column 0 -row 1 -columnspan 2 -rowspan 1 -sticky ew
@@ -208,9 +210,6 @@ proc vTclWindow.debugwin {base} {
         -anchor center -expand 0 -fill none -side left 
     pack $base.debug_status.call_num \
         -anchor center -expand 0 -fill none -side left 
-
-    pack $base.buttons.interrupt \
-        -anchor center -expand 0 -fill none -side right 
 
     grid $base.debug_status \
         -column 0 -row 1 -columnspan 2 -rowspan 1 -sticky ew
