@@ -17,7 +17,7 @@ use shellmak.
 	%% INTERFACE BETWEEN CONSULT AND SOURCE TO SOURCE TRANSFORMERS
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-transformer_db(typ, pro, del,    []).
+transformer_db(typ, pro, no_del, []).
 transformer_db(ssp, pro, no_del, []).
 transformer_db(spc, pro, no_del, []).
 transformer_db(pl,  obp, no_del, []).

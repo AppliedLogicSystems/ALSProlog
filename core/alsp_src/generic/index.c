@@ -143,7 +143,7 @@ indexproc(m, p, a)
 	do_indexing(ent);
 }
 
-#define SYSDEB(a)		/* nothing */
+#define SYSDEB(a)		 /* nothing */
 
 void
 do_indexing(ent)
@@ -213,6 +213,7 @@ do_indexing(ent)
     buf_ptr = (long *) 0;
 
     if (totalsize != 0) {
+
 	buf_ptr = (long *) w_alloccode(totalsize);
 
 	/*

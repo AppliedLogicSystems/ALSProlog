@@ -463,6 +463,8 @@ w_freecount(tot, used)
  | longwords at the beginning and end of the block.
  *-----------------------------------------------------------------*/
 
+/*  #define MDEBUG 1 */
+
 long *
 w_alloccode(size)
     int   size;
@@ -475,57 +477,45 @@ w_alloccode(size)
     if (size > WC_AREASIZE - WC_OVERHEAD)
 	printf("w_alloccode: Need block of size %d\n", 4 * size);
 #endif
+
     p = w_freeptr;
     size += WC_OVERHEAD;
+
     while ((s = *(p + WCI_SIZE)) < size) {
-	p = *((long **) p + WCI_FLINK);
-	if (p == w_freeptr) {
-	    long *new;
 
-#ifndef AtariOS
-	    long  len = max(size + 2, WC_AREASIZE);
+		p = *((long **) p + WCI_FLINK);
 
-#else
-	    long  len = max(size + 2 + 1, WC_AREASIZE);		/* +1 for
-								 * alignment
-								 */
-#endif /* AtariOS */
+		if (p == w_freeptr) {
+	    	long *new;
+	    	long  len = max(size + 2, WC_AREASIZE);
 
 #ifdef MDEBUG
-	    if (len > WC_AREASIZE + 4)
-		printf("w_alloccode: allocating block of size %d\n", 4 * len);
+	    	if (len > WC_AREASIZE + 4)
+			printf("w_alloccode: allocating block of size %d\n", 4 * len);
 #endif
-	    new = (long *) code_alloc((size_t)(4 * len), FE_XMEM_CLAUSE);
+	    	new = (long *) code_alloc((size_t)(4 * len), FE_XMEM_CLAUSE);
 
-#ifdef AtariOS
-	    if (((long) new) & 3) {
-		len--;
-		new++;
-	    }
-	    new = (long *) (((long) new) & ~3L);
-#endif /* AtariOS */
+	    		/* update record of total space */
+	    	w_totspace += len;
 
-	    /* update record of total space */
-	    w_totspace += len;
+	    		/* make it look like there is a used block at the */
+	    		/* beginning and end */
+	    	new[0] = new[len - 1] = -1;   
 
-	    /* make it look like there is a used block at the */
-	    /* beginning and end */
-	    new[0] = new[len - 1] = -1;
+	    		/* mark ends of the free block      */
+	    	new[1] = new[len - 2] = len - 2;
 
-	    /* mark ends of the free block      */
-	    new[1] = new[len - 2] = len - 2;
+	    	new += 1;
 
-	    new += 1;
-
-	    /* get next block on chain */
-	    p = *((long **) p + WCI_FLINK);
-	    *((long **) new + WCI_BLINK) = w_freeptr;
-	    *((long **) new + WCI_FLINK) = p;
-	    *((long **) p + WCI_BLINK) = new;
-	    *((long **) w_freeptr + WCI_FLINK) = new;
-	    p = w_freeptr;
-	}
-    }
+	    		/* get next block on chain */
+	    	p = *((long **) p + WCI_FLINK);
+	    	*((long **) new + WCI_BLINK) = w_freeptr;
+	    	*((long **) new + WCI_FLINK) = p;
+	    	*((long **) p + WCI_BLINK) = new;
+	    	*((long **) w_freeptr + WCI_FLINK) = new;
+	    	p = w_freeptr;
+		}
+    }	/* while */
 
     if (s < size + WC_EPSILON) {
 	long *b = *((long **) p + WCI_BLINK);
@@ -1342,12 +1332,12 @@ w_addclause(p, a, cg_id,
     if (!ent->first_clause) {	/* there are no clauses */
 
 	/*
-	 * There are no clauses in the procedure.  We need to install a jump
-	 * to newclause in the procedure entry table, and put a trust
-	 * into the choice point field of the one and only clause (the
-	 * trust code should never be run, but it will be there for future
-	 * additions).  Other bookkeeping in the procedure table entry and
-	 * the new clause needs to be taken care of also.
+	 | There are no clauses in the procedure.  We need to install a jump
+	 | to newclause in the procedure entry table, and put a trust
+	 | into the choice point field of the one and only clause (the
+	 | trust code should never be run, but it will be there for future
+	 | additions).  Other bookkeeping in the procedure table entry and
+	 | the new clause needs to be taken care of also.
 	 */
 
 	ic_install_jmp(ent, clauseCode(newclause) + dstartoffset, envsavemask);
@@ -1362,13 +1352,14 @@ w_addclause(p, a, cg_id,
 	if (cg_id == CGI_ASSERTA || cg_id == CGI_ASSERTZ)
 	    ent->flags |= NMSK_DYNAMIC;
 	w_relink(ent);
-    }
+    }		/* --------------- end no clauses exist -------  */
     else if (cg_id != CGI_ASSERTA && cg_id >= cgId(ent->last_clause)) {
 
-	/*
-	 * The clause which we want to add should come after all existing clauses
-	 * in the procedure.  The first thing we do is determine the clause id
-	 * for the clause we are adding.
+	/* 
+	 | Previous clauses exist, and:
+	 | The clause which we want to add should come after all existing clauses
+	 | in the procedure.  The first thing we do is determine the clause id
+	 | for the clause we are adding.
 	 */
 
 	if (cg_id == CGI_ASSERTZ)
@@ -1404,14 +1395,14 @@ w_addclause(p, a, cg_id,
 	 * code appropriately.
 	 */
 
-	if ((ent->flags & NMSK_USAGE) == NFLG_SINGLE) {		/* one clause
-								 */
-	    ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_MULTIPLE;
+	if ((ent->flags & NMSK_USAGE) == NFLG_SINGLE) {		/* one clause */
+	     ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_MULTIPLE;
 
-	    /* Install try_me_else jump to first clause */
+	    	/* Install try_me_else jump to first clause */
 	    ic_install_try_me_jmp(ent,
 				  clauseCode(prevclause),
 				  (long)choiceEntry(newclause));
+
 	    ic_install_retry_me(choiceCode(prevclause),
 				(long)choiceEntry(newclause),
 				ent->nargs,
@@ -1423,7 +1414,7 @@ w_addclause(p, a, cg_id,
 				ent->nargs,
 				emaskCode(prevclause));
 	}
-    }
+    }	/* End adding clause at very end */
     else {
 
 	/*

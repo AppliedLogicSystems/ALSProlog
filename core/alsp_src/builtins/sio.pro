@@ -47,24 +47,26 @@ use windows.
  */
 
 default_read_eoln_type(_, universal).
-default_write_eoln_type(socket, crlf).
 
-:- als_system(L),
-   dmember(os=OS, L),
-   (
-	OS=mswin32 -> assert(default_write_eoln_type(_, crlf))
-	;
-	OS=macos -> assert(default_write_eoln_type(_, cr))
-	;
-   	(OS=unix ->
-   		dmember(os_variation=OSM, L),
-   		((OSM=djgpp1 ; OSM=djgpp2) ->
-   			assert(default_write_eoln_type(_, crlf))
-   			;
-   			assert(default_write_eoln_type(_, lf))))
-	;
-   		assert(default_write_eoln_type(_, crlf))
-    ).
+default_write_eoln_type(socket, crlf) :-!.
+:-	als_system(L),
+	dmember(os=OS, L),
+	(OS=mswin32 -> assert(default_write_eoln_type(_, crlf))
+		;
+		(OS=macos -> assert(default_write_eoln_type(_, cr))
+			;
+			(OS=unix ->
+				dmember(os_variation=OSM, L),
+				( (OSM=djgpp1 ; OSM=djgpp2) ->
+					assert(default_write_eoln_type(_, crlf))
+					;
+					assert(default_write_eoln_type(_, lf))
+				)
+			)
+			;
+			assert(default_write_eoln_type(_, crlf))
+	)
+).
 
 
 /*
@@ -1265,7 +1267,7 @@ rexec_open0(s(Stream,Opts), Mode, Stream, Alias) :-
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Opts,NBuffering),
-	eoln_modes(socket, Options, NEoln),
+	eoln_modes(socket, Opts, NEoln),
 	sio_generic_open(0,Stream,NMode,NBuffering,NEoln).
 
 
@@ -1461,12 +1463,18 @@ wait_data(sysV_queue, Stream, Call) :-
 	call(Call).
 
 wait_data(socket, Stream, Call) :-
-	sio_poll(Stream, 1000000),	% 10 sec
+%	sio_poll(Stream, 100000),	% 1 sec  - restore when 2nd arg fixed
+	sio_poll(Stream, 10000),	% 0.1 sec
 	!,
+	call(Call).
+
+wait_data(socket, Stream, Call) :-
 	wait_data(socket, Stream, Call).
+
 	%% This default clause is supplied for all window systems;
 	%% each window system asserta's its particular delay clause
-	%% in the above conditional.
+	%% for wait_data/3.
+
 	%% Default: don't know how to wait, or wait failed, so convert to eof:
 wait_data(Type, Stream, Call) :-
 	sio_set_errcode(Stream,8),			%% SIOE_EOF
@@ -1899,6 +1907,7 @@ get_failure_read_eof_code(get_line0, -1).
  * handle a stream-not-ready condition.
  */
 
+%% Debugging clause:    
 %get_failure_read_snr(SNRAction, Pred, Arity, Stream, Call)
 %	:-
 %	pbi_write(gfrs(SNRAction, Pred, Arity, stream, Call)),
@@ -1906,10 +1915,11 @@ get_failure_read_eof_code(get_line0, -1).
 %	fail.
 
 get_failure_read_snr(snr_code, Pred, ArgNum, Stream, Call) :-
-	stream_type(Stream, window),
 	stream_blocking(Stream, true),
+	stream_type(Stream, StrmType),
+	dmember(StrmType, [socket,window]),
 	!,
-	wait_data(window, Stream, Call).
+	wait_data(StrmType, Stream, Call).
 get_failure_read_snr(wait, Pred, ArgNum, Stream, Call) :-
 	sio_poll(Stream, 10000000),	% 10 sec
 	!,

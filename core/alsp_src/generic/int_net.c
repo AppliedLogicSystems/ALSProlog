@@ -220,6 +220,8 @@ ilinknet()
 			UPDATE_ITEM(V,VT,VL,VH, VPT)\
 			}
 
+/*				printf("DO_UPDATE_FAIL:vl=%22.17g vh=%22.17g\n",VL,VH); \   */
+
 #define UPDATE_BOOLEAN(V,VT,VL,VH) { long tt;\
 				switch(status & (VL ## change + VH ## change))\
 					{/* boolean becomes a fixed point.  If both bounds
@@ -305,7 +307,9 @@ unflip_y()
 			UPDATE_ITEM(V,VT,VL,VH, VPT)\
 		}
 
+/*				printf("DO_UPDATE_FAIL:vl=%22.17g vh=%22.17g\n",VL,VH); \   */
 
+/*			printf(">>exit-DO_UPDATE:\n"); \    */
 
 /*----
 #define boolean_z       0x01        ---booleanInput and booleanOutput
@@ -423,7 +427,10 @@ ilnk_net()
 	while (qheadt != WTP_INTEGER) 
 	{
 		if (niters > itermax)
+		{
+			printf("Iteration bound exceeded: niters=%d\n", niters);
 			FAIL;
+		}
 
 		status = 0;
 
@@ -434,14 +441,23 @@ ilnk_net()
 		w_get_argn(&Y, &Yt, qhead, 4);
 		w_get_argn(&Goal, &Goalt, qhead, LINK_POSITION);
 
-		if ((int)OpCd < FIRSTBOOLEAN) { 	
+		if ((int)OpCd < FIRSTBOOLEAN) {
 					/* Setup for real or integer operation */
 			if (!extract_bds((PWord *)Z, Zt, &zl, &zh, &zpt))
+				{
+/*				printf("extract_bds_failed -- z\n");   */
 				FAIL;
+				}
 			if (!extract_bds((PWord *)X, Xt, &xl, &xh, &xpt))
+				{
+/*				printf("extract_bds_failed -- x\n");   */
 				FAIL;
+				}
 			if (!extract_bds((PWord *)Y, Yt, &yl, &yh, &ypt))
+				{
+/*				printf("extract_bds_failed -- y\n");   */
 				FAIL;
+				}
 
 #ifdef DEBUGSYS
 	if (debug_system[CSTRPRIM])

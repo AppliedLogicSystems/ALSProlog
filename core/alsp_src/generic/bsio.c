@@ -1349,6 +1349,24 @@ sio_ssbq_open()
 
 #ifdef HAVE_SOCKET
 
+int
+sio_gethostname()
+{
+    PWord v1,v2;
+    int   t1,t2;
+    char myhostname[MAXHOSTNAMELEN];
+
+    w_get_An(&v1, &t1, 1);	
+
+	gethostname(myhostname, MAXHOSTNAMELEN);
+    w_mk_uia(&v2, &t2, myhostname);
+
+    if (w_unify(v1, t1, v2, t2))
+		SUCCEED;
+    else
+		FAIL;
+}
+
 /*
  * sio_socket_open(HostOrPath,Port,Dom,Typ,NMode,NBuffering,QLen,SD,Stream)
  *

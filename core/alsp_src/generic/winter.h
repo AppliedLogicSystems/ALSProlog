@@ -18,14 +18,15 @@ extern "C" {
 
 
 #ifdef KERNAL
-#define DEFAULT_SAFETY		400		/* bytes	*/
+#define DEFAULT_SAFETY		400			/* bytes	*/
 
 #define DEFAULT_HEAP_SIZE	0x001000	/* long words */
 #define DEFAULT_STACK_SIZE	0x001000	/* long words */
 
 #define	MIN_ICBUFSIZE		0x001000	/* 64k code words */
 #define MAX_ICBUFSIZE		0x100000	/* 1M code words */
-#else
+
+#else		/* ----------- NON-KERNAL --------------------------*/
 #define DEFAULT_SAFETY		98304		/* bytes	*/
 
 #define DEFAULT_HEAP_SIZE	0x040000	/* long words (1 MBytes) */
@@ -33,6 +34,7 @@ extern "C" {
 
 #define	MIN_ICBUFSIZE		0x010000	/* 64k code words */
 #define MAX_ICBUFSIZE		0x100000	/* 1M code words */
+
 #endif /* KERNAL */
 
 

@@ -198,7 +198,7 @@ write_file_headers(TargetFile,MacFile,SourceFile,TStream,MStream)
  *--------------------------------------------------------------------------*/
 typeDefinitions(DefList,TgtStream,MacStream,Quiet) 
 	:-
-	xall(DefList,user,Extras,TgtStream,MacStream,Quiet),
+	xall(DefList,user,Extras,TgtStream,MacStream,Quiet,DefList),
 
 	printf(TgtStream,"\nmodule utilities.\n",[]),
 	pp_all(Extras,TgtStream, [quoted(true)]),
@@ -207,19 +207,19 @@ typeDefinitions(DefList,TgtStream,MacStream,Quiet)
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-xall([],user,[],_,_,Quiet) 
+xall([],user,[],_,_,Quiet,DefList) 
 	:-!.
-xall([],OtherMod,[],TgtStream,MacStream,Quiet) 
+xall([],OtherMod,[],TgtStream,MacStream,Quiet,DefList) 
 	:-!,
 	printf(TgtStream,"endmod.\n",[]).
-xall([Def | Defs],CurModule,[Extras | MoreExtras],TgtStream,MacStream,Quiet) 
+xall([Def | Defs],CurModule,[Extras | MoreExtras],TgtStream,MacStream,Quiet,DefList) 
 	:-
-	type_comp(Def,CurModule,NewModule,Extras,TgtStream,MacStream,Quiet),
-	xall(Defs,NewModule,MoreExtras,TgtStream,MacStream,Quiet).
+	type_comp(Def,CurModule,NewModule,Extras,TgtStream,MacStream,Quiet,DefList),
+	xall(Defs,NewModule,MoreExtras,TgtStream,MacStream,Quiet,DefList).
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
-type_comp(module(Mod),_,Mod,[],TgtStream,MacStream,Quiet)
+type_comp(module(Mod),_,Mod,[],TgtStream,MacStream,Quiet,DefList)
 	:-!,
 	printf(TgtStream, "module utilities.\n",[],[quoted(true)]),
 	printf(TgtStream, "use %t.\n",[Mod],[quoted(true)]),
@@ -227,18 +227,18 @@ type_comp(module(Mod),_,Mod,[],TgtStream,MacStream,Quiet)
 	printf(TgtStream, "module %t.\n",[Mod],[quoted(true)]),
 	printf(TgtStream, "use utilities.\n\n",[],[quoted(true)]).
 
-type_comp(endmod,_,user,[],TgtStream,MacStream,Quiet)
+type_comp(endmod,_,user,[],TgtStream,MacStream,Quiet,DefList)
 	:-!,
 	printf(TgtStream,"endmod.\n",[],[quoted(true)]).
 
-type_comp((defStruct(TypeName,SpecsList) :- Condition,Quiet),
+type_comp((defStruct(TypeName,SpecsList) :- Condition,Quiet,DefList),
 				CurMod,NewMod,Extras,TgtStream,MacStream)
 	:-!,
 	call(CurMod:Condition), !,
 	type_comp(defStruct(TypeName,SpecsList),
-				CurMod,NewMod,Extras,TgtStream,MacStream,Quiet).
+				CurMod,NewMod,Extras,TgtStream,MacStream,Quiet,DefList).
 
-type_comp(defStruct(TypeName,SpecsList),Mod,Mod,Extras,TgtStream,MacStream,Quiet)
+type_comp(defStruct(TypeName,SpecsList),Mod,Mod,Extras,TgtStream,MacStream,Quiet,DefList)
 	:-!,
 	ct_message(Quiet,'Transforming type = %t\n',[TypeName]),
 	printf(TgtStream, '\n\%\%--- %t defStruct ---\n\n',[TypeName],[quoted(true)]),
@@ -249,17 +249,17 @@ type_comp(defStruct(TypeName,SpecsList),Mod,Mod,Extras,TgtStream,MacStream,Quiet
 	dmember(makePred=MakePred, SpecsList),
 	dmember(structLabel=StructLabel, SpecsList),
 	dmember(propertiesList=InitPropertiesList, SpecsList),
-	expand_includes(InitPropertiesList, PropertiesList, Tail,Quiet),
+	expand_includes(InitPropertiesList, PropertiesList, Tail,Quiet,DefList),
 	Tail = [],
 
 	makeStructDefs(TypeName, AccessPred, SetPred, MakePred, 
 					PropertiesList, StructLabel,Extras,TgtStream,MacStream).
 
-type_comp((:- Cmd) ,Mod,Mod,[],TgtStream,MacStream,Quiet)
+type_comp((:- Cmd) ,Mod,Mod,[],TgtStream,MacStream,Quiet,DefList)
 	:-
 	call(Cmd),!.
 
-type_comp(Item,Mod,Mod,[],TgtStream,MacStream,Quiet)
+type_comp(Item,Mod,Mod,[],TgtStream,MacStream,Quiet,DefList)
 	:-
 	ct_message(Quiet,'Unknown item -- skipping\n     %t\n',[Item]),
 	printf(TgtStream,'%% Unknown item -- skipping:\n%%%t\n',[Item],[quoted(true)]).
@@ -422,20 +422,30 @@ flattenProps([Item | PropertiesList], [Item | RestFullList])
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-expand_includes([], Tail, Tail,Quiet).
-expand_includes([include(File,Name) | RestPropertiesList], PropertiesList, FinalTail,Quiet)
+expand_includes([], Tail, Tail,Quiet,DefList).
+expand_includes([include(Name) | RestPropertiesList], PropertiesList, 
+					FinalTail,Quiet,DefList)
+	:-
+	fetch_local_included_props(DefList, Name, PropertiesList, InterPropsListTail, Quiet, DefList),
+	!,
+	expand_includes(RestPropertiesList, InterPropsListTail, FinalTail,Quiet,DefList).
+
+expand_includes([include(File,Name) | RestPropertiesList], PropertiesList, 
+					FinalTail,Quiet,DefList)
 	:-
 	fetch_included_props(File, Name, PropertiesList, InterPropsListTail, Quiet),
 	!,
-	expand_includes(RestPropertiesList, InterPropsListTail, FinalTail,Quiet).
+	expand_includes(RestPropertiesList, InterPropsListTail, FinalTail,Quiet,DefList).
 
-expand_includes([include(File,Name) | RestPropertiesList], PropertiesList, FinalTail,Quiet)
+expand_includes([include(File,Name) | RestPropertiesList], PropertiesList, 
+					FinalTail,Quiet,DefList)
 	:-
-	expand_includes(RestPropertiesList, PropertiesList, FinalTail,Quiet).
+	expand_includes(RestPropertiesList, PropertiesList, FinalTail,Quiet,DefList).
 
-expand_includes([Item | InitPropertiesList], [Item | PropertiesList], FinalTail,Quiet)
+expand_includes([Item | InitPropertiesList], [Item | PropertiesList], 
+					FinalTail,Quiet,DefList)
 	:-
-	expand_includes(InitPropertiesList, PropertiesList, FinalTail,Quiet).
+	expand_includes(InitPropertiesList, PropertiesList, FinalTail,Quiet,DefList).
 
 fetch_included_props(File, Name, PropertiesList, InterPropsListTail, Quiet)
 	:-
@@ -447,25 +457,39 @@ fetch_included_props(File, Name, PropertiesList, InterPropsListTail, Quiet)
 	!,
 	read_terms(InStr, FTerms),
 	close(InStr),
-	fin_fetch_included_props(FTerms, File, Name, PropertiesList, InterPropsListTail, Quiet).
+	fin_fetch_included_props(FTerms, File, Name, PropertiesList, InterPropsListTail, Quiet, FTerms).
 
 fetch_included_props(File, Name, In, In, Quiet)
 	:-
 	ct_message(Quiet,'!Warning: Can\'t find included type file >> %t.typ << ...skipping.\n',
 				[File]).
 
-fin_fetch_included_props(FTerms, File, Name, PropertiesList, InterPropsListTail, Quiet)
+fin_fetch_included_props(FTerms, File, Name, PropertiesList, InterPropsListTail, Quiet, FTerms)
 	:-
 	dmember(defStruct(Name, FSpecs), FTerms),
 	dmember(propertiesList=FProps, FSpecs),
 	!,
-	expand_includes(FProps, PropertiesList, InterPropsListTail, Quiet).
+	expand_includes(FProps, PropertiesList, InterPropsListTail, Quiet, FTerms).
 
-fin_fetch_included_props(FTerms, File, Name, In, In, Quiet)
+fin_fetch_included_props(FTerms, File, Name, In, In, Quiet, FTerms)
 	:-
-	ct_message(Quiet,'!Warning: Can\'t find included type >> %t << in file %t...skipping.\n',
+	ct_message(Quiet,
+			   '!Warning: Can\'t find included type >> %t << in file %t...skipping.\n',
 				[Name,File]).
 
+
+fetch_local_included_props(FTerms, Name, PropertiesList, InterPropsListTail, Quiet, FTerms)
+	:-
+	dmember(defStruct(Name, FSpecs), FTerms),
+	dmember(propertiesList=FProps, FSpecs),
+	!,
+	expand_includes(FProps, PropertiesList, InterPropsListTail, Quiet, FTerms).
+
+fetch_local_included_props(DefList, Name, PropertiesList, InterPropsListTail, Quiet, FTerms)
+	:-
+	ct_message(Quiet,
+			   '!Warning: Can\'t find included type >> %t << in file %t...skipping.\n',
+				[Name,'local-file']).
 
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/

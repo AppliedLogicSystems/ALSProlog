@@ -418,6 +418,7 @@ static struct blt_struct {
 	BLT("sio_ssbq_open", 6, sio_ssbq_open, "_sio_ssbq_open"),
 #endif /* SSBQ */
 #ifdef HAVE_SOCKET
+	BLT("sio_gethostname",1,sio_gethostname,"_sio_gethostname"),
 	BLT("sio_socket_open", 10, sio_socket_open, "_sio_socket_open"),
 	BLT("sio_is_server_socket", 1, sio_is_server_socket,
 	    "_sio_is_server_socket"),

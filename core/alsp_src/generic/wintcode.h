@@ -287,10 +287,12 @@ extern ntbl_entry **w_nametable;
 /*-----------------------------------------------------------------*
  | INITIAL_ICOUNT is the number of times an unindexed procedure must
  | be executed (without modification) for indexing to be generated.
+ |
+ |	11/9/96: Changed from 6 to 1 to avoid the bug that appeared in 
+ |	the nrev example when indexing installed on the fly.
  *-----------------------------------------------------------------*/
 
-#define INITIAL_ICOUNT	6
-
+#define INITIAL_ICOUNT	1
 
 /*-----------------------------------------------------------------*
  | dbrs_t is a type indicating whether the database is 

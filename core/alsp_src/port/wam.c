@@ -31,6 +31,8 @@
 #include "alspi.h"
 #endif
 
+/*#include "dump_wam.h" */
+
 #ifdef TRACEBWAM
 extern	int tracewam	PARAMS(( Code * ));
 #endif
@@ -620,6 +622,8 @@ run_wam(startaddr)
     Code *CP;
     int   skip_ovflow, retval;
 
+int special_overflow = 0;
+
     if (startaddr == (Code *) 0) {
 #ifdef Threaded
 #define ABMOP(op,p1,p2,p3,p4) wam_instrs[op] = (Code) &&l##op;
@@ -882,24 +886,40 @@ overflow_check0:
 #endif	/* MacOS */
 	    if (((unsigned long) mr_TR - (unsigned long) mr_H) 
 				>= (unsigned long) wm_safety) {
+				if (special_overflow) goto special_finish;
 			DISPATCH;
 	    }
 	    if ((unsigned long) wm_safety <= (unsigned long) wm_normal) {
-				/* gc interrupt */
-#ifdef DEBUGSYS	/*--------------------------------------------------*/
+				/* --------- ORDINARY GC INTERRUPT --------- */
+
+#ifdef DEBUGSYS	/*..................................................*/
 								if (debug_system[GCINTR]) 
 									printf("-<<Start GC interrupt\n");
-#endif /* ---------------------------------------------- DEBUGSYS --*/
+#endif /* .............................................. DEBUGSYS ..*/
+
 			UNSHADOW_REGS;
+			{
+			/*
+			wam_task_state s;
+			get_wam_task_state(&s);
+			dump_wam_task_state(&s);*/
 			gc();
+			/*
+			get_wam_task_state(&s);
+			dump_wam_task_state(&s);*/
+			}
 			SHADOW_REGS;
-#ifdef DEBUGSYS	/*--------------------------------------------------*/
+
+#ifdef DEBUGSYS	/*..................................................*/
 								if (debug_system[GCINTR]) 
 									printf("-<<Return from GC interrupt\n");
-#endif /* ---------------------------------------------- DEBUGSYS --*/
+#endif /* .............................................. DEBUGSYS ..*/
+                if (special_overflow) goto special_finish;
 			DISPATCH;
-	    }
+	    } 		/* ----end-- ORDINARY GC INTERRUPT --------- */
+
 	    else {
+				/* --------- PROLOG SYSTEM INTERRUPT --------- */
 			ntbl_entry *entfrom = 
 				(ntbl_entry *) ((Code *)reg1 - OVFLOW_CHECK_BDISP);
 			PWord arg3;
@@ -957,7 +977,7 @@ overflow_check0:
 				/* call $interrupt/3 */
 			P = wm_overcode;
 			DISPATCH;
-	    	}
+	    	}	/* ----end-- PROLOG SYSTEM INTERRUPT --------- */
 	    goto get_out;
 
 	    /*-------------------------------------------------------------------*
@@ -1000,10 +1020,10 @@ g_list_deref:
 	    reg1 = PWPTR(n);
 g_list_common:
 	    if ( (n=MTP_TAG(reg1)) )
-		goto g_list_ground;
+			goto g_list_ground;
 	    n = *reg1;
 	    if (n != PWORD(reg1))
-		goto g_list_deref;
+			goto g_list_deref;
 	    /* write mode case */
 	    BIND3(reg1, MMK_LIST(mr_H),1000001);
 	    S = PWPTR(0);	/* set write mode */
@@ -1011,8 +1031,8 @@ g_list_common:
 g_list_ground:
 	    /* read mode case */
 	    if (n == MTP_LIST) {
-		S = MLISTADDR(reg1);
-		DISPATCH;
+			S = MLISTADDR(reg1);
+			DISPATCH;
 	    }
 	    DOFAIL;
 
@@ -1399,12 +1419,18 @@ CASE(W_SW_TERM):		/* sw_term varaddr,straddr,lisaddr,conaddr */
 	    DISPATCH;
 
 CASE(W_OVSW_TERM):		/* ovsw_term sw_term varaddr,straddr,lisaddr,conaddr */
+		special_overflow = 1;
+	    reg1 = (PWord *) P;
+		goto overflow_check0;
+special_finish:
+		special_overflow = 0;
 	    S = PWPTR(arg(mr_E, 1));
 	    DEREF(S);
 	    reg1 = (PWord *) P;
 	    P = getaddr(OPSIZE + OPSIZE + MTP_TAG(S) * DATASIZE);
 	    S = MLISTADDR(S);	/* needed for when we skip get_list */
-	    goto overflow_check0;
+/*	    goto overflow_check0;	*/
+		DISPATCH;
 
 CASE(W_SW_STRUCT):		/* sw_struct [align],nentries,table */
 	    reg1 = PWPTR(arg(mr_E, 1));
