@@ -11,7 +11,7 @@ Checkout Instructions
 
 Unix:
 
-Use Unix CVS to checkout als_prolog.  This insure correct line endings.
+Use Unix CVS to checkout als_prolog.  This insures correct line endings.
 
 Macintosh:
 
@@ -38,7 +38,7 @@ Build Instructions
 
 Unix:
 
-In the als_prolog directory, run GNU Make.
+In the als_prolog directory, run GNU Make (make or gmake, as appropriate)
 
 Macintosh:
 
@@ -46,7 +46,7 @@ In the als_prolog folder, run the AppleScript Build.
 
 Windows:
 
-In the als_prolog\win32 directory, run GNU Make.
+In the als_prolog\win32 directory, run GNU Make (use bash/cygwin)
 
 Open each installer template (standard_installer.wse and
 student_installer.wse)  with Wise and view it in the "Installation Expert" 
