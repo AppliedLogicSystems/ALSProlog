@@ -9,7 +9,6 @@
    re_comp().
 */
 #define USE_RE_COMP 1
-#define SIMPLE_MICS 1
 #define SUNOS_AOUT 1
 #define MISSING_EXTERN_CRYPT
 #define MISSING_EXTERN_STRTOUL
@@ -18,34 +17,12 @@
 #define MISSING_EXTERN_GETIMEOFDAY
 
 #define MinorOSStr	"sunos4.1.3"
-#define DIRENT	1
-#define HAVE_FCNTL_H	1
 #define HAVE_MACHINE_PARAM_H	1
 #define HAVE_MEMORY_H	1
-#define HAVE_NETDB_H	1
 #define HAVE_SGTTY_H	1
-#define HAVE_SYS_MMAN_H	1
-#define HAVE_SYS_PARAM_H	1
-#define HAVE_SYS_SOCKET_H	1
-#define HAVE_SYS_STAT_H	1
-#define HAVE_SYS_TIME_H	1
-#define HAVE_SYS_TIMES_H	1
-#define HAVE_SYS_WAIT_H	1
-#define HAVE_TERMIOS_H	1
-#define HAVE_TERMIO_H	1
-#define HAVE_UNISTD_H	1
 #define HAVE_DLFCN_H	1
-#define RETSIGTYPE	void
-#define SIGT	RETSIGTYPE
-#define SIGRET	/*do nothing*/
-#define HAVE_ST_BLKSIZE	1
-#define HAVE_ST_BLOCKS	1
-#define HAVE_ST_RDEV	1
-#define TIME_WITH_SYS_TIME	1
-#define HAVE_LONG_FILE_NAMES	1
 #define HAVE_RESTARTABLE_SYSCALLS	1
 #define HAVE_LIBDL	1
-#define HAVE_LIBM	1
 #define HAVE_LIBNSL	1
 #define HAVE_DEV_ZERO	1
 #define HAVE_BSD_SETPGRP	1
@@ -54,40 +31,16 @@
 #define HAVE_DLOPEN	1
 #define HAVE_EXP10	1
 #define HAVE_GAMMA	1
-#define HAVE_GETCWD	1
-#define HAVE_GETHOSTNAME	1
 #define HAVE_GETPAGESIZE	1
 #define HAVE_GETWD	1
-#define HAVE_LGAMMA	1
-#define HAVE_MKDIR	1
-#define HAVE_MMAP	1
-#define HAVE_MPROTECT	1
 #define HAVE_POLL	1
 #define HAVE_RE_COMP	1
-#define HAVE_REXEC	1
 #define HAVE_RINT	1
-#define HAVE_SELECT	1
-#define HAVE_SETITIMER	1
-#define HAVE_SETSID	1
 #define HAVE_SIGACTION	1
 #define HAVE_SIGSTACK	1
 #define HAVE_SIGVEC	1
-#define HAVE_SOCKET	1
-#define HAVE_SRAND	1
-#define HAVE_SRAND48	1
 #define HAVE_SRANDOM	1
-#define HAVE_STRCSPN	1
-#define HAVE_STRDUP	1
-#define HAVE_STRSPN	1
-#define HAVE_STRTOK	1
-#define HAVE_SYMLINK	1
-#define HAVE_SYSCONF	1
-#define HAVE_TEMPNAM	1
-#define HAVE_TIME	1
-#define HAVE_TIMES	1
-#define HAVE_VFPRINTF	1
 #define HAVE_WAIT3	1
-#define HAVE_WAITPID	1
 #define MISSING_EXTERN__FILBUF	1
 #define MISSING_EXTERN__FLSBUF	1
 #define MISSING_EXTERN_ACCEPT	1
