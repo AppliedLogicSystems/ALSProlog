@@ -422,6 +422,8 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 	int is_new, pre_named;
 	AP_Type type;
 	int r;
+	extern char library_dir[1024];
+	char tcl_library[1024]; 
 
 	type = AP_ObjType(w, *interp_name);
 	
@@ -443,6 +445,12 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 		AP_SetStandardError(w, AP_RESOURCE_ERROR, AP_NewSymbolFromStr(w, "tcl_memory"));
 		goto error;
 	}
+
+	/* Set tcl_library to point to alspro directory. */
+
+	strcpy(tcl_library, library_dir);
+	strcat(tcl_library, "tcl8.0");
+	Tcl_SetVar(interp, "tcl_library", tcl_library, TCL_GLOBAL_ONLY);
 	
 	r = Tcl_Init(interp);
 	if (r != TCL_OK) {
@@ -749,10 +757,13 @@ PI_END
 
 void pi_init(void)
 {
-
+	extern char executable_path[1024];
+  
 #ifdef macintosh
 	tcl_macQdPtr = &qd /*GetQD()*/;
 #endif
+
+	Tcl_FindExecutable(executable_path);
 
 	Tcl_InitHashTable(&tcl_interp_name_table, TCL_STRING_KEYS);
 	
