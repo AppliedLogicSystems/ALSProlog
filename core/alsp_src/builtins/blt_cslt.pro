@@ -588,6 +588,8 @@ load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WkExt,FCOpts)
 	load_source(CanonSrcPath,BaseFile,ObpPath,FCOpts),
 	note_paths(FCOpts, CanonSrcPath, ObpPath, CanonSrcPath).
 
+
+
 fin_load_from_file(obp,Nature,BaseFile,CanonSrcPath,OutFilePath,
 					WkExt,ExtOpts,DelFlag,FCOpts)
 	:-!,
@@ -644,8 +646,6 @@ obp_load_file(CanonSrcPath, BaseFile, FCOpts)
 
 obp_load_from_path(BaseFile,ObpPath, CanonSrcPath)
 	:-
-%	(filePlusExt(NoSuffixPath, _, CanonSrcPath),! ; NoSuffixPath = CanonSrcPath),
-%	establish_fcg(NoSuffixPath),
 	establish_fcg(BaseFile),
 	full_obp_load(CanonSrcPath, BaseFile, ObpPath),
 	reset_fcg(_).
@@ -661,8 +661,11 @@ default_load(CanonSrcPath,BaseFile,ObpPath,FCOpts)
 		note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath)
 		;
 		load_source_object(CanonSrcPath,BaseFile,ObpPath),
+		!,
 		note_paths(FCOpts, CanonSrcPath, ObpPath, CanonSrcPath)
-	).
+	),
+	! ; true.
+
 
 /*-------------------------------------------------------------*
  |	Record source/obp/loaded path information in the 
@@ -876,8 +879,6 @@ set_consult_messages(Value)
  | For loading source (.pro) files without writing the .obp file:
  *-------------------------------------------------------------*/ 
 load_source(Path,BaseFile,Type,FCOpts) :-
-	(filePlusExt(NoSuffixPath, _, Path),!; NoSuffixPath = Path),
-%	establish_fcg(NoSuffixPath),
 	establish_fcg(BaseFile),
 	obp_push_stop,
 
@@ -888,8 +889,11 @@ load_source(Path,BaseFile,Type,FCOpts) :-
 	obp_pop,
 	reset_fcg(_),
 	!.
+
 load_source(_,_,_,_) :-
 	obp_pop,
+	pop_clausegroup(FCG),
+	massively_abolish_clausegroup(FCG),
 		%% ld_src_err: "Internal error in load_source for file %t\n"
 	prolog_system_error(ld_src_err, []).
 
@@ -925,12 +929,12 @@ check_unset_tgt_mod(_).
  |	For loading source (.pro) files AND writing the .obp file:
  *-------------------------------------------------------------*/ 
 load_source_object(SPath,BaseFile,OPath) :-
-	(filePlusExt(NoSuffixPath, _, SPath),!; NoSuffixPath = SPath),
+%	(filePlusExt(NoSuffixPath, _, SPath),!; NoSuffixPath = SPath),
 %	establish_fcg(NoSuffixPath),
 	establish_fcg(BaseFile),
 	obp_open(OPath),
 	!,
-	xconsult(SPath,NErrs),
+	catch(xconsult(SPath,NErrs), _, obp_close_cleanup(SPath,OPath)),
 	obp_close,
 	reset_fcg(_),
 	(NErrs = 0 ->  
@@ -942,11 +946,25 @@ load_source_object(SPath,BaseFile,OPath) :-
 			prolog_system_error(obp_not_removed,[SPath,OPath])
 		)
 	).
+	
+
 load_source_object(SPath,BaseFile,OPath)
 	:-
 	prolog_system_error(no_open_fil, [OPath]),
 	prolog_system_error(no_obp, [OPath]),
 	xconsult(SPath,NErrs).
+
+obp_close_cleanup(SPath,OPath)
+	:-
+	obp_close,
+	pop_clausegroup(FCG),
+	massively_abolish_clausegroup(FCG),
+	(unlink(OPath) ->  
+			prolog_system_error(obp_removed,[SPath,OPath])
+			;   
+			prolog_system_error(obp_not_removed,[SPath,OPath])
+	),
+	fail.
 
 /*-------------------------------------------------------------*
  |	For loading source (.pro) files AND writing the .obp file,
