@@ -1,2 +1,2 @@
-#include <MSLWin32Headers>
+#include <Win32Headers>
 #define HAVE_CONFIG_H
