@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.16 1998/11/18 21:50:09 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.17 1998/12/06 02:24:57 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -67,21 +67,9 @@ proc new_project {} {
 proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
 	global tcl_platform
 
-#	if {$tcl_platform(platform) == "macintosh"} {
-#		set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
-#	} else {
-#		set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
-#		}
-#
-#	set DFT [list -filetypes $types]
-###	set ID ""
-#	set NewFilePath [eval tk_getOpenFile $DFT \
-#			{-title "Project File to Open"} \
-#			[list "-initialdir" $DfltDir] ]
-
 if {$tcl_platform(platform) != "unix"} {
 	set NewFilePaths [eval getFiles  \
-			{-prompt "Project File to Open"} ]
+			{-prompt "Files to Add to Project"} ]
 
 	if {$NewFilePaths == ""} then {
 		return
@@ -97,8 +85,8 @@ if {$tcl_platform(platform) != "unix"} {
 	
 	set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
 	set DFT [list -filetypes $types]
-	set NewFilePath [eval tk_getOpenFile $DFT \
-			{-title "Project File to Open"} \
+	set NewFilePath [eval getFiles $DFT \
+			{-title "Files to Add to Project"} \
 			[list "-initialdir" $DfltDir] ]
 	set BaseNewFile [file tail $NewFilePath]
 	set Prev [$Listbox get 0 end]
