@@ -194,7 +194,7 @@ vtl(File, ArgC, ArgV)
 
 vtl(Interp, File, ArgC, ArgV)
 	:-
-	init_tk_alslib(Interp_),
+	init_tk_alslib(Interp,_),
 	tcl_call(Interp, [set, argc, ArgC], _),
 	tcl_call(Interp, [set, argv, ArgV], _),
 	tcl_call(Interp, [source,File], _).

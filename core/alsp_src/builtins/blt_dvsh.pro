@@ -1156,15 +1156,31 @@ do_source_tcl(TclInterp, File)
 	tcl_call(TclInterp, [source, File], X),
 	printf(user_output, 'Tcl file %t sourced in Tcl interpreter %t\n', [File,TclInterp]).
 
+
 start_visual_tcl
 	:-
 	builtins:sys_searchdir(SSD),
-	split_path(SSD,SSDElts),
+	split_path(SSD,SSDElts0),
+	fix_disk(SSDElts0, SSDElts),
 	parent_path(PP),
+	append(SSDElts,[PP,vtcl],VTPathHomeElts),
+	join_path(unix,VTPathHomeElts, VTCL_HOME0),
+	catenate(['"',VTCL_HOME0, '"'], VTCL_HOME),
+
 	append(SSDElts,[PP,vtcl,'vt.tcl'],VTPathElts),
-	join_path(VTPathElts, VTPath),
-	init_tk_alslib(vttcli,_),
-	tcl_call(vttcli,[source,VTPath],_).
+	join_path(unix,VTPathElts, VTPath),
+
+	init_tk_alslib(vttlci,_),
+	tcl_eval(vttlci,'set argc 0',_),
+	tcl_eval(vttlci,'set argv {}',_),
+	tcl_call(vttlci,[source,VTPath],_),
+	tcl_eval(vttlci,[set_tcl_ga,vTcl,'VTCL_HOME',VTCL_HOME],_),
+	tcl_call(vttlci,['vTcl:prolog_intf'],_).
+
+fix_disk([Head0 | SSDElts0], [Head | SSDElts0])
+	:-
+	sub_atom(Head0,0,2,_,Head).
+
 
 remove_non_system_global_vars
 	:-
