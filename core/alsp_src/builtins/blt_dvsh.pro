@@ -72,7 +72,7 @@ alsdev(Shared)
 			,prompt_goal(user_prompt_goal(shl_tk_out_win))
 		]),
 	open(tk_win(shl_tcli, '.topals.txwin.text'), write, OSS, 
-		[alias(shl_tk_out_win)
+		[alias(shl_tk_out_win),write_eoln_type(lf)
 		]),
 	set_associated_output_alias(shl_tk_in_win, shl_tk_out_win),
 	catenate('WaitForLine','.topals.txwin.text',WaitVar),
@@ -252,12 +252,20 @@ install_defstruct(Basic, Elts)
 			makePred = Make,
 			structLabel = Name
 			] ),
-	file_input_dialog('Defstruct file name:', Name,typ,DefstrFile),
+%	file_input_dialog('Defstruct file name:', Name,typ,DefstrFile),
+	file_select_dialog(shl_tcli,
+						[title = 'Defstruct file name:',
+						 defaultname = deflttyp,
+						 mode = save_as,
+						 ext = '.typ',
+						 filetypes = [ ['*.typ',[typ]],['All Files',['*']] ]
+						],
+						DefstrFile),
 	open(DefstrFile,append,TmpTS,[]),
 	write_clause(TmpTS, DS, [quoted(true)]),
 	close(TmpTS),
 	sprintf(atom(Msg),'Defstruct %t added to file %t',[Name,DefstrFile]),
-	info_dialog(Msg).
+	info_dialog(shl_tcli, Msg, 'Defstruct finished').
 
 /*
 open('tmpout.typ',append,TmpTS,[]),
