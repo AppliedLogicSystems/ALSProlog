@@ -1912,6 +1912,7 @@ re_color_port(redo, _, _) :-!.
 re_color_port(Port, MRFCG, SrcMgr)
 	:-
 	accessObjStruct(tcl_doc_path, SrcMgr, Win),
+	!,
 	(Win \= nil ->
 		catenate(Win, '.text', TextWin),
 		port_color(Port, Color),
@@ -1919,7 +1920,7 @@ re_color_port(Port, MRFCG, SrcMgr)
 		configure_tag(call_tag, TextWin,['-background',Color])
 		;
 		true
-	).
+	).  
 
 	%blue:
 port_color(call, '#00acff').
@@ -1935,21 +1936,6 @@ dbg_boundary(MRFCG,1,1,Desc,Port,XGoal,DBGMGR, SrcMgr)
 		; 
 		true
 	).
-
-/*
-dbg_boundary(MRFCG,Box,Depth,Desc,Port,XGoal,DBGMGR, SrcMgr)
-	:-
-	Box=1,
-	Depth=1,
-	!,
-	((Port = exit; Port = fail) -> 
-		clean_up_src_win(MRFCG, SrcMgr) 
-		; 
-		true
-	).
-
-dbg_boundary(MRFCG,Box,Depth,Desc,Port,XGoal,DBGMGR, SrcMgr).
-*/
 
 fcg_change(Port,DBG,ClsGrp,Start,End, DBGMGR)
 	:-

@@ -2137,6 +2137,28 @@ system_stream_aliases([
 export close_down_nonsystem_streams/0.
 close_down_nonsystem_streams
 	:-
+	pget_stream_table(Num,Stream),
+	close_down_this_nonsystem_stream(Num,Stream),
+	fail.
+close_down_nonsystem_streams.
+
+close_down_this_nonsystem_stream(Num,Stream)
+	:-
+	Num >= 0,
+	stream_open_status(Stream, open),
+	!,
+	close(Stream),
+	(pget_alias(Alias,Stream) ->
+		pdel_alias(Alias,_)
+		;
+		true
+	).
+close_down_this_nonsystem_stream(Num,Stream).
+
+/*
+export close_down_nonsystem_streams/0.
+close_down_nonsystem_streams
+	:-
 	system_stream_aliases(SystemAliases),
 	pget_alias(Alias,Stream),
 	(dmember(Alias, SystemAliases) ->
@@ -2152,6 +2174,7 @@ close_down_nonsystem_streams
 	fail.
 
 close_down_nonsystem_streams.
+*/
 	
 
 

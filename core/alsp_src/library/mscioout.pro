@@ -12,10 +12,9 @@ export putc_n_of/3.
 
 export write_lines/1.
 export write_lines/2.
+export write_lines/3.
 export write_lines_opt/2.
-export write_lines_opt/3.
-export write_lines_nl/3.
-export write_lines_nl/4.
+
 export write_clause/1.
 export write_clause/2.
 export write_clause/3.
@@ -23,6 +22,9 @@ export write_clauses/1.
 export write_clauses/2.
 export write_clauses/3.
 
+export write_lines_opt/3.
+export write_lines_nl/3.
+export write_lines_nl/4.
 
 /*!-------------------------------------------------------------
  |	colwrite/4
@@ -102,7 +104,7 @@ putc_n_of(Num, Char, Stream)
 write_lines(List)
 	:-
 	sio:get_current_output_stream(TgtStream),
-	write_lines(TgtStream, List).
+	write_lines(TgtStream, List, []).
 
 /*!-------------------------------------------------------------
  |	write_lines/2
@@ -114,8 +116,7 @@ write_lines(List)
  *!------------------------------------------------------------*/
 write_lines(TgtStream, List)
 	:-
-	builtins:sys_env(OS,_,_),
-	write_lines_nl(List, TgtStream, OS,[]).
+	write_lines(TgtStream, List, []).
 
 /*!-------------------------------------------------------------
  |	write_lines_opt/2
@@ -128,76 +129,33 @@ write_lines(TgtStream, List)
 write_lines_opt(List, Opts)
 	:-
 	sio:get_current_output_stream(TgtStream),
-	builtins:sys_env(OS,_,_),
-	write_lines_nl(List, TgtStream, OS, Opts).
+	write_lines(TgtStream, List, Opts).
 
 /*!-------------------------------------------------------------
- |	write_lines_opt/3
- |	write_lines_opt(TgtStream, List, Opts)
- |	write_lines_opt(+, +, +)
+ |	write_lines/3
+ |	write_lines(Lines, Stream, Options)
+ |	write_lines(+, +, +)
  |
- |	- write a list of lines to a stream, with options
- |
- *!------------------------------------------------------------*/
-write_lines_opt(TgtStream, List, Opts)
-	:-
-	builtins:sys_env(OS,_,_),
-	write_lines_nl(List, TgtStream, OS, Opts).
-
-/*!-------------------------------------------------------------
- |	write_lines_nl/3
- |	write_lines_nl(Lines, TgtS, NL_type)
- |	write_lines_nl(+, +, +)
- |
- |	- write a list of lines to a stream, with nl type specified
+ |	- write a List of lines to a Stream, with Options
  |
  *!------------------------------------------------------------*/
-write_lines_nl(Lines, TgtS, NL_type)
+write_lines(Stream, Lines, Options)
 	:-
-	write_lines_nl(Lines, TgtS, NL_type, []).
+	write_lines0(Lines, Stream, Options).
 
-/*!-------------------------------------------------------------
- |	write_lines_nl/4
- |	write_lines_nl(Lines, TgtS, NL_type, Options)
- |	write_lines_nl(+, +, +, +)
- |
- |	- write a list of lines to a stream, with options, incl nl
- |
- *!------------------------------------------------------------*/
-write_lines_nl([], _, _, _).
+write_lines0([], _, _) :-!.
 
-write_lines_nl([Line | Lines], TgtS, NL_type, Options)
+write_lines0([Line | Lines], Stream, Options)
+	:-!,
+	write_term(Stream, Line, Options),
+	nl(Stream),
+	write_lines0(Lines, Stream, Options).
+
+write_lines0(Lines, Stream, Options)
 	:-
-	write_term(TgtS, Line, Options),
-	output_nl(NL_type, TgtS),
-	write_lines_nl(Lines, TgtS, NL_type, Options).
-
-/*!-------------------------------------------------------------
- |	output_nl/2
- |	output_nl(NL_type, TgtS)
- |	output_nl(+, +)
- |
- |	- output a specified nl type to a stream
- |
- *!------------------------------------------------------------*/
-output_nl(unix, TgtS)
-	:-
-%	nl(TgtS).
-	put_code(TgtS, 10).
-
-output_nl(mswin32, TgtS)
-	:-
-	put_code(TgtS, 13),
-	put_code(TgtS, 10).
-
-output_nl(dos, TgtS)
-	:-
-	put_code(TgtS, 13),
-	put_code(TgtS, 10).
-
-output_nl(macos, TgtS)
-	:-
-	put_code(TgtS, 13).
+	atomic(Lines),
+	write_term(Stream, Lines, Options),
+	nl(Stream).
 
 /*!-------------------------------------------------------------
  |	write_clause/1
