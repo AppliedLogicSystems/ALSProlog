@@ -1,0 +1,72 @@
+<HTML>
+<HEAD>
+<TITLE>atom_length/2</TITLE>
+</HEAD><BODY>
+<A NAME="82df56d3"></A>atom_length/2
+<P></P>
+<A NAME="82df56d9"></A><A NAME="84bad951"></A>atom_length/2 –  determine the length of an atom
+<P></P>
+<A NAME="84bad952"></A><B>FORMS
+<P></P>
+<A NAME="a24780f7"></A></B>atom_length(Atom,Length)  <A NAME="a24780f6"></A><A NAME="a24780f6"></A> 
+<P></P>
+<A NAME="a24780f8"></A><B>DESCRIPTION
+<P></P>
+<A NAME="a2478124"></A></B>atom_length/2 must have Atom bound to an atom.  Length is unified with the number of characters in the atom.
+<P></P>
+<A NAME="a247811b"></A><B>EXAMPLES  
+<P></P>
+<A NAME="a247811c"></A></B>?- atom_length(an_atom, L).
+<P></P>
+<A NAME="a247811d"></A>
+<P></P>
+<A NAME="a247811e"></A>L = 7
+<P></P>
+<A NAME="a247811f"></A>
+<P></P>
+<A NAME="a2478120"></A>yes.
+<P></P>
+<A NAME="a2478121"></A>?- atom_length('Another atom\n', L).                        
+<P></P>
+<A NAME="a2478122"></A>
+<P></P>
+<A NAME="a2478123"></A>L = 13
+<P></P>
+<A NAME="a247814f"></A>
+<P></P>
+<A NAME="a2478146"></A>yes.
+<P></P>
+<A NAME="a2478147"></A>?- atom_length(9.5, L).
+<P></P>
+<A NAME="a2478148"></A>error(type_error(atom,9.5),[builtins:atom_length(9.5,_3286)])
+<P></P>
+<A NAME="a2478149"></A>
+<P></P>
+<A NAME="a247814a"></A>Error: Argument of type atom expected instead of 9.5.
+<P></P>
+<A NAME="a247814b"></A>- Goal:          builtins:atom_length(9.5,_A)
+<P></P>
+<A NAME="a247814c"></A>- Throw pattern: error(type_error(atom,9.5),
+<P></P>
+<A NAME="a247814d"></A>                     [builtins:atom_length(9.5,_A)])
+<P></P>
+<A NAME="a247814e"></A><B>ERRORS
+<P></P>
+<A NAME="a247817a"></A></B>Atom is a variable
+<P></P>
+<A NAME="a2478171"></A>––––&gt;  instantiation_error.
+<P></P>
+<A NAME="a2478172"></A>Atom is neither a variable nor an atom
+<P></P>
+<A NAME="a2478173"></A>––––&gt;  type_error(atom,Atom)
+<P></P>
+<A NAME="a2478174"></A>Length is neither a variable nor an integer
+<P></P>
+<A NAME="a2478175"></A>––––&gt;  type_error(integer,Length)
+<P></P>
+<A NAME="a2478176"></A><B>SEE ALSO  
+<P></P>
+<A NAME="a2478177"></A></B>atom_concat/3. 
+<P></P>
+</BODY>
+</HTML>
