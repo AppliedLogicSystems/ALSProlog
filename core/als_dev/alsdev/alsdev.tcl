@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.49 1998/08/23 18:31:39 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.50 1998/08/25 22:26:55 choupt Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -19,6 +19,25 @@
 ##=================================================================================
 
 package require getDirectory
+
+
+# Load packages for opening documents from the Finder/Explorer on
+# Macintosh and Windows.  The user provided procedure tkOpenDocument
+# is called to handles files opened this way.
+#
+# OpenDocument is an ALS-custom package for Windows.  This package contains
+# the AttachOpenDocumentHandler procedure which should be called when
+# .topals is fully opened.
+#
+# appleevents is a standard Tcl/Tk package for the Mac.
+
+if {$tcl_platform(platform) == "windows"} {
+	load {} OpenDocument
+}
+if {$tcl_platform(platform) == "macintosh"} {
+	load {} {appleevents}
+}
+
 
 proc xpe { What } {
 	global array proenv
@@ -97,9 +116,6 @@ proc try {a selector b} {
 
 if {[info exists ALSTCLPATH]==0} then { set ALSTCLPATH . }
 
-if {$tcl_platform(platform) == "macintosh"} {
-	load {} {appleevents}
-}
 #################################
 # GLOBAL VARIABLES
 #--------------------------------
@@ -1558,4 +1574,12 @@ raise .topals
 wm positionfrom .topals user
 wm geometry .topals $proenv(.topals,geometry)
 focus .topals.text
+
+# Call AttachOpenDocumentHandler from the OpenDocument package to
+# install a custom window procedure on .topals window for handling
+# document opened form the Explorer.
+
+if {$tcl_platform(platform) == "windows"} {
+	AttachOpenDocumentHandler
+}
 
