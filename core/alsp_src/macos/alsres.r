@@ -102,7 +102,7 @@ resource 'vers' (1, purgeable) {
 	VERSION_MAJOR, VERSION_MINOR << 4 | VERSION_PATCH,
 	VERSION_MACOS_RELEASE_STAGE, 0, verUS,
 	VERSION_STRING,
-	VERSION_STRING " © Applied Logic Systems, Inc. 1997"
+	VERSION_STRING " © Applied Logic Systems, Inc. 1998"
 };
 
 /* Icons */
