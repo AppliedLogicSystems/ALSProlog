@@ -40,11 +40,11 @@ pbi_delay()
 	PWord *dv,m,g,vv,rdt,*one,*two;
 	int dvt,mt,gt,vvt,rdtt;
 
-/* #ifdef DEBUGFREEZE */
+#ifdef DEBUGFREEZE
 pbi_cptx();
 printf("enter delay----wm_H=%x--TK_DELAY=%x-----------------\n",
 			(int)wm_H,TK_DELAY);
-/* #endif */
+#endif
 
     w_get_An((PWord *)&dv, &dvt, 1);
     w_get_An(&m, &mt, 2);
@@ -132,12 +132,12 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 		/* return the delay term in the 4th arg: */
 	if (w_unify(rdt, rdtt, vv, vvt))
 	{
-/* #ifdef DEBUGFREEZE */
+#ifdef DEBUGFREEZE
 pbi_cptx();
 printf("exit delay---wm_H=%x--real_dv=%x[_%lu]-------\n", 
 					(int)wm_H,  (int)one,
 					(long)(((PWord *) one) - wm_heapbase));
-/* #endif */
+#endif
 		SUCCEED;
 	}
 	else
@@ -326,6 +326,7 @@ printf("combin_dels:r=_%lu f=_%lu wm_H=%x wm_HB=%x wm_B=%x\n",
 	w_rungoal(mod, goal, goal_t);
 }
 
+#endif /* FREEZE */
 
 
 /*========================================================================*
@@ -339,13 +340,18 @@ int	disp_heap 		PARAMS(( void ));
 
 	/*-------------------------------------------------*
 	 | Walk the choice point stack,from newest to
-     	 | oldest, printing out the choice points;
+     | oldest, printing out the choice points;
 	 *-------------------------------------------------*/
 
 int
 pbi_walk_cps()
 {
   PWord *CurP, *Stop;
+  PWord pn;
+  PWord *NXTC, *PP;
+  int PID;
+  ntbl_entry *pna;
+  char *sss;
 
 	CurP = (PWord *) wm_B;
 	Stop = (PWord *)wm_trailbase;
@@ -354,9 +360,42 @@ pbi_walk_cps()
 
 		/* see chpt.h for choice-point macros */
 	while (CurP != 0) {
-		printf("curP=%x  prevB=%x  spb=%x  hb=%x  nxtc= %x\n",
+
+	if (chpt_B(CurP) != 0) {
+
+		NXTC = (PWord *)chpt_NextClause(CurP);
+		PP = (PWord *)backChoiceCode( NXTC );
+		PID = procIdx( PP );
+		if ((0 < PID) && (PID < NTBL_SIZE)) {
+/*			pna = (w_nametable[PID]->tokid_arity);   */
+			pna = (w_nametable[PID]);
+			if (pna != 0)
+				pn = MFUNCTOR_TOKID(w_nametable[PID]->tokid_arity);
+			else
+				pn = 0;
+			if (pn != 0) 
+				sss = TOKNAME(pn); 
+			else 
+				sss = "!bad";
+		} else {
+			pn = 0;
+			sss = "!bad"; }
+
+		printf("curP=%x  prevB=%x  spb=%x  hb=%x  nxtc= %x [%x - %d - %x/%x] %s\n",
 				(int)CurP, (int)chpt_B(CurP), (int)chpt_SPB(CurP),
-				(int)chpt_HB(CurP), (int)chpt_NextClause(CurP)  );
+				(int)chpt_HB(CurP), 
+				(int)NXTC,
+				(int)PP,
+				PID,
+				(int)pna,
+				(int)pn,
+				sss
+				);
+	} else
+		printf("curP=%x  prevB=%x  spb=%x  hb=%x  nxtc= 0\n",
+				(int)CurP, (int)chpt_B(CurP), (int)chpt_SPB(CurP),
+				(int)chpt_HB(CurP)
+				);
 
 	CurP = (PWord *)chpt_B(CurP);
 	}
@@ -388,62 +427,63 @@ disp_heap_item(CurT)
   char *FSt;
 
     	Tagg =  MTP_TAG( *CurT );
-		printf("%lx - (%lx)[%d]", (long)CurT,(long)*CurT,(int)Tagg);
+		fprintf(stdout,"%lx - (%lx)[%d]", (long)CurT,(long)*CurT,(int)Tagg);
     	switch (Tagg) {
 		case MTP_UNBOUND:
 			CTagg = M_VARVAL(*CurT);
 			if (CTagg == (PWord)CurT)
-				printf("unbound\n");
+				fprintf(stdout,"unbound\n");
 			else
-				printf("Ref->%x\n",(int)CTagg);
+				fprintf(stdout,"Ref->%x\n",(int)CTagg);
 			break;
 		case MTP_STRUCT:
-			printf("structure:");
+			fprintf(stdout,"structure:");
 
 			STRADDR = MSTRUCTADDR(*CurT);
 			FID = MFUNCTOR_TOKID(*STRADDR);
 			if (FID < tok_table_size() )
 			{
 				FSt = toktable[FID].tkname;
-				printf("(%x)-fctr=tokid(%d) %s/%d\n",(int)STRADDR,
+				fprintf(stdout,"(%x)-fctr=tokid(%d) %s/%d\n",(int)STRADDR,
 								(int)FID,FSt,(int)MFUNCTOR_ARITY(*STRADDR));
 			}
 			else
-				printf("-weird sym(as fctr:%x/%x)\n",FID,MFUNCTOR_ARITY(*CurT));
+				fprintf(stdout,"-weird sym(as fctr:%x/%x)\n",FID,MFUNCTOR_ARITY(*CurT));
 			break;
 		case MTP_LIST:
-			printf("list\n");
+			fprintf(stdout,"list\n");
 			break;
 		case MTP_CONST:
 		{
 			CTagg = (int)MTP_CONSTTAG( (*CurT ) );
-			printf("constant: (%d)",(int)CTagg);
+			fprintf(stdout,"constant: (%d)",(int)CTagg);
 			switch (CTagg) {
 			case MTP_INT:
-				printf("-integer=%d\n",(int)MINTEGER(*CurT));
+				fprintf(stdout,"-integer=%d\n",(int)MINTEGER(*CurT));
 				break;
 			case MTP_SYM:
 				if (MSYMBOL((*CurT)) < tok_table_size() )
-					printf("-symbol=%d/%s\n",(int)MSYMBOL((*CurT)),
-							TOKNAME(MSYMBOL((*CurT))));
+					fprintf(stdout,"-symbol=%d/%s\n",MSYMBOL((*CurT)),
+							(int)TOKNAME(MSYMBOL((*CurT))));
 				else
-					printf("-weird sym(as fctr:%x/%x)\n",
-							(unsigned int)MFUNCTOR_TOKID(*CurT),(unsigned int)MFUNCTOR_ARITY(*CurT));
+					fprintf(stdout,"-weird sym(as fctr:%x/%x)\n",
+							(int)MFUNCTOR_TOKID(*CurT),(int)MFUNCTOR_ARITY(*CurT));
 				break;
 			case MTP_FENCE:
-				printf("-fence\n");
+				fprintf(stdout,"-fence\n");
 				break;
 			case MTP_UIA:
-				printf("-uia\n");
+				fprintf(stdout,"-uia\n");
 				break;
 			default:
-				printf("-unknown constant\n");
+				fprintf(stdout,"-unknown constant\n");
 			}
 		}
 			break;
 		default:
-			printf("unknown quantity: %d\n",(int)Tagg);
+			fprintf(stdout,"unknown quantity: %d\n",(int)Tagg);
 		}
+		fflush(stdout);
 }
 
 	/*-------------------------------------------------*
@@ -458,35 +498,33 @@ pbi_swp_tr(void)
 
 	BStop = (PWord) wm_B;
 	TrS = (PWord) wm_TR;
-	printf("trail:wm_TR=%lx -> BStop (=B) =%lx\n",(long)TrS,(long)BStop);
+	fprintf(stdout,"trail:wm_TR=%lx -> BStop (=B) =%lx\n",(long)TrS,(long)BStop);
 
 #ifdef TRAILVALS
-	for (CurT = (PWord **)wm_TR+1; CurT < (PWord **)BStop; CurT += 2)
+/*	for (CurT = (PWord **)wm_TR+1; CurT < (PWord **)BStop; CurT += 2)  */
+	for (CurT = (PWord **)BStop-1; CurT >= (PWord **)wm_TR; CurT -= 2)
 #else
 	for (CurT = (PWord **)wm_TR; CurT < (PWord **)BStop; CurT += 1)
 #endif
 	{
-		printf("%lx[%lx]->", (long)CurT,(long)(1 & (long)CurT) );
+		fprintf(stdout,"%lx->", (long)CurT);
 		disp_heap_item(*CurT);
 		Back1 = (*CurT)-1;
-		if ((MFUNCTOR_TOKID(*Back1) == TK_DELAY) &&
-				(MFUNCTOR_ARITY(*Back1) == 4))
-		{
-			printf("Delay VAR!");
-			printf("         ");
-/*			disp_heap_item(*Back1);   */
+		if ((MFUNCTOR_TOKID(*Back1) == TK_DELAY) &&(MFUNCTOR_ARITY(*Back1) == 4)) {
+			fprintf(stdout,"Delay VAR!");
+			fprintf(stdout,"         ");
 			disp_heap_item(Back1);
 		}
 #ifdef TRAILVALS
-		printf("  +>%lx[%lx]->", (long)(CurT-1),(long)(1 & (long)(CurT-1)) );
-/*		disp_heap_item(*(CurT+1));   */
-		disp_heap_item(*(CurT-1));
+		fprintf(stdout,"  +>%lx[%lx]->", (long)(CurT-1),(long)(1 & (long)(CurT-1)) );
+		disp_heap_item((PWord *)(CurT-1));  
 #else
 #endif
 	}
+	fprintf(stdout,"Stopped at CurT=%lx\n", (long)CurT);
+	fflush(stdout);
 	SUCCEED;
 }
-
 
 
 
@@ -554,4 +592,3 @@ disp_item()
 }
 
 
-#endif /* FREEZE */

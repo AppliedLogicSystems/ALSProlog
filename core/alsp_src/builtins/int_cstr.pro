@@ -15,7 +15,10 @@
  |              Integration into ALS Prolog
  *================================================================*/
 
+
 module rel_arith.
+
+:- dynamic(debug_system_on/1).
 
 intvl(_,_,_,_).
 
@@ -24,14 +27,19 @@ intvl(_,_,_,_).
 	type_and_bounds(TypeDescrip, PrologType, Lower, Upper, TypeCode)
 	type_and_bounds(+, -, -, -, -)
 
-	TypeCode: real = 0; integer = 1; boolean = 2
+	TypeCode: boolean = 0; integer = 1; real = 2; 
  *--------------------------------------------------------------*/
-type_and_bounds(real(L,U),    real,    L, U, 0).
-type_and_bounds(real,         real,    L, U, 0).
+type_and_bounds(real(L,U),    real,    L, U, 2).
+type_and_bounds(real,         real,    L, U, 2).
+type_and_bounds(real(R),      real,    L, U, 2)
+	:-!, 
+	float(R),
+	fuzz_float(R,L,U).
 type_and_bounds(integer(L,U), integer, L, U, 1).
 type_and_bounds(integer,      integer, L, U, 1).
-type_and_bounds(boolean(L,U), boolean, 0, 1, 2).
-type_and_bounds(boolean,      boolean, 0, 1, 2).
+
+%type_and_bounds(boolean(L,U), boolean, 0, 1, 0).
+%type_and_bounds(boolean,      boolean, 0, 1, 0).
 
 /*---------------------------------------------------------------
  |	new_type_interval/2
@@ -64,7 +72,15 @@ type_and_bounds(boolean,      boolean, 0, 1, 2).
 uia_space(_,UIA)
 	:-
 	'$uia_alloc'(24,UIA).
-%	'$uia_alloc'(16,UIA).
+
+new_type_interval(boolean(L,U),X)
+	:-!,
+	new_type_interval(boolean,X).
+
+new_type_interval(boolean,X)
+	:-!,
+	FreezeGoal = intvl(boolean,X, [], 1),
+	freeze(X, FreezeGoal).
 
 new_type_interval(TypeDescrip,X)
 	:-
@@ -74,14 +90,16 @@ new_type_interval(TypeDescrip,X)
 	uia_space(BareType,UIA),
 	'$uia_poked'(UIA,0,L1),
 	'$uia_poked'(UIA,8,U1),
-	'$uia_poked'(UIA,16,TC),
+	'$uia_pokel'(UIA,16,TC),
 	freeze_goal_for(BareType, X, L1, U1, UIA, FreezeGoal),
 	freeze(X, FreezeGoal).
 
 freeze_goal_for(real,    X, L1, U1, UIA, intvl(real,   X,[],UIA) ).
 freeze_goal_for(integer, X, L1, U1, UIA, intvl(integer,X,[],UIA) ).
-freeze_goal_for(boolean, X, L1, U1, UIA, intvl(boolean,X,[],UIA) ).
 
+%freeze_goal_for(boolean, X, L1, U1, UIA, intvl(boolean,X,[],UIA) ).
+
+	%% NEED::: DEAL WITH BOOLEANS:
 new_combined_interval(TypeDescrip, X)
 	:-
 pbi_write(new_combined_interval(TypeDescrip)),pbi_nl,pbi_ttyflush,
@@ -91,11 +109,12 @@ pbi_write(new_combined_interval(TypeDescrip)),pbi_nl,pbi_ttyflush,
 	uia_space(BareType,UIA),
 	'$uia_poked'(UIA,0,L1),
 	'$uia_poked'(UIA,8,U1),
-	'$uia_poked'(UIA,16,TC),
+	'$uia_pokel'(UIA,16,TC),
 	freeze_goal_for(BareType, X, L1, U1, UIA,TypeFreezeGoal),
 	'$delay_term_for'(X, DelayTerm),
 	arg(4, DelayTerm, OrigDomainTerm),
 	trailed_mangle(4, DelayTerm, (OrigDomainTerm, TypeFreezeGoal)).
+
 
 /*---------------------------------------------------------------
  |	Accessing and destructive changes to the components of an
@@ -208,6 +227,7 @@ show_used_by([_ | VarList])
 	:-
 	show_used_by(VarList).
 
+
 /*
 init_used_by([], _).
 
@@ -237,6 +257,10 @@ interval_bound(Side, Quant, Bound, Type)
 	max_bound(Type, MaxBound),
 	interval_bound_decide(Side, MaxBound, Bound).
 
+interval_bound(_,Quant, Quant, boolean)
+	:-!.
+
+
 interval_bound(_,Quant, Bound, _)
 	:-
 	Bound is float(Quant).
@@ -249,12 +273,12 @@ interval_bound_decide(lower, MaxBound, Bound)
 max_bound(real, 1.0e100).
 max_bound(integer, Y)
 	:-
-	maxint(X),
+			%% maxint(X),
+	current_prolog_flag(max_integer, X), 
 	Y is float(X).
 
 %% Temporary hack until we get the maxint prolog flag stuff implemented:
-
-maxint(123456789).
+%maxint(123456789).
 
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -305,17 +329,23 @@ domain_term_from_constr(DomainTerm, DomainTerm).
 	'$domain_term'(Var, DomainTerm),
 	valid_domain(DomainTerm, Type, LB, UB).
 
+/* REDUNDANT ??
 valid_domain(( A, B ), Type, LB, UB)
 	:-
 	valid_domain( A, Type, LB, UB).
+*/
 
 valid_domain(Intrv, Type, LB, UB)
 	:-
 	functor(Intrv,intvl,4),
 	arg(1,Intrv,Type),
-	arg(4,Intrv,UIA),
-	'$uia_peekd'(UIA,0,LB),
-	'$uia_peekd'(UIA,8,UB).
+	(Type = boolean ->
+		LB = 0, UB = 1
+		;
+		arg(4,Intrv,UIA),
+		'$uia_peekd'(UIA,0,LB),
+		'$uia_peekd'(UIA,8,UB)
+	).
 
 %%%%%%%%%%%%% NODE BUILDING%%%%%%%%%%%%%%%
 
@@ -337,28 +367,23 @@ point_interval( X, PX)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-/*
-export new_node/1.
-new_node(Node)
-	:-
-	'$iterate'(Node).
-*/
-
 export '$iterate'/1.
 '$iterate'(Goal)
 	:-
-%printf_opt('Goal= %t\n',[Goal], [lettervars(false) ,line_length(100)]),
+		%% Put #ifdef wrapper corresponding to DEBUGSYS around this:
+	(debug_system_on(cstr_ig) ->
+		printf_opt('Goal= %t\n',[Goal], [lettervars(false) ,line_length(100)])
+		; true),
 	Goal =.. [OP | Args],
 	prim_op_code(OP,OpCd),
 
 	XFGoal =.. [pop, OpCd,Z,X,Y,LinkArg],
 	fixup_iter(Args, Z,X,Y,XFGoal),
 
-/*
-printf_opt('>>%t--XFGoal= %t\n',[Goal,XFGoal], [lettervars(false) ,line_length(100)]),
+		%% Put #ifdef wrapper corresponding to DEBUGSYS around this:
+%printf_opt('>>%t--XFGoal= %t\n',[Goal,XFGoal], [lettervars(false) ,line_length(100)]),
 %show_used_by(['Z'-Z,'X'-X,'Y'-Y]),
-*/
-
+	!,
 	'$iter_link_net'(OpCd,Z,X,Y,XFGoal).
 
 fixup_iter([Z,X], Z,X,0,XFGoal)
@@ -369,30 +394,36 @@ fixup_iter([Z,X,Y], Z,X,Y,XFGoal)
 	:-
 	add_to_used_by([Z,X,Y], XFGoal).
 
-prim_op_code(unequal, 0).
-prim_op_code(equal, 1).
-prim_op_code(greatereq, 2).
-prim_op_code(higher, 3).
-prim_op_code(add, 4).
-prim_op_code(begin_tog, 5).
-prim_op_code(finish_tog, 6).
-prim_op_code(inf, 7).
-prim_op_code(j_less, 8).
-prim_op_code(k_equal, 9).
-prim_op_code(lub, 10).
-prim_op_code(mul, 11).
-prim_op_code(narrower, 12).
-prim_op_code(or, 13).
-prim_op_code(pow_odd, 14).
-prim_op_code(qpow_even, 15).
-prim_op_code(rootsquare, 16).
-prim_op_code(vabs, 17).
-prim_op_code(wrap, 18).
-prim_op_code(xp, 19).
-prim_op_code(cos, 20).
-prim_op_code(sin, 21).
-prim_op_code(tan, 22).
-
+prim_op_code(unequal,		0).
+prim_op_code(equal,			1).
+prim_op_code(greatereq,		2).
+prim_op_code(higher,		3).
+prim_op_code(add,			4).
+prim_op_code(begin_tog, 	5).
+prim_op_code(finish_tog,	6).
+prim_op_code(inf,			7).
+prim_op_code(j_less,		8).
+prim_op_code(k_equal,		9).
+prim_op_code(lub,			10).
+prim_op_code(mul,			11).
+prim_op_code(narrower,		12).
+prim_op_code(or,			13).
+prim_op_code(pow_odd,		14).
+prim_op_code(qpow_even,		15).
+prim_op_code(rootsquare,	16).
+prim_op_code(vabs,			17).
+prim_op_code(wrap,			18).
+prim_op_code(xp,			19).
+prim_op_code(cos,			20).
+prim_op_code(sin,			21).
+prim_op_code(tan,			22).
+	%% Booleans:
+prim_op_code(conjunction,	23).
+prim_op_code(disjunction,	24).
+prim_op_code(anynot,		25).
+prim_op_code(bothnot,		26).
+prim_op_code(exor,			27).
+prim_op_code(negation,		28).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

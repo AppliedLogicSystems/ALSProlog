@@ -20,17 +20,6 @@
 
 module rel_arith.
 
-/* Defined in sio_rt.pro:
-:- op(700,xfx,'::').
-:- op(700,xfx,'<>').   
-:- op(700,xfx,'@=').   
-:- op(600,xfx,'<=').    % subinterval, member, "diode"
-:- op(600,xfx, '|=').   % starts together
-:- op(600,xfx, '=|').   % ends together
-:- op(600,xfx,'=>').    % boolean implication
-:- op(150,fx, '~').   	% boolean negation
-*/
-
 /*-----------------------------------------------------------------------------*
  |  clp/1
  |  clp(Goals)
@@ -45,11 +34,22 @@ module rel_arith.
 :- module_closure('{}',1,clp0).
 :- module_closure(clp,1,clp0).
 
+
 clp0(M, X)
 	:-
 	clp(X, M).
 
-export clp/2.
+/*--------------------------------------------------------*
+ |	clp/2
+ |	clp(G, M)
+ |	clp(+, +)
+ |
+ |	- drives the recursion through G:
+ |
+ |	G = clp goal to be run
+ |	M = module
+ *--------------------------------------------------------*/
+
 clp( (L, Ls), M)
 	:-!,
 	clp_eval(L, M),
@@ -59,14 +59,26 @@ clp(G, M)
 	:- 
 	clp_eval(G, M).
 
-clp_eval( show(VName, Var), M )
-	:-!,
-	show_variable(VName, Var).
-
-clp_eval( show(Var), M )
-	:-!,
-	show_variable(Var).
-
+/*--------------------------------------------------------*
+ |	clp_eval( Expr, M )
+ |	clp_eval( Expr, M )
+ |	clp_eval( Expr, M )
+ |
+ |	- drives clp evaluation of individual goals
+ |
+ |	G = goal to run
+ |	M = module
+ |
+ |	Attempts to first run Expr as a CLP relation; if
+ |	this fails, calls Expr as a Prolog goal in module M
+ *--------------------------------------------------------*/
+				%%%
+				%%% For debugging:
+				%%%
+				clp_eval( show(VName, Var), M )
+					:-!,
+					show_variable(VName, Var).
+				
 clp_eval( Expr, M )
 	:-
 	Expr =.. [R, X, Y],
@@ -87,88 +99,45 @@ clp_arithmetic_relation( <> ).
 clp_arithmetic_relation( >  ).
 clp_arithmetic_relation( <  ).
 clp_arithmetic_relation( <= ).
-/*
+/*	--- need to fix parser for these:
 clp_arithmetic_relation( '|=' ).
 clp_arithmetic_relation( '=|' ).
 */
 clp_arithmetic_relation( 'i=' ).
 clp_arithmetic_relation( '=i' ).
 
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%% Debugging
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/*---------------------------------------------------------------
+ |			SYMBOLIC CONSTANTS
+ |	At the moment, adding additional requires adding a new token
+ |	to the system.  Say you want to add constant "gg", whose value
+ |	is (for descriptive purposes), defined by the #define M_GG ....
+ |	Then here, you add:
+ |
+ |	symbolic_constant(gg, 		cnst_gg).
+ |
+ |	Then in ~/generic/tokini.h, in the group at the end, add:
+ |
+ |		TK(TK_GG,  "cnst_gg"),
+ |	
+ |	Then, in ~/generic/intaux.c, in the function
+ |
+ |		extract_bds(DelVar, DelVar_t, LB, UB, IKind)
+ |
+ |	in the case 
+ |
+ |		else if (DelVar_t == WTP_SYMBOL)
+ |
+ |	add a case to the switch statement:
+ |
+ |		 case TK_GG  :   t = M_GG;
+ |						 break;
+ *--------------------------------------------------------------*/
 
-export show_variable/1.
-export show_variable/2.
-	%% debugging:
-show_variable(VName, Var)
-	:-
-	('$is_delay_var'(Var) ->
-	   '$domain_term'(Var, DomainTerm),
-	   valid_domain(DomainTerm, Type, LArg, UArg),
-	   access_used_by(DomainTerm, NL),
-   
-	    printf_opt('\n%t[%t] = %t: [%t, %t]\n', [VName,Var,Type,LArg,UArg],
-					[lettervars(false) ,line_length(100)]),
-	    printf_opt('\tUsedBy: %t\n',[NL],[lettervars(false),line_length(100)])
-	    ;
-	    printf_opt('\n%t = %t\n', [VName,Var],[lettervars(false),line_length(100)])
-	).
-
-	%% debugging:
-show_variable(Var)
-	:-
-	('$is_delay_var'(Var) ->
-	    '$domain'(Var, Type, LB, UB),
-	     printf_opt('\n%t = %t: [%t, %t]\n', [Var,Type,LB,UB],
-					[lettervars(false),line_length(100)])
-	     ;
-	     printf_opt('\n%t\n', [Var],[lettervars(false),line_length(100)])
-	).
-
-show_node(Node)
-	:-
-	var(Node),
-	'$delay_term_for'(Node, DT),
-	!,
-	printf_opt('%t : %t\n',[Node,DT],[lettervars(false),line_length(100)]).
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%% End Debugging
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% Symbolic Constants
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% Set up pi -- dirty trick;
-	%% After this runs, the clause for symbolic_constant(pi,PI) :-...
-	%% is replaced by a fact symbolic_constant(pi,PIVal)
-	%% with PIval computed to the accuracy of current system.
-	%% Formula taken from djgpp mailing list:
-	%% Morten Welinder <terra@diku.dk>
-	%% Ref to: http://www.diku.dk/~terra/pi.html
-	%%-------------------------------
-	%% Planned extension/modification:
-	%% Add user-extension predicate to control
-	%% addition of new constants.
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-symbolic_constant(pi,PI)
-	:-
-	PI is 16.0*atan(1.0/5.0) - 4.0*atan(1.0/239.0),
-	clause(symbolic_constant(pi,_),B,DBRef),
-	asserta(symbolic_constant(pi,PI)),
-	erase(DBRef).
-
-pi(PI) 
-	:-
-	symbolic_constant(pi,PI).
+symbolic_constant(pi, 		cnst_pi).
+symbolic_constant(pi_half,	cnst_pi_half).
+symbolic_constant(pi/2,		cnst_pi_half).
+symbolic_constant(pi_2,		cnst_pi_half).
+symbolic_constant(e,		cnst_e ).
 	
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Domain Declarations
@@ -206,7 +175,6 @@ pi(PI)
  *--------------------------------------------------------------*/
 
 export (::)/2.
-%export '::'/2.
 
 	%% X is a variable; freeze it to a domain:
 X :: Type 
@@ -215,7 +183,7 @@ X :: Type
 	!,
 	declare_variable(Type,X).
 
-	%% Process lists:
+	%% Process lists of declarations:
 [] :: _  :-!.
 
 [X | Xs] :: Type
@@ -223,34 +191,38 @@ X :: Type
 	X  :: Type,
 	Xs :: Type.
 
+	%%-----------------------------------------
 	%% X is neither a list, nor a variable;
 	%% so, check that it is an entity of
 	%% the correct type:
-	%% -----------
-		%% Query: do we want N :: real to succeed
-		%% when N is an integer in the correct range)?
+	%%-----------------------------------------
 
-X :: real(L,U)		
-	:- 
-	is_type(real,X),
-	L =< X, X =< U,
-	!.
-	
-X :: integer(L,U)	
-	:- 
-	is_type(integer,X),
-	L =< X, X =< U,
-	!.
+X :: Type
+	:-
+	check_type_match(Type, X).
 
-X :: boolean(L,U)	
-	:- 
-	is_type(boolean,X),
-	!.
+check_type_match(real(L,U), X)
+	:-
+	float(X),
+	L =< X, X =< U.
 
-X :: Type			
-	:- 
-	is_type(Type,X),
-	!.
+check_type_match(real, X)
+	:-
+	float(X).
+
+check_type_match(integer(L,U), X)
+	:-
+	integer(X),
+	L =< X, X =< U.
+
+check_type_match(integer, X)
+	:-
+	integer(X).
+
+check_type_match(boolean(_,_), 0).
+check_type_match(boolean(_,_), 1).
+check_type_match(boolean, 0).
+check_type_match(boolean, 1).
 
 is_type(real,X)
 	:-
@@ -271,8 +243,8 @@ is_type(boolean,1).
  |  A.  If X is an uninstatiated Prolog variable which is already
  |		frozen to some delayed goal, creates a new interval
  |		variable XX of type Type, and equates X = XX;
- |  B.  If X is an uninstatiated Prolog variable which is not a frozen
- |      	delay variable, freezes X to an interval domain
+ |  B.  If X is an uninstatiated Prolog variable which is not a
+ |		frozen delay variable, freezes X to an interval domain
  |		structure of type Type.
  |  C.  If X is an instatiated Prolog variable, tests that 
  |		X is frozen to an interval domain structure of type Type.
@@ -296,58 +268,78 @@ declare_variable(Type,X)
 	:-
 	domain_check(Type, X).
 
-check_or_mod_itype(PrimType,RestL0,RestU0,RestL,RestU)
+/*----------------------------------------------------------*
+ |	restrict_interval/2
+ |	restrict_interval(RestType,X)
+ |	restrict_interval(+,+)
+ |
+ |	X = an interval variable;
+ |	RestType ("restriction type") = a type expression;
+ |
+ |	X is restricted to become an interval of type RestType,
+ |	if this is meaningful.
+ *----------------------------------------------------------*/
+restrict_interval(RestType,X)
 	:-
-	check_mod_the_type(PrimType,RestL0, RestL),
-	check_mod_the_type(PrimType,RestU0, RestU).
-
-check_mod_the_type(PrimType,RestU, RestU)
-	:-
-	var(RestU),
+		%% '$domain'(X, XPrimType, LX, UX),
+	'$domain_term'(X, DomainTerm),
+	valid_domain(DomainTerm, XPrimType, LX, UX),
+	restrict_interval(RestType, XPrimType, XLB, XUB, X, DomainTerm),
 	!.
 
-check_mod_the_type(real,RestU, RestU)
-	:-
-	float(RestU).
+	%% Idempotent restriction is trivially ok, with no changes:
 
-check_mod_the_type(real,RestU0, RestU)
+restrict_interval(Type,   Type,    _, _, _, _) :-!.
+
+	%% If RestType is unbounded (RestType is an atom) and the restriction 
+	%% is "outward" (RestType >= XPrimType), this is also trivially ok:
+
+restrict_interval(integer,boolean, _, _, _, _) :-!.
+restrict_interval(real,   boolean, _, _, _, _) :-!.
+restrict_interval(real,   integer, _, _, _, _) :-!.
+
+	%% RestType is bounded (=.. [Type,L,U]); now the underlying
+	%% primitive types of RestType and XPrimType must be identical;
+	%% if they are, intersect the intervals; else raise an error:
+	%% X=[XLB, XUB],  RT=[RL,RU],
+
+restrict_interval(RestType, XPrimType, XLB, XUB, X, DomainTerm)
 	:-
-	integer(RestU0),
+	RestType =.. [XPrimType, RL, RU],
+	XLB =< RU,
+	RL =< XUB,
 	!,
-	RestU is float(RestU0).
+	max(XLB, RL, NewL),
+	min(XUB, RU, NewU),
+	update_lower_bd(DomainTerm, NewL),
+	update_upper_bd(DomainTerm, NewU).
 
-check_mod_the_type(integer,RestU, RestU)
+
+/*---NEED SOME SORT OF ERROR EXCEPTION ----
+	%% Error: Improper type restriction
+restrict_interval(RestType, XPrimType, XLB, XUB, X, DomainTerm)
 	:-
-	integer(RestU).
+ -------------------------------------------*/
 
-check_mod_the_type(boolean, 0,  0).
-check_mod_the_type(boolean, 1,  1).
-
-/*
-restrict_interval(RestType,X)
+restrict_interval(Type,X)
 	:-
-	pbi_write(restrict_interval(RestType)),pbi_nl,pbi_ttyflush,fail.
-*/
+	new_type_interval(Type,XX),
+	!,
+	'$iterate'(equal(X,XX)).
 
-restrict_interval(RestType,X)
+
+
+/*--- KILL
+restrict_interval(RestType, XPrimType, XLB, XUB, X)
 	:-
 	RestType =.. [PrimType, RestL0, RestU0],
-	check_or_mod_itype(PrimType,RestL0,RestU0,RestL,RestU),
-	'$domain_term'(X, XDomTm),
-	valid_domain(XDomTm,XType,XLB,XUB),
-	!,
-	(var(RestL) ->
-		RestL = XLB, NewL = XLB
-		;
-		max(XLB, RestL, NewL)
-	),
-	(var(RestU) ->
-		RestU = XUB, NewU = XUB
-		;
-		min(XUB, RestU, NewU)
-	),
-	combin_type([PrimType,XType], NewType),
-	(XType \= NewType ->
+	check_or_mod_itype(PrimType, RestL0, RestU0, RestL, RestU),
+
+	(var(RestL) -> RestL = XLB, NewL = XLB ; max(XLB, RestL, NewL)),
+	(var(RestU) -> RestU = XUB, NewU = XUB ; min(XUB, RestU, NewU)),
+
+	combin_type([PrimType,XPrimType], NewType),
+	(XPrimType \= NewType ->
 		update_intvl_type(XDomTm, NewType)
 		;
 		true
@@ -355,18 +347,40 @@ restrict_interval(RestType,X)
 	!,
 	update_lower_bd(XDomTm, NewL),
 	update_upper_bd(XDomTm, NewU).
+*/
 
-	%% Type is an atom:
-restrict_interval(Type,X)
+/***************************************
+	/*----------------------------------------------------------*
+	 |	Check and/or modify interval endpoints according
+	 |	to proposed input type; for use in restrict_type:
+	 *----------------------------------------------------------*/
+check_or_mod_itype(PrimType, RestL0, RestU0, RestL, RestU)
 	:-
-	'$domain'(X, Type, _, _),
+	check_mod_the_type(PrimType, RestL0, RestL),
+	check_mod_the_type(PrimType, RestU0, RestU).
+
+check_mod_the_type(PrimType, EP, EP)
+	:-
+	var(EP),
 	!.
 
-restrict_interval(Type,X)
+check_mod_the_type(real, EP, EP)
 	:-
-	new_type_interval(Type,XX),
+	float(EP).
+
+check_mod_the_type(real, EP0, EP)
+	:-
+	integer(EP0),
 	!,
-	'$iterate'(equal(X,XX)).
+	EP is float(EP0).
+
+check_mod_the_type(integer, EP, EP)
+	:-
+	integer(EP).
+
+check_mod_the_type(boolean, 0,  0).
+check_mod_the_type(boolean, 1,  1).
+***************************************/
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -381,16 +395,21 @@ restrict_interval(Type,X)
  |  ria_relation( Left, Right, RelationName )
  |  ria_relation( +, +, +)
  | 
- |  Handles instances constraint arithmetic relations
+ |  Handles instances constraint arithmetic relations which
+ |	must be added into the constraint network;
  |
  |  RelationName is the name of a clp relation 
  |  		(see clp_arithmetic_relation/1);
  |
  |  Left, Right are expressions which are the left and right
  |  arguments of the relational statement being processed;
+ |	Note that the process of flattening the arguments to the
+ |	relation will add network nodes corresponding to any
+ |	functions/operations occurring in the arg expressions.
  *--------------------------------------------------------------*/
-		%% Left is a variable, with the original relation expression
-		%% of the form:
+		%% Case 1:
+		%% Left is a variable, and the original relation expression
+		%% is of the form:
 		%%		Left is Expr ; Left := Expr ; Left == Expr
 		%%
 ria_relation( Left, Expr, Operator )
@@ -413,6 +432,11 @@ is_defining_rel( is ).
 is_defining_rel( := ).
 is_defining_rel( == ).
 
+/*---------------------------------------------------------------
+ |	define_interval/2
+ |	define_interval(Y, Expr)
+ |	define_interval(+, +)
+ *--------------------------------------------------------------*/
 define_interval(Y, Expr)
 	:-
 	flatten_expr(Expr, YE, Type),
@@ -459,7 +483,6 @@ add_relation(Relation, Left, Right)
 	:-
 	fmap_rel(Relation, Left, Right, Node),
 	!,
-	%new_node(Node).
 	'$iterate'( Node).
 
 /*-----------------------------------------------------------------
@@ -478,13 +501,6 @@ add_relation(Relation, Left, Right)
  |	Type	= the type of Value;
  *----------------------------------------------------------------*/
 
-/*
-flatten_expr(V, V, Type)
-	:-
-	var(V),		%% has to be a constraint delay var; look up its type
-	!,
-	'$domain'(V, Type, _, _).
-*/
 flatten_expr(V, V, Type)
 	:-
 	var(V),		%% has to be a constraint delay var; look up its type
@@ -534,7 +550,7 @@ flatten_expr(Expr, Res, Type)
 	down_type1(Function, Tp, Type),
 	flatten_expr(X, XE, Tp),
 	type1(Function, Tp, Type),
-	add_rel_node(Function, [XE], Res, Type).
+	add_fcn_node(Function, [XE], Res, Type).
 
 	%% Dyadic expressions - special:
 flatten_expr(X**0, 1, integer)
@@ -565,7 +581,7 @@ finish_flatten_power(N1,X,N,Res,Type)
 	flatten_expr(X, XE, PreType),
 	type_of_power(N1, PreType, Type),
 	odd_even_power_op(N, Opn),
-	add_rel_node(Opn, [XE, N1], Res, Type).
+	add_fcn_node(Opn, [XE, N1], Res, Type).
 
 flatten_expr( X<>Y, Res, boolean)
 	:-!,
@@ -584,7 +600,7 @@ flatten_expr( wrap(X,N), Res, real)
 	number(N),
 	N1 is N,
 	flatten_expr(X, XE, real),
-	add_rel_node(wrap, [XE, N1], Res, Type).
+	add_fcn_node(wrap, [XE, N1], Res, Type).
 	
 	%% Dyadic expressions - general:
 flatten_expr(Expr, Res, Type)
@@ -597,7 +613,7 @@ flatten_expr(Expr, Res, Type)
 	flatten_expr(Y, YE, T2),
 	type2(Function, T1, T2, Type),
 	normal_form(Function, [XE, YE], NF_Function, NF_Args),
-	add_rel_node(NF_Function, NF_Args, Res, Type).
+	add_fcn_node(NF_Function, NF_Args, Res, Type).
 
 odd_even_power_op(2, root) :-!. 
 odd_even_power_op(N, qpow_even) 
@@ -612,17 +628,16 @@ odd_even_power_op(N, pow_odd).
 
 flatten_expr1( sin,     X,Y, real ) 
 	:- 
-	pi(PI),
-	trigonometric(sin, X, Y, PI).
+	trigonometric(sin, X, Y, cnst_pi).
+
 flatten_expr1( cos,     X,Y, real ) 
 	:- 
-	pi(PI),
-	trigonometric(cos, X, Y, PI).
+	trigonometric(cos, X, Y, cnst_pi).
+
 flatten_expr1( tan,     X,Y, real ) 
 	:- 
-	pi(PI),
-	P is PI/2,
-	trigonometric(tan, X, Y, P).
+	trigonometric(tan, X, Y, cnst_pi_half).
+
 flatten_expr1( midpoint,X,Y, real) 
 	:- 
 	'$domain'(X, _, L, U),
@@ -637,7 +652,7 @@ flatten_expr1( median,  X,Y, real)
 	intv_median(L,U,Y).
 flatten_expr1( float,   X,Y, real) 
 	:- 
-	numeric(X), 
+	number(X), 
 	Y is float(X).
 flatten_expr1( round,   X,Y, integer) 
 	:- 
@@ -651,7 +666,7 @@ flatten_expr1( round,   X,Y, integer)
 	X =< Y + 0.5 .
 flatten_expr1( floor,   X,Y, integer) 
 	:- 
-	numeric(X),
+	number(X),
 	!, 
 	Y is floor(X).
 flatten_expr1( floor,   X,Y, integer) 
@@ -670,11 +685,17 @@ flatten_expr1( ceiling, X,Y, integer)
 	Y - 1 < X, 
 	X =< Y.
 
+	/*----------------------------------------------------------------------------*
+	 |	Y==sin(X) --> Q==wrap(XE, pi),  Y==sin(Q)
+	 |	Y==cos(X) --> Q==wrap(XE, pi),  Y==cos(Q)     where flatten_expr(X,XE,real)
+	 |	Y==tan(X) --> Q==wrap(XE, pi/2),Y==tan(Q)
+	 *----------------------------------------------------------------------------*/
 trigonometric( F, X, Res, Period)
 	:-
 	flatten_expr( X, XE, real),
-	add_rel_node( wrap, [XE,Period], Y, real),
-	add_rel_node( F, [Y], Res, real).
+	add_fcn_node( wrap, [XE,Period], Y, real),
+	add_fcn_node( F, [Y], Res, real).
+
 
 /*-----------------------------------------------------------------
  |	Type Propagation & Inference
@@ -691,11 +712,17 @@ type_of_power(N, integer, integer)
 	N > 0.
 type_of_power(N, _, real).
 
+	/*-----------------------------------------------------
+	 |	Upward type propagation: from arguments "upward to 
+	 |	the type of the function result 
+ 	 *----------------------------------------------------*/
+
 /*-----------------------------------------------------
  |	type1/3
  |	type1(Op, InType, OutType)
- |	type1(+, ?, ?)
- |		-- other modes??
+ |	type1(+, +, -)
+ |
+ |	upward type propagation for unary functions;
  *----------------------------------------------------*/
 
 type1( '~',   boolean, boolean) :-!.
@@ -710,6 +737,8 @@ type1( Op,        _, real).
  |	type2(Op, In1, In2, OutType)
  |	type2(+, ?, ?, ?)
  |		-- other modes??
+ |
+ |	upward type propagation for binary functions;
  *----------------------------------------------------*/
 
 type2(or,   boolean, boolean, boolean).
@@ -743,12 +772,22 @@ type2_integer(integer, boolean, integer).
 type2_integer(integer, integer, integer).
 
 	/*-----------------------------------------------------
-	 | Down tree rules - for propagating forced boolean/integer 
-	 | type down the tree.  These are derived from the rules 
-	 | above (but run backwards) when    outgoing type is 
-	 | determined or   ~,and, or,.. <> are involved
+	 |	Downward type propagation: from the type of the
+	 |	output value of a given operation "downward" to
+	 |	types for the arguments; Essentially these are
+	 |	"reverse" versions of the predicates above.
  	 *----------------------------------------------------*/
 
+/*-----------------------------------------------------
+ |	down_type1/3
+ |	down_type1( F, T1,  T)
+ |	down_type1( +, -,  +)
+ |
+ |	- downward type propagation for unary functions;
+ |
+ |	Infers the type T1 of the argument to the unary 
+ |	function F from the type of the output T of F
+ *----------------------------------------------------*/
 down_type1( '~', boolean, boolean):-!.
 down_type1( F, T1,  T)
 	:- 
@@ -757,6 +796,16 @@ down_type1( F, T1,  T)
 	type1(F,T1,T).  
 down_type1( _, _, _).
 
+/*-----------------------------------------------------
+ |	down_type2/4
+ |	down_type2( F, T1, T2, T)
+ |	down_type2( +, -, -, +)
+ |
+ |	- downward type propagation for binary functions;
+ |
+ |	Infers the types T1,T2 of the arguments to the
+ |	binary function F from the type of the output T of F
+ *----------------------------------------------------*/
 down_type2(and, boolean, boolean, boolean):-!.
 down_type2(nand,boolean, boolean, boolean):-!.
 down_type2(or,  boolean, boolean, boolean):-!.
@@ -769,6 +818,7 @@ down_type2( F, T1, T2, T)
 	type2( F, T1, T2, T).
 down_type2( _, _, _, _).
 
+/************
 combin_type(TypeList, real)
 	:-
 	dmember(real, TypeList), !.
@@ -776,6 +826,7 @@ combin_type(TypeList, integer)
 	:-
 	dmember(integer, TypeList), !.
 combin_type(TypeList, boolean).
+************/
 
 /*-----------------------------------------------------------------
  |	NORMAL FORM
@@ -817,18 +868,20 @@ commutes( <> ).
 commutes( xor ).
 
 /*-----------------------------------------------------------------
- |	add_rel_node/4
- |	add_rel_node(Function, F_Args, Res, Type)
- |	add_rel_node(+, +, ?, ?)
+ |	add_fcn_node/4
+ |	add_fcn_node(Function, F_Args, Res, Type)
+ |	add_fcn_node(+, +, ?, ?)
+ |
+ |	- handles function nodes encountered in relation arguments
  |
  |	Strategy: 
- |	1. try to eliminate locally by symbolic rewriting
- |	2. try to locate previously computed expressions (ig enabled)
+ |	1. try to eliminate locally by symbolic rewriting (if enabled)
+ |	2. try to locate previously computed expressions (if enabled)
  |	3. generate new node
  *----------------------------------------------------------------*/
 
 	%% Try symbolic re-writing:
-add_rel_node(F, [X,Y], Res, Type)
+add_fcn_node(F, [X,Y], Res, Type)
 	:-
 	reduce(F, X, Y, Res),
 	!.
@@ -836,14 +889,14 @@ add_rel_node(F, [X,Y], Res, Type)
 :-dynamic(global_common_subexpressions_enabled/0).
 
 	%% Look for common subexpr:
-add_rel_node(F, F_Args, Res, Type)
+add_fcn_node(F, F_Args, Res, Type)
 	:-
 	global_common_subexpressions_enabled,
 	find_existing_csx( F, F_Args, Res), 
 	!. 
 
 	%% Create new node:
-add_rel_node(F, F_Args, Res, Type)
+add_fcn_node(F, F_Args, Res, Type)
 	:-
 	Res :: Type,
 	eval_riax(F, F_Args, Res ).
@@ -853,6 +906,8 @@ add_rel_node(F, F_Args, Res, Type)
  |	reduce(F, X, Y, Res)
  |	reduce(+, +, +, -)
  *----------------------------------------------------------------*/
+
+:- dynamic(sym_eval/4).
 
 reduce(F, X, Y, Res)
 	:-
@@ -941,7 +996,6 @@ eval_riax(F, [X], Res )
 	:-
 	ria_map1(F, X, Res, Node, _ ),
 	!,
-%	new_node(Node).
 	'$iterate'( Node).
 
 	%% Unary with restricted range:
@@ -950,7 +1004,6 @@ eval_riax(F, [X], Res )
 	ria_map1r(F, X, Res, Node, _, Restrict ),
 	!,
 	call(Restrict),
-%	new_node(Node).
 	'$iterate'( Node).
 
 	%% Unrestricted binary:
@@ -958,7 +1011,6 @@ eval_riax(F, [X,Y], Res )
 	:-
 	ria_map2(F, X, Y, Res, Node, _ ),
 	!,
-%	new_node(Node).
 	'$iterate'( Node).
 
 /*
@@ -966,7 +1018,6 @@ eval_riax(Rel, [X,Y], _ )
 	:-
 	fmap_rel(Rel, X, Y, Node),
 	!,
-%	new_node(Node).
 	'$iterate'( Node).
 */
 
@@ -978,7 +1029,7 @@ ria_map1( sq,  X, Z, root(Z,X), 1).
 ria_map1( sin, X, Z, sin(Z,X),  1).    
 ria_map1( cos, X, Z, cos(Z,X),  1).    
 ria_map1( tan, X, Z, tan(Z,X),  1).    
-ria_map1(  '~' , X, Z, falseimplied(X,Z),2).
+ria_map1(  '~' , X, Z, negation(Z, X),2).
 
 ria_map1r(sqrt, X,     Z, root(X,Z),  2,  '$restrict'(Z,0,_) ).
 ria_map1r(asin, X,     Z, sin(X,Z),   2,  '$restrict'(Z,-pi/2,pi/2) ).
@@ -1054,6 +1105,7 @@ solve(X)
 	:- 
 	solve(X, 6, 0.0001).			% upto 2**6 solutions
 
+export solve/3.
 solve( X, _, RelErr )
 	:- 
 	pointlike(X, RelErr), 			% bound or very small intervals
@@ -1114,12 +1166,15 @@ i_solve(Bnd, X, Eps)
 	0 < Bnd ,  		
 	Bnd1 is Bnd - 1,
 	choose_split(X, M, Eps),
-
-'$domain'(X, _, XL, XU),
-'$domain'(X, _, ML, MU),
-printf('i_solve:bnd=%t X=[%t,%t] M=[%t,%t]\n',[Bnd,XL,XU,ML,MU]),
 	!,
-		%% Force 
+		%% Put #ifdef wrapper corresponding to DEBUGSYS around this:
+	(debug_system_on(cstrislv) ->
+		'$domain'(X, _, XL, XU),
+		'$domain'(X, _, ML, MU),
+		printf('i_solve:bnd=%t X=[%t,%t] M=[%t,%t]\n',[Bnd,XL,XU,ML,MU])
+		; true),
+
+		%% Force:
 	('$iterate'( greatereq(M, X) ) ; '$iterate'( greatereq(X, M) ) ),
 	i_solve(Bnd1, X, Eps).
 
@@ -1129,6 +1184,7 @@ i_solve(Bnd,X,Eps).
 		%% fails if interval is too small or not splittable:
 choose_split(X, M, RelErr)
 	:-   			
+	var(X),
 	'$domain'(X, _, L, U),
 	median(L, U, M),
 	(U - L)  >  RelErr * M,  	% interval is pointlike
@@ -1136,13 +1192,13 @@ choose_split(X, M, RelErr)
 	not(X==M),
 	!.
 
-median( L, U, 0  ) :- L<0,     U>0.
-median( L, U, 1  ) :- L<1.0,   U>1.0.
-median( L, U, -1 ) :- L< -1.0, U> -1.0.
-median( L, U,  M ) :- L==0.0,  M is U/3.0 .
-median( L, U,  M ) :- U==0.0,  M is L/3.0 .
-median( L, U,  M ) :- L>0,     U>0,  M is sqrt(L)*sqrt(U).
-median( L, U,  M ) :- L<0,     U<0,  M is -sqrt(-L)*sqrt(-U).
+median( L, U, 0  ) :- L<0,     U>0, !.
+median( L, U, 1  ) :- L<1.0,   U>  1.0, !.
+median( L, U, -1 ) :- L< -1.0, U> -1.0, !.
+median( L, U,  M ) :- L==0.0,  M is U/3.0, !.
+median( L, U,  M ) :- U==0.0,  M is L/3.0, !.  
+median( L, U,  M ) :- L>0,     U>0,  M is sqrt(L)*sqrt(U), !.
+median( L, U,  M ) :- L<0,     U<0,  M is -sqrt(-L)*sqrt(-U), !.
 		%% default to midpoint:
 median( L, U,  M ) :- M is (L+U)/2.0 .   
 
@@ -1184,18 +1240,26 @@ widest( [_ | Xs], Y, W )
 	:-
 	widest( Xs, Y, W ).
 
+export enumerate/1.
+enumerate( Var )
+	:-
+	var(Var),
+	!,
+	enumerate([Var]).
+
 enumerate( List )
 	:-
 	classify_intervals( List, Bs, Ns, Rs ),
 		%% do booleans first (smaller domains):
-	bool_enumerate( Bs ),   
-	int_enumerate(  Ns ),
+	boolean_enumerate( Bs ),   
+	integer_enumerate(  Ns ),
 	real_enumerate( Rs ).
 
 classify_intervals( [], [], [], [] ).
 
 classify_intervals( [X | List], Bs, Ns, Rs )
 	:-
+	var(X),
 	'$domain'( X, Type, LB, UB ),
 	!,
 	dispatch_classify_intervals(Type, X, List, Bs, Ns, Rs ).
@@ -1216,19 +1280,19 @@ dispatch_classify_intervals(real, X, List, Bs, Ns, [X | Rs] )
 	:-
 	classify_intervals( List, Bs, Ns, Rs ).
 
-bool_enumerate([]).
-bool_enumerate([ X | Xs ])
+boolean_enumerate([]).
+boolean_enumerate([ X | Xs ])
 	:-
 	boolean_generator( X ),
-	bool_enumerate( Xs ).
+	boolean_enumerate( Xs ).
 
 boolean_generator( B )
 	:-
-	'$iterate'( equal(B, 0), _).
+	'$iterate'( equal(B, 0)).
 
 boolean_generator( B )
 	:-
-	'$iterate'( equal(B, 1), _).
+	'$iterate'( equal(B, 1)).
 
 
 integer_enumerate([]).
@@ -1250,22 +1314,24 @@ integer_generator( X )
 	
 int_choice( X, L )
 	:-
-	'$iterate'( equal(X, L), _).
+	'$iterate'( equal(X, L)).
 
 int_choice( X, L )
 	:-
-	'$iterate'( unequal(X, L), _),
+	'$iterate'( unequal(X, L)),
 	integer_generator( X ).
 
 real_enumerate([]).
 
-real_enumerate( X )
+real_enumerate( [X | Xs] )
 	:-
-	solve( X ).
+	solve( X ),
+	solve(Xs).
 
 
 
 /*
+export enumerate/2.
 enumerate(List, Exec_on_Backtrack)
 	:-
 	classify_intervals( List, Bs, Ns, Rs ),

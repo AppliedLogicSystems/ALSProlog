@@ -20,12 +20,23 @@
 #define AND     &&
 #define OR      ||
 
-#undef pi
-#ifdef HAVE_M_PI
-#define pi()                M_PI
-#else 
-#define pi()                3.14159265358979323846
+#define BOOLEANKIND 0
+#define INTEGERKIND 1
+#define REALKIND    2
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
 #endif
+#ifndef M_PI_2
+#define M_PI_2 1.57079632679489661923
+#endif
+#ifndef M_E
+#define M_E 2.7182818284590452354
+#endif
+
+#undef pi
+#define pi()                M_PI
+
 #define ln(x)               log(x)
 #define ceiling(x)          ceil(x)
 
@@ -51,8 +62,6 @@
 #define redonode    (1 << 9)
 #define link    	(1 << 10)
 
-
-
 #define x_changed (xflip | xlchange | xhchange)
 #define y_changed (yflip | ylchange | yhchange)
 #define z_changed (zflip | zlchange | zhchange)
@@ -69,8 +78,20 @@
 			} \
 	}
 
-/******************* Instatiation for T = x *****************************
-unflip(T)::   if (status & xflip) { \
+/*++++++++++++++++++ Instatiation for T = z,x,y ++++++++++++++++++++++++++++
+#define unflip_z  if (status & zflip) { \
+				int_fp t = zl; \
+				status ^= zflip; \
+				zl = (zh NE 0.0) ? (- zh) : 0.0; \
+				zh = (t NE 0.0) ? (- t) : 0.0; \
+				switch (status & (zlchange | zhchange)) { \
+					case zlchange: \
+					case zhchange: \
+	--Flips the zlchange & zhchange:  status ^= (zlchange | zhchange); \
+			} \
+	}
+
+#define unflip_x  if (status & xflip) { \
 				int_fp t = xl; \
 				status ^= xflip; \
 				xl = (xh NE 0.0) ? (- xh) : 0.0; \
@@ -78,27 +99,22 @@ unflip(T)::   if (status & xflip) { \
 				switch (status & (xlchange | xhchange)) { \
 					case xlchange: \
 					case xhchange: \
-	Flips the xlchange & xhchange:::  status ^= (xlchange | xhchange); \
+	--Flips the xlchange & xhchange:  status ^= (xlchange | xhchange); \
 			} \
 	}
- ************************************************************************/
 
-
-
-
-/****************
-	NEED DFNS or EXTERN DECLS:
-deact  -- comes from macro defn of persistent;  needs change
-		-- only in "support" routines (e.g., higher)
-
-iaerror		-- 
-
-round	--
-	only called at 2 places in wrap
-
-ALSO clarify: w_Error (Error) label in wrap:
-
-****************/
+#define unflip_y  if (status & yflip) { \
+				int_fp t = yl; \
+				status ^= yflip; \
+				yl = (yh NE 0.0) ? (- yh) : 0.0; \
+				yh = (t NE 0.0) ? (- t) : 0.0; \
+				switch (status & (ylchange | yhchange)) { \
+					case ylchange: \
+					case yhchange: \
+	--Flips the ylchange & yhchange:  status ^= (ylchange | yhchange); \
+			} \
+	}
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #define GET_DBL_VAL(TYP, TRM, VAL) \
 		if (TYP == WTP_STRUCTURE) { \
@@ -110,6 +126,66 @@ ALSO clarify: w_Error (Error) label in wrap:
 					*(((short *) VAL) + i) = (short) vv; }  } \
 			else \
 				iaerror();  }
+
+		/******************************************************
+		 |	BOOLEAN STUFF
+		 ******************************************************/
+#define FIRSTBOOLEAN	23
+
+#define booleanZero     0x00
+#define booleanOne      0x01
+
+/*--------- declared in int_net.c: ------------------------*/
+
+extern long booleanInput;
+extern long booleanOutput;
+
+
+/* --------------- Masks for boolean encodings -------------* 
+Encodings:
+----------
+booleanInput:   |0, 0, ydef, y, xdef, x, zdef, z|
+
+booleanOutput:  |0, disable, ychg, y, xchg, x, zchg, z|
+                |1, 0, 0, 0, 0, 0, 0, 0|      ---> error
+                |1, 1, 1, 1, 1, 1, 1, 1|      ---> failure
+ *----------------------------------------------------------*/
+
+
+#define booleanError    0x80        /*booleanOutput*/
+#define booleanFail     0xff        /*booleanOutput*/
+#define booleanDisable  0x40        /*booleanOutput*/
+
+#define boolean_z       0x01        /*booleanInput and booleanOutput*/
+#define boolean_zdef    0x02        /*booleanInput*/
+#define boolean_zchg    0x02        /*booleanOutput*/
+
+#define boolean_x       0x04        /*booleanInput and booleanOutput*/
+#define boolean_xdef    0x08        /*booleanInput*/
+#define boolean_xchg    0x08        /*booleanOutput*/
+
+#define boolean_y       0x10        /*booleanInput and booleanOutput*/
+#define boolean_ydef    0x20        /*booleanInput*/
+#define boolean_ychg    0x20        /*booleanOutput*/
+
+		/******************************************************
+		 |	END BOOLEAN STUFF
+		 ******************************************************/
+
+
+
+/*********************************************************************
+	NEED DFNS or EXTERN DECLS:
+deact  -- comes from macro defn of persistent;  needs change
+		-- only in "support" routines (e.g., higher)
+
+iaerror		-- 
+
+round	--
+	only called at 2 places in wrap
+
+ALSO clarify: w_Error (Error) label in wrap
+***********************************************************************/
 
 
 #define fp			double
@@ -138,10 +214,10 @@ typedef union fpoverlay {
 #endif
 
 	/* This may be wrong for SunOS (or others) -- check for iszero defined in include */
-    /* This may be unused:
+    /* This may be unused:-----------------
 #define iszero(x)	       (x EQ -0.0)
 #define int_fp		  fp
-    */
+    -------------------------------------*/
 
 #ifdef HAVE_NEXTAFTER
 
@@ -172,6 +248,7 @@ typedef union fpoverlay {
 
 #else /* not-HAVE_NEXTAFTER */
 
+				/*------- THIS IS THE COMMON PORTABLE VERSION ---------*/
 #define next(x)	 if (x GE 0.0) { \
 				if (++(((fpoverlay *)&x)->l[SECOND]) EQ 0) \
 					++(((fpoverlay *)&x)->l[FIRST]); \
@@ -202,7 +279,7 @@ typedef union fpoverlay {
 #define initfpu()	       maxfp = DBL_MAX
 #define resetfpu()	      fpsetround(FP_RN)
 
-#elif HAVE_SWAPRM /* not-HAVE_FPSETROUND */
+#elif HAVE_SWAPRM /* HAVE_SWAPRM AND not-HAVE_FPSETROUND */
 
 #define upperbd(y, x)   (void)swapRM(ROUND_TO_PLUS_INFINITY); x = y
 #define lowerbd(y, x)   (void)swapRM(ROUND_TO_MINUS_INFINITY); x = y
@@ -214,6 +291,7 @@ int BNRP_oldRM;
 
 #else /* not-HAVE_FPSETROUND,  not-HAVE_SWAPRM */
 
+				/*------- THIS IS THE COMMON PORTABLE VERSION ---------*/
 #define upperbd(y, x)   x = y; next(x)
 #define lowerbd(y, x)   x = y; prev(x)
 #define upperbd2(y, x)  x = y; next(x)
@@ -246,16 +324,78 @@ typedef struct {
 	int    zt, xt, yt;
 	} primop;
 
+#define TYPE_POSITION		1
 #define USED_BY_POSITION	3
 #define UIA_POSITION		4
-#define UIA_DIMENSION		16
+#define LINK_POSITION		5
+
+#define UIA_DIMENSION		24
 #define UIA_FIRST_POS		0
 #define UIA_SECOND_POS		8
+#define UIA_THIRD_POS		16
 
 typedef struct {
 	long    pad;
 	double lower,upper;
 	} uia_dbls;
+
+	/*--------------------------------------------------------------* 
+	 |	Macro to check whether an incoming constraint argument 
+	 |	is in fact a symbol, which should be a symbolic constant
+	 |	naming a real number such as pi; in that case the
+	 |	value of the variable (Z, X, Y) currently holding the
+	 |	(symbol table offset of the symbol) is physically 
+	 |	overwritten with the appropriate float, and the corresponding
+	 |	type variable (Zt, Xt, Yt) is changed appropriately
+	 *--------------------------------------------------------------*/
+
+#define SYMB_CST(AA)
+/*
+	if (AA ## t == WTP_SYMBOL) {
+	}
+*/
+
+	/*--------------------------------------------------------------* 
+	 |	Macro to check whether an incoming constraint argument 
+	 |	(one of Z, X, Y) is ok
+	 *--------------------------------------------------------------*/
+
+#ifndef DoubleType
+#define OK_CSTR_ARG(AA) if ((AA ## t != WTP_INTEGER) && (AA ## t != WTP_STRUCTURE) \
+			&& (AA ## t != WTP_SYMBOL) && \
+			((AA ## t != WTP_REF) || (!CHK_DELAY(AA)))) \
+		FAIL;
+
+#else
+#define OK_CSTR_ARG(AA) if ((AA ## t != WTP_INTEGER) && (AA ## t != WTP_DOUBLE) \
+			&& (AA ## t != WTP_SYMBOL) && \
+			((AA ## t != WTP_REF) || (!CHK_DELAY(AA)))) \
+		FAIL;
+#endif
+
+/*  ORIGINAL non-macro forms:------------------
+#ifndef DoubleType
+	if ((Zt != WTP_INTEGER) && (Zt != WTP_STRUCTURE) &&
+			((Zt != WTP_REF) || (!CHK_DELAY(Z))))
+		FAIL;
+	if ((Xt != WTP_INTEGER) && (Xt != WTP_STRUCTURE) &&
+			((Xt != WTP_REF) || (!CHK_DELAY(X))))
+		FAIL;
+	if ((Yt != WTP_INTEGER) && (Yt != WTP_STRUCTURE) &&
+			((Yt != WTP_REF) || (!CHK_DELAY(Y))))
+		FAIL;
+#else
+	if ((Zt != WTP_INTEGER) && (Zt != WTP_DOUBLE) &&
+			((Zt != WTP_REF) || (!CHK_DELAY(Z))))
+		FAIL;
+	if ((Xt != WTP_INTEGER) && (Xt != WTP_DOUBLE) &&
+			((Xt != WTP_REF) || (!CHK_DELAY(X))))
+		FAIL;
+	if ((Yt != WTP_INTEGER) && (Yt != WTP_DOUBLE) &&
+			((Yt != WTP_REF) || (!CHK_DELAY(Y))))
+		FAIL;
+#endif
+------------------------------------*/
 
 #endif /* defined(INTCONSTR) */
 

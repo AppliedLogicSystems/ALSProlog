@@ -27,20 +27,19 @@
 
 :-libactivate(builtins,['library',listutl3],
     [nobind_member/2,
-%	 output_prolog_list/1,output_prolog_list/4, output_prolog_list/5,
-	flatten/2,n_of/3,number_list/2, number_list/3,encode_list/3,
+	flatten/2,is_length/2,n_of/3,number_list/2, number_list/3,encode_list/3,
 	struct_lookup_subst/4,check_default/4,check_default_del/5,
 	remove_tagged/3, merge_plists/3, merge_tagged_lists/3, 
 	mangle_change_tagged/3, subst_tagged/4, merge_in_list/3 ],[]).
-
-%:-libactivate(builtins,['library',lib_ctl],
-%	[bagOf/3, bagOf/4,setOf/4, setOf/3, max/3, min/3]).
-%:-module_closure(bagOf,3,bagOf), module_closure(setOf,3,setOf).
 
 :-builtins:libactivate(builtins, ['library',lib_ctl],
 	[bagOf/3, bagOf/4,setOf/4, setOf/3, max/3, min/3],
 	[module_closure(bagOf,3,bagOf), 
 	 module_closure(setOf,3,setOf)]).
+
+:-libactivate(builtins,['library','arithx-1'],
+    [max/3,min/3,max/2,min/2
+	],[]).
 
 :-libactivate(builtins,['library',strings],
     [asplit/4,head/4,alower/2,asub/4,asplit0/4,asplit00/4,head0/4,alower0/2,

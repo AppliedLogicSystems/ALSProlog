@@ -29,6 +29,7 @@
  |     PCFTP_SOCKETS    -- The PC-FTP TCP/IP sockets library found on DOS.
  *=======================================================================*/
 #include "defs.h"
+#include <math.h>
 
 #include <errno.h>
 #ifdef HAVE_FCNTL_H
@@ -5194,6 +5195,7 @@ sio_sprintf()
     UCHAR *buf;
     double dblval;
     int   fmt_type;
+	int fl;
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
@@ -5201,7 +5203,7 @@ sio_sprintf()
     w_get_An(&v4, &t4, 4);
 
     if (!getstring(&fmt, v1, t1))
-	FAIL;
+		FAIL;
 
     buf = (UCHAR *) (wm_H + 1);
     fmt_type = format_type(fmt);
@@ -5215,41 +5217,50 @@ sio_sprintf()
 	    break;
 	case WTP_INTEGER:
 	    if (fmt_type == FMT_DBL)
-		sprintf((char *)buf, (char *)fmt, (double) v2);
+			sprintf((char *)buf, (char *)fmt, (double) v2);
 	    else if (fmt_type == FMT_INT)
-		sprintf((char *)buf, (char *)fmt, v2);
+			sprintf((char *)buf, (char *)fmt, v2);
 	    else
-		sprintf((char *)buf, "?");
+			sprintf((char *)buf, "?");
 	    break;
 #ifndef DoubleType
 	case WTP_STRUCTURE:
 	    w_get_arity(&arity, v2);
 	    w_get_functor(&functor, v2);
 	    if (arity == 4 && functor == TK_DDOUBLE) {
-		int i;
-		for (i = 0; i < 4; i++) {
-		    w_get_argn(&v, &t, v2, i + 1);
-		    *(((short *) &dblval) + i) = (short) v;
-		}
+			int i;
+			for (i = 0; i < 4; i++) {
+		    	w_get_argn(&v, &t, v2, i + 1);
+		    	*(((short *) &dblval) + i) = (short) v;
+			}
 	    }
 	    else
-		FAIL;
+			FAIL;
+
+		fl = floor(dblval);
+		if (fl == dblval) 
+			fmt = "%3.1f";
+
 	    if (fmt_type == FMT_DBL)
-		sprintf((char *)buf, (char *)fmt, dblval);
+			sprintf((char *)buf, (char *)fmt, dblval);
 	    else if (fmt_type == FMT_INT) {
 	        if (dblval > (double) INT_MAX)
 	            sprintf((char *)buf, (char *)fmt, (unsigned int) dblval);
-		else sprintf((char *)buf, (char *)fmt, (int) dblval);
+			else sprintf((char *)buf, (char *)fmt, (int) dblval);
 	    } else
-		sprintf((char *)buf, "?");
+			sprintf((char *)buf, "?");
 	    break;
 #else
 	case WTP_DOUBLE:
 	    w_get_double(&dblval, v2);
+		fl = floor(dblval);
+		if (fl == dblval) 
+			fmt = "%3.1f";
+
 	    if (fmt_type == FMT_DBL)
-		sprintf((char *)buf, (char *)fmt, dblval);
+			sprintf((char *)buf, (char *)fmt, dblval);
 	    else if (fmt_type == FMT_INT)
-		sprintf((char *)buf, (char *)fmt, (int) dblval);
+			sprintf((char *)buf, (char *)fmt, (int) dblval);
 	    else
 		sprintf((char *)buf, "?");
 	    break;
@@ -5261,10 +5272,10 @@ sio_sprintf()
     w_mk_uia_in_place(&v, &t, buf);
 
     if (w_unify(v3, t3, v, t) 
-     && w_unify(v4, t4, (PWord) strlen((char *)buf), WTP_INTEGER))
-	SUCCEED;
+    		&& w_unify(v4, t4, (PWord) strlen((char *)buf), WTP_INTEGER))
+		SUCCEED;
     else
-	FAIL;
+		FAIL;
 }
 
 /*

@@ -31,8 +31,6 @@ PWord get_intvl_tm(DelVar, DelVar_t)
 	PWord DrT, CstrTm, functor;
 	int CstrTm_t;
 
-/* printf("in get_intvl_tm:DelVar=%x\n",DelVar); */
-
 	if ((DelVar_t == WTP_UNBOUND) && (CHK_DELAY((PWord *)DelVar)))
 	{
 	DrT = deref_2((PWord)DelVar);
@@ -50,18 +48,15 @@ PWord get_intvl_tm(DelVar, DelVar_t)
 	}
 	/* CstrTm should be intvl(Type,Var,UsedBy,UIA) */
 
-/* printf("out get_intvl_tm=%x\n",CstrTm); */
-
 	return(CstrTm);
 	}
 	else
-printf("get_intvl_tm:Non-delay: %x \n",DelVar);
 		FAIL;
 }	/* get_intvl_tm */
 
 
 /*--------------------------------------------------------
- 	extract_bds(DelVar, DelVar_t, LB, UB)
+ 	extract_bds(DelVar, DelVar_t, LB, UB, IKind)
 
 	DelVar is a (pointer to) an interval variable; if
 	this variable is bound to an integer, returns the
@@ -69,26 +64,33 @@ printf("get_intvl_tm:Non-delay: %x \n",DelVar);
 	If DelVar is an unbound interval variable (it is frozen),
 	extracts the values of the end points of the interval,
 	and binds them to (the vars pointed at by) LB, UB
+	IKind is the Kind of interval; if DelVar is actually
+	bound, it is determined by this (but we use the
+	"Kind" values: BOOLEANKIND, INTEGERKIND, REALKIND.
+	If DelVar is an unbound delay variable which is in
+	fact an interval variable, then IKind is extracted from
+	the 3rd slot in the UIA structure hold the end points
+	and interval kind.
  *-------------------------------------------------------*/
 
 int
-extract_bds	PARAMS( (PWord *, int, fp *, fp *) );
+extract_bds	PARAMS( (PWord *, int, fp *, fp *, int *) );
 
 int
-extract_bds(DelVar, DelVar_t, LB, UB)
+extract_bds(DelVar, DelVar_t, LB, UB, IKind)
 	PWord *DelVar;
-	int DelVar_t;
+	int DelVar_t, *IKind;
 	fp *LB, *UB;
 {
 	PWord *Intvl, *IntUIA; 
 	int IntUIA_t;
-    double pval;
-    int   valtype;
 
+		/* The variable is actually bound to something: */
 	if (DelVar_t == WTP_INTEGER)
 	{ 
 		*LB = (double)(int)DelVar; 
 	  	*UB = (double)(int)DelVar; 
+		*IKind = INTEGERKIND;
 	  	SUCCEED;
 	}
 #ifdef DoubleType
@@ -96,9 +98,32 @@ extract_bds(DelVar, DelVar_t, LB, UB)
 	{ 
 		w_get_double(LB, *DelVar);
 		*UB = *LB;
+		*IKind = REALKIND;
 	  	SUCCEED;
 	}
 #endif
+	else if (DelVar_t == WTP_SYMBOL)
+	{
+		int_fp t;
+
+		initfpu();
+		switch ((int)DelVar) {
+		case TK_PI	:	t = M_PI;
+						break; 
+		case TK_PI2	:	t = M_PI_2;
+						break;
+		case TK_E	:	t = M_E;
+						break;
+			default	:	resetfpu(); 
+						FAIL;
+		}
+		prev(t);
+		*UB = t;
+		*LB = -t;
+		resetfpu();
+		*IKind = REALKIND;
+		SUCCEED;
+	}
 	else if (DelVar_t == WTP_STRUCTURE)
 	{ 
 		PWord functor, vv;
@@ -106,26 +131,42 @@ extract_bds(DelVar, DelVar_t, LB, UB)
 		double uu=0;
 		int i;
 
-		w_get_arity(&arity, *DelVar);
-		w_get_functor(&functor, *DelVar);
+		w_get_arity(&arity, (PWord)DelVar);
+		w_get_functor(&functor, (PWord)DelVar);
 			/* Must have: arity == 4 && functor == TK_DDOUBLE */
 		if ((arity != 4) || (functor != TK_DDOUBLE))
 			FAIL;
 
 		for (i = 0; i < 4; i++) {
-		    w_get_argn(&vv, &tt, *DelVar, i + 1);
+		    w_get_argn(&vv, &tt, (PWord)DelVar, i + 1);
 			*(((short *) &uu)+ i) = (short) vv;
 		}
     	*LB = uu;
     	*UB = uu;
+		*IKind = REALKIND;
 	  	SUCCEED;
 	}
+		/* The variable is NOT actually bound to something,
+		   but is a delay variable:  */
 	else if ((DelVar_t == WTP_UNBOUND) && (CHK_DELAY(DelVar)))
 	{
  		Intvl = (PWord *)get_intvl_tm(DelVar, DelVar_t);
 		w_get_argn((long *)&IntUIA, &IntUIA_t, (long)Intvl, UIA_POSITION);
-		w_uia_peek((long)IntUIA, 0, (UCHAR *) LB, sizeof (double));
-		w_uia_peek((long)IntUIA, 8, (UCHAR *) UB, sizeof (double));
+
+		if (IntUIA_t == WTP_UIA) {
+				/* real or integer interval term */
+			w_uia_peek((long)IntUIA, UIA_FIRST_POS,  (UCHAR *) LB, sizeof (double));
+			w_uia_peek((long)IntUIA, UIA_SECOND_POS, (UCHAR *) UB, sizeof (double));
+			w_uia_peek((long)IntUIA, UIA_THIRD_POS,  (UCHAR *) IKind, sizeof (long));
+		}
+		else
+		{	
+			/* If we get here, the variable is a boolean interval var
+			   which is not bound to anything (ie, 0 or 1), and so is indefinite: */
+
+			*LB = 0; *UB = 1; *IKind = BOOLEANKIND;
+		}
+
 	  	SUCCEED;
 	}
 	else
@@ -193,15 +234,11 @@ pbi_fuzz()
 
 	initfpu();
 	t = dblval;       /* setup for next(t);  */
-/* printf("i_next(t): bef:t=%20.16f ",t); */
 	next(t);
 	ub = t;
-/* printf(" aft:t=%20.16f ub=%20.16f \n",t,ub); */
 	t = dblval; /* prev(t);  */
-/* printf("i_prev(t): bef:t=%20.16f ",t); */
 	prev(t);
 	lb = t;
-/* printf("aft: t=%20.16f lb=%20.16f \n",t,lb); */
 	resetfpu();
 
 #ifndef DoubleType
@@ -227,7 +264,7 @@ pbi_fuzz()
 }
 
 
-/* Dummy for now */
+/* -------------------- vv Dummy for now vv -------------------- */
 
 void iaerror	PARAMS( (void) );
 
@@ -241,12 +278,22 @@ void deact()
 {
 }
 
+/* -------------------- ^^ Dummy for now ^^ -------------------- */
+
 double round	PARAMS( (double) );
 
+	/* -- Round double to nearest longint -- */
 double round(num)
 	double num;
 {
-	return(num);
+	double ffl;
+
+	ffl = floor(num);
+
+	if ((num - ffl) <= 0.5)
+		return(ffl);
+	else
+		return(ffl+1);
 }
 
 
@@ -285,9 +332,67 @@ fp i_prev(x)
 }
 
 
+	/********************************************************
+	 |	BOOLEAN STUFF
+	 ********************************************************/
 
+/*---------------------------------------------------*
+ |	Boolean operator tables
+ *---------------------------------------------------*/
 
+int op_anynot[64] = {0x00,0x80,0x3c,0x00,0x80,0x80,0x80,0x80,
+					 0x43,0x80,0xff,0x40,0x00,0x80,0x30,0x20,
+					 0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+					 0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+					 0x43,0x80,0xff,0x40,0x80,0x80,0x80,0x80,
+					 0x03,0x80,0xff,0x00,0x03,0x80,0xff,0x00,
+					 0x00,0x80,0x0c,0x08,0x80,0x80,0x80,0x80,
+					 0x03,0x80,0xff,0x00,0x02,0x80,0x00,0xff};
 
+int op_bothnot[64] = {0x00,0x80,0x00,0x28,0x80,0x80,0x80,0x80,
+					  0x00,0x80,0x30,0x20,0x42,0x80,0x40,0xff,
+					  0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+					  0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+					  0x00,0x80,0x0c,0x08,0x80,0x80,0x80,0x80,
+					  0x03,0x80,0xff,0x00,0x02,0x80,0x00,0xff,
+					  0x42,0x80,0x40,0xff,0x80,0x80,0x80,0x80,
+					  0x02,0x80,0x00,0xff,0x02,0x80,0x00,0xff};
+
+int op_conjunction[64]={0x00,0x80,0x00,0x3c,0x80,0x80,0x80,0x80,
+						0x42,0x80,0x40,0xff,0x00,0x80,0x20,0x30,
+					 	0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+					 	0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+					 	0x42,0x80,0x40,0xff,0x80,0x80,0x80,0x80,
+					 	0x02,0x80,0x00,0xff,0x02,0x80,0x00,0xff,
+					 	0x00,0x80,0x08,0x0c,0x80,0x80,0x80,0x80,
+					 	0x02,0x80,0x00,0xff,0x03,0x80,0xff,0x00};
+
+int op_disjunction[64]={0x00,0x80,0x28,0x00,0x80,0x80,0x80,0x80,
+						0x00,0x80,0x20,0x30,0x43,0x80,0xff,0x40,
+						0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+						0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+						0x00,0x80,0x08,0x0c,0x80,0x80,0x80,0x80,
+						0x02,0x80,0x00,0xff,0x03,0x80,0xff,0x00,
+						0x43,0x80,0xff,0x40,0x80,0x80,0x80,0x80,
+						0x03,0x80,0xff,0x00,0x03,0x80,0xff,0x00};
+
+int op_exclusiveor[64]={0x00,0x80,0x00,0x00,0x80,0x80,0x80,0x80,
+						0x00,0x80,0x20,0x30,0x00,0x80,0x30,0x20,
+						0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+						0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+						0x00,0x80,0x08,0x0c,0x80,0x80,0x80,0x80,
+						0x02,0x80,0x00,0xff,0x03,0x80,0xff,0x00,
+						0x00,0x80,0x0c,0x08,0x80,0x80,0x80,0x80,
+						0x03,0x80,0xff,0x00,0x02,0x80,0x00,0xff};
+
+int op_negation[64]={0x00,0x80,0x0c,0x08,0x80,0x80,0x80,0x80,
+		    		 0x03,0x80,0xff,0x00,0x02,0x80,0x00,0xff,
+					 0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+					 0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+					 0x00,0x80,0x0c,0x08,0x80,0x80,0x80,0x80,
+					 0x03,0x80,0xff,0x00,0x02,0x80,0x00,0xff,
+					 0x00,0x80,0x0c,0x08,0x80,0x80,0x80,0x80,
+					 0x03,0x80,0xff,0x00,0x02,0x80,0x00,0xff};
 
 
 #endif /* defined(INTCONSTR) */

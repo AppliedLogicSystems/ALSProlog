@@ -194,14 +194,15 @@ static struct blt_struct {
 	BLT("$procinfo", 6, pbi_procinfo, "_pbi_procinfo"),
 	BLT("abolish", 3, pbi_abolish, "_pbi_abolish"),
 	BLT("abolish_clausegroup", 4, pbi_abolish_clausegroup, "_pbi_abolish_clausegroup"),
-		/* SPECIAL -- Freeze-related */
-#ifdef FREEZE
+		/* SPECIAL -- Debugging-related */
 	BLT("cptx", 0, pbi_cptx, "_pbi_cptx"),
 	BLT("display_heap", 2, disp_heap, "_disp_heap"),
 	BLT("display_item_addr", 1, disp_item, "_disp_item"),
 	BLT("swp_tr", 0, pbi_swp_tr, "_pbi_swp_tr"),
-	BLT("clct_tr", 1, pbi_clct_tr, "_pbi_clct_tr"),
 	BLT("walk_cps", 0, pbi_walk_cps, "_pbi_walk_cps"),
+		/* SPECIAL -- Freeze-related */
+#ifdef FREEZE
+	BLT("clct_tr", 1, pbi_clct_tr, "_pbi_clct_tr"),
 	BLT("$delay", 4, pbi_delay, "_pbi_delay"),
 	BLT("$is_delay_var", 1, pbi_is_delay_var, "_pbi_is_delay_var"),
 	BLT("$delay_term_for", 2, pbi_del_tm_for, "_pbi_del_tm_for"),
@@ -376,7 +377,9 @@ static struct blt_struct {
 	BLT("sio_is_server_socket", 1, sio_is_server_socket, "_sio_is_server_socket"),
 	BLT("sio_accept_socket_connection", 2, sio_accept_socket_connection, "_sio_accept_socket_connection"),
 	BLT("sio_poll",2,sio_poll,"_sio_poll"),
+#ifdef HAVE_SELECT
 	BLT("sio_simple_select", 2, sio_simple_select, "_sio_simple_select"),
+#endif /* HAVE_SELECT */
 #endif /* HAVE_SOCKET */
 
 #ifdef REXEC
@@ -466,6 +469,10 @@ static struct blt_struct {
 	BLT("gensym", 2, pbi_gensym, "_pbi_gensym"),
 	BLT("isgensym", 2, pbi_isgensym, "_pbi_isgensym"),
 #endif /* GENSYM */
+
+#ifdef DEBUGSYS
+	BLT("toggle_sys_debug", 1, pbi_toggle_debug_system, "_pbi_toggle_debug_system"),
+#endif /* DEBUGSYS */
 
 #ifdef PRIM_DBG
 	BLT("ptermaddr", 1, pbi_ptermaddr, "_pbi_ptermaddr"),
@@ -610,6 +617,8 @@ static struct blt2_struct {
 	BLT2("sio_get_byte", 2, ic_install_jmp, wm_sio_gbyte, NULLF, "_wm_sio_gbyte"),
 	BLT2("sio_put_byte", 2, ic_install_jmp, wm_sio_pbyte, NULLF, "_wm_sio_pbyte"),
 #endif /* SIO_ASM */
+
+
 
 
 #ifdef MotorolaMath

@@ -26,7 +26,14 @@ module builtins.
 	op(200,xfy,^),
 	module_closure(findall,3,findall),
 	module_closure(setof,3,setof),
-	module_closure(bagof,3,bagof).
+	module_closure(bagof,3,bagof),
+	module_closure(once,1,once).
+
+export once/1.
+once(Goal)
+	:-
+	Goal,
+	!.
 
 export findall/3.
 export setof/3.

@@ -502,6 +502,65 @@ notrace :-
 	setDebugInterrupt(spying),
 	setPrologInterrupt(spying).
 
+	/*--------------------------------------------------------
+	 *-------------------------------------------------------*/
+debug_sys_features(gcbeep,		0).
+debug_sys_features(gcinfo,		1).
+debug_sys_features(freezeinfo,	2).
+debug_sys_features(cstrprim, 	3).
+debug_sys_features(cstrchng, 	4).
+debug_sys_features(cstrupdt, 	5).
+debug_sys_features(cstruptm, 	6).
+debug_sys_features(cstrupad, 	7).
+debug_sys_features(cstrupxt, 	8).
+debug_sys_features(gcintr, 		9).
+debug_sys_features(cstrbpuf,	10).
+debug_sys_features(frezbv,		11).
+
+debug_sys_tag(cstr_ig,  rel_arith).
+debug_sys_tag(cstrislv, rel_arith).
+
+export toggle_system_debug/1.
+
+toggle_system_debug(cstr)
+	:-!,
+	toggle_system_debug(cstrprim),
+	toggle_system_debug(cstrchng),
+	toggle_system_debug(cstrupdt),
+	toggle_system_debug(cstruptm),
+	toggle_system_debug(cstrupad),
+	toggle_system_debug(cstrupxt),
+	toggle_system_debug(cstrbpuf).
+
+	%% C-level stuff:
+toggle_system_debug(WhichFeat)
+	:-
+	debug_sys_features(WhichFeat, FeatNum),
+	!,
+	toggle_sys_debug(FeatNum).
+
+	%% Prolog-level stuff:
+toggle_system_debug(WhichFeat)
+	:-
+	debug_sys_tag(WhichFeat, Module),
+	toggle_debug_sys_tag(WhichFeat, Module).
+
+/* Add error message */
+
+
+toggle_debug_sys_tag(WhichFeat, Module)
+	:-
+	Module:clause(debug_system_on(WhichFeat),true,Ref),
+	!,
+	Module:erase(Ref).
+
+toggle_debug_sys_tag(WhichFeat, Module)
+	:-
+	Module:assert(debug_system_on(WhichFeat)).
+
+
+
+
 /*************************
 /*
  * xform_command_or_query(InGoal,OutGoal)

@@ -213,6 +213,7 @@ glibfiles = [
 	compile,
 	compmath,
 	cutmacro,
+	debugsys,
 	expand,
 	fatal,
 	fileio,
@@ -261,6 +262,7 @@ gfiles_h =
 	coerce,
 	compile,
 	cutmacro,
+	debugsys,
 	defs,
 	fatal,
 	fileio,
@@ -378,9 +380,9 @@ cmnt(gen_dep) = ['generic dependencies',
 				 'At present, these are hand generated because I''ve got a feeling that it',
 				 'is now somewhat simpler to do it this way than it was in the past.'].
 
-defs_h = [aconfig, alloc, alspi, alssig, built, chpt, config, defs, dfltsys, 
-		  fatal, fileio, lexan, missing, mtypes, parser, tconfig, tokens, 
-		  alstypes, wamops, wamops0, winter, wintidx].
+defs_h = [aconfig, alloc, alspi, alssig, built, chpt, config, debugsys, 
+		  defs, dfltsys, fatal, fileio, lexan, missing, mtypes, parser, 
+		  tconfig, tokens, alstypes, wamops, wamops0, winter, wintidx].
 
 &(gen_h_dep) = [bdb, bmeta, bsystem, built, compile, compmath, expand, foreign,
 			 	main, module, parser, pckgload, wintcode].
