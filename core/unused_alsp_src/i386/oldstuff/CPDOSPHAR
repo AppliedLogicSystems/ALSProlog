@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+# Copy files of MS-DOS version of 386 system (for PharLap Environment)
+#
+
+DESTDIR=/elvis/pcfs/tmp
+
+( 	cd DOSPHAR/obj ; \
+	( for i in *.[chs] ; do ( topc $i > $DESTDIR/$i ) ; done ) ; \
+	( for i in *.m4    ; do ( topc $i > $DESTDIR/$i ) ; done ) ; \
+	( cp libta.lib $DESTDIR/libta.lib ) ; \
+	( cp vmrmc.o $DESTDIR/vmrmc.o ) ; \
+	( cp cle.obj $DESTDIR/cle.obj ) ; \
+	( topc Makefile.sys > $DESTDIR/makefile ) ; \
+	cd ../.. )
+
+#( 	cp DOSPHAR/libta.lib $DESTDIR/libta.lib )
+#( 	cp DOSPHAR/vmrmc.o $DESTDIR/vmrmc.o )
+
+#( 	cd DOSPHAR/obj/alsdir ; \
+#	(for i in *.pro ; do ( topc $i > $DESTDIR/$i ) ; done) ; \
+#	cd ../../.. )
+
+( 	cd DOSPHAR/obj/alsdir ; \
+	(test -d $DESTDIR/alsdir || mkdir $DESTDIR/alsdir) ; \
+	(for i in *.pro ; do ( topc $i > $DESTDIR/alsdir/$i ) ; done) ; \
+	(test -d $DESTDIR/alsdir/library || mkdir $DESTDIR/alsdir/library) ; \
+	(for i in library/*.pro ; do ( topc $i > $DESTDIR/alsdir/$i ) ; done) ; \
+	cd ../../.. )
+
+
+#
+# Let everybody to access files in the destination directory 
+#
+
+chmod 777 $DESTDIR/*
+chmod 777 $DESTDIR/alsdir/*
+chmod 777 $DESTDIR/alsdir/library/*
+

@@ -1,0 +1,2743 @@
+
+last(X,[X]).
+last(X,[_|Y]) :- last(X,Y).
+
+delete(_,[],[]).
+delete(X,[X|L],M) :- !, delete(X,L,M).
+delete(X,[Y|L1],[Y|L2]) :- delete(X,L1,L2).
+
+member(X,[X|_]).
+member(X,[_|Y]) :- member(X,Y).
+
+append([],L,L).
+append([X|L1],L2,[X|L3]) :- append(L1,L2,L3).
+
+uebersetzer :- repeat, main.
+
+main :- body, !, fail.
+main.
+
+body :-
+  prompt_user,
+  read_sent(S), !,
+  nl,
+  special_message(S),
+  parse(S,ParseTree),
+  transform(ParseTree,EngList),
+  nl,
+  write('The English:'),
+  nl, nl,
+  print_out(EngList),
+  nl.
+
+pretty_print(Var,I) :-
+  var(Var),
+  tab(I),
+  write(Var),
+  nl.
+pretty_print(Struct,I) :-
+  functor(Struct,F,N),
+  tab(I),
+  write(F),
+  nl,
+  J is I + 3,
+  print_children(Struct,N,1,J).
+
+print_children(Struct,N,Count,I) :-
+  Count > N.
+print_children(Struct,N,Count,I) :-
+  arg(Count,Struct,A),
+  pretty_print(A,I),
+  NCount is Count + 1,
+  print_children(Struct,N,NCount,I).
+special_message(S) :- not(match_msg(S)).
+
+match_msg([wiedersehen|[.|_]]).
+
+print_out([]) :-
+  write('.'),
+  nl.
+print_out([H|T]) :-
+  print_item(H),
+  print_out(T).
+
+print_item(',') :-
+  write(', ').
+print_item(Word) :-
+  write(Word),
+  write(' ').
+
+prompt_user :-
+  write('Enter a German sentence, ending it with ? ! or .'),
+  nl,
+  nl.
+
+read_sent([W|Ws]) :- get0(C), readword(C,W,C1), restsent(W,C1,Ws).
+
+restsent(W,_,[]) :- lastword(W), !.
+restsent(W,C,[W1|Ws]) :- readword(C,W1,C1), restsent(W1,C1,Ws).
+
+readword(C,W,C1) :- single_character(C), !, name(W,[C]), get0(C1).
+readword(C,W,C2) :-
+  in_word(C,NewC), !,
+  get0(C1),
+  restword(C1,Cs,C2),
+  name(W,[NewC|Cs]).
+readword(C,W,C2) :- get0(C1), readword(C1,W,C2).
+
+restword(C,[NewC|Cs],C2) :-
+  in_word(C,NewC), !,
+  get0(C1),
+  restword(C1,Cs,C2).
+restword(C,[],C).
+
+single_character(44).  /* , */
+single_character(59).  /* ; */
+single_character(58).  /* : */
+single_character(63).  /* ? */
+single_character(33).  /* ! */
+single_character(46).  /* . */
+
+in_word(C,C) :- C>96, C<123.              /* a b ...z */
+in_word(C,L) :- C>64, C<91, L is C+32.    /* A B ...Z */
+in_word(C,C) :- C>47, C<58.               /* 1 2 ...9 */
+in_word(39,39).                           /* ' */
+in_word(45,45).                           /* - */
+in_word(95,95).                           /* _ */
+
+lastword('.').
+lastword('!').
+lastword('?').
+
+parse(S,Tree) :-
+  last(X,S),
+  delete(X,S,NewS),
+  matrix_sent(NewS,[],Tree).
+
+parse(_,_) :-
+  write('The parsing/translation process has failed.'),
+  nl.
+
+matrix_sent(L1,L2,MStr) :-
+  find_sub_conj(L1,L3,Conj,[],LHS),
+  delete(',',LHS,NewLHS),
+  sentence(NewLHS,[],Mode,Str),
+  mat_prime(L3,L2,Mode,[mat,Str,sub_conj(Conj)],MStr).
+matrix_sent(L1,L2,mat(Str)) :-
+  delete(',',L1,NewL1),
+  sentence(NewL1,L2,_,Str).
+
+mat_prime(L1,L2,Mode,MList,MStr) :-
+  find_sub_conj(L1,L3,Conj,[],LHS),
+  delete(',',LHS,NewLHS),
+  transposed_sent(NewLHS,[],Mode,no_gap,no_gap,_,_,Str),
+  append(MList,[Str,sub_conj(Conj)],NewMList),
+  mat_prime(L3,L2,Mode,NewMList,MStr).
+mat_prime(L1,L2,Mode,MList,MStr) :-
+  delete(',',L1,NewL1),
+  transposed_sent(NewL1,L2,Mode,no_gap,no_gap,_,_,Str),
+  append(MList,[Str],NewMList),
+  MStr =.. NewMList.
+
+find_sub_conj([','|[SC|Rest]],Rest,SC,L,L) :-
+  subord_conj(SC,_).
+find_sub_conj([H|T],L,SC,L1,L2) :-
+  append(L1,[H],NewL),
+  find_sub_conj(T,L,SC,NewL,L2).
+
+
+subord_conj(als,[when]).
+subord_conj(bis,[until]).
+subord_conj(da,[since]).
+subord_conj(damit,[in,order,that]).
+subord_conj(dass,[that]).
+subord_conj(ehe,[before]).
+subord_conj(nachdem,[after]).
+subord_conj(ob,[whether]).
+subord_conj(obgleich,[although]).
+subord_conj(seitdem,[since]).  /* time */
+subord_conj(waehrend,[while]).
+subord_conj(wann,[when]).
+subord_conj(weil,[because]).
+subord_conj(wenn,[[if],[when]]).
+subord_conj(wie,[how]).
+
+sentence(L1,L2,Mode,s(sfeat(IdNum,[sent(IdNum)|TraceL],normal,Mode,Tense),
+                      stree(A,B))) :-
+  noun_phrase(L1,L3,A,SNum,SPerson,nominative,_,no_gap,no_gap,_,_),
+  verb_phrase(L3,L2,B,SNum,SPerson,Mode,Tense).
+
+sentence(L1,L2,Mode,s(sfeat(IdNum,[sent(IdNum)|TraceL],inverted,Mode,Tense),
+                      stree(NSG,V,Subj,Rest))) :-
+  non_subj_group(L1,[A|B],NSType,NSCase,Mode,NSG),
+  v_pos(A,SNum,SPerson,Mode,Tense,VKind,VCase,V),
+  noun_phrase(B,C,Subj,SNum,SPerson,nominative,_,no_gap,no_gap,_,_),
+  rest_pos(C,L2,NSType,NSCase,VKind,VCase,Rest).
+
+sentence(L1,L2,_,s(sfeat(IdNum,[sent(IdNum)|TraceL],compound,_,_),
+                   stree(S1,coord_conj(A),S2))) :-
+  sentence(L1,[A|B],_,S1),
+  coord_conj(A,_),
+  sentence(B,L2,_,S2).
+
+
+transposed_sent(L1,L2,Mode,InGap,OutGap,GapCase,GapNum,
+                s(sfeat(IdNum,[sent(IdNum)|TL],transposed,Mode,Tense),
+                  stree(A,B))) :-
+
+  noun_phrase(L1,L3,A,SNum,SPerson,nominative,_,InGap,NewGap,GapCase,GapNum),
+  transposed_vp(L3,L2,B,SNum,SPerson,Mode,Tense,NewGap,OutGap,GapCase,GapNum).
+
+noun_phrase(A,A,np(npfeat(_,_,type0,GapNum,GapCase,_,third),
+                   nptree(zero)),
+            GapNum,third,GapCase,_,gap,no_gap,GapCase,GapNum).
+
+noun_phrase([A|B],C,NPStr,Num,third,Case,not_pro,Gap,Gap,_,_) :-
+  proper_noun(A,_,Gender,_,_,_,_),
+  list_prop_cases(Case),
+  np_prime(B,C,np(npfeat(IdNum,TL,type1,singular,Case,Gender,third),
+                  nptree(n_proper(A))),NPStr,Num).
+
+noun_phrase(A,B,NPStr,NPNum,third,Case,not_pro,Gap,Gap,_,_) :-
+  n_restricted(A,C,NR,Num,Case,Gender),
+  n_restricted(C,D,NRG,_,genitive,_),
+  np_prime(D,B,np(npfeat(IdNum,TL,type2,Num,Case,Gender,third),
+                  nptree(NR,NRG)),NPStr,NPNum).
+
+
+noun_phrase([A|B],C,NPStr,NPNum,Person,Case,is_pro,Gap,Gap,_,_) :-
+  pronoun(A,_,Num,Person,Case),
+  np_prime(B,C,np(npfeat(IdNum,TL,type3,Num,Case,progender,Person),
+                  nptree(pro(A))),NPStr,NPNum).
+
+noun_phrase([A|B],C,NPStr,NPNum,third,Case,not_pro,Gap,Gap,_,_) :-
+  determiner(A,Base),
+  n_bar(B,D,A,none,NBStr,Num,Case,Gender),
+  np_prime(D,C,np(npfeat(IdNum,TL,type4,Num,Case,Gender,third),
+                  nptree(det(IdNum,TL,A,Base),NBStr)),NPStr,NPNum).
+
+noun_phrase(A,B,NPStr,NPNum,third,Case,not_pro,Gap,Gap,_,_) :-
+  n_bar(A,C,none,none,NBStr,Num,Case,Gender),
+  np_prime(C,B,np(npfeat(IdNum,TL,type5,Num,Case,Gender,third),
+                  nptree(NBStr)),NPStr,NPNum).
+
+np_prime([A|B],C,LHS,np(npfeat(IdNum,TL,type6,plural,Case,_,third),
+                        nptree(LHS,coord_conj(A),RHS)),plural) :-
+  coord_conj(A,_),
+  noun_phrase(B,C,RHS,_,_,Case,_,no_gap,no_gap,_,_).
+np_prime(A,A,S,S,Num) :-
+  S =.. [np,npfeat(_,_,_,Num,_,_,_),_].
+
+proper_noun(uwe,uwe,masculine,concrete,animate,no_loc,no_qual).
+proper_noun(katrina,katrina,feminine,concrete,animate,no_loc,no_qual).
+proper_noun(johann,johann,masculine,concrete,animate,no_loc,no_qual).
+proper_noun(friedrich,friedrich,masculine,concrete,animate,no_loc,no_qual).
+proper_noun(marie,marie,feminine,concrete,animate,no_loc,no_qual).
+proper_noun(demian,demian,masculine,concrete,animate,no_loc,no_qual).
+proper_noun(deutschland,germany,neuter,abstract,inanimate,loc,no_qual).
+proper_noun(muenchen,munich,_,abstract,inanimate,loc,no_qual).
+proper_noun(wien,vienna,_,abstract,inanimate,loc,no_qual).
+
+list_prop_cases(nominative).
+list_prop_cases(dative).
+list_prop_cases(accusative).
+list_prop_cases(genitive).
+
+n_restricted([A|B],C,n_restr(n_restr_feat(type1,Num,Case,Gender),
+                             n_restr_tree(det(IdNum,TL,A,Base),T)),
+             Num,Case,Gender) :-
+  determiner(A,Base),
+  nr_bar(B,C,A,none,T,Num,Case,Gender).
+
+n_restricted(A,B,n_restr(n_restr_feat(type2,Num,Case,Gender),
+                 n_restr_tree(T)),
+             Num,Case,Gender) :-
+  nr_bar(A,B,none,none,T,Num,Case,Gender).
+
+nr_bar([A|B],C,Det,Adj,nrbar(nrbarfeat(type1,Num,Case,Gender),
+                             nrbartree(adj(adjfeat(Base,Num,Case,Gender),
+                                           adjtree(A)),
+                                       T)),
+       Num,Case,Gender) :-
+  adjective(A,Base,_),
+  nr_bar(B,C,Det,A,T,Num,Case,Gender).
+
+nr_bar([A|B],B,Det,Adj,nrbar(nrbarfeat(type2,Num,Case,Gender),
+                             nrbartree(NTr)),
+       Num,Case,Gender) :-
+  is_noun(A,Det,Adj,NTr,Num,Case,Gender).
+
+determiner(X,X) :-
+  is_definite(X).
+determiner(X,D) :-
+  name(X,L),
+  det(D,_,Cat),
+  name(D,DL),
+  append(DL,_,L).
+
+
+is_definite(X) :-
+  member(X,[der,die,das,des,dem,den]).
+
+det(ein,a,mixed).
+det(kein,no,mixed).
+det(dies,this,weak).
+det(jed,every,weak).
+det(jen,that,weak).
+det(manch,some,weak).
+det(solch,such,weak).
+det(welch,which,weak).
+det(mein,my,mixed).
+det(dein,your,mixed).
+det(sein,his,mixed).
+det(ihr,her,mixed).
+det(ihr,their,mixed).
+det(unser,our,mixed).
+det(euer,your,mixed).
+det(i_hr,your,mixed).  /* Ihr */
+
+pronoun(ich,i,singular,first,nominative).
+pronoun(mir,me,singular,first,dative).
+pronoun(mich,me,singular,first,accusative).
+pronoun(du,you,singular,second,nominative).
+pronoun(dir,you,singular,second,dative).
+pronoun(dich,you,singular,second,accusative).
+pronoun(er,he,singular,third,nominative).
+pronoun(ihm,him,singular,third,dative).
+pronoun(ihn,him,singular,third,accusative).
+pronoun(sie,she,singular,third,nominative).
+pronoun(ihr,her,singular,third,dative).
+pronoun(sie,her,singular,third,accusative).
+pronoun(es,it,singular,third,nominative).
+pronoun(es,it,singular,third,accusative).
+pronoun(wir,we,plural,first,nominative).
+pronoun(uns,us,plural,first,dative).
+pronoun(uns,us,plural,first,accusative).
+pronoun(ihr,you,plural,second,nominative).
+pronoun(euch,you,plural,second,dative).
+pronoun(euch,you,plural,second,accusative).
+pronoun(sie,they,plural,third,nominative).
+pronoun(ihnen,them,plural,third,dative).
+pronoun(sie,them,plural,third,accusative).
+pronoun(s_ie,you,plural,third,nominative).
+pronoun(i_hnen,you,plural,third,dative).
+pronoun(s_ie,you,plural,third,accusative).
+
+n_bar([A|B],C,Det,Adj,NBStr,Num,Case,Gender) :-
+  adjective(A,Base,_),
+  n_bar(B,D,Det,A,T,Num,Case,Gender),
+  n_bar_prime(D,C,nbar(nbarfeat(type1,Num,Case,Gender),
+                       nbartree(adj(adjfeat(Base,Num,Case,Gender),
+                                    adjtree(A)),
+                                T)),
+              Num,Case,Gender,NBStr).
+
+n_bar([A|B],C,Det,Adj,NBStr,Num,Case,Gender) :-
+  is_noun(A,Det,Adj,NTree,Num,Case,Gender),
+  n_bar_prime(B,C,nbar(nbarfeat(type2,Num,Case,Gender),
+                       nbartree(NTree)),
+              Num,Case,Gender,NBStr).
+
+n_bar_prime(A,B,LHS,Num,Case,Gender,Tree) :-
+  prep_phrase(A,C,RHS),
+  n_bar_prime(C,B,nbar(nbarfeat(type3,Num,Case,Gender),
+                       nbartree(LHS,RHS)),
+              Num,Case,Gender,Tree).
+
+n_bar_prime(A,B,LHS,Num,Case,Gender,Tree) :-
+  relcl(A,C,Gender,RHS),
+  n_bar_prime(C,B,nbar(nbarfeat(type4,Num,Case,Gender),
+                       nbartree(LHS,RHS)),
+              Num,Case,Gender,Tree).
+
+n_bar_prime(A,A,S,Num,Case,Gender,S).
+
+prep_phrase([A|B],C,pp(PrepStr,NPStr)) :-
+  preposition(A,Cat,PrepStr),
+  get_case(Cat,Case),
+  noun_phrase(B,C,NPStr,_,_,Case,_,_,_,_,_).
+
+get_case(dat_acc,dative).
+get_case(dat_acc,accusative).
+get_case(Case,Case).
+
+preposition(A,Cat,p(pfeat(Cat),ptree(A))) :-
+  prep(A,_,Cat).
+
+prep(aus,[[out,of],from],dative).
+prep(bei,[by,near,with,at],dative).
+prep(mit,[with],dative).
+prep(nach,[after,to,[according,to]],dative).
+prep(seit,[since],dative).
+prep(von,[from,of,off,by],dative).
+prep(zu,[to],dative).
+
+prep(anstatt,[instead,of],genitive).
+prep(statt,[instead,of],genitive).
+prep(waehrend,[during],genitive).
+prep(wegen,[on,account,of],genitive).
+prep(bis,[until],accusative).
+prep(durch,[through],accusative).
+prep(fuer,[for],accusative).
+prep(gegen,[against],accusative).
+prep(ohne,[without],accusative).
+prep(um,[around],accusative).
+
+prep(an,[at,on,to,[up,to]],dat_acc).
+prep(auf,[upon,on,to],dat_acc).
+prep(hinter,[behind],dat_acc).
+prep(in,[in,into],dat_acc).
+prep(neben,[beside],dat_acc).
+prep(ueber,[over,above],dat_acc).
+prep(unter,[under,among],dat_acc).
+prep(vor,[before,[in,front,of]],dat_acc).
+prep(zwischen,[between],dat_acc).
+
+relcl([A|B],C,Gender,rel_cl(relpro(A,Num,Gender,Case),
+                            s_bar(Str))) :-
+  rel_pro(A,Num,Gender,Case),
+  transposed_sent(B,C,_,gap,no_gap,Case,Num,Str).
+
+rel_pro(der,singular,masculine,nominative).
+rel_pro(dessen,singular,masculine,genitive).
+rel_pro(dem,singular,masculine,dative).
+rel_pro(den,singular,masculine,accusative).
+rel_pro(die,singular,feminine,nominative).
+rel_pro(deren,singular,feminine,genitive).
+rel_pro(der,singular,feminine,dative).
+rel_pro(die,singular,feminine,accusative).
+rel_pro(das,singular,neuter,nominative).
+rel_pro(dessen,singular,neuter,genitive).
+rel_pro(dem,singular,neuter,dative).
+rel_pro(das,singular,neuter,accusative).
+rel_pro(die,plural,_,nominative).
+rel_pro(deren,plural,_,genitive).
+rel_pro(denen,plural,_,dative).
+rel_pro(die,plural,_,accusative).
+
+is_noun(N,none,none,NTree,Num,Case,Gender) :-
+  unmodified_noun(N,NTree,Num,Case,Gender).
+is_noun(N,none,Adj,NTree,Num,Case,Gender) :-
+  no_det_noun(N,Adj,NTree,Num,Case,Gender).
+is_noun(N,Det,_,NTree,Num,Case,Gender) :-
+  det_noun(N,Det,NTree,Num,Case,Gender).
+
+det_noun(N,Det,n(nfeat(N,singular,Case,Gender),
+                 ntree(N)),
+         singular,Case,Gender) :-
+  noun(N,_,_,Gender,_,_,_,_),
+  find_declension(Det,Decl),
+  find_suffix(Det,Suffix),
+  compute_case(Decl,Gender,Suffix,Case).
+
+det_noun(N,Det,n(nfeat(Base,singular,genitive,Gender),
+                 ntree(N)),
+         singular,genitive,Gender) :-
+  try_s_noun(N,Base,Gender),
+  try_s_det(Det).
+
+det_noun(N,Det,n(nfeat(Base,plural,Case,Gender),
+                 ntree(N)),
+         plural,Case,Gender) :-
+  noun(Base,N,_,Gender,_,_,_,_),
+  comp_pl_case(Det,Case).
+
+det_noun(N,Det,n(nfeat(Base,plural,dative,Gender),
+                 ntree(N)),
+         plural,dative,Gender) :-
+  remove_n(N,NewN),
+  noun(Base,NewN,_,Gender,_,_,_,_),
+  name(Det,L),
+  name('en',Enlist),
+  append(_,Enlist,L).
+
+noun(buch,buecher,book,neuter,concrete,inanimate,no_loc,no_qual).
+noun(kind,kinder,child,neuter,concrete,animate,no_loc,no_qual).
+noun(kirche,kirchen,church,feminine,concrete,inanimate,loc,no_qual).
+noun(geschichte,geschichten,history,feminine,abstract,inanimate,no_loc,no_qual).
+noun(garten,gaerten,garden,masculine,concrete,inanimate,loc,no_qual).
+noun(wetter,no_plural,weather,neuter,abstract,inanimate,no_loc,no_qual).
+noun(dieb,diebe,thief,masculine,concrete,animate,no_loc,no_qual).
+noun(fahrrad,fahrraeder,bicycle,neuter,concrete,inanimate,no_loc,no_qual).
+noun(mann,maenner,man,masculine,concrete,animate,no_loc,no_qual).
+noun(dalmatiner,dalmatiner,dalmatian,masculine,concrete,animate,no_loc,no_qual).
+noun(wissenschaftler,wissenschaftler,scientist,masculine,concrete,animate,
+     no_loc,no_qual).
+noun(hund,hunde,dog,masculine,concrete,animate,no_loc,no_qual).
+noun(katze,katzen,cat,feminine,concrete,animate,no_loc,no_qual).
+noun(wert,werte,value,masculine,abstract,inanimate,no_loc,qual).
+noun(tuer,tueren,door,feminine,concrete,inanimate,loc,no_qual).
+noun(tisch,tische,table,masculine,concrete,inanimate,loc,no_qual).
+noun(fluss,fluesse,river,masculine,concrete,inanimate,loc,no_qual).
+noun(mathematik,no_plural,mathematics,feminine,abstract,inanimate,no_loc,
+     no_qual).
+noun(baum,baueme,tree,masculine,concrete,inanimate,loc,no_qual).
+noun(ball,baelle,ball,masculine,concrete,inanimate,no_loc,no_qual).
+noun(tafel,tafeln,blackboard,feminine,concrete,inanimate,loc,no_qual).
+noun(teller,teller,plate,masculine,concrete,inanimate,no_loc,no_qual).
+noun(haus,haueser,house,neuter,concrete,inanimate,loc,no_qual).
+noun(reise,reisen,trip,feminine,abstract,inanimate,no_loc,no_qual).
+noun(schulter,schultern,shoulder,feminine,concrete,inanimate,no_loc,no_qual).
+noun(krieg,kriege,war,feminine,abstract,inanimate,no_loc,no_qual).
+noun(freund,freunde,friend,masculine,concrete,animate,no_loc,no_qual).
+noun(woche,wochen,week,feminine,abstract,inanimate,no_loc,no_qual).
+noun(stadt,staedte,city,feminine,abstract,inanimate,loc,no_qual).
+noun(einwohner,einwohner,inhabitant,masculine,conrete,animate,no_loc,no_qual).
+
+compute_case(_,masculine,er,nominative).
+compute_case(_,masculine,zero,nominative).
+compute_case(_,masculine,em,dative).
+compute_case(_,masculine,en,accusative).
+
+compute_case(_,feminine,e,nominative).
+compute_case(_,feminine,er,genitive).
+compute_case(_,feminine,er,dative).
+compute_case(_,feminine,e,accusative).
+
+compute_case(mixed,neuter,zero,nominative).
+compute_case(mixed,neuter,zero,accusative).
+compute_case(mixed,neuter,es,genitive).
+compute_case(_,neuter,es,nominative).
+compute_case(_,neuter,em,dative).
+compute_case(_,neuter,es,accusative).
+
+find_declension(Det,Decl) :-
+  determiner(Det,Base),
+  det(Base,_,Decl).
+find_declension(Det,definite) :-
+  is_definite(Det).
+
+find_suffix(die,e).
+find_suffix(das,es).
+find_suffix(Det,Suffix) :-
+  is_definite(Det),
+  name(Det,[H|T]),
+  name(Suffix,T).
+find_suffix(Det,Suffix) :-
+  determiner(Det,DBase),
+  name(Det,DL),
+  name(DBase,DBL),
+  append(DBL,SL,DL),
+  assign_suffix(Suffix,SL).
+
+assign_suffix(zero,[]).
+assign_suffix(S,L) :-
+  name(S,L).
+
+try_s_noun(N,Base,Gender) :-
+  name(N,L),
+  name('s',SList),
+  append(BL,SList,L),
+  name(Base,BL),
+  noun(Base,_,_,Gender,_,_,_,_).
+
+try_s_noun(N,Base,Gender) :-
+  name(N,L),
+  name('es',SList),
+  append(BL,SList,L),
+  name(Base,BL),
+  noun(Base,_,_,Gender,_,_,_,_).
+
+try_s_det(Det) :-
+  name(Det,L),
+  name('s',SList),
+  append(_,SList,L).
+
+comp_pl_case(Det,nominative) :-
+  name(Det,L),
+  name('e',EList),
+  append(_,EList,L).
+comp_pl_case(Det,genitive) :-
+  name(Det,L),
+  name('er',Erlist),
+  append(_,Erlist,L).
+comp_pl_case(Det,dative) :-
+  name(Det,L),
+  name('en',Enlist),
+  append(_,Enlist,L).
+comp_pl_case(Det,accusative) :-
+  name(Det,L),
+  name('e',Elist),
+  append(_,Elist,L).
+
+remove_n(W,Wout) :-
+  name(W,L),
+  name('n',NList),
+  append(WL,NList,L),
+  name(Wout,WL).
+remove_n(W,Wout) :-
+  name(W,L),
+  name('en',Enlist),
+  append(WL,Enlist,L),
+  name(Wout,WL).
+
+unmodified_noun(N,n(nfeat(N,singular,Case,Gender),
+                    ntree(N)),
+                singular,Case,Gender) :-
+  noun(N,_,_,Gender,_,_,_,_),
+  list_cases(Gender,Case).
+
+unmodified_noun(N,n(nfeat(Base,singular,genitive,Gender),
+                    ntree(N)),
+                singular,genitive,Gender) :-
+  try_s_noun(N,Base,Gender).
+
+unmodified_noun(N,n(nfeat(Base,plural,Case,Gender),
+                    ntree(N)),
+                plural,Case,Gender) :-
+  noun(Base,N,_,Gender,_,_),
+  list_cases_plural(Case).
+
+unmodified_noun(N,n(nfeat(Base,plural,dative,Gender),
+                    ntree(N)),
+                plural,dative,Gender) :-
+  remove_n(N,NewN),
+  noun(Base,NewN,_,Gender,_,_).
+
+list_cases(feminine,nominative).
+list_cases(feminine,genitive).
+list_cases(feminine,dative).
+list_cases(feminine,accusative).
+list_cases(_,nominative).
+list_cases(_,dative).
+list_cases(_,accusative).
+
+list_cases_plural(nominative).
+list_cases_plural(genitive).
+list_cases_plural(accusative).
+
+no_det_noun(N,Adj,n(nfeat(N,singular,Case,Gender),
+                    ntree(N)),
+            singular,Case,Gender) :-
+  noun(N,_,_,Gender,_,_,_,_),
+  adjective(Adj,_,Suffix),
+  compute_case_strong(Gender,Suffix,Case).
+
+no_det_noun(N,Adj,n(nfeat(Base,singular,genitive,Gender),
+                    ntree(N)),
+            singular,genitive,Gender) :-
+  try_s_noun(N,Base,Gender),
+  try_n_adj(Adj).
+
+no_det_noun(N,Adj,n(nfeat(Base,plural,Case,Gender),
+                    ntree(N)),
+            plural,Case,Gender) :-
+  noun(Base,N,_,Gender,_,_,_,_),
+  comp_pl_case(Adj,Case).
+
+no_det_noun(N,Adj,n(nfeat(Base,plural,dative,Gender),
+                    ntree(N)),
+            plural,dative,Gender) :-
+  remove_n(N,NewN),
+  noun(Base,NewN,_,Gender,_,_,_,_),
+  name(Adj,L),
+  name('en',Enlist),
+  append(BFL,Enlist,L),
+  name(BF,BFL),
+  adj(BF,_,_).
+
+adj(gut,good,restraint(_,_)).
+adj(ruhig,quiet,restraint(_,_)).
+adj(klein,small,restraint(concrete,_)).
+adj(schwer,heavy,restraint(concrete,_)).
+adj(schwer,difficult,restraint(abstract,_)).
+adj(tot,dead,restraint(concrete,animate)).
+adj(rot,red,restraint(_,_)).
+adj(klug,smart,restraint(concrete,animate)).
+adj(alt,old,restraint(_,_)).
+adj(fraglich,questionable,restraint(_,_)).
+adj(ander,other,restraint(_,_)).
+adj(zwei,two,restraint(_,_)).
+
+adjective(A,B,S) :-
+  name(A,L),
+  adj(B,_,_),
+  name(B,Blist),
+  append(Blist,Slist,L),
+  name(S,Slist).
+
+compute_case_strong(masculine,er,nominative).
+compute_case_strong(masculine,en,accusative).
+compute_case_strong(masculine,em,dative).
+compute_case_strong(feminine,e,nominative).
+compute_case_strong(feminine,er,genitive).
+compute_case_strong(feminine,er,dative).
+compute_case_strong(feminine,e,accusative).
+compute_case_strong(neuter,es,nominative).
+compute_case_strong(neuter,em,dative).
+compute_case_strong(neuter,es,accusative).
+
+try_n_adj(Adj) :-
+  name(Adj,L),
+  name('en',Enlist),
+  append(BL,Enlist,L),
+  name(Base,BL),
+  adj(Base,_,_).
+
+coord_conj(aber,but).
+coord_conj(sondern,but).
+coord_conj(oder,or).
+coord_conj(und,and).
+coord_conj(denn,for).
+
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,Mode,Tense) :-
+  verb(A,_,SNum,SPerson,Tense,Mode,_,_),
+  intr_complement(B,[D|E],CStr,Type),
+  prefix(D),
+  move_prefix(A,D,Verb),
+  verb(Verb,intransitive,SNum,SPerson,Tense,Mode,_,VStr),
+  vp_prime(E,C,vp(vpfeat(simple,Type,Mode,Tense,SPerson,SNum,separable),
+                  vptree(VStr,CStr)),
+           VPStr,SNum,SPerson,Mode,Tense).
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,Mode,Tense) :-
+  verb(A,_,SNum,SPerson,Tense,Mode,Case,_),
+  tr_complement(B,[D|E],Case,no_gap,no_gap,_,_,CStr,Type),
+  prefix(D),
+  move_prefix(A,D,Verb),
+  verb(Verb,transitive,SNum,SPerson,Tense,Mode,Case,VStr),
+  vp_prime(E,C,vp(vpfeat(simple,Type,Mode,Tense,SPerson,SNum,separable),
+                  vptree(VStr,CStr)),
+           VPStr,SNum,SPerson,Mode,Tense).
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,Mode,Tense) :-
+  verb(A,_,SNum,SPerson,Tense,Mode,_,_),
+  ditr_complement(B,[D|E],no_gap,no_gap,_,_,CStr,Type),
+  prefix(D),
+  move_prefix(A,D,Verb),
+  verb(Verb,ditransitive,SNum,SPerson,Tense,Mode,_,VStr),
+  vp_prime(E,C,vp(vpfeat(simple,Type,Mode,Tense,SPerson,SNum,separable),
+                  vptree(VStr,CStr)),
+           VPStr,SNum,SPerson,Mode,Tense).
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,Mode,Tense) :-
+  verb(A,intransitive,SNum,SPerson,Tense,Mode,_,VStr),
+  intr_complement(B,D,CStr,Type),
+
+vp_prime(D,C,vp(vpfeat(simple,Type,Mode,Tense,SPerson,SNum,intransitive),
+                vptree(VStr,CStr)),
+             VPStr,SNum,SPerson,Mode,Tense).
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,Mode,Tense) :-
+  verb(A,transitive,SNum,SPerson,Tense,Mode,Case,VStr),
+  tr_complement(B,D,Case,no_gap,no_gap,_,_,CStr,Type),
+
+vp_prime(D,C,vp(vpfeat(simple,Type,Mode,Tense,SPerson,SNum,transitive),
+                  vptree(VStr,CStr)),VPStr,SNum,SPerson,Mode,Tense).
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,Mode,Tense) :-
+  verb(A,ditransitive,SNum,SPerson,Tense,Mode,_,VStr),
+  ditr_complement(B,D,no_gap,no_gap,_,_,CStr,Type),
+
+vp_prime(D,C,vp(vpfeat(simple,Type,Mode,Tense,SPerson,SNum,ditransitive),
+                vptree(VStr,CStr)),
+             VPStr,SNum,SPerson,Mode,Tense).
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,Mode,Tense) :-
+  verb(A,be,SNum,SPerson,Tense,Mode,_,v(Feat,vtree(A,sein))),
+  be_comp(B,D,CStr,no_gap,no_gap,_,_,Type),
+  vp_prime(D,C,vp(vpfeat(simple,Type,Mode,Tense,SPerson,SNum,be),
+                  vptree(v(Feat,vtree(A,sein)),CStr)),
+           VPStr,SNum,SPerson,Mode,Tense).
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,Mode,Tense) :-
+  verb(A,_,SNum,SPerson,WTense,Mode,_,v(Feat,vtree(A,werden))),
+  rest_werden(B,D,werden_aux(v(Feat,vtree(A,werden))),
+              Mode,WTense,Tense,SNum,SPerson,VPStruct),
+  vp_prime(D,C,VPStruct,VPStr,SNum,SPerson,Mode,Tense).
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,Mode,VPTense) :-
+  aux(A,SNum,SPerson,Mode,Tense,sein,AStr),
+  agent(B,D,Agent),
+  passive_comp(D,[E|[worden|R]],CStr),
+  perfect_part(E,_,_,_,PerfStr),
+  construct_name(VPTense,Tense),
+
+vp_prime(R,C,vp(vpfeat(perfect,typeg,Mode,VPTense,SPerson,SNum,passive),
+                  vptree(AStr,Agent,CStr,PerfStr)),
+           VPStr,SNum,SPerson,Mode,Tense).
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,Mode,VPTense) :-
+  aux(A,SNum,SPerson,Mode,Tense,haben,AStr),
+  agent(B,D,Agent),
+  passive_comp(D,[E|[werden|[R|Rest]]],CStr),
+  perfect_part(E,_,_,_,PerfStr),
+  modal_infinitive(R,MStr),
+  construct_name(VPTense,Tense),
+
+vp_prime(Rest,C,vp(vpfeat(perfect,typeh,Mode,VPTense,SPerson,SNum,passive),
+                   vptree(AStr,Agent,CStr,PerfStr,MStr)),
+           VPStr,SNum,SPerson,Mode,Tense).
+
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,indicative,Tense) :-
+  modal(A,SNum,SPerson,Tense,MStr),
+  complement(B,[I|D],Cat,Case,no_gap,no_gap,_,_,CStr,Type),
+  infinitive(I,Cat,Case,IStr),
+  vp_prime(D,C,vp(vpfeat(simple,Type,indicative,Tense,SPerson,SNum,Cat),
+                  vptree(MStr,CStr,IStr)),
+           VPStr,SNum,SPerson,indicative,Tense).
+
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,Mode,VPTense) :-
+  aux(A,SNum,SPerson,Mode,AuxTense,haben,AuxStr),
+  complement(B,Rest,Cat,Case,no_gap,no_gap,_,_,CStr,Type),
+  rest_aux(Rest,D,Cat,Case,Str),
+  construct_name(VPTense,AuxTense),
+  vp_prime(D,C,vp(vpfeat(perfect,Type,Mode,VPTense,SPerson,SNum,Cat),
+                  vptree(AuxStr,CStr,Str)),
+           VPStr,SNum,SPerson,Mode,VPTense).
+
+verb_phrase([A|B],C,VPStr,SNum,SPerson,Mode,VPTense) :-
+  aux(A,SNum,SPerson,Mode,AuxTense,Kind,AuxStr),
+  complement(B,[Perf|Rest],Cat,Case,no_gap,no_gap,_,_,CStr,Type),
+  perfect_part(Perf,Cat,Kind,Case,PerfStr),
+  construct_name(VPTense,AuxTense),
+  vp_prime(Rest,C,vp(vpfeat(perfect,Type,Mode,VPTense,SPerson,SNum,Cat),
+                     vptree(AuxStr,CStr,PerfStr)),
+           VPStr,SNum,SPerson,Mode,VPTense).
+
+vp_prime([A|B],C,VPStr,
+         vp(vpfeat(compound,type0,Mode,Tense,SPerson,SNum,compound),
+            vptree(VPStr,coord_conj(A),RHS)),
+         SNum,SPerson,Mode,Tense) :-
+  coord_conj(A,_),
+  verb_phrase(B,C,RHS,SNum,SPerson,Mode,_).
+vp_prime(A,A,S,S,_,_,_,_).
+
+
+transposed_vp(A,C,VPStr,SNum,SPerson,Mode,Tense,InGap,InGap,_,_) :-
+  intr_complement(A,[B|D],CStr,Type),
+  verb(B,intransitive,SNum,SPerson,Tense,Mode,_,VStr),
+
+tvp_prime(D,C,vp(vpfeat(simple,Type,Mode,Tense,SPerson,SNum,intransitive),
+                   vptree(VStr,CStr)),
+            VPStr,SNum,SPerson,Mode,Tense).
+
+transposed_vp(A,C,VPStr,SNum,SPerson,Mode,Tense,InGap,OutGap,GapCase,GapNum) :-
+  tr_complement(A,[B|D],Case,InGap,OutGap,GapCase,GapNum,CStr,Type),
+  verb(B,transitive,SNum,SPerson,Tense,Mode,Case,VStr),
+
+tvp_prime(D,C,vp(vpfeat(simple,Type,Mode,Tense,SPerson,SNum,transitive),
+                   vptree(VStr,CStr)),
+            VPStr,SNum,SPerson,Mode,Tense).
+
+transposed_vp(A,C,VPStr,SNum,SPerson,Mode,Tense,InGap,OutGap,GapCase,GapNum) :-
+  ditr_complement(A,[B|D],InGap,OutGap,GapCase,GapNum,CStr,Type),
+  verb(B,ditransitive,SNum,SPerson,Tense,Mode,_,VStr),
+
+tvp_prime(D,C,vp(vpfeat(simple,Type,Mode,Tense,SPerson,SNum,ditransitive),
+                   vptree(VStr,CStr)),
+            VPStr,SNum,SPerson,Mode,Tense).
+
+transposed_vp(A,C,VPStr,SNum,SPerson,Mode,Tense,InGap,OutGap,GapCase,GapNum) :-
+  be_comp(A,[B|D],CStr,InGap,OutGap,GapCase,GapNum,Type),
+  verb(B,be,SNum,SPerson,Tense,Mode,_,v(Feat,vtree(B,sein))),
+  tvp_prime(D,C,vp(vpfeat(simple,Type,Mode,Tense,SPerson,SNum,be),
+                   vptree(v(Feat,vtree(B,sein)),CStr)),
+            VPStr,SNum,SPerson,Mode,Tense).
+
+transposed_vp(A,C,VPStr,SNum,SPerson,indicative,Tense,InGap,OutGap,
+              GapCase,GapNum) :-
+
+complement(A,[I|[M|Rest]],Cat,Case,InGap,OutGap,GapCase,GapNum,CStr,Type),
+  infinitive(I,Cat,Case,IStr),
+  modal(M,SNum,SPerson,Tense,MStr),
+
+tvp_prime(Rest,C,vp(vpfeat(simple,Type,indicative,Tense,SPerson,SNum,Cat),
+                    vptree(MStr,CStr,IStr)),
+            VPStr,SNum,SPerson,indicative,Tense).
+
+transposed_vp(A,C,VPStr,SNum,SPerson,Mode,VPTense,InGap,OutGap,GapCase,GapNum):-
+  complement(A,B,Cat,Case,InGap,OutGap,GapCase,GapNum,CStr,Type),
+  rest_aux1(B,[D|Rest],Cat,Case,Str),
+  aux(D,SNum,SPerson,Mode,AuxTense,haben,AuxStr),
+  construct_name(VPTense,AuxTense),
+
+tvp_prime(Rest,C,vp(vpfeat(perfect,Type,Mode,VPTense,SPerson,SNum,Cat),
+                    vptree(AuxStr,CStr,Str)),
+            VPStr,SNum,SPerson,Mode,VPTense).
+
+transposed_vp(A,C,VPStr,SNum,SPerson,Mode,VPTense,InGap,OutGap,GapCase,GapNum):-
+  complement(A,[B|D],Cat,Case,InGap,OutGap,GapCase,GapNum,CStr,Type),
+  aux(B,SNum,SPerson,Mode,AuxTense,haben,AuxStr),
+  rest_aux0(D,Rest,Cat,Case,RStr),
+  construct_name(VPTense,AuxTense),
+
+tvp_prime(Rest,C,vp(vpfeat(perfect,Type,Mode,VPTense,SPerson,SNum,Cat),
+                    vptree(AuxStr,CStr,RStr)),
+            VPStr,SNum,SPerson,Mode,VPTense).
+
+transposed_vp(A,C,VPStr,SNum,SPerson,Mode,VPTense,InGap,OutGap,GapCase,GapNum):-
+
+complement(A,[B|[D|Rest]],Cat,Case,InGap,OutGap,GapCase,GapNum,CStr,Type),
+  perfect_part(B,Cat,Kind,Case,PerfStr),
+  aux(D,SNum,SPerson,Mode,AuxTense,Kind,AuxStr),
+  construct_name(VPTense,AuxTense),
+
+tvp_prime(Rest,C,vp(vpfeat(perfect,Type,Mode,VPTense,SPerson,SNum,Cat),
+                    vptree(AuxStr,CStr,PerfStr)),
+            VPStr,SNum,SPerson,Mode,Tense).
+
+tvp_prime([A|B],C,TVPStr,
+          vp(vpfeat(compound,type0,Mode,Tense,SPerson,SNum,compound),
+             vptree(TVPStr,coord_conj(A),RHS)),
+          SNum,SPerson,Mode,Tense) :-
+  coord_conj(A,_),
+  transposed_vp(B,C,RHS,SNum,SPerson,Mode,_,no_gap,no_gap,_,_).
+tvp_prime(A,A,S,S,_,_,_,_).
+
+construct_name(VPTense,AuxTense) :-
+  name(AuxTense,ATL),
+  name('perfect',PerfL),
+  append(ATL,PerfL,VPTL),
+  name(VPTense,VPTL).
+
+prefix(A) :-
+
+member(A,[ab,fort,hin,weg,aus,heraus,hinaus,ein,her,herein,hinein,an,auf,
+          mit,vor,wieder,zu,zurueck,zusammen]).
+
+move_prefix(Base,Prefix,Verb) :-
+  name(Base,BaseL),
+  name(Prefix,PrefixL),
+  append(PrefixL,BaseL,L),
+  name(Verb,L).
+
+intr_complement(A,B,vp_comp(PrepSt),type1b) :-
+  prep_phrase(A,B,PrepSt).
+intr_complement(A,B,Str,Type) :-
+  advp(A,C,AStr),
+  rest_intr_comp(C,B,AStr,Str,Type).
+intr_complement(A,A,vp_comp(zero),type1a).
+
+rest_intr_comp(A,B,AStr,vp_comp(AStr,PrepStr),type1d) :-
+  prep_phrase(A,B,PrepStr).
+rest_intr_comp(A,A,AStr,vp_comp(AStr),type1c).
+
+tr_complement(A,B,Case,GapIn,GapOut,GapCase,GapNum,Str,Type) :-
+  noun_phrase(A,C,NPStr,_,_,Case,_,GapIn,GapOut,GapCase,GapNum),
+  rest_tr_comp(C,B,NPStr,Str,Type).
+tr_complement(A,B,Case,GapIn,GapOut,GapCase,GapNum,
+              vp_comp(AStr,NPStr),type2c) :-
+  advp(A,C,AStr),
+  noun_phrase(C,B,NPStr,_,_,Case,_,GapIn,GapOut,GapCase,GapNum).
+
+rest_tr_comp(A,B,NPStr,vp_comp(NPStr,AStr),type2b) :-
+  advp(A,B,AStr).
+rest_tr_comp(A,B,NPStr,vp_comp(NPStr,PP),type2d) :-
+  prep_phrase(A,B,PP).
+rest_tr_comp(A,A,NPStr,vp_comp(NPStr),type2a).
+
+ditr_complement(A,B,InGap,OutGap,GapCase,GapNum,Str,Type) :-
+  noun_phrase(A,C,NPStr,_,_,dative,not_pro,InGap,IntGap,GapCase,GapNum),
+  rest_ditr_comp1(C,B,NPStr,IntGap,OutGap,GapCase,GapNum,Str,Type).
+ditr_complement(A,B,InGap,OutGap,GapCase,GapNum,Str,Type) :-
+  noun_phrase(A,C,NPStr,_,_,dative,is_pro,InGap,IntGap,GapCase,GapNum),
+  rest_ditr_comp2(C,B,NPStr,IntGap,OutGap,GapCase,GapNum,Str,Type).
+ditr_complement(A,B,InGap,OutGap,GapCase,GapNum,Str,Type) :-
+  noun_phrase(A,C,NPStr,_,_,accusative,is_pro,InGap,IntGap,GapCase,GapNum),
+  rest_ditr_comp3(C,B,NPStr,IntGap,OutGap,GapCase,GapNum,Str,Type).
+
+rest_ditr_comp1(A,B,NPStr,InGap,OutGap,GapCase,GapNum,
+                vp_comp(NPStr,AStr,NPStr2),type3b) :-
+  advp(A,C,AStr),
+  noun_phrase(C,B,NPStr2,_,_,accusative,not_pro,InGap,OutGap,GapCase,GapNum).
+
+rest_ditr_comp1(A,B,NPStr,InGap,OutGap,GapCase,GapNum,
+                vp_comp(NPStr,NPStr2),type3a) :-
+  noun_phrase(A,B,NPStr2,_,_,accusative,not_pro,InGap,OutGap,GapCase,GapNum).
+
+rest_ditr_comp2(A,B,NPStr,InGap,OutGap,GapCase,GapNum,
+                vp_comp(NPStr,AStr,NPStr2),type3b) :-
+  advp(A,C,AStr),
+  noun_phrase(C,B,NPStr2,_,_,accusative,not_pro,InGap,OutGap,GapCase,GapNum).
+
+rest_ditr_comp2(A,B,NPStr,InGap,OutGap,GapCase,GapNum,
+                vp_comp(NPStr,NPStr2),type3a) :-
+  noun_phrase(A,B,NPStr2,_,_,accusative,not_pro,InGap,OutGap,GapCase,GapNum).
+
+rest_ditr_comp3(A,B,NPStr,InGap,OutGap,GapCase,GapNum,
+                vp_comp(NPStr,AStr,NPStr2),type3b) :-
+  advp(A,C,AStr),
+  noun_phrase(C,B,NPStr2,_,_,dative,_,InGap,OutGap,GapCase,GapNum).
+rest_ditr_comp3(A,B,NPStr,InGap,OutGap,GapCase,GapNum,
+                vp_comp(NPStr,NPStr2),type3a) :-
+  noun_phrase(A,B,NPStr2,_,_,dative,_,InGap,OutGap,GapCase,GapNum).
+
+be_comp(A,B,vp_comp(NPStr),InGap,OutGap,GapCase,GapNum,type4b) :-
+  noun_phrase(A,B,NPStr,_,_,nominative,_,InGap,OutGap,GapCase,GapNum).
+be_comp(A,B,vp_comp(AP),InGap,InGap,_,_,type4c) :-
+  adjp(A,B,AP).
+be_comp(A,B,vp_comp(PP),InGap,InGap,_,_,type4d) :-
+  prep_phrase(A,B,PP).
+be_comp(A,A,vp_comp(zero),InGap,InGap,_,_,type4a).
+
+rest_werden(A,B,AStr,Mode,Tense,future,SNum,SPerson,
+            vp(vpfeat(future,typeb,Mode,Tense,SPerson,SNum,Cat),
+               vptree(AStr,CStr,IStr,MStr))) :-
+  complement(A,[C|[D|B]],Cat,Case,no_gap,no_gap,_,_,CStr,_),
+  infinitive(C,Cat,Case,IStr),
+  modal_infinitive(D,MStr).
+rest_werden(A,B,AStr,Mode,Tense,future,SNum,SPerson,
+            vp(vpfeat(future,typea,Mode,Tense,SPerson,SNum,Cat),
+               vptree(AStr,CStr,IStr))) :-
+  complement(A,[C|B],Cat,Case,no_gap,no_gap,_,_,CStr,_),
+  infinitive(C,Cat,Case,IStr).
+rest_werden(A,B,AStr,Mode,Tense,future_perfect,SNum,SPerson,
+            vp(vpfeat(future,typec,Mode,Tense,SPerson,SNum,Cat),
+               vptree(AStr,CStr,PerfStr,RestStr))) :-
+  complement(A,[C|[D|B]],Cat,Case,no_gap,no_gap,_,_,CStr,_),
+  perfect_part(C,Cat,Kind,Case,PerfStr),
+  perf_inf(D,Kind,RestStr).
+
+perf_inf(haben,haben,perf_inf(haben)).
+perf_inf(sein,sein,perf_inf(sein)).
+
+rest_werden(A,B,AStr,Mode,Tense,Label,SNum,SPerson,
+            vp(vpfeat(Label,Type,Mode,Tense,SPerson,SNum,passive),
+               vptree(AStr,Agent,CStr,PerfStr,Str))) :-
+  agent(A,C,Agent),
+  passive_comp(C,[Perf|Rest],CStr),
+  perfect_part(Perf,_,_,_,PerfStr),
+  rest_perfect(Rest,B,Str,Label,Type).
+
+rest_perfect([werden|[B|C]],C,after_perf(inf(werden),modal_inf(B)),
+             future_passive,typef) :-
+  modal_list(B,_,_).
+rest_perfect([werden|B],B,after_perf(inf(werden)),future_passive,typed).
+rest_perfect([worden|[sein|B]],B,
+             after_perf(aperf(perffeat(passive),perftree(worden)),
+                        inf(sein)),
+             future_pass_perf,typei).
+rest_perfect(A,A,after_perf(zero),passive,typee).
+
+agent(A,B,agent(pp(p(PFeat,ptree(von)),NPStr))) :-
+  prep_phrase(A,B,pp(p(PFeat,ptree(von)),NPStr)).
+agent(A,A,agent(zero)).
+
+passive_comp(A,B,pass_comp(Str)) :-
+  prep_phrase(A,B,AStr).
+passive_comp(A,B,pass_comp(Str)) :-
+  advp(A,B,Str).
+passive_comp(A,A,pass_comp(zero)).
+
+
+
+aux(A,SNum,SPerson,Mode,Tense,haben,
+    aux(auxfeat(Mode,Tense,SPerson,SNum),
+        auxtree(A,haben))) :-
+  verb(A,_,SNum,SPerson,Tense,Mode,_,v(_,vtree(_,haben))).
+aux(A,SNum,SPerson,Mode,Tense,sein,
+    aux(auxfeat(Mode,Tense,SPerson,SNum),
+        auxtree(A,sein))) :-
+  verb(A,_,SNum,SPerson,Tense,Mode,_,v(_,vtree(_,sein))).
+
+complement(A,B,Cat,Case,InGap,OutGap,GapCase,GapNum,CStr,Type) :-
+  try_cat(Cat),
+  possible_comps(A,B,Cat,Case,InGap,OutGap,GapCase,GapNum,CStr,Type).
+
+try_cat(be).
+try_cat(intransitive).
+try_cat(transitive).
+try_cat(ditransitive).
+
+possible_comps(A,B,be,nominative,InGap,OutGap,GapCase,GapNum,CStr,Type):-
+  be_comp(A,B,CStr,InGap,OutGap,GapCase,GapNum,Type).
+possible_comps(A,B,intransitive,_,_,_,_,_,CStr,Type) :-
+  intr_complement(A,B,CStr,Type).
+possible_comps(A,B,transitive,Case,InGap,OutGap,GapCase,GapNum,CStr,Type):-
+  tr_complement(A,B,Case,InGap,OutGap,GapCase,GapNum,CStr,Type).
+possible_comps(A,B,ditransitive,_,InGap,OutGap,GapCase,GapNum,CStr,Type):-
+  ditr_complement(A,B,InGap,OutGap,GapCase,GapNum,CStr,Type).
+
+perfect_part(Perf,Cat,Kind,Case,perf(perffeat(Cat,Kind),
+                                     perftree(Perf,Base))) :-
+  strong_verb(Base,_,_,_,Perf,Kind),
+  get_extra_info(Base,Cat,Case).
+
+perfect_part(Perf,Cat,haben,Case,perf(perffeat(Cat,haben),
+                                      perftree(Perf,Base))) :-
+  name(Perf,PerfL),
+  name('ge',Gelist),
+  append(Gelist,L,PerfL),
+  remove_t(L,NewL),
+  name('en',Enlist),
+  append(NewL,Enlist,BaseL),
+  name(Base,BaseL),
+  get_extra_info(Base,Cat,Case).
+
+perfect_part(Perf,Cat,haben,Case,perf(perffeat(Cat,haben),
+                                      perftree(Perf,Base))) :-
+  name(Perf,PerfL),
+  name('iert',Iertlist),
+  append(_,Iertlist,PerfL),
+  name('t',Tlist),
+  append(L,Tlist,PerfL),
+  name('en',Enlist),
+  append(L,Enlist,BaseL),
+  name(Base,BaseL),
+  get_extra_info(Base,Cat,Case).
+
+perfect_part(Perf,Cat,haben,Case,perf(perffeat(Cat,haben),
+                                      perftree(Perf,Base))) :-
+  name(Perf,PerfL),
+  prefix(A),
+  name(A,PrefixList),
+  name('ge',Gelist),
+  append(PrefixList,L1,PerfL),
+  append(Gelist,L2,L1),
+  remove_t(L2,NewL),
+  name('en',Enlist),
+  append(NewL,Enlist,BaseL),
+  append(PrefixList,BaseL,BaseList),
+  name(Base,BaseList),
+  get_extra_info(Base,Cat,Case).
+
+remove_t(L,NewL) :-
+  name('t',Tlist),
+  append(NewL,Tlist,L).
+remove_t(L,NewL) :-
+  name('et',Etlist),
+  append(NewL,Etlist,L).
+
+get_extra_info(sein,be,_).
+get_extra_info(Base,intransitive,_) :-
+  intransitive_verb(Base,_,_,_,_,_,_).
+get_extra_info(Base,transitive,Case) :-
+  transitive_verb(Base,_,Case,_,_,_,_).
+get_extra_info(Base,ditransitive,_) :-
+  ditransitive_verb(Base,_,_,_,_).
+
+infinitive(Inf,intransitive,_,inf(Inf,intransitive)) :-
+  intransitive_verb(Inf,_,_,_,_,_,_).
+infinitive(Inf,transitive,Case,inf(Inf,transitive)) :-
+  transitive_verb(Inf,_,Case,_,_,_,_).
+infinitive(Inf,ditransitive,_,inf(Inf,ditransitive)) :-
+  ditransitive_verb(Inf,_,_,_,_).
+
+modal_infinitive(M,mod_inf(M)) :-
+  modal_list(M,_,_).
+
+modal_perf_part(Perf,perf(perffeat(modal,_),
+                          perftree(Perf,Base))) :-
+  modal_list(Base,_,Perf).
+
+modal_list(koennen,konn,gekonnt).
+modal_list(duerfen,durf,gedurft).
+modal_list(moegen,moch,gemocht).
+modal_list(muessen,muss,gemusst).
+modal_list(sollen,soll,gesollt).
+modal_list(wollen,woll,gewollt).
+
+modal_present(duerfen,darf,duerf).
+modal_present(koennen,kann,koenn).
+modal_present(moegen,mag,moeg).
+modal_present(muessen,muss,muess).
+modal_present(sollen,soll,soll).
+modal_present(wollen,will,woll).
+
+rest_aux(A,B,Cat,Case,Str) :-
+  rest_aux0(A,B,Cat,Case,Str).
+rest_aux(A,B,Cat,Case,Str) :-
+  rest_aux1(A,B,Cat,Case,Str).
+
+rest_aux0([A|[B|C]],C,Cat,Case,rest_str(rest_str_feat(type1),
+                                        rest_str_tree(IStr,MStr))) :-
+  infinitive(A,Cat,Case,IStr),
+  modal_infinitive(B,MStr).
+
+rest_aux1([A|B],B,_,accusative,rest_str(rest_str_feat(type2),
+                               rest_str_tree(PerfStr))) :-
+  modal_perf_part(A,PerfStr).
+
+advp([A|[B|D]],C,AStr) :-
+  quantifier(A,_),
+  adverb(B,_),
+  advp_prime(D,C,adv_p(q(A),adv(B)),AStr).
+advp([A|B],C,AStr) :-
+  adverb(A,_),
+  advp_prime(B,C,adv_p(adv(A)),AStr).
+
+advp_prime([A|B],C,AStr,adv_p(AStr,coord_conj(A),RHS)) :-
+  coord_conj(A,_),
+  advp(B,C,RHS).
+advp_prime(A,A,S,S).
+
+quantifier(sehr,very).
+quantifier(nicht,not).
+
+adverb(haeufig,frequently).
+adverb(schnell,quickly).
+adverb(kraeftig,powerfully).
+
+adjp([A|[B|D]],C,AP) :-
+  quantifier(A,_),
+  adj(B,_,_),
+  adjp_prime(D,C,adj_p(q(A),adj(B)),AP).
+adjp([A|B],C,AP) :-
+  adj(A,_,_),
+  adjp_prime(B,C,adj_p(adj(A)),AP).
+
+adjp_prime(A,B,AP,adj_p(AP,RHS)) :-
+  adjp(A,B,RHS).
+adjp_prime([A|B],C,AP,adj_p(AP,coord_conj(A),RHS)) :-
+  coord_conj(A,_),
+  adjp(B,C,RHS).
+adjp_prime(A,A,S,S).
+
+modal(M,SNum,SPerson,present,modal(modalfeat(present,SPerson,SNum),
+                                   modaltree(M,Base))) :-
+  modal_inflection(present,SNum,SPerson,E),
+  get_pres_mod_stem(M,E,Stem),
+  verify_modal(Base,Stem,SNum).
+modal(M,SNum,SPerson,past,modal(modalfeat(past,SPerson,SNum),
+                                modaltree(M,Base))) :-
+  modal_inflection(past,SNum,SPerson,E),
+  name(M,ML),
+  name(E,EL),
+  append(SL,EL,ML),
+  name(Stem,SL),
+  modal_list(Base,Stem,_).
+
+get_pres_mod_stem(M,zero,M).
+get_pres_mod_stem(M,E,Stem) :-
+  name(M,ML),
+  name(E,EL),
+  append(SL,EL,ML),
+  name(Stem,SL).
+
+verify_modal(Base,Stem,singular) :-
+  modal_present(Base,Stem,_).
+verify_modal(Base,Stem,plural) :-
+  modal_present(Base,_,Stem).
+
+modal_inflection(present,singular,first,zero).
+modal_inflection(present,singular,second,st).
+modal_inflection(present,singular,third,zero).
+modal_inflection(present,plural,first,en).
+modal_inflection(present,plural,second,t).
+modal_inflection(present,plural,third,en).
+
+modal_inflection(past,singular,first,te).
+modal_inflection(past,singular,second,test).
+modal_inflection(past,singular,third,te).
+modal_inflection(past,plural,first,ten).
+modal_inflection(past,plural,second,tet).
+modal_inflection(past,plural,third,ten).
+
+verb(V,Cat,SNum,SPerson,present,indicative,Case,
+     v(vfeat(indicative,present,SPerson,SNum,Cat),
+       vtree(V,Base))) :-
+  verb_inflection(present,SNum,SPerson,Ending),
+  regular(Cat,V,Ending,Base,Case).
+
+verb(V,Cat,SNum,SPerson,past,indicative,Case,
+     v(vfeat(indicative,past,SPerson,SNum,Cat),
+       vtree(V,Base))) :-
+  verb_inflection(past,SNum,SPerson,Ending),
+  regular(Cat,V,Ending,Base,Case).
+
+verb(V,Cat,SNum,SPerson,present,subjunctive,Case,
+     v(vfeat(subjunctive,present,SPerson,SNum,Cat),
+       vtree(V,Base))) :-
+  verb_inflection(past,SNum,SPerson,Ending),
+  regular(Cat,V,Ending,Base,Case).
+
+verb(V,Cat,SNum,SPerson,past,indicative,Case,
+     v(vfeat(indicative,past,SPerson,SNum,Cat),
+       vtree(V,Base))) :-
+  verb_inflection(past,strong,SNum,SPerson,Ending),
+  strong(Cat,V,Ending,Base,Case).
+
+verb(V,Cat,SNum,SPerson,present,indicative,Case,
+     v(vfeat(indicative,present,SPerson,SNum,Cat),
+       vtree(V,Base))) :-
+  verb_inflection(present,SNum,SPerson,Ending),
+  irregular_stem(Cat,V,Ending,Base,Case).
+
+verb(V,Cat,SNum,SPerson,present,subjunctive,Case,
+     v(vfeat(subjunctive,present,SPerson,SNum,Cat),
+       vtree(V,Base))) :-
+  verb_inflection(present,subjunctive,SNum,SPerson,Ending),
+  strong_subj_2(Cat,V,Ending,Base,Case).
+
+verb(V,Cat,SNum,SPerson,present,subjunctive,Case,
+     v(vfeat(subjunctive,present,SPerson,SNum,Cat),
+       vtree(V,Base))) :-
+  verb_inflection(present,subjunctive,SNum,SPerson,Ending),
+  subjunctive1(Cat,V,Ending,Base,Case).
+
+verb(V,be,SNum,SPerson,present,indicative,Case,
+     v(vfeat(indicative,present,SPerson,SNum,Cat),
+       vtree(V,Base))) :-
+  present_form(V,Base,SPerson,SNum),
+  intransitive_verb(Base,_,_,_,_,_,_).
+
+verb_inflection(present,singular,first,e).
+verb_inflection(present,singular,second,st).
+verb_inflection(present,singular,second,est).
+verb_inflection(present,singular,third,t).
+verb_inflection(present,singular,third,et).
+verb_inflection(present,plural,first,en).
+verb_inflection(present,plural,second,t).
+verb_inflection(present,plural,second,et).
+verb_inflection(present,plural,third,en).
+
+
+verb_inflection(past,singular,first,te).
+verb_inflection(past,singular,first,ete).
+verb_inflection(past,singular,second,test).
+verb_inflection(past,singular,second,etest).
+verb_inflection(past,singular,third,te).
+verb_inflection(past,singular,third,ete).
+verb_inflection(past,plural,first,ten).
+verb_inflection(past,plural,first,eten).
+verb_inflection(past,plural,second,tet).
+verb_inflection(past,plural,second,etet).
+verb_inflection(past,plural,third,ten).
+verb_inflection(past,plural,third,eten).
+
+verb_inflection(past,strong,singular,first,zero).
+verb_inflection(past,strong,singular,second,st).
+verb_inflection(past,strong,singular,second,est).
+verb_inflection(past,strong,singular,third,zero).
+verb_inflection(past,strong,plural,first,en).
+verb_inflection(past,strong,plural,first,n).
+verb_inflection(past,strong,plural,second,t).
+verb_inflection(past,strong,plural,second,et).
+verb_inflection(past,strong,plural,third,en).
+verb_inflection(past,strong,plural,third,n).
+
+verb_inflection(present,subjunctive,singular,first,e).
+verb_inflection(present,subjunctive,singular,second,est).
+verb_inflection(present,subjunctive,singular,third,e).
+verb_inflection(present,subjunctive,plural,first,en).
+verb_inflection(present,subjunctive,plural,second,et).
+verb_inflection(present,subjunctive,plural,third,en).
+
+regular(transitive,V,Ending,Base,Case) :-
+  get_base(V,Ending,Base),
+  transitive_verb(Base,_,Case,_,_,_,_).
+regular(ditransitive,V,Ending,Base,_) :-
+  get_base(V,Ending,Base),
+  ditransitive_verb(Base,_,_,_,_).
+regular(intransitive,V,Ending,Base,_) :-
+  get_base(V,Ending,Base),
+  intransitive_verb(Base,_,_,_,_,_,_).
+
+get_base(V,Ending,Base) :-
+  name(V,VL),
+  name(Ending,EL),
+  append(BL,EL,VL),
+  name('en',Enlist),
+  append(BL,Enlist,BLL),
+  name(Base,BLL).
+
+transitive_verb(kaufen,haben,accusative,[buy],[],restraint(subj(animate)),
+                no_locative).
+transitive_verb(schreiben,haben,accusative,[write],[],
+
+restraint(subj(animate),do(concrete,inanimate)),no_locative).
+transitive_verb(helfen,haben,dative,[help],[],norestraint,no_locative).
+transitive_verb(haben,haben,accusative,[have],[],norestraint,no_locative).
+transitive_verb(studieren,haben,accusative,[study],[],
+
+restraint(subj(animate),do(abstract,inanimate)),no_locative).
+transitive_verb(bitten,haben,accusative,[ask],[um(for,accusative)],
+                restraint(subj(animate)),no_locative).
+transitive_verb(stellen,haben,accusative,[put],[],restraint(subj(animate)),
+                locative).
+transitive_verb(sehen,haben,accusative,[see],[],norestraint,no_locative).
+transitive_verb(lesen,haben,accusative,[read],[],
+                restraint(subj(animate),do(_,inanimate)),no_locative).
+transitive_verb(bringen,haben,accusative,[bring],[],norestraint,locative).
+transitive_verb(schlagen,haben,accusative,[hit],[],norestraint,no_locative).
+transitive_verb(spielen,haben,accusative,[play],[],norestraint,no_locative).
+transitive_verb(fangen,haben,accusative,[catch],[],norestraint,no_locative).
+transitive_verb(machen,haben,accusative,[make],[],norestraint,no_locative).
+transitive_verb(zumachen,haben,accusative,[close],[],
+                restraint(do(concrete,inanimate)),locative).
+transitive_verb(zubringen,haben,accusative,[spend],[],
+                restraint(do(abstract,inanimate)),no_locative).
+transitive_verb(lieben,haben,accusative,[love],[],norestraint,no_locative).
+
+
+ditransitive_verb(geben,haben,[give],[],norestraint).
+ditransitive_verb(schreiben,haben,[write],[],
+
+restraint(subj(animate),io(animate),do(concrete,inanimate))).
+ditransitive_verb(bringen,haben,[bring],[],norestraint).
+ditransitive_verb(zurueckgeben,haben,[give,back],[],norestraint).
+intransitive_verb(denken,haben,[think],[an(of,accusative)],
+                  restraint(subj(animate)),no_motion,no_position).
+intransitive_verb(schreiben,haben,[write],[],
+                  restraint(subj(animate)),no_motion,no_position).
+intransitive_verb(stammen,sein,[come],[aus(from,dative)],norestraint,
+                  no_motion,no_position).
+intransitive_verb(laufen,sein,[run],[],restraint(subj(animate)),
+                  motion,no_position).
+intransitive_verb(spielen,haben,[play],[],norestraint,no_motion,no_position).
+intransitive_verb(sein,sein,[be],[],norestraint,no_motion,position).
+intransitive_verb(werden,sein,[become],[],norestraint,no_motion,position).
+intransitive_verb(gehen,sein,[go],[],norestraint,motion,no_position).
+intransitive_verb(studieren,haben,[study],[],restraint(subj(animate)),
+                  no_motion,no_position).
+intransitive_verb(grenzen,haben,[border],[an(on,accusative)],
+                  restraint(subj(inanimate)),no_motion,position).
+intransitive_verb(sehen,haben,[see],[],norestraint,no_motion,no_position).
+intransitive_verb(lesen,haben,[read],[],restraint(subj(animate)),no_motion,
+                  no_position).
+intransitive_verb(stehen,haben,[stand],[],norestraint,no_motion,position).
+intransitive_verb(warten,haben,[wait],[auf(for,accusative)],norestraint,
+                  no_motion,no_position).
+intransitive_verb(fliegen,sein,[fly],[],norestraint,motion,no_position).
+intransitive_verb(anfangen,haben,[begin],[],norestraint,no_motion,no_position).
+intransitive_verb(zurueckgehen,sein,[go,back],[],norestraint,motion,
+                  no_position).
+intransitive_verb(empfehlen,haben,[recommend],[],restraint(subj(animate)),
+                  no_motion,no_position).
+
+
+strong(transitive,V,Ending,Base,Case) :-
+  get_base_strong(V,Ending,Base),
+  transitive_verb(Base,_,Case,_,_,_,_).
+strong(ditransitive,V,Ending,Base,_) :-
+  get_base_strong(V,Ending,Base),
+  ditransitive_verb(Base,_,_,_,_).
+strong(intransitive,V,Ending,Base,_) :-
+  get_base_strong(V,Ending,Base),
+  intransitive_verb(Base,_,_,_,_,_,_).
+
+get_base_strong(V,zero,Base) :-
+  strong_verb(Base,V,_,_,_,_).
+get_base_strong(V,Ending,Base) :-
+  name(V,VL),
+  name(Ending,EL),
+  append(PrL,EL,VL),
+  name(Preterite,PrL),
+  strong_verb(Base,Preterite,_,_,_,_).
+
+strong_verb(geben,gab,gaeb,gib,gegeben,haben).
+strong_verb(denken,dachte,daechte,none,gedacht,haben).
+strong_verb(schreiben,schrieb,schrieb,none,geschrieben,haben).
+strong_verb(laufen,lief,lief,laeuf,gelaufen,sein).
+strong_verb(sein,war,waer,none,gewesen,sein).
+strong_verb(helfen,half,haelf,hilf,geholfen,haben).
+strong_verb(haben,hatte,haett,ha,gehabt,haben).
+strong_verb(werden,wurde,wuerd,wir,geworden,sein).
+strong_verb(gehen,ging,ging,none,gegangen,sein).
+strong_verb(sehen,sah,saeh,sieh,gesehen,haben).
+strong_verb(lesen,las,laes,lies,gelesen,haben).
+strong_verb(stehen,stand,staend,none,gestanden,haben).
+strong_verb(bringen,brachte,braechte,none,gebracht,haben).
+strong_verb(schlagen,schlug,schlueg,schlaeg,geschlagen,haben).
+strong_verb(fliegen,flog,floeg,none,geflogen,sein).
+strong_verb(zurueckgeben,zurueckgab,zurueckgaeb,zureuckgib,
+            zurueckgegeben,haben).
+strong_verb(fangen,fing,fing,faeng,gefangen,haben).
+strong_verb(anfangen,anfing,anfing,anfaeng,angefangen,haben).
+strong_verb(zurueckgehen,zurueckging,zurueckging,none,zurueckgegangen,sein).
+strong_verb(empfehlen,empfahl,empfaehl,empfiehl,empfohlen,haben).
+strong_verb(zubringen,zubrachte,zubraechte,none,zugebracht,haben).
+
+present_form(bin,sein,first,singular).
+present_form(bist,sein,second,singular).
+present_form(ist,sein,third,singular).
+present_form(sind,sein,first,plural).
+present_form(seid,sein,second,plural).
+present_form(sind,sein,third,plural).
+present_form(wird,werden,third,singular).
+
+irregular_stem(transitive,V,Ending,Base,Case) :-
+  get_irr_stem(V,Ending,Base),
+  transitive_verb(Base,_,Case,_,_,_,_).
+irregular_stem(ditransitive,V,Ending,Base,_) :-
+  get_irr_stem(V,Ending,Base),
+  ditransitive_verb(Base,_,_,_,_).
+irregular_stem(intransitive,V,Ending,Base,_) :-
+  get_irr_stem(V,Ending,Base),
+  intransitive_verb(Base,_,_,_,_,_,_).
+
+get_irr_stem(V,Ending,Base) :-
+  name(V,VL),
+  name(Ending,EL),
+  append(SL,EL,VL),
+  name(Stem,SL),
+  strong_verb(Base,_,_,Stem,_,_).
+
+strong_subj_2(transitive,V,Ending,Base,Case) :-
+  get_base_subj2_strong(V,Ending,Base),
+  transitive_verb(Base,_,Case,_,_,_,_).
+strong_subj_2(ditransitive,V,Ending,Base,_) :-
+  get_base_subj2_strong(V,Ending,Base),
+  ditransitive_verb(Base,_,_,_,_).
+strong_subj_2(intransitive,V,Ending,Base,_) :-
+  get_base_subj2_strong(V,Ending,Base),
+  intransitive_verb(Base,_,_,_,_,_,_).
+strong_subj_2(be,V,Ending,sein,_) :-
+  get_base_subj2_strong(V,Ending,sein),
+  intransitive_verb(sein,_,_,_,_,_,_).
+
+
+get_base_subj2_strong(V,Ending,Base) :-
+  name(V,VL),
+  name(Ending,EL),
+  append(StL,EL,VL),
+  name(Subj_stem,StL),
+  strong_verb(Base,_,Subj_stem,_,_,_).
+
+subjunctive1(transitive,V,Ending,Base,Case) :-
+  get_base_subj2(V,Ending,Base),
+  transitive_verb(Base,_,Case,_,_,_,_).
+subjunctive1(ditransitive,V,Ending,Base,_) :-
+  get_base_subj2(V,Ending,Base),
+  ditransitive_verb(Base,_,_,_,_).
+subjunctive1(intransitive,V,Ending,Base,_) :-
+  get_base_subj2(V,Ending,Base),
+  intransitive_verb(Base,_,_,_,_,_,_).
+subjunctive1(be,sei,e,sein,_) :-
+  intransitive_verb(sein,_,_,_,_,_,_).
+subjunctive1(be,V,Ending,sein,_) :-
+  name(V,VL),
+  name(Ending,EL),
+  append(BL,EL,VL),
+  name(sei,BL),
+  intransitive_verb(sein,_,_,_,_,_,_).
+
+get_base_subj2(V,Ending,Base) :-
+  get_base(V,Ending,Base).
+
+non_subj_group(A,B,np,Case,_,nsg(NPStr)) :-
+  noun_phrase(A,B,NPStr,_,_,Case,_,no_gap,no_gap,_,_),
+  Case \== nominative,
+  Case \== genitive.
+non_subj_group(A,B,pp,na,_,nsg(PrepStr)) :-
+  prep_phrase(A,B,PrepStr).
+non_subj_group(A,B,advp,na,_,nsg(AStr)) :-
+  advp(A,B,AStr).
+non_subj_group(A,B,sub_cl,na,Mode,nsg(SCl)) :-
+  subord_clause(A,B,Mode,SCl).
+
+subord_clause([A|B],C,Mode,subcl(sub_conj(A),
+                                 s_bar(Str))) :-
+  subord_conj(A,_),
+  transposed_sent(B,C,Mode,no_gap,no_gap,_,_,Str).
+
+v_pos(A,SNum,SPerson,Mode,Tense,werden,_,
+      vpos(werden,v(Feat,vtree(A,werden)))) :-
+  verb(A,_,SNum,SPerson,Tense,Mode,_,v(Feat,vtree(A,werden))).
+v_pos(A,SNum,SPerson,Mode,Tense,VKind,Case,vpos(normal,VStr)) :-
+  verb(A,VKind,SNum,SPerson,Tense,Mode,Case,VStr).
+
+rest_pos(A,B,np,dative,ditransitive,_,rest(type1,io(NPStr))) :-
+  noun_phrase(A,B,NPStr,_,_,accusative,_,no_gap,no_gap,_,_).
+rest_pos(A,B,np,dative,ditransitive,_,rest(type2,io(AStr,NPStr))) :-
+  advp(A,C,AStr),
+  noun_phrase(C,B,NPStr,_,_,accusative,_,no_gap,no_gap,_,_).
+rest_pos(A,B,advp,_,ditransitive,_,rest(type3,io(NPStr1,NPStr2))) :-
+  noun_phrase(A,C,NPStr1,_,_,accusative,is_pro,no_gap,no_gap,_,_),
+  noun_phrase(C,B,NPStr2,_,_,dative,_,no_gap,no_gap,_,_).
+rest_pos(A,B,advp,_,ditransitive,_,rest(type4,io(NPStr1,NPStr2))) :-
+  noun_phrase(A,C,NPStr1,_,_,dative,_,no_gap,no_gap,_,_),
+  noun_phrase(C,B,NPStr2,_,_,accusative,not_pro,no_gap,no_gap,_,_).
+rest_pos(A,B,np,accusative,ditransitive,_,rest(type5,io(NPStr))) :-
+  noun_phrase(A,B,NPStr,_,_,dative,_,no_gap,no_gap,_,_).
+rest_pos(A,B,np,accusative,ditransitive,_,rest(type6,io(AStr,NPStr))) :-
+  advp(A,C,AStr),
+  noun_phrase(C,B,NPStr,_,_,dative,_,no_gap,no_gap,_,_).
+
+rest_pos(A,B,np,Case,transitive,Case,rest(type7,do(AStr))) :-
+  advp(A,B,AStr).
+rest_pos(A,B,np,Case,transitive,Case,rest(type8,do(zero))).
+rest_pos(A,B,advp,_,transitive,Case,rest(type9,do(NPStr))) :-
+  noun_phrase(A,B,NPStr,_,_,Case,_,no_gap,no_gap,_,_).
+
+rest_pos(A,B,pp,_,intransitive,_,rest(type10,intr(AStr))) :-
+  advp(A,B,AStr).
+rest_pos(A,B,pp,_,intransitive,_,rest(type11,intr(zero))).
+rest_pos(A,B,advp,_,intransitive,_,rest(type12,intr(PrepStr))) :-
+  prep_phrase(A,B,PrepStr).
+rest_pos(A,B,advp,_,intransitive,_,rest(type13,intr(zero))).
+
+rest_pos(A,A,_,_,be,_,rest(type14,zero)).
+
+rest_pos(A,B,np,GCase,werden,_,rest(type15,CStr,InfStr)) :-
+  complement(A,[C|B],Cat,Case,gap,no_gap,GCase,_,CStr,_),
+  any_inf(C,Cat,Case,InfStr).
+
+any_inf(I,Cat,Case,InfStr) :-
+  infinitive(I,Cat,Case,InfStr).
+any_inf(I,_,_,InfStr) :-
+  modal_infinitive(I,InfStr).
+
+rest_pos(A,B,sub_cl,_,Cat,Case,rest(type16,CStr)) :-
+  complement(A,B,Cat,Case,no_gap,no_gap,_,_,CStr,_).
+
+ 
+
+transform(ParseTree,EngList) :-
+  ParseTree =.. [mat,Sent1,sub_conj(SConj),Sent2],
+  transform_s(Sent1,Eng1),
+  transform_sconj(SConj,EConj),
+  transform_s(Sent2,Eng2),
+  append(Eng1,[','],IntList1),
+  append(IntList1,EConj,IntList2),
+  append(IntList2,Eng2,EngList).
+
+transform(ParseTree,EngList) :-
+  ParseTree =.. [mat,Sent1,sub_conj(SConj1),Sent2,sub_conj(SConj2),
+                 Sent3],
+  transform_s(Sent1,Eng1),
+  transform_sconj(SConj1,EConj1),
+  transform_s(Sent2,Eng2),
+  transform_sconj(SConj2,EConj2),
+  transform_s(Sent3,Eng3),
+  append(Eng1,[','],IntList1),
+  append(IntList1,EConj1,IntList2),
+  append(IntList2,Eng2,IntList3),
+  append(IntList3,[','],IntList4),
+  append(IntList4,EConj2,IntList5),
+  append(IntList5,Eng3,EngList).
+
+transform(ParseTree,EngList) :-
+  ParseTree =.. [mat,Sent],
+  transform_s(Sent,EngList).
+
+transform_s(s(sfeat(_,_,Kind,_,_),stree(NPStr,VPStr)),Slist) :-
+  member(Kind,[normal,transposed]),
+  transform_np(NPStr,EngNP,NPfeats),
+  transform_vp(NPfeats,VPStr,EngVP),
+  append(EngNP,EngVP,Slist).
+
+transform_s(s(sfeat(_,_,inverted,_,_),stree(NSG,V,Subj,Rest)),Slist) :-
+  transform_np(Subj,EngNP,NPfeats),
+  transform_inv_vp(NPfeats,V,NSG,Rest,EngVP),
+  append(EngNP,EngVP,Slist).
+
+transform_s(s(sfeat(_,_,inverted,_,_),stree(NSG,V,Subj,Rest)),Slist) :-
+  transform_np(Subj,EngNP,NPfeats),
+  trans_inv_relcl_vp(NPfeats,V,NSG,Rest,EngNP,Slist).
+
+transform_s(s(sfeat(_,_,compound,_,_),stree(S1,coord_conj(A),S2)),Slist):-
+  transform_s(S1,List1),
+  transform_s(S2,List2),
+  coord_conj(A,E),
+  append(List1,[','],IntList1),
+  append(IntList1,[E],IntList2),
+  append(IntList2,List2,Slist).
+
+
+
+transform_sconj(wenn,[when]).
+transform_sconj(GConj,EConj) :-
+  subord_conj(GConj,EConj).
+
+transform_np(np(npfeat(_,_,type0,_,_,_,_),_),[],_).
+
+transform_np(np(npfeat(_,_,type1,_,_,_,_),
+                nptree(n_proper(N))),
+             [E],npfeats(State,Sentience,Loc,Qual)) :-
+  proper_noun(N,E,_,State,Sentience,Loc,Qual).
+
+transform_np(np(npfeat(_,_,type2,_,_,_,_),nptree(NR,NRG)),
+             List,npfeats(State,Sentience,Loc,Qual)) :-
+  poss_ok(NR),
+  synthesize_nr(NRG,tag_poss,PossNP,_,_,_,_),
+  synthesize_nr(NR,no_tag,[the|NP],State,Sentience,Loc,Qual),
+  append(PossNP,NP,List).
+
+poss_ok(n_restr(n_restr_feat(type1,_,_,_),
+                n_restr_tree(det(_,_,_,Base),_))) :-
+  is_definite(Base).
+poss_ok(n_restr(n_restr_feat(type2,_,_,_),_)).
+
+transform_np(np(npfeat(_,_,type2,_,_,_,_),nptree(NR,NRG)),
+             List,npfeats(State,Sentience,Loc,Qual)) :-
+  synthesize_nr(NR,no_tag,NP,State,Sentience,Loc,Qual),
+  synthesize_nr(NRG,no_tag,PNP,_,_,_,_),
+  append(NP,[of],IntList),
+  append(IntList,PNP,List).
+
+transform_np(np(npfeat(IdNum,TraceList,type3,Num,Case,_,Person),
+                nptree(pro(A))),
+             [EngPro],npfeats(State,Sentience,Loc,Qual)) :-
+
+handle_anaphora(A,IdNum,TraceList,Num,Case,Person,EngPro,State,Sentience,
+                  Loc,Qual).
+
+transform_np(np(npfeat(_,_,type4,_,_,_,_),
+                nptree(det(IdNum,TL,_,Base),NBStr)),List,
+             npfeats(State,Sentience,Loc,Qual)) :-
+  handle_det(IdNum,TL,Base,EDet),
+
+synthesize_nbar(NBStr,[EDet],List,restraint(_,_),State,Sentience,Loc,Qual).
+
+transform_np(np(npfeat(_,_,type5,_,_,_,_),nptree(NBStr)),
+             List,npfeats(State,Sentience,Loc,Qual)) :-
+
+synthesize_nbar(NBStr,[],List,restraint(_,_),State,Sentience,Loc,Qual).
+
+transform_np(np(npfeat(_,_,type6,_,_,_,_),
+                nptree(LHS,coord_conj(A),RHS)),
+             List,npfeats(State,Sentience,Loc,Qual)) :-
+  transform_np(LHS,EngLHS,npfeats(State,Sentience,Loc,Qual)),
+  coord_conj(A,EConj),
+  transform_np(RHS,EngRHS,_),
+  append(EngLHS,[EConj],IntList),
+  append(IntList,EngRHS,List).
+
+synthesize_nr(n_restr(n_restr_feat(type1,_,_,_),
+              n_restr_tree(det(IdNum,TL,_,Base),NRB)),Tag,NRL,
+              State,Sentience,Loc,Qual) :-
+  handle_det(IdNum,TL,Base,EDet),
+
+synthesize_nrbar(NRB,Tag,[EDet],NRL,restraint(_,_),State,Sentience,Loc,Qual).
+
+synthesize_nr(n_restr(n_restr_feat(type0,_,_,_),
+
+n_restr_tree(NRB)),Tag,NRL,State,Sentience,Loc,Qual) :-
+
+synthesize_nrbar(NRB,Tag,[],NRL,restraint(_,_),State,Sentience,Loc,Qual).
+
+synthesize_nrbar(nrbar(nrbarfeat(type1,_,_,_),
+
+nrbartree(adj(adjfeat(Base,_,_,_),_),NRBar)),Tag,List,
+                 NewList,OldRestraints,State,Sentience,Loc,Qual) :-
+  adj(Base,EngAdj,Restraints),
+  update_restraints(OldRestraints,Restraints,NewRestraints),
+  append(List,[EngAdj],IntList),
+
+synthesize_nrbar(NRBar,Tag,IntList,NewList,NewRestraints,State,Sentience,
+                   Loc,Qual).
+
+synthesize_nrbar(nrbar(nrbarfeat(type2,_,_,_),
+                       nrbartree(n(nfeat(Base,Number,_,_),_))),Tag,List,
+                 NewList,restraint(State,Sentience),State,Sentience,
+                 Loc,Qual) :-
+  noun(Base,_,EngBase,_,State,Sentience,Loc,Qual),
+  do_eng_plural(Number,EngBase,EngN),
+  handle_possessive(EngN,Tag,EngNoun),
+  append(List,[EngNoun],NewList).
+
+update_restraints(R,R,R).
+update_restraints(R,_,R).
+
+do_eng_plural(singular,N,N).
+do_eng_plural(plural,SingN,PluralN) :-
+  is_odd(SingN,PluralN).
+do_eng_plural(plural,SingN,PluralN) :-
+  name(SingN,SingL),
+  name('s',SList),
+  append(SingL,SList,PluralList),
+  name(PluralN,PluralList).
+
+is_odd(man,men).
+is_odd(history,histories).
+is_odd(child,children).
+is_odd(city,cities).
+
+handle_possessive(N,no_tag,N).
+handle_possessive(N,tag_poss,PossN) :-
+  name(N,NL),
+  name('_s',SL),
+  append(NL,SL,PossNL),
+  name(PossN,PossNL).
+
+synthesize_nbar(nbar(nbarfeat(type1,_,_,_),
+
+nbartree(adj(adjfeat(Base,_,_,_),_),NBStr)),List,NewL,
+                OldRestraints,State,Sentience,Loc,Qual) :-
+  adj(Base,EngAdj,Restraints),
+  update_restraints(OldRestraints,Restraints,NewRestraints),
+  append(List,[EngAdj],IntList),
+
+synthesize_nbar(NBStr,IntList,NewL,NewRestraints,State,Sentience,Loc,Qual).
+
+synthesize_nbar(nbar(nbarfeat(type2,_,_,_),
+                     nbartree(n(nfeat(Base,Num,_,_),_))),List,NewL,
+                restraint(State,Sentience),State,Sentience,Loc,Qual) :-
+  noun(Base,_,EngBase,_,State,Sentience,Loc,Qual),
+  do_eng_plural(Num,EngBase,EngN),
+  append(List,[EngN],NewL).
+
+synthesize_nbar(nbar(nbarfeat(type3,_,_,_),nbartree(NBStr,PP)),
+                List,NewL,Restraints,State,Sentience,Loc,Qual) :-
+
+synthesize_nbar(NBStr,List,IntList,Restraints,State,Sentience,Loc,Qual),
+  synthesize_pp(PP,EngPP,n_compl(State,Sentience,Loc,Qual)),
+  append(IntList,EngPP,NewL).
+
+synthesize_nbar(nbar(nbarfeat(type4,_,_,_),nbartree(NBStr,RelclStr)),
+                List,NewL,Restraints,State,Sentience,Loc,Qual) :-
+
+synthesize_nbar(NBStr,List,IntList,Restraints,State,Sentience,Loc,Qual),
+  synthesize_relcl(Sentience,RelclStr,ERelcl),
+  append(IntList,ERelcl,NewL).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(simple,Type,_,_,_,_,separable),
+                vptree(v(vfeat(Mode,Tense,Person,Num,_),vtree(_,Base)),
+                       VComp)),List) :-
+  not(member(Type,[type1a,type1b,type1c,type1d])),
+  handle_einfach(Type,VComp,Base,State,Sentience,Loc,Qual,EBase,RestL),
+  generate_verb(EBase,Mode,Tense,Person,Num,Verb),
+  do_rest_separable(Verb,RestL,List).
+
+do_rest_separable([would,Word],RestL,List) :-
+  append([would,Word],RestL,List).
+do_rest_separable([Word],RestL,List) :-
+  append([Word],RestL,List).
+do_rest_separable([would,Base,Particle],RestL,List) :-
+  append([would,Base],RestL,IntList),
+  append(IntList,[Particle],List).
+do_rest_separable([Base,Particle],RestL,List) :-
+  append([Base],RestL,IntList),
+  append(IntList,[Particle],List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(simple,Type,_,_,_,_,_),
+                vptree(v(vfeat(Mode,Tense,Person,Num,_),vtree(_,Base)),
+                       VComp)),List) :-
+  handle_einfach(Type,VComp,Base,State,Sentience,Loc,Qual,EBase,RestL),
+  generate_verb(EBase,Mode,Tense,Person,Num,Verb),
+  append(Verb,RestL,List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(_,typea,Mode,_,_,_,_),
+                vptree(_,CStr,inf(Inf,Cat))),List) :-
+
+setup_future(Mode,Inf,Cat,CStr,State,Sentience,Loc,Qual,Aux,L1,RestL,L2),
+  append([Aux],L1,IntList),
+  append(IntList,RestL,IntList2),
+  append(IntList2,L2,List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(_,typeb,Mode,_,_,_,_),
+                vptree(_,CStr,inf(Inf,Cat),mod_inf(M))),List) :-
+
+setup_future(Mode,Inf,Cat,CStr,State,Sentience,Loc,Qual,Aux,L1,RestL,L2),
+  handle_modal(M,Aux,PartOne),
+  append([to],L1,IL),
+  append(PartOne,IL,IntList1),
+  append(IntList1,RestL,IntList2),
+  append(IntList2,L2,List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(_,typec,Mode,_,_,_,_),
+
+vptree(_,CStr,perf(perffeat(Cat,_),perftree(_,Base)),_)),List):-
+
+setup_future(Mode,Base,Cat,CStr,State,Sentience,Loc,Qual,Aux,L1,RestL,L2),
+  eng_perf_part(L1,PerfPart),
+  append([Aux,have],PerfPart,IL),
+  append(IL,RestL,IntList),
+  append(IntList,L2,List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(_,typed,Mode,_,_,_,_),
+
+vptree(_,Agent,CStr,perf(perffeat(Cat,_),perftree(_,Base)),
+                       _)), List) :-
+  get_aux_will(Mode,Aux),
+  setup_passive(Base,Cat,CStr,Agent,State,Sentience,Loc,Qual,PerfPart,
+                AgentList,RestL),
+  append([Aux,be],PerfPart,IL),
+  append(IL,AgentList,IntList),
+  append(IntList,RestL,List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(_,typee,Mode,Tense,Person,Num,_),
+                vptree(_,Agent,CStr,perf(perffeat(Cat,_),
+                                    perftree(_,Base)),_)),List) :-
+  setup_passive(Base,Cat,CStr,Agent,State,Sentience,Loc,Qual,PerfPart,
+                AgentList,RestL),
+  get_e_part1(Num,Mode,Tense,Person,PartOne),
+  append(PartOne,PerfPart,IntList1),
+  append(IntList1,AgentList,IntList2),
+  append(IntList2,RestL,List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(_,typef,Mode,_,_,_,_),
+
+vptree(_,Agent,CStr,perf(perffeat(Cat,_),perftree(_,Base)),
+                       after_perf(_,modal_inf(M)))),List) :-
+  setup_passive(Base,Cat,CStr,Agent,State,Sentience,Loc,Qual,PerfPart,
+                AgentList,RestL),
+  get_aux_will(Mode,Aux),
+  handle_modal(M,Aux,PartOne),
+  append([to,be],PerfPart,IL),
+  append(PartOne,IL,IntList1),
+  append(IntList1,AgentList,IntList2),
+  append(IntList2,RestL,List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(_,typeg,Mode,Tense,Person,_,_),
+
+vptree(_,Agent,CStr,perf(perffeat(Cat,_),perftree(_,Base)))),
+             List) :-
+  setup_passive(Base,Cat,CStr,Agent,State,Sentience,Loc,Qual,PerfPart,
+                AgentList,RestL),
+  get_g_part1(Mode,Tense,Person,PartOne),
+  append(PartOne,PerfPart,IntList1),
+  append(IntList1,AgentList,IntList2),
+  append(IntList2,RestL,List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(_,typeh,Mode,_,_,_,_),
+
+vptree(_,Agent,CStr,perf(perffeat(Cat,_),perftree(_,Base)),
+                       mod_inf(M))),List) :-
+  setup_passive(Base,Cat,CStr,Agent,State,Sentience,Loc,Qual,PerfPart,
+                AgentList,RestL),
+  get_h_part1(Mode,M,PartOne),
+  append([have,been],PerfPart,IL),
+  append(PartOne,IL,IntList1),
+  append(IntList1,AgentList,IntList2),
+  append(IntList2,RestL,List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(simple,_,_,_,_,_,_),
+
+vptree(modal(modalfeat(Tense,Person,Num),modaltree(_,Base)),
+                       CStr,inf(Inf,Cat))),List) :-
+  setup(Inf,Cat,CStr,State,Sentience,Loc,Qual,L1,RestL,L2),
+  get_modal_simple(Base,Tense,Person,Num,PartOne,Kind),
+  handle_kind(Kind,L1,Arg),
+  append(PartOne,Arg,IntList),
+  append(IntList,RestL,IntList2),
+  append(IntList2,L2,List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(perfect,_,_,_,_,_,_),
+                vptree(aux(auxfeat(Mode,Tense,Person,Num),_),CStr,
+             rest_str(rest_str_feat(type1),
+                      rest_str_tree(inf(Inf,Cat),mod_inf(M))))),List) :-
+  setup(Inf,Cat,CStr,State,Sentience,Loc,Qual,L1,RestL,L2),
+  get_pres_aux(Num,Person,PresForm),
+  handle_double_modal(M,Mode,Tense,PresForm,PartOne,Kind),
+  handle_kind(Kind,L1,Arg),
+  append(PartOne,Arg,IntList),
+  append(IntList,RestL,IntList2),
+  append(IntList2,L2,List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(perfect,_,_,_,_,_,_),
+                vptree(aux(auxfeat(Mode,Tense,Person,Num),_),CStr,
+                       rest_str(rest_str_feat(type2),
+
+rest_str_tree(perf(_,perftree(_,Base)))))),
+             List) :-
+  get_pres_aux(Num,Person,PresForm),
+  handle_mod_perf(Base,Mode,Num,Tense,PresForm,PartOne),
+  synthesize_complement(CStr,RestL,State,Sentience,Loc,Qual,[],_,
+                        transitive(no_locative)),
+  append(PartOne,RestL,List).
+
+transform_vp(npfeats(State,Sentience,Loc,Qual),
+             vp(vpfeat(perfect,_,_,_,_,_,_),
+                vptree(aux(auxfeat(Mode,Tense,_,Num),_),CStr,
+                       perf(perffeat(Cat,_),perftree(_,Base)))),List) :-
+  setup(Base,Cat,CStr,State,Sentience,Loc,Qual,L1,RestL,L2),
+  get_part_one(Mode,Tense,Num,L1,PartOne),
+  append(PartOne,RestL,IntList),
+  append(IntList,L2,List).
+
+transform_vp(NPFeats,vp(vpfeat(compound,type0,_,_,_,_,_),
+                        vptree(VPStr,coord_conj(A),RHS)),List) :-
+  transform_vp(NPFeats,VPStr,LHlist),
+  transform_vp(NPFeats,RHS,RHlist),
+  coord_conj(A,E),
+  append(LHlist,[','],IntList1),
+  append(IntList1,[E],IntList2),
+  append(IntList2,RHlist,List).
+
+
+handle_einfach(Type,VPComp,Base,State,Sentience,Loc,Qual,EBase,RestL) :-
+  member(Type,[type1a,type1b,type1c,type1d]),
+  intransitive_verb(Base,_,EBase,Subcat,Restraints,Motion,Position),
+  match_restrs_subj(State,Sentience,Loc,Qual,Restraints),
+  synth_intr_comp(VPComp,Type,RestL,State,Sentience,Loc,Qual,Subcat,
+                  Motion,Position).
+
+handle_einfach(Type,VPComp,Base,State,Sentience,Loc,Qual,EBase,RestL) :-
+  member(Type,[type2a,type2b,type2c,type2d]),
+  transitive_verb(Base,_,_,EBase,Subcat,Restraints,Locat),
+  match_restrs_subj(State,Sentience,Loc,Qual,Restraints),
+  synth_tr_comp(VPComp,Type,RestL,State,Sentience,Loc,Qual,Subcat,
+                Locat,Restraints).
+
+handle_einfach(Type,VPComp,Base,State,Sentience,Loc,Qual,EBase,RestL) :-
+  member(Type,[type3a,type3b]),
+  ditransitive_verb(Base,_,EBase,Subcat,Restraints),
+  match_restrs_subj(State,Sentience,Loc,Qual,Restraints),
+
+synth_ditr_comp(VPComp,Type,RestL,State,Sentience,Loc,Qual,Subcat,Restraints).
+
+handle_einfach(Type,VPComp,sein,State,Sentience,Loc,Qual,[be],RestL) :-
+  member(Type,[type4a,type4b,type4c,type4d]),
+  intransitive_verb(sein,_,[be],Subcat,Restraints,_,_),
+  match_restrs_subj(State,Sentience,Loc,Qual,Restraints),
+  synth_be_comp(VPComp,Type,RestL,State,Sentience,Loc,Qual).
+
+synth_intr_comp(vp_comp(zero),type1a,[],_,_,_,_,_,_,_).
+
+synth_intr_comp(vp_comp(PrepStr),type1b,PList,State,Sentience,Loc,Qual,
+                Subcat,Motion,Postion) :-
+  synthesize_pp(PrepStr,PList,v_comp(Subcat,State,Sentience,Loc,Qual,
+                                     intransitive(Motion,Postion))).
+
+synth_intr_comp(vp_comp(AStr),type1c,AList,_,_,_,_,_,_,_) :-
+  synthesize_advp(AStr,AList).
+
+synth_intr_comp(vp_comp(AStr,PrepStr),type1d,List,State,Sentience,Loc,
+                Qual,Subcat,Motion,Postion) :-
+  synthesize_advp(AStr,AList),
+  synthesize_pp(PrepStr,PList,v_comp(Subcat,State,Sentience,Loc,Qual,
+                                     intransitive(Motion,Position))),
+  append(AList,PList,List).
+
+synth_tr_comp(vp_comp(NPStr),type2a,ENP,_,_,_,_,_,_,Restraints) :-
+  transform_np(NPStr,ENP,npfeats(OState,OSentience,OLoc,OQual)),
+  match_restrs_obj(do,OState,OSentience,OLoc,OQual,Restraints).
+
+synth_tr_comp(vp_comp(NPStr,AStr),type2b,List,_,_,_,_,_,_,Restraints) :-
+  transform_np(NPStr,ENP,npfeats(OState,OSentience,OLoc,OQual)),
+  match_restrs_obj(do,OState,OSentience,OLoc,OQual,Restraints),
+  synthesize_advp(AStr,AList),
+  append(ENP,AList,List).
+
+synth_tr_comp(vp_comp(AStr,NPStr),type2c,List,_,_,_,_,_,_,Restraints) :-
+  synthesize_advp(AStr,AList),
+  transform_np(NPStr,ENP,npfeats(OState,OSentience,OLoc,OQual)),
+  match_restrs_obj(do,OState,OSentience,OLoc,OQual,Restraints),
+  append(ENP,AList,List).
+
+synth_tr_comp(vp_comp(NPStr,PP),type2d,List,State,Sentience,Loc,Qual,
+              Subcat,Locat,Restraints) :-
+  synthesize_pp(PP,List1,v_comp(Subcat,State,Sentience,Loc,Qual,Locat)),
+  transform_np(NPStr,ENP,npfeats(OState,OSentience,OLoc,OQual)),
+  match_restrs_obj(do,OState,OSentience,OLoc,OQual,Restraints),
+  append(ENP,List1,List).
+
+match_restrs_subj(State,Sentience,Loc,Qual,Restraints) :-
+  Restraints =.. RL,
+  member(subj(SubjRestr),RL), !,
+  satisfy_subj_restr(SubjRestr,State,Sentience,Loc,Qual).
+match_restrs_subj(_,_,_,_,_).
+
+satisfy_subj_restr(State,State,_,_,_).
+satisfy_subj_restr(Sentience,_,Sentience,_,_).
+
+match_restrs_obj(do,State,Sentience,Loc,Qual,Restraints) :-
+  Restraints =.. RL,
+  member(do(R1,R2),RL), !,
+  satisfy_do_restrs(R1,R2,State,Sentience).
+match_restrs_obj(do,_,_,_,_,_).
+match_restrs_obj(io,State,Sentience,Loc,Qual,Restraints) :-
+  Restraints =.. RL,
+  member(io(IoRestr),RL), !,
+  satisfy_io_restrs(IoRestr,Sentience).
+match_restrs_obj(io,_,_,_,_,_).
+
+satisfy_do_restrs(State,Sentience,State,Sentience).
+satisfy_io_restrs(Sentience,Sentience).
+
+synth_ditr_comp(VPComp,Type,RestL,State,Sentience,Loc,Qual,Subcat,Restraints):-
+  VPComp =.. [vp_comp|[np(npfeat(_,_,_,_,Case,_,_),_)|_]],
+
+do_ditr(Case,VPComp,Type,RestL,State,Sentience,Loc,Qual,Subcat,Restraints).
+
+do_ditr(Case,vp_comp(NPStr,NPStr2),type3a,List,_,_,_,_,_,Restraints) :-
+  do_ditr_nps(NPStr,NPStr2,Case,Restraints,NP1,NP2,Between),
+  append(NP1,Between,Intlist),
+  append(Intlist,NP2,List).
+
+do_ditr(Case,vp_comp(NPStr,AStr,NPStr2),type3b,List,_,_,_,_,_,Restraints) :-
+  do_ditr_nps(NPStr,NPStr2,Case,Restraints,NP1,NP2,Between),
+  synthesize_advp(AStr,AList),
+  append(NP1,Between,IntList1),
+  append(IntList1,NP2,IntList2),
+  append(IntList2,AList,List).
+do_ditr_nps(NPStr,NPStr2,Case,Restraints,NP1,NP2,Between) :-
+  transform_np(NPStr,NP1,npfeats(N1State,N1Sentience,N1Loc,N1Qual)),
+  get_first(Case,Marker1,Between),
+  match_restrs_obj(Marker1,N1State,N1Sentience,N1Loc,N1Qual,Restraints),
+  transform_np(NPStr2,NP2,npfeats(N2State,N2Sentience,N2Loc,N2Qual)),
+  get_second(Case,Marker2),
+  match_restrs_obj(Marker2,N2State,N2Sentience,N2Loc,N2Qual,Restraints).
+
+get_first(dative,io,[]).
+get_first(accusative,do,[to]).
+get_second(dative,do).
+get_second(accusative,io).
+
+synth_be_comp(_,type4a,[],_,_,_,_).
+synth_be_comp(vp_comp(NPStr),type4b,NPS,_,_,_,_) :-
+  transform_np(NPStr,NPS,_).
+synth_be_comp(vp_comp(AP),type4c,AList,State,Sentience,Loc,Qual) :-
+  synthesize_adjp(AP,AList,State,Sentience,Loc,Qual).
+synth_be_comp(vp_comp(PP),type4d,List,State,Sentience,Loc,Qual) :-
+  synthesize_pp(PP,List,v_comp([],State,Sentience,Loc,Qual,
+                               intransitive(no_motion,position))).
+
+setup_future(Mode,Inf,Cat,CStr,State,Sentience,Loc,Qual,Aux,L1,RestL,L2):-
+  get_aux_will(Mode,Aux),
+  get_inf_info(Inf,Cat,EngBase,Subcat,Restraints,CatInfo),
+  match_restrs_subj(State,Sentience,Loc,Qual,Restraints),
+  get_lists(Cat,EngBase,L1,L2),
+
+synthesize_complement(CStr,RestL,State,Sentience,Loc,Qual,Subcat,Restraints,
+                        CatInfo).
+
+setup_passive(Base,Cat,CStr,Agent,State,Sentience,Loc,Qual,PerfPart,AgentList,
+              RestL) :-
+  get_inf_info(Base,Cat,EngBase,Subcat,Restraints,CatInfo),
+
+synthesize_pass_comp(CStr,RestL,State,Sentience,Loc,Qual,Subcat,Restraints,
+                       CatInfo),
+  synthesize_agent(Agent,AgentList),
+  eng_perf_part(EngBase,PerfPart).
+
+setup(Base,Cat,CStr,State,Sentience,Loc,Qual,L1,RestL,L2) :-
+  get_inf_info(Base,Cat,EngBase,Subcat,Restraints,CatInfo),
+  match_restrs_subj(State,Sentience,Loc,Qual,Restraints),
+  get_lists(Cat,EngBase,L1,L2),
+
+synthesize_complement(CStr,RestL,State,Sentience,Loc,Qual,Subcat,Restraints,
+                        CatInfo).
+
+get_lists(_,[W],[W],[]).
+get_lists(Cat,EngBase,EngBase,[]) :-
+  member(Cat,[be,intransitive]).
+get_lists(_,[H|T],[H],T).
+get_aux_will(indicative,will).
+get_aux_will(subjunctive,would).
+
+handle_modal(sollen,_,[should,have]).
+handle_modal(Modal,Aux,[Aux|Rest]) :-
+  get_rest(Modal,Rest).
+
+get_rest(duerfen,[be,allowed]).
+get_rest(koennen,[be,able]).
+get_rest(moegen,[like]).
+get_rest(muessen,[have]).
+get_rest(wollen,[want]).
+
+get_inf_info(Inf,intransitive,EngBase,Subcat,Restraints,
+             intransitive(Motion,Pos)) :-
+  intransitive_verb(Inf,_,EngBase,Subcat,Restraints,Motion,Pos).
+get_inf_info(Inf,transitive,EngBase,Subcat,Restraints,transitive(Locative)) :-
+  transitive_verb(Inf,_,_,EngBase,Subcat,Restraints,Locative).
+get_inf_info(Inf,ditransitive,EngBase,Subcat,Restraints,ditransitive) :-
+  ditransitive_verb(Inf,_,EngBase,Subcat,Restraints).
+
+get_e_part1(singular,indicative,present,first,[am,being]).
+get_e_part1(singular,indicative,present,_,[is,being]).
+get_e_part1(plural,indicative,present,_,[are,being]).
+get_e_part1(singular,indicative,past,_,[was,being]).
+get_e_part1(plural,indicative,past,_,[were,being]).
+get_e_part1(_,subjunctive,_,_,[would,have,been]).
+
+get_g_part1(indicative,pastperfect,_,[had,been]).
+get_g_part1(indicative,presentperfect,third,[has,been]).
+get_g_part1(indicative,presentperfect,_,[have,been]).
+get_g_part1(subjunctive,_,_,[would,have,been]).
+
+get_h_part1(indicative,duerfen,[was,allowed,to]).
+get_h_part1(indicative,koennen,[could]).
+get_h_part1(indicative,moegen,[would,have,liked,to]).
+get_h_part1(indicative,muessen,[must]).
+get_h_part1(indicative,sollen,[should]).
+get_h_part1(indicative,wollen,[wanted,to]).
+get_h_part1(subjunctive,duerfen,[would,have,been,allowed,to]).
+get_h_part1(subjunctive,koennen,[would,have,been,able,to]).
+get_h_part1(subjunctive,moegen,[would,have,liked,to]).
+get_h_part1(subjunctive,muessen,[would,have,had,to]).
+get_h_part1(subjunctive,sollen,[should]).
+get_h_part1(subjunctive,wollen,[would,have,wanted,to]).
+
+get_modal_simple(duerfen,Tense,Person,Num,[Aux,allowed,to],base) :-
+  get_durf_aux(Tense,Person,Num,Aux).
+get_modal_simple(koennen,present,_,_,[can],base).
+get_modal_simple(koennen,past,_,_,[could],base).
+get_modal_simple(moegen,present,Person,Num,[Like,to],base) :-
+  do_mod_morph(Person,Num,like,Like).
+get_modal_simple(moegen,past,_,_,[liked,to],base).
+get_modal_simple(muessen,present,_,_,[must],base).
+get_modal_simple(muessen,past,_,_,[had,to],base).
+get_modal_simple(sollen,present ,_,_,[should],base).
+get_modal_simple(sollen,past,_,_,[should,have],perf_part).
+get_modal_simple(wollen,present,Person,Num,[Want,to],base) :-
+  do_mod_morph(Person,Num,want,Want).
+get_modal_simple(wollen,past,_,_,[wanted,to],base).
+
+do_mod_morph(third,singular,Base,Result) :-
+  name(Base,BL),
+  name('s',SL),
+  append(BL,SL,RL),
+  name(Result,RL).
+do_mod_morph(_,_,Base,Base).
+
+get_durf_aux(present,first,singular,am).
+get_durf_aux(present,_,singular,is).
+get_durf_aux(present,_,plural,are).
+get_durf_aux(past,_,singular,was).
+get_durf_aux(past,_,plural,were).
+
+handle_kind(base,Base,Base).
+handle_kind(perf_part,Base,PerfPart) :-
+  eng_perf_part(Base,PerfPart).
+
+get_pres_aux(singular,third,has).
+get_pres_aux(_,_,have).
+
+handle_double_modal(koennen,indicative,present,PresForm,
+                    [PresForm,been,able,to],base).
+handle_double_modal(koennen,indicative,past,_,[had,been,able,to],base).
+handle_double_modal(koennen,subjunctive,_,_,[would,have,been,able,to],base).
+handle_double_modal(duerfen,indicative,present,PresForm,
+                    [PresForm,been,allowed,to],base).
+handle_double_modal(duerfen,indicative,past,_,[had,been,allowed,to],base).
+handle_double_modal(duerfen,subjunctive,_,_,[would,have,been,allowed,to],base).
+handle_double_modal(moegen,indicative,present,PresForm,[PresForm,liked,to],
+                    base).
+handle_double_modal(moegen,indicative,past,_,[had,liked,to],base).
+handle_double_modal(moegen,subjunctive,_,_,[would,have,liked,to],base).
+handle_double_modal(muessen,indicative,present,PresForm,[PresForm,had,to],
+                    base).
+handle_double_modal(muessen,indicative,past,_,[had,had,to],base).
+handle_double_modal(muessen,subjunctive,_,_,[would,have,had,to],base).
+handle_double_modal(sollen,_,_,_,[should,have],perf_part).
+handle_double_modal(wollen,indicative,present,PresForm,[PresForm,wanted,to],
+                    base).
+handle_double_modal(wollen,indicative,past,_,[had,wanted,to],base).
+handle_double_modal(wollen,subjunctive,_,_,[would,have,wanted,to],base).
+
+handle_mod_perf(duerfen,indicative,singular,present,_,[was,allowed,to,do]).
+handle_mod_perf(duerfen,indicative,plural,present,_,[were,allowed,to,do]).
+handle_mod_perf(duerfen,indicative,_,past,_,[had,been,allowed,to,do]).
+handle_mod_perf(duerfen,subjunctive,_,_,_,[would,have,been,allowed,to,do]).
+handle_mod_perf(koennen,indicative,_,present,_,[could,do]).
+handle_mod_perf(koennen,indicative,_,past,_,[had,been,able,to,do]).
+handle_mod_perf(koennen,subjunctive,_,_,_,[would,have,been,able,to,do]).
+handle_mod_perf(moegen,indicative,_,present,PresForm,[PresForm,liked,to,do]).
+handle_mod_perf(moegen,indicative,_,past,_,[had,liked,to,do]).
+handle_mod_perf(moegen,subjunctive,_,_,_,[would,have,liked,to,do]).
+handle_mod_perf(muessen,indicative,_,present,PresForm,[PresForm,had,to,do]).
+handle_mod_perf(muessen,indicative,_,past,_,[had,had,to,do]).
+handle_mod_perf(muessen,subjunctive,_,_,_,[would,have,had,to]).
+handle_mod_perf(sollen,_,_,_,_,[should,have,had,to,do]).
+handle_mod_perf(wollen,indicative,_,present,PresForm,[PresForm,wanted,to,do]).
+handle_mod_perf(wollen,indicative,_,past,_,[had,wanted,to,do]).
+handle_mod_perf(wollen,subjunctive,_,_,_,[would,have,wanted,to,do]).
+
+get_part_one(indicative,present,Num,[Base,Particle],PastVerb) :-
+  get_part_one(indicative,present,Num,[Base],IntList),
+  append(IntList,[Particle],PastVerb).
+get_part_one(indicative,present,Num,[EngBase],PastVerb) :-
+  handle_past(EngBase,Num,PastVerb).
+get_part_one(indicative,past,_,EngBase,List) :-
+  eng_perf_part(EngBase,PerfPart),
+  append([had],PerfPart,List).
+get_part_one(subjunctive,_,_,EngBase,List) :-
+  eng_perf_part(EngBase,PerfPart),
+  append([would,have],PerfPart,List).
+
+synthesize_agent(agent(zero),[]).
+synthesize_agent(agent(pp(p(_,ptree(von)),NPStr)),[by|NPL]) :-
+  transform_np(NPStr,NPL,_).
+
+generate_verb([Base,Particle],Mode,Tense,Person,Num,Verb) :-
+  generate_verb([Base],Mode,Tense,Person,Num,IntList),
+  append(IntList,[Particle],Verb).
+generate_verb([Base],subjunctive,_,_,_,[would,Base]).
+generate_verb([Base],indicative,present,Person,Num,Verb) :-
+  handle_present(Base,Person,Num,Verb).
+generate_verb([Base],indicative,past,Person,Num,Verb) :-
+  handle_past(Base,Num,Verb).
+
+handle_present(Base,Person,Num,[Verb]) :-
+  is_odd_pres_verb(Base,Person,Num,Verb).
+handle_present(Base,third,singular,[Verb]) :-
+  name(Base,L),
+  last(X,L),
+  name(Letter,[X]),
+  rest_s_form(L,Letter,Verb).
+handle_present(Base,_,_,[Base]).
+
+rest_s_form(BaseL,o,Verb) :-
+  name('es',Eslist),
+  append(BaseL,Eslist,VerbList),
+  name(Verb,VerbList).
+rest_s_form(BaseL,_,Verb) :-
+  name('s',SList),
+  append(BaseL,SList,VerbList),
+  name(Verb,VerbList).
+
+handle_past(Base,Num,[Verb]) :-
+  is_odd_past_verb(Base,Num,Verb).
+handle_past(Base,_,[Verb]) :-
+  name(Base,L),
+  last(X,L),
+  name(Letter,[X]),
+  rest_ed(L,Letter,Verb).
+
+rest_ed(L,e,Verb) :-
+  name('d',Dlist),
+  append(L,Dlist,VerbList),
+  name(Verb,VerbList).
+rest_ed(L,_,Verb) :-
+  name('ed',Edlist),
+  append(L,Edlist,VerbList),
+  name(Verb,VerbList).
+
+eng_perf_part([Base,Particle],[PerfPart,Particle]) :-
+  eng_perf_part([Base],[PerfPart]).
+eng_perf_part([Base],[PerfPart]) :-
+  is_odd_perf(Base,PerfPart).
+eng_perf_part([Base],[PerfPart]) :-
+  handle_past(Base,_,[PerfPart]).
+
+
+is_odd_pres_verb(be,first,singular,am).
+is_odd_pres_verb(be,third,singular,is).
+is_odd_pres_verb(be,_,_,are).
+is_odd_pres_verb(have,third,singular,has).
+is_odd_pres_verb(have,_,_,have).
+
+is_odd_past_verb(buy,_,bought).
+is_odd_past_verb(be,singular,was).
+is_odd_past_verb(be,plural,were).
+is_odd_past_verb(write,_,wrote).
+is_odd_past_verb(study,_,studied).
+is_odd_past_verb(give,_,gave).
+is_odd_past_verb(think,_,thought).
+is_odd_past_verb(come,_,came).
+is_odd_past_verb(run,_,ran).
+is_odd_past_verb(become,_,became).
+is_odd_past_verb(go,_,went).
+is_odd_past_verb(see,_,saw).
+is_odd_past_verb(read,_,read).
+is_odd_past_verb(stand,_,stood).
+is_odd_past_verb(bring,_,brought).
+is_odd_past_verb(hit,_,hit).
+is_odd_past_verb(fly,_,flew).
+is_odd_past_verb(begin,_,began).
+is_odd_past_verb(catch,_,caught).
+is_odd_past_verb(make,_,made).
+
+
+is_odd_perf(be,been).
+is_odd_perf(write,written).
+is_odd_perf(run,run).
+is_odd_perf(give,given).
+is_odd_perf(come,come).
+is_odd_perf(become,become).
+is_odd_perf(go,gone).
+is_odd_perf(see,seen).
+is_odd_perf(fly,flown).
+is_odd_perf(begin,begun).
+
+synthesize_relcl(Sentience,rel_cl(relpro(_,_,_,Case),s_bar(Str)),List):-
+  get_relpro(Sentience,Case,Rlist),
+  transform_s(Str,Slist),
+  append(Rlist,Slist,List).
+
+get_relpro(_,genitive,[whose]).
+get_relpro(animate,dative,[to,whom]).
+get_relpro(animate,accusative,[whom]).
+get_relpro(animate,nominative,[who]).
+get_relpro(inanimate,dative,[to,which]).
+get_relpro(inanimate,_,[which]).
+
+synthesize_complement(CStr,RestL,State,Sentience,Loc,Qual,Subcat,_,
+                      intransitive(Motion,Pos)) :-
+
+synth_intr_comp(CStr,_,RestL,State,Sentience,Loc,Qual,Subcat,Motion,Pos)
+.
+synthesize_complement(CStr,RestL,State,Sentience,Loc,Qual,_,_,
+                      intransitive(_,_)) :-
+  synth_be_comp(CStr,_,RestL,State,Sentience,Loc,Qual).
+synthesize_complement(CStr,RestL,State,Sentience,Loc,Qual,Subcat,Restraints,
+                      transitive(Locative)) :-
+  synth_tr_comp(CStr,_,RestL,State,Sentience,Loc,Qual,Subcat,Locative,
+                Restraints).
+synthesize_complement(CStr,RestL,State,Sentience,Loc,Qual,Subcat,Restraints,
+                      ditransitive) :-
+
+synth_ditr_comp(CStr,_,RestL,State,Sentience,Loc,Qual,Subcat,Restraints).
+
+synthesize_pass_comp(CStr,RestL,_,_,_,_,_,_,_) :-
+  synthesize_advp(CStr,RestL).
+synthesize_pass_comp(CStr,RestL,_,_,_,_,_,_,_) :-
+  synthesize_pp(CStr,RestL,_).
+synthesize_pass_comp(pass_comp(zero),[],_,_,_,_,_,_,_).
+
+synthesize_adjp(adj_p(AP,RHS),AList,State,Sentience,Loc,Qual) :-
+  synthesize_adjp(AP,List1,State,Sentience,Loc,Qual),
+  synthesize_adjp(RHS,List2,State,Sentience,Loc,Qual),
+  append(List1,[','],IntList),
+  append(IntList,List2,AList).
+
+synthesize_adjp(adj_p(AP,coord_conj(A),RHS),AList,State,Sentience,Loc,Qual) :-
+  synthesize_adjp(AP,List1,State,Sentience,Loc,Qual),
+  synthesize_adjp(RHS,List2,State,Sentience,Loc,Qual),
+  coord_conj(A,EngA),
+  append(List1,[EngA],IntList),
+  append(IntList,List2,AList).
+
+synthesize_adjp(adj_p(q(A),adj(B)),[EngA,EngB],State,Sentience,Loc,Qual):-
+  quantifier(A,EngA),
+  adj(B,EngB,restraint(State,Sentience)).
+
+synthesize_adjp(adj_p(adj(A)),[EngA],State,Sentience,Loc,Qual) :-
+  adj(A,EngA,restraint(State,Sentience)).
+
+synthesize_advp(adv_p(AStr,coord_conj(A),RHS),AList) :-
+  synthesize_advp(AStr,List1),
+  synthesize_advp(RHS,List2),
+  coord_conj(A,EngA),
+  append(List1,[EngA],IntList),
+  append(IntList,List2,AList).
+
+synthesize_advp(adv_p(q(A),adv(B)),[EngA,EngB]) :-
+  quantifier(A,EngA),
+  adverb(B,EngB).
+
+synthesize_advp(adv_p(adv(A)),[EngA]) :-
+  adverb(A,EngA).
+
+synthesize_pp(pp(p(pfeat(Case),ptree(Prep)),NPStr),List,
+              v_comp(Subcat,_,_,_,_,_)) :-
+  process_subcat(Subcat,Case,Prep,List1),
+  transform_np(NPStr,NPL,_),
+  append(List1,NPL,List).
+
+synthesize_pp(pp(p(pfeat(genitive),ptree(Prep)),NPStr),List,_) :-
+  prep(Prep,Eng,genitive),
+  transform_np(NPStr,NPL,_),
+  append(Eng,NPL,List).
+
+synthesize_pp(pp(p(pfeat(accusative),ptree(Prep)),NPStr),List,_) :-
+  prep(Prep,Eng,accusative),
+  transform_np(NPStr,NPL,_),
+  append(Eng,NPL,List).
+
+synthesize_pp(pp(p(pfeat(dative),ptree(Prep)),NPStr),List,Usage) :-
+  transform_np(NPStr,NPL,NPfeats),
+  G =.. [Prep,NPfeats,Usage,GList,AfterNP],
+  call(G),
+  tack_on(NPL,AfterNP,NewNPL),
+  append(GList,NewNPL,List).
+
+synthesize_pp(pp(p(pfeat(dat_acc),ptree(Prep)),NPStr),List,Comp) :-
+  NPStr =.. [np,npfeat(_,_,_,_,Case,_,_),_],
+  test_conds(Comp,Case),
+  transform_np(NPStr,NPL,NPfeats),
+  G =.. [Prep,NPfeats,Case,Comp,GList],
+  call(G),
+  append(GList,NPL,List).
+
+
+process_subcat([H|T],Case,Prep,[EngPrep]) :-
+  H =.. [Prep,EngPrep,PrepCase],
+  match_cases(PrepCase,Case).
+process_subcat([H|T],Case,Prep,L) :-
+  process_subcat(T,Case,Prep,L).
+
+match_cases(Case,Case).
+match_cases(accusative,dat_acc).
+match_cases(dative,dat_acc).
+
+tack_on(L,[],L).
+tack_on(L,Suffix,NewL) :-
+  get_last(X,L,[],RestL),
+  name(X,Xlist),
+  append(Xlist,Suffix,NL),
+  name(NewItem,NL),
+  append(RestL,[NewItem],NewL).
+
+get_last(X,[X],L,L).
+get_last(X,[H|T],L,L2) :-
+  append(L,[H],NewL),
+  get_last(X,T,NewL,L2).
+
+test_conds(Comp,accusative) :-
+  functor(Comp,v_comp,_).
+test_conds(_,dative).
+
+aus(_,_,[out,of],[]).
+
+bei(npfeats(_,inanimate,_,_),v_comp(_,_,_,_,_,_),[by],[]).
+bei(npfeats(_,animate,_,_),v_comp(_,_,_,_,_,_),[at],L) :-
+  name('_s',L).
+
+mit(_,_,[with],[]).
+
+nach(npfeats(_,_,loc,_),v_comp(_,_,_,_,_,intransitive(motion,_)),[to],[]).
+nach(_,v_comp(_,_,_,_,_,_),[after],[]).
+
+seit(_,v_comp(_,_,_,_,_,_),[since],[]).
+
+von(npfeats(_,_,_,qual),n_compl(_,_,_,_),[of],[]).
+von(npfeats(_,_,loc,_),_,[from],[]).
+
+zu(_,_,[to],[]).
+
+an(npfeats(abstract,_,_,_),dative,_,[at]).
+an(npfeats(concrete,_,_,_),dative,
+   v_comp(_,_,_,_,_,intransitive(_,position)),[at]).
+an(npfeats(concrete,_,_,_),accusative,v_comp(_,_,_,_,_,intransitive(motion,_)),
+   [up,to]).
+an(npfeats(concrete,_,_,_),accusative,
+   v_comp(_,_,_,_,_,intransitive(no_motion,_)),[on]).
+an(npfeats(concrete,_,_,_),accusative,
+   v_comp(_,_,_,_,_,transitive(_)),[to]).
+
+auf(npfeats(_,_,loc,_),accusative,
+    v_comp(_,_,_,_,_,intransitive(motion,_)),[to]).
+auf(_,accusative,
+    v_comp(_,_,_,_,_,transitive(locative)),[on]).
+auf(_,dative,
+    v_comp(_,_,_,_,_,intransitive(_,position)),[on]).
+
+hinter(_,_,_,[behind]).
+
+in(_,accusative,_,[into]).
+in(_,dative,_,[in]).
+
+neben(_,_,_,[beside]).
+
+ueber(npfeats(_,_,loc,_),accusative,
+      v_comp(_,_,_,_,_,intransitive(motion,_)),[over]).
+ueber(npfeats(_,_,loc,_),accusative,
+      v_comp(_,_,_,_,_,transitive(locative)),[over]).
+ueber(_,accusative,_,[about]).
+ueber(npfeats(_,_,loc,_),dative,_,[above]).
+
+unter(npfeats(_,_,loc,_),_,_,[under]).
+unter(npfeats(_,_,no_loc,_),_,_,[among]).
+
+vor(npfeats(concrete,_,_,_),_,_,[in,front,of]).
+vor(npfeats(abstract,_,_,_),dative,_,[before]).
+
+zwischen(_,_,_,[between]).
+
+/* First, we will not attempt to treat anaphora in a reasonable way.
+   Instead, the first clause of handle_anaphora will be used to stupidly
+   translate all German pronouns into their animate equivalents. */
+
+handle_anaphora(Pro,_,_,Num,Case,Person,EngPro,_,_,_,_) :-
+  get_engpro(Pro,Num,Case,Person,animate,EngPro).
+
+handle_anaphora(Pro,IdNum,TraceList,Num,Case,Person,EngPro,State,Sentience,
+                Loc,Qual) :-
+  get_cand_list(IdNum,TraceList,CandList),
+  very_naive_alg(IdNum,TraceList,CandList,[],AntList),
+
+get_answer(AntList,Pro,Num,Case,Person,State,Sentience,Loc,Qual,EngPro).
+
+get_cand_list(IdNum,TraceList,CandList) :-
+  retract(nplist(NL)),
+  assert(nplist(NL)),
+  get_part_list(IdNum,TraceList,NL,CandList).
+
+get_part_list(Id,Trace,[H|T],T) :-
+  H =.. [np,Id,Trace,_,_,_,_,_,_,_].
+get_part_list(Id,Trace,[H|T],List) :-
+  get_part_list(Id,Trace,T,List).
+
+very_naive_alg(_,_,[],L,L).
+very_naive_alg(IdNum,TraceList,[H|T],OldAntList,NewAntList) :-
+  found_cand(H,IdNum,TraceList),
+  append(OldAntList,[H],AntList),
+  very_naive_alg(IdNum,TraceList,T,AntList,NewAntList).
+very_naive_alg(IdNum,TraceList,[H|T],L1,L2) :-
+  very_naive_alg(IdNum,TraceList,T,L1,L2).
+
+found_cand(np(Num,List,_,_,_,_,_,_,is_np),IdNum,TraceList) :-
+  last(Sent,List),
+  last(Sent,TraceList),
+  handle_s_same(Num,List,IdNum,TraceList).
+found_cand(np(Num,List,_,_,_,_,_,_,is_np),IdNum,TraceList) :-
+  last(Sent1,List),
+  last(Sent2,TraceList),
+  Sent1 \== Sent2.
+
+handle_s_same(Num,[H1|T1],IdNum,[H2|T2]) :-
+  H1 =.. [np,FinalNum1],
+  H2 =.. [np,FinalNum2],
+  FinalNum2 > FinalNum1,
+  member(H1,[H2|T2]).
+
+
+get_answer([],Pro,Num,Case,Person,State,Sentience,Loc,Qual,EngPro) :-
+  get_engpro(Pro,Num,Case,Person,animate,EngPro).
+get_answer([H|T],Pro,Num,Case,Person,State,Sentience,Loc,Qual,EngPro) :-
+  H =.. [np,_,_,State,Sentience,Loc,Qual,Num,Gender,_],
+  get_engpro(Pro,Num,Case,Person,Sentience,EngPro).
+get_answer([H|T],Pro,Num,Case,Person,State,Sentience,Loc,Qual,EngPro) :-
+  get_answer(T,Pro,Num,Case,Person,State,Sentience,Loc,Qual,EngPro).
+
+get_engpro(Pro,Num,Case,Person,Sentience,EngPro) :-
+  pronoun(Pro,EngCand,Num,Person,Case),
+  return_engpro(Num,Case,Sentience,EngCand,EngPro).
+
+return_engpro(singular,_,inanimate,_,it).
+return_engpro(singular,_,animate,EngPro,EngPro).
+return_engpro(plural,nominative,inanimate,_,they).
+return_engpro(plural,_,inanimate,_,them).
+return_engpro(plural,_,animate,EngPro,EngPro).
+
+handle_det(IdNum,TraceList,GDet,EDet) :-
+  det(GDet,Eng,mixed),
+  do_mixed_det(IdNum,TraceList,GDet,Eng,EDet).
+handle_det(_,_,GDet,EDet) :-
+  det(GDet,EDet,_).
+handle_det(_,_,GDet,the) :-
+  is_definite(GDet).
+
+do_mixed_det(_,_,GDet,EDet,EDet) :-
+  member(GDet,[ein,kein,mein,dein,unser,euer,i_hr]).
+do_mixed_det(IdNum,TraceList,GDet,_,EDet) :-
+  get_match_pro(GDet,MatchPro,MatchNum),
+  handle_anaphora(MatchPro,IdNum,TraceList,MatchNum,nominative,third,
+                  EngPro,_,_,_,_),
+  translate_to_det(EngPro,EDet).
+
+get_match_pro(sein,er,singular).
+get_match_pro(ihr,sie,singular).
+get_match_pro(ihr,sie,plural).
+
+translate_to_det(it,its).
+translate_to_det(they,their).
+translate_to_det(them,their).
+translate_to_det(he,his).
+translate_to-det(him,his).
+translate_to_det(she,her).
+translate_to_det(her,her).
+
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(NPStr1),
+                 rest(type1,io(NPStr2)),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type3a,_,_,_,_,_),
+                          vptree(VStr,vp_comp(NPStr1,NPStr2))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(NPStr1),
+                 rest(type2,io(AStr,NPStr2)),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type3b,_,_,_,_,_),
+
+vptree(VStr,vp_comp(NPStr1,AStr,NPStr2))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(AStr),
+                 rest(type3,io(NPStr1,NPStr2)),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type3b,_,_,_,_,_),
+
+vptree(VStr,vp_comp(NPStr1,AStr,NPStr2))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(Advp),
+                 rest(type4,io(NPStr1,NPStr2)),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type3b,_,_,_,_,_),
+
+vptree(VStr,vp_comp(NPStr1,Advp,NPStr2))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(NPStr1),
+                 rest(type5,io(NPStr2)),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type3a,_,_,_,_,_),
+                          vptree(VStr,vp_comp(NPStr2,NPStr1))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(NPStr1),
+                 rest(type6,io(AStr,NPStr2)),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type3b,_,_,_,_,_),
+
+vptree(VStr,vp_comp(NPStr2,AStr,NPStr1))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(NPStr),
+                 rest(type7,do(AStr)),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type2b,_,_,_,_,_),
+                          vptree(VStr,vp_comp(NPStr,AStr))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(NPStr),rest(type8,_),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type2a,_,_,_,_,_),
+                          vptree(VStr,vp_comp(NPStr))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(AStr),
+                 rest(type9,do(NPStr)),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type2c,_,_,_,_,_),
+                          vptree(VStr,vp_comp(AStr,NPStr))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(PP),
+                 rest(type10,intr(AStr)),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type1d,_,_,_,_,_),
+                          vptree(VStr,vp_comp(AStr,PP))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(PP),
+                 rest(type11,_),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type1b,_,_,_,_,_),
+                          vptree(VStr,vp_comp(PP))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(Advp),
+                 rest(type12,intr(PP)),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type1d,_,_,_,_,_),
+                          vptree(VStr,vp_comp(Advp,PP))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),nsg(Advp),
+                 rest(type13,_),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type1c,_,_,_,_,_),
+                          vptree(VStr,vp_comp(Advp))),List).
+
+transform_inv_vp(NPFeats,vpos(normal,VStr),_,rest(type14,_),List) :-
+  transform_vp(NPFeats,vp(vpfeat(simple,type4a,_,_,_,_,_),
+                          vptree(VStr,vp_comp(zero))),List).
+
+transform_inv_vp(NPFeats,vpos(werden,VStr),nsg(NPStr),
+                 rest(type15,CStr,InfStr),List) :-
+  NPStr =.. [np,npfeat(_,_,_,_,Case,_,_),_],
+  adjust_cstr(CStr,Case,NPStr,NewCStr),
+  transform_vp(NPFeats,vp(vpfeat(future,typea,_,_,_,_,_),
+
+vptree(werden_aux(VStr),NewCStr,InfStr)),List).
+
+adjust_cstr(vp_comp(A),Case,NP,VPComp) :-
+  build_list([],A,L),
+  add_np(Case,L,NP,NewL),
+  append([vp_comp],NewL,VPL),
+  VPComp =.. VPL.
+adjust_cstr(vp_comp(A,B),Case,NP,VPComp) :-
+  build_list([],A,L),
+  build_list(L,B,L2),
+  add_np(Case,L2,NP,NewL),
+  append([vp_comp],NewL,VPL),
+  VPComp =.. VPL.
+adjust_cstr(vp_comp(A,B,C),Case,NP,VPComp) :-
+  build_list([],A,L),
+  build_list(L,B,L2),
+  build_list(L2,C,L3),
+  add_np(Case,L3,NP,NewL),
+  append([vp_comp],NewL,VPL),
+  VPComp =.. VPL.
+
+build_list(L,np(_,nptree(zero)),L).
+build_list(L,S,NewL) :-
+  append(L,[S],NewL).
+
+add_np(dative,L,NP,[NP|L]).
+add_np(accusative,L,NP,NewL) :-
+  append(L,[NP],NewL).
+
+trans_inv_relcl_vp(NPFeats,vpos(normal,VStr),
+                        nsg(subcl(sub_conj(A),s_bar(Str))),
+                        rest(type16,CStr),EngNP,List) :-
+  transform_sconj(A,E),
+  transform_s(Str,Slist1),
+  transform_vp(NPFeats,vp(vpfeat(simple,_,_,_,_,_,_),
+                          vptree(VStr,CStr)),Slist2),
+  append(E,Slist1,Intlist1),
+  append(Intlist1,[','],Intlist2),
+  append(Intlist2,EngNP,Intlist3),
+  append(Intlist3,Slist2,List).
+
+
+ 

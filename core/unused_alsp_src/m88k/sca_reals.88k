@@ -1,0 +1,643 @@
+#include "assembly.88k"
+; 
+; Creation:	Craig Thornley	
+;		November 15, 1989
+;
+;	Copyright (c) 1989 Motorola, Inc.
+;
+; Modified:	April 13, 1989	CT 	fixed bug in punify_answer
+;		June 9, 1989	CT	added psin & pcos
+;		June 12, 1989	CT	added plog10 & plog
+;					also fixed sp problems
+;		August 22, 1989 SM	added ptan, psinh, pcosh, ptanh, pasin,
+;					pacos, patan, pexp, psqrt, pfloor, 
+;					pceil, pfabs, pgamma, ppow, pfmod,
+;					patan2, phypot
+;		August 23, 1989	SM	added erf, erc
+;		Sept 7, 1989 	CT SM	modularized arity-2 scalars
+;					and arity-3 scalars
+;		Feb 5, 1990	kev	changed reg names and stack usage
+;		Feb 6, 1990	kev	Made punify_answer do the return to
+;					Prolog at the end of the work. 
+;					Also replaced all bsr instructions to
+;					punify_answer with a br and filled the
+;					delay slot if reasonable.
+;		March 10, 1992	SM	added pmac
+  
+;
+; sca_reals.88k -- Functions for double precision scalar arithmetic
+;
+;
+; padd
+; psub
+; pmul
+; pdiv
+; pmac
+; psin
+; pcos
+; ptan
+; psinh
+; pcosh
+; ptanh
+; pasin
+; pacos
+; patan
+; plog10
+; plog
+; pexp
+; psqrt
+; pfloor
+; pceil
+; pfabs
+; pgamma
+; ppow
+; pfmod
+; patan2
+; phypot
+; perf
+; perfc
+
+	text
+	global	_padd
+	global	_psub
+	global	_pmul
+	global	_pdiv
+	global	_pmac
+	global	_psin
+	global	_pcos
+        global 	_ptan
+	global	_psinh
+	global	_pcosh
+	global	_ptanh
+	global 	_pasin
+	global	_pacos
+	global	_patan
+	global	_plog10
+	global	_plog
+	global 	_pexp
+	global	_psqrt
+	global	_pfloor
+	global	_pceil
+	global 	_pfabs
+	global	_pgamma
+	global	_ppow
+	global	_pfmod
+	global	_patan2
+	global	_phypot
+	global	_perf
+	global	_perfc
+	; 
+	; pget_args is called by the double precision floating point
+	; builtins, padd, pmul, etc..  The subroutine gets the first
+	; two arguments (found in A1 and A2) and puts two double precision
+	; numbers in T1 T2 and T3 T4.  If either of the incoming arguments
+	; is not a number the call fails.
+
+pget_args:
+
+@drefA1:					; dereference A1
+	bb1	BGND,	A1,	@getdoubleA1	; if ground get out
+	ld	tmp1,	A1,	BIAS		; t1 = contents of A1+BIAS
+	cmp	A1,	A1,	tmp1		; compare the two 
+	bb0.n	eq,	A1,	@drefA1		; 
+	addu	A1,	tmp1,	ZERO		; put dereferenced value in A1
+	jmp	Fail				; fail because A1 is var
+@getdoubleA1:
+	bb0	BNUM,	A1,	@flt_fail	; fail if non_numeric
+	bb0	BUIA,	A1,	1f		; if integer go somewhere
+	clr	A1,	A1,	6<26>		; nuke the tag
+	ld	T2,	A1,	BIAS+8		;
+	ld	T1,	A1,	BIAS+4		; else load double
+	br	@derefA2
+1:
+	ext	A1,	A1,	26<0>		; get integer
+	flt.ds	T1,	A1			; convert to float
+
+
+@derefA2:
+	bb1	BGND,	A2,	@getdoubleA2	; if ground get out
+	ld	tmp1,	A2,	BIAS		; t1 = contents of A1+BIAS
+	cmp	A2,	A2,	tmp1		; compare the two 
+	bb0.n	eq,	A2,	@derefA2		; 
+	addu	A2,	tmp1,	ZERO		; put dereferenced value in A1
+	jmp	Fail				; fail because A1 is var
+@getdoubleA2:
+	bb0	BNUM,	A2,	@flt_fail	; fail if non_numeric
+	bb0	BUIA,	A2,	1f		; if integer go somewhere
+	clr	A2,	A2,	6<26>		; clear the tag
+	ld	T4,	A2,	BIAS+8		;
+	ld	T3,	A2,	BIAS+4		; else load double
+	jmp	r1				; leave, we're all set
+1:
+	ext	A2,	A2,	26<0>		; get integer
+	flt.ds	T3,	A2			; convert to float
+	jmp	r1
+
+
+	; _punify_answer unifies the double precision number in tmp1 & tmp2
+	; with the argument found in A3.  If the number can be converted to
+	; an integer it is and the resulting number (int or float) is unified
+	; with A3.
+
+	global	_punify_answer
+	; punify_answer
+
+_punify_answer:
+
+	; if possible convert to integer
+	or.u	T1,	ZERO,	hi16(33554431)	; largest int 2^25 - 1
+	or	T1,	T1,	lo16(33554431)
+	flt.ss	T1,	T1			; convert to float
+	fcmp.ssd S,	T1,	tmp1		; compare max int and double
+	bb1	lt,	S,	@notint		; can't convert to int
+	or.u	T1,	ZERO,	hi16(-33554432)	; smallest int -(2^25)
+	or	T1,	T1,	lo16(-33554432)
+	flt.ss	T1,	T1			; convert to float
+	fcmp.ssd S,	T1,	tmp1		; compare min int and double
+	bb1	gt,	S,	@notint		; can't convert to int
+
+	int.sd	T1,	tmp1			; round to integer
+	flt.ss	T3,	T1			; convert to float
+	fcmp.ssd S,	T3,	tmp1		; compare rounded int and float
+	bb1	ne,	S,	@notint		; can't convert to int
+	; convert to int and then unify with A3
+	
+	clr	T2,	T1,	6<26>		; clear the tag area
+	or.u	T2,	T2,	TINT		; set tag to TINT
+
+	; now we must dereference A3
+@drefA3:
+	bb1	BGND,	A3,	@grndA3		; if ground get out
+	ld	tmp1,	A3,	BIAS		; tmp1 = contents of A3+BIAS
+	cmp	S,	A3,	HB		; do early trail check
+	cmp	A3,	A3,	tmp1		; compare the two
+	bb0.n	eq,	A3,	@drefA3		; loop
+	addu	A3,	tmp1,	ZERO		; put back in A3
+	
+	; if we get here A3 is an unbound variable so bind it to T2
+	bb1.n	hs,	S,	@drefA3_cont	; branch if A3 >= HB
+	st	T2,	A3,	BIAS		;  but first bind it to T2	
+	cmp	S,	A3,	SPB		; SPB check
+	bb1	lo,	S,	@drefA3_cont	; branch if A3 < SPB
+	subu	TR,	TR,	4		; get trail entry
+	st	A3,	TR,	ZERO		; and trail the thing
+
+@drefA3_cont:
+	jmp.n	CP				; return and
+	addu	E,	OldE,	ZERO		;   reset the environment
+	
+
+
+@grndA3:
+	cmp	tmp1,	A3,	T2		; compare A3 with result
+	bb1	ne,	tmp1,	@flt_fail	; fail if not the same
+	jmp.n	CP				; return and
+	addu	E,	OldE,	ZERO		;   reset the environment
+
+
+
+@notint:
+; not an integer, so call _wm_g_dbl
+	or	UArg1,	A3,	ZERO		; put A3 in UArg1 for call
+	addu	E,	OldE,	ZERO		; reset environment
+	br.n	_wm_g_dbl			; call the double matcher
+	addu	r1,	CP,	ZERO		; set r1 to continue back in
+						; a clause
+
+
+
+_padd:
+	bsr	pget_args			; get the args, put in T1-T4
+	fadd.ddd tmp1,	T1,	T3		; do addition
+	br	_punify_answer			; unify and answer with A3
+
+_pmul:
+	bsr	pget_args			; get the args, put in T1-T4
+	fmul.ddd tmp1,	T1,	T3		; do multiplication
+	br	_punify_answer			; unify and answer with A3
+
+_pdiv:
+	bsr	pget_args			; get the args, put in T1-T4
+	fdiv.ddd tmp1,	T1,	T3		; do division
+	br	_punify_answer			; unify and answer with A3
+
+_psub:
+	bsr	pget_args			; get the args, put in T1-T4
+	fsub.ddd tmp1,	T1,	T3		; do subtraction
+	br	_punify_answer			; unify and answer with A3
+
+	; pmac(+Acc1,+R1,+R2,-Acc2) multiply and accumulate, a la pc_mac
+	; The unfortunate ordering of arguments means that pget_args must be replicated
+	; here; should macroize appropriately due to maintenance considerations.
+
+_pmac:
+	bsr	pget_args			; Acc1 now in T1-T2, R1 in T3-T4
+	; now load up R2 (third argument) into UArg1-2
+	deref	A3, 2f				; dereference R2 (third argument)	
+	fail
+2:	
+	bb0	BNUM,	A3,	@flt_fail	; fail if non_numeric
+	bb0	BUIA,	A3,	3f		; if integer go somewhere
+	clr	A2,	A3,	6<26>		; clear the tag
+	ld	UArg2,	A2,	BIAS+8		;
+	br.n	4f				; leave, we're all set
+	ld	UArg1,	A2,	BIAS+4		; else load double
+3:
+	ext	A2,	A3,	26<0>		; get integer
+	flt.ds	UArg1,	A2			; convert to float
+
+4:	fmul.ddd T3,	T3,	UArg1		; do the multiply
+	ld	UArg1,	E,	BIAS+20		; get Acc2 (4th argument) off the stack
+	fadd.ddd tmp1,	T1,	T3		; and accumulate
+	br.n	_punify_answer			; unify tmp1-2 with A3
+	or	A3,	UArg1,	ZERO		; load up A3 with Acc2	
+
+
+; the following routines are the unary scalar operators such as sin, cos, etc.
+; they are called with two arguments, the second will be unified with the 
+; answer.
+
+_get_argA1:
+
+@ga_drefA1:					; dereference A1
+	bb1	BGND,	A1,	@ga_getdoubleA1	; if ground get out
+	ld	tmp1,	A1,	BIAS		; t1 = contents of A1+BIAS
+	cmp	A1,	A1,	tmp1		; compare the two 
+	bb0.n	eq,	A1,	@ga_drefA1	; 
+	addu	A1,	tmp1,	ZERO		; put dereferenced value in A1
+	jmp	Fail				; fail because A1 is var
+@ga_getdoubleA1:
+	bb0	BNUM,	A1,	@flt_fail	; fail if non_numeric
+	bb0	BUIA,	A1,	@ga_cont	; integer?
+	clr	tmp1,	A1,	6<26>		; nuke the tag
+	ld	A2,	tmp1,	BIAS+8		;
+	ld	A1,	tmp1,	BIAS+4		; else load double
+	jmp	r1
+@ga_cont:
+	ext	A1,	A1,	26<0>		; get integer
+	flt.ds	A1,	A1			; convert to float
+	jmp	r1
+
+
+
+
+	;p2first saves stack & other stuff for call to arity-2 scalar routines
+
+_p2first:
+	subu	SP,	SP,	8		; push stack
+	st	A2,	SP,	4+BIAS		; save 2nd arg for later
+
+	jmp	r1				; return
+
+
+
+	;p2last restores Prolog stuff and unifies answer of arity-2 scalar 
+	;routines.
+
+_p2last:
+	ld	A3,	SP,	4+BIAS		; restore second arg
+	addu	SP,	SP,	8		; pop stack
+
+	or	tmp1,	A1,	ZERO		; move double into tmp1 & tmp2
+
+	jmp.n	r1				; return
+	or	tmp2,	A2,	ZERO
+
+
+_psin:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_sin				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+_pcos:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_cos				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+_ptan:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_tan				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_psinh:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_sinh				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_pcosh:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_cosh				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_ptanh:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_tanh				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_pasin:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_asin				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_pacos:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_acos				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_patan:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_atan				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_plog10:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_log10				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_plog:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_log				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_pexp:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_exp				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_psqrt:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_sqrt				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_pfloor:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_floor				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_pceil:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_ceil				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_pfabs:
+	subu	SP,	SP,	4		; room to push on stack
+	st	A2,	SP,	0+BIAS		; save 2nd arg for later
+	bsr	_get_argA1			; will put result in A1 & A2
+
+	; fabs - just clear the sign bit!
+	clr	A1,	A1,	1<31>		; clear sign bit of MSW (r2)
+
+	ld	A3,	SP,	0+BIAS		; restore 2nd arg
+	or	tmp1,	A1,	ZERO		; move double into tmp1 & tmp2
+	br.n	_punify_answer
+	or	tmp2,	A2,	ZERO
+
+_pgamma:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_gamma				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_perf:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_erf				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+_perfc:
+	bsr	_p2first			; do first half of stuff
+
+	bsr	_get_argA1			; will put result in A1 & A2
+	bsr	_erfc				; result will be in A1 & A2
+
+	bsr	_p2last				; do last half of stuff
+	br	_punify_answer
+
+
+
+
+; the following routines are those unary scalar operations which are called with
+; three (not two - as for the ones above - sin, cos, tan, sinh, etc.) arguments.
+; the first two are sent in r2,3 and r4,5 to the C library call, and the third
+; is unified with the answer.
+; Note that the code below is adapted from that for sin, cos, etc.
+; Note that this routine destroys A3 (so the caller should have it if needed).
+
+_get2args:
+	; first save A2 due to interference with C calling convention
+	or	T2,	ZERO, 	A2	; save A2=r3 because r2,r3 := deref(A1)
+
+	; now dereference A1, and place the value in r2,3 for C library call 
+@derefer_A1:
+	bb1	BGND,	A1,	@get_double_A1	; if ground get out
+	ld	tmp1,	A1,	BIAS		; t1 = contents of A1+BIAS
+	cmp	A1,	A1,	tmp1		; compare the two
+	bb0.n	eq,	A1,	@derefer_A1	
+	addu	A1,	tmp1,	ZERO		; put dereferenced value in A1
+	jmp	Fail				; fail because A1 is var
+@get_double_A1:
+	bb0	BNUM,	A1,	@flt_fail	; fail if non-numeric
+	bb0	BUIA,	A1,	@g2_cont_1	; integer?
+	clr	tmp1,	A1,	6<26>		; nuke the tag
+	ld	r3,	tmp1,	BIAS+8	  	; load LSW first
+	br.n	@derefer_A2			; done with 1st arg, now do 2nd
+	ld	r2,	tmp1,	BIAS+4		; else load double - what A1
+	; dereferences is put in r2,3 as the first arg to the C library call
+	; remember we have saved r3 (A2) and r4 (A3) above
+@g2_cont_1:
+	ext	A1,	A1,	26<0>		; get integer
+	flt.ds	r2,	A1			; r2,3 has the first arg for the
+						; C library call as above
+@derefer_A2:
+	; T2 has the saved value of A2 in it.
+	; Dereference T2 and place the value in r4,5 for C library call.
+	bb1	BGND,	T2,	@get_double_A2	; if ground get out
+	ld	tmp1,   T2,	BIAS		; t1 = contents of T2+BIAS
+	cmp	T2,	T2,	tmp1		; compare the two
+	bb0.n	eq,	T2,	@derefer_A2	
+	addu	T2,	tmp1,	ZERO		; put dereferenced value in T2
+	jmp	Fail				; fail because T2 is a var
+@get_double_A2:
+	bb0	BNUM,	T2,	@flt_fail	; fail if non-numeric
+	bb0	BUIA,	T2,	@g2_cont_2	; integer?
+	clr	tmp1,	T2,	6<26>		; nuke the tag
+	ld	r5,	tmp1,	BIAS+8		; load LSW first
+	jmp.n	r1				; all done, r4,5 := 2nd arg 
+	ld	r4,	tmp1,	BIAS+4		; else load double
+@g2_cont_2:
+	ext	T2,	T2,	26<0>		; get integer
+	jmp.n  	r1				; all done
+	flt.ds	r4,	T2			; convert to float
+						; r4,5 has 2nd arg to C lib call
+
+
+
+
+	;3-arity scalars
+
+	;p3 stores Prolog registers
+
+_p3first:
+	subu	SP,	SP,	8		; push stack
+	st	A3,	SP,	4+BIAS		; save 3rd arg for later
+
+	jmp	r1				; return
+
+
+	;p3last restores Prolog stuff and unifies answer of arity-3 scalar 
+	;routines.
+_p3last:
+
+	ld	A3,	SP,	4+BIAS		; restore third arg
+	addu	SP,	SP,	8		; pop stack
+
+	or	tmp1,	A1,	ZERO		; move double into tmp1 & tmp2
+	jmp.n	r1				; return
+	or	tmp2,	A2,	ZERO
+
+_ppow:
+	bsr	_p3first
+	bsr	_get2args			
+	; will leave value dereferenced by A1 in r2,3; A2 -> r4,5
+	bsr	_pow				; result will be in A1 & A2
+
+	bsr	_p3last
+
+	br	_punify_answer
+
+
+_pfmod:
+	bsr	_p3first
+	bsr	_get2args			
+	; will leave value dereferenced by A1 in r2,3; A2 -> r4,5
+	bsr	_fmod				; result will be in A1 & A2
+
+	bsr	_p3last
+
+	br	_punify_answer
+
+_patan2:
+	bsr	_p3first
+	bsr	_get2args			
+	; will leave value dereferenced by A1 in r2,3; A2 -> r4,5
+	bsr	_atan2				; result will be in A1 & A2
+
+	bsr	_p3last
+
+	br	_punify_answer
+
+_phypot:
+	bsr	_p3first
+	bsr	_get2args			
+	; will leave value dereferenced by A1 in r2,3; A2 -> r4,5
+	bsr	_hypot				; result will be in A1 & A2
+
+	bsr	_p3last
+
+	br	_punify_answer
+
+@flt_fail:
+	jmp	Fail
+
+
+
+
+	data

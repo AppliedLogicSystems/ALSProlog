@@ -1,0 +1,107 @@
+
+#--------- Static portion of Makefile
+WLD=../$(WIN)
+
+WSRCD = $(srcdir)/wins/src
+VPATH = $(WSRCD):$(srcdir)/generic
+CINTDIR = $(srcdir)/cinterf
+WINTLIB=$(WIN)interf.a
+
+LIBCS = $(WIN)aux.c $(ADDL_CS) $(patsubst %.c,%.o,$(wildcard $(WIN)*.c))
+LIBOBJS = $(patsubst %.c,%.o,$(LIBCS))
+$(WIN)PlainPROFILES	= $(WIN) $(ADDL_PROFS)
+$(WIN)PROFILES	= $(patsubst %,%.pro,$($(WIN)PlainPROFILES))
+
+LIBOBJS: $(LIBCS)
+
+#
+# Define CPPFLAGS and the default rule for translating .c files to .o files
+#
+CPPFLAGS= -I. -I.. -I../.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(WSRCD) -DHAVE_CONFIG_H
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(X_CFLAGS) $<
+
+PROFLAGS= -b
+
+#
+# create .src from .spc
+#
+TRFLAGS = -debug $(XTRFLAGS)
+
+$(WIN).src : $(WIN).spc $(WIN).h
+	$(PROLOG) $(PROFLAGS) $(CINTDIR)/c2pro/trans_c2pro_$(GOS) -g c2pro \
+		-p -srcpath $(WSRCD) $(WIN) $(TRFLAGS) $(XINCLUDES) $(XDEFINES)
+
+#
+# create .c files from .src files
+#
+FPREFIX	= $(WIN)
+CGFLAGS = -Ddebug -t mytrans $(XCGFLAGS)
+
+$(WIN)0.c $(WIN)1.c $(WIN)2.c $(WIN)3.c $(WIN)4.c : $(WIN).src
+	$(PROLOG) $(PROFLAGS) $(CINTDIR)/pro2intf/tpro2intf \
+	$(CINTDIR)/pro2intf/mytrans \
+	-g pro2intf -p $(WIN) -fpre $(FPREFIX) $(CGFLAGS)
+
+#
+#	Linking the library:
+#
+
+$(WINTLIB): $(LIBOBJS)
+	echo ar-LIBOBJS = $(LIBOBJS)
+	ar ruv $(WINTLIB) $(LIBOBJS)
+	-ranlib $(WINTLIB)
+
+#
+#	Target to make the library:
+#	We use a recursive call to force the LIBOBJS variable to
+#	be recomputed after all the $(WIN)<nnn>.c files are generated;
+#	The dependency below doesn't seem to do that.
+#
+library: $(WIN)0.c $(LIBOBJS)
+	make -f Makefile $(WINTLIB)
+	echo Library $(WINTLIB) finished
+
+IMAGE		= alspro_$(WIN)
+
+image: $(IMAGE)
+
+$(IMAGE)0: pimain.o pi_init.o $(PROLIB) $(WINTLIB)
+	$(CC) -o $(IMAGE)0 pimain.o pi_init.o \
+		$(PROLIB)	\
+		$(WINTLIB)	\
+		$(ADDL_LIBS)	\
+		$($(WIN)LIBS)	\
+		$(LIBS)	\
+		$(X_EXTRA_LIBS)
+
+$(IMAGE): $(IMAGE)0 $($(WIN)PROFILES)
+	ALSPATH=$(WLD); export ALSPATH; \
+	$(IMAGE)0 $($(WIN)PROFILES) \
+		-g 'save_image($(IMAGE),[libload(true)])'
+
+all: library image
+	echo library and image made for: motif
+
+cleanup:
+	-rm *.o
+	-rm *.obp
+	-rm core 
+
+super_clean:
+	-rm *.o
+	-rm *.obp
+	-rm core
+	-rm -r alsdir
+
+#
+# Dependencies
+#
+
+xtaux.o   : xtaux.c alspi.h cinterf.h
+$(WIN)aux.o : $(WIN)aux.c alspi.h cinterf.h $(WIN).h
+$(WIN)0.o : $(WIN)0.c alspi.h cinterf.h $(WIN).h
+$(WIN)1.o : $(WIN)1.c alspi.h cinterf.h $(WIN).h
+$(WIN)2.o : $(WIN)2.c alspi.h cinterf.h $(WIN).h
+$(WIN)3.o : $(WIN)3.c alspi.h cinterf.h $(WIN).h
+$(WIN)4.o : $(WIN)4.c alspi.h cinterf.h $(WIN).h

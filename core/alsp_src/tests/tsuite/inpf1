@@ -1,0 +1,2477 @@
+/*==========================================================================
+ *			sio.pro
+ *		Copyright (c) 1991-1992 Applied Logic Systems, Inc.
+ *
+ *		-- stream I/O builtins
+ *
+ * Author: Kevin A. Buettner
+ * Original Creation: 10/11/91
+ * Additions for different kinds of streams: Ken Bowen
+ *=========================================================================*/
+
+module sio.
+use windows.
+
+:- auto_use(sio).
+
+/*
+ * Define some global variables:
+ *
+ *	aliases will be a list of the current aliases and their associations.
+ *	It will take the form:
+ *		[[Alias1|Stream1],[Alias2|Stream2],...]
+ *
+ *	current_input_stream and current_output_stream are used to implement
+ *	the concept of default streams.
+ *
+ *	next_stream_identifier is used to give each stream a unique integer
+ *	so that two streams with the same filename will not unify together.
+ */
+
+:-	make_gv("_aliases"),
+	make_gv("_current_input_stream"),
+	make_gv("_current_output_stream"),
+	make_gv("_next_stream_identifier"),
+	make_gv("_user_prompt").
+
+:-	set_next_stream_identifier(0).
+
+/*
+ * next_stream_identifier/1 is used to retrieve the next stream identifier
+ *
+ */
+
+next_stream_identifier(Id) :-
+	get_next_stream_identifier(Id),
+	NextId is (Id+1) /\ 0xffffff,
+	set_next_stream_identifier(NextId).
+
+
+/*
+ * The following predicates access various components of a stream descriptor.
+ *
+ * Slot definitions:
+ *
+ *  stream_buffer   -- the buffer (UIA) associated with the stream. Our
+ *             C routines manage this component for the most
+ *             part.
+ *  stream_open_status -- either open or closed.
+ *  stream_type -- the type of stream.  This will be an atom such
+ *             as file, sysV_queue, etc.
+ *  stream_name -- the name of the stream; for files this will simply
+ *             be the file name or device name.
+ *  stream_mode -- A list cell whose head is either input or noinput
+ *             and whose tail is either output or nooutput. A
+ *             stream with the stream_mode field set to
+ *             [noinput|nooutput] is not terribly useful.
+ *  stream_options  -- the options list as obtained from open.  In time
+ *             this field may go away.
+ *  stream_identifier -- an integer uniquely identifying the stream. With
+ *             this identifier it is possible to open the same
+ *             file or device twice and yet not have the two
+ *             streams unify because the streams will be assigned
+ *             different stream identifiers.
+ *  stream_addl1    -- an extra field for use by certain streams.
+ *  stream_addl2    -- an extra field for use by certain streams.
+ *  stream_addl3    -- an extra field for use by certain streams.
+ *  stream_pgoals   -- the goals to run (for input streams) when a new
+ *		buffer is being read and a prompt is desired.
+ *  stream_syntax_errors -- number of syntax errors seen on a stream open for
+ *		input.
+ *  stream_wt_opts	-- structure containing default values for use
+ *		when writing out structured terms (write_term, writeq,
+ *		write, etc).  This will be a three argument structure
+ *		called with functor 'wt_opts'.  The first argument will give
+ *		the line length, the second gives the maximum depth to write
+ *		to, the third gives the manner in which depths are computed
+ *		(an atom).  Note that this value will only be instantiated
+ *		to this structure for streams opened for write access.
+ *    stream_wt_line_length	-- access first element of the structure
+ *		obtained by stream_wt_opts
+ *    stream_wt_maxdepth	-- access the second element of the structure
+ *		obtained by stream_wt_opts
+ *    stream_wt_depth_computation	-- access third element of the structure
+ *		obtained by stream_st_opts
+ *
+ *  We have included one extra slot for future expansion.  This comment
+ *  should be revised should this slot be used.
+ *
+ */
+
+export stream_identifier/2.
+export stream_open_status/2.
+
+stream_buffer(Stream,SD) :- 			arg(1,Stream,SD).
+stream_open_status(Stream,OpenStatus) :- 	arg(2,Stream,OpenStatus).
+stream_type(Stream,Type) :-			arg(3,Stream,Type).
+stream_name(Stream,Name) :-			arg(4,Stream,Name).
+stream_mode(Stream,Mode) :-			arg(5,Stream,Mode).
+stream_options(Stream,Options) :-		arg(6,Stream,Options).
+stream_identifier(Stream,Id) :-			arg(7,Stream,Id).
+stream_extra(Stream,Extra) :-			arg(8,Stream,Extra).
+stream_addl1(Stream,Addl1) :-			arg(9,Stream,Addl1).
+stream_addl2(Stream,Addl2) :-			arg(10,Stream,Addl2).
+stream_addl3(Stream,Addl3) :-			arg(11,Stream,Addl3).
+stream_pgoals(Stream,G)    :-			arg(12,Stream,G).
+stream_syntax_errors(Stream,E) :-		arg(13,Stream,E).
+stream_wt_opts(Stream,A) :-			arg(14,Stream,A).
+stream_wt_line_length(S,LL) :-			arg(14,S,A), arg(1,A,LL).
+stream_wt_maxdepth(S,MD) :-			arg(14,S,A), arg(2,A,MD).
+stream_wt_depth_computation(S,DC) :-		arg(14,S,A), arg(3,A,DC).
+
+set_stream_buffer(Stream,SD) :-			mangle(1,Stream,SD).
+set_stream_open_status(Stream,OpenStatus) :-	mangle(2,Stream,OpenStatus).
+set_stream_type(Stream,Type) :-			mangle(3,Stream,Type).
+set_stream_name(Stream,Name) :-			mangle(4,Stream,Name).
+set_stream_mode(Stream,Mode) :-			mangle(5,Stream,Mode).
+set_stream_options(Stream,Options) :-		mangle(6,Stream,Options).
+set_stream_identifier(Stream,Id) :-		mangle(7,Stream,Id).
+set_stream_extra(Stream,Extra) :-		mangle(8,Stream,Extra).
+set_stream_addl1(Stream,Addl1) :-		mangle(9,Stream,Addl1).
+set_stream_addl2(Stream,Addl2) :-		mangle(10,Stream,Addl2).
+set_stream_addl3(Stream,Addl3) :-		mangle(11,Stream,Addl3).
+set_stream_pgoals(Stream,G) :-			mangle(12,Stream,G).
+set_stream_syntax_errors(Stream,E) :-		mangle(13,Stream,E).
+set_stream_wt_opts(Stream,A) :-			mangle(14,Stream,A).
+set_stream_wt_line_length(S,LL) :-		arg(14,S,A), mangle(1,A,LL).
+set_stream_wt_maxdepth(S,MD) :-			arg(14,S,A), mangle(2,A,MD).
+set_stream_wt_depth_computation(S,DC) :-	arg(14,S,A), mangle(3,A,DC).
+
+
+/*
+ * is_stream(Stream_or_alias, Stream)
+ *
+ * Succeeds when Stream_or_alias is a stream or alias and will bind Stream
+ * to the corresponding Stream.
+ */
+
+export is_stream/2.
+
+is_stream(Stream_or_alias, Stream) :-
+	var(Stream_or_alias),
+	!,
+	fail.
+is_stream(Stream_or_alias, Stream_or_alias) :-
+	functor(Stream_or_alias,stream_descriptor,15),
+	!.
+is_stream(Alias,Stream) :-
+	current_alias(Alias,Stream).
+
+/*
+ * assign_alias(Alias, Stream_or_alias)
+ *
+ * Associates the atom Alias with the stream associated with Stream_or_alias.
+ */
+
+export assign_alias/2.
+
+assign_alias(Alias, Stream_or_alias) :-
+	atom(Alias),
+	is_stream(Stream_or_alias,Stream),
+	!,
+	get_aliases(Aliases),
+	assign_alias(Stream,Aliases,Alias,Stream_or_alias).
+
+assign_alias(Alias, Stream_or_alias) :-
+	(var(Alias) ; var(Stream_or_alias)),
+	!,
+	curmod(Mod),
+	trigger_event(	instantiation_error,
+			Mod:assign_alias(Alias, Stream_or_alias)).
+assign_alias(Alias, Stream_or_alias) :-
+	curmod(Mod),
+	trigger_event(	type_error,
+			Mod:assign_alias(Alias, Stream_or_alias)).
+
+assign_alias(Stream,Aliases,Alias,Stream_or_alias) :-
+	dmember([Alias|AliasTail],Aliases),
+	alias_present(Alias,Stream,AliasTail,Stream_or_alias).
+assign_alias(Stream,Aliases,Alias,Stream_or_alias) :-
+	stream_open_status(Stream,closed),
+	!,
+	curmod(Mod),
+	trigger_event(	io_control_error,
+			Mod:assign_alias(Alias, Stream_or_alias)).
+assign_alias(Stream,Aliases,Alias,Stream_or_alias) :-
+	set_aliases([[Alias|Stream]|Aliases]).
+
+alias_present(Alias,Stream,AliasTail,Stream_or_alias) :-
+/*
+ ######## I think that the following line should be Stream == AliasTail #####
+*/
+	dmember(Stream,AliasTail),
+	!.
+alias_present(Alias,Stream,AliasTail,Stream_or_alias) :-
+	curmod(Mod),
+	trigger_event(	io_control_error,
+			Mod:assign_alias(Alias, Stream_or_alias)).
+
+/*
+ * cancel_alias(Alias)
+ *
+ *	Deletes the association of the atom Alias with the stream (if any) with
+ *	which it is associated.
+ */
+
+export cancel_alias/1.
+
+cancel_alias(Alias) :-
+	var(Alias),
+	!,
+	curmod(Mod),
+	trigger_event(instantiation_error, Mod:cancel_alias(Alias)).
+cancel_alias(Alias) :-
+	atom(Alias),
+	Alias \= user,
+	!,
+	get_aliases(Aliases),
+	cancel_alias(Aliases, Alias).
+cancel_alias(user) :-
+	!,
+	curmod(Mod),
+	trigger_event(io_control_error, Mod:cancel_alias(user)).
+cancel_alias(Alias) :-
+	curmod(Mod),
+	trigger_event(type_error, Mod:cancel_alias(Alias)).
+
+cancel_alias([[Alias|_]|Rest],Alias) :-
+	set_aliases(Rest),
+	!.
+cancel_alias([],_) :-
+	!.
+cancel_alias(Aliases,Alias) :-
+	Aliases=[_|Rest],
+	cancel_aliases(Rest,Alias,Aliases).
+
+
+cancel_aliases([],_,_) :- !.
+cancel_aliases([[Alias|_]|Rest],Alias,Aliases) :-
+	!,
+	mangle(2,Aliases,Rest).
+cancel_aliases(Aliases,Alias,_) :-
+	Aliases=[_|Rest],
+	cancel_aliases(Rest,Alias,Aliases).
+
+
+/*
+ * current_alias(Alias,Stream)
+ *
+ *	Succeeds iff Alias is an alias which is associated with the stream
+ *	Stream.
+ */
+
+export current_alias/2.
+
+current_alias(Alias,Stream) :-
+	get_aliases(Aliases),
+	member([Alias|Stream],Aliases).
+
+/*
+ * current_input(Stream)
+ *
+ *      Succeeds iff the stream Stream is the current input stream.
+ */
+
+export current_input/1.
+
+current_input(Stream) :-
+        get_current_input_stream(Stream).
+
+/*
+ * current_output(Stream)
+ *
+ *      Succeeds iff the stream Stream is the current output stream.
+ */
+
+export current_output/1.
+
+current_output(Stream) :-
+        get_current_output_stream(Stream).
+
+
+/*
+ * set_input(Stream_or_alias)
+ *
+ * Sets the stream Stream_or_alias to be the current input stream.
+ */
+
+export set_input/1.
+
+set_input(Stream_or_alias) :-
+        is_stream(Stream_or_alias,Stream),
+        is_input_stream(Stream),
+        stream_open_status(Stream,OpenStatus),
+        OpenStatus \= closed,
+        !,
+        set_current_input_stream(Stream).
+
+set_input(Stream_or_alias) :-
+        curmod(Mod),
+        Call=Mod:set_input(Stream_or_alias),
+        (nonvar(Stream_or_alias) ; trigger_event(instantiation_error,Call)),
+        !,
+        (is_stream(Stream_or_alias,Stream) ; trigger_event(type_error,Call)),
+        !,
+        (is_input_stream(Stream) ; trigger_event(permission_error,Call)),
+        !,
+        trigger_event(existence_error,Call).
+
+
+ /*
+  * set_output(Stream_or_alias)
+  *
+  * Sets the stream Stream_or_alias to be the current output stream.
+  */
+
+export set_output/1.
+
+set_output(Stream_or_alias) :-
+        is_stream(Stream_or_alias,Stream),
+        is_output_stream(Stream),
+        stream_open_status(Stream,OpenStatus),
+        OpenStatus \= closed,
+        !,
+        set_current_output_stream(Stream).
+
+set_output(Stream_or_alias) :-
+        curmod(Mod),
+        Call=Mod:set_output(Stream_or_alias),
+        (nonvar(Stream_or_alias) ; trigger_event(instantiation_error,Call)),
+        !,
+        (is_stream(Stream_or_alias,Stream) ; trigger_event(type_error,Call)),
+        !,
+        (is_output_stream(Stream) ; trigger_event(permission_error,Call)),
+        !,
+        trigger_event(existence_error,Call).
+
+/*
+ * open(Source_sink,Mode,Stream)
+ */
+
+export open/3.
+open(Source_sink,Mode,Stream) :-
+	open(Source_sink,Mode,[text],Stream).
+
+
+/*
+ * open(Source_sink,Mode,Options,Stream)
+ */
+
+export open/4.
+open(Source_sink,Mode,Options,Stream) :-
+	check_open_mode(Source_sink,Mode,Options,Stream),
+	check_open_options(Source_sink,Mode,Options,Stream),
+	check_open_stream(Source_sink,Mode,Options,Stream),
+	open_stream(Source_sink,Mode,Options,Stream),
+	check_set_alias(Options, Stream).
+
+
+/*
+ * check_open_mode(Source_sink,Mode,Options,Stream)
+ *
+ *	Examines the Mode argument for validity and triggers an exception
+ *	if not valid.
+ */
+
+check_open_mode(Source_sink,Mode,Options,Stream) :-
+	var(Mode),
+	!,
+	trigger_event(	instantiation_error,
+			builtins:open(Source_sink,Mode,Options,Stream)).
+check_open_mode(Source_sink,Mode,Options,Stream) :-
+	atom(Source_sink),
+	file_modes(Mode,_,_),
+	!.
+check_open_mode(sysV_queue(_),Mode,Options,Stream) :-
+	qSTREAM_modes(Mode,_,_),
+	!.
+check_open_mode(sysV_STREAM(_),Mode,Options,Stream) :-
+	qSTREAM_modes(Mode,_,_),
+	!.
+check_open_mode(ssbq(_),Mode,Options,Stream) :-
+	qSTREAM_modes(Mode,_,_),
+	!.
+check_open_mode(socket(_),Mode,Options,Stream) :-
+	qSTREAM_modes(Mode,_,_),
+	!.
+check_open_mode(socket(_,_),Mode,Options,Stream) :-
+	qSTREAM_modes(Mode,_,_),
+	!.
+check_open_mode(socket(_,_,_),Mode,Options,Stream) :-
+	qSTREAM_modes(Mode,_,_),
+	!.
+check_open_mode(string(_),Mode,Options,Stream) :-
+	qSTREAM_modes(Mode,_,_),
+	!.
+check_open_mode(window(_),Mode,Options,Stream) :-
+	window_modes(Mode,_,_),
+	!.
+check_open_mode(Source_sink,Mode,Options,Stream) :-
+	trigger_event(	io_control_error,
+			builtins:open(Source_sink,Mode,Options,Stream)).
+
+/*
+ * check_open_options(Source_sink,Mode,Options,Stream)
+ *
+ *	Examines the Options argument for validity and triggers an exception
+ *	if not valid.
+ */
+
+check_open_options(Source_sink,Mode,Options,Stream) :-
+	var(Options),
+	!,
+	trigger_event(	instantiation_error,
+			builtins:open(Source_sink,Mode,Options,Stream)).
+check_open_options(Source_sink,Mode,Options,Stream) :-
+	check_list_options(Options,
+		[text,binary,
+		 alias(_),
+		 seek_type(previous),seek_type(byte),
+		 buffering(byte),buffering(line),buffering(block),
+		 bufsize(_),
+         	 prompt_goal(_),
+		 maxdepth(_), line_length(_), depth_computation(_),
+		 msg_type(_),create,			%% sysVq:
+		 perms(_), perms(_,_,_),
+		 target_node(_),				%% ssbq
+										%% sockets:
+		 connects(_), 	
+		 address(_),address(_,_)		
+		]),
+	!.
+check_open_options(Source_sink,Mode,Options,Stream) :-
+	trigger_event(	io_control_error,
+			builtins:open(Source_sink,Mode,Options,Stream)).
+
+
+check_list_options(V, ML) :-
+	var(V),
+	!,
+	fail.
+check_list_options([], ML) :-
+	!.
+check_list_options([H|T], ML) :-
+	member(H,ML),
+	check_list_options(T,ML).
+
+
+/*
+ * check_open_stream(Source_sink,Mode,Options,Stream)
+ *
+ *	Examines the Stream argument to make sure that it is a variable,
+ *	triggering an exception if it is not.
+ */
+
+check_open_stream(Source_sink,Mode,Options,Stream) :-
+	nonvar(Stream),
+	!,
+	trigger_event(	type_error,
+			builtins:open(Source_sink,Mode,Options,Stream)).
+check_open_stream(Source_sink,Mode,Options,Stream).
+
+/*
+ * check_set_alias(Options, Stream)
+ * If alias(Alias) is on Options, assigns Alias as an
+ * alias for Stream.
+ */
+
+check_set_alias(Options, Stream)
+	:-
+	dmember(alias(Alias), Options),
+	!,
+	assign_alias(Alias, Stream).
+check_set_alias(_, _).
+
+/*
+ * open_stream(Source_sink,Mode,Options,Stream)
+ *
+ *	Performs the open of Source_sink.
+ */
+
+open_stream(Source_sink,Mode,Options,Stream) :-
+	var(Source_sink),
+	!,
+	trigger_event(	instantiation_error,
+			builtins:open(Source_sink,Mode,Options,Stream)).
+open_stream(Source_sink,Mode,Options,Stream) :-
+	atom(Source_sink),
+	!,
+	open_file_stream(Source_sink,Mode,Options,Stream).
+open_stream(sysV_queue(Key),Mode,Options,Stream) :-
+	!,
+	open_sysVq_stream(Key,Mode,Options,Stream).
+open_stream(sysV_stream(Key),Mode,Options,Stream) :-
+	!,
+	open_sysV_STREAMS_stream(Key,Mode,Options,Stream).
+open_stream(ssbq(Q_Name),Mode,Options,Stream) :-
+	!,
+	open_ssbq_stream(Q_Name,Mode,Options,Stream).
+open_stream(socket(Descrip),Mode,Options,Stream) :-
+	!,
+	open_socket_stream(socket(Descrip),Mode,Options,Stream).
+open_stream(socket(Descrip,Domain),Mode,Options,Stream) :-
+	!,
+	open_socket_stream(socket(Descrip,Domain),Mode,Options,Stream).
+open_stream(socket(Descrip,Domain,Protocol),Mode,Options,Stream) :-
+	!,
+	open_socket_stream(socket(Descrip,Domain,Protocol),Mode,Options,Stream).
+open_stream(string(String),Mode,Options,Stream) :-
+	!,
+	open_string_stream(String,Mode,Options,Stream).
+open_stream(atom(String),Mode,Options,Stream) :-
+	!,
+	open_atom_stream(String,Mode,Options,Stream).
+open_stream(window(String),Mode,Options,Stream) :-
+	!,
+	open_window_stream(String,Mode,Options,Stream).
+
+%%
+%% This is the place to put in clauses for dealing with other types of streams
+%%
+
+open_stream(Source_sink,Mode,Options,Stream) :-
+	trigger_event(	io_control_error,
+			builtins:open(Source_sink,Mode,Options,Stream)).
+
+		/*---------*
+		 |   FILES |
+		 *---------*/
+
+open_file_stream(Source_sink,Mode,Options,Stream) :-
+	initialize_stream(file, Source_sink, Options, Stream),
+	file_modes(Mode,NMode,SMode),
+	set_stream_mode(Stream,SMode),
+	buffering(Options,NBuffering),
+	siof_open(Source_sink,Stream,NMode,NBuffering),
+	!.
+open_file_stream(Source_sink,Mode,Options,Stream) :-
+	curmod(Mod),
+	trigger_event(	io_control_error,
+			Mod:open(Source_sink,Mode,Options,Stream)).
+
+initialize_stream(StreamType,Source_sink,Options,Stream) :-
+	bufsize(StreamType,Options,BufSize),
+	sio_mkstream(BufSize,Stream),
+	set_stream_open_status(Stream,open),
+	set_stream_type(Stream,StreamType),
+	set_stream_name(Stream,Source_sink),
+	set_stream_options(Stream,Options),
+	next_stream_identifier(Id),
+	set_stream_identifier(Stream,Id),
+	wt_init_options(Options,Stream),	%% initialize wt options
+	prompt_goal(Options,PromptGoal),
+	set_stream_pgoals(Stream,PromptGoal),
+	set_stream_syntax_errors(Stream,0).
+
+
+		/*-------------------*
+		 |   SYSTEM V IPC Qs |
+		 *-------------------*/
+
+open_sysVq_stream(Key,Mode,Options,Stream) :-
+	get_ipc_key(Key, IPC_Key),
+	initialize_stream(sysV_queue,sysVq_stream(Key,IPC_Key),Options, Stream),
+	qSTREAM_modes(Mode,NMode,SMode),
+	set_stream_mode(Stream,SMode),
+	buffering(Options,NBuffering),
+	%% '$$msgget'(Key, PermsFlag, RetVal),
+	make_perms_flag(Mode, Options, PermsFlag),
+	get_message_type(Options, MessType),
+	get_message_wait(Options, MessWait),
+	sio_sysVq_open(IPC_Key,Stream,NMode,NBuffering,
+					    PermsFlag,MessType,MessWait),
+	!.
+open_sysVq_stream(Key,Mode,Options,Stream) :-
+	curmod(Mod),
+	trigger_event(  io_control_error,
+	Mod:open(sysVq_stream(Key),Mode,Options,Stream)).
+
+get_ipc_key(Key, Key) :-
+	integer(Key),
+	!.
+get_ipc_key(key(File,ID), IPC_Key) :-
+	'$$ftok'(File,ID,IPC_Key).
+
+make_perms_flag(Mode, Options, PermsFlag) :-
+	get_perms_flag(Mode, Options, PermsFlag0),
+	check_create(Options, PermsFlag0, PermsFlag).
+
+get_perms_flag(Mode, Options, PermsFlag) :-
+	dmember(perms(PermsFlag),Options), !.
+get_perms_flag(Mode, Options, PermsFlag) :-
+	dmember(perms(Owner,Group,Others),Options),
+	!,
+	decode_ipc_perms(Owner, OwnI),
+	decode_ipc_perms(Group, GrpI),
+	decode_ipc_perms(Others, OthI),
+	PermsFlag is OwnI*64 + GrpI*8 + OthI.
+get_perms_flag(Mode, Options, 438).		% 0666
+
+decode_ipc_perms(w,2).
+decode_ipc_perms(r,4).
+decode_ipc_perms(rw,6).
+
+check_create(Options, PermsFlag0, PermsFlag) :-
+	dmember(create, Options),
+	!,
+	PermsFlag is PermsFlag0 \/ 512.  % IPC_CREATE in <sys/ipc.h>
+check_create(Options, PermsFlag, PermsFlag).
+
+get_message_type(Options, MessType) :-
+	dmember(msg_type(MessType), Options), 
+	!.
+get_message_type(Options, 1).
+
+get_message_wait(Options, MessWait) :-
+	dmember(msg_wait(yes),Options),
+	!,
+	MessWait is not(2024).		% ~IPC_NOWAIT in <sys/ipc.h>
+get_message_wait(Options, 2024).
+
+
+qSTREAM_modes(read,0,[input|nooutput]).
+qSTREAM_modes(write,2,[noinput|output]).
+
+window_modes(read,0,[input|nooutput]).
+window_modes(write,2,[noinput|output]).
+
+		/*------------*
+		 |   SSB Qs   |
+		 *------------*/
+
+	%% Recommended: SIGUSR1 (30) or SIGUSR2 (31)
+ssbq_signal_num(31). 
+
+check_ssbq_initialize(_) :-
+	ssbq_system_initialized,
+	!.
+check_ssbq_initialize(_) :-
+	sio_ssbq_initialize,
+	assert(ssbq_system_initialized).
+%check_ssbq_initialize(write).
+
+open_ssbq_stream(Q_Name,Mode,Options,Stream) :-
+	check_ssbq_initialize(Mode),
+%	make_perms_flag(Mode, Options, PermsFlag),
+	get_message_wait(Options, MessWait),
+	initialize_stream(ssbq,Q_Name,Options,Stream),
+	qSTREAM_modes(Mode,NMode,SMode),
+	set_stream_mode(Stream,SMode),
+	target_node(Mode,Options,TargetNode),
+	buffering(Options,NBuffering),
+	sio_ssbq_open(Q_Name,Stream,NMode,NBuffering,TargetNode,MessWait),
+	!.
+open_ssbq_stream(Q_Name,Mode,Options,Stream) :-
+	curmod(Mod),
+	trigger_event(  io_control_error,
+	Mod:open(ssbq(Q_Name),Mode,Options,Stream)).
+
+target_node(read,_,'').
+target_node(write,Options,TargetNode) :-
+	dmember(target_node(TargetNode), Options).
+
+		/*------------*
+		 |   SOCKETS  |
+		 *------------*/
+
+open_socket_stream(socket(Domain),Mode,Options,Stream) :-
+	socket_type_default(Domain,Type),
+	socket_protocol_default(Domain,Type,Protocol),
+	open_socket_stream(Domain,Type,Protocol,Mode,Options,Stream).
+
+open_socket_stream(socket(Domain,Type),Mode,Options,Stream) :-
+	socket_protocol_default(Domain,Type,Protocol),
+	open_socket_stream(Domain,Type,Protocol,Mode,Options,Stream).
+
+open_socket_stream(Domain,Type,Protocol,Mode,Options,Stream) :-
+	make_perms_flag(Mode, Options, PermsFlag),
+	get_message_wait(Options, MessWait),
+	initialize_stream(socket,socket(Domain,Type,Protocol),Options,Stream),
+	qSTREAM_modes(Mode,NMode,SMode),
+	set_stream_mode(Stream,SMode),
+	buffering(Options,NBuffering),
+	get_socket_name(SocketName,Domain,Mode,Options),
+	get_socket_connects(SocketConnects,Options),
+	socket_codes(Domain,Dom, Type, Typ, Protocol, Prot),
+	sio_socket_open(Dom,Typ,Prot,Stream,NMode,NBuffering,MessWait,
+					SocketName, SocketConnects),
+	!.
+open_socket_stream(Domain,Type,Protocol,Mode,Options,Stream) :-
+	curmod(Mod),
+	trigger_event(  io_control_error,
+	Mod:open(socket(Domain,Type,Protocol),Mode,Options,Stream)).
+
+socket_type_default(af_unix,sock_stream).
+socket_type_default(af_inet,sock_stream).
+
+socket_protocol_default(af_unix,_,0).
+socket_protocol_default(af_inet,_,0).
+
+socket_codes(Domain,Dom, Type, Typ, Protocol, Prot) :-
+	socket_domain_codes(Domain,Dom),
+	socket_type_codes(Type, Typ),
+	socket_protocol_codes(Protocol, Prot).
+
+	%% These are the #define values from <sys/socket.h>
+
+socket_domain_codes(af_unix, 1).
+socket_domain_codes(af_inet, 2).
+socket_domain_codes(af_decnet, 12).
+socket_domain_codes(af_appletalk, 16).
+socket_domain_codes(af_osinet, 21).
+socket_domain_codes(af_gosip, 22).
+		%% there are many more (22 in all: maybe there will be need for others)
+
+socket_type_codes(sock_stream, 1).
+socket_type_codes(sock_dgram, 2).
+socket_type_codes(sock_raw, 3).
+socket_type_codes(sock_rdm, 4).
+socket_type_codes(sock_seqpacket, 5).
+
+	%% These are the #define values from <netinet/in.h>
+	%% The C constants are of the form IPPROTO_XXXX, where
+	%% the XXXX are what we use here (in l.c.);  see also
+	%% protocols(5) in the Unix manuals.
+
+socket_protocol_codes(ip, 0).
+socket_protocol_codes(icmp, 1).
+socket_protocol_codes(tcp, 6).
+socket_protocol_codes(udp, 17).
+
+get_socket_name(SocketName,_,_,Options) :-
+	dmember(name(SocketName, Options)), 
+	!.
+get_socket_name('',af_inet,read,_).	
+			% can use wildcard for incoming (read) sockets.
+
+get_socket_connects(SocketConnects,Options) :-
+	dmember(connects(SocketConnects),Options),
+	SocketConnects > 0, !.
+get_socket_connects(1,_).
+	
+		/*------------*
+		 |   STRINGS  |
+		 *------------*/
+
+open_string_stream(Source_sink,read,Options,Stream) :-
+	initialize_stream(string,string(Source_sink),Options,Stream),
+	set_stream_extra(Stream,Source_sink),
+	file_modes(read,NMode,SMode),
+	set_stream_mode(Stream,SMode),
+	buffering(Options,NBuffering),
+	sio_string_open(0,Stream,NMode,NBuffering),
+	!.
+open_string_stream(Source_sink,write,Options,Stream) :-
+	initialize_stream(string,string(Source_sink),Options,Stream),
+	set_stream_extra(Stream,[]),		%% head of list stream
+	set_stream_addl1(Stream,[]),		%% last cons cell of list stream
+	file_modes(write,NMode,SMode),
+	set_stream_mode(Stream,SMode),
+	buffering(Options,NBuffering),
+	sio_string_open(0,Stream,NMode,NBuffering),
+	!.
+open_string_stream(Source_sink,Mode,Options,Stream) :-
+	curmod(Mod),
+	trigger_event(	io_control_error,
+			Mod:open(string(Source_sink),Mode,Options,Stream)).
+
+		/*-----------------*
+		 |   SYMBOLS/UIAS  |
+		 *-----------------*/
+
+open_atom_stream(String,Mode,Options,Stream) :- fail.
+
+
+		/*-----------*
+		 |  WINDOWS  |
+		 *-----------*/
+
+:-
+	builtins:als_system(SysVars),
+	dmember(wins=WinSys, SysVars),
+	(WinSys = motif ->
+		assert_at_load_time(
+			( winsGetTextInsertionPosition(WinID, WinInsertPos) :-
+    				x_XmTextGetInsertionPosition(WinID,WinInsertPos) )
+						   ),
+		assert_at_load_time(
+			( write_buffer_to_win(BufUIA,NumCs,WinID,EndPos) :-
+				 x_XmTextGetInsertionPosition(WinID,StartPos),
+				 EndPos is StartPos + NumCs,
+				 x_XmTextReplace(WinID,StartPos,EndPos,BufUIA),
+				 x_XmTextSetInsertionPosition(WinID,EndPos)  )
+						   ),
+		asserta_at_load_time(
+			( wait_data(window, Stream, Call) :-!,
+				stream_identifier(Stream,StreamId),
+%				windows:prolog_xt_stream_mainLoop(StreamId),
+				prolog_xt_stream_mainLoop(StreamId),
+				read_buffer(window,Stream), !,
+%pbi_write(wins_sio_wait_data_call(Call)),pbi_nl,
+					%% restart call:
+				call(Call)		)	
+						   ) 
+	;	%% Motif %%
+	WinSys = openlook ->
+		assert_at_load_time(
+			( winsGetTextInsertionPosition(WinID, WinInsertPos) :-
+					c_alloc(long,Dummy), c_alloc(long,PosBuf),
+					x_OlTextEditGetCursorPosition(WinID,Dummy,
+						Dummy,PosBuf,1),
+					c_examine(PosBuf,long,WinInsertPos) )
+		),
+		assert_at_load_time(
+			( write_buffer_to_win(BufUIA,NumCs,WinID,EndPos) :-
+				x_OlTextEditInsert(WinID,BufUIA,NumCs,1),
+				x_OlTextEditTextBuffer(WinID,TextBuf),
+				x_LastTextBufferPosition(TextBuf,EndPos) )
+		),
+		asserta_at_load_time(
+			( wait_data(window, Stream, Call) :-!,
+				stream_identifier(Stream,StreamId),
+%				windows:prolog_xt_stream_mainLoop(StreamId),
+				prolog_xt_stream_mainLoop(StreamId),
+				read_buffer(window,Stream), !,
+					%% restart call:
+				call(Call)		)
+		)
+	;	%% OpenLook %%
+	true
+	).
+
+
+	%% This default clause is supplied for all window systems;
+	%% each window system asserta's its particular delay clause
+	%% in the above conditional.
+	%% Default: don't know how to wait, or wait failed, so convert to eof:
+wait_data(Type, Stream, Call) :-
+	sio_set_errcode(Stream,8),			%% SIOE_EOF
+	functor(Call,_,LastArg),
+	arg(LastArg,Call,-1).
+
+
+
+open_window_stream(Window,Mode,Options,Stream) :- 
+	getWinID(Window,WinID),
+	'$text_winGV$'(WinID,WinPosGV),
+	initialize_stream(window,Window,Options,Stream),
+	file_modes(Mode,NMode,SMode),
+	set_stream_mode(Stream,SMode),
+	buffering(Options,NBuffering),
+	winsGetTextInsertionPosition(WinID, WinInsertPos),
+	sio_window_open(WinID,Stream,WinInsertPos,NMode,NBuffering,WinPosGV),
+	TextBuffer = [],
+	set_stream_extra(Stream,TextBuffer),	%% the Prolog side window buffer
+	set_stream_addl1(Stream,TextBuffer),	%% the window insertion position
+	    %% Note: extra/addl1 together maintain the text buffer as an
+	    %% extensible list; addl1 points at the last cons pair in the
+	    %% list and new entries are made by mangling the tail pointer,
+	    %% so as to avoid any problems with resetting a normal extensible
+	    %% list tail variable on backtracking; this initial value for
+	    %% TextBuffer is a single entry of an empty line, which doesn't
+	    %% cause a new line to go out.
+	!.
+open_window_stream(Window,Mode,Options,Stream) :-
+	curmod(Mod),
+	trigger_event(	io_control_error,
+			Mod:open(window(Window),Mode,Options,Stream)).
+
+getWinID(Window,WinID) :-
+	'$text_winIDFor$'(Window,WinID),!.
+getWinID(Window,WinID) :-
+	'$text_winID$'(Window,WinID),!.
+
+
+/*
+ * bufsize/3 determines the buffer size to use by examining the options
+ * list and returning the default value if option not set
+ * The first argument allows for different default sizes
+ * according to the stream type.
+ */
+
+bufsize(_,Options,Size) :-
+	member(bufsize(Size),Options),
+	!.
+bufsize(_,_,1024).		%% Default buffer size
+
+/*
+ * prompt_goal/2 attempts to find the prompt goal from the options list
+ * and returns true if none is found.
+ */
+
+prompt_goal(Options,PromptGoal) :-
+    member(prompt_goal(PromptGoal),Options),
+    !.
+prompt_goal(_,true).
+
+
+/*
+ * wt_init_options/2 looks for maxdepth(N), line_length(N), and
+ * 	depth_computation(N) in the options list.  Once found these
+ *	values are installed in the stream (passed in as the second
+ *	argument)
+ */
+
+wt_init_options(Options,Stream) :-
+	wt_opts_default(WT_OPTS),
+	set_stream_wt_opts(Stream,WT_OPTS),
+	wt_init_opts(Options,Stream).
+
+wt_init_opts([],Stream) :- !.
+wt_init_opts([H|T],Stream) :-
+    wt_init_opt(H,Stream),
+    wt_init_opts(T,Stream).
+
+wt_init_opt(maxdepth(N),Stream) :-
+    integer(N),
+    N >= 0,
+    !,
+    set_stream_wt_maxdepth(Stream,N).
+wt_init_opt(line_length(L),Stream) :-
+    integer(N),
+    N > 4,
+    !,
+    set_stream_wt_line_length(Stream,L).
+wt_init_opt(depth_computation(D),Stream) :-
+    (D = flat ; D= nonflat),
+    !,
+    set_stream_wt_depth_computation(Stream,D).
+wt_init_opt(_,_).
+
+
+/*
+ * wt_opts_default returns the default term to set the stream_wt_opts field
+ * to in a stream descriptor.
+ */
+
+wt_opts_default(wt_opts(78,40000,flat)).
+
+
+/*
+ * buffering/2 determines the type of buffering and returns the numeric
+ * code to pass to the C primitive.
+ */
+
+buffering(Options,N) :-
+	member(buffering(Which),Options),
+	buffering_numbers(Which,N),
+	!.
+buffering(_,0).				%% block buffering
+
+buffering_numbers(block,0).		%% block buffering
+buffering_numbers(line,1).		%% line buffering
+buffering_numbers(byte,2).		%% byte buffering
+
+
+/*
+ * file_modes/3 enumerates the symbolic file mode names with the numbers
+ * used internally for file modes.  The third argument gives the mode type for
+ * storage in the stream descriptor.
+ */
+
+file_modes(read,0,[input|nooutput]).
+file_modes(read_write,1,[input|output]).
+file_modes(write,2,[noinput|output]).
+file_modes(append,3,[noinput|output]).
+
+
+/*
+ * is_input_stream(Stream)
+ *	Succeeds if the stream has mode type input.
+ */
+
+is_input_stream(Stream) :-
+	stream_mode(Stream,[input|_]).
+
+/*
+ * is_output_stream(Stream)
+ *	Succeeds if the stream has mode type output.
+ */
+
+is_output_stream(Stream) :-
+	stream_mode(Stream,[_|output]).
+
+
+/*
+ * close(Stream_or_alias)
+ */
+
+export close/1.
+
+close(Stream_or_alias) :-
+	is_stream(Stream_or_alias,Stream),
+	stream_open_status(Stream,open),
+	!,
+	close(Stream,Stream_or_alias).
+
+close(Stream_or_alias) :-
+	var(Stream_or_alias),
+	!,
+	curmod(Mod),
+	trigger_event(	instantiation_error,
+			Mod:close(Stream_or_alias)).
+
+close(Stream_or_alias) :-
+	is_stream(Stream_or_alias,Stream),
+	!,
+	curmod(Mod),
+	trigger_event(	io_control_error,
+			Mod:close(Stream_or_alias)).
+close(Stream_or_alias) :-
+	curmod(Mod),
+	trigger_event(	type_error,
+			Mod:close(Stream_or_alias)).
+
+close(Stream,_) :-
+	stream_identifier(Stream,StreamId),
+	StreamId < 0,
+	!.
+close(Stream,_) :-
+	set_stream_open_status(Stream,closed),
+	remove_aliases(Stream),
+	stream_type(Stream,StreamType),
+	close_stream(StreamType,Stream),
+	!.
+close(_,Stream_or_alias) :-
+	curmod(Mod),
+	trigger_event(	io_control_error,
+			Mod:close(Stream_or_alias)).
+
+close_stream(string,Stream) :-
+	is_output_stream(Stream),
+	!,
+	write_buffer(string,Stream),
+	stream_extra(Stream,List),
+	stream_name(Stream,string(List)).
+close_stream(string,_) :-
+	!.
+close_stream(_,Stream) :-
+	sio_close(Stream).
+
+%%
+%% close code for other stream types should be placed here.
+%%
+
+
+%%
+%% Remove aliases associated with a given stream.
+%%
+%% Also reassign the current default input and output streams to user
+%% if the given stream is attached to either (or both).
+%%
+
+remove_aliases(Stream) :-
+	current_alias(Alias,Stream),
+	cancel_alias(Alias),
+	fail.
+remove_aliases(Stream) :-
+	get_current_input_stream(Stream),
+	set_input(user),
+	fail.
+remove_aliases(Stream) :-
+	get_current_output_stream(Stream),
+	set_output(user),
+	!.
+remove_aliases(_).
+
+/*
+ * get_byte(Byte)
+ *
+ *	Unifies Byte with the next byte obtained from the default input stream.
+ */
+
+export get_byte/1.
+
+get_byte(Byte) :-
+	get_current_input_stream(Stream),
+	sio_get_byte(Stream,Byte),
+	!.
+get_byte(Byte) :-
+	get_current_input_stream(Stream),
+	get_failure(Stream,get_byte(Byte)).
+
+
+/*
+ * get_byte(Alias_or_stream, Byte)
+ *
+ *	Unifies Byte with the next byte obtained from the stream associated
+ *	with Alias_or_stream.
+ */
+
+export get_byte/2.
+
+get_byte(Stream, Byte) :-
+	sio_get_byte(Stream,Byte),
+	!.
+get_byte(Alias, Byte) :-
+	atom(Alias),
+	current_alias(Alias,Stream),
+	is_input_stream(Stream),
+	sio_get_byte(Stream,Byte),
+	!.
+get_byte(Alias_or_stream, Byte) :-
+	get_failure(Alias_or_stream,get_byte(Alias_or_stream,Byte)).
+
+get_failure(Alias_or_stream, Call) :-
+	var(Alias_or_stream),			%% variable stream descriptor
+	!,
+	curmod(Mod),
+	trigger_event(instantiation_error, Mod:Call).
+get_failure(Alias_or_stream,Call) :-	
+	is_stream(Alias_or_stream,Stream),
+	is_input_stream(Stream),
+	sio_errcode(Stream,FailCode),		%% valid stream descriptor
+	!,
+	get_failure(FailCode,Stream,Call).
+get_failure(Alias_or_stream,Call) :-
+	is_stream(Alias_or_stream,Stream),	%% valid stream, bad mode
+	!,
+	curmod(Mod),
+	trigger_event(io_control_error, Mod:Call).
+get_failure(Alias_or_stream,Call) :-		%% bad stream descriptor
+	curmod(Mod),
+	trigger_event(type_error, Mod:Call).
+
+
+get_failure(0,_,_) :-			%% SIOE_NORMAL
+	!,
+	fail.
+get_failure(6,Stream,Call) :-		%% SIOE_ILLREAD
+	!,
+	curmod(Mod),
+	trigger_event(io_control_error, Mod:Call).
+get_failure(5,Stream,Call) :-		%% SIOE_READ
+	stream_type(Stream,Type),
+	read_buffer(Type,Stream),
+	!,
+	call(Call).			%% restart call
+get_failure(5,Stream,Call) :-		%% SIOE_READ and read_buffer failure
+	sio_errcode(Stream,8),			%% SIOE_EOF
+	!,
+	functor(Call,_,LastArg),
+	arg(LastArg,Call,-1).
+get_failure(5,Stream,Call) :-		%% SIOE_READ and read_buffer failure
+	sio_errcode(Stream,14),			%% SIOE_WAITDATA
+	!,
+	stream_type(Stream,Type),
+	wait_data(Type, Stream, Call).
+get_failure(5,Stream,Call) :-		%% SIOE_READ
+	!,
+	curmod(Mod),
+	trigger_event(io_control_error, Mod:Call).
+get_failure(2,Stream,Call) :-		%% SIOE_INARG
+	curmod(Mod),
+	trigger_event(type_error, Mod:Call).
+
+/*
+ * get_char(Char)
+ *
+ *	Unifies Char with the next character obtained from the default
+ *	input stream.
+ */
+
+export get_char/1.
+
+get_char(Char) :-
+	get_current_input_stream(Stream),
+	sio_get_byte(Stream,Char),
+	!.
+get_char(Char) :-
+	get_current_input_stream(Stream),
+	get_failure(Stream,get_char(Char)).
+
+
+/*
+ * get_char(Alias_or_stream, Char)
+ *
+ *	Unifies Char with the next character obtained from the stream
+ *	associated with Alias_or_stream.
+ */
+
+export get_char/2.
+
+get_char(Stream, Char) :-
+	sio_get_byte(Stream,Char),
+	!.
+get_char(Alias, Char) :-
+	atom(Alias),
+	current_alias(Alias,Stream),
+	is_input_stream(Stream),
+	sio_get_byte(Stream,Char),
+	!.
+get_char(Alias_or_stream, Char) :-
+	get_failure(Alias_or_stream,get_char(Alias_or_stream,Char)).
+
+/*
+ * peek_char(Char)
+ *
+ *	Unifies Char with the next character obtained from the default
+ *	input stream.  The character is not consumed.
+ */
+
+export peek_char/1.
+
+peek_char(Char) :-
+	get_current_input_stream(Stream),
+	sio_get_byte(Stream,Char),
+	sio_unget_byte(Stream),
+	!.
+peek_char(Char) :-
+	get_current_input_stream(Stream),
+	get_failure(Stream,peek_char(Char)).
+
+
+/*
+ * peek_char(Alias_or_stream, Char)
+ *
+ *	Unifies Char with the next character obtained from the stream
+ *	associated with Alias_or_stream.  The character is not consumed.
+ */
+
+export peek_char/2.
+
+peek_char(Stream, Char) :-
+	sio_get_byte(Stream,Char),
+	sio_unget_byte(Stream),
+	!.
+peek_char(Alias, Char) :-
+	atom(Alias),
+	current_alias(Alias,Stream),
+	is_input_stream(Stream),
+	sio_get_byte(Stream,Char),
+	sio_unget_byte(Stream),
+	!.
+peek_char(Alias_or_stream, Char) :-
+	get_failure(Alias_or_stream,peek_char(Alias_or_stream,Char)).
+
+
+
+/*
+ * read_buffer/2
+ *	There are special case clauses for the streams which
+ *	are handled primarily from Prolog (e.g., string streams);
+ *	the rest default to sio_readbuffer
+ */
+
+%% need to deal with case where CurStringTail = []
+read_buffer(string,Stream) :-
+	stream_extra(Stream,Tail),
+	Tail == [],
+	!,
+	sio_set_eof(Stream),
+	fail.
+	
+read_buffer(string,Stream) :-
+	!,
+	stream_extra(Stream,CurTail),
+	sio_buf_params(Stream, BufStart, BufSize),
+	stream_buffer(Stream,SD),
+	sio_increment_bufpos(Stream),
+	transfer_string(CurTail,BufSize,BufStart,SD,0,NumCs,NewTail),
+	set_stream_extra(Stream,NewTail),
+	sio_set_position(Stream, 0, NumCs).
+	
+read_buffer(window,Stream) :-
+	stream_extra(Stream,Tail),
+	Tail == [],
+	!,
+	stream_pgoals(Stream,PromptGoal),
+	call(PromptGoal),
+	sio_set_errcode(Stream,14),			%% 14 =  SIOE_WAITDATA
+	fail.
+	
+read_buffer(window,Stream) :-
+	!,
+		%% get the queue of raw lines:
+	stream_extra(Stream,CurQueue),
+	sio_buf_params(Stream, BufStart, BufSize),
+	stream_buffer(Stream,SD),
+	move_lines_to_buffer(CurQueue,BufSize,BufStart,SD,0,NumCs,NewQueue),
+	set_stream_extra(Stream,NewQueue),
+	sio_set_position(Stream, 0, NumCs),
+	(NewQueue \= [] ->
+		true;
+		set_stream_addl1(Stream, [])
+	).
+
+%%
+%% This is the place to add read_buffer definitions for other stream types
+%%
+
+read_buffer(_,Stream) :-
+	!,
+	stream_pgoals(Stream,PromptGoal),
+	call(PromptGoal),
+	sio_readbuffer(Stream).
+
+/*
+ *	transfer_string(Tail,BufSize,CurPos,SD,CurNum,NumCs,NewTail)
+ *
+ *  Does the actual filling of the buffer in stream descriptor SD
+ *	from the source Prolog string Tail.  BufSize is the buffer size;
+ *	CurPos is the current position in that buffer as an offset from
+ *	the start of the uia SD; CurNum is the number of chars transferred
+ *	so far;  NumCs will return the total number of chars transferred,
+ *	and NewTail will return the remainder of Tail which isn't 
+ *	transferred.
+ *
+ */
+
+transfer_string([], _, _, _, NumCs, NumCs, []).
+transfer_string([C|RestTail],BufSize,CurPos,SD,CurNum,NumCs,NewTail) :-
+	CurNum < BufSize,!,
+	'$uia_pokeb'(SD, CurPos, C),
+	NextPos is CurPos + 1,
+	NextNum is CurNum + 1,
+	transfer_string(RestTail,BufSize,NextPos,SD,NextNum,NumCs,NewTail).
+transfer_string(CurTail, _, _, _, NumCs, NumCs, CurTail).
+
+/*-------------------------------------------------------------------------
+ |	move_lines_to_buffer/7
+ |	move_lines_to_buffer(CurQueue,BufSize,BufStart,SD,CurNum,NumCs,NewQueue)
+ |	move_lines_to_buffer(+,+,+,+,+,-,-)
+ |	
+ |	Fills (as much as possible) of the buffer ins stream descriptor SD
+ |	from the source CurQueue;  
+ |
+ |	CurQueue -- the initial raw lines queue (see below for details);
+ |	BufSize	 -- the size of SD's character buffer;
+ |	BufStart -- the position in SD at which the buffer starts;
+ |	SD		 -- the stream descriptor (structured uia) of the stream;
+ |	CurNum	 -- the number of chars which have already been written in;
+ |	NumCs	 -- the final number (total) of chars written into the buffer;
+ |	NewQueue -- the resulting raw line queue;  this is a tail of CurQueue;
+ |				in addition, the second argument of the first pair on
+ |				NewQueue may have been mangled from its original value.
+ |
+ |	Both CurQueue and NewQueue are lists of pairs of the form (Ptr, Offset),
+ |	where Ptr is a C pointer to a C string (in C space), and Offset is an
+ |	integer representing an offset in the C string.  When a pair is initially
+ |	put on the queue, this Offset is 0.  If this predicate only partially
+ |	consumes the string pointed at by Ptr (it will be the last one handled),
+ |	Offset is mangled to N, where N is the Offset of the first unconsumed
+ |	char in the C string;  move_lines_to_buffer/7 will start at this point
+ |	the next time read_buffer/2 is called.
+ *------------------------------------------------------------------------*/
+
+move_lines_to_buffer([],_,_,_,CurNum,CurNum,[]).
+move_lines_to_buffer(CurQueue,BufSize,BufStart,SD,CurNum,NumCs,NewQueue) :-
+	CurNum < BufSize,
+	!,
+	CurQueue = [(Ptr,Offset,Length) | RestCurQueue], 
+	BufferOffset is BufStart+CurNum,
+/*
+	MaxChars is BufSize - NumCs,
+	offsetted_copy(Ptr, Offset, SD, BufferOffset, MaxChars,
+					NumCopied, NewSourceOffset, EndFlag),
+*/
+		%% temporary hack:
+%    c_examine_str(Ptr,Offset,Length,TextUIA),
+TextUIA = Ptr,
+%write(move_lines-Ptr-TextUIA),nl,
+	name(TextUIA, TextString),
+	transfer_string(TextString,BufSize,BufStart,SD,0,NumCopied,StringTail),
+
+	NumCs is CurNum + NumCopied,
+	NewQueue = RestCurQueue.
+/*
+	(StringTail = [] -> EndFlag = 0; EndFlag = 1),
+
+		%% regular stuff again:
+	(EndFlag = 0 ->
+			%% consumed the whole C string
+		NextNum is CurNum + NumCopied,
+		move_lines_to_buffer(RestCurQueue,BufSize,BufStart,SD,NextNum,NumCs,NewQueue)
+		;
+		NewLen is Length - NumCopied,
+		arg(1, CurQueue, TheTriple),
+		mangle(2, TheTriple, NewSourceOffset),
+		mangle(3, TheTriple, NewLen),
+		NumCs is CurNum + NumCopied,
+		NewQueue = CurQueue
+	).
+*/
+move_lines_to_buffer(CurQueue,_,_,_,CurNum,CurNum,CurQueue).
+
+/*------------------------------------------------------------------------*
+ |	offsetted_copy/8
+ |	offsetted_copy(Source, SrcOffset, Target, TgtOffset, Max,
+ |					NumCopied, NewSrcOffset, EndFlag)
+ |	offsetted_copy(+, +, +, +, +, -, -, -)
+ |
+ |	To be defined in C (in bsio.c)
+ *------------------------------------------------------------------------*/
+
+
+
+
+/*
+ * read_upper/2
+ */
+
+%read_upper(file,Stream) :-
+read_upper(_,Stream) :-
+	!,
+	sio_bufshift(Stream),
+	sio_readupper(Stream).
+
+%%
+%% This is the place to add read_upper definitions for other stream types
+%%
+
+
+
+/*
+ * put_byte(Byte)
+ *
+ *	Outputs the byte Byte to the current default output stream.
+ */
+
+export put_byte/1.
+
+put_byte(Byte) :-
+	get_current_output_stream(Stream),
+	sio_put_byte(Stream,Byte),
+	!.
+put_byte(Byte) :-
+	get_current_output_stream(Stream),
+	put_failure(Stream,Byte,put_byte(Byte)).
+
+
+/*
+ * put_byte(Alias_or_stream,Byte)
+ *
+ *	Outputs the byte Byte to the stream defined by Alias_or_stream.
+ *
+ */
+
+export put_byte/2.
+
+
+put_byte(Stream, Byte) :-
+	sio_put_byte(Stream,Byte),
+	!.
+put_byte(Alias, Byte) :-
+	atom(Alias),
+	current_alias(Alias,Stream),
+	is_output_stream(Stream),
+	sio_put_byte(Stream,Byte),
+	!.
+put_byte(Alias_or_stream,Byte) :-
+	put_failure(Alias_or_stream,Byte,put_byte(Alias_or_stream,Byte)).
+
+
+put_failure(Alias_or_stream,Arg,Call) :-
+	var(Alias_or_stream),
+	!,
+	curmod(Mod),
+	trigger_event(instantiation_error, Mod:Call).
+put_failure(Alias_or_stream,Arg,Call) :-
+	is_stream(Alias_or_stream,Stream),
+	is_output_stream(Stream),
+	sio_errcode(Stream,FailCode),
+	!,
+	put_failure(FailCode,Stream,Arg,Call).
+put_failure(Alias_or_stream,Arg,Call) :-
+	is_stream(Alias_or_stream,Stream),
+	!,
+	curmod(Mod),
+	trigger_event(io_control_error, Mod:Call).
+put_failure(Stream,Arg,Call) :-
+	curmod(Mod),
+	trigger_event(type_error, Mod:Call).
+
+
+put_failure(3,Stream,Arg,Call) :-	%% SIOE_WRITE
+	stream_type(Stream,Type),
+	write_buffer(Type,Stream),
+	!,
+	sio_aux(Stream,Aux),
+	put_failure_write(Aux,Call).
+put_failure(5,Stream,Arg,Call) :-	%% SIOE_READ
+	stream_type(Stream,Type),
+	read_buffer(Type,Stream),
+	!,
+	call(Call).
+put_failure(5,Stream,Arg,Call) :-	%% SIOE_READ and read_buffer failure
+	sio_errcode(Stream,8),		%% SIOE_EOF
+	!,
+	call(Call).
+put_failure(0,_,_,Call) :-		%% SIOE_NORMAL (should not happen)
+	!,
+	fail.
+put_failure(2,Stream,Arg,Call) :-	%% SIOE_INARG
+	var(Arg),
+	!,
+	curmod(Mod),
+	trigger_event(instantiation_error, Mod:Call).
+put_failure(2,Stream,Arg,Call) :-	%% SIOE_INARG
+	!,
+	curmod(Mod),
+	trigger_event(type_error, Mod:Call).
+put_failure(_,Stream,Arg,Call) :-	%% catchall
+	!,
+	curmod(Mod),
+	trigger_event(io_control_error, Mod:Call).
+
+put_failure_write(0,_) :- !.
+put_failure_write(_,Call) :- call(Call).
+
+
+/*
+ * put_char(Char)
+ *
+ *	Outputs the character Char to the current default output stream.
+ */
+
+export put_char/1.
+
+put_char(Char) :-
+	get_current_output_stream(Stream),
+	sio_put_byte(Stream,Char),
+	!.
+put_char(Char) :-
+	get_current_output_stream(Stream),
+	put_failure(Stream,Char,put_char(Char)).
+
+/*
+ * put_char(Alias_or_stream,Char)
+ *
+ *	Outputs the character Char to the stream defined by Alias_or_stream.
+ *
+ */
+
+export put_char/2.
+
+
+put_char(Stream, Char) :-
+	sio_put_byte(Stream,Char),
+	!.
+put_char(Alias, Char) :-
+	atom(Alias),
+	current_alias(Alias,Stream),
+	is_output_stream(Stream),
+	sio_put_byte(Stream,Char),
+	!.
+put_char(Alias_or_stream,Char) :-
+	put_failure(Alias_or_stream,Char,put_char(Alias_or_stream,Char)).
+
+export putString/2.
+
+putString(Alias_or_stream, String) :-
+	is_stream(Alias_or_stream,Stream),
+	is_output_stream(Stream),
+	putString0(String, Stream).
+
+putString0([], _).
+putString0([C | String], Stream) :-
+%	sio_put_byte(Stream,C),
+	put_char(Stream,C),
+	putString0(String, Stream).
+	
+
+/*
+ * put_atom(Alias_or_stream,Atom)
+ *
+ *	Outputs the atom Atom to the stream defined by Alias_or_stream.
+ */
+
+export put_atom/2.
+
+
+put_atom(Stream, Atom) :-
+	sio_put_atom(Stream,Atom),
+	!.
+put_atom(Alias, Atom) :-
+	atom(Alias),
+	current_alias(Alias,Stream),
+	is_output_stream(Stream),
+	sio_put_atom(Stream,Atom),
+	!.
+put_atom(Alias_or_stream,Atom) :-
+	put_failure(Alias_or_stream,Atom,put_atom(Alias_or_stream,Atom)).
+
+
+/*
+ * put_number(Alias_or_stream,OutputType,Number)
+ *
+ *	Outputs the number Number as OutputType to the stream defined by
+ *	Alias_or_stream.
+ *
+ *	OutputType may take on the following values:
+ *		byte
+ *		short
+ *		long
+ *		float
+ *		double
+ */
+
+
+export put_number/3.
+
+
+put_number(Stream,OutputType,Number) :-
+	sio_put_number(Stream,OutputType,Number),
+	!.
+put_number(Alias, OutputType,Number) :-
+	atom(Alias),
+	current_alias(Alias,Stream),
+	is_output_stream(Stream),
+	sio_put_number(Stream,OutputType,Number),
+	!.
+put_number(Alias_or_stream,OutputType,Number) :-
+	put_failure(Alias_or_stream,Number,
+		put_number(Alias_or_stream,OutputType,Number)).
+
+
+/*
+ * write_buffer/2
+ */
+
+write_buffer(window,Stream) :-
+	sio_buf_params(Stream, BufStart, BufSize),
+	stream_buffer(Stream,SD),
+	sio_lpos(Stream, NumCs),
+	NumCs > 0,
+	!,
+	sio_fd(Stream, WinID),
+	'$uia_peeks'(SD,BufStart,NumCs,BufUIA),
+	write_buffer_to_win(BufUIA,NumCs,WinID,EndPos),
+	'$text_winGV$'(WinID,WinPosGV),
+	gv_set(WinPosGV,EndPos),
+	sio_set_position(Stream, 0, 0),
+	stream_addl3(Stream, ReadStreamAlias),
+	current_alias(ReadStreamAlias, ReadStream),
+	set_window_insert_pos(ReadStream,EndPos).
+/*
+	stream_addl3(Stream, ReadStream),
+	set_window_insert_pos(ReadStream,EndPos).
+*/
+write_buffer(window,Stream) :-
+	!.
+
+write_buffer(string,Stream) :-
+	sio_lpos(Stream, NumCs),
+	NumCs > 0,
+	!,
+	sio_buf_params(Stream, BufStart, _),
+	stream_buffer(Stream,SD),
+	uia_to_list(NumCs,SD,BufStart,List),
+	stream_extra(Stream,WholeString),
+	stream_addl1(Stream,LastCell),
+	last_cell(List,NewLastCell),
+	(   WholeString = []
+	->  set_stream_extra(Stream,List)
+	;   mangle(2,LastCell,List)
+	),
+	set_stream_addl1(Stream,NewLastCell),
+	sio_increment_bufpos(Stream),
+	sio_set_position(Stream,0,0).
+write_buffer(string,_) :-
+	!.
+
+%%
+%% This is the place to put write_buffer definitions for other types of
+%% streams.
+%%
+
+write_buffer(_,Stream) :-
+	!,
+	sio_writebuffer(Stream).
+
+/*
+ * write_lower/2
+ */
+
+%%
+%% This is the place to put write_lower definitions for other types of
+%% streams.
+%%
+
+write_lower(_,Stream) :-
+	!,
+	siof_writelower(Stream).
+
+
+%%
+%% uia_to_list(NumChars,UIA,Offset,List)
+%%
+%%	Moves NumChars starting at Offset from UIA into the list List.
+%%
+%%
+
+uia_to_list(0,_,_,[]) :-
+	!.
+uia_to_list(N,UIA,Offset,[C | T]) :-
+	'$uia_peekb'(UIA,Offset,C),
+	Offset1 is Offset+1,
+	N1 is N-1,
+	uia_to_list(N1,UIA,Offset1,T).
+
+
+%%
+%% last_cell(List,LastCell)
+%%
+%%	Unifies LastCell with the last cons cell in the list List.
+%%
+
+last_cell(X,X) :- 
+	X=[_],
+	!.
+last_cell([_|T],Last) :-
+	last_cell(T,Last).
+
+
+/*
+ * flush_input/1
+ *
+ *	Discards data currently in buffer for given input stream.
+ */
+
+export flush_input/1.
+flush_input(Alias_or_stream) :-
+	is_stream(Alias_or_stream,Stream),
+	is_input_stream(Stream),
+	!,
+	sio_lpos(Stream, NumCs),
+	sio_set_position(Stream, NumCs, NumCs),
+	sio_reset_eof(Stream).
+
+
+
+/*
+ * flush_output/0
+ *
+ *	Sends any output which is currently buffered by the processor for
+ *	the default output stream to be sent to that stream.
+ */
+
+export flush_output/0.
+
+flush_output :-
+	get_current_output_stream(Stream),
+	flush_output0(Stream).
+
+
+/*
+ * flush_ouptut(Alias_or_stream)
+ *
+ *	Sends any output which is currently buffered by the processor for
+ *	the stream associated with Stream_or_alias to be sent to that stream.
+ */
+
+export flush_output/1.
+
+flush_output(Alias_or_stream) :-
+	is_stream(Alias_or_stream,Stream),
+	is_output_stream(Stream),
+	!,
+	flush_output0(Stream).
+flush_output(Alias_or_stream) :-
+	var(Alias_or_stream),
+	!,
+	curmod(Mod),
+	trigger_event(	instantiation_error,
+			Mod:flush_output(Alias_or_stream)).
+flush_output(Alias_or_stream) :-
+	is_stream(Alias_or_stream,Stream),
+	!,
+	curmod(Mod),
+	trigger_event(	io_control_error,
+			Mod:flush_output(Alias_or_stream)).
+flush_output(Alias_or_stream) :-
+	curmod(Mod),
+	trigger_event(	type_error,
+			Mod:flush_output(Alias_or_stream)).
+
+flush_output0(Stream) :-
+	stream_type(Stream,Type),
+	write_buffer(Type,Stream),
+	!.
+flush_output0(Stream) :-
+	curmod(Mod),
+	trigger_event(	io_control_error,
+			Mod:flush_output(Stream)).
+
+/*
+ * at_end_of_stream
+ *
+ *	Succeeds if the default input stream is positioned at the end.
+ */
+
+export at_end_of_stream/0.
+
+at_end_of_stream :-
+	get_current_input_stream(Stream),
+	at_end_of_stream(Stream).
+
+
+/*
+ * at_end_of_stream(Alias_or_stream)
+ *
+ *	Succeeds if the input stream associated with Alias_or_stream is
+ *	positioned at the end.
+ */
+
+export at_end_of_stream/1.
+
+at_end_of_stream(Stream) :-
+	peek_char(Stream,-1).
+
+
+/*
+ * at_end_of_line
+ *
+ *	Succeeds if the default input stream is positioned at the end
+ *	of a line
+ */
+
+export at_end_of_line/0.
+
+at_end_of_line :-
+	get_current_input_stream(Stream),
+	at_end_of_line(Stream).
+
+
+/*
+ * at_end_of_line(Alias_or_stream)
+ *
+ *	Succeeds if the input stream associated with Alias_or_stream is
+ *	positioned at the end of a line.
+ */
+
+export at_end_of_line/1.
+
+at_end_of_line(Alias_or_stream) :-
+	peek_char(Alias_or_stream,0'\n).
+
+
+/*
+ * skip_line
+ *
+ *	Skips to next line of input for the default input stream.
+ */
+
+export skip_line/0.
+
+skip_line :-
+	get_current_input_stream(Stream),
+	skip_line(Stream).
+
+/*
+ * skip_line(Alias_or_stream)
+ *	Skips to the next line of input for the stream associated with
+ *	Alias_or_stream.
+ */
+
+export skip_line/1.
+
+skip_line(Stream) :-
+	get_char(Stream,Char),
+	skip_line0(Char,Stream).
+
+skip_line0(0'\n,_) :-
+	!.
+skip_line0(-1,_) :-
+	!.
+skip_line0(_,Stream) :-
+	get_char(Stream,Char),
+	skip_line0(Char,Stream).
+
+/*
+ * nl
+ *
+ *	Causes a newline to be output to the default output stream.
+ */
+
+export nl/0.
+nl :-
+	get_current_output_stream(Stream),
+	nl(Stream).
+
+/*
+ * nl(Stream)
+ *
+ *	Causes a newline to be output to the stream associated with
+ *	Stream.
+ */
+
+export nl/1.
+
+nl(Stream) :-
+	put_char(Stream,0'\n), flush_output(Stream).
+
+
+/*
+ * stream_position(Stream_or_alias, Position)
+ *
+ *	Unifies Position with the current stream position of the stream
+ *	denoted by Stream_or_alias.  Note that we call sio_getpos (so long
+ *  as we have a valid stream or alias).  These means that we can get
+ *  positions even for streams which aren't seekable.
+ */
+
+export stream_position/2.
+
+stream_position(Stream_or_alias, Position) :-
+    is_stream(Stream_or_alias,Stream),
+    !,
+    sio_getpos(Stream,Position).
+stream_position(Stream_or_alias, Position) :-
+	stream_position(Stream_or_alias, Position, current_position).
+
+
+/*
+ * stream_position(Stream_or_alias, Current_position, New_position)
+ *
+ *	Unifies Position with the current stream position of the stream
+ *	denoted by Stream_or_alias.  As a side effect, also sets the
+ *	stream position of said stream to the position represented by
+ *	New_position.   New_position may be one of the following values:
+ *
+ *	An absolute integer position into the stream.
+ *	The atom beginning_of_stream.
+ *	The atom end_of_stream.
+ *	The atom current_position.
+ *
+ *	These have the intuitive meanings.
+ */
+
+export stream_position/3.
+
+stream_position(Stream_or_alias, Current_position, New_position) :-
+	var(Stream_or_alias),
+	!,
+	curmod(Mod),
+	trigger_event(	instantiation_error,
+			Mod:stream_position(Stream_or_alias,
+					    Current_position,
+					    New_position)).
+stream_position(Stream_or_alias, Current_position, New_position) :-
+	is_stream(Stream_or_alias,Stream),
+	!,
+	position_check(Stream_or_alias, Current_position, New_position),
+	stream_type(Stream,Type),
+	stream_position(Type,Stream,Current_position,New_position).
+stream_position(Stream_or_alias, Current_position, New_position) :-
+	curmod(Mod),
+	trigger_event(	type_error,
+			Mod:stream_position(Stream_or_alias,
+					    Current_position,
+					    New_position)).
+
+position_check(Stream_or_alias, Current_position, New_position) :-
+	var(New_position),
+	!,
+	curmod(Mod),
+	trigger_event(	instantiation_error,
+			Mod:stream_position(Stream_or_alias,
+					    Current_position,
+					    New_position)).
+position_check(Stream_or_alias, Current_position, New_position) :-
+	positions_for_file_streams(New_position,_,_),
+	!.
+position_check(Stream_or_alias, Current_position, New_position) :-
+	curmod(Mod),
+	trigger_event(	type_error,
+			Mod:stream_position(Stream_or_alias,
+					    Current_position,
+					    New_position)).
+
+positions_for_file_streams(beginning_of_stream,0,0).
+positions_for_file_streams(end_of_stream,0,2).
+positions_for_file_streams(current_position,0,1).
+positions_for_file_streams(beginning_of_stream(Pos),Pos,0) :-
+	integer(Pos),
+	Pos >= 0.
+positions_for_file_streams(end_of_stream(Pos),Pos,2) :-
+	integer(Pos),
+	Pos =< 0.
+positions_for_file_streams(current_position(Pos),Pos,1) :-
+	integer(Pos).
+positions_for_file_streams(Position,Position,0) :- integer(Position).
+
+%%
+%% stream_position/4 should be extended for different stream types
+%%
+
+stream_position(file,Stream,Current_position,New_position) :-
+	positions_for_file_streams(New_position, Pos, Whence),
+	sio_seek(Stream,Current_position,Pos,Whence),
+	!.
+%%
+%% Other stream types to be added here
+%%
+
+%% Error handling clauses
+stream_position(_,Stream,Current_position,New_position) :-
+	sio_errcode(Stream,ErrCode),
+	!,
+	stream_position_failure(ErrCode,Stream,Current_position,New_position).
+stream_position(_,Stream,Current_position,New_position) :-
+	curmod(Mod),
+	trigger_event(	type_error,
+			Mod:stream_position(Stream,
+					    Current_position,
+					    New_position)).
+
+stream_position_failure(0,Stream,CurPos,NewPos) :-	%% SIOE_NORMAL
+	!,
+	fail.
+stream_position_failure(1,Stream,CurPos,NewPos) :-	%% SIOE_SYSCALL
+	!,
+	curmod(Mod),
+	trigger_event(	io_control_error,
+			Mod:stream_position(Stream,CurPos,NewPos)).
+stream_position_failure(2,Stream,CurPos,NewPos) :-	%% SIOE_INARG
+	!,
+	curmod(Mod),
+	trigger_event(	type_error,
+			Mod:stream_position(Stream,CurPos,NewPos)).
+
+
+/*
+ * get_token_list(Alias_or_stream, TokenList)
+ */
+
+export get_token_list/2.
+
+get_token_list(Stream,L1) :-
+	sio_next_tokens(Stream,L2,T),
+	!,
+	get_token_list(T,Stream,L1,L2).
+get_token_list(Alias, L1) :-
+	atom(Alias),
+	current_alias(Alias,Stream),
+	is_input_stream(Stream),
+	sio_next_tokens(Stream,L2,T),
+	!,
+	get_token_list(T,Stream,L1,L2).
+get_token_list(Alias_or_stream, TokType, TokVal) :-
+	gt_failure(Alias_or_stream,get_token_list(Alias_or_stream,List)).
+
+get_token_list(T,Stream,L1,L2) :-
+	var(T),
+	!,
+	L1=L2,
+	gt_failure(Stream,get_token_list(Stream,T)).
+get_token_list(_,Stream,L,L).	%% This is a good place to further scan the
+				%% token list if necessary.
+
+
+
+/*
+ * get_token(Alias_or_stream, TokType,TokVal)
+ *
+ */
+
+export get_token/3.
+
+get_token(Stream, TokType, TokVal) :-
+	sio_next_token(Stream,TokType,TokVal),
+	!.
+get_token(Alias, TokType, TokVal) :-
+	atom(Alias),
+	current_alias(Alias,Stream),
+	is_input_stream(Stream),
+	sio_next_token(Stream,TokType,TokVal),
+	!.
+get_token(Alias_or_stream, TokType, TokVal) :-
+	gt_failure(Alias_or_stream,get_token(Alias_or_stream,TokType,TokVal)).
+
+gt_failure(Alias_or_stream, Call) :-
+	var(Alias_or_stream),			%% variable stream descriptor
+	!,
+	curmod(Mod),
+	trigger_event(instantiation_error, Mod:Call).
+gt_failure(Alias_or_stream,Call) :-	
+	is_stream(Alias_or_stream,Stream),
+	is_input_stream(Stream),
+	sio_errcode(Stream,FailCode),		%% valid stream descriptor
+	!,
+	gt_failure(FailCode,Stream,Call).
+gt_failure(Alias_or_stream,Call) :-
+	is_stream(Alias_or_stream,Stream),	%% valid stream, bad mode
+	!,
+	curmod(Mod),
+	trigger_event(io_control_error, Mod:Call).
+gt_failure(Alias_or_stream,Call) :-		%% bad stream descriptor
+	curmod(Mod),
+	trigger_event(type_error, Mod:Call).
+
+gt_failure(0,_,_) :-			%% SIOE_NORMAL
+	!,
+	fail.
+gt_failure(6,Stream,Call) :-		%% SIOE_ILLREAD
+	!,
+	curmod(Mod),
+	trigger_event(io_control_error, Mod:Call).
+gt_failure(5,Stream,Call) :-		%% SIOE_READ
+	stream_type(Stream,Type),
+	read_buffer(Type,Stream),
+	!,
+	call(Call).			%% restart call
+gt_failure(5,Stream,Call) :-		%% SIOE_READ and read_buffer failure
+	sio_errcode(Stream,8),			%% SIOE_EOF
+	!,
+	call(Call).
+gt_failure(5,Stream,Call) :-		%% SIOE_READ and read_buffer failure
+	sio_errcode(Stream,14),			%% SIOE_WAITDATA
+	!,
+	stream_type(Stream,Type),
+	wait_data(Type, Stream, Call).
+gt_failure(5,Stream,Call) :-		%% SIOE_READ
+	!,
+	curmod(Mod),
+	trigger_event(io_control_error, Mod:Call).
+gt_failure(4,Stream,Call) :-		%% SIOE_READU
+	stream_type(Stream,Type),
+	read_upper(Type,Stream),
+	!,
+	call(Call).
+gt_failure(4,Stream,Call) :-		%% SIOE_READU and read buffer failure
+	sio_errcode(Stream,11),		%% SIOE_WRITEL
+	stream_type(Stream,Type),
+	write_lower(Type,Stream),
+	read_upper(Type,Stream),
+	!,
+	call(Call).
+gt_failure(4,Stream,Call) :-		%% SIOE_READU and read_buffer failure
+	sio_errcode(Stream,8),		%% SIOE_EOF
+	!,
+	call(Call).
+gt_failure(4,Stream,Call) :-		%% SIOE_READU
+	!,
+	curmod(Mod),
+	trigger_event(io_control_error, Mod:Call).
+gt_failure(10,Stream,Call) :-		%% SIOE_SHIFT
+	sio_bufshift(Stream),
+	!,
+	call(Call).
+gt_failure(10,Stream,Call) :-		%% SIOE_SHIFT and failure
+	sio_errcode(Stream,11),		%% SIOE_WRITEL
+	stream_type(Stream,Type),
+	write_lower(Type,Stream),
+	sio_bufshift(Stream),
+	!,
+	call(Call).
+gt_failure(10,Stream,Call) :-		%% SIOE_SHIFT and failure
+	!,
+	curmod(Mod),
+	trigger_event(io_control_error, Mod:Call).
+gt_failure(15,Stream,Call) :-		%% SIOE_PARTNUM
+	!,
+	curmod(Mod),
+	trigger_event(io_control_error, Mod:Call).
+
+gt_failure(2,Stream,Call) :-		%% SIOE_INARG
+	curmod(Mod),
+	trigger_event(type_error, Mod:Call).
+
+
+/*
+ * skip_layout(Stream)
+ */
+
+skip_layout(Stream) :-
+	sio_skip_layout(Stream),
+	!.
+skip_layout(Alias) :-
+	atom(Alias),
+	current_alias(Alias,Stream),
+	is_input_stream(Stream),
+	sio_skip_layout(Stream),
+	!.
+skip_layout(Alias_or_stream) :-
+	gt_failure(Alias_or_stream,skip_layout(Alias_or_stream)).
+
+
+
+/*
+ * get_number(Alias_or_stream,InputType,Number)
+ */
+
+export get_number/3.
+
+get_number(Stream,InputType,Number) :-
+	sio_get_number(Stream,InputType,Number),
+	!.
+get_number(Alias,InputType,Number) :-
+	atom(Alias),
+	current_alias(Alias,Stream),
+	is_input_stream(Stream),
+	sio_get_number(Stream,InputType,Number),
+	!.
+get_number(Alias_or_stream,InputType,Number) :-
+	gt_failure(Alias_or_stream,get_number(Alias_or_stream,InputType,Number)).
+
+
+/*
+ * get_line(Line)
+ *
+ *	Reads from the current input stream the current line or remaining
+ *	portion thereof into a UIA and unifies this UIA with Line.
+ */
+
+
+export get_line/1.
+
+get_line(Line) :-
+	get_current_input_stream(Stream),
+	get_line(Stream,Line).
+
+
+
+/*
+ * get_line(Stream,Line)
+ *
+ *	Reads from Stream the current line or remaining portion thereof
+ *	into a UIA and unifies this UIA with Line.
+ *
+ *	If end-of-file is encountered before any characters, this predicate
+ *	will fail.  If end-of-file is encountered before the newline, then
+ *	this predicate will unify Line with the UIA containing the characters
+ *	encountered up until the end-of-file.
+ */
+
+export get_line/2.
+
+get_line(Stream,Line) :-
+	get_line0(Stream,Line0,EndFlag),
+	gl_more(EndFlag,Stream,Line0,Line).
+
+
+
+gl_more(-1,_,_,_) :- !, fail.		%% fail on end of file
+gl_more(0,Stream,Line0,Line) :-		%% end of line not seen
+	get_line(Stream,Line1),
+	!,
+	'$atom_concat'(Line0,Line1,Line).
+gl_more(_,_,Line,Line).			%% End of line seen or end-of-file
+					%% encountered while attempting
+					%% to get rest of line
+
+
+get_line0(Stream,Line,EndFlag) :-
+	sio_readln(Stream,Line,EndFlag),
+	!.
+get_line0(Alias,Line,EndFlag) :-
+	atom(Alias),
+	current_alias(Alias,Stream),
+	is_input_stream(Stream),
+	sio_readln(Stream,Line,EndFlag),
+	!.
+get_line0(Alias_or_stream,Line,EndFlag) :-
+	get_failure(Alias_or_stream,get_line0(Alias_or_stream,Line,EndFlag)).
+
+
+/*
+ * put_line(Line)
+ */
+
+export put_line/1.
+
+put_line(Line) :-
+	get_current_output_stream(Stream),
+	put_line(Stream,Line).
+
+/*
+ * put_line(Stream,Line)
+ */
+
+export put_line/2.
+
+put_line(Stream,Line) :-
+	put_atom(Stream,Line),
+	nl(Stream).
+
+/*
+ * get_maxdepth(Alias_or_Stream,Depth)
+ */
+
+export get_maxdepth/2.
+
+get_maxdepth(Alias_or_Stream,Depth) :-
+	curmod(Mod),
+	Call = get_maxdepth(Alias_or_Stream,Depth),
+	(   nonvar(Alias_or_Stream)
+	;   trigger_event(instantiation_error,Call)),
+	!,
+	(   is_stream(Alias_or_Stream,Stream)
+	;   trigger_event(type_error,Call)),
+	!,
+	stream_wt_maxdepth(Stream,Depth).
+
+/*
+ * set_maxdepth(Alias_or_Stream,Depth)
+ */
+
+export set_maxdepth/2.
+
+set_maxdepth(Alias_or_Stream,Depth) :-
+	curmod(Mod),
+	Call = set_maxdepth(Alias_or_Stream,Depth),
+	(   nonvar(Alias_or_Stream),
+	    nonvar(Depth)
+	;   trigger_event(instantiation_error,Call)),
+	!,
+	(   is_stream(Alias_or_Stream,Stream),
+	    integer(Depth)
+	;   trigger_event(type_error,Call)),
+	!,
+	(   Depth > 0
+	;   trigger_event(range_error,Call)),
+	!,
+	set_stream_wt_maxdepth(Stream,Depth).
+
+
+/*
+ * get_line_length(Alias_or_Stream,Length)
+ */
+
+export get_line_length/2.
+
+get_line_length(Alias_or_Stream,Length) :-
+	curmod(Mod),
+	Call = set_line_length(Alias_or_Stream,Length),
+	(   nonvar(Alias_or_Stream)
+	;   trigger_event(instantiation_error,Call)),
+	!,
+	(   is_stream(Alias_or_Stream,Stream)
+	;   trigger_event(type_error,Call)),
+	!,
+	stream_wt_line_length(Stream,Length).
+
+
+/*
+ * set_line_length(Alias_or_Stream,Length)
+ */
+
+export set_line_length/2.
+
+set_line_length(Alias_or_Stream,Length) :-
+	curmod(Mod),
+	Call = set_line_length(Alias_or_Stream,Length),
+	(   nonvar(Alias_or_Stream),
+	    nonvar(Length)
+	;   trigger_event(instantiation_error,Call)),
+	!,
+	(   is_stream(Alias_or_Stream,Stream),
+	    integer(Length)
+	;   trigger_event(type_error,Call)),
+	!,
+	(   Length > 4
+	;   trigger_event(range_error,Call)),
+	!,
+	set_stream_wt_line_length(Stream,Length).
+
+
+/*
+ * get_depth_computation(Alias_or_Stream,DC)
+ */
+
+export get_depth_computation/2.
+
+get_depth_computation(Alias_or_Stream,DC) :-
+	curmod(Mod),
+	Call = set_depth_computation(Alias_or_Stream,DC),
+	(   nonvar(Alias_or_Stream)
+	;   trigger_event(instantiation_error,Call)),
+	!,
+	(   is_stream(Alias_or_Stream,Stream)
+	;   trigger_event(type_error,Call)),
+	!,
+	stream_wt_depth_computation(Stream,DC).
+
+
+/*
+ * set_depth_computation(Alias_or_Stream,DC)
+ */
+
+export set_depth_computation/2.
+
+set_depth_computation(Alias_or_Stream,DC) :-
+	curmod(Mod),
+	Call = set_depth_computation(Alias_or_Stream,DC),
+	(   nonvar(Alias_or_Stream),
+	    nonvar(DC)
+	;   trigger_event(instantiation_error,Call)),
+	!,
+	(   is_stream(Alias_or_Stream,Stream),
+	    atom(DC)
+	;   trigger_event(type_error,Call)),
+	!,
+	(   DC=flat
+	;   DC=nonflat
+	;   trigger_event(range_error,Call)),
+	!,
+	set_stream_wt_depth_computation(Stream,DC).
+
+
+
+
+
+queue_control(MsgQID, Cmd, Perms, Info) :-
+	encode_ipc_cmd(Cmd, CmdCode),
+	msgctl(MsgQID, CmdCode, Perms, Info).
+
+
+    /*---------------------------
+     * Initialization of user
+     *--------------------------*/
+user_prompt_goal(Stream) :-
+	get_user_prompt(Prompt),
+	put_atom(Stream,Prompt),
+	flush_output(Stream).
+
+export sio_pckg_init/0.
+
+
+/*
+ * sio_pckg_init	-- initialization procedure for streams
+ *
+ *	Note:  We have set the buffer sizes to 128 for both of the input
+ *	streams.  This is because a paste operation in Open Windows appears
+ *	to transmit only 128 characters at a time.
+ */
+
+sio_pckg_init :-
+
+    %% User Input/Output Streams
+    set_user_prompt(''),
+    open('$stdout',write,[buffering(line),text],OutStream),
+    open('$stdin',
+         read,
+         [prompt_goal(user_prompt_goal(OutStream)),bufsize(128)],
+         InStream),
+    set_stream_identifier(InStream,-1),
+    set_stream_identifier(OutStream,-2),
+    set_current_input_stream(InStream),
+    set_current_output_stream(OutStream),
+
+    %% Debugger streams
+    open('$stdout',write,
+	 [	buffering(line),text,
+		maxdepth(20),
+		line_length(76),
+		depth_computation(nonflat)],
+	 OutDStream),
+    open('$stdin', read,
+	 [prompt_goal(flush_output(OutDStream)), bufsize(128)],
+	 InDStream),
+    set_stream_identifier(InDStream,-3),
+    set_stream_identifier(OutDStream,-4),
+
+    %% Error stream
+    open('$stderr',write,[buffering(byte),text],OutEStream),
+    set_stream_identifier(OutEStream,-5),
+
+    %% Establish aliases
+    set_aliases([[user|InStream],[user|OutStream],
+		[user_input|InStream],[user_output|OutStream],
+		[debugger_input|InDStream],[debugger_output|OutDStream],
+		[error_stream|OutEStream] ]).
+
+:- sio_pckg_init.
+
+endmod.

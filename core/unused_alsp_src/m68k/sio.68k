@@ -1,0 +1,165 @@
+;
+; sio.68k		-- blindingly fast stream I/O primitives
+;	Copyright (c) 1991-1993 by Applied Logic Systems, Inc.
+;
+; Author: Kevin A. Buettner
+; Creation: 10/23/91
+; Revision History:
+;	
+
+
+#include "assembly.68k"
+#include "bsio.h"
+
+
+	text
+	global	wm_sio_gbyte
+wm_sio_gbyte:
+	unlk	E
+	deref	4(SP),	a0,	1f	; deref first arg
+gbfail:	fail				; fail if variable
+1:	tag_bne	MTP_STRUCT, gbfail
+	move.l	-MTP_STRUCT(a0), d0	; get functor
+	cmp.l	#MMK_FUNCTOR(SIO_SD_FUNCTOR,SIO_SD_ARITY), d0 
+	bne.s	gbfail			; fail if not correct functor
+	deref	4-MTP_STRUCT(a0), a0, gb1arg
+	fail				; fail if variable
+
+gb1arg:	ctag_bne MTP_UIA, a0, gbfail	; fail if not UIA
+	move.l	a0,	d0		; put uia back in d0
+	asr.l	#MTP_CONSTSHIFT, d0	; shift out the tags leaving offset
+	add.l	wm_heapbase,	d0	; now d0 has the real address
+	move.l	d0,	a0		; put uia address back in a0
+	addq.l	#4,	a0		; make a0 point at start of buffer
+	move.l	sio_FLAGS(a0),	d0	; get the flags
+	and.w	#SIOF_READ,	d0	; see if read mode is set
+	bne.s	1f			; branch if so
+	move.l	#SIOE_ILLREAD, sio_ERRCODE(a0); otherwise we've tried an
+	fail				; illegal read
+1:	deref	8(SP),	a1,	2f	; dereference second argument
+	bra.s	1f			; continue if variable
+2:	ctag_bne MTP_INT, a1, gbinarg	; arg invalid if not integer
+	cmp.l	#MMK_INT(-1), a1
+	blt.s	gbinarg			; arg invalid if less than zero
+	cmp.l	#MMK_INT(255), a1
+	bgt.s	gbinarg			; arg invalid if greater than 255
+
+1:	move.l	sio_CPOS(a0),	d1	; get the current character position
+	cmp.l	sio_LPOS(a0),	d1	; see if we've gone too far
+	blt.s	1f			; branch if we haven't
+	move.l	#SIOE_READ, sio_ERRCODE(a0)
+	fail				; we need a new buffer
+1:	move.l	#SIOE_NORMAL, sio_ERRCODE(a0)
+	addq.l	#1,	d1		; advance character position
+	move.l	d1,	sio_CPOS(a0)	; write back to memory
+	clr.l	d0			; clear d0 out
+	move.b	sio_BUFFER-1(a0,d1), d0	; put byte in d0
+#ifdef MacOS
+	cmp.w	#13,    d0     ; newline is ASCII 13 on Mac
+#else
+	cmp.w	#10,	d0		; see if we have a newline
+#endif	
+	bne.s	1f			; branch if we don't
+	addq.l	#1,	sio_LINENUM(a0)	; advance line number if we had newline
+	clr.l	sio_COLUMN(a0)		; clear column number
+	bra.s	2f
+1:
+	addq.l	#1,	sio_COLUMN(a0)	; increment column number
+2:	move.l	a1,	a0		; put second argument in a0
+	lsl.l	#MTP_CONSTSHIFT, d0	; make room for tags
+	addq.l	#MTP_INT,	d0	; add in integer tag
+	jmp	wm_unify		; unify the character just gotten
+
+gbinarg:
+	move.l	#SIOE_INARG, sio_ERRCODE(a0)
+	fail
+
+	text
+	global	wm_sio_pbyte
+wm_sio_pbyte:
+	unlk	E
+	deref	4(SP),	a0,	1f	; deref first arg
+pbfail:	fail				; fail if variable
+1:	tag_bne	MTP_STRUCT, pbfail
+	move.l	-MTP_STRUCT(a0), d0	; get functor
+	cmp.l	#MMK_FUNCTOR(SIO_SD_FUNCTOR,SIO_SD_ARITY), d0 
+	bne.s	pbfail			; fail if not correct functor
+	deref	4-MTP_STRUCT(a0), a0, pb1arg
+	fail				; fail if variable
+
+pb1arg:	ctag_bne MTP_UIA, a0, pbfail	; fail if not UIA
+	move.l	a0,	d0		; put uia back in d0
+	asr.l	#MTP_CONSTSHIFT, d0	; shift out the tags leaving offset
+	add.l	wm_heapbase,	d0	; now d0 has the real address
+	move.l	d0,	a0		; put uia address back in a0
+	addq.l	#4,	a0		; make a0 point at start of buffer
+	move.l	sio_LPOS(a0),	d3	; put last position in d3
+	move.l	sio_FLAGS(a0),	d2	; put the flags in d2
+	move.l	d2,	d0		; put flags in d0
+	and.w	#SIOF_WRITE,	d0	; See if in write mode
+	bne.s	1f			; branch if we are
+	move.l	#SIOE_ILLWRITE, sio_ERRCODE(a0); otherwise we've tried an
+	fail				; illegal write
+1:	move.l	d2,	d0		; put flags in d0
+	and.w	#(SIOF_READ|SIOF_EOF), d0 ; examine read and EOF flags
+	cmp.w	#SIOF_READ,	d0	; see if only the read flag is set
+	bne.s	1f			; branch if not
+	tst.l	d3			; see if last pos is zero
+	bne.s	1f			; branch if not
+	;
+	; If we've fallen through to this point, we are
+	;	in read_write mode,
+	;	the buffer is empty,
+	;	and end-of-file has not been encountered
+	; So we need to fill the buffer up if possible
+	;
+	move.l	#SIOE_READ,	sio_ERRCODE(a0)
+	fail
+1:
+	deref	8(SP),	a1,	pb2ndarg ; dereference second argument
+	; invalid argument if variable
+pbinarg:
+	move.l	#SIOE_INARG,	sio_ERRCODE(a0);
+	fail
+pb2ndarg:
+	ctag_bne MTP_INT, a1, pbinarg
+
+	move.l	sio_CPOS(a0),	d1	; put the current position in d1
+	move.l	a1,	d4		; put the character to write in d4
+	asr.l	#MTP_CONSTSHIFT, d4
+	move.b	d4,	sio_BUFFER(a0,d1) ; write the character to memory
+	addq.l	#1,	d1		; advance the current position
+	cmp.l	d3,	d1		; see if past LPOS
+	ble.s	1f			; branch if not
+	move.l	d1,	sio_LPOS(a0)	; store to memory
+	move.l	d1,	d3		; fix shadow in register also
+1:	move.l	d1,	sio_CPOS(a0)	; store the character position
+	or.w	#SIOF_DIRTY, d2		; or dirty flag into rest of flags
+	move.l	d2,	sio_FLAGS(a0)	; set the flags
+
+	; We now need to check the flags and the LPOS value to see if the
+	; buffer needs to be written.  If it does, we will fail with
+	; ERRCODE set to SIOE_WRITE.
+
+	move.l	d2,	d0		; put flags in d0
+	and.w	#SIOF_BBYTE,	d0	; see if byte buffering is in effect
+	bne.s	pbwrbuf			; branch if so
+	move.l	d2,	d0		
+	and.w	#SIOF_BLINE,	d0	; see if line buffering is in effect
+	beq.s	1f			; branch if not
+#ifdef MacOS
+	cmp.w   #13,    d4		; newline is 13 on Mac
+#else
+	cmp.w	#10,	d4		; see if last char in buffer was newline
+#endif
+	beq.s	pbwrbuf			; branch if so
+1:	cmp.l	sio_BFSIZE(a0),	d3	; see if buffer is full
+	beq.s	pbwrbuf
+
+	move.l	#SIOE_NORMAL,	sio_ERRCODE(a0)
+	rts
+
+pbwrbuf:
+	; we will come here if the buffer needs to be written out
+	move.l	#SIOE_WRITE,	sio_ERRCODE(a0)
+	fail

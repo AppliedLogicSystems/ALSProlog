@@ -1,0 +1,203 @@
+#include "assembly.88k"
+
+	text
+;
+; Code for Builtin Mangle/3
+;
+;	Copyright (c) 1989 Motorola, Inc.
+;	Copyright (c) 1989 Applied Logic Systems, Inc.
+;
+; Modified: Scott Medeiros	Sep 1992	support for big structures
+;
+;  REGISTERS
+;
+;  A1	argument 1  	(an integer, N)
+;  A2	argument 2  	(a structure or list, S)
+;  A3	argument 3  	(the Nth arg of S, A --may not be var)
+;  CP	return address
+;  OldE environment pointer
+;  
+	global _wm_mangle
+
+_wm_mangle:
+
+_m1:
+	bb1	BGND,	A1,	_m2		; dereference A1
+	ld	tmp1,	A1,	BIAS		;
+	cmp	tmp2,	A1,	tmp1		;
+	bb0.n	eq,	tmp2,	_m1		;
+	addu	A1,	tmp1,	0		;
+;
+; The first arg is a variable, fail.
+;
+	jmp	Fail				;
+
+_m2:
+	bb0	BNUM,	A1,	_fail		; integer(A1)?
+	bb1	BUIA,	A1,	_fail		; 
+
+	extu	A1,	A1,	26<0>		; get integer N
+	bcnd	eq0,	A1,	_fail		; fail if 0
+
+;
+; The first argument is an integer
+;
+_m3:
+	bb1	BGND,	A3,	_m4		; dereference A3
+	ld	tmp1,	A3,	BIAS		;
+	cmp	tmp2,	A3,	HeapBase	; do early test
+	cmp	A3,	A3,	tmp1		;
+	bb0.n	eq,	A3,	_m3		;
+	addu	A3,	tmp1,	0		;
+
+;; Old code -- if A3 is a variable, fail
+;	jmp	Fail				;
+;; End of old Code
+
+;; New code -- make sure var lives on heap
+	bb1	hs,	tmp2,	_m4		; branch if on heap
+	cmp	tmp2,	A3,	SPB		; see if we need to trail
+	bb1.n	lo,	tmp2,	1f		; branch if no trailing needed
+	st	H,	H,	BIAS		; make a variable on heap
+	subu	TR,	TR,	4		; push an entry onto the
+	st	A3,	TR,	0		;	trail
+1:
+	st	H,	A3,	BIAS		; bind variable to top of heap
+	addu	A3,	H,	0		; move top of heap to A3
+	addu	H,	H,	4		; advance H
+;; End of new code
+	
+
+;
+; The third argument is a nonvar.
+;
+_m4:
+	bb1	BGND,	A2,	_m5		; dereference A2
+	ld	tmp1,	A2,	BIAS		;
+	cmp	tmp2,	A2,	tmp1		;
+	bb0.n	eq,	tmp2,	_m4		;
+	addu	A2,	tmp1,	0		;
+;
+; The second arg is a variable, fail.
+;
+	jmp	Fail				;
+
+
+_m5:
+	bb1	BLIST,	A2,	_mlist		; list(A2)?
+	bb0	BSTRC,	A2,	_fail		; struct(A2)?
+;
+; Arg1 is an appropriate integer, Arg2 is a structure, Arg3 is nonvar.
+;
+	clr	A2,	A2,	6<26>		; point to functor/arity
+	ld	tmp1,	A2,	BIAS		; get functor/arity
+
+	addu	tmp2,	A2,	BIAS		; 	
+
+	extu	tmp1,	tmp1,	10<16>		; extract arity
+
+	cmp	tmp3,	tmp1,	1023		; check for escape arity
+	bb0	eq,	tmp3,	1f		; branch for small struct
+	ld	tmp1,	A2,	BIAS+4		; get big arity
+	clr	tmp1,	tmp1,	6<26>		; nuke the integer tag
+	addu	tmp2,	tmp2,	4		; bump base address
+
+1:	cmp	tmp1,	A1,	tmp1		; N > Arity?
+	bb1	hi,	tmp1,	_fail		;
+
+	st	A3,	tmp2[A1]		; mangle the arg
+
+;
+; Need to check for safety of A3 (before or after HB)
+;
+	bb1	BLIST,	A3,	_msafe		; list?
+	bb1	BSTRC,	A3,	_msafe		; struct?
+	bb1	BUIA,	A3,	_msafe		; uia?
+
+	jmp.n	CP 				; return
+	addu	E,	OldE,	0		;
+
+;
+; Arg1 is an integer, Arg2 is a list pointer, Arg3 is nonvar.
+;
+_mlist:
+	cmp	tmp1,	A1,	2		;
+	bb1	hi,	tmp1,	_fail		; 0<N<=2 ?
+
+	clr	A2,	A2,	6<26>		; point to car
+
+	addu	A1,	A1,	(BIAS/4)-1	; offset A1
+
+	st	A3,	A2[A1]			; mangle car or cdr
+
+;
+; Need to check for safety of A3 (before or after hb)
+;
+	bb1	BLIST,	A3,	_msafe		; list?
+	bb1	BSTRC,	A3,	_msafe		; struct?
+	bb1	BUIA,	A3,	_msafe		; uia?
+mret:
+	load	tmp2,	_gv_setcnt		; increment gv_setcnt
+	addu	tmp2,	tmp2,	1
+	store	tmp2,	_gv_setcnt
+
+	jmp.n	CP				; return
+	addu	E,	OldE,	0		;
+	
+;
+; A3 is a pointer type object (list, struct, uia, or float).  The
+; mangled object must be made safe.
+;
+_msafe:
+	clr	A3,	A3,	6<26>		; get address
+
+	cmp	tmp1,	A3,	A2		; compare against object 
+	bb1	ls,	tmp1,	mret		; --value older than object
+
+	addu	T1,	B,	0		; put choice ptr into T1
+	addu	T2,	H,	0		; put top of heap into T2
+
+	; A2		-- slot address (actually object address on m88k)
+	; A3		-- value which we put into slot (an address)
+	; T1		-- choice pointer
+	; T2		-- HB update pointer
+
+	cmp	tmp1,	A2,	HB		; compare slot address with HB
+	bb1	hs,	tmp1,	mret		; branch if no work to do
+
+	; Why it is safe to return when slot address is bigger than (or equal
+	; to) HB (this is commentary on the above two lines of code):
+	;
+	; We can't be here if we set the slot to something less than the
+	; object.  (Such an operation is intrinsically safe.) Therefore, we
+	; must have set it to something greater.  But both objects are
+	; in the same heap segment, so failure will wipe both out. Therefore,
+	; we need do nothing special.
+	;
+
+	cmp	tmp1,	A3,	HB		; compare obj address
+	bb1	hs,	tmp1,	m_updHB		; update choice pt if HB <= obj
+	br.n	m_loopmid			; branch to middle of loop
+	addu	T2,	HB,	0		;   whilst lowering the
+						;   choice point update value
+m_updHB:
+	br.n	m_loopmid			; branch to middle of loop
+	addu	HB,	T2,	0		;   whilst updating the
+						;   HB pointer
+m_updchpt:
+	st	T2,	T1,	chpt_HB		; update choice point
+m_nextchpt:
+	ld	T1,	T1,	chpt_B		; follow choice point chain
+	bcnd	eq0,	T1,	mret		; branch if at end
+m_loopmid:
+	ld	tmp1,	T1,	chpt_SPB	; get SPB value
+	ld	T3,	T1,	chpt_HB		; get HB value into T3
+	clr	tmp1,	tmp1,	2<0>		; clear compaction bit
+	cmp	tmp2,	A2,	T3		; compare slot addr with
+						;   HB (from chpt)
+	st	tmp1,	T1,	chpt_SPB	; store SPB value back
+	bb1	hs,	tmp2,	mret		; return if no more work to do
+	cmp	tmp1,	A3,	T3		; compare obj value with chpt HB
+	bb1	hs,	tmp1,	m_updchpt	;
+	br.n	m_nextchpt
+	addu	T2,	T3,	0		; lower the update value

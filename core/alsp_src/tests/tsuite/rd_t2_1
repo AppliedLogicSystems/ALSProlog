@@ -1,0 +1,15 @@
+/*
+ * rd_t2_1: This is a test include file
+ *
+ */
+
+p(x).
+p(y).
+p(z).
+p(
+#include "rd_t2_2"
+,
+[
+#include "rd_t2_2"
+]
+).

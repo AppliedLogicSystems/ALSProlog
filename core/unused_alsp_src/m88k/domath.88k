@@ -1,0 +1,2414 @@
+;
+; domath.88k		-- math package for m88k
+;	Copyright (c) 1991 Applied Logic Systems, Inc.
+;	Copyright (c) 1991 Motorola Inc.
+;
+; Author:	Scott Medeiros (port from Kevin Buettner's domath.sparc)
+; Creation:	5/17/91
+; Revision History:	
+;		8/16/91		SM	changed long code sequences in entry points to branches 
+;					(e.g. dbl_sin(2)) to avoid maintenance padding hassles
+;		8/19/91		SM	cleaned up and documented some
+;		9/11/91		SM	fixed elusive floating point overflow exception problem
+;					with int.sd in mth_getnum2 and dbl_putnum2.  Is all
+;					this overhead really worth it, though?
+;		4/13/92		SM	fixed mth_rshft and dbl_rshft to work properly for signed
+;					quantities (use ext instead of extu)
+;		7/21/92		SM	fixed a couple of bugs (in dbl_mod2, dbl_div2) where floor
+;					was being called instead of truncate
+;		3/31/93		SM+KB	fixed bug in dcmp_addi and dcmp_subi
+	
+
+
+#include "assembly.88k"
+#include "mtypes.h"
+#include "tokens.h"
+
+; The original Sparc documentation now follows.  Appearing after this will be some
+; 88k specific comments.
+
+
+;
+; Modes:
+;
+;	There is a concept of "mode" in this package.  This package can
+;	be in one of three modes.  They are integer, double, and decompile.
+;
+;	Under normal circumstances, this package starts out in integer mode.
+;	The arguments and operands are assumed to be integers and all
+;	operations are integer operations.
+;
+;	Double mode is entered when an overflow occurs in integer mode or
+;	when an operation is requested which necessitates doing double
+;	arithmetic.  Examples include multiplying by 2.5 or taking a
+;	square root.
+;
+;	Decompile mode is entered at the outset as a result of the safety
+;	value being negative.  Structure is built on the heap in this mode.
+;	Arguments do not need to dereference to numbers or expressions which
+;	will evaluate to numbers in this mode. (I.e, they may be variables).
+;
+;
+;	On the SPARC we implement these modes by the clever use of the
+;	jmpl instruction.  A typical subroutine branch to perform a given
+;	piece of arithmetic will look like this:
+;
+;			jmpl	[S+Offset], Ret
+;
+;	On the 88k, two instructions will be needed.  They will look like
+;	this:
+;			addu	tmp1,	S,	Offset
+;			jsr	tmp1
+;
+;	The S register contains the base address of the moded math subroutines.
+;	Offset will be the offset to add to this base to get to the desired
+;	math subroutine.  Ret, of course, is the standard place to put the
+;	return address.
+;
+;	The mode we are in is adjusted by changing S, the base to the moded
+;	math subroutines.   This means that Offset for a given math subroutine
+;	must be the same for each of the three modes.
+;	
+;
+; Arithmetic Stack:
+;
+;	On the SPARC, we allocate the arithmetic stack on the heap.  Since
+;	the amount of space required to evaluate an expression may be 
+;	determined at comile time, a bounded amount of space may be allocated
+;	on the heap.  The heap grows from smaller addresses to larger addresses,
+;	but the arithmetic stack will grow from larger addresses to smaller.
+;	The global location mth_bot contains the address of of the bottom
+;	of the stack.  When needed, the global location mth_stk refers to
+;	the start of this area (mth_bot will point at the end).
+;
+;	During an arithmetic evaluation on the SPARC, the top of stack will
+;	reside in OldE as OldE is not needed in the course of evaluation.  In
+;	the event that we are in a clause where the arithmetic forms the
+;	only goal so that CP and OldE contain valid values, the initialization
+;	routine writes them out to their expected places in the current
+;	(argument/environment) stack frame.  This also means that calling out
+;	may also be performed in a uniform manner.
+;
+;	Elements of the arithmetic stack consist of double words (64 bits)
+;	of which one word per element are wasted in decompilation and integer
+;	modes.  We waste them for the sake of uniformity and for ease of
+;	transition between integer and double modes if necessary.  When
+;	it is necessary to switch from integer mode to double mode, we
+;	start at the top of the stack and convert the integer format to
+;	double format for each element.  We also change S to point at
+;	dbl_base so that future evaluation will proceed in double mode.
+;
+;	As an optimization, we put the top of stack value in UArg1 for integer
+;	and decompilation modes.  We put the top of stack value in f0 for
+;	double mode.  Without this optimization an add (of the top two stack
+;	elements) would require two loads and one store.  With this
+;	optimization, however, only one load is required.  The expense, of
+;	course, comes in greater complexity.  Each of the push operations
+;	is now split into two variants, one for when the stack is empty
+;	(UArg1 or f0 may be loaded with no memory references), and the
+;	second when the stack is nonempty (UArg1 or f0 must be pushed on
+;	the stack so that the top of stack register is ready for the new
+;	top of stack).
+;
+;	Once allocated, the portion above the heap looks as follows (for
+;	double and integer modes only):
+;
+;		+-----------------------+
+;		| 			| 		(larger addresses)
+;		+---                 ---+		|   (direction of
+;		| 			| <-- mth_bot	V    arith stack
+;		+-----------------------+		     growth)
+;		|  .			|
+;		   .
+;		|  .			|
+;		+-----------------------+
+;		| 			|
+;		+---                 ---+
+;		| 			| <-- OldE
+;		+-----------------------+
+;		|  .			|
+;		   .
+;		|  .			|
+;		+-----------------------+
+;		| 			|
+;		+---  Space Reserved ---+
+;		| 			|
+;		+---  for callout    ---+
+;		| 			|
+;		+---  and for storing---+
+;		| 			|
+;		+---  doubles at end ---+		^  (direction of
+;		| 			|		|    heap growth)
+;		+---  of computation ---+
+;		| 			| <--H		(smaller addresses)
+;		+-----------------------+
+;
+;
+;	As stated before, the elements of the stack consist of double words.
+;	On the Sparc, they are also double word aligned.  Care must be taken
+;	when returning from a callout that they are still double word aligned.
+;	(Garbage compaction may have moved them somewhat).  There is also
+;	space reserved in this area for storing the various state information
+;	in order to do a callout.
+;
+;	When in decompilation mode, H is actually moved to just after mth_bot
+;	in order that structure may be built on the heap without interfering
+;	with the operation of the arithmetic stack.  The global location
+;	mth_stk is set to where H used to be.  
+;
+;	When in double mode and sometimes in integer mode (when the integer on 
+;	the stack is too large to be representable as a Prolog integer), the
+;	reserved space is used to build the double.  In each mode, when the
+;	computation is complete, there is no finishing code which needs to be
+;	run in order to deallocate the stack or readjust the heap pointer.
+;	The space wasted in decompilation mode is considered garbage.
+;
+; Calling Out:
+;	It will at times be necessary to call Prolog in the course of
+;	an evalution.  My favorite example is in the goal:
+;
+;		Y is X+1
+;
+;	In the process of evaluation, the value for X is obtained and pushed
+;	on the arithmetic stack.  We expect X to be bound to an integer
+;	or a double, but it is also permissible for X to be bound to an
+;	expression such as 3*4 which must be evaluated before execution can
+;	continue.  We must call Prolog to perform this evaluation.  We could
+;	also call C (which might ultimately get called anyway), but calling
+;	Prolog makes the evaluator more extensible.  This way expressions
+;	which are not recognizable at compile time may recognized by the
+;	interpretive evaluator at run time.  A user could, for example,
+;	extend is/2 to recognize a function which takes lengths of
+;	lists.  Then something of the following form could be written as
+;	a goal:
+;
+;		NewLen is len(InList)+1
+;
+;	We also use the call out mechanism in decompilation mode to get the
+;	system to handle the goal which has been built up.
+;
+;	The implementation of the call out mechanism is straight forward.
+;	In the initialization phase of an evaluation, CP is set to point
+;	at goal specific code to perform the callout.  This code will
+;	be responsible for saving/restoring argument and temporary registers
+;	in use (only the ones in use) on the argument environment stack so
+;	that they may be garbage collected.  Aside from this save/restore
+;	code, this code will look like almost any other call to a two argument
+;	predicate complete with garbage collector information.  (It is
+;	expected that only calls to two argument predicates will be needed
+;	since 'is' and all of the relational arithmetic	predicates require
+;	only two arguments.)  Since the argument registers might be in use,
+;	we will pass the two arguments and the target to call (either is/2
+;	or one of the relational operators) in UArg1, UArg2, and tmp1.
+;
+;	The state is saved on the arithmetic stack in the following format
+;	(at the time of the actual call out).
+;
+;		
+;
+;		+-----------------------+
+;		|   			| <-- H
+;		+-----------------------+
+;		|   Fence		| <-- mth_bot
+;		+-----------------------+
+;		|  .			|
+;		   .
+;		|  .			|
+;		+-----------------------+
+;		| 			|
+;		+---                 ---+
+;		| 			| <-- OldE
+;		+-----------------------+
+;		|  .			|
+;		   .
+;		|  .			|
+;		+-----------------------+
+;		|   CP			|
+;		+-----------------------+
+;		|   S			|
+;		+-----------------------+
+;		|   RET			|
+;		+-----------------------+
+;		|   RET2		|
+;		+-----------------------+
+;		|   Top Offset		|
+;		+-----------------------+
+;		|   Fence		| <--(where H used to point)
+;		+-----------------------+
+;
+;	A UIA fence delimits the ends of the area allocated for use as
+;	the arithmetic stack.  A UIA pointer is pushed onto argument/
+;	environment stack by the callout code to this area.  If garbage
+;	compaction needs to be performed, this area will not be collected
+;	away.  As stated earlier, however, it is possible for the arithmetic
+;	stack to become misaligned.  In the event that it becomes misaligned,
+;	our strategy is to move the stack upwards by one 32-bit word, thus
+;	realigning it.  Note that mth_bot points at the fence,  and H points
+;	at the next higher address.  The realignment procedure will actually
+;	overwrite the fence with a portion of the real bottom stack element
+;	(located at mth_bot-8).  The realignment procedure finishes with
+;	mth_bot also advancing by four in order to realign the bottom.
+;
+;	Top Offset refers to the offset between the first delimiting fence
+;	and the actual top of the arithmetic stack given by OldE.  It is not
+;	permissible to store an absolute address for this value as garbage
+;	compaction could move the area thus invalidating the absolute address.
+;	An offset will not be invalidated by garbage compaction.
+;
+;	RET and RET2 refer to places to return to within the arithmetic
+;	evaluator code.   RET2 refers to the actual place in the code
+;	stream layed down by icmath to return to.  RET contains a more
+;	recent point in the code which is performing the callout.
+;
+;	S and CP refer to the mode and callout code respectively.  In this
+;	case, the mode will be an address; one of mth_base, dcmp_base, or
+;	dbl_base.  The use of CP has been described earlier.  CP must be
+;	saved in case more than one callout is performed.
+;
+;	When calling 'is'/2, the left hand side	of the 'is' will be a variable.
+;	We handle this variable by making it appear to be part of the calling
+;	environment.  The argument/ environment stack frame will appear as
+;	follows:
+;
+;
+;		+-----------------------+
+;		|  CP"			|		(higher addresses)
+;		+-----------------------+
+;		|  OldE" 		| <-- Environment of clause
+;		+-----------------------+
+;		|  .	Environment	|
+;		   .	Variables
+;		   .	  and other
+;		   .	(possibly zero)
+;		   .	stack frames
+;		|  .			|
+;		+-----------------------+
+;		|  CP'	(dummy)		|
+;		+-----------------------+
+;		|  OldE'		| <-- E  (this is a dummy environment)
+;		+-----------------------+
+;		|  'is/2' result var	|
+;		+-----------------------+
+;		|  uia ptr to arith stk	|
+;		+-----------------------+
+;		|  .	Saved Arg	|
+;		   .	and Tmp Regs
+;		|  .			|
+;		+-----------------------+
+;		|  space for A2		|
+;		+-----------------------+
+;		|  space for A1		|
+;		+-----------------------+
+;		|  space for CP		|
+;		+-----------------------+
+;		|  space for OldE	| <-- SP	(lower addresses)
+;		+-----------------------+
+;
+;	
+
+
+;	88k port notes    - SM
+
+; It should first off be noted that the port from the Sparc to the 88k was a very direct mapping.
+; Though these two RISC architectures have some well-noted and oft-argued about differences (e.g.
+; register windows), they share very much (all instructions one word, delay slots, bare-bone
+; addressing modes).  Hence there was very little to do in terms of optimizing the design to fit
+; the 88k target.  (By the way: I anticipate this will NOT be the case for the 680x0 port - we
+; will want to utilize the complicated addressing modes...)
+
+; Now we'll assess some of the +ves and -ves of the 88k as a target of this port, vs. the Sparc.
+
+; +ves:
+; 	(1) Tighter integration of floating point unit with integer unit.  A Sparc integer register
+;	cannot be directly converted to floating point, and vice versa, instead, the source register
+;	must be written into memory.  
+;	(2) the .n option on 88k branches requires fewer wasted nops, but
+;	On the other hand, though, the Sparc wins
+;	when we re-do a computation by subu RET, RET, 12 on the 88k -- this works only if
+;	the flow-control instr. was a .n - else we must do subu RET, RET, 8.
+;	(3) I like that the 88k stores the actual return address in RET (r1), instead of the address
+;	of the subroutine call instruction (Sparc call, 88k bsr, jsr).
+;	Thus, on the 88k, we can always jump back to RET, and
+;	don't have to monkey with a +8 (skip delay slot). 
+
+; -ves:
+;	(1) Overflow checking is less efficient and more cumbersome, because there is no condition 
+;	code register.
+;	(2) Calling C requires much larger code sequences vs. the Sparc, because the Sparc has
+;	register windows, while on the 88k, we must manually push and pop the regs we wish to save.
+;	Of course, this is a register windows thing, but it affects us because it creates large
+; 	disparities in the size of code sequences between different modes.  This means either
+; 	excessive padding, or the cost of an extra branch to another subroutine.
+;	(3) BIAS stuff is always a pain...
+
+; Now, here are some significant conventions adopted in the 88k port.
+;	(This source code maps very closely to the Sparc port, and in many cases comments are
+;	included in the 88k source where significant divergence occurs.)
+;	(1) Sparc f0 maps to 88k M3,M4 pair
+;	(2) Due to the verbose 88k C calling sequences, much padding would be necessary if entry
+;	point code is expressed inline.  In most cases, branches to subroutines are used instead,
+;	for two principal reasons.  First, and most significantly, this excess padding is a
+;	maintenance nightmare.  Adding or removing code from an entry point necessitates adjusting
+;	the padding in at least one place in the set of three moded entry points.
+;	Second, we had some pads in excess of 80 bytes (yuck!), just too much.
+;	(3) Although we cited maintenance concerns as an issue, this did not prevent us from 
+;	getting the most out of the 88k when it was too tempting.  So, when calling subroutines
+;	from entry points, we'll often use the delay slot to best advantage by pulling in the first
+;	instruction from the subroutine to be branched to.  This instruction is always replicated
+;	as a comment in the subroutine...
+;	(4) We try to pretty closely follow the same register usage conventions as the Sparc
+;	(i.e. what's in the Prolog state - e.g. UArg1, UArg2) when it makes sense to do so.
+;	When we change, we comment it in the code. See, for example, mth_getnum2.
+;	(5) 88k UIAs are different than those for other ALS implementations, including the Sparc.
+;	On the 88k, an actual heap address is stored, vs. a heap offset.
+
+
+;
+; MBASE is the base address of the moded math subroutines
+; M1-M4 are math temporary / floating point registers subject to the following
+; constraints.  M1,M2 must be consecutive and M1 must be and even numbered
+; register.  M3,M4 are subject to the same constraints.
+;
+
+#define MBASE	S
+#define M1	T1
+#define M2	T2
+#define M3	T3
+#define M4	T4
+
+	data
+
+	global	_mth_stk
+	global	_mth_bot
+
+_mth_stk:
+	word	0
+_mth_bot:
+	word	0
+one_half:
+	double	0.5
+
+
+	text
+	global	_mth_base
+	global	_mth_eq
+	global	_mth_lt
+	global	_mth_gt
+	global	_mth_le
+	global	_mth_ge
+	global	_mth_ne
+	global	_mth_getnum
+	global	_mth_getnum0
+	global	_mth_putnum
+	global	_mth_push
+	global	_mth_pushdbl0
+	global	_mth_pushint
+	global	_mth_pushint0
+	global	_mth_add
+	global	_mth_sub
+	global	_mth_mul
+	global	_mth_div
+	global	_mth_fdiv
+	global	_mth_neg
+	global	_mth_mod
+	global	_mth_band
+	global	_mth_bor
+	global	_mth_bxor
+	global	_mth_not
+	global	_mth_lshft
+	global	_mth_rshft
+	global	_mth_power
+	global	_mth_abs
+	global	_mth_sin
+	global	_mth_cos
+	global	_mth_tan
+	global	_mth_asin
+	global	_mth_acos
+	global	_mth_atan
+	global	_mth_sqrt
+	global	_mth_exp
+	global	_mth_exp10
+	global	_mth_log
+	global	_mth_log10
+	global	_mth_floor
+	global	_mth_round
+	global	_mth_trunc
+	global	_mth_heapused
+	global	_mth_cputime
+	global	_mth_realtime
+	global	_mth_random
+	global	_mth_addi
+	global	_mth_subi
+	global	_mth_callout_init
+	global	_mth_callout
+	global	_mth_aftercall
+	global	_mth_sinh
+	global	_mth_cosh
+	global	_mth_tanh
+	global	_mth_ceil
+	global	_mth_erf
+	global	_mth_erfc
+	global	_mth_gamma
+	global	_mth_j0
+	global	_mth_j1
+	global	_mth_y0
+	global	_mth_y1
+	global	_mth_atan2
+	global	_mth_fmod
+	global	_mth_hypot
+	global	_mth_jn
+	global	_mth_yn
+
+
+	global	_dbl_base
+	global	_dcmp_base
+
+
+
+#macro	mth_cmp	cnd
+	ld	UArg2,	OldE,	BIAS
+	cmp	tmp1,	UArg1,	UArg2
+	bb1	cnd,	tmp1,	1f
+	fail
+1:	jmp 	RET
+#endm
+
+
+#macro	dbl_cmp	cnd
+; assumes M3,M4 (corr. to Sparc f0) holds the double to be checked with...
+
+	ld.d	M1,	OldE,	BIAS
+	fcmp.sdd tmp1,	M3,	M1
+	bb1	cnd,	tmp1,	2f
+	fail
+2:	jmp	RET
+#endm
+
+#macro	dcmp_cmp entryaddr
+	or.u	tmp1,	ZERO,	hi16(_mth_stk)
+	ld	tmp1,	tmp1,	lo16(_mth_stk)		; tmp1 := mth_stk
+	or.u	UArg2,	ZERO,	hi16(entryaddr)
+	br.n	rel_callout
+	ld	UArg2,	UArg2,	lo16(entryaddr)		; UArg2 := & rel op entry
+#endm
+
+; Note that SYM tags are indicated as literals below.
+; We wanted to use MMK_FUNCTOR(tokid,arity) but it didn't work...
+
+#macro 	bld_functor_2	tokid
+	or.u	tmp1,	ZERO,	0xc002			; c0 is SYM tag
+	br.n	dcmp_bld_functor_2
+	or	tmp1,	tmp1,	tokid
+#endm
+
+#macro	bld_functor_1	tokid
+	or.u	tmp1,	ZERO,	0xc001
+	br.n	dcmp_bld_functor_1
+	or	tmp1,	tmp1,	tokid
+#endm
+
+#macro	bld_symbol	tokid
+	or.u	UArg1,	ZERO,	0xc000
+	jmp.n	RET
+	or	UArg1,	UArg1,	tokid
+#endm
+
+
+	
+
+
+#macro	pad2
+	nop
+	nop
+#endm
+
+#macro	pad3
+	nop
+	nop
+	nop
+#endm
+
+#macro	pad4
+	pad2
+	pad2
+#endm
+
+#macro	pad5
+	pad3
+	pad2
+#endm
+
+
+; should macroize the 3 macros below
+; We assume all the C functions being called are math.h functions, hence we check _errno as we do.
+; Caveat: we'll only check errno for unaryCdbl  - this seems to be OK for how we use these macros...
+; and - we save 9 instructions by not checking!!
+
+; macro unaryCdbl	name
+; calls C function name that takes r2,r3 as its input argument, and returns double result in r2,r3
+; return result in M3,M4
+; do some 88k stuff to allow for C operation, and save whatever parts of the Prolog state in 
+; r1-r13 that need saving (note: the 88k software convention says that the callee should not
+; modify r14-r25)
+
+
+#macro	unaryCdbl	name
+	; save A1-A3, MBASE, UArg1 before call to C, restore afterwards
+	; Leave result in M3,M4
+;	subu	SP,	SP,	24		; push space for 6 registers on the stack
+; this instr now done in delay slot on call to dbl_sin2, etc.
+; as well as storing A1 - done before macro expanded
+	st	RET,	SP,	BIAS		; save RET (r1)
+;	st	A1,	SP,	BIAS+4		; save A1 (r2)
+	st	A2,	SP,	BIAS+8		; save A2 (r3)
+	st	A3,	SP,	BIAS+12		; save A3 (r4)
+	st	MBASE,	SP,	BIAS+16		; save MBASE (math mode)
+	st	UArg1,	SP,	BIAS+20		; save UArg1 (r10)
+
+	; _errno := 0
+	or.u	tmp1,	ZERO,	hi16(_errno)
+	st	ZERO,	tmp1,	lo16(_errno)	
+
+	; now load up r2-r3 with M3,M4 for the call to C
+	or	r2,	ZERO,	M3
+	bsr.n	name				; call the C function
+	or	r3,	ZERO,	M4		; r2,r3 is the double input to the C function
+
+	; back from C, if OK, put the output of the C function into M3,M4 else fail
+	or.u	tmp1,	ZERO,	hi16(_errno)
+	ld	tmp1,	tmp1,	lo16(_errno)	; get _errno after the math call
+		; fail if errno = 33 (EDOM) or 34 (ERANGE)
+	cmp	M1,	tmp1,	33		; EDOM?
+	bb1	eq,	M1,	1f
+	cmp	M1,	tmp1,	34		; ERANGE?
+	bb1	eq,	M1,	1f
+
+	; OK, no error, can succeed
+
+	or	M3,	ZERO,	r2
+	or	M4,	ZERO,	r3
+	; now restore the registers and fix the SP
+	ld	RET,	SP,	BIAS
+	ld	A1,	SP,	BIAS+4
+	ld	A2,	SP,	BIAS+8
+	ld	A3,	SP,	BIAS+12
+	ld	MBASE,	SP,	BIAS+16
+	ld	UArg1,	SP,	BIAS+20
+	jmp.n	RET
+	addu	SP,	SP,	24		; pop stack in the delay slot
+1:	fail
+#endm
+	
+; macro nularyCdbl	name
+; calls C function name that expects no input arguments, and returns double result in r2,r3
+; same as unaryCdbl, except don't have to load up r2,r3 for the call to C
+; I'm not quite sure that all these registers have to be saved (A1-3?)
+
+#macro nularyCdbl	name
+	; save A1-A3, MBASE, UArg1 before call to C, restore afterwards
+	; 
+;	subu	SP,	SP,	24		; push space for 5 registers on the stack 
+						; now done before call to dbl_cputime2, etc.
+	st	RET,	SP,	BIAS		; save RET (r1)
+;	st	A1,	SP,	BIAS+4		; save A1 (r2)  -before call to dbl_cputime2, etc.
+	st	A2,	SP,	BIAS+8		; save A2 (r3)
+	st	A3,	SP,	BIAS+12		; save A3 (r4)
+	st	MBASE,	SP,	BIAS+16		; save MBASE (math mode)
+	bsr.n	name				; call the C function
+	st	UArg1,	SP,	BIAS+20		; save UArg1 (r10) in the delay slot
+	; back from C, put the output of the C function into M3,M4
+	or	M3,	ZERO,	r2
+	or	M4,	ZERO,	r3
+	; now restore the registers and fix the SP
+	ld	RET,	SP,	BIAS
+	ld	A1,	SP,	BIAS+4
+	ld	A2,	SP,	BIAS+8
+	ld	A3,	SP,	BIAS+12
+	ld	MBASE,	SP,	BIAS+16
+	ld	UArg1,	SP,	BIAS+20
+	jmp.n	RET
+	addu	SP,	SP,	24		; pop stack in the delay slot
+#endm
+
+
+; macro binaryCdbl	name
+; calls C function name that takes r2,r3 as its 1st input argument, and r4,r5 as its second 
+; input argument, and returns double result in r2,r3
+; find input in M3,M4 and tmp1,tmp2 pairs
+; return result in M3,M4
+; do some 88k stuff to allow for C operation, and save whatever parts of the Prolog state in 
+; r1-r13 that need saving (note: the 88k software convention says that the callee should not
+; modify r14-r25)
+
+
+#macro	binaryCdbl	name
+	; save A1-A3, MBASE, UArg1 before call to C, restore afterwards
+	; Leave result in M3,M4
+	subu	SP,	SP,	24		; push space for 6 registers on the stack
+	st	RET,	SP,	BIAS		; save RET
+	st	A1,	SP,	BIAS+4		; save A1 (r2)
+	st	A2,	SP,	BIAS+8		; save A2 (r3)
+	st	A3,	SP,	BIAS+12		; save A3 (r4)
+	st	MBASE,	SP,	BIAS+16		; save MBASE (math mode)
+	st	UArg1,	SP,	BIAS+20		; save UArg1 (r10)
+	; now load up r2-r3 with tmp1,tmp2 for the call to C
+	or	r2,	ZERO,	tmp1
+	or	r3,	ZERO,	tmp2
+	or	r4,	ZERO,	M3
+	bsr.n	name				; call the C function
+	or	r5,	ZERO,	M4		; <r2,r3>, <r4,r5> are the double inputs to the
+						;  C function
+	; back from C, put the output of the C function into M3,M4
+	or	M3,	ZERO,	r2
+	or	M4,	ZERO,	r3
+	; now restore the registers and fix the SP
+	ld	RET,	SP,	BIAS
+	ld	A1,	SP,	BIAS+4
+	ld	A2,	SP,	BIAS+8
+	ld	A3,	SP,	BIAS+12
+	ld	MBASE,	SP,	BIAS+16
+	ld	UArg1,	SP,	BIAS+20
+	jmp.n	RET
+	addu	SP,	SP,	24		; pop stack in the delay slot
+#endm
+
+
+#macro floorCdbl
+; custom for dbl_mod   M1,M2 input  M1,M2 output 
+; don't return 
+	; save A1-A3, MBASE, UArg1 before call to C, restore afterwards
+	; save M3, M4 here as well
+	; Leave result in M3,M4
+	subu	SP,	SP,	32		; push space for 6 registers on the stack
+	st	RET,	SP,	BIAS		; save RET (r1)
+	st	A1,	SP,	BIAS+4		; save A1 (r2)
+	st	A2,	SP,	BIAS+8		; save A2 (r3)
+	st	A3,	SP,	BIAS+12		; save A3 (r4)
+	st	MBASE,	SP,	BIAS+16		; save S (math mode)
+	st	UArg1,	SP,	BIAS+20		; save UArg1 (r10)
+	st	M3,	SP,	BIAS+24		; save M3
+	st	M4,	SP,	BIAS+28		; save M4
+	; now load up r2-r3 with M1,M2 for the call to C
+	or	r2,	ZERO,	M1
+	bsr.n	_floor				; call the C function
+	or	r3,	ZERO,	M2		; r2,r3 is the double input to the C function
+	; back from C, put the output of the C function into M1,M2
+	or	M1,	ZERO,	r2
+	or	M2,	ZERO,	r3
+	; now restore the registers and fix the SP
+	ld	RET,	SP,	BIAS
+	ld	A1,	SP,	BIAS+4
+	ld	A2,	SP,	BIAS+8
+	ld	A3,	SP,	BIAS+12
+	ld	MBASE,	SP,	BIAS+16
+	ld	UArg1,	SP,	BIAS+20
+	ld	M3,	SP,	BIAS+24
+	ld	M4,	SP,	BIAS+28
+	addu	SP,	SP,	32		; pop stack
+#endm
+
+
+
+
+
+/*
+ * Integer routine entry points
+ */
+
+_mth_base:
+_mth_eq:
+	mth_cmp	eq
+_mth_lt:
+	mth_cmp	lt
+_mth_gt:
+	mth_cmp	gt
+_mth_le:
+	mth_cmp	le
+_mth_ge:
+	mth_cmp	ge
+_mth_ne:
+	mth_cmp	ne
+_mth_getnum:
+	; _mth_getnum pushes UArg1 onto the stack and then sets UArg1 to UArg2
+	; It drops into _mth_getnum0 below.
+	subu	OldE,	OldE,	 8			; allocate stack element
+	st	UArg1,	OldE,	BIAS			; push top value
+	or	UArg1,	UArg2,	ZERO			; UArg1 := UArg2
+_mth_getnum0:
+	; _mth_getnum0 takes argument in UArg1, dereferences it and pushes it
+	; onto the stack, setting the mode appropriately.  Only the
+	; dereferencing is done here, the rest of the code appears in
+	; mth_getnum2 and mth_getnum3 below.
+	deref	UArg1,	mth_getnum2 
+	br	mth_getnum3
+_mth_putnum:
+	; _mth_putnum takes the integer argument on the top of the stack,
+	; converts it to a double if is too large in magnitude to be stored
+	; as a Prolog integer and puts it into UArg1 with the appropriate
+	; tag.  It is expected that the stack has already been popped (in
+	; delay slot getting here).
+	br	mth_putnum2
+	nop
+_mth_push:
+	jmp.n	RET
+	st	UArg1,	OldE,	BIAS
+mth_pushdbl:
+	; mth_pushdbl is entered with the double already pushed on the stack.
+	; The rest of the ints on the stack need to be converted to doubles
+	br.n	istack_to_dstack0
+	or	tmp1,	OldE,	ZERO		; tmp1 tells where to start
+_mth_pushint:
+	; mth_pushint pushs UArg1 onto the stack, then sets UArg1 to
+	; integer found in UArg2.
+	subu	OldE,	OldE,	8		; Push
+	st	UArg1,	OldE,	BIAS
+	or	UArg1,	UArg2,	ZERO		; UArg1 := UArg2
+_mth_pushint0:
+	; mth_pushint0 expects UArg1 to be set to the integer needed to
+	; occupy the top of stack.  Therefore, there is nothing to do but
+	; return.
+	jmp 	RET
+	nop
+
+
+_mth_addi:
+	br.n	mth_add2
+	xor	tmp1,	UArg1,	UArg2		; sign bits of two operands in delay slot
+	pad4
+
+_mth_add:
+	ld	UArg2,	OldE,	BIAS-8		; load lh op
+	br.n	mth_add2
+	xor	tmp1,	UArg1,	UArg2		; sign bits of two operands
+
+
+_mth_subi:
+	br.n	mth_subi2
+	xor	tmp1,	UArg1,	UArg2		; sign bits of two operands
+	pad4
+
+
+_mth_sub:
+	ld	UArg2,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+	br.n	mth_sub2
+	xor	tmp1,	UArg1,	UArg2		; sign bits of two operands
+
+
+_mth_mul:
+	br.n	mth_mul2
+	ld	UArg2,	OldE,	BIAS-8		; load rh op (stack was popped in
+	nop					; caller)
+
+_mth_div:
+	br.n	mth_div2
+	ld	UArg2,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+	nop
+
+
+_mth_fdiv:
+	br.n	redo_as_dbl0
+	subu	OldE,	OldE,	8		; restore top stack element
+	nop
+
+_mth_neg:
+	; subu 	UArg2,	ZERO,	UArg1
+	; Overflow occurs in one case.  -(minint) overflows
+	; For 32-bit signed arithmetic, minint = - 2^31
+	; Just check to see if the sign bit of the result is different from the
+	; sign bit of the operand; if so, no overflow occurred.
+
+	xor	tmp1,	UArg2,	UArg1		; sign bits of result and operand
+	bb0	31,	tmp1,	1f		; branch if the same
+	jmp.n	RET				; else return, and ...
+	or	UArg1,	ZERO,	UArg2		; move the result into UArg1
+1:	; overflow
+	; just inline  redo_as_dbl0 here
+	br.n	istack_to_dstack		; convert to double in overflow mode
+	subu	RET,	RET,	12		; force re-execution of goal - jsr.n
+
+_mth_mod:
+	br.n	mth_mod2
+	ld	UArg2,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+	nop
+
+_mth_band:
+	ld	UArg2,	OldE,	BIAS-8
+	jmp.n	RET
+	and	UArg1,	UArg1,	UArg2
+	pad3
+_mth_bor:
+	ld	UArg2,	OldE,	BIAS-8
+	jmp.n	RET
+	or	UArg1,	UArg1,	UArg2
+	pad3
+_mth_bxor:
+	ld	UArg2,	OldE,	BIAS-8
+	jmp.n	RET
+	xor	UArg1,	UArg1,	UArg2
+	pad3
+_mth_not:
+	; logical negation...
+	jmp.n	RET
+	not	UArg1,	UArg1			; expands to one or.c instr
+	pad2
+
+_mth_lshft:
+	ld	UArg2,	OldE,	BIAS-8
+	jmp.n	RET
+	mak	UArg1,	UArg2,	UArg1
+	pad3
+
+_mth_rshft:
+	ld	UArg2,	OldE,	BIAS-8
+	jmp.n	RET
+	ext	UArg1,	UArg2,	UArg1
+	pad3
+
+_mth_power:
+	br.n	redo_as_dbl0
+	subu	OldE,	OldE,	8
+	nop
+
+_mth_atan2:
+	br.n	redo_as_dbl0
+	subu	OldE,	OldE,	8
+	nop
+
+_mth_fmod:
+	br.n	redo_as_dbl0
+	subu	OldE,	OldE,	8
+	nop
+
+_mth_hypot:
+	br.n	redo_as_dbl0
+	subu	OldE,	OldE,	8
+	nop
+
+_mth_jn:
+	br.n	redo_as_dbl0
+	subu	OldE,	OldE,	8
+	nop
+
+_mth_yn:
+	br.n	redo_as_dbl0
+	subu	OldE,	OldE,	8
+	nop
+
+_mth_abs:
+	bcnd	ge0,	UArg1,	1f
+	jmp.n	RET
+	sub	UArg1,	ZERO,	UArg1
+1:	jmp	RET
+
+_mth_sin:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal - jsr
+	nop
+
+_mth_cos:	
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal - jsr
+	nop
+
+_mth_tan:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal - jsr
+	nop
+
+_mth_asin:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal - jsr
+	nop
+
+_mth_acos:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal - jsr
+	nop
+
+_mth_atan:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal - jsr
+	nop
+
+_mth_sqrt:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal - jsr
+	nop
+
+_mth_exp:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal - jsr
+	nop
+
+_mth_exp10:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+_mth_log:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+_mth_log10:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+_mth_floor:	
+	jmp	RET			; floor is a nop for integers
+	pad2
+
+_mth_round:
+	jmp	RET			; round is a nop for integers
+	pad2
+
+_mth_trunc:
+	jmp	RET			; trunc is a nop for integers
+	pad2
+
+_mth_ceil:
+	jmp	RET			; ceil is a nop for integers
+	pad2
+
+_mth_cosh:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+_mth_erf:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+_mth_erfc:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+_mth_gamma:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+_mth_j0:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+_mth_j1:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+_mth_sinh:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+_mth_tanh:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+_mth_y0:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+_mth_y1:
+	br.n	istack_to_dstack	; convert to double
+	subu	RET,	RET,	8	; force re-execution of goal
+	nop
+
+
+_mth_heapused:
+	jmp.n	RET
+	subu	UArg1,	H,	HeapBase
+	nop
+
+
+_mth_cputime:
+	subu	RET,	RET,	8		; force re-execution of goal
+	br.n	istack_to_dstack		; convert to double
+	or	tmp1,	ZERO,	OldE		; tmp1 := OldE, tells where to start
+
+_mth_realtime:
+	subu	RET,	RET,	8		; force re-execution of goal
+	br.n	istack_to_dstack		; convert to double
+	or	tmp1,	ZERO,	OldE		; tmp1 := OldE, tells where to start
+
+_mth_random:
+	subu	RET,	RET,	8		; force re-execution of goal
+	br.n	istack_to_dstack		; convert to double
+	or	tmp1,	ZERO,	OldE		; tmp1 := OldE, tells where to start
+
+_mth_callout_init:
+	or.u	tmp1,	ZERO,	hi16(_mth_stk)
+	st	H,	tmp1,	lo16(_mth_stk)	; _mth_stk := H
+	or.u	tmp1,	ZERO,	hi16(_mth_bot)
+	ld	H,	tmp1,	lo16(_mth_bot)	; H := _mth_bot
+	jmp.n	RET
+	addu	H,	H,	4	
+
+_mth_callout:
+	or.u	tmp1,	ZERO,	hi16(_mth_stk)
+	br.n	mth_callout2
+	ld	tmp1,	tmp1,	lo16(_mth_stk)
+
+/*
+ * Double entry points
+ */
+
+; 
+; Our register conventions for doubles:
+; 	M3,M4  <==> Sparc f0   (TOS)
+;	Use tmp1,tmp2 and M1,M2 as scratch pairs. 
+
+_dbl_base:
+dbl_eq:
+	dbl_cmp	eq 
+dbl_lt:
+	dbl_cmp	lt
+dbl_gt:
+	dbl_cmp	gt
+dbl_le:
+	dbl_cmp	le
+dbl_ge:
+	dbl_cmp	ge
+dbl_ne:
+	dbl_cmp	ne
+
+dbl_getnum:
+	subu	OldE,	OldE,	8		; allocate stack element
+	st.d	M3,	OldE,	BIAS		; push top value
+	or	UArg1,	ZERO,	UArg2		; UArg1 := UArg2 
+dbl_getnum0:
+	; dbl_getnum takes argument in UArg1, dereferences it and pushes it
+	; onto the stack. Only the dereferencing is done here, the rest of 
+	; the code appears in dbl_getnum2 and dbl_getnum3 below.
+	deref	UArg1,	dbl_getnum2
+	br	dbl_getnum3
+dbl_putnum:
+	; dbl_putnum takes the double argument on the top of the stack,
+	; converts it to an integer if possible and tags the result (either
+	; integer or double as a Prolog object) and returns the result in
+	; UArg1.  It is expected that the stack has already been popped (in
+	; the delay slot getting here).
+	br	dbl_putnum2
+	nop
+dbl_push:
+	jmp.n	RET
+	st.d	M3,	OldE,	BIAS
+dbl_pushdbl:
+	; dbl_pushdbl is entered with its work done for it (see mth_pushbdl)
+	jmp 	RET
+	nop
+dbl_pushint:
+	; dbl_pushint pushes the integer in UArg1 onto the stack as a double
+	subu	OldE,	OldE,	8		; create stack element
+	st.d	M3,	OldE,	BIAS		; save UArg1
+	or	UArg1,	ZERO,	UArg2		; move new int to UArg1
+dbl_pushint0:
+	jmp.n	RET				; return, and
+	flt.ds	M3,	UArg1			; convert UArg1 to double and leave it in TOS
+dbl_addi:
+	flt.ds	tmp1,	UArg2			; convert UArg2 (holds immediate) to double
+	jmp.n	RET
+	fadd.ddd M3,	tmp1,	M3		; do the add in the delay slot
+	pad3
+dbl_add:
+	; add two top stack arguments and store back
+	ld.d	tmp1,	OldE,	BIAS-8
+	jmp.n	RET
+	fadd.ddd M3,	tmp1,	M3		; do the add in the delay slot
+dbl_subi:
+	flt.ds	tmp1,	UArg2			; convert UArgs (holds immediate) to double
+	jmp.n	RET
+	fsub.ddd M3,	M3,	tmp1		; do the sub in the delay slot
+	pad3
+dbl_sub:
+	; subtract top two stack arguments and store back
+	ld.d	tmp1,	OldE,	BIAS-8
+	jmp.n	RET
+	fsub.ddd M3,	tmp1,	M3		; do the sub in the delay slot
+dbl_mul:
+	ld.d	tmp1,	OldE,	BIAS-8
+	jmp.n	RET
+	fmul.ddd M3,	tmp1,	M3
+
+dbl_div:
+	ld	tmp1,	OldE,	BIAS-8
+	br.n	dbl_div2
+	ld	tmp2,	OldE,	BIAS-4
+;	ld.d	tmp1,	OldE,	BIAS-8		; probably should separate to two lds
+;	nop
+
+dbl_fdiv:
+	; fail on division by zero, otherwise just do a fdiv.ddd
+	ld	tmp1,	OldE,	BIAS-8
+	br.n	dbl_fdiv2
+	ld	tmp2,	OldE,	BIAS-4
+;	ld.d	tmp1,	OldE,	BIAS-8		; probably should separate to two lds
+;	nop
+dbl_neg:
+	; subtract from zero
+	;flt.ds	tmp1,	ZERO	
+	;jmp.n	RET
+	;fsub.ddd M3,	tmp1,	M3		; M3,M4 := 0 - M3,M4
+	; *** OK, the above will work, but what follows is neater
+	; just invert the sign bit - according to the 88k manual +0 = -0 so this is OK for 0 too.
+	; for a dp fp #, the sign bit is the most significant bit of the MSW
+	jmp.n	RET
+	xor.u	M3,	M3,	0x8000		; flip the most significant bit
+	pad4
+
+dbl_mod:
+	ld	tmp1,	OldE,	BIAS-8
+	br.n	dbl_mod2
+	ld	tmp2,	OldE,	BIAS-4
+;	ld.d	tmp1,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+						; should separate into two lds...
+;	nop
+
+	; dbl_band, dbl_bor, dbl_bxor - macro these?
+dbl_band:
+	; convert dpfp operands to integer, and 'em, and return integer result as double in M3,M4
+	ld.d	tmp1,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+	int.sd	M1,	tmp1
+	int.sd	M2,	M3
+	and	M1,	M1,	M2		; and integer operands
+	jmp.n	RET
+	flt.ds	M3,	M1			; convert integer result to double
+
+dbl_bor:
+	; convert dpfp operands to integer, or 'em, and return integer result as double in M3,M4
+	ld.d	tmp1,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+	int.sd	M1,	tmp1
+	int.sd	M2,	M3
+	or	M1,	M1,	M2		; or integer operands
+	jmp.n	RET
+	flt.ds	M3,	M1			; convert integer result to double
+
+dbl_bxor:
+	; convert dpfp operands to integer, xor 'em, and return integer result as double in M3,M4
+	ld.d	tmp1,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+	int.sd	M1,	tmp1
+	int.sd	M2,	M3
+	xor	M1,	M1,	M2		; xor integer operands
+	jmp.n	RET
+	flt.ds	M3,	M1			; convert integer result to double
+
+dbl_not:
+	; convert dpfp operand to integer, and return logical negation integer result as double
+	; in M3,M4
+	int.sd	tmp1,	M3
+	not	tmp2,	tmp1			; expands to one or.c instr
+	jmp.n	RET
+	flt.ds	M3,	tmp2
+dbl_lshft:
+	; convert dpfp operands to integer, perform left shift, and return integer result as
+	; double in M3,M4
+	ld.d	tmp1,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+	int.sd	tmp2,	tmp1
+	int.sd	M1,	M3
+	mak	M2,	tmp2,	M1		; do the shift
+	jmp.n	RET
+	flt.ds	M3,	M2
+	
+
+dbl_rshft:
+	; convert dpfp operands to integer, perform right shift, and return integer result as
+	; double in M3,M4
+	ld.d	tmp1,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+	int.sd	tmp2,	tmp1
+	int.sd	M1,	M3
+	ext	M2,	tmp2,	M1		; do the shift
+	jmp.n	RET
+	flt.ds	M3,	M2
+
+dbl_power:
+	; call C math library
+	ld	tmp1,	OldE,	BIAS-8
+	br.n	dbl_power2
+	ld	tmp2,	OldE,	BIAS-4
+
+dbl_atan2:
+	ld	tmp1,	OldE,	BIAS-8
+	br.n	dbl_atan22
+	ld	tmp2,	OldE,	BIAS-4
+
+dbl_fmod:
+	ld	tmp1,	OldE,	BIAS-8
+	br.n	dbl_fmod2
+	ld	tmp2,	OldE,	BIAS-4
+
+dbl_hypot:
+	ld	tmp1,	OldE,	BIAS-8
+	br.n	dbl_hypot2
+	ld	tmp2,	OldE,	BIAS-4
+
+dbl_jn:
+	ld	tmp1,	OldE,	BIAS-8
+	br.n	dbl_jn2
+	ld	tmp2,	OldE,	BIAS-4
+
+dbl_yn:
+	ld	tmp1,	OldE,	BIAS-8
+	br.n	dbl_yn2
+	ld	tmp2,	OldE,	BIAS-4
+
+	
+dbl_abs:
+	;Don't call C math library
+	; Well, we _could_ call the C math library, but instead we can just zero the sign bit
+	; According to the 88k manual, +0 = -0 so this is OK for 0
+	; for a dp fp #, the sign bit is the most significant bit of the MSW
+ 
+	jmp.n	RET
+	clr	M3,	M3,	1<31>
+	pad2
+
+	
+
+dbl_sin:
+	subu	SP,	SP,	24			; from unaryCdbl
+	br.n	dbl_sin2
+	st	A1,	SP,	BIAS+4			; save A1 -  from unaryCdbl
+dbl_cos:
+	subu	SP,	SP,	24			; from unaryCdbl
+	br.n	dbl_cos2
+	st	A1,	SP,	BIAS+4			; save A1 -  from unaryCdbl
+dbl_tan:
+	subu	SP,	SP,	24			; from unaryCdbl
+	br.n	dbl_tan2
+	st	A1,	SP,	BIAS+4			; save A1 -  from unaryCdbl
+dbl_asin:
+	subu	SP,	SP,	24			; from unaryCdbl
+	br.n	dbl_asin2
+	st	A1,	SP,	BIAS+4			; save A1 -  from unaryCdbl
+dbl_acos:
+	subu	SP,	SP,	24			; from unaryCdbl
+	br.n	dbl_acos2
+	st	A1,	SP,	BIAS+4			; save A1 -  from unaryCdbl
+dbl_atan:
+	subu	SP,	SP,	24			; from unaryCdbl
+	br.n	dbl_atan02
+	st	A1,	SP,	BIAS+4			; save A1 -  from unaryCdbl
+dbl_sqrt:
+	subu	SP,	SP,	24			; from unaryCdbl
+	br.n	dbl_sqrt2
+	st	A1,	SP,	BIAS+4			; save A1 -  from unaryCdbl
+dbl_exp:
+	subu	SP,	SP,	24			; from unaryCdbl
+	br.n	dbl_exp2
+	st	A1,	SP,	BIAS+4			; save A1 -  from unaryCdbl
+dbl_exp10:
+	br.n	dbl_exp102
+	or	tmp1,	ZERO,	10
+	nop
+
+dbl_log:
+	subu	SP,	SP,	24			; from unaryCdbl
+	br.n	dbl_log2
+	st	A1,	SP,	BIAS+4			; save A1 -  from unaryCdbl
+dbl_log10:
+	subu	SP,	SP,	24			; from unaryCdbl
+	br.n	dbl_log102
+	st	A1,	SP,	BIAS+4			; save A1 -  from unaryCdbl
+dbl_floor:
+	subu	SP,	SP,	24			; from unaryCdbl
+	br.n	dbl_floor2
+	st	A1,	SP,	BIAS+4			; save A1 -  from unaryCdbl
+dbl_round:
+	subu	SP,	SP,	24			; from unaryCdbl
+	br.n	dbl_round2
+	st	A1,	SP,	BIAS+4			; save A1 -  from unaryCdbl
+
+dbl_trunc:
+	subu	SP,	SP,	24		; from unaryCdbl
+	br.n	dbl_trunc2
+	st	A1,	SP,	BIAS+4		; save A1 -  from unaryCdbl
+
+dbl_ceil:
+	subu	SP,	SP,	24		; from unaryCdbl
+	br.n	dbl_ceil2
+	st	A1,	SP,	BIAS+4		; save A1 -  from unaryCdbl
+
+dbl_cosh:
+	subu	SP,	SP,	24
+	br.n	dbl_cosh2
+	st	A1,	SP,	BIAS+4
+dbl_erf:
+	subu	SP,	SP,	24
+	br.n	dbl_erf2
+	st	A1,	SP,	BIAS+4
+dbl_erfc:
+	subu	SP,	SP,	24
+	br.n	dbl_erfc2
+	st	A1,	SP,	BIAS+4
+dbl_gamma:
+	subu	SP,	SP,	24
+	br.n	dbl_gamma2
+	st	A1,	SP,	BIAS+4
+dbl_j0:
+	subu	SP,	SP,	24
+	br.n	dbl_j02
+	st	A1,	SP,	BIAS+4
+dbl_j1:
+	subu	SP,	SP,	24
+	br.n	dbl_j12
+	st	A1,	SP,	BIAS+4
+dbl_sinh:
+	subu	SP,	SP,	24
+	br.n	dbl_sinh2
+	st	A1,	SP,	BIAS+4
+dbl_tanh:
+	subu	SP,	SP,	24
+	br.n	dbl_tanh2
+	st	A1,	SP,	BIAS+4
+dbl_y0:
+	subu	SP,	SP,	24
+	br.n	dbl_y02
+	st	A1,	SP,	BIAS+4
+dbl_y1:
+	subu	SP,	SP,	24
+	br.n	dbl_y12
+	st	A1,	SP,	BIAS+4
+	
+dbl_heapused:
+	subu	UArg1,	H,	HeapBase
+	jmp.n	RET
+	flt.ds	M3,	UArg1
+
+dbl_cputime:
+	subu	SP,	SP,	24			; from nularyCdbl
+	br.n	dbl_cputime2
+	st	A1,	SP,	BIAS+4			; from nularyCdbl
+dbl_realtime:
+	subu	SP,	SP,	24			; from nularyCdbl
+	br.n	dbl_realtime2
+	st	A1,	SP,	BIAS+4			; from nularyCdbl
+dbl_random:
+	subu	SP,	SP,	24			; from nularyCdbl
+	br.n	dbl_random2
+	st	A1,	SP,	BIAS+4			; from nularyCdbl
+dbl_callout_init:
+	or.u	tmp1,	ZERO,	hi16(_mth_stk)
+	st	H,	tmp1,	lo16(_mth_stk)		; _mth_stk := H
+	or.u	tmp1,	ZERO,	hi16(_mth_bot)
+	ld	H,	tmp1,	lo16(_mth_bot)		; H := _mth_bot
+	jmp.n	RET
+	addu	H,	H,	4	
+
+dbl_callout:
+	or.u	tmp1,	ZERO,	hi16(_mth_stk)
+	br.n	dbl_callout2
+	ld	tmp1,	tmp1,	lo16(_mth_stk)
+
+/*
+ * Decompilation entry points
+ */
+
+_dcmp_base:
+_dcmp_eq:
+	dcmp_cmp 	_mth_eq_addr
+_dcmp_lt:
+	dcmp_cmp 	_mth_lt_addr
+_dcmp_gt:
+	dcmp_cmp	_mth_gt_addr
+_dcmp_le:
+	dcmp_cmp	_mth_le_addr
+_dcmp_ge:
+	dcmp_cmp	_mth_ge_addr
+_dcmp_ne:
+	dcmp_cmp	_mth_ne_addr
+dcmp_getnum:
+	; dcmp_getnum takes argument in UArg2, dereferences it and puts
+	; result in UArg1 after first pushing current value of UArg1 on stack
+	; onto the stack.
+	subu	OldE,	OldE,	8		; allocate stack element
+	st	UArg1,	OldE,	BIAS		; push top value
+	or	UArg1,	UArg2,	ZERO		; UArg1 := UArg2
+dcmp_getnum0:
+	; dcmp_getnum0 gets it argument in UArg1.  It will dereference and 
+	; leave it there
+	deref	UArg1,	dcmp_getnum2
+	br	dcmp_getnum3
+dcmp_putnum:
+	; dcmp_putnum corresponds to is/2.  Arguments are set and 'is'/2 is
+	; called. The variable on the left hand side of the 'is' is  passed
+	; back through UArg1 to be either unified or 'put' into some
+	; environment variable.
+	br.n	dcmp_putnum2
+	or	UArg2,	UArg1,	ZERO		; UArg2 := UArg1
+dcmp_push:
+	jmp.n	RET
+	st	UArg1,	OldE,	BIAS
+dcmp_pushdbl:
+	br	dcmp_pushdbl2
+	nop
+dcmp_pushint:
+	subu	OldE,	OldE,	 8		; create stack element
+	st	UArg1,	OldE,	BIAS
+	or	UArg1,	UArg2,	ZERO		; UArg1 := UArg2
+dcmp_pushint0:
+	br	dcmp_pushint2			
+	nop
+
+dcmp_addi:
+	st	UArg1,	OldE,	BIAS-8
+	clr	UArg1,	UArg2,	6<26>		; nuke the tag bits
+	or.u	UArg1,	UArg1,	TINT		; tag it as an int
+	bld_functor_2	TK_PLUS
+dcmp_add:
+	; builds '+'/2 structure from top two stack elements
+	bld_functor_2	TK_PLUS
+dcmp_subi:
+	st	UArg1,	OldE,	BIAS-8
+	clr	UArg1,	UArg2,	6<26>		; nuke the tag bits
+	or.u	UArg1,	UArg1,	TINT		; tag it as an int
+	bld_functor_2	TK_MINUS
+dcmp_sub:
+	bld_functor_2	TK_MINUS
+dcmp_mul:
+	bld_functor_2	TK_STAR			; takes 3 words
+dcmp_div:
+	bld_functor_2	TK_SLASHSLASH		; takes 3 words
+dcmp_fdiv:
+	bld_functor_2	TK_SLASH		; takes 3 words
+dcmp_neg:
+	bld_functor_1	TK_MINUS		; takes 3 words
+	pad3
+	
+dcmp_mod:
+	bld_functor_2	TK_MOD			; takes 3 words
+dcmp_band:
+	bld_functor_2	TK_BAND			; takes 3 words
+	pad3
+dcmp_bor:
+	bld_functor_2	TK_BOR			; takes 3 words
+	pad3
+dcmp_bxor:
+	bld_functor_2	TK_BXOR			; takes 3 words
+	pad3
+dcmp_not:
+	bld_functor_1	TK_BACKSLASH		; takes 3 words
+	nop
+dcmp_lshft:
+	bld_functor_2	TK_LSHFT		; takes 3 words
+	pad3
+dcmp_rshft:
+	bld_functor_2	TK_RSHFT		; takes 3 words
+	pad3
+dcmp_power:
+	bld_functor_2	TK_HAT			; takes 3 words
+dcmp_atan2:
+	bld_functor_2	TK_ATAN2		; takes 3 words
+dcmp_fmod:
+	bld_functor_2	TK_FMOD			; takes 3 words
+dcmp_hypot:
+	bld_functor_2	TK_HYPOT		; takes 3 words
+dcmp_jn:
+	bld_functor_2	TK_JN			; takes 3 words
+dcmp_yn:
+	bld_functor_2	TK_YN			; takes 3 words
+dcmp_abs:
+	bld_functor_1	TK_ABS			; takes 3 words
+	nop
+dcmp_sin:
+	bld_functor_1	TK_SIN			; takes 3 words
+dcmp_cos:
+	bld_functor_1	TK_COS			; takes 3 words
+dcmp_tan:
+	bld_functor_1	TK_TAN			; takes 3 words
+dcmp_asin:
+	bld_functor_1	TK_ASIN			; takes 3 words
+dcmp_acos:
+	bld_functor_1	TK_ACOS			; takes 3 words
+dcmp_atan:
+	bld_functor_1	TK_ATAN			; takes 3 words
+dcmp_sqrt:
+	bld_functor_1	TK_SQRT			; takes 3 words
+dcmp_exp:
+	bld_functor_1	TK_EXP			; takes 3 words
+dcmp_exp10:
+	bld_functor_1	TK_EXP10		; takes 3 words
+dcmp_log:
+	bld_functor_1	TK_LOG			; takes 3 words
+dcmp_log10:
+	bld_functor_1	TK_LOG10		; takes 3 words
+dcmp_floor:
+	bld_functor_1	TK_FLOOR		; takes 3 words
+dcmp_round:
+	bld_functor_1	TK_ROUND		; takes 3 words
+dcmp_trunc:
+	bld_functor_1	TK_TRUNC		; takes 3 words
+dcmp_ceil:
+	bld_functor_1	TK_CEIL			; takes 3 words
+dcmp_cosh:
+	bld_functor_1	TK_COSH			; takes 3 words
+dcmp_erf:
+	bld_functor_1	TK_ERF			; takes 3 words
+dcmp_erfc:
+	bld_functor_1	TK_ERFC			; takes 3 words
+dcmp_gamma:
+	bld_functor_1	TK_GAMMA		; takes 3 words
+dcmp_j0:
+	bld_functor_1	TK_J0			; takes 3 words
+dcmp_j1:
+	bld_functor_1	TK_J1			; takes 3 words
+dcmp_sinh:
+	bld_functor_1	TK_SINH			; takes 3 words
+dcmp_tanh:
+	bld_functor_1	TK_TANH			; takes 3 words
+dcmp_y0:
+	bld_functor_1	TK_Y0			; takes 3 words
+dcmp_y1:
+	bld_functor_1	TK_Y1			; takes 3 words
+dcmp_heapused:
+	bld_symbol	TK_HEAPUSED		; takes 3 words
+dcmp_cputime:
+	bld_symbol	TK_CPUTIME		; takes 3 words
+dcmp_realtime:
+	bld_symbol	TK_REALTIME		; takes 3 words
+dcmp_random:
+	bld_symbol	TK_RANDOM		; takes 3 words
+dcmp_callout_init:
+	jmp	RET
+	pad5
+dcmp_callout:
+	jmp	RET
+	pad2
+
+
+
+
+
+; All code below this is out of the way of the 3 sets of entry points.
+
+; mth_getnum2, dbl_getnum2, dcmp_getnum2
+;
+; These routines have dereferenced UArg1 to a ground object.  We need to
+; classify this object and convert the stack to another mode if necessary.
+;
+; Notice that the 88k deref macro is a little different than that for the SPARC.
+; Take advantage of 88k tagging scheme / 88k bit manipulation instructions...
+; We get a tagged term (UArg1).  Here we'll untag UArg1, but before, copy UArg1 to tmp1,
+; so we can preserve the type of the term.
+; If we ALWAYS end up using the dereferenced term in this way, I suppose we could add these two
+; instructions to the deref macro.  Otherwise, I think the 88k deref macro is more general
+; the way it is, and it'll be left as is.  
+
+mth_getnum2:
+
+	; we arrive here from deref
+	; Copy the tagged term to tmp1, and have UArg1 hold the untagged term.
+	; Notice the different register usage as compared with the Sparc implementation.
+	
+	or	tmp1,	ZERO,	UArg1		; tmp1 := UArg1
+	clr	UArg1,	UArg1,	6<26>		; nuke the tag
+	
+
+	; What do for a list?  Do a callout.  This enables the user to use extend_is/3 to build his
+	; own semantics for lists appearing in is/2.
+
+;	bb1	BLIST,	tmp1,	3f		; callout for a list
+	bb0	BNUM,	tmp1,	3f		; branch if structure or list or otherwise (not a num)
+	bb1	BUIA,	tmp1,	4f		; branch if double
+	; integer code
+	; sign-extend to 32 bits
+	; for +ve ints, just zero the tag....
+	; sign-extend from 26 bits to 32 bits: a better way to do this???
+	; UArg1 is the untagged term
+	bb1	25,	UArg1,	1f		; branch if negative
+	jmp.n	RET				; return, and
+	clr	UArg1,	UArg1,	6<26>		; positive => clear hi bits (a nop now)
+1:	jmp.n	RET				; return, and
+	set	UArg1,	UArg1,	6<26>		; negative => set hi bits
+4:	; double code
+	; this code is written straightforwardly - we have lots of pipeline conflicts!
+	; because we're running out of registers
+	ld	M3,	UArg1,	BIAS+4		; M3,M4 := the double in question
+	ld	M4,	UArg1,	BIAS+8		; the heap isn't doubleword aligned, so no ld.d
+;	st.d	M3,	OldE,	BIAS-8		; write the double onto the math stack
+
+;	Unfortunately, int.sd generates an exception when the integer can't be represented in
+;	less than 30 bits.  This can cause nightmares when we bang on lots of large floating
+;	point numbers.  
+;	The question is: is it worth detecting whether floats can be represented as ints??
+;	See especially dbl_putnum2.
+
+	extu	tmp1,	M3,	11<20>		; get the exponent (excess 1023 biased)
+						; extracting bits 30::20
+	cmp	tmp2,	tmp1,	1053		; if exponent > 30 (30+1023=1053), an exception
+						; will take place on an int.sd, so forget it
+	bb1.n	ge,	tmp2,	istack_to_dstack0	; convert the stack to floats
+	or	tmp1,	ZERO,	OldE		; set up tmp1 for istack_to_dstack0
+						; harmless when branch not taken
+; 	OK, the int.sd won't cause an exception, so proceed as before	
+	int.sd	tmp2,	M3			; convert M3 to an integer
+	flt.ds	M1,	tmp2			; convert it back to a float
+	fcmp.sdd M1,	M1,	M3		; now compare them
+	bb0.n	eq,	M1,	istack_to_dstack0	; not the same - convert the stack
+	or	tmp1,	ZERO,	OldE		; set up tmp1 for istack_to_dstack0
+	; can be represented as an integer
+	; UArg1 := integer value, and return
+	jmp.n 	RET
+	or	UArg1,	ZERO,	tmp2
+3:	; structure or list or otherwise code (non-numeric => do a callout)
+	or	UArg1,	ZERO,	tmp1		; put the tagged term back in UArg1
+	; we need to do this because we messed with the register usage as described above
+	; can fix this scheme to avoid this later....
+	or	tmp1,	ZERO, 	H		; tmp1 := H for mth_callout2
+	; and fall through into mth_callout2
+mth_callout2:
+	; non numeric code -- evaluate an expression by calling out
+	or	tmp2,	ZERO,	RET		; save return address, because
+	bsr.n	is_callout			; bsr writes over RET	
+	or	UArg2,	ZERO,	UArg1		; UArg2 := UArg1 in the delay slot
+	br.n	_mth_getnum0
+	ld	UArg1,	SP,	BIAS+4		; load up argument
+
+
+dbl_getnum2:
+	; nearly identical to mth_getnum2
+
+	; we arrive here from deref
+	; Copy the tagged term to tmp1, and have UArg1 hold the untagged term.
+	; Notice the different register usage as compared with the Sparc implementation.
+	
+	or	tmp1,	ZERO,	UArg1		; tmp1 := UArg1
+	clr	UArg1,	UArg1,	6<26>		; nuke the tag
+
+	; What do for a list?  Do a callout.  This enables the user to use extend_is/3 to build his
+	; own semantics for lists appearing in is/2.	
+
+;	bb1	BLIST,	tmp1,	3f		; callout for a list
+	
+	bb0	BNUM,	tmp1,	3f		; branch if structure or list or otherwise (not a num)
+	bb1	BUIA,	tmp1,	4f		; branch if double
+	; integer code
+	; sign-extend to 32 bits
+	; for +ve ints, just zero the tag....
+	; sign-extend from 26 bits to 32 bits: a better way to do this???
+	; UArg1 is the untagged term
+	bb1.n	25,	UArg1,	1f		; branch if negative
+	set	UArg1,	UArg1,	6<26>		; negative => set hi bits in the delay slot
+	clr	UArg1,	UArg1,	6<26>		; positive => clear hi bits (a nop now)
+1:	jmp.n	RET				; return, and
+	flt.ds	M3,	UArg1			; convert UArg1 to double, leave on TOS
+
+4:	; double code
+	ld	M3,	UArg1,	BIAS+4		; M3,M4 := the double in question
+	jmp.n	RET				; return ...
+	ld	M4,	UArg1,	BIAS+8		; the heap isn't doubleword aligned, so no ld.d
+;	st.d	M3,	OldE,	BIAS-8		; write the double onto the math stack
+	; this isn't necessary, just for Sparc
+3:	; structure or otherwise code
+	or	UArg1,	ZERO,	tmp1		; put the tagged term back in UArg1
+	; we need to do this because we messed with the register usage as described above
+	; can fix this scheme to avoid this later....
+	or	tmp1,	ZERO, 	H		; tmp1 := H for dbl_callout2
+	; and fall through to dbl_callout2
+
+dbl_callout2:
+
+	; non numeric code -- evaluate an expression by calling out
+	or	tmp2,	ZERO,	RET		; save return address, because
+	bsr.n	is_callout			; bsr writes over RET	
+	or	UArg2,	ZERO,	UArg1		; UArg2 := UArg1 in the delay slot
+	br.n	dbl_getnum0
+	ld	UArg1,	SP,	BIAS+4		; load up argument
+
+
+
+dcmp_getnum2:
+	; Kevin says:
+	; I don't expect this one to get called.  But we may eventually do some
+	; interesting optimizations which would cause it to get called.  So
+	; I am implementing it anyway.
+	jmp	RET				; return to caller - pretty tough, huh?
+
+
+; mth_getnum3, dbl_getnum3, dcmp_getnum3
+;
+; These routines have dereferenced UArg1 to a variable.  This is ok for
+; dcmp_getnum, but not for the others.  We will fail for them at present.
+; Eventually, we will probably call the Prolog code in order to trap the
+; variable and handle it by some other means.
+;
+
+dcmp_getnum3:
+	br	_wm_p_unsafe
+mth_getnum3:
+dbl_getnum3:
+	fail
+
+;
+; mth_putnum2, dbl_putnum2, dcmp_putnum2
+;
+;
+;	These routines take the top stack element, either in UArg1 or
+;	f0, converts this element to a Prolog object and then leaves 
+;	the tagged result in UArg1.
+;
+;	For integers, UArg1 is a signed 32-bit int.
+;	These routines correspond to 'is'/2 in the source code.
+;
+; *** m88k *** : f0 (Sparc floating point reg) needs to be mapped to two contiguous
+;		 88k regs.... M3,M4
+
+dcmp_pushint2:
+mth_putnum2:
+	extu	tmp1,	UArg1,	7<25>		; for 88k 26-bit signed integers
+						; get tag + sign bit of 26-bit integer
+						; tmp1 is zero-extended
+	cmp	tmp2,	tmp1,	ZERO		; see if zero
+	bb1	eq,	tmp2,	pn_int		; we have zero or a positive int
+	cmp	tmp2,	tmp1,	0x7f		; highest 7 bits 1111111 = -1 ==> -ve int
+	bb1	ne,	tmp2,	pn_cvtdbl
+pn_int:		
+	; simply tag the integer and return to caller
+	clr	UArg1,	UArg1,	6<26>		; nuke tag area
+	jmp.n	r1				; return, and
+	or.u	UArg1,	UArg1,	TINT		; insert integer tag in delay slot
+pn_cvtdbl:	
+	; convert int in UArg1 into a double and store back on math stack, and then
+	; also build the same double on the heap and return UArg1 as this double term
+	; cf. w_mk_double
+	
+	flt.ds	M3,	UArg1			; convert UArg1 to dp in M3,4
+pn_dbl:
+	; pn_dbl is an entry point for dbl_putnum2
+	; st.d	M3,	OldE,	BIAS-8		; write the double back into math stack
+	; the above is only for the Sparc, to allow conversions between fp and integer mode
+	
+	or.u	tmp1,	ZERO,	TFNC		; fence tag
+	or	tmp1,	tmp1,	3		; to bracket fence
+	st	tmp1,	H,	BIAS		; place the fence
+	st	M3,	H,	BIAS+4		; store the double out on the heap
+	st	M4,	H,	BIAS+8		; the heap isn't doubleword aligned, so no st.d
+	st	tmp1,	H,	BIAS+12		; place the matching fence
+
+	or.u	UArg1,	H,	TFLT		; UArg1 := tagged double term (points to
+						; term just built on the heap)
+	jmp.n	RET				; return, and
+	addu	H,	H,	16		; bump the heap pointer in the delay slot
+		
+	
+	
+
+dcmp_pushdbl2:
+dbl_putnum2:
+;       See mth_getnum2 also
+;       We avoid int.sd generating integer overflow exceptions.
+;       A legitimate question is: is it worth all these instructions to allow
+;	floats that can be represented as integers to be stored as integers?
+;       I don't know; but check out the performance differences when all this
+;	code below is replaced by a br pn_dbl  (or even better, branch to it
+;	directly!)
+
+	extu	tmp1,	M3,	11<20>		; get the exponent (excess 1023 biased)
+                                                ; extracting bits 30::20
+        cmp     tmp2,   tmp1,   1053            ; if exponent > 30 (30+1023=1053), an exception
+                                                ; will take place on an int.sd, so forget it
+        bb1     ge,     tmp2,   pn_dbl          ; remain a double
+
+	int.sd	M1,	M3			; convert the double to int
+	flt.ds	tmp1,	M1			; convert back to double
+	fcmp.sdd tmp1,	tmp1,	M3		; see if same as original
+	bb1	ne,	tmp1,	pn_dbl		; branch if not
+	br.n	mth_putnum2
+	or	UArg1,	ZERO,	M1		; UArg1 := integer (TOS)
+
+
+
+dcmp_putnum2:
+	or	tmp2,	ZERO,	RET		; save return address for is_callout
+	or.u	tmp1,	ZERO,	hi16(_mth_stk)
+	bsr.n	is_callout
+	ld	tmp1,	tmp1,	lo16(_mth_stk)	; tmp1 := start of stack area for is_callout
+	ld	UArg1,	SP,	BIAS+4		; load up arg
+	deref	UArg1,	1f
+1:	jmp	RET
+	
+
+_mth_pushdbl0:
+	; Unlike the rest of the procedures, this is the common entry point
+	; for mth_pushdbl0.  It will take the double from the words immediately
+	; following the call and push it on the stack.
+	; Notice that on the 88k RET need not be fooled with in the delay slot getting here,
+	; as on the Sparc.
+
+	ld	M3,	RET,	ZERO			; no BIAS on this ld, from the i-space
+	addu	tmp1,	MBASE, (mth_pushdbl-_mth_base)  
+	ld	M4,	RET,	4
+	jmp.n	tmp1
+	addu	RET,	RET,	8
+
+
+	; istack_to_dstack is branched to when we wish to convert between
+	; integer mode and double mode.  It will convert the elements on the
+	; stack.  istack_to_dstack will convert the top element (in UArg1)
+	; from and integer to a double and then do the memory based values.
+	; istack_to_dstack0 will only do the memory based ones.
+	; remember, for the 88k we're using M3,M4 as the f0 Sparc equivalent.
+
+istack_to_dstack:
+	flt.ds	M3,	UArg1			; M3,M4 := UArg1
+	addu	tmp1,	OldE,	ZERO		; tmp1 := OldE	
+istack_to_dstack0:
+	; tmp1 has place on stack to start converting from
+	; tmp2 has the place to stop
+	; M1,M2 temporarily holds the double to be re-written onto the stack
+	; M1 is also a scratch register
+	; tmp2 := place to stop  -- load mth_bot, tmp2
+	or.u	M1,	ZERO,	hi16(_mth_bot)
+	ld	tmp2,	M1,	lo16(_mth_bot)		
+4:	cmp	M1,	tmp1,	tmp2		; see if done
+	bb1.n	eq,	M1,	5f		; branch if done
+	addu	tmp1,	tmp1,	8		; in delay slot for next iteration
+	ld	M1,	tmp1,	BIAS-8		; get integer on stack
+	flt.ds	M1,	M1			; M1,M2 := TOS
+	br.n	4b				; loop back and ...
+	st.d	M1,	tmp1,	BIAS-8		; do the store in the delay slot
+
+5:	jmp.n	RET				; return to caller, and ...
+	addu	MBASE, 	MBASE, _dbl_base-_mth_base	; convert to double mode
+
+
+	; redo_as_dbl - another entry into istack_to_dstack
+
+redo_as_dbl:
+	subu	OldE,	OldE,	8		; restore top stack element
+redo_as_dbl0:
+	br.n	istack_to_dstack
+	subu	RET,	RET,	12		; force re-execution of
+						; subroutine causing overflow
+		; Subtract 8 for the Sparc, but 12 for the 88k because we must add into 
+		; tmp1 (the mode), then jump to this reg, while the Sparc can do it in one
+		; instruction without a register
+		; *** Note: this assumes that the subroutine causing overflow was called with a jsr.n
+		; This _seems_ to be true for all known calls of redo_as_dbl
+ 		; But, note that all the stuff calling the C library does it without delay slots
+
+
+dcmp_bld_functor_2:
+	; builds a structure from the functor in tmp1 and top two stack
+	; arguments.  The result is put on the top of the stack 
+	ld	UArg2,	OldE,	BIAS-8		; get stack arg already popped
+	st	tmp1,	H,	BIAS		; store functor
+	st	UArg2,	H,	BIAS+4		; store first arg
+	st	UArg1,	H,	BIAS+8		; store second arg
+	or.u	UArg1,	H,	TSTRUCT		; set up structure tag to heap
+	jmp.n	RET				; return, but first...
+	addu	H,	H,	12		; advance the heap
+
+dcmp_bld_functor_1:
+	; builds a structure from the functor in tmp1 and top stack
+	; element.  The result becomes the top stack element
+	st	tmp1,	H,	BIAS		; store functor
+	st	UArg1,	H,	BIAS+4		; store first arg
+	or.u	UArg1,	H,	TSTRUCT		; set up structure tag to heap
+	jmp.n	RET				; return, but first...
+	addu	H,	H,	8		; advance the heap
+
+
+is_dummyret:
+	gcinfo	0,	0,	0
+
+
+is_callout:
+	; Upon entry:
+	; 	tmp2	will have old return address
+	; 	UArg2 	will have right hand side of is
+	;	tmp1	is set to the start of the stack area
+
+	st	tmp2,	tmp1,	BIAS+8		; save RET2 value
+	st	RET,	tmp1,	BIAS+12		; save RET value
+	st	MBASE,	tmp1,	BIAS+16		; save mode
+	st	CP,	tmp1,	BIAS+20		; save generated callout address
+	subu	tmp2,	OldE,	tmp1		; tmp2 := OldE - tmp1 = TOS - Hinitial
+						; TOS > Hinitial
+	st	tmp2,	tmp1,	BIAS+4		; save offset to top
+	or.u	M1,	ZERO,	hi16(_mth_bot)	; get stack bottom (high end of stack area)
+	ld	tmp2,	M1,	lo16(_mth_bot)	; tmp2 := contents of mth_bot
+						; corr. to load mth_bot, tmp2
+	cmp	M1,	tmp2,	H		; see if H needs to be fixed
+	bb0	hi,	M1,	1f		; branch if not	
+	addu	H,	tmp2,	4		; fix H (when mth_bot > H)
+1:	subu	MBASE,	tmp2,	tmp1		; compute difference between top
+						; and bottom for making fence
+	extu	MBASE,	MBASE,	0<2>		; convert size from # bytes to
+						;    number of (32 bit) words
+	or.u	MBASE,	MBASE,	TFNC		; tag it as a fence
+	st	MBASE,	tmp1,	BIAS		; store fence at ends of stack
+	st	MBASE,	tmp2,	BIAS		; area
+	or.u	tmp1,	tmp1,	TUIA		; tag it as UIA
+	st	E,	SP,	BIAS+8
+	set_a	tmp2,	is_dummyret+GC_INFO_SIZE
+	st	tmp2,	SP,	BIAS+12		; dummy CP for dummy environment
+	addu	E,	SP,	8		; E --> the dummy environment (8,12 = E, CP)
+	st	tmp1,	SP,	BIAS		; store the UIA
+	or.u	M1,	ZERO,	hi16(_mth_is_addr) ; tmp1 := addr of is
+	ld	tmp1,	M1,	lo16(_mth_is_addr) ; corr. to load mth_is_addr, tmp1
+	addu	UArg1,	SP,	4		; set UArg1 up with a variable
+	jmp.n	CP				; call is/2 - i.e. custom code generated for
+						; this call to is, which will call [tmp1]
+	st	UArg1,	UArg1,	BIAS		; make variable in the delay slot
+
+rel_callout:
+	; Upon entry:
+	;	tmp1	will point at start of arith stack/callout area
+	;	UArg1	has left hand argument to relational operator
+	;	UArg2	has address of relational operator entry point
+	; rel_callout is called only from decompilation mode to build the
+	; relational operator.
+	
+	st	RET,	tmp1,	BIAS+12		; save RET value
+	st	MBASE,	tmp1,	BIAS+16		; save mode
+	st	CP,	tmp1,	BIAS+20		; save generated callout address
+	subu	tmp2,	OldE,	tmp1		; get offset to top
+	st	tmp2,	tmp1,	BIAS+4		; save offset to top
+	load	tmp2,	_mth_bot		; get stack bottom
+	subu	MBASE,	tmp2,	tmp1		; compute difference between top and bottom
+						; for making fence
+	extu	MBASE,	MBASE,	0<2>		; convert size from bytes to
+						;    (32 bit) words
+	or.u	MBASE,	MBASE,	TFNC		; tag it as a fence
+	st	MBASE,	tmp1,	BIAS		; store fence at ends of stack
+	st	MBASE,	tmp2,	BIAS		; area
+	or.u	tmp1,	tmp1,	TUIA		; tag it as a UIA
+	st	E,	SP,	BIAS+8
+	or.u	tmp2,	ZERO,	hi16(is_dummyret+GC_INFO_SIZE)
+						; tmp2 := &is_dummyret
+	or	tmp2,	tmp2,	lo16(is_dummyret+GC_INFO_SIZE)
+	st	tmp2,	SP,	BIAS+12		; dummy CP for dummy environment
+	addu	E,	SP,	8		; E --> the dummy environment (8,12 = E, CP)
+	st	tmp1,	SP,	BIAS		; store the UIA
+	st	tmp1,	SP,	BIAS+4		; also store it where we'd normally put variable
+						; (something tagged has to be put there)
+	or	tmp1,	ZERO,	UArg2		; set tmp1 to entry pt addr
+	jmp.n	CP				; call is/2 - i.e. custom code generated for
+						; this call to is, which will call [tmp1]
+	ld	UArg2,	OldE,	BIAS		; get left hand argument in delay slot
+
+
+_mth_aftercall:
+	; SP is set to original stack position.  Otherwise, must do
+	; everything else.
+	ld	E,	SP,	BIAS+8		; unlink dummy environment
+	ld	UArg1,	SP,	BIAS		; get stack base value
+	clr	UArg1,	UArg1,	6<26>		; nuke the tag
+	ld	UArg2,	UArg1,	BIAS		; get the fence
+	clr	UArg2,	UArg2,	6<26>		; nuke the tag
+	mak	UArg2,	UArg2,	0<2>		; shift left by 2 = multiply
+						;   by 4 (unsigned)
+						; #fenced elements * 4 = size
+						;   of fenced area (in bytes)
+	addu	UArg2,	UArg1,	UArg2		; get to end 
+	or.u	M1,	ZERO,	hi16(_mth_stk)	; reset global mem values
+	st	UArg1,	M1,	lo16(_mth_stk)	; store UArg1, mth_stk
+	or.u	M1,	ZERO,	hi16(_mth_bot)	
+	st	UArg2,	M1,	lo16(_mth_bot)	; store UArg2, mth_bot
+	ld	OldE,	UArg1,	BIAS+4		; get offset to astack top (Top Offset)
+	addu	OldE,	UArg1,	OldE		; reset astack top
+	ld	RET,	UArg1,	BIAS+8		; reset old return address
+	ld	tmp2,	UArg1,	BIAS+12		; get current return address
+	ld	MBASE,	UArg1,	BIAS+16		; reset mode
+	ld 	CP,	UArg1,	BIAS+20		; reset callout address
+	or.u	tmp1,	ZERO,	hi16(_dcmp_base)
+	or	tmp1,	tmp1,	lo16(_dcmp_base) ; set dcmp_base, tmp1
+	bcnd	gt0,	Safety,	1f		; branch if not in decompilation mode
+
+2:		
+	jmp	tmp2				; return to caller of ?_callout
+	; note that we don't need to add 8 like on the Sparc, cuz the 88k sets
+	; RET not to the  bsr (CALL, resp.), but to the following instr (or
+	; the one following the delay slot instr)
+
+1:	; see if the stack has become misaligned, and fix it if so
+	; stuff will always be word aligned <==> 00 in bit positions 1,0
+	; so, stuff will always be doubleword aligned if word aligned and bit
+	; pos 2 = 0
+	bb0.n 	2,	UArg2,	2b		; branch if not misaligned
+	or	H,	ZERO,	UArg1		; reset H whether misaligned or not
+
+	; realignment code
+	; This code seems to be rarely executed - I recall stepping through
+	; it and fixing some bugs at one time and getting it to run to my
+	; satisfaction. but I can't get it to execute now.  It _should_ work OK.
+
+	subu	tmp1,	UArg2,	4		; get ready to realign
+1:	ld	UArg1,	tmp1,	BIAS		; get stack word
+	st	UArg1,	tmp1,	BIAS+4		; store back one word up
+	cmp	M1,	tmp1,	OldE		; see if done
+	bb1.n	hi,	M1,	1b		; branch if not
+	subu	tmp1,	tmp1,	4		; for next iteration in delay slot, harmless
+						; when done
+	addu	UArg2,	UArg2,	4		; advance astack bottom
+	or.u	M1,	ZERO,	hi16(_mth_bot)	; store it
+	st	UArg2,	M1,	lo16(_mth_bot)	; corr. to store UArg2, mth_bot
+	; just jump back to tmp2, don't need to add 8 as on the Sparc (see above)
+	jmp.n	tmp2
+	addu	OldE,	OldE,	4		; adjust stack top in delay slot
+
+
+	
+; 	_mth_addi, _mth_add
+; 	_mth_addi is called with UArg2 already holding the rh op (immediate).
+; 	The work here is to detect overflow out of a signed 32-bit integer
+;	representation.  Overflow can only happen when the sign bits of both
+;	operands are the same, and then when the sign bit of the result is
+;	different (xor to the rescue!)
+;	Note that mth_addi and mth_add can share code here because 
+;	integer addition is commutative, i.e. UArg1+UArg2 = UArg2+UArg1
+	; I think using addu.co could reduce this code sequence by one instruction....
+
+; 	Now that we branch to this code from the entry points, we avoid code duplication
+; 	between mth_addi and mth_add.
+; 	Both mth_addi and mth_add enter mth_add2, and do stuff beforehand.
+; 	
+
+; _mth_add:	ld	UArg2,	OldE,	BIAS-8		; load lh op
+; _mth_addi:	xor	tmp1,	UArg1,	UArg2		; sign bits of two operands
+mth_add2:
+	bb1.n	31,	tmp1,	1f		; branch if unlike signs
+	addu	tmp2,	UArg2,	UArg1		; do the add in any event
+	; like signs - must check for overflow
+	xor	tmp1,	tmp2,	UArg2		; sign bits of result and operands
+	bb1	31,	tmp1,	2f		; different => overflow
+1:	jmp.n	RET
+	addu	UArg1,	UArg2,	UArg1		; return, with result in UArg1
+2:	; overflow
+	br.n	redo_as_dbl0			; redo the computation in double
+	subu	OldE,	OldE,	8		; mode, and use the delay slot
+
+
+;	_mth_subi, _mth_sub
+;	_mth_subi is called with UArg2 already holding the rh op (immediate).
+;	As above, the 88k makes us jump through hoops to detect overflow.
+;	For signed subtraction, overflow can only happen when the sign bits of
+; 	both operands are different, and then when the sign bit of the result
+;	is the same as that of the second (rh) operand.
+;	Unfortunately, mth_subi is computing UArg1-UArg2 while mth_sub is 
+;	computing UArg2-UArg1, hence the code is slightly different.
+
+	; UArg2 holds the rh op
+;	xor	tmp1,	UArg1,	UArg2		; sign bits of two operands done in delay slot
+mth_subi2:
+	bb0.n	31,	tmp1,	1f		; branch if like signs
+	subu	tmp2,	UArg1,	UArg2		; do the subtract in any event
+	; unlike signs - must check for overflow
+	xor	tmp1,	tmp2,	UArg2		; sign bits of result and rh op
+	bb0 	31,	tmp1,	2f		; same => overflow
+1:	jmp.n	RET				; return, with result in UArg1
+	subu	UArg1,	UArg1,	UArg2
+2:	; overflow
+	br.n	redo_as_dbl0			; redo the computation in double
+	subu	OldE,	OldE,	8		; mode, and use the delay slot
+
+
+
+;	These two instructions done in delay slot on way over here
+;	ld	UArg2,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+;	xor	tmp1,	UArg1,	UArg2		; sign bits of two operands
+mth_sub2:
+	bb0.n	31,	tmp1,	1f		; branch if like signs
+	subu	tmp2,	UArg2,	UArg1		; do the subtract in any event
+	; unlike signs - must check for overflow
+	xor	tmp1,	tmp2,	UArg1		; sign bits of result and rh op
+	bb0 	31,	tmp1,	2f		; same => overflow
+1:	jmp.n	RET				; return, with result in UArg1
+	subu	UArg1,	UArg2,	UArg1
+	
+2:	; overflow
+	br.n	redo_as_dbl0			; redo the computation in double
+	subu	OldE,	OldE,	8		; mode, and use the delay slot
+						; caller)
+
+;mth_mul2:
+	; adapt Kevin's original _mth_mul from math.88k, except do 32-bit 
+	; multiplication instead of 26-bit.
+	; Notice Kevin's nice use of the 88k ff0 and ff1 instructions.
+
+	; Multiplies UArg1 by UArg2 leaving the result in UArg1.
+	; tmp1 and tmp2 are modified.
+
+;	ld	UArg2,	OldE,	BIAS-8		; load rh op (stack was popped in
+						; caller) done in delay slot
+mth_mul2:
+	bcnd.n	lt0,	UArg1,	1f		; branch if 1st arg is less than
+						;  zero
+	ff0	tmp1,	UArg1
+
+	ff1	tmp1,	UArg1
+	addu	tmp1,	tmp1,	1
+1:
+	bcnd.n	lt0,	UArg2,	2f		; branch if 2nd arg is less than
+						;  zero
+	ff0	tmp2,	UArg2			;
+
+	ff1	tmp2,	UArg2
+	addu	tmp1,	tmp1,	1
+2:
+	and	tmp1,	tmp1,	0x001f		; disallow 32 (+ve or -ve)
+	and 	tmp2,	tmp2,	0x001f		; for both operands
+	addu	tmp1,	tmp2,	tmp1		; add bit positions together
+	cmp	tmp1,	tmp1,	32		; see if too big
+	bb1	gt,	tmp1,	redo_as_dbl
+
+	mul	UArg1,	UArg1,	UArg2		; do the multiplication
+	ext	tmp1,	UArg1,	1<31>		; extract sign bit
+	bcnd	eq0,	tmp1,	3f		; branch if ok
+	addu	tmp1,	tmp1,	1		; add 1
+	bcnd	ne0,	tmp1,	redo_as_dbl	; branch if not ok
+
+3:
+	jmp	RET
+
+
+;mth_div:
+	; adapt Kevin's original _mth_div from math.88k, except do 32-bit
+	; multiplication instead of 26-bit.
+
+ 	; Takes the dividend in UArg2, the divisor in UArg1, and
+	; leaves the quotient in UArg1.  
+
+	; Divide by 0 causes the goal to fail.
+	; Notice that the complexity below is caused by the 88k's lame 
+	; signed div  -- no negative operands allowed!
+
+;	ld	UArg2,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+mth_div2:
+	bcnd	eq0,	UArg1,	div_fail	; divide by 0 => failure
+	xor	tmp1,	UArg1,	UArg2		; figure out the resulting sign
+	bcnd	ge0,	UArg2,	1f		; get absolute value of UArg2
+	subu	UArg2,	ZERO,	UArg2
+1:
+	bcnd	ge0,	UArg1,	2f		; get absolute value of UArg1
+	subu	UArg1,	ZERO,	UArg1
+2:
+	div	UArg1,	UArg2,	UArg1		; do the division
+	bcnd	ge0,	tmp1,	3f		; branch if sign doesn't need
+						;  fixing
+	subu	UArg1,	ZERO,	UArg1		; fix the sign
+3:
+	jmp	RET
+div_fail:
+	fail
+
+;_mth_mod:
+	; adapt Kevin's original mth_mod from math.88k
+	;
+	;	Takes the dividend in UArg2, the divisor in UArg1, and using
+	;	the absolute value of these numbers, leaves the remainder in
+	;	UArg1.
+	;
+	;	Divide by zero causes failure.
+	;
+	;	tmp1 is used.
+	;	
+
+;	ld	UArg2,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+mth_mod2:
+	bcnd	eq0,	UArg1,	4f		; do an error return if
+						;  the divisor is zero
+	bcnd	ge,	UArg2,	1f		; take absolute value of UArg2
+	subu	UArg2,	ZERO,	UArg2		
+1:
+	bcnd	ge,	UArg1,	3f		; take abs value of UArg1
+	subu	UArg1,	ZERO,	UArg1
+3:
+	div	tmp1,	UArg2,	UArg1		; do the integer division
+	mul	tmp1,	UArg1,	tmp1		; multiply to allow a sub to get the mod
+	jmp.n	RET				; return, and
+	subu	UArg1,	UArg2,	tmp1		; leave the mod result in UArg1 (TOS)
+	
+4:
+	fail
+
+
+
+;dbl_div2:
+	; like dbl_fdiv, but call floor on the result - still return it as a double, as floor()
+	; is wont to do.
+	; fail on division by zero, otherwise just do a fdiv.ddd
+;	ld.d	tmp1,	OldE,	BIAS-8 		done in delay slot
+dbl_div2:
+	flt.ds	M1,	ZERO			; unfortunately necessary to compare fp with zero
+	fcmp.sdd M1,	M1,	M3		; divide by zero?
+	bb1	eq,	M1,	1f		; if so, fail
+	fdiv.ddd M3,	tmp1,	M3		; do the divide
+	; Note that when we use flt.ds, we can spend lots of time in floating
+	; point exception handlers (originally noted by SM 7-21-92)
+	trnc.sd	tmp1,	M3			; tmp1,tmp2 := trunc(M3,M4)
+	flt.ds	M3,	tmp1			; M3,M4 := flt(tmp1,tmp2)
+	jmp	RET
+1:	fail
+
+
+;dbl_fdiv:
+	; fail on division by zero, otherwise just do a fdiv.ddd
+;	ld.d	tmp1,	OldE,	BIAS-8
+dbl_fdiv2:
+	flt.ds	M1,	ZERO
+	fcmp.sdd M1,	M1,	M3		; divide by zero?
+	bb1	eq,	M1,	1f		; if so, fail
+	jmp.n	RET				; else just return and
+	fdiv.ddd M3,	tmp1,	M3		; and do the divide in the delay slot
+1:	fail
+
+
+;dbl_mod:
+; we could call fmod() in math.h.... (should we?)
+	; like mth_mod, but need to call floor
+;	ld.d	tmp1,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+dbl_mod2:
+	flt.ds	M1,	ZERO
+	fcmp.sdd M1,	M3,	M1		; is the divisor zero?
+	bb1	eq,	M1,	1f		; if so, fail
+	fdiv.ddd M1,	tmp1,	M3		; M1,M2 := tmp1,tmp2 / M3,M4
+	; as in dbl_div2, do truncate instead of floor   SM 7-21-92
+	; again, caveat about excessive time in floating point exceptions due to flt.ds and
+	; stuff that can't fit in 30 bits of integer
+	; lotsa reg conflicts in the two instructions below (can we use A1-A2?  SM 7-21)
+	trnc.sd	M1,	M1			; M1,M2 := trunc(M1,M2)
+	flt.ds	M1,	M1			; M1,M2 := flt(M1,M2)
+
+	fmul.ddd M1,	M1,	M3		; M1,M2 := floor'd div res * divisor
+	jmp.n	RET
+	fsub.ddd M3,	tmp1,	M1		; return LH op - M1,M2	
+1:	fail
+
+
+;dbl_power:
+	; call C math library
+;	ld.d	tmp1,	OldE,	BIAS-8		; load lh op (stack was popped in caller)
+dbl_power2:
+	binaryCdbl	_pow
+
+dbl_atan22:
+	binaryCdbl	_atan2
+
+dbl_fmod2:
+	binaryCdbl	_fmod
+
+dbl_hypot2:
+	binaryCdbl	_hypot
+
+dbl_jn2:
+	binaryCdbl	_jn
+
+dbl_yn2:
+	binaryCdbl	_yn
+
+
+dbl_sin2:
+	unaryCdbl	_sin
+dbl_cos2:
+	unaryCdbl	_cos
+dbl_tan2:
+	unaryCdbl	_tan
+dbl_asin2:
+	unaryCdbl	_asin
+dbl_acos2:
+	unaryCdbl	_acos
+dbl_atan02:
+	unaryCdbl	_atan
+dbl_sqrt2:
+	unaryCdbl	_sqrt
+dbl_exp2:
+	unaryCdbl	_exp
+
+;dbl_exp10:
+	; do this custom, call C exp()
+	; for the call to pow via binaryCdbl macro, must load up the base (10) in M3,M4, 
+	; and the exponent in tmp1,tmp2
+;	or	tmp1,	ZERO,	M3
+;	or	tmp2,	ZERO,	M4
+
+;	or	tmp1,	ZERO,	10		-- now done in delay slot
+dbl_exp102:
+	flt.ds	tmp1,	tmp1	
+	binaryCdbl	_pow			
+
+dbl_log2:
+	unaryCdbl	_log
+dbl_log102:
+	unaryCdbl	_log10
+dbl_floor2:
+	unaryCdbl	_floor
+
+dbl_round2:
+	; do this custom, call C floor()
+	; round(x) = floor(x+0.5)
+	; *** There's gotta be an easier way to do without calling the math lib at all
+	; unaryCdbl	_anint		; anint doesn't exist in System V
+	or.u	M1,	ZERO,	hi16(one_half)
+	or	M1,	M1,	lo16(one_half)
+	ld.d	tmp1,	M1,	ZERO		; tmp1,tmp2 := 0.5
+	fadd.ddd M3,	M3,	tmp1		; M3,M4 := M3,M4 + 0.5
+	; 2  instrs in unaryCdbl code sequence done in delay slot getting to dbl_round2
+	unaryCdbl _floor
+
+dbl_trunc2:
+	; do this custom, call C ceil() or floor()
+	; trunc(x) = if x < 0 then ceil(x) else floor(x)
+	; unaryCdbl	_aint			; aint doesn't exist in System V
+	flt.ds	M1,	ZERO			; unfortunately necessary to compare fp with zero
+	fcmp.sdd M1,	M3,	M1		; x = 0 ?
+	bb1	ge,	M1,	dbl_floor2
+	; 2  instrs in unaryCdbl code sequence done in delay slot getting to dbl_round2
+	unaryCdbl _ceil
+
+dbl_ceil2:
+	unaryCdbl	_ceil
+
+dbl_cosh2:
+	unaryCdbl	_cosh
+
+dbl_erf2:
+	unaryCdbl	_erf
+
+dbl_erfc2:
+	unaryCdbl	_erfc
+
+dbl_gamma2:
+	unaryCdbl	_gamma
+
+dbl_j02:
+	unaryCdbl	_j0
+
+dbl_j12:
+	unaryCdbl	_j1
+
+dbl_sinh2:
+	unaryCdbl	_sinh
+
+dbl_tanh2:
+	unaryCdbl	_tanh
+
+dbl_y02:
+	unaryCdbl	_y0
+
+dbl_y12:
+	unaryCdbl	_y1
+
+
+dbl_cputime2:
+	nularyCdbl	_als_cputime
+dbl_realtime2:
+	nularyCdbl	_als_realtime
+dbl_random2:
+	nularyCdbl	_als_random
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,384 @@
+;
+; functor.sprc		-- functor, arg, and mangle
+;	Copyright (c) 1991-1993 by Applied Logic Systems, Inc.
+;
+; Author:	Kevin A. Buettner
+; Creation:	1/25/91
+; Revision History:
+;
+
+#include "assembly.sprc"
+
+	text
+
+	;
+	; wm_functor	-- implements functor/3
+	;
+	;
+
+	global	wm_functor
+wm_functor:
+
+	; Dereference the first argument
+
+	deref	A1,	fg1
+
+	; first argument is a variable;  need to dereference both second
+	; and third arguments.  If they are of the proper type, then
+	; we can create a new structure.
+
+	deref	A2,	1f
+ffail:	fail				; fail if second arg is a variable
+
+1:
+	mov	0,	T1		; T1 is our numeric flag
+	and	A2, MTP_CONSTMASK, tmp1	; get tag of second arg
+	cmp	tmp1,	MTP_SYM		; see if we have a symbol
+	be	fv1gotsym		; branch if we have a symbol
+	cmp	tmp1,	MTP_UIA		; see if we have a UIA (operation
+					;    not needed if prev branch taken)
+	bne,a	fv1chknum		; branch if not a UIA
+	cmp	tmp1,	MTP_INT		; check to see if we have integer
+					;   in delay slot
+	srl	A2, MTP_CONSTSHIFT, UArg1	; get uia offset
+	add	UArg1,	HeapBase, UArg1	; set up actual heap address in UArg1
+	add	UArg1,	4,	UArg1	; skip fence to get to string
+	callC1	find_token,	UArg1	; find the token
+	sll	UArg1,	MTP_CONSTSHIFT, A2	; make room for tag
+	ba	fv1gotsym		; now we have sym after we...
+	add	A2,	MTP_SYM, A2	; add in the tag
+fv1chknum:
+	be	fv1gotnum		;
+	add	T1,	1,	T1	; increment numeric flag in delay slot
+	and	A2,	MTP_TAGMASK, tmp1	; get 2 bit tag
+	cmp	tmp1,	MTP_STRUCT	; see if we have a structure
+	bne	ffail			; fail if not
+	nop
+	ld	[A2-MTP_STRUCT], tmp2	; get functor
+	set	MMK_FUNCTOR(TK_DDOUBLE,4), tmp1	; setup functor to compare with
+	cmp	tmp1,	tmp2		; see if we have a double
+	bne	ffail			; fail if we don't
+	nop
+fv1gotnum:
+	; increment of numeric flag occured in the delay slot
+fv1gotsym:
+
+	;
+	; dereference third argument
+	;	A1	-- first arg deref'd (variable)
+	;	A2	-- second arg deref'd (symbol or numeric)
+	;	T1	-- numeric flag (0=symbolic, 1=numeric)
+	;
+
+	deref	A3,	1f
+	fail				; fail if third arg is variable
+1:	and	A3, MTP_CONSTMASK, tmp1	; put constant tags in tmp1
+	cmp	tmp1,	MTP_INT		; see if we have an integer
+	bne	ffail			; fail if it is not an integer
+	srl	A3, MTP_CONSTSHIFT, A3	; shift tag out leaving integer
+	cmp	A3,	0		; see if arity is zero
+	be	fvbind
+	cmp	T1,	1		; see if numeric flag is set
+	be	ffail			; fail if numeric and arity>0
+					; (the following instruction is in the
+					;  delay slot, but is worthless if
+					;  branch is taken)
+	cmp	A3,	255		; see if too big...this also handles
+					; negative numbers since we use the
+					; unsigned version of the branch
+	bcc,a	fvbig			; branch if too big or negative
+	cmp	A3,	ZERO		; compare against zero in delay slot
+	nop
+	set	MMK_SYM(TK_DOT), tmp2	; set up dot
+	cmp	A2,	tmp2		; see if proposed functor is a dot
+	bne	fvstruct		; branch if not
+	cmp	A3,	2		; see if arity is two
+	bne	fvstruct
+	add	H, MTP_LIST, A2		; set up list pointer in A2
+	st	H,	[H]		; put unbound on heap
+	add	H,	4,	H	; advance heap pointer
+	st	H,	[H]		; put another unbound on heap
+	ba	fvbind			; advance heap pointer and branch
+	add	H,	4,	H	;   to the binding code
+fvbig:
+	bl	ffail			; fail if less than zero
+	mov	255,	tmp1		; put 255 (escape arity) into tmp1
+	sll	tmp1,	24,	tmp1	; shift left 24 bits
+	or	tmp1,	A2,	A2	; make functor with escape arity
+	st	A2,	[H]		; put functor on heap
+	sll	A3, MTP_CONSTSHIFT, tmp1 ; shift real arity left
+	add	tmp1,	MTP_INT, tmp1	; tag real arity with integer
+	st	tmp1,	[H+4]		; store arity on heap
+	add	H, MTP_STRUCT,	A2	; put structure pointer into A2
+	ba	1f			; branch to loop start
+	add	H,	4,	H	; advance heap in delay slot
+
+fvstruct:
+	sll	A3,	24,	tmp1	; shift arity left 24 bits into tmp1
+	or	tmp1,	A2,	A2	; make functor
+	st	A2,	[H]		; put functor on heap
+	add	H, MTP_STRUCT,	A2	; put structure pointer in A2
+1:	add	H,	4,	H	; advance heap
+	subcc	A3,	1,	A3	; decrement counter
+	bgu	1b			; branch if greater than zero
+	st	H,	[H]		; store an unbound
+	add	H,	4,	H	; advance heap
+fvbind:	bind	A2,	A1		; bind the variable
+	proceed
+
+
+fg1:
+	;
+	; First argument is ground and resides in A1 with the two bit type
+	; in tmp1.
+	;
+	; Classify it and set up UArg1 with the symbol and T1 with the
+	; arity.  Then call unifier twice on the appropriate arguments
+	;
+
+	cmp	tmp1,	MTP_LIST	; check on the tag
+	be,a	fglist			; branch if it is a list
+	mov	2,	T1		; set up arity
+	bgu,a	fgconst			; branch if constant
+	mov	0,	T1		; set up arity for constant
+
+	;
+	; First argument is a structure.  Extract the functor.
+	;
+
+	ld	[A1-MTP_STRUCT], tmp1	; put functor in tmp1
+	set	MMK_FUNCTOR(TK_DDOUBLE,4), tmp2	; put $double/4 in tmp2
+	cmp	tmp1,	tmp2		; see if we have a double
+	be,a	fgconst			; branch if so
+	mov	0,	T1		; set up arity for constant
+
+	sll	tmp1,	8,	UArg1	; shift arity off of functor into UArg1
+	srl	tmp1,	24,	T1	; put arity into T1
+	cmp	T1,	255		; see if arity is escape arity
+	bne	fgunify			; branch if not
+	srl	UArg1,	8,	UArg1	; (delay slot) shift symbol back
+
+	ld	[A1+(4-MTP_STRUCT)], T1	; load arity into T1
+	srl	T1, MTP_CONSTSHIFT, T1	; untag it
+
+fgunify:
+	call	wm_unify		; call the unifier
+	mov	A2,	UArg2		; set up UArg2 with other argument
+	sll	T1, MTP_CONSTSHIFT, UArg1 ; shift for tagging arity
+	add	UArg1, MTP_INT,	UArg1	; turn it into a Prolog integer
+	sub	CP,	8,	RET	; set up RET for last call to unifier
+	mov	OldE,	E		; unlink environment
+	ba	wm_unify		; call unifier again
+	mov	A3,	UArg2		; set up UArg2 with arity to unify with
+
+fglist:
+	set	MMK_SYM(TK_DOT), UArg1	; put dot into UArg1
+	ba	fgunify
+	nop
+
+fgconst:
+	ba	fgunify
+	mov	A1,	UArg1		; put constant into UArg1
+
+	
+
+	;
+	; wm_arg implements arg/3
+	;
+
+	global	wm_arg
+wm_arg:
+	deref	A1,	ag1		; dereference first argument
+afail:	fail				; fail if variable
+
+ag1:	and	A1, MTP_CONSTMASK, tmp1	; get constant tags in order to
+	cmp	tmp1,	MTP_INT		;   see if we have an integer
+	bne	afail			; fail if we don't have an integer
+	srl	A1, MTP_CONSTSHIFT, A1	; shift out tags leaving integer
+	cmp	A1,	0		; see if arity is zero
+	be	afail			; fail if so
+	nop
+
+	deref	A2,	ag2		; dereference second argument
+	fail				; fail if second arg is a variable
+
+ag2:	cmp	tmp1,	MTP_LIST	; compare against list
+	bcs,a	astruct			; branch if we have a structure
+	ld	[A2-MTP_STRUCT], T1	; get functor in delay slot
+	be,a	alist			; branch if we have list
+	mov	2,	T1		; put list arity into T1 (delay slot)
+	fail				; fail if we have constant
+
+astruct:
+	set	MMK_FUNCTOR(TK_DDOUBLE,4), tmp1
+	cmp	T1,	tmp1		; see if functor is $double/4
+	bne,a	1f			; branch if not
+	srl	T1,	24,	T1	; leave arity of functor in T1
+					;	(delay slot)
+	fail				; fail if double
+1:	cmp	T1,	255		; see if we have escape arity
+	bne,a	agetarg2		; branch if not
+	cmp	A1,	T1		; see if argnum <= arity (delay slot)
+	ld	[tmp2+4], T1		; get real arity
+	srl	T1, MTP_CONSTSHIFT, T1	; shift out tag
+	ba	agetarg
+	add	tmp2,	4,	tmp2	; adjust tmp2 (in delay slot)
+
+alist:	sub	tmp2,	4,	tmp2	; adjust tmp2 so 1 based index will
+					; work on a list
+agetarg:
+	cmp	A1,	T1		; see if argnum <= arity
+agetarg2:
+	bgu	afail			; branch if not (argnum <= arity)
+	sll	A1,	2,	A1	; A1 := A1*4 (useless when bgu taken)
+	ld	[tmp2+A1],	UArg1	; get argument for unifier
+	sub	CP,	8,	RET	; set up RET for call to unifier
+	mov	OldE,	E		; unlink environment
+	ba	wm_unify		; call unifier
+	mov	A3,	UArg2		; set up UArg2 with arity to unify with
+
+
+
+	;
+	; mangle/3
+	;
+	; mangle is like arg, but with all 3 arguments instantiated.
+	;
+	; mangle(N,S,A) will replace the Nth argument in structure S with
+	; the argument A.  No trailing (or unification) is done. A may be
+	; of any type except variable.
+	;
+
+	global	wm_mangle
+wm_mangle:
+	deref	A1,	mg1		; dereference the first argument
+	fail				; fail if variable
+
+mg1:	and	A1, MTP_CONSTMASK, tmp1	; get constant tags in order to
+	cmp	tmp1,	MTP_INT		;   see if we have an integer
+	bne	mfail			; fail if we don't have an integer
+	srl	A1, MTP_CONSTSHIFT, A1	; shift out tags leaving integer
+	cmp	A1,	0		; see if arity is zero
+	be	mfail			; fail if so
+	nop
+
+	deref	A3,	mg3		; dereference third argument
+;; Old code -- fail if A3 is a variable
+;	fail				; fail if variable
+;; End of old code
+
+;; New code -- make sure var lives on heap
+	cmp	A3,	HeapBase
+	bcc	mg3				; branch if on heap
+	cmp	A3,	SPB			; see if we need to trail
+
+2:	bcs	3f				; branch if no trailing needed
+	st	H,	[H]			; make heap var in delay slot
+
+
+	sub	TR,	4,	TR		; push an entry
+	st	A3,	[TR]			;   onto the trail
+3:
+	st	H,	[A3]			; make lstack var point to heap
+	mov	H,	A3			; move heap top to UArg1
+	add	H,	4,	H		;   advancing H
+;; End of new code
+
+mg3:
+	deref	A2,	mg2		; dereference second argument
+mfail:	fail				; fail if second arg variable
+
+mg2:	cmp	tmp1,	MTP_LIST	; compare against list
+	bcs,a	mstruct			; branch if we have a structure
+	ld	[A2-MTP_STRUCT], T1	; get functor in delay slot
+	be,a	mlist			; branch if we have list
+	mov	2,	T1		; put list arity into T1 (delay slot)
+	fail				; fail if we have constant
+mstruct:
+	set	MMK_FUNCTOR(TK_DDOUBLE,4), tmp1
+	cmp	T1,	tmp1		; see if functor is $double/4
+	bne,a	1f			; branch if not
+	srl	T1,	24,	T1	; leave arity of functor in T1
+					;	(delay slot)
+	fail				; fail if double
+1:	cmp	T1,	255		; see if we have escape arity
+	bne,a	mputarg2		; branch if not
+	cmp	A1,	T1		; see if argnum <= arity (delay slot)
+	ld	[tmp2+4], T1		; get real arity
+	srl	T1, MTP_CONSTSHIFT, T1	; shift out tag
+	ba	mputarg
+	add	tmp2,	4,	tmp2	; adjust tmp2 (in delay slot)
+
+mlist:	sub	tmp2,	4,	tmp2	; adjust tmp2 so 1 based index will
+					;    work on a list
+mputarg:
+	cmp	A1,	T1		; see if argnum <= arity
+mputarg2:
+	bgu	mfail			; branch if not
+	sll	A1,	2,	A1	; A1 := A1*4 (useless when bgu taken)
+	add	tmp2,	A1,	tmp2	; set tmp2 to slot to modify
+	st	A3,	[tmp2]		; put third arg in slot
+	and	A3, MTP_TAGMASK, tmp1	; get tags
+	cmp	tmp1,	MTP_CONST	; see if tag is constant
+	bne,a	1f			; branch if pointer
+	andn	A3,	3,	A3	; clear tags in delay slot
+	and	A3, MTP_CONSTMASK, tmp1	; get constant tags
+	cmp	tmp1,	MTP_UIA		; see if tag is UIA
+	be,a	2f			; branch if uia
+	srl	A3,	4,	A3	; clear out tag
+mret:	proceed
+	;;;;;;;;;;;;;;;;;;
+	;; Former BUG on line below...don't think we should multiply by four
+	;;;;;;;;;;;;;;;;;;
+2:	;sll	A3,	2,	A3	; multiply by four
+	add	HeapBase, A3,	A3	; now address of UIA is in A3
+1:	cmp	tmp2,	A3		; compare slot to object put in slot
+	bcc,a	mret			; branch if slot address greater or
+	nop				;   equal to object address (we're
+					;   done)
+	load	gv_setcnt,	T1	; get the gv_setcnt value
+	add	T1,	1,	T1	; increment it
+	store	T1,	gv_setcnt	; store it back
+	mov	B,	T1		; put choice ptr into B
+	mov	H,	T2		; put top of heap into T2
+
+	;
+	; tmp2		-- slot address
+	; A3		-- value which we put into slot (an address)
+	; T1		-- choice pointer
+	; T2		-- HB update pointer
+	;
+
+	cmp	tmp2,	HB		; compare slot address with HB
+	bcc	mret			; return if no work to do
+	nop
+	cmp	A3,	HB		; compare obj address with HB
+	bcc	m_updHB			; update choice point if HB <= obj
+	nop
+	ba	m_loopmid		; branch to middle of loop whilst
+	mov	HB,	T2		;   lowering the choice point value
+m_updHB:
+	ba	m_loopmid		; branch to middle of loop whilst
+	mov	T2,	HB		;   updating the HB pointer
+
+m_updchpt:
+	ld	[T1+chpt_B],	T1	; follow choice point chain
+m_nextchpt:
+	cmp	T1,	0		; see if at end
+	be	mret			; branch if so
+	nop
+m_loopmid:
+	ld	[T1+chpt_SPB],	tmp1	; get SPB value
+	ld	[T1+chpt_HB],	T3	; get HB value into T3
+	andn	tmp1,	3,	tmp1	; clear compaction bit
+	st	tmp1,	[T1+chpt_SPB]	; store it back
+	cmp	tmp2,	T3		; compare slot value with HB (from chpt)
+;; next line used to be bgu instead of bcc. Am pretty sure bgu is wrong. -kev
+	bcc	mret			; return if no work to do
+	nop
+	cmp	A3,	T3		; compare obj value with HB
+	bcc,a	m_updchpt		; update choice point value if HB<=obj
+	st	T2,	[T1+chpt_HB]	; update choice point (in delay slot)
+	ld	[T1+chpt_B],	T1	; follow choice point chain
+	ba	m_nextchpt		; 
+	mov	T3,	T2		; otherwise lower the update value

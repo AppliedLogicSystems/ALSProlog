@@ -1,0 +1,109 @@
+#include "assembly.88k"
+
+	text
+;
+; Creation:  Brian K. Short   May 1988
+;
+;	Copyright (c) 1989 Motorola, Inc.
+;	Copyright (c) 1989 Applied Logic Systems, Inc.
+;
+; Code for Builtin Arg/3
+;
+; Modified:  Craig Thornley   Aug 1989  efficiency
+;	     Scott Medeiros   Sep 1992  big structures support
+;
+;  REGISTERS
+;
+;  A1	argument 1  	(an integer, N)
+;  A2	argument 2  	(a structure or list, S)
+;  A3	argument 3  	(the Nth arg of S, A --may be var)
+;  CP	return address
+;  OldE environment pointer
+;  
+	global _wm_arg
+_wm_arg:
+
+_a1:
+	bb1	BGND,	A1,	_a2		; dereference A1
+	ld	tmp1,	A1,	BIAS		;
+	cmp	tmp2,	A1,	tmp1		;
+	bb0.n	eq,	tmp2,	_a1		;
+	addu	A1,	tmp1,	0		;
+;
+; The first arg is a variable, fail.
+;
+	jmp	Fail				;
+
+_a2:
+	bb0	BNUM,	A1,	_fail		; integer(A1)?
+	bb1	BUIA,	A1,	_fail		; 
+
+	ext	A1,	A1,	26<0>		; get integer N
+
+	bcnd	le0,	A1,	_fail		; N<0?
+;
+; The first argument is a positive integer 
+;
+_a3:
+	bb1	BGND,	A2,	_a4		; dereference A2
+	ld	tmp1,	A2,	BIAS		;
+	cmp	tmp2,	A2,	tmp1		;
+	bb0.n	eq,	tmp2,	_a3		;
+	addu	A2,	tmp1,	0		;
+;
+; The second arg is a variable --  Fail
+;
+	jmp	Fail
+
+_a4:
+	bb1	BLIST,	A2,	_alist		; list(A2)?
+	bb0	BSTRC,	A2,	_fail		; struct(A2)?
+;
+; Arg1 is an appropriate integer and Arg2 is a structure.
+;
+	clr	A2,	A2,	6<26>		; point to functor/arity
+	ld	tmp1,	A2,	BIAS		; get functor/arity
+
+	extu	tmp1,	tmp1,	10<16>		; extract arity
+
+	bcnd	le0,	tmp1,	_fail		; fail if arity < 0
+	
+	cmp	tmp2,	tmp1,	1023		; check for escape arity
+	bb0	eq,	tmp2,	1f		; branch for small structure
+	ld	tmp1,	A2,	BIAS+4		; get the big arity into tmp1 - tagged
+	addu	A2,	A2,	4		; bump base address past big arity
+	ext	tmp1,	tmp1,	26<0>		; untag the arity
+
+; untagged arity is in tmp1
+; untagged index is in A1
+; base address of args is in A2
+1:	cmp	tmp2,	A1,	tmp1		; 0 < N < Arity?
+	bb1	hi,	tmp2,	_fail		;
+
+	addu	A2,	A2,	BIAS		;
+	ld	UArg1,	A2[A1]			; get Nth Arg
+	addu	UArg2,	A3,	0		; --and A3
+
+	addu	r1,	CP,	0		;
+	br.n	unify				; unify Nth Arg and A3
+	addu	E,	OldE,	0		;
+;
+; Arg1 is an integer and Arg2 is a list pointer.
+;
+_alist:
+	cmp	tmp1,	A1,	2		;
+	bb1	hi,	tmp1,	_fail		; 0<N<=2 ?
+
+	clr	A2,	A2,	6<26>		; point to car
+
+	addu	A1,	A1,	(BIAS/4)-1	; offset A1
+
+	ld	UArg1,	A2[A1]			; get car or cdr
+	addu	UArg2,	A3,	0		; --and A3
+
+	addu	r1,	CP,	0		; return
+	br.n	unify				;
+	addu	E,	OldE,	0		;
+
+	data
+

@@ -1,0 +1,93 @@
+;
+; switch.88k			-- switch on constant and
+;				   switch on structure
+;	Copyright (c) 1988 Applied Logic Systems, Inc.
+;
+; Author: Kevin A. Buettner
+; Creation: 7/27/88
+; Revision History:
+;	Revised: mm/dd/yy	Who		Why
+;	Revised: mm/dd/yy	Who		Why
+;
+;
+
+#include "assembly.88k"
+
+	text
+
+	global	_wm_sw_const
+	global	_wm_sw_struct
+
+	;
+	; wm_sw_const
+	;
+	;	Implements switch on constant.  On entry, r1 points to
+	;	the size of the table x 8 to binary search.  This 
+	;	table begins at the long word following the size.  If the
+	;	size information is added to r1, this will yield the address
+	;	of the last table entry.  The table entries consist of keys
+	;	followed by the address to jump to if a match is found.
+	;
+
+
+_wm_sw_const:
+	
+	ld	tmp2,	r1,	0		; get offset to last entry
+	addu	tmp1,	r1,	4		; put addr of 1st entry in tmp1
+	addu	tmp2,	r1,	tmp2		; put addr of last entry in tmp2
+	subu	tmp2,	tmp2,	4		; adjust to really point at last
+
+	bb0.n	BUIA,	A1,	@swsearch	; branch around uia code
+	addu	S,	A1,	0		; move the Key to S
+	bb1	BNUM,	A1,	@fail		; fail if we have a double
+	extu	S,	S,	26<0>		; strip tag off of uia pointer
+	addu	UArg1,	S,	BIAS+4		; put the address of the string
+						;  in UArg1
+	bsr	_Probe_token			; look for the token
+	bcnd	eq0,	UArg1,	@fail		; fail if token not found
+	or.u	S,	UArg1,	TSYM		; make a symbol out of the
+						;  token
+
+@swsearch:
+	;
+	; tmp1		-- lower bound
+	; tmp2		-- upper bound
+	; S		-- key
+	; UArg1		-- midpoint
+	; UArg2		-- key to compare against
+	;
+
+	subu	UArg1,	tmp2,	tmp1		; take difference
+	bcnd	lt0,	UArg1,	@fail		; fail if not found
+	extu	UArg1,	UArg1,	0<1>		; shift right 1 bit (divide by
+						;  two)
+	and	UArg1,	UArg1,	0xfff8		; round down
+	ld	UArg2,	tmp1,	UArg1		; load midpoint
+	addu	UArg1,	tmp1,	UArg1		; set midpoint
+	cmp	UArg2,	S,	UArg2		; compare keys
+	bb1	lo,	UArg2,	@lower		; branch if smaller
+	bb1	hi,	UArg2,	@higher		; branch if bigger
+
+	ld	UArg2,	UArg1,	4		; get address to jump to
+	jmp	UArg2				; jump there
+
+@lower:
+	br.n	@swsearch
+	subu	tmp2,	UArg1,	8		; set the upper bound
+@higher:
+	br.n	@swsearch
+	addu	tmp1,	UArg1,	8		; set the lower bound
+
+@fail:	jmp	Fail
+
+
+_wm_sw_struct:
+	ld	tmp2,	r1,	0		; get offset to last entry
+	extu	S,	A1,	26<0>		; get the structure pointer
+	ld	S,	S,	BIAS		; get the functor
+	addu	tmp1,	r1,	4		; put addr of 1st entry in tmp1
+	subu	tmp2,	tmp2,	4		; adjust so it will point at last
+	br.n	@swsearch			; search for the functor
+	addu	tmp2,	r1,	tmp2		; put addr of last entry in tmp2
+
+	data

@@ -1,0 +1,400 @@
+	text
+;
+; Creation:  Brian K. Short   May 1988
+; Modified:  Kevin Buettner   June 1992		Addition of A/E Stack compaction
+;
+;	Copyright (c) 1989 Motorola, Inc.
+;	Copyright (c) 1989 Applied Logic Systems, Inc.
+;
+; cut.88k		-- implements the cut operation
+;
+;
+
+#include "assembly.88k"
+
+#undef tmp3
+#undef tmp4
+#define tmp3 UArg1
+#define tmp4 UArg2
+
+	global _wm_docut
+
+@cutexception:
+	subu	SP,	SP,	8		; create a dummy frame
+	st	E,	SP,	BIAS+0		; save current environment
+	addu	tmp1,	r1,	0		; hang on to return address
+	bsr.n	@aroundgcinfo
+	addu	r1,	r1,	GC_INFO_SIZE	; advance r1 over the gc info
+
+	gcinfo	0,	0,	0
+
+@aroundgcinfo:
+	st	r1,	SP,	BIAS+4		; store the dummy return address
+	addu	E,	SP,	0		; set up e with this environment
+	subu	SP,	SP,	52		; allocate space to save some
+						;   stuff
+	st	tmp1,	E,	BIAS-4		; save the real return address
+	st	CP,	E,	BIAS-8		; save the cp and OldE in case
+	st	OldE,	E,	BIAS-12		;   they were being used
+	st	A1,	E,	BIAS-16		; save the argument regs
+	st	A2,	E,	BIAS-20
+	st	A3,	E,	BIAS-24
+	st	T1,	E,	BIAS-28		; save the temporaries
+	st	T2,	E,	BIAS-32
+	st	T3,	E,	BIAS-36
+	st	T4,	E,	BIAS-40
+
+
+	or	UArg2,	r0,	lo16(_wm_cutaddr)
+	or.u	UArg2,	UArg2,	hi16(_wm_cutaddr)
+	ld	UArg2,	UArg2,	0
+
+	or.u	A1,	UArg1,	TINT		; tag cutpt as integer and put
+						;  into A1
+	
+
+	jsr.n	UArg2				; call cut proc entry
+	addu	OldE,	E,	0		; put e into olde
+
+	gcinfo	0,	0,	10		; 10 perm vars
+
+	ld	r1,	E,	BIAS-4		; load the real return address
+	ld	CP,	E,	BIAS-8		; load the cp and OldE
+	ld	OldE,	E,	BIAS-12
+	ld	A1,	E,	BIAS-16		; load the argument regs
+	ld	A2,	E,	BIAS-20
+	ld	A3,	E,	BIAS-24
+	ld	T1,	E,	BIAS-28		; load the temporaries
+	ld	T2,	E,	BIAS-32
+	ld	T3,	E,	BIAS-36
+	ld	T4,	E,	BIAS-40
+
+	addu	SP,	E,	0		; set sp to E
+	ld	E,	SP,	BIAS+0		; reload Original E
+	addu	SP,	SP,	8		; now sp is back where it 
+						;  started.
+	jmp	r1				; return to caller
+
+_wm_docut:
+
+	bcnd	lt0,	Safety,	@cutexception	; exception?
+
+;
+; Code for cut operation (without exception test)
+; --called with bsr  (i.e. return is in r1)
+;
+; The environment to cut to is passed through UArg1
+;
+
+	global _wm_docut2
+_wm_docut2:
+
+	cmp	tmp1,	SPB,	UArg1		; determinate?
+	bb1	hi,	tmp1,	@cut_done	; nothing to do
+
+;
+; Must be less than, unwind choice points.
+;
+	ld	SPB,	B,	chpt_SPB	; load SPB val out of chpt
+
+1:
+
+	clr	SPB,	SPB,	1<0>		; clear compaction bit
+	cmp	tmp1,	SPB,	UArg1		;
+	bb1	hi,	tmp1,	cutcommon
+
+	ld	B,	B,	chpt_B		; load Prev Choice Point
+	ld	SPB,	B,	chpt_SPB	; load Choice Point SPB
+
+	br	1b
+
+;
+; Here is where the top choice point is loaded into the registers.
+;    --  b points to last choice point to cut 
+;
+cutcommon:
+
+	ld	HB,	B,	chpt_HB		; Choice Point HB
+	ld	Fail,	B,	chpt_Fail	; NextClause
+	addu	tmp1,	TR,	0		;
+	addu	TR,	B,	chpt_size	; advance over choice point
+	subu	tmp2,	B,	4		;
+	ld	B,	B,	chpt_B		; Prev Ch Pt
+
+;
+; Run down the trail and retrail those items that require it.
+; --tmp1 is OldTr, tmp2 is trail runner, tmp3 gets entries
+;
+cutloop:
+	cmp	tmp4,	tmp2,	tmp1		; runner < OldTr?
+	bb1	lo,	tmp4,	@cut_done	;
+
+	ld	tmp3,	tmp2,	0		;
+
+	cmp	tmp4,	tmp3,	tmp2		;
+	bb0.n	lo,	tmp4,	2f		;
+	subu	tmp2,	tmp2,	4		;
+
+	cmp	tmp4,	tmp3,	SPB		;
+	bb1	lo,	tmp4,	cutloop		;
+	cmp	tmp4,	tmp3,	HB		;
+	bb1	hs,	tmp4,	cutloop		; used to be hi which was buggy
+
+	subu	TR,	TR,	4		; keep the entry
+	br.n	cutloop				;
+	st	tmp3,	TR,	0		;
+
+2:
+	br.n	cutloop				;
+	subu	tmp2,	tmp2,	chpt_B		; skip over ch pt
+
+@cut_done:
+	jmp	r1				; return
+
+
+;
+; wm_cut performs the cut from within call.  This procedure
+; is similar to the above procedure, but it is also responsible
+; for cleaning up the argument/environment stack.
+;
+; T1 contains the module id.	(Not really important for cut).
+;
+
+	global	_wm_cut
+_wm_cut:
+	clr	UArg1,	A1,	6<26>		; untag the cutpt and move into
+						; UArg1
+	and	UArg1,	UArg1,	0xfffe		; clear any semicolon flag
+	addu	E,	OldE,	0		; reset the environment pointer
+	addu	r1,	CP,	0		; set r1 to continue
+
+	cmp	tmp1,	SPB,	UArg1		; determinate?
+	bb1	hi,	tmp1,	@cut_done	; nothing to do
+;
+; Must be less than, unwind choice points.
+;
+	;
+	; There is some work to do.  The first thing that needs to be done
+	; is to find the choice point to cut back to.  We do this by walking
+	; the choice point stack until we find a choice point with a saved
+	; SPB which is bigger (older) than UArg1.
+
+	ld	SPB,	B,	chpt_SPB	; load SPB val out of chpt
+1:
+
+	clr	SPB,	SPB,	1<0>		; clear compaction bit
+	cmp	tmp1,	SPB,	UArg1		;
+	bb1	hi,	tmp1,	2f
+
+	ld	B,	B,	chpt_B		; load Prev Choice Point
+	ld	SPB,	B,	chpt_SPB	; load Choice Point SPB
+
+	br	1b
+2:
+
+	;
+	; We have found the choice point to cut back to.  This is the
+	; value in B.  But before we cut back to this point, we must clean
+	; up the argument/environment stack.   After the cleanup, the rest
+	; of the cut operation is performed by branching to cutcommon.
+	; The code at cutcommon will set SPB, HB, and Fail.  It will also
+	; utilize UArg1 and UArg2 for trail cleanup.  Therefore we have
+	; these five registers free to use in whatever manner we desire in
+	; the argument/environment cleanup code.  A1-A3 and T1-T4 are also
+	; available.
+	;
+	; Note: On the 88k and on the Sparc, we have plenty of registers to
+	; work with.  Allocating registers on the M68k was a bit tricky and
+	; I expect it to be even trickier on the I386.
+	;
+
+
+	;
+	; See if any compaction needs to be done
+	;
+
+	cmp	tmp1,	UArg1,	E
+	bb1	ls,	tmp1,	cutcommon	; No compaction necessary
+
+
+	;
+	; A/E stack compaction -- Step 1:
+	;
+	; Traverse active environments back to "cutpt".  In the process of
+	; traversing the active environments, we will record in a small table
+	; the start and end of each environment.  A third slot in the table
+	; will be used to store "adjustment" values for use in the
+	; compaction phase.
+	;
+	; Register Usage
+	;	SPB	-- stack frame corresponding to top choice point
+	;		   after cut has been performed.  This is the value
+	;		   that we will traverse back to / beyond.
+	;	HB	-- Bottom of size/fixup table (we use the portion
+	;		   above H on the heap to store this table).  This
+	;		   will correspond with the most recent environment.
+	;		   As an initialization step, HB := H.  Then H will 
+	;		   be incremented in the process of doing the
+	;		   traversal.  When we are done, perform H := HB.
+	;	H	-- Top of size/fixup table.  This entry will correspond
+	;		   to the oldest environment examined thus far.
+	;	CP	-- Return address from previous environment.  This
+	;		   value will be important in order to obtain
+	;		   the size information for the current environment
+	;		   being examined.
+	;
+	;	T1	-- current environment being examined.
+	;	T3	-- higher environment address from previous iteration.
+	;		   This address is used to determine whether to
+	;		   create a new table entry or to merge the
+	;		   result of the current iteration into the top
+	;		   table entry.
+	;
+
+	addu	T1,	E,	0		; set T1 to topmost environment
+	addu	HB,	H,	0		; HB is the table base
+	addu	T3,	ZERO,	0		; set higher environment address
+						; to impossible value
+	
+1:	sub	UArg1,	CP,	8		; make UArg1 point at size value
+	ld	UArg1,	UArg1,	ZERO		; put size info into UArg1
+
+	extu	UArg2,	UArg1,	16<16>		; extract number of env vars
+						; into UArg2
+	mak	UArg1,	UArg1,	16<2>		; extract nargs and multiply
+						; by four
+	mak	UArg2,	UArg2,	0<2>		; multiply npv by four
+	addu	UArg1,	UArg1,	8		; add CP/CE sizes to nargs
+	addu	UArg1,	T1,	UArg1		; UArg1 now points one beyond
+						;   last argument
+	subu	UArg2,	T1,	UArg2		; UArg2 now points at last
+						;   environment variable
+	cmp	tmp1,	T3,	UArg2		; see if we can merge these
+						;   values into last table
+						;   entry
+	bb1	ne,	tmp1,	2f		; branch if not
+	br.n	3f				; otherwise...
+	st	UArg1,	H,	BIAS-8		; modify high address of
+						; previous entry (in delay slot)
+
+2:	st	UArg2,	H,	BIAS		; save low address in table
+	st	UArg1,	H,	BIAS+4		; save high address in table
+	add	H,	H,	12		; advance table pointer
+
+3:	addu	T3,	UArg1,	0		; save high value for next iter
+	ld	CP,	T1,	BIAS+4		; get next return address
+	ld	T1,	T1,	BIAS+0		; follow environment link
+
+	cmp	tmp1,	SPB,	T1		; see if we are done
+	bb1	hs,	tmp1,	1b		; branch if SPB greater or equal
+						;   to T1
+
+
+	;
+	; A/E Stack Compaction:	Step 2
+	;
+	; We have now set up the table.  We must now determine the staring
+	; address to slide the environment values up to.  We do this
+	; by examining the high value determined by the last iteration.  This
+	; will be one beyond the last argument of the last environment examined.
+	; If this value is greater than that of the SPB, then this is the
+	; environment of the SPB and our initial starting value should
+	; be the low address of that environment.  If the high value from
+	; the last iteration is equal to SPB, then the environment abuts that
+	; of SPB's environment and we again use the low address of this
+	; environment as our starting value.  But if the high value is strictly
+	; less than that of SPB, there is a gap between SPB and the last
+	; examined environment, so we use SPB as our starting address to
+	; slide things toward.
+	;
+
+	cmp	tmp1,	SPB,	UArg1		; see if SPB is bigger than
+						; high value from last iter..
+	bb1.n	hi,	tmp1,	1f		; ... branch if so
+	addu	T1,	SPB,	0		; set lead pointer with SPB
+						;   in delay slot
+	ld	UArg2,	H,	BIAS-12		; get low value...this needs to
+						;   be reloaded because of
+						;   possible merging
+	subu	H,	H,	12		; nuke table entry
+	cmp	tmp1,	SPB,	UArg2		; see if SPB is bigger than low
+						;   value from previous iter
+	bb0	hi,	tmp1,	1f		; branch if not (..bb0)
+
+	addu	T1,	UArg2,	0		; set lead pointer (not in
+						;   delay slot as on sparc)
+
+	;
+	; A/E Stack Compaction:	Step 3
+	;
+	; T1 now contains the address to slide the argument/environment
+	; stack towards (we will be shifting things from smaller addresses
+	; to larger addresses).
+	;
+	; H will be one (table entry) above the last table entry.
+	;
+	; In this step we will pick up the table entries one by one and
+	; move the range of addresses specified by these entries.  In addition,
+	; we will store an offset as the third value in the table.  This
+	; offset will be used to fix up pointers which point into regions of
+	; the stack which we are moving.
+	;
+	; Register Usage:
+	;
+	;	HB	-- bottom of size/fixup table
+	;	H	-- top of the size/fixup table
+	;	T1	-- address into A/E stack to which we move values
+	;	T2	-- address into A/E stack from which we get values
+	;	T3	-- initial value of T1; used to determine if a pointer
+	;		   needs fixing or not
+	;	A1	-- fixup value for the current environment
+	;	A2	-- lower end of environment which we are moving
+	;	A3	-- used to traverse size/fixup table
+	;
+	;	UArg1, UArg2, tmp1, and tmp2 are scratch
+	;
+
+1:	addu	A1,	ZERO,	0		; initially, no fixup needed
+	addu	T3,	T1,	0		; set T3 with initial value
+	cmp	tmp1,	H,	HB		; see if we are done
+	bb1	eq,	tmp1,	5f		; branch if so
+
+1:	subu	H,	H,	12		; go to previous table entry
+	ld	T2,	H,	BIAS+4		; get high address
+	ld	A2,	H,	BIAS		; get low address
+	subu	A1,	T1,	T2		; compute fixup value for
+						;    current environment
+	st	A1,	H,	BIAS+8		; store fixup value in table
+
+2:
+	ld	UArg1,	T2,	BIAS-4		; get environment value to move
+	bb1.n	BGND,	UArg1,	3f		; branch if ground
+	subu	T2,	T2,	4		; adjust pointer in delay slot
+	cmp	tmp1,	UArg1,	T3		; see if ptr >= start point
+	bb1	hs,	tmp1,	3f		; branch if so
+	cmp	tmp1,	UArg1,	A2		; see if smaller than lower end
+						; of env (code ptr if so)
+	bb1	lo,	tmp1,	3f		; branch if so
+	; If we fall through to here, UArg1 contains a pointer to be fixed
+	addu	A3,	H,	0		; set A3 to current entry in
+						; fixup table
+4:	ld	tmp1,	A3,	BIAS+4		; get high table entry
+	cmp	tmp2,	UArg1,	tmp1		; see if ptr >= table entry
+	bb1.n	hs,	tmp2,	4b		; branch if so (not done yet)
+	addu	A3,	A3,	12		; advance table ptr in delay
+						;   slot
+	; When we fall through, we've advanced the table pointer one too far
+	ld	tmp1,	A3,	BIAS-4		; get fixup value
+	addu	UArg1,	UArg1,	tmp1		; add fixup value to pointer
+
+3:
+	st	UArg1,	T1,	BIAS-4		; store the value
+	cmp	tmp1,	T2,	A2		; see if more environ to move
+	bb1.n	ne,	tmp1,	2b		; branch if so
+	subu	T1,	T1,	4		; decrement ptr which we are
+						;   moving to
+	cmp	tmp1,	H,	HB		; see if totally done
+	bb1	ne,	tmp1,	1b		; branch if more to do
+
+5:	br.n	cutcommon
+	addu	E,	E,	A1		; fix up value in delay slot

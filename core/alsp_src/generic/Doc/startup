@@ -1,0 +1,54 @@
+Starting Prolog Execution
+
+This section should become obsoleted when the top level loop is written
+in Prolog, but we have to talk about it now since it is the way things are
+currently done.
+
+When the C-defined top-level starts the Prolog execution, it calls wm_exec
+with the address of a code buffer which contains the startup code for the
+current goal. wm_exec sets up the Prolog registers to what the WAM expects
+them to be.
+
+The startup code that wm_exec calls has the role of being the
+"procedure entry" for the goal to be executed, and parts of the procedure.
+We want the behaviour of
+
+goal :- UserGoal.
+goal :- print_no.
+
+where UserGoal is the user's goal. The code for achieving this behaviour
+would normally be spread through the procedure entry for goal/0 and
+two clause blocks, one for the first clause, and another for the second
+clause. However, the startup code buffer contains the code for the choice
+points and "procedure" entry, the head of the first clause and the code for
+all of the second clause. The code for the body of the first clause is
+found in another code buffer.
+
+
+					% Pseudo call_entry
+		mov	OldE, E		% Move E into OldE location
+
+					% Pseudo exec_entry without
+					% overflow check.
+		mov	E, SP		% Set up the E pointer.
+
+					% Pseudo code portion of "procedure"
+					% entry.
+		try_me_else clause2
+
+					% This is where the procedure entry
+					% would have jumped to for the
+					% first clause
+
+					% Now make another frame for the
+					% execute. This is what would happen
+					% in a non-determinent single-goal
+					% clause.
+		push	4[E]		% Put down return address
+		push	[E]		% Put down OldE
+
+		execute UserGoal/0
+
+clause2:	trust_me_else_fail
+		execute print_no/0
+

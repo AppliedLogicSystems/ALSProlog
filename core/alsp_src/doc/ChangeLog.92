@@ -1,0 +1,750 @@
+Prior to 1993, we weren't very careful about documenting the changes
+made to ALS-Prolog.  Still, there was a period when we did some of this.
+The following is a record of changes made (mostly) prior to 1993. 
+
+Merge Source Changes
+
+1-26-90		tokini.h			kev
+	callWithDelayedInterrupt was not defined.  Replaced ocall with
+	callWithDelayedInterrupt
+
+1-30-90		wintcode.c			kev
+	The function decr_icount needed calls to makewritable and makerunable
+
+1-25-90		built.c				kev
+	The Motorola numeric primitives were added in with #ifdef MotorolaMath
+	around them MotorolaMath should be defined in config.h if these math
+	primitives are available
+
+1-26-90		bdb.c				kev
+	The macro MTP_CONSTTAG is used in pbi_firstargkey.  The source was
+	ifdefed to do the appropriate thing if MTP_CONSTTAG is not defined
+	(as on the 88k).
+
+1-26-90		bsystem.c			kev
+	SUCCEED was not present at the end of pbi_ouch, pbi_showanswers,
+	pbi_printno, pbi_printwarning, and pbi_statistics.  It was added to
+	each.
+
+1-31-90		loadfile.c			kev (for Ilyas)
+	Ilyas suggested that errno.h not be include on DOS systems. The
+	errno.h include was therefore moved into the #else part of a DOS
+	#ifdef.
+
+1-31-90		expand.c			kev
+	Removed the function (and its calls) extract_module_from_head.  This
+	was formerly used in very early versions to assert things into 
+	different modules
+
+1-31-90		dcgs.pro			kev
+	Cut added in expand_/3 to force determinacy.  Cut removed in dcg_expand
+	(after head) because it didn't do anything.
+
+1-31-90		bdb.c				kev
+	pbi_asserta and pbi_assertz -- calls to change_module removed.  Calls
+	to icode(IC_NEWMODULE...) and IC_ENDMODULE added.  These changes were
+	make to get the nesting to work properly.
+
+1-31-90		icom.h				kev
+	#define for change_module removed.
+
+1-31-90		foreign.c			kev
+	placement of end_mod call changed so that nesting would work properly.
+
+1-31-90		module.h			kev
+	cur_mod change to a #define.
+	declaration for top_module added (as an extern)
+
+1-31-90		module.c			kev
+	top_module declaration added.  Code added and changed to permit
+	module nesting.
+
+2-1-90		loadfile.c			kev
+	OBP file version number changed to force recompilation of .pro files.
+	New nesting stuff sometimes messes up with old .obp files.
+
+------	[Tape sent to Syracuse]
+
+2-2-90		compile.h			kev
+	SPREG changed from 31 to 23 in order to separate Prolog's stack pointer
+	from C's stack pointer (it was too much of a hassle figuring out
+	how to keep Prolog's stuff double word aligned).  Placement of last
+	temporary register also changed. (S takes the place of T5.)  This
+	took place in an m88k ifdef so it should not affect other
+	implementations.
+
+
+2-8-90		bdb.c				kev
+	Bug introduced when module nesting code added in assertz and asserta.
+	Goals in clause did not always call proper module.  Code rearranged
+	somewhat to work properly.
+
+2-10-90		debugger.pro			kev
+	When tracing a setof which generates more than one solution, upon
+	attempting to see the second (or third, etc) solution, the debugger
+	would backtrack into (and display) certain builtins.  A change was
+	made to dogoal and exitOrRedo to stop this from happening.
+
+2-12-90		main.c				kev
+	main_cntrl_c_handler changed so that it will not set the Safety value
+	at top level
+
+2-12-90		fileio.c			kev
+	Assignment of 0 to wm_interrupt_caught removed.
+
+2-13-90		fileio.c			kev
+	Assignment of 0 to wm_interrupt_caught put back in.  But we
+	do an additional check in the condition so that this will not be
+	done unless at the top level.  I had some trouble on the Motorola
+	system with this.  We can not handle the problem in the control-C
+	handler since the system service (fgets) will not restart by itself
+	on system V.  We need to set a flag which indicates that the interrupt
+	has been seen.  So my strategy is to ignore the top level control-C's.
+	All others (such as a consult of user) will (on System V) cause an
+	abort back to the query level.  I like this behavior and will take
+	pains to make it work the same way on the Sun.
+
+------	[Tape received from Syracuse]
+
+1-29-90 	bmisc.c
+		"termcmp" routine is changed to handle double numbers and lists.
+
+
+2-7-90 		builtins.pro 
+		The last clause of $interrupt/3 is changed.
+		The module closure of callWithDelayedInterrupt is defined.
+
+2-7-90 		blt_io.pro
+		The file "vsubst.pro" is updated to use my version of varsubst/3
+		and the predicate varsubst/3 is moved into the file "blt_io.pro".
+		The file "vsubst.pro" is deleted. And some more changes in comments.
+			
+2-7-90 		blt_sys.pro
+		all_ntbl_entries/4 is exported.
+		clauses/4 is added.
+		ls, cd and dir predicates are rearranged.
+
+
+2-8-90 		bmeta.c
+		pbi_true and pbi_equal are added. 
+			
+2-8-90  	arith.c
+		pbi_time is added.
+
+2-8-90 		built.c
+		true, equal, and $time is defined.
+
+
+2-9-90 		bdb.c
+		I am keeping #ifdef CodeGC in the function pbi_collectcode.
+		This is necessary since the function w_collect is
+		not defined.
+
+2-9-90  	bgv.c
+		Functions pbi_gv_get and pbi_gv_set check boundary conditions.
+
+2-9-90 		intinit.c
+		Unnecessary lines are deleted.
+
+2-9-90 		gv.h
+		This file is completely deleted.
+
+2-9-90 		winter.h
+		The "extern" definition of wm_magic is deleted.
+		The name of the file "interface.h" is changed to "wint88.h".
+
+2-9-90 		winter.c	
+		The definition of wm_magic is deleted.
+		
+2-9-90 		wint88.h
+		The file "interface.h: is copied into the generic directory, and
+		its name is changed to "wint88.h".
+
+
+2-12-90 	gv.c 
+		The initial value of wm_gvfreelist is the prolog constant -1.
+		The function fixptrs is changed.
+
+2-12-90 	fileio.c
+		The line "wm_interrupt_caught=0;" in the function fio_nxln is deleted.
+	
+
+Note:
+		My "main.c" asserts facts of the predicate "searchdir".
+		
+------	[Above changes are by Ilyas]
+
+2-13-90		system				kev
+	Merged above changes by Ilyas into my version.  Fixed an error in
+	pbi_time sent by Ilyas (it would not compile).  Left fileio.c
+	as is in my version (see above comment for 2-13).  bdb.c also had
+	some significant changes of my doing in it. Other than that, was
+	able to simply copy files which were different.
+
+2-14-90		arith.c and built.c		kev
+	Ilyas sent me new versions to get a better $time.
+
+2-15-90		blt_sys.pro			kev
+	Changed way that debugger is loaded slightly so that abolishes are
+	not performed from this file.  They are now performed by the debugger.
+
+2-15-90		debugger.pro			kev
+	Put a command to abolish trace, spy, and others at beginning of file
+	so that -d command line switch will work properly.
+
+2-15-90		main.c				kev
+	Autoload changed so that load_file is called in consult rather than
+	reconsult mode.  This was changed so that the -d would work properly.
+	The $ALSPATH stuff was also copied from Ilyas's main.c to this one.
+
+2-15-90		wintcode.h			kev
+	NMSK_RECONSULT renamed to NMSK_PERMANENT (for a different purpose).
+	The use of a reconsult bit dates back to the days of the PC.  The
+	present method of reconsulting is better (a reconsult nested within
+	a consult nested in a reconsult will work properly).  It uses
+	timestamps.  What I am trying to say here is that NMSK_RECONSULT is
+	no longer used and hasn't been since the days of the PC Prolog.  So it
+	is safe to rename it.
+
+	NMSK_PERMANENT will be used for ','/2, ';'/2, etc to indicate
+	control predicates which are permanent (should not be modified).
+
+2-15-90		module.c			kev
+	NMSK_PERMANENT used in new_mod for initializing the control predicates.
+
+
+2-18-90		bdb.c				kev
+	pbi_resolve_module ($resolve_module/4 from Prolog) added back in.  This
+	is necessary to get desirable behavior out of the debugger.
+
+2-18-90		debugger.pro			kev
+	Changed the way execute/3 works.  1) Attempting to trace clause or
+	retract either doesn't work or gives unexpected results due to
+	interaction of debugger interrupts and interrupts used in implementing
+	the decompiler.  2) (This is more minor, but still annoying)...
+	Attempting to trace any builtin defined in Prolog will sometimes bring 
+	you part way into the builtin because the initial call might be from
+	user.  We need to know whether or not the predicate being called 
+	eventually resolves to the builtins module (hence the need for 
+	$resolve_module/4).  So execute/3 now separates the behavior of 
+	certain types of builtins and also calls $resolve_module/4.
+
+-------	[Tape sent to Syracuse on 2/19/90]
+
+2-20-90		wintcode.c			kev
+	Took out extraneous line of code in the code space garbage collector.
+	This piece of code concerned itself with computing the clause address
+	and did not use macros.  When I put the code in for using macros, I 
+	forgot to remove the old one.  As a result, the assignment was done
+	twice (incorrectly on the 88k the first time).
+
+2-22-90		wintcode.c			kev
+	It turned out that there was more wrong with the code space garbage
+	collector.  I must have been asleep when I initially wrote the
+	heap marking code because the part of the code which looks for
+	database references never ran!   There was also a BIAS problem for
+	the 88k which I fixed.
+
+2-27-90		wintcode.c			kev
+	Ilyas told me about an fprintf whose first argument was not a file
+	descriptor.  I fixed it to work right.  Ilyas also told me about
+	abolish and reconsult which did not use the code space garbage 
+	collector stuff.
+
+2-28-90		wintcode.c			kev
+	Fixed the problem with abolish and reconsult so that they now call
+	w_freeclause instead of w_freecode directly.  This way the code
+	space garbage collector must free up code removed by abolish or
+	retract.  It is now possible to reconsult the builtins without
+	core dumping.  It is probably still not a good idea to do it though.
+	I suspect that the interrupt stuff might get screwed up.
+
+3-2-90		wintcode.c			kev
+	Removed a debugging printf which I had put in a few days ago and forgot
+	to remove.  This printf was in w_collect.
+
+3-2-90		wntbl.h				kev
+	Value for NTBL_CODESIZE on the 88k changed from 24 to 19.  Sam and
+	Craig at Motorola were noticing that the performance had dropped
+	between version 0.05 (before the merge) to the current ones (after
+	the merge).  The only way I could explain it was that the (code) cache
+	was behaving differently.  I found that the actual size of a procedure
+	entry on the 88k decreased between versions and that things were
+	no longer double word aligned.  I reviewed the switch code which
+	goes into the procedure entry (this is what determines how big the
+	code section must be) and found that the old value needed to be
+	24 due to the tb1 instructions required by the silicon filter.  I
+	think that we can actually change NTBL_CODESIZE to 17, but chose
+	19 because it gives us a couple of words to spare.  18 could be
+	used, but things will not end up double word aligned.  Craig reran
+	a few benchmarks and noted some improvement.  They may study this
+	issue in depth sometime in the future.
+
+3-7-90		compile.h			kev
+	Added in #defines for the sparc and vax.  This file should probably 
+	be made a system specific version.  It does have the advantage (as is),
+	however, of being able to compare the differences in implementations
+	at a glance.
+
+3-7-90		built.h				kev
+	Changed the value of UIA_MAX to be the same as PBI_NAMEMAX.  The
+	guys at Motorola were noticing a problem.
+
+
+-------	[Tape received from Syracuse on 3/13/90]
+
+
+arith.c 	2-13-90				Ilyas
+		The function "pbi_time" is fixed.
+		The function "do_is" is rewritten.
+
+
+built.c 	2-13-90				Ilyas
+		Entry for the function "pbi_time" is fixed.
+
+
+vprintf.c 	2-26-90				Ilyas
+		The order of include files "fileio.h" and "vprintf.h" in this file
+		is  changed, since it has been giving syntax error in SysV.
+		The reason for this syntax error is that we were changing some
+		definitions in "stdio.h" which is included in the file "fileio.h".
+
+wintcode.c 	3-2-90				Ilyas
+		The function "mark_from_retaddr" is changed, so that I386 system
+		can use that function.
+
+------	[Above changes merged in and both copies checked for differences]
+
+3-13-90		arith.c				kev
+	Fixed the tabs in the new version and made comparison of numbers
+	slightly more efficient.
+
+3-14-90		gc.c				kev
+	Added trail compaction of heap pointers to the garbage compactor. This
+	change was needed because global variables in conjunction with cut
+	can create trail garbage.
+
+3-15-90		main.c				kev & ken
+	makerunable and makewritable pairs added before and after call to
+	prolog_consult.
+
+3-15-90		wintcode.c			kev
+	makewritable and makerunable calls now encompass a wider range of code
+	in decr_icount.
+
+3-15-90		bdb.c				kev
+	makewritable and makerunable calls now encompass a wider range of code
+	in doassert.
+
+3-29-90		wntbl.h				kev
+	Moved a comment and added declarations for the VAX implementation.
+
+3-30-90		chpt.h				kev
+	Added in declarations for the vax implementation.
+
+3-30-90		types.h				kev
+	Added in declarations for vax and sparc implementations.
+
+3-30-90		wci.h				kev
+	Added in declarations for the vax.
+
+3-30-90		arith.c				kev
+	#include for config.h moved after #includes for system .h files
+	because vax was messing things up (multiple defn's).  As a rule,
+	all of our .h files should come after the system .h files so we
+	don't mess anything up.
+
+4-6-90		wdisp.c				kev
+	Modified printing of floating point numbers so that we can print
+	32 bit integer values which are doubles.  These will now print as 
+	an integer; things such as 1<<31.  They used to come out in 
+	scientific notation.
+4-18-90		main.c				kev
+	Using -g in conjunction with -p caused core dumps due to argument
+	counter (i) not being decremented in the loop which reads in switchs
+	(on -g option only).  Decrement statement put in.
+5-24-90		wintcode.c			kev
+	Removed #ifdef spy #endif pair around w_spy and w_nospy.  These were
+	giving an linker errors since w_spy and w_nospy are called from the
+	builtins.  Keith got kind of carried away with ifdefing out sections
+	of code.  (Or else he didn't go far enough).  My own personal
+	preference is to have as few ifdefs as possible.
+
+------	[Tape received from Syracuse and merged in 6-8-90]
+
+				CHANGES
+				=======
+
+
+built.c 		3-13-90
+	wm_dbg_call is updated for I386 system.
+
+
+builtins.pro 	3-14-90
+	goalFix predicate is extended to cover all cutmacro predicates.
+
+
+built.c 		3-14-90
+	names of low level predicates ';', ',' and '->' are changed to 
+	$semicolon, $comma, and $arrow.
+
+
+tokini.h (tokens.h)	3-14-90
+	$semicolon, $comma, and $arrow are added.
+
+
+parser.c 		3-26-90
+	The function 'prim_buf_read' is updated to make a call to 
+	the function 'alc_rst'.
+
+
+arith.c 		3-26-90
+	Kevin's version of 'arith.c' is adapted.
+
+
+module.c 		4-5-90
+	Certain functions are updated for the packaging system.
+
+
+bmeta.c 		4-5-90
+	'mangle' is updated.
+
+
+winter.c 		4-19-90
+	Functions 'w_uia_alloc', 'w_uia_peekb', 'w_uia_pokeb', 
+	'w_uia_peeks', and 'w_uia_pokes' are added.
+
+
+bparser.c 		4-19-90
+	Functions 'pbi_uia_alloc', 'pbi_uia_peekb', 'pbi_uia_pokeb', 
+	'pbi_uia_peeks', and 'pbi_uia_pokes' are added.
+	
+
+built.c 		4-19-90
+	'$uia_alloc', '$uia_peekb', '$uia_pokeb', 
+	'$uia_peeks', and '$uia_pokes' are defined.
+
+
+
+
+Error and Warning Messages: 	5/9/90
+
+	The following error and warning messages are added or updated in 
+	following files (generic and specific).
+
+
+Generic Files:
+
+alloc.c
+    "Error: Unable to allocate the parser area."
+    "Error: Parser area exhausted."
+
+bsystem.c
+    "Warning: Command failed."
+    "Warning in file '<fn>' near line <ln> has failed."
+
+loadfile.c
+    "Error: Unable to create a temporary file."
+    "Warning: <fn> was not created."
+    "Warning: File '<fn>' in old or unrecognized .OBP format."
+
+module.c
+    "Error: Module table full."
+    "Error: Module stack overflow."
+    "Error: default_uses table full."
+    "Error: default_proc table full."
+    "Error: Module use table full."
+
+parser.c
+    "Error: Parser symbol table full."
+    "Error: Parser string area exhausted."
+
+wintcode.c
+    "Error: Allocation for name table entry failed."
+    "Error: Out of clause space."
+    "Error: Procedure table full."
+    "Warning: Attempt made to change m:p/a. No action taken."
+
+
+Specific Files:
+
+gc.c
+    "Error: The heap overflow."
+
+index.c
+    "Error: Out of indexing nodes."
+    "Error: No code space for indexing block."
+
+main.c
+    "Error: Unable to read the image's directory."
+    "Error: Unrecognized switch (<switch>)"
+    "Error: Unable to abolish m:p/a."
+    "Error: Unable to assert sys_searchdir(<dir>) prior to loading builtins."
+    "Error: Unable to assert searchdir(<dir>) prior to loading builtins."
+    "Error: Unable to assert system information prior to loading builtins."
+    "Error: Unable to assert command line prior to loading builtins."
+    "Error: during loading of <fn>."
+	"Error: Numeric argument expected with -<switch> flag."
+    "Error: Unable to get current directory name."
+
+
+
+
+Portable system Merge 	5-15-90
+	Most of generic files are updated, so that they can be used by
+	the Portable system. Functions of generic files stayed same as
+	before.
+
+
+
+
+bgv.c 		5-16-90
+	gv_get and gv_set are updated to make boundary checks.
+
+
+wintcode.c 	5-25-90
+	Step2 and Step3 of the function w_collect are updated.
+	The function 'mark_clause' is updated.
+
+
+wintcode.h 	5-25-90 
+	WC_EPSILON is updated.
+
+
+fileio.c 	5-29-90
+	#ifdefs around rewind statements are removed. Those rewind statements
+	are required in DOS and SunOS operating systems, and don't make any
+	harm in other operating systems.
+
+
+parser.c 	5-29-90
+	#ifdefs around rewind statements are removed. Those rewind statements
+	are required in DOS and SunOS operating systems, and don't make any
+	harm in other operating systems.
+
+-------	[Above changes merged into system]
+
+6-8-90		fileio.c			kev
+	Code added to handle the printing of syntax errors.  Some code previously
+	ifdefed out was put back.
+
+6-8-90		parser.c			kev
+	Code added/removed to/from parser.c to handle the printing of syntax
+	errors.  Actually, some of the code was moved from the parser to
+	fileio.c (see above).
+
+6-11-90		wintcode.c			kev
+	Ilyas had commented out a line that made chat core dump when reconsulting
+	(for the 386 system).  Even with this line commented out, the 68020
+	system died.  This line performed a useful purpose and was uncommented.
+	It turned out that the stack frames between different prolog contexts
+	were not set up properly and this problem has been fixed (at least
+	for this problem) on the 88k and 68k versions.
+
+6-12-90		bmeta.c				kev
+	pbi_mangle changed so that the gc compaction bit (located in the
+	SPB field of a choice point is cleared when doing a choice point
+	stack walk.  This will cause garbage created by mangle to be
+	collected.  This might fix Ken's recent problem that he had.
+	The corresponding assembly code for 68k and 88k systems was
+	also corrected in the same manner.
+
+------The following changes were made while kev was in Syracuse and were
+------entered after the fact.
+
+7-30-90		wintcode.c			kev
+	Keith's AUTOINDEXING ifdef really pissed me off while doing the vax port
+	so I removed it.  All it did was ifdef out code that my assembly
+	language routines needed to call giving some linking errors.  Keith
+	really went overboard with his ifdefs.
+	
+	If AUTOINDEXING is not defined (as it isn't at this point in the VAX
+	port), nothing untoward will happen.  Keith did what he did to make
+	the image as small a possible, but if all implementations will 
+	eventually implement autoindexing anyway, there is no harm in including
+	it in the compilation during development.
+
+7-30-90		vprintf.h			kev
+	This file will eventually be removed.  For now, it has a comment
+	in it stating something to this effect.
+
+7-30-90		vprintf.c			kev
+	The old vprintf code is finally all gone and is replaced with
+	a varargs version called PI_printf (vprintf is actually a library
+	function which conflicts with our name).  This means that the
+	remaining three files in the 88k merge that weren't merged soon will
+	be.  All of the files which called vprintf or vputchar or vputdouble
+	are now changed to call (respectively) PI_printf, PI_putchar, and
+	PI_putdouble (there is no longer a need for vputdouble).
+
+7-30-90		main.c				kev
+	fio_init call added to do some initializations that Raman needed
+	to get the portable system to port to all machines.
+
+	als_exit(0) added to the end of main.c to keep it from erroring out
+	of make.  Apparently, system V compatability means that things will
+	error out of make unless there is an explicit exit(0) placed in the
+	code.  (I have not seen documentation to this effect, however).
+
+	Code was added to handle VMS pathnames.  It probably is still not
+	totally right, but it is a start.
+
+7-30-90		fileio.c			kev
+	fio_init function added to do some initializations that used to be
+	done at compile time.  These aren't terribly computationally intensive
+	so I am not worried about them affecting startup time all that much.
+
+------	Ilyas sent me a tape which I merged in around 9-24-90
+------	I didn't see a changes file
+
+8-27-90		bmeta.c				kev
+	mangle changed to increment gv_setcnt.  These changes were also
+	made in functor.vax, and functor.68k in the assembly implementations.
+	This will cause the garabage collector to collect more stuff when
+	a mangle is performed.
+
+
+9-25-90		alspi.h				kev
+	PI_BEGIN definition changed to include static.  This will permit
+	more than one PI_BEGIN / PI_END sequence in an image (but at most
+	one sequence per file).
+
+9-26-90		compmath.c			kev
+	Ilyas had changed compmath.c so that the 386 now has compiled
+	Arithmetic.  The 68k implementation did not.  Some of the
+	ifdefs reflecting this fact were removed.  At the present time,
+	there is only one ifdef dealing with the fact that xor is not
+	implemented yet on the 88k.
+
+9-28-90		alspi.h				kev
+	A declaration of a dummy static variable (___dummy___) was added
+	at the end of this file.  There was a problem with dynamic linking
+	on the 88k -- it needed a .bss section for things to work properly.
+	In most circumstances, a .bss section is created as a result of
+	the code that implements the foreign interface application.  But on
+	some of the simplest examples (hello.c for one), a .bss section was
+	not created and dynamic linking chokes.
+
+
+
+
+--- I remerged the system after I got the tape from Kevin -- Ilyas 10/8/90 ---
+--- Following changes were made in the current system ---
+
+10-15-90 	all related files
+	All processor flags are changed. We put 'als_' prefix for these
+	flags. For example, we use 'als_m68k' instead of 'm68k'.
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+	I merged the directory 'Merge2' (we got it from Kevin on 5/14/91) with
+my directory 'ilyas/Merge' (it contains packing stuff).
+
+Date: 5/24/91
+
+
+	GENERIC FILES
+	=============
+
+
+1. Generic .h Files
+-------------------
+
+New generic .h files created by Kevin:
+	cutmacro.h
+	fatal.h
+	tokini2.h
+
+New generic .h files created by Ilyas (for packaging):
+	coffform.h
+	pckg.h
+	pckgcoff.h
+	pckgmake.h
+	rinfo.h
+
+
+alloc.h		
+		Fences are dropped (Kevin)
+
+alspi.h		
+		P_PDEFINE is declared and function name is added to 
+		'pi_init' structure. (Ilyas)
+
+built.h
+		Fixes related to fail-return. (Kevin)
+
+chpt.h 		same
+
+coerce.h 	same
+
+coffform.h
+		COFF file formats for packaging. (Ilyas)
+
+compile.h
+		SPREG is changed for sparc. (Kevin)
+
+cutmacro.h
+		Definition of isCutMacro. (Kevin) 
+		
+fatal.h
+		For fatal errors. (Kevin)
+
+fileio.h:
+		SEEBFSIZE is 1024. (Kevin)
+
+icode.h:
+icodedef.h:
+		New math stuff.
+
+
+
+
+----------------------------------------------------------------------------
+
+Its time we revived this form of documentation of changes to the system.
+We should also include in this list any bugs that were fixed and a brief
+description of the pathological behaviour and what was done to fix it.
+This is useful because often a bug that was fixed in one system reappears
+in the same or another system, and this record will be of great help.
+
+
+2-25-93	:	pckgmake.h (for als_sparc )
+
+BUG		: 	The packaged image dumps core when attempting to do indexing.
+FIX		:	The code area size in the name table entry in the packaged code
+			was smaller than needed for switch-on-term. This mismatch happened
+			because in the coff macros the size and offsets of name table
+			components are hard-coded and these were not updated when
+			the sizes were changed in wintcode.h. The coff macros should be
+			fixed to use the constants defined in wintcode.h.
+
+3-1-93	:	bpckg.c built.c pckgcoff.h pckgcoff.c blt_pckg.pro mkpckg.pro
+
+UPDATE	:	The raw data area is stored in a file instead of memory. This
+			was needed to be able to package large amount of code.
+
+
+3-8-93	:	SPARC/icode2.c
+
+BUG		:	Packaged image of the alsdev development environment dumps core
+			when executing switch-on-term on a procedure with catch-all clause.
+FIX		:	The switch-on-term tries to suck instructions from the clause
+			code to fille any delay slots. However, this should not be done
+			when the code pointed to involves a branch of any kind. The check
+			was being done for call and branch but not for jmp and thsi was fixed.
+
+
+3-11-93	:	??? ( I wish I had documented this the first time I saw it)
+
+BUG		:	On NeXT when running pro2c interface generator, a deep recursive
+			call (sort_by_arity/2) fails after doing 2 gc's.
+FIX		:	none yet.
+
+
+4-15-93	:	SPARC
+
+BUG		:	packaged code dumps core when doing pckg_gvar_init
+FIX		:	(I saw this one before. Again I wish I had documented the fix).

@@ -1,0 +1,1 @@
+mytrans(I,O) :- name(O,[0'x ,0'_ |I]).

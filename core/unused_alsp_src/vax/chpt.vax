@@ -1,0 +1,267 @@
+;
+; chpt.vax			choice point code
+;	Copyright (c) 1990 Applied Logic Systems, Inc.
+;
+; Author: Kevin A. Buettner
+;
+;
+;
+;
+
+#include "assembly.vax"
+
+;
+; wm_try_me	-- try_me_else
+;
+; Called with the following sequence:
+;
+;	jsb	wm_try_me		; 6 bytes
+;	Failure Address			; 4 bytes
+;	nop				; 1 byte
+;	nop				; 1 byte
+;
+
+	global	wm_try_me
+wm_try_me:
+	movl	B,	-(TR)		; save the four regs on chpt stack
+	movl	SPB,	-(TR)
+	movl	HB,	-(TR)
+	movl	Fail,	-(TR)
+	movl	(SP)+,	r2		; get return address
+	movl	TR,	B
+	movl	E,	SPB
+	movl	H,	HB
+	movl	(r2),	Fail		; set up Failure address
+	jmp	6(r2)			; return -- skip over nops and Fail
+					;		address
+
+;
+; wm_retry_me	-- retry_me_else
+;
+; Called with the following sequence:
+;
+;	jsb	wm_retry_me		; 6 bytes
+;	Failure Address			; 4 bytes
+;	nop				; 1 byte
+;	nop				; 1 byte
+;
+
+
+
+	global	wm_retry_me
+
+1:	movl	(TR)+,	r0		; get trail entry
+	movl	r0,	(r0)		; create an unbound
+wm_retry_me:
+	cmpl	TR,	B		; see if done untrailing
+	blssu	1b			; branch if not
+
+	movl	HB,	H		; reset state for failure
+	movl	(SP),	r0
+	movl	SPB,	SP
+	movl	SPB,	E
+	movl	(r0),	Fail		; set up Failure address
+	jmp	6(r0)			; return
+
+;
+; wm_trust_me	-- trust_me_else
+;
+; Called with the following sequence:
+;
+;	jsb	wm_trust_me		; 6 bytes
+;	movl	E,	SP		; 3 bytes
+;	brw	entrypoint		; 3 bytes
+;
+;
+
+	global	wm_trust_me
+
+1:	movl	(TR)+,	r0
+	movl	r0,	(r0)
+wm_trust_me:
+	cmpl	TR,	B
+	blssu	1b
+
+	movl	HB,	H
+	movl	SPB,	E
+	movl	(TR)+,	Fail
+	movl	(TR)+,	HB
+	bicl3	#3,	(TR)+,	SPB
+	movl	(TR)+,	B
+	rsb
+
+
+;
+; wm_trust_fail	-- trust away a choice point and then fail
+;
+;
+
+	global	wm_trust_fail
+
+wm_trust_fail:
+	jsb	wm_trust_me
+	fail
+
+;
+; wm_try	-- performs try sequence
+;
+; Called with the following sequence:
+;
+;	tstl	r0			; 2 bytes (a nop)
+;	jsb	wm_try			; 6 bytes
+;	clause start			; 4 bytes
+;
+;
+
+	global	wm_try
+wm_try:
+	movl	B,	-(TR)		; save the four regs on chpt stack
+	movl	SPB,	-(TR)
+	movl	HB,	-(TR)
+	movl	Fail,	-(TR)
+	movl	(SP)+,	Fail		; get return address
+	movl	TR,	B
+	movl	E,	SPB
+	movl	H,	HB
+	jmp	@(Fail)+		; advance Fail and start at clause
+					; addr
+
+;
+; wm_retry	-- retry sequence
+;
+; Called with the following:
+;
+;	tstl	r0			; 2 bytes (a nop)
+;	jsb	wm_retry		; 6 bytes
+;	clause start			; 4 bytes
+;
+;
+
+
+	global	wm_retry
+
+1:	movl	(TR)+,	r0		; get trail entry
+	movl	r0,	(r0)		; create an unbound
+wm_retry:
+	cmpl	TR,	B		; see if done untrailing
+	blssu	1b			; branch if not
+
+	movl	HB,	H		; reset state for failure
+	movl	(SP),	Fail
+	movl	SPB,	SP
+	movl	SPB,	E
+	jmp	@(Fail)+		; execute the clause and set Fail
+
+;
+; wm_trust	-- trust 
+;
+; Called with the following sequence:
+;
+;	tstl	r0			; 2 bytes (a nop)
+;	jsb	wm_truste		; 6 bytes
+;	clausestart			; 4 bytes
+;
+;
+
+	global	wm_trust
+
+1:	movl	(TR)+,	r0
+	movl	r0,	(r0)
+wm_trust:
+	cmpl	TR,	B
+	blssu	1b
+
+	movl	HB,	H
+	movl	(SP),	r0		; jump address
+	movl	SPB,	SP
+	movl	SPB,	E
+	movl	(TR)+,	Fail
+	movl	(TR)+,	HB
+	bicl3	#3,	(TR)+,	SPB
+	movl	(TR)+,	B
+	;;jmp	@(SP)			; Jump to clause start
+	jmp	@(r0)			; Jump to clause start
+
+
+;
+; wm_sw_struct	-- switch on structure (actually functor)
+;
+; Called with the following sequence:
+;
+;	jsb	wm_sw_struct
+;	.word	N
+;
+; N is the number of entries in the table.  See wm_sw_const below.
+
+
+	global	wm_sw_struct
+wm_sw_struct:
+	deref	8(E),	S,	swsgnd
+swsgnd:	movl	-MTP_STRUCT(S),	S	; get functor (the key)
+	brw	swsearch
+
+
+
+;
+; wm_sw_const	-- switch on constant
+;
+; Called with the following sequence
+;
+;	jsb	wm_sw_const
+;	.word	N
+;
+; N is the number of entries in the immediately following table.  Each table
+; entry consists of two fields: the potential key and the address of the
+; clause to execute if the key matches.  Furthermore, the keys are sorted
+; so we can do a binary search on the table.
+;
+
+	global	wm_sw_const
+wm_sw_const:
+	deref	8(E),	S,	swcgnd
+swcgnd:	bicb	#~MTP_CONSTMASK, S, r0	; get tag
+	cmpb	#MTP_INT,	r0	; see if we have a integer
+	beql	swsearch		; branch if so
+	cmpb	#MTP_SYM,	r0	; see if we have a symbol
+	beql	swsearch		; branch if so
+	cmpb	#MTP_UIA,	r0	; see if we have a uia
+	bneq	swfail			; fail if not
+	extzv	#4, #28, S, r0		; get UIA offset
+	addl	wm_heapbase, r0		; now r0 will have the actual address
+	addl	#4,	r0		; skip over the fence
+	callC1	probe_token,	r0	; look for the token
+	movl	r0,	S		; put key in S and set condition codes
+	ashl	#MTP_CONSTSHIFT,r0,S	; shift key and set condition codes
+	beql	swfail			; fail if key is zero (not found)
+	addl	#MTP_SYM, S		; tag it
+
+swsearch:
+	movl	(SP)+,	r1		; get table address
+	movzwl	(r1)+,	r0		; put the number of entries in r0
+	movaq	-8(r1)[r0], r2		; put the end of the table in r2
+	subl	r1,	r2,	r0	; compute difference and put in r0
+
+	;
+	; r1 contains the address of the lower table entry
+	; r2 contains the address of the upper table entry
+	; S contains the key
+	; r0 is used to compute the midpoint
+	;
+
+1:	ashl	#-1,	r0,	r0	; halve the difference
+	bicl	#7,	r0		; clear low three bits to maintain
+					; alignment
+	addl	r1,	r0		; now r1 is set with midpoint
+	cmpl	S, 	(r0)		; compare against key
+	bgtru	2f
+	blssu	3f
+	jmp	@4(r0)			; jump to appropriate place
+2:	moval	8(r0),	r1		; set lower bound
+	subl	r1,	r2,	r0	; compute difference and put in r0
+	bgequ	1b			; branch if more to do
+swfail:	fail
+3:	moval	-8(r0),	r2		; set upper bound
+	subl	r1,	r2,	r0	; compute difference and put in r0
+	bgequ	1b			; branch if more to do
+	fail				; else fail
+	

@@ -1,0 +1,14 @@
+
+The following examples should be in this directory:
+
+animals.pro 	-- a naive expert system
+bench.pro	-- a symbolic equation solver
+dc.pro		-- a desk calculator
+diff.pro	-- a symbolic differentiator
+hickory.pro	-- knowledge for identification and classification shell
+id.pro		-- an identification and classification shell
+jobs.pro	-- a constraint solution shell
+mission.pro	-- a solution to the missionaries and cannibals problem
+nim.pro		-- a simple two player game
+nrev.pro	-- the standard LIPS benchmark
+queens.pro	-- placing queens on a chessboard

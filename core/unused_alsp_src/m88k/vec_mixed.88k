@@ -1,0 +1,123 @@
+
+#include "assembly.88k"
+;
+; Creation:	Craig Thornley
+;		June 21, 1989
+;
+;	Copyright (c) 1989 Motorola, Inc.
+;
+; vec_mixed.88k contains mixed vector builtins
+;
+; Modified:		When		Who	What
+;
+;
+;
+; vrc_mul(+VR,+VC1,-VC2)
+; vc_cmag2(+VC,-VR)
+	
+	global	_vrc_mul
+	global	_vc_cmag2
+
+
+	; vrc_mul(+VR,+VC1,-VC2)
+	;	VC1 = a + bi  each component of VC2 
+
+_vrc_mul:
+	bsr.n	_get_vecA1			; get vector from A1
+	or	UArg1,	A3,	ZERO		; save A3
+	; A3 has count of double words
+	or	T2,	A1,	ZERO		; store pointer to real vec
+	or	T3,	A3,	ZERO		; save # of real elements
+
+	bsr.n	_get_vecA1			; get vector from A2
+	or	A1,	A2,	ZERO
+	; A3 has count of double words
+	ext	A3,	A3,	31<1>		; # of elements in cmplx vec
+	cmp	T3,	A3,	T3		; 
+	bb1	ne,	T3,	@mixed_fail	; different lengths, fail
+
+	bsr.n	_bind_vecUArg1			; bind A3 to a new vector
+	mak	UArg2,	A3,	0<2>		; mult by 4 for words in vec
+
+	or	A2,	A1,	ZERO		; pointer to cmplx vec
+	or	A1,	T2,	ZERO		; pointer to real vec
+
+	ext	UArg2,	UArg2,	30<2>		; # of cmplx elements in each
+	subu	UArg2,	UArg2,	1
+
+@vrc_loop:
+	ld	tmp2,	A1,	4		; low word real
+	ld	tmp1,	A1,	0		; high word real
+	
+	ld	T2,	A2,	4 		; low word of real
+	ld	T1,	A2,	0 		; high word of real
+	ld	T4,	A2,	12 		; low word of imag
+	ld	T3,	A2,	8 		; high word of imag
+
+	fmul.ddd T1,	tmp1,	T1		; ra
+	fmul.ddd T3,	tmp1,	T3		; rb i
+
+	addu	A2,	A2,	16		; bump old complex vec pointer
+	addu	A1,	A1,	8		; bump old real vec pointer
+
+	st	T1,	UArg1,	0		; high word
+	st	T2,	UArg1,	4		; low word
+	st	T3,	UArg1,	8
+	st	T4,	UArg1,	12
+
+	addu	UArg1,	UArg1,	16		; bump new cmplx vec pointer
+
+	bcnd.n	ne0,	UArg2,	@vrc_loop
+	subu	UArg2,	UArg2,	1
+	
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+
+
+	; vc_cmag2(+VC,-VR)
+	;	elements of VR are a*a + b*b 
+
+_vc_cmag2:
+	bsr	_get_vecA1			; get vector from A1
+	; A3 has count of double words
+	or	UArg2,	A3,	ZERO		; # of words in real vector
+	bsr.n	_bind_vecUArg1			; bind A2 to a new vector
+	or	UArg1,	A2,	ZERO
+
+	; UArg1 contains pointer to first element of new vector	
+	; A1 contains pointer to first element of complex vector
+
+	ext	UArg2,	UArg2,	31<1>		; # of elements in each
+	subu	UArg2,	UArg2,	1
+
+@cmag2_loop:
+	ld	T2,	A1,	4 		; low word of real
+	ld	T1,	A1,	0 		; high word of real
+	ld	T4,	A1,	12 		; low word of imag
+	ld	T3,	A1,	8 		; high word of imag
+
+	fmul.ddd T1,	T1,	T1		; a*a 
+	fmul.ddd T3,	T3,	T3		; b*b
+	fadd.ddd T1,	T1,	T3		; a*a + b*b
+
+	addu	A1,	A1,	16		; bump complex vec pointer
+
+	st	T1,	UArg1,	0		; high word
+	st	T2,	UArg1,	4		; low word
+
+	addu	UArg1,	UArg1,	8		; bump real vec pointer
+
+	bcnd.n	ne0,	UArg2,	@cmag2_loop
+	subu	UArg2,	UArg2,	1
+	
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+
+
+
+
+
+@mixed_fail:
+	jmp	Fail

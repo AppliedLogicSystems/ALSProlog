@@ -1,0 +1,156 @@
+;
+; atomic.68k	-- atomic, atom, integer, nonvar, number, var
+;	Copyright (c) 1987-1993 Applied Logic Systems, Inc.
+;
+; Author: Kevin A. Buettner
+; Creation: 3/3/87
+; Revision History:
+;	4/5/90,		Kev	-- put in macros and converted to common
+;				   M68k format
+;
+;
+
+
+#include "assembly.68k"
+	text
+
+;
+; atomic
+;
+
+	global	wm_atomic
+wm_atomic:
+	unlk	E
+	deref	4(SP),	a0,	atomicground
+atomicfail:
+	fail
+atomicground:
+	subq.w	#MTP_LIST, d0
+	beq.s	atomicfail			; fail if list
+	bcs.s	isdouble
+	rts
+
+isdouble:
+	move.l	-MTP_STRUCT(a0), d0		; get functor
+	cmp.l	#MMK_FUNCTOR(TK_DDOUBLE,4), d0	; see if it is a double
+	bne.s	numfail				; fail if not
+	rts					; else succeed
+
+
+;
+; number
+;
+	global	wm_number
+wm_number:
+	unlk	E
+	deref	4(SP),	a0,	numground
+numfail:
+	fail
+numground:
+	subq.w	#MTP_LIST, d0
+	beq.s	numfail				; fail if list
+	bcs.s	isdouble
+
+isinteger:
+	move.l	a0, d0				; put value in d0
+	and.w	#MTP_CONSTMASK, d0		; get out all four tag bits
+	subq.w	#MTP_INT, d0			; see if tag is integer
+	bne.s	numfail				; fail if not
+	rts
+
+;
+; float
+;
+
+	global	wm_float
+wm_float:
+	unlk	E
+	deref	4(SP),	a0,	floatground
+	fail
+
+floatground:
+	subq.w	#MTP_LIST, d0
+	bcs.s	isdouble
+	fail
+
+
+;
+; integer
+;
+
+	global	wm_integer
+wm_integer:
+	unlk	E
+	deref	4(SP),	a0,	intground
+	fail
+intground:
+	subq.w	#MTP_CONST, d0
+	beq.s	isinteger
+	fail
+
+;
+; atom
+;
+	global	wm_atom
+wm_atom:
+	unlk	E
+	deref	4(SP),	a0,	atomground
+atomfail:
+	fail
+atomground:
+	move.l	a0, d0
+	and.w	#MTP_CONSTMASK, d0	; get constant tags
+	subq.w	#MTP_SYM, d0		; see if atom is a symbol
+	bne.s	atomnotsym		; branch if not
+	rts
+atomnotsym:
+	subq.w	#MTP_UIA-MTP_SYM, d0	; see if it's a UIA
+	bne.s	atomfail		; fail if not
+	rts
+
+;
+; nonvar
+;
+	global	wm_nonvar
+wm_nonvar:
+	unlk	E
+	deref	4(SP),	a0,	nonvarground
+varfail:
+	fail
+nonvarground:
+	rts
+
+;
+; var
+;
+	global	wm_var
+wm_var:
+	unlk	E
+	deref	4(SP),	a0,	varfail
+	rts
+
+;
+; eq
+;
+	global	wm_eq
+wm_eq:
+	unlk	E
+	deref	4(SP),	a0,	1f
+1:	deref	8(SP),	a1,	1f
+1:	cmp.l	a0, a1
+	bne.s	1f
+	rts
+1:	fail
+
+;
+; noneq
+;
+	global	wm_noneq
+wm_noneq:
+	unlk	E
+	deref	4(SP),	a0,	1f
+1:	deref	8(SP),	a1,	1f
+1:	cmp.l	a0, a1
+	beq.s	1f
+	rts
+1:	fail

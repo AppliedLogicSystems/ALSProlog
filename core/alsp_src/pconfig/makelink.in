@@ -1,0 +1,28 @@
+
+lsrcdir 	= $(isdir)/$(INTF)
+INTF		= $(INTF_NM)
+BASELIB		= $(INTF).a
+VPATH  		= $(lsrcdir):.
+
+CC		= gcc
+LINK		= $(CC)
+LN_S		= ln -s
+SHELL		= /bin/sh
+
+CFLAGS		= -O -g -Wall -Wshadow -Wconversion $(PROTOFLAGS)
+LDFLAGS		=
+LIBS		= -lnsl -lm 
+
+#
+# Define CPPFLAGS and the default rule for translating .c files to .o files
+#
+CPPFLAGS	= -I. -I.. -I$(lsrcdir) $(XINCLUDES) -DHAVE_CONFIG_H
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(X_CFLAGS) $<
+
+make:
+	@echo Make what?
+
+library: $(BASELIB)
+	@echo Library "$(BASELIB)" created.
+

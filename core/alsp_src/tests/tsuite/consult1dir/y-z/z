@@ -1,0 +1,1 @@
+z :- write('Test completed successfully.'), nl.

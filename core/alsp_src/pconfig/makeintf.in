@@ -1,0 +1,93 @@
+
+INTFCINCS	= -I../lib
+DEFINES		= -D_NO_PROTO $(INTF_DEFINES)
+
+INTF		= $(INTF_NM)
+INTFOBJS	= $(INTF_NM)0.o $(INTF_NM)1.o $(INTF_NM)2.o $(INTF_NM)3.o
+itfsrcdir	= $(isdir)/src
+INTFLIB		= $(INTF_NM)interf.a
+
+#VPATH = /mailbox3/alsp_src/bld-natv/../wins/src:/mailbox3/alsp_src/bld-natv/../generic
+VPATH		= $(itfsrcdir)
+
+#
+# Makefile
+#
+#	DEFINES -- 	define constants (eg -Dfoo[=num] ) used by
+#				cc and C-to-prolog translator
+#	INCLUDES-- 	include path specification (eg -I/x/y ) used by
+#				cc and C-to-prolog translator
+#	TRFLAGS	-- 	C-to-prolog translator flags: -debug
+#	CGFLAGS -- 	C interface generator flags: -fNum -sNum -cNum -Dflag
+#				control the maximum number of functions, types/structures,
+#				and constants respectively that are output into a file
+
+INTFLIB		= $(INTF)interf.a
+
+CC      	= gcc
+CFLAGS  	= -O -D_NO_PROTO 
+CLIBS   	= -lm
+#
+# Define CPPFLAGS and the default rule for translating .c files to .o files
+#
+#STDINCS = -I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(probldd)/..
+STDINCS 	= -I. -I.. -I$(srcdir)/generic -I$(itfsrcdir)
+CPPFLAGS 	= $(STDINCS) $(INTFCINCS) -DHAVE_CONFIG_H
+
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(INTF_CFLAGS) $<
+
+
+#
+# Prolog flags
+#
+PROFLAGS = -b
+
+#
+# make targets
+#
+library :  $(INTFLIB)
+
+#
+# create .src from .spc
+#
+
+C2PDB		= debug
+C2PFLAGS 	= -$(C2PDB) $(INTF_TRFLAGS)
+
+$(INTF).src : $(INTF).spc $(INTF).h
+	$(PROLOG) $(PROFLAGS) $(C2PDIR)/trans_c2pro_$(GOS) -g c2pro \
+		-p -srcpath $(itfsrcdir) $(INTF) $(C2PFLAGS) $(INTF_INCLUDES) $(INTF_DEFINES)
+#
+# create .c files from .src files
+#
+
+#MYTRANS = $(CINTDIR)/pro2intf/mytrans
+MYTRANS = $(P2IDIR)/mytrans
+
+P2IFLAGS = -Ddebug -t mytrans $(INTF_P2IFLAGS)
+
+$(INTF)0.c $(INTF)1.c $(INTF)2.c $(INTF)3.c $(INTF)4.c : $(INTF).src
+	$(PROLOG) $(PROFLAGS) $(P2IDIR)/tpro2intf \
+	$(MYTRANS) -g pro2intf -p $(INTF) -fpre $(FPREFIX) $(P2IFLAGS)
+
+#
+#	Linking the library:
+#
+
+$(INTFLIB): $(INTFOBJS)
+	ar ruv $(INTFLIB) $(INTFOBJS)
+	-ranlib $(INTFLIB)
+
+clean	:
+	rm -f *.o
+
+
+
+#
+# added by hand
+#
+
+#image : accmain.o $(INTFLIB)
+#	gcc -o alspro accmain.o $(INTFLIB) $(MERGE)/SPARC/Sun/obj/alspro.a \
+##		Accsys/accsys.a -lm

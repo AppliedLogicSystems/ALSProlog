@@ -1,0 +1,539 @@
+/*
+ * assembly.sprc	-- include file for other .sprc files
+ *
+ *	Copyright (c) 1990-1993 by Applied Logic Systems, Inc.
+ *
+ * Author: Kevin A. Buettner
+ * Creation: 3/7/90
+ * Revision History:
+ */
+
+/*
+ * include config.h, tokens.h and mtypes.h
+ */
+
+#include "aconfig.h"
+#include "tokens.h"
+#include "mtypes.h"
+
+
+/*
+ *		Register Assignments
+ *
+ *	g0 r0	ZERO		l0 r16	HeapBase
+ *	g1 r1	UArg1		l1 r17	StkBot
+ *	g2 r2	UArg2		l2 r18	OldE
+ *	g3 r3	tmp1		l3 r19	CP
+ *	g4 r4	tmp2		l4 r20	Fail
+ *	g5 r5			l5 r21	Safety
+ *	g6 r6			l6 r22	SP
+ *	g7 r7			l7 r23	S
+ *	o0 r8	H		i0 r24	A1
+ *	o1 r9	HB		i1 r25	A2
+ *	o2 r10	B		i2 r26	A3
+ *	o3 r11	TR		i3 r27	T1
+ *	o4 r12	SPB		i4 r28	T2
+ *	o5 r13	E		i5 r29	T3
+ *	o6 r14	cSP		i6 r30	cFP
+ *	o7 r15	RET		i7 r31	cRET
+ *
+ */
+
+#define ZERO	r0
+#define UArg1	r1
+#define UArg2	r2
+#define tmp1	r3
+#define tmp2	r4
+
+#define	H	r8
+#define HB	r9
+#define B	r10
+#define TR	r11
+#define SPB	r12
+#define E	r13
+#define cSP	r14
+#define RET	r15
+#define HeapBase r16
+#define StkBot	r17
+#define OldE	r18
+#define CP	r19
+#define Fail	r20
+#define Safety	r21
+#define SP	r22
+#define S	r23
+#define A1	r24
+#define A2	r25
+#define A3	r26
+#define T1	r27
+#define T2	r28
+#define T3	r29
+#define cFP	r30
+#define cRET	r31
+
+/*
+ * m88k, i386, Vax, and Sparc choice point structure
+ *
+ *	+-----------------------+
+ *	|       Prev B          |	+12
+ *	+-----------------------+
+ *	|       SPB             |	+8
+ *	+-----------------------+
+ *	|       HB              | 	+4
+ *	+-----------------------+
+ *	|       Failure Point   | <-- B	+0
+ *	+-----------------------+
+ */
+
+#define	chpt_HB	4
+#define chpt_SPB 8
+#define chpt_Fail 0
+#define chpt_B 12
+#define chpt_size 16
+
+/*
+ * GC_INFO_SIZE is the amount to add to RET to get to CP.
+ */
+
+#define GC_INFO_SIZE	20
+
+
+/*
+ *----	Instruction Macros  ----
+ */
+
+/*
+ * Macro Name:	deref
+ * Description:	Implements the dereference loop
+ * Parameters:	SrcDst		-- Source/Destination argument 
+ *						(must be a register)
+ *
+ *		GroundLabel	-- Label to branch to when ground
+ * Output Registers:
+ *		tmp1		-- will contain type of object
+ *		tmp2		-- SrcDst with the tag stripped off
+ * Internal Labels:
+ *		1000
+ */
+
+#macro	deref	SrcDst,	GroundLabel
+	andcc	SrcDst,	0x03,	tmp1
+1000:	bne	GroundLabel
+	andn	SrcDst,	0x03,	tmp2
+	ld	[tmp2],	SrcDst
+	subcc	tmp2,	SrcDst,	ZERO
+	bne	1000b
+	andcc	SrcDst,	0x03,	tmp1
+#endm
+
+/*
+ * Macro Name:	nop
+ * Description:	no-operation
+ */
+
+#macro	nop
+	sethi	0,	ZERO
+#endm
+
+
+/*
+ * Macro Name:	fail
+ * Description:	causes failure
+ * Input Registers:
+ *		Fail		-- failure register
+ */
+
+#macro	fail
+	jmpl	Fail,	ZERO
+	nop
+#endm
+
+
+
+/*
+ * Macro Name:	proceed
+ * Description:	implements a Prolog return from subroutine
+ * Input Registers:
+ *		CP	-- continuation pointer
+ *		OldE	-- Previous environment register
+ * Output Registers:
+ *		E	-- current environment register
+ */
+
+#macro	proceed
+	jmpl	CP,	ZERO
+	mov	OldE,	E
+#endm
+
+
+/*
+ * Macro Name:	bind
+ * Description:	Binds Obj to Var and trails if necessary
+ * Parameters:	Obj	-- Object
+ *		Var	-- Variable
+ * Input Registers:
+ * Output Registers:
+ * Other Registers:	HB and SPB are compared against for trailing.  TR
+ *			will be used for trailing and modified as appropriate
+ * Internal Labels:	1000
+ */
+
+#macro	bind	Obj,	Var
+	cmp	HB,	Var		; compare HB to Var
+	bleu	1000f			; branch if no trailing necessary
+	st	Obj,	[Var]		; do the binding (in delay slot)
+	cmp	Var,	SPB		; compare Var to SPB
+	bleu	1000f			; branch if no trailing necessary
+	nop
+	sub	TR,	4,	TR	; predecrement the trail
+	st	Var,	[TR]		; put address of variable on trail
+1000:
+#endm
+
+
+/*
+ * Macro Name:	bind_and_return
+ * Description:	Binds Obj to Var and trails if necessary.  Also performs
+ *		a return.  RLab is the label to branch to when returning
+ *		without trailing
+ * Parameters:	Obj	-- Object
+ *		Var	-- Variable
+ *		RLab	-- Return label for no trailing
+ * Input Registers:
+ * Output Registers:
+ * Other Registers:	HB and SPB are compared against for trailing.  TR
+ *			will be used for trailing and modified as appropriate
+ * Internal Labels:	None
+ */
+
+
+#macro	bind_and_return	Obj,	Var,	RLab
+	cmp	HB,	Var		; compare HB to Var
+	bleu	RLab			; branch if no trailing necessary
+	st	Obj,	[Var]		; do the binding (in delay slot)
+	cmp	Var,	SPB		; compare Var to SPB
+	bleu	RLab			; branch if no trailing necessary
+	nop
+	st	Var,	[TR-4]		; put address of variable on trail
+	retl				; return from subroutine
+	sub	TR,	4,	TR	; decrement the trail ptr to match
+#endm
+
+/*
+ * Macro Name:	heap_bind_and_return
+ * Description:	Binds Obj to Var and trails if necessary.  Also performs
+ *		a return.  RLab is the label to branch to when returning
+ *		without trailing.  This macro differs from bind_and_return
+ *		in that we know ahead of time that the variable is on the
+ *		heap.
+ * Parameters:	Obj	-- Object
+ *		Var	-- Variable
+ *		RLab	-- Return label for no trailing
+ * Input Registers:
+ * Output Registers:
+ * Other Registers:	HB and SPB are compared against for trailing.  TR
+ *			will be used for trailing and modified as appropriate
+ * Internal Labels:	None
+ */
+
+
+#macro	heap_bind_and_return	Obj,	Var,	RLab
+	cmp	HB,	Var		; compare HB to Var
+	bleu	RLab			; branch if no trailing necessary
+	st	Obj,	[Var]		; do the binding (in delay slot)
+	st	Var,	[TR-4]		; put address of variable on trail
+	retl				; return from subroutine
+	sub	TR,	4,	TR	; decrement the trail ptr to match
+#endm
+
+
+/*
+ * Macro Name:	callC0
+ * Description:	Calls a 0-ary C function without updating shadows
+ * Parameters:	func	-- function to call
+ * Other Registers:
+ *		cSP, cFP, and RET, globals
+ * Note:	Because of the organization of the registers in the SPARC,
+ *		arg1 and arg2 must be globals (one of UArg1, UArg2, tmp1, or
+ *		tmp2).  We should not expect these registers to be preserved
+ *		through the call.  The result, however, will be returned in
+ *		UArg1.
+ */
+
+#macro	callC0	func
+	save	cSP,	-96,	cSP	; protect Prolog's registers
+	sethi	hi(wm_in_Prolog),	o0	; no longer in prolog
+	call	func			; call the C function
+	st	ZERO, [o0+lo(wm_in_Prolog)]
+	restore	o0,	0,	UArg1	; restore Prolog's registers and
+					; move the result to UArg1
+	add	ZERO,	1,	tmp2	; back in
+	store	tmp2,	wm_in_Prolog	;	Prolog
+	load	wm_safety,	Safety
+#endm
+
+
+/*
+ * Macro Name:	callC1
+ * Description:	Calls a 1 argument C function without updating shadows
+ * Parameters:	func	-- function to call
+ *		arg1	-- argument to the function
+ * Other Registers:
+ *		cSP, cFP, and RET, globals
+ * Note:	Because of the organization of the registers in the SPARC,
+ *		arg1 and arg2 must be globals (one of UArg1, UArg2, tmp1, or
+ *		tmp2).  We should not expect these registers to be preserved
+ *		through the call.  The result will be returned in
+ *		UArg1, however.
+ */
+
+#macro	callC1	func,	arg1
+	save	cSP,	-96,	cSP	; protect Prolog's registers
+	sethi	hi(wm_in_Prolog),	o0	; no longer in prolog
+	st	ZERO, [o0+lo(wm_in_Prolog)]
+	call	func			; call the C function
+	mov	arg1,	o0		; set up first parameter
+	restore	o0,	0,	UArg1	; restore Prolog's registers and
+					; move the result to UArg1
+	add	ZERO,	1,	tmp2	; back in
+	store	tmp2,	wm_in_Prolog	;	Prolog
+	load	wm_safety,	Safety
+#endm
+
+/*
+ * Macro Name:	callC2
+ * Description:	Calls a 2 argument C function without updating shadows
+ * Parameters:	func	-- function to call
+ *		arg1	-- first argument to the function
+ *		arg2	-- second argument to the function
+ * Other Registers:
+ *		cSP, cFP, and RET, globals
+ * Note:	Because of the organization of the registers in the SPARC,
+ *		arg1 and arg2 must be globals (one of UArg1, UArg2, tmp1, or
+ *		tmp2).  We should not expect these registers to be preserved
+ *		through the call.  The result, however, will be returned in
+ *		UArg1.
+ */
+
+#macro	callC2	func,	arg1,	arg2
+	save	cSP,	-96,	cSP	; protect Prolog's registers
+	sethi	hi(wm_in_Prolog),	o0	; no longer in prolog
+	st	ZERO, [o0+lo(wm_in_Prolog)]
+	mov	arg1,	o0		; set up first parameter
+	call	func			; call the C function
+	mov	arg2,	o1		; set up second param in delay slot
+	restore	o0,	0,	UArg1	; restore Prolog's registers and
+					; move the result to UArg1
+	add	ZERO,	1,	tmp2	; back in
+	store	tmp2,	wm_in_Prolog	;	Prolog
+	load	wm_safety,	Safety
+#endm
+
+/*
+ * Macro Name:	callC4
+ * Description:	Calls a 4 argument C function without updating shadows
+ * Parameters:	func	-- function to call
+ *		arg1	-- first argument to the function
+ *		arg2	-- second argument to the function
+ *		arg3	-- third argument to the function
+ *		arg4	-- fourth argument to the function
+ * Other Registers:
+ *		cSP, cFP, and RET, globals
+ * Note:	Because of the organization of the registers in the SPARC,
+ *		arg1 thru arg4 must be globals (one of UArg1, UArg2, tmp1, or
+ *		tmp2).  We should not expect these registers to be preserved
+ *		through the call.  The result, however, will be returned in
+ *		UArg1.
+ */
+
+#macro	callC4	func,	arg1,	arg2,	arg3,	arg4
+	save	cSP,	-96,	cSP	; protect Prolog's registers
+	sethi	hi(wm_in_Prolog),	o0	; no longer in prolog
+	st	ZERO, [o0+lo(wm_in_Prolog)]
+	mov	arg1,	o0		; set up first parameter
+	mov	arg2,	o1		; set up second parameter
+	mov	arg3,	o2		; set up third parameter
+	call	func			; call the C function
+	mov	arg4,	o3		; set up fourth parameter in delay slot
+	restore	o0,	0,	UArg1	; restore Prolog's registers and
+					; move the result to UArg1
+	add	ZERO,	1,	tmp2	; back in
+	store	tmp2,	wm_in_Prolog	;	Prolog
+	load	wm_safety,	Safety
+#endm
+
+
+/*
+ * Macro Name:	load
+ * Description:	Loads a memory location into a register
+ * Parameters:	addr	-- address to load
+ *		reg	-- register to get
+ */
+
+#macro	load	addr,	reg
+	sethi	hi(addr),	reg	
+	ld	[reg+lo(addr)], reg
+#endm
+
+/*
+ * Macro Name:	store
+ * Description:	Stores a memory location into a register
+ * Parameters:	reg	-- register to put
+ *		addr	-- address to put to
+ * Other Registers:
+ *		tmp1 is used as a temporary
+ */
+
+#macro	store	reg,	addr
+	sethi	hi(addr),	tmp1
+	st	reg, [tmp1+lo(addr)]
+#endm
+
+
+/*
+ * Macro Name:	tag_cut
+ * Description:	Given an environment to cut to, tags this environment as
+ *		an integer.
+ * Parameters:	src	-- source argument	(untagged)
+ *		dst	-- destination argument	(tagged)
+ * Other Registers:
+ *		None.
+ */
+
+#macro	tag_cut	src,	dst
+	sub	HeapBase, src,	dst	; get offset from heapbase (src should
+					;   be below heapbase).
+	sll	dst, MTP_CONSTSHIFT, dst ; shift left to make room for tag
+	add	dst, MTP_INT,	dst	; add in the tag
+#endm
+
+
+/*
+ * Macro Name:	untag_cut
+ * Description:	Given an object produced by tag_cut, this operation will
+ *		restore the object to its original value which may be passed
+ *		to directly to cut.
+ * Parameters:	src	-- source argument (tagged)
+ *		dst	-- destination argument (untagged)
+ * Other Registers:
+ *		None.
+ */
+
+#macro	untag_cut src,	dst
+	srl	src, MTP_CONSTSHIFT, dst ; shift tag out
+	andn	dst,	3,	dst	; clear low two bits
+	sub	HeapBase, dst, dst	; subtract offset from HeapBase giving
+					; the orignal cut point
+#endm
+
+
+/*
+ * Macro Name:	gcinfo
+ * Description:	gc info after call
+ * Parameters:	msk		-- argument mask
+ *		nargs		-- number of arguments
+ * unimp	0
+ */
+
+#macro	gcinfo	msk,	nargs,	npv
+	word	0
+	word	(npv << 16) | nargs
+	word	msk
+#endm
+
+
+/*
+ * Macro Name:	try_me_else
+ * Description:	Performs the try_me_else sequence
+ * Parameters:	Which		-- wm_try0, wm_try1, wm_try2, or wm_try3
+ *		Label		-- place to continue execution at in event
+ *				   of failure
+ */
+
+#macro	try_me_else	Which, Label
+	call	Which
+	sub	TR,	16,	TR
+	set	Label,	Fail			; set failure point
+#endm
+
+
+/*
+ * Macro Name:	retry_me_else
+ * Description:	Performs the retry_me_else sequence
+ * Parameters:	Which		-- wm_retryN or wm_retry_uN
+ *		Label		-- place to continue execution at in event
+ *				   of failure
+ */
+
+#macro	retry_me_else	Which, Label
+	call	Which
+	mov	SPB,	E
+	set	Label,	Fail
+#endm
+
+
+/*
+ * Macro Name:	trust_me_else_fail
+ * Description:	Performs the trust sequence
+ * Parameters:	Which		-- wm_trustN or wm_trust_uN
+ */
+
+#macro	trust_me_else_fail	Which
+	call	Which
+	mov	SPB,	E
+	mov	E,	SP
+#endm
+
+
+/*
+ * Macro Name:	regs_base
+ * Description:	Puts the address current shadow space into given register
+ * Parameters:	Base	-- register to put regs base into
+ * Other Registers:
+ *		tmp1	-- temporary
+ */
+
+#macro	regs_base	Base
+	load	wm_regidx,	Base
+	set	wm_regs,	tmp1
+	sll	Base,	6,	Base
+	add	tmp1,	Base,	Base
+#endm
+
+/*
+ * Macro Name:	push_regs
+ * Description:	Computes address of current registers and adds one to
+ *		wm_reg_idx thus effectively pushing a new shadow register
+ *		frame.
+ * Parameters:	Base	-- set to address of current base before push
+ * Other Registers:
+ *		tmp1, tmp2	-- temps
+ */
+
+#macro	push_regs	Base
+	load	wm_regidx,	Base
+	set	wm_regs,	tmp1
+	add	Base,	1,	tmp2
+	sll	Base,	6,	Base
+	add	tmp1,	Base,	Base
+	store	tmp2,	wm_regidx
+#endm
+
+
+/*
+ * Macro Name:	pop_regs
+ * Description:	Decrements wm_reg_idx (popping frame) and sets Base to
+ *		address of previous shadow frame (the current one after
+ *		popping).
+ * Parameters:	Base	-- set to address of current base after pop
+ * Other Registers:
+ *		tmp1	-- temp
+ */
+
+#macro	pop_regs	Base
+	load	wm_regidx,	Base
+	sub	Base,	1,	Base
+	store	Base,	wm_regidx
+	set	wm_regs,	tmp1
+	sll	Base,	6,	Base
+	add	tmp1,	Base,	Base
+#endm

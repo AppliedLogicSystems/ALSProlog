@@ -1,0 +1,14 @@
+
+This directory contains the following :
+
+README	-- 	this file
+Doc		-- 	directory containing documentation
+c2pro	-- 	directory containig prolog sources for a translator
+	   		that scans C header files and ouputs prolog specs.
+	   		(see Doc/ctrans.doc for details)
+pro2c	--	directory containing prolog sources for an interface
+			generator that reads the prolog specification output
+			by translator in c2pro and outputs C code containing
+			the foreign interface definitions for functions, constants
+			and C structures. (see Doc/intfgen.doc for details)
+deps	--	makefile dependency generator

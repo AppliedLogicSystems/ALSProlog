@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+#	mkdist
+#
+#	Create a distribution directory, given a build directory, etc.
+#
+#	This can be invoked in one of two (related) ways:
+#	1.	You are located anywhere; you use a path to this file (in
+#		the top level of alsp_src, and pass command line args
+#		of the form
+#			-bld BP
+#		where BP is an absolute path to the build directory;
+#	2.	You are located in the top level of the build directory
+#		and you use a path to this file (in the top level of
+#		alsp_src); in this case , you don't need to pass the
+#			-bld BP
+#		args, because from the absence of -bld BP on the command
+#		line and the presence of cfg.pro in the top level of the
+#		current directory, we guess the build path to be the current
+#		directory path.
+#
+echo Setting up an ALS Prolog distribution directory...
+mkdist_prog=$0
+call_path=`echo $mkdist_prog|sed 's%/[^/][^/]*$%%'`
+
+if test $call_path = $mkdist_prog; then
+	alsp_dir=`pwd`
+else
+   if [ `echo $call_path | sed -e 's/^\(.\).*/\1/'` = "/" ]; then	
+      echo Path $call_path is absolute ; alsp_dir=$call_path
+   else	
+      echo Path $call_path is relative ; alsp_dir=`pwd`/$call_path
+   fi
+fi
+echo alsp_dir = $alsp_dir
+
+## AT ALS, there has to be a  working alspro on the path; use it:
+
+echo calling: alspro $alsp_dir/pconfig/pconfig -g setup_dist -p "$*"
+alspro $alsp_dir/pconfig/pconfig -g setup_dist -p "$@"
+#alspro $alsp_dir/pconfig/pconfig -p "$@"

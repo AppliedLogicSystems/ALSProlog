@@ -1,0 +1,74 @@
+
+%--- p2i defStruct Macros ---
+
+define_macro((accessP2I(inFile,_A,_B) => arg(1,_A,_B))).
+define_macro((setP2I(inFile,_A,_B) => mangle(1,_A,_B))).
+
+define_macro((accessP2I(inStream,_A,_B) => arg(2,_A,_B))).
+define_macro((setP2I(inStream,_A,_B) => mangle(2,_A,_B))).
+
+define_macro((accessP2I(baseName,_A,_B) => arg(3,_A,_B))).
+define_macro((setP2I(baseName,_A,_B) => mangle(3,_A,_B))).
+
+define_macro((accessP2I(fPrefix,_A,_B) => arg(4,_A,_B))).
+define_macro((setP2I(fPrefix,_A,_B) => mangle(4,_A,_B))).
+
+define_macro((accessP2I(dPred,_A,_B) => arg(5,_A,_B))).
+define_macro((setP2I(dPred,_A,_B) => mangle(5,_A,_B))).
+
+define_macro((accessP2I(tPred,_A,_B) => arg(6,_A,_B))).
+define_macro((setP2I(tPred,_A,_B) => mangle(6,_A,_B))).
+
+define_macro((accessP2I(curONum,_A,_B) => arg(7,_A,_B))).
+define_macro((setP2I(curONum,_A,_B) => mangle(7,_A,_B))).
+
+define_macro((accessP2I(curDispNum,_A,_B) => arg(8,_A,_B))).
+define_macro((setP2I(curDispNum,_A,_B) => mangle(8,_A,_B))).
+
+define_macro((accessP2I(initFcns,_A,_B) => arg(9,_A,_B))).
+define_macro((setP2I(initFcns,_A,_B) => mangle(9,_A,_B))).
+
+define_macro((accessP2I(outFile,_A,_B) => arg(10,_A,_B))).
+define_macro((setP2I(outFile,_A,_B) => mangle(10,_A,_B))).
+
+define_macro((accessP2I(outStream,_A,_B) => arg(11,_A,_B))).
+define_macro((setP2I(outStream,_A,_B) => mangle(11,_A,_B))).
+
+define_macro((accessP2I(cFileList,_A,_B) => arg(12,_A,_B))).
+define_macro((setP2I(cFileList,_A,_B) => mangle(12,_A,_B))).
+
+define_macro((accessP2I(pFileList,_A,_B) => arg(13,_A,_B))).
+define_macro((setP2I(pFileList,_A,_B) => mangle(13,_A,_B))).
+
+define_macro((accessP2I(pfStreams,_A,_B) => arg(14,_A,_B))).
+define_macro((setP2I(pfStreams,_A,_B) => mangle(14,_A,_B))).
+
+define_macro((accessP2I(module,_A,_B) => arg(15,_A,_B))).
+define_macro((setP2I(module,_A,_B) => mangle(15,_A,_B))).
+
+define_macro((accessP2I(fmax,_A,_B) => arg(16,_A,_B))).
+define_macro((setP2I(fmax,_A,_B) => mangle(16,_A,_B))).
+
+define_macro((accessP2I(smax,_A,_B) => arg(17,_A,_B))).
+define_macro((setP2I(smax,_A,_B) => mangle(17,_A,_B))).
+
+define_macro((accessP2I(cmax,_A,_B) => arg(18,_A,_B))).
+define_macro((setP2I(cmax,_A,_B) => mangle(18,_A,_B))).
+
+define_macro((
+    makeP2I(_A) =>
+            _A=..
+                [p2i,nil,nil,nil,nil,nil,nil,0,0,[],nil,nil,[],[],[],
+                    builtins,100000,100000,100000])).
+
+define_macro((
+    makeP2I(_A,_B) =>
+            struct_lookup_subst(
+                [inFile,inStream,baseName,fPrefix,dPred,tPred,curONum,
+                    curDispNum,initFcns,outFile,outStream,cFileList,
+                    pFileList,pfStreams,module,fmax,smax,cmax],
+                [nil,nil,nil,nil,nil,nil,0,0,[],nil,nil,[],[],[],builtins,
+                    100000,100000,100000],
+                _B,_C),
+            _A=..[p2i|_C])).
+

@@ -1,0 +1,368 @@
+;
+; cut.68k		-- implementation of cut
+;	Copyright (c) 1992-1993 by Applied Logic Systems, Inc.
+;
+; Author: Kevin A. Buettner
+; Creation: 2/14/92	(out of rts.68k created 2/23/87)
+; Revision History:
+;
+
+#include "assembly.68k"
+
+;
+; wm_docut	-- performs the cut operation
+;	On entry, a0 will contain the environment to cut back to.
+;	We compare this value with SPB.  If SPB is bigger (older than)
+;	the value in a0, things are already determinate and there is
+;	nothing to do.  Otherwise, there is some work to do.
+;
+
+	global	wm_docut
+	global	wm_docut2
+cutexception:
+	pea		dummyret		; push on the dummy return address
+	link	E,	#-20		; set up environment with enough
+					; space to save the four registers
+					; and the cut point (an argument)
+	move.l	d1,	-4(E)		; save d1
+	move.l	d2,	-8(E)		; save d2
+	move.l	d3,	-12(E)		; save d3
+	move.l	d4,	-16(E)		; save d4
+	move.l	wm_heapbase, d0	
+	sub.l	a0,	d0		; compute distance from the heapbase
+	lsl.l	#MTP_CONSTSHIFT, d0	; shift over so
+	addq.l	#MTP_INT, d0		;    we can add in the integer tag
+	move.l	d0,	(SP)		; push on the stack
+	move.l	wm_cutaddr, a0		; get the cut address
+	jsr	(a0)			; call the real cut
+gccut1:	move.w	#((gccut2-gccut1)/2), d0 ; gc info
+	move.l	-16(E),	d4		; restore d4
+	move.l	-12(E),	d3		; restore d3
+	move.l	-8(E),	d2		; restore d2
+	move.l	-4(E),	d1		; restore d1
+	unlk	E			; now ready for return
+	addq.l	#4,	SP		; skip over the dummy return address
+	rts
+gccut2:	gcinfo	0,	1,	4	; mask=0, one arg, four npv
+dummyret:
+	move.w	#((dummymask-dummyret)/2), d0
+dummymask:
+	gcinfo	0,	1,	0	; one arg (real return address)
+	
+wm_docut:
+	tst.l	Safety
+	bmi.s	cutexception
+wm_docut2:
+	cmp.l	a0,	SPB		; compare a0 with SPB
+	bls.s	2f
+	rts				; return if there's nothing to do
+
+	;
+	; 	There is some work to do.  The first thing that needs to be
+	;	done is to find the choice point to cut back to.  We do this
+	;	by walking the choice point stack until we find a choice point
+	;	with a saved SPB which is bigger (older) than d0
+	;
+
+1:
+	move.l	chpt_B(B), B		; get previous B
+2:
+	move.l	chpt_SPB(B), SPB	; get SPB value
+	and.w	#0xfffc, SPB		; and clear the compaction bit
+	cmp.l	a0,	SPB		; compare a0 with SPB
+	bls.s	1b			; branch if still nondeterminate
+
+cutcommon:
+	move.l	B,	a1		; set the lead pointer
+	lea	chpt_size(B), a0	; set the follow pointer
+
+	move.l	chpt_Fail(B), Fail	; load new Fail value
+	move.l	chpt_HB(B), HB		; 	and new HB
+	move.l	chpt_B(B), B		;	and new B
+
+
+
+
+
+	;
+	; a1 is set to the choice point just prior to the place we are
+	;	cutting to.  It is at the end of this choice point that we
+	;	will position the follow pointer.  The lead pointer will
+	;	stay where it is and advance till either the end of another
+	;	choice record is found or until it equals TR
+	;
+
+
+cutloop:
+	cmp.l	a1,	TR		; compare TR to lead pointer
+	bne.s	1f			; branch if not done
+	move.l	a0,	TR		; set TR to follow pointer
+	rts				; return
+1:	move.l	-(a1),	d0		; get trail entry
+	cmp.l	a1,	d0		; see if entry is bigger than pointer
+	bls.s	1f
+	sub.l	#chpt_size-4, a1	; move to beginning of choice point
+	bra.s	cutloop
+
+1:	cmp.l	d0,	HB		; compare against HB
+	bls.s	cutloop			; don't keep it if HB is lower or same
+	cmp.l	d0,	SPB		; compare against SPB
+	bhi.s	cutloop			; don't keep if SPB is bigger
+	move.l	d0,	-(a0)		; copy trail entry
+	bra.s	cutloop
+
+
+
+
+	;
+	; wm_cut performs the cut from within call.  This procedure
+	; is similar to the above procedure, but it is also responsible for
+	; cleaning up the argument/environment stack
+	;
+
+	global	wm_cut
+wm_cut:	unlk	E
+	move.l	4(SP),	d0		; get the tagged "cutpt"
+	lsr.l	#4,	d0		; shift out the tag
+	and.w	#0xfffc, d0		; clear semicolon tag if it is set
+	move.l	wm_heapbase, a0
+	sub.l	d0,	a0		; Now a0 has untagged "cutpt"
+
+	cmp.l	a0,	SPB		; compare a0 with SPB
+	bls.s	2f
+	rts				; return if there's nothing to do
+
+	;
+	; There is some work to do.  The first thing that needs to be
+	; done is to find the choice point to cut back to.  We do this
+	; by walking the choice point stack until we find a choice point
+	; with a saved SPB which is bigger (older) than d0
+	;
+
+1:
+	move.l	chpt_B(B), B		; get previous B
+2:
+	move.l	chpt_SPB(B), SPB	; get SPB value
+	and.w	#0xfffc, SPB		; and clear the compaction bit
+	cmp.l	a0,	SPB		; compare a0 with SPB
+	bls.s	1b			; branch if still nondeterminate
+
+	;
+	; We have found the choice point to cut back to.  This is the
+	; value in B.  But before we cut back to this point, we must clean
+	; up the argument/environment stack.  After the cleanup, the rest
+	; of the cut operation is performed by branching to cutcommon.
+	; The code at cutcommon will set SPB, HB, and Fail.  It will also
+	; utilize a0 and a1 for trail cleanup.  Therefore, we have these
+	; five registers free to use in whatever manner we desire in the
+	; argument/environment cleanup code. d0-d4 should also be available.
+	;
+
+	;
+	; See if any compaction needs to be done
+	;
+
+	cmp.l	E,	a0
+	bls.s	cutcommon		; No arg/env compaction necessary
+
+	;
+	; A/E stack compaction -- Step 1:
+	;
+	; Traverse active environments back to "cutpt".  In the process of
+	; traversing the active environments, we will record in a small table
+	; the start and end of each environment.  A third slot in the table
+	; will be used to store "adjustment" values for use in the compaction
+	; phase.
+	;
+	; Register Usage
+	;	SPB	-- stack frame corresponding to top choice point
+	;		   after cut has been performed.  This is value
+	;		   that we will traverse back to / beyond.
+	;
+	;	HB	-- Bottom of size/fixup table (we use the portion
+	;		   above H on the heap to store this table).  This
+	;		   will correspond with the most recent environment.
+	;		   As an initialization step, HB := H.  Then H will
+	;		   be incremented in the process of doing the
+	;		   traversal.  When we are done, perform H := HB.
+	;	H	-- Top of size/fixup table. This entry will correspond
+	;		   to the oldest environment examined thus far.
+	;
+	;	Fail	-- Return address from previous environment.  This
+	;		   value will be important in order to obtain
+	;		   the size information for the current environment
+	;		   being examined.
+	;
+	;	a1	-- current environment being examined.
+	;
+	;	d3	-- higher environment address from previous
+	;		   iteration. This address is used to determine
+	;		   whether to create a new table entry or to
+	;		   merge the result of the current iteration into
+	;		   the top table entry.
+	;
+
+	move.l	(SP),	Fail		; get return address
+	move.l	E,	a1		; set a1 to topmost environment
+	move.l	H,	HB		; HB is the table base
+	clr.l	d3			; set higher environment address to
+					; impossible value
+
+1:
+#ifdef MacOS
+	move.l	Fail,a0
+	move.w	2(a0), d0
+	move.l	(a0,d0.w*2), d0
+#else
+	move.w	2(Fail), d0		; get offset to size information
+	move.l	(Fail,d0.w*2), d0	; put size info into d0
+#endif
+	move.l	d0,	d1		; put size info into d1 also
+	and.l	#0xffff, d0		; put number of args into d0
+	move.l	#16,	d2		; set up for shift
+	lsr.l	d2,	d1		; put number of env vars into d1
+	lsl.l	#2,	d0		; shift size to get number of bytes
+	lsl.l	#2,	d1		; shift size to get number of bytes
+	neg.l	d1			; negate the environment size
+	add.l	#8,	d0		; add in CP, CE sizes to number of args
+	add.l	a1,	d0		; d0 now points one beyond last arg
+	add.l	a1,	d1		; d1 now points at last env var
+
+	cmp.l	d3,	d1		; see if we can merge these values
+					; into last table entry
+	bne.s	2f			; branch if we can't
+
+	move.l	d0,	-8(H)		; modify high address in previous entry
+	bra.s	3f
+
+2:	move.l	d1,	(H)		; store low address in table
+	move.l	d0,	4(H)		; store high address in table
+	add.l	#12,	H		; advance table pointer
+
+3:	move.l	d0,	d3		; save high value for next iteration
+	move.l	4(a1),	Fail		; get next return address
+	move.l	(a1),	a1		; follow environment link
+
+	cmp.l	a1,	SPB		; see if we are done
+	bcc.s	1b			; branch if SPB greater or equal to a1
+
+
+	;
+	; A/E Compaction: Step 2
+	; 
+	; We have now set up the table.  We must now determine the starting
+	; address to slide the environment values up to.  We do this
+	; by examining the high value determined by the last iteration.  This
+	; will be one beyond the last argument of the last environment examined.
+	; If this value is greater than that of the SPB,  then this is the
+	; environment of the SPB and our initial starting value should be
+	; the low address of that environment.  If the high value from the
+	; last iteration is equal to SPB, then the environment abuts that of
+	; SPB's environemnt and we again use the low address of this environment
+	; as our starting value.   But if the high value is strictly less than
+	; that of SPB, there is a gap between SPB and the last examined
+	; environment, so we use SPB as our starting address to slide things
+	; toward.
+	;
+	;
+
+	move.l	SPB,	a0		; initialize a0 with SPB value
+	cmp.l	d0,	SPB		; see if high value from last iteration
+					; is bigger than or equal to SPB
+	bhi.s	1f			; branch if not
+
+	move.l	-12(H),	d1		; load low address...this is necessary
+					; because of possible merging
+	cmp.l	d1,	SPB		; see if SPB is smaller than d1
+	bcs.s	2f
+
+	move.l	d1,	a0
+2:	sub.l	#12,	H		; nuke table entry
+
+	;
+	; A/E Compaction: Step 3
+	;
+	; a0 now contains the address to slide the argument/environment
+	; stack towards (we will be shifting things from smaller addresses
+	; to larger addresses).
+	; 
+	; H will be one above the last table entry.
+	;
+	; In this step we will pick up the table entries one by one and
+	; move the range of addresses specified by these entries.  In addition,
+	; we will store an offset as the third value in the table.  This
+	; offset will be used to fix up pointers which point into regions of
+	; the stack which we are moving.
+	;
+	; Register usage:
+	;
+	;	HB	-- bottom of size/fixup table
+	;	H	-- top of size/fixup table
+	;	a0	-- address into A/E stack to which we move values
+	;	a1	-- address into A/E stack from which we get values
+	;	Fail	-- used to traverse size/fixup table
+	;	d4	-- initial value of a0; used to determine if a pointer
+	;		   needs fixing or not
+	;	d3	-- fixup value for current environment
+	;	d2	-- lower end of environment which we are moving
+	;	d1	-- scratch
+	;	d0	-- scratch
+	; 
+
+
+1:	clr.l	d3			; initially, no fixup needed
+	move.l	a0,	d4		; set d4 with initial value
+
+	cmp.l	H,	HB		; see if we are done
+	beq	cutcompactiondone	; branch if we are done
+
+1:	sub.l	#12,	H		; go to previous table entry
+	move.l	4(H),	a1		; get high address
+	move.l	(H),	d2		; get low address
+	move.l	a0,	d3		; compute fixup value
+	sub.l	a1,	d3		; now d3 has fixup value
+	move.l	d3,	8(H)		; store fixup value into table
+
+2:	move.l	-(a1),	d1		; get environment value to move
+	move.l	#3,	d0		; set up for tag check
+
+	and.l	d1,	d0		; perform tag check
+	bne.s	3f			; branch if anything but reference
+	cmp.l	d4,	d1		; see if our pointer is bigger than
+					; or same as our start point
+	bcc.s	3f			; branch if so
+	cmp.l	d2,	d1		; see if smaller than lower end of
+					; environment (code pointer if so)
+	bcs.s	3f			; branch if so
+	; If we fall through to here, d1 contains a pointer which must be fixed
+	move.l	H,	Fail		; set Fail to current entry in fixup
+					; table
+#ifdef MacOS
+	move.l	a0, -(SP)		; SAVE a0, we're gonna use it for fail
+	movea.l	Fail, a0
+4:
+	add.l	#12, a0
+	cmp.l	-8(a0), d1
+	bcc.s	4b
+	add.l	-4(a0), d1
+
+	move.l	a0, Fail
+	move.l	(SP)+, a0
+
+#else
+4:	
+	add.l	#12,	Fail		; set up Fail for next iteration
+	cmp.l	-8(Fail), d1		; see if table entry bigger than ptr
+	bcc.s	4b			; branch if not
+	add.l	-4(Fail), d1		; add in fixup value
+#endif
+
+3:	move.l	d1,	-(a0)		; move the value
+	cmp.l	a1,	d2		; see if more environment to move
+	bne.s	2b			; branch if more environment to move
+	cmp.l	H,	HB		; see if totally done
+	bne	1b			; branch if more to do
+
+cutcompactiondone:
+	add	d3,	E
+	bra	cutcommon

@@ -1,0 +1,70 @@
+No 		Instruction 				Arg1 		Arg2 		Arg3 		Arg4
+== 		===========					====		====		====		====
+ 0		start_capture 				n/a			n/a 		n/a 		n/a
+ 1 		end_capture 				n/a 		n/a 		n/a 		n/a
+ 2		callinfo 					Mask 		NArgs 		n/a 		n/a
+ 3 		move 						SBaseReg 	SDisp 		DBaseReg 	DDisp
+ 4 		addtosp 					Num  		n/a 		n/a  		n/a
+ 5 		call 						PredId 		Arity 		n/a  		n/a
+ 6 		execute 					PredId 		Arity 		n/a 		n/a
+ 7 		proceed 					BaseReg 	Disp 		n/a 		n/a
+ 8 		inline_proceed 				n/a 		n/a 		n/a 		n/a
+ 9 		allocate1 					Size 		n/a 		n/a 		n/a
+10 		endallocate1 				n/a 		n/a 		n/a 		n/a
+11 		allocate 					Size 		n/a 		n/a 		n/a
+12 		deallocate1 				n/a 		n/a 		n/a 		n/a
+13 		deallocate2 				Size 		n/a 		n/a 		n/a
+14 		deallocate3 				n/a 		n/a 		n/a 		n/a
+15 		deallocate4 				Size 		n/a 		n/a 		n/a
+16 		trim 						Size1 		Size2 		DeterFlag	n/a
+17 		init_yvar1 					BaseReg 	Disp 		n/a 		n/a
+18 		init_yvar2					Incr 		n/a 		n/a 		n/a
+19 		cut_proceed					BaseReg 	Disp		n/a 		n/a
+20 		deallocate_cut_proceed		n/a 		n/a 		n/a 		n/a
+21 		docut 						BaseReg 	Disp 		n/a 		n/a
+22 		cutmacro					BaseReg 	Disp 		DBaseReg 	DDisp
+23 		get_symbol 					Symbol		BaseReg 	Disp 		n/a
+24 		get_integer					Integer		BaseReg 	Disp 		n/a
+25 		get_value 					SBaseReg 	SDisp 		DBaseReg 	DDisp
+26 		get_list 					BaseReg 	Disp		n/a 		n/a
+27 		get_structure				Functor 	Arity 		BaseReg 	Disp
+28 		get_uia 					UIAStr 		BaseReg 	Disp 		n/a 
+29 		put_unsafe					SBaseReg 	SDisp 		DBaseReg 	DDisp
+30 		put_integer 				Integer 	BaseReg 	Disp 		n/a
+31 		put_symbol 					Symbol 		BaseReg 	Disp 		n/a
+32 		put_y_variable 				SBaseReg 	SDisp 		DBaseReg 	DDisp
+33 		put_x_variable 				BaseReg 	Disp 		n/a 		n/a
+34 		put_list 					BaseReg 	Disp 		n/a 		n/a
+35 		put_structure				Functor 	Arity 		BaseReg 	Disp
+36 		put_uia 					UIAStr 		BaseReg 	Disp 		n/a
+37 		unify_symbol 				Symbol 		Pos 		n/a 		n/a
+38 		unify_integer				Integer 	Pos 		n/a 		n/a
+39 		unify_variable				BaseReg 	Disp 		Pos 		Body
+40 		unify_value 				BaseReg 	Disp 		Pos 		n/a
+41 		unify_local_value			BaseReg 	Disp 		Pos 		n/a
+42 		unify_void 					n/a 		n/a 		n/a 		n/a
+43 		endstruct (NOP) 			n/a 		n/a 		n/a 		n/a
+44 		mth_init 					Map 		n/a 		n/a 		n/a
+45 		mth_eq 						n/a 		n/a 		n/a 		n/a
+46 		mth_lt 						n/a 		n/a 		n/a 		n/a
+47 		mth_gt 						n/a 		n/a 		n/a 		n/a
+48 		mth_le 						n/a 		n/a 		n/a 		n/a
+49 		mth_ge 						n/a 		n/a 		n/a 		n/a
+50 		mth_ne 						n/a 		n/a 		n/a 		n/a
+51 		mth_get_value 				BaseReg 	Disp 		n/a 		n/a
+52 		mth_get_integer 			BaseReg 	Disp 		n/a 		n/a
+53 		mth_put_integer				BaseReg 	Disp 		n/a 		n/a
+54		mth_push_integer 			Integer 	n/a 		n/a 		n/a
+55 		mth_add						n/a 		n/a 		n/a 		n/a
+56 		mth_sub 					n/a 		n/a 		n/a 		n/a
+57 		mth_mul 					n/a 		n/a 		n/a 		n/a
+58 		mth_div						n/a 		n/a 		n/a 		n/a
+59 		mth_neg						n/a 		n/a 		n/a 		n/a
+60 		mth_mod						n/a 		n/a 		n/a 		n/a
+61 		mth_binary_and				n/a 		n/a 		n/a 		n/a
+62 		mth_binary_or				n/a 		n/a 		n/a 		n/a
+63 		mth_binary_xor 				n/a 		n/a 		n/a 		n/a
+64 		mth_not						n/a 		n/a 		n/a 		n/a
+65 		mth_left_shift 				n/a 		n/a 		n/a 		n/a
+66 		mth_right_shift 			n/a 		n/a 		n/a 		n/a
+

@@ -1,0 +1,149 @@
+;
+; atomic.vax		-- atomic, atom, integer, nonvar, number, var
+;	Copyright (c) 1987-90 Applied Logic Systems, Inc.
+;
+; Author: Kevin A. Buettner
+; Creation: 7/3/90
+; Revision History:
+;
+;
+
+
+#include "assembly.vax"
+	text
+
+;
+; atomic
+;
+
+	global	wm_atomic
+wm_atomic:
+	deref	8(SP),	r1,	atomicground
+atomicfail:
+	fail
+atomicground:
+	subb	#MTP_LIST, r0
+	beql	atomicfail			; fail if list
+	bcs	isdouble			; check on double if struct
+	d_proceed
+
+isdouble:
+	cmpl	#MMK_FUNCTOR(TK_DDOUBLE,4), -MTP_STRUCT(r1)
+	bneq	numfail
+	d_proceed
+
+;
+; number
+;
+
+	global wm_number
+wm_number:
+
+	deref	8(SP),	r1,	numground
+numfail:
+	fail
+numground:
+	subb	#MTP_LIST, r0
+	beql	numfail
+	bcs	isdouble
+
+isinteger:
+	bicb3	#~MTP_CONSTMASK, r1, r0
+	cmpb	#MTP_INT, r0
+	bneq	numfail
+	d_proceed
+
+
+;
+; float
+;
+
+	global	wm_float
+wm_float:
+    	deref	8(SP),	r1,	isdouble
+	fail
+
+floatground:
+	subb	#MTP_LIST, r0
+	bcs	isdouble
+	fail
+
+
+;
+; integer
+;
+
+	global	wm_integer
+wm_integer:
+	deref	8(SP),	r1,	intground
+	fail
+intground:
+	cmpb	#MTP_CONST, r0
+	beql	isinteger
+	fail
+
+
+;
+; atom
+;
+
+	global	wm_atom
+wm_atom:
+	deref	8(SP),	r1,	atomground
+atom_fail:
+	fail
+atomground:
+	bicb3	#~MTP_CONSTMASK, r1, r0
+	cmpb	#MTP_SYM, r0			; see if atom is a symbol
+	beql	atomproceed			; branch if so
+	cmpb	#MTP_UIA, r0			; see if atom is a uia
+	bneq	atom_fail			; fail if not
+atomproceed:
+	d_proceed
+
+
+
+;
+; nonvar and var
+;
+
+	global	wm_nonvar
+	global	wm_var
+wm_nonvar:
+	deref	8(SP),	r1,	nonvarground
+varfail:
+	fail
+wm_var:
+	deref	8(SP),	r1,	varfail
+nonvarground:
+	d_proceed
+
+
+
+;
+; eq
+;
+
+	global	wm_eq
+wm_eq:
+	deref	8(SP),	r1,	1f
+1:	deref	12(SP),	r2,	1f
+1:	cmpl	r1,	r2
+	bneq	1f
+	d_proceed
+1:	fail
+
+
+;
+; noneq
+;
+
+	global	wm_noneq
+wm_noneq:
+	deref	8(SP),	r1,	1f
+1:	deref	12(SP),	r2,	1f
+1:	cmpl	r1,	r2
+	beql	1f
+	d_proceed
+1:	fail
+

@@ -1,0 +1,717 @@
+Assembler Macros
+
+This document describes the assembler macros defined in m4. They are used to
+make the assembler code easier to understand and more compact.
+
+The macros defined are by no means complete. They were created as needed
+when various parts of the merge was going on and do not cover all of the
+WAM operations that should be handled. That will be for someone else to
+do.
+
+chpt
+
+The following contants are used for playing with choice points.
+
+chpt_B
+
+	Where, from the top of the choice point, the B value resides.
+
+chpt_HB
+
+	Where, from the top of the choice point, the HB value resides.
+
+chpt_SIZE
+
+	The size, in bytes, of a choice point.
+
+chpt_SPB
+
+	Where, from the top of the choice point, the SPB value resides.
+
+mtypes
+
+This section dfefines the WAM operations for handling Prolog tagged data
+types. Any operations and constants that appear in both mtypes.h and mtypes.m4
+should be the same, within reason. The differences should only be that the
+operations in the m4 file are in assembler and the ones in the h file are
+in C.
+
+
+Useful constants
+
+MTP_ARITYSHIFT
+
+	Shifting a functor word to the right by this constant will give the
+arity associated with a term.
+
+MTP_CHARCONSTBIT
+
+	Give the bit in a tagged Prolog constant which differentiates between
+the fence/int pair of constants from the uia/atom pair.
+
+MTP_CONST
+
+	Basic tag for a constant (UIA, fence, atom, or integer).
+
+MTP_CONSTMASK
+
+	ANDing this with a word will leave only the constant tags
+
+MTP_CONSTSHIFT
+
+	How many bits to shift a constant word to remove the constant tag.
+
+MTP_FENCE
+
+	Extended constant tag for a fence.
+
+MTP_FUNCTMASK
+
+	ANDing this constant with a functor/arity word leaves just the functor.
+
+MTP_INT
+
+	Extended constant tag for an integer.
+
+MTP_LIST
+
+	Basic tag for a list.
+
+MTP_REFMASK
+
+	ANDing MTP_REFMASK with a word will leave only the bits making it
+into a real machine pointer. Of course, it is assumed that merely striiping
+the tag off is enough to get a machine address.
+
+MTP_STRUCT
+
+	Basic tag for a structure.
+
+MTP_SYM
+
+	Extended constant tag for an atom.
+
+MTP_TAGMASK
+
+	ANDing MTP_TAGMASK with a tagged Prolog object will leave only
+bits associated with the basic tags.
+
+MTP_TAGTEST
+
+	Comparing this constant to a basic tag helps differentiate the basic
+types. The instructions JStruct, JList, and JConst then work. 
+
+MTP_TAGWIDTH
+
+	How many bits a basic tag takes up in a tagged Prolog object.
+
+MTP_UNBOUND
+
+	Basic tag for an unbound variable.
+
+MTP_UIA
+
+	Extended constant tag for a UIA.
+
+MTP_UIACONSTBIT
+
+	Give the bit in a tagged Prolog constant which differentiates between
+UIAs and atoms.
+
+SEMIBIT
+
+	Bit used for the semicolon flag.
+
+SEMIFLAG
+
+	What to OR with a cutpoint to set the semi-colon flag
+
+SEMIMASK
+
+	What to AND with a cutpoint to get rid of the semicolon flag
+
+Operand Macros in mtypes.m4
+
+
+GetArity(src)
+
+	Get the arity from the functor/arity word found in src and put it in
+src.
+
+The following code demonstrates the use of GetArity. It is assumed that EBX
+contains a tagged structure object.
+
+			_; Get the functor/arity word
+	GetFunctor(EAX,EBX)
+
+			_; Now get the arity out of the word.
+	GetArity(EAX)
+
+GetFunctor(dst,src)
+
+	src is a register with a tagged structure object. dst will receive the
+functor/arity word of the structure refered to by src.
+
+The following code demonstrates the use of GetArity. It is assumed that EBX
+contains a tagged structure object.
+
+			_; Get the functor/arity word
+	GetFunctor(EAX,EBX)
+
+			_; Now get the arity out of the word.
+	GetArity(EAX)
+
+
+GetStructAddr(src/dst)
+GetStructAddr(dst,src)
+
+	src contains a tagged structure. src/dst will receive a pointer which
+can be used by the other structure macros.
+
+In the following code, EAX is assumed to contain a tagged structure object.
+EBX will end up with the second subterm of the object.
+
+			_; Get the structure pointer
+	GetStructAddr(EAX)
+
+			_; We want the second argument
+	MOVL	OPRS(ECX,IMM(2))
+
+			_; So get it.
+	GetSubTermN(EBX,EAX,ECX)
+
+GetSubTermN(dst,src,n)
+
+	src is a StructAddr gotten from GetStructAddr. n must be a register
+giving the number of the subterm desired, which is put into dst. First
+subterm is numbered 1.
+
+GetSubTermN is mainly used in loops, which is why n must be a register. An
+integer form could be easily supplied.
+
+In the following code, EAX is assumed to contain a tagged structure object.
+EBX will end up with the second subterm of the object.
+
+			_; Get the structure pointer
+	GetStructAddr(EAX)
+
+			_; We want the second argument
+	MOVL	OPRS(ECX,IMM(2))
+
+			_; So get it.
+	GetSubTermN(EBX,EAX,ECX)
+
+JConst
+
+	Used after a TagTest. Will branch if item was a constant of some type.
+
+It is assumed in the following code that EAX has a tagged Prolog object. This
+object will be dereferenced, and we will to an appropriate place if it is
+a constant object. If so, EBX will contain the appropriate value.
+
+	Deref(EBX,EAX,AL,grnd,loop)
+
+	variable code
+
+grnd:
+			_; Check out the tag
+	TagTest(AL)
+
+			_; Jump if a constant
+	JConst	isconst
+
+	if not a constant, we'll be here.
+
+isconst:
+	what to do if a constant
+
+JList
+
+	Used after a TagTest. Will branch if item was a list.
+
+It is assumed in the following code that EAX has a tagged Prolog object. This
+object will be dereferenced, and we will to an appropriate place if it is
+a list object. If so, EBX will contain the appropriate value.
+
+	Deref(EBX,EAX,AL,grnd,loop)
+
+	variable code
+
+grnd:
+			_; Check out the tag
+	TagTest(AL)
+
+			_; Jump if a list
+	JList	islist
+
+	if not a list, we'll be here.
+
+islist:
+	what to do if a list
+
+JStruct
+
+	Used after a TagTest. Will branch if item was a structure.
+
+It is assumed in the following code that EAX has a tagged Prolog object. This
+object will be dereferenced, and we will to an appropriate place if it is
+a structure object. If so, EBX will contain the appropriate value.
+
+	Deref(EBX,EAX,AL,grnd,loop)
+
+	variable code
+
+grnd:
+			_; Check out the tag
+	TagTest(AL)
+
+			_; Jump if a structure
+	JStruct	isstruct
+
+	if not a structure, we'll be here.
+
+isstruct:
+	what to do if a structure
+
+TagTest(srcb)
+
+	Test a basic tag to see its type. srcb must be the byte register
+associated with the actual register that contained the tag object. After
+TagTest is done, the JStruct, JList, and JConst instructions can be used.
+
+For example, the following code dereferences the contents of EAX and will jump
+to the label Constant if a constant was found.
+
+	Deref(EBX,EAX,AL,grnd,loop)
+
+grnd:
+	TagTest(AL)
+	JConst	Constant
+
+
+MK_INT(dst)
+
+Make the integer in dst into a Prolog integer.
+
+The following code will make a Prolog integer with value 1.
+
+	MOVL	OPRS(EAX,IMM(1))
+	MK_INT(EAX)
+
+MK_SYM(dst)
+
+Make the atom in dst into a Prolog symbol.
+
+The following code will make a Prolog constant. It is assumed that TK_CALL
+has the value of the token index for the atom 'call'.
+
+	MOVL	OPRS(EAX,IMM(TK_CALL))
+	MK_SYM(EAX)
+
+MK_FUNCTOR(dst,src)
+
+	Make a functor word and put it into dst. dst should contain the atom
+name, while src contains the arity.
+
+MK_FUNCTOR destroys the copy of the arity in src.
+
+The following code will make a Prolog functor word for a term call/3 in EBX.
+It is assumed that TK_CALL has the value of the token index for the atom
+'call'.
+
+	MOVL	OPRS(EAX,IMM(3))	_; Set the arity
+	MOVL	OPRS(EBX,IMM(TK_CALL))	_; Get functor name
+	MK_FUNCTOR(EBX,EAX)		_; And make the functor word.
+
+TagTest(srcb)
+
+	Test a basic tag to see its type. srcb must be the byte register
+associated with the actual register that contained the tag object. After
+TagTest is done, the JStruct, JList, and JConst instructions can be used.
+
+For example, the following code dereferences the contents of EAX and will jump
+to the label Constant if a constant was found. The constant will be found in
+EBX when this code is done.
+
+	Deref(EBX,EAX,AL,grnd,loop)
+
+	what to do if EAX contains a variable.
+
+grnd:
+	TagTest(AL)
+	JConst	isconst
+
+	will be here if wasn't a constant.
+
+isconst:
+	will be here if was a constant
+
+If TagTest is not used in conjunction with a Deref, the srcb register must
+be prepared. The following code demonstrates how this is done. It is assumed
+that EAX contains a tagged Prolog object.
+
+	ANDB	OPRS(AL,IMM(MTP_TAGMASK))
+	TagTest(AL)
+	JConst isconst
+
+symbols
+
+These routines are defined in symbols.m4.
+
+TokenName(src)
+
+src will be given a pointer to the character string for the print name of
+the atom referenced by src. src is assumed to have the value of an untagged
+symbol when TokenName is called.
+
+Assume EAX has a tagged symbol in it. The following code will put a pointer to
+the character string for the symbol which the tagged object refered to in EAX.
+
+	SHLR	OPRS(EAX,IMM(MTP_CONSTSHIFT))
+	TokenName(EAX)
+
+wamops
+
+These routines are defined in wamops.m4
+
+ArgN(n)
+
+Give the proper addressing mode for argument N for the procedure frame pointed
+at by E.
+
+This is typically used in CMP and MOV instructions. An example which moves the
+contents of EDX into the 3rd argument position on the stack is given below.
+
+	MOVL	OPRS(ArgN(3),EDX)
+
+Bind(dst,src)
+
+dst is a variable pointer. Bind the value in src to this variable.
+
+The following code will dereference the tagged Prolog object found in EAX.
+If the object is a variable, we will create a Prolog integer with value 1 and
+bind it to this variable.
+
+	Deref(EBX,EAX,AL,grnd,loop)
+
+			_; Remember, we end up here if EAX was a variable.
+
+			_; Make the Prolog 1 integer.
+	MOVL	OPRS(EBX,IMM(1))
+	MK_INT(EBX)
+
+			_; And bind the variable.
+	Bind(EAX,EBX)
+
+
+Cut
+
+Call the cut routine and return to next instruction. It is assumed that EAX
+contains the stack location to cut back to.
+
+The following code demonstrates the use of Cut.
+
+			_; Pick up the cut point
+	MOVL	OPRS(EBX,DMADDR(-4,E))
+
+			_; Extract the actual point to cut back to
+	ExtractCutPt(EAX,EBX,BL)
+
+			_; And do the !
+	Cut
+
+	execution continues here
+
+CutProceed
+
+Jump to the cut routine. When done with the cut continue at the current
+continuation pointer.
+
+The following code demonstrates the use of CutProceed.
+
+			_; Pick up the cut point
+	MOVL	OPRS(EBX,DMADDR(-4,E))
+
+			_; Extract the actual point to cut back to
+	ExtractCutPt(EAX,EBX,BL)
+
+			_; Do the cut and move to the continuation pointer.
+	CutProceed
+
+	execution does not continue here after the cut.
+
+Deref(dst,src,srcb,grnd,drfloop)
+
+Provide a deref loop. The item to be dereferenced starts out in
+src. The final dereferenced item will be found in dst. grnd is
+a label to jump to if the item being dereferenced is ground. drfloop
+is a label that the deref loop can use internally. srcb is the byte
+representation of src.
+
+If src is ground, dst will have the only valid value. If src is
+unbound, both dst and src will have copies of the unbound variable.
+
+This should be written so that the internal label (drfloop) is
+generated internal to this macro. Also srcb should be removed when
+possible.
+
+The following code picks up the 4th argument from the current stack frame
+and dereferences it.
+
+			_; Get the 4th argument
+	GetAn(EAX,4)
+
+			_; Notice AL. It is the byte part of EAX.
+	Deref(EBX,EAX,AL,grnd,loop)
+
+	control goes here if EAX is a variable. Both EAX and EBX have valid
+	values
+
+grnd:
+	control comes here if EAX was ground. EBX has the value. EAX has been
+	trashed.
+
+RegExecute(src)
+MemExecute(memory)
+
+WAM EXECUTE instruction.
+
+The Reg instruction assumes that the address of the exec_entry for the
+procedure to be run is in the register src. The Mem instruction assumes that
+the address of the exec_entry for the procedure to be run is in a memory
+location. Both assume that any appropriate deallocation has been done.
+
+The following example pushes arguments for a final call on the stack and the
+calls the appropriate routine, which is found in EAX. The procedure exec_entry
+value could have been placed in EAX by the resolve_ref code. It is assumed
+that the deallocate, if necessary, has already been done.
+
+			_; Going to push a Prolog 1 on the stack.
+	MOVL	OPRS(EBX,IMM(1))
+	MK_INT(EBX)
+	PUSHL	EBX
+
+			_; Now leave this clause
+	RegExecute(EAX)
+
+The following example pushes arguments for a final call on the stack and the
+calls the appropriate routine, which is found in wm_overflow. The procedure
+exec_entry value could have been placed in EAX by the resolve_ref code. It is
+assumed that the deallocate, if necessary, has already been done.
+
+			_; Going to push a Prolog 1 on the stack.
+	MOVL	OPRS(EBX,IMM(1))
+	MK_INT(EBX)
+	PUSHL	EBX
+
+			_; Now leave this clause
+	MemExecute(wm_overflow)
+
+ExtractCutPt(dst,src,srcb)
+
+Extract the cutpoint from src, which has it stored as a Prolog integer
+and put the resulting cutpoint into dst. The final result placed in dst
+can be used by the wm_cut procedure to perform an actual cut operation.
+
+The value in src is destroyed by the operation.
+
+We will get rid of the srcb argument when we learn to use M4 a little better.
+
+The following code demonstrates the use of ExtractCutPt. Remember that EBX will
+no longer have a valid value after ExtractCutPt is executed.
+
+			_; Pick up the cut point
+	MOVL	OPRS(EBX,DMADDR(-4,E))
+
+			_; Extract the actual point to cut back to
+	ExtractCutPt(EAX,EBX,BL)
+
+			_; And do the !
+	Cut
+
+
+Fail
+
+Fail the WAM.
+
+In the following code, a choice point is set up with the alternative being
+next. When failure takes place, execution will continue at next.
+
+			_; Set up a choice point with alternative next.
+	TryMe(next)
+			_; Now we'll go to next:
+	Fail
+
+next:
+	execution will pick up here.
+
+GetArgN(dst,n)
+
+Get argument n from the argument frame pointed at by E and put it into dst.
+The argument position numbers are 1-based (the first argument is argument 1).
+
+The following code gets the first argument from the current stack frame
+and dereferences it.
+
+	GetArgN(EAX,1)
+
+	Deref(EBX,EAX,AL,grnd,loop)
+
+
+MakeCutPt(dst,src)
+
+Create a cut point integer in dst. src is assumed to have a value that would
+normally be handed to the wm_cut routine.
+
+src is not destroyed by this operation.
+
+The following code makes a cutpt value from SPB and puts it in EAX.
+
+	MakeCutPt(EAX,SPB)
+
+Proceed
+
+WAM PROCEED instruction.  Execution is transfered to the current continuation
+pointer.
+
+This operation destroys what was in EAX, but it is an assumption that EAX
+isn't valid through a normal control transfer.
+
+The following code assumed a mysterious deallocate was done, if needed.
+
+	mysterious deallocation
+
+			_; Terminate procedure and pick up at the continuation
+			_; pointer stored in the stack frame pointed at by E.
+	Proceed
+
+PutArgN(n,src)
+
+Put src into argument position n of the argument frame pointed at by E. The
+argument position numbers are 1-based (the first argument is argument 1).
+
+The following code will put a Prolog 1 at argument position 6.
+
+			_; Create the Prolog 1
+	MOVL	OPRS(EAX,IMM(1))
+	MK_INT(EAX)
+
+			_; Put EAX into argument position 6.
+	PutArgN(6,EAX)
+
+
+Trail(src)
+
+src must be trailed. Do it.
+
+The trail checks are not done by this macro. Only the actual pushing of src
+onto the trail is done.
+
+The following code will check to see if the variable pointer in EAX should
+be trailed. If so, it will trail it.
+
+			_; Check out against HB
+	CMPL	OPRS(HB,EAX)
+	JBE	notrail
+
+			_; Check out against SPB
+	CMPL	OPRS(SPB,EAX)
+	JA	notrail
+
+			_; Must trail the bugger
+	Trail(EAX)
+
+notrail:
+	didn't have to trail the variable.
+
+TrustMe
+
+This is the last alternative. Delete the choice point.
+
+In the following code, a choice point is set up with the alternative being
+next. When failure takes place, execution will continue at next, which will
+delete the choice point created by the TryMe.
+
+			_; Set up a choice point with alternative next.
+	TryMe(next)
+			_; Now we'll go to next:
+	Fail
+
+next:
+			_; Get rid of the choice point.
+	TrustMe
+
+TryMe(Alternate)
+
+Create a choice point on the backtrack stack with the alternative execution 
+address Alternate.
+
+
+In the following code, a choice point is set up with the alternative being
+next. When failure takes place, execution will continue at next.
+
+			_; Set up a choice point with alternative next.
+	TryMe(next)
+			_; Now we'll go to next:
+	Fail
+
+next:
+	execution will pick up here.
+
+Unbound(dst,src,label)
+
+	src is assumed to be a variable. It is dereferenced once and the
+result placed in dst. If it is an unbound, control will be transfered
+to label.
+
+src's initial value is not destroyed by Unbound.
+
+The following code assumes that EAX contains a tagged variable.
+
+			_; See if this variable points at another. If so,
+			_; go to regular Deref variable case.
+	Unbound(EBX,EAX,isvar)
+
+			_; Not an unbound variable in one dereference loop.
+			_; Do a full dereference loop.
+	Deref(EBX,EAX,AL,grnd,loop)
+
+isvar:
+	must be a variable. do whatever.
+
+
+cinter
+
+The following macros are provided to simplify using C routines from Prolog
+code.
+
+CReturn
+
+This is the register in which C returns values.
+
+execCProc(croutine,num)
+
+Execute a C procedure. It is assumed that the WAM was running when this
+macro is used. croutine is the name of the C routine to be called, while
+num is the number of arguments the C routine requires. One strangeness
+about this routine is that it is necessary to put down one long word on
+the stack before any of the arguments the C routine requires are layed
+down. This is to get the return address set up correctly. I don't like this,
+but there seemed no way out of it at the time.
+
+The following code will put down the integers 1,2, and 3 on the stack and
+call the C routine sum, which takes 3 arguments.
+
+			_; Remember the extra word
+	PUSHL	IMM(0)
+
+			_; Put the actual arguments down.
+	PUSHL	IMM(1)
+	PUSHL	IMM(2)
+	PUSHL	IMM(3)
+
+	execCProc(sum,3)
+
+			_; Make a Prolog integer from the result
+	MOVL	OPRS(EBX,CReturn)
+	MK_INT(EBX)

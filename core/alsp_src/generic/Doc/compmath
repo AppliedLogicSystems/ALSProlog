@@ -1,0 +1,45 @@
+Inline Math
+
+Introduction
+
+This section describes how inline math is layed out, compiled, etc.
+
+Assumptions made in the design.
+
+Seeveral assumptions are made in the code. First that the processor
+doesn't require strict alignment, as in the SPARC. The SPARC requires
+all quantities to be aligned on boundaries of their own size. For instance,
+32-bit quantities must be aligned on addresses that are a multiple of 4,
+while doubles (64-bit quantities) would have to be aligned on addresses that
+are a multiple of 8. We assume (safe on 68k and 386s) that only 16-bit
+alignment is necessary, and then only for speed.
+
+The Arithmetic Model
+
+The arithmetic code is compiled into a standard stack-based model. Operands
+are pushed on a stack and operated on by the operators. We will assume that
+the two types of operands will be floating point (64-bit floating) and
+integer (16-bit).
+
+Each stack location will consist of an operand and a tag stating the type of
+the operand. Each stack location needs to be able to hold the largest operand
+as well as a tag. So far this means it has to be 8-bytes to hold a double.
+In order to keep the whole entry word aligned, a 16-bit tag seems appropriate.
+The stack will grow in the direction of the memory area in which it resides.
+If it is on the heap, it should grow in the direction the heap does, while if
+it is on the local stack, it should grow in the direction the local stack
+grows. Whichever direction, it seems best that the tag be placed where the
+stack top is so that we can find the operand type quickly.
+
++-----------------------+
++ Tag of top element	+	<- Top of stack pointer points here.
++-----------------------+
++ Top element		+
++-----------------------+
++ Tag of next item	+	What an arithmetic stack looks like.
++-----------------------+
++ Next item		+
++-----------------------+
++ .....................	+
++-----------------------+
+

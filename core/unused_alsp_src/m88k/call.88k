@@ -1,0 +1,347 @@
+;
+; call.88k			-- code implementing call/1 and company
+;	Copyright (c) 1988 Applied Logic Systems, Inc.
+;
+; Creation Date: 7/14/88
+; Author: Kevin A. Buettner
+;
+
+
+#include "assembly.88k"
+
+	text
+	align	8
+
+	;
+	; wm_call implements the prolog builtin call/1.  On entry, T1 has the
+	;	module id of the module from which the call was initiated.
+	;	It gets this value from the procedure entry in which the
+	;	call was started.  The module id is not a valid prolog object
+	;	and no attempt should be made to dereference it.
+	;
+
+	global	_wm_call
+
+_wm_call:
+	addu	T2,	ZERO,	0		; put 0 in T2 so we don't
+						; ignore the overflow check
+
+@call_entry:
+	
+	st	A2,	E,	12+BIAS		; save the cutpt
+@call_deref:
+	bb1	BGND,	A1,	@call_isground	; dereference thing to call
+	ld	tmp1,	A1,	BIAS
+	cmp	tmp2,	tmp1,	A1
+	bb0.n	eq,	tmp2,	@call_deref
+	addu	A1,	tmp1,	0
+
+@call_fail:
+	jmp	Fail				; fail if we try to call
+						;  a variable
+
+@call_isground:
+	
+	bb1.n	BSTRC,	A1,	@call_isstruct	; branch if A1 points at a
+	clr	S,	A1,	6<26>		;  structure and extract 
+						;  value into s
+
+	bb0	BSYM,	A1,	@call_fail	; fail if A1 is not a symbol
+						;  of some sort
+	
+	bb0	BUIA,	A1,	@call_sym	; branch if we have a symbol
+
+	addu	UArg1,	S,	BIAS+4		; skip the fence and bias
+	bsr	_Probe_token			; look for the token
+	bcnd	eq0,	UArg1,	@call_fail	; fail if not found
+	addu	S,	UArg1,	0		; move token to s
+
+
+@call_sym:
+	
+	addu	A1, 	T1,	0		; move T1 (the module id) to
+						; A1
+	addu	A3,	ZERO,	0		; set A3 to zero (the arity)
+	addu	A2,	S,	0		; put the token in A2
+	addu	E,	E,	4		; adjust the environment
+	addu	SP,	E,	0		;   and the stack pointer to
+						;   match
+	br	@call_whereto			; figure out where we are
+						; going to
+
+@call_isstruct:
+	addu	A1,	T1,	0		; move T1 (mod id) to A1
+	ld	A2,	S,	BIAS		; load the functor into A3
+	addu	S,	S,	BIAS		; unbias s.
+	extu	A3,	A2,	10<16>		; extract the arity into A3
+	clr	A2,	A2,	16<16>		; clear high word of the
+						;  functor giving the token id
+	mak	tmp1,	A3,	30<2>		; shift arity left 2 and put
+						;  into tmp1
+	subu	E,	E,	tmp1		; create an appropriately sized
+	addu	E,	E,	BIAS+12		; frame.  At this time the
+						; frame is two words smaller
+						; than it ought to be. The
+						; addu is needed to reuse the
+						; frame of the call/1 which
+						; requires 3 words.  So e
+						; now really points at the
+						; first argument (unbiased).
+
+@call_copyargs:
+	ld	tmp2,	S,	tmp1		; load argument
+	subu	tmp1,	tmp1,	4		; decrement offset
+	st	tmp2,	E,	tmp1		; store the argument
+	bcnd	gt0,	tmp1,	@call_copyargs	;
+
+	subu	E,	E,	BIAS+8		; unbias e and allocate the
+						;  two words needed for cp
+						;  and ce
+	addu	SP,	E,	0		; set sp to e.
+
+
+
+@call_whereto:
+
+	;
+	; At this point, the following registers should be set up.
+	;
+	;	A1	-- contains the module id
+	;	A2	-- contains the token id of the procedure to call
+	;	A3	-- contains the arity
+	;
+	;	The other Prolog registers such as CP, and OldE, H, HB, and
+	;	others have meaningful values which can not be trashed.
+	;
+	; The C routine call_resolve_reference is responsible for taking
+	; A1, A2, and A3 in their present form and finding the address to
+	; jump to in order to perform the call.  This address will be returned
+	; in A1.  Prior to making the jump, A1, A2, and A3 will need to be
+	; set up from the frame as necessary.
+	;
+
+	addu	r5,	T2,	0		; move overflow check to r5
+	st	CP,	E,	BIAS+4		; save the continuation
+						;  pointer
+	st	OldE,	E,	BIAS+0		; save the continuation
+						;  environment
+	bsr	_call_resolve_reference		; find out where to go to
+
+	addu	r1,	A1,	0		; put place to continue in r1
+	ld	OldE,	E,	BIAS+0		; reload OldE
+	ld	CP,	E,	BIAS+4		; reload cp
+	ld	A1,	E,	BIAS+8		; I wish I could think of a
+	ld	A2,	E,	BIAS+12		;   good way to reload these
+	ld	A3,	E,	BIAS+16		;   without a lot of extra
+						;   overhead.
+	
+	;
+	; A note on the above.  It seems to me that a good way to reload
+	; the A registers depending on the arity is to add the right constant
+	; to r1 in the branch slot of the call to _call_resolve_reference.
+	; The thing to add, of course, would depend on the arity.  Following
+	; the bsr would be loads of A3, A2, and A1 in that order.  The only
+	; trouble with this idea is that at present the silicon filter will
+	; put in tb1's after the loads.  In other words we can't count on
+	; the assembly leaving the code alone.  To put it yet another way,
+	; it seems like a bad idea at this time to attempt to jump into or
+	; continue at a place in the code lacking a label.
+	;
+	; I considered using a jump table, but it seemed to me that the overhead
+	; in figuring out where to jump to in the jump table would be greater
+	; than doing the above three loads even if they are unnecessary.
+	;
+
+	jmp	r1				; start the goal.
+
+
+	;
+	; wm_colon implements ':'/2
+	;
+	;	A1 has the module as a token (or perhaps a uia)
+	;	A2 has the goal to execute
+	;	A3 has the cutpt
+	;
+
+	global	_wm_colon
+_wm_colon:
+	addu	T2,	ZERO,	0		; put 0 in T2 which will
+						; cause us not to skip overflow
+						; check
+@colon_deref:
+	bb1	BGND,	A1,	@colon_ground	; dereference the module
+	ld	tmp1,	A1,	BIAS
+	cmp	tmp2,	tmp1,	A1
+	bb0.n	eq,	tmp2,	@colon_deref
+	addu	A1,	tmp1,	0
+
+@colon_fail:
+	jmp	Fail				; fail if module is
+						;  a variable
+
+@colon_ground:
+	bb0	BSYM,	A1,	@colon_fail	; fail if module id is not
+						;  symbolic
+	bb0.n	BUIA,	A1,	@colon_gottok	; branch if we have a real sym
+	clr	UArg1,	A1,	6<26>		; wipe out the tag
+	addu	UArg1,	UArg1,	BIAS+4		; skip fence and bias
+	bsr	_Probe_token			; get the token
+	bcnd	eq0,	UArg1,	@colon_fail	; fail if not in symbol table
+@colon_gottok:
+	addu	T1,	UArg1,	0		; move module id to T1
+	addu	A1,	A2,	0		; put goal to execute in A1
+	addu	A2,	A3,	0		; put cutpt in A2
+	addu	E,	E,	4		; decrease frame size
+	br.n	@call_entry			; call call
+	addu	SP,	E,	0		; set sp to e
+
+
+	;
+	; wm_dbg_call implements dbg_call/2 which is essentially colon, but
+	; without the overflow check
+	;
+
+	global	_wm_dbg_call
+_wm_dbg_call:
+	br.n	@colon_deref			; code for colon is same
+						; except for overflow check
+						; setup
+	addu	T2,	ZERO,	1		; set up T2 so that overflow
+						; check will be ignored
+
+	;
+	; wm_ocall implements ocall/2 (what a stupid name) which is colon
+	; without the overflow check.  In addition, the Safety register is
+	; set so that the next call will be interrupted.
+	;
+
+	global	_wm_ocall
+_wm_ocall:
+
+	;
+	; Get the exception trigger value and put it in Safety.  Also
+	; put it into the memory shadow, wm_safety.
+	;
+
+	or.u	T2,	ZERO,	hi16(_wm_trigger)
+	ld	Safety,	T2,	lo16(_wm_trigger)
+	or.u	T2,	ZERO,	hi16(_wm_safety)
+	st	Safety,	T2,	lo16(_wm_safety)
+
+	br.n	@colon_deref			; branch to the colon code
+	addu	T2,	ZERO,	1		; after setting up T2 so
+						; that overflow check will
+						; be ignored.
+	
+	;
+	; wm_jump implements jump/2 which takes a database reference and
+	; a call template and jumps to that clause after using the arguments
+	; in the call template.
+	;
+
+	global	_wm_jump
+_wm_jump:
+
+        ;
+        ; Dereference the first argument
+        ;
+ 
+@jump_deref1:
+        bb1     BGND,   A1,     @jump_ground1
+        ld      tmp1,   A1,     BIAS
+        cmp     tmp2,   tmp1,   A1
+        bb0.n   eq,     tmp2,   @jump_deref1
+        addu    A1,     tmp1,   0
+ 
+@jump_fail:
+        jmp     Fail                            ; fail if first arg is variable
+
+@jump_ground1:
+
+@jump_deref2:
+	bb1	BGND,	A2,	@jump_ground2
+	ld	tmp1,	A2,	BIAS
+	cmp	A2,	tmp1,	A2
+	bb0.n	eq,	A2,	@jump_deref2
+	addu	A2,	tmp1,	0
+
+	jmp	Fail				; fail if second arg is a variable
+@jump_ground2:
+        st      A2,     E,      BIAS+12         ; save A2 for later
+
+        ;
+        ; Next we want to make sure that we have a structure and that the
+        ;       functor is $dbref/4.  Calling jump_validate_dbref will
+        ;       do this for us and return to us the address at which to
+        ;       begin execution
+        ;
+ 
+
+        bsr     _jump_validate_dbref		; validate the database ref
+
+        bcnd    eq0,    A1,	@jump_fail      ; fail if not valid
+
+	addu	r1,	A1,	0		; put place to continue at in r1
+	ld	A1,	E,	BIAS+12		; get A2 back, but in A1
+
+	bb1.n	BSTRC,	A1,	@jump_isstruct	; branch if A1 points at a
+	clr	S,	A1,	6<26>		;  structure and extract 
+						;  value into s
+
+	bb0	BSYM,	A1,	@jump_fail	; fail if A1 is not a symbol
+						;  of some sort
+	
+	addu	E,	E,	8		; adjust the environment
+	addu	SP,	E,	0		;   and the stack pointer to
+						;   match
+	st	CP,	E,	BIAS+4		; save the continuation
+						;  pointer
+	st	OldE,	E,	BIAS+0		; save the continuation
+						;  environment
+
+	jmp	r1				; do the clause
+
+@jump_isstruct:
+	ld	A3,	S,	BIAS		; get functor into A3
+	addu	S,	S,	BIAS		; unbias s.
+	extu	A3,	A3,	10<16>		; extract the arity from functor
+	mak	tmp1,	A3,	30<2>		; shift arity left 2 and put
+						;  into tmp1
+	subu	E,	E,	tmp1		; create an appropriately sized
+	addu	E,	E,	BIAS+16		; frame.  At this time the
+						; frame is two words smaller
+						; than it ought to be. The
+						; addu is needed to reuse the
+						; frame of the jump/2 which
+						; requires 4 words.  So e
+						; now really points at the
+						; first argument (unbiased).
+
+@jump_copyargs:
+	ld	tmp2,	S,	tmp1		; load argument
+	subu	tmp1,	tmp1,	4		; decrement offset
+	st	tmp2,	E,	tmp1		; store the argument
+	bcnd	gt0,	tmp1,	@jump_copyargs	;
+
+	subu	E,	E,	BIAS+8		; unbias e and allocate the
+						;  two words needed for cp
+						;  and ce
+	addu	SP,	E,	0		; set sp to e.
+
+
+
+@jump_whereto:
+
+	st	CP,	E,	BIAS+4		; save the continuation
+						;  pointer
+	st	OldE,	E,	BIAS+0		; save the continuation
+						;  environment
+
+	ld	A1,	E,	BIAS+8		; load up A regs recognizing
+	ld	A2,	E,	BIAS+12		; that some of them might get
+	ld	A3,	E,	BIAS+16		; garbage
+						;
+	
+	jmp	r1				; start the clause
+ 
+	data

@@ -1,0 +1,639 @@
+#include "assembly.88k"
+; 
+; Creation:	Craig Thornley	
+;		June 14, 1989
+;
+;	Copyright (c) 1989 Motorola, Inc.
+;
+; Modified:	June 19, 1989	CT	added pc_mag2
+;		June 20, 1989	CT	added prc_mul & eiexp
+;		Feb 5, 1990	kev	changed reg names and stack usage
+;		March 9, 1992	SM	added pcj_mul, pc_mac, pc_mag, pc_conj, pc_rec, pc_div
+;		March 10, 1992	SM	added prc_mac
+;		March 12, 1992	SM/CT	found ancient bugs in pc_add, etc. because at times
+;					TR was not restored before failure.
+;					Fix this throughout by saving TR (and Fail,SPB) on
+;					stack before calls to get_complexUArg1
+;		when 		who 	what
+;
+; sca_cmplx.88k -- Functions for complex scalar arithmetic
+;
+;
+; pc_add(+C1,+C2,-C3)
+; pc_sub(+C1,+C2,-C3)
+; pc_mul(+C1,+C2,-C3)
+; pcj_mul(+C1,+C2,-C3)
+; pc_mac(+Acc1,+C1,+C2,-Acc2)
+; pc_conj(+C1,-C2)
+; pc_rec(+C1, -C2)
+; pc_div(+Z1,+Z,-Z2)
+; pc_mag2(+C1,-R)
+; pc_mag(+C1,-R)
+; prc_mul(+R,+C1,-C2)
+; prc_mac(+Acc1,+R,+C,-Acc2)
+; eiexp(+R,+Sign,-C)
+
+	text
+	global	_pc_add
+	global	_pc_sub
+	global	_pc_mul
+	global	_pcj_mul
+	global 	_pc_mac
+	global	_pc_mag2
+	global 	_pc_mag
+	global	_pc_conj
+	global	_pc_rec
+	global 	_pc_div
+	global	_prc_mul
+	global	_prc_mac
+	global	_eiexp
+
+_pc_add:
+	subu	SP,	SP,	20
+	st	r14,	SP,	0+BIAS
+	st	r15,	SP,	4+BIAS
+	st	r16,	SP,	8+BIAS
+	st	r17,	SP,	12+BIAS
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in A1
+	or	UArg1,	A1,	ZERO	
+
+	or	r14,	T1,	ZERO		; put scalar into r14-r17 (almost)
+	or	r15,	T2,	ZERO		
+	st	T3,	SP,	16+BIAS		; store T3 on stack so as not to trash TR
+;	or	r16,	T3,	ZERO
+	or	r17,	T4,	ZERO
+
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in A2
+	or	UArg1,	A2,	ZERO
+
+	ld	r16,	SP,	16+BIAS		; now load in what was T3	
+
+	fadd.ddd T1,	r14,	T1		; (a+c)
+	fadd.ddd T3,	r16,	T3		; (b+d)i
+	
+	ld	r14,	SP,	0+BIAS		; restore the regs
+	ld	r15,	SP,	4+BIAS
+	ld	r16,	SP,	8+BIAS
+	ld	r17,	SP,	12+BIAS
+	addu	SP,	SP,	20
+	
+	bsr.n	_complex_unifier		; call the complex unifier
+	or	UArg1,	A3,	ZERO
+
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+_pc_sub:
+	subu	SP,	SP,	20
+	st	r14,	SP,	0+BIAS
+	st	r15,	SP,	4+BIAS
+	st	r16,	SP,	8+BIAS
+	st	r17,	SP,	12+BIAS
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in A1
+	or	UArg1,	A1,	ZERO	
+
+	or	r14,	T1,	ZERO		; put scalar into r14-r17 (almost)
+	or	r15,	T2,	ZERO
+	st	T3,	SP,	16+BIAS		; store T3 on stack so as not to trash TR
+;	or	r16,	T3,	ZERO
+	or	r17,	T4,	ZERO
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in A2
+	or	UArg1,	A2,	ZERO
+
+	ld	r16,	SP,	16+BIAS		; now load in what was T3
+
+	fsub.ddd T1,	r14,	T1		; (a-c)
+	fsub.ddd T3,	r16,	T3		; (b-d)i
+	
+	ld	r14,	SP,	0+BIAS		; restore the regs
+	ld	r15,	SP,	4+BIAS
+	ld	r16,	SP,	8+BIAS
+	ld	r17,	SP,	12+BIAS
+	addu	SP,	SP,	20
+	
+	bsr.n	_complex_unifier		; call the complex unifier
+	or	UArg1,	A3,	ZERO
+
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+
+_pc_mul:
+	subu	SP,	SP,	28
+	st	r14,	SP,	0+BIAS
+	st	r15,	SP,	4+BIAS
+	st	r16,	SP,	8+BIAS
+	st	r17,	SP,	12+BIAS
+	st	r18,	SP,	16+BIAS
+	st	r19,	SP,	20+BIAS
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in A1
+	or	UArg1,	A1,	ZERO	
+
+	or	r14,	T1,	ZERO		; put scalar into r14-r17 (almost)
+	or	r15,	T2,	ZERO
+	st	T3,	SP,	24+BIAS		; store T3 on stack so as not to trash TR
+;	or	r16,	T3,	ZERO
+	or	r17,	T4,	ZERO
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in A2
+	or	UArg1,	A2,	ZERO
+
+	ld	r16,	SP,	24+BIAS		; now load in what was T3
+
+	fmul.ddd tmp1,	r14,	T1
+	fmul.ddd UArg1,	r16,	T3
+	fmul.ddd r18,	r14,	T3
+	fmul.ddd A1,	r16,	T1
+
+	fsub.ddd T1,	tmp1,	UArg1
+	fadd.ddd T3,	r18,	A1
+	
+	ld	r14,	SP,	0+BIAS		; restore the regs
+	ld	r15,	SP,	4+BIAS
+	ld	r16,	SP,	8+BIAS
+	ld	r17,	SP,	12+BIAS
+	ld	r18,	SP,	16+BIAS
+	ld	r19,	SP,	20+BIAS
+	addu	SP,	SP,	28
+	
+	bsr.n	_complex_unifier		; call the complex unifier
+	or	UArg1,	A3,	ZERO
+
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+
+	; pc_mac(+Acc1,+Z1,+Z2,-Acc2) is an accumulator predicate for complex multiplication.
+	; A1 is the complex accumulator.  Multiply complex numbers Z1 and Z2, and add the
+	; result to Acc1, leaving the complex result in Acc2.
+	; Modify pc_mul slightly to do all this.
+
+_pc_mac:
+	subu	SP,	SP,	36
+	st	r14,	SP,	0+BIAS
+	st	r15,	SP,	4+BIAS
+	st	r16,	SP,	8+BIAS
+	st	r17,	SP,	12+BIAS
+	st	r18,	SP,	16+BIAS
+	st	r19,	SP,	20+BIAS
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in A2
+	or	UArg1,	A2,	ZERO	
+
+	or	r14,	T1,	ZERO		; put scalar into r14-r17 (almost)
+	or	r15,	T2,	ZERO
+	st	T3,	SP,	24+BIAS		; store T3 on stack so as not to trash TR
+;	or	r16,	T3,	ZERO
+	or	r17,	T4,	ZERO
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in A3
+	or	UArg1,	A3,	ZERO
+
+	ld	r16,	SP,	24+BIAS		; now load in what was T3
+	st	r18,	SP,	28+BIAS		; save Fail
+	st	r19,	SP,	32+BIAS		; save SPB
+
+	fmul.ddd tmp1,	r14,	T1
+	fmul.ddd UArg1,	r16,	T3
+	fmul.ddd r18,	r14,	T3
+	fmul.ddd A2,	r16,	T1		; reuse A2,A3, still need A1, though
+
+	fsub.ddd r14,	tmp1,	UArg1
+	fadd.ddd r16,	r18,	A2
+
+	; r14-r17 contain the result of the complex multiply Z1*Z2
+	; now get Acc1 and accumlate
+	; but first save r16 on stack, and
+	; restore r16 (TR) for the call to get_complexUArg1
+	; restore Fail and SPB too
+	
+	st	r16,	SP,	24+BIAS		; save r16
+	ld	r18,	SP,	28+BIAS		; restore Fail
+	ld	r19,	SP,	32+BIAS		; restore SPB
+	ld	r16,	SP,	8+BIAS		; restore original TR value - still valid
+						; since nothing has been bound yet
+	bsr.n	_get_complexUArg1
+	or	UArg1,	A1,	ZERO		; get the accumulator into T1-T4
+	ld	r16,	SP,	24+BIAS		; get back r16 (part of Z1*Z2 product)
+
+	fadd.ddd T1,	T1,	r14
+	fadd.ddd T3,	T3,	r16		; answer in T1-T4, unify with Acc2 later
+
+		
+	ld	r14,	SP,	0+BIAS		; restore regs, but r18-r19 already restored
+	ld	r15,	SP,	4+BIAS
+	ld	r16,	SP,	8+BIAS
+	ld	r17,	SP,	12+BIAS
+	addu	SP,	SP,	32
+	
+	bsr.n	_complex_unifier		; call the complex unifier
+	ld	UArg1,	E,	20+BIAS		; unify result with Acc2
+
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+
+	; pcj_mul(+Z1,+Z2,-Z3) multiplies complex number Z1 by the complex conjugate of Z2
+	; Z3 is bound to the complex result.
+	; the only difference between pcj_mul and pc_mul is the single xor.u instruction
+	; Should macroize this code sharing (and elsewhere) for maintenance concerns...
+
+_pcj_mul:
+	subu	SP,	SP,	28
+	st	r14,	SP,	0+BIAS
+	st	r15,	SP,	4+BIAS
+	st	r16,	SP,	8+BIAS
+	st	r17,	SP,	12+BIAS
+	st	r18,	SP,	16+BIAS
+	st	r19,	SP,	20+BIAS
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in A1
+	or	UArg1,	A1,	ZERO	
+
+	or	r14,	T1,	ZERO		; put scalar into r14-r17 (almost)
+	or	r15,	T2,	ZERO
+	st	T3,	SP,	24+BIAS		; store T3 on stack so as not to trash TR
+;	or	r16,	T3,	ZERO
+	or	r17,	T4,	ZERO
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in A2
+	or	UArg1,	A2,	ZERO
+
+	ld	r16,	SP,	24+BIAS		; now load in what was T3
+
+	xor.u	T3,	T3,	0x8000		; flip the sign bit of the imaginary part
+						; to get the complex conjugate
+
+	fmul.ddd tmp1,	r14,	T1
+	fmul.ddd UArg1,	r16,	T3
+	fmul.ddd r18,	r14,	T3
+	fmul.ddd A1,	r16,	T1
+
+	fsub.ddd T1,	tmp1,	UArg1
+	fadd.ddd T3,	r18,	A1
+	
+	ld	r14,	SP,	0+BIAS		; restore the regs
+	ld	r15,	SP,	4+BIAS
+	ld	r16,	SP,	8+BIAS
+	ld	r17,	SP,	12+BIAS
+	ld	r18,	SP,	16+BIAS
+	ld	r19,	SP,	20+BIAS
+	addu	SP,	SP,	28
+	
+	bsr.n	_complex_unifier		; call the complex unifier
+	or	UArg1,	A3,	ZERO
+
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+
+
+	; pc_mag2(+C,-R) R is the real scalar result of the sum of the
+	; squares of both components of the complex scalar C (a+bi)
+_pc_mag2:
+	bsr.n	_get_complexUArg1		; find complex in A1
+	addu	UArg1,	A1,	ZERO
+
+	fmul.ddd T1,	T1,	T1		; a*a
+	fmul.ddd T3,	T3,	T3		; b*b
+	fadd.ddd tmp1,	T1,	T3		; (a*a) + (b*b)
+	
+	br.n	_punify_answer
+	addu	A3,	A2,	ZERO
+
+
+	; pc_mag(+C, -R) is the square root of the real scalar result of the sum of the
+	; squares of both components of the complex scalar C (a+bi)
+	; pc_mag(C, R) :- pc_mag2(C,R1), R is sqrt(R1).
+
+_pc_mag:
+	subu	SP,	SP,	4		; call to sqrt can trash r0-r13, need to save
+	st	r14,	SP,	BIAS		; A2 across the call, though
+
+	bsr.n	_get_complexUArg1		; find complex in A1
+	addu	UArg1,	A1,	ZERO
+
+	fmul.ddd T1,	T1,	T1		; a*a
+	fmul.ddd T3,	T3,	T3		; b*b
+	addu	r14,	A2,	ZERO		; _punify_answer wants operand in A3,
+						; and we need r2&r3 (A1&A2) for call to sqrt anyway
+		; sqrt can trash r0-r13 by 88k software convention
+	bsr.n	_sqrt				; leaves result in A1,A2
+	fadd.ddd A1,	T1,	T3		; (a*a) + (b*b) in A1,A2 for call to sqrt
+	addu	A3,	r14,	ZERO		; punify_answer unifies A3 with tmp1,tmp2
+	ld	r14,	SP,	BIAS		; restore r14
+	addu	SP,	SP,	2		; reset SP
+	addu	tmp1,	A1,	ZERO		; load up tmp1,tmp2 with sqrt result
+	br.n	_punify_answer			; unify and return
+	addu	tmp2,	A2,	ZERO
+
+
+	; pc_conj(+C, -C1) C1 is the complex conjugate of C, i.e. a-bi
+	; pc_conj([R|I],[R|NegI]) :- NegI is -I.
+
+_pc_conj:
+	bsr.n	_get_complexUArg1		; find complex in A1
+	addu	UArg1,	A1,	ZERO
+
+	; imaginary part in T3,T4.  Just flip the sign bit (MSB of T3)
+	xor.u	T3,	T3,	0x8000		; flip the sign bit
+
+	bsr.n	_complex_unifier		; call the complex unifier
+	or	UArg1,	A2,	ZERO		; unify A2 with T1-T4
+
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+
+	; pc_rec(+Z, -Z1) computes the reciprocal Z1 of the complex scalar Z.
+	; If the denominator (X1^2+Y1^2) is 0  (only true for Z = [0|0]), fail
+
+_pc_rec:
+	bsr.n	_get_complexUArg1		; find complex in A1
+	addu	UArg1,	A1,	ZERO
+
+	fmul.ddd tmp1,	T1,	T1		; X1^2
+	fmul.ddd UArg1,	T3,	T3		; Y1^2
+	xor.u	T3,	T3,	0x8000		; flip the sign bit of imaginary part for
+						; reciprocal calculation
+	fadd.ddd tmp1,	tmp1,	UArg1		; X1^2 + Y1^2
+	flt.ds	UArg1,	ZERO			; double precision zero in UArg1,UArg2
+	fcmp.sdd UArg1,	tmp1,	UArg1		; denominator == 0?
+	bb1	eq,	UArg1,	@cmplx_fail	; no divide by 0 allowed, just fail
+	fdiv.ddd T1,	T1,	tmp1		; divide real component by (X1^2 + Y1^2)	
+	fdiv.ddd T3,	T3,	tmp1		; divide imaginary component by same
+	bsr.n	_complex_unifier		; call the complex unifier
+	or	UArg1,	A2,	ZERO		; unify A2 with T1-T4
+
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+	
+	; pc_div(+Z1,+Z2,-Z3) computes the ratio Z3 of two complex scalars Z1 and Z2.
+	; Z2 = [0|0] yields division by zero, and the predicate fails.
+
+_pc_div:
+	subu	SP,	SP,	28
+	st	r14,	SP,	0+BIAS
+	st	r15,	SP,	4+BIAS
+	st	r16,	SP,	8+BIAS
+	st	r17,	SP,	12+BIAS
+	st	r18,	SP,	16+BIAS	
+	st	r19,	SP,	20+BIAS
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in A1
+	or	UArg1,	A1,	ZERO	
+
+	or	r14,	T1,	ZERO		; put scalar into r14-r17 (almost)
+	or	r15,	T2,	ZERO
+	st	T3,	SP,	24+BIAS		; store T3 on stack so as not to trash TR
+;	or	r16,	T3,	ZERO
+	or	r17,	T4,	ZERO
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in A2
+	or	UArg1,	A2,	ZERO
+	xor.u	T3,	T3,	0x8000		; flip sign bit in imaginary part of Z2
+
+	ld	r16,	SP,	24+BIAS		; now load in what was T3
+
+	fmul.ddd tmp1,	r14,	T1
+	fmul.ddd UArg1,	r16,	T3
+	fmul.ddd r18,	r14,	T3
+	fmul.ddd A1,	r16,	T1
+
+	; compute X2^2 + Y2^2 for later use (denominator)
+	fmul.ddd r14,	T1,	T1		; X2^2
+	fmul.ddd r16,	T3,	T3		; Y2^2
+	fadd.ddd r14,	r14,	r16		; X2^2+Y^2
+
+	fsub.ddd T1,	tmp1,	UArg1
+	fadd.ddd T3,	r18,	A1
+
+	; now check for divide by zero
+	flt.ds	UArg1,	ZERO			; double precision zero in UArg1,UArg2
+	fcmp.sdd UArg1,	r14,	UArg1		; denominator == 0?
+	bb1	eq,	UArg1,	@pc_div_fail	; no divide by 0 allowed, just fail
+	fdiv.ddd T1,	T1,	r14		; divide real component by (X2^2+Y2^2)
+	fdiv.ddd T3,	T3,	r14		; divide imaginary component by same
+	
+	ld	r14,	SP,	0+BIAS		; restore the regs
+	ld	r15,	SP,	4+BIAS
+	ld	r16,	SP,	8+BIAS
+	ld	r17,	SP,	12+BIAS
+	ld	r18,	SP,	16+BIAS
+	ld	r19,	SP,	20+BIAS
+	addu	SP,	SP,	28
+	
+	bsr.n	_complex_unifier		; call the complex unifier
+	or	UArg1,	A3,	ZERO
+
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+
+@pc_div_fail:
+	; on failure in pc_div (divide by 0), ALS register state has been trashed, restore it before 
+	; failing.
+	; Notice that we really only need to restore r16 (TR), r18 (Fail), and r19 (SPB) on failure.
+	; These three registers are part of the top choice point.
+	; r14 (OldE), r15 (CP), and r17 (H) seem trashable on failure, so do so.
+
+	ld	r16,	SP,	8+BIAS		; restore TR
+	ld	r18,	SP,	16+BIAS		; restore Fail -- I hope so!
+	ld	r19,	SP,	20+BIAS		; restore SPB
+	fail					; and fail
+
+
+_prc_mul:
+	bsr.n	_get_complexUArg1		; find complex arg
+	addu	UArg1,	A2,	ZERO		; in A2
+	; complex is found in T1-T4
+
+@prc_derefA1:
+	bb1	BGND,	A1,	@prc_A1grnd	; normal dereference loop
+	ld	tmp1,	A1,	BIAS
+	cmp	A1,	A1,	tmp1
+	bb0.n	eq,	A1,	@prc_derefA1
+	addu	A1,	tmp1,	ZERO	
+	jmp	Fail				; unbound, so fail
+
+@prc_A1grnd:
+	bb0	BNUM,	A1,	@cmplx_fail	; fail if not a number
+	bb0	BUIA,	A1,	@convert_int	; branch if integer
+	clr	A1,	A1,	6<26>		; address of float
+	ld	A2,	A1,	BIAS+8		; get low half
+	br.n	@prc_cont
+	ld	A1,	A1,	BIAS+4		; get high half
+
+@convert_int:
+	ext	A1,	A1,	26<0>		; extract integer
+	flt.ds	A1,	A1			; convert to float
+
+@prc_cont:
+	fmul.ddd T1,	A1,	T1
+	fmul.ddd T3,	A1,	T3
+
+	bsr.n	_complex_unifier
+	addu	UArg1,	A3,	ZERO
+
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+
+	; prc_mac(+Acc1,+R,+C,-Acc2) is an accumulator predicate for prc_mul.
+	; Acc1 is the complex accumulator.  prc_mul(R,C,C1), and add C1 to Acc1
+	; to get Acc2.
+
+_prc_mac:
+	subu	SP,	SP,	8		; need a couple extra regs
+	st	r14,	SP,	0+BIAS
+	st	r15,	SP,	4+BIAS
+
+	or	S,	A1,	ZERO		; save A1 for later
+
+	; First get R  (should be using macros here, everything is boilerplate)
+	; Leave result in A1-A2
+	deref	A2,	2f
+	fail
+2:
+	bb0	BNUM,	A2,	@cmplx_fail	; fail if non_numeric
+	bb0	BUIA,	A2,	3f		; if integer go somewhere
+	clr	A2,	A2,	6<26>		; clear the tag
+	ld	A1,	A2,	BIAS+4		;
+	br.n	4f				; leave, we're all set
+	ld	A2,	A2,	BIAS+8		; else load double
+3:
+	ext	A2,	A2,	26<0>		; get integer
+	flt.ds	A1,	A2			; convert to float
+
+
+4:	bsr.n	_get_complexUArg1		; find a complex scalar in A3
+	or	UArg1,	A3,	ZERO
+	or	tmp1,	T1,	ZERO		; save Real part of Acc1 in tmp1-tmp2
+	or	tmp2,	T2,	ZERO
+	or	r14,	T3,	ZERO		; save Imag part of Acc1 in r14-r15
+	or	r15,	T4,	ZERO
+	
+	fmul.ddd r14,	r14,	A1		; multiply imag component by real
+	fmul.ddd A1,	tmp1,	A1		; multiply real component by real --> A1-A2
+
+	bsr.n	_get_complexUArg1		; find a complex scalar in S (was A1)
+	or	UArg1,	S,	ZERO		; put it in T1-T4
+
+	fadd.ddd T1,	T1,	A1		; accumulate real part
+	fadd.ddd T3,	T3,	r14		; accumulate imag part
+
+	ld	r14,	SP,	0+BIAS
+	ld	r15,	SP,	4+BIAS
+	addu	SP,	SP,	8
+
+	bsr.n	_complex_unifier		; call the complex unifier
+	ld	UArg1,	E,	20+BIAS		; fourth arg on stack
+
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+
+_eiexp:
+@ei_derefA1:
+	bb1	BGND,	A1,	@ei_A1grnd	; normal dereference loop
+	ld	tmp1,	A1,	BIAS
+	cmp	A1,	A1,	tmp1
+	bb0.n	eq,	A1,	@ei_derefA1
+	addu	A1,	tmp1,	ZERO	
+	jmp	Fail				; unbound, so fail
+
+@ei_A1grnd:
+	bb0	BNUM,	A1,	@cmplx_fail	; fail if not a number
+	bb0	BUIA,	A1,	@ei_convert 	; branch if integer
+	clr	A1,	A1,	6<26>		; address of float
+	ld	UArg2,	A1,	BIAS+8		; get low half
+	br.n	@ei_derefA2
+	ld	UArg1,	A1,	BIAS+4		; get high half
+
+@ei_convert:
+	ext	A1,	A1,	26<0>		; extract integer
+	flt.ds	UArg1,	A1			; convert to float
+
+@ei_derefA2:
+	bb1	BGND,	A2,	@ei_grndA2
+	ld	tmp1,	A2,	BIAS
+	cmp	A2,	A2,	tmp1
+	bb0.n	eq,	A2,	@ei_derefA2
+	addu	A2,	tmp1,	ZERO
+	jmp	Fail
+
+@ei_grndA2:
+	bb0	BNUM,	A2,	@cmplx_fail	; fail if not numeric
+	bb1	BUIA,	A2,	@cmplx_fail	; fail if float
+	ext	S,	A2,	26<0>		; extract integer
+	
+; now ready to call sin and cos
+; S contains sign
+; UArg1 & UArg2 contain real
+
+	subu	SP,	SP,	28		; push stack
+	st	E,	SP,	0+BIAS
+	st	A3,	SP,	4+BIAS
+	st	r14,	SP,	8+BIAS
+	st	r15,	SP,	12+BIAS
+	st	r16,	SP,	16+BIAS
+	st	r17,	SP,	20+BIAS
+	st	r18,	SP,	24+BIAS
+	
+
+	or	r18,	S,	ZERO		; the sign
+
+	; this is the imaginary component 
+	or	r14,	UArg1,	ZERO
+	or	r15,	UArg2,	ZERO	
+	or	A1,	r14,	ZERO		; set up args for call
+	bsr.n	_sin
+	or	A2,	r15,	ZERO
+	or	r16,	A1,	ZERO
+	or	r17,	A2,	ZERO
+
+	; this is the real component
+	or	A1,	r14,	ZERO		; set up args for call
+	bsr.n	_cos
+	or	A2,	r15,	ZERO
+	or	T1,	A1,	ZERO
+	or	T2,	A2,	ZERO
+
+	bcnd.n	ge0,	r18,	@ei_pos	
+	or	T4,	r17,	ZERO
+
+	br.n	@ei_cont
+	xor.u	T3,	r16,	0x8000		; change sign bit
+
+@ei_pos:
+	or	T3,	r16,	ZERO
+
+@ei_cont:
+	ld	E,	SP,	0+BIAS
+	ld	r14,	SP,	8+BIAS
+	ld	r15,	SP,	12+BIAS
+	ld	r16,	SP,	16+BIAS
+	ld	r17,	SP,	20+BIAS
+	ld	r18,	SP,	24+BIAS
+
+	bsr.n	_complex_unifier
+	ld	UArg1,	SP,	4+BIAS
+
+	addu	SP,	SP,	28		; pop stack
+
+	jmp.n	CP
+	addu	E,	OldE,	ZERO
+
+@cmplx_fail:
+	jmp	Fail
+
+
+
+
+	data

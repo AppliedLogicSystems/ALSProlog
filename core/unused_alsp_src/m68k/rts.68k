@@ -1,0 +1,1066 @@
+;
+; rts.68k			-- run time system
+;	Copyright (c) 1987-1993 by Applied Logic Systems, Inc.
+;
+; Author: Kevin Buettner
+; Creation: 2/23/87
+; Revision History:
+;	4/18/89		Kev		-- SUN revision to 88k model
+;	4/24/90		Kev		-- Conversion to .68k format
+;	2/14/92		Kev		-- put cut code into its own file
+;	6/23/92		Ron		-- put in #ifdefs for Mac specific stuff
+;	12/10/92	Kev		-- split stacks
+;
+
+
+#include "assembly.68k"
+
+;
+; The following are offsets to the associated values in the wm_regs structure
+;
+
+#define wm_HB	0
+#define wm_SPB	4
+#define wm_Fail	8
+#define wm_B	12
+#define wm_TR	16
+#define wm_H	20
+#define wm_E	24
+#define wm_SP	28
+
+	data
+saved_sp:
+	long	0
+	text
+;
+;
+; wm_try_me
+;
+;	This is the code for the try_me_else instruction.
+;
+;	This code should be called (with jsr).  It pushes a choice point
+;	and sets all registers except for Fail.  This value must be set after
+;	the call to wm_try_me is performed.
+;
+;
+
+	text
+	global	wm_try_me
+wm_try_me:
+#ifdef MacOS
+	move.l	a0, -(SP)		; Save whatever was in A0
+	move.l	Fail,a0
+	movem.l #0x690, -(TR)
+	movea.l	(SP)+,a0		; Restore A0
+#else	
+	movem.l	#0x630, -(TR)		; lay down HB, SPB, Fail, and B
+#endif
+	move.l	H,	HB
+	move.l	E,	SPB
+	move.l	TR,	B
+	rts
+
+;
+; wm_retry_me
+;
+;	The code which implements the failure and the retry.  The instruction
+;	which moves the failure address into Fail should be placed immediately
+;	after the jsr.
+;
+	global	wm_retry_me
+	untrail	wm_retry_me
+	move.l	HB,	H
+	move.l	(SP),	a0
+	move.l	SPB,	SP
+	move.l	SPB,	E
+	jmp	(a0)			; return
+
+;
+; wm_trust_me
+;
+;	This implements the code which pops a choice point.
+;
+	global	wm_trust_me
+	untrail	wm_trust_me
+	move.l	HB,	H		; reset H
+	move.l	(SP),	a0		; get the place to return to
+	move.l	SPB,	SP		; reset SP
+	move.l	SPB,	E		;   and E
+	move.l	(TR)+,	HB		; restore HB
+	move.l	(TR)+,	SPB		; restore SPB
+	move.l	(TR)+,	Fail		; restore Fail
+	and.w	#0xfffc, SPB		; nuke compaction bit in SPB
+	move.l	(TR)+,	B		; restore B
+	jmp	(a0)			; return
+
+
+;
+; wm_try
+;
+
+	global	wm_try
+wm_try:
+#ifdef MacOS
+	movea.l	Fail, a0
+	movem.l	#0x690, -(TR)
+#else
+	movem.l	#0x630, -(TR)		; put down HB, SPB, Fail, and B
+#endif
+	move.l	H,	HB		; set up HB
+	move.l	E,	SPB		; set up SPB
+	move.l	TR,	B		; set up B
+#ifdef MacOS
+	move.l	(SP)+, a0
+	move.l	(a0)+, d0
+	move.l	a0, Fail
+	move.l	d0, a0
+#else
+	move.l	(SP)+, Fail		; Put the return address in Fail
+	move.l	(Fail)+, a0		; get address to jump to in a0
+#endif
+	jmp	(a0)			; execute the clause
+
+;
+; wm_retry
+;
+
+	global	wm_retry
+	untrail	wm_retry		; wm_retry is entry point in 
+					;   untrailing loop
+	move.l	(SP),	Fail		; set Fail to the return address
+	move.l	HB,	H		; reset H
+	move.l	SPB,	SP		; reset SP
+	move.l	SPB,	E		; reset E
+#ifdef MacOS
+	move.l	Fail, a0
+	move.l	(a0)+, d0
+	move.l	a0, Fail
+	move.l	d0, a0
+#else
+	move.l	(Fail)+, a0		; get address to jump to and set Fail
+					;   to proper point
+#endif
+	move.l	8(SP),	a1		; put first arg in a1
+	jmp	(a0)			; execute the clause
+
+;
+; wm_trust
+;
+
+	global	wm_trust
+	untrail	wm_trust		; wm_trust is entry point in the
+					; 	untrailing loop
+	move.l	(SP),	a0
+	move.l	HB,	H
+	move.l	SPB,	SP
+	move.l	SPB,	E
+	move.l	(TR)+,	HB		; restore HB
+	move.l	(TR)+,	SPB		; restore SPB
+	move.l	(TR)+,	Fail		; restore Fail
+	and.w	#0xfffc, SPB		; nuke compaction bit in SPB
+	move.l	(TR)+,	B		; restore B
+	move.l	8(SP),	a1		; put first arg in a1
+	move.l	(a0),	a0		; get address to jump to
+	jmp	(a0)			; jump there
+
+;
+; wm_trust_fail
+;	Called when we wish to get rid of the choice point and then fail.
+;
+
+	global	wm_trust_fail
+wm_trust_fail:
+	jsr	wm_trust
+	long	wm_fail
+
+;
+; wm_nciadc
+;	Called to obtain the Next Choice In A Deleted Clause.
+;
+
+	global	wm_nciadc
+wm_nciadc:
+	callC0	next_choice_in_a_deleted_clause
+	move.l	d0,	a0
+	jmp	(a0)
+
+
+;
+; wm_abort
+;
+
+	global	wm_abort
+wm_abort:
+	clr.l	d1			; No next clause addresses are zero
+	bra.s	throwentry
+;
+; wm_throw
+;
+
+	data
+c22dat:	long	0
+
+	text
+	global	wm_throw
+
+wm_throw:
+	move.l	c22dat,	d1		; get the next clause address to
+					; 	search for
+
+throwentry:
+	move.l	wm_regidx, d0		; get the regidx
+	subq.l	#1,	d0		; subtract 1
+	lsl.l	#6,	d0		; shift left
+	lea	wm_regs, a0		; put regs address in a0
+	add.l	d0,	a0		; add offset
+	move.l	wm_B(a0), a1		; get original B and put in a1
+
+1:	
+#ifdef MacOS
+	move.l	Fail, d2
+	cmp.l	d1, d2
+#else	
+	cmp.l	d1,	Fail		; compare Fail with the catch22 address
+#endif
+	bne.s	2f
+
+#ifdef MacOS
+	fail
+#else
+	jmp	(Fail)			; fail if there
+#endif
+
+2:	move.l	chpt_B(B), d0		; get the next B
+	cmp.l	a1,	d0		; see if at end of line
+	bne.s	4f		
+	move.l	#1,	wm_aborted
+#ifdef MacOS
+	fail
+#else
+	jmp	(Fail)			; fail if at end of line
+#endif
+
+3:	move.l	(TR)+, a0		; get trail entry
+	move.l	a0, (a0)		; make an unbound
+
+4:	cmp.l	B,	TR		; see if done untrailing
+	bcs.s	3b			; branch if not
+	move.l	chpt_HB(B),	HB
+	move.l	chpt_SPB(B),	SPB
+	and.w	#0xfffc,	SPB
+	move.l	chpt_Fail(B),	Fail
+	add.l	#chpt_size,	TR
+	move.l	d0,	B		; advance to next choice point
+	bra.s	1b
+	
+;
+; wm_catch22
+;
+
+	global	wm_catch22
+wm_catch22:
+	move.l	Fail,	c22dat
+	unlk	E
+	rts
+
+;
+; wm_sw_const
+;	Input Registers:
+;		d0	-- address of first table entry
+;		a0	-- address of last table entry
+;		a1	-- key
+;		We also assume that the other dedicated registers are
+;		set appropriately.
+;	
+;	Table entries occupy two long words with the key in the first and the
+;	address to jump to in the second. Table entries are long word aligned.
+;
+;	Register Usage within sw_const:
+;		d2	-- key
+;		a6	-- midpoint
+;
+
+
+	global	wm_sw_const
+wm_sw_const:
+	move.l	a1,	d2		; set up the key
+	addq.l	#1,	d2
+	and.w	#MTP_CONSTMASK,	d2
+	bne.s	1f			; branch if not a UIA
+	move.l	d0,	-(SP)		; save d0
+	move.l	a0,	-(SP)		; save a0
+	move.l	a1,	d2
+	lsr.l	#MTP_CONSTSHIFT, d2	; get out the uia value
+	addq.l	#4,	d2		; add one longword to get over the fence
+	add.l	wm_heapbase, d2	; put string pointer in d2
+	callC1	probe_token,	d2
+	tst.l	d0			; see if we got the token ok
+	beq	wm_fail		; fail if not
+	lsl.l	#MTP_CONSTSHIFT, d0	; shift the token
+	addq.l	#MTP_SYM, d0		; add in symbol tag
+	move.l	d0, a1			; put it in a1
+	move.l	(SP)+,	a0		; get a0
+	move.l	(SP)+,	d0		; get d0
+
+1:	move.l	a1,	d2		; set up the key again
+	move.l	a0,	d1		; put high address in d1
+	sub.l	d0,	d1		; subtract low address
+
+swsearch:
+	lsr.l	#1, d1		; divide by two
+	and.l	#0xfffffff8, d1	; maintain alignment (round down)
+	move.l	d0,	a6
+	add.l	d1,	a6		; set midpoint
+	cmp.l	(a6),	d2		; compare to key
+	bhi.s	1f
+	bcs.s	2f
+	move.l	4(a6),	a0		; get place to jump to
+	move.l	SP,	a6		; restore environment value
+	jmp	(a0)			; jump there
+1:	move.l	a6,	d0
+	addq.l	#8,	d0		; set the lower bound
+	move.l	a0,	d1		; put high address in d1
+	sub.l	d0,	d1		; subtract lower address
+	bcc.s	swsearch
+	fail
+2:	lea	-8(a6),	a0		; set upper bound
+	move.l	a0,	d1		; put high address in d1
+	sub.l	d0,	d1		; subtract lower address
+	bcc.s	swsearch
+	fail
+
+;
+; wm_sw_struct
+;
+
+	global	wm_sw_struct
+wm_sw_struct:
+	move.l	-MTP_STRUCT(a1), d2	; get key
+	move.l	a0,	d1		; put high address in d1
+	sub.l	d0,	d1		; subtract low address
+	bra.s	swsearch
+
+;
+; enter_Prolog is called to indicate that Prolog has been entered.  The
+;	wm_in_Prolog flag is set appropriately and the wm_interrupt caught
+;	flag is checked.  If it is set then the safety register is set to -1
+;
+
+		global	enter_Prolog
+enter_Prolog:	
+	move.l	#1,	wm_in_Prolog
+	cmp.l	#0,	wm_interrupt_caught
+	beq.s	1f
+	move.l	#-1,	Safety
+	bra.s	2f
+1:	move.l	wm_safety, Safety
+2:	rts
+
+
+
+;
+; wm_exec is called from C to start out execution.
+;
+
+	global	wm_exec
+wm_exec:
+	link	E,	#-56
+	move.l	saved_sp, a0		; need to save saved_sp
+	movem.l	#0x7ffe, (SP)		; save the C registers
+	move.l	SP,	saved_sp	; save stack pointer in memory
+
+	move.l	wm_regidx, d0
+	lsl.l	#6, d0
+	lea	wm_regs, a0
+	add.l	d0, a0
+	move.l	wm_SP(a0),	SP
+	move.l	wm_SPB(a0),	SPB
+	move.l	wm_B(a0), B
+	move.l	wm_TR(a0), TR
+	move.l	wm_H(a0), H
+	move.l	H,	HB		; set HB equal to H
+#ifdef MacOS
+	lea	wm_trust_fail,	a1
+	move.l	a1,	Fail
+#else	/* MacOS */
+	lea	wm_trust_fail,	Fail
+#endif	/* MacOS */
+	move.l	wm_safety, Safety
+	addq.l	#1,	wm_regidx
+	move.l	8(E),	a1		; get thing to execute
+	pea	gce1 			; create
+	move.l	wm_E(a0), -(SP)		; 	a dummy
+	move.l	SP,	E		;		environment
+	move.l	#0,	wm_interrupt_caught 
+					; clear the interrupt flag
+	jsr	enter_Prolog		; set flag indicating we are
+					;   about to enter Prolog
+
+	jsr	(a1)
+gce1:		
+	move.w	#((gce2-gce1)/2), d0
+
+	bra	rungoal_ret		;
+gce2:	gcinfo	0,	0,	0	; mask=0, nargs=0, npv=0
+
+
+		global	wm_rungoal
+wm_rungoal:
+	link	E,	#-56
+	move.l	saved_sp, a0		; need to save saved_sp
+	movem.l	#0x7ffe, (SP)		; save the C registers
+	move.l	SP,	saved_sp	; save stack pointer in memory
+
+	move.l	wm_regidx, d0
+	lsl.l	#6,	d0
+	lea	wm_regs, a0
+	add.l	d0,	a0
+	move.l	wm_SP(a0), SP
+	move.l	wm_SPB(a0), SPB
+	move.l	wm_B(a0), B
+	move.l	wm_TR(a0), TR
+	move.l	wm_H(a0), H
+	move.l	H,	HB
+	pea	gcr1			; create a partial
+	move.l	wm_E(a0), -(SP)		; 	dummy environment
+	lea	-20(SP), a0		; put addr of cutpt into a0
+	move.l	wm_heapbase, d0
+	sub.l	a0,	d0		; compute distance from the heapbase
+	lsl.l	#MTP_CONSTSHIFT, d0	; shift over so
+	addq.l	#MTP_INT, d0		;    we can add in the integer tag
+	move.l	d0,	-(SP)		; push a cutput
+	move.l	12(E),	-(SP)		; push the module
+	move.l	8(E),	-(SP)		; push the goal
+	lea	12(SP),	E		; set E value to dummy environment
+	addq.l	#1,	wm_regidx
+	move.l	#0,	wm_interrupt_caught
+	move.l	wm_safety, Safety	; restore safety
+	jsr	enter_Prolog
+	jsr	rungoal_chpt
+gcr1:	move.w	#((gcr2-gcr1)/2), d0
+	move.l	#1,	d0
+rungoal_ret:
+	move.l	d0,	d4		; save return in d4
+	lea	-4(E),	a0		; set up for cut
+	jsr	wm_docut2		; cut away rungoal chpt
+	move.l	#0,	wm_in_Prolog	; no longer in Prolog
+	subq.l	#1,	wm_regidx
+	move.l	wm_regidx, d1
+	lsl.l	#6,	d1
+	lea	wm_regs, a1
+	add.l	d1,	a1
+
+	move.l	H,	wm_H(a1)	; Update H
+	move.l	TR,	wm_TR(a1)	; Update TR also
+	move.l	B,	wm_B(a1)	; Update B
+	move.l	d4,	d0		; restore d0
+	move.l	saved_sp,	SP	; restore stack pointer for C
+	movem.l	(SP), #0x7ffe
+	move.l	a0,	saved_sp
+	unlk	E
+	rts
+gcr2:	gcinfo	0,	0,	0	; mask=0, nargs=0, npv=0	
+
+rungoal_chpt:
+	link	E,	#0
+	jsr	wm_try_me
+#ifdef MacOS
+	move.l	a0, -(SP)
+	lea	rungoal_trust, a0
+	move.l	a0, Fail
+	move.l	(SP)+, a0
+
+#else
+	lea	rungoal_trust, Fail	; set up the failure point
+#endif
+	add.w	#-20, SP		; allocate new frame
+	move.l	16(E),	16(SP)		; move cutpoint
+	move.l	12(E),	12(SP)		; move second argument
+	move.l	8(E),	8(SP)		; move first argument
+	move.l	4(E),	4(SP)		; move return address
+	move.l	(E),	(SP)		; move environment value
+	move.l	SP, E			; set E
+	jmp	wm_colon
+rungoal_trust:
+	jsr	wm_retry_me		; hack like showanswers
+	move.l	(E), E
+	clr.l	d0
+	bra	rungoal_ret
+
+
+	global	wm_execute_builtin
+wm_execute_builtin:
+	jsr	wm_try_me		; Create a choice point
+#ifdef MacOS
+	lea	wm_trust_fail, a1
+	move.l	a1,Fail
+#else /* MacOS */
+	lea	wm_trust_fail, Fail	; Set the failure point
+#endif /* MacOS */
+	move.l	#0,	wm_in_Prolog	; leaving Prolog for a while
+	move.l	wm_regidx,	d0	; put register index into d0
+	lsl.l	#6,	d0		; shift it
+	lea	wm_regs,	a1	; put address of wm_regs into a1
+	add.l	d0,	a1		; add shifted offset to contents of a1
+#ifdef MacOS
+	;	The wm_regs structure is modified using movem instructions which
+	;	assume that H is in A5 and Fail is in A2.  It will be easier into
+	;	juggling things to emulate the "non-mac" way of doing things so
+	;	the wm_regs structure remains consistent accross 68000 systems.
+	;   Such juggling is what takes place here...
+	move.l	Fail, a5		; Move Fail into A5. 	
+	exg	a2, a5			; exchange with A2
+	movem.l	#0xfc60, (a1)		; do the movem
+	movea.l	a5, a2			; Move H back into A2
+	move.l	CurrentA5, a5		; restore the Global Pointer
+#else	/* MacOS */
+	movem.l	#0xfc60, (a1)
+#endif	/* MacOS */
+	move.l	saved_sp,	SP	; restore C's stack pointer
+	jsr	(a0)
+	;
+	; d0 will contain success or failure code (1 or 0 respectively), so
+	; we must be careful not to modify d0
+	;
+	move.l	wm_regidx,	d1
+	lsl.l	#6,	d1
+	lea	wm_regs,	a0
+	add.l	d1,	a0
+	movem.l	(a0),	#0xfc60		; Prolog's stack pointer will be
+					; restored here along with the
+					; other state registers
+
+#ifdef MacOS
+	;	See note above.  I'm just using the same techniques...
+	move.l	a2, -(SP)		; Save Fail addr on the stack
+	movea.l	a5, a2			; Put H back into A2
+	move.l	CurrentA5, a5		; Restore global pointer
+	move.l	(SP)+, Fail		; Put Fail address in proper place
+#endif	/* MacOS */
+
+	jsr	enter_Prolog		; back in Prolog now
+	tst.l	d0			; see if we failed
+	beq.s	wm_fail			; branch if so
+	move.l	E,	a0
+	unlk	E
+	jmp	wm_docut2		; cut away the top choice pt
+
+;
+; wm_fail
+;	This is the code to execute upon failure.
+;
+;	It is more efficient to replace a jump to wm_fail with the single
+;	instruction which implements failure.
+;	
+;
+
+	global	wm_fail
+wm_fail:
+	fail
+
+
+;
+; w_unify is called by the C defined builtins when unification is needed.
+;	Control is returned to C if successful, else failure occurs in the
+;	usual manner.
+;
+
+		global	_w_unify
+_w_unify:
+	link	a6,	#-64
+	move.l	saved_sp, a0		; need to save saved_sp
+	movem.l	#0x3ffe, (SP)		; save the C registers
+	move.l	SP,	saved_sp	; save stack pointer in memory
+
+	move.l	wm_regidx, d0
+	lsl.l	#6,	d0
+	;
+	; Note:  In the following code, B is not touched by the unifier.
+	; Therefore we use it to hold the regs base.
+	lea	wm_regs,	B
+	add.l	d0,	B
+	move.l	wm_SPB(B),	SPB	; set SPB
+	move.l	wm_TR(B),	TR	; set TR
+	move.l	wm_HB(B),	HB	; set HB
+	;; Uncomment following line when stacks are finally split
+;	move.l	wm_SP(B),	SP	; use Prolog's SP
+#ifdef MacOS
+	lea	unfail,	a1		; set a1 to failure address
+	move.l	a1,	Fail		; set Fail (mem loc) to failure address
+#else /* MacOS */
+	lea	unfail,	Fail		; set Fail (register) to failure addr
+#endif /* MacOS */
+	move.l	12(a6),	d0		; put args in d0
+	move.l	8(a6),	a0		;	and a0
+	jsr	wm_unify		; call the unifier
+	move.l	#1,	d0		; set success code
+	bra.s	1f			; branch around setting of failure
+unfail:	clr.l	d0			; set failure code
+1:	
+	move.l	saved_sp,	SP	; restore stack pointer for C
+	move.l	TR,	wm_TR(B)	; shadow TR
+	clr.l	wm_in_Prolog		; set wm_in_Prolog to zero as it may
+					; get inadvertently set in the unifier
+	movem.l	(SP),	#0x3ffe		; restore the C registers
+	move.l	a0,	saved_sp
+	unlk	a6
+	rts				; return
+
+;
+; wm_unify is called to perform those unifications which are potentially too
+;	long to do in line.
+;	
+; Register Usage:
+;	a0 and d0 contain the input arguments.  The rest of the registers
+;	may be used and we can not assume that they are free. In particular,
+;	d5, d6, and a4 will contain values necessary for doing the unification.
+;
+		global	wm_unify
+wm_unify:
+	move.l	a1, -(SP)		; save a1
+unify:
+	deref	d0,	a1,	g1	; dereference arg in d0
+
+	; argument in a1 is a variable
+
+	deref	a0,	a0,	v1g0
+
+	; both arguments are variables
+
+	cmp.l	a0, a1
+	beq.s	uret			; return if variables are equal
+	bhi.s	1f			; branch taken if a0 < a1
+	exg	a0, a1			; swap roles of a0 and a1
+1:	cmp.l	wm_heapbase, a0	; see if a0 is in the heap
+	bcs.s	2f			; branch if not
+	move.l	a0,	(a1)		; make a1 var point at a0
+	cmp.l	a1,	HB		; compare against HB
+	bls.s	1f			; branch if HB smaller or equal
+	move.l	a1,	-(TR)		; trail a1
+1:	move.l	(SP)+,	a1		; restore a1
+	rts				; return to caller
+
+2:
+	; a0 is in Arg/Env Stack
+
+	move.l	a1,	(a0)		; make a0 var point at a1
+	cmp.l	a0,	SPB			; compare against SPB
+	bhi.s	uret			; branch if trailing not needed
+	move.l	a0,	-(TR)
+uret:	move.l	(SP)+, a1		; restore a1
+	rts				; return to caller
+
+g1:	; thing in a1 is ground
+
+	deref	a0,	a0,	g1g0	; dereference argument in a0
+
+	exg	a0,	a1		; swap roles of a0 and a1
+v1g0:	bind	a0,	a1		; bind and trail
+	move.l	(SP)+,	a1		; restore a1
+	rts				; return to caller
+
+g1g0:	cmp.l	a0, a1			; see if objects are the same
+	beq.s	uret			; return if so
+	move.l	d1, -(SP)		; save d1
+	move.l	a1, d1
+	and.w	#MTP_TAGMASK, d1
+	cmp.w	d0, d1			; see if tags are the same
+	beq.s	1f			; branch if so
+ufail:	fail
+
+1:      
+	;
+	; tags are the same. see what we got and branch accordingly
+	;
+
+	tag_sws	ulist,	uconst
+
+	;
+	; must have a structure
+	;
+
+	subq.l	#MTP_STRUCT, a0
+	subq.l	#MTP_STRUCT, a1		; nuke structure tags
+
+	move.l	(a0)+, d1		; get one of the functors
+	cmp.l	(a1)+, d1		; compare against the other
+	bne.s	ufail			; fail if not the same
+
+	moveq	#24, d0
+	lsr.l	d0, d1			; shift d1 to get arity
+	cmp.w	#255, d1		; see if arity is escape arity
+	bne.s	1f			; branch if not
+	move.l	(a0)+,	d1		; get real arity
+	cmp.l	(a1)+,	d1		; fail if not the same
+	bne.s	ufail
+	lsr.l	#MTP_CONSTSHIFT, d1	; shift out tag leaving big arity
+1:	subq.l	#2, d1			; subtract 2
+	bcs.s	lastarg
+usloop:	
+	move.l	(a0)+, d0
+	move.l	a0, -(SP)
+	move.l	(a1)+, a0
+	jsr	wm_unify
+	move.l	(SP)+, a0
+	dbra	d1, usloop
+lastarg:
+	move.l	(a1), d0
+	move.l	(a0), a0
+	move.l	(SP)+, d1		; restore d1
+	jmp	unify
+
+ulist:	clr.l	d1
+	subq.l	#MTP_LIST, a0
+	subq.l	#MTP_LIST, a1
+	bra.s	usloop
+
+uconst:	move.l	a0, d0			; put object into d0
+	and.w	#MTP_CONSTMASK & ~ MTP_TAGMASK, d0		
+					; get constant tags only
+	beq	ufail			; fail if we have an integer
+	move.l	a1, d1			; put 2nd object into d1
+	and.w	#MTP_CONSTMASK & ~ MTP_TAGMASK, d1
+					; get constant tags of 2nd object
+	beq	ufail			; fail if we have an integer
+
+	;
+	; otherwise, either we have two symbols, a uia and a symbol,
+	; a symbol and a uia, or two uias.  We need to decide which situation
+	; we have and branch accordingly.
+	;
+
+	subq.w	#MTP_SYM & ~ MTP_TAGMASK, d0
+					; see if 1st is a symbol
+	bne.s	uuia
+	subq.w	#MTP_SYM & ~ MTP_TAGMASK, d1
+					; see if 2nd is a symbol
+	beq	ufail			; fail if both were symbols
+
+usymuia:
+	;
+	; We have a symbol and a uia
+	;
+	callC2	cmp_sym_uia,	a0,	a1
+	tst.l	d0
+	beq	ufail
+uret2:	move.l	(SP)+, d1		; restore d1
+	move.l	(SP)+, a1		; restore a1
+	rts
+
+uuia:	subq.w	#MTP_SYM & ~ MTP_TAGMASK, d1
+					; see if 2nd is a symbol
+	beq.s	uuiasym
+	; Compare the two uias
+	callC2	cmp_uia_uia,	a1,	a0
+	tst.l	d0
+	beq	ufail
+	bra	uret2
+
+uuiasym:
+	exg	a0, a1
+	bra.s	usymuia
+
+
+
+;
+; wm_resolve_ref	-- this code is called when an undefined procedure
+;			   is encountered in the execution of the prolog 
+;			   program.  Upon entry, a0 contains the start of the 
+;			   code in the name entry.  This address is passed
+;			   off to some C code which links in the real code to
+;			   run (if it can find some) and returns the address
+;			   of the code to run in d0.  If things went properly,
+;			   this will presumably be the original a0.  It may,
+;			   however, be the failure code or ....
+;
+
+	global	wm_resolve_ref
+wm_resolve_ref:
+	callC1	resolve_reference,	a0
+	move.l	d0, a0
+	jmp	(a0)
+
+
+	global	flush_cache
+flush_cache:
+	nop		; 32 nops
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+
+	nop		; 32 nops
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+
+	nop		; 32 nops
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+
+	nop		; 31 nops followed by an rts
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	rts
+
+;
+; wm_g_uia is called by code which needs to match an uninterned atom
+;	in the head.
+;
+
+	global	wm_g_uia
+wm_g_uia:
+	move.l	(SP)+, a0		; pop off the return address
+	deref	d0,	a1,	guia_ground
+	
+	move.l	H, d0			; put heap location in d0
+	sub.l	wm_heapbase, d0	; get offset from beginning
+	asl.l	#MTP_CONSTSHIFT, d0
+	add.w	#MTP_UIA, d0
+	bind	d0,	a1
+	move.w	(a0)+, d0		; get number of longwords
+1:	move.l	(a0)+, (H)+		; transfer the uia to the heap
+	dbra	d0, 1b
+	jmp	(a0)			; use a0 as the return address
+
+guia_fail:
+	fail
+
+guia_ground:
+	subq.w	#3, d0
+	bne.s	guia_fail
+	clr.l	d0
+	move.w	(a0)+, d0		; get size in longwords
+	asl.l	#2, d0			; convert to bytes
+	addq.l	#4, a0
+	add.l	a0, d0
+	move.l	d0, -(SP)		; push new return address
+	move.l	d1, -(SP)		; save d1
+	; Compare constant with address of string
+	callC2	cmp_obj_str,	a1,	a0
+	move.l	(SP)+, d1		; restore d1
+	tst.l	d0
+	beq.s	guia_fail
+	rts
+
+;
+;
+; wm_p_uia is called by code which needs to set up a uia in the body.
+;
+	global	wm_p_uia
+wm_p_uia:
+	move.l	H, d0
+	sub.l	wm_heapbase, d0
+	asl.l	#4, d0
+	add.w	#0xf, d0		; create a uia in d0
+	move.l	d0, a1			; save it in a1
+	move.l	(SP)+, a0		; get return address
+	move.w	(a0)+, d0		; get number of longwords
+1:	move.l	(a0)+, (H)+		; transfer uia to the heap
+	dbra	d0, 1b
+	move.l	a1, d0			; put UIA back into d0
+	jmp	(a0)
+
+	rts
+
+;
+; wm_g_int
+;	Entry: D0	-- thing to dereference and check
+;	       A0	-- constant
+;	Returns if it succeeds, branches to failure if not
+;
+
+	global wm_g_int
+
+wm_g_int:
+	deref	d0,	a1,	2f
+	bind	a0,	a1
+	rts				; return to caller
+
+2:	cmp.l	a0,	a1		; see if constants are same
+	bne.s	4f			; branch if not
+	rts				; return if so
+4:	fail
+
+;
+; wm_g_sym
+;	Entry:	D0	-- thing to dereference, check, and bind
+;		A0	-- constant
+;	Returns if successful, branches to failure if not
+;
+
+
+	global	wm_g_sym
+wm_g_sym:
+	deref	d0,	a1,	2f
+	bind	a0,	a1
+	rts				; return to caller
+
+2:	cmp.l	a0,	a1		; see if constants are same
+	bne.s	3f			; branch if not
+	rts				; return if so
+
+3:	move.l	a1,	d0		; get ready for uia check
+	addq.l	#1,	d0
+	and.w	#MTP_CONSTMASK,	d0
+	bne.s	4f			; fail if not uia
+	; See if uia and symbol have same print string
+	callC2	cmp_sym_uia,	a0,	a1
+	tst.l	d0			; test d0
+	beq.s	4f			; fail if zero
+	rts				
+4:	fail
+
+
+;
+; wm_u_lval performs the unify local value operation (write mode)
+;	d0 contains the value to dereference and heapify
+;
+
+	global	wm_u_lval
+wm_u_lval:
+	deref	d0,	a0,	2f
+	cmp.l	wm_heapbase, a0		; see if a0 is on the heap
+	bcc.s	2f			; branch if so
+	move.l	H,	(a0)		; perform binding
+	move.l	H,	a0		;
+	cmp.l	d0,	SPB		; see if we need to trail
+	bhi.s	2f			; branch if we don't need to
+	move.l	d0,	-(TR)		; trail it
+2:	move.l	a0,	(H)+		; put object on the heap
+	rts
+
+;
+; wm_p_unsafe performs the put_unsafe operation
+;
+;	d0	-- value to dereference
+;	a0	-- value after dereferencing
+;
+	global	wm_p_unsafe
+wm_p_unsafe:
+	deref	d0,	a0,	2f
+	cmp.l	wm_heapbase, a0		; see if a0 is on the heap
+	bcc.s	2f			; branch if so
+	move.l	H,	(a0)		; otherwise bind
+	move.l	H,	a0		; set up a0 for return
+	move.l	H,	(H)+		; install variable on heap
+	cmp.l	d0,	SPB		; see if we need to trail
+	bhi.s	2f			; branch if we don't need to
+	move.l	d0,	-(TR)		; perform trailing operation
+2:	rts
+	
+	global	rts_end
+rts_end:
+	rts

@@ -1,0 +1,12 @@
+Assembly language translator directories
+
+Merge			-- the merge directory
+	atrans		-- the generic part of the assembly language translator
+	M68k, I386, M88k, VAX, SPARC, etc
+			-- system specific directories
+		atr_args.pro	-- argument parsing stuff for one of M68k, I386,
+					etc.
+		atr_inst.pro	-- instructions for architecture
+		Mot, Sun, etc	-- operating system specific (actually assembler
+				   specific) directories
+			atr_out.pro	--  assembler specific output file

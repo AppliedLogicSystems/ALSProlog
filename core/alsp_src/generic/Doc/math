@@ -1,0 +1,36 @@
+File affected by doing math instructions
+
+icode.h
+icmeta.c
+icmath.c
+compmath.c
+icmath.h	Floating point instructions for coprocessor
+
+If code for exception check changes, the corresponding code in ic_end_macro
+must be changed also.
+
+Macro code is put down in the following fashion. This is done by ic_put_macro.
+
+	Overflow test (for interrupt)
+	If no overflow event then goto inline
+	structure building code
+
+				; If macro goal is not last goal in clause.
+	call to procedure
+	goto nextGoal
+
+				; If macro goal is last goal in clause.
+	deallocate	; if any
+	jump to procedure
+
+inline:
+	macro code
+
+
+				; If macro goal is not last goal in clause.
+nextGoal:
+	Rest of clause code.
+
+				; If macro goal is last goal in clause.
+	deallocate	; if any
+	proceed

@@ -1,0 +1,192 @@
+INTRODUCTION
+============
+
+This is the ALS Prolog source tree.  The documentation on ALS Prolog 
+as a Prolog system is of course in the ALS Prolog Manuals, which, not
+surprisingly, live in the manual directory, not here.  This source tree
+is used to create a number of versions of ALS Prolog, as follows:
+
+	-	The portable version (threaded code); this can be created on
+		a wide range of systems;
+
+	-	The native code version on those platforms for which the native
+		code generators (and details) have been built;
+
+	-	Versions (portable and/or native) which extend the basic ALS
+		Prolog systems (above) by having "foreign" predicates corresponding
+		to the functions of various window systems (e.g., X, Motif,
+		NextStep(soon), MSWindows(later), MacOS(later) etc.)
+
+The source tree machinery expects and heavily utilizes facilities found in
+Gnu make and gcc (esp. threading).  Theoretically, other tools might work,
+but none have yet been brought to our attention.  The construction process
+is more or less automatic, following closely the approach utilized in most
+gnu tool packages.  When all goes well, it is as simple as the following:
+
+1.	Unpack the source tree, however it has arrived.  If it is a collection
+	of shar archives, they are likely name als.01 ... als.0x   Put them
+	all in a directory where you want the top-level of the source directory
+	to live (at ALS, it is called alsp_src), and simply execute
+			unshar als.*
+	Call this directory SOURCE;
+
+2.	Create/select another directory in which the build will take place;
+	This can be anywhere; at the same level as SOURCE, or buried away
+	in other directories.  Call this directory BUILD; locate yourself in
+	BUILD;
+
+3.	Let PATH be a path (from BUILD) to SOURCE;  It can either be an
+	absolute path to SOURCE, or a relative path from BUILD to SOURCE;
+	for example, if BUILD were at the same level as SOURCE, PATH
+	could simply be ../SOURCE  Whichever form of PATH your choose,
+	just execute the following:
+
+		PATH/configure
+
+	[Remember, you are located in BUILD]  When this completes (and it
+	will take a while on most machines), the direcory BUILD will look
+	like this:
+
+		Makefile        bld-port/       cfg.pro*        config.h
+		bld-natv/       config.d        config.status*
+
+4.	Now, still at the top level of BUILD, just invoke 
+
+		make
+
+	Unless you have a screamingly fast machine, you can go away for a
+	long (maybe very long) lunch.  Both the configure and make steps
+	generate lots of messages; if you are going away for lunch, you may want
+	to log them with a facility like script, just in case something
+	goes wrong early on, but the process manages to continue.
+
+	When the process is done,  you will discover that a bld-wins
+	directory has been added, as well as several top-level files.
+	Here is what you will find in the bld-* directories (in addition
+	to lots of *.o-files, etc):
+
+		bld-port:
+			alspro.a	- ALS Prolog standard link library: portable version
+			alspro		- Portable version of ALS Prolog appropriate to
+						  the OS;
+
+		bld-natv:
+			alspro.a	- ALS Prolog native code link library suitable for
+						  the OS and architecture;
+			alspro		- ALS Prolog native code version appropriate 
+						  to the OS and architecture; 
+
+		bld-wins:
+			Subdirs, corresponding to the window systems( e.g. motif, x)
+
+			Inside subdir nnnn:
+				nnnninterf.a -	link library for interface from ALS Prolog
+								to system nnnn (e.g., motifinterf.a)
+				alspro_nnnn0 -	extended  version of ALS prolog with the
+								nnnninterf.a library linked in;
+				alspro_nnnn  -	extended  version of ALS prolog with the
+								nnnninterf.a library linked in, and
+								with all builtins and library files
+								packaged into a single executable;
+
+There is some additional machinery living in the tree to accomplish a
+number of useful related tasks, most importantly:
+
+	-	Packing the source tree into shar files of max size 500K for
+		transmission; one can select which architecture directories
+		are included;
+
+	-	Similary for the build tree (not yet done).
+
+It is planned that a common pattern of usage of the facilities will be:
+
+	-	The source tree is packaged and sent to a location;
+	-	The build is carried out and the build directory is packaged
+		and sent back to ALS.
+
+This may be either for original builds on a platform (architecture/os), or
+for updates, due to either changes in ALS Prolog, or to changes in 
+the platform.
+
+GUIDE TO THE TREE
+=================
+
+This is a quick tour of the tree structure and the principal files.
+
+Top Level Files:
+---------------
+	- Makefile.in 	-	Initial Makefile prototype for top-level Makefile
+						generated for the build directory
+	- aclocal.m4 	-	local m4 macros for autoconf to use in building
+						the configure shell script;
+	- alspro.1 		-	ALS Prolog man page; wildly out of date
+	- config.d.in 	-	config.d.in is a template file used by configure 
+						to produce config.d, which is then converted (by
+						configure) to the header file config.h in the build;
+	- config.guess 	-	the Gnu guesser for the system name;
+	- configure 	-	the configure script: sets up the initial build
+						directory and Makefiles;
+	- configure.in	-	initial for configure; processed by autoconf to
+						create configure;
+	- install.sh 	-	installation tool;
+	- sharme		-	script which packs the source tree into
+						shar archive files of max 500K size;
+	- sharbld		-	script which packs a build tree into
+						shar archive files of max 500K size;
+
+Top Level Directories / Non-architecture-specific
+-------------------------------------------------
+
+	- atrans 		-	common part of the assembly-language translator
+						[combined with various use-specific parts which
+						 appear in "atrans" subdirectories in the 
+						 appropriate part of the tree];
+	- bin 			-	misc executable things
+	- bld-natv 		-	contains the initial Makefile.in prototype for
+						architecture-specific build directories;
+	- bld-port		-	contains the initial Makefile.in prototype for
+						the portable build directory;
+	- builtins 		-	code for Prolog-defined builtin predicates;
+	- cinterf 		-	code for the C-library interface generator;
+	- doc 			-	the ChangeLog and other misc documentation;
+	- generate 		-	generate stuff for the common (generic) system;
+	- generic 		-	the common C-defined portion of the system; every
+						version of the system includes all of this;
+	- library 		-	code for Prolog-defined library predicates;
+	- pconfig 		-	contains a Prolog-defined configuration tool
+						which is invoked by configure after it has
+						done its work; sets up the directories etc.
+						for the extended windows-linked versions;
+	- port 			-	C code defined the byte code interpreter WAM
+						which is threaded into the portable version;
+	- tests 		-	code for various (Prolog, of course) tests, 
+						together with a Prolog-defined test driver;
+	- utils 		-	code for various C-defined utils;
+	- wins			-	information guiding the generation of interfaces
+						to various window systesm, together with 
+						prototype Makefile.in's for them;
+
+Top Level Directories / Architecture-specific
+-------------------------------------------------
+	
+These directories hold files defining the back-end of the
+compiler for the various architectures.  Some are empty, because
+those versions haven't been built yet.  Subdirectories within these
+architectures correspond to differing operating systems:
+
+	- hppa		-	HP Precision Architecture-based systems;
+	- i386		-	all Intel-based systems
+						dos(pharlap)  sysv(SCO) mswins os2 nextstep
+	- m68k		-	Motorola 68xxx-based systems:
+						sunos  macos  nextstep  sysv
+	- m88k		-	Motorola 88xxx-based systems:
+						dgux  sysv3  sysv4
+	- mips		-	MIPS-based system;
+	- powerpc	-	Power PC-based systems;
+	- rs6000	-	RS6000-based systems;
+	- sparc		-	SPARC-based systems;
+						sunos4  solaris2
+	- vax		-	VAX-based systems (not up to date; may never be);
+
+
+

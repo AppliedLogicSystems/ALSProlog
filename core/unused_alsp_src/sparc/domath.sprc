@@ -1,0 +1,1910 @@
+;
+; domath.sprc		-- math package for SPARC
+;	Copyright (c) 1991-1993 by Applied Logic Systems, Inc.
+;
+; Author:	Kevin A. Buettner
+; Creation:	2/26/91
+; Revision History:
+;
+
+#include "assembly.sprc"
+
+;
+; Modes:
+;
+;	There is a concept of "mode" in this package.  This package can
+;	be in one of three modes.  They are integer, double, and decompile.
+;
+;	Under normal circumstances, this package starts out in integer mode.
+;	The arguments and operands are assumed to be integers and all
+;	operations are integer operations.
+;
+;	Double mode is entered when an overflow occurs in integer mode or
+;	when an operation is requested which necessitates doing double
+;	arithmetic.  Examples include multiplying by 2.5 or taking a
+;	square root.
+;
+;	Decompile mode is entered at the outset as a result of the safety
+;	value being negative.  Structure is built on the heap in this mode.
+;	Arguments do not need to dereference to numbers or expressions which
+;	will evaluate to numbers in this mode. (I.e, they may be variables).
+;
+;
+;	On the SPARC we implement these modes by the clever use of the
+;	jmpl instruction.  A typical subroutine branch to perform a given
+;	piece of arithmetic will look like this:
+;
+;			jmpl	[S+Offset], Ret
+;
+;	On the 88k, two instructions will be needed.  They will look like
+;	this:
+;			addu	tmp1,	S,	Offset
+;			jsr	tmp1
+;
+;	The S register contains the base address of the moded math subroutines.
+;	Offset will be the offset to add to this base to get to the desired
+;	math subroutine.  Ret, of course, is the standard place to put the
+;	return address.
+;
+;	The mode we are in is adjusted by changing S, the base to the moded
+;	math subroutines.   This means that Offset for a given math subroutine
+;	must be the same for each of the three modes.
+;	
+;
+; Arithmetic Stack:
+;
+;	On the SPARC, we allocate the arithmetic stack on the heap.  Since
+;	the amount of space required to evaluate an expression may be 
+;	determined at comile time, a bounded amount of space may be allocated
+;	on the heap.  The heap grows from smaller addresses to larger addresses,
+;	but the arithmetic stack will grow from larger addresses to smaller.
+;	The global location mth_bot contains the address of of the bottom
+;	of the stack.  When needed, the global location mth_stk refers to
+;	the start of this area (mth_bot will point at the end).
+;
+;	During an arithmetic evaluation on the SPARC, the top of stack will
+;	reside in OldE as OldE is not needed in the course of evaluation.  In
+;	the event that we are in a clause where the arithmetic forms the
+;	only goal so that CP and OldE contain valid values, the initialization
+;	routine writes them out to their expected places in the current
+;	(argument/environment) stack frame.  This also means that calling out
+;	may also be performed in a uniform manner.
+;
+;	Elements of the arithmetic stack consist of double words (64 bits)
+;	of which one word per element are wasted in decompilation and integer
+;	modes.  We waste them for the sake of uniformity and for ease of
+;	transition between integer and double modes if necessary.  When
+;	it is necessary to switch from integer mode to double mode, we
+;	start at the top of the stack and convert the integer format to
+;	double format for each element.  We also change S to point at
+;	dbl_base so that future evaluation will proceed in double mode.
+;
+;	As an optimization, we put the top of stack value in UArg1 for integer
+;	and decompilation modes.  We put the top of stack value in f0 for
+;	double mode.  Without this optimization an add (of the top two stack
+;	elements) would require two loads and one store.  With this
+;	optimization, however, only one load is required.  The expense, of
+;	course, comes in greater complexity.  Each of the push operations
+;	is now split into two variants, one for when the stack is empty
+;	(UArg1 or f0 may be loaded with no memory references), and the
+;	second when the stack is nonempty (UArg1 or f0 must be pushed on
+;	the stack so that the top of stack register is ready for the new
+;	top of stack).
+;
+;	Once allocated, the portion above the heap looks as follows (for
+;	double and integer modes only):
+;
+;		+-----------------------+
+;		| 			| 		(larger addresses)
+;		+---                 ---+		|   (direction of
+;		| 			| <-- mth_bot	V    arith stack
+;		+-----------------------+		     growth)
+;		|  .			|
+;		   .
+;		|  .			|
+;		+-----------------------+
+;		| 			|
+;		+---                 ---+
+;		| 			| <-- OldE
+;		+-----------------------+
+;		|  .			|
+;		   .
+;		|  .			|
+;		+-----------------------+
+;		| 			|
+;		+---  Space Reserved ---+
+;		| 			|
+;		+---  for callout    ---+
+;		| 			|
+;		+---  and for storing---+
+;		| 			|
+;		+---  doubles at end ---+		^  (direction of
+;		| 			|		|    heap growth)
+;		+---  of computation ---+
+;		| 			| <--H		(smaller addresses)
+;		+-----------------------+
+;
+;
+;	As stated before, the elements of the stack consist of double words.
+;	On the Sparc, they are also double word aligned.  Care must be taken
+;	when returning from a callout that they are still double word aligned.
+;	(Garbage compaction may have moved them somewhat).  There is also
+;	space reserved in this area for storing the various state information
+;	in order to do a callout.
+;
+;	When in decompilation mode, H is actually moved to just after mth_bot
+;	in order that structure may be built on the heap without interfering
+;	with the operation of the arithmetic stack.  The global location
+;	mth_stk is set to where H used to be.  
+;
+;	When in double mode and sometimes in integer mode (when the integer on 
+;	the stack is too large to be representable as a Prolog integer), the
+;	reserved space is used to build the double.  In each mode, when the
+;	computation is complete, there is no finishing code which needs to be
+;	run in order to deallocate the stack or readjust the heap pointer.
+;	The space wasted in decompilation mode is considered garbage.
+;
+; Calling Out:
+;	It will at times be necessary to call Prolog in the course of
+;	an evalution.  My favorite example is in the goal:
+;
+;		Y is X+1
+;
+;	In the process of evaluation, the value for X is obtained and pushed
+;	on the arithmetic stack.  We expect X to be bound to an integer
+;	or a double, but it is also permissible for X to be bound to an
+;	expression such as 3*4 which must be evaluated before execution can
+;	continue.  We must call Prolog to perform this evaluation.  We could
+;	also call C (which might ultimately get called anyway), but calling
+;	Prolog makes the evaluator more extensible.  This way expressions
+;	which are not recognizable at compile time may recognized by the
+;	interpretive evaluator at run time.  A user could, for example,
+;	extend is/2 to recognize a function which takes lengths of
+;	lists.  Then something of the following form could be written as
+;	a goal:
+;
+;		NewLen is len(InList)+1
+;
+;	We also use the call out mechanism in decompilation mode to get the
+;	system to handle the goal which has been built up.
+;
+;	The implementation of the call out mechanism is straight forward.
+;	In the initialization phase of an evaluation, CP is set to point
+;	at goal specific code to perform the callout.  This code will
+;	be responsible for saving/restoring argument and temporary registers
+;	in use (only the ones in use) on the argument environment stack so
+;	that they may be garbage collected.  Aside from this save/restore
+;	code, this code will look like almost any other call to a two argument
+;	predicate complete with garbage collector information.  (It is
+;	expected that only calls to two argument predicates will be needed
+;	since 'is' and all of the relational arithmetic	predicates require
+;	only two arguments.)  Since the argument registers might be in use,
+;	we will pass the two arguments and the target to call (either is/2
+;	or one of the relational operators) in UArg1, UArg2, and tmp1.
+;
+;	The state is saved on the arithmetic stack in the following format
+;	(at the time of the actual call out).
+;
+;		
+;
+;		+-----------------------+
+;		|   			| <-- H
+;		+-----------------------+
+;		|   Fence		| <-- mth_bot
+;		+-----------------------+
+;		|  .			|
+;		   .
+;		|  .			|
+;		+-----------------------+
+;		| 			|
+;		+---                 ---+
+;		| 			| <-- OldE
+;		+-----------------------+
+;		|  .			|
+;		   .
+;		|  .			|
+;		+-----------------------+
+;		|   CP			|
+;		+-----------------------+
+;		|   S			|
+;		+-----------------------+
+;		|   RET			|
+;		+-----------------------+
+;		|   RET2		|
+;		+-----------------------+
+;		|   Top Offset		|
+;		+-----------------------+
+;		|   Fence		| <--(where H used to point)
+;		+-----------------------+
+;
+;	A UIA fence delimits the ends of the area allocated for use as
+;	the arithmetic stack.  A UIA pointer is pushed onto argument/
+;	environment stack by the callout code to this area.  If garbage
+;	compaction needs to be performed, this area will not be collected
+;	away.  As stated earlier, however, it is possible for the arithmetic
+;	stack to become misaligned.  In the event that it becomes misaligned,
+;	our strategy is to move the stack upwards by one 32-bit word, thus
+;	realigning it.  Note that mth_bot points at the fence,  and H points
+;	at the next higher address.  The realignment procedure will actually
+;	overwrite the fence with a portion of the real bottom stack element
+;	(located at mth_bot-8).  The realignment procedure finishes with
+;	mth_bot also advancing by four in order to realign the bottom.
+;
+;	Top Offset refers to the offset between the first delimiting fence
+;	and the actual top of the arithmetic stack given by OldE.  It is not
+;	permissible to store an absolute address for this value as garbage
+;	compaction could move the area thus invalidating the absolute address.
+;	An offset will not be invalidated by garbage compaction.
+;
+;	RET and RET2 refer to places to return to within the arithmetic
+;	evaluator code.   RET2 refers to the actual place in the code
+;	stream layed down by icmath to return to.  RET contains a more
+;	recent point in the code which is performing the callout.
+;
+;	S and CP refer to the mode and callout code respectively.  In this
+;	case, the mode will be an address; one of mth_base, dcmp_base, or
+;	dbl_base.  The use of CP has been described earlier.  CP must be
+;	saved in case more than one callout is performed.
+;
+;	When calling 'is'/2, the left hand side	of the 'is' will be a variable.
+;	We handle this variable by making it appear to be part of the calling
+;	environment.  The argument/ environment stack frame will appear as
+;	follows:
+;
+;
+;		+-----------------------+
+;		|  CP"			|		(higher addresses)
+;		+-----------------------+
+;		|  OldE" 		| <-- Environment of clause
+;		+-----------------------+
+;		|  .	Environment	|
+;		   .	Variables
+;		   .	  and other
+;		   .	(possibly zero)
+;		   .	stack frames
+;		|  .			|
+;		+-----------------------+
+;		|  CP'	(dummy)		|
+;		+-----------------------+
+;		|  OldE'		| <-- E  (this is a dummy environment)
+;		+-----------------------+
+;		|  'is/2' result var	|
+;		+-----------------------+
+;		|  uia ptr to arith stk	|
+;		+-----------------------+
+;		|  .	Saved Arg	|
+;		   .	and Tmp Regs
+;		|  .			|
+;		+-----------------------+
+;		|  space for A2		|
+;		+-----------------------+
+;		|  space for A1		|
+;		+-----------------------+
+;		|  space for CP		|
+;		+-----------------------+
+;		|  space for OldE	| <-- SP	(lower addresses)
+;		+-----------------------+
+;
+;	
+
+	data
+
+	global	mth_stk
+	global	mth_bot
+
+mth_stk:
+	word	0
+mth_bot:
+	word	0
+
+
+	text
+	global	mth_base
+	global	mth_eq
+	global	mth_lt
+	global	mth_gt
+	global	mth_le
+	global	mth_ge
+	global	mth_ne
+	global	mth_getnum
+	global	mth_getnum0
+	global	mth_putnum
+	global	mth_push
+	global	mth_pushdbl0
+	global	mth_pushint
+	global	mth_pushint0
+	global	mth_add
+	global	mth_sub
+	global	mth_mul
+	global	mth_div
+	global	mth_fdiv
+	global	mth_neg
+	global	mth_mod
+	global	mth_band
+	global	mth_bor
+	global	mth_bxor
+	global	mth_not
+	global	mth_lshft
+	global	mth_rshft
+	global	mth_power
+	global	mth_abs
+	global	mth_sin
+	global	mth_cos
+	global	mth_tan
+	global	mth_asin
+	global	mth_acos
+	global	mth_atan
+	global	mth_sqrt
+	global	mth_exp
+	global	mth_exp10
+	global	mth_log
+	global	mth_log10
+	global	mth_floor
+	global	mth_round
+	global	mth_trunc
+	global	mth_heapused
+	global	mth_cputime
+	global	mth_realtime
+	global	mth_random
+	global	mth_addi
+	global	mth_subi
+	global	mth_callout_init
+	global	mth_callout
+	global	mth_atan2
+	global	mth_ceil
+	global	mth_cosh
+	global	mth_erf
+	global	mth_erfc
+	global	mth_fmod
+	global	mth_gamma
+	global	mth_hypot
+	global	mth_j0
+	global	mth_j1
+	global	mth_jn
+	global	mth_sinh
+	global	mth_tanh
+	global	mth_y0
+	global	mth_y1
+	global	mth_yn
+
+	global	dbl_base
+	global	dbl_eq
+	global	dbl_lt
+	global	dbl_gt
+	global	dbl_le
+	global	dbl_ge
+	global	dbl_ne
+	global	dbl_getnum
+	global	dbl_getnum0
+	global	dbl_putnum
+	global	dbl_push
+	global	dbl_pushint
+	global	dbl_pushint0
+	global	dbl_add
+	global	dbl_sub
+	global	dbl_mul
+	global	dbl_div
+	global	dbl_fdiv
+	global	dbl_neg
+	global	dbl_mod
+	global	dbl_band
+	global	dbl_bor
+	global	dbl_bxor
+	global	dbl_not
+	global	dbl_lshft
+	global	dbl_rshft
+	global	dbl_power
+	global	dbl_abs
+	global	dbl_sin
+	global	dbl_cos
+	global	dbl_tan
+	global	dbl_asin
+	global	dbl_acos
+	global	dbl_atan
+	global	dbl_sqrt
+	global	dbl_exp
+	global	dbl_exp10
+	global	dbl_log
+	global	dbl_log10
+	global	dbl_floor
+	global	dbl_round
+	global	dbl_trunc
+	global	dbl_heapused
+	global	dbl_cputime
+	global	dbl_realtime
+	global	dbl_random
+	global	dbl_addi
+	global	dbl_subi
+	global	dbl_callout_init
+	global	dbl_callout
+	global	dbl_atan2
+	global	dbl_ceil
+	global	dbl_cosh
+	global	dbl_erf
+	global	dbl_erfc
+	global	dbl_fmod
+	global	dbl_gamma
+	global	dbl_hypot
+	global	dbl_j0
+	global	dbl_j1
+	global	dbl_jn
+	global	dbl_sinh
+	global	dbl_tanh
+	global	dbl_y0
+	global	dbl_y1
+	global	dbl_yn
+
+	global	dcmp_base
+	global	dcmp_eq
+	global	dcmp_lt
+	global	dcmp_gt
+	global	dcmp_le
+	global	dcmp_ge
+	global	dcmp_ne
+	global	dcmp_getnum
+	global	dcmp_getnum0
+	global	dcmp_putnum
+	global	dcmp_push
+	global	dcmp_pushint
+	global	dcmp_pushint0
+	global	dcmp_add
+	global	dcmp_sub
+	global	dcmp_mul
+	global	dcmp_div
+	global	dcmp_fdiv
+	global	dcmp_neg
+	global	dcmp_mod
+	global	dcmp_band
+	global	dcmp_bor
+	global	dcmp_bxor
+	global	dcmp_not
+	global	dcmp_lshft
+	global	dcmp_rshft
+	global	dcmp_power
+	global	dcmp_abs
+	global	dcmp_sin
+	global	dcmp_cos
+	global	dcmp_tan
+	global	dcmp_asin
+	global	dcmp_acos
+	global	dcmp_atan
+	global	dcmp_sqrt
+	global	dcmp_exp
+	global	dcmp_exp10
+	global	dcmp_log
+	global	dcmp_log10
+	global	dcmp_floor
+	global	dcmp_round
+	global	dcmp_trunc
+	global	dcmp_heapused
+	global	dcmp_cputime
+	global	dcmp_realtime
+	global	dcmp_random
+	global	dcmp_addi
+	global	dcmp_subi
+	global	dcmp_callout_init
+	global	dcmp_callout
+	global	dcmp_atan2
+	global	dcmp_ceil
+	global	dcmp_cosh
+	global	dcmp_erf
+	global	dcmp_erfc
+	global	dcmp_fmod
+	global	dcmp_gamma
+	global	dcmp_hypot
+	global	dcmp_j0
+	global	dcmp_j1
+	global	dcmp_jn
+	global	dcmp_sinh
+	global	dcmp_tanh
+	global	dcmp_y0
+	global	dcmp_y1
+	global	dcmp_yn
+
+	global	dbl_base
+	global	dcmp_base
+
+#macro	dcmp_cmp entryaddr
+	sethi	hi(mth_stk),	tmp1	
+	ld	[tmp1+lo(mth_stk)], tmp1
+	sethi	hi(entryaddr),	UArg2
+	ba	rel_callout
+	ld	[UArg2+lo(entryaddr)], UArg2
+
+	nop
+	nop
+	nop
+	nop
+#endm
+
+
+#macro	mth_cmp	instr
+	ld	[OldE],	UArg2
+	cmp	UArg1,	UArg2
+	instr	10f
+	nop
+	jmpl	Fail,	ZERO
+	nop
+10:	retl
+	nop
+	nop
+#endm
+
+
+#macro	dbl_cmp	instr
+	ldd	[OldE],	f2
+	fcmpd	f0,	f2
+	nop
+	instr	10f
+	nop
+	jmpl	Fail,	ZERO
+	nop
+10:	retl
+	nop
+#endm
+
+
+#macro	bld_functor_2	tokid
+	sethi	hi(MMK_FUNCTOR(tokid,2)), tmp1
+	ba	dcmp_bld_functor_2
+	add	tmp1,	lo(MMK_FUNCTOR(tokid,2)), tmp1
+#endm
+
+
+#macro	bld_functor_1	tokid
+	sethi	hi(MMK_FUNCTOR(tokid,1)), tmp1
+	ba	dcmp_bld_functor_1
+	add	tmp1,	lo(MMK_FUNCTOR(tokid,2)), tmp1
+#endm
+
+
+#macro	bld_symbol	tokid
+	sethi	hi(MMK_SYM(tokid)),	UArg1
+	retl
+	add	UArg1,	lo(MMK_SYM(tokid)),	UArg1
+#endm
+
+
+#macro	pad2
+	nop
+	nop
+#endm
+
+#macro	pad3
+	nop
+	nop
+	nop
+#endm
+
+#macro	pad5
+	pad3
+	pad2
+#endm
+
+#macro	pad6
+	pad3
+	pad3
+#endm
+
+#macro	pad7
+	pad5
+	pad2
+#endm
+
+#macro	pad9
+	pad6
+	pad3
+#endm
+
+#macro	unaryCdbl name
+	std	f0,	[OldE-8]
+	mov	OldE,	tmp1
+	save	cSP,	-96,	cSP		; protect Prolog's registers
+	call	name
+	ldd	[tmp1-8], o0
+	restore
+	retl
+	nop
+#endm
+
+#macro	nularyCdbl	name
+	save	cSP,	-96,	cSP		; protect Prolog's registers
+	call	name
+	nop
+	restore
+	retl
+	nop
+#endm
+
+#macro	binaryCdbl	name
+	std	f0,	[OldE-16]
+	mov	OldE,	tmp1
+	save	cSP,	-96,	cSP		; protect Prolog's registers
+	ldd	[tmp1-8], o0
+	call	name
+	ldd	[tmp1-16], o2
+	restore
+	retl
+	nop
+#endm
+
+
+/*
+ * Decompilation entry points
+ */
+
+dcmp_base:
+dcmp_eq:
+	dcmp_cmp	mth_eq_addr
+dcmp_lt:
+	dcmp_cmp	mth_lt_addr
+dcmp_gt:
+	dcmp_cmp	mth_gt_addr
+dcmp_le:
+	dcmp_cmp	mth_le_addr
+dcmp_ge:
+	dcmp_cmp	mth_ge_addr
+dcmp_ne:
+	dcmp_cmp	mth_ne_addr
+dcmp_getnum:
+	; dcmp_getnum takes argument in UArg2, dereferences it and puts
+	; result in UArg1 after first pushing current value of UArg1 on stack
+	; onto the stack.
+	sub	OldE,	8,	OldE		; allocate stack element
+	st	UArg1,	[OldE]			; push top value
+	mov	UArg2,	UArg1
+dcmp_getnum0:
+	; dcmp_getnum0 gets it argument in UArg1.  It will dereference and 
+	; leave it there
+	deref	UArg1,	dcmp_getnum2
+	ba,a	dcmp_getnum3
+dcmp_putnum:
+	; dcmp_putnum corresponds to is/2.  Arguments are set and 'is'/2 is
+	; called. The variable on the left hand side of the 'is' is  passed
+	; back through UArg1 to be either unified or 'put' into some
+	; environment variable.
+	ba	dcmp_putnum2
+	mov	UArg1,	UArg2
+dcmp_push:
+	retl
+	st	UArg1,	[OldE]
+dcmp_pushdbl:
+	ba	dcmp_pushdbl2
+	nop
+dcmp_pushint:
+	sub	OldE,	8,	OldE		; create stack element
+	st	UArg1,	[OldE]
+	mov	UArg2,	UArg1
+dcmp_pushint0:
+	ba	dcmp_pushint2			;
+	nop					;
+dcmp_addi:
+	st	UArg1,	[OldE-8]
+	sll	UArg2,	MTP_CONSTSHIFT,	UArg1
+	add	UArg1,	MTP_INT,	UArg1
+	bld_functor_2	TK_PLUS			; takes 3 words
+dcmp_subi:
+	st	UArg1,	[OldE-8]
+	sll	UArg2,	MTP_CONSTSHIFT,	UArg1
+	add	UArg1,	MTP_INT,	UArg1
+	bld_functor_2	TK_MINUS		; takes 3 words
+dcmp_add:
+	; builds '+'/2 structure from top two stack elements
+	bld_functor_2	TK_PLUS			; takes 3 words
+dcmp_sub:
+	bld_functor_2	TK_MINUS		; takes 3 words
+dcmp_mul:
+	bld_functor_2	TK_STAR			; takes 3 words
+dcmp_div:
+	bld_functor_2	TK_SLASHSLASH		; takes 3 words
+dcmp_fdiv:
+	bld_functor_2	TK_SLASH		; takes 3 words
+dcmp_neg:
+	bld_functor_1	TK_MINUS		; takes 3 words
+	nop					; dummy element
+dcmp_mod:
+	bld_functor_2	TK_MOD			; takes 3 words
+dcmp_band:
+	bld_functor_2	TK_BAND			; takes 3 words
+	pad9					; 9 words
+dcmp_bor:
+	bld_functor_2	TK_BOR			; takes 3 words
+	pad9
+dcmp_bxor:
+	bld_functor_2	TK_BXOR			; takes 3 words
+	pad9
+dcmp_not:
+	bld_functor_1	TK_BACKSLASH		; takes 3 words
+	pad5
+dcmp_lshft:
+	bld_functor_2	TK_LSHFT		; takes 3 words
+	pad9
+dcmp_rshft:
+	bld_functor_2	TK_RSHFT		; takes 3 words
+	pad9
+dcmp_power:
+	bld_functor_2	TK_HAT			; takes 3 words
+	pad6
+dcmp_abs:
+	bld_functor_1	TK_ABS			; takes 3 words
+	nop
+dcmp_sin:
+	bld_functor_1	TK_SIN			; takes 3 words
+	pad5
+dcmp_cos:
+	bld_functor_1	TK_COS			; takes 3 words
+	pad5
+dcmp_tan:
+	bld_functor_1	TK_TAN			; takes 3 words
+	pad5
+dcmp_asin:
+	bld_functor_1	TK_ASIN			; takes 3 words
+	pad5
+dcmp_acos:
+	bld_functor_1	TK_ACOS			; takes 3 words
+	pad5
+dcmp_atan:
+	bld_functor_1	TK_ATAN			; takes 3 words
+	pad5
+dcmp_sqrt:
+	bld_functor_1	TK_SQRT			; takes 3 words
+	pad5
+dcmp_exp:
+	bld_functor_1	TK_EXP			; takes 3 words
+	pad5
+dcmp_exp10:
+	bld_functor_1	TK_EXP10		; takes 3 words
+	pad5
+dcmp_log:
+	bld_functor_1	TK_LOG			; takes 3 words
+	pad5
+dcmp_log10:
+	bld_functor_1	TK_LOG10		; takes 3 words
+	pad5
+dcmp_floor:
+	bld_functor_1	TK_FLOOR		; takes 3 words
+	pad5
+dcmp_round:
+	bld_functor_1	TK_ROUND		; takes 3 words
+	pad5
+dcmp_trunc:
+	bld_functor_1	TK_TRUNC		; takes 3 words
+	pad5
+dcmp_heapused:
+	bld_symbol	TK_HEAPUSED		; takes 3 words
+	pad2
+dcmp_cputime:
+	bld_symbol	TK_CPUTIME		; takes 3 words
+	pad3
+dcmp_realtime:
+	bld_symbol	TK_REALTIME		; takes 3 words
+	pad3
+dcmp_random:
+	bld_symbol	TK_RANDOM		; takes 3 words
+	pad3
+dcmp_callout_init:
+	retl
+	nop
+	pad2
+	pad2
+dcmp_callout:
+	retl
+	nop
+	nop
+dcmp_ceil:
+	bld_functor_1	TK_CEIL			; takes 3 words
+	pad5
+dcmp_cosh:
+	bld_functor_1	TK_COSH			; takes 3 words
+	pad5
+dcmp_erf:
+	bld_functor_1	TK_ERF			; takes 3 words
+	pad5
+dcmp_erfc:
+	bld_functor_1	TK_ERFC			; takes 3 words
+	pad5
+dcmp_gamma:
+	bld_functor_1	TK_GAMMA		; takes 3 words
+	pad5
+dcmp_j0:
+	bld_functor_1	TK_J0			; takes 3 words
+	pad5
+dcmp_j1:
+	bld_functor_1	TK_J1			; takes 3 words
+	pad5
+dcmp_sinh:
+	bld_functor_1	TK_SINH			; takes 3 words
+	pad5
+dcmp_tanh:
+	bld_functor_1	TK_TANH			; takes 3 words
+	pad5
+dcmp_y0:
+	bld_functor_1	TK_Y0			; takes 3 words
+	pad5
+dcmp_y1:
+	bld_functor_1	TK_Y1			; takes 3 words
+	pad5
+dcmp_atan2:
+	bld_functor_2	TK_ATAN2		; takes 3 words
+	pad6
+dcmp_fmod:
+	bld_functor_2	TK_FMOD			; takes 3 words
+	pad6
+dcmp_hypot:
+	bld_functor_2	TK_HYPOT		; takes 3 words
+	pad6
+dcmp_jn:
+	bld_functor_2	TK_JN			; takes 3 words
+	pad6
+dcmp_yn:
+	bld_functor_2	TK_YN			; takes 3 words
+	pad6
+
+/*
+ * Integer routine entry points
+ */
+
+mth_base:
+mth_eq:
+	mth_cmp	be
+mth_lt:
+	mth_cmp	bl
+mth_gt:
+	mth_cmp	bg
+mth_le:
+	mth_cmp	ble
+mth_ge:
+	mth_cmp	bge
+mth_ne:
+	mth_cmp	bne
+mth_getnum:
+	; mth_getnum pushes UArg1 onto the stack and then sets UArg1 to UArg2
+	; It drops into mth_getnum0 below.
+	sub	OldE,	8,	OldE		; allocate stack element
+	st	UArg1,	[OldE]			; push top value
+	mov	UArg2,	UArg1
+mth_getnum0:
+	; mth_getnum0 takes argument in UArg1, dereferences it and pushes it
+	; onto the stack, setting the mode appropriately.  Only the
+	; dereferencing is done here, the rest of the code appears in
+	; mth_getnum2 and mth_getnum3 below.
+	deref	UArg1,	mth_getnum2
+	ba,a	mth_getnum3
+mth_putnum:
+	; mth_putnum takes the integer argument on the top of the stack,
+	; converts it to a double if is too large in magnitude to be stored
+	; as a Prolog integer and puts it into UArg1 with the appropriate
+	; tag.  It is expected that the stack has already been popped (in
+	; delay slot getting here).
+	ba	mth_putnum2
+	nop
+mth_push:
+	retl
+	st	UArg1,	[OldE]
+mth_pushdbl:
+	; mth_pushdbl is entered with the double already pushed on the stack.
+	; The rest of the ints on the stack need to be converted to doubles
+	ba	istack_to_dstack0
+	mov	OldE,	tmp1			; tmp1 tells where to start
+mth_pushint:
+	; mth_pushint pushs UArg1 onto the stack, then sets UArg1 to
+	; integer found in UArg2.
+	sub	OldE,	8,	OldE		; Push
+	st	UArg1,	[OldE]
+	mov	UArg2,	UArg1
+mth_pushint0:
+	; mth_pushint0 expects UArg1 to be set to the integer needed to
+	; occupy the top of stack.  Therefore, there is nothing to do but
+	; return.
+	retl
+	nop
+mth_addi:
+	retl
+	add	UArg1,	UArg2,	UArg1
+	pad2
+	pad2
+mth_subi:
+	retl
+	sub	UArg1,	UArg2,	UArg1
+	pad2
+	pad2
+mth_add:
+	ld	[OldE-8], UArg2
+	ba	mth_ovcheck
+	addcc	UArg2,	UArg1,	UArg2
+
+mth_sub:
+	ld	[OldE-8], UArg2
+	ba	mth_ovcheck
+	subcc	UArg2,	UArg1,	UArg2
+mth_mul:
+	ba	mth_mul2
+	ld	[OldE-8], UArg2
+	nop					; padding
+mth_div:
+	ba	mth_div2
+	ld	[OldE-8], UArg2
+	nop
+mth_fdiv:
+	ba	redo_as_dbl0
+	sub	OldE,	8,	OldE		; restore top stack element
+	nop
+mth_neg:
+	; subcc	ZERO,	UArg1,	UArg2	done in delay slot getting here
+	bvs,a	istack_to_dstack		; convert to double on overflow
+	sub	RET,	8,	RET		; force re-execution of goal
+	retl					; return from subroutine
+	mov	UArg2,	UArg1			; set UArg1 to result
+mth_mod:
+	ba	mth_mod2
+	ld	[OldE-8], UArg2
+	nop
+mth_band:
+	ld	[OldE-8], UArg2
+	retl
+	and	UArg1,	UArg2,	UArg1
+	pad9
+mth_bor:
+	ld	[OldE-8], UArg2
+	retl
+	or	UArg1,	UArg2,	UArg1
+	pad9
+mth_bxor:
+	ld	[OldE-8], UArg2
+	retl
+	xor	UArg1,	UArg2,	UArg1
+	pad9
+mth_not:
+	retl
+	orn	ZERO,	UArg1,	UArg1
+	pad6
+mth_lshft:
+	ld	[OldE-8], UArg2
+	retl
+	sll	UArg2,	UArg1,	UArg1
+	pad9
+mth_rshft:
+	ld	[OldE-8], UArg2
+	retl
+	sra	UArg2,	UArg1,	UArg1
+	pad9
+mth_power:
+	ba	redo_as_dbl0
+	sub	OldE,	8,	OldE		; restore top stack element
+	pad7
+mth_abs:
+	bl,a	1f
+	sub	ZERO,	UArg1,	UArg1
+1:	retl
+	nop
+mth_sin:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_cos:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_tan:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_asin:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_acos:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_atan:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_sqrt:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_exp:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_exp10:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_log:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_log10:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_floor:
+	retl					; floor is a nop for integers
+	nop
+	pad6
+mth_round:
+	retl					; round is a nop for integers
+	nop
+	pad6
+mth_trunc:
+	retl					; trunc is a nop for integers
+	nop
+	pad6
+mth_heapused:
+	retl
+	sub	H,	HeapBase,	UArg1
+	pad3
+mth_cputime:
+	sub	RET,	8,	RET		; force re-execution of goal
+	ba	istack_to_dstack0
+	mov	OldE,	tmp1			; tmp1 tells where to start
+	pad3
+mth_realtime:
+	sub	RET,	8,	RET		; force re-execution of goal
+	ba	istack_to_dstack0
+	mov	OldE,	tmp1			; tmp1 tells where to start
+	pad3
+mth_random:
+	sub	RET,	8,	RET		; force re-execution of goal
+	ba	istack_to_dstack0
+	mov	OldE,	tmp1			; tmp1 tells where to start
+	pad3
+mth_callout_init:
+	sethi	hi(mth_stk),	tmp1	
+	st	H,	[tmp1+lo(mth_stk)]
+	sethi	hi(mth_bot),	tmp1
+	ld	[tmp1+lo(mth_bot)], H
+	retl
+	add	H,	4,	H
+mth_callout:
+	sethi	hi(mth_stk),	tmp1	
+	ba	mth_callout2
+	ld	[tmp1+lo(mth_stk)], tmp1
+mth_ceil:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_cosh:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_erf:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_erfc:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_gamma:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_j0:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_j1:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_sinh:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_tanh:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_y0:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_y1:
+	ba	istack_to_dstack		; convert to double
+	sub	RET,	8,	RET		; force re-execution of goal
+	pad6
+mth_atan2:
+	ba	redo_as_dbl0
+	sub	OldE,	8,	OldE		; restore top stack element
+	pad7
+mth_fmod:
+	ba	redo_as_dbl0
+	sub	OldE,	8,	OldE		; restore top stack element
+	pad7
+mth_hypot:
+	ba	redo_as_dbl0
+	sub	OldE,	8,	OldE		; restore top stack element
+	pad7
+mth_jn:
+	ba	redo_as_dbl0
+	sub	OldE,	8,	OldE		; restore top stack element
+	pad7
+mth_yn:
+	ba	redo_as_dbl0
+	sub	OldE,	8,	OldE		; restore top stack element
+	pad7
+
+/*
+ * Double entry points
+ */
+
+dbl_base:
+dbl_eq:
+	dbl_cmp	fbe
+dbl_lt:
+	dbl_cmp	fbl
+dbl_gt:
+	dbl_cmp	fbg
+dbl_le:
+	dbl_cmp	fble
+dbl_ge:
+	dbl_cmp	fbge
+dbl_ne:
+	dbl_cmp	fbne
+dbl_getnum:
+	sub	OldE,	8,	OldE		; allocate stack element
+	std	f0,	[OldE]			; push top value
+	mov	UArg2,	UArg1
+dbl_getnum0:
+	; dbl_getnum takes argument in UArg1, dereferences it and pushes it
+	; onto the stack. Only the dereferencing is done here, the rest of 
+	; the code appears in dbl_getnum2 and dbl_getnum3 below.
+	deref	UArg1,	dbl_getnum2
+	ba,a	dbl_getnum3
+dbl_putnum:
+	; dbl_putnum takes the double argument on the top of the stack,
+	; converts it to an integer if possible and tags the result (either
+	; integer or double as a Prolog object) and returns the result in
+	; UArg1.  It is expected that the stack has already been popped (in
+	; the delay slot getting here).
+	ba	dbl_putnum2
+	nop
+dbl_push:
+	retl
+	std	f0,	[OldE]
+dbl_pushdbl:
+	; dbl_pushdbl is entered with its work done for it (see mth_pushdbl)
+	retl
+	nop
+dbl_pushint:
+	; dbl_pushint pushs the integer in UArg1 onto the stack as a double
+	sub	OldE,	8,	OldE		; create stack element
+	std	f0,	[OldE]			; save UArg1
+	mov	UArg2,	UArg1			; move new int to UArg1
+dbl_pushint0:
+	ba	dbl_pushint2			; convert to double after
+	st	UArg1,	[OldE-8]		; pushing integer on stack
+dbl_addi:
+	st	UArg2,	[OldE-8]
+	ld	[OldE-8],	f2
+	fitod	f2,	f2
+	retl
+	faddd	f0,	f2,	f0
+	nop
+dbl_subi:
+	st	UArg2,	[OldE-8]
+	ld	[OldE-8],	f2
+	fitod	f2,	f2
+	retl
+	fsubd	f0,	f2,	f0
+	nop
+dbl_add:
+	; add top two stack arguments and store back
+	ldd	[OldE-8], f2
+	retl
+	faddd	f0,	f2,	f0
+dbl_sub:
+	; subtract top two stack arguments and store back
+	ldd	[OldE-8], f2
+	retl
+	fsubd	f2,	f0,	f0
+dbl_mul:
+	ldd	[OldE-8], f2
+	retl
+	fmuld	f0,	f2,	f0
+dbl_div:
+	ba	dbl_div2
+	ldd	[OldE-8], f2
+	nop
+dbl_fdiv:
+	ba	dbl_fdiv2
+	ldd	[OldE-8], f2
+	nop
+dbl_neg:
+	retl
+	fnegs	f0,	f0
+	nop					; padding
+	nop					; padding
+dbl_mod:
+	ba	dbl_mod2
+	ldd	[OldE-8], f2
+	nop
+dbl_band:
+	fdtoi	f0,	f0
+	ldd	[OldE-8], f2
+	st	f0,	[OldE-8]
+	ld	[OldE-8], UArg1
+	fdtoi	f2,	f2
+	st	f2,	[OldE-8]
+	ld	[OldE-8], UArg2
+	and	UArg1,	UArg2,	UArg1
+	st	UArg1,	[OldE-8]
+	ld	[OldE-8], f0
+	retl
+	fitod	f0,	f0
+dbl_bor:
+	fdtoi	f0,	f0
+	ldd	[OldE-8], f2
+	st	f0,	[OldE-8]
+	ld	[OldE-8], UArg1
+	fdtoi	f2,	f2
+	st	f2,	[OldE-8]
+	ld	[OldE-8], UArg2
+	or	UArg1,	UArg2,	UArg1
+	st	UArg1,	[OldE-8]
+	ld	[OldE-8], f0
+	retl
+	fitod	f0,	f0
+dbl_bxor:
+	fdtoi	f0,	f0
+	ldd	[OldE-8], f2
+	st	f0,	[OldE-8]
+	ld	[OldE-8], UArg1
+	fdtoi	f2,	f2
+	st	f2,	[OldE-8]
+	ld	[OldE-8], UArg2
+	xor	UArg1,	UArg2,	UArg1
+	st	UArg1,	[OldE-8]
+	ld	[OldE-8], f0
+	retl
+	fitod	f0,	f0
+dbl_not:
+	fdtoi	f0,	f0
+	st	f0,	[OldE-8]
+	ld	[OldE-8], UArg1
+	orn	ZERO,	UArg1,	UArg1
+	st	UArg1,	[OldE-8]
+	ld	[OldE-8], f0
+	retl
+	fitod	f0,	f0
+dbl_lshft:
+	fdtoi	f0,	f0
+	ldd	[OldE-8], f2
+	st	f0,	[OldE-8]
+	ld	[OldE-8], UArg1
+	fdtoi	f2,	f2
+	st	f2,	[OldE-8]
+	ld	[OldE-8], UArg2
+	sll	UArg2,	UArg1,	UArg1
+	st	UArg1,	[OldE-8]
+	ld	[OldE-8], f0
+	retl
+	fitod	f0,	f0
+dbl_rshft:
+	fdtoi	f0,	f0
+	ldd	[OldE-8], f2
+	st	f0,	[OldE-8]
+	ld	[OldE-8], UArg1
+	fdtoi	f2,	f2
+	st	f2,	[OldE-8]
+	ld	[OldE-8], UArg2
+	sra	UArg2,	UArg1,	UArg1
+	st	UArg1,	[OldE-8]
+	ld	[OldE-8], f0
+	retl
+	fitod	f0,	f0
+dbl_power:
+	binaryCdbl	pow
+dbl_abs:
+	retl
+	fabss	f0,	f0
+	pad2
+dbl_sin:
+	unaryCdbl	sin
+dbl_cos:
+	unaryCdbl	cos
+dbl_tan:
+	unaryCdbl	tan
+dbl_asin:
+	unaryCdbl	asin
+dbl_acos:
+	unaryCdbl	acos
+dbl_atan:
+	unaryCdbl	atan
+dbl_sqrt:
+	unaryCdbl	sqrt
+dbl_exp:
+	unaryCdbl	exp
+dbl_exp10:
+	unaryCdbl	exp10
+dbl_log:
+	unaryCdbl	log
+dbl_log10:
+	unaryCdbl	log10
+dbl_floor:
+	unaryCdbl	floor
+dbl_round:
+	unaryCdbl	rint
+dbl_trunc:
+	unaryCdbl	aint
+dbl_heapused:
+	sub	H,	HeapBase,	UArg1
+	st	UArg1,	[OldE-8]
+	ld	[OldE-8],	f0
+	retl
+	fitod	f0,	f0
+
+dbl_cputime:
+	nularyCdbl	als_cputime
+dbl_realtime:
+	nularyCdbl	als_realtime
+dbl_random:
+	nularyCdbl	als_random
+dbl_callout_init:
+	sethi	hi(mth_stk),	tmp1	
+	st	H,	[tmp1+lo(mth_stk)]
+	sethi	hi(mth_bot),	tmp1
+	ld	[tmp1+lo(mth_bot)], H
+	retl
+	add	H,	4,	H
+dbl_callout:
+	sethi	hi(mth_stk),	tmp1		
+	ba	dbl_callout2
+	ld	[tmp1+lo(mth_stk)], tmp1	; put stack start in tmp1
+dbl_ceil:
+	unaryCdbl	ceil
+dbl_cosh:
+	unaryCdbl	cosh
+dbl_erf:
+	unaryCdbl	erf
+dbl_erfc:
+	unaryCdbl	erfc
+dbl_gamma:
+	unaryCdbl	gamma
+dbl_j0:
+	unaryCdbl	j0
+dbl_j1:
+	unaryCdbl	j1
+dbl_sinh:
+	unaryCdbl	sinh
+dbl_tanh:
+	unaryCdbl	tanh
+dbl_y0:
+	unaryCdbl	y0
+dbl_y1:
+	unaryCdbl	y1
+dbl_atan2:
+	binaryCdbl	atan2
+dbl_fmod:
+	binaryCdbl	fmod
+dbl_hypot:
+	binaryCdbl	hypot
+dbl_jn:
+	binaryCdbl	jn
+dbl_yn:
+	binaryCdbl	yn
+
+
+
+; mth_getnum2, dbl_getnum2, dcmp_getnum2
+;
+; These routines have dereferenced UArg1 to a ground object.  We need to
+; classify this object and convert the stack to another mode if necessary.
+;
+
+mth_getnum2:
+	cmp	tmp1,	MTP_LIST
+	bcs,a	1f			; branch if we have a structure
+	ld	[UArg1-MTP_STRUCT], tmp1 ; get functor in delay slot
+	be,a	mth_callout2			; have list
+	mov	H,	tmp1
+	and	UArg1, MTP_CONSTMASK, tmp1
+	cmp	tmp1,	MTP_INT		; see if we have an integer
+	bne,a	mth_callout2		; branch if not
+	mov	H,	tmp1		; put stack bot in tmp1
+	retl				; return and...
+	sra	UArg1,	MTP_CONSTSHIFT, UArg1	; convert to full integer
+
+1:	; structure code
+	set	MMK_FUNCTOR(TK_DDOUBLE,4), tmp2
+	cmp	tmp1,	tmp2		; see if functor is double
+	bne,a	mth_callout2		; branch if not
+	mov	H,	tmp1
+	; store the double
+	ld	[UArg1+(4-MTP_STRUCT)], tmp1
+	sra	tmp1,	MTP_CONSTSHIFT,	tmp1
+	sth	tmp1,	[OldE-8]
+	ld	[UArg1+(8-MTP_STRUCT)], tmp1
+	sra	tmp1,	MTP_CONSTSHIFT,	tmp1
+	sth	tmp1,	[OldE-6]
+	ld	[UArg1+(12-MTP_STRUCT)], tmp1
+	sra	tmp1,	MTP_CONSTSHIFT,	tmp1
+	sth	tmp1,	[OldE-4]
+	ld	[UArg1+(16-MTP_STRUCT)], tmp1
+	sra	tmp1,	MTP_CONSTSHIFT,	tmp1
+	sth	tmp1,	[OldE-2]
+
+	ldd	[OldE-8],	f0	; load up double
+	fdtoi	f0,	f2		; convert to integer
+	fitod	f2,	f4		; convert back to double
+	fcmpd	f0,	f4		; see if same
+	nop
+	fbne,a	istack_to_dstack0		; branch if different
+	mov	OldE,	tmp1		; put place to start converting at in
+					; tmp1
+	st	f2,	[OldE-8]	; store integer value on stack
+	retl				; return to caller
+	ld	[OldE-8], UArg1		; reload into UArg1
+
+mth_callout2:
+	; non numeric code -- evaluate an expression by calling out
+	mov	RET,	tmp2
+	call	is_callout
+	mov	UArg1,	UArg2
+	ba	mth_getnum0
+	ld	[SP+4], UArg1			; load up argument
+
+
+	; istack_to_dstack is branched to when we wish to convert between
+	; integer mode and double mode.  It will convert the elements on the
+	; stack.  istack_to_dstack will convert the top element (in UArg1)
+	; from and integer to a double and then do the memory based values.
+	; istack_to_dstack0 will only do the memory based ones.
+istack_to_dstack:
+	st	UArg1,	[OldE-8]
+	ldd	[OldE-8],	f0
+	fitod	f0,	f0
+	mov	OldE,	tmp1
+istack_to_dstack0:
+	; tmp1 has place on stack to start converting from
+3:	load	mth_bot, tmp2		; get place to stop
+4:	cmp	tmp1,	tmp2		; see if done
+	be	5f			; branch if done
+	add	tmp1,	8,	tmp1	; increment for next iteration
+	ld	[tmp1-8],	f2	; load as integer
+	fitod	f2,	f2		; convert to double
+	ba	4b			; loop back and...
+	std	f2,	[tmp1-8]	; store in the delay slot
+
+5:	retl
+	add	S, dbl_base-mth_base, S	; convert to double mode
+
+dbl_getnum2:
+	cmp	tmp1,	MTP_LIST
+	bcs,a	1f			; branch if we have a structure
+	ld	[UArg1-MTP_STRUCT], tmp1 ; get functor in delay slot
+	be,a	dbl_callout2		; have list
+	mov	H,	tmp1
+	and	UArg1, MTP_CONSTMASK, tmp1	
+	cmp	tmp1,	MTP_INT		; see if we have an integer
+	bne,a	dbl_callout2		; branch if not
+	mov	H,	tmp1		; put beginning of stack area in tmp1
+	sra	UArg1,	MTP_CONSTSHIFT, UArg1	; convert to full integer
+	st	UArg1,	[OldE-8]	; push integer on stack
+dbl_pushint2:
+	ld	[OldE-8],	f0	; load into floating point unit
+	retl				; return and...
+	fitod	f0,	f0		; convert to double format
+
+1:	; structure code
+	set	MMK_FUNCTOR(TK_DDOUBLE,4), tmp2
+	cmp	tmp1,	tmp2		; see if functor is double
+	bne,a	dbl_callout2		; branch if not
+	mov	H,	tmp1		; put beginning of stack area in tmp1
+	; store the double
+	ld	[UArg1+(4-MTP_STRUCT)], tmp1
+	sra	tmp1,	MTP_CONSTSHIFT,	tmp1
+	sth	tmp1,	[OldE-8]
+	ld	[UArg1+(8-MTP_STRUCT)], tmp1
+	sra	tmp1,	MTP_CONSTSHIFT,	tmp1
+	sth	tmp1,	[OldE-6]
+	ld	[UArg1+(12-MTP_STRUCT)], tmp1
+	sra	tmp1,	MTP_CONSTSHIFT,	tmp1
+	sth	tmp1,	[OldE-4]
+	ld	[UArg1+(16-MTP_STRUCT)], tmp1
+	sra	tmp1,	MTP_CONSTSHIFT,	tmp1
+	sth	tmp1,	[OldE-2]
+	retl				; return to caller
+	ldd	[OldE-8],	f0	; load top element into f0
+
+
+dbl_callout2:
+	; non numeric code -- evaluate an expression by calling out
+	mov	RET,	tmp2
+	call	is_callout
+	mov	UArg1,	UArg2
+	ba	dbl_getnum0
+	ld	[SP+4], UArg1			; load up 
+
+dcmp_getnum2:
+	; I don't expect this one to get called.  But we may eventually do some
+	; interesting optimizations which would cause it to get called.  So
+	; I am implementing it anyway.
+	retl				; return to caller
+	nop				; pretty tough, huh?
+
+; mth_getnum3, dbl_getnum3, dcmp_getnum3
+;
+; These routines have dereferenced UArg1 to a variable.  This is ok for
+; dcmp_getnum, but not for the others.  We will fail for them at present.
+; Eventually, we will probably call the Prolog code in order to trap the
+; variable and handle it by some other means.
+;
+
+dcmp_getnum3:
+	ba	wm_p_unsafe
+	nop
+
+mth_getnum3:
+dbl_getnum3:
+	; need to implement better
+	fail
+
+
+;
+; mth_putnum2, dbl_putnum2, dcmp_putnum2
+;
+;
+;	These routines take the top stack element, either in UArg1 or
+;	f0, converts this element to a Prolog object and then leaves 
+;	the tagged result in UArg1.
+;
+;	These routines correspond to 'is'/2 in the source code.
+;
+
+dcmp_pushint2:
+mth_putnum2:
+	sra	UArg1,	32-MTP_CONSTSHIFT-1, tmp1	; get top bits
+	cmp	tmp1,	ZERO			; see if zero
+	be	pn_int				; branch if positive int or zero
+	cmp	tmp1,	-1			; see if -1
+	bne,a	pn_cvtdbl			; branch if not negative int
+	st	UArg1,	[OldE-8]		; store integer in empty frame
+						;    in delay slot
+pn_int:	sll	UArg1,	MTP_CONSTSHIFT, UArg1	; make room for tag
+	retl					; return and...
+	add	UArg1,	MTP_INT, UArg1		; tag the integer
+
+pn_cvtdbl:
+	ld	[OldE-8],	f0		; load into floating point unit
+	fitod	f0,	f0			; convert to double
+pn_dbl:	
+	std	f0,	[OldE-8]		; store back to stack as double
+	set	MMK_FUNCTOR(TK_DDOUBLE,4), tmp2	; build $double/4 functor
+	st	tmp2,	[H]			; put onto heap
+
+	ldsh	[OldE-8],	tmp2
+	sll	tmp2,	MTP_CONSTSHIFT,	tmp2
+	add	tmp2,	MTP_INT,	tmp2
+	st	tmp2,	[H+4]
+
+	ldsh	[OldE-6],	tmp2
+	sll	tmp2,	MTP_CONSTSHIFT,	tmp2
+	add	tmp2,	MTP_INT,	tmp2
+	st	tmp2,	[H+8]
+
+	ldsh	[OldE-4],	tmp2
+	sll	tmp2,	MTP_CONSTSHIFT,	tmp2
+	add	tmp2,	MTP_INT,	tmp2
+	st	tmp2,	[H+12]
+
+	ldsh	[OldE-2],	tmp2
+	sll	tmp2,	MTP_CONSTSHIFT,	tmp2
+	add	tmp2,	MTP_INT,	tmp2
+	st	tmp2,	[H+16]
+
+	add	H,	MTP_STRUCT,	UArg1	; put tagged object into UArg1
+	retl					; return and ...
+	add	H,	20,	H		; update the heap pointer
+
+
+dcmp_pushdbl2:
+dbl_putnum2:
+	fdtoi	f0,	f2			; convert the double to int
+	fitod	f2,	f4			; convert back to double
+	fcmpd	f0,	f4			; see if same as original
+	nop
+	fbne	pn_dbl				; branch if not
+	nop
+	st	f2,	[OldE-8]
+	ba	mth_putnum2
+	ld	[OldE-8],	UArg1		; get top stack element
+
+dcmp_putnum2:
+	mov	RET,	tmp2			; save return address
+	sethi	hi(mth_stk),	tmp1	
+	call	is_callout			; call is/2
+	ld	[tmp1+lo(mth_stk)], tmp1
+	ld	[SP+4], UArg1			; load up arg
+	deref	UArg1, 1f			; dereference it
+1:	retl
+	nop
+
+is_dummyret:
+	gcinfo	0,	0,	0
+
+is_callout:
+	; Upon entry:
+	; 	tmp2	will have old return address
+	; 	UArg2	will have right hand side of is
+	; 	tmp1	is set to the start of the stack area.
+
+	st	tmp2,	[tmp1+8]		; save RET2 value
+	st	RET,	[tmp1+12]		; save RET value
+	st	S,	[tmp1+16]		; save mode
+	st	CP,	[tmp1+20]		; save generated callout address
+	sub	OldE,	tmp1,	tmp2		; get offset to top
+	st	tmp2,	[tmp1+4]		; save offset to top
+	load	mth_bot, tmp2			; get stack bottom (high end
+						;    of stack area)
+	cmp	tmp2,	H			; see if H needs to be fixed
+	bgu,a	1f				; branch if so
+	add	tmp2,	4,	H		; fix H in annulled delay slot
+1:	sub	tmp2,	tmp1,	S		; compute difference between top
+						; and bottom for making fence
+	sll	S,	MTP_CONSTSHIFT-2, S	; make room for tag...this
+						; offset is a long offset
+						; which is the reason for -2
+	add	S,	MTP_FENCE,	S	; tag it as a fence
+	st	S,	[tmp1]			; store fence at ends of stack
+	st	S,	[tmp2]			; area
+	sub	tmp1,	HeapBase,	tmp1	; make uia ptr...
+	sll	tmp1,	MTP_CONSTSHIFT, tmp1	;   ...tag it
+	add	tmp1,	MTP_UIA,	tmp1
+	st	E,	[SP+8]
+	set	is_dummyret+(GC_INFO_SIZE-8), tmp2
+	st	tmp2,	[SP+12]
+	add	SP,	8,	E
+	st	tmp1,	[SP]			; store it
+	load	mth_is_addr,	tmp1		; set tmp1 with address of is
+	add	SP,	4,	UArg1		; set UArg1 up with variable
+	jmpl	CP,	ZERO			; call is/2.
+	st	UArg1,	[UArg1]			; make variable
+
+
+rel_callout:
+	; Upon entry:
+	;	tmp1	will point at start of arith stack/callout area
+	;	UArg1	has left hand argument to relational operator
+	;	UArg2	has address of relational operator entry point
+	; rel_callout is called only from decompilation mode to build the
+	; build the relational operator.
+
+	st	RET,	[tmp1+12]		; save RET value
+	st	S,	[tmp1+16]		; save mode
+	st	CP,	[tmp1+20]		; save generated callout address
+	sub	OldE,	tmp1,	tmp2		; get offset to top
+	st	tmp2,	[tmp1+4]		; save offset to top
+	load	mth_bot, tmp2			; get stack bottom (high end
+						;    of stack area)
+	sub	tmp2,	tmp1,	S		; compute difference between top
+						; and bottom for making fence
+	sll	S,	MTP_CONSTSHIFT-2, S	; make room for tag...this
+						; offset is a long offset
+						; which is the reason for -2
+	add	S,	MTP_FENCE,	S	; tag it as a fence
+	st	S,	[tmp1]			; store fence at ends of stack
+	st	S,	[tmp2]			; area
+	sub	tmp1,	HeapBase,	tmp1	; make uia ptr...
+	sll	tmp1,	MTP_CONSTSHIFT, tmp1	;   ...tag it
+	add	tmp1,	MTP_UIA,	tmp1
+	st	E,	[SP+8]			; create a dummy environment
+	set	is_dummyret+12, tmp2		;   set up dummry return
+	st	tmp2,	[SP+12]			;   ...
+	add	SP,	8,	E		;   set E
+	st	tmp1,	[SP]			; store it
+	st	tmp1,	[SP+4]			; also store it where we'd
+						; normally put variable
+						; (something tagged has to be
+						; put there)
+	mov	UArg2,	tmp1			; set tmp1 to entry pt addr
+	jmpl	CP,	ZERO			; call is/2.
+	ld	[OldE],	UArg2			; get left hand argument
+
+
+
+	global mth_aftercall
+mth_aftercall:
+	; SP is set to original stack position.  Otherwise, must do everything
+	; else.
+	ld	[SP+8],	E			; unlink dummy environment
+	ld	[SP],	UArg1			; get stack base value
+	srl	UArg1, MTP_CONSTSHIFT, UArg1	; untag it
+	add	UArg1,	HeapBase, UArg1		; adjust back to absolute value
+	ld	[UArg1], UArg2			; get fence
+	srl	UArg2, MTP_CONSTSHIFT, UArg2	; untag it
+	sll	UArg2,	2,	UArg2		; multiply by four
+	add	UArg1,	UArg2,	UArg2		; get to end
+	store	UArg1,	mth_stk			; reset global mem values
+	store	UArg2,	mth_bot
+	ld	[UArg1+4], OldE			; get offset to astack top
+	add	UArg1,	OldE,	OldE		; reset astack top
+	ld	[UArg1+8], RET			; reset old return address
+	ld	[UArg1+12], tmp2		; get current return address
+	ld	[UArg1+16], S			; reset mode
+	ld	[UArg1+20], CP			; reset callout address
+	set	dcmp_base, tmp1 
+	cmp	Safety,	ZERO			; see if in decompilation mode
+	bg,a	1f				; branch if not
+	andcc	UArg2,	4, ZERO			; see if misaligned
+						;     in delay slot
+
+2:	jmpl	tmp2+8, ZERO			; return to caller of
+	nop					; 	?_callout
+
+1:	be	2b				; branch if not misaligned
+	mov	UArg1,	H			; reset H whether misaligned
+						; or not
+
+	sub	UArg2,	4,	tmp1		; get ready to realign
+1:	ld	[tmp1],	UArg1			; get stack word
+	st	UArg1,	[tmp1+4]		; store back one word up
+	cmp	tmp1,	OldE			; see if done
+	bgu,a	1b				; branch if not
+	sub	tmp1,	4,	tmp1		; get ready for next iteration
+
+	add	UArg2,	4,	UArg2		; advance astack bottom
+	store	UArg2,	mth_bot			; store it
+	jmpl	tmp2+8, ZERO			; return to caller
+	add	OldE,	4,	OldE		; adjust stack top
+
+
+	
+
+
+
+
+mth_ovcheck:
+	bvs,a	redo_as_dbl0			; branch if overflowed
+	sub	OldE,	8,	OldE		; restore top stack element
+
+	retl					; not overflowed -- return
+	mov	UArg2,	UArg1			; put result into UArg1
+
+redo_as_dbl:
+	sub	OldE,	8,	OldE		; restore top stack element
+redo_as_dbl0:
+	ba	istack_to_dstack
+	sub	RET,	8,	RET		; force re-execution of
+						; subroutine causing overflow
+
+
+dcmp_bld_functor_2:
+	; builds a structure from the functor in tmp1 and top two stack
+	; arguments.  The result is put on the top of the stack 
+	ld	[OldE-8],	UArg2		; get stack arg already popped
+	st	tmp1,	[H]			; store functor
+	st	UArg2,	[H+4]			; store first arg
+	st	UArg1,	[H+8]			; store second arg
+	add	H, MTP_STRUCT,	UArg1		; set up structure tag to heap
+	retl					; return, but first...
+	add	H,	12,	H		; advance the heap
+
+
+dcmp_bld_functor_1:
+	; builds a structure from the functor in tmp1 and top stack
+	; element.  The result becomes the top stack element
+	st	tmp1,	[H]			; store functor
+	st	UArg1,	[H+4]			; store first arg
+	add	H, MTP_STRUCT,	UArg1		; set up structure tag to heap
+	retl					; return, but first...
+	add	H,	8,	H		; advance the heap
+
+mth_mul2:
+	st	UArg1,	[OldE-16]		; save UArg1 in case of 
+						;    overflow
+	save	cSP,	-96,	cSP		; protect Prolog's registers
+	mov	UArg1,	o0			; set up 1st param to .mul
+	call	.mul				; perform the multiplication
+	mov	UArg2,	o1			; set up 2nd param to .mul
+	mov	o1,	UArg2			; move top part of result back
+	restore	o0,	0,	UArg1		; restore Prolog registers
+						; and move rest of result back
+
+	sra	UArg1,	31,	tmp1		; shift UArg1 leaving only sign
+	cmp	tmp1,	UArg2			; see if lower sign and upper
+						; sign are the same
+	bne,a	redo_as_dbl			; branch if not
+	ld	[OldE-16],	UArg1		; restore UArg1
+
+	retl					; return with integer
+	nop
+
+div_by_zero:
+	; We might wish to implement this better
+	fail
+
+
+
+
+mth_pushdbl0:
+	; Unlike the rest of the procedures, this is the common entry point
+	; for mth_pushdbl0.  It will take the double from the words immediately
+	; following the call and push it on the stack.
+	;
+
+	ld	[RET],	f0			; load up part of double
+	jmpl	S+(mth_pushdbl-mth_base), ZERO	; branch to mode specific code
+	ld	[RET+4], f1			; load up rest of double
+
+
+mth_div2:
+	cmp	UArg1,	ZERO
+	be,a	div_by_zero
+	nop
+	save	cSP,	-96,	cSP		; protect Prolog's registers
+	mov	UArg2,	o0			; set up 1st param to .mul
+	call	.div				; do division
+	mov	UArg1,	o1			; set up 2nd param to .mul
+	restore	o0,	0,	UArg1		; restore Prolog registers
+						; and move rest of result back
+	retl
+	nop
+
+dbl_div2:
+	st	ZERO,	[OldE-16]
+	ld	[OldE-16],	f4
+	ld	[OldE-16],	f5
+	fcmpd	f0,	f4
+	nop
+	fbe	div_by_zero
+	nop
+	fdivd	f2,	f0,	f0
+	std	f0,	[OldE-16]
+	mov	OldE,	tmp1
+	save	cSP,	-96,	cSP		; protect Prolog's registers
+	call	aint				; take the floor
+	ldd	[tmp1-16],	o0
+	restore					; restore Prolog registers
+	; result returned in f0
+	retl
+	nop
+
+dbl_fdiv2:
+	st	ZERO,	[OldE-16]		; store zero
+	ld	[OldE-16],	f4		; load into f4 and f5
+	ld	[OldE-16],	f5		;
+	fcmpd	f0,	f4			; see if divisor is zero
+	nop
+	fbe	div_by_zero			; branch if zero
+	nop
+	retl					; return to caller
+	fdivd	f2,	f0,	f0		; do division
+
+mth_mod2:
+	cmp	UArg1,	ZERO
+	be,a	div_by_zero
+	nop
+	save	cSP,	-96,	cSP		; protect Prolog's registers
+	mov	UArg2,	o0			; set up 1st param to .mul
+	call	.rem				; do division
+	mov	UArg1,	o1			; set up 2nd param to .mul
+	restore	o0,	0,	UArg1		; restore Prolog registers
+						; and move rest of result back
+	retl
+	nop
+
+dbl_mod2:
+	st	ZERO,	[OldE-16]
+	ld	[OldE-16],	f4
+	ld	[OldE-16],	f5
+	std	f0,	[OldE-24]
+	fcmpd	f0,	f4
+	nop
+	fbe	div_by_zero
+	fdivd	f2,	f0,	f0
+	mov	OldE,	tmp1
+	std	f0,	[OldE-16]
+	save	cSP,	-96,	cSP		; protect Prolog's registers
+	call	aint				; take the floor
+	ldd	[tmp1-16],	o0
+	restore					; restore Prolog registers
+	ldd	[OldE-24],	f2
+	ldd	[OldE-8],	f4
+	fmuld	f0,	f2,	f0
+	retl
+	fsubd	f4,	f0,	f0

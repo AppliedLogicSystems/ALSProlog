@@ -1,0 +1,259 @@
+;
+; interrupt.vax		-- stuff for implementing Keith's interrupts
+;	Copyright (c) 1990 Applied Logic Systems, Inc.
+;
+; Author:	Kevin A. Buettner
+; Creation:	7/18/90
+; Revision History:
+;
+
+
+#include "assembly.vax"
+#include "wintidx.h"
+
+;
+; dbg_spycheck is called to perform the move, subtract, and compare sequence
+;	necessary for checking for overflow.  Prior to doing the check though,
+;	it checks to see if spying is activated.  If it is (and if the safety
+;	register has a normal value), debug mode is set.
+
+
+	global	dbg_spycheck
+dbg_spycheck:
+	tstl	wm_spying		; see if we are spying or not
+	beql	1f			; branch if we are not
+	cmpl	wm_normal, Safety	; see if the normal safety value is in
+	bneq	1f			; branch if not
+	cvtbl	#-1, Safety		; set the safety flag
+1:	subl	H,	TR,	r0	; perform overflow test
+	cmpl	r0,	Safety
+	rsb
+
+;
+; dbg_decr_icount is not really a debugger function, but is similar in nature
+;	to dbg_spycheck above.  Like dbg_spycheck, it performs the move,
+;	subtract, and compare necessary for overflow and decompilation tests.
+;	Prior to doing this, however, it calls decr_icount which decrements
+;	icount field in the procedure entry.  If zero, indexing is
+;	performed.  Otherwise execution continues as normal.  What this does 
+;	is regenerates (or generates for the first time) indexing for the 
+;	procedure after it has been called some number of small times without
+;	modification.
+;
+
+	global	dbg_decr_icount
+dbg_decr_icount:
+	movl	(SP),	r0		; get return address
+	callC1	decr_icount,	r0	; use return address as argument
+	subl	H,	TR,	r0	; perform overflow test
+	cmpl	r0,	Safety
+	rsb				; return to the conditional branch
+
+
+
+;
+; wm_overflow is called when an exceptional condition is detected prior
+;	to executing a procedure.
+;
+
+
+dummyret1:
+	tstw	I^#(dummymask-dummyret1)
+dummymask:
+	long	0			; no arguments
+	long	-1			; end of clause indicator
+	long	0			; builtins have no clause block
+
+	global	wm_overflow
+wm_overflow:
+	tstl	Safety			; see if Safety is negative
+	bgeq	1f			; branch if not
+	brw	2f			; This branch is taken if not
+					;	real overflow
+1:
+
+	;
+	; The code for doing a garbage collection
+	;
+
+	pushal	dummyret1		; push dummy return address
+	pushl	E			; create the environment link
+	movl	SP,	E		; set E properly
+	try_me_else	panic_fail	; create a choice point
+					; that we should never fail out of
+	ashl	#6,	wm_regidx, r2	; Compute regs base
+	movab	wm_regs[r2],	r2
+
+	movl	SP,	4*wm_SP_idx(r2)	; save Prolog SP
+	movl	E,	4*wm_E_idx(r2)	; save Prolog E
+	movl	B,	4*wm_B_idx(r2)	; save B
+	movl	H,	4*wm_H_idx(r2)	; save H
+	movl	TR,	4*wm_TR_idx(r2)	; save TR
+	movl	SPB,	4*wm_SPB_idx(r2) ; save SPB
+	movl	HB,	4*wm_HB_idx(r2)	; save HB
+	clrl	wm_in_Prolog		; leaving Prolog for a while
+
+	callC0	gc			; call the garbage compactor
+
+
+	movl	4*wm_HB_idx(r2), HB		; restore registers
+	movl	4*wm_SPB_idx(r2), SPB
+	movl	4*wm_TR_idx(r2), TR
+	movl	4*wm_H_idx(r2), H
+	movl	4*wm_B_idx(r2), B
+	movl	4*wm_E_idx(r2), E
+	movl	4*wm_SP_idx(r2), SP
+
+	subl	H,	TR,	r0	; perform overflow test
+	cmpl	r0,	Safety
+	blssu	1f			; branch if not
+	jsb	enter_Prolog
+	trust_me_else_fail		; trust away the top choice point
+	movl	(SP)+,	E		; unlink the environment
+	addl	#4,	SP		; get rid of dummy return address
+	rsb				; return to caller
+
+1:	jmp	wm_abort
+
+
+;
+; The following code is entered when an interrupt has occurred.  Safety has
+; the negative value.  Our goal here is to restore the normal value to 
+; Safety and build a structure representing the frame on the stack and then
+; execute whatever wm_overcode points at.
+;
+
+
+
+2:	movl	(SP),	r0		; pick up return address
+	callC1	int_get_goal_tokid, r0	; get the token id
+	movl	r0,	T1		; save in T1 for atomic case
+	moval	12(SP),	S		; put arg pointer into S
+	extzv	#24, #8, r0, r2		; extract arity into r2
+	beql	5f			; branch if goal is atomic
+
+	moval	MTP_STRUCT(H),	T1	; put structure pointer to heap in T1
+	movl	r0,	(H)+		; put functor on the heap
+
+1:	deref	(S)+,	r1,	3f	; dereference stack argument
+	cmpl	wm_heapbase, r1		; see if var is on local stack
+	blequ	3f			; branch if not
+	movl	H,	(r1)		; bind to heap location
+	movl	H,	(H)+		; make heap loc variable
+	cmpl	r1,	SPB		; see if we need to bind
+	blssu	4f			; branch if we don't
+	movl	r1,	-(TR)		; trail it if we do
+	brb	4f
+3:	movl	r1,	(H)+		; put argument on the heap
+4:	sobgtr	r2,	1b		; loop around
+
+5:	movl	(SP)+,	r0		; pop return address off of stack
+	callC1	int_get_module, r0	; get module id
+	movl	(SP)+,	r1		; get environment linkage
+	movl	(SP)+,	r2		; get return address
+	movl	S,	SP		; start stack pointer at end of args
+	pushl	T1			; push the goal
+	pushl	r0			; push the module
+	ashl	#4, wm_interrupt_caught, r0
+	addl	#MTP_INT, r0, -(SP)	; push the interrupt number
+	pushl	r2			; push the return address
+	pushl	r1			; push the environment linkage
+	movl	SP,	E		; set E
+
+	clrl	wm_interrupt_caught
+	movl	wm_normal,	Safety	; set normal interrupts
+	movl	Safety,	wm_safety
+	jmp	@wm_overcode
+
+
+;
+; wm_abort
+;
+
+	global	wm_abort
+wm_abort:
+	clrl	r1			; No next clause addresses are zero
+	brb	throwentry
+
+
+;
+; wm_throw
+;
+
+	data
+c22dat:	long	0
+	text
+
+	global	wm_throw
+wm_throw:
+	movl	c22dat,	r1		; get the next clause address to
+					;	search for
+throwentry:
+	subl	#1,	wm_regidx, r0	; get regidx-1 into r0
+	ashl	#6,	r0,	r0	; Compute regs base
+	movab	wm_regs[r0],	r0
+	movl	4*wm_B_idx(r0),	T1	; put original B into T1
+
+1:	cmpl	r1,	Fail		; compare Fail with the catch22 address
+	bneq	2f			;
+	jmp	(Fail)			; fail if there
+
+2:	movl	chpt_B(B),	r0	; get the next B
+	cmpl	r0,	T1		; see if at end of line
+	bneq	4f			; branch if not
+	cvtbl	#1,	wm_aborted	; set aborted flag
+	jmp	(Fail)
+
+3:	movl	(TR)+,	S		; get trail entry
+	movl	S,	(S)		; make and unbound
+
+4:	cmpl	B,	TR		; see if done
+	bgtru	3b			; branch if not done
+	movl	chpt_HB(B), HB		; reset registers
+	bicl	#3, chpt_SPB(B), SPB
+	movl	chpt_Fail(B),	Fail
+	addl	#chpt_size,	TR
+	movl	r0,	B		; advance to next choice point
+	brb	1b
+
+
+;
+; wm_catch22
+;
+
+	global	wm_catch22
+wm_catch22:
+	movl	Fail,	c22dat
+	movl	(SP)+,	E
+	rsb
+
+;
+; set_prolog_interrupt
+;
+;	This patch of code will be jumped to after a control-C has been issued.
+;
+
+;	global	set_prolog_interrupt
+	entry	set_prolog_interrupt,^M<r6,r7>
+	movl	12(FP), r5
+	movl	4(r5), r6
+	bbc     #21, r6, 3f
+	ashl    #-16, r6, r6
+	clrl    r7
+1:
+	bbc     #0, r6, 2f
+	addl2   #4, r5
+2:
+	ashl    #-1, r6, r6
+	incb    r7
+	cmpb    r7, #5
+	blssu	1b
+	cvtbl   #-1, 20(r5)
+	ret
+3:
+	cvtbl   #-1,r5
+	ret
+
+;set_prolog_interrupt:
+;	cvtbl	#-1,	Safety		; set safety value to trap
+;	jmp	@cntrl_c_resume		; branch back to place to continue at

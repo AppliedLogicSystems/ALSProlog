@@ -1,0 +1,317 @@
+/*==============================================================*
+ | 		c2pro.pro
+ |	Copyright(c) 1991-4 Applied Logic Systems, Inc.
+ |
+ |		C language translator - Top Level
+ |
+ | Author: Kevin A. Buettner
+ |
+ | Created: 4/3/90
+ | Revision History:
+ |	9/23/91		P. Raman
+ |	4/94		K.Bowen
+ |
+ | Debugging levels
+ | ----------------
+ | Default level is 1;
+ | Each level adds to what was shown at the previous level:
+ |	0 - silent;
+ |	1 - show open/close of input files; dots for stmt processing;
+ |	2 - show token list of statemnt begin parsed;
+ |	3 - show result of parsing;
+ |	4 - show lines as read from source;
+ | Levels are set by the command line switch:
+ |	-d N
+ | which must occur after the  -p divider.
+ *===============================================================*/
+
+%:- [c2p,cparse,ctoken,cexp,cout,cfiles,cmisc,cmacro].
+
+module c2pro.
+use avl.
+
+	%-------------------------------------
+	% Dynamic Declarations:
+	%-------------------------------------
+
+%:-dynamic(debug/0).
+%debug.
+
+:-dynamic(silent/0).
+:-dynamic(skip_item/2).
+:-dynamic(exclude_files/5).
+:-dynamic(includePath/3).
+:-dynamic(currentPath/3).
+:-dynamic(imported/1).
+
+	%-------------------------------------
+	% OS-Specific File Loading (to disappear):
+	%-------------------------------------
+
+os_specific_file(unix,	cunix).
+os_specific_file(dos,	cdos).
+os_specific_file(macos,	cmac).
+os_specific_file(vms,	cvax).
+
+	%-------------------------------------
+	% file suffixes.
+	%-------------------------------------
+
+inSuffix('spc').
+outSuffix('src').
+
+%%-------------------------------------
+%% c2pro/0.
+%% command line goal:
+%% 	alspro c2pro -g c2pro -p file [file..] \
+%%		[-debug] [-Dflag[=num]]* [-Ipathname]*
+%%-------------------------------------
+
+	%% old:
+export ctrans/0.
+ctrans :- c2pro.
+
+export c2pro/0.
+
+c2pro
+	:-
+		%% clean db & load os-specific stuff:
+	cleanDB,
+	(c2pro_os(_) ->
+		true
+		;
+		builtins:als_system(SysVars),
+		dmember(os=OS,SysVars),
+		os_specific_file(OS,OS_File),
+		reconsult(OS_File)
+	),
+		%% parse command line & setup options:
+	get_cmdline_vals(SwitchVals),
+	pull_out_files(SwitchVals, Files, ReducedSwitchVals),
+
+	makeC2P(DummyState),
+	setC2P(inFile, DummyState, command_line),
+	setC2P(curLineNum, DummyState, 0),
+
+	parse_options(ReducedSwitchVals, Defines, DummyState),
+		%% process the files:
+	recheck_defaults([sourcePath(_)]),
+	c2pro(Files,Defines).
+
+	%-------------------------------------
+	%   pull_out_files/3
+	%-------------------------------------
+
+pull_out_files([], [], []).
+pull_out_files([['-null_switch' , File] | SwitchVals], 
+			[File | Files], ReducedSwitchVals)
+	:-
+	pull_out_files(SwitchVals, Files, ReducedSwitchVals).
+
+pull_out_files([Switch | SwitchVals], Files, [Switch | ReducedSwitchVals])
+	:-
+	pull_out_files(SwitchVals, Files, ReducedSwitchVals).
+
+	%-------------------------------------
+	%   parse_options/3
+	%-------------------------------------
+
+parse_options([],[],State).
+parse_options([FirstOpt | RestOpts], Defines, State)
+	:-
+	install_option(FirstOpt, Defines, RestDefines, State),
+	parse_options(RestOpts, RestDefines, State).
+
+	%-------------------------------------
+	%   install_option/4
+	%-------------------------------------
+
+	%% set debugging level:
+	%% option:  -d Level[=Num]
+install_option(['-d',InitLevel], Defines, Defines, State)
+	:-
+	(number(InitLevel) ->
+		Level = InitLevel
+		;
+		name(InitLevel, ILCs),
+		name(Level, ILCs)
+	),
+		
+	abolish(cur_debug_level,1),
+	assert(cur_debug_level(Level)).
+
+	%% set break at decln processing on item:
+	%% option:  -b Item  or -b [Item, ....]
+install_option(['-b',BreakItem], Defines, Defines, State)
+	:-
+	set_break_items(BreakItem).
+
+	%% option:  -DName[=Num]
+install_option([Opt], [define(Id,Val)|RestDefines], RestDefines, State)
+	:-
+	name(Opt, [0'-,0'D|DefStr] ),
+	!,
+	getIdentifier(DefStr,IdStr,RestStr,State),
+	name(Id,IdStr),
+		%% Is -D in the form -D<Nam>=<Val>   ???
+	getValueOpt(RestStr,Val).
+
+	% option:  -I Pathname
+install_option(['-I',PathAtm], Defines, Defines, State)
+	:- !,
+	name(PathAtm,PathStr),
+	addIncludePath(PathStr).
+
+	% option:  -IPathname
+install_option([Opt], Defines, Defines, State)
+	:-
+	name(Opt,[0'-,0'I|PathStr]),
+	!,
+	addIncludePath(PathStr).
+
+install_option(['-srcpath',Path], Defines, Defines, State)
+	:-
+	assert(sourcePath(Path)).
+
+install_option([Opt], Defines, Defines, State)
+	:-
+	name(Opt,[0'-|OptStr]),
+	name(Flag,OptStr),
+	output:assert(Flag).
+
+install_option(Opt, Defines, Defines, State).
+
+		%% Is -D in the form -D<Nam>=<Val>   ???
+getValueOpt([0'=|ValStr],[number(Num)])
+	:-
+	name(Num,ValStr),
+	number(Num),
+	!.
+getValueOpt(_,[number(1)]).		% default value of -D flag is 1
+
+recheck_defaults([]).
+recheck_defaults([Item | Rest])
+	:-
+	recheck_default(Item),
+	recheck_defaults(Rest).
+
+:-dynamic(sourcePath/1).
+
+recheck_default(sourcePath(_))
+	:-
+	(sourcePath(_) ->
+		true
+		;
+		assert(sourcePath('.'))
+	).
+
+set_break_items(BreakItem)
+	:-
+	name(BreakItem, BICs),
+	bufread(BICs, BItms0),
+	(var(BItms0) ->
+			%% BreakItem was a quoted var:
+		BItms = BreakItem
+		;
+		BItms = BItms0
+	),
+	sbis(BItms).
+
+:-dynamic(decln_break_on/1).
+
+sbis([]).
+sbis([BI | BItms])
+	:-
+	assert(decln_break_on(BI)),
+	sbis(BItms).
+sbis(BItms)
+	:-
+	assert(decln_break_on(BItms)).
+
+	%---------------------------------
+	% c2pro/2.
+	%---------------------------------
+
+c2pro([],_)
+	:- !.
+
+c2pro([FirstFile | Rest], Defines) 
+	:-
+	sourcePath(SrcPath),
+	input_file_setup(FirstFile, SrcPath, InName, BaseName),
+	outSuffix(OS),
+	filePlusExt(BaseName,OS,OutName),
+
+	init_state(InName, OutName, State),
+	do_c2pro(InName, State, Defines),
+	!,
+	c2pro(Rest, Defines).
+
+c2pro([_ | Rest], Defines) 
+	:-
+	c2pro(Rest, Defines).
+
+	%---------------------------------
+	%  input_file_setup/3
+	%---------------------------------
+
+input_file_setup(File, SrcPath, InName, BaseName)
+	:-
+	filePlusExt(BaseName,Ext,File),
+	!,
+	inSuffix(IS), 
+	(IS = Ext ->
+		InName = File
+		;
+		error('Bad source file: %t -- skipping\n',[File], 0)
+	).
+
+	%% Finding a path attached to a particular file
+	%% overrides the source path specified with a switch:
+input_file_setup(File, SrcPath, InName, BaseName)
+	:-
+	pathPlusFile(Path,BaseName,File),
+	Path \= '',
+	!,
+	inSuffix(IS), 
+	filePlusExt(File,IS,InName).
+
+	%% File is a pure, unadorned name (no path, no ext); 
+	%% use the SrcPath:
+input_file_setup(File, SrcPath, InName, File)
+	:-
+	inSuffix(IS), 
+	filePlusExt(File,IS,FileExt),
+	pathPlusFile(SrcPath,FileExt,InName).
+
+	%---------------------------------
+	%  init_state/3
+	%---------------------------------
+
+init_state(InName, OutName, State)
+	:-
+	makeC2P(State),
+	setC2P(inFile, State, InName),
+	setC2P(outFile, State, OutName),
+	open(OutName,write,OutStream,[]),
+	setC2P(outStream, State, OutStream),
+	gen_file_header(OutStream,InName,OutName),
+	avl_create(Table),
+	setC2P(info_table, State, Table).
+
+	%---------------------------------
+	% do_c2pro/3.
+	%---------------------------------
+
+
+do_c2pro(InName, State, Defines) 
+	:-
+	read_file(InName, State, Defines),
+	closeFile(State),
+	!.
+do_c2pro(InName, State,_)
+	:-
+	closeFile(State),
+	printf('\n>>>-->>> c2pro halted prematurely processing %t<<<---<<<\n',[InName]).
+
+endmod.

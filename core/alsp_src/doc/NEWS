@@ -1,0 +1,509 @@
+This file contains a history of user visible changes made to ALS-Prolog by
+version number.
+----
+1.63B:
+	* ALS-Prolog now runs on Solaris.
+
+1.62B:
+	* New foreign function PI_rungoal_with_update is declared as:
+
+	int PI_rungoal_with_update(PWord mod, PWord *goalp, int *gtypep);
+
+	PI_rungoal_with_update does what PI_rungoal does (runs a prolog
+	goal with structures supplied from C), but it performs the additional
+	step of updating the goal structure upon return.  An application
+	may then inspect this structure for bindings created whilst running
+	the goal.  Doing these inspections with PI_rungoal is unsafe as the
+	garbage collector may move structures around thus invalidating
+	any previously held pointers.
+
+1.61B:
+	* New directive dynamic/1.  This directive will cause a procedure
+	to be created (if it doesn't already exist) with no clauses.  Thus
+	calling this new procedure will not result in an undefined procedure
+	error/message.  Clauses may be added to or removed from a dynamic
+	procedure in the usual ways.  When the number of clauses associated
+	with the procedure goes to zero, the procedure does not become
+	undefined.  It merely has no clauses and calls to this procedure will
+	fail as usual.  Use of this directive will make it more palatable to
+	set undefined_predicate flag to either warning or error.  In the
+	future, procedures declared to be dynamic will be subject to the
+	so called "logical database" semantics where the database is frozen
+	with respect to the execution of a dynamic procedure.  Any change
+	to a dynamic procedure will affect only goals started after the
+	change to the procedure is made. 
+
+1.60B:	
+	* Calling an undefined predicate with call/1 or :/2, etc will now
+	take the action specified by the undefined_predicate flag.  This type
+	of call would just silently fail before.
+
+	* New command line option -P.  This option is like -p, but the first
+	list element obtained from command_line/1 will be the name of the
+	command invoking prolog (alspro for example).  This is useful for
+	developing applications which will eventually be packaged since
+	command_line/1 will take the form described above in a packaged
+	application.  The -p option is being retained for compatibility.
+
+	* command_line/1 is now exported.  There is no need to explicitly
+	reference it through the builtins module.
+
+1.58B:
+	* rexec/2 is a new predicate.  It takes the following form:
+
+		rexec(Command, Options)
+	
+	Command should be a (Bourne) shell command.  Options is a list
+	containing zero or more of the following forms:
+
+		host(HostName) -- execute the command on the machine named
+		by HostName.
+
+		username(User) -- run the command as the user User.
+
+		password(Password) -- provides the password for authentication
+		purposes.  If no password is supplied, you will be prompted
+		for one.
+
+		rstream(Stream,OpenOpts) -- designates the input stream to
+		read the output produced by the command.  This stream will
+		be connected to the standard output of the command.  Stream
+		will be bound to a stream descriptor.  OpenOpts is a list
+		containing open options.
+
+		wstream(Stream,OpenOpts) -- designates the output stream to
+		write to.  This will be connected to the standard input of
+		the command.
+
+		estream(Stream,OpenOpts) -- designates an input stream for
+		use in obtaining error messages from the command.  This
+		stream will be connected to standard error for the command.
+
+	If any of host, username, or password are specified, rexec/2 will
+	attempt to use the rexec call to remotely run the command Command
+	on the specified machine.  The remote execution daemon, rexecd
+	requires authentication.  This means that either a username and
+	password must be supplied in the program (with the username/1 and
+	password/1 forms), interactively, or via the .netrc file.  Not
+	all remote execution daemons support authentication via the .netrc
+	file.
+
+	If none of host, username, or password are specified, then rexec/2
+	will use a traditional fork and exec to run the command on the local
+	machine.
+
+1.56B:
+	* Buffering of I/O is redesigned.  It should no longer be possible
+	to generate syntax errors on perfectly legitimate input by letting
+	prolog get pieces of a term at a time.  This bug was most notably
+	evident when using socket streams.  Suppose that wsock is a socket
+	alias.  Something similar to the following would cause the reader
+	to have fits:
+
+	?- write(wsock, 'p(123'), flush_output(wsock).
+
+	?- write(wsock, '45'), flush_output(wsock).
+
+	?- write(wsock, '6). '), flush_output(wsock).
+
+	The reader on the other side should get p(123456) as a term. What
+	happened instead is that a syntax error would occur (a comma or
+	right paren was expected immediately after the 3 in 123).
+
+	This problem also manifested itself when pasting a text selection in
+	Open Windows.
+
+	* The open option eof_action(Action) is now implemented.  Action
+	may be one of reset, error, or eof_code.  The meanings of these
+	are as follows:
+
+		reset -- When end-of-file is reached, reset the end-of-file
+		indicator.  This is likely to be of use only for streams
+		connected to input devices such as terminals or datagram
+		sockets.  Prolog will go into an infinite loop when end-of-file
+		is read for other types of streams.
+
+		eof_code -- This is the default.  When end-of-file is reached,
+		some distinguished code is returned as the result of the
+		input operation to indicate that end-of-file has been reached.
+		read/[1,2] uses end_of_file while get_code/[1,2] uses -1.
+
+		error -- Generate an error when end-of-file is reached. The
+		error will have the form existence_error(past_end_of_stream,
+		Stream).
+
+	* Datagram sockets now have the end-of-file indication set for each
+	datagram.  This mechanism permits code written in Prolog to fully
+	process each incoming datagram without having to worry about running
+	over into the next datagram.  flush_input/1 should be used to reset the
+	stream attached to the datagram in order for more input to be read.
+	Alternately, eof_action(reset) may be specified in the open options.
+	The use of eof_action should be used with caution, however, since
+	reading a term may span datagrams.  This is potentially harmful since
+	datagrams are not considered reliable and may arrive multiple times,
+	out of order, or not at all.  Programmers using datagrams should
+	strive to make each datagram self contained.  If this is a hardship,
+	stream sockets should be used instead.
+
+	* The open option snr_action(Action) is now implemented. The "snr"
+	in snr_action stands for "Stream Not Ready".  Action may take on
+	one of the three following codes: wait, snr_code, or error.  The
+	meanings of these codes are as follows:
+
+		wait -- This is the default.  A call to a predicate which
+		performs I/O on a stream will wait as long as neccessary for
+		the I/O operation(s) to complete.
+
+		snr_code -- This option is meaningful for input streams only.
+		A call to a predicate performing input on a stream will return
+		either the atom stream_not_ready or -2 depending on the 
+		predicate. Predicates which return end_of_file to indicate
+		an end-of-file condition will return stream_not_ready to
+		indicate that not enough input could be read from the stream.
+		Predicates which return -1 to indicate end-of-file will
+		return -2 to indicate that no input was available from
+		the stream without blocking.  get_line/[1,2] will return
+		a term of the form stream_not_ready(PartialLine) to indicate
+		that the operation would block.  PartialLine is instantiated
+		to the portion of the line which was available prior to
+		attempting to perform the input operation which would block.
+
+		error -- Generate the error existence_error(stream_not_ready,
+		Stream) to indicate that an I/O operation on the stream
+		Stream would block.
+	
+	This machinery will even work with read/[1,2] or read_term/[2,3].
+	A partial term may be read before discovering that the stream
+	would block in an attempt to read more of the term.  The partial
+	term is saved away and the action specified by snr_action for the
+	given stream will be performed.  At a later time, read may be called
+	again at which time the saved partial term is used along with whatever
+	new input is available to possibly form a complete term.
+
+1.55B:
+
+	* poll/2 is a new predicate.  poll(Stream, TimeOut) will wait at most
+	TimeOut microseconds and then succeed if a non-blocking I/O operation
+	may be started on the stream Stream.  Failure will occur if the
+	I/O operation would block.  Note that an I/O operation such as
+	read/2 may block anyway if more than one buffer needs to be
+	read.  This predicate is probably just a stopgap measure until
+	better functionality is added to the I/O system in general.
+
+	* Datagram sockets are now implemented.  The source/sink specification
+	is as follows:
+	
+	socket(inet_dgram, Host, Port)
+
+	A datagram socket is one which is not connected.  It is up to the
+	sendto and recvfrom calls (in C) to set the address of where to
+	send the datagram.  At the Prolog level, this level of detail is
+	handled for the programmer (though not necessarily as the programmer
+	wants).  In the case of a server socket, the socket is initially
+	set up to write out to UDP port 9 which is similar to /dev/null.
+	As soon as a server socket stream (or stream clone) is able to read a
+	buffer, the address to write to will be the sender of the message which
+	was read.  Thus, so long as the server composes a reply and sends it
+	without reading an new buffer, the address of the sender will remain 
+	valid.
+
+	A client datagram socket is configured to send to specified host Host
+	and port Port in the call to open/[3,4].  There are no facilities
+	at present to change the address written to.
+
+	is_server_socket/1 may be used on datagram sockets.  
+
+	accept_connection/1 is not meaningful with respect to datagram sockets
+	as datagram sockets are connectionless.
+
+	* See tsuite/mathserv1.pro and tsuite/mathserv2.pro for examples
+	of client/server programming in Prolog.
+
+1.54B:
+
+	* The socket interface has been redesigned and simplified.  One of the
+	greatest barriers that a programmer faces in attempting to use sockets
+	in C is the relatively large number of system calls dealing with
+	sockets and the myriad parameters that these calls can take.  In C,
+	for example, between two to four calls are typically needed to open a
+	socket.  In Prolog, one call is needed to open a socket.  Another
+	call is needed if the programmer wishes to both read from and write
+	to the same socket or accept multiple connections.
+
+	In ALS-Prolog, a socket may be opened with a call to open/[3,4]. The
+	source/sink specification (the first argument) takes one of the
+	following forms:
+
+	socket(unix, PathName)
+	socket(inet_stream, Host)
+	socket(inet_stream, Host, Port)
+	socket(inet_dgram, TBA...)
+	socket(clone, Stream_Or_Alias)
+
+	Each of these forms will be considered separately.  Regardless of
+	the mode (read or write), the call to open/[3,4] will attempt to
+	open the stream as a server (if appropriate).  Failing that, it will
+	attempt to open the stream as a client.  If the stream is opened as
+	a server, then prior to the first buffer read or write, the stream will
+	wait for a client to connect.  In C (on Unix) this process is handled
+	with the accept call.  If the stream is opened as a client, the C
+	call to connect (which creates the connection) is performed as part
+	of the open.  If a connection is not possible or permitted, open 
+	generates a permission error.  We now consider what bearing this has
+	on each form of source/sink specification.
+
+	socket(unix, PathName): Open a unix domain socket.  Addresses in the
+	unix domain are merely path names which are specified by PathName. Unix
+	domain sockets are somewhat limited in that both the server and client
+	process must reside on the same machine.  The stream will be opened as
+	a server if the name specified by PathName does not currently exist
+	(and the requisite permissions exist to create a directory entry).
+	Otherwise, the stream will be opened as a client.
+
+	socket(inet_stream, Host):  Open an internet domain stream socket.
+	Addresses in this domain consist of a host name or address and a port
+	number which is an integer between 0 and 65535.  Note that this form
+	has no port specification.  It will attempt to use 1599 as the port
+	number.  This is the well known (!) port number for ALS-Prolog. The
+	stream will be opened as a server if Host is set to the name of the
+	host on which the process is running and no other process has already
+	established a server stream on this port.  Otherwise, the stream will
+	be opened as a client.  A permission error will be generated if neither
+	operation can be performed.  The host specification may either be a
+	host name or an internet address.
+
+	socket(inet_stream, Host, Port): Similar to the above, but the Port may
+	specified.  This permits an application to choose its own "well known"
+	port number and act as either a server or client.  Alternately, both
+	Host and Port may be variable in which case the system will open a
+	stream at a port of its choosing.  Host and Port will be instantiated
+	to values to the current host and the port which was actually opened.
+
+	socket(inet_dgram, TBA...): The interface for datagram sockets has
+	not been completed yet.  Datagram sockets are different from stream
+	sockets in that they are connectionless.  This means that to be truly
+	useful, we need a mechanism for specifying the address to which a
+	certain packet will go.  We also need a mechanism to obtain the address
+	from which a certain packet was read.  
+
+	socket(clone, Stream_or_Alias): This specification will create a new
+	(prolog) stream descriptor for a socket from an existing socket stream
+	descriptor.  This gives the programmer the ability to create more than
+	one buffer which refers to the same socket.  This cloning mechanism has
+	two uses.  Firstly, sockets are full duplex which means that they may
+	be both read from and written to.  Yet the interface which ALS-Prolog
+	provides will only naturally provide read access or write access, not
+	both simultaneously.  The cloning mechanism accommodates this
+	problem by allowing separate (prolog) stream descriptors for each
+	mode which refer to the same unix socket descriptor.  Secondly, server
+	socket streams will only act as a server until a connection is
+	established.  Once the connection is made, they lose their "server"
+	property.  An application which wants to service more than one client
+	will want to clone its "server" descriptor prior to performing any
+	reads to or writes from the stream.
+
+	* Two new predicates which will assist the programmer wishing to
+	use sockets are is_server_socket/1 and accept_socket_connection/1.
+	is_server_socket/1 takes an alias or stream descriptor as its single
+	argument.  It will succeed if this socket is a "server" socket waiting
+	for a connection.
+
+	As detailed in the previous paragraphs, a read or write operation will
+	implicitly accept a connection if a socket has the "server" property.
+	More advanced applications will probably want to explicitly accept
+	the connection.  This may be performed via the predicate
+	accept_socket_connection/1.  Its single argument is an alias or
+	stream descriptor representing a socket.  It will block until a
+	connection is received on a socket having the "server" property.
+	If the socket passed as the input argument does not have the
+	"server" property, that is it is already connected, then
+	accept_socket_connection/1 will simply succeed.
+
+	* Example: The following clause will open a connection between two
+	processes on the machine named Host with the provided aliases.  Note
+	that although only one socket is created, two streams reference this
+	same socket.  One of the processes must reside on the machine named
+	host.
+
+	socketpair(Host, ReadAlias, WriteAlias) :-
+	    open(socket(inet_stream,Host), read, RS, [alias(ReadAlias)]),
+	    (is_server_socket(RS) -> accept_socket_connection(RS) ; true),
+	    open(socket(clone,RS), write, _, [alias(WriteAlias)]).
+	
+	Below is sample interaction between two processes running on the same
+	machine.
+	
+Process 1				Process 2
+----------				----------
+
+?- socketpair(H,r,w).
+
+					?- socketpair(H,r,w).
+
+H = pinnacle				H = pinnacle
+
+yes.					yes.
+
+					?- get_char(r,C).
+
+?- put_char(w,a), flush_output(w).
+
+yes.					C = a
+
+					yes.
+
+					?- put_char(w,b), flush_output(w).
+
+					yes.
+
+?- get_char(r,C).
+
+C = b
+
+yes.
+
+?- close(r), close(w).			?- close(r), close(w).
+
+yes.					yes.
+
+
+
+1.53B:
+
+	* Calls to read_term and other input predicates are now able to
+	restart system calls which were interrupted.  Programs which
+	use the interval timer (sigalrm) and are also doing I/O will now
+	work properly.
+
+	* The als-mics program will now make sure that the mode on the output
+	image file is the same as on the input image file.
+
+	* save_image/2 now works on the NeXT.  This means that applications
+	may be packaged on the NeXT.
+
+	* stack overflows are now be caught on the NeXT.
+
+	* The prolog flag `undefined_predicate' may now be set the the value
+	`break'.  When set to `break', a call to an undefined predicate will
+	enter the same break handler that is normally entered when control-C
+	is pressed.
+
+	* The break handler menu has been updated.  The two new items are
+	`fail' and `break'.  The `fail' menu option will cause the goal which
+	was broken on to fail.  This will be most useful when used in
+	conjunction with an undefined predicate entering the break handler.
+	The `break' option will enter a new prolog shell.  Once the shell
+	has been exited, the break handler menu will pop up again.
+
+1.52B:
+
+	* set_prolog_flag/2 and current_prolog_flags/2 are now defined.  The
+	only flag implemented is `undefined_predicate'.  The legal values
+	for this flag are error, fail, and warning.  Calls in compiled code
+	to an undefined predicate will now take the action specified by this
+	flag.  The default value in the draft standard is error.  The default
+	value in ALS-Prolog (at present) is warning.  
+
+	* Pretty printing of arrow and semicolon has changed so that the arrow
+	is now put at the end of a line instead of at the beginning.  The
+	"then" part of the conditional is indented an additional level.
+
+	* The ALSDIR environment variable is no longer examined to obtain
+	the builtins directory.
+
+	* The ALSPATH variable is only available when running prolog or
+	a packaged application which uses the prolog environment.  Packaged
+	applications providing their own shell will need to set environment
+	variables and process the command line if so desired.
+
+1.51B:
+
+	* Virtually all command line options have been removed.  The only
+	remaining options are:
+		-b		Batch mode: no startup goal
+		-g Goal		Use Goal as the initial goal instead of the
+				shell
+		-v		Verbose (not implemented yet)
+		-p		Indicates that all following arguments and
+				flags should be saved as part of
+				builtins:command_line/1.
+	Options for controlling other aspects of the prolog environment are
+	either entirely gone or may be controlled via the ALS_OPTIONS
+	environment variable (see below).
+
+	* The ALS_OPTIONS environment variable is now used to control the
+	initial heap and stack size.  ALS_OPTIONS is a shell variable and
+	should be set in the standard way.  For example, when using the
+	C-Shell (csh), the following command may be used to set some
+	options:
+
+		example% setenv ALS_OPTIONS heap_size:4096,stack_size:2048
+	
+	Bourne Shell (or BASH) users would use the following commands to
+	achive the same effect:
+
+		example$ ALS_OPTIONS=heap_size:4096,stack_size:2048
+		example$ export ALS_OPTIONS
+	
+	The ALS_OPTIONS environment variable should be set to a sequence of
+	options where each option is separated from the previous option by
+	a comma. The valid options which may appear in ALS_OPTIONS (ranked
+	from most to least useful) are:
+
+		heap_size:HSIZE	-- HSIZE*1024 is the initial size of the heap.
+		stack_size:SSIZE -- SSIZE*1024 is the initial stack size.
+		icbuf_size:ISIZE -- ISIZE*1024 is the initial icode buffer size.
+		saved_state:SSNAME -- SSNAME is the name of the saved state to
+				load.
+		debug_shell	-- This option is a flag which replaces the
+				old -z option.  It is only likely be useful
+				to the ALS-Prolog implementers/maintainers. 
+				It will start up a very primitive Prolog shell
+				without any (Prolog defined) builtins.  This
+				shell is useful to help determine what is
+				going on when ALS-Prolog is massively broken.
+				
+	
+
+1.42B:
+
+	* number_chars/2 and number_codes/2 are implemented.
+
+	* char_list and code_list streams supported.
+
+	* library mechanism revamped.  The debugger is now loaded in
+	the same manner as the rest of the library.
+
+	* There is now a stack trace option in the break handler.
+
+1.40B:
+
+	* atom_chars/2 now behaves as specified in the draft standard.  Any
+	calls to atom_chars that you have in your code at present should
+	probably be changed to a call to atom_codes/2.  The calling pattern
+	is the same.  The second argument to atom_chars/2 in now a list of
+	characters instead of a list of character codes.
+
+	* open/4 used to be called with the following pattern:
+
+		open(Source_sink, Mode, Options, Stream)
+	
+	It is now called as follows:
+
+		open(Source_sink, Mode, Stream, Options)
+	
+	Note that the third and fourth arguments are interchanged.
+
+	* text and binary used to be valid options to open/4.  They no
+	longer are.  Instead specify type(text) or type(binary).
+
+	* see/1 and tell/1 now fail when attempting an open that results
+	in an error.  This is closer to how these predicates used to behave.
+
+	* put_char/1, put_char/2, get_char/1, get_char/2:  These now
+	operate on "characters" which are single character atoms.  They
+	previously operated on "codes" which are small integers.
+
+	* put_code/1, put_code/2, get_code/1, get_code/2:  These do
+	what put_char and get_char used to do; that is they operate
+	on character codes which are small integers.

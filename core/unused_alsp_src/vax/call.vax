@@ -1,0 +1,406 @@
+;
+; call.vax			-- call, ;/2, and others
+;	Copyright (c) 1990 Applied Logic Systems, Inc.
+;
+; Creation:	7/17/90
+; Author:	Kevin A. Buettner
+; Revision History:
+;
+
+
+#include "assembly.vax"
+
+	text
+
+;
+; wm_call implements the prolog builting call/1.  On entry, T1 has the
+; module id of the module from which the call was done.  The caller is
+; responsible for setting this value up.  This work is usually done in
+; the procedure entry.
+;
+
+	global	wm_call
+
+wm_call_callentry:
+	pushl	E			; finish making a call frame
+	movl	SP,	E
+wm_call:
+	clrl	S			; don't ignore the overflow check
+
+ocall_entry:
+
+	;
+	; entry point for Call with interrupt and others.  d4 set to one
+	; indicates that the overflow check will be ignored.
+	;
+
+	deref	8(SP),	r1,	call_isground
+
+call_fail:
+	fail
+
+call_isground:
+	cmpb	#MTP_LIST,	r0	; examine tag
+	beql	call_fail		; fail if it's a list
+	bgtru	call_isstruct		; branch if argument is a structure
+
+	;
+	; otherwise we have a constant
+	;
+
+	bicb	#~MTP_CONSTMASK, r1, r0	; get 4 bit version of tag into r0
+	cmpb	#MTP_SYM, r0		; see if we have a symbol
+	beql	1f			; branch if we do
+	cmpb	#MTP_UIA, r0		; see if we have a uia
+	bneq	call_fail		; fail if not
+1:	clrl	r2			; clear the arity
+	movl	4(SP),	8(SP)		; shift the return address
+	movl	(SP)+,	(SP)		; shift the environment link
+	brb	call_whereto
+
+call_isstruct:
+	decl	r1			; make structure pointer usable
+	movl	(r1)+,	r2		; put functor in r2
+	extzv	#24, #8, r2, r0		; extract the arity for
+	decl	r0			;    stack adjustment
+	mnegl	r0,	r0		; make it negative
+	moval	(SP)[r0], SP		; adjust stack pointer
+	mnegl	r0,	r0		; make it positive again for looping
+	movl	(E),	(SP)		; shift environment link
+	movl	4(E),	4(SP)		; shift return address
+1:	movl	(r1)[r0], 8(SP)[r0]	; Copy over the arguments
+	sobgeq	r0,	1b		; loop around til done
+
+	movl	r2,	r1		; put functor in r1
+	extzv	#24, #8, r2, r2		; extract arity into r2
+
+call_whereto:
+	movl	SP,	E		; set E appropriately
+	movl	FP,	SP		; set SP up for call to C
+	pushl	S			; push overflow check flag
+	pushl	r2			; push the arity
+	pushl	r1			; push the functor
+	pushl	T1			; push the module id
+	calls	#4,	call_resolve_reference
+	movl	E,	SP		; reset SP
+	clrl	r1			; clear the carry flag in case we
+					;   are ignoring the overflow check
+	jmp	(r0)			; execute the procedure
+
+;
+; wm_cut performs the cut from within call
+;
+; T1 contains the module id.
+;
+
+	global	wm_cut
+wm_cut:
+	movl	(SP)+, E		; unlink the stack frame
+	extzv	#4, #28, 4(SP), r0	; get cut environment
+	bicl	#3, r0			;   clear low two bits
+	subl	r0, wm_heapbase, r0	; 
+	brb	wm_docut2
+
+;
+; wm_docut	-- performs the cut operation
+;	On entry, r0 will contain the environment to cut back to.  We
+;	compare this value with SPB.  If SPB is bigger (older than) the
+;	value in r0, things are already determinate and there is nothing
+;	to do.  Otherwise, there is some work to do.
+;
+
+
+	global	wm_docut
+	global	wm_docut2
+
+
+wm_docut:
+	tstl	Safety
+	blss	cutexception
+wm_docut2:
+	cmpl	r0,	SPB		; compare r0 with SPB
+	bgequ	2f			; branch if we have work to do
+	rsb				; return if nothing to do
+
+	;
+	; There is some work to do.  The first thing that needs to be done
+	; is to find the choice point to cut back to.  We do this by walking
+	; the choice point stack until we find a choice point with a saved
+	; SPB which is bigger (older) than r0.
+	;
+
+1:	movl	chpt_B(B),	B	; get previous B
+2:	bicl3	#3, chpt_SPB(B), SPB	; get SPB value
+					;	(with compaction bit cleared)
+	cmpl	r0,	SPB		; compare r0 with SPB
+	bgequ	1b			; branch if still nondeterminate
+
+	movl	B,	r1		; set the lead pointer
+	moval	chpt_size(B), r0	; set the follow pointer
+
+	movl	chpt_Fail(B), Fail	; load new Fail value
+	movl	chpt_HB(B), HB		; 	and new HB
+	movl	chpt_B(B), B		;	and new B
+
+	;
+	; r1 is set to the choice point just prior to the place we are 
+	;	cutting to.  It is at the end of this choice point that we
+	;	will position the follow pointer.  The lead pointer will
+	;	stay where it is and advance till either the end of another
+	;	choice record is found or until it equals TR
+	;
+
+cutloop:
+	cmpl	r1,	TR		; compare TR to lead pointer
+	bneq	1f			; branch if not done
+	movl	r0,	TR		; set TR to follow pointer
+	rsb				; return
+1:	movl	-(r1),	r2		; get trail entry
+	cmpl	r1,	r2		; see if entry is bigger than pointer
+	bgequ	1f			; branch if we have real trail entry
+	subl	#chpt_size-4, r1	; else move to front of the chpt
+	brb	cutloop
+
+1:	cmpl	r2,	HB		; compare against HB
+	bgequ	cutloop			; don't keep it if HB is lower or same
+	cmpl	r2,	SPB		; compare against SPB
+	blssu	cutloop			; don't keep if SPB is bigger
+	movl	r2,	-(r0)		; copy trail entry
+	brb	cutloop
+
+
+	;
+	; cutexception is called when the safety register contains a negative
+	; value.  This means that an interrupt has been triggered.
+	;
+
+cutexception:
+	pushal	dummyret		; push on the dummy return address
+	pushl	E			; create an environment linkage
+	movl	SP,	E		;
+	pushl	T1			; save T1
+	subl	r0, wm_heapbase, r0	; compute distance from heapbase
+	ashl	#MTP_CONSTSHIFT, r0, r0 ; shift over so we can add in the
+	addl	#MTP_INT, r0, -(SP)	; 	constant tag and push on stack
+	jsb	@wm_cutaddr		; call the cut in the proc entry tbl
+gccut1:	
+	tstw	I^#(gccut2-gccut1)	; gc info
+	movl	-4(E),	T1		; restore T1
+	movl	E,	SP		; restore SP
+	movl	(SP)+,	E		; restore old E
+	addl	#4,	SP		; skip over dummy return address
+	rsb				; return to caller
+
+gccut2:	long	1			; 1 argument (the real return address)
+	long	-1			; end of clause indicator
+	long	0			; builtins have no clause block
+
+dummyret:
+	tstw	I^#(dummymask-dummyret)
+dummymask:
+	long	0			; no arguments
+	long	-1			; end of clause indicator
+	long	0			; builtins have no clause block
+
+
+;
+; wm_comma implements ','/2
+;
+; T1 has the module id
+;
+
+
+	global	wm_comma
+wm_comma:
+	subl	#12,	SP		; allocate some slots in the environment
+	bicl	#0x10,	16(E),	r1	; get the cutpt and wipe the semicolon
+					; flag
+    	movl	r1,	16(E)		; put the wiped version back
+	movl	r1,	4(SP)		; move the cutpt
+	movl	8(E),	(SP)		; move the first thing to call
+	movl	T1,	-4(E)		; store module id in environment
+	bsbw	wm_call_callentry	; invoke call
+gcc1:	tstw	I^#(gcc2-gcc1)		; gc info
+	movl	-4(E),	T1		; get module id back
+	cmpl	E,	SPB		; decide on type of trimming
+	blssu	1f
+	moval	-20(SPB), SP		; nondeterminate stuff
+	movl	16(E),	16(SP)		; move common stuff over
+	movl	12(E),	12(SP)
+	brb	2f
+1:	movl	E,	SP		; determinate branch label
+2:	movl	4(E),	8(SP)
+	movl	(E),	4(SP)
+	addl	#4,	SP
+	movl	SP,	E
+	jmp	wm_call
+gcc2:	long	0x0603			; mask and arguments
+	long	-1			; end of clause indicator
+	long	0			; the clause is a builtin
+
+
+;
+; wm_semicolon implements ';'/2
+;
+
+	global	wm_semicolon
+wm_semicolon:
+	movl	(SP),	-(SP)		; pick up Old E and push it
+	movl	8(SP),	4(SP)		; move the return address
+	movl	T1,	8(SP)		; install module id
+	movl	SP,	E		; set E appropriately
+	try_me_else	semitrust
+	movl	8(SP),	T1		; pick module id back up
+	subl	#16,	SP		; allocate a stack frame
+	movl	(E),	(SP)		; shift the OldE
+	movl	4(E),	4(SP)		; shift the return address
+	movl	12(E),	8(SP)		; shift the thing to call
+	bisl	#0x10, 20(E), 12(SP)	; mark cutpt as coming from first
+					;   part of the semicolon
+	movl	SP,	E		; set E to new frame
+	brw	wm_call			; do the call
+
+semitrust:
+	trust_me_else_fail
+	movl	8(SP),	T1		; pick the module id back up
+	movl	(SP),	8(SP)		; shift the Old E
+	movl	4(SP),	12(SP)		; shift the return address
+	addl	#8,	SP		; adjust the stack pointer
+	movl	SP,	E		; adjust E
+	brw	wm_call			; do the call
+
+
+;
+; wm_arrow implements '->'/2
+;
+
+	global	wm_arrow
+wm_arrow:
+	subl	#16,	SP		; allocate an environment
+	movl	16(E),	r1		; get the cut point
+	bbcc	#4,	r1,	1f	; test and clear semicolon flag
+	subl	SPB,	wm_heapbase, r2	; use SPB as cutpt
+	brb	2f
+1:	subl	E,	wm_heapbase, r2	; else use E as cutpt
+2:	ashl	#4,	r2,	r2	; shift,
+	addl	#MTP_INT, r2,	-8(E)	;	tag and store for later
+	movl	r1,	16(E)		; move wiped version back
+	movl	r1,	4(SP)		; move the cut point
+	movl	8(E),	(SP)		; move the first thing to call
+	movl	T1,	-4(E)		; save module id in environment
+	bsbw	wm_call_callentry	; invoke call
+gca1:	tstw	I^#(gca2-gca1)		; nop for getting at gc info
+	extzv	#4, #28, -8(E), r0	; get cut environment and store in r0
+	subl	r0, wm_heapbase, r0	; adjust to point into the stack
+	bsbw	wm_docut		; perform the arrow cut
+	movl	-4(E),	T1		; get the module id
+	movl	4(E),	8(E)		; move return address
+	movl	(E),	4(E)		; move environment link
+	moval	4(E),	SP		; set up the stack pointer
+	movl	SP,	E		; set up E
+	brw	wm_call			; do second part of arrow
+
+gca2:	long	0x0603			; mask and number of arguments
+	long	-1			; end of clause indicator
+	long	0
+
+;
+; wm_colon implements ':'/2
+;
+
+	global	wm_colon
+wm_colon:
+	deref	8(SP),	T1,	colon_ground
+	fail				; fail if module arg is a variable
+colon_ground:
+	movl	4(SP),	8(SP)		; shift return address
+	movl	(SP)+,	(SP)		; shift environment link
+	movl	SP,	E		; set up E
+	brw	wm_call			; now go to work on the 2nd argument
+
+
+;
+; wm_dbg_call implements dbg_call/2 which is essentially call but
+; 	without the overflow check
+;
+
+	global	wm_dbg_call
+wm_dbg_call:
+	deref	8(SP),	T1,	dbg_call_ground
+	fail				; fail if module arg is a variable
+ocall_ground:
+	movl	wm_trigger, Safety
+	movl	Safety,	wm_safety
+dbg_call_ground:
+	movl	4(SP),	8(SP)		; shift the return address
+	movl	(SP)+,	(SP)		; shift the environment link
+	movl	SP,	E		; set up E
+	movl	#1,	S		; set S so that the overflow check
+					; will be ignored
+	brw	ocall_entry		; now go to work on the second arg
+
+
+;
+; wm_ocall implements callWithDelayedInterrupt (formerly ocall/2) which is
+;	call without the overflow check.  In addition, the Safety register
+;	set so that the next call will be interrupted.
+;
+
+	global	wm_ocall
+wm_ocall:
+	deref	8(SP),	T1,	ocall_ground
+	fail				; fail if module arg is variable
+
+;
+; wm_jump implements jump/2
+;
+
+	global	wm_jump
+wm_jump:
+	deref	8(E),	r1,	1f	; dereference first argument
+	fail
+1:
+	deref	12(E),	r2,	1f	; dereference second argument
+jump_fail:
+	fail				; fail if second arg is a variable
+1:
+	; Call jump_validate_dbref with arguments
+
+	callC2	jump_validate_dbref, r1, r2
+	tstl	r0			; see if valid
+	beql	jump_fail		; fail if not
+
+	;
+	; r0 has the clause address
+	; r2 has the call structure
+	;
+
+	bicb	#~MTP_TAGMASK,	r2,	r1	; get tags into r1
+	cmpb	#MTP_LIST,	r1	; see what we got
+	beql	jump_fail		; fail if it is a list
+	bgtru	jump_isstruct		; branch if it is a structure
+	bicb	#~MTP_CONSTMASK, r2,	r1	; put const tags into r1
+	cmpb	#MTP_SYM,	r1	; see if we have a symbol
+	beql	1f			; branch if we do
+	cmpb	#MTP_UIA,	r1	; see if we have a uia
+	bneq	jump_fail		; branch if we don't
+1:	movl	4(SP),	8(SP)		; shift return address
+	movl	(SP)+,	(SP)		; shift environment linkage
+	brb	jump_whereto
+
+jump_isstruct:
+	decl	r2			; make structure pointer usable
+	movl	(r2)+, r1		; get functor
+	extzv	#24, #8, r1, r1		; put arity into r1
+	mnegl	r1,	S		; put negated arity into S for
+	moval	8(SP)[S],	SP	;	stack adjustment
+	decl	r1			; subtract one from the arity
+	movl	(E),	S		; get environment linkage
+	movl	4(E),	4(SP)		; shift return address
+	movl	S,	(SP)		; put down environment linkage
+1:	movl	(r2)[r1], 8(SP)[r1]	; move arguments over
+	sobgeq	r1,	1b		; loop around
+
+jump_whereto:
+	movl	SP,	E		; set E appropriately
+	jmp	(r0)			; go

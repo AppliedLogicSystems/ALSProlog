@@ -1,0 +1,355 @@
+/*======================================================================*
+ |		cexp.pro
+ |	Copyright (c) 1990-91 Applied Logic Systems, Inc.
+ |
+ |		Expression parser
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 4/6/90
+ |
+ | Revision History:
+ |	Revised:	5/7/91, kev,	added expression_additive/3 for
+ |					88k implementation.
+ |	Updated:	9/5/91, raman,	bug fixes
+ |
+ | Major Procedures:
+ |	expression/5 
+ |		The first argument is the return value of the
+ |		expression. Second arg is the file descriptor and 
+ |		the third arg is the symbol table. The fourth and
+ |		fifth  arguments are the list values typical of DCG rules.
+ |
+ |		The expression will be evaluated as much as
+ |		possible.
+ |		
+ *======================================================================*/
+
+module c2pro.
+
+expression(Val,State) --> e12(Val,State).
+
+
+/*
+ * e12	-- conditional expression
+ */
+
+e12(Val,State) --> e11(V1,State), e12s(Val,V1,State).
+
+e12s(Val,V1,State) -->
+	[question], !, e12(V2,State), [colon], e12(V3,State),
+	{eval_conditional(V1,V2,V3,Val)}.
+e12s(V,V,State) --> [].
+
+eval_conditional(0,_,V,V) :- !.
+eval_conditional(N,V,_,V) :- number(N), !.
+eval_conditional(V1,V2,V3,conditional(V1,V2,V3)).
+
+/*
+ * e11	-- logical or
+ */
+
+e11(Val,State) --> e10(V1,State), e11s(Val,V1,State).
+
+e11s(Val,V1,State) --> 
+	[lor], !, e10(V2,State), {eval_lor(V1,V2,V3)}, 
+	e11s(Val,V3,State).
+e11s(V,V,State) --> [].
+
+eval_lor(0,0,0)		:- !.
+eval_lor(N1,_,1)	:- number(N1), !.
+eval_lor(_,N2,1)	:- number(N2), !.
+eval_lor(N1,N2,lor(N1,N2)).
+
+/*
+ * e10	-- logical and
+ */
+
+e10(Val,State) --> e9(V1,State), e10s(Val,V1,State).
+
+e10s(Val,V1,State) --> 
+	[land], !, e9(V2,State), {eval_land(V1,V2,V3)}, 
+	e10s(Val,V3,State).
+e10s(V,V,State) --> [].
+
+eval_land(0,_,0)	:- !.
+eval_land(_,0,0)	:- !.
+eval_land(N1,N2,1)	:- number(N1),number(N2), !.
+eval_land(N1,N2,land(N1,N2)).
+
+
+/*
+ * e9	-- bitwise inclusive or
+ */
+
+e9(Val,State) --> e8(V1,State), e9s(Val,V1,State).
+
+e9s(Val,V1,State) --> 
+	[or], !, e8(V2,State), {eval_or(V1,V2,V3)}, 
+	e9s(Val,V3,State).
+e9s(V,V,State) --> [].
+
+eval_or(N1,N2,V)
+	:- 
+	number(N1), number(N2), V is N1 \/ N2, !.
+eval_or(N1,N2,or(N1,N2)).
+
+/*
+ * e8	-- bitwise exclusive or
+ */
+
+e8(Val,State) --> e7(V1,State), e8s(Val,V1,State).
+
+e8s(Val,V1,State) -->
+	[carat], !, e7(V2,State), {eval_xor(V1,V2,V3)}, 
+	e8s(Val,V3,State).
+e8s(V,V,State) --> [].
+
+eval_xor(N1,N2,V)
+	:-
+	number(N1), number(N2), V is N1 xor N2, !.
+eval_xor(N1,N2,xor(N1,N2)).
+
+/*
+ * e7	-- bitwise and
+ */
+
+e7(Val,State) --> e6(V1,State), e7s(Val,V1,State).
+
+e7s(Val,V1,State) -->
+	[and], !, e6(V2,State), {eval_and(V1,V2,V3)}, 
+	e7s(Val,V3,State).
+e7s(V,V,State) --> [].
+
+eval_and(N1,N2,V)
+	:-
+	number(N1), number(N2), V is N1 /\ N2, !.
+eval_and(N1,N2,and(N1,N2)).
+
+/*
+ * e6	-- equality operators
+ */
+
+e6(Val,State) --> e5(V1,State), e6s(Val,V1,State).
+
+e6s(Val,V1,State) -->
+		[EqOp], {isEqOp(EqOp)}, !,
+		e5(V2,State), {e6s_eval(EqOp,V1,V2,V3)}, e6s(Val,V3,State).
+e6s(V,V,State) --> [].
+
+isEqOp(equalEqual).
+isEqOp(notequal).
+
+e6s_eval(equalEqual,N1,N2,V)
+	:-
+	number(N1),
+	number(N2), !, 
+	eval_Equal(N1,N2,V).
+e6s_eval(equalEqual,N1,N2,equal(N1,N2)) :- !.
+e6s_eval(notequal,N1,N2,V)
+	:-
+	number(N1),
+	number(N2), !,
+	eval_notEqual(N1,N2,V).
+e6s_eval(notequal,N1,N2,not_equal(N1,N2)).
+
+eval_Equal(N,N,1) :- !.
+eval_Equal(_,_,0).
+
+eval_notEqual(N,N,0) :- !.
+eval_notEqual(_,_,1).
+
+/*
+ * e5	-- relational operators
+ */
+
+e5(Val,State) --> e4(V1,State), e5s(Val,V1,State).
+
+e5s(Val,V1,State) -->
+	[RelOp], {isRelOp(RelOp)}, !,
+	e4(V2,State), {e5s_eval(RelOp,V1,V2,V3)}, e5s(Val,V3,State).
+e5s(V,V,State) --> [].
+
+isRelOp(langle).
+isRelOp(rangle).
+isRelOp(lessOrEqual).
+isRelOp(greaterOrEqual).
+
+e5s_eval(langle,N1,N2,V)
+	:-
+	number(N1),
+	number(N2),
+	!,
+	eval_less(N1,N2,V).
+e5s_eval(langle,N1,N2,N1<N2) :- !.
+e5s_eval(rangle,N1,N2,V) :-
+	number(N1),
+	number(N2),
+	!,
+	eval_less(N2,N1,V).
+e5s_eval(rangle,N1,N2,N1>N2) :- !.
+e5s_eval(lessOrEqual,N1,N2,V)
+	:-
+	number(N1),
+	number(N2),
+	!,
+	eval_lessOrEqual(N1,N2,V).
+e5s_eval(lessOrEqual,N1,N2,N1=<N2) :- !.
+e5s_eval(greaterOrEqual,N1,N2,V)
+	:-
+	number(N1),
+	number(N2),
+	!,
+	eval_lessOrEqual(N2,N1,V).
+e5s_eval(greaterOrEqual,N1,N2,N1>=N2).
+
+eval_less(N1,N2,1) :- N1 < N2,!.
+eval_less(N1,N2,0).
+
+eval_lessOrEqual(N1,N2,1) :- N1 =< N2, !.
+eval_less(N1,N2,0).
+
+/*
+ * e4	-- shift level operators
+ */
+
+e4(Val,State) --> e3(V1,State), e4s(Val,V1,State).
+
+e4s(Val,V1,State) --> 
+	[ShiftOp], {isShiftOp(ShiftOp)}, !,
+	e3(V2,State), {e4s_eval(ShiftOp,V1,V2,V3)}, e4s(Val,V3,State).
+e4s(V,V,State) --> [].
+
+isShiftOp(leftshift).
+isShiftOp(rightshift).
+
+e4s_eval(leftshift,N1,N2,V)
+	:-
+	number(N1),
+	number(N2),
+	V is N1<<N2, !.
+e4s_eval(leftshift,N1,N2,N1<<N2) :- !.
+e4s_eval(rightshift,N1,N2,V)
+	:-
+	number(N1),
+	number(N2),
+	V is N1>>N2, !.
+e4s_eval(rightshift,N1,N2,N1>>N2).
+
+/*
+ * e3	-- additive level operators
+ */
+
+e3(Val,State) --> e2(V1,State), e3s(Val,V1,State).
+
+e3s(Val,V1,State) -->
+	[AddOp], {isAddOp(AddOp)}, !,
+	e2(V2,State), {e3s_eval(AddOp,V1,V2,V3)}, e3s(Val,V3,State).
+e3s(V,V,State) --> [].
+
+isAddOp(plus).
+isAddOp(minus).
+
+e3s_eval(plus,N1,N2,V)
+	:-
+	number(N1),
+	number(N2),
+	V is N1+N2, !.
+e3s_eval(plus,N1,N2,N1+N2) :- !.
+e3s_eval(minus,N1,N2,V) :-
+	number(N1),
+	number(N2),
+	V is N1-N2, !.
+e3s_eval(minus,N1,N2,N1-N2).
+
+/*
+ * e2	-- multiplicative level operators
+ */
+
+e2(Val,State) --> e1(V1,State), e2s(Val,V1,State).
+
+e2s(Val,V1,State) -->
+	[MulOp], {isMulOp(MulOp)}, !, 
+	e1(V2,State), {e2s_eval(MulOp,V1,V2,V3)}, e2s(Val,V3,State).
+e2s(V,V,State) --> [].
+
+isMulOp(star).
+isMulOp(slash).
+isMulOp(percent).
+
+e2s_eval(star,N1,N2,V)
+	:-
+	number(N1),
+	number(N2),
+	V is N1*N2, !.
+e2s_eval(star,N1,N2,N1*N2) :- !.
+e2s_eval(slash,N1,N2,V)
+	:-
+	number(N1),
+	number(N2),
+	V is N1/N2,!.
+e2s_eval(slash,N1,N2,N1/N2) :- !.
+e2s_eval(percent,N1,N2,V)
+	:-
+	number(N1),
+	number(N2), 
+	V is N1 mod N2, !.
+e2s_eval(percent,N1,N2,mod(N1,N2)).
+
+/*
+ * e1	-- unary operators
+ */
+
+e1(Val,State) --> sizeof_exp(Val,State), !.
+e1(Val,State) --> primary_exp(Val,State), !.
+e1(Val,State) --> cast_exp(Val,State), !.
+e1(Val,State) --> unop_exp(Val,State).
+
+%
+
+primary_exp(Num,State) --> [number(Num)], !.
+primary_exp(Exp,State) --> [lparen], !, expression(Exp,State), [rparen].
+primary_exp(Val,State) --> [ident(Id)], 		% enum constant
+	{ accessC2P(info_table, State, Table),
+	  avl_search(assign(Id),val(Val),Table) }, ! .
+% primary_exp(ident(Id),State) --> [ident(Id)].
+
+%
+
+cast_exp(Val,State) --> [lparen], type_spec(State,_),  
+	abstract_declt(State,_), [rparen], e1(Val,State).
+
+%
+% size returned is 32 (arbitrary)
+%
+
+sizeof_exp(32,State) --> 
+	[fident(sizeof),lparen], !, type_spec(State,_), [rparen].
+
+sizeof_exp(32,State) --> 
+	[ident(sizeof), lparen], !, e1(_,State), [rparen].
+
+sizeof_exp(32,State) --> 
+	[ident(sizeof)], e1(_,State).
+
+%
+
+unop_exp(Val,State) --> [UnOp], {isUnary(UnOp)}, e1(E,State),
+	{e1_eval(UnOp,E,Val)}.
+
+
+isUnary(minus).
+isUnary(plus).
+isUnary(lnot).
+isUnary(not).
+
+e1_eval(minus,N,Val) :- number(N), Val is -N, !.
+e1_eval(minus,E,-E).
+e1_eval(lnot,E,Val) :- !, eval_lnot(E,Val).
+e1_eval(not,N,Val) :- number(N), Val is \(N), !.
+e1_eval(not,N,not(N)).
+
+eval_lnot(0,1) :- !.
+eval_lnot(N,0) :- number(N), !.
+eval_lnot(E,lnot(E)).
+
+endmod.

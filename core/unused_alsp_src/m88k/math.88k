@@ -1,0 +1,192 @@
+;
+; math.88k			-- arithmetic support for ALS-Prolog
+;
+;	Copyright (c) 1988 Applied Logic Systems, Inc.
+;
+; Author: Kevin A. Buettner
+; Creation: 7/28/88
+; Revision History:
+;	Revised: mm/dd/yy	who		why
+;	Revised: mm/dd/yy	who		why
+;
+
+#include "assembly.88k"
+#ifdef notdef
+
+	;
+	; _mth_getint is given an argument to dereference in Uarg1.  If the
+	; result of the dereference is a variable, failure occurs.  If the
+	; result is ground, but not an integer, return occurs through r1 as
+	; normal.  Otherwise, r1 is advanced to the next word and this is
+	; used as the return address.  The compiler will place a branch to the
+	; afp after the subroutine call to _mth_getint.
+	;
+	; tmp1 is used in the dereference operation.
+	; UArg1 will return with the sign extended (untagged) integer
+	;
+
+	text
+
+	global _mth_getint
+_mth_getint:
+	bb1	BGND,	UArg1,	@gi_ground	; branch if ground
+	ld	tmp1,	UArg1,	BIAS		; follow the reference chain
+	cmp	UArg1,	tmp1,	UArg1		; see if we have a variable
+	bb1.n	ne,	UArg1,	_mth_getint	; branch if not
+	addu	UArg1,	tmp1,	0		;  -- but first set UArg1 to
+						;     the new value
+@fail:	jmp	Fail				; Fail if we have a variable
+
+@gi_ground:
+	bb0	BNUM,	UArg1,	@gi_ret		; branch if not a number
+	bb1	BUIA,	UArg1,	@gi_ret		; branch if it's a double
+	addu	r1,	r1,	4		; advance past branch to afp
+@gi_ret:
+	jmp.n	r1
+	ext	UArg1,	UArg1,	26<0>
+
+
+
+	;
+	; _mth_getval is used to match an integer found in UArg1 with
+	; an unknown object found in UArg2.  The tag part of UArg1 is clear.
+	;
+
+	global	_mth_getval
+_mth_getval:
+	or.u	UArg1,	UArg1,	TINT		; or in the integer tag
+
+@gv_deref:
+	bb1	BGND,	UArg2,	@gv_ground	; dereference UArg1
+	ld	tmp1,	UArg2,	BIAS
+	cmp	S,	UArg2,	HB		; do early trail check
+	cmp	UArg2,	tmp1,	UArg2
+	bb0.n	eq,	UArg2,	@gv_deref
+	addu	UArg2,	tmp1,	0
+
+	bb1.n	hs,	S,	@gv_cont	; branch if UArg1 >= HB
+	st	UArg1,	UArg2,	BIAS		; -- but first do the binding
+	cmp	S,	UArg2,	SPB		; do spb check
+	bb1	lo,	S,	@gv_cont	; branch if UArg1 < spb
+	subu	TR,	TR,	4		; allocate a new trail entry
+	st	UArg2,	TR,	0		; and trail UArg1
+@gv_cont:
+	jmp	r1				; return to caller
+
+@gv_ground:
+	cmp	tmp1,	UArg1,	UArg2		; compare the objects
+	bb1	ne,	tmp1,	@fail		; fail if not equal
+	jmp	r1				; otherwise continue
+
+
+	;
+	; _mth_divide
+	;
+	;	Takes the dividend in UArg1, the divisor in UArg2, and
+	;	leaves the quotient in UArg1.  
+	;
+	;	r1 is assumed to point at a branch instruction which will
+	;	take us to the overflow code (division by zero).  Successful
+	;	returns add 4 to r1 and then jump to r1.
+	;
+	;	tmp1 is used.
+	;
+	global	_mth_div
+_mth_div:
+	bcnd	eq0,	UArg2,	@divret
+	xor	tmp1,	UArg1,	UArg2		; figure out the resulting sign
+	bcnd	ge0,	UArg1,	@div1abs	; get absolute value of UArg1
+	subu	UArg1,	r0,	UArg1
+@div1abs:
+	bcnd	ge0,	UArg2,	@div2abs	; get absolute value of UArg2
+	subu	UArg2,	r0,	UArg2
+@div2abs:
+	div	UArg1,	UArg1,	UArg2		; do the division
+	bcnd	ge0,	tmp1,	@divsignfixed	; branch if sign doesn't need
+						;  fixing
+	subu	UArg1,	r0,	UArg1		; fix the sign
+@divsignfixed:
+	addu	r1,	r1,	4
+@divret:
+	jmp	r1
+
+
+	;
+	; _mth_mod
+	;
+	;	Takes the dividend in UArg1, the divisor in UArg2, and using
+	;	the absolute value of these numbers, leaves the remainder in
+	;	UArg1.
+	;
+	;	r1 is assumed to point to the branch instruction which will
+	;	take us to the overflow code.  Successful returns add 4 to
+	;	r1 before jumping to it.
+	;
+	;	tmp1 is used.
+	;	
+
+	global	_mth_mod
+_mth_mod:
+	bcnd	eq0,	UArg2,	@modret		; do an error return if
+						;  the divisor is zero
+	bcnd	ge,	UArg1,	@mod1abs	; take absolute value of UArg1
+	subu	UArg1,	r0,	UArg1
+@mod1abs:
+	bcnd	ge,	UArg2,	@mod2abs	; take abs value of UArg2
+	subu	UArg2,	r0,	UArg2
+@mod2abs:
+	div	tmp1,	UArg1,	UArg2
+	mul	tmp1,	UArg2,	tmp1
+	subu	UArg1,	UArg1,	tmp1
+	
+	addu	r1,	r1,	4		; advance over jump to
+						; overflow code
+@modret:
+	jmp	r1
+
+
+	;
+	; _mth_mul
+	;
+	;	Multiplies UArg1 by UArg2 leaving the result in UArg1.  r1
+	;	should point at the branch instruction to take when overflow
+	;	occurs.  Normal return is accomplished by adding 4 to r1 and
+	;	then jumping to this address.
+	;
+	;	tmp1 and tmp2 are modified.
+	;
+
+	global	_mth_mul
+_mth_mul:
+	bcnd.n	lt0,	UArg1,	@mul2ndarg	; branch if 1st arg is less than
+						;  zero
+	ff0	tmp1,	UArg1
+
+	ff1	tmp1,	UArg1
+	and	tmp1,	tmp1,	0x001f		; disallow 32
+	addu	tmp1,	tmp1,	1
+@mul2ndarg:
+	bcnd.n	lt0,	UArg2,	@mulov1		; branch if 2nd arg is less than
+						;  zero
+	ff0	tmp2,	UArg2			;
+
+	ff1	tmp2,	UArg2
+	and	tmp2,	tmp2,	0x001f
+	addu	tmp1,	tmp1,	1
+@mulov1:
+	addu	tmp1,	tmp2,	tmp1		; add bit positions together
+	cmp	tmp1,	tmp1,	26		; see if too big
+	bb1	gt,	tmp1,	@mulovret
+
+	mul	UArg1,	UArg1,	UArg2		; do the multiplication
+	ext	tmp1,	UArg1,	7<25>		; extract sign bits
+	bcnd	eq0,	tmp1,	@mulnormret	; branch if ok
+	addu	tmp1,	tmp1,	1		; add 1
+	bcnd	ne0,	tmp1,	@mulovret	; branch if not ok
+
+@mulnormret:
+	addu	r1,	r1,	4
+@mulovret:
+	jmp	r1
+#endif
+	data

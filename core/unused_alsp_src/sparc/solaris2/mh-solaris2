@@ -1,0 +1,5 @@
+# mh-solaris2		-- Makefile fragment for solaris2.x
+
+# run fixup on .s files prior to assembly
+.s.o :
+	$(SHELL) $(srcdir)/$(ARCH)/$(OS)/fixasm $*.s && as -q -o $@ $*.s

@@ -1,0 +1,429 @@
+#include "assembly.88k"
+#include "wint88.h"
+
+;
+; interface.88k		-- interface between C and assembly
+;
+;	Copyright (c) 1989, 1990 Applied Logic Systems, Inc.
+;
+;
+
+	data
+	align	4
+
+	text
+
+	;
+	; get_regs_base returns with r10 set to one of the saved register
+	; sets in the wm_regs structure. From C this address would be
+	; wm_regs[wm_regidx].
+	;
+	; r11 is used in this subroutine.
+	;
+
+get_regs_base:
+	; Put value of _wm_regidx into r10
+	or.u	r11,	r0,	hi16(_wm_regidx)
+	ld	r10,	r11,	lo16(_wm_regidx)
+
+	; Put address of _wm_regs into r11
+	or.u	r11,	r0,	hi16(_wm_regs)
+	or	r11,	r11,	lo16(_wm_regs)
+
+	mak	r10,	r10,	26<6>		; shift the index
+	jmp.n	r1				; return to caller whilst
+	addu	r10,	r11,	r10		; adding the address of wm_regs
+	
+	global	setup_prolog_regs
+setup_prolog_regs:
+	or.u	r11,	r0,	hi16(_wm_regidx)
+	ld	r10,	r11,	lo16(_wm_regidx)
+						; get the value of wm_regidx
+	mak	r10,	r10,	26<6>		; shift it
+	or.u	r11,	r0,	hi16(_wm_regs);
+	addu	r11,	r11,	lo16(_wm_regs);
+	addu	r10,	r11,	r10		; and add to the wm_regs addr
+
+	ld	CP,	r10,	wm_CP_idx*4 		; load the CP
+	ld	TR,	r10,	wm_TR_idx*4		; load TR
+	ld	H,	r10,	wm_H_idx*4 
+	ld	Fail,	r10,	wm_FAIL_idx*4 
+	ld	SPB,	r10,	wm_SPB_idx*4 
+	ld	B,	r10,	wm_B_idx*4 
+	ld	E,	r10,	wm_E_idx*4 
+	ld	SP,	r10,	wm_SP_idx*4
+
+	;
+	; Bias the things which need to be biased
+	;
+
+	subu	H,	H, 	BIAS			
+	subu	SPB,	SPB,	BIAS
+	subu	HB,	HB,	BIAS
+	subu	E,	E,	BIAS
+	subu	SP,	SP,	BIAS
+
+	; Set HB equal to H
+
+	addu	HB,	H,	0
+
+	;
+	; Set the flag which indicates that we are in Prolog and
+	; determine the proper value for the Safety register
+	;
+
+	addu	r11,	r0,	1		; put 1 into r11
+	or.u	r12,	r0,	hi16(_wm_in_Prolog)	
+	st	r11,	r12,	lo16(_wm_in_Prolog)	
+						; Store 1 into wm_in_Prolog
+
+	or.u	r12,	r0,	hi16(_wm_safety)
+	ld	Safety,	r12,	lo16(_wm_safety)
+
+	or.u	r12,	r0,	hi16(_wm_heapbase)
+	or	r12,	r12,	lo16(_wm_heapbase)
+	ld	HeapBase, r12,	0 
+	subu	HeapBase, HeapBase, BIAS	; Bias HeapBase
+
+	or.u	r12,	r0,	hi16(_wm_stackbot)
+	or	r12,	r12,	lo16(_wm_stackbot)
+	ld	StkBot,	r12,	0 
+	subu	StkBot,	StkBot,	BIAS		; Bias StkBot
+
+	jmp	r1			; return
+
+
+	global	save_prolog_regs
+save_prolog_regs:
+	or.u	r10,	r0,	hi16(_wm_in_Prolog)
+	st	r0,	r10,	lo16(_wm_in_Prolog)	
+						; put zero in wm_in_Prolog
+
+	or.u	r11,	r0,	hi16(_wm_regidx)
+	or	r11,	r11,	lo16(_wm_regidx)
+	ld	r10,	r11,	0		; get the value of wm_regidx
+	mak	r10,	r10,	26<6>		;
+	or.u	r11,	r0,	hi16(_wm_regs);
+	addu	r11,	r11,	lo16(_wm_regs);
+	add	r10,	r11,	r10
+
+	;
+	; Unbias some stuff
+	;
+
+	addu	H,	H, 	BIAS			
+	addu	SPB,	SPB,	BIAS
+	addu	HB,	HB,	BIAS
+	addu	E,	E,	BIAS
+	addu	SP,	SP,	BIAS
+
+
+	st	CP,	r10,	wm_CP_idx*4
+	st	TR,	r10,	wm_TR_idx*4
+	st	H,	r10,	wm_H_idx*4
+	st	Fail,	r10,	wm_FAIL_idx*4 
+	st	SPB,	r10,	wm_SPB_idx*4
+	st	HB,	r10,	wm_HB_idx*4 
+	st	B,	r10,	wm_B_idx*4 
+	st	E,	r10,	wm_E_idx*4
+	st	SP,	r10,	wm_SP_idx*4
+
+	;
+	; Save the safety
+	;
+
+	or.u	r12,	r0,	hi16(_wm_safety)
+	st	Safety,	r12,	lo16(_wm_safety)
+
+	jmp	r1			; return
+
+
+	global	__w_unify
+__w_unify:
+	push_c_regs			; push the C regs
+	or.u	r12,	r0,	hi16(_wm_heapbase)
+					; start setting up the load of heapbase
+	bsr.n	get_regs_base		; get regs base...
+	ld	HeapBase, r12,	lo16(_wm_heapbase)
+					; load HeapBase
+
+					; and load selected registers...
+
+	ld	HB,	r10,	wm_HB_idx*4
+	ld	SPB,	r10,	wm_SPB_idx*4
+	ld	SP,	r10,	wm_SP_idx*4
+	ld	TR,	r10,	wm_TR_idx*4
+	addu	T1,	r10,	0	; save r10 in T1 for later
+
+	subu	HeapBase, HeapBase, BIAS ; bias HeapBase
+	subu	HB,	HB,	BIAS	; bias HB
+	subu	SPB,	SPB,	BIAS	; bias SPB
+	subu	SP,	SP,	BIAS	; bias SP
+
+	bsr.n	@cont
+	add	Fail,	r1,	0
+	br.n	@ret
+	add	r2,	r0,	r0	; 0 indicates failure
+@cont:
+	add	UArg1,	A1,	0	; set up unifier argument
+	bsr.n	unify			; call the unifier
+	add	UArg2,	A2,	0	; set up second unifier argument
+
+	add	r2,	r0,	1	; 1 indicates success
+@ret:
+
+	st	TR,	T1,	wm_TR_idx*4	; store TR
+	pop_c_regs			; do return stuff 
+	jmp	r1
+
+;
+; _wm_rungoal
+;
+;	Called from C to run a goal whose module is given in r2 and goal
+;	structure given in r3.  The success / failure status is returned
+;	in r2.
+;
+	global	_wm_rungoal
+_wm_rungoal:
+	push_c_regs			; save the C regs away for awhile
+	bsr	setup_prolog_regs	; set up the prolog registers
+	addu	OldE,	E,	0	; set OldE to something reasonable
+	or.u	r12,	r0,	hi16(_wm_regidx)
+	ld	r10,	r12,	lo16(_wm_regidx)
+	addu	r10,	r10,	1	; increment value of _wm_regidx
+	st	r10,	r12,	lo16(_wm_regidx)
+					; store it back
+	or.u	A3,	E,	TINT	; set up a cut point
+	subu	SP,	SP,	20	; allocate a stack frame
+	addu	E,	SP,	0	; set up e
+	bsr.n	rungoal_chpt		; run the goal
+	addu	CP,	r1,	GC_INFO_SIZE	; and set up CP
+	gcinfo	0,	0,	0	; mask=0,nargs=0,npv=0
+	br.n	leave_prolog2		; branch to leave_prolog after...
+	addu	r2,	r0,	1	;   ...putting 1 into r2
+
+rungoal_chpt:
+	or.u	Fail,	r0,	hi16(rungoal_trust)
+	or	Fail,	Fail,	lo16(rungoal_trust)
+	bsr.n	_wm_try3		; create a choice point
+	subu	TR,	TR,	16	; -- part of choice point creation
+	or.u	Fail,	r0,	hi16(rungoal_trust)
+	or	Fail,	Fail,	lo16(rungoal_trust)
+	subu	SP,	SP,	20	; allocate a new stack frame
+	br.n	_wm_colon		; branch to colon after first..
+	addu	E,	SP,	0	;  ..setting e
+
+rungoal_trust:
+	br.n	leave_prolog2		; branch to leave_prolog after...
+	addu	r2,	r0,	0	;  ...putting zero into r2
+
+
+;
+; _wm_exec
+;
+;	Called from C to execute a query or command.  The place to
+;	begin execution should be in r2.
+;
+
+	global	_wm_exec
+_wm_exec:
+	push_c_regs			; the call to push_c_regs
+	bsr	setup_prolog_regs
+	addu	OldE,	E,	0	; set OldE to something reasonable
+	or.u	r12,	r0,	hi16(_wm_regidx)
+	ld	r10,	r12,	lo16(_wm_regidx)
+					; get the value of wm_regidx
+	addu	r10,	r10,	1	; increment it
+	st	r10,	r12,	lo16(_wm_regidx)	
+					; store it
+	set_a	Fail,	leave_prolog2
+
+	jsr.n	r2				; jump to the code 
+	add	CP,	r1,	GC_INFO_SIZE	;    and set up CP
+	gcinfo	0,	0,	0		; mask=0,nargs=0,npv=0
+	br	leave_prolog2
+
+
+	;
+	; leave_prolog2 is similar to leave_prolog, but preserves the
+	; bindings made in process of running goal
+	;
+
+leave_prolog2:
+	bsr.n	_wm_docut2			; cut away choice points
+	sub	UArg1,	E,	4		; want to cut away rungoal chpt
+						; but no more
+
+	store	ZERO,	_wm_in_Prolog		; put zero in wm_in_Prolog
+
+	set_a	tmp1,	_wm_regidx
+	ld	UArg1,	tmp1,	ZERO
+	subu	UArg1,	UArg1,	1		; decrement it
+	st	UArg1,	tmp1,	0		; store it
+	mak	UArg1,	UArg1,	26<6>		; shift left by six bits
+	set_a	UArg2,	_wm_regs
+	add	UArg1,	UArg2,	UArg1		; UArg1 now points at proper
+						;   register set
+
+	st	TR,	UArg1,	wm_TR_idx*4	; update TR
+	st	B,	UArg1,	wm_B_idx*4	; update B (gc can change it)
+	addu	H,	H, 	BIAS		; unbias H for storing	(was HB - raman)
+	st	H,	UArg1,	wm_H_idx*4	; Update H with bottom H (was HB)
+	pop_c_regs				; restore C's registers
+	jmp	r1
+
+;
+; _wm_exec_builtinX
+;
+;	Executes a builtin.  The address of the builtin is found in
+;	T1.  A choice point is pushed in order that the garbage compacter
+;	may be called.  Also, code which examines choice points and possibly
+;	updates them will not have to concern itself with the "top" choice
+;	point located in the registers as this choice point is cut away.
+;
+
+
+	global	_wm_exec_builtin0
+	global	_wm_exec_builtin1
+	global	_wm_exec_builtin2
+	global	_wm_exec_builtin3
+_wm_exec_builtin3:
+	st	A3, 	E,	BIAS+16
+_wm_exec_builtin2:
+	st	A2, 	E,	BIAS+12
+_wm_exec_builtin1:
+	st	A1,	E,	BIAS+8
+_wm_exec_builtin0:
+	bsr.n	_wm_try0
+	subu	TR,	TR,	16
+	bsr.n	@ebc
+	addu	Fail,	r1,	0
+
+	bsr.n	_wm_trust0
+	addu	E,	SPB,	0
+	jmp.n	Fail
+	addu	SP,	E,	0
+
+@ebc:
+	st	CP,	E,	BIAS+4
+	bsr.n	get_regs_base			; get reg base pointer into r10
+	st	OldE,	E,	BIAS+0
+
+	addu	r11,	E,	BIAS		; unbias E into r11
+	st	r11,	r10,	wm_E_idx*4	; save unbiased E
+	st	B,	r10,	wm_B_idx*4	; save B
+	addu	r11,	H,	BIAS		; unbias H into r11
+	st	r11,	r10,	wm_H_idx*4	; save unbiased H
+	st	TR,	r10,	wm_TR_idx*4	; save TR
+	addu	r11,	SPB,	BIAS		; unbias SPB into r11
+	st	r11,	r10,	wm_SPB_idx*4	; save unbiased SPB
+	addu	r11,	HB,	BIAS		; unbias HB into r11
+	st	r11,	r10,	wm_HB_idx*4	; save unbiased HB
+
+	addu	H,	r10,	0		; save reg base in H while
+						; we are in C
+	
+	or.u	r10,	r0,	hi16(_wm_in_Prolog)
+
+	;--- Call the C routine
+	jsr.n	T1				
+	st	r0,	r10,	lo16(_wm_in_Prolog) ; no longer in Prolog
+	;--- Now we are back
+
+	;
+	; We determine failure by examining the return status register
+	; which is r2.  We must be careful to leave this register alone
+	; until it is examined.
+	;
+
+	addu	r11,	r0,	1
+	or.u	r10,	r0,	hi16(_wm_in_Prolog)
+	st	r11,	r10,	lo16(_wm_in_Prolog)
+						; Set flag saying we are back
+						; in Prolog
+	or.u	r10,	r0,	hi16(_wm_safety)
+	ld	Safety,	r10,	lo16(_wm_safety)
+						; Reload the safety value
+	addu	r10,	H,	0		; put the reg base pointer
+						; back in r10
+	ld	H,	r10,	wm_H_idx*4	; reload H
+	ld	HB,	r10,	wm_HB_idx*4	; reload HB
+	ld	TR,	r10,	wm_TR_idx*4	; reload TR
+	ld	B,	r10,	wm_B_idx*4	; reload B (gv_alloc can
+						;   change it)
+
+	addu	UArg1,	E,	0
+	ld	r1,	E,	BIAS+4
+	ld	E,	E,	BIAS+0
+
+	subu	H,	H,	BIAS		; bias H
+
+	bcnd.n	eq0,	r2,	1f
+	subu	HB,	HB,	BIAS		; bias HB
+
+	br	_wm_docut2			; cut away the choice pt
+
+1:	fail
+
+
+;
+; wm_resolve_refN
+;
+;	Called to resolve an undefined reference.  It is expected that
+;	r1 is set to the beginning of the procedure entry structure
+;	(ntbl_entry in wintcode.h).  These subroutines will save the
+;	arguments, continuation pointer, and environment in the frame
+;	and then call the C function resolve_reference.  resolve_reference
+;	will install the appropriate stuff in the procedure entry table
+;	and then return the address to continue execution at (in A1).
+;
+;	The only registers that need to be saved are the argument registers.
+;	The rest of the registers are in calling procedure reserved registers.
+;
+
+	global	_wm_resolve_ref0
+	global	_wm_resolve_ref1
+	global	_wm_resolve_ref2
+	global	_wm_resolve_ref3
+
+_wm_resolve_ref3:
+	st	A3,	E,	BIAS+16	; store the arguments
+	st	A2,	E,	BIAS+12
+	st	A1,	E,	BIAS+8
+	addu	A1,	r1,	0	; set A1 for the call to resolve_ref
+	bsr	_resolve_reference	; call resolve_reference
+	addu	r1,	A1,	0	; put the place to continue in r1
+	load	Safety,	_wm_safety
+	ld	A1,	E,	BIAS+8
+	ld	A2,	E,	BIAS+12
+	jmp.n	r1			; continue
+	ld	A3,	E,	BIAS+16
+
+_wm_resolve_ref2:
+	st	A2,	E,	BIAS+12	; store the arguments
+	st	A1,	E,	BIAS+8
+	addu	A1,	r1,	0	; set A1 for the call to resolve_ref
+	bsr	_resolve_reference	; call resolve_reference
+	addu	r1,	A1,	0	; put the place to continue in r1
+	load	Safety,	_wm_safety
+	ld	A1,	E,	BIAS+8
+	jmp.n	r1			; continue
+	ld	A2,	E,	BIAS+12
+
+_wm_resolve_ref1:
+	st	A1,	E,	BIAS+8	; store the arguments
+	addu	A1,	r1,	0	; set A1 for the call to resolve_ref
+	bsr	_resolve_reference	; call resolve_reference
+	addu	r1,	A1,	0	; put the place to continue in r1
+	load	Safety,	_wm_safety
+	ld	A1,	E,	BIAS+8
+	jmp	r1			; continue
+
+_wm_resolve_ref0:
+	addu	A1,	r1,	0	; set A1 for the call to resolve_ref
+	bsr	_resolve_reference	; call resolve_reference
+	load	Safety,	_wm_safety
+	jmp	A1			; jump to the place to continue
+
+	data
+

@@ -1,0 +1,769 @@
+Real Procedure Calls
+====================
+
+The main use of real procedure call mechanism is to run routines that 
+are better suited to the real mode than to the protected mode or 
+to run routines that have been already written as a real mode program. 
+In the context of this documentation, a real procedure means a real 
+mode program.
+
+Calling a real procedure is a two-step process. 
+In the first step, the protected mode application loads the real procedure
+as an overlay and makes a call to an initialization routine in the real 
+procedure by using the extended service E0 of the OS/x86 kernel.
+Since a call to the initialization routine is a far call to the entry point 
+(CS:IP in the EXE header) in the real procedure, the executable for the real 
+procedure must be an EXE file.
+The OS/x86 kernel returns a handle to protected mode which designates that 
+real procedure and its entry point.
+In the second step, the protected mode application invokes the real procedure 
+via the handle by using the extended service E1 of the OS/x86 kernel.
+Information is passed back and forth between the protected mode application
+and the real procedure in a transaction buffer (maximum 4KB).
+
+In the rest of this document, we will concentrate on how to interface
+a real mode library from the protected mode.
+
+
+
+
+
+How to Interface to A Real Mode Library
+=======================================
+
+
+
+1. Creation of A Real Procedure
+
+A real procedure is created by linking a collection of real mode functions
+with the real mode part of a RPC interface. 
+The real mode part of a RPC interface contains an initialization routine and
+a dispatcher routine.
+The initialization routine is executed when the protected mode application
+uses the extended service E0 of the OS/x86 kernel, and returns the address of 
+the dispatcher routine.
+When the protected mode part of the RPOC interface invokes the extended 
+service E1 of the OS/x86 kernel, the control is transferred to the dispatcher
+routine of the real mode part of the RPC interface.
+The dispatcher routine decodes the function code in the transaction buffer 
+by using a function table to invoke a far call to that function after it 
+transfers function arguments into the stack from the transaction buffer.
+
+
+
+
+2. Creation of Protected Mode Part of RPC Interface
+
+The protected mode part of a RPC interface is linked with the protected mode
+application wants to use the real mode library represented by that RPC 
+interface.
+The protected mode part of a RPC interface consists of an initialization 
+routine and a collection of RPC entry routines.
+
+The initialization routine loads the real procedure as an overlay and calls 
+its initialization function by using the extended service E0 of the OS/x86 
+kernel.
+It gets a handle from the OS/x86 kernel which will be used the invoke
+real procedure calls in RPC entry routines.
+
+For each real mode function in the real procedure, there will be a RPC entry 
+routine in the protected mode part of the RPC interface.
+The name of a RPC entry routine is same as the name of that function in
+the real mode.
+When a call to a function "f" (which exists in the real procedure) is invoked 
+in the protected mode, a call to its RPC entry in the protected mode
+is actually invoked.
+First, a RPC entry routine transfers arguments of the function into 
+the transaction buffer.
+Then, the RPC entry routine invokes a call to the real procedure via the handle
+by using the extended service E1 of the OS/x86 kernel, after it puts 
+the function code into the transaction buffer.
+
+
+
+
+
+3. Execution of A Real Mode Function From Protected Mode
+
+When a call to a function, f(a1,...,an), which exists in the real procedure 
+is invoked, the stack looks like as follows at the entry point of its RPC 
+entry procedure.
+
+			+----------------+
+			|       an       |    |
+			+----------------+    |
+			|        .       |    V
+			|        .       |
+			+----------------+
+			|       a1       |
+			+----------------+
+			|    ret addr    | <== ESP
+			+----------------+
+
+The RPC entry procedure creates an transaction buffer in the stack before 
+it jumps to the real procedure.
+The following figure shows a transaction buffer created by a RPC entry 
+procedure.
+
+			+----------------+
+			|       a1       |    |
+			+----------------+    |
+			|        .       |    V
+			|        .       |
+			+----------------+
+			|       an       |
+			+----------------+
+			|   return val   |
+			+----------------+
+			|    argument    |
+			|    types       |
+			+----------------+
+			|code |type|arity| <== transaction buffer
+			+----------------+
+
+		A Transaction Buffer (in Stack)
+
+An argument of the function is directly copied into the transaction buffer,
+if it is a constant.
+On the other hand, if it is a pointer, that pointer is dereferenced and
+the value pointed by that pointer is transferred into the transaction
+buffer instead of that pointer.
+The reason for this is that passing a pointer to the protected memory
+space into the real mode doesn't make any sense, since protected and
+real mode memory spaces are different.
+In the real mode side of the RPC interface, a pointer to the value in
+the transaction buffer will be recreated.
+
+You should also note that the order of arguments in the transaction
+buffer is reversed.
+The reversed order of arguments makes life much easier during
+the creation of transaction buffer in the protected mode and 
+decoding it in the real mode.
+
+A RPC entry function also reserves space for the return value of the real 
+mode function after it transfers arguments of the function into the transaction
+buffer. 
+The amount of space reserved for the return value depends on the type
+of that real mode function.
+Then, it transfers coded argument types into the transaction buffer.
+Each argument type takes one byte in the transaction buffer.
+Finally, it puts the function code, type and arity into the transaction
+buffer.
+
+When the transaction buffer is completely created, the RPC entry function
+makes a real procedure call via the RPC handle by using the extended service E1
+of the OS/x86 kernel.
+In the real mode, the control is transferred to a dispatcher routine.
+The dispatcher routine  gets the address of the transaction buffer which
+is transferred from the protected mode into the real mode, and 
+transfers arguments in the transaction buffer into the stack (real mode stack).
+Then it decodes the function code in the transaction buffer and 
+invokes a far call to the decoded real mode function by getting its
+address from a function table.
+After the real mode function returns back to the dispatcher routine,
+the dispatcher routine transfers the return value of the function
+in registers AX and DX into the transaction buffer.
+If the real mode function uses any argument of its arguments as an output,
+the value of that argument automatically will be in 
+the transaction buffer.
+Finally, the dispatcher routine returns back to the RPC entry function in
+the protected mode with the updated transaction buffer.
+
+The RPC entry function transfers the return value of the real mode function in
+and output arguments in the updated transaction buffer
+into their locations in the protected mode application program.. 
+The return value of a function in the protected mode is returned in
+register EAX or in registers EAX and EDX depending on the type of the function.
+Finally, when the RPC entry function returns back the protected mode
+application, the execution of a real mode function from the protected mode
+is completed.
+
+
+
+
+
+RPC Interface
+=============
+
+A RPC interface consists of two parts: the protected mode part and
+the real mode part. 
+The protected mode part of a RPC interface catches
+a call in the protected mode to a function which exists in the real mode,
+and it prepares a transaction buffer which contains arguments of the function
+and other information about the function.
+After the transaction buffer is prepared, it is passed into
+the real mode.
+The real mode part gets this transaction buffer, and it actually calls
+the real mode function after it decodes the transaction buffer.
+
+
+
+1. The Protected Mode Part of A RPC Interface
+
+The protected mode part of a RPC interface consists of an initialization
+routine and a collection of RPC entry functions.
+The initialization routine is responsible to load the real procedure
+into the memory as an overlay. 
+A RPC entry function is responsible to catch a call in the protected mode
+to a function which exists in the real procedure.
+
+
+1.1. The Initialization Routine
+
+The name of the initialization routine is <libname>_init where <libname> is
+the name of the RPC interface.
+This initialization is called to load the real procedure which contains
+real mode functions into the memory as an overlay.
+After it loads the real procedure into the memory, it saves the handle
+for this real procedure.
+This RPC handle will be used by RPC entry functions to make
+real procedure calls.
+
+The following variables are used by the initialization function:
+
+	<libname>_rpc_path: 	
+	    This is the complete path name of the file which
+	    contains the real procedure. This variable is
+	    defined ion the protected mode application, not
+	    in the protected mode part of the RPC interface.
+	    This variable must be created from the variable 
+	    <libname>_rpc_fname which is defined in the protected 
+	    mode part of the RPC interface.
+	    The variable <libname>_rpc_fname defines the file name of 
+	    the real procedure.
+	    The protected mode application program must find the
+	    directory where the real procedure file exists, and combines the
+	    name of that directory with the file name of the real procedure
+	    to create the variable <libname>_rpc_path. 
+	    For example, if it wants search the real procedure file in 
+	    current directory, it should simply copy the content of 
+	    the variable <libname>_rpc_fname into the variable 
+	    <libname>_rpc_path. 
+	
+	RPCHandle:
+	    If the real procedure file is successfully loaded into 
+	    the memory, this variable holds its handle.
+	    This RPC handle is used by RPC entry functions to make 
+	    real procedure calls.
+
+
+
+The basic algorithm of the initialization routine as follows:
+
+	1. Save registers
+	2. If the real procedure file has been already loaded
+	   (the variable RPCHandle is not -1), got the step 7.
+	3. Try to load the real procedure file designated by the variable
+	   <libname>_rpc_path by using the extended service E0 of
+	   the OS/x86 kernel.
+	4. If it is successfully loaded, goto step 6. 
+	5. Give the error message, and exit to DOS.
+	6. Move the RPC handle in register AL into the variable RPCHandle.
+	7. Restore registers, and return.
+
+The initialization routine can be explicitly called from the protected mode
+application program, or it will be called when the first RPC entry
+function is executed.
+
+
+
+1.2. RPC Entry Functions
+
+There will a RPC entry function in the protected mode part of 
+a RPC interface for each real mode function in the real procedure.
+The name of a RPC entry function is same as the name of 
+its counterpart in the real procedure.
+In fact, when a call to a real mode function is invoked in 
+protected mode application, that call is actually for the RPC entry function
+of that real mode function.
+
+At the beginning of a RPC entry function, the protected mode stack 
+is looks like as follows.
+
+
+			+----------------+
+			|       an       |    |
+			+----------------+    |
+			|        .       |    V
+			|        .       |
+			+----------------+
+			|       a1       |
+			+----------------+
+			|    ret addr    | <== ESP
+			+----------------+
+
+
+Each argument takes a 32-bit long word or two 32-bit long words 
+in the protected mode stack depending on its type.
+
+A RPC entry function prepares a transaction buffer in the protected mode stack
+from arguments of the function and some other information specific to 
+that function.
+After it prepares the transaction buffer, it makes a real procedure call
+via the RPC handle created by the initialization routine.
+The real mode part of the RPC interface returns back to the RPC entry
+function with an updated transaction buffer.
+The RPC entry function transfers output arguments and return value 
+of the function from the updated transaction buffer into their
+locations in the protected mode application.
+The complete structure of a transaction buffer will be discussed
+in the next subsection.
+
+
+The basic algorithm of a RPC entry function is as follows.
+
+	1. Save registers.
+	2. Call <libname>_init function to load the real procedure
+	   if it has not been already loaded. 	
+	3. Create the transaction buffer.
+	   3.1. Copy arguments into the transaction buffer. 
+	        If an argument is a constant it is directly copied
+	        into the transaction buffer. If it is a pointer,
+	        the value pointed by that pointer is copied into 
+	        the transaction buffer instead of that pointer.
+	   3.2. Reserve space for the return value of the real mode
+	        function in the transaction buffer. The amount of 
+	        space reserved depends on the type of the real mode
+	        function. If the return value of the function is a string
+	        pointer, space is reserved for the string not for that
+	        string pointer.
+	   3.3. Push coded argument types into the transaction buffer.
+	        Each coded type takes a byte in the transaction buffer.
+	   3.4. Put the function code, the function type and the function
+	        arity into the transaction buffer.
+	4. Make a real procedure call via the RPC handle by using
+	   the extended service E1 of the OS/x86 kernel.
+	5. Copy the return value of the real mode function in 
+	   the updated transaction buffer into variables
+	   RetArg (and into RetArgBuf). The variable RetArgBuf is only 
+	   used when the type of the real mode function is a pointer.
+	6. Copy output arguments from the updated transaction buffer into
+	   their locations in the protected mode application.
+	   Only pointer type arguments can be output arguments.
+	7. Restore registers.
+	8. Move RetArg into the register EAX, and RetArg+4 into 
+	   the register EDX. These two registers represent the return
+	   value of the RPC entry function.
+	9. Return.
+
+
+
+1.3. Transaction Buffer
+
+The transaction buffer is used to pass information back and forth
+between the protected mode and the real mode.
+The structure of a transaction buffer will look like as follow:
+
+
+			+----------------+
+			|       a1       |    |
+			+----------------+    |
+			|        .       |    V
+			|        .       |
+			+----------------+
+			|       an       |
+			+----------------+
+			|   return val   |
+			+----------------+
+			|    argument    |
+			|    types       |
+			+----------------+
+			|code |type|arity| <== transaction buffer
+			+----------------+
+
+		A Transaction Buffer (in Stack)
+
+
+
+Each argument takes one or more 32-bit long words in the transaction buffer 
+depending on its type.
+If the type of an argument is a constant, the argument of the RPC entry
+function is directly transferred into the transaction buffer.
+If an argument is a pointer, the value pointed by that pointer 
+is copied into the transaction buffer.
+
+The following types are currently allowed by a RPC interface.
+
+	char		/* one byte,	lower byte of long word in buffer */
+	int		/* two bytes 	lower word of long word in buffer */
+	short		/* two bytes 	lower word of long word in buffer */
+	long 		/* four bytes 	one long word in buffer		  */
+	float		/* four bytes 	one long word in buffer		  */
+	double 		/* eight bytes 	two long words in buffer	  */
+
+	char   pointer	/* Length of string + one long word 		  */
+	vector pointer	/* Length of vector + one long word 		  */
+	int    pointer	/* two bytes 	lower word of long word in buffer */
+	short  pointer	/* two bytes 	lower word of long word in buffer */
+	long   pointer 	/* four bytes 	one long word in buffer 	  */
+	float  pointer	/* four bytes 	one long word in buffer 	  */
+	double pointer	/* eight bytes 	two long words in buffer 	  */
+
+
+If the type of an argument is "char pointer" or "vector pointer", it is 
+represented as follows in the transaction buffer.
+
+			+----------------+
+			|                |    |
+			|    string      |    |
+			|      or        |    V
+			|    vector      |
+			|                |  <= beginning of string or vector
+			+----------------+
+			|      size      |
+			+----------------+
+
+The difference between "string" and "vector" is that the size of a vector
+must be always given during the creation of a RPC interface.
+On the other hand, the size of a string may not be given. 
+If the size of a string is given, it behaves as same as a vector does.
+If its size is not given, the RPC entry function calculates the size
+of the string when it is copying the string into the transaction buffer.
+If the type of the return value is "char pointer", its size must be
+always given.
+
+The function code takes two bytes in the transaction buffer, and
+that code represents the real mode function.
+A function code is an integer between 0 and the number of functions 
+in the real procedure.
+Each function code represents a unique real mode function in
+the real procedure.
+
+The function type indicates the type of the real mode function.
+The function arity takes one byte in the transaction buffer and
+indicates that how many arguments that real mode function has.
+
+Each argument type takes one byte in the transaction buffer, and 
+represents one of types above.
+Four long words are reserved in the transaction buffer, ie.
+the maximum function arity currently can be 16.
+
+
+
+2. The Real Mode Part of RPC Interface
+
+The real mode part of a RPC interface consists of a start-up routine,
+a dispatcher routine and a function table.
+
+The start-up routine is executed immediately after the real procedure
+is loaded by the protected mode part of the RPC interface.
+Its basic function is to return the address of the dispatcher routine 
+into the protected mode.
+If real mode functions are written in Microsoft C, a special initialization
+routine is also executed to initialize variables used by 
+the Microsoft library.
+
+The function table holds addresses of all real mode functions in
+that real procedure.
+This function table is used to decode the function code in 
+the transaction buffer.
+
+The dispatcher routine is the main entry for the real procedure.
+This is the function executed when a RPC entry function in
+the protected mode part of the RPC interface invokes 
+the extended service E1 of the OS/x86 kernel.
+The dispatcher routine gets the transaction buffer and decodes
+information in that buffer before it calls the real mode function.
+The basic algorithm of the dispatcher routine is as follows.
+
+	1. Change registers SS and SP to use our own stack area.
+	2. Transfer arguments from the transaction buffer into
+	   the real mode stack. Each argument in the real mode stack
+	   takes one, two, four or eight 16-bit words depending on
+	   its type. If the type of an argument is a constant, 
+	   it is simply transferred into the real mode stack from
+	   the transaction buffer. If it is a pointer, a pointer to
+	   the argument in the transaction buffer is pushed into the real
+	   mode stack. In fact, if the real mode function uses 
+	   an argument as an output argument, it updates the argument in
+	   the transaction buffer.
+	3. Get the address of the real mode function whose function code
+	   given in the transaction buffer from the function table, 
+	   and call it.
+	4. Transfer the return value of the function in registers AX and DX
+	   into the transaction buffer. If the return value is a pointer,
+	   the value pointed by that pointer is transferred into 
+	   the transaction buffer.
+	5. Restore the previous stack, and return.
+
+When the dispatcher routine returns back to the protected mode, 
+a RPC entry function will get the updated transaction buffer.
+
+
+
+
+
+How to Create A RPC Interface
+=============================
+
+In this section, we will describe how to create a RPC interface for 
+a set of real mode functions.
+We will assume that you have a set of real mode functions or
+a real mode library, and you want call it "libname" in the rest
+of this section. 
+This name will be also the name of the RPC interface you are going to create.
+You will have also the following two files:
+
+	1. The file called "rpcp.s" written in PharLap 386|ASM Assembler syntax 
+	   is a template file for the protected mode part of a RPC interface.
+	2. The file called "rpcr.asm" written in Microsoft Macro Assembler
+	   syntax is a template file for the real mode part of a RPC interface.
+
+To create a RPC interface for your real mode functions, you have to follow
+the following five main steps.
+
+	1. Create the include file called "libname.h" which is going to
+	   contain macro expansions to define your RPC interface.
+	2. Create the file "libname.s" by copying the file "rpcp.s"
+	   Then customize the file "libname.s" for your RPC interface.
+	3. Create the file "libname.asm" by copying the file "rpcr.asm"
+	   Then customize the file "libname.asm" for your RPC interface.
+	4. Assembly the file "libname.s" by using PharLap 386|ASM assembler
+	   to create the file "libname.o". The file "libname.o" will be
+	   the protected mode part of your RPC interface. You can link
+	   this file with your protected mode application program by using
+	   PharLap 386|Link linker.
+	5. Assembly the file "libname.asm" by using Microsoft Macro assembler
+	   to create the "libname.obj". The file "libname.obj" will be 
+	   the real mode part of your RPC interface. Then you have to link
+	   this file with your real mode functions to create the file
+	   "libname.rpc". Although, the file "libname.rpc" is a EXE file,
+	   you cannot run that file directly. That is the real procedure
+	   file to be loaded by the protected mode part of your RPC interface.
+
+Now, these five main steps will be explained in the following five
+subsections.
+
+
+
+1. How to Create Include File "libname.h"
+
+The include file "libname.h" is going to contain a macro expansion 
+to define your RPC interface and a set of macro expansions to define 
+your real mode functions.
+This include file will be included by your RPC interface files "libname.s" 
+and "libname.asm"
+
+To define your RPC interface, you have to put following line into
+the file "libname.h"
+
+	defRPC libname
+
+This definition will let "libname" be used as the name of your RPC interface.
+This name will be used during the creation of some functions and variables
+in the protected mode and the real mode parts of the interface.
+
+For each real mode function, you have to put a macro expansion line in
+the following format into the file "libname.h".
+
+	defRPCentry funcname,functype,funcargtypes
+
+where "funcname" is the name of the real mode function, "functype" is the 
+type of the function, and "funcargtypes" is a list of argument types.
+The list of argument types must be in the following format.
+
+	<argtype1,..,argtypeN>
+
+ie., the list starts with the character '<', ends with the character '>',
+and each argument type is separated by the character ','.
+Of course, if a function doesn't have any argument, argument types
+will be represented by an empty list <>.
+
+If the type of an argument is a constant type, the argument type must be 
+in the following format.
+
+	<ConsType>
+
+where "ConsType" must be one of the following types.
+
+	char		/* one byte */
+	int   		/* two bytes */
+	short   	/* two bytes */
+	long   		/* four bytes */
+	float   	/* four bytes */
+	double   	/* eight bytes */
+
+If the type of an argument is a pointer type, the argument type must be
+in one of the following formats.
+
+	<PtrType,ptr,IO,Size>
+	<PtrType,ptr,,Size>
+	<PtrType,ptr,IO> 
+	<PtrType,ptr> 
+
+"PtrType" must be one of the followings.
+
+	int
+	short
+	long
+	float 
+	double
+	char
+	vector
+
+The type where "PtrType" is "char" is used to represent C strings.
+The type where "PtrType" is "vector" can be used to represent ground 
+C structures. 
+The ground structure means a structure that none of its arguments is a pointer.
+
+"IO" must be the string "input" or "output".
+If it is input, that argument is only passed from the protected mode into
+the real mode.
+If it is output, it is passed back and forth between the protected mode
+and the real mode.
+If it is not given, it is assumed that it is input.
+You have to define "IO" as input or output depending on how your
+real mode function is going to use that argument.
+
+If "PtrType" is "vector", "Size" must be always defined.
+If "PtrType" is "char", you may not define "Size".
+"Size" defines how much space will be reserved for that argument in
+the transaction buffer.
+If "Size" is not given when "PtrType" is "char", the size of that
+argument will be calculated during its transfer into the real mode.
+If the function type is a character pointer (a C string), "Size" must be given.
+You have to make sure that the space defined by "Size" for an output
+argument is big enough to store that output argument.
+
+
+
+Example:
+
+;;
+;; This is an example include file for a real mode library called testlib
+;; with the following functions. 
+;;
+defRPC testlib
+
+;;
+;; int func1(a1,a2,a3)
+;; int a1;			 
+;; short *a2; 		/* used as input 	*/
+;; short *a3;		/* used as output	*/
+;;
+defRPCentry func1,<int>,<<int>,<short,ptr>,<short,ptr,output>>
+
+;;
+;; int func2(a1,a2,a3)
+;; char *a1;		/* used as input 	*/
+;; char *a2;		/* used as input	*/
+;; char *a3;		/* used as output	*/
+;;
+defRPCentry func2,<int>,<<char,ptr>,<char,ptr,input>,<char,ptr,output,256>>
+
+;;
+;; char *func3()	/* no arguments */
+;;
+defRPCentry func3,<char,ptr,output,128>,<>
+
+;;
+;; long *func4(a1)
+;; struct_x *a1;	/* used as input 	*/
+;;			/* struct_x is struct {char t; long v} 	*/
+;;			/* size of this structure is 1+4=5, 	*/
+;;			/* and there is no pointer in it 	*/
+;;
+defRPCentry func4,<long,ptr,output>,<<vector,ptr,input,5>>
+	
+
+
+2. How to Create File "libname.s"
+
+First, you have to copy the template file "rpcp.s" as "libname.s"
+to create the file "libname.s". 
+Then, you have to update followings in that file.
+
+	a. Change the first line of the file (title line), 
+	   with the following line.
+		TITLE libname
+	   This change is not essential. If you want, you can still use 
+	   the generic name in the template file.
+
+	b. Find the line with "INCLUDE" statement in the file, 
+	   and change that line with the following line.
+		INCLUDE libname.h
+	   This line will include macro expansions in the file "libname.h".
+
+The file "libname.s" will be an assembly file written in PharLap 386|ASM 
+assembler syntax to represent the protected mode part of your RPC interface.
+
+
+
+
+3. How to Create File "libname.asm"
+
+First, you have to copy the template file "rpcr.asm" as "libname.asm"
+to create the file "libname.asm". 
+Then, you have to update followings in that file.
+
+	a. Change the first line of the file (title line), 
+	   with the following line.
+		TITLE libname
+	   This change is not essential. If you want, you can still use 
+	   the generic name in the template file.
+
+	b. Find the line with "INCLUDE" statement in the file, 
+	   and change that line with the following line.
+		INCLUDE libname.h
+	   This line will include macro expansions in the file "libname.h".
+
+	c. Locate the following line in the file
+		MSC 	EQU 	1
+	   If all of your real mode functions are written in assembly,
+	   delete this line. If any of your real mode functions 
+	   is written in Microsoft C, you have to keep this line.
+
+The file "libname.asm" will be  assembly file written in Microsoft Macro 
+assembler syntax to represent the real mode part of your RPC interface.
+
+
+
+4. How to Create File "libname.o"
+
+You have to assembly the file "libname.s" by using PharLap 386|ASM
+assembler to create the file "libname.o".
+This object file will represent the protected mode part of 
+your RPC interface.
+Later, you have to link this object file with your protected mode
+application program.
+
+Before make any call to a function in the file "libname.o", 
+you have to define and initialize the following variable
+in your protected application program.
+
+	libname_rpc_path
+
+This variable should hold the complete path name of the file "libname.rpc".
+You may define that variable as follows.
+
+	char libname_rpc_path[256];
+
+If your file "libname.rpc" is going to be in the current directory,
+you can simply copy the content of the variable "libname_rpc_fname" which
+is going to contain the string "libname.rpc" into your variable
+"libname_rpc_path".
+For example, you can put following C statements into your application
+program if the file "libname.rpc" is going to be in the current directory.
+
+	strcpy(libname_rpc_path,libname_rpc_fname);
+
+The reason for this is to give an option to you so that you can
+keep the file "libname.rpc" in any directory you wanted.
+
+
+
+
+5. How to Create Files "libname.obj" and "libname.rpc"
+
+You have to assembly the file "libname.asm" by using Microsoft Macro Assembler
+to create the file "libname.obj".
+Then, you have to link this file with your real mode procedures
+to create the file "libname.rpc".
+The file "libname.rpc" is an executable file which holds your real procedure.
+This is the file will be loaded by the protected mode part of your
+RPC interface.
+
+
+
+
+

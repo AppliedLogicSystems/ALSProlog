@@ -1,0 +1,298 @@
+;
+; decompile.88k			-- clause decompiler
+;	Copyright (c) 1988 Applied Logic Systems, Inc.
+;
+; Author: Kevin A. Buettner
+; Creation Date: 7/20/88
+; Revision History:
+;	Revised: mm/dd/yy	who		why
+;	Revised: mm/dd/yy	who		why
+;
+;
+
+
+#include "tokens.h"
+#include "assembly.88k"
+
+#define COMMA_2 (TK_COMMA+0xc0020000)
+#define DBREF_4 (TK_DBREF+0xc0040000)
+#define RIF_2   (TK_RIF  +0xc0020000)
+
+
+	;
+	; wm_decompile is $decompile from Prolog.  $decompile is called with
+	;	two arguments; the database reference of the thing to decompile
+	;	and the structure to match with.
+	;
+
+	data
+decompilation_environment:
+	word	0
+	global	_dcmp_tokid_arity
+_dcmp_tokid_arity:
+	word	0
+
+	text
+
+	global	_wm_decompile
+_wm_decompile:
+
+	;
+	; Dereference the first argument
+	;
+
+@dcmp_deref1:
+	bb1	BGND,	A1,	@dcmp_ground
+	ld	tmp1,	A1,	BIAS
+	cmp	tmp2,	tmp1,	A1
+	bb0.n	eq,	tmp2,	@dcmp_deref1
+	addu	A1,	tmp1,	0
+
+@dcmp_fail:
+	jmp	Fail				; fail if first arg is variable
+
+@dcmp_ground:
+
+	;
+	; Next we want to make sure that we have a structure and that the
+	;	functor is $dbref/4.  Calling dcmp_validate_dbref will 
+	;	do this for us and return to us the address at which to
+	;	begin execution
+	;
+
+	bb0	BSTRC,	A1,	@dcmp_fail	; fail if not a structure
+	clr	UArg1,	A1,	6<26>		; clear the tag
+	ld	A1,	UArg1,	BIAS		; get the functor
+	or.u	UArg2,	r0,	hi16(DBREF_4)	; put the dbref/4 functor in
+	or	UArg2,	UArg2,	lo16(DBREF_4)	;   UArg2
+	cmp	UArg2,	A1,	UArg2		; see if the functor which we
+						;   just loaded is dbref/4
+	bb1	ne,	UArg2,	@dcmp_fail	; fail if not
+	bsr	dcmp_validate_dbref		; validate the database ref
+	bcnd	eq0,	UArg1,	@dcmp_fail	; fail if not valid
+	st	A2,	E,	BIAS+12		; save A2 for later
+	subu	SP,	SP,	16		; allocate an environment
+
+
+
+	;
+	; UArg1 contains the address of the place to jump to in order to
+	; 	decompile the clause.
+	;
+	; The global variable _dcmp_tokid_arity has the token id and arity 
+	;	for building the head structure.
+	;
+
+
+	or	UArg2,	r0,	lo16(_dcmp_tokid_arity)
+	or.u	UArg2,	UArg2,	hi16(_dcmp_tokid_arity)
+
+	ld	UArg2,	UArg2,	0		; load the head functor
+
+	extu	tmp1,	UArg2,	10<16>		; extract the arity
+	bcnd	eq0,	tmp1,	@dcmp_symhead	; branch if the head is a symbol
+
+	;
+	; The head has at least one argument.  Need to build structure for
+	;	the head and push structure arguments on the stack
+	;
+
+	st	UArg2,	H,	BIAS		; store the functor on the heap
+	or.u	UArg2,	H,	TSTRUCT		; put struct pointer in UArg2
+	mak	tmp1,	tmp1,	10<2>		; shift arity left by two
+	subu	SP,	SP,	tmp1		; Make sp point (biased) at
+						;  first arg
+	addu	tmp2,	SP,	0		; make tmp2 point at first arg
+						;  also
+
+@dcmp_buildhead:
+	addu	H,	H,	4		; advance the heap pointer
+	st	H,	H,	BIAS		; store a variable on the heap
+	st	H,	tmp2,	BIAS		; store the variable on stack
+	addu	tmp2,	tmp2,	4		; decrement the stack pointer
+	subu	tmp1,	tmp1,	4		; decrement the counter
+	bcnd	gt0,	tmp1,	@dcmp_buildhead	;
+
+	addu	H,	H,	4		; advance h one more word
+
+@dcmp_symhead:
+
+	;
+	; At this point the arguments have been pushed onto the stack and
+	; the stack pointer is pointing at the first argument (if any).
+	;
+	; UArg2 contains the head.
+	; UArg1 contains the address in the clause to jump to.
+	;
+	; We will set up the decompilation environment.  The environment
+	; cell usage is:
+	;
+	;	BIAS-4	:	the head of the clause
+	;	BIAS-8	:	body
+	;	BIAS-12	:	aux body pointer
+	;	BIAS-16	:	safety value
+	;
+
+	st	UArg2,	E,	BIAS-4		; save the head
+	st	Safety,	E,	BIAS-16		; save the safety
+	st	r0,	E,	BIAS-8		; clear the
+	st	r0,	E,	BIAS-12		;  body pointers
+
+	or	UArg2,	r0,	lo16(decompilation_environment)
+	or.u	UArg2,	UArg2,	hi16(decompilation_environment)
+	st	E,	UArg2,	0		; save e for later
+	st	OldE,	E,	BIAS+0		; save OldE
+	st	CP,	E,	BIAS+4		; save cp
+
+	subu	SP,	SP,	8		; allocate space on new frame
+						;   for cp and OldE
+	addu	OldE,	E,	0		; set up OldE
+	st	OldE,	SP,	BIAS+0		; put it on the stack
+	bsr.n	@dcmp_doit			; set up the cp
+	addu	CP,	r1,	0		;
+
+	;
+	; Here we should be back from running the clause in decompilation mode.
+	;
+
+	ld	UArg2,	E,	BIAS-8		; get the body (if any)
+	ld	UArg1,	E,	BIAS-4		; get the head
+	bcnd	eq0,	UArg2,	@dcmp_unify	; branch if there is no body
+
+	or	tmp1,	r0,	lo16(RIF_2)	; put the :-/2 functor in tmp1
+	or.u	tmp1,	tmp1,	hi16(RIF_2)
+	st	tmp1,	H,	BIAS		; store the functor
+	st	UArg1,	H,	BIAS+4		; store the head
+	st	UArg2,	H,	BIAS+8		; store the body
+	or.u	UArg1,	H,	TSTRUCT		; put a pointer to the structure
+						;  in UArg1
+	addu	H,	H,	12
+
+@dcmp_unify:
+	ld	CP,	E,	BIAS+4		; get the continuation pointer
+	ld	UArg2,	E,	BIAS+12		; get the argument to unify
+						;  with
+	ld	Safety,	E,	BIAS-16		; reload the safety value
+	ld	E,	E,	BIAS		; reload the old environment
+	br.n	_wm_unify			; invoke the unifier
+	addu	r1,	CP,	0		;   setting r1 to the place to
+						;   continue at
+
+@dcmp_doit:
+	st	CP,	SP,	BIAS+4		; save the cp
+	addu	E,	SP,	0		; set up e
+	ld	A1,	E,	BIAS+8		; load regs (if needed)
+	ld	A2,	E,	BIAS+12
+	ld	A3,	E,	BIAS+16
+	subu	Safety,	r0,	1		; put -1 in safety
+	jmp	UArg1				; jump to the clause start
+
+
+	;
+	;
+	; decompile_goal is called from the overflow code to build the code
+	;  corresponding to a goal and merge it into the body found through
+	;  the decompilation_environment.
+	;
+	;
+
+
+	global	decompile_goal
+decompile_goal:
+	addu	UArg1,	r1,	0		; set UArg1 to r1
+	bsr	dcmp_get_goal_tokid
+	
+	;
+	; UArg1 now has the token and arity (in functor format) for the goal
+	;
+	;
+
+	extu	UArg2,	UArg1,	10<16>		; extract the arity
+	bcnd	eq0,	UArg2,	@dcmp_goal_sym	;
+
+	;
+	; Arity was non-zero.  Must build a structure with the arguments
+	; extracted from the stack.  Any arguments in registers were put onto
+	; the stack prior to getting into decompile_goal.
+	; 
+
+	st	UArg1,	H,	BIAS		; store the functor on the heap
+	or.u	UArg1,	H,	TSTRUCT		; put struct pointer in UArg2
+	addu	H,	H,	4		; advance h
+
+	addu	tmp1,	E,	BIAS+8		; make tmp1 point at first arg
+
+@dcmp_build_goal:
+	ld	S,	tmp1,	0		; get the argument
+
+@bg_deref:
+	bb1	BGND,	S,	@bg_ground	; dereference s
+	ld	tmp2,	S,	BIAS
+	cmp	S,	tmp2,	S
+	bb0.n	eq,	S,	@bg_deref
+	addu	S,	tmp2,	0
+
+	cmp	tmp2,	S,	HeapBase
+	bb1	ge,	tmp2,	@bg_ground	; branch if s>=HeapBase
+	st	H,	S,	BIAS		; bind the local variable to
+						;  the heap location
+	addu	S,	H,	0		; set s to h
+@bg_ground:
+	st	S,	H,	BIAS		; store argument on heap
+	addu	H,	H,	4		; advance the heap pointer
+	addu	tmp1,	tmp1,	4		; advance the arg pointer
+	subu	UArg2,	UArg2,	1		; decrement the counter
+	bcnd	gt0,	UArg2,	@dcmp_build_goal
+
+
+
+
+
+@dcmp_goal_sym:
+	
+	;
+	; Regardless of whether we had a structure or a symbol, UArg1
+	; the goal to install.  The next step is build the comma if required.
+	;
+
+	or	UArg2,	r0,	lo16(decompilation_environment)
+	or.u	UArg2,	UArg2,	hi16(decompilation_environment)
+	ld	UArg2,	UArg2,	0		; get the dcmp env
+
+	ld	tmp1,	UArg2,	BIAS-8		; get pointer to goals
+	bcnd	ne0,	tmp1,	@build_comma	; build the comma if non-zero
+	st	UArg1,	UArg2,	BIAS-8		; else store the first goal
+
+@dcmp_goal_ret:
+	jmp.n	CP				; proceed
+	addu	E,	OldE,	0		;
+
+@build_comma:
+	ld	tmp2,	UArg2,	BIAS-12		; get the comma hole
+	bcnd	ne0,	tmp2,	@attach_comma	; branch if non-zero
+	or.u	S,	H,	TSTRUCT		; make a pointer to the comma
+						;   structure
+	st	S,	UArg2,	BIAS-8		; store the pointer
+@bc2:
+	st	tmp1,	H,	BIAS+4		; store first goal
+	or	tmp1,	r0,	lo16(COMMA_2)	; put comma/2 in tmp1
+	or.u	tmp1,	tmp1,	hi16(COMMA_2)	;
+
+	st	tmp1,	H,	BIAS		; store the functor
+	add	H,	H,	8		; point to the comma hole
+	st	H,	UArg2,	BIAS-12		; store the comma hole
+	st	UArg1,	H,	BIAS		; store the goal that we
+						;   just built in the hole
+	br.n	@dcmp_goal_ret			; return, but first
+	add	H,	H,	4		;   advance h beyond the hole
+
+@attach_comma:
+	ld	tmp1,	tmp2,	BIAS		; get goal from comma hole
+	or.u	S,	H,	TSTRUCT		; make a structure pointer
+	st	S,	tmp2,	BIAS		; store in the comma hole
+	br	@bc2
+	
+
+data
+
+

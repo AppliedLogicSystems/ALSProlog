@@ -1,0 +1,128 @@
+/*
+ * alspi.h		-- Prolog types and other macros for the ALS-Prolog
+ *				C-Interface
+ *
+ * 	Copyright (c) 1986-1993 Applied Logic Systems, Inc.
+ *
+ * Author: Kevin A. Buettner
+ * Creation: 11/7/86
+ * Revision History:
+ *	Revised: 6/6/87		Kev		Sun Interface
+ *		 6/8/88		Chris		Changed names for consistancy
+ *		 6/13/88	Chris		Change filename to "alspi.h"
+ *		 11/9/88	Kev		Motorola Interface
+ */
+
+#ifndef _ALSPI_H_INCLUDED_
+#define _ALSPI_H_INCLUDED_
+
+/*
+ * Set up some macros for dealing with prototypes and other ANSI C features.
+ */
+
+#ifndef PARAMS
+#if defined(__STDC__)
+#define CONST const
+#define PARAMS(arglist) arglist
+#else
+#define CONST
+#define PARAMS(arglist) ()
+#endif
+#endif /* PARAMS */
+
+
+#ifndef PWordTypeDefined
+typedef long PWord;
+#define PWordTypeDefined 1
+#endif
+
+#define PI_VAR 		0		/* unbound variables */
+#define PI_LIST 	1
+#define PI_STRUCT 	2
+#define PI_SYM 		3
+#define PI_INT 		4
+#define PI_UIA 		5
+#define PI_DOUBLE 	6
+
+
+typedef struct {
+		char *name;
+		int  arity;
+		int (*func) PARAMS((void));
+		char *funcname;
+} PSTRUCT;
+
+#define PI_BEGIN static PSTRUCT pi_init_array[] = {
+#define PI_DEFINE(p,a,f) {p,a,f,((char *) -1)},
+#define PI_MODULE(m) {m,-1,((int (*)PARAMS((void))) 0),((char *) -1)},
+#define PI_END {((char *) -1),-1,((int (*)PARAMS((void))) 0),((char *) -1)} };
+
+#define PI_PDEFINE(p,a,f,fn) {p,a,f,fn},
+
+#define PI_INIT PrologInit(pi_init_array)
+
+
+extern char *WinsTypeStr;
+
+#define MOTIF_WIN_STR "motif"
+#define OL_WIN_STR    "openlook"
+#define DEC_WIN_STR   "decwins"
+#define NEXT_WIN_STR  "nextwins"
+#define DOS_WIN_STR   "doswins"
+#define MAC_WIN_STR   "macwins"
+#define NO_WIN_STR    "nowins"
+
+/*
+ * Added 6/11/88 - chris
+ */
+
+#define PI_FAIL		return(0)
+#define PI_SUCCEED	return(1)
+
+
+/*
+ * Informational, warning, and error messages
+ *
+ * PI_app_printf must be defined by the application.
+ */
+
+typedef enum {
+    PI_app_printf_banner,		/* als startup banner */
+    PI_app_printf_informational,	/* informational only */
+    PI_app_printf_warning,		/* message is a warning */
+    PI_app_printf_error,		/* message is an error */
+    PI_app_printf_fatal_error		/* message is fatal error */
+} PI_app_printf_flags;
+
+/*
+ * Declarations for foreign interface functions - 6/15/88 - chris
+ */
+
+extern	char *	PI_forceuia	PARAMS(( PWord *, int * ));
+extern	void	PI_getan	PARAMS(( PWord *, int *, int ));
+extern	void	PI_getargn	PARAMS(( PWord *, int *, PWord, int ));
+extern	void	PI_gethead	PARAMS(( PWord *, int *, PWord ));
+extern	void	PI_gettail	PARAMS(( PWord *, int *, PWord ));
+extern	void	PI_getdouble	PARAMS(( double *, PWord ));
+extern	void	PI_getstruct	PARAMS(( PWord *, int *, PWord ));
+extern	char *	PI_getsymname	PARAMS(( char *, PWord, int ));
+extern	char *	PI_getuianame	PARAMS(( char *, PWord, int ));
+extern	void	PI_getuiasize	PARAMS(( PWord, int * ));
+extern	void	PI_makedouble	PARAMS(( PWord *, int *, double ));
+extern	void	PI_makelist	PARAMS(( PWord *, int * ));
+extern	void	PI_makestruct	PARAMS(( PWord *, int *, PWord, int ));
+extern	void	PI_makesym	PARAMS(( PWord *, int *, char * ));
+extern	void	PI_makeuia	PARAMS(( PWord *, int *, char * ));
+extern	void	PI_allocuia	PARAMS(( PWord *, int *, int ));
+extern	int	PI_printf	PARAMS(( char *, ... ));
+extern	int	PI_aprintf	PARAMS(( char *, char *, ... ));
+extern	int	PI_rungoal	PARAMS(( PWord, PWord, int ));
+extern	int	PI_rungoal_with_update	PARAMS(( PWord, PWord *, int * ));
+extern	int	PI_unify	PARAMS(( PWord , int, PWord , int ));
+extern	void	PrologInit	PARAMS(( PSTRUCT * ));
+extern	void	PI_shutdown	PARAMS(( void ));
+extern	int	PI_toplevel	PARAMS(( void ));
+extern	int	PI_prolog_init	PARAMS(( char *, int, char ** ));
+extern	void	PI_app_printf	PARAMS(( int, ... ));
+
+#endif /* _ALSPI_H_INCLUDED_ */

@@ -1,0 +1,383 @@
+	text
+;
+; Creation:  Brian K. Short   May 1988
+; Modified Heavily by Scott Medeiros and Kevin Buettner in 1992.
+;
+;	Copyright (c) 1989 Motorola, Inc.
+;	Copyright (c) 1989-92 Applied Logic Systems, Inc.
+;
+; assembly.h  -- Include file for assembler files and documentation.
+;
+
+;
+;			REGISTER ASSIGNMENT
+;
+;		r0	ZERO		r16	TR
+;		r1	RET		r17	H
+;		r2	A1		r18	Fail
+;		r3	A2		r19	SPB	
+;		r4	A3		r20	HB
+;		r5	S		r21	B
+;		r6	T1/tmp3		r22	Safety
+;		r7	T2/tmp4		r23	SP	(Prolog Stack Pointer)
+;		r8	T3		r24	HeapBase
+;		r9	T4		r25	Stack Bottom
+;		r10	UArg1		r26	linker
+;		r11	UArg2		r27	linker
+;		r12	tmp1		r28	linker
+;		r13	tmp2		r29	linker
+;		r14	OldE		r30	E
+;		r15	CP		r31	sp	(C stack pointer)
+;
+; Prior to 10-26:
+;		r5	T1/tmp3	
+;		r6	T2/tmp4
+;		r7	T3
+;		r8	T4
+;		r9	S
+;
+
+#define	ZERO	r0	
+#define	RET	r1
+#define	A1	r2
+#define	A2	r3
+#define	A3	r4
+#define	S	r5
+#define	T1	r6
+#define	T2	r7
+#define	tmp3	r6
+#define	tmp4	r7
+#define	T3	r8
+#define	T4	r9
+#define	UArg1	r10
+#define	UArg2	r11
+#define	tmp1	r12
+#define	tmp2	r13
+#define	OldE	r14
+#define	CP	r15
+#define	TR	r16
+#define	H	r17
+#define	Fail	r18
+#define	SPB	r19
+#define	HB	r20
+#define	B	r21
+#define	Safety	r22
+#define	SP	r23
+#define	HeapBase r24
+#define	StkBot	r25
+
+#define	E	r30
+#define	sp	r31
+
+
+/*
+ * m88k, i386, Vax, and Sparc choice point structure
+ *
+ *	+-----------------------+
+ *	|       Prev B          |	+12
+ *	+-----------------------+
+ *	|       SPB             |	+8
+ *	+-----------------------+
+ *	|       HB              | 	+4
+ *	+-----------------------+
+ *	|       Failure Point   | <-- B	+0
+ *	+-----------------------+
+ */
+
+#define	chpt_HB	4
+#define chpt_SPB 8
+#define chpt_Fail 0
+#define chpt_B 12
+#define chpt_size 16
+
+
+;
+; Half-Word Tag Values
+;
+
+; bound
+#define TBND	0x0000
+
+; fence
+#define TFNC	0xec00
+
+; uia
+#define TUIA	0xd000
+
+; float (double)
+#define TFLT	0xb000
+
+; symbol
+#define TSYM	0xc000
+
+; integer
+#define TINT	0xa000
+
+; list
+#define TLIST	0x8800
+
+; structure
+#define TSTRUCT	0x8400
+
+
+;
+; Tag Bit Assignments
+;
+
+; This is the reference bit which is set for references (bounds).
+#define BGND	31
+
+; This is the symbol bit, set for all symbolic types. 
+#define	BSYM	30	
+
+; This is the number bit, set for all numeric types.
+#define BNUM	29
+
+; This is the uia bit, set for uia's, fences, and floats (doubles).
+#define BUIA	28
+
+; This bit indicates a list.
+#define BLIST	27
+
+; This bit indicates a structure.
+#define	BSTRC	26
+
+; This bit indicates the sign of an integer.
+#define	BSIGN	25
+
+;
+;                 Tagged Word Bit Layout
+;
+;	MSB's		Tag Type	Conditions
+;
+;	000000		bound		not BGND
+;	100101		fence		BUIA & BSTRC
+;	110100		uia		BUIA & BSYM
+;	101100		float		BUIA & BNUM
+;	110000		symbol		not BUIA & BSYM
+;	101000		integer		BNUM & not BUIA
+;	100010		list		BLIST
+;	100001		structure	BSTRC
+;
+
+;
+; This is by far the most sophisticated tagging scheme so far.
+; It works very well for frequently executed operations on tags.
+; This following section depicts a few cases.
+;
+; dereferencing --	
+;		drfA1:	bb1	BREF,	A1,	nonvarA1
+;			ld	tmp1,	A1,	0
+;			cmp	tmp2,	tmp1,	A1
+;			bb0.n	eq,	tmp2,	drfA1
+;			addu	A1,	tmp1,	0
+;		varA1:
+;
+;		nonvarA1:
+;
+; extracting address from tagged cell --
+;			clr	A1,	A1,	6<26>
+;
+; getting integer value from tagged integer
+;			ext	A1,	A1,	26<0>
+;
+; creating new list --
+;			or.u	A1,	h,	TLIST
+;			st	tmp1,	h,	BIAS	
+;			addu	h,	h,	4
+;			st	h,	h,	BIAS
+;			addu	h,	h,	4
+;
+; integer add --
+;			bb0	BNUM,	A1,	_fail
+;			bb1	BUIA,	A1,	_fail
+;			bb0	BNUM,	A2,	_fail
+;			bb1	BUIA,	A2,	_fail
+;			add	A3,	A1,	A2
+;			extu	A3,	A3,	26<0>	
+;			xor	tmp1,	A1,	A2
+;			bb1.n	BSIGN,	tmp1,	_done
+;			or.u	A3,	A3,	TINT	
+;			xor	tmp2,	A1,	A3
+;			bb1	BSIGN,	tmp2,	Overflow
+;		_done:
+;
+
+;
+; Maximum arity for structures.
+;
+#define MAXARITY	0x3ff
+;
+
+;
+; Bias on the stacks
+;
+
+#define BIAS 32768
+
+;
+; Number of words occupied by gc information
+;
+
+#define GC_INFO_SIZE 12
+
+
+/*
+ *----	Instruction Macros  ----
+ *	Added by SM for use in the domath.88k stuff
+ */
+
+/*
+ * Macro Name:	deref
+ * Description:	Implements the dereference loop
+		If SrcDst can be dereferenced to a ground object, branch to
+		GroundLabel, with SrcDst containing the dereferenced object (still tagged).
+ * Parameters:	SrcDst		-- Source/Destination argument 
+ *						(must be a register)
+ *
+ *		GroundLabel	-- Label to branch to when ground
+ * 		IL		-- Allows for unique local labels to be 
+ *			   	   created
+ *  * Internal Labels:
+ *		1:
+ */
+
+#macro	deref	SrcDst,	GroundLabel
+1:
+	bb1	BGND,	SrcDst,	GroundLabel	; if ground return
+	ld	tmp1,	SrcDst,	BIAS		; dereference
+	cmp	SrcDst,	SrcDst,	tmp1		; compare the two
+	bb0.n	eq,	SrcDst,	1b		; if not the same go again
+	addu	SrcDst,	tmp1,	ZERO		; put value back into SrcDst
+#endm
+
+/*
+ * Macro Name:	nop
+ * Description:	no-operation
+ */
+
+#macro	nop
+	add	ZERO,	ZERO,	ZERO
+#endm
+
+
+/*
+ * Macro Name:	fail
+ * Description:	causes failure
+ * Input Registers:
+ *		Fail		-- failure register
+ */
+
+#macro	fail
+	jmp	Fail
+#endm
+
+/*
+ * Macro Name:	not
+ * Description:	Logical negation
+
+ * Parameters:	Src		-- Source argument (must be a register)
+ *		Dst		-- Destination argument (must be a register)
+ *
+ */
+
+#macro 	not	Dst, Src
+	or.c	Dst,	ZERO,	Src
+#endm
+
+/*
+ * Macro Name:	gcinfo
+ * Description:	gc info after call
+ * Parameters:	msk		-- argument mask
+ *		nargs		-- number of arguments
+ *		npv		-- number of permanent variables
+ */
+
+#macro	gcinfo	msk,	nargs,	npv
+	addu	ZERO,	ZERO,	0
+	word	((npv << 16) | nargs)
+	word	msk
+#endm
+
+
+/*
+ * Macro Name:	set_a
+ * Description:	set a register to a constant (usually an address)
+ * Parameters:	reg		-- register to set
+ * 		const		-- constant
+ */
+
+#macro	set_a	reg,	const
+	or.u	reg,	ZERO,	hi16(const)
+	or	reg,	reg,	lo16(const)
+#endm
+
+
+/*
+ * Macro Name:	load
+ * Description:	Loads a memory location into a register
+ * Parameters:	reg	-- register to load into
+ *		addr	-- address to load
+ */
+
+#macro	load	reg,	addr
+	or.u	reg,	ZERO,	hi16(addr)
+	ld	reg,	reg,	lo16(addr)
+#endm
+
+
+/*
+ * Macro Name:	store
+ * Description:	Stores contents of register to memory location
+ * Parameters:	reg	-- register to store
+ *		addr	-- address to store into
+ * Other Register:
+ *		tmp1	is used as a temporary
+ */
+
+#macro	store	reg,	addr
+	or.u	tmp1,	ZERO,	hi16(addr)
+	st	reg,	tmp1,	lo16(addr)
+#endm
+
+/*
+ * Macro Name: push_c_regs
+ * Description: Push registers which C needs saved onto the stack.
+ * Parameters: None.
+ */
+
+#macro	push_c_regs
+	subu	sp,	sp,	88	; allocate a frame for storing the
+					; preserved register set...also
+					; allocate space (32 bytes) for
+					; any calls we will want to make
+					; back to C. (for OCS)
+	st.d	r14,	sp,	32	; store r14 and r15
+	st.d	r16,	sp,	40	; store r16 and r17
+	st.d	r18,	sp,	48	; store r18 and r19
+	st.d	r20,	sp,	56	; store r20 and r21
+	st.d	r22,	sp,	64	; store r22 and r23
+	st.d	r24,	sp,	72	; store r24 and r25
+	st	r30,	sp,	80	; store r30
+	st	r1,	sp,	84	; store return address for getting back
+					; to C
+#endm
+
+
+/*
+ * Macro Name: pop_c_regs
+ * Description: Pop registers for return to C.
+ */
+
+#macro	pop_c_regs
+	ld	r1,	sp,	84	; load return address
+	ld	r30,	sp,	80	; load e
+	ld.d	r14,	sp,	32	; load r14 and r15
+	ld.d	r16,	sp,	40	; load r16 and r17
+	ld.d	r18,	sp,	48	; load r18 and r19
+	ld.d	r20,	sp,	56	; load r20 and r21
+	ld.d	r22,	sp,	64	; load r22 and r23
+	ld.d	r24,	sp,	72	; load r24 and r25
+	addu	sp,	sp,	88	; and deallocate the frame
+#endm
+

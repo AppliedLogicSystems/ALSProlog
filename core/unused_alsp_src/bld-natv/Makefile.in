@@ -1,0 +1,88 @@
+#
+# Makefile.in is the Makefile template for alspro.
+# Makefile is generated from Makefile.in by running configure.
+#
+
+srcdir = @srcdir@/..
+VPATH  = @srcdir@/../generic:@srcdir@/../@ARCH@:..
+
+ARCH		= @ARCH@
+OS		= @OS@
+
+CC		= @CC@
+LINK		= $(CC)
+INSTALL		= @INSTALL@
+INSTALL_PROGRAM	= @INSTALL_PROGRAM@
+INSTALL_DATA	= @INSTALL_DATA@
+LN_S		= @LN_S@
+SHELL		= /bin/sh
+
+CFLAGS		= -O -g -Wall -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes
+LDFLAGS		= 
+LIBS		= @LIBS@
+
+X_CFLAGS	= @X_CFLAGS@
+X_LIBS		= @X_LIBS@
+X_EXTRA_LIBS	= @X_EXTRA_LIBS@
+
+prefix		= /usr/local
+exec_prefix	= $(prefix)
+
+PROLOG		= ../bld-port/alspro
+
+include $(srcdir)/generic/mh-generic
+
+include $(srcdir)/$(ARCH)/mh-$(ARCH)
+
+include $(srcdir)/$(ARCH)/$(OS)/mh-$(OS)
+
+objects = $(gfiles_o) $(afiles_o)
+
+alspro.a: $(objects)
+	ar ruv alspro.a $(objects)
+	-ranlib alspro.a
+
+alspro:	pimain.o alspro.a 
+	$(CC) -o alspro $^ $(LDFLAGS) $(LIBS)
+
+testdir	= $(srcdir)/tests
+
+testrun: alspro
+	alspro -b $(testdir)/autotest $(testdir)/autotest_db -g run_tests -p -srcdir $(srcdir)
+
+atrans: $(srcdir)/generate/atrans
+	if [ ! -d atrans ]; then		\
+		rm -rf atrans;			\
+		mkdir atrans;			\
+	fi
+	if [ `echo $(srcdir) | sed -e 's/^\(.\).*/\1/'` = "/" ]; then	\
+		$(LN_S) $(srcdir)/generate/atrans/*.pro atrans;		\
+		$(LN_S) $(srcdir)/$(ARCH)/atr_*.pro atrans;		\
+		$(LN_S) $(srcdir)/$(ARCH)/$(OS)/atr_*.pro atrans;	\
+	else								\
+	    (	cd atrans; 						\
+		$(LN_S) ../$(srcdir)/generate/atrans/*.pro . ;		\
+		$(LN_S) ../$(srcdir)/$(ARCH)/atr_*.pro . ;		\
+		$(LN_S) ../$(srcdir)/$(ARCH)/$(OS)/atr_*.pro . ;	\
+	    );								\
+	fi
+
+$(asrcext).s :
+	ALSPATH=atrans; export ALSPATH;					\
+	$(PROLOG) -b atrans atr_inst atr_args atr_out -g atrans -p $< -I$(srcdir)/$(ARCH) -I$(srcdir)/generic -I.. -o $@
+
+.SUFFIXES:	$(asrcext)
+
+cleanup:
+	-rm *.o
+	-rm *.obp
+	-rm core
+
+super_clean:
+	-rm *.o
+	-rm *.h
+	-rm *.obp
+	-rm core
+	-rm alsmics
+	-rm -r atrans
+	-rm -r alsdir

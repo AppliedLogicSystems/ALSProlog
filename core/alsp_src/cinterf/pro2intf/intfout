@@ -1,0 +1,136 @@
+/*=========================================================*
+ |      intfout.pro
+ |      Copyright (c) 1991-94 Applied Logic Systems, Inc.
+ |
+ | Date:  3 Oct 1991
+ | Author: P. Raman
+ | Modification History:
+ |
+ | Purpose 	: file control, and header and footer information
+ *=========================================================*/
+
+module pro2intf.
+
+	% file suffixes
+
+inSuffix('src').
+
+outSuffix('c').
+
+	
+	% input file handling
+
+openInputFile(State, InStream) :-
+	accessP2I(inFile, State, InFile),
+	open(InFile, read, InStream, []),
+	setP2I(inStream, State, InStream),
+	debug("Reading from file %t ...",[InFile]).
+
+closeInputFile(State) 
+	:- 
+	accessP2I(inStream, State, InStream),
+	close(InStream),
+	accessP2I(inFile, State, InFile),
+	debug("Done reading from %t\n",[InFile]).
+
+	% output file handling
+
+openOutputFile(State) :-
+	openOutputFile(_,State).
+
+openOutputFile(OutStream,State) 
+	:-
+	accessP2I(curONum,State,Count),
+	increment_Num(curONum,State,_),
+	accessP2I(baseName, State, BaseName),
+	outSuffix(Suffix),
+	catenate([BaseName,Count],NewBase),
+	filePlusExt(NewBase,Suffix,File),
+
+	accessP2I(cFileList, State, CFileList),
+	append(CFileList, [File], NewCFileList),
+	setP2I(cFileList, State, NewCFileList),
+
+	open(File,write,OutStream,[]),
+	setP2I(outFile, State, File),
+	setP2I(outStream, State, OutStream),
+	debug("Writing to file %t\n",[File]),
+	accessP2I(inFile, State, InFile),
+	gen_file_header(OutStream,InFile,File,
+			printf(OutStream,'\t\t--by ALS Interface Generator\n\n',[])
+			),
+	printf(OutStream,'#include "alspi.h"\n',[]),
+	printf(OutStream,'#include "cinterf.h"\n',[]),
+	printf(OutStream,'#include "%t.h"\n\n',[BaseName]).
+
+switchOutputFile(State)
+	:-
+	switchOutputFile(_,State).
+
+switchOutputFile(OutStream,State)
+	:-
+	accessP2I(outStream, State, CurOutStream),
+	close(CurOutStream),
+	openOutputFile(OutStream,State).
+
+closeOutputFile(State) 
+	:- 
+	accessP2I(outStream, State, CurOutStream),
+	close(CurOutStream).
+%
+
+write_type_header(OutStream).
+
+write_type_footer(SetupList,OutStream,State) 
+	:-
+	accessP2I(baseName,State,BaseName),
+	accessP2I(curONum,State,Count),
+	accessP2I(initFcns, State, OldInitFcns),
+	printf(OutStream,'%t%t_init()\n{\n',[BaseName,Count]),
+	catenate([BaseName,Count,'_init'],InitFcn),
+	append(OldInitFcns, [InitFcn], NewInitFcns),
+	setP2I(initFcns, State, NewInitFcns),
+	emit_setup(SetupList,OutStream),
+	printf(OutStream,'}\n',[]).
+
+emit_setup([],_).
+
+emit_setup([ struct(Name,FieldArray) | SetupList ],OutStream ) 
+	:- !,
+	printf(OutStream,'  CI_STRUCT("%t",%t,%t)\n',[Name,Name,FieldArray]),
+	emit_setup(SetupList,OutStream).
+
+emit_setup([ type(Name,CType,TypeCode) | SetupList ],OutStream ) 
+	:-
+	printf(OutStream,'  CI_CTYPEDEF("%t",%t,%t)\n',[Name,CType,TypeCode]),
+	emit_setup(SetupList,OutStream).
+
+%
+
+write_const_header(OutStream, State) :-
+	accessP2I(baseName, State, BaseName),
+	accessP2I(curONum, State, Count),
+	accessP2I(initFcns, State, OldInitFcns),
+	printf(OutStream,'%t%t_init()\n{\n',[BaseName,Count]).
+	catenate([BaseName,Count,'_init'],InitFcn),
+	append(OldInitFcns, [InitFcn], NewInitFcns),
+	setP2I(initFcns, State, NewInitFcns).
+
+
+write_const_footer(OutStream, State) 
+	:-
+	printf(OutStream,'}\n',[]).
+
+%
+
+debug(Msg) :-
+	debug(Msg,[]).
+
+debug(Fmt,List) :-
+	debug,
+	!,
+	printf(user,Fmt,List),
+	flush_output(user).
+debug(Fmt,List).
+
+endmod.

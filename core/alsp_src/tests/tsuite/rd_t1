@@ -1,0 +1,40 @@
+%%
+%% rd_t1	-- file to test #if #else facilities of reader
+%%
+%%
+%%
+
+%% term1 will always be read
+term1(x).
+
+#if user:p
+%% The following two "p" terms will only be read if p is true (above)
+p(x).
+p(y).
+
+#elif user:q
+%% The following two clauses will be read if p failed, but q succeeds
+q(x).
+q(y).
+
+#   if user:a
+%% The following two clauses will be read if p failed, q succeeds and a
+%%	succeeds.
+a(1).
+a(2).
+#   endif
+
+#elif user:r
+%% More of the same
+r(x).
+r(y).
+
+#else
+%% if none of p, q, or r are defined, these clauses will be read
+s(x).
+s(y).
+
+#endif
+
+%% term2 is always read
+term2(z).

@@ -1,0 +1,41 @@
+
+#
+# Makefile.mach
+#
+# Machine specific makefile for ALS Prolog on Port(able) version
+#
+# Note : variable MDIR and MAKEMACH are set in Makefile.gen
+#
+
+#
+# What are the machine specific files
+#
+
+MHFILES = config
+
+# How to copy machine specific files to target directory
+
+mcopy	: $(MAKEMACH)
+	for i in $(MHFILES); do		\
+		if [ ! -h $$i.h ]; then ln -s $(MDIR)/$$i.h . ; fi; done
+	touch mcopy
+
+#
+# Clean up the machine specific files
+#
+
+mclean	:
+	rm -f mdepend
+	rm -f mcopy
+	for i in $(MHFILES); do rm -f $$i.h; done
+
+#
+# Machine specific dependencies
+#
+
+mdepend : $(MAKEMACH)
+	touch mdepend
+
+#
+# end of Makefile.mach
+#

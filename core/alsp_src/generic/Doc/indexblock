@@ -1,0 +1,272 @@
+The indexing block:
+
+When a procedure has sufficient complexity, it can have an indexing block
+associated with it. The procedure must have multiple entries. When
+an indexing block is associated with a procedure, the index_block field
+of the name table entry will have a non-null value, pointing at the
+beginning of a code block allocated for the index block. The flags field
+of the name table entry will be changed from NFLG_MULTIPLE to NFLG_SWITCH
+and the code entry of the name table entry will contain a switch_on_term
+instruction. If the switch_on_term instruction is sufficient for control
+transfer and the indexing block is not needed (0 or 1 clauses in the procedure
+for eacvh type recognized by the switch_on_term instruction), then the
+index_block field will be left as null.
+
+The switch_on_term instruction will check to see if its argument is a
+variable, constant, term, or list. If it is variable, control will pass
+to the naive try/retry chain which all procedures have. The try instruction
+is found in the name table entry (see The Name Table Entry). If either
+the constant, term, or list paths have no associated clauses, the
+switch_on_term instruction will instigate failure. If only one clause in
+the procedure matches that type, control will pass to the determinate
+start entry into the clause. This entry point is used only from the
+switch_on_term instruction when we have dereferenced the first
+argument and can bypass the first argument dereferencing and read type check
+in the clause which we will be executing. Otherwise, control will transfer
+into the indexing block.
+
+For example, the procedure
+
+	append([],L,L).
+	append([X|L1],L2,[X|L3]) :- append(L1,L2,L3).
+
+will have a switch_on_term instruction, but no indexing block, since the
+constant and list types have only one clause, and if the first argument
+has one of these types, control can pass directly to the appropriate
+clause. Having a term as the first argument will cause the switch_on_term
+instruction to instigate a failure. The procedure
+
+	foo(a).
+	foo(b).
+
+will get an indexing block because the constant type has two different
+entries that are distinct. The procedure
+
+	foo(a).
+	foo(a).
+
+would be just as happy with the normal naive try/retry chain.
+
+Each type of first argument item (constant, functor/arity, or list, but not
+variable since all the above would have to be hit) has a block of code
+in the indexing block if it has multiple clauses whose first argument is of
+that type. Control will transfer to either an indexing try/retry patch or
+to a switch_on instruction.
+
+Try/retry patches:
+
+Try/retry patches are found in index blocks for two reasons. Either they are
+pointed at by a switch_on entry (See section on switch_on instructions)
+or the patch is an entry point from the switch_on_term instruction and
+will either point at a clause entry or a switch_on instruction. If it
+points at a clause block, it will point to the first argument dereference
+cycle since the argument register from the switch_on_term instruction is no
+longer in the register in which it started (we may have backtracked from
+earlier in the try/retry patch and the scratch register will have a random
+value in it. One optimization is to have the switch_on_term instruction
+put the dereferenced first argument value back into the stack frame. We
+still have to hit the dereference loop in the clause, but at least it is
+only one pass, not the multiple that may have been necessary to dereference
+the object in the first place.)
+
+Index patch try/retry chains that are pointed at by the switch_on_term
+instruction are used to do simple index block patching or to break up
+switch_on patches. For example, the procedure
+
+	foo(a).
+	foo(X).
+
+would have the constant part of the switch on term instruction point
+at the following try/retry patch
+
+	try clause 1	% foo(a)
+	trust clause 2	% foo(X)
+
+and the index patch is being used for a simple index block entry. switch_on
+patches have to be split up in the current indexer for the following type
+of situation
+
+	foo(a)
+	foo(b)
+	foo(X)
+	foo(a)
+	foo(b).
+
+The constant portion of the switch_on_term for this procedure will point
+to the indexing patch
+
+	try indexpatch1
+	retry clause3		% foo(X) case
+	trust indexpatch2
+
+where indexpatch1 handles clauses 1 and 2, while indexpatch2 handles clauses
+4 and 5.
+
+The try/retry patches use try, retry, and trust instructions that are
+different from the ones found in the naive try/retry chain of a procedure.
+Rather than being called with the next clause to try if failure ensues and
+then continuing execution with the instruction following the choice point
+instruction, they are called with the place to transfer control to (the
+clause which is being tried), while the next clause address is made to point
+to the instruction following the indexing choice point instruction. The
+index choice point instructions should be long word aligned since various
+functions of the system have to go back into the code patch to pick up
+address values and it works faster if they are long-word aligned. In fact,
+some processors, such as the SPARC will generate a hardware fault if
+a long word load is attempted on a non-long-word boundary.
+
+The naive try/retry chain for a procedure has the form
+
+clause1:	retry clause2
+		code for clause 1
+
+clause2:	retry clause3
+		code for clause 2
+
+........
+
+clausen:	trust 0
+		code for clause n
+
+where the choice point gets the label found in the choice point instruction
+and control passes to the instruction following the choice point instruction.
+A indexing try_retry chain has the form
+
+		try clause1
+		retry clause2
+		.............
+		trust clausen
+
+where the choice point gets the address of the instruction following the
+choice point instruction and control is transfered to the argument of the
+choice point instruction.
+
+switch_on instructions:
+
+switch_on instructions perform a search on the atom or functor/arity
+of the first argument in the procedure. The long word aligned table is stored
+in the index block with a code header that calls the specific switch_on
+instruction to be used with an argument of the number of entries in the table.
+The table looks like
+
+	Load register with number of entries in the table
+	call the switch_on instruction
+	Table entry 0
+	Table entry 1
+	.............
+
+The table entry consists of two long words. The first is the atom or
+functor/arity term as found in the first argument or heap term in the first
+argument respectively. The second is a code address where control should
+be transfered if that key is found. The code address portion can point to
+one of two places, either to a specific clause (bypassing the choice point
+code since the clause will be determinate), or at an indexing try/retry
+patch. The latter case happens when there are multiple keys in the procedure
+which have the same first argument. For instance, in the switch_on
+table for the procedure
+
+	foo(a).
+	foo(b).
+	foo(a).
+	foo(c).
+
+the code address portion for the keys b and c will point at the clause address
+for clause 2 and 4 respectively, while the code address portion for key a
+will point at a try/retry patch which moves through clause 1 first and then
+clause 3.
+
+	try clause 1
+	trust clause 2
+
+Currently, the keys are kept in the table in ascending order and the switch_on
+instructions use binary search to find the appropriate key. This seems to
+leave the possibility of incremental indexing in that more space than is
+needed could be kept for the table and new entries could be placed in without
+having to destroy the block and starting over. Of course, this would work
+with hashing also, though the table would have to be rehashed if the
+table had to be expanded.
+
+Removing an indexing block:
+
+All code pointers in an index block point either back into the index block
+or to a clause for the procedure. So, if the index block is removed,
+such as in w_nukeindexing, choice point addresses will have to be changed to
+point at the choice entry of a clause in the procedure.
+
+Since the absolute ordering of clauses is the same in an indexing chain
+and the naive try/retry (variable) chain of a procedure, we can change
+the next clause address in a choice point to point to the choice point
+entry (hence into the naive try/retry chain of the procedure) of a clause
+and be assured that continued backtracking through the procedure will hit
+the remaining clauses in the right order.
+
+If the next clause entry of the choice point points back into the index block,
+this means that it is pointing at a switch_on_const or switch_on_term
+block from a try/retry patch entry that transfered control to a specific
+clause with a variable as the first argument (see Try/Retry Patches).
+Unfortunately, it is rather difficult to look at the switch_on table and
+figure out which is the clause which should be tried in case of failure,
+since this would entail walking over the switch_on table and finding which
+clause came before all the others. The case is demonstrated by
+
+	foo(a).
+	foo(b).
+	foo(X).
+	foo(a).
+	foo(b).
+
+which generates the patch
+
+	try switch_on1		% Handle clauses 1 and 2
+	retry clause3		% foo(X) case
+	trust switch_on2	% Handle clauses 4 and 5
+
+If a choice point created by this indexing patch points at a index patch
+choice point instruction which points back into the index block, i.e. the
+trust instruction in the above patch is pointed at by the choice point
+modified by the retry instruction and that trust instruction points into the
+index block, then we have to figure out where to make that choice point
+point. The best choice that doesn't involve a lot of computation is to
+look at the choice point instruction for clause3 and change the choice point to
+point at where clause3 would have gone because of failure in the naive
+try/retry chain (the variable chain).
+
+Another case is when two adjacent choice points on the stack are both
+associated with the same index block. This can happen with the procedure
+
+	foo(b)
+	foo(a)
+	foo(a).
+	foo(X).
+	foo(a).
+	foo(b).
+
+which has the indexing patches
+
+fooconst:	try switch_on1
+		retry clause4
+		trust switch_on2
+
+switch_on1 will, for the argument a, have the index patch
+
+	try clause2
+	trust clause3
+
+If foo/1 is called with a, we will go into the first index patch and create
+a choice point. The SPB register will be pointing at the current stack top.
+After the switch_on_const instruction runs, it will go into the second patch
+and run the try instruction, which will end up running clause2. The choice
+point created by this try instruction will have the same SPB value as the
+try instruction at the fooconst label. In fact, this is the only place
+where adjacent SPB values will be the same, since we usually at least have
+a return address put down by someone. Anyway, when scanning the choice point
+stack for fixing up next clause addresses, we will hit the second choice
+point first. The next clause entry in the choice point here should point
+at the choice point entry for clause3, which will put us back in the naive
+try/retry chain of the procedure, and future backtracking will hit the
+remaining clauses in the right order. The next choice point hit will be the
+one created at fooconst try instruction. SInce the previous choice point
+is now pointing into the naive chain, this choice point must become a nop
+failure. We can't just delete it without lots of computation, so we'll
+just change its next clause address to do a trust to delete the choice point
+and have the continuation address be a failure.

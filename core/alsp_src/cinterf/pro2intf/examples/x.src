@@ -1,0 +1,3361 @@
+/*================================================================
+          x.src
+          --Generated from: x.spc
+          Date: 94/5/23   Time: 13:58:54
+ *===============================================================*/
+
+
+/* Open file x.spc */
+
+
+/* Open file x.h */
+
+
+/* Open file /usr/include/X11/Xlib.h */
+
+
+/* Open file /usr/include/X11/X.h */
+
+als_const('X_PROTOCOL',int).
+als_const('X_PROTOCOL_REVISION',int).
+
+als_type('XID',[unsigned_long]).
+
+als_type('Window',[unsigned_long]).
+
+als_type('Drawable',[unsigned_long]).
+
+als_type('Font',[unsigned_long]).
+
+als_type('Pixmap',[unsigned_long]).
+
+als_type('Cursor',[unsigned_long]).
+
+als_type('Colormap',[unsigned_long]).
+
+als_type('GContext',[unsigned_long]).
+
+als_type('KeySym',[unsigned_long]).
+
+als_type('Mask',[unsigned_long]).
+
+als_type('Atom',[unsigned_long]).
+
+als_type('VisualID',[unsigned_long]).
+
+als_type('Time',[unsigned_long]).
+
+als_type('KeyCode',[unsigned_char]).
+als_const('None',int).
+als_const('ParentRelative',int).
+als_const('CopyFromParent',int).
+als_const('PointerWindow',int).
+als_const('InputFocus',int).
+als_const('PointerRoot',int).
+als_const('AnyPropertyType',int).
+als_const('AnyKey',int).
+als_const('AnyButton',int).
+als_const('AllTemporary',int).
+als_const('CurrentTime',int).
+als_const('NoSymbol',int).
+als_const('NoEventMask',int).
+als_const('KeyPressMask',int).
+als_const('KeyReleaseMask',int).
+als_const('ButtonPressMask',int).
+als_const('ButtonReleaseMask',int).
+als_const('EnterWindowMask',int).
+als_const('LeaveWindowMask',int).
+als_const('PointerMotionMask',int).
+als_const('PointerMotionHintMask',int).
+als_const('Button1MotionMask',int).
+als_const('Button2MotionMask',int).
+als_const('Button3MotionMask',int).
+als_const('Button4MotionMask',int).
+als_const('Button5MotionMask',int).
+als_const('ButtonMotionMask',int).
+als_const('KeymapStateMask',int).
+als_const('ExposureMask',int).
+als_const('VisibilityChangeMask',int).
+als_const('StructureNotifyMask',int).
+als_const('ResizeRedirectMask',int).
+als_const('SubstructureNotifyMask',int).
+als_const('SubstructureRedirectMask',int).
+als_const('FocusChangeMask',int).
+als_const('PropertyChangeMask',int).
+als_const('ColormapChangeMask',int).
+als_const('OwnerGrabButtonMask',int).
+als_const('KeyPress',int).
+als_const('KeyRelease',int).
+als_const('ButtonPress',int).
+als_const('ButtonRelease',int).
+als_const('MotionNotify',int).
+als_const('EnterNotify',int).
+als_const('LeaveNotify',int).
+als_const('FocusIn',int).
+als_const('FocusOut',int).
+als_const('KeymapNotify',int).
+als_const('Expose',int).
+als_const('GraphicsExpose',int).
+als_const('NoExpose',int).
+als_const('VisibilityNotify',int).
+als_const('CreateNotify',int).
+als_const('DestroyNotify',int).
+als_const('UnmapNotify',int).
+als_const('MapNotify',int).
+als_const('MapRequest',int).
+als_const('ReparentNotify',int).
+als_const('ConfigureNotify',int).
+als_const('ConfigureRequest',int).
+als_const('GravityNotify',int).
+als_const('ResizeRequest',int).
+als_const('CirculateNotify',int).
+als_const('CirculateRequest',int).
+als_const('PropertyNotify',int).
+als_const('SelectionClear',int).
+als_const('SelectionRequest',int).
+als_const('SelectionNotify',int).
+als_const('ColormapNotify',int).
+als_const('ClientMessage',int).
+als_const('MappingNotify',int).
+als_const('LASTEvent',int).
+als_const('ShiftMask',int).
+als_const('LockMask',int).
+als_const('ControlMask',int).
+als_const('Mod1Mask',int).
+als_const('Mod2Mask',int).
+als_const('Mod3Mask',int).
+als_const('Mod4Mask',int).
+als_const('Mod5Mask',int).
+als_const('ShiftMapIndex',int).
+als_const('LockMapIndex',int).
+als_const('ControlMapIndex',int).
+als_const('Mod1MapIndex',int).
+als_const('Mod2MapIndex',int).
+als_const('Mod3MapIndex',int).
+als_const('Mod4MapIndex',int).
+als_const('Mod5MapIndex',int).
+als_const('Button1Mask',int).
+als_const('Button2Mask',int).
+als_const('Button3Mask',int).
+als_const('Button4Mask',int).
+als_const('Button5Mask',int).
+als_const('AnyModifier',int).
+als_const('Button1',int).
+als_const('Button2',int).
+als_const('Button3',int).
+als_const('Button4',int).
+als_const('Button5',int).
+als_const('NotifyNormal',int).
+als_const('NotifyGrab',int).
+als_const('NotifyUngrab',int).
+als_const('NotifyWhileGrabbed',int).
+als_const('NotifyHint',int).
+als_const('NotifyAncestor',int).
+als_const('NotifyVirtual',int).
+als_const('NotifyInferior',int).
+als_const('NotifyNonlinear',int).
+als_const('NotifyNonlinearVirtual',int).
+als_const('NotifyPointer',int).
+als_const('NotifyPointerRoot',int).
+als_const('NotifyDetailNone',int).
+als_const('VisibilityUnobscured',int).
+als_const('VisibilityPartiallyObscured',int).
+als_const('VisibilityFullyObscured',int).
+als_const('PlaceOnTop',int).
+als_const('PlaceOnBottom',int).
+als_const('FamilyInternet',int).
+als_const('FamilyDECnet',int).
+als_const('FamilyChaos',int).
+als_const('PropertyNewValue',int).
+als_const('PropertyDelete',int).
+als_const('ColormapUninstalled',int).
+als_const('ColormapInstalled',int).
+als_const('GrabModeSync',int).
+als_const('GrabModeAsync',int).
+als_const('GrabSuccess',int).
+als_const('AlreadyGrabbed',int).
+als_const('GrabInvalidTime',int).
+als_const('GrabNotViewable',int).
+als_const('GrabFrozen',int).
+als_const('AsyncPointer',int).
+als_const('SyncPointer',int).
+als_const('ReplayPointer',int).
+als_const('AsyncKeyboard',int).
+als_const('SyncKeyboard',int).
+als_const('ReplayKeyboard',int).
+als_const('AsyncBoth',int).
+als_const('SyncBoth',int).
+als_const('RevertToNone',int).
+als_const('RevertToPointerRoot',int).
+als_const('RevertToParent',int).
+als_const('Success',int).
+als_const('BadRequest',int).
+als_const('BadValue',int).
+als_const('BadWindow',int).
+als_const('BadPixmap',int).
+als_const('BadAtom',int).
+als_const('BadCursor',int).
+als_const('BadFont',int).
+als_const('BadMatch',int).
+als_const('BadDrawable',int).
+als_const('BadAccess',int).
+als_const('BadAlloc',int).
+als_const('BadColor',int).
+als_const('BadGC',int).
+als_const('BadIDChoice',int).
+als_const('BadName',int).
+als_const('BadLength',int).
+als_const('BadImplementation',int).
+als_const('FirstExtensionError',int).
+als_const('LastExtensionError',int).
+als_const('InputOutput',int).
+als_const('InputOnly',int).
+als_const('CWBackPixmap',int).
+als_const('CWBackPixel',int).
+als_const('CWBorderPixmap',int).
+als_const('CWBorderPixel',int).
+als_const('CWBitGravity',int).
+als_const('CWWinGravity',int).
+als_const('CWBackingStore',int).
+als_const('CWBackingPlanes',int).
+als_const('CWBackingPixel',int).
+als_const('CWOverrideRedirect',int).
+als_const('CWSaveUnder',int).
+als_const('CWEventMask',int).
+als_const('CWDontPropagate',int).
+als_const('CWColormap',int).
+als_const('CWCursor',int).
+als_const('CWX',int).
+als_const('CWY',int).
+als_const('CWWidth',int).
+als_const('CWHeight',int).
+als_const('CWBorderWidth',int).
+als_const('CWSibling',int).
+als_const('CWStackMode',int).
+als_const('ForgetGravity',int).
+als_const('NorthWestGravity',int).
+als_const('NorthGravity',int).
+als_const('NorthEastGravity',int).
+als_const('WestGravity',int).
+als_const('CenterGravity',int).
+als_const('EastGravity',int).
+als_const('SouthWestGravity',int).
+als_const('SouthGravity',int).
+als_const('SouthEastGravity',int).
+als_const('StaticGravity',int).
+als_const('UnmapGravity',int).
+als_const('NotUseful',int).
+als_const('WhenMapped',int).
+als_const('Always',int).
+als_const('IsUnmapped',int).
+als_const('IsUnviewable',int).
+als_const('IsViewable',int).
+als_const('SetModeInsert',int).
+als_const('SetModeDelete',int).
+als_const('DestroyAll',int).
+als_const('RetainPermanent',int).
+als_const('RetainTemporary',int).
+als_const('Above',int).
+als_const('Below',int).
+als_const('TopIf',int).
+als_const('BottomIf',int).
+als_const('Opposite',int).
+als_const('RaiseLowest',int).
+als_const('LowerHighest',int).
+als_const('PropModeReplace',int).
+als_const('PropModePrepend',int).
+als_const('PropModeAppend',int).
+als_const('GXclear',int).
+als_const('GXand',int).
+als_const('GXandReverse',int).
+als_const('GXcopy',int).
+als_const('GXandInverted',int).
+als_const('GXnoop',int).
+als_const('GXxor',int).
+als_const('GXor',int).
+als_const('GXnor',int).
+als_const('GXequiv',int).
+als_const('GXinvert',int).
+als_const('GXorReverse',int).
+als_const('GXcopyInverted',int).
+als_const('GXorInverted',int).
+als_const('GXnand',int).
+als_const('GXset',int).
+als_const('LineSolid',int).
+als_const('LineOnOffDash',int).
+als_const('LineDoubleDash',int).
+als_const('CapNotLast',int).
+als_const('CapButt',int).
+als_const('CapRound',int).
+als_const('CapProjecting',int).
+als_const('JoinMiter',int).
+als_const('JoinRound',int).
+als_const('JoinBevel',int).
+als_const('FillSolid',int).
+als_const('FillTiled',int).
+als_const('FillStippled',int).
+als_const('FillOpaqueStippled',int).
+als_const('EvenOddRule',int).
+als_const('WindingRule',int).
+als_const('ClipByChildren',int).
+als_const('IncludeInferiors',int).
+als_const('Unsorted',int).
+als_const('YSorted',int).
+als_const('YXSorted',int).
+als_const('YXBanded',int).
+als_const('CoordModeOrigin',int).
+als_const('CoordModePrevious',int).
+als_const('Complex',int).
+als_const('Nonconvex',int).
+als_const('Convex',int).
+als_const('ArcChord',int).
+als_const('ArcPieSlice',int).
+als_const('GCFunction',int).
+als_const('GCPlaneMask',int).
+als_const('GCForeground',int).
+als_const('GCBackground',int).
+als_const('GCLineWidth',int).
+als_const('GCLineStyle',int).
+als_const('GCCapStyle',int).
+als_const('GCJoinStyle',int).
+als_const('GCFillStyle',int).
+als_const('GCFillRule',int).
+als_const('GCTile',int).
+als_const('GCStipple',int).
+als_const('GCTileStipXOrigin',int).
+als_const('GCTileStipYOrigin',int).
+als_const('GCFont',int).
+als_const('GCSubwindowMode',int).
+als_const('GCGraphicsExposures',int).
+als_const('GCClipXOrigin',int).
+als_const('GCClipYOrigin',int).
+als_const('GCClipMask',int).
+als_const('GCDashOffset',int).
+als_const('GCDashList',int).
+als_const('GCArcMode',int).
+als_const('GCLastBit',int).
+als_const('FontLeftToRight',int).
+als_const('FontRightToLeft',int).
+als_const('FontChange',int).
+als_const('XYBitmap',int).
+als_const('XYPixmap',int).
+als_const('ZPixmap',int).
+als_const('AllocNone',int).
+als_const('AllocAll',int).
+als_const('DoRed',int).
+als_const('DoGreen',int).
+als_const('DoBlue',int).
+als_const('CursorShape',int).
+als_const('TileShape',int).
+als_const('StippleShape',int).
+als_const('AutoRepeatModeOff',int).
+als_const('AutoRepeatModeOn',int).
+als_const('AutoRepeatModeDefault',int).
+als_const('LedModeOff',int).
+als_const('LedModeOn',int).
+als_const('KBKeyClickPercent',int).
+als_const('KBBellPercent',int).
+als_const('KBBellPitch',int).
+als_const('KBBellDuration',int).
+als_const('KBLed',int).
+als_const('KBLedMode',int).
+als_const('KBKey',int).
+als_const('KBAutoRepeatMode',int).
+als_const('MappingSuccess',int).
+als_const('MappingBusy',int).
+als_const('MappingFailed',int).
+als_const('MappingModifier',int).
+als_const('MappingKeyboard',int).
+als_const('MappingPointer',int).
+als_const('DontPreferBlanking',int).
+als_const('PreferBlanking',int).
+als_const('DefaultBlanking',int).
+als_const('DisableScreenSaver',int).
+als_const('DisableScreenInterval',int).
+als_const('DontAllowExposures',int).
+als_const('AllowExposures',int).
+als_const('DefaultExposures',int).
+als_const('ScreenSaverReset',int).
+als_const('ScreenSaverActive',int).
+als_const('HostInsert',int).
+als_const('HostDelete',int).
+als_const('EnableAccess',int).
+als_const('DisableAccess',int).
+als_const('StaticGray',int).
+als_const('GrayScale',int).
+als_const('StaticColor',int).
+als_const('PseudoColor',int).
+als_const('TrueColor',int).
+als_const('DirectColor',int).
+als_const('LSBFirst',int).
+als_const('MSBFirst',int).
+
+/* Close file /usr/include/X11/X.h */
+
+als_const('NeedWidePrototypes',int).
+als_const('True',int).
+als_const('False',int).
+als_const('QueuedAlready',int).
+als_const('QueuedAfterReading',int).
+als_const('QueuedAfterFlush',int).
+als_macro('ConnectionNumber').
+als_macro('RootWindow').
+als_macro('DefaultScreen').
+als_macro('DefaultRootWindow').
+als_macro('DefaultVisual').
+als_macro('DefaultGC').
+als_macro('BlackPixel').
+als_macro('WhitePixel').
+als_const('AllPlanes',int).
+als_macro('QLength').
+als_macro('DisplayWidth').
+als_macro('DisplayHeight').
+als_macro('DisplayWidthMM').
+als_macro('DisplayHeightMM').
+als_macro('DisplayPlanes').
+als_macro('DisplayCells').
+als_macro('ScreenCount').
+als_macro('ServerVendor').
+als_macro('ProtocolVersion').
+als_macro('ProtocolRevision').
+als_macro('VendorRelease').
+als_macro('DisplayString').
+als_macro('DefaultDepth').
+als_macro('DefaultColormap').
+als_macro('BitmapUnit').
+als_macro('BitmapBitOrder').
+als_macro('BitmapPad').
+als_macro('ImageByteOrder').
+als_macro('NextRequest').
+als_macro('LastKnownRequestProcessed').
+als_macro('ScreenOfDisplay').
+als_macro('DefaultScreenOfDisplay').
+als_macro('DisplayOfScreen').
+als_macro('RootWindowOfScreen').
+als_macro('BlackPixelOfScreen').
+als_macro('WhitePixelOfScreen').
+als_macro('DefaultColormapOfScreen').
+als_macro('DefaultDepthOfScreen').
+als_macro('DefaultGCOfScreen').
+als_macro('DefaultVisualOfScreen').
+als_macro('WidthOfScreen').
+als_macro('HeightOfScreen').
+als_macro('WidthMMOfScreen').
+als_macro('HeightMMOfScreen').
+als_macro('PlanesOfScreen').
+als_macro('CellsOfScreen').
+als_macro('MinCmapsOfScreen').
+als_macro('MaxCmapsOfScreen').
+als_macro('DoesSaveUnders').
+als_macro('DoesBackingStore').
+als_macro('EventMaskOfScreen').
+
+als_struct('XExtData',['number'=[int],
+'next'=[ptr,'struct _XExtData'],
+'free_private'=[ptr,func,int],
+'private_data'=[ptr,char]]).
+
+als_struct('XExtCodes',['extension'=[int],
+'major_opcode'=[int],
+'first_event'=[int],
+'first_error'=[int]]).
+
+als_struct('_XExtension',['next'=[ptr,'struct _XExten'],
+'codes'=['XExtCodes'],
+'create_GC'=[ptr,func,int],
+'copy_GC'=[ptr,func,int],
+'flush_GC'=[ptr,func,int],
+'free_GC'=[ptr,func,int],
+'create_Font'=[ptr,func,int],
+'free_Font'=[ptr,func,int],
+'close_display'=[ptr,func,int],
+'error'=[ptr,func,int],
+'error_string'=[ptr,func,ptr,char],
+'name'=[ptr,char]]).
+
+als_struct('XPixmapFormatValues',['depth'=[int],
+'bits_per_pixel'=[int],
+'scanline_pad'=[int]]).
+
+als_struct('XGCValues',['function'=[int],
+'plane_mask'=[unsigned_long],
+'foreground'=[unsigned_long],
+'background'=[unsigned_long],
+'line_width'=[int],
+'line_style'=[int],
+'cap_style'=[int],
+'join_style'=[int],
+'fill_style'=[int],
+'fill_rule'=[int],
+'arc_mode'=[int],
+'tile'=[unsigned_long],
+'stipple'=[unsigned_long],
+'ts_x_origin'=[int],
+'ts_y_origin'=[int],
+'font'=[unsigned_long],
+'subwindow_mode'=[int],
+'graphics_exposures'=[int],
+'clip_x_origin'=[int],
+'clip_y_origin'=[int],
+'clip_mask'=[unsigned_long],
+'dash_offset'=[int],
+'dashes'=[char]]).
+
+als_type('GC',[ptr,struct]).
+
+als_struct('Visual',['ext_data'=[ptr,'XExtData'],
+'visualid'=[unsigned_long],
+'class'=[int],
+'red_mask'=[unsigned_long],
+'green_mask'=[unsigned_long],
+'blue_mask'=[unsigned_long],
+'bits_per_rgb'=[int],
+'map_entries'=[int]]).
+
+als_struct('Depth',['depth'=[int],
+'nvisuals'=[int],
+'visuals'=[ptr,'Visual']]).
+
+als_struct('Screen',['ext_data'=[ptr,'XExtData'],
+'display'=[ptr,'struct _XDisplay'],
+'root'=[unsigned_long],
+'width'=[int],
+'height'=[int],
+'mwidth'=[int],
+'mheight'=[int],
+'ndepths'=[int],
+'depths'=[ptr,'Depth'],
+'root_depth'=[int],
+'root_visual'=[ptr,'Visual'],
+'default_gc'=[ptr,'GC'],
+'cmap'=[unsigned_long],
+'white_pixel'=[unsigned_long],
+'black_pixel'=[unsigned_long],
+'max_maps'=[int],
+'min_maps'=[int],
+'backing_store'=[int],
+'save_unders'=[int],
+'root_input_mask'=[long]]).
+
+als_struct('ScreenFormat',['ext_data'=[ptr,'XExtData'],
+'depth'=[int],
+'bits_per_pixel'=[int],
+'scanline_pad'=[int]]).
+
+als_struct('XSetWindowAttributes',['background_pixmap'=[unsigned_long],
+'background_pixel'=[unsigned_long],
+'border_pixmap'=[unsigned_long],
+'border_pixel'=[unsigned_long],
+'bit_gravity'=[int],
+'win_gravity'=[int],
+'backing_store'=[int],
+'backing_planes'=[unsigned_long],
+'backing_pixel'=[unsigned_long],
+'save_under'=[int],
+'event_mask'=[long],
+'do_not_propagate_mask'=[long],
+'override_redirect'=[int],
+'colormap'=[unsigned_long],
+'cursor'=[unsigned_long]]).
+
+als_struct('XWindowAttributes',['x'=[int],
+'y'=[int],
+'width'=[int],
+'height'=[int],
+'border_width'=[int],
+'depth'=[int],
+'visual'=[ptr,'Visual'],
+'root'=[unsigned_long],
+'class'=[int],
+'bit_gravity'=[int],
+'win_gravity'=[int],
+'backing_store'=[int],
+'backing_planes'=[unsigned_long],
+'backing_pixel'=[unsigned_long],
+'save_under'=[int],
+'colormap'=[unsigned_long],
+'map_installed'=[int],
+'map_state'=[int],
+'all_event_masks'=[long],
+'your_event_mask'=[long],
+'do_not_propagate_mask'=[long],
+'override_redirect'=[int],
+'screen'=[ptr,'Screen']]).
+
+als_struct('XHostAddress',['family'=[int],
+'length'=[int],
+'address'=[ptr,char]]).
+
+als_struct('XImage',['width'=[int],
+'height'=[int],
+'xoffset'=[int],
+'format'=[int],
+'data'=[ptr,char],
+'byte_order'=[int],
+'bitmap_unit'=[int],
+'bitmap_bit_order'=[int],
+'bitmap_pad'=[int],
+'depth'=[int],
+'bytes_per_line'=[int],
+'bits_per_pixel'=[int],
+'red_mask'=[unsigned_long],
+'green_mask'=[unsigned_long],
+'blue_mask'=[unsigned_long],
+'obdata'=[ptr,char],
+'f.create_image'=[ptr,func,ptr,'struct _XImage'],
+'f.destroy_image'=[ptr,func,int],
+'f.get_pixel'=[ptr,func,unsigned_long],
+'f.put_pixel'=[ptr,func,int],
+'f.sub_image'=[ptr,func,ptr,'struct _XImage'],
+'f.add_pixel'=[ptr,func,int]]).
+
+als_struct('XWindowChanges',['x'=[int],
+'y'=[int],
+'width'=[int],
+'height'=[int],
+'border_width'=[int],
+'sibling'=[unsigned_long],
+'stack_mode'=[int]]).
+
+als_struct('XColor',['pixel'=[unsigned_long],
+'red'=[unsigned_short],
+'green'=[unsigned_short],
+'blue'=[unsigned_short],
+'flags'=[char],
+'pad'=[char]]).
+
+als_struct('XSegment',['x1'=[short],
+'y1'=[short],
+'x2'=[short],
+'y2'=[short]]).
+
+als_struct('XPoint',['x'=[short],
+'y'=[short]]).
+
+als_struct('XRectangle',['x'=[short],
+'y'=[short],
+'width'=[unsigned_short],
+'height'=[unsigned_short]]).
+
+als_struct('XArc',['x'=[short],
+'y'=[short],
+'width'=[unsigned_short],
+'height'=[unsigned_short],
+'angle1'=[short],
+'angle2'=[short]]).
+
+als_struct('XKeyboardControl',['key_click_percent'=[int],
+'bell_percent'=[int],
+'bell_pitch'=[int],
+'bell_duration'=[int],
+'led'=[int],
+'led_mode'=[int],
+'key'=[int],
+'auto_repeat_mode'=[int]]).
+
+als_struct('XKeyboardState',['key_click_percent'=[int],
+'bell_percent'=[int],
+'bell_pitch'=[unsigned_int],
+'bell_duration'=[unsigned_int],
+'led_mask'=[unsigned_long],
+'global_auto_repeat'=[int],
+'auto_repeats'=[array(32),char]]).
+
+als_struct('XTimeCoord',['time'=[unsigned_long],
+'x'=[short],
+'y'=[short]]).
+
+als_struct('XModifierKeymap',['max_keypermod'=[int],
+'modifiermap'=[ptr,unsigned_char]]).
+
+als_struct('solBufStruct',['buffer'=[ptr,char],
+'bufptr'=[ptr,char],
+'bufmax'=[ptr,char],
+'ReqCode'=[int],
+'first_error'=[int],
+'extension'=[int]]).
+
+als_struct('Display',['ext_data'=[ptr,'XExtData'],
+'next'=[ptr,'struct _XDisplay'],
+'fd'=[int],
+'lock'=[int],
+'proto_major_version'=[int],
+'proto_minor_version'=[int],
+'vendor'=[ptr,char],
+'resource_base'=[long],
+'resource_mask'=[long],
+'resource_id'=[long],
+'resource_shift'=[int],
+'resource_alloc'=[ptr,func,unsigned_long],
+'byte_order'=[int],
+'bitmap_unit'=[int],
+'bitmap_pad'=[int],
+'bitmap_bit_order'=[int],
+'nformats'=[int],
+'pixmap_format'=[ptr,'ScreenFormat'],
+'vnumber'=[int],
+'release'=[int],
+'head'=[ptr,'struct _XSQEvent'],
+'tail'=[ptr,'struct _XSQEvent'],
+'qlen'=[int],
+'last_request_read'=[unsigned_long],
+'request'=[unsigned_long],
+'last_req'=[ptr,char],
+'buffer'=[ptr,char],
+'bufptr'=[ptr,char],
+'bufmax'=[ptr,char],
+'max_request_size'=[unsigned_int],
+'db'=[ptr,'struct _XrmHashBucketRec'],
+'synchandler'=[ptr,func,int],
+'display_name'=[ptr,char],
+'default_screen'=[int],
+'nscreens'=[int],
+'screens'=[ptr,'Screen'],
+'motion_buffer'=[unsigned_long],
+'current'=[unsigned_long],
+'min_keycode'=[int],
+'max_keycode'=[int],
+'keysyms'=[ptr,unsigned_long],
+'modifiermap'=[ptr,'XModifierKeymap'],
+'keysyms_per_keycode'=[int],
+'xdefaults'=[ptr,char],
+'scratch_buffer'=[ptr,char],
+'scratch_length'=[unsigned_long],
+'ext_number'=[int],
+'ext_procs'=[ptr,'_XExtension'],
+'event_vec'=[array(128),ptr,func,int],
+'wire_vec'=[array(128),ptr,func,int],
+'lock_meaning'=[unsigned_long],
+'key_bindings'=[ptr,'struct XKeytrans'],
+'cursor_font'=[unsigned_long],
+'atoms'=[ptr,'struct _DisplayAtoms'],
+'reconfigure_wm_window.sequence_number'=[long],
+'reconfigure_wm_window.old_handler'=[ptr,func,int],
+'reconfigure_wm_window.succeeded'=[int],
+'flags'=[unsigned_long],
+'mode_switch'=[unsigned_int],
+'onunlockhandler'=[ptr,func,int],
+'solShMemptr'=[ptr,'solBufStruct'],
+'semid'=[int]]).
+
+als_struct('XKeyEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'root'=[unsigned_long],
+'subwindow'=[unsigned_long],
+'time'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'x_root'=[int],
+'y_root'=[int],
+'state'=[unsigned_int],
+'keycode'=[unsigned_int],
+'same_screen'=[int]]).
+
+als_struct('XKeyPressedEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'root'=[unsigned_long],
+'subwindow'=[unsigned_long],
+'time'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'x_root'=[int],
+'y_root'=[int],
+'state'=[unsigned_int],
+'keycode'=[unsigned_int],
+'same_screen'=[int]]).
+
+als_struct('XKeyReleasedEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'root'=[unsigned_long],
+'subwindow'=[unsigned_long],
+'time'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'x_root'=[int],
+'y_root'=[int],
+'state'=[unsigned_int],
+'keycode'=[unsigned_int],
+'same_screen'=[int]]).
+
+als_struct('XButtonEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'root'=[unsigned_long],
+'subwindow'=[unsigned_long],
+'time'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'x_root'=[int],
+'y_root'=[int],
+'state'=[unsigned_int],
+'button'=[unsigned_int],
+'same_screen'=[int]]).
+
+als_struct('XButtonPressedEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'root'=[unsigned_long],
+'subwindow'=[unsigned_long],
+'time'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'x_root'=[int],
+'y_root'=[int],
+'state'=[unsigned_int],
+'button'=[unsigned_int],
+'same_screen'=[int]]).
+
+als_struct('XButtonReleasedEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'root'=[unsigned_long],
+'subwindow'=[unsigned_long],
+'time'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'x_root'=[int],
+'y_root'=[int],
+'state'=[unsigned_int],
+'button'=[unsigned_int],
+'same_screen'=[int]]).
+
+als_struct('XMotionEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'root'=[unsigned_long],
+'subwindow'=[unsigned_long],
+'time'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'x_root'=[int],
+'y_root'=[int],
+'state'=[unsigned_int],
+'is_hint'=[char],
+'same_screen'=[int]]).
+
+als_struct('XPointerMovedEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'root'=[unsigned_long],
+'subwindow'=[unsigned_long],
+'time'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'x_root'=[int],
+'y_root'=[int],
+'state'=[unsigned_int],
+'is_hint'=[char],
+'same_screen'=[int]]).
+
+als_struct('XCrossingEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'root'=[unsigned_long],
+'subwindow'=[unsigned_long],
+'time'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'x_root'=[int],
+'y_root'=[int],
+'mode'=[int],
+'detail'=[int],
+'same_screen'=[int],
+'focus'=[int],
+'state'=[unsigned_int]]).
+
+als_struct('XEnterWindowEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'root'=[unsigned_long],
+'subwindow'=[unsigned_long],
+'time'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'x_root'=[int],
+'y_root'=[int],
+'mode'=[int],
+'detail'=[int],
+'same_screen'=[int],
+'focus'=[int],
+'state'=[unsigned_int]]).
+
+als_struct('XLeaveWindowEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'root'=[unsigned_long],
+'subwindow'=[unsigned_long],
+'time'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'x_root'=[int],
+'y_root'=[int],
+'mode'=[int],
+'detail'=[int],
+'same_screen'=[int],
+'focus'=[int],
+'state'=[unsigned_int]]).
+
+als_struct('XFocusChangeEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'mode'=[int],
+'detail'=[int]]).
+
+als_struct('XFocusInEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'mode'=[int],
+'detail'=[int]]).
+
+als_struct('XFocusOutEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'mode'=[int],
+'detail'=[int]]).
+
+als_struct('XKeymapEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'key_vector'=[array(32),char]]).
+
+als_struct('XExposeEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'width'=[int],
+'height'=[int],
+'count'=[int]]).
+
+als_struct('XGraphicsExposeEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'drawable'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'width'=[int],
+'height'=[int],
+'count'=[int],
+'major_code'=[int],
+'minor_code'=[int]]).
+
+als_struct('XNoExposeEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'drawable'=[unsigned_long],
+'major_code'=[int],
+'minor_code'=[int]]).
+
+als_struct('XVisibilityEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'state'=[int]]).
+
+als_struct('XCreateWindowEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'parent'=[unsigned_long],
+'window'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'width'=[int],
+'height'=[int],
+'border_width'=[int],
+'override_redirect'=[int]]).
+
+als_struct('XDestroyWindowEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'event'=[unsigned_long],
+'window'=[unsigned_long]]).
+
+als_struct('XUnmapEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'event'=[unsigned_long],
+'window'=[unsigned_long],
+'from_configure'=[int]]).
+
+als_struct('XMapEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'event'=[unsigned_long],
+'window'=[unsigned_long],
+'override_redirect'=[int]]).
+
+als_struct('XMapRequestEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'parent'=[unsigned_long],
+'window'=[unsigned_long]]).
+
+als_struct('XReparentEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'event'=[unsigned_long],
+'window'=[unsigned_long],
+'parent'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'override_redirect'=[int]]).
+
+als_struct('XConfigureEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'event'=[unsigned_long],
+'window'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'width'=[int],
+'height'=[int],
+'border_width'=[int],
+'above'=[unsigned_long],
+'override_redirect'=[int]]).
+
+als_struct('XGravityEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'event'=[unsigned_long],
+'window'=[unsigned_long],
+'x'=[int],
+'y'=[int]]).
+
+als_struct('XResizeRequestEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'width'=[int],
+'height'=[int]]).
+
+als_struct('XConfigureRequestEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'parent'=[unsigned_long],
+'window'=[unsigned_long],
+'x'=[int],
+'y'=[int],
+'width'=[int],
+'height'=[int],
+'border_width'=[int],
+'above'=[unsigned_long],
+'detail'=[int],
+'value_mask'=[unsigned_long]]).
+
+als_struct('XCirculateEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'event'=[unsigned_long],
+'window'=[unsigned_long],
+'place'=[int]]).
+
+als_struct('XCirculateRequestEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'parent'=[unsigned_long],
+'window'=[unsigned_long],
+'place'=[int]]).
+
+als_struct('XPropertyEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'atom'=[unsigned_long],
+'time'=[unsigned_long],
+'state'=[int]]).
+
+als_struct('XSelectionClearEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'selection'=[unsigned_long],
+'time'=[unsigned_long]]).
+
+als_struct('XSelectionRequestEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'owner'=[unsigned_long],
+'requestor'=[unsigned_long],
+'selection'=[unsigned_long],
+'target'=[unsigned_long],
+'property'=[unsigned_long],
+'time'=[unsigned_long]]).
+
+als_struct('XSelectionEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'requestor'=[unsigned_long],
+'selection'=[unsigned_long],
+'target'=[unsigned_long],
+'property'=[unsigned_long],
+'time'=[unsigned_long]]).
+
+als_struct('XColormapEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'colormap'=[unsigned_long],
+'new'=[int],
+'state'=[int]]).
+
+als_struct('XClientMessageEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'message_type'=[unsigned_long],
+'format'=[int],
+'data.b'=[array(0),char],
+'data.s'=[array(0),short],
+'data.l'=[array(5),long]]).
+
+als_struct('XMappingEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long],
+'request'=[int],
+'first_keycode'=[int],
+'count'=[int]]).
+
+als_struct('XErrorEvent',['type'=[int],
+'display'=[ptr,'Display'],
+'resourceid'=[unsigned_long],
+'serial'=[unsigned_long],
+'error_code'=[unsigned_char],
+'request_code'=[unsigned_char],
+'minor_code'=[unsigned_char]]).
+
+als_struct('XAnyEvent',['type'=[int],
+'serial'=[unsigned_long],
+'send_event'=[int],
+'display'=[ptr,'Display'],
+'window'=[unsigned_long]]).
+
+als_struct('XEvent',['type'=[int],
+'xany'=['XAnyEvent'],
+'xkey'=['XKeyEvent'],
+'xbutton'=['XButtonEvent'],
+'xmotion'=['XMotionEvent'],
+'xcrossing'=['XCrossingEvent'],
+'xfocus'=['XFocusChangeEvent'],
+'xexpose'=['XExposeEvent'],
+'xgraphicsexpose'=['XGraphicsExposeEvent'],
+'xnoexpose'=['XNoExposeEvent'],
+'xvisibility'=['XVisibilityEvent'],
+'xcreatewindow'=['XCreateWindowEvent'],
+'xdestroywindow'=['XDestroyWindowEvent'],
+'xunmap'=['XUnmapEvent'],
+'xmap'=['XMapEvent'],
+'xmaprequest'=['XMapRequestEvent'],
+'xreparent'=['XReparentEvent'],
+'xconfigure'=['XConfigureEvent'],
+'xgravity'=['XGravityEvent'],
+'xresizerequest'=['XResizeRequestEvent'],
+'xconfigurerequest'=['XConfigureRequestEvent'],
+'xcirculate'=['XCirculateEvent'],
+'xcirculaterequest'=['XCirculateRequestEvent'],
+'xproperty'=['XPropertyEvent'],
+'xselectionclear'=['XSelectionClearEvent'],
+'xselectionrequest'=['XSelectionRequestEvent'],
+'xselection'=['XSelectionEvent'],
+'xcolormap'=['XColormapEvent'],
+'xclient'=['XClientMessageEvent'],
+'xmapping'=['XMappingEvent'],
+'xerror'=['XErrorEvent'],
+'xkeymap'=['XKeymapEvent'],
+'pad'=[array(24),long]]).
+
+als_struct('_XQEvent',['next'=[ptr,'struct _XSQEvent'],
+'event'=['XEvent']]).
+als_macro('XAllocID').
+
+als_struct('XCharStruct',['lbearing'=[short],
+'rbearing'=[short],
+'width'=[short],
+'ascent'=[short],
+'descent'=[short],
+'attributes'=[unsigned_short]]).
+
+als_struct('XFontProp',['name'=[unsigned_long],
+'card32'=[unsigned_long]]).
+
+als_struct('XFontStruct',['ext_data'=[ptr,'XExtData'],
+'fid'=[unsigned_long],
+'direction'=[unsigned_int],
+'min_char_or_byte2'=[unsigned_int],
+'max_char_or_byte2'=[unsigned_int],
+'min_byte1'=[unsigned_int],
+'max_byte1'=[unsigned_int],
+'all_chars_exist'=[int],
+'default_char'=[unsigned_int],
+'n_properties'=[int],
+'properties'=[ptr,'XFontProp'],
+'min_bounds'=['XCharStruct'],
+'max_bounds'=['XCharStruct'],
+'per_char'=[ptr,'XCharStruct'],
+'ascent'=[int],
+'descent'=[int]]).
+
+als_struct('XTextItem',['chars'=[ptr,char],
+'nchars'=[int],
+'delta'=[int],
+'font'=[unsigned_long]]).
+
+als_struct('XChar2b',['byte1'=[unsigned_char],
+'byte2'=[unsigned_char]]).
+
+als_struct('XTextItem16',['chars'=[ptr,'XChar2b'],
+'nchars'=[int],
+'delta'=[int],
+'font'=[unsigned_long]]).
+
+als_struct('XEDataObject',['display'=[ptr,'Display'],
+'gc'=[ptr,'GC'],
+'visual'=[ptr,'Visual'],
+'screen'=[ptr,'Screen'],
+'pixmap_format'=[ptr,'ScreenFormat'],
+'font'=[ptr,'XFontStruct']]).
+
+als_type('XErrorHandler',[ptr,func,int]).
+
+als_type('XIOErrorHandler',[ptr,func,int]).
+
+/* Close file /usr/include/X11/Xlib.h */
+
+
+/* Open file /usr/include/X11/Xutil.h */
+
+als_const('NoValue',int).
+als_const('XValue',int).
+als_const('YValue',int).
+als_const('WidthValue',int).
+als_const('HeightValue',int).
+als_const('AllValues',int).
+als_const('XNegative',int).
+als_const('YNegative',int).
+
+als_struct('XSizeHints',['flags'=[long],
+'x'=[int],
+'y'=[int],
+'width'=[int],
+'height'=[int],
+'min_width'=[int],
+'min_height'=[int],
+'max_width'=[int],
+'max_height'=[int],
+'width_inc'=[int],
+'height_inc'=[int],
+'min_aspect.x'=[int],
+'min_aspect.y'=[int],
+'max_aspect.x'=[int],
+'max_aspect.y'=[int],
+'base_width'=[int],
+'base_height'=[int],
+'win_gravity'=[int]]).
+als_const('USPosition',int).
+als_const('USSize',int).
+als_const('PPosition',int).
+als_const('PSize',int).
+als_const('PMinSize',int).
+als_const('PMaxSize',int).
+als_const('PResizeInc',int).
+als_const('PAspect',int).
+als_const('PBaseSize',int).
+als_const('PWinGravity',int).
+als_const('PAllHints',int).
+
+als_struct('XWMHints',['flags'=[long],
+'input'=[int],
+'initial_state'=[int],
+'icon_pixmap'=[unsigned_long],
+'icon_window'=[unsigned_long],
+'icon_x'=[int],
+'icon_y'=[int],
+'icon_mask'=[unsigned_long],
+'window_group'=[unsigned_long]]).
+als_const('InputHint',int).
+als_const('StateHint',int).
+als_const('IconPixmapHint',int).
+als_const('IconWindowHint',int).
+als_const('IconPositionHint',int).
+als_const('IconMaskHint',int).
+als_const('WindowGroupHint',int).
+als_const('AllHints',int).
+als_const('WithdrawnState',int).
+als_const('NormalState',int).
+als_const('IconicState',int).
+als_const('DontCareState',int).
+als_const('ZoomState',int).
+als_const('InactiveState',int).
+
+als_struct('XTextProperty',['value'=[ptr,unsigned_char],
+'encoding'=[unsigned_long],
+'format'=[int],
+'nitems'=[unsigned_long]]).
+
+als_struct('XIconSize',['min_width'=[int],
+'min_height'=[int],
+'max_width'=[int],
+'max_height'=[int],
+'width_inc'=[int],
+'height_inc'=[int]]).
+
+als_struct('XClassHint',['res_name'=[ptr,char],
+'res_class'=[ptr,char]]).
+als_macro('XDestroyImage').
+als_macro('XGetPixel').
+als_macro('XPutPixel').
+als_macro('XSubImage').
+als_macro('XAddPixel').
+
+als_struct('XComposeStatus',['compose_ptr'=[ptr,char],
+'chars_matched'=[int]]).
+als_macro('IsKeypadKey').
+als_macro('IsCursorKey').
+als_macro('IsPFKey').
+als_macro('IsFunctionKey').
+als_macro('IsMiscFunctionKey').
+als_macro('IsModifierKey').
+
+als_type('Region',[ptr,struct]).
+als_const('RectangleOut',int).
+als_const('RectangleIn',int).
+als_const('RectanglePart',int).
+
+als_struct('XVisualInfo',['visual'=[ptr,'Visual'],
+'visualid'=[unsigned_long],
+'screen'=[int],
+'depth'=[int],
+'class'=[int],
+'red_mask'=[unsigned_long],
+'green_mask'=[unsigned_long],
+'blue_mask'=[unsigned_long],
+'colormap_size'=[int],
+'bits_per_rgb'=[int]]).
+als_const('VisualNoMask',int).
+als_const('VisualIDMask',int).
+als_const('VisualScreenMask',int).
+als_const('VisualDepthMask',int).
+als_const('VisualClassMask',int).
+als_const('VisualRedMaskMask',int).
+als_const('VisualGreenMaskMask',int).
+als_const('VisualBlueMaskMask',int).
+als_const('VisualColormapSizeMask',int).
+als_const('VisualBitsPerRGBMask',int).
+als_const('VisualAllMask',int).
+
+als_struct('XStandardColormap',['colormap'=[unsigned_long],
+'red_max'=[unsigned_long],
+'red_mult'=[unsigned_long],
+'green_max'=[unsigned_long],
+'green_mult'=[unsigned_long],
+'blue_max'=[unsigned_long],
+'blue_mult'=[unsigned_long],
+'base_pixel'=[unsigned_long],
+'visualid'=[unsigned_long],
+'killid'=[unsigned_long]]).
+als_const('ReleaseByFreeingColormap',int).
+als_const('BitmapSuccess',int).
+als_const('BitmapOpenFailed',int).
+als_const('BitmapFileInvalid',int).
+als_const('BitmapNoMemory',int).
+als_const('XCSUCCESS',int).
+als_const('XCNOMEM',int).
+als_const('XCNOENT',int).
+
+als_type('XContext',[int]).
+als_macro('XUniqueContext').
+als_macro('XStringToContext').
+
+/* Close file /usr/include/X11/Xutil.h */
+
+
+/* Open file /usr/include/X11/Xatom.h */
+
+als_const('XATOM_H',int).
+als_const('XA_PRIMARY',int).
+als_const('XA_SECONDARY',int).
+als_const('XA_ARC',int).
+als_const('XA_ATOM',int).
+als_const('XA_BITMAP',int).
+als_const('XA_CARDINAL',int).
+als_const('XA_COLORMAP',int).
+als_const('XA_CURSOR',int).
+als_const('XA_CUT_BUFFER0',int).
+als_const('XA_CUT_BUFFER1',int).
+als_const('XA_CUT_BUFFER2',int).
+als_const('XA_CUT_BUFFER3',int).
+als_const('XA_CUT_BUFFER4',int).
+als_const('XA_CUT_BUFFER5',int).
+als_const('XA_CUT_BUFFER6',int).
+als_const('XA_CUT_BUFFER7',int).
+als_const('XA_DRAWABLE',int).
+als_const('XA_FONT',int).
+als_const('XA_INTEGER',int).
+als_const('XA_PIXMAP',int).
+als_const('XA_POINT',int).
+als_const('XA_RECTANGLE',int).
+als_const('XA_RESOURCE_MANAGER',int).
+als_const('XA_RGB_COLOR_MAP',int).
+als_const('XA_RGB_BEST_MAP',int).
+als_const('XA_RGB_BLUE_MAP',int).
+als_const('XA_RGB_DEFAULT_MAP',int).
+als_const('XA_RGB_GRAY_MAP',int).
+als_const('XA_RGB_GREEN_MAP',int).
+als_const('XA_RGB_RED_MAP',int).
+als_const('XA_STRING',int).
+als_const('XA_VISUALID',int).
+als_const('XA_WINDOW',int).
+als_const('XA_WM_COMMAND',int).
+als_const('XA_WM_HINTS',int).
+als_const('XA_WM_CLIENT_MACHINE',int).
+als_const('XA_WM_ICON_NAME',int).
+als_const('XA_WM_ICON_SIZE',int).
+als_const('XA_WM_NAME',int).
+als_const('XA_WM_NORMAL_HINTS',int).
+als_const('XA_WM_SIZE_HINTS',int).
+als_const('XA_WM_ZOOM_HINTS',int).
+als_const('XA_MIN_SPACE',int).
+als_const('XA_NORM_SPACE',int).
+als_const('XA_MAX_SPACE',int).
+als_const('XA_END_SPACE',int).
+als_const('XA_SUPERSCRIPT_X',int).
+als_const('XA_SUPERSCRIPT_Y',int).
+als_const('XA_SUBSCRIPT_X',int).
+als_const('XA_SUBSCRIPT_Y',int).
+als_const('XA_UNDERLINE_POSITION',int).
+als_const('XA_UNDERLINE_THICKNESS',int).
+als_const('XA_STRIKEOUT_ASCENT',int).
+als_const('XA_STRIKEOUT_DESCENT',int).
+als_const('XA_ITALIC_ANGLE',int).
+als_const('XA_X_HEIGHT',int).
+als_const('XA_QUAD_WIDTH',int).
+als_const('XA_WEIGHT',int).
+als_const('XA_POINT_SIZE',int).
+als_const('XA_RESOLUTION',int).
+als_const('XA_COPYRIGHT',int).
+als_const('XA_NOTICE',int).
+als_const('XA_FONT_NAME',int).
+als_const('XA_FAMILY_NAME',int).
+als_const('XA_FULL_NAME',int).
+als_const('XA_CAP_HEIGHT',int).
+als_const('XA_WM_CLASS',int).
+als_const('XA_WM_TRANSIENT_FOR',int).
+als_const('XA_LAST_PREDEFINED',int).
+
+/* Close file /usr/include/X11/Xatom.h */
+
+
+/* Open file /usr/include/X11/cursorfont.h */
+
+als_const('XC_num_glyphs',int).
+als_const('XC_X_cursor',int).
+als_const('XC_arrow',int).
+als_const('XC_based_arrow_down',int).
+als_const('XC_based_arrow_up',int).
+als_const('XC_boat',int).
+als_const('XC_bogosity',int).
+als_const('XC_bottom_left_corner',int).
+als_const('XC_bottom_right_corner',int).
+als_const('XC_bottom_side',int).
+als_const('XC_bottom_tee',int).
+als_const('XC_box_spiral',int).
+als_const('XC_center_ptr',int).
+als_const('XC_circle',int).
+als_const('XC_clock',int).
+als_const('XC_coffee_mug',int).
+als_const('XC_cross',int).
+als_const('XC_cross_reverse',int).
+als_const('XC_crosshair',int).
+als_const('XC_diamond_cross',int).
+als_const('XC_dot',int).
+als_const('XC_dotbox',int).
+als_const('XC_double_arrow',int).
+als_const('XC_draft_large',int).
+als_const('XC_draft_small',int).
+als_const('XC_draped_box',int).
+als_const('XC_exchange',int).
+als_const('XC_fleur',int).
+als_const('XC_gobbler',int).
+als_const('XC_gumby',int).
+als_const('XC_hand1',int).
+als_const('XC_hand2',int).
+als_const('XC_heart',int).
+als_const('XC_icon',int).
+als_const('XC_iron_cross',int).
+als_const('XC_left_ptr',int).
+als_const('XC_left_side',int).
+als_const('XC_left_tee',int).
+als_const('XC_leftbutton',int).
+als_const('XC_ll_angle',int).
+als_const('XC_lr_angle',int).
+als_const('XC_man',int).
+als_const('XC_middlebutton',int).
+als_const('XC_mouse',int).
+als_const('XC_pencil',int).
+als_const('XC_pirate',int).
+als_const('XC_plus',int).
+als_const('XC_question_arrow',int).
+als_const('XC_right_ptr',int).
+als_const('XC_right_side',int).
+als_const('XC_right_tee',int).
+als_const('XC_rightbutton',int).
+als_const('XC_rtl_logo',int).
+als_const('XC_sailboat',int).
+als_const('XC_sb_down_arrow',int).
+als_const('XC_sb_h_double_arrow',int).
+als_const('XC_sb_left_arrow',int).
+als_const('XC_sb_right_arrow',int).
+als_const('XC_sb_up_arrow',int).
+als_const('XC_sb_v_double_arrow',int).
+als_const('XC_shuttle',int).
+als_const('XC_sizing',int).
+als_const('XC_spider',int).
+als_const('XC_spraycan',int).
+als_const('XC_star',int).
+als_const('XC_target',int).
+als_const('XC_tcross',int).
+als_const('XC_top_left_arrow',int).
+als_const('XC_top_left_corner',int).
+als_const('XC_top_right_corner',int).
+als_const('XC_top_side',int).
+als_const('XC_top_tee',int).
+als_const('XC_trek',int).
+als_const('XC_ul_angle',int).
+als_const('XC_umbrella',int).
+als_const('XC_ur_angle',int).
+als_const('XC_watch',int).
+
+/* Close file /usr/include/X11/cursorfont.h */
+
+
+/* Open file /usr/include/X11/Xresource.h */
+
+als_const('NULL',int).
+
+als_type('XrmQuark',[int]).
+
+als_type('XrmQuarkList',[ptr,int]).
+als_const('NULLQUARK',int).
+
+als_type('XrmString',[ptr,char]).
+als_const('NULLSTRING',int).
+als_macro('XrmStringsEqual').
+als_const('XrmBindTightly',int).
+als_const('XrmBindLoosely',int).
+
+als_type('XrmBinding',[int]).
+
+als_type('XrmBindingList',[ptr,int]).
+
+als_type('XrmName',[int]).
+
+als_type('XrmNameList',[ptr,int]).
+als_macro('XrmNameToString').
+als_macro('XrmStringToName').
+als_macro('XrmStringToNameList').
+
+als_type('XrmClass',[int]).
+
+als_type('XrmClassList',[ptr,int]).
+als_macro('XrmClassToString').
+als_macro('XrmStringToClass').
+als_macro('XrmStringToClassList').
+
+als_type('XrmRepresentation',[int]).
+als_macro('XrmStringToRepresentation').
+als_macro('XrmRepresentationToString').
+
+als_struct('XrmValue',['size'=[unsigned_int],
+'addr'=[ptr,char]]).
+
+als_type('XrmValuePtr',[ptr,struct]).
+
+als_type('XrmHashBucket',[ptr,struct]).
+
+als_type('XrmHashTable',[ptr,ptr,struct]).
+
+als_type('XrmSearchList',[array(0),ptr,ptr,struct]).
+
+als_type('XrmDatabase',[ptr,struct]).
+als_const('XrmoptionNoArg',int).
+als_const('XrmoptionIsArg',int).
+als_const('XrmoptionStickyArg',int).
+als_const('XrmoptionSepArg',int).
+als_const('XrmoptionResArg',int).
+als_const('XrmoptionSkipArg',int).
+als_const('XrmoptionSkipLine',int).
+als_const('XrmoptionSkipNArgs',int).
+
+als_type('XrmOptionKind',[int]).
+
+als_struct('XrmOptionDescRec',['option'=[ptr,char],
+'specifier'=[ptr,char],
+'argKind'=[int],
+'value'=[ptr,char]]).
+
+als_type('XrmOptionDescList',[ptr,struct]).
+
+/* Close file /usr/include/X11/Xresource.h */
+
+
+/* Close file x.h */
+
+
+ret('long ')/[long]='BlackPixel'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('long ')/[long]='WhitePixel'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('long ')/[long]='ConnectionNumber'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='DefaultColormap'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='DefaultDepth'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('GC ')/[ptr,struct]='DefaultGC'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('long ')/[long]='DefaultRootWindow'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('Screen *')/[ptr,struct]='DefaultScreenOfDisplay'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='DefaultScreen'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('Visual *')/[ptr,struct]='DefaultVisual'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('long ')/[long]='DisplayCells'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('long ')/[long]='DisplayPlanes'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('char *')/[ptr,char]='DisplayString'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='LastKnownRequestProcessed'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='NextRequest'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='ProtocolVersion'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='ProtocolRevision'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='QLength'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('Window ')/[unsigned_long]='RootWindow'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='ScreenCount'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('Screen *')/[ptr,struct]='ScreenOfDisplay'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('char *')/[ptr,char]='ServerVendor'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='VendorRelease'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='BlackPixelOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='WhitePixelOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='CellsOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('Colormap ')/[unsigned_long]='DefaultColormapOfScreen'('Screen *'/[ptr,
+    struct])/'x.spc'.
+
+ret('int ')/[int]='DefaultDepthOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('GC ')/[ptr,struct]='DefaultGCOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('Visual *')/[ptr,struct]='DefaultVisualOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='DoesBackingStore'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='DoesSaveUnders'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('Display *')/[ptr,struct]='DisplayOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='EventMaskOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='HeightOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='HeightMMOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='MaxCmapsOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='MinCmapsOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='PlanesOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('Window ')/[unsigned_long]='RootWindowOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='WidthOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='WidthMMOfScreen'('Screen *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='ImageByteOrder'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='BitmapBitOrder'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='BitmapPad'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='BitmapUnit'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('long ')/[long]='DisplayHeight'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('long ')/[long]='DisplayHeightMM'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('long ')/[long]='DisplayWidth'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('long ')/[long]='DisplayWidthMM'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='IsCursorKey'('KeySym '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='IsFunctionKey'('KeySym '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='IsKeypadKey'('KeySym '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='IsMiscFunctionKey'('KeySym '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='IsModifierKey'('KeySym '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='IsPFKey'('KeySym '/[unsigned_long])/'x.spc'.
+
+ret('long ')/[long]='XMaxRequestSize'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('unsigned long ')/[unsigned_long]='XDisplayMotionBufferSize'('Display *'/[
+    ptr,
+    struct])/'x.spc'.
+
+ret('void ')/[void]='XrmStringToNameList'('char *'/[ptr,char],
+'XrmQuarkList '/[ptr,int])/'x.spc'.
+
+ret('void ')/[void]='XrmStringToClassList'('char *'/[ptr,char],
+'XrmQuarkList '/[ptr,int])/'x.spc'.
+
+ret('void ')/[void]='XActivateScreenSaver'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XAddHost'('Display *'/[ptr,struct],
+'XHostAddress *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XAddHosts'('Display *'/[ptr,struct],
+'XHostAddress *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XAddPixel'('XImage *'/[ptr,struct],
+'long '/[long])/'x.spc'.
+
+ret('void ')/[void]='XAddToSaveSet'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XAllocColor'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long],
+'XColor *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='XAllocColorCells'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long],
+'int '/[int],
+'unsigned long *'/[array(0),unsigned_long],
+'unsigned int '/[unsigned_int],
+'unsigned long *'/[array(0),unsigned_long],
+'unsigned int '/[unsigned_int])/'x.spc'.
+
+ret('int ')/[int]='XAllocColorPlanes'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long],
+'int '/[int],
+'unsigned long *'/[array(0),unsigned_long],
+'int '/[int],
+'int '/[int],
+'int '/[int],
+'int '/[int],
+'unsigned long *'/[ptr,unsigned_long],
+'unsigned long *'/[ptr,unsigned_long],
+'unsigned long *'/[ptr,unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XAllocNamedColor'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long],
+'char *'/[ptr,char],
+'XColor *'/[ptr,struct],
+'XColor *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XAllowEvents'('Display *'/[ptr,struct],
+'int '/[int],
+'Time '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XAutoRepeatOff'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XAutoRepeatOn'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XBell'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XChangeActivePointerGrab'('Display *'/[ptr,struct],
+'unsigned int '/[unsigned_int],
+'Cursor '/[unsigned_long],
+'Time '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XChangeGC'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'unsigned long '/[unsigned_long],
+'XGCValues *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XChangeKeyboardControl'('Display *'/[ptr,struct],
+'unsigned long '/[unsigned_long],
+'XKeyboardControl *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XChangeKeyboardMapping'('Display *'/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'KeySym *'/[ptr,unsigned_long],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XChangePointerControl'('Display *'/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'int '/[int],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XChangeProperty'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Atom '/[unsigned_long],
+'Atom '/[unsigned_long],
+'int '/[int],
+'int '/[int],
+'unsigned char *'/[ptr,unsigned_char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XChangeSaveSet'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XChangeWindowAttributes'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'unsigned long '/[unsigned_long],
+'XSetWindowAttributes *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='XCheckIfEvent'('Display *'/[ptr,struct],
+'XEvent *'/[ptr,union],
+'int (*)()'/[ptr,func,int],
+'char *'/[ptr,char])/'x.spc'.
+
+ret('int ')/[int]='XCheckMaskEvent'('Display *'/[ptr,struct],
+'long '/[long],
+'XEvent *'/[ptr,union])/'x.spc'.
+
+ret('int ')/[int]='XCheckTypedEvent'('Display *'/[ptr,struct],
+'int '/[int],
+'XEvent *'/[ptr,union])/'x.spc'.
+
+ret('int ')/[int]='XCheckTypedWindowEvent'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int '/[int],
+'XEvent *'/[ptr,union])/'x.spc'.
+
+ret('int ')/[int]='XCheckWindowEvent'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'long '/[long],
+'XEvent *'/[ptr,union])/'x.spc'.
+
+ret('void ')/[void]='XCirculateSubwindows'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XCirculateSubwindowsDown'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XCirculateSubwindowsUp'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XClearArea'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XClearWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XClipBox'('Region '/[ptr,struct],
+'XRectangle *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XCloseDisplay'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XConfigureWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'unsigned int '/[unsigned_int],
+'XWindowChanges *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XConvertSelection'('Display *'/[ptr,struct],
+'Atom '/[unsigned_long],
+'Atom '/[unsigned_long],
+'Atom '/[unsigned_long],
+'Window '/[unsigned_long],
+'Time '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XCopyArea'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('Colormap ')/[unsigned_long]='XCopyColormapAndFree'('Display *'/[ptr,
+    struct],
+'Colormap '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XCopyGC'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'GC '/[ptr,struct],
+'unsigned long '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XCopyPlane'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'int '/[int],
+'unsigned long '/[unsigned_long])/'x.spc'.
+
+ret('Pixmap ')/[unsigned_long]='XCreateBitmapFromData'('Display *'/[ptr,
+    struct],
+'Drawable '/[unsigned_long],
+'char *'/[ptr,char],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int])/'x.spc'.
+
+ret('Colormap ')/[unsigned_long]='XCreateColormap'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Visual *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('Cursor ')/[unsigned_long]='XCreateFontCursor'('Display *'/[ptr,struct],
+'unsigned int '/[unsigned_int])/'x.spc'.
+
+ret('GC ')/[ptr,struct]='XCreateGC'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'unsigned long '/[unsigned_long],
+'XGCValues *'/[ptr,struct])/'x.spc'.
+
+ret('Cursor ')/[unsigned_long]='XCreateGlyphCursor'('Display *'/[ptr,struct],
+'Font '/[unsigned_long],
+'Font '/[unsigned_long],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'XColor *'/[ptr,struct],
+'XColor *'/[ptr,struct])/'x.spc'.
+
+ret('XImage *')/[ptr,struct]='XCreateImage'('Display *'/[ptr,struct],
+'Visual *'/[ptr,struct],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'int '/[int],
+'char *'/[ptr,char],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('Pixmap ')/[unsigned_long]='XCreatePixmap'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int])/'x.spc'.
+
+ret('Cursor ')/[unsigned_long]='XCreatePixmapCursor'('Display *'/[ptr,struct],
+'Pixmap '/[unsigned_long],
+'Pixmap '/[unsigned_long],
+'XColor *'/[ptr,struct],
+'XColor *'/[ptr,struct],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int])/'x.spc'.
+
+ret('Pixmap ')/[unsigned_long]='XCreatePixmapFromBitmapData'('Display *'/[
+    ptr,
+    struct],
+'Drawable '/[unsigned_long],
+'char *'/[ptr,char],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'unsigned long '/[unsigned_long],
+'unsigned long '/[unsigned_long],
+'unsigned int '/[unsigned_int])/'x.spc'.
+
+ret('Region ')/[ptr,struct]='XCreateRegion'(void/[void])/'x.spc'.
+
+ret('Window ')/[unsigned_long]='XCreateSimpleWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'unsigned long '/[unsigned_long],
+'unsigned long '/[unsigned_long])/'x.spc'.
+
+ret('Window ')/[unsigned_long]='XCreateWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'Visual *'/[ptr,struct],
+'unsigned long '/[unsigned_long],
+'XSetWindowAttributes *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XDefineCursor'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Cursor '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XDeleteContext'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XContext '/[int])/'x.spc'.
+
+ret('XModifierKeymap *')/[ptr,struct]='XDeleteModifiermapEntry'('XModifierKeymap *'/[
+    ptr,
+    struct],
+'KeyCode '/[unsigned_char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDeleteProperty'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Atom '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XDestroyImage'('XImage *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XDestroyRegion'('Region '/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XDestroySubwindows'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XDestroyWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XDisableAccessControl'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XDisplayKeycodes'('Display *'/[ptr,struct],
+'int *'/[ptr,int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('char *')/[ptr,char]='XDisplayName'('char *'/[ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XDrawArc'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawArcs'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'XArc *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawImageString'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'char *'/[ptr,char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawImageString16'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'XChar2b *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawLine'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawLines'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'XPoint *'/[ptr,struct],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawPoint'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawPoints'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'XPoint *'/[ptr,struct],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawRectangle'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int])/'x.spc'.
+
+ret('void ')/[void]='XDrawRectangles'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'XRectangle *'/[array(0),struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawSegments'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'XSegment *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawString'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'char *'/[ptr,char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawString16'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'XChar2b *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawText'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'XTextItem *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XDrawText16'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'XTextItem16 *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XEmptyRegion'('Region '/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XEnableAccessControl'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='XEqualRegion'('Region '/[ptr,struct],
+'Region '/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='XEventsQueued'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('char *')/[ptr,char]='XFetchBuffer'('Display *'/[ptr,struct],
+'int *'/[ptr,int],
+'int '/[int])/'x.spc'.
+
+ret('char *')/[ptr,char]='XFetchBytes'('Display *'/[ptr,struct],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('int ')/[int]='XFetchName'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'char **'/[ptr,ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XFillArc'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XFillArcs'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'XArc *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XFillPolygon'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'XPoint *'/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XFillRectangle'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int])/'x.spc'.
+
+ret('void ')/[void]='XFillRectangles'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'XRectangle *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XFindContext'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XContext '/[int],
+'caddr_t *'/[ptr,ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XFlush'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XForceScreenSaver'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XFree'('char *'/[ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XFreeColormap'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XFreeColors'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long],
+'unsigned long *'/[array(0),unsigned_long],
+'int '/[int],
+'unsigned long '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XFreeCursor'('Display *'/[ptr,struct],
+'Cursor '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XFreeExtensionList'('char **'/[ptr,ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XFreeFont'('Display *'/[ptr,struct],
+'XFontStruct *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XFreeFontInfo'('char **'/[ptr,ptr,char],
+'XFontStruct *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XFreeFontNames'('char **'/[array(0),ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XFreeFontPath'('char **'/[ptr,ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XFreeGC'('Display *'/[ptr,struct],
+'GC '/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XFreeModifiermap'('XModifierKeymap *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XFreePixmap'('Display *'/[ptr,struct],
+'Pixmap '/[unsigned_long])/'x.spc'.
+
+ret('GContext ')/[unsigned_long]='XGContextFromGC'('GC '/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='XGeometry'('Display *'/[ptr,struct],
+'int '/[int],
+'char *'/[ptr,char],
+'char *'/[ptr,char],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'int '/[int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('char *')/[ptr,char]='XGetAtomName'('Display *'/[ptr,struct],
+'Atom '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XGetClassHint'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XClassHint *'/[ptr,struct])/'x.spc'.
+
+ret('char *')/[ptr,char]='XGetDefault'('Display *'/[ptr,struct],
+'char *'/[ptr,char],
+'char *'/[ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XGetErrorDatabaseText'('Display *'/[ptr,struct],
+'char *'/[ptr,char],
+'char *'/[ptr,char],
+'char *'/[ptr,char],
+'char *'/[ptr,char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XGetErrorText'('Display *'/[ptr,struct],
+'int '/[int],
+'char *'/[ptr,char],
+'int '/[int])/'x.spc'.
+
+ret('char **')/[ptr,ptr,char]='XGetFontPath'('Display *'/[ptr,struct],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('int ')/[int]='XGetFontProperty'('XFontStruct *'/[ptr,struct],
+'Atom '/[unsigned_long],
+'unsigned long *'/[ptr,unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XGetGeometry'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'Window *'/[ptr,unsigned_long],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'unsigned int *'/[ptr,unsigned_int],
+'unsigned int *'/[ptr,unsigned_int],
+'unsigned int *'/[ptr,unsigned_int],
+'unsigned int *'/[ptr,unsigned_int])/'x.spc'.
+
+ret('int ')/[int]='XGetIconName'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'char **'/[ptr,ptr,char])/'x.spc'.
+
+ret('int ')/[int]='XGetIconSizes'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XIconSize **'/[ptr,ptr,struct],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('XImage *')/[ptr,struct]='XGetImage'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'long '/[long],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XGetInputFocus'('Display *'/[ptr,struct],
+'Window *'/[ptr,unsigned_long],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('void ')/[void]='XGetKeyboardControl'('Display *'/[ptr,struct],
+'XKeyboardState *'/[ptr,struct])/'x.spc'.
+
+ret('KeySym *')/[ptr,unsigned_long]='XGetKeyboardMapping'('Display *'/[ptr,
+    struct],
+'KeyCode '/[unsigned_char],
+'int '/[int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('XModifierKeymap *')/[ptr,struct]='XGetModifierMapping'('Display *'/[ptr,
+    struct])/'x.spc'.
+
+ret('XTimeCoord *')/[ptr,struct]='XGetMotionEvents'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Time '/[unsigned_long],
+'Time '/[unsigned_long],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('int ')/[int]='XGetNormalHints'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XSizeHints *'/[ptr,struct])/'x.spc'.
+
+ret('unsigned long ')/[unsigned_long]='XGetPixel'('XImage *'/[ptr,struct],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XGetPointerControl'('Display *'/[ptr,struct],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('int ')/[int]='XGetPointerMapping'('Display *'/[ptr,struct],
+'unsigned char *'/[array(0),unsigned_char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XGetScreenSaver'('Display *'/[ptr,struct],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('Window ')/[unsigned_long]='XGetSelectionOwner'('Display *'/[ptr,struct],
+'Atom '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XGetSizeHints'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XSizeHints *'/[ptr,struct],
+'Atom '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XGetStandardColormap'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XStandardColormap *'/[ptr,struct],
+'Atom '/[unsigned_long])/'x.spc'.
+
+ret('XImage *')/[ptr,struct]='XGetSubImage'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'unsigned long '/[unsigned_long],
+'int '/[int],
+'XImage *'/[ptr,struct],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XGetTransientForHint'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Window *'/[ptr,unsigned_long])/'x.spc'.
+
+ret('XVisualInfo *')/[ptr,struct]='XGetVisualInfo'('Display *'/[ptr,struct],
+'long '/[long],
+'XVisualInfo *'/[ptr,struct],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('int ')/[int]='XGetWindowAttributes'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XWindowAttributes *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='XGetWindowProperty'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Atom '/[unsigned_long],
+'long '/[long],
+'long '/[long],
+'int '/[int],
+'Atom '/[unsigned_long],
+'Atom *'/[ptr,unsigned_long],
+'int *'/[ptr,int],
+'unsigned long *'/[ptr,unsigned_long],
+'unsigned long *'/[ptr,unsigned_long],
+'unsigned char **'/[ptr,ptr,unsigned_char])/'x.spc'.
+
+ret('XWMHints *')/[ptr,struct]='XGetWMHints'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XGetZoomHints'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XSizeHints *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XGrabButton'('Display *'/[ptr,struct],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'Window '/[unsigned_long],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'int '/[int],
+'Window '/[unsigned_long],
+'Cursor '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XGrabKey'('Display *'/[ptr,struct],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'Window '/[unsigned_long],
+'int '/[int],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XGrabKeyboard'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int '/[int],
+'int '/[int],
+'int '/[int],
+'Time '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XGrabPointer'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'int '/[int],
+'Window '/[unsigned_long],
+'Cursor '/[unsigned_long],
+'Time '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XGrabServer'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XIfEvent'('Display *'/[ptr,struct],
+'XEvent *'/[ptr,union],
+'int (*)()'/[ptr,func,int],
+'char *'/[ptr,char])/'x.spc'.
+
+ret('XModifierKeymap *')/[ptr,struct]='XInsertModifiermapEntry'('XModifierKeymap *'/[
+    ptr,
+    struct],
+'KeyCode '/[unsigned_char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XInstallColormap'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long])/'x.spc'.
+
+ret('Atom ')/[unsigned_long]='XInternAtom'('Display *'/[ptr,struct],
+'char *'/[ptr,char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XIntersectRegion'('Region '/[ptr,struct],
+'Region '/[ptr,struct],
+'Region '/[ptr,struct])/'x.spc'.
+
+ret('KeySym ')/[unsigned_long]='XKeycodeToKeysym'('Display *'/[ptr,struct],
+'KeyCode '/[unsigned_char],
+'int '/[int])/'x.spc'.
+
+ret('KeyCode ')/[unsigned_char]='XKeysymToKeycode'('Display *'/[ptr,struct],
+'KeySym '/[unsigned_long])/'x.spc'.
+
+ret('char *')/[ptr,char]='XKeysymToString'('KeySym '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XKillClient'('Display *'/[ptr,struct],
+'XID '/[unsigned_long])/'x.spc'.
+
+ret('char **')/[ptr,ptr,char]='XListExtensions'('Display *'/[ptr,struct],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('char **')/[ptr,ptr,char]='XListFonts'('Display *'/[ptr,struct],
+'char *'/[ptr,char],
+'int '/[int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('char **')/[ptr,ptr,char]='XListFontsWithInfo'('Display *'/[ptr,struct],
+'char *'/[ptr,char],
+'int '/[int],
+'int *'/[ptr,int],
+'XFontStruct **'/[ptr,ptr,struct])/'x.spc'.
+
+ret('XHostAddress *')/[ptr,struct]='XListHosts'('Display *'/[ptr,struct],
+'int *'/[ptr,int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('Colormap *')/[ptr,unsigned_long]='XListInstalledColormaps'('Display *'/[
+    ptr,
+    struct],
+'Window '/[unsigned_long],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('Atom *')/[ptr,unsigned_long]='XListProperties'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('Font ')/[unsigned_long]='XLoadFont'('Display *'/[ptr,struct],
+'char *'/[ptr,char])/'x.spc'.
+
+ret('XFontStruct *')/[ptr,struct]='XLoadQueryFont'('Display *'/[ptr,struct],
+'char *'/[ptr,char])/'x.spc'.
+
+ret('int ')/[int]='XLookupColor'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long],
+'char *'/[ptr,char],
+'XColor *'/[ptr,struct],
+'XColor *'/[ptr,struct])/'x.spc'.
+
+ret('KeySym ')/[unsigned_long]='XLookupKeysym'('XKeyEvent *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XLookupString'('XKeyEvent *'/[ptr,struct],
+'char *'/[ptr,char],
+'int '/[int],
+'KeySym *'/[ptr,unsigned_long],
+'XComposeStatus *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XLowerWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XMapRaised'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XMapSubwindows'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XMapWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XMaskEvent'('Display *'/[ptr,struct],
+'long '/[long],
+'XEvent *'/[ptr,union])/'x.spc'.
+
+ret('int ')/[int]='XMatchVisualInfo'('Display *'/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'int '/[int],
+'XVisualInfo *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XMoveResizeWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XMoveWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('XModifierKeymap *')/[ptr,struct]='XNewModifiermap'('int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XNextEvent'('Display *'/[ptr,struct],
+'XEvent *'/[ptr,union])/'x.spc'.
+
+ret('void ')/[void]='XNoOp'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XOffsetRegion'('Region '/[ptr,struct],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('Display *')/[ptr,struct]='XOpenDisplay'('char *'/[ptr,char])/'x.spc'.
+
+ret('int ')/[int]='XParseColor'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long],
+'char *'/[ptr,char],
+'XColor *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='XParseGeometry'('char *'/[ptr,char],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('void ')/[void]='XPeekEvent'('Display *'/[ptr,struct],
+'XEvent *'/[ptr,union])/'x.spc'.
+
+ret('void ')/[void]='XPeekIfEvent'('Display *'/[ptr,struct],
+'XEvent *'/[ptr,union],
+'int (*)()'/[ptr,func,int],
+'char *'/[ptr,char])/'x.spc'.
+
+ret('int ')/[int]='XPending'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('char *')/[ptr,char]='Xpermalloc'('unsigned int '/[unsigned_int])/'x.spc'.
+
+ret('int ')/[int]='XPointInRegion'('Region '/[ptr,struct],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('Region ')/[ptr,struct]='XPolygonRegion'('XPoint *'/[array(0),struct],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XPutBackEvent'('Display *'/[ptr,struct],
+'XEvent *'/[ptr,union])/'x.spc'.
+
+ret('void ')/[void]='XPutImage'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'GC '/[ptr,struct],
+'XImage *'/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XPutPixel'('XImage *'/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'unsigned long '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XQueryBestCursor'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'unsigned int *'/[ptr,unsigned_int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('int ')/[int]='XQueryBestSize'('Display *'/[ptr,struct],
+'int '/[int],
+'Drawable '/[unsigned_long],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'unsigned int *'/[ptr,unsigned_int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('int ')/[int]='XQueryBestStipple'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'unsigned int *'/[ptr,unsigned_int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('int ')/[int]='XQueryBestTile'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'unsigned int *'/[ptr,unsigned_int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('void ')/[void]='XQueryColor'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long],
+'XColor *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XQueryColors'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long],
+'XColor *'/[array(0),struct],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XQueryExtension'('Display *'/[ptr,struct],
+'char *'/[ptr,char],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('XFontStruct *')/[ptr,struct]='XQueryFont'('Display *'/[ptr,struct],
+'XID '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XQueryKeymap'('Display *'/[ptr,struct],
+'char *'/[array(32),char])/'x.spc'.
+
+ret('int ')/[int]='XQueryPointer'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Window *'/[ptr,unsigned_long],
+'Window *'/[ptr,unsigned_long],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'unsigned int *'/[ptr,unsigned_int])/'x.spc'.
+
+ret('void ')/[void]='XQueryTextExtents'('Display *'/[ptr,struct],
+'XID '/[unsigned_long],
+'char *'/[ptr,char],
+'int '/[int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'XCharStruct *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XQueryTextExtents16'('Display *'/[ptr,struct],
+'XID '/[unsigned_long],
+'XChar2b *'/[ptr,struct],
+'int '/[int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'XCharStruct *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='XQueryTree'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Window *'/[ptr,unsigned_long],
+'Window *'/[ptr,unsigned_long],
+'Window **'/[ptr,ptr,unsigned_long],
+'unsigned int *'/[ptr,unsigned_int])/'x.spc'.
+
+ret('void ')/[void]='XRaiseWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XReadBitmapFile'('Display *'/[ptr,struct],
+'Drawable '/[unsigned_long],
+'char *'/[ptr,char],
+'unsigned int *'/[ptr,unsigned_int],
+'unsigned int *'/[ptr,unsigned_int],
+'Pixmap *'/[ptr,unsigned_long],
+'int *'/[ptr,int],
+'int *'/[ptr,int])/'x.spc'.
+
+ret('void ')/[void]='XRebindKeysym'('Display *'/[ptr,struct],
+'KeySym '/[unsigned_long],
+'KeySym *'/[array(0),unsigned_long],
+'int '/[int],
+'unsigned char *'/[ptr,unsigned_char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XRecolorCursor'('Display *'/[ptr,struct],
+'Cursor '/[unsigned_long],
+'XColor *'/[ptr,struct],
+'XColor *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='XRectInRegion'('Region '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XRefreshKeyboardMapping'('XMappingEvent *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XRemoveFromSaveSet'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XRemoveHost'('Display *'/[ptr,struct],
+'XHostAddress *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XRemoveHosts'('Display *'/[ptr,struct],
+'XHostAddress *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XReparentWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Window '/[unsigned_long],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XResetScreenSaver'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XResizeWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'unsigned int '/[unsigned_int],
+'int '/[int])/'x.spc'.
+
+ret('char *')/[ptr,char]='XResourceManagerString'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XRestackWindows'('Display *'/[ptr,struct],
+'Window *'/[array(0),unsigned_long],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XrmGetResource'('XrmDatabase '/[ptr,struct],
+'char *'/[ptr,char],
+'char *'/[ptr,char],
+'char **'/[ptr,ptr,char],
+'XrmValue *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='XrmQGetResource'('XrmDatabase '/[ptr,struct],
+'XrmNameList '/[ptr,int],
+'XrmClassList '/[ptr,int],
+'XrmRepresentation *'/[ptr,int],
+'XrmValue *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='XrmQGetSearchList'('XrmDatabase '/[ptr,struct],
+'XrmNameList '/[ptr,int],
+'XrmClassList '/[ptr,int],
+'XrmSearchList '/[array(0),ptr,ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XrmQGetSearchResource'('XrmSearchList '/[array(0),ptr,ptr,
+    struct],
+'XrmName '/[int],
+'XrmClass '/[int],
+'XrmRepresentation *'/[ptr,int],
+'XrmValue *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XrmInitialize'(void/[void])/'x.spc'.
+
+ret('void ')/[void]='XrmParseCommand'('XrmDatabase *'/[ptr,ptr,struct],
+'XrmOptionDescList '/[ptr,struct],
+'int '/[int],
+'char *'/[ptr,char],
+'int *'/[ptr,int],
+'char **'/[ptr,ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XrmMergeDatabases'('XrmDatabase '/[ptr,struct],
+'XrmDatabase *'/[ptr,ptr,struct])/'x.spc'.
+
+ret('XrmDatabase ')/[ptr,struct]='XrmGetFileDatabase'('char *'/[ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XrmPutFileDatabase'('XrmDatabase '/[ptr,struct],
+'char *'/[ptr,char])/'x.spc'.
+
+ret('XrmDatabase ')/[ptr,struct]='XrmGetStringDatabase'('char *'/[ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XrmPutResource'('XrmDatabase *'/[ptr,ptr,struct],
+'char *'/[ptr,char],
+'char *'/[ptr,char],
+'XrmValue *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XrmQPutResource'('XrmDatabase *'/[ptr,ptr,struct],
+'XrmBindingList '/[ptr,int],
+'XrmQuarkList '/[ptr,int],
+'XrmRepresentation '/[int],
+'XrmValue *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XrmPutStringResource'('XrmDatabase *'/[ptr,ptr,struct],
+'char *'/[ptr,char],
+'char *'/[ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XrmQPutStringResource'('XrmDatabase *'/[ptr,ptr,struct],
+'XrmBindingList '/[ptr,int],
+'XrmQuarkList '/[ptr,int],
+'char *'/[ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XrmPutLineResource'('XrmDatabase *'/[ptr,ptr,struct],
+'char *'/[ptr,char])/'x.spc'.
+
+ret('XrmQuark ')/[int]='XrmUniqueQuark'(void/[void])/'x.spc'.
+
+ret('XrmQuark ')/[int]='XrmStringToName'('char *'/[ptr,char])/'x.spc'.
+
+ret('XrmQuark ')/[int]='XrmStringToClass'('char *'/[ptr,char])/'x.spc'.
+
+ret('XrmQuark ')/[int]='XrmStringToRepresentation'('char *'/[ptr,char])/'x.spc'.
+
+ret('XrmQuark ')/[int]='XrmStringToQuark'('char *'/[ptr,char])/'x.spc'.
+
+ret('char *')/[ptr,char]='XrmNameToString'('XrmQuark '/[int])/'x.spc'.
+
+ret('char *')/[ptr,char]='XrmClassToString'('XrmQuark '/[int])/'x.spc'.
+
+ret('char *')/[ptr,char]='XrmRepresentationToString'('XrmQuark '/[int])/'x.spc'.
+
+ret('char *')/[ptr,char]='XrmQuarkToString'('XrmQuark '/[int])/'x.spc'.
+
+ret('void ')/[void]='XrmStringToQuarkList'('char *'/[ptr,char],
+'XrmQuarkList '/[ptr,int])/'x.spc'.
+
+ret('void ')/[void]='XrmStringToBindingQuarkList'('char *'/[ptr,char],
+'XrmBindingList '/[ptr,int],
+'XrmQuarkList '/[ptr,int])/'x.spc'.
+
+ret('void ')/[void]='XRotateBuffers'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XRotateWindowProperties'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Atom *'/[array(0),unsigned_long],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XSaveContext'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XContext '/[int],
+'caddr_t '/[ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XSelectInput'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'long '/[long])/'x.spc'.
+
+ret('int ')/[int]='XSendEvent'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int '/[int],
+'long '/[long],
+'XEvent *'/[ptr,union])/'x.spc'.
+
+ret('void ')/[void]='XSetAccessControl'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('int (*)()')/[ptr,func,int]='XSetAfterFunction'('Display *'/[ptr,struct],
+'int (*)()'/[ptr,func,int])/'x.spc'.
+
+ret('void ')/[void]='XSetArcMode'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetBackground'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'unsigned long '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetClassHint'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XClassHint *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XSetClipMask'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'Pixmap '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetClipOrigin'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetClipRectangles'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'XRectangle *'/[array(0),struct],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetCloseDownMode'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetCommand'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'char **'/[ptr,ptr,char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetDashes'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'int '/[int],
+'char *'/[array(0),char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetErrorHandler'('int (*)()'/[ptr,func,int])/'x.spc'.
+
+ret('void ')/[void]='XSetFillRule'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetFillStyle'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetFont'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'Font '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetFontPath'('Display *'/[ptr,struct],
+'char **'/[ptr,ptr,char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetForeground'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'unsigned long '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetFunction'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetGraphicsExposures'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetIconName'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'char *'/[ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XSetIconSizes'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XIconSize *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetInputFocus'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'int '/[int],
+'Time '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetIOErrorHandler'('int (*)()'/[ptr,func,int])/'x.spc'.
+
+ret('void ')/[void]='XSetLineAttributes'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XSetModifierMapping'('Display *'/[ptr,struct],
+'XModifierKeymap *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XSetNormalHints'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XSizeHints *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XSetPlaneMask'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'unsigned long '/[unsigned_long])/'x.spc'.
+
+ret('int ')/[int]='XSetPointerMapping'('Display *'/[ptr,struct],
+'unsigned char *'/[array(0),unsigned_char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetRegion'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'Region '/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XSetScreenSaver'('Display *'/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetSelectionOwner'('Display *'/[ptr,struct],
+'Atom '/[unsigned_long],
+'Window '/[unsigned_long],
+'Time '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetSizeHints'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XSizeHints *'/[ptr,struct],
+'Atom '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetStandardColormap'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XStandardColormap *'/[ptr,struct],
+'Atom '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetStandardProperties'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'char *'/[ptr,char],
+'char *'/[ptr,char],
+'Pixmap '/[unsigned_long],
+'char **'/[ptr,ptr,char],
+'int '/[int],
+'XSizeHints *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XSetState'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'unsigned long '/[unsigned_long],
+'long '/[long],
+'int '/[int],
+'unsigned long '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetStipple'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'Pixmap '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetSubwindowMode'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetTile'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'Pixmap '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetTransientForHint'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetTSOrigin'('Display *'/[ptr,struct],
+'GC '/[ptr,struct],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XSetWindowBackground'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'unsigned long '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetWindowBackgroundPixmap'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Pixmap '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetWindowBorder'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'unsigned long '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetWindowBorderPixmap'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Pixmap '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetWindowBorderWidth'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'unsigned int '/[unsigned_int])/'x.spc'.
+
+ret('void ')/[void]='XSetWindowColormap'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Colormap '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XSetWMHints'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XWMHints *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XSetZoomHints'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'XSizeHints *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XShrinkRegion'('Region '/[ptr,struct],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XStoreBuffer'('Display *'/[ptr,struct],
+'char *'/[ptr,char],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XStoreBytes'('Display *'/[ptr,struct],
+'char *'/[ptr,char],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XStoreColor'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long],
+'XColor *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XStoreColors'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long],
+'XColor *'/[array(0),struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XStoreName'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'char *'/[ptr,char])/'x.spc'.
+
+ret('void ')/[void]='XStoreNamedColor'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long],
+'char *'/[ptr,char],
+'unsigned long '/[unsigned_long],
+'int '/[int])/'x.spc'.
+
+ret('KeySym ')/[unsigned_long]='XStringToKeysym'('char *'/[ptr,char])/'x.spc'.
+
+ret('XImage *')/[ptr,struct]='XSubImage'('XImage *'/[ptr,struct],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int])/'x.spc'.
+
+ret('void ')/[void]='XSubtractRegion'('Region '/[ptr,struct],
+'Region '/[ptr,struct],
+'Region '/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XSync'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('int (*)()')/[ptr,func,int]='XSynchronize'('Display *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XTextExtents'('XFontStruct *'/[ptr,struct],
+'char *'/[ptr,char],
+'int '/[int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'XCharStruct *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XTextExtents16'('XFontStruct *'/[ptr,struct],
+'XChar2b *'/[ptr,struct],
+'int '/[int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'XCharStruct *'/[ptr,struct])/'x.spc'.
+
+ret('int ')/[int]='XTextWidth'('XFontStruct *'/[ptr,struct],
+'char *'/[ptr,char],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XTextWidth16'('XFontStruct *'/[ptr,struct],
+'XChar2b *'/[ptr,struct],
+'int '/[int])/'x.spc'.
+
+ret('int ')/[int]='XTranslateCoordinates'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Window '/[unsigned_long],
+'int '/[int],
+'int '/[int],
+'int *'/[ptr,int],
+'int *'/[ptr,int],
+'Window *'/[ptr,unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XUndefineCursor'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XUngrabButton'('Display *'/[ptr,struct],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XUngrabKey'('Display *'/[ptr,struct],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XUngrabKeyboard'('Display *'/[ptr,struct],
+'Time '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XUngrabPointer'('Display *'/[ptr,struct],
+'Time '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XUngrabServer'('Display *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XUninstallColormap'('Display *'/[ptr,struct],
+'Colormap '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XUnionRectWithRegion'('XRectangle *'/[ptr,struct],
+'Region '/[ptr,struct],
+'Region '/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XUnionRegion'('Region '/[ptr,struct],
+'Region '/[ptr,struct],
+'Region '/[ptr,struct])/'x.spc'.
+
+ret('XContext ')/[int]='XUniqueContext'(void/[void])/'x.spc'.
+
+ret('void ')/[void]='XUnloadFont'('Display *'/[ptr,struct],
+'Font '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XUnmapSubwindows'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('void ')/[void]='XUnmapWindow'('Display *'/[ptr,struct],
+'Window '/[unsigned_long])/'x.spc'.
+
+ret('VisualID ')/[unsigned_long]='XVisualIDFromVisual'('Visual *'/[ptr,struct])/'x.spc'.
+
+ret('void ')/[void]='XWarpPointer'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'Window '/[unsigned_long],
+'int '/[int],
+'int '/[int],
+'unsigned int '/[unsigned_int],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+ret('void ')/[void]='XWindowEvent'('Display *'/[ptr,struct],
+'Window '/[unsigned_long],
+'long '/[long],
+'XEvent *'/[ptr,union])/'x.spc'.
+
+ret('int ')/[int]='XWriteBitmapFile'('Display *'/[ptr,struct],
+'char *'/[ptr,char],
+'Pixmap '/[unsigned_long],
+'unsigned int '/[unsigned_int],
+'int '/[int],
+'int '/[int],
+'int '/[int])/'x.spc'.
+
+/* Close file x.spc */
+
+
+/* Close file x.spc */
+
+
+/* Close file x.spc */
+

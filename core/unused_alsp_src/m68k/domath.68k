@@ -1,0 +1,1996 @@
+;
+; domath.68k		-- math package for m68k
+;	Copyright (c) 1991-93 Applied Logic Systems, Inc.
+;	Copyright (c) 1991-93 Motorola, Inc.
+;
+; Author:	Scott Medeiros (port from Kevin Buettner's domath.sparc)
+; Creation:	4/6/92
+; Revision History:	
+;	Revised: 5-14-93, kev	-- Merged Scott's Sun and Delta versions
+
+
+#include "assembly.68k"
+#include "icmath.h"
+#include "config.h"
+
+
+;
+; Modes:
+;
+;	There is a concept of "mode" in this package.  This package can
+;	be in one of three modes.  They are integer, double, and decompile.
+;
+;	Under normal circumstances, this package starts out in integer mode.
+;	The arguments and operands are assumed to be integers and all
+;	operations are integer operations.
+;
+;	Double mode is entered when an overflow occurs in integer mode or
+;	when an operation is requested which necessitates doing double
+;	arithmetic.  Examples include multiplying by 2.5 or taking a
+;	square root.
+;
+;	Decompile mode is entered at the outset as a result of the safety
+;	value being negative.  Structure is built on the heap in this mode.
+;	Arguments do not need to dereference to numbers or expressions which
+;	will evaluate to numbers in this mode. (I.e, they may be variables).
+;
+;
+;	On the SPARC we implement these modes by the clever use of the
+;	jmpl instruction.  A typical subroutine branch to perform a given
+;	piece of arithmetic will look like this:
+;
+;			jmpl	[S+Offset], Ret
+;
+;	On the 88k, two instructions will be needed.  They will look like
+;	this:
+;			addu	tmp1,	S,	Offset
+;			jsr	tmp1
+;
+;	The S register contains the base address of the moded math subroutines.
+;	Offset will be the offset to add to this base to get to the desired
+;	math subroutine.  Ret, of course, is the standard place to put the
+;	return address.
+;
+;	The mode we are in is adjusted by changing S, the base to the moded
+;	math subroutines.   This means that Offset for a given math subroutine
+;	must be the same for each of the three modes.
+;	
+;
+; Arithmetic Stack:
+;
+;	On the SPARC, we allocate the arithmetic stack on the heap.  Since
+;	the amount of space required to evaluate an expression may be 
+;	determined at comile time, a bounded amount of space may be allocated
+;	on the heap.  The heap grows from smaller addresses to larger addresses,
+;	but the arithmetic stack will grow from larger addresses to smaller.
+;	The global location mth_bot contains the address of of the bottom
+;	of the stack.  When needed, the global location mth_stk refers to
+;	the start of this area (mth_bot will point at the end).
+;
+;	During an arithmetic evaluation on the SPARC, the top of stack will
+;	reside in OldE as OldE is not needed in the course of evaluation.  In
+;	the event that we are in a clause where the arithmetic forms the
+;	only goal so that CP and OldE contain valid values, the initialization
+;	routine writes them out to their expected places in the current
+;	(argument/environment) stack frame.  This also means that calling out
+;	may also be performed in a uniform manner.
+;
+;	Elements of the arithmetic stack consist of double words (64 bits)
+;	of which one word per element are wasted in decompilation and integer
+;	modes.  We waste them for the sake of uniformity and for ease of
+;	transition between integer and double modes if necessary.  When
+;	it is necessary to switch from integer mode to double mode, we
+;	start at the top of the stack and convert the integer format to
+;	double format for each element.  We also change S to point at
+;	dbl_base so that future evaluation will proceed in double mode.
+;
+;	As an optimization, we put the top of stack value in UArg1 for integer
+;	and decompilation modes.  We put the top of stack value in f0 for
+;	double mode.  Without this optimization an add (of the top two stack
+;	elements) would require two loads and one store.  With this
+;	optimization, however, only one load is required.  The expense, of
+;	course, comes in greater complexity.  Each of the push operations
+;	is now split into two variants, one for when the stack is empty
+;	(UArg1 or f0 may be loaded with no memory references), and the
+;	second when the stack is nonempty (UArg1 or f0 must be pushed on
+;	the stack so that the top of stack register is ready for the new
+;	top of stack).
+;
+;	Once allocated, the portion above the heap looks as follows (for
+;	double and integer modes only):
+;
+;		+-----------------------+
+;		| 			| 		(larger addresses)
+;		+---                 ---+		|   (direction of
+;		| 			| <-- mth_bot	V    arith stack
+;		+-----------------------+		     growth)
+;		|  .			|
+;		   .
+;		|  .			|
+;		+-----------------------+
+;		| 			|
+;		+---                 ---+
+;		| 			| <-- OldE
+;		+-----------------------+
+;		|  .			|
+;		   .
+;		|  .			|
+;		+-----------------------+
+;		| 			|
+;		+---  Space Reserved ---+
+;		| 			|
+;		+---  for callout    ---+
+;		| 			|
+;		+---  and for storing---+
+;		| 			|
+;		+---  doubles at end ---+		^  (direction of
+;		| 			|		|    heap growth)
+;		+---  of computation ---+
+;		| 			| <--H		(smaller addresses)
+;		+-----------------------+
+;
+;
+;	As stated before, the elements of the stack consist of double words.
+;	On the Sparc, they are also double word aligned.  Care must be taken
+;	when returning from a callout that they are still double word aligned.
+;	(Garbage compaction may have moved them somewhat).  There is also
+;	space reserved in this area for storing the various state information
+;	in order to do a callout.
+;
+;	When in decompilation mode, H is actually moved to just after mth_bot
+;	in order that structure may be built on the heap without interfering
+;	with the operation of the arithmetic stack.  The global location
+;	mth_stk is set to where H used to be.  
+;
+;	When in double mode and sometimes in integer mode (when the integer on 
+;	the stack is too large to be representable as a Prolog integer), the
+;	reserved space is used to build the double.  In each mode, when the
+;	computation is complete, there is no finishing code which needs to be
+;	run in order to deallocate the stack or readjust the heap pointer.
+;	The space wasted in decompilation mode is considered garbage.
+;
+; Calling Out:
+;	It will at times be necessary to call Prolog in the course of
+;	an evalution.  My favorite example is in the goal:
+;
+;		Y is X+1
+;
+;	In the process of evaluation, the value for X is obtained and pushed
+;	on the arithmetic stack.  We expect X to be bound to an integer
+;	or a double, but it is also permissible for X to be bound to an
+;	expression such as 3*4 which must be evaluated before execution can
+;	continue.  We must call Prolog to perform this evaluation.  We could
+;	also call C (which might ultimately get called anyway), but calling
+;	Prolog makes the evaluator more extensible.  This way expressions
+;	which are not recognizable at compile time may recognized by the
+;	interpretive evaluator at run time.  A user could, for example,
+;	extend is/2 to recognize a function which takes lengths of
+;	lists.  Then something of the following form could be written as
+;	a goal:
+;
+;		NewLen is len(InList)+1
+;
+;	We also use the call out mechanism in decompilation mode to get the
+;	system to handle the goal which has been built up.
+;
+;	The implementation of the call out mechanism is straight forward.
+;	In the initialization phase of an evaluation, CP is set to point
+;	at goal specific code to perform the callout.  This code will
+;	be responsible for saving/restoring argument and temporary registers
+;	in use (only the ones in use) on the argument environment stack so
+;	that they may be garbage collected.  Aside from this save/restore
+;	code, this code will look like almost any other call to a two argument
+;	predicate complete with garbage collector information.  (It is
+;	expected that only calls to two argument predicates will be needed
+;	since 'is' and all of the relational arithmetic	predicates require
+;	only two arguments.)  Since the argument registers might be in use,
+;	we will pass the two arguments and the target to call (either is/2
+;	or one of the relational operators) in UArg1, UArg2, and tmp1.
+;
+;	The state is saved on the arithmetic stack in the following format
+;	(at the time of the actual call out).
+;
+;		
+;
+;		+-----------------------+
+;		|   			| <-- H
+;		+-----------------------+
+;		|   Fence		| <-- mth_bot
+;		+-----------------------+
+;		|  .			|
+;		   .
+;		|  .			|
+;		+-----------------------+
+;		| 			|
+;		+---                 ---+
+;		| 			| <-- OldE
+;		+-----------------------+
+;		|  .			|
+;		   .
+;		|  .			|
+;		+-----------------------+
+;		|   CP			|
+;		+-----------------------+
+;		|   S			|
+;		+-----------------------+
+;		|   RET			|
+;		+-----------------------+
+;		|   RET2		|
+;		+-----------------------+
+;		|   Top Offset		|
+;		+-----------------------+
+;		|   Fence		| <--(where H used to point)
+;		+-----------------------+
+;
+;	A UIA fence delimits the ends of the area allocated for use as
+;	the arithmetic stack.  A UIA pointer is pushed onto argument/
+;	environment stack by the callout code to this area.  If garbage
+;	compaction needs to be performed, this area will not be collected
+;	away.  As stated earlier, however, it is possible for the arithmetic
+;	stack to become misaligned.  In the event that it becomes misaligned,
+;	our strategy is to move the stack upwards by one 32-bit word, thus
+;	realigning it.  Note that mth_bot points at the fence,  and H points
+;	at the next higher address.  The realignment procedure will actually
+;	overwrite the fence with a portion of the real bottom stack element
+;	(located at mth_bot-8).  The realignment procedure finishes with
+;	mth_bot also advancing by four in order to realign the bottom.
+;
+;	Top Offset refers to the offset between the first delimiting fence
+;	and the actual top of the arithmetic stack given by OldE.  It is not
+;	permissible to store an absolute address for this value as garbage
+;	compaction could move the area thus invalidating the absolute address.
+;	An offset will not be invalidated by garbage compaction.
+;
+;	RET and RET2 refer to places to return to within the arithmetic
+;	evaluator code.   RET2 refers to the actual place in the code
+;	stream layed down by icmath to return to.  RET contains a more
+;	recent point in the code which is performing the callout.
+;
+;	S and CP refer to the mode and callout code respectively.  In this
+;	case, the mode will be an address; one of mth_base, dcmp_base, or
+;	dbl_base.  The use of CP has been described earlier.  CP must be
+;	saved in case more than one callout is performed.
+;
+;	When calling 'is'/2, the left hand side	of the 'is' will be a variable.
+;	We handle this variable by making it appear to be part of the calling
+;	environment.  The argument/ environment stack frame will appear as
+;	follows:
+;
+;
+;		+-----------------------+
+;		|  CP"			|		(higher addresses)
+;		+-----------------------+
+;		|  OldE" 		| <-- Environment of clause
+;		+-----------------------+
+;		|  .	Environment	|
+;		   .	Variables
+;		   .	  and other
+;		   .	(possibly zero)
+;		   .	stack frames
+;		|  .			|
+;		+-----------------------+
+;		|  CP'	(dummy)		|
+;		+-----------------------+
+;		|  OldE'		| <-- E  (this is a dummy environment)
+;		+-----------------------+
+;		|  'is/2' result var	|
+;		+-----------------------+
+;		|  uia ptr to arith stk	|
+;		+-----------------------+
+;		|  .	Saved Arg	|
+;		   .	and Tmp Regs
+;		|  .			|
+;		+-----------------------+
+;		|  space for A2		|
+;		+-----------------------+
+;		|  space for A1		|
+;		+-----------------------+
+;		|  space for CP		|
+;		+-----------------------+
+;		|  space for OldE	| <-- SP	(lower addresses)
+;		+-----------------------+
+;
+;	
+
+
+
+	data
+
+	global	mth_stk
+	global	mth_bot
+
+mth_stk:
+	long	0
+mth_bot:
+	long	0
+
+
+	global	int_table
+	global	dbl_table
+	global	dcmp_table
+
+int_table:
+	long	_mth_eq
+	long	_mth_lt
+	long	_mth_gt
+	long	_mth_le
+	long	_mth_ge
+	long	_mth_ne
+	long	_mth_getnum
+	long	_mth_putnum
+	long	_mth_pushint
+	long	_mth_pushdbl
+	long	_mth_add
+	long	_mth_sub
+	long	_mth_mul
+	long	_mth_div
+	long	_mth_fdiv
+	long	_mth_neg
+	long	_mth_mod
+	long	_mth_band
+	long	_mth_bor
+	long	_mth_bxor
+	long	_mth_not
+	long	_mth_lshft
+	long	_mth_rshft
+	long	_mth_power
+	long	_mth_abs
+	long	_mth_sin
+	long	_mth_cos
+	long	_mth_tan
+	long	_mth_asin
+	long	_mth_acos
+	long	_mth_atan
+	long	_mth_sqrt
+	long	_mth_exp
+	long	_mth_exp10
+	long	_mth_log
+	long	_mth_log10
+	long	_mth_floor
+	long	_mth_round
+	long	_mth_trunc
+	long	_mth_heapused
+	long	_mth_cputime
+	long	_mth_realtime
+	long	_mth_random
+	long	_mth_addi
+	long	_mth_subi
+	long	_mth_callout_init
+	long	_mth_callout
+	long	_mth_sinh
+	long	_mth_cosh
+	long	_mth_tanh
+	long	_mth_ceil
+	long	_mth_erf
+	long	_mth_erfc
+	long	_mth_gamma
+	long	_mth_j0
+	long	_mth_j1
+	long	_mth_y0
+	long	_mth_y1
+	long	_mth_atan2
+	long	_mth_fmod
+	long	_mth_hypot
+	long	_mth_jn
+	long	_mth_yn
+
+dbl_table:
+	long	dbl_eq
+	long	dbl_lt
+	long	dbl_gt
+	long	dbl_le
+	long	dbl_ge
+	long	dbl_ne
+	long	dbl_getnum
+	long	dbl_putnum
+	long	dbl_pushint
+	long	dbl_pushdbl
+	long	dbl_add
+	long	dbl_sub
+	long	dbl_mul
+	long	dbl_div
+	long	dbl_fdiv
+	long	dbl_neg
+	long	dbl_mod
+	long	dbl_band
+	long	dbl_bor
+	long	dbl_bxor
+	long	dbl_not
+	long	dbl_lshft
+	long	dbl_rshft
+	long	dbl_power
+	long	dbl_abs
+	long	dbl_sin
+	long	dbl_cos
+	long	dbl_tan
+	long	dbl_asin
+	long	dbl_acos
+	long	dbl_atan
+	long	dbl_sqrt
+	long	dbl_exp
+	long	dbl_exp10
+	long	dbl_log
+	long	dbl_log10
+	long	dbl_floor
+	long	dbl_round
+	long	dbl_trunc
+	long	dbl_heapused
+	long	dbl_cputime
+	long	dbl_realtime
+	long	dbl_random
+	long	dbl_addi
+	long	dbl_subi
+	long	dbl_callout_init
+	long	dbl_callout
+	long	dbl_sinh
+	long	dbl_cosh
+	long	dbl_tanh
+	long	dbl_ceil
+	long	dbl_erf
+	long	dbl_erfc
+	long	dbl_gamma
+	long	dbl_j0
+	long	dbl_j1
+	long	dbl_y0
+	long	dbl_y1
+	long	dbl_atan2
+	long	dbl_fmod
+	long	dbl_hypot
+	long	dbl_jn
+	long	dbl_yn
+
+dcmp_table:
+	long	dcmp_eq
+	long	dcmp_lt
+	long	dcmp_gt
+	long	dcmp_le
+	long	dcmp_ge
+	long	dcmp_ne
+	long	dcmp_getnum
+	long	dcmp_putnum
+	long	dcmp_pushint
+	long	dcmp_pushdbl
+	long	dcmp_add
+	long	dcmp_sub
+	long	dcmp_mul
+	long	dcmp_div
+	long	dcmp_fdiv
+	long	dcmp_neg
+	long	dcmp_mod
+	long	dcmp_band
+	long	dcmp_bor
+	long	dcmp_bxor
+	long	dcmp_not
+	long	dcmp_lshft
+	long	dcmp_rshft
+	long	dcmp_power
+	long	dcmp_abs
+	long	dcmp_sin
+	long	dcmp_cos
+	long	dcmp_tan
+	long	dcmp_asin
+	long	dcmp_acos
+	long	dcmp_atan
+	long	dcmp_sqrt
+	long	dcmp_exp
+	long	dcmp_exp10
+	long	dcmp_log
+	long	dcmp_log10
+	long	dcmp_floor
+	long	dcmp_round
+	long	dcmp_trunc
+	long	dcmp_heapused
+	long	dcmp_cputime
+	long	dcmp_realtime
+	long	dcmp_random
+	long	dcmp_addi
+	long	dcmp_subi
+	long	dcmp_callout_init
+	long	dcmp_callout
+	long	dcmp_sinh
+	long	dcmp_cosh
+	long	dcmp_tanh
+	long	dcmp_ceil
+	long	dcmp_erf
+	long	dcmp_erfc
+	long	dcmp_gamma
+	long	dcmp_j0
+	long	dcmp_j1
+	long	dcmp_y0
+	long	dcmp_y1
+	long	dcmp_atan2
+	long	dcmp_fmod
+	long	dcmp_hypot
+	long	dcmp_jn
+	long	dcmp_yn
+
+
+	text
+	even
+	global	_mth_eq
+	global	_mth_lt
+	global	_mth_gt
+	global	_mth_le
+	global	_mth_ge
+	global	_mth_ne
+	global	_mth_getnum
+	global	_mth_putnum
+	global	_mth_pushint
+	global	mth_pushdbl0
+	global	_mth_add
+	global	_mth_sub
+	global	_mth_mul
+	global	_mth_div
+	global	_mth_fdiv
+	global	_mth_neg
+	global	_mth_mod
+	global	_mth_band
+	global	_mth_bor
+	global	_mth_bxor
+	global	_mth_not
+	global	_mth_lshft
+	global	_mth_rshft
+	global	_mth_power
+	global	_mth_abs
+	global	_mth_sin
+	global	_mth_cos
+	global	_mth_tan
+	global	_mth_asin
+	global	_mth_acos
+	global	_mth_atan
+	global	_mth_sqrt
+	global	_mth_exp
+	global	_mth_exp10
+	global	_mth_log
+	global	_mth_log10
+	global	_mth_floor
+	global	_mth_round
+	global	_mth_trunc
+	global	_mth_heapused
+	global	_mth_cputime
+	global	_mth_realtime
+	global	_mth_random
+	global	_mth_addi
+	global	_mth_subi
+	global	_mth_callout_init
+	global	_mth_callout
+	global	mth_aftercall
+
+
+
+#macro	math_fail
+; here must restore Fail to what it was on entry, and then fail
+	move.l	8(SP),	Fail		; reset Fail register
+	fail
+#endm
+
+
+#macro	mth_cmp
+	move.l	(Fail), d2		; LH op
+	cmp.l	8(Fail),	d2	; RH op
+#endm
+
+
+#macro	dbl_cmp
+	fmove.d	(Fail), fp0		; LH op
+	fcmp.d	8(Fail),fp0		; RH op
+#endm
+
+#macro dcmp_cmp		entryaddr
+	move.l	mth_stk,	d3	; load up d3 with mth_stk, for rel_callout
+	move.l	entryaddr,	d2	; load up d2 with & rel op entry, for rel_callout
+	bsr	rel_callout
+	rts
+#endm
+
+#macro bld_functor_1	tokid
+	lea	MTP_STRUCT(H),	a0		; put a structure pointer to heap in a0
+	move.l	#MMK_FUNCTOR(tokid,1),	(H)+	; store functor
+	move.l	(Fail),		(H)+		; store first arg
+	move.l	a0,		(Fail)		; store struct term onto TOS
+	rts
+#endm
+
+#macro bld_functor_2	tokid
+	lea	MTP_STRUCT(H),	a0		; put a structure pointer to heap in a0
+	move.l	#MMK_FUNCTOR(tokid,2),	(H)+	; store functor
+	move.l	8(Fail),	(H)+		; store first arg
+	move.l	(Fail),		(H)+		; store second arg
+	move.l	a0,		8(Fail)		; store struct term onto new TOS
+	addq.l	#8,		Fail		; adjust math sp
+	rts
+#endm
+
+#macro bld_symbol	tokid
+	subq.l	#8,	Fail			; push math stack
+	move.l	#MMK_SYM(tokid),	(Fail)		; push symbol onto TOS
+	rts
+#endm
+	
+
+#macro	dbl_unop Op
+	Op	(Fail),	fp0			; compute unary op of TOS
+	fmove.d	fp0,	(Fail)			; and write result back onto TOS (overwrite arg)
+	rts					; and return
+#endm
+
+#macro	dbl_blop Op
+	fintrz.d	(Fail),	fp0		; get integer part of rh op in fp0
+	fintrz.d	8(Fail), fp1		; get integer part of lh op in fp1
+	fmove.l	fp0,	d0			; move int(rhop)to d0
+	fmove.l	fp1,	d1			; move int(lhop) to d1
+	Op	d0,	d1			; apply logical operator.l
+	fmove.l	d1,	fp0			; store (double) result into fp temp
+	fmove.d fp0,	8(Fail)			; store result onto new TOS
+	addq.l	#8,	Fail			; fix up math sp
+	rts
+#endm
+
+; macro nularyCdbl	name
+; calls C function that expects no input arguments, and returns a double result
+; double name()
+; save d5-d7, and a1-a7 before the call to C
+; register mask for movem (predecrement) : 00000111 01111111  = 0x077f
+;			  (postincrement): 11111110 11100000  = 0xfee0
+; remember, SP=a7 is both the Prolog and C stack pointer
+; both gcc and Green Hills C store double function results in d0,d1
+; ** CAVEAT only for C objects built without FP=M68881 - when FP=M68881, return
+; in fp0.
+; *** For NewMath, we assume that all alspro objects are built with FP=M68881,
+; so that double functions return answer in fp0
+;	move.l	d1,	4(Fail)			; push low part of double
+;	move.l	d0,	(Fail)			; push high part of double
+; would replace the fmove.d below
+
+#ifdef MATH_RETVAL_IN_FP
+#macro	nularyCdbl	name
+	movem.l	#0x077f, -(SP)			; push d5-d7, a1-a7 onto stack
+	jsr	name				; and go over to C
+	movem.l	(SP)+,	#0xfee0			; restore saved regs
+	subq.l	#8,	Fail			; push math stack
+	fmove.d	fp0,	(Fail)
+	rts
+#endm
+#else /* MATH_RETVAL_IN_FP */
+#macro	nularyCdbl	name
+	movem.l	#0x077f, -(SP)			; push d5-d7, a1-a7 onto stack
+	jsr	name				; and go over to C
+	movem.l	(SP)+,	#0xfee0			; restore saved regs
+	subq.l	#8,	Fail			; push math stack
+	move.l	d1,	4(Fail)			; push low part of double
+	move.l	d0,	(Fail)			; push high part of double
+	rts
+#endm
+#endif /* MATH_RETVAL_IN_FP */
+
+;
+; macro	unaryCdbl	name
+; call C function that expects one double input argument; Returns double result
+;
+#ifdef MATH_RETVAL_IN_FP
+#macro	unaryCdbl	name
+	movem.l	#0x077f, -(SP)		; push d5-d7, a1-a7 onto stack
+	move.l	4(Fail), -(SP)		; push low part of double argument
+	move.l	(Fail),  -(SP)		; push high part of double argument
+	clr.l	errno			; errno := 0
+	jsr	name			; and go over to C
+	cmpi.l	#33,	errno		; EDOM? (domain error)
+	beq	mth_fail		; if so, fail
+	cmpi.l	#34,	errno		; ERANGE? (range error)
+	beq	mth_fail		; if so, fail
+	addq.l	#8,	SP		; fix up sp
+	movem.l	(SP)+,	#0xfee0		; restore saved regs
+	fmove.d	fp0,	(Fail)		; push double result
+	rts
+#endm
+#else /* MATH_RETVAL_IN_FP */
+#macro	unaryCdbl	name
+	movem.l	#0x077f, -(SP)		; push d5-d7, a1-a7 onto stack
+	move.l	4(Fail), -(SP)		; push low part of double argument
+	move.l	(Fail),  -(SP)		; push high part of double argument
+	clr.l	errno			; errno := 0
+	jsr	name			; and go over to C
+	cmpi.l	#33,	errno		; EDOM? (domain error)
+	beq	mth_fail		; if so, fail
+	cmpi.l	#34,	errno		; ERANGE? (range error)
+	beq	mth_fail		; if so, fail
+	addq.l	#8,	SP		; fix up sp
+	movem.l	(SP)+,	#0xfee0		; restore saved regs
+	move.l	d1,	4(Fail)		; push low part of double
+	move.l	d0,	(Fail)		; push high part of double
+	rts
+#endm
+#endif /* MATH_RETVAL_IN_FP */
+
+
+; macro binaryCdbl	name
+; calls C function that expects two double input arguments, and returns a double result
+; double name(arg1, arg2)
+;	double arg1;
+;	double arg2;
+; save d5-d7, and a1-a7 before the call to C
+; register mask for movem (predecrement) : 00000111 01111111  = 0x077f
+;			  (postincrement): 11111110 11100000  = 0xfee0
+; remember, SP=a7 is both the Prolog and C stack pointer
+; both gcc and Green Hills C store double function results in d0,d1 (int,long in d0) USUALLY
+; ** CAVEAT only for C objects built without FP=M68881 - when FP=M68881, return in fp0
+; *** For NewMath, we assume that all alspro objects are built with FP=M68881, so that
+; Assume arguments for the C call are on the top of the math stack
+; double functions return answer in fp0
+
+#ifdef MATH_RETVAL_IN_FP
+#macro	binaryCdbl	name
+	movem.l	#0x077f, -(SP)		; push d5-d7, a1-a7 onto stack
+	move.l	4(Fail), -(SP)		; push low part of double argument #2
+	move.l	(Fail),  -(SP)		; push high part of double argument #2
+	move.l	12(Fail),  -(SP)	; push low part of double argument #1
+	move.l	8(Fail),   -(SP)	; push high part of double argument #1
+	clr.l	errno			; errno := 0
+	jsr	name			; and go over to C
+	cmpi.l	#33,	errno		; EDOM? (domain error)
+	beq	mth_fail		; if so, fail
+	cmpi.l	#34,	errno		; ERANGE? (range error)
+	beq	mth_fail		; if so, fail
+	adda.l	#16,	SP		; fix up sp
+	movem.l	(SP)+,	#0xfee0		; restore saved regs
+	fmove.d	fp0,	8(Fail)		; push double result
+	addq.l	#8,	Fail		; pop stack one el, and now store result
+	rts
+#endm
+#else /* MATH_RETVAL_IN_FP */
+#macro	binaryCdbl	name
+	movem.l	#0x077f, -(SP)		; push d5-d7, a1-a7 onto stack
+	move.l	4(Fail), -(SP)		; push low part of double argument #2
+	move.l	(Fail),  -(SP)		; push high part of double argument #2
+	move.l	12(Fail),  -(SP)	; push low part of double argument #1
+	move.l	8(Fail),   -(SP)	; push high part of double argument #1
+	clr.l	errno			; errno := 0
+	jsr	name			; and go over to C
+	cmpi.l	#33,	errno		; EDOM? (domain error)
+	beq	mth_fail		; if so, fail
+	cmpi.l	#34,	errno		; ERANGE? (range error)
+	beq	mth_fail		; if so, fail
+	adda.l	#16,	SP		; fix up sp
+	movem.l	(SP)+,	#0xfee0		; restore saved regs
+	move.l	d1,	12(Fail)	; push low part of double
+	move.l	d0,	8(Fail)		; push high part of double
+	addq.l	#8,	Fail		; pop stack one el, and now store result
+	rts
+#endm
+#endif /* MATH_RETVAL_IN_FP */
+
+
+/*
+ * Integer routine entry points
+ */
+
+_mth_eq:
+	mth_cmp
+	beq	2f
+	math_fail
+_mth_lt:
+	mth_cmp
+	blt	2f
+	math_fail
+_mth_gt:
+	mth_cmp
+	bgt	2f
+	math_fail
+_mth_le:
+	mth_cmp
+	ble	2f
+	math_fail
+_mth_ge:
+	mth_cmp
+	bge	2f
+	math_fail
+_mth_ne:
+	mth_cmp
+	bne 	2f
+	math_fail
+2:	rts
+
+
+_mth_getnum:
+	; _mth_getnum takes argument in d1, dereferences it and pushes it
+	; onto the stack, setting the mode appropriately.  Only the
+	; dereferencing is done here, the rest of the code appears in
+	; mth_getnum2 and mth_getnum3 below.
+	deref	d1,	a0,	mth_getnum2
+	bra	mth_getnum3
+dcmp_pushint:
+	subq.l	#8,	Fail			; push math stack
+	move.l	d1,	(Fail)			; push d1 onto stack
+	bsr	_mth_putnum			; call putnum
+	move.l	d1,	(Fail)			; push result onto stack
+	rts
+_mth_putnum:
+	; _mth_putnum takes the integer argument on the top of the stack,
+	; converts it to a double if is too large in magnitude to be stored
+	; as a Prolog integer and puts it into d1 with the appropriate tag.
+
+	bfextu	(Fail){#0:#5},	d0		; extract upper 5 bits of 32 bit integer into d0
+;	cmpi.b	#0,	d0			; all 0's => zero or +ve integer fits in 28 bits
+	tst.b	d0				; all 0's => zero or +ve integer fits in 28 bits
+	beq	2f				; so branch to int code
+	cmpi.b	#0x1f,	d0			; are all 5 bits 1's ? if so, a -ve integer in 28 bits
+	bne	3f				; if not, didn't fit in 28 bits, convert to double
+2:	; leave tagged integer in d1
+	move.l	(Fail),	d1			; move integer on TOS into d1
+	lsl.l	#MTP_CONSTSHIFT, d1		; shift integer over to occupy 31::4
+	addq.l	#MTP_INT,	d1		; add the integer tag
+	rts
+3:	; convert int on TOS to a double and store back onto math stack, and then also build
+	; the same double on the heap and return d1 as this double term
+	fmove.l	(Fail),	fp0			; convert integer on TOS to a double
+	fmove.d	fp0,	(Fail)			; and overwrite TOS now with a double
+	; now construct double/4 structure on heap
+pn_dbl:
+	lea	MTP_STRUCT(H), a0		; put a stucture pointer to heap in a0
+	move.l	a0,	d1			; and move it to d1
+	move.l	#MMK_FUNCTOR(TK_DDOUBLE,4), (H)+	; put functor on heap
+	move.w	(Fail),	 d2			; put first quarter (short) into long stack el
+	lsl.l	#MTP_CONSTSHIFT,d2
+	addq.l	#MTP_INT,	d2
+	move.l	d2,	(H)+
+	move.w	2(Fail), d2			; put second quarter
+	lsl.l	#MTP_CONSTSHIFT,d2
+	addq.l	#MTP_INT,	d2
+	move.l	d2,	(H)+
+	move.w	4(Fail), d2			; put third quarter
+	lsl.l	#MTP_CONSTSHIFT,d2
+	addq.l	#MTP_INT,	d2
+	move.l	d2,	(H)+
+	move.w	6(Fail), d2			; put fourth quarter
+	lsl.l	#MTP_CONSTSHIFT,d2
+	addq.l	#MTP_INT,	d2
+	move.l	d2,	(H)+
+
+	; make double term in d1
+	rts
+
+_mth_pushdbl:
+	; an entry point into istack_to_dstack
+	; mth_pushdbl is entered with the double already pushed on the stack.
+	; The rest of the ints on the stack need to be converted to doubles
+
+	; istack_to_dstack is branched to when we wish to convert between
+	; integer mode and double mode.  It will convert the elements on the
+	; stack.
+	lea	mth_bot,	a0		; get address of mth_bot
+	move.l	(a0),		d2		; d2 = where to stop conversion (bottom of stack)
+	move.l	Fail,	a0			; set up a0 for istack_to_dstack
+	addq.l	#8,	a0			; TOS already is a double, so start one lower
+	bra	7f				; branch into istack_to_dstack below
+	; because of the entry points below, we need this extra branch
+
+redo_as_dbl:
+	; another entry point into istack_to_dstack
+	; just monkey with the return address left on the runtime stack to allow us to re-execute
+	; the math op that got us here, only now S will be set to double mode from istack_to_dstack
+	; Reset the ret addr to the jsr that got us here.  Because the 68k has variable length
+	; instructions, this is not enough.  We must further know the length of the jsr.
+	; We assume we are always called like:
+	;	jsr	([Table_disp,S]) where Table_disp is a word offset ==> 3 words (6 bytes)
+
+	; also optimize here and place those calls to the math library that return doubles and
+	; must be re-run in double mode.
+
+_mth_fdiv:
+_mth_power:
+_mth_sin:
+_mth_cos:
+_mth_tan:
+_mth_asin:
+_mth_acos:
+_mth_atan:
+_mth_sqrt:
+_mth_exp:
+_mth_exp10:
+_mth_log:
+_mth_log10:
+_mth_cputime:
+_mth_realtime:
+_mth_random:
+_mth_sinh:
+_mth_cosh:
+_mth_tanh:
+_mth_erf:
+_mth_erfc:
+_mth_gamma:
+_mth_j0:
+_mth_j1:
+_mth_y0:
+_mth_y1:
+_mth_atan2:
+_mth_fmod:
+_mth_hypot:
+_mth_jn:
+_mth_yn:
+
+	subq.l	#6,	(SP)		; subtract 6 from ret addr on top of runtime 
+					; stack to re-execute jsr w/mem indirect instruction
+		; since the runtime stack and the Prolog stack are the same, this assumes we
+		; have our ret addr just sitting there on TOS...
+
+
+	; istack_to_dstack is branched to when we wish to convert between
+	; integer mode and double mode.  It will convert the elements on the
+	; stack.
+
+istack_to_dstack:	
+	lea	mth_bot,	a0		; get address of mth_bot
+	move.l	(a0),		d2		; d2 = where to stop conversion (bottom of stack)
+	move.l	Fail,	a0			; a0 = where to start conversion
+7:	cmp.l	a0,	d2			; done yet?
+	beq	5f				; get out
+	fmove.l	(a0),	fp0			; convert current int to double
+	fmove.d	fp0,	(a0)			; and write it back onto stack as a double
+	addq.l	#8,	a0			; move a0 along
+	bra	7b
+5:	lea	dbl_table,	S		; set S mode to double
+	rts
+	
+
+
+_mth_pushint:
+	; mth_pushint pushs integer in d1 onto the stack
+	
+	subq.l	#8,	Fail			; push
+	move.l	d1,	(Fail)
+	rts
+
+
+_mth_addi:
+	; immediate op (rh) in d0
+	move.l	(Fail),	d1			; get lh op, don't overwrite d0 cuz of overflow
+	add.l	d0,	d1			; do the add, not overwriting either argument
+	bvs	redo_as_dbl			; if overflow, redo computation as double
+	move.l	d1,	(Fail)			; else write result onto stack
+	rts					; and return
+#ifdef notdef
+	add.l	(Fail),	d0			; do the add, don't overwrite memory ...
+	bvs	redo_as_dbl			; if overflow, redo computation as double
+	move.l	d0,	(Fail)			; now write result onto stack
+	rts					; and return
+#endif
+
+_mth_add:
+	move.l	(Fail), d2			; get rh op
+	add.l	8(Fail), d2			; do the add, don't overwrite memory ...
+	bvs 	redo_as_dbl			; if overflow, redo computation as double
+	move.l	d2,	8(Fail)			; store onto new TOS
+	addq.l	#8,	Fail			; adjust math sp
+	rts
+
+_mth_subi:
+	; immediate (rh) op in d0
+	move.l	(Fail),	d1			; we can't overwrite mem due to overflow
+	sub.l	d0, 	d1			; do the subtraction
+	bvs	redo_as_dbl			; if overflow, redo computation as double
+	move.l	d1,	(Fail)			; if not, write result onto stack
+	rts	
+
+
+_mth_sub:
+	move.l	8(Fail),d2			; get lh op
+	sub.l	(Fail),	d2			; do the subtract
+	bvs 	redo_as_dbl			; if overflow, redo computation as double
+	move.l	d2,	8(Fail)			; store onto new TOS
+	addq.l	#8,	Fail			; adjust math sp
+	rts
+
+
+_mth_mul:
+	move.l	(Fail), d2			; get rh op
+	muls.l	8(Fail),d2			; do the multiply, don't overwrite memory ...
+	bvs 	redo_as_dbl			; if overflow, redo computation as double
+	move.l	d2,	8(Fail)			; store onto new TOS
+	addq.l	#8,	Fail			; adjust math sp
+	rts
+
+_mth_div:
+	tst.l	(Fail)				; rh op zero?
+	beq	mth_fail			; if so, fail
+	move.l	8(Fail), d2			; get lh op
+	divs.l	(Fail),  d2			; do the divide
+	bvs 	redo_as_dbl			; if overflow, redo computation as double
+	move.l	d2,	8(Fail)			; store onto new TOS
+	addq.l	#8,	Fail			; adjust math sp
+	rts
+
+
+_mth_neg:
+	move.l	(Fail),	d2			; get operand
+	neg.l	d2				; op := 0 - op (don't overwrite memory ...)
+	bvs	redo_as_dbl			; if overflow, redo computation as double
+	move.l	d2,	(Fail)			; now write result onto stack
+	rts					; and return
+
+_mth_mod:
+	tst.l	(Fail)				; rh op zero?
+	beq	mth_fail			; if so, fail
+	move.l	8(Fail), d2			; get lh op
+	divs.l	(Fail),  d2			; do the divide
+	bvs 	redo_as_dbl			; if overflow, redo computation as double
+	muls.l	(Fail), d2			; d2 := result*divisor
+	sub.l	d2,	8(Fail)			; TOS := dividend - d2  == dividend mod divisor
+	addq.l	#8,	Fail			; adjust math sp
+	rts
+
+_mth_band:
+	move.l	(Fail), d2			; get rh op
+	and.l	d2, 	8(Fail)			; do the and
+	addq.l	#8,	Fail			; adjust math sp
+	rts
+
+_mth_bor:
+	move.l	(Fail), d2			; get rh op
+	or.l	d2, 	8(Fail)			; do the and
+	addq.l	#8,	Fail			; adjust math sp
+	rts
+
+_mth_bxor:
+	move.l	(Fail), d2			; get rh op
+	eor.l	d2, 	8(Fail)			; do the and
+	addq.l	#8,	Fail			; adjust math sp
+	rts
+
+_mth_not:
+	not.l	(Fail)			; logical negation
+	rts
+
+_mth_lshft:
+	move.l	(Fail),	d2		; get shift count
+	move.l	8(Fail),d3		; get operand
+	lsl.l	d2,	d3		; do the shift
+	move.l	d3,	8(Fail)		; store the result onto new TOS
+	addq.l	#8,	Fail		; adjust math sp
+	rts
+
+_mth_rshft:
+	move.l	(Fail),	d2		; get shift count
+	move.l	8(Fail),d3		; get operand
+	lsr.l	d2,	d3		; do the shift
+	move.l	d3,	8(Fail)		; store the result onto new TOS
+	addq.l	#8,	Fail		; adjust math sp
+	rts
+
+
+_mth_abs:
+	tst.l	(Fail)			; compare operand to zero
+	blt	2f			; less than zero 
+	rts				; >= 0, so just return
+2:	neg.l	(Fail)			; op := -op
+	rts
+
+
+_mth_floor:
+_mth_round:
+_mth_trunc:
+_mth_ceil:
+	rts				; just return, these are nops for ints
+
+_mth_heapused:
+	move.l	H,	d2			; get H
+	move.l	wm_heapbase, d1			; get HeapBase
+	sub.l	d1, d2				; H - HeapBase
+	subq.l	#8,	Fail			; push math stack
+	move.l	d2,	(Fail)			; store result 
+	rts
+
+
+_mth_callout_init:
+dbl_callout_init:
+	move.l	H,	mth_stk			; mth_stk := H
+	movea.l	mth_bot, H			; H := mth_bot
+	addq.l	#4,	H			; bump the heap pointer
+	rts
+
+_mth_callout:
+; expression to be evaluated is already in d2
+; stack frames are identical to those for callouts generated internally
+
+	move.l	mth_stk,	d3		; set up d3 for is_callout
+	bsr	is_callout			; do the callout
+	move.l	-16(SP),	d1		; put callout result into d1 for getnum
+;	move.l	4(SP),	Fail			; reset Fail to what it was before callout
+;	adda.l	#20,	SP			; restore original return address to TOS
+	bra	_mth_getnum			; and call getnum
+
+dbl_callout:
+; *** This should be more efficient, (we needn't bsr is_callout!!), but
+; we really should use macros to capture the abstraction.
+
+; expression to be evaluated is already in d2
+; stack frames are identical to those for callouts generated internally
+
+	move.l	mth_stk,	d3		; set up d3 for is_callout
+	bsr	is_callout			; do the callout
+	move.l	-16(SP),	d1		; put callout result into d1 for getnum
+;	move.l	4(SP),	Fail			; reset Fail to what it was before callout
+;	adda.l	#20,	SP			; restore original return address to TOS
+	bra	dbl_getnum			; and call getnum
+
+is_callout:
+	; Upon entry:
+	; 	d2 	will have right hand side of is
+	; 	d3	is set to the start of the stack area, usually = mth_stk
+	
+	;	
+	;	+___________________________+
+	;	|	Old Stuff	    |
+	;	+___________________________+		(higher addresses)
+	;	|	Fail		    |
+	;	+___________________________+
+	;	|	&callout_code	    |
+	; 	+___________________________+
+	;	|	RET2		    |
+	;	+___________________________+
+	;	|	RET		    |
+	;	+___________________________+	<------ SP     (SP on entry)
+	;	|	CP'		    |
+	;	+___________________________+
+	;	|	OldE'		    |
+	;	+___________________________+
+	;	|	is/2 result var	    |		(lower addresses)
+	;	+___________________________+
+	;	|	UIA to math stack   |
+	;	+___________________________+  <------ NewSP   (SP on exit)
+
+	; Caller can access is/2 result var at -16(SP) 
+	; This routine cleans up dummy environment on exit
+
+
+	suba.l	#16,	SP		; push stack for the dummy env
+		; Question: How come this wasn't done in the other ports?
+		; If we don't do this, it seems we'll write over previous environment
+		; and, in 68k case, temps saved on stack
+		; If we push the stack as we do here, pop it in mth_aftercall
+
+	movea.l	d3,	a0		; load up a0 with base of math stack
+	move.l	S,	8(a0)		; store mode off low end of stack area
+	move.l	Fail,	d4		; load TOS into Dn
+	sub.l	d3,	d4		; compute top offset = TOS - Hinitial
+					; TOS > Hinitial
+	move.l	d4,	4(a0)		; store top offset
+	; now place the fences around the math stack area so the garbage collector is ok
+	move.l	mth_bot, d4		; put mth_bot into Dn
+	cmp.l	H, d4			; stack bottom (highest address) :: H
+	bls	2f			; H is OK, doesn't need mending
+					; mth_bot > H, so mend H  (H := mth_bot+4)
+	movea.l	d4,	H		; two-address ugliness
+	addq.l	#4,	H		; reset H
+2:	sub.l	d3,	d4		; compute difference between top and bottom
+					; for fence building
+	lsl.l	#MTP_CONSTSHIFT, d4	; make room for tag
+	addi.l	#MTP_FENCE, d4		; add in fence tag
+					; place matching fences, first lo then hi
+	move.l	d4,	(d3.l)		; use d3 like An (d3 is really an index here)
+	lea	mth_bot, a0		; get &mth_bot for memory indirect store
+	move.l	d4,	([a0])		; store into high end of mem
+	; now consider the just fenced off area is a UIA, and tag it as such
+	lsl.l	#MTP_CONSTSHIFT, d3	; make room for tag
+	addi.l	#MTP_UIA, d3		; add in UIA tag
+	move.l	E,	8(SP)		; store E for dummy env
+	lea	is_dummyret, a0
+	move.l	a0,	12(SP)		; and CP for dummy env
+	movea.l	SP,	E		; set up E for callout
+	addq.l	#8,	E		; E := SP+8  --> dummy env
+	move.l	d3,	(SP)		; make the UIA an environment variable of dummy env
+					; now gc won't collect our math stack
+	move.l	SP,	d1		; set up d1 with LHS of is/2
+	addq.l	#4,	d1		; result var in dummy env
+	move.l	d1,	(d1.l)		; make it unbound, again d1 is really an index here
+	movea.l	mth_is_addr, a0		; load up where to callout for callout_code
+	move.l	28(SP),	Fail		; reset Fail in case callout fails, to &FailureCode
+	jmp	([24,SP])		; &callout_code saved on arg/env stack
+
+rel_callout:
+	; Upon entry:
+	;	d3	will point at start of arith stack/callout area
+	;	d2	will have right hand side of is
+
+	; different than is_callout:
+	; set up for callout, (d1,d2) = (lh,rh) in lh relop rh
+
+; rel_callout is called only from decompilation mode to build the
+; relational operator
+
+; Stack frame is exactly the same as that for is_callout.
+; We wanted to optimize a bit and do a bra rel_callout instead of a bsr rel_callout
+; (pushing only one return address on the stack, not two, viz.  RET  RET2)
+; but it made it too difficult to reset Fail from the stack
+; (if the stack frame layout is different, mth_callout can't be used for both, cuz
+; Fail is saved at a different offset).  Also, we could reset Fail not in mth_aftercall,
+; but in the caller of is_callout/rel_callout.  However, this doesn't work cuz the whole
+; point of the attempted optimization was that rel_callout wouldn't need to return to its
+; direct caller (bra vs. bsr)!
+
+
+	suba.l	#16,	SP		; push stack for the dummy env
+		; Question: How come this wasn't done in the other ports?
+		; If we don't do this, it seems we'll write over previous environment
+		; and, in 68k case, temps saved on stack
+		; If we push the stack as we do here, pop it in mth_aftercall
+
+	movea.l	d3,	a0		; load up a0 with base of math stack
+	move.l	S,	8(a0)		; store mode off low end of stack area
+	move.l	Fail,	d4		; load TOS into Dn
+	sub.l	d3,	d4		; compute top offset = TOS - Hinitial
+					; TOS > Hinitial
+	move.l	d4,	4(a0)		; store top offset
+	; now place the fences around the math stack area so the garbage collector is ok
+	move.l	mth_bot, d4		; put mth_bot into Dn
+	sub.l	d3,	d4		; compute difference between top and bottom
+					; for fence building
+	lsl.l	#MTP_CONSTSHIFT, d4	; make room for tag
+	addi.l	#MTP_FENCE, d4		; add in fence tag
+					; place matching fences, first lo then hi
+	move.l	d4,	(d3.l)		; use d3 like An (d3 is really an index here)
+	lea	mth_bot, a0		; get &mth_bot for memory indirect store
+	move.l	d4,	([a0])		; store into high end of mem
+	; now consider the just fenced off area is a UIA, and tag it as such
+	lsl.l	#MTP_CONSTSHIFT, d3	; make room for tag
+	addi.l	#MTP_UIA, d3		; add in UIA tag
+	move.l	E,	8(SP)		; store E for dummy env
+	lea	is_dummyret, a0
+	move.l	a0,	12(SP)		; and CP for dummy env
+	movea.l	SP,	E		; set up E for callout
+	addq.l	#8,	E		; E := SP+8  --> dummy env
+	move.l	d3,	(SP)		; make the UIA an environment variable of dummy env
+					; now gc won't collect our math stack
+	; now set up a0, d1, d2 for custom callout code
+	movea.l	d2,	a0		; load up where to callout for callout_code
+	move.l	(Fail), d1		; get rh op of relop
+	move.l	8(Fail), d2		; get lh op of relop
+	move.l	28(SP), Fail		; reset Fail in case callout fails, to &FailureCode
+	jmp	([24,SP])		; &callout_code saved on arg/env stack ([24,SP])
+
+
+mth_aftercall:
+	; SP is as it was just before calling out  -- pop it 4 els worth before returning
+	movea.l	8(SP),	E		; unlink dummy env
+	move.l	(SP),	d3		; get stack base value (tagged as UIA)
+	asr.l	#MTP_CONSTSHIFT, d3	; shift out the tag
+	move.l	(d3.l),	d4		; get fence
+	asr.l	#MTP_CONSTSHIFT, d4	; shift out the tag
+	move.l	d3,	mth_stk		; reset mth_stk
+	add.l	d3,	d4		; get to end
+	move.l	d4,	mth_bot		; reset mth_bot
+	movea.l	d3,	a0		; put stack base into An
+	movea.l	4(a0),	Fail		; get astack top offset
+	adda.l	d3,	Fail		; reset math stack top
+	movea.l	8(a0),	S		; reset mode
+	
+	adda.l	#20,	SP		; pop stack from is_callout/rel_callout
+
+
+	tst.l	Safety			; check for decompilation mode
+	bgt	1f			; branch if not in decompilation mode
+2:
+	jmp	([-4,SP])		; return to caller of ?_callout  ([16,SP])
+
+1:	; see if the stack has become misaligned, and fix it if so
+	; stuff will always be word aligned <==> 00 in bit positions 1,0
+	; so, stuff will always be doubleword aligned if word aligned & bit pos 2 = 0
+	; i.e. if the low 3 bits are 0
+	movea.l	mth_stk, H		; reset H no matter what
+;	bfextu	mth_bot{#29:#3}, d2	; extract least significant 3 bits bits (2,1,0),
+					; zero extended
+	bfextu	d4{#29:#3}, d2		; extract least significant 3 bits (2,1,0),
+					; zero extended
+					; from mth_bot (resident in d4)
+	tst.b	d2			; compare low 8 bits with 0
+	beq	2b			; return if not misaligned
+
+	; realignment code  -- does this ever run?
+	; Must conjure up a test case that exercises both the misalign test above,
+	; and the consequent realignment code below
+
+	; d4 - mth_bot
+
+	move.l	d4,	a0		; get mth_bot into An
+3:	move.l	-(a0),	4(a0)		; move stack el into higher memory (one word)
+					; and a0 is decremented for next iteration too
+		; Semantics of predecrement above aren't discussed in the manual (I think),
+		; but experiments show that a0 is decremented before RH operand evaluated.
+	cmpa.l	a0,	Fail		; hit math stack => have moved entire stack up
+	bne	3b			; if not, move another stack el
+	addq.l	#4,	mth_bot		; advance astack bottom (mth_bot = d4)
+	addq.l	#4,	Fail		; adjust MathTOS
+	jmp	([-4,SP])		; return to caller of ?_callout  ([16,SP])
+	
+	
+
+
+mth_fail:
+	math_fail
+
+/*
+ * Double entry points
+ */
+
+
+
+dbl_eq:
+	dbl_cmp
+	fbeq	2f
+	math_fail 
+dbl_lt:
+	dbl_cmp
+	fblt	2f
+	math_fail
+dbl_gt:
+	dbl_cmp
+	fbgt	2f
+	math_fail
+dbl_le:
+	dbl_cmp
+	fble	2f
+	math_fail
+dbl_ge:
+	dbl_cmp
+	fbge	2f
+	math_fail
+dbl_ne:
+	dbl_cmp
+	fbne	2f
+	math_fail
+2:	rts
+
+dbl_getnum:
+	; _dbl_getnum takes argument in d1, dereferences it and pushes it
+	; onto the stack, setting the mode appropriately.  Only the
+	; dereferencing is done here, the rest of the code appears in
+	; dbl_getnum2 and dbl_getnum3 below.
+	deref	d1,	a0,	dbl_getnum2
+	bra	dbl_getnum3
+
+
+dcmp_pushdbl:
+	bsr	dbl_putnum		; put number into d1
+	move.l	d1,	(Fail)		; put number on the stack
+	rts
+
+dbl_putnum:
+	; dbl_putnum takes the double argument on the top of the stack,
+	; converts it to an integer if possible and tags the result (either
+	; integer or double as a Prolog object) and returns the result in
+	; d1.
+		
+	fmove.d	(Fail),	fp0		; move TOS into fp0
+	fmove.l	fp0,	d2		; and convert to integer  d2 := int(fp0)
+	fmove.l	d2,	fp1		; now convert back to double
+	fcmp.X	fp1,	fp0		; are they the same?
+	fbne	pn_dbl			; it's a double, so branch to pn_dbl (within mth_putnum)
+	move.l	d2,	(Fail)		; it's an int, so overwrite TOS with int
+	bra	_mth_putnum		; and branch to mth_putnum
+	
+
+dbl_pushdbl:
+	; dbl_pushdbl is entered with its work done for it (see mth_pushbdl)
+	rts
+
+dbl_pushint:
+	; dbl_pushint pushes the integer in d1 onto the stack as a double
+	subq.l	#8, 	Fail			; create stack element
+	fmove.l	d1,	fp0
+	fmove.d	fp0,	(Fail)
+	rts
+
+dbl_addi:
+	; immediate op (rh) in d0
+	fmove.l	d0,	fp0			; need one op in fpn
+	fadd.d	(Fail),	fp0			; do the add, don't care about overflow
+	fmove.d	fp0,	(Fail)			; and write the result back onto TOS
+	rts
+dbl_add:
+	; add two top stack arguments and store back
+	fmove.d	(Fail),	fp0			; get RH op, need at least one op in fpn
+	fadd.d	8(Fail), fp0			; do the add, don't care about overflow
+	fmove.d	fp0,	8(Fail)			; store result onto new TOS
+	addq.l	#8,	Fail			; fix up math sp
+	rts
+dbl_subi:
+	; immediate (rh) op in d0
+	fmove.d	(Fail),	fp0			; need one op in fpn
+	fmove.l	d0,	fp1			; need to convert integer operand to double
+	fsub.X	fp1,	fp0			; do the subtract, don't care about overflow
+	fmove.d	fp0,	(Fail)			; and write result back onto TOS
+	rts
+dbl_sub:
+	; subtract top two stack arguments and store back
+	fmove.d	8(Fail), fp0			; get LH op, need at least one op in fpn
+	fsub.d	(Fail),	fp0			; do the subtract, don't care about overflow
+	fmove.d	fp0,	8(Fail)			; store result onto new TOS
+	addq.l	#8,	Fail			; fix up math sp
+	rts
+dbl_mul:
+	; multiply two top stack arguments and store back
+	fmove.d	(Fail),	fp0			; get RH op, need at least one op in fpn
+	fmul.d	8(Fail), fp0			; do the multiply, don't care about overflow
+	fmove.d	fp0,	8(Fail)			; store result onto new TOS
+	addq.l	#8,	Fail			; fix up math sp
+	rts
+
+dbl_fdiv:
+	; fail on division by zero
+	ftst.d	(Fail)				; rh op  (divisor) zero?
+	fbeq	mth_fail			; if so, fail
+	fmove.d	8(Fail), fp0			; get lh op (dividend)
+	fdiv.d	(Fail), fp0			; do the divide, don't care about overflow
+	fmove.d	fp0,	8(Fail)			; store result onto new TOS
+	addq.l	#8,	Fail			; fix up math sp
+	rts
+
+
+dbl_div:
+	; like dbl_fdiv, but return trunc(result)
+	ftst.d	(Fail)				; rh op  (divisor) zero?
+	fbeq	mth_fail			; if so, fail
+	fmove.d	8(Fail), fp0			; get lh op (dividend)
+	fdiv.d	(Fail), fp0			; do the divide, don't care about overflow
+	fintrz.X fp0,	fp1			; get int part
+	fmove.d	fp1,	8(Fail)			; and store it onto TOS
+	addq.l	#8,	Fail			; fix up math sp
+	rts
+
+dbl_neg:
+	dbl_unop	fneg.d
+
+dbl_mod:
+	; analogue to dbl_fdiv
+	ftst.d	(Fail)				; rh op (divisor) zero?
+	fbeq	mth_fail			; if so, fail
+	fmove.d	8(Fail), fp0			; get lh op (dividend)
+	fmod.d	(Fail),	fp0			; fp0 := dividend mod divisor
+	fmove.d	fp0, 8(Fail)			; store result onto new TOS
+	addq.l	#8,	Fail			; fix up math sp
+	rts
+
+dbl_band:
+	; convert dpfp operands to integer, and 'em, and return integer result as double on TOS
+	dbl_blop	and.l
+dbl_bor:
+	; convert dpfp operands to integer, or 'em, and return integer result 
+	; as double on TOS
+	dbl_blop	or.l
+dbl_bxor:
+	; convert dpfp operands to integer, xor 'em, and return integer result 
+	; as double on TOS
+	dbl_blop	eor.l
+dbl_not:
+	; convert dpfp operand to integer, and return logical negation integer result 
+	; as double on TOS
+	rts
+dbl_lshft:
+	; convert dpfp operands to integer, perform left shift, and return integer result 
+	; as double on TOS
+	dbl_blop	lsl.l
+
+dbl_rshft:
+	; convert dpfp operands to integer, perform right shift, and return integer result 
+	; as double on TOS
+	dbl_blop	lsr.l
+
+dbl_power:
+	; call C math library to compute x^y
+	; CAVEAT -- for Motorola R3V6
+	; 	math.h's pow() isn't very precise, e.g.
+	; 	pow(2,24) ==> 16777215.999999975 instead of 16777216
+	binaryCdbl	pow
+	
+dbl_abs:
+	dbl_unop	fabs.d 
+	
+
+dbl_sin:
+	dbl_unop	fsin.d
+dbl_cos:
+	dbl_unop	fcos.d
+dbl_tan:
+	dbl_unop	ftan.d	
+dbl_asin:
+	dbl_unop	fasin.d
+dbl_acos:
+	dbl_unop	facos.d
+dbl_atan:
+	dbl_unop	fatan.d
+dbl_sqrt:
+	dbl_unop	fsqrt.d
+dbl_exp:
+	dbl_unop	fetox.d
+dbl_exp10:
+	dbl_unop	ftentox.d
+dbl_log:
+	dbl_unop	flogn.d
+dbl_log10:
+	dbl_unop	flog10.d
+dbl_sinh:
+	dbl_unop	fsinh.d
+dbl_cosh:
+	dbl_unop	fcosh.d
+dbl_tanh:
+	dbl_unop	ftanh.d
+
+
+dbl_floor:
+	; write this custom cuz it's so simple, instead of calling out to C math library
+	; 68k fint instructions work ok, fintrz works for +ve nums, but need to adjust
+	; result if negative
+	fintrz.d	(Fail),	fp0			; get int part, round down to zero
+	fbge	2f					; >= 0 needs no adjusting
+	fcmp.d	(Fail),	fp0				; can the negative double pass as an int?
+	fbeq	2f					; if so, no adjusting necessary
+	fsub.l	#1,	fp0				; else subtract one
+2:	fmove.d	fp0,	(Fail)
+	rts	
+
+dbl_round:
+	; round(x) = floor(x+0.5)
+	; after 0.5 is added to operand, code proceeds as in dbl_floor above
+	fmove.d	(Fail),	fp1				; get double from top of math stack
+	fadd.d	#0.5,	fp1				; fp2 := x+0.5
+	fintrz.X fp1,	fp0				; now proceed as in dbl_floor
+	fbge	2f					; >= 0 needs no adjusting
+	fcmp.X	fp1,	fp0				; can the negative double pass as an int?
+	fbeq	2f					; if so, no adjusting necessary
+	fsub.l	#1,	fp0				; else subtract one
+2:	fmove.d	fp0,	(Fail)
+	rts	
+#ifdef notdef
+	dbl_unop	fint.d
+	-- Unfortunately, fint(0.5)=0 not 1 (yuck!), so we code as below
+#endif
+
+dbl_trunc:
+	dbl_unop	fintrz.d
+
+dbl_heapused:
+	; just like mth_heapused, but of course the result is converted to double
+	move.l	H,	d2			; get H
+	move.l	wm_heapbase, d1			; get HeapBase
+	sub.l	d1, d2				; H - HeapBase
+	subq.l	#8,	Fail			; push math stack
+	fmove.l	d2,	fp0			; convert result 
+	fmove.d	fp0,	(Fail)			; store result onto TOS
+	rts
+
+dbl_cputime:
+	nularyCdbl	als_cputime
+dbl_realtime:
+	nularyCdbl	als_realtime
+dbl_random:
+	nularyCdbl	als_random
+
+dbl_ceil:
+	unaryCdbl	ceil
+dbl_erf:
+	unaryCdbl	erf
+dbl_erfc:
+	unaryCdbl	erfc
+dbl_gamma:
+	unaryCdbl	gamma
+dbl_j0:	unaryCdbl	j0
+dbl_j1:	unaryCdbl	j1
+dbl_y0:	unaryCdbl	y0
+dbl_y1:	unaryCdbl	y1
+
+dbl_atan2:
+	binaryCdbl	atan2
+dbl_fmod:
+	binaryCdbl	fmod
+dbl_hypot:
+	binaryCdbl	hypot
+dbl_jn:	binaryCdbl	jn
+dbl_yn:	binaryCdbl	yn
+
+
+
+/*
+ * Decompilation entry points
+ */
+
+dcmp_eq:
+	dcmp_cmp	mth_eq_addr
+dcmp_lt:
+	dcmp_cmp	mth_lt_addr
+dcmp_gt:
+	dcmp_cmp	mth_gt_addr
+dcmp_le:
+	dcmp_cmp	mth_le_addr
+dcmp_ge:
+	dcmp_cmp	mth_ge_addr
+dcmp_ne:
+	dcmp_cmp	mth_ne_addr
+dcmp_getnum:
+	; dcmp_getnum takes argument in d1, dereferences it and puts
+	; result on TOS
+	deref	d1,	a0,	dcmp_getnum2
+	bra	dcmp_getnum3
+
+dcmp_putnum:
+	; dcmp_putnum corresponds to is/2.  Arguments are set and 'is'/2 is
+	; called. The variable on the left hand side of the 'is' is  passed
+	; back on the stack to be either unified or 'put' into some
+	; environment variable.
+	move.l	(Fail),	d2			; set up d2 with RHS of is for is_callout
+	move.l	mth_stk, d3			; set up d3 with start of stack area for is_callout
+	bsr	is_callout			; do callout
+	move.l	-16(SP),	d1		; get result var of is/2
+;	move.l	4(SP),	Fail			; reset Fail to what it was before callout
+;	adda.l	#20,	SP			; restore original return address to TOS
+	deref	d1,	a0,	1f		; dereference it now, into a0
+1:	move.l	a0,	d1			; putnum leaves result in d1
+	rts
+
+dcmp_addi:
+	; immediate op (rh) in d0 (untagged)
+	lsl.l	#MTP_CONSTSHIFT, d0	; set up int for a tag
+	addq.l	#MTP_INT,	d0	; add the integer tag
+	subq.l	#8,	Fail		; push math stack
+	move.l	d0,	(Fail)		; set up for macro
+	bld_functor_2	TK_PLUS
+dcmp_add:
+	; builds '+'/2 structure from top two stack elements
+	bld_functor_2	TK_PLUS
+dcmp_subi:
+	; immediate op (rh) in d0 (untagged)
+	lsl.l	#MTP_CONSTSHIFT, d0	; set up int for a tag
+	addq.l	#MTP_INT,	d0	; add the integer tag
+	subq.l	#8,	Fail		; push math stack
+	move.l	d0,	(Fail)		; set up for macro
+	bld_functor_2	TK_MINUS
+dcmp_sub:
+	bld_functor_2	TK_MINUS
+dcmp_mul:
+	bld_functor_2	TK_STAR
+dcmp_div:
+	bld_functor_2	TK_SLASHSLASH
+dcmp_fdiv:
+	bld_functor_2	TK_SLASH
+dcmp_neg:
+	bld_functor_1	TK_MINUS
+dcmp_mod:
+	bld_functor_2	TK_MOD
+dcmp_band:
+	bld_functor_2	TK_BAND
+dcmp_bor:
+	bld_functor_2	TK_BOR
+dcmp_bxor:
+	bld_functor_2	TK_BXOR
+dcmp_not:
+	bld_functor_1	TK_BACKSLASH
+dcmp_lshft:
+	bld_functor_2	TK_LSHFT
+dcmp_rshft:
+	bld_functor_2	TK_RSHFT
+dcmp_power:
+	bld_functor_2	TK_HAT
+dcmp_abs:
+	bld_functor_1	TK_ABS
+dcmp_sin:
+	bld_functor_1	TK_SIN
+dcmp_cos:
+	bld_functor_1	TK_COS
+dcmp_tan:
+	bld_functor_1	TK_TAN
+dcmp_asin:
+	bld_functor_1	TK_ASIN
+dcmp_acos:
+	bld_functor_1	TK_ACOS
+dcmp_atan:
+	bld_functor_1	TK_ATAN
+dcmp_sqrt:
+	bld_functor_1	TK_SQRT
+dcmp_exp:
+	bld_functor_1	TK_EXP
+dcmp_exp10:
+	bld_functor_1	TK_EXP10
+dcmp_log:
+	bld_functor_1	TK_LOG
+dcmp_log10:
+	bld_functor_1	TK_LOG10
+dcmp_floor:
+	bld_functor_1	TK_FLOOR
+dcmp_round:
+	bld_functor_1	TK_ROUND
+dcmp_trunc:
+	bld_functor_1	TK_TRUNC
+dcmp_heapused:
+	bld_symbol	TK_HEAPUSED
+dcmp_cputime:
+	bld_symbol	TK_CPUTIME
+dcmp_realtime:
+	bld_symbol	TK_REALTIME
+dcmp_random:
+	bld_symbol	TK_RANDOM
+dcmp_callout_init:
+	rts
+dcmp_callout:
+	; expression is in d2, push it onto the Math Stack
+	subq.l	#8,	Fail			; push math stack
+	move.l	d2,	(Fail)			; push d2 onto math stack
+	rts
+dcmp_sinh:
+	bld_functor_1	TK_SINH
+dcmp_cosh:
+	bld_functor_1	TK_COSH
+dcmp_tanh:
+	bld_functor_1	TK_TANH
+dcmp_ceil:
+	bld_functor_1	TK_CEIL
+dcmp_erf:
+	bld_functor_1	TK_ERF
+dcmp_erfc:
+	bld_functor_1	TK_ERFC
+dcmp_gamma:
+	bld_functor_1	TK_GAMMA
+dcmp_j0:
+	bld_functor_1	TK_J0
+dcmp_j1:
+	bld_functor_1	TK_J1
+dcmp_y0:
+	bld_functor_1	TK_Y0
+dcmp_y1:
+	bld_functor_1	TK_Y1
+dcmp_atan2:
+	bld_functor_2	TK_ATAN2
+dcmp_fmod:
+	bld_functor_2	TK_FMOD
+dcmp_hypot:
+	bld_functor_2	TK_HYPOT
+dcmp_jn:
+	bld_functor_2	TK_JN
+dcmp_yn:
+	bld_functor_2	TK_YN
+
+
+
+
+
+
+; mth_getnum2, dbl_getnum2, dcmp_getnum2
+;
+; These routines have dereferenced d1 to a ground object.  We need to
+; classify this object and convert the stack to another mode if necessary.
+; low word of d0 contains the 2-bit tag  ; a0 contains (tagged) dereferenced term
+;
+
+mth_getnum2:
+
+	; we arrive here from deref (ground)
+	
+
+	; What do for a list?  Do a callout.  This enables the user to use extend_is/3 to build
+	; his/her own semantics for lists appearing in is/2.
+
+	tag_swc	3f,	4f			; callout for lists, for structures must
+						; first check for double/4		
+	; must be a constant
+	ctag_bne MTP_INT, a0, 4f		; callout if not an integer
+
+	; integer code
+	; sign-extend to 32 bits
+
+	move.l	a0,	d1			; can't do bit instructions on An
+	asr.l	#MTP_CONSTSHIFT, d1		; nuke the tag, leave the 32-bit integer
+						; (only 28 bits used though)
+	subq.l	#8,	Fail			; push math stack
+	move.l	d1,	(Fail)			; push integer onto stack
+	rts
+
+
+
+3:	; if not a double/4 struct, do a callout just like for a list
+	move.l	d1,	d4			; don't nuke tagged term in d1
+	andi.l	#~MTP_TAGMASK,	d4		; zero the tag bits to get functor heap addr
+	movea.l	d4,	a0			; put into an A-reg
+	cmpi.l	#MMK_FUNCTOR(TK_DDOUBLE,4), (a0)	; is the functor a double/4?
+	bne	4f				; not a double/4, so do a callout
+
+	; double code
+	; double/4 contains 4 short (16-bit) parts (tagged!), though layed out in 
+	; 4 consecutive 32-bit words
+	; push the double onto the stack, and then call istack_to_dstack to convert from int mode
+
+	move.l	Fail,	d4			; save old TOS
+
+	subq.l	#8,	Fail			; push math stack
+	move.l	4(a0),	d3			; get first quarter of double
+	asr.l	#MTP_CONSTSHIFT, d3		; nuke the integer tag
+	move.w	d3,	(Fail)
+	move.l	8(a0),	d3
+	asr.l	#MTP_CONSTSHIFT, d3
+	move.w	d3,	2(Fail)
+	move.l	12(a0),	d3
+	asr.l	#MTP_CONSTSHIFT, d3
+	move.w	d3,	4(Fail)
+	move.l	16(a0),	d3
+	asr.l	#MTP_CONSTSHIFT, d3
+	move.w	d3,	6(Fail)
+
+#ifdef notdef
+	move.l	4(a0),	(Fail)			; push first quarter of double
+	subq.l	#8,	Fail			; push math stack
+	move.l	8(a0),	(Fail)			; push second quarter of double
+	subq.l	#8,	Fail			; push math stack
+	move.l	12(a0),	(Fail)			; push third quarter of double
+	subq.l	#8,	Fail			; push math stack
+	move.l	(a0),	(Fail)			; push fourth quarter of double
+#endif
+	; now transition from int mode to double mode
+	; custom entry to istack_to_dstack, a la _mth_pushdbl
+	; should make this a common entry point for istack_to_dstack?
+#ifdef notdef
+	movea.l	d4,	a0			; a0 = where to start converting stack from
+	bra	istack_to_dstack		; istack_to_dstack does a rts when done
+#endif
+	lea	mth_bot, a0			; get address of mth_bot
+	move.l	(a0),	d2			; d2 = where to stop conversion (bottom of stack)
+	move.l	d4,	a0			; a0 = where to start converting stack from
+	bra 	7b
+
+
+4:	; for a list, do a callout too
+	; put tagged term (RHS of is/2) into d2 for is_callout
+	move.l	d1,	d2			; load up d2 for is_callout
+	move.l	H,	d3			; load up d3 for is_callout
+	bsr	is_callout			; callout
+	move.l	-16(SP),	d1		; load up LHS of is/2
+;	move.l	4(SP),	Fail			; reset Fail to what it was before callout
+;	adda.l	#20,	SP			; restore original return address to TOS
+	bra	_mth_getnum			; call getnum
+
+
+dbl_getnum2:
+;
+; dbl_getnum2 is very similar to mth_getnum2, the only difference being that
+; here when we find an int, we convert it to double, and we don't change mode from int
+; to double (cuz we're already in double mode)
+; Probably should figure out a neat way to use macros to encapsulate the shared code segments.
+
+	; we arrive here from deref (ground)
+
+	; What do for a list?  Do a callout.  This enables the user to use extend_is/3 to build
+	; his/her own semantics for lists appearing in is/2.
+
+	tag_swc	3f,	4f			; callout for lists, for structures must
+						; first check for double/4		
+	; must be a constant
+	ctag_bne MTP_INT, a0, 4f		; callout if not an integer
+
+	; integer code
+	; sign-extend to 32 bits, and then convert to double, and push onto the math stack
+
+	move.l	a0,	d1			; can't do bit instructions on An
+	asr.l	#MTP_CONSTSHIFT, d1		; nuke the tag, leave the 32-bit integer
+						; (only 28 bits used though)
+	subq.l	#8,	Fail			; push math stack
+	fmove.l d1,	fp0			; convert to double	
+	fmove.d	fp0,	(Fail)			; and push the double onto the stack
+	rts
+
+
+3:	; if not a double/4 struct, do a callout just like for a list
+	move.l	d1,	d4			; don't nuke tagged term in d1
+	andi.l	#~MTP_TAGMASK,	d4		; zero the tag bits to get functor heap addr
+	movea.l	d4,	a0			; put into an A-reg
+	cmpi.l	#MMK_FUNCTOR(TK_DDOUBLE,4), (a0) ; is the functor a double/4?
+	bne	4f				; not a double/4, so do a callout
+
+	; double code
+	; double/4 contains 4 short (16-bit) parts (tagged!), though layed out in 
+	; 4 consecutive 32-bit words
+	; push the double onto the stack, and just return
+
+	move.l	Fail,	d4			; save old TOS
+
+	subq.l	#8,	Fail			; push math stack
+	move.l	4(a0),	d3			; get first quarter of double
+	asr.l	#MTP_CONSTSHIFT, d3		; nuke the integer tag
+	move.w	d3,	(Fail)
+	move.l	8(a0),	d3
+	asr.l	#MTP_CONSTSHIFT, d3
+	move.w	d3,	2(Fail)
+	move.l	12(a0),	d3
+	asr.l	#MTP_CONSTSHIFT, d3
+	move.w	d3,	4(Fail)
+	move.l	16(a0),	d3
+	asr.l	#MTP_CONSTSHIFT, d3
+	move.w	d3,	6(Fail)
+
+	rts					; and return				
+
+4:	; for a list, do a callout too
+	; put tagged term (RHS of is/2) into d2 for is_callout
+	move.l	d1,	d2			; load up d2 for is_callout
+	move.l	H,	d3			; load up d3 for is_callout
+	bsr	is_callout			; callout
+	move.l	-16(SP),	d1		; load up LHS of is/2
+;	move.l	4(SP),	Fail			; reset Fail to what it was before callout
+;	adda.l	#20,	SP			; restore original return address to TOS
+	bra	dbl_getnum			; call getnum
+
+
+
+dcmp_getnum2:
+	; this _shouldn't_ be called
+	; just push a0 (dereferenced term) onto TOS
+	; maybe later some interesting optimizations could be applied here, but...
+	subq.l	#8,	Fail			; push math stack
+	move.l	a0,	(Fail)			; push d1 onto math stack
+	rts
+
+
+; mth_getnum3, dbl_getnum3, dcmp_getnum3
+;
+; These routines have dereferenced d1 to a variable (a0 holds fully deref'd var).  
+; This is ok for dcmp_getnum, but not for the others.  We will fail for them at present.
+; Eventually, we will probably call the Prolog code in order to trap the
+; variable and handle it by some other means.
+;
+
+dcmp_getnum3:
+;	We'd like to just
+;	bra	_wm_p_unsafe
+;	Unfortunately, the 68k implementation inlines put_unsafe instructions, so
+;	we must replicate the code here.
+;	See icode1.c, ic_p_unsafe, for the code that appears here
+
+	move.l	a0,	d0	; set up d0 for dereferencing
+1:	move.l	d0, a0		; standard dereference sequence
+ 	and.w	#3, d0
+ 	bne.s	2f
+ 	move.l	(a0), d0
+ 	cmp.l	a0, d0
+ 	bne.s	1b
+ 
+ 	cmp.l	#wm_heapbase, d0 ; see if deref'd value is on stack
+ 	bcc.s	2f		; branch if in heap  -- bhs == bcc
+ 	move.l	H, (a0)		; bind to top of heap
+ 	move.l	H, a0
+ 	move.l	H, (H)+		; create variable on heap
+ 	cmp.l	d0, SPB		; see if need to trail
+ 	bhi.s	2f		; branch if we don't need to
+ 	move.l	d0, -(TR)	; Trail it
+
+2:	; for our purposes, store onto top of math stack
+	subq.l	#8,	Fail	; push math stack
+	move.l	a0, 	(Fail)	; store value
+	rts
+
+mth_getnum3:
+dbl_getnum3:
+	math_fail
+
+
+dcmp_pushdbl2:
+dbl_putnum2:
+;	See mth_getnum2 also
+;	We avoid int.sd generating integer overflow exceptions.
+;	A legitimate question is: is it worth all these instructions to allow floats that
+;	can be represented as integers to be stored as integers?
+;	I don't know; but check out the performance differences when all this code below
+;	is replaced by a br pn_dbl  (or even better, branch to it directly!)
+
+	rts
+
+mth_pushdbl0:
+	; Unlike the rest of the procedures, this is the common entry point
+	; for mth_pushdbl0.  It will take the double from the words immediately
+	; following the call and push it on the stack.
+	; SP should point at the return address, and ([4,SP]) and ([8,SP]) at the double halves
+
+	move.l	([SP],4),   -(Fail)		; store first half of double (LSW)
+	move.l	([SP]), -(Fail)			; store second half of double (MSW)
+	addq.l	#8,	(SP)			; bump ret addr past the double
+	jmp	([PUSHDBL_INDEX*4,S])		; and jump to *_pushdbl
+
+
+
+is_dummyret:
+	move.w	#((dummygcinfo-is_dummyret)/2), d0
+dummygcinfo:
+	gcinfo	0,	0,	0

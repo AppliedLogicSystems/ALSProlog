@@ -1,0 +1,97 @@
+# 
+# Makefile to make 386 System in DOS Environment with CMS libraries
+# 
+
+#
+# Delete modules ctop1 and ctop2 from original HighC library
+# (Those modules contains memory management functions such as
+# malloc and free)
+# 
+HIGHCLIB=c:\highc\small\hce.lib 
+VMHIGHCLIB=vmhce.lib 
+
+$(VMHIGHCLIB):
+	copy $(HIGHCLIB) $(VMHIGHCLIB)
+	386lib $(VMHIGHCLIB) -delete ctop1 ctop2
+
+
+#
+# Create CMS Virtual Memory Library
+#
+CMSVMLIB=libta.lib
+VMLIB=vmlib.a
+
+$(VMLIB): vminit.o
+	copy $(CMSVMLIB) $(VMLIB)
+	386lib $(VMLIB) -add vminit.o
+
+
+#
+# Real mode code part of CMS Virtual Memory library
+#
+VMRMOBJ=vmrmc.o
+
+$(VMRMOBJ): vmrmc.s
+	386asm vmrmc.s -386P -80387 -twocase -nolist -o $(VMRMOBJ)
+
+
+#
+# How to make ALS Prolog image 
+# in CMS Virtual Memory Environment
+#
+VMFOROBJS=vmpimain.o
+#VMFOROBJS=cmsmain.o
+
+alsprovm.exp: $(VMFOROBJS) $(VMRMOBJ) $(VMLIB) $(VMHIGHCLIB) 
+	386link <@< 
+$(VMRMOBJ)
+$(VMFOROBJS) 
+-lib $(ALIB) 
+-lib $(VMLIB) 
+-lib $(VMHIGHCLIB) 
+-pack
+-unpriv
+-maxreal 0ffffh
+-realbreak pmbase
+-exe alsprovm.exp
+<
+
+ 
+#
+# How to make ALS Prolog executable image 
+# in CMS Virtual Memory Environment
+#
+PHRUN386B=c:\phar386\bin\run386b.exe
+ 
+alsprovm.exe:  alsprovm.exp
+    bind386 $(RUN386B) alsprovm.exp -exe alsprovm.exe
+
+
+
+#
+# How to make an application package 
+# in CMS Virtual Memory Environment
+#
+alspvm.exp: $(VMFOROBJS) $(VMRMOBJ) $(VMLIB) $(VMHIGHCLIB) 
+	386link <@<
+$(VMRMOBJ)
+$(VMFOROBJS) 
+$(PCKGS) 
+-lib $(PCKGLIB) 
+-lib $(VMLIB) 
+-lib $(VMHIGHCLIB) 
+-pack
+-unpriv
+-maxreal 0ffffh
+-realbreak pmbase
+-exe alspvm.exp
+<
+
+
+#
+# Dependencies for files used 
+# in CMS Virtual Memory Environment
+#
+vminit.o: vminit.c config.h pckg.h
+
+cmsmain.o: cmsmain.c

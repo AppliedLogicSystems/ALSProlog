@@ -1,0 +1,56 @@
+If the E register moves:
+
+Change PERMOFFSET in varproc.c to represent how far from the E register
+the permanent variables begin (in PWords). For example, since the
+permanent variables are just below the E register, PERMOFFSET=1
+(See figure 1).
+
+High memory
+
+---------------------------------
+| Where E points		|
+---------------------------------
+| First permanent variable	|	PERMOFFSET is 1 away from where
+---------------------------------	E points.
+|	...............		|
+
+Low memory
+
+Figure 1.
+
+CP and CE Registers
+
+The 88k implementation has continuation pointer (CP) and continuation
+environment (CE) registers, while others such as the 386 and the 68020
+do not. On the 88k, we save room for these registers in the environment
+in the ALLOCATE instruction for the first goal in a multi-goal clause
+and in the environments for the middle goals (all others but the first and
+last goal), so that they can be filled in if necessary by choice point
+instructions or the like.
+
+On chips such as the 80386 and the 68020, this doesn't work as well. When
+a CALL is executed, an actual subroutine call is done which puts the
+return address to the CALL on the top of the stack. If we've already saved
+room for the return address, then the return address put down by the
+CALL instruction is in the wrong place (see Figure 2).
+
+---------------------------------
+| Room saved for CP		|
+---------------------------------
+| Room saved for CE		|
+---------------------------------
+| Where CALL would put CP	|
+---------------------------------
+
+Figure 2.
+
+In order to correct for this problem, there is a #define in the compiler
+called STACKADJUST which allows for this situation. In setting up the
+frame for all CALL environments (but not the last goal in a multi-goal
+clause), STACKADJUST has a value saying how many extra locations to save.
+For the 88k, the value will be 2, since we want room for both the CP and CE
+registers. For the 386 and the 68020, STACKADJUST should have a value of 0.
+Then the CALL instruction will put CE where we want it and it is then up
+to the procedure entry head (at the callEntry location) to create and fill
+in the CE slot from the current E value.
+

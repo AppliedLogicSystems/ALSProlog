@@ -1,0 +1,26 @@
+disassem.c	disassem.c	1
+list_asm	
+gc.c	gc.c	27
+CLRBIT	FENCEVAL	ISFENCE	ISPTR	ISUIA	MARK	MARKED	REV	REVERSEIT	SETBIT	TOPTR	TSTBIT	UIAVAL	UNREVERSEIT	chpt_E	env_CP	env_E	gc	gcstats	init_marks	mark	mark_args	mark_from	pwrite	rev	rev_update	val_at	
+icut.c	icode1.c	4
+ic_cut_proceed	ic_cutmacro	ic_deallocate_cut_proceed	ic_docut	
+ienvctl.c	icode1.c	14
+ic_allocate	ic_allocate1	ic_call	ic_deallocate1	ic_deallocate2	ic_deallocate3	ic_deallocate4	ic_endallocate1	ic_execute	ic_init_yvar1	ic_init_yvar2	ic_inline_proceed	ic_proceed	ic_trim	
+ifmath.c	icmath.c	13
+ic_mth_acos	ic_mth_asin	ic_mth_atan	ic_mth_cos	ic_mth_exp	ic_mth_floor	ic_mth_log	ic_mth_log10	ic_mth_power	ic_mth_round	ic_mth_sin	ic_mth_sqrt	ic_mth_tan	
+iget.c	icode1.c	6
+ic_g_int	ic_g_list	ic_g_structure	ic_g_sym	ic_g_uia	ic_g_value	
+iindex.c	icode2.c	19
+ic_install_builtin	ic_install_call	ic_install_call_entry	ic_install_equal	ic_install_jmp	ic_install_module_closure	ic_install_next_choice_in_a_deleted_clause	ic_install_no	ic_install_normal_exec_entry	ic_install_overflow_call	ic_install_reference	ic_install_resolve_ref	ic_install_retry_me	ic_install_spy	ic_install_switch_on_term	ic_install_true	ic_install_trust_me	ic_install_try_me	ic_install_try_me_jmp	
+imath.c	icmath.c	21
+ic_mth_abs	ic_mth_add	ic_mth_band	ic_mth_bor	ic_mth_bxor	ic_mth_div	ic_mth_eq	ic_mth_ge	ic_mth_getval	ic_mth_gt	ic_mth_le	ic_mth_lshft	ic_mth_lt	ic_mth_mod	ic_mth_mul	ic_mth_ne	ic_mth_neg	ic_mth_not	ic_mth_pushint	ic_mth_rshft	ic_mth_sub	
+imeta.c	icode1.c	9
+ICODE	ic_1stargalloc	ic_begin_macro	ic_callinfo	ic_end_capture	ic_end_macro	ic_put_macro	ic_start_capture	icode	
+imisc.c	icode1.c	3
+ic_addtosp	ic_move	ic_uiastr	
+index.c	index.c	14
+INIT_IH	SYSDEB	addtobuf	alloc_node	compute_size	computetablesize	do_indexing	get_clause_information	indexproc	initialize_nodeallocator	insert_node	installtreeoverhead	walk_bottom	walk_tree	
+iput.c	icode1.c	9
+ic_endstruct	ic_p_int	ic_p_list	ic_p_structure	ic_p_sym	ic_p_uia	ic_p_unsafe	ic_p_xvar	ic_p_yvar	
+iunify.c	icode1.c	6
+ic_u_int	ic_u_lval	ic_u_sym	ic_u_val	ic_u_var	ic_u_void	

@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# This script will "fix" the output of the cvs rdiff command.  The cvs rdiff
+# has the unfortunate characteristic of telling the user about files which
+# have been removed and are no longer of interest anymore....even _really_
+# old files.  Therefore much of the output from cvs rdiff is worthless. This
+# script removes the worthless portions.
+#
+
+exec sed -n -e '
+:start
+/^diff.*:removed$/b nuke
+p
+n
+b start
+:nuke
+n
+/^diff.*:removed/b nuke
+/^diff/b start
+b nuke
+'

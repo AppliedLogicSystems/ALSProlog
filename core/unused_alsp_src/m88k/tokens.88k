@@ -1,0 +1,101 @@
+;
+; tokens.88k			-- assembly language interface to find_token
+;				   probe_token, and token_name
+;	Copyright (c) 1988 Applied Logic Systems, Inc.
+;
+; Creation: 7/15/88
+; Author: Kevin A. Buettner
+; Revision History:
+;
+;
+
+
+#include "assembly.88k"
+
+
+;
+; The following subroutines (find_token, probe_token, and tok_name)
+; each take an argument in UArg1 and return the result in UArg1.
+;
+; find_token is given a string and will return the symbol table index of the
+; token (it will intern it in the symbol table if not there).
+;
+; probe_token is given a string and will return the symbol table index of the
+; token if present, zero if not.  Obviously, there is no token with a symbol
+; table index of zero.
+;
+; token_name is given a symbol table index and will return a pointer to the
+; string which represents the symbol.
+;
+;
+;
+
+	text
+
+	global	_Find_token
+_Find_token:
+	st	r3,	SP,	12		; save r3
+	or.u	r3,	r0,	hi16(_find_token)
+				    		; set r3 to the address of
+						;  _find_token
+	br.n	@common
+	addu	r3,	r3,	lo16(_find_token)
+
+
+	global	_Probe_token
+_Probe_token:
+	st	r3,	SP,	12		; save r3
+	or.u	r3,	r0,	hi16(_probe_token)
+						; set r3 to the address of
+						;  _probe_token
+	br.n	@common
+	addu	r3,	r3,	lo16(_probe_token)
+
+
+
+	global	_Token_name
+_Token_name:
+	st	r3,	SP,	12
+	or.u	r3,	r0,	hi16(_token_name)
+	br.n	@common
+	addu	r3,	r3,	lo16(_token_name)
+
+
+
+
+@common:
+	st	r1,	SP,	4
+	st	r2,	SP,	8
+	st	r4,	SP,	16
+	st	r5,	SP,	20
+	st	r6,	SP,	24
+	st	r7,	SP,	28
+	st	r8,	SP,	32
+	st	r9,	SP,	36
+	st	r11,	SP,	44
+	st	r12,	SP,	48
+	st	r13,	SP,	52
+
+
+	jsr.n	r3				; perform subroutine call
+	addu	r2,	UArg1,	0		; set up r2 with parameter
+
+	ld	r1,	SP,	4		; reload all regs but r2
+	ld	r3,	SP,	12
+	ld	r4,	SP,	16
+	ld	r5,	SP,	20
+	ld	r6,	SP,	24
+	ld	r7,	SP,	28
+	ld	r8,	SP,	32
+	ld	r9,	SP,	36		; r10 is UArg1
+	ld	r11,	SP,	44
+	ld	r12,	SP,	48
+	ld	r13,	SP,	52
+
+	addu	UArg1,	r2,	0		; set UArg1 with the result
+	jmp.n	r1				; return to caller
+	ld	r2,	SP,	8		; reload r2
+
+
+	data
+

@@ -1,0 +1,323 @@
+i386 Specific Files
+
+The files specific to the 386 system are listed in this section. A description
+of what they implement is also given.
+
+C and H Files
+
+built.c
+
+	Contains Prolog builtin initialization. There were enough differences
+between the two systems to warrent making this system dependent.
+
+disassem.c
+
+	Implements the disassembler.
+
+doscalls.c
+
+	Implements various file routines for the DOS version that weren't
+supplied by the High C library.
+
+fmath.h
+
+	Defines macros used for back-end code generation for inline floating
+point math. Specific for the 387 math co-processor.
+
+gc.c
+
+	The garbage collector. Not all machine dependencies have been removed,
+which is why it is here.
+
+icut.c
+
+	Back-end code generator. Contains the cut instructions.
+
+ienvctl.c
+
+	Back-end code generator. Contains the instructions for handling
+environments and control (call, execute).
+
+ifmath.c
+
+	Back-end code generator. Contains the instructions for inline
+floating point math. Specific for the 387 co-processor.
+
+iget.c
+
+	Back-end code generator. Implements the GET instructions used for
+head matching.
+
+iindex.c
+
+	Back-end code generator. Incorrectly named. Contains anything not
+found in the other files. Has indexing instructions, choice point instructions.
+general procedure table code, etc.
+
+imath.c
+
+	Back-end code generator. Implements inline integer math instructions.
+
+imath.h
+
+	Back-end code generator. Contains instructions specific to inline
+integer math code generation.
+
+imeta.c
+
+	Back-end code generator. Contains the icode/4 routine as well as
+various machine specific operations.
+
+imisc.c
+
+	Back-end code generator. Utility routines for laying down of code,
+as well as the deref loop, the code which lays down UIAs in the code
+stream, add_to_sp, and ic_move.
+
+index.c
+
+	The procedure indexer. Found here because it also lays down machine
+specific code in a procedure table entry. The machine specific parts should be
+moved into the backend code generator so that this file can be the same for
+everyone.
+
+iput.c
+
+	Back-end code generator. Implements the PUT instructions.
+
+iunify.c
+
+	Back-end code generator. Implements the UNIFY instructions.
+
+labels.h
+
+	Back-end code generator. Defines some macros which make the handling
+of "labels" in the code generator less machine specific.
+
+machinst.h
+
+	Defines the actual machine instructions layed down by the back-end
+code generator.
+
+machreg.h
+
+	Provides the mapping from symbolic machine registers to the actual
+number used by the processor. Used by the back-end code generator.
+
+main.c
+
+	Main startup for the Prolog system. Here because a lot of it is
+machine specific, though these parts could be #ifdef'd.
+
+wamregs.h
+
+	Provides the mapping from Prolog registers to machine registers. Used
+by the back-end code generator. This file had better match wamregs.m4.
+
+
+Assembly-Related Files
+
+call.m4
+
+	This file produces actual assembler code for the "interpreter"
+predicates :/2, ,/3, !/1, ->/3, ;/3, ocall/2.
+
+choice.m4
+
+	This file produces actual assembler code for all of the choice point
+instructions.
+
+chpt.m4
+
+	This file produces no code. It is included by m4 files which will
+access the choice points.
+
+cinter.m4
+
+	This file produces no code. It is included by m4 files which will
+call C routines to do some of their work.
+
+cut.m4
+
+	This file produces actual assembler code for the inline cut operation.
+
+int.m4
+
+	This file produces actual assembler code for the interrupt handler.
+
+jump.m4
+
+	This file produces actual assembler code for the jump/2 predicate.
+
+mtypes.m4
+
+	This file produces no code. It must match the mtypes.h file. It
+defines operations needed by the assembler code for handling Prolog data
+types.
+
+rts.m4
+
+	This file produces actual assembler code. It is the catch all for
+routines that didn't end up in their own files. This includes
+
+	- the unifier,
+	- wm_exec, 
+	- the switch_on instructions,
+	- wm_exec_cproc (used to execute a C procedure when the registers are
+		set up for the WAM),
+	- wm_resolve_ref,
+	- call_mod_closure, and
+	- wm_rungoal
+
+symbols.m4
+
+	This file produces no code. It supplies macros for accessing the
+token table from assembler code.
+
+uia.m4
+
+	This file produces actual machine code implementing the various
+UIA instructions. These are
+
+	- wm_p_uia
+	- wm_g_uia
+	- wm_g_sym
+	- wm_u_sym
+
+There are also support routines in here used by the unifier.
+
+wamops.m4
+
+	This file prduces no code. It contains macros which define code
+which makes typical wam operations simpler to state (eg, the Bind macro).
+
+wamregs.m4
+
+	This file produces no code. It defines the mapping between Prolog
+registers and the actual register set of the machine.
+
+Files in the i386/Generate Directory
+
+Specific assembler files contain the macros necessary for translating the
+m4 assembler mnemonics into the appropriate assembler syntax.
+
+Ilyas should do the specific documentation of these files.
+
+asm.m4
+
+	This file is used in conjunction with m4 to create the assembly
+language files from the m4 files. It loads the appropriate specific
+assembler file (sunos.m4, masm.m4) when it is loaded into m4.
+
+masm.m4
+
+	Specific assembler file for the MASM assembler used in the Xenix
+and DOS versions of the system.
+
+mport.m4
+
+	Specific assembler file for the Microport assembler used in the
+Microport version of the system. Very close to the sunos.m4 file.
+
+sunos.m4
+
+	Specific assembler file for the Sun 386i Unix assembler used in the
+386i version of the system. Very close to the mport.m4 file.
+
+The i386 Makefile.orig
+
+Most of the Makefile.orig follows the instructions found in other
+documentation. This section is meant to discuss the paculiarities of the
+i386 Makefile.orig.
+
+The SGENFILES has the names of all of the assembler files (.s files) that
+must be generated. There are no other files for the i386 system that must
+be generated.
+
+The assembler independent files are written so that M4 is used to translate
+them into the assembler dependent files. Three variables are used to control
+how the translation is done. The variable GENASS is used to specify the program
+used for the translation process, in this case M4. This variable was initially
+supplied because the System V m4 was the only one available on all of the
+Unix platforms the i386 system was developed on and there are differences
+between the Sun implementation and the System V implementation. The default
+one run on the Sun was their version, so the variable was necessary. 
+The variable GENASSINC contains a list of all the files that should be included
+by the M4 file before they are translated. At the moment, this list only 
+contains the file with the assembler independent=>dependent macros.
+
+The M4FLAGS variable contains the flags needed for controlling the translation
+process. It usually only contains strings of the form
+
+	-Dcontrol
+
+where control is a string specifiying one aspect of the translation process.
+For instance, the string MASM means that the independent assembler syntax
+will be translated to MASM syntax. The following list gives the various
+options for the 386 system.
+
+FLEXNAMES
+	The C compiler being used prepends an _ to all variables and procedure
+names. This is important for the assembler/C interface.
+
+MASM
+	Assembler syntax should be MASM.
+
+MPORT
+	Assembler syntax should be for the Microport System V assembler.
+
+SUNOS
+	Assembler syntax should be for the Sun 386i assembler.
+
+The following list gives the M4FLAGS values for various implementations.
+
+Xenix
+	M4FLAGS= -DMASM -DFLEXNAMES
+
+Microport
+	M4FLAGS= -DMPORT
+
+DOS
+	M4FLAGS= -DMASM
+
+Sun 386i
+	M4FLAGS= -DSUNOS
+
+
+The .s dependencies in Makefile.orig use the GENASSINC variable in their
+dependency line so that they know which files are used by all of the
+generated assemlbler files. Also included in this dependency line are any
+other files that are needed. These include any files included by the m4
+files which are generating the .s files. The command line for the depndency
+would then call the macro processor to create the .s file. For example, the
+jump.s file requires the files
+
+	jump.m4,
+	mtypes.m4,
+	wamops.m4,
+	wamregs.m4, and
+	cinter.m4
+
+to be created. Its dependency lines would be
+
+jump.s:	${GENASSINC} jump.m4 mtypes.m4 wamops.m4 cinter.m4
+	${GENASS} jump.m4 >jump.s
+
+The first line gives the dependencies, will the second line runs the processor
+over the jump.m4 file, creating jump.s.
+
+The Makefile.orig file also contains a .o dependency line for each of the
+generated files which need to create a .o file. In the i386 Makefile.orig,
+there are only .o lines for each of the .s lines. These lines run the assembler
+over the .s file. For example, the line associated with the jump.s file would
+be
+
+jump.o:	jump.s
+
+The line imeediately following the above line must be blank, of course, unless
+it is necessary to run a non-standard assembler command over the .s file to
+create the .o file.
+
+The sclean dependency line deletes any file specific to the i386 system.
+The i386 system only requires that its Generate directory be cleaned up, if
+necessary, and the .s files created from the M4 files be deleted.

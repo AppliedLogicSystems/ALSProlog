@@ -1,0 +1,3 @@
+
+
+CLIBS	= -lm -lsocket

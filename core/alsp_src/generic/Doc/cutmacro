@@ -1,0 +1,229 @@
+Cutmacros, and all that shit
+
+One of the ambiguities in Prolog implementation is the problem of a cut in
+an interpreter predicate such as call/1. What do we mean when we write
+
+	call(!)
+
+The meaning of this goal depends on what the programmer usually means by
+the subgoal
+
+	call(Goal)
+
+
+Is this supposed to be treated as an in-line expansion in a clause, or is
+it meant to be a call to an anonymous, single clause procedure. As a more
+clear example, is the clause
+
+	a(A) :- call(b(A)),c.
+
+supposed to behave like the clause
+
+	a(A) :- b(A), c.
+
+or behave like the clauses
+
+	a(A) :- d(A), c.
+	d(A) :- b(A).
+
+If the first interpretation is the one we want, call(!) must cut to the
+procedure a/1, whereas in the second case we want it to cut to d/1. ALS
+Prolog implements the first interpretation through the use of "cut macros".
+
+"Cut macros" are used to make the use of cut implicit. The person writing a
+program never thinks about things like to where the cut is supposed to cut
+back. The user writes
+
+	a :- call(!), b.
+
+and doesn't worry about how cut gets its information of where to cut back.
+Interpreter predicates start with the Prolog atom '!' and go from there.
+There isn't a problem when ! appears in the clause by itself, eg
+
+	a :- !, b.
+
+The compiler notices that there is a ! goal and compiles the cut inline
+into a "cut" instruction in the WAM which has an argument giving the
+"cut point". The "cut point" is the point to which cut should do its duty.
+
+For the interpreter predicates, a different method is used to get the
+cut point argument to !. The compiler notices when it has a cut macro, which
+is a goal which may interpret !/0 and need to cut back to the procedure
+which called the cut macro. When the subgoal being compiled is a cut-macro,
+the compiler creates a cut point argument for the procedure, which is
+represented by a Prolog integer, and puts it in the call frame for the cut
+macro call as an invisible last argument of the procedure call. For instance,
+the clause compiler would take the clause
+
+	a(A) :- builtins:A.
+
+and normally set up the call frame for :/2 to be
+
+	|---------------|
+	| A		|
+	|---------------|
+	| builtins	|
+	|---------------|
+
+Since :/2 is a cut macro, the frame is actually set up as
+
+	|---------------|
+	| cut point	|
+	|---------------|
+	| A		|
+	|---------------|
+	| builtins	|
+	|---------------|
+
+The code which implements :/2 then knows that it is actually :/3 and will
+handle the 3rd argument to :/2 appropriately.
+
+:/2 is a good example to show how the interpreter predicates make use of the
+cut point. Let's look at what happens when we execute the clause
+
+a(1) :- builtins:!,b.
+
+The compiler produces code which lays down the stack frame
+
+
+	|---------------|
+	| cut point	|
+	|---------------|
+	| !		|
+	|---------------|
+	| builtins	|
+	|---------------|
+
+When control is passed to :/2, it takes the term representing the goal to
+be called apart and places the terms arguments on the stack. In our case
+here, there are no arguments to cut, so none are copied. However, the
+cut point is put down as the last argument of !/0 by :/2, so the stack
+frame looks like
+
+
+	|---------------|
+	| cut point	|
+	|---------------|
+
+The code implementing !/0 knows that it has a hidden argument, the cut point,
+and pulls it out before performing the WAM cut instruction.
+
+All of the cut macros use this last hidden argument in the same way. The code
+for the subgoal
+
+	(Goal1,Goal2)
+
+will copy the cut point, which is hidden as the 3rd argument of ,/2, into
+the m+1st argument position for Goal1, which has m arguments. If Goal1
+doesn't need the cutpoint, its code will run normally and not use it.
+After Goal1 completes, ,/2 will copy the cutpoint into the n+1st argument
+position for Goal2, which has n arguments. Standard Prolog code
+cannot access the cut point when it is given in this manner, only code
+which has been written in C or assembler, since it is possible to read
+beyond the arguments the code has. This makes more sense with an example.
+If the compiler thinks of a/2 as a cutmacro, it will lay down as a 3rd argument
+the cut point, but the syntax of the head
+
+	a(Arg1,Arg2) :- .....
+
+has no way of moving on to any hidden arguments. Only code hand-compiled
+by a systems programmer can get to this extra argument.
+
+The decompilation routines for ALS Prolog normally ignore this extra
+argument when they are decompiling a clause. They use the tokid_arity
+field of the name table entry for the procedure in which the clause resides
+to decide how many arguments to pull off of the stack. The nargs field of
+the same name table entry will be the same if the procedure isn't a cut
+macro and will be one more than the actual arity of the call if it is a cut
+macro. Since the subgoal being decompiled is never actually run, it is
+fine to ignore the cut point argument, what is needed are the arguments which
+the user put into the clause, not any the system added.
+
+The Prolog interrupt mechanism throws a kink into the works. The decompiler
+now is just one usage of a more general mechanism which captures the next
+goal which is to run and prvides it to a Prolog program. The program can
+do whatever it wants with the goal, either leaving it alone, modifying it,
+and even letting it run. The program has the choice of what happens to
+the interrupted goal.
+
+Once again, the decompiler doesn't produce any problems. The interrupt
+handler for the decompiler stops the call being made, takes the term
+representing the goal and puts it into a structure which is being built
+up representing the clause being decompiled. However, the debugger, which
+also uses the interrupt mechanism wants to actually run the goal. The
+interrupt handler for the debugger catches the goal, prints out a copy
+to the user, and then runs the interrupted goal.
+
+The problem is what is packaged up in the term representing the interrupted
+goal. When the decompiler runs, we only want the arguments that were present
+in the user source code. When the debugger runs, we want all information,
+including the cut point. This may not appear to be too much of a problem.
+When a cut macro is decompiled, we could just put the cut point into the
+subgoal term. The decompiler and the printing routine for the debugger would
+strip out the cut point argument and use only the part which represents
+what was actually explicit in the source code for the clause. But what about
+when we call the interrupted goal?
+
+Our problem is that we have two ways of calling a cut macro. It can appear in
+a clause having only n arguments, as in
+
+	a :- builtins:!, ....
+
+or, if picked up by the interrupt mechanism, it can be found with the cut
+point added.
+
+	int :- ocall(:(builtins,!,CutPt)), ....
+
+Here, :/2 has become :/3.
+
+One of the decisions to be made are where, as an example, the :/3 calls are
+allowed to be made. Should the Prolog programmer be able to make a call
+to a cut macro, supplying the cut point?
+
+	nonlocal(CutPt) :- !(CutPt).
+
+If this is to be done in general, there must be a way supplied for the user
+to get the cut point for a given procedure.
+
+A more pressing problem is how to handle the fact that we have both :/2 and
+:/3. Should we have a name table entry for each one? If so, each cut-macro
+procedure would have 2 entries, one where the compiler adds the hidden
+argument and one where it is explicit in the users program. It becomes even
+worse since these routines are often module closures, which means, in the
+current regime, that there are two entries in every module for each
+cut macro. This can get very expensive in terms of name table space.
+
+Method Used on the 386
+
+This is only one of several solutions. It is not claimed to be the best, but
+was used to get something working. It is hoped that a better solution will be
+found.
+
+The user cannot put the n+1-argument version of a cut macro into the code
+to be compiled. It can only be called by an interpreter proedicate such
+as call/1, :/2, or ocall/2. Of course, this means they are also callable
+by ->/2 and ;/2, but that is only because of how the latter two are
+currently implemented. The manual should make it clear that this
+implementation artifact should not be used. Of course, the user cannot
+get a proper cut point, so it would hard to use the cut point explicit
+versions of cut macros.
+
+To implement this, it is only necessary to modify call_resolve_reference()
+in module.c to check for an a-1 (where a is the arity of the term representing
+the call) arity version of the call if it is a cut-macro after not having
+found an a-arity version. Also, the interrupt code has to make sure that it
+increases the arity on a goal which has the hidden argument. In other
+words, when a cut macro is interrupted, the cut point argument must be tagged
+on the end of the term built up. This is done in wm_overflow() in rts.m4.
+
+Because of the way cutmacros are marked, there is one obnoxious side-effect
+of this solution. Atoms are marked as being cut macros in the token table
+rather than procedures being marked in the name table. So, any procedure
+which has as its primary functor a cut macro will get the hidden argument.
+For normal processing, this is OK, because the argument will be ignored.
+The program will just run a little more slowly because of the extra argument
+being pushed. However, when these calls are interrupted, they will have
+the extra argument. fixGoal/2 facts for these would be needed for decompilation
+to work correctly. Or the users should be warned not to use cutmacro atoms
+as predicate names. Or the cutmacro could be moved from the token table.
+Or...........

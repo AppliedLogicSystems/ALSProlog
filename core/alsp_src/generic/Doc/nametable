@@ -1,0 +1,100 @@
+The name table is the place that stores information about procedures.
+
+The code portion:
+
+The code portion of the name table entry contains the code that is first
+executed when the procedure is called. Any clause which calls the procedure
+actually jumps to this portion of the name table to use the clause.
+
+The code found here depends on the current state of the procedure. The code
+region always starts with the code for checking to see if code execution
+is too be interrupted. If so, execution transfers to the overflow portion of
+the name table entry. To skip the overflow check, one transfers control to
+IEC Code words into the code portion (see below).
+
+	nameTableEntryPtr->code+IEC
+
+The state of the procedure can be found in the flags portion of the name table
+entry.
+
+NFLG_UNDEFINED:
+
+The procedure has no clauses. The code portion contains only the overflow
+check and a call to resolve_reference.
+
+	Overflow check
+	jmp resolve_reference
+
+NFLG_SINGLE:
+
+The procedure has only one clause. The code portion contains the overflow
+check and a jump to the code portion of the clause block for the single
+clause.
+
+	Overflow check
+	jmp code(first clause block in procedure)
+
+NFLG_MULTIPLE:
+
+The procedure has multiple clauses. There is no indexing, only the naive
+try_me/retry_me chain. The code portion contains the overflow check, the
+try_me instruction, and a jump into the code portion of the first clause
+block in the procedure.
+
+	Overflow check
+	wm_try_me(choiceEntry(second clause block in procedure))
+	jmp code(first clause block in procedure)
+
+NFLG_SWITCH:
+
+The procedure has an index block associated with it. The code portion
+contains the overflow check, the switch_on_term instruction and the
+try_me instruction for the naive try_me/retry_me chain.
+
+NFLG_IMPORTED:
+
+The procedure is actually defined in another module. The code from the
+code portion of the defining module's name table entry for the procedure
+has been copied into this code portion.
+
+	Code from defining procedure's name table code entry.
+
+NFLG_BUILTIN:
+
+The procedure is a non-Prolog defined builtin. The code portion calls the
+builtin, or if the builtin is small enough, contains the code for the builtin.
+
+	Overflow check
+	Code for executing builtin
+
+
+Why a try_me in the name table?
+
+It may seem strange to have the try_me instruction in the name table entry
+rather than in the clause block for the first clause in the procedure. If
+the try_me instruction is found in the clause block, however, a problem with
+retract occurs. Suppose we have the procedure
+
+	a(1).
+	a(2).
+	a(3).
+
+and the goal
+
+	?- retract(a(A)).
+
+has been executed. retract/1 is written with the new clause decompiler which
+works by calling the procedure and stopping at each clause decompiled. This
+is done for good reasons. It means that builtins like clause/2, retract/1, etc
+can use the indexing associated with a procedure to locate the proper clause
+much quicker than the old method, which ran through the DBRef chain and
+decompiled each clause separately. This didn't use the indexing available.
+Anyway, the above retract/1 call will bind A to 1 and delete the first clause.
+The choice point associated with the retract call is now pointing at the
+choice point code entry of the clause block for the second clause (a(2)).
+Since a(2) is now the first clause, the retry_me instruction here should be
+changed to a try_me. However, if this is done, another choice point will be
+created, since the try_me will run if the retract/1 call is forced to
+backtrack. But we want a retry_me done. So, all clause blocks have either
+a retry_me or trust_me instruction and the try_me is kept in the name table
+entry.

@@ -1,0 +1,275 @@
+#include "assembly.88k"
+
+	text
+;
+; Creation:  Brian Keith Short  May 1988
+;
+;	Copyright (c) 1989 Motorola, Inc.
+;	Copyright (c) 1989 Applied Logic Systems, Inc.
+;
+; ident.s  --  identical and friend 
+;
+; Modified: Scott Medeiros	Sep 1992	big structures support
+;
+; To call builtin identical, push the stack, then save what is necessary.
+;
+; The stack grows toward lower addresses.  Pushing decrements the
+; address, popping increments.  The 4 values saved are the return
+; address, an arg count (if needed), and pointers to the base of
+; the object being unified.
+;
+;  REGISTERS
+;
+;    A1		first argument
+;    A2		second argument
+;    cp		return address
+;    OldE	old environment pointer
+;
+	global _wm_nonidentical	
+
+_wm_nonidentical:
+
+	addu	r1,	Fail,	0			;
+	br.n	identical				; 
+	addu	E,	OldE,	0			;
+
+
+	global _wm_identical	
+
+_wm_identical:
+
+	addu	r1,	CP,	0			; 
+	addu	CP,	Fail,	0			;
+	addu	E,	OldE,	0			;
+; 
+; Here is the subroutine for identical
+; --cp is failure pointer, r1 is normal return
+;
+identical:
+
+_i1:       
+	bb1	BGND,	A1,	_ignd			; dereference A1
+	ld	tmp1,	A1,	BIAS			;
+	cmp	tmp2,	tmp1,	A1			;
+	bb0.n	eq,	tmp2,	_i1			;
+	addu	A1,	tmp1,	0			;
+;
+; The first Arg is a variable.
+;
+_i2:
+	bb1	BGND,	A2,	_fail			; dereference A2
+	ld	tmp1,	A2,	BIAS			;
+	cmp	tmp2,	tmp1,	A2			;
+	bb0.n	eq,	tmp2,	_i2			;
+	addu	A2,	tmp1,	0			;
+;
+; Both args are vars, so they must be identical.
+;
+	cmp	tmp3,	A1,	A2			; equal?
+	bb0	eq,	tmp3,	_fail			;
+
+	jmp	r1					; return
+
+;
+; The first arg is nonvar, second is undereferenced.
+;
+_ignd:
+	bb1	BGND,	A2,	_i3			; dereference A2
+	ld	tmp1,	A2,	BIAS			;
+	cmp	tmp2,	tmp1,	A2			;
+	bb0.n	eq,	tmp2,	_ignd			;
+	addu	A2,	tmp1,	0			;
+;
+; The first arg is nonvar, second is var -- Fail
+;
+_fail:
+	jmp	CP					; Failure
+
+
+_i3:
+	cmp	tmp1,	A1,	A2			; are they eq?
+	bb1	eq,	tmp1,	_iret			;
+
+	and	tmp2,	A1,	A2			;
+	bb1	BLIST,	tmp2,	_ilist12		; list?
+	bb1	BSTRC,	tmp2,	_istruct12		; struct?
+	bb1	BUIA,	tmp2,	_iUIA12			; UIA?
+
+	bb0	BSYM,	tmp2,	_fail			; not floats
+
+	bb1	BUIA,	A2,	_isym_uia		; arg2 UIA?
+	bb0	BUIA,	A1,	_fail			; arg1 UIA?
+
+;
+; Match uia with symbol.
+;
+	addu	tmp1,	A1,	0			; exchange
+	addu	A1,	A2,	0			;
+	addu	A2,	tmp1,	0			;
+;
+; Match symbol with uia.
+;
+_isym_uia:
+
+	extu	UArg1,	A2,	26<0>			; the symbol string
+
+	subu	SP,	SP,	8
+	st	r1,	SP,	BIAS
+
+	bsr.n	_Find_token				; 
+	addu	UArg1,	UArg1,	BIAS+4			; jump the fence
+
+	ld	r1,	SP,	BIAS
+	addu	SP,	SP,	8
+
+	or.u	A2,	UArg1,	TSYM			; get result token
+
+	cmp	tmp1,	A1,	A2			; are they same?
+	bb0	eq,	tmp1,	_fail			;
+
+	jmp	r1					; return
+
+;
+; Match two UIA's.  The fences and words are matched.  It is assumed
+; that the fence contains a count of words between the fences plus one.
+;
+; Note: on entry the UIA's may be symbolic or numeric.  
+;      --tmp2 must be set to the logical AND of the tags
+;
+
+_iUIA12:						; UIA1/UIA2
+
+	bb1.n	BSYM,	tmp2,	_iUIA12top		; symbolic?
+	clr	A1,	A1,	6<26>			; 
+
+	bb0	BNUM,	tmp2,	_fail			;
+
+_iUIA12top:
+
+	clr	A2,	A2,	6<26>			;
+
+	ld	tmp1,	A1,	BIAS			; first fence
+	ld	tmp2,	A2,	BIAS			; second fence
+
+	addu	A1,	A1,	BIAS
+	addu	A2,	A2,	BIAS
+
+	cmp	tmp3,	tmp1,	tmp2			; compare fences
+	bb0	eq,	tmp3,	_fail			;
+
+	extu	tmp3,	tmp1,	16<0>			; get count
+
+	ld	tmp1,	A1[tmp3]			; get last word
+
+_iUIA12a:
+
+	ld	tmp2,	A2[tmp3]			; get word
+	subu	tmp3,	tmp3,	1			; count words
+	cmp	tmp1,	tmp1,	tmp2			; match words
+	bb0	eq,	tmp1,	_fail			;
+	bcnd.n	gt0,	tmp3,	_iUIA12a		;
+	ld	tmp1,	A1[tmp3]			; get word
+
+_iret:
+	jmp	r1					; return
+
+;
+; Match two lists.
+;
+_ilist12:
+
+	clr	tmp1,	A1,	6<26>			; get pointer 1
+	clr	tmp2,	A2,	6<26>			; get pointer 2
+
+	ld	A1,	tmp1,	BIAS			; get car's
+	ld	A2,	tmp2,	BIAS			;
+
+	subu	SP,	SP,	16			; push stack
+	st	r1,	SP,	0x0+BIAS		;
+	st	tmp1,	SP,	0x8+BIAS 		; 
+
+	bsr.n	identical				; match car's
+	st	tmp2,	SP,	0xC+BIAS		;
+
+	ld	tmp1,	SP,	0x8+BIAS		; restore
+	ld	tmp2,	SP,	0xC+BIAS		;
+	ld	r1,	SP,	0x0+BIAS		;
+
+	ld	A1,	tmp1,	BIAS+4			; match cdr's
+	ld	A2,	tmp2,	BIAS+4			;
+
+	br.n	identical				; 
+	addu	SP,	SP,	16			; tail recurse
+
+
+; 
+; Match two structures.
+;
+; 9/18/92 Big Structures modifications by Scott Medeiros
+_istruct12:
+
+	clr	tmp1,	A1,	6<26>			; 
+	clr	tmp2,	A2,	6<26>			;
+
+	ld	A1,	tmp1,	BIAS			; functor/arity 1
+	ld	A2,	tmp2,	BIAS			; functor/arity 2
+
+	addu	tmp1,	tmp1,	BIAS			; bias tmp1
+	addu	tmp2,	tmp2,	BIAS			; bias tmp2
+
+	extu	tmp4,	A1,	10<16>			; get arity
+
+	cmp	tmp3,	A1,	A2			; match funct/arity
+	bb0	eq,	tmp3,	_fail			;
+
+	cmp	tmp3,	tmp4,	1023			; check for escape arity
+	bb1	ne,	tmp3,	1f			; branch for usual size structs
+	ld	tmp3,	tmp1,	4			; get big arity 1 - tagged int
+	ld	tmp4,	tmp2,	4			; get big arity 2 - tagged int
+	cmp	tmp3,	tmp3,	tmp4			; compare big arities
+	bb0	eq,	tmp3,	_fail			; fail if not same arity
+; for big structures, untag the arities, and move base address past big arity	
+	ext	tmp3,	tmp3,	26<0>			; untag big arity 1
+	ext	tmp4,	tmp4,	26<0>			; untag big arity 2
+
+	addu	tmp1,	tmp1,	4			; bump base address
+	addu	tmp2,	tmp2,	4			; bump base address
+
+1:	ld	A1,	tmp1[tmp4]			; last arg
+
+	subu	tmp3,	tmp4,	1			; count arg
+
+	bcnd.n	eq0,	tmp3,	identical		; match only arg
+	ld	A2,	tmp2[tmp4]			;
+
+	subu	SP,	SP,	16			; push stack
+	st	r1,	SP,	0x0+BIAS		;
+	st	tmp3,	SP,	0x4+BIAS		;
+	st	tmp1,	SP,	0x8+BIAS		; save
+
+	bsr.n	identical				; match last arg
+	st	tmp2,	SP,	0xC+BIAS		;
+
+_iargs:							; return point for bcnd
+
+	ld	tmp4,	SP,	0x4+BIAS		; restore 
+	ld	tmp1,	SP,	0x8+BIAS		;
+	ld	tmp2,	SP,	0xC+BIAS		;
+
+	subu	tmp3,	tmp4,	1			; count arg
+	st	tmp3,	SP,	0x4+BIAS		;
+
+	ld	A1,	tmp1[tmp4]			; next arg 1
+	bcnd.n	gt0,	tmp3,	identical		; match next args
+	ld	A2,	tmp2[tmp4]			; next arg 2
+
+	ld	r1,	SP,	0x0+BIAS		;
+	br.n	identical				; match first arg
+	addu	SP,	SP,	16			; tail recurse
+
+	data
+
+
+
+
+

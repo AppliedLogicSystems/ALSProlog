@@ -1,0 +1,395 @@
+;
+; compare.vax			-- implements compare/3 for the VAX
+;	Copyright (c) 1990 Applied Logic Systems, Inc.
+;
+; Author: Kevin A. Buettner
+; Creation: 8/17/90
+; Revision History:
+;
+;
+
+
+#include "assembly.vax"
+
+	;
+	; wm_compare implements compare/3.  The entry point is down a ways.
+	;
+
+	;
+	; cmp_strings expects r0 and r1 to be loaded with the addresses of
+	; the strings to compare.  If the strings are equal, a normal return
+	; from subroutine will be performed.  Otherwise, either cmp_less
+	; or cmp_greater are branched to depending upon the circumstances.
+	;
+	; r2 is used as a temporary.
+
+cmp_strings:
+	movb	(r0)+,	r2			; get character from 1st string
+	cmpb	r2,	(r1)+			; compare against 2nd string
+	blssu	cmp_less			; branch if less
+	bgtru	cmp_greater			; branch if greater
+	tstb	r2				; see if done
+	bneq	cmp_strings			; branch if not
+	rsb					; return if we are
+
+
+	global	wm_compare
+wm_compare:
+	movl	12(E),	r1			; put first term into r1
+	movl	16(E),	r2			; put second term into r2
+	bsbb	compare				; do the comparison
+						; will return here if equal
+	movl	#MMK_SYM(TK_EQ), r0		; put equal symbol in r0
+cmp_unlink_and_unify:
+	movl	8(E),	r1			; get first arg for unifier
+	movl	E,	SP			; do unlink operation
+	movl	(SP)+,	E			; 
+	jmp	wm_unify			; call the unifier
+
+cmp_less:
+	movl	#MMK_SYM(TK_LESS), r0		; <
+	brb	cmp_unlink_and_unify
+
+cmp_greater:
+	movl	#MMK_SYM(TK_GRT), r0		; >
+	brb	cmp_unlink_and_unify
+
+compare:
+
+	deref	r1,	r1,	cmp_g1		; dereference first argument
+
+	;
+	; first argument is a variable.  We will dereference the second
+	; argument.  Note that the usual branch to the ground case
+	; will take us back to cmp_less.
+	;
+
+	deref	r2,	r2,	cmp_less
+
+	;
+	; both argument are variables.  Do comparison on the variables.
+	;
+
+	cmpl	r1,	r2
+	blssu	cmp_less
+	bgtru	cmp_greater
+	
+	;
+	; Variables are the same.  Return and continue
+	;
+	
+	rsb
+
+cmp_g1:
+	;
+	; First argument is ground.  Dereference the second argument
+	;
+
+	movl	r0,	r3			; save tags for a bit
+	deref	r2,	r2,	cmp_g2
+
+	brw	cmp_greater			; quit if second arg is var
+
+cmp_g2:
+	;
+	; Both first and second arguments are ground.  If arguments are
+	;	equal, then we can return right away.  Otherwise, we have
+	;	to do a lot of other stuff...
+	;
+
+	cmpl	r1,	r2			; see if equal
+	bneq	1f				; branch around the return
+	rsb
+
+1:	cmpb	r3,	#MTP_LIST		; examine tags of first arg
+	blssu	cmp_struct			; branch if we have structure
+	beql	1f				; branch if we have list
+	brw	cmp_const			; branch if we have constant
+
+1:	movl	#MMK_FUNCTOR(TK_DOT,2), r3	; put list functor in r3
+	subl	#MTP_LIST, r1			; wipe tag
+	brb	cmp_struct_
+
+cmp_struct:
+	decl	r1				; wipe structure tag
+	movl	(r1)+,	r3			; put functor in r3
+	cmpl	#MMK_FUNCTOR(TK_DDOUBLE,4), r3	; see if it is a double
+	bneq	cmp_struct_			; branch if not
+	brw	cmp_double			; branch to the double code
+
+	;
+	; We now have r3 loaded with the functor and r1 loaded with the
+	; address of the first argument.  The next step is to decode the
+	; second argument and set it up.
+	;
+
+cmp_struct_:
+	cmpb	r0,	#MTP_LIST		; examine tags of second arg
+	beql	1f				; branch if it is a list
+	blssu	cmp_struct_struct		; branch if it is a structure
+	brw	cmp_greater			; else it is a constant and
+						; structures are bigger than
+						; constants
+1:	; The list case
+	movl	#MMK_FUNCTOR(TK_DOT,2),	r0	; put list functor in r0
+	subl	#MTP_LIST,	r2		; nuke list tag
+	brb	cmp_st_st_
+
+cmp_struct_struct:
+	decl	r2				; nuke structure tag
+	movl	(r2)+,	r0			; put functor in r0
+	cmpl	#MMK_FUNCTOR(TK_DDOUBLE,4), r0	; see if it is a double
+	bneq	cmp_st_st_
+	brw	cmp_greater			; structure bigger than double
+
+cmp_st_st_less:
+	brw	cmp_less
+
+cmp_st_st_greater:
+	brw	cmp_greater
+
+cmp_st_st_:
+	;
+	; We have two structures with functors in r3 and r0 and pointers to
+	;	arguments in r1 and r2.
+	;
+	
+	;
+	; Compare arities
+	;
+
+	pushl	r0
+	pushl	r3				; save r0 and r3
+
+	extzv	#24, #8, r3, r3			; extract arities
+	extzv	#24, #8, r0, r0
+
+	cmpl 	r3, r0				; compare arities
+	blssu	cmp_st_st_less
+	bgtru	cmp_st_st_greater
+
+	movl	(SP)+,	r3
+	movl	(SP)+,	r0			; pop r0 and r3 off stack
+
+	;
+	; Compare functors (they have same arity)
+	;
+
+	pushl	r0
+	pushl	r1
+	pushl	r2
+	pushl	r3				; save r0 through r2
+
+	callC1	cmp_gettokstring,	r0	; get string corresponding to
+						;  functor of second argument
+	movl	r0,	r1			; save string address in r1
+	callC1	cmp_gettokstring,	r3	; get string corresponding to
+						;  functor of first argument
+	bsbw	cmp_strings			; compare the strings
+						;  (returns if equal)
+	movl	(SP)+,	r3
+	movl	(SP)+,	r2
+	movl	(SP)+,	r1
+	movl	(SP)+,	r0			; pop r0 through r3 off stack
+
+
+	;
+	; Compare arguments (They have same arity and functor)
+	;
+
+	extzv	#24, #8, r0, r0			; extract arity
+	brb 	2f				; continue
+
+1:	
+	addl	#4,	r1,	-(SP)		; push new pointers on stack
+	addl	#4,	r2,	-(SP)
+	pushl	r0				; save the counter
+	movl	(r1),	r1			; get args
+	movl	(r2),	r2
+	bsbw	compare				; compare, returning only if
+						;	equal
+	movl	(SP)+,	r0			; restore counter
+	movl	(SP)+,	r2			; restore the args
+	movl	(SP)+,	r1
+2:	sobgtr	r0,	1b			; loop around
+	
+	movl	(r1),	r1			; setup for last argument
+	movl	(r2),	r2
+	brw	compare				; tail recurse to compare
+
+cmp_const:
+	;
+	; The first argument is a constant.  We need to furter classify
+	; this constant.  It will be either an integer, a symbol, or a UIA
+	;
+
+	bicb	#~MTP_CONSTMASK, r1, r3		; get the constant tags
+	cmpb	r3,	#MTP_SYM		; see what we have
+	blssu	cmp_int				; branch if we have an integer
+	beql	cmp_sym				; branch if we have a symbol
+	brw	cmp_uia				; branch if we have a uia
+cmp_int:
+	;
+	; We have an integer.  Decode the second argument
+	;
+
+	cmpb	r0,	#MTP_LIST
+	blssu	cmp_int_struct			; branch if second arg struct
+	beql	cmp_const_less
+cmp_int_const:
+	; Second argument is a constant.  See if it is an integer
+	cmpzv	#0, #4, r2, #MTP_INT		; neat bit field compare
+	bneq	cmp_const_less			; branch if not
+
+	;
+	; We have two integers.  Do a signed comparison
+	;
+
+	cmpl	r1,	r2			; compare them
+	blss	cmp_const_less
+	bgtr	cmp_const_greater
+	rsb					; return if equal
+
+cmp_int_struct:
+	;
+	; First argument is an integer; Second is a structure.  Need to see
+	; if the second is a double and do the right sort of comparison if it
+	; is.
+
+	cmpl	#MMK_FUNCTOR(TK_DDOUBLE,4), -MTP_STRUCT(r2)
+						; see if functor is $double/4
+	bneq	cmp_const_less			; branch if not (ordinary
+						;	structure)
+	callC2	cmp_int_double,	r1, r2		; Call C to do comparison
+cmp_numtest:
+	tstl	r0				; check result
+	blss	cmp_const_less
+	bgtr	cmp_const_greater
+	rsb					; return if equal
+
+cmp_sym:
+	;
+	; We have a symbol as the first argument.  Decode the second arg.
+	;
+
+	cmpb	r0,	#MTP_LIST		; set up condition codes
+	blssu	cmp_sym_struct			; need to do the double check
+	beql	cmp_const_less			; symbols are less than lists
+
+	;
+	; Second arg is a constant.  Decode it.
+	;
+	cmpzv	#0, #4, r2, #MTP_SYM		; set condition codes
+	blssu	cmp_const_greater		; symbols greater than integers
+	beql	cmp_sym_sym			; compare the symbols
+
+	;
+	; otherwise the first argument is a symbol and the second is a uia
+	;
+
+	callC1	cmp_gettokstring, r1		; get string of token
+	extzv	#4, #28, r2, r1			; shift out tag
+	addl	#4,	r1			; add four to skip fence
+	addl	wm_heapbase, r1			; add the heapbase in
+	brw	cmp_strings			; compare the strings
+
+cmp_const_less:
+	brw	cmp_less
+
+cmp_sym_struct:
+	;
+	; First argument is a symbol; Second is a structure.  See if it is a
+	; double.  If it is we exit with greater.  If not, we exit with less
+	;
+	cmpl	#MMK_FUNCTOR(TK_DDOUBLE,4), -MTP_STRUCT(r2)
+	bneq	cmp_const_less			; branch if really structure
+cmp_const_greater:
+	brw	cmp_greater
+
+cmp_sym_sym:
+	;
+	; Both arguments are symbols
+	;
+	callC1	cmp_gettokstring, r1		; get string of first token
+	movl	r0,	r3			; save in r3
+	callC1	cmp_gettokstring, r2		; get string for second token
+	movl	r0,	r1
+	movl	r3,	r0			; now we are set
+	brw	cmp_strings
+
+cmp_uia:
+	;
+	; We have a UIA as the first argument.  Decode the second.
+	;
+	cmpb	r0,	#MTP_LIST		; set up the condition codes
+	blssu	cmp_sym_struct			; need to do the double check
+	beql	cmp_const_less
+
+	;
+	; Second arg is a constant.  Decode the constant.
+	;
+
+	cmpzv	#0, #4, r2, #MTP_SYM		; set condition codes
+	blssu	cmp_const_greater
+	beql	cmp_uia_sym			; compare the symbols
+
+	;
+	; Both arguments are UIAs
+	;
+
+	extzv	#4, #28, r1, r0			; get offset for first
+	extzv	#4, #28, r2, r1			; get offset for second
+	addl	#4, wm_heapbase, r2		; put heapbase+4 in r2
+	addl	r2,	r0
+	addl	r2,	r1
+	brw	cmp_strings			; compare the strings
+
+cmp_uia_sym:
+	;
+	; First argument is a UIA.  Second argument is a symbol
+	;
+	extzv	#4, #28, r1, r3			; get offset
+	addl	#4,	r3
+	addl	wm_heapbase, r3			; now we have string pointer
+	callC1	cmp_gettokstring, r2		; get the token string for 2nd
+	movl	r0,	r1			; put into r1
+	movl	r3,	r0			; we are now set to compare
+	brw	cmp_strings			;   the strings
+
+cmp_dbl_less:
+	brw	cmp_less
+
+cmp_dbl_greater:
+	brw	cmp_greater
+
+cmp_double:
+	; 
+	; first argument is a double
+	;
+	subl	#4-MTP_STRUCT, r1		; readjust back to a double
+						;   pointer
+	cmpb	r0, #MTP_LIST		; look at second argument
+	beql	cmp_dbl_less   		; doubles are less than lists
+	blssu	cmp_double_struct		; branch if second arg is a
+						;   struct
+	;
+	; Second argument is a constant
+	;
+
+	cmpzv	#0, #4, r2, #MTP_INT		; see if second arg is an int
+	bneq	cmp_dbl_less   		; branch if not
+	callC2	cmp_int_double, r2, r1		; compare the arguments
+	tstl	r0
+	blss	cmp_dbl_greater
+	bgtr	cmp_dbl_less   
+	rsb					; return if equal
+						;	(should not happen)
+
+cmp_double_struct:
+	;
+	; First argument double; second argument structure
+	;
+	cmpl	#MMK_FUNCTOR(TK_DDOUBLE,4), -MTP_STRUCT(r2)
+	bneq	cmp_dbl_less   		; branch if not double
+	callC2	cmp_double_double, r1, r2	; compare them
+	brw	cmp_numtest

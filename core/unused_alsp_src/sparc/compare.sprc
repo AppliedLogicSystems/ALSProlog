@@ -1,0 +1,415 @@
+;
+; compare.sprc		-- implements compare/3 for sparc
+;	Copyright (c) 1990-1993 by Applied Logic Systems, Inc.
+;
+; Author:	Kevin A. Buettner
+; Creation:	2/5/91
+; Revision History:
+;
+
+#include "assembly.sprc"
+
+;
+; wm_compare implements compare/3.
+;
+
+	global	wm_compare
+wm_compare:
+	call	compare				; compare A2 and A3
+	mov	OldE,	E			; unlink environment in delay
+						;   slot for eventual return
+	set	MMK_SYM(TK_EQ),	UArg2		; if we return, set UArg2 with
+						;   =
+	sub	CP,	8,	RET		; set RET to return properly
+	ba	wm_g_sym			; get symbol (UArg2 is set
+						; properly)
+	mov	A1,	UArg1			; set UArg1 in delay slot
+
+cmp_less:
+	set	MMK_SYM(TK_LESS), UArg2		; put < into UArg2
+	sub	CP,	8,	RET		; set RET to return properly
+	ba	wm_g_sym			; get symbol (UArg2 is set
+						; properly)
+	mov	A1,	UArg1			; set UArg1 in delay slot
+
+cmp_greater:
+	set	MMK_SYM(TK_GRT), UArg2		; put > into UArg2
+	sub	CP,	8,	RET		; set RET to return properly
+	ba	wm_g_sym			; get symbol (UArg2 is set
+						; properly)
+	mov	A1,	UArg1			; set UArg1 in delay slot
+
+
+	;
+	; compare expects A2 and A3 to contain the arguments to compare
+	;
+
+compare:
+	deref	A2,	cmp_g1			; dereference first argument
+
+	;
+	; first argument is a variable.  We will dereference the second
+	; argument.  Note that the usual branch to the ground case
+	; will take us back to cmp_less
+	;
+
+	deref	A3,	cmp_less
+
+	;
+	; both arguments are variables.  Do comparison on the variables.
+	;
+
+	cmp	A2,	A3
+	bcs	cmp_less			; branch if less
+	nop
+	bgu	cmp_greater			; branch if greater
+	nop
+
+	;
+	; Variables are the same.  Return and continue.
+	;
+
+	retl
+	nop
+
+cmp_g1:
+	;
+	; First argument is ground.  Dereference the second argument
+	;
+
+	mov	tmp1,	UArg1			; save tags for a bit
+	deref	A3,	cmp_g2
+
+	ba	cmp_greater			; quit if second arg is var
+	nop
+
+cmp_g2:
+	;
+	; Both first and second arguments are ground.  If arguments are
+	; equal, then we can return right away.  Otherwise, we have
+	; to do a lot of other stuff...
+	;
+
+	cmp	A2,	A3			; see if equal
+	bne,a	1f				; branch around the return
+	cmp	UArg1,	MTP_LIST		; see what we have on first
+						; arg in delay slot
+	retl					; return if equal
+	nop
+1:
+	set	MMK_FUNCTOR(TK_DDOUBLE,4), tmp2	; set tmp2 with $double/4
+	bcs,a	cmp_struct			; branch if we have structure
+	ld	[A2-MTP_STRUCT], UArg1		; get functor out in delay slot
+
+	bgu,a	cmp_const			; branch if we have a constant
+	and	A2, MTP_CONSTMASK, UArg1	; get constant tags in delay
+						;   slot
+
+	;
+	; fall through for list
+	;
+
+	set	MMK_FUNCTOR(TK_DOT,2), UArg1	; put '.'/2 in UArg1
+	sub	A2,	4+MTP_LIST,	A2	; wipe tag and point one before
+						;   start of list
+	ba	cmp_struct_			; branch and
+	cmp	tmp1,	MTP_LIST		; do tag comparison of 2nd
+						;   arg in delay slot
+
+cmp_struct:
+	cmp	UArg1,	tmp2			; see if functor is $double/4
+	be	cmp_double			; branch if double
+	cmp	tmp1,	MTP_LIST		; do tag comparison of 2nd
+						;   arg in delay slot
+	sub	A2, MTP_STRUCT, A2		; make A2 point at functor
+						;
+cmp_struct_:
+	bcs,a	cmp_struct_struct		; branch if it is a structure
+	ld	[A3-MTP_STRUCT], UArg2		; load functor in delay slot
+	bgu	cmp_greater			; structures bigger than consts
+	nop
+
+	; fall through for list
+
+	set	MMK_FUNCTOR(TK_DOT,2), UArg2	; put '.'/2 into UArg2
+	ba	cmp_struct_struct_		; continue on with struct
+	sub	A3,	4+MTP_LIST,	A3	; comparison and wipe tag
+
+cmp_struct_struct:
+	cmp	UArg2,	tmp2			; see if functor is $double/4
+	be	cmp_greater			; structure bigger than double
+	sub	A3, MTP_STRUCT, A3		; make A3 point at functor
+
+cmp_struct_struct_:
+	;
+	; We have two structures with functors in UArg1 and UArg2 and pointers
+	; to arguments in A2 and A3.
+	;
+
+	; Compare arities
+
+	srl	UArg1,	24,	tmp1		; extract arities
+	srl	UArg2,	24,	tmp2		;
+
+	cmp	tmp1,	tmp2			; compare arities
+	bcs	cmp_less			; branch accordingly
+	nop
+	bgu	cmp_greater
+	cmp	tmp1,	255			; see if we have escape arity
+						; (useless if branch taken)
+	bne	1f				; branch if we have escape arity
+	nop
+	; need to load real arities and try the comparison again
+	ld	[A2+4],	tmp1			; load real arity
+	add	A2,	4,	A2		; adjust structure pointer
+	ld	[A3+4],	tmp2			; load real arity
+	add	A3,	4,	A3		; adjust structure pointer
+	srl	tmp1,	MTP_CONSTSHIFT,	tmp1		; extract arities
+	srl	tmp2,	MTP_CONSTSHIFT,	tmp2
+	cmp	tmp1,	tmp2			; redo comparison
+	bcs	cmp_less			; branch accordingly
+	nop
+	bgu	cmp_greater
+	nop
+
+1:
+	; fall through if equal arities
+	; We will now need to compare functors
+
+	sub	SP,	16,	SP		; allocate space on stack
+	st	RET,	[SP]
+	st	T1,	[SP+4]
+	st	T2,	[SP+8]
+	st	T3,	[SP+12]
+
+	mov	A2,	T2			; save arg pointers
+	mov	A3,	T3
+	cmp	UArg1,	UArg2			; see if functors equal
+	be	seqfunc				; branch if so
+	mov	tmp1,	T1			; save arity (in delay slot)
+
+	mov	UArg2,	A3			;
+
+	callC1	cmp_gettokstring, UArg1		; get first functor string
+
+	mov	UArg1,	A2
+	mov	A3,	UArg1			; set up to get next string
+
+	callC1	cmp_gettokstring, UArg1		; get second functor string
+
+	call	cmp_strings			; compare the strings
+	mov	UArg1,	A3			; finish setup in delay slot
+
+	; We will return if functors are equal
+
+seqfunc:
+
+	sll	T1,	2,	T1		; shift T1 (mult by four)
+	add	T2,	T1,	T2		; advance to last argument
+	add	T3,	T1,	T3		;   for both arguments
+	sub	ZERO,	T1,	T1		; negate T1
+sloop:	addcc	T1,	4,	T1		; see if on last argument
+	ld	[T1+T2], A2			; load argument for compare
+	be	sloopdone			; branch if on last arg
+	ld	[T1+T3], A3			; load another argument
+	call	compare				; call compare
+	sub	RET,	sloopdone-sloop, RET	; loop sneakily
+
+sloopdone:
+	ld	[SP],	RET			; get RET
+	ld	[SP+4],	T1			; reload T's
+	ld	[SP+8],	T2
+	ld	[SP+12], T3
+	ba	compare
+	add	SP,	16,	SP		; deallocate stack frame
+
+cmp_const:
+	;
+	; The first argument is a constant.  We need to further classify
+	; this constant.  It will be either an integer, a symbol, or a UIA.
+	;
+
+	cmp	UArg1,	MTP_SYM			; see what we have
+	be	cmp_sym				; branch if we have symbol
+	nop
+	bgu	cmp_uia				; branch if we have uia
+	nop
+
+	; fall through for integer.  Decode second argument
+
+	cmp	tmp1,	MTP_LIST
+	bcs,a	cmp_int_struct			; branch if second arg struct
+	ld	[A3-MTP_STRUCT], tmp1
+	be	cmp_less			; ints are less than lists
+	nop
+
+	; Second argument is a constant.  See if it is an integer
+	andcc	A3, (MTP_CONSTMASK & ~MTP_TAGMASK), ZERO
+	bne	cmp_less			; branch if not integer
+	nop
+
+	; We have two integers.  Do a signed comparison.
+	cmp	A2,	A3			; compare the integers
+	bl	cmp_less
+	nop
+	bg	cmp_greater
+	nop
+	retl					; return if equal
+	nop
+
+cmp_int_struct:
+	; First argument is an integer;  Second is a structure.  Need to see
+	; if the second is a double and do the right sort of comparison if it
+	; is.
+	set	MMK_FUNCTOR(TK_DDOUBLE,4), tmp2
+	cmp	tmp1,	tmp2			; see if functor is $double/4
+	bne	cmp_less			; branch if not (ints less
+						;   than ordinary structure)
+	nop
+	mov	A2,	UArg1
+	mov	A3,	UArg2
+	callC2	cmp_int_double,	UArg1,	UArg2	; call C to do comparison
+cmp_numtest:
+	cmp	UArg1,	0
+	bl	cmp_less
+	nop
+	bg	cmp_greater
+	nop
+	retl
+	nop
+
+
+cmp_sym:
+	; First arg is symbol.  Decode second arg.
+	cmp	tmp1,	MTP_LIST		; set up condition codes
+	bcs,a	cmp_sym_struct			; need to do double check
+	ld	[A3-MTP_STRUCT], tmp1		; get functor in delay slot
+	be	cmp_less			; symbols less than lists
+	nop
+
+	; Second arg is constant.  Decode it.
+	and	A3, MTP_CONSTMASK, tmp1		; get constant tags
+	cmp	tmp1,	MTP_SYM			; set condition codes
+	bcs	cmp_greater			; symbols greater than ints
+	nop
+	be	cmp_sym_sym
+	nop
+
+	; Otherwise first arg is a symbol and second is a uia
+
+	mov	A2,	UArg1
+	callC1	cmp_gettokstring,	UArg1	; get string of the token
+	ba	cmp_str_uia
+	mov	UArg1,	A2
+
+cmp_sym_struct:
+	; First argument is a symbol;  Second is a structure.  See if it is
+	; double.  If it is we exit with greater.  If not, we exit with less.
+	set	MMK_FUNCTOR(TK_DDOUBLE,4), tmp2
+	cmp	tmp1,	tmp2			; see if $double/4 functor
+	be	cmp_greater
+	nop
+	ba	cmp_less
+	nop
+
+cmp_sym_sym:
+	; Both arguments are symbols
+	mov	A2,	UArg1
+	callC1	cmp_gettokstring, UArg1		; get the token string of first
+	mov	UArg1,	A2
+	mov	A3,	UArg1
+	callC1	cmp_gettokstring, UArg1
+	ba	cmp_strings			; compare the strings
+	mov	UArg1,	A3			; set up A3 in delay slot
+
+cmp_uia:
+	; We have a UIA as the first argument.  Decode the second.
+	cmp	tmp1,	MTP_LIST		; set up condition codes
+	bcs,a	cmp_sym_struct			; need to do the double check
+	ld	[A3-MTP_STRUCT], tmp1		; get functor in delay slot
+	be	cmp_less			; uia less than list
+	nop
+
+	; Second arg is a constant.  Decode the constant
+	and	A3, MTP_CONSTMASK, tmp1		; get constant mask
+	cmp	tmp1,	MTP_SYM
+	bcs	cmp_greater			; uia greater than integer
+	nop
+	be,a	cmp_uia_sym			; branch if symbol
+	mov	A3,	UArg1			; get ready for call to C
+
+	; Both arguments are UIAs
+
+	srl	A2, MTP_CONSTSHIFT, A2		; shift out tags
+	add	A2,	4,	A2		; add four to skip fence
+	add	HeapBase, A2,	A2		; A2 points at first string
+cmp_str_uia:
+	srl	A3, MTP_CONSTSHIFT, A3		; shift out tags of second
+	add	A3,	4,	A3		; add four to skip fence
+	add	HeapBase, A3,	A3		; A3 points at second string
+
+cmp_strings:
+	; A2 points at first string and A3 points at second string
+	ldub	[A2],	tmp1			; get byte from first string
+	ldub	[A3],	tmp2			; get byte from second string
+	add	A2,	1,	A2		; advance A2
+	add	A3,	1,	A3		; advance A3
+	cmp	tmp1,	tmp2			; compare the characters
+	bcs	cmp_less			; branch if less
+	nop
+	bgu	cmp_greater			; branch if greater
+	cmp	tmp2,	0			; see if at end (useless in
+						;  delay slot)
+	bne,a	cmp_strings+4			; loop around if not done
+	ldub	[A2],	tmp1			; get byte from first string
+						; in delay slot
+	
+	retl					; return if strings equal
+	nop
+
+cmp_uia_sym:
+	; First argument is a UIA. Second argument is a symbol.
+	callC1	cmp_gettokstring, UArg1		; get the token string
+	mov	UArg1,	A3			; store string back into UArg1
+	srl	A2, MTP_CONSTSHIFT, A2		; shift out tags
+	add	A2,	4,	A2		; add four to skip fence
+	ba	cmp_strings			; compare the strings
+	add	HeapBase, A2,	A2		; now A2 points a UIA string
+						;   (in delay slot)
+cmp_double:
+	; first argument is a double
+	cmp	tmp1,	MTP_LIST		; look at second argument
+	be	cmp_less			; doubles are less than lists
+	nop
+	bcs,a	cmp_double_struct		; branch if second arg struct
+	ld	[A3-MTP_STRUCT], tmp1		; get functor in delay slot
+
+	; Second argument is a constant
+
+	andcc	A3, (MTP_CONSTMASK & ~MTP_TAGMASK), ZERO
+	bne	cmp_less			; branch if not integer
+	nop
+
+	mov	A2,	UArg1
+	mov	A3,	UArg2
+	callC2	cmp_int_double,	UArg2,	UArg1	; compare the arguments
+	cmp	UArg1,	0
+	bl	cmp_greater
+	nop
+	bg	cmp_less
+	nop
+	retl
+	nop
+
+cmp_double_struct:
+	; First arg double; second arg structure;  functor in tmp1
+	set	MMK_FUNCTOR(TK_DDOUBLE,4), tmp2	; set tmp2 to $double/4
+	cmp	tmp1,	tmp2			; see if we have a double
+	bne	cmp_less			; branch if not (doubles are
+						; less than ordinary structs)
+	nop
+	mov	A2,	UArg1
+	mov	A3,	UArg2
+	callC2	cmp_double_double, UArg1, UArg2	; compare them
+	ba	cmp_numtest
+	nop

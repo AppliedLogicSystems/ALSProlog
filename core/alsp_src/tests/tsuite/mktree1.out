@@ -1,0 +1,1368 @@
+
+Command: [major(a),left,minor(b),left,major(c),up,right,major(d),up,up,right,
+    minor(bb),left,major(cc),up,right,major(dd)].
+Equivalence Class: 0
+        dd
+    bb
+        cc
+a
+        d
+    b
+        c
+
+node(major(a),node(minor(b),node(major(c),$,$),node(major(d),$,$)),
+    node(minor(bb),node(major(cc),$,$),node(major(dd),$,$)))
+
+Command: [major(a),left,major(b),left,major(c),up,right,major(d),up,up,right,
+    minor(bb),left,major(cc),up,right,major(dd)].
+Equivalence Class: 1
+        dd
+    bb
+        cc
+a
+        d
+    b
+        c
+
+node(major(a),node(major(b),node(major(c),$,$),node(major(d),$,$)),
+    node(minor(bb),node(major(cc),$,$),node(major(dd),$,$)))
+
+Command: [minor(a)].
+Equivalence Class: 2
+a
+
+node(minor(a),$,$)
+
+Command: [minor(b)].
+Equivalence Class: 2
+b
+
+node(minor(b),$,$)
+
+Command: [major(a)].
+Equivalence Class: 3
+a
+
+node(major(a),$,$)
+
+Command: [major(b)].
+Equivalence Class: 4
+b
+
+node(major(b),$,$)
+
+Command: [major(a),left,minor(b)].
+Equivalence Class: 5
+    <empty>
+a
+    b
+
+node(major(a),node(minor(b),$,$),$)
+
+Command: [major(a),right,minor(b)].
+Equivalence Class: 6
+    b
+a
+    <empty>
+
+node(major(a),$,node(minor(b),$,$))
+
+Command: [major(a),left,minor(c)].
+Equivalence Class: 5
+    <empty>
+a
+    c
+
+node(major(a),node(minor(c),$,$),$)
+
+Command: [major(a),right,minor(c)].
+Equivalence Class: 6
+    c
+a
+    <empty>
+
+node(major(a),$,node(minor(c),$,$))
+
+Command: [major(a),left,minor(z),left,major(c),up,right,major(d),up,up,right,
+    minor(y),left,major(cc),up,right,major(dd)].
+Equivalence Class: 0
+        dd
+    y
+        cc
+a
+        d
+    z
+        c
+
+node(major(a),node(minor(z),node(major(c),$,$),node(major(d),$,$)),
+    node(minor(y),node(major(cc),$,$),node(major(dd),$,$)))
+
+Command: [major(a),left,major(b),left,major(c),up,right,major(d),up,up,right,
+    minor(ww),left,major(cc),up,right,major(dd)].
+Equivalence Class: 1
+        dd
+    ww
+        cc
+a
+        d
+    b
+        c
+
+node(major(a),node(major(b),node(major(c),$,$),node(major(d),$,$)),
+    node(minor(ww),node(major(cc),$,$),node(major(dd),$,$)))
+
+Command: [major(dd),up,minor(zap),right,major(cc),up,swap,up,major(a),swap,
+    left,right,major(d),up,major(b),left,major(c)].
+Equivalence Class: 1
+        dd
+    zap
+        cc
+a
+        d
+    b
+        c
+
+node(major(a),node(major(b),node(major(c),$,$),node(major(d),$,$)),
+    node(minor(zap),node(major(cc),$,$),node(major(dd),$,$)))
+
+Command: [minor(c),up,major(b),swap,left,major(zw),left,major(zww),up,up,up,
+    major(a0),swap,left,minor(wombat),up,up,swap,major(a00),up,swap,
+    major(a000),up,swap,left,major(a11),up,up,swap,major(a0000),up,swap,left,
+    right,minor(foo),up,major(a1111),left,right,major(a22),up,minor(qwerty),
+    left,left,left,left,left,major(leftleaf)].
+Equivalence Class: 7
+                            c
+                        b
+                                <empty>
+                            zw
+                                zww
+                    a0
+                        wombat
+                a00
+                    <empty>
+            a000
+                <empty>
+        $
+            a11
+    a0000
+        <empty>
+$
+        foo
+    a1111
+            a22
+        qwerty
+                <empty>
+            $
+                    <empty>
+                $
+                        <empty>
+                    $
+                            <empty>
+                        $
+                            leftleaf
+
+node($,
+    node(major(a1111),
+        node(minor(qwerty),
+            node($,node($,node($,node($,node(major(leftleaf),$,$),$),$),$),
+                $),
+            node(major(a22),$,$)),
+        node(minor(foo),$,$)),
+    node(major(a0000),$,
+        node($,node(major(a11),$,$),
+            node(major(a000),$,
+                node(major(a00),$,
+                    node(major(a0),node(minor(wombat),$,$),
+                        node(major(b),node(major(zw),node(major(zww),$,$),$),
+                            node(minor(c),$,$))))))))
+
+Command: [major(b)].
+Equivalence Class: 4
+b
+
+node(major(b),$,$)
+
+Command: [left,major(a1111),right,minor(123456),up,left,minor(654321),right,
+    major(a22),up,left,left,left,left,left,major(leftleaf),up,up,up,up,up,up,
+    up,right,major(a0000),right,left,major(a11),up,right,major(a000),right,
+    major(a00),right,major(a0),left,minor(#$$#),up,right,major(b),right,
+    minor(rightleaf),up,left,major(zw),left,major(zww)].
+Equivalence Class: 7
+                            rightleaf
+                        b
+                                <empty>
+                            zw
+                                zww
+                    a0
+                        #$$#
+                a00
+                    <empty>
+            a000
+                <empty>
+        $
+            a11
+    a0000
+        <empty>
+$
+        123456
+    a1111
+            a22
+        654321
+                <empty>
+            $
+                    <empty>
+                $
+                        <empty>
+                    $
+                            <empty>
+                        $
+                            leftleaf
+
+node($,
+    node(major(a1111),
+        node(minor(654321),
+            node($,node($,node($,node($,node(major(leftleaf),$,$),$),$),$),
+                $),
+            node(major(a22),$,$)),
+        node(minor(123456),$,$)),
+    node(major(a0000),$,
+        node($,node(major(a11),$,$),
+            node(major(a000),$,
+                node(major(a00),$,
+                    node(major(a0),node(minor(#$$#),$,$),
+                        node(major(b),node(major(zw),node(major(zww),$,$),$),
+                            node(minor(rightleaf),$,$))))))))
+
+Command: [minor(2*3),up,swap,major(a)].
+Equivalence Class: 6
+    2*3
+a
+    <empty>
+
+node(major(a),$,node(minor(2*3),$,$))
+
+Command: [minor(1),left,minor(2),right,major(3),right,major(4),left,major(5),
+    left,up,right,major(6),up,up,up,up,left,major(7),right,major(8),left,
+    major(9),right,major(10),left,minor(11),up,right,major(12),up,up,up,
+    right,major(13),left,major(14),up,up,up,up,up,right,minor(15),left,
+    minor(16),left,minor(17),right,minor(18),right,minor(19),right,minor(20),
+    left,major(21),right,major(22),up,up,up,up,up,up,up,right,minor(23),left,
+    major(24),up,right,major(25),left,major(26),left,major(27),up,right,
+    major(28),right,major(29),up,left,minor(30),left,major(31),up,right,
+    major(32),left,major(33),up,up,up,up,left,left,minor(34),right,major(35),
+    right,major(36),left,minor(37),up,right,major(38),right,major(39),up,
+    left,major(40),up,up,up,left,major(41),right,minor(42),up,left,minor(43),
+    left,minor(44),left,major(45),up,right,minor(46),up,up,right,minor(47),
+    left,major(48),up,right,major(49),left,major(50),left,minor(51),up,right,
+    minor(52),left,minor(53),up,right,major(54),left,minor(55),left,
+    minor(56),left,major(57),left,minor(58),up,right,minor(59),up,up,right,
+    major(60),up,up,up,up,up,up,up,up,up,right,minor(61),left,major(62),up,
+    right,major(63),left,major(64),up,right,minor(65),left,major(66),left,
+    major(67),left,minor(68),up,up,right,minor(69),left,minor(70),up,right,
+    major(71),up,up,up,up,left,right,major(72),up,left,minor(73),right,
+    minor(74),up,right,minor(75),up,up,up,up,up,up,up,left,major(76),left,
+    minor(77),up,right,minor(78),up,up,up,right,major(79),left,minor(80),up,
+    right,minor(81),right,minor(82),up,left,major(83),up,up,left,left,
+    major(84),up,right,major(85),up,up,up,up,right,right,left,minor(86),left,
+    minor(87),left,minor(88),up,up,right,minor(89),right,minor(90),up,left,
+    minor(91),right,major(92),right,major(93),up,left,major(94),up,up,up,up,
+    up,right,right,major(95),up,major(96),left,major(97),left,major(98),up,
+    right,major(99),up,up,up,up,up,up,right,major(100),right,major(101),up,
+    left,major(102),left,minor(103),up,right,minor(104)].
+Equivalence Class: 8
+                    101
+                100
+                        104
+                    102
+                        103
+            25
+                                95
+                            96
+                                    99
+                                97
+                                    98
+                        29
+                                    90
+                                89
+                                            93
+                                        92
+                                            94
+                                    91
+                                        <empty>
+                            86
+                                    <empty>
+                                87
+                                    88
+                    28
+                                <empty>
+                            32
+                                33
+                        30
+                            31
+                26
+                                82
+                            81
+                                83
+                        79
+                                85
+                            80
+                                84
+                    27
+                                        39
+                                    38
+                                        40
+                                36
+                                    37
+                            35
+                                                <empty>
+                                            65
+                                                        71
+                                                    69
+                                                        70
+                                                66
+                                                        <empty>
+                                                    67
+                                                        68
+                                        63
+                                                72
+                                            64
+                                                    75
+                                                73
+                                                    <empty>
+                                    61
+                                        62
+                                41
+                                                <empty>
+                                            49
+                                                            <empty>
+                                                        54
+                                                                <empty>
+                                                            55
+                                                                    60
+                                                                56
+                                                                        59
+                                                                    57
+                                                                        58
+                                                    52
+                                                        53
+                                                50
+                                                    51
+                                        47
+                                            48
+                                    43
+                                            46
+                                        44
+                                            45
+                        34
+                                78
+                            76
+                                77
+        23
+            24
+    15
+            <empty>
+        16
+                            <empty>
+                        20
+                                22
+                            21
+                                <empty>
+                    19
+                        <empty>
+                18
+                    <empty>
+            17
+                <empty>
+1
+                <empty>
+            4
+                    6
+                5
+                    <empty>
+        3
+            <empty>
+    2
+                    <empty>
+                13
+                    14
+            8
+                        12
+                    10
+                        11
+                9
+                    <empty>
+        7
+            <empty>
+
+node(minor(1),
+    node(minor(2),
+        node(major(7),$,
+            node(major(8),
+                node(major(9),$,
+                    node(major(10),node(minor(11),$,$),node(major(12),$,$))),
+                node(major(13),node(major(14),$,$),$))),
+        node(major(3),$,
+            node(major(4),node(major(5),$,node(major(6),$,$)),$))),
+    node(minor(15),
+        node(minor(16),
+            node(minor(17),$,
+                node(minor(18),$,
+                    node(minor(19),$,
+                        node(minor(20),node(major(21),$,node(major(22),$,$)),
+                            $)))),
+            $),
+        node(minor(23),node(major(24),$,$),
+            node(major(25),
+                node(major(26),
+                    node(major(27),
+                        node(minor(34),
+                            node(major(76),node(minor(77),$,$),
+                                node(minor(78),$,$)),
+                            node(major(35),
+                                node(major(41),
+                                    node(minor(43),
+                                        node(minor(44),node(major(45),$,$),
+                                            node(minor(46),$,$)),
+                                        node(minor(47),node(major(48),$,$),
+                                            node(major(49),
+                                                node(major(50),
+                                                    node(minor(51),$,$),
+                                                    node(minor(52),
+                                                        node(minor(53),$,$),
+                                                        node(major(54),
+                                                            node(minor(55),
+                                                                node(
+                                                                    minor(
+                                                                        56),
+                                                                    node(
+                                                                        major(
+                                                                            57),
+                                                                        node(
+                                                                            minor(
+                                                                                58),
+                                                                            $,
+                                                                            $),
+                                                                        node(
+                                                                            minor(
+                                                                                59),
+                                                                            $,
+                                                                            $)),
+                                                                    node(
+                                                                        major(
+                                                                            60),
+                                                                        $,
+                                                                        $)),
+                                                                $),
+                                                            $))),
+                                                $))),
+                                    node(minor(61),node(major(62),$,$),
+                                        node(major(63),
+                                            node(major(64),
+                                                node(minor(73),$,
+                                                    node(minor(75),$,$)),
+                                                node(major(72),$,$)),
+                                            node(minor(65),
+                                                node(major(66),
+                                                    node(major(67),
+                                                        node(minor(68),$,$),
+                                                        $),
+                                                    node(minor(69),
+                                                        node(minor(70),$,$),
+                                                        node(major(71),$,
+                                                            $))),
+                                                $)))),
+                                node(major(36),node(minor(37),$,$),
+                                    node(major(38),node(major(40),$,$),
+                                        node(major(39),$,$))))),
+                        node(major(79),
+                            node(minor(80),node(major(84),$,$),
+                                node(major(85),$,$)),
+                            node(minor(81),node(major(83),$,$),
+                                node(minor(82),$,$)))),
+                    node(major(28),
+                        node(minor(30),node(major(31),$,$),
+                            node(major(32),node(major(33),$,$),$)),
+                        node(major(29),
+                            node(minor(86),
+                                node(minor(87),node(minor(88),$,$),$),
+                                node(minor(89),
+                                    node(minor(91),$,
+                                        node(major(92),node(major(94),$,$),
+                                            node(major(93),$,$))),
+                                    node(minor(90),$,$))),
+                            node(major(96),
+                                node(major(97),node(major(98),$,$),
+                                    node(major(99),$,$)),
+                                node(major(95),$,$))))),
+                node(major(100),
+                    node(major(102),node(minor(103),$,$),
+                        node(minor(104),$,$)),
+                    node(major(101),$,$))))))
+
+Command: [minor(1),left,minor(2),right,major(3),right,major(4),left,major(5),
+    left,up,right,major(6),up,up,up,up,left,major(7),right,major(8),left,
+    major(9),right,major(10),left,minor(11),up,right,major(12),up,up,up,
+    right,major(13),left,major(14),up,up,up,up,up,right,minor(15),left,
+    minor(16),left,minor(17),right,minor(18),right,minor(19),right,minor(20),
+    left,major(21),right,major(22),up,up,up,up,up,up,up,right,minor(23),left,
+    major(24),up,right,major(25),left,major(26),left,major(27),up,right,
+    major(28),right,major(29),up,left,minor(30),left,major(31),up,right,
+    major(32),left,major(33),up,up,up,up,left,left,minor(34),right,major(35),
+    right,major(36),left,minor(37),up,right,major(38),right,major(39),up,
+    left,major(40),up,up,up,left,major(41),right,minor(42),up,left,minor(43),
+    left,minor(44),left,major(45),up,right,minor(46),up,up,right,minor(47),
+    left,major(48),up,right,major(49),left,major(50),left,minor(51),up,right,
+    minor(52),left,minor(53),up,right,major(54),left,minor(55),left,
+    minor(56),left,major(57),left,minor(58),up,right,major(59),up,up,right,
+    major(60),up,up,up,up,up,up,up,up,up,right,minor(61),left,major(62),up,
+    right,major(63),left,major(64),up,right,minor(65),left,major(66),left,
+    major(67),left,minor(68),up,up,right,minor(69),left,minor(70),up,right,
+    major(71),up,up,up,up,left,right,major(72),up,left,minor(73),right,
+    minor(74),up,right,minor(75),up,up,up,up,up,up,up,left,major(76),left,
+    minor(77),up,right,minor(78),up,up,up,right,major(79),left,minor(80),up,
+    right,minor(81),right,minor(82),up,left,major(83),up,up,left,left,
+    major(84),up,right,major(85),up,up,up,up,right,right,left,minor(86),left,
+    minor(87),left,minor(88),up,up,right,minor(89),right,minor(90),up,left,
+    minor(91),right,major(92),right,major(93),up,left,major(94),up,up,up,up,
+    up,right,right,major(95),up,major(96),left,major(97),left,major(98),up,
+    right,major(99),up,up,up,up,up,up,right,major(100),right,major(101),up,
+    left,major(102),left,minor(103),up,right,minor(104)].
+Equivalence Class: 9
+                    101
+                100
+                        104
+                    102
+                        103
+            25
+                                95
+                            96
+                                    99
+                                97
+                                    98
+                        29
+                                    90
+                                89
+                                            93
+                                        92
+                                            94
+                                    91
+                                        <empty>
+                            86
+                                    <empty>
+                                87
+                                    88
+                    28
+                                <empty>
+                            32
+                                33
+                        30
+                            31
+                26
+                                82
+                            81
+                                83
+                        79
+                                85
+                            80
+                                84
+                    27
+                                        39
+                                    38
+                                        40
+                                36
+                                    37
+                            35
+                                                <empty>
+                                            65
+                                                        71
+                                                    69
+                                                        70
+                                                66
+                                                        <empty>
+                                                    67
+                                                        68
+                                        63
+                                                72
+                                            64
+                                                    75
+                                                73
+                                                    <empty>
+                                    61
+                                        62
+                                41
+                                                <empty>
+                                            49
+                                                            <empty>
+                                                        54
+                                                                <empty>
+                                                            55
+                                                                    60
+                                                                56
+                                                                        59
+                                                                    57
+                                                                        58
+                                                    52
+                                                        53
+                                                50
+                                                    51
+                                        47
+                                            48
+                                    43
+                                            46
+                                        44
+                                            45
+                        34
+                                78
+                            76
+                                77
+        23
+            24
+    15
+            <empty>
+        16
+                            <empty>
+                        20
+                                22
+                            21
+                                <empty>
+                    19
+                        <empty>
+                18
+                    <empty>
+            17
+                <empty>
+1
+                <empty>
+            4
+                    6
+                5
+                    <empty>
+        3
+            <empty>
+    2
+                    <empty>
+                13
+                    14
+            8
+                        12
+                    10
+                        11
+                9
+                    <empty>
+        7
+            <empty>
+
+node(minor(1),
+    node(minor(2),
+        node(major(7),$,
+            node(major(8),
+                node(major(9),$,
+                    node(major(10),node(minor(11),$,$),node(major(12),$,$))),
+                node(major(13),node(major(14),$,$),$))),
+        node(major(3),$,
+            node(major(4),node(major(5),$,node(major(6),$,$)),$))),
+    node(minor(15),
+        node(minor(16),
+            node(minor(17),$,
+                node(minor(18),$,
+                    node(minor(19),$,
+                        node(minor(20),node(major(21),$,node(major(22),$,$)),
+                            $)))),
+            $),
+        node(minor(23),node(major(24),$,$),
+            node(major(25),
+                node(major(26),
+                    node(major(27),
+                        node(minor(34),
+                            node(major(76),node(minor(77),$,$),
+                                node(minor(78),$,$)),
+                            node(major(35),
+                                node(major(41),
+                                    node(minor(43),
+                                        node(minor(44),node(major(45),$,$),
+                                            node(minor(46),$,$)),
+                                        node(minor(47),node(major(48),$,$),
+                                            node(major(49),
+                                                node(major(50),
+                                                    node(minor(51),$,$),
+                                                    node(minor(52),
+                                                        node(minor(53),$,$),
+                                                        node(major(54),
+                                                            node(minor(55),
+                                                                node(
+                                                                    minor(
+                                                                        56),
+                                                                    node(
+                                                                        major(
+                                                                            57),
+                                                                        node(
+                                                                            minor(
+                                                                                58),
+                                                                            $,
+                                                                            $),
+                                                                        node(
+                                                                            major(
+                                                                                59),
+                                                                            $,
+                                                                            $)),
+                                                                    node(
+                                                                        major(
+                                                                            60),
+                                                                        $,
+                                                                        $)),
+                                                                $),
+                                                            $))),
+                                                $))),
+                                    node(minor(61),node(major(62),$,$),
+                                        node(major(63),
+                                            node(major(64),
+                                                node(minor(73),$,
+                                                    node(minor(75),$,$)),
+                                                node(major(72),$,$)),
+                                            node(minor(65),
+                                                node(major(66),
+                                                    node(major(67),
+                                                        node(minor(68),$,$),
+                                                        $),
+                                                    node(minor(69),
+                                                        node(minor(70),$,$),
+                                                        node(major(71),$,
+                                                            $))),
+                                                $)))),
+                                node(major(36),node(minor(37),$,$),
+                                    node(major(38),node(major(40),$,$),
+                                        node(major(39),$,$))))),
+                        node(major(79),
+                            node(minor(80),node(major(84),$,$),
+                                node(major(85),$,$)),
+                            node(minor(81),node(major(83),$,$),
+                                node(minor(82),$,$)))),
+                    node(major(28),
+                        node(minor(30),node(major(31),$,$),
+                            node(major(32),node(major(33),$,$),$)),
+                        node(major(29),
+                            node(minor(86),
+                                node(minor(87),node(minor(88),$,$),$),
+                                node(minor(89),
+                                    node(minor(91),$,
+                                        node(major(92),node(major(94),$,$),
+                                            node(major(93),$,$))),
+                                    node(minor(90),$,$))),
+                            node(major(96),
+                                node(major(97),node(major(98),$,$),
+                                    node(major(99),$,$)),
+                                node(major(95),$,$))))),
+                node(major(100),
+                    node(major(102),node(minor(103),$,$),
+                        node(minor(104),$,$)),
+                    node(major(101),$,$))))))
+
+Command: [major(a),left,major(b)].
+Equivalence Class: 10
+    <empty>
+a
+    b
+
+node(major(a),node(major(b),$,$),$)
+
+Command: [minor(1),left,minor(2),right,major(3),right,major(4),left,major(5),
+    left,up,right,major(6),up,up,up,up,left,major(7),right,major(8),left,
+    major(9),right,major(10),left,minor(11),up,right,major(12),up,up,up,
+    right,major(13),left,major(14),up,up,up,up,up,right,minor(15),left,
+    minor(16),left,minor(17),right,minor(18),right,minor(19),right,minor(20),
+    left,major(21),right,major(22),up,up,up,up,up,up,up,right,minor(23),left,
+    major(24),up,right,major(25),left,major(26),left,major(27),up,right,
+    major(28),right,major(29),up,left,minor(30),left,major(31),up,right,
+    major(32),left,major(33),up,up,up,up,left,left,minor(34),right,major(35),
+    right,major(36),left,minor(37),up,right,major(38),right,major(39),up,
+    left,major(40),up,up,up,left,major(41),right,minor(42),up,left,minor(43),
+    left,minor(44),left,major(45),up,right,minor(46),up,up,right,minor(47),
+    left,major(48),up,right,major(49),left,major(50),left,minor(51),up,right,
+    minor(52),left,minor(53),up,right,major(54),left,minor(55),left,
+    minor(56),left,major(57),left,minor(different58),up,right,minor(59),up,
+    up,right,major(60),up,up,up,up,up,up,up,up,up,right,minor(61),left,
+    major(62),up,right,major(63),left,major(64),up,right,minor(65),left,
+    major(66),left,major(67),left,minor(68),up,up,right,minor(69),left,
+    minor(70),up,right,major(71),up,up,up,up,left,right,major(72),up,left,
+    minor(73),right,minor(different74),up,right,minor(75),up,up,up,up,up,up,
+    up,left,major(76),left,minor(77),up,right,minor(78),up,up,up,right,
+    major(79),left,minor(80),up,right,minor(81),right,minor(82),up,left,
+    major(83),up,up,left,left,major(84),up,right,major(85),up,up,up,up,right,
+    right,left,minor(86),left,minor(87),left,minor(88),up,up,right,minor(89),
+    right,minor(90),up,left,minor(91),right,major(92),right,major(93),up,
+    left,major(94),up,up,up,up,up,right,right,major(95),up,major(96),left,
+    major(97),left,major(98),up,right,major(99),up,up,up,up,up,up,right,
+    major(100),right,major(101),up,left,major(102),left,minor(103),up,right,
+    minor(104)].
+Equivalence Class: 8
+                    101
+                100
+                        104
+                    102
+                        103
+            25
+                                95
+                            96
+                                    99
+                                97
+                                    98
+                        29
+                                    90
+                                89
+                                            93
+                                        92
+                                            94
+                                    91
+                                        <empty>
+                            86
+                                    <empty>
+                                87
+                                    88
+                    28
+                                <empty>
+                            32
+                                33
+                        30
+                            31
+                26
+                                82
+                            81
+                                83
+                        79
+                                85
+                            80
+                                84
+                    27
+                                        39
+                                    38
+                                        40
+                                36
+                                    37
+                            35
+                                                <empty>
+                                            65
+                                                        71
+                                                    69
+                                                        70
+                                                66
+                                                        <empty>
+                                                    67
+                                                        68
+                                        63
+                                                72
+                                            64
+                                                    75
+                                                73
+                                                    <empty>
+                                    61
+                                        62
+                                41
+                                                <empty>
+                                            49
+                                                            <empty>
+                                                        54
+                                                                <empty>
+                                                            55
+                                                                    60
+                                                                56
+                                                                        59
+                                                                    57
+                                                                        different58
+                                                    52
+                                                        53
+                                                50
+                                                    51
+                                        47
+                                            48
+                                    43
+                                            46
+                                        44
+                                            45
+                        34
+                                78
+                            76
+                                77
+        23
+            24
+    15
+            <empty>
+        16
+                            <empty>
+                        20
+                                22
+                            21
+                                <empty>
+                    19
+                        <empty>
+                18
+                    <empty>
+            17
+                <empty>
+1
+                <empty>
+            4
+                    6
+                5
+                    <empty>
+        3
+            <empty>
+    2
+                    <empty>
+                13
+                    14
+            8
+                        12
+                    10
+                        11
+                9
+                    <empty>
+        7
+            <empty>
+
+node(minor(1),
+    node(minor(2),
+        node(major(7),$,
+            node(major(8),
+                node(major(9),$,
+                    node(major(10),node(minor(11),$,$),node(major(12),$,$))),
+                node(major(13),node(major(14),$,$),$))),
+        node(major(3),$,
+            node(major(4),node(major(5),$,node(major(6),$,$)),$))),
+    node(minor(15),
+        node(minor(16),
+            node(minor(17),$,
+                node(minor(18),$,
+                    node(minor(19),$,
+                        node(minor(20),node(major(21),$,node(major(22),$,$)),
+                            $)))),
+            $),
+        node(minor(23),node(major(24),$,$),
+            node(major(25),
+                node(major(26),
+                    node(major(27),
+                        node(minor(34),
+                            node(major(76),node(minor(77),$,$),
+                                node(minor(78),$,$)),
+                            node(major(35),
+                                node(major(41),
+                                    node(minor(43),
+                                        node(minor(44),node(major(45),$,$),
+                                            node(minor(46),$,$)),
+                                        node(minor(47),node(major(48),$,$),
+                                            node(major(49),
+                                                node(major(50),
+                                                    node(minor(51),$,$),
+                                                    node(minor(52),
+                                                        node(minor(53),$,$),
+                                                        node(major(54),
+                                                            node(minor(55),
+                                                                node(
+                                                                    minor(
+                                                                        56),
+                                                                    node(
+                                                                        major(
+                                                                            57),
+                                                                        node(
+                                                                            minor(
+                                                                                different58),
+                                                                            $,
+                                                                            $),
+                                                                        node(
+                                                                            minor(
+                                                                                59),
+                                                                            $,
+                                                                            $)),
+                                                                    node(
+                                                                        major(
+                                                                            60),
+                                                                        $,
+                                                                        $)),
+                                                                $),
+                                                            $))),
+                                                $))),
+                                    node(minor(61),node(major(62),$,$),
+                                        node(major(63),
+                                            node(major(64),
+                                                node(minor(73),$,
+                                                    node(minor(75),$,$)),
+                                                node(major(72),$,$)),
+                                            node(minor(65),
+                                                node(major(66),
+                                                    node(major(67),
+                                                        node(minor(68),$,$),
+                                                        $),
+                                                    node(minor(69),
+                                                        node(minor(70),$,$),
+                                                        node(major(71),$,
+                                                            $))),
+                                                $)))),
+                                node(major(36),node(minor(37),$,$),
+                                    node(major(38),node(major(40),$,$),
+                                        node(major(39),$,$))))),
+                        node(major(79),
+                            node(minor(80),node(major(84),$,$),
+                                node(major(85),$,$)),
+                            node(minor(81),node(major(83),$,$),
+                                node(minor(82),$,$)))),
+                    node(major(28),
+                        node(minor(30),node(major(31),$,$),
+                            node(major(32),node(major(33),$,$),$)),
+                        node(major(29),
+                            node(minor(86),
+                                node(minor(87),node(minor(88),$,$),$),
+                                node(minor(89),
+                                    node(minor(91),$,
+                                        node(major(92),node(major(94),$,$),
+                                            node(major(93),$,$))),
+                                    node(minor(90),$,$))),
+                            node(major(96),
+                                node(major(97),node(major(98),$,$),
+                                    node(major(99),$,$)),
+                                node(major(95),$,$))))),
+                node(major(100),
+                    node(major(102),node(minor(103),$,$),
+                        node(minor(104),$,$)),
+                    node(major(101),$,$))))))
+
+Command: [major(a),left,major(b)].
+Equivalence Class: 10
+    <empty>
+a
+    b
+
+node(major(a),node(major(b),$,$),$)
+
+Command: [major(a),left,minor(bb)].
+Equivalence Class: 5
+    <empty>
+a
+    bb
+
+node(major(a),node(minor(bb),$,$),$)
+
+Command: print.
+Equivalence Class: 0
+        dd
+    _
+        cc
+a
+        d
+    _
+        c
+
+Equivalence Class: 1
+        dd
+    _
+        cc
+a
+        d
+    b
+        c
+
+Equivalence Class: 2
+_
+
+Equivalence Class: 3
+a
+
+Equivalence Class: 4
+b
+
+Equivalence Class: 5
+    <empty>
+a
+    _
+
+Equivalence Class: 6
+    _
+a
+    <empty>
+
+Equivalence Class: 7
+                            _
+                        b
+                                <empty>
+                            zw
+                                zww
+                    a0
+                        _
+                a00
+                    <empty>
+            a000
+                <empty>
+        $
+            a11
+    a0000
+        <empty>
+$
+        _
+    a1111
+            a22
+        _
+                <empty>
+            $
+                    <empty>
+                $
+                        <empty>
+                    $
+                            <empty>
+                        $
+                            leftleaf
+
+Equivalence Class: 8
+                    101
+                100
+                        _
+                    102
+                        _
+            25
+                                95
+                            96
+                                    99
+                                97
+                                    98
+                        29
+                                    _
+                                _
+                                            93
+                                        92
+                                            94
+                                    _
+                                        <empty>
+                            _
+                                    <empty>
+                                _
+                                    _
+                    28
+                                <empty>
+                            32
+                                33
+                        _
+                            31
+                26
+                                _
+                            _
+                                83
+                        79
+                                85
+                            _
+                                84
+                    27
+                                        39
+                                    38
+                                        40
+                                36
+                                    _
+                            35
+                                                <empty>
+                                            _
+                                                        71
+                                                    _
+                                                        _
+                                                66
+                                                        <empty>
+                                                    67
+                                                        _
+                                        63
+                                                72
+                                            64
+                                                    _
+                                                _
+                                                    <empty>
+                                    _
+                                        62
+                                41
+                                                <empty>
+                                            49
+                                                            <empty>
+                                                        54
+                                                                <empty>
+                                                            _
+                                                                    60
+                                                                _
+                                                                        _
+                                                                    57
+                                                                        _
+                                                    _
+                                                        _
+                                                50
+                                                    _
+                                        _
+                                            48
+                                    _
+                                            _
+                                        _
+                                            45
+                        _
+                                _
+                            76
+                                _
+        _
+            24
+    _
+            <empty>
+        _
+                            <empty>
+                        _
+                                22
+                            21
+                                <empty>
+                    _
+                        <empty>
+                _
+                    <empty>
+            _
+                <empty>
+_
+                <empty>
+            4
+                    6
+                5
+                    <empty>
+        3
+            <empty>
+    _
+                    <empty>
+                13
+                    14
+            8
+                        12
+                    10
+                        _
+                9
+                    <empty>
+        7
+            <empty>
+
+Equivalence Class: 9
+                    101
+                100
+                        _
+                    102
+                        _
+            25
+                                95
+                            96
+                                    99
+                                97
+                                    98
+                        29
+                                    _
+                                _
+                                            93
+                                        92
+                                            94
+                                    _
+                                        <empty>
+                            _
+                                    <empty>
+                                _
+                                    _
+                    28
+                                <empty>
+                            32
+                                33
+                        _
+                            31
+                26
+                                _
+                            _
+                                83
+                        79
+                                85
+                            _
+                                84
+                    27
+                                        39
+                                    38
+                                        40
+                                36
+                                    _
+                            35
+                                                <empty>
+                                            _
+                                                        71
+                                                    _
+                                                        _
+                                                66
+                                                        <empty>
+                                                    67
+                                                        _
+                                        63
+                                                72
+                                            64
+                                                    _
+                                                _
+                                                    <empty>
+                                    _
+                                        62
+                                41
+                                                <empty>
+                                            49
+                                                            <empty>
+                                                        54
+                                                                <empty>
+                                                            _
+                                                                    60
+                                                                _
+                                                                        59
+                                                                    57
+                                                                        _
+                                                    _
+                                                        _
+                                                50
+                                                    _
+                                        _
+                                            48
+                                    _
+                                            _
+                                        _
+                                            45
+                        _
+                                _
+                            76
+                                _
+        _
+            24
+    _
+            <empty>
+        _
+                            <empty>
+                        _
+                                22
+                            21
+                                <empty>
+                    _
+                        <empty>
+                _
+                    <empty>
+            _
+                <empty>
+_
+                <empty>
+            4
+                    6
+                5
+                    <empty>
+        3
+            <empty>
+    _
+                    <empty>
+                13
+                    14
+            8
+                        12
+                    10
+                        _
+                9
+                    <empty>
+        7
+            <empty>
+
+Equivalence Class: 10
+    <empty>
+a
+    b
+
+
+Command: end_of_file.

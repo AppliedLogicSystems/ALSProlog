@@ -1,0 +1,321 @@
+;
+; functor.68k		-- functor and arg
+;	Copyright (c) 1987-1993 Applied Logic Systems, Inc.
+;
+; Author: Kevin A. Buettner
+; Creation: 2/2/87
+; Revision History:
+;	4/12/90		kev	-- name changed from functor.s to functor.68k
+;				   macros added and source changes made to
+;				   reflect the new format
+;
+;
+
+#include "assembly.68k"
+
+	text
+	global	wm_functor
+wm_functor:
+	unlk	E
+	;
+	; get the first argument and dereference.  It is available at 4(SP)
+	;
+
+	deref	4(SP),	a0,	fg1
+
+	;
+	; first argument is a variable.  Need to dereference both second
+	; and third arguments.  If they are of the proper type, then we
+	; can create a new structure.
+	;
+
+	deref	8(SP),	a1,	1f
+	fail				; fail if second arg is a variable
+
+1:
+	clr.l	d2			; d2 is our numeric flag
+	ctag_bne MTP_SYM, a1, fv1chkuia	; check UIA if not a symbol
+	move.l	a1, d1			; put symbol in d1
+	bra.s	fv1gotsym
+fv1chkuia:
+	subq.w	#MTP_UIA-MTP_SYM, d0	; see if we have a UIA
+	bne.s	fv1chknum		; check on numeric if not
+	move.l	a1, d0			; put uia back into d0
+	asr.l	#MTP_CONSTSHIFT, d0	; shift out the tags leaving offset
+	add.l	wm_heapbase, d0	; now d0 has the real address
+	addq.l	#4, d0			; advance over the fence
+	move.l	a0, -(SP)		; save a0
+	callC1	find_token, d0		; get the token id back in d0
+	move.l	(SP)+, a0		; restore a0
+#ifdef MacOS
+	;	In MPW C v3.2.3, d2 is NOT saved accross C calls. So the 
+	;	preceeding jsr to find_token could possibly corrupt d2.
+	;	To insure that d2 remains "clear" (as it should be in this case),
+	;	we clear it again!
+	clr.l	d2				
+#endif
+	asl.l	#MTP_CONSTSHIFT, d0	; shift the token id
+	addq.l	#MTP_SYM, d0		; add in the tag
+	move.l	d0, d1			; put symbol in d1
+	bra.s	fv1gotsym
+fv1chknum:
+	tag_ext	a1
+	tag_swc	fv1chkdbl, ffail
+					; branch to fv1chkdbl if a1 is a struct
+					; branch to ffail if a1 is a list
+					; fall through for constants
+	ctag_bne MTP_INT, a1,	ffail	; fail if a1 is not tagged an integer
+	bra.s	fv1gotnum
+fv1chkdbl:
+	move.l	-MTP_STRUCT(a1), d0	; put functor into d0
+	cmp.l	#MMK_FUNCTOR(TK_DDOUBLE,4), d0
+					; see if the functor is $double/4
+	bne.s	ffail			; fail if not
+fv1gotnum:
+	addq.l	#1, d2			; set numeric flag
+	move.l	a1, d1			; store second arg in d1 for a while
+
+
+fv1gotsym:
+
+	;
+	; dereference third argument
+	;
+
+	deref	12(SP),	a1, 1f
+ffail:	fail				; fail if third arg is a variable
+
+1:	ctag_bne MTP_INT, a1, ffail	; fail if not a1 is not an integer
+	move.l	a1, d0			; put into d0
+	asr.l	#MTP_CONSTSHIFT, d0	; nuke tags
+	bmi.s	ffail			; fail if less than zero
+	beq.s	fvsym			; branch if zero
+	tst.l	d2			; see if we have a numeric argument
+	bne.s	ffail			; fail if so
+	cmp.l	#255, d0		; see if too big
+	bcc.s	fvbig			; branch if too big (or equal)
+
+	cmp.l	#MMK_SYM(TK_DOT), d1	; see if symbol is the dot
+	bne.s	fvstruct		; branch if not
+	cmp.w	#2, d0			; see if integer is two
+	bne.s	fvstruct		; branch if not
+	lea	MTP_LIST(H), a1		; put a list pointer to heap in a1
+	move.l	H, (H)+
+	move.l	H, (H)+			; cons cell created
+	bra.s	fvbind			; do the binding
+fvsym:	move.l	d1, a1			; put symbol in a1
+	bra.s	fvbind			; and do the binding
+fvbig:	move.l	a1,	4(H)		; store the arity
+	lea	MTP_STRUCT(H),	a1	; put struct ptr to heap in a1
+	move.l	#24,	d2		; put shift count into d2
+	move.l	#255,	d3		; put escape arity in d3
+	asl.l	d2,	d3		; shift escape arity
+	or.l	d3,	d1		; arity with symbol creating functor
+	move.l	d1,	(H)+		; store functor
+	bra.s	1f
+fvstruct:
+	lea	MTP_STRUCT(H), a1	; put a structure pointer to heap in a1
+	move.l	d1, (H)
+	move.b	d0, (H)			; create the functor
+1:	subq.w	#1, d0			; subtract one from arity for dbra
+	addq.l	#4, H			; advance over the functor
+1:	move.l	H, (H)+			; lay down the variables
+	dbra	d0, 1b
+
+fvbind:	bind	a1, a0			; bind object a1 to variable a0
+	rts				; return
+
+
+fg1:	;
+	; First argument is ground.  Classify it and set up d0 with the
+	;	symbol, d1 with the arity and then call the unifier on
+	;	these with the second and third argument.
+	;
+
+	tag_sws	fglist, fgsym
+
+	;
+	; First argument is a structure.  Extract the functor.
+	;
+	subq.l	#MTP_STRUCT, a0		; make a0 a real pointer
+	move.l	(a0), d0		; get the functor
+	cmp.l	#MMK_FUNCTOR(TK_DDOUBLE,4), d0	; see if it is a double
+	beq.s	fgreal
+	move.l	d0, d1			; put arity in d1
+	move.l	#24, d2
+	lsr.l	d2, d1
+	and.l	#0xffffff, d0		; clear arity out of d0
+	cmp.l	#255,	d1		; see if arity is escape arity
+	beq.s	1f			; branch if so
+	lsl.l	#MTP_CONSTSHIFT, d1	; make room for tags
+	addq.l	#MTP_INT, d1		; install integer tags
+	bra.s	fgunify
+1:	move.l	4(a0),	d1		; get big arity (it is already tagged)
+	bra.s	fgunify			; perform the unification
+
+fglist:	move.l	#MMK_SYM(TK_DOT), d0	; set up dot as the symbol
+	moveq	#MMK_INT(2), d1		; arity is 2
+	bra.s	fgunify
+
+fgreal:	lea	MTP_STRUCT(a0), a0
+fgsym:	move.l	a0, d0			; symbol is already set up
+	moveq	#MMK_INT(0), d1		; arity is zero
+
+fgunify:
+	move.l	8(SP), a0		; set up symbol
+	jsr	wm_unify		; invoke unifier
+	move.l	d1, d0
+	move.l	12(SP), a0		; set up the arity
+	jmp	wm_unify
+
+
+
+;
+; wm_arg implements arg/3
+;
+
+	global	wm_arg
+wm_arg:
+	unlk	E
+	deref	4(SP),	a0,	ag1	; dereference first argument
+	fail				; fail if first argument is a variable
+
+ag1:	ctag_bne MTP_INT, a0, afail
+	move.l	a0, d1			; put integer in d1
+	asr.l	#MTP_CONSTSHIFT, d1	; shift it right and nuke tags
+	ble.s	afail			; fail if zero or negative
+
+	deref	8(SP),	a0,	ag2
+afail:	fail				; fail if second argument is variable
+
+ag2:	tag_swl	astruct, afail		; switch on ground type
+
+	;
+	; else object is a list
+	;
+	subq.l	#MTP_LIST, a0		; nuke tags to make a0 a real pointer
+	moveq	#2, d0			; move arity into d1
+	bra.s	agetarg
+
+astruct:
+	subq.l	#1, a0			; nuke tags to make a0 a real pointer
+	move.l	(a0)+, d0		; yank out the functor/arity
+	cmp.l	#DOUBLE_4, d0		; see if it is a double
+	beq.s	afail			; fail if it is
+	move.l	#24, d2
+	lsr.l	d2, d0			; keep arity
+	cmp.w	#255,	d0		; see if arity is escape arity
+	bne.s	agetarg			; branch if not
+	move.l	(a0)+,	d0		; get out big arity
+	asr.l	#MTP_CONSTSHIFT, d0	; shift out the tag
+agetarg:
+	cmp.l	d0, d1			; see if d1 is too big
+	bhi.s	afail			; fail if so
+	sub.l	#1, d1			; adjust d0
+	lsl.l	#2, d1			;    to use as an offset
+	move.l	0(a0,d1.w), a0		; get argument
+	move.l	12(SP), d0		; get thing to unify with
+	jmp	wm_unify		; do the unification
+
+
+;
+; mangle/3
+;
+;	mangle is like arg, but with all 3 arguments instatiated.
+;
+;	mangle(N,S,A) will replace the Nth argument in structure S with 
+;	the argument A.  No trailing is done.  A may be of any type except
+;	variable.
+;
+
+	global	wm_mangle
+wm_mangle:
+	unlk	E
+	deref	4(SP),	a0,	mg1	; dereference first argument
+	fail				; fail if variable
+mg1:	ctag_bne MTP_INT, a0,	mfail	; fail if not integer
+	move.l	a0, d1			; put integer in d0
+	asr.l	#4, d1			; shift it right and nuke tags
+	ble.s	mfail			; fail if zero or negative
+
+	deref	12(SP),	a0,	mg3	; dereference third argument
+	fail				; fail if variable
+mg3:	move.l	a0, d2			; put into d2
+
+	deref	8(SP),	a0,	mg2	; dereference second argument
+mfail:	fail				; fail if second argument is variable
+
+mg2:	tag_swl	mstruct, mfail		; branch to mstruct if structure,
+					; fail if we have a constant
+	;
+	; else object is a list
+	;
+	subq.l	#2, a0			; nuke tags to make a0 a real pointer
+	moveq	#2, d0			; move arity into d0
+	bra.s	mputarg
+
+mstruct:
+	subq.l	#MTP_STRUCT, a0		; nuke tags to make a0 a real pointer
+	move.l	(a0)+, d0		; yank out the functor/arity
+	move.l	#24, d3
+	lsr.l	d3, d0			; keep arity
+	cmp.w	#255,	d0		; see if arity is escape arity
+	bne.s	mputarg			; branch if not
+	move.l	(a0)+,	d0		; get out big arity
+	asr.l	#MTP_CONSTSHIFT, d0	; shift out the tag
+mputarg:
+	cmp.l	d0, d1			; see if d1 is too big
+	bhi.s	mfail			; fail if so
+	subq.l	#1, d1			; adjust d1
+	lsl.l	#2, d1			;    to use as an offset
+	add.l	d1, a0			; adjust a0 to point at slot to mangle
+	move.l	d2, (a0)		; mangle argument
+	tag_ext	d2
+	tag_bne	MTP_CONST, 1f		; branch if not constant
+	ctag_bne MTP_UIA, d2, mret	; return if not uia
+	asr.l	#MTP_CONSTSHIFT, d2	; shift out the tags leaving offset
+	add.l	wm_heapbase, d2		; now d0 has the real address
+	addq.l	#4, d2			; advance over the fence
+	bra.s	2f
+1:	
+	sub.w	d0, d2			; wipe tag off of value
+2:	cmp.l	a0, d2			; compare slot with value
+	bls.s	mret			; branch if value lower than slot
+	add.l	#1,	gv_setcnt	; increment gv_setcnt
+	move.l	H, d0			; put top of heap in d0
+	move.l	B, a1			; put B in a1
+	
+	; a0		-- slot address
+	; d2		-- value which we put in slot (an address)
+	; a1		-- choice pointer
+	; d0		-- HB update pointer
+
+	cmp.l	a0, HB 			; compare slot value with HB
+	bls.s	mret			; return if no work to do
+	cmp.l	d2, HB			; compare obj value with HB
+	bls.s	m_updHB			; update choice point if HB<=obj
+	move.l	HB, d0			; else lower the choice point value
+	bra.s	m_loopmid
+m_updHB:
+	move.l	d0, HB
+	bra.s	m_loopmid
+
+m_updchpt:
+	move.l	d0, chpt_HB(a1)		; update choice point
+m_nextchpt:
+	move.l	chpt_B(a1), a1		; follow choice point chain
+	cmp.l	#0, a1			; see if at end
+	beq.s	m_loopend
+m_loopmid:
+	and.l	#0xfffffffc, chpt_SPB(a1) ; clear compaction bit
+	move.l	chpt_HB(a1), d1		; get HB and put in d1
+	cmp.l	a0, d1			; compare slot value with HB
+	bls.s	m_loopend		; return if no work to do
+	cmp.l	d2, d1			; compare obj value with HB
+	bls.s	m_updchpt		; update the choice point if HB<=obj
+	move.l	d1, d0			; otherwise lower the update value
+	bra.s	m_nextchpt
+m_loopend:
+
+mret:	
+	rts

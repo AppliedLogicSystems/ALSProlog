@@ -1,0 +1,64 @@
+#
+# Makefile.in is the Makefile template for alspro.
+# Makefile is generated from Makefile.in by running configure.
+#
+
+srcdir = @srcdir@/..
+VPATH  = @srcdir@/../generic:@srcdir@/../port:..
+
+ARCH		= port
+MACH_OS		= @MACH_OS@
+
+CC		= @CC@
+LINK		= $(CC)
+INSTALL		= @INSTALL@
+INSTALL_PROGRAM	= @INSTALL_PROGRAM@
+INSTALL_DATA	= @INSTALL_DATA@
+LN_S		= @LN_S@
+SHELL		= /bin/sh
+
+CFLAGS		= -O -g -Wall -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes
+LDFLAGS		= 
+LIBS		= @LIBS@
+
+X_CFLAGS	= @X_CFLAGS@
+X_LIBS		= @X_LIBS@
+X_EXTRA_LIBS	= @X_EXTRA_LIBS@
+
+TARGET		= @TARGET@
+
+prefix		= /usr/local
+exec_prefix	= $(prefix)
+
+include $(srcdir)/generic/mh-generic
+
+include $(srcdir)/port/mh-port
+
+objects = $(gfiles_o) $(afiles_o)
+
+alspro.a:	$(objects)
+	ar ruv alspro.a $(objects)
+	-ranlib alspro.a
+
+alspro:	pimain.o alspro.a 
+	$(CC) -o alspro $^ $(LDFLAGS) $(LIBS)
+	alspro $(srcdir)/tests/snrev -g snrev
+
+testdir	= $(srcdir)/tests
+
+testrun: alspro
+	alspro -b $(testdir)/autotest $(testdir)/autotest_db -g run_tests -p -srcdir $(srcdir)
+
+cleanup:
+	-rm *.o
+	-rm *.obp
+	-rm core
+
+super_clean:
+	-rm *.o
+	-rm *.h
+	-rm *.obp
+	-rm core
+	-rm alsmics
+#### Warning: don't add rm alsdir to super_clean here in bld-port;
+#### We run alspro in bld-port AFTER the super_clean is done in sharbld.

@@ -1,0 +1,19 @@
+#!/bin/sh
+#	The Solaris assembly seems to have the unfortunate characteristic of
+#	always putting a nop prior to a conditional floating point branch
+#	instruction.  In our code, we always precede such an instruction
+#	with a nop and before that with an fcmpd.
+#
+#	This code goes through and comments out the nops so that the Solaris
+#	assembly (when run with -q) will put the required nop in instead of
+#	two.
+#
+
+for FILE do
+	mv $FILE ${FILE}s
+	sed -e '/fcmpd/{
+			n
+			s/^/!/
+		       }' ${FILE}s >$FILE
+	rm ${FILE}s
+done

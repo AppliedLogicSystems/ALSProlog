@@ -1,0 +1,106 @@
+Kev's ruminations on this endeavor of merging the two systems.
+
+1.	The interrupt mechanism at present is too complicated.  The Magic 
+	argument to $int need not be there.  The wm_magic value in C need not
+	exist.  The Magic value should properly be allocated from Prolog.
+	If this were done, the entire file intinit.c could go away.
+
+	Ok, so how do we make things work?
+
+	We make the interrupt mechanism call $int/2 which will only take
+	a module and the interrupted call.  We either have whoever calls ouch
+	set the Magic value directly or create a one argument ouch which will
+	set the Magic value.  $int/2 will then be responsible for retrieving
+	the magic value if necessary.
+
+	The above is not quite good enough though.  While it is certainly
+	true that this will handle the 386 system as it currently exists,
+	it will not handle system generated signals since there is no easy
+	method of setting the magic value once the magic value is removed
+	from C. 
+
+	One of our goals in processing system supplied interrupts is to do
+	so quickly with a minimum in overhead.  The overhead incurred by
+	the full generality of the Magic mechanism is simply too great (in
+	my opinion) to deal with system supplied interrupts.  But even if
+	this were not the case (and I do realize that my colleagues will
+	quite likely argue vociferously with me on this point), we can avoid
+	the critical section problem by not permitting system interrupts to
+	use the Magic mechanism.
+
+	Thus we make $interrupt take 3 arguments as before, but this time the
+	first argument is the signal number to process (0 if it is a Prolog
+	signal).
+
+	Now we can of course still implement Keith's mechanism.  I would
+	argue that this machinery is somewhat simpler and more general since
+	we can implement Keith's mechanism in Prolog.  Clauses for $interrupt
+	might look like the following:
+
+		$interrupt(0,Mod,Goal) :- 
+			!,
+			getMagic(Magic),
+			$int(Magic,Mod,Goal).
+		$interrupt(2,Mod,Goal) :-	/* SIGINT */
+			!,
+			handle_control_C(Mod,Goal).
+		$interrupt(14,Mod,Goal) :-	/* SIGALRM */
+			!,
+			handle_alarm_clock(Mod,Goal).
+
+	If desired, we could make things more uniform by using the following
+	code.  This would correspond most closely to Keith's original mechanism
+	where everything uses the magic value.
+
+		$interrupt(0,Mod,Goal) :-
+			!,
+			getMagic(Magic),
+			$int(Magic,Mod,Goal).
+		$interrupt(N,Mod,Goal) :-
+			getMagic(OldMagic),
+			NewMagic = signal(N,OldMagic),
+			setMagic(NewMagic),
+			$int(NewMagic,Mod,Goal).
+
+
+	In order to further improve efficiency in processing signals, we could
+	perform yet another modification of the $interrupt mechanism.  Instead
+	of passing in the Module and the Goal, we could simply pass a frame
+	number.  This frame number could then be decoded if necessary into
+	the Module and Call.  But the point is that this information is not
+	always needed and for truly efficient processing, we can avoid the
+	overhead in creating the Call.  This method does have however some
+	implementation nasties which I won't go into.  It is something else
+	to consider (One of the benefits of it though is that it would avoid
+	the problem of passing the cutmacro information into the $interrupt
+	mechanism).
+
+
+2.	How can we implement an ifdef facility for Prolog?
+
+	We have a little used facility in ALS-Prolog called expand/3 which
+	is used to implement the dcg expander.  This mechanism has been
+	criticized because it is not compatible with other Prologs.  But
+	it can be used to implement an ifdef facility without modification
+	to the parser.
+
+	Recall that when an 1200 level operator is encountered (at the top 
+	level) by the code responsible for rewriting a term into something 
+	acceptable by the compiler (expand.c), it is turned into a command
+	which is compiled and then executed.  In the case of DCG rules, the
+	expander translates the grammar rule into a clause and then asserts
+	it (which is a point of contention with the people that don't like
+	this method.  They believe that expand should pass back the thing
+	expanded and then the compiler should be called.)  But we can make
+	other things happen.  For example, ifdef could be made a 1200 level
+	prefix operator.  The expander would then be called and if the ifdef
+	argument is not of the right type, then code is read in with read/1
+	until an elsif or endif is encountered.  If the ifdef argument is
+	something real, then the ifdef is ignored and the compiler keeps
+	reading as normal.
+
+	This method may not be robust enough for our customers (we would
+	probably want to make parser modifications in order to facilitate
+	proper error checking), but it can certainly be used internally
+	in order to control operating system and machine differences that
+	we need to incorporate in our Prolog source.

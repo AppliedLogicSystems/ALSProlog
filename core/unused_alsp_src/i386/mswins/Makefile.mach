@@ -1,0 +1,83 @@
+#
+# Makefile.mach
+#	machine specific makefile for ALS Prolog on the 386 DOS version
+#
+# Note : variables MDIR, MAKEMACH are set in Makefile.gen
+#
+
+SYSOS	= MSWins
+
+#
+# What are the machine specific files
+#
+
+MCFILES	=	bdos bint86 doscalls paction2
+
+MHFILES =	config sconfig dos386
+
+MAFILES	=	int86 inthand
+
+MPROFILES =
+
+MVMFILES = vmpimain.c vminit.c cmsmain.c vmrmc.o libta.lib
+
+MDEMOFILES = setexp.c cle.obj
+ 
+
+#
+# How to __COPY__ machine specific files to target directory
+#
+
+mcopy	: $(MAKEMACH)
+	for i in $(MCFILES); do		\
+		if [ ! -h $$i.c ]; then cp $(MDIR)/$$i.c . ; fi; done
+	for i in $(MHFILES); do		\
+		if [ ! -h $$i.h ]; then cp $(MDIR)/$$i.h . ; fi; done
+	for i in $(MAFILES); do		\
+		if [ ! -h $$i.s ]; then cp $(MDIR)/$$i.s . ; fi; done
+#	for i in $(MPROFILES); do	\
+#		if [ ! -h $$i.pro ]; then cp $(MDIR)/$$i.pro . ; fi; done
+	for i in $(MVMFILES); do        \
+		if [ ! -h $$i ]; then cp $(MDIR)/$$i . ; fi; done
+	for i in $(MDEMOFILES); do        \
+		if [ ! -h $$i ]; then cp $(MDIR)/$$i . ; fi; done
+	touch mcopy
+
+#
+# Clean up the machine specific files
+#
+
+mclean	:
+	rm -f mdepend
+	rm -f mcopy
+	for i in $(MCFILES); do rm -f $$i.c; done
+	for i in $(MHFILES); do rm -f $$i.h; done
+	for i in $(MAFILES); do rm -f $$i.s; done
+	for i in $(MVMFILES); do rm -f $$i; done
+	for i in $(MDEMOFILES); do rm -f $$i; done
+#	for i in $(MPROFILES); do rm -f $$i.pro $$i.obp; done
+
+#
+# Machine specific dependencies
+#
+
+mdepend	: $(MAKEMACH)
+	echo > mdepend
+	echo '#' >> mdepend
+	echo '# Machine specific dependencies' >> mdepend
+	echo '#' >> mdepend
+	echo >> mdepend
+	echo -n 'MOBJS = ' >> mdepend
+	for i in $(MCFILES) $(MAFILES); do	\
+		echo -n $$i.o ' '>> mdepend; done
+	echo >> mdepend
+	echo >> mdepend
+	ALSPATH=$(DEPS); export ALSPATH;	\
+		$(PROLOG) deps -b -q -g deps -p $(MCFILES) -o mdepend.x
+	cat mdepend.x >> mdepend
+	echo >> mdepend
+	rm -f mdepend.x
+
+#
+# end of Makefile.mach
+#

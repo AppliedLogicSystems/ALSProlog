@@ -1,0 +1,61 @@
+#
+# Makefile.mach
+#	machine specific makefile for ALS Prolog on the 386  SYSV version
+#
+# Note : variables MDIR, MAKEMACH are set in Makefile.gen
+#
+
+SYSOS	= SYSV
+
+# SCO unix cannot chase symbolic links
+# So we choose "plain" mode for cpfile
+
+CPMODE = plain
+
+#
+# What are the machine specific files
+#
+
+MHFILES = config
+
+MPROFILES =
+
+#-------------------------------------------------------
+# How to copy machine specific files to target directory
+#-------------------------------------------------------
+
+mcopy	:
+	cpfile -m $(CPMODE) -s $(MDIR) -x .c $(MCFILES)
+	cpfile -m $(CPMODE) -s $(MDIR) -x .h $(MHFILES)
+	cpfile -m $(CPMODE) -s $(MDIR) -x .pro $(MPROFILES)
+	cpfile -m $(CPMODE) -s $(MDIR) -x .s $(MSFILES)
+
+#-------------------------------------------------------
+# Clean up the machine specific files
+#-------------------------------------------------------
+
+mclean	:
+	rm -f mdepend
+	rmfile -x .c $(MCFILES)
+	rmfile -x .h $(MHFILES)
+	rmfile -x .pro $(MPROFILES)
+	rmfile -x .s $(MSFILES)
+
+
+#-------------------------------------------------------
+# Files generated from machine specific files
+#-------------------------------------------------------
+
+mgenerate :
+
+
+#-------------------------------------------------------
+# Machine specific dependencies
+#-------------------------------------------------------
+
+mdepend	:
+	touch mdepend
+
+#
+# end of Makefile.mach
+#

@@ -1,0 +1,456 @@
+;
+; unify.sprc		-- unification code for the sparc implementation
+;	Copyright (c) 1991-1993 by Applied Logic Systems, Inc.
+;
+; Author:	Kevin A. Buettner
+; Creation:	1/21/91
+;
+;
+
+#include "assembly.sprc"
+
+	;
+	; wm_unify
+	;
+
+	global	wm_unify
+wm_unify:
+	deref	UArg2,	gr2			; dereference UArg2
+
+	;
+	; Argument in UArg2 is a variable
+	;
+
+	deref	UArg1,	g1v2			; dereference UArg1
+
+	;
+	; Both arguments are variables.  We must decide which way
+	; to do the binding.
+	;
+
+	cmp	UArg1,	UArg2			; compare args
+	bcs,a	2f				; branch if less
+	cmp	UArg1,	HeapBase		; see if on heap in delay slot
+	bgu,a	1f				; branch if greater
+	mov	UArg1,	tmp1			; start swap in delay slot
+uret:	retl					; return if equal
+	nop					; do nothing in delay slot
+
+1:	mov	UArg2,	UArg1			; finish swap of
+	mov	tmp1,	UArg2			;   UArg1 and UArg2
+	cmp	UArg1,	HeapBase		; see if UArg1 is on heap
+2:	bcs,a	2f				; branch if not
+	cmp	SPB,	UArg1			;  do trail check in delay slot
+
+	; UArg1 and UArg2 both point at heap with UArg1 < UArg2
+	cmp	HB,	UArg2			; see if we need to trail
+	bleu	uret				; branch if not
+	st	UArg1,	[UArg2]			; Make UArg2 loc point at UArg1
+						;   (in delay slot)
+	sub	TR,	4,	TR		; decrement TR
+	retl					; return whilst doing
+	st	UArg2,	[TR]			;   the trailing operation
+
+2:	; UArg1 points to Arg/Env Stack and UArg1 < UArg2
+	bgu	uret				; branch if no trailing needed
+	st	UArg2,	[UArg1]			; do binding in delay slot
+	sub	TR,	4,	TR		; decrement TR
+	retl					; return whilst doing
+	st	UArg1,	[TR]			;   the trailing operation
+
+
+g1v2:	; UArg1 contains a ground;  UArg2 contains a variable.
+	; must perform the bindings...
+
+	bind_and_return	UArg1,	UArg2,	uret
+
+gr2:	; UArg2 contains the ground object
+	; tmp1 contains the (2 bit) tag of the ground object
+	; tmp2 contains the ground object with the tag stripped off
+
+	cmp	tmp1,	MTP_LIST		; compare to list tag
+	bgu,a	uconst
+	andcc	UArg2,	(MTP_CONSTMASK & ~MTP_TAGMASK),	tmp2	
+						; get constant tags in
+						; delay slot
+	bcs,a	ustruct
+	nop
+
+	; fall through for list case
+
+ulist:
+	deref	UArg1,	1f			; dereference remaining arg
+	bind_and_return	UArg2,	UArg1,	2f 	; bind when UArg1 is var
+1:	cmp	tmp1,	MTP_LIST		; see if we have a list tag
+	bne	ufail				; fail if not
+	cmp	UArg1,	UArg2			; See if equal (useless in delay
+						;   slot when above branch taken)
+	bne,a	3f				; Branch if not, and...
+	sub	SP,	12,	SP		; Allocate a stack frame
+						;   in the delay slot
+2:	retl					; return if equal
+	nop					;   .. also for binding
+3:	st	UArg2,	[SP+8]			; save list pointer 2
+	ld	[UArg2-MTP_LIST], UArg2		; get car for list 2
+	st	UArg1,	[SP+4]			; save list pointer 1
+	st	RET,	[SP]			; save return address
+	call	wm_unify			; call unifier
+	ld	[UArg1-MTP_LIST], UArg1		; get car for list 1 
+						;    (in delay slot)
+
+	ld	[SP+8],	UArg2			; get list pointer 2
+	ld	[SP+4],	UArg1			; get list pointer 1
+	ld	[UArg2+(4-MTP_LIST)], UArg2	; get cdr 2
+	ld	[UArg1+(4-MTP_LIST)], UArg1	; get cdr 1
+	ld	[SP],	RET			; get former return address
+	ba	wm_unify			; tail recurse to unifier
+	add	SP,	12,	SP		; readjust the stack pointer
+
+	;
+	; structure code
+	;
+	; UArg2 contains structure
+	; UArg1 contains other argument to dereference
+	;
+
+ustruct:
+	deref	UArg1,	1f			; dereference remaining arg
+	bind_and_return	UArg2,	UArg1, 2f	; bind when UArg1 is var
+1:	cmp	UArg1,	UArg2			; See if equal
+	bne,a	3f				; branch if not and ...
+	cmp	tmp1,	MTP_STRUCT		; see if we have a structure
+						;   (in delay slot)
+2:	retl					; return
+	nop
+3:	
+	bne	ufail				; fail if not structure
+	nop
+	ld	[UArg1-MTP_STRUCT], tmp1	; put functor into tmp1
+	ld	[UArg2-MTP_STRUCT], tmp2	; put other functor in tmp2
+	cmp	tmp1,	tmp2			; see if functors equal
+	be,a	1f				; branch if equal
+	srl	tmp1,	24,	tmp1		; get arity (in delay slot)
+ufail:	fail
+
+1:	cmp	tmp1,	255			; see if we have escape arity
+	bne,a	1f				; branch if not
+	subcc	tmp1,	1,	tmp1		; decrement tmp1 (in delay slot)
+	add	UArg1,	4,	UArg1		; advance UArg1
+	add	UArg2,	4,	UArg2		;	and UArg2
+	ld	[UArg1-MTP_STRUCT], tmp1	; put real arities into
+	ld	[UArg2-MTP_STRUCT], tmp2	;	UArg1 and UArg2
+	cmp	tmp1,	tmp2			; see if arities are equal
+	bne	ufail				; branch if unequal
+	srl	tmp1, MTP_CONSTSHIFT, tmp1
+	subcc	tmp1,	1,	tmp1		; decrement tmp1
+
+1:	bne	2f				; branch if more than one arg
+	ld	[UArg1+(4-MTP_STRUCT)],	tmp2	; get arg associated with UArg1
+						;   (in delay slot)
+	; one argument case
+	ld	[UArg2+(4-MTP_STRUCT)], UArg1	; get last argument
+	ba	wm_unify			; tail recurse
+	mov	tmp2,	UArg2
+
+2:	; multi-argument case
+	sub	SP,	16,	SP		; allocate a stack frame
+	st	T2,	[SP+12]			; save T2 on the stack
+	add	UArg2,	4-MTP_STRUCT,	T2	; make T2 point at second arg
+	ld	[T2],	UArg2			; start loading UArg2
+	st	T1,	[SP+8]			; save T1 on the stack
+	st	S,	[SP+4]			; save S on the stack
+	st	RET,	[SP]			; save return address on frame
+	mov	tmp1,	S			; put the counter in S
+	add	UArg1,	4-MTP_STRUCT,	T1	; make T1 point at first arg
+	mov	tmp2,	UArg1			; set UArg1 with value loaded
+						; in delay slot above
+
+
+3:	add	T1,	4,	T1		; advance arg pointer
+	call	wm_unify			; call unifier on args
+	add	T2,	4,	T2		; advance arg pointer in delay
+						;   slot
+
+	ld	[T2],	UArg2			; start loading next argument
+	subcc	S,	1,	S		; decrement tmp1
+	bne	3b				; branch back if not last arg
+	ld	[T1], UArg1			; get next argument for UArg1
+
+
+	;
+	; clean up multi-arg stack frame
+	;
+
+	ld	[SP],	RET			; reload saved registers
+	ld	[SP+4],	S
+	ld	[SP+8],	T1
+	ld	[SP+12], T2
+	ba	wm_unify			; tail recurse to unifier
+	add	SP,	16,	SP		; deallocate stack frame
+						;  (in delay slot)
+uconst:
+	; UArg2 contains dereferenced ground object
+	; tmp2 contains the constant tags with the lower 2 bits masked out
+	; The condition codes are set by the masking operation which
+	; occured in the delay slot of the branch to this location. 
+
+
+	bne,a	uconst2				; branch if not an integer
+	cmp	tmp2,	(MTP_SYM & ~MTP_TAGMASK)
+						; See if we have a symbol
+						; (in the delay slot)
+
+	; 
+	;	wm_u_int	-- unify integer
+	;	wm_g_int	-- get integer
+	;
+	;	UArg1	-- object to dereference
+	;	UArg2	-- integer (tagged) to work with
+	;
+
+	global	wm_g_int
+	global	wm_u_int
+wm_g_int:
+	deref	UArg1,	1f			; dereference remaining arg
+	bind_and_return	UArg2,	UArg1, 2f	; bind when UArg1 is var
+wm_u_int:
+	deref	UArg1,	1f			; dereference arg
+	heap_bind_and_return	UArg2,	UArg1, 2f	
+						; bind when UArg1 is var
+1:	cmp	UArg1,	UArg2			; See if equal
+	bne	3f				; branch if not
+	nop
+2:	retl					; return
+	nop
+3:	fail					; fail if not equal
+	
+
+uconst2:
+	;
+	; We get to this point when we know we have a symbol of some type
+	; (the integer case has been eliminated).  The condition codes
+	; have already been set by a comparison to see if we have a symbol
+	; or not
+	;
+	;
+
+	be	wm_g_sym
+	nop
+
+	;
+	; Not a symbol.  Must be a UIA
+	;
+
+	deref	UArg1,	1f			; dereference remaining arg
+	bind_and_return	UArg2,	UArg1,	2f	; bind when UArg1 is var
+1:	cmp	UArg1,	UArg2			; see if equal
+	bne,a	3f				; branch if not
+	and	UArg1,	MTP_CONSTMASK,	tmp1	; extract const tags while 
+						;   branching
+2:	retl					; else return
+	nop
+3:	cmp	tmp1,	MTP_SYM			; see if we have symbol
+	bne,a	4f				; branch if we don't
+	cmp	tmp1,	MTP_UIA			; do UIA comparison in delay
+						;   slot
+	callC2	cmp_sym_uia, UArg1, UArg2	; compare symbol with uia
+	orcc	UArg1,	ZERO,	ZERO		; test the result
+	be	ufail				; fail if zero result returned
+	nop
+	retl					; else return
+	nop
+4:	bne	ufail				; fail if not UIA
+	nop
+	callC2	cmp_uia_uia, UArg1, UArg2	; compare the two uias
+	orcc	UArg1,	ZERO,	ZERO		; test the result
+	be	ufail				; fail if zero result returned
+	nop
+	retl					; else return
+	nop
+
+
+
+
+	; 
+	;	wm_u_sym	-- unify symbol
+	;	wm_g_sym	-- get symbol
+	;
+	;	UArg1	-- object to dereference
+	;	UArg2	-- symbol (tagged) to work with
+	;
+
+	global	wm_u_sym
+	global	wm_g_sym
+wm_u_sym:
+	deref	UArg1,	1f			; dereference arg
+	heap_bind_and_return UArg2, UArg1, 2f	; bind when UArg1 is var
+wm_g_sym:
+	deref	UArg1,	1f			; dereference remaining arg
+	bind_and_return	UArg2,	UArg1,	2f	; bind when UArg1 is var
+1:	cmp	UArg1,	UArg2			; See if equal
+	bne,a	3f				; branch if not
+	and	UArg1,	MTP_CONSTMASK,	tmp1
+2:	retl					; return
+	nop
+3:	cmp	tmp1,	MTP_UIA			; see if we have a UIA
+	bne	ufail				; fail if not uia
+	nop
+	callC2	cmp_sym_uia,	UArg2,	UArg1	; compare the symbol and UIA
+	orcc	UArg1,	ZERO,	ZERO		; test the result
+	be	ufail				; fail if zero result returned
+	nop
+	retl					; otherwise succeed
+	nop
+
+
+
+	;
+	; wm_g_uia is called by code which needs to match an uninterned
+	; atom in the head.
+	;
+	; UArg1 contains the object to match
+	; RET points 8 before the fence and the uia data.  The fence contains
+	; the total number of words occupied by the fence and the uia data.
+	; It is tagged, so we will have to extract value before this number
+	; is usable.
+	; 
+
+	global	wm_g_uia
+wm_g_uia:
+	deref	UArg1,	guia_ground		; dereference
+	;
+	; fall through if variable... we now need to get the current heap
+	; location and tag it as a UIA and bind it to UARg1 before we do
+	; the copy
+	;
+	ld	[RET+8],	tmp2		; get fence off early
+	sub	H, HeapBase,	tmp1		; get offset from beginning
+						; of heap into tmp1
+	sll	tmp1, MTP_CONSTSHIFT,	tmp1	; make room for tag
+	add	tmp1,	MTP_UIA,	tmp1	; add in the tag
+	bind	tmp1,	UArg1			; perform the binding
+	
+guia_copy:
+	;
+	; tmp2 has the fence
+	; RET points 12 before the UIA data (8 before the UIA fence)
+	;
+	; We must copy the UIA data and store the fences
+	;
+
+	st	tmp2,	[H]			; store the first fence
+	srl	tmp2,	2,	tmp1		; get number of bytes in
+	andn	tmp1,	3,	tmp1		;   data plus one fence
+	st	tmp2,	[H+tmp1]		; store the last fence
+	add	H,	tmp1,	H		; advance H to point at
+						; last fence
+	sub	H,	4,	H		; make H point at last word
+						;   of data area to copy to
+	add	RET,	8,	RET		; advance RET to point at
+						;   fence in code area
+	add	RET,	tmp1,	RET		; advance RET to point at
+						;   place to continue execution
+						;   at;  This will be one word
+						;   ahead of where the last
+						;   of the uia data will be
+						;   found in the code area
+	sub	ZERO,	tmp1,	tmp1		; negate tmp1
+	add	tmp1,	4,	tmp1		; don't want to copy the fence
+
+guia_copyloop:
+	ld	[RET+tmp1],	tmp2		; get data 
+	addcc	tmp1,	4,	tmp1		; advance counter and test
+	bne	guia_copyloop			; loop around
+	st	tmp2,	[H+tmp1]		; store uia data (in delay slot)
+
+	jmpl	RET,	ZERO			; return to caller whilst
+	add	H,	8,	H		;  advancing H past last fence
+
+
+guia_ground:
+	cmp	tmp1,	MTP_CONST		; see if we have a constant
+	bne	ufail				; branch if we don't
+	nop
+	ld	[RET+8],	tmp2		; get fence 
+	add	RET,	12,	UArg2		; set UArg2 to point at string
+	srl	tmp2,	2,	tmp2		; convert to byte length
+	andn	tmp2,	3,	tmp2		; ...
+	add	RET,	tmp2,	RET		; advance over the data
+	callC2	cmp_obj_str, UArg1, UArg2	; compare the two in C
+	orcc	UArg1,	ZERO,	ZERO		; test the result
+	be	ufail				; fail if zero result returned
+	nop
+	retl					; otherwise succeed
+	nop
+
+	;
+	; wm_p_uia is called by code which needs to set up a uia in the
+	; body of a clause.
+	;
+	; UArg1 will be set to the appropriate value and the UIA will be
+	; copied onto the heap
+	;
+
+	global	wm_p_uia
+wm_p_uia:
+	ld	[RET+8],	tmp2		; get fence off early
+	sub	H, HeapBase,	UArg1		; get offset from beginning
+						; of heap into UArg1
+	sll	UArg1, MTP_CONSTSHIFT,	UArg1	; make room for tag
+	ba	guia_copy
+	add	UArg1,	MTP_UIA,	UArg1	; add in the tag
+
+
+	;
+	; wm_u_lval performs the unify local value operation (write mode)
+	;
+	; UArg1 is set to the object to dereference
+	; UArg2 is set to the address on the heap to bind
+	; 
+
+	global	wm_u_lval
+wm_u_lval:
+
+	deref	UArg1,	1f			; dereference argument
+	cmp	UArg1,	HeapBase		; see if on heap
+	bcs,a	2f				; branch if not
+	cmp	UArg1,	SPB
+1:	retl					; return from subroutine
+	st	UArg1,	[UArg2]			;   whilst storing the argument
+2:	bcs	3f				; branch if we don't need
+	st	UArg2,	[UArg1]			;   to trail while binding
+	sub	TR,	4,	TR		; push an entry
+	st	UArg1,	[TR]			;   onto the trail
+3:	retl					; return from subroutine whilst
+	st	UArg2,	[UArg2]			;   making heap loc a variable
+
+
+	;
+	; wm_p_unsafe is called to perform the put_unsafe operation
+	;
+	; UArg1 is set to the object to dereference.  On exit it will
+	;	contain the dereferenced object.
+	;
+
+	global	wm_p_unsafe
+wm_p_unsafe:
+	deref	UArg1,	1f			; dereference argument
+
+	cmp	UArg1,	HeapBase
+	bcs,a	2f				; branch if lower (not on heap)
+	cmp	UArg1,	SPB			; see if we need to trail
+						; in delay slot
+1:	retl					; return to caller
+	nop
+
+2:	bcs	3f				; branch if no trailing needed
+	st	H,	[H]			; make heap var in delay slot
+
+
+	sub	TR,	4,	TR		; push an entry
+	st	UArg1,	[TR]			;   onto the trail
+3:
+	st	H,	[UArg1]			; make lstack var point to heap
+	mov	H,	UArg1			; move heap top to UArg1
+	retl					; return to caller whilst
+	add	H,	4,	H		;   advancing H

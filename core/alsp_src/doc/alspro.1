@@ -1,0 +1,134 @@
+.TH alspro 1 "20 January 1994" "ALS"
+.SH NAME
+alspro \- Prolog compiler and interactive shell
+.SH SYNOPSIS
+.B alspro
+[
+.B \-b
+] 
+[ \fB\-g \fIgoal\fR ]
+[
+.B \-v
+]
+[
+.IR sourcefile\| .\|.\|.
+]
+[
+.B \-p
+.IR appargs\| .\|.\|.
+]
+.SH DESCRIPTION
+.I alspro
+is the interactive Prolog development environment developed by Applied Logic
+Systems.  ALS Prolog consists of an incremental Prolog compiler,
+an interactive Prolog shell, and a library of builtin predicates.
+The Prolog shell is a user interface 
+to which you can submit Prolog goals
+and have the results returned interactively. To the Prolog application 
+programmer, ALS Prolog acts the same as a standard Prolog interpreter, but
+internally, both consulted and asserted Prolog clauses are compiled.
+.LP
+Whenever 
+.I alspro 
+is executed, it will look for a startup file called .alspro in 
+your current directory, and in your home directory. 
+You can put Prolog procedures and directives in this file which will
+customize your Prolog environment.
+After processing the .alspro startup file, zero or more \fIsourcefile\fRs
+are compiled (if necessary) and loaded into ALS Prolog.  Source files named
+with a \fI.pro\fR extension may be compiled into a more quickly loadable
+form denoted with the \fI.obp\fR extension by leaving the extension off
+when loading the file.  When specified without an extension, ALS Prolog will
+load the most recently modified
+of the \fI.pro\fR and \fI.obp\fR files updating the latter if necessary.
+.SH OPTIONS
+.TP 
+.B \-b
+run ALS Prolog in batch mode; that is
+control will return to the OS shell
+invoking ALS Prolog after processing the command line.
+This option is useful if you just want to compile
+Prolog files without entering the Prolog shell.
+.TP  
+\fB\-g \fIgoal\fR
+run the Prolog 
+.IR goal
+after ALS Prolog starts up. The goal might have to be quoted depending on the
+rules of the shell you are running in or if the goal contains any of your
+shell's special characters.  The goal need not have a terminating full stop
+(period).  After execution of the goal, control will return to the operating
+system shell.
+.TP
+.B \-p
+distinguishes between command line arguments intended for ALS Prolog and 
+those switches intended for an application.  Those command line arguments
+which occur after the \fB\-p\fR will be accessible as a list via the
+procedure \fIcommand_line/1\fR.
+If \fB\-P\fR is used instead of \fB\-p\fR, the name of the image will be
+the first element of the list obtained from \fIcommand_line/1\fR.  The
+.B \-P
+switch is useful for developing programs which will eventually be turned
+into standalone applications.
+.TP
+.B \-v
+turns on verbose mode. This causes all system loading messages, including 
+some which are normally suppressed, to be printed.
+.LP
+The
+.B ALS_OPTIONS
+environment variable may be used to control certain other
+environmental aspects of
+ALS Prolog, including initial heap and stack size.  The
+.B ALS_OPTIONS
+environment variable should be set to a sequence of
+options where each option is separated from the previous option by a
+comma.  The valid options which may appear in 
+.B ALS_OPTIONS
+(ranked from most to least useful) are:
+.RS
+.TP 2i
+heap_size:HSIZE
+HSIZE*1024 is the initial size of the heap in bytes.
+.TP
+stack_size:SSIZE
+SSIZE*1024 is the initial stack size in bytes.
+.TP
+icbuf_size:ISIZE
+ISIZE*1024 is the initial icode buffer
+size in bytes.  The size of the icode buffer has a direct
+bearing on the size of clauses which may be asserted
+and on the number of clauses which the indexer may
+successfully index.
+.TP
+debug_shell
+Cause ALS-Prolog to start up with a very
+primitive Prolog shell without any (Prolog defined)
+builtins.  This shell is useful to help determine what
+is going on when ALS-Prolog is massively broken.
+.RE
+.LP
+The following Bourne shell commands will set the
+.B ALS_OPTIONS
+environment variable so that ALS Prolog will start up with a four megabyte
+heap and a two megabyte stack:
+.RS
+.LP
+ALS_OPTIONS=heap_size:4096,stack_size:2048
+.br
+export ALS_OPTIONS
+.RE
+.SH FILES
+.DT
+.TP
+\fIPRODIR\fR/als/examples/*
+example Prolog programs
+.TP
+\fIPRODIR\fR/als/alsdir/*
+ALS Prolog system files
+.LP
+.I PRODIR
+is usually /usr/local/prolog.
+.SH SEE ALSO
+.LP
+.I "ALS Prolog User's Guide and Reference Manual"
+.br

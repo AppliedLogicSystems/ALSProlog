@@ -1,0 +1,327 @@
+Interrupts on the 386
+
+The 386 Prolog compares the distance between the backtracking stack and the
+heap to see if a garbage collection is necessary. If this distance ever
+becomes less than a pre-defined value, called the heap safety value, the
+program is interrupted, and the garbage collector code is run.
+
+The test is done at the entrance to a procedure. When a procedure is called
+by a call or execute instruction, control is transfered to a location in the
+name table entry for the procedure which is being called. The first thing
+done in this patch of code is the overflow check. If no overflow has been
+detected, control continues on. Either control is passed to the first clause,
+or the indexing code is run, or the resolve refrence code is run.
+
+This overflow check is useful as a general interrupt mechanism in Prolog. Since
+it is always done on procedure entry, and since all calls must go through
+the procedure table entry, any call can be interrupted. If the overflow check
+is told that the heap safety value is larger than the current distance
+between the heap and backtrack stack, the next call will be stopped. In the
+Sun, this is currently used for garbage collection and the debugger. However,
+the overflow code must examine all of the possibilities of why the interrupt
+happened and what to do about it. As the overflow code is written in assembler,
+it is difficult to add in new interrupts into the system.
+
+The approach taken in the 386 is to let the overflow handler, or what we will
+call now the interrupt handler), be written in Prolog. This was done on the
+Mac originally for garbage collection and the resolve refrence code, but
+it was not quite as general a mechanism as is being used now on the 386 and
+the IM. Either system, or user, code can trigger an interrupt by setting the
+heap safety to a value which garantees that the next call will be interrupted.
+When the interrupt happens, the interrupted call is packaged up in a term and
+passed as an argument to the interrupt handler. The continuation pointer from
+the handler will point into the interrupted clause, and the computation will
+continue where it would have continued if the call had never been interrupted
+when the handler returns. An example will help make this clearer. Suppose the
+goal
+
+	:- b, c, f(s,d), d, f.
+
+is running. The call for c/0 has returned and f/2 is about to be called. 
+Something happens to trigger an interrupt and f/2 is called. The overflow code
+will run and the goal will now operationally look as though it were
+
+	:- b, c, $int(f(s,d)), d, f.
+
+Rather than f/2 running, $int/1 will run. When $int/2 returns, d/0 will
+run, which is what would have happened if f/2 had run and returned. If $int/1
+decides to run f/2, all it has to do is call it. $int/1 can leave choice
+points points and be cut since it is exactly like any other procedure call. Any
+cuts inside $int/1 will have no effects outside of the call. In other words,
+it is a fairly safe operation. Once the interrupt handler is called, the
+interrupt trigger should be reset, or the interrupt handler will interrupt
+itself, going into an infinite loop.
+
+If some thought is given to the possibilities of this interrupt machanism, it
+becomes apparent that it can be used for a variety of things. For instance, it
+can be used to write a clause decompiler in Prolog itself. The $int/1 code
+could be something of the form
+
+	$int(Goal) :-
+		save Goal somewhere,
+		set an interrupt.
+
+The goal would be saved somewhere, and the interrupt code would merely
+return after making sure that the next call would be interrupted. It is not
+necessary to call Goal, because nothing below the clause being decompiled
+is of interest. A trace mechanism would be of the form
+
+	$int(Goal) :-
+		show user Goal,
+		set an interrupt and call Goal.
+
+Here, the code will show the user the goal and then call it, after making sure
+that all subgoals in Goal will be interrupted. A ^C trapper could be written
+which keeps the current goal pending. Then the user could be given a choice
+of turning on the trace mechanism, calling a break package which would
+continue the original computation when it returned, or even stop the
+computation altogether.
+
+In order for the above operations to take place, the interrupt handler
+needs to know which interrupt has been issued. This is done through the
+magic value. Magic is a global variable, which is given as the first
+argument to the $int/2 call
+
+	$int(Magic,Goal)
+
+Calling $int/2 with the magic value means that the proper handler will be
+called. If Magic is allowed to be a regular term, information can be passed
+back from an interrupt, such as the accumlated goals from a clause which
+is being decompiled.
+
+In order to write code such as the decompiler in Prolog, several routines are
+needed. The system programmer must be able to set and examine the magic
+value. This is done with the setMagic/1 and getMagic/1 calls. The programmer
+must also be able to interrupt the next call. This is done with the ouch/0
+call. For example, the goal
+
+	:- ouch, a.
+
+will call
+
+	$int(Magic,a)
+
+If the clause
+
+	b :- ouch.
+
+is called by the goal
+
+	:- b,a.
+
+then
+
+	$int(Magic,a)
+
+will be called once again, since after b returns, a/0 is the next goal
+called. Finally, there must be a way of calling a goal without interrupting
+it, but setting the interrupt so that the the goal after the goal called will
+be interrupted. If a/0 is to be called and the next call after it is to be
+interrupted, the call
+
+	:- ocall(a)
+
+is used. For example, if a/0 is defined by
+
+	a :- b.
+
+then
+
+
+	:- ocall(a).
+
+will call
+
+	:- $int(Magic,b).
+
+not
+
+	:- int(Magic,a).
+
+However, if a/0 is merely the fact
+
+	a.
+
+then the call
+
+	:- ocall(a),b.
+
+will end up calling
+
+	:- $int(Magic,b).
+
+As an extended example of the use of these routines, a clause decompiler
+will now be built. The code given earlier gives the general idea.
+
+	$int(Goal) :-
+		save Goal somewhere,
+		set an interrupt.
+
+The goal can be saved in the magic value for the next call. The clause so far
+would be
+
+	$int(s(Goals,Final),NewGoal) :-
+		setMagic(s([Goal|Goals],Final)),
+		resetint,
+		ouch.
+
+The magic value has the new goal added to it. Next, the interrupt mechanism
+is reset so that the next goal will be caught, and the trigger is set for
+the next call.
+
+To start the decompiler, the clause should be called as though it were to
+be run. However, each subgoal will be interrupted and discarded before it can
+be run. The starting clause would be something of the form
+
+	$source(Head,Body) :-
+		setMagic(s([],Body)),
+		ocall(Head).
+
+First, the magic value is set to the decompiler interrupt with an initially
+empty body and a variable in which to return the completed body of the
+decompiled clause. The goal is then called with ocall/1, which will make
+sure that the next goal called after Head will be interrupted. The above $int/2
+clause will then catch all subgoals. The head code for Head will bind any
+variables in Head from values in the head of the clause, and all variables
+that are in both the head and body of the clause will be correct in the
+decompiled clause, since an environment has been created for the clause. Since
+the clause is actually running, each subgoal will pick up its variables
+from the clause environment. If the decompiler should ever backtrack, the
+procedure for Head will backtrack, going on to the next clause, which will
+be treated in the same way.
+
+The only tricky thing is the stopping of the decompiler. The two clauses
+given above will decompile the entire computation, including the code
+which called the decompiler. The best method would be to have a goal which
+the decompiler would recognize as being the end of clause flag. However,
+rather than having a special goal which would always stop the decompiler,
+which would mean that the decompiler would not be able to decompile itself,
+some way must be found to make only the particular call to this goal was
+the one at which the decompiler should stop. The above clauses would be changed
+to
+
+	$int(s(ForReal,Goals,Final),$endSource(Variable)) :-
+		ForReal == Variable,!.
+	$int(s(ForReal,Goals,Final),Goal) :-
+		setMagic(s(ForReal,[Goal|Goals],Final)),
+		resetint,
+		ouch.
+
+	$source(Head,Body) :-
+		setMagic(s(ForReal,[],Body)),
+		ocall(Head),
+		$endSource(ForReal).
+
+Here, $source/2 has a the variable ForReal in its environment. This is carried
+through the interrupts through the magic value, and if the interrupted goal
+is ever $endSource(ForReal), the decompiler stops. Since $endSource(ForReal)
+will be caught when $source/2 is called, since all subgoals are then being
+caught, it's argument will come from $source/2's environment. Otherwise,
+the interrupted goal is added to the growing list of subgoals, and the
+compuation continues. If $source/2 is called by $source/2, there will be a new
+environment and the first $endSource/1 encountered will be caught and stored,
+but not the second one.
+
+The following code gives the complete decompiler which handles choice
+points and the like properly.
+
+%
+% The source extracter (I though decompiler was no longer appropriate).
+%
+
+export $source/3.
+
+$source(Module,Head,Clause) :-
+		% Source of the ForReal variable used to mark the end
+		% of extraction.
+	$source(ForReal,Module,Head,Clause). 
+
+$source(ForReal,Module,Head,Clause) :- 
+		% Set the s/2 interrupt.
+	setMagic(s(ForReal,Back)),
+		% Start extracting.
+	ocall(Module,Head),
+		% This goal is never run, but is used to stop the extracter.
+	$endSource(ForReal),
+		% Make the clause to be returned.
+	fixBody(Back,Head,Clause),
+		% And set a normal interrupt.
+	setMagic(gc).
+% $source has been failed all the way. Have to cleanup s/2 interrupt pending
+% from the last clause of the extracted procedure.
+$source(ForReal,_,_,_) :-
+			% Stop the extracter. This goal is never run.
+	$endSource(ForReal),
+			% Got to clean up choice point in s/2 interrupt.
+	setMagic(fail),
+	fail.
+	
+%
+% The s/2 interrupt is used as the entry point in the interrupt code for
+% the source code extracter. It used used for entering a clause for the
+% first time.
+%
+
+% Going into a clause for the first time.
+$int(s(ForReal,Final),_,Goal) :-
+	$source0(ForReal,[],Final,Goal).
+% Catch a failure that means $source is failing all the way out.
+$int(s(_,_),_,_) :-
+		% See if ultimate failure has been requested.
+	getMagic(fail),
+		% Yep. Do it.
+	!,fail.
+% $source has backtracked and we need to see if there is another matching
+% clause in the procedure.
+$int(s(ForReal,Final),_,_) :- !,
+		% Set interrupt for entry into a clause.
+	setMagic(s(ForReal,Final)),
+		% And fail into it.
+	ocall(fail).
+
+%
+% For s/3 interrupt, we are in the middle of source extracting a clause.
+$int(s(ForReal,Goals,Final),_,Goal) :- !,
+	$source0(ForReal,Goals,Final,Goal).
+
+% When the source extracter was called, a variable was given which is used to
+% identify the end of extraction. This variable is ForReal, and the $endSource
+% term will have this variable as its argument when the decmpiler is brought
+% to an end. Here we check it. This is done so that we can extract the
+% extracter.
+$source0(ForReal,Final,Final,$endSource(Check)) :-
+	Check == ForReal,!.
+% Not at the end.
+$source0(ForReal,Goals,Final,Goal) :-
+		% Set s/3 interrupt with the latest goal tacked on.
+	setMagic(s(ForReal,[Goal|Goals],Final)),
+		% Since the continuation pointer points into the clause
+		% that is being extracted, all we have to do is return from
+		% this one without starting up the sub-goal we have just
+		% extracted, after setting up the next interrupt.
+	resetint,
+	ouch.
+
+
+Actual Implementation of Interrupts
+
+Three variables are used to implement interrupts.
+
+wm_safety:
+	What the WAM uses when it is checking to see whether an interrupt
+should happen.
+
+wm_normal:
+	What wm_safety should be when we are only doing gc checking.
+
+wm_trigger:
+	What wm_safety is set to when we require a user defined interrupt
+(eg a call to ouch/0). It is usually the size of the entire heap and stack
+so we guarantee a gc interrupt.
+
+GC by the Overflow Code
+
+To have the overflow code do a GC, change the value of OverflowPtr (which
+is found in int.m4) to wm_overflowgc. Otherwise, to leave GC under user
+control, set OverflowPtr to wm_overflow.
+

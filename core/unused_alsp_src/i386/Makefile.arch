@@ -1,0 +1,107 @@
+#
+# Makefile.arch
+# architecture specific makefile for ALS Prolog on 386
+# 
+# Note : variable ADIR is set in Makefile.gen
+#
+
+ACFILES=	disassem icode1 icode2 icmath
+
+AHFILES= 	fmath wamregs mtypes machreg machinst
+
+APROFILES=
+
+# file extension of assembler source
+
+ASRCEXT=	.m4
+
+ASHFILES=	assembly
+
+ASRCFILES=	jump call rts cut choice int uia salloc
+
+ASFILES= 	$(ASRCFILES) $(ASHFILES)
+
+# files to be generated
+
+AGENFILES=	jump.s call.s rts.s cut.s choice.s int.s uia.s salloc.s
+
+AGENDIR	=	Generate
+AGENINCL=	asm.m4 masm.m4 sysv.m4 sunos.m4
+
+#-------------------------------------------------------
+# Copy arch specific files
+#-------------------------------------------------------
+
+acopy	: $(MAKEARCH)
+	-mkdir $(AGENDIR)
+	$(CPFILE) -m $(CPMODE) -s $(ADIR)/$(AGENDIR) -t $(AGENDIR) $(AGENINCL)
+	$(CPFILE) -m $(CPMODE) -s $(ADIR) -x .c $(ACFILES)
+	$(CPFILE) -m $(CPMODE) -s $(ADIR) -x .h $(AHFILES)
+	$(CPFILE) -m $(CPMODE) -s $(ADIR) -x $(ASRCEXT) $(ASFILES)
+	$(CPFILE) -m $(CPMODE) -s $(ADIR) -x .pro $(APROFILES)
+
+
+#-------------------------------------------------------
+# Clean arch specific files
+#-------------------------------------------------------
+
+aclean	:
+	rm -rf $(AGENDIR)
+	$(RMFILE) $(AGENFILES)
+	$(RMFILE) -x .c $(ACFILES)
+	$(RMFILE) -x .h $(AHFILES)
+	$(RMFILE) -x $(ASRCEXT) $(ASFILES)
+	$(RMFILE) -x .pro $(APROFILES)
+
+#-------------------------------------------------------
+# Generate from arch specific files
+#-------------------------------------------------------
+
+agenerate : $(AGENFILES)
+
+# operating system flag SYSOS is defined in Makefile.mach
+
+GENASS= /usr/5bin/m4 -D$(SYSOS) $(AGENDIR)/asm.m4
+
+# Files that GENASS needs
+
+GENASSINC= $(AGENDIR)/asm.m4
+
+#
+# If either of the include files have been updated, make sure whoever
+# uses asm.m4 is notified.
+#
+
+$(GENASSINC):	$(AGENDIR)/masm.m4 $(AGENDIR)/sysv.m4 $(AGENDIR)/sunos.m4
+	touch $(GENASSINC)
+
+
+jump.s:	${GENASSINC} jump.m4 assembly.m4
+	${GENASS} jump.m4 >jump.s
+
+call.s:	${GENASSINC} call.m4 assembly.m4
+	${GENASS} call.m4 >call.s
+
+rts.s:	${GENASSINC} rts.m4 assembly.m4
+	${GENASS} rts.m4 >rts.s
+
+cut.s:	${GENASSINC} cut.m4 assembly.m4
+	${GENASS} cut.m4 >cut.s
+
+choice.s:	${GENASSINC} choice.m4 assembly.m4
+	${GENASS} choice.m4 >choice.s
+
+int.s:	${GENASSINC} int.m4 assembly.m4
+	${GENASS} int.m4 >int.s
+
+uia.s:	${GENASSINC} uia.m4 assembly.m4
+	${GENASS} uia.m4 >uia.s
+
+salloc.s: ${GENASSINC} salloc.m4 assembly.m4
+	${GENASS} salloc.m4 >salloc.s
+
+
+#
+# end of Makefile.arch
+#
+

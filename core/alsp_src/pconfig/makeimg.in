@@ -1,0 +1,34 @@
+
+PIMAINC	= $(srcdir)/generic/pimain.c
+
+PIMAINO	= pimain.o
+TOPOBJS	= $(PIMAINO) $(XOBJS)
+
+probldd = $(probld)/$(ARCH)_$(OS)
+PROLIB	= $(probldd)/bld-$(protype)/alspro.a
+#PROLOG	= $(probldd)/alspro
+
+CC      = gcc
+CFLAGS  = -O $(OTHERCFLAGS)
+CLIBS   = -lm
+
+#
+# Define CPPFLAGS and the default rule for translating .c files to .o files
+#
+STDINCS = -I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(probldd)
+CPPFLAGS = $(STDINCS) $(INTFCINCS) -DHAVE_CONFIG_H
+
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(INTF_CFLAGS) $<
+
+all: $(TSYSN)_basis
+	echo done
+
+pimain.o: $(PIMAINC) pi_init.c pi_cfg.h
+	$(CC) -o pimain.o -c $(CPPFLAGS) $(CFLAGS) $(INTF_CFLAGS) $(PIMAINC) 
+
+
+$(TSYSN)_basis : $(TOPOBJS) $(PROLIB) $(MOTIFINTLIB)
+	echo starting $(TSYSN)_basis
+	$(CC) -o hitk_basis $(TOPOBJS) \
+		$(PROLIB)   \

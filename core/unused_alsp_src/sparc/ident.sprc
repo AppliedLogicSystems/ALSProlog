@@ -1,0 +1,196 @@
+;
+; ident.sprc	== and \==
+;	Copyright (c) 1991-1993 by Applied Logic Systems, Inc.
+;
+; Author:	Kevin A. Buettner
+; Creation:	2/5/91
+; Revision History:
+;
+
+#include "assembly.sprc"
+
+	global	wm_nonidentical
+wm_nonidentical:
+	mov	OldE,	E			; nuke environment
+	sub	Fail,	8,	RET
+	ba	ident
+	mov	CP,	T3
+
+	global	wm_identical
+wm_identical:
+	mov	OldE,	E			; nuke environment
+	sub	CP,	8,	RET
+	mov	Fail,	T3
+
+ident:
+
+;
+; ident is called to check identity of two arguments.  This subroutine will
+; return normally if the arguments are identical.  If not, it will exit
+; abnormally by jumping to the location pointed at by T3.
+;
+; Register Usage:
+;	RET	-- place to return to minus 8
+;	T3	-- place to fail to
+;	A1	-- first Argument
+;	A2	-- second Argument
+;
+
+	deref	A1,	gv1			; dereference 1st arg
+
+	; Argument in A1 is a variable
+
+	deref	A2,	idfail			; dereference 2nd arg
+
+	; Both arguments are variable
+
+	cmp	A1,	A2			; see if variables equal
+	bne	idfail				; fail if not
+	nop
+idret:	retl					; return if equal
+	nop
+
+gv1:	; A1 is ground
+
+	deref	A2,	g1g2			; dereference 2nd arg
+idfail:	jmpl	T3,	ZERO			; not equal
+	nop
+
+g1g2:	cmp	A1,	A2			; see if objects are the same
+	be	idret				; return if so
+	nop
+
+	and	A1, MTP_TAGMASK, tmp2		; get tag of first object
+	cmp	tmp1,	tmp2			; see if tags are the same
+	bne	idfail				; branch if not
+	nop
+
+	; Tags are the same.  See what we got and branch accordingly.
+
+	cmp	tmp1,	MTP_LIST		; compare against list
+	bcs,a	idstruct			; branch if structure
+	ld	[A1-MTP_STRUCT], tmp1		; load functor in delay slot
+
+	bgu,a	idconst				; branch if constant
+	and	A1, MTP_CONSTMASK, tmp1		; get const tags in delay slot
+
+	; Fall through for lists
+
+idlist:
+	ld	[A1+(4-MTP_LIST)], tmp1		; get cdr of first
+	ld	[A2+(4-MTP_LIST)], tmp2		; get cdr of second
+	ld	[A1-MTP_LIST],	A1		; get car of first
+	ld	[A2-MTP_LIST],	A2		; get car of second
+	sub	SP,	12,	SP		; allocate space on stack
+	st	RET,	[SP]			; store return address
+	st	tmp1,	[SP+4]			; store cdr of first
+	call	ident
+	st	tmp2,	[SP+8]			; store cdr of second
+
+	ld	[SP],	RET			; reload return address
+	ld	[SP+4],	A1			; reload cdr of first
+	ld	[SP+8],	A2			; reload cdr of second
+	ba	ident				; tail recurse
+	add	SP,	12,	SP		; deallocate stack space
+
+idstruct:
+	ld	[A2-MTP_STRUCT], tmp2		; load functor of second struct
+	cmp	tmp1,	tmp2			; compare functors
+	bne	idfail				; branch if not equal
+	srl	tmp1,	24,	tmp1		; shift to get arity (useless
+						;   when branch taken)
+	cmp	tmp1,	255			; see if we have escape arity
+	bne,a	1f				; branch if not
+	subcc	tmp1,	1,	tmp1		; subtract one from count
+						;	(in delay slot)
+	add	A1,	4,	A1		; advance structure pointers
+	add	A2,	4,	A2
+	ld	[A1-MTP_STRUCT], tmp1		; load real arities
+	ld	[A2-MTP_STRUCT], tmp2
+	cmp	tmp1,	tmp2			; see if arities equal
+	bne	idfail
+	srl	tmp1, MTP_CONSTSHIFT, tmp1	; shift out tag leaving arity
+	subcc	tmp1,	1,	tmp1		; do subtraction for loop
+
+1:	bne,a	1f				; branch if multi-arg
+	sub	SP,	16,	SP		; allocate space on stack
+						; in delay slot
+	ld	[A1+(4-MTP_STRUCT)], A1
+	ba	ident				; compare first args
+	ld	[A2+(4-MTP_STRUCT)], A2
+
+1:	st	RET,	[SP]
+	st	S,	[SP+4]
+	st	T1,	[SP+8]
+	st	T2,	[SP+12]
+	sll	tmp1,	2,	S		; multiply by four and put in S
+	add	A1, 4-MTP_STRUCT, T1		; T1 and
+	add	A2, 4-MTP_STRUCT, T2		;	T2 now have arg ptrs
+	add	T1,	S,	S		; S now has final address
+
+1:	ld	[T1],	A1			; get args
+	ld	[T2],	A2
+	call	ident				; see if args identical
+	add	T1,	4,	T1		; advance to next argument
+	cmp	S,	T1			; see if done
+	bne	1b				; loop if not done
+	add	T2,	4,	T2		; advance other pointer
+
+	ld	[T1],	A1			; get final args
+	ld	[T2],	A2
+	ld	[SP],	RET			; reload saved registers
+	ld	[SP+4],	S
+	ld	[SP+8],	T1
+	ld	[SP+12], T2
+	ba	ident
+	add	SP,	16,	SP		; deallocate frame in delay slot
+
+
+idconst:
+	and	A2, MTP_CONSTMASK, tmp2		; get other const tags
+	cmp	tmp1,	MTP_INT			; see if we have an integer
+	be	idfail				; fail if we do
+
+	cmp	tmp2,	MTP_INT			; see if second is an integer
+						;   (in delay slot...useless
+						;    when branch taken)
+	be	idfail				; fail if we do
+						; delay slot filled by
+						; next instruction...useless
+						; when branch taken
+
+	;
+	; Otherwise, either we have two symbols, a uia and a symbol,
+	; a symbol and a uia, or two uias.  We need to decide which
+	; situation we have and branch accordingly.
+	;
+
+	mov	A1,	UArg1			; put arguments in UArg1 and 2
+	mov	A2,	UArg2			;
+
+	cmp	tmp1,	MTP_SYM			; see if we have a symbol
+	bne	iduia				; branch if not
+	cmp	tmp2,	MTP_SYM			; see if second is symbol
+	be	idfail				; fail if so
+	nop
+
+	; We have a symbol and a uia
+
+	callC2	cmp_sym_uia, UArg1, UArg2	; compare them
+idtst:	cmp	UArg1,	0			; see if not equal
+	be	idfail
+	nop
+	retl
+	nop
+
+iduia:	cmp	tmp2,	MTP_SYM			; see if second is a symbol
+	be	iduiasym
+	nop
+	callC2	cmp_uia_uia, UArg1, UArg2
+	ba	idtst
+	nop
+
+iduiasym:
+	callC2	cmp_sym_uia, UArg2, UArg1
+	ba	idtst
+	nop

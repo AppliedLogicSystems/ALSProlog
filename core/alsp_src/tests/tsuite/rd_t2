@@ -1,0 +1,7 @@
+/*
+ * rd_t2:	A file which includes some other files
+ *
+ *	Note that there are no actual clauses in this file
+ */
+
+#include "rd_t2_1"

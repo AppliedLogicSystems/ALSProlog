@@ -1,0 +1,191 @@
+NAME
+
+     $current_package/1  -- get the name of the current package
+   
+
+FORMS
+
+     $current_package(Package)
+
+
+DESCRIPTION
+
+     Gets the name of the package loaded in the system. 
+     If no package is loaded in the system, "Package" will be
+     unified with the integer -1.
+
+
+
+
+
+NAME
+ 
+     $get_default_proc/3  -- get the default procedure whose default procedure
+                             table index is given
+
+
+FORMS
+
+     $get_default_proc(Idx,Pred,Arity)
+
+
+DESCRIPTION
+
+     Gets name and arity of the default procedure whose default procedure
+     table index is given. The first argument must be an integer and 
+     a correct default procedure table index. If it is not, this predicate
+     fails.
+
+
+
+
+
+
+NAME
+
+     $get_default_use/2  -- get the default use module whose default use
+                            module table index is given.
+
+
+FORMS
+
+     $get_default_use(Idx,ModName)
+
+
+DESCRIPTION
+
+     Gets the name of a module in the default use module table.
+     The first argument must be an integer and a correct default use
+     module table index. If it is not, this predicate fails.
+
+
+
+
+
+
+NAME
+
+     $listasm_clause/2  -- list the clause in the assembler syntax
+
+
+FORMS
+
+     $listasm_clause(DBRef,PckgName)
+
+
+DESCRIPTION
+
+     Prints the given clause in the PharLap 386|ASM assembler syntax
+     in the current output stream. The first argument is the data base
+     reference of the clause, and the second argument is the name of the
+     package being created. 
+
+
+NOTES
+
+     See packaging documentation for more information.
+
+
+
+
+
+
+NAME
+
+     $listasm_ntblentry/4  -- list the name table entry in the assembler syntax
+
+
+FORMS
+
+     $listasm_ntblentry(Module,Pred,Arity,PckgName)
+
+
+DESCRIPTION
+
+     Prints the name table entry of the given procedure in the PharLap 
+     386|ASM assembler syntax in the current output stream. The first three
+     arguments represent the procedure, and the last argument is the name
+     of the package being created. 
+
+
+NOTES
+
+     See packaging documentation for more information.
+
+
+
+
+
+
+NAME
+
+     $ntblentry/3  -- print the address of the name table entry
+
+
+FORMS
+
+     $ntblentry(Module,Pred,Arity)
+
+
+DESCRIPTION
+
+     Prints the address of the name table entry of the given procedure 
+     in the hexadecimal format. This predicate is used to produce 
+     unique names for packaged procedures.
+
+
+NOTES
+
+     See packaging documentation for more information.
+
+
+
+
+
+NAME
+
+     $package_external_defs/0  -- Put "extrn" directives into the package file
+
+
+FORMS
+
+     $package_external_defs
+
+
+DESCRIPTION
+
+     Puts "extrn" directives into the package file. 
+
+
+NOTES
+
+     See packaging documentation for more information.
+
+
+
+
+
+
+NAME
+
+     $package_toktbl/1  -- Copy the system token table in the packaging   
+                           token table.
+
+
+FORMS
+
+     $package_toktbl(NumofToks)
+
+
+DESCRIPTION
+
+     Copies the system token table into the package token file, and
+     returns the number of tokens.
+
+
+NOTES
+
+     See packaging documentation for more information.
+
+
+

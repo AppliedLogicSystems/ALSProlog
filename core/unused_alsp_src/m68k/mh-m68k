@@ -1,0 +1,22 @@
+#
+# mh-m68k
+#	architecture specific makefile fragment for ALS Prolog on m68k's
+#
+
+acfiles_c =	cmp.c disassem.c icmath.c icode1.c icode2.c int.c uia.c
+acfiles_o =	$(acfiles_c:.c=.o)
+acfiles_h =	aconfig.h codegen.h icmath.h machinst.h mtypes.h
+
+$(acfiles_o):	$(defs_h)
+
+asfiles_68k =	atomic.68k call.68k compare.68k cut.68k \
+		domath.68k functor.68k ident.68k interrupt.68k \
+		rts.68k sio.68k
+
+asfiles_o = 	$(asfiles_68k:.68k=.o)
+
+afiles_o =	$(acfiles_o) $(asfiles_o)
+
+asrcext =	.68k
+
+$(asfiles_o) :	atrans assembly.68k rts.h

@@ -1,0 +1,386 @@
+%
+% This file contains documentation on the packaging system.
+%
+% Author: Ilyas Cicekli
+% Date  : 8/15/89
+%
+
+
+Packaging
+=========
+
+An application packaging in ALS-Prolog environment means that
+creating object files for Prolog programs and linking them with 
+ALS-Prolog library to get an executable image.
+
+There are three steps to create a package in the packaging system 
+of ALS-Prolog. These steps are as follows:
+	1. Create assembly files to represent Prolog programs.
+	2. Assembly these files using an assembler to create object files.
+	3. Link these objects files with ALS-Prolog library to create
+	   a new executable image.
+
+
+
+
+How to Create Package Files
+===========================
+
+
+1. Creating A Package
+
+To create package files, first we have to run ALS-Prolog, 
+and consult two packaging files. These packaging files are 
+'pckg.pro', and one of the following files.
+
+	pdos.pro  	if you are going to use PharLap 386 assembler
+	pxenix.pro	if you are going to use Xenix Assembler
+	pmport.pro	if you are going to use Microport Assembler
+	psunos.pro	if you are going to use SunOS Assembler
+
+After these packaging files are consulted, you are ready to use the
+ALS-Packaging system. Instead of to run ALS-Prolog and to consult two
+files above, we can run the executable image of ALS-packaging system.
+In fact, the executable ALS-packaging system contains all procedures
+in "builtins.pro" and in two files above. In the first case, there won't
+be any package already loaded in the system. In the second case
+packaging-system package will be loaded.
+
+Now you are ready to consult your own files which contains procedures
+to be packaged. 
+
+The top level predicate in the packaging system is package/8.
+This predicate can be called as follows to create package files.
+
+	package(Procs,PckgName,PckgFile,PckgTokTblFile,
+		StartPred,PrePckgName,DefProcSwch,TokTblSwch)
+
+Procs: 
+	This argument represents procedures which will be packaged. 
+	This can be a term in one of the following forms, 
+	or a list of those terms.
+		M:P/A	
+		P/A
+		P
+	Of course, any part of terms above can be an unbound variable.
+	For example, the following term
+		[user:_,m1:p/1]
+	represents all procedures in the module "user" and the procedure p/1
+	in the module "m1". A procedure doesn't only mean a predicate
+	defined in Prolog, it means any name table entry in the system.
+	On other words, each name table entry is assumed as a procedure in 
+	packaging system. 
+
+	IMPORTANT NOTE:
+		Procedures defined by this argument should represent
+		a closed set of procedures. This means that if you are 
+		packaging a procedure "p" and one of its clauses is as follows,
+			p(X,Y) :- q(X), r(Y).
+		you have to package procedures "q" and "r" in the same package.
+		If you don't follow this rule, the assembler will complain
+		about undefined symbols when you assembly your package files.
+
+		It is not necessary, but it will be good practice to package
+		each module separately since procedures defined by
+		the term "modulename:_" are guaranteed to be a closed set
+		of procedures.
+
+PckgName:
+	This argument is the name of the package to be created.
+	Later, the created package can be referred by this name.
+	The name can be any Prolog symbol, but it is advised that it
+	should start with a letter and contains only
+	alphanumeric characters and the character "_". The reason
+	for this restriction, the package name is used as a part of symbolic
+	names in the package, and they should be valid symbol names in
+	an assembler syntax.
+
+PckgFile:
+	The name of the package file which will store procedures 
+	(their name table entries and their clauses if they are 
+	Prolog predicates) in an assembler syntax.
+
+PckgTokTblFile:
+	The name of the package file which will store the token table,
+	the module table, the default use module table, and the default
+	procedure table in an assembler syntax.
+
+StartPred:
+	This the name of a zero-arity predicate name which will be executed
+	after the package is loaded. Normally, after a package is loaded,
+	the system will be in Prolog top_level environment. This start predicate
+	gives an option to the user to decide whether he/she wants to 
+	be in Prolog top-level environment or to execute a zero-arity predicate.
+	Of course, in the second case the system won't be in Prolog top-level
+	environment. The value of this argument is -1 (default case) or
+	M/P where M is the module name and P is the name of a 
+	zero-arity predicate in that module.
+
+PrePckgName:
+	This is the name of the previous package which is the father
+	of the package which is going to be created. An application
+	package consists of a list of package files which contain
+	procedures and a package token table file
+	in an assembler syntax. The package files are linked to each other
+	with father relation. The default value of this argument is 
+	the currently loaded package in the system. If there is no
+	previous package, the value of this argument is -1. Normally
+	all user packages will have a previous package. The user should
+	guarantee that the father of the package which is going to be created
+	has been already loaded in the system. 
+
+DefProcSwch:
+	In ALS-Prolog, there are default procedures which should
+	explicitly imported in each module when a module is imported.
+	The name table entries of these procedures should be saved in
+	a package if they are not already saved in one of its ancestor
+	packages. If this switch is 1 (default case), all name table entries
+	of these default procedures in all modules are saved in the package.
+	If the switch is -1, they are not saved. 
+
+TokTblSwch:
+	This is the switch which determines whether the package token table
+	file will be created or not. If it is 1 (default case), the file
+	is created. If it is -1, it won't be created. In each application
+	package, the package token table of the last package is used
+	the package token table of that application package.
+	If we are creating a package file and we don't have any intention to
+	use it an application package, we don't need to create its the
+	package token table file. Our intention there is to use it as 
+	a father of another package which is going to be created in the same
+	session.
+
+
+Other versions of the package predicate with lesser arguments are
+available. In those cases, default values of missing arguments
+are taken. These predicates are as follows.
+
+	package(Procs,PckgName)
+	package(Procs,PckgName,PckgFile,PckgTokTblFile)
+	package(Procs,PckgName,StartPred,DefProcSwch,TokTblSwch)
+	package(Procs,PckgName,StartPred,DefProcSwch,TokTblSwch,PrePckgName)
+	package(Procs,PckgName,PckgFile,PckgTokTblFile,
+		StartPred,DefProcSwch,TokTblSwch)
+	
+Default values for missing arguments are as follows.
+
+PckgFile 	: <package name>.s 
+PckgTokTblFile 	: <package name>tok.s 
+StartPred	: -1 
+DefProcSwch	: 1 ( they will be included)
+TokTblSwch	: 1 ( The token table file will be created )
+PrePckgName 	: currently loaded package in the system.
+
+
+
+2. Creating Packaging Package
+
+To create packaging package files, first we have to run ALS-Prolog, 
+and consult two packaging files. These packaging files are 
+'pckg.pro', and one of the following files.
+
+	pdos.pro  	if you are going to use PharLap 386 assembler
+	pxenix.pro	if you are going to use Xenix Assembler
+	pmport.pro	if you are going to use Microport Assembler
+	psunos.pro	if you are going to use SunOS Assembler
+
+After these packaging files are consulted, you are ready to use the
+ALS-Packaging system. 
+
+Now, there are three modules in the system, and there is no currently
+loaded package in the system.
+
+	1. user	 	contains only default procedures which are included
+			by every module in the system.
+	2. builtins	contains all builtins predicates
+	3. packaging	contains all packaging predicates
+
+We can create a single package which contains all predicates defined in
+modules above, or we can create three separate package files. 
+I will create these three separate packages "tuser", "tblt", and "tpckg". 
+These packages will be organized as follows.
+
+	tuser
+	  ^
+	  |
+	  |
+	tblt
+	  ^
+	  |
+	  |
+	tpckg
+
+In fact, creation of these packages will be incremental.
+First, the package "tuser" is created to package predicates in the
+module user. Its parent will be an empty package. Second,
+we create the package "tblt" which will contain procedures defined
+in the module builtins. Finally, the package "tblt" is created to package
+packaging procedures.
+
+To create the first package "tuser", the following goal can be executed.
+
+	package(user:_,tuser,-1,-1,-1)
+
+The file "tuser.s" will be created to contain all procedures in 
+the module builtins. Since we are not planning to use this package file
+as an application package, we don't need to create a package token
+table file. Even though, default procedures in each module won't be saved,
+default procedures in the module user will be saved since we are
+saving all procedures in that module.
+
+Now, without leaving Prolog environment, we can create the second package
+"tblt" as at the top of the package "tuser". We can create this package 
+as follows.
+
+	package(builtins:_,tblt,-1,-1,1,tuser)
+
+Files "tblt.s" and "tblttok.s" will be created to contain all procedures
+in the module builtins, and the token table and other information about
+package, respectively. The reason that we create a token table file is 
+that we are planning to use packages "tuser" and "tblt" as an application
+package. The combination of these files "tuser.s", "tblt.s", "tblttok.s"
+and ALS-Prolog library will represent a packaged ALS-Prolog system.
+
+Now we can create our third package file on the top of the second one.
+
+	package(packaging:_,tpckg,-1,-1,1,tblt)
+
+File "tpckg.s" will contain procedures in the packaging
+system, and file "tpckgtok.s" will contain the token table and
+other information about package. The combination of files "tuser.s",
+"tblt.s", "tpckg.s", "tpckgtok.s" and ALS-Prolog library will represent
+a packaged ALS-Prolog with packaging system.
+
+
+
+
+Formats of Package Files
+========================
+
+An application package consists of a list package files contains 
+procedures and a package token table package in an assembler syntax.
+Package files which contains procedures are linked each other 
+with father relation. An application package will look like as follows.
+
+	package_file_1
+		^
+		|
+		|
+	package_file_2
+		^
+		|
+		|
+		.
+		.
+		.
+		^
+		|
+		|
+	package_file_n    <--   package_token_table_file
+
+A package token table of an application package (there is only one
+package token table for each application package) contains top level
+information about the application package. The information in this file
+actually defines the application package. This package token table will
+contain the following information. In fact, this file defines five
+gloabal variables used by ALS-Prolog Packaging system.
+
+
+system_pckg:
+	<name of the root package in the chain of packages>
+
+pckg_start_pred:
+	<package start predicate>
+
+pckg_modtbl:
+	<package module table>
+	<package default use module table>
+	<package default procedure table>
+
+pckg_toktbl:
+	<package token table>
+
+pckg_toktbl_size:
+	<number of tokens in package token table>
+
+All of five variables are made public, so that the system can reach their
+values when the application package is loaded.
+All tables saves the information in the tables in the system.
+When the application package is loaded, system tables are restored
+from tables in this file.
+
+A package file of an application package contains packaged name table
+entries and clauses of procedures. It defines only one global variable
+which holds information about that package. The format of a package
+file will be as follows.
+
+pckg_code_start:
+
+	<packaged name table entries of procedures>
+
+	<a dummy used block>
+	<packaged clauses of procedures>
+	<a dummy used block>
+
+pckg_code_end:
+
+pckg_ntbl:
+	<number of name table entries in package>
+	<list package name table entries>
+
+<package name>:
+	<previous package>
+	<location of pckg_code_start>
+	<location of pckg_code_end>
+	<package name>
+
+Variable <package name> is the only public variable in this file.
+All other variables are local to this file. Variables "pckg_code_start"
+and "pckg_code_end" mark beginning and end of code area of the package.
+This information is used when another package is created on the top
+of this package. Dummy used blocks marks beginning and end of packaged
+clauses, and they can be used when packaged clauses are retracted.
+So the space of a retracted packaged clause can be reclaimed.
+
+Variable "pckg_ntbl" contains a list of pointers to packaged name
+table entries. When application package is loaded, the system name 
+table is initialized from the information in the package name table.
+
+<previous package> is a pointer to the previous package, so that
+the previous package can be accessed from this package.
+<location of pckg_code_start>, <location of pckg_code_end>, and
+<package name> are used when another package is created from this 
+package. 
+
+
+Packaged Name Table Entries
+
+A packaged name table entry is an assembly procedure which exactly represents 
+a name table entry. When this procedure is assemblied, the size of the 
+compiled code will be exactly size of a name table entry. In fact,
+the idea is that to use this assemblied procedure as a name table entry.
+A packaged name table entry will look like as follows (in MS-DOS).
+
+		align 	4
+		dd	<location of name table entry>
+<procedure name> proc near
+		<name table header>
+		<overflow code>
+<procedure name>_call:
+		<call entry code>
+<procedure name>_exec:
+		<exec entry code>
+<procedure name>_code:
+		<code entry code>
+<procedure name> endp
+
+Locations <procedure name>_call, <procedure name>_exec, and
+<procedure name>_code are made public; so that they can be accessed
+by other packages. <procedure name> is a symbol which is constructed
+from "package name" and "location of name table entry".
+The original location of the name table entry which is used in 
+the <procedure name> is saved immediately before a packaged
+name table entry, so that it can be used to produce same <procedure name>.
+
+
+

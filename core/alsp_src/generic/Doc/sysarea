@@ -1,0 +1,18 @@
+List of system areas
+   (Both those which are explicit in the Prolog model, and those which are
+hidden or implicitly in support of the model.)
+
+Parser:
+
+parser area		prs_area (areap)	alloc.c
+parser stack		pstack			parser.c
+string area		strarea			parser.c
+token table		tktble			parser.c
+initial tokens table	initoks			parser.c
+variable names table	vtable			parser.c
+error table		prs_erc			parser.c
+
+WAM:
+
+code area					wintcode.c
+heap			the_heap		
