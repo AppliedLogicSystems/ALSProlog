@@ -701,6 +701,17 @@ static unsigned long image_end(int image_file)
 #endif
 
 #ifndef USE_ELF_SECTION_FOR_IMAGE
+#ifdef EXTERNAL_STATE
+long ss_image_offset(const char *imagepath)
+{
+  char statepath[IMAGEDIR_MAX];
+
+  strcpy(statepath, imagepath);
+  strcat(statepath, ".pst");
+  if (access(statepath, R_OK) != -1) return -1;
+  else return 0;
+}
+#else
 long ss_image_offset(const char *imagepath)
 {
     unsigned long file_size, image_size;
@@ -729,6 +740,7 @@ long ss_image_offset(const char *imagepath)
 	return image_size;
     else return 0;
 }
+#endif
 #endif
 
 static int copy(const char *filename, const char *copyname)
@@ -893,12 +905,25 @@ int ss_attach_state_to_file(const char *image_name)
 
 
 #ifndef PURE_ANSI
+#ifdef EXTERNAL_STATE
+int
+ss_save_state(const char *filename, long offset)
+{
+  char statename[IMAGEDIR_MAX];
+  strcpy(statename, filename);
+  strcat(statename, ".pst");
+  os_store_db(&current_engine.db, statename, 0);
+  return 1;
+
+}
+#else
 int
 ss_save_state(const char *filename, long offset)
 {
 	os_store_db(&current_engine.db, filename, offset);
 	return 1;
 }
+#endif
 
 #if 0
 {
@@ -991,11 +1016,22 @@ ss_err:
 #define SS_MALLOCQUANT	4096
 #define SS_MALLOCDIST	16384
 
+#ifdef EXTERNAL_STATE
+static void
+ss_restore_state(const char *filename,long offset)
+{
+  char statename[IMAGEDIR_MAX];
+  strcpy(statename, filename);
+  strcat(statename, ".pst");
+  os_load_db(&current_engine.db, statename, 0);
+}
+#else
 static void
 ss_restore_state(const char *filename,long offset)
 {
 	os_load_db(&current_engine.db, filename, offset);
 }
+#endif
 
 #if 0
 {
