@@ -65,11 +65,13 @@ directory ($BLDDIR):
 2. On the Mac, decode and extract the project files using Stuffit
 Expander.  The following projects need expanding:
 
+	{blddir}bld-port:alspro_d_lib.prj.sit.hqx
 	{blddir}bld-port:alspro_lib.prj.sit.hqx
 	{blddir}bld-port:alspro_b.prj.sit.hqx
 	{blddir}bld-port:alspro_dll.prj.sit.hqx
 	{blddir}bld-port:testdll.x86.prj.sit.hqx
 
+	{blddir}bld-port:demo_alspro_d_lib.prj.sit.hqx
 	{blddir}bld-port:demo_alspro_lib.prj.sit.hqx
 	{blddir}bld-port:demo_alspro_b.prj.sit.hqx
 	{blddir}bld-port:demo_alspro_dll.prj.sit.hqx
@@ -109,13 +111,20 @@ set.
 Files generated:
 ----------------
 
-Alspro libararies:
+Static extensable development system libraries:
+
+{blddir}bld-port:alspro_d.lib
+{blddir}bld-port:demo_alspro_d.lib
+
+Static embedable prolog engine libraries:
 
 {blddir}bld-port:alspro.lib
+{blddir}bld-port:demo_alspro.lib
+
+Dynamic embedable prolog engine libraries:
+
 {blddir}bld-port:alspro.dll
 {blddir}bld-port:alspro.dll.lib
-
-{blddir}bld-port:demo_alspro.lib
 {blddir}bld-port:demo_alspro.dll
 {blddir}bld-port:demo_alspro.dll.lib
 
