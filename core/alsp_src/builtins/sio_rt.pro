@@ -1771,13 +1771,19 @@ pp_xform_body(struct((G1,G2),_,_),CID,(XG1,XG2))
 	pp_xform_body(G1,CID,XG1),
 	pp_xform_body(G2,CID,XG2).
 
-pp_xform_body(struct((G1;G2),_,_),CID,(XG1;XG2)) 
+pp_xform_body(struct((G1;G2),_,_),CID,
+				('$dbg_apg'(CID,SG0,EG1),(XG1;XG2),'$dbg_apge'(CID,SG0,EG1))) 
 	:-!,
+	arg(2,G1,SG),SG0 is SG-1,
+	arg(3,G2,EG),EG1 is EG+1,
 	pp_xform_body(G1,CID,XG1),
 	pp_xform_body(G2,CID,XG2).
 
-pp_xform_body(struct((G1->G2),_,_),CID,(XG1->XG2)) 
+pp_xform_body(struct((G1->G2),_,_),CID,
+				('$dbg_apg'(CID,SG0,EG1),(XG1->XG2),'$dbg_apge'(CID,SG0,EG1))) 
 	:-!,
+	arg(2,G1,SG),SG0 is SG-1,
+	arg(3,G2,EG),EG1 is EG+1,
 	pp_xform_body(G1,CID,XG1),
 	pp_xform_body(G2,CID,XG2).
 

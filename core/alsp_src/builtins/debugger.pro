@@ -1465,7 +1465,6 @@ nospy([Pat|More]) :-
 %% === Port is leashed, so interact:
 getResponse(Wins,Port,Box,Depth, Module, Goal, Response) 
 	:-
-%pbi_write(getResponse(Wins,Port)),pbi_nl,pbi_ttyflush,
     leashed(Port),
     !,
     getresponse2(Wins,Port,Box,Depth,Module,Goal,Response).

@@ -502,7 +502,7 @@ force_libload_all([File|Files],DirDC)
 
 force_libload_file(File,DirDC)
 	:-
-	extendPath(DirDC,File,FileName),
+%	extendPath(DirDC,File,FileName),
 	split_path(DirDC, DirDCElts),
 	dappend(DirDCElts, [File], FNElts),
 	join_path(FNElts, FileName),

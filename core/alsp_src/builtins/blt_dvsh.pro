@@ -1522,12 +1522,12 @@ v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
 	:-
 	builtins:get_primary_manager(ALSIDEMGR),
 	send(ALSIDEMGR, get_value( debugger_mgr, DBGMGR)),
-!,
+	!,
 	vv_showGoalToUserWin(Port,Box,Depth, Module, Goal, DBGMGR, Response).
 
 vv_showGoalToUserWin(Port,Box,Depth, Module, Goal, DBGMGR, Response)
 	:-
-%write(enter_vv_showGoalToUserWin),nl,flush_output,
+%write(vv_showGoalToUserWin),nl,flush_output,
 	accessObjStruct(mrfcg, DBGMGR, CG),
 	(CG > 0 ->
 		send(DBGMGR,  get_mrfcg(CG, SrcMgr)),
@@ -1753,6 +1753,7 @@ showGoalToUserWin_other(Port,Box,Depth, Module, XGoal, Response, MRFCG, DBGMGR, 
 	flush_output(debugger_output),
 
 	re_color_port(Port, MRFCG, SrcMgr),
+
 %	send(DBGMGR, show_stack_list),
 	!,
 	(dbg_boundary(MRFCG,Box,Depth,general,Port,XGoal,DBGMGR, SrcMgr) ->
@@ -1862,9 +1863,9 @@ getresponse2(tcltk,Port,Box,Depth,Module,Goal,Response)
 	:-
 	short_deb_resps(Resps),
 	tcl_call(shl_tcli, [wait_for_debug_response],RawResponse),
-	(sub_atom(RawResponse,1,1,_,'B') ->
+	(sub_atom(RawResponse,0,1,_,'B') ->
 		nl(debugger_output),flush_output(debugger_output),
-		sub_atom(RawResponse, 2, 1, _,RR)
+		sub_atom(RawResponse, 1, 1, _, RR)
 		;
 		RR=RawResponse
 	),
@@ -2631,7 +2632,6 @@ showsms
 	:-
 	builtins:get_primary_manager(ALSMgr),
 	accessObjStruct(source_mgrs, ALSMgr, SrcMgrsList),
-write(start_sm_list),nl,flush_output,
 	show_sm_list(SrcMgrsList).
 
 show_sm_list(V)
