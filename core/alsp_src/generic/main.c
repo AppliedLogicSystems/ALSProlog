@@ -906,7 +906,22 @@ PI_toplevel(int *result)
 	    PI_makesym(&mv, &mt, "builtins");
 #endif /* KERNAL */
 	    PI_makesym(&gv, &gt, "$start");
-	    *result = PI_rungoal(mv, gv, gt);
+	    {
+	    PWord func, t, call, a;
+	    int funct, tt, callt, at;
+		PI_makesym(&func, &funct, "catch");
+		PI_makesym(&t, &tt, "true");
+		PI_makestruct(&call, &callt, func, 3);
+		PI_getargn(&a, &at, call, 1);
+		PI_unify(a, at, gv, gt);
+		PI_getargn(&a, &at, call, 3);
+		PI_unify(a, at, t, tt);
+	    if (PI_rungoal_with_update(mv, &call, &callt)) {
+	    	PI_getargn(&a, &at, call, 2);
+	    	if (at == PI_VAR) *result = 1;
+	    	else *result = 2;
+	    } else *result = 0;
+	    }
 	    return (0);
 	}
     }

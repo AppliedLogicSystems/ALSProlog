@@ -99,6 +99,9 @@ cl_test "$prolog -q -b -g true" 0
 cl_test "$prolog -q -b -g fail" 1
 cl_test "$prolog -q -b -g 'throw(foo)'" 2
 
+# test -g syntax error handling
+cl_test "$prolog -q -b -g 'foo(bar.'" 2
+
 # test error handling for invalid -heap and -stack options
 
 cl_test "$prolog -b -heap 2> /dev/null" 2
