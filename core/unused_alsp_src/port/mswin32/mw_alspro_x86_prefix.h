@@ -1,2 +1,2 @@
-#include "x86_prefix.h"
+#include <MSLWin32Headers>
 #define HAVE_CONFIG_H

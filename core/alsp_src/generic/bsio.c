@@ -1019,7 +1019,7 @@ sio_file_open()
 #if	defined(DOS) /* || defined(MSWin32) */
 	if ((SIO_FD(buf) = open(filename, flags | O_BINARY, (S_IWRITE | S_IREAD))) == -1)
 #elif	defined(MacOS) || defined(MSWin32)
-	if ((SIO_FD(buf) = open((char *)filename, flags)) == -1)
+	if ((SIO_FD(buf) = open((char *)filename, flags | O_BINARY)) == -1)
 #elif defined(__GO32__) || defined(OS2)
 	if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1)
 #elif defined(UNIX)
@@ -1649,7 +1649,7 @@ accept_connection(vsd, buf, sktaddr)
 	c_addr_len = sizeof(c_addr);
     if (SIO_FLAGS(buf) & SIOF_NEEDACCEPT) {
 			/* int newfd = accept(SIO_FD(buf), (struct sockaddr *) 0, (int *) 0);  */
-		int newfd = accept(SIO_FD(buf), &c_addr, (int *)&c_addr_len);
+		int newfd = accept(SIO_FD(buf), (struct sockaddr *)&c_addr, &c_addr_len);
 		if (newfd < 0) {
 	    	return -1;
 		}
@@ -1969,7 +1969,7 @@ stream_is_ready(buf, usec_to_wait)
 	    wait_time.tv_usec = usec_to_wait % 1000000;
 
 /* extern int select(size_t, int *, int *, int *, const struct timeval *); */
-	    if (select((size_t)SIO_FD(buf)+1, (int *)&rfds, (int *)&wfds, (int *)&efds, &wait_time)  > 0)
+	    if (select(SIO_FD(buf)+1, &rfds, &wfds, &efds, &wait_time)  > 0)
 		return 1;
 	    else
 		return 0;

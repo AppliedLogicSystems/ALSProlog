@@ -11,6 +11,8 @@
 extern void kernal32_init(void);
 extern void user32_init(void);
 extern void gdi32_init(void);
+extern void winspool32_init(void);
+extern void comdlg32_init(void);
 extern void mswin32aux_init(void);
 
 void pi_init(void)
