@@ -168,7 +168,7 @@ dfltlog_script(silent_logout, [_,_,SInfo],
 
 lg_cmplt(Tag, ID, Date, Time, SR, SW, State, SInfo)
 	:-
-	dmember(Tag, [not_allowed, logout, missing_area]),
+	dmember(Tag, [not_allowed, already_logged_in, logout, missing_area]),
 	!,
 	break_connection(logout,[ID],SR,SW,State,SInfo),
 	mangle(1, State, done).
