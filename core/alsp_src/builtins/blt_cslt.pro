@@ -878,7 +878,6 @@ set_consult_messages(Value)
 load_source(Path,BaseFile,Type) :-
 	(filePlusExt(NoSuffixPath, _, Path),!; NoSuffixPath = Path),
 %	establish_fcg(NoSuffixPath),
-write(load_source_NO_OBP(Path,BaseFile,Type)),nl,flush_output,
 	establish_fcg(BaseFile),
 	obp_push_stop,
 	xconsult(Path,NErrs),

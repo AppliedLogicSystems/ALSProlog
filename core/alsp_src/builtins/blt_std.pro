@@ -80,12 +80,17 @@ showmod(M).
 
 noshowmod(builtins).
 noshowmod(sio).
+noshowmod(syscfg).
 noshowmod(xconsult).
+noshowmod(alsdev).
 noshowmod(debugger).
+noshowmod(rel_arith).
 noshowmod(pgm_info).
 noshowmod(sys_maint).
 noshowmod(objects).
 noshowmod(windows).
+noshowmod(tcltk).
+noshowmod(tk_alslib).
 
 nonsemi(P) :-
 	isgensym(semi,P),

@@ -333,14 +333,14 @@ display_stats(Stream) :-
 	dmember(code_area(Cused,Ctotal),Stat),
 	dmember(wm_regs(SP,E,SPB,HB,H,TR,B),Stat),
 	printf(Stream,'------------ statistics (in bytes) -----------------\n\n',[]),
-	printf(Stream,'Heap used    : %d\n',[Hused],[]),
-	printf(Stream,'Trail used   : %d\n',[Tused],[]),
-	printf(Stream,'Heap & Trail : %d / %d (remaining/total)\n',[Hleft,Halloced],[]),
-	printf(Stream,'Stack        : %d / %d / %d (used/remaining/total)\n',[Sused,Sleft,Stotal],[]),
-	printf(Stream,'Code         : %d / %d (used/total)\n',[Cused,Ctotal],[]),
-	printf(Stream,'Global Vars  : %d\n',[GValloced],[]),
-	printf(Stream,'WAM regs     : SP=%#x E=%#x SPB=%#x\n',[SP,E,SPB],[]),
-	printf(Stream,'             : HB=%#x H=%#x TR=%#x B=%#x\n',[HB,H,TR,B],[]),
+	printf(Stream,'Heap used    \t: %d\n',[Hused],[]),
+	printf(Stream,'Trail used   \t: %d\n',[Tused],[]),
+	printf(Stream,'Heap & Trail \t: %d / %d (remaining/total)\n',[Hleft,Halloced],[]),
+	printf(Stream,'Stack        \t: %d / %d / %d (used/remaining/total)\n',[Sused,Sleft,Stotal],[]),
+	printf(Stream,'Code         \t: %d / %d (used/total)\n',[Cused,Ctotal],[]),
+	printf(Stream,'Global Vars  \t: %d\n',[GValloced],[]),
+	printf(Stream,'WAM regs     \t: SP=%#x E=%#x SPB=%#x\n',[SP,E,SPB],[]),
+	printf(Stream,'                 \t: HB=%#x H=%#x TR=%#x B=%#x\n',[HB,H,TR,B],[]),
 	flush_output(Stream).
 
 export heap_status/1.

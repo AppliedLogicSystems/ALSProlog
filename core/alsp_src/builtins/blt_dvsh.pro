@@ -9,20 +9,6 @@
  |	Creation Date: 1997
  *=============================================================*/
 
-
-	%% For now, needs to be in module user:
-make_shell_prompts(alsdev, 1,'?- ','?-_').
-
-make_shell_prompts(alsdev, N,Prompt1,Prompt2)
-	:-
-	N > 1,
-	!,
-	sprintf(PL1,'Break (%d) ?- ',[N]),
-	sprintf(PL2,'          ?-_',[]),
-	name(Prompt1,PL1),
-	name(Prompt2,PL2).
-
-
 module builtins.
 use tcltk.
 use tk_alslib.
@@ -163,11 +149,7 @@ alsdev(Shared)
 
 alsdev_splash(TclPath)
 	:-
-%	subPath(TPL, TclPath),
-%	append(TPL, [images,'turnstile_splash.gif'], TPLI),
-%	tcl_call(shl_tcli, [file,join | TPLI], SPP),
 	tcl_call(shl_tcli, [file,join,TclPath,'turnstile_splash.gif'], SPP),
-
 	catenate('image create photo als_splash_gif -file ',SPP,Splashy),
 	CL= [
 		'wm withdraw .',
@@ -182,7 +164,6 @@ alsdev_splash(TclPath)
 		'update idletasks '],
 	list_tcl_eval(CL, shl_tcli, _),
 	tcl_call(shl_tcli, [update],_).
-
 
 
 
@@ -236,9 +217,203 @@ add_static_items_to_menu([Item | List], Interp, MenuPath)
 	tcl_call(Interp, [MenuPath,add,command,'-label',Label], _),
 	add_static_items_to_menu(List, Interp, MenuPath).
 
+endmod.   % builtins
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%			%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+module alsdev.
+use tcltk.
+use tk_alslib.
+
+alsdev_default_setup(SystemDefaults)
+	:-
+	find_alsdev_ini(Items),
+	(dmember(window_settings(IniSettings), Items) -> true ; IniSettings = []),
+	establish_window_defaults(IniSettings, SystemDefaults),
+	(dmember(text_settings(TextSettings), Items) ->
+		setup_defaults(TextSettings, text)
+		;
+		true
+	).
+
+:- dynamic(alsdev_ini_path/1).
+
+find_alsdev_ini(Items)
+	:-
+	exists_file('alsdev.ini'),
+	!,
+	assert(alsdev_ini_path('alsdev.ini')),
+	grab_terms('alsdev.ini', Items).
+
+find_alsdev_ini([]).
+
+establish_window_defaults(Ini, SystemDefaults)
+	:-
+	setup_win_default(background,Back,Ini,SystemDefaults),
+	setup_win_default(foreground,Fore,Ini,SystemDefaults),
+	setup_win_default(selectbackground,SelectBack,Ini,SystemDefaults),
+	setup_win_default(selectforeground,SelectFore,Ini,SystemDefaults),
+	setup_win_default(font,Font,Ini,SystemDefaults),
+	setup_win_default(tabs,Tabs,Ini,SystemDefaults),
+
+	tcl_call(shl_tcli, [set_proenv,win_general,background,Back], _),
+	tcl_call(shl_tcli, [set_proenv,win_general,foreground,Fore], _),
+	tcl_call(shl_tcli, [set_proenv,win_general,selectbackground,SelectBack], _),
+	tcl_call(shl_tcli, [set_proenv,win_general,selectforeground,SelectFore], _),
+	tcl_call(shl_tcli, [set_proenv,win_general,font,Font], _),
+	tcl_call(shl_tcli, [set_proenv,win_general,tabs,Tabs], _).
+
+
+setup_win_default(What,Var,Ini,SystemDefaults)
+	:-
+	dmember(What = Var, Ini),
+	!.
+setup_win_default(What,Var,Ini,SystemDefaults)
+	:-
+	dmember([What,Var], SystemDefaults),
+	Var \= '',
+	!.
+setup_win_default(background,'#d9d9d9', _,_).
+setup_win_default(foreground,'Black', _,_).
+setup_win_default(selectbackground,'#c3c3c3', _,_).
+setup_win_default(selectforeground,'Black', _,_).
+setup_win_default(font,'Courier 12', _,_).
+setup_win_default(tabs,'', _,_).
+
+change_settings(WinSettingsVals, TextSettingsVals)
+	:-
+	WinSettingsVals = [Back, Fore, SelectBack, SelectFore, Font, Tabs],
+
+	WinSettings = 
+		window_settings([background=Back, foreground=Fore, 
+						 selectbackground=SelectBack, selectforeground=SelectFore, 
+						 font=Font, tabs=Tabs ]),
+
+	TextSettingsVals = [Family, Size, SizeUnits, Style],
+	TextSettings = 
+		text_settings([family=Family,size=Size,sizeunits=SizeUnits,style=Style]),
+
+	modify_settings([WinSettings,TextSettings]).
+
+modify_settings(WinSettings)
+	:-
+	alsdev_ini_path(ALSDEVINIPath),
+	!,
+	grab_terms(ALSDEVINIPath, OldTerms),
+	replace_items(OldTerms, WinSettings, NewTerms),
+	open(ALSDEVINIPath, write, OutS, []),
+	write_clauses(OutS, NewTerms, [quoted(true)]),
+	close(OutS).
+
+modify_settings(Terms)
+	:-
+	open('alsdev.ini', write, OutS, []),
+	write_clauses(OutS, Terms),
+	close(OutS).
+
+replace_items(OldTerms, NewSettings, NewTerms)
+	:-
+	replace_items(OldTerms, NewSettings, UnusedNew, ModifiedTerms),
+	append(UnusedNew, ModifiedTerms, NewTerms).
+
+replace_items([], Unused, Unused, []).
+replace_items([Old | OldTerms], Replacements, UnusedReps, [New | NewTerms])
+	:-
+	replacement(Old, Replacements, InterReps, New),
+	replace_items(OldTerms, InterReps, UnusedReps, NewTerms).
+
+replacement(Old, Replacements, InterRep, New)
+	:-
+	functor(Old, FF, A),
+	functor(New, FF, A),
+	dmember(New, Replacements),
+	!,
+	list_delete(Replacements, New, InterRep).
+replacement(Old, Rep, Rep, Old).
+
+setup_defaults([], _).
+setup_defaults([Tag=Value | TextSettings], Group)
+	:-
+	tcl_call(shl_tcli, [set_proenv,text,Tag,Value], _),
+	setup_defaults(TextSettings, Group).
+
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%			RECONSULT ETC.						%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+do_reconsult(PathAtom)
+	:-
+	sys_env(OS,_,_),
+	perf_reconsult(OS, PathAtom).
+
+perf_reconsult(unix, PathAtom)
+	:-!,
+	reconsult(PathAtom).
+
+perf_reconsult(mswin32, PathAtom0)
+	:-!,
+		%% repair path (G:/ ...)
+	repair_path(PathAtom0, PathAtom),
+	reconsult(PathAtom).
+
+perf_reconsult(macos, PathAtom)
+	:-!,
+		%% any repairs ??
+	reconsult(PathAtom).
+
+repair_path(PathAtomIn, PathAtomOut)
+	:-
+	atom_codes(PathAtomIn, PAInCs),
+	repair_path0(PAInCs, PAOutCs),
+	atom_codes(PathAtomOut, PAOutCs).
+
+repair_path0([], []).
+repair_path0([0'/ | PAInCs], [0'\\ | PAOutCs])
+	:-
+	repair_path0(PAInCs, PAOutCs).
+repair_path0([C | PAInCs], [C | PAOutCs])
+	:-
+	repair_path0(PAInCs, PAOutCs).
+
+
+
+
+clear_workspace
+	:-
+	findall(MM, non_system_module(MM), UserMods),
+	clear_each_module(UserMods).
+
+clear_each_module([]).
+clear_each_module([M | UserMods])
+	:-
+	printf(shl_tk_out_win, 'Module %t cleared.\n',[M]),
+	findall(P/A, procedures(M,P,A,_), ML),
+	M:abolish_list(ML),
+	clear_each_module(UserMods).
+
+non_system_module(M)
+	:-
+	modules(M, _),
+	not((builtins:noshowmod(M))),
+	not(library_module(M)).
+
+	%% Needs to be done better:
+library_module(avl).
+library_module(cref).
+library_module(macroxp).
+library_module(shellmak).
+library_module(ttyshlmk).
+
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			DEFSTRUCT HANDLING					%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 install_defstruct(Basic, Elts)
 	:-
@@ -252,7 +427,6 @@ install_defstruct(Basic, Elts)
 			makePred = Make,
 			structLabel = Name
 			] ),
-%	file_input_dialog('Defstruct file name:', Name,typ,DefstrFile),
 	file_select_dialog(shl_tcli,
 						[title = 'Defstruct file name:',
 						 defaultname = deflttyp,
@@ -261,18 +435,27 @@ install_defstruct(Basic, Elts)
 						 filetypes = [ ['*.typ',[typ]],['All Files',['*']] ]
 						],
 						DefstrFile),
-	open(DefstrFile,append,TmpTS,[]),
-	write_clause(TmpTS, DS, [quoted(true)]),
+	(exists_file(DefstrFile) ->
+		open(DefstrFile,append,TmpTS,[])
+		;
+		path_elements(DefstrFile,PathElts),
+		last(PathElts, BasicFile),
+		open(DefstrFile,write,TmpTS,[]),
+		defstrfile_header(BasicFile, TmpTS)
+	),
+	write_defstruct(TmpTS, DS),
 	close(TmpTS),
 	sprintf(atom(Msg),'Defstruct %t added to file %t',[Name,DefstrFile]),
 	info_dialog(shl_tcli, Msg, 'Defstruct finished').
 
-/*
-open('tmpout.typ',append,TmpTS,[]),
-write_clause(TmpTS, DS, [quoted(true)]),
-close(TmpTS).
-*/
-
+defstrfile_header(BasicFile, S)
+	:-
+	date(Date),time(Time),
+	printf(S,'/*========================================================================*\n',[]),
+	printf(S,' |\t\t%s\n', [BasicFile]),
+	printf(S,' |\n', []),
+	printf(S,' |\tStarted %t - %t\n', [Date,Time]),
+	printf(S,' *========================================================================*/\n\n',[]).
 
 rd_defstrc_elts([], []).
 rd_defstrc_elts([Elt | Elts], [EltTerm | EltsTerms])
@@ -301,6 +484,65 @@ rd_defstruct_elt(Elt, EltTerm)
 	),
 	atom_codes(Cmt, CmtCs),
 	EltTerm = [Name, Default, Cmt].
+
+write_defstruct(S, 
+	defStruct(Name, [
+			propertiesList = EltsTerms,
+			accessPred = Access,
+			setPred = Set,
+			makePred = Make,
+			structLabel = Name
+			] )		)
+	:-
+	printf(S, 'defStruct(%t, [\n', [Name],[quoted(true)]),
+	printf(S, '   propertiesList = [\n', []),
+	write_defstr_props(EltsTerms, S),
+	printf(S, '      ],\n', []),
+	printf(S, '      accessPred = %t,\n', [Access],[quoted(true)]),
+	printf(S, '      setPred = %t,\n',    [Set],[quoted(true)]),
+	printf(S, '      makePred = %t,\n',   [Make],[quoted(true)]),
+	printf(S, '      structLabel = %t\n',[Name],[quoted(true)]),
+	printf(S, '      ]).\n\n', []).
+
+write_defstr_props([],_).
+write_defstr_props([Elt], S)
+	:-
+	write_defstr_propelt(Elt, S).
+write_defstr_props([Elt | EltsTerms], S)
+	:-
+	write_defstr_propelt(Elt, S),
+	put_code(S, 0',),
+	nl(S),
+	write_defstr_props(EltsTerms, S).
+
+	%% EltTerm = [Name, Default, Cmt]
+write_defstr_propelt([Name, Default, Cmt], S)
+	:-
+	printf(S, '      %t', [Name],[quoted(true),line_length(1000)]),
+	(Default = nil ->
+		true
+		;
+		printf(S, '/%t', [Default],[quoted(true),line_length(1000)])
+	),
+	printf(S, '\t\t- %t', [Cmt],[quoted(true),line_length(1000)]).
+
+read_typ_file(FileName, DefStrNames, OriginalTypDefs)
+	:-
+	grab_terms(FileName, OriginalTypDefs),
+	findall(NN,  member(defStruct(NN, _), OriginalTypDefs), DefStrNames).
+
+edit_defstruct
+	:-
+	file_select_dialog(shl_tcli,
+						[title = 'Defstruct file to open:',
+						 ext = '.typ',
+						 filetypes = [ ['*.typ',['.typ']],['All Files',['*']] ]
+						],
+						DefstrFile),
+	read_typ_file(DefstrFile, DefStrNames, OriginalTypDefs),
+	popup_select_items(shl_tcli, DefStrNames, [title='DefStruct to Edit:'], [EditDefStr]),
+	write(got=EditDefStr),nl,
+	dmember(defStruct(EditDefStr, EditDefStrBody), OriginalTypDefs).
 
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -359,13 +601,22 @@ delete_file_from_project
 	:-
 printf(user_output, 'Wants to delete file from project\n', []).
 
-endmod. %% builtins
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%% 		
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+setup_for_debugging(Which)
+	:-
+	xconsult:change_source_level_debugging(Which).
+
+endmod.   % alsdev.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% 		VISUAL DEBUGGER ROUTINES				%%%%%
 	%%%%% 		  -- portions in module builtins		%%%%% 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 module builtins.
 
 
@@ -498,26 +749,19 @@ get_st_rec_by_fcg(FCGNum, Rec)
 	arg(FCGNum, DBFRTBL, Rec).
 
 
-	%% Expects FileName to exist and be accessible:
 start_src_trace(FileName)
 	:-
-		%% Next 2 goals need only be here, because they
-		%% will _ALWAYS_ run:
 	init_visual_debugger,
 	tcl_call(shl_tcli, [ensure_db_showing], _),
-	get_src_trace_rec(FileName, Rec),
-	access_dbstr(winname, Rec, WinName),
-	tcl_call(shl_tcli, [win_exists,WinName], true),
-	!,
-	set_dbstr(head_tag, Rec, 0),
-	set_dbstr(call_tag, Rec, 0),
-	tcl_call(shl_tcli, [reset_st_win,WinName], _).
-
-start_src_trace(FileName)
-	:-
 		%% Old Rec exists, but window has been destroyed, so
 		%% remove old rec, and start over:
+	continue_start_src_trace(FileName).
+
+continue_start_src_trace(FileName)
+	:-
 	(get_src_trace_rec(FileName, OldRec) ->
+		access_dbstr(winname, OldRec, OldWinName),
+		tcl_call(shl_tcli, [careful_withdraw,OldWinName], _),
 		remove_src_trace_rec(OldRec)
 		;
 		true),
@@ -560,6 +804,7 @@ create_src_trace(FileName, WinName, TextWinName, BaseFileName,
 	catenate(WinName, '.textwin.text', TextWinName),
 	catenate('Source Trace: ',FF, Title),
 	tcl_call(shl_tcli, ['vTclWindow.debug_source_trace',WinName,Title],R),
+	tcl_call(shl_tcli, [TextWinName,delete,'1.0',end], _),
 	tcl_call(shl_tcli, [load_file_to_win,FileName,TextWinName],LoadRes),
 	LoadRes = [NumLines, LineIndex].
 
@@ -577,6 +822,17 @@ exec_toggle_leash(Port)
 		;
 		assert(leashed(Port))
 	).
+
+source_trace_closedown(STWin)
+	:-
+	debugger_abort.
+
+set_debugwin_width(M5Size, MainWinSize)
+	:-
+	M1 is M5Size//5,
+	NChars is (MainWinSize - 3*M1)//M1,
+	set_line_length(debugger_output, NChars).
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Handle hidden debugging goals:
@@ -596,9 +852,24 @@ exec_toggle_leash(Port)
 	%% '$dbg_aph' ::
 
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
-	:-!,
+	:-
 %printf('+#+%t: $dbg_aph(%t,%t,%t)\n',[call,ClsGrp,Start,End]),flush_output,
-	color_my_port(ClsGrp,Start,End,call,head_tag).
+	color_my_port(ClsGrp,Start,End,call,head_tag),
+	!.
+
+	%% The call to color_my_port could fail on the very first call to
+	%% a predicate defined in a file which has not yet been set up for
+	%% debugging; this alternate clause tries to get the file set up:
+showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
+	:-
+%write(zero_rec_for_clsgrp=[ClsGrp,BaseFileName,SrcFilePath]),nl,
+	builtins:file_clause_group(BaseFileName, ClsGrp),
+	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options),
+	reload_debug(DebugType, SrcFilePath),
+	continue_start_src_trace(SrcFilePath),
+	!.
+
+
 	
 showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-!,
@@ -744,7 +1015,6 @@ showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
 	!,
 	getResponse(tcltk,Port,Box,Depth, Module, XGoal, Response).
 
-
 color_my_port(ClsGrp,Start,End,Port,TagName)
 	:-
 	tktxt_info(ClsGrp,TextWin,Start,End,STRec,
@@ -778,10 +1048,13 @@ re_color_port(Port, MRFCG, STRec)
 	port_color(Port, Color),
 	configure_tag(call_tag, TextWin,['-background',Color]).
 
-port_color(call, blue).
+%port_color(call, blue).
+port_color(call, '#00acff').
 port_color(exit, green).
-port_color(fail, red).
+%port_color(fail, red).
+port_color(fail, '#fe0076').
 port_color(redo, yellow).
+
 
 getresponse2(tcltk,Port,Box,Depth,Module,Goal,Response)
 	:-
@@ -811,6 +1084,7 @@ tktxt_info(ClsGrp,TextWin,Start,End,Rec,
 			StartLine,StartChar,EndLine,EndChar)
 	:-
 	get_st_rec_by_fcg(ClsGrp, Rec),
+	Rec \= 0,
 	access_dbstr(textwin, Rec, TextWin),
 	access_dbstr(numlines, Rec, NumLines),
 	access_dbstr(invlineindex, Rec, InvLineIndex),
@@ -821,6 +1095,7 @@ tktxt_info(ClsGrp,TextWin,Start,End,Rec,
 	arg(EndLine, InvLineIndex, ELOffset),
 	!,
 	EndChar is End - ELOffset.
+
 
 display_st_record(StartLine,StartChar,EndLine,EndChar, 
 						Color,TextWin, TagName, Rec)
@@ -879,6 +1154,20 @@ disp_find_line_pos(MidStart,MidLN,LowLN,HighLN,Offset,ILI,LN)
 disp_find_line_pos(MidStart,MidLN,LowLN,HighLN,Offset,ILI,LN)
 	:-
 	find_line_pos(LowLN,MidLN,Offset,ILI,LN).
+
+
+
+
+
+export jedit/0.
+jedit :-
+	tcl_call(shl_tcli, [alsdev_jedit], XX).
+
+
+
+%	tcl_call(shl_tcli, ['jedit:jedit','-embedded',1], XX).
+
+
 
 endmod.
 

@@ -7,6 +7,11 @@
  |
  | Author: Ken Bowen
  | Started: December, 1997
+ |
+ |	Note: The font used in the textwindow portion of .debugwin (see
+ |		  debugwin.tcl) must be a monofont such as courier; this is 
+ |		  necessary for the prolog pretty-print to be able to appropriately
+ |		  fit the output to the window.
  *======================================================================*/
 		   
 

@@ -1528,8 +1528,8 @@ setup_debug(Module, Predicate, Arity)
 	reload_debug(DebugType, SrcFilePath),
 	!,
 	(debug_io(tcltk) ->
-		(pathPlusFile(_,FF,SrcFilePath) -> true ; FF = SrcFilePath),
-		(filePlusExt(FileName,_,FF) -> true ; FileName = FF),
+%		(pathPlusFile(_,FF,SrcFilePath) -> true ; FF = SrcFilePath),
+%		(filePlusExt(FileName,_,FF) -> true ; FileName = FF),
 		start_src_trace(SrcFilePath)
 		;
 		true
@@ -1548,8 +1548,8 @@ reload_debug(normal, SrcFilePath)
 	source_level_debugging(on),
 	!,
 	(filePlusExt(NoSuff,_,SrcFilePath),!; NoSuff = SrcFilePath),
-	reconsult(source(NoSuff)),
-	als_advise("Reloaded (debug) files = %t\n",[SrcFilePath]).
+	consult(source(NoSuff),[quiet(true)]),
+	als_advise(debugger_output,"Reloaded (debug) files = %t\n",[SrcFilePath]).
 
 reload_debug(DebugType, SrcFilePath).
 
@@ -1812,7 +1812,13 @@ act_on_response(exit,Port,Box,Depth, Module,Goal,Wins,Response) :- !,
 	halt.
 
 %% === User wants to abort.
-act_on_response(abort,Port,Box,Depth, Module,Goal,Wins,nodebug) :- !,
+act_on_response(abort,Port,Box,Depth, Module,Goal,Wins,nodebug) 
+	:- !,
+	debugger_abort.
+
+export debugger_abort/0.
+debugger_abort
+	:-
 	write(debugger_output,'Aborting from debugger.'),
 	nl(debugger_output),
 	dbg_notrace,
@@ -1862,13 +1868,13 @@ act_on_response(change_print_mode, Port,Box,Depth, Module,Goal,Wins,Response) :-
 	->  DC1=nonflat
 	;   DC1=flat),
 	set_depth_computation(debugger_output,DC1),
-	als_advise("Depth computation is now %s\n",[DC1]),
+	als_advise(debugger_output,"Depth computation is now %s\n",[DC1]),
 	show_again(Port,Box,Depth,Module,Goal,Wins,Response).
     
 %% === Print statistics
 act_on_response(statistics, Port,Box,Depth, Module,Goal,Wins,Response) :-
 	!,
-	statistics,
+	display_stats(debugger_output),
 	show_again(Port,Box,Depth,Module,Goal,Wins,Response).
 
 %% === Print stack trace
