@@ -280,12 +280,14 @@ ilnk_net()
 					UNLINK_ALL;
 					FAIL;
 				}
+				if (Xt == WTP_UNBOUND)   
+					IntrvTm = (PWord)get_intvl_tm((PWord *)X, Xt);
+				else
+					FAIL;
 				if (xl == xh) {
 						printf("x_changed->point:xl=%g xh=%g\n",xl,xh);  
 					bind_int_unfreeze((PWord *)X,&Xt,xl);
 				}
-				if (Xt == WTP_UNBOUND)   
-					IntrvTm = (PWord)get_intvl_tm((PWord *)X, Xt);
 				update_propagate(xl, xh, X, Xt, IntrvTm, Goal);
 
 			}	/* x changed */
@@ -300,12 +302,14 @@ ilnk_net()
 					UNLINK_ALL;
 					FAIL;
 				}
+				if (Yt == WTP_UNBOUND)   
+					IntrvTm = (PWord)get_intvl_tm((PWord *)Y, Yt);
+				else
+					FAIL;
 				if (yl == yh) {
 						printf("y_changed->point:yl=%g yh=%g\n",yl,yh);  
 					bind_int_unfreeze((PWord *)Y,&Yt,yl);
 				}
-				if (Yt == WTP_UNBOUND)   
-					IntrvTm = (PWord)get_intvl_tm((PWord *)Y, Yt);
 				update_propagate(yl,yh,Y,Yt,IntrvTm,Goal);
 
 			}	/* y changed */
