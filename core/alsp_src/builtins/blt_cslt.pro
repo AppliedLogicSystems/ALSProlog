@@ -537,9 +537,13 @@ record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr)
 		fcg/''				%%  - FCG: File Clause Group (for return to caller)
 */
 
-	send(ALSMgr, insert_src_mgr_by_cg(FCG, FileMgr)),
 	access_cslt_opts(srcfilepath, FCOpts, SourceFilePath), 
-	send(FileMgr, note_loaded(FCG, SourceFilePath)),
+	(FCG > 0 ->
+		send(ALSMgr, insert_src_mgr_by_cg(FCG, FileMgr)),
+		send(FileMgr, note_loaded(FCG, SourceFilePath))
+		;
+		true
+	),
 	access_cslt_opts(obp_path, FCOpts, ObpFilePath), 
 	(ObpFilePath \= '' ->
 		send(FileMgr, set_value(obp_file,ObpFilePath))
