@@ -4,6 +4,9 @@ void locate_library_executable(int argc, char *argv[])
 {
     DWORD l;
     char *endpath;
+#ifdef DLL
+	HANDLE dll;
+#endif
     
     l = GetModuleFileName(NULL, executable_path, IMAGEDIR_MAX);
     if (l == 0 || l >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
