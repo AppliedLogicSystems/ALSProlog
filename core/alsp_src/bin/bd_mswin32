@@ -1,0 +1,43 @@
+#!/bin/sh
+#  Setup a build directory for mswin32
+#
+#  $1 - source directory
+#  $2 - build directory
+#
+case $# in
+2)	;;
+*)	echo 'Usage: bd_mswin32 srcdir builddir' 1>&2; exit 2
+esac
+
+echo Making $2
+mkdir $2
+cp $1/port/mswin32/mswin32_config.h $2/config.h
+
+echo Making $2/bld-port
+mkdir $2/bld-port
+cp $1/generic/pi_cfg.in $2/bld-port/pi_cfg.h
+cp $1/bld-port/tconfig.in $2/bld-port/tconfig.h
+cp $1/port/mswin32/alspro_lib.prj.sit.hqx $2/bld-port/
+cp $1/port/mswin32/alspro_dll.prj.sit.hqx $2/bld-port/
+cp $1/port/mswin32/alspro_b.prj.sit.hqx $2/bld-port/
+
+cp $1/port/mswin32/package.bat $2/bld-port/
+cp $1/port/mswin32/testrun.bat $2/bld-port/
+
+mkdir $2/bld-port/alsdir
+mkdir $2/bld-port/alsdir/builtins
+ln -s $1/builtins/*.pro $2/bld-port/alsdir/builtins/
+mkdir $2/bld-port/alsdir/library
+ln -s $1/library/*.pro $2/bld-port/alsdir/library/
+
+echo Making $2/bld-wins
+mkdir $2/bld-wins
+mkdir $2/bld-wins/mswin32
+
+cp $1/wins/build/mswin32/make_interf.bat $2/bld-wins/mswin32
+cp $1/wins/build/mswin32/do_c2pro.bat $2/bld-wins/mswin32
+cp $1/wins/build/mswin32/do_p2intrf.bat $2/bld-wins/mswin32
+cp $1/wins/build/mswin32/mswin32intf_lib.prj.sit.hqx $2/bld-wins/mswin32
+cp $1/wins/build/mswin32/alspro_mswin32.prj.sit.hqx $2/bld-wins/mswin32
+
+ln -s $2/bld-port/alsdir $2/bld-wins/mswin32/
