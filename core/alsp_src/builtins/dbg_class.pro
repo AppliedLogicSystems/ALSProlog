@@ -305,6 +305,7 @@ source_trace_mgrAction(clear_decorations, State)
 source_trace_mgrAction(start_src_trace(BaseFileName, SrcFilePath, FCG), State)
 	:-
 	setObjStruct(fcg, State, FCG),
+	!,
 	fin_mgr_start_source_trace(SrcFilePath, State).
 
 	%% Assume that the file has previously been consulted, with source code 
@@ -333,6 +334,7 @@ fin_mgr_start_source_trace(SrcFilePath, State)
 	inverted_index(LineIndex, InvertedLineIndex),
 	setObjStruct(invlineindex, State, InvertedLineIndex),
 	setObjStruct(head_tag, State, 0),
+	!,
 	setObjStruct(call_tag, State, 0).
 
 inverted_index(LineIndex, InvertedLineIndex)
