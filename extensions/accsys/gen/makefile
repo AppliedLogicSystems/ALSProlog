@@ -2,12 +2,12 @@
 # Makefile for the interfaces to the accsys library
 #
 
-ALSSRC=/mailbox3/alsp_src
+ALSSRC=/apache/alsp_src
 
 #
 #	Cinterf:
 #
-CINTDIR	= /mailbox3/alsp_src/cinterf
+CINTDIR	= /apache/alsp_src/cinterf
 C2PDIR	= $(CINTDIR)/c2pro
 P2IDIR	= $(CINTDIR)/pro2intf
 
@@ -17,7 +17,7 @@ PROLOG = alspro
 #	General accsys stuff
 #
 FPREFIX		= acc
-srcdir		= /mailbox3/alsp_src
+srcdir		= /apache/alsp_src
 itfsrcdir	= ../src
 #VPATH		= $(itfsrcdir)
 SPECFILE	= $(itfsrcdir)/accsys.spc
@@ -54,13 +54,16 @@ C2PDB		= debug
 C2PFLAGS 	= -$(C2PDB) $(INTF_TRFLAGS)
 
 
+
+#		$(PROFLAGS) -g c2pro \
+
 $(INTF).src : $(SPECFILE) $(HFILES) c2prolcl.pro
 	$(PROLOG) c2prolcl.pro \
-		$(PROFLAGS) -g c2pro \
 		-p -srcpath $(itfsrcdir) $(INTF) $(C2PFLAGS) \
 		$(INTF_INCLUDES) -master accsys $(INTF_DEFINES) \
 		-filter $(FILTXPR) -filterFile $(FILTFILE)
 
+#		$(PROFLAGS) -g c2pro \
 
 #
 #	Create .c files from .src files
@@ -89,10 +92,10 @@ $(INTF)0.c $(INTF)1.c $(INTF)2.c $(INTF)3.c : $(INTF).src p2intlcl.pro
 #
 
 d3i d3x d3z d3t d3n:
-	echo trying tgt=acsy$@
-	make cfiles INTF=acsy$@ INTFVAR=$@ PROTYPE=$(PROTYPE)
+	echo trying tgt=acs$@
+	make cfiles INTF=acs$@ INTFVAR=$@ PROTYPE=$(PROTYPE)
 	
-d3iz d3in d3ix d3inz d3ixz d3it d3int d3ixt d3intz d3ixtz:
-	echo trying tgt=acsy$@
-	make cfiles INTF=acsy$@ INTFVAR=$@ PROTYPE=$(PROTYPE)
+d3iz d3itz d3in d3ix d3inz d3ixz d3it d3int d3ixt d3intz d3ixtz:
+	echo trying tgt=acs$@
+	make cfiles INTF=acs$@ INTFVAR=$@ PROTYPE=$(PROTYPE)
 

@@ -34,29 +34,31 @@
 #include <io.h>
 #endif
 
-#ifdef MSC
+#if defined(MSC)
 #define DIFFDRIVE EXDEV
-#endif
 
-#ifdef TURBOC
+#elif defined(TURBOC)
 #define DIFFDRIVE ENOTSAM
-#endif
 
-#ifdef ZORTECH
+#elif defined(ZORTECH)
 #define DIFFDRIVE 17
-#endif
 
-#ifdef LATTICE
+#elif defined(LATTICE)
 #define DIFFDRIVE EXDEV
-#endif
 
-#ifdef __HIGHC__
+#elif defined(__HIGHC__)
 #define DIFFDRIVE EXDEV
-#endif
 
-#ifdef unix
+#elif defined(unix)
 #define DIFFDRIVE EXDEV
-#endif
+
+#elif defined(MacOS)
+#define DIFFDRIVE EXDEV
+
+#else
+#error
+#endif /* MSC, TURBOC, ZORTECH, LATTICE, __HIGHC__, unix, MacOS */
+
 
 #define BLOCKSZ 0x1000
 #define SMALLSZ 0x0100
@@ -111,30 +113,24 @@ int _DECLARE _Arename(
 
 	if (fd1 < 0)
 	{
-#ifdef MSC
+#if defined(MSC)
 		if (errno == ENOENT) /* file not found */
-		{
-#endif
-#ifdef ZORTECH
+#elif defined(ZORTECH)
 		if (errno == ENOENT) /* file not found */
-		{
-#endif
-#ifdef TURBOC
+#elif defined(TURBOC)
 		if (errno == ENOFILE) /* file not found */
-		{
-#endif
-#ifdef LATTICE
+#elif defined(LATTICE)
 		if (errno == ENOENT) /* file not found */
-		{
-#endif
-#ifdef __HIGHC__
+#elif defined(__HIGHC__)
 		if (errno == ENOENT) /* file not found */
-		{
-#endif
-#ifdef unix
+#elif defined(unix)
 		if (errno == ENOENT) /* file not found */
+#elif defined(MacOS)
+		if (errno == ENOENT) /* file not found */
+#else
+	#error
+#endif	/* MSC, ZORTECH, TURBOC, LATTICE, __HIGHC__, unix, MacOS */
 		{
-#endif
 	    	rc = dNOTFOUND;
 		}
 		else

@@ -458,7 +458,7 @@ return(SUCCESS);
 } /* end of dmerge() */
 
 
-int _DECLARE rdnext(
+static int _DECLARE rdnext(
 #ifndef unix 
 
 	/* inputs */			/* d_report: 10670+ */

@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "d4def.h"
 
-/*
+/* #ifndef HAVE_ECVT */
 static char buf_for_ecvt[128];
 
 char *ecvt(value,count,dec,sign)
@@ -37,13 +37,13 @@ char *ecvt(value,count,dec,sign)
 
 	if (buf_for_ecvt[0] == '-') {
 		*sign = 1;
-		buf_for_ecvt[2] = buf_for_ecvt[1]; 	-- move first digit 
+		buf_for_ecvt[2] = buf_for_ecvt[1]; 	/* -- move first digit */
 		retval = &buf_for_ecvt[2];
 		p = &buf_for_ecvt[(3+count)];
 	}
 	else {
 		*sign = 0;
-		buf_for_ecvt[1] = buf_for_ecvt[0]; 	-- move first digit 
+		buf_for_ecvt[1] = buf_for_ecvt[0]; /*-- move first digit */  
 		retval = &buf_for_ecvt[1];
 		p = &buf_for_ecvt[(2+count)];
 	}
@@ -58,7 +58,8 @@ char *ecvt(value,count,dec,sign)
 
 	return(retval);
 }
-*/
+
+/*#endif  HAVE_ECVT */
 
 
 /* I should write _memavl function  -- Ilyas 
@@ -68,16 +69,13 @@ _memavl()
 	return(0x100000);
 }
 
-#ifdef unix
-
 #include <memory.h>
 #include <string.h>
 #include <ctype.h>
 /* #include <floatingpoint.h> */
 #include <float.h>
 
-/* #ifdef sun4  * sunos 4.1.3 */
-#if !defined(HAVE_MEMMOVE)
+#if (!defined(HAVE_MEMMOVE) && !defined(__DJGPP__) && !defined(__GO32__))
 char *
 memmove(dest,src,count)
 	char *dest;
@@ -103,9 +101,9 @@ memmove(dest,src,count)
 	return(src);
 }
 
-#endif /* not-HAVE_MEMMOVE -- sun4 */
+#endif /* HAVE_MEMMOVE */
 
-
+#if !defined(HAVE_STRUPR)
 char *
 strupr(str)
 	char *str;
@@ -122,8 +120,10 @@ strupr(str)
 	}
 	return(newstr);
 }
+#endif /* HAVE_STRUPR */
 
 
+#if !defined(HAVE_ITOA)
 char *
 itoa(val,str,radix)
 	int  val;
@@ -135,18 +135,19 @@ itoa(val,str,radix)
 
 	if (val < 0 ) { 
 /*		econvert((double)val,12,&decpt,&sign,str+1);  */
-		ecvt((double)val,12,&decpt,&sign,str+1);
+/*		ecvt((double)val,12,&decpt,&sign,str+1); */
+		ecvt((double)val,12,&decpt,&sign);
 		*str = '-';
 		*(str+(decpt+1)) = 0;	
 	}
 	else {
 /*		econvert((double)val,12,&decpt,&sign,str);   */
-		ecvt((double)val,12,&decpt,&sign,str);
+		ecvt((double)val,12,&decpt,&sign);
 		*(str+decpt) = 0;	
 	}
 	return(str);
 }
-
+#endif /* HAVE_ITOA */
 
 /*
 char *
@@ -158,5 +159,3 @@ ltoa(val,str,radix)
 	return(itoa((int)val,str,radix));
 }
 */
-	
-#endif unix

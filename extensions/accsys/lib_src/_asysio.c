@@ -44,8 +44,7 @@
 #include <fcntl.h>
 
 
-#ifndef unix 
-#ifdef OS2
+#if defined(OS2)
 
 #define INCL_DOS     /* Microsoft C only */
 #include <os2def.h>  /* Microsoft C only */
@@ -73,6 +72,18 @@
 #ifndef OPEN_SHARE_DENYREADWRITE
 #define OPEN_SHARE_DENYREADWRITE 0x0010
 #endif
+
+
+
+#elif defined(unix)
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#elif defined(MacOS)
+/* Undefine OPEN because it conflicts with a struct definition in AppleTalk.h */
+#undef OPEN
+#include <GUSI.h>
+
 #else
 	/* PC-DOS or MS-DOS */
 #include <dos.h>
@@ -81,19 +92,10 @@
 	/* Some compiler package (e.g., Turbo C 2.0)
 	   does not have this definition. */
 #endif
-#endif
-#endif 	/* unix */
-
-
-#ifdef unix 
-#include <sys/types.h>
-#include <sys/stat.h>
-#endif 	/* unix */
-
+#endif	/* OS2, unix, MacOS */
 
 #include "db4.h"
 #include "d4def.h"
-
 
 int _DECLARE _dcre8new(filename,force)
 		/* input */
@@ -117,20 +119,18 @@ int _DECLARE _dcre8new(filename,force)
 
 if (force != FORCE)
 {
-#ifdef TURBOC
+#if defined(TURBOC)
   	_fmode = O_BINARY;
 	handle = creatnew(filename, _A_NORMAL);
-#endif
 
-#ifdef MSC
-#ifdef OS2
+#elif defined(MSC)
+#if defined(OS2)
     if (DosOpen((PSZ) filename, (PHFILE) &handle, &usAction,
     			0L, FILE_NORMAL, FILE_CREATE,
 			OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYREADWRITE,
 			0L)
        ) handle = -1;
-#else
-#ifdef _WINDOWS
+#elif defined(_WINDOWS)
 	handle = OpenFile((LPSTR) filename, (LPOFSTRUCT) &wrc,
 		OF_EXIST | OF_SHARE_EXCLUSIVE);
 	if (handle) goto done;
@@ -139,11 +139,9 @@ if (force != FORCE)
 #else
 	/* PC-DOS || MS-DOS */
 	if (_dos_creatnew(filename, _A_NORMAL, &handle)) handle = -1;
-#endif
-#endif
-#endif
+#endif /* OS2, _WINDOWS */
 
-#ifdef USEINTREG
+#elif defined(USEINTREG)
 	inregs.h.ah = 0x5b; /* create new file */
 	inregs.x.cx = 0;    /* CX.HIGH = 0   CX.LOW = attribute */
 	inregs.x.dx = FP_OFF((char far *) filename);
@@ -160,63 +158,65 @@ if (force != FORCE)
 	(void) intdos(&inregs, &outregs);
 	errno = _doserrno;
 	handle = -1;
-#endif
 
-#ifdef LATTICE
+#elif defined(LATTICE)
 	handle = dcreatx(filename, _A_NORMAL);
-#endif
 
-#ifdef __HIGHC__
+#elif defined(__HIGHC__)
 	if (_dos_creatnew(filename, _A_NORMAL, &handle)) handle = -1;
-#endif 	/* __HIGHC__ */
 
-#ifdef unix
+#elif defined(unix)
 	handle = open(filename, O_RDWR | O_CREAT | O_EXCL | O_TRUNC);
-#endif 	/* unix */
+
+#elif defined(MacOS)
+	handle = open(filename, O_RDWR | O_CREAT | O_EXCL | O_TRUNC | O_BINARY);
+	fsetfileinfo(filename, '????', '????');
+#else
+#error
+#endif 	/* TURBOC, MSC, USEINTREG, LATTICE, _HIGHC_, unix, MacOS */
 
 done:
     return(handle);
 }
 
 /* force == FORCE */
-#ifdef TURBOC
+#if defined(TURBOC)
     handle = _creat(filename, 0);
-#endif
 
-#ifdef MSC
-#ifdef OS2
+#elif defined(MSC)
+#if defined(OS2)
 	    if (DosOpen((PSZ) filename, (PHFILE) &handle, &usAction,
     			0L, FILE_NORMAL, FILE_TRUNCATE | FILE_CREATE,
 			OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYREADWRITE,
 			0L)
 	       ) handle = -1;
-#else
-#ifdef _WINDOWS
+
+#elif defined(_WINDOWS)
 		handle = OpenFile((LPSTR) filename,  (LPOFSTRUCT) &wrc,
 			OF_CREATE | OF_READWRITE | OF_SHARE_EXCLUSIVE);
 #else
 		/* PC-DOS || MS-DOS */
 		if (_dos_creat(filename, _A_NORMAL, &handle)) handle = -1;
 #endif
-#endif
-#endif
 
-#ifdef ZORTECH
+#elif defined(ZORTECH)
     handle = creat(filename, S_IREAD | S_IWRITE);
-#endif
 
-#ifdef LATTICE
+#elif defined(LATTICE)
     handle = creat(filename, S_IREAD | S_IWRITE | O_RAW);
-#endif
 
-#ifdef __HIGHC__
+#elif defined(__HIGHC__)
 	if (_dos_creat(filename, _A_NORMAL, &handle)) handle = -1;
-#endif 	/* __HIGHC__ */
 
-#ifdef unix
+#elif defined(unix)
 	handle = open(filename, O_RDWR | O_CREAT | O_TRUNC,
 				  S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-#endif 	/* unix */
+
+#elif defined(MacOS)
+	handle = open(filename, O_RDWR | O_CREAT | O_TRUNC | O_BINARY);
+#else
+#error
+#endif	/* TURBOC, MSC, USEINTREG, LATTICE, _HIGHC_, unix, MacOS */
 
 	return(handle);
 } /* end of _dcre8new() */

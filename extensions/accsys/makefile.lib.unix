@@ -25,8 +25,8 @@ SHELL	= /bin/sh
 
 CPPFLAGS	= -I. -I.. -I$(lsrcdir) $(XINCLUDES) -DHAVE_CONFIG_H
 
-PROBLD	= /mailbox3/builds
-srcdir	= /mailbox3/alsp_src
+PROBLD	= /dakota/builds
+srcdir	= /apache/alsp_src
 
 SOS=abc
 
@@ -75,6 +75,7 @@ _dprvkey.o \
 _dputkey.o \
 _drewfwd.o \
 _drmkey.o \
+_dtmmutl.o \
 _dutil.o \
 _dzcmp.o \
 _dzero.o \
@@ -125,6 +126,12 @@ dunktoa.o \
 dunktod.o \
 dutmpdir.o \
 dutoday.o \
+dtchkmm.o \
+dtcreat.o \
+dtgetmm.o \
+dtmemosz.o \
+dtmemuse.o \
+dtopen.o \
 compmsc.o 
 
 
@@ -172,23 +179,22 @@ dxupdkey.o \
 dtaddmm.o \
 dtchkmm.o \
 dtcreat.o \
-dtcreat3.o \
 dtgetmm.o \
-dtgetmm3.o \
 dtmemosz.o \
-dtmemsz3.o \
 dtmemuse.o \
+dtnewmm.o \
 dtopen.o \
-dtopen3.o \
 dtupdmm.o \
+dtcreat3.o \
+dtgetmm3.o \
+dtmemsz3.o \
+dtopen3.o \
 #_dindex.o \
-#dtnewmm.o \
 #dtputmm3.o \
 _dxgetnd.o \
 _dxopen.o \
 _dxput.o \
 _dxstag.o \
-_dtmmutl.o \
 _dnopen.o \
 _dnxtkey.o \
 

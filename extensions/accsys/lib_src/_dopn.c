@@ -57,25 +57,23 @@ int _DECLARE _dopn(filename,mode)
 	OFSTRUCT wrc;
 #endif
 
-#ifndef unix
-#ifndef _WINDOWS
-	i = (mode & d_READONLY) ? (O_RDONLY | O_BINARY) : (O_RDWR | O_BINARY);
-#else
+#if defined(_WINDOWS)
 	i = (mode & d_READONLY) ? OF_READ : OF_READWRITE;
-#endif
-#else 	/* unix */
+#elif defined(unix)
 	i = (mode & d_READONLY) ? O_RDONLY : O_RDWR;
-#endif 	/* unix */
-
-#ifndef unix
-#ifndef _WINDOWS
-	j = d_DENYRW; /* Single-User version */
 #else
-    j = OF_SHARE_EXCLUSIVE;
+	i = (mode & d_READONLY) ? (O_RDONLY | O_BINARY) : (O_RDWR | O_BINARY);
 #endif
-#endif 	/* unix */
 
-#ifdef MSCLONE
+#if defined(_WINDOWS)
+    j = OF_SHARE_EXCLUSIVE;
+#elif defined(unix)
+#elif defined(MacOS)
+#else
+	j = d_DENYRW; /* Single-User version */
+#endif
+
+#if defined(MSCLONE)
 #ifdef _WINDOWS
 	i = OpenFile((LPSTR) filename,  (LPOFSTRUCT) &wrc, i | j);
 #else
@@ -88,42 +86,42 @@ int _DECLARE _dopn(filename,mode)
     	i = open(filename, i);
 	}
 #endif
-#endif
 
-#ifdef TURBOC
+#elif defined(TURBOC)
 	if (_osmajor >= 3)
     	i = _open(filename, i | j);
 	else
     	i = _open(filename, i);
-#endif
 
-#ifdef __HIGHC__
+#elif defined(__HIGHC__)
     	i = _open(filename, i);
-#endif 	/* __HIGHC__ */
 
-#ifdef unix
+#elif defined(unix)
     	i = open(filename, i);
-#endif 	/* unix */
+
+#elif defined(MacOS)
+    	i = open(filename, i);
+		
+#else
+#error
+#endif
 
     if (i < 0)
     {
-#ifdef MSCLONE
+#if defined(MSCLONE)
 		if (ERRNO == ENOENT) /* file not found */
-		{
-#endif
-#ifdef TURBOC
+#elif defined(TURBOC)
 		if (ERRNO == ENOFILE) /* file not found */
-		{
-#endif
-#ifdef __HIGHC__
+#elif defined(__HIGHC__)
 		if (ERRNO == ENOENT) /* file not found */
-		{
-#endif
-#ifdef unix
+#elif defined(unix)
 		if (ERRNO == ENOENT) /* file not found */
+#elif defined(MacOS)
+		if (ERRNO == ENOENT) /* file not found */
+#else
+	#error
+#endif
 		{
-#endif 	/* unix */
-
 	    	d_report = 10421;
 	    	return(dNOTFOUND);
 		}
@@ -139,16 +137,17 @@ int _DECLARE _dopn(filename,mode)
 int _DECLARE _dcls(fh)
 	int fh;
 {
-#ifdef MSCLONE
+#if defined(MSCLONE)
     return(close(fh));
-#endif
-#ifdef TURBOC
+#elif defined(TURBOC)
     return(_close(fh));
+#elif defined(__HIGHC__)
+    return(close(fh));
+#elif defined(unix)
+    return(close(fh));
+#elif defined(MacOS)
+    return(close(fh));
+#else
+	#error
 #endif
-#ifdef __HIGHC__
-    return(close(fh));
-#endif 	/* __HIGHC__ */
-#ifdef unix
-    return(close(fh));
-#endif 	/* unix */
 } /* end of _dcls() */

@@ -70,7 +70,7 @@ void DECLARE dUexpnm(
 	}
 done:
 	pointer = result;
-#ifndef unix 
+#if !defined(unix) && !defined(MacOS) 
 	while (*pointer)
 	{
 #ifdef NIHONGO

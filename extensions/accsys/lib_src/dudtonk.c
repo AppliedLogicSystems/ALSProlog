@@ -66,6 +66,7 @@ if (!number)
 	return;
 }
 
+/* extern char *ecvt  PARAMS((double,int,int *,int *)); */
 /**** ILYAS **** Type casting ****/
 digptr = (char *)ecvt(number, 25, &dec, &sign);
 *key++ = (char) 0x34 + dec;

@@ -1,0 +1,238 @@
+/*================================================================
+          acsd3iz.src
+          --Generated from: ../src/accsys.spc
+          Date: 95/12/3   Time: 14:5:53
+ *===============================================================*/
+
+
+/* Open file ../src/accsys.spc */
+
+
+/* Open file ../src/accsys.h */
+
+
+als_type('CHAR_PTR',[ptr,char]).
+
+als_type('INT_PTR',[ptr,int]).
+
+als_type('UINT_PTR',[ptr,unsigned_int]).
+
+als_type('LONG_PTR',[ptr,long]).
+
+als_type('DOUBLE_PTR',[ptr,double]).
+
+als_type('VOID_PTR',[ptr,void]).
+
+als_type('DBF',[ptr,struct]).
+
+als_type('DBT',[ptr,struct]).
+
+als_type('MDX',[ptr,struct]).
+
+als_type('IDX',[ptr,struct]).
+
+als_type('NDX',[ptr,struct]).
+
+als_struct('TAG',['tagid'=[int],
+'tagnm'=[array(11),char],
+'keytype'=[int]]).
+
+als_type('TAG_PTR',[ptr,struct]).
+als_const('d_SINGLE',int).
+als_const('d_READONLY',int).
+als_const('d_SHARED',int).
+als_const('d_SHARE_READ',int).
+als_const('hasMDX',int).
+als_const('hasDBT4',int).
+als_const('hasDBT3',int).
+als_const('isENCRYPTED',int).
+als_const('SUCCESS',int).
+als_const('dERROR',int).
+als_const('dBADNAME',int).
+als_const('dBADFILE',int).
+als_const('dOUTRANGE',int).
+als_const('dNOTFOUND',int).
+als_const('dBOF',int).
+als_const('dEOF',int).
+als_const('dKEYVIOL',int).
+als_const('dMISMATCH',int).
+als_const('dNOOPEN',int).
+als_const('dILLEGAL',int).
+als_const('dIOERR',int).
+als_const('dMEMERR',int).
+als_const('dENCRYPT',int).
+als_const('dRDONLY',int).
+
+als_gvar('dversion','char *',[array(0),char])/'accsys.h'.
+
+
+als_gvar('d_report','int ',[int])/'accsys.h'.
+
+
+als_gvar('dretcode','int ',[int])/'accsys.h'.
+
+
+als_gvar('d_blksiz','int ',[int])/'accsys.h'.
+
+
+als_gvar('d_request','unsigned short ',[unsigned_short])/'accsys.h'.
+
+
+als_gvar('d_recno','long ',[long])/'accsys.h'.
+
+als_const('NO_STATUS',int).
+als_const('MDXstyle',int).
+als_const('NDXstyle',int).
+
+ret('int ')/[int]='dDcreat'('CHAR_PTR '/[ptr,char],
+'int '/[int],
+'CHAR_PTR *'/[array(0),ptr,char])/'accsys.h'.
+
+ret('int ')/[int]='dDdate'('DBF '/[ptr,struct],
+'INT_PTR '/[ptr,int],
+'INT_PTR '/[ptr,int],
+'INT_PTR '/[ptr,int])/'accsys.h'.
+
+ret('DBF ')/[ptr,struct]='dDopen'('CHAR_PTR '/[ptr,char],
+'int '/[int],
+'int '/[int])/'accsys.h'.
+
+ret('int ')/[int]='dDclose'('DBF '/[ptr,struct])/'accsys.h'.
+
+ret('long ')/[long]='dDbuffs'('CHAR_PTR '/[ptr,char],
+'int '/[int])/'accsys.h'.
+
+ret('int ')/[int]='dDflush'('DBF '/[ptr,struct])/'accsys.h'.
+
+ret('int ')/[int]='dDinsrec'('DBF '/[ptr,struct],
+'long '/[long],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('int ')/[int]='dDapprec'('DBF '/[ptr,struct],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('int ')/[int]='dDreccnt'('DBF '/[ptr,struct],
+'LONG_PTR '/[ptr,long])/'accsys.h'.
+
+ret('int ')/[int]='dDupdrec'('DBF '/[ptr,struct],
+'long '/[long],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('int ')/[int]='dDdelrec'('DBF '/[ptr,struct],
+'long '/[long])/'accsys.h'.
+
+ret('int ')/[int]='dDrmrec'('DBF '/[ptr,struct],
+'long '/[long])/'accsys.h'.
+
+ret('int ')/[int]='dDrclrec'('DBF '/[ptr,struct],
+'long '/[long])/'accsys.h'.
+
+ret('int ')/[int]='dDrecsta'('DBF '/[ptr,struct],
+'long '/[long])/'accsys.h'.
+
+ret('int ')/[int]='dDgetrec'('DBF '/[ptr,struct],
+'long '/[long],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('int ')/[int]='dDfldno'('DBF '/[ptr,struct],
+'int '/[int],
+'INT_PTR '/[ptr,int],
+'CHAR_PTR '/[ptr,char],
+'CHAR_PTR '/[ptr,char],
+'INT_PTR '/[ptr,int],
+'INT_PTR '/[ptr,int])/'accsys.h'.
+
+ret('int ')/[int]='dDfldnm'('DBF '/[ptr,struct],
+'CHAR_PTR '/[ptr,char],
+'INT_PTR '/[ptr,int],
+'INT_PTR '/[ptr,int],
+'CHAR_PTR '/[ptr,char],
+'INT_PTR '/[ptr,int],
+'INT_PTR '/[ptr,int])/'accsys.h'.
+
+ret('int ')/[int]='dDreclen'('DBF '/[ptr,struct])/'accsys.h'.
+
+ret('int ')/[int]='dDfields'('DBF '/[ptr,struct])/'accsys.h'.
+
+ret('int ')/[int]='dDcopy'('CHAR_PTR '/[ptr,char],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('int ')/[int]='dU3itodf'('int '/[int],
+'int '/[int],
+'int '/[int],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('int ')/[int]='dU3itodk'('int '/[int],
+'int '/[int],
+'int '/[int],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('void ')/[void]='dUatocf'('CHAR_PTR '/[ptr,char],
+'int '/[int],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('int ')/[int]='dUatonf'('CHAR_PTR '/[ptr,char],
+'int '/[int],
+'int '/[int],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('void ')/[void]='dUdfto3i'('CHAR_PTR '/[ptr,char],
+'INT_PTR '/[ptr,int],
+'INT_PTR '/[ptr,int],
+'INT_PTR '/[ptr,int])/'accsys.h'.
+
+ret('int ')/[int]='dUdftodk'('CHAR_PTR '/[ptr,char],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('void ')/[void]='dUdkto3i'('CHAR_PTR '/[ptr,char],
+'INT_PTR '/[ptr,int],
+'INT_PTR '/[ptr,int],
+'INT_PTR '/[ptr,int])/'accsys.h'.
+
+ret('int ')/[int]='dUdtonf'('double '/[double],
+'int '/[int],
+'int '/[int],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('void ')/[void]='dUdtonk'('int '/[int],
+'double '/[double],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('void ')/[void]='dUexpnm'('CHAR_PTR '/[ptr,char],
+'CHAR_PTR '/[ptr,char],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('int ')/[int]='dUleap'('int '/[int])/'accsys.h'.
+
+ret('double ')/[double]='dUnftod'('CHAR_PTR '/[ptr,char],
+'int '/[int])/'accsys.h'.
+
+ret('int ')/[int]='dUnftonk'('int '/[int],
+'CHAR_PTR '/[ptr,char],
+'int '/[int],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('int ')/[int]='dUnktoa'('int '/[int],
+'CHAR_PTR '/[ptr,char],
+'int '/[int],
+'int '/[int],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('double ')/[double]='dUnktod'('int '/[int],
+'CHAR_PTR '/[ptr,char])/'accsys.h'.
+
+ret('void ')/[void]='dUtoday'('INT_PTR '/[ptr,int],
+'INT_PTR '/[ptr,int],
+'INT_PTR '/[ptr,int])/'accsys.h'.
+
+/* Close file ../src/accsys.h */
+
+
+/* Close file ../src/accsys.spc */
+
+
+/* Close file ../src/accsys.spc */
+
+
+/* Close file ../src/accsys.spc */
+

@@ -24,6 +24,14 @@
  * The following code inserts a record in the middle of the
  * keys list.
  */
+#ifdef __MWERKS__
+/* Metrowerks complains about short parameters that aren't declared
+   in the strict ANSI C format. */
+int _DECLARE _dputkey(PINDEX pindex, PADIOBUFF pio, PAVAILIST pfreelst,
+					  PXDXNOD ndptr, CHAR_PTR key, long recno,
+					  unsigned short offset, pCHAR_PTR key1, LONG_PTR node1,
+					  pCHAR_PTR key2, LONG_PTR node2)
+#else
 #ifndef ACDLL
 int _DECLARE _dputkey(pindex,pio,pfreelst,ndptr,key,recno,offset,
 						key1,node1,key2,node2)
@@ -43,6 +51,7 @@ int _DECLARE _dputkey(DBGDAT_PTR dbgptr,
 	LONG_PTR  node1; /* 1st node number when split */
 	pCHAR_PTR key2;
 	LONG_PTR  node2; /* 2nd node number when split */
+#endif /* MacOS */
 {
 PCOMDAT comptr;
 CHAR_PTR kptr; /* pointer to key in index */

@@ -53,6 +53,16 @@ pad_back(Buf,CurPos,PadStart)
  |	AccSys stuff.
  *-------------------------------------------------------------------*/
 
+/*!-----------------------------------------------------------------------------
+ |	close_all_tables/0.
+ |	close_all_tables
+ |	close_all_tables
+ |
+ |	- closes all open tables in a given module
+ |
+ |	Defined as a module closure; hence closes all modules which are open in
+ |	the module in which it is called.
+ *!----------------------------------------------------------------------------*/
 :-module_closure(close_all_tables,0).
 export close_all_tables/0.
 
@@ -61,6 +71,35 @@ close_all_tables(Module)
 	(save_all_indexfiles(Module) -> true ; true),
 	d_close_all_tables.
 
+/*!-----------------------------------------------------------------------------
+ |	close_table/1
+ |	close_table(FilePtr)
+ |	close_table(+)
+ |
+ |	- closes the specified open table
+ |
+ |	If FilePtr is a table file pointer returned from a call to open_table/3,
+ |	then close_table(FilePtr) closes that table.
+ *!----------------------------------------------------------------------------*/
+export close_table/1.
+close_table(FilePtr)
+	:-
+	dDclose(FilePtr,_).
+
+/*!-----------------------------------------------------------------------------
+ |	open_table/3.
+ |	open_table(Name,FilePtr,NumberRecords)
+ |	open_table(+,-,-)
+ |
+ |	- opens a database table
+ |
+ |	Inputs:
+ |	Name - the name (path to) a database table
+ |
+ |	Outputs:
+ |	FilePtr		a pointer to the table, for use in subsequent calls;
+ |	NumberRecords	the number of recordsin the table when opened
+ *!----------------------------------------------------------------------------*/
 export open_table/3.
 open_table(Name,FilePtr,NumberRecords)
 	:-
@@ -69,20 +108,43 @@ open_table(Name,FilePtr,NumberRecords)
 	FilePtr > 0,
 	dDreccnt(FilePtr, NumberRecords, _).
 
-export close_table/1.
-close_table(FilePtr)
-	:-
-	dDclose(FilePtr,_).
-
-
+/*!-----------------------------------------------------------------------------
+ |	access_db3/3.
+ |	access_db3(RelName,Head,Module) 
+ |	access_db3(+,+,+) 
+ |	access_db3/4.
+ |	access_db3(AccPath,RelName,Head,Module) 
+ |	access_db3(+,+,+,+) 
+ |
+ |	- access a table and match against a goal
+ |
+ |	Inputs:
+ |	RelName		a relation (table/file) name
+ |	Head		a Prolog goal
+ |	Module		a module
+ |	AccPath		a full path a table file
+ |
+ |	In access_db3/3, the table/relation name is taken to also be the file name,
+ |	while in access_db3/4, the table/relation name is distinct from the full
+ |	path to the file.
+ |
+ |	Head is normally a paritially instantiated Prolog goal whose functor is
+ |	identical with RelName and whose arity is the number of columns in the table.
+ |	
+ |	This predicate performs non-indexed lookup on the table; rows from the
+ |	table are retrieved and unified against Head until either a successful
+ |	unification occurs, or the table is exhausted.  This process is 
+ |	re-satisfiable; ie, if a success row is found and the table is not
+ |	exhausted, a choice point is left.
+ *!----------------------------------------------------------------------------*/
 export access_db3/3.
 export access_db3/4.
 export access_db3/6.
 export access_db3/7.
 
-access_db3(Name,Head,Module) 
+access_db3(RelName,Head,Module) 
 	:-
-	open_table(Name,FilePtr,NumberRecords),
+	open_table(RelName,FilePtr,NumberRecords),
 	!,
 	access_db3(1,NumberRecords,Name,FilePtr,Head,Module,close).
 
@@ -98,7 +160,7 @@ access_db3(CurNum,NumberRecords,Name,FilePtr,Head,Module)
 
 
 	%% catch when at end of file, and quit: 
-	%% don't close the file because the ptr to it is cached;
+	%% don't close the file because the ptr to it is now cached;
 	%% gets closed with everything later.
 access_db3(CurNum,NumberRecords,Name,FilePtr,_,_,close) 
 	:-
@@ -126,6 +188,16 @@ access_db3(CurNum,NumberRecords,Name,FilePtr,Head,Module,CloseFlag)
 			%% try again:
 	access_db3(NextNum,NumberRecords,Name,FilePtr,Head,Module,CloseFlag).
 
+/*!-----------------------------------------------------------------------------
+ |	access_db3_all/5
+ |	access_db3_all(AccPath,RelName,Head,Module,List) 
+ |	access_db3_all(+,+,+,+,-) 
+ |
+ |	-	finds all solutions to a query
+ |
+ |	Similar to access_db?/?, but returns the list of all success rows in the
+ |	final argument List.
+ *!----------------------------------------------------------------------------*/
 export access_db3_all/5.
 access_db3_all(AccPath,RelName,Head,Module,List) 
 	:-
@@ -227,23 +299,23 @@ list_or_null(Item, Null)
 list_or_null([], _).
 list_or_null([_|_], _).
 
-/*---------------------------------------------------------------------
+/*!-----------------------------------------------------------------------------
+ |	output_db3/4.
+ |	output_db3(AccPath,RelName,Head,RecordNumber)
+ |	output_db3(AccPath,RelName,Head,RecordNumber)
  |	output_db3/5
  |	output_db3(AccPath,RelName,Head,RecordNumber,Module)
  |	output_db3(+,+,+,-,+)
  |
- |	Writes a record out to the database
- |	(and updates the number of records in the database, via AccSys)
- |	
- |	 RelName - The name of the relation to which the record belongs
- |	 Head	 - The info to be written to the database. It is in the form
+ |	- outputs (inserts) a record to a database table
  |
- |		  			RelName(Field1,Field2,...,Fieldn), 
- |
- |				where n is the arity of RelName.
- |	 RecordNumber - the AccSys record number assigned
- |	 Module - the module in which the putInfo clause resides
- *---------------------------------------------------------------------*/
+ |	Inputs:
+ |		AccPath		the full path to the table file
+ |		RelName		the relation name (=functor of Head)
+ |		Head		the goal whose args make up the row to insert
+ |	Outputs:
+ |		RecordNumber		the number assigned to the record
+ *!----------------------------------------------------------------------------*/
 export output_db3/4.
 output_db3(AccPath,RelName,Head,RecordNumber)
 	:-
@@ -263,6 +335,19 @@ output_db3(AccPath,RelName,Head,RecordNumber,Module)
 % delete: Non-Deterministic Delete a record from the database
 %--------------------------------------------------------------------------
 
+/*!-----------------------------------------------------------------------------
+ |	delete_db3/4.
+ |	delete_db3(AccPath,RelName,Head,Module) 
+ |	delete_db3(+,+,+,+) 
+ |
+ |	- deletes a record from a database table
+ |
+ |	Uses Head as a query to locate a matching row in the table, and then
+ |	deletes that row; is re-satisfiable, in that subsequent calls will
+ |	attempt to find (and delete) matching rows following the last matched
+ |	and deleted row. The query solution is non-indexed, so that the
+ |	effectively performs an access_db3 call to locate the record.
+ *!----------------------------------------------------------------------------*/
 export delete_db3/4.
 delete_db3(AccPath,RelName,Head,Module) 
 	:-
@@ -303,6 +388,16 @@ delete_db3_by_rec_num(AccPath,RecNo,RetVal)
 % det_delete: Deterministic Delete a record from the database
 %--------------------------------------------------------------------------
 
+/*!-----------------------------------------------------------------------------
+ |	det_delete_db3/4.
+ |	det_delete_db3(AccPath,RelName,Head,Module) 
+ |	det_delete_db3(+,+,+,+) 
+ |
+ |	- deterministically deletes a record from a database table
+ |
+ |	Uses Head as a query to locate a matching row in the table, and then
+ |	deletes that row. Is not re-satisfiable and non-indexed.
+ *!----------------------------------------------------------------------------*/
 export det_delete_db3/4.
 det_delete_db3(AccPath,RelName,Head,Module) 
 	:-
@@ -333,6 +428,18 @@ do_det_delete_db3(CurNum,NumberRecords,RelName,FilePtr,Head,Module)
 % update: Update a record in the database
 %--------------------------------------------------------------------------
 
+/*!-----------------------------------------------------------------------------
+ |	update_db3/5
+ |	update_db3(AccPath,RelName,MatchHead,OutHead,Module) 
+ |	update_db3(+,+,+,+,+) 
+ |
+ |	- updates a database row in place
+ |
+ |	MatchHead is used to locate record which is then replaced by the row
+ |	determined by OutHead.  Effectively, this is a access, followed by
+ |	a delete, followed by an output (in place). Not re-satisfiable, and
+ |	non-indexed.
+ *!----------------------------------------------------------------------------*/
 export update_db3/5.
 update_db3(AccPath,RelName,MatchHead,OutHead,Module) 
 	:-
@@ -378,8 +485,25 @@ do_update_db3(CurNum,NumberRecords,RelName,Part,FilePtr,MatchHead, OutHead,Modul
 
 #if (syscfg:d3x)
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*!-----------------------------------------------------------------------------
+ |	iaccess_db3/4
+ |	iaccess_db3(RelName,DBFPath,Head,Module)
+ |	iaccess_db3(+,+,+,+)
+ |
+ |	- performs an indexed access to a table row
+ |
+ |	Inputs:
+ |		RelName		the relation name
+ |		DBFPath		the full path to the table file
+ |		Head		a goal as in access_db3/?
+ |		Module		a module
+ |
+ |	If indicies have been constructed for the table, this call utilizes any
+ |	instantiated arguments of Head to attempt to access a row of the table.
+ |	Not resatisfiable.  Note the unfortunate inversion of the first two
+ |	arguments between this predicate and access_db3/4.  {Any plan to
+ |	correct this must fix the outputs of the concept transformer.}
+ *!----------------------------------------------------------------------------*/
 export iaccess_db3/4.
 iaccess_db3(RelName,DBFPath,Head,Module)
 	:-
@@ -394,9 +518,13 @@ iaccess_db3(RelName,DBFPath,Head,Module)
 	:-
 	access_db3(DBFPath,RelName,Head,Module).
 	
-
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*!-----------------------------------------------------------------------------
+ |	ioutput_db3/3.
+ |	ioutput_db3(DBFPath,RelName,Head)
+ |	ioutput_db3(+,+,+)
+ | 
+ |	- outputs a row to an indexed table
+ *!----------------------------------------------------------------------------*/
 export ioutput_db3/3.
 ioutput_db3(DBFPath,RelName,Head)
 	:-
@@ -417,8 +545,13 @@ ioutput_db3(DBFPath,RelName,Head,Module,RecordNumber)
 	match_all_patterns(PatternList,Head,Arity,MatchList),
 	idx_all_output_db3(MatchList,RelName,RecordNumber,DBFPath,Head,Arity,Module).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*!-----------------------------------------------------------------------------
+ |	idelete_db3/3.
+ |	idelete_db3(DBFPath,RelName,Head)
+ |	idelete_db3(+,+,+)
+ |
+ |	- deletes a row from and indexed table
+ *!----------------------------------------------------------------------------*/
 export idelete_db3/3.
 idelete_db3(DBFPath,RelName,Head)
 	:-
@@ -450,7 +583,7 @@ idelete_db3(DBFPath,RelName,Head,Module,RecordNumber)
  |	where <FF> is a functor of arity N+1.  The expression
  |	in the n+1st place provides the access method information.
  *---------------------------------------------------------*/
-/*!----------------------------------------------------------
+/*----------------------------------------------------------
  | match_pattern/5
  | match_pattern(PatternList,Head,Arity,AccessPattern,Match).
  | match_pattern(+,+,+,-, -)
@@ -464,7 +597,7 @@ idelete_db3(DBFPath,RelName,Head,Module,RecordNumber)
  |	Match - the match value [returned by match_idx_pattern]
  |
  |	Recurses down PatternList, seeking the first matching pattern
- *!---------------------------------------------------------*/
+ *---------------------------------------------------------*/
 match_pattern([AccessPattern | PatternList],Head,Arity,AccessPattern, Match)
 	:-
 	match_idx_pattern(1,Arity,AccessPattern,Head,Match).
@@ -472,7 +605,7 @@ match_pattern([_ | PatternList],Head,Arity,AccessPattern,Match)
 	:-
 	match_pattern(PatternList,Head,Arity,AccessPattern,Match).
 
-/*!----------------------------------------------------------
+/*----------------------------------------------------------
  | match_all_patterns/4
  | match_all_patterns(PatternList,Head,Arity,SuccessList)
  | match_all_patterns(+,+,+,-)
@@ -488,7 +621,7 @@ match_pattern([_ | PatternList],Head,Arity,AccessPattern,Match)
  |					Match = match value [returned by match_idx_pattern]
  |
  |	Recurses down PatternList, seeking all matching patterns
- *!---------------------------------------------------------*/
+ *---------------------------------------------------------*/
 match_all_patterns([],_,_,[]).
 match_all_patterns([AccessPattern | PatternList],Head,Arity,
 					[AccessPattern+Match | SuccessList])
@@ -499,7 +632,7 @@ match_all_patterns([_ | PatternList],Head,Arity,SuccessList)
 	:-
 	match_all_patterns(PatternList,Head,Arity,SuccessList).
 
-/*!----------------------------------------------------------
+/*----------------------------------------------------------
  | match_idx_pattern/5
  | match_idx_pattern(Pos,Arity,AccessPattern,Head,Match)
  | match_idx_pattern(+,+,+,+,-)
@@ -518,7 +651,7 @@ match_all_patterns([_ | PatternList],Head,Arity,SuccessList)
  |	returns Match as the list of match results from the
  |	corresponding arg matches; essentially recursively applies
  |	idx_match_made to each pair.
- *!---------------------------------------------------------*/
+ *---------------------------------------------------------*/
 export match_idx_pattern/5.
 match_idx_pattern(Pos,Arity,AccessPattern,Head,[])
 	:-
@@ -533,7 +666,7 @@ match_idx_pattern(Pos,Arity,AccessPattern,Head, Match)
 	NextPos is Pos+1,
 	match_idx_pattern(NextPos,Arity,AccessPattern,Head,MatchTail).
 
-/*!----------------------------------------------------------
+/*----------------------------------------------------------
  |	idx_match_made/4
  |	idx_match_made(IdxSpec,IncomingVal,Match,MatchTail)
  |	idx_match_made(+,+,-,-)
@@ -549,15 +682,15 @@ match_idx_pattern(Pos,Arity,AccessPattern,Head, Match)
  |	If IncomingVal is non_var, 
  |		Then Match = [ IncomingVar | MatchTail]
  |		Else Match = MatchTail
- *!---------------------------------------------------------*/
+ *---------------------------------------------------------*/
 idx_match_made(+,IncomingVal,[IncomingVal | MatchTail], MatchTail)
 	:-!,
 	nonvar(IncomingVal).
 idx_match_made(-,_,Match,Match).
 
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 idx_access_db3(AccessPattern,Match,RelName,DBFPath,Head,Arity,Module)
 	:-
 	idx_access_db3(AccessPattern,Match,RelName,DBFPath,Head,Arity,Module,TheRecNo).
@@ -584,8 +717,8 @@ xmem(Item, [_ | Tail ])
 	xmem(Item, Tail).
 xmem(Item, Item).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+ *----------------------------------------------------------------------------*/
 				%	IFCN:  <ifnc>(Match,Key),
 				%	IAP:   iap(Key,RecNo,....),
 
@@ -610,7 +743,7 @@ iap(hdx,Key,RecNo,IndexName,Module)
 	!,
 	gv_get(VNum, IStruct),
 	hash_lookup(Key,KeyEntries,IStruct),
-	member(RecNo, KeyEntries).
+	(member(RecNo, KeyEntries); KeyEntries = [_ | RecNo]).
 	
 iap(IndexType,Key,RecNo,IndexName,Module)
 	:-
@@ -618,16 +751,16 @@ iap(IndexType,Key,RecNo,IndexName,Module)
 	restore_index(Module,IndexName,FileName),
 	iap(IndexType,Key,RecNo,IndexName,Module).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+ *----------------------------------------------------------------------------*/
 idx_all_output_db3([],RelName,RecordNumber,DBFPath,Head,Arity,Module).
 idx_all_output_db3([Pattern+Match | MatchList],RelName,RecordNumber,DBFPath,Head,Arity,Module)
 	:-
 	idx_output_db3(Pattern,Match,RelName,RecordNumber,DBFPath,Head,Arity,Module),
 	idx_all_output_db3(MatchList,RelName,RecordNumber,DBFPath,Head,Arity,Module).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+ *----------------------------------------------------------------------------*/
 idx_output_db3(Pattern,Match,RelName,RecNo,DBFPath,Head,Arity,Module)
 	:-
 	M is Arity+1,
@@ -658,16 +791,16 @@ insert_idx_rec(hdx,Key,RecNo,IStruct)
 	:-
 	hash_insert_multi(Key,RecNo,IStruct).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+ *----------------------------------------------------------------------------*/
 idx_all_delete_db3([],RelName,RecordNumber,DBFPath,Head,Arity,Module).
 idx_all_delete_db3([Pattern+Match | MatchList],RelName,RecordNumber,DBFPath,Head,Arity,Module)
 	:-
 	idx_delete_db3(Pattern,Match,RelName,RecordNumber,DBFPath,Head,Arity,Module),
 	idx_all_delete_db3(MatchList,RelName,RecordNumber,DBFPath,Head,Arity,Module).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+ *----------------------------------------------------------------------------*/
 idx_delete_db3(Pattern,Match,RelName,RecNo,DBFPath,Head,Arity,Module)
 	:-
 	M is Arity+1,
@@ -698,6 +831,18 @@ delete_idx_rec(hdx,Key,RecNo,IStruct)
 	/* -------------------------------------
  	 |	PIDX Indexes
 	 * ------------------------------------- */
+/*!-----------------------------------------------------------------------------
+ |	setup_pdx/1.
+ |	setup_pdx(Name)
+ |	setup_pdx(+)
+ |	setup_pdx/2.
+ |	setup_pdx(Module, Name)
+ |	setup_pdx(+, +)
+ |
+ |	-	sets up a pdx (determinate prolog hash table) index named Name
+ |
+ |	setup_pdx/1 is a module closure expanding to setup_pdx/2.
+ *!----------------------------------------------------------------------------*/
 :-module_closure(setup_pdx,1).
 export setup_pdx/1.
 export setup_pdx/2.
@@ -705,8 +850,8 @@ setup_pdx(Module,Name)
 	:-
 	make_pdx_idx(Name,Module).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+ *----------------------------------------------------------------------------*/
 export make_pdx_idx/2.
 export make_pdx_idx/4.
 
@@ -751,8 +896,14 @@ fin_make_idx(pmx,Name,IStruct,Module,GVN)
 */
 
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*!-----------------------------------------------------------------------------
+ |	make_pmx_idx/2.
+ |	make_pmx_idx(Name,Module)
+ |	make_pmx_idx(Name,Module)
+ |
+ |	-	sets up a pmx (non-determinate prolog hash table) index named Name
+ |
+ *!----------------------------------------------------------------------------*/
 export make_pmx_idx/2.
 export make_pmx_idx/4.
 
@@ -767,8 +918,8 @@ make_pmx_idx(Name,Size,Incr,Module)
 	IStruct = ix(0,FF,Size,Incr),
 	fin_make_idx(pdx,Name,IStruct,Module,GVN).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 export set_all_args/4.
 set_all_args(Cur,Size,FF,ArgVal)
 	:-
@@ -779,8 +930,19 @@ set_all_args(Cur,Size,FF,ArgVal)
 	Next is Cur +1,
 	set_all_args(Next,Size,FF,ArgVal).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*!-----------------------------------------------------------------------------
+ |	save_indexfile/1
+ |	save_indexfile(FileName)
+ |	save_indexfile(+)
+ |	save_indexfile/2
+ |	save_indexfile(Module,FileName)
+ |	save_indexfile(+,+)
+ |
+ |	- writes in in-memory pdx or pmx out to disk
+ |
+ |
+ |	save_indexfile/1 is a module closure which expands to save_indexfile/2
+ *!----------------------------------------------------------------------------*/
 :-module_closure(save_indexfile,1).
 export save_indexfile/1.
 export save_indexfile/2.
@@ -810,6 +972,13 @@ write_out_indicies([IndexName | Indicies],Module,OutS)
 	write_out_index(Index,IndexName,OutS),
 	write_out_indicies(Indicies,Module,OutS).
 
+/*!-----------------------------------------------------------------------------
+ |	save_all_indexfiles/1
+ |	save_all_indexfiles(Module)
+ |	save_all_indexfiles(+)
+ |
+ |	- writes all indexfiles from Module out to disk
+ *!----------------------------------------------------------------------------*/
 export save_all_indexfiles/1.
 save_all_indexfiles(Module)
 	:-
@@ -822,8 +991,8 @@ save_each_indexfile([FileName | IFiles],Module)
 	save_indexfile(Module,FileName),
 	save_each_indexfile(IFiles,Module).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+ *----------------------------------------------------------------------------*/
 export add_index/4.
 add_index(IndexName,Type,Module,FileName)
 	:-
@@ -843,8 +1012,8 @@ finish_add_index(FileName,IStruct,IndexName,Type,Module)
 	:-
 	complete_save_indexfile(FileName,[idx(IndexName,Type,IStruct)],Module).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 update_insert_index([],IndexName,IStruct,Type,[idx(IndexName,Type,IStruct)]).
 
 update_insert_index([idx(IndexName,Type,_) | OldTerms],IndexName,IStruct,
@@ -858,8 +1027,18 @@ write_out_index(Index,IndexName,OutS)
 	:-
 	write_clause(OutS,Index).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*!-----------------------------------------------------------------------------
+ |	restore_index/2.
+ |	restore_index(IndexName,FileName)
+ |	restore_index(+,+)
+ |	restore_index/3.
+ |	restore_index(Module,IndexName,FileName)
+ |	restore_index(+,+,+)
+ |
+ |	- reloads an in-memory pdx or pmx index from disk
+ |
+ |	restore_index/2 is a module closure which expands to |	restore_index/3.
+ *!----------------------------------------------------------------------------*/
 :-module_closure(restore_index,2).
 export restore_index/2.
 export restore_index/3.
@@ -873,8 +1052,11 @@ read_indexfile(FileName,Terms)
 	:-
 	open(FileName,read,InS,[]),
 	read_term(InS,FileFileName,[]),
+	match_path_name(FileName,FileFileName),
+/*
 	(FileName = FileFileName, !;
 		pathPlusFile(_,FileFileName,FileName) ),
+*/
 	read_terms(InS,Terms),
 	close(InS).
 
@@ -886,8 +1068,14 @@ fin_restore([Index | Terms], Module)
 	install_index_str(IndexName,Type,GVNum,Module),
 	fin_restore(Terms, Module).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+match_path_name(FileName,FileName) :-!.
+match_path_name(FileName,FileFileName)
+	:-
+	pathPlusFile(_,FileName0,FileFileName),
+	pathPlusFile(_,FileName0,FileName).
+
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 install_index_str(IndexName,Type,GVNum,Module)
 	:-
 	Module:index_structs(IndexName,Type,GVNum),
@@ -896,8 +1084,8 @@ install_index_str(IndexName,Type,GVNum,Module)
 	:-
 	Module:assert(index_structs(IndexName,Type,GVNum)).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 insert_ixr(IX,RecNo,IStruct)
 	:-
 	IStruct = ix(CurMax,FF,Size, Incr),
@@ -932,8 +1120,8 @@ delete_ixr(IX,RecNo,IStruct)
 	arg(IX,FF,RecNo),
 	mangle(IX,FF,0).
 	
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 insert_imxr(IX,RecNo,IStruct)
 	:-
 	IStruct = ix(CurMax,FF,Size, Incr),
@@ -1001,8 +1189,8 @@ ddel(RecList, RecListTail, RecNo)
 	).
 ddel(RecList, RecListTail, RecNo).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 copy_slots(Cur,Size,Src,Dst)
 	:-
 	Cur > Size, !.
@@ -1013,8 +1201,8 @@ copy_slots(Cur,Size,Src,Dst)
 	Next is Cur + 1,
 	copy_slots(Next,Size,Src,Dst).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 retr_ixr(IX,RecNo,ix(CurMax,FF,_,_))
 	:-
 	IX =< CurMax,
@@ -1026,8 +1214,8 @@ retr_imxr(IX,RecNo,ix(CurMax,FF,_,_))
 	arg(IX, FF, RecList),
 	member(RecNo, RecList).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+ *----------------------------------------------------------------------------*/
 export bld_idx/6.
 bld_idx(pdx,RelName,IndexName,Module,Pattern,KeyFcn)
 	:-
@@ -1047,8 +1235,8 @@ bld_idx(pdx,RelName,IndexName,Module,Pattern,KeyFcn)
 	Module:clause(GetIt,gv_get(VNum,_)),
 	install_index_str(IndexName,pdx, VNum,Module).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 	%% Exhausted all records:
 do_pdx_ix(CurNum,NumberRecords,Name,FilePtr,_,IStruct,Pattern,Arity,KeyFcn) 
 	:-
@@ -1079,8 +1267,8 @@ do_pdx_ix(CurNum,NumberRecords,Name,FilePtr,Module,IStruct,Pattern,Arity,KeyFcn)
 	do_pdx_ix(NextNum,NumberRecords,Name,FilePtr,Module,IStruct,Pattern,Arity,KeyFcn).
 
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 bld_idx(pmx,RelName,IndexName,Module,Pattern,KeyFcn)
 	:-
 	Module:table_access_path(RelName,AccPath),
@@ -1099,8 +1287,8 @@ bld_idx(pmx,RelName,IndexName,Module,Pattern,KeyFcn)
 	Module:clause(GetIt,gv_get(VNum,_)),
 	install_index_str(IndexName,pmx, VNum,Module).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 	%% Exhausted all records:
 do_pmx_ix(CurNum,NumberRecords,Name,FilePtr,_,IStruct,Pattern,Arity,KeyFcn) 
 	:-
@@ -1130,8 +1318,8 @@ do_pmx_ix(CurNum,NumberRecords,Name,FilePtr,Module,IStruct,Pattern,Arity,KeyFcn)
 	NextNum is CurNum + 1,
 	do_pmx_ix(NextNum,NumberRecords,Name,FilePtr,Module,IStruct,Pattern,Arity,KeyFcn).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 bld_idx(hdx,RelName,IndexName,Module,Pattern,KeyFcn)
 	:-
 	Module:table_access_path(RelName,AccPath),
@@ -1151,8 +1339,8 @@ bld_idx(hdx,RelName,IndexName,Module,Pattern,KeyFcn)
 	do_hdx_ix(1,NumberRecords,RelName,FilePtr,Module,HashTable,Pattern,Arity,KeyFcn),
 	install_index_str(IndexName, hdx,GVNum,Module).
 
-/*!----------------------------------------------------------
- *!---------------------------------------------------------*/
+/*----------------------------------------------------------
+ *---------------------------------------------------------*/
 do_hdx_ix(CurNum,NumberRecords,Name,FilePtr,_,HashTable,Pattern,Arity,KeyFcn) 
 	:-
 	CurNum > NumberRecords,

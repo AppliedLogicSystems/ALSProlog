@@ -1,6 +1,6 @@
 /*=============================================================================
  |				accsysul.pro 	
- |	Copyright (c) 1991-1993 Applied Logic Systems, Inc.
+ |	Copyright (c) 1991-1995 Applied Logic Systems, Inc.
  |
  |		-- Low Level Layer above AccSys dBase Library Predicates
  |
@@ -16,11 +16,7 @@
  |	----------------
  |	d3i		- dBaseIII/IV simple i/0 (no indexing, no memo, no mgmt)
  |
- |	d3n 	- dBaseIII indexing machinery (no memo; no mgmt)
- |
- |	d3x 	- dBaseIV indexing machinery (no memo; no mgmt)
- |
- |	d3t		- dBase memo machinery (incl. mgmt)
+ |	d3x 	- dBaseIV indexing machinery (no memo; no mgmt)		-- not used in this file
  |
  |	d3z		- dBaseIII/IV management machinery (no d3t)
  |
@@ -32,48 +28,15 @@
  |	d3iz  (= d3i & d3z)
  |		- dBaseIII simple interface (i/o; no mgmt)
  |
- |	d3in (= d3i & d3n)
- |		- dBaseIII indexed(III) interface (i/o with indexing; no memo, no mgmt)
- |
- |	d3inz  (= d3i & d3n & d3z)
- |		- dBase indexed(III) interface (i/o with indexing & mgmt; no memo)
- |
  |	d3ixz  (= d3i & d3x & d3z)
  |		- dBase indexed(IV) interface (i/o with indexing & mgmt; no memo)
- |
- |	d3it (= d3i & d3t)
- |		- dBaseIII/IV simple memo interface (i/o; no indexing, no mgmt)
- |
- |	d3int (= d3i & d3t & d3n)
- |		- dBase indexed(III) memo interface (i/o; no mgmt)
- |
- |	d3ixt (= d3i & d3t & d3x)
- |		- dBase indexed(IV) memo interface (i/o; no mgmt)
- |
- |	d3intz (= d3i & d3t & d3n & d3z)
- |		- dBaseIII indexed memo interface with management
- |
- |	d3ixtz (= d3i & d3t & d3x & d3z)
- |		- dBaseIII indexed memo interface with management
  *---------------------------------------------------------------------------*/
 /*
 	%% Raw feature tags:
 :-dynamic(d3i/0).
-:-dynamic(d3x/0).
+:-dynamic(d3x/0).		-- not used in this file
 :-dynamic(d3z/0).
-:-dynamic(d3n/0).
-:-dynamic(d3t/0).
 
-	%% Target system feature tags:
-% d3i		%% defined as by raw feature tag
-d3in	:- d3i, d3n.
-d3inz	:- d3i, d3n, d3z.
-d3ixz	:- d3i, d3x, d3z.
-d3it	:- d3i, d3t.
-d3int	:- d3i, d3n, d3t.
-d3ixt	:- d3i, d3x, d3t.
-d3intz	:- d3i, d3n, d3t, d3z.
-d3ixtz	:- d3i, d3x, d3t, d3z.
 */
 
 /*---------------------------------------------------------------------------*
@@ -114,7 +77,7 @@ d3ixtz	:- d3i, d3x, d3t, d3z.
 	dUnktod/3
 	dUtoday/3
 
-	d3x
+	d3x  -- not linked any more
 	---
 	dXactidx/3
 	dXbuffs/2
@@ -135,64 +98,12 @@ d3ixtz	:- d3i, d3x, d3t, d3z.
 	dXrmkey/4
 	dXupdkey/5
 
-	d3n
-	---
-	dNbuffs/3
-	dNopen/4
-	dNclose/2
-	dNgetrno/4
-	dNnxtkey/4
-	dNnxtkey/5
-	dNprvkey/4
-	dNprvkey/5
-	dNcurkey/4
-	dNcurkey/5
-	dNrewind/2
-	dNforwrd/2
-	dNputkey/4
-	dNrmkey/4
-	dNupdkey/5
-	dNflush/2
-	
-	d3t
-	---
-	dTcreat/2
-	dTaddmm/6
-	dTchkmm/2
-	dTclose/2
-	dTgetmm/6
-	dTmemosz/4
-	dTmemuse/2
-	dTnewmm/5
-	dTopen/3
-	dTupdmm/6
-	
 	d3z
 	---
 	dDcreat/3
 	dDcopy/3
 	dDfields/2
 	dDfldnm/8
-
-  -- nolonger use these:
-	dXaddtag/7
-	dXexplen/4
-	dXexpr/7
-	dXezindx/7
-	dXindex/10
-	dXkeytyp/2
-	dXlistag/3
-	dXrename/3
-	dXrmtag/4
-	dXsortag/3
-	dXtags/2
-
-	dNcreat/4
-	dNcopy/3
-	dNkeylen/2
-	dNkeytyp/2
-	dNexplen/3
-	dNexpr/4
  *---------------------------------------------------------------------------*/
 module accsys_db3.
 
@@ -233,6 +144,7 @@ flush_dD_buffers(Mod,Name)
  |
  | Outputs:
  |	RetVal 		memory required to allocate file buffers or error code
+ |
  |				(memory size is positive; error codes are negative)
  *--------------------------------------------------------------------*/
 export dDbuffs/3.
@@ -358,6 +270,18 @@ dDreclen(DBFPTR,RetVal) :-
  | dDgetrec/4
  | dDgetrec(DBFPTR,RecNo,Rec,RetVal)
  | dDgetrec(+,+,-,-)
+ |
+ |	-	reads a record from a DBF file by record number
+ |
+ | Inputs:
+ |	DBFPTR 		DBF file reference
+ | 	RecNo 		Record number
+ |
+ | Outputs:
+ | 	Rec 		Record buffer
+ |	RetVal 		Success or error code
+ *--------------------------------------------------------------------*/
+/*!-d3i-----------------------------------------------------------------
  | dDgetrec/5
  | dDgetrec(DBFPTR,RecNo,RecLen,Rec,RetVal)
  | dDgetrec(+,+,+,-,-)
@@ -417,7 +341,6 @@ dDrecsta(DBFPTR,RecNo,RetVal) :-
  |
  | Outputs:
  |	RetVal 		Success or error code
- |
  *--------------------------------------------------------------------*/
 export dDapprec/3.
 dDapprec(DBFPTR,Rec,RetVal) :-
@@ -644,41 +567,6 @@ acc_fields_to_record(Pos,NumofFields,SUCCESS,DBFPTR,[FieldVal | Fields],Rec) :-
 acc_fields_to_record(Pos,NumofFields,SUCCESS,DBFPTR,[],Rec) :-
 	Pos > NumofFields, !.
 
-/****************
-
-/*!-d3i-----------------------------------------------------------------
- | acc_dDgetrec/2
- | acc_dDgetrec(DBFPTR,Fields)
- | acc_dDgetrec(+,-)
- |
- |	-	
- |
- | Inputs:
- | 	DBFPTR 		DBF	file reference 
- |
- | Outputs:
- | 	Fields 		List of field values
- *--------------------------------------------------------------------*/
-acc_dDgetrec(DBFPTR,Fields) :-
-	'$c_constinfo'('SUCCESS',SUCCESS),
-	'$c_constinfo'('dNOOPEN',DNOOPEN),
-	dDreccnt(DBFPTR,Count,SUCCESS),
-	a_dDreclen(DBFPTR,RecLen),
-	RecLen \= DNOOPEN,
-	'$uia_alloc'(RecLen,Rec),
-	acc_dDgetrec(1,Count,DBFPTR,Rec,SUCCESS),
-	acc_record_to_fields(DBFPTR,Rec,Fields).
-
-acc_dDgetrec(RecNo,Count,DBFPTR,Rec,SUCCESS) :-
-	a_dDgetrec(DBFPTR,RecNo,Rec,SUCCESS).
-acc_dDgetrec(RecNo,Count,DBFPTR,Rec,SUCCESS) :-
-	RecNo < Count, !,
-	NewRecNo is RecNo + 1,
-	acc_dDgetrec(NewRecNo,Count,DBFPTR,Rec,SUCCESS).
-
-
-*****************/
-
 #endif		%% d3i
 
 #if (syscfg:d3z)
@@ -884,665 +772,6 @@ dDdate(DBFPTR,Month,Day,Year,RetVal) :-
 
 #endif		%% d3z
 
-#if (syscfg:d3n)
-
-/********************************************************************
- *
- * 		dN Functions - NDX Indexing (III) Functions 			
- *
- *******************************************************************/
-
-/*!-d3n-----------------------------------------------------------------
- | dNcreat/4
- | dNcreat(NDXName,KeyExpr,Type,RetVal)
- | dNcreat(+,+,+,-)
- |
- | Inputs:
- | 	NDXName 	Name of NDX database file
- |	KeyExpr 	Key expression
- |	Type 		Type and length
- |
- | Outputs:
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNcreat/4.
-dNcreat(NDXName,KeyExpr,Type,RetVal) :-
-	a_dNcreat(NDXName,KeyExpr,Type,RetVal).
-
-/*!-d3n-----------------------------------------------------------------
- | dNcopy/3
- | dNcopy(SrcNDXName,DestNDXName,RetVal)
- | dNcopy(+,+,-)
- |
- | Inputs:
- | 	SrcNDXName 	Name of original NDX database file
- | 	DestNDXName	Name of new NDX database file
- |
- | Outputs:
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNcopy/3.
-dNcopy(SrcNDXName,DestNDXName,RetVal) :-
-	a_dNcopy(SrcNDXName,DestNDXName,RetVal).
-
-/*!-d3n-----------------------------------------------------------------
- | dNbuffs/3
- | dNbuffs(NDXName,Buffs,RetVal)
- | dNbuffs(+,+,-)
- |
- | Inputs:
- |	NDXName 	Name of NDX database file
- |	Buffs 		Number of buffers requested
- |
- | Outputs:
- |	RetVal 		memory required to allocate file buffers or error code
- |				(memory size is positive; error codes are negative)
- *--------------------------------------------------------------------*/
-export dNbuffs/3.
-dNbuffs(NDXName,Buffs,RetVal) :-
-	a_dNbuffs(NDXName,Buffs,RetVal).
-
-/*!-d3n-----------------------------------------------------------------
- | dNopen/4
- | dNopen(NDXName,ModeStr,Buffs,RetVal)
- | dNopen(+,+,+,-)
- |
- | Inputs:
- | 	NDXName 	Name of NDX database file
- | 	ModeStr 	File open mode (a string)
- | 	Buffs 		Number of buffers to be used
- |
- | Outputs:
- |	RetVal 		File reference pointer or NULL (0).
- *--------------------------------------------------------------------*/
-export dNopen/4.
-dNopen(NDXName,ModeStr,Buffs,RetVal) 
-	:-
-	accsys_file_link_cache(NDXName, ModeStr, Buffs, RetVal),
-	!.
-
-dNopen(NDXName,ModeStr,Buffs,RetVal) 
-	:-
-	'$c_constinfo'(ModeStr,Mode),
-	a_dNopen(NDXName,Mode,Buffs,RetVal),
-	RetVal > 0,
-	assert(accsys_file_link_cache(NDXName, ModeStr, Buffs, RetVal)).
-
-dNopen(NDXName,ModeStr,Buffs,RetVal) 
-	:-
-	accsys_file_link_cache(ONDXName, OModeStr, OBuffs, ORetVal),
-	NDXFName \= NDXName,
-	retract(accsys_file_link_cache(ONDXName, OModeStr, OBuffs, ORetVal)),
-	'$c_constinfo'(ModeStr,Mode),
-	a_dDopen(NDXName,Mode,Buffs,RetVal),
-	RetVal > 0,
-	!,
-	assert(accsys_file_link_cache(NDXName, ModeStr, Buffs, RetVal)).
-
-dNopen(NDXName,ModeStr,Buffs,RetVal) 
-	:-
-	dDglobal_vs(dretcode,ErrVal),
-	a_retcode(ErrCode,		ErrVal,  ErrorText),
-	dDglobal_vs(d_report,RepErrVal),
-	printf('Accsys NDX open error %t (%t): %t [rep: %t]\n',
-			[NDXName,ErrVal,ErrorText,RepErrVal]).
-
-/*!-d3n-----------------------------------------------------------------
- | dNclose/2
- | dNclose(NDXPTR,RetVal)
- | dNclose(+,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |
- | Outputs:
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNclose/2.
-dNclose(NDXPTR,RetVal) :-
-	a_dNflush(NDXPTR,_),
-	retract_all(accsys_file_link_cache(NDXName, _, _, NDXPTR)),
-	a_dNclose(NDXPTR,RetVal).
-
-/*!-d3n-----------------------------------------------------------------
- | dNgetrno/4
- | dNgetrno(NDXPTR,Key,RecNo,RetVal)
- | dNgetrno(+,+,-,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |	Key 		Key 
- |
- | Outputs:
- | 	RecNo 		Record Number
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNgetrno/4.
-dNgetrno(NDXPTR,Key,RecNo,RetVal) :-
-    '$uia_alloc'(4,RecNoPtr),
-	acc_key_to_keybuf(NDXPTR,Key,KeyBuf),
-    a_dNgetrno(NDXPTR,KeyBuf,RecNoPtr,RetVal),
-    '$uia_peekl'(RecNoPtr,0,RecNo).
-
-/*!-d3n-----------------------------------------------------------------
- | dNnxtkey/4
- | dNnxtkey(NDXPTR,Key,RecNo,RetVal)
- | dNnxtkey(+,-,-,-)
- | dNnxtkey/5
- | dNnxtkey(NDXPTR,KeyLen,Key,RecNo,RetVal)
- | dNnxtkey(+,+,-,-,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |	KeyLen 		Key length 
- |
- | Outputs:
- |	Key 		Key 
- | 	RecNo 		Record Number
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNnxtkey/4.
-export dNnxtkey/5.
-dNnxtkey(NDXPTR,Key,RecNo,RetVal) :-
-	acc_dNkeylen(NDXPTR,KeyLen),
-	dNnxtkey(NDXPTR,KeyLen,Key,RecNo,RetVal).
-
-dNnxtkey(NDXPTR,KeyLen,Key,RecNo,RetVal) :-
-    '$uia_alloc'(KeyLen,Key),
-    '$uia_alloc'(4,RecNoPtr),
-    a_dNnxtkey(NDXPTR,Key,RecNoPtr,RetVal),
-    '$uia_peekl'(RecNoPtr,0,RecNo).
-
-/*!-d3n-----------------------------------------------------------------
- | dNprvkey/4
- | dNprvkey(NDXPTR,Key,RecNo,RetVal)
- | dNprvkey(+,-,-,-)
- | dNprvkey/5
- | dNprvkey(NDXPTR,KeyLen,Key,RecNo,RetVal)
- | dNprvkey(+,+,-,-,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |	KeyLen 		Key length 
- |
- | Outputs:
- |	Key 		Key 
- | 	RecNo 		Record Number
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNprvkey/4.
-export dNprvkey/5.
-dNprvkey(NDXPTR,Key,RecNo,RetVal) :-
-	acc_dNkeylen(NDXPTR,KeyLen),
-	dNprvkey(NDXPTR,KeyLen,Key,RecNo,RetVal).
-
-dNprvkey(NDXPTR,KeyLen,Key,RecNo,RetVal) :-
-    '$uia_alloc'(KeyLen,Key),
-    '$uia_alloc'(4,RecNoPtr),
-    a_dNprvkey(NDXPTR,Key,RecNoPtr,RetVal),
-    '$uia_peekl'(RecNoPtr,0,RecNo).
-
-/*!-d3n-----------------------------------------------------------------
- | dNcurkey/4
- | dNcurkey(NDXPTR,Key,RecNo,RetVal)
- | dNcurkey(+,-,-,-)
- | dNcurkey/5
- | dNcurkey(NDXPTR,KeyLen,Key,RecNo,RetVal)
- | dNcurkey(+,+,-,-,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |	KeyLen 		Key length 
- |
- | Outputs:
- |	Key 		Key 
- | 	RecNo 		Record Number
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNcurkey/4.
-export dNcurkey/5.
-dNcurkey(NDXPTR,Key,RecNo,RetVal) :-
-	acc_dNkeylen(NDXPTR,KeyLen),
-	dNcurkey(NDXPTR,KeyLen,Key,RecNo,RetVal).
-
-dNcurkey(NDXPTR,KeyLen,Key,RecNo,RetVal) :-
-    '$uia_alloc'(KeyLen,Key),
-	'$uia_alloc'(4,RecNoPtr),
-	a_dNcurkey(NDXPTR,Key,RecNoPtr,RetVal),
-	'$uia_peekl'(RecNoPtr,0,RecNo).
-
-/*!-d3n-----------------------------------------------------------------
- | dNrewind/2
- | dNrewind(NDXPTR,RetVal)
- | dNrewind(+,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |
- | Outputs:
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNrewind/2.
-dNrewind(NDXPTR,RetVal) :-
-	a_dNrewind(NDXPTR,RetVal).
-
-/*!-d3n-----------------------------------------------------------------
- | dNforwrd/2
- | dNforwrd(NDXPTR,RetVal)
- | dNforwrd(+,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |
- | Outputs:
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNforwrd/2.
-dNforwrd(NDXPTR,RetVal) :-
-	a_dNforwrd(NDXPTR,RetVal).
-
-/*!-d3n-----------------------------------------------------------------
- | dNputkey/4
- | dNputkey(NDXPTR,Key,RecNo,RetVal)
- | dNputkey(+,+,+,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |	Key 		Key 
- | 	RecNo 		Record Number
- |
- | Outputs:
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNputkey/4.
-dNputkey(NDXPTR,Key,RecNo,RetVal) :-
-	acc_key_to_keybuf(NDXPTR,Key,KeyBuf),
-    a_dNputkey(NDXPTR,KeyBuf,RecNo,RetVal).
-
-/*!-d3n-----------------------------------------------------------------
- | dNrmkey/4
- | dNrmkey(NDXPTR,Key,RecNo,RetVal)
- | dNrmkey(+,+,+,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |	Key 		Key 
- | 	RecNo 		Record Number
- |
- | Outputs:
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNrmkey/4.
-dNrmkey(NDXPTR,Key,RecNo,RetVal) :-
-	acc_key_to_keybuf(NDXPTR,Key,KeyBuf),
-    a_dNrmkey(NDXPTR,KeyBuf,RecNo,RetVal).
-
-/*!-d3n-----------------------------------------------------------------
- | dNupdkey/5
- | dNupdkey(NDXPTR,OldKey,NewKey,RecNo,RetVal)
- | dNupdkey(+,+,+,+,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |	OldKey 		Old key 
- |	NewKey 		New key 
- | 	RecNo 		Record Number
- |
- | Outputs:
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNupdkey/5.
-dNupdkey(NDXPTR,OldKey,NewKey,RecNo,RetVal) :-
-	acc_key_to_keybuf(NDXPTR,OldKey,OldKeyBuf),
-	acc_key_to_keybuf(NDXPTR,NewKey,NewKeyBuf),
-    a_dNupdkey(NDXPTR,OldKeyBuf,NewKeyBuf,RecNo,RetVal).
-
-/*!-d3n-----------------------------------------------------------------
- | dNflush/2
- | dNflush(NDXPTR,RetVal)
- | dNflush(+,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |
- | Outputs:
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNflush/2.
-dNflush(NDXPTR,RetVal) :-
-	a_dNflush(NDXPTR,RetVal).
-
-/*!-d3n-----------------------------------------------------------------
- | dNkeylen/2
- | dNkeylen(NDXPTR,RetVal)
- | dNkeylen(+,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |
- | Outputs:
- |	RetVal 		Key lenght or error code
- |				(Key length is positive; error codes are negative)
- *--------------------------------------------------------------------*/
-export dNkeylen/2.
-dNkeylen(NDXPTR,RetVal) :-
-	a_dNkeylen(NDXPTR,RetVal).
-
-/*!-d3n-----------------------------------------------------------------
- | dNkeytyp/2
- | dNkeytyp(NDXPTR,RetVal)
- | dNkeytyp(+,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |
- | Outputs:
- |	RetVal 		Key type or error code
- |				(Key type is positive; error codes are negative)
- *--------------------------------------------------------------------*/
-export dNkeytyp/2.
-dNkeytyp(NDXPTR,RetVal) :-
-	a_dNkeytyp(NDXPTR,RetVal).
-
-/*!-d3n-----------------------------------------------------------------
- | dNexplen/3
- | dNexplen(NDXPTR,ExprLen,RetVal)
- | dNexplen(+,-,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |
- | Outputs:
- |	ExprLen 	Key expression length
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNexplen/3.
-dNexplen(NDXPTR,ExprLen,RetVal) :-
-	'$uia_alloc'(4,ExprLenPtr),
-	a_dNexplen(NDXPTR,ExprLenPtr,RetVal),
-	'$uia_peekl'(ExprLenPtr,0,ExprLen).
-
-/*!-d3n-----------------------------------------------------------------
- | dNexpr/4
- | dNexpr(NDXPTR,Expr,Unique,RetVal)
- | dNexpr(+,-,-,-)
- |
- | Inputs:
- | 	NDXPTR 		NDX	file reference 
- |
- | Outputs:
- |	Expr 		Key expression 
- |	Unique 		Uniqueness of key
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dNexpr/4.
-dNexpr(NDXPTR,Expr,Unique,RetVal) :-
-	'$c_constinfo'('SUCCESS',SUCCESS),
-	dNexplen(NDXPTR,ExprLen,SUCCESS),
-	'$uia_alloc'(ExprLen,Expr),
-	'$uia_alloc'(4,UniquePtr),
-	a_dNexpr(NDXPTR,Expr,UniquePtr,RetVal),
-	'$uia_peekl'(UniquePtr,0,Unique).
-
-/*!-d3n-----------------------------------------------------------------
- *--------------------------------------------------------------------*/
-
-acc_key_to_keybuf(NDXPTR,Key,KeyBuf) :-
-	'$c_constinfo'('dNOOPEN',DNOOPEN),
-	a_dNkeylen(NDXPTR,KeyLen),
-	KeyLen \= DNOOPEN,
-	space_padded_uia(KeyLen,Key,KeyBuf).
-
-acc_dNkeylen(NDXPTR,KeyLen) :-
-	'$c_constinfo'('dNOOPEN',DNOOPEN),
-	a_dNkeylen(NDXPTR,KeyLen),
-	KeyLen \= DNOOPEN.
-
-
-space_padded_uia(Size,UIA,NewUIA) :-
-	'$uia_alloc'(Size,NewUIA),
-	'$strlen'(UIA,Len),
-	(Len < Size, !, StrSize = Len ; StrSize = Size),
-	'$uia_poke'(NewUIA,0,StrSize,UIA),
-	put_spaces_into_uia(StrSize,Size,NewUIA).
-
-put_spaces_into_uia(From,To,UIA) :-
-	From < To, !,
-	'$uia_pokeb'(UIA,From,0' ),
-	Next is From + 1,
-	put_spaces_into_uia(Next,To,UIA).
-put_spaces_into_uia(From,To,UIA).
-
-
-#endif		%% d3n
-
-#if (syscfg:d3x)
-
-/********************************************************************
- *																	*
- * 				dX Functions - MDX (IV) Indexing Functions 			*
- *																	*
- *******************************************************************/
-
-/*!-d3x-----------------------------------------------------------------
- |	dXactidx/3
- |	dXactidx(Mdxptr, Tagname, Retval)
- |	dXactidx(+, +, -)
- *--------------------------------------------------------------------*/
-export dXactidx/3.
-dXactidx(Mdxptr, Tagname, Retval)
-	:-
-	a_dXactidx(Mdxptr, Tagname, Retval).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXbuffs/2
- |	dXbuffs(Mdxname, Buffs)
- |	dXbuffs(+, -)
- *--------------------------------------------------------------------*/
-export dXbuffs/2.
-dXbuffs(Mdxname, Buffs)
-	:-
-	a_dXbuffs(Mdxname, Buffs).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXclose/2
- |	dXclose(Mdxptr, RetVal)
- |	dXclose(+, -)
- *--------------------------------------------------------------------*/
-export dXclose/2.
-dXclose(Mdxptr, RetVal)
-	:-
-	a_dXclose(Mdxptr, RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXcopy/3
- |	dXcopy(Src, Dest, RetVal)
- |	dXcopy(+, +, -)
- *--------------------------------------------------------------------*/
-export dXcopy/3.
-dXcopy(Src, Dest, RetVal)
-	:-
-	a_dXcopy(Src, Dest, RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXcurkey/4
- |	dXcurkey(Idxptr, Key, Recno, RetVal)
- |	dXcurkey(+, -, -, -)
- *--------------------------------------------------------------------*/
-export dXcurkey/4.
-dXcurkey(Idxptr, Key, Recno, RetVal)
-	:-
-	a_dXkeylen(Idxptr, KeyLen),
-	'$uia_alloc'(KeyLen,Key),
-	a_dXcurkey(Idxptr, Key, Recno, RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXdeaidx/2
- |	dXdeaidx(Idxptr,RetVal)
- |	dXdeaidx(+,-)
- *--------------------------------------------------------------------*/
-export dXdeaidx/2.
-dXdeaidx(Idxptr,RetVal)
-	:-
-	a_dXdeaidx(Idxptr,RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXflush/2
- |	dXflush(Mdxptr,RetVal)
- |	dXflush(+,-)
- *--------------------------------------------------------------------*/
-export dXflush/2.
-dXflush(Mdxptr,RetVal)
-	:-
-	a_dXflush(Mdxptr,RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXforwrd/2
- |	dXforwrd(Idxptr,RetVal)
- |	dXforwrd(+,-)
- *--------------------------------------------------------------------*/
-export dXforwrd/2.
-dXforwrd(Idxptr,RetVal)
-	:-
-	a_dXforwrd(Idxptr,RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXgetrno/4
- |	dXgetrno(Idxptr, Key, Recno, RetVal)
- |	dXgetrno(+, +, -, -)
- *--------------------------------------------------------------------*/
-export dXgetrno/4.
-dXgetrno(Idxptr, Key, Recno, RetVal)
-	:-
-	a_dXgetrno(Idxptr, Key, Recno, RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXidxbuf/3
- |	dXidxbuf(Mdxptr, Tagname, RetVal)
- |	dXidxbuf(+, +, -)
- *--------------------------------------------------------------------*/
-export dXidxbuf/3.
-dXidxbuf(Mdxptr, Tagname, RetVal)
-	:-
-	a_dXidxbuf(Mdxptr, Tagname, RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXkeylen/2
- |	dXkeylen(Idxptr, RetVal)
- |	dXkeylen(+, -)
- *--------------------------------------------------------------------*/
-export dXkeylen/2.
-dXkeylen(Idxptr, RetVal)
-	:-
-	a_dXkeylen(Idxptr, RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXnxtkey/4
- |	dXnxtkey(Idxptr, Key, Recno, RetVal)
- |	dXnxtkey(+, -, -, -)
- *--------------------------------------------------------------------*/
-export dXnxtkey/4.
-dXnxtkey(Idxptr, Key, Recno, RetVal)
-	:-
-	a_dXkeylen(Idxptr, KeyLen),
-	'$uia_alloc'(KeyLen,Key),
-	a_dXnxtkey(Idxptr, Key, Recno, RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXopen/4
- |	dXopen(Mdxname, Mode, Buffs, RetVal)
- |	dXopen(+, +, +, -)
- *--------------------------------------------------------------------*/
-export dXopen/4.
-dXopen(Mdxname, Mode, Buffs, RetVal)
-	:-
-	a_dXopen(Mdxname, Mode, Buffs, RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXprvkey/4
- |	dXprvkey(Idxptr, Key, Recno, RetVal)
- |	dXprvkey(+, -, -, -)
- *--------------------------------------------------------------------*/
-export dXprvkey/4.
-dXprvkey(Idxptr, Key, Recno, RetVal)
-	:-
-	a_dXkeylen(Idxptr, KeyLen),
-	'$uia_alloc'(KeyLen,Key),
-	a_dXprvkey(Idxptr, Key, Recno, RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXputkey/4
- |	dXputkey(Idxptr, Key, Recno, RetVal)
- |	dXputkey(+, +, +, -)
- *--------------------------------------------------------------------*/
-export dXputkey/4.
-dXputkey(Idxptr, Key, Recno, RetVal)
-	:-
-	a_dXputkey(Idxptr, Key, Recno, RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXrewind/2
- |	dXrewind(Idxptr, RetVal)
- |	dXrewind(+, -)
- *--------------------------------------------------------------------*/
-export dXrewind/2.
-dXrewind(Idxptr, RetVal)
-	:-
-	a_dXrewind(Idxptr, RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXrmkey/4
- |	dXrmkey(Idxptr, Key, Recno, RetVal)
- |	dXrmkey(+, +, +, -)
- *--------------------------------------------------------------------*/
-export dXrmkey/4.
-dXrmkey(Idxptr, Key, Recno, RetVal)
-	:-
-	a_dXrmkey(Idxptr, Key, Recno, RetVal).
-
-/*!-d3x-----------------------------------------------------------------
- |	dXupdkey/5
- |	dXupdkey(Idxptr, OldKey, NewKey, Recno, RetVal)
- |	dXupdkey(+, +, +, +, -)
- *--------------------------------------------------------------------*/
-export dXupdkey/5.
-dXupdkey(Idxptr, OldKey, NewKey, Recno, RetVal)
-	:-
-	a_dXupdkey(Idxptr, OldKey, NewKey, Recno, RetVal).
-
-
-#endif		%% d3x
-
-/*************
-#if (syscfg:d3z)
-
-/*!-d3x-----------------------------------------------------------------
- |	dXaddtag/6
- |	dXaddtag(Dbfname, Mdxname, Tagname, Iexpr, Typelen, RetVal)
- |	dXaddtag(+, +, +, +, +, -)
- *--------------------------------------------------------------------*/
-export dXaddtag/6.
-dXaddtag(Dbfname, Mdxname, Tagname, Iexpr, Typelen, RetVal)
-	:-
-	a_dXaddtag(Dbfname, Mdxname, Tagname, Iexpr, Typelen, 0, RetVal).
-
-/*
-dXexplen(Mdxptr, Tagname, Length, RetVal)
-dXexpr(Mdxptr, Tagname, Iexpr, FORcond,  Unique, Order, RetVal)
-dXezindx(Name, Fieldno, Orderuniq, CallType, ProgFile, RetVal, RetVal)
-dXindex(Dbfname, Mdxname, Tagname, iexpr, typelen, unique, (*Keygen)(record, Key), FORcond, (*condcheck)(record), RetVal)
-dXkeytyp(Idxptr, RetVal)
-dXlistag(Mdxptr, Tagptr, RetVal)
-dXrename(Oldname, Newname, RetVal)
-dXrmtag(Dbfname, Mdxname, Tagname, RetVal)
-dXsortag(Mdxptr, Tagptr, RetVal)
-dXtags(Mdxptr, RetVal)
-*/
-
-
-#endif		%% d3z
-*************/
-
 /********************************************************************
  *																	*
  * 				dU Functions - Utility Functions 					*
@@ -1555,6 +784,8 @@ dXtags(Mdxptr, RetVal)
  | dU3itodf/5
  | dU3itodf(Month,Day,Year,DateField,RetVal)
  | dU3itodf(+,+,+,-,-)
+ |
+ |	- Converts 3 integers (month, day, year) to a date field
  |
  | Inputs:
  |	Month 		Month
@@ -1572,28 +803,11 @@ dU3itodf(Month,Day,Year,DateField,RetVal) :-
 	a_dU3itodf(Month,Day,Year,DateField,RetVal).
 
 /*!-d3i-----------------------------------------------------------------
- | dU3itodk/5
- | dU3itodk(+,+,+,-,-)
- | dU3itodk(+,+,+,-,-)
- |
- | Inputs:
- |	Month 		Month
- | 	Day 		Day
- | 	Year 		Year
- |
- | Outputs:
- |	DateKey		eight-byte dBASE date key
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dU3itodk/5.
-dU3itodk(Month,Day,Year,DateKey,RetVal) :-
-	'$uia_alloc'(8,DateKey),
-	a_dU3itodk(Month,Day,Year,DateKey,RetVal).
-
-/*!-d3i-----------------------------------------------------------------
  | dUatocf/3
  | dUatocf(Str,Width,CField)
  | dUatocf(+,+,-)
+ |
+ |	- Converts a string to a character field
  |
  | Inputs:
  |	Str 		ASCII character string
@@ -1611,6 +825,8 @@ dUatocf(Str,Width,CField) :-
  | dUatonf/5
  | dUatonf(Str,Width,Decimal,NField,RetVal)
  | dUatonf(+,+,+,-,-)
+ |
+ |	- Converts a string to a numeric/float field
  | 
  | Inputs:
  |   Str         ASCII character string 
@@ -1631,6 +847,8 @@ dUatonf(Str,Width,Decimal,NField,RetVal) :-
  | dUdfto3i(DateField,Month,Day,Year)
  | dUdfto3i(+,-,-,-)
  |
+ |	- Converts a date field to 3 integers (month, day, year)
+ |
  | Inputs:
  |	DateField	eight-byte dBASE date field
  |
@@ -1650,49 +868,11 @@ dUdfto3i(DateField,Month,Day,Year) :-
 	'$uia_peekl'(YearPtr,0,Year).
 
 /*!-d3i-----------------------------------------------------------------
- | dUdkto3i/4
- | dUdkto3i(DateKey,Month,Day,Year)
- | dUdkto3i(+,-,-,-)
- |
- | Inputs:
- |	DateKey		eight-byte dBASE date key
- |
- | Outputs:
- |	Month 		Month
- | 	Day 		Day
- | 	Year 		Year
- *--------------------------------------------------------------------*/
-export dUdkto3i/4.
-dUdkto3i(DateKey,Month,Day,Year) :-
-	'$uia_alloc'(4,MonthPtr),
-	'$uia_alloc'(4,DayPtr),
-	'$uia_alloc'(4,YearPtr),
-	a_dUdkto3i(DateKey,MonthPtr,DayPtr,YearPtr),
-	'$uia_peekl'(MonthPtr,0,Month),
-	'$uia_peekl'(DayPtr,0,Day),
-	'$uia_peekl'(YearPtr,0,Year).
-
-/*!-d3i-----------------------------------------------------------------
- | dUdftodk/3
- | dUdftodk(DateField,DateKey,RetVal) 
- | dUdftodk(+,-,-) 
- |
- | Inputs:
- |	DateField	eight-byte dBASE date field
- |
- | Outputs:
- |	DateKey		eight-byte dBASE date key
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dUdftodk/3.
-dUdftodk(DateField,DateKey,RetVal) :-
-	'$uia_alloc'(8,DateKey),
-	a_dUdftodk(DateField,DateKey,RetVal).
-
-/*!-d3i-----------------------------------------------------------------
  | dUdtonf/5
  | dUdtonf(DoubleNum,Width,Decimal,NField,RetVal)
  | dUdtonf(+,+,+,-,-)
+ |
+ |	- Converts a double to a numeric/float field
  | 
  | Inputs:
  |   DoubleNum 	Double floating point number
@@ -1708,27 +888,8 @@ dUdtonf(DoubleNum,Width,Decimal,NField,RetVal) :-
     '$uia_alloc'(Width,NField),
     a_dUdtonf(DoubleNum,Width,Decimal,NField,RetVal).
 
-/*!-d3i-----------------------------------------------------------------
- | dUdtonk/3
- | dUdtonk(Style,DoubleNum,Key)
- | dUdtonk(+,+,-Key)
- | 
- | Inputs:
- | 	Style 		MDXstyle or NDXstyle
- |   DoubleNum 	Double floating point number
- |
- | Outputs:
- |   Key  		Key buffer (12 bytes for MDXstyle; 8 bytes for NDXstyle)
- |
- *--------------------------------------------------------------------*/
-export dUdtonk/3.
-dUdtonk(Style,DoubleNum,Key) :-
-	'$c_constinfo'(Style,StyleConst),
-	( '$c_constinfo'('NDXstyle',StyleConst), KeySize is 8  ;
-	  '$c_constinfo'('MDXstyle',StyleConst), KeySize is 12 ), !,
-    '$uia_alloc'(KeySize,Key), 
-    a_dUdtonk(StyleConst,DoubleNum,Key).
 
+/**********************
 /*!-d3i-----------------------------------------------------------------
  | dUexpnm/3
  | dUexpnm(FName,FExtension,ExpFName)
@@ -1748,11 +909,14 @@ dUexpnm(FName,FExtension,ExpFName) :-
 	ExpFNameSize is FNameSize + FExtensionSize + 1,
     '$uia_alloc'(ExpFNameSize,ExpFName),
 	a_dUexpnm(FName,FExtension,ExpFName).
+**********************/
 
 /*!-d3i-----------------------------------------------------------------
  | dUleap/2
  | dUleap(Year,RetVal)
  | dUleap(+,-)
+ |
+ |	- determines whether a year is a leap year
  |
  | Inputs:
  | 	Year 		Year
@@ -1769,6 +933,8 @@ dUleap(Year,RetVal) :-
  | dUnftod(NField,Width,RetVal)
  | dUnftod(+,+,-)
  | 
+ |	- Converts a numeric/float field to a double
+ |
  | Inputs:
  |   NField      Numeric field  
  |   Width       Width of character field 
@@ -1781,75 +947,11 @@ dUnftod(NField,Width,RetVal) :-
 	a_dUnftod(NField,Width,RetVal).
 
 /*!-d3i-----------------------------------------------------------------
- | dUnftonk/5
- | dUnftonk(Style,NField,Width,Key,RetVal)
- | dUnftonk(+,+,+,-,-)
- | 
- | Inputs:
- | 	Style 		MDXstyle or NDXstyle
- |   NField      Numeric field  
- |   Width       Width of character field 
- |
- | Outputs:
- |   Key  		Key buffer (12 bytes for MDXstyle; 8 bytes for NDXstyle)
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dUnftonk/5.
-dUnftonk(Style,NField,Width,Key,RetVal) :-
-	'$c_constinfo'(Style,StyleConst),
-	( '$c_constinfo'('NDXstyle',StyleConst), KeySize is 8  ;
-	  '$c_constinfo'('MDXstyle',StyleConst), KeySize is 12 ), !,
-    '$uia_alloc'(KeySize,Key), 
-    a_dUnftonk(StyleConst,NField,Width,Key,RetVal).
-
-/*!-d3i-----------------------------------------------------------------
- | dUnktoa/6
- | dUnktoa(Style,Key,Width,Decimal,Str,RetVal)
- | dUnktoa(+,+,+,+,-,-)
- | 
- | Inputs:
- | 	Style 		MDXstyle or NDXstyle
- |   Key  		Key buffer (12 bytes for MDXstyle; 8 bytes for NDXstyle)
- |   Width       Width of character field 
- |	Decimal 	Decimal places
- |
- | Outputs:
- |   Str         ASCII character string 
- |	RetVal 		Success or error code
- *--------------------------------------------------------------------*/
-export dUnktoa/6.
-dUnktoa(Style,Key,Width,Decimal,Str,RetVal) :-
-	'$c_constinfo'(Style,StyleConst),
-	( '$c_constinfo'('NDXstyle',StyleConst) ;
-	  '$c_constinfo'('MDXstyle',StyleConst) ), !,
-	StrSize is Width + 1,
-    '$uia_alloc'(StrSize,Str), 
-    a_dUnktoa(StyleConst,Key,Width,Decimal,Str,RetVal).
-
-/*!-d3i-----------------------------------------------------------------
- | dUnktod/3
- | dUnktod(Style,Key,RetVal)
- | dUnktod(+,+,-)
- | 
- | Inputs:
- | 	Style 		MDXstyle or NDXstyle
- |   Key  		Key buffer (12 bytes for MDXstyle; 8 bytes for NDXstyle)
- |
- | Outputs:
- |   Str         ASCII character string 
- |   RetVal  	Double floating point number
- *--------------------------------------------------------------------*/
-export dUnktod/3.
-dUnktod(Style,Key,RetVal) :-
-	'$c_constinfo'(Style,StyleConst),
-	( '$c_constinfo'('NDXstyle',StyleConst) ;
-	  '$c_constinfo'('MDXstyle',StyleConst) ), !,
-    a_dUnktod(StyleConst,Key,RetVal).
-
-/*!-d3i-----------------------------------------------------------------
  | dUtoday/3
  | dUtoday(Month,Day,Year)
  | dUtoday(-,-,-)
+ |
+ |	- Gets today's date
  |
  | Inputs:
  |
@@ -1978,15 +1080,6 @@ export dTupdmm/6.
 dTupdmm(Dbtptr, Dbtlength, Memobuff, Memofield, Setnew, RetVal)
 	:-
 	a_dTupdmm(Dbtptr, Dbtlength, Memobuff, Memofield, Setnew, RetVal).
-
-/*------------------------------------------------------------------
-dTclose3(Dbtptr, RetVal)
-dTgetmm3(Dbtptr, Memofield, Memobuff, RetVal)
-dTmemsz3(Dbtptr, Memofield, Size, RetVal)
-dTopen3(Dbtname, Mode, RetVal)
-dTputmm3(Dbtptr, Memobuff, Memofield, RetVal)
-dTcreat3(Dbtname, RetVal)
- *--------------------------------------------------------------------*/
 
 #endif		%% d3t - memo
 

@@ -5,6 +5,7 @@
 ARCH = sparc
 OS = solaris2.4
 GOS = unix
+PROTYPE = port
  
 #all: d3i d3x d3z d3t d3n d3iz d3in d3ix d3inz d3ixz d3it d3int d3ixt d3intz d3ixtz
  

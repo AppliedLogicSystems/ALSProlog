@@ -145,7 +145,12 @@ void _DECLARE ACltoa(lvalue,ascii,base)
 #endif
 
 #ifndef STANDARD
+/*
 #ifndef unix
+#ifndef MacOS
+*/
+#ifdef 0
+#ifndef HAVE_ITOA
 	/* simulate itoa() of other compilers */
 void _DECLARE itoa(ivalue,buffer,ignore)
 	int ivalue;
@@ -154,7 +159,9 @@ void _DECLARE itoa(ivalue,buffer,ignore)
 {
 	(void) stci_d(buffer, ivalue);
 } /* end of itoa() */
+#endif
 
+#ifndef HAVE_LTOA
 /* simulate ltoa() of other compilers */
 void _DECLARE ltoa(lvalue,buffer,ignore)
 	long lvalue;
@@ -163,8 +170,14 @@ void _DECLARE ltoa(lvalue,buffer,ignore)
 {
 	(void) stcl_d(buffer, lvalue);
 } /* end of ltoa() */
+#endif
+#endif /* #ifdef 0 */
 
-#endif 	/* unix */
+/*
+#endif  MacOS 
+#endif 	 unix 
+*/
+
 /* simulate memicmp() of other compilers */
 int _DECLARE memicmp(left, right, len)
 	void *left;
@@ -183,9 +196,9 @@ int _DECLARE memicmp(left, right, len)
 	}
 	return(0);
 } /* end of memicmp() */
-#endif
+#endif  /* STANDARD */
 
-#ifdef ZORTECH
+#if defined(ZORTECH) || defined(MacOS)
 	/* This stricmp() makes a partial match if one string is
 	 * shorter than the other.
 	 */

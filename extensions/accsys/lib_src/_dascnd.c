@@ -363,7 +363,13 @@ int _DECLARE _dascnd(DBGDAT_PTR dbgptr,
 
 } /* end of _dascnd() */
 
-
+#ifdef __MWERKS__
+/* Metrowerks complains about short parameters that aren't declared
+   in the strict ANSI C format. */
+static int _DECLARE updidx(int opcode, int ismdx, PCOMDAT comptr, PXDXNOD nodptr,
+						   unsigned short offset, long node1, CHAR_PTR key1)
+	
+#else
 static int _DECLARE updidx(opcode,ismdx,comptr,nodptr,offset,node1,key1)
 	int    opcode;
 	int    ismdx;
@@ -372,6 +378,7 @@ static int _DECLARE updidx(opcode,ismdx,comptr,nodptr,offset,node1,key1)
 	unsigned short offset;
 	long   node1;
 	CHAR_PTR key1;
+#endif
 {
 	CHAR_PTR gptr;
 	unsigned int len;
@@ -399,6 +406,13 @@ static int _DECLARE updidx(opcode,ismdx,comptr,nodptr,offset,node1,key1)
 } /* end of updidx() */
 
 
+#ifdef __MWERKS__
+/* Metrowerks complains about short parameters that aren't declared
+   in the strict ANSI C format. */
+static void _DECLARE insidx(int ismdx, PCOMDAT comptr, PXDXNOD nodptr,
+							unsigned short offset, CHAR_PTR key, long nodeid)
+	
+#else
 static void _DECLARE insidx(ismdx,comptr,nodptr,offset,key,nodeid)
 	int    ismdx;
 	PCOMDAT comptr;
@@ -406,6 +420,7 @@ static void _DECLARE insidx(ismdx,comptr,nodptr,offset,key,nodeid)
 	unsigned short offset;
 	CHAR_PTR key;
 	long   nodeid;
+#endif
 {
 	CHAR_PTR idxptr;
 	unsigned len;

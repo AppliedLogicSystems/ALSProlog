@@ -1,0 +1,8 @@
+#
+# Info Makefile for the accsys library & interface
+#     ---- for inclusion in lower makefiles
+ARCH = powerpc
+OS = aix4.1
+SOS = aix4
+GOS = unix
+PROTYPE = port

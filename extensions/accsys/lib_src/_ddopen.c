@@ -29,11 +29,13 @@
 #include <fcntl.h>
 #endif
 
-#ifdef ZORTECH
+#ifdef ZORTECH 
 void * __CDECL memccpy
 	(void *to, const void *from, int value, unsigned int len);
 #endif
-
+#ifdef MacOS
+void *memccpy(void *to, const void *from, int value, unsigned int len);
+#endif
 
 
 #ifndef ACDLL
@@ -333,8 +335,12 @@ DBF _DECLARE _dDopen(
 
 
 
+#if defined(ZORTECH) || defined(MacOS)
 #ifdef ZORTECH
 void * __CDECL memccpy(void *to, const void *from, int value, unsigned int len)
+#else
+void *memccpy(void *to, const void *from, int value, unsigned int len)
+#endif
 {
     char *orig, *dest;
     int found = 0;

@@ -9,22 +9,30 @@
 # GOS	=   # unix
 # INTF_D =  # d3i
 
-ALSSRC=/mailbox3/alsp_src
+ALSSRC=/apache/alsp_src
+#ALSSRC=/alsp_dos.src
 
-PROBLD	= /mailbox3/builds
+PROBLD	= /dakota/builds
+#PROBLD	= /builds
 PROBLDARCHOS	= $(PROBLD)/$(ARCH)_$(OS)
+#PROBLDARCHOS	= $(PROBLD)/$(ARCH)_dj2
 PROBLDD	= $(PROBLDARCHOS)/bld-$(PROTYPE)
 PROLIB	= $(PROBLDARCHOS)/bld-$(PROTYPE)/alspro.a
 PROLOG = $(ALSSRC)/bin/wh_als $(PROBLD)/$(ARCH)_$(OS)
 
 #	General accsys stuff
 FPREFIX		= acc
-srcdir		= /mailbox3/alsp_src
+srcdir		= /apache/alsp_src
+#srcdir		= /alsp_dos.src
 itfsrcdir	= ../../src
 VPATH		= $(itfsrcdir):../../gen
+#VPATH		= $(itfsrcdir);../../gen
 SPECFILE	= $(itfsrcdir)/accsys.spc
 HFILES		= $(itfsrcdir)/accsys.h
 SYSCFG		= ../../syscfg
+
+vp:
+	echo vp=$(VPATH)
 
 INTFCINCS	= -I../lib
 DEFINES		= -D_NO_PROTO $(INTF_DEFINES)
@@ -56,6 +64,9 @@ CPPFLAGS 	= $(STDINCS) $(INTFCINCS) -DHAVE_CONFIG_H
 INTF_CFLAGS	= -I $(PROBLD)/$(ARCH)_$(OS) \
 				-I $(srcdir)/port -I $(srcdir)/port/$(SOS) \
 				-I $(PROBLD)/$(ARCH)_$(OS)/bld-$(PROTYPE)
+#INTF_CFLAGS	= -I $(PROBLD)/$(ARCH)_dj2 \
+#				-I $(srcdir)/port -I $(srcdir)/port/$(SOS) \
+#				-I $(PROBLD)/$(ARCH)_dj2/bld-$(PROTYPE)
 
 %.o: %.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(INTF_CFLAGS) $<
@@ -74,14 +85,22 @@ library: $(INTFOBJS)
 
 d3i d3x d3z d3t d3n: $(SYSCFG)
 	echo trying tgt=$@ with protype=$(PROTYPE)
-	make library INTF=acsy$@ INTFVAR=$@ PROTYPE=$(PROTYPE)
+	make library INTF=acs$@ INTFVAR=$@ PROTYPE=$(PROTYPE)
 	
-d3iz d3in d3ix d3inz d3ixz d3it d3int d3ixt d3intz d3ixtz: $(SYSCFG)
+d3iz d3itz d3in d3ix d3inz d3ixz d3it d3int d3ixt d3intz d3ixtz: $(SYSCFG)
 	echo trying tgt=$@
-	make library INTF=acsy$@ INTFVAR=$@
-	
+	make library INTF=acs$@ INTFVAR=$@
+
+acsd3izinterf.a: d3iz
+
 clean:
 	rm -f *.o
 
+#Dependcies:
+
+$(INTF)0.o: $(INTF)0.c
+$(INTF)1.o: $(INTF)1.c
+$(INTF)2.o: $(INTF)2.c
+$(INTF)3.o: $(INTF)3.c
 
 

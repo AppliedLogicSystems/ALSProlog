@@ -12,5 +12,5 @@ PROTYPE=port
 all: d3i d3iz
 	echo all done
  
-include ../makefile.info
+include ../makefile.inf
 include ../../makefile.cmn

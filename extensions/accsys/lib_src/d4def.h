@@ -27,6 +27,8 @@
 
 #ifdef UNIX
 #define unix 1
+#define HAVE_ECVT 1
+#define HAVE_STRDUP 1
 #endif /* UNIX */
 
 #ifndef AccDB4
@@ -1269,6 +1271,19 @@ extern char _dWINbuf[]; /* _dWINbuf[120] */
 #endif
 #else 	/* unix */
 
+#ifdef MacOS
+#ifdef STANDARD
+#undef STANDARD
+#endif
+int stricmp(CHAR_PTR str1, CHAR_PTR str2);
+char *strdup(const char *s);
+char *strupr(char *str);
+int memicmp(void *left, void *right, size_t len);
+int _memavl(void);
+char *itoa(int  val, char *str, int  radix);
+char *ecvt(double value, int count, int *dec, int *sign);
+#else 	/* MacOS */
+
 #ifdef LATTICE
 #define O_BINARY O_RAW
 #define d_DENYRW  O_SDRW
@@ -1295,6 +1310,7 @@ int stricmp(CHAR_PTR str1, CHAR_PTR str2);
 #endif
 
 #endif	/* LATTICE */
+#endif	/* MacOS */
 #endif 	/* unix */
 
 
@@ -1444,6 +1460,37 @@ void _DECLARE _ACfree(VOID_PTR memory);
 #define _ACwrite write
 #define _ACremove remove
 #endif 	/* unix */
+
+#ifdef MacOS
+#include <memory.h>
+#include <string.h>
+#include <sys/errno.h>
+#include <unistd.h>
+#define ACmemcpy memcpy
+#define ACmemccpy memccpy
+#define ACmemset memset
+#define ACmemmove memmove
+#define ACmemcmp memcmp
+#define ACmemCMP memcmp
+#define ACmemicmp memicmp
+#define ACstrchr strchr
+#define ACstrstr strstr
+#define ACstrrchr strrchr
+#define ACstrcpy strcpy
+#define ACstrncpy strncpy
+#define ACstrcmp strcmp
+#define ACstricmp stricmp
+#define ACstrlen strlen
+#define ACstrcat strcat
+#define ACstrupr strupr
+#define ACatoi atoi
+#define ACatof atof
+#define ACitoa itoa
+#define ACltoa ltoa
+#define _ACread read
+#define _ACwrite write
+#define _ACremove remove
+#endif 	/* MacOS */
 
 
 

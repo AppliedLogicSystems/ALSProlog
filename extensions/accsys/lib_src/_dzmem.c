@@ -40,6 +40,9 @@ unsigned int _DECLARE _ACmemavl();
 #ifdef LATTICE
 unsigned int _DECLARE _ACmemavl();
 #endif
+#ifdef MacOS
+#define _ACmemavl _memavl
+#endif
 #else
 #define WMEMSIZE 60000
 unsigned int _DECLARE _ACmemavl();

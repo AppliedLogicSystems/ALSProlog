@@ -3,28 +3,35 @@
 #	$3 = GOS
 #	$4 = SOS (short form)
 #	$5 = X_CFLAGS 
+#	$6 = DIRNAME 
 
 fulldbilist="d3i d3x d3z d3t d3n d3iz d3in d3ix d3inz d3ixz d3it d3int d3ixt d3intz d3ixtz"
 dbilist="d3i d3iz"
 
+echo Setting up dir for: ARCH=$1 OS=$2 GOS=$3 SOS=$4 X_CFLAGS=$5 DIRNAME=$6
+if test $6
+then DIRNAME=$6
+else
+	DIRNAME=$1_$2
+fi
+echo DIRNAME=$DIRNAME
 
-
-mkdir $1_$2
-cd $1_$2
+mkdir $DIRNAME
+cd $DIRNAME
 mkdir intf
 mkdir lib
 
 
 echo "#" > makefile
 echo "# Top Makefile for the accsys library & interface" >> makefile
-echo "# ---- version for >>" $1_$2 "<<" >> makefile
+echo "# ---- version for >>" $DIRNAME - $1_$2 "<<" >> makefile
 echo "#" >> makefile
 echo " ">> makefile
 echo ".PHONY : all" >> makefile
 echo " ">> makefile
 echo "all:" >> makefile
-echo "	$(MAKE) -C  lib library" >> makefile
-echo "	$(MAKE) -C intf all" >> makefile
+echo '	make -C  lib library' >> makefile
+echo '	make -C intf all' >> makefile
 
 #	$1 = ARCH
 #	$2 = OS (long form)
@@ -44,7 +51,7 @@ echo "PROTYPE = port" >> makefile.inf
 cd intf
 echo "#" > makefile
 echo "# Makefile for the interface to the accsys library" >> makefile
-echo "# ---- version for >>" $1_$2 "<<" >> makefile
+echo "# ---- version for >>" $DIRNAME - $1_$2 "<<" >> makefile
 echo "#" >> makefile
 
 echo ARCH	= $1 >> makefile
@@ -63,7 +70,7 @@ cd ..
 cd lib
 echo "#" > makefile
 echo "# Makefile for the accsys library" >> makefile
-echo "# ---- version for >>" $1_$2 "<<" >> makefile
+echo "# ---- version for >>" $DIRNAME - $1_$2 "<<" >> makefile
 echo "#" >> makefile
 echo X_CFLAGS	= $5 >> makefile
 echo XINCLUDES	=  >> makefile

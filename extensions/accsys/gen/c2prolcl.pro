@@ -129,6 +129,7 @@ cur_debug_level(1).
 :-dynamic(imported/1).
 :-dynamic(trace_enter_file/1).
 :-dynamic(tgt_os/1).
+:-dynamic(win32funcmacros/0).
 
 :- make_gv("InfoTable").
 
@@ -522,6 +523,7 @@ set_filter_expr(FiltExpr)
 	:-
 	assert(raw_filter_expr(FiltExpr)).
 	
+:- dynamic(raw_filter_expr/1).
 
 calc_filters
 	:-
@@ -532,6 +534,12 @@ calc_filters
 									 syntax_errors(quiet)]),
 	calc_filters(FiltExpr).
 
+calc_filters
+	:-
+	filter_file(Path),
+	get_filter_info(Path,[FiltExpr]),
+	calc_filters(FiltExpr).
+	
 calc_filters.
 
 	%% Incoming is 'all':
@@ -1060,6 +1068,7 @@ e1(Val,State) --> unop_exp(Val,State).
 
 primary_exp(Num,State) --> [number(Num)], !.
 primary_exp(Num,State) --> [char(Num)], !.
+primary_exp(S,State) --> [string(S)], !.
 primary_exp(Exp,State) --> [lparen], !, expression(Exp,State), [rparen].
 primary_exp(Val,State) --> [ident(Id)], 		% enum constant
 	{ 
@@ -1348,7 +1357,8 @@ diskOfPathTokList('')   --> [].
 
 typeOfPathStr(unix,Disk, [0'/ |_], abs) :- !.
 typeOfPathStr(macos, Disk, CompStr,  abs) :- Disk \= '', !.
-typeOfPathStr(dos, Disk, [0'\ |_], abs) :- !.
+typeOfPathStr(mswin32, Disk, [0'\\ |_], abs) :- !.
+typeOfPathStr(dos, Disk, [0'\\ |_], abs) :- !.
 typeOfPathStr(vms, Disk, [0'/ |_], abs) :- !.
 typeOfPathStr(_,   Disk, CompStr,  rel).
 
@@ -1358,6 +1368,7 @@ typeOfPathStr(_,   Disk, CompStr,  rel).
 
 typeOfPathTokList(unix,Disk,[slash|_],    abs) :- !.
 typeOfPathTokList(macos, Disk,CompTokList,  abs) :- Disk \= '', !.
+typeOfPathTokList(mswin32, Disk,[backslash|_],abs) :- !.
 typeOfPathTokList(dos, Disk,[backslash|_],abs) :- !.
 typeOfPathTokList(vms, Disk,[slash|_],    abs) :- !.
 typeOfPathTokList(_,   Disk,CompTokList,  rel).
@@ -1376,7 +1387,8 @@ typeOfPathTokList(_,   Disk,CompTokList,  rel).
 compsOfPathStr(unix, Comps)		  --> [0'/ ], !,    compsOfPathStr(unix,Comps).
 compsOfPathStr(macos, ['::'|Comps]) --> [0': ,0': ],!,compsOfPathStr(macos, Comps).
 compsOfPathStr(macos, [':'|Comps])  --> [0': ], !,    compsOfPathStr(macos, Comps).
-compsOfPathStr(dos, Comps) 		  --> [0'\ ], !,    compsOfPathStr(dos, Comps).
+compsOfPathStr(mswin32, Comps) 		  --> [0'\\ ], !,    compsOfPathStr(mswin32, Comps).
+compsOfPathStr(dos, Comps) 		  --> [0'\\ ], !,    compsOfPathStr(dos, Comps).
 compsOfPathStr(vms, Comps) 		  --> [0'/ ], !,    compsOfPathStr(vms, Comps).
 
 compsOfPathStr( _, _ )			  --> [0'* ], !.
@@ -1388,7 +1400,8 @@ compsOfPathStr( _, [])			  --> [].
 moreComps(unix,Comps)		 --> [0'/ ], !,    compsOfPathStr(unix,Comps).
 moreComps(macos, ['::'|Comps]) --> [0': ,0': ],!,compsOfPathStr(macos, Comps).
 moreComps(macos, Comps)		 --> [0': ], !,    compsOfPathStr(macos, Comps).
-moreComps(dos, Comps)		 --> [0'\ ], !,    compsOfPathStr(dos, Comps).
+moreComps(mswin32, Comps)		 --> [0'\\ ], !,    compsOfPathStr(mswin32, Comps).
+moreComps(dos, Comps)		 --> [0'\\ ], !,    compsOfPathStr(dos, Comps).
 moreComps(vms, Comps)		 --> [0'/ ], !,    compsOfPathStr(vms, Comps).
 moreComps( _,  [])		 	 --> [].
 
@@ -1411,6 +1424,7 @@ endQuote([Char|Rest]) --> [Char], endQuote(Rest).
 compsOfPathTokList(unix,Comps) 		  --> [slash],     !,compsOfPathTokList(unix,Comps).
 compsOfPathTokList(macos, ['::'|Comps]) --> [coloncolon],!,compsOfPathTokList(macos,Comps).
 compsOfPathTokList(macos, [':' |Comps]) --> [colon],     !,compsOfPathTokList(macos,Comps).
+compsOfPathTokList(mswin32, Comps)        --> [backslash], !,compsOfPathTokList(mswin32,Comps).
 compsOfPathTokList(dos, Comps)        --> [backslash], !,compsOfPathTokList(dos,Comps).
 compsOfPathTokList(vms, Comps)        --> [slash],     !,compsOfPathTokList(vms,Comps).
 
@@ -1453,8 +1467,10 @@ diskSym(X,[X,':']).
 
 absMark(macos, abs,['']).
 absMark(unix, abs,['/']).
+absMark(mswin32, abs,['\\']).
 absMark(macos, rel,[':']).
 absMark(unix, rel,[]).
+absMark(mswin32, rel,[]).
 
 addPathSep([],[], _).
 addPathSep([File|IList],[File|OList], OS) :-
@@ -1464,6 +1480,7 @@ addPathSep([File|IList],[File|OList], OS) :-
 possPathSep([],L,L, _).
 possPathSep([_|_],['/'|L],L, unix).
 possPathSep([_|_],[':'|L],L, macos).
+possPathSep([_|_],['\\'|L],L, mswin32).
 
 endmod.
 /*===============================================================*
@@ -1506,6 +1523,9 @@ process_line(Line, OutLine, State)
  *-----------------------------------------------------------*/
 
 macro_statement0(ident(Id),Rest,State) 
+	:-!,
+	macro_statement(Id,Rest,State).
+macro_statement0(fident(Id),Rest,State) 
 	:-!,
 	macro_statement(Id,Rest,State).
 macro_statement0(Tok,Rest,State) 
@@ -1737,7 +1757,8 @@ check_const(Id,Defn,State)
 check_const(Id,Defn,State).
 
 const_type(Val,int) :- integer(Val), !.
-const_type(Val,double) :- float(Val).
+const_type(Val,double) :- float(Val), !.
+const_type(Val,str) :- atom(Val).
 
 /*---------------------------------------------------------------------*
  | addToTable(Key,Defn,State,InTab,OutTab)
@@ -1937,6 +1958,12 @@ skipLines([pound,ident(endif) | _],State,endif) :- !.
 skipLines([pound,ident(else) | _],State,else) :- !.
 skipLines([pound,ident(elif) | Exp],State,elif(Exp)) :- !.
 skipLines([pound,ident(Cond) | _],State,RetTok) :-
+	conditional(Cond),
+	!,
+	skipLines(State,What),
+	skipMore(What,State),
+	skipLines(State,RetTok).
+skipLines([pound,fident(Cond) | _],State,RetTok) :-
 	conditional(Cond),
 	!,
 	skipLines(State,What),
@@ -2483,12 +2510,48 @@ output_func_gvar([func|PRetType],Name,DSpec,Declt,
 output_func_gvar(PRetType,Name,DSpec,Declt, RSpec,RDeclt,ADeclt,State)
 	:-
 	output_gvar(Name,DSpec,Declt,ADeclt,PRetType,State).
-	
+
+/* output_func has as evil hack attached to it to handle MSWin32
+   headers.  This hack is controlled by the -mswin32funcmacros
+   option.
+   
+   Most functions that handle text in MSWin32 have ANSI and Wide (Unicode)
+   versions.  Output_func skips the Wide versions and strips the A from
+   ANSI versions. */
+
+:- dynamic(win32funcmacros/0).
+
 output_func(Name,_,_,_,_,State)
 	:-
 	(silent; skip_item(_,all); skip_item(_,func)), !.
-
+output_func(Name,_,_,_,_,State)
+	:-
+	output:win32funcmacros,
+	%%accessC2P(tgt_os, State, OS),
+	%%OS = mswin32,	
+	atom_length(Name, Length),
+	sub_atom(Name, Length, 1, LastChar),
+	LastChar = 'W', !.
 output_func(Name,DSpec,ADeclt,Params,PRetType,State)
+	:-
+	output:win32funcmacros,
+	%%accessC2P(tgt_os, State, OS),
+	%%OS = mswin32,	
+	atom_length(Name, Length),
+	sub_atom(Name, Length, 1, LastChar),
+	LastChar = 'A',
+	Name \== 'CharPrevExA',
+	Name \== 'CharNextExA',
+	Name \== 'GetStringTypeA',
+	Name \== 'LineDDA',
+	ShortLen is Length - 1,
+	sub_atom(Name, 1, ShortLen, NewName),
+	output_func0(NewName,DSpec,ADeclt,Params,PRetType,State).
+output_func(Name,DSpec,ADeclt,Params,PRetType,State)
+	:-
+	output_func0(Name,DSpec,ADeclt,Params,PRetType,State).
+	
+output_func0(Name,DSpec,ADeclt,Params,PRetType,State)
 	:- 
 	dspec_to_str(DSpec,DSpecStr),
 	adeclt_to_str(ADeclt,ADecltStr),
@@ -2499,7 +2562,7 @@ output_func(Name,DSpec,ADeclt,Params,PRetType,State)
 	pathPlusFile(_,File,FName),
 	!,
 	printf(OutStream,')/\'%t\'.\n',[File]).
-output_func(Name,_,_,_,_,State)
+output_func0(Name,_,_,_,_,State)
 	:-
 	error('output_func for %t failed\n',[Name],State).
 
@@ -2551,6 +2614,7 @@ output_gvar(Name,DSpec,Declt,ADeclt,PType,State)
 output_type(Name,DSpec,Declt,State)
 	:-
 	(silent; skip_item(_,all); skip_item(_,ctype)), !.
+
 output_type(Name,DSpec,Declt,State)
 	:-
 %	accessC2P(info_table,State,Tab),
@@ -2595,7 +2659,7 @@ output_components( [ field(DSpec,Declts) | Rest ] ,Prefix,State)
 	getInfoTable(Tab),
 	deref(DSpec,Tab,_,_,PSpec),
 	output_fields(Declts,DSpec,PSpec,Prefix,State),
-	print_comma_cond(Rest,State),
+	(Declts = [] ; print_comma_cond(Rest,State)),
 	output_components(Rest,Prefix,State).
 	
 output_fields( [] ,_,_,_,_).
@@ -2754,7 +2818,8 @@ error(Fmt,State)
 
 error(Fmt,Args,0)
 	:-!,
-	printf(error_stream,Fmt,Args).
+%%	printf(error_stream,Fmt,Args).
+	printf(user,Fmt,Args).
 
 error(Fmt,Args,State)
 	:-
@@ -2766,7 +2831,8 @@ error(Fmt,Args,State)
 	name(NewFmt, NewFmtCs),
 	append([FileName,LineNum],Args,NewArgs),
 
-	printf(error_stream,NewFmt,NewArgs).
+%%	printf(error_stream,NewFmt,NewArgs).
+	printf(user,NewFmt,NewArgs).
 
 /*=================================================================*
  | 		cmisc.pro
@@ -3089,7 +3155,8 @@ consume_semicolon(State) --> [semicolon], !.
 consume_semicolon(State,Toks,[]) 
 	:-
 	error('parse error\nParsed successfully %t\nI don\'t understand %t\nRemaining tokens %t\n\n',
-		   [DSpec,Declt,Toks],State).
+		   [DSpec,Declt,Toks],State),
+	get_line(_).
 
 %%-------------------------------------------------------
 %%
@@ -3443,10 +3510,11 @@ comp_decln(State,field(DSpec,DecltList)) -->
 	decln_specs(State,DSpec), 
 	comp_declt_list(State,DecltList).
 
+comp_declt_list(State,[]) --> [semicolon], !.
 comp_declt_list(State,[Declt|Rest]) --> 
 	comp_declt(State,Declt),
 	comp_declt_list_rest(State,Rest).
-
+	
 comp_declt_list_rest(State,[]) --> [semicolon], !.
 comp_declt_list_rest(State,Rest) --> [comma], 
 	comp_declt_list(State,Rest).
@@ -3534,7 +3602,11 @@ qualifier('_Near', near).
 qualifier(far, far).
 qualifier(near, near).
 qualifier(huge,huge).
+qualifier('_huge',huge).
 qualifier(pascal,pascal).
+qualifier('__cdecl',cdecl).
+qualifier('__stdcall',stdcall).
+
 
 %-----------------------------------------------------
 % things that can follow a function declarator
@@ -3722,7 +3794,8 @@ process_decln(DSpec,Declts,State)
 	check_tagged_structdef(DSpec,InTable,OutTable),
 %	setC2P(info_table, State, OutTable),
 	setInfoTable(OutTable),
-	process_typedef_declts(Declts,DSpec,State).
+	accessC2P(fcn_filter, State, FcnFilter),
+	process_typedef_declts(Declts,DSpec,FcnFilter, State).
 
 process_decln(DSpec,Declts,State) 
 	:-
@@ -3741,12 +3814,12 @@ check_tagged_structdef(DSpec,InTab,OutTab) :-
 check_tagged_structdef(_,Tab,Tab).
 
 %%-------------------------------------
-%% process_typedef_declts/3
+%% process_typedef_declts/4
 %%-------------------------------------
 
-process_typedef_declts([],_,State).
+process_typedef_declts([],_,FcnFilter,State).
 
-process_typedef_declts([Declt|Rest],DSpec,State) 
+process_typedef_declts([Declt|Rest],DSpec,FcnFilter,State) 
 	:-
 	scan_declt(Declt,ident(Name),_,_),
 %	accessC2P(info_table, State, InTable),
@@ -3754,9 +3827,43 @@ process_typedef_declts([Declt|Rest],DSpec,State)
 	insert_type(ident(Name),DSpec,Declt,InTable,OutTable),
 %	setC2P(info_table, State, OutTable),
 	setInfoTable(OutTable),
-	output_type(Name,DSpec,Declt,State),
-	process_typedef_declts(Rest,DSpec,State).
+	process_typedef_decl(FcnFilter, Name, DSpec, Declt, State),
+	process_typedef_declts(Rest,DSpec,FcnFilter,State).
 
+
+process_typedef_decl(all, Name, DSpec, Declt, State)
+	:- 
+	!,
+	output_type(Name,DSpec,Declt,State).
+
+process_typedef_decl(all_except(Excl), Name, DSpec, Declt, State)
+	:-
+	(
+	    dmember(Name, Excl) -> true
+	    ;
+	    output_type(Name,DSpec,Declt,State)
+	).
+
+process_typedef_decl(all_xcpt(Pat), Name, DSpec, Declt, State)
+	:-
+	(
+	    xcld_fcn_pat(Pat, Name) -> true
+	    ;
+	    output_type(Name,DSpec,Declt,State)
+	).
+
+process_typedef_decl(List, Name, DSpec, Declt, State)
+	:-
+	(
+	    dmember(Name, List) -> true
+	    ;
+	    output_type(Name,DSpec,Declt,State)
+	).
+
+process_typedef_decl(_, Name, DSpec, Declt, State)
+	:-
+	output_type(Name,DSpec,Declt,State).
+	
 %%-------------------------------------
 %% process_declts/4
 %%-------------------------------------
