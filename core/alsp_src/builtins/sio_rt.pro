@@ -451,7 +451,8 @@ rt_err_print(Token,ErrorMessage,Tokens,Stream) :-
 	prolog_system_error(Info, []).
 
 rt_err_info(Token,ErrorMessage,Tokens,Stream, SyntaxStruct) :-
-	SyntaxStruct = syntax(0,ErrorMessage,LineNumber,Stream),
+%	SyntaxStruct = syntax(0,ErrorMessage,LineNumber,Stream),
+	SyntaxStruct = syntax(0,0,0,0,ErrorMessage,LineNumber,Stream),
 	rt_isolate_error(Tokens,Token,IL1,IL2,
 			 lineinfo(StreamName,LineNumber,_)),
 	open(atom(ErrString),write,ES),
@@ -466,7 +467,11 @@ rt_err_info(Token,ErrorMessage,Tokens,Stream, SyntaxStruct) :-
 	tab(ES,CaratPos),
 	write(ES,'^'),
 	close(ES),
-	mangle(1,SyntaxStruct,ErrString).
+	mangle(1,SyntaxStruct,ErrString),
+	mangle(2,SyntaxStruct,StartPos),
+	mangle(3,SyntaxStruct,CaratPos),
+	mangle(4,SyntaxStruct,Pos3).
+
 
 
 %%
