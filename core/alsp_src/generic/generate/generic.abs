@@ -17,7 +17,9 @@ schema([
 	cmnt(2),
 	'CPPFLAGS',
 	case(&(context_name), [
-		  (mac: [irule(c,'68k.o'), irule(c,'ppc.o')]),
+		  (mac: [irule(c,'68k.o'),
+			 irule(c,'ppc.o'),
+			 irule(c,'mpw_ppc.o')]),
 		  (_:irule(c) )
 	] ),
 	cmnt(3),
@@ -30,7 +32,11 @@ schema([
 			 gforfiles_ppc_o  = ext(gforfiles,'ppc.o')  qual one_per_line,
 			 gpckgfiles_ppc_o = ext(gpckgfiles,'ppc.o') qual one_per_line,
 			 glibfiles_ppc_o  = ext(glibfiles,'ppc.o')  qual one_per_line,
-			 gfiles_ppc_o 	= ['{gforfiles_ppc_o} {gpckgfiles_ppc_o} {glibfiles_ppc_o}']
+			 gfiles_ppc_o 	= ['{gforfiles_ppc_o} {gpckgfiles_ppc_o} {glibfiles_ppc_o}'],
+			 gforfiles_mpw_ppc_o  = ext(gforfiles,'mpw_ppc.o')  qual one_per_line,
+			 gpckgfiles_mpw_ppc_o = ext(gpckgfiles,'mpw_ppc.o') qual one_per_line,
+			 glibfiles_mpw_ppc_o  = ext(glibfiles,'mpw_ppc.o')  qual one_per_line,
+			 gfiles_mpw_ppc_o 	= ['{gforfiles_mpw_ppc_o} {gpckgfiles_mpw_ppc_o} {glibfiles_mpw_ppc_o}']
 			  ] ),
 		 (_:[
 			 gforfiles_c  = ext(gforfiles,c)  qual one_per_line,
@@ -142,7 +148,7 @@ cmnt(1) 		= ['How to build everything'].
 
 all 	depends_on  [alsdir, setup, generated, alspro_b, alsmics, alspro, alstest].
 
-macall	depends_on	[mpw_alspro_b_68k, sioux_alspro_b_68k, sioux_alspro_b_ppc, alspro_b, alstest].
+macall	depends_on	[generated, mpw_alspro_b_ppc, mpw_alspro_b_68k, sioux_alspro_b_68k, sioux_alspro_b_ppc, mpw_alspro_b, sioux_alspro_b, alspro_b, alstest].
 
 cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 					'C source files to object files'].
@@ -153,7 +159,7 @@ cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 &(cpp_includes)	= case(&(context_name),
 		[
 		 (mac:
-			'-i : -i :: -i {srcdir}generic -i {srcdir}{ARCH} -i {srcdir}{ARCH}:{SOS}' ),
+			'-i : -i :: -i {srcdir}generic: -i {srcdir}generic:generate:tok.h: -i {srcdir}{ARCH} -i {srcdir}{ARCH}:{SOS}' ),
 		 (djgpp: &(basic_unix_includes)+' -I$(srcdir)/i386/djgpp '),
 		 (_: &(basic_unix_includes) ) 
 		] ).
@@ -167,8 +173,9 @@ cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 
 'CPPFLAGS'			= &(cpp_includes) + &(cpp_defines).
 
-irule(c,'68k.o') = irule(c, '68k.o', [' {CC68k} {CPPFLAGS}  {CFLAGS68k}  {DepDir}{Default}.c -o {TargDir}{Default}.68k.o']).
-irule(c,'ppc.o') = irule(c, 'ppc.o', [' {CCppc} {CPPFLAGS}  {CFLAGSppc}  {DepDir}{Default}.c -o {TargDir}{Default}.ppc.o']).
+irule(c,'68k.o') = irule(c, '68k.o', ['{CC68k} -o {TargDir}{Default}.68k.o {CPPFLAGS} {CFLAGS} {CFLAGS68k} {DepDir}{Default}.c']).
+irule(c,'ppc.o') = irule(c, 'ppc.o', ['{CCppc} -o {TargDir}{Default}.ppc.o {CPPFLAGS} {CFLAGS} {CFLAGSppc} {DepDir}{Default}.c']).
+irule(c,'mpw_ppc.o') = irule(c, 'mpw_ppc.o', ['{CCppc} -o {TargDir}{Default}.mpw_ppc.o {CPPFLAGS} {CFLAGS} {CFLAGSppc} {MPWPPCFLAGS} {DepDir}{Default}.c']).
 
 irule(c) = 
 	irule(c,&(object),
@@ -299,21 +306,34 @@ cmnt(4) = ['These items must generate themselves from other files'].
 'LEXRUN'	= &(invoke) + './lexinit > lexinit.h' .
 'SIORUN'	= &(invoke) + './sioinit > siolex.h' .
 'ICODERUN'	= &(invoke) + './icode > icode.h' .
-'MAGICRUN'	= &(invoke) + './magic' .
+'MAGICRUN'	= case(&(context_name), [
+				(mac: 'magic'),
+				(_: &(invoke) + './magic')]).
 'BLDTRUN'	= &(invoke) + './bldtok' .
 
-generated depends_on ['${GENFILES}'].
+generated depends_on case(&(context_name), [
+			(mac: ['{GENFILES}']),
+			(_: ['${GENFILES}'])]).
 
-rule('magic') = 
-	rule('magic',	
-			['$(srcdir)/generic/generate/magic.c', 
-			 'defs.h', 'aconfig.h', 'oconfig.h', 'config.h', 'tconfig.h'],
-			['${CC} $(CPPFLAGS) -o magic $(srcdir)/generic/generate/magic.c'] ).
+rule('magic') =
+    rule('magic',	
+	case(&(context_name), [
+	    (mac: ['{srcdir}generic:generate:magic.c', 
+		   '{srcdir}generic:defs.h', '{srcdir}{ARCH}:aconfig.h', '{srcdir}{ARCH}:{SOS}:oconfig.h',
+		   '{srcdir}{ARCH}:{SOS}:config.h', 'tconfig.h']),
+	    (_: ['$(srcdir)/generic/generate/magic.c', 
+		 'defs.h', 'aconfig.h', 'oconfig.h', 'config.h', 'tconfig.h'])]),
+	case(&(context_name), [
+	    (mac: ['{CC68k} -o magic.o {CPPFLAGS} {CFLAGS} {CFLAGS68K} {srcdir}generic:generate:magic.c',
+		   '{LINK68K} -o magic {TOOLLINKFLAGS} {MPWINITLIBS68K} magic.o {MPWLIBS68K}'] ),
+	    (_: ['${CC} $(CPPFLAGS) -o magic $(srcdir)/generic/generate/magic.c'])])).
 
 rule('magic.h') = 
 	rule('magic.h',	
-			[magic],
-			['$(MAGICRUN)'] ).
+		[magic],
+		case(&(context_name), [
+		   (mac: ['{MAGICRUN}']),
+		   (_: ['$(MAGICRUN)'] )])).
 
 'tokini2.h' depends_on ['tokens.h'].
 
@@ -397,7 +417,7 @@ rule(alstest) =
 		case(&context_name, [
 		(mac: [
 		 'echo >> nrev_rcd',
-		 'alspro_b {srcdir}tests:snrev -g snrev >> nrev_rcd',
+		 'alspro_b -obp {srcdir}tests:snrev -g snrev >> nrev_rcd',
 		 'catenate nrev_rcd']),
 		(_: [
 		 'echo >> nrev_rcd',

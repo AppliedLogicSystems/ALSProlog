@@ -25,6 +25,10 @@
 #include "freeze.h"
 #endif
 
+#ifdef MacOS
+#include "alspi.h"
+#endif
+
 #ifdef TRACEBWAM
 extern	int tracewam	PARAMS(( Code * ));
 #endif
@@ -133,9 +137,6 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 
 #define BIND3(r,f,w)  { TRAIL(r,w); *(r) = PWORD(f); }
 
-/*
-#define BIND3X(r,f,w)  { TRAILBX(r,w,f); *(r) = PWORD(f); }
-*/
 
 #ifdef FREEZE
 
@@ -146,15 +147,6 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 	 |  informational purposes only; eliminated from
 	 |  code in non-DEBUGFREEZE case.
 	 *-------------------------------------------------*/
-
-/*
-#define TRAILBX(r,l,f) \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
-	  *--mr_TR = PWORD(r); \
-	  if ( CHK_DELAY(r) ) { \
-			printf("@@@ [ln=%d] r=%x  f=%x mr_TR=%x\n",l,(int)r,(int)f,(int)mr_TR-1); \
-	    	wm_safety = -2; wm_interrupt_caught = 3; } } } 
-*/
 
 #define TRAIL(r,l) \
   { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
@@ -190,19 +182,6 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 				combin_dels((PWord)r,(PWord)f); }  } } }; \
   *(r) = PWORD(f); }
 
-/*
-#define VVBIND(r,f,lln)   { \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
-	  *--mr_TR = PWORD(r); \
-	  if ( CHK_DELAY(r) ) { \
-		printf("vvb@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x\n",lln, \
-			(int)r,(long) (((PWord *) r) - wm_heapbase),(int)mr_TR-1); \
-	  		if ( CHK_DELAY(f) && r != f ) { \
-			  printf("   match is delay [f=%x[_%lu]]\n",(int)f,(long)(((PWord *) f) - wm_heapbase)); \
-				combin_dels((PWord)r,(PWord)f); }  } } }; \
-  *(r) = PWORD(f); }
-*/
-
 #endif /*=== DEBUGFREEZE ===*/
 
 #else /*===== no-FREEZE =====*/
@@ -220,8 +199,6 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 	  (v) = *(PWord **)(v); }
 
 /*
-#define UNWINDTRAIL for (reg1 = mr_TR; reg1 < mr_B; reg1++){ \
-*/
 #ifdef TRAILVALS
 #define UNWINDTRAIL for (reg1 = (mr_B - 1); reg1 >= mr_TR; reg1--){ \
 	if (1 & *reg1) \
@@ -229,6 +206,13 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 	else \
 		*PWPTR(*reg1) = MMK_VAR(*reg1);\
 	}
+#else
+#define UNWINDTRAIL for (reg1 = mr_TR; reg1 < mr_B; reg1++){ *PWPTR(*reg1) = MMK_VAR(*reg1);}
+#endif
+*/
+
+#ifdef TRAILVALS
+#define UNWINDTRAIL for (reg1 = mr_TR; reg1 < mr_B; reg1++){ *PWPTR(*reg1) = MMK_VAR(*reg1);}
 #else
 #define UNWINDTRAIL for (reg1 = mr_TR; reg1 < mr_B; reg1++){ *PWPTR(*reg1) = MMK_VAR(*reg1);}
 #endif
@@ -729,6 +713,17 @@ overflow_check:
 	    reg1 = (PWord *) P;
 	    P += OPSIZE;
 overflow_check0:
+#ifdef MacOS
+#ifdef DEBUG
+		if ((unsigned long) mr_SP < (unsigned long) wm_stackbot_safety)
+			stack_overflow();
+#endif
+		yield_counter -= 1;
+	    if (yield_counter == 0) {
+	    	PI_yield_time();
+	    	yield_counter = yield_interval;
+	    }
+#endif
 	    if (((unsigned long) mr_TR - (unsigned long) mr_H) 
 				>= (unsigned long) wm_safety) {
 			DISPATCH;

@@ -1755,7 +1755,7 @@ cat > conftest.${ac_ext} <<EOF
 EOF
 # Some shells (Coherent) do redirections in the wrong order, so need
 # the parens.
-ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+ac_err=`eval "$ac_cpp conftest.${ac_ext} >/dev/null 2>&1"`
 if test -z "$ac_err"; then
   rm -rf conftest*
   no_x=

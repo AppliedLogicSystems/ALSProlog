@@ -54,9 +54,9 @@ add_event(EventId,Module,Proc)
 	:- 
 	asserta(global_handler(EventId,Module,Proc)).
 
-/*
- * global_handler/2 is the entry to the global handler.
- */
+/*-----------------------------------------------------------*
+ | global_handler/2 is the entry to the global handler.
+ *-----------------------------------------------------------*/
 
 global_handler(EventId,Goal) :-
 	global_handler(EventId,Module,Proc),
@@ -66,12 +66,12 @@ global_handler(EventId,Goal) :-
 	ThrowTerm =.. [EventId,Goal],
 	throw(ThrowTerm).
 
-/*
- * global_handler/3 is a local database of event names and the handlers
- * to use for those events.
- *
- * global_handler(EventId, Module, Proc)
- */
+/*-----------------------------------------------------------*
+ | global_handler/3 is a local database of event names and 
+ | the handlers to use for those events.
+ |
+ | global_handler(EventId, Module, Proc)
+ *-----------------------------------------------------------*/
 
 global_handler(sigint,builtins,default_cntrl_c_handler).
 global_handler(reisscntrl_c,builtins,silent_abort).
@@ -79,35 +79,35 @@ global_handler(libload,builtins,libload).
 global_handler(prolog_error,builtins,prolog_error).
 global_handler(undefined_predicate,builtins,undefined_predicate).
 
+/*--------------------------------------------------*
+ | call_handler(Event,Goal,Context,Module,Proc)
+ |
+ | call_handler/5 builds a handler and calls it.
+ *--------------------------------------------------*/
 
-/*
- * call_handler(Event,Goal,Context,Module,Proc)
- *
- * call_handler/5 builds a handler and calls it.
- */
-
-call_handler(Event,Goal,Context,Module,Proc) :-
+call_handler(Event,Goal,Context,Module,Proc) 
+	:-
 	functor(Call,Proc,3),
 	arg(1,Call,Event),
 	arg(2,Call,Goal),
 	arg(3,Call,Context),
 	Module:Call.
 
+/*--------------------------------------------------------*
+ | signal_handler is called by the primitive interrupt
+ | mechanism to deal with signals.
+ *--------------------------------------------------------*/
 
-/*
- * signal_handler is called by the primitive interrupt mechanism to deal
- * with signals.
- */
-
-signal_handler(SigNum,Module,Goal) :-
+signal_handler(SigNum,Module,Goal) 
+	:-
 	signal_name(SigNum,SigName),
 	!,
 	get_context(Context),
 	propagate_event(SigName,Module:Goal,Context).
 
-/*
- * signal_name/2 associates signal numbers with signal names.
- */
+/*--------------------------------------------------------------*
+ | signal_name/2 associates signal numbers with signal names.
+ *--------------------------------------------------------------*/
 
 signal_name(1,sighup).
 signal_name(2,sigint).		%% interrupt (as in Cntrl-C)
@@ -148,13 +148,12 @@ signal_name(67,heap_overflow).
 signal_name(68,prolog_error).
 signal_name(69,undefined_predicate).
 
-
-/*
- * propagate_event/3 is called to propagate events. (Pretty profound, huh?)
- *
- * propagate_event(EventId,Goal,Context)
- *
- */
+/*-----------------------------------------------------*
+ | propagate_event/3 is called to propagate events.
+ |
+ | propagate_event(EventId,Goal,Context)
+ |
+ *-----------------------------------------------------*/
 export propagate_event/3.
 
 propagate_event(EventId,Goal,context(Module,Proc,PrevContext)) :-
@@ -163,11 +162,10 @@ propagate_event(EventId,Goal,context(Module,Proc,PrevContext)) :-
 propagate_event(EventId,Goal,global_context) :-
 	global_handler(EventId,Goal).
 
-
-/*
- * trigger_event/2 is called to start the event handler for the given event
- * name and goal.
- */
+/*-------------------------------------------------------*
+ | trigger_event/2 is called to start the event handler 
+ | for the given event name and goal.
+ *-------------------------------------------------------*/
 
 export trigger_event/2.
 
@@ -175,72 +173,81 @@ trigger_event(EventId,ModuleAndGoal) :-
 	get_context(Context),
 	propagate_event(EventId,ModuleAndGoal,Context).
 
-
-/*
- * trap(Goal,Handler) is used to install a local handler Handler.
- * Otherwise, it behaves like call/1.
- *
- * It must install the new handler on entry to the goal and failure back into
- * the goal.  When an exit occurs, or a failure out of the goal, the old
- * handler must be re-established.  There is a problem in the procedure in that
- * if a throw is performed in the handler, the context will not be set right.
- * The same is true for an abort.
- */
-
+/*------------------------------------------------------------------*
+ | trap(Goal,Handler) 
+ | -- used to install a local handler Handler.
+ | Otherwise, it behaves like call/1.
+ |
+ | It must install the new handler on entry to the goal and failure 
+ | back into the goal.  When an exit occurs, or a failure out of the 
+ | goal, the old handler must be re-established.  There is a problem 
+ | in the procedure in that if a throw is performed in the handler, 
+ | the context will not be set right.  The same is true for an abort.
+ *------------------------------------------------------------------*/
 :-	compiletime,
 	module_closure(trap,2).
 
-trap(Module,Goal,Handler) :- 
+trap(Module,Goal,Handler) 
+	:- 
 	get_context(OldContext),
 	catch(	trap(Module,Goal,Handler,OldContext),
 		Anything,
 		(set_context(OldContext),throw(Anything))).
 
-trap(Module,Goal,Handler,OldContext) :-
+trap(Module,Goal,Handler,OldContext) 
+	:-
 	decompose_handler(Handler,Module,HMod,HProc),
 	NewContext = context(HMod,HProc,OldContext),
 	set_context(NewContext),
 	trap_call(Module,Goal),
 	trap_exit(OldContext,NewContext).
 
-trap(_,_,_,OldContext) :-
+trap(_,_,_,OldContext) 
+	:-
 	set_context(OldContext),
 	fail.
 
-trap_call(Module,Goal) :- Module:Goal.
+trap_call(Module,Goal) 
+	:- 
+	Module:Goal.
 
-trap_exit(OldContext,NewContext) :- set_context(OldContext).
-trap_exit(OldContext,NewContext) :- set_context(NewContext), fail.
+trap_exit(OldContext,NewContext) 
+	:- 
+	set_context(OldContext).
 
-/*
- * set_context/1 and get_context/1 use global variables and are built by
- * the following call to make_gv.
- */
+trap_exit(OldContext,NewContext) 
+	:- 
+	set_context(NewContext), fail.
 
+/*-------------------------------------------------------------*
+ | set_context/1 and get_context/1 use global variables and 
+ | are built by the following call to make_gv.
+ *-------------------------------------------------------------*/
 :- make_gv('_context'), set_context(global_context).
 
-/*
- * PrologError is a global variable which contains the last prolog
- * error encountered.
- */
+/*------------------------------------------------------------*
+ | PrologError is a global variable which contains the last 
+ | prolog | error encountered.
+ *------------------------------------------------------------*/
 
 :- make_gv('PrologError').
 
-/*
- * decompose_handler(Handler,Module,HMod,HProc) is called to get the module and
- * procedure in a handler.  This permits a handler in a different module
- * to be used.
- */
+/*------------------------------------------------------------*
+ | decompose_handler(Handler,Module,HMod,HProc) 
+ | -- called to get the module and procedure in a handler.  
+ | This permits a handler in a different module to be used.
+ *------------------------------------------------------------*/
 
 decompose_handler(M:P,_,M,P) :- !.
 decompose_handler(P,M,M,P).
 
 
-/*
- * Specific handlers
- */
+/*--------------------------*
+ | Specific handlers
+ *--------------------------*/
 
-default_cntrl_c_handler(_,M:G,_) :-
+default_cntrl_c_handler(_,M:G,_) 
+	:-
 	breakhandler(M,G).
 
 silent_abort(_,_,_) :-
@@ -288,15 +295,15 @@ undefined_predicate(break, M:G) :-
 	als_advise('\nWarning: Undefined procedure %s:%s/%d called.\n',[M,P,A]),
 	breakhandler(M,G).
 
-/*
- * Application controlled interrupts of procedures.
- *
- *	This facility is very primitive and should be improved.
- *
- *	break_on/3 and break_off/3 cause an interrupt to be delivered when
- *	a certain procedure is called.  These are similar to spy and nospy.
- */
-
+/*---------------------------------------------------------------*
+ | Application controlled interrupts of procedures.
+ |
+ | [This facility is very primitive and should be improved.]
+ |
+ | break_on/3 and break_off/3 
+ | -- cause an interrupt to be delivered when a certain 
+ | procedure is called.  These are similar to spy and nospy.
+ *---------------------------------------------------------------*/
 export break_on/3, break_off/3.
 
 break_on(M,P,A) :-
@@ -309,9 +316,9 @@ break_off(M,P,A) :-
 	dbg_nospy(M,P,A).
 
 /********************************************************** 
- * Triggering certain predefined events
- *
- * The following predicates are used to trigger events
+ | Triggering certain predefined events
+ |
+ | The following predicates are used to trigger events
  **********************************************************/
 
 /*----------------------------------------------------------------
@@ -330,7 +337,6 @@ break_off(M,P,A) :-
  |		to figure out the actual number of frames to where the
  |		error occurred.  A better implementation would be to use
  |		the als$cd directive to get the environment.
- |
  *----------------------------------------------------------------*/
 export type_error/3.
 type_error(Type,Culprit,Depth) :-
@@ -397,21 +403,20 @@ system_error(L) :-
 	setPrologError(error(system_error,L)),
 	forcePrologError.
 
-
 /*----------------------------------------------------------------------
- * Argument checking predicates which will trigger an error if argument
- * is not of proper form.
+ | Argument checking predicates which will trigger an error if argument
+ | is not of proper form.
  *----------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------*
- * atom_ok(Atom) will succeed if Atom is an atom, it will trigger an
- * instantiation error if Atom is a variable and a type error if Atom
- * is non-variable, but not an atom.  
- *
- * If an error is triggered, the error goal will be the one which called
- * atom_ok.  In order for the error throwing code to work properly, atom_ok
- * should not be called from a disjunction, or call and it should not be
- * the last goal in the clause.
+ | atom_ok(Atom) will succeed if Atom is an atom, it will trigger an
+ | instantiation error if Atom is a variable and a type error if Atom
+ | is non-variable, but not an atom.  
+ |
+ | If an error is triggered, the error goal will be the one which called
+ | atom_ok.  In order for the error throwing code to work properly, atom_ok
+ | should not be called from a disjunction, or call and it should not be
+ | the last goal in the clause.
  *---------------------------------------------------------------------*/
 
 export atom_ok/1.
@@ -500,11 +505,10 @@ number_ok(Num) :-
 number_ok(Other) :-
 	type_error(number,Other,2).
 
-
-
-/*
- * char_list_ok/1 is different in that it will fail when any portion is var.
- */
+/*------------------------------------------------------*
+ | char_list_ok/1 is different in that it will fail 
+ | when any portion is var.
+ *------------------------------------------------------*/
 export char_list_ok/1.
 
 char_list_ok(Var) :-
@@ -528,10 +532,10 @@ character(C) :-			%% should write in C or assembler
 	atom(C),
 	atom_length(C,1).
 
-
-/*
- * code_list_ok/1 is different in that it will fail when any portion is var.
- */
+/*--------------------------------------------------------*
+ | code_list_ok/1 is different in that it will fail 
+ | when any portion is var.
+ *--------------------------------------------------------*/
 export code_list_ok/1.
 
 code_list_ok(Var) :-
@@ -551,6 +555,5 @@ code_list_ok([C|T]) :-
 	code_list_ok(T).
 code_list_ok(Other) :-
 	domain_error(character_code_list,Other,2).
-
 
 endmod.

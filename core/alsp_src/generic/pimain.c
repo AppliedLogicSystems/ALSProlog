@@ -48,19 +48,20 @@ extern	void	main	PARAMS(( int, char ** ));
 #include <GUSI.h>
 #endif
 
+#ifdef MPW_TOOL
+#include <CursorCtl.h>
+#else
 #if THINK_C
 #include <console.h>
 #endif			/* THINK_C */
-#if __MWERKS__
+#ifdef __MWERKS__
 #include <console.h>
 #include <SIOUX.h>
 
 tSIOUXSettings  SIOUXSettings =
-        {1, 1, 0, 0, 0, 0, 4, 80, 24, 0, 0, 22, 12, 0};
+        {1, 1, 1, 0, 0, 0, 4, 80, 24, 0, 0, 22, 12, 0};
 
 #endif			/* __MWERKS__ */
-#ifdef MPW_TOOL
-#include <CursorCtl.h>
 #endif			/* MPW_TOOL */
 
 #include <Events.h>
@@ -90,7 +91,7 @@ main(int argc, char ** argv)
 #endif
 
 #if defined(__MWERKS__) && !defined(MPW_TOOL)
-    printf("Please use # on a blank line to signal end-of-file.\n");
+    printf("Please use Control-E (followed by a return) to signal end-of-file.\n");
     printf("Avoid Control-D, because this will terminate the application.\n\n");
 #endif 
 
@@ -99,7 +100,7 @@ main(int argc, char ** argv)
 #endif
 
 #endif /* MacOS */
-    
+
     if ((exit_status = PI_prolog_init(WIN_STR, argc, argv)) != 0) {
 	PI_app_printf(PI_app_printf_error, "Prolog init failed !\n");
 	exit(1);
@@ -128,6 +129,34 @@ main(int argc, char ** argv)
 
 }
 
+
+/* PI_get_options returns a string containing option settings for ALSPro.
+   Usually this string comes from getenv(), except on the Mac where it
+   is stored in a preferences file.
+*/
+const char *PI_get_options(void)
+{
+#if defined(MacOS) && !defined(MPW_TOOL)
+    /* This is a very simple version at the moment.  The preferences file
+       must be in the same directory as the application.  This should be
+       extended to also look in the preferences folder and system folder.
+       The preferences file consists of a single line with the standard
+       ALSPro options.
+    */
+    FILE *pref_file;
+    static char pref_str[256];
+
+    pref_file = fopen("ALSPro Prefs", "r");
+
+    if (pref_file) {
+	fgets(pref_str, 255, pref_file);
+	fclose(pref_file);
+	return pref_str;
+    } else return NULL;
+#else    
+    return getenv("ALS_OPTIONS");
+#endif
+}
 /*
  * PI_app_printf is called from the prolog environment to display error and
  * warning messages.  The first parameter, messtype, describes the type
@@ -210,7 +239,7 @@ void	PI_yield_time(void)
 #ifdef MPW_TOOL
     SpinCursor(32);
 #endif
-#ifdef __MWERKS__
+#if defined(__MWERKS__) && !defined(MPW_TOOL)
     SIOUXHandleOneEvent(NULL);
 #endif
 #ifdef THINK_C
@@ -226,14 +255,24 @@ void	PI_yield_time(void)
 }
 
 #ifdef __MWERKS__
+
+#ifdef MPW_TOOL
+#if __POWERPC__
+#include <fcntl.h>
+#else
 #include <unix.h>
+#endif
+#else
+#include <unix.h>
+#endif
 
 /* This a patch for metrowerk's open() function.  
    Hopefully this can be removed in a future release.
 */
+int metrowerks_open_patch(const char *filename, int mode);
 int metrowerks_open_patch(const char *filename, int mode)
 {
-#ifdef MPW_TOOL
+#if defined(MPW_TOOL) && !__POWERPC__
   int mpw_mode;
 
 /* MPW's open() mode values taken from {CIncludes}FCntl.h. */

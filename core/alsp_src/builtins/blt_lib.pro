@@ -94,7 +94,7 @@
 
 :-libactivate(macroxp,['library',macro],
 	[define_macro/1, mx_cl/0,
-		mx/0, expand_macros/2,
+		mx/0, mx/1, expand_macros/2,
 		macro_expand/0, macro_expand_files/2,
 		macro_expand_files/3, macro_expand/2], [] ).
 

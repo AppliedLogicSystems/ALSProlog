@@ -35,8 +35,16 @@ test :-
 	copylines('/etc/termcap','copylines.out').
 */
 test :-
-	copylines(['/usr/include/stdio.h','/etc/termcap', '/etc/sendmail.cf'],
+	als_system(SysVars),
+	dmember(os=OS, SysVars),
+	OS=unix ->
+		copylines(['/usr/include/stdio.h','/etc/termcap', '/etc/sendmail.cf'],
+			  'copylines.out') ;
+		copylines(['mailbox3:alsp_src:tests:tsuite:testmath.pro',
+			   'mailbox3:alsp_src:tests:tsuite:compare.pro',
+			   'mailbox3:alsp_src:tests:tsuite:timeio.pro'],
 			  'copylines.out').
+
 
 
 copylines(InFileList,OutFile) 

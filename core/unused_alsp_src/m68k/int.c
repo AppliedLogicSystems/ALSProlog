@@ -1,32 +1,37 @@
-/*
- *
- * int.c		-- interrupt helper functions for the Sun
- *	Copyright (c) 1989 Applied Logic Systems, Inc.
- *
- *
- * Author: Kevin A. Buettner
- * Creation: 5/24/89
- * Revision History:
- *
- */
+/*================================================================*
+ |			int.c
+ |		Copyright (c) 1989-95 Applied Logic Systems, Inc.
+ |
+ |			-- interrupt helper functions for M68k
+ |
+ |		Routines:
+ |
+ |		int_get_goal_tokid(codeaddr)   
+ |		int_get_module(codeaddr)
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 5/24/89
+ | Revision History:
+ *================================================================*/
 
 #include "defs.h"
 #include "wintcode.h"
-
 
 extern	PWord	int_get_goal_tokid	PARAMS(( Code * ));
 extern	PWord	int_get_module		PARAMS(( Code * ));
 
 PWord
 int_get_goal_tokid(codeaddr)
-    Code *codeaddr;	/* should point at the bra in the overflow entry */
+    Code *codeaddr;		/* should point at the bra in the 
+						 | overflow entry */
 {
     ntbl_entry *ent;
 
-    /*
-     * codeaddr-3 will put us at the overflow field.  We need to back up from
-     * there in order to get to the name entry
-     */
+    /*---------------------------------------------------*
+     | codeaddr-3 will put us at the overflow field.  
+	 | We need to back up from there in order to get to 
+	 | the name entry
+     *---------------------------------------------------*/
 
     ent = (ntbl_entry *) (((char *) (codeaddr-3)) - 
 			      (int) ((ntbl_entry *) 0)->overflow);
@@ -37,7 +42,8 @@ int_get_goal_tokid(codeaddr)
 
 
 PWord int_get_module(codeaddr)
-    Code *codeaddr;	/* should point at the bra in the overflow entry */
+    Code *codeaddr;		/* should point at the bra in the 
+						 | overflow entry */
 {
     ntbl_entry *ent;
 

@@ -513,7 +513,11 @@ static int pgetpid(void)
 
 #include <ctype.h>
 
+#ifdef MPW_TOOL
+#include <fcntl.h>
+#else
 #include <unix.h>
+#endif
 #include <stdio.h>
 #include <limits.h>
 

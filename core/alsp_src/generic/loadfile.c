@@ -38,8 +38,10 @@
 #include <file.h>
 
 #elif   defined(MacOS)
-#ifdef HAVE_GUSI
+#if defined(HAVE_GUSI)
 #include <GUSI.h>
+#elif defined(MPW_TOOL)
+#include <fcntl.h>
 #else
 #include <unix.h>
 #endif

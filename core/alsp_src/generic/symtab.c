@@ -76,8 +76,7 @@ static long ts_prime = 2039;		/* actual size (the prime number) */
 static long ts_cutoff = 1712;		/* the cutoff point */
 static long ts_next = TK_EOF + 1;	/* the next token index */
 
-int
-tok_table_size()
+int tok_table_size(void)
 {
 	return(ts_prime);
 }

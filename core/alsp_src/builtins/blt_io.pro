@@ -338,16 +338,23 @@ load(FileName,Type,CanonPath,Nature,LoadedPath)
  |		- the path plus a 'pro' or 'obp' extension is an existing regular file
  *-----------------------------------------------------------------------*/
 check_existence(user) :- !.
-check_existence(Path) :-
+check_existence(Path) 
+	:-
 	exists_file(Path),
 	file_status(Path,Status),
-	member(type=regular,Status),
+	(member(type=regular,Status) -> 
+		true
+		;
+		member(type=symbolic_link, Status),
+		follow_link(Path,_,FileCode),
+		fileTypeCode(FileTypeCode, regular)
+	),
 	!.
-check_existence(Path) :-
+check_existence(Path) 
+	:-
 	(Suffix=pro;Suffix=obp),
 	filePlusExt(Path,Suffix,PathPlusSuffix),
-	exists_file(PathPlusSuffix),
-	!.
+	exists_file(PathPlusSuffix).
 
 /*-----------------------------------------------------------------------*
  |	load_canon/4
@@ -408,7 +415,8 @@ export obp_in_cur/0.
 obp_in_cur 
 	:-
 	abolish(obpLocation,2),
-	asserta(obpLocation(_,'.')).
+	directory_self(Self),
+	asserta(obpLocation(_,Self)).
 
 obpPath(Path,OPath)
 	:-
@@ -422,23 +430,21 @@ obpPath(Path,OPath)
 	filePlusExt(Path,obp,OPath).
 
 
+	%% The Dir for obp files is an absolute path:
+obpPath(Dir,File,OPath)
+	:-
+	is_absolute_pathname(Dir),
+	!,
+	filePlusExt(File,obp,ObpFile),
+	pathPlusFile(Dir,ObpFile,OPath).
+
 	%% The Dir for obp files is non-absolute:
 obpPath(Dir,File,OPath)
 	:-
-	sub_atom(Dir,1,1,First),
-	directory_separator(DirSep),
-	First \= DirSep,
-	!,
 	get_cwd(CurPath),
 	filePlusExt(File,obp,ObpFile),
 	extendPath(CurPath, Dir, XPath),
 	pathPlusFile(XPath, ObpFile, OPath).
-
-	%% The Dir for obp files is an absolute path:
-obpPath(Dir,File,OPath)
-	:-
-	filePlusExt(File,obp,ObpFile),
-	pathPlusFile(Dir,ObpFile,OPath).
 
 /*-----------------------------------------------------------------------*
  |	load3/5

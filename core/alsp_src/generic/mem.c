@@ -29,10 +29,14 @@
 #include <fcntl.h>
 #endif
 
-#ifdef __MWERKS__
+#ifdef MacOS
+/* for fixing PPC MPW Tool Malloc Bug. */
+#include <Memory.h>
+#if !defined(MPW_TOOL) && defined(__MWERKS__)
 #include <unix.h>
 /* MetroWerks does not define the EINTR error code. */
 #define EINTR           4
+#endif
 #endif
 
 #include <errno.h>
@@ -278,8 +282,6 @@ allocate_prolog_heap_and_stack(size)
      * is that it will much easier to implement saved states.
      *-------------------------------------------------------------*/
 
-printf("About to call mmap.....\n");
-
     retval = (PWord *) mmap((caddr_t) STACKSTART,
 			    size * sizeof (PWord) + NPROTECTED * pgsize,
 			    PROT_READ | PROT_WRITE,
@@ -431,7 +433,7 @@ release_bottom_stack_page()
 #else
 /*------ All other operating systems and architectures --------*/
 
-#if	defined(arch_m88k) || defined(arch_m68k)
+#if	defined(Portable) || defined(arch_m88k) || defined(arch_m68k)
 void stack_overflow(void);
 
 void
@@ -448,9 +450,11 @@ PWord *
 allocate_prolog_heap_and_stack(size)
     size_t size;			/* number of PWords to allocate */
 {
-#ifdef MacOS
-    PWord *retval = (PWord *) malloc(sizeof (PWord) * (size) + 4);
-    retval = (PWord *)((long)retval + 4 - ((long)retval & 3));
+#if __POWERPC__ && defined(MPW_TOOL)
+    /* The malloc that comes with the StdCLib in CW7 seems to be broken,
+       you can only malloc up to 0x800000 bytes. Work around by using
+       NewPtr. */
+    PWord *retval = (PWord *) NewPtr(sizeof (PWord) * size);
 #else
     PWord *retval = (PWord *) malloc(sizeof (PWord) * size);
 #endif
@@ -788,7 +792,7 @@ ss_malloc0(size, align, fe_num, actual_sizep)
 	if (align)
 	    p_diff = (char *) round(*pp, pgsize) - (char *) *pp;
 	p_size = FB_SIZE(*pp) - p_diff;
-	if (size <= p_size && p_size <= best_size) {
+	if (p_size >= 0 && size <= p_size && p_size <= best_size) {
 	    bestp = pp;
 	    best_size = p_size;
 	    best_diff = p_diff;

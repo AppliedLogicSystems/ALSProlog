@@ -37,6 +37,8 @@ export directory/3.
 export get_current_drive/1.
 export change_current_drive/1.
 
+export move_file/2.
+
 /*!--------------------------------------------------------------
  |	date/1
  |	date(Date)
@@ -476,10 +478,21 @@ disp_follow_link(symbolic_link, File, _, FinalFile, FinalTypeCode)
 	read_link(File, LinkTarget),
 	pathPlusFile(Path,TFile,LinkTarget),
 	change_cwd(Path),
-	(follow_link(LinkTarget, FinalFile, FinalTypeCode),!; true),
-	change_cwd(CWD).
+	fin_disp_follow_link(TFile, FinalFile, CWD, FinalTypeCode).
+
 
 disp_follow_link(FinalType, File, FileTypeCode, File, FileTypeCode).
+
+fin_disp_follow_link(TFile, FinalFile, CWD, FinalTypeCode)
+	:-
+	follow_link(TFile, FinalFile, FinalTypeCode),
+	!,
+	change_cwd(CWD).
+
+fin_disp_follow_link(TFile, FinalFile, CWD, FinalTypeCode)
+	:-
+	change_cwd(CWD),
+	fail.
 
 export disj_to_string/2.
 disj_to_string((Pattern1 ; Pattern2), PatternChars)
@@ -570,5 +583,11 @@ file_size(_,0)
 get_current_drive(root).
 
 change_current_drive(_).
+
+/*!----------------------------------------------------------------
+ *!----------------------------------------------------------------*/
+move_file(Source, Target)
+	:-
+	printf(atom(Cmd),'mv %t %t', [Source, Target]).
 
 endmod.

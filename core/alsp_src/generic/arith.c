@@ -32,7 +32,9 @@
 #include <GUSI.h>
 #else
 #include <Events.h>
+#ifndef MPW_TOOL
 #include <unix.h>
+#endif
 #include <errno.h>
 #endif
 #else  /* MacOS */
@@ -299,10 +301,10 @@ gamma(x)
 
 #endif
 
-/*
- * do_is recursively descends the expression to evaluate and returns
- * the value of the tree at each stage.   If an error is encountered, a long
- * jump is performed back to the original caller. 
+/*--------------------------------------------------------------------------------*
+ | do_is recursively descends the expression to evaluate and returns
+ | the value of the tree at each stage.   If an error is encountered, a long
+ | jump is performed back to the original caller. 
  | In the implementations with no coercion (#ifndef COERCE2INT), the third argument 
  | is a pointer to an int variable which is used to return the computed
  | type of the expression, primarily either WTP_INT or WTP_STRUCTURE 
@@ -325,10 +327,10 @@ gamma(x)
  | 		pbi_is
  |		name
  |		recursive calls on itself by do_is;
- | These are all contained in this file, since they are so few, we leave the
+ | These are all contained in this file; since they are so few, we leave the
  | responsibility for allocation and initialization of ty to them; should this
  | situation change, a wrapper function should be used.
- */
+ *--------------------------------------------------------------------------------*/
 
 static double
 do_is(v, t, ty)
@@ -397,6 +399,7 @@ do_is(v, t, ty)
 			break; 
 		    case TK_BACKSLASH:
 		    case TK_NOT:
+			*ty = ty1;
 			rv = (double) ~(long) rv;
 			break;
 		    case TK_EXP:

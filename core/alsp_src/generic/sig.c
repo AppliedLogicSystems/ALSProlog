@@ -34,7 +34,11 @@
 #ifdef HAVE_GUSI
 #include <GUSI.h>
 #else
+#ifdef MPW_TOOL
+#include <fcntl.h>
+#else
 #include <unix.h>
+#endif
 #endif
 #endif
 
@@ -392,7 +396,7 @@ pbi_alarm()
 	act.sa_flags = SA_SIGINFO;
 	(void) sigaction(SIGALRM, &act, 0);
     }
-#else		  /* HAVE_SIGACTION ... */
+#else		  /* not-HAVE_SIGACTION || not-defined(SA_SIGINFO) */
 #if defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
     {
 	struct sigvec v;
@@ -405,23 +409,31 @@ pbi_alarm()
 #else
 	v.sv_flags = SV_INTERRUPT;	/* do not restart certain system calls */
 	sigvec(SIGALRM, &v, 0);
-#endif
+#endif	/* HAVE_SIGVECTOR */
     }
-#else				/* !HAVE_SIGVEC */
+#else				/* !HAVE_SIGVEC && !HAVE_SIGVECTOR */
     (void) signal(SIGALRM, signal_handler);
-#endif				 /* !HAVE_SIGVEC */
+#endif				 /* defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR) */
+
 #endif		  /* HAVE_SIGACTION ... */
+
 #else /* !HAVE_SETITIMER */
+
 #ifdef HAVE_UNISTD_H
     alarm((unsigned long) dval);
 #endif
+
 #ifndef MacOS
     (void) signal(SIGALRM, signal_handler);
-#endif /* MacOS */
+#endif /* ndef MacOS */
+
 #endif /* HAVE_SETITIMER */
+
 #endif /* #ifndef DOS */
+
     PI_SUCCEED;
 #endif /* __GO32__ */
+
 }
 
 #if defined(SIGCHLD) || defined (SIGCLD)

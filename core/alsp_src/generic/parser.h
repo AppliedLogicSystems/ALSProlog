@@ -99,6 +99,7 @@ extern	void	symtab_init	PARAMS(( void ));
 extern	long	find_token	PARAMS(( UCHAR * ));
 extern	long	probe_token	PARAMS(( UCHAR * ));
 extern	int	tknamelen	PARAMS(( long ));
+extern	int	tok_table_size	PARAMS((void));
 
 /* parser.c */
 extern	void	parser_init	PARAMS(( void ));

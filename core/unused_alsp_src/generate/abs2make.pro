@@ -258,7 +258,8 @@ abs_w(irule(ID), SrcTerms, Context,Out)
 	%%%%%%%%%%%%%%%%%%%%%
 	%% Explicit Rule
 	%%%%%%%%%%%%%%%%%%%%%
-abs_w(rule(ID), SrcTerms, Context,Out)
+
+abs_w(rule(ID), SrcTerms, Context, Out)
 	:-
 	(lookup( (rule(ID) = rule(Tgt,Dep,Action)), SrcTerms, Context) ->
 		true 
@@ -272,7 +273,7 @@ abs_w(rule(ID), SrcTerms, Context,Out)
 	(dmember(context_name=mac, Context) ->
 		printf(Out, '%t \xC4 ', [RuleTgt])
 		;
-		printf(Out, '%t: ', [RuleTgt])
+		printf(Out, '%t : ', [RuleTgt])
 	),
 	list_body(RuleDep, [one_final | DepQuals], Context, Out),
 	list_body(RuleAction, [rule_body | ActionQuals], Context, Out).

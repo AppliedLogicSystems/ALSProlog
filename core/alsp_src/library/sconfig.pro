@@ -96,14 +96,6 @@ export known_ws/1.
 known_ws(motif).
 known_ws(nextstep).
 known_ws(dvx).
-/*
-known_ws(openlook).
-known_ws(decwins).
-known_ws(mac_os).
-known_ws(ms_wins3).
-known_ws(ms_wins95).
-known_ws(present_man).
-*/
 
 export winsystems_for/2.
 winsystems_for(Arch_OS, WSL)
@@ -227,6 +219,20 @@ export system_dir_root/2.
 system_dir_root(x,'X').
 system_dir_root(motif,'Motif').
 
+
+
+export characteristic_files/3.
+characteristic_files(motif, include, ['Xm/Xm.h']).
+characteristic_files(motif, lib, 
+					 [ID^files(ID,'libXm.*',[_|_])]).
+
+export possible_dir_for/4.
+possible_dir_for(motif,include,_,'/usr/include').
+possible_dir_for(motif,include,solaris,'/usr/dt/include').
+possible_dir_for(motif,lib,_,'/usr/lib').
+possible_dir_for(motif,lib,solaris,'/usr/dt/lib').
+	
+
 export flatten_ws_lists/2.
 flatten_ws_lists([], []).
 flatten_ws_lists([Tag=Value | WSHeaderItems], [Tag = FlatValue | WSHeaderLines])
@@ -272,5 +278,12 @@ prefix_dir([Item | List], WSDir, [XItem | XList])
 	:-
 	extendPath(WSDir, Item, XItem),
 	prefix_dir(List, WSDir, XList).
+
+export prefix_to/3.
+prefix_to([], _, []).
+prefix_to([Item | List], Atom, [XItem | XList])
+	:-
+	catenate(Atom, Item, XItem),
+	prefix_to(List, Atom, XList).
 
 endmod.

@@ -177,7 +177,7 @@ pbi_mangle()
 }
 
 
-#ifdef 0
+#if 0
 int
 pbi_trailed_mangle()
 {				/* trailed_mangle(ArgN,Struct,Arg) */

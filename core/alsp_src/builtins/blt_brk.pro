@@ -1,16 +1,16 @@
 /*=====================================================================
- * 		blt_brk.pro 	
- * 	Copyright (c) 1987-94 Applied Logic Systems, Inc.
- *
- *	Basic break handler for ^C or ^Break interrupts
- *
- * Author: Ken Bowen (based on code from Kevin Buettner)
- * Date  : 7/29/91
- *
- * Revised 4/1/93 - Ken Bowen 
- *   -- changed to library menu routines
- *   -- changed to stream I/O routines
- *     - removed see/tell info from breakpoint record
+ | 		blt_brk.pro 	
+ | 	Copyright (c) 1987-95 Applied Logic Systems, Inc.
+ |
+ |	Basic break handler for ^C or ^Break interrupts
+ |
+ | Author: Ken Bowen (based on code from Kevin Buettner)
+ | Date  : 7/29/91
+ |
+ | Revised 4/1/93 - Ken Bowen 
+ |   -- changed to library menu routines
+ |   -- changed to stream I/O routines
+ |     - removed see/tell info from breakpoint record
  *===================================================================*/
 module builtins.
 use windows.
@@ -18,7 +18,8 @@ use windows.
 :- make_gv('BreakLevel').
 :- setBreakLevel([b(0,user,true)]).
 
-breakhandler(M,G) :- 
+breakhandler(M,G) 
+	:- 
 	getBreakLevel(BreakList),
 	BreakList = [b(OldLevel,_,_) | _],
 	NewLevel is OldLevel+1,
@@ -27,7 +28,8 @@ breakhandler(M,G) :-
 		  breakhandler(NewM,NewG),
 		  breakhandler0(NewM,NewG) ), !.
 
-breakhandler(M,G) :- 
+breakhandler(M,G) 
+	:- 
 	getBreakLevel(BreakList),
 	BreakList = [_ | BreakListTail],
 	setBreakLevel(BreakListTail),
@@ -69,7 +71,8 @@ options(ListOfCodes, Responses, Prompt,
 			 indent		= '    ',
 			 prompt		= Prompt ] ).
 
-breakhandler0(M,G) :- 
+breakhandler0(M,G) 
+	:- 
 	getBreakLevel([b(Level,_,_)|_]),
 	catenate(['Break(',Level,') >'],Prompt),
 	listOfCodes(ListOfCodes),
@@ -81,36 +84,41 @@ breakhandler0(M,G) :-
 	menu(break_window,ChoiceItems,Response,Options),
 	break_handler(Response,M,G).
 
-break_handler(abort,M,G) :- 
-	!, 
+break_handler(abort,M,G) 
+	:-!, 
 	setBreakLevel([b(0,user,true)]),
 		%% abort_ctlc: "Aborting from Control-C or Control-Break.\n"
 	prolog_system_error(abort_ctlc, []),
 	abort.
-break_handler(break_shell,M,G) :-
-	!,
+break_handler(break_shell,M,G) 
+	:-!,
 	prolog_shell,
 	breakhandler0(M,G).
-break_handler(continue(M,G),M,G) :- 
-	!,
+break_handler(continue(M,G),M,G) 
+	:-!,
 	getBreakLevel([_ | PrevList]),
 	setBreakLevel(PrevList),
+	(obtain_alarm_interval(Intrv) -> 
+%		write(breakhandler_resetting_alarm(Intrv,Intrv)),nl,flush_output,
+		alarm(Intrv, Intrv) 
+		; 
+		true),
 	M:G.
-break_handler(debug(M,G),M,G) :- 
-	!,
+break_handler(debug(M,G),M,G) 
+	:-!,
 	catch(trace(M,G),
 		  breakhandler_debug(NewM,NewG),
 		  breakhandler0(NewM,NewG) ).
-break_handler(exit,M,G) :- 
-	!, 
+break_handler(exit,M,G) 
+	:-!, 
 		%% exit_ctlc: "Exiting Prolog from Control-C or Control-Break.\n"
 	prolog_system_error(exit_ctlc, []),
 	halt.
-break_handler(fail,M,G) :-
-	!,
+break_handler(fail,M,G) 
+	:-!,
 	fail.
-break_handler(previous,M,G) :- 
-	!, 
+break_handler(previous,M,G) 
+	:-!, 
 	getBreakLevel([_ | PrevList]),
 	setBreakLevel(PrevList),
 	PrevList = [b(PrevLevel, PrevM, PrevG) | _],
@@ -121,25 +129,28 @@ break_handler(previous,M,G) :-
 		;
 	    throw(breakhandler(PrevM,PrevG))
 	).
-break_handler(show(M,G),M,G) :- 
-	!,
+break_handler(show(M,G),M,G) 
+	:-!,
 	als_advise('Break at: %t:%t\n',[M,G]),
 	breakhandler0(M,G).
-break_handler(stack_trace,M,G) :-
-	!,
+break_handler(stack_trace,M,G) 
+	:-!,
 	stack_trace,
 	breakhandler0(M,G).
 
-break_handler(Otherwise,M,G) :- 
+break_handler(Otherwise,M,G) 
+	:- 
 	als_advise('\n    Bad input! Please re-enter.\n\n',[]),
 	!,
 	breakhandler0(M,G).
 
-stack_trace :-
+stack_trace 
+	:-
 	stack_trace(1).
 
 stack_trace(30) :- !.
-stack_trace(N) :-
+stack_trace(N) 
+	:-
 	frame_info(N,FI),
 	!,
 	printf(debugger_output,'(%d) %t\n',[N,FI],[quoted(true),maxdepth(8)]),

@@ -31,18 +31,6 @@ test_info(ident, ident, user, test,
 test_info(numio, numio, user, test,
 			'tests for get_number/3 and put_number/3.').
 
-test_info(par1, par1, user, main,
-			'tests for global variables, trap mechanism, alarm & interrupts.').
-
-test_info(par2, par2, user, main,
-			' Producers and consumers without the timer.').
-
-test_info(par3, par3, user, main,
-			' Consumers and producers with time slices.').
-
-test_info(par4, par4, user, main,
-			'  Producers and consumers (for primes) with added buffering.').
-
 test_info(retract1, retract1, user, doit1,
 			'  test out retract.').
 
@@ -65,8 +53,16 @@ test_info(testmath, testmath, user, test,
 			'test of math functions.').
 
 
+test_info(par1, par1, user, main,
+			'tests for global variables, trap mechanism, alarm & interrupts.').
 
+test_info(par2, par2, user, main,
+			' Producers and consumers without the timer.').
 
+test_info(par3, par3, user, main,
+			' Consumers and producers with time slices.').
 
+test_info(par4, par4, user, main,
+			'  Producers and consumers (for primes) with added buffering.').
 
 endmod.

@@ -9,6 +9,7 @@
  *	Original Creation Date: 3/20/86
  *====================================================================*/
 
+
 module builtins.
 
 /*
@@ -94,6 +95,7 @@ clauses(DBRef,Next,DBRef).
 clauses(Previous,Current,DBRef) :-
         '$clauseinfo'(Current,Next,_,_),
         clauses(Current,Next,DBRef).
+
 
 /*
  * Filter clauses whose first arguments don't match the first argument
@@ -197,6 +199,7 @@ doexport(Pat) :-
 	write(error_stream,'Invalid P/A in export list.  Ignoring it.'),
 	nl(error_stream).
 
+
 /*
  * Set use declarations in a module
  */
@@ -297,6 +300,7 @@ initHashTable(N,T)
 	arg(N,T,[]),
 	NN is N-1,
 	initHashTable(NN,T).
+
 
 /*---------------------------------------------------------------*
  |	hash_member/3
@@ -403,7 +407,6 @@ hash_insert_multi(Bucket,Array,Index,Key,Value,Table)
 	arg(3,Table,RehashCount),
 	NewRehashCount is RehashCount-1,
 	hash_rehash(NewRehashCount,Table).
-
 
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/

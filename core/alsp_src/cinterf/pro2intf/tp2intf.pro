@@ -444,7 +444,7 @@ write_dispatch_header([RetType|ArgTypes],DispatchFuncName,CDispatchFuncName,Arit
 	increment_Num(curDispNum,State,_),
 	accessP2I(outStream, State, OutStream),
 	accessP2I(fPrefix, State, FPrefix),
-	printf(OutStream,'%t_dispatch%t()\n{\n',[FPrefix,DN]),
+	printf(OutStream,'static int %t_dispatch%t(void)\n{\n',[FPrefix,DN]),
 	sprintf(CDFNList,'%t_dispatch%t',[FPrefix,DN]),
 	sprintf(DFNList,'%t%d',[FPrefix,DN]),
 	name(CDispatchFuncName,CDFNList),
@@ -855,7 +855,7 @@ processArityGroup([Func|RestFuncs], Accum, Sorted)
 	:-
 	place_func_in_accum(Func,Accum,NewAccum),
 	processArityGroup(RestFuncs,NewAccum,Sorted).
-
+	
 
 place_func_in_accum(Func,Accum,NewAccum)
 	:-
@@ -996,7 +996,7 @@ arityGroupExterns([func_group(_,_,_,CDFN,_) | Rest],OutStream)
 
 gen_pi_pdefines(FuncList,OutStream)
 	:-
-	gen_externs(FuncList,OutStream),
+	%%gen_externs(FuncList,OutStream),
 	printf(OutStream,'\n\nPI_BEGIN\n',[]),
 	genPI_PDEFINES(FuncList,OutStream),
 	printf(OutStream,'PI_END\n\n',[]).
@@ -1018,7 +1018,7 @@ gen_table_init(State)
 	accessP2I(outStream, State, OutStream),
 	accessP2I(baseName, State, BaseName),
 	accessP2I(initFcns, State, OldInitFcns),
-	printf(OutStream,'%t_compact_init()\n',[BaseName]),
+	printf(OutStream,'void %t_compact_init(void)\n',[BaseName]),
 	printf(OutStream,'{\n\tPI_INIT;\n}\n',[]),
 	catenate(BaseName,'_compact_init',InitFcn),
 	append(OldInitFcns, [InitFcn], NewInitFcns),
@@ -1257,7 +1257,7 @@ write_compact_interf_init(State)
 	accessP2I(baseName, State, BaseName),
 	accessP2I(curONum, State, Count),
 	accessP2I(outStream, State, OutStream),
-	printf(OutStream, '%t_init()\n{\n',[BaseName]),
+	printf(OutStream, 'void %t_init(void)\n{\n',[BaseName]),
 	accessP2I(initFcns, State, InitFcns),
 %	accessP2I(cmpctFCnt, State, LCFNum),
 %	!,
@@ -1316,7 +1316,7 @@ gen_global_variable_interf(_,State).
 
 gen_gv_cfunc_header(Prefix,OutStream)
 	:-
-	printf(OutStream, '%t_gv_dispatch()\n',[Prefix]),
+	printf(OutStream, 'static int %t_gv_dispatch(void)\n',[Prefix]),
 	printf(OutStream, '{\n',[]),
 	printf(OutStream, '\tPWord dispatchVal,dispatchType;\n',[]),
 	printf(OutStream, '\tPWord argVal; int argType;\n',[]),
@@ -1347,7 +1347,7 @@ gen_gv_init(Prefix,State,OutStream)
 	accessP2I(baseName, State, BaseName),
 	accessP2I(curONum, State, Count),
 	accessP2I(initFcns, State, OldInitFcns),
-	printf(OutStream, '%t%t_init()\n',[BaseName,Count]),
+	printf(OutStream, 'void %t%t_init(void)\n',[BaseName,Count]),
 	printf(OutStream, '{\n\tPI_INIT;\n}\n\n',[]),
 	catenate([BaseName,Count,'_init'],InitFcn),
 	append(OldInitFcns, [InitFcn], NewInitFcns),
@@ -1716,7 +1716,7 @@ openOutputFile(OutStream,State)
 	gen_file_header(OutStream,InFile,File,
 			printf(OutStream,'\t\t--by ALS Interface Generator\n\n',[])
 			),
-	printf(OutStream,'#include "alspi.h"\n',[]),
+	printf(OutStream,'#include "defs.h"\n',[]),
 	printf(OutStream,'#include "cinterf.h"\n',[]),
 	accessP2I(hincs,State,Hincs),
 	print_incs(Hincs,OutStream),
@@ -1751,7 +1751,7 @@ write_type_footer(SetupList,OutStream,State)
 	accessP2I(baseName,State,BaseName),
 	accessP2I(curONum,State,Count),
 	accessP2I(initFcns, State, OldInitFcns),
-	printf(OutStream,'%t%t_init()\n{\n',[BaseName,Count]),
+	printf(OutStream,'void %t%t_init(void)\n{\n',[BaseName,Count]),
 	catenate([BaseName,Count,'_init'],InitFcn),
 	append(OldInitFcns, [InitFcn], NewInitFcns),
 	setP2I(initFcns, State, NewInitFcns),
@@ -1776,7 +1776,7 @@ write_const_header(OutStream, State) :-
 	accessP2I(baseName, State, BaseName),
 	accessP2I(curONum, State, Count),
 	accessP2I(initFcns, State, OldInitFcns),
-	printf(OutStream,'%t%t_init()\n{\n',[BaseName,Count]),
+	printf(OutStream,'void %t%t_init(void)\n{\n',[BaseName,Count]),
 	catenate([BaseName,Count,'_init'],InitFcn),
 	append(OldInitFcns, [InitFcn], NewInitFcns),
 	setP2I(initFcns, State, NewInitFcns).

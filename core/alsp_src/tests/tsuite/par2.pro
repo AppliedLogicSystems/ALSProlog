@@ -12,7 +12,11 @@
  */
 
 
-main :-	consume(100,L) & ints_from(0,L).
+main :-	
+	als_system(SysVars),
+	dmember(os=OS,SysVars),
+	not(OS = macos),
+	consume(100,L) & ints_from(0,L).
 
 primes(N) :-
 	consume(N,P) & sieve(IF2,P) & ints_from(2,IF2).

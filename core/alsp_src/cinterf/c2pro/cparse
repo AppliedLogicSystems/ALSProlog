@@ -485,7 +485,14 @@ enum_exp_opt(Item,State) --> [equal], !,
 %	  setC2P(info_table, State, OutTable)
 	  setInfoTable(OutTable)
 	}.
-enum_exp_opt( _, State) --> [].
+enum_exp_opt(Item, State) --> [],
+	{ 
+%	  accessC2P(info_table, State, InTable),
+	  getInfoTable(InTable),
+	  avl_insert(assign(Item),val(0),InTable,OutTable),
+%	  setC2P(info_table, State, OutTable)
+	  setInfoTable(OutTable)
+	}.
 
 
 enum_def_rest(State) --> [rcurly], !.

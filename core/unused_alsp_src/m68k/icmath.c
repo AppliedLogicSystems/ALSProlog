@@ -1,16 +1,19 @@
-/*
- * icmath.c		-- stuff to emit math instructions
- *	Copyright (c) 1991 Applied Logic Systems, Inc.
- *	Copyright (c) 1991 Motorola Inc.
- *
- * Author:	Kevin Buettner, Motorola 68k port by Scott Medeiros
- * Creation:	2/18/92
- * Revision History:
- * 11/30/94,	C. Houpt	-- Parametrized math stack pointer
- *					register so different platforms can use
- *					different registers.  The MacOS use the B
- *					register instead of the Fail register.
- */
+/*===================================================================*
+ |			icmath.c
+ |	Copyright (c) 1992 Applied Logic Systems, Inc.
+ |	Copyright (c) 1992 Motorola Inc.
+ |
+ |			-- stuff to emit math instructions
+ |
+ | Author:	Kevin Buettner, 
+ | Creation:	2/18/92
+ | Revision History:
+ | 		Motorola 68k port by Scott Medeiros
+ | 11/30/94,	C. Houpt	-- Parametrized math stack pointer
+ |					register so different platforms can use
+ |					different registers.  The MacOS use the B
+ |					register instead of the Fail register.
+ *===================================================================*/
 
 #include "defs.h"
 #include "icom.h"
@@ -23,9 +26,10 @@
 
 #include <stdio.h>
 
-/* These are the global symbols we need access to.  Thus, RELOC_INFO is
- * emitted around uses of these symbols (for packaging).
- */
+/*-------------------------------------------------------------------*
+ | These are the global symbols we need access to.  Thus, RELOC_INFO
+ | is emitted around uses of these symbols (for packaging).
+ *-------------------------------------------------------------------*/
 extern long int_table;
 extern long dcmp_table;
 extern long mth_bot;
@@ -41,10 +45,12 @@ static int stackmax;
 #define ICODE(macro,str,func,obp) extern void func PARAMS(( long, long, long, long ));
 #include "icodedef.h"
 
-/* MStack is the register that contains th math stack pointer.
-   On most machines the Fail register is temporarily used for the math stack pointer,
-   but on the Macintosh, the B register is used.
-*/
+/*-----------------------------------------------------------------* 
+ | MStack is the register that contains th math stack pointer.
+ | On most machines the Fail register is temporarily used for 
+ | the math stack pointer,
+ | but on the Macintosh, the B register is used.
+ *-----------------------------------------------------------------*/
 #ifdef MacOS
 #define MStack	B
 #else
@@ -59,24 +65,30 @@ ic_mth_init1(isonlygoal,regmask,y,z)
     long y, z;
 {
 
-    /* First need to save off MStack, so that it can be used as a MathSP */
+		/*------------------------------------------------------* 
+		 | First need to save off MStack, so that it can be 
+		 | used as a MathSP 
+		 *------------------------------------------------------*/
     MOVE(MStack,ADIRECT,0,SP,PREDECR,0);	/* move.l	MStack,	-(SP) */
 
-/* the next 2 instructions initialize the Math SP.  The second instruction is overwritten
-   by ic_mth_fin, afterwards, when it is known how big the arithmetic stack needs to be.
-*/
-
+		/*------------------------------------------------------------* 
+		 | The next 2 instructions initialize the Math SP.  The 
+		 | second instruction is overwritten by ic_mth_fin, afterwards, 
+		 | when it is known how big the arithmetic stack needs to be.
+		 *------------------------------------------------------------*/
     MOVE(H,ADIRECT,0,D0,DDIRECT,0);		/* move.l	H,     	d0 */
-    ADDIL(0,D0,DDIRECT,0);			/* overwrite extension word after instr word */
+    ADDIL(0,D0,DDIRECT,0);				/* overwrite extension word after instr word */
     mth_stackadj = ic_ptr - 1;
 
-    ANDIW(0xfff8,D0,DDIRECT,0);			/* 68k only allows this op on d-regs -- aaarghhh!!! */
+    ANDIW(0xfff8,D0,DDIRECT,0);				/* 68k only allows this op on d-regs */
     MOVE(D0,DDIRECT,0,MStack,ADIRECT,0);	/* movea.l	d0,	MStack */
 
-/* the and doubleword aligns the arithmetic stack -- this assumes that the stack has been allocated
-   one (long)word more than necessary, otherwise doubleword aligning would make the stack one
-   element too small.  This depends on the constant chosen in ic_mth_fin...
-*/
+		/*---------------------------------------------------------------------* 
+		 | The and doubleword aligns the arithmetic stack -- this assumes 
+		 | that the stack has been allocated one (long)word more than 
+		 | necessary, otherwise doubleword aligning would make the stack one
+   		 | element too small.  This depends on the constant chosen in ic_mth_fin...
+		 *---------------------------------------------------------------------*/
 #ifdef notdef
     MOVI((int) &mth_bot,A0,ADIRECT,0);		/* movea.l	#mth_bot, a0    */
 #endif

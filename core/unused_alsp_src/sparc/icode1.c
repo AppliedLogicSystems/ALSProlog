@@ -24,16 +24,17 @@
 #include "icodedef.h"
 #undef ICODE
 
-/*
+/*--------------------------------------------------------------------*
  * READMODE, WRITEMODE, CAPTUREMODE, MACROMODE, and ALLOCMODE are the
  * potential values which the variable capturemode may take on.
- */
+ *--------------------------------------------------------------------*/
 
-#define READMODE 0		/* in read mode			*/
-#define WRITEMODE 1		/* in write mode		*/
-#define CAPTUREMODE 2		/* capture unify instrs		*/
-#define MACROMODE 3		/* loading a macro expansion	*/
-#define ALLOCMODE 4		/* emitting allocation code	*/
+#define READMODE 0		/* in read mode				 */
+#define WRITEMODE 1		/* in write mode			 */
+#define CAPTUREMODE 2	/* capturing unify instrs	
+						   read/write mode expansion */
+#define MACROMODE 3		/* loading a macro expansion */
+#define ALLOCMODE 4		/* emitting allocation code	 */
 
 /*
  * CAPTURESIZE is the size of the capture area.  The capture area is where we

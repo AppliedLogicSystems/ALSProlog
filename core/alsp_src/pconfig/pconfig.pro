@@ -2,12 +2,16 @@
  |		pconfig.pro
  |	Copyright (c) 1994 Applied Logic Systems, Inc.
  |
- |	Prolog-stage configuration during builds
+ |	Prolog-driven windowing stage configuration during builds
+ |
+ |	Called after 'make all' has been executed in bld-port and
+ |	bld-natv (if native code supported);  creates the bld-wins
+ |	directory, together with appropriate subdirectories (e.g.,
+ |	x, motif, etc.) and makefiles.
  |
  |	Author: Ken Bowen
  |	Date begun: 8 Aug 94
  *==================================================================*/
-
 
 module pconfig.
 use  mkdist.
@@ -16,6 +20,11 @@ use  mkdist.
 	%% Top-level entry to the prolog-level configuration process
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+	%------------------------------------------------------
+	%
+	%  Main entry:
+	%
+	%------------------------------------------------------
 export pconfig/0.
 
 pconfig 
@@ -24,6 +33,11 @@ pconfig
 	build_base_config,
 	setup_wins(SwitchInfo).
 
+	%------------------------------------------------------
+	% Obtains command line objections and verifies existence of
+	% a target window system, or obtains one from ws.tgt at top
+	% level in the build directory;
+	%------------------------------------------------------
 acquire_options(SwitchInfo)
 	:-
 	get_cmdline_vals(SwitchVals),
@@ -53,6 +67,16 @@ ws_opt_file(SwitchInfo0, [tgtws=TGTWS | SwitchInfo0])
 
 ws_opt_file(SwitchInfo, SwitchInfo).
 
+	%------------------------------------------------------
+	% Initial accumulation of information; extract from:
+	% 1. (xtr_cfg_info):
+	%	 bld-natv/makefile, if this exists;
+	%    else from bld-port/makefile;
+	% 2. (read_config_h): config.h
+	% 3. prologVersion from als_system list.
+	%
+	% Writes everything to cfg.pro and asserts everything:
+	%------------------------------------------------------
 build_base_config
 	:-
 	xtr_cfg_info('./',BaseInfo),
@@ -66,8 +90,6 @@ build_base_config
 	write_clauses(OutStr, [cfg(prologVersion,PVer) | Info]),
 	close(OutStr),
 	assert_all(Info).
-
-%	install_sharbld.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Read the config.h file in the top-level build directory
@@ -110,9 +132,9 @@ disp_read_config_h(LCs, Items, InStr)
 	:-
 	read_config_h(InStr, Items).
 
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%------------------------------------------------------
 	%% Read across /* -- */ - C-sytle comments
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%------------------------------------------------------
 
 to_end_cmt(InStr)
 	:-
@@ -139,10 +161,10 @@ end_cmnt(LCs)
 	:-
 	append(X,[0'*,0'/ | Y], LCs), !.
 
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%------------------------------------------------------
 	%% Convert a string "#define <Symb> <Val>" to 
 	%% a fact: '#define'('<Symb>', <PrologVal>)
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%------------------------------------------------------
 
 cfg_process(LCs, '#define'(Expr, Value))
 	:-
@@ -188,9 +210,9 @@ xtr_cfg_info(BLD_Dir,TagsList, Info)
 	close(MFStrm).
 
 
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%------------------------------------------------------
 	%% Extract configuration information from a given Makefile
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%------------------------------------------------------
 
 xtr_cfgi([], MFStrm, []) :-!.
 
@@ -230,8 +252,9 @@ trial_mem(TG, [TG | RestTagsList], RestTagsList).
 trial_mem(TG, [Other | TailTagsList], [Other | RestTagsList])
 	:-
 	trial_mem(TG, TailTagsList, RestTagsList).
+
 	/*----------------------------------------------------
-	 |	Determining bld dirs & libs
+	 |	Determining which bld dirs exist
 	 *---------------------------------------------------*/
 
 get_bld_dirs(BDList)
@@ -252,8 +275,15 @@ get_bld_dirs([BD | ToCheck],[BD0 | BDList])
 get_bld_dirs([BD | ToCheck],BDList)
 	:-
 	get_bld_dirs(ToCheck,BDList).
+
 	/*----------------------------------------------------
-	 |	Setting up the bld-wins subdir
+	 *----------------------------------------------------
+	 ||	 Setting up the bld-wins subdir
+	 ||
+	 ||  "Main" entry to most of the hard work; creates
+	 ||  the bld-wins dir, and all the various subdirs,
+	 ||  together with makefiles, etc.
+	 *---------------------------------------------------*
 	 *---------------------------------------------------*/
 
 setup_wins(SwitchInfo)
@@ -261,6 +291,7 @@ setup_wins(SwitchInfo)
 	check_make_subdir('./bld-wins'),
 	cfg('ARCH',ARCH),
 	cfg('OS',OS),
+			%% Use library info from: sconfig.pro:
 	(dmember(tgtws=TGTWS, SwitchInfo) ->
 		builtins:specif_winsystems_for(_,TGTWS,SubdirList)
 		;
@@ -272,9 +303,14 @@ setup_wins(SwitchInfo)
 		get_bld_dirs(BDList),
 		change_cwd('./bld-wins'),
 		make_each_subdir(SubdirList),
+
+			% Path: <srcdir>/bld-natv/
 		cfg(srcdir,BLD_NATV_SRC_PATH_Atm),
 
+			% Path: <srcdir>/bld-natv/../wins/build
 		extendPath(BLD_NATV_SRC_PATH_Atm,'wins/build',WINBLD ),
+
+			% Path: <srcdir>/bld-natv/../wins/build/makefile.in
 		pathPlusFile(WINBLD, 'makefile.in', WINMKPATH),
 
 		general_os(ARCH,OS,GOS),
@@ -286,18 +322,18 @@ setup_wins(SwitchInfo)
 				    './makefile', GOS),
 
 		subPath(BLD_NATV_SRC_PATH,BLD_NATV_SRC_PATH_Atm),
+
+			%% Create each ws subdir & makefile:
 		create_makefiles_and_subdirs(SubdirList, ARCH, OS, SwitchInfo,
 									 BLD_NATV_SRC_PATH,BDList),
 		change_cwd('..')
 	),
 	change_cwd('..').
 
-interleave([], _, []).
-interleave([Item | ItemList], Inter, [Item,Inter | Result])
-	:-
-	interleave(ItemList, Inter, Result).
 
-
+	%
+	% Simple creation of each subdir in a list:
+	%
 make_each_subdir([]).
 make_each_subdir([Subdir | SubdirList])
 	:-
@@ -314,14 +350,20 @@ check_make_subdir(Subdir)
 	make_subdir(Subdir),
 	printf(user,'   Created subdir %t \n',[Subdir]).
 
+	%%------------------------------------------------------------
+	%%	Recurse down list, creating each individual windowing
+	%%	makefile:
+	%%------------------------------------------------------------
 create_makefiles_and_subdirs( [], _, _, _, _,_).
 
 create_makefiles_and_subdirs( [Subdir | Subdirs], ARCH, OS, SwitchInfo,
 								BLD_NATV_SRC_PATH,BDList)
 	:-
+		% Path: <srcdir>/bld-natv/../wins/build/<Subdir>
 	append(BLD_NATV_SRC_PATH,[wins,build,Subdir], BldSubdirPath),
 	subPath(BldSubdirPath, BldSubdirPathAtm),
 
+		% Path: <srcdir>/bld-natv/../wins/build
 	append(BLD_NATV_SRC_PATH,[wins,build], BldPath),
 	subPath(BldPath, BldPathAtm),
 
@@ -332,6 +374,12 @@ create_makefiles_and_subdirs( [Subdir | Subdirs], ARCH, OS, SwitchInfo,
 
 	create_makefiles_and_subdirs( Subdirs, ARCH, OS,SwitchInfo, BLD_NATV_SRC_PATH,BDList).
 
+	%%------------------------------------------------------------
+	%% Build a given (windowing) 'build' subdirectory, including
+	%% the makefile, the alsdir and tests subdirs, and the
+	%% files:
+	%%		tconfig.h   pi_cfg.h   pi_init.c
+	%%------------------------------------------------------------
 create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH,BDList, 
 					 SwitchInfo, BldPathAtm, BldSubdirPathAtm, GOS)
 	:-
@@ -348,9 +396,14 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH,BDList,
 	cfg('X_LIBS', INI_X_LIBS),
 	cfg('X_EXTRA_LIBS', INI_X_EXTRA_LIBS), 
 
-	xx_cfg(Subdir, 'X_CFLAGS', INI_X_CFLAGS, X_CFLAGS),
-	xx_cfg(Subdir, 'X_LIBS', INI_X_LIBS, X_LIBS),
-	xx_cfg(Subdir, 'X_EXTRA_LIBS', INI_X_EXTRA_LIBS, X_EXTRA_LIBS), 
+
+		%% Handle things like location of Motif include
+		%% files and libraries:
+
+	general_os(ARCH,OS,BaseOS,_),
+	xx_cfg(Subdir, 'X_CFLAGS', BaseOS, INI_X_CFLAGS, X_CFLAGS),
+	xx_cfg(Subdir, 'X_LIBS', BaseOS, INI_X_LIBS, X_LIBS),
+	xx_cfg(Subdir, 'X_EXTRA_LIBS', BaseOS, INI_X_EXTRA_LIBS, X_EXTRA_LIBS), 
 
 	SubHeaderLines = [
 		'LIBS' = LIBS,
@@ -363,17 +416,28 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH,BDList,
 	mk_bd_incs(BDList, BDINCS),
 
 		%% Handle the  makefile:
+
+		%% Get the path to the source makefile.in:
+		%%
 	extendPath(BldSubdirPathAtm, 'makefile.in', SubDirMakefile),
 	(exists_file(SubDirMakefile) ->
 		SrcMKFTail = SubDirMakefile
 		;
 		extendPath(BldPathAtm, 'mf-cmn.in', SrcMKFTail)
 	),
+
+		%% Path to target makefile to create:
+	pathPlusFile(Subdir,'makefile',SubdirMakefile),
+
+		%% Write header lines into target makefile, followed by
+		%% copying all of source makefile:
+	trans_xtnd_makefile(SrcMKFTail, SubHeaderLines, SubdirMakefile, GOS), 
+
+		%% Copy tconfig.h to this directory, from
+		%% the parallel bld-port/tconfig.h:
+		%%
 	catenate('cp ../bld-port/tconfig.h ', Subdir, CpCmd),
 	system(CpCmd),
-
-	pathPlusFile(Subdir,'makefile',SubdirMakefile),
-	trans_xtnd_makefile(SrcMKFTail, SubHeaderLines, SubdirMakefile, GOS), 
 
 		%% Handle pi_cfg.h:
 	check_default(WSHeaderItems, 'CFG', '', Cfgs),
@@ -403,43 +467,129 @@ add_depth(N, BP, BNSP)
 	M is N-1,
 	add_depth(M, ['..' | BP], BNSP).
 
-xx_cfg(Subdir, 'X_CFLAGS', INI_X_CFLAGS, X_CFLAGS)
+	%%---------------------------------------------
+	%% Work out, if possible where to find various
+	%% ws (e.g., Motif) include files, libraries,
+	%% etc.;  Note that the X files are already
+	%% taken care of, when appropriate:
+	%%---------------------------------------------
+
+	%% Include files:
+xx_cfg(Subdir, 'X_CFLAGS', OS, INI_X_CFLAGS, X_CFLAGS)
 	:-!,
-	search_includes(Subdir,MotifIncs),
-	Initial = [INI_X_CFLAGS |  MotifIncs],
+	search_includes(Subdir,OS, SpecialIncs),
+	Initial = [INI_X_CFLAGS |  SpecialIncs],
 	interleave(Initial, ' ', Second),
 	catenate(Second, X_CFLAGS).
 
-xx_cfg(Subdir, 'X_LIBS', INI_X_LIBS, X_LIBS)
+	%% Library files:
+xx_cfg(Subdir, 'X_LIBS', OS, INI_X_LIBS, X_LIBS)
 	:-!,
-	search_libs(Subdir,Libs),
+	search_libs(Subdir,OS, Libs),
 	Initial = [INI_X_LIBS | Libs],
 	interleave(Initial, ' ', Second),
 	catenate(Second, X_LIBS).
 
-xx_cfg(_, _, X_EXTRA_LIBS, X_EXTRA_LIBS).
+xx_cfg(_, _, _, X_EXTRA_LIBS, X_EXTRA_LIBS).
 
-search_includes(x,[]) :-!.
-search_includes(Subdir,Incs)
+	%%-------------------------------------
+	%% Locate the libraries for this subdir:
+	%%-------------------------------------
+
+	%% Nothing to do for X:
+search_includes(x,_,[]) :-!.
+
+	%% Try different places for the includes corresponding
+	%% to this subdir (e.g., motif):
+
+search_includes(Subdir, OS, Incs)
+	:-
+	characteristic_files(Subdir, include, CharactFiles),
+	places_to_look(CharactFiles, Subdir, include, OS, IncDirs),
+	prefix_to(IncDirs, ' -I ', Incs).
+
+	%% Return empty list otherwise:
+search_includes(_,_,[]).
+
+places_to_look([], Subdir, Type, OS, []).
+places_to_look([CFile | CharactFiles], Subdir, Type, OS, Incs)
+	:-
+	search_dir_for(CFile, Subdir, Type, OS, TheseIncDirs),
+	append(TheseIncDirs, RestIncs, Incs),
+	places_to_look(CharactFiles, Subdir, Type, OS, RestIncs).
+
+search_dir_for(CFile, Subdir, Type, OS, TheseIncDirs)
+	:-
+	possible_dir_for(Subdir,Type,OS,InitIncDir),
+	fin_search_dir_for0(CFile, Subdir, Type, OS, InitIncDir, TheseIncDirs).
+
+fin_search_dir_for0(InitIncDir^Test, Subdir, Type, OS, InitIncDir, TheseIncDirs)
+	:-!,
+	fin_search_dir_for(Test, Subdir, Type, OS, InitIncDir, TheseIncDirs).
+
+fin_search_dir_for0(CFile, Subdir, Type, OS, InitIncDir, TheseIncDirs)
+	:-
+	fin_search_dir_for((extendPath(InitIncDir,CFile,TestPath),
+						exists_file(TestPath)), 
+						Subdir, Type, OS, InitIncDir, TheseIncDirs).
+
+fin_search_dir_for(Test, Subdir, Type, OS, InitIncDir, [InitIncDir])
+	:-
+%	extendPath(InitIncDir,CFile,TestPath),
+	call(Test),
+	!.
+
+fin_search_dir_for(Test, Subdir, Type, OS, IncDir, TheseIncDirs)
 	:-
 	system_dir_root(Subdir,Atom),
 	getcwd(CurDir),
-	change_cwd('/usr/include'),
+	change_cwd(IncDir),
 	subdirs(IncSUBDirs),
 	change_cwd(CurDir),
 	filt_for_atom(IncSUBDirs, Atom, InitBaseIncs),
 	sort(InitBaseIncs, InterBaseIncs1),
 	dreverse(InterBaseIncs1, BaseIncs),
 	!,
-	bagOf(IF, [F,FP]^(member(F,BaseIncs),
+	test_filt(BaseIncs, Test, IncDir, TheseIncDirs).
+
+/*
+	bagof(IF, [F,FP]^(member(F,BaseIncs),
 			pathPlusFile('/usr/include',F,FP),
 			catenate('-I',FP,IF) ),
-		Incs).
+		TheseIncDirs).
+*/
 
-search_includes(_,[]).
 
-search_libs(x,[]) :-!.
-search_libs(Subdir,Libs)
+	%% Couldn't find any:
+search_dir_for(CFile, Subdir, Type, OS, [])
+	:-
+	printf('Warning! Couldn\'t locate %t dir for %t - %t\n',[Type,Subdir,CFile]).
+
+test_filt([BI | BaseIncs], TestTerm, IncDir, [IncDir | RestDirs])
+	:-
+	copy_term(TestTerm, TestPath^Test),
+	call(Test),
+	!,
+	test_filt(BaseIncs, TestTerm, IncDir, RestDirs).
+
+test_filt([_ | BaseIncs], TestTerm, IncDir, RestDirs)
+	:-
+	test_filt(BaseIncs, TestTerm, IncDir, RestDirs).
+
+	%%-------------------------------------
+	%% Locate the libraries for this subdir:
+	%%-------------------------------------
+
+search_libs(x,_,[]) :-!.
+
+search_libs(Subdir,OS, Libs)
+	:-
+	characteristic_files(Subdir, lib, CharactFiles),
+	places_to_look(CharactFiles, Subdir, lib, OS, LibsDirs),
+	prefix_to(LibsDirs, ' -L', Libs).
+
+/*
+search_libs(Subdir,OS, Libs)
 	:-
 	system_dir_root(Subdir,Atom),
 	getcwd(CurDir),
@@ -454,8 +604,9 @@ search_libs(Subdir,Libs)
 	pathPlusFile('/usr/lib',Choice,FP),
 	catenate('-L',FP, LibElt),
 	Libs = [LibElt].
+*/
 
-search_libs(_,[]).
+search_libs(_,_,[]).
 
 filt_for_atom(InList, Atom, OutList)
 	:-
@@ -710,6 +861,11 @@ do_clean_lines([SD | SubdirList], Tag, [L | CleanLines])
 	sprintf(LCs, '\tcd %t; make %t', [SD,Tag]),
 	name(L, LCs),
 	do_clean_lines(SubdirList, Tag, CleanLines).
+
+interleave([], _, []).
+interleave([Item | ItemList], Inter, [Item,Inter | Result])
+	:-
+	interleave(ItemList, Inter, Result).
 
 install_sharbld
 	:-

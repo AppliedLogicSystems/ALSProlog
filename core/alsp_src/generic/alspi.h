@@ -120,9 +120,11 @@ extern	void	PI_shutdown	PARAMS(( void ));
 extern	int	PI_toplevel	PARAMS(( void ));
 extern	int	PI_prolog_init	PARAMS(( char *, int, char ** ));
 extern	void	PI_app_printf	PARAMS(( int, ... ));
+extern	const char *	PI_get_options	PARAMS(( void ));
 
 #ifdef MacOS
-extern long yield_interval;
+extern	long	yield_interval;
+extern  long	yield_counter;
 extern	void	PI_yield_time	PARAMS(( void ));
 #endif
 
