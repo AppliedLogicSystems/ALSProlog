@@ -85,5 +85,13 @@ abolish_list([P/A | More],M) :-
 	M:abolish(P,A),
 	abolish_list(More,M).
 
+retract_all/1.
+retract_all(Pattern)
+	:-
+	retract(Pattern),
+	!,
+	retract_all(Pattern).
+retract_all(_).
+	
 
 endmod.

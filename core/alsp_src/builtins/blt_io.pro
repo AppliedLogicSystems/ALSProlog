@@ -130,19 +130,19 @@ consult(consult,TheFileName)
 	:- 
 	consult_nature(TheFileName, FileName, Nature),
 	consultmessage('Consulting %s ...\n',[FileName]),
-	load(FileName, 0, Path,Nature),
+	load(FileName, 0, Path, Nature, LoadedPath),
 	!,
 	source_debug_record(Path),
-	consultmessage('%s consulted\n',[Path]).
+	consultmessage('%s consulted\n',[LoadedPath]).
 
 consult(reconsult,TheFileName) 
 	:-
 	consult_nature(TheFileName, FileName, Nature),
 	consultmessage('Reconsulting %s ...\n',[FileName]),
-	load(FileName, 1, Path,Nature),
+	load(FileName, 1, Path, Nature, LoadedPath),
 	!,
 	adjust_source_deb(Path),
-	consultmessage('%s reconsulted\n',[Path]).
+	consultmessage('%s reconsulted\n',[LoadedPath]).
 
 consult(_,FileName) 
 	:-
@@ -278,9 +278,9 @@ loadfor(FileName,Libs,InitFunction,Pathname) :-
 	!.
 
 /*-----------------------------------------------------------------------*
- | load/4
- | load(FileName,Type,CanonPath,Nature)
- | load(+,+,-,+)
+ | load/5
+ | load(FileName,Type,CanonPath,Nature,LoadedPath)
+ | load(+,+,-,+,-)
  |
  | 	- main entry for (re)consulting files
  |
@@ -295,12 +295,12 @@ loadfor(FileName,Libs,InitFunction,Pathname) :-
 	make_gv('_reconsult_flag'), set_reconsult_flag(0).
 
 	%% File source is the user stream:
-load(user,Type,user,Nature) 
+load(user,Type,user,Nature,LoadedPath) 
 	:-!,
-	load_canon(user,Type,Nature).
+	load_canon(user,Type,Nature,LoadedPath).
 
 	%% Source is a 'normal' file:
-load(FileName,Type,CanonPath,Nature) 
+load(FileName,Type,CanonPath,Nature,LoadedPath) 
 	:-
 	possibleLocation(FileName, PathName),
 	rootPathFile(Drive, PathList, File, PathName),
@@ -321,7 +321,7 @@ load(FileName,Type,CanonPath,Nature)
 	      %% Propogate failure
 	    fail
 	),
-	load_canon(CanonPath,Type,Nature),
+	load_canon(CanonPath,Type,Nature,LoadedPath),
 	!,
 	set_current_consult_directory(OldCCD).
 
@@ -350,9 +350,9 @@ check_existence(Path) :-
 	!.
 
 /*-----------------------------------------------------------------------*
- |	load_canon/3
- |	load_canon(Path,Type,Nature)
- |	load_canon(+,+,+)
+ |	load_canon/4
+ |	load_canon(Path,Type,Nature,LoadedPath)
+ |	load_canon(+,+,+,-)
  | 
  |	Type:
  |		0 - consult
@@ -369,7 +369,7 @@ check_existence(Path) :-
  |	consult/reconsult, abolishing things if necessary;  Then it calls 
  |	load3/4, and afterward cleans up as needed.
  *-----------------------------------------------------------------------*/
-load_canon(Path,Type,Nature) 
+load_canon(Path,Type,Nature,LoadedPath) 
 	:-
 	(filePlusExt(NoSuff,Ext,Path),
 	 	(Ext = pro ; Ext = obp)
@@ -383,7 +383,7 @@ load_canon(Path,Type,Nature)
 	RFlag1 is RFlag0 \/ Type,
 	set_reconsult_flag(RFlag1),
 	load_canon_reconsult(RFlag1,CG),
-	load3(Ext,Path,Type,Nature),
+	load3(Ext,Path,Type,Nature,LoadedPath),
 	set_reconsult_flag(RFlag0),
 	pop_clausegroup(_).
 
@@ -441,30 +441,28 @@ obpPath(Dir,File,OPath)
 	pathPlusFile(Dir,ObpFile,OPath).
 
 /*-----------------------------------------------------------------------*
- |	load3/4
- |	load3(Ext,Path,Type,Nature)
- |	load3(+,+,+,+)
+ |	load3/5
+ |	load3(Ext,Path,Type,Nature,LoadedPath)
+ |	load3(+,+,+,+,-)
  *-----------------------------------------------------------------------*/
 
-
 	%% Requested source was user; load from it:
-load3(_,user,Type,Nature) 
+load3(_,user,Type,Nature,user) 
 	:- !,
 	load_source(user,Type).
 
 	%% Requested source had an explicit obp extension; so load it:
 	%% (It has already passed an existence test above):
-load3(obp,OPath,Type,Nature) 
+load3(obp,OPath,Type,Nature,LoadedPath) 
 	:- !,
 	filePlusExt(Path,obp,OPath),
 	filePlusExt(Path,pro,SPath),
 	obp_load(OPath,Status),
-	load4_checkstatus(Status,SPath,OPath).
-
+	load4_checkstatus(Status,SPath,OPath,OPath).
 
 	%% The requested source had no extension, and the explicit path
 	%% exists, so load it as source:
-load3(no(extension),Path,Type,Nature) 
+load3(no(extension),Path,Type,Nature,Path) 
 	:-
 	exists_file(Path),
 	file_status(Path,Status),
@@ -476,49 +474,49 @@ load3(no(extension),Path,Type,Nature)
 	%% failed), the explicit path file does not exist; so add on both the
 	%% 'pro' and 'obp' extensions, and try to load from them; this is the
 	%% most common case:
-load3(no(extension),Path,Type,Nature) 
+load3(no(extension),Path,Type,Nature,LoadedPath) 
 	:- !,
 	filePlusExt(Path,pro,SPath),
 	obpPath(Path,OPath),
-	load4(SPath,OPath,Type,Nature).
+	load4(SPath,OPath,Type,Nature,LoadedPath).
 
 	%% The requested path explicity ended in a 'pro' extension, so 
 	%% directly load it:
-load3(_,Path,Type,Nature) 
+load3(_,Path,Type,Nature,Path) 
 	:-
 	load_source(Path,Type).
 	
 /*-----------------------------------------------------------------------*
- |	load4/4
- |	load4(SPath,OPath,Type,Nature)
- |	load4(+,+,+,+)
+ |	load4/5
+ |	load4(SPath,OPath,Type,Nature,LoadedPath)
+ |	load4(+,+,+,+,-)
  *-----------------------------------------------------------------------*/
 	%% We are told to load from source:
-load4(SPath,OPath,Type,source) 
+load4(SPath,OPath,Type,source,SPath) 
 	:- !,
 	load_source_object(SPath,OPath).
 
 	%% Compare file times: source file older than obp file,
 	%% so load the obp file:
-load4(SPath,OPath,Type,_) 
+load4(SPath,OPath,Type,_,OPath) 
 	:-
 	comp_file_times(SPath,OPath),	%% Succeeds if both files exist
-					%% and SPath older than OPath
+									%% and SPath older than OPath
 	!,
 	obp_load(OPath,Status),
 	load4_checkstatus(Status,SPath,OPath).
 
 	%% If source exists it is newer, so load it:
-load4(SPath,OPath,Type,_) 
+load4(SPath,OPath,Type,_,SPath) 
 	:-
 	exists_file(SPath),
-	file_status(Path,Status),
+	file_status(SPath,Status),
 	dmember(type=regular,Status),
 	!,
 	load_source_object(SPath,OPath).
 
 	%% Source doesn't exist, so load obp file:
-load4(SPath,OPath,Type,_) 
+load4(SPath,OPath,Type,_,OPath) 
 	:-
 	obp_load(OPath,Status),
 	load4_checkstatus(Status,SPath,OPath).

@@ -166,9 +166,11 @@
 #if defined(__STDC__)
 #define CONST const
 #define PARAMS(arglist) arglist
+#undef OldStrs
 #else 		/* !__STDC__ */
 #define CONST
 #define PARAMS(arglist) ()
+#define OldStrs
 #endif		/* __STDC__ */
 #endif /* PARAMS */
 

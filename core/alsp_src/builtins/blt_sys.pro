@@ -305,7 +305,6 @@ display_stats(Stream) :-
 
 :- make_hash_table('_libinfo').
 
-
 lib_load(Module,Call) 
 	:-
 	functor(Call,P,A),
@@ -313,7 +312,7 @@ lib_load(Module,Call)
 	(pdel_libinfo(_,FileName), fail ; true),
 	sys_searchdir(ALSDIR),
 	'$atom_concat'(ALSDIR,FileName,FullFileName),
-	load(FullFileName,1,_,obp),
+	load(FullFileName,1,_,obp,_),
 	!,
 	Module:call(Call).
 
@@ -346,7 +345,7 @@ force_libload_file(File,DirDC)
 	append(DirDCList,[LibHeader,File],XDirDCList),
 	subPath(XDirDCList,FileName),
 	als_advise('Loading %s\n',[FileName]),
-	(load(FileName,1,_,obp) ->
+	(load(FileName,1,_,obp,_) ->
 		(pdel_libinfo(_,File), fail ; true),
 		als_advise('...loaded\n',[])
 		;
@@ -363,6 +362,18 @@ lib_recording(LH,LT)
 lib_recording(LH,LT)
 	:-
  	assert_at_load_time(lib_path_rec(LH,LT)).
+
+export libactivate/4.
+libactivate(M,[LH|LT],PredList,ModClosures) 
+	:-
+	libhide(M,[LH|LT],PredList),
+	mc_all(ModClosures).
+	
+mc_all([]).
+mc_all([ModClose | ModClosures])
+	:-
+	call(ModClose),
+	mc_all(ModClosures).
 
 libhide(M,[LH|LT],PredList) 
 	:-

@@ -640,11 +640,14 @@ gv_number(Mod,Name,VN) :-
  * It's calculated from the als_system/1 values.
  */
 
+export sys_env/3.
+
 :-	compiletime,
 	als_system(SysVars),
 	dmember(processor=Proc,SysVars),
 	dmember(os=OS,SysVars),
-	assert(sys_env(OS,Proc)).
+	dmember(os_variation=MinorOS,SysVars),
+	assert(sys_env(OS,MinorOS,Proc)).
 
 
 
@@ -711,7 +714,7 @@ build_primitive_closures(_) :-
 	.
 
 :-	compiletime,
-    	sys_env(_,Proc),
+    	sys_env(_,_,Proc),
 	build_primitive_predicates,
 	build_primitive_closures(Proc).
 
@@ -724,7 +727,7 @@ load_builtins(File) :-
 	sys_searchdir(Path),
 	'$atom_concat'('builtins/',File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
- %%pbi_write(FileAndPath),pbi_nl,
+%%pbi_write(FileAndPath),pbi_nl,
 	'$load'(FileAndPath, 0),
 	!.
 
@@ -752,9 +755,11 @@ load_builtins(File) :-
 	load_builtins(blt_msg),
 	load_builtins(blt_brk),
 	load_builtins(xconsult),
+	load_builtins(fs_cmn),
 	load_builtins(dcgs),
 	load_builtins(blt_pckg),
 	load_builtins(blt_shl).
+
 
 %% set up the operators (stream io stuff needs to be loaded in order to
 %% 			 set up the operators)
@@ -763,20 +768,21 @@ load_builtins(File) :-
 	op(900,fy,\+).
 
 
-:-	sys_env(_,Proc),
+:-	sys_env(_,_,Proc),
     	(   (Proc = sparc ; Proc = m88k; Proc = m68k)
 	->  load_builtins(blt_is)
     	;   true
         ).
 
-:-	sys_env(OS,_),
+:-	sys_env(OS,_,_),
 	(   OS = unix -> load_builtins(fsunix)
 	;   OS = dos  -> load_builtins(fsdos386)
 	;	OS = macos -> load_builtins(fsmac)
 	;   true		%% Extend to other OS's
 	).
 
-:-	sys_env(_,Proc),
+
+:-	sys_env(_,_,Proc),
 	(   Proc = m88k
 	->  load_builtins(blt_mth88)
 	;   true

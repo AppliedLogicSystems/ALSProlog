@@ -22,7 +22,7 @@
 #include <libgen.h>
 #elif defined(HAVE_REGEX_H)
 #include <regex.h>
-#endif
+#endif					/* HAVE_LIBGEN_H */
 
 #include <errno.h>
 

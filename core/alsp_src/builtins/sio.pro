@@ -781,19 +781,23 @@ open_stream(Socket,Mode,Options,Stream) :-
 	open_socket_stream(Socket,Mode,Options,Stream).
 open_stream(string(String),Mode,Options,Stream) :-
 	!,
+	(nonvar(String),!, String = [_|_]; true),
 	open_string_stream(String,Mode,Options,Stream).
 open_stream(code_list(String),Mode,Options,Stream) :-
 	!,
+	(nonvar(String),!, String = [_|_]; true),
 	open_string_stream(String,Mode,Options,Stream).
 open_stream(char_list(String),Mode,Options,Stream) :-
 	!,
+	(nonvar(String),!, String = [_|_]; true),
 	open_char_list_stream(String,Mode,Options,Stream).
-open_stream(atom(String),Mode,Options,Stream) :-
+open_stream(atom(Atom),Mode,Options,Stream) :-
 	!,
-	open_atom_stream(String,Mode,Options,Stream).
-open_stream(window(String),Mode,Options,Stream) :-
+	(nonvar(Atom),!,atom(Atom); true),
+	open_atom_stream(Atom,Mode,Options,Stream).
+open_stream(window(WinName),Mode,Options,Stream) :-
 	!,
-	open_window_stream(String,Mode,Options,Stream).
+	open_window_stream(WinName,Mode,Options,Stream).
 
 %%
 %% This is the place to put in clauses for dealing with other types of streams

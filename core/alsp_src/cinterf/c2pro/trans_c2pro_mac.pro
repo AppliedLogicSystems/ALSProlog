@@ -39,32 +39,35 @@ setC2P(fd_stack,_A,_B) :- mangle(6,_A,_B).
 accessC2P(info_table,_A,_B) :- arg(7,_A,_B).
 setC2P(info_table,_A,_B) :- mangle(7,_A,_B).
 
-accessC2P(outFile,_A,_B) :- arg(8,_A,_B).
-setC2P(outFile,_A,_B) :- mangle(8,_A,_B).
+accessC2P(fcn_filter,_A,_B) :- arg(8,_A,_B).
+setC2P(fcn_filter,_A,_B) :- mangle(8,_A,_B).
 
-accessC2P(outStream,_A,_B) :- arg(9,_A,_B).
-setC2P(outStream,_A,_B) :- mangle(9,_A,_B).
+accessC2P(outFile,_A,_B) :- arg(9,_A,_B).
+setC2P(outFile,_A,_B) :- mangle(9,_A,_B).
+
+accessC2P(outStream,_A,_B) :- arg(10,_A,_B).
+setC2P(outStream,_A,_B) :- mangle(10,_A,_B).
 
 export makeC2P/1.
-makeC2P(_A) :- _A=..[c2p,nil,nil,nil,0,[[]],[],[],nil,nil].
+makeC2P(_A) :- _A=..[c2p,nil,nil,nil,0,[[]],[],[],all,nil,nil].
 
 export makeC2P/2.
 makeC2P(_A,_B) :-
         struct_lookup_subst(
             [inFile,inStream,curLine,curLineNum,ifdef_stack,fd_stack,
-                info_table,outFile,outStream],
-            [nil,nil,nil,0,[[]],[],[],nil,nil],_B,_C),
+                info_table,fcn_filter,outFile,outStream],
+            [nil,nil,nil,0,[[]],[],[],all,nil,nil],_B,_C),
         _A=..[c2p|_C].
 
 export xmakeC2P/2.
-xmakeC2P(c2p(_A,_B,_C,_D,_E,_F,_G,_H,_I),[_A,_B,_C,_D,_E,_F,_G,_H,_I]).
+xmakeC2P(c2p(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J),[_A,_B,_C,_D,_E,_F,_G,_H,_I,_J]).
 
 endmod.
 
 module utilities.
 typeProperties(c2p,
     [inFile,nil,inStream,nil,curLine,nil,curLineNum,0,ifdef_stack,[],
-        fd_stack,[],info_table,[],outFile,nil,outStream,nil]).
+        fd_stack,[],info_table,[],fcn_filter,all,outFile,nil,outStream,nil]).
 noteOptionValue(c2p,_A,_B,_C) :- setC2P(_A,_C,_B).
 endmod.
 /*==============================================================*
@@ -105,9 +108,6 @@ use avl.
 
 :- dynamic(cur_debug_level/1).
 cur_debug_level(1).
-
-%:-dynamic(debug/0).
-%debug.
 
 :-dynamic(silent/0).
 :-dynamic(skip_item/2).
@@ -169,6 +169,7 @@ c2pro
 	parse_options(ReducedSwitchVals, Defines, DummyState),
 		%% process the files:
 	recheck_defaults([sourcePath(_)]),
+	calc_filters,
 	c2pro(Files,Defines).
 
 	%-------------------------------------
@@ -195,10 +196,43 @@ parse_options([FirstOpt | RestOpts], Defines, State)
 	install_option(FirstOpt, Defines, RestDefines, State),
 	parse_options(RestOpts, RestDefines, State).
 
-	%-------------------------------------
-	%   install_option/4
-	%-------------------------------------
-
+/*--------------------------------------------------------------
+ |   install_option/4
+ |
+ |	Options: 
+ |	
+ |	+Debugging:
+ |	1.	Set debugging level (where Level is a number: 1 =< Level =< 9):
+ |	 		option:  -d Level
+ |	
+ |	2.	Set break at decln processing on item:
+ |			option:  -b Item  or -b [Item, ....]
+ |	
+ |	+Force definition of (C) constant:
+ |		option:  -DName[=Num]
+ |	
+ |	+Setup include paths (use either):
+ |		option:  -I Pathname
+ |		option:  -IPathname
+ |	
+ |	+Establish a source path:
+ |		option:  -srcpath Path
+ |
+ |	+Set path to a function filter spec file
+ |		option:	 -filterFile Path
+ |
+ |	+Establish function filter 
+ |		option:	 -filter FilterSpec
+ |
+ |		[ See below for description of function filters].
+ |
+ |	+Establish master name
+ |		option:	 -master Name
+ |
+ |	+Set miscellaneous flag (Flag must be an atom, not one of above):
+ |		option:  -Flag
+ |	
+ *-------------------------------------------------------------*/
 	%% set debugging level:
 	%% option:  -d Level[=Num]
 install_option(['-d',InitLevel], Defines, Defines, State)
@@ -242,17 +276,35 @@ install_option([Opt], Defines, Defines, State)
 	!,
 	addIncludePath(PathStr).
 
+	% option: -srcpath Path
 install_option(['-srcpath',Path], Defines, Defines, State)
 	:-
 	assert(sourcePath(Path)).
 
+ 	% option:	 -filterFile Path
+install_option(['-filterFile',Path], Defines, Defines, State)
+	:-
+	set_filter_file(Path).
+
+ 	% option:	 -filter Filter
+install_option(['-filter', Filter], Defines, Defines, State)
+	:-
+	set_filter_expr(Filter).
+
+install_option(['-master', MasterName], Defines, Defines, State)
+	:-
+	assert(master_name(MasterName)).
+
 install_option([Opt], Defines, Defines, State)
 	:-
-	name(Opt,[0'-|OptStr]),
+	name(Opt,[0'- | OptStr]),
 	name(Flag,OptStr),
 	output:assert(Flag).
 
-install_option(Opt, Defines, Defines, State).
+	%% Skip anything else:
+install_option(Opt, Defines, Defines, State)
+	:-
+	error('c2pro: Warning: unknown option: %t\n',[Opt],0).
 
 		%% Is -D in the form -D<Nam>=<Val>   ???
 getValueOpt([0'=|ValStr],[number(Num)])
@@ -305,9 +357,221 @@ sbis(BItms)
 	:-
 	assert(decln_break_on(BItms)).
 
-	%---------------------------------
-	% c2pro/2.
-	%---------------------------------
+/*-----------------------------------------
+ |	Function filters:
+ |
+ |	Allows the specification of interfaces consisting of subsets of 
+ |	of the full (source) library.  There are two broad types of 
+ |	specifications: basic filters and compound filters.
+ |
+ |	Basic filters:  
+ |	-------------
+ |	These are terms of one of the following forms:
+ |
+ |		all  			 -	(default) include all functions from the library;
+ |		all_except(List) -	include all functions from the library
+ |							except the members of List
+ |		List 			 - 	include just the elements of List
+ |
+ |	Here list consists of atoms naming functions, or expressions F/N,
+ |	where F is an atom naming a function. [The N is ignored; allowing
+ |	its presence is a convenience.]
+ |
+ |	Basic filters are specified by equations: 
+ |
+ |		FiltName = FiltTerm.
+ |
+ |	Here FiltName is an atom naming the filter and FiltTerm is one of
+ |	the basic filter expressions described above. Typically these occur
+ |	in specification files (see below).
+ |
+ |	Compound filters:
+ |	----------------
+ |	These are combinations of basic filters.  Abstractly,
+ |	
+ |		F1 + F2 + ... + Fn
+ |	
+ |	The result of the combination is evalutated to another basic filter.
+ |	
+ |	The rules for for evaluating these combinations are:
+ |	
+ |		all + <anything> 				= all;
+ |		all_except(L1) + all_except(L2) = all_except(L1 intersect L2);
+ |		List1 + List2 					= List1 union List2;
+ |		List1 + all_except(List2) 		= all_except(List2 diff List1).
+ |
+ |	Here 'union' is 'set union' and diff is 'set difference'.
+ |
+ |	The rationale of this approach runs as follows.  In most settings, 
+ |	the interfacing process involves several layers and files of code:
+ |
+ |		mylibxx.pro		<- a "smoothing/convenience" layer of code
+ |		mylib.pro		<- the generated immediate dispatch layer code
+ |		mylibinterf.a	<- the generated interface C code archived;
+ |		mylib.a			<- the external C code archived as a library
+ |
+ |	One needs to co-ordinate the selection of function/predicate subsets
+ |	at all levels.  The mechanism here controls the selection of functions
+ |	included in mylib.pro and mylibinterf.a, and ultimately, those selected
+ |	by the linker from mylib.a.  Since mylibxx.pro (which may really be
+ |	a collection of files) is not generated, there is no immediate control
+ |	of what is selected from it. However, a useful approach is to utilize
+ |	the preprocessor mechanism to group the elements of mylibxx.pro into
+ |	segments corresponding to the basic filters (which can be overlapping).
+ |	by using expressions
+ |
+ |	#ifdef (syscfg:BFi)
+ |	...
+ |	#endif % BFi
+ |
+ |	The -A command line switch is used to pass a compound filter which
+ |	an image is being made:
+ |
+ |	alspro -A	'BF1+BF2+...+BFn'
+ |
+ |	This causes each of the following facts to be asserted:
+ |
+ |		syscfg:BFi
+ |
+ |	This will select the appropriate units from mylibxx.pro, while the action
+ |	of the mechanism here will make the approprate selections for
+ |	mylib.pro and mylibinterf.a.
+ *-------------------------------------------*/
+set_filter_file(Path)
+	:-
+	exists_file(Path),
+	!,
+	assert(filter_file(Path)).
+
+set_filter_file(Path)
+	:-
+	error('Error: Can''t find filter file: %t\n', [Path], 0).
+
+
+set_filter_expr(FiltExpr)
+	:-
+	assert(raw_filter_expr(FiltExpr)).
+	
+
+calc_filters
+	:-
+	raw_filter_expr(FiltExprAtm),
+	abolish(raw_filter_expr,1),
+	!,
+	atomread(FiltExprAtm, FiltExpr, [attach_fullstop(true),
+									 syntax_errors(quiet)]),
+	calc_filters(FiltExpr).
+
+calc_filters.
+
+	%% Incoming is 'all':
+calc_filters(all)
+	:-!,
+	assert(fcn_filter(all)).
+
+	%% Incoming is all_except(Excl):
+calc_filters(all_except(Excl))
+	:-
+	assert(fcn_filter(all_except(Excl))).
+
+	%% Incoming is explicit list of fcns to include:
+calc_filters(FiltExpr)
+	:-
+	FiltExpr = [_|_],
+	!,
+	assert(fcn_filter(FiltExpr)).
+
+	%% Incoming is an atom or A+B:
+calc_filters(Expr)
+	:-
+	(atom(Expr); functor(Expr,+,2)),
+	!,
+	filter_file_path(Path),
+	get_filter_info(Path,BasicFilters),
+	calc_filters(Expr,BasicFilters,FinalFilter),
+	assert(fcn_filter(FinalFilter)).
+
+calc_filters(Expr)
+	:-
+	error('Error: Improper filter: %t\n', [Expr], 0),
+	!,
+	fail.
+
+:-dynamic(filter_file/1).
+
+filter_file_path(Path)
+	:-
+	filter_file(Path),
+	!.
+
+filter_file_path(Path)
+	:-
+	Path = './filters', 
+	exists_file(Path),!.
+
+filter_file_path(Path)
+	:-
+	Path = '../../syscfg',
+	exists_file(Path),!.
+
+filter_file_path(Path)
+	:-
+	error('Error: Can''t find filter file: %t\n', [Path], 0),
+	!,
+	fail.
+
+get_filter_info(Path,Filters)
+	:-
+	open(Path,read,PS,[]),
+	read_terms(PS,Filters),
+	close(PS).
+
+calc_filters(E+F,Filters,FinalFilter)
+	:-!,
+	calc_filters(E,Filters,E_Filter),
+	calc_filters(F,Filters,F_Filter),
+	filter_combine(E_Filter, F_Filter, FinalFilter).
+
+calc_filters(Expr,Filters,FinalFilter)
+	:-
+	dmember(Expr=NextFilter, Filters),
+	(NextFilter = (_ + _) ->
+		calc_filters(NextFilter,Filters,FinalFilter)
+		;
+		FinalFilter = NextFilter
+	).
+
+/*-----------------------------------------------------------------
+ |	all + <anything> 				= all;
+ |	all_except(L1) + all_except(L2) = all_except(L1 intersect L2);
+ |	List1 + List2 					= List1 union List2;
+ |	List1 + all_except(List2)		= all_except(List2 diff List1)
+ *----------------------------------------------------------------*/
+
+filter_combine(all, _, all) :-!.
+filter_combine(_, all, all) :-!.
+
+filter_combine(all_except(L1), all_except(L2),all_except(L3))
+	:-!,
+	intersect(L1, L2, L3).
+
+filter_combine(all_except(L1), L2, Result)
+	:-!,
+	filter_combine(L2, all_except(L1), Result).
+
+filter_combine(L1, all_except(L2), all_except(L2, L3))
+	:-!,
+	list_diff(L2, L1, L3).
+
+filter_combine(L1, L2, L3)
+	:-
+	union(L1, L2, L3).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%
+	%% 		c2pro/2.
+	%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 c2pro([],_)
 	:- !.
@@ -315,11 +579,13 @@ c2pro([],_)
 c2pro([FirstFile | Rest], Defines) 
 	:-
 	sourcePath(SrcPath),
-	input_file_setup(FirstFile, SrcPath, InName, BaseName),
+	setup_the_input_file(FirstFile, SrcPath, InName, BaseName),
 	outSuffix(OS),
 	filePlusExt(BaseName,OS,OutName),
 
 	init_state(InName, OutName, State),
+	fcn_filter(FcnFilter),
+	setC2P(fcn_filter, State, FcnFilter),
 	do_c2pro(InName, State, Defines),
 	!,
 	c2pro(Rest, Defines).
@@ -331,6 +597,25 @@ c2pro([_ | Rest], Defines)
 	%---------------------------------
 	%  input_file_setup/3
 	%---------------------------------
+
+setup_the_input_file(FirstFile, SrcPath, InName, BaseName)
+	:-
+	input_file_setup(FirstFile, SrcPath, InName, BaseName),
+	exists_file(InName),
+	!.
+setup_the_input_file(FirstFile, SrcPath, InName, BaseName)
+	:-
+	master_name(MasterName),
+	inSuffix(IS), 
+	filePlusExt(MasterName,IS,FileExt),
+	pathPlusFile(SrcPath,FileExt,InName),
+	exists_file(InName),
+	!,
+	BaseName = FirstFile.
+
+setup_the_input_file(FirstFile, SrcPath, InName, BaseName)
+	:-
+	error('Can''t find source file: %t -- skipping\n',[FirstFile], 0).
 
 input_file_setup(File, SrcPath, InName, BaseName)
 	:-
@@ -3001,11 +3286,13 @@ process_decln(DSpec,Declts,State) :-
 	check_tagged_structdef(DSpec,InTable,OutTable),
 	setC2P(info_table, State, OutTable),
 	process_typedef_declts(Declts,DSpec,State).
+
 process_decln(DSpec,Declts,State) :-
 	accessC2P(info_table, State, InTable),
 	check_tagged_structdef(DSpec,InTable,OutTable),
 	setC2P(info_table, State, OutTable),
-	process_declts(Declts,DSpec,State).
+	accessC2P(fcn_filter, State, FcnFilter),
+	process_declts(Declts,DSpec,FcnFilter,State).
 
 check_tagged_structdef(DSpec,InTab,OutTab) :-
 	is_tagged_structdef(DSpec),
@@ -3024,29 +3311,87 @@ process_typedef_declts([Declt|Rest],DSpec,State) :-
 	output_type(Name,DSpec,Declt,State),
 	process_typedef_declts(Rest,DSpec,State).
 
-%
+%---------------
 
-process_declts( [] ,DSpec,State).
+process_declts( [] ,DSpec,_,State).
 
-process_declts( [ Declt | Rest ] ,DSpec,State) 
+		%% debugging:
+process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
+	:-
+%	printf('process_decl: %t \n',[Declt]),
+	fail.
+
+process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
+	:-
+	Declt = func(paren(ptr([],func(ident(_),[]))),[]),
+	!,
+	process_declts(Rest,DSpec,FcnFilter,State).
+
+process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
+	:-
+	Declt = func(ident(FID),[]),
+	not(member(FID, ['XCreateRegion','XrmInitialize',
+				 'XrmUniqueQuark','XUniqueContext' ]) ), 
+	!,
+	process_declts(Rest,DSpec,FcnFilter,State).
+
+process_declts( [ func(ident(FID),Params) | Rest ] ,DSpec,FcnFilter,State) 
+	:-
+%printf('process fcn decl: %t -- filter = %t\n',[FID,FcnFilter]),
+	!,
+			%% This handles the recursive call to process_declts:
+	process_fcn_decl(FcnFilter,func(ident(FID),Params),Rest,DSpec,State).
+
+
+process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
 	:-
 	(Declt = ptr([],func(ident(_),[]));
-	  Declt = func(paren(ptr([],func(ident(_),[]))),[]);
-	   (Declt = func(ident(FID),[]),
-		not(member(FID, ['XCreateRegion','XrmInitialize',
-				 'XrmUniqueQuark','XUniqueContext' ]) ) 
-	    ) ;
 	    Declt = ptr([],ptr([],func(ident(_),[])))
 	),
-%pbi_write(skip_this(Declt)),pbi_nl,pbi_ttyflush,
 	!,
-	process_declts(Rest,DSpec,State).
+	process_declts(Rest,DSpec,FcnFilter,State).
 
-process_declts( [ Declt | Rest ] ,DSpec,State) 
+process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
 	:-
 	output_func_gvar(DSpec,Declt,State),
-	process_declts(Rest,DSpec,State).
+	process_declts(Rest,DSpec,FcnFilter,State).
 
+process_fcn_decl(all,FDeclt,Rest,DSpec,State)
+	:-!,
+	output_func_gvar(DSpec, FDeclt, State),
+	process_declts(Rest,DSpec,FcnFilter,State).
+
+process_fcn_decl(all_except(Excl),FDeclt,Rest,DSpec,State)
+	:-!,
+	FDeclt = func(ident(FID),Params), 
+	(dmember(FID, Excl) ->
+		true
+		;
+		(dmember(FID/_, Excl) ->
+			true
+			;
+			output_func_gvar(DSpec, FDeclt, State)
+		)
+	),
+	process_declts(Rest,DSpec,FcnFilter,State).
+
+process_fcn_decl(List,FDeclt,Rest,DSpec,State)
+	:-
+	FDeclt = func(ident(FID),Params), 
+	(dmember(FID, List) ->
+		output_func_gvar(DSpec, FDeclt, State)
+		;
+		(dmember(FID/_, List) ->
+			output_func_gvar(DSpec, FDeclt, State)
+			;
+			true
+		)
+	),
+	process_declts(Rest,DSpec,FcnFilter,State).
+
+process_fcn_decl(FcnFilter,_,Rest,DSpec,State)
+	:-
+	process_declts(Rest,DSpec,FcnFilter,State).
 
 %
 %	adeclt_to_str/2

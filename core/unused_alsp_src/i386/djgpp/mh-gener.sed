@@ -16,7 +16,7 @@ s/^	.\//	go32 /
 s/pi_cfg\.h\.proto/pi_cfg/
 
 /-o prebldtok/ a\
-	go32 prebldtok > prebldtok.out
+	go32 prebldtok > prebldtok.out/
 s/`.\/prebldtok`/@prebldtok.out/
 s/`date`/YY\/MM\/DD/g
 s/echo >>/echo. >>/

@@ -15,6 +15,7 @@ defStruct(p2i,
 		inFile/nil,	%% current input file being processed
 		inStream/nil,	%% stream from input file
 		baseName/nil,	%% base file name (no ext)
+		hincs/[],		%% list of h files to be included (no .h ext)
 
 		fPrefix/nil,	%% prefix for gen.preds corresp. to fcns.
 		dPred/nil,	%% dup. elim/gen pred.

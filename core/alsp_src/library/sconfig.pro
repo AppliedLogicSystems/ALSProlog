@@ -45,7 +45,7 @@ general_os(Arch, String, OS, unix)
 general_os(Arch, String, OS, unix) 
 	:-
 	sub_atom(String,1,5,OS), 
-	dmember(OS,[dynix,linux,sunos]), 
+	dmember(OS,[dynix,linux,sunos,djgpp]), 
 	!.
 
 	%%

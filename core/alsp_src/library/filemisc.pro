@@ -54,6 +54,27 @@ output_nl(mac, TgtS)
 	:-
 	put_code(TgtS, 13).
 
+write_lines(List)
+	:-
+	sio:get_current_output_stream(TgtStream),
+	write_lines(TgtStream, List).
+
+write_lines(TgtStream, List)
+	:-
+	builtins:sys_env(OS,_,_),
+	write_lines_nl(List, TgtStream, OS,[]).
+
+write_lines_opt(List, Opts)
+	:-
+	sio:get_current_output_stream(TgtStream),
+	builtins:sys_env(OS,_,_),
+	write_lines_nl(List, TgtStream, OS, Opts).
+
+write_lines_opt(TgtStream, List, Opts)
+	:-
+	builtins:sys_env(OS,_,_),
+	write_lines_nl(List, TgtStream, OS, Opts).
+
 write_lines_nl(Lines, TgtS, NL_type)
 	:-
 	write_lines_nl(Lines, TgtS, NL_type, []).
@@ -65,6 +86,44 @@ write_lines_nl([Line | Lines], TgtS, NL_type, Options)
 	write_term(TgtS, Line, Options),
 	output_nl(NL_type, TgtS),
 	write_lines_nl(Lines, TgtS, NL_type, Options).
+
+export write_clause/1.
+export write_clause/2.
+export write_clause/3.
+export write_clauses/1.
+export write_clauses/2.
+export write_clauses/3.
+
+write_clause(Clause) :-
+	sio:get_current_output_stream(Stream),
+	write_clause(Stream, Clause).
+
+write_clause(Stream, Clause) :-
+	write_clause(Stream, Clause, []).
+
+write_clause(Stream, Clause, Options) :-
+	write_term(Stream,Clause, Options),
+	put_code(Stream, 0'.),
+	nl(Stream).
+
+write_clauses(Clauses) :-
+	sio:get_current_output_stream(Stream),
+	write_clauses(Stream,Clauses).
+
+write_clauses(Stream, Clauses) :-
+	write_clauses(Stream,Clauses,[]).
+
+write_clauses(Stream, Clauses, Options) :-
+	write_clauses0(Clauses, Stream, Options).
+
+write_clauses0([], Stream, Options).
+write_clauses0([nl | Clauses], Stream, Options) :-
+	!,
+    	nl(Stream),
+    	write_clauses0(Clauses, Stream, Options).
+write_clauses0([Clause | Clauses], Stream, Options) :-
+	write_clause(Stream, Clause, Options),
+	write_clauses0(Clauses, Stream, Options).
 
 export install_file_links/2.
 install_file_links(LinkDir, SrcDir)

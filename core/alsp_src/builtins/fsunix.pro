@@ -16,14 +16,14 @@
 module builtins.
 
 export date/1.
-export date_less/2.
-export date_pattern/4.
-export set_date_pattern/1.
-export valid_date/1.
-export valid_date/3.
+%export date_less/2.
+%export date_pattern/4.
+%export set_date_pattern/1.
+%export valid_date/1.
+%export valid_date/3.
 export time/1.
-export time_less/2.
-export datetime_less/2.
+%export time_less/2.
+%export datetime_less/2.
 
 export get_cwd/1.
 export change_cwd/1.
@@ -39,7 +39,7 @@ export subdirs/1.
 export subdirs_red/1.
 export collect_files/3.
 export directory/3.
-export canon_path/2.
+%export canon_path/2.
 
 export get_current_drive/1.
 export change_current_drive/1.
@@ -61,6 +61,7 @@ date(Date)
 	MM is Month + 1,
 	date_pattern(YY,MM,DD,Date).
 
+%/*******************************
 /*!--------------------------------------------------------------
  |	date_less/2
  |	date_less(Date0, Date1)
@@ -144,6 +145,7 @@ end_of_month(30,MM,YY)
 end_of_month(31,MM,YY)
 	:-
 	dmember(MM, [1,3,5,7,8,10,12]).
+%*************************/
 
 /*!--------------------------------------------------------------
  |	time/1
@@ -159,6 +161,7 @@ time(HH:MM:SS)
 	:-
 	'$time'(SS,MM,HH,_,_,_,_,_,_).
 
+%/*******************************
 /*!--------------------------------------------------------------
  |	time_less/2
  |	time_less(Time0, Time1)
@@ -190,6 +193,7 @@ datetime_less((Date0,Time0), (Date1,Time1))
 	:-
 	date_less(Date0, Date1),!;
 		Date0 = Date1, time_less(Time0, Time1).
+%*************************/
 
 /*!--------------------------------------------------------------
  |	change_cwd/1
@@ -247,6 +251,13 @@ get_cwd(Path)
  |		 [read,write],
  |		 [execute]  ]
  *!--------------------------------------------------------------*/
+	%% This may go away later:
+make_subdir(NewDir)
+	:-
+	sys_env(unix,djgpp,_),
+	!,
+	mkdir(NewDir).
+
 make_subdir(NewDir)
 	:-
 			%%[rwx,rwx,rwx]
@@ -323,7 +334,8 @@ remove_subdir(SubDir)
  *!--------------------------------------------------------------*/
 remove_file(FileName)
 	:-
-	prolog_system_error(nyi, ['remove_file/1',unix]).
+%	prolog_system_error(nyi, ['remove_file/1',unix]).
+	unlink(FileName).
 
 /*!----------------------------------------------------------------
  |	files/2
@@ -362,9 +374,6 @@ files(Directory, Pattern, List)
 	fixFileType(regular, InternalFileType),
 	filterForFileType(FirstResult, Disk, PathList, InternalFileType, List).
 
-%	name(Directory, DirCs),
-%	filterForFileType(FirstResult, DirCs, 4, List).
-%	fixFileType(FileType, InternalFileType),
 /*!----------------------------------------------------------------
  |	subdirs/1
  |	subdirs(SubdirList)
@@ -493,8 +502,10 @@ file_status(FileName, Status) :-
  *!------------------------------------------------------------------*/
 
 	% If no pattern has been give, assume a complete wildcard is wanted:
-directory(Var,FileType,List) :- 
-	var(Var),!,
+directory(Var,FileType,List) 
+	:- 
+	var(Var),
+	!,
 	directory('*',FileType,List).
 
 directory([ Pattern1 | Patterns ], FileType, List) 
@@ -520,6 +531,7 @@ directory(Pattern, FileType, List)
 	(InitPath = '' -> Path = '.' ; Path = InitPath),
 
 	'$getDirEntries'(Path, Regex, FirstResult),
+
 	!,
 	fixFileType(FileType, InternalFileType),
 	filterForFileType(FirstResult, Disk, PathList, InternalFileType, List).
@@ -546,14 +558,7 @@ fixFileType(FileType, InternalFileType)
 filterForFileType([], _, _, _, []).
 filterForFileType([FileName | Files], Disk, PathList, FileType, List)
 	:-
-	rootPathFile(Disk, PathList, FileName, FullFile),
-	'$getFileStatus'(FullFile, StatusTerm),
-	!,
-	arg(1, StatusTerm, ThisFileType),
-	((ThisFileType = FileType ; dmember(ThisFileType, FileType)) ->
-		List = [FileName | ListTail];
-		List = ListTail
-	),
+	filter_file(FileName, Disk, PathList, FileType, List, ListTail),
 	filterForFileType(Files, Disk, PathList, FileType, ListTail).
 
 	%% Need this error case since '$getFileStatus'/2 can fail when given
@@ -561,6 +566,30 @@ filterForFileType([FileName | Files], Disk, PathList, FileType, List)
 filterForFileType([FileName | Files], Disk, PathList, FileType, List)
 	:-
 	filterForFileType(Files, Disk, PathList, FileType, List).
+
+filter_file(FileName, Disk, PathList, FileType, [FileName | ListTail], ListTail)
+	:-
+	rootPathFile(Disk, PathList, FileName, FullFile),
+	'$getFileStatus'(FullFile, StatusTerm),
+	arg(1, StatusTerm, ThisFileType),
+	fflt_ck(ThisFileType, FileType, FullFile),
+	!.
+filter_file(FileName, Disk, PathList, FileType, List, List).
+
+fflt_ck(FileType, FileType, FullFile) :-!.
+fflt_ck(ThisFileType, FileType, FullFile)
+	:-
+	dmember(ThisFileType, FileType),
+	!.
+	%% Incoming file is a symbolic link; dereference and try again:
+fflt_ck(ThisFileType, FileType, FullFile)
+	:-
+	fileTypeCode(ThisFileType, symbolic_link),
+	read_link(FullFile, LinkTarget),
+	'$getFileStatus'(LinkTarget, LinkStatusTerm),
+	arg(1, LinkStatusTerm, LinkFileType),
+	fflt_ck(LinkFileType, FileType, FullFile).
+
 
 export disj_to_string/2.
 disj_to_string((Pattern1 ; Pattern2), PatternChars)
@@ -587,6 +616,7 @@ make_reg_exp([C | RestPattern],[C | RestRegex])
 	:-
 	make_reg_exp(RestPattern,RestRegex).
 
+%/*************************
 /*!--------------------------------------------------------------
  |	canon_path/2
  |	canon_path(SrcPath,CanonPath)
@@ -616,101 +646,12 @@ canon_path(SrcPath,CanonPath)
 	change_cwd(WeAreHere).
 
 
-
-
-/*
-	rootPathFile(Disk,SubDirList,EndPathFile,SrcPath),
-	append(SubDirList,[EndPathFile],FullList),
-	can_path(FullList,Disk,File,CanonPath).
-
-%% Take care of some immediate special cases:
-	
-	%% Direct ref to a file in cur. dir.
-can_path([],'',File,CanonPath)
-	:-!,
-	get_cwd(LocalPath),
-	pathPlusFile(LocalPath,File,CanonPath).
-
-	%% Almost direct ref to a file in cur. dir., via './'
-can_path(['.'],'',File,CanonPath)
-	:-!,
-	get_cwd(LocalPath),
-	pathPlusFile(LocalPath,File,CanonPath).
-
-	%% Almost direct ref to a file in parent dir., via '../'
-can_path(['..'],'',File,CanonPath)
-	:-!,
-	get_cwd(LocalPath),
-	subPath(PathList,LocalPath),
-	strip_last(PathList,ParPathList),
-	subPath(ParPathList,ParPath),
-	pathPlusFile(ParPath,File,CanonPath).
-
-%% The general case:
-
-can_path(SubDirList,Disk,File,CanonPath)
-	:-
-	follow_path(SubDirList,Disk,RealSubDirList),
-	rootPathFile(Disk,RealSubDirList,File,CanonPath).
-
-follow_path([],Disk,[]) :-!.
-follow_path(SubDirList,Disk,RealSubDirList)
-	:-
-	follow_path(SubDirList,Disk,[],RealSubDirList).
-
-follow_path([],Disk,RealSubDirList,RealSubDirList).
-follow_path(['' | SubDirList],Disk,[],RealSubDirList)
-	:-
-	follow_path(SubDirList,Disk,[''],RealSubDirList).
-
-follow_path(['.' | SubDirList],Disk,InitRealSubDirList,RealSubDirList)
-	:-!,
-	follow_path(SubDirList,Disk,InitRealSubDirList,RealSubDirList).
-
-follow_path(['..' | SubDirList],Disk,InitRealSubDirList,RealSubDirList)
-	:-
-	rootPathFile(Disk,InitRealSubDirList,'..',NextPath),
-	get_cwd(WeAreHere),
-	change_cwd(NextPath),
-	get_cwd(RealLinkPath),
-	change_cwd(WeAreHere),
-	subPath(NextInitList, RealLinkPath),
-	follow_path(SubDirList,Disk,NextInitList,RealSubDirList).
-
-follow_path([SD | SubDirList],Disk,InitRealSubDirList,RealSubDirList)
-	:-
-	rootPathFile(Disk,InitRealSubDirList,SD,NextPath),
-	file_status(NextPath, Status),
-	dmember(type=Type,Status),
-	follow_on_path(Type,NextPath,InitRealSubDirList,SD,SubDirList,Disk,RealSubDirList).
-
-follow_on_path(directory,NextPath,InitRealSubDirList,SD,SubDirList,Disk,RealSubDirList)
-	:-!,
-	append(InitRealSubDirList,[SD], NextPathList),
-	follow_path(SubDirList,Disk,NextPathList,RealSubDirList).
-
-follow_on_path(symbolic_link,NextPath,InitRealSubDirList,SD,SubDirList,Disk,RealSubDirList)
-	:-!,
-	read_link(NextPath,LinkPath),
-			%% It is a link; switch there, get real path, & return:
-			%% [This is a dirty "?optimization?"]:
-	get_cwd(WeAreHere),
-	change_cwd(LinkPath),
-	get_cwd(RealLinkPath),
-	change_cwd(WeAreHere),
-	subPath(NextInitList, RealLinkPath),
-	follow_path(SubDirList,Disk,NextInitList,RealSubDirList).
-
-follow_on_path(regular,NextPath,InitRealSubDirList,SD,[],Disk,RealSubDirList)
-	:-
-	append(InitRealSubDirList, [SD], RealSubDirList).
-*/
-
 strip_last([_],[]) :-!.
 strip_last([H | PathList], [H | ParPathList])
 	:-
 	strip_last(PathList, ParPathList).
 
+%*************************/
 
 
 

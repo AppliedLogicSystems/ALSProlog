@@ -60,7 +60,7 @@ identify_case(dos).
 
 :- 
 	compiletime,
-	sys_env(OS,_),
+	sys_env(OS,_,_),
 	( OS = dos, !,		%% DOS
 		addclause(builtins,file_separator('.')),
 		addclause(builtins,directory_separator('\\')),
@@ -358,7 +358,7 @@ same_path([], []).
 same_path([Node1 | RestPath1], [Node2 | RestPath2]) :-
 	(Node1 = Node2 ;
 			%% Must make case identif. conditional on the os:
-		builtins:sys_env(OS,_),
+		builtins:sys_env(OS,_,_),
 		identify_case(OS),
 		same_uc(Node1, Node2) ),
 	!,
@@ -383,7 +383,7 @@ same_disk(Disk, Disk) :-
 	!.
 same_disk(Disk1, Disk2) :-
 		%% Must make case identif. conditional on the os:
-	builtins:sys_env(OS,_),
+	builtins:sys_env(OS,_,_),
 	identify_case(OS),
 	same_uc(Disk1, Disk2).
 

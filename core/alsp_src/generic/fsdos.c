@@ -71,7 +71,7 @@ getDirEntries()
 
     for (dirEntry = readdir(dirp); dirEntry != NULL; dirEntry = readdir(dirp)) {
 #ifdef HAVE_REGCMP
-	if ((regexVal = re_exec(dirEntry->d_name)) == 1) {
+	if ((regexVal = regexec(dirEntry->d_name)) == 1) {
 #else
 	if ((regexVal = re_exec(dirEntry->d_name)) == 1) {
 #endif

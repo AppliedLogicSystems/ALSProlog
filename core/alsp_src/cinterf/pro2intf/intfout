@@ -27,7 +27,7 @@ openInputFile(State, InStream) :-
 	debug("Reading from file %t ...",[InFile]).
 
 closeInputFile(State) 
-	:- 
+	:-
 	accessP2I(inStream, State, InStream),
 	close(InStream),
 	accessP2I(inFile, State, InFile),
@@ -61,7 +61,15 @@ openOutputFile(OutStream,State)
 			),
 	printf(OutStream,'#include "alspi.h"\n',[]),
 	printf(OutStream,'#include "cinterf.h"\n',[]),
-	printf(OutStream,'#include "%t.h"\n\n',[BaseName]).
+	accessP2I(hincs,State,Hincs),
+	print_incs(Hincs,OutStream),
+	nl(OutStream).
+
+print_incs([],OutStream).
+print_incs([HFile | Hincs],OutStream)
+	:-
+	printf(OutStream,'#include "%t.h"\n\n',[HFile]),
+	print_incs(Hincs,OutStream).
 
 switchOutputFile(State)
 	:-
@@ -111,7 +119,7 @@ write_const_header(OutStream, State) :-
 	accessP2I(baseName, State, BaseName),
 	accessP2I(curONum, State, Count),
 	accessP2I(initFcns, State, OldInitFcns),
-	printf(OutStream,'%t%t_init()\n{\n',[BaseName,Count]).
+	printf(OutStream,'%t%t_init()\n{\n',[BaseName,Count]),
 	catenate([BaseName,Count,'_init'],InitFcn),
 	append(OldInitFcns, [InitFcn], NewInitFcns),
 	setP2I(initFcns, State, NewInitFcns).

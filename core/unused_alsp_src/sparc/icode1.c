@@ -1776,6 +1776,7 @@ icode(iidx, w, x, y, z)
     static int proc_id, proc_arity;
     static int firstargkey;
 
+
     if (makeobp)
 	f_icode(iidx,w,x,y,z);
     
