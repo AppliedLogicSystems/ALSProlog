@@ -1,0 +1,110 @@
+# Makefile.vc
+#
+# This makefile builds Tktable.dll, a table widget as a dynamically
+# loadable Tk extension.  This makefile is suitable for use with
+# Microsoft Visual C++ 4.0.
+# TkTable requires access to the Tcl/Tk sources to build on Windows
+# because of a few internal items that are in Tk
+# It is also necessary to build tkTabletcl.h on a system with 'sed'
+# (UNIX or an MKS Tools enabled Windows system)
+#
+
+PROJECT	= Tktable
+TBL_VERSION = 1.80
+
+#
+# Project directories -- these may need to be customized for your site
+#
+# ROOT --	location of the example files.
+# TMPDIR --	location for .obj files.
+# TOOLS32 --	location of VC++ compiler installation.
+# TCL --	location where Tcl is installed.
+#
+
+ROOT		= .
+TMPDIR		= .
+TOOLS32		= c:\msdev
+
+# Set your version of Tcl
+# Set SRC_DIR to point to a directory that has Tcl/Tk SOURCES
+
+SRC_DIR		= C:\jhobbs\src
+#SRC_DIR		= E:\project\tools\src\tcl
+TCL_VERSION	= 7.6
+TK_VERSION	= 4.2
+TCL_LIB_V	= 76
+TK_LIB_V	= 42
+#TCL_VERSION	= 8.0b1
+#TK_VERSION	= 8.0b1
+#TCL_LIB_V	= 80
+#TK_LIB_V	= 80
+
+TCL_DIR		= $(SRC_DIR)\tcl$(TCL_VERSION)
+TK_DIR		= $(SRC_DIR)\tk$(TK_VERSION)
+
+WISH		= $(TK_DIR)\win\wish
+
+# comment the following line to compile with symbols
+NODEBUG=1
+
+#
+# Visual C++ tools
+#
+
+PATH=$(TOOLS32)\bin;$(PATH)
+
+cc32	= $(TOOLS32)\bin\cl -I$(TOOLS32)\include
+CP      = copy
+RM      = del
+
+INCLUDES = -I$(TOOLS32)\include -I"$(TCL_DIR)\generic" \
+	-I"$(TK_DIR)\generic" -I"$(TK_DIR)\win" -I"$(TK_DIR)\xlib"
+DEFINES = -nologo $(DEBUGDEFINES) -DTBL_VERSION=\"$(TBL_VERSION)\"
+LIBS	= $(TCL_DIR)\win\tcl$(TCL_LIB_V).lib $(TK_DIR)\win\tk$(TK_LIB_V).lib
+
+!include <ntwin32.mak>
+
+# 
+# Global makefile settings
+#
+
+DLLOBJS = $(TMPDIR)\$(PROJECT).obj
+
+# Targets
+
+all: pkgIndex.tcl
+
+test: pkgIndex.tcl
+	@"$(WISH)" <<
+		lappend auto_path $(ROOT)
+		package require $(PROJECT)
+		if ![catch {$(PROJECT)}] {
+		    puts "Test passed."
+		    exit 0
+		} else {
+		    puts "$(PROJECT) failed to load and run"
+		    exit 1
+		}
+<<
+
+pkgIndex.tcl: $(PROJECT).dll
+	"$(WISH)" <<
+		pkg_mkIndex $(ROOT) $(PROJECT).dll
+<<
+
+$(PROJECT).dll: $(DLLOBJS)
+	$(link) $(linkdebug) $(dlllflags) $(LIBS) \
+		$(guilibsdll) -out:$(PROJECT).dll $(DLLOBJS)
+
+# Implicit Targets
+
+.c.obj:
+	$(cc32) $(cdebug) $(cflags) $(cvarsdll) $(INCLUDES) \
+		$(DEFINES) -Fo$(TMPDIR)\ $<
+
+clean:
+	-$(RM) $(TMPDIR)\*.obj
+	-$(RM) $(PROJECT).dll
+	-$(RM) $(PROJECT).lib
+	-$(RM) $(PROJECT).exp
+	-$(RM) pkgIndex.tcl

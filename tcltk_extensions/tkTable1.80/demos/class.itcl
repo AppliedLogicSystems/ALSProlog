@@ -1,0 +1,61 @@
+#!/bin/sh
+# the next line restarts using [incr Tcl] extended wish \
+	exec itkwish "$0" ${1+"$@"}
+
+## namespace.itcl
+##
+## This demo shows the use of the table widget for [incr Tcl] namespaces.
+## The demo is pretty lame, but it just shows that the table works in
+## namespaces.
+##
+## jeff.hobbs@acm.org
+
+set LIBRARY Tktable[info sharedlibext]
+
+## Ensure that the table library extension is loaded
+if {[string match {} [info commands table]] && \
+	[catch {package require Tktable} err]} {
+    if {[catch {load [file join [pwd] .. $LIBRARY]} err] && \
+	    [catch {load [file join [pwd] $LIBRARY]} err]} {
+	error $err
+    }
+}
+
+## Make sure that we have everything loaded
+## I need this to ease testing in TkCon.
+load {} Itk
+
+if 1 {
+
+    ## Example use of Spreadsheet class
+
+    source [file join [file dir [info script]] spreadsheet.itk]
+
+    spreadsheet .s -rows 7 -cols 8
+    pack .s -fill both -exp 1
+
+    puts "To see data: .s print"
+
+} else {
+
+    ## This is a simple use of namespace state variables.  Not very effective
+    ## in practice, but just for example...
+
+    namespace tbl {
+	private variable state
+
+	proc create {name args} {
+	    global state
+	    ## Obviously, all these tables share the same variable...
+	    table $name -variable [scope state]
+
+	    eval $name configure $args
+	}
+    }
+
+    tbl::create .t -rows $table(rows) -cols $table(cols) -flashmode on \
+	    -titlerows 1 -titlecols 1 -width 5 -height 4
+    pack .t -fill both -expand 1
+    puts "To see state, eval: namespace tbl { parray state }"
+
+}
