@@ -250,13 +250,12 @@ alsdev(Shared, ALS_IDE_Mgr)
     sio:set_alias(warning_output, OSS),
 
 	sio:reset_user(ISS,OSS),
-
 	set_prolog_flag(windows_system, tcltk),
-%	set_consult_messages(false),
-	alsdev:check_alsdev_flags,
 
 		%% For ALS IDE Project system:
 	alsdev:setup_ide_project_globals(ALS_IDE_Mgr),
+
+	alsdev:check_alsdev_flags,
 
 	retract(save_clinfo(CLInfo)),
 	ss_load_dot_alspro(CLInfo),
@@ -693,7 +692,7 @@ set_flags_values([[Flag,_,Val] | FlagsList])
 check_alsdev_flags
 	:-
 	current_prolog_flag(debug, DebugFlag),
-		switch_debugging_setup(DebugFlag).
+	switch_debugging_setup(DebugFlag).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			EDIT (FILE) WINDOWS					%%%%%
@@ -830,7 +829,6 @@ clear_workspace
 	clear_each_module(UserMods),
 	close_down_nonsystem_streams,
 	destroy_all_tcl_interpreters,
-%pbi_write(tcl_interpreters_killed),pbi_nl,pbi_flush_output,
 	listener_prompt.
 
 clear_each_module([]).
