@@ -299,7 +299,8 @@ export_from(Mod, PredAs)
 	:-
 	'$icode'(-10,Mod,0,0,0),
 	doexport(PredAs),
-	'$icode'(-11,0,0,0,0).
+%	'$icode'(-11,0,0,0,0).
+	'$icode'(-9,0,0,0,0).
 
 /*----------------------------------------------------------------------*
  | Set use declarations in a module
