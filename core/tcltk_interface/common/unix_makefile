@@ -1,0 +1,33 @@
+# Generic Unix makefile for ALS Prolog Tcl Plugin
+# To use, the following symbols must be defined:
+#    LINK - linker directives to create shared library
+
+#SRCDIR = /apache/choupt/alsp_src
+SRCDIR = /apache/alsp_src
+
+VPATH = ../common:$(SRCDIR)/generic
+
+CC = gcc
+
+CPPFLAGS = -I $(SRCDIR)/generic -I /usr/include/X11R5
+
+CFLAGS = -Wall -MD -fPIC
+
+source = alspi_slib.c new_alspi.c tcl_interface.c
+
+objects = $(source:.c=.o)
+
+
+tclintf.psl: $(objects)
+	$(CC) $(LINK) -L/usr/local/lib $(objects) \
+		-ltcl8.0 -ltk8.0 -lX11 -lm -lc -o tclintf.psl
+	
+$(objects) : makefile unix_makefile
+
+-include *.d
+
+clean :
+	rm -f $(objects) *.d
+
+superclean: clean
+	rm -f tclintf.psl
