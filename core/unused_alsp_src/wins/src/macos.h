@@ -40,3 +40,5 @@ void macos2_init(void);
 void macos3_init(void);
 void macos4_init(void);
 void macos_init(void);
+
+#define GetTrapVector(x) (0)
