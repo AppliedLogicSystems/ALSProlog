@@ -84,6 +84,12 @@ proc vTclWindow.debugwin {base} {
         -padx 2 -text stack \
 		-command { set DebugResponse Bt }
 
+    button $base.buttons.interrupt \
+        -font {lucida 10 bold} \
+        -foreground $proenv(interrupt_button,foreground) \
+		-padx 11 -pady 0 -text Interrupt \
+        -command interrupt_action
+
     frame $base.debug_status \
         -borderwidth 1 -relief sunken 
     label $base.debug_status.port_label \
@@ -138,6 +144,8 @@ proc vTclWindow.debugwin {base} {
         -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.stack_trace \
         -anchor center -expand 0 -fill none -side left 
+    pack $base.buttons.interrupt \
+        -anchor center -expand 0 -fill none -side right 
 
     pack $base.debug_status \
         -anchor center -expand 0 -fill x -side top 
@@ -159,6 +167,8 @@ proc vTclWindow.debugwin {base} {
 
 	bind .debugwin <Unmap> {unmap_alsdev_debug}
 	bind .debugwin <Map>   {map_alsdev_debug}
+	bind .debugwin.text <KeyPress> {bell; .debugwin.text delete {insert-1 chars} insert}
+	bindtags .debugwin.text {Text .debugwin.text .debugwin all}
 
 	# accelerators
 	bind_accelerators .debugwin $mod debugwin
