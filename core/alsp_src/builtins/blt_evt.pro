@@ -60,6 +60,8 @@ add_event(EventId,Module,Proc)
  *-----------------------------------------------------------*/
 
 global_handler(EventId,Goal) :-
+
+%pbi_write(global_handler(EventId,Goal)),pbi_nl,pbi_ttyflush,
 	global_handler(EventId,Module,Proc),
 	!,
 	call_handler(EventId,Goal,global_context,Module,Proc).
@@ -102,6 +104,7 @@ call_handler(Event,Goal,Context,Module,Proc)
 
 signal_handler(SigNum,Module,Goal) 
 	:-
+%pbi_write(signal_handler(SigNum,Module,Goal)),pbi_nl,pbi_ttyflush,
 	signal_name(SigNum,SigName),
 	!,
 	get_context(Context),
@@ -151,7 +154,10 @@ trap(Module,Goal,Handler)
 	get_context(OldContext),
 	catch(	trap(Module,Goal,Handler,OldContext),
 		Anything,
-		(set_context(OldContext),throw(Anything))).
+		(
+pbi_write(trap_catch(Module,Goal,Handler)),pbi_nl,pbi_ttyflush,
+			set_context(OldContext),throw(Anything)
+		)).
 
 trap(Module,Goal,Handler,OldContext) 
 	:-
@@ -207,6 +213,7 @@ decompose_handler(P,M,M,P).
 
 default_cntrl_c_handler(_,M:G,_) 
 	:-
+%pbi_write(default_cntrl_c_handler),pbi_nl,pbi_ttyflush,
 	breakhandler(M,G).
 
 silent_abort(_,_,_) :-

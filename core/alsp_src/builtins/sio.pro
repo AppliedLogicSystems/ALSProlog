@@ -979,6 +979,8 @@ open_null_stream(Source_sink,Mode,Options,Stream)
 open_null_stream(Source_sink,Mode,Options,Stream) :-
 	permission_error(open,source_sink,Source_sink,2).
 
+
+
 		/*---------*
 		 |   FILES |
 		 *---------*/
@@ -1032,7 +1034,8 @@ default_snr(tk_win, snr_code).
 default_snr(StreamType, wait).
 
 default_blocking(window, false) :-!.
-default_blocking(tk_window, false) :-!.
+%default_blocking(tk_window, false) :-!.
+default_blocking(tk_window, true) :-!.
 default_blocking(Type, false) :- functor(Type, socket,_), !.
 default_blocking(_, true).
 
@@ -1636,80 +1639,6 @@ data_ready(Stream)
 :-dynamic(setStreamId/2).
 :-dynamic(getStreamId/2).
 
-/******************** MOVED TO blt_misc ***********************
-:-
-	/* For the moment, make this code assume nowins - we need to
-	   reorganize the loading order of the builtins in order to
-	   get flags working by the time sio is loaded. */
-	current_prolog_flag(windows_system, WinSys),
-%	WinSys = nowins,
-	(WinSys = motif ->
-		assert_at_load_time(
-			( winsGetTextInsertionPosition(WinID, WinInsertPos) :-
-    				x_XmTextGetInsertionPosition(WinID,WinInsertPos) )
-						   ),
-		assert_at_load_time(
-			( write_buffer_to_win(output,BufUIA,NumCs,WinID,EndPos) :-
-				 x_XmTextGetLastPosition(WinID,StartPos),
-				 EndPos is StartPos + NumCs,
-				 x_XmTextReplace(WinID,StartPos,EndPos,BufUIA),
-				 x_XmTextSetInsertionPosition(WinID,EndPos),
-				 getDisplay(Display),
-				 x_XFlush(Display)
-
-						   ) ),
-	   assert_at_load_time(
-	     ( write_buffer_to_win(append,BufUIA,NumCs,WinID,EndPos) :-!,
-				x_XmTextGetLastPosition(WinID,StartPos),
-				EndPos is StartPos + NumCs,
-				x_XmTextReplace(WinID,StartPos,EndPos,BufUIA),
-				x_XmTextSetInsertionPosition(WinID,EndPos),
-				getDisplay(Display),
-				x_XFlush(Display)
-	     )
-	   ),
-		asserta_at_load_time(
-			( wait_data(window, Stream, Call) :-!,
-				stream_pgoals(Stream,PromptGoal),
-				call(PromptGoal),
-				sio:stream_addl3(Stream, CurAddl3),
-				sio:set_stream_addl3(Stream, [Call | CurAddl3]),
-				prolog_xt_mainLoop(data_ready(Stream)),
-				sio:set_stream_addl3(Stream, CurAddl3),
-				sio:read_buffer(window,Stream), !,
-					%% restart call:
-				call(Call)		)	
-						   ) 
-	;	%% end Motif %%
-	WinSys = openlook ->
-		assert_at_load_time(
-			( winsGetTextInsertionPosition(WinID, WinInsertPos) :-
-					c_alloc(long,Dummy), c_alloc(long,PosBuf),
-					x_OlTextEditGetCursorPosition(WinID,Dummy,
-						Dummy,PosBuf,1),
-					c_examine(PosBuf,long,WinInsertPos) )
-		),
-		assert_at_load_time(
-			( write_buffer_to_win(BufUIA,NumCs,WinID,EndPos) :-
-				x_OlTextEditInsert(WinID,BufUIA,NumCs,1),
-				x_OlTextEditTextBuffer(WinID,TextBuf),
-				x_LastTextBufferPosition(TextBuf,EndPos) )
-		),
-		asserta_at_load_time(
-			( wait_data(window, Stream, Call) :-!,
-				stream_pgoals(Stream,PromptGoal),
-				call(PromptGoal),
-				stream_identifier(Stream,StreamId),
-				prolog_xt_stream_mainLoop(StreamId),
-				read_buffer(window,Stream), !,
-					%% restart call:
-				call(Call)		)
-		)
-	;	%% OpenLook %%
-	true
-	).
-******************** MOVED TO blt_misc ***********************/
-
 wait_data(tk_window, Stream, Call) 
 	:-!,
 	wait_data(tcltk, Stream, Call).
@@ -1721,10 +1650,14 @@ wait_data(tk_win, Stream, Call)
 wait_data(tcltk, Stream, Call) 
 	:-!,
 	stream_addl1(Stream, Alias),
-	stream_addl3(Stream, WinID),
+	stream_name(Stream, WinID),
 	tcl_call(shl_tcli, [set_prompt_mark, WinID], _),
-	tcl_call(shl_tcli, [bind,WinID,'<Return>', [ xmit_line_plain,WinID,Alias]], _),
-	tcl_call(shl_tcli, [ tkwait, variable, 'WaitForLine' ], _),
+
+	tcl_call(shl_tcli, 
+		[bind,WinID,'<Return>', [ xmit_line_plain,WinID,Alias]], _),
+
+	tcl_call(shl_tcli, [set,'WaitForLine',0], _),
+	tcl_call(shl_tcli, [wait_for_line0], _),
 
 	call(Call).
 
@@ -1733,20 +1666,6 @@ wait_data(sysV_queue, Stream, Call)
 	loop_for_data(sysV_queue, Stream),
 	!,
 	call(Call).
-
-/*
-wait_data(tk_window, Stream, Call) 
-	:-
-%	stream_pgoals(Stream,PromptGoal),
-%	call(PromptGoal),
-%	stream_identifier(Stream,StreamId),
-%	prolog_xt_stream_mainLoop(StreamId),
-%	read_buffer(window,Stream), !,
-	stream_addl2(Stream, Interp),
-	tcl_eval(Interp, 'after 1000 ; update', _),
-			%% restart call:
-	call(Call).
-*/
 
 wait_data(socket, Stream, Call) :-
 	sio_poll(Stream, 100000),	% 1 sec  - restore when 2nd arg fixed
@@ -1839,7 +1758,6 @@ open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
 	:-
 	(atom(WinName) -> WinID = WinName ; sprintf(atom(WinID), '%t', [WinName]) ),
 	initialize_stream(tk_window,WinID,Options,Stream),
-%	initialize_stream(tk_window,WinName,Options,Stream),
 
 	(dmember(alias(Alias), Options) -> true ; Alias = WinName),
 		%% store the stream alias:
@@ -1847,7 +1765,7 @@ open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
 		%% store the tcl/tk interpreter:
 	set_stream_addl2(Stream, Interp),
 		%% store the window id:
-	set_stream_addl3(Stream, WinID),
+	set_stream_addl3(Stream, ''),
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
@@ -1876,6 +1794,25 @@ open_tcl_transfer_stream(CmdPattern,Interp,Mode,Options,Stream)
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
 	sio_tk_win_open(ID,Stream,NMode,NBuffering).
+
+	%% open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
+clone_stream(Stream, StreamName, StreamType, Mode, StreamClone)
+	:-
+	initialize_stream(tk_window,StreamName,[],StreamClone),
+	set_stream_addl1(Stream, ''),
+	stream_addl2(Stream, Interp),
+	set_stream_addl2(StreamClone, Interp),
+	set_stream_addl3(Stream, ''),
+
+	stream_mode(Stream,SMode),
+	set_stream_mode(StreamClone,SMode),
+	file_modes(Mode,NMode,_),
+	buffering([],NBuffering),
+	sio_tk_win_open(StreamName,StreamClone,NMode,NBuffering),
+	TextBuffer = '',
+	set_stream_extra(StreamClone,TextBuffer),	%% the Prolog side window buffer
+	!.
+
 
 /*
  * bufsize/3 determines the buffer size to use by examining the options
@@ -1941,6 +1878,18 @@ wt_init_opt(_,_).
 %wt_opts_default(wt_opts(78,40000,flat)).
 wt_opts_default(wt_opts(78,400,flat)).
 
+export associated_output_alias/2.
+export set_associated_output_alias/2.
+
+associated_output_alias(InStreamAlias, OutStreamAlias)
+	:-
+	current_alias(InStreamAlias, InStream),
+	stream_addl3(InStream, OutStreamAlias).
+
+set_associated_output_alias(InStreamAlias, OutStreamAlias)
+	:-
+	current_alias(InStreamAlias, InStream),
+	set_stream_addl3(InStream, OutStreamAlias).
 
 /*
  * buffering/2 determines the type of buffering and returns the numeric
@@ -2173,20 +2122,27 @@ get_failure(15, Stream, Call) :-	%% SIOE_PARTNUM
  */
 
 get_failure_read(Stream, Call) :-
+%pbi_write(get_failure_read_eof_action2(Call)),pbi_nl,pbi_ttyflush,
 	stream_type(Stream,Type),
+%pbi_write(gfr2(Type)),pbi_nl,pbi_ttyflush,
 	read_buffer(Type,Stream),
 	stream_eof_action(Stream, EOFAction),
 	get_failure_read_maybe_reset_eof(EOFAction, Stream),
 	!,
 	call(Call).			%% restart call
+
 get_failure_read(Stream, Call) :-
 	sio_errcode(Stream, Num),
+%pbi_write(get_failure_read_CLAUSE2(Num)),pbi_nl,pbi_ttyflush,
 	get_failure_read(Num, Stream, Call).
+
+
 get_failure_read(8, Stream, Call) :-	%% SIOE_EOF
 	!,
 	stream_eof_action(Stream, EOFAction),
 	functor(Call,Pred,ArgNum),
 	get_failure_read_eof(EOFAction, Pred, ArgNum, Stream, Call).
+
 get_failure_read(14, Stream, Call) :-	%% SIOE_NOTREADY
 	!,
 	stream_snr_action(Stream, SNRAction),
@@ -2253,21 +2209,22 @@ get_failure_read_eof_code(get_line0, -1).
  */
 
 %% Debugging clause:    
-%get_failure_read_snr(SNRAction, Pred, Arity, Stream, Call)
-%	:-
-%	pbi_write(gfrs(SNRAction, Pred, Arity, stream, Call)),
-%	pbi_nl,pbi_ttyflush,
-%	fail.
+/*
+get_failure_read_snr(SNRAction, Pred, Arity, Stream, Call)
+	:-
+	pbi_write(gfrs(SNRAction, Pred, Arity, stream, Call)),pbi_nl,pbi_ttyflush,
+	fail.
+*/
 
-get_failure_read_snr(snr_code, Pred, ArgNum, Stream, Call) :-
-
+get_failure_read_snr(snr_code, Pred, ArgNum, Stream, Call) 
+	:-
 	stream_blocking(Stream, BLOCK),
-	stream_type(Stream, StrmType),
 	stream_blocking(Stream, true),
 	stream_type(Stream, StrmType),
 	dmember(StrmType, [socket,tk_window,tk_win,window]),
 	!,
 	wait_data(StrmType, Stream, Call).
+
 get_failure_read_snr(wait, Pred, ArgNum, Stream, Call) :-
 	sio_poll(Stream, 10000000),	% 10 sec
 	!,
@@ -2558,6 +2515,23 @@ read_buffer(window,Stream)
 
 read_buffer(tk_window,Stream) 
 	:- 
+/*
+stream_extra(Stream,XTRA),
+(XTRA=eof(What) ->
+	pbi_write(rb_tk_xtra_1A(What)),pbi_nl,pbi_ttyflush
+	;
+	pbi_write(rb_tk_xtra_1B(XTRA)),pbi_nl,pbi_ttyflush,
+	fail
+),
+*/
+	stream_extra(Stream,eof(_)),
+	!,
+	sio_set_errcode(Stream,8),		%% 8 =  SIOE_EOF
+	sio_set_eof(Stream),		
+	fail.
+
+read_buffer(tk_window,Stream) 
+	:- 
 	stream_extra(Stream,''),
 	!,
 	stream_pgoals(Stream,PromptGoal),
@@ -2567,7 +2541,13 @@ read_buffer(tk_window,Stream)
 
 read_buffer(tk_window,Stream) 
 	:- !,
-	stream_extra(Stream,CurQueue),
+	stream_extra(Stream,InCurQueue),
+	(InCurQueue = eof(CurQueue) ->
+		EOFFlag = true
+		;
+		EOFFlag = false,
+		CurQueue = InCurQueue
+	),
 	sio_buf_params(Stream, BufStart, BufSize),
 	sio_cpos(Stream,  CPos),
 	sio_lpos(Stream,  LPos),
@@ -2578,7 +2558,23 @@ read_buffer(tk_window,Stream)
 	NLPos is LPos + NumCs,
 	NCPos is CPos,
 	sio_set_position(Stream, NCPos, NLPos),
-	set_stream_extra(Stream,NewQueue).
+	(EOFFlag = true ->
+		OutNewQueue = eof(NewQueue)
+		;
+		OutNewQueue = NewQueue
+	),
+	set_stream_extra(Stream,OutNewQueue).
+
+set_extra_eof(StreamOrAlias)
+	:-
+%pbi_write(enter_set_extra_eof(StreamOrAlias)),pbi_nl,pbi_ttyflush,
+	stream_or_alias_ok(StreamOrAlias, Stream),
+	stream_token_list(Stream,TL),
+	stream_extra(Stream,CurQueue),
+	set_stream_extra(Stream,eof(CurQueue)),
+	append(TL, [end_of_file(StreamOrAlias,0,0)],NTL),
+	set_stream_token_list(Stream,NTL),
+	sio_set_eof(Stream).
 
 %%
 %% This is the place to add read_buffer definitions for other stream types
@@ -2625,6 +2621,7 @@ push_prompt(Stream_or_alias)
 export add_to_stream_buffer/2.
 add_to_stream_buffer(StreamOrAlias, InputLine)
 	:-
+%pbi_write(add_to_stream_buffer(StreamOrAlias, InputLine)),pbi_nl,pbi_ttyflush,
 	is_stream(StreamOrAlias, Stream),
 	stream_extra(Stream, CurBuffer),
 	'$atom_concat'(CurBuffer, InputLine, NewBuffer),
@@ -3082,7 +3079,7 @@ write_buffer(tk_window,Stream) :-
 	'$uia_peeks'(SD,BufStart,NumCs,BufUIA),
 	stream_mode(Stream, [_|OutType]),
 	stream_addl2(Stream, Interp),
-	stream_addl3(Stream, WinID),
+	stream_name(Stream, WinID),
 	sio_set_position(Stream, 0, 0),
 	catch(tcl_call(Interp, [WinID,insert,end,BufUIA], _),_,true),
 	catch(tcl_call(Interp, [WinID,see,end], _),_,true),
@@ -3369,7 +3366,7 @@ nl0(Stream)
 	stream_type(Stream,tk_window),
 	!,
 	stream_addl2(Stream, Interp),
-	stream_addl3(Stream, WinName),
+	stream_name(Stream, WinName),
 	tcl_eval(Interp, [WinName,' insert end "\n" ; update'], _).
 
 nl0(Stream) 
@@ -3530,7 +3527,7 @@ get_token_list(Stream_or_alias, List) :-
 	sio_errcode(Stream, FailCode),
 	get_failure(FailCode, Stream, get_token_list(Stream_or_alias,List)).
 
-	%%% get_token_list/2:
+	%%% get_token_list/4:
 get_token_list(T,Stream,L1,L2) :-
 	var(T),
 	!,

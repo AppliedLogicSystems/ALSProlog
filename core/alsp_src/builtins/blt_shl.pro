@@ -506,7 +506,7 @@ push_prompt(nowins,_,_) :-!.
 push_prompt(tcltk,OutStream,Prompt1)
 	:-
 	nl(OutStream),
-	put_atom(OutStream,Prompt1),
+%	put_atom(OutStream,Prompt1),
 	flush_output(OutStream),
 	tcl_call(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _).
 push_prompt(Wins,OutStream,Prompt1)
@@ -549,17 +549,15 @@ shell_exit(InStream, OutStream,Level,DebuggingState)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 export als_exec/2.
-als_exec( InputLine, TextWinPath)
+
+als_exec( InputLine, InStreamAlias, Wins)
 	:-
-	add_to_stream_buffer(shl_tk_in_win, InputLine),
-	shell_read_execute(shl_tk_in_win,shl_tk_out_win,tcltk,Status),
+	add_to_stream_buffer(InStreamAlias, InputLine),
+		%% get the associated output stream alias:
+	associated_output_alias(InStreamAlias, OutStreamAlias),
+
+	shell_read_execute(InStreamAlias,OutStreamAlias,Wins,Status),
 	continue_prolog_loop(Status).
-
-
-prolog_shell_loop(tcltk,InStream,OutStream) 
-	:-!,
-	tcl_call(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _),
-	tk_main_loop.
 
 prolog_shell_loop(Wins,InStream,OutStream) 
 	:-
@@ -778,6 +776,7 @@ pbi_write(setting_alarm_clock(Goal0,AlarmIntrv)),pbi_nl,pbi_ttyflush,
 	alarm(AlarmIntrv,AlarmIntrv).
 set_alarm_clock(_,_) :-!.
 
+/*
 unset_alarm(0) :-!.
 unset_alarm(AlarmIntrv)
 	:-
@@ -787,6 +786,11 @@ unset_alarm(AlarmIntrv)
 	alarm(AlarmIntrv,AlarmIntrv),
 	!,
 	fail.
+*/
+unset_alarm(0) :-!.
+unset_alarm(AlarmIntrv)
+	:-
+	alarm(0,0).
 
 export do_shell_query2/2.
 do_shell_query2(Mod,Goal) 

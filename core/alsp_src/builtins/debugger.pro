@@ -1413,13 +1413,22 @@ nospy([Pat|More]) :-
  *-------------------------------------------------------------------------*/
 
 %% === Port is leashed, so interact:
-getResponse(Wins,Port,Box,Depth, Module, Goal, Response) :-
+getResponse(Wins,Port,Box,Depth, Module, Goal, Response) 
+	:-
+%pbi_write(getResponse(Wins,Port)),pbi_nl,pbi_ttyflush,
     leashed(Port),
     !,
     getresponse2(Wins,Port,Box,Depth,Module,Goal,Response).
 
 %% === Not a leashed port -- Keep debugging:
-getResponse(Wins,_,Box,Depth,Module,Goal,debug) :- 				
+
+getResponse(pbi,_,Box,Depth,Module,Goal,debug) 
+	:-!,
+    pbi_nl,
+	pbi_ttyflush.
+
+getResponse(Wins,_,Box,Depth,Module,Goal,debug) 
+	:-
     nl(debugger_output).
 
 
@@ -1552,12 +1561,6 @@ toggle_debug_io
 	%% Default:
 
 debug_io(nowins).
-/*
-debug_io(Where)
-	:-
-	als_system(L),
-	dmember(wins=Where, L).
-*/
 
 dbg_io_opp(nowins, WhichWins)
 	:-!,
@@ -1586,24 +1589,17 @@ showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 
 showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 	:-
+	debug_io(pbi),
+	!,
+	showGoalToUserPBI(Port,Box,Depth, Module, XGoal, Response).
+
+showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
+	:-
 	showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%% TTY I/O Hooks   %%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%% COMMOND I/O STUFF %%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-showGoalToUserTTY(exit,_,_,_,'$dbg_aph'(_,_,_),debug) :-!.
-showGoalToUserTTY(exit,_,_,_,'$dbg_apg'(_,_,_),debug) :-!.
-
-showGoalToUserTTY(_,_,_,_,'$dbg_aph'(_,_,_),skip) :-!.
-showGoalToUserTTY(_,_,_,_,'$dbg_apg'(_,_,_),skip) :-!.
-
-showGoalToUserTTY(Port,Box,Depth, Module, XGoal, Response)
-	:-
-					    %% Display the port:
-    writeGoal(Box,Depth,Port,Module,XGoal),
-			   			%% And find out what do do:
-    getResponse(tty,Port,Box,Depth, Module, XGoal, Response).
 
 		%% Items for debugger menu (menu/4 in Library: iolayer.pro)
 		%% Compare usage in break package (blt_brk.pro)
@@ -1694,11 +1690,30 @@ short_deb_resps([
 	_-'$badInput$'		%% default for all other input
 		]).
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%% TTY I/O Hooks   %%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+showGoalToUserTTY(exit,_,_,_,'$dbg_aph'(_,_,_),debug) :-!.
+showGoalToUserTTY(exit,_,_,_,'$dbg_apg'(_,_,_),debug) :-!.
+
+showGoalToUserTTY(_,_,_,_,'$dbg_aph'(_,_,_),skip) :-!.
+showGoalToUserTTY(_,_,_,_,'$dbg_apg'(_,_,_),skip) :-!.
+
+showGoalToUserTTY(Port,Box,Depth, Module, XGoal, Response)
+	:-
+					    %% Display the port:
+    writeGoal(Box,Depth,Port,Module,XGoal),
+			   			%% And find out what do do:
+    getResponse(tty,Port,Box,Depth, Module, XGoal, Response).
+
+
 
 %% === Handle the interaction:
 
+	%%----------------%%
 	%%%%% TTY mode %%%%%
-
+	%%----------------%%
 getresponse2(tty,Port,Box,Depth,Module,Goal,Response) 
 	:-
 	short_deb_resps(Resps),
@@ -1730,8 +1745,45 @@ disp_getresponse_cont('$badInput$', Port,Box,Depth,Module,Goal,Resps,Response)
 
 disp_getresponse_cont(Response,Port,Box,Depth,Module,Goal,Resps,Response).
 
+	%%----------------%%
+	%%%%% PBI mode %%%%%
+	%%----------------%%
+getresponse2(pbi,Port,Box,Depth,Module,Goal,Response) 
+	:-!,
+	short_deb_resps(Resps),
+	getresponse_cont_pbi(Port,Box,Depth,Module,Goal,Resps,RR),
+	!,
+    act_on_response(RR,Port,Box,Depth, Module,Goal,pbi,Response).
 
+	%% First try to act without loading the menu code:
+getresponse_cont_pbi(Port,Box,Depth,Module,Goal,Resps,Response)
+	:-
+	pbi_put(0'\?),
+	pbi_ttyflush,
+	pbi_get0(RC), 
+	(RC =< 32 ->
+		R = c
+		;
+		atom_codes(R, [RC])
+	),
+	dmember(R-Resp0,Resps),
+	!,
+	disp_getresponse_cont_pbi(Resp0, Port,Box,Depth,Module,Goal,Resps,Response).
+	
+getresponse_cont_pbi(Port,Box,Depth,Module,Goal,Resps,Response)
+	:-
+	pbi_put(8).
+
+disp_getresponse_cont_pbi('$badInput$', Port,Box,Depth,Module,Goal,Resps,Response)
+	:-
+	pbi_put(8).
+disp_getresponse_cont_pbi(Response,Port,Box,Depth,Module,Goal,Resps,Response).
+
+	%%------------------%%
 	%%%%% tcltk mode %%%%%
+	%%------------------%%
+
+
 
 %% === User wants to break to subsidiary Prolog shell.
 act_on_response(break,Port,Box,Depth, Module,Goal,Wins,Response) :- !,
@@ -1878,6 +1930,42 @@ alsdev_step(What)
 	:-
 	printf('alsdev_step = %t\n', [What]),
 	flush_output.
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%  PBI I/O HOOKS    %%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+showGoalToUserPBI(exit,_,_,_,'$dbg_aph'(_,_,_),debug) :-!.
+showGoalToUserPBI(exit,_,_,_,'$dbg_apg'(_,_,_),debug) :-!.
+
+showGoalToUserPBI(_,_,_,_,'$dbg_aph'(_,_,_),skip) :-!.
+showGoalToUserPBI(_,_,_,_,'$dbg_apg'(_,_,_),skip) :-!.
+
+showGoalToUserPBI(Port,Box,Depth, Module, XGoal, Response)
+	:-
+					    %% Display the port:
+    writeGoalPBI(Box,Depth,Port,Module,XGoal),
+			   			%% And find out what do do:
+    getResponse(pbi,Port,Box,Depth, Module, XGoal, Response).
+
+
+/*-------------------------------------------------------------------------*
+ | writeGoalPBI/5
+ | writeGoalPBI(Box,Depth,Port,Module,Goal) 
+ *-------------------------------------------------------------------------*/
+
+writeGoalPBI(Box,Depth,Port,Module,Goal) 
+	:-
+%	printf(debugger_output,'(%d) %d %t: ', [Box,Depth,Port]),
+
+	pbi_nl,
+	pbi_put(0'(),
+	pbi_write(Box), pbi_put(32),
+	pbi_write(') '),
+	pbi_write(Depth), pbi_put(32),
+	pbi_write(Port),  pbi_put(58),
+	pbi_write(Module:Goal),
+	pbi_ttyflush.
 
 
 endmod.					%% builtins:  debugger segment
