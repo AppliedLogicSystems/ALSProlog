@@ -31,7 +31,9 @@
 		]).
  *-------------------------------------------------------------------------*/
 
+%module dd.
 module builtins.
+%export do_defStruct/3.
 
 :- module_closure(defStruct,2,do_defStruct).
 
@@ -321,7 +323,8 @@ gen_xfwrite(TypeName,DelaySlots,LastP,PropertiesList,StructLabel,
 	:-
 	catenate('xfwrite_',TypeName, WPred),
 	findall(P, 
-		(member(P, PropertiesList), not(member(P, DelaySlots))),
+		(member(P, PropertiesList), not( member(P, DelaySlots)),
+			not((P=P0/_, member(P0,DelaySlots))) ),
 		NonDelaySlots),
 	Head =.. [WPred, FileName, TaggedNonDelays, DelayOffsets, Stream],
 	Dummy = '                ',
@@ -345,7 +348,9 @@ gen_xfwrite(TypeName,DelaySlots,LastP,PropertiesList,StructLabel,
 			write_term(Stream6, V6, [quoted(true)]),put_code(Stream6,0',),
 			xfwrite_slots(AllButLast6,DelayOffsets6,Stream6) ),
 	CodeList = [Clause1, Clause2, Clause3, Clause4, Clause5, Clause6
-		| CodeListTail].
+		| InterCodeListTail],
+	xgen_xfwrite(TypeName,DelaySlots,NonDelaySlots,LastP,PropertiesList,StructLabel,
+			NDSlotsVars,AllButLast, Dummy, Mod, SpecsList, InterCodeListTail, CodeListTail).
 		
 setup_matchup([],DelaySlots,Dummy,[],[],[]).
 setup_matchup([Last],DelaySlots,Dummy,[],[],[])
@@ -364,18 +369,120 @@ setup_matchup([PP | PropertiesList],DelaySlots,Dummy,
 	(PP=P/_ -> true ; PP=P),
 	setup_matchup(PropertiesList,DelaySlots,Dummy,NDSlotsVars,AllButLast,DelayOffsets).
 	
-	
-/*
-xfwrite_slots([],_,_).
-xfwrite_slots([P=D | AllButLast],[P=V | DelayOffsets],Stream)
-	:-!,
-	stream_property(Stream,position(V)),
-	write(Stream, D, [quoted(true)]),
-	xfwrite_slots(AllButLast,DelayOffsets,Stream).
-xfwrite_slots([P=V | AllButLast],DelayOffsets,Stream)
-	:-
-	write(Stream, V, [quoted(true)]),
-	xfwrite_slots(AllButLast,DelayOffsets,Stream).
-*/
-endmod.
 
+%%%%%%%%%%%% EXTENDED XFWRITE %%%%%%%%%%%%%%%%%%%%%%
+
+xgen_xfwrite(TypeName,DelaySlots,NonDelaySlots,LastP,PropertiesList,StructLabel,
+		NDSlotsVars,AllButLast, Dummy, Mod, SpecsList, InterCodeListTail, CodeListTail)
+	:-
+	catenate('xfwrite_open_',TypeName, OpenPred),
+	OpenHead =.. [OpenPred,TgtFileName, TaggedNonDelays, XDelayOffsets, Stream],
+
+	catenate('xfwrite_close_',TypeName, ClosePred),
+	CloseHead =.. [ClosePred,XTaggedDelayValues, XDelayOffsets, Stream],
+
+	length(NonDelaySlots, K),
+	length(DelaySlots, N1),
+	calc_dummy_pat(Dummy, Pat),
+
+	append(AllButLast, [LastP=Dummy], AllSlots), 
+	append(DelaySlots, [LastP=Nn], XDelaySlots),
+
+	Clause7 = (OpenHead :-
+		dslm(NDSlotsVars, TaggedNonDelays),
+		open(TgtFileName, read_write, Stream),
+		printf(Stream, '%t=[local=%t,global=%t].\n',[StructLabel,K,N1],[quoted(true)]),
+		xfwrite_slots_eq(AllSlots,DelaySlots,XDelayOffsets,Stream)
+	),
+	
+	Clause8 = xfwrite_slots_eq([],_,[],_),
+	Clause9 = (  xfwrite_slots_eq([P9=D9 | AllButLast9],[P9 | DelaySlots9],
+					[P9=V9 | DelayOffsets9], Stream9) 
+				 :-!,
+				 write_term(Stream9, P9, [quoted(true)]),
+				 put_code(Stream9, 0'=),
+				 stream_property(Stream9,position(V9)),
+				 write_term(Stream9, D9, [quoted(true)]),
+				 put_code(Stream9,0'.), nl(Stream9),
+				 xfwrite_slots_eq(AllButLast9,DelaySlots9,DelayOffsets9,Stream9) 
+			),
+	Clause10 = ( xfwrite_slots_eq([P10=V10 | AllButLast10],DelaySlots10,
+					DelayOffsets10,Stream10) 
+				 :-
+				 write_clause(Stream10, P10=V10, [quoted(true)]),
+				 xfwrite_slots_eq(AllButLast10,DelaySlots10,DelayOffsets10,Stream10) ),
+
+	Clause11 = ( CloseHead :-
+					xfwrite_delay_vals(XTaggedDelayValues, XDelayOffsets, Stream),
+					close(Stream)
+			),
+
+	Clause12 = xfwrite_delay_vals([], [], Stream),
+
+	Clause13 = ( xfwrite_delay_vals(
+					[Tag=Value | TaggedDelayValues], [Tag=Offset | TaggedOffsets], 
+					Stream)
+					:-
+					stream_position(Stream, _, Offset),
+					printf(Stream, Pat, [Value], [quoted(true)]),
+					xfwrite_delay_vals(TaggedDelayValues, TaggedOffsets, Stream)
+			),
+
+	catenate('xfread_init_',TypeName, InitReadPred),
+	InitReadHead =.. [InitReadPred, TaggedValues, N, Stream],
+
+	Clause14 = ( InitReadHead :-
+					stream_position(Stream, _, 0),
+					read(Stream, Header),
+					Header = (StructLabel=[local=NL,global=NG]),
+					TN is NL+NG,
+					read_n(TN, Tgd, Stream),
+					dreverse(Tgd, [LastP=N0 | RevTaggedValues]),
+					N is floor(N0),
+					dreverse(RevTaggedValues, TaggedValues)
+			),
+
+	catenate('xfread_',TypeName, ReadPred),
+	ReadHead2 =.. [ReadPred, TFile, TTerm],
+	catenate('xfreads_',TypeName, ReadPredS),
+	ReadHead2W =.. [ReadPredS, TTerm, Stream],
+	ReadHead3 =.. [ReadPred, TFile, M, TTerm],
+	ReadHead3W =.. [ReadPredS, M, TTerm, Stream],
+
+	Clause20 = ( ReadHead2 :-
+				    open(TFile, read_write, Stream),
+					unwind_protect(ReadHead2W, close(Stream))
+			),
+	ReadHead3 =.. [ReadPred, TFile, M, TTerm],
+	Clause21 = ( ReadHead3 :-
+				    open(TFile, read_write, Stream),
+					unwind_protect(ReadHead3W, close(Stream))
+			),
+	Clause22 = ( ReadHead2W :-
+					InitReadHead,
+					findall(V,member(_=V, TaggedValues), TValues),
+					append(TValues, [Terms], TArgs),
+					TTerm =.. [StructLabel | TArgs],
+					read_all(Terms, Stream)
+			),
+	Clause23 = ( ReadHead3W :-
+					InitReadHead,
+					findall(V,member(_=V, TaggedValues), TValues),
+					append(TValues, [Terms], TArgs),
+					TTerm =.. [StructLabel | TArgs],
+					read_n(Terms, M, Stream)
+			),
+
+	InterCodeListTail = [Clause7, Clause8, Clause9, Clause10, Clause11,
+						 Clause12, Clause13, Clause14, 
+				%		 Clause15, Clause16, Clause17, Clause18, Clause19,
+						 Clause20, Clause21,
+						 Clause22, Clause23 | CodeListTail].
+
+calc_dummy_pat(Dummy, Pat)
+	:-
+	atom_length(Dummy, DL),
+	DL2 is DL+2,
+	sprintf(atom(Pat),'%% %t.8f',[DL2]).
+
+endmod.

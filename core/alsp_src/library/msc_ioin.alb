@@ -1,5 +1,6 @@
 libactivate(builtins,[library,msc_ioin],
     [read_terms/1,read_terms/2,read_terms_pos/1,read_terms_pos/2,
         read_terms_pos/3,read_terms_vn/2,grab_terms/2,grab_lines/2,
-        get_lines/2,read_lines/2,read_as_list/3],
+        get_lines/2,read_lines/2,read_as_list/3,read_n/3, read_all/2
+		],
     []).
