@@ -215,7 +215,6 @@ proc load_source {path name} {
 	if {$tcl_platform(platform) == "macintosh"} {
 		uplevel "source -rsrc {$name}"
 	} else {
-	bell
 		uplevel "source \[file join {$path} {$name.tcl}]"
 	}
 }
