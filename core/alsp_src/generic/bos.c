@@ -35,6 +35,10 @@
 #include "fswin32.h"
 #endif
 
+#ifdef unix
+#include <pwd.h>
+#endif
+
 #ifndef PURE_ANSI
 int
 pbi_access()
@@ -103,6 +107,39 @@ pbi_getenv()
     else
 	FAIL;
 }
+
+#ifdef unix
+int
+pbi_get_user_home(void)
+{
+    PWord v1, v2, h;
+    int   t1, t2, ht;
+    const char *name;
+    const struct passwd *record;
+
+    PI_getan(&v1, &t1, 1);
+    PI_getan(&v2, &t2, 2);
+
+    if (t1 == PI_SYM) name = PI_getsymname(NULL, v1, 0);
+    else if (t1 == PI_UIA) name = PI_getuianame(NULL, v1, 0);
+    else PI_FAIL;
+
+    record = getpwnam(name);
+    if (!record) PI_FAIL;
+
+    PI_makeuia(&h, &ht, record->pw_dir);
+    
+    if (PI_unify(v2, t2, h, ht)) PI_SUCCEED;
+    else PI_FAIL;
+}
+#else
+int
+pbi_get_user_home(void)
+{
+  PI_FAIL;
+}
+#endif
+
 #endif /* OSACCESS */
 
 int
