@@ -38,7 +38,7 @@ Build Instructions
 
 Unix:
 
-In the als_prolog directory, run GNU Make (make or gmake, as appropriate)
+In the als_prolog/unix directory, run GNU Make (make or gmake, as appropriate)
 
 Macintosh:
 

@@ -66,7 +66,7 @@ $(MAIN_OBJECTS) : $(MAKEFS)
 
 $(LIB_OBJECTS) $(STATIC_OBJECTS) $(SHARED_OBJECTS) : $(MAKEFS)
 
-binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro alsdev
+binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro alsdev studalsdev
 
 all : default
 
@@ -154,6 +154,14 @@ lib: $(GETDIR)/getDirectory.tcl $(GETDIR)/unix_pkgIndex.tcl $(GETFILES)/getFiles
 alsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
 	./alspro_b -q -b -obp -no_dot_alspro \
 	-g 'save_image(alsdev,[start_goal((builtins:start_alsdev)), \
+	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
+	select_lib(library,[$(ALSDEVLIBS)])])'
+
+studalsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
+	./alspro_b -q -b -obp -no_dot_alspro \
+	-g 'builtins:abolish(save_image,1), \
+	sio:abolish(open_socket_stream,4), \
+	save_image(studalsdev,[start_goal((builtins:start_alsdev)), \
 	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
 	select_lib(library,[$(ALSDEVLIBS)])])'
 
