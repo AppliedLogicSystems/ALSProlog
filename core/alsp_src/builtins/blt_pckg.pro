@@ -241,17 +241,18 @@ base_obp_list([
     ':alsdir:builtins:blt_als.obp',
     ':alsdir:builtins:blt_atom.obp',
     ':alsdir:builtins:blt_brk.obp',
+    ':alsdir:builtins:blt_cslt.obp',
     ':alsdir:builtins:blt_ctl.obp',
     ':alsdir:builtins:blt_db.obp',
     ':alsdir:builtins:blt_evt.obp',
     ':alsdir:builtins:blt_flgs.obp',
     ':alsdir:builtins:blt_frez.obp',
     ':alsdir:builtins:blt_io.obp',
-    ':alsdir:builtins:blt_lib.obp',
     ':alsdir:builtins:blt_msg.obp',
     ':alsdir:builtins:blt_misc.obp',
     ':alsdir:builtins:blt_pckg.obp',
     ':alsdir:builtins:blt_shl.obp',
+    ':alsdir:builtins:blt_shlr.obp',
     ':alsdir:builtins:blt_std.obp',
     ':alsdir:builtins:blt_stk.obp',
     ':alsdir:builtins:blt_sys.obp',
@@ -282,8 +283,8 @@ base_obp_list([
  |  stored as resources.
  *---------------------------------------------------------------*/
 save_base_package(NewName) :-
-	force_libload_all(
-	  [':builtins:debugger']),
+	add_lib_qual(['debugger'],builtins,QualFilesList),
+	force_libload_all(QualFilesList),
 	base_obp_list(BList),
 	save_app_with_obp(NewName, BList, [], '', '').
 
