@@ -1,0 +1,3 @@
+OS_CPPFLAGS = -DUNIX_HPUX
+OS_LIBS = -lm -ldld
+OS_SL_EXT = sl
