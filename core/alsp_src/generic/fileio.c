@@ -130,7 +130,7 @@ fncname(tok)							\
 	if (tbl[i].inuse && tbl[i].tkidx == tok)		\
 	    break;						\
     if (i >= tbmax) {						\
-	for (i=0; i<tbmax && tbl[i].inuse; i++);		\
+	for (i=0; i<tbmax && tbl[i].inuse; i++) {};		\
 	if (i>=tbmax)						\
 	    i = -1;						\
     }								\
