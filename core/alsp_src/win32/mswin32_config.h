@@ -11,6 +11,8 @@
 #define MSWin32 1
 #define OSStr "mswin32"
 
+#define SIMPLE_MICS 1
+
 #define HAVE_STDARG_H	1
 #define HAVE_STDLIB_H	1
 #define HAVE_FCNTL_H	1
