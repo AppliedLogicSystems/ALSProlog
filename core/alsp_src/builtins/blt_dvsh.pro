@@ -602,7 +602,7 @@ setup_ide_project_globals(ALSIDEObject)
 	send( DebuggerObject, get_value(myHandle, DebuggerHandle) ),
 	tcl_call(shl_tcli, [set_tcl_ga, proenv, debugger_mgr, DebuggerHandle], _).
 
-alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom)
+alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom, DebugVis)
 	:-
 	abolish(alsdev_ini_path,1),
 	find_alsdev_ini(Items),
@@ -626,6 +626,16 @@ alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom)
 		true ; TopGeom = [] ),
 	(dmember(window_position('.debugwin', DebugGeom), Items) ->
 		true ; DebugGeom = [] ),
+	(dmember(visible('.debugwin',DebugVis), Items) -> 
+		(DebugVis = 1 ->
+			set_prolog_flag(debug,on)
+			;
+			set_prolog_flag(debug,off)
+		)
+		; 
+		DebugVis = 0,
+		set_prolog_flag(debug,off)
+	),
 	(dmember(prolog_value(prolog_flags,FlagsList),Items) ->
 		set_flags_values(FlagsList)
 		;
@@ -652,6 +662,19 @@ find_alsdev_ini(Items)
 	PrefsFile = '.alsdev',
 	append(HomeDirList, [PrefsFile], PrefsFileList),
 	fin_find_alsdev_ini(PrefsFileList, Items).
+
+/*
+find_alsdev_ini(Items)
+	:-
+	sys_env(mswin32,_,_),
+	getenv('windir', HomeDir0),
+	split_path(HomeDir0, HomeDir0List),
+	PrefsFile = '.alsdev',
+	get_user_name(User),
+	append(HomeDir0List, ['Profiles',User,PrefsFile], PrefsFileList),
+	fin_find_alsdev_ini(PrefsFileList, Items),
+	!.
+*/
 
 find_alsdev_ini(Items)
 	:-
@@ -720,18 +743,17 @@ replace_items([Old | OldTerms],  NewTerm, Functor, Arity, Arg1,  [Old | NewTerms
 setup_defaults([], _).
 setup_defaults([Tag=Value | TextSettings], Group)
 	:-
-%	tcl_call(shl_tcli, [set_proenv,text,Tag,Value], _),
 	tcl_call(shl_tcli, [set_tcl_ga2,proenv,text,Tag,Value], _),
 	setup_defaults(TextSettings, Group).
 
 win_positions_for_exit(TopGeom, DebugGeom)
 	:-
 	modify_settings(window_position('.topals',TopGeom), 
-						window_position, 2, '.topals'),
+					window_position, 2, '.topals'),
+	tcl_call(shl_tcli, [get_tcl_ga,proenv,debugwin], DebugVis),
+	modify_settings(visible('.debugwin',DebugVis), visible,2,DebugVis), 
 	modify_settings(window_position('.debugwin',DebugGeom), 
-						window_position, 2, '.debugwin').
-
-
+					window_position, 2, '.debugwin').
 
 save_prolog_flags
 	:-
@@ -1450,7 +1472,7 @@ source_trace_closedown(STWin)
 
 set_debugwin_width(MSize, MainWinSize)
 	:-
-	NChars is floor(1.6 * (MainWinSize)//MSize ),
+	NChars is floor(1.8 * (MainWinSize)//MSize ),
 	sio:is_stream(debugger_output, DS),
 	set_line_length(DS, NChars).
 
@@ -1981,7 +2003,10 @@ reset_all_spypoints
 	:-
     dbg_spyoff,
 	findall(Mod-List, mspylist(Mod,List), SpyList),
+write(reset_the_spypoints(SpyList)),nl,flush_output,
 	reset_the_spypoints(SpyList),
+    setPrologInterrupt(spying),
+    setDebugInterrupt(spying),
     dbg_spyon.
 
 mspylist(Mod,List)
