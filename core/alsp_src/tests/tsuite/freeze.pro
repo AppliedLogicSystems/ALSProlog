@@ -34,12 +34,13 @@ int_pc :- freeze(TS,produce(0,TS)), consume(TS).
 
 produce(N, [N | T])
 	:-
+write(p(N)),nl,flush_outout,
 	M is N+1,
 	freeze(T, produce(M,T)).
 
 consume([N | T])
 	:-
-	write(n=N),nl,
+	write(c(n)=N),nl,flush_output,
 	write('>'),read(X),
 	disp(X,T).
 
@@ -122,14 +123,14 @@ j :-
 	s0(W1).
 
 j :-
-	pbi_write('Got to clause #2 for j'),pbi_nl,pbi_ttyflush.
+	write('Got to clause #2 for j'),nl,flush_output.
 	
 
 s0(def).
 
 frump(A,B)
 	:-
-	pbi_write(frump_running('-',B)),pbi_nl,pbi_ttyflush,
+	write(frump_running('-',B)),nl,flush_output,
 	fail.
 
 	/*-------------------------------------
@@ -154,9 +155,9 @@ k0(jj(W1,W2)) :-
 
 t01(W1,W2)
 	:-
-	pbi_write('aaa+'),pbi_nl,pbi_ttyflush,
+	write('aaa+'),nl,flush_output,
 	[W1,W2]=[foo,bar],
-	pbi_write('bbb+'),pbi_nl,pbi_ttyflush,
+	write('bbb+'),nl,flush_output,
 	cptx,
 	swp_tr.
 
@@ -164,11 +165,11 @@ flop(def,flameout).
 
 grump(A,B)
 	:-
-	pbi_write(grump_running(A,B)),pbi_nl,pbi_ttyflush.
+	write(grump_running(A,B)),nl,flush_output.
 
 silly(A,B)
 	:-
-	pbi_write(silly_running(A,B)),pbi_nl,pbi_ttyflush.
+	write(silly_running(A,B)),nl,flush_output.
 
 	/*-------------------------------------
 	 | Elementary test:
