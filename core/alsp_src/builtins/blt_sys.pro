@@ -257,49 +257,42 @@ export os/0.
 	system(ls).
 
 ls(Dir) :- 
-	exec_file_command(ls,Dir).
+	tilda_expand(Dir, NDir),
+	exec_file_command(ls,NDir).
 
-:-	als_system(ALS_Info),
-	dmember(os=OS,ALS_Info),
-	(   OS=dos, !,
-		assert_at_load_time( ((dir) :- system(dir)) ),
-		assert_at_load_time( (dir(Dir) :- exec_file_command(dir,Dir)) )
-	;
-	(OS=mswin32, !,
-		assert_at_load_time( ((dir) :- system(dir)) ),
-		assert_at_load_time( (dir(Dir) :- exec_file_command(dir,Dir)) )
-	)
-	;
-	    true).
+dir :-
+	system(dir).
+dir(Dir) :-
+	tilda_expand(Dir, NDir),
+	exec_file_command(dir,NDir).
 
-:-	als_system(ALS_Info),
-	dmember(os=OS,ALS_Info),
-	dmember(os_variation=OS_Variant,ALS_Info),
-	(OS=dos, !,
-		assert_at_load_time( ((cd) :- system('cd')) ),
-		assert_at_load_time( ((os) :- system('command')) )
-	 %% end DOS
-	 ;
-	 (OS=mswin32, !,
-		assert_at_load_time( ((cd) :- system('cd')) ),
-		assert_at_load_time( ((os) :- system('command')) )
-	 )
-	 ;
-	 (OS=unix, !,
-		assert_at_load_time( ((cd) :- getenv('HOME',Env), change_cwd(Env))  ), 
-		(OS_Variant = sun, !,
-			assert_at_load_time( ((os) :- system('csh')) )
-			;
-			assert_at_load_time( ((os) :- system('sh')) )
-		)
-	 )
-	 %% end UNIX
-	 ;
-	 assert_at_load_time( ((os) :- write('No os shell available.'),nl) )
-	).
+os :-
+	sys_env(OS, _, _),
+	os(OS).
+os :-
+	write('No os shell available.'),nl.
 
-cd(Dir) :- 
-	change_cwd(Dir).
+os(mswin32) :-
+	(getenv('SHELL', Shell) ; getenv('COMSPEC', Shell)),
+	!,
+	system(Shell).
+os(mswin32) :-
+	system('command').
+
+os(unix) :-
+	getenv('SHELL', Shell),
+	!,
+	system(Shell).
+os(unix) :-
+	system('sh').
+
+cd :-
+	getenv('HOME', Home),
+	change_cwd(Home).
+
+cd(Dir) :-
+	tilda_expand(Dir, NDir), 
+	change_cwd(NDir).
 
 /*------------------------------------------------------------------*
  * printing system usage information
