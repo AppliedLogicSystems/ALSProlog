@@ -81,11 +81,6 @@ proc add_edit_menu {menubar type window} {
     $menubar.edit add separator
     $menubar.edit add command -label "Preferences$elipsis" \
 			-command "$type.preference $window"
-	if {$tcl_platform(platform) != "macintosh"} {
-    	.topals.mmenb.edit add separator
-    	.topals.mmenb.edit add command -label {Flush Input} -state disabled
-    }
-
 	$menubar add cascade -menu $menubar.edit -label "Edit"
 }
 
@@ -154,7 +149,7 @@ proc add_tools_menu {menubar type window} {
 	-label "Edit" -command edit_defstruct 
 
 
-	$menubar add cascade -label "Project" -menu $menubar.tools
+	$menubar add cascade -label "Tools" -menu $menubar.tools
 
 
 }
