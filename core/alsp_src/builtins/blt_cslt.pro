@@ -781,6 +781,7 @@ src_setup(pl, BaseFile, ObpLocn, FCOpts, Path, Path, OPath)
 	file_extension(Path,FP,pl),
 	make_obp_locn(ObpLocn, FP, BaseFile, FCOpts, OPath).
 
+
 src_setup('', BaseFile, ObpLocn, FCOpts, Path, Path, '').
 
 src_setup('', BaseFile, ObpLocn, FCOpts, Path, SrcPath, OPath)
