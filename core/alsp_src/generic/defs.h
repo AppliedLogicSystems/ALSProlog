@@ -508,10 +508,6 @@ extern	int	isdir			PARAMS((CONST char * ));
 extern	int	absolute_pathname	PARAMS((CONST char *name));
 extern	char *	re_comp			PARAMS((CONST char *pattern));
 extern	int	re_exec			PARAMS((CONST char *s));
-extern unsigned char *c2pstrcpy(unsigned char *ps, const char *cs);
-extern char *p2cstrcpy(char *cs, const unsigned char *ps);
-
-
 #ifndef HAVE_GUSI
 extern  int	access			PARAMS((CONST char *, int x));
 extern  int	chdir			PARAMS((CONST char *dirname));
