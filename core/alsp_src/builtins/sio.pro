@@ -3241,6 +3241,8 @@ write_buffer(tk_win,Stream) :-
 	tcl_call(Interp, [WinID,mark,set,lastPrompt,[end,-2,chars]], _),
 	tcl_call(Interp, [WinID,mark,set,insert,end], _),
 	tcl_call(Interp, [WinID,see,end], _),
+	tcl_call(Interp, [winfo,parent,WinID], Parent),
+	tcl_call(Interp, [raise_patch,Parent], _),
 	tcl_call(Interp, [focus,WinID], _),
 	tcl_call(Interp, [update], _).
 /*
