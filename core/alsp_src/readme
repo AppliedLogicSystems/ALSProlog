@@ -190,11 +190,15 @@ Top Level Directories / Non-architecture-specific
 						[combined with various use-specific parts which
 						 appear in "atrans" subdirectories in the 
 						 appropriate part of the tree];
-	- bin 			-	misc executable things, including:
+	- bin 			-	misc executable things, (or sources for them)
+						including:
 			- sharme		-	script which packs the source tree into
 								shar archive files of max 500K size;
 			- sharbld		-	script which packs a build tree into
 								shar archive files of max 500K size;
+			- format converters:
+							dos <--> unix
+							mac <--> unix
 	- bld-natv 		-	contains the initial makefile.in prototype for
 						architecture-specific build directories, together
 						with the inital (identical) config files tconfig.h.in 
