@@ -1334,7 +1334,7 @@ static Elf_Scn *find_named_section(Elf *elf, const char *name, int create)
     Elf32_Shdr *section_header;
     char *section_name;
     Elf_Data *str_data;
-    void *new_d_buf;
+    Elf_Void *new_d_buf;
     Elf32_Word name_offset;
     size_t name_size, new_d_size;
     
@@ -1361,7 +1361,7 @@ static Elf_Scn *find_named_section(Elf *elf, const char *name, int create)
     	new_d_buf = malloc(new_d_size);
     	if (!new_d_buf) return NULL;
     	memcpy(new_d_buf, str_data->d_buf, str_data->d_size);
-    	memcpy(new_d_buf+str_data->d_size, name, name_size);
+    	memcpy(((char *)new_d_buf)+str_data->d_size, name, name_size);
     	name_offset = str_data->d_size;
     	
     	str_data->d_buf = new_d_buf;
