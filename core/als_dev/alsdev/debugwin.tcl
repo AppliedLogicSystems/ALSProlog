@@ -79,9 +79,9 @@ proc vTclWindow.debugwin {base} {
     button $base.buttons.statistics \
         -padx 2 -text statistics \
 		-command { set DebugResponse Bi }
-    button $base.buttons.stack_trace \
-        -padx 2 -text stack \
-		-command { set DebugResponse Bt }
+#    button $base.buttons.stack_trace \
+#        -padx 2 -text stack \
+#		-command { set DebugResponse Bt }
 
     frame $base.buttons.sep1 \
         -borderwidth 1 -relief flat -width 4 -background black
@@ -178,8 +178,8 @@ proc vTclWindow.debugwin {base} {
         -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.statistics \
         -anchor center -expand 0 -fill none -side left 
-    pack $base.buttons.stack_trace \
-        -anchor center -expand 0 -fill none -side left 
+#    pack $base.buttons.stack_trace \
+#        -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.sep1 \
         -anchor center -expand 0 -fill y -side left -padx 4
     pack $base.buttons.abort \
