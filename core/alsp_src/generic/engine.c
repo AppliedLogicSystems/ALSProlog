@@ -792,7 +792,8 @@ static void relocate_prolog_memory(prolog_engine *pe, long stack_heap_offset, lo
 	/* Brute force approach! */
 	{
 		for (p = pe->reg.E.ptr; p < pe->stack_base; p++) {
-			if (p->ptr + stack_heap_offset > pe->stack_max && p->ptr + stack_heap_offset < pe->trail_base) {
+			if (p->ptr > pe->stack_max - stack_heap_offset && p->ptr < pe->trail_base - trail_offset)
+			{
 				do_offset(p, stack_heap_offset);
 			}
 		}
