@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.84 1999/03/09 22:17:13 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.85 1999/03/10 02:08:39 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -704,6 +704,7 @@ proc exit_prolog { } {
 				-title "Exit Prolog?" -message "Really Exit ALS Prolog?" \
 				-type yesno -default yes]
 	if {$ans == "yes"} then {
+		prolog call alsdev possible_save_project
 		if {[document.close_all]} then {
 			save_window_positions
 			prolog call alsdev save_prolog_flags 
