@@ -5,7 +5,7 @@ if test $# -lt 1
 then
     echo 'Usage: win32_setup source_dir [prefix defines...]' 1>&2
     echo 'Example:' 1>&2
-    echo '    win32_setup ../alsp_src' 1>&2
+    echo '    win32_setup ../alsp_src "#define INTCONSTR"' 1>&2
     exit 2
 fi
 
