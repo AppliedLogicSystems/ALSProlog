@@ -137,7 +137,7 @@ main(void)
 	SetupALSProlog();
     //Tk_MainLoop();
     //Tcl_DeleteInterp(interp);
-    Tcl_Exit(0);
+    //Tcl_Exit(0);
 }
 
 
@@ -431,6 +431,64 @@ extern long standard_console_read(char *buf, long n);
 extern long standard_console_write(char *buf, long n);
 extern long standard_console_error(char *buf, long n);
 
+static char *simple_write(AP_World *w, AP_Obj obj, char *s)
+{
+    switch (AP_ObjType(w, obj)) {
+    case AP_VARIABLE:
+    	s += sprintf(s, "V%lx", obj.p);
+	break;
+    case AP_LIST:
+	{
+		AP_Obj p = obj;
+
+		s += sprintf(s, "[");
+		
+		while (AP_ObjType(w, p) == AP_LIST) {
+			s = simple_write(w, AP_ListHead(w, p), s);
+			p = AP_ListTail(w, p);
+		}
+		
+		if (!AP_IsNullList(w, p)) {
+			s += sprintf(s, "|");
+			s = simple_write(w, p, s);
+		}
+		
+		s += sprintf(s, "]");
+	}	
+	break;
+    case AP_STRUCTURE:
+    {
+    	int arity, i;
+    	
+    	s += sprintf(s, "%s(", AP_GetAtomStr(w, AP_GetStructureFunctor(w, obj)));
+    	
+    	arity = AP_GetStructureArity(w, obj);
+    	
+    	i = 1;
+    	while (1) {
+    		s = simple_write(w, AP_GetArgument(w, obj, i), s);
+    		i++;
+    		if (i > arity) break;
+    		s += sprintf(s, ",");
+    	}
+    	
+    	s += sprintf(s, ")");
+    }
+	break;
+    case AP_ATOM:
+		s += sprintf(s, "%s", AP_GetAtomStr(w, obj));
+	break;
+    case AP_INTEGER:
+    	s += sprintf(s, "%ld", AP_GetLong(w, obj));
+	break;
+    case AP_FLOAT:
+    	s += sprintf(s, "%f", AP_GetDouble(w, obj));
+	break;
+    }
+    
+    return s;
+}
+
 void SetupALSProlog(void)
 {
     PI_system_setup setup;
@@ -477,7 +535,7 @@ void SetupALSProlog(void)
     pi_init();
 {
 int success;
-PI_status_toplevel(&success);
+//PI_status_toplevel(&success);
 }
 
     term = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "consult"),
@@ -485,8 +543,18 @@ PI_status_toplevel(&success);
 		
     AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
 
-    term = AP_NewSymbolFromStr(w, "alsdev");
-    AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
-
+    term = AP_NewSymbolFromStr(w, "start_alsdev");
+    {
+    	AP_Result r;
+    	r = AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
+    	if (r == AP_EXCEPTION) {
+    		char s[1000];
+    		simple_write(w, AP_GetException(w), s);
+    		panic(s);
+    	} 
+	}
+	
     PI_shutdown();
 }
+
+

@@ -32,33 +32,6 @@
 #include "tcl.h"
 #include "tk.h"
 
-#if (TK_RELEASE_LEVEL == 0)
-#   define RELEASE_LEVEL alpha
-#elif (TK_RELEASE_LEVEL == 1)
-#   define RELEASE_LEVEL beta
-#elif (TK_RELEASE_LEVEL == 2)
-#   define RELEASE_LEVEL final
-#endif
-
-#if (TK_RELEASE_LEVEL == 2)
-#   define MINOR_VERSION (TK_MINOR_VERSION * 16) + TK_RELEASE_SERIAL
-#else
-#   define MINOR_VERSION TK_MINOR_VERSION * 16
-#endif
-
-resource 'vers' (1) {
-	TK_MAJOR_VERSION, MINOR_VERSION,
-	RELEASE_LEVEL, 0x00, verUS,
-	TK_PATCH_LEVEL,
-	TK_PATCH_LEVEL ", by Ray Johnson © 1993-1996" "\n" "Sun Microsystems Labratories"
-};
-
-resource 'vers' (2) {
-	TK_MAJOR_VERSION, MINOR_VERSION,
-	RELEASE_LEVEL, 0x00, verUS,
-	TK_PATCH_LEVEL,
-	"Wish " TK_PATCH_LEVEL " © 1993-1996"
-};
 
 
 /* 
@@ -107,6 +80,8 @@ read 'TEXT' (202, "als_settings", purgeable, preload) "als_settings.tcl";
 read 'TEXT' (203, "als_tklib", purgeable, preload) "als_tklib.tcl";
 read 'TEXT' (204, "debugwin", purgeable, preload) "debugwin.tcl";
 read 'TEXT' (205, "defstr", purgeable, preload) "defstr.tcl";
+read 'TEXT' (206, "als_document", purgeable, preload) "als_document.tcl";
+read 'TEXT' (207, "als_menu", purgeable, preload) "als_menu.tcl";
 
 
 /*
