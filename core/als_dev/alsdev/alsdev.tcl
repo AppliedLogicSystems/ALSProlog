@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.38 1998/03/10 17:52:46 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.39 1998/03/11 02:50:05 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -335,8 +335,7 @@ proc set_top_bindings { WinPath StreamAlias WaitVar DataVar } {
 		"xmit_line_plain $WinPath $StreamAlias "
 	bind $WinPath <Control-d> \
 		"ctl-d_action $WinPath $StreamAlias "
-	bind $WinPath <Control-c> \
-		"ctl-c_action_during_read $WinPath $StreamAlias $WaitVar"
+	bind $WinPath <Control-c> "listener.copy .topals"
 	bind $WinPath <Control-u> \
 		"ctl-u_action $WinPath"
 
