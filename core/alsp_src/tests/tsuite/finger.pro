@@ -15,11 +15,16 @@ read_and_print_lines(Stream) :-
 read_and_print_lines(_).
 
 
-test :- finger(choupt,'world.std.com').
+test :- finger(choupt,herbrand).
+ntest :- nfinger(choupt,herbrand).
 
 nfinger(Who, Where) :-
-	open(nsocket(inet, stream, 0), read_write, S),
-	nsocket_connect(S, Where, 79),
-	put_line(S, Who),
-	read_and_print_lines(S),
-	close(S).
+	nsocket(internet, stream, 0, SD),
+	write(SD), nl,
+	nsocket_connect(SD, Where, 79),
+	open(nsocket(SD), write, WS, []),
+	open(nsocket(SD), read, RS, []),
+	put_line(WS, Who),
+	read_and_print_lines(RS),
+	close(WS), close(RS),
+	nsocket_close(SD).
