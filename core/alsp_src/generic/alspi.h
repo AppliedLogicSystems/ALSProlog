@@ -170,8 +170,8 @@ extern	ALSPI_API(const char *)	PI_get_options	PARAMS(( void ));
 
 typedef long (*console_func)(char *, long);
 
-extern ALSPI_API(void)	PI_set_console_functions(console_func read,
-								console_func write, console_func error);
+extern ALSPI_API(void)	PI_set_console_functions(console_func readf,
+								console_func writef, console_func error);
 
 #ifdef MacOS
 extern	long	yield_interval;
