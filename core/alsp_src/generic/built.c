@@ -208,7 +208,7 @@ static struct blt_struct {
 #endif /* FREEZE */
 
 #ifdef INTCONSTR
-#include "intrv_pb.h"
+/*  #include "intrv_pb.h"  */
 /*
 	BLT("equal",	  3, i_equal, "_i_equal"),
 	BLT("greatereq",  3, i_greatereq, "_i_greatereq"),
@@ -237,6 +237,7 @@ static struct blt_struct {
 */
 
 	BLT("fuzz_float",  3, pbi_fuzz, "_pbi_fuzz"),
+	BLT("$iter_link_net",  5, ilinknet, "_ilinknet"),
 #endif /* INTCONSTR */
 
 #ifdef SCO_UNIX			/* procedure names must be < 32 chars */

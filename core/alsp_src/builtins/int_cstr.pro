@@ -158,7 +158,8 @@ point_interval( X, PX)
 new_node(N)
 	:-
 %printf_opt('>==>new_node(%t)\n',[N], [lettervars(false),line_length(100)]),
-	'$iterate'(N, link).
+%	'$iterate'(N, link).
+	'$iterate'(N).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -195,16 +196,120 @@ tidg :-
 tidg :-
 	assert(it_debug_gl).
 
+export tt33/0.
+tt33 :-
+	X::real(0,1),Y::real(3,4),
+	Z::real,
+%	Z::real(0,50),
+	'$delay_term_for'(X, XDelayTerm),
+	arg(4, XDelayTerm, XConstraintTerm),
+	domain_term_from_constr(XConstraintTerm, XDomainTerm),
+	printf('xterm(before)=%t\n',[XDomainTerm]),
+
+	'$delay_term_for'(Z, ZDelayTerm),
+	arg(4, ZDelayTerm, ZConstraintTerm),
+	domain_term_from_constr(ZConstraintTerm, ZDomainTerm),
+	printf('zterm(before)=%t\n',[ZDomainTerm]),
+	
+	{Z==X+Y},
+
+	printf('xterm(after1)=%t\n',[XDomainTerm]),
+	printf('zterm(after1)=%t\n',[ZDomainTerm]),
+
+	{Z==2.5},
+	printf('xterm(after2)=%t\n',[XDomainTerm]),
+	printf('zterm(after2)=%t\n',[ZDomainTerm]).
+
+/*
+%	W::real,
+	W::real(2.9,77.8),
+	'$delay_term_for'(W, WDelayTerm),
+	arg(4, WDelayTerm, WConstraintTerm),
+	domain_term_from_constr(WConstraintTerm, WDomainTerm),
+	printf('wterm(before2)=%t\n',[WDomainTerm]),
+	printf('WWWWWWWWWWWWWWWWWWWWWWWWWWWWWw\n',[]),
+	{W==X+Y},
+	printf('xterm(after2)=%t\n',[XDomainTerm]),
+	printf('wterm(after2)=%t\n',[WDomainTerm]),
+	printf('zterm(after2)=%t\n',[ZDomainTerm]).
+*/
+
+export tt11/0.
+tt11 :- 
+	 X::real(0,3), {Y is X*(X+1), show('Y',Y), Y==2, show('X',X), show('Y',Y) }.
+
+export tt12/0.
+tt12 :- 
+	 X::real(0,3), {Y is (X+1), show('Y',Y), Y==2, show('X',X), show('Y',Y) }.
+
+export tt13/0.
+tt13 :- 
+	 X::real(0,3), 
+	 Z::real(0,100), 
+	 {Z == (X+1.4),  show('X',X), show('Z',Z), X==2, show('X',X), show('Z',Z) }.
+
+export tt14/0.
+tt14 :- 
+	 X::real(0,3), 
+	 Z::real(0,100), 
+	 {Z == (X+1.4),  show('X',X), show('Z',Z), Z==2, show('X',X), show('Z',Z) }.
+
 export '$iterate'/1.
+
+/*-----
 '$iterate'(Goal)
 	:-
 	'$iterate'(Goal, _).
+*-----*/
+
+
+'$iterate'(Goal)
+	:-
+	Goal =.. [OP | Args],
+	prim_op_code(OP,OpCd),
+	fixup_iter(Args, Z,X,Y),
+	'$iter_link_net'(OpCd,Z,X,Y,Goal).
+
+fixup_iter([Z,X], Z,X,0).
+fixup_iter([Z,X,Y], Z,X,Y).
+
+prim_op_code(unequal, 0).
+prim_op_code(equal, 1).
+prim_op_code(greatereq, 2).
+prim_op_code(higher, 3).
+prim_op_code(add, 4).
+prim_op_code(begin_tog, 5).
+prim_op_code(cos, 6).
+prim_op_code(finish_tog, 7).
+prim_op_code(inf, 8).
+prim_op_code(j_less, 9).
+prim_op_code(k_equal, 10).
+prim_op_code(lub, 11).
+prim_op_code(mul, 12).
+prim_op_code(narrower, 13).
+prim_op_code(or, 14).
+prim_op_code(pow_odd, 15).
+prim_op_code(qpow_even, 16).
+prim_op_code(rootsquare, 17).
+prim_op_code(sin, 18).
+prim_op_code(tan, 19).
+prim_op_code(vabs, 20).
+prim_op_code(wrap, 21).
+prim_op_code(xp, 22).
+
+
+
+
+
+
+
 
 export '$iterate'/2.
 '$iterate'(Goal, link)
 	:-
 %pbi_write(iterate_link([Goal | Tail],Tail,_)),pbi_nl,pbi_ttyflush,
 	iterate_link([Goal | Tail],Tail,_).
+
 
 iterate_link(Queue, T, T)
 	:-

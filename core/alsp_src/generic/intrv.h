@@ -49,6 +49,10 @@
 #define zlchange    (1 << 7)
 #define zhchange    (1 << 8)
 
+#define x_changed (xflip | xlchange | xhchange)
+#define y_changed (yflip | ylchange | yhchange)
+#define z_changed (zflip | zlchange | zhchange)
+
 /****************
 	NEED DFNS or EXTERN DECLS:
 deact  -- comes from macro defn of persistent;  needs change
@@ -79,7 +83,6 @@ ALSO clarify: w_Error (Error) label in wrap:
 #define int_fp		fp
 
 	/* Drop following externs if/when intaux.c is included in this file */
-extern void extract_bds    PARAMS( (PWord *, fp *, fp *) );
 extern void iaerror    PARAMS( (void) );
 extern void deact    PARAMS( (void) );
 	/* Dummy */
@@ -200,5 +203,20 @@ int BNRP_oldRM;
 #else
 #define DblRtrnType WTP_DOUBLE
 #endif
+
+
+
+
+/* QUEUE STUFF */
+
+
+typedef struct {
+	int    opcd;
+	double zl,zh,xl,xh,yl,yh;
+	PWord  X,Y,Z,goal;
+	} primop;
+
+
+
 
 #endif /* defined(INTCONSTR) */

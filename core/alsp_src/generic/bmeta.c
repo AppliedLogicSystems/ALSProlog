@@ -179,15 +179,14 @@ pbi_mangle()
 extern void	disp_heap_item	PARAMS(( PWord * ));
 
 #ifdef TRAILVALS
+
+void trailed_mangle0	PARAMS((PWord,PWord,int,PWord,int));
+
 int
 pbi_trailed_mangle(void)
 {				/* trailed_mangle(ArgN,Struct,Arg) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
-    int   arity;
-    PWord *argaddr;
-    PWord *b;
-    PWord *newv3 = NULL;	/* stifle -Wall */
 
     w_get_An(&v1, &t1, 1);	/* Get argument number  */
     w_get_An(&v2, &t2, 2);	/* Get structure or list */
@@ -195,6 +194,21 @@ pbi_trailed_mangle(void)
 
     if ((t1 != WTP_INTEGER) || (t3 == WTP_UNBOUND))
 	FAIL;
+
+	trailed_mangle0(v1,v2,t2,v3,t3);
+
+	SUCCEED;
+}
+
+void
+trailed_mangle0(v1,v2,t2,v3,t3)
+	PWord v1, v2, v3;
+	int       t2, t3;
+{				
+    int   arity;
+    PWord *argaddr;
+    PWord *b;
+    PWord *newv3 = NULL;	/* stifle -Wall */
 
     switch (t2) {
 	case WTP_STRUCTURE:
@@ -228,10 +242,12 @@ printf("tr_mg: wm_TR-2=%lx   *argaddr=%lx  ",(long)(wm_TR-2),(long)*argaddr);
 disp_heap_item(argaddr); 
 */
 
-		/*Copy the old value onto the 
-		  right place on the trail: */
+	/* Copy the old value onto the right place on the trail: */
+
     *((PWord *)wm_TR-2) = *argaddr;
-		/* Trail this location: */
+
+	/* Trail this location: */
+
     *--((PWord *)wm_TR) = (PWord)argaddr;
 	wm_TR = (PWord *)wm_TR - 1;
 

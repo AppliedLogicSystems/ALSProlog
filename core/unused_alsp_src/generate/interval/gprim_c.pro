@@ -64,10 +64,10 @@ module pseudocode.
 export make_c/0.
 make_c 
 	:- 
-	make_c( 'pseudoc.ode',  'intrv_pr.h', 'intrv_pb.h', 'intrv.c').
+	make_c( 'pseudoc.ode',  'intrv_pr.h', 'intrv.c').
 
-export make_c/3.
-make_c( SrcFile, OutFileH, OutFileHB, OutFileC)
+export make_c/2.
+make_c( SrcFile, OutFileHB, OutFileC)
 	:-
 	open(SrcFile,read,InS,[]),
 	read_pseudo(InS, IntervalOps, PseudoCode1),
@@ -75,24 +75,19 @@ make_c( SrcFile, OutFileH, OutFileHB, OutFileC)
 	adjust_names(PseudoCode1, PseudoCode),
 	bagof(SOP, sop(SOP), SOPs),
 
-	open(OutFileH, write, OutHS, []), 
-	open(OutFileHB, write, OutHBS, []), 
 	open(OutFileC, write, OutCS, []),
-	headers(OutHS, OutFileH, SrcFile),
-	headers(OutHS, OutFileHB, SrcFile),
 	headers(OutCS, OutFileC, SrcFile),
-	printf(OutCS, '\n#include "intrv.h"\n', []),
-	printf(OutCS, '\n#if defined(INTCONSTR)\n\n',[]),
-	printf(OutCS, '\n\nextern void extract_bds PARAMS((PWord *, fp *, fp *));\n',[]),
-	printf(OutCS, 'extern void change_bound PARAMS((PWord *, fp *, int));\n\n',[]),
+%	printf(OutCS, '\n#if defined(INTCONSTR)\n\n',[]),
+
+	open(OutFileHB, write, OutHBS, []),
+	headers(OutHBS, OutFileHB, SrcFile),
 	
-	compile_s_primitives( SOPs, OutHS, OutHBS, OutCS),
-	compile_primitives( IntervalOps, PseudoCode, OutHS, OutHBS, OutCS),
+	compile_s_primitives( SOPs, null, OutHBS, OutCS),
+	compile_primitives( IntervalOps, PseudoCode, null, OutHBS, OutCS),
 	!,
-	close(OutHS), 
-	close(OutHBS), 
-	printf(OutCS, '\n#endif /* defined(INTCONSTR) */\n\n',[]),
-	close(OutCS).
+%	printf(OutCS, '\n#endif /* defined(INTCONSTR) */\n\n',[]),
+	close(OutCS),
+	close(OutHBS).
 
 	/*------------------------------------------------*
 	 | Read input file, and break items into groups
@@ -225,26 +220,16 @@ compile_primitive( Name, PseudoCode, OutHS, OutHBS, OutCS)
 		Head = Entry),
 	Head =.. [Name | Args],
 	label_pfx(Name, LabPfx), 
-	printf(OutCS, 'int  %t  PARAMS( (void) );\n',[IName]),
 	length(Args,NNArgs),
-	(NNArgs > 4 ->
-		procheader( IName, Args, OutCS)
-		;
-		procheader2( IName, Args, OutCS)
-	),
+
+	ansi_proto(NNArgs, IName, '', OutCS),
+	procheader( NNArgs, IName, OutCS),
+	ansi_proto(NNArgs, IName, extern, OutHBS),
 
 	extract_labels(Body, LabPfx, [], LabelInfo),
-
 	compile_body( Body, standard, LabPfx, LabelInfo, OutCS ),
 	!,
-	(NNArgs > 4 ->
-		procend( IName, 4, OutCS),
-		blt_incd_info(Name, 10, OutHBS)
-		;
-		procend( IName, 3, OutCS),
-		blt_incd_info(Name, 7, OutHBS)
-	),
-	ansi_proto(IName, OutHS),
+	printf(OutCS, '\treturn(0);\n}\n\n',[]),
 		%% notify user we finished a primitive:
 	printf(user_output, '-%t\n', [Name]),
 	flush_output(user_output).
@@ -260,8 +245,11 @@ compile_s_prim( SOP, OutHS, OutHBS, OutCS)
 	catenate('i_', Name, IName),
 	cmt_for(OutCS, IName),
 	clause(SOP, Body),
-	printf(OutCS, 'int  %t  PARAMS( (void) );\n',[IName]),
-	procheader2( IName, Args, OutCS),
+
+	ansi_proto(NNArgs, IName, '', OutCS),
+	procheader( 4, IName, OutCS),
+	ansi_proto(4, IName, extern, OutHBS),
+
 	label_pfx(Name, LabPfx), 
 	printf(OutCS,'\t\t/* Macro version of call: %t  */\n',[SOP]),
 
@@ -269,9 +257,7 @@ compile_s_prim( SOP, OutHS, OutHBS, OutCS)
 
 	compile_body( Body, special, LabPfx, LabelInfo, OutCS ),
 	!,
-	procend( IName, 3, OutCS),
-	blt_incd_info(Name, 7, OutHBS),
-	ansi_proto(IName, OutHS),
+	printf(OutCS, '\treturn(0);\n}\n\n',[]),
 		%% notify user we finished a primitive:
 	printf(user_output, '-%t\n', [Name]),
 	flush_output(user_output).
@@ -353,38 +339,62 @@ label_pfx(Name, LabPfx)
 	abolish(cur_prim_key, 1),
 	catenate(K,'_',LabPfx).
 
-procheader(Name, Stream)
+procheader(_, Name, Stream)
 	:-
-	printf(Stream, '\n\ninterval_op(%t)\n', [Name]).     
-
-procheader(Name, Args, Stream)
+	printf(Stream, '\nint\n%t()\n{\n', [Name]).
+/*
+procheader(6, Name, Stream)
 	:-
-	printf(Stream, '\nint\n%t()\n', [Name]),
+	printf(Stream, '\nint\n%t(zl,zh,xl,xh,yl,yh)\n', [Name]),
+	printf(Stream, '\tdouble zl,zh,xl,xh,yl,yh;\n', []),
 	printf(Stream, '{\n', []),
+	aux_args(Name,InternalArgs),
+	internal_args_dec(InternalArgs, Stream, double).
 
-	args_PWord_dec(3, [z,x,y], Stream, InPWordArgs, InternalArgs),
-	args_types_dec(3, [z,x,y], Stream, InTypeArgs),
-	real_int_end_type(RIET),
-	aux_args(Name,AuxArgs),
-	append(AuxArgs, InternalArgs, I2DeclareArgs),
-	internal_args_dec(I2DeclareArgs, Stream, RIET),
-	int_ret_args(InternalArgs, Stream),
-	int_ret_type_args(InternalArgs, Stream),
-	printf(Stream, '\tint status = 0;\n', []),
-	printf(Stream, '\tPWord stat_var;\n', []),
-	printf(Stream, '\tint stat_var_t;\n', []),
-	printf(Stream, '#ifndef DoubleType\n', []),
-	printf(Stream, '\tPWord functor;\n', []),
-	printf(Stream, '\tPWord vv;\n', []),
-	printf(Stream, '\tint arity, tt, i;\n', []),
-	printf(Stream, '#endif\n', []),
-	nl(Stream),
-	get_args(InPWordArgs, InTypeArgs, 1, Stream),
-	nl(Stream),
-	setup_args(InPWordArgs, InTypeArgs, InternalArgs, RIET, Stream).
+procheader(5, Name, Stream)
+	:-
+	printf(Stream, '\nint\n%t(zl,zh,xl,xh,yl)\n', [Name]),
+	printf(Stream, '\tdouble zl,zh,xl,xh,yl;\n', []),
+	printf(Stream, '{\n', []),
+	aux_args(Name,InternalArgs),
+	internal_args_dec(InternalArgs, Stream, double).
+
+procheader(4, Name, Stream)
+	:-
+	printf(Stream, '\nint\n%t(zl,zh,xl,xh)\n', [Name]),
+	printf(Stream, '\tdouble zl,zh,xl,xh;\n', []),
+	printf(Stream, '{\n', []),
+	aux_args(Name,InternalArgs),
+	internal_args_dec(InternalArgs, Stream, double).
+*/
+
+
+ansi_proto(_, Name, Ex, Stream)
+	:-
+	printf(Stream, '%t int\t%t\t\tPARAMS((void));\n',[Ex,Name]).
+/*
+ansi_proto(4, Name, Ex, Stream)
+	:-
+	printf(Stream, 
+		'%t int\t%t\t\tPARAMS((double,double,double,double));\n',
+		[Ex,Name]).
+
+ansi_proto(5, Name, Ex, Stream)
+	:-
+	printf(Stream, 
+		'%t int\t%t\t\tPARAMS((double,double,double,double,double));\n',
+		[Ex,Name]).
+
+ansi_proto(6, Name, Ex, Stream)
+	:-
+	printf(Stream, 
+	'%t int\t%t\t\tPARAMS((double,double,double,double,double,double));\n',
+		[Ex,Name]).
+*/
 
 real_int_end_type(double).
 
+/*
 procheader2(Name, Args, Stream)
 	:-
 	printf(Stream, '\nint\n%t()\n', [Name]),
@@ -411,13 +421,7 @@ procheader2(Name, Args, Stream)
 	nl(Stream),
 	setup_args(InPWordArgs, InTypeArgs, InternalArgs, RIET, Stream).
 
-special_procheader( IName, Args, OutCS)
-	:-
-	real_int_end_type(RIET),
-	printf(OutCS, '\nint\n%t(zl,zh, xl, xh, status)\n', [IName]),
-	printf(OutCS, '\t%t zl,zh, xl, xh;\n', [RIET]),
-	printf(OutCS, '\tint status;\n', []),
-	printf(OutCS, '{\n', []).
+*/
 
 aux_args(i_begin_tog,[]) :-!.
 aux_args(i_finish_tog,[]) :-!.
@@ -444,6 +448,7 @@ aux_args(i_wrap,[vl, vh, ul]) :-!.
 
 aux_args(_,[vl, vh]).
 
+/*
 procend( Name, N, S)
 	:-
 	(N = 3 ->
@@ -493,6 +498,9 @@ args_types_dec0(N, [VName | VNList], Stream, [VT | InTypeArgs])
 	printf(Stream, '%t, ',[VT]),
 	M is N-1,
 	args_types_dec0(M, VNList, Stream, InTypeArgs).
+*/
+
+internal_args_dec([], Stream, RIET) :-!.
 
 internal_args_dec(InternalArgs, Stream, RIET)
 	:-
@@ -508,6 +516,7 @@ internal_args_dec0([A | InternalArgs], Stream)
 	printf(Stream, '%t, ', [A]),
 	internal_args_dec0(InternalArgs, Stream).
 
+/*
 int_ret_args(InternalArgs, Stream)
 	:-
 	printf(Stream, '\tPWord ',[]),
@@ -572,13 +581,21 @@ setup_args([PWV | InPWordArgs], [TPV | InTypeArgs],
 	printf(Stream, '\telse  FAIL;\n\n', []),
 	setup_args(InPWordArgs, InTypeArgs, RestVNs, RIET, Stream).
 
+ansi_proto(Name, null)
+	:-!.
+
 ansi_proto(Name, Stream)
 	:-
 	printf(Stream, 'extern int\t%t\t\tPARAMS( (void) );\n',[Name]).
 
+blt_incd_info(IName, N, null)
+	:-!.
+
 blt_incd_info(IName, N, Stream)
 	:-
 	printf(Stream, '\tBLT("%t",\t%d,\ti_%t,\t"_i_%t"),\n',[IName,N,IName,IName]).
+
+*/
 
 cmt_for(OutCS, IName)
 	:-
@@ -586,6 +603,7 @@ cmt_for(OutCS, IName)
 	printf(OutCS, '      |   %t \n', [IName]),
 	printf(OutCS, '      *----------------*/\n\n', []).
 
+/*
 setup_return_for(S, VName,N)
 	:-
 	printf(S, '\t  w_get_An(&%t_v, &%t_vt, %d);\n', [VName,VName,N]),
@@ -657,6 +675,7 @@ consis_and_change2(S)
 	printf(S, '\tif (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);\n',[]),
 	printf(S, '\tif (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);\n',[]),
 	printf(S, '\tif (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);\n\n',[]).
+*/
 */
 
 /*--------------------------------------------------------------*

@@ -13,18 +13,18 @@ all: all-generic all-port all-maketop
 #
 #	All versions of ...
 #
-all-generic: generic.unix generic.dj1 generic.dj2 generic.msw31 \
+all-generic: generic.unix generic.dj1 generic.dj2 generic.w31 \
 			generic.mac generic.os2
 
-all-port: port.unix port.dj1 port.dj2 port.msw31 port.mac port.os2
+all-port: port.unix port.dj1 port.dj2 port.w31 port.mac port.os2
 
-all-maketop: maketop.unix maketop.dj1 maketop.dj2 maketop.msw31 \
+all-maketop: maketop.unix maketop.dj1 maketop.dj2 maketop.w31 \
 			maketop.mac maketop.os2
 
 #
 #	All makefiles for version ...
 #
-msw31: generic.msw31 port.msw31 maketop.msw31
+w31: generic.w31 port.w31 maketop.w31
 
 unix: generic.unix port.unix maketop.unix
 
@@ -65,10 +65,10 @@ generic.os2: ../generic/generate/generic.abs
 		-p -src ../generic/generate/generic.abs \
 		-tgt ../generic/generate/generic.os2 -ctx os2
 
-generic.msw31: ../generic/generate/generic.abs
+generic.w31: ../generic/generate/generic.abs
 	$(ALSPRO) $(A2M)  -g abs2make_cl -p \
 		-src ../generic/generate/generic.abs \
-		-tgt ../generic/generate/generic.w31 -ctx msw31
+		-tgt ../generic/generate/generic.w31 -ctx w31
 
 generic.mac: ../generic/generate/generic.abs
 	$(ALSPRO) $(A2M)  -g abs2make_cl -p \
@@ -112,13 +112,13 @@ port.os2: ../bld-port/makefile.abs ../port/port.abs
                 -src ../port/port.abs \
                 -tgt ../port/port.os2 -ctx os2
 
-port.msw31: ../bld-port/makefile.abs ../port/port.abs
+port.w31: ../bld-port/makefile.abs ../port/port.abs
 	$(ALSPRO) $(A2M)  -g abs2make_cl -p \
                 -src ../bld-port/makefile.abs \
-                -tgt ../bld-port/makefile.w31 -ctx msw31
+                -tgt ../bld-port/makefile.w31 -ctx w31
 	$(ALSPRO) $(A2M)  -g abs2make_cl -p \
                 -src ../port/port.abs \
-                -tgt ../port/port.w31 -ctx msw31
+                -tgt ../port/port.w31 -ctx w31
 
 
 port.mac: ../bld-port/makefile.abs ../port/port.abs
@@ -149,9 +149,9 @@ maketop.os2: maketop.abs
 	$(ALSPRO) $(A2M) -g abs2make_cl \
 		-p -src maketop.abs -tgt maketop.os2 -ctx os2
 
-maketop.msw31: maketop.abs
+maketop.w31: maketop.abs
 	$(ALSPRO) $(A2M)  -g abs2make_cl \
-		-p -src maketop.abs -tgt maketop.w31 -ctx msw31 
+		-p -src maketop.abs -tgt maketop.w31 -ctx w31 
 
 maketop.mac: maketop.abs
 	$(ALSPRO) $(A2M) -g abs2make_cl -p \

@@ -165,7 +165,7 @@ extern	int	pbi_bind_vars		PARAMS(( void ));
 #ifdef INTCONSTR
 	/* intrv.c */
 
-#include "intrv_pr.h"
+/*  #include "intrv_pr.h"  */
 /*
 extern int		i_equal			PARAMS( (void) );
 extern int		i_greatereq		PARAMS( (void) );
@@ -193,6 +193,7 @@ extern int      i_xp            PARAMS( (void) );
 */
 
 extern int	pbi_fuzz	PARAMS((void));
+extern int  ilinknet	PARAMS((void));
 #endif
 
 

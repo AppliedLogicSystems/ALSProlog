@@ -291,6 +291,34 @@
 	TK(TK_NUMBER_CHARS,"number_chars"),
 	TK(TK_NUMBER_CODES,"number_codes"),
 	TK(TK_SNR,"stream_not_ready"),
+
+		/* Tokens specifically added for the
+		   primitive operators of the
+		   interval constraint subsystem;
+		   TK_COS, TK_SIN, TK_TAN are defined above;
+		 */
+
+	TK(TK_UNEQUAL, "unequal"),
+	TK(TK_EQUAL, "equal"),
+	TK(TK_GREATEREQ, "greatereq"),
+	TK(TK_HIGHER, "higher"),
+	TK(TK_ADD, "add"),
+	TK(TK_BEGIN_TOG, "begin_tog"),
+	TK(TK_FINISH_TOG, "finish_tog"),
+	TK(TK_INF, "inf"),
+	TK(TK_J_LESS, "j_less"),
+	TK(TK_K_EQUAL,  "k_equal"),
+	TK(TK_LUB, "lub"),
+	TK(TK_MUL, "mul"),
+	TK(TK_NARROWER, "narrower"),
+	TK(TK_OR, "or"),
+	TK(TK_POW_ODD, "pow_odd"),
+	TK(TK_QPOW_EVEN, "qpow_even"),
+	TK(TK_ROOTSQUARE, "rootsquare"),
+	TK(TK_VABS, "vabs"),
+	TK(TK_WRAP, "wrap"),
+	TK(TK_XP, "xp"),
+/*        OP(TK_IDCL, "::", 0, OP_XFX(700)), */
 	
 	/*
 	 * TK_EOF is the last token and must remain so.  If adding a token

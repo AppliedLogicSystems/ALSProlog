@@ -5,61 +5,91 @@
  |
  |		Supporting functions for (generated) intrv.c (intrv.h)
  *==================================================================*/
-	/* Drop following if/when this file is included in intrv.c */
+
 #include "intrv.h"
 #if defined(INTCONSTR)
 #include "freeze.h"
 
-
-
 extern PWord	deref_2		PARAMS(( PWord ));
 
+PWord *get_intvl_tm		PARAMS((PWord *, int));
+
 /*--------------------------------------------------------
- 	extract_bds(IntStruct, ZL, ZH)
+ 	PWord *get_intvl_tm(DelTerm, DelTerm_t)
 
 	IntStruct is a (pointer to) an interval delay structure;
 	extracts the values of the end points of the interval,
 	and binds them to (the vars pointed at by) ZL, ZH
  *-------------------------------------------------------*/
-
-
-void extract_bds	PARAMS( (PWord *, fp *, fp *) );
-
-void
-extract_bds(IntStruct, ZL, ZH)
-	PWord *IntStruct; /* IntStruct_t == WTP_UNBOUND) */
-	fp *ZL, *ZH;
+PWord *get_intvl_tm(DelTerm, DelTerm_t)
+	PWord *DelTerm; 
+	int DelTerm_t;
 {
 	PWord DrT, *CstrTm, functor;
 	int *CstrTm_t;
+
+/* printf("in get_intvl_tm:DelTerm=%x\n",DelTerm); */
+
+	if ((DelTerm_t == WTP_UNBOUND) && (CHK_DELAY((PWord *)DelTerm)))
+	{
+	DrT = deref_2((PWord)DelTerm);
+	w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)((PWord *)DrT-1), 4);
+
+		/* CstrTm is now the delay term from DelTerm;
+		   but it might be a compound (comma) interval delay
+		   term, so we need to pull out the leftmost component */
+
+	w_get_functor(&functor, (PWord)CstrTm);
+	while(TK_COMMA == functor )
+	{
+		w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)CstrTm, 1);
+		w_get_functor(&functor, (PWord)CstrTm);
+	}
+	/* CstrTm should be intvl(Type,Var,_,L,U) */
+
+/* printf("out get_intvl_tm=%x\n",CstrTm); */
+
+	return(CstrTm);
+	}
+	else
+printf("get_intvl_tm:Non-delay: %x \n",DelTerm);
+		FAIL;
+}	/* get_intvl_tm */
+
+
+/*--------------------------------------------------------
+ 	extract_bds(DelTerm, ZL, ZH)
+
+	DelTerm is a (pointer to) an interval delay structure;
+	extracts the values of the end points of the interval,
+	and binds them to (the vars pointed at by) ZL, ZH
+ *-------------------------------------------------------*/
+int extract_bds	PARAMS( (PWord *, int, fp *, fp *) );
+
+int
+extract_bds(DelTerm, DelTerm_t, ZL, ZH)
+	PWord *DelTerm; 
+	int DelTerm_t;
+	fp *ZL, *ZH;
+{
+	PWord *CstrTm;
 	PWord ZLV, ZHV;
 	int ZLV_t, ZHV_t;
 #ifndef DoubleType
-	PWord vv;
+	PWord vv, functor;	/* vars for GET_DBL_VAL */
 	int arity, tt, i;
 #endif
 
-/* printf("!+extract_bds:IntStruct=%x\n",(int)IntStruct); */
+/* printf("!+extract_bds:DelTerm=%x\n",DelTerm);  */
 
-		/* Test that we are really getting a delay var */
-	if (CHK_DELAY((PWord *)IntStruct))
+		/* Test that we are really getting a delay var,
+		   or a point (integer) interval: */
+	if ((CHK_DELAY((PWord *)DelTerm)) || (DelTerm_t = WTP_INTEGER))
 	{
-		DrT = deref_2((PWord)IntStruct);
-		w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)((PWord *)DrT-1), 4);
-
-			/* CstrTm is now the delay term from IntStruct;
-				but it might be a compound (comma) interval delay
-				term, so we need to pull out the leftmost component */
-
-		w_get_functor(&functor, (PWord)CstrTm);
-		while(TK_COMMA == functor )
-		{
-			w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)CstrTm, 1);
-            w_get_functor(&functor, (PWord)CstrTm);
-		}
+		CstrTm = get_intvl_tm(DelTerm, DelTerm_t);
 		
-			/* CstrTm should be intvl(Type,Var,_,L,U)
-				-- maybe we should test?? */
+		/* CstrTm should be intvl(Type,Var,_,L,U)
+						-- maybe we should test?? */
              
 		w_get_argn(&ZLV, &ZLV_t, (PWord)CstrTm, 4);
 
@@ -81,12 +111,14 @@ extract_bds(IntStruct, ZL, ZH)
 			w_get_double(&ZH, ZHV);
 #endif
 
-/* printf("extracted: L=%g  H=%g\n",(fp)*ZL, (fp)*ZH); */
+ printf("extracted: L=%g  H=%g\n",(fp)*ZL, (fp)*ZH); 
 
+	SUCCEED;
 	}
 	else
 			/* Change to exception later */
 		printf("Error: Non-delay var passed to extract_bds\n");
+		FAIL;
 }
 
 #if 0
@@ -130,8 +162,8 @@ void change_bound(IntStruct, PtrFP, Which)
 #endif  /* #ifdef 0 */
 
 
-fp i_next  PARAMS((fp *));
-fp i_prev  PARAMS((fp *));
+extern fp i_next  PARAMS((fp *));
+extern fp i_prev  PARAMS((fp *));
 
 	/* Prototypes */
 int	pbi_fuzz	PARAMS((void));

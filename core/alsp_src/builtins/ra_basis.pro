@@ -292,7 +292,9 @@ restrict_interval(Type,X)
 	Type =.. [PrimType, RestL, RestU],
 	'$delay_term_for'(X, XDelayTerm),
 	arg(4, XDelayTerm, XCT),
-	XCT = intvl(XType,_, _, XL,XU),
+	domain_term_from_constr(XCT, XDomTm),
+	XDomTm = intvl(XType,_, _, XL,XU),
+
 	(var(RestL) ->
 		RestL = XL, NewL = XL
 		;
@@ -312,6 +314,15 @@ restrict_interval(Type,X)
 	!,
 	trailed_mangle(4, XCT, NewL),
 	trailed_mangle(5, XCT, NewU).
+
+restrict_interval(Type,X)
+	:-
+	'$delay_term_for'(X, XDelayTerm),
+	arg(4, XDelayTerm, XCT),
+	domain_term_from_constr(XCT, XDomTm),
+	XDomTm = intvl(Type,_, _, _,_),
+	!.
+
 
 restrict_interval(Type,X)
 	:-
