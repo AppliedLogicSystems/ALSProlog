@@ -3,6 +3,7 @@
  |		Copyright (c) 1999-2004 Applied Logic Systems, Inc.
  |	
  |		Parse tokenized html into pxml prolog terms
+ |		  -- assumes the html was originally cleaned up by HTMLTidy
  |
  |	Authors: Ken Bowen & Chuck Houpt
  |
@@ -44,11 +45,14 @@ module pxml.
 export grab_pxml/2.
 grab_pxml(Path, PXML)
     :-
+/*
     grab_lines(Path, RawLines),
     cut_cmts_js(RawLines, ScriptlessLines),
     read_tokens_lines(ScriptlessLines, Tokens),
     parse_pxml(Tokens, PXML).
-
+*/
+    grab_html_tokens(Path, Tokens),
+    parse_pxml(Tokens, PXML).
 
 
 /*
@@ -69,6 +73,10 @@ r_pxml(S, L)
 
 	%%------------------------------------------
 	%% Parse the token stream
+        %%  -- assumes the html was originally 
+	%%     cleaned up by HTMLTidy; in particular,
+	%%     <p> is a binary tag, so it must always
+	%%     be matched by </p>
 	%%------------------------------------------
 export parse_pxml/2.
 parse_pxml([], []).
@@ -77,7 +85,6 @@ parse_pxml(Tokens, [Term | RestTerms])
 	read_pxml_term(Tokens, Term, RestTokens),
 	parse_pxml(RestTokens, RestTerms).
 
-export read_pxml_term/3.
 read_pxml_term([string(StringAtom) | RestTokens], StringAtom, RestTokens)
 	:-!.
 
@@ -87,7 +94,7 @@ read_pxml_term(['<', InTag,'>','<', InTag,'>' | Tokens], Term, RestTokens)
 	!,
 	read_pxml_term(['<', InTag,'>' | Tokens], Term, RestTokens).
 
-
+export read_pxml_term/3.
 read_pxml_term(['<', InTag | Tokens], Term, RestTokens)
 	:-
 	make_lc_sym(InTag, Tag),
@@ -244,7 +251,7 @@ read_to_close_html(Tokens, [Term | SubTerms], Tag, RestTokens)
 	%%------------------------------------------
 unary_tag(hr).
 unary_tag(br).
-unary_tag(p).
+%unary_tag(p).
 unary_tag('!doctype').
 unary_tag(meta).
 unary_tag(img).
@@ -335,122 +342,6 @@ start_can_terminate(ul, li).
 start_can_terminate(ol, li).
 end_can_terminate(ul, li).
 end_can_terminate(ol, li).
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%% Input: Parse DTD files
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-	/* Very simple DTD parser -- not complete */
-export parse_dtd/2.
-parse_dtd(DTDTokens, DTDTerm)
-	:-
-	parse_dtd(DTDTokens, DTDTerm, Remainder).
-
-parse_dtd([], [], []).
-parse_dtd(DTDTokens, [DTDTerm | DTDTermList], Remainder)
-	:-
-	dtde(DTDTerm, DTDTokens, RestDTDTokens),
-	!,
-	parse_dtd(RestDTDTokens, DTDTermList, Remainder).
-parse_dtd(Remainder, [], Remainder).
-
-	%% comment
-dtde(comment(List)) --> ['<','!--'], {!},  read_comment(List).
-
-read_comment(List, In, Out)
-	:-
-	rc(In, List, Out).
-
-rc(['--','>' | Out], [], Out).
-rc([Item | RestIn], [Item | List], Out)
-	:-
-	rc(RestIn, List, Out).
-
-	%% !ELEMENT
-dtde(element(Name, Parts)) 
-	--> ['<'], keyword('!element'), {!},  [Name], eparts(Parts), ['>'].
-
-eparts(Parts) --> ['('], eparts_list(Parts0, Kind), [')'], {mk_parts_list(Kind, Parts0, Parts)}.
-eparts([]) --> ['EMPTY'].
-mk_parts_list(Kind, Parts0, Parts)
-	:-
-	nonvar(Kind),
-	!,
-	Kind = disj,
-	Parts = disj(Parts0).
-
-mk_parts_list(Kind, Parts, Parts).
-
-eparts_list([Part | Parts],Kind) --> 
-	epart(Part), [Punct], {Punct=',' ; Punct='|',Kind=disj}, eparts_list(Parts,Kind).
-
-eparts_list([Part],_) --> epart(Part).
-eparts_list([], _, X, X).
-
-/*
-eparts(disj(Parts)) --> ['('], eparts_disj_list(Parts), [')'].
-eparts(Parts) --> ['('], eparts_list(Parts), [')'].
-eparts([]) --> ['EMPTY'].
-
-eparts_disj_list([Part | Parts]) --> epart(Part), ['|'], eparts_disj_list(Parts).
-eparts_disj_list([Part]) --> epart(Part).
-eparts_disj_list([],X,X).
-
-eparts_list([Part | Parts]) --> epart(Part), [','], eparts_list(Parts).
-eparts_list([Part]) --> epart(Part).
-eparts_list([], X, X).
-*/
-
-epart(Parts) --> ['('], eparts_list(Parts0,Kind), [')'], {mk_parts_list(Kind, Parts0, Parts)}.
-epart(MPart) --> [Part], part_modifier(Mod), {part_modify(Mod, Part, MPart)}.
-epart(Part) --> [Part].
-
-part_modifier(Mod) --> [Mod], {is_part_modifier(Mod)}.
-is_part_modifier('+').
-is_part_modifier('*').
-is_part_modifier('?').
-
-	%% !ATTLIST
-dtde(attlist(Name, Tag, Value, Option)) 
-	--> ['<'], keyword('!attlist'), {!}, 
-		[Name], [Tag], attlist_value(Value), attlist_option(Option), ['>'].
-
-attlist_value(disj(Value)) --> ['('], disjunct_list(Value), [')'], {!}.
-attlist_value('#cdata') --> keyword('#cdata').
-
-attlist_option('#required') --> keyword('#required'), {!}.
-attlist_option('#implied') --> keyword('#implied'), {!}.
-attlist_option(text(Text)) --> [Text].
-
-disjunct_list([Item | Items]) --> [Item], ['|'], disjunct_list(Items).
-disjunct_list([Item]) --> [Item].
-disjunct_list([], X, X).
-
-keyword(What) --> [Item], {keyword(What, Item)}.
-
-keyword(What, What) :-!. 
-keyword('!element', '!ELEMENT') :-!.
-keyword('!attlist', '!ATTLIST') :-!.
-keyword('#cdata', 'CDATA') :-!.
-keyword('#required', '#REQUIRED') :-!.
-keyword('#implied', '#IMPLIED') :-!.
-keyword(What, Item) 
-	:-
-	atom_codes(Item, ItemCs),
-	make_lc(ItemCs, LCItemCs),
-	atom_codes(What, LCItemCs).
-
-part_modify(Mod, Part, MPart)
-	:-
-	MPart =.. [Mod, Part].
-
-quoted_text(Text, Target, In, Out)
-	:-
-	read_to(In, Target, Text, Out).
-
-items([Item | Items]) --> [Item], items(Items).
-items([Item]) --> [Item].
-items([], X, X).
 
 endmod.
 

@@ -38,14 +38,19 @@
 module pxml.
 
 
-export grab_html_tokens/2.
-grab_html_tokens(Path, HTMLPageTokens)
+export grab_html_tokens_cleaned/2.
+grab_html_tokens_cleaned(Path, HTMLPageTokens)
     :-
     grab_lines(Path, RawLines),
     cut_cmts_js(RawLines, ScriptlessLines),
     read_tokens_lines(ScriptlessLines, HTMLPageTokens).
 
 
+export grab_html_tokens/2.
+grab_html_tokens(Path, HTMLPageTokens)
+    :-
+    open(Path, read, S),
+    unwind_protect( read_tokens(S, HTMLPageTokens), close(S) ).
 
 	%%------------------------------------------
 	%% Strip out comments, java script & styles
@@ -178,6 +183,13 @@ script_cmt_cut(normal, Line, [Line | ScriptlessLinesTail], normal,
 	%%------------------------------------------
 	%% Tokenize the input
 	%%------------------------------------------
+export rtt/2.
+rtt(File, Tokens)
+	:-
+	open(File, read, S),
+	read_tokens(S, Tokens),
+	close(S).
+
 export read_tokens_lines/2.
 read_tokens_lines(Lines, Tokens)
 	:-
@@ -199,6 +211,8 @@ export read_tokens/2.
 read_tokens(S, Tokens)
 	:-
 	read_tokens(normal, S,  Tokens, [], _).
+
+
 
 /*----------------------------------------------------------------*
  | read_tokens/5

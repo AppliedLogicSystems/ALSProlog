@@ -36,7 +36,10 @@ create_html_descs([Doc | ModPreds], Mod, Data, DateTime, [PredOneLiner | RestMod
 create_html_descs([Doc | ModPreds], Mod, Data, DateTime, [PredOneLiner | RestModOneLiners])
 	:-
 	get_doc_preddesc(Doc, PredDesc),
-	printf(user_output, '!!FAILURE creating html description for: %t  -- skipping\n', [PredDesc]),
+        get_doc_file(Doc, File),
+	printf(user_output, 
+	       '!!FAILURE creating html description for: %t in module = %t from file = %t -- skipping\n', 
+	       [PredDesc, Mod, File]),
 	create_html_descs(ModPreds, Mod, Data, DateTime, RestModOneLiners).
 
 html_desc(Doc, Module, DateTime, Data, PredText-ShortNote)

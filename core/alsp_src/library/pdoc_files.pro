@@ -25,6 +25,8 @@ build_files_desc(Data, General, FileDescLines)
 
 write_files_desc(Data, General, FilesList, OS, FileDescLines)
 	:-
+%	get_mods_preds_list(Data, ModsPredsList),
+
 	dmember(keywords=KeyWords, General),
 	dmember(doctitle=DocTitle, General),
 	dmember(datetime=DateTime, General),
@@ -222,7 +224,7 @@ write_files_details([FileDesc | FilesList], OS)
 write_file_detail(FileDesc, OS)
 	:-
 	FileDesc = FileName - (Detail, FileDocList),
-
+printf(user_output, 'FILE: %t\n', [FileName]),
 	codesweep([
 	'<TABLE BORDER="1" WIDTH="100%" CELLPADDING="3" CELLSPACING="0" SUMMARY="">',
 	'<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">',
@@ -233,6 +235,8 @@ write_file_detail(FileDesc, OS)
 	'<TD>'
 	  	], OS),
 	file_detail(Detail, OS),
+	printf(OS, '\n<br>File contents:&nbsp;&nbsp;&nbsp;', []),
+	file_contents(FileDocList, OS),
 	codesweep([
 	'</TD>',
 	'</TR>',
@@ -248,5 +252,24 @@ file_detail([Line | Detail], OS)
 	printf(OS, '%t<BR>\n', [Line]),
 	file_detail(Detail, OS).
 
+file_contents([], OS).
+file_contents([Doc | FileDocList], OS)
+	:-
+	do_doc_content(Doc, OS),
+	file_contents(FileDocList, OS).
+
+do_doc_content(Doc, OS)
+	:-
+	get_doc_preddesc(Doc, PredDesc),
+	get_doc_module(Doc, Module),
+	PredDesc = P/A,
+	catenate(P, A, XPD),
+	get_doc_file(Doc, FileName),
+	!,
+	printf(OS, '<a href="./%t/%t.html"> %t </a>&nbsp;&nbsp;&nbsp;', [Module,XPD,PredDesc]).
+do_doc_content(Doc, OS)
+	:-
+	get_doc_preddesc(Doc, PredDesc),
+	printf(OS, 'Missing: %t &nbsp;&nbsp;&nbsp;', [PredDesc]).
 
 endmod.
