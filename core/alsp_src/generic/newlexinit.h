@@ -1,4 +1,4 @@
-char lx_chtb[256] = {
+const char lx_chtb[256] = {
 /* 00 nul | 01 soh  | 02 stx | 03 etx  | 04 eot | 05 enq  | 06 ack | 07 bel */
    LX_EOF,  LX_WSP,   LX_WSP,  LX_WSP,   LX_EOF,  LX_WSP,   LX_WSP,  LX_WSP,
 

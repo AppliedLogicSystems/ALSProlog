@@ -14,19 +14,21 @@
  |						   Mac compilers that can't handle them.
  *===================================================================*/
 #include "defs.h"
-#include "varproc.h"
+//#include "varproc.h"
 #include "cutmacro.h"
 #include "compile.h"
 #include "module.h"
 #include "icode.h"
 #include "icodegen.h"
 
+#if 0
+moved to engine.h
 static int npv;				/* number of permanent variables */
 static int ngoals;			/* number of goals               */
 static int nvars;			/* number of variables           */
 static int goalnumber;		/* which goal we're working on,  *
 				 			 * 0 represents the head         */
-static int nargs;		    /* number of arguments in the current goal */
+static int cnargs;		    /* number of arguments in the current goal */
 
 static int firstgoalnumber;
 			/* usually 1, but not when there are cut(s) preceding
@@ -55,10 +57,13 @@ static int to_do_top = 0;
 		 * points to the next available location on the
 		 * "to do" stack
 		 *----------------------------------------------*/
+#endif
 
 #define TDT_SET(tdt,n) tdt = to_do_top; to_do_top += n
 #define TDT_RESET(tdt) to_do_top = tdt
 
+#if 0
+moved to engine.h
 static pword model[MODELSIZE];
 
 		/*----------------------------------------------*
@@ -92,41 +97,42 @@ static int cd_gmod;		/* Goal module; i.e, module to place next goal in	 */
 
 static int model_SP;
 static int model_E;
+#endif
 
-static	int		comp_rule				PARAMS(( pword ));
-static	void	deallocate_environment	PARAMS(( pword, int, int, int ));
-static	void	initialize_environment_variables PARAMS(( void ));
+static	int		comp_rule				(PE, pword );
+static	void	deallocate_environment	(PE, pword, int, int, int );
+static	void	initialize_environment_variables ( PE );
 #if defined(InMath) && !defined(NewMath)
-static	long	regfreemap				PARAMS(( void ));
+static	long	regfreemap				( void );
 #endif
 #ifdef NewMath
-static	long	regusemap				PARAMS(( void ));
-static	void	arith_temp_homes		PARAMS(( void ));
+static	long	regusemap				( void );
+static	void	arith_temp_homes		( void );
 #endif
-static	int		do_macro				PARAMS(( pword, int ));
-static	int		goalsize				PARAMS(( pword ));
-static	void	incr_usecnt				PARAMS(( int ));
-static	void	init_model				PARAMS(( pword, pword ));
-static	void	init_targets			PARAMS(( pword ));
-static	void	init_only_targets		PARAMS(( pword ));
-static	void	reassign_homes			PARAMS(( pword ));
-static	void	comp_head				PARAMS(( pword ));
-static	void	record_first_argument	PARAMS(( int, pword ));
-static	void	comp_head_structure		PARAMS(( int ));
-static	void	comp_hstruct_argument	PARAMS(( pword, int ));
-static	void	move					PARAMS(( int, int ));
-static	int		find_home				PARAMS(( int ));
-static	int		find_temp_in_reg		PARAMS(( int ));
-static	int		free_target				PARAMS(( int ));
-static	void	move_perms				PARAMS(( int ));
-static	void	move_to_temp			PARAMS(( int ));
-static	void	comp_goal				PARAMS(( pword ));
-static	int		comp_goal_structure		PARAMS(( pword, int ));
-static	int		comp_struct_arg1		PARAMS(( pword ));
-static	void	comp_struct_arg2		PARAMS(( pword, int, int ));
-static	pword	get_compiler_directives	PARAMS(( pword ));
-static	void	compiler_directives 	PARAMS(( void ));
-static	void	emit_cd_cutpt			PARAMS(( void ));
+static	int		do_macro				( pword, int );
+static	int		goalsize				( pword );
+static	void	incr_usecnt				(PE, int );
+static	void	init_model				(PE, pword, pword );
+static	void	init_targets			(PE, pword );
+static	void	init_only_targets		(PE, pword );
+static	void	reassign_homes			(PE, pword );
+static	void	comp_head				(PE, pword );
+static	void	record_first_argument	(PE,  int, pword );
+static	void	comp_head_structure		(PE, int );
+static	void	comp_hstruct_argument	(PE, pword, int );
+static	void	move					(PE, int, int );
+static	int		find_home				(PE, int );
+static	int		find_temp_in_reg		(PE,  int );
+static	int		free_target				(PE,  int );
+static	void	move_perms				(PE, int );
+static	void	move_to_temp			(PE, int );
+static	void	comp_goal				(PE, pword );
+static	int		comp_goal_structure		(PE,  pword, int );
+static	int		comp_struct_arg1		(PE, pword );
+static	void	comp_struct_arg2		(PE, pword, int, int );
+static	pword	get_compiler_directives	(PE, pword );
+static	void	compiler_directives 	( PE );
+static	void	emit_cd_cutpt			( PE );
 
 #if 0
 #ifdef MaxFunc
@@ -136,8 +142,7 @@ static	void	emit_cd_cutpt			PARAMS(( void ));
  */
 
 int
-max(x, y)
-    int   x, y;
+max(int x, int y)
 {
     return (x < y) ? y : x;
 }
@@ -154,10 +159,12 @@ max(x, y)
  *=====================================================================*/
 
 int
-compile_clause(r, fromparser)
-    pword r;
-    int   fromparser;		/* flag indicating if we came from the parser
+compile_clause(
+    PE,
+    pword r,
+    int   fromparser		/* flag indicating if we came from the parser
 				 */
+)
 {
     pword rh;			/* rule head */
 
@@ -169,17 +176,17 @@ compile_clause(r, fromparser)
 #ifndef KERNAL
 	/* Is this really a parser error? Couldn't it be generated directly? */
 	if (fromparser)
-	    parser_error("Head of clause of inappropriate type.");
+	    parser_error(hpe, "Head of clause of inappropriate type.");
 #endif /* KERNAL */
 	return 0;		/* return failure code if not   */
     }
 
-    npv = classify_vars(r);	/* Do analysis of the variables and cuts */
+    npv = classify_vars(hpe, r);	/* Do analysis of the variables and cuts */
 
     ngoals = RULE_NGOALS(r);	/* Tell everyone how many goals we have  */
     nvars = RULE_NVARS(r);	/* Similarly for the number of variables */
 
-    compute_call_env_sizes(ngoals, nvars);
+    compute_call_env_sizes(hpe, ngoals, nvars);
 
     /*--------------------------------------------------------------*
 	 * Figure out how big of an environment we need after each call...
@@ -191,11 +198,11 @@ compile_clause(r, fromparser)
 					 				 */
     cd_cutpt = -1;		/* No cutpt info requested yet */
 
-    if (!comp_rule(r)) {	/* Generate the code for the clause  */
+    if (!comp_rule(hpe, r)) {	/* Generate the code for the clause  */
 #ifndef KERNAL
 	/* Is this really a parser error? Couldn't it be generated directly? */
 	if (fromparser)
-	    parser_error("Goal in clause of inapproprate type.");
+	    parser_error(hpe, "Goal in clause of inapproprate type.");
 #endif /* KERNAL */
 	return 0;
     }
@@ -209,8 +216,7 @@ compile_clause(r, fromparser)
 }
 
 static int
-comp_rule(rule)
-    pword rule;
+comp_rule(PE, pword rule)
 {
     int   gtp;				/* goal type 		*/
     int   macrofix;			/* math fixup flag 	*/
@@ -271,14 +277,14 @@ comp_rule(rule)
     if (firstgoalnumber > ngoals)
 		goal = NIL_VAL;
     else
-		goal = get_compiler_directives(RULE_GOALN(rule, firstgoalnumber));
+		goal = get_compiler_directives(hpe, RULE_GOALN(rule, firstgoalnumber));
 
-    init_model(RULE_HEAD(rule), goal);
+    init_model(hpe, RULE_HEAD(rule), goal);
 
     /*----------------------------------------*
      * Compile the head of the rule.
      *----------------------------------------*/
-    comp_head(RULE_HEAD(rule));
+    comp_head(hpe, RULE_HEAD(rule));
 
     if (firstgoalnumber > 1) {
 	/*------------------------------------------------------------------------*
@@ -297,7 +303,7 @@ comp_rule(rule)
 	else {
 	    icode(I_DOCUT, EREG, 0, 0, 0);
 	    if (firstgoalnumber == ngoals)
-			init_only_targets(RULE_GOALN(rule, firstgoalnumber));
+			init_only_targets(hpe, RULE_GOALN(rule, firstgoalnumber));
 	}
     }
 
@@ -320,7 +326,7 @@ comp_rule(rule)
      * uninitialized environment variables.
      *------------------------------------------------------------------------*/
 
-    initialize_environment_variables();
+    initialize_environment_variables(hpe);
 
     /*------------------------------------------------------------------------*
      * Initialize goalnumber, goal, gtp, and macrofix.
@@ -340,7 +346,7 @@ comp_rule(rule)
 		 * Do compiler directives
 		 *----------------------------------------*/
 
-		compiler_directives();
+		compiler_directives(hpe);
 
 		/*---------------------------------------------------------------*
 		 * Get the functor id of the goal.  For example, the functor id
@@ -374,7 +380,7 @@ comp_rule(rule)
 		     * Emit the argument set up code for the goal.
 		     *----------------------------------------*/
 
-		    comp_goal(goal);
+		    comp_goal(hpe, goal);
 
 		    /*--------------------------------------------------------------*
 		     * Check to see if the goal is a cutmacro.  If it is, then put
@@ -392,7 +398,7 @@ comp_rule(rule)
 
 				loc = (s <= NAREGS) ? (ASTART + s - 1)
 			    			: (model_Adst + goalsize(goal) - 1);
-				free_target(loc);
+				free_target(hpe, loc);
 #ifdef SlowCut
 				if (functor_id == TK_CUT && garity == 0)
 			    	icode(I_CUTMACRO, EREG, 0,
@@ -421,18 +427,18 @@ comp_rule(rule)
 				 *----------------------------------------*/
 
 #ifdef CPREG
-				move(vtbl[RETIDX].home, CPREG);
+				move(hpe, vtbl[RETIDX].home, CPREG);
 #else
-				move(vtbl[RETIDX].home, model_Adst - 1);
+				move(hpe, vtbl[RETIDX].home, model_Adst - 1);
 #endif
 				/*----------------------------------------*
 				 * Move the environment pointer
 				 *----------------------------------------*/
 
 #ifdef OLDEREG
-				move(vtbl[ENVIDX].home, OLDEREG);
+				move(hpe, vtbl[ENVIDX].home, OLDEREG);
 #else
-				move(vtbl[ENVIDX].home, model_Adst - 2);
+				move(hpe, vtbl[ENVIDX].home, model_Adst - 2);
 #endif
 
 				icode(I_ADDTOSP, model_Adst - 2 - model_SP, 0, 0, 0);
@@ -483,7 +489,7 @@ comp_rule(rule)
 			 * must immediately follow each call.
 			 *----------------------------------------------------*/
 
-			gccallinfo();
+			gccallinfo(hpe);
 
 #ifdef SlowCut
 			isdeterminateforsure = (functor_id == TK_CUT && garity == 0);
@@ -512,7 +518,7 @@ comp_rule(rule)
 
 		goalnumber++;
 		if (goalnumber == firstgoalnumber + 1)
-		    reassign_homes(RULE_HEAD(rule));
+		    reassign_homes(hpe, RULE_HEAD(rule));
 		goal = RULE_GOALN(rule, goalnumber);
 
 #ifndef SlowCut
@@ -548,7 +554,7 @@ comp_rule(rule)
 		 * See if there are any compiler directives on this goal
 		 *---------------------------------------------------------*/
 
-		goal = get_compiler_directives(goal);
+		goal = get_compiler_directives(hpe, goal);
 		gtp = TYPEOF(goal);
 		gsize = goalsize(goal);
 
@@ -620,10 +626,10 @@ comp_rule(rule)
 
 		    model_Adst2 = 0;
 
-		    init_targets(goal);
+		    init_targets(hpe, goal);
 		}
 		else
-		    deallocate_environment(goal, gtp, gsize, isdeterminateforsure);
+		    deallocate_environment(hpe, goal, gtp, gsize, isdeterminateforsure);
 
 		/*------------------------------------------------------------*
 		 * model_SPstart is the place where the stack pointer starts
@@ -643,9 +649,7 @@ comp_rule(rule)
  *========================================================================*/
 
 static void
-deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
-    pword goal;
-    int   gtp, gsize, isdeterminateforsure;
+deallocate_environment(PE, pword goal, int gtp, int gsize, int isdeterminateforsure)
 {
     int   esize = call_env_sizes[goalnumber - 1];
     int   s, i, t, p, v;
@@ -665,7 +669,7 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
      * Initialize targets for the last goal.
      */
 
-    init_targets(goal);
+    init_targets(hpe, goal);
 
     /*-----------------------------------------------------------------*
      * Scan the goal arguments.  When a goal argument is the same variable
@@ -690,9 +694,9 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
 		!vtbl[v = VO_VAL(model[p])].unsafe &&
 		vtbl[v].pvnum &&
 		vtbl[v].home == p) {
-		if (!(t = find_temp_in_reg(vtbl[v].target)))
+		if (!(t = find_temp_in_reg(hpe, vtbl[v].target)))
 		    break;
-		move(p, t);
+		move(hpe, p, t);
 		model[t] = model[p];
 		vtbl[v].home = t;
 		vtbl[v].pvnum = 0;
@@ -711,9 +715,9 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
 	if (TYPEOF(model[model_Adst - 1]) == TP_VO &&
 	    !vtbl[v = VO_VAL(model[model_Adst - 1])].unsafe &&
 	    vtbl[v].home == model_Adst - 1) {
-	    t = find_temp_in_reg(vtbl[v].target);
+	    t = find_temp_in_reg(hpe, vtbl[v].target);
 	    if ( t ) {
-		move(model_Adst - 1, t);
+		move(hpe, model_Adst - 1, t);
 		model[t] = model[model_Adst - 1];
 		vtbl[v].home = t;
 		vtbl[v].pvnum = 0;
@@ -726,9 +730,9 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
 	if (TYPEOF(model[model_Adst - 2]) == TP_VO &&
 	    !vtbl[v = VO_VAL(model[model_Adst - 2])].unsafe &&
 	    vtbl[v].home == model_Adst - 2) {
-	    t = find_temp_in_reg(vtbl[v].target);
+	    t = find_temp_in_reg(hpe, vtbl[v].target);
 	    if (t) {
-		move(model_Adst - 2, t);
+		move(hpe, model_Adst - 2, t);
 		model[t] = model[model_Adst - 2];
 		vtbl[v].home = t;
 		vtbl[v].pvnum = 0;
@@ -770,7 +774,7 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
 		(v = VO_VAL(model[s])) == VO_VAL(ag) &&
 		model[model_Adst + i - 1] == NIL_VAL) {
 		if (!isdeterminateforsure)
-		    move(s, model_Adst + i - 1);
+		    move(hpe, s, model_Adst + i - 1);
 		model[model_Adst + i - 1] = model[s];
 		vtbl[v].home = model_Adst + i - 1;
 	    }
@@ -785,7 +789,7 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
 #ifndef CPREG
 	if (model[model_Adst - 1] == NIL_VAL) {
 	    if (!isdeterminateforsure)
-		move(model_E + 1, model_Adst - 1);
+		move(hpe, model_E + 1, model_Adst - 1);
 	    model[model_Adst - 1] = model[model_E + 1];
 	    vtbl[RETIDX].home = model_Adst - 1;
 	}
@@ -793,7 +797,7 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
 #ifndef OLDEREG
 	if (model[model_Adst - 2] == NIL_VAL) {
 	    if (!isdeterminateforsure)
-		move(model_E, model_Adst - 2);
+		move(hpe, model_E, model_Adst - 2);
 	    model[model_Adst - 2] = model[model_E];
 	    vtbl[ENVIDX].home = model_Adst - 2;
 	}
@@ -821,7 +825,7 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
  *============================================================================*/
 
 void
-gccallinfo()
+gccallinfo(PE)
 {
     register int i;
     register int v;
@@ -873,7 +877,7 @@ gccallinfo()
  *============================================================================*/
 
 static void
-initialize_environment_variables()
+initialize_environment_variables(PE)
 {
     register int i;
     register int v;
@@ -917,7 +921,7 @@ initialize_environment_variables()
 
 #if defined(InMath) && !defined(NewMath)
 static long
-regfreemap()
+regfreemap(void)
 {
     register int i;
     register int map = 0;
@@ -939,7 +943,7 @@ regfreemap()
 #ifdef NewMath
 
 static long
-regusemap()
+regusemap(void)
 {
     register int i;
     register int map = 0;
@@ -964,8 +968,7 @@ regusemap()
  *============================================================================*/
 
 int
-isarithmetic(goal)
-    pword goal;
+isarithmetic(pword goal)
 {
     int   f;
 
@@ -996,7 +999,7 @@ isarithmetic(goal)
  *============================================================================*/
 
 static void
-arith_temp_homes()
+arith_temp_homes(void)
 {
     register int v;
     int   n;
@@ -1016,9 +1019,7 @@ arith_temp_homes()
 #endif /* NewMath */
 
 static int
-do_macro(goal, gtp)
-    pword goal;
-    int   gtp;
+do_macro(pword goal, int gtp)
 {
     int   macrofix = 0;
 
@@ -1053,8 +1054,7 @@ do_macro(goal, gtp)
  *============================================================================*/
 
 static int
-goalsize(goal)
-    pword goal;
+goalsize(pword goal)
 {
     int   size;
     int   func;
@@ -1081,8 +1081,7 @@ goalsize(goal)
 }
 
 static void
-incr_usecnt(v)
-    int   v;
+incr_usecnt(PE, int v)
 {
     if (++vtbl[v].usecnt == vtbl[v].noccurences) {
 	model[vtbl[v].home] = NIL_VAL;
@@ -1095,16 +1094,14 @@ incr_usecnt(v)
  *============================================================================*/
 
 static void
-init_model(head, firstgoal)
-    pword head;
-    pword firstgoal;
+init_model(PE, pword head, pword firstgoal)
 {
     register int i;
     int   firstgoalsize = goalsize(firstgoal);
     pword s;
 
     model_E = MODELSIZE - 2;	/* room for return address and prev env */
-    nargs = 0;
+    cnargs = 0;
     nargsmatched = 0;		/* haven't matched any arguments yet. */
 
     /*---------------------------------------------------------------------*
@@ -1114,14 +1111,14 @@ init_model(head, firstgoal)
     if (TYPEOF(head) == TP_TERM) {
 	register int ti, v;
 
-	nargs = TERM_ARITY(head);
-	model_E -= nargs;
+	cnargs = TERM_ARITY(head);
+	model_E -= cnargs;
 
 	/*---------------------------------------------------------------------*
 	 * Take care of the register part of the model first.
 	 *---------------------------------------------------------------------*/
 
-	for (i = 1; i <= NAREGS && i <= nargs; i++) {
+	for (i = 1; i <= NAREGS && i <= cnargs; i++) {
 	    s = TERM_ARGN(head, i);
 	    ti = ASTART + i - 1;
 	    if (IS_VO(s) && vtbl[v = VO_VAL(s)].pvnum == 0 &&
@@ -1133,7 +1130,7 @@ init_model(head, firstgoal)
 		    vtbl[v].target = model_E + i + 1;	/* this may be
 							 * reassigned
 							 */
-		incr_usecnt(VO_VAL(s));
+		incr_usecnt(hpe, VO_VAL(s));
 	    }
 	    else {
 		model[ti] = s;
@@ -1145,7 +1142,7 @@ init_model(head, firstgoal)
 	 * Now take care of the overflow case.
 	 */
 
-	for (i = NAREGS + 1; i <= nargs; i++) {
+	for (i = NAREGS + 1; i <= cnargs; i++) {
 	    s = TERM_ARGN(head, i);
 	    ti = model_E + i + 1;
 
@@ -1153,7 +1150,7 @@ init_model(head, firstgoal)
 		vtbl[VO_VAL(s)].home == 0) {
 		vtbl[VO_VAL(s)].home = ti;
 		model[ti] = s;
-		incr_usecnt(VO_VAL(s));
+		incr_usecnt(hpe, VO_VAL(s));
 	    }
 	    else
 		model[ti] = s;
@@ -1164,7 +1161,7 @@ init_model(head, firstgoal)
      * Initialize those registers not covered by the arguments (if any).
      *---------------------------------------------------------------------*/
 
-    for (i = nargs + 1; i <= NAREGS; i++) {
+    for (i = cnargs + 1; i <= NAREGS; i++) {
 	model[ASTART + i - 1] = NIL_VAL;
     }
 
@@ -1233,7 +1230,7 @@ init_model(head, firstgoal)
 	model_SP = model_Eend - firstgoalsize - STACKADJUST;
 	model_Adst = model_Eend - firstgoalsize;
 	model_Adst2 = 0;
-	init_targets(firstgoal);
+	init_targets(hpe, firstgoal);
     }
     else if (ngoals - firstgoalnumber == 0) {
 	model_Eend = model_E;
@@ -1244,9 +1241,9 @@ init_model(head, firstgoal)
 						 */
 
 	if (firstgoalnumber == 1) {
-	    init_targets(firstgoal);
-	    icode(I_ALLOCATE1, nargs + 2, 0, 0, 0);
-	    model_SP -= (nargs + 2);
+	    init_targets(hpe, firstgoal);
+	    icode(I_ALLOCATE1, cnargs + 2, 0, 0, 0);
+	    model_SP -= (cnargs + 2);
 
 	    /*---------------------------------------------------------------------*
 	     * The stuff in the following if statement will move variables
@@ -1269,13 +1266,13 @@ init_model(head, firstgoal)
 			ag = TERM_ARGN(firstgoal, j);
 			if (TYPEOF(ah) == TP_VO && TYPEOF(ag) == TP_VO &&
 			    VO_VAL(ah) == VO_VAL(ag)) {
-			    move(model_E + i + 1, model_SP + i + 1);
+			    move(hpe, model_E + i + 1, model_SP + i + 1);
 			    model[model_SP + i + 1] = model[model_E + i + 1];
 			}
 		    }
 		    if (i == j) {
 #ifndef CPREG
-			move(model_E + 1, model_SP + 1);	/* move
+			move(hpe, model_E + 1, model_SP + 1);	/* move
 								 * return
 								 * address
 								 */
@@ -1284,7 +1281,7 @@ init_model(head, firstgoal)
 #endif
 
 #ifndef OLDEREG
-			move(model_E, model_SP);	/* move env pointer */
+			move(hpe, model_E, model_SP);	/* move env pointer */
 			model[model_SP] = model[model_E];
 			vtbl[ENVIDX].home = model_SP;
 #endif
@@ -1292,7 +1289,7 @@ init_model(head, firstgoal)
 		}
 		else if (firstgoalsize == 0) {
 #ifndef CPREG
-		    move(model_E + 1, model_SP + 1);	/* move return
+		    move(hpe, model_E + 1, model_SP + 1);	/* move return
 							 * address
 							 */
 		    model[model_SP + 1] = model[model_E + 1];
@@ -1300,7 +1297,7 @@ init_model(head, firstgoal)
 #endif
 
 #ifndef OLDEREG
-		    move(model_E, model_SP);	/* move env pointer */
+		    move(hpe, model_E, model_SP);	/* move env pointer */
 		    model[model_SP] = model[model_E];
 		    vtbl[ENVIDX].home = model_SP;
 #endif
@@ -1308,10 +1305,10 @@ init_model(head, firstgoal)
 	    }
 
 	    icode(I_ENDALLOC1, 0, 0, 0, 0);
-	    icode(I_ADDTOSP, -max(0, firstgoalsize - nargs), 0, 0, 0);
+	    icode(I_ADDTOSP, -max(0, firstgoalsize - cnargs), 0, 0, 0);
 	    vtbl[RETIDX].target = model_Adst - 1;
 	    vtbl[ENVIDX].target = model_Adst - 2;
-	    model_SP -= max(0, firstgoalsize - nargs);
+	    model_SP -= max(0, firstgoalsize - cnargs);
 	    for (i = model_SP; i < model_Adst - 2; i++)
 		model[i] = NIL_VAL;
 	}
@@ -1329,12 +1326,12 @@ init_model(head, firstgoal)
 	    model_Adst2 = model_Adst;	/* this will get us the variable
 					 * movement optimizations
 					 */
-	    init_targets(NIL_VAL);	/* still need to do some of the
+	    init_targets(hpe, NIL_VAL);	/* still need to do some of the
 					 * initializations
 					 */
-	    icode(I_ADDTOSP, -max(0, firstgoalsize - nargs), 0, 0, 0);
+	    icode(I_ADDTOSP, -max(0, firstgoalsize - cnargs), 0, 0, 0);
 	    vtbl[RETIDX].target = model_Adst - 1;
-	    model_SP -= max(0, firstgoalsize - nargs);
+	    model_SP -= max(0, firstgoalsize - cnargs);
 	    for (i = model_SP; i < model_Eend - 1; i++)
 		model[i] = NIL_VAL;
 	}
@@ -1343,7 +1340,7 @@ init_model(head, firstgoal)
     else {			/* no goals */
 	model_Adst = model_Eend;
 	model_Adst2 = 0;
-	init_targets(firstgoal);
+	init_targets(hpe, firstgoal);
     }
     icode(IC_ENDALLOC, 0, 0, 0, 0);
     model_SPstart = model_SP;
@@ -1370,8 +1367,7 @@ init_model(head, firstgoal)
  *============================================================================*/
 
 static void
-init_targets(t)
-    pword t;
+init_targets(PE, pword t)
 {
     register int i;
 
@@ -1400,7 +1396,7 @@ init_targets(t)
      * Initialize the target fields in the vtbl array.
      *---------------------------------------------------------------------*/
 
-    init_only_targets(t);
+    init_only_targets(hpe, t);
 
     if (goalnumber == ngoals) {
 #ifdef CPREG
@@ -1427,8 +1423,7 @@ init_targets(t)
  *============================================================================*/
 
 static void
-init_only_targets(t)
-    pword t;
+init_only_targets(PE, pword t)
 {
     pword s;
     register int i, n;
@@ -1464,8 +1459,7 @@ init_only_targets(t)
  *============================================================================*/
 
 static void
-reassign_homes(head)
-    pword head;
+reassign_homes(PE, pword head)
 {
     if (TYPEOF(head) == TP_TERM) {
 	register int i;
@@ -1501,8 +1495,7 @@ reassign_homes(head)
 }
 
 static void
-comp_head(head)
-    pword head;
+comp_head(PE, pword head)
 {
     int   i;
     pword arg;
@@ -1510,7 +1503,7 @@ comp_head(head)
     int   ti;
 
     if (TYPEOF(head) != TP_TERM) {
-	record_first_argument(TP_VO, (pword) 0);
+	record_first_argument(hpe, TP_VO, (pword) 0);
 	return;
     }
 
@@ -1539,13 +1532,13 @@ comp_head(head)
 		    if (TYPEOF(model[ti]) == TP_VO &&
 			VO_VAL(model[ti]) == v) {
 			if (vtbl[v].usecnt == 0) {
-			    move(ti, vtbl[v].home);
+			    move(hpe, ti, vtbl[v].home);
 			    vtbl[v].usecnt++;
 			}
 			else if (vtbl[v].home != ti) {
 			    icode(I_G_VALUE, index_of(ti), disp_of(ti),
 			     index_of(vtbl[v].home), disp_of(vtbl[v].home));
-			    incr_usecnt(v);
+			    incr_usecnt(hpe, v);
 			}
 			if (vtbl[v].usecnt == vtbl[v].noccurences)
 			    model[ti] = NIL_VAL;	/* only nil it out
@@ -1562,14 +1555,14 @@ comp_head(head)
 #ifdef DoubleType
 	    case TP_DOUBLE:
 #endif
-		comp_head_structure(ti);
+		comp_head_structure(hpe, ti);
 		break;
 	    default:
 		printf("Something funny in comp_head!\n");
 		break;
 	}
 	if (i == 1)
-	    record_first_argument(tp, arg);
+	    record_first_argument(hpe, tp, arg);
     }
 }
 
@@ -1578,9 +1571,7 @@ comp_head(head)
  *============================================================================*/
 
 static void
-record_first_argument(tp, arg)
-    int   tp;
-    pword arg;
+record_first_argument(PE, int  tp, pword arg)
 {
     switch (tp) {
 	case TP_SYM:
@@ -1614,8 +1605,7 @@ record_first_argument(tp, arg)
  *============================================================================*/
 
 static void
-comp_head_structure(loc)
-    int   loc;
+comp_head_structure(PE, int loc)
 {
     int   tdbase;
     pword strct;
@@ -1644,21 +1634,21 @@ comp_head_structure(loc)
 	if (tp == TP_LIST) {
 	    icode(I_G_LIST, index_of(loc), disp_of(loc), 0, 0);
 	    model[loc] = NIL_VAL;
-	    comp_hstruct_argument(LIST_CAR(strct), 0);
-	    comp_hstruct_argument(LIST_CDR(strct), 1);
+	    comp_hstruct_argument(hpe, LIST_CAR(strct), 0);
+	    comp_hstruct_argument(hpe, LIST_CDR(strct), 1);
 	}
 	else {			/* must be a structure */
 	    icode(I_G_STRUCTURE, functor_id_of_term(strct), arity_of_term(strct),
 		  index_of(loc), disp_of(loc));
 	    model[loc] = NIL_VAL;
 	    for (i = 1; i <= TERM_ARITY(strct); i++)
-		comp_hstruct_argument(TERM_ARGN(strct, i), i - 1);
+		comp_hstruct_argument(hpe, TERM_ARGN(strct, i), i - 1);
 	}
 
 	icode(I_END_CAPTURE, 0, 0, 0, 0);
 
 	for (i = tdbase; i < to_do_top; i++)
-	    comp_head_structure(to_do[i]);
+	    comp_head_structure(hpe, to_do[i]);
 	TDT_RESET(tdbase);
     }
 }
@@ -1671,9 +1661,7 @@ comp_head_structure(loc)
  *============================================================================*/
 
 static void
-comp_hstruct_argument(arg, n)
-    pword arg;
-    int   n;
+comp_hstruct_argument(PE, pword arg, int n)
 {
     int   t, v;
 
@@ -1690,7 +1678,7 @@ comp_hstruct_argument(arg, n)
 #ifdef DoubleType
 	case TP_DOUBLE:
 #endif /* DoubleType */
-	    t = find_temp();
+	    t = find_temp(hpe);
 	    model[t] = arg;
 	    to_do[to_do_top++] = t;
 	    icode(I_U_VAR, index_of(t), disp_of(t), n, 0);
@@ -1702,7 +1690,7 @@ comp_hstruct_argument(arg, n)
 		vtbl[v].usecnt++;
 	    }
 	    else {
-		t = find_home(v);
+		t = find_home(hpe, v);
 		if (vtbl[v].usecnt == 0) {
 		    icode(I_U_VAR, index_of(t), disp_of(t), n, 0);
 		    vtbl[v].unsafe = 0;
@@ -1729,8 +1717,7 @@ comp_hstruct_argument(arg, n)
  *============================================================================*/
 
 int
-index_of(n)
-    int   n;
+index_of_pe(PE, int n)
 {
     if (n <= LASTREG)
 	return REGS;
@@ -1750,8 +1737,7 @@ index_of(n)
  *============================================================================*/
 
 int
-disp_of(n)
-    int   n;
+disp_of_pe(PE, int n)
 {
     int   idx = index_of(n);
 
@@ -1764,8 +1750,7 @@ disp_of(n)
 }
 
 static void
-move(n, m)
-    int   n, m;
+move(PE, int n, int m)
 {
     if (n == m && TYPEOF(model[m]) == TP_VO
 	&& vtbl[VO_VAL(model[m])].pvnum == 0)
@@ -1780,17 +1765,16 @@ move(n, m)
  *============================================================================*/
 
 static int
-find_home(v)
-    int   v;
+find_home(PE, int v)
 {
     int   home;
 
     if (vtbl[v].home)
 	return vtbl[v].home;
-    else if (vtbl[v].target && free_target(vtbl[v].target))
+    else if (vtbl[v].target && free_target(hpe, vtbl[v].target))
 	home = vtbl[v].target;
     else
-	home = find_temp();
+	home = find_temp(hpe);
     model[home] = MK_VO(v);
     vtbl[v].home = home;
     return home;
@@ -1805,7 +1789,7 @@ find_home(v)
  *============================================================================*/
 
 int
-find_temp()
+find_temp(PE)
 {
     int   i;
 
@@ -1835,8 +1819,7 @@ find_temp()
  *============================================================================*/
 
 static int
-find_temp_in_reg(targ)
-    int   targ;
+find_temp_in_reg(PE, int targ)
 {
     int   i;
 
@@ -1860,8 +1843,7 @@ find_temp_in_reg(targ)
  *============================================================================*/
 
 static int
-free_target(loc)
-    int   loc;
+free_target(PE, int loc)
 {
     int   start, tdbase, loc2;
     int   limit, v, dst;
@@ -1900,9 +1882,9 @@ free_target(loc)
 	    if (IS_VO(model[loc])) {
 		v = VO_VAL(model[loc]);
 		if (vtbl[v].pvnum)
-		    move_perms(loc);
+		    move_perms(hpe,loc);
 		else if (vtbl[v].home == loc)
-		    move_to_temp(loc);
+		    move_to_temp(hpe, loc);
 	    }
 	}
 
@@ -1911,7 +1893,7 @@ free_target(loc)
 	else if (IS_VO(model[loc2])
 		 && vtbl[v = VO_VAL(model[loc2])].home == loc2) {
 	    if (vtbl[v].pvnum) {
-		move_perms(loc2);
+		move_perms(hpe, loc2);
 		break;
 	    }
 	    else if (vtbl[v].home == vtbl[v].target)
@@ -1922,7 +1904,7 @@ free_target(loc)
 		loc = vtbl[v].target;
 	    }
 	    else {
-		move_to_temp(loc2);
+		move_to_temp(hpe, loc2);
 		break;
 	    }
 	}
@@ -1933,7 +1915,7 @@ free_target(loc)
 	else {
 	    loc2 = to_do[--to_do_top];
 	    loc = to_do[--to_do_top];
-	    move_to_temp(loc2);
+	    move_to_temp(hpe, loc2);
 	    break;
 	}
     }
@@ -1946,7 +1928,7 @@ free_target(loc)
 	if (loc == loc2 && IS_VO(model[dst]) && v == VO_VAL(model[dst])) ;
 	/* variable is already in place */
 	else {
-	    move(loc2, dst);
+	    move(hpe, loc2, dst);
 	    model[dst] = model[loc2];
 	    model[loc2] = NIL_VAL;
 	}
@@ -1956,8 +1938,7 @@ free_target(loc)
 }
 
 static void
-move_perms(start)
-    int   start;
+move_perms(PE, int start)
 {
     int   i;
 
@@ -1975,14 +1956,14 @@ move_perms(start)
 		    ;		/* do nothing....t is already set by the if */
 		}
 		else
-		    t = find_temp();
+		    t = find_temp(hpe);
 		if (vtbl[v].unsafe && vtbl[v].firstocc != 0) {
 		    icode(I_P_UNSAFE, index_of(i), disp_of(i),
 			  index_of(t), disp_of(t));
 		    vtbl[v].unsafe = 0;
 		}
 		else
-		    move(i, t);
+		    move(hpe, i, t);
 		model[t] = model[i];
 		vtbl[v].home = t;
 		vtbl[v].pvnum = 0;	/* no longer permanent */
@@ -1993,15 +1974,14 @@ move_perms(start)
 }
 
 static void
-move_to_temp(loc)
-    int   loc;
+move_to_temp(PE, int loc)
 {
     int   v = VO_VAL(model[loc]);
-    int   t = find_temp();
+    int   t = find_temp(hpe);
 
     model[t] = model[loc];
     vtbl[v].home = t;
-    move(loc, t);
+    move(hpe, loc, t);
     model[loc] = NIL_VAL;
 }
 
@@ -2013,8 +1993,7 @@ move_to_temp(loc)
  *============================================================================*/
 
 static void
-comp_goal(goal)
-    pword goal;
+comp_goal(PE, pword goal)
 {
     int   i, n, v, loc;
     pword arg;
@@ -2038,12 +2017,12 @@ comp_goal(goal)
 	arg = TERM_ARGN(goal, i);
 	switch (TYPEOF(arg)) {
 	    case TP_INT:
-		free_target(loc);
+		free_target(hpe, loc);
 		icode(I_P_INT, INT_VAL(arg), index_of(loc), disp_of(loc), 0);
 		model[loc] = arg;
 		break;
 	    case TP_SYM:
-		free_target(loc);
+		free_target(hpe, loc);
 		icode(I_P_SYM, FUNCTOR_TOKID(arg), index_of(loc), disp_of(loc), 0);
 		model[loc] = arg;
 		break;
@@ -2053,7 +2032,7 @@ comp_goal(goal)
 #ifdef DoubleType
 	    case TP_DOUBLE:
 #endif /* DoubleType */
-		comp_goal_structure(arg, loc);
+		comp_goal_structure(hpe, arg, loc);
 		break;
 	    default:
 		break;
@@ -2081,7 +2060,7 @@ comp_goal(goal)
 		 * at home or if it is at home, but is still a permanent
 		 * variable.
 		 */
-		free_target(loc);
+		free_target(hpe, loc);
 
 		if (vtbl[v].usecnt == 0) {
 		    if (vtbl[v].pvnum) {
@@ -2116,7 +2095,7 @@ comp_goal(goal)
 			    model[src] = NIL_VAL;
 		    }
 		    else {
-			move(src, loc);
+			move(hpe, src, loc);
 			model[loc] = model[src];
 			vtbl[v].usecnt++;
 			if (vtbl[v].lastocc == goalnumber) {
@@ -2145,8 +2124,7 @@ comp_goal(goal)
  *============================================================================*/
 
 void
-comp_math_struct(arg)
-    pword arg;
+comp_math_struct(PE, pword arg)
 {
     int   SPstart, loc;
 
@@ -2158,12 +2136,12 @@ comp_math_struct(arg)
     SPstart = loc = model_SP;
     switch (TYPEOF(arg)) {
 	case TP_INT:
-	    free_target(loc);
+	    free_target(hpe, loc);
 	    icode(I_P_INT, INT_VAL(arg), index_of(loc), disp_of(loc), 0);
 	    model[loc] = arg;
 	    break;
 	case TP_SYM:
-	    free_target(loc);
+	    free_target(hpe, loc);
 	    icode(I_P_SYM, FUNCTOR_TOKID(arg), index_of(loc), disp_of(loc), 0);
 	    model[loc] = arg;
 	    break;
@@ -2173,7 +2151,7 @@ comp_math_struct(arg)
 #ifdef DoubleType
 	case TP_DOUBLE:
 #endif /* DoubleType */
-	    comp_goal_structure(arg, loc);
+	    comp_goal_structure(hpe, arg, loc);
 	    break;
 	default:
 	    break;
@@ -2204,9 +2182,7 @@ comp_math_struct(arg)
  *============================================================================*/
 
 static int
-comp_goal_structure(strct, loc)
-    pword strct;
-    int   loc;
+comp_goal_structure(PE, pword strct, int loc)
 {
     int   i, n;
     int   tdbase;
@@ -2221,9 +2197,9 @@ comp_goal_structure(strct, loc)
 	) {
 	TDT_SET(tdbase, 0);
 	if (loc == 0)
-	    loc = find_temp();
+	    loc = find_temp(hpe);
 	else
-	    free_target(loc);
+	    free_target(hpe, loc);
 	model[loc] = strct;
 	if (tp == TP_UIA)
 	    icode(I_P_UIA, (long) UIA_NAME(strct),
@@ -2237,32 +2213,32 @@ comp_goal_structure(strct, loc)
     else if (tp == TP_LIST) {
 	n = 2;
 	TDT_SET(tdbase, n);
-	to_do[tdbase + 1] = comp_struct_arg1(LIST_CDR(strct));
-	to_do[tdbase] = comp_struct_arg1(LIST_CAR(strct));
+	to_do[tdbase + 1] = comp_struct_arg1(hpe,LIST_CDR(strct));
+	to_do[tdbase] = comp_struct_arg1(hpe,LIST_CAR(strct));
 	if (loc == 0)
-	    loc = find_temp();
+	    loc = find_temp(hpe);
 	else
-	    free_target(loc);
+	    free_target(hpe, loc);
 	model[loc] = strct;
 	icode(I_P_LIST, index_of(loc), disp_of(loc), 0, 0);
-	comp_struct_arg2(LIST_CAR(strct), to_do[tdbase], 0);
-	comp_struct_arg2(LIST_CDR(strct), to_do[tdbase + 1], 1);
+	comp_struct_arg2(hpe,LIST_CAR(strct), to_do[tdbase], 0);
+	comp_struct_arg2(hpe,LIST_CDR(strct), to_do[tdbase + 1], 1);
 	icode(I_ENDSTRUCT, 0, 0, 0, 0);
     }
     else {
 	n = TERM_ARITY(strct);
 	TDT_SET(tdbase, n);
 	for (i = n; i > 0; i--)
-	    to_do[tdbase + i - 1] = comp_struct_arg1(TERM_ARGN(strct, i));
+	    to_do[tdbase + i - 1] = comp_struct_arg1(hpe,TERM_ARGN(strct, i));
 	if (loc == 0)
-	    loc = find_temp();
+	    loc = find_temp(hpe);
 	else
-	    free_target(loc);
+	    free_target(hpe, loc);
 	model[loc] = strct;
 	icode(I_P_STRUCTURE, functor_id_of_term(strct), arity_of_term(strct),
 	      index_of(loc), disp_of(loc));
 	for (i = 1; i <= n; i++)
-	    comp_struct_arg2(TERM_ARGN(strct, i), to_do[tdbase + i - 1], i - 1);
+	    comp_struct_arg2(hpe,TERM_ARGN(strct, i), to_do[tdbase + i - 1], i - 1);
 	icode(I_ENDSTRUCT, 0, 0, 0, 0);
     }
 
@@ -2271,8 +2247,7 @@ comp_goal_structure(strct, loc)
 }
 
 static int
-comp_struct_arg1(arg)
-    pword arg;
+comp_struct_arg1(PE, pword arg)
 {
     switch (TYPEOF(arg)) {
 	case TP_UIA:
@@ -2281,7 +2256,7 @@ comp_struct_arg1(arg)
 #ifdef DoubleType
 	case TP_DOUBLE:
 #endif
-	    return (comp_goal_structure(arg, 0));
+	    return (comp_goal_structure(hpe, arg, 0));
 	    break;
 	default:
 	    return 0;
@@ -2290,9 +2265,7 @@ comp_struct_arg1(arg)
 }
 
 static void
-comp_struct_arg2(arg, loc, n)
-    pword arg;
-    int   loc, n;
+comp_struct_arg2(PE, pword arg, int loc, int n)
 {
     int   t, v;
 
@@ -2316,7 +2289,7 @@ comp_struct_arg2(arg, loc, n)
 		    vtbl[v].usecnt++;
 		}
 		else {
-		    t = find_home(v);
+		    t = find_home(hpe, v);
 		    if (vtbl[v].usecnt == 0) {
 			icode(I_U_VAR, index_of(t), disp_of(t), n, 1);
 			vtbl[v].unsafe = 0;
@@ -2365,8 +2338,7 @@ comp_struct_arg2(arg, loc, n)
  *============================================================================*/
 
 static pword
-get_compiler_directives(goal)
-    pword goal;
+get_compiler_directives(PE, pword goal)
 {
     pword arg;
 
@@ -2399,16 +2371,16 @@ get_compiler_directives(goal)
 }
 
 static void
-compiler_directives()
+compiler_directives(PE)
 {
     if (cd_cutpt != -1)
-	emit_cd_cutpt();
+	emit_cd_cutpt(hpe);
 }
 
 static void
-emit_cd_cutpt()
+emit_cd_cutpt(PE)
 {
-    int   loc = find_home(cd_cutpt);
+    int   loc = find_home(hpe, cd_cutpt);
 
     vtbl[cd_cutpt].usecnt++;
     vtbl[cd_cutpt].unsafe = 0;

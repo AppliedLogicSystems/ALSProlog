@@ -20,14 +20,14 @@
 #include <stdio.h>
 #include "alspi.h"
 
-static	int	lookup_c_sym	PARAMS(( char * ));
-static	int	c_structinfo	PARAMS(( void ));
-static	int	c_typeinfo	PARAMS(( void ));
-static	int	c_constinfo	PARAMS(( void ));
-static	int	c_rconstinfo	PARAMS(( void ));
-static	int	c_call		PARAMS(( void ));
-static	int	c_makeuia	PARAMS(( void ));
-static	int	c_convertCstrPstr PARAMS(( void ));
+static	int	lookup_c_sym	( char * );
+static	int	c_structinfo	( void );
+static	int	c_typeinfo	( void );
+static	int	c_constinfo	( void );
+static	int	c_rconstinfo	( void );
+static	int	c_call		( void );
+static	int	c_makeuia	( void );
+static	int	c_convertCstrPstr ( void );
 
 /*
  * symbols for "$farptr", "f", "[]" and "c";
@@ -53,10 +53,7 @@ static int constsymtype;
  */
 
 void
-CI_makefar(vp, tp, ptr)
-    PWord *vp;
-    int  *tp;
-    unsigned short *ptr;
+CI_makefar(PWord *vp, int  *tp, unsigned short *ptr)
 {
     PWord arg;
     int   argtype;
@@ -114,8 +111,7 @@ SymTblEntry symtable[SYMTBLSZ];
  */
 
 static int
-lookup_c_sym(symbol)
-    char *symbol;
+lookup_c_sym(char *symbol)
 {
     register unsigned long sum, acc, slen, i, start;
     register char *s;
@@ -226,7 +222,7 @@ sym_insert_2long(char *symbol, int type, long longval1, long longval2)
  *---------------------------------------------------------------------------*/
 
 EXPORT ALSPI_API(int)
-CI_get_integer(PWord *arg, int type)
+CI_get_integer(PE, PWord *arg, int type)
 {
     double adbl;
 
@@ -390,7 +386,7 @@ CI_get_double(double *dbl, unsigned long arg, unsigned long type)
  */
 
 static int
-c_structinfo()
+c_structinfo(void)
 {				/* usage :
 				 * $c_structinfo(name,size__re,list_ret)
 				 */
@@ -472,7 +468,7 @@ c_structinfo()
 		PI_FAIL;
 	}
 	else {
-	    PI_makeuia(&v, &t, field[i].type_name);
+	    PI_makeuia(&v, &t, field[i].typename);
 	    if (!PI_unify(arg, argtype, v, t))
 		PI_FAIL;
 	}
@@ -494,7 +490,7 @@ c_structinfo()
 
 
 static int
-c_typeinfo()
+c_typeinfo(void)
 {				/* usage :
 				 * $c_typeinfo(name,size_reet)ype_ret)
 				 */
@@ -553,7 +549,7 @@ c_typeinfo()
 
 
 static int
-c_constinfo()
+c_constinfo(void)
 {				/* usage : $c_constinfo(name,val_ret) */
     PWord V1;
     int   T1;
@@ -610,7 +606,7 @@ c_constinfo()
 
 
 static int
-c_rconstinfo()
+c_rconstinfo(void)
 {				/* usage : $c_rconstinfo(name,val_ret) */
     PWord V1;
     int   T1;
@@ -652,7 +648,7 @@ c_rconstinfo()
 #define MAXNARGS 30
 
 static int
-c_call()
+c_call(void)
 {
     PWord v1;
     int   t1;			/* function pointer */
@@ -660,7 +656,7 @@ c_call()
     int   t2;			/* arglist */
     PWord vret;
     int   tret;			/* function return value */
-    int   (*funcptr) PARAMS(( char *, ...));
+    int   (*funcptr) ( char *, ...);
     long  retval;
     PWord head;
     int   headtype;
@@ -673,7 +669,7 @@ c_call()
 
     if (!CI_get_integer(&v1, t1))
 	PI_FAIL;
-    funcptr = (int (*)PARAMS((char *, ...))) v1;
+    funcptr = (int (*)(char *, ...)) v1;
 
     while (t2 == PI_LIST) {
 	PI_gethead(&head, &headtype, v2);
@@ -689,7 +685,7 @@ c_call()
 
     switch (nargs) {
 	case 0:
-	    retval = (*(int (*)PARAMS((void)))funcptr) ();
+	    retval = (*(int (*)(void))funcptr) ();
 	    break;
 	case 1:
 	    retval = (*funcptr) (args[0]);
@@ -747,7 +743,7 @@ c_call()
  */
 
 static int
-c_makeuia()
+c_makeuia(void)
 {
     PWord PascalFlag;
     int PascalFlagType;
@@ -789,7 +785,7 @@ c_makeuia()
 
 
 static int
-c_convertCstrPstr()
+c_convertCstrPstr(void)
 {
     PWord Pointer, PascalFlag;
     int PointerType, PascalFlagType;
@@ -965,7 +961,7 @@ PI_END
 /* *INDENT-ON* */
 
 void
-cinterf_init()
+cinterf_init(void)
 {
     PI_makesym(&fieldsym, &fieldsymtype, "f");
     PI_makesym(&pnil, &niltype, "[]");	/* make a nil symbol */

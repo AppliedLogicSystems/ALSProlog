@@ -35,9 +35,9 @@
  */
 
 /* Also defined by Win32 headers. */
-typedef unsigned char byte;
+typedef unsigned char als_byte;
 typedef struct pwrd_ {
-                  byte tag;
+                  als_byte tag;
                   struct pwrd_ *val;
                } pwrd;
 typedef pwrd * pword;
@@ -92,7 +92,7 @@ extern pword prs_area;
 #define TERM_FUNCTOR(t) (PWADDR(t)->val)
 #define TERM_ARGN(t,n)  ((PWADDR(t)+n)->val)
 #define TERM_ARITY(t)   (FUNCTOR_ARITY(TERM_FUNCTOR(t)))
-#define MK_TERM(a)   (mk_term((long)(a)))       /* a is the arity */
+#define MK_TERM(a)   (mk_term(hpe, (long)(a)))       /* a is the arity */
 
 
 /*
@@ -106,7 +106,7 @@ extern pword prs_area;
 #define FUNCTOR_ARITY(f) ((long) (PWADDR(f)+1)->val)
 #define FUNCTOR_TOKID(f) FUNCTOR_VAL(f)
 #define FUNCTOR_NAME(f) (TOKNAME(FUNCTOR_TOKID(f)))
-#define MK_FUNCTOR(t,a) (mk_functor((long)(t),(long)(a)))
+#define MK_FUNCTOR(t,a) (mk_functor(hpe, (long)(t),(long)(a)))
                 /* t is index into token table, a is arity */
 #define MK_SYM(t) (MK_FUNCTOR(t,0))
 
@@ -117,7 +117,7 @@ extern pword prs_area;
 
 #define LIST_CAR(d) (PWADDR(d)->val)
 #define LIST_CDR(d) ((PWADDR(d)+1)->val)
-#define MK_LIST(car,cdr) mk_list((car),(cdr))
+#define MK_LIST(car,cdr) mk_list(hpe, (car),(cdr))
 
 
 /*
@@ -125,7 +125,7 @@ extern pword prs_area;
  */
 
 #define INT_VAL(o) ((long) (PWADDR(o)->val))
-#define MK_INT(i) mk_int((long)(i))
+#define MK_INT(i) mk_int(hpe, (long)(i))
 
 
 
@@ -133,7 +133,7 @@ extern pword prs_area;
  * NIL:         (internal nil, not [])
  */
 
-extern pwrd nil_val;
+extern const pwrd nil_val;
 #define NIL_VAL ((pword) &nil_val)
 
 /*
@@ -141,7 +141,7 @@ extern pwrd nil_val;
  */
 
 #define VO_VAL(v) ((long) (PWADDR(v)->val))
-#define MK_VO(vo) (mk_vo((long)(vo)))
+#define MK_VO(vo) (mk_vo(hpe, (long)(vo)))
 
 /*
  * CLAUSES
@@ -151,7 +151,7 @@ extern pwrd nil_val;
 #define RULE_HEAD(r) ((PWADDR(r)+1)->val)
 #define RULE_GOALN(r,n) ((PWADDR(r)+1+n)->val)
 #define RULE_NGOALS(r) ((long) (PWADDR(r)->val))
-#define MK_RULE(n) (mk_rule((long)(n)))
+#define MK_RULE(n) (mk_rule(hpe, (long)(n)))
         /* n is the number of goals .. used for allocation of space */
 
 
@@ -168,7 +168,7 @@ extern pwrd nil_val;
  *
  */
 
-#define MK_DOUBLE(v) mk_double((double) (v))
+#define MK_DOUBLE(v) mk_double(hpe, (double) (v))
 
 #ifdef DoubleType
 #define DOUBLE_VAL1(v) ((long) PWADDR(v)->val)
@@ -183,22 +183,22 @@ extern pwrd nil_val;
  */
 
 
-#define MK_UIA(s) mk_uia(s)
+#define MK_UIA(s) mk_uia(hpe, s)
 #define UIA_NAME(v) ((char *) ((pword) (v)+1))
 
-extern	void	prs_area_init	PARAMS(( unsigned long ));
-extern	void	alc_rst		PARAMS(( void ));
-extern	int	is_double	PARAMS(( double *, pword ));
-extern	pword	mk_term		PARAMS(( long ));
-extern	pword	mk_functor	PARAMS(( long, long ));
-extern	pword	mk_list		PARAMS(( pword, pword ));
-extern	pword	mk_int		PARAMS(( long ));
-extern	pword	mk_vo		PARAMS(( long ));
-extern	pword	mk_rule		PARAMS(( long ));
-extern	pword	mk_double	PARAMS(( double ));
-extern	double	double_val	PARAMS(( pword ));
-extern	long	functor_id_of_term PARAMS(( pword ));
-extern	long	arity_of_term	PARAMS(( pword ));
-extern	pword	mk_uia		PARAMS(( char * ));
+extern	void	prs_area_init	(PE, unsigned long );
+extern	void	alc_rst		( PE );
+extern	int	is_double	( double *, pword );
+extern	pword	mk_term		(PE,  long );
+extern	pword	mk_functor	(PE,  long, long );
+extern	pword	mk_list		(PE,  pword, pword );
+extern	pword	mk_int		(PE,  long );
+extern	pword	mk_vo		(PE,  long );
+extern	pword	mk_rule		(PE,  long );
+extern	pword	mk_double	(PE,  double );
+extern	double	double_val	( pword );
+extern	long	functor_id_of_term ( pword );
+extern	long	arity_of_term	( pword );
+extern	pword	mk_uia		(PE,  char * );
 
 #endif /* ALLOC_I */

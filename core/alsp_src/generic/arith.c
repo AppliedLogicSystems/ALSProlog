@@ -49,21 +49,21 @@
 
 #include "random.h"
 
-extern	double	als_random	PARAMS(( void ));
+extern	double	als_random	( void );
 #ifndef HAVE_AINT
-extern	double	aint		PARAMS(( double ));
+extern	double	aint		( double );
 #endif
 /*****
 #ifndef HAVE_RINT
-extern	double	rint		PARAMS(( double ));
+extern	double	rint		( double );
 #endif
 ****/
 #ifndef HAVE_EXP10
-extern	double	exp10		PARAMS(( double ));
+extern	double	exp10		( double );
 #endif
-static	double	do_is		PARAMS(( PWord, int, int * ));
+static	double	do_is		(PE, PWord, int, int * );
 
-static jmp_buf is_error;
+//static jmp_buf is_error;
 
 enum {
 	IS_INSTANTIATION_ERROR = 1,
@@ -76,21 +76,21 @@ enum {
 	IS_UNDEFINED_ERROR
 };
 
-PWord error_functor; int error_arity;
+//PWord error_functor; int error_arity;
 
 /* Define how to handle random numbers */
 
 #ifdef HAVE_SRAND48
 #define drandom drand48
 #define srandom srand48
-extern	void	srand48		PARAMS(( long ));
-extern	double	drand48		PARAMS(( void ));
+extern	void	srand48		( long );
+extern	double	drand48		( void );
 
 #elif defined(HAVE_SRANDOM)
 #define RANDRANGE 0x7fffffff
 #ifndef __DJGPP__
-extern	long	random		PARAMS(( void ));
-extern	void	srandom		PARAMS(( int ));
+extern	long	random		( void );
+extern	void	srandom		( int );
 #endif
 
 #elif defined(HAVE_SRAND)
@@ -104,7 +104,7 @@ extern	void	srandom		PARAMS(( int ));
 
 #ifdef HAVE_TIME
 int
-pbi_time()
+pbi_time(PE)
 {				/* real system time */
     PWord vsec, vmin, vhour, vmday, vmon, vyear, vwday, vyday, visdst, vkind;
     int   tsec, tmin, thour, tmday, tmon, tyear, twday, tyday, tisdst, tkind;
@@ -151,7 +151,7 @@ pbi_time()
 #endif /* HAVE_TIME */
 
 int
-pbi_srandom()
+pbi_srandom(PE)
 {
     PWord v1;
     int t1;
@@ -159,7 +159,7 @@ pbi_srandom()
 
     w_get_An(&v1,&t1,1);
 
-    if (get_number(v1,t1,&seed)) {
+    if (get_number(hpe,v1,t1,&seed)) {
 	minimal_standard_rand_init((long) seed);
 	SUCCEED;
     }
@@ -171,8 +171,7 @@ pbi_srandom()
 #ifndef HAVE_AINT
 /* aint rounds towards zero */
 double
-aint(d)
-    double d;
+aint(double d)
 {
     if (d < 0)
 	return (ceil(d));
@@ -198,8 +197,7 @@ rint0(double d)
 }
 
 #ifndef HAVE_EXP10
-double exp10(d)
-    double d;
+double exp10(double d)
 {
     return pow((double) 10, d);
 }
@@ -226,7 +224,7 @@ gamma(double x)
 /*------------------------------------------------------------------------------*
  |	Symbolic floating point constants (also used in interval arithmetic)
  *------------------------------------------------------------------------------*/
-double sym_f_cnst[] = {
+const double sym_f_cnst[] = {
 	D_PI,			/* pi         */
 	D_PI_2,    		/* pi/2       */ 
 	D_E,       		/* e          */ 
@@ -274,10 +272,12 @@ double sym_f_cnst[] = {
  *--------------------------------------------------------------------------------*/
 
 static double
-do_is(v, t, ty)
-    PWord v;
-    int   t;
-    int   *ty;
+do_is(
+    PE,
+    PWord v,
+    int   t,
+    int   *ty
+)
 {
     int   arity;
     PWord functor;
@@ -316,7 +316,7 @@ do_is(v, t, ty)
 	    if (t2 != WTP_SYMBOL && v2 != TK_NIL)
 		longjmp(is_error, IS_INSTANTIATION_ERROR);
 	    else
-		return do_is(v1, t1, ty);
+		return do_is(hpe, v1, t1, ty);
 
 	case WTP_INTEGER:
 	    return (double) (v);
@@ -330,7 +330,7 @@ do_is(v, t, ty)
 
 		w_get_argn(&v1, &t1, v, 1);
 		ty1 = WTP_INTEGER;
-		rv = do_is(v1, t1, &ty1);
+		rv = do_is(hpe, v1, t1, &ty1);
 		errno = 0;
 		*ty = WTP_DOUBLE;
 		switch ((int) functor) {
@@ -433,10 +433,10 @@ do_is(v, t, ty)
 
 		w_get_argn(&v1, &t1, v, 1);
 		ty1 = WTP_INTEGER;
-		rv1 = do_is(v1, t1, &ty1);
+		rv1 = do_is(hpe, v1, t1, &ty1);
 		w_get_argn(&v2, &t2, v, 2);
 		ty2 = WTP_INTEGER;
-		rv2 = do_is(v2, t2, &ty2);
+		rv2 = do_is(hpe, v2, t2, &ty2);
 
 		switch ((int) functor) {
 		    case TK_PLUS: 
@@ -542,12 +542,14 @@ do_is(v, t, ty)
 
 
 void
-make_number(v, t, d)
-    PWord *v;
-    int  *t;
-    double d;
+make_number(
+    PE,
+    PWord *v,
+    int  *t,
+    double d
+)
 {
-	make_numberx(v,t,d,WTP_INTEGER);
+	make_numberx(hpe, v,t,d,WTP_INTEGER);
 }
 
 /*---------------------------------------------------------------
@@ -562,10 +564,7 @@ make_number(v, t, d)
  *--------------------------------------------------------------*/
 
 void
-make_numberx(v, t, d, TP)
-    PWord *v;
-    int  *t, TP;
-    double d;
+make_numberx(PE,PWord *v, int  *t, double d, int TP)
 {
     int fl;
 
@@ -604,17 +603,13 @@ typedef union newdouble {
 extern NEWDOUBLE NAN_REAL, POS_INF;
 
 void
-make_ieee_nan(v, t)
-    PWord *v;
-    int  *t;
+make_ieee_nan(PE, PWord *v, int  *t)
 {
     w_mk_double(v, t, NAN_REAL.d);
 }
 
 void
-make_ieee_inf(v, t)
-    PWord *v;
-    int  *t;
+make_ieee_inf(PE, PWord *v, int  *t)
 {
     w_mk_double(v, t, POS_INF.d);
 }
@@ -622,7 +617,7 @@ make_ieee_inf(v, t)
 /*---------------------------------------------------------------
  *--------------------------------------------------------------*/
 
-static int handle_is_error(int status)
+static int handle_is_error(PE, int status)
 {
     PWord s;
     int st;
@@ -664,7 +659,7 @@ static int handle_is_error(int status)
 }
 
 int
-pbi_is()
+pbi_is(PE)
 {
     PWord v1, v2;
     int   t1, t2, ty;
@@ -676,15 +671,15 @@ pbi_is()
 
     status = setjmp(is_error);
     if (status) 
-    	return handle_is_error(status);
+    	return handle_is_error(hpe, status);
     	
 
 	ty = WTP_INTEGER;
-	is_res = do_is(v2, t2, &ty);
+	is_res = do_is(hpe, v2, t2, &ty);
 
 /*    make_number(&v2, &t2, do_is(v2, t2)); */
 
-    make_numberx(&v2, &t2, is_res, ty);
+    make_numberx(hpe, &v2, &t2, is_res, ty);
 
     if (w_unify(v1, t1, v2, t2))
 	SUCCEED;
@@ -697,7 +692,7 @@ pbi_is()
 
 #define NUMCOMP(name,rel)		\
 int								\
-name()						  	\
+name(PE)						  	\
 {							   	\
     PWord v1,v2;				\
     int t1,t2;					\
@@ -709,13 +704,13 @@ name()						  	\
 								\
     status = setjmp(is_error);					\
     if (status) {		\
-	return handle_is_error(status);						\
+	return handle_is_error(hpe, status);						\
     }							\
 								\
 	ty1 = WTP_INTEGER;			\
 	ty2 = WTP_INTEGER;			\
 								\
-    if (do_is(v1,t1,&ty1) rel do_is(v2,t2,&ty2)) {			\
+    if (do_is(hpe, v1,t1,&ty1) rel do_is(hpe, v2,t2,&ty2)) {			\
 	SUCCEED;					\
     }							\
     else {						\
@@ -733,10 +728,9 @@ NUMCOMP(pbi_arithnotequal, !=)
 
 
 
-int pbi_fpconst_val	PARAMS(( void ));
 
 int
-pbi_fpconst_val()
+pbi_fpconst_val(PE)
 {
     PWord cnst, value, fv;
     int   cnst_t, value_t, fv_t;
@@ -751,7 +745,7 @@ pbi_fpconst_val()
 	switch ((int)cnst) {
 		FPCCASE(the_val)
 	}
-	make_number(&fv, &fv_t, the_val);
+	make_number(hpe, &fv, &fv_t, the_val);
 
 	if (w_unify(value, value_t, fv, fv_t))
 		SUCCEED;
@@ -759,10 +753,8 @@ pbi_fpconst_val()
 		FAIL;
 }
 
-int pbi_uia_poke_fpconst 	PARAMS (( void ));
-
 int
-pbi_uia_poke_fpconst()
+pbi_uia_poke_fpconst(PE)
 { 			/* uia_poke_fpconst(V,Sgn,UIA,Off) */
     PWord Val, Sgn, UIABuf, Off;
     int   Val_t, Sgn_t, UIABuf_t, Off_t;

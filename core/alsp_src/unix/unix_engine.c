@@ -115,12 +115,16 @@ void unprotect_stack(prolog_engine *pe)
 /* Can I use safe functions in a interupt handler? */
 static void sigsegv_handler(int signum)
 {
+  signal(signum, SIG_DFL);
+#if 0
+FIXME
 	if (current_engine.stack_protected) {
 		unprotect_stack(&current_engine);
 		signal_handler(ALSSIG_STACK_OVERFLOW);
 	} else {
 		signal(signum, SIG_DFL);
 	}
+#endif
 }
 
 struct sigaction original_sigsegv_action;

@@ -52,8 +52,10 @@ struct use_entry {
 #endif
 
 Code *
-resolve_reference(entfrom)
-    ntbl_entry *entfrom;	/* entry from which we are coming from */
+resolve_reference(
+    PE,
+    ntbl_entry *entfrom	/* entry from which we are coming from */
+)
 {
     ntbl_entry *entto;		/* entry where we'd like to go to */
     PWord functor;
@@ -62,7 +64,7 @@ resolve_reference(entfrom)
     functor = MFUNCTOR_TOKID(entfrom->tokid_arity);
     arity = MFUNCTOR_ARITY(entfrom->tokid_arity);
 
-    entto = resolve_ref((PWord) entfrom->modid, (PWord) functor, arity);
+    entto = resolve_ref(hpe, (PWord) entfrom->modid, (PWord) functor, arity);
 
     if (entto == (ntbl_entry *) 0) {
 	wm_interrupt_caught = ALSSIG_UNDEFINED_PRED;
@@ -77,7 +79,7 @@ resolve_reference(entfrom)
 	    copy_code((long *) entto->code, (long *) entfrom->code,
 		      (int)(NTBL_CODESIZE * sizeof (Code) / sizeof (long)));
 	else
-	    ic_install_reference(entfrom->code, (PWord) entto->code);
+	    ic_install_reference(hpe, entfrom->code, (PWord) entto->code);
 
 	entfrom->flags = (entfrom->flags & ~NMSK_USAGE) | NFLG_IMPORTED;
 	(void) w_dbprotect(odbrs);
@@ -90,15 +92,13 @@ resolve_reference(entfrom)
 #endif
 
 ntbl_entry *
-resolve_ref(modid, tokid, arity)
-    PWord modid, tokid;
-    int   arity;
+resolve_ref(PE, PWord modid, PWord tokid, int arity)
 {
     register int u;
     int   modidx;
     ntbl_entry *ent;
 
-    if ((modidx = modprobe_id(modid)) != -1) {
+    if ((modidx = modprobe_id(hpe, modid)) != -1) {
 	/* Scan through the use list, looking for a hit. */
 	for (u = module_table[modidx].nextuse;
 	     u != -1;
@@ -133,9 +133,11 @@ resolve_ref(modid, tokid, arity)
 #endif
 
 Code *
-call_resolve_reference(m, p, a, i)
-    PWord m, p;
-    int   a, i;
+call_resolve_reference(
+    PE,
+    PWord m, PWord p,
+    int   a, int i
+)
 {
     ntbl_entry *ent;
     dbprot_t odbrs;
@@ -152,12 +154,12 @@ call_resolve_reference(m, p, a, i)
 
     if ( (ent = w_nameprobe(m, p, a)) )
 	return (i) ? ent->code : ent->exec_entry;
-    else if ( (ent = resolve_ref(m, p, a)) )
+    else if ( (ent = resolve_ref(hpe, m, p, a)) )
 	return (i) ? ent->code : ent->exec_entry;
     else if (isCutMacro(p, a - 1)) {
 	if ( (ent = w_nameprobe(m, p, a - 1)) )
 	    return (i) ? ent->code : ent->exec_entry;
-	else if ( (ent = resolve_ref(m, p, a - 1)) )
+	else if ( (ent = resolve_ref(hpe, m, p, a - 1)) )
 	    return (i) ? ent->code : ent->exec_entry;
     }
     
@@ -175,7 +177,7 @@ call_resolve_reference(m, p, a, i)
 
 #ifdef PACKAGE
 void
-set_curr_package_module()
+set_curr_package_module(void)
 {
     /* set current module to the module "builtin" */
     top_module = &module_stack[0];
@@ -185,12 +187,14 @@ set_curr_package_module()
 
 
 int
-next_module(n, m, mt, u, ut)
-    int   n;
-    PWord *m;			/* module */
-    int  *mt;			/* module type */
-    PWord *u;			/* use list */
-    int  *ut;			/* use list type */
+next_module(
+    PE,
+    int   n,
+    PWord *m,			/* module */
+    int  *mt,			/* module type */
+    PWord *u,			/* use list */
+    int  *ut			/* use list type */
+)
 {
     PWord l, ll;		/* temporary lists */
     int   lt, llt;		/* temporary list types */
@@ -247,8 +251,7 @@ next_module(n, m, mt, u, ut)
  */
 
 int
-mod_id(tk)
-    int   tk;
+mod_id(PE, int tk)
 {
     int   i;
 
@@ -273,8 +276,7 @@ mod_id(tk)
  */
 
 int
-modprobe_id(tk)
-    PWord tk;
+modprobe_id(PE, PWord tk)
 {
     int   i;
 
@@ -311,8 +313,7 @@ struct defprocs {
 
 
 void
-new_mod(tk)
-    PWord tk;
+new_mod(PE, PWord tk)
 {
     register int i;
     int   modidx;
@@ -325,7 +326,7 @@ new_mod(tk)
     /* Set the current module (for the compiler and that ilk. */
     cur_mod = tk;
 
-    modidx = mod_id(cur_mod);
+    modidx = mod_id(hpe, cur_mod);
 
     /* Make sure the module hasn't already been created. */
     if (module_table[modidx].nextuse != -1)
@@ -333,7 +334,7 @@ new_mod(tk)
 
     /* Add in the auto-uses */
     for (i = 0; i < default_usemax; i++)
-	adduse(modidx, default_uses[i]);
+	adduse(hpe, modidx, default_uses[i]);
 
     /* Global module gets everything */
     mod_adduse(MODULE_GLOBAL, cur_mod);
@@ -357,7 +358,7 @@ new_mod(tk)
  */
 
 void
-end_mod()
+end_mod(PE)
 {
 
     if (top_module == module_stack) {
@@ -373,8 +374,7 @@ end_mod()
  */
 
 void
-push_clausegroup(cg)
-    int   cg;
+push_clausegroup(PE, int cg)
 {
     if (++top_clausegroup == &clausegroup_stack[MAXMODNESTING])
 	fatal_error(FE_OVER_CGSTK, 0);
@@ -386,7 +386,7 @@ push_clausegroup(cg)
  */
 
 int
-pop_clausegroup()
+pop_clausegroup(PE)
 {
     int   cg;
 
@@ -403,8 +403,7 @@ pop_clausegroup()
  */
 
 void
-add_default_use(tokid)
-    int   tokid;
+add_default_use(PE, int tokid)
 {
     int   i;
 
@@ -426,13 +425,12 @@ add_default_use(tokid)
      */
 
     for (i = nmods - 1; i >= 0; i--)
-	adduse(i, tokid);
+	adduse(hpe, i, tokid);
 }
 
 #ifdef PACKAGE
 void
-pckg_add_default_use(tokid)
-    int   tokid;
+pckg_add_default_use(int tokid)
 {
     int   i;
 
@@ -456,9 +454,10 @@ pckg_add_default_use(tokid)
  */
 
 int
-get_default_use(n, m, mt)
-    PWord n;
-    PWord *m, *mt;		/* default use module name */
+get_default_use(
+    PWord n,
+    PWord *m, PWord *mt		/* default use module name */
+)
 {
     if (n >= 0 && n < default_usemax) {
 	*m = (PWord) default_uses[n];
@@ -494,9 +493,7 @@ get_default_use(n, m, mt)
  */
 
 void
-add_default_proc(tokid, arity)
-    PWord tokid;
-    int   arity;
+add_default_proc(PE, PWord tokid, int arity)
 {
     int   i;
 
@@ -530,9 +527,7 @@ add_default_proc(tokid, arity)
  * this is called from pckgload.c
  */
 void
-pckg_add_default_proc(tokid, arity)
-    PWord tokid;
-    int   arity;
+pckg_add_default_proc(PWord tokid, int arity)
 {
     int   i;
 
@@ -557,9 +552,7 @@ pckg_add_default_proc(tokid, arity)
  */
 
 int
-pckg_is_default_proc(tokid, arity)
-    PWord tokid;
-    int   arity;
+pckg_is_default_proc(PWord tokid, int arity)
 {
     int   i;
 
@@ -579,10 +572,11 @@ pckg_is_default_proc(tokid, arity)
  */
 
 int
-get_default_proc(n, p, pt, a, at)
-    PWord n;
-    PWord *p, *pt;		/* default procedure name */
-    PWord *a, *at;		/* default procedure arity */
+get_default_proc(
+    PWord n,
+    PWord *p, PWord *pt,		/* default procedure name */
+    PWord *a, PWord *at		/* default procedure arity */
+)
 {
     if (n >= 0 && n < default_procmax) {
 	*p = (PWord) default_procs[n].tokid;
@@ -607,8 +601,7 @@ get_default_proc(n, p, pt, a, at)
  */
 
 void
-adduse(m, u)
-    int   m, u;
+adduse(PE, int m, int u)
 {
     int   up;			/* use pointer */
 
@@ -644,10 +637,12 @@ adduse(m, u)
 
 
 void
-export_pred(mod, tok, arity)
-    PWord mod;			/* module id */
-    PWord tok;			/* token id  */
-    int   arity;		/* arity     */
+export_pred(
+    PE,
+    PWord mod,			/* module id */
+    PWord tok,			/* token id  */
+    int   arity			/* arity     */
+)
 {
     ntbl_entry *ent;
 
@@ -669,10 +664,12 @@ export_pred(mod, tok, arity)
  */
 
 void
-createModuleClosureProcedure(name1, arity, name2)
-    PWord name1;
-    int   arity;
-    PWord name2;
+createModuleClosureProcedure(
+    PE,
+    PWord name1,
+    int   arity,
+    PWord name2
+)
 {
     ntbl_entry *ent1, *ent2;
     int   arity2;
@@ -691,17 +688,19 @@ createModuleClosureProcedure(name1, arity, name2)
     ent1->flags = NFLG_BUILTIN | NMSK_EXPORT | NFLG_BLT_MODCLOSURE;
 
     /* Don't want to do overflow code on destination, so go to ->code. */
-    ic_install_module_closure(ent1, ent2->code);
+    ic_install_module_closure(hpe, ent1, ent2->code);
 
-    add_default_proc(name1, arity);
+    add_default_proc(hpe, name1, arity);
 }
 
 int
-createModCloseProc(tgtmod, name1, arity, name2)
-	int tgtmod;
-    PWord name1;
-    int   arity;
-    PWord name2;
+createModCloseProc(
+	PE,
+	int tgtmod,
+    PWord name1,
+    int   arity,
+    PWord name2
+)
 {
     ntbl_entry *ent1, *ent2;
     int   arity2;
@@ -722,9 +721,9 @@ createModCloseProc(tgtmod, name1, arity, name2)
 
 
     /* Don't want to do overflow code on destination, so go to ->code. */
-    ic_install_module_closure(ent1, ent2->code);
+    ic_install_module_closure(hpe, ent1, ent2->code);
 
-    add_default_proc(name1, arity);
+    add_default_proc(hpe, name1, arity);
     
     return 1;
 }
@@ -732,7 +731,7 @@ createModCloseProc(tgtmod, name1, arity, name2)
 #ifdef debugging
 
 void
-mod_stats()
+mod_stats(void)
 {
     int   m, u;
 
@@ -756,28 +755,29 @@ mod_stats()
 
 
 void
-module_init()
+module_init(PE)
 {
-    if (!module_stack) {
+// don't make assumptions about uninitialzed memory!
+//    if (!module_stack) {
 	module_stack = (int *)
-	    ss_malloc(MAXMODNESTING * sizeof (int), FE_MODULE_INIT);
+	    ss_malloc(hpe, MAXMODNESTING * sizeof (int), FE_MODULE_INIT);
 	clausegroup_stack = (int *)
-	    ss_malloc(MAXMODNESTING * sizeof (int), FE_MODULE_INIT);
+	    ss_malloc(hpe, MAXMODNESTING * sizeof (int), FE_MODULE_INIT);
 	module_table = (struct mtbl_entry *)
-	    ss_malloc(NMODULES * sizeof (struct mtbl_entry), FE_MODULE_INIT);
+	    ss_malloc(hpe, NMODULES * sizeof (struct mtbl_entry), FE_MODULE_INIT);
 	use_table = (struct use_entry *)
-	    ss_malloc(NUSEDEFS * sizeof (struct use_entry), FE_MODULE_INIT);
+	    ss_malloc(hpe, NUSEDEFS * sizeof (struct use_entry), FE_MODULE_INIT);
 	
 	/* Allocate and initialize the default_uses structure */
 	default_uses = (long *)
-	    ss_malloc(MAXDEFUSES * sizeof (long), FE_MODULE_INIT);
+	    ss_malloc(hpe, MAXDEFUSES * sizeof (long), FE_MODULE_INIT);
 	default_uses[0] = MODULE_GLOBAL;
 	default_uses[1] = MODULE_BUILTINS;
 	default_usemax = 2;
 
 	/* Allocate and initialize the default_procs structure */
 	default_procs = (struct defprocs *)
-	    ss_malloc(MAXDEFPROCS * sizeof (struct defprocs), FE_MODULE_INIT);
+	    ss_malloc(hpe, MAXDEFPROCS * sizeof (struct defprocs), FE_MODULE_INIT);
 	default_procs[0].tokid = TK_COMMA;
 	default_procs[0].arity = 2;
 	default_procs[1].tokid = TK_SCOLON;
@@ -796,28 +796,28 @@ module_init()
 	*top_clausegroup = -1;
 
 	/* create the user module (default) */
-	new_mod((PWord) find_token((UCHAR *)"user"));
+	new_mod(hpe, (PWord) find_token((UCHAR *)"user"));
 
 	/* create the builtins module */
-	new_mod((PWord) find_token((UCHAR *)"builtins"));	
+	new_mod(hpe, (PWord) find_token((UCHAR *)"builtins"));	
 
 	/* pop builtins module off the stack */
-	end_mod();
+	end_mod(hpe);
 
 	/* leaving the user module as default */
 
 	/* register the global variables in this module */
-	ss_register_global((long *) &top_module);
-	ss_register_global((long *) &module_stack);
-	ss_register_global((long *) &top_clausegroup);
-	ss_register_global((long *) &clausegroup_stack);
-	ss_register_global((long *) &module_table);
-	ss_register_global((long *) &use_table);
-	ss_register_global((long *) &nmods);
-	ss_register_global((long *) &nuses);
-	ss_register_global((long *) &default_uses);
-	ss_register_global((long *) &default_usemax);
-	ss_register_global((long *) &default_procs);
-	ss_register_global((long *) &default_procmax);
-    }
+	ss_register_global(hpe, (long *) &top_module);
+	ss_register_global(hpe, (long *) &module_stack);
+	ss_register_global(hpe, (long *) &top_clausegroup);
+	ss_register_global(hpe, (long *) &clausegroup_stack);
+	ss_register_global(hpe, (long *) &module_table);
+	ss_register_global(hpe, (long *) &use_table);
+	ss_register_global(hpe, (long *) &nmods);
+	ss_register_global(hpe, (long *) &nuses);
+	ss_register_global(hpe, (long *) &default_uses);
+	ss_register_global(hpe, (long *) &default_usemax);
+	ss_register_global(hpe, (long *) &default_procs);
+	ss_register_global(hpe, (long *) &default_procmax);
+//    }
 }

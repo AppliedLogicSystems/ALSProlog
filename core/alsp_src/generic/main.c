@@ -115,30 +115,30 @@ static char versionNum[] = VERSION_STRING;	/* from version.h */
 static int exit_status = 0;
 static jmp_buf exit_return; 
 
-static	void	panic_fail	PARAMS(( void ));
+static	void	panic_fail	( void );
 #ifdef arch_m88k
-static	void	panic_continue	PARAMS(( void ));
+static	void	panic_continue	( void );
 #endif
-static	void	abolish_predicate PARAMS(( const char *, const char *, int ));
-static	void	assert_sys_searchdir PARAMS(( char * ));
-static	void	assert_als_system PARAMS((const char *, const char *,
+static	void	abolish_predicate (PE, const char *, const char *, int );
+static	void	assert_sys_searchdir (PE, char * );
+static	void	assert_als_system (PE, const char *, const char *,
 					  const char *, const char *,
-					  const char *));
-static	void	assert_atom_in_module PARAMS(( const char*, const char * ));
+					  const char *);
+static	void	assert_atom_in_module (PE,  const char*, const char * );
 
 
-static	void	autoload	PARAMS(( char * ));
-static	void	chpt_init	PARAMS(( void ));
+static	void	autoload	(PE,  char * );
+void	chpt_init	( PE );
 
 static void
-panic_fail()
+panic_fail(void)
 {
     fatal_error(FE_PANIC_FAIL, 0);
 }
 
 #ifdef arch_m88k
 static void
-panic_continue()
+panic_continue(void)
 {
     fatal_error(FE_PANIC_CONTINUE, 0);
 }
@@ -155,7 +155,7 @@ extern int run_wam(Code *startaddr);
 
 /* ALS Prolog Command Line Development Evnvironment */
 
-static int PI_prolog_init0(const PI_system_setup *setup)
+static int PI_prolog_init0(PE, const PI_system_setup *setup)
 {
     unsigned long heapsize;
     unsigned long stacksize;
@@ -267,6 +267,9 @@ static int PI_prolog_init0(const PI_system_setup *setup)
       else state_path = NULL;
     }    
     	
+    	
+    //state_path = NULL;
+    //offset = 0;
     /*
      * Set up the alsdir variable.  First use the image directory and
      * attach alsdir to the path.  If this directory does not exist then
@@ -310,8 +313,9 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 #endif
 
 	init_prolog_globals();
-	init_prolog_engine(&current_engine, stacksize, heapsize);
-    saved_state_loaded = als_mem_init(state_path, offset);
+	init_db(hpe->db);
+	init_prolog_engine(hpe, stacksize, heapsize);
+    saved_state_loaded = als_mem_init(hpe, state_path, offset);
 
 #if 0
 //    if (heapsize * 4 < DEFAULT_SAFETY * 2)
@@ -349,24 +353,24 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 
 //    prs_area_init(heapsize / 8);
 #endif
-    prs_area_init(0);
+    prs_area_init(hpe, 0);
 
 #if	defined(arch_i386) || defined(arch_sparc) || defined(arch_m68k)
     if (icbufsize < MIN_ICBUFSIZE || !init_icode_buf(icbufsize))
 	fatal_error(FE_ICODEBUFINIT, 0);
 #endif /* arch_i386 or arch_sparc */
 
-    parser_init();
+    parser_init(hpe);
 
     w_initcode();
 #ifndef KERNAL
     fio_init();
 #endif /* KERNAL */
 #ifdef Portable
-    wam_init();		/* This must come before module_init */
+    wam_init(hpe);		/* This must come before module_init */
 #endif
-    module_init();
-    chpt_init();
+    module_init(hpe);
+    chpt_init(hpe);
 
 #ifdef PACKAGE
     if (system_pckg != (long *) -1) {
@@ -380,37 +384,39 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 	builtin_init();
     }
 #else  /* PACKAGE */
-    builtin_init();
+    builtin_init(hpe);
 #endif /* PACKAGE */
 
-    time_cut_interrupt_init();
+    time_cut_interrupt_init(hpe);
 #ifdef OBP
 /*    fix_MAGIC(); */		/* for loadfile.c */
 #endif /* OBP */
 
 #ifndef KERNAL
     if (system_pckg != (long *) -1 || saved_state_loaded)
-	pckg_run_init_goal();
+	pckg_run_init_goal(hpe);
 #endif /* KERNAL */
 
     /*
      * Intialize Foreign Interface preds used by builtins
      */
 
-    init_fsutils();		/* see fsunix.c, fsdos.c, etc. */
+    init_fsutils(hpe);		/* see fsunix.c, fsdos.c, etc. */
 #ifndef KERNAL
+#ifdef BCINTER
     cinterf_init();		/* see cinterf.c */
+#endif
 #endif /* KERNAL */
 
 #ifndef KERNAL
     if (system_pckg != (long *) -1 || saved_state_loaded) {
-	abolish_predicate("builtins", "als_system", 1);
+	abolish_predicate(hpe, "builtins", "als_system", 1);
 #if 0	/* should leave original sys_searchdir since image may be moved */
-	abolish_predicate("builtins", "sys_searchdir", 1);
+	abolish_predicate(hpe, "builtins", "sys_searchdir", 1);
 #endif
     }
 
-    assert_sys_searchdir(alsdir);
+    assert_sys_searchdir(hpe, alsdir);
 #endif /* KERNAL */
 
     /*---------------------------------------*
@@ -427,7 +433,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 #endif
 
 #ifndef KERNAL
-    assert_als_system(OSStr, MinorOSStr, ProcStr,
+    assert_als_system(hpe, OSStr, MinorOSStr, ProcStr,
 		      SysManufacturer, versionNum);
 
     /*-------------------------------------------*
@@ -442,7 +448,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
     assert_atom_in_module("syscfg","djgpp2");
 
 #elif defined(MacOS)
-    assert_atom_in_module("syscfg","macos");
+    assert_atom_in_module(hpe, "syscfg","macos");
 
 #endif
 
@@ -453,8 +459,8 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 #endif
 
 #ifdef FREEZE 
-    assert_atom_in_module("builtins","freeze");
-    assert_atom_in_module("syscfg","freeze");
+    assert_atom_in_module(hpe, "builtins","freeze");
+    assert_atom_in_module(hpe, "syscfg","freeze");
 #endif
 #endif /* KERNAL */
 
@@ -477,12 +483,12 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 	} else f_load("application.obp");
 #else
     	strcpy(f, "builtins");
-#ifndef PURE_ANSI
+//#ifndef PURE_ANSI
     	l = strlen(f);
     	f[l] = DIR_SEPARATOR; f[l+1] = 0;
     	strcat(f, "builtins");
-#endif /* PURE_ANSI */
-    	autoload(f);
+//#endif /* PURE_ANSI */
+    	autoload(hpe, f);
 #endif /* KERNAL */
     }
 
@@ -535,15 +541,12 @@ static int PI_prolog_init0(const PI_system_setup *setup)
  * abolish_predicate abolishes the given predicate
  */
 static void
-abolish_predicate(module, pred, arity)
-    const char *module;
-    const char *pred;
-    int   arity;
+abolish_predicate(PE, const char *module, const char *pred, int arity)
 {
     char  command[2048];
 
     sprintf(command, "abolish(%s,%s,%d)", module, pred, arity);
-    if (!exec_query_from_buf(command)) {
+    if (!exec_query_from_buf(hpe, command)) {
 	sprintf(command, "%s:%s/%d", module, pred, arity);
 	fatal_error(FE_ABOLISH_FAIL, (long) command);
     }
@@ -558,8 +561,7 @@ abolish_predicate(module, pred, arity)
  * been loaded, it is necessary to use the most primitive version of assert.
  */
 static void
-assert_sys_searchdir(name)
-    char *name;
+assert_sys_searchdir(PE, char *name)
 {
     PWord c, a1, a2, a4, b, s, p;
     int ct, a1t, a2t, a4t, bt, st, pt;
@@ -595,14 +597,12 @@ assert_sys_searchdir(name)
  | 	builtins file; primarily used for modules builtins and syscfg.
  *-----------------------------------------------------------------------------*/
 static void
-assert_atom_in_module(mod_name,atom_name)
-    const char *mod_name;
-    const char *atom_name;
+assert_atom_in_module(PE, const char *mod_name,const char *atom_name)
 {
     char  command[2048];
 
     sprintf(command, "assertz(%s,%s,_,0)", mod_name,atom_name);
-    if (!exec_query_from_buf(command)) {
+    if (!exec_query_from_buf(hpe, command)) {
 		fatal_error(FE_ASSERT_SYS, 0);
     	}
 }
@@ -613,8 +613,8 @@ assert_atom_in_module(mod_name,atom_name)
  |	loading the builtins file.
  *-----------------------------------------------------------------------------*/
 static void
-assert_als_system(os, os_var, proc, man, ver)
-    const char *os, *os_var, *proc, *man, *ver;
+assert_als_system(PE, const char *os, const char *os_var,
+		const char *proc, const char *man, const char *ver)
 {
     char  command[2048];
 
@@ -628,7 +628,7 @@ assert_als_system(os, os_var, proc, man, ver)
 	    proc,
 	    man,
 	    ver);
-    if (!exec_query_from_buf(command)) {
+    if (!exec_query_from_buf(hpe, command)) {
 		fatal_error(FE_ASSERT_SYS, 0);
     	}
 }
@@ -641,8 +641,7 @@ assert_als_system(os, os_var, proc, man, ver)
  *-------------------------------------------------------------*/
 
 static void
-autoload(f)
-    char *f;
+autoload(PE, char *f)
 {
     int   status = 0;
     char  fext[1024];
@@ -656,10 +655,10 @@ autoload(f)
 #endif 
 */
 #ifdef MacOS
-    status = obpres_load(fext);
-    if (status != 1) status = load_file(fext, 0); 
+    status = obpres_load(hpe, fext);
+    if (status != 1) status = load_file(hpe, fext, 0); 
 #else
-    status = load_file(fext, 0);  
+    status = load_file(hpe, fext, 0);  
 #endif
     if (!status) {
 /*
@@ -672,19 +671,19 @@ autoload(f)
 
 
 EXPORT ALSPI_API(void)
-PI_toplevel(void)
+PI_toplevel_pe(PE)
 {
 	int result;
 	PI_status_toplevel(&result);
 }
 
 EXPORT ALSPI_API(int)
-PI_status_toplevel(int *result)
+PI_status_toplevel_pe(PE, int *result)
 {
 #ifndef KERNAL
     if (noautoload && !pckgloaded) {
 	if (!setjmp(exit_return)) {
-	    read_loop(nt_query, PMPT_QUERY);
+	    read_loop(hpe, nt_query, PMPT_QUERY);
 	    return (0);
 	}
     }
@@ -703,7 +702,7 @@ PI_status_toplevel(int *result)
 		p = GetString(129);
 	     
 		if (p && **p) {
-	    	    strncpy(start, *p+1, **p);
+	    	    strncpy(start, (char *)*p+1, **p);
 	    	    start[**p] = 0; 
 		    PI_makesym(&mv, &mt, "user");
 		    PI_makesym(&gv, &gt, start);
@@ -742,8 +741,7 @@ PI_status_toplevel(int *result)
 }
 
 void
-als_exit(status)
-    int   status;
+als_exit(int status)
 {
     exit_status = status;
 
@@ -769,17 +767,15 @@ PI_shutdown0(void)
 extern int _access();
 
 int
-access(fname, mode)
-    char *fname;
-    int   mode;
+access(char *fname, int mode)
 {
     return (_access(fname, mode));
 }
 
 #endif /* DOS */
 
-static void
-chpt_init()
+void
+chpt_init(PE)
 {
     wm_E = wm_SP - 2;
     wm_E[0] = (PWord) wm_SP;
@@ -807,8 +803,7 @@ chpt_init()
  *-------------------------------------------------------------------*/
 
 char *
-strdup(s1)
-    CONST char *s1;
+strdup(const char *s1)
 {
     char *dup;
 
@@ -831,13 +826,11 @@ strdup(s1)
  *-------------------------------------------------------------------*/
 
 size_t
-strspn(s1, s2)
-    CONST char *s1;
-    CONST char *s2;
+strspn(const char *s1, const char *s2)
 {
     register size_t count;
     register int c;
-    register CONST char *p;
+    register const char *p;
 
     count = 0;
 
@@ -859,13 +852,11 @@ done:
  | consists entirely of characters not from string s2.
  *-------------------------------------------------------------------*/
 
-size_t strcspn(s1, s2)
-    CONST char *s1;
-    CONST char *s2;
+size_t strcspn(const char *s1, const char *s2)
 {
     register size_t count;
     register int c;
-    register CONST char *p;
+    register const char *p;
 
     count = 0;
 
@@ -897,9 +888,7 @@ done:
  *-------------------------------------------------------------------*/
 
 char *
-strtok(s1,s2)
-    char *s1;
-    CONST char *s2;
+strtok(char *s1,const char *s2)
 {
     static char *oldpos = 0;
     char *start, *end;
@@ -932,10 +921,10 @@ strtok(s1,s2)
  | backs.  Who knows, maybe someday we will want to call it.
  *-------------------------------------------------------------------*/
 
-extern	char *	copyright	PARAMS(( void ));
+extern	char *	copyright	( void );
 
 char *
-copyright()
+copyright(void)
 {
     static char copyright_[] = "Copyright (c) 1994-6 Applied Logic Systems, Inc";
     return copyright_;
@@ -1012,7 +1001,7 @@ void app_printf(int messtype, va_list args);
 #endif
 
 EXPORT ALSPI_API(int)
-PI_prolog_init(int argc, char *argv[])
+PI_prolog_init_pe(PE, int argc, char *argv[])
 {
   PI_system_setup setup;
 
@@ -1045,7 +1034,7 @@ extern void demo_check(void);
 #endif
 
 EXPORT ALSPI_API(int)
-PI_startup(const PI_system_setup *setup)
+PI_startup_pe(PE, const PI_system_setup *setup)
 {
 #ifdef DEMO
 	demo_check();
@@ -1133,7 +1122,7 @@ PI_startup(const PI_system_setup *setup)
     init_security();
 
     {
-    int result = PI_prolog_init0(setup);
+    int result = PI_prolog_init0(hpe, setup);
 
     return result;
     }
@@ -1141,7 +1130,7 @@ PI_startup(const PI_system_setup *setup)
 }
 
 EXPORT ALSPI_API(void)
-PI_shutdown(void)
+PI_shutdown_pe(PE)
 {
 
     PI_shutdown0();
@@ -1215,7 +1204,7 @@ TimerUPP TimeProcUPP;
 TMTask gTask;
 #define foo 1000
 
-static pascal void TimeProc(TMTaskPtr task)
+static pascal void TimeProc(PE, TMTaskPtr task)
 {
  	wm_safety = -1;
     coop_interupt = 1;
@@ -1397,7 +1386,7 @@ PI_app_printf(int messtype, ...)
    is stored in a preferences file.
 */
 EXPORT ALSPI_API(const char *)
-PI_get_options(void)
+PI_get_options_pe(PE)
 {
 #ifdef MacOS
     if (MPW_Tool) {

@@ -1,4 +1,4 @@
-unsigned short sio_chtb[256] = {
+const unsigned short sio_chtb[256] = {
 /* 00 nul */
 SIOC_WHITESPACE,
 /* 01 soh  */

@@ -16,7 +16,8 @@
 
 typedef struct tkentry_ {
 	unsigned short length;
-	unsigned char *tkname;	/* pointer to string which is name of token */
+//	unsigned char *tkname;	/* pointer to string which is name of token */
+	char *tkname;	/* pointer to string which is name of token */
 	unsigned short unop;	/* unary operator precedence and assoc */
 	unsigned short binop;	/* binary op precedence and assoc */
 } tkentry;
@@ -27,7 +28,7 @@ extern tkentry *toktable;	/* note: although I am exporting the toktable,
 				 *       the macros provided here in parser.h
 				 */
 
-extern int errcount;
+//extern int perrcount;
 
 #define TOKNAME(t)  (toktable[(t)].tkname)
 #define TOKNAMELEN(t) (toktable[(t)].length)
@@ -36,7 +37,7 @@ extern int errcount;
 
 #define N_TOK_CHARS 256
 extern long *char_to_tok_map;
-#define char_to_tok(ch) (char_to_tok_map[(ch)])
+#define char_to_tok(ch) (char_to_tok_map[UCHARC(ch)])
 #define tok_to_char(tok) (*TOKNAME(tok))
 #define is_char_tok(tok) ((tok) == (char_to_tok(tok_to_char(tok))))
 #define is_char_code(ch) (0 <= (ch) && (ch) < N_TOK_CHARS)
@@ -93,42 +94,41 @@ extern long *char_to_tok_map;
 extern char tokstr[];		/* defined in lexan.c */
 
 
-#ifdef PARAMS			/* prevent errors in bldtok.c */
-
 /* symtab.c */
-extern	void	symtab_init	PARAMS(( void ));
-extern	long	find_token	PARAMS(( const UCHAR * ));
-extern	long	probe_token	PARAMS(( UCHAR * ));
-extern	int	tok_table_size	PARAMS((void));
+extern	void	symtab_init	( PE );
+extern	long	find_token_pe	(PE,  const UCHAR * );
+//extern	long	find_token_pe	(PE,  const char * );
+#define find_token(x)	find_token_pe(hpe, x)
+extern	long	probe_token	(PE, UCHAR * );
+extern	int	tok_table_size	(PE);
 
 /* parser.c */
-extern	void	parser_init	PARAMS(( void ));
-extern	void	parser_reset	PARAMS(( void ));
-extern	int	find_var	PARAMS(( char * ));
-extern	void	push_rator	PARAMS(( long, long ));
-extern	void	bld_clause	PARAMS(( void ));
-extern	void	nt_query	PARAMS(( void ));
-extern	void	parser_error	PARAMS(( const char * ));
-extern	void	read_loop	PARAMS(( void (*) PARAMS((void)), int ));
-extern	pword	bld_strl	PARAMS(( char * ));
-extern	pword	bld_vlst	PARAMS(( void ));
-extern	int	qtok		PARAMS(( int ));
-extern	void	bld_showanswers	PARAMS(( void ));
-extern	int	consult		PARAMS(( int ));
-extern	pword	prim_read	PARAMS(( void ));
-extern	int	exec_query_from_buf PARAMS(( char * ));
-extern	UCHAR *	token_name	PARAMS(( int ));
+extern	void	parser_init	( PE );
+extern	void	parser_reset	( PE );
+extern	int	find_var	(PE,  char * );
+extern	void	push_rator	(PE, long, long );
+extern	void	bld_clause	( PE );
+extern	void	nt_query	( PE );
+extern	void	parser_error	(PE,  const char * );
+extern	void	read_loop	(PE, void (*) (PE), int );
+extern	pword	bld_strl	(PE, char * );
+extern	pword	bld_vlst	( PE );
+extern	int	qtok		(PE, int );
+extern	void	bld_showanswers	( PE );
+extern	int	consult		(PE,  int );
+extern	pword	prim_read	( PE );
+extern	int	exec_query_from_buf (PE, char * );
+extern	UCHAR *	token_name	(PE, int );
 
 /* mapsym.c */
-extern	void	push_symmap	PARAMS(( void ));
-extern	void	pop_symmap	PARAMS(( void ));
-extern	long	symmap		PARAMS(( long ));
-extern	long *	sym_order	PARAMS(( long * ));
+extern	void	push_symmap	( PE );
+extern	void	pop_symmap	( PE );
+extern	long	symmap		(PE, long );
+extern	long *	sym_order	(PE, long * );
 
 /* expand.c */
-extern	void	parser_action	PARAMS(( int, pword ));
-extern	pword	cvt_term_to_rule PARAMS(( PWord, int ));
+extern	void	parser_action	(PE, int, pword );
+extern	pword	cvt_term_to_rule (PE, PWord, int );
 
-#endif /* PARAMS */
 
 #endif /* __parser_h_ */

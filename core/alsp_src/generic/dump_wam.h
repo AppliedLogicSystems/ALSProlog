@@ -20,5 +20,5 @@ typedef struct {
 
 } wam_task_state;
 
-void get_wam_task_state(wam_task_state *s);
+void get_wam_task_state(PE, wam_task_state *s);
 void dump_wam_task_state(const wam_task_state *s);

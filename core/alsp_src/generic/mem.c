@@ -106,12 +106,12 @@
 
 /*//static long *als_mem;*/
 
-long *	alloc_big_block		PARAMS(( size_t, int ));
-static	long *	ss_malloc0		PARAMS(( size_t, int, int, long * ));
+long *	alloc_big_block		( size_t, int );
+static	long *	ss_malloc0		( PE, size_t, int, int, long * );
 #ifndef PURE_ANSI
-static	void	ss_restore_state	PARAMS(( const char *, long ));
+static	void	ss_restore_state	(PE,  const char *, long );
 #endif /* PURE_ANSI */
-static	int	ss_saved_state_present	PARAMS(( void ));
+static	int	ss_saved_state_present	( void );
 
 #define amheader (* (struct am_header *) als_mem)
 
@@ -127,9 +127,7 @@ static	int	ss_saved_state_present	PARAMS(( void ));
 #endif
 
 long *
-alloc_big_block(size, fe_num)
-    size_t size;
-    int fe_num;
+alloc_big_block(size_t size, int fe_num)
 {
     long *np;
 
@@ -143,9 +141,11 @@ alloc_big_block(size, fe_num)
 }
 
 int
-als_mem_init(file,offset)
-    const char *file;
-    long offset;
+als_mem_init(
+    PE,
+    const char *file,
+    long offset
+)
 {
 
     if (ss_saved_state_present())
@@ -175,7 +175,7 @@ als_mem_init(file,offset)
 	/* Set integrity information in case saved state is created */
 	/*//amheader.integ_als_mem = &als_mem;*/
 	amheader.integ_als_mem_init = als_mem_init;
-	amheader.integ_w_unify = w_unify;
+	amheader.integ_w_unify = w_unify_pe;
 	strcpy(amheader.integ_version_num, VERSION_STRING);
 	strcpy(amheader.integ_processor, ProcStr);
 	strcpy(amheader.integ_minor_os, MinorOSStr);
@@ -184,7 +184,7 @@ als_mem_init(file,offset)
     }
     else {		/* need to open specified file and load it */
 #ifndef PURE_ANSI
-	ss_restore_state(file,offset);
+	ss_restore_state(hpe, file,offset);
 #endif /* PURE_ANSI */
 	return 1;	/* saved state loaded */
     }
@@ -193,11 +193,13 @@ als_mem_init(file,offset)
 #define SMALLEST_BLOCK_SIZE 16
 
 static long *
-ss_malloc0(size, align, fe_num, actual_sizep)
-    size_t size;
-    int align;
-    int fe_num;
-    long *actual_sizep;
+ss_malloc0(
+    PE,
+    size_t size,
+    int align,
+    int fe_num,
+    long *actual_sizep
+)
 {
     long **bestp = (long **) 0;
     long best_size = 0x7fffffff;
@@ -271,20 +273,24 @@ ss_malloc0(size, align, fe_num, actual_sizep)
 }
 
 long *
-ss_pmalloc(size,fe_num,actual_sizep)
-    size_t size;
-    int fe_num;
-    long *actual_sizep;
+ss_pmalloc(
+    PE,
+    size_t size,
+    int fe_num,
+    long *actual_sizep
+)
 {
-    return ss_malloc0(size,1,fe_num,actual_sizep);
+    return ss_malloc0(hpe, size,1,fe_num,actual_sizep);
 }
 
 long *
-ss_malloc(size,fe_num)
-    size_t size;
-    int fe_num;
+ss_malloc(
+    PE,
+    size_t size,
+    int fe_num
+)
 {
-    return ss_malloc0(size,0,fe_num,(long *) 0);
+    return ss_malloc0(hpe, size,0,fe_num,(long *) 0);
 }
 
 #if 0
@@ -300,7 +306,7 @@ ss_malloc(size,fe_num)
  */
 
 long *
-ss_fmalloc_start()
+ss_fmalloc_start(void)
 {
     long *retval;
 /* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
@@ -319,8 +325,7 @@ ss_fmalloc_start()
 }
 
 long *
-ss_fmalloc(size)
-    size_t size;
+ss_fmalloc(size_t size)
 {
     long * newblock ;
 
@@ -335,8 +340,7 @@ ss_fmalloc(size)
 #endif
 
 void
-ss_register_global(addr)
-    long *addr;
+ss_register_global(PE, long *addr)
 {
     if (amheader.nglobals > AM_MAXGLOBALS)
 	fatal_error(FE_SS_MAXGLOBALS,0);
@@ -407,7 +411,7 @@ long ss_image_offset(const char *image_name)
     else return 0;
 }
 
-int ss_save_image_with_state(const char * new_image_name)
+int ss_save_image_with_state(PE, const char * new_image_name)
 {
     char image_name[MAX_PATH];
     DWORD l;
@@ -423,10 +427,10 @@ int ss_save_image_with_state(const char * new_image_name)
     	return 0;
     }
     
-    return ss_attach_state_to_file(new_image_name);
+    return ss_attach_state_to_file(hpe, new_image_name);
 }
 
-int ss_attach_state_to_file(const char *image_name)
+int ss_attach_state_to_file(PE, const char *image_name)
 {   
     HANDLE image_file;
     DWORD state_offset;
@@ -447,7 +451,7 @@ int ss_attach_state_to_file(const char *image_name)
     	return 0;
     }
         
-    return ss_save_state(image_name, state_offset);
+    return ss_save_state(hpe, image_name, state_offset);
 }
 
 #endif /* MSWin32 */
@@ -794,7 +798,7 @@ static int copy(const char *filename, const char *copyname)
 }
 
 #ifdef USE_ELF_SECTION_FOR_IMAGE
-int ss_save_image_with_state(const char * new_image_name)
+int ss_save_image_with_state(PE, const char * new_image_name)
 {
     
     if (copy(executable_path, new_image_name) != 0) {
@@ -802,10 +806,10 @@ int ss_save_image_with_state(const char * new_image_name)
     	return 0;
     }
 
-    return ss_attach_state_to_file(new_image_name);
+    return ss_attach_state_to_file(hpe, new_image_name);
 }
 
-int ss_attach_state_to_file(const char * image_name)
+int ss_attach_state_to_file(PE, const char * image_name)
 {
     char tmp_name[L_tmpnam];
     mem_file_info tmp_mmap;
@@ -817,7 +821,7 @@ int ss_attach_state_to_file(const char * image_name)
     
     tmpnam(tmp_name);
 
-    ss_save_state(tmp_name, 0);
+    ss_save_state(hpe, tmp_name, 0);
 
     if (!open_memory_file(tmp_name, &tmp_mmap)) return 0;
 
@@ -866,7 +870,7 @@ int ss_attach_state_to_file(const char * image_name)
 }
 
 #else
-int ss_save_image_with_state(const char * new_image_name)
+int ss_save_image_with_state(PE, const char * new_image_name)
 {
     
     if (copy(executable_path, new_image_name) != 0) {
@@ -874,10 +878,10 @@ int ss_save_image_with_state(const char * new_image_name)
     	return 0;
     }
 
-    return ss_attach_state_to_file(new_image_name);
+    return ss_attach_state_to_file(hpe, new_image_name);
 }
 
-int ss_attach_state_to_file(const char *image_name)
+int ss_attach_state_to_file(PE, const char *image_name)
 {
     int image_file;
     long state_offset;
@@ -897,7 +901,7 @@ int ss_attach_state_to_file(const char *image_name)
     	return 0;
     }
         
-    return ss_save_state(image_name, state_offset);
+    return ss_save_state(hpe, image_name, state_offset);
 }
 #endif
 
@@ -907,20 +911,20 @@ int ss_attach_state_to_file(const char *image_name)
 #ifndef PURE_ANSI
 #ifdef EXTERNAL_STATE
 int
-ss_save_state(const char *filename, long offset)
+ss_save_state(PE, const char *filename, long offset)
 {
   char statename[IMAGEDIR_MAX];
   strcpy(statename, filename);
   strcat(statename, ".pst");
-  os_store_db(&current_engine.db, statename, 0);
+  os_store_db(hpe->db, statename, 0);
   return 1;
 
 }
 #else
 int
-ss_save_state(const char *filename, long offset)
+ss_save_state(PE, const char *filename, long offset)
 {
-	os_store_db(&current_engine.db, filename, offset);
+	os_store_db(hpe->db, filename, offset);
 	return 1;
 }
 #endif
@@ -1018,18 +1022,18 @@ ss_err:
 
 #ifdef EXTERNAL_STATE
 static void
-ss_restore_state(const char *filename,long offset)
+ss_restore_state(PE, const char *filename,long offset)
 {
   char statename[IMAGEDIR_MAX];
   strcpy(statename, filename);
   strcat(statename, ".pst");
-  os_load_db(&current_engine.db, statename, 0);
+  os_load_db(hpe->db, statename, 0);
 }
 #else
 static void
-ss_restore_state(const char *filename,long offset)
+ss_restore_state(PE, const char *filename,long offset)
 {
-	os_load_db(&current_engine.db, filename, offset);
+	os_load_db(hpe->db, filename, offset);
 }
 #endif
 
@@ -1274,7 +1278,7 @@ ss_err:
  */
 
 static int
-ss_saved_state_present()
+ss_saved_state_present(void)
 {
 #ifdef MACH_SUBSTRATE
     kern_return_t stat;
@@ -1312,7 +1316,7 @@ ss_saved_state_present()
 
 #if 0
 
-int pbi_save_app_with_obp(void)
+int pbi_save_app_with_obp(PE)
 {
     PWord v1, v2, v3, v4, v5;
     int t1, t2, t3, t4, t5;
@@ -1529,7 +1533,7 @@ int pbi_save_app_with_obp(void)
 }
 #endif
 
-void heap_overflow(void)
+void heap_overflow(PE)
 {
     if (wm_normal <= DEFAULT_SAFETY/8) fatal_error(FE_OVER_HEAP, 0);
     wm_normal = wm_normal/2;
@@ -1539,7 +1543,7 @@ void heap_overflow(void)
 #if 0
     //if (wm_regidx != 0)
 #endif
-    if (current_engine.reg_stack_top != current_engine.reg_stack_base)
+    if (hpe->reg_stack_top != hpe->reg_stack_base)
     {
 	wm_safety = -1;
     }

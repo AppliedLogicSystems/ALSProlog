@@ -41,17 +41,28 @@ isopt(const char *opt, char *str)
 #pragma export on
 #endif
 
-EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
+/* static prolog_engine my_engine;*/
+
+#if 0
+static void my_thread(PE)
+{
+	
+}
+#endif
+
+EXPORT ALSPI_API(int)	PI_main_pe(PE,int argc, char *argv[], void (*init)(void))
 {
     int   exit_status, success;
     char *als_opts;
     PI_system_setup setup;
+	prolog_engine *hpe1 /*, *hpe2*/;
 
 #ifdef MSWin32
 	TCHAR old_title[MAX_PATH];
 	BOOL got_title, got_input_mode;
 	DWORD old_input_mode;
 #endif
+
 
 #if defined(KERNAL) && defined(__MWERKS__) && defined(macintosh)
     argc = 0; argv = NULL;
@@ -215,19 +226,52 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     SetConsoleTitle("ALS Prolog");
 #endif
 
-    if ((exit_status = PI_startup(&setup)) != 0) {
+	hpe1 = malloc(sizeof(prolog_engine));
+	memset(hpe1, 0x00, sizeof(*hpe1));
+	hpe1->db = malloc(sizeof(prolog_database));
+	memset(hpe1->db, 0x00, sizeof(*hpe1->db));
+	//hpe = &my_engine;
+
+    if ((exit_status = PI_startup_pe(hpe1, &setup)) != 0) {
 	PI_app_printf(PI_app_printf_error, "Prolog init failed !\n");
 	exit(EXIT_ERROR);
     }
 
-    if (init) init();
+#if 0
+	hpe2 = malloc(sizeof(prolog_engine));
+	memset(hpe2, 0x00, sizeof(*hpe2));
+	hpe2->db =hpe1->db;
+	init_prolog_engine(hpe2, DEFAULT_HEAP_SIZE, DEFAULT_STACK_SIZE);
+	
+	//	CreateThread(my_thread, hpe2);
 
-    if ((exit_status = PI_status_toplevel(&success)) != 0) {
+	hpe2 = malloc(sizeof(prolog_engine));
+	memset(hpe2, 0x00, sizeof(*hpe2));
+	hpe2->db = malloc(sizeof(prolog_database));
+	memset(hpe2->db, 0x00, sizeof(*hpe2->db));
+	//hpe = &my_engine;
+
+    if ((exit_status = PI_startup_pe(hpe2, &setup)) != 0) {
+	PI_app_printf(PI_app_printf_error, "Prolog init failed !\n");
+	exit(EXIT_ERROR);
+    }
+
+//    if (init) init();
+
+
+    if ((exit_status = PI_status_toplevel_pe(hpe2, &success)) != 0) {
+	PI_app_printf(PI_app_printf_error, "Prolog shell crashed !\n");
+	exit(EXIT_ERROR);
+    }
+#endif
+
+    if ((exit_status = PI_status_toplevel_pe(hpe1, &success)) != 0) {
 	PI_app_printf(PI_app_printf_error, "Prolog shell crashed !\n");
 	exit(EXIT_ERROR);
     }
 
-    PI_shutdown();
+//    PI_shutdown_pe(hpe2);
+    PI_shutdown_pe(hpe1);
 
 #ifdef MSWin32
 	if (got_title) SetConsoleTitle(old_title);

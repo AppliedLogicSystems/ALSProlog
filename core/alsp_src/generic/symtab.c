@@ -39,7 +39,7 @@ static int nsearches;
  */
 
 
-struct ts {
+static const struct ts {
     long  allocation;
     long  size;
     long  cutoff;
@@ -76,7 +76,7 @@ struct ts {
 /*//static unsigned long ts_cutoff = 1712;*/		/* the cutoff point */
 /*//static unsigned long ts_next = TK_EOF + 1;*/	/* the next token index */
 
-int tok_table_size(void)
+int tok_table_size(PE)
 {
 	return(ts_prime);
 }
@@ -92,7 +92,7 @@ int tok_table_size(void)
 
 #define TK(ppsym, name) {sizeof(name)-1, (UCHAR *) name, 0, 0}
 #define OP(ppsym, name, a, b) {sizeof(name)-1, (UCHAR *) name, a, b}
-static tkentry initial_table[] =
+static const tkentry initial_table[] =
 {
     {0, (UCHAR *) "used up entry", 0, 0},
 #include "newtokini.h"            /* initial definitions of tokens */
@@ -154,9 +154,9 @@ static tkentry initial_table[] =
 /*//long *char_to_tok_map;*/
 
 /* Prototypes */
-static	tkentry ** lookup		PARAMS(( UCHAR *, size_t * ));
-static	void	new_string_space	PARAMS(( size_t ));
-static	void	increase_table_size	PARAMS(( void ));
+static	tkentry ** lookup		(PE,  UCHAR *, size_t * );
+static	void	new_string_space	(PE,  size_t );
+static	void	increase_table_size	( PE );
 
 
 
@@ -170,9 +170,11 @@ static	void	increase_table_size	PARAMS(( void ));
  */
 
 static tkentry **
-lookup(name, len)
-    UCHAR *name;		/* character string to hash */
-    size_t *len;		/* length of string */
+lookup(
+    PE,
+    UCHAR *name,		/* character string to hash */
+    size_t *len			/* length of string */
+)
 {
     register UCHAR *s =  name;
     register unsigned int n, shift;
@@ -238,12 +240,14 @@ lookup(name, len)
  */
 
 long
-probe_token(s)
-    UCHAR *s;			/* string to find */
+probe_token(
+    PE,
+    UCHAR *s			/* string to find */
+)
 {
     tkentry **pos;
 
-    pos = lookup(s, 0);		/* perform lookup */
+    pos = lookup(hpe, s, 0);		/* perform lookup */
     if (*pos)
 	return *pos - toktable;	/* token is present */
     else
@@ -257,27 +261,27 @@ probe_token(s)
  */
 
 long
-find_token(const UCHAR *cs)
+find_token_pe(PE, const UCHAR *cs)
 {
     size_t len;
     tkentry **pos;
     UCHAR *s = (UCHAR *)cs;
 
-    pos = lookup(s, &len);
+    pos = lookup(hpe, s, &len);
 
     if (*pos)
 		return *pos - toktable;	/* already in table */
     else {			/* must add to table */
 	if (ts_next > ts_cutoff) {
-	    increase_table_size();	/* increase size and rehash */
-	    pos = lookup(s, 0);	/* rehash current */
+	    increase_table_size(hpe);	/* increase size and rehash */
+	    pos = lookup(hpe, s, 0);	/* rehash current */
 	}
 
 	*pos = toktable + ts_next;
 
 
 	if ((int)(len + 1) > strings_last - strings)
-		new_string_space(len + 1);	/* get more string space */
+		new_string_space(hpe, len + 1);	/* get more string space */
 	
 	toktable[ts_next].length = len;
 	toktable[ts_next].tkname = strings;
@@ -301,8 +305,10 @@ find_token(const UCHAR *cs)
 #define default_string_space_request 1024
 
 static void
-new_string_space(request)
-    size_t request;
+new_string_space(
+    PE,
+    size_t request
+)
 {
     if (strings_next && *strings_next > (signed) request) {
 	strings = (UCHAR *) strings_next;
@@ -315,7 +321,7 @@ new_string_space(request)
 	else
 	    request = default_string_space_request;
 
-	strings = (UCHAR *) ss_malloc(request,FE_STRSPACE);
+	strings = (UCHAR *) ss_malloc(hpe, request,FE_STRSPACE);
 	strings_last = strings + request - 1;
     }
 }
@@ -332,7 +338,7 @@ new_string_space(request)
  */
 
 static void
-increase_table_size()
+increase_table_size(PE)
 {
     tkentry *new_table;
     register unsigned int i;
@@ -352,7 +358,7 @@ increase_table_size()
 	/* FIXME: ss_malloc never returns if allocation fails; yet if
 	   allocation fails, we should be able to proceed for a while */
 	new_table = (tkentry *)
-	    ss_malloc(sizeof (tkentry) * tablesizes[ts_allocidx].allocation,
+	    ss_malloc(hpe, sizeof (tkentry) * tablesizes[ts_allocidx].allocation,
 		      FE_SYMSPACE);
 	if (new_table == (tkentry *) 0)
 	    ts_cutoff = ts_prime;	/* Unable to allocate more space */
@@ -382,7 +388,7 @@ increase_table_size()
 
 	    /* rehash */
 	    for (i = 1; i < ts_next; i++)
-		*lookup(toktable[i].tkname, 0) = toktable + i;
+		*lookup(hpe, toktable[i].tkname, 0) = toktable + i;
 	}
 
     }
@@ -390,30 +396,30 @@ increase_table_size()
 
 
 void
-symtab_init()
+symtab_init(PE)
 {
     register unsigned int i;
     char chtokstr[2];
 
     if (!toktable) {
 	/* allocate space for the token table */
-	toktable = (tkentry *) ss_malloc(sizeof (tkentry) * ts_allocated,
+	toktable = (tkentry *) ss_malloc(hpe, sizeof (tkentry) * ts_allocated,
 			 			FE_SYMTAB_INIT);
 
 	/* Copy initial_table to toktable */
 	memcpy((char *) toktable, (char *) initial_table, sizeof initial_table);
 	
 	/* malloc space for the hash table */
-	hashtable = (tkentry **) ss_malloc(ts_allocated * sizeof (tkentry **),
+	hashtable = (tkentry **) ss_malloc(hpe, ts_allocated * sizeof (tkentry **),
 					   FE_SYMTAB_INIT);
 	memset((char *) hashtable, 0, sizeof (tkentry **) * ts_allocated);
 
 	/* hash the initial entries */
 	for (i = 1; i < ts_next; i++)
-	    *lookup(toktable[i].tkname, 0) = toktable + i;
+	    *lookup(hpe, toktable[i].tkname, 0) = toktable + i;
 	
 	/* malloc space for the character-to-token map */
-	char_to_tok_map = (long *) ss_malloc(sizeof(long) * N_TOK_CHARS,
+	char_to_tok_map = (long *) ss_malloc(hpe, sizeof(long) * N_TOK_CHARS,
 					     FE_SYMTAB_INIT);
 	/* Initialize the character-to_token map */
 	chtokstr[1] = 0;
@@ -423,17 +429,17 @@ symtab_init()
 	}
 	
 	/* register the globals in this module with the saved state mechanism */
-	ss_register_global((long *) &ts_allocidx);
-	ss_register_global((long *) &ts_allocated);
-	ss_register_global((long *) &ts_prime);
-	ss_register_global((long *) &ts_cutoff);
-	ss_register_global((long *) &ts_next);
-	ss_register_global((long *) &toktable);
-	ss_register_global((long *) &hashtable);
-	ss_register_global((long *) &strings);
-	ss_register_global((long *) &strings_last);
-	ss_register_global((long *) &strings_next);
-	ss_register_global((long *) &char_to_tok_map);
+	ss_register_global(hpe, (long *) &ts_allocidx);
+	ss_register_global(hpe, (long *) &ts_allocated);
+	ss_register_global(hpe, (long *) &ts_prime);
+	ss_register_global(hpe, (long *) &ts_cutoff);
+	ss_register_global(hpe, (long *) &ts_next);
+	ss_register_global(hpe, (long *) &toktable);
+	ss_register_global(hpe, (long *) &hashtable);
+	ss_register_global(hpe, (long *) &strings);
+	ss_register_global(hpe, (long *) &strings_last);
+	ss_register_global(hpe, (long *) &strings_next);
+	ss_register_global(hpe, (long *) &char_to_tok_map);
     } else {
     	/* Copy initial_table to toktable */
 		memcpy((char *) toktable, (char *) initial_table, sizeof initial_table);
@@ -462,7 +468,7 @@ symtab_init()
  *      4. binop        Binary operator precedence and associativity (short)
  */
 void
-pckg_toktbl_init()
+pckg_toktbl_init(void)
 {
     register UCHAR *tokptr;	/* Pointer to package token table */
     register long numoftoks;	/* Number of tokens in package token table */
@@ -530,7 +536,7 @@ pckg_toktbl_init()
 #endif /* PCKGLOAD_DEBUG */
 
 	/* hash the entry */
-	*lookup(toktable[i].tkname, 0) = toktable + i;
+	*lookup(hpe, toktable[i].tkname, 0) = toktable + i;
     }
 
     /* New ts_next */
@@ -545,7 +551,7 @@ pckg_toktbl_init()
 
 
 int
-save_toktbl()
+save_toktbl(void)
 {
     register int idx;
     long  firsttokid;		/* Token ID of first token in package token

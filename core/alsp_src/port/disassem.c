@@ -29,7 +29,7 @@
 
 #define ABMOP(op,p1,p2,p3,p4) {#op,{p1,p2,p3,p4}},
 
-static struct _icode { 
+static const struct _icode { 
     const char *instr_name;
     int   arg[4];
 } ic_array[] = {
@@ -38,8 +38,8 @@ static struct _icode {
 };
 #undef ABMOP
 
-enum AbstractMachineOps decode_instr PARAMS(( Code ));
-int	display_instr	PARAMS( (enum AbstractMachineOps, Code *));
+enum AbstractMachineOps decode_instr ( Code );
+int	display_instr	 (PE, enum AbstractMachineOps, Code *);
 
 
 /*
@@ -48,8 +48,7 @@ int	display_instr	PARAMS( (enum AbstractMachineOps, Code *));
  */
 
 enum AbstractMachineOps
-decode_instr(inst)
-    Code inst;
+decode_instr(Code inst)
 {
     enum AbstractMachineOps i;
     for (i=W_FIRST_OP; i<W_NUM_OPS; i++)
@@ -67,10 +66,11 @@ decode_instr(inst)
 */
 
 void
-list_asm(addr, n)
-    Code *addr;			/* Start address */
-    int   n;
-
+list_asm(
+    PE,
+    Code *addr,			/* Start address */
+    int   n
+)
 {
     Code *stopaddr = addr + n - 2, *ip;
     long  ilength;
@@ -92,7 +92,7 @@ list_asm(addr, n)
 	else
 	{
 		printf("[%03d]%x:",(int)(ip-addr),(unsigned int)ip); 
-		ilength = display_instr(instr,ip);
+		ilength = display_instr(hpe, instr,ip);
 		ip += ilength;
 		printf("\n");
 	}
@@ -100,9 +100,7 @@ list_asm(addr, n)
 }
 
 int
-display_instr(instr,ip)
-    enum AbstractMachineOps instr;
-	Code *ip;
+display_instr(PE, enum AbstractMachineOps instr, Code *ip)
 {
     long  i, ilength, need_comma;
 	ilength = 1;
@@ -199,7 +197,7 @@ display_instr(instr,ip)
 */
 
 #ifdef TRACEBWAM
-void tracewam	PARAMS(( Code * ));
+void tracewam	( Code * ));
 
 int bwam_trace = 0;
 int bwam_trace_low = 0;
@@ -240,13 +238,12 @@ toggle_bwam(void)
 }
 
 void
-tracewam(PP)
-    Code *PP;
+tracewam(Code *PP)
 {
     enum AbstractMachineOps instr;
 
 	if ((bwam_trace > 0) && ((Code *)bwam_trace_low <= PP)
-			&&  (PP <= (Code *)bwam_trace_high ) )
+			&&  (PP <= (Code *)bwam_trace_lhigh ) )
 	{
 		instr = decode_instr(*PP);
 		if ((instr < 0) || (instr > ICNUM)) 
@@ -254,7 +251,7 @@ tracewam(PP)
 		else
 		{
 			printf("[%lx]",(unsigned long)PP); 
-			display_instr(instr,PP);   
+			display_instr(hpe, instr,PP);   
 			printf("\n");
 		};
 		fflush(stdout);

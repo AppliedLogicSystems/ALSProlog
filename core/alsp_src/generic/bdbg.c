@@ -12,7 +12,7 @@
 #include "wintcode.h"
 
 int
-pbi_dbg_nospy()
+pbi_dbg_nospy(PE)
 {				/* dbg_nospy(M,P,A) */
     PWord m, p, a;
     int   mt, pt, at;
@@ -21,7 +21,7 @@ pbi_dbg_nospy()
     w_get_An(&p, &pt, 2);
     w_get_An(&a, &at, 3);
 
-    if (xform_uia(&m, &mt) && xform_uia(&p, &pt) && at == WTP_INTEGER) {
+    if (xform_uia(hpe, &m, &mt) && xform_uia(hpe, &p, &pt) && at == WTP_INTEGER) {
 	int   status;
 
 	dbprot_t odbrs = w_dbprotect(DBRS_WRITABLE);
@@ -38,7 +38,7 @@ pbi_dbg_nospy()
 
 
 int
-pbi_dbg_spy()
+pbi_dbg_spy(PE)
 {				/* dbg_spy(M,P,A) */
     PWord m, p, a;
     int   mt, pt, at;
@@ -47,7 +47,7 @@ pbi_dbg_spy()
     w_get_An(&p, &pt, 2);
     w_get_An(&a, &at, 3);
 
-    if (xform_uia(&m, &mt) && xform_uia(&p, &pt) && at == WTP_INTEGER) {
+    if (xform_uia(hpe, &m, &mt) && xform_uia(hpe, &p, &pt) && at == WTP_INTEGER) {
 	int   status;
 
 	dbprot_t odbrs = w_dbprotect(DBRS_WRITABLE);
@@ -64,21 +64,21 @@ pbi_dbg_spy()
 
 
 int
-pbi_dbg_spyoff()
+pbi_dbg_spyoff(PE)
 {				/* dbg_spyoff */
     wm_spying = 0;
     SUCCEED;
 }
 
 int
-pbi_dbg_spyon()
+pbi_dbg_spyon(PE)
 {				/* dbg_spyon */
     wm_spying = 1;
     SUCCEED;
 }
 
 int
-pbi_dbg_spying()
+pbi_dbg_spying(PE)
 {				/* dbg_spying */
     if (wm_spying)
 	SUCCEED;

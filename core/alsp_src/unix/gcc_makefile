@@ -11,7 +11,5 @@ CC=gcc
 # -Wstrict-prototypes - Complains about arg-less function pointer like:
 #                       int (*func)(), which I think are legal.
 
-# -Werror has been removed until we move to Solaris 2.5+
-
-CFLAGS += -O -MMD -Wall -Wmissing-prototypes -Wwrite-strings \
+CFLAGS += -O -MMD -Wall -W -Werror -Wmissing-prototypes -Wwrite-strings \
 		 -Wnested-externs -Wpointer-arith

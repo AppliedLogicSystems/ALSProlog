@@ -47,7 +47,7 @@
  */
 
 typedef struct index_str {
-    byte  tag;
+    als_byte  tag;
     long  key;			/* machine type this node represents or */
     					/* if tag is TOP then number of entries */
     struct index_str *llink;
@@ -83,38 +83,38 @@ typedef struct {
 		    (ih).startaddr = (Code *) 0
 
 
-static long *buf_ptr;
+//static long *ibuf_ptr;
 
-static long nargs;
-static long emaskagg;		/* the emask aggregate */
+//static long inargs;
+//static long emaskagg;		/* the emask aggregate */
 
-static index_node *free_ptr;
-static int nodes_left;
-static jmp_buf alloc_overflow;
+//static index_node *free_ptr;
+//static int nodes_left;
+//static jmp_buf alloc_overflow;
 
-static	void	initialize_nodeallocator PARAMS(( void ));
-static	index_node * alloc_node	PARAMS(( void ));
-static	void	insert_node	PARAMS(( index_header *, long, int, Code * ));
-static	void	compute_size	PARAMS(( index_header *, int, Code * ));
-static	int	computetablesize PARAMS(( int ));
-static	void	addtobuf	PARAMS(( int, index_header * ));
-static	switchTableEntry * walk_tree PARAMS(( index_node *, switchTableEntry *,
-					      int ));
-static	void	installtreeoverhead PARAMS(( int, int, switchTableEntry ** ));
-static	void	walk_bottom	PARAMS(( index_node *, int ));
+static	void	initialize_nodeallocator ( PE );
+static	index_node * alloc_node	( PE );
+static	void	insert_node	(PE, index_header *, long, int, Code * );
+static	void	compute_size	(PE, index_header *, int, Code * );
+static	int	computetablesize ( int );
+static	void	addtobuf	(PE, int, index_header * );
+static	switchTableEntry * walk_tree (PE,  index_node *, switchTableEntry *,
+					      int );
+static	void	installtreeoverhead (PE, int, int, switchTableEntry ** );
+static	void	walk_bottom	(PE,  index_node *, int );
 static	long *	get_clause_information
-				PARAMS (( long *, int *, long *, Code ** ));
+				( long *, int *, long *, Code ** );
 
 
 static void
-initialize_nodeallocator()
+initialize_nodeallocator(PE)
 {
     free_ptr = (index_node *) prs_area;
     nodes_left = PARSER_AREASIZ * sizeof (pwrd) / sizeof (index_node);
 }
 
 static index_node *
-alloc_node()
+alloc_node(PE)
 {
     if (nodes_left <= 0) {
 
@@ -133,9 +133,7 @@ alloc_node()
 
 
 void
-indexproc(m, p, a)
-    PWord m, p;
-    int   a;
+indexproc_pe(PE, PWord m, PWord p, int a)
 {
     ntbl_entry *ent;
 
@@ -146,8 +144,7 @@ indexproc(m, p, a)
 #define SYSDEB(a)		 /* nothing */
 
 void
-do_indexing(ent)
-    ntbl_entry *ent;
+do_indexing_pe(PE, ntbl_entry *ent)
 {
     long *curaddr, *firstaddr;
     int   tp;
@@ -163,9 +160,9 @@ do_indexing(ent)
     if (setjmp(alloc_overflow))
 	return;			/* catch allocator overflow */
 
-    initialize_nodeallocator();
+    initialize_nodeallocator(hpe);
     nclauses = 0;
-    nargs = ent->nargs;
+    inargs = ent->nargs;
 
     firstaddr = curaddr = ent->first_clause;
 
@@ -182,27 +179,27 @@ do_indexing(ent)
 
 	switch (tp) {
 	    case ITP_CONST:
-		insert_node(&const_ih, key, BOT, clausestart);
+		insert_node(hpe, &const_ih, key, BOT, clausestart);
 		break;
 	    case ITP_LIST:
-		insert_node(&list_ih, key, VAR, clausestart);
+		insert_node(hpe, &list_ih, key, VAR, clausestart);
 		break;
 	    case ITP_STRUCT:
-		insert_node(&struct_ih, key, BOT, clausestart);
+		insert_node(hpe, &struct_ih, key, BOT, clausestart);
 		break;
 	    default:
-		insert_node(&const_ih, key, VAR, clausestart);
-		insert_node(&list_ih, key, VAR, clausestart);
-		insert_node(&struct_ih, key, VAR, clausestart);
+		insert_node(hpe, &const_ih, key, VAR, clausestart);
+		insert_node(hpe, &list_ih, key, VAR, clausestart);
+		insert_node(hpe, &struct_ih, key, VAR, clausestart);
 		break;
 	}
     }
 
     emaskagg = 0;
 
-    compute_size(&const_ih, nclauses, choiceEntry(firstaddr));
-    compute_size(&list_ih, nclauses, choiceEntry(firstaddr));
-    compute_size(&struct_ih, nclauses, choiceEntry(firstaddr));
+    compute_size(hpe, &const_ih, nclauses, choiceEntry(firstaddr));
+    compute_size(hpe, &list_ih, nclauses, choiceEntry(firstaddr));
+    compute_size(hpe, &struct_ih, nclauses, choiceEntry(firstaddr));
     totalsize = const_ih.size + list_ih.size + struct_ih.size;
 
     SYSDEB(printf("totalsize=%d words\n", totalsize));
@@ -210,11 +207,11 @@ do_indexing(ent)
     if (totalsize > MAX_INDEX_BLOCK_SIZE)
 	longjmp(alloc_overflow, 1);
 
-    buf_ptr = (long *) 0;
+    ibuf_ptr = (long *) 0;
 
     if (totalsize != 0) {
 
-	buf_ptr = (long *) w_alloccode(totalsize);
+	ibuf_ptr = (long *) w_alloccode(totalsize);
 
 	/*
 	 * Note: w_alloccode will not return if space is not available.
@@ -222,17 +219,17 @@ do_indexing(ent)
 	 * for zero and exitting.
 	 */
 
-	ent->index_block = buf_ptr;
-	buf_ptr += WCI_CLAUSECODE;	/* skip over memory management stuff */
+	ent->index_block = ibuf_ptr;
+	ibuf_ptr += WCI_CLAUSECODE;	/* skip over memory management stuff */
 
 	/*
 	 * The order of the following procedure calls is somewhat important
 	 * and will probably vary between wam implementations
 	 */
 
-	addtobuf(ITP_LIST, &list_ih);
-	addtobuf(ITP_STRUCT, &struct_ih);
-	addtobuf(ITP_CONST, &const_ih);
+	addtobuf(hpe, ITP_LIST, &list_ih);
+	addtobuf(hpe, ITP_STRUCT, &struct_ih);
+	addtobuf(hpe, ITP_CONST, &const_ih);
 
     }
 
@@ -246,13 +243,13 @@ do_indexing(ent)
 	 * sw_on_term (because on RISCs we might try to suck
 	 * some instructions from here to fill delay slots)
 	 */
-	ic_install_try_me(choiceCode(firstaddr),
+	ic_install_try_me(hpe, choiceCode(firstaddr),
 			  (long)choiceEntry(nextClauseAddr(ent->first_clause)),
-			  nargs);
+			  inargs);
 
 	/* Install the switch */
 
-	ic_install_switch_on_term(ent,
+	ic_install_switch_on_term(hpe, ent,
 				  choiceEntry(firstaddr),
 				  struct_ih.startaddr,
 				  list_ih.startaddr,
@@ -275,17 +272,13 @@ do_indexing(ent)
 }
 
 static void
-insert_node(ihp, key, tag, val)
-    index_header *ihp;
-    long  key;
-    int   tag;
-    Code *val;
+insert_node(PE, index_header *ihp, long key, int tag, Code *val)
 {
     index_node *p, *q;
     long *sizeptr = NULL;	/* Initialized to stifle -Wall complaint */
 
     if (ihp->ip == NULLNODE) {
-	p = alloc_node();
+	p = alloc_node(hpe);
 	p->tag = tag;
 	p->key = key;
 	p->addr.val = val;
@@ -297,7 +290,7 @@ insert_node(ihp, key, tag, val)
 	p = ihp->ip->llink;	/* set p to last node in list */
 	for (;;) {
 	    if (tag == VAR || p->tag == VAR) {
-		q = alloc_node();
+		q = alloc_node(hpe);
 		q->tag = tag;
 		q->key = key;
 		q->addr.val = val;
@@ -308,7 +301,7 @@ insert_node(ihp, key, tag, val)
 		break;
 	    }
 	    else if (p->tag == BOT) {
-		q = alloc_node();
+		q = alloc_node(hpe);
 		q->tag = TVAL;
 		q->key = p->key;
 		q->addr.val = p->addr.val;
@@ -326,7 +319,7 @@ insert_node(ihp, key, tag, val)
 	    }
 	    else if (p->key == key) {
 		if (p->tag == TVAL) {
-		    q = alloc_node();
+		    q = alloc_node(hpe);
 		    q->llink = q;
 		    q->rlink = q;
 		    q->tag = BOT;
@@ -338,7 +331,7 @@ insert_node(ihp, key, tag, val)
 		    (ihp->lowernodes)++;
 		}
 		p = (p->addr.ptr)->llink;
-		q = alloc_node();
+		q = alloc_node(hpe);
 		q->llink = p;
 		q->rlink = p->rlink;
 		p->rlink->llink = q;
@@ -351,7 +344,7 @@ insert_node(ihp, key, tag, val)
 	    }
 	    else if (((unsigned) key) < ((unsigned) p->key)) {
 		if (p->llink == NULLNODE) {
-		    q = alloc_node();
+		    q = alloc_node(hpe);
 		    q->llink = NULLNODE;
 		    q->rlink = NULLNODE;
 		    q->tag = TVAL;
@@ -366,7 +359,7 @@ insert_node(ihp, key, tag, val)
 	    }
 	    else {		/* (key > p->key) */
 		if (p->rlink == NULLNODE) {
-		    q = alloc_node();
+		    q = alloc_node(hpe);
 		    q->llink = NULLNODE;
 		    q->rlink = NULLNODE;
 		    q->tag = TVAL;
@@ -385,10 +378,7 @@ insert_node(ihp, key, tag, val)
 
 
 static void
-compute_size(ihp, nclauses, startaddr)	/* also fill in things for size 0 */
-    index_header *ihp;
-    int   nclauses;
-    Code *startaddr;
+compute_size(PE, index_header *ihp, int nclauses, Code *startaddr)	/* also fill in things for size 0 */
 {
     int   toplevelcount;
     int   tablesize;
@@ -460,9 +450,11 @@ computetablesize(nentries)	/* returns table size in words */
 #define TREEALONE 2
 
 static void
-addtobuf(tp, ihp)
-    int   tp;			/* type */
-    index_header *ihp;
+addtobuf(
+    PE,
+    int   tp,			/* type */
+    index_header *ihp
+)
 {
     switchTableEntry *tree_ptr;
 
@@ -470,11 +462,11 @@ addtobuf(tp, ihp)
 	return;
 
     if (ihp->topnodes == 1) {	/* then we got a tree as the only node */
-	ihp->startaddr = (Code *) buf_ptr;
-	tree_ptr = (switchTableEntry *) buf_ptr;
-	buf_ptr += computetablesize(ihp->ip->key);
-	installtreeoverhead(tp, ihp->ip->key, &tree_ptr);
-	tree_ptr = walk_tree(ihp->ip->addr.ptr, tree_ptr, TREEALONE);
+	ihp->startaddr = (Code *) ibuf_ptr;
+	tree_ptr = (switchTableEntry *) ibuf_ptr;
+	ibuf_ptr += computetablesize(ihp->ip->key);
+	installtreeoverhead(hpe, tp, ihp->ip->key, &tree_ptr);
+	tree_ptr = walk_tree(hpe, ihp->ip->addr.ptr, tree_ptr, TREEALONE);
     }
     else {
 	int   i, n;
@@ -488,32 +480,32 @@ addtobuf(tp, ihp)
 	addr = (Code *) 0;
 
 	/* Tell index node where this index patch will be located */
-	ihp->startaddr = (Code *) buf_ptr;
+	ihp->startaddr = (Code *) ibuf_ptr;
 
 	/* We need a pointer to where the next bit of code in the
 	 * current index patch will go
 	 */
-	toplev_ptr = buf_ptr;
+	toplev_ptr = ibuf_ptr;
 
 	/* Move to where next index patch will go */
-	buf_ptr += (n * RETRYSIZE + TRYOVERHEAD);
+	ibuf_ptr += (n * RETRYSIZE + TRYOVERHEAD);
 
 	/* Go down chain, putting code into the indexing patch. */
 	for (i = 1; i <= n; i++, w = w->rlink) {
 
 	    if (w->tag == TOP) {
-		tree_ptr = (switchTableEntry *) buf_ptr;
+		tree_ptr = (switchTableEntry *) ibuf_ptr;
 
-		/* Next patch goes at buf_ptr */
+		/* Next patch goes at ibuf_ptr */
 		addr = (Code *) tree_ptr;
 
 		/* Save room for next patch */
-		buf_ptr += computetablesize(w->key);
+		ibuf_ptr += computetablesize(w->key);
 
 		/* Put in code */
-		installtreeoverhead(tp, w->key, &tree_ptr);
+		installtreeoverhead(hpe, tp, w->key, &tree_ptr);
 
-		tree_ptr = walk_tree(w->addr.ptr, tree_ptr, i == n);
+		tree_ptr = walk_tree(hpe, w->addr.ptr, tree_ptr, i == n);
 		emask = 0;
 	    }
 	    else {
@@ -527,13 +519,13 @@ addtobuf(tp, ihp)
 	    }
 
 	    if (i == 1) {
-		toplev_ptr = ic_install_try(toplev_ptr, addr, nargs);
+		toplev_ptr = ic_install_try(hpe, toplev_ptr, addr, inargs);
 	    }
 	    else if (i == n) {
-		toplev_ptr = ic_install_trust(toplev_ptr, addr, nargs, emask);
+		toplev_ptr = ic_install_trust(hpe, toplev_ptr, addr, inargs, emask);
 	    }
 	    else {
-		toplev_ptr = ic_install_retry(toplev_ptr, addr, nargs, emask);
+		toplev_ptr = ic_install_retry(hpe, toplev_ptr, addr, inargs, emask);
 	    }
 	}			/* for */
     }				/* else */
@@ -567,10 +559,12 @@ addtobuf(tp, ihp)
  */
 
 switchTableEntry *
-walk_tree(ip, tp, isdet)
-    index_node *ip;
-    switchTableEntry *tp;	/* address of roving tree pointer */
-    int   isdet;
+walk_tree(
+    PE,
+    index_node *ip,
+    switchTableEntry *tp,	/* address of roving tree pointer */
+    int   isdet
+)
 {
     if (ip != NULLNODE) {
 
@@ -579,7 +573,7 @@ walk_tree(ip, tp, isdet)
 	 */
 
 	/* Do left side */
-	tp = walk_tree(ip->llink, tp, isdet);
+	tp = walk_tree(hpe, ip->llink, tp, isdet);
 
 	/* Handle this node. Output key/address pair. */
 	tp->key = ip->key;
@@ -595,14 +589,14 @@ walk_tree(ip, tp, isdet)
 	    /* More than one. Output try/retry chain. */
 
 	    /* Code entry points where try/retry chain is going */
-	    tp->addr = (Code *) buf_ptr;
-	    walk_bottom(ip->addr.ptr, isdet);
+	    tp->addr = (Code *) ibuf_ptr;
+	    walk_bottom(hpe, ip->addr.ptr, isdet);
 	}
 
 	/* Move to next table location */
 	tp++;
 
-	return walk_tree(ip->rlink, tp, isdet);
+	return walk_tree(hpe, ip->rlink, tp, isdet);
     }
     else
 	return tp;
@@ -613,8 +607,8 @@ walk_tree(ip, tp, isdet)
 #define wm_sw_const    W_SW_CONST
 #define wm_sw_struct   W_SW_STRUCT
 #else
-extern	void	wm_sw_const	PARAMS(( void ));
-extern	void	wm_sw_struct	PARAMS(( void ));
+extern	void	wm_sw_const	( void );
+extern	void	wm_sw_struct	( void );
 #endif
 
 /*
@@ -623,12 +617,14 @@ extern	void	wm_sw_struct	PARAMS(( void ));
  */
 
 static void
-installtreeoverhead(tp, nentries, lptr)
-    int   tp;			/* type of the entry */
-    int   nentries;		/* number of entries */
-    switchTableEntry **lptr;	/* address of pointer to where the tree
+installtreeoverhead(
+    PE,
+    int   tp,			/* type of the entry */
+    int   nentries,		/* number of entries */
+    switchTableEntry **lptr	/* address of pointer to where the tree
 				 * overhead will go
 				 */
+)
 {
     long *swaddr = NULL;	/* Initialized to stifle -Wall */
 
@@ -645,7 +641,7 @@ installtreeoverhead(tp, nentries, lptr)
     }
 
     *lptr = (switchTableEntry *) 
-		ic_install_tree_overhead(swaddr, nentries, (Code *) *lptr);
+		ic_install_tree_overhead(hpe, swaddr, nentries, (Code *) *lptr);
 }
 
 
@@ -663,9 +659,11 @@ installtreeoverhead(tp, nentries, lptr)
  */
 
 static void
-walk_bottom(ip, isdet)
-    index_node *ip;
-    int   isdet;		/* The "is determinate" flag */
+walk_bottom(
+    PE,
+    index_node *ip,
+    int   isdet		/* The "is determinate" flag */
+)
 {
     index_node *w;
 
@@ -673,20 +671,20 @@ walk_bottom(ip, isdet)
 
     do {
 	if (w == ip) {
-	    buf_ptr = ic_install_try(buf_ptr, clauseCode(w->addr.val), nargs);
+	    ibuf_ptr = ic_install_try(hpe, ibuf_ptr, clauseCode(w->addr.val), inargs);
 	}
 	else if (w->rlink == ip) {
-	    buf_ptr = ic_install_trust(
-					  buf_ptr,
+	    ibuf_ptr = ic_install_trust(hpe,
+					  ibuf_ptr,
 					  clauseCode(w->addr.val) +
 				      (isdet ? dstartCode(w->addr.val) : 0),
-					  nargs,
+					  inargs,
 					  emaskCode(w->addr.val));
 	}
 	else {
-	    buf_ptr = ic_install_retry(buf_ptr,
+	    ibuf_ptr = ic_install_retry(hpe, ibuf_ptr,
 				       clauseCode(w->addr.val),
-				       nargs,
+				       inargs,
 				       emaskCode(w->addr.val));
 	}
 
@@ -697,11 +695,12 @@ walk_bottom(ip, isdet)
 
 
 long *
-get_clause_information(addr, tp, key, clausestart)
-    long *addr;			/* Pointer to clause entry for the code */
-    int  *tp;			/* Index type of the first argument */
-    long *key;			/* Actual Prolog type of 1st argument */
-    Code **clausestart;		/* Where the clause code itself starts */
+get_clause_information(
+    long *addr,			/* Pointer to clause entry for the code */
+    int  *tp,			/* Index type of the first argument */
+    long *key,			/* Actual Prolog type of 1st argument */
+    Code **clausestart		/* Where the clause code itself starts */
+)
 {
     long  k;
 

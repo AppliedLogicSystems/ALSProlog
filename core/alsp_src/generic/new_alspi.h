@@ -1,7 +1,7 @@
 /* The New Interface */
 
 typedef enum {AP_FAIL, AP_SUCCESS, AP_EXCEPTION} AP_Result;
-typedef void AP_World;
+typedef prolog_engine AP_World;
 typedef struct {long p; int t;} AP_Obj;
 typedef enum {AP_VARIABLE, AP_INTEGER, AP_FLOAT, AP_ATOM, AP_LIST, AP_STRUCTURE} AP_Type;
 
@@ -31,11 +31,11 @@ AP_API(AP_Obj) AP_NewStructure(AP_World *w, AP_Obj functor, int arity);
 AP_API(AP_Result) AP_Call(AP_World *w, AP_Obj module, AP_Obj *term);
 AP_API(AP_Obj) AP_NewSymbolFromStr(AP_World *w, const char *s);
 AP_API(AP_Obj) AP_GetArgument(AP_World *w, AP_Obj structure, int index);
-extern AP_Obj AP_UNBOUND_OBJ;
+extern const AP_Obj AP_UNBOUND_OBJ;
 AP_API(AP_Result) AP_SetException(AP_World *w, AP_Obj ball);
 AP_API(AP_Obj) AP_GetException(AP_World *w);
 AP_API(AP_Result) AP_SetError(AP_World *w, AP_Obj error_term);
 AP_API(AP_Result) AP_SetStandardError(AP_World *w, AP_StandardError error_type, ...);
-AP_API(int) AP_OldToNewCall(AP_Result (*new_func)(), int arity);
+AP_API(int) AP_OldToNewCall(PE, AP_Result (*new_func)(), int arity);
 AP_API(int) AP_GetStructureArity(AP_World *w, AP_Obj struc);
 AP_API(AP_Obj) AP_GetStructureFunctor(AP_World *w, AP_Obj struc);

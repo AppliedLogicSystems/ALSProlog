@@ -231,7 +231,7 @@ typedef struct ext_prec {
   NEWINTERVAL b;
 } EXT_PREC;
 
-extern NEWDOUBLE NAN_REAL, POS_INF;
+extern const NEWDOUBLE NAN_REAL, POS_INF;
 
 
 

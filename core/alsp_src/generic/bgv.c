@@ -16,21 +16,21 @@
 #include "defs.h"
 
 int
-pbi_gv_alloc()
+pbi_gv_alloc(PE)
 {				/* gv_alloc(vn) */
     PWord v;
     int   t;
 
     w_get_An(&v, &t, 1);
 
-    if (w_unify(v, t, gv_alloc(), WTP_INTEGER))
+    if (w_unify(v, t, gv_alloc(hpe), WTP_INTEGER))
 	SUCCEED;
     else
 	FAIL;
 }
 
 int
-pbi_gv_free()
+pbi_gv_free(PE)
 {
     PWord v;
     int   t;
@@ -40,12 +40,12 @@ pbi_gv_free()
     if (t != WTP_INTEGER || v <= 0 || v > (wm_gvbase - wm_trailbase))
 	FAIL;
 
-    gv_free(v);
+    gv_free(hpe, v);
     SUCCEED;
 }
 
 int
-pbi_gv_get()
+pbi_gv_get(PE)
 {
     PWord v1;
     int   t1;
@@ -60,7 +60,7 @@ pbi_gv_get()
     if (t1 != WTP_INTEGER || v1 <= 0 || v1 > (wm_gvbase - wm_trailbase))
 	FAIL;
 
-    gv_get(&v, &t, v1);
+    gv_get(hpe, &v, &t, v1);
 
     if (w_unify(v, t, v2, t2))
 	SUCCEED;
@@ -69,7 +69,7 @@ pbi_gv_get()
 }
 
 int
-pbi_gv_set()
+pbi_gv_set(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -80,7 +80,7 @@ pbi_gv_set()
     if (t1 != WTP_INTEGER || v1 <= 0 || v1 > (wm_gvbase - wm_trailbase))
 	FAIL;
 
-    gv_set(v2, t2, v1);
+    gv_set(hpe, v2, t2, v1);
     SUCCEED;
 }
 
@@ -93,7 +93,7 @@ pbi_gv_set()
  */
 
 int
-pbi_gv_alloc_init()
+pbi_gv_alloc_init(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -103,10 +103,10 @@ pbi_gv_alloc_init()
 
     if (t1 != WTP_INTEGER || v1 <= 0 || 
 	v1 > (wm_gvbase - wm_trailbase) + ((wm_TR - wm_H) - wm_normal) ||
-	gv_alloc_gvnum(v1) != v1)
+	gv_alloc_gvnum(hpe, v1) != v1)
 	FAIL;
     
-    gv_set(v2, t2, v1);
+    gv_set(hpe, v2, t2, v1);
     SUCCEED;
     
 }
@@ -121,7 +121,7 @@ pbi_gv_alloc_init()
 
 
 int
-pbi_gv_isfree()
+pbi_gv_isfree(PE)
 {
     PWord v1;
     int   t1;
@@ -130,7 +130,7 @@ pbi_gv_isfree()
 
     if (t1 != WTP_INTEGER || v1 <= 0 ||
 	v1 > (wm_gvbase - wm_trailbase) + ((wm_TR - wm_H) - wm_normal) ||
-	!gv_isfree(v1))
+	!gv_isfree(hpe, v1))
 	FAIL;
     else
 	SUCCEED;
@@ -148,7 +148,7 @@ pbi_gv_isfree()
  */
 
 int
-pbi_gv_maxpossible()
+pbi_gv_maxpossible(PE)
 {
     PWord v1;
     int   t1;

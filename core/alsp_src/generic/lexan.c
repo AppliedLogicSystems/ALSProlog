@@ -32,13 +32,13 @@
 
 lxi_but *lexbdp = &seetbl[USRSEEI].lb;	/* pointer to buffer descriptor */
 
-#define nxtbuf() ((void) (*(lexbdp->nextbuf))(lexbdp), bp = lexbdp->curpos)
+#define nxtbuf() ((void) (*(lexbdp->nextbuf))(hpe, lexbdp), bp = lexbdp->curpos)
 
 #define CType(c) (lx_chtb[(unsigned char) (c)])
 
 char  tokstr[1024];
 
-static	int	escape_char	PARAMS(( char ** ));
+static	int	escape_char	( char ** );
 
 /*----------------------------------------------------------------------*
  | next_token gets the next token from the input stream, classifies it and
@@ -48,7 +48,7 @@ static	int	escape_char	PARAMS(( char ** ));
  *----------------------------------------------------------------------*/
 
 void
-next_token()
+next_token(PE)
 {
     register char *bp = lexbdp->curpos;		/* buffer pointer */
     int   ctype;		/* character type */
@@ -106,12 +106,12 @@ next_token()
 		    if (ctype == LX_NL)		/* check for newline */
 			nxtbuf();
 		    else if (ctype == LX_EOF) {		/* check for EOF */
-			static char buf[70];
+			char buf[70];
 
 			lexbdp->curpos = bp;
 			sprintf(buf,
 				"Unclosed C-Style comment beginning at line %d.", starting_line);
-			parser_error(buf);
+			parser_error(hpe, buf);
 		    }
 		}
 	}
@@ -186,7 +186,7 @@ next_token()
 		    }
 #ifdef notdef
 		    if (*bp != '\'')
-			parser_error("Single quote character expected in character constant");
+			parser_error(hpe, "Single quote character expected in character constant");
 		    bp++;
 #endif
 		    break;	/* out of the switch */
@@ -291,7 +291,7 @@ next_token()
 	    while (1) {
 		if (CType((*bp)) == LX_NL) {
 		    lexbdp->curpos = bp;
-		    parser_error("Unterminated (single) quoted string.");
+		    parser_error(hpe, "Unterminated (single) quoted string.");
 		}
 		else if (CType((*bp)) == LX_SQT) {
 		    if (CType((*++bp)) == LX_SQT)
@@ -319,7 +319,7 @@ next_token()
 	    while (1) {
 		if (CType((*bp)) == LX_NL) {
 		    lexbdp->curpos = bp;
-		    parser_error("Unterminated (double) quoted string.");
+		    parser_error(hpe, "Unterminated (double) quoted string.");
 		}
 		else if (CType((*bp)) == LX_DQT) {
 		    if (CType((*++bp)) == LX_DQT)
@@ -369,7 +369,7 @@ next_token()
     if (curtkty == TKTP_OTHER) {	/* i.e, we haven't defined it yet */
 	if (CType(tokstr[0]) == LX_UCAL) {	/* then we have a variable */
 	    curtkty = TKTP_VAR;
-	    curtok = find_var(tokstr);	/* look in the variable table */
+	    curtok = find_var(hpe, tokstr);	/* look in the variable table */
 	}
 	else {
 	    int   firstc = tokstr[0];
@@ -380,7 +380,7 @@ next_token()
 		    /* look for token without quote */
 		    curtok = find_token((UCHAR *)tokstr + 1);
 		}
-		else if ( (curtok = probe_token((UCHAR *)tokstr + 1)) )
+		else if ( (curtok = probe_token(hpe, (UCHAR *)tokstr + 1)) )
 		    curtkty = TKTP_CONST;
 		else {
 		    curtkty = TKTP_OBJECT;
@@ -393,7 +393,7 @@ next_token()
 		    curtkty = TKTP_FUNCTOR;
 		}
 #ifdef AllUIAConsts
-		else if ((curtok = probe_token(tokstr))) {
+		else if ((curtok = probe_token(hpe, tokstr))) {
 		    if (TOKUNOP(curtok) || TOKBINOP(curtok))
 			curtkty = TKTP_OP;
 
@@ -425,8 +425,7 @@ next_token()
 }
 
 static int
-escape_char(bpp)
-    register char **bpp;
+escape_char(register char **bpp)
 {
     int   iv;
 

@@ -48,9 +48,9 @@
  * Control/C handler and structure to store original handler.
  */
 
-extern int cntrlc_handler PARAMS((void));
-extern int endof_cntrlc_handler PARAMS((void));
-extern int set_prolog_interrupt PARAMS((void));
+extern int cntrlc_handler (void));
+extern int endof_cntrlc_handler (void));
+extern int set_prolog_interrupt (void));
 
 struct intvec_struc {
     long  prot_vec_addr;
@@ -101,7 +101,7 @@ void  signal_handler(AST_param)
     char  AST_param;
 #else
 #define NAIVE_SIGNAL_HANDLER 1
-extern int set_prolog_interrupt	PARAMS((void));
+extern int set_prolog_interrupt	(void);
 void  signal_handler(signum)
     int   signum;
 #endif 		/* defined(HAVE_UCONTEXT_H) */
@@ -109,7 +109,9 @@ void  signal_handler(signum)
 #if 0
     //if (wm_regidx != 0)
 #endif
-    if (current_engine.reg_stack_top != current_engine.reg_stack_base)
+#if 0 // Threading problem
+    if (hpe->reg_stack_top != hpe->reg_stack_base)
+#endif
     {
 #if !defined(arch_i386) && !defined(Portable)
 	if (wm_in_Prolog) {
@@ -164,15 +166,16 @@ void  signal_handler(signum)
 
 	}
 #endif /* !arch_i386 && !Portable */
-	wm_safety = -1;
+// Threading fix me!
+//	wm_safety = -1;
     }
 
 #ifdef VMS
     SYS$QIOW(0, chan, 0x123, 0, 0, 0, signal_handler, 0, 0, 0, 0, 0);
     wm_interrupt_caught = SIGINT;
 #else  /* not DOS or VMS */
-
-    wm_interrupt_caught = signum;
+//  Threading fix me!
+//    wm_interrupt_caught = signum;
 
     if (signum != ALSSIG_STACK_OVERFLOW)
 #if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
@@ -211,12 +214,14 @@ void  signal_handler(signum)
 
 
 void
-reissue_cntrlc()
+reissue_cntrlc(PE)
 {
 #if 0
     //if (wm_regidx != 0)
 #endif
-    if (current_engine.reg_stack_top != current_engine.reg_stack_base)
+#if 0 // thread problem
+    if (hpe->reg_stack_top != hpe->reg_stack_base)
+#endif
     {
 	wm_safety = -1;
 	wm_interrupt_caught = ALSSIG_REISS_CNTRLC;
@@ -226,7 +231,7 @@ reissue_cntrlc()
 /* signal_name_list[] is an array of paired signal numbers and their
    prolog names. Used to initilize the signal_name table. */
 
-static struct {int signal; const char *name;} signal_name_list[] = {
+static const struct {int signal; const char *name;} signal_name_list[] = {
 /* ANSI C Signals */
     {SIGABRT, "sigabrt"},
     {SIGFPE, "sigfpe"},
@@ -316,7 +321,7 @@ static void init_signal_names(void)
    Fails if there is no coresponding name for the signal number.
 */
 
-int pbi_signal_name(void)
+int pbi_signal_name(PE)
 {
     PWord v1, v2, s;
     int   t1, t2, st;
@@ -334,7 +339,7 @@ int pbi_signal_name(void)
 }
 
 void
-init_sigint()
+init_sigint(void)
 {
     /*
      * Initilize the signal name table.
@@ -436,7 +441,7 @@ init_sigint()
 
 
 void
-reset_sigint()
+reset_sigint(void)
 {
 #ifdef DOS
     if (cntrcl_init_flag == 1) {
@@ -460,7 +465,7 @@ reset_sigint()
     return;
 }
 
-int pbi_alarm(void)
+int pbi_alarm(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -500,11 +505,10 @@ int pbi_alarm(void)
 #define SIGCHLD SIGCLD
 #endif
 
-static	void	burychild	PARAMS(( int ));
+static	void	burychild	( int );
 
 static void
-burychild(signo)
-    int signo;
+burychild(int signo)
 {
 #if defined(HAVE_WAITPID) && defined(WNOHANG)
     /* waitpid is preferable */
@@ -522,7 +526,7 @@ burychild(signo)
 }
 
 void
-deathwatch()
+deathwatch(void)
 {
     /* FIXME: Reliable signals */
     (void) signal(SIGCHLD, burychild);

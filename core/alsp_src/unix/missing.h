@@ -36,280 +36,280 @@
  */
 
 #if MISSING_EXTERN__FILBUF
-extern	int	_filbuf		PARAMS(( FILE * ));
+extern	int	_filbuf		( FILE * );
 #endif
 
 #if MISSING_EXTERN__FLSBUF
-extern	int	_flsbuf		PARAMS(( int, FILE * ));
+extern	int	_flsbuf		( int, FILE * );
 #endif
 
 #ifdef MISSING_EXTERN_ACCESS
-extern	int	access		PARAMS(( const char *, int ));
+extern	int	access		( const char *, int );
 #endif
 
 #ifdef MISSING_EXTERN_ATOI
-extern	int	atoi		PARAMS(( const char * ));
+extern	int	atoi		( const char * );
 #endif
 
 #ifdef MISSING_EXTERN_BRK
-extern	int	brk		PARAMS(( void * ));
+extern	int	brk		( void * );
 #endif
 
 #ifdef MISSING_EXTERN_BCOPY
-extern	void	bcopy		PARAMS(( const void *, void *, int ));
+extern	void	bcopy		( const void *, void *, int );
 #endif
 
 #ifdef MISSING_EXTERN_BZERO
-extern	void	bzero		PARAMS(( char *, int ));
+extern	void	bzero		( char *, int );
 #endif
 
 #ifdef MISSING_EXTERN_CHDIR
-extern	int	chdir		PARAMS(( const char * ));
+extern	int	chdir		( const char * );
 #endif
 
 #ifdef MISSING_EXTERN_CLOSE
-extern	int	close		PARAMS(( int ));
+extern	int	close		( int );
 #endif
 
 #ifdef MISSING_EXTERN_DUP2
-extern	int	dup2		PARAMS(( int, int ));
+extern	int	dup2		( int, int );
 #endif
 
 #ifdef MISSING_EXTERN_EXECL
-extern	int	execl		PARAMS(( const char *, ... ));
+extern	int	execl		( const char *, ... );
 #endif
 
 #ifdef MISSING_EXTERN_FCLOSE
-extern	int	fclose		PARAMS(( FILE * ));
+extern	int	fclose		( FILE * );
 #endif
 
 #ifdef MISSING_EXTERN_FFLUSH
-extern	int	fflush		PARAMS(( FILE * ));
+extern	int	fflush		( FILE * );
 #endif
 
 #ifdef MISSING_EXTERN_SSCANF
-extern	int	sscanf		PARAMS(( char *, const char *format, ... ));
+extern	int	sscanf		( char *, const char *format, ... );
 #endif
 
 
 #ifdef MISSING_EXTERN_FORK
-extern	pid_t	fork		PARAMS(( void ));
+extern	pid_t	fork		( void );
 #endif
 
 #if MISSING_EXTERN_FPRINTF
-extern	int	fprintf		PARAMS(( FILE *, const char *, ... ));
+extern	int	fprintf		( FILE *, const char *, ... );
 #endif
 
 #ifdef MISSING_EXTERN_FPUTC
-extern	int	fputc		PARAMS(( int, FILE * ));
+extern	int	fputc		( int, FILE * );
 #endif
 
 #ifdef MISSING_EXTERN_FGETC
-extern	int	fgetc		PARAMS(( FILE * ));
+extern	int	fgetc		( FILE * );
 #endif
 
 #ifdef MISSING_EXTERN_FREAD
-extern	int	fread		PARAMS(( void *, size_t, int, FILE * ));
+extern	int	fread		( void *, size_t, int, FILE * );
 #endif
 
 #ifdef MISSING_EXTERN_FREE
-extern	void	free		PARAMS(( void * ));
+extern	void	free		( void * );
 #endif
 
 #ifdef MISSING_EXTERN_FSEEK
-extern	int	fseek		PARAMS(( FILE *, long, int ));
+extern	int	fseek		( FILE *, long, int );
 #endif
 
 #ifdef MISSING_EXTERN_FWRITE
-extern	int	fwrite		PARAMS(( const void *, size_t, size_t, FILE * ));
+extern	int	fwrite		( const void *, size_t, size_t, FILE * );
 #endif
 
 #ifdef MISSING_EXTERN_GETCWD
-extern	char *	getcwd		PARAMS(( char *, size_t ));
+extern	char *	getcwd		( char *, size_t );
 #endif
 
 #ifdef MISSING_EXTERN_GETENV
-extern	char *	getenv		PARAMS(( char * ));
+extern	char *	getenv		( char * );
 #endif
 
 #ifdef MISSING_EXTERN_GETHOSTNAME
-extern	int	gethostname 	PARAMS(( char *, int ));
+extern	int	gethostname 	( char *, int );
 #endif
 
 #ifdef MISSING_EXTERN_GETPAGESIZE
-extern	int	getpagesize	PARAMS(( void ));
+extern	int	getpagesize	( void );
 #endif
 
 #ifdef MISSING_EXTERN_GETPID
-extern	pid_t	getpid		PARAMS(( void ));
+extern	pid_t	getpid		( void );
 #endif
 
 #ifdef MISSING_EXTERN_GETWD
-extern	char *	getwd		PARAMS(( char * ));
+extern	char *	getwd		( char * );
 #endif
 
 #ifdef MISSING_EXTERN_HTONS
-extern	unsigned short htons	PARAMS(( unsigned short ));
+extern	unsigned short htons	( unsigned short );
 #endif
 
 #ifdef MISSING_EXTERN_LSEEK
-extern	off_t	lseek		PARAMS(( int, off_t, int ));
+extern	off_t	lseek		( int, off_t, int );
 #endif
 
 #ifdef MISSING_EXTERN_OPEN
-extern	int	open		PARAMS(( const char *, int, ... ));
+extern	int	open		( const char *, int, ... );
 #endif
 
 #ifdef MISSING_EXTERN_MALLOC
-extern	void *	malloc		PARAMS(( size_t ));
+extern	void *	malloc		( size_t );
 #endif
 
 #ifdef MISSING_EXTERN_MEMSET
-extern	void *	memset		PARAMS(( void *, int c, size_t n ));
+extern	void *	memset		( void *, int c, size_t n );
 #endif
 
 #ifdef MISSING_EXTERN_MUNMAP
-extern	int	munmap		PARAMS(( caddr_t addr, int len ));
+extern	int	munmap		( caddr_t addr, int len );
 #endif
 
 #ifdef MISSING_EXTERN_MKDIR
-extern	int	mkdir		PARAMS(( const char *, mode_t ));
+extern	int	mkdir		( const char *, mode_t );
 #endif
 
 #ifdef MISSING_EXTERN_PERROR
-extern	void	perror		PARAMS(( const char * ));
+extern	void	perror		( const char * );
 #endif
 
 #ifdef MISSING_EXTERN_PIPE
-extern	int	pipe		PARAMS(( int [2] ));
+extern	int	pipe		( int [2] );
 #endif
 
 #ifdef MISSING_EXTERN_PRINTF
-extern	int	printf		PARAMS(( const char *, ... ));
+extern	int	printf		( const char *, ... );
 #endif
 
 #ifdef MISSING_EXTERN_READLINK
-extern	int	readlink	PARAMS(( const char *, void *, int ));
+extern	int	readlink	( const char *, void *, int );
 #endif
 
 #ifdef MISSING_EXTERN_REALLOC
-extern	void *	realloc		PARAMS(( void *, size_t ));
+extern	void *	realloc		( void *, size_t );
 #endif
 
 #ifdef MISSING_EXTERN_REGCMP
-extern	char *	regcmp		PARAMS(( const char *, ... ));
+extern	char *	regcmp		( const char *, ... );
 #endif
 
 #ifdef MISSING_EXTERN_REGEX
-extern	char *	regex		PARAMS(( const char *, const char *, ... ));
+extern	char *	regex		( const char *, const char *, ... );
 #endif
 
 #ifdef MISSING_EXTERN_RE_COMP
-extern	char *	re_comp		PARAMS(( const char * ));
+extern	char *	re_comp		( const char * );
 #endif
 
 #ifdef MISSING_EXTERN_RE_EXEC
-extern int	re_exec		PARAMS(( char * ));
+extern int	re_exec		( char * );
 #endif
 
 #ifdef MISSING_EXTERN_READ
-extern	int	read		PARAMS(( int, void *, unsigned int ));
+extern	int	read		( int, void *, unsigned int );
 #endif
 
 #ifdef MISSING_EXTERN_REWIND
-extern	int	rewind		PARAMS(( FILE * ));
+extern	int	rewind		( FILE * );
 #endif
 
 #ifdef MISSING_EXTERN_REXEC
-extern	int	rexec		PARAMS(( char **, int, char *, char *, char *, int * ));
+extern	int	rexec		( char **, int, char *, char *, char *, int * );
 #endif
 
 #ifdef MISSING_EXTERN_RMDIR
-extern	int	rmdir		PARAMS(( const char * ));
+extern	int	rmdir		( const char * );
 #endif
 
 #ifdef MISSING_EXTERN_SBRK
-extern	void *	sbrk		PARAMS(( int ));
+extern	void *	sbrk		( int );
 #endif
 
 #ifdef MISSING_EXTERN_SELECT
-extern	int	select		PARAMS(( int, fd_set *, fd_set *, fd_set *, struct timeval * ));
+extern	int	select		( int, fd_set *, fd_set *, fd_set *, struct timeval * );
 #endif
 
 #ifdef MISSING_EXTERN_SETITIMER
-extern	int	setitimer	PARAMS(( int, struct itimerval *, struct itimerval * ));
+extern	int	setitimer	( int, struct itimerval *, struct itimerval * );
 #endif
 
 #ifdef MISSING_EXTERN_SETPGRP
 #ifdef HAVE_BSD_SETPGRP
-extern	int	setpgrp		PARAMS(( int, int ));
+extern	int	setpgrp		( int, int );
 #else
-extern	int	setpgrp		PARAMS(( void ));
+extern	int	setpgrp		( void );
 #endif
 #endif
 
 #ifdef MISSING_EXTERN_SETVBUF
 #ifdef SETVBUF_REVERSED
-extern	int	setvbuf 	PARAMS(( FILE *, int, char *, size_t ));
+extern	int	setvbuf 	( FILE *, int, char *, size_t );
 #else
-extern	int	setvbuf		PARAMS(( FILE *, char *, int, size_t ));
+extern	int	setvbuf		( FILE *, char *, int, size_t );
 #endif
 #endif
 
 #ifdef MISSING_EXTERN_SIGVEC
-extern	int	sigvec		PARAMS(( int, struct sigvec *, struct sigvec * ));
+extern	int	sigvec		( int, struct sigvec *, struct sigvec * );
 #endif
 
 #ifdef MISSING_EXTERN_SIGSTACK
-extern	int	sigstack	PARAMS(( struct sigstack *, struct sigstack * ));
+extern	int	sigstack	( struct sigstack *, struct sigstack * );
 #endif
 
 #ifdef MISSING_EXTERN_STAT
-extern	int	stat		PARAMS(( const char *, struct stat * ));
+extern	int	stat		( const char *, struct stat * );
 #endif
 
 #ifdef MISSING_EXTERN_LSTAT
-extern	int	lstat		PARAMS(( const char *, struct stat * ));
+extern	int	lstat		( const char *, struct stat * );
 #endif
 
 #ifdef MISSING_EXTERN_SYMLINK
-extern	int	symlink		PARAMS(( const char *, const char * ));
+extern	int	symlink		( const char *, const char * );
 #endif
 
 #ifdef MISSING_EXTERN_SYSTEM
-extern	int	system		PARAMS(( const char * ));
+extern	int	system		( const char * );
 #endif
 
 #if MISSING_EXTERN_TIME
-extern	long	time		PARAMS(( long * ));
+extern	long	time		( long * );
 #endif
 
 #ifdef MISSING_EXTERN_TIMES
-extern	int	times		PARAMS(( struct tms * ));
+extern	int	times		( struct tms * );
 #endif
 
 #ifdef MISSING_EXTERN_UNLINK
-extern	int	unlink		PARAMS(( const char * ));
+extern	int	unlink		( const char * );
 #endif
 
 #ifdef MISSING_EXTERN_VFPRINTF
-extern	int	vfprintf	PARAMS(( FILE *, const char *, va_list ));
+extern	int	vfprintf	( FILE *, const char *, va_list );
 #endif
 
 #ifdef MISSING_EXTERN_VSPRINTF
-extern	int	vsprintf	PARAMS(( char *, const char *, va_list ));
+extern	int	vsprintf	( char *, const char *, va_list );
 #endif
 
 #ifdef MISSING_EXTERN_WAIT
-extern	pid_t	wait		PARAMS(( int * ));
+extern	pid_t	wait		( int * );
 #endif
 
 #ifdef MISSING_EXTERN_WRITE
-extern	int	write		PARAMS(( int, const void *, unsigned int ));
+extern	int	write		( int, const void *, unsigned int );
 #endif
 
 #ifdef MISSING_EXTERN_CRYPT
-extern char    *crypt           PARAMS((char *, char *));
+extern char    *crypt           (char *, char *);
 #endif
 
 #ifdef MISSING_EXTERN_STRTOUL

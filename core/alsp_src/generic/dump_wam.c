@@ -2,7 +2,7 @@
 
 #include "dump_wam.h"
 
-void get_wam_task_state(wam_task_state *s)
+void get_wam_task_state(PE, wam_task_state *s)
 {
 	s->P = 0; /* Currently not saved outside of run_wam!?!?!? */
 	s->B = (PWord) wm_B;

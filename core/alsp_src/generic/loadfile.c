@@ -118,7 +118,7 @@ typedef struct {
  * It is assumed in the format table below that a short is 16 bits.
  */
 
-static unsigned short format_tab[] =
+static const unsigned short format_tab[] =
 {
     FR(U, U, U, U),		/* IC_ENDALLOC          -26 */
     FR(U, U, U, U),		/* IC_BEGINALLOC        -25 */
@@ -164,7 +164,7 @@ static char MAGIC[] =
 "ALS-Prolog Loadable Object Module\r\nFormat 1.21(XXXXXXXXXX,YYYYYYYYYY)\r\n\032\004\019\026";
 
 void
-fix_MAGIC()
+fix_MAGIC(void)
 {
     char *m = MAGIC;
     char *p = ProcStr;
@@ -214,23 +214,21 @@ fix_MAGIC()
  * .OBP file information
  */
 
-static FILE *obp_fp;
-static long obp_nrecs;
+//static FILE *obp_fp;
+//static long obp_nrecs;
 
 /*
  * Put the given icode into the .OBP file.
  */
 void
-f_icode(opcode, a1, a2, a3, a4)
-    int   opcode;
-    long  a1, a2, a3, a4;
+f_icode(PE, int opcode, long a1, long a2, long a3, long a4)
 {
     long  args[4];
     register int format;
     register long arg;
     register int i;
-    static long init_pos;
-    static long init_obp_nrecs;
+//    static long init_pos;
+//    static long init_obp_nrecs;
 
 
     args[0] = a1;
@@ -268,7 +266,7 @@ f_icode(opcode, a1, a2, a3, a4)
 		putc((arg >> 8), obp_fp);
 		break;
 	    case FT_XWORD:
-		arg = symmap(arg);
+		arg = symmap(hpe, arg);
 		putc(arg, obp_fp);
 		putc(arg >> 8, obp_fp);
 		break;
@@ -304,8 +302,7 @@ f_icode(opcode, a1, a2, a3, a4)
  * Returns 0 if it is unsuccessful.
  */
 int
-obp_open(fname)
-    char *fname;
+obp_open(PE, char *fname)
 {
     mod_header obp_header = {
     	"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -338,7 +335,7 @@ fname = RedirectOBP(fname, new_name);
     fsetfileinfo(fname, 'ALS4', 'OBPT');
 #endif
 
-    push_symmap();		/* push current symbol table map */
+    push_symmap(hpe);		/* push current symbol table map */
     /* and allocate a new one */
 
     obp_nrecs = 0;		/* initialize number of icode records */
@@ -350,7 +347,7 @@ fname = RedirectOBP(fname, new_name);
 }
 
 void
-obp_close()
+obp_close(PE)
 {
     int   i;
     unsigned short strsize;
@@ -382,7 +379,7 @@ obp_close()
     /*
      * Write the symbol table information
      */
-    toks = sym_order(&ntoks);
+    toks = sym_order(hpe, &ntoks);
     obp_header.symtab_size = ntoks;
     for (i = 0; i < ntoks; i++) {
 	tok = toks[i];
@@ -403,7 +400,7 @@ obp_close()
     /*
      * Release space used by current token map and restore old one
      */
-    pop_symmap();
+    pop_symmap(hpe);
 }
 
 
@@ -416,7 +413,7 @@ obp_close()
 #endif
 
 static int
-mem_load(unsigned char *startrp)
+mem_load(PE, unsigned char *startrp)
 {
     char  cbuf[CBUFSIZ];	/* character buffer */
     char *cbp;
@@ -530,7 +527,7 @@ mem_load(unsigned char *startrp)
  */
 
 int
-f_load(const char *fname)
+f_load(PE, const char *fname)
 {
     unsigned char *p;
     mem_file_info i;
@@ -539,7 +536,7 @@ f_load(const char *fname)
     p = open_memory_file(fname, &i);
     
     if (p) {
-    	result = mem_load(p);
+    	result = mem_load(hpe, p);
 	close_memory_file(&i);
     } else result = FLOAD_FAIL;
     
@@ -573,7 +570,7 @@ static const char *strip_path(const char *name)
  * obpres_load: Load a OBPT resource
  */
 
-int obpres_load(const char *fname)
+int obpres_load(PE, const char *fname)
 {
     char **obp_handle;
     Str255 pfname;
@@ -588,7 +585,7 @@ int obpres_load(const char *fname)
     if (obp_handle) {
     	HLock(obp_handle);
     
-    	result = mem_load(*obp_handle);
+    	result = mem_load(hpe, (unsigned char *)*obp_handle);
     	
 	HUnlock(obp_handle);
 	ReleaseResource(obp_handle);
@@ -600,33 +597,33 @@ int obpres_load(const char *fname)
 #endif /* MacOS */
 
 
-static struct obp_stack_rec {
-    int   nrecs;
-    int   makeobp;
-    FILE *fp;
-} obp_stack[100];
-static int obp_stack_top = 0;
+//static struct obp_stack_rec {
+//    int   nrecs;
+//    int   makeobp;
+//    FILE *fp;
+//} obp_stack[100];
+//static int obp_stack_top = 0;
 
 void
-obp_push()
+obp_push(PE)
 {
     obp_stack[obp_stack_top].nrecs = obp_nrecs;
-    obp_stack[obp_stack_top].makeobp = makeobp;
+    obp_stack[obp_stack_top].makeobp = imakeobp;
     obp_stack[obp_stack_top].fp = obp_fp;
     obp_stack_top++;
 }
 
 void
-obp_pop()
+obp_pop(PE)
 {
     obp_stack_top--;
     obp_nrecs = obp_stack[obp_stack_top].nrecs;
-    makeobp = obp_stack[obp_stack_top].makeobp;
+    imakeobp = obp_stack[obp_stack_top].makeobp;
     obp_fp = obp_stack[obp_stack_top].fp;
 }
 
 #define LOAD_RETURN(status) 					\
-	{ 	makeobp=old_makeobp;				\
+	{ 	imakeobp=old_makeobp;				\
 		w_reconstamp=old_reconsult_stamp;		\
 		obp_fp = old_obp_fp;				\
 		obp_nrecs = old_obp_nrecs;			\
@@ -641,12 +638,11 @@ obp_pop()
 
 #if (defined(__DJGPP__) || defined(__GO32__))
 
-static	long	get_file_modified_time	PARAMS(( CONST char * ));
-static	int	isdir			PARAMS((CONST char * ));
+static	long	get_file_modified_time	( const char * ));
+static	int	isdir			(const char * ));
 
 static long 
-get_file_modified_time(fname)
-    CONST char *fname;
+get_file_modified_time(const char *fname)
 {
 #if defined(DOS)
 
@@ -693,8 +689,7 @@ get_file_modified_time(fname)
  *
  */
 static int
-isdir(fname)
-    CONST char *fname;
+isdir(const char *fname)
 {
 #if defined(DOS)
 
@@ -741,16 +736,18 @@ static int faccess(char *fname, int mode)
 	return 0;
     }
 }
-#define get_file_modified_time(fname) (!faccess(fname, R_OK))
+#define get_file_modified_time(fname) ((!faccess(fname, R_OK))+1)
 #endif /* PURE_ANSI */
 
 
 #ifdef OLDCLOAD
 
 int
-load_file(fname, options)
-    char *fname;
-    int   options;
+load_file(
+    PE,
+    char *fname,
+    int   options
+)
 {
     long  pro_time, obp_time;
     char *ext, *fnp;
@@ -758,7 +755,7 @@ load_file(fname, options)
     int   status;
     long  old_reconsult_stamp = w_reconstamp;
 #ifdef OBP
-    int   old_makeobp = makeobp;
+    int   old_makeobp = imakeobp;
     FILE *old_obp_fp = obp_fp;
     int   old_obp_nrecs = obp_nrecs;
 #endif /* OBP */
@@ -769,7 +766,7 @@ load_file(fname, options)
      * Assume we are not creating .obp files until we
      * explicitly say otherwise.
      */
-    makeobp = 0;
+    imakeobp = 0;
 #endif /* OBP */
 
     /*
@@ -782,7 +779,7 @@ load_file(fname, options)
      *  If the file "user", directly consult it
      */
     if (strcmp(fname, "user") == 0) {
-	errorcount = consult(find_token((UCHAR *)fname));
+	errorcount = consult(hpe, find_token((UCHAR *)fname));
 	LOAD_RETURN(1)
     }
 
@@ -795,11 +792,11 @@ load_file(fname, options)
     /*
      * Run fnp backwards looking for an extension.
      */
-#ifdef PURE_ANSI
-    for (fnp--; fnp != fname && *fnp != '.'; fnp--) ;
-#else
+//#ifdef PURE_ANSI
+//    for (fnp--; fnp != fname && *fnp != '.'; fnp--) ;
+//#else
     for (fnp--; fnp != fname && *fnp != DIR_SEPARATOR && *fnp != '.'; fnp--) ;
-#endif /* PURE_ANSI */
+//#endif /* PURE_ANSI */
 
 /*  printf("load_file:fname=%s fnp=%s\n",fname,fnp);  */
     /*
@@ -816,7 +813,7 @@ load_file(fname, options)
 #ifdef OBP
 	if (strcmp(fnp, ".obp") == 0) {
 
-	    if (f_load(fname) != FLOAD_FAIL) {
+	    if (f_load(hpe, fname) != FLOAD_FAIL) {
 		LOAD_RETURN(1)
 	    }
 	    else {
@@ -826,7 +823,7 @@ load_file(fname, options)
 	else 
 #endif /* OBP */
 	{
-	    errorcount = consult(find_token((UCHAR *)fname));
+	    errorcount = consult(hpe, find_token((UCHAR *)fname));
 	    LOAD_RETURN(1)
 	}
     }
@@ -865,7 +862,7 @@ load_file(fname, options)
 #ifdef OBP
     if (obp_time && (obp_time > (pro_time + EPSILON_TIME))) {
 	strcpy(ext, "obp");
-	status = f_load(new_fname);
+	status = f_load(hpe, new_fname);
 	if (status == FLOAD_FAIL) {
 	    LOAD_RETURN(0)
 	}
@@ -893,11 +890,11 @@ load_file(fname, options)
 	 */
 #ifdef OBP
 	strcpy(ext, "obp");
-	if (obp_open(new_fname) == 0) {
+	if (obp_open(hpe, new_fname) == 0) {
 	    fprintf(stderr, "Warning: Unable to create %s \n", new_fname);
 	}
 	else {
-	    makeobp = 1;
+	    imakeobp = 1;
 	}
 #endif /* OBP */
 
@@ -906,7 +903,7 @@ load_file(fname, options)
 	 */
 /* printf("load_file: Really about to try .pro file\n"); */
 	strcpy(ext, "pro");
-	errorcount = consult(find_token((UCHAR *)new_fname));
+	errorcount = consult(hpe, find_token((UCHAR *)new_fname));
 
 	/*
 	 * We need to check to see if any syntax errors were reported.
@@ -925,8 +922,8 @@ load_file(fname, options)
 	 * Delete .obp files if any syntax errors were reported.
 	 */
 #if OBP
-	if (makeobp == 1) {
-	    obp_close();
+	if (imakeobp == 1) {
+	    obp_close(hpe);
 	    if (errorcount) {
 		strcpy(ext, "obp");
 		fprintf(stderr, "%s%s%s \n",
@@ -960,9 +957,7 @@ load_file(fname, options)
 #else  /* not-OLDCLOAD */
 
 int
-load_file(fname, options)
-    char *fname;
-    int   options;
+load_file(char *fname, int options)
 {
     strcat(fname, ".obp");
 

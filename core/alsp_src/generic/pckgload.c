@@ -42,7 +42,7 @@ pckg_init()
     pckg_ntbl_init();
 #if 0
     pckg_gvar_init();
-    pckg_run_init_goal();
+    pckg_run_init_goal(hpe);
 #endif
 }
 
@@ -98,7 +98,7 @@ pckg_modtbl_init()
 	 * Fill the use list of the module with modules in the use list
 	 * of the module in the package module table.
 	 */
-	modtblidx = mod_id(modid);
+	modtblidx = mod_id(hpe, modid);
 	modptr = (char *) (((long) modptr + 3) & 0xfffffffc);
 	numofusemods = *(LongPtr(modptr))++;
 	while (numofusemods--) {
@@ -239,7 +239,7 @@ pckg_ntbl_init()
 	     * into the name table.
 	     */
 	    ent = (ntbl_entry *) (*entptr++);
-	    ntblidx = nameprobe(ent->modid,
+	    ntblidx = nameprobe(hpe, ent->modid,
 				MFUNCTOR_TOKID(ent->tokid_arity),
 				MFUNCTOR_ARITY(ent->tokid_arity));
 
@@ -356,12 +356,12 @@ pckg_start()
  */
 
 void
-pckg_run_init_goal()
+pckg_run_init_goal(PE)
 {
     char  goal[1024];
 
     sprintf(goal, "builtins:'$initialize'");
-    if (!exec_query_from_buf(goal)) {
+    if (!exec_query_from_buf(hpe, goal)) {
 	fprintf(stderr,
 	  "\nError: Unable to run initialization predicate 'builtins:$initialize'");
     }

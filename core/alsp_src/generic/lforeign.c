@@ -15,17 +15,18 @@
 /*#undef DynamicForeign */
 #ifdef DynamicForeign
 
-typedef void (*PFV) PARAMS(( void ));		/* A function pointer type */
+typedef void (*PFV) ( void ));		/* A function pointer type */
 
 #if defined(HAVE_DLOPEN)
 
 #include <dlfcn.h>
 
 PFV
-load_object(objname, libstr, entry)
-    char *objname;		/* name of .so file      */
-    char *libstr;
-    char *entry;		/* entry point          */
+load_object(
+    char *objname,		/* name of .so file      */
+    char *libstr,
+    char *entry		/* entry point          */
+)
 {
     void *handle;
     void *funcaddr = NULL;
@@ -42,7 +43,7 @@ load_object(objname, libstr, entry)
 	return (PFV) funcaddr;
 }
 
-void foreign_shutdown()
+void foreign_shutdown(void)
 {
     /* nothing to do */
 }
@@ -61,10 +62,11 @@ char *mktemp();
 #define round(x,s) ((((x)-1) & ~((s)-1)) + (s))
 
 PFV
-load_object(name, libstr, entry)
-    char *name;			/* name of .o file      */
-    char *libstr;
-    char *entry;		/* entry point          */
+load_object(
+    char *name,			/* name of .o file      */
+    char *libstr,
+    char *entry		/* entry point          */
+)
 {
 
     char  tempname[32];
@@ -140,7 +142,7 @@ load_object(name, libstr, entry)
 }
 
 void
-foreign_shutdown()
+foreign_shutdown(void)
 {
     /* Do nothing. */
 }
@@ -168,15 +170,15 @@ foreign_shutdown()
 #include <string.h>
 
 #ifdef MISSING_EXTERN_LDOPEN
-extern	LDFILE *ldopen		PARAMS(( CONST char *, LDFILE * ));
+extern	LDFILE *ldopen		( const char *, LDFILE * ));
 #endif
-extern	int	ldclose		PARAMS(( LDFILE * ));
-extern	int	ldshread	PARAMS(( LDFILE *, unsigned int, SCNHDR * ));
-extern	int	ldtbread	PARAMS(( LDFILE *, long, SYMENT * ));
-extern	char *	ldgetname	PARAMS(( LDFILE *, CONST SYMENT * ));
-extern	int	ldnshread	PARAMS(( LDFILE *, CONST char *, SCNHDR * ));
-extern	char *	mktemp		PARAMS(( char * ));
-extern	int	unlink		PARAMS(( CONST char * ));
+extern	int	ldclose		( LDFILE * ));
+extern	int	ldshread	( LDFILE *, unsigned int, SCNHDR * ));
+extern	int	ldtbread	( LDFILE *, long, SYMENT * ));
+extern	char *	ldgetname	( LDFILE *, const SYMENT * ));
+extern	int	ldnshread	( LDFILE *, const char *, SCNHDR * ));
+extern	char *	mktemp		( char * ));
+extern	int	unlink		( const char * ));
 
 /*  a symbol table file is an binary object */
 typedef struct {
@@ -206,25 +208,23 @@ typedef struct {
 } ENVIRONMENT;
 ENVIRONMENT Environment;	/* program environment */
 
-static	void	fatal		PARAMS(( char *, char * ));
-static	IMAGE *	CreateImage	PARAMS(( char * ));
-static	void	DestroyImage	PARAMS(( IMAGE * ));
-static	void	DestroyImages	PARAMS(( void ));
-static	void	TraverseSectionsImage PARAMS(( IMAGE * ));
-static	long	FindSymbolValue	PARAMS(( char * ));
-static	long	GetSectionStart	PARAMS(( char * ));
-static	char *	xtext_and_xdata_strings PARAMS(( long, long , char *, long ));
-static	char *	GenerateCoffFile PARAMS(( IMAGE *, IMAGE * ));
-static	IMAGE *	CreateSymbolTable PARAMS(( IMAGE *, IMAGE *, char * ));
-static	void	CreateEnvironment PARAMS(( void ));
-static	void	Load		PARAMS(( char *, char * ));
+static	void	fatal		( char *, char * ));
+static	IMAGE *	CreateImage	( char * ));
+static	void	DestroyImage	( IMAGE * ));
+static	void	DestroyImages	( void ));
+static	void	TraverseSectionsImage ( IMAGE * ));
+static	long	FindSymbolValue	( char * ));
+static	long	GetSectionStart	( char * ));
+static	char *	xtext_and_xdata_strings ( long, long , char *, long ));
+static	char *	GenerateCoffFile ( IMAGE *, IMAGE * ));
+static	IMAGE *	CreateSymbolTable ( IMAGE *, IMAGE *, char * ));
+static	void	CreateEnvironment ( void ));
+static	void	Load		( char *, char * ));
 
 jmp_buf fatalbuf;
 
 static void
-fatal(fcn, msg)
-    char *fcn;
-    char *msg;
+fatal(char *fcn, char *msg)
 {
     (void) printf("loadforeign: %s\n", msg);
     longjmp(fatalbuf, 1);
@@ -242,8 +242,7 @@ fatal(fcn, msg)
 static IMAGE ImageMemory[NUMBEROFIMAGES];
 
 static IMAGE *
-CreateImage(FileName)
-    char *FileName;
+CreateImage(char *FileName)
 {
     IMAGE *Result;
     int   i;
@@ -265,15 +264,14 @@ found:
 }
 
 static void
-DestroyImage(Image)
-    IMAGE *Image;
+DestroyImage(IMAGE *Image)
 {
     ldclose(Image->ldfile);
     Image->FileName = (char *) 0;
 }
 
 static void
-DestroyImages()
+DestroyImages(void)
 {
     int   i;
 
@@ -284,8 +282,7 @@ DestroyImages()
 
 
 static void
-TraverseSectionsImage(Image)
-    IMAGE *Image;
+TraverseSectionsImage(IMAGE *Image)
 {
     unsigned int NumOfSections = HEADER(Image->ldfile).f_nscns;
     unsigned counter;
@@ -331,8 +328,7 @@ TraverseSectionsImage(Image)
  */
 
 static long
-FindSymbolValue(symbol_name_to_find)
-    char *symbol_name_to_find;
+FindSymbolValue(char *symbol_name_to_find)
 {
     unsigned int NumOfSymbols = HEADER(Environment.Image->ldfile).f_nsyms;
     int   i;
@@ -352,8 +348,7 @@ FindSymbolValue(symbol_name_to_find)
 }
 
 static long
-GetSectionStart(section_name)
-    char *section_name;
+GetSectionStart(char *section_name)
 {
     SCNHDR sh;
 
@@ -459,7 +454,7 @@ CreateSymbolTable(ExecuImage, RelocImage, LibStr)
 #define TFILENAMESIZE 256	/* max length of temp file names */
 
 static void
-CreateEnvironment()
+CreateEnvironment(void)
 {
     char *Space;
     static char CoffFileName[TFILENAMESIZE];
@@ -577,42 +572,46 @@ static void SIOUXSetEventVector(short (*handler)(EventRecord *))
 #endif
 
 const alspi_func_ptrs alspi_funcs = {
-    PI_forceuia,
-    PI_getan,
-    PI_getargn,
-    PI_gethead,
-    PI_gettail,
-    PI_getdouble,
-    PI_getstruct,
-    PI_getsymname,
-    PI_getuianame,
-    PI_getuiasize,
-    PI_makedouble,
-    PI_makelist,
-    PI_makestruct,
-    PI_makesym,
-    PI_makeuia,
-    PI_allocuia,
-    PI_vprintf,
-    PI_vaprintf,
+    PI_forceuia_pe,
+    PI_getan_pe,
+    PI_getargn_pe,
+    PI_gethead_pe,
+    PI_gettail_pe,
+    PI_getdouble_pe,
+    PI_getstruct_pe,
+    PI_getsymname_pe,
+    PI_getuianame_pe,
+    PI_getuiasize_pe,
+    PI_makedouble_pe,
+    PI_makelist_pe,
+    PI_makestruct_pe,
+    PI_makesym_pe,
+    PI_makeuia_pe,
+    PI_allocuia_pe,
+    PI_vprintf_pe,
+    PI_vaprintf_pe,
 #ifdef APP_PRINTF_CALLBACK
-    PI_vapp_printf,
+    PI_vapp_printf_pe,
 #else
     NULL,
 #endif
-    PI_rungoal,
-    PI_rungoal_with_update,
-    PI_rungoal_with_update_and_catch,
-    PI_unify,
-    PrologInit,
+    PI_rungoal_pe,
+    PI_rungoal_with_update_pe,
+    PI_rungoal_with_update_and_catch_pe,
+    PI_unify_pe,
+    PrologInit_pe,
+#ifdef BCINTER
     CI_get_integer,
     CI_get_double,
     sym_insert_2long,
     sym_insert_dbl,
     find_callback,
-    PI_throw,
-    PI_getball,
-    PI_interrupt,
+#else
+	NULL, NULL, NULL, NULL, NULL,
+#endif
+    PI_throw_pe,
+    PI_getball_pe,
+    PI_interrupt_pe,
     library_dir,
     executable_path
 #ifdef macintosh
@@ -659,7 +658,7 @@ static plugin_error os_load_plugin(const char *lib_name,
 			    library_reference *library, alspi_init_func *init);
 
 /* load_plugin(name, lib_info, result_code, os_specific_result) */
-int prolog_load_plugin(void)
+int prolog_load_plugin(PE)
 {
     PWord v1, v2, v3, v4, uia, s, os;
     int t1, t2, t3, t4, uiat, st, ost;

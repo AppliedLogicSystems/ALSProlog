@@ -10,7 +10,7 @@
  * Revision History:
  *===============================================================*/
 #include "defs.h"
-#include "varproc.h"
+//#include "varproc.h"
 
 /*
  * How far from where the E register points that the permanent variables
@@ -19,20 +19,19 @@
 
 #define PERMOFFSET	1
 
-varinf vtbl[VTBLSIZE + 2];	/* variable table               */
+//varinf vtbl[VTBLSIZE + 2];	/* variable table               */
 
-int   call_env_sizes[MAXGLS];
+//int   call_env_sizes[MAXGLS];
 
-static	void	init_vtbl	PARAMS(( int ));
-static	void	vwalk_term	PARAMS(( pword, int, int ));
-static	void	vwalk_const	PARAMS(( pword, int, int ));
-static	void	vwalk_list	PARAMS(( pword, int, int ));
-static	void	vwalk_rule	PARAMS(( pword, int, int ));
-static	void	vwalk_vo	PARAMS(( pword, int, int ));
+static	void	init_vtbl	(PE, int );
+static	void	vwalk_term	(PE, pword, int, int );
+static	void	vwalk_const	(PE, pword, int, int );
+static	void	vwalk_list	(PE, pword, int, int );
+static	void	vwalk_rule	(PE, pword, int, int );
+static	void	vwalk_vo	(PE, pword, int, int );
 
 static void
-init_vtbl(n)
-    int   n;
+init_vtbl(PE, int n)
 {
     register int i;
 
@@ -55,9 +54,9 @@ init_vtbl(n)
     }
 }
 
-#define vwalk(t) vwalk_rule(t,-1,-1)
+#define vwalk(t) vwalk_rule(hpe,t,-1,-1)
 
-static void (*vwalk_tbl[]) PARAMS(( pword, int, int )) = {
+static void (*const vwalk_tbl[]) (PE, pword, int, int ) = {
     vwalk_term,
 	vwalk_const,
 	vwalk_list,
@@ -73,12 +72,10 @@ static void (*vwalk_tbl[]) PARAMS(( pword, int, int )) = {
 	vwalk_const
 };
 
-#define VWALK(t,l,g) (*vwalk_tbl[TYPEOF(t)])(t,l,g)
+#define VWALK(t,l,g) (*vwalk_tbl[TYPEOF(t)])(hpe,t,l,g)
 
 static void
-vwalk_term(t, l, gn)
-    pword t;
-    int   l, gn;
+vwalk_term(PE, pword t, int l, int gn)
 {
     register int i, n;
 
@@ -88,17 +85,13 @@ vwalk_term(t, l, gn)
 }
 
 static void
-vwalk_const(t, l, gn)
-    pword t;
-    int   l, gn;
+vwalk_const(PE, pword t, int l, int gn)
 {
     /* empty */
 }
 
 static void
-vwalk_list(t, l, gn)
-    pword t;
-    int   l, gn;
+vwalk_list(PE, pword t, int l, int gn)
 {
     while (TYPEOF(t) == TP_LIST) {
 	VWALK(LIST_CAR(t), l + 1, gn);	/* Walk the car */
@@ -108,9 +101,7 @@ vwalk_list(t, l, gn)
 }
 
 static void
-vwalk_rule(t, l, gn)
-    pword t;
-    int   l, gn;
+vwalk_rule(PE, pword t, int l, int gn)
 {
     register int i, n;
 
@@ -126,9 +117,7 @@ vwalk_rule(t, l, gn)
 }
 
 static void
-vwalk_vo(t, l, gn)		/* the payoff */
-    pword t;
-    int   l, gn;
+vwalk_vo(PE, pword t, int l, int gn)		/* the payoff */
 {
     register int vo = (int) VO_VAL(t);
 
@@ -152,8 +141,7 @@ vwalk_vo(t, l, gn)		/* the payoff */
  */
 
 int
-classify_vars(t)
-    pword t;
+classify_vars(PE, pword t)
 {
     int   ptb[VTBLSIZE];
     register int i, j;		/* indices */
@@ -163,12 +151,12 @@ classify_vars(t)
           fgn,			/* first goal number (won't be 1 when ! comes
 				 * first)
 				 */
-          npv;			/* number of permanent variables */
+          lnpv;			/* number of permanent variables */
 
     nv = RULE_NVARS(t);		/* get number of variables */
     ng = RULE_NGOALS(t);	/* and the number of goals */
 
-    init_vtbl(nv);		/* initialize the variable table */
+    init_vtbl(hpe, nv);		/* initialize the variable table */
 
     vwalk(t);			/* get first occurence, last occurence, and
 				 * in structure information about the
@@ -194,20 +182,20 @@ classify_vars(t)
     /* record indices of permanent variables and increment the perm var count
      */
 
-    npv = 0;			/* haven't found any permanent vars yet */
+    lnpv = 0;			/* haven't found any permanent vars yet */
     for (i = 0; i < nv; i++)
 	if (!ISTEMP(vtbl[i].firstocc,
 		    vtbl[i].lastocc,
 		    vtbl[i].istoplevinhead, ng, fgn))
-	    ptb[npv++] = i;
+	    ptb[lnpv++] = i;
 
     /* We now wish to sort the indices in order of last used.  The ptb
      * index will then correspond to the permanent variable
      * number.
      */
 
-    for (i = 0; i < npv - 1; i++)
-	for (j = i + 1; j < npv; j++)
+    for (i = 0; i < lnpv - 1; i++)
+	for (j = i + 1; j < lnpv; j++)
 	    if (vtbl[ptb[i]].lastocc < vtbl[ptb[j]].lastocc) {
 		temp = ptb[i];	/* swap */
 		ptb[i] = ptb[j];
@@ -219,10 +207,10 @@ classify_vars(t)
      * later on)
      */
 
-    for (i = 0; i < npv; i++)
+    for (i = 0; i < lnpv; i++)
 	vtbl[ptb[i]].pvnum = i + PERMOFFSET;
 
-    return (npv);
+    return (lnpv);
 }
 
 /*
@@ -232,21 +220,19 @@ classify_vars(t)
  */
 
 void
-compute_call_env_sizes(ngoals, nvars)
-    int   ngoals;
-    int   nvars;
+compute_call_env_sizes(PE, int lngoals, int lnvars)
 {
     register int i;
     register int j;
 
     /* Clear all of the sizes */
-    for (j = 0; j <= ngoals; j++)
+    for (j = 0; j <= lngoals; j++)
 	call_env_sizes[j] = 0;
 
     /* For each call, we must keep all of the permament variables needed for
      * each following call.
      */
-    for (i = 0; i < nvars; i++)
+    for (i = 0; i < lnvars; i++)
 	if (vtbl[i].pvnum)	/* if it is a permanent var */
 	    /* Make sure in environment for each previous call */
 	    for (j = vtbl[i].lastocc - 1; j > 0; j--)

@@ -81,7 +81,7 @@
 #endif
 
 int
-pgetcwd(void)
+pgetcwd(PE)
 {
     PWord v1, sym;
     int   t1, symType;
@@ -110,7 +110,7 @@ pgetcwd(void)
  */
 
 int
-pchdir()
+pchdir(PE)
 {
     PWord v1;
     int   t1;
@@ -137,7 +137,7 @@ pchdir()
  */
 
 int
-punlink(void)
+punlink(PE)
 {
     PWord v1;
     int   t1;
@@ -170,7 +170,7 @@ punlink(void)
  */
 
 int
-getDirEntries()
+getDirEntries(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -229,7 +229,7 @@ getDirEntries()
  */
 
 int
-getFileStatus(void)
+getFileStatus(PE)
 {
     PWord v1, v2, vtime;
     int   t1, t2, ttime;
@@ -328,7 +328,7 @@ getFileStatus(void)
  */
 
 int
-read_link(void)
+read_link(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -373,7 +373,7 @@ read_link(void)
  */
 
 int
-make_symlink(void)
+make_symlink(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -409,7 +409,7 @@ make_symlink(void)
  */
 
 int
-pcmp_fs(void)
+pcmp_fs(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -443,7 +443,7 @@ pcmp_fs(void)
  */
 
 int
-prmdir()
+prmdir(PE)
 {
     PWord v1;
     int   t1;
@@ -470,7 +470,7 @@ prmdir()
  */
 
 int
-pmkdir()
+pmkdir(PE)
 {
     PWord v1,v2;
     int   t1,t2;
@@ -826,8 +826,7 @@ canonicalize_pathname()
 #endif /* CCANONP */
 
 long 
-get_file_modified_time(fname)
-    CONST char *fname;
+get_file_modified_time(const char *fname)
 {
     struct stat buf;
 
@@ -842,8 +841,7 @@ get_file_modified_time(fname)
  *
  */
 int
-isdir(fname)
-    CONST char *fname;
+isdir(const char *fname)
 {
     struct stat buf;
 
@@ -854,7 +852,7 @@ isdir(fname)
 }
 
 int
-pgetpid()
+pgetpid(PE)
 {
     PWord v1, vpid;
     int   t1, tpid;
@@ -955,7 +953,7 @@ PI_END
 /* *INDENT-ON* */
 
 void
-init_fsutils()
+init_fsutils(PE)
 {
     PI_INIT;
 }

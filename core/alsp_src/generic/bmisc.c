@@ -20,13 +20,13 @@
 #include <stdio.h>
 #include <time.h>
 
-static	unsigned long hashN	PARAMS(( PWord, int, int ));
-static	void	als_gensym	PARAMS(( UCHAR *, UCHAR * ));
+static	unsigned long hashN	(PE, PWord, int, int );
+static	void	als_gensym	( UCHAR *, UCHAR * );
 
 #ifdef CMeta
 
 static int
-termcmp(PWord v1, int t1, PWord v2, int t2)
+termcmp(PE, PWord v1, int t1, PWord v2, int t2)
 {
     int   r;
     PWord av1, av2;
@@ -167,7 +167,7 @@ termcmp(PWord v1, int t1, PWord v2, int t2)
 	    for (i = 1; i <= a1; i++) {
 		w_get_argn(&av1, &at1, v1, i);
 		w_get_argn(&av2, &at2, v2, i);
-		if ( (r = termcmp(av1, at1, av2, at2)) )
+		if ( (r = termcmp(hpe, av1, at1, av2, at2)) )
 		    return r;
 	    }
 	    return 0;
@@ -184,7 +184,7 @@ termcmp(PWord v1, int t1, PWord v2, int t2)
 }
 
 int
-pbi_compare()
+pbi_compare(PE)
 {				/* compare(Rel,Term1,Term2)   */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -194,7 +194,7 @@ pbi_compare()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    res = termcmp(v2, t2, v3, t3);
+    res = termcmp(hpe, v2, t2, v3, t3);
 
     if (w_unify(v1, t1,
 		(PWord) ((res < 0) ? TK_LESS : ((res > 0) ? TK_GRT : TK_EQ)), WTP_SYMBOL))
@@ -204,11 +204,13 @@ pbi_compare()
 }
 
 int
-wm_identical(v1, t1, v2, t2)
-    PWord v1;
-    int   t1;
-    PWord v2;
-    int   t2;
+wm_identical(
+    PE,
+    PWord v1,
+    int   t1,
+    PWord v2,
+    int   t2
+)
 {
     PWord argval1, argval2;
     int   argtype1, argtype2;
@@ -229,11 +231,11 @@ wm_identical(v1, t1, v2, t2)
 	    case WTP_LIST:
 		w_get_car(&argval1, &argtype1, v1);
 		w_get_car(&argval2, &argtype2, v2);
-		if (!wm_identical(argval1, argtype1, argval2, argtype2))
+		if (!wm_identical(hpe, argval1, argtype1, argval2, argtype2))
 		    return (0);
 		w_get_cdr(&argval1, &argtype1, v1);
 		w_get_cdr(&argval2, &argtype2, v2);
-		if (!wm_identical(argval1, argtype1, argval2, argtype2))
+		if (!wm_identical(hpe, argval1, argtype1, argval2, argtype2))
 		    return (0);
 		return (1);
 		break;
@@ -246,7 +248,7 @@ wm_identical(v1, t1, v2, t2)
 		    for (i = 1; i <= arity1; i++) {
 			w_get_argn(&argval1, &argtype1, v1, i);
 			w_get_argn(&argval2, &argtype2, v2, i);
-			if (!wm_identical(argval1, argtype1, argval2, argtype2))
+			if (!wm_identical(hpe, argval1, argtype1, argval2, argtype2))
 			    return (0);
 		    }
 		    return (1);
@@ -296,10 +298,12 @@ wm_identical(v1, t1, v2, t2)
 
 #ifdef HASH
 static unsigned long
-hashN(v, t, d)
-    PWord v;
-    int   t;
-    int   d;
+hashN(
+    PE,
+    PWord v,
+    int   t,
+    int   d
+)
 {
     if (d <= 0)
 	return 0;
@@ -311,7 +315,7 @@ hashN(v, t, d)
 
 		    w_get_car(&vh, &th, v);
 		    w_get_cdr(&vt, &tt, v);
-		    return (hashN(vh, th, d - 1) ^ hashN(vt, tt, d - 1));
+		    return (hashN(hpe, vh, th, d - 1) ^ hashN(hpe, vt, tt, d - 1));
 		}
 	    case WTP_STRUCTURE:{
 		    PWord functor, va;
@@ -324,7 +328,7 @@ hashN(v, t, d)
 		    if (d > 1) {
 			for (i = 1; i <= arity; i++) {
 			    w_get_argn(&va, &ta, v, i);
-			    acc ^= hashN(va, ta, d - 1);
+			    acc ^= hashN(hpe, va, ta, d - 1);
 			}
 		    }
 		    return acc;
@@ -380,7 +384,7 @@ hashN(v, t, d)
 }
 
 int
-pbi_hashN()
+pbi_hashN(PE)
 {				/* hashN(Term,N,Depth,HashVal) */
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -395,7 +399,7 @@ pbi_hashN()
     }
     else {
 	if (w_unify(v4, t4, 
-		    (PWord) (hashN(v1, t1, (int) v3) % v2) + 1, WTP_INTEGER))
+		    (PWord) (hashN(hpe, v1, t1, (int) v3) % v2) + 1, WTP_INTEGER))
 	    SUCCEED;
 	else
 	    FAIL;
@@ -408,8 +412,7 @@ static long gensym_start_time = 0;
 static long gensym_counter = 0;
 
 static void
-als_gensym(buffer, prefix)
-    UCHAR *buffer, *prefix;
+als_gensym(UCHAR *buffer, UCHAR *prefix)
 {
     if (!gensym_start_time) gensym_start_time = time(NULL);
 
@@ -422,7 +425,7 @@ als_gensym(buffer, prefix)
 
 
 int
-pbi_gensym()
+pbi_gensym(PE)
 {
     PWord v1, v2, vr;
     int   t1, t2, tr;
@@ -447,7 +450,7 @@ pbi_gensym()
 }
 
 int
-pbi_isgensym()
+pbi_isgensym(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -495,7 +498,7 @@ static const char *typestrings[] =
 };
 
 int
-pbi_ptermaddr()
+pbi_ptermaddr(PE)
 {
     PWord v1;
     int   t1;
@@ -503,7 +506,7 @@ pbi_ptermaddr()
     w_get_An(&v1, &t1, 1);
     if (t1 == WTP_UIA)
 	v1 = (PWord) (M_FIRSTUIAWORD(v1) - 1);
-    PI_printf("type: %s\taddr/val: %#x\n", typestrings[t1], v1);
+    PI_printf(hpe, "type: %s\taddr/val: %#x\n", typestrings[t1], v1);
     SUCCEED;
 }
 
@@ -514,7 +517,7 @@ pbi_ptermaddr()
  */
 
 int
-pbi_traildump()
+pbi_traildump(PE)
 {
     PWord *tr, *b;
 
@@ -566,7 +569,7 @@ pbi_traildump()
  *-------------------------------------------------------------------*/
 
 int
-pbi_frame_info()	/* frame_info(Count,Goal) */
+pbi_frame_info(PE)	/* frame_info(Count,Goal) */
 {
     PWord v1, v2, vg, va, vr;
     int   t1, t2, tg, ta, tr;

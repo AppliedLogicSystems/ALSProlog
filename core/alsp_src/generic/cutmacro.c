@@ -8,7 +8,7 @@
  | Creation:    4/17/92
  *================================================================*/
 
-short cut_macro_arities[] =
+const short cut_macro_arities[] =
 {
     0,				/* unused */
     1,				/* call */

@@ -16,20 +16,20 @@
 
 #ifdef XPANDTM
 
-#include "varproc.h"
-#include "parsstak.h"
+//#include "varproc.h"
+//#include "parsstak.h"
 #include "module.h"
 #include "compile.h"
 #include "icodegen.h"
 #include "main.h"
 
-static	void	rxpbod			PARAMS(( pword ));
-static	pword	expand_pred		PARAMS(( pword ));
-static	pword	expand_fact		PARAMS(( int, pword ));
-static	pword	expand_rule		PARAMS(( int, pword ));
-static	pword	expand_query	PARAMS(( int, pword ));
-static	pword	expand_command	PARAMS(( int, pword ));
-static  pword	expand_expand	PARAMS(( int, pword ));
+static	void	rxpbod			(PE, pword );
+static	pword	expand_pred		(PE, pword );
+static	pword	expand_fact		(PE,  int, pword );
+static	pword	expand_rule		(PE, int, pword );
+static	pword	expand_query	(PE, int, pword );
+static	pword	expand_command	(PE, int, pword );
+static  pword	expand_expand	(PE, int, pword );
 
 /*
  * DCG and Rule Expansion:
@@ -42,8 +42,10 @@ static  pword	expand_expand	PARAMS(( int, pword ));
  */
 
 static pword
-expand_pred(r)
-    pword r;
+expand_pred(
+    PE,
+    pword r
+)
 {
     if (TYPEOF(r) == TP_UIA)
 	return (MK_SYM(find_token((UCHAR *)UIA_NAME(r))));
@@ -52,72 +54,70 @@ expand_pred(r)
 }
 
 static pword
-expand_fact(nvars, r)
-    int   nvars;
-    pword r;
+expand_fact(PE, int   lnvars, pword r)
 {
     pword rv;
 
     rv = MK_RULE(0);
-    RULE_HEAD(rv) = expand_pred(r);
-    RULE_NVARS(rv) = nvars;
+    RULE_HEAD(rv) = expand_pred(hpe, r);
+    RULE_NVARS(rv) = lnvars;
 
     return rv;
 }
 
 static pword
-expand_rule(nvars, r)
-    int   nvars;
-    pword r;
+expand_rule(PE, int lnvars, pword r)
 {
-    push_rator(nvars, 0);
-    *pst_rand++ = expand_pred(TERM_ARGN(r, 1));
-    rxpbod(TERM_ARGN(r, 2));
-    bld_clause();
+    push_rator(hpe, lnvars, 0);
+    *pst_rand++ = expand_pred(hpe, TERM_ARGN(r, 1));
+    rxpbod(hpe, TERM_ARGN(r, 2));
+    bld_clause(hpe);
     return (*--pst_rand);
 }
 
 
 static pword
-expand_query(nvars, r)
-    int   nvars;
-    pword r;
+expand_query(
+    PE,
+    int  lnvars,
+    pword r
+)
 {
-    push_rator(nvars, 0);
+    push_rator(hpe, lnvars, 0);
     *pst_rand++ = MK_SYM(TK_QUEST);
-    rxpbod(TERM_ARGN(r, 1));
-    bld_showanswers();
-    bld_clause();
+    rxpbod(hpe, TERM_ARGN(r, 1));
+    bld_showanswers(hpe);
+    bld_clause(hpe);
     return (*--pst_rand);
 }
 
 static pword
-expand_command(nvars, r)
-    int   nvars;
-    pword r;
+expand_command(PE, int lnvars, pword r)
 {
-    push_rator(nvars, 0);
+    push_rator(hpe, lnvars, 0);
     *pst_rand++ = MK_SYM(TK_RIF);
-    rxpbod(TERM_ARGN(r, 1));
-    bld_clause();
+    rxpbod(hpe, TERM_ARGN(r, 1));
+    bld_clause(hpe);
     return (*--pst_rand);
 }
 
 static pword
-expand_expand(nvars, r)
-    int   nvars;
-    pword r;
+expand_expand(
+    PE,
+    int   lnvars,
+    pword r
+)
 {
     pword s, t;
 
-    push_rator(nvars, 0);
+    push_rator(hpe, lnvars, 0);
     *pst_rand++ = MK_SYM(TK_RIF);
 
     t = MK_TERM(3);
     TERM_FUNCTOR(t) = MK_FUNCTOR(TK_EXPAND, 3);
     TERM_ARGN(t, 1) = MK_SYM(cur_mod);
     TERM_ARGN(t, 2) = r;
-    TERM_ARGN(t, 3) = bld_vlst();
+    TERM_ARGN(t, 3) = bld_vlst(hpe);
 
     s = MK_TERM(2);
     TERM_FUNCTOR(s) = MK_FUNCTOR(TK_COLON, 2);
@@ -126,7 +126,7 @@ expand_expand(nvars, r)
 
     *pst_rand++ = s;
 
-    bld_clause();
+    bld_clause(hpe);
 
     return (*--pst_rand);
 }
@@ -144,8 +144,7 @@ expand_expand(nvars, r)
  */
 
 void
-rxpbod(gs)
-    pword gs;
+rxpbod(PE, pword gs)
 {
     pword t;
     register int tp;
@@ -155,7 +154,7 @@ rxpbod(gs)
 	   FUNCTOR_TOKID(TERM_FUNCTOR(gs)) == TK_COMMA) {
 	n = TERM_ARITY(gs);
 	for (i = 1; i < n; i++)
-	    rxpbod(TERM_ARGN(gs, i));
+	    rxpbod(hpe, TERM_ARGN(gs, i));
 	gs = TERM_ARGN(gs, n);
     }
 
@@ -195,15 +194,13 @@ rxpbod(gs)
 #define FROM_PARSER 1
 
 void
-parser_action(nvars, t)
-    int   nvars;
-    pword t;
+parser_action(PE, int lnvars, pword t)
 {
     icode(IC_INIT, 0, 0, 0, 0);
     if (TYPEOF(t) == TP_TERM) {
 	switch (FUNCTOR_TOKID(TERM_FUNCTOR(t))) {
 	    case TK_QUEST:
-		if (compile_clause(expand_query(nvars, t), FROM_PARSER))
+		if (compile_clause(hpe, expand_query(hpe, lnvars, t), FROM_PARSER))
 		    icode(IC_EXECQUERY, 0, 0, 0, 0);
 		break;
 	    case TK_RIF:
@@ -214,7 +211,7 @@ parser_action(nvars, t)
 			 * execute a command
 			 */
 
-			if (compile_clause(expand_command(nvars, t), FROM_PARSER))
+			if (compile_clause(hpe, expand_command(hpe, lnvars, t), FROM_PARSER))
 			    icode(IC_EXECCOMMAND, 0, 0, 0, 0);
 			break;
 		    case 2:
@@ -223,7 +220,7 @@ parser_action(nvars, t)
 			 * assert a rule
 			 */
 
-			if (compile_clause(expand_rule(nvars, t), FROM_PARSER))
+			if (compile_clause(hpe, expand_rule(hpe, lnvars, t), FROM_PARSER))
 			    icode(IC_ADDCLAUSE, 0, 0, 0, 0);
 			break;
 		    default:
@@ -232,25 +229,25 @@ parser_action(nvars, t)
 			 * assert the colon dash thing as a fact
 			 */
 
-			if (compile_clause(expand_fact(nvars, t), FROM_PARSER))
+			if (compile_clause(hpe, expand_fact(hpe, lnvars, t), FROM_PARSER))
 			    icode(IC_ADDCLAUSE, 0, 0, 0, 0);
 			break;
 		}
 		break;
 	    default:
 		if (TOKBINOP(FUNCTOR_TOKID(TERM_FUNCTOR(t))) >> 4 == 1200) {
-		    if (compile_clause(expand_expand(nvars, t), FROM_PARSER))
+		    if (compile_clause(hpe, expand_expand(hpe, lnvars, t), FROM_PARSER))
 			icode(IC_EXECCOMMAND, 0, 0, 0, 0);
 		}
 		else {
-		    if (compile_clause(expand_fact(nvars, t), FROM_PARSER))
+		    if (compile_clause(hpe, expand_fact(hpe, lnvars, t), FROM_PARSER))
 			icode(IC_ADDCLAUSE, 0, 0, 0, 0);
 		}
 		break;
 	}
     }
     else {
-	if (compile_clause(expand_fact(nvars, t), FROM_PARSER))
+	if (compile_clause(hpe, expand_fact(hpe, lnvars, t), FROM_PARSER))
 	    icode(IC_ADDCLAUSE, 0, 0, 0, 0);
     }
 
@@ -270,26 +267,26 @@ parser_action(nvars, t)
  */
 
 #ifdef KERNAL
-static long vtable[512];
+//static long evtable[512];
 #else
-static long vtable[4096];
+//static long evtable[4096];
 #endif /* KERNAL */
-static int vtp;
+//static int vtp;
 
 
-static	pword	cvt_walk_term	PARAMS(( PWord ));
-static	pword	cvt_walk_list	PARAMS(( PWord ));
-static	pword	cvt_walk_sym	PARAMS(( PWord ));
-static	pword	cvt_walk_int	PARAMS(( PWord ));
-static	pword	cvt_walk_var	PARAMS(( PWord ));
-static	pword	cvt_walk_uia	PARAMS(( PWord ));
+static	pword	cvt_walk_term	(PE, PWord );
+static	pword	cvt_walk_list	(PE,  PWord );
+static	pword	cvt_walk_sym	(PE,  PWord );
+static	pword	cvt_walk_int	(PE,  PWord );
+static	pword	cvt_walk_var	(PE,  PWord );
+static	pword	cvt_walk_uia	(PE,  PWord );
 
 #ifdef DoubleType
-static	pword	cvt_walk_dbl	PARAMS(( PWord ));
+static	pword	cvt_walk_dbl	(PE,  PWord );
 #endif
 
 
-static pword (*cvt_walk_tbl[])PARAMS(( PWord )) = {
+static pword (*cvt_walk_tbl[])(PE, PWord ) = {
     	cvt_walk_var,
 	cvt_walk_list,
 	cvt_walk_term,
@@ -301,20 +298,18 @@ static pword (*cvt_walk_tbl[])PARAMS(( PWord )) = {
 #endif
 };
 
-#define CVTWALK(v,t) (*cvt_walk_tbl[(t)])(v)
+#define CVTWALK(v,t) (*cvt_walk_tbl[(t)])(hpe, v)
 
 pword
-cvt_term_to_rule(v, t)
-    PWord v;
-    int   t;
+cvt_term_to_rule(PE, PWord v, int t)
 {
     pword r;
     PWord functor;
     int   arity;
 
     vtp = 0;
-    alc_rst();
-    parser_reset();
+    alc_rst(hpe);
+    parser_reset(hpe);
     switch (t) {
 	case WTP_STRUCTURE:
 	    w_get_arity(&arity, v);
@@ -323,15 +318,15 @@ cvt_term_to_rule(v, t)
 		PWord arg;
 		int   argt;
 
-		push_rator(0, 0);	/* number of vars not known yet */
+		push_rator(hpe, 0, 0);	/* number of vars not known yet */
 		w_get_argn(&arg, &argt, v, 1);
 
-		*pst_rand++ = expand_pred(CVTWALK(arg, argt));
+		*pst_rand++ = expand_pred(hpe, CVTWALK(arg, argt));
 
 		w_get_argn(&arg, &argt, v, 2);
-		rxpbod(CVTWALK(arg, argt));
+		rxpbod(hpe, CVTWALK(arg, argt));
 
-		bld_clause();
+		bld_clause(hpe);
 		RULE_NVARS(TOP_RAND) = vtp;
 		r = *--pst_rand;
 
@@ -345,7 +340,7 @@ cvt_term_to_rule(v, t)
 	    return (r);
 	    break;
 	case WTP_UIA:
-	    (void) force_uia(&v, &t);
+	    (void) force_uia(hpe, &v, &t);
 	    r = MK_RULE(0);	/* enough room for head only */
 	    RULE_HEAD(r) = CVTWALK(v, t);
 	    RULE_NVARS(r) = vtp;
@@ -358,8 +353,7 @@ cvt_term_to_rule(v, t)
 }
 
 static pword
-cvt_walk_term(v)
-    PWord v;
+cvt_walk_term(PE, PWord v)
 {
     PWord functor, arg;
     int   i, arity, argt;
@@ -381,8 +375,7 @@ cvt_walk_term(v)
 
 
 static pword
-cvt_walk_list(v)
-    PWord v;
+cvt_walk_list(PE, PWord v)
 {
     PWord carv, cdrv;
     int   cart, cdrt;
@@ -394,23 +387,20 @@ cvt_walk_list(v)
 }
 
 static pword
-cvt_walk_sym(v)
-    PWord v;
+cvt_walk_sym(PE, PWord v)
 {
     return (MK_SYM((int) v));
 }
 
 static pword
-cvt_walk_int(v)
-    PWord v;
+cvt_walk_int(PE, PWord v)
 {
     return (MK_INT(v));
 }
 
 
 static pword
-cvt_walk_uia(v)
-    PWord v;
+cvt_walk_uia(PE, PWord v)
 {
     char  buf[512];
 
@@ -422,8 +412,7 @@ cvt_walk_uia(v)
 
 #ifdef DoubleType
 static pword
-cvt_walk_dbl(v)
-    PWord  v;
+cvt_walk_dbl(PE, PWord  v)
 {
     double d;
 
@@ -433,16 +422,15 @@ cvt_walk_dbl(v)
 #endif
 
 static pword
-cvt_walk_var(v)
-    PWord v;
+cvt_walk_var(PE, PWord v)
 {
     int   i;
 
-    for (i = 0; i < vtp && vtable[i] != v; i++) ;
+    for (i = 0; i < vtp && evtable[i] != v; i++) ;
 
     if (i >= vtp) {
 	i = vtp++;
-	vtable[i] = v;
+	evtable[i] = v;
     }
 
     return (MK_VO(i));

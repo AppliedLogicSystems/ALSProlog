@@ -88,11 +88,11 @@
 /* These should be in sys/ipc.h or sys/msg.h, but some systems have really
  * lame include files.
  */
-extern	key_t	ftok		PARAMS(( CONST char *, int ));
-extern	int	msgget		PARAMS(( key_t, int ));
-extern	int	msgsnd		PARAMS(( int, CONST void *, size_t, int ));
-extern	int	msgrcv		PARAMS(( int, void *, size_t, long, int ));
-extern	int	msgctl		PARAMS(( int, int, ... ));
+extern	key_t	ftok		( const char *, int );
+extern	int	msgget		( key_t, int );
+extern	int	msgsnd		( int, const void *, size_t, int );
+extern	int	msgrcv		( int, void *, size_t, long, int );
+extern	int	msgctl		( int, int, ... );
 
 #endif /* SysVIPC */
 
@@ -213,66 +213,66 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 /* Declare socket related functions */
 #if defined(HAVE_SOCKET)
 #ifdef MISSING_EXTERN_SOCKET
-extern	int	socket		PARAMS(( int, int, int ));
+extern	int	socket		( int, int, int );
 #endif
 #ifdef MISSING_EXTERN_BIND
-extern	int	bind		PARAMS(( int, struct sockaddr *, int ));
+extern	int	bind		( int, struct sockaddr *, int );
 #endif
 #ifdef MISSING_EXTERN_CONNECT
-extern	int	connect 	PARAMS(( int, struct sockaddr *, int ));
+extern	int	connect 	( int, struct sockaddr *, int );
 #endif
 #ifdef MISSING_EXTERN_LISTEN
-extern	int	listen		PARAMS(( int, int ));
+extern	int	listen		( int, int );
 #endif
 #ifdef MISSING_EXTERN_GETHOSTNAME
-extern	int	gethostname	PARAMS(( char *, int ));
+extern	int	gethostname	( char *, int );
 #endif
 #ifdef MISSING_EXTERN_GETSOCKNAME
-extern	int	getsockname	PARAMS(( int, struct sockaddr *, int * ));
+extern	int	getsockname	( int, struct sockaddr *, int * );
 #endif
 #ifdef MISSING_EXTERN_SELECT
-extern	int	select		PARAMS(( int, fd_set *, fd_set *, fd_set *, struct timeval * ));
+extern	int	select		( int, fd_set *, fd_set *, fd_set *, struct timeval * );
 #endif
 #ifdef MISSING_EXTERN_ACCEPT
-extern	int	accept		PARAMS(( int, struct sockaddr *, int * ));
+extern	int	accept		( int, struct sockaddr *, int * );
 #endif
 #ifdef MISSING_EXTERN_REXEC
-extern	int	rexec		PARAMS(( char **, int, char *, char *, char *, int * ));
+extern	int	rexec		( char **, int, char *, char *, char *, int * );
 #endif
 #ifdef MISSING_EXTERN_SENDTO
-extern	int	sendto		PARAMS(( int, void *, int, int, struct sockaddr *, int ));
+extern	int	sendto		( int, void *, int, int, struct sockaddr *, int );
 #endif
 #ifdef MISSING_EXTERN_RECVFROM
-extern	int	recvfrom	PARAMS(( int, void *, int, int, struct sockaddr *, int * ));
+extern	int	recvfrom	( int, void *, int, int, struct sockaddr *, int * );
 #endif
 #ifdef MISSING_EXTERN_SHUTDOWN
-extern	int	shutdown	PARAMS(( int, int) );
+extern	int	shutdown	( int, int) );
 #endif
 #endif /* HAVE_SOCKET */
 
 #include "bsio.h"
 #include "newsiolex.h"
 
-static	UCHAR *	get_stream_buffer PARAMS(( PWord, int ));
-static	void	incr_fdrefcnt	PARAMS(( int ));
-static	int	decr_fdrefcnt	PARAMS(( int ));
-static	int	compute_flags	PARAMS(( char *, int , int ));
-static	void	delete_stream_name PARAMS(( PWord ));
-static	int	accept_connection PARAMS(( PWord, char * , char **));
-static	int	stream_is_ready	PARAMS(( char *, long ));
-static	void	shift_buffer	PARAMS(( UCHAR * ));
-static	int	write_buf	PARAMS(( PWord, UCHAR * ));
-static	long	stream_end	PARAMS(( UCHAR * ));
-static	int	skip_layout	PARAMS(( UCHAR * ));
-static	int	octal		PARAMS(( UCHAR ** ));
-static	unsigned long	hexadecimal	PARAMS(( UCHAR ** ));
-static	int	decimal		PARAMS(( UCHAR **, UCHAR *, double *, int *));
-static	int	escaped_char	PARAMS(( UCHAR ** ));
-static	void	quoted_atom	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *lim, UCHAR *buf));
-static	int	quoted_string	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *, UCHAR * ));
-static	int	char_constant	PARAMS(( UCHAR **, UCHAR *, int, int ));
-static	int	next_token0	PARAMS(( UCHAR *, PWord *, int *, PWord *, int * ));
-static	int	format_type	PARAMS(( UCHAR * ));
+static	UCHAR *	get_stream_buffer (PE, PWord, int );
+static	void	incr_fdrefcnt	( int );
+static	int	decr_fdrefcnt	( int );
+static	int	compute_flags	( char *, int , int );
+static	void	delete_stream_name (PE, PWord );
+static	int	accept_connection (PE, PWord, char * , char **);
+static	int	stream_is_ready	( char *, long );
+static	void	shift_buffer	( UCHAR * );
+static	int	write_buf	(PE, PWord, UCHAR * );
+static	long	stream_end	( UCHAR * );
+static	int	skip_layout	( UCHAR * );
+static	int	octal		( UCHAR ** );
+static	unsigned long	hexadecimal	( UCHAR ** );
+static	int	decimal		( UCHAR **, UCHAR *, double *, int *);
+static	int	escaped_char	( UCHAR ** );
+static	void	quoted_atom	( PE, PWord *, PWord *, int *, UCHAR **, UCHAR *lim, UCHAR *buf);
+static	int	quoted_string	(PE, PWord *, PWord *, int *, UCHAR **, UCHAR *, UCHAR * );
+static	int	char_constant	( UCHAR **, UCHAR *, int, int );
+static	int	next_token0	(PE, UCHAR *, PWord *, int *, PWord *, int * );
+static	int	format_type	( UCHAR * );
 
 enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
@@ -409,7 +409,7 @@ EXPORT ALSPI_API(void)	PI_set_console_functions(console_func read,
  */
 
 int
-sio_mkstream()
+sio_mkstream(PE)
 {
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -472,9 +472,11 @@ sio_mkstream()
  */
 
 static UCHAR *
-get_stream_buffer(v, t)
-    PWord v;
-    int   t;
+get_stream_buffer(
+    PE,
+    PWord v,
+    int   t
+)
 {
     PWord functor;
     int   arity;
@@ -507,7 +509,7 @@ get_stream_buffer(v, t)
 
 
 int
-sio_errcode()
+sio_errcode(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -516,7 +518,7 @@ sio_errcode()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (w_unify(v2, t2, (PWord) SIO_ERRCODE(buf), WTP_INTEGER))
@@ -535,7 +537,7 @@ sio_errcode()
 
 
 int
-sio_set_errcode()
+sio_set_errcode(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -544,7 +546,7 @@ sio_set_errcode()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (t2 != WTP_INTEGER) {
@@ -569,7 +571,7 @@ sio_set_errcode()
  */
 
 int
-sio_buf_params()
+sio_buf_params(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -580,7 +582,7 @@ sio_buf_params()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     bufstart = SIO_BUFFER(buf)-buf;
@@ -603,7 +605,7 @@ sio_buf_params()
 
 
 int
-sio_errno()
+sio_errno(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -612,7 +614,7 @@ sio_errno()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (w_unify(v2, t2, (PWord) SIO_ERRNO(buf), WTP_INTEGER))
@@ -632,7 +634,7 @@ sio_errno()
 
 
 int
-sio_aux()
+sio_aux(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -641,7 +643,7 @@ sio_aux()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (w_unify(v2, t2, (PWord) SIO_AUX(buf), WTP_INTEGER))
@@ -659,7 +661,7 @@ sio_aux()
  */
 
 int
-sio_fd()
+sio_fd(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -669,7 +671,7 @@ sio_fd()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
 /* printf("sio_fd: SIO_FD(buf)=%d\n",SIO_FD(buf)); */
@@ -698,7 +700,7 @@ sio_fd()
  */
 
 int
-sio_increment_bufpos()
+sio_increment_bufpos(PE)
 {
     PWord v1;
     int   t1;
@@ -706,7 +708,7 @@ sio_increment_bufpos()
 
     w_get_An(&v1, &t1, 1);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     SIO_BUFPOS(buf) += SIO_LPOS(buf);
@@ -723,7 +725,7 @@ sio_increment_bufpos()
  */
 
 int
-sio_set_position()
+sio_set_position(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -733,7 +735,7 @@ sio_set_position()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (t2 != WTP_INTEGER || t3 != WTP_INTEGER) {
@@ -755,7 +757,7 @@ sio_set_position()
  */
 
 int
-sio_set_eof()
+sio_set_eof(PE)
 {
     PWord v1;
     int   t1;
@@ -763,7 +765,7 @@ sio_set_eof()
 
     w_get_An(&v1, &t1, 1);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     SIO_ERRCODE(buf) = SIOE_EOF;
@@ -782,7 +784,7 @@ sio_set_eof()
  */
 
 int
-sio_reset_eof()
+sio_reset_eof(PE)
 {
     PWord v1;
     int   t1;
@@ -790,7 +792,7 @@ sio_reset_eof()
 
     w_get_An(&v1, &t1, 1);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     SIO_ERRCODE(buf) = SIOE_NORMAL;
@@ -808,7 +810,7 @@ sio_reset_eof()
  */
 
 int
-sio_cpos()
+sio_cpos(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -817,7 +819,7 @@ sio_cpos()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (w_unify(v2, t2, (PWord) SIO_CPOS(buf), WTP_INTEGER))
@@ -834,7 +836,7 @@ sio_cpos()
  */
 
 int
-sio_lpos()
+sio_lpos(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -843,7 +845,7 @@ sio_lpos()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (w_unify(v2, t2, (PWord) SIO_LPOS(buf), WTP_INTEGER))
@@ -922,7 +924,7 @@ static int refcnt_index(int fd)
 
 #define PRIME_TABLE_MAX	55
 
-int prime[PRIME_TABLE_MAX] = {
+const int prime[PRIME_TABLE_MAX] = {
 	2,	3,	5,	7,	11,	13,	17,	19,	23,	29,	31,	37,
 	41,	43,	47,	53,	59,	61,	67,	71,	73,	79,	83,	89,
 	97,	101,	103,	107,	109,	113,
@@ -946,8 +948,7 @@ static int next_prime(int n)
 }
 	
 static void
-incr_fdrefcnt(fd)
-    int fd;
+incr_fdrefcnt(int fd)
 {
     if (fdrefcnts == NULL) {
 #ifdef MSWin32
@@ -975,8 +976,7 @@ incr_fdrefcnt(fd)
 }
 
 static int
-decr_fdrefcnt(fd)
-    int fd;
+decr_fdrefcnt(int fd)
 {
     if (--fdrefcnts[refcnt_index(fd)].refcnt <= 0)
 	return 1;
@@ -991,8 +991,7 @@ static int openmax = 0;
 #define OPEN_MAX_GUESS 256
 
 static void
-incr_fdrefcnt(fd)
-    int fd;
+incr_fdrefcnt(int fd)
 {
     if (fdrefcnts == NULL) {
 #if defined(_SC_OPEN_MAX)
@@ -1017,8 +1016,7 @@ incr_fdrefcnt(fd)
 }
 
 static int
-decr_fdrefcnt(fd)
-    int fd;
+decr_fdrefcnt(int fd)
 {
     if (fd < 0 || fd >= openmax) fatal_error(FE_FDREFOVERFLOW, 0);
     if (--fdrefcnts[fd] <= 0)
@@ -1037,10 +1035,7 @@ decr_fdrefcnt(fd)
  */
 
 static int
-compute_flags(buf, m, b)
-    char *buf;
-    int m;
-    int b;
+compute_flags(char *buf, int m, int b)
 {
     long flags;
 
@@ -1103,7 +1098,7 @@ static int MSL_open_patch(const char *path, int flags)
 #endif
 
 int
-sio_file_open()
+sio_file_open(PE)
 {
     PWord v1, v2, v3, v4, v5;
     int   t1, t2, t3, t4, t5;
@@ -1121,7 +1116,7 @@ sio_file_open()
     w_get_An(&v4, &t4, 4);
     w_get_An(&v5, &t5, 5);
 
-    if ((buf = get_stream_buffer(v2, t2)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v2, t2)) == (UCHAR *) 0)
 	FAIL;
 
     if (!getstring(&filename, v1, t1) || t3 != WTP_INTEGER ||
@@ -1207,7 +1202,7 @@ sio_file_open()
 
 
 int
-sio_console_open()
+sio_console_open(PE)
 {
     PWord v1, v2, v3, v4, v5, v6;
     int   t1, t2, t3, t4, t5, t6;
@@ -1221,7 +1216,7 @@ sio_console_open()
     w_get_An(&v5, &t5, 5);
     w_get_An(&v6, &t6, 6);
 
-    if ((buf = get_stream_buffer(v2, t2)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v2, t2)) == (UCHAR *) 0)
 	FAIL;
 
     if (t3 != WTP_INTEGER ||
@@ -1234,6 +1229,10 @@ sio_console_open()
     if (compute_flags((char *)buf,v3,v4) < 0)
 	FAIL;
 
+    if (v6 == 1) {
+    	if (v3 != SIOM_WRITE) FAIL;
+	SIO_FD(buf) = CONSOLE_ERROR;
+    }
     switch (v3) {
 	case SIOM_READ:
 	    SIO_FD(buf) = CONSOLE_READ;
@@ -1241,10 +1240,6 @@ sio_console_open()
 	case SIOM_WRITE:
 	    SIO_FD(buf) = CONSOLE_WRITE;
 	    break;
-    }
-    if (v6 == 1) {
-    	if (v3 != SIOM_WRITE) FAIL;
-	SIO_FD(buf) = CONSOLE_ERROR;
     }
 
     SIO_EOLNTYPE(buf) = v5;
@@ -1263,7 +1258,7 @@ sio_console_open()
  */
 
 int
-pbi_ftok()
+pbi_ftok(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -1305,7 +1300,7 @@ pbi_ftok()
  */
 
 int
-sio_sysVq_open()
+sio_sysVq_open(PE)
 {
     PWord v1, v2, v3, v4, v5, v6, v7;
     int   t1, t2, t3, t4, t5, t6, t7;
@@ -1319,7 +1314,7 @@ sio_sysVq_open()
     w_get_An(&v6, &t6, 6);
     w_get_An(&v7, &t7, 7);
 
-    if ((buf = get_stream_buffer(v2, t2)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v2, t2)) == (UCHAR *) 0)
 	FAIL;
 
 
@@ -1367,7 +1362,7 @@ sio_sysVq_open()
  */
 
 int
-sio_ssbq_initialize()
+sio_ssbq_initialize(PE)
 {
 
     if (ipc_init(30) == -1) {
@@ -1387,7 +1382,7 @@ sio_ssbq_initialize()
  */
 
 int
-sio_ssbq_open()
+sio_ssbq_open(PE)
 {
     PWord v1, v2, v3, v4, v5, v6;
     int   t1, t2, t3, t4, t5, t6;
@@ -1402,7 +1397,7 @@ sio_ssbq_open()
     w_get_An(&v5, &t5, 5);
     w_get_An(&v6, &t6, 6);
 
-    if ((buf = get_stream_buffer(v2, t2)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v2, t2)) == (UCHAR *) 0)
 	FAIL;
 
     if (!getstring(&queuename, v1, t1) || t3 != WTP_INTEGER ||
@@ -1452,7 +1447,7 @@ sio_ssbq_open()
 #ifdef HAVE_SOCKET
 
 int
-sio_gethostname()
+sio_gethostname(PE)
 {
     PWord v1,v2;
     int   t1,t2;
@@ -1557,7 +1552,7 @@ static PResult true_sio_nsocket(PObj family, PObj type, PObj protocol, PObj desc
 }
 #endif
 
-int sio_nsocket(void)
+int sio_nsocket(PE)
 {
     PWord family, type, protocol, descriptor, result;
     int family_t, type_t, protocol_t, descriptor_t, result_t;
@@ -1606,7 +1601,7 @@ int sio_nsocket(void)
     SUCCEED;
 }
 
-int sio_nsocket_connect(void)
+int sio_nsocket_connect(PE)
 {
     PWord family, descriptor, address, port, result;
     int family_t, descriptor_t, address_t, port_t, result_t;
@@ -1670,7 +1665,7 @@ int sio_nsocket_connect(void)
     SUCCEED;
 }
 
-int sio_nsocket_bind(void)
+int sio_nsocket_bind(PE)
 {
     PWord family, descriptor, port, result;
     int family_t, descriptor_t, port_t, result_t;
@@ -1712,7 +1707,7 @@ int sio_nsocket_bind(void)
     SUCCEED;
 }
 
-int sio_nsocket_listen(void)
+int sio_nsocket_listen(PE)
 {
     PWord family, descriptor, backlog, result;
     int family_t, descriptor_t, backlog_t, result_t;
@@ -1743,7 +1738,7 @@ int sio_nsocket_listen(void)
     SUCCEED;
 }
 
-int sio_nsocket_accept(void)
+int sio_nsocket_accept(PE)
 {
     PWord family, descriptor, peer, new_descriptor, result, addr;
     int family_t, descriptor_t, peer_t, new_descriptor_t, result_t, addr_t;
@@ -1787,7 +1782,7 @@ int sio_nsocket_accept(void)
 
 /* sio_nsocket_select(+[read], +[write], +[except], -[readmark], -[writemark],
    -[exceptmark], +sec, +msec, -result) */
-int sio_nsocket_select(void)
+int sio_nsocket_select(PE)
 {
     PWord read, write, exception, read_mark, write_mark, except_mark, sec, usec, result;
     int read_t, write_t, exception_t, read_mark_t, write_mark_t, except_mark_t, sec_t, usec_t, result_t;
@@ -1905,7 +1900,7 @@ int sio_nsocket_select(void)
     SUCCEED;
 }
 
-int sio_nsocket_close(void)
+int sio_nsocket_close(PE)
 {
     PWord descriptor, result;
     int descriptor_t, result_t;
@@ -1969,7 +1964,7 @@ int sio_nsocketpair(void)
 
 
 int
-sio_nsocket_open()
+sio_nsocket_open(PE)
 {
     PWord descriptor, type, mode, buffering, eoln, stream;
     int   descriptor_t, type_t, mode_t, buffering_t, eoln_t, stream_t;
@@ -1984,7 +1979,7 @@ sio_nsocket_open()
     w_get_An(&eoln, &eoln_t, 5);
     w_get_An(&stream, &stream_t, 6);
 
-    if ((buf = get_stream_buffer(stream, stream_t)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, stream, stream_t)) == (UCHAR *) 0)
 	FAIL;
     
     SIO_ERRCODE(buf) = SIOE_INARG;
@@ -2118,8 +2113,8 @@ static AP_Result do_gethostbyname(AP_World *w, AP_Obj name,
 	return UnifyEntity(w, entity, official_name, alias_list, address_list);
 }
 
-int pbi_gethostbyname(void) {return AP_OldToNewCall(do_gethostbyname, 4);}
-int pbi_gethostbyaddr(void) {return AP_OldToNewCall(do_gethostbyaddr, 4);}
+int pbi_gethostbyname(PE) {return AP_OldToNewCall(hpe, do_gethostbyname, 4);}
+int pbi_gethostbyaddr(PE) {return AP_OldToNewCall(hpe, do_gethostbyaddr, 4);}
 
 
 
@@ -2136,7 +2131,7 @@ int pbi_gethostbyaddr(void) {return AP_OldToNewCall(do_gethostbyaddr, 4);}
  */
 
 int
-sio_socket_open()
+sio_socket_open(PE)
 {
     PWord v1, v2, v3, v4, v5, v6, v7, v8, v9, v10;
     int   t1, t2, t3, t4, t5, t6, t7, t8, t9, t10;
@@ -2171,7 +2166,7 @@ sio_socket_open()
     w_get_An(&v9, &t9, 9);	/* Socket Descriptor to clone */
     w_get_An(&v10, &t10, 10);	/* Stream Descriptor */
 
-    if ((buf = get_stream_buffer(v10, t10)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v10, t10)) == (UCHAR *) 0)
 	FAIL;
     
     SIO_ERRCODE(buf) = SIOE_INARG;
@@ -2227,7 +2222,7 @@ sio_socket_open()
     SIO_SOCKET_ADDRESS_LEN(buf) = 0;
     SIO_ERRCODE(buf) = SIOE_NORMAL;
 
-    if ( (clone_buf = get_stream_buffer(v9, t9)) ) {
+    if ( (clone_buf = get_stream_buffer(hpe, v9, t9)) ) {
 
 	/* clone the file descriptor and increment reference count */
 	SIO_FD(buf) = SIO_FD(clone_buf);
@@ -2460,8 +2455,7 @@ sio_socket_open()
 }
 
 static void
-delete_stream_name(vsd)
-    PWord vsd;
+delete_stream_name(PE, PWord vsd)
 {
 #ifndef MISSING_UNIX_DOMAIN_SOCKETS
     PWord vns,vn,vd;
@@ -2488,10 +2482,12 @@ delete_stream_name(vsd)
  */
 
 static int
-accept_connection(vsd, buf, sktaddr)
-    PWord vsd;
-    char  *buf;
-    char  **sktaddr;
+accept_connection(
+    PE,
+    PWord vsd,
+    char  *buf,
+    char  **sktaddr
+)
 {
 		/* Internet socket addresses */
     struct sockaddr_in c_addr;	
@@ -2507,7 +2503,7 @@ accept_connection(vsd, buf, sktaddr)
 		else {
 	    	SIO_FLAGS(buf) &= ~SIOF_NEEDACCEPT;
 	    	if (decr_fdrefcnt(SIO_FD(buf))) {
-				delete_stream_name(vsd);
+				delete_stream_name(hpe, vsd);
 				/* close connection descriptor */
 				if (closesocket(SIO_FD(buf)) == SOCKET_ERROR)
 		    		perror("accept_connection");
@@ -2527,7 +2523,7 @@ accept_connection(vsd, buf, sktaddr)
  */
 
 int
-sio_is_server_socket()
+sio_is_server_socket(PE)
 {
     PWord v1;
     int t1;
@@ -2535,7 +2531,7 @@ sio_is_server_socket()
 
     w_get_An(&v1, &t1, 1);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
     
     if ( SIO_TYPE(buf) == SIO_TYPE_SOCKET_STREAM 
@@ -2554,7 +2550,7 @@ sio_is_server_socket()
  */
 
 int
-sio_accept_socket_connection()
+sio_accept_socket_connection(PE)
 {
     PWord v1,v2,v3;
     int t1,t2,t3;
@@ -2564,10 +2560,10 @@ sio_accept_socket_connection()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 		FAIL;
     
-    if (accept_connection(v1, buf, &sktaddr) == 0) {
+    if (accept_connection(hpe, v1, buf, &sktaddr) == 0) {
     	w_mk_uia(&v3, &t3, sktaddr);
     	if (w_unify(v2, t2, v3, t3))
 			SUCCEED;
@@ -2622,7 +2618,7 @@ sio_fork(void)
  */
 
 int
-sio_rexec()
+sio_rexec(PE)
 {
 #ifndef __GO32__
     PWord v1, v2, v3, v4, v5, v6, v7;
@@ -2657,9 +2653,9 @@ sio_rexec()
 	password = NULL;
 	}
     
-    rbuf = (char *)get_stream_buffer(v5,t5);
-    wbuf = (char *)get_stream_buffer(v6,t6);
-    ebuf = (char *)get_stream_buffer(v7,t7);
+    rbuf = (char *)get_stream_buffer(hpe, v5,t5);
+    wbuf = (char *)get_stream_buffer(hpe,v6,t6);
+    ebuf = (char *)get_stream_buffer(hpe,v7,t7);
 
     rfd = wfd = efd = -1;
     
@@ -2829,9 +2825,7 @@ sio_rexec()
  */
 
 static int
-stream_is_ready(buf, usec_to_wait)
-    char *buf;
-    long usec_to_wait;
+stream_is_ready(char *buf, long usec_to_wait)
 {
     switch (SIO_TYPE(buf)) {
 	case SIO_TYPE_FILE :
@@ -2883,7 +2877,7 @@ stream_is_ready(buf, usec_to_wait)
  |	SBList, which is a list of the corresponding stream buffers.
  *------------------------------------------------------------*/
 int
-sio_simple_select()
+sio_simple_select(PE)
 {
     PWord v1, v2, v3, st;
     int t1, t2, t3, stt, wait_val;
@@ -2938,7 +2932,7 @@ sio_simple_select()
 
 	while (v1 != TK_NIL) {
 		w_get_car(&st,&stt,&v1);
-    	if ((buf = get_stream_buffer(st, stt)) == (UCHAR *) 0)
+    	if ((buf = get_stream_buffer(hpe, st, stt)) == (UCHAR *) 0)
 			FAIL;
 		bfd = SIO_FD(buf);
 		FD_SET(bfd, &rfds);
@@ -2970,10 +2964,10 @@ sio_simple_select()
  * sio_poll(Stream, WaitTime)
  */
 
-extern	int	get_number	PARAMS( (PWord, int, double *) );
+extern	int	get_number	 (PE,PWord, int, double *);
 
 int
-sio_poll()
+sio_poll(PE)
 {
     PWord v1, v2;
     int t1, t2;
@@ -2983,7 +2977,7 @@ sio_poll()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
 /*
@@ -2992,7 +2986,7 @@ sio_poll()
 	FAIL;
     }
 */
-	if (!get_number(v2, t2, &waitval)) {
+	if (!get_number(hpe,v2, t2, &waitval)) {
 		SIO_ERRCODE(buf) = SIOE_INARG;
 		FAIL;
 	}
@@ -3019,7 +3013,7 @@ sio_poll()
  */
 
 int
-sio_generic_open()
+sio_generic_open(PE)
 {
     PWord v1, v2, v3, v4, v5;
     int   t1, t2, t3, t4, t5;
@@ -3031,7 +3025,7 @@ sio_generic_open()
     w_get_An(&v4, &t4, 4);
     w_get_An(&v5, &t5, 5);
 
-    if ((buf = get_stream_buffer(v2, t2)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v2, t2)) == (UCHAR *) 0)
 	FAIL;
 
     if (t1 != WTP_INTEGER || t3 != WTP_INTEGER || t4 != WTP_INTEGER || t5 != WTP_INTEGER) {
@@ -3057,8 +3051,7 @@ sio_generic_open()
  */
 
 static void
-shift_buffer(buf)
-    UCHAR *buf;
+shift_buffer(UCHAR *buf)
 {
     int count = SIO_LPOS(buf) - SIO_CPOS(buf);
     if (count <= 0) {
@@ -3083,7 +3076,7 @@ shift_buffer(buf)
  */
 
 int
-sio_bufshift()
+sio_bufshift(PE)
 {
     PWord v1;
     int   t1;
@@ -3091,7 +3084,7 @@ sio_bufshift()
 
     w_get_An(&v1, &t1, 1);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (SIO_FLAGS(buf) & SIOF_DIRTY) {
@@ -3119,9 +3112,7 @@ sio_bufshift()
  */
 
 static int
-write_buf(vsd,buf)
-    PWord vsd;
-    UCHAR *buf;
+write_buf(PE, PWord vsd,UCHAR *buf)
 {
     int   writeflg = 0;
     char *sktaddr;
@@ -3180,7 +3171,7 @@ write_buf(vsd,buf)
 
 #ifdef HAVE_SOCKET
 	case SIO_TYPE_SOCKET_STREAM:
-	    if (accept_connection(vsd, buf, &sktaddr)) {
+	    if (accept_connection(hpe, vsd, buf, &sktaddr)) {
 		writeflg = SOCKET_ERROR;
 		break;		/* break early */
 	    }
@@ -3269,7 +3260,7 @@ write_buf(vsd,buf)
  */
 
 int
-sio_close()
+sio_close(PE)
 {
     PWord v1;
     int   t1;
@@ -3278,11 +3269,11 @@ sio_close()
 
     w_get_An(&v1, &t1, 1);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (SIO_FLAGS(buf) & SIOF_DIRTY) {
-	if (!write_buf(v1,buf)) {
+	if (!write_buf(hpe, v1,buf)) {
 	    FAIL;
 	}
     }
@@ -3339,7 +3330,7 @@ close_socket:
 		 */
 
 		if (SIO_FLAGS(buf) & SIOF_NEEDACCEPT)
-		    delete_stream_name(v1);
+		    delete_stream_name(hpe, v1);
 
 #if defined(BERKELEY_SOCKETS)
 		if (SIO_TYPE(buf) == SIO_TYPE_SOCKET_DGRAM)
@@ -3479,7 +3470,7 @@ static int write_eoln(UCHAR *buf, int b)
  */
 
 int
-sio_get_byte()
+sio_get_byte(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -3489,7 +3480,7 @@ sio_get_byte()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_READ)) {
@@ -3536,7 +3527,7 @@ sio_get_byte()
  */
 
 int
-sio_put_byte()
+sio_put_byte(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -3546,7 +3537,7 @@ sio_put_byte()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_WRITE)) {
@@ -3603,7 +3594,7 @@ sio_put_byte()
 */
 
 int
-sio_unget_byte()
+sio_unget_byte(PE)
 {
     PWord v;
     int   t;
@@ -3612,7 +3603,7 @@ sio_unget_byte()
 
     w_get_An(&v, &t, 1);
 
-    if ((buf = get_stream_buffer(v, t)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v, t)) == (UCHAR *) 0)
 	FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_READ)) {
@@ -3636,7 +3627,7 @@ sio_unget_byte()
  * ssbq_get_msg(QName)
  */
 int
-ssbq_get_msg()
+ssbq_get_msg(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -3673,7 +3664,7 @@ ssbq_get_msg()
  */
 
 int
-sio_readbuffer()
+sio_readbuffer(PE)
 {
     PWord v1;
     int   t1;
@@ -3683,7 +3674,7 @@ sio_readbuffer()
 
     w_get_An(&v1, &t1, 1);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_READ)) {
@@ -3697,7 +3688,7 @@ sio_readbuffer()
     }
 
     if (SIO_FLAGS(buf) & SIOF_DIRTY)
-		write_buf(v1,buf);
+		write_buf(hpe, v1,buf);
 
     if ((SIO_FLAGS(buf) & SIOF_DONTBLOCK) && !stream_is_ready((char *)buf,0)) {
 		SIO_ERRCODE(buf) = SIOE_NOTREADY;
@@ -3762,7 +3753,7 @@ sio_readbuffer()
 
 #ifdef HAVE_SOCKET
 	case SIO_TYPE_SOCKET_STREAM:
-	    if (accept_connection(v1,buf,&sktaddr) < 0) {
+	    if (accept_connection(hpe, v1,buf,&sktaddr) < 0) {
 		nchars = -1;
 		break;			/* break early */
 	    }
@@ -3838,7 +3829,7 @@ sio_readbuffer()
  */
 
 int
-sio_writebuffer()
+sio_writebuffer(PE)
 {
     PWord v1;
     int   t1;
@@ -3846,7 +3837,7 @@ sio_writebuffer()
 
     w_get_An(&v1, &t1, 1);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_WRITE)) {
@@ -3854,7 +3845,7 @@ sio_writebuffer()
 	FAIL;
     }
 
-    if (write_buf(v1,buf)) {
+    if (write_buf(hpe, v1,buf)) {
 	shift_buffer(buf);
 	SIO_ERRCODE(buf) = SIOE_NORMAL;
 	SUCCEED;
@@ -3872,7 +3863,7 @@ sio_writebuffer()
  *-------------------------------------------------------------------------*/
 
 int
-sio_getpos()
+sio_getpos(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -3883,12 +3874,12 @@ sio_getpos()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     curpos = SIO_BUFPOS(buf) + SIO_CPOS(buf);
 
-	make_numberx(&v3, &t3, curpos, WTP_INTEGER);
+	make_numberx(hpe, &v3, &t3, curpos, WTP_INTEGER);
 
 /*    if (w_unify(v2, t2, (PWord) curpos, WTP_INTEGER)) */
 
@@ -3899,8 +3890,7 @@ sio_getpos()
 }
 
 static long
-stream_end(buf)
-    UCHAR *buf;
+stream_end(UCHAR *buf)
 {
     long  curpos;
     long  endpos;
@@ -3929,7 +3919,7 @@ stream_end(buf)
  *-------------------------------------------------------------------*/
 
 int
-sio_seek()
+sio_seek(PE)
 {
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -3946,7 +3936,7 @@ sio_seek()
     w_get_An(&v3, &t3, 3);
     w_get_An(&v4, &t4, 4);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (NONSEEKABLE(SIO_TYPE(buf))) {
@@ -4018,7 +4008,7 @@ sio_seek()
 	SIO_CPOS(buf) = pos - SIO_BUFPOS(buf);
     else {
 	if (SIO_FLAGS(buf) & SIOF_DIRTY) {
-	    if (!write_buf(v1,buf))
+	    if (!write_buf(hpe, v1,buf))
 		FAIL;
 	}
 #ifdef PURE_ANSI
@@ -4043,7 +4033,7 @@ sio_seek()
 
     SIO_ERRCODE(buf) = SIOE_NORMAL;
 
-	make_numberx(&v0, &t0, curpos, WTP_INTEGER);
+	make_numberx(hpe,&v0, &t0, curpos, WTP_INTEGER);
 /*    if (w_unify(curpos, WTP_INTEGER, v2, t2)) */
     if (w_unify(v0, t0, v2, t2))
 	SUCCEED;
@@ -4059,7 +4049,7 @@ sio_seek()
  *
  */
 
-static int scan_eoln(CONST char *cs, int eoln_type)
+static int scan_eoln(const char *cs, int eoln_type)
 {
     int len;
     
@@ -4159,8 +4149,7 @@ static void skip_trailing_lf(UCHAR *buf)
  */
 
 static int
-skip_layout(buf)
-    UCHAR *buf;
+skip_layout(UCHAR *buf)
 {
     register UCHAR *p, *lim;
     UCHAR *startpos;	/* used for determining value of SIO_COLUMN */
@@ -4223,7 +4212,7 @@ skip_layout(buf)
 		}
 	    }
 	    else {
-		while (p < lim && (sio_chtb[*p] & SIOC_WHITESPACE)) {
+		while (p < lim && (sio_chtb[UCHARC(*p)] & SIOC_WHITESPACE)) {
 		    if ((nl = get_eoln(p, lim, buf))) {
 		        if (nl == -1) lim = p;
 		        else {
@@ -4292,8 +4281,7 @@ binary(UCHAR **pp)
 }
 
 static int
-octal(pp)
-    UCHAR **pp;
+octal(UCHAR **pp)
 {
     register UCHAR *p;
     register int val;
@@ -4301,7 +4289,7 @@ octal(pp)
     p = *pp;
     val = *p - '0';
     p++;
-    while (sio_chtb[*p] & SIOC_OCTAL) {
+    while (sio_chtb[UCHARC(*p)] & SIOC_OCTAL) {
 	val = (val << 3) + (*p - '0');
 	p++;
     }
@@ -4310,8 +4298,7 @@ octal(pp)
 }
 
 static unsigned long
-hexadecimal(pp)
-    UCHAR **pp;
+hexadecimal(UCHAR **pp)
 {
     register UCHAR *p;
     register unsigned long val;
@@ -4319,7 +4306,7 @@ hexadecimal(pp)
 
     p = *pp;
     val = 0;
-    while ( (ctype = sio_chtb[*p] & SIOC_HEXADECIMAL) ) {
+    while ( (ctype = sio_chtb[UCHARC(*p)] & SIOC_HEXADECIMAL) ) {
 	switch (ctype) {
 	    case SIOC_DECIMAL:
 		val = (val << 4) + (*p - '0');
@@ -4351,16 +4338,16 @@ decimal(pp, ty)
     d = *p++ - '0';
     frac = 0;
 
-    while (sio_chtb[*p] & SIOC_DECIMAL)
+    while (sio_chtb[UCHARC(*p)] & SIOC_DECIMAL)
 	d = 10.0 * d + (*p++) - '0';
 
-    if (*p == '.' && (sio_chtb[*(p + 1)] & SIOC_DECIMAL)) {
+    if (*p == '.' && (sio_chtb[UCHARC(*(p + 1))] & SIOC_DECIMAL)) {
 	UCHAR *s;
 	
 	*ty = WTP_DOUBLE;
 
 	p++;
-	while (sio_chtb[*p] & SIOC_DECIMAL)
+	while (sio_chtb[UCHARC(*p)] & SIOC_DECIMAL)
 	    p++;
 	s = p - 1;
 
@@ -4371,10 +4358,10 @@ decimal(pp, ty)
 	d += frac / 10;
     }
 
-    if ((sio_chtb[*p] & SIOC_E) &&
-	(((sio_chtb[*(p + 1)] & SIOC_PLUSMINUS)
-	  && (sio_chtb[*(p + 2)] & SIOC_DECIMAL))
-	 || (sio_chtb[*(p + 1)] & SIOC_DECIMAL))) {
+    if ((sio_chtb[UCHARC(*p)] & SIOC_E) &&
+	(((sio_chtb[UCHARC(*(p + 1))] & SIOC_PLUSMINUS)
+	  && (sio_chtb[UCHARC(*(p + 2))] & SIOC_DECIMAL))
+	 || (sio_chtb[UCHARC(*(p + 1))] & SIOC_DECIMAL))) {
 	int   expnt = 0;
 	int   neg = 0;
 	double m, z;
@@ -4386,8 +4373,8 @@ decimal(pp, ty)
 	else if (*p == '+')
 	    p++;
 
-	while (sio_chtb[*p] & SIOC_DECIMAL)
-	    expnt = 10 * expnt + (*p++) - '0';
+	while (sio_chtb[UCHARC(*p)] & SIOC_DECIMAL)
+	    expnt = 10 * expnt + UCHARC(*p++) - '0';
 
 	m = 1.0;
 	z = 10.0;
@@ -4423,18 +4410,18 @@ decimal(UCHAR **pp, UCHAR *lim, double *dval, int *ty)
     d = *p++ - '0';
     frac = 0;
 
-    while (sio_chtb[*p] & SIOC_DECIMAL) {
+    while (sio_chtb[UCHARC(*p)] & SIOC_DECIMAL) {
 	d = 10.0 * d + (*p++) - '0';
     }
 	
     if (*p == '.') {
-    	if ((sio_chtb[*(p + 1)] & SIOC_DECIMAL)) {
+    	if ((sio_chtb[UCHARC(*(p + 1))] & SIOC_DECIMAL)) {
 	    UCHAR *s;
 	
 	    *ty = WTP_DOUBLE;
 
 	    p++;
-	    while (sio_chtb[*p] & SIOC_DECIMAL)
+	    while (sio_chtb[UCHARC(*p)] & SIOC_DECIMAL)
 		p++;
 	    s = p - 1;
 
@@ -4446,10 +4433,10 @@ decimal(UCHAR **pp, UCHAR *lim, double *dval, int *ty)
 	} else if ((p+1) >= lim) success = 0;
     }
 
-    if ((sio_chtb[*p] & SIOC_E)) {
-    	if (((sio_chtb[*(p + 1)] & SIOC_PLUSMINUS)
-	  && (sio_chtb[*(p + 2)] & SIOC_DECIMAL))
-	 || (sio_chtb[*(p + 1)] & SIOC_DECIMAL)) {
+    if ((sio_chtb[UCHARC(*p)] & SIOC_E)) {
+    	if (((sio_chtb[UCHARC(*(p + 1))] & SIOC_PLUSMINUS)
+	  && (sio_chtb[UCHARC(*(p + 2))] & SIOC_DECIMAL))
+	 || (sio_chtb[UCHARC(*(p + 1))] & SIOC_DECIMAL)) {
 	    int   expnt = 0;
 	    int   neg = 0;
 	    double m, z;
@@ -4461,8 +4448,8 @@ decimal(UCHAR **pp, UCHAR *lim, double *dval, int *ty)
 	    else if (*p == '+')
 		p++;
 
-	    while (sio_chtb[*p] & SIOC_DECIMAL)
-		expnt = 10 * expnt + (*p++) - '0';
+	    while (sio_chtb[UCHARC(*p)] & SIOC_DECIMAL)
+		expnt = 10 * expnt + UCHARC(*p++) - '0';
 
 	    m = 1.0;
 	    z = 10.0;
@@ -4491,8 +4478,7 @@ decimal(UCHAR **pp, UCHAR *lim, double *dval, int *ty)
 }
 
 static int
-escaped_char(pp)
-    UCHAR **pp;
+escaped_char(UCHAR **pp)
 {
     register UCHAR *p = *pp + 1;
     				/* set p and skip over the backslash */
@@ -4541,12 +4527,15 @@ escaped_char(pp)
 #define DOUBLEQUOTING 1
 
 static void
-quoted_atom(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
-    PWord *vpTokType, *vpTokVal;
-    int  *tpTokVal;
-    UCHAR **pp;
-    UCHAR *lim;
-    UCHAR *buf;
+quoted_atom(
+    PE,
+    PWord *vpTokType,
+    PWord *vpTokVal,
+    int  *tpTokVal,
+    UCHAR **pp,
+    UCHAR *lim,
+    UCHAR *buf
+)
 {
     register UCHAR *p;
     register int count;
@@ -4656,7 +4645,7 @@ quoted_atom(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
 	}
 	*q = 0;
     }
-    else if ( (*vpTokVal = probe_token(atomstart)) )
+    else if ( (*vpTokVal = probe_token(hpe, atomstart)) )
 	*tpTokVal = WTP_SYMBOL;
     else
 	w_mk_uia(vpTokVal, tpTokVal, atomstart);
@@ -4678,12 +4667,7 @@ quoted_atom(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
 }				/* quoted_atom */
 
 static int
-quoted_string(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
-    PWord *vpTokType, *vpTokVal;
-    int  *tpTokVal;
-    UCHAR **pp;
-    UCHAR *lim;
-    UCHAR *buf;
+quoted_string(PE, PWord *vpTokType, PWord *vpTokVal, int  *tpTokVal, UCHAR **pp, UCHAR *lim, UCHAR *buf)
 {
     register UCHAR *p;
     register int c;
@@ -4774,11 +4758,12 @@ quoted_string(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
 }
 
 static int
-char_constant(pp, lim, inc, endc)
-    UCHAR **pp;
-    UCHAR *lim;
-    int   inc;
-    int   endc;
+char_constant(
+    UCHAR **pp,
+    UCHAR *lim,
+    int   inc,
+    int   endc
+)
 {
 #if !defined(SIO_ENDCHAR_REQUIRED_FOR_CHAR_CONSTS) && defined(__MWERKS__)
 #pragma unused(endc)
@@ -4819,8 +4804,8 @@ char_constant(pp, lim, inc, endc)
 #endif /* SIO_ENDCHAR_REQUIRED_FOR_CHAR_CONSTS */
 }
 
-static long nt_tokstart;
-static long nt_tokend;
+//static long nt_tokstart;
+//static long nt_tokend;
 
 /*
  * next_token0: primitive called by pbi_next_token
@@ -4836,12 +4821,14 @@ do {							\
 } while (0)
 
 static int
-next_token0(buf, vpTokType, tpTokType, vpTokVal, tpTokVal)
-    UCHAR *buf;
-    PWord *vpTokType;
-    int  *tpTokType;
-    PWord *vpTokVal;
-    int  *tpTokVal;
+next_token0(
+    PE,
+    UCHAR *buf,
+    PWord *vpTokType,
+    int  *tpTokType,
+    PWord *vpTokVal,
+    int  *tpTokVal
+)
 {
     UCHAR *p, *lim, *tokstart, *oldp;
     int   eossave;
@@ -4887,7 +4874,7 @@ next_token0(buf, vpTokType, tpTokType, vpTokVal, tpTokVal)
 	if (SIO_FLAGS(buf) & SIOF_INQATOM) {
 	    oldp = p;
 	    p--;		/* fake out single quote */
-	    quoted_atom(vpTokType, vpTokVal, tpTokVal, &p, lim, buf);
+	    quoted_atom(hpe, vpTokType, vpTokVal, tpTokVal, &p, lim, buf);
 	    if (p == oldp && *vpTokType != TK_LEXERR) { 
 			SIO_CPOS(buf) = tokstart - SIO_BUFFER(buf);
 			SIO_ERRCODE(buf) = SIOE_READ;
@@ -4896,7 +4883,7 @@ next_token0(buf, vpTokType, tpTokType, vpTokVal, tpTokVal)
 	}
 	else if (SIO_FLAGS(buf) & SIOF_INSTRING) {
 	    p--;		/* fake out double quote */
-	    if (!quoted_string(vpTokType, vpTokVal, tpTokVal, &p, lim, buf)) {
+	    if (!quoted_string(hpe, vpTokType, vpTokVal, tpTokVal, &p, lim, buf)) {
 			*vpTokType = TK_LEXERR;
 			*vpTokVal = SIOL_UNTERM_STRING;
 			*tpTokVal = WTP_INTEGER;
@@ -4911,7 +4898,7 @@ next_token0(buf, vpTokType, tpTokType, vpTokVal, tpTokVal)
 	}
     }
     else
-	switch (sio_chtb[*p] & SIOC_TOKENSTART) {
+	switch (sio_chtb[UCHARC(*p)] & SIOC_TOKENSTART) {
 	    case SIOC_SINGLE:
 		*tpTokVal = WTP_SYMBOL;
 		switch (*p++) {
@@ -4954,10 +4941,10 @@ next_token0(buf, vpTokType, tpTokType, vpTokVal, tpTokVal)
 		}
 		break;
 	    case SIOC_GRAPHIC:
-		while (sio_chtb[*++p] & SIOC_GRAPHIC) ;
+		while (sio_chtb[UCHARC(*++p)] & SIOC_GRAPHIC) ;
 		goto makesym;
 	    case SIOC_LOWERCASE:
-		while (sio_chtb[*++p] & SIOC_ALPHANUMERIC) ;
+		while (sio_chtb[UCHARC(*++p)] & SIOC_ALPHANUMERIC) ;
 makesym:
 		CHECK_FOR_POSSIBLE_SPLIT(p);
 		eossave = *p;
@@ -4976,11 +4963,11 @@ makesym:
 		    *vpTokType = TK_SYMBOL;
 		break;
 	    case SIOC_UPPERCASE:
-		while (sio_chtb[*++p] & SIOC_ALPHANUMERIC) ;
+		while (sio_chtb[UCHARC(*++p)] & SIOC_ALPHANUMERIC) ;
 		CHECK_FOR_POSSIBLE_SPLIT(p);
 		eossave = *p;
 		*p = 0;
-		if ( (*vpTokVal = probe_token(tokstart)) )
+		if ( (*vpTokVal = probe_token(hpe, tokstart)) )
 		    *tpTokVal = WTP_SYMBOL;
 		else
 		    w_mk_uia(vpTokVal, tpTokVal, tokstart);
@@ -4990,17 +4977,17 @@ makesym:
 	    case SIOC_DECIMAL:
 		*vpTokType = TK_FLOAT;
 		if (*p == '0') {
-		    if (*(p + 1) == 'x' && (sio_chtb[*(p + 2)] & SIOC_HEXADECIMAL)) {
+		    if (*(p + 1) == 'x' && (sio_chtb[UCHARC(*(p + 2))] & SIOC_HEXADECIMAL)) {
 			p += 2;
-			make_number(vpTokVal, tpTokVal, (double) hexadecimal(&p)); 
+			make_number(hpe, vpTokVal, tpTokVal, (double) hexadecimal(&p)); 
 		    }
-		    else if (*(p + 1) == 'o' && (sio_chtb[*(p + 2)] & SIOC_OCTAL)) {
+		    else if (*(p + 1) == 'o' && (sio_chtb[UCHARC(*(p + 2))] & SIOC_OCTAL)) {
 			p += 2;
-			make_number(vpTokVal, tpTokVal, (double) octal(&p)); 
+			make_number(hpe, vpTokVal, tpTokVal, (double) octal(&p)); 
 			}
 		    else if (*(p + 1) == 'b' && (*(p + 2)=='0' || *(p + 2)=='1')) {
 			p += 2;
-			make_number(vpTokVal, tpTokVal, (double) binary(&p)); 
+			make_number(hpe, vpTokVal, tpTokVal, (double) binary(&p)); 
 			}
 				/* IEEE NAN */
 		    else if (*(p + 1) == 'n') {		
@@ -5008,7 +4995,7 @@ makesym:
 				p += 4;
 			else 
 				p += 2;
-			make_ieee_nan(vpTokVal, tpTokVal); 
+			make_ieee_nan(hpe, vpTokVal, tpTokVal); 
 			}
 
 				/* IEEE Infinity */
@@ -5017,7 +5004,7 @@ makesym:
 				p += 4;
 			else
 				p += 2;
-			make_ieee_inf(vpTokVal, tpTokVal); 
+			make_ieee_inf(hpe, vpTokVal, tpTokVal); 
 		    }
 				/* Character Constants */
 #ifdef	SIO_ZERO_QUOTE_FOR_CHAR_CONSTS
@@ -5038,7 +5025,7 @@ makesym:
 		    else
 			{
 				if (decimal(&p, lim, &dec_val, &ty)) {
-				    make_numberx(vpTokVal, tpTokVal, dec_val,ty);
+				    make_numberx(hpe, vpTokVal, tpTokVal, dec_val,ty);
 				} else {
 				    SIO_CPOS(buf) = tokstart - SIO_BUFFER(buf);
 				    SIO_ERRCODE(buf) = SIOE_READ;
@@ -5049,7 +5036,7 @@ makesym:
 		else
 		{
 			if (decimal(&p, lim, &dec_val, &ty)) {
-			    make_numberx(vpTokVal, tpTokVal, dec_val,ty);
+			    make_numberx(hpe, vpTokVal, tpTokVal, dec_val,ty);
 			} else {
 			    SIO_CPOS(buf) = tokstart - SIO_BUFFER(buf);
 			    SIO_ERRCODE(buf) = SIOE_READ;
@@ -5062,7 +5049,7 @@ makesym:
 		if (*p == '\'') {
 		    CHECK_FOR_POSSIBLE_SPLIT(p+1);
 		    oldp = p+1;
-		    quoted_atom(vpTokType, vpTokVal, tpTokVal, &p, lim, buf);
+		    quoted_atom(hpe, vpTokType, vpTokVal, tpTokVal, &p, lim, buf);
 		    if (p == oldp && *vpTokType != TK_LEXERR) { 
 			SIO_CPOS(buf) = p - SIO_BUFFER(buf);
 			SIO_ERRCODE(buf) = SIOE_READ;
@@ -5087,7 +5074,7 @@ makesym:
 #endif /* SIO_BACKQUOTE_FOR_CHAR_CONSTS */
 		else if (*p == '\"') {
 		    /*CHECK_FOR_POSSIBLE_SPLIT(p+1);*/
-		    if (!quoted_string(vpTokType,vpTokVal, tpTokVal, 
+		    if (!quoted_string(hpe, vpTokType,vpTokVal, tpTokVal, 
 				      &p, lim, buf)) {
 			*vpTokType = TK_LEXERR;
 			*vpTokVal = SIOL_UNTERM_STRING;
@@ -5123,7 +5110,7 @@ makesym:
  */
 
 int
-sio_next_token()
+sio_next_token(PE)
 {
     PWord v1, v2, v3, vTokType, vTokVal;
     int   t1, t2, t3, tTokType, tTokVal;
@@ -5133,7 +5120,7 @@ sio_next_token()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_READ)) {
@@ -5141,7 +5128,7 @@ sio_next_token()
 	FAIL;
     }
 
-    if (next_token0(buf, &vTokType, &tTokType, &vTokVal, &tTokVal) &&
+    if (next_token0(hpe, buf, &vTokType, &tTokType, &vTokVal, &tTokVal) &&
 	w_unify(v2, t2, vTokType, tTokType) &&
 	w_unify(v3, t3, vTokVal, tTokVal))
 	SUCCEED;
@@ -5156,7 +5143,7 @@ sio_next_token()
  */
 
 int
-sio_next_tokens()
+sio_next_tokens(PE)
 {
     PWord v1, v2, v3, vTokType, vTokVal, L, T;
     int   t1, t2, t3, tTokType, tTokVal, linenum0, preprocessing;
@@ -5169,7 +5156,7 @@ sio_next_tokens()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
 #ifdef CW_PLUGIN
@@ -5187,7 +5174,7 @@ sio_next_tokens()
     if (preprocessing) {
 	cpos0 = SIO_CPOS(buf);
     }
-    if (!(next_token0(buf, &vTokType, &tTokType, &vTokVal, &tTokVal) ||
+    if (!(next_token0(hpe, buf, &vTokType, &tTokType, &vTokVal, &tTokVal) ||
 	  (preprocessing && linenum0 != SIO_LINENUM(buf)))) {
 	if (w_unify(v2, t2, v3, t3))
 	    SUCCEED;
@@ -5294,7 +5281,7 @@ sio_next_tokens()
 		cpos0 = SIO_CPOS(buf);
 		linenum0 = SIO_LINENUM(buf);
 	    }
-	    if (!(next_token0(buf, &vTokType, &tTokType, &vTokVal, &tTokVal) ||
+	    if (!(next_token0(hpe, buf, &vTokType, &tTokType, &vTokVal, &tTokVal) ||
 		  (preprocessing && linenum0 != SIO_LINENUM(buf)))) {
 		*S = T = MMK_VAR((PWord) S);
 		break;
@@ -5309,7 +5296,7 @@ sio_next_tokens()
 
 	SIO_ELINENUM(buf) = linenum0;
 
-	if (_w_unify(a2, L) && _w_unify(a3, T))
+	if (_w_unify(hpe, a2, L) && _w_unify(hpe, a3, T))
 	    SUCCEED;
 	else
 	    FAIL;
@@ -5322,7 +5309,7 @@ sio_next_tokens()
  */
 
 int
-sio_skip_layout()
+sio_skip_layout(PE)
 {
     PWord v1;
     int   t1;
@@ -5330,7 +5317,7 @@ sio_skip_layout()
 
     w_get_An(&v1, &t1, 1);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_READ)) {
@@ -5360,7 +5347,7 @@ sio_skip_layout()
  */
 
 int
-sio_linenumber()
+sio_linenumber(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -5369,7 +5356,7 @@ sio_linenumber()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (w_unify(v2, t2, SIO_LINENUM(buf), WTP_INTEGER))
@@ -5383,7 +5370,7 @@ sio_linenumber()
  */
 
 int
-sio_get_number()
+sio_get_number(PE)
 {
     PWord v1, v2, v3, vNum;
     int   t1, t2, t3, tNum;
@@ -5400,7 +5387,7 @@ sio_get_number()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_READ)) {
@@ -5408,7 +5395,7 @@ sio_get_number()
 	FAIL;
     }
 
-    if (!xform_uia(&v2, &t2)) {
+    if (!xform_uia(hpe, &v2, &t2)) {
 	SIO_ERRCODE(buf) = SIOE_INARG;
 	FAIL;
     }
@@ -5496,17 +5483,17 @@ sio_get_number()
 	    break;
 	case TK_LONG:
 	case TK_INT:
-	    make_number(&vNum, &tNum, (double) longval);
+	    make_number(hpe, &vNum, &tNum, (double) longval);
 	    break;
 	case TK_ULONG:
 	case TK_UINT:
-	    make_number(&vNum, &tNum, (double) (unsigned long) longval);
+	    make_number(hpe, &vNum, &tNum, (double) (unsigned long) longval);
 	    break;
 	case TK_FLOAT:
-	    make_numberx(&vNum, &tNum, (double) floatval, WTP_DOUBLE);
+	    make_numberx(hpe, &vNum, &tNum, (double) floatval, WTP_DOUBLE);
 	    break;
 	case TK_DOUBLE:
-	    make_numberx(&vNum, &tNum, doubleval, WTP_DOUBLE);
+	    make_numberx(hpe, &vNum, &tNum, doubleval, WTP_DOUBLE);
 	    break;
     }
 
@@ -5521,9 +5508,9 @@ sio_get_number()
  * get_eoln_str() returns a pointer to a string containing the end-of-line characters for
  * the stream.
  */
-static CONST char *get_eoln_str(UCHAR *buf)
+static const char *get_eoln_str(UCHAR *buf)
 {
-    CONST char *eoln_str;
+    const char *eoln_str;
     
     switch(SIO_EOLNTYPE(buf) & SIOEOLN_WRITE_MASK) {
     case SIOEOLN_WRITE_CRLF:
@@ -5548,7 +5535,7 @@ static CONST char *get_eoln_str(UCHAR *buf)
  */
 
 int
-sio_put_atom()
+sio_put_atom(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -5559,7 +5546,7 @@ sio_put_atom()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_WRITE)) {
@@ -5618,7 +5605,7 @@ sio_put_atom()
  */
 
 int
-sio_put_number()
+sio_put_number(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -5636,7 +5623,7 @@ sio_put_number()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_WRITE)) {
@@ -5650,7 +5637,7 @@ sio_put_number()
 	FAIL;
     }
 
-    if (!xform_uia(&v2, &t2)) {
+    if (!xform_uia(hpe, &v2, &t2)) {
 	SIO_ERRCODE(buf) = SIOE_INARG;
 	FAIL;
     }
@@ -5660,7 +5647,7 @@ sio_put_number()
 	case TK_UBYTE:
 	case TK_CHAR:
 	case TK_UCHAR:
-	    if (!getlong(&longval, v3, t3)) {
+	    if (!getlong(hpe, &longval, v3, t3)) {
 		SIO_ERRCODE(buf) = SIOE_INARG;
 		FAIL;
 	    }
@@ -5673,7 +5660,7 @@ sio_put_number()
 	    break;
 	case TK_SHORT:
 	case TK_USHORT:
-	    if (!getlong(&longval, v3, t3)) {
+	    if (!getlong(hpe, &longval, v3, t3)) {
 		SIO_ERRCODE(buf) = SIOE_INARG;
 		FAIL;
 	    }
@@ -5686,7 +5673,7 @@ sio_put_number()
 	    break;
 	case TK_INT:
 	case TK_LONG:
-	    if (!getlong(&longval, v3, t3)) {
+	    if (!getlong(hpe, &longval, v3, t3)) {
 		SIO_ERRCODE(buf) = SIOE_INARG;
 		FAIL;
 	    }
@@ -5761,7 +5748,7 @@ sio_put_number()
  */
 
 int
-sio_qatom()
+sio_qatom(PE)
 {
     PWord v1, v2, v3, vTokVal;
     int   t1, t2, t3, tTokVal;
@@ -5781,9 +5768,9 @@ sio_qatom()
     else
 	FAIL;
 
-    if (sio_chtb[*atom] & SIOC_LOWERCASE)
+    if (sio_chtb[UCHARC(*atom)] & SIOC_LOWERCASE)
 	mask = SIOC_ALPHANUMERIC;
-    else if (sio_chtb[*atom] & SIOC_GRAPHIC)
+    else if (sio_chtb[UCHARC(*atom)] & SIOC_GRAPHIC)
 	mask = SIOC_GRAPHIC;
     else
 	mask = 0;
@@ -5792,7 +5779,7 @@ sio_qatom()
     count = 0;
     bscnt = 0;
 
-    while (*a && (sio_chtb[*a] & mask)) {
+    while (*a && (sio_chtb[UCHARC(*a)] & mask)) {
 	if (*a == '\\')
 	    bscnt++;
 	if (*a == '/' && *(a+1) == '*') 
@@ -5831,9 +5818,9 @@ sio_qatom()
 				 */
 
     while (*a) {
-	if (sio_chtb[*a] & SIOC_ESCCHAR)
+	if (sio_chtb[UCHARC(*a)] & SIOC_ESCCHAR)
 	    count += 2;
-	else if (*a != ' ' && (sio_chtb[*a] & SIOC_WHITESPACE))
+	else if (*a != ' ' && (sio_chtb[UCHARC(*a)] & SIOC_WHITESPACE))
 	    count += 4;
 	else
 	    count++;
@@ -5850,7 +5837,7 @@ sio_qatom()
     *b++ = '\'';		/* put down the initial quote */
     a = atom;
     while (*a) {
-	if (sio_chtb[*a] & SIOC_ESCCHAR) {
+	if (sio_chtb[UCHARC(*a)] & SIOC_ESCCHAR) {
 	    *b++ = '\\';	/* put down the backspace */
 	    switch (*a) {
 		case 7:
@@ -5880,7 +5867,7 @@ sio_qatom()
 	    }
 	    a++;
 	}
-	else if (*a != ' ' && (sio_chtb[*a] & SIOC_WHITESPACE)) {
+	else if (*a != ' ' && (sio_chtb[UCHARC(*a)] & SIOC_WHITESPACE)) {
 	    *b++ = '\\';
 	    *b++ = ((*a >> 6) & 7) + '0';
 	    *b++ = ((*a >> 3) & 7) + '0';
@@ -5906,7 +5893,7 @@ sio_qatom()
  */
 
 int
-sio_var_to_atom()
+sio_var_to_atom(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -5935,7 +5922,7 @@ sio_var_to_atom()
  */
 
 int
-sio_lettervar()
+sio_lettervar(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -5974,8 +5961,7 @@ sio_lettervar()
 #define FMT_STR 3
 
 static int
-format_type(s)
-    register UCHAR *s;
+format_type(register UCHAR *s)
 {
     for (;;) {
 	while (*s && *s != '%')
@@ -6020,7 +6006,7 @@ format_type(s)
  */
 
 int
-sio_sprintf()
+sio_sprintf(PE)
 {
     PWord v1, v2, v3, v4, v;
     int   t1, t2, t3, t4, t;
@@ -6111,7 +6097,7 @@ sio_sprintf()
  * sio_sprintf_number(Number, Buffer, Length)
  */
 
-int sio_sprintf_number(void)
+int sio_sprintf_number(PE)
 {
     PWord v1, v2, v3, v;
     int   t1, t2, t3, t;
@@ -6205,7 +6191,7 @@ int sio_sprintf_number(void)
  */
 
 int
-sio_isgraphicatom()
+sio_isgraphicatom(PE)
 {
     PWord v1;
     int   t1;
@@ -6221,7 +6207,7 @@ sio_isgraphicatom()
 	FAIL;
 
     while (*atom) {
-	if (sio_chtb[*atom] & SIOC_GRAPHIC)
+	if (sio_chtb[UCHARC(*atom)] & SIOC_GRAPHIC)
 	    atom++;
 	else
 	    FAIL;
@@ -6232,8 +6218,7 @@ sio_isgraphicatom()
 #ifdef SysVIPC
 /*  for debugging the IPC message queue stuff */
 void
-display_queue(msqid)
-    int   msqid;
+display_queue(int msqid)
 {
     struct msqid_ds buffr;
 
@@ -6282,7 +6267,7 @@ display_queue(msqid)
  */
 
 int
-pbi_msgctl()
+pbi_msgctl(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -6323,16 +6308,16 @@ pbi_msgctl()
  | Stream is the input argument.  It should contain an open stream.
  *-----------------------------------------------------------------------------*/
 int
-sio_nl(void)
+sio_nl(PE)
 {
     PWord v1;
     int   t1;
     UCHAR *buf, *b, *l;
-    CONST UCHAR *s, *eoln_str;
+    const UCHAR *s, *eoln_str;
 
     w_get_An(&v1, &t1, 1);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 		FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_WRITE)) {
@@ -6394,7 +6379,7 @@ sio_nl(void)
  *-----------------------------------------------------------------------------*/
 
 int
-sio_readln()
+sio_readln(PE)
 {
     PWord v1, v2, v3, vBuf;
     int   t1, t2, t3, tBuf;
@@ -6406,7 +6391,7 @@ sio_readln()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 		FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_READ)) {
@@ -6477,7 +6462,7 @@ sio_readln()
  */
 
 int
-sio_position_in_line()
+sio_position_in_line(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -6489,7 +6474,7 @@ sio_position_in_line()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
+    if ((buf = get_stream_buffer(hpe, v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
     bufstart = SIO_BUFFER(buf);

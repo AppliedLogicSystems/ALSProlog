@@ -2,5 +2,7 @@
 
 int main(int argc, char *argv[])
 {
-    return PI_main(argc, argv, NULL);
+    
+   // PI_main_pe(NULL, argc, argv, NULL);
+    return PI_main_pe(NULL, argc, argv, NULL);
 }

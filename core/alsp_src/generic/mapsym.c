@@ -102,11 +102,8 @@
  * on the to_free list.  The block returned will be longword aligned.
  */
 
-static long * alloc	PARAMS(( size_t, long ** ));
 static long *
-alloc(size, to_free_ptr)
-    size_t size;
-    long **to_free_ptr;
+alloc(size_t size, long **to_free_ptr)
 {
     char *unaligned = malloc(size + 12);
     long *aligned;
@@ -133,10 +130,8 @@ alloc(size, to_free_ptr)
  * free_em will free up the space allocated by successive calls to alloc.
  */
 
-static	void	free_em		PARAMS(( long * ));
 static void
-free_em(to_free)
-    long *to_free;
+free_em(long *to_free)
 {
     long *tbf;
 
@@ -174,13 +169,13 @@ free_em(to_free)
  *
  */
 
-#define BBSZ 4			/* number of buckets in a bucket block */
-#define HASHSZ 512		/* number of entries in hash table */
-#define HASHMASK (HASHSZ-1)
+//#define BBSZ 4			/* number of buckets in a bucket block */
+//#define HASHSZ 512		/* number of entries in hash table */
+//#define HASHMASK (HASHSZ-1)
 			/* mask to use for HASHSZ a power of two */
-#define NIBB 4			/* number of initial bucket blocks to
-				 * allocate
-				 */
+//#define NIBB 4			/* number of initial bucket blocks to
+//				 * allocate
+//				 */
 #define NBB 32			/* number of bucket blocks to allocate later */
 
 #define KEY_EMPTY 65535		/* map_tag value indicating empty slot */
@@ -188,21 +183,21 @@ free_em(to_free)
 				 * pointer
 				 */
 
-struct bucket_block {
-    long  key_ptr[BBSZ];
-    unsigned short map_tag[BBSZ];
-};
+//struct bucket_block {
+//    long  key_ptr[BBSZ];
+//    unsigned short map_tag[BBSZ];
+//};
 
-static struct map_descr {
-    struct map_descr *prev;
-    long *mem_allocated;
-    long  next_mapval;
-    struct bucket_block *next_bb;
-    struct bucket_block *last_bb;
-    long  key_ptr[HASHSZ];
-    unsigned short map_tag[HASHSZ];
-    struct bucket_block initial_bbs[NIBB];
-}    *mapstack;
+//static struct map_descr {
+//    struct map_descr *prev;
+//    long *mem_allocated;
+//    long  next_mapval;
+//    struct bucket_block *next_bb;
+//    struct bucket_block *last_bb;
+//    long  key_ptr[HASHSZ];
+//    unsigned short map_tag[HASHSZ];
+//    struct bucket_block initial_bbs[NIBB];
+//}    *mapstack;
 
 
 /*
@@ -211,7 +206,7 @@ static struct map_descr {
  */
 
 void
-push_symmap()
+push_symmap(PE)
 {
     long *to_free;
     struct map_descr *new_map;
@@ -238,7 +233,7 @@ push_symmap()
  */
 
 void
-pop_symmap()
+pop_symmap(PE)
 {
     struct map_descr *old_map;
 
@@ -252,10 +247,8 @@ pop_symmap()
  * new_bucket is called internally to get a new bucket block
  */
 
-static	struct bucket_block * new_bucket PARAMS(( void ));
-
 static struct bucket_block *
-new_bucket()
+new_bucket(PE)
 {
     if (mapstack->next_bb > mapstack->last_bb) {
 	mapstack->next_bb = (struct bucket_block *)
@@ -272,8 +265,7 @@ new_bucket()
  */
 
 long
-symmap(tokid)
-    long  tokid;
+symmap(PE, long tokid)
 {
     int   hi = tokid & HASHMASK;
     register int i;
@@ -301,7 +293,7 @@ symmap(tokid)
 	}
 	else if (kp[i] != tokid) {
 	    if (i == BBSZ - 1) {
-		struct bucket_block *new = new_bucket();
+		struct bucket_block *new = new_bucket(hpe);
 
 		new->key_ptr[0] = kp[i];
 		new->map_tag[0] = v;
@@ -330,8 +322,7 @@ symmap(tokid)
  */
 
 long *
-sym_order(szp)
-    long *szp;
+sym_order(PE, long *szp)
 {
     long *rv;
     int   hi;

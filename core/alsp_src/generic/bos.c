@@ -43,7 +43,7 @@
 
 #ifndef PURE_ANSI
 int
-pbi_access()
+pbi_access(PE)
 {				/* $access(path,mode) */
     PWord v1, v2;
     int   t1, t2;
@@ -69,7 +69,7 @@ pbi_access()
 #ifdef OSACCESS
 #ifndef PURE_ANSI
 int
-pbi_chdir()
+pbi_chdir(PE)
 {
     PWord v1;
     int   t1;
@@ -85,7 +85,7 @@ pbi_chdir()
 #endif /* PURE_ANSI */
 
 int
-pbi_getenv()
+pbi_getenv(PE)
 {
     PWord v1, v2;
     PWord slv;
@@ -111,7 +111,7 @@ pbi_getenv()
 }
 
 int
-pbi_get_user_home(void)
+pbi_get_user_home(PE)
 {
 #ifdef UNIX
     PWord v1, v2, h;
@@ -141,7 +141,7 @@ pbi_get_user_home(void)
 #endif /* OSACCESS */
 
 int
-pbi_system()
+pbi_system(PE)
 {
     PWord v;
     int   t;
@@ -150,7 +150,7 @@ pbi_system()
     w_get_An(&v, &t, 1);
     if (getstring(&str, v, t)
 	|| (t == WTP_LIST 
-	    && list_to_string((str = (UCHAR *) wm_H + 1), v, wm_normal - 256))) {
+	    && list_to_string(hpe, (str = (UCHAR *) wm_H + 1), v, wm_normal - 256))) {
 #if defined(DOS) || defined(__GO32__) || defined(OS2)
       char *cp;
       int switching=1, switched=0;
@@ -213,7 +213,7 @@ pbi_system()
  */
 
 int
-pbi_tmpnam()
+pbi_tmpnam(PE)
 {
     PWord v1, vtn;
     int t1, ttn;
@@ -234,19 +234,19 @@ pbi_tmpnam()
 
 
 int
-pbi_protect_bottom_stack_page()
+pbi_protect_bottom_stack_page(PE)
 {				/* $protect_bottom_stack_page */
 #if 0
     protect_bottom_stack_page();
 #endif
-	protect_stack(&current_engine);
+	protect_stack(hpe);
     SUCCEED;
 }
 
 int   argcount = 0;	/* global copies of main's argc and argv */
 char **argvector = NULL;
 
-int pbi_command_line(void)
+int pbi_command_line(PE)
 {
     PWord v1, list, newlist;
     int   t1, i, listt, newlistt;
@@ -279,7 +279,7 @@ int pbi_command_line(void)
 }
 
 #if defined(UNIX) && !defined(UNIX_CYGWIN32) /* _XOPEN_CRYPT */
-int pbi_crypt(void)
+int pbi_crypt(PE)
 {
     PWord v1, v2, v3, u;
     int   t1, t2, t3, ut;
@@ -305,7 +305,7 @@ int pbi_crypt(void)
 }
 #endif
 
-int pbi_copy_file(void)
+int pbi_copy_file(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -321,7 +321,7 @@ int pbi_copy_file(void)
 	else FAIL;
 }
 
-int pbi_get_current_image(void)
+int pbi_get_current_image(PE)
 {
 	PWord v1, s;
 	int t1, st;
@@ -333,6 +333,258 @@ int pbi_get_current_image(void)
 	return PI_unify(v1, t1, s, st);
 }
 
+typedef struct {
+  prolog_engine *hpe;
+  PWord goal; int goalt;
+} thread_info;
+
+static void *prolog_thread(void *data)
+{
+  thread_info *info = data;
+  PWord builtinsmod, init, usermod;
+  int builtinsmod_t, init_t, usermod_t;
+
+  gv_alloc(info->hpe);
+  PI_makesym_pe(info->hpe, &builtinsmod, &builtinsmod_t, "builtins");
+  PI_makesym_pe(info->hpe, &init, &init_t, "pckg_init");
+  PI_makesym_pe(info->hpe, &usermod, &usermod_t, "user");
+
+  PI_rungoal_pe(info->hpe, builtinsmod, init, PI_SYM);
+  PI_rungoal_pe(info->hpe, usermod,  info->goal, info->goalt);
+
+  free(info);
+
+  return NULL;
+}
+
+#ifdef UNIX
+#include <pthread.h>
+#endif
+
+void simple_copy(prolog_engine *pa, PWord *a, int *at,
+		    prolog_engine *pb, PWord b, int bt);
 
 
+int pbi_new_thread(PE)
+{
+	PWord v1, v2;
+	int t1, t2;
+	prolog_engine *hpe2;
+	int id = 0;
+	thread_info *info;
+	 
+	PI_getan(&v1, &t1, 1);
+	PI_getan(&v2, &t2, 2);
+	
+	hpe2 = malloc(sizeof(prolog_engine));
+	memset(hpe2, 0x00, sizeof(*hpe2));
 
+	hpe2->db = hpe->db;
+	init_prolog_engine(hpe2,  DEFAULT_HEAP_SIZE, DEFAULT_STACK_SIZE);
+
+	info = malloc(sizeof(*info));
+	info->hpe = hpe2;
+	simple_copy(hpe2, &info->goal, &info->goalt, hpe, v1, t1);
+
+#ifdef UNIX
+	pthread_create((pthread_t *)&id, NULL, prolog_thread, info);
+#elif macintosh
+	id = CreateThread(hpe, prolog_thread, info);
+#elif WIN32
+	CreateThread(NULL, 0, prolog_thread, info, 0, &id);
+#endif
+
+	return PI_unify(v2, t2, id, PI_INT);
+}
+
+
+struct _sync_record {
+  int thread;
+  prolog_engine *pe;
+  PWord term;
+  int term_t;
+  int who;
+#ifdef UNIX
+  pthread_cond_t cond;
+#elif macintosh
+  condition cond;
+#elif WIN32
+  
+#endif 
+  struct _sync_record *next;
+};
+
+typedef struct _sync_record sync_record;
+
+#ifdef UNIX
+pthread_mutex_t sync_mutex;
+#elif macintosh
+#elif WIN32
+CRITICAL_SECTION sync_mutex;
+#endif
+sync_record *sync_stack = NULL;
+
+
+void thread_init(void)
+{
+#ifdef UNIX
+  pthread_mutex_init(&sync_mutex, NULL);
+#elif macintosh
+#elif WIN32
+	InitializeCriticalSection(&sync_mutex);
+#endif
+}
+
+
+int pbi_receive(PE)
+{
+  PWord thread, term, copy;
+  int thread_t, term_t, copyt;
+  sync_record sync;
+
+  PI_getan(&thread, &thread_t, 1);
+  PI_getan(&term, &term_t, 2);
+
+#ifdef UNIX	
+  sync.thread = pthread_self();
+#elif WIN32
+	sync.thread = (int)GetCurrentThread();
+#endif
+  sync.pe = hpe;
+  sync.term = term;
+  sync.term_t = term_t;
+#ifdef UNIX
+  pthread_mutex_lock(&sync_mutex);
+#elif WIN32
+	EnterCriticalSection(&sync_mutex);
+#endif
+  sync.next = sync_stack;
+  sync_stack = &sync;
+#ifdef UNIX
+  pthread_cond_init(&sync.cond, NULL);
+  pthread_cond_wait(&sync.cond, &sync_mutex);
+  pthread_mutex_unlock(&sync_mutex);
+  pthread_cond_destroy(&sync.cond);
+#elif WIN32
+	LeaveCriticalSection(&sync_mutex);
+	
+#endif
+  
+  simple_copy(hpe, &copy, &copyt, sync.pe, sync.term, sync.term_t);
+
+  return PI_unify(thread, thread_t, sync.who, PI_INT) &&
+    PI_unify(term, term_t, copy, copyt);
+}
+
+int pbi_send(PE)
+{
+  PWord thread, term, copy;
+  int thread_t, term_t, copyt;
+  sync_record *s, *p;
+  int r;
+
+  PI_getan(&thread, &thread_t, 1);
+  PI_getan(&term, &term_t, 2);
+
+#ifdef UNIX
+  pthread_mutex_lock(&sync_mutex);
+#elif WIN32
+	EnterCriticalSection(&sync_mutex);
+#endif
+  for(p = NULL, s = sync_stack; s ; p = s, s = s->next)
+    if (s->thread == thread) break;
+  
+  if (s) {
+    simple_copy(hpe, &copy, &copyt, s->pe, s->term, s->term_t);
+    r = PI_unify(term, term_t, copy, copyt);
+    
+    if (r) {
+      s->pe = hpe;
+      s->term = term;
+      s->term_t = term_t;
+#ifdef UNIX
+      s->who= pthread_self();
+#elif WIN32
+	s->who = (int)GetCurrentThread();
+#endif
+#ifdef UNIX
+      pthread_cond_signal(&s->cond);
+#elif WIN32
+	//Event
+#endif
+      if (p) p->next = s->next;
+      else sync_stack = s->next;
+    } else s = NULL;
+  }
+#ifdef UNIX  
+  pthread_mutex_unlock(&sync_mutex);
+#else
+	LeaveCriticalSection(&sync_mutex);
+#endif
+  if (s) return r; else PI_FAIL;
+}
+
+/* Copy term b to term a */
+/* This must be expanded to do full copying with loops */
+void simple_copy(prolog_engine *pa, PWord *a, int *at,
+		    prolog_engine *pb, PWord b, int bt)
+{
+  switch(bt) {
+  case PI_VAR:
+    *a = (PWord)a; *at = PI_VAR;
+  case PI_INT:
+    *a = b; *at = bt;
+    break;
+  case PI_SYM:
+    if (pa->db == pb->db) {
+      *a = b; *at = bt;
+    } else {
+      PI_makesym_pe(pa, a, at, PI_getsymname_pe(pb, NULL, b, bt));
+    }
+    break;
+  case PI_UIA:
+    PI_makeuia_pe(pa, a, at, PI_getuianame_pe(pb, NULL, b, bt));
+    break;
+  case PI_LIST: 
+    {
+      PWord bcar, bcdr, acar, acdr, a2car, a2cdr;
+      int bcart, bcdrt, acart, acdrt, a2cart, a2cdrt;
+
+      PI_makelist_pe(pa, a, at);
+      PI_gethead_pe(pb, &bcar, &bcart, b);
+      PI_gettail_pe(pb, &bcdr, &bcdrt, b);
+      simple_copy(pa, &acar, &acart, pb, bcar, bcart);
+      simple_copy(pa, &acdr, &acdrt, pb, bcdr, bcdrt);
+      PI_gethead_pe(pa, &a2car, &a2cart, *a);
+      PI_gettail_pe(pa, &a2cdr, &a2cdrt, *a);
+      if (acart != PI_VAR) PI_unify_pe(pa, a2car, a2cdr, acar, acart);
+      if (acdrt != PI_VAR) PI_unify_pe(pa, a2cdr, a2cdrt, acdr, acdrt);
+    }
+    break;
+  case PI_STRUCT:
+    {
+      PWord functor;
+      int arity, i;
+
+      PI_getstruct_pe(pb, &functor, &arity, b);
+      PI_makestruct_pe(pa, a, at, functor, arity);
+      for (i = 1; i <= arity; i++) {
+	PWord aarg, barg, copy;
+	int aargt, bargt, copyt;
+
+        PI_getargn_pe(pa, &aarg, &aargt, *a, i);
+	PI_getargn_pe(pb, &barg, &bargt, b, i);
+	simple_copy(pa, &copy, &copyt, pb, barg, bargt);
+	if (copyt != PI_VAR) PI_unify_pe(pa, aarg, aargt, copy, copyt);
+      }
+    }
+    break;
+  case PI_DOUBLE:
+    {
+      double d;
+      PI_getdouble_pe(pb, &d, b);
+      PI_makedouble_pe(pa, a, at, d);
+    }
+    break;
+  }
+}

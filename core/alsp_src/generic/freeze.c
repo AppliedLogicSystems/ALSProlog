@@ -21,15 +21,14 @@
 #include "compile.h"
 #include "freeze.h"
 
-int	pbi_delay		PARAMS(( void ));
-int	pbi_is_delay_var	PARAMS(( void ));
-int	update_chpt_slots	PARAMS(( PWord ));
-int	pbi_clct_tr		PARAMS(( void ));
-int	pbi_unset_2nd		PARAMS(( void ));
-int pbi_del_tm_for		PARAMS(( void ));
-PWord	deref_2		PARAMS(( PWord ));
+int	pbi_delay		( PE );
+int	pbi_is_delay_var	( PE );
+int	update_chpt_slots	(PE, PWord );
+int	pbi_clct_tr		( PE );
+int pbi_del_tm_for		( PE );
+PWord	deref_2		( PWord );
 
-int pbi_kill_freeze		PARAMS(( void ));
+int pbi_kill_freeze		( PE );
 
 /*---------------------------------------------------------------*
  | pbi_delay()
@@ -45,7 +44,7 @@ int pbi_kill_freeze		PARAMS(( void ));
  *---------------------------------------------------------------*/
 
 int
-pbi_delay()
+pbi_delay(PE)
 {
 	PWord *dv,m,g,vv,rdt,*one,*two;
 	int dvt,mt,gt,vvt,rdtt;
@@ -95,6 +94,7 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 	w_install(one,(int)one,MTP_UNBOUND); 
 	two = (PWord *)((PWord *)wm_H + 2); 
 	w_install(two,(int)two,MTP_UNBOUND);
+
 		/* make the delay term: */
 	w_mk_term(&vv, &vvt, TK_DELAY, 4);
 		/* the 2nd arg (=two) is ok -- it's unbound;
@@ -166,14 +166,14 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 
 /* printf("Calling update_chpt_slots(h=%x,hb=%x)\n",wm_H,wm_HB); */
 
-	update_chpt_slots((PWord)wm_H);
+	update_chpt_slots(hpe, (PWord)wm_H);
 	wm_HB = wm_H;
 
 		/* return the delay term in the 4th arg: */
 	if (w_unify(rdt, rdtt, vv, vvt))
 	{
 #ifdef DEBUGFREEZE
-pbi_cptx(); 
+pbi_cptx(PE); 
 printf("exit delay---wm_H=%x--real_dv=%x[_%lu]--*incom=%x -----\n", 
 					(int)wm_H,  (int)one,
 					(long)(((PWord *) one) - wm_heapbase),
@@ -195,7 +195,7 @@ if (debug_system[FRZDELAY]) {
 }
 
 int
-pbi_is_delay_var()
+pbi_is_delay_var(PE)
 {
     PWord *dv;
     PWord *rdv;
@@ -220,7 +220,7 @@ if (debug_system[FRZDELAY]) {
 		FAIL;
 }
 
-int pbi_kill_freeze()
+int pbi_kill_freeze(PE)
 {
     PWord *dv;
     int dvt;
@@ -240,8 +240,7 @@ int pbi_kill_freeze()
 
 
 PWord
-deref_2(w)
-    register PWord w;
+deref_2(register PWord w)
 {
     register PWord x,w2;
 
@@ -257,7 +256,7 @@ deref_2(w)
 	 | collecting the active delay var terms;
 	 *-------------------------------------------------*/
 int
-pbi_clct_tr()
+pbi_clct_tr(PE)
 {
 	PWord **CurT,*Back1,*Forw1;
 	PWord BStop,v1,clctv,DrT;
@@ -349,7 +348,7 @@ pbi_unset_2nd()
 }
 
 int
-pbi_del_tm_for()
+pbi_del_tm_for(PE)
 {
 	PWord *Back1, v1,v2,DrT,tms;
 	int t1,t2;
@@ -374,8 +373,7 @@ pbi_del_tm_for()
 }
 
 int
-update_chpt_slots(hval)
-	PWord hval;
+update_chpt_slots(PE, PWord hval)
 {
   PWord *CurP, *Stop;
 
@@ -405,8 +403,7 @@ update_chpt_slots(hval)
 	 |	gc check will have been done just as we enter....
 	 *--------------------------------------------------------------*/
 void
-combin_dels(r,f)
-	PWord r, f;
+combin_dels(PE, PWord r,PWord f)
 {
 	PWord mod,   goal,   cdfctr;
 	int   mod_t, goal_t, cdf_t;
@@ -434,10 +431,10 @@ printf("combin_dels:r=_%lu f=_%lu wm_H=%x wm_HB=%x wm_B=%x\n",
                                DEBUGGING FUNCTIONS
  *========================================================================*/
 
-int	pbi_walk_cps	PARAMS(( void ));
-void	disp_heap_item	PARAMS(( PWord * ));
-int	pbi_swp_tr		PARAMS(( void ));
-int	disp_heap 		PARAMS(( void ));
+int	pbi_walk_cps	( PE );
+void	disp_heap_item	(PE, PWord * );
+int	pbi_swp_tr		( PE );
+int	disp_heap 		( PE );
 
 	/*-------------------------------------------------*
 	 | Walk the choice point stack,from newest to
@@ -445,7 +442,7 @@ int	disp_heap 		PARAMS(( void ));
 	 *-------------------------------------------------*/
 
 int
-pbi_walk_cps()
+pbi_walk_cps(PE)
 {
   PWord *CurP, *Stop;
   PWord pn;
@@ -508,7 +505,7 @@ pbi_walk_cps()
 	  Print out current values of WAM registers;
 	 *-------------------------------------------------*/
 int
-pbi_cptx()
+pbi_cptx(PE)
 {
 	printf("Tr_b= %x  B= %x  TR= %x  H= %x  HB= %x  H_b= %x\n",
 			(int)wm_trailbase,(int)wm_B,(int)wm_TR,
@@ -521,8 +518,7 @@ pbi_cptx()
 	 *-------------------------------------------------*/
 
 void
-disp_heap_item(CurT)
-  PWord *CurT;
+disp_heap_item(PE, PWord *CurT)
 {
   PWord Tagg, CTagg, *STRADDR;
   int FID;
@@ -543,7 +539,7 @@ disp_heap_item(CurT)
 
 			STRADDR = MSTRUCTADDR(*CurT);
 			FID = MFUNCTOR_TOKID(*STRADDR);
-			if (FID < tok_table_size() )
+			if (FID < tok_table_size(hpe) )
 			{
 				FSt = toktable[FID].tkname;
 				fprintf(stdout,"(%x)-fctr=tokid(%d) %s/%d\n",(int)STRADDR,
@@ -564,7 +560,7 @@ disp_heap_item(CurT)
 				fprintf(stdout,"-integer=%d\n",(int)MINTEGER(*CurT));
 				break;
 			case MTP_SYM:
-				if (MSYMBOL((*CurT)) < tok_table_size() )
+				if (MSYMBOL((*CurT)) < tok_table_size(hpe) )
 					fprintf(stdout,"-symbol=%ld/%s\n",MSYMBOL((*CurT)),
 							TOKNAME(MSYMBOL((*CurT))));
 				else
@@ -594,7 +590,7 @@ disp_heap_item(CurT)
 	 *-------------------------------------------------*/
 
 int
-pbi_swp_tr(void)
+pbi_swp_tr(PE)
 {
 	PWord **CurT, *Back1, BStop, TrS;
 
@@ -610,16 +606,16 @@ pbi_swp_tr(void)
 #endif
 	{
 		fprintf(stdout,"%lx->", (long)CurT);
-		disp_heap_item(*CurT);
+		disp_heap_item(hpe, *CurT);
 		Back1 = (*CurT)-1;
 		if ((MFUNCTOR_TOKID(*Back1) == TK_DELAY) &&(MFUNCTOR_ARITY(*Back1) == 4)) {
 			fprintf(stdout,"Delay VAR!");
 			fprintf(stdout,"         ");
-			disp_heap_item(Back1);
+			disp_heap_item(hpe, Back1);
 		}
 #ifdef TRAILVALS
 		fprintf(stdout,"  +>%lx[%lx]->", (long)(CurT-1),(long)(1 & (long)(CurT-1)) );
-		disp_heap_item((PWord *)(CurT-1));  
+		disp_heap_item(hpe, (PWord *)(CurT-1));  
 #else
 #endif
 	}
@@ -636,7 +632,7 @@ pbi_swp_tr(void)
 	 *-------------------------------------------------*/
 
 int
-disp_heap()
+disp_heap(PE)
 {
     PWord v1,v2;
     int   t1,t2,start,stop;
@@ -672,16 +668,14 @@ printf("Heap display: %x --> %x\n",(int)start,(int)stop);
 
 
 	for (CurA = (PWord *)start; CurA >= (PWord *)stop; CurA -= 1)
-		disp_heap_item(CurA);   
+		disp_heap_item(hpe, CurA);   
 
 	SUCCEED;
 }
 
 
-int disp_item	PARAMS((void));
-
 int
-disp_item()
+disp_item(PE)
 {
     PWord v1;
     int   t1;

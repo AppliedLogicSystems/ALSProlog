@@ -86,7 +86,8 @@
 
 #define SIO_HEADER(b,i) 	(*((long *)(b) + SIO_LAST + i))
 #define SIO_HEADER_PTR(b,i) ((long *)(b) + SIO_LAST + i)
-#define SIO_BUFFER(b) 		((unsigned char *)(b) + sizeof(long)*(SIO_LAST+SIO_HDSIZE))
+//#define SIO_BUFFER(b) 		((unsigned char *)(b) + sizeof(long)*(SIO_LAST+SIO_HDSIZE))
+#define SIO_BUFFER(b) 		((b) + sizeof(long)*(SIO_LAST+SIO_HDSIZE))
 
 #define SIO_SDSIZE(n)		(sizeof(long)*(SIO_LAST+SIO_HDSIZE) + n)
 

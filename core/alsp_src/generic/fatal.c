@@ -118,9 +118,7 @@ static const char *errors[] =
 
 
 void
-fatal_error(errcode, arg)
-    int   errcode;
-    long  arg;
+fatal_error(int errcode, long arg)
 {
     if (arg)
         PI_app_printf(PI_app_printf_fatal_error,

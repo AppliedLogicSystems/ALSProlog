@@ -4,4 +4,4 @@ CPPFLAGS += -DUNIX_LINUX -I /usr/include/libelf
 # it to avoid problems.
 CCOMP=glibc20-cc
 CFLAGS+= -rdynamic
-OS_LIBS = -lm -ldl -lcrypt
+OS_LIBS = -lm -ldl -lcrypt -lpthread

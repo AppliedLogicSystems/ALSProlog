@@ -17,7 +17,7 @@
 
 #include <setjmp.h>
 #include "lexan.h"
-#include "parsstak.h"
+//#include "parsstak.h"
 #include "module.h"
 #include "icodegen.h"
 
@@ -34,11 +34,11 @@
  */
 
 #ifdef KERNAL
-static jmp_buf prs_erc[10];	/* buffers for error recovery   */
+//static jmp_buf prs_erc[10];	/* buffers for error recovery   */
 #else
-static jmp_buf prs_erc[30];	/* buffers for error recovery   */
+//static jmp_buf prs_erc[30];	/* buffers for error recovery   */
 #endif /* KERNAL */
-static int   prs_erc_index = -1; /* index into the above         */
+//static int   prs_erc_index = -1; /* index into the above         */
 
 /*
  * vtable is an array of UIA's which represent the variable names
@@ -46,12 +46,12 @@ static int   prs_erc_index = -1; /* index into the above         */
  */
 
 #ifdef KERNAL
-static pword vtable[64];	/* variable name table          */
+//static pword vtable[64];	/* variable name table          */
 #else
-static pword vtable[240];	/* variable name table          */
+//static pword vtable[240];	/* variable name table          */
 #endif /* KERNAL */
 
-static int   nxtvar;		/* next free space in var table */
+//static int   nxtvar;		/* next free space in var table */
 
 
 /*
@@ -64,34 +64,34 @@ static int   nxtvar;		/* next free space in var table */
  * pointing one beyond where the top element resides.
  */
 
-struct rator *pst_rator;	/* parser stack top -- rator */
-pword *pst_rand;		/* parser stack top -- rand */
+//struct rator *pst_rator;	/* parser stack top -- rator */
+//pword *pst_rand;		/* parser stack top -- rand */
 
-static struct rator ps_rator[PSTKSZ];
-static pword ps_rand[PSTKSZ];
+//static struct rator ps_rator[PSTKSZ];
+//static pword ps_rand[PSTKSZ];
 
 /*
  * errcount is the number of errors encountered so far in the parse.  Care
  *      must be taken to preserve this value in recursive consults.
  */
 
-int   errcount = 0;
+//int   perrcount = 0;
 
-static	void	bld_struct	PARAMS(( void ));
-static	int	reduce_stack	PARAMS(( int ));
-static	void	push_op		PARAMS(( int ));
-static	void	nt_term0	PARAMS(( void ));
-static	void	nt_term		PARAMS(( int ));
-static	void	nt_list		PARAMS(( void ));
-static	void	nt_listexpr	PARAMS(( void ));
-static	void	nt_args		PARAMS(( void ));
-static	void	nt_uselist	PARAMS(( void ));
-static	void	nt_exportlist	PARAMS(( void ));
-static	void	check_sym	PARAMS(( const char * ));
-static	void	nt_toplevel	PARAMS(( void ));
-static	int	bottomRead	PARAMS(( const char *, const char * ));
-static	void	buf_nextline	PARAMS(( lxi_but * ));
-static	int	buf_syntaxerror	PARAMS(( lxi_but *, const char * ));
+static	void	bld_struct	( PE );
+static	int	reduce_stack	(PE,  int );
+static	void	push_op		(PE, int );
+static	void	nt_term0	( PE );
+static	void	nt_term		(PE, int );
+static	void	nt_list		( PE );
+static	void	nt_listexpr	( PE );
+static	void	nt_args		( PE );
+static	void	nt_uselist	( PE );
+static	void	nt_exportlist	( PE );
+static	void	check_sym	(PE,  const char * );
+static	void	nt_toplevel	( PE );
+static	int	bottomRead	(PE,  const char *, const char * );
+static	void	buf_nextline	(PE, lxi_but * );
+static	int	buf_syntaxerror	(PE, lxi_but *, const char * );
 
 
 /*
@@ -99,10 +99,10 @@ static	int	buf_syntaxerror	PARAMS(( lxi_but *, const char * ));
  */
 
 void
-parser_init()
+parser_init(PE)
 {
-    symtab_init();
-    parser_reset();		/* Reset the parser */
+    symtab_init(hpe);
+    parser_reset(hpe);		/* Reset the parser */
 }
 
 /*
@@ -110,7 +110,7 @@ parser_init()
  */
 
 void
-parser_reset()
+parser_reset(PE)
 {
     nxtvar = 0;
     pst_rator = ps_rator;	/* initialize tops of stacks */
@@ -126,8 +126,7 @@ parser_reset()
  */
 
 int
-find_var(s)
-    char *s;
+find_var(PE, char *s)
 {
     register int i;
 
@@ -169,9 +168,7 @@ find_var(s)
  */
 
 void
-push_rator(tokid, prec)
-    long tokid;
-    long prec;
+push_rator(PE, long tokid, long prec)
 {
     pst_rator->last_rand = pst_rand;
     pst_rator->precedence = prec;
@@ -185,7 +182,7 @@ push_rator(tokid, prec)
  */
 
 static void
-bld_struct()
+bld_struct(PE)
 {
     int   n;
 
@@ -194,7 +191,7 @@ bld_struct()
     n = pst_rand - pst_rator->last_rand;	/* compute arity */
 
     if (n < 0)
-	parser_error("Error in bld_struct.");
+	parser_error(hpe, "Error in bld_struct.");
     else if (n == 0)
 	*pst_rand++ = MK_SYM(pst_rator->token_id);
     else if (n == 2 && pst_rator->token_id == TK_DOT) {
@@ -221,7 +218,7 @@ bld_struct()
  */
 
 void
-bld_clause()
+bld_clause(PE)
 {
     pword r;
     int   n;
@@ -238,7 +235,7 @@ bld_clause()
     }
 #else
     if (n < 0)
-	parser_error("Error in bld_clause.");
+	parser_error(hpe, "Error in bld_clause.");
 #endif /* KERNAL */
 
     r = MK_RULE(n);
@@ -260,8 +257,7 @@ bld_clause()
  */
 
 static int
-reduce_stack(prec)
-    int   prec;
+reduce_stack(PE, int prec)
 {
     int   arity;
 
@@ -306,9 +302,9 @@ call_bld_struct:
 	     */
 
 	    if (arity == 1 && !(TOKUNOP(TOP_RATOR.token_id)))
-		parser_error("Right hand term expected for binary operator");
+		parser_error(hpe, "Right hand term expected for binary operator");
 
-	    bld_struct();
+	    bld_struct(hpe);
 	}
 	arity = pst_rand - TOP_RATOR.last_rand;
     }
@@ -326,8 +322,7 @@ call_bld_struct:
  */
 
 static void
-push_op(raw_prec)
-    int   raw_prec;
+push_op(PE, int raw_prec)
 {
     pst_rator->last_rand = pst_rand - 1;
     pst_rator->precedence = raw_prec;
@@ -344,74 +339,74 @@ push_op(raw_prec)
  */
 
 static void
-nt_term0()
+nt_term0(PE)
 {
     long  tok;
 
     if (curtkty == TKTP_VAR) {
 	*pst_rand++ = MK_VO(curtok);
-	next_token();
+	next_token(hpe);
     }
     else if (curtkty == TKTP_INT) {
 	*pst_rand++ = MK_INT(curtok);
-	next_token();
+	next_token(hpe);
     }
     else if (curtkty == TKTP_OTHER) {
 	if (curtok == TK_LBRAC)
-	    nt_list();
+	    nt_list(hpe);
 	else if (curtok == TK_LPAREN) {
-	    next_token();
-	    nt_term(1200);
+	    next_token(hpe);
+	    nt_term(hpe, 1200);
 	    if (curtkty == TKTP_OTHER && curtok == TK_RPAREN)
-		next_token();
+		next_token(hpe);
 	    else
-		parser_error("')' expected.");
+		parser_error(hpe, "')' expected.");
 	}
 	else if (curtok == TK_LCURLY) {
-	    push_rator(TK_CURLYS, 0);
-	    next_token();	/* consume the { */
+	    push_rator(hpe, TK_CURLYS, 0);
+	    next_token(hpe);	/* consume the { */
 	    if (curtkty != TKTP_OTHER || curtok != TK_RCURLY)
-		nt_term(1200);
+		nt_term(hpe, 1200);
 	    if (curtkty != TKTP_OTHER || curtok != TK_RCURLY)
-		parser_error("'}' expected.");
+		parser_error(hpe, "'}' expected.");
 
-	    next_token();	/* consume the right curly */
-	    bld_struct();	/* build the curly structure */
+	    next_token(hpe);	/* consume the right curly */
+	    bld_struct(hpe);	/* build the curly structure */
 	}
 	else {			/* must be a constant */
 	    goto makeconst;
 	}
     }
     else if (curtkty == TKTP_STRING) {
-	*pst_rand++ = bld_strl(tokstr);
-	next_token();
+	*pst_rand++ = bld_strl(hpe, tokstr);
+	next_token(hpe);
     }
     else if (curtkty == TKTP_FUNCTOR) {
-	push_rator(curtok, 0);
-	next_token();		/* get the paren     */
-	next_token();		/* consume the paren */
-	nt_args();		/* get the arguments */
+	push_rator(hpe, curtok, 0);
+	next_token(hpe);		/* get the paren     */
+	next_token(hpe);		/* consume the paren */
+	nt_args(hpe);		/* get the arguments */
     }
     else if (curtkty == TKTP_OP) {
 	/* operator found in non-op position, turn it into a constant */
 	*pst_rand++ = MK_SYM(curtok);
-	next_token();
+	next_token(hpe);
     }
     else if (curtkty == TKTP_CONST) {
 makeconst:
 	tok = curtok;
-	next_token();
+	next_token(hpe);
 	if (curtkty == TKTP_OTHER && curtok == TK_LPAREN) {
-	    next_token();	/* consume the left paren */
-	    push_rator(tok, 0);
-	    nt_args();
+	    next_token(hpe);	/* consume the left paren */
+	    push_rator(hpe, tok, 0);
+	    nt_args(hpe);
 	}
 	else
 	    *pst_rand++ = MK_SYM(tok);
     }
     else if (curtkty == TKTP_OBJECT) {
 	*pst_rand++ = (pword) curtok;
-	next_token();
+	next_token(hpe);
     }
 }
 
@@ -451,13 +446,12 @@ makeconst:
  */
 
 static void
-nt_term(n)
-    int   n;
+nt_term(PE, int n)
 {
     int   prefix_prec;
 
 
-    push_rator(0, HIPREC);	/* push the "fence" on */
+    push_rator(hpe, 0, HIPREC);	/* push the "fence" on */
     n <<= 4;			/* force n into prefix/assoc format */
     prefix_prec = n | ASSC_RIGHT;
 
@@ -465,13 +459,13 @@ nt_term(n)
 	if (PRE_OP) {
 	    while (PRE_OP && PREC_ONLY(TOKUNOP(curtok)) < prefix_prec) {
 		prefix_prec = PREC_RIGHT(TOKUNOP(curtok));
-		push_rator(curtok, TOKUNOP(curtok));
-		next_token();
+		push_rator(hpe, curtok, TOKUNOP(curtok));
+		next_token(hpe);
 	    }
 
 	    if (INFIXOP) {
 		/* turn prev prefix op into a symbol */
-		bld_struct();
+		bld_struct(hpe);
 		goto post_op;
 	    }
 	}
@@ -479,37 +473,37 @@ nt_term(n)
 	if (curtkty != TKTP_OTHER ||
 	    (curtok != TK_RPAREN && curtok != TK_RBRAC && curtok != TK_RCURLY
 	     && curtok != TK_VBAR))
-	    nt_term0();
+	    nt_term0(hpe);
 
 post_op:
 
 	while (POST_OP && PREC_ONLY(TOKUNOP(curtok)) <= n) {
-	    if (!reduce_stack(TOKUNOP(curtok)))
-		parser_error(
+	    if (!reduce_stack(hpe, TOKUNOP(curtok)))
+		parser_error(hpe, 
 		     "Associativity conflict to left of postfix operator.");
 
-	    push_op(TOKUNOP(curtok));
-	    next_token();
+	    push_op(hpe, TOKUNOP(curtok));
+	    next_token(hpe);
 	}
 
 	if (INFIXOP && PREC_ONLY(TOKBINOP(curtok)) <= n) {
-	    if (!reduce_stack(TOKBINOP(curtok)))
-		parser_error(
+	    if (!reduce_stack(hpe, TOKBINOP(curtok)))
+		parser_error(hpe, 
 		       "Associativity conflict to left of infix operator.");
 
 	    prefix_prec = PREC_RIGHT(TOKBINOP(curtok));
-	    push_op(TOKBINOP(curtok));
-	    next_token();
+	    push_op(hpe, TOKBINOP(curtok));
+	    next_token(hpe);
 	}
 	else
 	    break;
     }
 
-    (void) reduce_stack(HIPREC);
+    (void) reduce_stack(hpe, HIPREC);
 
     pst_rator--;		/* pop of the "fence" */
     if (pst_rator->last_rand == pst_rand)
-	parser_error("Non-empty term expected.");
+	parser_error(hpe, "Non-empty term expected.");
 }
 
 
@@ -518,48 +512,48 @@ post_op:
  */
 
 static void
-nt_list()
+nt_list(PE)
 {
     if (curtkty == TKTP_OTHER && curtok == TK_LBRAC)
-	next_token();
+	next_token(hpe);
     else
-	parser_error("'[' expected.");
+	parser_error(hpe, "'[' expected.");
 
     if (curtkty == TKTP_OTHER && curtok == TK_RBRAC) {
-	next_token();
+	next_token(hpe);
 	*pst_rand++ = MK_SYM(TK_NIL);
     }
     else {
-	nt_listexpr();
+	nt_listexpr(hpe);
 
 	if (curtkty == TKTP_OTHER && curtok == TK_RBRAC)
-	    next_token();
+	    next_token(hpe);
 	else
-	    parser_error("']' expected.");
+	    parser_error(hpe, "']' expected.");
     }
 }
 
 
 static void
-nt_listexpr()
+nt_listexpr(PE)
 {
     pword temp;
 
-    nt_term(999);
+    nt_term(hpe, 999);
 
     if (TOKENIS(TK_COMMA)) {
-	next_token();
+	next_token(hpe);
 
 	if (curtkty == TKTP_OTHER &&
 	    (curtok == TK_RPAREN || curtok == TK_RBRAC ||
 	     curtok == TK_RCURLY || curtok == TK_VBAR))
-	    parser_error("Term expected after comma in list.");
+	    parser_error(hpe, "Term expected after comma in list.");
 
-	nt_listexpr();
+	nt_listexpr(hpe);
     }
     else if (TOKENIS(TK_VBAR)) {
-	next_token();
-	nt_term(999);
+	next_token(hpe);
+	nt_term(hpe, 999);
     }
     else
 	*pst_rand++ = MK_SYM(TK_NIL);
@@ -569,35 +563,35 @@ nt_listexpr()
 }
 
 static void
-nt_args(void)
+nt_args(PE)
 {
 /* Special metrowerks 4 bug.  If the second call to nt_term uses 999
    instead of i, compiler crashes  
 */
 	int i = 999;
-    nt_term(999);
+    nt_term(hpe, 999);
 
     while (!(curtkty == TKTP_OTHER && curtok == TK_RPAREN)) {
 	if (TOKENIS(TK_COMMA))
-	    next_token();
+	    next_token(hpe);
 	else
-	    parser_error(	/* Need comma or right paren  */
+	    parser_error(hpe, 	/* Need comma or right paren  */
 			 "Comma or right paren expected in argument list.");
 
 	if (curtkty == TKTP_OTHER &&
 	    (curtok == TK_RPAREN || curtok == TK_RBRAC ||
 	     curtok == TK_RCURLY || curtok == TK_VBAR))
-	    parser_error("Term expected after comma in argument list.");
+	    parser_error(hpe, "Term expected after comma in argument list.");
 
-	nt_term(i);
+	nt_term(hpe, i);
     }
 
     if (curtkty != TKTP_OTHER || curtok != TK_RPAREN)
-	parser_error("')' expected.");
+	parser_error(hpe, "')' expected.");
 
-    next_token();		/* consume the )     */
+    next_token(hpe);		/* consume the )     */
 
-    bld_struct();
+    bld_struct(hpe);
 }
 
 #define adduse(tok)	icode(IC_ADDUSE,tok,0,0,0)
@@ -606,61 +600,60 @@ nt_args(void)
 #define export_predicate(tok,arity)	icode(IC_EXPORTPRED,tok,arity,0,0)
 
 static void
-nt_uselist()
+nt_uselist(PE)
 {
     for (;;) {
-	check_sym("Module name expected in use declaration.");
+	check_sym(hpe, "Module name expected in use declaration.");
 
 	adduse(curtok);
 
-	next_token();
+	next_token(hpe);
 	if (curtkty == TKTP_FULLSTOP)
 	    return;
 	else if (TOKENIS(TK_COMMA))
-	    next_token();
+	    next_token(hpe);
 	else
-	    parser_error("'.' or ',' expected in use declaration.");
+	    parser_error(hpe, "'.' or ',' expected in use declaration.");
     }
 }
 
 static void
-nt_exportlist()
+nt_exportlist(PE)
 {
     long  token;
     int   arity;
 
     while (1) {
-	check_sym("Predicate name expected in export declaration.");
+	check_sym(hpe, "Predicate name expected in export declaration.");
 
 	token = curtok;
 
-	next_token();
+	next_token(hpe);
 	if (!TOKENIS(TK_SLASH))
-	    parser_error("'/' expected after predicate name in export list.");
+	    parser_error(hpe, "'/' expected after predicate name in export list.");
 
-	next_token();
+	next_token(hpe);
 	if (curtkty != TKTP_INT)
-	    parser_error("Integer expected after '/' in export list.");
+	    parser_error(hpe, "Integer expected after '/' in export list.");
 
 	arity = curtok;
 
-	next_token();
+	next_token(hpe);
 
 	export_predicate(token, arity);		/* icode call */
 
 	if (curtkty == TKTP_FULLSTOP)
 	    return;
 	else if (TOKENIS(TK_COMMA))
-	    next_token();
+	    next_token(hpe);
 	else
-	    parser_error("'.' or ',' expected in export list.");
+	    parser_error(hpe, "'.' or ',' expected in export list.");
     }
 }
 
 
 static void
-check_sym(errstr)
-    const char *errstr;
+check_sym(PE, const char *errstr)
 {
     if (curtkty == TKTP_OTHER || curtkty == TKTP_OP || curtkty == TKTP_CONST)
 	return;
@@ -672,84 +665,85 @@ check_sym(errstr)
 	return;
     }
 
-    parser_error(errstr);
+    parser_error(hpe, errstr);
 }
 
 
 
 static void
-nt_toplevel()
+nt_toplevel(PE)
 {
 
     if (curtkty == TKTP_FULLSTOP)
 	return;
     else if (TOKENIS(TK_MODULE)) {
-	next_token();
-	check_sym("Module name expected in module declaration.");
+	next_token(hpe);
+	check_sym(hpe, "Module name expected in module declaration.");
 	new_module(curtok);
-	next_token();
+	next_token(hpe);
     }
     else if (TOKENIS(TK_USE)) {
-	next_token();
-	nt_uselist();
+	next_token(hpe);
+	nt_uselist(hpe);
     }
     else if (TOKENIS(TK_ENDMOD)) {
-	next_token();
+	next_token(hpe);
 	end_module();
     }
     else if (TOKENIS(TK_EXPORT)) {
-	next_token();
-	nt_exportlist();
+	next_token(hpe);
+	nt_exportlist(hpe);
     }
     else {
-	nt_term(1200);
+	nt_term(hpe, 1200);
 
 	if (curtkty != TKTP_FULLSTOP)
-	    parser_error("'.' expected.");
+	    parser_error(hpe, "'.' expected.");
 
-	parser_action(nxtvar, TOP_RAND);
+	parser_action(hpe, nxtvar, TOP_RAND);
 
 	return;
     }
 
     if (curtkty != TKTP_FULLSTOP)
-	parser_error("'.' expected.");
+	parser_error(hpe, "'.' expected.");
 }
 
 void
-nt_query()
+nt_query(PE)
 {
     if (curtkty == TKTP_FULLSTOP)
 	return;
 
-    push_rator(TK_QUEST, 0);	/* use ?- as fake head */
-    nt_term(1200);
-    bld_struct();
+    push_rator(hpe, TK_QUEST, 0);	/* use ?- as fake head */
+    nt_term(hpe, 1200);
+    bld_struct(hpe);
 
     if (curtkty != TKTP_FULLSTOP)
-	parser_error("'.' expected.");
+	parser_error(hpe, "'.' expected.");
 
-    parser_action(nxtvar, TOP_RAND);
+    parser_action(hpe, nxtvar, TOP_RAND);
 }
 
 
 
 void
-parser_error(errstring)
-    const char *errstring;
+parser_error(PE,  const char *errstring)
 {
-    errcount++;
+    perrcount++;
 
     /* Do any error recovery specified by the type of file */
-    (void) ((*(lexbdp->err_rec)) (lexbdp, errstring));
+    (void) ((*(lexbdp->err_rec)) (hpe, lexbdp, errstring));
 
     longjmp(prs_erc[prs_erc_index], 1);
 }
 
 void
-read_loop(rdfunc, pptidx)
-    void  (*rdfunc) PARAMS(( void ));
-    int   pptidx;
+read_loop(
+    PE,
+    void  (*rdfunc) ( PE ),
+    int   pptidx
+)
 {
     int   eof = 0;
 
@@ -759,11 +753,11 @@ read_loop(rdfunc, pptidx)
 	setjmp(prs_erc[prs_erc_index]);
 
 	eof = 0;
-	parser_reset();
-	alc_rst();
+	parser_reset(hpe);
+	alc_rst(hpe);
 
 	curprompt = prompts[pptidx].pprompt;	/* set primary prompt */
-	next_token();
+	next_token(hpe);
 	curprompt = prompts[pptidx].sprompt;	/* set secondary prompt */
 
 	if (curtkty == TKTP_EOF) {
@@ -771,7 +765,7 @@ read_loop(rdfunc, pptidx)
 	    eof = 1;
 	}
 	else
-	    (*rdfunc) ();
+	    (*rdfunc) (hpe);
     }
 
     prs_erc_index--;
@@ -779,8 +773,7 @@ read_loop(rdfunc, pptidx)
 
 
 pword
-bld_strl(s)
-    char *s;
+bld_strl(PE, char *s)
 {
     register char *t = s;
     register pword r = MK_SYM(TK_NIL);
@@ -797,7 +790,7 @@ bld_strl(s)
 }
 
 pword
-bld_vlst()
+bld_vlst(PE)
 {
     int   i = nxtvar - 1;
     pword r = MK_SYM(TK_NIL);
@@ -809,21 +802,23 @@ bld_vlst()
 }
 
 int
-qtok(t)
-    int   t;
+qtok(
+    PE,
+    int   t
+)
 {
     register UCHAR *s = TOKNAME(t);
 
     if (t == TK_NIL || t == TK_CUT)
 	return (0);		/* special cases */
 
-    if (lx_chtb[(*s)] != LX_LCAL)
+    if (lx_chtb[UCHARC(*s)] != LX_LCAL)
 	return (1);
 
     s++;
 
-    while (*s && (lx_chtb[(*s)] == LX_LCAL || lx_chtb[(*s)] == LX_UCAL
-		  || lx_chtb[(*s)] == LX_NUM))
+    while (*s && (lx_chtb[UCHARC(*s)] == LX_LCAL || lx_chtb[UCHARC(*s)] == LX_UCAL
+		  || lx_chtb[UCHARC(*s)] == LX_NUM))
 	s++;
 
     return (*s);
@@ -831,19 +826,19 @@ qtok(t)
 
 
 void
-bld_showanswers()
+bld_showanswers(PE)
 {
     register pword vl;
     register int i;
 
-    push_rator(find_token((UCHAR *)"showanswers"), 0);
-    *pst_rand++ = bld_vlst();
+    push_rator(hpe, find_token((UCHAR *)"showanswers"), 0);
+    *pst_rand++ = bld_vlst(hpe);
 
     for (vl = MK_SYM(TK_NIL), i = nxtvar - 1; i >= 0; i--)
 	vl = MK_LIST(MK_VO(i), vl);
 
     *pst_rand++ = vl;
-    bld_struct();
+    bld_struct(hpe);
 }
 
 
@@ -853,19 +848,18 @@ bld_showanswers()
  */
 
 int
-consult(f)
-    int   f;
+consult(PE, int f)
 {
     int   ec;
     int   oldf = fio_seeing();
 
-    parser_reset();
+    parser_reset(hpe);
 
-    if (fio_see(f)) {
-	read_loop(nt_toplevel, PMPT_CONSULT);
-	ec = errcount;
-	fio_seen();
-	fio_see(oldf);
+    if (fio_see(hpe, f)) {
+	read_loop(hpe, nt_toplevel, PMPT_CONSULT);
+	ec = perrcount;
+	fio_seen(hpe);
+	fio_see(hpe, oldf);
 
 #ifdef Indexing
 	gen_indexing();
@@ -881,8 +875,7 @@ consult(f)
 
 /* This is what actually does a read */
 static int
-bottomRead(pprompt, sprompt)
-    const char *pprompt, *sprompt;
+bottomRead(PE, const char *pprompt, const char *sprompt)
 {
     int   retval;
 
@@ -892,11 +885,11 @@ bottomRead(pprompt, sprompt)
     setjmp(prs_erc[prs_erc_index]);
 
     /* Initialize everything */
-    parser_reset();
-    alc_rst();
+    parser_reset(hpe);
+    alc_rst(hpe);
     curprompt = pprompt;	/* Start with the primary prompt */
 
-    next_token();		/* prime the pump */
+    next_token(hpe);		/* prime the pump */
 
     if (curtkty == TKTP_EOF) {
 	retval = 0;		/* EOF has been hit */
@@ -915,14 +908,14 @@ bottomRead(pprompt, sprompt)
 	curprompt = sprompt;	/* Switch to secondary prompt */
 
 	/* read the term that the user typed in */
-	nt_term(HIPREC);
+	nt_term(hpe, HIPREC);
 
 	/* error if he didn't type a .  */
 	if (curtkty != TKTP_FULLSTOP)
-	    parser_error("'.' expected.");
+	    parser_error(hpe, "'.' expected.");
 
 	if (pst_rand == ps_rand)
-	    parser_error("Empty term unacceptable in read.\n");
+	    parser_error(hpe, "Empty term unacceptable in read.\n");
 
 	/* Got a non-eof */
 	retval = 1;
@@ -944,11 +937,11 @@ bottomRead(pprompt, sprompt)
  */
 
 pword
-prim_read()
+prim_read(PE)
 {
     /* Do read and check for EOF */
-    if (bottomRead(prompts[PMPT_READ].pprompt, prompts[PMPT_READ].sprompt))
-	return (MK_LIST(*--pst_rand, bld_vlst()));
+    if (bottomRead(hpe, prompts[PMPT_READ].pprompt, prompts[PMPT_READ].sprompt))
+	return (MK_LIST(*--pst_rand, bld_vlst(hpe)));
     else			/* EOF has been hit */
 	return (MK_LIST(
 			   MK_SYM(find_token((UCHAR *)"end_of_file")),
@@ -960,8 +953,7 @@ prim_read()
 #define whitespace(c) ((c) <= 32 || (c) == 127)
 
 static void
-buf_nextline(lbp)
-    lxi_but *lbp;
+buf_nextline(PE, lxi_but *lbp)
 {
     register char *bp = lbp->bufptr;
 
@@ -978,16 +970,16 @@ buf_nextline(lbp)
 
 
 static int
-buf_syntaxerror(lbp, errstring)
-    lxi_but *lbp;
-    const char *errstring;
+buf_syntaxerror(PE, lxi_but *lbp, const char *errstring)
 {
     return (0);
 }
 
 int
-exec_query_from_buf(buf)
-    char *buf;
+exec_query_from_buf(
+    PE,
+    char *buf
+)
 {
     lxi_but *oldlb;
     lxi_but lb;
@@ -1008,15 +1000,15 @@ exec_query_from_buf(buf)
 	return 0;
     }
     else {
-	parser_reset();
-	alc_rst();
-	push_rator(TK_RIF, 0);
-	next_token();
-	nt_term(1200);
-	bld_struct();
+	parser_reset(hpe);
+	alc_rst(hpe);
+	push_rator(hpe, TK_RIF, 0);
+	next_token(hpe);
+	nt_term(hpe, 1200);
+	bld_struct(hpe);
 	prs_erc_index--;
 	lexbdp = oldlb;
-	parser_action(nxtvar, *--pst_rand);
+	parser_action(hpe, nxtvar, *--pst_rand);
 	return 1;
     }
 }
@@ -1027,8 +1019,7 @@ exec_query_from_buf(buf)
  */
 
 UCHAR *
-token_name(tok)
-    int   tok;
+token_name(PE, int tok)
 {
     return (TOKNAME(tok));
 }

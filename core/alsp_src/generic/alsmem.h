@@ -55,9 +55,9 @@ struct am_header {
 	/* Integrity information to make sure saved state matches image */
 
 	long **integ_als_mem;		/* address of als_mem variable */
-	int (*integ_als_mem_init) PARAMS((CONST char *, long));
+	int (*integ_als_mem_init) (PE, const char *, long);
 					/* address of als_mem_init */
-	int (*integ_w_unify) PARAMS(( PWord, int, PWord, int ));
+	int (*integ_w_unify) (PE, PWord, int, PWord, int );
 					/* address of w_unify */
 	char integ_version_num[12];	/* version number information */
 	char integ_processor[12];	/* name of processor */

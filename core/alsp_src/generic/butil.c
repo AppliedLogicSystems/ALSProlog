@@ -15,7 +15,7 @@
  *=====================================================================*/
 #include "defs.h"
 
-static	void	hc	PARAMS(( PWord *, int *, pword ));
+static	void	hc	(PE, PWord *, int *, pword );
 
 /*
  * heap_copy copies structure returned by the parser to the heap
@@ -26,10 +26,12 @@ static	void	hc	PARAMS(( PWord *, int *, pword ));
 static long varptrs[MAXVARS];	/* pointers to words */
 
 static void
-hc(rval, rtag, w)
-    PWord *rval;		/* value to return */
-    int  *rtag;			/* tag to return   */
-    pword w;			/* object to copy */
+hc(
+    PE,
+    PWord *rval,		/* value to return */
+    int  *rtag,			/* tag to return   */
+    pword w			/* object to copy */
+)
 {
     register int i;
     PWord v;
@@ -44,9 +46,9 @@ hc(rval, rtag, w)
 	    return;
 	case TP_LIST:
 	    w_mk_list(rval, rtag);	/* make a list cell     */
-	    hc(&v, &t, LIST_CAR(w));
+	    hc(hpe, &v, &t, LIST_CAR(w));
 	    w_install_car(*rval, v, t);
-	    hc(&v, &t, LIST_CDR(w));
+	    hc(hpe, &v, &t, LIST_CDR(w));
 	    w_install_cdr(*rval, v, t);
 	    return;
 	case TP_TERM:
@@ -54,7 +56,7 @@ hc(rval, rtag, w)
 		      TERM_ARITY(w));
 
 	    for (i = 1; i <= TERM_ARITY(w); i++) {
-		hc(&v, &t, TERM_ARGN(w, i));
+		hc(hpe, &v, &t, TERM_ARGN(w, i));
 		w_install_argn(*rval, i, v, t);
 	    }
 	    return;
@@ -82,28 +84,27 @@ hc(rval, rtag, w)
 }
 
 void
-heap_copy(rval, rtag, w)
-    PWord *rval;
-    int  *rtag;
-    pword w;
+heap_copy(PE, PWord *rval, int  *rtag, pword w)
 {
     register int i;
 
     for (i = 0; i < MAXVARS; i++)
 	varptrs[i] = -1;
 
-    hc(rval, rtag, w);
+    hc(hpe, rval, rtag, w);
 }
 
 int
-xform_uia(vp, tp)
-    PWord *vp;
-    int  *tp;
+xform_uia(
+    PE,
+    PWord *vp,
+    int  *tp
+)
 {
     int   tk = 0;
 
     if (*tp == WTP_UIA) {
-	if ( (tk = probe_token((UCHAR *) M_FIRSTUIAWORD(*vp))) ) {
+	if ( (tk = probe_token(hpe, (UCHAR *) M_FIRSTUIAWORD(*vp))) ) {
 	    *vp = (PWord) tk;
 	    *tp = WTP_SYMBOL;
 	    return 1;
@@ -118,12 +119,15 @@ xform_uia(vp, tp)
 }
 
 int
-force_uia(vp, tp)
-    PWord *vp;
-    int  *tp;
+force_uia(
+    PE,
+    PWord *vp,
+    int  *tp
+)
 {
     if (*tp == WTP_UIA) {
-	*vp = (PWord) find_token((UCHAR *)M_FIRSTUIAWORD(*vp));
+//	*vp = (PWord) find_token((UCHAR *)M_FIRSTUIAWORD(*vp));
+	*vp = (PWord) find_token((char *)M_FIRSTUIAWORD(*vp));
 	*tp = WTP_SYMBOL;
 	return 1;
     }
@@ -134,12 +138,11 @@ force_uia(vp, tp)
 }
 
 void
-string_to_list(l, t, s)
-    PWord *l;
-    int  *t;
-    UCHAR *s;
+//string_to_list(PWord *l, int  *t, UCHAR *s)
+string_to_list(PE, PWord *l, int  *t, char *s)
 {
-    unsigned char *q;
+//    unsigned char *q;
+    char *q;
     PWord lt;
     int   tt;
 
@@ -159,10 +162,12 @@ string_to_list(l, t, s)
 }
 
 int
-list_to_string(s, l, m)
-    UCHAR *s;			/* Buffer to copy to */
-    PWord l;			/* List pointer */
-    int   m;			/* Max length of string */
+list_to_string(
+    PE,
+    UCHAR *s,			/* Buffer to copy to */
+    PWord l,			/* List pointer */
+    int   m			/* Max length of string */
+)
 {
     int   t;
     PWord carv;
@@ -198,10 +203,12 @@ list_to_string(s, l, m)
  */
 
 int
-getstring(addr, v, t)
-    UCHAR **addr;
-    PWord v;
-    int   t;
+getstring_pe(
+    PE,
+    UCHAR **addr,
+    PWord v,
+    int   t
+)
 {
     if (t == WTP_SYMBOL)
 	*addr = TOKNAME(v);
@@ -224,10 +231,7 @@ getstring(addr, v, t)
  */
 
 int
-getlong(ip, v, t)
-    long *ip;
-    PWord v;
-    int   t;
+getlong(PE, long *ip, PWord v, int t)
 {
     switch (t) {
 	case WTP_INTEGER:
@@ -278,10 +282,7 @@ getlong(ip, v, t)
  */
 
 int
-getdouble(dp, v, t)
-    double *dp;
-    PWord v;
-    int   t;
+getdouble_pe(PE,double *dp, PWord v, int t)
 {
     switch (t) {
 	case WTP_INTEGER:
@@ -327,8 +328,10 @@ getdouble(dp, v, t)
  */
 
 int
-get_gv_number(name)
-    UCHAR *name;
+get_gv_number(
+    PE,
+    UCHAR *name
+)
 {
     PWord vArg, vFunctor, vStruct, vName;
     int   tArg, tFunctor, tStruct, tName;
@@ -339,10 +342,10 @@ get_gv_number(name)
     PI_makeuia(&vName,&tName,(char *)name);
     w_install_argn(vStruct, 1, vName, tName);
     PI_getargn(&vArg,&tArg,vStruct,2);
-    handle = gv_alloc();
-    gv_set(vArg,tArg,handle);
+    handle = gv_alloc(hpe);
+    gv_set(hpe, vArg,tArg,handle);
     if (PI_rungoal(TK_BUILTINS, vStruct, tStruct)) {
-	gv_get(&vArg,&tArg,handle);
+	gv_get(hpe, &vArg,&tArg,handle);
 	if (tArg != WTP_INTEGER)
 	    retval = -1;
 	else
@@ -350,20 +353,18 @@ get_gv_number(name)
     }
     else
 	retval = -1;
-    gv_free(handle);
+    gv_free(hpe, handle);
     return retval;
 }
 
 void
-set_prolog_error(namtok,arity,rfunc,rarity,rsym,v2,t2,v3,t3)
-    PWord namtok, rfunc, rsym, v2, v3;
-    int arity, rarity, t2, t3;
+set_prolog_error(PE, PWord namtok,int arity,PWord rfunc,int rarity,PWord rsym,PWord v2,int t2,PWord v3,int t3)
 {
     /*//static long pegvnum = -5;*/	/* something other than -1 */
     if (pegvnum < 0) {
 	if (pegvnum == -5)
-	    ss_register_global(&pegvnum);
-	pegvnum = get_gv_number((UCHAR *)"PrologError");
+	    ss_register_global(hpe, &pegvnum);
+	pegvnum = get_gv_number(hpe, (UCHAR *)"PrologError");
     }
 
     if (pegvnum > 0) {
@@ -441,7 +442,7 @@ set_prolog_error(namtok,arity,rfunc,rarity,rsym,v2,t2,v3,t3)
 	 * Indicate (to the interrupt system) that an error has occurred.
 	 */
 	
-	gv_set(ev, et, pegvnum);
+	gv_set(hpe, ev, et, pegvnum);
 
 	wm_safety = -1;
 	wm_interrupt_caught = ALSSIG_ERROR;
@@ -453,18 +454,18 @@ set_prolog_error(namtok,arity,rfunc,rarity,rsym,v2,t2,v3,t3)
 #endif
 
 EXPORT ALSPI_API(void)
-PI_throw(PWord obj, int objt)
+PI_throw_pe(PE,PWord obj, int objt)
 {
-	gv_set(obj, objt, get_gv_number((UCHAR *)"PrologError"));
+	gv_set(hpe, obj, objt, get_gv_number(hpe, (UCHAR *)"PrologError"));
 
 	wm_safety = -1;
 	wm_interrupt_caught = ALSSIG_ERROR;
 }
 
 EXPORT ALSPI_API(void)
-PI_getball(PWord *obj, int *objt)
+PI_getball_pe(PE,PWord *obj, int *objt)
 {
-	gv_get(obj, objt, get_gv_number((UCHAR *)"PrologError"));
+	gv_get(hpe, obj, objt, get_gv_number(hpe, (UCHAR *)"PrologError"));
 }
 
 #ifdef macintosh

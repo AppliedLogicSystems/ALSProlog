@@ -35,7 +35,7 @@
  *				(cf. directory/3 in fsunix.pro)
  */
 
-getDirEntries()
+getDirEntries(void)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -133,7 +133,7 @@ getDirEntries()
  *		fileStatus(FileType,ModTime,OwnPermiss,ByteSize,Blocks)
  */
 
-getFileStatus()
+getFileStatus(void)
 {
     PWord v1, v2, vtime;
     int   t1, t2, ttime;
@@ -230,7 +230,7 @@ getFileStatus()
  *	ResultPath	-- path to the file = value of the link
  */
 
-read_link()
+read_link(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -271,7 +271,7 @@ read_link()
  *		make_symlink('./foo','./bar')
  */
 
-make_symlink()
+make_symlink(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -300,7 +300,7 @@ make_symlink()
  * last modification time of File2.
  */
 
-pcmp_fs()
+pcmp_fs(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -332,7 +332,7 @@ pcmp_fs()
  * Removes the indicated directory
  */
 
-prmdir()
+prmdir(void)
 {
     PWord v1;
     int   t1;
@@ -357,7 +357,7 @@ prmdir()
  *      Creates the indicated directory.
  */
 
-pmkdir()
+pmkdir(void)
 {
     PWord v1;
     int   t1;
@@ -375,7 +375,7 @@ pmkdir()
     PI_SUCCEED;
 }
 
-pgetcwd()
+pgetcwd(void)
 {
     PWord v1, sym;
     int   t1, symType;
@@ -402,7 +402,7 @@ pgetcwd()
  * Changes the current working directory to be that given by the input.
  */
 
-pchdir()
+pchdir(PE)
 {
     PWord v1;
     int   t1;
@@ -427,7 +427,7 @@ pchdir()
  * Unlinks the indicated file from the file system
  */
 
-punlink()
+punlink(void)
 {
     PWord v1;
     int   t1;
@@ -446,7 +446,7 @@ punlink()
 }
 
 int
-canonicalize_pathname()
+canonicalize_pathname(void)
 {
     PWord v1, v2, vp;
     int   t1, t2, tp;
@@ -490,7 +490,8 @@ canonicalize_pathname()
 	PI_FAIL;
 }
 
-pgetpid()
+int
+pgetpid(void)
 {
     PWord v1, vpid;
     int t1;
@@ -519,7 +520,7 @@ PI_PDEFINE("make_symlink", 2, make_symlink, "_make_symlink")
 PI_END
 /* *INDENT-ON* */
 void
-init_fsutils()
+init_fsutils(void)
 {
     PI_INIT;
 }

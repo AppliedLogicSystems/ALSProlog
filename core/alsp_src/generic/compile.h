@@ -280,14 +280,16 @@
 #endif
 
 /* compile.c */
-extern	int	compile_clause	PARAMS(( pword, int ));
-extern	void	gccallinfo	PARAMS(( void ));
-extern	int	index_of	PARAMS(( int ));
-extern	int	disp_of		PARAMS(( int ));
-extern	int	find_temp	PARAMS(( void ));
+extern	int	compile_clause	(PE, pword, int );
+extern	void	gccallinfo	( PE );
+extern	int	index_of_pe	(PE, int );
+#define index_of(a)	index_of_pe(hpe, a)
+extern	int	disp_of_pe		(PE, int );
+#define disp_of(a)	disp_of_pe(hpe, a)
+extern	int	find_temp	( PE );
 #ifdef NewMath
-extern	void	comp_math_struct PARAMS(( pword ));
+extern	void	comp_math_struct ( pword );
 #endif
 
 /* compmath.c */
-extern	void	comp_math	PARAMS(( pword, int, long, long ));
+extern	void	comp_math	( pword, int, long, long );

@@ -6,18 +6,20 @@
  |
  *===========================================================================*/
 
+#if 0
 #ifndef MacOS
-extern int isnan PARAMS( (double) );
-extern int isinf PARAMS( (double) );
-extern int finite PARAMS( (double) );
+extern int isnan  (double);
+extern int isinf  (double);
+extern int finite  (double);
+#endif
 #endif
 
 #ifdef HAVE_IEEE_FP
 #include <ieeefp.h>
 #endif
 
-extern int is_ieee_nan PARAMS( (double) );
-extern int is_ieee_inf PARAMS( (double) );
+extern int is_ieee_nan  (double);
+extern int is_ieee_inf  (double);
 
 #  define D_PI      3.14159265358979323846
 #  define D_PI_2    1.57079632679489661923

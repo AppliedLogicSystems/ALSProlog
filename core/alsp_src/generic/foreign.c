@@ -21,13 +21,11 @@
 
 #ifndef DoubleType
 
-static	void	fixTag		PARAMS(( PWord *, int * ));
-static	void	tagFix		PARAMS(( PWord *, int * ));
+static	void	fixTag		(PE, PWord *, int * );
+static	void	tagFix		(PE, PWord *, int * );
 
 static void
-fixTag(v, t)
-    PWord *v;
-    int  *t;
+fixTag(PE, PWord *v, int  *t)
 {
     if (*t == WTP_STRUCTURE) {
 	PWord functor;
@@ -41,25 +39,20 @@ fixTag(v, t)
 }
 
 static void
-tagFix(v, t)
-    PWord *v;
-    int  *t;
+tagFix(PE, PWord *v, int  *t)
 {
     if (*t == PI_DOUBLE)
 	*t = WTP_STRUCTURE;
 }
 #endif
 
-static PWord PI_modid = MODULE_GLOBAL;
+//static PWord PI_modid = MODULE_GLOBAL;
 
 int
-load_foreign(filename, libstr, initfcn)
-    char *filename;
-    char *libstr;
-    char *initfcn;
+load_foreign(char *filename, char *libstr, char *initfcn)
 {
 #ifdef DynamicForeign
-    void (*fptr)PARAMS(( void ));
+    void (*fptr)( void );
     if ( (fptr = load_object(filename, libstr, initfcn)) ) {
 	(*fptr)();
 	return 1;
@@ -83,9 +76,9 @@ load_foreign(filename, libstr, initfcn)
 #endif
 
 EXPORT ALSPI_API(char *)
-PI_forceuia(PWord *val_ptr, int  *type_ptr)
+PI_forceuia_pe(PE, PWord *val_ptr, int  *type_ptr)
 {
-    if (force_uia(val_ptr, type_ptr))
+    if (force_uia(hpe, val_ptr, type_ptr))
 	return ((char *) TOKNAME(*val_ptr));
     else
 	return ((char *) 0);
@@ -93,44 +86,44 @@ PI_forceuia(PWord *val_ptr, int  *type_ptr)
 
 
 EXPORT ALSPI_API(void)
-PI_getan(PWord *val_ptr, int  *type_ptr, int arg_num)
+PI_getan_pe(PE, PWord *val_ptr, int  *type_ptr, int arg_num)
 {
     w_get_An(val_ptr, type_ptr, arg_num);
 #ifndef DoubleType
-    fixTag(val_ptr, type_ptr);
+    fixTag(hpe, val_ptr, type_ptr);
 #endif
 }
 
 EXPORT ALSPI_API(void)
-PI_getargn(PWord *val_ptr, int  *type_ptr, PWord struct_val, int arg_num)
+PI_getargn_pe(PE, PWord *val_ptr, int  *type_ptr, PWord struct_val, int arg_num)
 {
     w_get_argn(val_ptr, type_ptr, struct_val, arg_num);
 #ifndef DoubleType
-    fixTag(val_ptr, type_ptr);
+    fixTag(hpe, val_ptr, type_ptr);
 #endif
 }
 
 
 EXPORT ALSPI_API(void)
-PI_gethead(PWord *val_ptr, int  *type_ptr, PWord list_val)
+PI_gethead_pe(PE, PWord *val_ptr, int  *type_ptr, PWord list_val)
 {
     w_get_car(val_ptr, type_ptr, list_val);
 #ifndef DoubleType
-    fixTag(val_ptr, type_ptr);
+    fixTag(hpe, val_ptr, type_ptr);
 #endif
 }
 
 EXPORT ALSPI_API(void)
-PI_gettail(PWord *val_ptr, int  *type_ptr, PWord list_val)
+PI_gettail_pe(PE, PWord *val_ptr, int  *type_ptr, PWord list_val)
 {
     w_get_cdr(val_ptr, type_ptr, list_val);
 #ifndef DoubleType
-    fixTag(val_ptr, type_ptr);
+    fixTag(hpe, val_ptr, type_ptr);
 #endif
 }
 
 EXPORT ALSPI_API(void)
-PI_getdouble(double *num, PWord v)
+PI_getdouble_pe(PE, double *num, PWord v)
 {
 #ifndef DoubleType
     PWord v1;
@@ -147,7 +140,7 @@ PI_getdouble(double *num, PWord v)
 
 
 EXPORT ALSPI_API(void)
-PI_getstruct(PWord *func_ptr, int  *arity_ptr, PWord struct_val)
+PI_getstruct_pe(PE, PWord *func_ptr, int  *arity_ptr, PWord struct_val)
 {
     w_get_functor(func_ptr, struct_val);
     w_get_arity(arity_ptr, struct_val);
@@ -163,7 +156,7 @@ PI_getstruct(PWord *func_ptr, int  *arity_ptr, PWord struct_val)
  */
 
 EXPORT ALSPI_API(char *)
-PI_getsymname(char *buf_ptr, PWord sym_val, int size)
+PI_getsymname_pe(PE, char *buf_ptr, PWord sym_val, int size)
 {
     if (buf_ptr == (char *) 0)
 	return ((char *) TOKNAME(sym_val));
@@ -182,7 +175,7 @@ PI_getsymname(char *buf_ptr, PWord sym_val, int size)
  */
 
 EXPORT ALSPI_API(char *)
-PI_getuianame(char *buf_ptr, PWord uia_val, int size)
+PI_getuianame_pe(PE, char *buf_ptr, PWord uia_val, int size)
 {
     if (buf_ptr == NULL)
 	return ((char *) M_FIRSTUIAWORD(uia_val));
@@ -194,7 +187,7 @@ PI_getuianame(char *buf_ptr, PWord uia_val, int size)
 
 
 EXPORT ALSPI_API(void)
-PI_getuiasize(PWord uia_val, int *size_ptr)
+PI_getuiasize_pe(PE, PWord uia_val, int *size_ptr)
 {
     *size_ptr = (int) M_UIASIZE(uia_val);
 }
@@ -205,11 +198,11 @@ PI_getuiasize(PWord uia_val, int *size_ptr)
  */
 
 EXPORT ALSPI_API(void)
-PI_makedouble(PWord *v, int *t, double n)
+PI_makedouble_pe(PE, PWord *v, int *t, double n)
 {
-    make_numberx(v, t, n, WTP_DOUBLE);
+    make_numberx(hpe, v, t, n, WTP_DOUBLE);
 #ifndef DoubleType
-    fixTag(v, t);
+    fixTag(hpe, v, t);
 #endif
 }
 
@@ -217,7 +210,7 @@ PI_makedouble(PWord *v, int *t, double n)
 /* Creation of lists and structures is fixed.   -- Ilyas & Raman 5/16/91 */
 
 EXPORT ALSPI_API(void)
-PI_makelist(PWord *val_ptr, int *val_type)
+PI_makelist_pe(PE, PWord *val_ptr, int *val_type)
 {
     w_mk_list(val_ptr, val_type);
 
@@ -227,7 +220,7 @@ PI_makelist(PWord *val_ptr, int *val_type)
 
 
 EXPORT ALSPI_API(void)
-PI_makestruct(PWord *val_ptr, int *val_type, PWord functor, int arity)
+PI_makestruct_pe(PE, PWord *val_ptr, int *val_type, PWord functor, int arity)
 {
     int   i;
 
@@ -239,7 +232,7 @@ PI_makestruct(PWord *val_ptr, int *val_type, PWord functor, int arity)
 }
 
 EXPORT ALSPI_API(void)
-PI_makesym(PWord *val_ptr, int  *val_type,  const char *buf_ptr)
+PI_makesym_pe(PE, PWord *val_ptr, int  *val_type,  const char *buf_ptr)
 {
     *val_ptr = find_token((UCHAR *)buf_ptr);
     if (val_type)
@@ -247,16 +240,16 @@ PI_makesym(PWord *val_ptr, int  *val_type,  const char *buf_ptr)
 }
 
 EXPORT ALSPI_API(void)
-PI_makeuia(PWord *val_ptr, int  *val_type, const char *buf_ptr)
+PI_makeuia_pe(PE, PWord *val_ptr, int  *val_type, const char *buf_ptr)
 {
-    if ((*val_ptr = probe_token((UCHAR *)buf_ptr)) == 0)
+    if ((*val_ptr = probe_token(hpe, (UCHAR *)buf_ptr)) == 0)
 	w_mk_uia(val_ptr, val_type, (UCHAR *)buf_ptr);
     else
 	*val_type = PI_SYM;
 }
 
 EXPORT ALSPI_API(void)
-PI_allocuia(PWord *val_ptr, int *val_type, int size)
+PI_allocuia_pe(PE, PWord *val_ptr, int *val_type, int size)
 {
     w_uia_alloc(val_ptr, val_type, (size_t)size);
 }
@@ -270,7 +263,7 @@ PI_allocuia(PWord *val_ptr, int *val_type, int size)
 
 /*VARARGS0 */
 EXPORT ALSPI_API(int)
-PI_printf(const char *fmt, ...)
+PI_printf(PE, const char *fmt, ...)
 {
     va_list l;
     int result;
@@ -283,7 +276,7 @@ PI_printf(const char *fmt, ...)
 }
 
 EXPORT ALSPI_API(int)
-PI_vprintf(const char *fmt, va_list args)
+PI_vprintf_pe(PE, const char *fmt, va_list args)
 {
     char *buf;
     PWord vArg, vFunctor, vStruct, vSIO;
@@ -309,7 +302,7 @@ PI_vprintf(const char *fmt, va_list args)
 
 /*VARARGS0 */
 EXPORT ALSPI_API(int)
-PI_aprintf(const char *alias, const char *fmt, ...)
+PI_aprintf(PE, const char *alias, const char *fmt, ...)
 {
     va_list l;
     int result;
@@ -322,7 +315,7 @@ PI_aprintf(const char *alias, const char *fmt, ...)
 }
 
 EXPORT ALSPI_API(int)
-PI_vaprintf(const char *alias, const char *fmt, va_list args)
+PI_vaprintf_pe(PE, const char *alias, const char *fmt, va_list args)
 {
     char *buf;
     PWord vArg, vFunctor, vStruct, vSIO;
@@ -351,7 +344,7 @@ PI_set_app_printf_callback(void (*callback)(int, va_list))
 }
 
 EXPORT ALSPI_API(void)
-PI_vapp_printf(int messtype, va_list args)
+PI_vapp_printf_pe(PE, int messtype, va_list args)
 {
     if (PI_app_printf_callback) {
     	PI_app_printf_callback(messtype, args);
@@ -371,48 +364,48 @@ PI_app_printf(int messtype, ...)
 #endif
 
 EXPORT ALSPI_API(int)
-PI_rungoal(PWord mod, PWord goal, int goaltype)
+PI_rungoal_pe(PE, PWord mod, PWord goal, int goaltype)
 {
     return w_rungoal(mod, goal, goaltype);
 }
 
 EXPORT ALSPI_API(int)
-PI_rungoal_with_update(PWord mod, PWord *gvp, int *gtp)
+PI_rungoal_with_update_pe(PE, PWord mod, PWord *gvp, int *gtp)
 {
     int status, handle;
-    handle = gv_alloc();
-    gv_set(*gvp,*gtp,handle);
+    handle = gv_alloc(hpe);
+    gv_set(hpe, *gvp,*gtp,handle);
     status = w_rungoal(mod, *gvp, *gtp);
-    gv_get(gvp,gtp,handle);
-    gv_free(handle);
+    gv_get(hpe, gvp,gtp,handle);
+    gv_free(hpe, handle);
     return status;
 }
 
 EXPORT ALSPI_API(int)
-PI_rungoal_with_update_and_catch(PWord mod, PWord *gvp, int *gtp, int *exception)
+PI_rungoal_with_update_and_catch_pe(PE, PWord mod, PWord *gvp, int *gtp, int *exception)
 {
     int status, handle;
-    handle = gv_alloc();
-    gv_set(*gvp,*gtp,handle);
+    handle = gv_alloc(hpe);
+    gv_set(hpe, *gvp,*gtp,handle);
     status = w_rungoal(mod, *gvp, *gtp);
-    gv_get(gvp,gtp,handle);
-    gv_free(handle);
+    gv_get(hpe, gvp,gtp,handle);
+    gv_free(hpe, handle);
     *exception = wm_interrupt_caught != 0;
     return status;
 }
 
 EXPORT ALSPI_API(void)
-PI_interrupt(void)
+PI_interrupt_pe(PE)
 {
-	pbi_forceCtlC();
+	pbi_forceCtlC(hpe);
 }
 
 EXPORT ALSPI_API(int)
-PI_unify(PWord val1, int type1, PWord val2, int type2)
+PI_unify_pe(PE, PWord val1, int type1, PWord val2, int type2)
 {
 #ifndef DoubleType
-    tagFix(&val1, &type1);
-    tagFix(&val2, &type2);
+    tagFix(hpe, &val1, &type1);
+    tagFix(hpe, &val2, &type2);
 #endif
     return w_unify(val1, type1, val2, type2);
 }
@@ -420,7 +413,7 @@ PI_unify(PWord val1, int type1, PWord val2, int type2)
 
 
 EXPORT ALSPI_API(void)
-PrologInit(PSTRUCT *ap)
+PrologInit_pe(PE, PSTRUCT *ap)
 {
 
     for (;;) {
@@ -429,13 +422,13 @@ PrologInit(PSTRUCT *ap)
 	else if (ap->arity == -1) {
 	    PWord tok = find_token((UCHAR *)ap->name);
 
-	    new_mod(tok);	/* this pair of calls will create and */
-	    end_mod();		/* initialize the module if necessary */
-	    PI_modid = tok;
+	    new_mod(hpe, tok);	/* this pair of calls will create and */
+	    end_mod(hpe);		/* initialize the module if necessary */
+	    hpe->db->PI_modid = tok;
 	    ap++;
 	}
 	else {
-	    w_assert_foreign((PWord) PI_modid,
+	    w_assert_foreign((PWord) hpe->db->PI_modid,
 			     ap->name,
 			     ap->arity,
 			     ap->func);
@@ -453,7 +446,7 @@ PrologInit(PSTRUCT *ap)
 	}
     }
 
-    PI_modid = MODULE_GLOBAL;	/* set default for next call to PrologInit */
+    hpe->db->PI_modid = MODULE_GLOBAL;	/* set default for next call to PrologInit */
 }
 
 #ifdef macintosh

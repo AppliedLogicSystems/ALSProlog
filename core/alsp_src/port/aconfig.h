@@ -18,7 +18,7 @@
  * use gcc to get threaded code interpreter
  */
 
-#if __GNUC__ >= 2 && !defined(Bytecode)
+#if 0 /* __GNUC__ >= 2 && !defined(Bytecode)*/
 #define Threaded	1
 #define ProcStr	"port_thread"
 #else 

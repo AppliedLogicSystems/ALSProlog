@@ -25,7 +25,7 @@
 
 int   pckg_error = 0;
 
-pbi_get_pckg_error()
+pbi_get_pckg_error(PE)
 {				/* $get_pckg_error(Error) */
     PWord v1;
     int   t1;
@@ -39,7 +39,7 @@ pbi_get_pckg_error()
 }
 
 
-pbi_package_listasm_clause()
+pbi_package_listasm_clause(PE)
 {				/* $listasm_clause(DBRef,PckgName) */
     PWord v1, v2;
     int   t1, t2;
@@ -49,7 +49,7 @@ pbi_package_listasm_clause()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if (((ca = validate_dbref(v1, t1, &na)) != 0 && force_uia(&v2, &t2)) &&
+    if (((ca = validate_dbref(v1, t1, &na)) != 0 && force_uia(hpe, &v2, &t2)) &&
 	(listasm_clause(ca, TOKNAME(v2)) != -1))
 	SUCCEED;
     else
@@ -57,7 +57,7 @@ pbi_package_listasm_clause()
 }
 
 
-pbi_package_listasm_ntblentry()
+pbi_package_listasm_ntblentry(PE)
 {				/* $listasm_ntblentry(M,P,A,PckgName)   */
     PWord m, p, a, v4;
     int   mt, pt, at, t4;
@@ -68,8 +68,8 @@ pbi_package_listasm_ntblentry()
     w_get_An(&a, &at, 3);
     w_get_An(&v4, &t4, 4);
 
-    if (xform_uia(&m, &mt) && xform_uia(&p, &pt) &&
-	at == WTP_INTEGER && force_uia(&v4, &t4)) {
+    if (xform_uia(hpe, &m, &mt) && xform_uia(hpe, &p, &pt) &&
+	at == WTP_INTEGER && force_uia(hpe, &v4, &t4)) {
 	if ((ent = w_nameprobe(m, p, (int) a)) &&
 	    (listasm_ntblentry(ent, TOKNAME(v4)) != -1))
 	    SUCCEED;
@@ -81,7 +81,7 @@ pbi_package_listasm_ntblentry()
 }
 
 
-pbi_package_mark_proc()
+pbi_package_mark_proc(PE)
 {				/* $package_mark_proc(Module,Pred,Arity)   */
     PWord m, p, a;
     int   mt, pt, at;
@@ -91,7 +91,7 @@ pbi_package_mark_proc()
     w_get_An(&p, &pt, 2);
     w_get_An(&a, &at, 3);
 
-    if (xform_uia(&m, &mt) && xform_uia(&p, &pt) && at == WTP_INTEGER &&
+    if (xform_uia(hpe, &m, &mt) && xform_uia(hpe, &p, &pt) && at == WTP_INTEGER &&
 	(ent = w_nameprobe(m, p, (int) a)) && mark_package_proc(ent))
 	SUCCEED;
     else
@@ -99,7 +99,7 @@ pbi_package_mark_proc()
 }
 
 
-pbi_package_unmark_proc()
+pbi_package_unmark_proc(PE)
 {				/* $package_unmark_proc(Module,Pred,Arity)   */
     PWord m, p, a;
     int   mt, pt, at;
@@ -109,7 +109,7 @@ pbi_package_unmark_proc()
     w_get_An(&p, &pt, 2);
     w_get_An(&a, &at, 3);
 
-    if (xform_uia(&m, &mt) && xform_uia(&p, &pt) && at == WTP_INTEGER &&
+    if (xform_uia(hpe, &m, &mt) && xform_uia(hpe, &p, &pt) && at == WTP_INTEGER &&
 	(ent = w_nameprobe(m, p, (int) a)) && unmark_package_proc(ent))
 	SUCCEED;
     else
@@ -117,7 +117,7 @@ pbi_package_unmark_proc()
 }
 
 
-pbi_package_toktbl()
+pbi_package_toktbl(PE)
 {				/* $package_toktbl(NumofToks) */
     PWord v1, n;
     int   t1;
@@ -132,7 +132,7 @@ pbi_package_toktbl()
 
 
 
-pbi_get_default_proc()
+pbi_get_default_proc(PE)
 {				/* $get_default_proc(idx,pred,arity) */
     PWord v1, v2, v3;
     PWord t1, t2, t3;
@@ -152,7 +152,7 @@ pbi_get_default_proc()
 }
 
 
-pbi_get_default_use()
+pbi_get_default_use(PE)
 {				/* $get_default_use(idx,ModName) */
     PWord v1, v2;
     PWord t1, t2;
@@ -171,7 +171,7 @@ pbi_get_default_use()
 }
 
 
-pbi_current_package()
+pbi_current_package(PE)
 {				/* $current_package(Pckg) */
     PWord v1;
     PWord t1;
@@ -190,7 +190,7 @@ pbi_current_package()
 
 #define MAX_PROC_NAME_LEN 256
 
-pbi_coff_operation()
+pbi_coff_operation(PE)
 {				/* $coff_operation(OpCode,Arg1,Arg2,Arg3,Arg4)
 				 */
     PWord v1, v2, v3, v4, v5;
@@ -264,7 +264,7 @@ pbi_coff_operation()
 		char  buf[MAX_PROC_NAME_LEN];
 
 		if (getstring(&ptr, v2, t2) &&
-		    xform_uia(&v3, &t3) && xform_uia(&v4, &t4) &&
+		    xform_uia(hpe, &v3, &t3) && xform_uia(hpe, &v4, &t4) &&
 		    t5 == WTP_INTEGER) {
 		    ntbl_entry *ent;
 

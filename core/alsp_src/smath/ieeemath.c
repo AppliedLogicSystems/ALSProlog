@@ -25,7 +25,7 @@ double  tmpIE,tmpxIE,tmpyIE; /* these are used in the min/max macros,
 
   /* these defs may vary from machine to machine */
 #ifdef LITTLE_ENDIAN
-NEWDOUBLE
+const NEWDOUBLE
     NAN_REAL      = {{0xffff, 0xffff, 0xffff, 0x7fff}},
     POS_INF       = {{0x0000, 0x0000, 0x0000, 0x7ff0}},
     MAX_REAL      = {{0xffff, 0xffff, 0xffff, 0x7fef}},
@@ -34,12 +34,12 @@ NEWDOUBLE
     NEG_ZERO      = {{0x0000, 0x0000, 0x0000, 0x8000}},
     NEG_INF       = {{0x0000, 0x0000, 0x0000, 0xfff0}};
 
-NEWINTERVAL
+const NEWINTERVAL
   PNINF          =
     {{0x0000, 0x0000, 0x0000, 0xfff0,
       0x0000, 0x0000, 0x0000, 0x7ff0}};
 #else
-NEWDOUBLE
+const NEWDOUBLE
     NAN_REAL      = {{0x7fff, 0xffff, 0xffff, 0xffff}},
     POS_INF       = {{0x7ff0, 0x0000, 0x0000, 0x0000}},
     MAX_REAL      = {{0x7fef, 0xffff, 0xffff, 0xffff}},
@@ -48,7 +48,7 @@ NEWDOUBLE
     NEG_ZERO      = {{0x8000, 0x0000, 0x0000, 0x0000}},
     NEG_INF       = {{0xfff0, 0x0000, 0x0000, 0x0000}};
 
-NEWINTERVAL
+const NEWINTERVAL
   PNINF          =
     {{0xfff0, 0x0000, 0x0000, 0x0000,
       0x7ff0, 0x0000, 0x0000, 0x0000}};

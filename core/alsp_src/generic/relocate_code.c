@@ -17,7 +17,7 @@
 
 #define ABMOP(op,p1,p2,p3,p4) {#op,{p1,p2,p3,p4}},
 
-static struct _icode { 
+static const struct _icode { 
     const char *instr_name;
     int   arg[4];
 } ic_array[] = {
@@ -26,12 +26,12 @@ static struct _icode {
 };
 #undef ABMOP
 
-enum AbstractMachineOps decode_instr PARAMS(( Code ));
-int	display_instr	PARAMS( (enum AbstractMachineOps, Code *));
+enum AbstractMachineOps decode_instr ( Code );
+int	display_instr	 (PE, enum AbstractMachineOps, Code *);
 
 
 
-#define ICNUM    sizeof(ic_array)/sizeof(struct _icode)
+#define ICNUM    (sizeof(ic_array)/sizeof(struct _icode))
 #define MIN(a,b) ((a)<(b)?(a):(b))
 /*
 #define HOLDPRINTF printf
@@ -58,7 +58,7 @@ relocate_code(Code *addr, int n, prolog_database *db, block_info old_blocks[])
 
       instr = *ip; /* always byte code */
       /*instr = (enum AbstractMachineOps)*ip;*/
-      if (instr < 0 || instr > ICNUM) 
+      if (instr < 0 || instr > ((signed)(ICNUM))) 
 	{
 #if 0
 		printf("[%03d]%x: BAD INSTRUCTION: Content=%08o\n",

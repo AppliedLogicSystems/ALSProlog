@@ -55,43 +55,43 @@
 		/* Maximum module nesting permitted */
 #define MAXMODNESTING 30
 
-#define mod_adduse(module,use)	adduse(mod_id(module),use)
+#define mod_adduse(module,use)	adduse(hpe, mod_id(hpe, module),use)
 
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_D0
 #endif
 
-extern	Code *	resolve_reference PARAMS( (ntbl_entry *) );
+extern	Code *	resolve_reference  (PE, ntbl_entry *);
 
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_A0
 #endif
 
-extern	ntbl_entry * resolve_ref PARAMS( (PWord, PWord, int) );
+extern	ntbl_entry * resolve_ref  (PE, PWord, PWord, int);
 
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_D0
 #endif
 
-extern	Code *	call_resolve_reference PARAMS( (PWord, PWord, int, int) );
+extern	Code *	call_resolve_reference  (PE, PWord, PWord, int, int);
 
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_A0
 #endif
 
-extern	int		next_module	PARAMS( (int, PWord *, int *, PWord *, int *) );
-extern	int		mod_id		PARAMS( (int) );
-extern	int		modprobe_id	PARAMS( (PWord) );
-extern	void	new_mod		PARAMS( (PWord) );
-extern	void	end_mod		PARAMS( (void) );
-extern	void	push_clausegroup PARAMS( (int) );
-extern	int		pop_clausegroup	PARAMS( (void) );
-extern	void	add_default_use	PARAMS( (int) );
-extern	void	add_default_proc PARAMS( (PWord, int) );
-extern	void	adduse		PARAMS( (int, int) );
-extern	void	export_pred	PARAMS( (PWord, PWord, int) );
-extern	void	createModuleClosureProcedure PARAMS( (PWord, int, PWord) );
-extern  int		createModCloseProc	PARAMS( (int, PWord, int, PWord) );
-extern	void	module_init	PARAMS( (void) );
+extern	int		next_module	 (PE, int, PWord *, int *, PWord *, int *);
+extern	int		mod_id		 (PE, int);
+extern	int		modprobe_id	 (PE, PWord);
+extern	void	new_mod		 (PE, PWord);
+extern	void	end_mod		 (PE);
+extern	void	push_clausegroup  (PE, int);
+extern	int		pop_clausegroup	 (PE);
+extern	void	add_default_use	 (PE, int);
+extern	void	add_default_proc  (PE, PWord, int);
+extern	void	adduse		 (PE, int, int);
+extern	void	export_pred	 (PE, PWord, PWord, int);
+extern	void	createModuleClosureProcedure  (PE, PWord, int, PWord);
+extern  int		createModCloseProc	 (PE, int, PWord, int, PWord);
+extern	void	module_init	 (PE);
 
 #endif /* _MODULE_H_INCLUDED_ */

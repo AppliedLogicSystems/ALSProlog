@@ -55,21 +55,21 @@ typedef struct {
          } pptinfo;
 
 extern const char *curprompt;
-extern pptinfo prompts[];
+extern const pptinfo prompts[];
 
 #define PMPT_QUERY   0
 #define PMPT_CONSULT 1
 #define PMPT_READ    2
 
-extern	void	fio_init	PARAMS( (void) );
-extern	int	fio_see		PARAMS( (int) );
-extern	void	fio_seen	PARAMS( (void) );
-extern	int	fio_seeing	PARAMS( (void) );
-extern	int	fio_get0	PARAMS( (void) );
-extern	int	fio_get		PARAMS( (void) );
-extern	void	fio_put		PARAMS( (int) );
-extern	void	fio_nl		PARAMS( (void) );
-extern	int	fio_tell	PARAMS( (int) );
-extern	void	fio_told	PARAMS( (void) );
-extern	int	fio_telling	PARAMS( (void) );
-extern	void	fio_flush	PARAMS( (void) );
+extern	void	fio_init	 (void);
+extern	int	fio_see		 (PE, int);
+extern	void	fio_seen	 (PE);
+extern	int	fio_seeing	 (void);
+extern	int	fio_get0	 (void);
+extern	int	fio_get		 (void);
+extern	void	fio_put		 (int);
+extern	void	fio_nl		 (void);
+extern	int	fio_tell	 (PE, int);
+extern	void	fio_told	 (void);
+extern	int	fio_telling	 (void);
+extern	void	fio_flush	 (void);

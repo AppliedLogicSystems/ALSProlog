@@ -49,7 +49,7 @@ int absolute_pathname(const char *name)
 
 /* ceh - I'm not really sure what cononicalize_pathname does, or wether it really applies
    on the Mac.  This function is a NOP. */
-static int canonicalize_pathname(void)
+static int canonicalize_pathname(PE)
 {
     PWord v1, v2, vp;
     int   t1, t2, tp;
@@ -83,7 +83,7 @@ static int canonicalize_pathname(void)
 	PI_FAIL;
 }
 
-int pgetpid(void)
+int pgetpid(PE)
 {
     PWord v1, vpid;
     int   t1, tpid;
@@ -229,8 +229,8 @@ int pgetcwd(void)
  * Changes the current working directory to be that given by the input.
  */
 
-int pchdir(void);
-int pchdir(void)
+int pchdir(PE);
+int pchdir(PE)
 {
     PWord v1;
     int   t1;
@@ -278,7 +278,7 @@ int punlink(void)
 
 /* ceh - I'm not really sure what cononicalize_pathname does, or wether it really applies
    on the Mac.  This function is a NOP. */
-static int canonicalize_pathname(void)
+static int canonicalize_pathname(PE)
 {
     PWord v1, v2, vp;
     int   t1, t2, tp;
@@ -317,7 +317,7 @@ static int canonicalize_pathname(void)
 /* Other routines. */
 
 
-int absolute_pathname(CONST char *name)
+int absolute_pathname(const char *name)
 {    
     return *name != ':' && (strchr(name, ':') != NULL);
 }
@@ -828,7 +828,7 @@ pcmp_fs(void)
 #endif /* MacOS */
 
 #ifdef MacOS
-unsigned char *open_memory_file(const char *file_name, mem_file_info *info)
+void *open_memory_file(const char *file_name, mem_file_info *info)
 {
     Str255 pfile_name;
     FSSpec spec;

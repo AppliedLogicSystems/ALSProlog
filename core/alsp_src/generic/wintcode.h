@@ -314,78 +314,126 @@ extern	unsigned long w_timestamp;
 extern	unsigned long w_reconstamp;
 extern	PWord	wm_aborted;
 
-extern	dbprot_t w_dbprotect	PARAMS(( dbprot_t ));
-extern	int	w_namelookup	PARAMS(( PWord, PWord, int ));
-extern	ntbl_entry *w_nameprobe PARAMS(( PWord, PWord, int ));
-extern	ntbl_entry *w_nameentry	PARAMS(( PWord, PWord, int ));
-extern	void	w_initcode	PARAMS(( void ));
-extern	void	w_freecount	PARAMS(( long *, long * ));
-extern	long *	w_alloccode	PARAMS(( int ));
-extern	void	w_freecode	PARAMS(( long * ));
-extern	long *	w_installcode	PARAMS(( Code *, int, int, int* ));
-extern	void	copy_code	PARAMS(( long *, long *, int ));
-extern	void	w_nukeindexing	PARAMS(( ntbl_entry * ));
-extern	void	w_fixchoicepoints PARAMS(( long * ));
-extern	void	w_abolish	PARAMS(( ntbl_entry * ));
-extern	int	w_erase		PARAMS(( int, long * ));
-extern	void	w_freeclause	PARAMS(( long * ));
-extern	void	w_assertz	PARAMS(( PWord, int, Code *, int,
-                                         long, int, int, long ));
-extern	void	w_asserta	PARAMS(( PWord, int, Code *, int,
-					 long, int, int, long ));
-extern	void	w_addclause	PARAMS(( PWord, int, int, Code *,
+extern	dbprot_t w_dbprotect_pe	(PE, dbprot_t );
+#define		w_dbprotect(a)	w_dbprotect_pe(hpe,a)
+extern	int	w_namelookup_pe	(PE, PWord, PWord, int );
+#define		w_namelookup(a,b,c)	w_namelookup_pe(hpe,a,b,c)
+extern	ntbl_entry *w_nameprobe_pe (PE, PWord, PWord, int );
+#define		w_nameprobe(a,b,c)	w_nameprobe_pe(hpe,a,b,c)
+extern	ntbl_entry *w_nameentry_pe	(PE, PWord, PWord, int );
+#define		w_nameentry(a,b,c)		w_nameentry_pe(hpe,a,b,c)
+extern	void	w_initcode_pe	(PE);
+#define		w_initcode()		w_initcode_pe(hpe)
+extern	void	w_freecount_pe	(PE, long *, long * );
+#define		w_freecount(a,b)		w_freecount_pe(hpe,a,b)
+extern	long *	w_alloccode_pe	(PE, int );
+#define		w_alloccode(a)	w_alloccode_pe(hpe,a)
+extern	void	w_freecode_pe	(PE, long * );
+#define		w_freecode(a)	w_freecode_pe(hpe,a)
+extern	long *	w_installcode_pe	(PE, Code *, int, int, int* );
+#define		w_installcode(a,b,c,d)	w_installcode_pe(hpe,a,b,c,d)
+extern	void	copy_code	(long *, long *, int );
+extern	void	w_nukeindexing_pe	(PE, ntbl_entry * );
+#define		w_nukeindexing(a)	w_nukeindexing_pe(hpe,a)
+extern	void	w_fixchoicepoints_pe (PE, long * );
+#define		w_fixchoicepoints(a)	w_fixchoicepoints_pe(hpe,a)
+extern	void	w_abolish_pe	(PE, ntbl_entry * );
+#define		w_abolish(a)	w_abolish_pe(hpe,a)
+extern	int	w_erase_pe		(PE, int, long * );
+#define		w_erase(a,b)		w_erase_pe(hpe,a,b)
+extern	void	w_freeclause_pe	(PE, long * );
+#define		w_freeclause(a)	w_freeclause_pe(hpe,a)
+extern	void	w_assertz_pe	(PE, PWord, int, Code *, int,
+                                         long, int, int, long );
+#define		w_assertz(a,b,c,d,e,f,g,h)		w_assertz_pe(hpe,a,b,c,d,e,f,g,h)
+extern	void	w_asserta_pe	(PE, PWord, int, Code *, int,
+					 long, int, int, long );
+#define		w_asserta(a,b,c,d,e,f,g,h)		w_asserta_pe(hpe,a,b,c,d,e,f,g,h)
+extern	void	w_addclause_pe	(PE, PWord, int, int, Code *,
 					 int, long, int, int,
-					 long ));
-extern	void	w_abolish_cg	PARAMS(( ntbl_entry *, int, int ));
-extern	void	w_execquery	PARAMS(( Code *, int ));
-extern	void	w_execcommand	PARAMS(( Code *, int ));
-extern	void	w_exec		PARAMS(( Code *, int, const char* ));
-extern	void	w_assert_builtin PARAMS(( const char *, int, int (*) PARAMS(( void )) ));
-extern	void	w_assert_built2	PARAMS(( const char *, int, void (*) PARAMS(( ntbl_entry *, PWord, PWord )), PWord, PWord ));
-extern	void	w_assert_foreign PARAMS(( PWord, const char *, int, int (*) PARAMS(( void )) ));
-extern	void	w_dynamic	PARAMS(( PWord, PWord, int ));
-extern	int	w_spy		PARAMS(( PWord, PWord, int ));
-extern	int	w_nospy		PARAMS(( PWord, PWord, int ));
-extern	void	w_libbreak	PARAMS(( PWord, PWord, int ,int ));
-extern	PWord	nextproc	PARAMS(( PWord, int ));
-extern	long *	first_clause	PARAMS(( int ));
-extern	long *	next_clause	PARAMS(( long * ));
-extern	void	make_dbref	PARAMS(( long *, PWord *, int * ));
-extern	long *	w_validate_dbref PARAMS(( long *, int nid, long cid ));
+					 long );
+#define		w_addclause(a,b,c,d,e,f,g,h,i)		w_addclause_pe(hpe,a,b,c,d,e,f,g,h,i)
+extern	void	w_abolish_cg_pe	(PE, ntbl_entry *, int, int );
+#define		w_abolish_cg(a,b,c)		w_abolish_cg_pe(hpe,a,b,c)
+extern	void	w_execquery_pe	(PE, Code *, int );
+#define		w_execquery(a,b)		w_execquery_pe(hpe,a,b)
+extern	void	w_execcommand_pe	(PE, Code *, int );
+#define		w_execcommand(a,b)		w_execcommand_pe(hpe,a,b)
+extern	void	w_exec_pe		(PE, Code *, int, const char* );
+#define		w_exec(a,b,c)		w_exec_pe(hpe,a,b,c)
+extern	void	w_assert_builtin_pe (PE, const char *, int, int (*) ( PE ) );
+#define		w_assert_builtin(a,b,c)		w_assert_builtin_pe(hpe,a,b,c)
+extern	void	w_assert_built2_pe	(PE, const char *, int, void (*) (PE, ntbl_entry *, PWord, PWord ), PWord, PWord );
+#define		w_assert_built2(a,b,c,d,e)		w_assert_built2_pe(hpe,a,b,c,d,e)
+extern	void	w_assert_foreign_pe (PE, PWord, const char *, int, int (*) ( PE ) );
+#define		w_assert_foreign(a,b,c,d)		w_assert_foreign_pe(hpe,a,b,c,d)
+extern	void	w_dynamic_pe	(PE, PWord, PWord, int );
+#define		w_dynamic(a,b,c)		w_dynamic_pe(hpe,a,b,c)
+extern	int	w_spy_pe		(PE, PWord, PWord, int );
+#define		w_spy(a,b,c)		w_spy_pe(hpe,a,b,c)
+extern	int	w_nospy_pe		(PE, PWord, PWord, int );
+#define		w_nospy(a,b,c)		w_nospy_pe(hpe,a,b,c)
+extern	void	w_libbreak_pe	(PE, PWord, PWord, int ,int );
+#define		w_libbreak(a,b,c,d)		w_libbreak_pe(hpe,a,b,c,d)
+extern	PWord	nextproc_pe	(PE, PWord, int );
+#define		nextproc(a,b)		nextproc_pe(hpe,a,b)
+extern	long *	first_clause_pe	(PE, int );
+#define		first_clause(a)	first_clause_pe(hpe,a)
+struct prolog_database_;
+extern	long *	next_clause_db	(struct prolog_database_ *db, long * );
+#define		next_clause(a)	next_clause_db(hpe->db,a)
+extern	void	make_dbref_pe	(PE, long *, PWord *, int * );
+#define		make_dbref(a,b,c)		make_dbref_pe(hpe,a,b,c)
+extern	long *	w_validate_dbref_pe (PE, long *, int nid, long cid );
+#define		w_validate_dbref(a,b,c)		w_validate_dbref_pe(hpe,a,b,c)
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_D0
 #endif
-extern	long *	validate_dbref	PARAMS(( PWord, int, PWord * ));
-extern	Code *	jump_validate_dbref PARAMS(( PWord ref, PWord term ));
+extern	long *	validate_dbref_pe	(PE, PWord, int, PWord * );
+#define		validate_dbref(a,b,c)		validate_dbref_pe(hpe,a,b,c)
+extern	Code *	jump_validate_dbref_pe (PE, PWord ref, PWord term );
+#define		jump_validate_dbref(a,b)		jump_validate_dbref_pe(hpe,a,b)
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_A0
 #endif
-extern	void	gen_indexing	PARAMS(( void ));
-extern	void	decr_icount	PARAMS(( Code * ));
-extern	void	seticount	PARAMS(( ntbl_entry * ));
+extern	void	gen_indexing_pe	( PE );
+#define		gen_indexing()		gen_indexing_pe(hpe)
+extern	void	decr_icount_pe	(PE, Code * );
+#define		decr_icount(a)	decr_icount_pe(hpe,a)
+extern	void	seticount_pe	(PE, ntbl_entry * );
+#define		seticount(a)	seticount_pe(hpe,a)
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_D0
 #endif
-extern	long *	next_choice_in_a_deleted_clause PARAMS(( long * ));
+extern	long *	next_choice_in_a_deleted_clause_pe (PE, long * );
+#define		next_choice_in_a_deleted_clause(a)	next_choice_in_a_deleted_clause_pe(hpe,a)
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_A0
 #endif
-extern	void	w_collect	PARAMS(( void ));
-extern	PWord *	w_frame_info	PARAMS(( PWord *, long **, long * ));
-extern	void	w_relink	PARAMS(( ntbl_entry * ));
-extern	void	w_relinkall	PARAMS(( void ));
-extern	char *	w_getnamestring	PARAMS(( Code *, char * ));
-extern	int	nameprobe	PARAMS(( PWord, PWord, int ));
+extern	void	w_collect_pe	(PE);
+#define		w_collect()	w_collect_pe(hpe)
+extern	PWord *	w_frame_info_pe	(PE, PWord *, long **, long * );
+#define		w_frame_info(a,b,c)		w_frame_info_pe(hpe,a,b,c)
+extern	void	w_relink_pe	(PE, ntbl_entry * );
+#define		w_relink(a)	w_relink_pe(hpe,a)
+extern	void	w_relinkall_pe	(PE);
+#define		w_relinkall()	w_relinkall_pe(hpe)
+extern	char *	w_getnamestring_pe	(PE, Code *, char * );
+#define		w_getnamestring(a,b)		w_getnamestring_pe(hpe,a,b)
+extern	int	nameprobe_pe	(PE, PWord, PWord, int );
+#define		nameprobe(a,b,c)		nameprobe_pe(hpe,a,b,c)
 
 /*-----------------------------------------------------------------*
  | from index.c 
  *-----------------------------------------------------------------*/
-extern	void	indexproc	PARAMS(( PWord, PWord, int ));
-extern	void	do_indexing	PARAMS(( ntbl_entry * ));
+extern	void	indexproc_pe	(PE, PWord, PWord, int );
+#define		indexproc(a,b,c)		indexproc_pe(hpe,a,b,c)
+extern	void	do_indexing_pe	(PE, ntbl_entry * );
+#define		do_indexing(a)	do_indexing_pe(hpe,a)
 
 /*-----------------------------------------------------------------*
  | from gc.c 
  *-----------------------------------------------------------------*/
-extern	int	gc		PARAMS(( void ));
+//extern	int	gc		( void );
 
 #endif /* _WINTCODE_H_INCLUDED_ */

@@ -22,7 +22,7 @@
  */
 
 int
-getDirEntries()
+getDirEntries(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -266,7 +266,7 @@ int als_system(const char * command)
 
 #endif
 
-unsigned char *open_memory_file(const char *file_name, mem_file_info *info)
+void *open_memory_file(const char *file_name, mem_file_info *info)
 {
     HANDLE file, file_map;
     unsigned char *mem;

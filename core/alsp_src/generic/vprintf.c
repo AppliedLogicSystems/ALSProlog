@@ -44,8 +44,7 @@ PI_oprintf(const char *fmt, ...)
  * buffer.
  */
 void
-PI_oputchar(c)
-    int   c;
+PI_oputchar(int c)
 {
     putc(c, outfd);
 }

@@ -77,6 +77,8 @@ static HANDLE timer_reset_event;
 
 static DWORD WINAPI timer_thread( LPVOID p)
 {
+// Fix me
+#if 0
 	DWORD time_out, next_time_out;
 		
 	time_out = next_time_out = INFINITE;
@@ -96,7 +98,8 @@ static DWORD WINAPI timer_thread( LPVOID p)
 			break;
 		}
 	}
-	
+#endif
+
 	return 0;
 }
 

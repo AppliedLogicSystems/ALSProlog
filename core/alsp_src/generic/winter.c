@@ -14,7 +14,7 @@
 
 /* WAM variables that must be set for execution */
 
-PWord wm_normal = DEFAULT_SAFETY;
+//PWord wm_normal = DEFAULT_SAFETY;
 
 /*
  * Following four variables (wm_safety, wm_trigger, wm_regidx and
@@ -24,18 +24,18 @@ PWord wm_normal = DEFAULT_SAFETY;
  * where these variables leave (in DOS environment).            -- Ilyas 5/20/91
  */
 #ifndef WM_SAFETY_REG_HOOK
-PWord wm_safety = DEFAULT_SAFETY;
+//PWord wm_safety = DEFAULT_SAFETY;
 #endif	/* WM_SAFETY_REG_HOOK */
-PWord wm_trigger = -1;
+//PWord wm_trigger = -1;
 #if 0
 //int   wm_regidx = 0;
 #endif
-PWord wm_interrupt_caught = 0;
+//PWord wm_interrupt_caught = 0;
 
 
-PWord wm_in_Prolog = 0;
+//PWord wm_in_Prolog = 0;
 
-PWord wm_spying = 0;
+//PWord wm_spying = 0;
 
 
 /*//Code *wm_cutaddr;*/
@@ -43,12 +43,12 @@ PWord wm_spying = 0;
 /*//				 * exception*/
 /*//				 */
 #ifdef KERNAL
-PWord *wm_regs[10][NumWAMRegs];
+//PWord *wm_regs[10][NumWAMRegs];
 #else
 /*//PWord *wm_regs[100][NumWAMRegs];*/
 #endif /* KERNAL */
 
-#ifdef MacOS
+#if 0 /* def MacOS this is no longer used only 68k version */
 /* Since the Mac WAM is not allowed to use the A5 register, we store
  * the H pointer in a2 and keep the Fail Addr in a memory location, which
  * is declared here.
@@ -72,7 +72,7 @@ long *Fail;
 
 #define round(x,s) ((((x)-1) & ~(long)((s)-1)) + (s))
 
-PWord	deref		PARAMS(( PWord ));
+PWord	deref		( PWord );
 
 #ifdef DEBUG
 static int valid_pword(PWord p)
@@ -111,10 +111,7 @@ deref(PWord w)
 }
 
 void
-w_get(vp, tp, in)
-    PWord *vp;
-    int  *tp;
-    PWord in;
+w_get_pe(PE, PWord *vp, int  *tp, PWord in)
 {
 
     in = deref(in);
@@ -167,10 +164,7 @@ printf("w_get:incoming(in)=%x\n",(int)in);
 }
 
 void
-w_install(addr, val, tag)
-    PWord *addr;
-    PWord val;
-    int   tag;
+w_install_pe(PE, PWord *addr, PWord val, int tag)
 {
     switch (tag) {
 	case WTP_UNBOUND:
@@ -205,11 +199,7 @@ w_install(addr, val, tag)
 }
 
 void
-w_install_argn(s, n, v, t)
-    PWord s;
-    int   n;
-    PWord v;
-    int   t;
+w_install_argn_pe(PE, PWord s, int n, PWord v, int t)
 {
 #ifdef BigStruct
     if (MFUNCTOR_ARITY(*((PWord *) s)) == ESCAPE_ARITY) {
@@ -220,9 +210,7 @@ w_install_argn(s, n, v, t)
 }
 
 void
-w_install_unbound_argn(s, n)
-    PWord s;
-    int   n;
+w_install_unbound_argn_pe(PE, PWord s, int n)
 {
 #ifdef BigStruct
     if (MFUNCTOR_ARITY(*((PWord *) s)) == ESCAPE_ARITY) {
@@ -233,11 +221,7 @@ w_install_unbound_argn(s, n)
 }
 
 void
-w_get_argn(rval, rtag, s, argn)
-    PWord *rval;
-    int  *rtag;
-    PWord s;
-    int   argn;
+w_get_argn_pe(PE, PWord *rval, int  *rtag, PWord s, int argn)
 {
 #ifdef BigStruct
     if (MFUNCTOR_ARITY(*((PWord *) s)) == ESCAPE_ARITY) {
@@ -248,11 +232,7 @@ w_get_argn(rval, rtag, s, argn)
 }
 
 void
-w_mk_term(rval, rtag, func, arity)
-    PWord *rval;
-    int  *rtag;
-    PWord func;
-    int   arity;
+w_mk_term_pe(PE, PWord *rval, int  *rtag, PWord func, int   arity)
 {
     register PWord *p;
 
@@ -276,17 +256,13 @@ w_mk_term(rval, rtag, func, arity)
 }
 
 void
-w_get_functor(rfunc, saddr)
-    PWord *rfunc;
-    PWord saddr;
+w_get_functor_pe(PE, PWord *rfunc, PWord saddr)
 {
     *rfunc = MFUNCTOR_TOKID(*((PWord *) saddr));
 }
 
 void
-w_get_arity(rarity, saddr)
-    int  *rarity;
-    PWord saddr;
+w_get_arity_pe(PE, int  *rarity, PWord saddr)
 {
     *rarity = MFUNCTOR_ARITY(*((PWord *) saddr));
 #ifdef BigStruct
@@ -297,9 +273,7 @@ w_get_arity(rarity, saddr)
 }
 
 void
-w_mk_list(rval, rtag)
-    PWord *rval;
-    int  *rtag;
+w_mk_list_pe(PE, PWord *rval, int  *rtag)
 {
     *rval = (PWord) wm_H;
     wm_H += 2;
@@ -312,9 +286,7 @@ w_mk_list(rval, rtag)
  */
 
 void
-w_mk_unbound(rval, rtag)
-    PWord *rval;
-    int  *rtag;
+w_mk_unbound_pe(PE, PWord *rval, int  *rtag)
 {
     register PWord *p;
 
@@ -332,10 +304,7 @@ w_mk_unbound(rval, rtag)
  */
 
 void
-w_get_An(rval, rtag, n)
-    PWord *rval;
-    int  *rtag;
-    int  n;
+w_get_An_pe(PE, PWord *rval, int  *rtag, int  n)
 {
     w_get(rval, rtag, *(wm_SP + n + 1));
 }
@@ -350,10 +319,7 @@ w_get_An(rval, rtag, n)
  */
 
 UCHAR *
-w_get_uianame(s, uia, size)
-    register UCHAR *s;
-    PWord uia;
-    register int size;
+w_get_uianame_pe(PE, register UCHAR *s, PWord uia, register int size)
 {
     UCHAR *buf = s;
     register UCHAR *t;
@@ -383,10 +349,7 @@ w_get_uianame(s, uia, size)
  * output of UIAs, hence the somewhat messy code.
  */
 void
-w_mk_uia(rval, rtag, str)
-    PWord *rval;
-    int  *rtag;
-    register UCHAR *str;
+w_mk_uia_pe(PE, PWord *rval, int  *rtag, register UCHAR *str)
 {
     register UCHAR *t;
     register int i = 0;
@@ -415,11 +378,7 @@ w_mk_uia(rval, rtag, str)
  *      the length of str is explicitly passed, so str does not have to be 0 terminated.
  */
 void
-w_mk_len_uia(rval, rtag, str, len)
-    PWord *rval;
-    int  *rtag;
-    register UCHAR *str;
-    register size_t len;
+w_mk_len_uia_pe(PE, PWord *rval, int  *rtag, register UCHAR *str, register size_t len)
 {
     register UCHAR *t;
     register int i = len;
@@ -449,10 +408,7 @@ w_mk_len_uia(rval, rtag, str, len)
  */
 
 void
-w_mk_uia_in_place(rval, rtag, str)
-    PWord *rval;
-    int  *rtag;
-    register UCHAR *str;
+w_mk_uia_in_place_pe(PE, PWord *rval, int  *rtag, register UCHAR *str)
 {
     register UCHAR *t;
     register int i;
@@ -479,10 +435,7 @@ w_mk_uia_in_place(rval, rtag, str)
  *      uia will be stored.
  */
 void
-w_uia_alloc(rval, rtag, size)
-    PWord *rval;
-    int  *rtag;
-    size_t size;
+w_uia_alloc_pe(PE, PWord *rval, int  *rtag, size_t size)
 {
     register PWord *t;
     register int i;
@@ -515,9 +468,7 @@ w_uia_alloc(rval, rtag, size)
  * w_uia_clip(uia,clipsize)
  */
 int
-w_uia_clip(uia, clipsize)
-    PWord uia;
-    int   clipsize;
+w_uia_clip_pe(PE, PWord uia, int clipsize)
 {
     int   size;
     int   i;
@@ -571,11 +522,7 @@ w_uia_clip(uia, clipsize)
  * w_uia_peek(uia,off,val,valsize)
  */
 int
-w_uia_peek(uia, off, val, valsize)
-    PWord uia;
-    int   off;
-    register UCHAR *val;
-    register int valsize;
+w_uia_peek_pe(PE, PWord uia, int off, register UCHAR *val, register int valsize)
 {
     int   size;
     register UCHAR *t;
@@ -596,11 +543,7 @@ w_uia_peek(uia, off, val, valsize)
  * w_uia_poke(uia,off,val,valsize)
  */
 int
-w_uia_poke(uia, off, val, valsize)
-    PWord uia;
-    int   off;
-    register UCHAR *val;
-    register int valsize;
+w_uia_poke_pe(PE, PWord uia, int off, register UCHAR *val, register int valsize)
 {
     int   size;
     register UCHAR *t;
@@ -621,11 +564,7 @@ w_uia_poke(uia, off, val, valsize)
  * w_uia_peeks(uia,off,val,valsize)
  */
 int
-w_uia_peeks(uia, off, val, valsize)
-    PWord uia;
-    int   off;
-    register UCHAR *val;
-    register int valsize;
+w_uia_peeks_pe(PE, PWord uia, int off, register UCHAR *val, register int valsize)
 {
     int   size;
     register UCHAR *t;
@@ -650,10 +589,7 @@ w_uia_peeks(uia, off, val, valsize)
  * w_uia_pokes(uia,off,val)
  */
 int
-w_uia_pokes(uia, off, val)
-    PWord uia;
-    int   off;
-    register UCHAR *val;
+w_uia_pokes_pe(PE, PWord uia, int off, register UCHAR *val)
 {
     int   size;
     register UCHAR *t;
@@ -674,10 +610,7 @@ w_uia_pokes(uia, off, val)
 #ifdef DoubleType
 
 void
-w_mk_double(rval, rtag, dbl)
-    PWord *rval;
-    int  *rtag;
-    double dbl;
+w_mk_double(PWord *rval, int  *rtag, double dbl)
 {
 #ifdef COERCE2INTS
     if (dbl == floor(dbl) && MINPROLOGINT <= dbl && dbl <= MAXPROLOGINT) {
@@ -701,16 +634,14 @@ w_mk_double(rval, rtag, dbl)
 }
 
 void
-w_get_double(dbl, ptr)
-    double *dbl;
-    PWord ptr;
+w_get_double( double *dbl, PWord ptr)
 {
     *(long *) dbl = *(((PWord *)ptr) + 1);
     *(((long *) dbl) + 1) = *(((PWord *)ptr) + 2);
 }
 #else
 void
-w_mk_double(PWord *rval, int  *rtag, double dbl)
+w_mk_double_pe(PE, PWord *rval, int  *rtag, double dbl)
 {
 	int   i;
 
@@ -720,7 +651,7 @@ w_mk_double(PWord *rval, int  *rtag, double dbl)
 }
 
 void
-w_get_double(double *dbl, PWord ptr)
+w_get_double_pe(PE, double *dbl, PWord ptr)
 {
 	PWord v;
 	int i,t;
@@ -735,23 +666,19 @@ w_get_double(double *dbl, PWord ptr)
 
 
 int
-w_unify(v1, t1, v2, t2)
-    PWord v1, v2;
-    int   t1, t2;
+w_unify_pe(PE, PWord v1, int t1, PWord v2, int t2)
 {
     PWord a1, a2;
 
     w_install(&a1, v1, t1);
     w_install(&a2, v2, t2);
 
-    return _w_unify(a1, a2);
+    return _w_unify(hpe, a1, a2);
 
 }
 
 int
-w_rungoal(mod, gv, gt)
-    PWord mod, gv;
-    int   gt;
+w_rungoal_pe(PE, PWord mod, PWord gv, int gt)
 {
     PWord a1, a2;
     dbprot_t odbrs;
@@ -762,7 +689,7 @@ w_rungoal(mod, gv, gt)
 
 
     odbrs = w_dbprotect(DBRS_RUNABLE);
-    status = wm_rungoal(a1, a2);
+    status = wm_rungoal(hpe, a1, a2);
     (void) w_dbprotect(odbrs);
 
     return status;

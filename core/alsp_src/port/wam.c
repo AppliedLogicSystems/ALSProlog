@@ -35,24 +35,24 @@
 /*#include "dump_wam.h" */
 
 #ifdef TRACEBWAM
-extern	int tracewam	PARAMS(( Code * ));
+extern	int tracewam	( Code * );
 #endif
 
-	int	run_wam		PARAMS(( Code * ));
-static	int	wam_unify	PARAMS(( PWord *, PWord * ));
+int	run_wam		(PE,  Code * );
+static	int	wam_unify	(PE, PWord *, PWord * );
 
 #ifdef	Threaded
 Code  wam_instrs[W_NUM_OPS];	/* map from instruction number to label */
 #endif	/* Threaded */
 
-extern int trailed_mangle0 PARAMS((PWord,PWord,int,PWord,int));
+extern int trailed_mangle0 (PWord,PWord,int,PWord,int);
 
 #ifdef	IProfile
 
 static long iprofile_counts[W_NUM_OPS];
 #define DO_PROFILE(op)	: iprofile_counts[op]++; lp##op
 
-init_iprofile()
+init_iprofile(void)
 {
     int i;
     for (i=0; i<W_NUM_OPS; i++)
@@ -64,14 +64,12 @@ typedef struct {
     int  idx;
 } iprofstruct;
 
-static int iprofcmp(a,b)
-    iprofstruct *a;
-    iprofstruct *b;
+static int iprofcmp(iprofstruct *a, iprofstruct *b)
 {
     return a->count < b->count;
 }
 
-dump_iprofile()
+dump_iprofile(void)
 {
     int i;
     iprofstruct s[W_NUM_OPS];
@@ -97,7 +95,7 @@ dump_iprofile()
 
 /*--- Global WAM register locations for use by unify() ---*/
 
-PWord *gr_SPB, *gr_HB, *gr_TR;
+//PWord *gr_SPB, *gr_HB, *gr_TR;
 
 /*-----------------------------------*
  * Special purpose WAM code patches
@@ -179,7 +177,7 @@ PWord *gr_SPB, *gr_HB, *gr_TR;
 #define	MMTCH(f) printf("   match is delay [f=%x[_%lu]]\n", 				\
 						  (int)f,(long)(((PWord *) f) - wm_heapbase));	   
 
-int ck_intvl_punch   PARAMS((PWord, PWord, int));
+void ck_intvl_punch   (PE, PWord, PWord, int);
 
     /*-------------------------------------------------*
 	 |	ck_intvl_punch - used during variable binding,
@@ -193,10 +191,8 @@ int ck_intvl_punch   PARAMS((PWord, PWord, int));
 	 |	the binding by creating appropriate constraints
 	 |	which run instead...
 	 *-------------------------------------------------*/
-int
-ck_intvl_punch(r, fv, ft)
-	PWord r,fv;
-	int ft;
+void
+ck_intvl_punch(PE, PWord r, PWord fv, int ft)
 {
 	PWord r3, mf;
 	int r3t, mfa;
@@ -277,7 +273,7 @@ ck_intvl_punch(r, fv, ft)
   		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
 		w_get(&fv, &ft, (PWord)f); 							\
 /*		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\   */
-		if (!ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft)) {		\
+		if (!ck_intvl_punch(hpe, (PWord)(((PWord *)r)-1), fv, ft)) {		\
       		*(r) = PWORD(f);							\
 		}												\
 		printf("setting interrupt\n");					\
@@ -312,7 +308,7 @@ ck_intvl_punch(r, fv, ft)
 				 MMTCH(f)                                       \
   				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 	\
 			    UNSHADOW_##_SHDW_;								\
-				combin_dels((PWord)r,(PWord)f); 				\
+				combin_dels(hpe, (PWord)r,(PWord)f); 				\
 				SHADOW_##_SHDW_; 								\
   				*(r) = PWORD(f);								\
 			} else { /* r >= wm_heapbase; f not delay */		\
@@ -344,7 +340,7 @@ ck_intvl_punch(r, fv, ft)
   		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
 		w_get(&fv, &ft, (PWord)f); 							\
 /*		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\   */
-		if (!ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft)) {		\
+		if (!ck_intvl_punch(hpe, (PWord)(((PWord *)r)-1), fv, ft)) {		\
       		*(r) = PWORD(f);							\
 		}												\
 		printf("setting interrupt\n");					\
@@ -377,7 +373,7 @@ ck_intvl_punch(r, fv, ft)
 				 MMTCH(f)                                       \
   				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 	\
 			    UNSHADOW_##_SHDW_;								\
-				combin_dels((PWord)r,(PWord)f); 				\
+				combin_dels(hpe, (PWord)r,(PWord)f); 				\
 				SHADOW_##_SHDW_; 								\
   				*(r) = PWORD(f);								\
 			} else { /* r >= wm_heapbase; f not delay */		\
@@ -411,7 +407,7 @@ ck_intvl_punch(r, fv, ft)
   		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
 		w_get(&fv, &ft, (PWord)f); 							\
 /*		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\    */
-		if (!ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft)) {		\
+		if (!ck_intvl_punch(hpe, (PWord)(((PWord *)r)-1), fv, ft)) {		\
       		*(r) = PWORD(f);							\
 		}												\
 	    wm_safety = -2; wm_interrupt_caught = 3; 		\
@@ -443,7 +439,7 @@ ck_intvl_punch(r, fv, ft)
 	  		if ( CHK_DELAY(f) && r != f ) { 					\
   				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 	\
 			    UNSHADOW_##_SHDW_;								\
-				combin_dels((PWord)r,(PWord)f); 				\
+				combin_dels(hpe, (PWord)r,(PWord)f); 				\
 				SHADOW_##_SHDW_; 								\
   				*(r) = PWORD(f);								\
 			} else { /* r >= wm_heapbase; f not delay */		\
@@ -473,7 +469,7 @@ ck_intvl_punch(r, fv, ft)
 	  	*(PWord *)--mr_TR = PWORD(r); 					\
   		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
 		w_get(&fv, &ft, (PWord)f); 						\
-		if (!ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft)) {		\
+		if (!ck_intvl_punch(hpe, (PWord)(((PWord *)r)-1), fv, ft)) {		\
       		*(r) = PWORD(f);							\
 		}												\
 /*		printf("setting interrupt\n");		*/			\
@@ -501,7 +497,7 @@ ck_intvl_punch(r, fv, ft)
 	  		if ( CHK_DELAY(f) && r != f ) { 					\
   				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 	\
 			    UNSHADOW_##_SHDW_;								\
-				combin_dels((PWord)r,(PWord)f); 				\
+				combin_dels(hpe, (PWord)r,(PWord)f); 				\
 				SHADOW_##_SHDW_; 								\
   				*(r) = PWORD(f);								\
 			} else { /* r >= wm_heapbase; f not delay */		\
@@ -638,7 +634,7 @@ ck_intvl_punch(r, fv, ft)
   }                                  \
   gr_TR = mr_TR; gr_HB = mr_HB;      \
   gr_SPB = mr_SPB;                   \
-  if( wam_unify(f1,f2) ){            \
+  if( wam_unify(hpe, f1,f2) ){            \
     mr_TR = gr_TR;                   \
     DISPATCH;                        \
   }                                  \
@@ -672,7 +668,7 @@ ck_intvl_punch(r, fv, ft)
  *-----------------------------------------------------*/
 
 void
-wam_init()
+wam_init(PE)
 {
     struct {
 	CodePtr patchaddr;
@@ -692,7 +688,7 @@ wam_init()
     ic_puti( W_GCMAGIC ); 										\
     ic_putl( 0 );
 
-    run_wam((Code *) 0);	/* initialize wam_instrs */
+    run_wam(hpe, (Code *) 0);	/* initialize wam_instrs */
 
     ic_ptr = (Code *) (w_alloccode(64) + WCI_CLAUSECODE);
 
@@ -700,7 +696,7 @@ wam_init()
     ic_puti(W_FAIL);
 
     wm_trust_fail = ic_ptr;
-    ic_put_align(W_TRUST_ME);
+    ic_put_align(hpe, W_TRUST_ME);
     ic_putl((PWord)wm_fail);
 
     wm_return_success = ic_ptr;
@@ -715,17 +711,17 @@ wam_init()
     wm_rungoal_code = ic_ptr;
     ic_puti(W_WAM_START1);
     ic_putl((PWord)wm_return_success);
-    ic_put_align(W_TRY_ME);
+    ic_put_align(hpe, W_TRY_ME);
     try_patchaddr = (PWord *) ic_ptr;
     ic_putl(0);
     ic_puti(W_ADDTOSP);		/* make 2 arguments */
     ic_putl(-2);
     ic_puti(W_P_SYM);		/* arg1=modid ; w_p_sym SP(0),modid */
-    ic_put_reg(1, 0);
+    ic_put_reg(hpe, 1, 0);
     rungoal_modpatch = (PWord *) ic_ptr;
     ic_putl(0);				/* modid to be filled in later */
     ic_puti(W_P_SYM);		/* arg2=goal ; w_p_sym SP(1),goal */
-    ic_put_reg(1, 1);
+    ic_put_reg(hpe, 1, 1);
     rungoal_goalpatch = (PWord *) ic_ptr;
     ic_putl(0);				/* goal struct to be filled in later */
     ic_puti(W_WAM_START1);
@@ -735,7 +731,7 @@ wam_init()
     PUT_MAGIC(0, 0, 0);
     ic_puti(W_PROCEED);
     *try_patchaddr = PWORD(ic_ptr);	/* try should point to trust */
-    ic_put_align(W_TRUST_ME);
+    ic_put_align(hpe, W_TRUST_ME);
     ic_putl((PWord)(ic_ptr + DATASIZE));
     ic_puti(W_RETURN);
     ic_putl((PWord)0);
@@ -764,13 +760,12 @@ wam_init()
  *---------------------------------------------------------*/
 
 int
-wm_rungoal(a1, a2)		/* module, goal */
-    PWord a1, a2;
+wm_rungoal(PE, PWord a1, PWord a2)		/* module, goal */
 {
     *rungoal_modpatch = a1;
     *rungoal_goalpatch = a2;
 
-    return (run_wam(wm_rungoal_code));
+    return (run_wam(hpe, wm_rungoal_code));
 }
 
 /*-----------------------------------------------------------------*
@@ -778,10 +773,12 @@ wm_rungoal(a1, a2)		/* module, goal */
  *-----------------------------------------------------------------*/
 
 void
-wm_exec(startaddr)
-    Code *startaddr;
+wm_exec(
+    PE,
+    Code *startaddr
+)
 {
-    (void) run_wam(startaddr);
+    (void) run_wam(hpe, startaddr);
 }
 
 /*---------------------------------------------------------------*
@@ -791,8 +788,8 @@ wm_exec(startaddr)
  *---------------------------------------------------------------*/
 
 int
-run_wam(startaddr)
-    Code *startaddr;		/* pointer to clause to execute wam on */
+run_wam(PE,
+	Code *startaddr)	/* pointer to clause to execute wam on */
 {
     register Code *P = startaddr;
     register PWord *S = NULL;
@@ -839,7 +836,7 @@ int special_overflow = 0;
 //    }
 #endif
 
-	push_register_stack(&current_engine);
+	push_register_stack(hpe);
 		
 #ifdef Threaded
 #define CASE(op) l##op DO_PROFILE(op)
@@ -1103,7 +1100,7 @@ overflow_check0:
 #endif /* .............................................. DEBUGSYS ..*/
 
 			UNSHADOW_REGS;
-			gc();
+			gc(hpe);
 			SHADOW_REGS;
 
 #ifdef DEBUGSYS	/*..................................................*/
@@ -1631,7 +1628,7 @@ CASE(W_OVJUMP):
 
 CASE(W_FOREIGN_JUMP):		/* foreign_jump dst */
 	    UNSHADOW_REGS;
-	    if (!((*(int (*)PARAMS((void))) *PWPTR(P + OPSIZE)) ())) {
+	    if (!((*(int (*)(PE)) *PWPTR(P + OPSIZE)) (hpe))) {
 		SHADOW_REGS;
 		DOFAIL;
 	    }
@@ -1671,7 +1668,7 @@ CASE(W_SW_CONST):		/* sw_const [align],nentries,table(key,addr) */
 	    reg1 = PWPTR(arg(mr_E, 1));
 	    DEREF(reg1);
 	    if (M_ISUIA(reg1)) {
-		if ((reg1 = PWPTR(probe_token((UCHAR *)M_FIRSTUIAWORD(MUIA(reg1))))) == PWPTR(0))
+		if ((reg1 = PWPTR(probe_token(hpe, (UCHAR *)M_FIRSTUIAWORD(MUIA(reg1))))) == PWPTR(0))
 		    DOFAIL;
 		reg1 = PWPTR(MMK_SYM(reg1));
 	    }
@@ -1978,7 +1975,7 @@ callpart:
 	    else
 		DOFAIL;
 
-	    if ((P = call_resolve_reference(PWORD(reg2), PWORD(reg1), n, skip_ovflow))
+	    if ((P = call_resolve_reference(hpe, PWORD(reg2), PWORD(reg1), n, skip_ovflow))
 		== wm_fail)
 		DOFAIL;
 
@@ -2035,7 +2032,7 @@ CASE(W_WEIRD_JUMP):		/* jump(DBRef,callstruct) */
 	    DISPATCH;
 
 CASE(W_RESOLVE_REF):
-	    P = resolve_reference((ntbl_entry *) (P - RESOLVE_REF_BDISP));
+	    P = resolve_reference(hpe, (ntbl_entry *) (P - RESOLVE_REF_BDISP));
 	    DISPATCH;
 
 	    /* Special instructions - wam_start1, wam_start2, special,
@@ -2075,7 +2072,7 @@ CASE(W_THROW):
 #if 0
 	    //oldB = wm_regs[wm_regidx-1][wm_B_idx];
 #endif
-	    oldB = ((PWord *)((current_engine.reg_stack_top-1)->B.ptr));
+	    oldB = ((PWord *)((hpe->reg_stack_top-1)->B.ptr));
 	    
 	    for (;;) {
 		if (c22dat == cp_NC(mr_B))
@@ -2130,7 +2127,7 @@ get_out:
 #if 0
     //wm_regidx--;
 #endif
-    pop_register_stack(&current_engine);
+    pop_register_stack(hpe);
 
 #if 0 /* ----------old code ----------*/
     if (untrail) {
@@ -2235,8 +2232,10 @@ UNWINDTRAIL for (reg1 = mr_TR+1; reg1 < mr_B; reg1+=2){ *PWPTR(*reg1) = *((PWord
 #define mr_SPB gr_SPB
 
 static int
-wam_unify(f1, f2)
-    register PWord *f1, *f2;
+wam_unify(
+    PE,
+    register PWord *f1, register PWord *f2
+)
 {
     register int t1, t2;	/* types of the formulae */
     PWord *temp;
@@ -2308,7 +2307,7 @@ wam_unify(f1, f2)
 #endif
 
 	    for (i = 1; i <= n; i++)
-		if (wam_unify(PWPTR(MSUBTERMN(f1, i)),
+		if (wam_unify(hpe, PWPTR(MSUBTERMN(f1, i)),
 			      PWPTR(MSUBTERMN(f2, i))) == 0)
 		    return 0;
 	    return 1;
@@ -2317,8 +2316,8 @@ wam_unify(f1, f2)
 	    f1 = MLISTADDR(f1);
 	    f2 = MLISTADDR(f2);
 
-	    if (wam_unify(PWPTR(MLIST_CAR(f1)), PWPTR(MLIST_CAR(f2))))
-		return (wam_unify(PWPTR(MLIST_CDR(f1)), PWPTR(MLIST_CDR(f2))));
+	    if (wam_unify(hpe, PWPTR(MLIST_CAR(f1)), PWPTR(MLIST_CAR(f2))))
+		return (wam_unify(hpe, PWPTR(MLIST_CDR(f1)), PWPTR(MLIST_CDR(f2))));
 	    return (0);
 
 	case MTP_CONST:
@@ -2362,9 +2361,7 @@ wam_unify(f1, f2)
      *---------------------------------------------*/
 
 int
-_w_unify(f1, f2)
-    PWord f1, f2;
-
+_w_unify(PE, PWord f1, PWord f2)
 {
     int   retval;
 
@@ -2372,7 +2369,7 @@ _w_unify(f1, f2)
     gr_HB = wm_HB;
     gr_SPB = wm_SPB;
 
-    retval = wam_unify(PWPTR(f1), PWPTR(f2));
+    retval = wam_unify(hpe, PWPTR(f1), PWPTR(f2));
 
     wm_TR = gr_TR;
 
@@ -2391,10 +2388,10 @@ _w_unify(f1, f2)
  |
  |		installs a reference to G into R (R --> G)
  *---------------------------------------------------------------*/
-int     pbi_bind_vars           PARAMS(( void ));
+int     pbi_bind_vars           ( PE );
 
 int
-pbi_bind_vars()
+pbi_bind_vars(PE)
 {
 	PWord r,  g;
 	int   rt, gt;
@@ -2420,11 +2417,10 @@ pbi_bind_vars()
 #if defined(INTCONSTR)
 #include "intrv.h"
 
-void plain_bind	PARAMS((PWord, PWord));
+void plain_bind	(PWord, PWord));
 
 void
-plain_bind(r, v)
-	PWord r,  v;
+plain_bind(PWord r, PWord v)
 {
 	*PWPTR(r) = v;
 	PLAINTRAIL(r);
@@ -2432,12 +2428,9 @@ plain_bind(r, v)
 
 
 
-void bind_point_unfreeze	PARAMS((PWord *,int *,double,int));
+void bind_point_unfreeze	(PWord *,int *,double,int));
 void
-bind_point_unfreeze(r,t,pv,k)
-	PWord *r;
-	int *t,k;
-	double pv;
+bind_point_unfreeze(PWord *r,int *t,double pv,int k)
 {
 	PWord *vl;
 	int vlt;
@@ -2472,7 +2465,7 @@ bind_point_unfreeze(r,t,pv,k)
 	  *((PWord *)r +1) = (PWord)((PWord *)r + 1);
 
 
-	  ck_intvl_punch((PWord)(((PWord *)r)-1), *vl, vlt);		
+	  ck_intvl_punch(hpe, (PWord)(((PWord *)r)-1), *vl, vlt);		
 /*----------------?????????????
 	  if (!ck_intvl_punch((PWord)(((PWord *)r)-1), vl, vlt)) {		
      	*(r) = PWORD(f);							

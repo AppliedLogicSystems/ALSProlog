@@ -13,4 +13,4 @@
 #define isCutMacro(tok,arity) ((tok) <= TK_CUT && \
 				cut_macro_arities[(tok)] == (arity))
 
-extern short cut_macro_arities[];
+extern const short cut_macro_arities[];

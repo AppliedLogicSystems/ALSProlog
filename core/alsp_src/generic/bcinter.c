@@ -18,7 +18,7 @@
  */
 
 int
-pbi_c_malloc()
+pbi_c_malloc(PE)
 {
     PWord v1;
     int   t1;
@@ -34,7 +34,7 @@ pbi_c_malloc()
     if (t1 == WTP_INTEGER
 	&& v1 > 0
 	&& (return_value = (long) malloc((size_t)v1)) != (long) NULL) {
-	make_number(&v, &t, (double) return_value);
+	make_number(hpe, &v, &t, (double) return_value);
 	if (w_unify(v2, t2, v, t))
 	    SUCCEED;
     }
@@ -46,7 +46,7 @@ pbi_c_malloc()
  */
 
 int
-pbi_c_free()
+pbi_c_free(PE)
 {
     PWord v;
     int   t;
@@ -54,7 +54,7 @@ pbi_c_free()
 
     w_get_An(&v, &t, 1);
 
-    if (get_number(v, t, &ptrval)) {
+    if (get_number(hpe,v, t, &ptrval)) {
 	free((char *) (long) ptrval);
 	SUCCEED;
     }
@@ -84,7 +84,7 @@ pbi_c_free()
  */
 
 int
-pbi_c_set()
+pbi_c_set(PE)
 {
     PWord v1;
     int   t1;
@@ -117,7 +117,7 @@ pbi_c_set()
      */
     if (t1 == WTP_UIA)
 	ptr = (UCHAR *) M_FIRSTUIAWORD(v1);
-    else if (get_number(v1, t1, &doubleval))
+    else if (get_number(hpe,v1, t1, &doubleval))
 	ptr = (UCHAR *) (long) doubleval;
     else
 	FAIL;
@@ -149,31 +149,31 @@ pbi_c_set()
 
 	switch (type) {
 	    case 1:		/* int type */
-		if (!get_number(data, datatype, &doubleval))
+		if (!get_number(hpe,data, datatype, &doubleval))
 		    FAIL;
 		*(int *) (ptr + offset) = (int) doubleval;
 		break;
 
 	    case 2:		/* unsigned int type */
-		if (!get_number(data, datatype, &doubleval))
+		if (!get_number(hpe,data, datatype, &doubleval))
 		    FAIL;
 		*(unsigned int *) (ptr + offset) = (unsigned int) doubleval;
 		break;
 
 	    case 3:		/* long type */
-		if (!get_number(data, datatype, &doubleval))
+		if (!get_number(hpe,data, datatype, &doubleval))
 		    FAIL;
 		*(long *) (ptr + offset) = (long) doubleval;
 		break;
 
 	    case 4:		/* unsigned long type */
-		if (!get_number(data, datatype, &doubleval))
+		if (!get_number(hpe,data, datatype, &doubleval))
 		    FAIL;
 		*(unsigned long *) (ptr + offset) = (unsigned long) doubleval;
 		break;
 
 	    case 5:		/* ptr type */
-		if (!get_number(data, datatype, &doubleval))
+		if (!get_number(hpe,data, datatype, &doubleval))
 		    FAIL;
 		*(UCHAR **) (ptr + offset) = (UCHAR *) (long) doubleval;
 		break;
@@ -227,13 +227,13 @@ pbi_c_set()
 		break;
 
 	    case 12:		/* float type */
-		if (!get_number(data, datatype, &doubleval))
+		if (!get_number(hpe,data, datatype, &doubleval))
 		    FAIL;
 		*(float *) (ptr + offset) = (float) doubleval;
 		break;
 
 	    case 13:		/* double type */
-		if (!get_number(data, datatype, &doubleval))
+		if (!get_number(hpe,data, datatype, &doubleval))
 		    FAIL;
 		*(double *) (ptr + offset) = doubleval;
 		break;
@@ -288,7 +288,7 @@ pbi_c_set()
  */
 
 int
-pbi_c_examine()
+pbi_c_examine(PE)
 {
     PWord v1;
     int   t1;
@@ -317,7 +317,7 @@ pbi_c_examine()
 
     if (t1 == WTP_UIA)
 	ptr = (UCHAR *) M_FIRSTUIAWORD(v1);
-    else if (get_number(v1, t1, &doubleval))
+    else if (get_number(hpe,v1, t1, &doubleval))
 	ptr = (UCHAR *) (long) doubleval;
     else
 	FAIL;
@@ -349,31 +349,31 @@ pbi_c_examine()
 
 	switch (type) {
 	    case 1:		/* int type */
-		make_number(&v, &t, (double)( *(int *) (ptr + offset)));
+		make_number(hpe, &v, &t, (double)( *(int *) (ptr + offset)));
 		if (!w_unify(data, datatype, v, t))
 		    FAIL;
 		break;
 
 	    case 2:		/* unsigned int type */
-		make_number(&v, &t, (double) *(unsigned int *) (ptr + offset));
+		make_number(hpe, &v, &t, (double) *(unsigned int *) (ptr + offset));
 		if (!w_unify(data, datatype, v, t))
 		    FAIL;
 		break;
 
 	    case 3:		/* long type */
-		make_number(&v, &t, (double) *(long *) (ptr + offset));
+		make_number(hpe, &v, &t, (double) *(long *) (ptr + offset));
 		if (!w_unify(data, datatype, v, t))
 		    FAIL;
 		break;
 
 	    case 4:		/* unsigned long type */
-		make_number(&v, &t, (double) *(unsigned long *) (ptr + offset));
+		make_number(hpe, &v, &t, (double) *(unsigned long *) (ptr + offset));
 		if (!w_unify(data, datatype, v, t))
 		    FAIL;
 		break;
 
 	    case 5:		/* ptr type */
-		make_number(&v, &t, (double) (long) *(UCHAR **) (ptr + offset));
+		make_number(hpe, &v, &t, (double) (long) *(UCHAR **) (ptr + offset));
 		if (!w_unify(data, datatype, v, t))
 		    FAIL;
 		break;
@@ -422,13 +422,13 @@ pbi_c_examine()
 		break;
 
 	    case 12:		/* float type */
-		make_numberx(&v, &t, (double) *(float *) (ptr + offset), WTP_DOUBLE);
+		make_numberx(hpe, &v, &t, (double) *(float *) (ptr + offset), WTP_DOUBLE);
 		if (!w_unify(data, datatype, v, t))
 		    FAIL;
 		break;
 
 	    case 13:		/* double type */
-		make_numberx(&v, &t, *(double *) (ptr + offset), WTP_DOUBLE);
+		make_numberx(hpe, &v, &t, *(double *) (ptr + offset), WTP_DOUBLE);
 		if (!w_unify(data, datatype, v, t))
 		    FAIL;
 		break;
@@ -470,10 +470,7 @@ pbi_c_examine()
 #ifdef DOS
 
 void
-make_farptr(vp, tp, ptr)
-    PWord *vp;
-    int  *tp;
-    unsigned short *ptr;
+make_farptr(PWord *vp, int  *tp, unsigned short *ptr)
 {
     w_mk_term(vp, tp, (PWord) find_token("$farptr"), 3);
     w_install_argn(*vp, 1, (PWord) * (ptr), WTP_INTEGER);
@@ -485,7 +482,7 @@ make_farptr(vp, tp, ptr)
  * usage : $c_make_farptr(ptr,seg,farptr)
  */
 int
-pbi_c_make_farptr()
+pbi_c_make_farptr(PE)
 {
     PWord v1;
     int   t1;
@@ -503,7 +500,7 @@ pbi_c_make_farptr()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    if (get_number(v1, t1, &ptrval) && t2 == WTP_INTEGER) {
+    if (get_number(hpe,v1, t1, &ptrval) && t2 == WTP_INTEGER) {
 	longptrval = (long) ptrval;
 	if (v2 == 1)		/* assume data segment */
 	    farptrval = (_Far *) (char *) longptrval;

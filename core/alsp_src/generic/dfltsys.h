@@ -8,7 +8,7 @@
  |	Date: 04/10/95
  *==================================================================*/
 
-#define BCINTER		1
+//#define BCINTER		1
 #define LIBBRK		1
 #define SYS_OBP		1
 #define HASH		1

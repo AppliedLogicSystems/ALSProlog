@@ -31,9 +31,9 @@ typedef struct {
             short unsafe;    	/* used for unify_local_value			*/
          } varinf;
 
-extern varinf vtbl[];          /* variable information table   			*/
+//extern varinf vtbl[];          /* variable information table   			*/
 
-extern int call_env_sizes[];	/* size of environment for each call (goal) in body */
+//extern int call_env_sizes[];	/* size of environment for each call (goal) in body */
 #define IS_VO(s) (TYPEOF(s) == TP_VO)
 
 /*
@@ -45,10 +45,10 @@ extern int call_env_sizes[];	/* size of environment for each call (goal) in body
 #define ENVIDX VTBLSIZE
 
 /* ----------- varproc.c ----------- */
-extern	int		classify_vars		PARAMS(( pword ));
-extern	void	compute_call_env_sizes	PARAMS(( int, int ));
+extern	int		classify_vars		(PE,  pword );
+extern	void	compute_call_env_sizes	(PE, int, int );
 
 /* ----------- compile.c ----------- */
 #ifdef NewMath
-extern	int	isarithmetic		PARAMS(( pword ));
+extern	int	isarithmetic		( pword );
 #endif

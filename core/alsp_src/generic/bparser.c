@@ -15,8 +15,8 @@
  *=============================================================================*/
 #include "defs.h"
 
-static	int	string_to_number PARAMS(( UCHAR *, double * ));
-static	int	get_prec	PARAMS(( PWord, PWord ));
+static	int	string_to_number ( UCHAR *, double * );
+static	int	get_prec	(PE, PWord, PWord );
 
 /*
  * string_to_number is used by pbi_name to convert a potential string
@@ -28,9 +28,7 @@ static	int	get_prec	PARAMS(( PWord, PWord ));
  */
 
 static int
-string_to_number(str, dblp)
-    register UCHAR *str;
-    double *dblp;
+string_to_number(register UCHAR *str,  double *dblp)
 {
     register int c;
     double v;
@@ -157,7 +155,7 @@ string_to_number(str, dblp)
 
 
 int
-pbi_name()
+pbi_name(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -169,7 +167,7 @@ pbi_name()
 	PWord slv;
 	int   slt;
 
-	string_to_list(&slv, &slt, TOKNAME(v1));
+	string_to_list(hpe, &slv, &slt, TOKNAME(v1));
 	if (w_unify(v2, t2, slv, slt))
 	    SUCCEED;
 	else
@@ -179,7 +177,7 @@ pbi_name()
 	PWord slv;
 	int   slt;
 
-	string_to_list(&slv, &slt, (UCHAR *) M_FIRSTUIAWORD(v1));
+	string_to_list(hpe, &slv, &slt, (UCHAR *) M_FIRSTUIAWORD(v1));
 	if (w_unify(v2, t2, slv, slt))
 	    SUCCEED;
 	else
@@ -192,7 +190,7 @@ pbi_name()
 
 	sprintf(buf, "%ld", (long) v1);
 
-	string_to_list(&slv, &slt, (UCHAR *)buf);
+	string_to_list(hpe, &slv, &slt, (UCHAR *)buf);
 	if (w_unify(v2, t2, slv, slt))
 	    SUCCEED;
 	else
@@ -217,7 +215,7 @@ pbi_name()
 	    *(((short *) &d) + i) = vt;
 	}
 	sprintf(buf, "%1.10g", d);
-	string_to_list(&vt, &tt, (UCHAR *)buf);
+	string_to_list(hpe, &vt, &tt, (UCHAR *)buf);
 	if (w_unify(v2, t2, vt, tt))
 	    SUCCEED;
 	else
@@ -233,7 +231,7 @@ pbi_name()
 
 	w_get_double(&d, v1);
 	sprintf(buf, "%1.10g", d);
-	string_to_list(&vt, &tt, (UCHAR *)buf);
+	string_to_list(hpe, &vt, &tt, (UCHAR *)buf);
 	if (w_unify(v2, t2, vt, tt))
 	    SUCCEED;
 	else
@@ -248,7 +246,7 @@ pbi_name()
 	 * if needed, without having to copy the string.
 	 */
 	str = (UCHAR *) (wm_H + 1);
-	if (list_to_string(str, v2, wm_normal - 256)) {
+	if (list_to_string(hpe, str, v2, wm_normal - 256)) {
 	    PWord v;
 	    int   t;
 	    double d;
@@ -256,14 +254,14 @@ pbi_name()
 	    if (string_to_number(str, &d))
 			/*!!!!!!!!!!!!!!!!!!!!!!!*/
 			/* MAY NEED MODIFICATION */
-		make_number(&v, &t, d);
+		make_number(hpe, &v, &t, d);
 #ifdef AllUIAConsts
 	    else {
 		v = (PWord) find_token(str);
 		t = WTP_SYMBOL;
 	    }
 #else
-	    else if ( (v = probe_token(str)) )
+	    else if ( (v = probe_token(hpe, str)) )
 		t = WTP_SYMBOL;
 	    else
 		w_mk_uia_in_place(&v, &t, str);
@@ -278,7 +276,8 @@ pbi_name()
 
     }
     else if (t2 == WTP_SYMBOL && v2 == TK_NIL &&
-	     w_unify(v1, t1, (PWord) find_token((UCHAR *)""), WTP_SYMBOL))
+//	     w_unify(v1, t1, (PWord) find_token((UCHAR *)""), WTP_SYMBOL))
+	     w_unify(v1, t1, (PWord) find_token(""), WTP_SYMBOL))
 	SUCCEED;
     else
 	FAIL;
@@ -286,8 +285,11 @@ pbi_name()
 
 
 static int
-get_prec(assoc, tok)
-    PWord assoc, tok;
+get_prec(
+    PE,
+    PWord assoc,
+    PWord tok
+)
 {
     int   prec, tassoc;
 
@@ -346,7 +348,7 @@ get_prec(assoc, tok)
 }
 
 int
-pbi_op()
+pbi_op(PE)
 {				/* op(P,A,T) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -356,7 +358,7 @@ pbi_op()
     w_get_An(&v3, &t3, 3);
 
     if (t1 == WTP_UNBOUND && t2 == WTP_SYMBOL && t3 == WTP_SYMBOL) {
-	int   prec = get_prec(v2, v3);
+	int   prec = get_prec(hpe, v2, v3);
 
 	if (prec && w_unify(v1, t1, (PWord) prec, WTP_INTEGER))
 	    SUCCEED;
@@ -431,7 +433,7 @@ pbi_op()
 }
 
 int
-pbi_tokid()
+pbi_tokid(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -447,7 +449,7 @@ pbi_tokid()
 
 
 int
-pbi_uia_alloc()
+pbi_uia_alloc(PE)
 {				/* $uia_alloc(BufLen,UIABuf) */
     PWord v1, v2;
     int   t1, t2;
@@ -470,7 +472,7 @@ pbi_uia_alloc()
 
 
 int
-pbi_uia_peekb()
+pbi_uia_peekb(PE)
 {				/* $uia_peekb(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -495,7 +497,7 @@ pbi_uia_peekb()
 
 
 int
-pbi_uia_pokeb()
+pbi_uia_pokeb(PE)
 {				/* $uia_pokeb(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -518,7 +520,7 @@ pbi_uia_pokeb()
 
 
 int
-pbi_uia_peekw()
+pbi_uia_peekw(PE)
 {				/* $uia_peekw(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -543,7 +545,7 @@ pbi_uia_peekw()
 
 
 int
-pbi_uia_pokew()
+pbi_uia_pokew(PE)
 {				/* $uia_pokew(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -566,7 +568,7 @@ pbi_uia_pokew()
 
 
 int
-pbi_uia_peekl()
+pbi_uia_peekl(PE)
 {				/* $uia_peekl(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -581,7 +583,7 @@ pbi_uia_peekl()
     if (t1 == WTP_UIA && t2 == WTP_INTEGER &&
 	w_uia_peek(v1, (int) v2, (UCHAR *) &pval, sizeof (long))) {
 		/* Should return integer (long) */
-	make_number(&val, &valtype, (double) pval);
+	make_number(hpe,&val, &valtype, (double) pval);
 	if (w_unify(v3, t3, val, valtype))
 	    SUCCEED;
 	else
@@ -593,7 +595,7 @@ pbi_uia_peekl()
 
 
 int
-pbi_uia_pokel()
+pbi_uia_pokel(PE)
 {				/* $uia_pokel(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -604,7 +606,7 @@ pbi_uia_pokel()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-    if (t1 == WTP_UIA && t2 == WTP_INTEGER && get_number(v3, t3, &dval)) {
+    if (t1 == WTP_UIA && t2 == WTP_INTEGER && get_number(hpe,v3, t3, &dval)) {
 	pval = (unsigned long) dval;
 	if (w_uia_poke(v1, (int) v2, (UCHAR *) &pval, sizeof (long)))
 	    SUCCEED;
@@ -616,7 +618,7 @@ pbi_uia_pokel()
 }
 
 static int
-do_pbi_uia_peekd(PWord v1, int t1, PWord v2, int t2, PWord v3, int t3)
+do_pbi_uia_peekd(PE, PWord v1, int t1, PWord v2, int t2, PWord v3, int t3)
 {
     PWord val;
     int   valtype;
@@ -625,7 +627,7 @@ do_pbi_uia_peekd(PWord v1, int t1, PWord v2, int t2, PWord v3, int t3)
     if (t1 == WTP_UIA && t2 == WTP_INTEGER &&
 		w_uia_peek(v1, (int) v2, (UCHAR *) &pval, sizeof (double))) 
 	{
-		make_numberx(&val, &valtype, (double) pval, WTP_DOUBLE);
+		make_numberx(hpe,&val, &valtype, (double) pval, WTP_DOUBLE);
 		if (w_unify(v3, t3, val, valtype))
 	    	SUCCEED;
 		else
@@ -637,7 +639,7 @@ do_pbi_uia_peekd(PWord v1, int t1, PWord v2, int t2, PWord v3, int t3)
 }	/* do_pbi_uia_peekd */
 
 int
-pbi_uia_peekd()
+pbi_uia_peekd(PE)
 {				/* $uia_peekd(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -646,17 +648,17 @@ pbi_uia_peekd()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-	return(do_pbi_uia_peekd(v1,t1, v2,t2, v3,t3 ));
+	return(do_pbi_uia_peekd(hpe, v1,t1, v2,t2, v3,t3 ));
 
 }	/* pbi_uia_peekd */
 
 
 static int
-do_pbi_uia_poked(PWord v1, int t1, PWord v2, int t2, PWord v3, int t3)
+do_pbi_uia_poked(PE, PWord v1, int t1, PWord v2, int t2, PWord v3, int t3)
 {
     double pval;
 
-    if (t1 == WTP_UIA && t2 == WTP_INTEGER && get_number(v3, t3, &pval)) {
+    if (t1 == WTP_UIA && t2 == WTP_INTEGER && get_number(hpe,v3, t3, &pval)) {
 		if (w_uia_poke(v1, (int) v2, (UCHAR *) &pval, sizeof (double)))
 	    	SUCCEED;
 		else
@@ -668,7 +670,7 @@ do_pbi_uia_poked(PWord v1, int t1, PWord v2, int t2, PWord v3, int t3)
 }	/* do_pbi_uia_poked */
 
 int
-pbi_uia_poked()
+pbi_uia_poked(PE)
 {				/* $uia_poked(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -677,13 +679,13 @@ pbi_uia_poked()
     w_get_An(&v2, &t2, 2);
     w_get_An(&v3, &t3, 3);
 
-	return( do_pbi_uia_poked(v1,t1, v2,t2, v3,t3) );
+	return( do_pbi_uia_poked(hpe, v1,t1, v2,t2, v3,t3) );
 
 }	/* pbi_uia_poked */
 
 
 int
-pbi_uia_peek()
+pbi_uia_peek(PE)
 {				/* $uia_peek(UIABuf,Offset,Size,Val) */
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -707,7 +709,7 @@ pbi_uia_peek()
 
 
 int
-pbi_uia_poke()
+pbi_uia_poke(PE)
 {			/* $uia_poke(UIABuf,Offset,Size,Val,ValOffset) */
     PWord v1, v2, v3, v4, v5;
     int   t1, t2, t3, t4, t5;
@@ -742,7 +744,7 @@ pbi_uia_poke()
 
 
 int
-pbi_uia_peeks()
+pbi_uia_peeks(PE)
 {				/* $uia_peeks(UIABuf,Offset,Sym) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -757,7 +759,7 @@ pbi_uia_peeks()
     if (t1 == WTP_UIA && t2 == WTP_INTEGER) {
 	str = (UCHAR *) (wm_H + 1);
 	if (w_uia_peeks(v1, (int) v2, str, wm_normal - 256)) {
-	    if ( (val = probe_token(str)) )
+	    if ( (val = probe_token(hpe, str)) )
 		valtype = WTP_SYMBOL;
 	    else
 		w_mk_uia_in_place(&val, &valtype, str);
@@ -771,7 +773,7 @@ pbi_uia_peeks()
 
 
 int
-pbi_uia_peeks4()
+pbi_uia_peeks4(PE)
 {				/* $uia_peeks(UIABuf,Offset,Size,Sym) */
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -787,7 +789,7 @@ pbi_uia_peeks4()
     if (t1 == WTP_UIA && t2 == WTP_INTEGER && t3 == WTP_INTEGER && v3 > 0) {
 	str = (UCHAR *) (wm_H + 1);
 	if (w_uia_peeks(v1, (int) v2, str, (int) v3)) {
-	    if ( (val = probe_token(str)) )
+	    if ( (val = probe_token(hpe, str)) )
 		valtype = WTP_SYMBOL;
 	    else
 		w_mk_uia_in_place(&val, &valtype, str);
@@ -801,7 +803,7 @@ pbi_uia_peeks4()
 
 
 int
-pbi_uia_pokes()
+pbi_uia_pokes(PE)
 {				/* $uia_pokes(UIABuf,Offset,Sym) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -821,7 +823,7 @@ pbi_uia_pokes()
 
 
 int
-pbi_uia_clip()
+pbi_uia_clip(PE)
 {				/* $uia_clip(UIABuf,Size) */
     PWord v1, v2;
     int   t1, t2;
@@ -837,7 +839,7 @@ pbi_uia_clip()
 
 
 int
-pbi_uia_size()
+pbi_uia_size(PE)
 {				/* $uia_size(UIABuf,Size) */
     PWord v1, v2;
     int   t1, t2;
@@ -853,7 +855,7 @@ pbi_uia_size()
 
 
 int
-pbi_strlen()
+pbi_strlen(PE)
 {				/* $strlen(Symbol,Size) */
     PWord v1, v2;
     int   t1, t2;
@@ -872,10 +874,7 @@ pbi_strlen()
 }
 
 int
-get_number(v, t, val)
-    PWord v;
-    int   t;
-    double *val;
+get_number(PE, PWord v, int t, double *val)
 {
     if (t == WTP_INTEGER)
 	*val = (double) v;
@@ -908,7 +907,7 @@ get_number(v, t, val)
 }
 
 int
-pbi_atom_concat()
+pbi_atom_concat(PE)
 {				/* $atom_concat(In1,In2,Out) */
     PWord v1, v2, v3, vConcat;
     int   t1, t2, t3, tConcat;
@@ -942,7 +941,7 @@ pbi_atom_concat()
  */
 
 int
-pbi_sub_atom()
+pbi_sub_atom(PE)
 {
     PWord v1, v2, v3, v4, vSA;
     int   t1, t2, t3, t4, tSA;
@@ -991,7 +990,7 @@ pbi_sub_atom()
  */
 
 int
-pbi_atom_length()
+pbi_atom_length(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -1031,7 +1030,7 @@ pbi_atom_length()
  */
 
 int
-pbi_char_code()
+pbi_char_code(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -1077,14 +1076,14 @@ enum C_list_codes {
     C_list_code
 };
 
-static int string_to_C_list PARAMS(( PWord *, int *, UCHAR *, enum C_list_codes ));
-
 static int
-string_to_C_list(vp,tp,str,C_which)
-    PWord *vp;
-    int *tp;
-    UCHAR *str;
-    enum C_list_codes C_which;
+string_to_C_list(
+    PE,
+    PWord *vp,
+    int *tp,
+    UCHAR *str,
+    enum C_list_codes C_which
+)
 {
     register PWord *H, *lim;
     if (!*str) {
@@ -1121,15 +1120,15 @@ enum ltos_retcodes {
     ltos_SUCCESS
 };
 
-static enum ltos_retcodes C_list_to_string PARAMS(( PWord *, int *, PWord, int, enum C_list_codes ));
-
 static enum ltos_retcodes
-C_list_to_string(vp,tp,vin,tin,C_which)
-    PWord *vp;
-    int *tp;
-    PWord vin;
-    int tin;
-    enum C_list_codes C_which;
+C_list_to_string(
+    PE,
+    PWord *vp,
+    int *tp,
+    PWord vin,
+    int tin,
+    enum C_list_codes C_which
+)
 {
     PWord va;
     int ta;
@@ -1189,7 +1188,7 @@ C_list_to_string(vp,tp,vin,tin,C_which)
  */
 
 int
-pbi_atom_chars()
+pbi_atom_chars(PE)
 {
     PWord v1, v2, vr;
     int t1, t2, tr;
@@ -1213,7 +1212,7 @@ pbi_atom_chars()
 	PERR_TYPE(TK_ATOM_CHARS,2,TK_LIST,v2,t2);
     
     if (str) {
-	if (!string_to_C_list(&vr,&tr,str,C_list_char))
+	if (!string_to_C_list(hpe, &vr,&tr,str,C_list_char))
 	    PERR_RESOURCE(TK_ATOM_CHARS,2,TK_HEAPUSED);
 	
 	if (w_unify(vr,tr,v2,t2))
@@ -1222,7 +1221,7 @@ pbi_atom_chars()
 	    FAIL;
     }
     else {
-	switch (C_list_to_string(&vr,&tr,v2,t2,C_list_char)) {
+	switch (C_list_to_string(hpe, &vr,&tr,v2,t2,C_list_char)) {
 	    case ltos_RESOURCE :
 		PERR_RESOURCE(TK_ATOM_CHARS,2,TK_HEAPUSED);
 		break;
@@ -1255,7 +1254,7 @@ pbi_atom_chars()
  */
 
 int
-pbi_atom_codes()
+pbi_atom_codes(PE)
 {
     PWord v1, v2, vr;
     int t1, t2, tr;
@@ -1279,7 +1278,7 @@ pbi_atom_codes()
 	PERR_TYPE(TK_ATOM_CODES,2,TK_LIST,v2,t2);
     
     if (str) {
-	if (!string_to_C_list(&vr,&tr,str,C_list_code))
+	if (!string_to_C_list(hpe, &vr,&tr,str,C_list_code))
 	    PERR_RESOURCE(TK_ATOM_CODES,2,TK_HEAPUSED);
 	
 	if (w_unify(vr,tr,v2,t2))
@@ -1288,7 +1287,7 @@ pbi_atom_codes()
 	    FAIL;
     }
     else {
-	switch (C_list_to_string(&vr,&tr,v2,t2,C_list_code)) {
+	switch (C_list_to_string(hpe, &vr,&tr,v2,t2,C_list_code)) {
 	    case ltos_RESOURCE :
 		PERR_RESOURCE(TK_ATOM_CODES,2,TK_HEAPUSED);
 		break;
@@ -1316,7 +1315,7 @@ pbi_atom_codes()
 #ifdef SUBTYPES
 
 int
-pbi_less_sut_int()
+pbi_less_sut_int(PE)
 {				/* less_sut_int(A,B) */
     PWord v1, v2;
     int   t1, t2;
@@ -1345,7 +1344,7 @@ pbi_less_sut_int()
 }
 
 int
-pbi_eq_sut_int()
+pbi_eq_sut_int(PE)
 {				/* eq_sut_int(A,B) */
     PWord v1, v2;
     int   t1, t2;
@@ -1373,13 +1372,10 @@ pbi_eq_sut_int()
 	    FAIL;
 }
 
-extern void    w_mk_sut_int PARAMS(( PWord *, int *, long ));
+extern void    w_mk_sut_int ( PWord *, int *, long ));
 
 void
-w_mk_sut_int(rval, rtag, ival)
-    PWord *rval;
-	int  *rtag;
-	long ival;
+w_mk_sut_int(PWord *rval, int  *rtag, long ival)
 {
     *rval = (PWord) MMK_UIAVAL(wm_H);
 	*rtag = WTP_UIA;
@@ -1395,7 +1391,7 @@ w_mk_sut_int(rval, rtag, ival)
 	   same as the value in the incoming prolog integer 
 	   in arg #1 */
 int
-pbi_mk_sut_int()
+pbi_mk_sut_int(PE)
 {				/* mk_sut_int(A,B) */
     PWord v1, v2, new;
     int   t1, t2, newt;
@@ -1414,7 +1410,7 @@ pbi_mk_sut_int()
 }
 
 int
-pbi_t_sut_int()
+pbi_t_sut_int(PE)
 {
 	long i,m;
 
@@ -1429,7 +1425,7 @@ pbi_t_sut_int()
 }
 
 int
-pbi_pos_atom()
+pbi_pos_atom(PE)
 {
     PWord v1, v2, new;
     int   t1, t2, newt;

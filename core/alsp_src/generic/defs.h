@@ -137,6 +137,8 @@
 #include "macos_config.h"
 #elif defined(MSWIN32)
 #include "mswin32_config.h"
+#elif defined(ALS_ANSI)
+#include "ansi_config.h"
 #else
 #error
 #endif
@@ -217,21 +219,6 @@
 
 #endif /* PURE_ANSI */
 
-/*---------------------------------------------------------------------*
- | Set up some macros for dealing with prototypes and other ANSI C features.
- *---------------------------------------------------------------------*/
-
-#ifndef PARAMS
-#if defined(__STDC__) || defined(__cplusplus)
-#define CONST const
-#define PARAMS(arglist) arglist
-#undef OldStrs
-#else 		/* !__STDC__ */
-#define CONST
-#define PARAMS(arglist) ()
-#define OldStrs
-#endif		/* __STDC__ */
-#endif /* PARAMS */
 
 #ifdef UNIX
 			/* include some standard files */
@@ -250,6 +237,7 @@
 #include <unistd.h>
 #endif		/* HAVE_UNISTD_H */
 #include <signal.h>
+
 
 /*---------------------------------------------------------------------*
  | Don't use sigaction if implementation of sigaction is immature.
@@ -337,13 +325,26 @@
  | Include commonly needed Generic include files
  *---------------------------------------------------------------------*/
 
+struct prolog_engine_struct;
+
+#define PE struct prolog_engine_struct *hpe
+
 /* #include "wd_size.h"	 */
 #include "mtypes.h"	/* not generic, but every platform has one */
+
 #include "alstypes.h"
 #include "alloc.h"
 #include "fileio.h"	/* candidate for eventual elimination */
 #include "parser.h"
 #include "newtokens.h"
+
+#include "engine.h"
+#include "cexception.h"
+#include "cassert.h"
+
+
+#include "fileio.h"	/* candidate for eventual elimination */
+
 #include "sig.h"
 #include "winter.h"
 #include "fatal.h"
@@ -351,42 +352,38 @@
 #include "chpt.h"
 #include "built.h"
 
-#include "engine.h"
-#include "cexception.h"
-#include "cassert.h"
-
 #include "security.h"
 /*---------------------------------------------------------------------*
  | If string.h doesn't exist or is lacking certain functions, we provide
  | our own replacements for the functions declared therein...
  *---------------------------------------------------------------------*/
 #ifndef HAVE_STRTOK
-extern char *strtok PARAMS(( char *s1, const char *s2 ));
+extern char *strtok ( char *s1, const char *s2 );
 #endif 		/* HAVE_STRTOK */
 #ifndef HAVE_STRDUP
-extern char *strdup PARAMS(( const char *s1 ));
+extern char *strdup ( const char *s1 );
 #endif 		/* HAVE_STRDUP */
 #ifndef HAVE_STRSPN
-extern size_t strspn PARAMS(( const char *s1, const char *s2 ));
+extern size_t strspn ( const char *s1, const char *s2 );
 #endif 		/* HAVE_STRSPN */
 #ifndef HAVE_STRCSPN
-extern size_t strcspn PARAMS(( const char *s1, const char *s2 ));
+extern size_t strcspn ( const char *s1, const char *s2 );
 #endif 		/* HAVE_STRCSPN */
 
 /*---------------------------------------------------------------------*
  | Declare the als memory allocation function and associated helpers
  *---------------------------------------------------------------------*/
-extern	int	als_mem_init	PARAMS(( CONST char *file, long offset ));
-extern	long *	ss_pmalloc	PARAMS(( size_t size, int fe_num, long *asizep ));
-extern	long *	ss_malloc	PARAMS(( size_t size, int fe_num ));
-extern	void	ss_register_global PARAMS(( long *addr ));
-extern	long	ss_image_offset	PARAMS((const char *));
-extern	int	ss_save_image_with_state PARAMS((CONST char * ));
-extern	int	ss_attach_state_to_file PARAMS((const char *file_name));
-extern	int	ss_save_state	PARAMS((CONST char *, long ));
-extern	void	protect_bottom_stack_page PARAMS(( void ));
-extern	long *	ss_fmalloc_start PARAMS(( void ));
-extern	long *	ss_fmalloc	PARAMS(( size_t ));
+extern	int	als_mem_init	( PE, const char *file, long offset );
+extern	long *	ss_pmalloc	( PE, size_t size, int fe_num, long *asizep );
+extern	long *	ss_malloc	( PE, size_t size, int fe_num );
+extern	void	ss_register_global (PE,  long *addr );
+extern	long	ss_image_offset	(const char *);
+extern	int	ss_save_image_with_state (PE, const char * );
+extern	int	ss_attach_state_to_file (PE, const char *file_name);
+extern	int	ss_save_state	(PE, const char *, long );
+extern	void	protect_bottom_stack_page ( void );
+extern	long *	ss_fmalloc_start ( void );
+extern	long *	ss_fmalloc	( size_t );
 
 /*---------------------------------------------------------------------*
  | Declare prototypes of other functions which have no obvious header file.
@@ -394,8 +391,8 @@ extern	long *	ss_fmalloc	PARAMS(( size_t ));
 
 /* ----------   arith.c ----------   */
 
-void make_ieee_nan PARAMS( (PWord *, int *) );
-void make_ieee_inf PARAMS( (PWord *, int *) );
+void make_ieee_nan  (PE, PWord *, int *);
+void make_ieee_inf  (PE, PWord *, int *);
 
 /* os routines. */
 int os_copy_file(const char *from_file, const char *to_file);
@@ -414,8 +411,8 @@ extern	int	win32s_system;
 extern	int	MPW_Tool;
 #endif
 
-extern	void	als_exit	PARAMS(( int ));
-extern	void	heap_overflow	PARAMS(( void ));
+extern	void	als_exit	( int );
+extern	void	heap_overflow	( PE );
 
 #define IMAGEDIR_MAX	1024
 extern char library_path[IMAGEDIR_MAX];
@@ -424,77 +421,72 @@ extern char executable_path[IMAGEDIR_MAX];
 
 void	locate_library_executable(int argc, char *argv[]);
 
-/* ----------   arith.c ----------   */
-void make_ieee_nan PARAMS( (PWord *, int *) );
-void make_ieee_inf PARAMS( (PWord *, int *) );
-
-
 /* ----------   disassem.c ----------   */
-extern	void	list_asm	PARAMS(( Code *, int ));
+extern	void	list_asm	(PE,  Code *, int );
 
 /* ----------   loadfile.c ----------   */
-/* extern	void	fix_MAGIC	PARAMS(( void )); */
-extern	void	f_icode		PARAMS(( int, long, long, long, long ));
-extern	int	obp_open	PARAMS(( char * ));
-extern	void	obp_close	PARAMS(( void ));
-extern	int	f_load		PARAMS(( CONST char * ));
-extern	int	load_file	PARAMS(( char *, int ));
+/* extern	void	fix_MAGIC	( void ); */
+extern	void	f_icode		(PE, int, long, long, long, long );
+extern	int	obp_open	(PE, char * );
+extern	void	obp_close	( PE );
+extern	int	f_load		(PE,  const char * );
+extern	int	load_file	(PE, char *, int );
 #ifdef MacOS
-extern	int	obpres_load	PARAMS((const char *fname));
+extern	int	obpres_load	(PE, const char *fname);
 #endif
-extern	void	obp_push	PARAMS(( void ));
-extern	void	obp_pop		PARAMS(( void ));
+extern	void	obp_push	( PE );
+extern	void	obp_pop		( PE );
 
 /* ----------   sig.c ----------   */
-extern	void	deathwatch	PARAMS(( void ));
-extern	void	reissue_cntrlc	PARAMS(( void ));
+extern	void	deathwatch	( void );
+extern	void	reissue_cntrlc	( PE );
 
 /* ----------   vprintf.c ----------   */
-extern	void	PI_oprintf	PARAMS(( const char *, ... ));
-extern	void	PI_oputchar	PARAMS(( int ));
+extern	void	PI_oprintf	( const char *, ... );
+extern	void	PI_oputchar	( int );
 
 /* ----------   fsdos.c, fsmac.c, fsunix.c, or fsvms.c ----------   */
-extern	void	init_fsutils	PARAMS(( void ));
+extern	void	init_fsutils	( PE );
 
-extern	int	pgetcwd		PARAMS(( void ));
-extern	int	pchdir		PARAMS(( void ));
-extern	int	punlink		PARAMS(( void ));
+extern	int	pgetcwd		( PE );
+extern	int	pchdir		( PE );
+extern	int	punlink		( PE );
 
 #ifdef FSACCESS
-extern	int	getDirEntries	PARAMS(( void ));
-extern	int	getFileStatus	PARAMS(( void ));
-extern	int	read_link	PARAMS(( void ));
-extern	int	make_symlink	PARAMS(( void ));
-extern	int	pcmp_fs		PARAMS(( void ));
-extern	int	prmdir		PARAMS(( void ));
-extern	int	pmkdir		PARAMS(( void ));
-extern	char *	canonical_pathname PARAMS(( char *, char ** ));
-extern	int	canonicalize_pathname PARAMS(( void ));
-extern	int	pgetpid		PARAMS(( void ));
+extern	int	getDirEntries	( PE );
+extern	int	getFileStatus	( PE );
+extern	int	read_link	( PE );
+extern	int	make_symlink	( PE );
+extern	int	pcmp_fs		( PE );
+extern	int	prmdir		( PE );
+extern	int	pmkdir		( PE );
+extern	char *	canonical_pathname ( char *, char ** );
+extern	int	canonicalize_pathname ( PE );
+extern	int	pgetpid		( PE );
 #endif /* FSACCESS */
 
 #if (!defined(__DJGPP__) && !defined(__GO32__))
-extern	long	get_file_modified_time	PARAMS((CONST char * ));
-extern	int	isdir			PARAMS((CONST char * ));
+extern	long	get_file_modified_time	(const char * );
+extern	int	isdir			(const char * );
 #endif
 
 #if MacOS
-extern	int	absolute_pathname	PARAMS((CONST char *name));
-extern	char *	re_comp			PARAMS((CONST char *pattern));
-extern	int	re_exec			PARAMS((CONST char *s));
+extern	int	absolute_pathname	(const char *name);
+extern	char *	re_comp			(const char *pattern);
+extern	int	re_exec			(const char *s);
 #ifndef HAVE_GUSI
-extern  int	access			PARAMS((CONST char *, int x));
-extern  int	chdir			PARAMS((CONST char *dirname));
-extern  char *	getcwd			PARAMS((char *, int));
+extern  int	access			(const char *, int x);
+extern  int	chdir			(const char *dirname);
+extern  char *	getcwd			(char *, int);
 #endif
 #endif
 
 typedef struct {
-    unsigned char *start;
+    void *start;
     unsigned long length;
 } mem_file_info;
 
-extern unsigned char *open_memory_file(const char *file_name, mem_file_info *info);
+extern void *open_memory_file(const char *file_name, mem_file_info *info);
 extern void close_memory_file(mem_file_info *info);
 
 /* ----------  bsio.c ------------*/
@@ -503,34 +495,34 @@ extern long standard_console_write(char *buf, long n);
 extern long standard_console_error(char *buf, long n);
 
 /* ----------   sig.c ----------   */
-extern	void	init_sigint	PARAMS(( void ));
-extern	void	reset_sigint	PARAMS(( void ));
+extern	void	init_sigint	( void );
+extern	void	reset_sigint	( void );
 
 /* ----------   cinterf.c ----------   */
-extern	void	cinterf_init	PARAMS(( void ));
+extern	void	cinterf_init	( void );
 
 /* ----------   from either assembly code or wam.c ----------   */
-extern	void	wm_exec		PARAMS(( Code * ));
-extern	int	wm_rungoal	PARAMS(( PWord, PWord ));
+extern	void	wm_exec		(PE, Code * );
+extern	int	wm_rungoal	(PE, PWord, PWord );
 
 /* ----------   foreign.c ----------   */
-extern	int	load_foreign	PARAMS(( char *, char *, char * ));
+extern	int	load_foreign	( char *, char *, char * );
 
 #ifdef DynamicForeign
 /* ----------   lforeign.c ----------   */
-extern	void (*	load_object	PARAMS(( char *, char *, char * )) ) PARAMS((void));
-extern	void	foreign_shutdown PARAMS(( void ));
+extern	void (*	load_object	( char *, char *, char * ) ) (void);
+extern	void	foreign_shutdown ( void );
 #endif /* DynamicForeign */
 
 #ifdef Portable
-extern	void	wam_init	PARAMS(( void ));
+extern	void	wam_init	( PE );
 #endif /* Portable */
 
 /* ----------   icode1.c ----------   */
-extern	int	init_icode_buf	PARAMS(( int ));
+extern	int	init_icode_buf	( int );
 
 #ifdef MacOS
-extern	void	init_math		PARAMS(( void ));
+extern	void	init_math		( void );
 #endif
 
 #ifdef MaxFunc

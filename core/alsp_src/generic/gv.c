@@ -15,12 +15,12 @@
 static	void	fixptrs	(prolog_engine *);
 
 PWord
-gv_alloc()
+gv_alloc(PE)
 {
     register int i;
     PWord vn;
 
-prolog_engine_invariant(&current_engine);
+prolog_engine_invariant(hpe);
 
     if (wm_gvfreelist != (PWord *) MMK_INT(-1)) {
 	vn = (PWord) (wm_gvbase - wm_gvfreelist);
@@ -52,14 +52,14 @@ prolog_engine_invariant(&current_engine);
 	//fixptrs(wm_regidx);
 #endif
 
-	fixptrs(&current_engine);
+	fixptrs(hpe);
 
 	/*
 	 * Initialize the new batch of variables;
 	 */
 
 	wm_trailbase -= GV_SHIFT;
-	current_engine.heap_size -= GV_SHIFT;
+	hpe->heap_size -= GV_SHIFT;
 	
 	for (i = 0; i < GV_SHIFT - 1; i++) {
 	    *(long **) (wm_trailbase + i) = wm_gvfreelist;
@@ -70,7 +70,7 @@ prolog_engine_invariant(&current_engine);
    }
 
     *(wm_gvbase - vn) = MMK_INT(0);
-prolog_engine_invariant(&current_engine);
+prolog_engine_invariant(hpe);
     return vn;
 }
 
@@ -96,22 +96,21 @@ prolog_engine_invariant(&current_engine);
  */
 
 int
-gv_alloc_gvnum(gvnum)
-    int gvnum;
+gv_alloc_gvnum(PE, int gvnum)
 {
     PWord *tofree;
     int num;
 
-    if (gv_isfree(gvnum)) {
+    if (gv_isfree(hpe, gvnum)) {
 	tofree = 0;
-	while ((num=gv_alloc()) != gvnum) {
+	while ((num=gv_alloc(hpe)) != gvnum) {
 	    *(wm_gvbase-num) = (PWord) tofree;
 	    tofree = wm_gvbase-num;
 	}
 	while (tofree) {
 	    PWord *temp = tofree;
 	    tofree =  (PWord *) *tofree;
-	    gv_free(wm_gvbase - temp);
+	    gv_free(hpe, wm_gvbase - temp);
 	}
 	return gvnum;
     }
@@ -126,8 +125,7 @@ gv_alloc_gvnum(gvnum)
  */
 
 int
-gv_isfree(gvnum)
-    int gvnum;
+gv_isfree(PE, int gvnum)
 {
     if (gvnum > wm_gvbase - wm_trailbase)
 	return 1;
@@ -180,27 +178,30 @@ static void fixptrs(prolog_engine *pe)
 }
 
 void
-gv_free(vn)
-    PWord vn;
+gv_free(PE, PWord vn)
 {
     *(long **) (wm_gvbase - vn) = wm_gvfreelist;
     wm_gvfreelist = wm_gvbase - vn;
 }
 
 void
-gv_get(vp, tp, vn)
-    PWord *vp;
-    int  *tp;
-    PWord vn;
+gv_get(
+    PE,
+    PWord *vp,
+    int  *tp,
+    PWord vn
+)
 {
     w_get(vp, tp, *(wm_gvbase - vn));
 }
 
 void
-gv_set(v, t, vn)
-    PWord v;
-    int   t;
-    PWord vn;
+gv_set(
+    PE,
+    PWord v,
+    int   t,
+    PWord vn
+)
 {
     register PWord *newp;
     register PWord *b;

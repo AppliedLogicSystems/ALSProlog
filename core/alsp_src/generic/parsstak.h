@@ -28,8 +28,8 @@ struct rator {
 	long	token_id;
 };
 
-extern struct rator *pst_rator;	/* parser stack top -- rator (operator) */
-extern pword *pst_rand;		/* parser stack top -- rand */
+//extern struct rator *pst_rator;	/* parser stack top -- rator (operator) */
+//extern pword *pst_rand;		/* parser stack top -- rand */
 
 #define TOP_RATOR (*(pst_rator-1))
 #define TOP_RAND (*(pst_rand-1))

@@ -121,7 +121,7 @@
 #endif
 
 int
-pgetcwd(void)
+pgetcwd(PE)
 {
     PWord v1, sym;
     int   t1, symType;
@@ -250,7 +250,7 @@ pchdir()
 #else
 
 int
-pchdir()
+pchdir(PE)
 {
     PWord v1;
     int   t1;
@@ -278,7 +278,7 @@ pchdir()
  */
 
 int
-punlink(void)
+punlink(PE)
 {
     PWord v1;
     int   t1;
@@ -313,7 +313,7 @@ punlink(void)
  */
 
 int
-getDirEntries()
+getDirEntries(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -413,7 +413,7 @@ getDirEntries()
  */
 
 int
-getFileStatus(void)
+getFileStatus(PE)
 {
     PWord v1, v2, vtime;
     int   t1, t2, ttime;
@@ -596,7 +596,7 @@ make_symlink(void)
  */
 
 int
-pcmp_fs(void)
+pcmp_fs(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -630,7 +630,7 @@ pcmp_fs(void)
  */
 
 int
-prmdir()
+prmdir(PE)
 {
     PWord v1;
     int   t1;
@@ -657,7 +657,7 @@ prmdir()
  */
 
 int
-pmkdir()
+pmkdir(PE)
 {
     PWord v1,v2;
     int   t1,t2;
@@ -728,18 +728,16 @@ pmkdir()
 
 #define STAT stat_with_timeout
 
-static	void	stat_timedout		PARAMS(( void ));
-static	int	stat_with_timeout	PARAMS(( const char *, struct stat * ));
+static	void	stat_timedout		( void ));
+static	int	stat_with_timeout	( const char *, struct stat * ));
 
 static void
-stat_timedout()
+stat_timedout(void)
 {
 }
 
 static int
-stat_with_timeout(path, statbuf)
-    const char *path;
-    struct stat *statbuf;
+stat_with_timeout(const char *path, struct stat *statbuf)
 {
     struct sigaction newact;
     struct sigaction oldact;
@@ -784,9 +782,7 @@ stat_with_timeout(path, statbuf)
 #endif /* !defined(HAVE_SETITIMER) */
 
 static char *
-canonical_pathname(path_name,file_namep)
-    char *path_name;
-    char **file_namep;
+canonical_pathname(char *path_name,char **file_namep)
 {
     dev_t rootdev, thisdev;
     ino_t rootino, thisino;
@@ -982,7 +978,7 @@ canonical_pathname(path_name,file_namep)
 
 
 static int
-canonicalize_pathname()
+canonicalize_pathname(PE)
 {
     PWord v1, v2, vp;
     int   t1, t2, tp;
@@ -1017,8 +1013,7 @@ canonicalize_pathname()
 #endif /* CCANONP */
 
 long 
-get_file_modified_time(fname)
-    CONST char *fname;
+get_file_modified_time(const char *fname)
 {
     struct stat buf;
 
@@ -1033,8 +1028,7 @@ get_file_modified_time(fname)
  *
  */
 int
-isdir(fname)
-    CONST char *fname;
+isdir(const char *fname)
 {
     struct stat buf;
 
@@ -1046,7 +1040,7 @@ isdir(fname)
 
 #ifndef MacOS
 int
-pgetpid()
+pgetpid(PE)
 {
     PWord v1, vpid;
     int   t1, tpid;
@@ -1152,7 +1146,7 @@ PI_END
 /* *INDENT-ON* */
 
 void
-init_fsutils()
+init_fsutils(PE)
 {
     PI_INIT;
 }

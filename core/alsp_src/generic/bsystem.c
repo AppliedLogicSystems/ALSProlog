@@ -22,17 +22,17 @@
 #include <Types.h>
 #endif
 
-static	void	abortmessage	PARAMS(( void ));
+static	void	abortmessage	( PE );
 
 int
-pbi_ouch()
+pbi_ouch(PE)
 {
     wm_safety = wm_trigger;
     SUCCEED;
 }
 
 int
-pbi_forceCtlC()
+pbi_forceCtlC(PE)
 {
     wm_interrupt_caught = SIGINT;
     wm_safety = wm_trigger;
@@ -40,7 +40,7 @@ pbi_forceCtlC()
 }
 
 int
-pbi_forcePrologError()
+pbi_forcePrologError(PE)
 {
     wm_interrupt_caught = ALSSIG_ERROR;
     wm_safety = wm_trigger;
@@ -56,7 +56,7 @@ pbi_forcePrologError()
  */
 
 int
-pbi_reset_wm_normal()
+pbi_reset_wm_normal(PE)
 {
     wm_normal = DEFAULT_SAFETY;
     /*
@@ -76,7 +76,7 @@ pbi_reset_wm_normal()
 #ifdef OLDSHELL
 
 int
-pbi_showanswers()
+pbi_showanswers(PE)
 {
     int   ch;
     PWord nv, av, ev;
@@ -94,7 +94,7 @@ pbi_showanswers()
 
 	w_get_car(&ev, &et, nv);
 
-	if (!xform_uia(&ev, &et) && et != WTP_UIA) {
+	if (!xform_uia(hpe, &ev, &et) && et != WTP_UIA) {
 	    PI_oprintf("Error in showanswers, et=%d\n", et);
 	    als_exit(1);
 	}
@@ -140,7 +140,7 @@ pbi_showanswers()
 #endif /* OLDSHELL */
 
 static void
-abortmessage()
+abortmessage(PE)
 {
     switch (wm_aborted) {
 	case 0:		/* do nothing ... no abort */
@@ -160,10 +160,10 @@ abortmessage()
 }
 
 int
-pbi_halt()
+pbi_halt(PE)
 {
     if (wm_aborted)
-	abortmessage();
+	abortmessage(hpe);
     als_exit(0);
 
     /* Never returns */
@@ -174,14 +174,14 @@ pbi_halt()
 
 #ifdef OLDSHELL
 int
-pbi_printno()
+pbi_printno(PE)
 {
     if (wm_aborted) {
 	/* If we are at the top level, print message;
 	 * otherwise be silent.
 	 */
 	if (wm_regidx == 1)
-	    abortmessage();
+	    abortmessage(hpe);
     }
     else
 	PI_oprintf("\nno.\n");
@@ -190,7 +190,7 @@ pbi_printno()
 #endif /* OLDSHELL */
 
 int
-pbi_printwarning()
+pbi_printwarning(PE)
 {
     if (wm_aborted) {
 	/* If we are at the top level, print message;
@@ -199,8 +199,8 @@ pbi_printwarning()
 #if 0
 	//if (wm_regidx == 1)
 #endif
-	if (current_engine.reg_stack_top == current_engine.reg_stack_base+1)
-	    abortmessage();
+	if (hpe->reg_stack_top == hpe->reg_stack_base+1)
+	    abortmessage(hpe);
     }
     else if (curfd == stdin)
 	PI_oprintf("\nWarning: Command failed.\n");
@@ -212,7 +212,7 @@ pbi_printwarning()
 
 
 int
-pbi_stack_overflow()
+pbi_stack_overflow(PE)
 {
     PWord v;
     int   t;
@@ -227,7 +227,7 @@ pbi_stack_overflow()
 }
 
 int
-pbi_stack_info()
+pbi_stack_info(PE)
 {
     PWord v1;
     int   t1;
@@ -243,7 +243,7 @@ pbi_stack_info()
 
 
 /*
-int pbi_limits_info()
+int pbi_limits_info(PE)
 {
     PWord v1,v2,v3;
     int   t1,t2,t3;
@@ -274,7 +274,7 @@ printf("Max=%d Min=%d MA=%d\n",MaxInt,-MaxInt,MaxArity);
 #ifdef MacOS
 
 int
-pbi_debugger(void)
+pbi_debugger(PE)
 {
     Debugger();
 
@@ -285,7 +285,7 @@ pbi_debugger(void)
 
 /* #ifdef OLDSHELL */
 int
-pbi_statistics()
+pbi_statistics(PE)
 {
     PWord v;
     int   t;
@@ -360,19 +360,19 @@ pbi_statistics()
 
     w_mk_term(&item, &itemtype, (PWord) find_token((UCHAR *)"wm_regs"), 7);
 
-    make_number(&numv, &numt, (double) (unsigned long) wm_SP);
+    make_number(hpe, &numv, &numt, (double) (unsigned long) wm_SP);
     w_install_argn(item, 1, numv, numt);
-    make_number(&numv, &numt, (double) (unsigned long) wm_E);
+    make_number(hpe, &numv, &numt, (double) (unsigned long) wm_E);
     w_install_argn(item, 2, numv, numt);
-    make_number(&numv, &numt, (double) (unsigned long) wm_SPB);
+    make_number(hpe, &numv, &numt, (double) (unsigned long) wm_SPB);
     w_install_argn(item, 3, numv, numt);
-    make_number(&numv, &numt, (double) (unsigned long) wm_HB);
+    make_number(hpe, &numv, &numt, (double) (unsigned long) wm_HB);
     w_install_argn(item, 4, numv, numt);
-    make_number(&numv, &numt, (double) (unsigned long) wm_H);
+    make_number(hpe, &numv, &numt, (double) (unsigned long) wm_H);
     w_install_argn(item, 5, numv, numt);
-    make_number(&numv, &numt, (double) (unsigned long) wm_TR);
+    make_number(hpe, &numv, &numt, (double) (unsigned long) wm_TR);
     w_install_argn(item, 6, numv, numt);
-    make_number(&numv, &numt, (double) (unsigned long) wm_B);
+    make_number(hpe, &numv, &numt, (double) (unsigned long) wm_B);
     w_install_argn(item, 7, numv, numt);
 
     w_mk_list(&lv, &lt);
@@ -388,14 +388,14 @@ pbi_statistics()
 
 #ifdef	IProfile
 int
-pbi_init_iprofile()
+pbi_init_iprofile(PE)
 {
     init_iprofile();
     SUCCEED;
 }
 
 int
-pbi_dump_iprofile()
+pbi_dump_iprofile(PE)
 {
     dump_iprofile();
     SUCCEED;

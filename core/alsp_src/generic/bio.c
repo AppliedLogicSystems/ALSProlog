@@ -21,7 +21,7 @@
 #include "icom.h"
 #include "wintcode.h"
 
-int pbi_save_image_with_state_to_file(void)
+int pbi_save_image_with_state_to_file(PE)
 {
     PWord v1;
     int t1;
@@ -29,13 +29,13 @@ int pbi_save_image_with_state_to_file(void)
 
     w_get_An(&v1, &t1, 1);
 
-    if (getstring(&name, v1, t1) && ss_save_image_with_state((char *)name))
+    if (getstring(&name, v1, t1) && ss_save_image_with_state(hpe, (char *)name))
 	SUCCEED;
     else
 	FAIL;
 }
 
-int pbi_attach_state_to_file(void)
+int pbi_attach_state_to_file(PE)
 {
     PWord v1;
     int t1;
@@ -43,7 +43,7 @@ int pbi_attach_state_to_file(void)
 
     w_get_An(&v1, &t1, 1);
 
-    if (getstring(&name, v1, t1) && ss_attach_state_to_file((char *)name))
+    if (getstring(&name, v1, t1) && ss_attach_state_to_file(hpe, (char *)name))
 	SUCCEED;
     else
 	FAIL;
@@ -51,38 +51,34 @@ int pbi_attach_state_to_file(void)
 
 #if !defined(KERNAL) && !defined(PURE_ANSI)
 int
-pbi_save_state_to_file()		/* save_state_to_file */
+pbi_save_state_to_file(PE)		/* save_state_to_file */
 {
     PWord v1;
     int t1;
     UCHAR *name;
     w_get_An(&v1, &t1, 1);
 
-    if (getstring(&name, v1, t1) && ss_save_state((char *)name, 0))
+    if (getstring(&name, v1, t1) && ss_save_state(hpe, (char *)name, 0))
 	SUCCEED;
     else
 	FAIL;
 }
 #endif /* !defined(KERNAL) && !defined(PURE_ANSI) */
 
-static	int	pload_file	PARAMS(( UCHAR *, int ));
-
 static int
-pload_file(name, reconbit)
-    UCHAR *name;
-    int   reconbit;
+pload_file(PE, UCHAR *name, int reconbit)
 {
     int   retval;
 
     dbprot_t odbrs = w_dbprotect(DBRS_WRITABLE);
-    retval = load_file((char *) name, reconbit); 
+    retval = load_file(hpe, (char *) name, reconbit); 
 /*    retval = load_obp((char *) name, reconbit);   */
     (void) w_dbprotect(odbrs);
     return retval;
 }
 
 int
-pbi_load()
+pbi_load(PE)
 {				/* $load(File,Flag) */
     PWord v1, v2;
     int   t1, t2;
@@ -91,28 +87,28 @@ pbi_load()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if (t2 == WTP_INTEGER && getstring(&str, v1, t1) && pload_file(str, (int) v2))
+    if (t2 == WTP_INTEGER && getstring(&str, v1, t1) && pload_file(hpe, str, (int) v2))
 	SUCCEED;
     else
 	FAIL;
 }
 
 int
-pbi_nl()
+pbi_nl(PE)
 {
     fio_nl();
     SUCCEED;
 }
 
 int
-pbi_ttyflush()
+pbi_ttyflush(PE)
 {
     fio_flush();
 
     SUCCEED;
 }
 
-static void simple_write(PWord v, int t)
+static void simple_write(PE, PWord v, int t)
 {
     switch (t) {
     case PI_VAR:
@@ -128,7 +124,7 @@ static void simple_write(PWord v, int t)
 	    list = v; listt = t;
 	    while(1) {
 	        PI_gethead(&head, &headt, list);
-	        simple_write(head, headt);
+	        simple_write(hpe, head, headt);
 	        PI_gettail(&list, &listt, list);
 	        if (listt == PI_LIST) printf(",");
 	        else break;
@@ -138,7 +134,7 @@ static void simple_write(PWord v, int t)
 	    
 	    if (!(list == listnil && listt == PI_SYM)) {
 		printf(",");
-	    	simple_write(list, listt);
+	    	simple_write(hpe, list, listt);
 	    }
 	    
 	    printf("]");
@@ -154,7 +150,7 @@ static void simple_write(PWord v, int t)
 	    i = 1;
 	    while(1) {
 	    	PI_getargn(&a, &at, v, i);
-	    	simple_write(a, at);
+	    	simple_write(hpe, a, at);
 	    	i++;
 	    	if (i <= arity) printf(",");
 	    	else break;
@@ -184,14 +180,14 @@ static void simple_write(PWord v, int t)
     }
 }
 
-int pbi_debug(void)
+int pbi_debug(PE)
 {
     PWord v;
     int   t;
 
     PI_getan(&v, &t, 1);
 
-    simple_write(v, t);
+    simple_write(hpe, v, t);
     printf("\n");
     fflush(stdout);
     SUCCEED;
@@ -199,14 +195,14 @@ int pbi_debug(void)
 
 #ifndef KERNAL
 int
-pbi_write()
+pbi_write(PE)
 {
     PWord v;
     int   t;
 
     w_get_An(&v, &t, 1);
 
-    prolog_write(v, t);
+    prolog_write(hpe, v, t);
     SUCCEED;
 }
 #endif /* KERNAL */
@@ -215,20 +211,20 @@ pbi_write()
 
 
 int
-pbi_display()
+pbi_display(PE)
 {
     PWord va1;
     int   ta1;
 
     w_get_An(&va1, &ta1, 1);
 
-    prolog_display(va1, ta1);
+    prolog_display(hpe, va1, ta1);
 
     SUCCEED;
 }
 
 int
-pbi_get()
+pbi_get(PE)
 {
     PWord v;
     int   t;
@@ -242,7 +238,7 @@ pbi_get()
 }
 
 int
-pbi_get0()
+pbi_get0(PE)
 {
     PWord v;
     int   t;
@@ -258,7 +254,7 @@ pbi_get0()
 
 
 int
-pbi_put()
+pbi_put(PE)
 {
     PWord v;
     int   t;
@@ -275,14 +271,14 @@ pbi_put()
 
 
 int
-pbi_read()
+pbi_read(PE)
 {
     PWord a1v, rv;
     int   a1t, rt;
 
     w_get_An(&a1v, &a1t, 1);
 
-    heap_copy(&rv, &rt, LIST_CAR(prim_read()));
+    heap_copy(hpe, &rv, &rt, LIST_CAR(prim_read(hpe)));
 
     if (w_unify(rv, rt, a1v, a1t))
 	SUCCEED;
@@ -292,14 +288,14 @@ pbi_read()
 
 
 int
-pbi_see()
+pbi_see(PE)
 {
     PWord v;
     int   t;
 
     w_get_An(&v, &t, 1);
 
-    if (force_uia(&v, &t) && fio_see((int) v))
+    if (force_uia(hpe, &v, &t) && fio_see(hpe, (int) v))
 	SUCCEED;
     else
 	FAIL;
@@ -307,7 +303,7 @@ pbi_see()
 
 
 int
-pbi_seeing()
+pbi_seeing(PE)
 {
     PWord v;
     int   t;
@@ -322,23 +318,23 @@ pbi_seeing()
 
 
 int
-pbi_seen()
+pbi_seen(PE)
 {
-    fio_seen();
+    fio_seen(hpe);
 
     SUCCEED;
 }
 
 
 int
-pbi_tell()
+pbi_tell(PE)
 {
     PWord v;
     int   t;
 
     w_get_An(&v, &t, 1);
 
-    if (force_uia(&v, &t) && fio_tell((int) v))
+    if (force_uia(hpe, &v, &t) && fio_tell(hpe, (int) v))
 	SUCCEED;
     else
 	FAIL;
@@ -346,7 +342,7 @@ pbi_tell()
 
 
 int
-pbi_telling()
+pbi_telling(PE)
 {
     PWord v;
     int   t;
@@ -361,7 +357,7 @@ pbi_telling()
 
 
 int
-pbi_told()
+pbi_told(PE)
 {
     fio_told();
 
@@ -371,14 +367,14 @@ pbi_told()
 
 
 int
-pbi_writeq()
+pbi_writeq(PE)
 {
     PWord va1;
     int   ta1;
 
     w_get_An(&va1, &ta1, 1);
 
-    prolog_writeq(va1, ta1);
+    prolog_writeq(hpe, va1, ta1);
 
     SUCCEED;
 }
@@ -388,7 +384,7 @@ pbi_writeq()
 #ifdef DynamicForeign
 
 int
-pbi_load_foreign()
+pbi_load_foreign(PE)
 {				/* $loadforeign(Name, LibStr, InitFunction) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -420,26 +416,26 @@ pbi_load_foreign()
 
 #ifdef SYS_OBP
 int
-pbi_obp_push_stop()
+pbi_obp_push_stop(PE)
 {
 #ifdef OBP
-    obp_push();
-    makeobp = 0;
+    obp_push(hpe);
+    imakeobp = 0;
 #endif
     SUCCEED;
 }
 
 int
-pbi_obp_pop()
+pbi_obp_pop(PE)
 {
 #ifdef OBP
-    obp_pop();
+    obp_pop(hpe);
 #endif
     SUCCEED;
 }
 
 int
-pbi_obp_open()
+pbi_obp_open(PE)
 {
 #ifdef OBP
     PWord v1;
@@ -449,12 +445,12 @@ pbi_obp_open()
     w_get_An(&v1, &t1, 1);
 
     if (getstring(&name, v1, t1)) {
-	obp_push();
-	makeobp = 1;
-	if (obp_open((char *) name))
+	obp_push(hpe);
+	imakeobp = 1;
+	if (obp_open(hpe, (char *) name))
 	    SUCCEED;
 	else {
-	    obp_pop();
+	    obp_pop(hpe);
 	    FAIL;
 	}
     }
@@ -466,24 +462,24 @@ pbi_obp_open()
 }
 
 int
-pbi_obp_close()
+pbi_obp_close(PE)
 {
 #ifdef OBP
-    obp_close();
-    obp_pop();
+    obp_close(hpe);
+    obp_pop(hpe);
 #endif
     SUCCEED;
 }
 
 
 int
-pbi_obp_load()
+pbi_obp_load(PE)
 {				/* obp_load(FileName,Stat) */
     PWord v1, v2;
     int   t1, t2, status;
     UCHAR *name;
 #ifdef OBP
-    int   old_makeobp = makeobp;
+    int   old_makeobp = imakeobp;
 #endif
 
     w_get_An(&v1, &t1, 1);
@@ -492,13 +488,13 @@ pbi_obp_load()
     if (getstring(&name, v1, t1)) {
 #ifdef OBP
 	dbprot_t odbrs;
-	makeobp = 0;		/* don't want to make obp out of loading of
+	imakeobp = 0;		/* don't want to make obp out of loading of
 				 		 * one
 				 		 */
 	odbrs = w_dbprotect(DBRS_WRITABLE);
-	status = f_load((char *) name);
+	status = f_load(hpe, (char *) name);
 	(void) w_dbprotect(odbrs);
-	makeobp = old_makeobp;
+	imakeobp = old_makeobp;
 #else
 	status = 0;
 #endif
@@ -512,27 +508,27 @@ pbi_obp_load()
 }
 
 int
-pbi_resource_load(void)
+pbi_resource_load(PE)
 {
 #ifdef MacOS
 				/* resource_load(FileName,Stat) */
     PWord v1;
     int   t1, status;
     UCHAR *name;
-    int   old_makeobp = makeobp;
+    int   old_makeobp = imakeobp;
 
     w_get_An(&v1, &t1, 1);
 
     if (getstring(&name, v1, t1)) {
 
 	dbprot_t odbrs;
-	makeobp = 0;		/* don't want to make obp out of loading of
+	imakeobp = 0;		/* don't want to make obp out of loading of
 				 		 * one
 				 		 */
 	odbrs = w_dbprotect(DBRS_WRITABLE);
-	status = obpres_load((char *) name);
+	status = obpres_load(hpe, (char *) name);
 	(void) w_dbprotect(odbrs);
-	makeobp = old_makeobp;
+	imakeobp = old_makeobp;
 
 	if (status == 1)
 	    SUCCEED;
@@ -550,7 +546,7 @@ pbi_resource_load(void)
 
 #ifdef OLDCONSULT
 int
-pbi_old_consult()
+pbi_old_consult(PE)
 {				/* old_consult(FileName,NErrs) */
     PWord v1, v2;
     int   t1, t2;
@@ -561,7 +557,7 @@ pbi_old_consult()
     w_get_An(&v2, &t2, 2);
 
     if (getstring(&name, v1, t1)
-	   && (ec = consult(find_token(name))) != -1) {	
+	   && (ec = consult(hpe, find_token(name))) != -1) {	
 	if (w_unify(v2, t2, ec, WTP_INTEGER))
 	    SUCCEED;
 	else

@@ -39,7 +39,7 @@ extern void   stack_overflow  PARAMS(( int ));
 
 #undef mask
 
-static unsigned long *marks;
+//static unsigned long *marks;
 
 #define TOPTR(w)    ((long *) (((long) (w)) & ~MTP_TAGMASK))
 #define SETBIT(a,b) *((a)+((b)>>5)) |= 1<<((b)&037)
@@ -47,7 +47,7 @@ static unsigned long *marks;
 #define TSTBIT(a,b) (*((a)+((b)>>5)) & (1<<((b)&037)))
 #define MARK(h)     SETBIT(marks,(h)-wm_heapbase),nmarked++
 #define MARKED(h)   TSTBIT(marks,(h)-wm_heapbase)
-#define REV(loc)    rev(heap_low,heap_high,(long *)(loc),(long)(loc))
+#define REV(loc)    rev(hpe, heap_low,heap_high,(long *)(loc),(long)(loc))
 
 #define FENCEVAL(v) MFENCE_VAL(v)
 
@@ -121,21 +121,21 @@ static unsigned long *marks;
  |      apb             -- argument pointer corresponding to b for phase 2
  *---------------------------------------------------------------------------------*/
 
-static long *heap_low;
-static long *heap_high;
-static long nmarked;
+//static long *heap_low;
+//static long *heap_high;
+//static long nmarked;
 
 #ifdef DEBUGSYS /*--------------------------------------------------*/
 static int gccallcount;		/* number of times gc has been called */
 extern int gcbeep;
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 
-static	long *	mark_args	PARAMS(( long *, Code * ));
-static	void	mark_from	PARAMS(( long * ));
-static	void	rev		    PARAMS(( long *, long *, long *, long ));
-static	void	rev_update	PARAMS(( long *, long ));
-static	void	init_marks	PARAMS(( void ));
-static	void	mark		PARAMS(( long ));
+static	long *	mark_args	(PE, long *, Code * );
+static	void	mark_from	(PE, long * );
+static	void	rev		    (PE, long *, long *, long *, long );
+static	void	rev_update	(PE, long *, long );
+static	void	init_marks	( PE );
+static	void	mark		(PE, long );
 
 #ifdef INTCONSTR
 static	int	core_gc		PARAMS(( void ));
@@ -152,7 +152,7 @@ int
 core_gc()
 #else
 int
-gc()
+gc(PE)
 #endif
 {
     long *mrccp;
@@ -287,10 +287,8 @@ gc()
     val_at(heap_high) = MTP_INT;	/* put constant in free heap location */
     nmarked =           0;
 
-    init_marks();
-    mark((long) heap_high);		    /* mark it  */
-
-
+    init_marks(hpe);
+    mark(hpe, (long) heap_high);		    /* mark it  */
 
     /*-----------------------------------------------------------------------*
      | Phase 2:   Mark from arguments, environments, trail cells, and
@@ -317,23 +315,23 @@ gc()
 
 		if (apb <= e) {
 	    	for (ap += 2; ap < apb; ap++)
-				mark_from(ap);
+				mark_from(hpe, ap);
 		}
 		else {
 	    	ra = env_CP(ap);
 	    	for (ap += 2; ap < e; ap++)
-				mark_from(ap);
+				mark_from(hpe, ap);
 	    	while (e < apb) {
-				ap = mark_args(e, ra);
+				ap = mark_args(hpe, e, ra);
 				ra = env_CP(e);
 				e = env_E(e);
 
 				if (apb < e)
 		    		for (; ap < apb; ap++)
-						mark_from(ap);
+						mark_from(hpe, ap);
 				else
 		    		for (; ap < e; ap++)
-						mark_from(ap);
+						mark_from(hpe, ap);
 	    	}  /* while (e < apb)  */
 		}      /* if (apb <= e)-else */
 
@@ -400,7 +398,7 @@ gc()
      *----------------------------------------------------------------------*/
     for (ap = wm_trailbase; ap < wm_gvbase; ap++)
 	{
-		mark_from(ap - BIAS);
+		mark_from(hpe, ap - BIAS);
 	}
 
     /*-----------------------------------------------------------------------*
@@ -575,8 +573,8 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 				mp = marks + ((h - wm_heapbase) >> 5);
 				m = *mp << (32 - i);
 		   	}
-		   rev_update(h, (long)nh);
-		   rev(heap_low, h - 1, h, (long)h);
+		   rev_update(hpe, h, (long)nh);
+		   rev(hpe, heap_low, h - 1, h, (long)h);
 		   nh--;
 		}	/* if (((long m) < 0) */
 
@@ -594,7 +592,7 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 	for (; mp <= mstop; mp++, h += i)
 	    for (i = 32, m = *mp; i && m; i--, h++, m >>= 1)
 		if (m & 1) {						/* if low bit is set... */
-		    rev_update(h, (long)nh);
+		    rev_update(hpe, h, (long)nh);
 		    if (ISFENCE(val_at(h))) {
 				v = val_at(h);
 				val_at(nh) = v;
@@ -614,7 +612,7 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 			    	val_at(nh) = ((long) nh) | (v & MTP_TAGMASK);
 				}
 				else {
-			    	rev(h + 1, heap_high, h, (long)nh);
+			    	rev(hpe, h + 1, heap_high, h, (long)nh);
 			    	val_at(nh) = val_at(h);
 				}
 		    }	/* if(ISFENCE...) - else */
@@ -660,10 +658,10 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 	if ((wm_TR - wm_H) < wm_normal)
 	  {
 	    printf("expanding heap from: %ld cells\nto: %ld cells\n",
-		   current_engine.heap_size, current_engine.heap_size+0x40000);
+		   hpe->heap_size, hpe->heap_size+0x40000);
 
-	    if (!size_prolog_engine(&current_engine, current_engine.stack_size,
-			       current_engine.heap_size+0x40000)) heap_overflow();
+	    if (!size_prolog_engine(hpe, hpe->stack_size,
+			       hpe->heap_size+0x40000)) heap_overflow(hpe);
 	  }
 
 #ifdef undef 
@@ -696,9 +694,11 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 	 *----------------------------------------------------*/
 
 static long *
-mark_args(e, ra)
-    long *e;
-    Code *ra;			/* return address */
+mark_args(
+    PE,
+    long *e,
+    Code *ra			/* return address */
+)
 {
     long  mask;			/* mask           */
     int   nargs;
@@ -738,7 +738,7 @@ mark_args(e, ra)
 
     for (e += 2; nargs--; e++) {
 		if ((mask & 1) || nargs < cutoff)
-	    	mark_from(e);
+	    	mark_from(hpe, e);
 		mask >>= 1;
     }
     return e;
@@ -751,10 +751,9 @@ mark_args(e, ra)
 	 *----------------------------------------------------*/
 
 static void
-mark_from(loc)
-    long *loc;
+mark_from(PE, long *loc)
 {
-    mark(val_at(loc));
+    mark(hpe, val_at(loc));
     REV(loc);
 }
 	/*--------------------------*
@@ -772,8 +771,7 @@ mark_from(loc)
  *-------------------------------------------------------------------------------*/
 
 static void
-rev(lo, hi, loc, targ)
-    long *lo, *hi, *loc, targ;
+rev(PE, long *lo, long *hi, long *loc, long targ)
 {
     long *ptr;
     long  v;
@@ -811,8 +809,7 @@ rev(lo, hi, loc, targ)
  *------------------------------------------------------------------------------*/
 
 static void
-rev_update(loc, targ)
-    long *loc, targ;
+rev_update(PE, long *loc, long targ)
 {
     long  v, tags, *ptr, temp;
 
@@ -853,7 +850,7 @@ rev_update(loc, targ)
 
 
 static void
-init_marks()
+init_marks(PE)
 {
     register unsigned long *m;
 
@@ -861,7 +858,7 @@ init_marks()
     //marks = (unsigned long *) prs_area;
 #endif
 
-    marks = (unsigned long *) current_engine.mark_area;
+    marks = (unsigned long *) hpe->mark_area;
     m = marks + ((wm_H - wm_heapbase) / 32) + 1;
 
     while (m > marks) {
@@ -875,8 +872,7 @@ init_marks()
 	 *----------------------------------------------------*/
 
 static void
-mark(val)
-    register long val;
+mark(PE, register long val)
 {
     register long *ptr, *bptr;
     register long tag, btag;
@@ -935,7 +931,7 @@ mark_top:
 				}
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 				xval = (long) MMK_STRUCTURE( ((PWord *)val)-1 );
-				mark(xval);   
+				mark(hpe, xval);   
 #ifdef DEBUGSYS /*--------------------------------------------------*/
 				if (debug_system[GCFREEZEINFO]) {
     				printf("--xval=%x marked\n",(int)xval);

@@ -1,5 +1,6 @@
 #include "defs.h"
 #include <errno.h>
+#include "module.h"
 
 #include "engine.h"
 
@@ -59,6 +60,10 @@
 #undef ane_entbase
 #undef ane_entptr
 
+#undef perrcount
+#undef prs_erc_index
+#undef obp_stack_top
+
 #undef wm_fail
 #undef wm_trust_fail
 #undef wm_return_success
@@ -70,8 +75,15 @@
 #undef rungoal_modpatch
 #undef rungoal_goalpatch
 
+#undef wm_normal
+#undef wm_safety
+#undef wm_trigger
+#undef wm_interrupt_caught
+#undef wm_in_Prolog
+#undef wm_spying
 
-prolog_engine current_engine;
+#undef wm_aborted
+
 
 #define THROW_GENERIC_ERROR(n) Failure((n), 0)
 #define Register_Stack_Overflow 0
@@ -82,6 +94,7 @@ prolog_engine current_engine;
 void init_prolog_globals(void)
 {
 	os_init_prolog_globals();
+	thread_init();
 }
 
 prolog_engine *create_prolog_engine(size_t stack_size, size_t heap_size)
@@ -102,11 +115,13 @@ void delete_prolog_engine(prolog_engine *pe)
 	free(pe);
 }
 
+void chpt_init(PE);
+
 void init_prolog_engine(prolog_engine *pe, size_t stack_size, size_t heap_size)
 {	
 	if (sizeof(PCell) != sizeof(PWord)) fatal_error(0,0);
 	
-	init_db(&pe->db);
+	//	init_db(pe->db);
 	
 	alloc_prolog_memory(pe, stack_size, heap_size);
 
@@ -122,8 +137,19 @@ void init_prolog_engine(prolog_engine *pe, size_t stack_size, size_t heap_size)
 
 	pe->reg.TR.ptr = pe->trail_base;
 
-	pe->reg.rFAIL.code = pe->db.wm_panic;
+	pe->reg.rFAIL.code = pe->db->wm_panic;
 	
+	pe->wm_normal = DEFAULT_SAFETY;
+	pe->wm_safety = DEFAULT_SAFETY;
+	pe->wm_trigger = -1;
+	pe->wm_interrupt_caught = 0;
+	pe->wm_in_Prolog = 0;
+	pe->wm_spying = 0;
+
+	pe->wm_aborted = 0;
+
+	chpt_init(pe);
+
 	ASSERT(prolog_engine_invariant(pe));
 }
 
@@ -145,6 +171,9 @@ void init_db(prolog_database *db)
     //no init struct defprocs *default_procs;
     //no init long default_procmax;
 #endif
+	db->nmods = 0;
+	db->nuses = 0;
+
 	db->ts_allocidx = 0;
 	db->ts_allocated = 2048;
 	db->ts_prime = 2039;
@@ -166,10 +195,20 @@ void init_db(prolog_database *db)
 	db->w_reconstamp = 0;
 	db->w_tofreelist = 0;
 	db->w_tofreesize = 0;
-	db->w_nametable = 0;
+	db->db_w_nametable = 0;
 	db->codeblock_list = 0;
 	db->ane_entbase = 0;
 	db->ane_entptr = 0;
+	
+	db->state = DBRS_WRITABLE;
+
+	db->perrcount = 0;
+
+	db->prs_erc_index = -1;
+	
+	db->obp_stack_top = 0;
+	db->PI_modid = MODULE_GLOBAL;
+
 }
 
 void fix_offset(void **q, prolog_database *db, block_info old_blocks[])
@@ -348,25 +387,26 @@ void load_db(prolog_database *db, void *f, long offset,
 
 void move_db(prolog_database *db)
 {
-	prolog_database new_db;
+	prolog_database *new_db;
 	int i;
 	
-	new_db = *db;
+	new_db = malloc(sizeof(*new_db));
+	*new_db = *db;
 	
 	/* copy the first big block */
-	new_db.als_mem = (struct am_header *)alloc_big_block(db->als_mem->blocks[0].asize, FE_ALS_MEM_INIT);
-	memcpy(new_db.als_mem, db->als_mem, db->als_mem->blocks[0].asize);
-	new_db.als_mem->blocks[0].start = (long *)new_db.als_mem;
-	new_db.als_mem->blocks[0].asize = db->als_mem->blocks[0].asize;
+	new_db->als_mem = (struct am_header *)alloc_big_block(db->als_mem->blocks[0].asize, FE_ALS_MEM_INIT);
+	memcpy(new_db->als_mem, db->als_mem, db->als_mem->blocks[0].asize);
+	new_db->als_mem->blocks[0].start = (long *)new_db->als_mem;
+	new_db->als_mem->blocks[0].asize = db->als_mem->blocks[0].asize;
 	
 	/* Copy any other big blocks */
 	for (i = 1; i < db->als_mem->nblocks; i++) {
-		new_db.als_mem->blocks[i].start = alloc_big_block(db->als_mem->blocks[i].asize, FE_ALS_MEM_INIT);
-		new_db.als_mem->blocks[i].asize = db->als_mem->blocks[i].asize;
-		memcpy(new_db.als_mem->blocks[i].start, db->als_mem->blocks[i].start, db->als_mem->blocks[i].asize);		
+		new_db->als_mem->blocks[i].start = alloc_big_block(db->als_mem->blocks[i].asize, FE_ALS_MEM_INIT);
+		new_db->als_mem->blocks[i].asize = db->als_mem->blocks[i].asize;
+		memcpy(new_db->als_mem->blocks[i].start, db->als_mem->blocks[i].start, db->als_mem->blocks[i].asize);		
 	}
 	
-	relocate_db(&new_db, (block_info *)db->als_mem->blocks);
+	relocate_db(new_db, (block_info *)db->als_mem->blocks);
 
 	/* Erase old blocks */
 	{
@@ -379,7 +419,8 @@ void move_db(prolog_database *db)
 	/* Free old blocks someday */
 
 	/* Replace old with new */
-	*db = new_db;
+	*db = *new_db;
+	free(new_db);
 }
 	
 static void relocate_db(prolog_database *db, block_info *old_blocks)
@@ -450,31 +491,31 @@ static void relocate_db(prolog_database *db, block_info *old_blocks)
 	}
 	}
 	
-	FIX_OFFSET(&db->w_nametable);
+	FIX_OFFSET(&db->db_w_nametable);
 	
 	{
 		for (i = 0; i < NTBL_SIZE; i++) {
-			if (db->w_nametable[i]) {
-				FIX_OFFSET(&db->w_nametable[i]);
+			if (db->db_w_nametable[i]) {
+				FIX_OFFSET(&db->db_w_nametable[i]);
 				
-				if (db->w_nametable[i]->first_clause) {
+				if (db->db_w_nametable[i]->first_clause) {
 					long *p;
-					FIX_OFFSET(&db->w_nametable[i]->first_clause);
-					p = db->w_nametable[i]->first_clause;
+					FIX_OFFSET(&db->db_w_nametable[i]->first_clause);
+					p = db->db_w_nametable[i]->first_clause;
 					while (p) {
 						FIX_OFFSET(&nextClauseAddr(p));
 						relocate_code(choiceEntry(p), sizeCode(p), db, old_blocks);
-						p = next_clause(p);
+						p = next_clause_db(db, p);
 					}
 				}
-				if (db->w_nametable[i]->last_clause) FIX_OFFSET(&db->w_nametable[i]->last_clause);
-				if (db->w_nametable[i]->index_block) {
+				if (db->db_w_nametable[i]->last_clause) FIX_OFFSET(&db->db_w_nametable[i]->last_clause);
+				if (db->db_w_nametable[i]->index_block) {
 					long *p;
-					FIX_OFFSET(&db->w_nametable[i]->index_block);
-					p = db->w_nametable[i]->index_block;
+					FIX_OFFSET(&db->db_w_nametable[i]->index_block);
+					p = db->db_w_nametable[i]->index_block;
 					relocate_code(choiceEntry(p)+2, sizeCode(p), db, old_blocks);
 				}
-				relocate_code(db->w_nametable[i]->overflow, (int) (NTBL_OVERFLOWSIZE 
+				relocate_code(db->db_w_nametable[i]->overflow, (int) (NTBL_OVERFLOWSIZE 
 	                               + NTBL_CALLENTRYSIZE
 				       + NTBL_EXECENTRYSIZE
 				       + NTBL_CODESIZE), db, old_blocks);
@@ -785,7 +826,7 @@ static int do_offset(PCell *p, long offset)
 	return size;
 }
 
-static void relocate_prolog_memory(prolog_engine *pe, long stack_max_offset, long stack_heap_offset, long trail_offset)
+static void relocate_prolog_memory(prolog_engine *pe, long stack_heap_offset, long trail_offset)
 {
 	register_set *s;
 	PCell *p, *t;
@@ -808,7 +849,7 @@ static void relocate_prolog_memory(prolog_engine *pe, long stack_max_offset, lon
 	/* Brute force approach! */
 	{
 		for (p = pe->reg.E.ptr; p < pe->stack_base; p++) {
-			if (p->ptr > pe->stack_max - stack_max_offset && p->ptr < pe->trail_base - trail_offset)
+			if (p->ptr > pe->stack_max - stack_heap_offset && p->ptr < pe->trail_base - trail_offset)
 			{
 				do_offset(p, stack_heap_offset);
 			}
@@ -850,9 +891,7 @@ int size_prolog_engine(prolog_engine *pe, size_t new_stack_size, size_t new_heap
 {
 TRY {
 	long diff = (long)(new_stack_size + new_heap_size) - (long)(pe->stack_size + pe->heap_size);
-	PCell *old_heap_base = pe->heap_base,
-	      *old_trail_base = pe->trail_base,
-	      *old_stack_max = pe->stack_max;
+	PCell *old_heap_base = pe->heap_base, *old_trail_base = pe->trail_base;
 	
 	prolog_engine_invariant(pe);
 	
@@ -866,7 +905,7 @@ TRY {
 		resize_prolog_memory(pe, new_stack_size, new_heap_size);
 	}
 	
-	relocate_prolog_memory(pe, pe->stack_max - old_stack_max, pe->heap_base - old_heap_base, pe->trail_base - old_trail_base);
+	relocate_prolog_memory(pe, pe->heap_base - old_heap_base, pe->trail_base - old_trail_base);
 
 	ASSERT(prolog_engine_invariant(pe));
 	
@@ -877,7 +916,7 @@ TRY {
 } ENDTRY
 }
 
-int pbi_resize_memory(void)
+int pbi_resize_memory(PE)
 {
 	PWord v1, v2;
     int   t1, t2;
@@ -885,7 +924,7 @@ int pbi_resize_memory(void)
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
     
-    size_prolog_engine(&current_engine, v1, v2);
+    size_prolog_engine(hpe, v1, v2);
 	
 	SUCCEED;
 }

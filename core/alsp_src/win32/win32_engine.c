@@ -82,6 +82,9 @@ void unprotect_stack(prolog_engine *pe)
 
 static LONG WINAPI exception_filter(struct _EXCEPTION_POINTERS *lpexpExceptionInfo)
 {
+#if 1
+    	return EXCEPTION_CONTINUE_SEARCH;
+#else	
     if (lpexpExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION
         && current_engine.stack_protected) {
 	unprotect_stack(&current_engine);
@@ -89,7 +92,8 @@ static LONG WINAPI exception_filter(struct _EXCEPTION_POINTERS *lpexpExceptionIn
 	return EXCEPTION_CONTINUE_EXECUTION;
     } else {
     	return EXCEPTION_CONTINUE_SEARCH;
-    }	    
+    }
+#endif    	    
 }
 
 void os_init_prolog_globals(void)

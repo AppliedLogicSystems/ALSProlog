@@ -9,7 +9,7 @@
  *================================================================*/
 
 #include "defs.h"
-#include "varproc.h"
+//#include "varproc.h"
 #include "compile.h"
 #include "module.h"
 #include "icode.h"
@@ -34,10 +34,7 @@ static int comp_exp();
  *      isenv           -- 1 if an environment has been allocated, 0 otherwise
  */
 
-comp_math(goal, islastgoal, deallocneeded)
-    pword goal;
-    int   islastgoal;
-    int   deallocneeded;
+comp_math(pword goal, int islastgoal, int deallocneeded)
 {
     int   functor;
     int   rv;
@@ -114,8 +111,7 @@ comp_math(goal, islastgoal, deallocneeded)
 }
 
 static int
-comp_exp(e)
-    pword e;
+comp_exp(pword e)
 {
     int   id, arity, loc;
 
@@ -344,7 +340,7 @@ int   cmictab[] =
 
 
 
-static	void	comp_exp	PARAMS(( pword ));
+static	void	comp_exp	( pword ));
 
 /*
  * comp_math is called from compile.c with four arguments.
@@ -357,18 +353,19 @@ static	void	comp_exp	PARAMS(( pword ));
  */
 
 void
-comp_math(goal, isonlygoal, regmask, stackadj)
-    pword goal;
-    int   isonlygoal;
-    long  regmask;
-    long  stackadj;
+comp_math(
+    pword goal,
+    int   isonlygoal,
+    long  regmask,
+    long  stackadj
+)
 {
     int   functor;
 
     functor = FUNCTOR_TOKID(TERM_FUNCTOR(goal));
 
     icode(I_MTH_INIT1, isonlygoal, regmask, 0, 0);
-    gccallinfo();		/* we need the call info if we call out */
+    gccallinfo(hpe);		/* we need the call info if we call out */
     icode(I_MTH_INIT2, regmask, stackadj, 0, 0);
     if (functor == TK_IS) {
 
@@ -382,7 +379,7 @@ comp_math(goal, isonlygoal, regmask, stackadj)
 	    }
 	    else {
 		if (!loc) {
-		    loc = find_temp();
+		    loc = find_temp(hpe);
 		    vtbl[i].home = loc;
 		}
 
@@ -428,8 +425,7 @@ comp_math(goal, isonlygoal, regmask, stackadj)
 }
 
 static void
-comp_exp(e)
-    pword e;
+comp_exp(pword e)
 {
     int   id, arity, loc;
 
@@ -443,7 +439,7 @@ comp_exp(e)
 
 	    if (!vtbl[id].usecnt) {
 		if (!loc) {
-		    loc = find_temp();
+		    loc = find_temp(hpe);
 		    vtbl[id].home = loc;
 		}
 		icode(I_P_XVAR, index_of(loc), disp_of(loc), 0, 0);

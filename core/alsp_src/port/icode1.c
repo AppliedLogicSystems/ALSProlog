@@ -26,35 +26,35 @@
 
 extern int system_debugging;
 
-#ifdef KERNAL
-#define MAXCALLS    80
-#define ICBUFSIZE  3024
-#else
-#define MAXCALLS    512
-#define ICBUFSIZE 32768
-#endif /* KERNAL */
+//#ifdef KERNAL
+//#define MAXCALLS    80
+//#define ICBUFSIZE  3024
+//#else
+//#define MAXCALLS    512
+//#define ICBUFSIZE 32768
+//#endif /* KERNAL */
 
-Code *dstart;	/* Where to go for a determinate start of
-				 * clause
-				 */
+//Code *dstart;	/* Where to go for a determinate start of
+//				 * clause
+//				 */
 
-int makeobp;
+//int makeobp;
 
 /*
  * data structure for storing gc call information
  */
 
-static struct {
-    Code *patchaddr;
-    long  argenvsize;
-    long  argmask;
-} callinfo[MAXCALLS];
+//static struct {
+//    Code *patchaddr;
+//    long  argenvsize;
+//    long  argmask;
+//} callinfo[MAXCALLS];
 
-static int callidx;		/* call index                   */
+//static int callidx;		/* call index                   */
 
 /* 1 if the first argument has been processed.  0 otherwise. */
 
-int   firstargprocessed;
+//int   firstargprocessed;
 
 /*
  * Pointer to the determinate code for the first argument in which
@@ -62,25 +62,25 @@ int   firstargprocessed;
  * first argument.
  */
 
-Code *firstargptr;
+//Code *firstargptr;
 
-int   capturemode;		/* not used in Port code */
+//int   capturemode;		/* not used in Port code */
 
 /*
  * The icode buffer and buffer pointer
  */
 
-Code  icode_buf[ICBUFSIZE];
+//Code  icode_buf[ICBUFSIZE];
 /*  Now declared in icodegen.h; 
   Code *ic_ptr;  */
 
-ic_uptr_type ic_uptr;
+//ic_uptr_type ic_uptr;
 
 /*
  * Previous instruction pointer for doing minimial peephole optimization
  */
 
-Code *ic_pptr;
+//Code *ic_pptr;
 
 /*---------------------------------------------------------------------------
  * The "Portable" version has no temporary registers.  Therefore, the compiler
@@ -91,7 +91,7 @@ Code *ic_pptr;
  * or execute instruction.
  *--------------------------------------------------------------------------*/
 
-static long sp_disp;
+//static long sp_disp;
 
 #define BLKSIZE(obj) (sizeof(obj)/sizeof(Code))
 
@@ -101,20 +101,20 @@ static long sp_disp;
 		 (iidx >= 0 ? posic[iidx] : negic[-iidx-1]), \
 		 w,x,y,z);
 
-#define ICODE(macro,str,addr,obp) void addr PARAMS(( long, long, long, long ));
+#define ICODE(macro,str,addr,obp) void addr (PE, long, long, long, long );
 #include "icodedef.h"
 
-static	void	ic_illegal	PARAMS(( long, long, long, long ));
-static	void	ic_uiastr	PARAMS(( char * ));
-static	void	ic_p_const	PARAMS(( long, long, long ));
-static	void	ic_backpatch	PARAMS(( Code *, int ));
-static	void	addtosp		PARAMS(( long ));
+static	void	ic_illegal	(PE, long, long, long, long );
+static	void	ic_uiastr	(PE,  char * );
+static	void	ic_p_const	(PE, long, long, long );
+static	void	ic_backpatch	(PE,  Code *, int );
+static	void	addtosp		(PE, long );
 
 #undef ICODE
 #define ICODE(macro,str,addr,obp) {addr},
 
-static struct {
-    void  (*doit) PARAMS(( long, long, long, long ));
+static const struct {
+    void  (*doit) (PE, long, long, long, long );
 } instrs[] = {
 
 #include "icodedef.h"
@@ -123,21 +123,18 @@ static struct {
 
 
 void
-ic_illegal(x, y, z, w)
-    long  x, y, z, w;
+ic_illegal(PE, long x, long y, long z, long w)
 {
     printf("Illegal icode instruction\n");
 }
 
 void
-ic_start_capture(x, y, z, w)
-    long  x, y, z, w;
+ic_start_capture(PE, long x, long y, long z, long w)
 {
 }
 
 void
-ic_end_capture(x, y, z, w)
-    long  x, y, z, w;
+ic_end_capture(PE, long x, long y, long z, long w)
 {
 }
 
@@ -145,8 +142,7 @@ ic_end_capture(x, y, z, w)
 /* ic_punch is used to put one opcode at a given address */
 
 void
-ic_punch(ptr, data)
-    Code *ptr, data;
+ic_punch(Code *ptr, Code data)
 {
     *ptr = abinst(data);
 }
@@ -156,8 +152,7 @@ ic_punch(ptr, data)
  */
 
 void
-ic_put_align(data)
-    Code  data;
+ic_put_align(PE, Code data)
 {
     *ic_ptr++ = abinst(data);
     ic_ptr += (sizeof (PWord) - sizeof (Code)) / sizeof (Code);
@@ -172,9 +167,7 @@ ic_put_align(data)
  */
 
 void
-ic_put_reg(base, offset)
-    Code  base;
-    long  offset;
+ic_put_reg(PE, Code base, long offset)
 {
     PWord *longptr;
 
@@ -191,8 +184,7 @@ ic_put_reg(base, offset)
  */
 
 void
-ic_putl(data)
-    PWord data;
+ic_putl_pe(PE, PWord data)
 {
     PWord *ptr = (PWord *) ic_ptr;
 
@@ -216,9 +208,7 @@ ic_putl(data)
  */
 
 static void
-ic_backpatch(where, conditional)
-    Code *where;
-    int   conditional;
+ic_backpatch(PE, Code *where, int conditional)
 {
     PWord *dst = (PWord *) where;
 
@@ -228,8 +218,7 @@ ic_backpatch(where, conditional)
 
 
 void
-ic_callinfo(mask, nargs, envsize, w)
-    long  mask, nargs, envsize, w;
+ic_callinfo(PE, long mask, long nargs, long envsize, long w)
 {
     callinfo[callidx].patchaddr = ic_ptr;
     callinfo[callidx].argenvsize = (envsize << 16) | nargs;
@@ -250,8 +239,7 @@ ic_callinfo(mask, nargs, envsize, w)
  */
 
 static void
-addtosp(num)
-    long  num;
+addtosp(PE, long num)
 {
     num += sp_disp;
     if (num != 0) {
@@ -270,8 +258,7 @@ addtosp(num)
  */
 
 void
-ic_call(p, a, y, z)
-    long  p, a, y, z;
+ic_call(PE, long p, long a, long y, long z)
 {
     if (sp_disp) {
 	ic_puti(W_ADDTOSP_CALL);
@@ -292,8 +279,7 @@ ic_call(p, a, y, z)
  */
 
 void
-ic_execute(p, a, x, y)
-    long  p, a, x, y;
+ic_execute(PE, long p, long a, long x, long y)
 {
     if (sp_disp) {
 	ic_puti(W_ADDTOSP_EXECUTE);
@@ -314,10 +300,9 @@ ic_execute(p, a, x, y)
  */
 
 void
-ic_allocate(size, x, y, z)
-    long  size, x, y, z;
+ic_allocate(PE, long size, long x, long y, long z)
 {
-    ic_addtosp(-size, x, y, z);
+    ic_addtosp(hpe, -size, x, y, z);
 }
 
 
@@ -330,10 +315,9 @@ ic_allocate(size, x, y, z)
  */
 
 void
-ic_allocate1(size, x, y, z)
-    long  size, x, y, z;
+ic_allocate1(PE, long size, long x, long y, long z)
 {
-    addtosp(-size);
+    addtosp(hpe, -size);
 }
 
 /*
@@ -344,8 +328,7 @@ ic_allocate1(size, x, y, z)
  */
 
 void
-ic_endallocate1(x, y, z, w)
-    long  x, y, z, w;
+ic_endallocate1(PE, long x, long y, long z, long w)
 {
     LABEL(dstart)
 }
@@ -357,22 +340,20 @@ ic_endallocate1(x, y, z, w)
  *                              as ic_deallocate.
  */
 
-static Code *deallocate2patch;
-static Code *deallocate3patch;
-static PWord *size2patch;
-static int my_isdetflag;
+//static Code *deallocate2patch;
+//static Code *deallocate3patch;
+//static PWord *size2patch;
+//static int my_isdetflag;
 
 void
-ic_deallocate1(w, x, y, z)
-    long  w, x, y, z;
+ic_deallocate1(PE, long w, long x, long y, long z)
 {
     deallocate2patch = deallocate3patch = (Code *) 0;
     my_isdetflag = 1;
 }
 
 void
-ic_deallocate2(size1, x, y, z)
-    long  size1, x, y, z;
+ic_deallocate2(PE, long size1, long x, long y, long z)
 {
     my_isdetflag = 0;
     ic_puti(W_DEALLOCATE2);
@@ -386,14 +367,12 @@ ic_deallocate2(size1, x, y, z)
 
 
 void
-ic_deallocate3(w, x, y, z)
-    long  w, x, y, z;
+ic_deallocate3(PE, long w, long x, long y, long z)
 {
 }
 
 void
-ic_deallocate4(size2, x, y, z)
-    long  size2, x, y, z;
+ic_deallocate4(PE, long size2, long x, long y, long z)
 {
     if (my_isdetflag) {
 	ic_puti(W_DEALLOCATE4);
@@ -402,7 +381,7 @@ ic_deallocate4(size2, x, y, z)
     }
     else {
 	*(size2patch - 1) = size2;	/* backpatch size2 */
-	ic_backpatch(deallocate2patch, 0);
+	ic_backpatch(hpe, deallocate2patch, 0);
     }
 }
 
@@ -424,8 +403,7 @@ ic_deallocate4(size2, x, y, z)
 
 
 void
-ic_trim(size1, size2, isdeterminateforsure, x)
-    long  size1, size2, isdeterminateforsure, x;
+ic_trim(PE, long size1, long size2, long isdeterminateforsure, long x)
 {
     if (isdeterminateforsure) {
 	ic_puti(W_TRIM1);
@@ -448,8 +426,7 @@ ic_trim(size1, size2, isdeterminateforsure, x)
  */
 
 void
-ic_proceed(base, disp, y, z)
-    long  base, disp, y, z;
+ic_proceed(PE, long base, long disp, long y, long z)
 {
     ic_puti(W_PROCEED);
 }
@@ -464,8 +441,7 @@ ic_proceed(base, disp, y, z)
  */
 
 void
-ic_inline_proceed(w, x, y, z)
-    long  w, x, y, z;
+ic_inline_proceed(PE, long w, long x, long y, long z)
 {
     ic_puti(W_PROCEED);
 }
@@ -480,8 +456,7 @@ ic_inline_proceed(w, x, y, z)
  */
 
 void
-ic_init_yvar1(ebase, edisp, x, y)
-    long  ebase, edisp, x, y;
+ic_init_yvar1(PE, long ebase, long edisp, long x, long y)
 {
     ic_puti(W_INIT_YVAR1);
     ic_putl(edisp);
@@ -498,8 +473,7 @@ ic_init_yvar1(ebase, edisp, x, y)
  */
 
 void
-ic_init_yvar2(incr, x, y, z)
-    long  incr, x, y, z;
+ic_init_yvar2(PE, long incr, long x, long y, long z)
 {
     ic_puti(W_INIT_YVAR2);
     ic_putl(incr);
@@ -515,15 +489,13 @@ ic_init_yvar2(incr, x, y, z)
  */
 
 void
-ic_g_uia(uiastr, base, disp, x)
-    long  uiastr;
-    long  base, disp, x;
+ic_g_uia(PE, long uiastr, long base, long disp, long x)
 {
     ic_puti(W_G_UIA);
-    ic_put_reg(base, disp);
+    ic_put_reg(hpe, base, disp);
 
     /* Lay down UIA after instruction */
-    ic_uiastr((char *) uiastr);
+    ic_uiastr(hpe, (char *) uiastr);
 }
 
 /*
@@ -536,11 +508,10 @@ ic_g_uia(uiastr, base, disp, x)
  */
 
 void
-ic_g_sym(tokid, base, disp, x)
-    long  tokid, base, disp, x;
+ic_g_sym(PE, long tokid, long base, long disp, long x)
 {
     ic_puti(W_G_SYM);
-    ic_put_reg(base, disp);
+    ic_put_reg(hpe, base, disp);
     ic_putl(MMK_SYM(tokid));
 }
 
@@ -554,11 +525,10 @@ ic_g_sym(tokid, base, disp, x)
  */
 
 void
-ic_g_int(i, base, disp, x)
-    long  i, base, disp, x;
+ic_g_int(PE, long i, long base, long disp, long x)
 {
     ic_puti(W_G_INT);
-    ic_put_reg(base, disp);
+    ic_put_reg(hpe, base, disp);
     ic_putl(MMK_INT(i));
 }
 
@@ -572,12 +542,11 @@ ic_g_int(i, base, disp, x)
  */
 
 void
-ic_g_value(sbase, sdisp, dbase, ddisp)
-    long  sbase, sdisp, dbase, ddisp;
+ic_g_value(PE, long sbase, long sdisp, long dbase, long ddisp)
 {
     ic_puti(W_G_VALUE);
-    ic_put_reg(sbase, sdisp);
-    ic_put_reg(dbase, ddisp);
+    ic_put_reg(hpe, sbase, sdisp);
+    ic_put_reg(hpe, dbase, ddisp);
 }
 
 /*
@@ -588,8 +557,7 @@ ic_g_value(sbase, sdisp, dbase, ddisp)
  */
 
 void
-ic_g_list(base, disp, x, y)
-    long  base, disp, x, y;
+ic_g_list(PE, long base, long disp, long x, long y)
 {
     if (base == 1) {
 	disp += sp_disp;
@@ -617,8 +585,7 @@ ic_g_list(base, disp, x, y)
  */
 
 void
-ic_g_structure(funcid, arity, base, disp)
-    long  funcid, arity, base, disp;
+ic_g_structure(PE, long funcid, long arity, long base, long disp)
 {
     if (base == 1) {
 	disp += sp_disp;
@@ -641,13 +608,11 @@ ic_g_structure(funcid, arity, base, disp)
  */
 
 void
-ic_p_uia(uiastr, base, disp, x)
-    long  uiastr;
-    long  base, disp, x;
+ic_p_uia(PE, long uiastr, long base, long disp, long x)
 {
     ic_puti(W_P_UIA);
-    ic_put_reg(base, disp);
-    ic_uiastr((char *) uiastr);
+    ic_put_reg(hpe, base, disp);
+    ic_uiastr(hpe, (char *) uiastr);
 }
 
 /*
@@ -660,12 +625,11 @@ ic_p_uia(uiastr, base, disp, x)
  */
 
 void
-ic_p_unsafe(sbase, sdisp, dbase, ddisp)
-    long  sbase, sdisp, dbase, ddisp;
+ic_p_unsafe(PE, long sbase, long sdisp, long dbase, long ddisp)
 {
     ic_puti(W_P_UNSAFE);
-    ic_put_reg(sbase, sdisp);
-    ic_put_reg(dbase, ddisp);
+    ic_put_reg(hpe, sbase, sdisp);
+    ic_put_reg(hpe, dbase, ddisp);
 }
 
 /*
@@ -678,11 +642,10 @@ ic_p_unsafe(sbase, sdisp, dbase, ddisp)
  */
 
 void
-ic_p_int(i, base, disp, x)
-    long  i, base, disp, x;
+ic_p_int(PE, long i, long base, long disp,long  x)
 {
     ic_puti(W_P_SYM);
-    ic_p_const(MMK_INT(i), base, disp);
+    ic_p_const(hpe, MMK_INT(i), base, disp);
 }
 
 /*
@@ -695,19 +658,17 @@ ic_p_int(i, base, disp, x)
  */
 
 void
-ic_p_sym(sym, base, disp, x)
-    long  sym, base, disp, x;
+ic_p_sym(PE, long sym, long base, long disp, long x)
 {
     ic_puti(W_P_SYM);
-    ic_p_const(MMK_SYM(sym), base, disp);
+    ic_p_const(hpe, MMK_SYM(sym), base, disp);
 }
 
 
 static void
-ic_p_const(con, base, disp)
-    long  con, base, disp;
+ic_p_const(PE, long con, long base, long disp)
 {
-    ic_put_reg(base, disp);
+    ic_put_reg(hpe, base, disp);
     ic_putl(con);
 }
 
@@ -722,8 +683,7 @@ ic_p_const(con, base, disp)
  */
 
 void
-ic_p_yvar(ebase, edisp, dbase, ddisp)
-    long  ebase, edisp, dbase, ddisp;
+ic_p_yvar(PE, long ebase, long edisp, long dbase, long ddisp)
 {
     if (ebase == 1)
 	edisp += sp_disp;
@@ -762,11 +722,10 @@ ic_p_yvar(ebase, edisp, dbase, ddisp)
  */
 
 void
-ic_p_xvar(base, disp, x, y)
-    long  base, disp, x, y;
+ic_p_xvar(PE, long base, long disp, long x, long y)
 {
     ic_puti(W_P_XVAR);
-    ic_put_reg(base, disp);
+    ic_put_reg(hpe, base, disp);
 }
 
 /*
@@ -777,11 +736,10 @@ ic_p_xvar(base, disp, x, y)
  */
 
 void
-ic_p_list(base, disp, x, y)
-    long  base, disp, x, y;
+ic_p_list(PE, long base, long disp, long x, long y)
 {
     ic_puti(W_P_LIST);
-    ic_put_reg(base, disp);
+    ic_put_reg(hpe, base, disp);
 }
 
 /*
@@ -794,11 +752,10 @@ ic_p_list(base, disp, x, y)
  */
 
 void
-ic_p_structure(funcid, arity, base, disp)
-    long  funcid, arity, base, disp;
+ic_p_structure(PE, long funcid,long  arity, long base, long disp)
 {
     ic_puti(W_P_STRUCTURE);
-    ic_put_reg(base, disp);
+    ic_put_reg(hpe, base, disp);
     ic_putl(MMK_FUNCTOR(funcid, arity));
 }
 
@@ -810,8 +767,7 @@ ic_p_structure(funcid, arity, base, disp)
  */
 
 void
-ic_endstruct(x, y, z, w)
-    long  x, y, z, w;
+ic_endstruct(PE, long x, long y,long  z, long w)
 {
 }
 
@@ -825,8 +781,7 @@ ic_endstruct(x, y, z, w)
  */
 
 void
-ic_addtosp(num, x, y, z)
-    long  num, x, y, z;
+ic_addtosp(PE, long num, long x, long y, long z)
 {
     sp_disp += num;
 }
@@ -839,8 +794,7 @@ ic_addtosp(num, x, y, z)
  */
 
 static void
-ic_uiastr(s)
-    char *s;
+ic_uiastr(PE, char *s)
 {
     register long l, i;
     register char *cptr;
@@ -887,8 +841,7 @@ ic_uiastr(s)
  */
 
 void
-ic_move(sbase, sdisp, dbase, ddisp)
-    long  sbase, sdisp, dbase, ddisp;
+ic_move(PE, long sbase, long sdisp, long dbase, long ddisp)
 {
     if (sbase == 1)
 	sdisp += sp_disp;
@@ -930,8 +883,7 @@ ic_move(sbase, sdisp, dbase, ddisp)
  */
 
 void
-ic_u_sym(sym, n, y, z)
-    long  sym, n, y, z;
+ic_u_sym(PE, long sym, long n, long y, long z)
 {
     ic_puti(W_U_SYM);
     ic_putl(MMK_SYM(sym));
@@ -945,8 +897,7 @@ ic_u_sym(sym, n, y, z)
  */
 
 void
-ic_u_int(i, n, y, z)
-    long  i, n, y, z;
+ic_u_int(PE, long i, long n, long y, long z)
 {
     ic_puti(W_U_INT);
     ic_putl(MMK_INT(i));
@@ -962,8 +913,7 @@ ic_u_int(i, n, y, z)
  */
 
 void
-ic_u_var(base, disp, n, body)
-    long  base, disp, n, body;
+ic_u_var(PE, long base, long disp, long n, long body)
 {
     if (base == 1) {
 	disp += sp_disp;
@@ -992,8 +942,7 @@ ic_u_var(base, disp, n, body)
  */
 
 void
-ic_u_val(base, disp, n, z)
-    long  base, disp, n, z;
+ic_u_val(PE, long base, long disp, long n, long z)
 {
     if (base == 1) {
 	disp += sp_disp;
@@ -1018,11 +967,10 @@ ic_u_val(base, disp, n, z)
  */
 
 void
-ic_u_lval(base, disp, n, z)
-    long  base, disp, n, z;
+ic_u_lval(PE, long base, long disp, long n,long  z)
 {
     ic_puti(W_U_LVAL);
-    ic_put_reg(base, disp);
+    ic_put_reg(hpe, base, disp);
 }
 
 /*
@@ -1033,8 +981,7 @@ ic_u_lval(base, disp, n, z)
  */
 
 void
-ic_u_void(x, y, z, w)
-    long  x, y, z, w;
+ic_u_void(PE, long x, long y, long z, long w)
 {
     ic_puti(W_U_VOID);
 }
@@ -1049,12 +996,11 @@ ic_u_void(x, y, z, w)
  */
 
 void
-ic_docut(base, disp, z, w)
-    long  base, disp, z, w;
+ic_docut(PE, long base, long disp, long z, long w)
 {
-    addtosp(0);
+    addtosp(hpe, 0);
     ic_puti(W_DOCUT);
-    ic_callinfo(0L, 0L, 0L, 0L);
+    ic_callinfo(hpe, 0L, 0L, 0L, 0L);
 }
 
 /*
@@ -1067,10 +1013,9 @@ ic_docut(base, disp, z, w)
  */
 
 void
-ic_cut_proceed(base, disp, y, z)
-    long  base, disp, y, z;
+ic_cut_proceed(PE, long base, long disp, long y, long z)
 {
-    addtosp(0);
+    addtosp(hpe, 0);
     ic_puti(W_CUT_PROCEED);
 }
 
@@ -1083,10 +1028,9 @@ ic_cut_proceed(base, disp, y, z)
  */
 
 void
-ic_deallocate_cut_proceed(w, x, y, z)
-    long  w, x, y, z;
+ic_deallocate_cut_proceed(PE, long w, long x, long y, long z)
 {
-    addtosp(0);
+    addtosp(hpe, 0);
     ic_puti(W_CUT_PROCEED);	/* same as deallocate_cut_proceed */
 }
 
@@ -1100,28 +1044,25 @@ ic_deallocate_cut_proceed(w, x, y, z)
  */
 
 void
-ic_cutmacro(ebase, edisp, dbase, ddisp)
-    long  ebase, edisp, dbase, ddisp;
+ic_cutmacro(PE, long ebase, long edisp, long dbase, long ddisp)
 {
     ic_puti(W_CUTMACRO);
-    ic_put_reg(ebase, edisp);
-    ic_put_reg(dbase, ddisp);
+    ic_put_reg(hpe, ebase, edisp);
+    ic_put_reg(hpe, dbase, ddisp);
 }
 
 
 void
-icode(iidx, w, x, y, z)
-    int   iidx;
-    long  w, x, y, z;
+icode_pe(PE, int iidx, long w, long x, long y, long z)
 {
-    static PWord proc_id;
-    static int proc_arity;
-    static PWord firstargkey;
+//    static PWord proc_id;
+//    static int proc_arity;
+//    static PWord firstargkey;
     register int i;
 
 #ifdef OBP
-    if (makeobp)
-	f_icode(iidx, w, x, y, z);
+    if (imakeobp)
+	f_icode(hpe, iidx, w, x, y, z);
 #endif
 
     if (iidx < 0) {
@@ -1209,15 +1150,15 @@ icode(iidx, w, x, y, z)
 		break;
 
 	    case IC_ENDMODULE:
-		end_mod();
+		end_mod(hpe);
 		break;
 
 	    case IC_NEWMODULE:
-		new_mod(w);	/* w is token id of new module */
+		new_mod(hpe, w);	/* w is token id of new module */
 		break;
 
 	    case IC_EXPORTPRED:
-		export_pred((PWord) cur_mod, w, (int) x);
+		export_pred(hpe, (PWord) cur_mod, w, (int) x);
 		break;
 
 	    case IC_1STARG:
@@ -1248,15 +1189,15 @@ icode(iidx, w, x, y, z)
 		break;
 
 	    case IC_CREMODCLOSURE:
-		createModuleClosureProcedure(w, (int) x, y);
+		createModuleClosureProcedure(hpe, w, (int) x, y);
 		break;
 
 	    case IC_ADDTO_AUTOUSE:
-		add_default_use((int) w);
+		add_default_use(hpe, (int) w);
 		break;
 
 	    case IC_ADDTO_AUTONAME:
-		add_default_proc(w, (int) x);
+		add_default_proc(hpe, w, (int) x);
 		break;
 
 	    case IC_BEGINALLOC:
@@ -1280,7 +1221,7 @@ icode(iidx, w, x, y, z)
 	Code *tp = ic_ptr;
 	ICPrint(iidx, w, x, y, z);
 
-	(*instrs[iidx].doit) (w, x, y, z);
+	(*instrs[iidx].doit) (hpe, w, x, y, z);
 	if (tp != ic_ptr)
 	    ic_pptr = tp;
 #ifdef KERNAL

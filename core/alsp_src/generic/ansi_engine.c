@@ -64,7 +64,7 @@ void free_prolog_memory(prolog_engine *pe)
 
 void realloc_prolog_memory(prolog_engine *pe, size_t new_stack_size, size_t new_heap_size)
 {
-	pe->memory_base = safe_realloc((Ptr)pe->memory_base,
+	pe->memory_base = safe_realloc(pe->memory_base,
 		(new_heap_size + new_stack_size + pe->globals_base - pe->trail_base)*sizeof(PCell));
 
 	pe->mark_area = safe_realloc(pe->mark_area, new_heap_size/8);

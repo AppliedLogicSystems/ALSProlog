@@ -28,7 +28,7 @@
 #include <sys/mman.h>
 
 #elif	defined(arch_m88k)  /* !HAME_MMAP */
-extern	int	memctl		PARAMS(( void *, int, int ));
+extern	int	memctl		( void *, int, int ));
 
 #endif /* HAVE_MMAP */
 
@@ -47,9 +47,9 @@ extern int system_debugging;
  * wm_aborted indicates whether an abort was done or not.
  *-----------------------------------------------------------------*/
 
-PWord wm_aborted = 0;
+//PWord wm_aborted = 0;
 
-long *aib_clause_addr;		/* used by assertz */
+//long *aib_clause_addr;		/* used by assertz */
 
 /*-----------------------------------------------------------------*
  * w_nametable is allocated to be an array of pointers to procedure entries
@@ -77,14 +77,14 @@ long *aib_clause_addr;		/* used by assertz */
 
 /*//static struct codeblock *codeblock_list = (struct codeblock *) 0;*/
 
-static	long *	code_alloc	PARAMS(( size_t, int ));
-static	void	makerunable	PARAMS(( void ));
-static	void	makewritable	PARAMS(( void ));
-static	ntbl_entry * alloc_name_entry PARAMS(( void ));
-static	long *	cbsffa		PARAMS(( Code * ));
-static	long *	clause_start_from_retaddr PARAMS(( Code *, long * ));
-static	void	mark_fromretaddr PARAMS(( Code * ));
-static	void	mark_clause	PARAMS(( long * ));
+static	long *	code_alloc	(PE,  size_t, int );
+static	void	makerunable	( void );
+static	void	makewritable	( void );
+static	ntbl_entry * alloc_name_entry ( PE );
+static	long *	cbsffa		( Code * );
+static	long *	clause_start_from_retaddr ( Code *, long * );
+static	void	mark_fromretaddr ( Code * );
+static	void	mark_clause	( long * );
 
 /*-----------------------------------------------------------------*
  | code_alloc
@@ -95,18 +95,16 @@ static	void	mark_clause	PARAMS(( long * ));
  *-----------------------------------------------------------------*/
 
 static long *
-code_alloc(size, fe_num)
-    size_t size;
-    int fe_num;
+code_alloc(PE, size_t size, int fe_num)
 {
     struct codeblock *newcb;
 
-    newcb = (struct codeblock *) ss_malloc(sizeof (struct codeblock), fe_num);
+    newcb = (struct codeblock *) ss_malloc(hpe, sizeof (struct codeblock), fe_num);
 
     newcb->next = codeblock_list;
     codeblock_list = newcb;
     
-    newcb->addr = ss_pmalloc(size, fe_num, &newcb->size);
+    newcb->addr = ss_pmalloc(hpe, size, fe_num, &newcb->size);
 	
 	memset(newcb->addr, -1, newcb->size);
     return newcb->addr;
@@ -136,13 +134,11 @@ void dump_codespace(void)
 
 #ifdef PACKAGE
 int
-pckg_addto_codeblocks(addr, len)
-    long *addr;
-    int   len;
+pckg_addto_codeblocks(long *addr, int len)
 {
     struct codeblock *newcb;
 
-    newcb = (struct codeblock *) ss_malloc(sizeof (struct codeblock),
+    newcb = (struct codeblock *) ss_malloc(hpe, sizeof (struct codeblock),
 					   FE_CODESPACE_INIT);
 
     newcb->next = codeblock_list;
@@ -160,7 +156,7 @@ pckg_addto_codeblocks(addr, len)
  *-----------------------------------------------------------------*/
 
 static void
-makerunable()
+makerunable(void)
 {
 #if !defined(Portable) && !defined(arch_sparc)	
 			/* Portable doesn't need any of this stuff */
@@ -204,7 +200,7 @@ makerunable()
  *-----------------------------------------------------------------*/
 
 static void
-makewritable()
+makewritable(void)
 {
 #if !defined(Portable) && !defined(arch_sparc)	
 			/* Portable doesn't need any of this stuff */
@@ -232,14 +228,13 @@ makewritable()
 
 
 dbprot_t
-w_dbprotect(newstate)
-    dbprot_t newstate;
+w_dbprotect_pe(PE, dbprot_t newstate)
 {
-    static dbprot_t state = DBRS_WRITABLE;
+//    static dbprot_t state = DBRS_WRITABLE;
     dbprot_t oldstate;
 
-    oldstate = state;
-    if (state != newstate) {
+    oldstate = hpe->db->state;
+    if (hpe->db->state != newstate) {
 	switch (newstate) {
 	    case DBRS_WRITABLE :
 		makewritable();
@@ -248,7 +243,7 @@ w_dbprotect(newstate)
 		makerunable();
 		break;
 	}
-	state = newstate;
+	hpe->db->state = newstate;
     }
     return oldstate;
 }
@@ -266,13 +261,13 @@ w_dbprotect(newstate)
 /*//static ntbl_entry *ane_entptr = (ntbl_entry *) 0;*/
 
 static ntbl_entry *
-alloc_name_entry()
+alloc_name_entry(PE)
 {
 
     if (ane_entbase == ane_entptr) {
 
 	ane_entbase = (ntbl_entry *) 
-		code_alloc(NENT_ALLOCQUANT * sizeof (ntbl_entry), FE_XMEM_NTBL);
+		code_alloc(hpe, NENT_ALLOCQUANT * sizeof (ntbl_entry), FE_XMEM_NTBL);
 
 	memset((char *) ane_entbase, -1 , NENT_ALLOCQUANT * sizeof (ntbl_entry));
 	ane_entptr = ane_entbase + NENT_ALLOCQUANT;
@@ -290,9 +285,7 @@ alloc_name_entry()
  *-----------------------------------------------------------------*/
 
 int
-nameprobe(modid, tokid, arity)
-    PWord modid, tokid;
-    int   arity;
+nameprobe_pe(PE, PWord modid, PWord tokid, int arity)
 {
     register int i, s;
     register ntbl_entry *n;
@@ -324,9 +317,7 @@ nameprobe(modid, tokid, arity)
  *-----------------------------------------------------------------*/
 
 int
-w_namelookup(modid, tokid, arity)
-    PWord modid, tokid;
-    int   arity;
+w_namelookup_pe(PE, PWord modid, PWord tokid, int arity)
 {
     int   i;
     ntbl_entry *n;
@@ -342,7 +333,7 @@ w_namelookup(modid, tokid, arity)
 	fatal_error(FE_FULL_NTBL, 0);
 
     /* Well, install it. */
-    w_nametable[i] = n = alloc_name_entry();
+    w_nametable[i] = n = alloc_name_entry(hpe);
     n->flags = NFLG_UNDEFINED;
     n->modid = modid;
     n->tokid_arity = MMK_FUNCTOR(tokid, arity);
@@ -374,9 +365,7 @@ w_namelookup(modid, tokid, arity)
  *-----------------------------------------------------------------*/
 
 ntbl_entry *
-w_nameprobe(modid, tokid, arity)
-    PWord modid, tokid;
-    int   arity;
+w_nameprobe_pe(PE, PWord modid, PWord tokid, int arity)
 {
     int   i;
     ntbl_entry *n;
@@ -394,10 +383,7 @@ w_nameprobe(modid, tokid, arity)
 }
 
 ntbl_entry *
-w_nameentry(modid, tokid, arity)
-    PWord modid, tokid;
-    int   arity;
-
+w_nameentry_pe(PE, PWord modid, PWord tokid, int arity)
 {
     return w_nametable[w_namelookup(modid, tokid, arity)];
 }
@@ -410,12 +396,12 @@ w_nameentry(modid, tokid, arity)
 #define WC_HEADERSIZE 4
 
 void
-w_initcode()
+w_initcode_pe(PE)
 {
     if (!w_freeptr) {
 	long *headerblock;
 
-	headerblock = ss_malloc(WC_HEADERSIZE * sizeof (long),
+	headerblock = ss_malloc(hpe, WC_HEADERSIZE * sizeof (long),
 				FE_CODESPACE_INIT);
 
 	/*
@@ -433,27 +419,25 @@ w_initcode()
 	w_freeptr = headerblock;
 
 	w_nametable = (ntbl_entry **)
-		ss_malloc(NTBL_SIZE * sizeof (ntbl_entry *),
+		ss_malloc(hpe, NTBL_SIZE * sizeof (ntbl_entry *),
 			  FE_CODESPACE_INIT);
 	memset((char *) w_nametable, 0 , NTBL_SIZE * sizeof(ntbl_entry *));
 
-	ss_register_global((long *) &w_freeptr);
-	ss_register_global((long *) &w_totspace);
-	ss_register_global((long *) &w_timestamp);
-	ss_register_global((long *) &w_reconstamp);
-	ss_register_global((long *) &w_tofreelist);
-	ss_register_global((long *) &w_tofreesize);
-	ss_register_global((long *) &w_nametable);
-	ss_register_global((long *) &codeblock_list);
-	ss_register_global((long *) &ane_entbase);
-	ss_register_global((long *) &ane_entptr);
+	ss_register_global(hpe, (long *) &w_freeptr);
+	ss_register_global(hpe, (long *) &w_totspace);
+	ss_register_global(hpe, (long *) &w_timestamp);
+	ss_register_global(hpe, (long *) &w_reconstamp);
+	ss_register_global(hpe, (long *) &w_tofreelist);
+	ss_register_global(hpe, (long *) &w_tofreesize);
+	ss_register_global(hpe, (long *) &w_nametable);
+	ss_register_global(hpe, (long *) &codeblock_list);
+	ss_register_global(hpe, (long *) &ane_entbase);
+	ss_register_global(hpe, (long *) &ane_entptr);
     }
 }
 
 void
-w_freecount(tot, used)
-    long *tot, *used;
-
+w_freecount_pe(PE,long *tot, long *used)
 {
     long  f;
     long *p;
@@ -482,8 +466,7 @@ w_freecount(tot, used)
 /*  #define MDEBUG 1 */
 
 long *
-w_alloccode(size)
-    int   size;
+w_alloccode_pe(PE,int size)
 {
     long *p;			/* search pointer */
     long  codeSize = size;	/* Keep real size of usable data */
@@ -507,9 +490,9 @@ w_alloccode(size)
 
 #ifdef MDEBUG
 	    	if (len > WC_AREASIZE + 4)
-			printf("w_alloccode: allocating block of size %ld\n", 4 * len);
+			printf("w_alloccode: allocating block of size %d\n", 4 * len);
 #endif
-	    	new = (long *) code_alloc((size_t)(4 * len), FE_XMEM_CLAUSE);
+	    	new = (long *) code_alloc(hpe, (size_t)(4 * len), FE_XMEM_CLAUSE);
 
 	    		/* update record of total space */
 	    	w_totspace += len;
@@ -565,10 +548,9 @@ w_alloccode(size)
  *-----------------------------------------------------------------*/
 
 void
-w_freecode(p)
-    long *p;
+w_freecode_pe(PE,long *p)
 {
-    long *q;
+    long *q, *r;
     long  s;
 
     s = sizeUsedBlock(p);	/* pull out the size */
@@ -633,11 +615,13 @@ if (*(p + s) > 0) {		/* if next block is free... */
  *-----------------------------------------------------------------*/
 
 long *
-w_installcode(buffer, bufsize, extra, actualsize)
-    Code *buffer;		/* pointer to buffer of Code */
-    int   bufsize;		/* size of the buffer (in Code words) */
-    int   extra;		/* amount of extra space to allocate */
-    int  *actualsize;		/* the actual amount of space allocated */
+w_installcode_pe(
+    PE,
+    Code *buffer,		/* pointer to buffer of Code */
+    int   bufsize,		/* size of the buffer (in Code words) */
+    int   extra,		/* amount of extra space to allocate */
+    int  *actualsize		/* the actual amount of space allocated */
+)
 {
     long *areastart;
     int   copysize;
@@ -684,14 +668,12 @@ w_installcode(buffer, bufsize, extra, actualsize)
  | copy_code procedure for the 88k.
  *-----------------------------------------------------------------*/
 
-extern	void	wm_g_uia	PARAMS(( void ));
-extern	void	wm_p_uia	PARAMS(( void ));
-extern	void	mth_pushdbl0	PARAMS(( void ));
+extern	void	wm_g_uia	( void );
+extern	void	wm_p_uia	( void );
+extern	void	mth_pushdbl0	( void );
 
 void
-copy_code(buffer, to, bufsize)
-    long *buffer, *to;
-    int   bufsize;
+copy_code(long *buffer, long *to, int bufsize)
 {
     register long *s, *t;
     register long v;
@@ -755,18 +737,16 @@ copy_code(buffer, to, bufsize)
 #else  /* arch_m88k */
 #ifdef arch_sparc
 
-extern	void	wm_g_uia	PARAMS(( void ));
-extern	void	wm_p_uia	PARAMS(( void ));
-extern	void	mth_pushdbl0	PARAMS(( void ));
+extern	void	wm_g_uia	( void );
+extern	void	wm_p_uia	( void );
+extern	void	mth_pushdbl0	( void );
 
 /*-----------------------------------------------------------------*
  * copy_code procedure for the Sparc.
  *-----------------------------------------------------------------*/
 
 void
-copy_code(buffer, to, bufsize)
-    long *buffer, *to;
-    int   bufsize;
+copy_code(long *buffer, long *to, int bufsize)
 {
     register long *s, *t, *targ;
     register long v, offs;
@@ -848,10 +828,7 @@ copy_code(buffer, to, bufsize)
  *-----------------------------------------------------------------*/
 
 void
-copy_code(from, to, count)
-    register long *from;
-    register long *to;
-    register int count;
+copy_code(register long *from, register long *to, register int count)
 {
     while (count--)
 	*to++ = *from++;
@@ -873,8 +850,7 @@ copy_code(from, to, count)
  *-----------------------------------------------------------------*/
 
 void
-w_nukeindexing(ent)
-    ntbl_entry *ent;
+w_nukeindexing_pe(PE, ntbl_entry *ent)
 {
     long *p;
 
@@ -897,16 +873,16 @@ w_nukeindexing(ent)
 	    }
 
 	    if (nextClauseAddr(p) == 0) {
-		ic_install_jmp(ent,
+		ic_install_jmp(hpe, ent,
 			       clauseCode(p) + dstartCode(p),
 			       emaskCode(p));
 		ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_SINGLE;
 	    }
 	    else {
-		ic_install_try_me_jmp(ent,
+		ic_install_try_me_jmp(hpe, ent,
 				      clauseCode(p),
 				      (long)choiceEntry(nextClauseAddr(p)));
-		ic_install_retry_me(choiceCode(p),
+		ic_install_retry_me(hpe, choiceCode(p),
 				    (long)choiceEntry(nextClauseAddr(p)),
 				    ent->nargs,
 				    emaskCode(p));
@@ -959,8 +935,7 @@ w_nukeindexing(ent)
  *-----------------------------------------------------------------*/
 
 void
-w_fixchoicepoints(ib)
-    long *ib;
+w_fixchoicepoints_pe(PE, long *ib)
 {
     long *ib_end;
     register PWord *b;
@@ -1039,8 +1014,7 @@ w_fixchoicepoints(ib)
  *-----------------------------------------------------------------*/
 
 static long *
-cbsffa(addr)
-    Code *addr;
+cbsffa(Code *addr)
 {
     long *ret, size;
     int   i;
@@ -1069,8 +1043,7 @@ cbsffa(addr)
  *-----------------------------------------------------------------*/
 
 void
-w_abolish(ent)
-    ntbl_entry *ent;
+w_abolish_pe(PE, ntbl_entry *ent)
 {
     w_abolish_cg(ent, 0, 0);
 }
@@ -1080,9 +1053,7 @@ w_abolish(ent)
  *-----------------------------------------------------------------*/
 
 int
-w_erase(n, a)
-    int   n;
-    long *a;
+w_erase_pe(PE, int n, long *a)
 {
     ntbl_entry *ent;
     long *p, *q;
@@ -1102,7 +1073,7 @@ w_erase(n, a)
 
 	    if (ent->flags & NMSK_DYNAMIC) {
 		ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_BUILTIN;
-		ic_install_fail(ent);
+		ic_install_fail(hpe, ent);
 	    }
 	    else {
 		ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_UNDEFINED;
@@ -1124,13 +1095,13 @@ w_erase(n, a)
 		/* Will only be one clause in new procedure */
 		ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_SINGLE;
 
-		ic_install_jmp(ent,
+		ic_install_jmp(hpe, ent,
 			       clauseCode(q) + dstartCode(q),
 			       emaskCode(q));
 	    }
 	    else {
 		/* Will be other stuff. */
-		ic_install_try_me_jmp(ent,
+		ic_install_try_me_jmp(hpe, ent,
 				      clauseCode(q),
 				      (long)choiceEntry(nextClauseAddr(q)));
 	    }
@@ -1163,7 +1134,7 @@ w_erase(n, a)
 		 */
 		ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_SINGLE;
 
-		ic_install_jmp(ent, clauseCode(p) + dstartCode(p), emaskCode(p));
+		ic_install_jmp(hpe, ent, clauseCode(p) + dstartCode(p), emaskCode(p));
 	    }
 	    /* Make penultimate clause not point to deleted clause. */
 	    nextClauseAddr(p) = 0;
@@ -1172,7 +1143,7 @@ w_erase(n, a)
 	    ent->last_clause = p;
 
 	    /* Penultimate is now the last. Put in a trust. */
-	    ic_install_trust_me(choiceCode(p),
+	    ic_install_trust_me(hpe, choiceCode(p),
 				(PWord) (clauseCode(p) + dstartCode(p)),
 				ent->nargs,
 				emaskCode(p));
@@ -1180,7 +1151,7 @@ w_erase(n, a)
 	else {
 	    /* Make previous clause point after deleted clause */
 	    *(p + WCI_NEXTCLAUSEADDR) = (long) q;
-	    ic_install_retry_me(choiceCode(p), (long)choiceEntry(q),
+	    ic_install_retry_me(hpe, choiceCode(p), (long)choiceEntry(q),
 				ent->nargs, emaskCode(p));
 
 	    /* If previous clause is first in the procedure, the try_me in
@@ -1188,7 +1159,7 @@ w_erase(n, a)
 	     * necessary.
 	     */
 	    if (p == ent->first_clause)
-		ic_install_try_me_jmp(ent, clauseCode(p), (long)choiceEntry(q));
+		ic_install_try_me_jmp(hpe, ent, clauseCode(p), (long)choiceEntry(q));
 	}
     }
 
@@ -1207,8 +1178,7 @@ w_erase(n, a)
  *-----------------------------------------------------------------*/
 
 void
-w_freeclause(a)
-    long *a;
+w_freeclause_pe(PE, long *a)
 {
 #ifndef CodeGC
     w_freecode(a);		/* Actually free up the code */
@@ -1265,23 +1235,24 @@ w_freeclause(a)
  *-----------------------------------------------------------------*/
 
 void
-w_assertz(p, a, buffer, bufsize, firstargkey, fstartoffset, dstartoffset, envsavemask)
-    PWord p;			/* token id */
-    int   a;			/* arity */
-    Code *buffer;		/* temp buffer which has clause code */
-    int   bufsize;		/* size of buffer */
-    long  firstargkey;		/* first argument key */
-    int   fstartoffset;		/* first argument start after dereference
+w_assertz_pe(PE, 
+    PWord p,			/* token id */
+    int   a,			/* arity */
+    Code *buffer,		/* temp buffer which has clause code */
+    int   bufsize,		/* size of buffer */
+    long  lfirstargkey,		/* first argument key */
+    int   fstartoffset,		/* first argument start after dereference
 				 * loop
 				 */
-    int   dstartoffset;		/* determinate start offset */
-    long  envsavemask;		/* environment save mask */
+    int   dstartoffset,		/* determinate start offset */
+    long  envsavemask		/* environment save mask */
+)
 
 {
     w_addclause(
 		   p, a, CGI_ASSERTZ,
 		   buffer, bufsize,
-		   firstargkey, fstartoffset, dstartoffset,
+		   lfirstargkey, fstartoffset, dstartoffset,
 		   envsavemask);
 }
 
@@ -1296,36 +1267,36 @@ w_assertz(p, a, buffer, bufsize, firstargkey, fstartoffset, dstartoffset, envsav
  *-----------------------------------------------------------------*/
 
 void
-w_asserta(p, a, buffer, bufsize, firstargkey, fstartoffset, dstartoffset, envsavemask)
-    PWord p;
-    int   a;
-    Code *buffer;
-    int   bufsize;
-    long  firstargkey;
-    int   fstartoffset;
-    int   dstartoffset;
-    long  envsavemask;
+w_asserta_pe(PE, 
+    PWord p,
+    int   a,
+    Code *buffer,
+    int   bufsize,
+    long  lfirstargkey,
+    int   fstartoffset,
+    int   dstartoffset,
+    long  envsavemask
+)
 {
     w_addclause(
 		   p, a, CGI_ASSERTA,
 		   buffer, bufsize,
-		   firstargkey, fstartoffset, dstartoffset,
+		   lfirstargkey, fstartoffset, dstartoffset,
 		   envsavemask);
 }
 
 void
-w_addclause(p, a, cg_id,
-	    buffer, bufsize,
-	    firstargkey, fstartoffset, dstartoffset, envsavemask)
-    PWord p;
-    int   a;
-    int   cg_id;
-    Code *buffer;
-    int   bufsize;
-    long  firstargkey;
-    int   fstartoffset;
-    int   dstartoffset;
-    long  envsavemask;
+w_addclause_pe(PE, 
+    PWord p,
+    int   a,
+    int   cg_id,
+    Code *buffer,
+    int   bufsize,
+    long  lfirstargkey,
+    int   fstartoffset,
+    int   dstartoffset,
+    long  envsavemask
+)
 {
     int   procid;
     ntbl_entry *ent;
@@ -1353,13 +1324,13 @@ w_addclause(p, a, cg_id,
 
 #ifndef KERNAL
     if (system_debugging) {
-	list_asm(clauseCode(newclause), bufsize);
+	list_asm(hpe, clauseCode(newclause), bufsize);
     }
 #endif /* KERNAL */
 
     /* Fill in the entries in the clause data structure */
     *(newclause + WCI_PROCIDX) = procid;
-    *(newclause + WCI_FIRSTARGKEY) = firstargkey;
+    *(newclause + WCI_FIRSTARGKEY) = lfirstargkey;
     *(newclause + WCI_FSTART) = fstartoffset;
     *(newclause + WCI_DSTART) = dstartoffset;
     *(newclause + WCI_EMASK) = envsavemask;
@@ -1377,8 +1348,8 @@ w_addclause(p, a, cg_id,
 	 | the new clause needs to be taken care of also.
 	 */
 
-	ic_install_jmp(ent, clauseCode(newclause) + dstartoffset, envsavemask);
-	ic_install_trust_me(choiceCode(newclause),
+	ic_install_jmp(hpe, ent, clauseCode(newclause) + dstartoffset, envsavemask);
+	ic_install_trust_me(hpe, choiceCode(newclause),
 			    (PWord) (clauseCode(newclause) + dstartoffset),
 			    ent->nargs,
 			    envsavemask);
@@ -1421,7 +1392,7 @@ w_addclause(p, a, cg_id,
 	nextClauseAddr(prevclause) = newclause;
 	nextClauseAddr(newclause) = (long *) 0;
 	ent->last_clause = newclause;
-	ic_install_trust_me(choiceCode(newclause),
+	ic_install_trust_me(hpe, choiceCode(newclause),
 			    (PWord)(clauseCode(newclause) + dstartoffset),
 			    ent->nargs,
 			    envsavemask);
@@ -1436,17 +1407,17 @@ w_addclause(p, a, cg_id,
 	     ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_MULTIPLE;
 
 	    	/* Install try_me_else jump to first clause */
-	    ic_install_try_me_jmp(ent,
+	    ic_install_try_me_jmp(hpe, ent,
 				  clauseCode(prevclause),
 				  (long)choiceEntry(newclause));
 
-	    ic_install_retry_me(choiceCode(prevclause),
+	    ic_install_retry_me(hpe, choiceCode(prevclause),
 				(long)choiceEntry(newclause),
 				ent->nargs,
 				emaskCode(prevclause));
 	}
 	else {			/* multiple clauses */
-	    ic_install_retry_me(choiceCode(prevclause),
+	    ic_install_retry_me(hpe, choiceCode(prevclause),
 				(long)choiceEntry(newclause),
 				ent->nargs,
 				emaskCode(prevclause));
@@ -1493,7 +1464,7 @@ w_addclause(p, a, cg_id,
 	 * Set next_clause field of newclause
 	 */
 	nextClauseAddr(newclause) = nextclause;
-	ic_install_retry_me(
+	ic_install_retry_me(hpe, 
 			       choiceCode(newclause),
 			       (long)choiceEntry(nextclause),
 			       ent->nargs,
@@ -1510,7 +1481,7 @@ w_addclause(p, a, cg_id,
 	    if (nextClauseAddr(nextclause) == (long *) 0) {
 		/* nextclause is only clause.  Install trust_me in nextclause
 		 */
-		ic_install_trust_me(
+		ic_install_trust_me(hpe, 
 			choiceCode(nextclause),
 			(PWord)(clauseCode(nextclause) + dstartCode(nextclause)),
 			ent->nargs,
@@ -1519,7 +1490,7 @@ w_addclause(p, a, cg_id,
 	    }
 
 	    ent->first_clause = newclause;
-	    ic_install_try_me_jmp(
+	    ic_install_try_me_jmp(hpe, 
 				     ent,
 				     clauseCode(newclause),
 				     (long)choiceEntry(nextclause));
@@ -1528,11 +1499,11 @@ w_addclause(p, a, cg_id,
 	    nextClauseAddr(prevclause) = newclause;
 		if (ent->first_clause == prevclause) {
 				/* prev clause IS the very first clause */
-			ic_install_try_me_jmp(ent,
+			ic_install_try_me_jmp(hpe, ent,
 						clauseCode(prevclause) + dstartoffset,
 						(long)choiceEntry(newclause));
 		};
-	    ic_install_retry_me(
+	    ic_install_retry_me(hpe, 
 				   choiceCode(prevclause),
 				   (long)choiceEntry(newclause),
 				   ent->nargs,
@@ -1563,10 +1534,11 @@ w_addclause(p, a, cg_id,
 	 *--------------------------------------------------*/
 
 void
-w_abolish_cg(ent, cg_id, cg_mask)
-    ntbl_entry *ent;
-    int   cg_id;
-    int   cg_mask;
+w_abolish_cg_pe(PE, 
+    ntbl_entry *ent,
+    int   cg_id,
+    int   cg_mask
+)
 {
     long *p, *q, *eb1;
 
@@ -1603,7 +1575,7 @@ w_abolish_cg(ent, cg_id, cg_mask)
 		nextClauseAddr(eb1) = p;
 
 		if (p) {		/* There are final clause(s) to stay */
-	    	ic_install_retry_me(choiceCode(eb1),
+	    	ic_install_retry_me(hpe, choiceCode(eb1),
 								(long)choiceEntry(p),
 								ent->nargs,
 								emaskCode(eb1));
@@ -1612,12 +1584,12 @@ w_abolish_cg(ent, cg_id, cg_mask)
 	    	ent->last_clause = eb1;	/* eb1 is the last clause now */
 	    	if (eb1 == ent->first_clause) {	/* eb1 is the only clause */
 			ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_SINGLE;
-			ic_install_jmp(ent,
+			ic_install_jmp(hpe, ent,
 			       clauseCode(eb1) + dstartCode(eb1),
 			       emaskCode(eb1));
 	    	}
 	    	else {		/* eb1 is last clause */
-			ic_install_trust_me(choiceCode(eb1),
+			ic_install_trust_me(hpe, choiceCode(eb1),
 				    (PWord) (clauseCode(eb1) + dstartCode(eb1)),
 				    ent->nargs,
 				    emaskCode(eb1));
@@ -1629,12 +1601,12 @@ w_abolish_cg(ent, cg_id, cg_mask)
 		if (p) {		/* There are final clauses */
 	    	if (nextClauseAddr(p) == 0) {	/* p is the only clause */
 				ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_SINGLE;
-				ic_install_jmp(ent,
+				ic_install_jmp(hpe, ent,
 			       clauseCode(p) + dstartCode(p),
 			       emaskCode(p));
 	    	}
 	    	else {
-			ic_install_try_me_jmp(ent,
+			ic_install_try_me_jmp(hpe, ent,
 				      clauseCode(p),
 				      (long)choiceEntry(nextClauseAddr(p)));
 	    	}
@@ -1650,17 +1622,13 @@ w_abolish_cg(ent, cg_id, cg_mask)
 }
 
 void
-w_execquery(buffer, bufsize)
-    Code *buffer;
-    int   bufsize;
+w_execquery_pe(PE, Code *buffer, int bufsize)
 {
     w_exec(buffer, bufsize, "print_no");
 }
 
 void
-w_execcommand(buffer, bufsize)
-    Code *buffer;
-    int   bufsize;
+w_execcommand_pe(PE, Code *buffer, int bufsize)
 {
     w_exec(buffer, bufsize, "print_warning");
 }
@@ -1675,10 +1643,7 @@ extern fixSystemStack(long);
 #endif
 
 void
-w_exec(buffer, bufsize, nocatcher)
-    Code *buffer;
-    int   bufsize;
-    const char *nocatcher;
+w_exec_pe(PE, Code *buffer, int bufsize,  const char *nocatcher)
 {
     long *qbuf;
     Code *execCode;
@@ -1693,7 +1658,7 @@ w_exec(buffer, bufsize, nocatcher)
 
     qbuf = w_installcode(buffer, bufsize, QOVERHEAD, &ibufsize);
 
-    execCode = ic_install_no(clauseCode(qbuf) + ibufsize - QOVERHEAD,
+    execCode = ic_install_no(hpe, clauseCode(qbuf) + ibufsize - QOVERHEAD,
 			     clauseCode(qbuf), nocatcher);
 
     wm_aborted = 0;
@@ -1707,10 +1672,10 @@ w_exec(buffer, bufsize, nocatcher)
      * similar to what I do below...
      */
     stackOffBy = alignSystemStack();
-    wm_exec(execCode);
+    wm_exec(hpe, execCode);
     fixSystemStack((long) stackOffBy);
 #else
-    wm_exec(execCode);
+    wm_exec(hpe, execCode);
 #endif
     w_dbprotect(odbrs);
 
@@ -1722,8 +1687,8 @@ w_exec(buffer, bufsize, nocatcher)
 #if 0
     //if (wm_aborted && (wm_regidx != 0))
 #endif
-    if (wm_aborted && (current_engine.reg_stack_top != current_engine.reg_stack_base))
-	reissue_cntrlc();
+    if (wm_aborted && (hpe->reg_stack_top != hpe->reg_stack_base))
+	reissue_cntrlc(hpe);
     else
 	wm_aborted = 0;
 
@@ -1732,26 +1697,24 @@ w_exec(buffer, bufsize, nocatcher)
 }
 
 void
-w_assert_builtin(name, arity, builtin)
-    const char *name;
-    int   arity;
-    int   (*builtin) PARAMS(( void ));
+w_assert_builtin_pe(PE, const char *name, int arity, int   (*builtin) ( PE ))
 {
     ntbl_entry *ent;
 
-    ent = w_nametable[w_namelookup(
+    ent = w_nametable[w_namelookup( 
 		 (PWord) MODULE_BUILTINS, (PWord) find_token((UCHAR *)name), arity)];
     ent->flags = NFLG_BUILTIN | NMSK_EXPORT | NFLG_BLT_BUILTIN;
-    ic_install_builtin(ent, builtin);
+    ic_install_builtin(hpe, ent, builtin);
 }
 
 
 void
-w_assert_built2(name, arity, installer, p1, p2)
-    const char *name;
-    int   arity;
-    void  (*installer) PARAMS(( ntbl_entry *, PWord, PWord ));
-    PWord p1, p2;
+w_assert_built2_pe(PE, 
+    const char *name,
+    int   arity,
+    void  (*installer) ( PE, ntbl_entry *, PWord, PWord ),
+    PWord p1, PWord p2
+)
 {
     ntbl_entry *ent;
     short bflg;
@@ -1759,28 +1722,29 @@ w_assert_built2(name, arity, installer, p1, p2)
     ent = w_nametable[w_namelookup(
 		 (PWord) MODULE_BUILTINS, (PWord) find_token((UCHAR *)name), arity)];
 
-    if ((long) installer == (long) ic_install_jmp)
+    if ( installer ==  (void *) ic_install_jmp)
 	bflg = NFLG_BLT_JMP;
-    else if ((long) installer == (long) ic_install_call)
+    else if ( installer ==  (void *) ic_install_call)
 	bflg = NFLG_BLT_CALL;
-    else if ((long) installer == (long) ic_install_equal)
+    else if ( installer ==  (void *) ic_install_equal)
 	bflg = NFLG_BLT_EQUAL;
-    else if ((long) installer == (long) ic_install_true)
+    else if ( installer ==  (void *) ic_install_true)
 	bflg = NFLG_BLT_TRUE;
     else {
 	bflg = NFLG_BLT_UNKNOWN;
     }
 
     ent->flags = NFLG_BUILTIN | NMSK_EXPORT | bflg;
-    (*installer) (ent, p1, p2);
+    (*installer) (hpe, ent, p1, p2);
 }
 
 void
-w_assert_foreign(modid, name, arity, builtin)
-    PWord modid;
-    const char *name;
-    int   arity;
-    int   (*builtin) PARAMS(( void ));
+w_assert_foreign_pe(PE, 
+    PWord modid,
+    const char *name,
+    int   arity,
+    int   (*builtin) ( PE )
+)
 {
     ntbl_entry *ent;
 
@@ -1788,28 +1752,24 @@ w_assert_foreign(modid, name, arity, builtin)
 
     ent->flags = NFLG_BUILTIN | NMSK_EXPORT | NFLG_BLT_BUILTIN;
 
-    ic_install_builtin(ent, builtin);
+    ic_install_builtin(hpe, ent, builtin);
 
     w_relink(ent);
 
 }
 
 void
-w_dynamic(m, p, a)
-    PWord m, p;
-    int a;
+w_dynamic_pe(PE,  PWord m,  PWord p, int a)
 {
     ntbl_entry *ent = w_nametable[w_namelookup(m, p, a)];
 
     ent->flags |= NMSK_DYNAMIC;
     if ((ent->flags & NMSK_USAGE) == NFLG_UNDEFINED)
-		ic_install_fail(ent);
+		ic_install_fail(hpe, ent);
 }
 
 int
-w_spy(m, p, a)
-    PWord m, p;
-    int   a;
+w_spy_pe(PE, PWord m, PWord p, int a)
 {
     ntbl_entry *ent;
 
@@ -1824,9 +1784,7 @@ w_spy(m, p, a)
 }
 
 int
-w_nospy(m, p, a)
-    PWord m, p;
-    int   a;
+w_nospy_pe(PE, PWord m, PWord p, int a)
 {
     ntbl_entry *ent;
 
@@ -1842,24 +1800,20 @@ w_nospy(m, p, a)
 
 
 void
-w_libbreak(m, p, a, i)
-    PWord m, p;
-    int   a, i;
+w_libbreak_pe(PE, PWord m, PWord p, int a, int i)
 {
     ntbl_entry *ent;
 
     ent = w_nametable[w_namelookup(m, p, a)];
     if ((ent->flags & NMSK_USAGE) == NFLG_UNDEFINED) {
 		ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_LIBBREAK;
-		ic_install_libbreak(ent, i);
+		ic_install_libbreak(hpe, ent, i);
     }
 }
 
 
 PWord
-nextproc(n, f)
-    register PWord n;
-    int   f;
+nextproc_pe(PE, register PWord n, int f)
 {
     register ntbl_entry *ent;
 
@@ -1904,8 +1858,8 @@ nextproc(n, f)
  *-----------------------------------------------------------------*/
 
 long *
-first_clause(n)
-    int   n;			/* name table index */
+first_clause_pe(PE, int n)
+			/* name table index */
 {
     register ntbl_entry *ent;
 
@@ -1932,14 +1886,15 @@ first_clause(n)
  *-----------------------------------------------------------------*/
 
 long *
-next_clause(a)
-    long *a;			/* address of current clause */
+next_clause_db(prolog_database *db, long *a)
+			/* address of current clause */
 {
+	prolog_database *x = (prolog_database *)db;
     if (a == (long *) 0)
 	return ((long *) 0);
     else if (*(a + WCI_MASK) & WCMSK_TOBEFREED) {
 	register long *c =
-	w_nametable[(*(a + WCI_PROCIDX))]->first_clause;
+	x->db_w_nametable[(*(a + WCI_PROCIDX))]->first_clause;
 	register long i = *(a + WCI_CLAUSEID);
 
 	while (c && i > *(c + WCI_CLAUSEID))
@@ -1968,10 +1923,11 @@ next_clause(a)
  *-----------------------------------------------------------------*/
 
 void
-make_dbref(a, res, restype)
-    long *a;
-    PWord *res;
-    int  *restype;
+make_dbref_pe(PE, 
+    long *a,
+    PWord *res,
+    int  *restype
+)
 {
     if (a == (long *) 0) {
 	*res = (PWord) 0;
@@ -1987,7 +1943,7 @@ make_dbref(a, res, restype)
 	w_install_argn(*res, 2, (PWord) (((long) a) >> 16), WTP_INTEGER);
 	w_install_argn(*res, 3, (PWord) (*(a + WCI_PROCIDX) & 0xffff),
 		       WTP_INTEGER);
-	make_number(&cv, &ct, (double) clauseId(a));
+	make_number(hpe, &cv, &ct, (double) clauseId(a));
 	w_install_argn(*res, 4, cv, ct);
     }
 }
@@ -2002,10 +1958,11 @@ make_dbref(a, res, restype)
  *-----------------------------------------------------------------*/
 
 long *
-w_validate_dbref(addr, nid, cid)
-    long *addr;
-    int   nid;
-    long  cid;
+w_validate_dbref_pe(PE, 
+    long *addr,
+    int   nid,
+    long  cid
+)
 {
     long  size;
 
@@ -2042,10 +1999,11 @@ w_validate_dbref(addr, nid, cid)
  *-----------------------------------------------------------------*/
 
 long *
-validate_dbref(ref, reftype, nameid)
-    PWord ref;
-    int   reftype;
-    PWord *nameid;
+validate_dbref_pe(PE, 
+    PWord ref,
+    int   reftype,
+    PWord *nameid
+)
 {
     if (reftype == WTP_STRUCTURE) {
 	PWord functor;
@@ -2065,7 +2023,7 @@ validate_dbref(ref, reftype, nameid)
 	    w_get_argn(&cid, &t4, ref, 4);
 
 	    if (t1 == WTP_INTEGER && t2 == WTP_INTEGER &&
-			t3 == WTP_INTEGER && getlong(&clause_id, cid, t4))
+			t3 == WTP_INTEGER && getlong(hpe, &clause_id, cid, t4))
 		return w_validate_dbref(
 					(long *) (caddrlow | (caddrhi << 16)),
 					(int) *nameid,
@@ -2091,9 +2049,7 @@ validate_dbref(ref, reftype, nameid)
 #endif
 
 Code *
-jump_validate_dbref(ref, term)
-    PWord ref;
-    PWord term;
+jump_validate_dbref_pe(PE, PWord ref, PWord term)
 {
     PWord v;
     int   t;
@@ -2119,7 +2075,7 @@ jump_validate_dbref(ref, term)
 	w_get_argn(&cid, &t4, v, 4);
 
 	if (t1 == WTP_INTEGER && t2 == WTP_INTEGER &&
-	    t3 == WTP_INTEGER && getlong(&clause_id, cid, t4) &&
+	    t3 == WTP_INTEGER && getlong(hpe, &clause_id, cid, t4) &&
 	    (jumpAddr = w_validate_dbref(
 				      (long *) (caddrlow | (caddrhi << 16)),
 					    (int) nameid,
@@ -2158,7 +2114,7 @@ jump_validate_dbref(ref, term)
  *-----------------------------------------------------------------*/
 
 void
-gen_indexing()
+gen_indexing_pe(PE)
 {
 #ifdef Indexing
     register int i;
@@ -2185,8 +2141,7 @@ gen_indexing()
  *-----------------------------------------------------------------*/
 
 void
-decr_icount(addr)
-    Code *addr;
+decr_icount_pe(PE, Code *addr)
 {
 #ifdef Indexing
     register ntbl_entry *ent;
@@ -2211,8 +2166,7 @@ decr_icount(addr)
  *-----------------------------------------------------------------*/
 
 void
-seticount(ent)
-    ntbl_entry *ent;
+seticount_pe(PE, ntbl_entry *ent)
 {
 #ifdef AutoIndexing
     if (!(ent->flags & NMSK_SPYSET) &&
@@ -2237,8 +2191,7 @@ seticount(ent)
 #endif
 
 long *
-next_choice_in_a_deleted_clause(addr)
-    long *addr;
+next_choice_in_a_deleted_clause_pe(PE, long *addr)
 {
     addr = next_clause(addr - WCI_CHOICEENTRY);
 
@@ -2261,7 +2214,7 @@ next_choice_in_a_deleted_clause(addr)
  *-----------------------------------------------------------------*/
 
 void
-w_collect()
+w_collect_pe(PE)
 {
     register PWord *h, *h_end;
     long **upd, *p;
@@ -2271,7 +2224,7 @@ w_collect()
      */
 
     gv_setcnt++;
-    gc();
+    gc(hpe);
 
     /*
      * Step 2: Find database references on the heap and mark from them.
@@ -2346,7 +2299,7 @@ w_collect()
 #if 0
     //if (wm_regidx)
 #endif
-    if (current_engine.reg_stack_top != current_engine.reg_stack_base)
+    if (hpe->reg_stack_top != hpe->reg_stack_base)
     {
 	register PWord *e, *b, *spb;
 
@@ -2394,14 +2347,11 @@ w_collect()
      * free list.
      */
     w_tofreesize = 0;
-
 }
 
 
 static long *
-clause_start_from_retaddr(ra,mp)
-    Code *ra;
-    long *mp;
+clause_start_from_retaddr( Code *ra,long *mp)
 {
 #ifndef GCMASK
     long *p;
@@ -2480,8 +2430,7 @@ clause_start_from_retaddr(ra,mp)
 }
 
 static void
-mark_fromretaddr(ra)
-    Code *ra;
+mark_fromretaddr(Code *ra)
 {
     long *ca = clause_start_from_retaddr(ra,0);
     if (ca)
@@ -2489,8 +2438,7 @@ mark_fromretaddr(ra)
 }
 
 static void
-mark_clause(c)
-    long *c;
+mark_clause(long *c)
 {
     long  size;
 
@@ -2527,10 +2475,11 @@ mark_clause(c)
  *-----------------------------------------------------------------*/
 
 PWord *
-w_frame_info(f,ca,mp)
-    PWord *f;
-    long **ca;
-    long *mp;
+w_frame_info_pe(PE, 
+    PWord *f,
+    long **ca,
+    long *mp
+)
 {
     long *nf;
     if (*(f+1)) {
@@ -2558,8 +2507,7 @@ w_frame_info(f,ca,mp)
  *-----------------------------------------------------------------*/
 
 void
-w_relink(ent)
-    ntbl_entry *ent;
+w_relink_pe(PE, ntbl_entry *ent)
 {
     if (ent->flags & NMSK_EXPORT) {
 	register PWord key;
@@ -2586,7 +2534,7 @@ w_relink(ent)
  *-----------------------------------------------------------------*/
 
 void
-w_relinkall()
+w_relinkall_pe(PE)
 {
     register int i;
     register ntbl_entry *e;
@@ -2612,9 +2560,7 @@ w_relinkall()
  *-----------------------------------------------------------------*/
 
 char *
-w_getnamestring(addr, buf)
-    Code *addr;
-    char *buf;
+w_getnamestring_pe(PE, Code *addr, char *buf)
 {
     int n;
     ntbl_entry *ent;

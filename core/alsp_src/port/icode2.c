@@ -27,8 +27,7 @@
  */
 
 void
-ic_install_spy(n)
-    ntbl_entry *n;
+ic_install_spy(ntbl_entry *n)
 {
     ic_punch(n->exec_entry, W_SPY);
 }
@@ -45,9 +44,7 @@ ic_install_spy(n)
  */
 
 void
-ic_install_libbreak(n, i)
-    ntbl_entry *n;
-    int   i;
+ic_install_libbreak(PE, ntbl_entry *n, int i)
 {
     Code *oldptr = ic_ptr;
 
@@ -69,8 +66,7 @@ ic_install_libbreak(n, i)
  */
 
 void
-ic_install_decr_icount(n)
-    ntbl_entry *n;
+ic_install_decr_icount(ntbl_entry *n)
 {
     ic_punch(n->exec_entry, W_DECR_ICOUNT);
 }
@@ -84,8 +80,7 @@ ic_install_decr_icount(n)
  */
 
 void
-ic_install_normal_exec_entry(n)
-    ntbl_entry *n;
+ic_install_normal_exec_entry(ntbl_entry *n)
 {
     if (n->flags & NMSK_SPYSET)
 	ic_punch(n->exec_entry, W_SPY);
@@ -97,16 +92,14 @@ ic_install_normal_exec_entry(n)
 
 
 void
-ic_install_call_entry(n)
-    ntbl_entry *n;
+ic_install_call_entry(ntbl_entry *n)
 {
     ic_punch(n->call_entry, W_NOP);
 }
 
 
 void
-ic_install_next_choice_in_a_deleted_clause(buf)
-    Code *buf;
+ic_install_next_choice_in_a_deleted_clause(Code *buf)
 {
     ic_punch(buf, W_NCIADC);
 }
@@ -117,16 +110,18 @@ ic_install_next_choice_in_a_deleted_clause(buf)
  */
 
 void
-ic_install_tmjmp(n, firstclause, secondclause)
-    ntbl_entry *n;
-    Code *firstclause;
-    PWord secondclause;
+ic_install_tmjmp(
+    PE,
+    ntbl_entry *n,
+    Code *firstclause,
+    PWord secondclause
+)
 {
     Code *oldptr = ic_ptr;
 
     ic_ptr = n->code;
 
-    ic_put_align(W_TRY_ME_JUMP);
+    ic_put_align(hpe, W_TRY_ME_JUMP);
     ic_putl(secondclause);
     ic_putl((PWord)firstclause);
 
@@ -143,16 +138,13 @@ ic_install_tmjmp(n, firstclause, secondclause)
  */
 
 void
-ic_install_try_me(buf, nextclause, nargs)
-    Code *buf;
-    PWord nextclause;
-    int   nargs;
+ic_install_try_me(PE, Code *buf, PWord nextclause, int nargs)
 {
     Code *oldptr = ic_ptr;
 
     ic_ptr = buf;
 
-    ic_put_align(W_TRY_ME);
+    ic_put_align(hpe, W_TRY_ME);
     ic_putl(nextclause);
 
     ic_ptr = oldptr;
@@ -164,17 +156,13 @@ ic_install_try_me(buf, nextclause, nargs)
  */
 
 void
-ic_install_retry_me(buf, nextclause, nargs, emask)
-    Code *buf;
-    PWord nextclause;
-    int   nargs;
-    int   emask;
+ic_install_retry_me(PE, Code *buf, PWord nextclause, int nargs, int emask)
 {
     Code *oldptr = ic_ptr;
 
     ic_ptr = buf;
 
-    ic_put_align(W_RETRY_ME);
+    ic_put_align(hpe, W_RETRY_ME);
     ic_putl(nextclause);
 
     ic_ptr = oldptr;
@@ -187,16 +175,13 @@ ic_install_retry_me(buf, nextclause, nargs, emask)
  */
 
 void
-ic_install_trust_me(buf, whereto, nargs, emask)
-    Code *buf;
-    PWord whereto;
-    int  nargs, emask;
+ic_install_trust_me(PE, Code *buf, PWord whereto, int nargs, int emask)
 {
     Code *oldptr = ic_ptr;
 
     ic_ptr = buf;
 
-    ic_put_align(W_TRUST_ME);
+    ic_put_align(hpe, W_TRUST_ME);
     ic_putl(whereto);
 
     ic_ptr = oldptr;
@@ -209,10 +194,11 @@ ic_install_trust_me(buf, whereto, nargs, emask)
  */
 
 Code *
-icIndexPatch(place, choiceInstr, where)
-    Code *place;		/* Where this code is to go */
-    Code *choiceInstr;		/* The index patch choice point instruction */
-    Code *where;		/* Where to go after the choice instruction */
+icIndexPatch(
+    Code *place,		/* Where this code is to go */
+    Code *choiceInstr,		/* The index patch choice point instruction */
+    Code *where 		/* Where to go after the choice instruction */
+)
 {
     long *longptr;
 
@@ -235,10 +221,12 @@ icIndexPatch(place, choiceInstr, where)
 /*//extern Code *wm_fail;*/
 
 void
-ic_install_switch_on_term(nameEntry, varaddr, straddr, lisaddr, conaddr, emask)
-    ntbl_entry *nameEntry;
-    Code *varaddr, *straddr, *lisaddr, *conaddr;
-    int emask;	/* not used */
+ic_install_switch_on_term(
+    PE,
+    ntbl_entry *nameEntry,
+    Code *varaddr, Code *straddr, Code *lisaddr, Code *conaddr,
+    int emask	/* not used */
+)
 {
     ic_ptr = nameEntry->code;
 
@@ -271,17 +259,14 @@ ic_install_switch_on_term(nameEntry, varaddr, straddr, lisaddr, conaddr, emask)
 /*//extern Code *wm_return_success;*/
 
 Code *
-ic_install_no(buf, clausestart, nocatcher)
-    Code *buf;
-    Code *clausestart;
-    const char *nocatcher;
+ic_install_no(PE, Code *buf, Code *clausestart, const char *nocatcher)
 {
     Code *oldptr = ic_ptr;
     Code *startaddr;
 
     ic_ptr = buf;
 
-    ic_put_align(W_TRUST_ME);
+    ic_put_align(hpe, W_TRUST_ME);
     ic_putl((PWord) w_nameentry((PWord) MODULE_BUILTINS,
 			        (PWord) find_token((UCHAR *)nocatcher), 0)->exec_entry);
 
@@ -290,10 +275,10 @@ ic_install_no(buf, clausestart, nocatcher)
     ic_puti(W_WAM_START1);
     ic_putl((PWord) wm_return_success);
 
-    ic_put_align(W_TRY_ME);
+    ic_put_align(hpe, W_TRY_ME);
     ic_putl((PWord)buf);
 
-    ic_put_align(W_TRY_ME);	/* choice pt for cutting away */
+    ic_put_align(hpe, W_TRY_ME);	/* choice pt for cutting away */
     ic_putl((PWord)buf);
 
     ic_puti(W_WAM_START2);
@@ -308,9 +293,7 @@ ic_install_no(buf, clausestart, nocatcher)
 
 
 void
-ic_install_builtin(ne, builtin)
-    ntbl_entry *ne;
-    int   (*builtin) PARAMS(( void ));
+ic_install_builtin(PE, ntbl_entry *ne, int   (*builtin) ( PE ))
 {
     Code *oldptr = ic_ptr;
 
@@ -329,10 +312,7 @@ ic_install_builtin(ne, builtin)
 /* This is used most of the time to install builtins */
 
 void
-ic_install_jmp(n, whereto, emask)
-    ntbl_entry *n;
-    Code *whereto;
-    int   emask;
+ic_install_jmp(PE, ntbl_entry *n, Code *whereto, int emask)
 {
     Code *oldptr = ic_ptr;
 
@@ -355,8 +335,7 @@ ic_install_jmp(n, whereto, emask)
  */
 
 void
-ic_install_resolve_ref(n)
-    ntbl_entry *n;
+ic_install_resolve_ref(ntbl_entry *n)
 {
     ic_punch(n->code, W_RESOLVE_REF);
     if (!(n->flags & NMSK_SPYSET))
@@ -370,8 +349,7 @@ ic_install_resolve_ref(n)
  */
 
 void
-ic_install_fail(n)
-    ntbl_entry *n;
+ic_install_fail(PE, ntbl_entry *n)
 {
 	Code *old_ptr = ic_ptr;
     ic_ptr = (n->code);
@@ -391,9 +369,7 @@ ic_install_fail(n)
  */
 
 void
-ic_install_reference(buf, whereto)
-    Code *buf;
-    PWord whereto;
+ic_install_reference(PE, Code *buf, PWord whereto)
 {
     Code *oldptr = ic_ptr;
 
@@ -411,10 +387,7 @@ ic_install_reference(buf, whereto)
  */
 
 void
-ic_install_bref(ent, name, arity)
-    ntbl_entry *ent;
-    PWord name;
-    PWord arity;
+ic_install_bref(PE, ntbl_entry *ent, PWord name, PWord arity)
 {
     ntbl_entry *dst;
 
@@ -422,16 +395,13 @@ ic_install_bref(ent, name, arity)
 				   (PWord) find_token((char *)name),
 				   (int) arity)];
 
-    ic_install_reference(ent->code, (PWord) dst->code);
+    ic_install_reference(hpe, ent->code, (PWord) dst->code);
 
 }
 
 
 void
-ic_install_instr(ent, instr, dummy)
-    ntbl_entry *ent;
-    PWord instr;
-    PWord dummy;
+ic_install_instr(PE, ntbl_entry *ent, PWord instr, PWord dummy)
 {
     ic_punch(ent->code, (Code) instr);
 }
@@ -444,8 +414,7 @@ ic_install_instr(ent, instr, dummy)
  */
 
 void
-ic_install_overflow_call(n)
-    ntbl_entry *n;
+ic_install_overflow_call(ntbl_entry *n)
 {
     ic_punch(n->overflow, W_NOP);
 }
@@ -463,9 +432,7 @@ ic_install_overflow_call(n)
  */
 
 void
-ic_install_module_closure(ent, whereto)
-    ntbl_entry *ent;
-    Code *whereto;
+ic_install_module_closure(PE, ntbl_entry *ent, Code *whereto)
 {
     Code *oldptr = ic_ptr;
 
@@ -479,21 +446,17 @@ ic_install_module_closure(ent, whereto)
 
 
 void
-ic_install_call(ent, whereto)
-    ntbl_entry *ent;
-    long *whereto;
+ic_install_call(ntbl_entry *ent, long *whereto)
 {
 }
 
 void
-ic_install_equal(ent)
-    ntbl_entry *ent;
+ic_install_equal(ntbl_entry *ent)
 {
 }
 
 void
-ic_install_true(ent)
-    ntbl_entry *ent;
+ic_install_true(ntbl_entry *ent)
 {
 }
 
@@ -512,13 +475,10 @@ ic_install_true(ent)
 
 
 long *
-ic_install_try(ptr, cstart, nargs)
-    long *ptr;
-    Code *cstart;
-    int nargs;
+ic_install_try(PE, long *ptr, Code *cstart, int nargs)
 {
     ic_ptr = ptr;
-    ic_put_align(W_TRY);
+    ic_put_align(hpe, W_TRY);
     ic_putl((PWord)cstart);
     return (long *) ic_ptr;
 }
@@ -539,14 +499,10 @@ ic_install_try(ptr, cstart, nargs)
 
 
 long *
-ic_install_retry(ptr, cstart, nargs, emask)
-    long *ptr;
-    Code *cstart;
-    int nargs;
-    int emask;
+ic_install_retry(PE, long *ptr, Code *cstart, int nargs, int emask)
 {
     ic_ptr = (Code *)ptr;
-    ic_put_align(W_RETRY);
+    ic_put_align(hpe, W_RETRY);
     ic_putl((PWord)cstart);
     return (long *) ic_ptr;
 }
@@ -567,14 +523,10 @@ ic_install_retry(ptr, cstart, nargs, emask)
 
 
 long *
-ic_install_trust(ptr, cstart, nargs, emask)
-    long *ptr;
-    Code *cstart;
-    int nargs;
-    int emask;
+ic_install_trust(PE, long *ptr, Code *cstart, int nargs, int emask)
 {
     ic_ptr = (Code *)ptr;
-    ic_put_align(W_TRUST);
+    ic_put_align(hpe, W_TRUST);
     ic_putl((PWord) cstart);
     return (long *) ic_ptr;
 }
@@ -591,14 +543,11 @@ ic_install_trust(ptr, cstart, nargs, emask)
  */
 
 Code *
-ic_install_tree_overhead(swinst,nentries,ptr)
-    long * swinst;
-    int nentries;
-    Code *ptr;
+ic_install_tree_overhead(PE, long *swinst,int nentries,Code *ptr)
 {
     ic_ptr = ptr;
 
-    ic_put_align((Code) swinst);
+    ic_put_align(hpe, (Code) swinst);
     ic_putl((PWord)nentries);
 
     return ic_ptr;

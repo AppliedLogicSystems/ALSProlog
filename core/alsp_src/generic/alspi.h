@@ -28,12 +28,8 @@ extern "C" {
 extern char library_dir[1024];
 extern char executable_path[1024];
 
-
-/*
- * Set up some macros for dealing with prototypes and other ANSI C features.
- */
-
-#define PARAMS(arglist) arglist
+#define PE struct prolog_engine_struct *hpe
+struct prolog_engine_struct;
 
 #if defined(macintosh)
 #define ALSPI_API(X)		pascal X
@@ -62,14 +58,15 @@ typedef long PWord;
 typedef struct {
 		const char *name;
 		int  arity;
-		int (*func) PARAMS((void));
+		int (*func) (PE);
 		const char *funcname;
 } PSTRUCT;
 
 #define PI_BEGIN static PSTRUCT pi_init_array[] = {
 #define PI_DEFINE(p,a,f) {p,a,f,((char *) -1)},
-#define PI_MODULE(m) {m,-1,((int (*)PARAMS((void))) 0),((char *) -1)},
-#define PI_END {((char *) -1),-1,((int (*)PARAMS((void))) 0),((char *) -1)} };
+#define PI_MODULE(m) {m,-1,((int (*)(void))) 0),((char *) -1)},
+//#define PI_END {((char *) -1),-1,((int (*)(void)) 0),((char *) -1)} };
+#define PI_END {((char *) -1),-1,NULL,((char *) -1)} };
 
 #define PI_PDEFINE(p,a,f,fn) {p,a,f,fn},
 
@@ -131,48 +128,82 @@ typedef struct {
  * Declarations for foreign interface functions - 6/15/88 - chris
  */
 
-extern	ALSPI_API(char *)	PI_forceuia	PARAMS(( PWord *, int * ));
-extern	ALSPI_API(void)	PI_getan	PARAMS(( PWord *, int *, int ));
-extern	ALSPI_API(void)	PI_getargn	PARAMS(( PWord *, int *, PWord, int ));
-extern	ALSPI_API(void)	PI_gethead	PARAMS(( PWord *, int *, PWord ));
-extern	ALSPI_API(void)	PI_gettail	PARAMS(( PWord *, int *, PWord ));
-extern	ALSPI_API(void)	PI_getdouble	PARAMS(( double *, PWord ));
-extern	ALSPI_API(void)	PI_getstruct	PARAMS(( PWord *, int *, PWord ));
-extern	ALSPI_API(char *)	PI_getsymname	PARAMS(( char *, PWord, int ));
-extern	ALSPI_API(char *)	PI_getuianame	PARAMS(( char *, PWord, int ));
-extern	ALSPI_API(void)	PI_getuiasize	PARAMS(( PWord, int * ));
-extern	ALSPI_API(void)	PI_makedouble	PARAMS(( PWord *, int *, double ));
-extern	ALSPI_API(void)	PI_makelist	PARAMS(( PWord *, int * ));
-extern	ALSPI_API(void)	PI_makestruct	PARAMS(( PWord *, int *, PWord, int ));
-extern	ALSPI_API(void)	PI_makesym	PARAMS(( PWord *, int *, const char * ));
-extern	ALSPI_API(void)	PI_makeuia	PARAMS(( PWord *, int *, const char * ));
-extern	ALSPI_API(void)	PI_allocuia	PARAMS(( PWord *, int *, int ));
-extern	ALSPI_API(int)	PI_printf	PARAMS(( const char *, ... ));
-extern	ALSPI_API(int)	PI_aprintf	PARAMS(( const char *, const char *, ... ));
-extern  ALSPI_API(int)	PI_vprintf	PARAMS(( const char *, va_list ));
-extern  ALSPI_API(int)	PI_vaprintf	PARAMS(( const char *, const char *, va_list ));
-extern	ALSPI_API(int)	PI_rungoal	PARAMS(( PWord, PWord, int ));
-extern	ALSPI_API(int)	PI_rungoal_with_update	PARAMS(( PWord, PWord *, int * ));
-extern	ALSPI_API(int)	PI_rungoal_with_update_and_catch	PARAMS(( PWord, PWord *, int *, int * ));
-extern	ALSPI_API(int)	PI_unify	PARAMS(( PWord , int, PWord , int ));
-extern	ALSPI_API(void)	PrologInit	PARAMS(( PSTRUCT * ));
-extern	ALSPI_API(void)	PI_shutdown	PARAMS(( void ));
-extern	ALSPI_API(void)	PI_toplevel	PARAMS(( void ));
-extern	ALSPI_API(int)	PI_status_toplevel	PARAMS(( int * ));
-extern	ALSPI_API(int)	PI_prolog_init	PARAMS(( int, char **));
-extern	ALSPI_API(int)	PI_startup	PARAMS(( const PI_system_setup *));
-extern	ALSPI_API(void)	PI_throw	PARAMS((PWord obj, int objt));
-extern	ALSPI_API(void)	PI_getball	PARAMS((PWord *obj, int *objt));
-extern	ALSPI_API(int)	PI_main		PARAMS((int argc, char *argv[], void (*init)(void)));
-extern	ALSPI_API(void)	PI_interrupt	PARAMS((void));
+extern	ALSPI_API(char *)	PI_forceuia_pe	(PE, PWord *, int * );
+#define		PI_forceuia(a,b)	PI_forceuia_pe(hpe,a,b)
+extern	ALSPI_API(void)	PI_getan_pe	(PE, PWord *, int *, int );
+#define		PI_getan(a,b,c)	PI_getan_pe(hpe,a,b,c)
+extern	ALSPI_API(void)	PI_getargn_pe	(PE, PWord *, int *, PWord, int );
+#define		PI_getargn(a,b,c,d)	PI_getargn_pe(hpe,a,b,c,d)
+extern	ALSPI_API(void)	PI_gethead_pe	(PE, PWord *, int *, PWord );
+#define		PI_gethead(a,b,c)	PI_gethead_pe(hpe,a,b,c)
+extern	ALSPI_API(void)	PI_gettail_pe	(PE, PWord *, int *, PWord );
+#define		PI_gettail(a,b,c)	PI_gettail_pe(hpe,a,b,c)
+extern	ALSPI_API(void)	PI_getdouble_pe	(PE, double *, PWord );
+#define		PI_getdouble(a,b)	PI_getdouble_pe(hpe,a,b)
+extern	ALSPI_API(void)	PI_getstruct_pe	(PE, PWord *, int *, PWord );
+#define		PI_getstruct(a,b,c)	PI_getstruct_pe(hpe,a,b,c)
+extern	ALSPI_API(char *)	PI_getsymname_pe	(PE, char *, PWord, int );
+#define		PI_getsymname(a,b,c)	PI_getsymname_pe(hpe,a,b,c)
+extern	ALSPI_API(char *)	PI_getuianame_pe	(PE, char *, PWord, int );
+#define		PI_getuianame(a,b,c)	PI_getuianame_pe(hpe,a,b,c)
+extern	ALSPI_API(void)	PI_getuiasize_pe	(PE, PWord, int * );
+#define		PI_getuiasize(a,b)	PI_getuiasize_pe(hpe,a,b)
+extern	ALSPI_API(void)	PI_makedouble_pe	(PE, PWord *, int *, double );
+#define		PI_makedouble(a,b,c)	PI_makedouble_pe(hpe,a,b,c)
+extern	ALSPI_API(void)	PI_makelist_pe	(PE, PWord *, int * );
+#define		PI_makelist(a,b)	PI_makelist_pe(hpe,a,b)
+extern	ALSPI_API(void)	PI_makestruct_pe	(PE, PWord *, int *, PWord, int );
+#define		PI_makestruct(a,b,c,d)	PI_makestruct_pe(hpe,a,b,c,d)
+extern	ALSPI_API(void)	PI_makesym_pe	(PE, PWord *, int *, const char * );
+#define		PI_makesym(a,b,c)	PI_makesym_pe(hpe,a,b,c)
+extern	ALSPI_API(void)	PI_makeuia_pe	(PE, PWord *, int *, const char * );
+#define		PI_makeuia(a,b,c)	PI_makeuia_pe(hpe,a,b,c)
+extern	ALSPI_API(void)	PI_allocuia_pe	(PE, PWord *, int *, int );
+#define		PI_allocuia(a,b,c)	PI_allocuia_pe(hpe,a,b,c)
+extern	ALSPI_API(int)	PI_printf	(PE, const char *, ... );
+extern	ALSPI_API(int)	PI_aprintf	(PE, const char *, const char *, ... );
+extern  ALSPI_API(int)	PI_vprintf_pe	(PE, const char *, va_list );
+#define		PI_vprintf(a,b)	PI_vprintf_pe(hpe,a,b)
+extern  ALSPI_API(int)	PI_vaprintf_pe	(PE, const char *, const char *, va_list );
+#define		PI_vaprintf(a,b,c)	PI_vaprintf_pe(hpe,a,b,c)
+extern	ALSPI_API(int)	PI_rungoal_pe	(PE, PWord, PWord, int );
+#define		PI_rungoal(a,b,c)	PI_rungoal_pe(hpe,a,b,c)
+extern	ALSPI_API(int)	PI_rungoal_with_update_pe	(PE, PWord, PWord *, int * );
+#define		PI_rungoal_with_update(a,b,c)	PI_rungoal_with_update_pe(hpe,a,b,c)
+extern	ALSPI_API(int)	PI_rungoal_with_update_and_catch_pe	(PE, PWord, PWord *, int *, int * );
+#define		PI_rungoal_with_update_and_catch(a,b,c,d)	PI_rungoal_with_update_and_catch_pe(hpe,a,b,c,d)
+extern	ALSPI_API(int)	PI_unify_pe	(PE, PWord , int, PWord , int );
+#define		PI_unify(a,b,c,d)	PI_unify_pe(hpe,a,b,c,d)
+extern	ALSPI_API(void)	PrologInit_pe	(PE, PSTRUCT * );
+#define		PrologInit(a)	PrologInit_pe(hpe,a)
+extern	ALSPI_API(void)	PI_shutdown_pe	(PE);
+#define		PI_shutdown()	PI_shutdown_pe(hpe)
+extern	ALSPI_API(void)	PI_toplevel_pe	(PE);
+#define		PI_toplevel()	PI_toplevel_pe(hpe)
+extern	ALSPI_API(int)	PI_status_toplevel_pe	(PE, int * );
+#define		PI_status_toplevel(a)	PI_status_toplevel_pe(hpe,a)
+extern	ALSPI_API(int)	PI_prolog_init_pe	(PE, int, char **);
+#define		PI_prolog_init(a,b)	PI_prolog_init_pe(hpe,a,b)
+extern	ALSPI_API(int)	PI_startup_pe	(PE, const PI_system_setup *);
+#define		PI_startup(a)	PI_startup_pe(hpe,a)
+extern	ALSPI_API(void)	PI_throw_pe	(PE,PWord obj, int objt);
+#define		PI_throw(a,b)	PI_throw_pe(hpe,a,b)
+extern	ALSPI_API(void)	PI_getball_pe	(PE,PWord *obj, int *objt);
+#define		PI_getball(a,b)	PI_getball_pe(hpe,a,b)
+extern	ALSPI_API(int)	PI_main_pe	(PE,int argc, char *argv[], void (*init)(void));
+#define		PI_main(a,b,c)	PI_main_pe(hpe,a,b,c)
+extern	ALSPI_API(void)	PI_interrupt_pe	(PE);
+#define		PI_interrupt()	PI_interrupt_pe(hpe)
 
 
 #ifdef APP_PRINTF_CALLBACK
 extern	ALSPI_API(void)	PI_set_app_printf_callback(void (*callback)(int, va_list));
 #endif
-extern	ALSPI_API(void)	PI_app_printf	PARAMS(( int, ... ));
-extern  ALSPI_API(void)    PI_vapp_printf  PARAMS(( int, va_list ));
-extern	ALSPI_API(const char *)	PI_get_options	PARAMS(( void ));
+extern	ALSPI_API(void)	PI_app_printf	( int, ... );
+extern  ALSPI_API(void)    PI_vapp_printf_pe  (PE, int, va_list );
+#define		PI_vapp_printf(a,b)	PI_vapp_printf_pe(hpe,a,b)
+extern	ALSPI_API(const char *)	PI_get_options_pe	(PE);
+#define		PI_get_options()	PI_get_options_pe(hpe)
 
 typedef long (*console_func)(char *, long);
 
@@ -182,7 +213,7 @@ extern ALSPI_API(void)	PI_set_console_functions(console_func readf,
 #ifdef macintosh
 extern	long	yield_interval;
 extern  long	yield_counter;
-extern	void	PI_yield_time	PARAMS(( void ));
+extern	void	PI_yield_time	( void );
 extern	ALSPI_API(void)	PI_set_yield_proc(void (*p)(void));
 #endif
 
@@ -304,7 +335,7 @@ typedef struct {
   char *fname;
   unsigned int foffset;
   short  ftype;    /* integer identifying C type; 0 for struct/union */
-  char *type_name;  /* when ftype is 0, typename is set to struct name */
+  char *typename;  /* when ftype is 0, typename is set to struct name */
   int  arraysz;    /* N=0 => not an array, N>0 => array of size N */
 } FieldEntry;      /* For array, currently, this is set to 1000   */
                    /* Later, when ctrans is modified to recognize */
@@ -350,10 +381,10 @@ typedef struct {
  * interface generator ).
  *-----------------------------------------------------------------------*/
 
-extern	ALSPI_API(int)	sym_insert_2long PARAMS(( char *, int, long, long ));
-extern	ALSPI_API(int)	sym_insert_dbl	PARAMS(( char *, int, double ));
-extern	ALSPI_API(int)	CI_get_integer	PARAMS(( PWord *, int ));
-extern	ALSPI_API(int)	CI_get_double	PARAMS(( double *, unsigned long, unsigned long ));
+extern	ALSPI_API(int)	sym_insert_2long ( char *, int, long, long );
+extern	ALSPI_API(int)	sym_insert_dbl	( char *, int, double );
+extern	ALSPI_API(int)	CI_get_integer	( PWord *, int );
+extern	ALSPI_API(int)	CI_get_double	( double *, unsigned long, unsigned long );
 
 extern	ALSPI_API(const char *) find_callback(void *func, void *object);
 

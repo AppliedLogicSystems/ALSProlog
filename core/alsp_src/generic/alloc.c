@@ -15,17 +15,16 @@
 #include "defs.h"
 #include <math.h>		/* for floor */
 
-pwrd  nil_val =
+const pwrd  nil_val =
 {TP_NIL, 0};
 
-pword prs_area;
-static pword areap;
+//pword prs_area;
+//static pword areap;
 
-static	pword	allocat	PARAMS(( size_t ));
+static	pword	allocat	(PE,  size_t );
 
 void
-prs_area_init(marksize)
-    unsigned long  marksize;
+prs_area_init(PE, unsigned long marksize)
 {
     if (marksize < sizeof (pwrd) * PARSER_AREASIZ)
 	marksize = sizeof (pwrd) * PARSER_AREASIZ;
@@ -46,8 +45,7 @@ prs_area_init(marksize)
 }
 
 static pword
-allocat(size)
-    size_t size;
+allocat(PE, size_t size)
 {
     register pword t;
 
@@ -62,30 +60,28 @@ allocat(size)
 }
 
 void
-alc_rst()
+alc_rst(PE)
 {
     areap = prs_area;
 }
 
 pword
-mk_term(arity)
-    long  arity;
+mk_term(PE, long arity)
 {
     register pword t;
 
-    t = allocat((size_t) arity + 1);
+    t = allocat(hpe, (size_t) arity + 1);
     t->tag = TP_TERM;
 
     return t;
 }
 
 pword
-mk_functor(tkid, arity)
-    long  tkid, arity;
+mk_functor(PE, long tkid, long arity)
 {
     register pword f;
 
-    f = allocat(2);
+    f = allocat(hpe, 2);
     f->tag = TP_SYM;
     f->val = (pword) tkid;
     (f + 1)->val = (pword) arity;
@@ -94,12 +90,11 @@ mk_functor(tkid, arity)
 }
 
 pword
-mk_list(car, cdr)
-    pword car, cdr;
+mk_list(PE, pword car, pword cdr)
 {
     register pword c;
 
-    c = allocat(2);
+    c = allocat(hpe, 2);
     c->tag = TP_LIST;
     c->val = car;
     (c + 1)->val = cdr;
@@ -108,12 +103,11 @@ mk_list(car, cdr)
 }
 
 pword
-mk_int(iv)
-    long  iv;
+mk_int(PE, long iv)
 {
     register pword h;
 
-    h = allocat(1);
+    h = allocat(hpe, 1);
     h->tag = TP_INT;
     h->val = (pword) iv;
 
@@ -122,12 +116,11 @@ mk_int(iv)
 
 
 pword
-mk_vo(vo)
-    long  vo;
+mk_vo(PE, long vo)
 {
     register pword z;
 
-    z = allocat(1);
+    z = allocat(hpe, 1);
     z->tag = TP_VO;
     z->val = (pword) vo;
 
@@ -135,12 +128,11 @@ mk_vo(vo)
 }
 
 pword
-mk_rule(ng)
-    long  ng;
+mk_rule(PE, long ng)
 {
     register pword rv;
 
-    rv = allocat((size_t)ng + 2);
+    rv = allocat(hpe, (size_t)ng + 2);
     rv->tag = TP_RULE;
     rv->val = (pword) ng;
 
@@ -148,8 +140,7 @@ mk_rule(ng)
 }
 
 pword
-mk_double(dbl)
-    double dbl;
+mk_double(PE, double dbl)
 {
     register pword d;
 
@@ -160,7 +151,7 @@ mk_double(dbl)
 #endif
 	{
 #ifdef DoubleType
-	d = allocat(2);
+	d = allocat(hpe, 2);
 	d->tag = TP_DOUBLE;
 	d->val = (pword) * (long *) &dbl;
 	(d + 1)->val = (pword) * (((long *) &dbl) + 1);
@@ -178,8 +169,7 @@ mk_double(dbl)
 
 #ifdef DoubleType
 double
-double_val(p)
-    pword p;
+double_val(pword p)
 {
     double d;
 
@@ -208,8 +198,7 @@ double_val(pword p)
  */
 
 long
-functor_id_of_term(p)
-    pword p;
+functor_id_of_term(pword p)
 {
     switch (TYPEOF(p)) {
 	case TP_TERM:
@@ -224,8 +213,7 @@ functor_id_of_term(p)
 }
 
 long
-arity_of_term(p)
-    pword p;
+arity_of_term(pword p)
 {
     switch (TYPEOF(p)) {
 	case TP_TERM:
@@ -245,9 +233,7 @@ arity_of_term(p)
  */
 
 int
-is_double(d, t)
-    double *d;
-    pword t;
+is_double(double *d, pword t)
 {
 #ifdef DoubleType
     if (TYPEOF(t) == TP_DOUBLE) {
@@ -270,15 +256,14 @@ is_double(d, t)
 
 
 pword
-mk_uia(s)
-    char *s;
+mk_uia(PE, char *s)
 {
     pword f;
     register char *t;
     long l;
 
     l = strlen(s) + 1;
-    f = allocat((l / sizeof (pwrd)) + (l % sizeof (pwrd) != 0) + 1);
+    f = allocat(hpe, (l / sizeof (pwrd)) + (l % sizeof (pwrd) != 0) + 1);
 
     f->tag = TP_UIA;
     f->val = (pword) l;

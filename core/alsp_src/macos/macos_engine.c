@@ -170,7 +170,7 @@ static OSErr DuplicateThisApplication(ConstStr255Param newAppName)
     return FSpFileCopy(&AppSpec, &DirSpec, (StringPtr) newAppName, NULL, 0, 1);
 }
 
-int ss_save_image_with_state(const char * new_image_name)
+int ss_save_image_with_state(PE, const char * new_image_name)
 {
 	Str255 pnew_image_name;
 	
@@ -178,12 +178,12 @@ int ss_save_image_with_state(const char * new_image_name)
 	
 	DuplicateThisApplication(pnew_image_name);
    
-	return ss_attach_state_to_file(new_image_name);
+	return ss_attach_state_to_file(hpe, new_image_name);
 }
 
-int ss_attach_state_to_file(const char *image_name)
+int ss_attach_state_to_file(PE, const char *image_name)
 {
-	os_store_db(&current_engine.db, image_name, 0);
+	os_store_db(hpe->db, image_name, 0);
 	return 1;
 }
 

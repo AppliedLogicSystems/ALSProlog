@@ -18,13 +18,13 @@
 #ifdef CMeta
 
 int
-pbi_true()
+pbi_true(PE)
 {
     SUCCEED;
 }
 
 int
-pbi_equal()
+pbi_equal(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -40,7 +40,7 @@ pbi_equal()
 }	/* pbi_equal */
 
 int
-pbi_arg()
+pbi_arg(PE)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -113,7 +113,7 @@ pbi_arg()
 #define w_get_cdraddr(addr,list)    (addr = (PWord *)list + 1)
 
 int
-pbi_mangle()
+pbi_mangle(PE)
 {				/* mangle(ArgN,Struct,Arg) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -212,14 +212,14 @@ pbi_mangle()
 
 }
 
-extern void	disp_heap_item	PARAMS(( PWord * ));
+extern void	disp_heap_item	(PE, PWord * );
 
 #ifdef TRAILVALS
 
-int trailed_mangle0	PARAMS((PWord,PWord,int,PWord,int));
+int trailed_mangle0	(PWord,PWord,int,PWord,int));
 
 int
-pbi_trailed_mangle(void)
+pbi_trailed_mangle(PE)
 {				/* trailed_mangle(ArgN,Struct,Arg) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -254,9 +254,7 @@ pbi_trailed_mangle(void)
  *---------------------------------------------------------------*/
 
 int
-trailed_mangle0(v1,v2,t2,v3,t3)
-     PWord v1, v2, v3;
-     int       t2, t3;
+trailed_mangle0(PWord v1,PWord v2,int t2,PWord v3,int t3)
 {				
   int   arity;
   PWord *argaddr;
@@ -434,7 +432,7 @@ trailed_mangle0(v1,v2,t2,v3,t3)
 #endif
 
 int
-pbi_functor()
+pbi_functor(PE)
 {				/* functor(Struct,F,A)  */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -451,7 +449,7 @@ pbi_functor()
 
     switch (t1) {
 	case WTP_UIA:
-	    if (!force_uia(&v1, &t1)) {
+	    if (!force_uia(hpe, &v1, &t1)) {
 		FAIL;
 		break;
 	    }
@@ -496,7 +494,7 @@ pbi_functor()
 	    	    else FAIL;
 	    	} else FAIL;
 	    	
-	    } else if (t3 == WTP_INTEGER  && v3 >= 0 && force_uia(&v2, &t2)) {
+	    } else if (t3 == WTP_INTEGER  && v3 >= 0 && force_uia(hpe, &v2, &t2)) {
 		PWord s;
 		int   t;
 		int   i;
@@ -565,7 +563,7 @@ pbi_functor()
 }
 
 int
-pbi_identical()
+pbi_identical(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -573,14 +571,14 @@ pbi_identical()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if (wm_identical(v1, t1, v2, t2))
+    if (wm_identical(hpe, v1, t1, v2, t2))
 	SUCCEED;
     else
 	FAIL;
 }
 
 int
-pbi_unidentical()
+pbi_unidentical(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -588,29 +586,14 @@ pbi_unidentical()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if (wm_identical(v1, t1, v2, t2))
+    if (wm_identical(hpe, v1, t1, v2, t2))
 	FAIL;
     else
 	SUCCEED;
 }
 
 int
-pbi_eq()
-{
-    PWord v1, v2;
-    int   t1, t2;
-
-    w_get_An(&v1, &t1, 1);
-    w_get_An(&v2, &t2, 2);
-
-    if (t1 == t2 && v1 == v2)
-	SUCCEED;
-    else
-	FAIL;
-}
-
-int
-pbi_noneq()
+pbi_eq(PE)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -619,6 +602,21 @@ pbi_noneq()
     w_get_An(&v2, &t2, 2);
 
     if (t1 == t2 && v1 == v2)
+	SUCCEED;
+    else
+	FAIL;
+}
+
+int
+pbi_noneq(PE)
+{
+    PWord v1, v2;
+    int   t1, t2;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+
+    if (t1 == t2 && v1 == v2)
 	FAIL;
     else
 	SUCCEED;
@@ -626,7 +624,7 @@ pbi_noneq()
 
 
 int
-pbi_var()
+pbi_var(PE)
 {
     PWord va1;
     int   ta1;
@@ -640,7 +638,7 @@ pbi_var()
 }
 
 int
-pbi_nonvar()
+pbi_nonvar(PE)
 {
     PWord va1;
     int   ta1;
@@ -654,7 +652,7 @@ pbi_nonvar()
 }
 
 int
-pbi_integer()
+pbi_integer(PE)
 {
     PWord va1;
     int   ta1;
@@ -668,7 +666,7 @@ pbi_integer()
 }
 
 int
-pbi_float()
+pbi_float(PE)
 {
     PWord v;
     int   t;
@@ -697,7 +695,7 @@ pbi_float()
 }
 
 int
-pbi_number()
+pbi_number(PE)
 {
     PWord v;
     int   t;
@@ -728,7 +726,7 @@ pbi_number()
 }
 
 int
-pbi_atom()
+pbi_atom(PE)
 {
     PWord va1;
     int   ta1;
@@ -742,7 +740,7 @@ pbi_atom()
 }
 
 int
-pbi_atomic()
+pbi_atomic(PE)
 {
     PWord va1;
     int   ta1;
@@ -773,7 +771,7 @@ pbi_atomic()
 }
 
 int
-pbi_compound(void)
+pbi_compound(PE)
 {
     PWord va1;
     int   ta1;
@@ -813,7 +811,7 @@ pbi_compound(void)
  */
 
 int
-pbi_findterm()
+pbi_findterm(PE)
 {				/* $findterm(F,A,Pos, Term,NewPos) */
     PWord f, a, p, t, n;
     int   ft, at, pt, tt, nt;
@@ -826,7 +824,7 @@ pbi_findterm()
     w_get_An(&t, &tt, 4);
     w_get_An(&n, &nt, 5);
 
-    if (!xform_uia(&f, &ft) || at != WTP_INTEGER || pt != WTP_INTEGER || p < 0)
+    if (!xform_uia(hpe, &f, &ft) || at != WTP_INTEGER || pt != WTP_INTEGER || p < 0)
 	FAIL;
 
     functor = MMK_FUNCTOR(f, a);

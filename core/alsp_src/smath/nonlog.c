@@ -17,7 +17,7 @@
 #include "smath.h"
 #include "ieeemath.h"
 
-extern NEWDOUBLE MAX_REAL, POS_INF, NEG_INF, POS_ZERO, NEG_ZERO;
+extern const NEWDOUBLE MAX_REAL, POS_INF, NEG_INF, POS_ZERO, NEG_ZERO;
 
 /* **************************************************************** */
 /* non-logical operations  */

@@ -40,7 +40,7 @@
 #define IC_ENDALLOC	-26
 
 #ifdef OBP
-extern	int	makeobp;
+//extern	int	imakeobp;
 #endif /* OBP */
 
 #endif	/* _ICOM_H_INCLUDED_ */

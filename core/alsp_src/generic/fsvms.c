@@ -10,7 +10,7 @@
 
 #ifdef VMS
 
-init_fsutils()
+void init_fsutils(void)
 {
 }
 
