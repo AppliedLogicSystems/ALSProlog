@@ -222,8 +222,7 @@ consume_semicolon(State, _, _) --> [semicolon], !.
 consume_semicolon(State,X,Y,Toks,[]) 
 	:-
 	error('parse error\nParsed successfully %t\nI don\'t understand %t\nRemaining tokens %t\n\n',
-		   [X, Y, /*DSpec, Declt,*/ Toks],State),
-	get_line(_).
+		   [X, Y, /*DSpec, Declt,*/ Toks],State).
 
 %%-------------------------------------------------------
 %%
