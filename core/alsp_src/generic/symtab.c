@@ -417,18 +417,17 @@ symtab_init()
     register int i;
     char chtokstr[2];
 
+    /* Adjust the symbol length bytes */
+    for (i = 1; i < sizeof(initial_table)/sizeof(tkentry); i++)
+	initial_table[i].tkname[-1] = strlen(initial_table[i].tkname);
+
     if (!toktable) {
 	/* allocate space for the token table */
 	toktable = (tkentry *) ss_malloc(sizeof (tkentry) * ts_allocated,
 			 			FE_SYMTAB_INIT);
 
-	/* Adjust the symbol length bytes */
-	for (i = 1; i < sizeof(initial_table)/sizeof(tkentry); i++)
-		initial_table[i].tkname[-1] = strlen(initial_table[i].tkname);
-
 	/* Copy initial_table to toktable */
 	memcpy((char *) toktable, (char *) initial_table, sizeof initial_table);
-
 	
 	/* malloc space for the hash table */
 	hashtable = (tkentry **) ss_malloc(ts_allocated * sizeof (tkentry **),
