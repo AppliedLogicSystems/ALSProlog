@@ -49,7 +49,7 @@
 typedef struct index_str {
     byte  tag;
     long  key;			/* machine type this node represents or */
-    /* if tag is TOP then number of entries */
+    					/* if tag is TOP then number of entries */
     struct index_str *llink;
     struct index_str *rlink;
     union {
