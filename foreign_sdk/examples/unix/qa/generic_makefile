@@ -1,10 +1,9 @@
-SDK_DIR = ../../..
+SDK_DIR = ../..
 
 qa: qa.c
-	gcc $(STATIC_LINK) \
+	gcc $(RUNTIME_LINK) \
 	-o qa -I$(SDK_DIR)/include \
 	    qa.c -L$(SDK_DIR)/lib -lalspro -lc
 
 clean:
 	rm -f qa know.obp
-	
