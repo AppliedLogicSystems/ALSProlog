@@ -424,11 +424,11 @@ disp_heap_item(CurT)
 				break;
 			case MTP_SYM:
 				if (MSYMBOL((*CurT)) < tok_table_size() )
-					printf("-symbol=%d/%s\n",MSYMBOL((*CurT)),
-							(int)TOKNAME(MSYMBOL((*CurT))));
+					printf("-symbol=%d/%s\n",(int)MSYMBOL((*CurT)),
+							TOKNAME(MSYMBOL((*CurT))));
 				else
 					printf("-weird sym(as fctr:%x/%x)\n",
-							(int)MFUNCTOR_TOKID(*CurT),(int)MFUNCTOR_ARITY(*CurT));
+							(unsigned int)MFUNCTOR_TOKID(*CurT),(unsigned int)MFUNCTOR_ARITY(*CurT));
 				break;
 			case MTP_FENCE:
 				printf("-fence\n");
@@ -548,7 +548,7 @@ disp_item()
 
     w_get_An(&v1, &t1, 1);
 
-	printf("item= %x t= %d\n",v1,t1);
+	printf("item= %lx t= %d\n",v1,t1);
 
     SUCCEED;
 }
