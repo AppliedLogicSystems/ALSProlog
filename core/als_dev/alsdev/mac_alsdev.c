@@ -355,12 +355,18 @@ void SetupALSProlog(void)
 
     pi_init();
 
-/*
-    term = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "consult"),
-		1, AP_NewSymbolFromStr(w, "blt_dvsh"));
-		
-    AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
-*/
+{
+	extern char executable_path[1000];
+	extern long ss_image_offset(const char *image_name);
+
+	if (!ss_image_offset(executable_path)) {
+		term = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "consult"),
+					1, AP_NewSymbolFromStr(w, "blt_dvsh"));
+			
+	    AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
+	}
+}
+
 	PI_set_yield_proc(tcltk_yield);
 
     term = AP_NewSymbolFromStr(w, "start_alsdev");

@@ -12,20 +12,37 @@ build-tree
 
 Installed Tcl/Tk.
 
+Adding Tcl/Tk source and images
+-------------------------------
+
+Whenever you add a new Tcl source file, add a line to mac_alsdev.r like this:
+
+read 'TEXT' (XXX, "als_projects", purgeable, preload) "als_projects.tcl";
+
+Where XXX is a unique 'TEXT' resource ID.
+
+Whenever you add a new GIF image, convert the image to base64 (and check it
+in), then add a line to mac_alsdev.r  like this:
+
+read 'GIFf' (XXX, "open_ptr", purgeable, preload) "open_ptr.b64";
+
+On the Mac, the program "MPack" can be used to create base64 files.
+
 Build
 -----
 
-Make alspro_b in the mwbuild directory and move it to the alsdev folder.
+Make "alspro PPC.lib" in the mwbuild directory.
 
 In alsdev, setup an alsdir with the folders "builtins" and "library".
 
-Copy the file tcltk.pro into the alsdev folder. Remove consult of "tclintf".
+Copy the file tcltk.pro into the alsdir/shared folder.
 
-Run alspro_b and consult "mac_make.pro" to build all necessary obp files.
+Open mac_alsdev.mcp, and make "Build All" to create "ALS Prolog Base PPC"
 
-Open mac_alsdev.mcp.
+Create a new image from "ALS Prolog Base PPC" with the following command:
 
-Make "PPC Build" to create "ALS Prolog PPC".
+save_image('ALS Prolog', [select_lib(builtins, [debugger]),
+	select_lib(library,[miscterm,msc_ioin,strctutl,strings,tcl_sppt,tk_alslib, listutl1])]).
 
 Runtime Setup
 -------------
