@@ -364,6 +364,9 @@ atomic_input_dialog(Interp, Msg, Title, Atom)
 	).
 
 /*------------------------------------------------------------*
+ *------------------------------------------------------------*/
+
+/*------------------------------------------------------------*
  |	file_select_dialog/2
  |	file_select_dialog(Prompt, FileName)
  |	file_select_dialog(+, -)
@@ -617,12 +620,6 @@ extend_menubar(MenubarPath, Label, MenuEntriesList, Interp)
 	extend_menubar_cascade(MenubarPath, Label, MenuPath, Interp),
 	list_extend_cascade(MenuEntriesList, MenuPath, Interp).
 
-/*
-extend_menubar_cascade(Label, MenuPath)
-	:-
-	extend_menubar_cascade('.topals.mmenb', Label, MenuPath, shl_tcli).
-*/
-
 extend_menubar_cascade(MenubarPath, Label, MenuPath, Interp)
 	:-
 	fixup_for_tkwin_path(Label, TclLabel),
@@ -630,9 +627,9 @@ extend_menubar_cascade(MenubarPath, Label, MenuPath, Interp)
 	(tcl_call(Interp, [winfo,exists,MenuPath],'1') ->
 		true
 		;
-		tcl_call(Interp, [menu,MenuPath,'-relief',raised],_)
+		tcl_call(Interp, [menu,MenuPath,'-relief',raised,'-tearoff',0],_),
+		tcl_call(Interp, [MenubarPath,add,cascade,'-label',Label,'-menu',MenuPath], _)
 	),
-	tcl_call(Interp, [MenubarPath,add,cascade,'-label',Label,'-menu',MenuPath], _),
 	tcl_call(Interp, [update],_).
 
 list_extend_cascade([], MenuPath, Interp)
@@ -644,7 +641,6 @@ list_extend_cascade([MenuEntry | MenuEntriesList], MenuPath, Interp)
 	list_extend_cascade(MenuEntriesList, MenuPath, Interp).
 
 export extend_cascade/3.
-
 extend_cascade(cascade(Label,SubList), MenuPath, Interp)
 	:-!,
 	extend_menubar_cascade(MenuPath, Label, NewMenuPath, Interp),

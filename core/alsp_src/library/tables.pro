@@ -130,7 +130,7 @@ load_table_package(Interp)
 :- compiletime, module_closure( create_table, 3, create_table4).
 
 :- compiletime, module_closure( create_table_r, 3, create_table3_r).
-:- compiletime, module_closure( create_table_r, 4, create_table4_r).
+:- compiletime, module_closure( create_table_r, 5, create_table4_r).
 
 create_table3(Mod, TableName, Options)
 	:-
@@ -184,38 +184,12 @@ create_table4_r(Mod, TableName, Options, Interp, XOpts,BTR)
 	check_default(Options, flashmode,	on,			Flashmode),
 	check_default(Options, width,		NCols,		Width),
 	check_default(Options, height,		NRows,		Height),
+	check_default(Options, menu,		'',			ReqMenuBar),
+	check_default(Options, upperpane,	'',			ReqUpperPane),
+	check_default(Options, lowerpane,	'',			ReqLowerPane),
 
 	to_tcl_opts(XOpts, XXOpts),
 	catenate(TableName, '_info', TableInfoArrayName),
-/*
-	OptionsList = [
-		cols,		NCols,
-		width,		Width,
-		titlerows,	NTitleRows,
-		roworigin,	Roworigin,
-		rows,		NRows,
-		height,		Height,
-		titlecols,	NTitleCols,
-		colorigin,	Colorigin,
-		font,		Tablefont,
-		foreground,	Foreground,
-		background, Background,
-		selectmode,	Selectmode,
-		rowstretch,	Rowstretch,
-		colstretch,	Colstretch,
-		flashmode,	Flashmode
-		| XXOpts
-	],
-	OthersList = [
-		colheadings, ColHeadings,
-		rowheadings, RowHeadings,
-		title,		Title
-		],
-	tcl_call(Interp, 
-			[build_table4,TableName,TableInfoArrayName,
-					OptionsList,OthersList],
-			BTR),
-*/
 	OptionsList = [
 		colheadings, ColHeadings,
 		rowheadings, RowHeadings,
@@ -234,7 +208,10 @@ create_table4_r(Mod, TableName, Options, Interp, XOpts,BTR)
 		selectmode,	Selectmode,
 		rowstretch,	Rowstretch,
 		colstretch,	Colstretch,
-		flashmode,	Flashmode
+		flashmode,	Flashmode,
+		menu,		ReqMenuBar,
+		upperpane,	ReqUpperPane,
+		lowerpane,	ReqLowerPane
 		| XXOpts
 	],
 	tcl_call(Interp, 

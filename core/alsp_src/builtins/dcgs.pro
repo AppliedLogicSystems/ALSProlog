@@ -32,6 +32,10 @@ dcg_expand((H --> B), ReturnClause) :-
                  ReturnClause=(RH :- RB)
    ).
 
+expand_head_or_goal((Mod:Head), (Mod:ReturnHead), InV, OutV) 
+	:-!,
+	expand_head_or_goal(Head, ReturnHead, InV, OutV).
+
 expand_head_or_goal(Head, ReturnHead, InV, OutV) :-
    functor(Head, HeadFunctor, Arity),
    Arity_plus_1 is Arity+1,
