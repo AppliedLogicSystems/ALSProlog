@@ -946,6 +946,7 @@ ld_fs(OS)
 	consult_builtins(BDir, dcgs),
 	consult_builtins(BDir, blt_pckg),
 	consult_builtins(BDir, blt_frez),
+	consult_builtins(BDir, simplio),
 	consult_builtins(BDir, blt_shl).
 
 %%--------------------------------------------

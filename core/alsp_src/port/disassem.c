@@ -74,7 +74,7 @@ list_asm(addr, n)
     int   n;
 
 {
-    Code *stopaddr = addr + n;
+    Code *stopaddr = addr + n - 2;
     long  ilength;
     enum AbstractMachineOps instr;
 
@@ -202,14 +202,39 @@ display_instr(instr,ip)
 void tracewam	PARAMS(( Code * ));
 
 int bwam_trace = 0;
+int bwam_trace_low = 0;
+int bwam_trace_high = 0;
 
 int
 toggle_bwam(void)
 {
-	if (bwam_trace == 0)
-		bwam_trace = 1;
-	else
+    PWord v1,v2;
+	int   t1,v2;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+	
+	if ((t1 != WTP_INTEGER) || (t2 != WTP_INTEGER))
+		FAIL;
+
+	if (v1 < -1)
+		FAIL;
+
+	if (v1 == -1) {
+		if (bwam_trace == 0)
+			bwam_trace = 1;
+		else
+			bwam_trace = 0;
+	}
+	else if (v1 == 0) 
 		bwam_trace = 0;
+	else if (v1 == 1) 
+		bwam_trace = 1;
+	else {
+		 bwam_trace_low = v1;
+		 bwam_trace_high = v2;
+		 printf("trace: low=%x high=%x\n",v1,v2);
+	}
 	
 	return 1;
 }
@@ -220,7 +245,8 @@ tracewam(PP)
 {
     enum AbstractMachineOps instr;
 
-	if (bwam_trace > 0)
+	if ((bwam_trace > 0) && ((Code *)bwam_trace_low <= PP)
+			&&  (PP <= (Code *)bwam_trace_lhigh ) )
 	{
 		instr = decode_instr(*PP);
 		if ((instr < 0) || (instr > ICNUM)) 
