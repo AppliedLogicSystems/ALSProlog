@@ -41,12 +41,19 @@ Window hide .spy_select
 
 	## Bindings for the main window:
 
-bind .topals.txwin.text <Return> { xmit_line .topals.txwin.text  }
-bind .topals.txwin.text <Control-d> \
-	{ prolog call builtins handle_ctl_d -atom .topals.txwin.text}
-bind .topals.txwin.text <Control-c> \
-	{ prolog call user handle_ctl_c -atom .topals.txwin.text}
-bindtags .topals.txwin.text {Text .topals.txwin.text .topals all}
+proc set_top_bindings { WinPath StreamAlias WaitVar DataVar } {
+	bind $WinPath <Return> \
+		"xmit_line_plain $WinPath $StreamAlias "
+	bind $WinPath <Control-d> \
+		"ctl-d_action $WinPath $StreamAlias "
+	bind $WinPath <Control-c> \
+		"prolog call builtins forceCtlC"
+	bind $WinPath <Control-u> \
+		"ctl-u_action $WinPath"
+	bindtags $WinPath "Text $WinPath .topals all"
+}
+#		"xmit_line $WinPath $StreamAlias "
+
 
 	## Variable on which we execute 'tkwait variable ...' when we really
 	## have to wait for input (e.g., getting the user's response during 
@@ -75,15 +82,33 @@ proc set_prompt_mark { TxtWin } {
 
 	# Transmits a 'line' when the user hits <Return> at the
 	# top-level:
-proc xmit_line { TxtWin } {
+
+proc xmit_line { TxtWin StreamAlias } {
 	global WaitForLine
 
 	set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -2 chars} ]
 	set WaitForLine ''
-	if { "$ThisLine"!="" } then {
-		prolog call builtins als_exec -atom $ThisLine\n -atom $TxtWin 
-	} 
+	prolog call builtins als_exec -atom $ThisLine\n -atom $StreamAlias -atom tcltk
 	$TxtWin mark set lastPrompt {insert -1 chars}
+}
+
+proc xmit_line0 { TxtWin StreamAlias WaitVar DataVar} {
+	global $WaitVar 
+
+	set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -2 chars} ]
+#	set WaitForLine ''
+#	prolog call builtins als_exec -atom $ThisLine\n -atom $StreamAlias -atom tcltk
+
+	prolog call builtins add_to_stream_buffer -atom $StreamAlias -atom $ThisLine\n
+	$TxtWin mark set lastPrompt {insert -1 chars}
+	set WaitVar 1
+}
+
+proc wait_for_line0 { } {
+	global WaitForLine
+
+	while { "$WaitForLine"!=1 } { dooneevent wait }
+	set WaitForLine 0
 }
 
 	# Transmits a 'line' when the user hits <Return> at points
@@ -93,10 +118,37 @@ proc xmit_line_plain { TxtWin StreamAlias } {
 	global WaitForLine
 
 	set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -2 chars} ]
-	set WaitForLine ''
-	bind $TxtWin <Return> [list xmit_line $TxtWin ]
+	set WaitForLine 1
+
+#	bind $TxtWin <Return> [list xmit_line $TxtWin $StreamAlias ]
 	prolog call builtins add_to_stream_buffer -atom $StreamAlias -atom $ThisLine\n
 }
+
+proc ctl-d_action { TxtWin StreamAlias } {
+	global WaitForLine
+
+	set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -2 chars} ]
+	if { [llength $ThisLine]>0 } then {
+		return
+	} 
+	prolog call sio set_extra_eof -atom $StreamAlias
+	set WaitForLine 1
+}
+
+proc ctl-u_action { WinPath } {
+	set EndIndex [$WinPath index end]
+	set LastLineLN [expr [string range $EndIndex 0 [expr [string first "." $EndIndex] - 1]] - 1]
+	set PromptIndex [$WinPath index lastPrompt]
+	set PromptPtIdx [string first "." $PromptIndex]
+	set PromptLN [string range $PromptIndex 0 [expr $PromptPtIdx - 1]]
+	if { $PromptLN < $LastLineLN } then {
+		$WinPath delete $LastLineLN.0 $LastLineLN.end
+	} else {
+		set PromptCX [expr 1 + [string range $PromptIndex [expr $PromptPtIdx + 1] end]]
+		$WinPath delete $LastLineLN.$PromptCX $LastLineLN.end
+	}
+}
+
 
 global LocalClipboard ; set LocalClipboard ""
 
