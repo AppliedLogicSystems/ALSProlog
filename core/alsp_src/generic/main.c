@@ -32,6 +32,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef SSI_UNIKEY
+#include <ssi_cw32.h>
+#endif
+
 #if 0			/* FIXME:  Can we get rid of this stuff? */
 #ifdef BSDUNIX
 #include <sys/time.h>
@@ -49,6 +53,7 @@
 #endif /* 0 */
 
 #ifdef MacOS
+#include <TextUtils.h>
 #ifdef MPW_TOOL
 #else
 #include <unix.h>
@@ -103,6 +108,7 @@ static char alsdir[IMAGEDIR_MAX];	/* directory where ALS system resides */
 
 #ifdef MSWin32
 char *MinorOSStr = "mswindows";
+int win32s_system = 0;
 #endif
 
 static char versionNum[] = SysVersionNum;	/* from version.h */
@@ -180,6 +186,21 @@ PI_prolog_init(win_str, argc, argv)
 #ifdef Portable
     extern Code *wm_panic;
 #endif /* Portable */
+
+
+#ifdef SSI_UNIKEY
+    if (SSI_Open(0)) {
+	PI_app_printf(PI_app_printf_error,
+"\
+Error: UniKey Hardware key required.\n\
+This demo version of ALS Prolog requires a UniKey hardware key.\n\
+Please check that the hardware key is correctly attached to the parallel port.\n\
+Exiting ALS Prolog.\n\
+"
+	);
+	exit(1);
+    }    
+#endif
 
 	/* Put arg and argv in globals so they can be used by the builtin get_argc_argv/2 */
 	argcount = argc;
@@ -320,10 +341,9 @@ PI_prolog_init(win_str, argc, argv)
 	    fatal_error(FE_ALS_MEM_INIT, 0);
 	saved_state_loaded = als_mem_init(imagepath, saved_state_image_offset);
 	free(imagepath);
-    }
-    else
+    } else {
 	saved_state_loaded = als_mem_init(saved_state_filename,0);
-
+    }
     /*
      * Set up the alsdir variable.  First use the image directory and
      * attach alsdir to the path.  If this directory does not exist then
@@ -470,7 +490,7 @@ PI_prolog_init(win_str, argc, argv)
 	#define IS_WIN32 FALSE
 #endif
 #define IS_NT      IS_WIN32 && (BOOL)(GetVersion() < 0x80000000)
-#define IS_WIN32S  IS_WIN32 && (BOOL)(!(IS_NT) && (LOBYTE(LOWORD(GetVersion()))<4))
+#define IS_WIN32S  IS_WIN32 && (BOOL)(!(IS_NT) && ((GetVersion() & 0xFF)<4))
 #define IS_WIN95 (BOOL)(!(IS_NT) && !(IS_WIN32S)) && IS_WIN32
 
     if (IS_NT) MinorOSStr = "mswinnt";
@@ -523,6 +543,39 @@ PI_prolog_init(win_str, argc, argv)
     	strcat(f, "builtins");
     	autoload(f);
     }
+
+#ifdef MacOS
+    /* load the autoload files, call the initilize routine. */
+    {
+    	Str255 pfile;
+    	char file[256];
+    	int status, i;
+    	for (i = 1, GetIndString(pfile, 128, i); pfile[0]; i++, GetIndString(pfile, 128, i)) {
+	    strncpy(file, pfile+1, pfile[0]);
+	    file[pfile[0]] = 0; 
+    	    status = obpres_load(file);
+	    if (status != 1) fatal_error(FE_AUTOLOAD, (long)file);
+    	}
+    }
+    
+    {
+	StringHandle p;
+	char init[256];
+	
+	p = GetString(128);
+     
+	if (p && **p) {
+	    PWord mv, gv;
+	    int   mt, gt;
+    	    strncpy(init, *p+1, **p);
+    	    init[**p] = 0; 
+	    PI_makesym(&mv, &mt, "user");
+	    PI_makesym(&gv, &gt, init);
+	    PI_rungoal(mv, gv, gt);
+	}	
+    }
+    
+#endif
 
     /*---------------------------------------*
      * Establish the Control/C (or Control/BREAK) handler
@@ -940,13 +993,18 @@ autoload(f)
 
     strcpy(fext, alsdir);
     strcat(fext, f);
+    
 /*
 #ifndef OLDCLOAD
     strcat(fext, ".obp");
 #endif 
 */
+#ifdef MacOS
+    status = obpres_load(fext);
+    if (status != 1) status = load_file(fext, 0); 
+#else
     status = load_file(fext, 0);  
-
+#endif
     if (!status) {
 /*
 	PI_app_printf(PI_app_printf_warning,
@@ -970,6 +1028,23 @@ PI_toplevel()
 	    PWord mv, gv;
 	    int   mt, gt;
 
+#ifdef MacOS
+	    {
+		StringHandle p;
+		char start[256];
+		
+		p = GetString(129);
+	     
+		if (p && **p) {
+	    	    strncpy(start, *p+1, **p);
+	    	    start[**p] = 0; 
+		    PI_makesym(&mv, &mt, "user");
+		    PI_makesym(&gv, &gt, start);
+		    PI_rungoal(mv, gv, gt);
+		    return (0);
+		}	
+	    }
+#endif
 	    PI_makesym(&mv, &mt, "builtins");
 	    PI_makesym(&gv, &gt, "$start");
 	    PI_rungoal(mv, gv, gt);
@@ -1002,6 +1077,14 @@ PI_shutdown()
      * Restore  the Control/C (or Control/BREAK) handler
      */
     reset_sigint();
+    
+#ifdef SSI_UNIKEY
+    if (SSI_Close()) {
+	PI_app_printf(PI_app_printf_error, "Error: UniKey close failed.\n");
+	exit(1);
+    }
+#endif
+
 }
 
 #ifdef DOS
