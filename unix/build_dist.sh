@@ -78,6 +78,7 @@ then
 	then
 		cp -pr "$BIN/alspro.pst" "$DISTDIR"
 	fi
+	cp -pr "$BIN/libalspro.so" "$DISTDIR"
 fi
 
 tar -C $ARCH -czf $DISTNAME-$ARCH.tgz $DISTNAME
