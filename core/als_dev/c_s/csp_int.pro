@@ -247,6 +247,7 @@ interact(respond(Pattern), Mod, TaskEnv, true, SInfo)
 				true )
 		)
 	),
+	
 nl(user_output),
 printf(user_output, Pattern, [], [line_length(5000)]),
 nl(user_output), flush_output(user_output).
@@ -470,13 +471,14 @@ disp_read_terms_from_stream(NextTerm, SrcStrm, [NextTerm |  TermsFromStream], Re
 
 send_lines([], SW)
 	:-
-	nl(SW),
+%	nl(SW),
 	flush_output(SW).
 send_lines([Line | Lines], SW)
 	:-
 	stream_open_status(SW, open),
 	!,
-	put_atom(SW, Line), nl(SW), flush_output(SW),
+	put_atom(SW, Line), nl(SW),
+	flush_output(SW),
 	send_lines(Lines, SW).
 send_lines([Line | Lines], SW)
 	:-!.
