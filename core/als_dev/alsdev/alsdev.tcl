@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.72 1999/01/25 13:50:27 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.73 1999/02/05 18:53:33 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -309,10 +309,8 @@ proc establish_defaults {} {
 		-var DefaultVals -var TopGeom -var DebugGeom -var DebugVis
 	reset_default_values $DefaultVals
 	if {$TopGeom != ""} then { set proenv(.topals,geometry) $TopGeom }
-	if {$DebugGeom != ""} then { 
-		set proenv(.debugwin,geometry) $DebugGeom 
-		set proenv(debugwin) $DebugVis 
-	}
+	if {$DebugGeom != ""} then { set proenv(.debugwin,geometry) $DebugGeom }
+	set proenv(debugwin) $DebugVis 
 }
 
 proc reset_default_values { DefaultValsList } {
@@ -414,6 +412,7 @@ load_source $ALSTCLPATH {defstr}
 load_source $ALSTCLPATH {als_menu}
 load_source $ALSTCLPATH {als_document}
 load_source $ALSTCLPATH {als_projects}
+
 #load_source $ALSTCLPATH {prodebug}
 
 #load_source $ALSTCLPATH {als_tkfbox}
@@ -984,7 +983,7 @@ proc ensure_db_showing {} {
 		bind .debugwin.text <Unmap> {unmap_alsdev_debug}
 		bind .debugwin.text <Map>   {map_alsdev_debug}
 	} else {
-    	wm deiconify .debugwin
+    		Window show .debugwin
 		raise .debugwin
 	}
 }
@@ -992,9 +991,9 @@ proc ensure_db_showing {} {
 proc hide_debugwin {} {
 	global array proenv
 	foreach Win  $proenv(debugwin,visible) {
-		wm iconify $Win
+		Window hide $Win
 	}
-	Window iconify .debugwin
+	Window hide .debugwin
 	set proenv(debugwin) 0
 }
 
@@ -1621,6 +1620,8 @@ raise_patch .topals
 wm positionfrom .topals user
 wm geometry .topals $proenv(.topals,geometry)
 focus .topals.text
+
+if {$proenv(debugwin) == 1} then { ensure_db_showing }
 
 # Call AttachOpenDocumentHandler from the OpenDocument package to
 # install a custom window procedure on .topals window for handling

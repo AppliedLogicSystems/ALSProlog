@@ -347,21 +347,13 @@ proc post_open_document {Title Win} {
 	global array tcl_platform 
 	global mod
 
-	.topals.mmenb.file delete last
-	.topals.mmenb.file delete last
-	.topals.mmenb.file add command \
+	.topals.mmenb.windows add command \
 		-label $Title -font {Helvetica 10 italic} -command "show_window $Win"
-    .topals.mmenb.file add separator
-	if {$tcl_platform(platform) == "windows"} {
-    	.topals.mmenb.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_prolog}
-    } else {
-    	.topals.mmenb.file add command -label "Quit" -accelerator "$mod-Q" -command {re exit_prolog}
-	}
 }
 
 proc un_post_open_document {Title} {
-	set PrjIdx [.topals.mmenb.file index $Title]
-	.topals.mmenb.file delete $PrjIdx
+	set PrjIdx [.topals.mmenb.windows index $Title]
+	.topals.mmenb.windows delete $PrjIdx
 }
 
 	########################
@@ -374,7 +366,9 @@ proc document.new {} {
 	incr proenv(untitled_counter) 
 	set Title "Untitled #$proenv(untitled_counter)"
 	set w [create_document_window $Title]
+	set proenv($w,title) $Title
 	send_prolog_t als_ide_mgr [list open_non_file_edit_win $w $Title] list
+	post_open_document $Title $w
 }
 
 proc document.open args {
@@ -399,7 +393,7 @@ proc document.open args {
 		set Ext [file extension $file],
 		send_prolog_t als_ide_mgr [list open_edit_win $file $BaseFile $Ext] list
 			## prolog source_handler will call back to do:
-#		load_document $file
+			##		load_document $file
 	}
 }
 
@@ -462,6 +456,7 @@ proc document.save {w} {
 			-defaultextension .pro ]
 		if {$file != ""} then {
 
+		un_post_open_document $proenv($w,title)
 		save_as_core $w $file
 		send_prolog_t als_ide_mgr [list save_doc_as $w $file] list
 		set file_name [lindex [file split $file] end]
@@ -469,16 +464,6 @@ proc document.save {w} {
 		set proenv($w,title) $file_name
 		set proenv(document,$file) $w
 		post_open_document $file_name $w
-
-#			prolog call alsdev rename_anon_doc -atom $w -atom $file \
-#				-number $proenv($w,src_handler) -var RenameFlag
-#			if {$RenameFlag == "ok"} then {
-#				save_as_core $w $file
-#				return true
-#			} else {
-#				return false
-#			}
-
 		}
 	}
 	if {[info exists proenv($w,src_handler)]} then {
