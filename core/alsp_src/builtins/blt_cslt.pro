@@ -149,6 +149,7 @@ cslt_cleanup(MessageValue,ReconFlg, FCGValue)
  |				  comparison against obp file
  |	LoadedPath	- path to actual file loaded
  |	DebugType	- normal (=default) / debug (consult with debug info)
+ |	
  *------------------------------------------------------------*/
 	%% Create new consult opts structure, with defaults:
 cgo_struct(
@@ -376,12 +377,20 @@ exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
 	cont_consult(SrcExt, Nature, DD+SrcPathList, BaseFile, FCOpts).
 
 		%% Incoming pathlist is NOT absolute:
-		%% Try the gobal search path list:
+		%% Try the global search path list:
 exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
 	:-
-	searchdir(SearchDir), 
+	searchdir(SearchDir),
 	rootPlusPath(SDDrive,SDPathList,SearchDir),
 	append(SDPathList,PathList,SrcPathList),
+	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
+
+		%% Try the system builtins directory:
+exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
+	:-
+	sys_searchdir(ALSDIR),
+	extendPath(ALSDIR, builtins, BuiltinsDir),
+	rootPlusPath(SDDrive,SrcPathList,BuiltinsDir),
 	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
 
 		%% Can't find file
@@ -392,7 +401,7 @@ exec_consult(_, Drive, BaseFile, Nature, SrcExt, FCOpts)
 	existence_error(file,OrigFileDesc,OrigFileDesc).
 
 /*-------------------------------------------------------------*
- |	- Determine real source file paht, and setup global
+ |	- Determine real source file path, and setup global
  |	  information for this specific consult;
  |	- Do the loading with load_from_file/6
  |	- Restore appropriate global information.
@@ -652,9 +661,13 @@ check_for_regular(Path)
 		true
 		;
 		member(type=symbolic_link, Status),
-		follow_link(Path,_,FileCode),
-		fileTypeCode(FileTypeCode, regular)
+			%% Must give follow_link/4 the correct directory context:
+		pathPlusFile(DirPath,_,Path),
+		subPath(DirPathSrcList, DirPath),
+		follow_link(Path, _, DirPathSrcList, FinalTypeCode),
+		fileTypeCode(FinalTypeCode, regular)
 	).
+
 
 /*-----------------------------------------------------------*
  |	Databse structure for recording information about
@@ -996,7 +1009,7 @@ fin_o_f_path(subdir(arch,Where), OutDisk, GenExt, CanonSrcPath,
 		;
 				%% take Where to be = cur (subdir of current):
 		get_cwd(CurDir),
-		subPath(OutDirList, CurDir),
+		rootPlusPath(OrigDisk,OutDirList,CurDir),
 		append(OutDirList, [SubDir], NewPathList)
 	),
 	rootPlusPath(OrigDisk, NewPathList, OutDir),

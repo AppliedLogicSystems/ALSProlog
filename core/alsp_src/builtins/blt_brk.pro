@@ -102,11 +102,13 @@ break_handler(continue(M,G),M,G)
 	:-!,
 	getBreakLevel([_ | PrevList]),
 	setBreakLevel(PrevList),
+/*
 	(obtain_alarm_interval(Intrv) -> 
 %		write(breakhandler_resetting_alarm(Intrv,Intrv)),nl,flush_output,
 		alarm(Intrv, Intrv) 
 		; 
 		true),
+*/
 	M:G.
 break_handler(debug(M,G),M,G) 
 	:-!,

@@ -974,7 +974,6 @@ consult_builtins(BDir, File)
 	'$atom_concat'(FileAndPath,'.pro',FilePathPro),
 	'$atom_concat'(FileAndPath,'.obp',FilePathObp),
 	cslt_blts_ld(File, FilePathPro,FilePathObp).
-%	(resource_load(File) ; load4(FilePathPro,FilePathObp,1,obp,_)).
 
 	/*---------------------------------------------------------*
 	 |	Note: Basic builtins loaded by this procedures
@@ -996,7 +995,6 @@ cslt_blts_ld(File, FilePathPro,FilePathObp)
 	:-
 	obp_open(FilePathObp),
 	xconsult(FilePathPro, NErrs),
-%pbi_write(cslt_blts_ld(File,nerrs=NErrs)),pbi_nl,pbi_ttyflush,
 	obp_close,
 	(NErrs = 0, !; unlink(FilePathObp), fail).
 

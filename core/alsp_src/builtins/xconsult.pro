@@ -76,6 +76,7 @@ readFile(Stream, File, ModStack)
 	:-
 	readvnv(Stream,Term,Names,Vars),
 	!,
+%	gc,
 	process(Term,Names,Vars,Stream, File, ModStack).
 
 readvnv(Stream,Term,Names,Vars) 

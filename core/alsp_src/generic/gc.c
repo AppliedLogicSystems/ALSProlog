@@ -25,6 +25,16 @@
 #include <time.h>
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 
+#if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
+extern void stack_overflow  PARAMS(( int, struct siginfo *, struct ucontext * ));
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
+extern void    stack_overflow  PARAMS(( int, int, struct sigcontext *, caddr_t ));
+#elif defined(Portable)
+extern void   stack_overflow  PARAMS(( int ));
+#else
+#error
+#endif
+
 #undef mask
 
 static unsigned long *marks;
@@ -146,6 +156,7 @@ static	void	rev		    PARAMS(( long *, long *, long *, long ));
 static	void	rev_update	PARAMS(( long *, long ));
 static	void	init_marks	PARAMS(( void ));
 static	void	mark		PARAMS(( long ));
+
 
 #include <stdio.h>
 
@@ -401,7 +412,7 @@ gc()
      |             tr is the follow pointer.
      |             apb is use to keep track of where the previous chpt is
 	 |
-	 |	The primary for loop steps from choice point to choice point, working
+	 |	The primary for-loop steps from choice point to choice point, working
 	 |	its way down from mrccp to the most recent (topmost) choice point.
 	 |  At each step of the loop, b initially points to the lowest (start)
 	 |  point of a cp, so we can do things like apply chpt_HB() to b;
@@ -634,11 +645,33 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 		pbi_cptx();
 /*		pbi_walk_cps(); */
 /*		pbi_swp_tr();  */
+    	printf("new_gap=%d normal_safety = %d\n",(wm_TR - wm_H),wm_normal);
     	fflush(stdout);
 	}
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 
-    return 1;
+#ifdef undef 
+
+	if ((wm_TR - wm_H) < wm_normal)
+/*		heap_overflow();    */
+/*		stack_overflow(ALSSIG_HEAP_OVERFLOW); */
+
+		/**** WARNING!!!!!
+		 The 1st 2 #ifdef cases below need work (declarations, etc):::: */
+
+#if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
+		stack_overflow(ALSSIG_HEAP_OVERFLOW, struct siginfo *siginf, struct ucontext *sigcon);
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
+		stack_overflow(ALSSIG_HEAP_OVERFLOW, int code, struct sigcontext *scp, caddr_t addr);
+#elif defined(Portable)
+		stack_overflow(ALSSIG_HEAP_OVERFLOW);
+#else
+#error
+#endif
+	else
+    	return 1;
+
+#endif /* #ifdef 0 ----------------*/
 
 }	/* gc() */
 
@@ -854,7 +887,7 @@ mark_top:
 	    	MARK(ptr);						/* mark back fence 				*/
 		}	/* ISUIA(val) */
 		goto mark_backup;
-    }	/* ISCONST(val) */
+    }	/* -- end -- ISCONST(val) ----- */
 
     ptr = TOPTR(val);
     if (ptr < heap_low || ptr > heap_high)
@@ -871,18 +904,18 @@ mark_top:
 		if (CHK_DELAY((PWord *)val))
 			{
 #ifdef DEBUGSYS /*--------------------------------------------------*/
-								if (debug_system[FREEZEINFO]) {
-    								printf("\ngc: Delay-val=%x tag=%d..",(int)val,(int)tag);
-    								fflush(stdout);
-								}
+				if (debug_system[FREEZEINFO]) {
+    				printf("\ngc: Delay-val=%x tag=%d..",(int)val,(int)tag);
+    				fflush(stdout);
+				}
 #endif /* ---------------------------------------------- DEBUGSYS --*/
-			xval = (long) MMK_STRUCTURE( ((PWord *)val)-1 );
-			mark(xval);   
+				xval = (long) MMK_STRUCTURE( ((PWord *)val)-1 );
+				mark(xval);   
 #ifdef DEBUGSYS /*--------------------------------------------------*/
-								if (debug_system[FREEZEINFO]) {
-    								printf("--xval=%x marked\n",(int)xval);
-    								fflush(stdout);
-								}
+				if (debug_system[FREEZEINFO]) {
+    				printf("--xval=%x marked\n",(int)xval);
+    				fflush(stdout);
+				}
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 			}
 #endif /* FREEZE */
