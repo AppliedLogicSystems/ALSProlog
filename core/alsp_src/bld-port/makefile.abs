@@ -347,18 +347,18 @@ rule('demo_alspro.ppc.lib',
 
 %% I can't get it to link under CW8
 rule(mpw_alspro_b_68k,
-	[ext('pimain.68k',&(object)), 'sioux_stub.68k.o', 'alspro.68k.lib'],
-	['{LINK68K} -o mpw_alspro_b_68k {TOOLLINKFLAGS} {MPWINITLIBS68K} pimain.68k.o alspro.68k.lib sioux_stub.68k.o {MPWLIBS68K}']).
+	[ext('pi_init.68k',&(object)), 'sioux_stub.68k.o', 'alspro.68k.lib'],
+	['{LINK68K} -o mpw_alspro_b_68k {TOOLLINKFLAGS} {MPWINITLIBS68K} pi_init.68k.o alspro.68k.lib sioux_stub.68k.o {MPWLIBS68K}']).
 
 rule(mpw_alspro_b_ppc,
-	[ext('pimain.ppc',&(object)), 'sioux_stub.ppc.o', 'alspro.ppc.lib'],
-	['{LINKPPC} -o mpw_alspro_b_ppc {TOOLLINKFLAGS} pimain.ppc.o alspro.ppc.lib sioux_stub.ppc.o {MPWLIBSPPC}']).
+	[ext('pi_init.ppc',&(object)), 'sioux_stub.ppc.o', 'alspro.ppc.lib'],
+	['{LINKPPC} -o mpw_alspro_b_ppc {TOOLLINKFLAGS} pi_init.ppc.o alspro.ppc.lib sioux_stub.ppc.o {MPWLIBSPPC}']).
 
 rule('mpw_alspro_b',
 	[/*ext('pimain.68k',&(object)),'alspro.68k.lib', */
-	 ext('pimain.ppc',&(object)), 'sioux_stub.ppc.o', 'alspro.ppc.lib'],
+	 ext('pi_init.ppc',&(object)), 'sioux_stub.ppc.o', 'alspro.ppc.lib'],
 	[/*'{LINK68K} -o mpw_alspro_b {TOOLLINKFLAGS} {MPWINITLIBS68K} pimain.68k.o alspro.68k.lib {MPWLIBS68K}',*/
-	 '{LINKPPC} -o mpw_alspro_b {TOOLLINKFLAGS} pimain.ppc.o alspro.ppc.lib sioux_stub.ppc.o {MPWLIBSPPC}']).
+	 '{LINKPPC} -o mpw_alspro_b {TOOLLINKFLAGS} pi_init.ppc.o alspro.ppc.lib sioux_stub.ppc.o {MPWLIBSPPC}']).
 	 
 rule('mpw_alspro',
 	['mpw_alspro_b'],
@@ -373,31 +373,31 @@ rule('builtins.r',
 /* SIOUX Applications */
 
 rule(sioux_alspro_b_68k,
-	[ext('pimain.68k',&(object)),'alspro.68k.lib',
+	[ext('pi_init.68k',&(object)),'alspro.68k.lib',
 	 '{srcdir}port:macos:alsres.r'],
-	['{LINK68K} -o sioux_alspro_b_68k {SIOUXLINKFLAGS} pimain.68k.o alspro.68k.lib {SIOUXLIBS68K}',
+	['{LINK68K} -o sioux_alspro_b_68k {SIOUXLINKFLAGS} pi_init.68k.o alspro.68k.lib {SIOUXLIBS68K}',
 	 'Rez -o sioux_alspro_b_68k -a {srcdir}port:macos:alsres.r']).
 
 rule(sioux_alspro_b_ppc,
-	[ext('pimain.ppc',&(object)),'alspro.ppc.lib',
+	[ext('pi_init.ppc',&(object)),'alspro.ppc.lib',
 	 '{srcdir}port:macos:alsres.r'],
-	['{LINKPPC} -o sioux_alspro_b_ppc {SIOUXLINKFLAGS} pimain.ppc.o alspro.ppc.lib {SIOUXLIBSPPC}',
+	['{LINKPPC} -o sioux_alspro_b_ppc {SIOUXLINKFLAGS} pi_init.ppc.o alspro.ppc.lib {SIOUXLIBSPPC}',
 	 'Rez -o sioux_alspro_b_ppc -a {srcdir}port:macos:alsres.r']).
 
 rule('sioux_alspro_b',
-	[ext('pimain.68k',&(object)),'alspro.68k.lib',
-	 ext('pimain.ppc',&(object)),'alspro.ppc.lib',
+	[ext('pi_init.68k',&(object)),'alspro.68k.lib',
+	 ext('pi_init.ppc',&(object)),'alspro.ppc.lib',
 	 '{srcdir}port:macos:alsres.r'],
-	['{LINK68K} -o sioux_alspro_b {SIOUXLINKFLAGS} pimain.68k.o alspro.68k.lib {SIOUXLIBS68K}',
-	 '{LINKPPC} -o sioux_alspro_b {SIOUXLINKFLAGS} pimain.ppc.o alspro.ppc.lib {SIOUXLIBSPPC}',
+	['{LINK68K} -o sioux_alspro_b {SIOUXLINKFLAGS} pi_init.68k.o alspro.68k.lib {SIOUXLIBS68K}',
+	 '{LINKPPC} -o sioux_alspro_b {SIOUXLINKFLAGS} pi_init.ppc.o alspro.ppc.lib {SIOUXLIBSPPC}',
 	 'Rez -o sioux_alspro_b -a {srcdir}port:macos:alsres.r']).
 
 rule('demo_sioux_alspro_b',
-	[ext('pimain.68k',&(object)),'demo_alspro.68k.lib',
-	 ext('pimain.ppc',&(object)),'demo_alspro.ppc.lib',
+	[ext('pi_init.68k',&(object)),'demo_alspro.68k.lib',
+	 ext('pi_init.ppc',&(object)),'demo_alspro.ppc.lib',
 	 '{srcdir}port:macos:alsres.r'],
-	['{LINK68K} -o demo_sioux_alspro_b {SIOUXLINKFLAGS} pimain.68k.o demo_alspro.68k.lib {SIOUXLIBS68K} {EVE68KLIB}',
-	 '{LINKPPC} -o demo_sioux_alspro_b {SIOUXLINKFLAGS} pimain.ppc.o demo_alspro.ppc.lib {SIOUXLIBSPPC} {EVEPPCLIB}',
+	['{LINK68K} -o demo_sioux_alspro_b {SIOUXLINKFLAGS} pi_init.68k.o demo_alspro.68k.lib {SIOUXLIBS68K} {EVE68KLIB}',
+	 '{LINKPPC} -o demo_sioux_alspro_b {SIOUXLINKFLAGS} pi_init.ppc.o demo_alspro.ppc.lib {SIOUXLIBSPPC} {EVEPPCLIB}',
 	 'Rez -o demo_sioux_alspro_b -a {srcdir}port:macos:alsres.r']).
 
 rule('sioux_alspro',

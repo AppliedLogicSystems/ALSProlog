@@ -534,6 +534,8 @@ fetch_local_included_props(DefList, Name, PropertiesList, InterPropsListTail, Qu
 			   '!Warning: Can\'t find included type >> %t << in file %t...skipping.\n',
 				[Name,'local-file']).
 
+:- dynamic(include_dir/1).
+
 locate_include_file(FullFile, FullFile)
 	:-
 	exists(FullFile),
@@ -542,6 +544,13 @@ locate_include_file(FullFile, FullFile)
 locate_include_file(FullFile, FullIncludeFile)
 	:-
 	include_dir(Path),
+	pathPlusFile(Path, FullFile, FullIncludeFile),
+	exists(FullIncludeFile),
+	!.
+
+locate_include_file(FullFile, FullIncludeFile)
+	:-
+	builtins:searchdir(Path),
 	pathPlusFile(Path, FullFile, FullIncludeFile),
 	exists(FullIncludeFile),
 	!.

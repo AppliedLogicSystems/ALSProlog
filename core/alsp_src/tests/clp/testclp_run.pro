@@ -103,6 +103,9 @@ clp_testing([CurID | RestIDs], Failures, OS)
 	VNames = ArgsCopy,
 	run_clp_test(CurID, ArgsCopy, BodyCopy, Failures, NewFailures, OS),
 	write(user_output,CurID), nl(user_output),
+gc,
+statistics,
+	!,
 	clp_testing(RestIDs, NewFailures, OS).
 
 run_clp_test(CurNum, ArgsCopy, BodyCopy, FIn, FOut, OS)
