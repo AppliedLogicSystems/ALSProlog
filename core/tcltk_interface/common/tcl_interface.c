@@ -437,8 +437,6 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 
 	*interpretor = interp;
 
-	Tcl_Eval(interp, "button .b");
-
 	return (pre_named) ? AP_SUCCESS : AP_Unify(w, *interp_name, AP_NewUIAFromStr(w, namep));
 	
 error_delete:
@@ -448,41 +446,12 @@ error:
 }
 
 static AP_Result tcl_new(AP_World *w, AP_Obj interp_name)
-#if 0
-{
-  Tcl_Interp *interp;
-  char s[1000];
-
-  interp = Tcl_CreateInterp();
-  if (!interp) {
-    printf("failed to create interp\n");
-    exit(EXIT_FAILURE);
-  }
-	
-  if (Tcl_Init(interp) != TCL_OK) {
-    printf("failed to init interp\n");
-    exit(EXIT_FAILURE);
-  }
-
-  if (Tk_Init(interp) != TCL_OK) {
-    printf("failed to init Tk\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);	
-
-  while (gets(s)) {
-    Tcl_Eval(interp, s);
-  }
-}
-#endif
-#if 1
 {
 	Tcl_Interp *interp;
 	
 	return built_interp(w, &interp, &interp_name);
 }
-#endif
+
 static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 {
 	AP_Result result;
