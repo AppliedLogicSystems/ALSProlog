@@ -1,23 +1,19 @@
-/*
- * alloc.h              -- runtime structure definitions and accessing
- *                              macros (16 bit machines)
- *
- *      Copyright (c) 1985 by Kevin A. Buettner
- *	Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
- *
- *
- * Author:  Kevin A. Buettner
- * Creation: 6/15/85
- * Revision History:
- *      Revised: 08/31/85,  Kevin A. Buettner -- Merged alloc32.h with
- *                          alloc.h
- *      Revised: 01/13/86,  Kevin A. Buettner -- PC mods
- *	Revised: 06/24/87,  Kevin A. Buettner -- SUN changes
- */
-
+/*===============================================================*
+ |			alloc.h              
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
+ |
+ |			-- runtime structure definitions and accessing macros 
+ |
+ | Author:  Kevin A. Buettner
+ | Creation: 6/15/85
+ | Revision History:
+ | 08/31/85,  Kevin A. Buettner -- Merged alloc32.h with alloc.h
+ | 01/13/86,  Kevin A. Buettner -- PC mods
+ | 06/24/87,  Kevin A. Buettner -- SUN changes
+ *===============================================================*/
 #ifndef ALLOC_I
 #define ALLOC_I 1
-
 
 /* Allocation constants */
 
@@ -25,7 +21,6 @@
                                   * transformations are also done in this
                                   * area
                                   */
-
 
 /*
  * A pword is the basic prolog word out of which all compiler data structures

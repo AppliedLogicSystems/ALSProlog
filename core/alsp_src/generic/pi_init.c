@@ -6,6 +6,8 @@
  |		- a segment of the old pimain.c
  *=====================================================================*/
 
-pi_init()
+#include "pi_init.h"
+
+void pi_init(void)
 {
 }

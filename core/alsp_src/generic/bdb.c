@@ -11,7 +11,7 @@
  *   06/28/85: K. Buettner  -- Conversion to wam and compiled prolog
  *   09/12/85: K. Buettner  -- arithmetic predicates moved to separate file.
  *   01/28/86: K. Buettner  -- IBM PC conversion
- *   05/04/89: K. Hughes and K. Buettner -- split off built.c
+ *   05/04/89: K. Hughes and K. Buettner -- split off from built.c
  *=============================================================*/
 
 /*-------------------------------------------
@@ -42,8 +42,11 @@
 		pbi_libbreak()
  *------------------------------------------*/
 /*-------------------------------------------
-	Special:
+	Special (freeze-related):
 		pbi_cptx()
+		pbi_swp_tr()
+		pbi_walk_cps()
+		....
  *------------------------------------------*/
 
 #include "defs.h"
@@ -102,7 +105,6 @@ pbi_abolish_clausegroup()
     else
 	FAIL;
 }
-
 
 extern long *aib_clause_addr;
 static	int	doassert	PARAMS(( int, PWord, pword, int ));
@@ -270,7 +272,6 @@ pbi_icode()
     w_get_An(&v3, &t3, 3);
     w_get_An(&v4, &t4, 4);
     w_get_An(&v5, &t5, 5);
-
 
     if (t1 == WTP_INTEGER && t3 == WTP_INTEGER && t5 == WTP_INTEGER &&
 	(t4 == WTP_INTEGER || t4 == WTP_SYMBOL) &&
@@ -539,14 +540,15 @@ pbi_listasm_clause()
     int   t1;
     PWord na;
     long *ca;
-    int   codesize;
+/*    int   codesize;   */
 
     w_get_An(&v1, &t1, 1);
 
     if ((ca = validate_dbref(v1, t1, &na)) != 0) {
-	codesize = (int) ((sizeCode(ca) + (WCI_CLAUSECODE - WCI_CHOICECODE)) * (sizeof (long) / sizeof (Code)));
+/*	codesize = (int) ((sizeCode(ca) + (WCI_CLAUSECODE - WCI_CHOICECODE)) * (sizeof (long) / sizeof (Code)));  */
 	list_asm(choiceCode(ca),
-		     (int) ((sizeCode(ca) + (WCI_CLAUSECODE - WCI_CHOICECODE)) * (sizeof (long) / sizeof (Code))));
+		     (int) ((sizeCode(ca) + (WCI_CLAUSECODE - WCI_CHOICECODE)) * 
+					(sizeof (long) / sizeof (Code))));
 	SUCCEED;
     }
     else

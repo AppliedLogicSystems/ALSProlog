@@ -113,6 +113,11 @@ dispatch_import(FileName,IType,State) :-
 	!.
 dispatch_import(FileName,IType,State) :-
 	assert(imported(FileName)),
+	(trace_enter_file(FileName) ->
+	trace
+	;
+	true
+	),
 	openFile(FileName,State).
 
 /*

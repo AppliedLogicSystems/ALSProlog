@@ -510,8 +510,7 @@ load4(SPath,OPath,Type,_,OPath)
 load4(SPath,OPath,Type,_,SPath) 
 	:-
 	exists_file(SPath),
-	file_status(SPath,Status),
-	dmember(type=regular,Status),
+	deref_file_type(SPath,regular),
 	!,
 	load_source_object(SPath,OPath).
 
@@ -520,6 +519,20 @@ load4(SPath,OPath,Type,_,OPath)
 	:-
 	obp_load(OPath,Status),
 	load4_checkstatus(Status,SPath,OPath).
+
+export deref_file_type/2.
+deref_file_type(Path,FType)
+	:-
+	file_status(Path,Status),
+	dmember(type=InitType,Status),
+	disp_deref_file_type(InitType,Path,FType).
+
+disp_deref_file_type(symbolic_link,Path,FType) 
+	:-!,
+	read_link(Path, LinkTarget),
+	deref_file_type(LinkTarget,FType).
+
+disp_deref_file_type(FType,Path,FType) :-!.
 
 
 /*-----------------------------------------------------------------------*

@@ -1,12 +1,13 @@
-/*
- * gv.c         -- global variable management
- *      Copyright (c) 1987-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 9/18/87
- * Revision History:
- *      Revised: mm/dd/yy       who             why
- */
+/*===============================================================*
+ |			gv.c         
+ |		Copyright (c) 1987-1993 Applied Logic Systems, Inc.
+ |
+ |			-- global variable management
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 9/18/87
+ | Revision History:
+ *===============================================================*/
 #include "defs.h"
 
 #define GV_SHIFT 32
@@ -158,7 +159,6 @@ gv_free(vn)
     *(long **) (wm_gvbase - vn) = wm_gvfreelist;
     wm_gvfreelist = wm_gvbase - vn;
 }
-
 
 void
 gv_get(vp, tp, vn)

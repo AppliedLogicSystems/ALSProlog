@@ -1,18 +1,18 @@
-/*
- * wdisp.c            -- dispatch table and print routines for the prolog
- *                              data types
- *      Copyright (c) 1985 by Kevin A. Buettner
- *      Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 6/15/85
- * Revision History:
- *      Revised: 2/??/86,   	kev -- alspro port
- *      Revised: 5/14/86,       kev     -- parenthesis problem on prefix ops
- */
-
+/*=================================================================*
+ |			wdisp.c
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1995 by Applied Logic Systems, Inc.
+ |
+ |			-- dispatch table & print routines for prolog data types
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 6/15/85
+ | Revision History:
+ | 02/??/86 - kev -- alspro port
+ | 05/14/86 - kev -- parenthesis problem on prefix ops
+ | 10/26/94 - C. Houpt -- char* cast in wr_sym.
+ *=================================================================*/
 #include "defs.h"
-
 
 /*
  * write and company
@@ -321,7 +321,7 @@ wr_sym(w, flags, depth)
     int   depth;
 {
     if ((flags & WQUOTE) && qtok((int) w))
-	write_quoted_symbol(TOKNAME(w));
+	write_quoted_symbol((char *)TOKNAME(w));
     else
 	PI_oprintf("%s", TOKNAME(w));
 }

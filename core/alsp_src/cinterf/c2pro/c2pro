@@ -23,6 +23,11 @@
  | Levels are set by the command line switch:
  |	-d N
  | which must occur after the  -p divider.
+ | Addl debugging tool:
+ |	-T FileName   (where FileName is a complete path)
+ | causes trace to be turned on when openFile is called (basically
+ | when #include FileName or #import FileName is executed.  Example:
+ |	-T /usr/include/objc/objc-class.h
  *===============================================================*/
 
 %:- [c2p,cparse,ctoken,cexp,cout,cfiles,cmisc,cmacro].
@@ -43,6 +48,7 @@ cur_debug_level(1).
 :-dynamic(includePath/3).
 :-dynamic(currentPath/3).
 :-dynamic(imported/1).
+:-dynamic(trace_enter_file/1).
 
 	%-------------------------------------
 	% OS-Specific File Loading (to disappear):
@@ -196,6 +202,11 @@ install_option(['-I',PathAtm], Defines, Defines, State)
 	:- !,
 	name(PathAtm,PathStr),
 	addIncludePath(PathStr).
+
+	% option:  -T FileName 		(full path to file)
+install_option(['-T',PathAtm], Defines, Defines, State)
+	:- !,
+	assert(trace_enter_file(PathAtm)).
 
 	% option:  -IPathname
 install_option([Opt], Defines, Defines, State)

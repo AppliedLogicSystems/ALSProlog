@@ -47,7 +47,8 @@ save_state(FileName) :-
 
 export save_image/1.
 
-save_image(NewImageName) :-
+save_image(NewImageName)
+	:-
 	tmpnam(SSName),
 	save_state(SSName),
 	get_image_dir_and_name(ImageDir,ImageName),
@@ -69,40 +70,61 @@ mics_cmd_fmt('%sals-mics %s%s %s %s').
 
 export save_image/2.
 
-save_image(ImageName, Options) :-
+save_image(ImageName, Options)
+	:-
 	process_image_options(Options),
 	save_image(ImageName).
 
-process_image_options([]) :-
-	!.
-process_image_options([Option | Options]) :-
+process_image_options([])
+	:-!.
+process_image_options([Option | Options])
+	:-
 	process_image_option(Option),
 	process_image_options(Options).
 
-process_image_option(init_goals(NewGoals)) :-
-	!,
+process_image_option(init_goals(NewGoals))
+	:-!,
 	builtins:clause('$initialize',OldGoals),
 	builtins:abolish('$initialize',0),
-	builtins:assert(('$initialize' :- OldGoals, user:NewGoals)).
-process_image_option(start_goal(G)) :-
-	!,
+	builtins:assert(('$initialize'
+	:- OldGoals, user:NewGoals)).
+
+process_image_option(start_goal(G))
+	:-!,
 	builtins:abolish('$start',0),
-	builtins:assertz(('$start' :- user:G)).
-process_image_option(libload(true)) :-
-	!,
+	builtins:assertz(('$start'
+	:- user:G)).
+
+process_image_option(libload(true))
+	:-!,
 	force_libload_all.
-process_image_option(libload(false)) :-
-	!.
-process_image_option(select_lib(FilesList)) :-
-	!,
-	force_libload_all(FilesList).
+
+process_image_option(libload(false))
+	:-!.
+
+process_image_option(select_lib(FilesList)) 
+	:-!,
+	add_lib_qual(FilesList,library,QualFilesList),
+	force_libload_all(QualFilesList).
+
+process_image_option(select_lib(Libary,FilesList)) 
+	:-!,
+	add_lib_qual(FilesList,Library,QualFilesList),
+	force_libload_all(QualFilesList).
+
 %% FIXME:  When encountering an unknown option, we should give an error
 %%	message and attempt to restore the previous state of $start/0 and
 %%	$initialize/0.  Also after successfully saving the image, we
 %%	should restore $start/0 and $initialize/0.
+
 process_image_option(Unknown) :-
 	als_advise('Ignoring unknown save image option \`%t\'\n', [Unknown]).
 
+add_lib_qual([],_,[]).
+add_lib_qual([File | FilesList],Library,[QualFile | QualFilesList])
+	:-
+	extendPath(Library,File,QualFile),
+	add_lib_qual(FilesList,Library,QualFilesList).
 
 /*
  * package(PckgName)

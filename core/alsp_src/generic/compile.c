@@ -1,16 +1,18 @@
-/*
- * compile.c            -- clause compilation module for prolog compiler
- *      Copyright (c) 1985 by Kevin A. Buettner
- *      Copyright (c) 1987-1993 Applied Logic Systems, Inc.
- *
- * Author:  Kevin A. Buettner
- * Creation: 6/16/85
- * Revision History:
- *      Revised:  02/11/87,   Kevin     -- Native code mods
- *      Revised:  10/26/90,   Kevin     -- compiler directive stuff added
- */
-
-
+/*===================================================================*
+ |			compile.c            
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1987-1995 Applied Logic Systems, Inc.
+ |
+ |			-- clause compilation module for prolog compiler
+ |
+ | Author:  Kevin A. Buettner
+ | Creation: 6/16/85
+ | Revision History:
+ | 02/11/87 - Kevin     -- Native code mods
+ | 10/26/90 - Kevin     -- compiler directive stuff added
+ | 11/21/94 - C. Houpt	-- Allocate large global arrays with malloc() for
+ |						   Mac compilers that can't handle them.
+ *===================================================================*/
 #include "defs.h"
 #include "varproc.h"
 #include "cutmacro.h"
@@ -19,27 +21,27 @@
 #include "icode.h"
 #include "icodegen.h"
 
+static int npv;				/* number of permanent variables */
+static int ngoals;			/* number of goals               */
+static int nvars;			/* number of variables           */
+static int goalnumber;		/* which goal we're working on,  *
+				 			 * 0 represents the head         */
+static int nargs;		    /* number of arguments in the current goal */
 
-static int npv;			/* number of permanent variables */
-static int ngoals;		/* number of goals               */
-static int nvars;		/* number of variables           */
-static int goalnumber;		/* which goal we're working on, 0 represents
-				 * the head
-				 */
-static int nargs;		/* number of arguments in the current goal
-				 *
-				 */
 static int firstgoalnumber;
-
 			/* usually 1, but not when there are cut(s) preceding
 			 * the first real goal
 			 */
-static int nargsmatched;
 
+static int nargsmatched;
 			/* number of arguments matched in head so far.
 			 */
 
+#ifdef NO_FAR_DATA
+static int *to_do;
+#else
 static int to_do[TODOSIZE];
+#endif
 
 			/* the "to_do" stack.  We use this stack when
 			 * compiling structure to keep track of register
@@ -50,18 +52,30 @@ static int to_do[TODOSIZE];
 			 * down and structure occurring in the body is
 			 * built bottom-up
 			 */
-static int to_do_top = 0;
 
+static int to_do_top = 0;
 			/* points to the next available location on the
 			 * "to do" stack
 			 */
 
-
 #define TDT_SET(tdt,n) tdt = to_do_top; to_do_top += n
 #define TDT_RESET(tdt) to_do_top = tdt
 
-
+#ifdef NO_FAR_DATA
+static pword *model;
+#else
 static pword model[MODELSIZE];
+#endif
+
+#ifdef NO_FAR_DATA
+void init_compiler_data(void)
+{
+    to_do = malloc(TODOSIZE*sizeof(*to_do));
+    if (to_do == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+    model = malloc(MODELSIZE*sizeof(*model));
+    if (model == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+}
+#endif
 
 			/* stack model of argument blocks and environment.
 			 * The following variables are indices into this
@@ -70,8 +84,8 @@ static pword model[MODELSIZE];
 
 static int model_Adst;		/* index of destination arguments */
 static int model_Adst2;		/* index of destination arguments which might
-				 * overlap the source arguments
-				 */
+				 			 * overlap the source arguments */
+
 static int model_Eend;		/* end of safe part of E */
 static int model_SPstart;
 
@@ -82,65 +96,56 @@ static int model_SPstart;
 			 *      are the potentially free temporaries.
 			 */
 
-/*
+/*---------------------------------*
  * Compiler directive variables
- *
- */
+ *---------------------------------*/
 
-static int cd_cutpt;		/* Variable number to put cutpt in; -1 if not
-				 * needed
-				 */
-static int cd_cmod;		/* Clause module */
-static int cd_gmod;		/* Goal module; i.e, module to place next
-				 * goal in
-				 */
-
+static int cd_cutpt;	/* Variable number to put cutpt in; -1 if not needed */
+static int cd_cmod;		/* Clause module									 */
+static int cd_gmod;		/* Goal module; i.e, module to place next goal in	 */
 
 static int model_SP;
 static int model_E;
 
-
-static	int	comp_rule		PARAMS(( pword ));
+static	int		comp_rule				PARAMS(( pword ));
 static	void	deallocate_environment	PARAMS(( pword, int, int, int ));
-static	void	initialize_environment_variables
-					PARAMS(( void ));
+static	void	initialize_environment_variables PARAMS(( void ));
 #if defined(InMath) && !defined(NewMath)
-static	long	regfreemap		PARAMS(( void ));
+static	long	regfreemap				PARAMS(( void ));
 #endif
 #ifdef NewMath
-static	long	regusemap		PARAMS(( void ));
-static	void	arith_temp_homes	PARAMS(( void ));
+static	long	regusemap				PARAMS(( void ));
+static	void	arith_temp_homes		PARAMS(( void ));
 #endif
-static	int	do_macro		PARAMS(( pword, int ));
-static	int	goalsize		PARAMS(( pword ));
-static	void	incr_usecnt		PARAMS(( int ));
-static	void	init_model		PARAMS(( pword, pword ));
-static	void	init_targets		PARAMS(( pword ));
-static	void	init_only_targets	PARAMS(( pword ));
-static	void	reassign_homes		PARAMS(( pword ));
-static	void	comp_head		PARAMS(( pword ));
+static	int		do_macro				PARAMS(( pword, int ));
+static	int		goalsize				PARAMS(( pword ));
+static	void	incr_usecnt				PARAMS(( int ));
+static	void	init_model				PARAMS(( pword, pword ));
+static	void	init_targets			PARAMS(( pword ));
+static	void	init_only_targets		PARAMS(( pword ));
+static	void	reassign_homes			PARAMS(( pword ));
+static	void	comp_head				PARAMS(( pword ));
 static	void	record_first_argument	PARAMS(( int, pword ));
-static	void	comp_head_structure	PARAMS(( int ));
+static	void	comp_head_structure		PARAMS(( int ));
 static	void	comp_hstruct_argument	PARAMS(( pword, int ));
-static	void	move			PARAMS(( int, int ));
-static	int	find_home		PARAMS(( int ));
-static	int	find_temp_in_reg	PARAMS(( int ));
-static	int	free_target		PARAMS(( int ));
-static	void	move_perms		PARAMS(( int ));
-static	void	move_to_temp		PARAMS(( int ));
-static	void	comp_goal		PARAMS(( pword ));
-static	int	comp_goal_structure	PARAMS(( pword, int ));
-static	int	comp_struct_arg1	PARAMS(( pword ));
-static	void	comp_struct_arg2	PARAMS(( pword, int, int ));
+static	void	move					PARAMS(( int, int ));
+static	int		find_home				PARAMS(( int ));
+static	int		find_temp_in_reg		PARAMS(( int ));
+static	int		free_target				PARAMS(( int ));
+static	void	move_perms				PARAMS(( int ));
+static	void	move_to_temp			PARAMS(( int ));
+static	void	comp_goal				PARAMS(( pword ));
+static	int		comp_goal_structure		PARAMS(( pword, int ));
+static	int		comp_struct_arg1		PARAMS(( pword ));
+static	void	comp_struct_arg2		PARAMS(( pword, int, int ));
 static	pword	get_compiler_directives	PARAMS(( pword ));
-static	void	compiler_directives	PARAMS(( void ));
-static	void	emit_cd_cutpt		PARAMS(( void ));
-
+static	void	compiler_directives 	PARAMS(( void ));
+static	void	emit_cd_cutpt			PARAMS(( void ));
 
 #ifdef MaxFunc
-/* We are using a macro for "max" -- Ilyas,Raman 5/17/90 */
 /*
  * max returns the greater of its two parameters
+ * 	-- We are using a macro for "max" -- Ilyas, Raman 5/17/90 
  */
 
 int
@@ -152,7 +157,6 @@ max(x, y)
 #else  /* MaxFunc */
 #define max(a,b) ((a)<(b) ? (b) : (a))
 #endif /* MaxFunc */
-
 
 /*
  * compile_clause takes a rule r generated by parser and generates
@@ -209,7 +213,6 @@ compile_clause(r, fromparser)
     return 1;
 }
 
-
 static int
 comp_rule(rule)
     pword rule;
@@ -228,11 +231,9 @@ comp_rule(rule)
     if (TYPEOF(rule) != TP_RULE)
 	fatal_error(FE_IN_COMP1, 0);
 
-
     ngoals = (int) RULE_NGOALS(rule);
 
 #ifdef NewMath
-
     /*
      * If the last goal is arithmetic and we attempt to generate inline math
      * (new math), the stack frame is not set up properly for the inline math.
@@ -270,7 +271,6 @@ comp_rule(rule)
      * Initialize the model and emit instructions necessary for setting up
      * the environment and stack pointer for the first goal.
      */
-
     goalnumber = 0;
 
     if (firstgoalnumber > ngoals)
@@ -283,7 +283,6 @@ comp_rule(rule)
     /*
      * Compile the head of the rule.
      */
-
     comp_head(RULE_HEAD(rule));
 
     if (firstgoalnumber > 1) {
@@ -306,8 +305,6 @@ comp_rule(rule)
 		init_only_targets(RULE_GOALN(rule, firstgoalnumber));
 	}
     }
-
-
 
     /*
      * firstgoalnumber will always be positive (since we start it out at one
@@ -343,7 +340,6 @@ comp_rule(rule)
     macrofix = do_macro(goal, gtp);
 
     for (;;) {
-
 
 	/*
 	 * Do compiler directives
@@ -639,7 +635,6 @@ comp_rule(rule)
     }
 }
 
-
 /*
  * deallocate_environment is called for deallocating an environment just
  * prior to setting up the arguments for the last goal.
@@ -655,7 +650,6 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
     pword ag;
 
     icode(I_DEALLOCATE1, 0, 0, 0, 0);
-
 
     /*
      * Set model_Adst, model_Adst2, and a guess at model_SP.
@@ -816,7 +810,6 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
     icode(I_DEALLOCATE4, max(esize, gsize + 2 - (MODELSIZE - model_E)), 0, 0, 0);
 }
 
-
 /*
  * gccallinfo puts out the instruction just following a jsr which the garbage
  * compacter uses to determine the environment size and argument usage.
@@ -869,7 +862,6 @@ gccallinfo()
      */
     icode(I_CALLINFO, mask, MODELSIZE - model_E - 2, call_env_sizes[goalnumber], 0);
 }
-
 
 /*
  * The following function is called to initialize environment variables to
@@ -961,7 +953,6 @@ regusemap()
     return map;
 }
 
-
 /*
  * isarithmetic takes a goal and determines if it is one of the ones for
  * which we should compile inline arithmetic for.
@@ -981,7 +972,6 @@ isarithmetic(goal)
     else
 	return 0;
 }
-
 
 /*
  * arith_temp_homes allocates space for any temporaries, should
@@ -1021,7 +1011,6 @@ arith_temp_homes()
 }
 #endif /* NewMath */
 
-
 static int
 do_macro(goal, gtp)
     pword goal;
@@ -1052,7 +1041,6 @@ do_macro(goal, gtp)
 
     return macrofix;
 }
-
 
 /*
  * goalsize is given a structure purported to be a goal.  It returns the
@@ -1088,7 +1076,6 @@ goalsize(goal)
     return size;
 }
 
-
 static void
 incr_usecnt(v)
     int   v;
@@ -1097,8 +1084,6 @@ incr_usecnt(v)
 	model[vtbl[v].home] = NIL_VAL;
     }
 }
-
-
 
 /*
  * init_model is responsible for initializing the model of the machine
@@ -1152,7 +1137,6 @@ init_model(head, firstgoal)
 	    }
 	}
 
-
 	/*
 	 * Now take care of the overflow case.
 	 */
@@ -1179,7 +1163,6 @@ init_model(head, firstgoal)
     for (i = nargs + 1; i <= NAREGS; i++) {
 	model[ASTART + i - 1] = NIL_VAL;
     }
-
 
     model_Eend = model_E;	/* don't want to clobber return address */
     model_SP = model_Eend;
@@ -1352,7 +1335,6 @@ init_model(head, firstgoal)
 		model[i] = NIL_VAL;
 	}
 
-
     }
     else {			/* no goals */
 	model_Adst = model_Eend;
@@ -1362,7 +1344,6 @@ init_model(head, firstgoal)
     icode(IC_ENDALLOC, 0, 0, 0, 0);
     model_SPstart = model_SP;
 }
-
 
 /*
  * init_targets scans the given goal and looks for top-level temporary
@@ -1432,7 +1413,6 @@ init_targets(t)
     }
 }
 
-
 /*
  * init_only_targets is called by init_targets to initialize the target
  *      fields in the vtbl array.  No other initializations are performed.
@@ -1466,7 +1446,6 @@ init_only_targets(t)
     }
 }
 
-
 /*
  * reassign_homes is called just after the first goal to set up homes for those
  * variables which lived in registers during the compilation of the head and
@@ -1484,12 +1463,10 @@ static void
 reassign_homes(head)
     pword head;
 {
-
     if (TYPEOF(head) == TP_TERM) {
 	register int i;
 	register pword s;
 	int   head_nargs, ti, v;
-
 
 	head_nargs = TERM_ARITY(head);
 	if (head_nargs > NAREGS)
@@ -1499,16 +1476,13 @@ reassign_homes(head)
 	    s = TERM_ARGN(head, i);
 	    ti = model_E + i + 1;
 
-
 	    if (IS_VO(s) && vtbl[v = VO_VAL(s)].pvnum == 0 &&
 		vtbl[v].usecnt < vtbl[v].noccurences) {
 		vtbl[v].home = ti;
 		vtbl[v].target = 0;
 		model[ti] = s;
 	    }
-
 	}
-
     }
 
 #ifdef OLDEREG
@@ -1627,7 +1601,6 @@ record_first_argument(tp, arg)
     }
 }
 
-
 /*
  * comp_head_structure(loc)
  *
@@ -1685,7 +1658,6 @@ comp_head_structure(loc)
 	TDT_RESET(tdbase);
     }
 }
-
 
 /*
  * comp_hstruct_argument(arg,n)
@@ -1745,8 +1717,6 @@ comp_hstruct_argument(arg, n)
 	    break;
     }
 }
-
-
 
 /*
  * index_of(n)
@@ -1876,7 +1846,6 @@ find_temp_in_reg(targ)
     return 0;
 }
 
-
 /*
  * free_target(loc)
  *
@@ -1885,7 +1854,6 @@ find_temp_in_reg(targ)
  *      free.  If the location is already free or can be freed, it returns 1.
  *      Otherwise it returns 0.
  */
-
 
 static int
 free_target(loc)
@@ -1983,7 +1951,6 @@ free_target(loc)
     return 1;
 }
 
-
 static void
 move_perms(start)
     int   start;
@@ -2021,7 +1988,6 @@ move_perms(start)
 	}
 }
 
-
 static void
 move_to_temp(loc)
     int   loc;
@@ -2034,7 +2000,6 @@ move_to_temp(loc)
     move(loc, t);
     model[loc] = NIL_VAL;
 }
-
 
 /*
  * comp_goal is responsible for setting up arguments for a goal.  The
@@ -2089,9 +2054,7 @@ comp_goal(goal)
 	    default:
 		break;
 	}
-
     }
-
 
     /*
      * set up variables
@@ -2169,7 +2132,6 @@ comp_goal(goal)
     }
 }
 
-
 #ifdef NewMath
 /*
  * comp_math_struct is called by comp_math.c when the math compiler finds
@@ -2223,7 +2185,6 @@ comp_math_struct(arg)
 
 }
 #endif
-
 
 /*
  * comp_goal_structure is responsible for emitting the code for building
@@ -2373,7 +2334,6 @@ comp_struct_arg2(arg, loc, n)
     }
 }
 
-
 /*
  * get_compiler_directives
  *
@@ -2433,7 +2393,6 @@ get_compiler_directives(goal)
     }
     return goal;
 }
-
 
 static void
 compiler_directives()

@@ -1,16 +1,14 @@
-
-/*
- * varproc.c            -- functions for dealing with variables prior to
- *                         compilation.
- *      Copyright (c) 1985 by Kevin A. Buettner
- *      Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
+/*===============================================================*
+ *			varproc.c            
+ *		Copyright (c) 1985 by Kevin A. Buettner
+ *		Copyright (c) 1986-1995 by Applied Logic Systems, Inc.
  *
+ |			-- functions for dealing with variables prior to compilation.
+ |
  * Author:  Kevin A. Buettner
  * Creation: 6/16/85
  * Revision History:
- *      Revised: mm/dd/yy,      Name    -- Reason
- */
-
+ *===============================================================*/
 #include "defs.h"
 #include "varproc.h"
 
@@ -21,7 +19,16 @@
 
 #define PERMOFFSET	1
 
+#ifdef NO_FAR_DATA
+varinf *vtbl;	/* variable table               */
+void init_varproc_data(void)
+{
+    vtbl = malloc((VTBLSIZE + 2)*sizeof(*vtbl));
+    if (vtbl == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+}
+#else
 varinf vtbl[VTBLSIZE + 2];	/* variable table               */
+#endif
 
 int   call_env_sizes[MAXGLS];
 

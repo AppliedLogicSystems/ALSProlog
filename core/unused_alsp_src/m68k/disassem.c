@@ -4,7 +4,9 @@
  *
  * Author: Kevin A. Buettner
  * Creation: 2/17/87
- * Revision History:
+ * 10/26/94,	C. Houpt -- Redefined the Instruction Pointer as a union so
+ *				that it can be used as both a short and long pointer.  This
+ *				avoid the need to casting l-values, which is not ANSI.
  */
 
 #include "defs.h"
@@ -36,8 +38,18 @@ main()
 }
 #endif
 
+/* static Code *ip; */
 
-static Code *ip;
+/* Define the Instruction Pointer (uip) as a union so that it can be used
+   as both a short and long pointer.
+*/
+union {
+	Code *c;
+	long *l;
+}	uip;
+
+/* Define ip as a code pointer to handle the common case of fetching Code. */
+#define ip	uip.c
 
 void
 list_asm(addr, n)
@@ -215,7 +227,7 @@ decode_immed(opcode)
 		data = *ip++;
 		break;
 	    case 2:
-		data = *((long *) ip)++;
+		data = *uip.l++;
 		break;
 	}
 	if (mode == 7 && reg == 4)
@@ -337,7 +349,7 @@ decode_misc(opcode)
 	    break;
 	case 040:
 	    if (mode == 1)
-		PI_printf("link\tA%d, #%d.l\n", reg, *((long *) ip)++);
+		PI_printf("link\tA%d, #%d.l\n", reg, *uip.l++);
 	    else
 		PI_printf("nbcd\t%s\n", EAstr(mode, reg, 0));
 	    break;
@@ -472,7 +484,7 @@ decode_quick(opcode)
 	else if (reg == 2)
 	    PI_printf("trap%s.w\t#%d\n", condition_codes[condition], *ip++);
 	else
-	    PI_printf("trap%s.l\t#%d\n", condition_codes[condition], *((long *) ip)++);
+	    PI_printf("trap%s.l\t#%d\n", condition_codes[condition], *uip.l++);
     }
     else
 	PI_printf("s%s\t%s\n", condition_codes[condition], EAstr(mode, reg, 0));
@@ -497,7 +509,7 @@ decode_branch(opcode)
 	size = 'w';
     }
     else if (disp == 0xff) {
-	disp = *((int *) ip)++;
+	disp = *uip.l++;
 	size = 'l';
     }
     else {
@@ -905,7 +917,7 @@ EAstr(mode, reg, size)
 			bd = *ip++;	/* base displacement is one word */
 			break;
 		    case 3:
-			bd = *((long *) ip)++;
+			bd = *uip.l++;
 			break;
 		}
 		isuppress = (ext >> 6) & 1;
@@ -936,7 +948,7 @@ milab:
 		    od = *ip++;
 		    break;
 		case 3:
-		    od = *((long *) ip)++;
+		    od = *uip.l++;
 		    break;
 	    }
 
@@ -1010,7 +1022,7 @@ milab:
 		    sprintf(buf, "%s", symbolic_name(*ip++));
 		    break;
 		case 1:	/* Absolute long address */
-		    sprintf(buf, "%s", symbolic_name(*((long *) ip)++));
+		    sprintf(buf, "%s", symbolic_name(*uip.l++));
 		    break;
 		case 2:
 		    sprintf(buf, "(%d,PC)", *ip++);
@@ -1031,7 +1043,7 @@ milab:
 						 */
 				break;
 			    case 3:
-				bd = *((long *) ip)++;
+				bd = *uip.l++;
 				break;
 			}
 			isuppress = (ext >> 6) & 1;
@@ -1064,7 +1076,7 @@ milab:
 			    sprintf(buf, "#%d", *ip++);
 			    break;
 			case 2:
-			    sprintf(buf, "#%ld", *((long *) ip)++);
+			    sprintf(buf, "#%ld", *uip.l++);
 			    break;
 			default:
 			    sprintf(buf, "Bad size");

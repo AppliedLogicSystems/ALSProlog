@@ -348,9 +348,9 @@ getMoreNum( InStream, Num, _, OutStream, Num,State) :-
 %
 
 getFractAndExponent(InStream,INum,Mag,OutStream,Fract,Exponent,State) :-
-	getFraction(InStream,INum,Mag,Stream1,Fract,State),
-	getExponentOpt(Stream1,Stream2,Exponent),
-	floatMarkerOpt(Stream2,OutStream).
+	getFraction(InStream,INum,Mag,OutStream,Fract,State),
+	getExponentOpt(InStream,OutStream,Exponent,State),
+	floatMarkerOpt(InStream,OutStream).
 
 getFraction( [ Char | InStream ],INum,Mag,OutStream,Num,State) :-
 	isNumeric(Char,Digit),
@@ -369,7 +369,7 @@ getExponentOpt( [ Char | InStream ], OutStream, Exponent,State) :-
 getExponentOpt(Stream, Stream, 0,State).
 
 getExponent(InStream,OutStream,Exponent,State) :-
-	getSignOpt(Sign,InStream,NStream,State),
+	getSignOpt(Sign,InStream,NStream),
 	getDecimal(NStream, 0, OutStream, Num,State),
 	Exponent is Num * Sign.
 

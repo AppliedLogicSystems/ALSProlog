@@ -5,7 +5,7 @@
 
 #include "alspi.h"
 #include "cinterf.h"
-#include "next.h"
+#include "nextstep.h"
 
 #define MAXNARGS 30
 

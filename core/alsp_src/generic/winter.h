@@ -1,11 +1,13 @@
-/*
- * winter.h			-- machine / C interface include file
- *	Copyright (c) 1987-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Created: 11/25/87
- * Revision History:
- */
+/*=====================================================================*
+ |		winter.h
+ |	Copyright (c) 1987-1994 Applied Logic Systems, Inc.
+ |
+ |		(Low level) machine / C interface include file
+ |
+ | Author: Kevin A. Buettner
+ | Created: 11/25/87
+ | Revision History:
+ *=====================================================================*/
 
 #ifndef _WINTER_H_INCLUDED_
 #define _WINTER_H_INCLUDED_ 1
@@ -111,21 +113,21 @@ extern	int	wm_trust_fail	PARAMS(( void ));
 #endif /* Portable */
 
 
-/*
+/*@[3.1]@------------------------------------------------------------------
  * To the builtins, we wish to present a machine independent representation
  * of the prolog objects and their tags.  Hence the WTP tags below.
- */
+ *--------------------------------------------------------------------------*/
 
-#define WTP_REF         0               /* Reference            */
-#define WTP_UNBOUND     0               /* Unbound Variable     */
-#define WTP_LIST        1               /* List                 */
-#define WTP_STRUCTURE   2               /* Structure            */
-#define WTP_SYMBOL      3               /* Symbol               */
-#define WTP_INTEGER     4               /* Signed integer */
-#define WTP_UIA		5		/* UnInterned Atom	*/
+#define WTP_REF         0               /* Reference        */
+#define WTP_UNBOUND     0               /* Unbound Variable */
+#define WTP_LIST        1               /* List             */
+#define WTP_STRUCTURE   2               /* Structure        */
+#define WTP_SYMBOL      3               /* Symbol           */
+#define WTP_INTEGER     4               /* Signed integer   */
+#define WTP_UIA	        5               /* UnInterned Atom	*/
 
 #ifdef	DoubleType
-#define WTP_DOUBLE	6		/* Floating point number */
+#define WTP_DOUBLE      6               /* Floating point number */
 #endif /* DoubleType */
 
 
@@ -135,13 +137,13 @@ extern	int	wm_trust_fail	PARAMS(( void ));
 
 #define w_get_car(rval,rtag,laddr) w_get(rval,rtag,* (PWord *) laddr)
 #define w_get_cdr(rval,rtag,laddr) w_get(rval,rtag,* (((PWord *) laddr)+1))
-#define w_install_car(l,v,t)    w_install((PWord *) l,v,t)
-#define w_install_cdr(l,v,t)    w_install(((PWord *) l)+1,v,t)
-#define w_mk_int(rval,rtag,ival) (*(rval)=(PWord)(ival),*(rtag)=WTP_INTEGER)
-#define w_mk_sym(rval,rtag,tokid) (*(rval)=(PWord)(tokid),*(rtag)=WTP_SYMBOL)
+#define w_install_car(l,v,t)       w_install((PWord *) l,v,t)
+#define w_install_cdr(l,v,t)       w_install(((PWord *) l)+1,v,t)
+#define w_mk_int(rval,rtag,ival)   (*(rval)=(PWord)(ival),*(rtag)=WTP_INTEGER)
+#define w_mk_sym(rval,rtag,tokid)  (*(rval)=(PWord)(tokid),*(rtag)=WTP_SYMBOL)
 
 #define w_install_unbound_car(l) 	w_install((PWord *)l,(PWord)((PWord *)(l)),WTP_UNBOUND)
-#define w_install_unbound_cdr(l) w_install(((PWord *)l)+1,(PWord)(((PWord *)l)+1),WTP_UNBOUND)
+#define w_install_unbound_cdr(l)    w_install(((PWord *)l)+1,(PWord)(((PWord *)l)+1),WTP_UNBOUND)
 
 /*
  * Declarations and prototypes for functions defined in winter.c

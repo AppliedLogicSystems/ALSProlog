@@ -1,20 +1,27 @@
-/*
- * loadfile.c           -- Object module store and load functions
- *
- * Copyright (c) 1986-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation Date: 4/22/86
- * Revision History:
- *      02/24/88,       kev     -- Sun Mods
- *      10/29/90,       ilyas   -- To create .OBP files without creating
- *                                                       a temporary file.
- *      06/03/92,   ron         -- Added support in get_file_date_time() and
- *                                 isdir() for Macintosh file system.
- */
-
+/*===================================================================*
+ |			loadfile.c           
+ |		Copyright (c) 1986-1995 Applied Logic Systems, Inc.
+ |
+ |			-- Object module store and load functions
+ |
+ | Author: Kevin A. Buettner
+ | Creation Date: 4/22/86
+ | Revision History:
+ | 02/24/88 - kev -- Sun Mods
+ | 10/29/90 - ilyas -- To create .OBP files without creating
+ |                                                       a temporary file.
+ | 06/03/92 - ron -- Added support in get_file_date_time() and
+ |                   isdir() for Macintosh file system.
+ | 11/29/94 - C. Houpt	-- Moved MacOS specific file code for
+ |			  get_file_modified_time() and isdir() to fsmac.c
+ |			  I strongly suggest moving these functions to fsunix/fsdos.
+ |			  -- Zero initilized the OBP headers, because otherwise random bytes
+ |				 appear in the headers (this makes it difficult to compare files).
+ |			  -- Various UCHAR casts.
+ |			  -- Merge OBP and non-OBP load_file() for debugging,
+ |				 the non-OBP load_file was out of date.
+ *===================================================================*/
 #include "defs.h"
-
 
 #if	defined(DOS)	/* OS includes */
 #include <stdefs.h>
@@ -30,14 +37,16 @@
 #include <stat.h>
 #include <file.h>
 
+/*
 #elif	defined(MacOS)
 #include <StdDef.h>
 #include <errno.h>
 #include <Types.h>
 #include <Files.h>
 #include <ToolUtils.h>
+*/
 
-#else	/* must be unix */
+#else	!defined(MacOS) /* must be unix */
 #include <errno.h>
 #include <sys/file.h>
 #endif			/* OS includes */
@@ -57,7 +66,6 @@
  */
 
 #define EPSILON_TIME   60
-
 
 static char MAGIC[] =
 "ALS-Prolog Loadable Object Module\r\nFormat 1.21(XXXXXXXXXX,YYYYYYYYYY)\r\n\032\004\019\026";
@@ -144,7 +152,7 @@ static unsigned short format_tab[] =
 };
 
 static	long	get_file_modified_time	PARAMS(( char * ));
-static	int	isdir			PARAMS(( char * ));
+static	int		isdir					PARAMS(( char * ));
 
 /*
  * fix_magic is called at initialization time to replaces the X's with
@@ -205,7 +213,6 @@ fix_MAGIC()
 
 static FILE *obp_fp;
 static long obp_nrecs;
-
 
 /*
  * Put the given icode into the .OBP file.
@@ -290,12 +297,22 @@ int
 obp_open(fname)
     char *fname;
 {
-    mod_header obp_header;
+    mod_header obp_header = {
+    	"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    	"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    	"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    	"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    	"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
+    	0,
+    	0,
+    	0,
+    	0,    
+    };
 
     /*
      * Are we able to open .OBP file?
      */
-#if defined(DOS) || defined(AtariOS) || defined(__GO32__)
+#if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(MacOS)
     if ((obp_fp = fopen(fname, "w+b")) == NULL) {
 #else
     if ((obp_fp = fopen(fname, "w+")) == NULL) {	/* } for vi */
@@ -322,7 +339,17 @@ obp_close()
     long *toks;
     long  ntoks;
     long  tok;
-    mod_header obp_header;
+    mod_header obp_header = {
+    	"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    	"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    	"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    	"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    	"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
+    	0,
+    	0,
+    	0,
+    	0,    
+    };
 
     /*
      * Update the header information.
@@ -384,7 +411,7 @@ f_load(fname)
     unsigned short strsize;
     unsigned short binop, unop;
 
-#if defined(DOS) || defined(AtariOS) || defined(__GO32__)
+#if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(MacOS)
     if ((fp = fopen(fname, "rb")) != NULL) {
 #else
     if ((fp = fopen(fname, "r")) != NULL) {	/* } for vi */
@@ -405,7 +432,7 @@ f_load(fname)
     for (i = 0; i < header.symtab_size; i++) {
 	fread((char *) (&strsize), sizeof strsize, 1, fp);
 	fread(cbuf, (size_t) strsize, 1, fp);
-	j = find_token(cbuf);
+	j = find_token((UCHAR *)cbuf);
 	*(tokmap + i) = j;
 	fread(&unop, sizeof (unsigned short), 1, fp);
 	fread(&binop, sizeof (unsigned short), 1, fp);
@@ -489,117 +516,6 @@ f_load(fname)
     return (FLOAD_SUCCESS);
 }
 
-
-
-
-static long
-get_file_modified_time(fname)
-    char *fname;
-{
-#ifdef DOS
-
-    long  date_and_time;
-
-    if (!isdir(fname)) {
-	date_and_time = get_file_date_and_time(fname);
-	if (date_and_time != -1)
-	    return (date_and_time);
-	else
-	    return (0);
-    }
-    else
-	return (0);
-
-#else  /* DOS */
-#ifdef MacOS
-    FileParam fp;
-
-    c2pstr(fname);
-
-    fp.ioCompletion = 0;
-    fp.ioNamePtr = fname;
-    fp.ioVRefNum = 0;
-    fp.ioFVersNum = 0;
-    fp.ioFDirIndex = 0;
-
-    if (PBGetFInfo((ParmBlkPtr) & fp, false)) {
-	p2cstr(fname);
-	return (0);
-    }
-
-    p2cstr(fname);
-
-    return (fp.ioFlMdDat);
-
-#else  /* MacOS */
-
-    struct stat buf;
-
-    if (stat(fname, &buf) == -1 || buf.st_mode & S_IFDIR)
-	return (long) 0;
-
-    return buf.st_mtime;
-
-#endif /* MacOS */
-#endif /* DOS */
-}
-
-
-
-/*
- * Returns 1 if fname is a directory, 0 otherwise.
- *
- */
-static int
-isdir(fname)
-    char *fname;
-{
-#ifdef DOS
-
-#define DIR_BIT 0x0010
-
-    int   fattr;		/* file attribute */
-
-    fattr = get_file_attr(fname);
-    if (fattr != -1)
-	return (fattr & DIR_BIT);
-    else
-	return (0);
-#else  /* DOS */
-
-#ifdef MacOS
-
-    FileParam fp;
-
-    c2pstr(fname);
-
-    fp.ioCompletion = 0;
-    fp.ioNamePtr = fname;
-    fp.ioVRefNum = 0;
-    fp.ioFVersNum = 0;
-    fp.ioFDirIndex = 0;
-
-    PBGetFInfo((ParmBlkPtr) & fp, false);
-
-    p2cstr(fname);
-
-    if (BitTst(&fp.ioFlAttrib, 3))
-	return (1);
-    return (0);
-
-#else  /* MacOS */
-
-    struct stat buf;
-
-    if (stat(fname, &buf) == -1)
-	return (0);
-
-    return (buf.st_mode & S_IFDIR);
-
-#endif /* MacOS */
-#endif /* DOS */
-}
-
 static struct obp_stack_rec {
     int   nrecs;
     int   makeobp;
@@ -625,11 +541,6 @@ obp_pop()
     obp_fp = obp_stack[obp_stack_top].fp;
 }
 
-
-#ifndef R_OK
-#define R_OK 4
-#endif
-
 #define LOAD_RETURN(status) 					\
 	{ 	makeobp=old_makeobp;				\
 		w_reconstamp=old_reconsult_stamp;		\
@@ -638,7 +549,80 @@ obp_pop()
 		return(status);					\
 	}
 
+#else /* OBP */
 
+#define LOAD_RETURN(status)	return(status);
+
+#endif	/* OBP */
+
+#ifndef MacOS
+
+static long
+get_file_modified_time(fname)
+    char *fname;
+{
+#ifdef DOS
+
+    long  date_and_time;
+
+    if (!isdir(fname)) {
+	date_and_time = get_file_date_and_time(fname);
+	if (date_and_time != -1)
+	    return (date_and_time);
+	else
+	    return (0);
+    }
+    else
+	return (0);
+
+#else  /* DOS */
+
+    struct stat buf;
+
+    if (stat(fname, &buf) == -1 || buf.st_mode & S_IFDIR)
+	return (long) 0;
+
+    return buf.st_mtime;
+
+#endif /* DOS */
+}
+
+/*
+ * Returns 1 if fname is a directory, 0 otherwise.
+ *
+ */
+static int
+isdir(fname)
+    char *fname;
+{
+#ifdef DOS
+
+#define DIR_BIT 0x0010
+
+    int   fattr;		/* file attribute */
+
+    fattr = get_file_attr(fname);
+    if (fattr != -1)
+	return (fattr & DIR_BIT);
+    else
+	return (0);
+#else  /* DOS */
+
+    struct stat buf;
+
+    if (stat(fname, &buf) == -1)
+	return (0);
+
+    return (buf.st_mode & S_IFDIR);
+
+#endif /* DOS */
+}
+
+#endif /* not MacOS */
+
+#ifndef R_OK
+#define R_OK 4
+#endif
 
 int
 load_file(fname, options)
@@ -649,17 +633,21 @@ load_file(fname, options)
     char *ext, *fnp;
     char  new_fname[256];
     int   status;
-    int   old_makeobp = makeobp;
     long  old_reconsult_stamp = w_reconstamp;
+#ifdef OBP
+    int   old_makeobp = makeobp;
     FILE *old_obp_fp = obp_fp;
     int   old_obp_nrecs = obp_nrecs;
+#endif /* OBP */
     int   errorcount;
 
+#ifdef OBP
     /*
      * Assume we are not creating .obp files until we
      * explicitly say otherwise.
      */
     makeobp = 0;
+#endif /* OBP */
 
     /*
      * Are we reconsulting?
@@ -671,7 +659,7 @@ load_file(fname, options)
      *  If the file "user", directly consult it
      */
     if (strcmp(fname, "user") == 0) {
-	errorcount = consult(find_token(fname));
+	errorcount = consult(find_token((UCHAR *)fname));
 	LOAD_RETURN(1)
     }
 
@@ -691,8 +679,10 @@ load_file(fname, options)
      *  Try to access the file as specified by making sure that
      *  it is not a directory. If it is accessable, load that file.
      */
-    if (access(fname, R_OK) == 0 && !isdir(fname)) {
+    if (access(fname, R_OK) == 0 && !isdir(fname)) 
+	{
 /* printf("load_file:access ok to fname=%s\n",fname); */
+#ifdef OBP
 	if (strcmp(fnp, ".obp") == 0) {
 	    if (f_load(fname) != FLOAD_FAIL) {
 		LOAD_RETURN(1)
@@ -701,7 +691,9 @@ load_file(fname, options)
 		LOAD_RETURN(0)
 	    }
 	}
-	else {
+	else 
+#endif /* OBP */
+	{
 	    errorcount = consult(find_token(fname));
 	    LOAD_RETURN(1)
 	}
@@ -720,8 +712,10 @@ load_file(fname, options)
 	strcpy(ext, "pro");
 /* printf("load_file: added pro ext-new_fname=%s\n",new_fname); */
 	pro_time = get_file_modified_time(new_fname);
+#if OBP
 	strcpy(ext, "obp");
 	obp_time = get_file_modified_time(new_fname);
+#endif /* OBP */
     }
     else {
 	/*
@@ -735,6 +729,7 @@ load_file(fname, options)
     /*
      *  Try to load .obp file if it is newer than .pro file
      */
+#ifdef OBP
     if (obp_time && (obp_time > (pro_time + EPSILON_TIME))) {
 	strcpy(ext, "obp");
 	status = f_load(new_fname);
@@ -753,6 +748,7 @@ load_file(fname, options)
 		fprintf(stderr, "Attempting to recompile.\n");
 	}
     }
+#endif /* OBP */
 
     /*
      *  Try to load .pro file if it is newer than .obp file
@@ -762,6 +758,7 @@ load_file(fname, options)
 	/*
 	 * Are we able to create .obp file?
 	 */
+#ifdef OBP
 	strcpy(ext, "obp");
 	if (obp_open(new_fname) == 0) {
 	    fprintf(stderr, "Warning: Unable to create %s \n", new_fname);
@@ -769,13 +766,14 @@ load_file(fname, options)
 	else {
 	    makeobp = 1;
 	}
+#endif /* OBP */
 
 	/*
 	 * Load .pro file
 	 */
 /* printf("load_file: Really about to try .pro file\n"); */
 	strcpy(ext, "pro");
-	errorcount = consult(find_token(new_fname));
+	errorcount = consult(find_token((UCHAR *)new_fname));
 
 	/*
 	 * We need to check to see if any syntax errors were reported.
@@ -793,6 +791,7 @@ load_file(fname, options)
 	 * Close .obp file.
 	 * Delete .obp files if any syntax errors were reported.
 	 */
+#if OBP
 	if (makeobp == 1) {
 	    obp_close();
 	    if (errorcount) {
@@ -812,6 +811,7 @@ load_file(fname, options)
 #endif /* DOS */
 	    }
 	}
+#endif /* OBP */
 
 	LOAD_RETURN(1)
     }
@@ -819,8 +819,8 @@ load_file(fname, options)
     LOAD_RETURN(0)
 }
 
-#else  /* OBP */
 
+/******
 int
 load_file(fname, options)
     char *fname;
@@ -828,7 +828,9 @@ load_file(fname, options)
 {
     if (options)
 	w_reconstamp = w_timestamp;
-    consult(find_token(fname));
+    consult(find_token((UCHAR *)fname));
 }
 
-#endif /* OBP */
+*********/
+
+

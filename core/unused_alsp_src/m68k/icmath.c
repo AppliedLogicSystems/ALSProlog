@@ -6,7 +6,10 @@
  * Author:	Kevin Buettner, Motorola 68k port by Scott Medeiros
  * Creation:	2/18/92
  * Revision History:
- *	Revised: mm/dd/yy	Who		-- Why and What
+ * 11/30/94,	C. Houpt	-- Parametrized math stack pointer
+ *					register so different platforms can use
+ *					different registers.  The MacOS use the B
+ *					register instead of the Fail register.
  */
 
 #include "defs.h"
@@ -23,7 +26,6 @@
 /* These are the global symbols we need access to.  Thus, RELOC_INFO is
  * emitted around uses of these symbols (for packaging).
  */
-
 extern long int_table;
 extern long dcmp_table;
 extern long mth_bot;
@@ -36,10 +38,20 @@ static LAB mth_initlab2;
 static int stacksize;		/* number of elements in arithmetic stack */
 static int stackmax;
 
-#define ICODE(macro,str,func,obp) void func PARAMS(( long, long, long, long ));
+#define ICODE(macro,str,func,obp) extern void func PARAMS(( long, long, long, long ));
 #include "icodedef.h"
 
+/* MStack is the register that contains th math stack pointer.
+   On most machines the Fail register is temporarily used for the math stack pointer,
+   but on the Macintosh, the B register is used.
+*/
+#ifdef MacOS
+#define MStack	B
+#else
+#define MStack	Fail
+#endif
 
+void ic_mth_init1(long isonlygoal, long regmask, long y, long z);
 void
 ic_mth_init1(isonlygoal,regmask,y,z)
     long isonlygoal;
@@ -47,8 +59,8 @@ ic_mth_init1(isonlygoal,regmask,y,z)
     long y, z;
 {
 
-    /* First need to save off Fail, so that it can be used as a MathSP */
-    MOVE(Fail,ADIRECT,0,SP,PREDECR,0);	/* move.l	Fail,	-(SP) */
+    /* First need to save off MStack, so that it can be used as a MathSP */
+    MOVE(MStack,ADIRECT,0,SP,PREDECR,0);	/* move.l	MStack,	-(SP) */
 
 /* the next 2 instructions initialize the Math SP.  The second instruction is overwritten
    by ic_mth_fin, afterwards, when it is known how big the arithmetic stack needs to be.
@@ -59,7 +71,7 @@ ic_mth_init1(isonlygoal,regmask,y,z)
     mth_stackadj = ic_ptr - 1;
 
     ANDIW(0xfff8,D0,DDIRECT,0);			/* 68k only allows this op on d-regs -- aaarghhh!!! */
-    MOVE(D0,DDIRECT,0,Fail,ADIRECT,0);	/* movea.l	d0,	Fail */
+    MOVE(D0,DDIRECT,0,MStack,ADIRECT,0);	/* movea.l	d0,	MStack */
 
 /* the and doubleword aligns the arithmetic stack -- this assumes that the stack has been allocated
    one (long)word more than necessary, otherwise doubleword aligning would make the stack one
@@ -96,7 +108,7 @@ RELOC_INFO(RELOC_GVAR,(ic_ptr-(sizeof(long)/sizeof(Code))),symidx_int_table)
       .            clause)
    |  .                        |
    +___________________________+
-   |	Fail                   |
+   |	Fail (or B on MacOS    |
    +---------------------------+
    |	&Callout Code          |  <------ SP
    -----------------------------
@@ -128,8 +140,8 @@ RELOC_INFO(RELOC_GVAR,(ic_ptr-(sizeof(long)/sizeof(Code))),symidx_int_table)
 
 RELOC_INFO(RELOC_GVAR,(ic_ptr-(sizeof(long)/sizeof(Code))),symidx_mth_stk)
 #endif
-    MOVE(Fail,ADIRECT,0,H,ADIRECT,0);	/* 1 word */
-    ADDQ(4,H,ADIRECT,0);	      		/* H := Fail + 4 = 1 word */
+    MOVE(MStack,ADIRECT,0,H,ADIRECT,0);	/* 1 word */
+    ADDQ(4,H,ADIRECT,0);	      		/* H := MStack + 4 = 1 word */
     MOVI(&dcmp_table,S,ADIRECT,0);	/* movea.l	dcmp_table, S	= 3 words */    
     BRA(FLAB(mth_initlab2));		/* 1 word */
 
@@ -162,11 +174,10 @@ RELOC_INFO(RELOC_GVAR,(ic_ptr-(sizeof(long)/sizeof(Code))),symidx_mth_is_addr)
 
 }
 
-
 /* 2 words gcinfo inbetween code segments emitted */
 
+extern void * mth_aftercall(void);
 
-extern long mth_aftercall;
 void
 ic_mth_init2(regmask,sadj,y,z)
     long regmask;
@@ -220,10 +231,8 @@ ic_mth_fin(x, y, z, w)
        &CalloutCode      <----- SP
     */
 
-    MOVE(SP,DISPL,4,Fail,ADIRECT,0);	/* move.l  4(sp), Fail */
+    MOVE(SP,DISPL,4,MStack,ADIRECT,0);	/* move.l  4(sp), MStack */
 }
-
-
 
 void
 ic_mth_eq(x,y,z,w)
@@ -233,8 +242,6 @@ ic_mth_eq(x,y,z,w)
     stacksize -= 2;
 }
 
-
-
 void
 ic_mth_lt(x,y,z,w)
     long x, y, z, w;
@@ -242,8 +249,6 @@ ic_mth_lt(x,y,z,w)
     JSRI(S,MEMINDIRECT,LT_INDEX*4);
     stacksize -= 2;
 }
-
-
 
 void
 ic_mth_gt(x,y,z,w)
@@ -253,8 +258,6 @@ ic_mth_gt(x,y,z,w)
     stacksize -= 2;
 }
 
-
-
 void
 ic_mth_le(x,y,z,w)
     long x, y, z, w;
@@ -262,8 +265,6 @@ ic_mth_le(x,y,z,w)
     JSRI(S,MEMINDIRECT,LE_INDEX*4);
     stacksize -= 2;
 }
-
-
 
 void
 ic_mth_ge(x,y,z,w)
@@ -273,8 +274,6 @@ ic_mth_ge(x,y,z,w)
     stacksize -= 2;
 }
 
-
-
 void
 ic_mth_ne(x,y,z,w)
     long x, y, z, w;
@@ -282,8 +281,6 @@ ic_mth_ne(x,y,z,w)
     JSRI(S,MEMINDIRECT,NE_INDEX*4);
     stacksize -= 2;
 }
-
-
 
 void
 ic_mth_getval(base,disp,z,w)
@@ -308,7 +305,7 @@ ic_mth_getval(base,disp,z,w)
    address sitting on the stack in those failure situations.
 */
 
-    MOVE(SP,DISPL,4,Fail,ADIRECT,0);	/* move.l 4(sp), Fail */
+    MOVE(SP,DISPL,4,MStack,ADIRECT,0);	/* move.l 4(sp), MStack */
  
 #ifdef notdef
     BSR(BLAB(wm_unify));
@@ -320,7 +317,6 @@ RELOC_INFO(RELOC_GVAR,(ic_ptr-(sizeof(long)/sizeof(Code))),symidx_wm_unify)
 
     stacksize -= 1;
 }
-
 
 void
 ic_mth_getnum(base,disp,z,w)
@@ -339,7 +335,6 @@ ic_mth_getnum(base,disp,z,w)
 	stackmax = stacksize;
 }
 
-
 void
 ic_mth_putnum(base,disp,z,w)
     long base, disp;
@@ -355,8 +350,7 @@ ic_mth_putnum(base,disp,z,w)
     stacksize -= 1;	
 }
 
-
-extern long mth_pushdbl0;
+extern void *  mth_pushdbl0(void);
 
 void
 ic_mth_pushdbl(d0,d1,z,w)

@@ -1,5 +1,5 @@
 /*
- * next.spc
+ * nextstep.spc
  */
 
 #exclude <ansi/ *>
@@ -11,14 +11,14 @@
 
 als$begin_silent; /* dont output the following */
 
-#define __ARCHITECTURE__ "m68k"
+/* #define __ARCHITECTURE__ "m68k" */
 
 typedef int va_list;
 typedef int size_t;
 
 als$end_silent;
 
-#import "next.h"
+#import "nextstep.h"
 
 
 extern void "DPSFlush"();

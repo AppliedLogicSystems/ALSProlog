@@ -1,15 +1,16 @@
-/*
- * wintcode.h                     -- code space management include file
- *	Copyright (c) 1985 by Kevin A. Buettner
- *	Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
- *
- * Author:  Kevin A. Buettner
- * Creation: 6/21/85
- * Revision History:
- *      Revised:  01/15/86,   K. Buettner     -- IBM PC port
- *	Revised:  8/14/86,    K. Buettner     -- Sun Port
- */
-
+/*=================================================================*
+ |			wintcode.h                     
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1995 by Applied Logic Systems, Inc.
+ |
+ |			-- code space management include file
+ | Author:  Kevin A. Buettner
+ | Creation: 6/21/85
+ | Revision History:
+ | 01/15/86 - K. Buettner -- IBM PC port
+ | 08/14/86 - K. Buettner -- Sun Port
+ | 10/26/94 - C. Houpt -- Added emaskCodeAddr() for use in index.c.
+ *=================================================================*/
 #ifndef _WINTCODE_H_INCLUDED_
 #define _WINTCODE_H_INCLUDED_ 1
 
@@ -201,6 +202,7 @@ extern ntbl_entry **w_nametable;
 #define dstartCode(item)	((int)(*((long *)(item) + WCI_DSTART)))
 #define fstartCode(item)	((int)(*((long *)(item) + WCI_FSTART)))
 #define emaskCode(item)		((int)(*((long *)(item) + WCI_EMASK)))
+#define emaskCodeAddr(item)	((int*)(((long *)(item) + WCI_EMASK)))
 #define choiceEntry(item)	((Code *)((long *)(item) + WCI_CHOICEENTRY))
 #define choiceCode(item)	((Code *)((long *)(item) + WCI_CHOICECODE))
 #define clauseCode(item)	((Code *)((long *)(item) + WCI_CLAUSECODE))
@@ -328,12 +330,23 @@ extern	long *	first_clause	PARAMS(( int ));
 extern	long *	next_clause	PARAMS(( long * ));
 extern	void	make_dbref	PARAMS(( long *, PWord *, int * ));
 extern	long *	w_validate_dbref PARAMS(( long *, int nid, long cid ));
-extern	long *	validate_dbref	PARAMS(( PWord, int, PWord * ));
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_D0
+#endifextern	long *	validate_dbref	PARAMS(( PWord, int, PWord * ));
 extern	Code *	jump_validate_dbref PARAMS(( PWord ref, PWord term ));
+ifdef POINTERS_IN_A0
+#pragma pointers_in_A0
+#endif
 extern	void	gen_indexing	PARAMS(( void ));
 extern	void	decr_icount	PARAMS(( Code * ));
 extern	void	seticount	PARAMS(( ntbl_entry * ));
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_D0
+#endif
 extern	long *	next_choice_in_a_deleted_clause PARAMS(( long * ));
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_A0
+#endif
 extern	void	w_collect	PARAMS(( void ));
 extern	PWord *	w_frame_info	PARAMS(( PWord *, long **, long * ));
 extern	void	w_relink	PARAMS(( ntbl_entry * ));

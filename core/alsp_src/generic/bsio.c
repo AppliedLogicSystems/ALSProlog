@@ -1,31 +1,40 @@
-/*
- * bsio.c               -- stream I/O primitives
- *      Copyright (c) 1991-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 10/8/91
- * Revision History:
- *      Some additions by Ken Bowen
- *      Socket additions by Kevin Jiang (February-April, 1993)
- *	Socket rewrite by Kevin Buettner (Dec, 1993)
- *	Buffer management rewrite by Kevin Buettner (Dec, 1993)
- *
- * Configuration parameters (defines, in aconfig.h or mconfig.h):
- *
- *  SysVIPC             -- Unix System V IPC message queues
- *  SSBQ                -- Software Services Backplane Queues
- *  HAVE_SOCKET         -- sockets (should include DOS/FTP & Mac)
- *    Subsidiary params for sockets:
- *      UNIX  -- various flavors of unix; if your brand of unix doesn't
- *		 support sockets, then don't define HAVE_SOCKET.
- *      DOS   -- stuff for PC-FTP TCP/IP sockets
- *	MacOS -- sockets on the mac
- */
-
+/*=======================================================================*
+ |			bsio.c
+ |		Copyright (c) 1991-1995 Applied Logic Systems, Inc.
+ |
+ |			-- stream I/O primitives
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 10/8/91
+ | Revision History:
+ |      Some additions by Ken Bowen
+ |      Socket additions by Kevin Jiang (February-April, 1993)
+ |		Socket rewrite by Kevin Buettner (Dec, 1993)
+ |		Buffer management rewrite by Kevin Buettner (Dec, 1993)
+ | 10/26/94 - C. Houpt -- Put inclusion of <fcntl.h> under the control of
+ |			  HAVE_FCNTL_H. Put sio_poll() under the control of HAVE_SOCKET. 
+ |			  Added char* casts for various calls.
+ |			  -- Put in corrected version of open() and read() to fix
+ |				 various bugs in Unix emulation libraries.
+ | ??/??/94,	C. Houpt -- NEED TO ADD SOCKET SUPPORT FOR MAC!
+ |
+ | Configuration parameters (defines, in aconfig.h or mconfig.h):
+ |
+ |  SysVIPC             -- Unix System V IPC message queues
+ |  SSBQ                -- Software Services Backplane Queues
+ |  HAVE_SOCKET         -- sockets (should include DOS/FTP & Mac)
+ |    Subsidiary params for sockets:
+ |      UNIX  -- various flavors of unix; if your brand of unix doesn't
+ |		 		 support sockets, then don't define HAVE_SOCKET.
+ |      DOS   -- stuff for PC-FTP TCP/IP sockets
+ |	    MacOS -- sockets on the mac
+ *=======================================================================*/
 #include "defs.h"
 
 #include <errno.h>
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 
 #ifdef DOS
 #include <types.h>
@@ -776,21 +785,26 @@ sio_file_open()
 	    break;
     }
 
-    if (compute_flags(buf,v3,v4) < 0)
+    if (compute_flags((char *)buf,v3,v4) < 0)
 	FAIL;
 
-    if (strcmp(filename, "$stdin") == 0)
+    if (strcmp((char *)filename, "$stdin") == 0)
 	SIO_FD(buf) = STDIN_FILENO;
-    else if (strcmp(filename, "$stdout") == 0)
+    else if (strcmp((char *)filename, "$stdout") == 0)
 	SIO_FD(buf) = STDOUT_FILENO;
-    else if (strcmp(filename, "$stderr") == 0)
+    else if (strcmp((char *)filename, "$stderr") == 0)
 	SIO_FD(buf) = STDERR_FILENO;
     else {
 #if	defined(DOS)
 	if ((SIO_FD(buf) = open(filename, flags, (S_IWRITE | S_IREAD))) == -1) {
 	    /* } */
 #elif	defined(MacOS)
-	    if ((SIO_FD(buf) = open(filename, flags)) == -1) {	/* } */
+#ifdef THINK_C
+	    /* Open files as text files to insure CR/NL conversion. */
+	    if ((SIO_FD(buf) = open((char *)filename, flags | O_TEXT)) == -1) {	/* } */
+#else
+	    if ((SIO_FD(buf) = open((char *)filename, flags)) == -1) {	/* } */
+#endif
 #else  /* default code */
 	if ((SIO_FD(buf) = open(filename, flags, 0777)) == -1) {
 #endif
@@ -1540,9 +1554,9 @@ sio_rexec()
     if (!getstring(&password, v4,t4))
 	password = NULL;
     
-    rbuf = get_stream_buffer(v5,t5);
-    wbuf = get_stream_buffer(v6,t6);
-    ebuf = get_stream_buffer(v7,t7);
+    rbuf = (char *)get_stream_buffer(v5,t5);
+    wbuf = (char *)get_stream_buffer(v6,t6);
+    ebuf = (char *)get_stream_buffer(v7,t7);
 
     rfd = wfd = efd = -1;
     
@@ -1746,7 +1760,7 @@ stream_is_ready(buf, usec_to_wait)
     }
 }
 
-
+#if HAVE_SOCKET
 /*
  * sio_poll will check if an I/O operation is ready on a stream.  It will
  * succeed if an I/O operation on the stream will not block. Otherwise it will
@@ -1781,6 +1795,7 @@ sio_poll()
     else
 	FAIL;
 }
+#endif /* HAVE_SOCKET */
 
 /*
  *	window_insert_pos(WinID, WinPos)
@@ -1874,7 +1889,7 @@ sio_window_open()
 	FAIL;
     }
 
-    if (compute_flags(buf,v3,v4) < 0)
+    if (compute_flags((char *)buf,v3,v4) < 0)
 	FAIL;
 
     SIO_TYPE(buf) = SIO_TYPE_PROLOG_MANAGED;
@@ -1920,7 +1935,7 @@ sio_generic_open()
 	FAIL;
     }
 
-    if (compute_flags(buf,v3,v4) < 0)
+    if (compute_flags((char *)buf,v3,v4) < 0)
 	FAIL;
 
     SIO_TYPE(buf) = SIO_TYPE_PROLOG_MANAGED;
@@ -2016,14 +2031,14 @@ write_buf(vsd,buf)
 	}
     }
 
-    if ((SIO_FLAGS(buf) & SIOF_DONTBLOCK) && !stream_is_ready(buf,0)) {
+    if ((SIO_FLAGS(buf) & SIOF_DONTBLOCK) && !stream_is_ready((char *)buf,0)) {
 	SIO_ERRCODE(buf) = SIOE_NOTREADY;
 	return 0;
     }
 
     switch (SIO_TYPE(buf)) {
 	case SIO_TYPE_FILE:
-	    writeflg = write(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
+	    writeflg = write(SIO_FD(buf), (char *)SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
 	    break;
 
 #ifdef SysVIPC
@@ -2416,7 +2431,49 @@ ssbq_get_msg()
 }
 #endif /* SSBQ */
 
+/* Correct various bugs in different Unix emulation libraries. */
+#if defined(THINK_C)
 
+/* Think C's setvbuf() is broken, so stdin cannot do line buffering,
+   This function works around it by using fgets().
+*/
+static int corrected_read(int fn, char *buffer, int count)
+{
+    int result;
+
+    if (fn == 0) {
+    	char *line;
+	line = fgets(buffer, count, stdin);
+	result = ferror(stdin) ? EOF : ( line == NULL ? 0 : strlen(line));
+    } else {
+	result = read(fn, buffer, count);
+    }
+    	
+    return result;
+}
+
+#elif defined(__MWERKS__)
+
+/* MetroWerk's read() does not do CR/LF conversion, nor does it recognize
+   Control-D as EOF.  This function works around these problems.
+   Control-D's must be on a blank line to work.
+*/
+static int corrected_read(int fn, char *buffer, int count)
+{
+    int result;
+    char *p;
+    	
+    result = read(fn, buffer, count);
+    	
+    if (result != EOF) {
+    	if (result > 0 && *buffer == '\004') result = 0;
+    	for (p = buffer + result - 1; p >= buffer; p--)
+    	   if (*p == '\r') *p = '\n';
+    }
+    	
+    return result;
+}
+#endif
 
 /*
  * sio_readbuffer(SD)
@@ -2448,7 +2505,7 @@ sio_readbuffer()
     if (SIO_FLAGS(buf) & SIOF_DIRTY)
 	write_buf(v1,buf);
 
-    if ((SIO_FLAGS(buf) & SIOF_DONTBLOCK) && !stream_is_ready(buf,0)) {
+    if ((SIO_FLAGS(buf) & SIOF_DONTBLOCK) && !stream_is_ready((char *)buf,0)) {
 	SIO_ERRCODE(buf) = SIOE_NOTREADY;
 	return 0;
     }
@@ -2459,7 +2516,11 @@ sio_readbuffer()
 
     switch (SIO_TYPE(buf)) {
 	case SIO_TYPE_FILE:
-	    nchars = read(SIO_FD(buf), buffer, (size_t)nchars);
+#if defined(THINK_C) || defined(__MWERKS__)
+		nchars = corrected_read(SIO_FD(buf), (char *)buffer, nchars);
+#else
+	    nchars = read(SIO_FD(buf), (char *)buffer, (size_t)nchars);
+#endif
 	    break;
 #ifdef SysVIPC
 	case SIO_TYPE_SYSVQ: {
@@ -4161,11 +4222,11 @@ sio_qatom()
     }
 
     /* Handle the special case atoms */
-    if (strcmp(atom, "!") == 0) {
+    if (strcmp((char *)atom, "!") == 0) {
 	count = 1;
 	mask = 1;
     }
-    else if (strcmp(atom, "[]") == 0) {
+    else if (strcmp((char *)atom, "[]") == 0) {
 	count = 2;
 	mask = 1;
     }
@@ -4273,7 +4334,7 @@ sio_var_to_atom()
     if (t1 != WTP_UNBOUND)
 	FAIL;
 
-    sprintf(buf, "_%lu", (long) (((PWord *) v1) - wm_heapbase));
+    sprintf((char *)buf, "_%lu", (long) (((PWord *) v1) - wm_heapbase));
     w_mk_uia(&v3, &t3, buf);
     if (w_unify(v2, t2, v3, t3))
 	SUCCEED;
@@ -4307,7 +4368,7 @@ sio_lettervar()
 	*(((UCHAR *) M_FIRSTUIAWORD(v3)) + 1) = 0;
     }
     else {
-	sprintf(buf, "%c%d", (int)('A' + v1 % 26),(int)(v1 / 26));
+	sprintf((char *)buf, "%c%d", (int)('A' + v1 % 26),(int)(v1 / 26));
 	w_mk_uia(&v3, &t3, buf);
     }
 
@@ -4400,18 +4461,18 @@ sio_sprintf()
 
     switch (t2) {
 	case WTP_SYMBOL:
-	    sprintf(buf, fmt, TOKNAME(v2));
+	    sprintf((char *)buf, (char *)fmt, TOKNAME(v2));
 	    break;
 	case WTP_UIA:
-	    sprintf(buf, fmt, (UCHAR *) M_FIRSTUIAWORD(v2));
+	    sprintf((char *)buf, (char *)fmt, (UCHAR *) M_FIRSTUIAWORD(v2));
 	    break;
 	case WTP_INTEGER:
 	    if (fmt_type == FMT_DBL)
-		sprintf(buf, fmt, (double) v2);
+		sprintf((char *)buf, (char *)fmt, (double) v2);
 	    else if (fmt_type == FMT_INT)
-		sprintf(buf, fmt, v2);
+		sprintf((char *)buf, (char *)fmt, v2);
 	    else
-		sprintf(buf, "?");
+		sprintf((char *)buf, "?");
 	    break;
 #ifndef DoubleType
 	case WTP_STRUCTURE:
@@ -4427,21 +4488,21 @@ sio_sprintf()
 	    else
 		FAIL;
 	    if (fmt_type == FMT_DBL)
-		sprintf(buf, fmt, dblval);
+		sprintf((char *)buf, (char *)fmt, dblval);
 	    else if (fmt_type == FMT_INT)
-		sprintf(buf, fmt, (int) dblval);
+		sprintf((char *)buf, (char *)fmt, (int) dblval);
 	    else
-		sprintf(buf, "?");
+		sprintf((char *)buf, "?");
 	    break;
 #else
 	case WTP_DOUBLE:
 	    w_get_double(&dblval, v2);
 	    if (fmt_type == FMT_DBL)
-		sprintf(buf, fmt, dblval);
+		sprintf((char *)buf, (char *)fmt, dblval);
 	    else if (fmt_type == FMT_INT)
-		sprintf(buf, fmt, (int) dblval);
+		sprintf((char *)buf, (char *)fmt, (int) dblval);
 	    else
-		sprintf(buf, "?");
+		sprintf((char *)buf, "?");
 	    break;
 #endif
 	default:
@@ -4451,7 +4512,7 @@ sio_sprintf()
     w_mk_uia_in_place(&v, &t, buf);
 
     if (w_unify(v3, t3, v, t) 
-     && w_unify(v4, t4, (PWord) strlen(buf), WTP_INTEGER))
+     && w_unify(v4, t4, (PWord) strlen((char *)buf), WTP_INTEGER))
 	SUCCEED;
     else
 	FAIL;

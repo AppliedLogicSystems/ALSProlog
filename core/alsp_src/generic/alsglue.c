@@ -1,12 +1,13 @@
-/*
- * alsglue.c		-- provides "glue" between dynamically loaded
- *			   shared objects and the rest of ALS-Prolog.
- *
- *	Copyright (c) 1994 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Created: 4/19/94
- */
+/*===================================================================
+ |			alsglue.c		
+ |		Copyright (c) 1994-5 Applied Logic Systems, Inc.
+ |
+ |		-- provides "glue" between dynamically loaded
+ |			   shared objects and the rest of ALS-Prolog.
+ |
+ | Author: Kevin A. Buettner
+ | Created: 4/19/94
+ *==================================================================*/
 
 #include "defs.h"
 
@@ -17,8 +18,8 @@
 
 static int canthappen = 0;
 
-void
-PI_alsglue()
+static void
+PI_alsglue(void)
 {
     if (canthappen) {
 	(void) PI_forceuia( (PWord *) 0, (int *) 0 );
@@ -38,7 +39,8 @@ PI_alsglue()
 	(void) PI_makeuia( (PWord *) 0, (int *) 0, (char *) 0 );
 	(void) PI_allocuia( (PWord *) 0, (int *) 0, (int) 0 );
 	(void) PI_printf( 0 );
-	(void) PI_aprintf( 0 );
+/*	(void) PI_aprintf( 0 );   */
+	(void) PI_aprintf( 0, 0 );
 	(void) PI_rungoal( (PWord) 0, (PWord) 0, (int) 0 );
 	(void) PI_rungoal_with_update( (PWord) 0, (PWord *) 0, (int *) 0 );
 	(void) PI_unify( (PWord) 0 , (int) 0, (PWord) 0 , (int) 0 );

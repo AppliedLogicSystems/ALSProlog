@@ -95,9 +95,9 @@ determine_default_ws(WS)
 export known_ws/1.
 
 known_ws(motif).
+known_ws(nextstep).
 /*
 known_ws(openlook).
-known_ws(nextstep).
 known_ws(decwins).
 known_ws(dv_x).
 known_ws(mac_os).
@@ -156,6 +156,7 @@ ws_vars(x, ARCH, OS, WSHeaderLines)
 	WSHeaderLines =
 	[
 		'WIN'		= x ,
+		'C2PFILT'	= all,
 		'ADDL_CS' 	= [] ,
 		'CFLAGS'	= '' ,
 		'$(WIN)LIBS' 	= '-lX11' ,
@@ -170,6 +171,7 @@ ws_vars(motif, ARCH, OS, WSHeaderLines)
 	WSHeaderLines =
 	[
 		'WIN'		= motif ,
+		'C2PFILT'	= all,
 		'ADDL_CS' 	= ['xtaux.c'] ,
 		'CFLAGS'	= '-D_NO_PROTO' ,
 		'$(WIN)LIBS' 	= '-lXm -lMrm -lXt -lX11' ,
@@ -177,6 +179,23 @@ ws_vars(motif, ARCH, OS, WSHeaderLines)
 		'CFG' 		= ['#define WIN_STR MOTIF_WIN_STR'],
 		'ADDL_INITS' 	= ['x_init();', 'xtaux_init();'] ,
 		'ADDL_PROFS' 	= ['../x/*.pro']
+	].
+
+ws_vars(nextstep, ARCH, OS, WSHeaderLines)
+	:-
+	WSHeaderLines =
+	[
+		'WIN'		= nextstep,
+		'C2PFILT'	= all,
+		'XINCLUDES'	= '-I/usr/include/ansi -I/usr/include/bsd \
+				   -I/usr/include/appkit'
+		'ADDL_CS' 	= [] ,
+		'CFLAGS'	= '-D_NO_PROTO' ,
+		'$(WIN)LIBS' 	= '-lXm -lMrm -lXt -lX11' ,
+		'ADDL_LIBS' 	= [] ,
+		'CFG' 		= ['#define WIN_STR NEXTSTEP_WIN_STR'],
+		'ADDL_INITS' 	= [] ,
+		'ADDL_PROFS' 	= []
 	].
 
 export flatten_ws_lists/2.

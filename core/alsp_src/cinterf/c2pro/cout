@@ -13,8 +13,8 @@
  |	output_openFile/1	-- set up output control flags
  |	output_closeFile/1	-- remove output control flags
  |	output_exclude/5	-- set up exclude spec for files
- |	output_begin_silent/2- stop all output
- |	output_end_silent/2	-- resume output
+ |	output_begin_silent/0- stop all output
+ |	output_end_silent/0	-- resume output
  |	output_header/2		-- print header
  |	output_footer/2		-- print footer
  |	output_macro/3		-- outputs a macro identifier
@@ -137,21 +137,21 @@ output_exclude(ExclType,Disk,Comps,PathType,What)
 	assert(exclude_files(ExclType,Disk,Comps,PathType,What)).
 
 	%---------------------------------------
-	% output_begin_silent/2
+	% output_begin_silent/0
 	%
 
-output_begin_silent(FD,Tab)
+output_begin_silent
 	:- assert(silent).
 
 
 	%---------------------------------------
-	% output_end_silent/2
+	% output_end_silent/0
 	%
 
-output_end_silent(FD,Tab)
+output_end_silent
 	:-
 	retract(silent), !.
-output_end_silent(FD,Tab).
+output_end_silent.
 
 	%---------------------------------------
 	% output_header/2.

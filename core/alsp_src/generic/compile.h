@@ -1,36 +1,21 @@
+/*================================================================*
+ |			compile.h
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1989-1993 Applied Logic Systems, Inc.
+ |
+ |			-- definitions for compiler
+ |
+ | This file describes to the compiler how Prolog maps onto particular
+ | machine architectures.
+ |
+ | Author:  Kevin A. Buettner
+ | Creation: 6/16/85
+ | 02/7/89 - K.Hughes -- Changed for 386 compiler mods
+ | 05/1/89 - K.Buettner -- 88k and sun version merged with 386
+ | 03/7/90 - K.Buettner	-- added in SPARC defns
+ *================================================================*/
 
-/*
- * compile.h            -- definitions for compiler
- *      Copyright (c) 1985 by Kevin A. Buettner
- *		Copyright (c) 1989-1993 Applied Logic Systems, Inc.
- *
- * This file describes to the compiler how Prolog maps onto a particular
- * machine architecture.
- *
- * This file will be different for each particular machine architecture.
- *
- * Author:  Kevin A. Buettner
- * Creation: 6/16/85
- * Revision History:
- *	Revised: 2/7/89,	kmh	-- Changed for 386 compiler mods
- *      Revised: 5/1/89,	kev     -- 88k and sun version merged with 386
- *	Revised: 3/7/90,	kev	-- added in SPARC defns
- */
-
-#ifdef MacOS
-/*
- *  9/3/92, by Ron
- *
- *  MPW C v3.2.3 has a nasty bug in it in which incorrect code is
- *  generated for automatic arrays greater than or equal to 64K.
- *  This is why I have knocked TODOSIZE down a few "ints" so that
- *  the to_do array comes in just under 64K.
- */
-#define TODOSIZE  16380
-#else
 #define TODOSIZE  16384
-#endif
-
 #define MODELSIZE 8192
 
 /*

@@ -8,6 +8,7 @@
 module builtins.
 
 export flatten_comma_list/2.
+export build_comma_list/2.
 
 /*!---------------------------------------------------------------
  |	flatten_comma_list/2
@@ -114,5 +115,24 @@ join_up((A, B), C, Result)
 
 join_up(A, B, (A, B)).
 
+
+/*!---------------------------------------------------------------
+ |	build_comma_list/2
+ |	build_comma_list(SourceList, ResultList)
+ |	build_comma_list(+, -)
+ |	
+ |	- builds comma list from an ordinary list
+ |	
+ |	If SourceList is an ordinary list (e.g., [a,b,c,...,z]) 
+ |	then ResultList is the corresponding comma list resulting 
+ |	from left-to-right traversal, terminating in the final element
+ |	of SourceList: (e.g., (a,b,c,...,z) ).
+ *!--------------------------------------------------------------*/
+
+build_comma_list([Last], Last)
+	:-!. 
+build_comma_list([Goal | SourceList], (Goal, ResultList))
+	:-
+	build_comma_list(SourceList, ResultList).
 
 endmod.

@@ -1,19 +1,18 @@
-/*
- * module.h                     -- module management include file
- *
- * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
- *
- * Author:  Kevin A. Buettner
- * Creation: 6/21/85
- * Revision History:
- *      01/15/86, K. Buettner     -- IBM PC port
- *	8/14/86,  K. Buettner     -- Sun Port
- *	10/5/88,  kmh
- *		Changed all references to modules outside of module.h
- *		to use their atom name token IDs.
- */
-
+/*=========================================================*
+ |			module.h                     
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1995 by Applied Logic Systems, Inc.
+ |
+ |			-- module management include file
+ |
+ | Author:  Kevin A. Buettner
+ | Creation: 6/21/85
+ | Revision History:
+ | 01/15/86 - K.Buettner -- IBM PC port
+ | 08/14/86 - K.Buettner -- Sun Port
+ | 10/05/88 - K.Hughes -- Changed all references to modules outside 
+ |			of module.h to use their atom name token IDs.
+ *=========================================================*/
 #ifndef _MODULE_H_INCLUDED_
 #define _MODULE_H_INCLUDED_ 1
 
@@ -45,10 +44,21 @@ extern int *top_clausegroup;
 #define MAXMODNESTING 30
 
 #define mod_adduse(module,use)	adduse(mod_id(module),use)
-
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_D0
+#endif
 extern	Code *	resolve_reference PARAMS( (ntbl_entry *) );
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_A0
+#endif
 extern	ntbl_entry * resolve_ref PARAMS( (PWord, PWord, int) );
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_D0
+#endif
 extern	Code *	call_resolve_reference PARAMS( (PWord, PWord, int, int) );
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_A0
+#endif
 extern	int	next_module	PARAMS( (int, PWord *, int *, PWord *, int *) );
 extern	int	mod_id		PARAMS( (int) );
 extern	int	modprobe_id	PARAMS( (PWord) );

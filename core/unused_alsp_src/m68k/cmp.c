@@ -5,8 +5,7 @@
  * Author: Kevin A. Buettner
  * Creation: 2/29/88
  * Revision History:
- *	Revised: mm/dd/yy	who		what and why
- *	Revised: mm/dd/yy	who		what and why
+ * 11/16/94	C. Houpt	Added pointer type pragmas for MetroWerks.
  */
 
 #include "defs.h"
@@ -18,6 +17,9 @@
  * off and the TOKNAME macro is used to return the string.
  */
 
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_D0
+#endif
 extern	UCHAR *	cmp_gettokstring	PARAMS(( long ));
 
 UCHAR *
@@ -26,6 +28,9 @@ cmp_gettokstring(tok)
 {
     return TOKNAME(MFUNCTOR_TOKID(tok));
 }
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_A0
+#endif
 
 #define DBLARG(d,p,a) ((short *)&(d))[(a)-1] = (short) ((*(((long *) (p))+a))>>4)
 

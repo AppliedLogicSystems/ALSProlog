@@ -1,22 +1,22 @@
-/*
- * paction.c
- *	Copyright (c) 1991-1993 Applied Logic Systems, Inc.
- *
- *| Interface to Highland FLEX license manager,  setting demo expiration dates, etc.
- *
- * Author : Prabhakaran Raman
- * Date   : 11/12/91
- *
- *     FLEX is defined as a compilation flag for machines
- *     that have FLEX license manager.
- *
- *     EXP_DATE is a compilation flag that is set to the expiration time
- *     in seconds. This is used to create a demo tape for machines that
- *     do not have FLEX license manager.
- */
-
+/*===================================================================*
+ |			paction.c
+ |		Copyright (c) 1991-1995 Applied Logic Systems, Inc.
+ |
+ |		-- Interface to Highland FLEX license manager,  
+ |			setting demo expiration dates, etc.
+ |
+ | Author : Prabhakaran Raman
+ | Date   : 11/12/91
+ | 10/26/94, C. Houpt -- Added prototype for paction().
+ |-----------------------------------------------------------------
+ |     FLEX is defined as a compilation flag for machines
+ |     that have FLEX license manager.
+ |
+ |     EXP_DATE is a compilation flag that is set to the expiration time
+ |     in seconds. This is used to create a demo tape for machines that
+ |     do not have FLEX license manager.
+ *===================================================================*/
 #include <stdio.h>
-
 #include "defs.h"
 
 #ifdef _M88KBCS_TARGET
@@ -34,8 +34,8 @@ static char feature[64] = "alspro_";
 
 #endif /* FLEX */
 
-void
-paction()
+static void
+paction(void)
 {
 #ifdef FLEX
     int   rc;

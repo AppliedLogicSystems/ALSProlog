@@ -1,29 +1,23 @@
-/*
- * parser.c             -- parser for prolog system
- *      Copyright (c) 1985-1993 by Kevin A. Buettner
- *
- * Author:  Kevin A. Buettner
- * Creation: 10/25/84                   -- MV-8000 version
- * Revision History:
- *      Revision: 6/15/85,  K. Buettner -- compiler mods, better storage
- *                                         management, port to Unix
- *
- *      Revision: 8/8/85,   K. Buettner -- Division of lexical analyzer and
- *                                         parser into separate files;
- *                                         documentation, reorganization
- *
- *      Revision  1/12/86,  K. Buettner -- port to IBM-PC for ALS
- *      Revision: mm/dd/yy, name        -- Reason
- */
-
-
+/*=============================================================*
+ |			parser.c             
+ |		Copyright (c) 1985-1995 by Kevin A. Buettner
+ |
+ |			-- parser for prolog system
+ |
+ | Author:  Kevin A. Buettner
+ | Creation: 10/25/84  -- MV-8000 version
+ | Revision History:
+ | 06/15/85 - K. Buettner -- compiler mods, port to Unix
+ | 08/08/85 - K. Buettner -- Split lexical analyzer to separate file;
+ | 01/12/86 - K. Buettner -- port to IBM-PC for ALS
+ | 10/26/94 - C. Houpt	-- Various UCHAR* casts.
+ *=============================================================*/
 #include "defs.h"
 #include <setjmp.h>
 #include "lexan.h"
 #include "parsstak.h"
 #include "module.h"
 #include "icodegen.h"
-
 
 /*
  * Global Variables
@@ -37,7 +31,11 @@
  *      a file being read.
  */
 
+#ifdef NO_FAR_DATA
+static jmp_buf *prs_erc;	/* buffers for error recovery   */
+#else
 static jmp_buf prs_erc[30];	/* buffers for error recovery   */
+#endif
 static int   prs_erc_index = -1; /* index into the above         */
 
 /*
@@ -45,7 +43,11 @@ static int   prs_erc_index = -1; /* index into the above         */
  *
  */
 
+#ifdef NO_FAR_DATA
+static pword *vtable;	/* variable name table          */
+#else
 static pword vtable[240];	/* variable name table          */
+#endif
 static int   nxtvar;		/* next free space in var table */
 
 
@@ -62,10 +64,24 @@ static int   nxtvar;		/* next free space in var table */
 struct rator *pst_rator;	/* parser stack top -- rator */
 pword *pst_rand;		/* parser stack top -- rand */
 
+#ifdef NO_FAR_DATA
+static struct rator *ps_rator;
+static pword *ps_rand;
+void init_parser_data(void)
+{
+    prs_erc = malloc(30*sizeof(*prs_erc));
+    if (prs_erc == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+    vtable = malloc(240*sizeof(*vtable));
+    if (vtable == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+    ps_rator = malloc(PSTKSZ*sizeof(*ps_rator));
+    if (ps_rator == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+    ps_rand = malloc(PSTKSZ*sizeof(*ps_rand));
+    if (ps_rand == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+}
+#else
 static struct rator ps_rator[PSTKSZ];
 static pword ps_rand[PSTKSZ];
-
-
+#endif
 
 /*
  * errcount is the number of errors encountered so far in the parse.  Care
@@ -448,6 +464,7 @@ nt_term(n)
 {
     int   prefix_prec;
 
+
     push_rator(0, HIPREC);	/* push the "fence" on */
     n <<= 4;			/* force n into prefix/assoc format */
     prefix_prec = n | ASSC_RIGHT;
@@ -653,7 +670,7 @@ check_sym(errstr)
 	return;
 
     if (curtkty == TKTP_OBJECT && TYPEOF((pword) curtok) == TP_UIA) {
-	curtok = find_token(UIA_NAME((pword) curtok));
+	curtok = find_token((UCHAR *)UIA_NAME((pword) curtok));
 	curtkty = TKTP_CONST;
 
 	return;
@@ -824,7 +841,7 @@ bld_showanswers()
     register pword vl;
     register int i;
 
-    push_rator(find_token("showanswers"), 0);
+    push_rator(find_token((UCHAR *)"showanswers"), 0);
     *pst_rand++ = bld_vlst();
 
     for (vl = MK_SYM(TK_NIL), i = nxtvar - 1; i >= 0; i--)
@@ -939,8 +956,8 @@ prim_read()
 	return (MK_LIST(*--pst_rand, bld_vlst()));
     else			/* EOF has been hit */
 	return (MK_LIST(
-			   MK_SYM(find_token("end_of_file")),
-			   MK_SYM(find_token("[]"))
+			   MK_SYM(find_token((UCHAR *)"end_of_file")),
+			   MK_SYM(find_token((UCHAR *)"[]"))
 		));
 }
 

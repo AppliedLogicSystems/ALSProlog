@@ -1,21 +1,21 @@
-/*
- * defs.h	-- Common definitions and configuration parameters
- *
- *	Copyright (c) 1990-1993 by Applied Logic Systems, Inc.
- *
- * Creation: 9/27/90 (originally config.h)
- * Author: Keith Hughes and Kevin Buettner
- *
- * This file contains common configuration parameters.  Certain assumptions
- * are made in this file about the architecture and machine on which
- * Prolog will be built for.  aconfig.h and mconfig, the architecture and
- * machine dependent configuration files can override these assumptions if
- * they are wrong.  Certain other parameters will simply not be defined here
- * because they will be different for every platform.  In this case, these
- * parameters will be defined in either aconfig.h or mconfig.h.
- * 
- */
-
+/*=====================================================================*
+ |			defs.h	
+ |		Copyright (c) 1990-1995 by Applied Logic Systems, Inc.
+ |
+ |			-- Common definitions and configuration parameters
+ |
+ | Creation: 9/27/90 (originally config.h)
+ | Author: Keith Hughes and Kevin Buettner
+ |
+ | This file contains common configuration parameters.  Certain assumptions
+ | are made in this file about the architecture and machine on which
+ | Prolog will be built for.  aconfig.h and mconfig, the architecture and
+ | machine dependent configuration files can override these assumptions if
+ | they are wrong.  Certain other parameters will simply not be defined here
+ | because they will be different for every platform.  In this case, these
+ | parameters will be defined in either aconfig.h or mconfig.h.
+ | 
+ *=====================================================================*/
 #ifndef _DEFS_H_INCLUDED_
 #define _DEFS_H_INCLUDED_ 1
 
@@ -32,6 +32,10 @@
 #define UNIX     1
 #define OSStr "unix"
 
+/* Like UNIX and OSStr above, assume that the OS has a brk() call. */
+
+/*** #define HAVE_BRK  ***/
+
 /*
  * SlowCut needs to be defined at the present time in order for our interrupt
  * mechanism to work properly.  It is unfortunate that this is the case.
@@ -43,7 +47,6 @@
 
 #define SlowCut 1
 
-
 /*
  * NewMath indicates that goals performing arithmetic are totally expanded.
  * InMath and FMath must also be defined if NewMath is defined.
@@ -54,7 +57,6 @@
 #define NewMath 1
 #define InMath 1	/* Inline math */
 #define FMath 1		/* Inline floating math */
-
 
 /* 
  * It may be useful to turn off the following configuration parameters when
@@ -80,8 +82,6 @@
 #define Indexing	1
 #define BigStruct	1
 
-
-
 /*
  * Other Parameters which are not defined by default; these should be defined
  * in either mconfig.h or aconfig.h if needed.
@@ -105,8 +105,6 @@
  *
  */
 
- 
- 
 /*
  * Include the architecture and machine specific configuration files.  The
  * machine specific file is included after the architecture specific file so
@@ -156,7 +154,6 @@
   /* memory.h and strings.h conflict on some systems */
 #endif		/* HAVE_STRINGS_H */
 #endif /* not STDC_HEADERS and not HAVE_STRING_H */
-
 
 /*
  * Set up some macros for dealing with prototypes and other ANSI C features.
@@ -257,13 +254,12 @@
 #define memmove(s1,s2,n) bcopy(s2,s1,n)
 #endif
 
-
 /*
  * Include commonly needed Generic include files
  */
 
 #include "mtypes.h"	/* not generic, but every platform has one */
-#include "types.h"
+#include "alstypes.h"
 #include "alloc.h"
 #include "fileio.h"	/* candidate for eventual elimination */
 #include "parser.h"
@@ -273,7 +269,6 @@
 #include "alspi.h"
 #include "chpt.h"
 #include "built.h"
-
 
 /* If string.h doesn't exist or is lacking certain functions, we provide our
  * own replacements for the functions declared therein...
@@ -335,6 +330,14 @@ extern	void	PI_oputchar	PARAMS(( int ));
 
 /* fsdos.c, fsmac.c, fsunix.c, or fsvms.c */
 extern	void	init_fsutils	PARAMS(( void ));
+#if MacOS
+extern	int	access		PARAMS((CONST char *, int x));
+extern	int	chdir		PARAMS((CONST char *dirname));
+extern	char *	getcwd		PARAMS((char *, size_t));
+extern	long	get_file_modified_time	PARAMS((CONST char * ));
+extern	int	isdir			PARAMS((CONST char * ));
+extern	int	absolute_pathname	PARAMS((CONST char *name));
+#endif
 
 /* sig.c */
 extern	void	init_sigint	PARAMS(( void ));
@@ -363,5 +366,18 @@ extern	void	wam_init	PARAMS(( void ));
 /* icode1.c */
 extern	int	init_icode_buf	PARAMS(( int ));
 
+#ifdef NO_FAR_DATA
+/* Global array allocation functions. */
+extern	void	init_capturestructs	PARAMS(( void ));
+extern	void	init_compiler_data	PARAMS(( void ));
+extern	void	init_cinterf_data	PARAMS(( void ));
+extern	void	init_varproc_data	PARAMS(( void ));
+extern	void	init_expand_data	PARAMS(( void ));
+extern	void	init_parser_data	PARAMS(( void ));
+#endif
+
+#ifdef MacOS
+extern	void	init_math		PARAMS(( void ));
+#endif
 
 #endif /* _DEFS_H_INCLUDED_ */

@@ -1,16 +1,15 @@
-/*
- * varproc.h            -- data structure definitions for dealing with
- *                         variable allocation during compilation
- *      Copyright (c) 1985 by Kevin A. Buettner
- *	Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
- *
- * Author:  Kevin A. Buettner
- * Creation: 6/16/85
- * Revision History:
- *      Revised:  mm/dd/yy,    Name     -- Reason
- */
-
-
+/*===============================================================*
+ |			varproc.h            
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
+ |
+ |			-- data structure definitions for dealing with
+ |             variable allocation during compilation
+ |
+ | Author:  Kevin A. Buettner
+ | Creation: 6/16/85
+ | Revision History:
+ *===============================================================*/
 #define VTBLSIZE 1024
 #define MAXGLS 512
 
@@ -29,7 +28,11 @@ typedef struct {
             short unsafe;    	/* used for unify_local_value		*/
          } varinf;
 
+#ifdef NO_FAR_DATA
+extern varinf *vtbl;           /* variable information table   */
+#else
 extern varinf vtbl[];           /* variable information table   */
+#endif
 extern int call_env_sizes[];	/* size of environment for each call (goal)
                                    in body                              */
 #define IS_VO(s) (TYPEOF(s) == TP_VO)

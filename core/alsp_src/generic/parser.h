@@ -1,15 +1,16 @@
-/*
- * parser.h     -- include file for parser.c and company
- *      Copyright (c) 1985 by Kevin A. Buettner
- *	Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
- *
- * Author:  Kevin A. Buettner
- * Creation: 11/15/84, MV8000
- * Revision History:
- *      Revised:  6/15/85, K. Buettner  -- Modifications for 
- *                                         WAM compiler parsing
- *	Revised:  11/14/90, kev		-- separation of unary and binary ops
- */
+/*=================================================================*
+ |			parser.h     
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1995 by Applied Logic Systems, Inc.
+ |
+ |			-- include file for parser.c and company
+ |
+ | Author:  Kevin A. Buettner
+ | Creation: 11/15/84, MV8000
+ | Revision History:
+ | 06/15/85 - K.Buettner -- Modifications for WAM compiler parsing
+ | 11/14/90 - K.Buettner -- separation of unary and binary ops
+ *=================================================================*/
 #ifndef __parser_h_
 #define __parser_h_
 

@@ -1,13 +1,19 @@
 /*=================================================================*
- *			mem.c                
- *      Copyright (c) 1992-1994 Applied Logic Systems, Inc.
- *
- *			-- memory allocation
- *
- * Author: Kevin A. Buettner
- * Creation: 12/17/92
+ |			mem.c                
+ |      Copyright (c) 1992-1994 Applied Logic Systems, Inc.
+ |
+ |			-- memory allocation
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 12/17/92
+ | 12/11/94 - C. Houpt -- Put sys/types.h and fcntl.h under ifdef control.
+ | 				 -- Removed SIGBUS, SIGSEGV signal handling for Mac
+ |				 -- Added HAVE_BRK for ifdef control of brk(), sbrk().
+ |				 -- Ifdefed around 3 param open() call.
+ |				 -- Misc char casts.
+ |??/??/94 - C. Houpt -- NEED non-brk() implementation of ss_restore_state.
+ |					    Maybe from the Windows version.
  *=================================================================*/
-
 #include "defs.h"
 #include "version.h"
 #include "sig.h"
@@ -16,8 +22,12 @@
 #include <unistd.h>
 #endif	/* HAVE_UNISTD_H */
 
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include <errno.h>
 
 static	void	coredump_cleanup	PARAMS(( int ));
@@ -400,7 +410,12 @@ PWord *
 allocate_prolog_heap_and_stack(size)
     size_t size;			/* number of PWords to allocate */
 {
+#ifdef MacOS
+    PWord *retval = (PWord *) malloc(sizeof (PWord) * size + 4);
+    retval = (PWord *)((long)retval + 4 - ((long)retval & 3));
+#else
     PWord *retval = (PWord *) malloc(sizeof (PWord) * size);
+#endif
 
     if (retval == 0)
 	fatal_error(FE_BIGSTACK, 0);
@@ -415,8 +430,12 @@ allocate_prolog_heap_and_stack(size)
 #ifdef arch_m88k
     (void) signal(SIGFPE, stack_overflow);
 #endif
+
+/* These signals are not available on the Mac. */
+#ifndef MacOS
     (void) signal(SIGBUS, coredump_cleanup);
     (void) signal(SIGSEGV, coredump_cleanup);
+#endif
     return retval;
 }
 
@@ -607,7 +626,7 @@ alloc_big_block(size, fe_num)
 	|| np != (long *) next_big_block_addr)
 	fatal_error(fe_num, 0);
     next_big_block_addr += size;
-#else /* HAVE_MMAP */
+#elif defined(HAVE_BRK) 
     {
 	long *bp = (long *) sbrk(0);
 
@@ -622,6 +641,11 @@ alloc_big_block(size, fe_num)
 	if (sbrk((int)size) == (char *) -1)
 	    fatal_error(fe_num, 0);
     }
+#else /* HAVE_BRK */
+	np = (long *)malloc(size);
+	
+	if (np == NULL)
+	    fatal_error(fe_num, 0);
 #endif /* HAVE_MMAP */
     
     return np;
@@ -809,9 +833,11 @@ ss_fmalloc_start()
     long *retval;
 #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE)
     retval = (long *) next_big_block_addr;
-#else	/* HAVE_MMAP */
+#elif defined(HAVE_BRK)
     retval = (long *) sbrk(0);
     retval = (long *) round((long) retval,pgsize);
+#else
+	retval = (long *) -1;
 #endif	/* HAVE_MMAP */
     if (retval == (long *) -1)
 	fatal_error(FE_SS_FMALLOC,0);
@@ -854,7 +880,11 @@ ss_save_state(filename)
      * Open the saved state file.
      */
     
+#ifdef MacOS
+    ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC);
+#else
     ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+#endif
     if (ssfd < 0)
 	return 0;
     
@@ -899,7 +929,7 @@ ss_save_state(filename)
     
     for (bnum=0; bnum < header.nblocks; bnum++)
 	if (write(ssfd,
-		  header.blocks[bnum].start,
+		  (char *)header.blocks[bnum].start,
 		  (size_t)header.blocks[bnum].fsize) < 0)
 	    goto ss_err;
     
@@ -934,7 +964,7 @@ ss_restore_state(filename,offset)
     if (lseek(ssfd, offset, 0) < 0)
 	goto ss_err;
     
-    if (read(ssfd, &hdr, sizeof (struct am_header)) < 0)
+    if (read(ssfd, (char *)&hdr, sizeof (struct am_header)) < 0)
 	goto ss_err;
     
     if (lseek(ssfd, offset, 0) < 0)
@@ -1014,7 +1044,7 @@ ss_restore_state(filename,offset)
 	offset += hdr.blocks[bnum].fsize;
     }
     
-#else	/* HAVE_MMAP */
+#elif	defined(HAVE_BRK)
     {
 	long *mchain = (long *) 0;
 	long **mptr = (long **) 0;
@@ -1043,6 +1073,11 @@ ss_restore_state(filename,offset)
 	    free((char *) mptr);
 	}
     }
+#else
+
+    /* ceh - We need a non-brk implementation of the above code! */
+    goto ss_err;
+
 #endif	/* HAVE_MMAP */
 
     /* Initialize the globals */

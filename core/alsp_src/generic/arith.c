@@ -1,20 +1,20 @@
-/*
- * arith.c   -- arithmetic builtins defined in C.
- *
- * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986-93 Applied Logic Systems, Inc.
- *
- * Program Author:  Kevin A. Buettner
- * Creation:  11/14/84
- *      09/12/85,       K. Buettner -- arithmetic predicates moved from
- *                                      builtins.c
- *      02/28/86,       K. Buettner -- PC port (for integer stuff only)
- *          11/08/90,       K. Buettner -- Put longjmp in for error handling
- *      06/03/92,       R. DiNapoli -- Added #ifdefs for Mac include files
- */
-
+/*===================================================================*
+ |			arith.c   
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-95 Applied Logic Systems, Inc.
+ |
+ | 			-- arithmetic builtins defined in C.
+ |
+ | Program Author:  Kevin A. Buettner
+ | Creation:  11/14/84
+ | 09/12/85 - K. Buettner -- arithmetic predicates moved from builtins.c
+ | 02/28/86 - K. Buettner -- PC port (for integer stuff only)
+ | 11/08/90 - K. Buettner -- Put longjmp in for error handling
+ | 06/03/92 - R. DiNapoli -- Added #ifdefs for Mac include files
+ | 10/26/94 - C. Houpt -- Added clock_ticks_per_second for Macintosh
+ |						and removed unneeded Mac header.
+ *===================================================================*/
 #include "defs.h"
-
 #include <math.h>
 
 #ifdef DOS
@@ -26,7 +26,6 @@
 #include <types.h>
 #else  /* VMS */
 #ifdef MacOS
-#include <StdDef.h>
 #include <errno.h>
 #include <Events.h>
 #else  /* MacOS */
@@ -103,9 +102,11 @@ extern	void	srandom		PARAMS(( int ));
  * C-compiler to generate faulty code.  To get around this, I had to define
  * currentTime to be a function , defined below:
  */
+define currentTime (double)(((double)TickCount()) / ((double)CLOCKS_PER_SEC))
+#if 0
 #define currentTime current_time()
-double
-current_time()
+static double
+current_time(void)
 {
     double double_ticks;
     long  long_ticks;
@@ -115,7 +116,7 @@ current_time()
     double_ticks = double_ticks / 60.0;
     return (double) (double_ticks - start_time);
 }
-
+#endif
 #else
 #define currentTime time(0L)
 #endif /* MacOS */
@@ -131,7 +132,11 @@ init_time()
 #ifdef	_SC_CLK_TCK
     clock_ticks_per_second = sysconf(_SC_CLK_TCK);
 #else	/* HAVE_UNISTD_H */
+#ifdef MacOS
+    clock_ticks_per_second = 60;
+#else	/* MacOS */
     clock_ticks_per_second = HZ;
+#endif	/* MacOS */
 #endif	/* HAVE_UNISTD_H */
 }
 
@@ -192,6 +197,11 @@ als_cputime()
 			/ (double) clock_ticks_per_second;
 #endif /* VMS */
 }
+#else /* HAVE_TIMES */
+double
+als_cputime()
+{
+    return (double) (currentTime - start_time);
 #endif /* HAVE_TIMES */
 
 
@@ -205,11 +215,16 @@ als_realtime()
 double
 als_random()
 {
+		/* ceh - why doesn't unix use RAND_MAX?? */
+#if MacOS
+    return ((double) random()) / ((double) RAND_MAX);
+#else
 #ifdef	RANDRANGE
     return ((double) random()) / ((double) RANDRANGE);
 #else	/* RANDRANGE */
     return drandom();
 #endif	/* RANDRANGE */
+#endif
 }
 
 int

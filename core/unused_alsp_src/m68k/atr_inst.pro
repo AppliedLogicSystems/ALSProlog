@@ -7,8 +7,10 @@
  |
  | Author: Kevin A. Buettner
  | Created: 4/4/90
- |
- | Module Name:	instructions
+ | Revision History:
+ |	12/28/94 - C. Houpt	--	Added externdata and externcode
+ |							directives to support Mac.
+ |-----------------------------------------------------------------
  | Exported Procedures:
  |	instruction(Opcode,Args,OutOpcode,InTab,OutTab)
  |		-- succeeds if Opcode and Args are of appropriate type
@@ -18,14 +20,11 @@
  |		-- Parses InList leaving InList and giving Opcode as
  |		   the return value.  This is a dcg rule.
  *===================================================================*/
-
 module instructions.
-
 use labels.
 
 export instruction/5.
 export opcode/3.
-
 /*
  * An opcode is considered to be an identifier possibly followed by a dot
  * followed by another identifier.
@@ -90,6 +89,10 @@ instr(data,pseudo,[],data).
 instr(global,pseudo,[abs(_)],global).
 instr(long,pseudo,[abs(_)],long).
 instr(even,pseudo,[],even).
+%% ceh
+instr(externdata, pseudo, [abs(_)], externdata).
+instr(externcode, pseudo, [abs(_)], externcode).
+instr(globaldata,pseudo,[abs(_)],globaldata).
 
 %% Add Decimal with Extend (should be Add Binary Coded Decimal)
 instr(abcd,b,[predecr(_),predecr(_)],abcd).

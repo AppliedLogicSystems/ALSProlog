@@ -1,20 +1,20 @@
-/*
- * foreign.c            -- foreign interface functions
- *      Copyright (c) 1987-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation Date: 6/6/87
- * Revision History:
- *      Revised: mm/dd/yy       Who             Why and What
- *      Revised: 06/08/88       Chris           Changed names for consistancy
- *                                              Added max arg to PI_getuianame()
- *      Revised: 06/13/88       Chris           changed "ptypes.h" to "alspi.h"
- *      Revised: 07/13/88       Chris           moved some stuff from vprintf.h
- *      Revised: 07/12/93       Kev             added PI_printf and PI_putchar
- *                                              to call new stream I/O in
- *                                              prolog
- *
- */
+/*=========================================================================*
+ |			foreign.c            
+ |		Copyright (c) 1987-1995 Applied Logic Systems, Inc.
+ |
+ |			-- foreign interface functions
+ |
+ | Author: Kevin A. Buettner
+ | Creation Date: 6/6/87
+ | Revision History:
+ | 06/08/88 - Chris -- Changed names for consistancy
+ |                     Added max arg to PI_getuianame()
+ | 06/13/88 - Chris -- changed "ptypes.h" to "alspi.h"
+ | 07/13/88 - Chris -- moved some stuff from vprintf.h
+ | 07/12/93 - Kev   -- added PI_printf and PI_putchar to call new stream 
+ |						I/O in prolog
+ | 10/26/94	- C. Houpt -- Various char* and UCHAR* casts.
+ *=========================================================================*/
 
 #include "defs.h"
 #include "module.h"
@@ -174,7 +174,7 @@ PI_getsymname(buf_ptr, sym_val, size)
 {
     if (buf_ptr == (char *) 0)
 	return ((char *) TOKNAME(sym_val));
-    else if (strlen(TOKNAME(sym_val)) <= size)
+    else if (strlen((char *)TOKNAME(sym_val)) <= size)
 	return (strcpy(buf_ptr, (char *) TOKNAME(sym_val)));
     else
 	return ((char *) 0);	/* couldn't fit uia into buffer */
@@ -196,7 +196,7 @@ PI_getuianame(buf_ptr, uia_val, size)
 {
     if (buf_ptr == NULL)
 	return ((char *) M_FIRSTUIAWORD(uia_val));
-    if (w_get_uianame(buf_ptr, uia_val, size) != NULL)
+    if (w_get_uianame((UCHAR *)buf_ptr, uia_val, size) != NULL)
 	return (buf_ptr);
     else
 	return NULL;
@@ -265,7 +265,7 @@ PI_makesym(val_ptr, val_type, buf_ptr)
     int  *val_type;
     char *buf_ptr;
 {
-    *val_ptr = find_token(buf_ptr);
+    *val_ptr = find_token((UCHAR *)buf_ptr);
     if (val_type)
 	*val_type = PI_SYM;
 }
@@ -276,8 +276,8 @@ PI_makeuia(val_ptr, val_type, buf_ptr)
     int  *val_type;
     char *buf_ptr;
 {
-    if ((*val_ptr = probe_token(buf_ptr)) == 0)
-	w_mk_uia(val_ptr, val_type, buf_ptr);
+    if ((*val_ptr = probe_token((UCHAR *)buf_ptr)) == 0)
+	w_mk_uia(val_ptr, val_type, (UCHAR *)buf_ptr);
     else
 	*val_type = PI_SYM;
 }
@@ -440,7 +440,7 @@ PrologInit(ap)
 	if (ap->name == (char *) -1)
 	    break;
 	else if (ap->arity == -1) {
-	    PWord tok = find_token(ap->name);
+	    PWord tok = find_token((UCHAR *)ap->name);
 
 	    new_mod(tok);	/* this pair of calls will create and */
 	    end_mod();		/* initialize the module if necessary */

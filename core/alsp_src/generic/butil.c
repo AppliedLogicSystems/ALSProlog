@@ -1,18 +1,18 @@
-/*
- * butil.c   -- prolog builtin utilties.
- *
- * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986-1993 by Applied Logic Systems
- *
- * Program Author:  Kevin A. Buettner
- * Creation:  11/14/84
- * Revision History: (fixes, not addition of new builtins)
- *      06/28/85,       K. Buettner -- Conversion to wam and compiled prolog
- *      09/12/85,       K. Buettner -- arithmetic predicates moved to
- *                                     separate file.
- *      01/28/86,       K. Buettner -- IBM PC conversion
- */
-
+/*=====================================================================*
+ |			butil.c   
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1995 by Applied Logic Systems
+ |
+ |			-- prolog builtin utilties.
+ |
+ | Program Author:  Kevin A. Buettner
+ | Creation:  11/14/84
+ | Revision History: (fixes, not addition of new builtins)
+ | 06/28/85	 - K. Buettner -- Conversion to wam and compiled prolog
+ | 09/12/85	 - K. Buettner -- arithmetic predicates moved to separate file.
+ | 01/28/86	 - K. Buettner -- IBM PC conversion
+ | 10/26/94	 - C. Houpt -- Various char* and UCHAR* casts.
+ *=====================================================================*/
 #include "defs.h"
 
 static	void	hc	PARAMS(( PWord *, int *, pword ));
@@ -69,7 +69,7 @@ hc(rval, rtag, w)
 	    *rtag = WTP_REF;
 	    return;
 	case TP_UIA:
-	    w_mk_uia(rval, rtag, UIA_NAME(w));
+	    w_mk_uia(rval, rtag, (UCHAR *)UIA_NAME(w));
 	    return;
 #ifdef DoubleType
 	case TP_DOUBLE:
@@ -336,7 +336,7 @@ get_gv_number(name)
 
     PI_makesym(&vFunctor, &tFunctor, "gv_number");
     PI_makestruct(&vStruct, &tStruct, vFunctor, 2);
-    PI_makeuia(&vName,&tName,name);
+    PI_makeuia(&vName,&tName,(char *)name);
     w_install_argn(vStruct, 1, vName, tName);
     PI_getargn(&vArg,&tArg,vStruct,2);
     handle = gv_alloc();
@@ -363,7 +363,7 @@ set_prolog_error(namtok,arity,rfunc,rarity,rsym,v2,t2,v3,t3)
     if (pegvnum < 0) {
 	if (pegvnum == -5)
 	    ss_register_global(&pegvnum);
-	pegvnum = get_gv_number("PrologError");
+	pegvnum = get_gv_number((UCHAR *)"PrologError");
     }
 
     if (pegvnum > 0) {

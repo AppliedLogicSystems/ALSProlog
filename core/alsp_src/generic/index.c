@@ -1,16 +1,15 @@
-/*
- * index.c              -- indexing functions for full first argument indexing
- *      Copyright (c) 1986-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation Date: 2/11/86
- * Revision History:
- *      Revised: 7/31/90        kev     -- Made generic
- *      Revised: mm/dd/yy
- *
- */
-
-
+/*===============================================================*
+ |			index.c              
+ |      Copyright (c) 1986-1995 Applied Logic Systems, Inc.
+ |
+ |			-- indexing functions for full first argument indexing
+ |
+ | Author: Kevin A. Buettner
+ | Creation Date: 2/11/86
+ | Revision History:
+ | 07/31/90 - kev -- Made generic
+ | 10/26/94 - C. Houpt -- Fixed l-value cast problem in do_indexing().
+ *===============================================================*/
 #include "defs.h"
 
 #ifdef Indexing
@@ -260,13 +259,19 @@ do_indexing(ent)
 				  emaskagg);
 	/* Install emaskagg if possible */
 	if (ent->index_block)
-	    emaskCode(ent->index_block) = emaskagg;
+			/* Was:
+	    		emaskCode(ent->index_block) = emaskagg;
+			 * But thats not ANSI
+			 */
+	{
+		register int *p = emaskCodeAddr(ent->index_block);
+		*p = emaskagg;
+	}
 
 	/* Mark the procedure as having an index block */
 	ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_SWITCH;
     }
 }
-
 
 static void
 insert_node(ihp, key, tag, val)

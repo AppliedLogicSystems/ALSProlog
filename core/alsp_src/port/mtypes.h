@@ -1,31 +1,30 @@
-/*
- * mtypes.h			-- low level prolog types
- *
- * This file should be reflected in mtypes.m4.
- *
- *	Implementation-dependent
- *
- * This file should contain all machine dependent manipulation of the machine
- * level Prolog types (what the WAM uses), so that they are easy to find
- * and change if necessary.
- *
- * See the "Machine Dependent Files" section of the implementation
- * documentation for a philosophy of this file.
- *
- *	Copyright (c) 1987 Applied Logic Systems
- *
- * Author: Kevin A. Buettner
- * Created: 2/17/87
- * Revision History
- *		3/10/89	kmh	Consolidated all low-level Prolog type/type
- *				manipulation information to mtypes.h
- */
+/*===================================================================*
+ |		mtypes.h
+ |	Copyright (c) 1987-95 Applied Logic Systems, Inc.
+ |
+ |		Low-level prolog types
+ |		Implementation-dependent
+ |
+ | This file contains all machine dependent manipulation of the machine
+ | level Prolog types (what the WAM uses), so that they are easy to find
+ | and change if necessary.
+ |
+ | See the "Machine Dependent Files" section of the implementation
+ | documentation for a philosophy of this file.
+ |
+ | Author: Kevin A. Buettner
+ | Created: 2/17/87
+ | Revision History
+ |		3/10/89	kmh	Consolidated all low-level Prolog type/type
+ |				manipulation information to mtypes.h
+ *===================================================================*/
 
-/*
-The low level types use the bottom two bits for primary tag differentiation.
-The following give the bit patterns for the basic types, as well as the mask
-needed to get just these bits left in the integer being examined.
-*/
+/*@[3.2]@----------------------------------------------------------
+ | The low level types use the bottom two bits for primary tag 
+ | differentiation.  The following give the bit patterns for the basic 
+ | types, as well as the mask needed to get just these bits left in 
+ | the integer being examined.
+ *-----------------------------------------------------------------*/
 
 #define MTP_TAGMASK	0x3
 #define MTP_TAG(o) (((PWord)(o)) & MTP_TAGMASK)
@@ -35,20 +34,20 @@ needed to get just these bits left in the integer being examined.
 #define MTP_LIST	2
 #define MTP_CONST	3
 
-/*
-In the current implementation, the constant type includes 4 types, being
-integers, symbols, UIAs and fences. The lower 4 bits are used to differentiate
-these types. The bottom two bits will be from MTP_CONST above, while the
-next two give the actual differentiation.
-
-The following mask gives the bits which give this tag, while the rest
-gives the bit patterns for the 4 bits, including the MTP_CONST bits.
-
-	MTP_INT		(0 << 2) | MTP_CONST
-	MTP_SYM		(1 << 2) | MTP_CONST
-	MTP_FENCE	(2 << 2) | MTP_CONST
-	MTP_UIA		(3 << 2) | MTP_CONST
-*/
+/*-----------------------------------------------------------------------
+ | In horizontal tagging, the constant type includes 4 types, being
+ | integers, symbols, UIAs and fences. The lower 4 bits are used to 
+ | differentiate these types. The bottom two bits will be from MTP_CONST 
+ | above, while the next two give the actual differentiation.
+ | 
+ | The following mask gives the bits which give this tag, while the rest
+ | gives the bit patterns for the 4 bits, including the MTP_CONST bits.
+ | 
+ | 	MTP_INT		(0 << 2) | MTP_CONST
+ | 	MTP_SYM		(1 << 2) | MTP_CONST
+ | 	MTP_FENCE	(2 << 2) | MTP_CONST
+ | 	MTP_UIA		(3 << 2) | MTP_CONST
+ *-----------------------------------------------------------------------*/
 
 #define MTP_CONSTMASK	0xf
 #define MTP_CONSTSHIFT	4
@@ -73,7 +72,7 @@ in a full word integer representation.
  * MBIAS and MUNBIAS are required on the 88k.  When possible, these macros
  * are not used except in the 88k mtypes file.  There are several places in
  * the source where BIAS factors need to be explicitly introduced.  MBIAS and
- * MUNBIAS on the 68k are simply identity operations.
+ * MUNBIAS on the non-88k archs are simply identity operations.
  */
 
 #define MBIAS(x) (x)

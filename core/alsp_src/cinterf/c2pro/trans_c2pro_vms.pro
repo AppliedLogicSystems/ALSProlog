@@ -95,6 +95,11 @@ endmod.
  | Levels are set by the command line switch:
  |	-d N
  | which must occur after the  -p divider.
+ | Addl debugging tool:
+ |	-T FileName   (where FileName is a complete path)
+ | causes trace to be turned on when openFile is called (basically
+ | when #include FileName or #import FileName is executed.  Example:
+ |	-T /usr/include/objc/objc-class.h
  *===============================================================*/
 
 %:- [c2p,cparse,ctoken,cexp,cout,cfiles,cmisc,cmacro].
@@ -115,6 +120,7 @@ cur_debug_level(1).
 :-dynamic(includePath/3).
 :-dynamic(currentPath/3).
 :-dynamic(imported/1).
+:-dynamic(trace_enter_file/1).
 
 	%-------------------------------------
 	% OS-Specific File Loading (to disappear):
@@ -268,6 +274,11 @@ install_option(['-I',PathAtm], Defines, Defines, State)
 	:- !,
 	name(PathAtm,PathStr),
 	addIncludePath(PathStr).
+
+	% option:  -T FileName 		(full path to file)
+install_option(['-T',PathAtm], Defines, Defines, State)
+	:- !,
+	assert(trace_enter_file(PathAtm)).
 
 	% option:  -IPathname
 install_option([Opt], Defines, Defines, State)
@@ -1291,6 +1302,11 @@ dispatch_import(FileName,IType,State) :-
 	!.
 dispatch_import(FileName,IType,State) :-
 	assert(imported(FileName)),
+	(trace_enter_file(FileName) ->
+	trace
+	;
+	true
+	),
 	openFile(FileName,State).
 
 /*
@@ -1913,8 +1929,8 @@ endmod.
  |	output_openFile/1	-- set up output control flags
  |	output_closeFile/1	-- remove output control flags
  |	output_exclude/5	-- set up exclude spec for files
- |	output_begin_silent/2- stop all output
- |	output_end_silent/2	-- resume output
+ |	output_begin_silent/0- stop all output
+ |	output_end_silent/0	-- resume output
  |	output_header/2		-- print header
  |	output_footer/2		-- print footer
  |	output_macro/3		-- outputs a macro identifier
@@ -2037,21 +2053,21 @@ output_exclude(ExclType,Disk,Comps,PathType,What)
 	assert(exclude_files(ExclType,Disk,Comps,PathType,What)).
 
 	%---------------------------------------
-	% output_begin_silent/2
+	% output_begin_silent/0
 	%
 
-output_begin_silent(FD,Tab)
+output_begin_silent
 	:- assert(silent).
 
 
 	%---------------------------------------
-	% output_end_silent/2
+	% output_end_silent/0
 	%
 
-output_end_silent(FD,Tab)
+output_end_silent
 	:-
 	retract(silent), !.
-output_end_silent(FD,Tab).
+output_end_silent.
 
 	%---------------------------------------
 	% output_header/2.
@@ -2578,7 +2594,11 @@ read_lines(Line, State) :-
 	get_statement(Line, Stmt, State),
 	!,
 	dot_debug(2,'\nPARSING STATEMENT : %t\n',[Stmt]),
-	parse_statement(State,Stmt,Rest),
+	(parse_statement(State,Stmt,Rest) ->
+		true
+		;
+		printf('Error parsing stmt: %t\n',[Stmt])
+	),
 	read_lines(Rest,State).
 read_lines(Line,State) :-
 	output_footer(State).
@@ -2719,10 +2739,10 @@ consume_semicolon(State,Toks,[]) :-
 
 als_statement(State) -->
 	[ident('als$begin_silent'),semicolon], !,
-	{ output_begin_silent(State) }.
+	{ output_begin_silent }.
 als_statement(State) --> 
 	[ident('als$end_silent'),semicolon],
-	{ output_end_silent(State) }.
+	{ output_end_silent }.
 als_statement(State) --> 
 	[fident('als$ctype'),lparen,ident(Name),rparen,semicolon], 
 	!,
@@ -2771,8 +2791,9 @@ objc_statement(State) -->
 objc_statement(State) -->
 	[ident(class)],
 	declt_list(State,DecltList),
-	consume_semicolon(State,[at,ident(class)],DecltList),
-	{ process_class_decln(DecltList,State) }.
+%	{ consume_semicolon(State,[at,ident(class)],DecltList),
+	 consume_semicolon(State),
+	{  process_class_decln(DecltList,State) }.
 
 
 process_class_decln([],State).
@@ -2788,7 +2809,7 @@ interfaceOrProtocol(protocol).
 
 instance_variables_opt(State,Public) --> [lcurly], !,
 	public_field_list_opt(State,Public),
-	other_field_lists_opt(State,InTab),
+	other_field_lists_opt(State),
 	[rcurly].
 instance_variables_opt(State,[]) --> [].
 
@@ -2804,10 +2825,10 @@ public_field_list_opt(State,[]) --> [].
 other_field_lists_opt(State) -->
 	[at,ident(_)],
 	!,
-	field_list(State,_,_),
+	field_list(State,_),
 	other_field_lists_opt(State).
 other_field_lists_opt(State) -->
-	field_list(State,_,_),
+	field_list(State,_),
 	!.
 other_field_lists_opt(State) --> [].
 	
@@ -4095,9 +4116,9 @@ getMoreNum( InStream, Num, _, OutStream, Num,State) :-
 %
 
 getFractAndExponent(InStream,INum,Mag,OutStream,Fract,Exponent,State) :-
-	getFraction(InStream,INum,Mag,Stream1,Fract,State),
-	getExponentOpt(Stream1,Stream2,Exponent),
-	floatMarkerOpt(Stream2,OutStream).
+	getFraction(InStream,INum,Mag,OutStream,Fract,State),
+	getExponentOpt(InStream,OutStream,Exponent,State),
+	floatMarkerOpt(InStream,OutStream).
 
 getFraction( [ Char | InStream ],INum,Mag,OutStream,Num,State) :-
 	isNumeric(Char,Digit),
@@ -4116,7 +4137,7 @@ getExponentOpt( [ Char | InStream ], OutStream, Exponent,State) :-
 getExponentOpt(Stream, Stream, 0,State).
 
 getExponent(InStream,OutStream,Exponent,State) :-
-	getSignOpt(Sign,InStream,NStream,State),
+	getSignOpt(Sign,InStream,NStream),
 	getDecimal(NStream, 0, OutStream, Num,State),
 	Exponent is Num * Sign.
 

@@ -1,19 +1,19 @@
-/*
- * gc.c                 -- garbage compactor for ALS Prolog
- *      Copyright (c) 1987-1993 Applied Logic Systems, Inc.
- *
- * Author:  Kevin A. Buettner
- * Creation Date: 5/24/87
- * Revision History:
- *      Revised: 8/2/88         kev     -- 88k port
- *      Revised: 4/25/89        kev     -- port back to sun
- *      Revised: 10/4/90        kev     -- Took out machine specific
- *                                          designations in port to SPARC
- *      Revised: 5/14/91        raman   -- amiga port (heap/stack high mem)
- *      Revised: 4/3/93         raman   -- made it generic
- */
-
-
+/*==================================================================*
+ |			gc.c                 
+ |		Copyright (c) 1987-1995 Applied Logic Systems, Inc.
+ |
+ |			-- garbage compactor for ALS Prolog
+ |
+ | Author:  Kevin A. Buettner
+ | Creation Date: 5/24/87
+ | Revision History:
+ | 08/02/88 - kev -- 88k port
+ | 04/25/89 - kev -- port back to sun
+ | 10/04/90 - kev -- removed machine-specific designations in port to SPARC
+ | 05/14/91 - raman -- amiga port (heap/stack high mem)
+ | 04/03/93 - raman -- made it generic
+ | 10/27/93 - C. Houpt -- Use ASCII Beep (7) for gcbeep on Mac.
+ *==================================================================*/
 #include "defs.h"
 #include "machinst.h"
 #include "wintcode.h"
@@ -160,8 +160,12 @@ gc()
     wm_E -= BIAS;
     if (gcbeep) {
 	putchar(007);
+#ifdef MacOS
+	putchar(007);
+#else
 	putchar(0200);
 	putchar(0200);
+#endif
 	fflush(stdout);
     }
 
