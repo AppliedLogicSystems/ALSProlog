@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.19 1999/01/21 20:02:36 choupt Exp $"
+#|		"$Id: als_projects.tcl,v 1.20 1999/01/25 13:50:26 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -104,7 +104,7 @@ proc del_from_files_list { Listbox } {
 	set ans [tk_messageBox -icon warning -title "Delete Paths?" \
 		-message "Delete the $N selected files?" -type yesno -default yes]
 	if {$ans == "yes"} then {
-		for {set i [expr $N - 1] } { $i>=0 } { incr i -1 } {
+		foreach i $SelNums {
 			$Listbox delete $i
 		}
 	}

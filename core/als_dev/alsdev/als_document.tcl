@@ -461,18 +461,29 @@ proc document.save {w} {
 		set file [tk_getSaveFile -initialfile [wm title $w] \
 			-defaultextension .pro ]
 		if {$file != ""} then {
-			prolog call alsdev rename_anon_doc -atom $w -atom $file \
-				-number $proenv($w,src_handler) -var RenameFlag
-			if {$RenameFlag == "ok"} then {
-				save_as_core $w $file
-				return true
-			} else {
-				return false
-			}
+
+		save_as_core $w $file
+		send_prolog_t als_ide_mgr [list save_doc_as $w $file] list
+		set file_name [lindex [file split $file] end]
+		set proenv($w,file) $file
+		set proenv($w,title) $file_name
+		set proenv(document,$file) $w
+		post_open_document $file_name $w
+
+#			prolog call alsdev rename_anon_doc -atom $w -atom $file \
+#				-number $proenv($w,src_handler) -var RenameFlag
+#			if {$RenameFlag == "ok"} then {
+#				save_as_core $w $file
+#				return true
+#			} else {
+#				return false
+#			}
+
 		}
 	}
 	if {[info exists proenv($w,src_handler)]} then {
-		send_prolog  $proenv($w,src_handler) clear_errors_display
+	prolog call alsdev send -number $proenv($w,src_handler) -atom clear_errors_display
+#		send_prolog  $proenv($w,src_handler) clear_errors_display
 	}
 }
 
