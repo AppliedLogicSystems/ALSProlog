@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <netinet/in.h>
+
 #include <unix_e.h>
 
 BYTE _SSIWS_PrivateCompIdCodes[] =
@@ -32,8 +34,8 @@ static void program_key(key_type type, const char *device)
     
     
     if (type == timed_key) {
-    	mem_init[0] = 1;
-    	mem_init[3] = 31*24*60*60; /* one month in seconds */
+    	mem_init[0] = htonl(1);
+    	mem_init[3] = htonl(31*24*60*60); /* one month in seconds */
     }
     
     if (SSIWS_WriteMemory(SSIWS_APPLICATION_ID, 0, (WORD *)mem_init, mem_max*2))

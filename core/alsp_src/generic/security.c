@@ -30,6 +30,9 @@
 #endif
 
 #if defined(SSIWS_UNIKEY)
+
+#include <netinet/in.h>
+
 #include <unix_e.h>
 
 /* Applied Logic System's Company Code */
@@ -221,16 +224,16 @@ static void get_hardware_key_times(unsigned long *now, unsigned long *start,
 			    unsigned long *end, unsigned long *duration)
 {
 #if defined(SSIWS_UNIKEY)
-    long key_memory[3];
+    unsigned long key_memory[3];
 
     time((time_t *)now);
 
     if (SSIWS_ReadMemory(SSIWS_APPLICATION_ID, 2, (WORD *)key_memory, 6))
         hardware_key_error();
 
-    *start = key_memory[0];
-    *end = key_memory[1];
-    *duration = key_memory[2];   	
+    *start = ntohl(key_memory[0]);
+    *end = ntohl(key_memory[1]);
+    *duration = ntohl(key_memory[2]);   	
 
 #elif defined(SSI_UNIKEY)
     SYSTEMTIME sys_time;
@@ -263,10 +266,10 @@ static void get_hardware_key_times(unsigned long *now, unsigned long *start,
 static void set_hardware_key_times(unsigned long start, unsigned long end)
 {
 #if defined(SSIWS_UNIKEY)
-    long key_memory[2];
+    unsigned long key_memory[2];
 
-    key_memory[0] = start;
-    key_memory[1] = end;
+    key_memory[0] = htonl(start);
+    key_memory[1] = htonl(end);
 
     if (SSIWS_WriteMemory(SSIWS_APPLICATION_ID, 2, key_memory, 4))
     	hardware_key_error();
@@ -360,6 +363,7 @@ static void init_hardware_key(void)
     
     if (SSIWS_ReadMemory(SSIWS_APPLICATION_ID, 0, (WORD *)&type, 2))
     	hardware_key_error();
+    type = ntohl(type);
     
 #elif defined(SSI_UNIKEY)
     int ROMSize;
