@@ -13,7 +13,7 @@
 
 #if defined(HAVE_UCONTEXT_H)
 #include <ucontext.h>
-/*#include <siginfo.h> */
+
 extern	void	signal_handler	PARAMS(( int, siginfo_t *, ucontext_t *));
 
 #elif defined(arch_m88k)
