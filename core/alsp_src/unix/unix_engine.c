@@ -37,9 +37,16 @@ static int dev_zero_fd = -1; /* Cached file descriptor for /dev/zero. */
 
 #else
 
+#ifdef UNIX_CYGWIN32
+/* CYGWIN32 20.1 has a bug that causes an error when MAP_PRIVATE is used
+   with MAP_ANONYMOUS. */
+
+#define MMAP(start, length, flags) \
+     (mmap((start), (length), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|(flags), -1, 0))
+#else
 #define MMAP(start, length, flags) \
      (mmap((start), (length), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|(flags), -1, 0))
-
+#endif
 #endif
 
 #define THROW_UNIX_ERROR(n) \
