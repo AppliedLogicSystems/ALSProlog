@@ -27,8 +27,10 @@ cp $1/port/mswin32/testrun.bat $2/bld-port/
 
 mkdir $2/bld-port/alsdir
 mkdir $2/bld-port/alsdir/builtins
+rm -f $2/bld-port/alsdir/builtins/*.pro
 ln -s $1/builtins/*.pro $2/bld-port/alsdir/builtins/
 mkdir $2/bld-port/alsdir/library
+rm -f $2/bld-port/alsdir/library/*.pro
 ln -s $1/library/*.pro $2/bld-port/alsdir/library/
 
 echo Making $2/bld-wins
@@ -41,7 +43,13 @@ cp $1/wins/build/mswin32/do_p2intf.bat $2/bld-wins/mswin32
 cp $1/wins/build/mswin32/c2p_cmd.lst $2/bld-wins/mswin32
 cp $1/wins/build/mswin32/p2i_cmd.lst $2/bld-wins/mswin32
 
+cp $1/wins/build/mswin32/winpack.bat $2/bld-wins/mswin32
+
 cp $1/wins/build/mswin32/mswin32intf_lib.prj.sit.hqx $2/bld-wins/mswin32
 cp $1/wins/build/mswin32/alspro_mswin32.prj.sit.hqx $2/bld-wins/mswin32
 
-ln -s $2/bld-port/alsdir $2/bld-wins/mswin32/
+rm -f $2/bld-wins/mswin32/alsdir
+ln -s $2/bld-port/alsdir $2/bld-wins/mswin32/alsdir
+
+
+
