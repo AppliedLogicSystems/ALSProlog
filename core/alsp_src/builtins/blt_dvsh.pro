@@ -722,7 +722,10 @@ module_preds(M,L)
 
 module_preds(Mod,S,L)
 	:-
-	findall(P/A, (debugger:spying_on(CallForm,Mod),functor(CallForm,P,A)),S0),
+	findall(PA, (debugger:spying_on(CallForm,Mod),
+					functor(CallForm,P,A),
+					catenate([P,'/',A],PA)  ),
+					S0),
 	sort(S0, S),
 
 	findall(PA, 
