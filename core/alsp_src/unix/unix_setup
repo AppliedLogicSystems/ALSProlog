@@ -1,19 +1,19 @@
 #!/bin/sh
 
 # Check for correct number of arguments
-if test $# -lt 3
+if test $# -lt 2
 then
-    echo 'Usage: unix_setup source_dir os processor [flags...]' 1>&2
+    echo 'Usage: unix_setup source_dir os [flags...]' 1>&2
     echo 'Example:' 1>&2
-    echo '    unix_setup ../alsp_src hpux port' 1>&2
+    echo '    unix_setup ../alsp_src hpux' 1>&2
     exit 2
 fi
 
 # Extract arguments
 source_dir=$1
 os=$2
-proc=$3
-shift 3
+proc=port
+shift 2
 flags=$*
 
 # Check for relative source directory
