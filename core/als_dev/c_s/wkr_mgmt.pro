@@ -666,9 +666,41 @@ csp_script(send_known_workers,
 			]
 		).
 
+csp_script(send_all_info, [], TaskEnv,
+	[
+	 server_info(SInfo),
+	 task(current_queue(RawQ)),
+	 full_delay(RawQ)^gather_all_server_info(RawQ,SInfo,InfoList),
+	 full_delay(InfoList)^[
+		InfoList = [QEntries,WrkrList,Users],
+	 	length(QEntries, NumEntries),
+		pack_for_client(QEntries, QEntriesExpr),
+		length(WrkrList, NumWrkrs),
+		pack_for_client(WrkrList, WrkrListExpr),
+		length(Users, NumUsers),
+		pack_for_client(Users, UsersExpr),
+	 	respond('**admin_resp@all_info@%t@%t@%t@%t@%t@%t',
+			[NumEntries, QEntriesExpr, NumWrkrs, WrkrListExpr,NumUsers, UsersExpr])
+		]
+	] ).
+
+
+
+
 endmod.
 
 module socket_comms.
+
+/*!----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+export gather_all_server_info/3.
+gather_all_server_info(RawQ,SInfo,InfoList)
+	:-
+	queue_representation(RawQ, QEntries),
+	known_workers(WrkrList),
+	cur_logged_in_users(Users, SInfo),
+	InfoList = [QEntries,WrkrList,Users].
+
 
 /*!----------------------------------------------------------------------*
  |	queue_representation/2
@@ -681,6 +713,7 @@ module socket_comms.
  *-----------------------------------------------------------------------*/
 
 export queue_representation/2.
+/*
 queue_representation(L, [])
 	:-
 	var(L),
@@ -690,6 +723,37 @@ queue_representation([RawItem | RawQ], [QE | QEntries])
 	:-
 	queue_rep(RawItem, QE),
 	queue_representation(RawQ, QEntries).
+*/
+
+queue_representation(L, [])
+	:-
+	var(L),
+	!.
+
+queue_representation([], []).
+
+queue_representation([m(_) | RawQ], QEntries)
+	:-!,
+	queue_representation2(RawQ, QEntries).
+
+queue_representation([_ | RawQ], QEntries)
+	:-
+	queue_representation(RawQ, QEntries).
+
+queue_representation2(L, [])
+	:-
+	var(L),
+	!.
+
+queue_representation2([], []).
+
+queue_representation2([m(_) | _], []) :-!.
+
+queue_representation2([RawItem | RawQ], [QE | QEntries])
+	:-
+	queue_rep(RawItem, QE),
+	queue_representation2(RawQ, QEntries).
+
 
 queue_rep(s(Socket), QE)
 	:-!,
