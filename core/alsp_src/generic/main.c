@@ -31,6 +31,8 @@
 #include <setjmp.h>
 /* #include "winter.h" */
 
+#include <limits.h>
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -288,17 +290,22 @@ PI_prolog_init0(int argc, char **argv)
 
     if (als_opts) {
 	char *opt, *val;
+	int i;
 	als_opts = strdup(als_opts);
 	if (als_opts == NULL)
 	    fatal_error(FE_ALS_OPTIONS, 0);
 
 	opt = strtok(als_opts, " ,");
 	while (opt) {
-	    if ( (val = isopt("heap_size:",opt)) )
-		heapsize = atoi(val) * 1024 / 4;
-	    else if ( (val = isopt("stack_size:",opt)) )
-		stacksize = atoi(val) * 1024 / 4;
-	    else if ( (val = isopt("saved_state:",opt)) ) {
+	    if ( (val = isopt("heap_size:",opt)) ) {
+	        i = atoi(val);
+		if (i < 0 || i > ULONG_MAX/256) fatal_error(FE_ALS_OPTIONS, 0);
+		heapsize = i * 256;
+	    } else if ( (val = isopt("stack_size:",opt)) ) {
+	        i = atoi(val);
+		if (i < 0 || i > ULONG_MAX/256) fatal_error(FE_ALS_OPTIONS, 0);
+		stacksize = i * 256;
+	    } else if ( (val = isopt("saved_state:",opt)) ) {
 		saved_state_filename = strdup(val);
 		if (saved_state_filename == 0)
 		    fatal_error(FE_ALS_OPTIONS, 0);
@@ -331,21 +338,21 @@ PI_prolog_init0(int argc, char **argv)
     	    	break;
     	    case heap_scan:
     	    	r = sscanf(argv[i], "%lu", &value);
-    	    	if (r != 1) {
+    	    	if (r != 1 || value > ULONG_MAX/256) {
     	    	    fprintf(stderr, "Usage: -heap N\n");
-    	    	    exit(EXIT_FAILURE);
+    	    	    exit(EXIT_ERROR);
     	    	} else {
-    	    	    heapsize = value * 1024 / 4;
+    	    	    heapsize = value * 256;
     	    	    state = arg_scan;
     	    	}
     	    	break;
     	    case stack_scan:
     	    	r = sscanf(argv[i], "%lu", &value);
-    	    	if (r != 1) {
+    	    	if (r != 1 || value > ULONG_MAX/256) {
     	    	    fprintf(stderr, "Usage: -stack N\n");
-    	    	    exit(EXIT_FAILURE);
+    	    	    exit(EXIT_ERROR);
     	    	} else {
-    	    	    stacksize = value * 1024 / 4;
+    	    	    stacksize = value * 256;
     	    	    state = arg_scan;
     	    	}
     	    	break;
@@ -358,11 +365,11 @@ PI_prolog_init0(int argc, char **argv)
     	switch (state) {
     	case heap_scan:
 	    fprintf(stderr, "Usage: -heap N\n");
-	    exit(EXIT_FAILURE);
+	    exit(EXIT_ERROR);
     	    break;
     	case stack_scan:
     	    fprintf(stderr, "Usage: -stack N\n");
-    	    exit(EXIT_FAILURE);
+    	    exit(EXIT_ERROR);
     	    break;
     	default:
     	    break;
@@ -1047,7 +1054,7 @@ autoload(f)
 }
 
 int
-PI_toplevel()
+PI_toplevel(int *result)
 {
 #ifndef KERNAL
     if (noautoload && !pckgloaded) {
@@ -1086,7 +1093,7 @@ PI_toplevel()
 	    PI_makesym(&mv, &mt, "builtins");
 #endif /* KERNAL */
 	    PI_makesym(&gv, &gt, "$start");
-	    PI_rungoal(mv, gv, gt);
+	    *result = PI_rungoal(mv, gv, gt);
 	    return (0);
 	}
     }
