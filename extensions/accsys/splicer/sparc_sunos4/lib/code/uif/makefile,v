@@ -1,0 +1,88 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  r0:1.1.1.1 accsys-init:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     95.11.17.16.15.42;  author ken;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     95.11.17.16.15.42;  author ken;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#  
+#  Makefile for splicer library: code/uif
+# 
+
+VPATH=/mailbox3/splicer/code/uif
+
+
+LclIncs= -I/mailbox3/splicer/include 
+LclFlags = 
+
+BASELIB=libXI.a
+
+
+
+all: library myXlib 
+
+CC = gcc
+LINK = $(CC)
+CFLAGS = -O -g -Wall -Wshadow -Wconversion $(PROTOFLAGS)
+LIBS = -lnsl -lm
+#
+#
+CPPFLAGS = -I. $(LclIncs) $(XINCLUDES) $(LclFlags)
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(X_CFLAGS) $<
+
+BASEOBJS	= xEvent.o \
+xMenus.o \
+xWindows.o \
+xDialogs.o 
+
+library: $(BASELIB)
+
+
+$(BASELIB): $(BASEOBJS)
+	echo BASEOBJS=$(BASEOBJS)
+	ar ruv $(BASELIB) $(BASEOBJS)
+	ranlib $(BASELIB)
+
+
+# Dependencies:
+
+xEvent.o : xEvent.c 
+xMenus.o : xMenus.c 
+xWindows.o : xWindows.c 
+xDialogs.o : xDialogs.c 
+
+myXlib:
+	(cd myXlib ; make all)
+
+@
+
+
+1.1.1.1
+log
+@Initial import of accsys into the repository.
+@
+text
+@@

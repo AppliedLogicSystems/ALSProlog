@@ -1,0 +1,67 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  r0:1.1.1.1 accsys-init:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     95.11.17.16.15.39;  author ken;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     95.11.17.16.15.39;  author ken;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@[	srcmake = true,
+	system = splicer,
+	protype = natv,
+	probld	= '/mailbox3/builds',
+	fprefix = ga,
+	isdir='/mailbox3/splicer',
+	includes = [include],
+	codetrees = 
+	[code-
+	  [	fitness-[	binary,
+					permutations
+				],
+		[name=ga,libname=libGA]-[[name=binary,libname=libGAb],
+								 [name=permutations,libname=libGAp]
+								 ],
+		[name=uif,libname=libXI]-[[name=myXlib,libname=libMyXlib]]
+	  ]
+	],
+	omitpattern=[mac,'*']
+].
+
+[
+protoflags(''),
+x_cflags('-Dsun4'),
+xlibs(''),
+x_extra_libs(''),
+xincludes('')
+].
+
+@
+
+
+1.1.1.1
+log
+@Initial import of accsys into the repository.
+@
+text
+@@
