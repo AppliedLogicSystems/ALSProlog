@@ -2,7 +2,6 @@
 
 #ifdef __MWERKS__
 #include <unix.h>
-#endif
 
 /* There are no symbolic links in Win32, so lstat == stat.
    But what about Win95 aliases? */
@@ -17,7 +16,6 @@
 int als_access(const char *path, int mode);
 #undef access
 #define access als_access
-
 
 struct als_stat
 {
@@ -53,3 +51,10 @@ char * als_getenv(const char * name);
 int als_system(const char * command);
 #define getenv als_getenv
 #define system als_system
+
+#else
+
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
+

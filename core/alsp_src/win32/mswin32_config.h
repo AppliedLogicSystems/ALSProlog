@@ -34,3 +34,5 @@
 #define HAVE_STRTOK	1
 
 #define REVERSE_ENDIAN 1
+
+#include <windows.h>

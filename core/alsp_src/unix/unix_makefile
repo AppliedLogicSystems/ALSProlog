@@ -12,6 +12,8 @@ include $(SOURCE_DIR)/unix/$(SUBOS)_makefile
 
 OS_CPPFLAGS=-DUNIX $(SUBOS_CPPFLAGS)
 
+OS_CFLAGS = -fpic
+
 OS_SOURCE = unixio.c missing.c
 
 -include ../install_components

@@ -2118,11 +2118,12 @@ sio_socket_open()
     
     SIO_ERRCODE(buf) = SIOE_INARG;
 
-    if (!getstring(&host_or_path, v1, t1))
+    if (!getstring(&host_or_path, v1, t1)) {
 	if (t1 == WTP_UNBOUND)
 	    host_or_path = NULL;
 	else
 	    FAIL;
+    }
     
     if (t2 == WTP_UNBOUND)
 	portnum = 0;
@@ -2191,7 +2192,7 @@ sio_socket_open()
 
 #if defined(BERKELEY_SOCKETS)
 
-    if ((SIO_FD(buf) = socket(domain, socktype, 0)) == INVALID_SOCKET)
+    if ((SIO_FD(buf) = socket(domain, socktype, 0)) == (signed long)INVALID_SOCKET)
     {
 	SIO_ERRCODE(buf) = SIOE_SYSCALL;
 	SIO_ERRNO(buf) = socket_errno;

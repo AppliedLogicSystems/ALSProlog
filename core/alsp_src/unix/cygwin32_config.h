@@ -1,17 +1,17 @@
 
-#define SIMPLE_MICS 1
-
-
 
 #define MinorOSStr	"cygwin32"
 
+#define MISSING_EXTERN_CRYPT
 
+/*
 #define MISSING_EXTERN_TEMPNAM
 #define MISSING_EXTERN_GETHOSTNAME
 #define MISSING_EXTERN_REXEC
 #define MISSING_EXTERN_REALPATH
+*/
 
-/*---------------------*/
+/*---------------------
 #define DIRENT	1
 #define HAVE_FCNTL_H	1
 #define HAVE_MEMORY_H	1
@@ -28,7 +28,7 @@
 #define HAVE_UNISTD_H	1
 #define RETSIGTYPE	void
 #define SIGT	RETSIGTYPE
-#define SIGRET	/*do nothing*/
+#define SIGRET
 #define HAVE_ST_BLKSIZE	1
 #define HAVE_ST_BLOCKS	1
 #define HAVE_ST_RDEV	1
@@ -71,3 +71,4 @@
 #define HAVE_VFPRINTF	1
 #define HAVE_WAIT3	1
 #define HAVE_WAITPID	1
+*/

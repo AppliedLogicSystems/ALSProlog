@@ -34,10 +34,8 @@
  * value.
  */
 
-#ifndef MSWin32
 /* Also defined by Win32 headers. */
 typedef unsigned char byte;
-#endif
 typedef struct pwrd_ {
                   byte tag;
                   struct pwrd_ *val;
