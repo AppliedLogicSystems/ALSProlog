@@ -77,6 +77,7 @@ parse_pxml(Tokens, [Term | RestTerms])
 	read_pxml_term(Tokens, Term, RestTokens),
 	parse_pxml(RestTokens, RestTerms).
 
+export read_pxml_term/3.
 read_pxml_term([string(StringAtom) | RestTokens], StringAtom, RestTokens)
 	:-!.
 
