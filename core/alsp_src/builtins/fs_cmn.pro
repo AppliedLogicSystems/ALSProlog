@@ -231,48 +231,17 @@ datetime_less((Date0,Time0), (Date1,Time1))
  |	or the file at the end) are dereferenced out;
  *!--------------------------------------------------------------*/
 
-/* canon_path needs a version of change_cwd that will return
-   false if the directory doesn't exist.  This should use
-   something like exists_dir/1, but for now use the following
-   as a hack. */
-test_and_change_cwd(NewDir)
-	:-
-	chdir(NewDir).
-
+/* Post 3.1.1 - replace canon_path with C-level OS builtin for correctness */
 canon_path(SrcPath,CanonPath)
 	:-
 	get_cwd(WeAreHere),
+	unwind_protect((
+		path_directory_tail(SrcPath, Directory, Tail),
+		change_cwd(Directory),
+		get_cwd(CanonDir),
+		path_elements(CanonPath, [CanonDir, Tail])
+	), change_cwd(WeAreHere)).
 
-%	rootPathFile(Disk,SubDirList,EndPathFile,SrcPath),
-	
-	(test_and_change_cwd(SrcPath) ->
-		get_cwd(CanonPath)
-		;
-		split_path(SrcPath, [Disk | PathElts]),
-		dreverse(PathElts, [EndPathFile | RevSubDirList]),
-		dreverse(RevSubDirList, SubDirList),
-
-%		rootPathFile(Disk,SubDirList,'',ShortSrcPath),
-		join_path([Disk | SubDirList], ShortSrcPath),
-		(ShortSrcPath \= '' ->
-			change_cwd(ShortSrcPath)
-			;
-			true
-		),
-		get_cwd(ShortCanonPath),
-/*
-		rootPathFile(Drive,ShortSubDirList,FF,ShortCanonPath),
-		(FF = '' ->
-			AddOn = []
-			;
-			AddOn = [FF]
-		),
-		dappend(ShortSubDirList, AddOn, TheSubdirList),
-		rootPathFile(Drive,TheSubdirList,EndPathFile,CanonPath)
-*/
-		join_path([ShortCanonPath, EndPathFile], CanonPath)
-	),
-	change_cwd(WeAreHere).
 
 strip_last([_],[]) :-!.
 strip_last([H | PathList], [H | ParPathList])
