@@ -10,7 +10,30 @@ demo_init
 		;
 		no_key_file(KeyPath)
 	).
+
+qkc :-
+	builtins:sys_searchdir(SSD),
+	join_path([SSD, 'alspro.key'], KeyPath),
+	exists_file(KeyPath),
+	open(KeyPath, read, IS, []),
+	get_line(IS, KeyAtom),
+	close(IS),
+	check_key_type(KeyAtom, KeyType, KeyInfo, KeyPath),
+	(KeyPath = permanent -> 
+		true
+		;
+		(KeyPath = day30 ->
+			date(Today),
+			date_less(Today, QDate)
+			;
+			printf(user_output, 'Missing valid key; use ALS Prolog (alsdev) first\n', []),
+			halt
+		)
+	).
 		
+
+
+
 no_key_file(KeyPath)
 	:-
 	sprintf(atom(Msg),'%t\n%t\n%t',[
