@@ -18,7 +18,7 @@
 
 #if defined(macintosh)
 #define ALS_BIG_ENDIAN
-#elif defined(WIN32)
+#elif defined(WIN32) || defined(UNIX_CYGWIN32)
 #define ALS_LITTLE_ENDIAN
 #elif defined(UNIX)
     #if defined(UNIX_LINUX)
