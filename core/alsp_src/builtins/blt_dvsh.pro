@@ -32,7 +32,11 @@ start_alsdev
 	ss_load_dot_alspro(CLInfo),
 	library_setup,
 	init_tk_alslib(shl_tcli,Shared),
-alsdev_splash(Shared),
+builtins:sys_searchdir(ALSDIRPath),
+path_elements(ALSDIRPath, Elements),
+append(Elements, [images], ImagesList),
+join_path(ImagesList, ImagesPath),
+alsdev_splash(ImagesPath),
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	alsdev(Shared).
@@ -256,13 +260,6 @@ alsdev_default_setup(SystemDefaults)
 	window_defaults_setup('.topals',	Items,SystemDefaults),
 	window_defaults_setup('.debugwin',	Items,SystemDefaults),
 	window_defaults_setup('.document',	Items,SystemDefaults).
-/*
-	(dmember(text_settings(TextSettings), Items) ->
-		setup_defaults(TextSettings, text)
-		;
-		true
-	).
-*/
 
 :- dynamic(alsdev_ini_path/1).
 
@@ -712,6 +709,8 @@ non_sys_modules(Mods)
 	list_diff(L, SysMs, Mods).
 
 export module_preds/2.
+export module_preds/3.
+
 module_preds(M,L)
 	:-
 	findall(PA, 
@@ -726,6 +725,42 @@ module_preds(M,L)
 		sort(L0, L1),
 		L = L1
 	).
+
+module_preds(Mod,S,L)
+	:-
+	findall(P/A, (debugger:spying_on(CallForm,Mod),functor(CallForm,P,A)),S0),
+	sort(S0, S),
+
+	findall(PA, 
+		(all_procedures(Mod,P,A,R), R\=0,atom_codes(P,[PC0|_]),
+			PC0<129, catenate([P,'/',A],PA)
+		), 
+		L0),
+	(L0 = [] ->
+		catenate('No predicates defined in ',Mod,Msg),
+		L = [Msg] 
+		; 
+		sort(L0, L1),
+		remove(S, L1, L)
+	).
+
+remove([], L, L).
+remove([Item | S], L1, L)
+	:-
+	delete_sorted(L1, Item, L2),
+	remove(S, L2, L).
+
+delete_sorted([], Item, []).
+delete_sorted([Item | L], Item, L)
+	:-!.
+delete_sorted([H | L], Item, L)
+	:-
+	H @> Item,
+	!.
+
+delete_sorted([H | L1], Item, [H | L2])
+	:-
+	delete_sorted(L1, Item, L2).
 
 endmod.	%% builtins
 
@@ -1247,6 +1282,79 @@ clear_source_trace_wins([Rec | RecsList])
 	access_dbstr(fcg_num,Rec,FCG),
 	clean_up_src_win(FCG),
 	clear_source_trace_wins(RecsList).
+
+
+reset_spypoints(Module, NewSpyListIn, NewNoSpyList)
+	:-
+	fixup_tcltk_pa_descs(NewSpyListIn, NewSpyList),
+	(NewSpyList = [] ->
+		true
+		;
+    	dbg_spyoff,
+		install_spypoints_in_mod(NewSpyList, Module),
+    	setPrologInterrupt(spying),
+    	setDebugInterrupt(spying),
+		printf(debugger_output,
+				'Spypoints set in module %t on:\n\t%t\n',
+				[Module, NewSpyList]),
+    	dbg_spyon
+	),
+	remove_old_spypoints(Module, NewSpyList, OldSpyList),
+/*
+	(OldSpyList = [] -> true 
+		;
+		printf(debugger_output,
+				'Spypoints removed in module %t from:\n\t%t\n',
+					[Module, OldSpyList])
+	),
+*/
+    check_spyoff.
+
+fixup_tcltk_pa_descs([], []).
+fixup_tcltk_pa_descs([Desc | ListIn], [P/A | List])
+	:-
+	atomread(Desc,P/A), 
+	fixup_tcltk_pa_descs(ListIn, List).
+
+install_spypoints_in_mod([], Module).
+install_spypoints_in_mod([P/A | NewSpyList], Module)
+	:-
+    install_spypoint(Module,P,A),
+	install_spypoints_in_mod(NewSpyList, Module).
+
+remove_old_spypoints(Module, NewSpyList, OldSpyList)
+	:-
+	findall(PA,  oldspy(PA, Module, NewSpyList), OldSpyList),
+	remove_spypoints_in_mod(OldSpyList, Module).
+
+
+oldspy(P/A, Module, NewSpyList)
+	:-
+	spying_on(Pat, Module),
+	functor(Pat, P, A),
+	not(dmember(P/A, NewSpyList)).
+
+remove_spypoints_in_mod([], Module).
+remove_spypoints_in_mod([P/A | NewNoSpyList], Module)
+	:-
+	nospy(Module,P,A),
+	remove_spypoints_in_mod(NewNoSpyList, Module).
+
+
+endmod.
+
+
+
+
+module alsdev.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+export col2/1.
+col2(B)
+	:-
+	tcl_call(shl_tcli, [do_2col,B], X).
+
 
 endmod.
 
