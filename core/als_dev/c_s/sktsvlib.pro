@@ -187,7 +187,13 @@ initialize_server(CmdLine, SInfo)
 	(Logfile = nil ->
 		true
 		;
-		open(Logfile, append, LogStream, []),
+		(file_extension(LogfileBase,_,Logfile) ->
+			true ; LogfileBase = Logfile),
+		number_chars(PID, PIDCs),
+		atom_chars(PIDatom, PIDCs),
+		file_extension(LogfileBase, PIDatom, ThisLogFile),
+		set_server_info(log_file, SInfo, ThisLogFile),
+		open(ThisLogFile, append, LogStream, []),
 		set_server_info(log_stream, SInfo, LogStream),
 		date(Date), time(Time),
 		sio_gethostname(Hostname),
@@ -600,5 +606,45 @@ break_connection(Reason,Args,SR,SW,State,SInfo)
 	(stream_open_status(SR, open) -> close(SR) ; true).
 
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%           WORKER ALARM MANAGEMENT
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+export install_worker_alarm_handler/0.
+install_worker_alarm_handler
+	:-
+	asserta(global_handler(sigalrm,socket_comms,worker_alarm_handler)).
+
+worker_alarm_handler(EventId, Goal, Context) 
+	:-
+	EventId \== sigalrm,
+	!,
+	propagate_event(EventId,Goal,Context).
+
+worker_alarm_handler(_,ModuleAndGoal,_) 
+	:-
+	process_some_incoming_messages(WW),
+	disp_worker_alarm_handler(WW, ModuleAndGoal).
+
+disp_worker_alarm_handler(-1, ModuleAndGoal)
+	:-!,
+	trigger_event(sigint, ModuleAndGoal).
+
+disp_worker_alarm_handler(_, ModuleAndGoal)
+	:-
+	ModuleAndGoal.
+
+shell_alarm_interval(1.05).
+
+/*
+process_some_incoming_messages(WW)
+	:-
+	get_MainQ(q(QT,SInfo)),
+*/
 
 endmod.		%% socket_comms
+
+/*!----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+

@@ -261,7 +261,10 @@ interact(respond(Pattern, Args), Mod, TaskEnv, true, SInfo)
 	stream_open_status(SW, open),
 	!,
 	printf(SW, Pattern, Args, [line_length(500000)]),
-	nl(SW), flush_output(SW).
+	nl(SW), flush_output(SW),
+nl(user_output),
+printf(user_output, Pattern, Args, [line_length(500000)]),
+nl(user_output), flush_output(user_output).
 
 interact(respond(Pattern, Args), Mod, TaskEnv, true, SInfo)
 	:-!.
@@ -272,7 +275,10 @@ interact(respond(Pattern, Args, Options), Mod, TaskEnv, true, SInfo)
 	stream_open_status(SW, open),
 	!,
 	printf(SW, Pattern, Args, [line_length(500000) | Options]),
-	nl(SW), flush_output(SW).
+	nl(SW), flush_output(SW),
+nl(user_output),
+printf(user_output, Pattern, Args, [line_length(500000) | Options]),
+nl(user_output), flush_output(user_output).
 
 interact(respond(Pattern, Args, Options), Mod, TaskEnv, true, SInfo)
 	:-!.

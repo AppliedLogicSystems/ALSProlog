@@ -161,6 +161,7 @@ begin_free_worker(CmdLine, SInfo)
 	dmember(st=fws, CmdLine),
 	!,
 %printf(user_output,'ENTER: begin_free_worker\n',[]),flush_output(user_output),
+	assert(process_character(worker)),
 	getpid(MyPID0), MyPID is floor(MyPID0), 
 		%% Get initial necessary info from commandline:
 	dmember(uport=MyPortAtom,CmdLine),
@@ -169,7 +170,9 @@ begin_free_worker(CmdLine, SInfo)
 	set_server_info(ports_list, SInfo, [MyPort]),
 	master_info_cmd_line(CmdLine, SInfo).
 
-begin_free_worker(CmdLine, SInfo).
+begin_free_worker(CmdLine, SInfo)
+	:-
+	assert(process_character(main_server)).
 
 master_info_cmd_line(CmdLine, SInfo)
 	:-
@@ -198,10 +201,10 @@ check_master_connect(CmdLine,InitQueueTail, QueueTail, SInfo)
 	dmember(chost=MasterHost,CmdLine),
 	dmember(cport=MasterPortAtom,CmdLine),
 	atomread(MasterPortAtom, MasterPort),
-	!,
 %printf('check_master_connect-call: special_connect_job\n',[]),flush_output,
 	getpid(PID0), PID is floor(PID0),
 	special_connect_job(MasterHost, MasterPort, PID, JobRec, SInfo),
+	!,
 	InitQueueTail = QueueTail,
 	JobRec = c(_,MWS,_,_),
 	access_server_info(worker_id,SInfo,MyID),
@@ -356,7 +359,7 @@ issue_start_worker(WCfg, ThisHost, SP, WID, SInfo)
 		 	fail
 	),
 			%% Yes; Is there a process & can we connect:
-	(proceed_start_worker(WkRS, WPort, WCfg, ThisHost, SP, WID, SInfo) ->
+	(proceed_start_worker(WkRS, WorkerHost, WPort, WCfg, ThisHost, SP, WID, SInfo) ->
 		true
 		;
 		server_info_out(running_no_connect, 0, [WorkerHost,WPort], SInfo),
@@ -381,14 +384,14 @@ spawn_free_worker(SHost,SP,WHost,WID,WCfg, SInfo)
 	system(Cmd).
 
 	/*--------------------------------------------------------------*
-	 |	proceed_start_worker/7
-	 |	proceed_start_worker(WkRS, Port, WCfg, ThisHost, SP, WID, SInfo)
-	 |	proceed_start_worker(+, +, +, +, +, +, +)
+	 |	proceed_start_worker/8
+	 |	proceed_start_worker(WkRS, WorkerHost, Port, WCfg, ThisHost, SP, WID, SInfo)
+	 |	proceed_start_worker(+, +, +, +, +, +, +, +)
 	 |
 	 |	Try to connect to a running worker process:
 	 *--------------------------------------------------------------*/
 			%% Opened socket; Is it a server socket? - If so, QUIT:
-proceed_start_worker(WkRS, Port, WCfg, ThisHost, SP, WID, SInfo)
+proceed_start_worker(WkRS, WorkerHost, Port, WCfg, ThisHost, SP, WID, SInfo)
 	:-
 	is_server_socket(WkRS),
 	!,
@@ -396,11 +399,11 @@ proceed_start_worker(WkRS, Port, WCfg, ThisHost, SP, WID, SInfo)
 	fail.
 
 		%% Not a server socket (we're a client); Try to connect to it:
-proceed_start_worker(WkRS, WorkerPort, WCfg, ThisHost, SP, WID, SInfo)
+proceed_start_worker(WkRS, WorkerHost, WorkerPort, WCfg, ThisHost, SP, WID, SInfo)
 	:-
 	flush_input(WkRS),
 	open(socket(clone,WkRS),write,WkWS,[write_eoln_type(lf)]),
-	special_connect_job(WHost, WorkerPort, 0, Worker, SInfo),
+	special_connect_job(WorkerHost, WorkerPort, 0, Worker, SInfo),
 	catch( (printf(WkWS, 'are_you_available(\'%t\',%t,\'%t\').\n', 
 							[ThisHost,SP,WID]), 
 			flush_output(WkWS)),
@@ -605,17 +608,12 @@ handle_task(worker_job,Task,TaskArgs,Mod,TaskEnv,SInfo)
 add_job_rec(Job, State)
 	:-
 	access_login_connection_info(waiting_jobs, State, CurJobsList),
-%	CurJobList = (Head, Tail),
-%	Tail = [Job | NewTail],
 	append(CurJobsList, [Job], NewJobsList),
 	set_login_connection_info(waiting_jobs, State, NewJobsList).
 
 pop_job_rec(Job, State)
 	:-
 	access_login_connection_info(waiting_jobs, State, [Job | RestJobsList]),
-%	CurJobList = (Head, Tail),
-%	nonvar(Head),
-%	Head = [Job | NewHead],
 	set_login_connection_info(waiting_jobs, State, RestJobsList).
 
 /*------------------------------------------------------------------------*
@@ -627,6 +625,63 @@ mk_job_rec(Task,TaskArgs,Mod,TaskEnv,Job)
 	access_tsk_env(jobID, TaskEnv, JobID),
 	access_tsk_env(userID, TaskEnv, UserID),
 	xmake_job_rec(Job,[Task,TaskArgs,Mod,State,JobID,UserID,UserAreaPath]).
+
+	%% record_submit_acknowledge(neutral_submit(FileName), JobID, TaskEnv)
+export record_submit_acknowledge/3.
+record_submit_acknowledge(Msg, JobID, TaskEnv)
+	:-
+	access_tsk_env(state, TaskEnv, State),
+%	access_login_connection_info(job_connects, State, JobConnects),
+nl(user_output),
+printf(user_output, 'ACK:%t id=%t \n',[Msg, JobID]),
+flush_output(user_output).
+
+
+export job_notify/3.
+job_notify(Msg, JobID, TaskEnv)
+	:-
+	access_tsk_env(state, TaskEnv, State),
+	access_login_connection_info(job_connects, State, JobConnects),
+	dmember(JobID-Client, JobConnects),
+	Client = c(_,SW,_,_),
+
+	cnvrt_msg(Msg, Pattern, Args),
+
+nl(user_output),
+write(user_output,'ACK-job_notify: '),
+printf(user_output, Pattern, Args, [line_length(500000)]),
+flush_output(user_output),
+
+	printf(SW, Pattern, Args, [line_length(500000)]),
+	flush_output(SW).
+
+
+%cnvrt_msg(neutral_submit(FF,JID), '**neutral_submit@%t@%t\n', [FF,JID])
+%	:-!.
+
+cnvrt_msg(Msg, '%t', [Msg])
+	:-
+	atom(Msg), 
+	!.
+
+cnvrt_msg(Msg, Pattern, [Functor | Args])
+	:-
+	functor(Msg, Functor, NArgs),
+	Msg =.. [Functor | Args],
+%	catenate('**', Functor, InitPat),
+	BeginPat = ['**%t' | TailPat],
+	setup_respond_args_pat(NArgs, TailPat),
+	catenate(BeginPat, Pattern).
+
+setup_respond_args_pat(0, ['\n']) :-!.
+setup_respond_args_pat(NArgs, ['@%t' | TailPat])
+	:-
+	NArgs > 0,
+	MArgs is NArgs - 1,
+	setup_respond_args_pat(MArgs, TailPat).
+
+
+
 
 endmod.
 
