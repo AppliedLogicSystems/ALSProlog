@@ -170,7 +170,7 @@ endmodule :- '$icode'(-9,0,0,0,0).
 
 export exportpred/2.
 
-exportpred(P,A) :- $icode(-11,P,A,0,0).
+exportpred(P,A) :- '$icode'(-11,P,A,0,0).
 
 /*-------------------------------------------------------------*
  * Negation by failure
