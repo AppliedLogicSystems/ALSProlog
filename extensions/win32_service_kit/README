@@ -29,10 +29,11 @@ Instructions
 	Print to a Postscript file.
 	Convert Postscript file to PDF with Acrobat 3.0
 
-3) Consutruct Distribution Package
+3) Construct Distribution Package
 	Create a folder called "Win32 Service Kit" plus the version number,
 	with the following files in it (remove underscores where necessary):
 		Service Test.exe
 		Service Package Stub.exe
 		Win32 Service.pro
 		Simple Service.pro
+		Win32 Service Kit.pdf
