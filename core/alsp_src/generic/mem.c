@@ -29,16 +29,6 @@
 #include <fcntl.h>
 #endif
 
-#ifdef MacOS
-/* for fixing PPC MPW Tool Malloc Bug. */
-#include <Memory.h>
-#if !defined(MPW_TOOL) && defined(__MWERKS__)
-#include <unix.h>
-/* MetroWerks does not define the EINTR error code. */
-#define EINTR           4
-#endif
-#endif
-
 #ifdef MSWin32
 #include <windows.h>
 #include "fswin32.h"
@@ -63,7 +53,8 @@ unsigned long ReversedHiBit = 0x80000000;
 
 /* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
 
-#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || defined(MACH_SUBSTRATE)
+#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) \
+	|| defined(MACH_SUBSTRATE) || defined(MSWin32)
 
 static	int	bottom_stack_page_is_protected = 0;
 
@@ -347,6 +338,75 @@ release_bottom_stack_page()
     bottom_stack_page_is_protected = 0;
 }
 
+#elif defined(MSWin32)
+
+#define STACKSTART	0x01000000
+#define CODESTART	0x06000000
+#define NPROTECTED	5
+
+
+
+static void
+release_bottom_stack_page()
+{
+    DWORD OldProtection;
+
+    if (!VirtualProtect((void *)STACKSTART, NPROTECTED * pgsize, PAGE_READWRITE, &OldProtection)) {
+	fatal_error(FE_STKOVERFLOW, 0);
+    }
+    
+    bottom_stack_page_is_protected = 0;
+}
+
+static LONG stack_overflow(struct _EXCEPTION_POINTERS *lpexpExceptionInfo)
+{
+    if (lpexpExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION
+        && bottom_stack_page_is_protected) {
+	release_bottom_stack_page();
+	signal_handler(ALSSIG_STACK_OVERFLOW);
+	return -1; //EXCEPTION_CONTINUE_EXECUTION;
+    } else {
+    	return 0; //EXCEPTION_CONTINUE_SEARCH;
+    }	    
+}
+
+void
+protect_bottom_stack_page()
+{
+    DWORD OldProtection;
+
+    if (!VirtualProtect((void *)STACKSTART, NPROTECTED * pgsize, PAGE_NOACCESS /*PAGE_READWRITE | PAGE_GUARD*/, &OldProtection)) {
+	fatal_error(FE_STKOVERFLOW, 0);
+    }
+
+    bottom_stack_page_is_protected = 1;
+}
+
+
+PWord *
+allocate_prolog_heap_and_stack(size)
+    size_t size;				/* number of PWords to allocate */
+{
+    LPVOID stack;
+
+       
+    SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)stack_overflow);
+    
+    stack = VirtualAlloc((LPVOID)STACKSTART,
+    			 size * sizeof(PWord) + NPROTECTED * pgsize,
+    		         MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    
+    if (stack != (LPVOID)STACKSTART)
+	fatal_error(FE_BIGSTACK, 0);
+
+    protect_bottom_stack_page();
+
+    return (PWord *)STACKSTART;
+}
+
+
+
+
 #elif defined(MACH_SUBSTRATE)
 	/*------- Operating systems with Mach as the substrate -------*/
 
@@ -470,14 +530,7 @@ PWord *
 allocate_prolog_heap_and_stack(size)
     size_t size;			/* number of PWords to allocate */
 {
-#if __POWERPC__ && defined(MPW_TOOL)
-    /* The malloc that comes with the StdCLib in CW7 seems to be broken,
-       you can only malloc up to 0x800000 bytes. Work around by using
-       NewPtr. */
-    PWord *retval = (PWord *) NewPtr(sizeof (PWord) * size);
-#else
     PWord *retval = (PWord *) malloc(sizeof (PWord) * size);
-#endif
 
     if (retval == 0)
 	fatal_error(FE_BIGSTACK, 0);
@@ -633,7 +686,8 @@ static	int	ss_saved_state_present	PARAMS(( void ));
 #define round(x,s) ((((long) (x) - 1) & ~(long)((s)-1)) + (s))
 
 /* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
-#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || defined(MACH_SUBSTRATE)
+#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) \
+	|| defined(MACH_SUBSTRATE) || defined(MSWin32)
 /*
  * next_big_block_addr is the location at which we will attempt to allocate
  * the next big block of memory that our prolog system requests.  Note that
@@ -724,11 +778,14 @@ alloc_big_block(size, fe_num)
     }
 #elif defined(MSWin32)
     
-    np = VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    np = VirtualAlloc((void *)next_big_block_addr, size, MEM_RESERVE | MEM_COMMIT,
+    			PAGE_READWRITE);
     
     if (np == NULL)
         fatal_error(fe_num, 0);
-    
+ 
+    next_big_block_addr += size;
+   
 #else /* HAVE_BRK */
 	np = (long *)malloc(size);
 	
@@ -764,7 +821,8 @@ als_mem_init(file,offset)
 
     else if (!file) {	/* no file specified */
 /* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
-#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || defined(MACH_SUBSTRATE)
+#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) \
+	|| defined(MACH_SUBSTRATE) || defined(MSWin32)
 	next_big_block_addr = CODESTART;
 #else 
 	/* Leave malloc and friends some space to work with */
@@ -798,7 +856,8 @@ als_mem_init(file,offset)
 	strcpy(header.integ_minor_os, MinorOSStr);
 
 /* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
-#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || defined(MACH_SUBSTRATE)
+#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || \
+	defined(MACH_SUBSTRATE) || defined(MSWin32)
 	ss_register_global(&next_big_block_addr);
 #endif	/* defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
 
@@ -923,7 +982,8 @@ ss_fmalloc_start()
 {
     long *retval;
 /* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
-#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || defined(MACH_SUBSTRATE)
+#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || \
+	defined(MACH_SUBSTRATE) || defined(MSWin32)
     retval = (long *) next_big_block_addr;
 #elif defined(HAVE_BRK)
     retval = (long *) sbrk(0);
@@ -1351,7 +1411,7 @@ printf("Wrote blocks to file\n");
 ss_err:
     printf("!!Save_state error writing file: bnum=%d errno=%d\n",bnum,errno);
     close(ssfd);
-    unlink(filename);
+    unlink((char *)filename);
     return 0;
 }
 
