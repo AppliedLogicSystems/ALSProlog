@@ -1092,17 +1092,6 @@ PI_shutdown0(void)
      * Restore  the Control/C (or Control/BREAK) handler
      */
     reset_sigint();
-
-#ifdef HARDWARE_KEY
-    shutdown_hardware_key();
-#endif
-
-#ifdef MSWin32
-    if (WSACleanup() != 0) {
-	PI_app_printf(PI_app_printf_warning, "WinSock cleanup failed !\n");
-    }
-#endif
-
 }
 
 #ifdef DOS
@@ -1488,8 +1477,7 @@ PI_shutdown(void)
 
 #ifdef MSWin32
     if (WSACleanup() != 0) {
-    	/* for some reason this is always signalling an error */
-	//PI_app_printf(PI_app_printf_warning, "WinSock cleanup failed !\n");
+	PI_app_printf(PI_app_printf_warning, "WinSock cleanup failed !\n");
     }
 #endif
 
