@@ -213,9 +213,10 @@ schema([
 			(mac:[ rule('mpw_pimain.68k.o'),
 			       rule('mpw_pimain.ppc.o'),
 			       rule('sioux_pimain.68k.o'),
-			       rule('sioux_pimain.ppc.o'),
+			       rule('sioux_pimain.ppc.o')
+			       /* ,
 			       rule('SIOUX_EOF_Fix.68k.o'),
-			       rule('SIOUX_EOF_Fix.ppc.o')
+			       rule('SIOUX_EOF_Fix.ppc.o') */
 				]),
 			(_:noop) ]),
 
@@ -323,17 +324,21 @@ rule('mpw_pimain.ppc.o',
 	 ['{srcdir}generic:pimain.c'],
 	 ['{CCPPC} -o mpw_pimain.ppc.o {CPPFLAGS} {CFLAGS} {CFLAGSPPC} -D MPW_TOOL {srcdir}generic:pimain.c']).
 
+/*
 rule('SIOUX_EOF_Fix.68k.o',
 	['{srcdir}port:macos:SIOUX_EOF_Fix.c'],
 	['{CC68K} -o SIOUX_EOF_Fix.68k.o {CPPFLAGS} {CFLAGS} {CFLAGS68K} {srcdir}port:macos:SIOUX_EOF_Fix.c']).
+*/
 
 rule('sioux_pimain.68k.o',
 	 ['{srcdir}generic:pimain.c'],
 	 ['{CC68K} -o sioux_pimain.68k.o {CPPFLAGS} {CFLAGS} {CFLAGS68K} {srcdir}generic:pimain.c']).
 
+/*
 rule('SIOUX_EOF_Fix.ppc.o',
 	['{srcdir}port:macos:SIOUX_EOF_Fix.c'],
 	['{CCPPC} -o SIOUX_EOF_Fix.ppc.o {CPPFLAGS} {CFLAGS} {CFLAGSPPC} {srcdir}port:macos:SIOUX_EOF_Fix.c']).
+*/
 
 rule('sioux_pimain.ppc.o',
 	 ['{srcdir}generic:pimain.c'],
@@ -355,26 +360,25 @@ rule('mpw_alspro_b',
 	['{LINK68K} -o mpw_alspro_b {TOOLLINKFLAGS} {MPWINITLIBS68K} mpw_pimain.68k.o alspro.68k.lib {MPWLIBS68K}',
 	 '{LINKPPC} -o mpw_alspro_b {TOOLLINKFLAGS} mpw_pimain.ppc.o alspro.ppc.lib {MPWLIBSPPC}']).
 
-%% I currently can't get SIOUX_EOF_fix.68k.o to link properly
 rule(sioux_alspro_b_68k,
-	[ext('sioux_pimain.68k',&(object)),'alspro.68k.lib', 'SIOUX_EOF_Fix.68k.o',
+	[ext('sioux_pimain.68k',&(object)),'alspro.68k.lib', /* 'SIOUX_EOF_Fix.68k.o', */
 	 '{srcdir}port:macos:alsres.r'],
 	['{LINK68K} -o sioux_alspro_b_68k {SIOUXLINKFLAGS} sioux_pimain.68k.o alspro.68k.lib {SIOUXLIBS68K}',
 	 'Rez -o sioux_alspro_b_68k -a {srcdir}port:macos:alsres.r']).
 
 rule(sioux_alspro_b_ppc,
-	[ext('sioux_pimain.ppc',&(object)),'alspro.ppc.lib', 'SIOUX_EOF_Fix.ppc.o',
+	[ext('sioux_pimain.ppc',&(object)),'alspro.ppc.lib', /* 'SIOUX_EOF_Fix.ppc.o', */
 	 '{srcdir}port:macos:alsres.r'],
-	['{LINKPPC} -o sioux_alspro_b_ppc {SIOUXLINKFLAGS} sioux_pimain.ppc.o alspro.ppc.lib SIOUX_EOF_Fix.ppc.o {SIOUXLIBSPPC}',
+	['{LINKPPC} -o sioux_alspro_b_ppc {SIOUXLINKFLAGS} sioux_pimain.ppc.o alspro.ppc.lib {SIOUXLIBSPPC}',
 	 'Rez -o sioux_alspro_b_ppc -a {srcdir}port:macos:alsres.r']).
 
 rule('sioux_alspro_b',
 	[ext('sioux_pimain.68k',&(object)),'alspro.68k.lib',
 	 ext('sioux_pimain.ppc',&(object)),'alspro.ppc.lib',
-	 'SIOUX_EOF_Fix.ppc.o',
+	 /* 'SIOUX_EOF_Fix.ppc.o', */
 	 '{srcdir}port:macos:alsres.r'],
 	['{LINK68K} -o sioux_alspro_b {SIOUXLINKFLAGS} sioux_pimain.68k.o alspro.68k.lib {SIOUXLIBS68K}',
-	 '{LINKPPC} -o sioux_alspro_b {SIOUXLINKFLAGS} sioux_pimain.ppc.o alspro.ppc.lib SIOUX_EOF_Fix.ppc.o {SIOUXLIBSPPC}',
+	 '{LINKPPC} -o sioux_alspro_b {SIOUXLINKFLAGS} sioux_pimain.ppc.o alspro.ppc.lib {SIOUXLIBSPPC}',
 	 'Rez -o sioux_alspro_b -a {srcdir}port:macos:alsres.r']).
 
 
