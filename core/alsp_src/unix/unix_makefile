@@ -14,8 +14,6 @@ MAKEFILES += $(SUBOS)_makefile
 
 CPPFLAGS += -DUNIX
 
-CFLAGS += -fpic
-
 OS_SOURCE = unixio.c missing.c unix_engine.c unix_locate.c
 
 STATIC_SOURCE = unix_static.c
