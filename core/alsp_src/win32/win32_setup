@@ -29,6 +29,7 @@ cp $source_dir/win32/alspro_lib.prj.sit.hqx .
 cp $source_dir/win32/alspro_dll.prj.sit.hqx .
 cp $source_dir/win32/alspro_b.prj.sit.hqx .
 cp $source_dir/win32/testdll.x86.prj.sit.hqx .
+cp $source_dir/win32/Build_Win32.sit.hqx .
 
 rm -f package.bat
 ln -s $source_dir/win32/package.bat .
