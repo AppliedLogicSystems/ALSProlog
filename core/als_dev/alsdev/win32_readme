@@ -15,6 +15,9 @@ Build
 
 Make "alspro x86.lib" in the mwbuild directory.
 
+In alsdev, setup an alsdir with the folders "builtins" and "library".  Add
+"shared" and "image" as described in the Runtime section below.
+
 Open win32_alsdev.mcp, and make "Win32 Build" to create "ALS Prolog Base.exe"
 
 Create a new image from "ALS Prolog Base.exe" with the following command:
