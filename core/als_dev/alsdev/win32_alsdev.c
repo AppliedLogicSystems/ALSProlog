@@ -107,7 +107,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	    AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
 	}
 }
-    term = AP_NewSymbolFromStr(w, "start_alsdev");
+
+    term = AP_NewSymbolFromStr(w, "$start");
     {
     	AP_Result r;
     	r = AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
