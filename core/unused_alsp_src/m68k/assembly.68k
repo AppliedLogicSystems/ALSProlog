@@ -7,10 +7,12 @@
  * Author: Kevin A. Buettner
  * Creation: 4/5/90
  * Modified:
- *	06/23/92	by Ron	Added #ifdefs for Mac specific code and for
+ * 06/23/92	- R.DiNapoli -- Added #ifdefs for Mac specific code and for
  *				dealing with the Mac's desire to use A5 as
  *				a "global variable" pointer...
- *	10/26/94 - C.Hoput - 
+ * 01/05/95	- C.Houpt -- Include config.h for better preprocessor control.
+ *				Added common external declarations.
+ *				Added tag_swc_long.
  */
 
 /*

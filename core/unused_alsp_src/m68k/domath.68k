@@ -11,6 +11,11 @@
 ;						so that it can be assigned to any register.
 ;						Use B register instead of Fail register for the
 ;						Macintosh (where Fail is NOT a register).
+;				-- Removed jump tables to C code, where array initilization
+;				   is handled properly.
+;				-- created SANE versions of floating point routines.
+;				-- Modified C calling macros for MPW C, MetroWerks and Think C
+;				   calling conventions.
 
 #include "assembly.68k"
 #include "icmath.h"
@@ -297,6 +302,37 @@
 ;	
 
 #ifdef MacOS
+#ifdef __MWERKS__
+	externcode acosd
+	externcode asind
+	externcode atan2d
+	externcode coshd
+	externcode sinhd
+	externcode tanhd
+	externcode expd
+	externcode logd
+	externcode log10d
+	externcode powd
+	externcode ceild
+	externcode floord
+	externcode fmodd
+
+#define  acos	acosd
+#define  asin	asind
+#define  atan2	atan2d
+#define  cosh	coshd
+#define  sinh	sinhd
+#define  tanh	tanhd
+#define  exp	expd
+#define  log	logd
+#define  log10	log10d
+#define  pow	powd
+#define  ceil	ceild
+#define  floor	floord
+/* NOTE: fmod is not defined, because it conflicts with 68881 opcode.
+         A separate __MWERKS__ ifdef is used in sane_dbl_fmod
+*/
+#else
 	externcode asin
 	externcode acos
 	externcode exp
@@ -306,24 +342,25 @@
 	externcode cosh
 	externcode tanh
 	externcode floor
-
 	externcode pow
-	externcode als_cputime
-	externcode als_realtime
-	externcode als_random
 	externcode ceil
+	externcode atan2
+	externcode fmod
+#endif
+	externcode gamma
+	externcode hypot
 	externcode erf
 	externcode erfc
-	externcode gamma
 	externcode j0
 	externcode j1
 	externcode y0
 	externcode y1
-	externcode atan2
-	externcode fmod
-	externcode hypot
 	externcode jn
 	externcode yn
+
+	externcode als_cputime
+	externcode als_realtime
+	externcode als_random
 
 	externdata	errno
 	externdata mth_is_addr
@@ -831,7 +868,6 @@ dcmp_table:
 	fail
 #endm
 
-
 #macro	mth_cmp
 	move.l	(MStack), d2		; LH op
 	cmp.l	8(MStack),	d2	; RH op
@@ -893,6 +929,15 @@ dcmp_table:
 	rts
 #endm
 
+#macro	dbl_ulop Op
+	fintrz.d	(MStack),	fp0		; get integer part of rh op in fp0
+	fmove.l	fp0,	d0			; move int(rhop)to d0
+	Op	d0				; apply logical operator.l
+	fmove.l	d0,	fp0			; store (double) result into fp temp
+	fmove.d fp0,	(MStack)			; store result onto new TOS
+	rts
+#endm
+
 #ifdef MacOS
 #define DblToExt	FOZ2X+FFDBL
 #define ExtToDbl	FOX2Z+FFDBL
@@ -928,8 +973,6 @@ dcmp_table:
 #macro	sane_dbl_cmp
 	sane_op DblToExt, (MStack), sanefp0
 	sane_op FOCMP+FFDBL, 8(MStack), sanefp0
-;	fmove.d	(MStack), fp0		; LH op
-;	fcmp.d	8(MStack),fp0		; RH op
 #endm
 
 #macro	sane_dbl_unop Op
@@ -937,9 +980,6 @@ dcmp_table:
 	sane_unop Op, sanefp0
 	sane_op ExtToDbl, sanefp0, (MStack)
 	rts					; and return
-;	Op	(MStack),	fp0			; compute unary op of TOS
-;	fmove.d	fp0,	(MStack)			; and write result back onto TOS (overwrite arg)
-;	rts					; and return
 #endm
 
 #macro	sane_dbl_elems_unop Op
@@ -947,19 +987,6 @@ dcmp_table:
 	sane_elems_unop Op, sanefp0
 	sane_op ExtToDbl, sanefp0, (MStack)
 	rts					; and return
-;	Op	(MStack),	fp0			; compute unary op of TOS
-;	fmove.d	fp0,	(MStack)			; and write result back onto TOS (overwrite arg)
-;	rts					; and return
-#endm
-
-#macro	sane_dbl_elems_unop Op
-	sane_op DblToExt, (MStack), sanefp0
-	sane_elems_unop Op, sanefp0
-	sane_op ExtToDbl, sanefp0, (MStack)
-	rts					; and return
-;	Op	(MStack),	fp0			; compute unary op of TOS
-;	fmove.d	fp0,	(MStack)			; and write result back onto TOS (overwrite arg)
-;	rts					; and return
 #endm
 
 #macro	sane_dbl_blop Op
@@ -975,15 +1002,17 @@ dcmp_table:
 	sane_op ExtToDbl, sanefp0, 8(MStack)
 	addq.l	#8,	MStack			; fix up math sp
 	rts
-;	fintrz.d	(MStack),	fp0		; get integer part of rh op in fp0
-;	fintrz.d	8(MStack), fp1		; get integer part of lh op in fp1
-;	fmove.l	fp0,	d0			; move int(rhop)to d0
-;	fmove.l	fp1,	d1			; move int(lhop) to d1
-;	Op	d0,	d1			; apply logical operator.l
-;	fmove.l	d1,	fp0			; store (double) result into fp temp
-;	fmove.d fp0,	8(MStack)			; store result onto new TOS
-;	addq.l	#8,	MStack			; fix up math sp
-;	rts
+#endm
+
+#macro	sane_dbl_ulop Op
+	sane_op DblToExt, (MStack), sanefp0
+	sane_op ExtToLong, sanefp0, sanelong0
+	move.l sanelong0, d0
+	Op d0
+	move.l d0, sanelong0
+	sane_op LongToExt, sanelong0, sanefp0
+	sane_op ExtToDbl, sanefp0, (MStack)
+	rts
 #endm
 #endif /* MacOS */
 
@@ -1004,7 +1033,8 @@ dcmp_table:
 ; would replace the fmove.d below
 
 #ifdef MacOS
-/* For MPW C */
+
+#ifdef applec
 #macro	nularyCdbl	name
 	movem.l	#0x077f, -(SP)			; push d5-d7, a1-a7 onto stack
 	jsr	name				; and go over to C
@@ -1012,14 +1042,24 @@ dcmp_table:
 	move.w d0, sanefp0
 	move.l d1, sanefp0+2
 	move.l a0, sanefp0+6
-	pea sanefp0
 	subq.l	#8,	MStack			; push math stack
-	pea (MStack)
-	move.w	#ExtToDbl, -(SP)
-	trap #_FP68K
+	sane_op ExtToDbl, sanefp0, (MStack)
 	rts
 #endm
 #else
+/* For Metrowerks and Think. */
+#macro	nularyCdbl	name
+	subq.l	#8,	MStack			; push math stack
+	movem.l	#0x077f, -(SP)			; push d5-d7, a1-a7 onto stack
+	pea (MStack)
+	jsr	name				; and go over to C
+	addq.l	#4,	SP
+	movem.l	(SP)+,	#0xfee0			; restore saved regs
+	rts
+#endm
+#endif
+
+#else /* MacOS */
 #ifdef MATH_RETVAL_IN_FP
 #macro	nularyCdbl	name
 	movem.l	#0x077f, -(SP)			; push d5-d7, a1-a7 onto stack
@@ -1049,13 +1089,12 @@ dcmp_table:
 
 #ifdef MacOS
 /* For MPW C */
+#ifdef applec
 #macro	unaryCdbl	name
 	movem.l	#0x077f, -(SP)			; push d5-d7, a1-a7 onto stack
 	sub.l #10, SP
 	pea (MStack)
-	pea 4(SP)
-	move.w #DblToExt, -(SP)
-	trap #_FP68K
+	sane_op DblToExt, (MStack), 4(SP)
 	clr.l	errno			; errno := 0
 	jsr	name				; and go over to C
 	add.l #10, SP			; fix up sp
@@ -1067,13 +1106,28 @@ dcmp_table:
 	move.w d0, sanefp0
 	move.l d1, sanefp0+2
 	move.l a0, sanefp0+6
-	pea sanefp0
-	pea (MStack)
-	move.w	#ExtToDbl, -(SP)
-	trap #_FP68K
+	sane_op ExtToDbl, sanefp0, (MStack)
 	rts
 #endm
 #else
+#macro	unaryCdbl	name
+	movem.l	#0x077f, -(SP)			; push d5-d7, a1-a7 onto stack
+	move.l 4(MStack), -(SP)
+	move.l (MStack), -(SP)
+	pea (MStack)
+	clr.l	errno			; errno := 0
+	jsr	name				; and go over to C
+	add.l #12, SP			; fix up sp
+	movem.l	(SP)+,	#0xfee0			; restore saved regs
+	cmpi.l	#33,	errno		; EDOM? (domain error)
+	beq	mth_fail		; if so, fail
+	cmpi.l	#34,	errno		; ERANGE? (range error)
+	beq	mth_fail		; if so, fail
+	rts
+#endm
+#endif
+
+#else /* MacOS */
 #ifdef MATH_RETVAL_IN_FP
 #macro	unaryCdbl	name
 	movem.l	#0x077f, -(SP)		; push d5-d7, a1-a7 onto stack
@@ -1128,6 +1182,7 @@ dcmp_table:
 
 #ifdef MacOS
 /* For MPW C */
+#ifdef applec
 #macro	binaryCdbl	name
 	movem.l	#0x077f, -(SP)			; push d5-d7, a1-a7 onto stack
 	sub.l #20, SP
@@ -1158,6 +1213,28 @@ dcmp_table:
 	rts
 #endm
 #else
+#macro	binaryCdbl	name
+	movem.l	#0x077f, -(SP)		; push d5-d7, a1-a7 onto stack
+	move.l	4(MStack), -(SP)		; push low part of double argument #2
+	move.l	(MStack),  -(SP)		; push high part of double argument #2
+	move.l	12(MStack),  -(SP)	; push low part of double argument #1
+	move.l	8(MStack),   -(SP)	; push high part of double argument #1
+	pea 8(MStack)
+	clr.l	errno			; errno := 0
+	jsr	name			; and go over to C
+	cmpi.l	#33,	errno		; EDOM? (domain error)
+	beq	mth_fail		; if so, fail
+	cmpi.l	#34,	errno		; ERANGE? (range error)
+	beq	mth_fail		; if so, fail
+	adda.l	#20,	SP		; fix up sp
+	movem.l	(SP)+,	#0xfee0		; restore saved regs
+	addq.l	#8,	MStack		; pop stack one el, and now store result
+	rts
+#endm
+#endif
+
+#else /* MacOS */
+
 #ifdef MATH_RETVAL_IN_FP
 #macro	binaryCdbl	name
 	movem.l	#0x077f, -(SP)		; push d5-d7, a1-a7 onto stack
@@ -1310,7 +1387,7 @@ _mth_pushdbl:
 	; stack.
 	lea	mth_bot,	a0		; get address of mth_bot
 	move.l	(a0),		d2		; d2 = where to stop conversion (bottom of stack)
-	move.l	Fail,	a0			; set up a0 for istack_to_dstack
+	move.l	MStack,	a0			; set up a0 for istack_to_dstack
 	addq.l	#8,	a0			; TOS already is a double, so start one lower
 	bra	7f				; branch into istack_to_dstack below
 	; because of the entry points below, we need this extra branch
@@ -1369,7 +1446,14 @@ _mth_yn:
 	; integer mode and double mode.  It will convert the elements on the
 	; stack.
 
+#ifdef MacOS
+istack_to_dstack:
+	tst.l has_fpu
+	beq sane_istack_to_dstack
+fpu_istack_to_dstack:
+#else
 istack_to_dstack:	
+#endif
 	lea	mth_bot,	a0		; get address of mth_bot
 	move.l	(a0),		d2		; d2 = where to stop conversion (bottom of stack)
 	move.l	MStack,	a0			; a0 = where to start conversion
@@ -1666,7 +1750,7 @@ rel_callout:
 ; (pushing only one return address on the stack, not two, viz.  RET  RET2)
 ; but it made it too difficult to reset MStack from the stack
 ; (if the stack frame layout is different, mth_callout can't be used for both, cuz
-; MStack is saved at a different offset).  Also, we could reset Fail not in mth_aftercall,
+; MStack is saved at a different offset).  Also, we could reset MStack not in mth_aftercall,
 ; but in the caller of is_callout/rel_callout.  However, this doesn't work cuz the whole
 ; point of the attempted optimization was that rel_callout wouldn't need to return to its
 ; direct caller (bra vs. bsr)!
@@ -1865,10 +1949,10 @@ dbl_addi:
 	rts
 dbl_add:
 	; add two top stack arguments and store back
-	fmove.d	(Fail),	fp0			; get RH op, need at least one op in fpn
-	fadd.d	8(Fail), fp0			; do the add, don't care about overflow
-	fmove.d	fp0,	8(Fail)			; store result onto new TOS
-	addq.l	#8,	Fail			; fix up math sp
+	fmove.d	(MStack),	fp0			; get RH op, need at least one op in fpn
+	fadd.d	8(MStack), fp0			; do the add, don't care about overflow
+	fmove.d	fp0,	8(MStack)			; store result onto new TOS
+	addq.l	#8,	MStack			; fix up math sp
 	rts
 dbl_subi:
 	; immediate (rh) op in d0
@@ -1941,7 +2025,7 @@ dbl_bxor:
 dbl_not:
 	; convert dpfp operand to integer, and return logical negation integer result 
 	; as double on TOS
-	rts
+	dbl_ulop	not.l
 dbl_lshft:
 	; convert dpfp operands to integer, perform left shift, and return integer result 
 	; as double on TOS
@@ -2008,7 +2092,7 @@ dbl_floor:
 dbl_round:
 	; round(x) = floor(x+0.5)
 	; after 0.5 is added to operand, code proceeds as in dbl_floor above
-	fmove.d	(Fail),	fp1				; get double from top of math stack
+	fmove.d	(MStack),	fp1				; get double from top of math stack
 	fadd.d	#0.5,	fp1				; fp2 := x+0.5
 	fintrz.X fp1,	fp0				; now proceed as in dbl_floor
 	fbge	2f					; >= 0 needs no adjusting
@@ -2058,7 +2142,11 @@ dbl_y1:	unaryCdbl	y1
 dbl_atan2:
 	binaryCdbl	atan2
 dbl_fmod:
+#ifdef __MWERKS__
+	binaryCdbl	fmodd
+#else
 	binaryCdbl	fmod
+#endif
 dbl_hypot:
 	binaryCdbl	hypot
 dbl_jn:	binaryCdbl	jn
@@ -2093,7 +2181,6 @@ sane_dbl_ne:
 	math_fail
 2:	rts
 
-
 sane_dbl_putnum:
 	; dbl_putnum takes the double argument on the top of the stack,
 	; converts it to an integer if possible and tags the result (either
@@ -2107,14 +2194,6 @@ sane_dbl_putnum:
 	bne pn_dbl
 	sane_op ExtToLong, sanefp0, (MStack)
 	bra _mth_putnum
-	;fmove.d	(MStack),	fp0		; move TOS into fp0
-	;fmove.l	fp0,	d2		; and convert to integer  d2 := int(fp0)
-	;fmove.l	d2,	fp1		; now convert back to double
-	;fcmp.X	fp1,	fp0		; are they the same?
-	;fbne	pn_dbl			; it's a double, so branch to pn_dbl (within mth_putnum)
-	;move.l	d2,	(MStack)		; it's an int, so overwrite TOS with int
-	;bra	_mth_putnum		; and branch to mth_putnum
-	
 
 sane_dbl_pushint:
 	; dbl_pushint pushes the integer in d1 onto the stack as a double
@@ -2123,10 +2202,6 @@ sane_dbl_pushint:
 	sane_op LongToExt, sanelong0, sanefp0
 	sane_op ExtToDbl, sanefp0, (MStack)
 	rts
-	;subq.l	#8, 	MStack			; create stack element
-	;fmove.l	d1,	fp0
-	;fmove.d	fp0,	(MStack)
-	;rts
 
 sane_dbl_addi:
 	; immediate op (rh) in d0
@@ -2135,10 +2210,7 @@ sane_dbl_addi:
 	sane_op FOADD+FFDBL, (MStack), sanefp0
 	sane_op DblToExt, sanefp0, (MStack)
 	rts
-	;fmove.l	d0,	fp0			; need one op in fpn
-	;fadd.d	(MStack),	fp0			; do the add, don't care about overflow
-	;fmove.d	fp0,	(MStack)			; and write the result back onto TOS
-	;rts
+
 sane_dbl_add:
 	; add two top stack arguments and store back
 	sane_op DblToExt, (MStack), sanefp0
@@ -2146,11 +2218,7 @@ sane_dbl_add:
 	sane_op ExtToDbl, sanefp0, 8(MStack) 
 	addq.l	#8,	MStack			; fix up math sp
 	rts
-	;fmove.d	(MStack),	fp0			; get RH op, need at least one op in fpn
-	;fadd.d	8(MStack), fp0			; do the add, don't care about overflow
-	;fmove.d	fp0,	8(MStack)			; store result onto new TOS
-	;addq.l	#8,	MStack			; fix up math sp
-	;rts
+
 sane_dbl_subi:
 	; immediate (rh) op in d0
 	move.l d0, sanelong0
@@ -2159,11 +2227,7 @@ sane_dbl_subi:
 	sane_op FOSUB+FFEXT, sanefp1, sanefp0
 	sane_op ExtToDbl, sanefp0, (MStack)
 	rts
-	;fmove.d	(MStack),	fp0			; need one op in fpn
-	;fmove.l	d0,	fp1			; need to convert integer operand to double
-	;fsub.X	fp1,	fp0			; do the subtract, don't care about overflow
-	;fmove.d	fp0,	(MStack)			; and write result back onto TOS
-	;rts
+
 sane_dbl_sub:
 	; subtract top two stack arguments and store back
 	sane_op DblToExt, 8(MStack), sanefp0
@@ -2171,11 +2235,7 @@ sane_dbl_sub:
 	sane_op ExtToDbl, sanefp0, 8(MStack)
 	addq.l	#8,	MStack			; fix up math sp
 	rts
-	;fmove.d	8(MStack), fp0			; get LH op, need at least one op in fpn
-	;fsub.d	(MStack),	fp0			; do the subtract, don't care about overflow
-	;fmove.d	fp0,	8(MStack)			; store result onto new TOS
-	;addq.l	#8,	MStack			; fix up math sp
-	;rts
+
 sane_dbl_mul:
 	; multiply two top stack arguments and store back
 	sane_op DblToExt, (MStack), sanefp0
@@ -2183,11 +2243,6 @@ sane_dbl_mul:
 	sane_op ExtToDbl, sanefp0, 8(MStack)
 	addq.l	#8,	MStack			; fix up math sp
 	rts
-	;fmove.d	(MStack),	fp0			; get RH op, need at least one op in fpn
-	;fmul.d	8(MStack), fp0			; do the multiply, don't care about overflow
-	;fmove.d	fp0,	8(MStack)			; store result onto new TOS
-	;addq.l	#8,	MStack			; fix up math sp
-	;rts
 
 sane_dbl_fdiv:
 	; fail on division by zero
@@ -2202,15 +2257,6 @@ sane_dbl_fdiv:
 	addq.l	#8,	MStack
 	rts
 	
-	;ftst.d	(MStack)				; rh op  (divisor) zero?
-	;fbeq	mth_fail			; if so, fail
-	;fmove.d	8(MStack), fp0			; get lh op (dividend)
-	;fdiv.d	(MStack), fp0			; do the divide, don't care about overflow
-	;fmove.d	fp0,	8(MStack)			; store result onto new TOS
-	;addq.l	#8,	MStack			; fix up math sp
-	;rts
-
-
 sane_dbl_div:
 	; like dbl_fdiv, but return trunc(result)
 	sane_op DblToExt, (MStack), sanefp0
@@ -2225,15 +2271,6 @@ sane_dbl_div:
 	addq.l	#8,	MStack
 	rts
 	
-	;ftst.d	(MStack)			; rh op  (divisor) zero?
-	;fbeq	mth_fail			; if so, fail
-	;fmove.d	8(MStack), fp0			; get lh op (dividend)
-	;fdiv.d	(MStack), fp0			; do the divide, don't care about overflow
-	;fintrz.X fp0,	fp1			; get int part
-	;fmove.d	fp1,	8(MStack)		; and store it onto TOS
-	;addq.l	#8,	MStack			; fix up math sp
-	;rts
-
 sane_dbl_neg:
 	sane_dbl_unop	FONEG
 
@@ -2250,14 +2287,6 @@ sane_dbl_mod:
 	addq.l	#8,	MStack
 	rts
 
-	;ftst.d	(MStack)				; rh op (divisor) zero?
-	;fbeq	mth_fail			; if so, fail
-	;fmove.d	8(MStack), fp0			; get lh op (dividend)
-	;fmod.d	(MStack),	fp0			; fp0 := dividend mod divisor
-	;fmove.d	fp0, 8(MStack)			; store result onto new TOS
-	;addq.l	#8,	MStack			; fix up math sp
-	;rts
-
 sane_dbl_band:
 	; convert dpfp operands to integer, and 'em, and return integer result as double on TOS
 	sane_dbl_blop	and.l
@@ -2272,7 +2301,7 @@ sane_dbl_bxor:
 sane_dbl_not:
 	; convert dpfp operand to integer, and return logical negation integer result 
 	; as double on TOS
-	rts
+	sane_dbl_ulop	not.l
 sane_dbl_lshft:
 	; convert dpfp operands to integer, perform left shift, and return integer result 
 	; as double on TOS
@@ -2324,30 +2353,9 @@ sane_dbl_tanh:
 
 sane_dbl_floor:
 	unaryCdbl	floor
-	; write this custom cuz it's so simple, instead of calling out to C math library
-	; 68k fint instructions work ok, fintrz works for +ve nums, but need to adjust
-	; result if negative
-	;fintrz.d	(MStack),	fp0			; get int part, round down to zero
-	;fbge	2f					; >= 0 needs no adjusting
-	;fcmp.d	(MStack),	fp0				; can the negative double pass as an int?
-	;fbeq	2f					; if so, no adjusting necessary
-	;fsub.l	#1,	fp0				; else subtract one
-2:	;fmove.d	fp0,	(MStack)
-	;rts	
 
 sane_dbl_round:
 	sane_dbl_unop	FORTI
-	; round(x) = floor(x+0.5)
-	; after 0.5 is added to operand, code proceeds as in dbl_floor above
-	;fmove.d	(MStack),	fp1				; get double from top of math stack
-	;fadd.d	#0.5,	fp1				; fp2 := x+0.5
-	;fintrz.X fp1,	fp0				; now proceed as in dbl_floor
-	;fbge	2f					; >= 0 needs no adjusting
-	;fcmp.X	fp1,	fp0				; can the negative double pass as an int?
-	;fbeq	2f					; if so, no adjusting necessary
-	;fsub.l	#1,	fp0				; else subtract one
-;2:	;fmove.d	fp0,	(MStack)
-	;rts	
 
 sane_dbl_trunc:
 	sane_dbl_unop	FOTTI
@@ -2362,13 +2370,6 @@ sane_dbl_heapused:
 	sane_op LongToExt, sanelong0, sanefp0
 	sane_op ExtToDbl, sanefp0, (MStack)	; store result onto TOS
 	rts
-	;move.l	H,	d2			; get H
-	;move.l	wm_heapbase, d1			; get HeapBase
-	;sub.l	d1, d2				; H - HeapBase
-	;subq.l	#8,	MStack			; push math stack
-	;fmove.l	d2,	fp0			; convert result 
-	;fmove.d	fp0,	(MStack)			; store result onto TOS
-	;rts
 
 #endif
 
@@ -2623,7 +2624,7 @@ mth_getnum2:
 	move.l	H,	d3			; load up d3 for is_callout
 	bsr	is_callout			; callout
 	move.l	-16(SP),	d1	; load up LHS of is/2
-;	move.l	4(SP),	MStack	; reset Fail to what it was before callout
+;	move.l	4(SP),	MStack	; reset MStack to what it was before callout
 ;	adda.l	#20,	SP		; restore original return address to TOS
 	bra	_mth_getnum			; call getnum
 
@@ -2707,7 +2708,7 @@ sane_tail_dbl_getnum2:
 	move.l	H,	d3			; load up d3 for is_callout
 	bsr	is_callout			; callout
 	move.l	-16(SP),	d1	; load up LHS of is/2
-;	move.l	4(SP),	Fail	; reset MStack to what it was before callout
+;	move.l	4(SP),	MStack	; reset MStack to what it was before callout
 ;	adda.l	#20,	SP		; restore original return address to TOS
 	bra	dbl_getnum			; call getnum
 
@@ -2746,8 +2747,8 @@ dcmp_getnum3:
  	bne.s	1b
  
 #ifdef MacOS
-; ceh this is odd!!! Why is it comparing #wm_heapbase?!?!?
-	cmp.l	wm_heapbase, d0 ; see if deref'd value is on stack
+	pea	wm_heapbase
+	cmp.l	(SP)+, d0
 #else
  	cmp.l	#wm_heapbase, d0 ; see if deref'd value is on stack
 #endif

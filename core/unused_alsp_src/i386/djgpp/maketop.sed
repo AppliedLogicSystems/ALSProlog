@@ -1,7 +1,7 @@
 /VPATH.*=/ s/:/;/g
 s/@srcdir@/pathsrc/g
 s/@ARCH@/i386/g
-s/@CC@/gcc -Ipathsrc\/i386\/djgpp/
+s/@CC@/gcc -Ipathsrc\/..\/i386\/djgpp/
 s/@MACH_OS@/djgpp/
 s/@OS@/djgpp/
 s/@LIBS@/pathsrc\/i386\/djgpp\/libregex.a -lm/

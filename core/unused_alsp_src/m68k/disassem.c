@@ -38,8 +38,6 @@ main()
 }
 #endif
 
-/* static Code *ip; */
-
 /* Define the Instruction Pointer (uip) as a union so that it can be used
    as both a short and long pointer.
 */

@@ -1,5 +1,5 @@
 /*
- * icode.h			-- include file for 68020 code generator
+ * machinst.h			-- include file for 68020 code generator
  *	Copyright (c) 1987-1993 by Applied Logic Systems, Inc.
  *
  * Author: Kevin A. Buettner
@@ -186,6 +186,8 @@ typedef Code * LAB;
 	  if (mode == DISPL) ic_put(disp); }
 #define CMPAbs(addr,dreg) \
 	{ ic_put(0xb0b9 | ((dreg)<<9)); ic_putl(addr); }
+#define CMPAAbs(addr,areg) \
+	{ ic_put(0xb1f9 | ((areg)<<9)); ic_putl(addr); }
 #define CMPA(reg,mode,disp,areg) \
 	{ ic_put(0xb1c0 | ((areg)<<9) | ((mode)<<3) | (reg)); \
 	  if (mode == DISPL) ic_put(disp); }
@@ -315,6 +317,8 @@ typedef Code * LAB;
 #define SUBQ(num,reg,mode,disp) \
 	{ ic_put(0x5180 | (((num)&7)<<9) | ((mode)<<3) | (reg)); \
 	  if (mode == DISPL) ic_put(disp);		}
+#define SUBQAbs(num,disp) \
+	{ ic_put(0x51b9 | (((num)&7)<<9)); ic_putl(disp); }
 #define SUBQW(num,reg,mode,disp) \
 	{ ic_put(0x5140 | (((num)&7)<<9) | ((mode)<<3) | (reg)); \
 	  if (mode == DISPL) ic_put(disp);		}
@@ -337,7 +341,6 @@ typedef Code * LAB;
 
 extern Code *ic_macropatch1;
 extern Code *ic_macropatch2;
-/* extern Code *ic_ptr;  */
 
 /* Do not call these as functions... */
 extern	void	wm_unify	PARAMS(( void ));

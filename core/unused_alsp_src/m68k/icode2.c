@@ -84,7 +84,21 @@ ic_install_call_entry(n)
     /* do nothing */
 }
 
+#ifdef MacOS
+extern long yield_counter;
 
+static void ic_install_stack_yield_check(ntbl_entry *n)
+{
+    int disp;
+    
+    CMPAAbs(&wm_stackbot_safety, SP)
+    disp = LDISP(n->overflow);
+    BLE(disp)
+    SUBQAbs(1, &yield_counter)
+    disp = LDISP(n->overflow);
+    BEQ(disp)
+}
+#endif
 
 /*
  * ic_install_normal_exec_entry is given a procedure entry point and fills
@@ -108,7 +122,9 @@ ic_install_normal_exec_entry(n)
 {
     Code *oldptr = ic_ptr;
     ic_ptr = n->exec_entry;
-
+#ifdef MacOS
+    ic_install_stack_yield_check(n);
+#endif
     MOVE(TR,ADIRECT,0,D0,DDIRECT,0);
     SUBAD(H,D0)
     CMPDD(OV,D0)
@@ -136,6 +152,9 @@ ic_install_spy(n)
     Code *oldptr = ic_ptr;
 
     ic_ptr = n->exec_entry;
+#ifdef MacOS
+    ic_install_stack_yield_check(n);
+#endif
     JSR((long) dbg_spycheck)
 
     ic_ptr = oldptr;
@@ -188,6 +207,9 @@ ic_install_decr_icount(n)
     Code *oldptr = ic_ptr;
 
     ic_ptr = n->exec_entry;
+#ifdef MacOS
+    ic_install_stack_yield_check(n);
+#endif
     JSR((long) dbg_decr_icount)
 
     ic_ptr = oldptr;
@@ -779,7 +801,6 @@ ic_install_no(buf,clausestart,nocatcher)
 
     ic_ptr = buf;
 
-
     JSR((int) wm_retry_me)
 
     JMP(w_nameentry(MODULE_BUILTINS,find_token((UCHAR *)nocatcher),0)->exec_entry)
@@ -978,11 +999,7 @@ ic_install_tree_overhead(swaddr, nentries, ic)
     int nentries;
     Code *ic;
 {
-    Code *oldptr;
-    Code *tmp_ic_ptr;
 	register ic_uptr_type ic_uptr;
-
-	oldptr = ic;
 	ic_uptr.code_ptr = ic;
 
     LEA_PCREL(A0)		/* lea (PC, 14), A0	*/
@@ -992,7 +1009,5 @@ ic_install_tree_overhead(swaddr, nentries, ic)
     ic_put(8*nentries);		/*          ^^^^^	*/
     JMP(swaddr)
 
-	tmp_ic_ptr = ic_ptr;
-	ic_ptr = oldptr;
-    return tmp_ic_ptr;
+    return ic_ptr;
 }

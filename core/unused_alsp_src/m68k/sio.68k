@@ -5,6 +5,7 @@
 ; Author: Kevin A. Buettner
 ; Creation: 10/23/91
 ; Revision History:
+;	1/5/95	C. Houpt	Changed newline test to detect MacOS newlines (char 13)
 ;	
 
 

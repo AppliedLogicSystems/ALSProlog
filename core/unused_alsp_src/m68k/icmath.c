@@ -108,7 +108,7 @@ RELOC_INFO(RELOC_GVAR,(ic_ptr-(sizeof(long)/sizeof(Code))),symidx_int_table)
       .            clause)
    |  .                        |
    +___________________________+
-   |	Fail (or B on MacOS    |
+   |	Fail (or B on MacOS)   |
    +---------------------------+
    |	&Callout Code          |  <------ SP
    -----------------------------

@@ -6,6 +6,7 @@
 ; Author: Kevin Buettner
 ; Creation Date: 5/10/89
 ; Revision History:
+;	1/5/95	C. Houpt	Added stack overflow check and time yielding to wm_overflow.
 ;
 
 #include "assembly.68k"
@@ -79,13 +80,103 @@ set_prolog_interrupt:
 ;
 ; wm_overflow is called when an exceptional condition is detected prior
 ;	to executing a procedure.
+;             On the Mac, it is also called on a stack overflow, or when it is
+;       necessary to yield time.
 ;
+#ifdef MacOS
+		externcode PI_yield_time
+		externdata yield_interval
+		externcode stack_overflow
+		externdata yield_counter
+		externdata wm_stackbot
+		externdata saved_sp
+#endif
 
 		global	wm_overflow
 wm_overflow:	
 		tst.l	d7			; see if d7 is negative
 		bmi	2f			; branch taken if not real 
 						;	overflow
+#ifdef MacOS
+		; In MacOS wm_overflow is also used for stack overlows, and
+		; to yield time to other applications.
+		
+		; Check for heap overflow.
+		move.l	TR, d0
+		sub.l	H, d0
+		cmp.l	d7, d0
+		bcs handle_heap_overflow
+		
+		; Check for stack overflow.
+		cmpa.l wm_stackbot, SP
+		ble.s handle_stack_overflow
+		
+		; Yield time to other applications
+		move.l	(SP)+,	d4		; pop off return address
+		jsr	wm_try_me		; Force registers out into
+						; a choice point
+		move.l	wm_regidx, d0		; The code for gc entry...
+		lsl.l	#6,	d0
+		lea	wm_regs, a0
+		add.l	d0,	a0
+		move.l	Fail, a5
+		exg		a2, a5
+		movem.l	#0xfc60, (a0)
+		movea.l	a5, a2
+		move.l	CurrentA5, a5
+		move.l	#0,	wm_in_Prolog	; leaving Prolog...
+		move.l	saved_sp,	SP	; restore C's stack pointer
+		jsr	PI_yield_time
+		move.l	yield_interval, yield_counter
+		move.l	wm_regidx, d0
+		lsl.l	#6,	d0
+		lea		wm_regs, a0
+		add.l	d0,	a0
+		movem.l	(a0),	#0xfc60		; restore the regs from memory
+		move.l	a2, -(SP)		; Juggle registers so that the 
+		movea.l	a5, a2			; Mac version of the WAM is right
+		move.l	CurrentA5, a5
+		move.l	(SP)+, Fail
+		jsr	enter_Prolog		; set flag indicating we are
+						; back in Prolog
+		jsr	wm_trust_me		; Bring top choice pt back
+						; into registers
+		move.l	d4,	a0
+		jmp	(a0)
+
+handle_stack_overflow:
+		move.l	(SP)+,	d4		; pop off return address
+		jsr	wm_try_me		; Force registers out into a choice point
+		move.l	wm_regidx, d0		; The code for gc entry...
+		lsl.l	#6,	d0
+		lea	wm_regs, a0
+		add.l	d0,	a0
+		move.l	Fail, a5
+		exg		a2, a5
+		movem.l	#0xfc60, (a0)
+		movea.l	a5, a2
+		move.l	CurrentA5, a5
+		move.l	#0,	wm_in_Prolog	; leaving Prolog...
+		move.l	saved_sp,	SP	; restore C's stack pointer
+		jsr	stack_overflow
+		move.l	wm_regidx, d0
+		lsl.l	#6,	d0
+		lea		wm_regs, a0
+		add.l	d0,	a0
+		movem.l	(a0),	#0xfc60		; restore the regs from memory
+		move.l	a2, -(SP)		; Juggle registers so that the 
+		movea.l	a5, a2			; Mac version of the WAM is right
+		move.l	CurrentA5, a5
+		move.l	(SP)+, Fail
+		jsr	enter_Prolog		; set flag indicating we are
+						; back in Prolog
+		jsr	wm_trust_me		; Bring top choice pt back
+						; into registers
+		move.l	d4,	a0
+		jmp	(a0)
+
+handle_heap_overflow:
+#endif
 		;
 		; The code for doing a garbage collection
 		;
@@ -106,6 +197,10 @@ wm_overflow:
 		movem.l	#0xfc60, (a0)		; save the registers in memory
 #endif
 		move.l	#0,	wm_in_Prolog	; leaving Prolog...
+#ifdef MacOS
+; ceh - shouldn't the stack be restored!? gc can call printf, etc...
+		move.l	saved_sp,	SP	; restore C's stack pointer
+#endif
 		jsr	gc			; call the garbage compacter
 huh:
 		move.l	wm_regidx, d0

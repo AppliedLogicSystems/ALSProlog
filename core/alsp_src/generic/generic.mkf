@@ -235,7 +235,7 @@ endif
 
 alsmics: alsdir $(srcdir)/utils/$(alsmics_c)
 	$(CC) -o alsmics $(srcdir)/utils/$(alsmics_c) $(CPPFLAGS) $(micsflags)
-	cp alsmics alsdir/als-mics
+	-cp alsmics alsdir/als-mics
 
 
 #

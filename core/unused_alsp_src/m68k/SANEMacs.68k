@@ -1,0 +1,79 @@
+; Defined from MPW Assembler header, SANEMacs.a
+
+;ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
+; Operation code masks.
+;ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
+#define FOADD		0x0000			; add
+#define FOSUB		0x0002			; subtract
+#define FOMUL		0x0004			; multiply
+#define FODIV		0x0006			; divide
+#define FOCMP		0x0008			; compare, no exception from unordered
+#define FOCPX		0x000A			; compare, signal invalid if unordered
+#define FOREM		0x000C			; remainder
+#define FOZ2X		0x000E			; convert to extended
+#define FOX2Z		0x0010			; convert from extended
+#define FOSQRT		0x0012			; square root
+#define FORTI		0x0014			; round to integral value
+#define FOTTI		0x0016			; truncate to integral value
+#define FOSCALB 	0x0018			; binary scale
+#define FOLOGB		0x001A			; binary log
+#define FOCLASS 	0x001C			; classify
+
+#define FOSETENV	0x0001			; set environment
+#define FOGETENV	0x0003			; get environment
+#define FOSETHV 	0x0005			; set halt vector
+#define FOGETHV 	0x0007			; get halt vector
+#define FOD2B		0x0009			; convert decimal to binary
+#define FOB2D		0x000B			; convert binary to decimal
+#define FONEG		0x000D			; negate
+#define FOABS		0x000F			; absolute
+#define FOCPYSGN	0x0011			; copy sign
+#define FONEXT		0x0013			; next-after
+#define FOSETXCP	0x0015			; set exception
+#define FOPROCENTRY	0x0017			; procedure entry
+#define FOPROCEXIT	0x0019			; procedure exit
+#define FOTESTXCP	0x001B			; test exception
+
+
+;ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
+; Operand format masks.
+;ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
+#define FFEXT		0x0000			; extended -- 80-bit float
+#define FFEXT96		0x0020			; extended -- 96-bit float
+#define FFDBL		0x0800			; double -- 64-bit float
+#define FFSGL		0x1000			; single -- 32-bit float
+#define FFINT		0x2000			; integer -- 16-bit integer
+#define FFLNG		0x2800			; long int -- 32-bit integer
+#define FFCOMP		0x3000			; comp -- 64-bit integer
+
+;ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
+; Elementary function operation code masks.
+;ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
+#define ELEXT96		0x0080			; 96-bit extended format
+#define FOLNX		0x0000			; base-e log
+#define FOLOG2X 	0x0002			; base-2 log
+#define FOLN1X		0x0004			; ln (1 + x)
+#define FOLOG21X	0x0006			; log2 (1 + x)
+#define FOEXPX		0x0008			; base-e exponential
+#define FOEXP2X 	0x000A			; base-2 exponential
+#define FOEXP1X 	0x000C			; exp (x) - 1
+#define FOEXP21X	0x000E			; exp2 (x) - 1
+#define FOXPWRI 	0x8010			; integer exponentiation
+#define FOXPWRY 	0x8012			; general exponentiation
+#define FOCOMPOUND	0xC014			; compound
+#define FOANNUITY	0xC016			; annuity
+#define FOSINX		0x0018			; sine
+#define FOCOSX		0x001A			; cosine
+#define FOTANX		0x001C			; tangent
+#define FOATANX 	0x001E			; arctangent
+#define FORANDX 	0x0020			; random
+
+;ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
+; Class and sign inquiries.
+;ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
+#define FCSNAN		1				; signaling NAN
+#define FCQNAN		2				; quiet NAN
+#define FCINF		3				; infinity
+#define FCZERO		4				; zero
+#define FCNORM		5				; normal number
+#define FCDENORM	6				; denormal number
