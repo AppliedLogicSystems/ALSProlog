@@ -131,6 +131,16 @@ win32_path_type(Path, relative).
 
 
 split_path(Path, List) :-
+	sub_atom(Path,0,1,_,'{'),
+	!,
+	(sub_atom(Path,Before,1,_,'}') ->
+		Before0 is Before - 1,
+		sub_atom(Path,1,Before0,_,Path0)
+		;
+		sub_atom(Path,1,_,0,Path0)
+	),
+	split_path(Path0, List).
+split_path(Path, List) :-
 	sys_env(OS, _, _),
 	!,
 	split_path(OS, Path, List).
@@ -295,6 +305,8 @@ win32_split_path(Path, List) :-
 	win32_split_relpath(Path, List).
 
 win32_split_relpath('', []) :- !.
+win32_split_relpath(Path, []) :- 
+	sub_atom(Path, 0, 1, _, '}').
 win32_split_relpath(Path, [Head | Tail]) :-
 	find_sub(Path, Before, After, ['/', '\\']),
 	!,
