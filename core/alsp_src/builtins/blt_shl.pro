@@ -12,10 +12,18 @@
  |  Major revisions: 1995-96
  *=============================================================*/
 
-
 module builtins.
 use sio.
  
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% We store (read) prompts on a stack in a global 
+	%% variable because we (may) come and go from the
+	%% window system, so we can't hold on to them:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%:-	make_gv("_shell_prompts"), 	set_shell_prompts( [('?- ','?-_')] ).
+:-	make_gv("_shell_prompts", [('?- ','?-_')] ).
+
 /*-------------------------------------------------------------------------------*
  | start_shell/1
  | start_shell(DefaultShellCall)
@@ -32,7 +40,7 @@ use sio.
 		addl_slots= [ ]
 	]).
 
-:- dynamic('$dv'/0).
+:- dynamic(dvf/0).
 
 start_shell(DefaultShellCall) 
 	:-
@@ -59,7 +67,7 @@ start_shell0(DefaultShellCall)
 	process_cl_asserts(CLInfo),
 	!,
 		%% 
-	('$dv' -> qkc ; true),
+	(dvf -> qkc ; true),
 	ss_load_dot_alspro(CLInfo),
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
@@ -279,14 +287,6 @@ system_name_proc(_, 'ALS Prolog (Native)').
  | it knows about certain debugger global variables and so will interact well
  | with the debugger.
  *-------------------------------------------------------------------------*/
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% We store (read) prompts on a stack in a global 
-	%% variable because we (may) come and go from the
-	%% window system, so we can't hold on to them:
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-:-	make_gv("_shell_prompts"), 	set_shell_prompts( [('?- ','?-_')] ).
-
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% This is the default system tty shell:
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -605,14 +605,14 @@ do_shell_query(Goal0,VarNames,Vars,Wins,AlarmIntrv,InStream,OutStream)
 	setRetry(0),            %%    and Retry in case of debugging.
 	xform_command_or_query(Goal0,Goal1),
 	do_shell_query2(user,Goal1),
-	dbg_notrace,
+%	dbg_notrace,
 	dbg_spyoff,
 	showanswers(VarNames,Vars,Wins,InStream,OutStream),
 	!.
 
 do_shell_query(Goal,VarNames,Vars,Wins,AlarmIntrv,InStream,OutStream) 
 	:-
-	dbg_notrace,
+%	dbg_notrace,
 	dbg_spyoff,
 	print_no(OutStream).
 
@@ -794,7 +794,6 @@ module debugger.
 
 :- abolish(ensure_db_showing, 0).
 ensure_db_showing.
-
 
 endmod.
 

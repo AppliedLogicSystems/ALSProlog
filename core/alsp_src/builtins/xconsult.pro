@@ -103,6 +103,14 @@ readFile(Stream, File, SDMode, ModStack, CurErrs, FinalErrs)
 %	gc,
 	disp_process(Flag, Term,Names,Vars,Stream, File, SDMode, ModStack, CurErrs, FinalErrs).
 
+xc_process_list([], Stream, File, SDMode, ModStack, ModStack, CurErrs, CurErrs).
+
+xc_process_list([Term | List], Stream, File, SDMode, ModStack, FinalStack, CurErrs, FinalErrs)
+	:-
+	process(Term,[],[],Stream, File, ModStack, NewModStack, CurErrs, NewErrs, Flag), !,
+	xc_process_list(List, Stream, File, SDMode, NewModStack, FinalStack, NewCurErrs, FinalErrs).
+
+
 disp_process(ok, end_of_file, Names,Vars,Stream, File, SDMode, ModStack, CurErrs, FinalErrs)
 	:-
 	(ModStack = [] ->
@@ -163,6 +171,23 @@ process('?-'(Command),Names,Vars,Stream, File, ModStack, ModStack, Errs, NewErrs
 	topmod(Module),
 	!,
 	execute_command_or_query(Stream,qf,Module,Command, Errs, NewErrs, Flag).
+
+/**********************
+process(':-'(defineClass(DMod,Spec)),
+			Names,Vars,Stream, File, ModStack, NewModStack, CurErrs, NewErrs, ok)
+	:- !, 
+	process(defineClass(DMod,Spec),
+			Names,Vars,Stream, File, ModStack, NewModStack, CurErrs, NewErrs, ok).
+
+process(defineClass(DMod,Spec),
+			Names,Vars,Stream, File, ModStack, NewModStack, CurErrs, NewErrs, ok)
+	:- !, 
+write(defineClass(DMod,Spec)),nl,
+	builtins:defineClass(DMod,Spec,Code),
+write(code=Code),nl,flush_output,
+	xc_process_list(Code, Stream, File, SDMode, ModStack, NewModStack, CurErrs, NewErrs).
+**********************/
+
 
 process((':-'(Command) :- '$dbg_aph'(_,_,_)),Names,Vars,Stream, File, ModStack, ModStack, 
 				Errs, NewErrs, Flag)
@@ -330,6 +355,7 @@ dodeclare((D1,D2))
 	dodeclare(D2).
 dodeclare(Var)
 	:-
+pbi_debug(dodeclare(Var)),
 	atom(Var),
 	!,
 	topmod(M),
@@ -340,6 +366,8 @@ dodeclare(Huh)
 	:-
 	write(error_stream,'Invalid Variable Declaration.  Ignoring it.'),
 	nl(error_stream).
+
+
 
 /*
  * kill certain global variables
@@ -356,6 +384,8 @@ killvars(M)
 	!,
 	killvars(M).
 killvars(_).
+
+
 
 /*
  * addrule

@@ -356,7 +356,8 @@ dynamic0( (Left , Right), M)
 :-
 	gv_alloc(VN),
 	assert_at_load_time((setPrologInterrupt(X) :- gv_set(VN,X))),
-	assert_at_load_time((getPrologInterrupt(X) :- gv_get(VN,X))).
+	assert_at_load_time((getPrologInterrupt(X) :- gv_get(VN,X))),
+	global_gv_info:assert_at_load_time(gvi('PrologInterrupt',VN,builtins,debug_off)).
 
 export setPrologInterrupt/1.
 export getPrologInterrupt/1.
@@ -673,7 +674,8 @@ export throw/1.
 :-
 	gv_alloc(VarNum),
 	assert_at_load_time( (setCatchVariable(Value) :- gv_set(VarNum,Value)) ),
-	assert_at_load_time( (getCatchVariable(Value) :- gv_get(VarNum,Value)) ).
+	assert_at_load_time( (getCatchVariable(Value) :- gv_get(VarNum,Value)) ),
+	global_gv_info:assert_at_load_time(gvi('CatchVariable',VarNum,builtins,0)).
 
 catch(Module,Goal,Pat,ExGoal) 
 	:-
@@ -741,22 +743,58 @@ dappend([H|T],L,[H|TL]) :- dappend(T,L,TL).
  | make_gv is defined here because it is called from some of the other
  | builtins files.  Heretofore, we have done explicit gv_alloc's and
  | asserts.
+ |
+ |	Note: Have to use name/2 here because atom_codes/2 is not yet defined.
  *----------------------------------------------------------------------*/
+
+module global_gv_info.
+:-dynamic(gvi/4).
+endmod.
 
 :-	
 	compiletime,
-	module_closure(make_gv,1),
+	module_closure(make_gv,1,make_gv1),
+	module_closure(make_gv,2,make_gv2),
 	module_closure(free_gv,1),
 	module_closure(gv_number,2).
     
-make_gv(Mod,Name) 
+make_gv1(Mod,Name) 
+	:- 
+	make_gv2(Mod,Name,0). 
+
+make_gv2(Mod,Name,InitVal) 
+	:- 
+	atom(Name), 
+	global_gv_info:gvi(Name,VN,Mod,InitVal0),
+	!,
+	(InitVal0 = InitVal ->
+		true
+		;
+		global_gv_info:retract(gvi(Name,VN,Mod,InitVal0)),
+		global_gv_info:assert_at_load_time(gvi(Name,VN,Mod,InitVal))
+	).
+
+make_gv2(Mod,Name,InitVal) 
 	:- 
 	atom(Name), 
 	!, 
 	name(Name,NameList), 
-	make_gv(Mod, NameList).
+	make_gv2(Mod, NameList, InitVal).
 
-make_gv(Mod,Name) 
+
+make_gv2(Mod,NameList,InitVal) 
+	:-
+	name(Name,NameList),
+	global_gv_info:gvi(Name,VN,Mod,InitVal0),
+	!,
+	(InitVal0 = InitVal ->
+		true
+		;
+		global_gv_info:retract(gvi(Name,VN,Mod,InitVal0)),
+		global_gv_info:assert_at_load_time(gvi(Name,VN,Mod,InitVal))
+	).
+
+make_gv2(Mod,Name,InitVal) 
 	:-
 	name(SetFunc,[0's,0'e,0't | Name]),
 	name(GetFunc,[0'g,0'e,0't | Name]),
@@ -765,8 +803,11 @@ make_gv(Mod,Name)
 	arg(1,SetHead,SetVar),
 	arg(1,GetHead,GetVar),
 	gv_alloc(VN),
+	gv_set(VN, InitVal),
 	Mod:assert_at_load_time((SetHead :- gv_set(VN,SetVar))),
-	Mod:assert_at_load_time((GetHead :- gv_get(VN,GetVar))).
+	Mod:assert_at_load_time((GetHead :- gv_get(VN,GetVar))),
+	name(AtomicName, Name),
+	global_gv_info:assert_at_load_time( gvi(AtomicName,VN,Mod,InitVal) ).
 
 free_gv(Mod,Name) 
 	:- 
@@ -785,6 +826,8 @@ free_gv(Mod,Name)
 	arg(1,GetHead,GetVar),
 	Mod:retract((SetHead :- gv_set(VN,SetVar))),
 	Mod:retract((GetHead :- gv_get(VN,GetVar))),
+	name(AtomicName, Name),
+	global_gv_info:retract(gvi(AtomicName,VN,Mod,_)),
 	!,
 	gv_free(VN).
 
@@ -980,7 +1023,6 @@ xform_file_list(File,_,consult(File)).
 export exists_file/1.
 exists_file([Head | Tail])
 	:-!,
-%	subPath([Head | Tail], Path),
 	join_path([Head | Tail], Path),
 	'$access'(Path,0).
 
@@ -1055,6 +1097,7 @@ cslt_blts_ld(File, FilePathPro,FilePathObp)
 cslt_blts_ld(File, FilePathPro,FilePathObp)
 	:-
 	obp_open(FilePathObp),
+%pbi_write('cslt_blts'=File), pbi_nl,pbi_ttyflush,
 	xconsult(FilePathPro, NErrs, ErrList),
 %pbi_write('..cslt_blts'=NErrs), pbi_nl,pbi_ttyflush,
 	obp_close,
@@ -1122,6 +1165,10 @@ ld_fs(OS)
 	consult_builtins(BDir, blt_shlr),			
 	consult_builtins(BDir, blt_cslt),			
 	consult_builtins(BDir, blt_shl),
+
+%	consult_builtins(BDir, blt_dvsh),
+%	consult_builtins(BDir, dbg_class),
+%	consult_builtins(BDir, projects),
 
 	consult_builtins(BDir, debugger).
 

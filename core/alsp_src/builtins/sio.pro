@@ -38,7 +38,7 @@ use tcltk.
 	make_hash_table("_stream_table"),
 	make_gv("_current_input_stream"),
 	make_gv("_current_output_stream"),
-	make_gv("_user_prompt"),
+	make_gv("_user_prompt",''),
 	make_gv("_next_stream_identifier").
 
 
@@ -1757,7 +1757,6 @@ loop_for_data(Type, Stream)
 	:-
 	loop_for_data(Type, Stream).
 
-
 open_window_stream(Window,Mode,Options,Stream) 
 	:- 
 	getWinID(Window,WinID),
@@ -1807,12 +1806,16 @@ getWinID(Window,WinID) :-
 	'$text_winIDFor$'(Window,WinID),!.
 getWinID(Window,Window).
 
+
+%/******
 getWinGV(WinID,WinPosGV) :-
 	'$text_winGV$'(WinID,WinPosGV),
 	!.
 getWinGV(WinID,WinPosGV) :-      %% allocate a gvar for WinID if not previously alloced
 	gv_alloc(WinPosGV),
 	assert('$text_winGV$'(WinID,WinPosGV)). 
+%******/
+
 
 
 export create_wait_var_name/2.

@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.85 1999/03/10 02:08:39 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.86 1999/08/06 16:25:55 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -28,6 +28,8 @@
 #
 # appleevents is a standard Tcl/Tk package for the Mac.
 
+#puts ALSTCLPATH=$ALSTCLPATH
+
 if {$tcl_platform(platform) == "windows"} {
 	load {} OpenDocument
 	load {} getDirectory
@@ -41,6 +43,7 @@ if {$tcl_platform(platform) == "macintosh"} {
 
 package require getDirectory
 package require getFiles
+
 
 proc xpe { What } {
 	global array proenv
@@ -307,8 +310,7 @@ switch $tcl_platform(platform) {
 proc establish_defaults {} {
 	global array proenv
 
-	prolog call alsdev alsdev_ini_defaults  \
-		-var DefaultVals -var TopGeom -var DebugGeom -var DebugVis
+	prolog call alsdev alsdev_ini_defaults  -var DefaultVals -var TopGeom -var DebugGeom -var DebugVis
 	reset_default_values $DefaultVals
 	if {$TopGeom != ""} then { set proenv(.topals,geometry) $TopGeom }
 	if {$DebugGeom != ""} then { set proenv(.debugwin,geometry) $DebugGeom }
@@ -1309,7 +1311,7 @@ proc carry_out_listasm {} {
 			return
 		}
 	}
-puts "calling list_asm on $Mod:$Pred"
+#puts "calling list_asm on $Mod:$Pred"
 	prolog call builtins carry_out_listasm -atom "$Mod:$Pred"
 }
 

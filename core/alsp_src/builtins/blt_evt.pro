@@ -16,6 +16,20 @@
 
 module builtins.
 
+/*-------------------------------------------------------------*
+ | set_context/1 and get_context/1 use global variables and 
+ | are built by the following call to make_gv.
+ *-------------------------------------------------------------*/
+%:- make_gv('_context'), set_context(global_context).
+:- make_gv('_context', global_context).
+
+/*------------------------------------------------------------*
+ | PrologError is a global variable which contains the last 
+ | prolog | error encountered.
+ *------------------------------------------------------------*/
+
+:- make_gv('PrologError').
+
 /*!----------------------------------------------------------------------
  |	set_event_handler/3
  |	set_event_handler(Module, EventId, Proc)
@@ -187,18 +201,6 @@ trap_exit(OldContext,NewContext)
 	:- 
 	set_context(NewContext), fail.
 
-/*-------------------------------------------------------------*
- | set_context/1 and get_context/1 use global variables and 
- | are built by the following call to make_gv.
- *-------------------------------------------------------------*/
-:- make_gv('_context'), set_context(global_context).
-
-/*------------------------------------------------------------*
- | PrologError is a global variable which contains the last 
- | prolog | error encountered.
- *------------------------------------------------------------*/
-
-:- make_gv('PrologError').
 
 /*------------------------------------------------------------*
  | decompose_handler(Handler,Module,HMod,HProc) 

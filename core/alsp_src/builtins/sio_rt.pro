@@ -17,12 +17,11 @@
  |	op/3		-- define or delete an operator
  |	current_op/3	-- look for operator
  *=======================================================================*/
+
 module sio.
 
-
-:-	make_gv('_eof_acceptable_as_fullstop'),
-	set_eof_acceptable_as_fullstop(false).
-
+%:-	make_gv('_eof_acceptable_as_fullstop'), set_eof_acceptable_as_fullstop(false).
+:-	make_gv('_eof_acceptable_as_fullstop', false).
 
 export read/1.
 

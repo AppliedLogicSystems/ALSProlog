@@ -344,6 +344,11 @@ douse((M1,M2))
 	douse(M1),
 	douse(M2).
 
+douse([]) :-!.
+douse([N | Ns]) :-
+	douse(N),
+	douse(Ns).
+
 douse(M) :-
 	atom(M),
 	!,
@@ -351,6 +356,15 @@ douse(M) :-
 	$icode(-8, MM, 0, 0, 0).	/* add to module use list */
 
 	%% Need error exceptions....
+
+export use_by_mod/2.
+use_by_mod(Mods, ByMod)
+	:-
+	'$icode'(-10,ByMod,0,0,0),
+	douse(Mods),
+	'$icode'(-9,0,0,0,0).
+
+
 
 /*---------------------------------------------------------------------
  | 				Hash table (expandable) predicates
@@ -759,7 +773,10 @@ make_hash_table(Mod,Name)
 	:-
 	make_hash_framework(Mod,Name,VN),
 	hash_create(InitialHashTable),
-	gv_set(VN,InitialHashTable).
+	gv_set(VN,InitialHashTable),
+	name(AtomicName, Name),
+	hash_create(InitialHashTable0),
+	global_gv_info:assert_at_load_time(gvi(AtomicName,VN,Mod,InitialHashTable0)).
 
 export make_hash_framework/3.
 make_hash_framework(Mod,Name,VN)

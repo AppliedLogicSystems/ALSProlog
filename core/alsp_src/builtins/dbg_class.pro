@@ -20,6 +20,7 @@ use tk_alslib.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         %% The one and only top level debugger class:
+/*
 :-defineClass(
 	[   name=debugger_mgr,
 		subClassOf=genericObjects,
@@ -46,6 +47,7 @@ use tk_alslib.
 			stack_display_list		= '.debugwin.stacklist'
 			]
 	]).
+*/
 
 debugger_mgrAction([Functor | Args], State)
 	:-

@@ -74,6 +74,8 @@ alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a $(MAKEFS)
 	$(CC) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LIBS)
 
 alspro :  alsdir alspro_b $(BUILTINS) $(MAKEFS)
+	rm -f alsdir/builtins/*.obp
+	rm -f alsdir/library/*.obp
 	./alspro_b -q -b -obp -g 'save_image(alspro,[])'
 
 ifndef NO_STATIC_LIB
@@ -153,13 +155,21 @@ lib: $(GETDIR)/getDirectory.tcl $(GETDIR)/unix_pkgIndex.tcl $(GETFILES)/getFiles
 	cp -r $(GETFILES)/unix_pkgIndex.tcl lib/tk8.0/getFiles/pkgIndex.tcl
 
 alsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
+	rm -f alsdir/builtins/*.obp
+	rm -f alsdir/library/*.obp
+	rm -f $(SUBOS)/*.obp
 	./alspro_b -q -b -obp -no_dot_alspro \
+	alsdir/shared/tcltk_util \
 	-g 'save_image(alsdev,[start_goal((builtins:start_alsdev)), \
 	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
 	select_lib(library,[$(ALSDEVLIBS)])])'
 
 studalsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
+	rm -f alsdir/builtins/*.obp
+	rm -f alsdir/library/*.obp
+	rm -f $(SUBOS)/*.obp
 	./alspro_b -q -b -obp -no_dot_alspro \
+	alsdir/shared/tcltk_util \
 	-g 'builtins:abolish(save_image,1), \
 	sio:abolish(open_socket_stream,4), \
 	save_image(studalsdev,[start_goal((builtins:start_alsdev)), \
@@ -172,7 +182,7 @@ clean :
 distclean: superclean
 
 superclean : clean
-	rm -fr alsdir alspro alspro_b libalspro.a libalspro.$(OS_SL_EXT)
+	rm -fr alsdir alspro* alspro_b* alsdev* studals* libalspro.a libalspro.$(OS_SL_EXT)* *.obp $(SUBOS) lib
 
 -include *.d
 

@@ -64,6 +64,7 @@ proceed_start_new_project(ALSIDEObject)
 		%% opened, and is written back out to the project
 		%% file when the project is closed.
 
+/*
 :- defineClass(
 	[   name=gen_project_mgr,
 		subClassOf=genericObjects,
@@ -155,6 +156,7 @@ proceed_start_new_project(ALSIDEObject)
 				]
 			]
 	]).
+*/
 
 :-dynamic(project_mgrAction/2).
 
