@@ -6,6 +6,7 @@ set -o errexit -o nounset
 ALS_PROLOG=..
 BIN=$ALS_PROLOG/core/win32
 LIB=$ALS_PROLOG/core/alsp_src/library
+BUILTINS=$ALS_PROLOG/core/alsp_src/builtins
 EXAMPLES=$ALS_PROLOG/examples
 MAN=$ALS_PROLOG/manual
 
@@ -56,6 +57,9 @@ cp -p $MAN/$WELCOME "$DISTDIR/Welcome.txt"
 cp -p $MAN/copying.als "$DISTDIR/Copying ALS.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
 
+mkdir "$DISTDIR/alsdir/builtins"
+cp -p $BUILTINS/*.pro "$DISTDIR/alsdir/builtins"
+
 mkdir "$DISTDIR/alsdir/library"
 cp -p $LIB/*.pro "$DISTDIR/alsdir/library"
 cp -p $LIB/*.alb "$DISTDIR/alsdir/library"
@@ -64,6 +68,7 @@ if test $EDITION = standard
 then
 	cp -pr "$ALS_PROLOG/foreign_sdk/win32/ALS_Prolog_Foreign_SDK" "$DISTDIR"
 	cp -pr "$BIN/alspro.exe" "$DISTDIR"
+	cp -pr "$BIN/alspro.dll" "$DISTDIR"
 fi
 
 echo "Build directory complete."
