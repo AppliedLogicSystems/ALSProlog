@@ -304,7 +304,7 @@ typedef struct {
   char *fname;
   unsigned int foffset;
   short  ftype;    /* integer identifying C type; 0 for struct/union */
-  char *typename;  /* when ftype is 0, typename is set to struct name */
+  char *type_name;  /* when ftype is 0, typename is set to struct name */
   int  arraysz;    /* N=0 => not an array, N>0 => array of size N */
 } FieldEntry;      /* For array, currently, this is set to 1000   */
                    /* Later, when ctrans is modified to recognize */

@@ -472,7 +472,7 @@ c_structinfo()
 		PI_FAIL;
 	}
 	else {
-	    PI_makeuia(&v, &t, field[i].typename);
+	    PI_makeuia(&v, &t, field[i].type_name);
 	    if (!PI_unify(arg, argtype, v, t))
 		PI_FAIL;
 	}
