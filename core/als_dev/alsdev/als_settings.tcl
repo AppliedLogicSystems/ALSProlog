@@ -13,125 +13,100 @@ proc vTclWindow.alsdev_settings {base} {
     ###################
     toplevel $base -class Toplevel
     wm focusmodel $base passive
-    wm geometry $base 535x154+199+212
+    wm geometry $base 233x142+199+212
     wm maxsize $base 1137 870
-    wm minsize $base 1 1
+    wm minsize $base 0 0
     wm overrideredirect $base 0
     wm resizable $base 1 1
     wm deiconify $base
-    wm title $base "ALS Prolog Development Environment Settings"
+    wm title $base "Fonts & Colors"
 	wm protocol .alsdev_settings WM_DELETE_WINDOW {wm withdraw .alsdev_settings}
 
 		# Text Font Description:
-    frame $base.font_desc \
-        -borderwidth 1 -relief sunken
+    label $base.font_label -text {Fonts} 
 
-    label $base.font_desc.family_label -text {Font Family:} 
+    label $base.family_label -text {Family:} 
 	set FamilyMenuCmd \
-		[concat tk_optionMenu $base.font_desc.familymenu proenv(text,family) [font families]]
+		[concat tk_optionMenu $base.familymenu proenv(text,family) \
+			[concat user system [lsort -ascii [font families]] ] ]
+
 	set FamilyMenu [eval $FamilyMenuCmd]
 	set MenuEndNum [$FamilyMenu index end]
+
 	for {set iii 0} {$iii <= $MenuEndNum} {incr iii} {
 		$FamilyMenu entryconfigure $iii \
-			-command "font_family_choice \"[$FamilyMenu entrycget $iii -label]\""
+			-command "font_family_choice \"[$FamilyMenu entrycget $iii -label]\" \$proenv(fonts_and_colors)"
 	}
 
-    label $base.font_desc.size_label -text {Size:} 
-	set SizeMenu [tk_optionMenu $base.font_desc.sizemenu proenv(text,size) \
+    label $base.size_label -text {Size:} 
+	set SizeMenu [tk_optionMenu $base.sizemenu proenv(text,size) \
 		6 8 10 12 14 16 18 20 22 24]
 	set MenuEndNum [$SizeMenu index end]
 	for {set iii 0} {$iii <= $MenuEndNum} {incr iii} {
 		$SizeMenu entryconfigure $iii \
-			-command "font_size_choice [$SizeMenu entrycget $iii -label]"
+			-command "font_size_choice [$SizeMenu entrycget $iii -label]  \$proenv(fonts_and_colors)"
 	}
 
-	set SizeUnitsMenu  [tk_optionMenu $base.font_desc.sizeunitsmenu proenv(text,sizeunits) \
-		pixels points]
-	$SizeUnitsMenu entryconfigure 0 -command "font_size_units_choice pixels"
-	$SizeUnitsMenu entryconfigure 1 -command "font_size_units_choice points"
-
-    label $base.font_desc.style_label -text {Style:} 
-	set StyleMenu [tk_optionMenu $base.font_desc.stylemenu proenv(text,style) \
+    label $base.style_label -text {Style:} 
+	set StyleMenu [tk_optionMenu $base.stylemenu proenv(text,style) \
 		normal bold italic ]
-	$StyleMenu entryconfigure 0 -command "font_style_choice normal"
-	$StyleMenu entryconfigure 1 -command "font_style_choice bold"
-	$StyleMenu entryconfigure 2 -command "font_style_choice italic"
-
-#    frame $base.font_desc.spacer1 -borderwidth 1 -relief flat -width 3 -background Black
-#    button $base.font_desc.install \
-#        -command install_font -padx 2 -text Install
+	$StyleMenu entryconfigure 0 -command "font_style_choice normal  \$proenv(fonts_and_colors)"
+	$StyleMenu entryconfigure 1 -command "font_style_choice bold  \$proenv(fonts_and_colors)"
+	$StyleMenu entryconfigure 2 -command "font_style_choice italic  \$proenv(fonts_and_colors)"
 
 		# Text Color Description:
-    frame $base.color_desc \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-    label $base.color_desc.color_label \
-        -text {Color: } 
-    button $base.color_desc.background \
-		-background $proenv(topals,background) \
-        -command choose_background_color -padx 11 -pady 4 -text Background 
-    button $base.color_desc.foreground \
-		-foreground $proenv(topals,foreground) \
-        -command choose_foreground_color -padx 11 -pady 4 -text Foreground 
-
-		# Generated Files Locations:
-    frame $base.obp_lcn \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-    label $base.obp_lcn.glabel \
-        -text {Generated Files (*.obp) Location: } 
-	set OBPMenu [tk_optionMenu $base.obp_lcn.optmenu proenv(obplcn) \
-		{Generated in Current (gic)} {Generated in Source(gis)} \
-		{Generated in Arch/Current (giac)} {Generated in Arch/Source(gias)}  ]
-	set proenv(obplcn) {Generated in Arch/Source(gias)}
-
+    label $base.color_label -text {Color: } 
+    button $base.background \
+		-background $proenv(.topals,background) \
+        -command "choose_background_color \$proenv(fonts_and_colors)" -padx 11 -pady 4 -text Background 
+    button $base.foreground \
+		-foreground $proenv(.topals,foreground) \
+        -command "choose_foreground_color \$proenv(fonts_and_colors)" -padx 11 -pady 4 -text Foreground 
 
 		# Save settings button:
-    button $base.save_settings \
-        -command save_alsdev_settings -padx 11 -pady 4 \
-		-text {Save Settings} 
-
+	frame $base.buttons -relief sunken -borderwidth 1
+    button $base.buttons.save_settings \
+        -command save_alsdev_settings -pady 4 -text {Save} 
+    button $base.buttons.cancel \
+        -command cancel_fonts_and_colors -pady 4 -text {Cancel} 
 
     ###################
     # SETTING GEOMETRY
     ###################
-    pack $base.font_desc \
-        -anchor center -expand 0 -fill x -pady 4 -side top 
-    pack $base.font_desc.family_label \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.font_desc.familymenu \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.font_desc.size_label \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.font_desc.sizemenu \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.font_desc.sizeunitsmenu \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.font_desc.style_label \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.font_desc.stylemenu \
-        -anchor center -expand 0 -fill none -side left 
+    grid columnconf $base 0 -weight 0
+    grid rowconf $base 0 -weight 0
 
-#    pack $base.font_desc.spacer1 \
-#        -anchor center -expand 0 -fill y -padx 3 -side left 
-#    pack $base.font_desc.install \
-#        -anchor center -expand 0 -fill none -side left 
+    grid $base.font_label \
+		-column 0 -row 0 -columnspan 2 -rowspan 1 -sticky ew
+    grid $base.family_label \
+		-column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew
+    grid $base.familymenu \
+		-column 1 -row 1 -columnspan 1 -rowspan 1 -sticky ew
+    grid $base.size_label \
+		-column 0 -row 2 -columnspan 1 -rowspan 1 -sticky ew
+    grid $base.sizemenu \
+		-column 1 -row 2 -columnspan 1 -rowspan 1 -sticky ew
+    grid $base.style_label \
+		-column 0 -row 3 -columnspan 1 -rowspan 1 -sticky ew
+    grid $base.stylemenu \
+		-column 1 -row 3 -columnspan 1 -rowspan 1 -sticky ew
 
-    pack $base.color_desc \
-        -anchor center -expand 0 -fill x -pady 4 -side top 
-    pack $base.color_desc.color_label \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.color_desc.background \
-        -anchor center -expand 0 -fill none -padx 8 -side left 
-    pack $base.color_desc.foreground \
-        -anchor center -expand 0 -fill none -padx 8 -side left 
+    grid $base.color_label \
+		-column 2 -row 0 -columnspan 1 -rowspan 1 -sticky ew
+    grid $base.background \
+		-column 2 -row 1 -columnspan 1 -rowspan 1 -sticky ew
+    grid $base.foreground \
+		-column 2 -row 2 -columnspan 1 -rowspan 1 -sticky ew
 
-    pack $base.obp_lcn \
-        -anchor center -expand 0 -fill x -pady 4 -side top 
-    pack $base.obp_lcn.glabel \
-        -anchor center -expand 0 -fill none -side left 
-    pack $base.obp_lcn.optmenu \
-        -anchor center -expand 0 -fill none -side top 
+    grid $base.buttons \
+		-column 0 -row 4 -columnspan 3 -rowspan 1 -sticky ew
 
-    pack $base.save_settings \
-        -anchor center -expand 0 -fill none -pady 4 -side bottom 
+    pack $base.buttons.save_settings \
+		 -anchor center -expand 0 -fill none -side right -padx 8
+    pack $base.buttons.cancel \
+		 -anchor center -expand 0 -fill none -side left -padx 8
+
+    wm geometry $base ""
+    wm resizable $base 0 1
 }
 

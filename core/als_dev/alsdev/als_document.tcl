@@ -1,18 +1,21 @@
-# document.tcl
-# Copyright (c) 1998 Applied Logic Systems, Inc.
+##=================================================================================
+# 		document.tcl
+# 		Copyright (c) 1998 Applied Logic Systems, Inc.
 #
 # IDE Document windows.
-
+#
 # proenv indexes
 #
 # proenv(document_index) - Monotoniclly increasing index to create unique window names
 #
 # proenv(document,$file) - Name of window which contains the file $file
 #
-
+#
 # Document fields
 # proenv($window, file) - Path to the file for this document. Empty string if untitled.
 # proenv($window, dirty) - true iff document window is dirty.
+#
+##=================================================================================
 
 set proenv(document_index) 0
 
@@ -37,7 +40,7 @@ proc create_document_window {title} {
 	add_default_menus $w.menubar
 	add_file_menu $w.menubar document $w
 	add_edit_menu $w.menubar document $w
-	add_project_menu $w.menubar document $w
+	add_prolog_menu $w.menubar document $w
 	add_tools_menu $w.menubar document $w
 	add_help_menu $w.menubar
 		
@@ -49,7 +52,14 @@ proc create_document_window {title} {
 	scrollbar $w.sb -command "$w.text yview"
 	pack $w.sb -side right -fill both
 	pack $w.text -fill both -expand 1 -side left
-	$w.text configure -highlightthickness 0
+	$w.text configure -highlightthickness 0 \
+		-background $proenv(.document,background) \
+		-foreground $proenv(.document,foreground) \
+		-selectbackground $proenv(.document,selectbackground) \
+		-selectforeground $proenv(.document,selectforeground) \
+		-font $proenv(.document,font) \
+		-tabs $proenv(.document,tabs) 
+
 	focus $w.text
 
 	# Init document fields
@@ -94,6 +104,7 @@ proc load_document {file} {
 		set proenv($w,file) $file
 		set proenv(document,$file) $w
 	}
+	return $proenv(document,$file)
 }
 
 # Document methods
@@ -119,9 +130,9 @@ proc document.open args {
 	}
 }
 
-proc document.new {} {
-	create_document_window "Untitled"
-}
+#proc document.new {} {
+#	create_document_window "Untitled"
+#}
 
 proc document.close {w} {
 	dispose_document_window $w
@@ -139,7 +150,8 @@ proc document.save {w} {
 
 proc document.save_as {w} {
 	global array proenv
-	set file [tk_getSaveFile -initialfile [wm title $w]]
+	set file [tk_getSaveFile -initialfile [wm title $w] \
+		-defaultextension .pro ]
 	if {$file != ""} then {
 		if {[info exists proenv($w,file)]} then {
 			unset proenv(document,$proenv($w,file))

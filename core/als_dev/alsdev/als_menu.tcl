@@ -1,5 +1,12 @@
-
-
+##=================================================================================
+#|				als_menu.tcl
+#|		Copyright (c) 1998 Applied Logic Systems, Inc.
+#|
+#|		Tcl/Tk procedures for IDE menu code
+#|
+#|	Author: Chuck Houpt
+#|	Date:	January 1998
+##=================================================================================
 
 # Menu accelerator modifier key and elipsis string.
 
@@ -11,7 +18,6 @@ if {"$tcl_platform(platform)" == "macintosh"} {
 	set elipsis "..."
 }
 
-
 proc add_default_menus {menubar} {
 	global tcl_platform
 
@@ -22,13 +28,13 @@ proc add_default_menus {menubar} {
 	}
 }
 
-
 proc add_file_menu {menubar type window} {
 	global tcl_platform
 	global mod
 	global elipsis
 	
-	menu $menubar.file
+	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
+	menu $menubar.file -tearoff $TearOff
 	
     $menubar.file add command -label New -accelerator "$mod-N" -command document.new
     if {$tcl_platform(platform) == "macintosh"} {
@@ -39,18 +45,13 @@ proc add_file_menu {menubar type window} {
     $menubar.file add separator
     $menubar.file add command -label Save -accelerator "$mod-S" -command "$type.save $window"
     $menubar.file add command -label "Save As$elipsis" -command "$type.save_as $window"
-    $menubar.file add separator
-    $menubar.file add command -label "Consult$elipsis" -command reconsult
-    $menubar.file add command \
-        -label "Set Directory$elipsis" -command set_directory 
-    $menubar.file add command -label "Source Tcl$elipsis" -command source_tcl -state disabled
-	$menubar.file add command \
-		-label "Clear Workspace" -command clear_workspace
-    $menubar.file add separator
-    $menubar.file add command -label "Page Setup$elipsis" \
-		-command "$type.page_setup $window" -state disabled
-    $menubar.file add command -label "Print$elipsis" -accelerator "$mod-P"\
-		-command "$type.print $window" -state disabled
+
+#    $menubar.file add separator
+#    $menubar.file add command -label "Page Setup$elipsis" \
+#		-command "$type.page_setup $window" -state disabled
+#    $menubar.file add command -label "Print$elipsis" -accelerator "$mod-P"\
+#		-command "$type.print $window" -state disabled
+
     $menubar.file add separator
     $menubar.file add command -label "Quit" -accelerator "$mod-Q" -command exit_prolog
 
@@ -61,8 +62,10 @@ proc add_edit_menu {menubar type window} {
 	global tcl_platform
 	global mod
 	global elipsis
+	global proenv
 
-	menu $menubar.edit
+	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
+	menu $menubar.edit -tearoff $TearOff
 	
     $menubar.edit add command \
         -label Undo -accelerator "$mod-Z" -command "$type.undo $window" -state disabled
@@ -79,79 +82,135 @@ proc add_edit_menu {menubar type window} {
     $menubar.edit add command \
         -label {Select All} -accelerator "$mod-A" -command "$type.select_all $window"
     $menubar.edit add separator
-    $menubar.edit add command -label "Preferences$elipsis" \
-			-command "$type.preference $window"
+
+    menu $menubar.edit.preferences -relief raised -tearoff 0
+    $menubar.edit add cascade -label "Preferences$elipsis" \
+    	-menu $menubar.edit.preferences
+    $menubar.edit.preferences add command \
+		-label {Fonts & Colors} -command "fonts_and_colors $window"
+	menu $menubar.edit.preferences.generate -relief raised -tearoff 0
+	set proenv(obplcn) gias
+    $menubar.edit.preferences add cascade \
+		-menu $menubar.edit.preferences.generate -label {Generated Files}
+	$menubar.edit.preferences.generate add radiobutton \
+		-variable proenv(obplcn) -value gic \
+		-label {Generated in Current (gic)}
+	$menubar.edit.preferences.generate add radiobutton \
+		-variable proenv(obplcn) -value gis \
+		-label {Generated in Source(gis)}
+	$menubar.edit.preferences.generate add radiobutton \
+		-variable proenv(obplcn) -value gias \
+		 -label {Generated in Arch/Source(gias)}
+	$menubar.edit.preferences.generate add radiobutton \
+		-variable proenv(obplcn) -value giac \
+		-label {Generated in Arch/Current (giac)}
+
 	$menubar add cascade -menu $menubar.edit -label "Edit"
 }
 
-proc add_project_menu {menubar type window} {
+proc add_prolog_menu {menubar type window} {
 	global tcl_platform
 	global mod
 	global elipsis
 
-	menu $menubar.project
+	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
+	menu $menubar.prolog -tearoff $TearOff
 
-	if {$tcl_platform(platform) == "macintosh"} {
-		$menubar.project add command -label "Add File" -state disabled
-		$menubar.project add command -label "Remove File" -state disabled
-	} else {
-		$menubar.project add command \
-			-label "Open Project" -command open_project -state disabled
-		$menubar.project add command \
-			-label "New Project" -command new_project -state disabled
-		$menubar.project add command \
-			-label "Save Project" -command save_project -state disabled
-		$menubar.project add command \
-			-label "Save As Project" -command save_as_project -state disabled
-		$menubar.project add command \
-			-label "Close Project" -command close_project -state disabled
+    $menubar.prolog add command -label "Consult" -accelerator "$mod-K" -command "$type.consult $window"
+    $menubar.prolog add command -label "Source Tcl$elipsis" -command source_tcl -state disabled
+	$menubar.prolog add command \
+		-label "Clear Workspace" -command clear_workspace
+
+	if {"$type"=="listener"} then { 
+    	$menubar.prolog add separator
+    	$menubar.prolog add command \
+        	-label "Set Directory$elipsis" -command set_directory 
+
+    	$menubar.prolog add separator
+		$menubar.prolog add command \
+			-label "Dynamic Flags" \
+			-command show_dynamic_flags
+		menu $menubar.prolog.static -cursor {} -title "Static Flags"
+		$menubar.prolog add cascade -label "Static Flags" -menu $menubar.prolog.static 
+
+	} elseif {"$type"=="debugwin"} then {
+    	$menubar.prolog add separator
+    	$menubar.prolog add command -label {Abort} \
+        	-command { set DebugResponse Ba }
+    	$menubar.prolog add command -label {Break} \
+			-command { set DebugResponse Bb }
 	}
-    $menubar.project add separator
-    $menubar.project add command -label "Consult" -accelerator "$mod-K" -command "$type.consult $window"
-    $menubar.project add separator
-	$menubar.project add command \
-		-label "Dynamic Flags" \
-		-command show_dynamic_flags
-	menu $menubar.project.static -cursor {} -title "Static Flags"
-	$menubar.project add cascade -label "Static Flags" -menu $menubar.project.static 
-
-	$menubar add cascade -label "Project" -menu $menubar.project
-
+	$menubar add cascade -label "Prolog" -menu $menubar.prolog
 }
 
 proc add_tools_menu {menubar type window} {
 	global tcl_platform
 	global mod
 	global elipsis
+	global proenv
 
-	menu $menubar.tools
+	if {"$type"=="document"} then { return }	
 
-	$menubar.tools add checkbutton \
-	-label Debugger -command exec_toggle_debugwin -variable proenv(debugwin)
+	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
+	menu $menubar.tools -tearoff $TearOff
 
-	menu $menubar.tools.tclshell -relief raised
-	$menubar.tools add cascade \
-	-label {Tcl Shell} -menu $menubar.tools.tclshell -state disabled
-	$menubar.tools.tclshell add command \
-	-label "User Defined" -command {prolog_tcltk_shell user_def_choice}
-	$menubar.tools.tclshell add command \
-	-label "shl_tcli (System - Danger!)" \
-	-command {prolog_tcltk_shell shl_tcli}
+	if {"$type"=="listener"} then {
+		$menubar.tools add checkbutton \
+			-label Debugger -command exec_toggle_debugwin -variable proenv(debugwin)
 
-	$menubar.tools add separator 
-	## DefStructs:
-	menu $menubar.tools.defstr -relief raised
-	$menubar.tools add cascade \
-	-label {Structs} -menu $menubar.tools.defstr
-	$menubar.tools.defstr add command \
-	-label "Define New" -command new_defstruct
-	$menubar.tools.defstr add command \
-	-label "Edit" -command edit_defstruct 
+		menu $menubar.tools.tclshell -relief raised
+		$menubar.tools add cascade \
+			-label {Tcl Shell} -menu $menubar.tools.tclshell -state disabled
+		$menubar.tools.tclshell add command \
+			-label "User Defined" -command {prolog_tcltk_shell user_def_choice}
+		$menubar.tools.tclshell add command \
+			-label "shl_tcli (System - Danger!)" \
+			-command {prolog_tcltk_shell shl_tcli}
 
+		$menubar.tools add separator 
+		## DefStructs:
+		menu $menubar.tools.defstr -relief raised -tearoff 0
+		$menubar.tools add cascade \
+			-label {Structs} -menu $menubar.tools.defstr
+		$menubar.tools.defstr add command \
+			-label "Define New" -command new_defstruct
+		$menubar.tools.defstr add command \
+			-label "Edit" -command edit_defstruct 
+	} else {
 
+		# Spy
+		$menubar.tools add checkbutton  -label {Spy/NoSpy} \
+			-command exec_toggle_spywin -variable proenv(spywin)
+		$menubar.tools add command  -label {NoSpy all } \
+			-command nospy_all -state disabled
+		$menubar.tools add command  -label {Spy When} -state disabled
+
+		$menubar.tools add separator
+
+		menu $menubar.tools.settings -relief raised
+		$menubar.tools add cascade -label Settings -menu $menubar.tools.settings
+    	$menubar.tools.settings add command \
+        	-label {Set Print Depth} 
+		$menubar.tools.settings add command \
+			-label {Toggle Flat Print} -command { set DebugResponse Bm }
+
+		menu $menubar.tools.leashing -relief raised
+    	$menubar.tools add cascade \
+        	-label {Leashing}  -menu $menubar.tools.leashing
+		$menubar.tools.leashing add checkbutton \
+        	-label {call} -variable proenv(leash,call) \
+			-command {exec_toggle_leash call} 
+		$menubar.tools.leashing add checkbutton \
+        	-label {exit} -variable proenv(leash,exit) \
+			-command {exec_toggle_leash exit} 
+		$menubar.tools.leashing add checkbutton \
+        	-label {redo} -variable proenv(leash,redo) \
+			-command {exec_toggle_leash redo} 
+		$menubar.tools.leashing add checkbutton \
+        	-label {fail} -variable proenv(leash,fail) \
+			-command {exec_toggle_leash fail} 
+	}
 	$menubar add cascade -label "Tools" -menu $menubar.tools
-
-
 }
 
 proc add_help_menu {menubar} {
@@ -169,3 +228,4 @@ proc add_help_menu {menubar} {
 	}
 
 }
+
