@@ -53,7 +53,11 @@ save_image(ImageName, Options)
 save_image0(ImageName, Options)
 	:-
 	process_image_options(Options, ImageName, FinalImageName),
-	save_image(FinalImageName).
+	(dmember(preserve(all), Options) ->
+		save_image_develop(FinalImageName)
+		;
+		save_image(FinalImageName)
+	).
 
 /*!--------------------------------------------------------------*
  |	save_image/1
@@ -84,7 +88,6 @@ save_image(NewImageName)
 	command_line(CmdLine),
 	abolish(command_line,1),
 
-
 	(bagof( file_clause_group(Path2,CG2), 
 			file_clause_group(Path2,CG2), 
 			SDList2) 
@@ -92,8 +95,12 @@ save_image(NewImageName)
 	abolish(file_clause_group,2),
 	dynamic(file_clause_group/2),
 
-%	append(SDList0, SDList1, SDListA),
-%	append(SDListA, SDList2, SDList),
+	(bagof( consulted(A,B,C,D,E), 
+			consulted(A,B,C,D,E), 
+			SDList3) 
+	  -> true ; SDList3 = []),
+	abolish(consulted,5),
+	dynamic(consulted/5),
 
 		%% Save the new image based on OS
 	als_system(SystemList),
@@ -112,11 +119,38 @@ save_image(NewImageName)
 	save_image_type(Type, IMN, OrigALSDIR),
 	
 		%% Re-install the search dir info:
-	assert(sys_searchdir(ALSDIR)),
+	assert(sys_searchdir(OrigALSDIR)),
 	laa(SDList0),
 	laa(SDList1),
 	laa(SDList2),
+	laa(SDList3),
 	assert(command_line(CmdLine)).
+
+save_image_develop(NewImageName)
+	:-
+	adjust_sys_search_for_save(ALSDIR, OrigALSDIR),
+
+	command_line(CmdLine),
+	abolish(command_line,1),
+
+		%% Save the new image based on OS
+	als_system(SystemList),
+	dmember(os = OS, SystemList),
+	dmember(os_variation = OSVariation, SystemList),
+	image_type(OS, OSVariation, Type),
+	(OS = mswin32 ->
+		(filePlusExt(_,_,NewImageName) ->
+			IMN = NewImageName
+			;
+			filePlusExt(NewImageName,exe,IMN)
+		)
+		;
+		IMN = NewImageName
+	),
+	save_image_type(Type, IMN, OrigALSDIR),
+
+	assert(command_line(CmdLine)).
+
 
 	%%----------------------
 	%% This is really just assert_all from the library, but it
@@ -139,10 +173,10 @@ laa([Item | Rest])
 
 adjust_sys_search_for_save(ALSDIR,OrigALSDIR)
 	:-
+	sys_searchdir(ALSDIR),
 	(orig_sys_searchdir(OrigALSDIR) ->
 		true
 		;
-		sys_searchdir(ALSDIR),
 		OrigALSDIR = ALSDIR,
 		assert(orig_sys_searchdir(OrigALSDIR))
 	),
@@ -367,6 +401,9 @@ process_image_options([Option | Options], CurImageName, FinalImageName)
  |	process_image_option(Option)
  |	process_image_option(+)
  *---------------------------------------------------------------*/
+process_image_option(preserve(all))
+	:-!.
+
 process_image_option(init_goals(NewGoals))
 	:-!,
 	builtins:clause('$initialize',OldGoals),
@@ -404,7 +441,7 @@ process_image_option(select_lib(Library,FilesList))
 process_image_option(Unknown) 
 	:-
 %	als_advise('Ignoring unknown save image option \`%t\'\n', [Unknown]).
-	throw(se(Unkown)).
+	throw(se(Unknown)).
 
 /*---------------------------------------------------------------*
  |	add_lib_qual/3

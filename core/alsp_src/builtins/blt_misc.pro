@@ -12,6 +12,7 @@
 
 module sio.
 
+/*****
 :-	current_prolog_flag(windows_system, WinSys),
 	(WinSys = motif ->
 		assert_at_load_time(
@@ -79,5 +80,6 @@ module sio.
 	;	%% OpenLook %%
 	true
 	).
+*****/
 
 endmod.

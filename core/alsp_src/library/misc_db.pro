@@ -167,14 +167,14 @@ retract_all0([Pattern| List], Module)
 
 /*!---------------------------------------------------------------
  |	retract_each/2
- |	retract_each(Module, Pattern)
+ |	retract_each(Pattern, Module)
  |	retract_each(+, +)
  |
  |	- retracts, from Module, all clauses matching Pattern
  |
  *!--------------------------------------------------------------*/
 
-retract_each(Module, Pattern)
+retract_each(Pattern, Module)
 	:-
 	Module:retract(Pattern),
 	fail.

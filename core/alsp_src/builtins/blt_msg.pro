@@ -156,14 +156,18 @@ prolog_system_warning(ErrorCode, Args)
 export als_advise/1.
 als_advise(FormatString) 
 	:-
-	als_advise(FormatString, []),
-	flush_output.
+	als_advise(warning_output, FormatString, []).
 
 export als_advise/2.
 als_advise(FormatString, Args) 
 	:-
-	printf(warning_output, FormatString, Args),
-	flush_output(warning_output).
+	als_advise(warning_output, FormatString, Args).
+
+export als_advise/3.
+als_advise(Stream, FormatString, Args) 
+	:-
+	printf(Stream, FormatString, Args),
+	flush_output(Stream).
 
 %%%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%
 %%%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%
@@ -189,7 +193,7 @@ error_code(abort,		'Execution aborted.\n').
 error_code(uncaught,	'Uncaught throw...\n%t\nExecution aborted.\n').
 
 error_code(xconsult_er, 'Error (x)consulting file %t.\n').
-error_code(qf, 			'Query failed.\n').
+error_code(qf, 			'Query failed: %t\n').
 error_code(cf, 			'Command failed.\n').
 error_code(rdef_comma,	'Attempt to redefine comma - ignored.\n').
 error_code(rdef_semi,	'Attempt to redefine semicolon - ignored.\n').

@@ -364,7 +364,7 @@ shared_lib_exts(Exts)
 exec_consult(user, FCOpts)
 	:-!,
 	adjust_recon_flag(FCOpts),
-	load_source(user,_),
+	load_source(user,user,_),
 	mangle(12, FCOpts, user),
 	set_reconsult_flag(1).
 
@@ -395,7 +395,8 @@ exec_consult(BaseFile, FCOpts)
 
 exec_consult(PathList, Drive, BaseFile, ensure_loaded, SrcExt, FCOpts)
 	:-
- 	consulted(BaseFile, SrcPath, ObpPath, _, _),
+% 	consulted(BaseFile, SrcPath, ObpPath, _, _),
+ 	consulted(BaseFile, _, ObpPath, _, _),
 	!,
 	note_paths(FCOpts, SrcPath, ObpPath, ObpPath).
 
@@ -562,9 +563,16 @@ load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WkExt,FCOpts)
 	:-
 			%% Found in blt_shlr.pro:
 	transformer_db(WkExt, GenExt, DelFlag, ExtOpts), 
+	!,
 	outFilePath(GenExt, CanonSrcPath, BaseFile, OutFilePath),
 	fin_load_from_file(GenExt,Nature,BaseFile,CanonSrcPath,
 						OutFilePath,WkExt,ExtOpts,DelFlag,FCOpts).
+
+load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WkExt,FCOpts)
+	:-
+	load_source(CanonSrcPath,BaseFile,ObpPath),
+	ObpPath = none,
+	note_paths(FCOpts, CanonSrcPath, ObpPath, CanonSrcPath).
 
 fin_load_from_file(obp,Nature,BaseFile,CanonSrcPath,OutFilePath,
 					WkExt,ExtOpts,DelFlag,FCOpts)
@@ -598,7 +606,8 @@ fin_load_from_file(GenExt,Nature,BaseFile,SrcPath,OutFilePath,
  *-------------------------------------------------------------*/ 
 obp_load_file(CanonSrcPath, BaseFile, FCOpts)
 	:-
- 	consulted(BaseFile, CanonSrcPath, ObpPath, _, _),
+% 	consulted(BaseFile, CanonSrcPath, ObpPath, _, _),
+ 	consulted(BaseFile, _, ObpPath, _, _),
 	obp_load_from_path(BaseFile,ObpPath, CanonSrcPath),
 	!,
 	note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath).
@@ -620,9 +629,10 @@ obp_load_file(CanonSrcPath, BaseFile, FCOpts)
 
 obp_load_from_path(BaseFile,ObpPath, CanonSrcPath)
 	:-
-	(filePlusExt(NoSuffixPath, _, CanonSrcPath),! ; NoSuffixPath = CanonSrcPath),
-	establish_fcg(NoSuffixPath),
-	full_obp_load(CanonSrcPath, ObpPath),
+%	(filePlusExt(NoSuffixPath, _, CanonSrcPath),! ; NoSuffixPath = CanonSrcPath),
+%	establish_fcg(NoSuffixPath),
+	establish_fcg(BaseFile),
+	full_obp_load(CanonSrcPath, BaseFile, ObpPath),
 	reset_fcg(_).
 
 /*-------------------------------------------------------------*
@@ -635,7 +645,7 @@ default_load(CanonSrcPath,BaseFile,ObpPath,FCOpts)
 		obp_load_from_path(BaseFile,ObpPath, CanonSrcPath),
 		note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath)
 		;
-		load_source_object(CanonSrcPath,ObpPath),
+		load_source_object(CanonSrcPath,BaseFile,ObpPath),
 		note_paths(FCOpts, CanonSrcPath, ObpPath, CanonSrcPath)
 	).
 
@@ -653,10 +663,10 @@ note_paths(FCOpts, SrcFilePath, ObpPath, LoadedPath)
  |	Low-level load from .obp file, with check on status
  |	afterwards:
  *-------------------------------------------------------------*/ 
-full_obp_load(SrcPath, ObpPath)
+full_obp_load(SrcPath, BaseFile,ObpPath)
 	:-
 	obp_load(ObpPath,Status),
-	obp_load_checkstatus(Status,SrcPath,ObpPath).
+	obp_load_checkstatus(Status,SrcPath,BaseFile,ObpPath).
 
 /*-----------------------------------------------------------------------*
  |	obp_load_checkstatus/3
@@ -664,22 +674,22 @@ full_obp_load(SrcPath, ObpPath)
  |	obp_load_checkstatus(Status,SPath,OPath)
  *-----------------------------------------------------------------------*/
 	%% FLOAD_FAIL
-obp_load_checkstatus(0,SPath,OPath) 
+obp_load_checkstatus(0,SPath,BaseFile,OPath) 
 	:-!,	
 		%% obpload_er: "Error loading Prolog obp file %t.\n"
 	prolog_system_error(obpload_er, [OPath]),
-	attempt_load_source_object(SPath,OPath).
+	attempt_load_source_object(SPath,BaseFile,OPath).
 
 	%% FLOAD_SUCCESS
-obp_load_checkstatus(1,SPath,OPath) 
+obp_load_checkstatus(1,SPath,BaseFile,OPath) 
 	:-!.
 
 	%% FLOAD_ILLOBP
-obp_load_checkstatus(2,SPath,OPath) 
+obp_load_checkstatus(2,SPath,BaseFile,OPath) 
 	:-	
 		%% old_obp: "%t in old or unrecognized .obp format.\n"
 	prolog_system_error(old_obp, [OPath]),
-	attempt_load_source_object(SPath,OPath).
+	attempt_load_source_object(SPath,BaseFile,OPath).
 
 /*-----------------------------------------------------------------------*
  | prepend_current_consult_directory/4
@@ -802,12 +812,12 @@ fin_record_consult(File, SrcFilePath, ObpPath, DebugType, Options)
  	consulted(File, OrigDir, A, B, C),
 	!,
  	retract(consulted(File, SrcFilePath, A, B, C)),
- 	assert(consulted(File, SrcFilePath, ObpPath, DebugType, Options)).
+ 	assert_at_load_time(consulted(File, SrcFilePath, ObpPath, DebugType, Options)).
 
 	%% Not previously recorded:
 fin_record_consult(File, SrcFilePath, ObpPath, DebugType, Options)
 	:-
- 	assert(consulted(File, SrcFilePath, ObpPath, DebugType, Options)).
+ 	assert_at_load_time(consulted(File, SrcFilePath, ObpPath, DebugType, Options)).
 
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		%% CONTROLLING MESSAGES
@@ -850,15 +860,16 @@ set_consult_messages(Value)
 /*-------------------------------------------------------------*
  | For loading source (.pro) files without writing the .obp file:
  *-------------------------------------------------------------*/ 
-load_source(Path,Type) :-
+load_source(Path,BaseFile,Type) :-
 	(filePlusExt(NoSuffixPath, _, Path),!; NoSuffixPath = Path),
-	establish_fcg(NoSuffixPath),
+%	establish_fcg(NoSuffixPath),
+	establish_fcg(BaseFile),
 	obp_push_stop,
 	xconsult(Path,NErrs),
 	obp_pop,
 	reset_fcg(_),
 	!.
-load_source(_,_) :-
+load_source(_,_,_) :-
 	obp_pop,
 		%% ld_src_err: "Internal error in load_source for file %t\n"
 	prolog_system_error(ld_src_err, []).
@@ -866,9 +877,10 @@ load_source(_,_) :-
 /*-------------------------------------------------------------*
  |	For loading source (.pro) files AND writing the .obp file:
  *-------------------------------------------------------------*/ 
-load_source_object(SPath,OPath) :-
+load_source_object(SPath,BaseFile,OPath) :-
 	(filePlusExt(NoSuffixPath, _, SPath),!; NoSuffixPath = SPath),
-	establish_fcg(NoSuffixPath),
+%	establish_fcg(NoSuffixPath),
+	establish_fcg(BaseFile),
 	obp_open(OPath),
 	!,
 	xconsult(SPath,NErrs),
@@ -883,7 +895,7 @@ load_source_object(SPath,OPath) :-
 			prolog_system_error(obp_not_removed,[SPath,OPath])
 		)
 	).
-load_source_object(SPath,OPath)
+load_source_object(SPath,BaseFile,OPath)
 	:-
 	prolog_system_error(no_open_fil, [OPath]),
 	prolog_system_error(no_obp, [OPath]),
@@ -893,12 +905,12 @@ load_source_object(SPath,OPath)
  |	For loading source (.pro) files AND writing the .obp file,
  |	BUT make sure the file exists, and give a warning message:
  *-------------------------------------------------------------*/ 
-attempt_load_source_object(SPath,OPath) :-
+attempt_load_source_object(SPath,BaseFile,OPath) :-
 	exists_file(SPath),
 	prolog_system_error(atmpt_cmp, [SPath]),
-	load_source_object(SPath,OPath).
+	load_source_object(SPath,BaseFile,OPath).
 
-attempt_load_source_object(SPath,OPath) :-
+attempt_load_source_object(SPath,BaseFile,OPath) :-
 	prolog_system_error(ld_fail, [SPath]).
 
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1109,12 +1121,12 @@ fin_o_f_path(subdir(arch,Where), OutDisk, GenExt, CanonSrcPath,
 		;
 				%% take Where to be = cur (subdir of current):
 		get_cwd(CurDir),
-		rootPlusPath(OrigDisk,OutDirList,CurDir),
+		rootPlusPath(OutDisk,OutDirList,CurDir),
 		append(OutDirList, [SubDir], NewPathList)
 	),
-	rootPlusPath(OrigDisk, NewPathList, OutDir),
+	rootPlusPath(OutDisk, NewPathList, OutDir),
 	(exists_file(OutDir) -> true ; make_subdir(OutDir) ),
-	rootPathFile(OrigDisk, NewPathList, OutFile, OutFilePath).
+	rootPathFile(OutDisk, NewPathList, OutFile, OutFilePath).
 
 fin_o_f_path(OutDir, OutDisk, GenExt, CanonSrcPath, BaseFile, OutFilePath)
 	:-
@@ -1192,23 +1204,6 @@ generated_in_arch(Which)
 	(Which = src -> Place = src ; Place = cur),
 	asserta(genFileLocn(_,subdir(arch,Place), '')).
 
-export setup_tcltk/0.
-setup_tcltk
-	:-
-	setup_tcltk(shl_tcli).
-
-setup_tcltk(Interp)
-	:-
-	consult('tclintf.psl'),
-	tcl_new(Interp),
-	tcl_eval(Interp, 'set TclLib [info library]', TclLibPath),
-	sprintf(atom(Cmd0), 'source "%t/init.tcl"', [TclLibPath]),
-	tcl_eval(Interp, Cmd0, _),
-
-	tcl_eval(Interp, 'set TkLib $tk_library', TkLibPath),
-	sprintf(atom(Cmd1), 'source "%t/tk.tcl"', [TkLibPath]),
-	tcl_eval(Interp, Cmd1, _).
-	
 /* Some definitions for standard */
 
 export multifile/1.

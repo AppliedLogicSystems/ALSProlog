@@ -16,6 +16,7 @@
 
 module sio.
 use windows.
+use tcltk.
 
 :- auto_use(sio).
 
@@ -49,6 +50,7 @@ use windows.
 default_read_eoln_type(_, universal).
 
 default_write_eoln_type(socket, crlf) :- !.
+
 :-	als_system(L),
 	dmember(os=OS, L),
 	(OS=mswin32 -> assert(default_write_eoln_type(_, crlf))
@@ -635,10 +637,12 @@ open(Source_sink,Mode,Stream,Options)
 	:-
 	check_source_sink_and_mode(Source_sink,Mode),
 	check_open_options(Options),
-	check_alias(Options,Alias),
+	check_alias(Options, Source_sink, Alias),
+	alias_extend_opts(Alias, Options, XOptions),
+
 	check_repositionability(Source_sink,Mode,Options,Positionability),
 	var_ok(Stream),
-	open_stream(Source_sink,Mode,Options,Stream),
+	open_stream(Source_sink,Mode,XOptions,Stream),
 	(Alias = no(alias) -> true ; set_alias(Alias, Stream)),
 	stream_identifier(Stream,Id),
 	set_stream_table(Id,Stream),
@@ -701,10 +705,12 @@ check_source_sink_and_mode(console_error(_),Mode) :-
 	check_mode(Mode,read_write_modes(Mode,_,_)).
 check_source_sink_and_mode(tk_win(_,_),Mode) :-
 	!,
-	check_mode(Mode,read_write_modes(Mode,_,_)).
+	(Mode = read_write; Mode = read ; Mode = Write ).
+%	check_mode(Mode,read_write_modes(Mode,_,_)).
 check_source_sink_and_mode(tk_window(_,_),Mode) :-
 	!,
-	check_mode(Mode,read_write_modes(Mode,_,_)).
+	(Mode = read_write; Mode = read ; Mode = Write ).
+%	check_mode(Mode,read_write_modes(Mode,_,_)).
 check_source_sink_and_mode(window(_),Mode) :-
 	!,
 	check_mode(Mode,read_write_modes(Mode,_,_)).
@@ -794,17 +800,33 @@ check_list_option(M,ML) :-
 	domain_error(stream_option,M,3).
 
 
-/*
- * check_alias(Options, Stream)
- *
- * Checks for an alias and whether or not it is a valid alias for a new open.
- */
+/*----------------------------------------------------------*
+ | check_alias/3
+ | check_alias(Options, Source_sink, Alias)
+ | check_alias(+, +, -)
+ |
+ |	Checks for an alias 'Alias' and determines whether or 
+ |	not it is a valid alias for a new stream open; 
+ |	returns the alias found in the variable 'Alias'.
+ |	Under some circumstances (eg, for a tk_window stream),
+ |	will generate an alias if one is not found on Options. 
+ |	Normally, if no alias is found, binds Alias to no(alias)
+ *----------------------------------------------------------*/
 
-check_alias(Options,Alias) :-
+
+check_alias(Options, Source_sink, Alias) 
+	:-
 	dmember(alias(Alias), Options),
 	!,
 	check_alias(Alias).
-check_alias(Options,no(alias)).
+
+	%% No alias; use WinName as one for tk_windows:
+check_alias(Options, tk_window(_,WinName), Alias) 
+	:-!,
+	(atom(WinName) -> Alias = WinName ; sprintf(atom(Alias), '%t', [WinName]) ),
+	check_alias(Alias).
+
+check_alias(Options, Source_sink, no(alias)).
 
 check_alias(Var) :-
 	var(Var),
@@ -816,6 +838,13 @@ check_alias(Alias) :-
 	permission_error(open,source_sink,alias(Alias),2).
 check_alias(Alias).
 	
+alias_extend_opts(no(alias), Options, Options)
+	:-!.
+alias_extend_opts(Alias, Options, Options)
+	:-
+	dmember(alias(Alias), Options),
+	!.
+alias_extend_opts(Alias, Options, [alias(Alias) | Options]).
 
 /*
  * check_repositionability/4 checks to see if the positionability option
@@ -999,6 +1028,7 @@ initialize_stream(StreamType,Source_sink,Options,Stream)
 
 default_snr(window, snr_code).
 default_snr(tk_window, snr_code).
+default_snr(tk_win, snr_code).
 default_snr(StreamType, wait).
 
 default_blocking(window, false) :-!.
@@ -1481,7 +1511,7 @@ rexec_open0(0, _, 0, no(alias)) :-
 rexec_open0(s(Stream,Opts), Mode, Stream, Alias) :-
 	var_ok(Stream),
 	check_open_options(Opts),
-	check_alias(Opts, Alias),
+	check_alias(Opts, nil, Alias),
 	initialize_stream(socket,socket(0,0,inet,stream),Opts,Stream),
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
@@ -1633,7 +1663,6 @@ data_ready(Stream)
 				x_XFlush(Display)
 	     )
 	   ),
-
 		asserta_at_load_time(
 			( wait_data(window, Stream, Call) :-!,
 				stream_pgoals(Stream,PromptGoal),
@@ -1646,7 +1675,7 @@ data_ready(Stream)
 					%% restart call:
 				call(Call)		)	
 						   ) 
-	;	%% Motif %%
+	;	%% end Motif %%
 	WinSys = openlook ->
 		assert_at_load_time(
 			( winsGetTextInsertionPosition(WinID, WinInsertPos) :-
@@ -1676,11 +1705,31 @@ data_ready(Stream)
 	).
 ******************** MOVED TO blt_misc ***********************/
 
-wait_data(sysV_queue, Stream, Call) :-
+wait_data(tk_window, Stream, Call) 
+	:-!,
+	wait_data(tcltk, Stream, Call).
+
+wait_data(tk_win, Stream, Call) 
+	:-!,
+	wait_data(tcltk, Stream, Call).
+
+wait_data(tcltk, Stream, Call) 
+	:-!,
+	stream_addl1(Stream, Alias),
+	stream_addl3(Stream, WinID),
+	tcl_call(shl_tcli, [set_prompt_mark, WinID], _),
+	tcl_call(shl_tcli, [bind,WinID,'<Return>', [ xmit_line_plain,WinID,Alias]], _),
+	tcl_call(shl_tcli, [ tkwait, variable, 'WaitForLine' ], _),
+
+	call(Call).
+
+wait_data(sysV_queue, Stream, Call) 
+	:-!,
 	loop_for_data(sysV_queue, Stream),
 	!,
 	call(Call).
 
+/*
 wait_data(tk_window, Stream, Call) 
 	:-
 %	stream_pgoals(Stream,PromptGoal),
@@ -1692,6 +1741,7 @@ wait_data(tk_window, Stream, Call)
 	tcl_eval(Interp, 'after 1000 ; update', _),
 			%% restart call:
 	call(Call).
+*/
 
 wait_data(socket, Stream, Call) :-
 	sio_poll(Stream, 100000),	% 1 sec  - restore when 2nd arg fixed
@@ -1782,25 +1832,26 @@ getWinGV(WinID,WinPosGV) :-      %% allocate a gvar for WinID if not previously 
 
 open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
 	:-
-	(atom(WinName) -> WinID = WinName ; 
-		sprintf(atom(WinID), '%t', [WinName]) ),
+	(atom(WinName) -> WinID = WinName ; sprintf(atom(WinID), '%t', [WinName]) ),
 	initialize_stream(tk_window,WinName,Options,Stream),
+
+	(dmember(alias(Alias), Options) -> true ; Alias = WinName),
+		%% store the stream alias:
+	set_stream_addl1(Stream, Alias),
+		%% store the tcl/tk interpreter:
 	set_stream_addl2(Stream, Interp),
+		%% store the window id:
 	set_stream_addl3(Stream, WinID),
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
 	sio_tk_win_open(WinID,Stream,NMode,NBuffering),
-	TextBuffer = [],
+	TextBuffer = '',
 	set_stream_extra(Stream,TextBuffer),	%% the Prolog side window buffer
-	set_stream_addl1(Stream,TextBuffer),	%% the window insertion position
-	    %% Note: extra/addl1 together maintain the text buffer as an
-	    %% extensible list; addl1 points at the last cons pair in the
-	    %% list and new entries are made by mangling the tail pointer,
-	    %% so as to avoid any problems with resetting a normal extensible
-	    %% list tail variable on backtracking; this initial value for
-	    %% TextBuffer is a single entry of an empty line, which doesn't
-	    %% cause a new line to go out.
+	    %% Note: extrar maintains the text buffer;
+		%% New lines are pasted onto the end using
+		%% '$atom_concat", and the result is 
+		%% set_stream_extra into the stream slot
 	!.
 
 open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
@@ -1819,9 +1870,6 @@ open_tcl_transfer_stream(CmdPattern,Interp,Mode,Options,Stream)
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
 	sio_tk_win_open(ID,Stream,NMode,NBuffering).
-
-
-
 
 /*
  * bufsize/3 determines the buffer size to use by examining the options
@@ -1844,7 +1892,6 @@ prompt_goal(Options,PromptGoal) :-
     member(prompt_goal(PromptGoal),Options),
     !.
 prompt_goal(_,true).
-
 
 /*
  * wt_init_options/2 looks for maxdepth(N), line_length(N), and
@@ -2207,9 +2254,12 @@ get_failure_read_eof_code(get_line0, -1).
 %	fail.
 
 get_failure_read_snr(snr_code, Pred, ArgNum, Stream, Call) :-
+
+	stream_blocking(Stream, BLOCK),
+	stream_type(Stream, StrmType),
 	stream_blocking(Stream, true),
 	stream_type(Stream, StrmType),
-	dmember(StrmType, [socket,window]),
+	dmember(StrmType, [socket,tk_window,tk_win,window]),
 	!,
 	wait_data(StrmType, Stream, Call).
 get_failure_read_snr(wait, Pred, ArgNum, Stream, Call) :-
@@ -2440,25 +2490,28 @@ first_nonblank_char([_ | Rest], Char) :-
 
 
 
-/*
- * read_buffer/2
- *	There are special case clauses for the streams which
- *	are handled primarily from Prolog (e.g., atom or string streams);
- *	the rest default to sio_readbuffer
- */
+/*------------------------------------------------------------*
+ |  read_buffer/2
+ |	read_buffer(Type,Stream)
+ |	read_buffer(+,+)
+ |
+ |	There are special case clauses for the streams which
+ |	are handled primarily from Prolog (e.g., atom or string streams);
+ |	the rest default to sio_readbuffer
+ *------------------------------------------------------------*/
 
-read_buffer(atom,Stream) :-
-	!,
+read_buffer(atom,Stream) 
+	:-!,
 	sio_bufshift(Stream),
 	read_atom(Stream).
 	
-read_buffer(string,Stream) :-
-	!,
+read_buffer(string,Stream) 
+	:-!,
 	sio_bufshift(Stream),
 	read_string(Stream).
 
-read_buffer(null_stream, Stream) :-
-	!,
+read_buffer(null_stream, Stream) 
+	:-!,
 	sio_set_eof(Stream),
 	fail.	
 
@@ -2478,7 +2531,6 @@ read_buffer(window,Stream)
 	stream_extra(Stream,Tail),
 	Tail == [],
 	!,
-%	alarm(0,0),
 	stream_pgoals(Stream,PromptGoal),
 	call(PromptGoal),
 	sio_set_errcode(Stream,14),		%% 14 =  SIOE_NOTREADY
@@ -2487,13 +2539,6 @@ read_buffer(window,Stream)
 read_buffer(window,Stream) 
 	:- !,
 		%% get the queue of raw lines:
-/*
-	(builtins:obtain_alarm_interval(Intrv) -> 
-%		write(read_buffer_resetting_alarm(Intrv,Intrv)),nl,flush_output,
-		alarm(Intrv, Intrv) 
-		; 
-		true),
-*/
 	stream_extra(Stream,CurQueue),
 	sio_buf_params(Stream, BufStart, BufSize),
 	stream_buffer(Stream,SD),
@@ -2505,19 +2550,34 @@ read_buffer(window,Stream)
 		set_stream_addl1(Stream, [])
 	).
 
-export push_prompt/1.
-push_prompt(Stream_or_alias)
-	:-
-	is_stream(Stream_or_alias,Stream),
-	stream_pgoals(Stream,PromptGoal),
-	call(PromptGoal).
+read_buffer(tk_window,Stream) 
+	:- 
+	stream_extra(Stream,''),
+	!,
+	sio_set_errcode(Stream,14),		%% 14 =  SIOE_NOTREADY
+	fail.
+
+read_buffer(tk_window,Stream) 
+	:- !,
+	stream_extra(Stream,CurQueue),
+	sio_buf_params(Stream, BufStart, BufSize),
+	sio_cpos(Stream,  CPos),
+	sio_lpos(Stream,  LPos),
+	BeginPoint is BufStart + CPos,
+	stream_buffer(Stream,SD),
+	atom_length(CurQueue, CQL),
+	move_queue_seg_to_buffer(CurQueue,CQL,BufSize,BeginPoint,SD,NumCs,NewQueue),
+	NLPos is LPos + NumCs,
+	NCPos is CPos,
+	sio_set_position(Stream, NCPos, NLPos),
+	set_stream_extra(Stream,NewQueue).
 
 %%
 %% This is the place to add read_buffer definitions for other stream types
 %%
 
-read_buffer(_,Stream) :-
-	!,
+read_buffer(_,Stream) 
+	:-!,
 	stream_pgoals(Stream,PromptGoal),
 	call(PromptGoal),
 	read_buffer(Stream).
@@ -2536,11 +2596,38 @@ read_buffer(Stream) :-
 	!,
 	read_buffer(Stream).
 
+export push_prompt/1.
+push_prompt(Stream_or_alias)
+	:-
+	is_stream(Stream_or_alias,Stream),
+	stream_pgoals(Stream,PromptGoal),
+	call(PromptGoal).
 
-/*
- * read_atom/1 is called by read_buffer to fill the buffer associated with an
- * atom stream.
- */
+/*----------------------------------------------------------*
+ |	add_to_stream_buffer/2
+ |	add_to_stream_buffer(StreamOrAlias, InputLine)
+ |	add_to_stream_buffer(+, +)
+ |	
+ |	called by the code implementing read_buffer/2 for
+ |	tk_window streams to add the incoming line (which
+ |	is part of a term) to the queue being accumulated
+ |	in the "extra" slot of the stream.
+ *----------------------------------------------------------*/
+
+export add_to_stream_buffer/2.
+add_to_stream_buffer(StreamOrAlias, InputLine)
+	:-
+	is_stream(StreamOrAlias, Stream),
+	stream_extra(Stream, CurBuffer),
+	'$atom_concat'(CurBuffer, InputLine, NewBuffer),
+	set_stream_extra(Stream, NewBuffer).
+
+/*----------------------------------------------------------*
+ |	read_atom/1 
+ |	
+ |	called by read_buffer to fill the buffer associated 
+ |	with an atom stream.
+ *----------------------------------------------------------*/
 
 read_atom(Stream) :-
 	stream_addl1(Stream,APos),
@@ -2678,6 +2765,7 @@ read_window(Stream) :-
  |	the next time read_buffer/2 is called.
  *------------------------------------------------------------------------*/
 
+
 move_lines_to_buffer([],_,_,_,CurNum,CurNum,[]).
 move_lines_to_buffer(CurQueue,BufSize,BufStart,SD,CurNum,NumCs,NewQueue) :-
 	CurNum < BufSize,
@@ -2693,6 +2781,39 @@ move_lines_to_buffer(CurQueue,BufSize,BufStart,SD,CurNum,NumCs,NewQueue) :-
 	NewQueue = RestCurQueue.
 move_lines_to_buffer(CurQueue,_,_,_,CurNum,CurNum,CurQueue).
 
+
+	%% move_queue_seg_to_buffer(CurQueue,CQL,BufSize,BeginPoint,SD,NumCs,NewQueue),
+
+move_queue_seg_to_buffer('',0,_,_,_,_,_,_)
+	:-!,
+	fail.
+
+move_queue_seg_to_buffer(CurQueue,CQL,BufSize,Offset,SD,NumCs,NewQueue)
+	:-
+	copy_into_uia(0,CQL,CurQueue,Offset,BufSize,SD,NumCs),
+	(NumCs < CQL ->
+		Start is NumCs + 1,
+		sub_atom(CurQueue, Start, CQL, NewQueue)
+		;
+		NewQueue = ''
+	).
+
+copy_into_uia(CurPos,NumToCopy,SrcUIA,BufPos,BufSize,Buf,NumCs)
+	:-
+	CurPos =< NumToCopy,
+	BufPos < BufSize,
+	!,
+	'$uia_peekb'(SrcUIA, CurPos, BB),
+	'$uia_pokeb'(Buf, BufPos, BB),
+	NextPos is CurPos + 1,
+	NextBufPos is BufPos + 1,
+	copy_into_uia(NextPos,NumToCopy,SrcUIA,NextBufPos,BufSize,Buf,NumCs).
+
+copy_into_uia(CurPos,_,_,_,_,_,NumCs)
+	:-
+	NumCs is CurPos - 1.
+	
+	
 
 /*
  * put_failure/4
@@ -2950,35 +3071,15 @@ write_buffer(tk_window,Stream) :-
 	sio_lpos(Stream, NumCs),
 	NumCs > 0,
 	!,
-%	sio_fd(Stream, WinID),
 	'$uia_peeks'(SD,BufStart,NumCs,BufUIA),
 	stream_mode(Stream, [_|OutType]),
 	stream_addl2(Stream, Interp),
 	stream_addl3(Stream, WinID),
-	sprintf(atom(Cmd), '%t insert end {%t} ; update', [WinID, BufUIA]),
 	sio_set_position(Stream, 0, 0),
-	catch( tcl_eval(Interp, Cmd, _), _, true).
+	catch(tcl_call(Interp, [WinID,insert,end,BufUIA], _),_,true),
+	catch(tcl_call(Interp, [update,idletasks], _),_,true).
 
 write_buffer(tk_window,Stream) :-!.
-
-/*
-write_buffer(tcl_transfer,Stream) :-
-	sio_buf_params(Stream, BufStart, BufSize),
-	stream_buffer(Stream,SD),
-	sio_lpos(Stream, NumCs),
-	NumCs > 0,
-	!,
-%	sio_fd(Stream, ID),
-	'$uia_peeks'(SD,BufStart,NumCs,BufUIA),
-%	stream_mode(Stream, [_|OutType]),
-	stream_addl2(Stream, Interp),
-	stream_addl3(Stream, CmdPattern),
-	sprintf(atom(Cmd), CmdPattern, [BufUIA]),
-%	catch( tcl_eval(Interp, Cmd, _), _, true),
-	tcl_eval(Interp, Cmd, _),
-	sio_set_position(Stream, 0, 0).
-
-*/
 
 write_buffer(tcl_transfer,Stream) 
 	:-!,
@@ -3260,8 +3361,7 @@ nl0(Stream)
 	!,
 	stream_addl2(Stream, Interp),
 	stream_addl3(Stream, WinName),
-	sprintf(atom(Cmd), '%t insert end "\n" ; update', [WinName]), 
-	tcl_eval(Interp, Cmd, _).
+	tcl_eval(Interp, [WinName,' insert end "\n" ; update'], _).
 
 nl0(Stream) 
 	:-
@@ -3410,7 +3510,6 @@ export get_token_list/2.
 
 get_token_list(Stream,L1) :-
 	sio_next_tokens(Stream,L2,T),
-	!,
 	get_token_list(T,Stream,L1,L2).
 get_token_list(Alias, L1) :-
 	is_input_alias(Alias, Stream),
@@ -3422,6 +3521,7 @@ get_token_list(Stream_or_alias, List) :-
 	sio_errcode(Stream, FailCode),
 	get_failure(FailCode, Stream, get_token_list(Stream_or_alias,List)).
 
+	%%% get_token_list/2:
 get_token_list(T,Stream,L1,L2) :-
 	var(T),
 	!,
@@ -3497,24 +3597,23 @@ get_line(Line) :-
 	get_current_input_stream(Stream),
 	get_line(Stream,Line).
 
-
-
-/*
- * get_line(Stream_or_alias, Line)
- *
- *	Reads from Stream the current line or remaining portion thereof
- *	into a UIA and unifies this UIA with Line.
- *
- *	If end-of-file is encountered before any characters, this predicate
- *	will fail.  If end-of-file is encountered before the newline, then
- *	this predicate will unify Line with the UIA containing the characters
- *	encountered up until the end-of-file.
- */
+/*-------------------------------------------------------------------------*
+ |	get_line(Stream_or_alias, Line)
+ |
+ |	Reads from Stream the current line or remaining portion thereof
+ |	into a UIA and unifies this UIA with Line.
+ |
+ |	If end-of-file is encountered before any characters, this predicate
+ |	will fail.  If end-of-file is encountered before the newline, then
+ |	this predicate will unify Line with the UIA containing the characters
+ |	encountered up until the end-of-file.
+ *-------------------------------------------------------------------------*/
 
 export get_line/2.
 
 get_line(Stream,Line) :-
 	get_line0(Stream,Line0,EndFlag),
+%pbi_write(get_line0(Line0,EndFlag)),pbi_nl,pbi_ttyflush,
 	gl_more(EndFlag,Stream,Line0,Line).
 
 gl_more(-2,_,_,stream_not_ready('')) :-
@@ -3771,8 +3870,11 @@ sio_pckg_init :-
 	 buffering(line), type(text)]),
     open(console('standard input'), read, InStream, 
 	 ['$stream_identifier'(-1), alias(user_input),
-	 prompt_goal(user_prompt_goal(user_output))]),
+	 prompt_goal(user_prompt_goal(user_output))]). 
 
+export open_addl_std_streams/0.
+open_addl_std_streams
+	:-
     %% Debugger streams
 
     open(console('debugger output'),write, OutDStream,
@@ -3790,8 +3892,10 @@ sio_pckg_init :-
 	 ['$stream_identifier'(-5), alias(error_stream),
 	 buffering(line),type(text)]),
 
-    set_input(InStream),
-    set_output(OutStream),
+%    set_input(InStream),
+%    set_output(OutStream),
+    set_input(user_input),
+    set_output(user_output),
 
     %% Establish additional aliases
     set_alias(warning_input, InDStream),

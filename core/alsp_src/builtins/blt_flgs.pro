@@ -22,10 +22,14 @@ export set_prolog_flag/2.
 set_prolog_flag(Flag, Value) 
 	:-
 	atom_ok(Flag),
-	(   get_PROLOG_flag(Flag, _) -> true
-	;   domain_error(prolog_flag, Flag, 1) ),
-	(   prolog_flag_value_check(Flag, Value) -> true
-	;   domain_error(flag_value, Flag+Value, 1) ),
+	(get_PROLOG_flag(Flag, _) -> true
+		;   
+		domain_error(prolog_flag, Flag, 1) 
+	),
+	(prolog_flag_value_check(Flag, Value) -> true
+		;   
+		domain_error(flag_value, Flag+Value, 1) 
+	),
 	!,
 	set_PROLOG_flag(Flag, Value).
 
@@ -160,6 +164,10 @@ default_prolog_flag_value(double_quotes, codes).
 	%%  extension
 	%%---------------------------------
 
+default_prolog_flag_value(windows_system, tcltk)
+	:-
+	all_procedures(user,tcleval,3,0), !.
+
 	%% Keep this one BEFORE the one for X:
 default_prolog_flag_value(windows_system, motif)
 	:-
@@ -189,6 +197,11 @@ default_prolog_flag_value(windows_system, wxwins)
 */
 default_prolog_flag_value(windows_system, nowins).
 
+prolog_flag_value_check(windows_system, Which)
+	:-
+	clause(default_prolog_flag_value(windows_system,Which), _),
+	!.
+
 	%%---------------------------------
 	%%	anonymous solution reporting
 	%%---------------------------------
@@ -203,6 +216,28 @@ default_prolog_flag_value(anonymous_solutions, false).
 	%% 
 	%% - defined in C
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#if (syscfg:intconstr)
+
+	%%-----------------------------------------------------
+	%% For CLP(BNR): 
+	%%    iters_max_exceeded control;
+	%% When max is exceeded, options are:
+	%%     -- succeed (leaves network in place); 
+	%%     -- fail (quiet; backtracking resets net);
+	%%     -- warning (fails & issues warning; 
+	%%                        backtracking resets net);
+	%%     -- exception (backtracking resets net);
+	%%-----------------------------------------------------
+
+prolog_flag_value_check(iters_max_exceeded, succeed).
+prolog_flag_value_check(iters_max_exceeded, fail).
+prolog_flag_value_check(iters_max_exceeded, warning).
+prolog_flag_value_check(iters_max_exceeded, exception).
+
+default_prolog_flag_value(iters_max_exceeded, succeed).
+
+#endif
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% ACTUALLY INITIALIZE THE FLAGS:

@@ -211,6 +211,11 @@ check_rt_options(Other, _,_, _, _,_) :-
  |
  |		--  indicates how to handle a syntax error.
  |
+ |		+ error: raise error exception
+ |		+ fail:	 fail, outputting error message
+ |		+ quiet: fail, with no message		
+ |		+ dec10: attempt Dec10-style error emulation
+ |
  |	vars_and_names(Vars,Names)
  |
  |		--  Unifies Vars with a list of the
