@@ -4648,21 +4648,21 @@ pbi_msgctl()
 #endif /* SysVIPC */
 
 
-/*
- * sio_readln(Stream,Line,EOLNFlag)
- *
- * Stream is the input argument.  It should contain an open stream.
- * Line will be unified with a UIA containing as much of the current
- *      line as could be read. The end of line character(s) are not returned
- *      in this buffer.
- * EOLNFlag will take on one of the following values.
- *      0 if the end of line was not read.
- *      1 if the end of line was read.
- *
- * Note: The following code will need to be ifdef'd in order to accomodate
- * other systems.  Details like different end of line characters and number
- * of end of line characters need to be addressed.
- */
+/*-----------------------------------------------------------------------------*
+ | sio_readln(Stream,Line,EOLNFlag)
+ |
+ | Stream is the input argument.  It should contain an open stream.
+ | Line will be unified with a UIA containing as much of the current
+ |      line as could be read. The end of line character(s) are not returned
+ |      in this buffer.
+ | EOLNFlag will take on one of the following values.
+ |      0 if the end of line was not read.
+ |      1 if the end of line was read.
+ |
+ | Note: The following code will need to be ifdef'd in order to accomodate
+ | other systems.  Details like different end of line characters and number
+ | of end of line characters need to be addressed.
+ *-----------------------------------------------------------------------------*/
 
 int
 sio_readln()
@@ -4678,50 +4678,59 @@ sio_readln()
     w_get_An(&v3, &t3, 3);
 
     if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
-	FAIL;
+		FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_READ)) {
-	SIO_ERRCODE(buf) = SIOE_ILLREAD;
-	FAIL;
+		SIO_ERRCODE(buf) = SIOE_ILLREAD;
+		FAIL;
     }
 
     if (t2 != WTP_UNBOUND || t3 != WTP_UNBOUND) {
-	SIO_ERRCODE(buf) = SIOE_INARG;
-	FAIL;
+		SIO_ERRCODE(buf) = SIOE_INARG;
+		FAIL;
     }
 
     cpos = wpos = SIO_CPOS(buf);
     lpos = SIO_LPOS(buf);
     if (cpos >= lpos) {
-	SIO_ERRCODE(buf) = SIOE_READ;
-	FAIL;
+		SIO_ERRCODE(buf) = SIOE_READ;
+		FAIL;
     }
 
-    while (wpos < lpos && SIO_BUFFER(buf)[wpos] != '\n')
-	wpos++;
+		/* read either DOS(\r\n) or UNIX(\n) or Mac(\r) eolns */
+    while (wpos < lpos && 
+			SIO_BUFFER(buf)[wpos] != '\r' &&
+			SIO_BUFFER(buf)[wpos] != '\n' )
+		wpos++;
 
     if (wpos < lpos) {		/* end of line read */
-	SIO_BUFFER(buf)[wpos] = 0;
-	w_mk_uia(&vBuf, &tBuf, SIO_BUFFER(buf) + cpos);
-	SIO_BUFFER(buf)[wpos] = '\n';
-	SIO_CPOS(buf) = wpos + 1;
-	SIO_LINENUM(buf) += 1;
-	SIO_COLUMN(buf) = 0;
-	eoln_read = 1;
+		if ((SIO_BUFFER(buf)[wpos] == '\r')  &&
+			  ( SIO_BUFFER(buf)[wpos+1] == '\n') )
+			{
+				SIO_BUFFER(buf)[wpos] = 0;
+				wpos++;
+			}
+		SIO_BUFFER(buf)[wpos] = 0;
+		w_mk_uia(&vBuf, &tBuf, SIO_BUFFER(buf) + cpos);
+		SIO_BUFFER(buf)[wpos] = '\n';
+		SIO_CPOS(buf) = wpos + 1;
+		SIO_LINENUM(buf) += 1;
+		SIO_COLUMN(buf) = 0;
+		eoln_read = 1;
     }
-    else {			/* end of line not read */
-	SIO_BUFFER(buf)[lpos] = 0;
-	w_mk_uia(&vBuf, &tBuf, SIO_BUFFER(buf) + cpos);
-	SIO_CPOS(buf) = lpos;
-	eoln_read = 0;
+    else {					/* end of line not read */
+		SIO_BUFFER(buf)[lpos] = 0;
+		w_mk_uia(&vBuf, &tBuf, SIO_BUFFER(buf) + cpos);
+		SIO_CPOS(buf) = lpos;
+		eoln_read = 0;
     }
 
     SIO_ERRCODE(buf) = SIOE_NORMAL;
 
     if (w_unify(v2, t2, vBuf, tBuf) && w_unify(v3, t3, eoln_read, WTP_INTEGER))
-	SUCCEED;
+		SUCCEED;
     else
-	FAIL;
+		FAIL;
 }
 
 /*

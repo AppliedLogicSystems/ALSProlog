@@ -132,7 +132,8 @@
 	 winsystems_for/2, winsystems_for/3, ws_vars/3,ws_vars/4,
 	 flatten_ws_lists/2,  flatten_to_atom/2, cat_together_seplines/2,
 	 cat_together_spaced/2, prefix_dir/3,
-	 determine_default_ws/1, known_ws/1 ], [] ).
+	 determine_default_ws/1, known_ws/1,
+	 specif_winsystems_for/3 ], [] ).
 
 :-libactivate(builtins,['library',cmpdirs], [cmpdirs/3], [] ).
 

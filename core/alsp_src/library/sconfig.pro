@@ -89,17 +89,17 @@ export determine_default_ws/1.
 determine_default_ws(WS)
 	:-
 	builtins:als_system(SysProps),
-	dmember(wins=WS0,SysProps),
-	catenate(WS0,'_ws',WS).
+	dmember(wins=WS0,SysProps).
+%	catenate(WS0,'_ws',WS).
 
 export known_ws/1.
 
 known_ws(motif).
 known_ws(nextstep).
+known_ws(dvx).
 /*
 known_ws(openlook).
 known_ws(decwins).
-known_ws(dv_x).
 known_ws(mac_os).
 known_ws(ms_wins3).
 known_ws(ms_wins95).
@@ -137,7 +137,9 @@ winsystems_for(Arch, OSString, WSL)
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 gen_winsystems(unix, [x, motif]).
 
+export specif_winsystems_for/3.
 specif_winsystems_for(_, nextstep, [nextstep]).
+specif_winsystems_for(_, dvx, [x, motif]).
 
 	%% Window system-specific information which is to
 	%% be written into the top of the Makefile for that
