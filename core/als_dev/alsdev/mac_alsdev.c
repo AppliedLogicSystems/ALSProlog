@@ -423,7 +423,6 @@ SIOUXHandleOneEvent(EventRecord *event)
 
 
 
-
 #include <alspi.h>
 #include <new_alspi.h>
 
@@ -489,6 +488,11 @@ static char *simple_write(AP_World *w, AP_Obj obj, char *s)
     return s;
 }
 
+static void tcltk_yield (void)
+{
+	Tcl_DoOneEvent(TCL_DONT_WAIT);
+}
+
 void SetupALSProlog(void)
 {
     PI_system_setup setup;
@@ -527,8 +531,8 @@ void SetupALSProlog(void)
     }
 
 
-        PI_set_console_functions(standard_console_read, standard_console_write,
-    				standard_console_error);
+    PI_set_console_functions(standard_console_read, standard_console_write,
+				standard_console_error);
 
     if ((exit_status = PI_startup(&setup)) != 0) return;
 
@@ -542,6 +546,8 @@ int success;
 		1, AP_NewSymbolFromStr(w, "blt_dvsh"));
 		
     AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
+
+	PI_set_yield_proc(tcltk_yield);
 
     term = AP_NewSymbolFromStr(w, "start_alsdev");
     {
