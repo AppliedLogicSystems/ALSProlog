@@ -15,6 +15,7 @@
  *=======================================================================*/
 #include "defs.h"
 
+#ifdef OLDFIO
 
 static	void	fio_nxln	PARAMS(( lxi_but * ));
 static	int	fio_syntax_err	PARAMS(( lxi_but *, char * ));
@@ -53,8 +54,6 @@ int   curtkty = 0;
 FILE *curfd;
 
 char *curprompt;
-
-#ifdef OLDFIO
 
 #ifdef MacOS
 pptinfo prompts[3] =

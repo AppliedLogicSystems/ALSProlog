@@ -12,6 +12,7 @@
 
 #include "defs.h"
 
+#ifndef KERNAL
 /*
  * The following function should never be called, but if it is, we want
  * to be sure that nothing bad will happen.
@@ -51,3 +52,4 @@ PI_alsglue(void)
 	(void) PI_app_printf( 0 );
     }
 }
+#endif /* KERNAL */

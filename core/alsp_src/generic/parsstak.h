@@ -16,7 +16,11 @@
  |      the only modules which use these defines.
  *===================================================================*/
 
+#ifdef KERNAL
+#define PSTKSZ 150
+#else
 #define PSTKSZ 850
+#endif /* KERNAL */
 
 struct rator {
 	pword	*last_rand;	/* pointer to last operand on operand stack */

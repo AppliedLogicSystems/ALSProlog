@@ -20,7 +20,11 @@
  | Size of Name Table Entry Pointers
  *-----------------------------------------------------------------*/
 
+#ifdef KERNAL
+#define NTBL_SIZE 1024 		/* total number of name table entries	*/
+#else
 #define NTBL_SIZE 16384		/* total number of name table entries	*/
+#endif /* KERNAL */
 
 #define NTBL_ENTRYSIZE	(NTBL_HEADERSIZE+NTBL_OVERFLOWSIZE+ 	\
 			 			NTBL_CALLENTRYSIZE+NTBL_EXECENTRYSIZE)
@@ -195,7 +199,11 @@ extern ntbl_entry **w_nametable;
 
 #define WC_OVERHEAD   WCI_CLAUSECODE+1
 #define WC_EPSILON    WC_OVERHEAD+3		/* longwords */
+#ifdef KERNAL
+#define WC_AREASIZE   1024			/* longwords */
+#else
 #define WC_AREASIZE   131072			/* longwords */
+#endif /* KERNAL */
 
 #define sizeFreeBlock(item)		(*((long *)(item)+WCI_SIZE))
 #define sizeUsedBlock(item)		(-(*((long *)(item)+WCI_SIZE)))

@@ -26,8 +26,13 @@
 
 extern system_debugging;
 
+#ifdef KERNAL
+#define MAXCALLS    80
+#define ICBUFSIZE  3024
+#else
 #define MAXCALLS    256
 #define ICBUFSIZE 32768
+#endif /* KERNAL */
 
 Code *dstart;	/* Where to go for a determinate start of
 				 * clause
@@ -231,6 +236,12 @@ ic_callinfo(mask, nargs, envsize, w)
     callinfo[callidx].argmask = mask;
 
     callidx++;
+#ifdef KERNAL
+    if (callidx >= MAXCALLS) {
+    	fprintf(stderr, "overflowed call buffer\n");
+    	exit(-1);
+    }
+#endif /* KERNAL */
     ic_puti(W_GCMAGIC);
     ic_putl(0L);
 }
@@ -1270,5 +1281,12 @@ icode(iidx, w, x, y, z)
 	(*instrs[iidx].doit) (w, x, y, z);
 	if (tp != ic_ptr)
 	    ic_pptr = tp;
+#ifdef KERNAL
+	if (ic_ptr > icode_buf+ICBUFSIZE) {
+	  printf("%p %p\n", ic_ptr, icode_buf+ICBUFSIZE);
+	  fprintf(stderr, "overflowed ic buffer\n");
+	  /*exit(-1);*/
+	}
+#endif /* KERNAL */
     }
 }

@@ -242,7 +242,11 @@ w_dbprotect(newstate)
  | alloc_name_entry returns a pointer to a new (uninitialized) name entry.
  *-----------------------------------------------------------------*/
 
+#ifdef KERNAL
+#define NENT_ALLOCQUANT 64
+#else
 #define NENT_ALLOCQUANT 1024
+#endif /* KERNAL */
 static ntbl_entry *ane_entbase = (ntbl_entry *) 0;
 static ntbl_entry *ane_entptr = (ntbl_entry *) 0;
 
@@ -1320,9 +1324,11 @@ w_addclause(p, a, cg_id,
     /* Get clause space from the clause area and copy the code into it */
     aib_clause_addr = newclause = w_installcode(buffer, bufsize, 0, (int *) 0);
 
+#ifndef KERNAL
     if (system_debugging) {
 	list_asm(clauseCode(newclause), bufsize);
     }
+#endif /* KERNAL */
 
     /* Fill in the entries in the clause data structure */
     *(newclause + WCI_PROCIDX) = procid;

@@ -28,17 +28,29 @@ extern int *top_clausegroup;
 #define MODULE_BUILTINS TK_BUILTINS	/* id of the builtins module	*/
 
 		/* Maximum number of modules */
+#ifdef KERNAL
+#define NMODULES 32
+#else
 #define NMODULES 256
+#endif /* KERNAL */
 
 		/* Total number of use definitions permissible */
+#ifdef KERNAL
+#define NUSEDEFS 512
+#else
 #define NUSEDEFS 4096
+#endif /* KERNAL */
 
 		/* Maximum number of default use entries */
 #define MAXDEFUSES 100
 
 		/* Maximum number of procedures to be automatically entered in a module at
    				module initialization */
+#ifdef KERNAL
+#define MAXDEFPROCS 100
+#else
 #define MAXDEFPROCS 400
+#endif /* KERNAL */
 
 		/* Maximum module nesting permitted */
 #define MAXMODNESTING 30

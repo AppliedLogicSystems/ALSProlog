@@ -141,7 +141,9 @@ static	void	assert_atom_in_module PARAMS(( char*, char * ));
 #ifndef MacOS
 static	int	absolute_pathname PARAMS((CONST char * ));
 #endif
+#ifndef PURE_ANSI
 static	void	whereami	PARAMS(( char * ));
+#endif /* PURE_ANSI */
 static	void	autoload	PARAMS(( char * ));
 static	void	chpt_init	PARAMS(( void ));
 
@@ -321,8 +323,11 @@ PI_prolog_init0(argc, argv)
      * get the image directory; the call to whereami will initialize it and
      * the image name;
      */
+
+#ifndef PURE_ANSI
     if (argc >= 1) whereami(argv[0]);
     else whereami(NULL);
+#endif /* PURE_ANSI */
 
 #ifdef SIMPLE_MICS 
     saved_state_image_offset = ss_image_offset();
@@ -352,6 +357,7 @@ PI_prolog_init0(argc, argv)
      * just use the image directory.  It is this directory which we search
      * to find the builtins.
      */
+#ifndef PURE_ANSI
 #ifdef MacOS
     {
 	const char *s;
@@ -392,12 +398,15 @@ PI_prolog_init0(argc, argv)
 	strcpy(alsdir + strlen(alsdir) - 1, ".alsdir]");
 #endif
     }
+#endif /* PURE_ANSI */
 
     if (heapsize * 4 < DEFAULT_SAFETY * 2)
 	fatal_error(FE_SMALLHEAP, 0);
 
+#ifndef KERNAL
     if (stacksize * 4 < 65536)
 	fatal_error(FE_SMALLSTACK, 0);
+#endif /* KERNAL */
 
     /* Perform some initial allocations */
 
@@ -426,15 +435,17 @@ PI_prolog_init0(argc, argv)
 
     prs_area_init(heapsize / 8);
 
-
 #if	defined(arch_i386) || defined(arch_sparc) || defined(arch_m68k)
     if (icbufsize < MIN_ICBUFSIZE || !init_icode_buf(icbufsize))
 	fatal_error(FE_ICODEBUFINIT, 0);
 #endif /* arch_i386 or arch_sparc */
 
     parser_init();
+
     w_initcode();
+#ifndef KERNAL
     fio_init();
+#endif /* KERNAL */
 #ifdef Portable
     wam_init();		/* This must come before module_init */
 #endif
@@ -461,16 +472,21 @@ PI_prolog_init0(argc, argv)
 /*    fix_MAGIC(); */		/* for loadfile.c */
 #endif /* OBP */
 
+#ifndef KERNAL
     if (system_pckg != (long *) -1 || saved_state_loaded)
 	pckg_run_init_goal();
+#endif /* KERNAL */
 
     /*
      * Intialize Foreign Interface preds used by builtins
      */
 
     init_fsutils();		/* see fsunix.c, fsdos.c, etc. */
+#ifndef KERNAL
     cinterf_init();		/* see cinterf.c */
+#endif /* KERNAL */
 
+#ifndef KERNAL
     if (system_pckg != (long *) -1 || saved_state_loaded) {
 	abolish_predicate("builtins", "als_system", 1);
 #if 0	/* should leave original sys_searchdir since image may be moved */
@@ -479,6 +495,7 @@ PI_prolog_init0(argc, argv)
     }
 
     assert_sys_searchdir(alsdir);
+#endif /* KERNAL */
 
     /*---------------------------------------*
      | Set up the als_system fact.
@@ -493,6 +510,7 @@ PI_prolog_init0(argc, argv)
 
 #endif
 
+#ifndef KERNAL
     assert_als_system(OSStr, MinorOSStr, ProcStr,
 		      SysManufacturer, versionNum);
 
@@ -522,6 +540,7 @@ PI_prolog_init0(argc, argv)
     assert_atom_in_module("builtins","freeze");
     assert_atom_in_module("syscfg","freeze");
 #endif
+#endif /* KERNAL */
 
     /* Initilize any libraries. */
     pi_init();
@@ -533,12 +552,21 @@ PI_prolog_init0(argc, argv)
 	{
     	char f[20];
     	size_t l;
-    	
+
+#ifdef KERNAL
+	f_load("builtins.obp");
+	if (argc >= 2) {
+	    f_load(argv[1]);
+	} else f_load("application.obp");
+#else
     	strcpy(f, "builtins");
+#ifndef PURE_ANSI
     	l = strlen(f);
     	f[l] = DIR_SEPARATOR; f[l+1] = 0;
     	strcat(f, "builtins");
+#endif /* PURE_ANSI */
     	autoload(f);
+#endif /* KERNAL */
     }
 
 #ifdef MacOS
@@ -685,6 +713,7 @@ assert_als_system(os, os_var, proc, man, ver)
  * absolute_pathname tests to see if we have an absolute pathname or not
  *-----------------------------------------------------------------------------*/
 
+#ifndef PURE_ANSI
 #if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(OS2) || defined(MSWin32)
 
 static int
@@ -992,6 +1021,7 @@ whereami(name)
     *(cutoff + 1) = 0;		/* chop off the filename part */
 #endif
 }
+#endif /* PURE_ANSI */
 
 /*-------------------------------------------------------------*
  | autoload will attempt to load the named file from
@@ -1032,13 +1062,16 @@ autoload(f)
 int
 PI_toplevel()
 {
+#ifndef KERNAL
     if (noautoload && !pckgloaded) {
 	if (!setjmp(exit_return)) {
 	    read_loop(nt_query, PMPT_QUERY);
 	    return (0);
 	}
     }
-    else {
+    else
+#endif /* KERNAL */
+    {
 	if (!setjmp(exit_return)) {
 	    PWord mv, gv;
 	    int   mt, gt;
@@ -1060,7 +1093,11 @@ PI_toplevel()
 		}	
 	    }
 #endif
+#ifdef KERNAL
+	    PI_makesym(&mv, &mt, "user");
+#else
 	    PI_makesym(&mv, &mt, "builtins");
+#endif /* KERNAL */
 	    PI_makesym(&gv, &gt, "$start");
 	    PI_rungoal(mv, gv, gt);
 	    return (0);
@@ -1337,6 +1374,10 @@ BOOL CtrlHandler(DWORD fdwCtrlType)
 
 #ifdef APP_PRINTF_CALLBACK
 void app_printf(int messtype, va_list args);
+#endif
+
+#if defined(KERNAL) && defined(__MWERKS__) && defined(macintosh)
+#include <console.h>
 #endif
 
 int

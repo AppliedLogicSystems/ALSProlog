@@ -38,6 +38,10 @@
 
 #include <limits.h>
 
+#ifdef PURE_ANSI
+#define EINTR	0
+#endif /* PURE_ANSI */
+
 #ifdef MacOS
     #ifdef HAVE_GUSI
 	//#include <GUSI.h>
@@ -256,12 +260,37 @@ static int corrected_read(int fn, char *buffer, int count)
 }
 #endif
 
+#ifdef PURE_ANSI
 static int standard_console_io(int port, char *buf, size_t size)
 {
+    char *s;
+    switch(port) {
+    case CONSOLE_READ:
+    	s = fgets(buf, size, stdin);
+    	if (s) return strlen(s);
+    	else return 0;
+    	break;
+    case CONSOLE_WRITE:
+	return fwrite(buf, sizeof(char), size, stdout);
+    	break;
+    case CONSOLE_ERROR:
+	return fwrite(buf, sizeof(char), size, stderr);
+    	break;
+    }
+}
+
+#else
+
+static int standard_console_io(int port, char *buf, size_t size)
+{
+    extern int MPW_Tool;
     switch(port) {
     case CONSOLE_READ:
 #ifdef MacOS
-    	return corrected_read(STDIN_FILENO, buf, size);
+      if (MPW_Tool) {
+	printf("\n");
+      }
+   	return corrected_read(STDIN_FILENO, buf, size);
 #else
     	return read(STDIN_FILENO, buf, size);
 #endif
@@ -276,9 +305,8 @@ static int standard_console_io(int port, char *buf, size_t size)
 	return -1;
 	break;
     }
-    
 }
-
+#endif /* PURE_ANSI */
 
 int (*console_io)(int, char *, size_t) = standard_console_io;
 
@@ -334,6 +362,8 @@ sio_mkstream()
     SIO_EOLNTYPE(buf) = SIOEOLN_READ_UNIV | SIOEOLN_WRITE_LF;
 #elif defined(MSWin32)
     SIO_EOLNTYPE(buf) = SIOEOLN_READ_UNIV | SIOEOLN_WRITE_CRLF;
+#elif defined(PURE_ANSI)
+    SIO_EOLNTYPE(buf) = SIOEOLN_READ_UNIV | SIOEOLN_WRITE_LF;
 #else
 #error
 #endif   
@@ -769,7 +799,7 @@ sio_lpos()
  * returned if it should be left open.
  */
 
-#ifdef __MWERKS__
+#if defined(PURE_ANSI) || defined(__MWERKS__) 
 /* This is a problem common to all systems that use MetroWerks ANSI Libraries open. */
 /* Currently MacOS and MSWin32 */
 
@@ -969,7 +999,6 @@ compute_flags(buf, m, b)
  * through the file system.
  */
 
-
 int
 sio_file_open()
 {
@@ -977,7 +1006,11 @@ sio_file_open()
     int   t1, t2, t3, t4, t5;
     UCHAR *filename;
     UCHAR *buf;
+#ifdef PURE_ANSI
+    char *flags;
+#else
     int   flags = 0;
+#endif /* PURE_ANSI */
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
@@ -995,6 +1028,22 @@ sio_file_open()
     }
     SIO_TYPE(buf) = SIO_TYPE_FILE;
 
+#ifdef PURE_ANSI
+    switch (v3) {
+	case SIOM_READ:
+	    flags = "rb";
+	    break;
+	case SIOM_WRITE:
+	    flags = "wb";
+	    break;
+	case SIOM_APPEND:
+	    flags = "ab";
+	    break;
+	case SIOM_READ_WRITE:
+	    flags = "w+b";
+	    break;
+    }
+#else
     switch (v3) {
 	case SIOM_READ:
 	    flags = O_RDONLY;
@@ -1009,12 +1058,20 @@ sio_file_open()
 	    flags = O_RDWR | O_CREAT;
 	    break;
     }
+#endif /* PURE_ANSI */
 
     if (compute_flags((char *)buf,v3,v4) < 0)
 	FAIL;
 
     SIO_EOLNTYPE(buf) = v5;
 
+#ifdef PURE_ANSI
+    if ((SIO_FD(buf) = (long) fopen(filename, flags)) == (long)NULL) {
+	SIO_ERRCODE(buf) = SIOE_SYSCALL;
+	SIO_ERRNO(buf) = errno;
+	FAIL;
+    }
+#else
     if (strcmp((char *)filename, "$stdin") == 0)
 	SIO_FD(buf) = STDIN_FILENO;
     else if (strcmp((char *)filename, "$stdout") == 0)
@@ -1043,6 +1100,8 @@ sio_file_open()
 	    FAIL;
 	}
     }
+#endif /* PURE_ANSI */
+
     incr_fdrefcnt(SIO_FD(buf));
     SIO_ERRCODE(buf) = SIOE_NORMAL;
     SUCCEED;
@@ -2413,7 +2472,12 @@ write_buf(vsd,buf)
 #endif /* SysVIPC */
 
     if (SIO_FLAGS(buf) & SIOF_READ) {
-	if (lseek((int) SIO_FD(buf), (long) SIO_BUFPOS(buf), SEEK_SET) == -1) {
+#ifdef PURE_ANSI
+	if (fseek((FILE *) SIO_FD(buf), (long) SIO_BUFPOS(buf), SEEK_SET) == -1)
+#else
+	if (lseek((int) SIO_FD(buf), (long) SIO_BUFPOS(buf), SEEK_SET) == -1)
+#endif /* PURE_ANSI */
+	{
 	    SIO_ERRCODE(buf) = SIOE_SYSCALL;
 	    SIO_ERRNO(buf) = errno;
 	    return 0;
@@ -2427,7 +2491,11 @@ write_buf(vsd,buf)
 
     switch (SIO_TYPE(buf)) {
 	case SIO_TYPE_FILE:
+#ifdef PURE_ANSI
+	    writeflg = fwrite((void *)SIO_BUFFER(buf), 1, (size_t)SIO_LPOS(buf), (FILE *)SIO_FD(buf));
+#else
 	    writeflg = write(SIO_FD(buf), (char *)SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
+#endif /* PURE_ANSI */
 	    break;
 
 #ifdef SysVIPC
@@ -2503,9 +2571,9 @@ write_buf(vsd,buf)
     }
 
     switch (SIO_TYPE(buf)) {
+#ifdef HAVE_SOCKET
     case SIO_TYPE_SOCKET_STREAM:
     case SIO_TYPE_SOCKET_DGRAM:
-#ifdef HAVE_SOCKET
 	if (writeflg == SOCKET_ERROR) {
 	    if (socket_errno == EINTR)
 		SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
@@ -2515,8 +2583,8 @@ write_buf(vsd,buf)
 	    }
 	    return 0;
 	}
-#endif
 	break;
+#endif
     default:
 	if (writeflg == -1) {
 	    if (errno == EINTR)
@@ -2563,7 +2631,11 @@ sio_close()
     switch (SIO_TYPE(buf)) {
 	case SIO_TYPE_FILE:
 	    if (decr_fdrefcnt(SIO_FD(buf)))
+#ifdef PURE_ANSI
+		closeflg = fclose((FILE *)SIO_FD(buf));
+#else
 		closeflg = close(SIO_FD(buf));
+#endif /* PURE_ANSI */
 	    break;
 
 #ifdef SysVIPC
@@ -2640,6 +2712,7 @@ close_socket:
     }
 
     switch (SIO_TYPE(buf)) {
+#ifdef HAVE_SOCKET
     case SIO_TYPE_SOCKET_STREAM:
     case SIO_TYPE_SOCKET_DGRAM:
 #ifdef HAVE_SOCKET
@@ -2654,6 +2727,7 @@ close_socket:
 	}
 #endif
 	break;
+#endif
     default:
 	if (closeflg == -1) {
 	    if (errno == EINTR)
@@ -2977,7 +3051,11 @@ sio_readbuffer()
 
     switch (SIO_TYPE(buf)) {
 	case SIO_TYPE_FILE:
+#ifdef PURE_ANSI
+	    nchars = fread((void *)buffer, 1, (size_t)nchars, (FILE *)SIO_FD(buf));
+#else
 	    nchars = read(SIO_FD(buf), (char *)buffer, (size_t)nchars);
+#endif /* PURE_ANSI */
 	    break;
 #ifdef SysVIPC
 	case SIO_TYPE_SYSVQ: {
@@ -3163,9 +3241,15 @@ stream_end(buf)
     long  curpos;
     long  endpos;
 
+#ifdef PURE_ANSI
+    curpos = fseek((FILE *)SIO_FD(buf), 0, SEEK_CUR);
+    endpos = fseek((FILE *)SIO_FD(buf), 0, SEEK_END);
+    (void) fseek((FILE *)SIO_FD(buf), curpos, SEEK_SET);
+#else
     curpos = lseek(SIO_FD(buf), 0, SEEK_CUR);
     endpos = lseek(SIO_FD(buf), 0, SEEK_END);
     (void) lseek(SIO_FD(buf), curpos, SEEK_SET);
+#endif /* PURE_ANSI */
     return endpos;
 }
 
@@ -3233,7 +3317,12 @@ sio_seek()
 	    if (!write_buf(v1,buf))
 		FAIL;
 	}
-	if ((pos = lseek(SIO_FD(buf), v3, v4)) < 0) {
+#ifdef PURE_ANSI
+	if ((pos = fseek((FILE *)SIO_FD(buf), v3, v4)) < 0)
+#else
+	if ((pos = lseek(SIO_FD(buf), v3, v4)) < 0)
+#endif /* PURE_ANSI */
+	{
 	    SIO_ERRCODE(buf) = SIOE_SYSCALL;
 	    SIO_ERRNO(buf) = errno;
 	    FAIL;

@@ -22,10 +22,18 @@
 
 #endif /* !HAVE_CONFIG_H */
 
+#if defined(KERNAL) && defined(__MWERKS__) && defined(macintosh)
+#include <console.h>
+#endif
+
 void
 main(int argc, char ** argv)
 {
     int   exit_status;
+
+#if defined(KERNAL) && defined(__MWERKS__) && defined(macintosh)
+    argc = ccommand(&argv);
+#endif
 
     if ((exit_status = PI_prolog_init(argc, argv)) != 0) {
 	PI_app_printf(PI_app_printf_error, "Prolog init failed !\n");

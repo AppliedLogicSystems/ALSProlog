@@ -277,7 +277,11 @@ void init_expand_data(void)
     if (vtable == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
 }
 #else
+#ifdef KERNAL
+static long vtable[512];
+#else
 static long vtable[4096];
+#endif /* KERNAL */
 #endif
 static int vtp;
 

@@ -99,6 +99,8 @@ extern	void	prolog_display	PARAMS( (PWord, int) );
 /* built.c */
 extern	void	builtin_init	PARAMS( (void) );
 extern	void	time_cut_interrupt_init PARAMS( (void) );
+extern	int	pbi_set_interrupt_vector	PARAMS((void));
+extern  int     pbi_uncaught_interrupt PARAMS( (void) );
 
 /* bmisc.c */
 #ifdef CMeta
@@ -207,6 +209,7 @@ extern	int	pbi_seen	PARAMS(( void ));
 extern	int	pbi_tell	PARAMS(( void ));
 extern	int	pbi_telling	PARAMS(( void ));
 extern	int	pbi_told	PARAMS(( void ));
+extern	int	pbi_debug	PARAMS(( void ));
 extern	int	pbi_ttyflush	PARAMS(( void ));
 extern	int	pbi_write	PARAMS(( void ));
 extern	int	pbi_writeq	PARAMS(( void ));
@@ -263,6 +266,7 @@ extern	int	pbi_frame_info	PARAMS(( void ));
 
 /* bos.c */
 extern	int	pbi_access	PARAMS(( void ));
+extern	int	pbi_chdir	PARAMS(( void ));
 extern	int	pbi_getenv	PARAMS(( void ));
 extern	int	pbi_system	PARAMS(( void ));
 extern	int	pbi_tmpnam	PARAMS(( void ));

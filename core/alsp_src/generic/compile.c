@@ -184,8 +184,11 @@ compile_clause(r, fromparser)
 	rh = TERM_FUNCTOR(rh);	/* Get the rule head                  */
 
     if (TYPEOF(rh) != TP_SYM) {	/* See if the rule head of appropriate type */
+#ifndef KERNAL
+	/* Is this really a parser error? Couldn't it be generated directly? */
 	if (fromparser)
 	    parser_error("Head of clause of inappropriate type.");
+#endif /* KERNAL */
 	return 0;		/* return failure code if not   */
     }
 
@@ -207,8 +210,11 @@ compile_clause(r, fromparser)
     cd_cutpt = -1;		/* No cutpt info requested yet */
 
     if (!comp_rule(r)) {	/* Generate the code for the clause  */
+#ifndef KERNAL
+	/* Is this really a parser error? Couldn't it be generated directly? */
 	if (fromparser)
 	    parser_error("Goal in clause of inapproprate type.");
+#endif /* KERNAL */
 	return 0;
     }
 

@@ -326,7 +326,6 @@ printf("combin_dels:r=_%lu f=_%lu wm_H=%x wm_HB=%x wm_B=%x\n",
 	w_rungoal(mod, goal, goal_t);
 }
 
-#endif /* FREEZE */
 
 
 /*========================================================================*
@@ -592,3 +591,4 @@ disp_item()
 }
 
 
+#endif /* FREEZE */

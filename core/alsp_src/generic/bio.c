@@ -36,8 +36,9 @@ int pbi_save_image_with_state_to_file(void)
     else
 	FAIL;
 }
-#endif
+#endif /* SIMPLE_MICS */
 
+#if !defined(KERNAL) && !defined(PURE_ANSI)
 int
 pbi_save_state_to_file()		/* save_state_to_file */
 {
@@ -52,6 +53,7 @@ pbi_save_state_to_file()		/* save_state_to_file */
     else
 	FAIL;
 }
+#endif /* !defined(KERNAL) && !defined(PURE_ANSI) */
 
 static	int	pload_file	PARAMS(( UCHAR *, int ));
 
@@ -100,7 +102,92 @@ pbi_ttyflush()
     SUCCEED;
 }
 
+static void simple_write(PWord v, int t)
+{
+    switch (t) {
+    case PI_VAR:
+    	printf("V%lx", v); 
+	break;
+    case PI_LIST:
+	{
+	    PWord list, head, listnil;
+	    int listt, headt, listnilt;
+	    
+	    printf("[");
+	    
+	    list = v; listt = t;
+	    while(1) {
+	        PI_gethead(&head, &headt, list);
+	        simple_write(head, headt);
+	        PI_gettail(&list, &listt, list);
+	        if (listt == PI_LIST) printf(",");
+	        else break;
+	    }
+	    
+	    PI_makesym(&listnil, &listnilt, "[]");
+	    
+	    if (!(list == listnil && listt == PI_SYM)) {
+		printf(",");
+	    	simple_write(list, listt);
+	    }
+	    
+	    printf("]");
+	}
+	break;
+    case PI_STRUCT:
+    	{
+    	    PWord funcname, a;
+    	    int i, arity, at;
+	    PI_getstruct(&funcname, &arity, v);
+	    printf("%s(", PI_getsymname(NULL, funcname, 0));
+	    
+	    i = 1;
+	    while(1) {
+	    	PI_getargn(&a, &at, v, i);
+	    	simple_write(a, at);
+	    	i++;
+	    	if (i <= arity) printf(",");
+	    	else break;
+	    }
+	    printf(")");
+	}
+	break;
+    case PI_SYM:
+	printf("%s", PI_getsymname(NULL, v, 0));
+	break;
+    case PI_INT:
+    	printf("%ld", v);
+	break;
+    case PI_UIA:
+	printf("%s", PI_getuianame(NULL, v, 0));
+	break;
+    case PI_DOUBLE:
+	{
+	    double d;
+	    PI_getdouble(&d, v);
+	    printf("%f", d);
+	}
+	break;
+    default:
+    	printf("<Unknown Object %lx>", v);
+    	break;
+    }
+}
 
+int pbi_debug(void)
+{
+    PWord v;
+    int   t;
+
+    PI_getan(&v, &t, 1);
+
+    simple_write(v, t);
+    printf("\n");
+    fflush(stdout);
+    SUCCEED;
+}
+
+#ifndef KERNAL
 int
 pbi_write()
 {
@@ -110,9 +197,9 @@ pbi_write()
     w_get_An(&v, &t, 1);
 
     prolog_write(v, t);
-
     SUCCEED;
 }
+#endif /* KERNAL */
 
 #ifdef OLDCIO
 

@@ -19,10 +19,14 @@
 
 /* #define PARSER_AREASIZ 65536  */   
 
+#ifdef KERNAL
+#define PARSER_AREASIZ 5000
+#else
 #define PARSER_AREASIZ 131072     /* size of parser's scratch area; input
                                   * transformations are also done in this
                                   * area
                                   */
+#endif /* KERNAL */
 
 /*
  * A pword is the basic prolog word out of which all compiler data structures

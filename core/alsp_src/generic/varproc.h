@@ -9,8 +9,13 @@
  | Author:  Kevin A. Buettner
  | Creation: 6/16/85
  *===============================================================*/
+#ifdef KERNAL
+#define VTBLSIZE 256
+#define MAXGLS 64
+#else
 #define VTBLSIZE 1024
 #define MAXGLS 512
+#endif
 
 typedef struct {
             short firstocc;		/* goal in which var first appears 		*/

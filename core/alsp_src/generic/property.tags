@@ -32,6 +32,10 @@ FREEZE - specific freeze code
 
 DEBUGFREEZE - debugging messages for freeze support code -- to be dropped
 
+KERNAL - Kernal-specific portions of the source
+
+PURE_ANSI - Pure ANSI compilant portions of the source
+
 DynamicForeign - dynamic loading of foreign (C) code
 
 DoubleType - supports native double number type

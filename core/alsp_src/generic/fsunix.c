@@ -970,6 +970,7 @@ pgetpid()
 
 /* *INDENT-OFF* */
 PI_BEGIN
+#ifndef PURE_ANSI
     PI_PDEFINE("getcwd", 1, pgetcwd, "_pgetcwd")
     PI_PDEFINE("chdir", 1, pchdir, "_pchdir")
     PI_PDEFINE("unlink", 1, punlink, "_punlink")
@@ -988,6 +989,7 @@ PI_BEGIN
 #endif /* CCANONP */
     PI_PDEFINE("getpid",1,pgetpid,"_pgetpid")
 #endif /* FSACCESS */
+#endif /* PURE_ANSI */
 PI_END
 /* *INDENT-ON* */
 

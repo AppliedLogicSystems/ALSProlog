@@ -14,6 +14,12 @@
 #ifndef ALSMEM_H_INCLUDED
 #define ALSMEM_H_INCLUDED
 
+#ifdef KERNAL
+#define AM_BLOCKSIZE		0x00038000
+#define AM_MALLOCSPACE		1
+#define AM_MAXBLOCKS		32
+#define AM_MAXGLOBALS		64
+#else
 /* AM_BLOCKSIZE is the default block size to allocate */
 #define AM_BLOCKSIZE		0x00200000	/* about 2 meg */
 
@@ -29,6 +35,7 @@
 /* Maximum number of global variables which we may register to be
    saved.  These should not refer to dynamically allocated memory.  */
 #define AM_MAXGLOBALS		64
+#endif /* KERNAL */
 
 struct am_header {
 
