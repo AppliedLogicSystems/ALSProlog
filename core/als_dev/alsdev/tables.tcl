@@ -30,8 +30,9 @@ proc load_table_package {DirsList} {
 
 	## Create a table 
 
-proc build_table {BaseName InfoArrayName List} {
+proc build_table {BaseName InfoArrayName OptsList} {
 	upvar #0 $InfoArrayName IA 
+	global array tcl_platform
 
 	eval [list global array $InfoArrayName]
 	set IA(library) Tktable
@@ -40,30 +41,28 @@ proc build_table {BaseName InfoArrayName List} {
 	append IA(tabletop)   "." $BaseName _toplevel
 	append IA(table) $IA(tabletop) ".table"
 	append DataArrayName $BaseName _array
+	set IA(array)   $DataArrayName
 
-	set IA(numrows) 6
-	set IA(titlerows) 1
-	set IA(numcols) 6
-	set IA(titlecols) 0
-
-	set IA(headings) {}
-	set IA(title) ""
-
-	set IA(tablefont) {Times 9 normal}
+	set IA(rows) 6
+	set IA(cols) 6
+	set IA(font) {Times 9 normal}
+	set IA(font) system
 	set IA(foreground) black
 	set IA(background) #b9b9b9
-	set IA(roworigin) -1
-	set IA(colorigin) 0
 	set IA(selectmode) extended
 	set IA(rowstretch) unset
-	set IA(colstretch) all
-	set IA(flashmode) on
+	set IA(colstretch) unset
 
-	while {$List != ""} {
-		set IA([lindex $List 0]) [lindex $List 1]
-		set List [lrange $List 2 end]
+	set IA(variable) $IA(array)
+	append IA(yscrollbar) $IA(tabletop) ".sy"
+	append IA(xscrollbar) $IA(tabletop) ".sx"
+	append IA(yscrollcommand) $IA(yscrollbar) " set"
+	append IA(xscrollcommand) $IA(xscrollbar) " set"
+
+	while {$OptsList != ""} {
+		set IA([lindex $OptsList 0]) [lindex $OptsList 1]
+		set OptsList [lrange $OptsList 2 end]
 	}
-	set IA(array)   $DataArrayName
 	global array $IA(array)
 	global array $DataArrayName
 
@@ -80,38 +79,29 @@ proc build_table {BaseName InfoArrayName List} {
 			set ff($i,-1) [lindex $IA(rowheadings) $i] 
 		}
 	}
-	table_object $InfoArrayName
-	update
-	return $DataArrayName
-}
+#	table_object $InfoArrayName
 
-
-proc table_object {InfoArrayName } {
-	upvar #0 $InfoArrayName IA
-	global array tcl_platform
-
-	append YSB $IA(tabletop) ".sy"
-	append XSB $IA(tabletop) ".sx"
-
-#	toplevel_patch $IA(tabletop)
+#proc table_object {InfoArrayName } {
+#	upvar #0 $InfoArrayName IA
+#	global array tcl_platform
 
 	eval toplevel $IA(tabletop)
 	if {$tcl_platform(platform) == "windows"} {
 		focus -force $IA(tabletop)
 	}
-	wm title $IA(tabletop) $IA(title)
-
 	table $IA(table) \
-		-rows $IA(numrows) \
-		-cols $IA(numcols) \
+		-rows $IA(rows) \
+		-height $IA(height) \
+		-cols $IA(cols) \
+		-width $IA(width) \
 		-variable $IA(array) \
 		-titlerows $IA(titlerows) \
 		-titlecols $IA(titlecols) \
-		-font $IA(tablefont) \
+		-font $IA(font) \
 		-foreground $IA(foreground) \
 		-background $IA(background) \
-		-yscrollcommand "$YSB set" \
-		-xscrollcommand "$XSB set" \
+		-yscrollcommand $IA(yscrollcommand) \
+		-xscrollcommand $IA(xscrollcommand) \
 		-roworigin $IA(roworigin) \
 		-colorigin $IA(colorigin) \
 		-selectmode $IA(selectmode) \
@@ -119,19 +109,132 @@ proc table_object {InfoArrayName } {
 		-colstretch $IA(colstretch) \
 		-flashmode $IA(flashmode)
 
-	scrollbar $YSB -command [list $IA(table) yview]  
-	scrollbar $XSB -command [list $IA(table) xview] -orient horizontal 
+	scrollbar $IA(yscrollbar) -command [list $IA(table) yview]  
+	scrollbar $IA(xscrollbar) -command [list $IA(table) xview] -orient horizontal 
+
+	set RetL [list $IA(table) $DataArrayName $InfoArrayName $IA(tabletop)]
 
 	grid columnconfig $IA(tabletop) 0 -weight 1
 	grid rowconfig $IA(tabletop) 0 -weight 1
-	grid $YSB \
+	set RowC 0
+	set ColC 0
+	grid $IA(table) \
+		-column $ColC -row $RowC -columnspan 1 -rowspan 1 -sticky nesw
+	grid $IA(yscrollbar) \
+		 -column [expr 1 + $ColC] -row $RowC -columnspan 1 -rowspan 1 -sticky ns
+	grid $IA(xscrollbar) \
+		-column $ColC -row [expr 1 + $RowC] -columnspan 1 -rowspan 1 -sticky ew
+	incr ColC
+	incr RowC
+	if {[info exists IA(lowerpane)] == 1} then {
+tk_dialog .jjj "--" "lowerpane exists" "" 0 OK
+		append IA(lowerpane) $IA(tabletop) "." lowerpane
+		frame $IA(lowerpane) -background $IA(background) -relief flat
+		grid $IA(lowerpane) \
+			-column 0 -row $RowC -columnspan 2 -rowspan 1 -sticky nesw
+		append $RetL [list " lowerpane " $IA(lowerpane)]
+	}
+
+	wm title $IA(tabletop) $IA(title)
+	update
+#	return [list $IA(table) $DataArrayName $InfoArrayName $IA(tabletop)]
+	return $RetL
+}
+}
+
+
+proc build_table4 {BaseName InfoArrayName OptsList OthersList} {
+	upvar #0 $InfoArrayName IA 
+
+	eval [list global array $InfoArrayName]
+	set IA(library) Tktable
+	append IA(library) [info sharedlibext]
+
+	append IA(tabletop)   "." $BaseName _toplevel
+	append IA(table) $IA(tabletop) ".table"
+	append DataArrayName $BaseName _array
+	set IA(array)   $DataArrayName
+
+	set IA(rows) 6
+	set IA(cols) 6
+#	set IA(font) {{Times 9 normal}}
+	set IA(font) system
+	set IA(foreground) black
+	set IA(background) #b9b9b9
+	set IA(selectmode) extended
+	set IA(rowstretch) unset
+	set IA(colstretch) unset
+
+	set IA(variable) $IA(array)
+	append IA(yscrollbar) $IA(tabletop) ".sy"
+	append IA(xscrollbar) $IA(tabletop) ".sx"
+	append IA(yscrollcommand) $IA(yscrollbar) " set"
+	append IA(xscrollcommand) $IA(xscrollbar) " set"
+
+	set NOL ""
+	while {$OptsList != ""} {
+		if {[lindex $OptsList 0] != "" } then {
+			set IA([lindex $OptsList 0]) [lindex $OptsList 1]
+			append NOL " -[lindex $OptsList 0] [lindex $OptsList 1]"
+		}
+		set OptsList [lrange $OptsList 2 end]
+	}
+#	append NOL " -font " $IA(font)
+tk_dialog .jjj "NOL" "$NOL" "" 0 OK
+	global array $IA(array)
+	global array $DataArrayName
+
+	while {$OthersList != ""} {
+		set IA([lindex $OthersList 0]) [lindex $OthersList 1]
+		set OthersList [lrange $OthersList 2 end]
+	}
+
+	upvar #0 $IA(array) ff
+	if {$IA(colheadings) != ""} {
+		set ll [llength $IA(colheadings)]
+		for {set i 0} { $i < $ll } {incr i} { 
+			set ff(-1,$i) [lindex $IA(colheadings) $i] 
+		}
+	}
+	if {$IA(rowheadings) != ""} {
+		set ll [llength $IA(rowheadings)]
+		for {set i 0} { $i < $ll } {incr i} { 
+			set ff($i,-1) [lindex $IA(rowheadings) $i] 
+		}
+	}
+
+	table_object2 $InfoArrayName $NOL
+	wm title $IA(tabletop) $IA(title)
+	update
+	return [list $IA(table) $DataArrayName $InfoArrayName $IA(tabletop)]
+}
+
+proc table_object2 {InfoArrayName OptsList} {
+	upvar #0 $InfoArrayName IA
+	global array tcl_platform
+
+	eval toplevel $IA(tabletop)
+	if {$tcl_platform(platform) == "windows"} {
+		focus -force $IA(tabletop)
+	}
+	eval table $IA(table) $OptsList
+
+	scrollbar $IA(yscrollbar) -command [list $IA(table) yview]  
+	scrollbar $IA(xscrollbar) -command [list $IA(table) xview] -orient horizontal 
+
+	grid columnconfig $IA(tabletop) 0 -weight 1
+	grid rowconfig $IA(tabletop) 0 -weight 1
+	grid $IA(yscrollbar) \
 		 -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns
 	grid $IA(table) \
 		-column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw
-	grid $XSB \
+	grid $IA(xscrollbar) \
 		-column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew
 	update
 }
+
+
+
 
 proc set_table { ArrayName Row Col Val } {
 	upvar #0 $ArrayName TA
