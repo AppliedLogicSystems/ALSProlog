@@ -15,6 +15,7 @@
  *=======================================================================*/
 #include "defs.h"
 
+// THREADED - this is old - not used by threads.
 #ifdef OLDFIO
 
 static	void	fio_nxln	(PE, lxi_but * );

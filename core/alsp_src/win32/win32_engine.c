@@ -27,6 +27,11 @@ typedef struct _FIXED_SYSTEM_INFO {
 
 static DWORD page_size(void)
 {
+	FIXED_SYSTEM_INFO info;
+	GetSystemInfo((LPSYSTEM_INFO)&info);
+	return info.dwPageSize;
+#if 0
+// THREAD - not thread safe
 	static DWORD size = 0;
 	
 	if (!size) {
@@ -35,6 +40,7 @@ static DWORD page_size(void)
 		size = info.dwPageSize;
 	}
 	return size;
+#endif
 }
 
 static LPVOID safe_VirtualAlloc(LPVOID lpAddress,	DWORD dwSize,
@@ -80,6 +86,7 @@ void unprotect_stack(prolog_engine *pe)
 	pe->stack_protected = 0;
 }
 
+// THREAD
 static LONG WINAPI exception_filter(struct _EXCEPTION_POINTERS *lpexpExceptionInfo)
 {
 #if 1

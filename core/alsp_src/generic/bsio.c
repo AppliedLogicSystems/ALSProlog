@@ -294,6 +294,7 @@ long standard_console_error(char *buf, long n)
 #elif defined(MSWin32)
 
 // Quick fix for Control-C on NT
+// THREAD
 extern HANDLE InteruptCompleteEvent;
 
 long standard_console_read(char *buf, long n)
@@ -346,6 +347,7 @@ long standard_console_error(char *buf, long n)
 
 #endif /* PURE_ANSI */
 
+// THREAD
 #ifdef macintosh
 console_func console_read = NULL,
 	     console_write = NULL,
@@ -895,9 +897,11 @@ typedef struct {
 	unsigned short refcnt;
 } fdrefcnt;
 
+// THREAD
 static fdrefcnt *fdrefcnts = NULL;
 static int fdrefcnts_size;
 
+// THREAD
 static int openmax = 0;
 #define OPEN_MAX_GUESS 256
 
@@ -986,6 +990,7 @@ decr_fdrefcnt(int fd)
 
 #else /* not MacOS */
 
+// THREAD
 static unsigned short *fdrefcnts = NULL;
 static int openmax = 0;
 #define OPEN_MAX_GUESS 256

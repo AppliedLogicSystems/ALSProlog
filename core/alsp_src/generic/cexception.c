@@ -249,9 +249,11 @@ void Open_and_Read_File(thing *p)
 
 */
 
+// THREAD
 /* Pointer to the top of the failure frame stack. */
 static volatile FailFrame *gFailStack = NULL;
 
+// THREAD
 /* The error code for the current failure. */
 static volatile int gFailError = 0;
 static volatile long gFailMessage = 0;		
@@ -317,8 +319,3 @@ void Failure(int error, long message)
 		
 	}
 }
-
-
-
-
-

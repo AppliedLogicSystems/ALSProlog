@@ -22,6 +22,7 @@ static	void	hc	(PE, PWord *, int *, pword );
  * creating variables where necessary.
  */
 
+// THREAD
 #define MAXVARS 600
 static long varptrs[MAXVARS];	/* pointers to words */
 

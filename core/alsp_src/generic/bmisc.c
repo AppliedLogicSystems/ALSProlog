@@ -408,6 +408,7 @@ pbi_hashN(PE)
 #endif /* HASH */
 
 #ifdef GENSYM
+// THREAD
 static long gensym_start_time = 0;
 static long gensym_counter = 0;
 

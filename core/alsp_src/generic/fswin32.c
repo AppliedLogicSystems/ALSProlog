@@ -122,7 +122,7 @@ static time_t FileTimeToTime_T(const FILETIME *fileTime)
 	SYSTEMTIME time;
 	long years, leap_years, leap_days, days, i, secs;
 	
-	static int MonthDays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+	static const int MonthDays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 							//jan feb mar apr may jun jul aug sep oct nov dec
 
 	// First, convert file time to system time
@@ -212,6 +212,7 @@ int als_stat(const char *path, struct als_stat *buf)
 
 char * als_getenv(const char * name)
 {
+	// THREAD
 	#define VAL_MAX	1024
 	static TCHAR value[VAL_MAX];
 	DWORD result;

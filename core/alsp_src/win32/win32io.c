@@ -6,7 +6,7 @@ int os_copy_file(const char *from_file, const char *to_file)
     else return 0;
 }
 
-
+// THREAD - this is probably ok, because is only called during setup
 static double process_start_time;
 DWORD platform;
 
@@ -77,6 +77,7 @@ static HANDLE timer_reset_event;
 
 static DWORD WINAPI timer_thread( LPVOID p)
 {
+// THREAD - do I need to implement timers for threads?
 // Fix me
 #if 0
 	DWORD time_out, next_time_out;

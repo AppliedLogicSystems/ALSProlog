@@ -243,6 +243,7 @@ pbi_protect_bottom_stack_page(PE)
     SUCCEED;
 }
 
+// THREADED
 int   argcount = 0;	/* global copies of main's argc and argv */
 char **argvector = NULL;
 
@@ -602,3 +603,5 @@ void simple_copy(prolog_engine *pa, PWord *a, int *at,
     break;
   }
 }
+
+// THREADED - complete all of the above

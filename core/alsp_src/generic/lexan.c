@@ -30,6 +30,7 @@
 
 #include "newlexinit.h"		/* Get initial lex table */
 
+// THREAD - this is old, so no need to make thread-safe
 lxi_but *lexbdp = &seetbl[USRSEEI].lb;	/* pointer to buffer descriptor */
 
 #define nxtbuf() ((void) (*(lexbdp->nextbuf))(hpe, lexbdp), bp = lexbdp->curpos)
