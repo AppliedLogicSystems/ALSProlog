@@ -1243,4 +1243,3 @@ coff_align8 :-
 	'$coff_operation'(15,_,_,_,_).
 
 endmod.
->>>>>>> 1.42
