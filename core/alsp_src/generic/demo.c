@@ -112,6 +112,132 @@ static void delete_demo_key_info(void)
 }
 #endif
 
+#ifdef Win32
+
+#define ALS_SUB_KEY "SOFTWARE\\Applied Logic Systems\\ALS Prolog"
+#define DEMO_REG_KEY "Demo Key"
+
+static void init_demo_key_info(void)
+{
+}
+
+static int demo_key_info_exists(void)
+{
+	HKEY reg_key;
+	LONG err;
+	
+	err = RegOpenKeyEx(HKEY_CURRENT_USER, ALS_SUB_KEY, 0, KEY_READ, &reg_key);
+	if (err == ERROR_SUCCESS) {
+		size = max;
+		err = RegQueryValueEx(reg_key, DEMO_REG_KEY, NULL, NULL, NULL, NULL); 
+		RegCloseKey(&reg_key);
+	}
+	
+	return (err == ERROR_SUCCESS);
+}
+
+static void read_demo_key_info(char *key, int max)
+{
+	HKEY reg_key;
+	LONG err;
+	DWORD type, size;
+	
+	err = RegOpenKeyEx(HKEY_CURRENT_USER, ALS_SUB_KEY, 0, KEY_READ, &reg_key);
+	if (err == ERROR_SUCCESS) {
+		size = max;
+		err = RegQueryValueEx(reg_key, DEMO_REG_KEY, NULL, &type, key, &size); 
+		if (err != ERROR_SUCCESS || type != REG_SZ) {
+			key[0] = 0;
+		}
+		RegCloseKey(&reg_key);
+	}
+}
+
+static void write_demo_key_info(char *key)
+{
+	HKEY reg_key;
+	LONG err;
+	DWORD type, size;
+	
+	err = RegCreateKeyEx(HKEY_CURRENT_USER, ALS_SUB_KEY, 0, KEY_WRITE, &reg_key);
+	if (err == ERROR_SUCCESS) {
+		type = REG_SZ;
+		size = strlen(key)+1;
+		RegSetValueEx(reg_key, DEMO_REG_KEY, NULL, &type, key, &size); 
+		RegCloseKey(&reg_key);
+	}
+}
+
+static void delete_demo_key_info(void)
+{
+	HKEY reg_key;
+	LONG err;
+	
+	err = RegOpenKeyEx(HKEY_CURRENT_USER, ALS_SUB_KEY, 0, KEY_WRITE, &reg_key);
+	if (err == ERROR_SUCCESS) {
+		RegDeleteKey(reg_key, DEMO_REG_KEY); 
+		RegCloseKey(&reg_key);
+	}
+}
+#endif
+
+#ifdef UNIX
+
+char *demo_file_path;
+#define DEMO_FILE ".alspro_demo_key"
+
+static void init_demo_key_info(void)
+{
+	const char *home;
+		if (	
+	getenv("HOME"
+	
+	demo_file_path = malloc(strlen(home)+1+strlen(DEMO_FILE)+1);
+	strcpy(demo_file_path, home);
+	strcat(demo_file_path, "/");
+	strcat(demo_file_path, DEMO_FILE);
+}
+
+static int demo_key_info_exists(void)
+{
+	return !access(demo_file_path, R_OK);
+}
+
+static void read_demo_key_info(char *key, int max)
+{
+	int f;
+	size_t count;
+
+	f = open(demo_file_path, O_RDONLY);
+	
+	if (f != -1) {
+		count = read(f, key, max-1);
+		if (count != -1) key[count] = 0;
+		else key[0] = 0;
+		close(f); 
+	}
+}
+
+static void write_demo_key_info(char *key)
+{
+	int f;
+	OSErr err;
+	short f;
+	long count;
+	
+	f = open(demo_file_path, O_WRONLY | O_CREAT);
+	if (f != -1) {
+		write(f, key, strlen(key));
+		close(f);
+	}
+}
+
+static void delete_demo_key_info(void)
+{
+	unlink(demo_file_path);
+}
+#endif
+
 static void console_get_demo_key(char *key, int max)
 {
 	fprintf(stdout, "\
@@ -154,7 +280,7 @@ static int valid_demo_key(char *key)
 	
 	sscanf(key, "%d-%d-%d-%d", a, b, c, d);
 
-	CalculateCheckSum
+	//CalculateCheckSum
 	if (d != calculat_checksum(a | b | c)) return 0;
 	
 	a = rotate(a);

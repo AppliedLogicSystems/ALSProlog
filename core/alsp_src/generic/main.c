@@ -1047,7 +1047,12 @@ static void EndCoop(void);
 EXPORT ALSPI_API(int)
 PI_startup(const PI_system_setup *setup)
 {
+#ifdef DEMO
+	extern void demo_check(void);
+	demo_check();
+#endif
 #ifdef MacOS
+{
     /* Determine if we are running under MPW. */
     ProcessSerialNumber PSN;
     ProcessInfoRec info;
@@ -1080,6 +1085,7 @@ PI_startup(const PI_system_setup *setup)
 #endif
 
    StartCoop();
+}
 #endif /* MacOS */
 
 #ifdef APP_PRINTF_CALLBACK 

@@ -1058,7 +1058,7 @@ overflow_check:
 	    P += OPSIZE;
 overflow_check0:
 #ifdef MacOS
-#ifdef DEBUG
+#if 0
 		if ((unsigned long) mr_SP < (unsigned long) wm_stackbot_safety)
 			stack_overflow();
 #endif	/* DEBUG */
