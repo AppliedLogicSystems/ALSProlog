@@ -4,11 +4,13 @@
 
 AP_API(AP_Result) AP_Unify(AP_World *w, AP_Obj a, AP_Obj b)
 {
+	if (a.p == AP_UNBOUND_OBJ.p && a.t == AP_UNBOUND_OBJ.t) return AP_SUCCESS;
+	if (b.p == AP_UNBOUND_OBJ.p && b.t == AP_UNBOUND_OBJ.t) return AP_SUCCESS;
 	if (PI_unify(a.p, a.t, b.p, b.t)) return AP_SUCCESS;
 	else return AP_FAIL;
 }
 
-AP_API(AP_Obj) AP_MakeUIAFromStr(AP_World *w, const char *s)
+AP_API(AP_Obj) AP_NewUIAFromStr(AP_World *w, const char *s)
 {
 	AP_Obj r;
 	
@@ -21,8 +23,12 @@ AP_API(AP_Obj) AP_NewNumberFromLong(AP_World *w, long n)
 {
 	AP_Obj r;
 	
-	r.p = n;
-	r.t = PI_INT;	
+	if (n > 134217727 || n < -134217727) {
+		PI_makedouble(&r.p, &r.t, n);
+	} else {
+		r.p = n;
+		r.t = PI_INT;
+	}	
 	
 	return r;
 }
@@ -45,7 +51,7 @@ AP_API(AP_Obj) AP_NullList(AP_World *w)
 	return r;
 }
 
-AP_API(AP_Obj) AP_NewList(AP_World *w, AP_Obj head, AP_Obj tail)
+AP_API(AP_Obj) AP_NewInitList(AP_World *w, AP_Obj head, AP_Obj tail)
 {
 	AP_Obj r, car, cdr;
 	
@@ -139,7 +145,7 @@ AP_API(AP_Obj) AP_ListTail(AP_World *w,  AP_Obj list)
 	return r;
 }
 
-AP_API(AP_Obj) AP_MakeStructure(AP_World *w, AP_Obj functor, int arity, ...)
+AP_API(AP_Obj) AP_NewInitStructure(AP_World *w, AP_Obj functor, int arity, ...)
 {
 	va_list ap;
 	AP_Obj r, arg, arg_value;
@@ -160,13 +166,45 @@ AP_API(AP_Obj) AP_MakeStructure(AP_World *w, AP_Obj functor, int arity, ...)
 	return r;
 }
 
+AP_API(AP_Obj) AP_NewStructure(AP_World *w, AP_Obj functor, int arity)
+{
+	AP_Obj r;
+	
+	PI_makestruct(&r.p, &r.t, functor.p, arity);
+	
+	return r;
+}
+
+AP_API(int) AP_GetStructureArity(AP_World *w, AP_Obj struc)
+{
+	PWord func;
+	int arity;
+	
+	PI_getstruct(&func, &arity, struc.p);
+
+	return arity;
+}
+
+AP_API(AP_Obj) AP_GetStructureFunctor(AP_World *w, AP_Obj struc)
+{
+	PWord func;
+	int arity;
+	AP_Obj result;
+	
+	PI_getstruct(&func, &arity, struc.p);
+
+	result.p = func; result.t = PI_SYM;
+	
+	return result;
+}
+
 static AP_Obj exception;
 AP_API(AP_Result) AP_Call(AP_World *w, AP_Obj module, AP_Obj *term)
 {
 	AP_Obj catch_term, caught;
 
-	catch_term = AP_MakeStructure(w, AP_MakeSymbolFromStr(w, "catch"), 3,
-						*term, AP_UNBOUND_OBJ, AP_MakeSymbolFromStr(w, "true")); 
+	catch_term = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "catch"), 3,
+						*term, AP_UNBOUND_OBJ, AP_NewSymbolFromStr(w, "true")); 
 	if (PI_rungoal_with_update(module.p, &catch_term.p, &catch_term.t)) {
 		*term = AP_GetArgument(w, catch_term, 1);
 		caught = AP_GetArgument(w, catch_term, 2);
@@ -180,7 +218,7 @@ AP_API(AP_Result) AP_Call(AP_World *w, AP_Obj module, AP_Obj *term)
 	} 
 }
 
-AP_API(AP_Obj) AP_MakeSymbolFromStr(AP_World *w, const char *s)
+AP_API(AP_Obj) AP_NewSymbolFromStr(AP_World *w, const char *s)
 {
 	AP_Obj r;
 	PI_makesym(&r.p, &r.t, s); 
@@ -206,7 +244,7 @@ AP_API(AP_Result) AP_SetError(AP_World *w, AP_Obj error_term)
 {
 	AP_Obj error;
 	
-	error = AP_MakeStructure(w, AP_MakeSymbolFromStr(w, "error"), 2,
+	error = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "error"), 2,
 					error_term, AP_NullList(w));
 	
 	return AP_SetException(w, error);
@@ -244,35 +282,35 @@ AP_API(AP_Result) AP_SetStandardError(AP_World *w, AP_StandardError error_type, 
 
 	switch (error_type) {
 	case AP_INSTANTIATION_ERROR:
-		error = AP_MakeSymbolFromStr(w, "instantiation_error");
+		error = AP_NewSymbolFromStr(w, "instantiation_error");
 		break;
 	case AP_TYPE_ERROR:
-		error = AP_MakeStructure(w, AP_MakeSymbolFromStr(w, "type_error"), 2, obj1, obj2);
+		error = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "type_error"), 2, obj1, obj2);
 		break;
 	case AP_DOMAIN_ERROR:
-		error = AP_MakeStructure(w, AP_MakeSymbolFromStr(w, "domain_error"), 2, obj1, obj2);
+		error = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "domain_error"), 2, obj1, obj2);
 		break;
 	case AP_EXISTENCE_ERROR:
-		error = AP_MakeStructure(w, AP_MakeSymbolFromStr(w, "existence_error"), 2, obj1, obj2);
+		error = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "existence_error"), 2, obj1, obj2);
 		break;
 	case AP_PERMISSION_ERROR:
-		error = AP_MakeStructure(w, AP_MakeSymbolFromStr(w, "permission_error"), 3, obj1, obj2, obj3);
+		error = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "permission_error"), 3, obj1, obj2, obj3);
 		break;
 	case AP_REPRESENTATION_ERROR:
-		error = AP_MakeStructure(w, AP_MakeSymbolFromStr(w, "representation_error"), 1, obj1); 
+		error = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "representation_error"), 1, obj1); 
 		break;
 	case AP_EVALUATION_ERROR:
-		error = AP_MakeStructure(w, AP_MakeSymbolFromStr(w, "evaluation_error"), 1, obj1); 
+		error = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "evaluation_error"), 1, obj1); 
 		break;
 	case AP_RESOURCE_ERROR:
-		error = AP_MakeStructure(w, AP_MakeSymbolFromStr(w, "resource_error"), 1, obj1); 
+		error = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "resource_error"), 1, obj1); 
 		break;
 	case AP_SYNTAX_ERROR:
-		error = AP_MakeStructure(w, AP_MakeSymbolFromStr(w, "syntax_error"), 1, obj1); 
+		error = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "syntax_error"), 1, obj1); 
 		break;
 	case AP_SYSTEM_ERROR:
 	default:
-		error = AP_MakeSymbolFromStr(w, "system_error");
+		error = AP_NewSymbolFromStr(w, "system_error");
 		break;
 	}
 	va_end(va);
