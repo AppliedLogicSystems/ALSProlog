@@ -18,6 +18,12 @@
 #include "version.h"
 #include "sig.h"
 
+/* CHANGE THIS TO UNIX_HPUX ifdef when we move to configless world. */
+#ifdef __hp9000s800
+#undef __harg
+#define __harg int
+#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif	/* HAVE_UNISTD_H */
