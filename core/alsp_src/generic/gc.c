@@ -173,6 +173,7 @@ gc()
     long *ap;
     long *apb;
     long *tr;
+    long *tr1;
     long *oldest_ap;
     Code *ra;			/* return address */
     register int i;
@@ -352,6 +353,9 @@ gc()
 		 | of a trail pair, we have copied the contents of a heap location into
 		 | that trail position; hence *tr is incorrect for such a location;
 		 | instead, we want to just pass tr to mark_from in that case.
+		 |		Note that in this case, the contents of tr, being a heap
+		 |	value, could be biased; hence we use val_at(tr) in this case.
+		 |
 		 |     Now, tr is sweeping from lower (more recent) to upper locations
 		 | on the trail; thus it encounters the lower member (copied value
 		 | to be reset) first, then the upper regular type of trail location
@@ -361,16 +365,21 @@ gc()
 		 *------------------------------------------------------------------*/
 		for (; tr < b; tr++) {
 				/* mark the copied (2nd pair element) value): */
-	/*		mark_from(tr);    */
-    		mark(val_at(tr));
+/*			mark_from(tr);      */
+/*    		mark(val_at(tr));   */
+			tr1 = tr;
+
 				/* move up one element; now an "ordinary" trail value: */ 
 	    	ap = (long *) *++tr;	/* tr is not biased */
 	    	if (oldest_ap <= ap && ap < heap_low)
+			{
 				mark_from(ap);
+    			mark(val_at(tr1));
+			}
 		}
 #else /* no-TRAILVALS */
 		for (; tr < b; tr++) {
-	    	ap = (long *) *tr;	/* tr is not biased */
+	    	ap = (long *) *tr;					/* tr is not biased */
 	    	if (oldest_ap <= ap && ap < heap_low)
 				mark_from(ap);
 		}
@@ -478,7 +487,7 @@ chpt_after_trail_entry:	/* entry point into for-loop */
     		/* long *b,  *tr */
 
 			/*---------------------------------------------------------------*
-			 | The pair (b, tr) sweep down from the bottom of one cp to the
+			 | The pair (b, tr) sweeps down from the bottom of one cp to the
 			 | top of the next (younger) cp; at each step, b is advanced
 			 | first, and then tr.
 			 *---------------------------------------------------------------*/

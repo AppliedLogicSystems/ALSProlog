@@ -827,8 +827,11 @@ pcmp_fs(void)
 
 #endif /* not HAVE_GUSI */
 
+
+#endif /* MacOS */
+
 #ifdef MacOS
-static unsigned char *open_memory_file(const char *file_name, mem_file_info *info)
+unsigned char *open_memory_file(const char *file_name, mem_file_info *info)
 {
     Str255 pfile_name;
     FSSpec spec;
@@ -870,10 +873,8 @@ error:
     return NULL;
 }
 
-static void close_memory_file(mem_file_info *info)
+void close_memory_file(mem_file_info *info)
 {
     DisposePtr(info->start);
 }
 #endif
-
-#endif /* MacOS */
