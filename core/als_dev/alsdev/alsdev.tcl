@@ -5,6 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
+#|		"$Id: alsdev.tcl,v 1.38 1998/03/10 17:52:46 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -185,7 +186,6 @@ proc vTclWindow. {args} {
     # SETTING GEOMETRY
     ###################
 }
-
 	#################################
 	# 		INITIAL SETUP
 	#--------------------------------
@@ -298,6 +298,7 @@ proc load_source {path name} {
 	}
 }
 
+
 load_source $ALSTCLPATH {alsdev_main}
 load_source $ALSTCLPATH {als_settings}
 load_source $ALSTCLPATH {debugwin}
@@ -305,6 +306,7 @@ load_source $ALSTCLPATH {defstr}
 load_source $ALSTCLPATH {als_menu}
 load_source $ALSTCLPATH {als_document}
 load_source $ALSTCLPATH {als_tkfbox}
+
 
 proc load_photo {image_name base_name} {
 	global tcl_platform ALSTCLPATH
@@ -915,6 +917,16 @@ proc exit_debugger {} {
 	hide_debugwin
 }
 
+proc switch_debug_setup {Which} {
+	global array proenv
+
+	if {"$Which"=="on"} then {
+		if {"$proenv(debugwin)"==0} then { toggle_debugwin }
+	} else {
+		if {"$proenv(debugwin)"==1} then { toggle_debugwin }
+	}
+}
+
 		###############################
 		######### SPYPOINTS
 		###############################
@@ -1120,6 +1132,10 @@ if {$tcl_platform(platform) == "macintosh"} {
 	# Make .topals.mmenb the default menu for all windows.
 	. configure -menu .topals.mmenb
 }
+Window show .topals
+wm positionfrom .topals user
+wm geometry .topals $proenv(.topals,geometry)
+
 Window show .debug_settings
 Window hide .debug_settings
 
