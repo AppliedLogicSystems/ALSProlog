@@ -199,7 +199,7 @@ ALSO clarify: w_Error (Error) label in wrap
 extern void iaerror    PARAMS( (void) );
 extern void deact    PARAMS( (void) );
 	/* Dummy */
-extern fp round    PARAMS(( fp ));
+extern fp int_round    PARAMS(( fp ));
 
 #define LOWER_BOUND 0
 #define UPPER_BOUND 1
