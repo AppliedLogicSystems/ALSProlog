@@ -362,9 +362,9 @@ print_banner(OutS,L)
 	name(WBan, [UInC | WNCs]),
 	!,
 #if (syscfg:intconstr)
-	printf(OutS,'CLP(BNR)(r) [%s Version %s [%s] (%s)]\n',[Name,Version,OSVar,WBan]),
+	printf(OutS,'CLP(BNR)(r) [%s Version %s [%s]]\n',[Name,Version,OSVar]),
 #else
-	printf(OutS,'%s Version %s [%s] (%s)\n',[Name,Version,OSVar,WBan]),
+	printf(OutS,'%s Version %s [%s]\n',[Name,Version,OSVar]),
 #endif
 	printf(OutS,'   Copyright (c) 1987-96 Applied Logic Systems, Inc.\n\n',[]).
 
