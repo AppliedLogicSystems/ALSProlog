@@ -37,16 +37,18 @@ start_shell(DefaultShellCall)
 start_shell0(DefaultShellCall)
 	:-
 	setup_debugger_stubs,
+
 	make_clinfo(CLInfo, DefaultShellCall, false),	% verbosity = verbose
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,CLInfo),
+
 	assertz(command_line(ResidualCommandLine)),
 	setup_search_dirs(CLInfo),
-	ss_load_dot_alspro(CLInfo),
 	output_system_banner(CLInfo),
 	library_setup,
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	!,
+	ss_load_dot_alspro(CLInfo),
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
 

@@ -9,6 +9,24 @@
  |	Authors: Ken Bowen
  |	Date: 6/96
  *====================================================================*/
+module builtins.
+
+export setup_cmd_line/0.
+setup_cmd_line
+	:-
+	abolish(command_line,1),
+	pbi_get_command_line(RawCommandLine),
+	get_user_cmd_line(RawCommandLine, ResidualCommandLine),
+	assertz(command_line(ResidualCommandLine)).
+
+get_user_cmd_line([], []).
+get_user_cmd_line(['-p' | T], T)
+	:-!.
+get_user_cmd_line([_ | RawCommandLine], ResidualCommandLine)
+	:-
+	get_user_cmd_line(RawCommandLine, ResidualCommandLine).
+
+endmod.
 
 module sio.
 
