@@ -10,9 +10,9 @@ Irix through the check_sysinfo_security/1 predicate.
 Please see the Software Security (now Rainbow) documentation
 for information about installing the hardware keys.
 
-On Irix, the hardware serial number ca be determined with the
-"/sbin/sysinfo -s" command.  Use the TCL script "gen_checksum.tcl"
-to generate a checksum, with the following command line:
+On Irix, the hardware serial number can be determined with the
+"/sbin/sysinfo -s" command.  Use the TCL script "common/gen_checksum.tcl"
+to generate a checksum with the following command line:
 
 gen_checksum.tcl <serial-number>
 
