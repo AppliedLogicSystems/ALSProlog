@@ -16,7 +16,22 @@
  |	X can be alpha-numeric; alphas are all UC.
  |
  *============================================================*/
-module serials.
+sn :- write('Type [30,perm] = '), read(Type), dsn(Type).
+dsn(30) :-
+	date(D0),
+	date_plus_30(D0, D),
+	serial_nums:gen_30day(D, day30-prof, Key),
+	write(key=Key),nl.
+
+	%% Junk, for now (get library stuff from PM project):
+date_plus_30(YY/MM0/DD, YY/MM/DD)
+	:-
+	MM0 < 12, !, MM is MM0+1.
+date_plus_30(YY0/1/DD, N, YY/MM/DD)
+	:-
+	YY is YY0+1.
+
+module serial_nums.
 
 export xt/0.
 xt :-
