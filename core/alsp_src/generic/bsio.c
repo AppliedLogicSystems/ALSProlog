@@ -2048,8 +2048,7 @@ stream_is_ready(buf, usec_to_wait)
 	    wait_time.tv_sec = usec_to_wait / 1000000;
 	    wait_time.tv_usec = usec_to_wait % 1000000;
 
-/* extern int select(size_t, int *, int *, int *, const struct timeval *); */
-	    if (select(SIO_FD(buf)+1, &rfds, &wfds, &efds, &wait_time)  > 0)
+	    if (select(SIO_FD(buf)+1, &rfds, &wfds, &efds, &wait_time) > 0)
 		return 1;
 	    else
 		return 0;
@@ -2574,7 +2573,7 @@ write_buf(vsd,buf)
 #endif /* HAVE_SOCKET */
 
 	case SIO_TYPE_CONSOLE:
-	    if (console_io) writeflg = console_io(SIO_FD(buf), SIO_BUFFER(buf), SIO_LPOS(buf));
+	    if (console_io) writeflg = console_io(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
 	    else { writeflg = SIO_LPOS(buf); }
 	    break;
 
@@ -3158,7 +3157,7 @@ sio_readbuffer()
 #endif /* HAVE_SOCKET */
 
 	case SIO_TYPE_CONSOLE:
-	    if (console_io) nchars = console_io(SIO_FD(buf), buffer, nchars);
+	    if (console_io) nchars = console_io(SIO_FD(buf), buffer, (size_t)nchars);
 	    else { nchars = 0; }
 	    break;
 	   

@@ -66,19 +66,18 @@ decode_instr(inst)
 #define printf PI_printf
 */
 
-static Code *ip;
-
 void
 list_asm(addr, n)
     Code *addr;			/* Start address */
     int   n;
 
 {
-    Code *stopaddr = addr + n - 2;
+    Code *stopaddr = addr + n - 2, *ip;
     long  ilength;
     enum AbstractMachineOps instr;
 
-	printf("startaddr=%x  stopaddr=%x  codelen=%d\n",addr,stopaddr,n),
+	printf("startaddr=%x  stopaddr=%x  codelen=%d\n",
+		(unsigned int)addr,(unsigned int)stopaddr,n),
 	fflush(stdout);
 
     for (ip = addr; ip < stopaddr; ) {
@@ -86,12 +85,13 @@ list_asm(addr, n)
 	instr = decode_instr(*ip);
 	if ((instr < 0) || (instr > ICNUM)) 
 	{
-		printf("[%03.0d]%x: BAD INSTRUCTION: Content=%08.0o\n", (int)(ip-addr), ip, *ip);
+		printf("[%03d]%x: BAD INSTRUCTION: Content=%08o\n",
+			(int)(ip-addr), (unsigned int)ip, (unsigned int)*ip);
 		break;
 	}
 	else
 	{
-		printf("[%03.0d]%x:",(int)(ip-addr),ip); 
+		printf("[%03d]%x:",(int)(ip-addr),(unsigned int)ip); 
 		ilength = display_instr(instr,ip);
 		ip += ilength;
 		printf("\n");
