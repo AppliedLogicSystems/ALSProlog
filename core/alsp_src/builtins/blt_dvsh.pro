@@ -56,7 +56,7 @@ alsdev(Shared)
 	:-
 	sys_env(OS, _, _),
 	(OS = macos ->
-		tcl_call(shl_tcli, [source, '-rsrc', 'alsdev'], _)
+		tcl_call(shl_tcli, 'source -rsrc alsdev', _)
 	  ;
 	  (
 	    pathPlusFile(Shared, 'alsdev.tcl', ALSDEVTCL),
@@ -163,24 +163,18 @@ alsdev(Shared)
 
 	builtins:prolog_shell(ISS,OSS,alsdev).
 
-
-alsdev_splash(TclPath)
+alsdev_splash(Path)
 	:-
-	tcl_call(shl_tcli, [file,join,TclPath,'turnstile_splash.gif'], SPP),
-	catenate(['image create photo als_splash_gif -file \\{',SPP,'\\}'],Splashy),
-	CL= [
-		'wm withdraw .',
-		'toplevel .als_splash_screen -bd 2 -relief flat',
-		'wm withdraw .als_splash_screen ',
-		Splashy,
-		'wm overrideredirect .als_splash_screen 1 ',
-		'label .als_splash_screen.label -image als_splash_gif -bd 1 -relief flat ',
-		'pack .als_splash_screen.label -side top -expand 1 -fill both ',
-		'wm geometry .als_splash_screen +270+200 ',
-		'wm deiconify .als_splash_screen ',
-		'update idletasks '],
-	list_tcl_eval(CL, shl_tcli, _),
-	tcl_call(shl_tcli, [update],_).
+	sys_env(OS, _, _),
+	(OS = macos ->
+		tcl_call(shl_tcli, 'source -rsrc als_splash', _)
+		;
+		(
+			pathPlusFile(Path, 'als_splash.tcl', SplashFile),
+			tcl_call(shl_tcli, [source, SplashFile], _)			
+		)
+	),
+	tcl_call(shl_tcli, [splash, Path], _).
 
 push_prompt(tcltk,OutStream,Prompt1)
 	:-!,
