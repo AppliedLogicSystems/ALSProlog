@@ -34,4 +34,4 @@ then
     exit 1
 fi
 
-cc $*
+i386-glibc20-linux-gcc $*
