@@ -1,41 +1,34 @@
 /*======================================================================
-|		fsdos.pro
-|		Copyright (c) 1988-91 Applied Logic Systems, Inc.
-|
-|	Miscellaneous low-level file system functions
-|			-- Unix Version		(fsunix.pro)
-|			-- DOS 386 Version	(fsdos386.pro)
-|			-- VMS Version 		(fsvms.pro)
-|
-|	Authors: Keith Hughes, Bola Odulate, and Nick Karonis
-|	Date:	4/88
-|	Revision: Ken Bowen -- 11/88
-|		-- library version: 11/91
-|
-*=======================================================================*/
+ |		fsdos.pro
+ |		Copyright (c) 1988-91 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |	Miscellaneous low-level file system functions
+ |			-- Unix Version		(fsunix.pro)
+ |			-- DOS 386 Version	(fsdos386.pro)
+ |			-- VMS Version 		(fsvms.pro)
+ |
+ |	Authors: Keith Hughes, Bola Odulate, and Nick Karonis
+ |	Date:	4/88
+ |	Revision: Ken Bowen -- 11/88
+ |		-- library version: 11/91
+ *=======================================================================*/
 module builtins.
 
 export date/1.
-%export date_less/2.
-%export date_pattern/4.
-%export set_date_pattern/1.
 export time/1.
-%export time_less/2.
-
 export get_cwd/1.
 export change_cwd/1.
 export make_subdir/1.
 export remove_subdir/1.
 export remove_file/1.
 export file_status/2.
-
 export files/2.
 export files/3.
 export subdirs/1.
 export subdirs_red/1.
 export collect_files/3.
 export directory/3.
-
 export get_current_drive/1.
 export change_current_drive/1.
 
@@ -56,55 +49,6 @@ date(Date) 				% get current date
 	MM is Month + 1,
 	date_pattern(YY,MM,DD,Date).
 
-/************************
-/*!--------------------------------------------------------------
- |	date_less/2
- |	date_less(Date0, Date1)
- |	date_less(+,+)
- |
- |	 - tests two terms representing dates for ordering
- |
- |	If Date0 and Date1 are date terms of the form YY/MM/DD, succeeds
- |	if and only if Date0 represents a date earlier than Date1.
- *!--------------------------------------------------------------*/
-date_less(YY0/MM0/DD0, YY1/MM1/DD1)
-	:-
-	(YY0 < YY1,!;
-		(YY0 = YY1, 
-			(MM0 < MM1,!; (MM0 = MM1, DD0 < DD1)))).
-
-/*!--------------------------------------------------------------
- *!--------------------------------------------------------------*/
-set_date_pattern(AA/BB/CC)
-    :-
-    name(AA, [AChar | _]),
-    dmember(AChar, "ymd"),
-    name(BB, [BChar | _]),
-    dmember(BChar, "ymd"),
-    name(CC, [CChar | _]),
-    dmember(CChar, "ymd"),
-    ACharU is AChar - 32,
-    BCharU is BChar - 32,
-    CCharU is CChar - 32,
-    sort([ACharU,BCharU,CCharU],YMD_Var_Chars0),
-    dreverse(YMD_Var_Chars0, YMD_Var_Chars1),
-    insert_comma_chars(YMD_Var_Chars1, YMD_Var_Chars2),
-    append([0'[ | YMD_Var_Chars2], [ACharU,0'/,BCharU,0'/,CCharU,0']], PatternChars),
-    bufread(PatternChars, [PatternArgsList | _]),
-    DatePattern =.. [date_pattern | PatternArgsList],
-    abolish(date_pattern,4),
-    assert(DatePattern).
- 
-insert_comma_chars([], []).
-insert_comma_chars([C | RestCs], [C, 0', | RestICs])
-	:-
-	insert_comma_chars(RestCs, RestICs).
-
-    %% Default:
-date_pattern(YY,MM,DD,YY/MM/DD).
-
-******************/
-
 /*!--------------------------------------------------------------
  |	time/1
  |	time(HH:MM:SS)
@@ -118,26 +62,6 @@ date_pattern(YY,MM,DD,YY/MM/DD).
 time(HH:MM:SS) 				% get current time
 	:-
 	'$time'(SS,MM,HH,_,_,_,_,_,_).
-
-
-/***********************
-/*!--------------------------------------------------------------
- |	time_less/2
- |	time_less(Time0, Time1)
- |	time_less(+,+)
- |
- |	 - tests two terms representing time for ordering
- |
- |	If Time0 and Time1 are time terms of the form HH:MM:SS, succeeds
- |	if and only if Time0 represents a time earlier than Time1.
- *!--------------------------------------------------------------*/
-time_less(HH0:MM0:SS0, HH1:MM1:SS1)
-	:-
-	(HH0 < HH1,!;
-		(HH0 = HH1, 
-			(MM0 < MM1,!; (MM0 = MM1, SS0 < SS1)))).
-
-***************/
 
 /*---------------------------------------------------------------------
  |	Change the current working directory being used by the program. 
@@ -160,7 +84,6 @@ change_cwd(NewDir)
 get_cwd(Path) 
 	:-
 	'$getcwd'(Path).
-
 
 /*!--------------------------------------------------------------
  |	make_subdir/1
@@ -220,7 +143,6 @@ files(Pattern, FileList)
 	directory(Pattern, regular, FileList1),
 	directory(Pattern, read_only, FileList2),
     sorted_merge([FileList1,FileList2], FileList).
-
 
 /*!----------------------------------------------------------------
  |	subdirs/1
@@ -384,7 +306,6 @@ file_size(_,0)
 	:-
 	prolog_system_error(nyi, ['file_size/2',dos_djgpp]).
 
-
 /*---------------------------------------------------------------------
  |	Determine current disk drive. Drive = constant (1=A, 2=B, etc).
  *---------------------------------------------------------------------*/
@@ -393,7 +314,6 @@ get_current_drive(Drive)
 	'$getdrive'(DriveNum),
 	W is DriveNum - 1 + 0'A,
 	name(Drive,[W]).
-
 
 /*---------------------------------------------------------------------
  |	Change the current drive being used. Can be used in one of two ways,

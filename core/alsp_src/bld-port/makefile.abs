@@ -1,0 +1,433 @@
+/*-------------------------------------------------------------------------*
+ |			makefile.abs
+ | Makefile.in is the Makefile template for alspro.
+ | Makefile is generated from Makefile.in by running configure.
+ |
+ *-------------------------------------------------------------------------*/
+
+schema([
+	cmnt(top),
+	systype = port,
+	'ARCH'	= port,
+
+	case(&(context_name), [
+		(mac: [
+			srcdir 		= 'mailbox3:alsp_src:',
+			'OS'		= 'macos7',
+			'SOS'		= 'macos'
+			] ),
+		(os2: [
+			srcdir = 	'@srcdir@',
+			'MACH_OS'	= '@MACH_OS@',
+			'OS'		= 'os2_3.0',
+			'SOS'		= os2
+			] ),
+		(djgpp1: [
+			srcdir 		= '@srcdir@',
+			'OS'		= djgpp1,
+			'SOS'		= djgpp1,
+			'SHELL'		= '/bin/sh'
+			] ),
+		(djgpp2: [
+			srcdir 		= '@srcdir@',
+			'OS'		= 'djgpp2.0',
+			'SOS'		= djgpp2,
+			'SHELL'		= '/bin/sh'
+			] ),
+		(w31: [
+			'include C:\\HIGHC\WIN\vars.mkf',
+			srcdir 		= '@srcdir@',
+			'OS'		= 'win3.1',
+			'SOS'		= w31,
+			'SHELL'		= '/bin/sh'
+			] ),
+		(_: [
+			srcdir 			= '@srcdir@'/'..',
+			'MACH_OS'		= '@MACH_OS@',
+			'OS'			= '@OS@',
+			'SOS'			= '@SOS@',
+			'INSTALL'		= '@INSTALL@',
+			'INSTALL_PROGRAM'	= '@INSTALL_PROGRAM@',
+			'INSTALL_DATA'		= '@INSTALL_DATA@',
+			'LN_S'			= '@LN_S@',
+			'SHELL'			= '/bin/sh'
+			] ) ] ),
+
+	case(&(context_name), [
+		(mac: rule(':')),
+		(_: ~'VPATH' = &(vpath_val))]),
+
+	case(&(context_name), [
+		(mac: [
+			'CC68k'			= 'MWC68K',
+			'LINK68k'		= 'MWLINK68K',
+			'CCppc'			= 'MWCPPC',
+			'LINKppc'		= 'MWLINKPPC',
+
+			%% For debugging, add -sym full and remove -d
+			'LIBLINKFLAGS'		= '-library -sym full -d',
+			'TOOLLINKFLAGS'		= '-mpwtool -sym full -d',
+			'SIOUXLINKFLAGS'	= '-application -c \'ALS4\' -size on -sizemin 10240 -sizemax 10240 -sym full -d'
+			] ),
+		(w31: [
+			'CC'			= hc386,
+			'LINK'			= '$(CC)'
+			] ),
+		(_: [
+			'CC'			= gcc,
+			'LINK'			= '$(CC)'
+			] ) ] ),
+
+	case(&(context_name),
+		[
+		 (w31:('CFLAGS' = &(highC_cflags))),
+		 (mac:   ([
+		    'CFLAGS' = '-EOL -mpw_chars -requireprotos -w off -nosyspath -sym full',
+		    'CFLAGS68K' = '-opt full -model farData -model codesmart',
+                    'CFLAGSPPC' = '-opt speed,peep,global,l3'])),
+		 (os2: ('CFLAGS' = &(gcc_cflags))),
+		 (_: ('CFLAGS' = &(gcc_cflags))) 
+		]),
+
+	case(&(context_name), [
+		(mac:  [
+			'GUSIIncludes'	= '{MPW}Interfaces:GUSIIncludes:',
+			'GUSILibraries'	= '{MPW}Libraries:GUSILibraries:',
+
+			'COMMONLIBS68K' = '"{MW68KLibraries}MathLib68K (4i/8d).Lib" "{MW68KLibraries}CPlusPlus.lib" \xB6\n\
+					   "{MW68KLibraries}ToolLibs.o" "{MW68KLibraries}PLStringFuncs.glue.lib"',
+
+			'MPWINITLIBS68K'= '"{MW68KLibraries}MPWRuntime.68K.lib" \xB6\n\
+					   "{MW68KLibraries}MacOS.Lib" \xB6\n\
+					   "{MW68KLibraries}MathLib68K (4i/8d).Lib" \xB6\n\
+					   "{MW68KLibraries}MPW ANSI (4i/8d) C.68K.Lib" \xB6\n\
+					   "{MW68KLibraries}ToolLibs.o" \xB6\n\
+					   "{MW68KLibraries}PLStringFuncs.glue.lib"',
+
+%%			'MPWLIBS68K'	= '"{GUSILibraries}GUSI.Lib.68K" \xB6\n\
+%%					   {COMMONLIBS68K}',
+			'MPWLIBS68K'	= '',
+
+			'SIOUXLIBS68K'	= '"{MW68KLibraries}MacOS.Lib" "{GUSILibraries}GUSI.Lib.68K" \xB6\n\
+					   "{MW68KLibraries}ANSI (N/4i/8d) C.68K.Lib" \xB6\n\
+					   "{MW68KLibraries}SIOUX.68K.Lib" \xB6\n\
+					   {COMMONLIBS68K}',
+
+			'COMMONLIBSPPC'	= '"{SharedLibraries}InterfaceLib" \xB6\n\
+					   "{MWPPCLibraries}ANSI (NL) C.PPC.Lib" "{MWPPCLibraries}MathLib" \xB6\n\
+					   "{MWPPCLibraries}PPCToolLibs.o" "{MWPPCLibraries}PLStringFuncsPPC.lib"',
+
+			'MPWLIBSPPC'	= '"{SharedLibraries}InterfaceLib" \xB6\n\
+					   "{MWPPCLibraries}MathLib" \xB6\n\
+					   "{GUSILibraries}GUSIMPW.Lib.PPC" \xB6\n\
+					   "{GUSILibraries}GUSI.Lib.PPC" \xB6\n\
+					   "{MWPPCLibraries}MPW ANSI.C.PPC.Lib" \xB6\n\
+					   "{MWPPCLibraries}MWMPWCRuntime.Lib" \xB6\n\
+					   "{MWPPCLibraries}PPCToolLibs.o" \xB6\n\
+					   "{MWPPCLibraries}PLStringFuncsPPC.lib"',
+
+			'SIOUXLIBSPPC'	= '"{GUSILibraries}GUSI.Lib.PPC" \xB6\n\
+					   "{MWPPCLibraries}MWCRuntime.Lib" \xB6\n\
+					   "{MWPPCLibraries}SIOUX.PPC.Lib" \xB6\n\
+					   {COMMONLIBSPPC}'
+			] ),
+		(djgpp1: [
+			'LDFLAGS'		= '',
+			'LIBS'			= ' $(srcdir)/i386/djgpp/libregex.a -lm ',
+			'X_CFLAGS'		= '',
+			'X_LIBS'		= '',
+			'X_EXTRA_LIBS'		= '',
+			'TARGET'		= djgpp1,
+			prefix			= 'go32 ',
+			exec_prefix		= '$(prefix)'
+			] ),
+		(djgpp2: [
+			'LDFLAGS'		= '',
+			'LIBS'			= ' -lm ',
+			'X_CFLAGS'		= '',
+			'X_LIBS'		= '',
+			'X_EXTRA_LIBS'		= '',
+			'TARGET'		= djgpp2,
+			prefix			= '',
+			exec_prefix		= '$(prefix)'
+			] ),
+		(os2: [
+			'LDFLAGS'		= '',
+			'LIBS'			= '',
+			'X_CFLAGS'		= '',
+			'X_LIBS'		= '',
+			'X_EXTRA_LIBS'		= '',
+			'TARGET'		= os2,
+			prefix			= '/usr/local',
+			exec_prefix		= '$(prefix)'
+			] ),
+		(_: [
+			'LDFLAGS'		= '',
+			'LIBS'			= '@LIBS@',
+			'X_CFLAGS'		= '@X_CFLAGS@',
+			'X_LIBS'		= '@X_LIBS@',
+			'X_EXTRA_LIBS'		= '@X_EXTRA_LIBS@',
+			'TARGET'		= '@TARGET@',
+			prefix			= '/usr/local',
+			exec_prefix		= '$(prefix)'
+			] ) ] ),
+
+	case(&(context_name),
+		[
+		 (djgpp1:shell( ['include ../generic.mkf',
+					    'include ../port.mkf'])),
+		 (djgpp2:shell( ['include ../generic.mkf',
+					    'include ../port.mkf'])),
+		 (w31:shell(['include ../generic.mkf',
+					    'include ../port.mkf'])),
+		 (mac:[include_raw('../generic/generate/generic.mac'),
+		       include_raw('../port/port.mac')  ]),
+		 (_:shell(  ['include $(srcdir)/generic/generic.mkf',
+					    'include $(srcdir)/port/port.mkf'])) ]),
+
+	case(&(context_name), [
+			(unix: rule(mi)),
+			(_: noop) ]),
+
+	case(&(context_name), [
+			(mac: [objects_68k = '{gfiles_68k_o} {afiles_68k_o}',
+			       objects_ppc = '{gfiles_ppc_o} {afiles_ppc_o}']),
+			(_: objects = '$(gfiles_o) $(afiles_o)')]),
+
+	case(&(context_name), [
+		  (mac: noop ),
+		  (_:	[
+			rule(cppflags),
+			rule(setup),
+			rule('pi_cfg.h'),
+			rule('pi_init.c')
+				]) ]),
+
+	case(&(context_name), [
+			(mac: [rule('{objects_ppc} {objects_68k}'),
+			       rule('alspro.ppc.lib'),
+			       rule('alspro.68k.lib')] ),
+			(_: rule('alspro.a'))]),
+
+	case(&(context_name), [
+			(mac:[ rule('mpw_pimain.68k.o'),
+			       rule('mpw_pimain.ppc.o'),
+			       rule('sioux_pimain.68k.o'),
+			       rule('sioux_pimain.ppc.o'),
+			       rule('SIOUX_EOF_Fix.68k.o'),
+			       rule('SIOUX_EOF_Fix.ppc.o')
+				]),
+			(_:noop) ]),
+
+	case(&(context_name), [
+			(mac: [
+				rule(mpw_alspro_b_68k),
+				rule(mpw_alspro_b_ppc),
+				rule(sioux_alspro_b_68k),
+				rule(sioux_alspro_b_ppc),
+				rule(mpw_alspro_b),
+				rule(sioux_alspro_b),
+				rule(alspro_b)
+			      ]),
+			(_: rule('alspro_b'))]),
+
+	'IMGOPTS' = 'select_lib(builtins,[debugger]),select_lib(library,[iolayer,simplio])',
+	rule(alspro),
+
+	case(&(context_name), [
+			(mac: [ 
+				testdir	= '{srcdir}tests:',
+				rule(testrun)
+				]),
+			(_:[
+				testdir	= '$(srcdir)'/tests,
+				rule(testrun)
+				] ) ]),
+
+	rule(cleanup),
+	rule(super_clean)
+]).				%% End of Schema
+
+cmnt(top) = ['        makefile.in',
+      '    Copyright (c) 1994-95 Applied Logic Systems, Inc.',
+      '  ',
+      '  Makefile template for bld-port: Byte/Threaded version ',
+      '  For building ALS-Prolog on ' + '>> ' + &(context_name) + ' <<',
+      '  ',
+      'Generated by abs2make from bld-port/makefile.abs: '+date+' - '+time].
+
+&(vpath_val)  = 
+	case(&(context_name),[
+		(unix: ('$(srcdir)'/generic;'$(srcdir)'/port;'$(srcdir)'/port/'@SOS@';'..' )),
+		(os2:  ('$(srcdir)'/generic;'$(srcdir)'/port;'$(srcdir)'/port/os2;'..' )),
+		(djgpp1: ('$(srcdir)'/generic;'$(srcdir)'/port;'$(srcdir)'/port/djgpp1;'..' )),
+		(djgpp2: ('$(srcdir)'/generic;'$(srcdir)'/port;'$(srcdir)'/port/djgpp2;'..' )),
+		(_: ('$(srcdir)'/generic;'$(srcdir)'/port;'$(srcdir)'/port/'@SOS@';'..' )) 
+			  ]).
+
+rule(':', ['{srcdir}generic:', '{srcdir}{ARCH}:'], []). 
+
+&(gcc_cflags)   = '-O -g -Wall -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes'.
+&(highC_cflags) = '-Hwin ' .
+&(mpw_cflags)   = '-O ' .
+
+rule(cppflags,
+	[],
+	['echo $(CPPFLAGS) > cppflags',
+	 'echo $(CFLAGS) >> cppflags',
+	 'echo $(X_CFLAGS) >> cppflags' ]).
+
+rule(setup,
+	['pi_cfg.h', 'pi_init.c',cppflags],
+	['echo setup done > setup'] ).
+
+rule(mi,[],['$(srcdir)/bin/cmn_mkfi', 'mv cmn_info.mkf ..']).
+
+rule('pi_cfg.h',
+ 	['$(srcdir)'/generic/'pi_cfg.in'],
+	case(&(context_name),
+		[(mac:(['Duplicate {srcdir}generic/pi_cfg.in pi_cfg.h'])),
+		 ( _ :(['cp $(srcdir)/generic/pi_cfg.in pi_cfg.h']))]) ).
+
+rule('pi_init.c',
+ 	['$(srcdir)'/generic/'pi_init.c'],
+	case(&(context_name),
+		[(mac:(['cp $(srcdir)/generic/pi_init.c  pi_init.c'])),
+		 ( _ :(['cp $(srcdir)/generic/pi_init.c  pi_init.c'])) ]) ).
+
+	%% This needs more case/by/case analysis:
+rule('alspro.a',
+	['setup $(objects)'],
+	['ar ruv alspro.a $(objects)',
+	 '-ranlib alspro.a']).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%% Macintosh Version Specifics %%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+rule('{objects_ppc} {objects_68k}', ['magic.h'], []).
+
+rule('alspro.68k.lib',
+	['{objects_68k}'],
+	['{LINK68K} -o alspro.68k.lib {LIBLINKFLAGS} {objects_68k}']).
+
+rule('alspro.ppc.lib',
+	['{objects_ppc}'],
+	['{LINKPPC} -o alspro.ppc.lib {LIBLINKFLAGS} {objects_ppc}']).
+
+rule('mpw_pimain.68k.o',
+	 ['{srcdir}generic:pimain.c'],
+	 ['{CC68K} -o mpw_pimain.68k.o {CPPFLAGS} {CFLAGS} {CFLAGS68K} -D MPW_TOOL {srcdir}generic:pimain.c']).
+
+rule('mpw_pimain.ppc.o',
+	 ['{srcdir}generic:pimain.c'],
+	 ['{CCPPC} -o mpw_pimain.ppc.o {CPPFLAGS} {CFLAGS} {CFLAGSPPC} -D MPW_TOOL {srcdir}generic:pimain.c']).
+
+rule('SIOUX_EOF_Fix.68k.o',
+	['{srcdir}port:macos:SIOUX_EOF_Fix.c'],
+	['{CC68K} -o SIOUX_EOF_Fix.68k.o {CPPFLAGS} {CFLAGS} {CFLAGS68K} {srcdir}port:macos:SIOUX_EOF_Fix.c']).
+
+rule('sioux_pimain.68k.o',
+	 ['{srcdir}generic:pimain.c'],
+	 ['{CC68K} -o sioux_pimain.68k.o {CPPFLAGS} {CFLAGS} {CFLAGS68K} {srcdir}generic:pimain.c']).
+
+rule('SIOUX_EOF_Fix.ppc.o',
+	['{srcdir}port:macos:SIOUX_EOF_Fix.c'],
+	['{CCPPC} -o SIOUX_EOF_Fix.ppc.o {CPPFLAGS} {CFLAGS} {CFLAGSPPC} {srcdir}port:macos:SIOUX_EOF_Fix.c']).
+
+rule('sioux_pimain.ppc.o',
+	 ['{srcdir}generic:pimain.c'],
+	 ['{CCPPC} -o sioux_pimain.ppc.o {CPPFLAGS} {CFLAGS} {CFLAGSPPC} {srcdir}generic:pimain.c']).
+
+%% I can't get it to link under CW8
+rule(mpw_alspro_b_68k,
+	[ext('mpw_pimain.68k',&(object)),'alspro.68k.lib'],
+	['{LINK68K} -o mpw_alspro_b_68k {TOOLLINKFLAGS} {MPWINITLIBS68K} mpw_pimain.68k.o alspro.68k.lib {MPWLIBS68K}']).
+
+
+rule(mpw_alspro_b_ppc,
+	[ext('mpw_pimain.ppc',&(object)),'alspro.ppc.lib'],
+	['{LINKPPC} -o mpw_alspro_b_ppc {TOOLLINKFLAGS} mpw_pimain.ppc.o alspro.ppc.lib {MPWLIBSPPC}']).
+
+rule('mpw_alspro_b',
+	[ext('mpw_pimain.68k',&(object)),'alspro.68k.lib',
+	 ext('mpw_pimain.ppc',&(object)),'alspro.ppc.lib'],
+	['{LINK68K} -o mpw_alspro_b {TOOLLINKFLAGS} {MPWINITLIBS68K} mpw_pimain.68k.o alspro.68k.lib {MPWLIBS68K}',
+	 '{LINKPPC} -o mpw_alspro_b {TOOLLINKFLAGS} mpw_pimain.ppc.o alspro.ppc.lib {MPWLIBSPPC}']).
+
+%% I currently can't get SIOUX_EOF_fix.68k.o to link properly
+rule(sioux_alspro_b_68k,
+	[ext('sioux_pimain.68k',&(object)),'alspro.68k.lib', 'SIOUX_EOF_Fix.68k.o',
+	 '{srcdir}port:macos:alsres.r'],
+	['{LINK68K} -o sioux_alspro_b_68k {SIOUXLINKFLAGS} sioux_pimain.68k.o alspro.68k.lib {SIOUXLIBS68K}',
+	 'Rez -o sioux_alspro_b_68k -a {srcdir}port:macos:alsres.r']).
+
+rule(sioux_alspro_b_ppc,
+	[ext('sioux_pimain.ppc',&(object)),'alspro.ppc.lib', 'SIOUX_EOF_Fix.ppc.o',
+	 '{srcdir}port:macos:alsres.r'],
+	['{LINKPPC} -o sioux_alspro_b_ppc {SIOUXLINKFLAGS} sioux_pimain.ppc.o alspro.ppc.lib SIOUX_EOF_Fix.ppc.o {SIOUXLIBSPPC}',
+	 'Rez -o sioux_alspro_b_ppc -a {srcdir}port:macos:alsres.r']).
+
+rule('sioux_alspro_b',
+	[ext('sioux_pimain.68k',&(object)),'alspro.68k.lib',
+	 ext('sioux_pimain.ppc',&(object)),'alspro.ppc.lib',
+	 'SIOUX_EOF_Fix.ppc.o',
+	 '{srcdir}port:macos:alsres.r'],
+	['{LINK68K} -o sioux_alspro_b {SIOUXLINKFLAGS} sioux_pimain.68k.o alspro.68k.lib {SIOUXLIBS68K}',
+	 '{LINKPPC} -o sioux_alspro_b {SIOUXLINKFLAGS} sioux_pimain.ppc.o alspro.ppc.lib SIOUX_EOF_Fix.ppc.o {SIOUXLIBSPPC}',
+	 'Rez -o sioux_alspro_b -a {srcdir}port:macos:alsres.r']).
+
+
+	%%%%%%%%%%%%%%%%%%%%%%
+	%%%%% ALL Versions %%%
+	%%%%%%%%%%%%%%%%%%%%%%
+
+rule(alspro_b,
+	case(&(context_name), [
+		(mac: ['mpw_alspro_b_ppc']),
+		(_: [ext(pimain,&(object)),'alspro.a'])]),
+	case(&(context_name),[
+		(mac: ['duplicate -y mpw_alspro_b_ppc alspro_b']),
+		(djgpp1: ['$(CC) -o alspro_b $^ $(LDFLAGS) $(LIBS)',
+				 'coff2exe alspro_b' ]),
+		(djgpp2: ['$(CC) -o alspro_b $^ $(LDFLAGS) $(LIBS)',
+				 'coff2exe alspro_b' ]),
+		(_:['$(CC) -o alspro_b $^ $(LDFLAGS) $(LIBS)'])  ]) ).
+
+rule(alspro,
+	[alspro_b],
+	case(&(context_name), [
+		(djgpp1: ['alspro_b -obp -g ''save_image(alspro,[$(IMGOPTS)])''',
+				  'coff2exe alspro']),
+		(djgpp2: ['alspro_b -obp -g ''save_image(alspro,[$(IMGOPTS)])''',
+				  'coff2exe alspro']),
+		(_:['alspro_b -obp -g ''save_image(alspro,[$(IMGOPTS)])'''])
+		])
+	).
+
+rule(testrun,
+	[],
+	case(&(context_name),[
+		(mac: ['alspro_b -obp -b {testdir}autotest {testdir}atest_db -g run_tests -p -srcdir {srcdir}']),
+		(_:[' alspro_b -obp -b $(testdir)/autotest $(testdir)/atest_db -g run_tests -p -srcdir $(srcdir)'])])).
+
+rule(cleanup,
+	[],
+	case(&(context_name),[
+		(mac: ['Delete ?*.o',
+		       'Delete ?*.obp']),
+		(_:[('-rm -f *.' + &(object)),
+		 '-rm -f *.obp',
+		 '-rm -f core'])])).
+
+rule(super_clean,
+	[],
+	[('-rm -f *.' + &(object)),
+	 '-rm -f *.obp',
+	 '-mv tconfig.h tconfig.hxh',
+	 '-rm -f *.h',
+	 '-mv tconfig.hxh tconfig.h',
+	 '-rm -f core']).
+
+%%#### Warning: don't add rm alsdir to super_clean here in bld-port;.
+%%#### We run alspro in bld-port AFTER the super_clean is done in sharbld.

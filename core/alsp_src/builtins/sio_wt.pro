@@ -1,6 +1,7 @@
 /*=============================================================*
  | 		sio_wt.pro
- |	Copyright (c) 1990-1994 Applied Logic Systems, Inc.
+ |	Copyright (c) 1990-1996 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		write_term and company
  |
@@ -446,7 +447,7 @@ wd(Var, Lev, Depth, _, nospace,[VarAtom|Hole],Hole,BP,WInfo)
 	!,
 	winfo_varcounter(WInfo,VarNum),
 	sio_lettervar(VarNum,VarAtom0),
-	$atom_concat('_',VarAtom0,VarAtom),
+	'$atom_concat'('_',VarAtom0,VarAtom),
 	Var = '%lettervar%'(VarAtom),
 	NextVarNum is VarNum+1,
 	set_winfo_varcounter(WInfo,NextVarNum).
@@ -1111,7 +1112,7 @@ scan(Char,T,Count,Breaks,LineLen,BreakLev,ILL,EL) :-
 scan(Atom,T,Count,Breaks,LineLen,BreakLev,ILL,EL) :-
 	atom(Atom),
 	!,
-	$strlen(Atom,AtomLength),
+	'$strlen'(Atom,AtomLength),
 	NewCount is Count+AtomLength,
 	scan(T,NewCount,Breaks,LineLen,BreakLev,ILL,EL).
 
@@ -1219,7 +1220,7 @@ insertBreak(_,Pri,H,T,Break,[H|NewT]) :-
     
 breakCount(break(_,_,_,_),false,1) :- !.
 breakCount(break(_,_,_,_),_,0) :- !.
-breakCount(spop(_,_,Atom,_),_,N) :- $strlen(Atom,NC), !, N is NC+2.
+breakCount(spop(_,_,Atom,_),_,N) :- '$strlen'(Atom,NC), !, N is NC+2.
 breakCount(space(_,_,_,_),_,1).
 
 
@@ -1319,7 +1320,7 @@ os2(spop(Pri,break,Atom,_IL),T,Stream,IL,II)
 	tab(Stream,II),
 	indent(Stream,ILP),
 	put_atom(Stream,Atom),
-	$strlen(Atom,AtomLength),
+	'$strlen'(Atom,AtomLength),
 	TabWidth is 4-AtomLength,
 	tab(Stream,TabWidth),
 	!,
@@ -1542,7 +1543,7 @@ subst_gen_letter_names(Var,Counter)
 	!,
 	arg(1,Counter,VarNum),
 	sio_lettervar(VarNum,VarAtom0),
-	$atom_concat('_',VarAtom0,VarAtom),
+	'$atom_concat'('_',VarAtom0,VarAtom),
 	Var = '%lettervar%'(VarAtom),
 	NextVarNum is VarNum+1,
 	mangle(1,Counter,NextVarNum).

@@ -1,11 +1,12 @@
-/*
- * blt_stk.pro 	-- Stack Overflow Check
- *
- * Copyright (c) 1992 Applied Logic Systems, Inc.
- *
- * Author: Ilyas Cicekli
- * Date  : 5/27/91
- */
+/*-----------------------------------------------------------------*
+ | blt_stk.pro 	-- Stack Overflow Check
+ |
+ | Copyright (c) 1992 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ | Author: Ilyas Cicekli
+ | Date  : 5/27/91
+ *-----------------------------------------------------------------*/
 
 module builtins.
 

@@ -1,12 +1,13 @@
 /*=====================================================================
- *		blt_term.pro
- *		Copyright (c) 1986-1992 Applied Logic Systems, Inc.
- *
- *	Builtin predicates for manipulating terms
- *
- *	Authors: Kevin A. Buettner, Ken Bowen, Chris White,
- *	         Keith Hughes, Ilyas Cicekli
- *	Original Creation Date: 3/20/86
+ |		blt_term.pro
+ |	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |	Builtin predicates for manipulating terms
+ |
+ |	Authors: Kevin A. Buettner, Ken Bowen, Chris White,
+ |	         Keith Hughes, Ilyas Cicekli
+ |	Original Creation Date: 3/20/86
  *====================================================================*/
 
 module builtins.

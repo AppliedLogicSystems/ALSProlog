@@ -1,11 +1,13 @@
 /*=========================================================
- * blt_is.pro		-- extensible version of is/2
- *
- *	Copyright (c) 1991-1992 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 4/11/91
- * Revision History:
+ |				blt_is.pro		
+ |	Copyright (c) 1991-1996 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |			- extensible version of is/2
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 4/11/91
+ | Revision History:
  *========================================================*/
 
 module builtins.

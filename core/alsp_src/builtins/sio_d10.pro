@@ -1,15 +1,15 @@
-/*
- * sio_d10.pro		-- DEC-10 compatiblity
- *
- *	Copyright (c) 1992 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 1-17-92
- * Revision History:
- */
+/*--------------------------------------------------------------------*
+ |		sio_d10.pro		
+ |	Copyright (c) 1992 Applied Logic Systems, Inc.
+ |		Distribution rights: Unrestriced
+ |
+ |		-- DEC-10 compatiblity
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 1-17-92
+ *--------------------------------------------------------------------*/
 
 module sio.
-
 
 /*
  * see(File_or_alias_or_stream)

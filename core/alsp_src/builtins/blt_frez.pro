@@ -1,12 +1,15 @@
 /*========================================================================
- |		blt_frez.pro
- |	Copyright (c) 1995 Applied Logic Systems, Inc.
+ |			blt_frez.pro
+ |	Copyright (c) 1995-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		-- freeze handling
  |
  | Author: Ken Bowen
  | Creation: 4/95
  *========================================================================*/
+
+#if (syscfg:freeze)
 
 module builtins.
 
@@ -484,3 +487,5 @@ exact_mem([ _ | RightPairs], V)
 	exact_mem(RightPairs, V).
 
 endmod.
+
+#endif

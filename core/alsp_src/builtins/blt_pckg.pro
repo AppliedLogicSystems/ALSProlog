@@ -1,6 +1,7 @@
 /*=====================================================================
  | 		blt_pckg.pro
- | 		Copyright (c) 1990-92 Applied Logic Systems, Inc.
+ |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		Packaging predicates to create object modules
  |		in COFF file format.
@@ -10,11 +11,15 @@
  | Modification History :
  |		  3/3/93 - P.Raman -- write raw data out to a file
  |
- | Author : Kevin Buettner - Version A
+ | Author : Kevin Buettner - Version B
  | Date:    06/01/93
  *=====================================================================*/
 
 module builtins.
+
+	%%%%
+	%%%%   Version B
+	%%%%
 
 /*-------------------------------------------------------------------*
  |	pckg_init/0
@@ -202,9 +207,9 @@ add_lib_qual([File | FilesList],Library,[QualFile | QualFilesList])
 	extendPath(Library,File,QualFile),
 	add_lib_qual(FilesList,Library,QualFilesList).
 
-
-
-
+	%%%%
+	%%%%   Version A
+	%%%%
 
 /*-----------Ilyas's packaging starts here -----------------------*
  * package(PckgName)

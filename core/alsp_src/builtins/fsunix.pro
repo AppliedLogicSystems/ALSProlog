@@ -1,23 +1,20 @@
 /*========================================================================sts=
-|		fsunix.pro
-|		Copyright (c) 1988-92 Applied Logic Systems, Inc.
-|
-|	Miscellaneous low-level file system functions
-|			-- Unix Version		(fsunix.pro)
-|			-- DOS 386 Version	(fsdos386.pro)
-|			-- VMS Version 		(fsvms.pro)
-|
-|	Authors: Keith Hughes, Ilyas Cicekli, & Ken Bowen
-|	Date:	Begun 4/88
-|	Revision: Ken Bowen -- 11/88, 1/91 
-|		-- library version: 11/91
-|
-*===========================================================================*/
+ |		fsunix.pro
+ |	Copyright (c) 1988-92 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |	Miscellaneous low-level file system functions
+ |			-- Unix Version		(fsunix.pro)
+ |
+ |	Authors: Keith Hughes, Ilyas Cicekli, & Ken Bowen
+ |	Date:	Begun 4/88
+ |	Revision: Ken Bowen -- 11/88, 1/91 
+ |		-- library version: 11/91
+ *===========================================================================*/
 module builtins.
 
 export date/1.
 export time/1.
-
 export get_cwd/1.
 export change_cwd/1.
 export make_subdir/1.
@@ -25,18 +22,13 @@ export make_subdir/2.
 export remove_subdir/1.
 export remove_file/1.
 export file_status/2.
-
 export files/2.
 export files/3.
 export subdirs/1.
 export subdirs_red/1.
-%export collect_files/3.
 export directory/3.
-%export canon_path/2.
-
 export get_current_drive/1.
 export change_current_drive/1.
-
 export move_file/2.
 
 /*!--------------------------------------------------------------
@@ -279,38 +271,6 @@ subdirs_red(SubdirList)
 	list_delete(SubdirList0, '.', SubdirList1),
 	list_delete(SubdirList1, '..', SubdirList).
 
-/***************************************************************
-/*!----------------------------------------------------------------
- |	collect_files/3
- |	collect_files(PatternList,FileType,FileList)
- |	collect_files(+,+,-)
- |
- |	- returns a list of files meeting conditions
- |
- |	If PatternList is a list of file name patterns, possibly
- |	including the usual wildcard characters '*' and '?', and
- |	if FileType is a standard FileType (see below), then FileList
- |	is a sorted list of all files in the current working directory
- |	which are of type FileType, and which match at least one of
- |	the patterns on PatternList.  Works by recursively working down 
- |	PatternList and calling directory/3 on each element, and then
- |	doing a sorted merge on the resulting lists.
- *!----------------------------------------------------------------*/
-collect_files([],FileType,[]).
-collect_files([Pattern | RestPatterns],FileType,FileList)
-	:-
-	fileTypeCode(InternalType, FileType),
-	collect_files0([Pattern | RestPatterns],InternalType,FileListList),
-	sorted_merge(FileListList, FileList).
-
-collect_files0([], _, []).
-collect_files0([Pattern | RestPatterns], InternalType, 
-				[FileList | RestFileList]) 
-	:-
-	directory(Pattern, InternalType, FileList),
-	collect_files0(RestPatterns, InternalType, RestFileList).
-***************************************************************/
-
 /*---------------------------------------------------------------
  |	File types/attributes:
  |		-- at the abstract (Prolog) level:
@@ -518,45 +478,6 @@ make_reg_exp([0'* | RestPattern],[0'., 0'* | RestRegex])
 make_reg_exp([C | RestPattern],[C | RestRegex])
 	:-
 	make_reg_exp(RestPattern,RestRegex).
-
-/*************************
-/*!--------------------------------------------------------------
- |	canon_path/2
- |	canon_path(SrcPath,CanonPath)
- |	canon_path(+,-)
- |
- |	 -	canonicalizes a path name
- |
- |  If SrcPath is a path name, either to a file or to a directory,
- |	CanonPath is a canonicalized version of that path name, in the
- |	sense that all symbolic links  in the path (to either subdirs
- |	or the file at the end) are dereferenced out;
- *!--------------------------------------------------------------*/
-canon_path(SrcPath,CanonPath)
-	:-
-	get_cwd(WeAreHere),
-
-	rootPathFile(Disk,SubDirList,EndPathFile,SrcPath),
-	(change_cwd(SrcPath) ->
-		get_cwd(CanonPath)
-		;
-		rootPathFile(Disk,SubDirList,'',ShortSrcPath),
-		change_cwd(ShortSrcPath),
-		get_cwd(ShortCanonPath),
-		subPath(ShortSubDirList,ShortCanonPath),
-		rootPathFile(_,ShortSubDirList,EndPathFile,CanonPath)
-	),
-	change_cwd(WeAreHere).
-
-
-strip_last([_],[]) :-!.
-strip_last([H | PathList], [H | ParPathList])
-	:-
-	strip_last(PathList, ParPathList).
-
-*************************/
-
-
 
 /*!----------------------------------------------------------------
  |	file_size/2

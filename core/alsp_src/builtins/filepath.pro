@@ -1,6 +1,7 @@
 /*=================================================================
- |	filepath.pro
- |	Copyright (c) 1991-92 Applied Logic Systems, Inc.
+ |		filepath.pro
+ |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |	Abstract handling of building and decomposing file names with paths.
  |

@@ -1,15 +1,18 @@
-/*
- * blt_atom.pro		-- atom / constant processing predicates
- *	Copyright (c) 1993 Applied Logic Systems, Inc.
- *
- * Author:  Kevin A. Buettner
- * Created: 10-26-93
- *
- * The procedure descriptions in this file are from the March, 1993 Draft
- * Standard.
- */
+/*========================================================================*
+ |			blt_atom.pro		
+ |		Copyright (c) 1986-1996 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |			-- atom / constant processing predicates
+ |
+ | Author:  Kevin A. Buettner
+ | Created: 10-26-93
+ |
+ | Procedure descriptions in this file are from the March, 1993
+ | Draft ISO Standard.
+ *========================================================================*/
 
-
+module builtins.
 /*
  * atom_concat/3
  *
@@ -265,3 +268,5 @@ term_codes(Term, List) :-
 	close(S),
 	!,
 	List = WList.
+
+endmod.

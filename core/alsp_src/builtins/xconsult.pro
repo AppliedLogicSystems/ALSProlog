@@ -1,6 +1,7 @@
 /*=================================================================*
  | 			xconsult.pro
- |		Copyright (c) 1992-4, Applied Logic Systems, Inc.
+ |	Copyright (c) 1992-96, Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		Transforms prolog programs into a form which is
  |		somewhat efficient to run under ALS-Prolog.  The primary

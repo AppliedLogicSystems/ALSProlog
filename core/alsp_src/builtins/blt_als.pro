@@ -1,12 +1,12 @@
 /*======================================================================
- *		blt_als.pro
- *		Copyright (c) 1986-1992 Applied Logic Systems, Inc.
- *
- *	Special Builtin predicates for internal ALS use only.
- *
- *	Authors: Kevin A. Buettner, Ken Bowen, Chris White,
- *	         Keith Hughes, Ilyas Cicekli
- *	Original Creation Date: 3/20/86
+ |		blt_als.pro
+ |		Copyright (c) 1986-1996 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |	Special Builtin predicates 
+ |
+ |	Authors: Kevin A. Buettner
+ |	Original Creation Date: 3/20/86
  *====================================================================*/
 
 module builtins.
