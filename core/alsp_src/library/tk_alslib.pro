@@ -64,10 +64,10 @@ init_tk_alslib(Interp,Shared)
 	(exists_file(InitShared) -> 
 		Shared = InitShared
 		; 
-		join_path([ALSDIR,'..'], Shared)
+		Shared = ALSDIR
 	),
 	sys_env(OS,_,_),
-	load_tclintf(OS, Shared),
+%	load_tclintf(OS, Shared),
 
 	catch(tk_new(Interp),Ball1,check_tcl_error(Ball1)),
 	tcl_call(Interp, [wm,withdraw,'.'], _),
