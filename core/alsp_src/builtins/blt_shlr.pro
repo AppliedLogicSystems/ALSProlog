@@ -10,8 +10,9 @@
  *===================================================================*/
 
 module builtins.
-use objects.
 use shellmak.
+
+%use objects.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% INTERFACE BETWEEN CONSULT AND SOURCE TO SOURCE TRANSFORMERS

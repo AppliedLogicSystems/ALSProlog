@@ -577,8 +577,9 @@ libhide0([P/A | Rest], M, LibFileName)
 
 sys_exclude(builtins).
 sys_exclude(sio).
-sys_exclude(objects).
 sys_exclude(xconsult).
+
+%sys_exclude(objects).
 
 /*------------------------------------------------------------------*
  *

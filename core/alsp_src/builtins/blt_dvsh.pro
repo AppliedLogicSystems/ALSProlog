@@ -9,12 +9,14 @@
  |	Creation Date: 1997
  *=============================================================*/
 
+/***
 mkw32 :-
 	reconsult(projects),
 	reconsult(dbg_class),
 	save_image('ALS Prolog',[select_lib(builtins, [debugger]),
 		select_lib(library,[listutl1,miscterm,msc_ioin,objects,strctutl,strings,
 					tcl_sppt,tk_alslib,typecomp])]).
+***/
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -407,7 +409,8 @@ endmod.   % builtins
 module alsdev.
 use tcltk.
 use tk_alslib.
-use objects.
+
+%use objects.
 
 
 	%%------------------------------------------
@@ -1130,7 +1133,7 @@ export sys_modules/1.
 sys_modules([
 	builtins,syscfg,rel_arith,xconsult,sio,
 	pgm_info,debugger,tcltk,windows,tk_alslib,alsdev,utilities,
-	alsshell,avl,cref,macroxp,objects,shellmak,ttyshlmk
+	alsshell,avl,cref,macroxp,shellmak,ttyshlmk
 	]).
 
 export non_sys_modules/1.
@@ -1943,6 +1946,7 @@ col2(B)
 	tcl_call(shl_tcli, [do_2col,B], X).
 
 
+/***
 process_oop
 	:-
 	file_select_dialog(shl_tcli,[filetypes=[['oop files',['*.oop']]]],FileName),
@@ -1951,6 +1955,7 @@ process_oop
 		;
 		objects:objectProcessFile(FileName,_)
 	).
+***/
 			
 
 
