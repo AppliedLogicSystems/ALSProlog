@@ -57,7 +57,7 @@ yes.
 <tr><td>float</td><td>float</td></tr>
 <tr><td>string</td><td>atom (uninterned)</td></tr>
 <tr><td>lists</td><td>lists</td></tr>
-<tr><td>tuples</td><td>comma lists??</td></tr>
+<tr><td>tuples</td><td>comma lists, or '()' for the empty tuple</td></tr>
 </table>
 
 <!--
@@ -104,6 +104,9 @@ py_call(mod, func(args..), result).
 <p>
 Calls the function <em>func</em> in the module <em>mod</em> and unifies
 the result with <em>result</em>.
+</p>
+<p>
+The arguments can include keyword arguments, which take the form key=value.
 </p>
 
 

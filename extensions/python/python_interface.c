@@ -26,10 +26,14 @@ static AP_Obj PythonToPrologObj(PyObject *py, AP_World *w)
 	} else if (PyTuple_Check(py)) {
 		int i, length = PyTuple_Size(py);
 		
-		for (i = length-1, pro = PythonToPrologObj(PyTuple_GetItem(py,length-1),w) ;
-			 i; i--) {
-			pro = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, ","), 2,
-					PythonToPrologObj(PyTuple_GetItem(py, i-1), w), pro);
+		if (length == 0) {
+			pro = AP_NewSymbolFromStr(w, "()");
+		} else {
+			for (i = length-1, pro = PythonToPrologObj(PyTuple_GetItem(py,length-1),w) ;
+				 i; i--) {
+				pro = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, ","), 2,
+						PythonToPrologObj(PyTuple_GetItem(py, i-1), w), pro);
+			}
 		}
 
 	} else if (PyList_Check(py)) {
@@ -54,6 +58,10 @@ static AP_Obj PythonToPrologObj(PyObject *py, AP_World *w)
 	return pro;
 }
 
+static int IsNullTuple(AP_World *w, AP_Obj pro)
+{
+	return AP_Unify(w, pro, AP_NewSymbolFromStr(w, "()")) == AP_SUCCESS;
+}
 
 static PyObject *PrologToPythonObj(AP_World *w, AP_Obj pro)
 {
@@ -72,7 +80,9 @@ static PyObject *PrologToPythonObj(AP_World *w, AP_Obj pro)
 
 	case AP_ATOM:
 		if (AP_IsNullList(w, pro)) {
-			py = PyList_New(0);		
+			py = PyList_New(0);
+		} else if (IsNullTuple(w, pro)) {
+			py = PyTuple_New(0);		
 		} else {
 			py = PyString_FromString(AP_GetAtomStr(w, pro));
 		}
@@ -178,14 +188,24 @@ static AP_Result py_eval(AP_World *w, AP_Obj command, AP_Obj result)
 	return AP_Unify(w, result, PythonToPrologObj(r, w));	
 }
 
-static AP_Result py_call3(AP_World *w, AP_Obj module, AP_Obj call, AP_Obj result)
+static int IsKeywordArg(AP_World *w, AP_Obj call, int i)
 {
-	PyObject *m, *f, *a, *r;
+	AP_Obj item = AP_GetArgument(w, call, i);
+	AP_Obj equal = AP_NewSymbolFromStr(w, "=");
+	
+	return AP_ObjType(w, item) == AP_STRUCTURE &&
+		   AP_GetStructureArity(w, item) == 2 &&
+		   AP_Unify(w, equal, AP_GetStructureFunctor(w, item)) == AP_SUCCESS;
+}
+
+static AP_Result py_call3(AP_World *w, AP_Obj module_name, AP_Obj call, AP_Obj result)
+{
+	PyObject *module, *func, *args, *key_args, *r, *apply, *apply_args;
 	int arity, i;
 
-	if (AP_ObjType(w, module) != AP_ATOM) {
+	if (AP_ObjType(w, module_name) != AP_ATOM) {
 		AP_SetStandardError(w, AP_TYPE_ERROR,
-					AP_NewSymbolFromStr(w, "atom"), module);
+					AP_NewSymbolFromStr(w, "atom"), module_name);
 		return AP_EXCEPTION;
 	}
 	// is this correct?
@@ -195,24 +215,43 @@ static AP_Result py_call3(AP_World *w, AP_Obj module, AP_Obj call, AP_Obj result
 		return AP_EXCEPTION;
 	}
 	
-	m = PyImport_ImportModule((char *)AP_GetAtomStr(w, module));
-	if (!m) {
+	apply = PyObject_GetAttrString(PyImport_ImportModule("__builtin__"), "apply");
+	
+	module = PyImport_ImportModule((char *)AP_GetAtomStr(w, module_name));
+	if (!module) {
 		return PythonToPrologException(w);	
 	}
 	
 	if (AP_ObjType(w, call) == AP_ATOM) {
-		f = PyObject_GetAttrString(m, (char *)AP_GetAtomStr(w, call));
+		func = PyObject_GetAttrString(module, (char *)AP_GetAtomStr(w, call));
 		arity = 0;
 	} else {
-		f = PyObject_GetAttrString(m, (char *)AP_GetAtomStr(w, AP_GetStructureFunctor(w, call)));
+		func = PyObject_GetAttrString(module, (char *)AP_GetAtomStr(w, AP_GetStructureFunctor(w, call)));
 		arity = AP_GetStructureArity(w, call);
 	}
 	
-	a = PyTuple_New(arity);
-	for (i = 0; i < arity; i++) {
-		PyTuple_SetItem(a, i, PrologToPythonObj(w, AP_GetArgument(w, call, i+1)));
+
+	key_args = PyDict_New();
+	for ( ; arity > 0 && IsKeywordArg(w, call, arity) ; arity--) {
+		AP_Obj key, value;
+		key = AP_GetArgument(w, AP_GetArgument(w, call, arity), 1);
+		value = AP_GetArgument(w, AP_GetArgument(w, call, arity), 2);
+		
+		PyDict_SetItem(key_args, PrologToPythonObj(w, key), PrologToPythonObj(w, value));
 	}
-	r = PyEval_CallObject(f, a);
+
+	args = PyTuple_New(arity);
+	for (i = 0; i < arity; i++) {
+		PyTuple_SetItem(args, i, PrologToPythonObj(w, AP_GetArgument(w, call, i+1)));
+	}
+	
+	
+	apply_args = PyTuple_New(3);
+	PyTuple_SetItem(apply_args, 0, func);
+	PyTuple_SetItem(apply_args, 1, args);
+	PyTuple_SetItem(apply_args, 2, key_args);
+	
+	r = PyEval_CallObject(apply, apply_args);
 
 	if (r == NULL) {
 		return PythonToPrologException(w);
