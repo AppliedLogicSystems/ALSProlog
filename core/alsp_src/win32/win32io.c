@@ -73,7 +73,8 @@ static struct {
 	DWORD interval;
 } timer_state;
 
-static HANDLE timer_state_mutex;
+static CRITICAL_SECTION timer_state_critical_section;
+static HANDLE timer_reset_event;
 
 static DWORD WINAPI timer_thread( LPVOID )
 {
@@ -82,11 +83,12 @@ static DWORD WINAPI timer_thread( LPVOID )
 	time_out = next_time_out = INFINITE;
 	
 	while (1) {
-		switch (WaitForSingleObject(timer_state_mutex, time_out)) {
+		switch (WaitForSingleObject(timer_reset_event, time_out)) {
 		case WAIT_OBJECT_0:
+			EnterCriticalSection(&timer_state_critical_section);
 			time_out = timer_state.initial ? timer_state.initial : INFINITE;
 			next_time_out = timer_state.interval ? timer_state.interval : INFINITE;
-			ReleaseMutex(timer_state_mutex);
+			LeaveCriticalSection(&timer_state_critical_section);
 			break;
 		case WAIT_TIMEOUT:
 			wm_safety = -1;
@@ -105,7 +107,8 @@ static void initialize_timer(void)
 	
 	timer_state.initial = 0;
 	timer_state.interval = 0;
-	timer_state_mutex = CreateMutex(NULL, TRUE, NULL);
+	InitializeCriticalSection(&timer_state_critical_section);
+	timer_reset_event = CreateEvent(NULL, FALSE, FALSE, NULL);
 	CreateThread(NULL, 0, timer_thread, NULL, 0, &id);
 	timer_initialized = TRUE;
 } 
@@ -114,11 +117,15 @@ int os_set_timer(double initial, double interval)
 {
 	if (!timer_initialized) initialize_timer();
 	
+	
+	EnterCriticalSection(&timer_state_critical_section);
+	
 	timer_state.initial = initial * 1000.0;
 	timer_state.interval = interval * 1000.0;
 	
-	ReleaseMutex(timer_state_mutex);
-	WaitForSingleObject(timer_state_mutex, INFINITE);
+	LeaveCriticalSection(&timer_state_critical_section);
+	
+	SetEvent(timer_reset_event);
 	
 	return 0;
 }
