@@ -12,7 +12,8 @@
 module alsdev.
 use tcltk.
 use tk_alslib.
-use objects.
+
+%use objects.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%       DEBUGGER ObjectPro CLASS DEFINITIONS    %%%%%

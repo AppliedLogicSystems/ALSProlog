@@ -23,8 +23,9 @@
 
 module debugger. 		%% debugger segment
 use windows.
-use objects.
 use alsshell.
+
+%use objects.
 
 /*-------------------------------------------------------------------------*
  |	trace/0, trace/1, and trace/2.
