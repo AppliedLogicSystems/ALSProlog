@@ -16,7 +16,7 @@ item: Global
   Patch Flags=0000000000000001
   Patch Threshold=85
   Patch Memory=4000
-  EXE Filename=ALS Prolog 3.1 Installer.exe
+  EXE Filename=ALS Prolog 3.1 Demo Installer.exe
   FTP Cluster Size=20
   Variable Name1=_SYS_
   Variable Default1=C:\WINNT\System32
