@@ -328,7 +328,7 @@ lib_load(Module,Call)
 	sys_searchdir(ALSDIR),
 	'$atom_concat'(ALSDIR,FileName,FullFileName),
 %	Module:abolish(P,A),
-	load(FullFileName,1,_,obp,_),
+	(resource_load(FileName); load(FullFileName,1,_,obp,_)),
 	!,
 	Module:call(Call).
 
