@@ -19,7 +19,7 @@ void pi_init(void)
 	user32_init();
 	gdi32_init();
 	winspool32_init();
-	shell32_init();
+	//shell32_init();
 	//ole32_init();
 	comdlg32_init();
 	mswin32aux_init();
