@@ -31,16 +31,39 @@ proc generate {date duration customer_id} {
 	if {$duration <= 0 || $duration > 99} then {return "Out of Range Duration"}
 	if {$customer_id < 0 || $customer_id > 9999} then {return "Out of Range Customer ID"}
 	
-	set a [clock format $time -format "%m%d"]
-	set b [format "%02d%02d" $year $duration]
-	set c [format "%04d" $customer_id]
+	# Use scanf to convert month-day to number because expr will interpret
+	# the string "0101" as an octal number.
+	scan [clock format $time -format "%m%d"] "%d" a
+	puts $a
+	set b [expr $year*100 + $duration]
+	set c $customer_id
+		
+	set a [rotate $a 4935]
+	set b [rotate $b 6723]
+	set c [rotate $c 2385] 
+	set d [checksum [expr $a ^ $b ^ $c]]
 	
-	scan $a "%d" na
-	scan $b "%d" nb
-	scan $c "%d" nc
+	return [format "%04d-%04d-%04d-%04d" $a $b $c $d]
+}
+
+proc rotate {n r} {
+
+	set n1 [expr ($n % 10)/1]
+	set n2 [expr ($n % 100)/10]
+	set n3 [expr ($n % 1000)/100]
+	set n4 [expr ($n % 10000)/1000]
+
+	set r1 [expr ($r % 10)/1]
+	set r2 [expr ($r % 100)/10]
+	set r3 [expr ($r % 1000)/100]
+	set r4 [expr ($r % 10000)/1000]
+
+	set n1 [expr ($n1 + $r1) % 10]
+	set n2 [expr ($n2 + $r2) % 10]
+	set n3 [expr ($n3 + $r3) % 10]
+	set n4 [expr ($n4 + $r4) % 10]
 	
-	set d [checksum [expr $na ^ $nb ^ $nc]]
-	return [concat $a-$b-$c-$d]
+	return [expr $n1 + $n2*10 + $n3*100 + $n4*1000]
 }
 
 proc checksum {n} {
