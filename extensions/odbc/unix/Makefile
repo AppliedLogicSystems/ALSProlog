@@ -11,7 +11,7 @@ SOURCE= alspi_slib.c pi_init.c odbc0.c odbc1.c odbc2.c odbc3.c odbcaux.c
 OBJECTS = $(SOURCE:.c=.o)
 
 odbc.psl: $(OBJECTS)
-	gcc -fpic -MD -shared $(OBJECTS) -lodbc -lc -o odbc.psl
+	gcc -fpic -MD -shared $(OBJECTS) -L/apache/als_build_support/unix/linux/lib -lodbc -lc -o odbc.psl
 
 clean:
 	rm -f *.o *.d odbc.psl
