@@ -2151,6 +2151,7 @@ void
 decr_icount(addr)
     Code *addr;
 {
+#ifdef Indexing
     register ntbl_entry *ent;
     dbprot_t odbrs;
 
@@ -2162,6 +2163,7 @@ decr_icount(addr)
 	ic_install_normal_exec_entry(ent);
     }
     (void) w_dbprotect(odbrs);
+#endif /* Indexing */
 }
 
 /*-----------------------------------------------------------------*

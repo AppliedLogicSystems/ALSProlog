@@ -40,11 +40,11 @@ pbi_delay()
 	PWord *dv,m,g,vv,rdt,*one,*two;
 	int dvt,mt,gt,vvt,rdtt;
 
-#ifdef DEBUGFREEZE
+/* #ifdef DEBUGFREEZE */
 pbi_cptx();
 printf("enter delay----wm_H=%x--TK_DELAY=%x-----------------\n",
 			(int)wm_H,TK_DELAY);
-#endif
+/* #endif */
 
     w_get_An((PWord *)&dv, &dvt, 1);
     w_get_An(&m, &mt, 2);
@@ -132,12 +132,12 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 		/* return the delay term in the 4th arg: */
 	if (w_unify(rdt, rdtt, vv, vvt))
 	{
-#ifdef DEBUGFREEZE
+/* #ifdef DEBUGFREEZE */
 pbi_cptx();
 printf("exit delay---wm_H=%x--real_dv=%x[_%lu]-------\n", 
 					(int)wm_H,  (int)one,
 					(long)(((PWord *) one) - wm_heapbase));
-#endif
+/* #endif */
 		SUCCEED;
 	}
 	else

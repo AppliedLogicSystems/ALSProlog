@@ -39,6 +39,7 @@ nobind_member(X, [_ | T])
 	:-
 	nobind_member(X, T).
 
+/*************
 /*!---------------------------------------------------------------------
  |	output_prolog_list/1
  |	output_prolog_list(List)
@@ -71,6 +72,7 @@ output_prolog_list(Stream,[Item | RestList],Indent,Term,Spacer,DefaultContent)
 	),
 	nl(Stream),
 	output_prolog_list(Stream,RestList,Indent,Term,Spacer,DefaultContent).
+*************/
 
 /*!---------------------------------------------------------------------
  |	flatten/2

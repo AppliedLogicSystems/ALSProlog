@@ -213,105 +213,109 @@ ilnk_net()
 		disp_infp(1,OpCd,Z,Zt,zl,zh,X,Xt,xl,xh,Y,Yt,yl,yh);
 #endif
 
-		/* ------------------------------------------------------
-		   if nothing changed, we're done with this queue element;
-		   otherwise, there is work to do:
-         * ------------------------------------------------------ */
+	/* ----------------------------------------------------------------
+	   if nothing changed, we're done with this queue element;
+	   otherwise, there is work to do:
+	   For each interval:
+
+	   1. check consistency of the interval; fail if it is inconsistent;
+		  -- need to reset the link arg of each qelemnt before we FAIL;
+	   
+	   2. the interval is consistent; first check whether it has collapsed 
+		  into a point interval, & if so, rebind the variable it (the
+		  frozen interval) is bound to, and raise the appropriate 
+		  unfreeze interrupt;
+
+	   3.  the interval is consistent, and is not a point interval;
+		   update the 
+		   , and propagate to the operations which use 
+		   these intervals (put those ops on the queue); 
+	 * ---------------------------------------------------------------- */
 
 		if (status != 0)
 		{
-			if (status & ~link) { /* something changed */
-				unflip(z);
-				unflip(x);
-				unflip(y);
-			}
-			
-		/* ------------------------------------------------------
-		   check consistency of each interval; fail if any are 
-		   inconsistent:
-				-- need to reset the link arg of each qelemnt before we FAIL:
-         * ------------------------------------------------------ */
-
-			if ((z_changed & status) && (zl > zh)) {
-				printf("z_changed & inconsistent:zl=%g zh=%g\n",zl,zh);  
-				UNLINK_ALL;
-				FAIL;
+		if (status & ~link) { /* something changed */
+			/* -------------------
+			 |		z
+         	 * ------------------- */
+			unflip(z);
+			if (z_changed & status) {
+				if (zl > zh) {		/* z inconsistent */
+						printf("z_changed & inconsistent:zl=%g zh=%g\n",zl,zh);  
+					UNLINK_ALL;
+					FAIL;
 				}
-
-			if ((x_changed & status) && (xl > xh)) {
-				printf("x_changed & inconsistent:xl=%g xh=%g\n",xl,xh);  
-				UNLINK_ALL;
-				FAIL;
+					/* put boolean update here */
+	   				/* -------------------------------------------------------*
+					 | IntrvTm should be intvl(ProType,Var,UsedBy,L,U,UIA); 
+					 | Below, if Z is bound (Zt != WTP_UNBOUND), we assume
+					 | that Z is a point, which means failure here, because if
+					 | it is already a point, it can't change....
+					 *--------------------------------------------------------*/
+				if (Zt == WTP_UNBOUND) 
+					IntrvTm = (PWord)get_intvl_tm((PWord *)Z, Zt);
+				else
+					FAIL;
+	   				/* -------------------------------------------------------*
+					 |  End points have coalesced, so change (bind) the
+					 |  underlying variable to a point.
+					 *--------------------------------------------------------*/
+				if (zl == zh) {
+						printf("z_changed->point:zl=%g zh=%g\n",zl,zh);  
+					bind_int_unfreeze((PWord *)Z,&Zt,zl);
 				}
+	   				/* -------------------------------------------------------*
+					 *--------------------------------------------------------*/
+				update_propagate(zl, zh, Z, Zt, IntrvTm, Goal);
 
-			if ((y_changed & status) && (yl > yh)) {
-				printf("y_changed & inconsistent:yl=%g yh=%g\n",yl,yh);  
-				UNLINK_ALL;
-				FAIL;
+			}	/*  z changed */
+
+				/* -------------------
+				 |		x
+         		 * ------------------- */
+			unflip(x);
+			if (x_changed & status) {
+				if (xl > xh) {
+						printf("x_changed & inconsistent:xl=%g xh=%g\n",xl,xh);  
+					UNLINK_ALL;
+					FAIL;
 				}
+				if (xl == xh) {
+						printf("x_changed->point:xl=%g xh=%g\n",xl,xh);  
+					bind_int_unfreeze((PWord *)X,&Xt,xl);
+				}
+				if (Xt == WTP_UNBOUND)   
+					IntrvTm = (PWord)get_intvl_tm((PWord *)X, Xt);
+				update_propagate(xl, xh, X, Xt, IntrvTm, Goal);
 
-		/* ------------------------------------------------------
-		   all intervals are consistent; first check whether any
-		   have collapsed into point intervals, & if so, rebind
-		   them and raise the appropriate unfreeze interrupt 
-         * ------------------------------------------------------ */
-/*
-			if ((z_changed & status) && (zl == zh)) {
-							printf("z_changed->point:zl=%g zh=%g\n",zl,zh);  
-				bind_int_unfreeze((PWord *)Z,&Zt,zl);
-			}
+			}	/* x changed */
 
-			if ((x_changed & status) && (xl == xh)) {
-							printf("x_changed->point:xl=%g xh=%g\n",xl,xh);  
-				bind_int_unfreeze((PWord *)X,&Xt,xl);
-			}
+				/* -------------------
+				 |		y
+         		 * ------------------- */
+			unflip(y);
+			if (y_changed & status) {
+				if (yl > yh) {
+						printf("y_changed & inconsistent:yl=%g yh=%g\n",yl,yh);  
+					UNLINK_ALL;
+					FAIL;
+				}
+				if (yl == yh) {
+						printf("y_changed->point:yl=%g yh=%g\n",yl,yh);  
+					bind_int_unfreeze((PWord *)Y,&Yt,yl);
+				}
+				if (Yt == WTP_UNBOUND)   
+					IntrvTm = (PWord)get_intvl_tm((PWord *)Y, Yt);
+				update_propagate(yl,yh,Y,Yt,IntrvTm,Goal);
 
-			if ((y_changed & status) && (yl == yh)) {
-							printf("y_changed->point:yl=%g yh=%g\n",yl,yh);  
-				bind_int_unfreeze((PWord *)Y,&Yt,yl);
-			}
-*/
-		/* ------------------------------------------------------
-		   all intervals are consistent, and collapse of any into 
-		   point intervals has been handled;  update the intervals 
-		   which changed, and propagate to the operations which use 
-		   these intervals (put those ops on the queue); 
-         * ------------------------------------------------------ */
+			}	/* y changed */
 
 #ifdef CONSTRDEBUG
 	if (debug_constr_flag > 0)
 		note_changes();
 #endif
+			}	/* (status & ~link) -- something changed */
 
-		if (Zt == WTP_UNBOUND) 
-			IntrvTm = (PWord)get_intvl_tm((PWord *)Z, Zt);
-
-		if (z_changed & status) {     /* printf("z_changed:zl=%g zh=%g\n",zl,zh);  */
-			update_propagate(zl, zh, Z, Zt, IntrvTm, Goal);
-			if (zl == zh) { printf("z_changed->point:zl=%g zh=%g\n",zl,zh);  
-				bind_int_unfreeze((PWord *)Z,&Zt,zl);
-			};
-			}
-
-		if (Xt == WTP_UNBOUND)   
-			IntrvTm = (PWord)get_intvl_tm((PWord *)X, Xt);
-
-		if (x_changed & status) {     /* printf("x_changed:xl=%g xh=%g\n",xl,xh);  */
-			update_propagate(xl, xh, X, Xt, IntrvTm, Goal);
-			if (xl == xh) {   printf("x_changed->point:xl=%g xh=%g\n",xl,xh);  
-				bind_int_unfreeze((PWord *)X,&Xt,xl);
-			};
-			}
-
-		if (Yt == WTP_UNBOUND)   
-			IntrvTm = (PWord)get_intvl_tm((PWord *)Y, Yt);
-
-		if (y_changed & status) {     /* printf("y_changed:yl=%g yh=%g\n",yl,yh);  */
-			update_propagate(yl,yh,Y,Yt,IntrvTm,Goal);
-			if (yl == yh) {   printf("y_changed->point:yl=%g yh=%g\n",yl,yh);  
-				bind_int_unfreeze((PWord *)Y,&Yt,yl);
-			};
-			}
 
 		/* ------------------------------------------------------
 		   Note that next/ntextt already holds the (pointer) from
@@ -320,7 +324,7 @@ ilnk_net()
 		   it is being disconnected from the queue), and then set
 		   qhead to next 
          * ------------------------------------------------------ */
-		}
+		}	/* status != 0 */
 
 		w_get_argn(&next, &nextt, qhead, 6);
 		w_install_unbound_argn(qhead, 6);
@@ -369,10 +373,6 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal)
 	 *----  */
 
 /* printf("Enter: update_propagate:L=%g H=%g Intrv=%x \n", L, H, IntrvTm); */
-
-	/* FIX FIX FIX:  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		Right now, this is an absolute change; it needs to
-		be changed into a trailed_mangle-style update */
 
 	w_uia_alloc(&IntUIA, &IntUIA_t, (size_t)UIA_DIMENSION);
 	w_uia_poke(IntUIA, (int) UIA_FIRST_POS, (UCHAR *) &L, sizeof (double));
@@ -427,10 +427,10 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal)
 
 
 void
-bind_int_unfreeze(Z,Zt,zl)
-	PWord *Z;
-	int *Zt;
-	double zl;
+bind_int_unfreeze(V,Vt,pv)
+	PWord *V;
+	int *Vt;
+	double pv;
 {
 }
 

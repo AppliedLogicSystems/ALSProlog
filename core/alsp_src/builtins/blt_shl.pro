@@ -129,7 +129,7 @@ ss_parse_command_line(['-q' | T], L, CLInfo)
 	mangle(2, CLInfo, quiet),
 	ss_parse_command_line(T, L, CLInfo).
 
-	%% -S: Atom - File to add to search list;
+	%% -s: Atom - File to add to search list;
 	%% in reverse order; later reverse it:
 ss_parse_command_line(['-s', File | T], L, CLInfo)
 	:-!,
@@ -436,9 +436,9 @@ export shell_read_execute/4.
 shell_read_execute(InStream,OutStream,Wins,Status)
 	:-
 	shell_read(InStream,OutStream,InitGoal,NamesOfVars,Vars),
-pbi_write('After_shell_read '),pbi_nl,cptx,
+%pbi_write('After_shell_read '),pbi_nl,cptx,
 	shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status),
-pbi_write('After_shell_execute '),pbi_nl,cptx,
+%pbi_write('After_shell_execute '),pbi_nl,cptx,
 	!.
 
 continue_prolog_loop(halt) 

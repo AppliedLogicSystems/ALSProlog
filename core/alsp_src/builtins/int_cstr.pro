@@ -84,6 +84,7 @@ freeze_goal_for(boolean, X, L1, U1, UIA, intvl(boolean,X,[],UIA) ).
 
 new_combined_interval(TypeDescrip, X)
 	:-
+pbi_write(new_combined_interval(TypeDescrip)),pbi_nl,pbi_ttyflush,
 	type_and_bounds(TypeDescrip, BareType, L, U, TC),
 	interval_bound(lower,L,L1,BareType),
 	interval_bound(upper,U,U1,BareType),
@@ -114,13 +115,11 @@ update_intvl_type(Intvl, NewType)
 
 update_lower_bd(Intvl, NewVal)
 	:-
-%	trailed_mangle(4, Intvl, NewVal),
 	arg(4, Intvl, UIA),
 	update_uia_dbl(Intvl,0,NewVal). %% 0 = lower
 
 update_upper_bd(Intvl, NewVal)
 	:-
-%	trailed_mangle(5, Intvl, NewVal),
 	arg(4, Intvl, UIA),
 	update_uia_dbl(Intvl,1,NewVal). %% 1 = upper
 
@@ -338,11 +337,12 @@ point_interval( X, PX)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+/*
 export new_node/1.
-
 new_node(Node)
 	:-
 	'$iterate'(Node).
+*/
 
 export '$iterate'/1.
 '$iterate'(Goal)

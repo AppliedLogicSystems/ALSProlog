@@ -56,7 +56,8 @@ clp( (L, Ls), M)
 	clp( Ls, M).
 
 clp(G, M)
-	:- clp_eval(G, M).
+	:- 
+	clp_eval(G, M).
 
 clp_eval( show(VName, Var), M )
 	:-!,
@@ -215,10 +216,10 @@ X :: Type
 	declare_variable(Type,X).
 
 	%% Process lists:
-[] :: _ .
+[] :: _  :-!.
 
 [X | Xs] :: Type
-	:- 
+	:-!, 
 	X  :: Type,
 	Xs :: Type.
 
@@ -248,7 +249,8 @@ X :: boolean(L,U)
 
 X :: Type			
 	:- 
-	is_type(Type,X),!.
+	is_type(Type,X),
+	!.
 
 is_type(real,X)
 	:-
@@ -286,29 +288,62 @@ declare_variable(Type,X)
 declare_variable(Type,X)
 	:-
 	var(X),
-	new_type_interval(Type,X),
-	!.
+	!,
+	new_type_interval(Type,X).
 
+	%% nonvar(X):
 declare_variable(Type,X)
 	:-
 	domain_check(Type, X).
 
-restrict_interval(Type,X)
+check_or_mod_itype(PrimType,RestL0,RestU0,RestL,RestU)
 	:-
-	Type =.. [PrimType, RestL, RestU],
+	check_mod_the_type(PrimType,RestL0, RestL),
+	check_mod_the_type(PrimType,RestU0, RestU).
+
+check_mod_the_type(PrimType,RestU, RestU)
+	:-
+	var(RestU),
+	!.
+
+check_mod_the_type(real,RestU, RestU)
+	:-
+	float(RestU).
+
+check_mod_the_type(real,RestU0, RestU)
+	:-
+	integer(RestU0),
+	!,
+	RestU is float(RestU0).
+
+check_mod_the_type(integer,RestU, RestU)
+	:-
+	integer(RestU).
+
+check_mod_the_type(boolean, 0,  0).
+check_mod_the_type(boolean, 1,  1).
+
+restrict_interval(RestType,X)
+	:-
+	pbi_write(restrict_interval(RestType)),pbi_nl,pbi_ttyflush,fail.
+
+restrict_interval(RestType,X)
+	:-
+	RestType =.. [PrimType, RestL0, RestU0],
+	check_or_mod_itype(PrimType,RestL0,RestU0,RestL,RestU),
 	'$domain_term'(X, XDomTm),
-	valid_domain(XDomTm,Type,LB,UB),
+	valid_domain(XDomTm,XType,XLB,XUB),
+	!,
 	(var(RestL) ->
-		RestL = XL, NewL = XL
+		RestL = XLB, NewL = XLB
 		;
-		max(XL, RestL, NewL)
+		max(XLB, RestL, NewL)
 	),
 	(var(RestU) ->
-		RestU = XU, NewU = XU
+		RestU = XUB, NewU = XUB
 		;
-		min(XU, RestU, NewU)
+		min(XUB, RestU, NewU)
 	),
-
 	combin_type([PrimType,XType], NewType),
 	(XType \= NewType ->
 		update_intvl_type(XDomTm, NewType)
@@ -319,6 +354,7 @@ restrict_interval(Type,X)
 	update_lower_bd(XDomTm, NewL),
 	update_upper_bd(XDomTm, NewU).
 
+	%% Type is an atom:
 restrict_interval(Type,X)
 	:-
 	'$domain'(X, Type, _, _),
@@ -421,7 +457,8 @@ add_relation(Relation, Left, Right)
 	:-
 	fmap_rel(Relation, Left, Right, Node),
 	!,
-	new_node(Node).
+	%new_node(Node).
+	'$iterate'( Node).
 
 /*-----------------------------------------------------------------
  |	flatten_expr/3
@@ -879,7 +916,8 @@ eval_riax(F, [X], Res )
 	:-
 	ria_map1(F, X, Res, Node, _ ),
 	!,
-	new_node(Node).
+%	new_node(Node).
+	'$iterate'( Node).
 
 	%% Unary with restricted range:
 eval_riax(F, [X], Res )
@@ -887,21 +925,24 @@ eval_riax(F, [X], Res )
 	ria_map1r(F, X, Res, Node, _, Restrict ),
 	!,
 	call(Restrict),
-	new_node(Node).
+%	new_node(Node).
+	'$iterate'( Node).
 
 	%% Unrestricted binary:
 eval_riax(F, [X,Y], Res )
 	:-
 	ria_map2(F, X, Y, Res, Node, _ ),
 	!,
-	new_node(Node).
+%	new_node(Node).
+	'$iterate'( Node).
 
 /*
 eval_riax(Rel, [X,Y], _ )
 	:-
 	fmap_rel(Rel, X, Y, Node),
 	!,
-	new_node(Node).
+%	new_node(Node).
+	'$iterate'( Node).
 */
 
 ria_map1(  - , X, Z, add(0,X,Z),    1).
