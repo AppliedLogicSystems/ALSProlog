@@ -338,6 +338,9 @@ proc do_select_items { BaseName Mode Title SourceItemsList } {
 		$BaseName.clist.listbox insert end $Item
 	}
 	$BaseName.clist.listbox configure -selectmode $Mode
+	focus $BaseName.clist.listbox 
+	$BaseName.clist.listbox activate 0
+	$BaseName.clist.listbox selection set 0
 
 	Window show $BaseName
 	tkwait variable proenv(waitvar,$BaseName)
@@ -417,6 +420,7 @@ proc vTclWindow.popup_select_widget {base} {
 		-command "fin_popup_list_box cancel $base"
     button $base.buttons.ok \
         -padx 11 -pady 4 -text OK \
+		-default active \
 		-command "fin_popup_list_box ok $base"
 
     ###################
