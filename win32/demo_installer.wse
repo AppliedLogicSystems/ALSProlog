@@ -921,13 +921,8 @@ item: Include Script
   Pathname=%_WISE_%\INCLUDE\uninstal.wse
 end
 item: Install File
-  Source=.\Unwise.eng
-  Destination=%MAINDIR%\Unwise.eng
-  Flags=0000000000000010
-end
-item: Install File
-  Source=.\Unwise32.exe
-  Destination=%MAINDIR%\Unwise32.exe
+  Source=d:\als_prolog\win32\Unwise.exe
+  Destination=%MAINDIR%\Unwise.exe
   Flags=0000000000000010
 end
 item: Set Variable
