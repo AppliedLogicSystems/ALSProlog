@@ -554,10 +554,12 @@ foreign_shutdown()
 #include "alspi_slib.h"
 #include "cinterf.h"
 
+#ifdef MacOS
 static QDGlobals *GetQD(void)
 {
     return &qd;
 }
+#endif
 
 typedef unsigned long library_reference;
 
