@@ -5,5 +5,5 @@ entry .b -textvariable b
 label .close -text ")"
 pack .know .a .comma .b .close -side left
 
-bind .a <Return> {prolog "user:know($a, B)." b}
-bind .b <Return> {prolog "user:know(A, $b)." a}
+bind .a <Return> {prolog_call [struct know $a [var b]]}
+bind .b <Return> {prolog_call [struct know [var a] $b]}
