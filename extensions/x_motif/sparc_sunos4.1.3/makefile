@@ -52,3 +52,14 @@ motifsource = \
 motifintf.so: $(motifsource)
 	$(CC) -c $(motifincludes) $(motifsource)
 	$(LINK) alspi_slib.o motif0.o motif1.o motif2.o  motif3.o pi_init.o motifaux.o xtaux.o -o motifintf.so $(LIBS)
+
+clean:
+	make -f ../common/interface_make WIN=x clean
+	make -f ../common/interface_make WIN=motif clean
+	-rm -f alspi_slib.o x0.o x1.o x2.o pi_init.o xaux.o xtaux.o
+	-rm -f alspi_slib.o motif0.o motif1.o motif2.o motif3.o pi_init.o motifaux.o xtaux.o
+
+superclean: clean
+	make -f ../common/interface_make WIN=x superclean
+	make -f ../common/interface_make WIN=motif superclean
+	-rm -f xintf.so motifintf.so
