@@ -61,7 +61,7 @@
 :- reconsult(sec816).
 
 :- reconsult(sec91).
-% :- reconsult(maxint).   Contians tests that use the flag maxint.
+:- reconsult(maxint).
 :- reconsult(sec93).
 :- reconsult(sec94).
 
