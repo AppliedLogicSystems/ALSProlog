@@ -1494,6 +1494,15 @@ disp_try_select(Return, StreamList, Timeout)
 */
 
 		/*------------*
+		 |   FORK    |
+		 *------------*/
+
+export fork/1.
+
+fork(ID) :-
+	sio_fork(ID).
+
+		/*------------*
 		 |   REXEC    |
 		 *------------*/
 
