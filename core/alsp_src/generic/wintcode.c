@@ -1641,7 +1641,7 @@ void
 w_exec(buffer, bufsize, nocatcher)
     Code *buffer;
     int   bufsize;
-    char *nocatcher;
+    const char *nocatcher;
 {
     long *qbuf;
     Code *execCode;
@@ -1693,7 +1693,7 @@ w_exec(buffer, bufsize, nocatcher)
 
 void
 w_assert_builtin(name, arity, builtin)
-    char *name;
+    const char *name;
     int   arity;
     int   (*builtin) PARAMS(( void ));
 {
@@ -1708,7 +1708,7 @@ w_assert_builtin(name, arity, builtin)
 
 void
 w_assert_built2(name, arity, installer, p1, p2)
-    char *name;
+    const char *name;
     int   arity;
     void  (*installer) PARAMS(( ntbl_entry *, PWord, PWord ));
     PWord p1, p2;
@@ -1738,7 +1738,7 @@ w_assert_built2(name, arity, installer, p1, p2)
 void
 w_assert_foreign(modid, name, arity, builtin)
     PWord modid;
-    char *name;
+    const char *name;
     int   arity;
     int   (*builtin) PARAMS(( void ));
 {
@@ -2573,7 +2573,7 @@ w_getnamestring(addr, buf)
 {
     int n;
     ntbl_entry *ent;
-    char *suffix;
+    const char *suffix;
     int offset;
 
 

@@ -51,9 +51,7 @@ void foreign_shutdown()
 
 #include <stdio.h>
 #include <a.out.h>
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

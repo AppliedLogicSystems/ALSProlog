@@ -50,11 +50,11 @@ extern FILE *curfd;
 extern int linenum;
 
 typedef struct {
-            char *pprompt;	/* primary prompt string        */
-            char *sprompt;	/* secondary prompt string      */
+            const char *pprompt;	/* primary prompt string        */
+            const char *sprompt;	/* secondary prompt string      */
          } pptinfo;
 
-extern char *curprompt;
+extern const char *curprompt;
 extern pptinfo prompts[];
 
 #define PMPT_QUERY   0

@@ -423,7 +423,7 @@ pbi_walk_cps()
   PWord *NXTC, *PP;
   int PID;
   ntbl_entry *pna;
-  char *sss;
+  const char *sss;
 
 	CurP = (PWord *) wm_B;
 	Stop = (PWord *)wm_trailbase;

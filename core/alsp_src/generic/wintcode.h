@@ -333,10 +333,10 @@ extern	void	w_addclause	PARAMS(( PWord, int, int, Code *,
 extern	void	w_abolish_cg	PARAMS(( ntbl_entry *, int, int ));
 extern	void	w_execquery	PARAMS(( Code *, int ));
 extern	void	w_execcommand	PARAMS(( Code *, int ));
-extern	void	w_exec		PARAMS(( Code *, int, char* ));
-extern	void	w_assert_builtin PARAMS(( char *, int, int (*) PARAMS(( void )) ));
-extern	void	w_assert_built2	PARAMS(( char *, int, void (*) PARAMS(( ntbl_entry *, PWord, PWord )), PWord, PWord ));
-extern	void	w_assert_foreign PARAMS(( PWord, char *, int, int (*) PARAMS(( void )) ));
+extern	void	w_exec		PARAMS(( Code *, int, const char* ));
+extern	void	w_assert_builtin PARAMS(( const char *, int, int (*) PARAMS(( void )) ));
+extern	void	w_assert_built2	PARAMS(( const char *, int, void (*) PARAMS(( ntbl_entry *, PWord, PWord )), PWord, PWord ));
+extern	void	w_assert_foreign PARAMS(( PWord, const char *, int, int (*) PARAMS(( void )) ));
 extern	void	w_dynamic	PARAMS(( PWord, PWord, int ));
 extern	int	w_spy		PARAMS(( PWord, PWord, int ));
 extern	int	w_nospy		PARAMS(( PWord, PWord, int ));

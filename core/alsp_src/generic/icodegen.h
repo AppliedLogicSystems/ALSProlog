@@ -66,7 +66,7 @@ extern	long *	ic_install_try		PARAMS(( long *, Code *, int ));
 extern	long *	ic_install_retry	PARAMS(( long *, Code *, int, int ));
 extern	long *	ic_install_trust	PARAMS(( long *, Code *, int, int ));
 extern	Code *	ic_install_tree_overhead PARAMS(( long *, int, Code * ));
-extern	Code *	ic_install_no		PARAMS(( Code *, Code *, char * ));
+extern	Code *	ic_install_no		PARAMS(( Code *, Code *, const char * ));
 extern	void	ic_install_reference	PARAMS(( Code *, PWord ));
 
 #if Portable

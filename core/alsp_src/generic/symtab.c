@@ -266,11 +266,11 @@ probe_token(s)
  */
 
 long
-find_token(s)
-    UCHAR *s;			/* string to find */
+find_token(const UCHAR *cs)
 {
     size_t len;
     tkentry **pos;
+    UCHAR *s = (UCHAR *)cs;
 
     pos = lookup(s, &len);
 

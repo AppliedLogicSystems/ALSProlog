@@ -56,7 +56,7 @@ extern	int	brk		PARAMS(( void * ));
 #endif
 
 #if HAVE_BCOPY && MISSING_EXTERN_BCOPY
-extern	void	bcopy		PARAMS(( char *, const char *, size_t ));
+extern	void	bcopy		PARAMS(( const void *, void *, int ));
 #endif
 
 #ifdef MISSING_EXTERN_BZERO
@@ -87,6 +87,11 @@ extern	int	fclose		PARAMS(( FILE * ));
 extern	int	fflush		PARAMS(( FILE * ));
 #endif
 
+#ifdef MISSING_EXTERN_SSCANF
+extern	int	sscanf		PARAMS(( char *, const char *format, ... ));
+#endif
+
+
 #ifdef MISSING_EXTERN_FORK
 extern	pid_t	fork		PARAMS(( void ));
 #endif
@@ -97,6 +102,10 @@ extern	int	fprintf		PARAMS(( FILE *, const char *, ... ));
 
 #if MISSING_EXTERN_FPUTC
 extern	int	fputc		PARAMS(( int, FILE * ));
+#endif
+
+#if MISSING_EXTERN_FGETC
+extern	int	fgetc		PARAMS(( FILE * ));
 #endif
 
 #if MISSING_EXTERN_FREAD
@@ -157,6 +166,10 @@ extern	void *	malloc		PARAMS(( size_t ));
 
 #ifdef MISSING_EXTERN_MEMSET
 extern	void *	memset		PARAMS(( void *, int c, size_t n ));
+#endif
+
+#ifdef MISSING_EXTERN_MUNMAP
+extern	int	munmap		PARAMS(( caddr_t addr, int len ));
 #endif
 
 #ifdef MISSING_EXTERN_MKDIR
@@ -253,6 +266,10 @@ extern	int	sigstack	PARAMS(( struct sigstack *, struct sigstack * ));
 
 #ifdef MISSING_EXTERN_STAT
 extern	int	stat		PARAMS(( const char *, struct stat * ));
+#endif
+
+#ifdef MISSING_EXTERN_LSTAT
+extern	int	lstat		PARAMS(( const char *, struct stat * ));
 #endif
 
 #ifdef MISSING_EXTERN_SYMLINK
