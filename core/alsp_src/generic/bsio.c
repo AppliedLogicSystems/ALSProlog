@@ -123,6 +123,11 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	#define readsocket(a,b,c)	read((a), (b), (c))
 	#define writesocket(a,b,c)	write((a), (b), (c))
 	#define closesocket(a)		close((a))
+#ifdef __hp9000s800
+        #define selectsocket(a,b,c,d,e) select(a,(int*)b,(int*)c,(int*)d,e) 
+#else
+        #define selectsocket(a,b,c,d,e) select(a,b,c,d,e)
+#endif
 	#define socket_errno		errno
 	#define INVALID_SOCKET	-1
 	#define SOCKET_ERROR	-1
@@ -134,6 +139,7 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	#define readsocket(a,b,c)	read((a), (b), (c))
 	#define writesocket(a,b,c)	write((a), (b), (c))
 	#define closesocket(a)		close((a))
+        #define selectsocket(a,b,c,d,e) select(a,b,c,d,e)
 	#define socket_errno		errno
 	#define INVALID_SOCKET	-1
 	#define SOCKET_ERROR	-1
@@ -141,6 +147,7 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	#elif defined(MSWin32)
 	#define readsocket(a,b,c)	recv((a), (b), (c), 0)
 	#define writesocket(a,b,c)	send((a), (b), (c), 0)
+        #define selectsocket(a,b,c,d,e) select(a,b,c,d,e)
 	#define socket_errno		WSAGetLastError()
 	
 	#else
@@ -2543,7 +2550,7 @@ stream_is_ready(buf, usec_to_wait)
 	    wait_time.tv_sec = usec_to_wait / 1000000;
 	    wait_time.tv_usec = usec_to_wait % 1000000;
 
-	    if (select(SIO_FD(buf)+1, &rfds, &wfds, &efds, &wait_time) > 0)
+	    if (selectsocket(SIO_FD(buf)+1, &rfds, &wfds, &efds, &wait_time) > 0)
 		return 1;
 	    else
 		return 0;
@@ -2633,9 +2640,9 @@ sio_simple_select()
 	}
 
 	if (v2 > 0)
-		rrr = select(nfds+1, &rfds, &wfds, &efds, &wait_time);
+		rrr = selectsocket(nfds+1, &rfds, &wfds, &efds, &wait_time);
 	else
-		rrr = select(nfds+1, &rfds, &wfds, &efds, NULL);
+		rrr = selectsocket(nfds+1, &rfds, &wfds, &efds, NULL);
 
 	if (rrr  >= 0)
 		SUCCEED;
