@@ -86,28 +86,3 @@ install_links0([File | FileList],SrcDir)
 	install_links0(FileList,SrcDir).
 
 endmod.
-
-
-
-/*************
-export copyFiles/2.
-/*!---------------------------------------------------------------------
-  | copyFiles(SourceFilesList, TargetSubDirPath)
- *!--------------------------------------------------------------------*/
-copyFiles(SourceFilesList, TargetSubDirPath)
-	:-
-	name(TargetSubDirPath, TargetSubDirPathChars),
-	copyFiles0(SourceFilesList, TargetSubDirPathChars).
-
-copyFiles0([], _).
-copyFiles0([File | SourceFilesList], TargetSubDirPathChars)
-	:-
-	name(File, FileChars),
-	append(TargetSubDirPathChars," > bucket.bit",Tmp1),
-	append(FileChars, [0' | Tmp1], Tmp2),
-	append("copy ",Tmp2,CmdChars),
-	system(CmdChars),
-	!,
-	copyFiles0(SourceFilesList, TargetSubDirPathChars).
-*************/
-

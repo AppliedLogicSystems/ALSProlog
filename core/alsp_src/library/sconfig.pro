@@ -156,15 +156,42 @@ flatten_ws_lists([Tag=Value | WSHeaderItems], [Tag = FlatValue | WSHeaderLines])
 	!,
 	flatten_to_atom(Value, FlatValue),
 	flatten_ws_lists(WSHeaderItems, WSHeaderLines).
+flatten_ws_lists([Tag=[] | WSHeaderItems], [Tag = '' | WSHeaderLines])
+	:-!,
+	flatten_ws_lists(WSHeaderItems, WSHeaderLines).
 flatten_ws_lists([Tag=Value | WSHeaderItems], [Tag = Value | WSHeaderLines])
 	:-
 	flatten_ws_lists(WSHeaderItems, WSHeaderLines).
 
 export flatten_to_atom/2.
 flatten_to_atom([], '').
+flatten_to_atom([Atom], Atom)
+	:-!,
+	atom(Atom).
 flatten_to_atom([Atom | List], FlatValue)
 	:-
 	flatten_to_atom(List, ListFlatValue),
 	catenate([Atom,' \\\n',ListFlatValue], FlatValue).
+
+export cat_together_seplines/2.
+cat_together_seplines([], '').
+cat_together_seplines([Item | Rest], Result)
+	:-
+	cat_together_seplines(Rest, RestResult),
+	catenate([Item, '\n', RestResult], Result).
+
+export cat_together_spaced/2.
+cat_together_spaced([], '').
+cat_together_spaced([Item | Rest], Result)
+	:-
+	cat_together_spaced(Rest, RestResult),
+	catenate([Item, ' ', RestResult], Result).
+
+export prefix_dir/3.
+prefix_dir([], _, []).
+prefix_dir([Item | List], WSDir, [XItem | XList])
+	:-
+	extendPath(WSDir, Item, XItem),
+	prefix_dir(List, WSDir, XList).
 
 endmod.
