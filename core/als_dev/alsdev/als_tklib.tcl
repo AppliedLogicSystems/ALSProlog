@@ -146,8 +146,10 @@ proc do_popup_input {Prompt Title} {
 
 	set proenv(.input_popup) ""
 	Window show .input_popup
+	raise .input_popup
 	wm title .input_popup $Title
     .input_popup.input_p.input_popup_head configure -text $Prompt
+    focus .input_popup.input_p.input_popup_entry
 	tkwait variable proenv(.input_popup)
 	return $proenv(.input_popup)
 }

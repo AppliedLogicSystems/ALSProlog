@@ -20,6 +20,7 @@
 set argc 0
 set argv ""
 
+
 if {[info exists ALSTCLPATH]==0} then { set ALSTCLPATH . }
 #puts "LOADING ALSDEV.TCL: ALSTCLPATH=$ALSTCLPATH"
 
@@ -52,21 +53,55 @@ set proenv(defstr_ld)			false
 
 set proenv(debugwin_button,background)	#cee8e6
 set proenv(interrupt_button,foreground)	#ff0000
+
+set proenv(.topals,geometry)	400x300+0+0
+set proenv(.debugwin,geometry)	400x300+300+0
+
+set proenv(.topals,foreground)	black
+set proenv(.debugwin,foreground)	black
+set proenv(.document,foreground)	black
+
+set proenv(.topals,background)	#ffffff
+set proenv(.debugwin,background)	#ffffff
+set proenv(.document,background)	#ffffff
+
+set proenv(.topals,selectforeground)	systemHighlightText
+set proenv(.debugwin,selectforeground)	systemHighlightText
+set proenv(.document,selectforeground)	systemHighlightText
+
+set proenv(.topals,selectbackground)	systemHighlight
+set proenv(.debugwin,selectbackground)	systemHighlight
+set proenv(.document,selectbackground)	systemHighlight
+
+set proenv(.topals,font)	{user 10 normal}
+set proenv(.debugwin,font)	{user 10 normal}
+set proenv(.document,font)	{user 10 normal}
+
+set proenv(.topals,tabs)	{}
+set proenv(.debugwin,tabs)	{}
+set proenv(.document,tabs)	{}
+
 if {$tcl_platform(platform) == "macintosh"} {
-	set proenv(.topals,background)       #ffffff
-	set proenv(.topals,font) {Monaco 9 normal}
-	set proenv(debugwin,font)   {Monaco 9 normal}
-	set proenv(edit,font)       {Monaco 9 normal}
-} else {
-	set proenv(.topals,background)       #d9d9d9	
-	set proenv(.topals,font) {user 10 normal}
-	set proenv(debugwin,font)   {user 10 normal}
-	set proenv(edit,font)       {user 10 normal}
+	set proenv(.topals,font)		{Monaco 9 normal}
+	set proenv(.debugwin,font)		{Monaco 9 normal}
+	set proenv(.document,font)		{Monaco 9 normal}
+} elseif {$tcl_platform(platform) == "windows"} {
+	set proenv(.topals,selectbackground)	SystemHighlight
+	set proenv(.debugwin,selectbackground)	SystemHighlight
+	set proenv(.document,selectbackground)	SystemHighlight
+} elseif {$tcl_platform(platform) == "unix"} {
+	set proenv(.topals,background)	#d9d9d9	
+	set proenv(.debugwin,background)	#d9d9d9
+	set proenv(.document,background)	#d9d9d9
+	set proenv(.topals,selectforeground)	black
+	set proenv(.debugwin,selectforeground)	black
+	set proenv(.document,selectforeground)	black
+	set proenv(.topals,selectbackground)	#c3c3c3
+	set proenv(.debugwin,selectbackground)	#c3c3c3
+	set proenv(.document,selectbackground)	#c3c3c3
 }
 
 set	proenv(edit,visible)		{}
-
-
 
 #---------------------------------------------------------------
 
@@ -111,9 +146,9 @@ proc vTclWindow. {args} {
     ###################
 }
 
-#################################
-# 		INITIAL SETUP
-#--------------------------------
+	#################################
+	# 		INITIAL SETUP
+	#--------------------------------
 
 switch $tcl_platform(platform) {
 	unix {
@@ -130,32 +165,35 @@ switch $tcl_platform(platform) {
 	}
 }
 
-proc grab_defaults {Win} {
-	global array proenv
-	set CFGDF [$Win configure]
-	set SEEKTAGS {-background -foreground -selectbackground -selectforeground -font -tabs}
-	foreach Item $CFGDF {
-		if "[lsearch -exact $SEEKTAGS [lindex $Item 0]] > -1" then {
-			lappend SEEKRESULTS [list [string range [lindex $Item 0] 1 end] [lindex $Item 3]]
-		}
-	}
-	return $SEEKRESULTS
-}
-
 proc establish_defaults {} {
 	global array proenv
-    text .tmp_test_text -height 2 -width 2 
-	set Window .tmp_test_text
-	set Background [$Window cget -background ]
-	set Foreground [$Window cget -foreground ]
-	set SelectBackground [$Window cget -selectbackground ]
-	set SelectForeground [$Window cget -selectforeground ]
-	set Font [$Window cget -font ]
-	set Tabs [$Window cget -tabs]
-	destroy .tmp_test_text
 
-	set Vals [list $Background $Foreground $SelectBackground $SelectForeground $Font $Tabs]
-	prolog call alsdev alsdev_default_setup -list $Vals
+	prolog call alsdev alsdev_ini_defaults  \
+		-var DefaultVals -var TopGeom -var DebugGeom
+	reset_default_values $DefaultVals
+	if {"$TopGeom"!=""} then { set proenv(.topals,geometry) $TopGeom }
+	if {"$DebugGeom"!=""} then { set proenv(.debugwin,geometry) $DebugGeom }
+}
+
+proc reset_default_values { DefaultValsList } {
+	set TopVals [lindex $DefaultValsList 0] 
+	set DebugVals [lindex $DefaultValsList 1] 
+	set EditVals [lindex $DefaultValsList 2] 
+
+	if {"$TopVals"!=""} then { reset_def_vals .topals $TopVals }
+	if {"$DebugVals"!=""} then { reset_def_vals .debugwin $DebugVals }
+	if {"$EditVals"!=""} then { reset_def_vals .document $EditVals }
+}
+
+proc reset_def_vals { Which ValsList } {
+	global proenv
+
+ 	set proenv($Which,background) [lindex $ValsList  0]
+ 	set proenv($Which,foreground) [lindex $ValsList  1]
+ 	set proenv($Which,selectbackground) [lindex $ValsList  2]
+ 	set proenv($Which,selectforeground) [lindex $ValsList  3]
+ 	set proenv($Which,font) [lindex $ValsList  4]
+ 	set proenv($Which,tabs) [lindex $ValsList  5]
 }
 
 proc set_proenv {Left Right Value} {
@@ -176,9 +214,7 @@ proc return_proenv_defaults {} {
 	return $Defs
 }
 
-
 establish_defaults
-
 
 proc unmap_alsdev_main {} {
 	global array proenv
@@ -205,7 +241,10 @@ proc unmap_alsdev_debug {} {
 proc map_alsdev_debug {} {
 	global array proenv
 	if {[winfo exists .debugwin]} then {
-		if {"$proenv(debugwin)"==0} then { show_debugwin }
+		if {"$proenv(debugwin)"==0} then { 
+			wm geometry .debugwin $proenv(.debugwin,geometry)
+			show_debugwin 
+		}
 	} 
 }
 
@@ -258,8 +297,8 @@ proc set_top_bindings { WinPath StreamAlias WaitVar DataVar } {
 		"ctl-c_action_during_read $WinPath $StreamAlias $WaitVar"
 	bind $WinPath <Control-u> \
 		"ctl-u_action $WinPath"
-	bindtags $WinPath "Text $WinPath .topals all"
 
+	bindtags $WinPath "Text $WinPath .topals all"
 	bind Text <ButtonRelease-2> {} 
 	bind $WinPath <ButtonRelease-2> [list copy_paste_text $WinPath]
 }
@@ -387,8 +426,7 @@ proc ctl-d_action { TxtWin StreamAlias } {
 	if { [llength $ThisLine]>0 } then {
 		return
 	} 
-	prolog call sio set_extra_eof -atom $StreamAlias
-	set WaitForLine 1
+	exit_prolog 
 }
 
 proc ctl-u_action { WinPath } {
@@ -466,16 +504,29 @@ proc show_dir_on_main { Dir } {
 }
 
 proc exit_prolog { } {
-	
+	global WaitForLine
+
 	set ans [tk_dialog .quit_dialog "Exit Prolog?" \
 		"Really Exit ALS Prolog?" "" 0 Yes No ]
 	if {"$ans"==1} then {
 		return 0
 	} else {
 		if {[document.close_all]} then {
-			exit
+			save_window_positions
+			set WaitForLine -3
 		}
 	}
+}
+
+proc save_window_positions {} {
+	global proenv
+	set TopGeom [wm geometry .topals]	
+	if {[winfo exists .debugwin]==1} then {
+		set DebugGeom [wm geometry .debugwin]	
+	} else {
+		set DebugGeom $proenv(.debugwin,geometry)
+	}
+	prolog call alsdev win_positions_for_exit -atom $TopGeom -atom $DebugGeom
 }
 
 proc input_item { } {
@@ -601,27 +652,6 @@ proc text_front_win {} {
 	}
 }
 
-proc save_alsdev_settings {} {
-	global array proenv
-	set FrontWin [text_front_win]
-	if {[string range $FrontWin 1 4]=="edit"} then {
-		set Grp edit
-	} else {
-		set Grp $FrontWin
-	}
-	set TgtTextWin $FrontWin.text
-
-	set proenv($Grp,background)         [lindex $Vals 0]
-	set proenv($Grp,foreground)         [lindex $Vals 1]
-	set proenv($Grp,selectbackground)   [lindex $Vals 2]
-	set proenv($Grp,selectbackground)   [lindex $Vals 3]
-	set proenv($Grp,font)               [lindex $Vals 4]
-	set proenv($Grp,tabs)               [lindex $Vals 5]
-	prolog call alsdev change_settings -list $Vals -atom $Grp
-
-	Window hide .alsdev_settings
-}
-
 proc fonts_and_colors { Window } {
 	global proenv
 
@@ -678,7 +708,7 @@ proc save_fonts_and_colors { Window } {
 	grab release .alsdev_settings
 	Window hide .alsdev_settings
 
-	prolog call alsdev change_settings -list $Vals -atom $Grp
+	prolog call alsdev change_window_settings -list $Vals -atom $Grp
 }
 
 #################################################
@@ -798,7 +828,9 @@ proc exec_toggle_debugwin {} {
 proc ensure_db_showing {} {
 	global array proenv
 		
-	if {[winfo exists .debugwin]==0} then { Window show .debugwin }
+	if {[winfo exists .debugwin]==0} then { 
+		Window show .debugwin 
+	}
 	.debugwin.text delete 1.0 end
 	show_debugwin
 }
@@ -807,6 +839,7 @@ proc show_debugwin {} {
 	global array proenv
 		
 	Window show .debugwin
+	wm geometry .debugwin $proenv(.debugwin,geometry)
 	raise .debugwin
 	prolog call builtins change_debug_io -atom debugwin
 	check_leashing
@@ -1063,7 +1096,13 @@ proc do_2col {base} {
 ###############________________________________##################
 ###############________________________________##################
 
+
+if {$tcl_platform(platform) == "macintosh"} {
+	# Make .topals.mmenb the default menu for all windows.
+	. configure -menu .topals.mmenb
+}
 Window show .topals
+wm geometry .topals $proenv(.topals,geometry)
 
 Window show .debug_settings
 Window hide .debug_settings
@@ -1071,10 +1110,7 @@ Window hide .debug_settings
 Window show .alsdev_settings
 Window hide .alsdev_settings
 
-if {$tcl_platform(platform) == "macintosh"} {
-	# Make .topals.mmenb the default menu for all windows.
-	. configure -menu .topals.mmenb
-}
 update idletasks
 raise .topals
 focus .topals.text
+

@@ -7,7 +7,7 @@ proc splash {path} {
 	if {$tcl_platform(platform) == "macintosh"} then {
 		image create photo als_splash_gif -format gif -data [resource read GIFf turnstile_splash]
 	} else {
-		image create photo als_splash_gif -file [file join $path turnstile_splash.gif]
+		image create photo als_splash_gif -file [file join $path .. images turnstile_splash.gif]
 	}
 	wm overrideredirect .als_splash_screen 1
 	label .als_splash_screen.label -image als_splash_gif -bd 1 -relief flat
