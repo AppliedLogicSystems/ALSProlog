@@ -1,0 +1,33 @@
+# Generic ALS Prolog Unix Window Interface Plugin makefile
+# To use, the following symbols must be defined:
+#    WIN - Window Library name (usually x or motif)
+#    SRCDIR - ALS Prolog source directory (for locating c2pro and p2int)
+#    CINCLUDES - include directives for C
+#    CC - C compiler/linker
+#    LINK - linker directives to create shared library
+#    LIBS - libraries need by shared library
+
+source = \
+	 $(SRCDIR)/generic/alspi_slib.c \
+	 $(WIN)0.c \
+	 $(WIN)1.c \
+	 $(WIN)2.c \
+	 $(WIN)3.c \
+	 ../$(WIN)_source/pi_init.c \
+	 ../$(WIN)_source/$(WIN)aux.c \
+	 ../$(WIN)_source/xtaux.c
+
+includes = -I ../$(WIN)_source -I $(SRCDIR)/generic $(CINCLUDES)
+
+$(WIN)intf.so: $(source)
+	$(CC) $(LINK) $(includes) $(source) $(LIBS) -o $(WIN)intf.so
+
+# This is a kludge to create x3.c
+$(WIN)3.c :
+	echo '' > $(WIN)3.c
+
+clean:
+	-rm -f $(WIN)3.c
+
+superclean: clean
+	-rm -f $(WIN)intf.so

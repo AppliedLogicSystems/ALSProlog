@@ -1,0 +1,43 @@
+# Generic ALS Prolog Unix Window Library Interface makefile
+# To use, the following symbols must be defined:
+#    WIN - Window Library name (usually x or motif)
+#    SRCDIR - ALS Prolog source directory (for locating c2pro and p2int)
+#    C2PINCLUDES - c2pro include directives for the Window Library headers
+#    C2PDEFINES - c2pro preprocessor define directives 
+
+WSRCD = ../$(WIN)_source
+
+VPATH = $(WSRCD)
+
+all : $(WIN)0.c
+
+CINTDIR = $(SRCDIR)/cinterf
+
+C2PFiles = c2p.pro c2pro cexp cfiles cmacro cout cparse ctoken
+C2PFS = $(addprefix $(CINTDIR)/c2pro/,$(C2PFiles))
+
+c2prolcl.pro: $(C2PFS)
+	cat $(C2PFS) > c2prolcl.pro
+
+$(WIN).src : $(WIN).spc $(WIN).h c2prolcl.pro
+	alspro -b c2prolcl.pro -g c2pro \
+		-p -os unix -filter all -srcpath $(WSRCD) $(WIN) \
+		-debug $(C2PINCLUDES) $(C2PDEFINES)
+
+P2IFiles= p2i.pro pro2intf intfout mytrans
+P2IFS = $(addprefix $(CINTDIR)/pro2intf/,$(P2IFiles))
+
+p2intlcl.pro: $(P2IFS)
+	cat $(P2IFS) > p2intlcl.pro
+
+$(WIN)0.c $(WIN)1.c $(WIN)2.c $(WIN)3.c $(WIN)4.c $(WIN).pro: $(WIN).src p2intlcl.pro
+	alspro -b p2intlcl.pro -g pro2intf -p $(WIN) -fpre $(WIN) -Ddebug -t mytrans
+
+clean:
+	-rm -f c2prolcl.pro
+	-rm -f $(WIN).src
+	-rm -f p2intlcl.pro
+	-rm -f $(WIN)0.c $(WIN)1.c $(WIN)2.c $(WIN)3.c $(WIN)4.c
+
+superclean: clean
+	-rm -f $(WIN).pro
