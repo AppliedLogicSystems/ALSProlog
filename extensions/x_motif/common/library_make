@@ -6,6 +6,7 @@
 #    CC - C compiler/linker
 #    LINK - linker directives to create shared library
 #    LIBS - libraries need by shared library
+#    LIBEXT - shared library extension
 
 source = \
 	 $(SRCDIR)/generic/alspi_slib.c \
@@ -19,8 +20,8 @@ source = \
 
 includes = -I ../$(WIN)_source -I $(SRCDIR)/generic $(CINCLUDES)
 
-$(WIN)intf.so: $(source)
-	$(CC) $(LINK) $(includes) $(source) $(LIBS) -o $(WIN)intf.so
+$(WIN)intf.$(LIBEXT): $(source)
+	$(CC) $(LINK) $(includes) $(source) $(LIBS) -o $(WIN)intf.$(LIBEXT)
 
 # This is a kludge to create x3.c
 $(WIN)3.c :
@@ -30,4 +31,4 @@ clean:
 	-rm -f $(WIN)3.c
 
 superclean: clean
-	-rm -f $(WIN)intf.so
+	-rm -f $(WIN)intf.$(LIBEXT)
