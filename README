@@ -16,7 +16,7 @@ Use Unix CVS to checkout als_prolog.  This insures correct line endings.
 Macintosh:
 
 Use MacCVS Pro and the "ALS Prolog CVS Stationary" (in
-/apache/als_build_support/macos)  to checkout als_prolog.  This insures
+/home/als_build_support/macos)  to checkout als_prolog.  This insures
 that line endings and file types are correct. 
 
 Windows:
