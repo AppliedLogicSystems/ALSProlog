@@ -106,7 +106,7 @@ Operating System:	AIX 3.2.5
 uname -a output:	AIX checkers 2 3 000152044600
 Source directory:	/max4/kev/pk-940913
 Build directory:	/checkers/kev
-Window system:		X11R5/Motif 1.2
+Window system:		X11R6/Motif 1.2
 
 Build commands:
 
@@ -128,7 +128,7 @@ Operating System:	Solaris 2.3
 uname -a output:	SunOS fatalbert 5.3 Generic sun4d sparc
 Source directory:	/export/home/fatalbert/kev/pk-940913
 Build directory:	/export/home/fatalbert/kev/pk-fatalbert
-Window system:		X11R5/Motif 1.2
+Window system:		X11R6/Motif 1.2
 
 Build commands:
 
@@ -160,7 +160,7 @@ Operating System	SVR4
 uname -a output:	UNIX_System_V max 4.0 R40V3 m88k mc88100
 Source directory:	/max4/kev/pk-940913
 Build directory:	/max4/kev/pk-max
-Window system:		X11R5/Motif 1.2
+Window system:		X11R6/Motif 1.2
 
 Build commands:
 
@@ -201,7 +201,7 @@ Operating System:	NeXTStep-??
 uname -a output:	not supported (pretty lame if you ask me)
 Source directory:	/Remotes/max4/kev/pk-940913
 Build directory:	/Vader/Users/pro/pk-darth
-Window system:		X11R5/Motif1.2 (CubX)
+Window system:		X11R6/Motif1.2 (CubX)
 
 Build commands:
 
@@ -233,7 +233,7 @@ Operating System:	IRIX-5.2
 uname -a output:	IRIX stimpy 5.2 02282016 IP22 mips
 Source directory:	/export/home/stimpy/kev/pk-940913
 Build directory:	/export/home/stimpy/kev/pk-stimpy
-Window system:		X11R5/Motif1.2 ??
+Window system:		X11R6/Motif1.2 ??
 
 Build commands:
 
@@ -282,7 +282,7 @@ Operating System:	SunOS 4.1.3
 uname -a output:	SunOS rattler 4.1.3 1 sun4c
 Source directory:	/home/max4/kev/pk-940913
 Build directory:	/home/max4/kev/pk-rattler
-Window system:		X11R5/Motif1.2
+Window system:		X11R6/Motif1.2
 
 Build commands:
 
@@ -298,10 +298,10 @@ Comments:
 
 	The X_CFLAGS line is needed for the configure because the
 	system administrators forgot to rebuild the fixed include files
-	for gcc after they'd installed X11R5 and Motif1.2.  Doing this
+	for gcc after they'd installed X11R6 and Motif1.2.  Doing this
 	sort of thing is normally not a good idea, but it is necessary
 	here in order to avoid mixing some X11R4 include files (the
-	ones which gcc has fixed) with new X11R5 include files.
+	ones which gcc has fixed) with new X11R6 include files.
 
 	Note that the correct way to fix this problem is to get the
 	system administrators to rebuild gcc's include files.
@@ -309,7 +309,7 @@ Comments:
 	The reason for setting X_LIBS on this machine is to force /usr/lib
 	to be looked at first before any other library locations.  This
 	machine is a Sparc running SunOS4.1.3, but (as noted above) has been
-	upgraded to X11R5 and Motif1.2.  There is still a directory which
+	upgraded to X11R6 and Motif1.2.  There is still a directory which
 	is normally searched first which has Sun's old openwindows libraries
 	in it.  These libraries are X11R4 and are incompatible with the
 	include files located in /usr/include/X11 on this machine.

@@ -9,7 +9,7 @@ LD = gcc
 
 VPATH = ../common:$(ALSP_SOURCE)
 
-CPPFLAGS = -I ../common -I $(ALSP_SOURCE) -isystem $(ALS_BUILD_SUPPORT)/include -I /usr/include/X11R5 -DUNIX -DUNIX_NAME='"$(UNIX_NAME)"'
+CPPFLAGS = -I ../common -I $(ALSP_SOURCE) -isystem $(ALS_BUILD_SUPPORT)/include -I /usr/include/X11R6 -DUNIX -DUNIX_NAME='"$(UNIX_NAME)"'
 
 CFLAGS = -Wall -MD -fPIC -DITCL
 

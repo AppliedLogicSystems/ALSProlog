@@ -384,7 +384,7 @@ characteristic_files(wxwin, lib, ['libwx_motif.a', 'libwxextend_motif.a']).
  *-----------------------------------------------------------------------*/
 
 possible_dir_for(motif,lib,_,'/usr/lib').
-possible_dir_for(motif,lib,_,'/usr/lib/X11R5').
+possible_dir_for(motif,lib,_,'/usr/lib/X11R6').
 possible_dir_for(motif,lib,solaris,'/usr/dt/lib').
 
 possible_dir_for(wxwin,include,_,'/usr2/wxwins/include/base').

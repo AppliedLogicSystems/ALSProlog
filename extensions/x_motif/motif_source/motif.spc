@@ -23,7 +23,7 @@
 	   in the head path ' "* / ' or ' <* / '
 	   appropriately from information it is supplied
 	   on the command line.  This need is because the
-	   locations of X11R5, Motif1.2 on AIX and HP-UX
+	   locations of X11R6, Motif1.2 on AIX and HP-UX
 	   (and maybe elsewhere) are in other places, as
 	   are even X11 and Motif1.1 on DV/X
 	 */
