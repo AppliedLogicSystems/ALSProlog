@@ -154,7 +154,8 @@ extern	ALSPI_API(int)	PI_rungoal_with_update_and_catch	PARAMS(( PWord, PWord *, 
 extern	ALSPI_API(int)	PI_unify	PARAMS(( PWord , int, PWord , int ));
 extern	ALSPI_API(void)	PrologInit	PARAMS(( PSTRUCT * ));
 extern	ALSPI_API(void)	PI_shutdown	PARAMS(( void ));
-extern	ALSPI_API(int)	PI_toplevel	PARAMS(( int * ));
+extern	ALSPI_API(void)	PI_toplevel	PARAMS(( void ));
+extern	ALSPI_API(int)	PI_status_toplevel	PARAMS(( int * ));
 extern	ALSPI_API(int)	PI_prolog_init	PARAMS(( int, char **));
 extern	ALSPI_API(int)	PI_startup	PARAMS(( CONST PI_system_setup *));
 extern	ALSPI_API(void)	PI_throw	PARAMS((PWord obj, int objt));

@@ -873,8 +873,16 @@ autoload(f)
     }
 }
 
+
+EXPORT ALSPI_API(void)
+PI_toplevel(void)
+{
+	int result;
+	PI_status_toplevel(&result);
+}
+
 EXPORT ALSPI_API(int)
-PI_toplevel(int *result)
+PI_status_toplevel(int *result)
 {
 #ifndef KERNAL
     if (noautoload && !pckgloaded) {

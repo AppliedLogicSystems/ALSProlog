@@ -218,7 +218,7 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 
     if (init) init();
 
-    if ((exit_status = PI_toplevel(&success)) != 0) {
+    if ((exit_status = PI_status_toplevel(&success)) != 0) {
 	PI_app_printf(PI_app_printf_error, "Prolog shell crashed !\n");
 	exit(EXIT_ERROR);
     }
