@@ -47,8 +47,6 @@ schema([
 			] ) ] ),
 
 
-	~gfiles_h = ext(gfiles_h,h) qual one_per_line,
-
 
 	~'OTHERFILES' = ext('OTHERFILES',c),
 
@@ -88,23 +86,6 @@ schema([
 
 	cmnt(gen_dep),
 	~defs_h = ext(defs_h,h) qual one_per_line,
-
-	case(&(context_name),[
-		 (mac: noop
-/* 
-		     [
-				'{gfiles_' + '68k_o' + '}' : '{defs_h}',
-				(ext(&(gen_h_dep),'68k.o') qual single_line) : ext([module,wintcode,wntbl,wci], h) qual single_line,
-				depends_list('68k.o'),
-				'{gfiles_' + 'ppc_o' + '}' : '{defs_h}',
-				(ext(&(gen_h_dep),'ppc.o') qual single_line) : ext([module,wintcode,wntbl,wci], h) qual single_line,
-				depends_list('ppc.o') ]
-*/
-		 ),
-		 ( _ :[ 
-			'$(gfiles_' + &(object) + ')' : '$(defs_h)',
-			(ext(&(gen_h_dep),&(object)) qual single_line) : ext([module,wintcode,wntbl,wci], h) qual single_line,
-			depends_list(&(object))] )]),
 
 	case(&(context_name),[
 		(w31:noop),
@@ -255,61 +236,6 @@ glibfiles = [
 	wintcode,
 	winter ].
 
-gfiles_h = 
-	[
-	alloc,
-	alsmem,
-	alspi,
-	alssig,
-	bsio,
-	built,
-	chpt,
-	cinterf,
-	coerce,
-	compile,
-	cutmacro,
-	debugsys,
-	defs,
-	fatal,
-	fileio,
-	fpbasis,
-	hztypes,
-	icodedef,
-	icodegen,
-	icom,
-	intrv,
-	intrv_pr,
-	intrv_pb,
-	istr,
-	lexan,
-	lexinit,
-	main,
-	missing,
-	module,
-	mvarargs,
-	parser,
-	parsstak,
-	pckg,
-	pckgcoff,
-	pckgmake,
-	rinfo,
-	sig,
-	siolex,
-	tokens,
-	tokini,
-	tokini2,
-	alstypes,
-	varproc,
-	version,
-	wamops,
-	wamops0,
-	wci,
-	wd_size,
-	wintcode,
-	winter,
-	wintidx,
-	wntbl ].
-
 'OTHERFILES' = [alsglue].
 
 cmnt(4) = ['These items must generate themselves from other files'].
@@ -446,42 +372,3 @@ rule(alstest) =
 		 'echo >> nrev_rcd',
 		 &(invoke) + 'alspro -b -obp $(srcdir)/tests/snrev -g snrev >> nrev_rcd',
 		 'cat nrev_rcd' ] )])).
-
-depends_list(_) = 
-	depends_list(EXT,
-			[
-			ext(bdb,      EXT)	: ext([icodegen,cutmacro,compile],h),
-			ext(bdbg,     EXT)	: ext([wintcode],h),
-			ext(bio,      EXT)	: ext([icom,wintcode],h),
-			ext([built,bmeta],EXT): ext([icodegen,icom],h),
-			ext(bmisc,    EXT)	: ext([wintcode,compile],h),
-			ext(bpckg,    EXT)	: ext([wintcode,coerce,pckg,rinfo,pckgcoff],h),
-			ext(bsio,     EXT)	: ext([bsio,siolex],h),
-			ext(cinterf,  EXT)	: ext([cinterf],h),
-			ext(compile,  EXT)	: ext([varproc,cutmacro,compile,icode,icodegen,icom],h),
-			ext(compmath, EXT)	: ext([varproc,compile,icode,icodegen,icom],h),
-			ext(expand,   EXT)	: ext([varproc,parsstak,compile,icodegen,icom,main],h),
-			ext(freeze,   EXT)	: ext([icodegen,cutmacro,compile,module,wintcode,wntbl,wci],h),
-			ext(gc,       EXT)	: ext([machinst,wintcode],h),
-			ext(index,    EXT)	: ext([icodegen,icom],h),
-			ext(intaux,    EXT)	: ext([intrv,freeze],h),
-			ext(int_net,    EXT)	: ext([intrv,freeze,intrv_pr],h),
-			ext(intrv,    EXT)	: ext([intrv,freeze,intrv_pr],h),
-			ext(lexan,    EXT)	: ext([lexan,lexinit],h),
-			ext(loadfile, EXT)	: ext([wintcode,icodegen,magic,version],h),
-			ext(main,     EXT)	: ext([main,version,pckg,rinfo],h),
-			ext(mem,      EXT)	: ext([version,sig,alsmem],h),
-			ext(module,   EXT)	: ext([cutmacro,main,icodegen,icom],h),
-			ext(newpckgcoff,  EXT)	: ext([coerce,pckgcoff,rinfo],h),
-			ext(parser,   EXT)	: ext([lexan,parsstak,icodegen,icom],h),
-			ext(pckgcoff, EXT)	: ext([coerce,pckgcoff,rinfo],h),
-			ext(pckgload, EXT)	: ext([pckg],h),
-			ext(pckgmake, EXT)	: ext([pckg,pckgcoff,pckgmake,rinfo,compile],h),
-			ext(pimain,   EXT)	: ext([config,alspi,pi_cfg],h),
-			ext(rinfo,    EXT)	: ext([rinfo],h),
-			ext(sig,      EXT)	: ext([sig],h),
-			ext(symtab,   EXT)	: ext([pckg,pckgcoff,tokini2],h),
-			ext(varproc,  EXT)	: ext([varproc],h),
-			ext(wintcode, EXT)	: ext([cutmacro,main,rinfo,icodegen],h),
-			ext(winter,   EXT)	: ext([winter],h)
-			] ).
