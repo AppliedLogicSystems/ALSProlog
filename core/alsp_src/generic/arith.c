@@ -61,9 +61,11 @@ extern	double	als_random	PARAMS(( void ));
 #ifndef HAVE_AINT
 extern	double	aint		PARAMS(( double ));
 #endif
+/*****
 #ifndef HAVE_RINT
 extern	double	rint		PARAMS(( double ));
 #endif
+****/
 #ifndef HAVE_EXP10
 extern	double	exp10		PARAMS(( double ));
 #endif
@@ -264,6 +266,7 @@ aint(d)
 }
 #endif /* HAVE_AINT */
 
+/********
 #ifndef HAVE_RINT
 double
 rint(d)
@@ -272,6 +275,13 @@ rint(d)
     return (floor(d + 0.5));
 }
 #endif
+*******/
+double
+rint0(d)
+    double d;
+{
+    return (floor(d + 0.5));
+}
 
 #ifndef HAVE_EXP10
 double exp10(d)
@@ -430,7 +440,7 @@ do_is(v, t, ty)
 			break;
 		    case TK_ROUND: 
 			*ty = WTP_INTEGER; 
-			rv = rint(rv);
+			rv = rint0(rv);
 			break;
 		    case TK_TRUNC: 
 			*ty = WTP_INTEGER; 
