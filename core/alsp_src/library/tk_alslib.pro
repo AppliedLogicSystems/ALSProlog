@@ -69,6 +69,37 @@ init_tk_alslib(Interp,Shared)
 		tcl_call(Interp, [source, ALSTKLIB], _)
 	)).
 
+/*------------------------------------------------------------*
+ |	fixup_for_tkwin_path/2
+ |	fixup_for_tkwin_path(Atom, TclLabel)
+ |	fixup_for_tkwin_path(+, -)
+ |
+ |	Adjusts incoming Atom to be possibly appropriate as the 
+ |	name of a Tk window path by: 
+ |	i) converting all uppercase chars to lower case;
+ |	ii) converting blanks to "-" .
+ *------------------------------------------------------------*/
+export fixup_for_tkwin_path/2.
+fixup_for_tkwin_path(Atom, TclLabel)
+	:-
+	atom_codes(Atom, LabelCs),
+	fixup_for_tkwin_path0(LabelCs, TclLabelCs),
+	atom_codes(TclLabel, TclLabelCs).
+
+fixup_for_tkwin_path0([], []).
+fixup_for_tkwin_path0([C | LabelCs], [NewC | TclLabelCs])
+	:-
+	((0'A =< C, C =< 0'Z) ->
+		NewC is C + 32
+		;
+		(C = 0'   -> 
+			NewC = 0'_
+			;
+			NewC = C
+		)
+	),
+	fixup_for_tkwin_path0(LabelCs, TclLabelCs).
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% 		POPUP SELECTION LISTS 			%%%%%
@@ -126,10 +157,6 @@ popup_select_items(Interp, SourceList, Options, ChoiceList)
 		BaseName = '.popup_select_widget'), 
 	(dmember(mode=Mode, Options) -> true;
 		Mode = browse),
-/*
-	(dmember(interp=Interp, Options) -> true ;
-		Interp = tcli),
-*/
 	(dmember(title=Title, Options) -> true ;
 		Title = 'List Selection'),
 	mk_tcl_atom_list(SourceList, TclSourceList),
@@ -339,6 +366,19 @@ cont_file_select(save_as, DefaultName, Ext, IDir, Title, FileName, FileTypes, In
 				'-initialdir', IDir, '-filetypes', FileTypes], 
 				FileName).
 /*------------------------------------------------------------*
+ |	create_image/2
+ |	create_image(ImagePath, ImageName)
+ |	create_image(+, +)
+ |	create_image/3
+ |	create_image(Interp, ImagePath, ImageName)
+ |	create_image(+, +, +)
+ |	
+ |	display_image/1
+ |	display_image(ImageName)
+ |	display_image(+)
+ |	display_image/3
+ |	display_image(Interp, ImageName, Options)
+ |	display_image(+, +, +)
  *------------------------------------------------------------*/
 
 export create_image/2.
@@ -363,8 +403,6 @@ create_image(Interp, ImagePath, ImageName)
 		true
 	),
 	tcl_call(Interp, [image,create,photo,ImageName,'-file',ImagePath], _).
-
-
 
 export display_image/1.
 export display_image/3.
@@ -407,8 +445,6 @@ create_display_image(Interp, ImagePath, Options)
 	create_image(ImagePath, ImageName),
 	display_image(Interp, ImageName, Options).
 
-
-
 /****
 export display_image/3.
 export display_image/5.
@@ -438,6 +474,17 @@ display_image(Interp, ImageDir, ImageFile, ImageWidth, ImageHeight)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*------------------------------------------------------------*
+ |	extend_main_menubar/2
+ |	extend_main_menubar(Label, MenuEntriesList)
+ |	extend_main_menubar(+, +)
+ |
+ |	extend_menubar/3
+ |	extend_menubar(MenubarPath, Label, MenuEntriesList)
+ |	extend_menubar(+, +, +)
+ |	
+ |	extend_menubar/4
+ |	extend_menubar(MenubarPath, Label, MenuEntriesList, Interp)
+ |	extend_menubar(+, +, +, +)
  *------------------------------------------------------------*/
 extend_main_menubar(Label, MenuEntriesList)
 	:-
@@ -452,9 +499,11 @@ extend_menubar(MenubarPath, Label, MenuEntriesList, Interp)
 	extend_menubar_cascade(MenubarPath, Label, MenuPath, Interp),
 	list_extend_cascade(MenuEntriesList, MenuPath, Interp).
 
+/*
 extend_menubar_cascade(Label, MenuPath)
 	:-
 	extend_menubar_cascade('.topals.mmenb', Label, MenuPath, shl_tcli).
+*/
 
 extend_menubar_cascade(MenubarPath, Label, MenuPath, Interp)
 	:-
@@ -468,26 +517,6 @@ extend_menubar_cascade(MenubarPath, Label, MenuPath, Interp)
 	tcl_call(Interp, [MenubarPath,add,cascade,'-label',Label,'-menu',MenuPath], _),
 	tcl_call(Interp, [update],_).
 
-fixup_for_tkwin_path(Label, TclLabel)
-	:-
-	atom_codes(Label, LabelCs),
-	fixup_for_tkwin_path0(LabelCs, TclLabelCs),
-	atom_codes(TclLabel, TclLabelCs).
-
-fixup_for_tkwin_path0([], []).
-fixup_for_tkwin_path0([C | LabelCs], [NewC | TclLabelCs])
-	:-
-	((0'A =< C, C =< 0'Z) ->
-		NewC is C + 32
-		;
-		(C = 0'   -> 
-			NewC = 0'_
-			;
-			NewC = C
-		)
-	),
-	fixup_for_tkwin_path0(LabelCs, TclLabelCs).
-
 list_extend_cascade([], MenuPath, Interp)
 	:-
 	tcl_call(Interp, [update],_).
@@ -495,6 +524,13 @@ list_extend_cascade([MenuEntry | MenuEntriesList], MenuPath, Interp)
 	:-
 	extend_cascade(MenuEntry, MenuPath, Interp),
 	list_extend_cascade(MenuEntriesList, MenuPath, Interp).
+
+export extend_cascade/3.
+
+extend_cascade(cascade(Label,SubList), MenuPath, Interp)
+	:-!,
+	extend_menubar_cascade(MenuPath, Label, NewMenuPath, Interp),
+	list_extend_cascade(SubList, NewMenuPath, Interp).
 
 extend_cascade(Label + tcl(Call), MenuPath, Interp)
 	:-!,
@@ -555,8 +591,40 @@ insert_tcl_call_arg(Arg, CmdS)
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
+export menu_entries_list/2.
+export menu_entries_list/3.
 
+menu_entries_list(MenuPath, EntriesList)
+	:-
+	menu_entries_list(tcli, MenuPath, EntriesList).
+
+menu_entries_list(Interp, MenuPath, EntriesList)
+	:-
+	tcl_call(Interp, [menu_entries_list, MenuPath], EntriesList).
+
+export path_to_main_menu_entry/2.
+
+path_to_main_menu_entry(Index, SubMenuPath)
+	:-
+	path_to_menu_entry(shl_tcli, '.topals.mmenb', Index, SubMenuPath).
+
+export path_to_menu_entry/3.
+export path_to_menu_entry/4.
+
+path_to_menu_entry(MenuPath, Index, SubMenuPath)
+	:-
+	path_to_menu_entry(tcli, MenuPath, Index, SubMenuPath).
+
+path_to_menu_entry(Interp, MenuPath, Index, SubMenuPath)
+	:-
+	tcl_call(Interp, [MenuPath,entrycget,Index,'-menu'],SubMenuPath).
 
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
+
+add_to_main_menu_entry(Index, Entry)
+	:-
+	path_to_main_menu_entry(Index, MenuPath),
+	extend_cascade(Entry, MenuPath, shl_tcli).
+
 endmod.
