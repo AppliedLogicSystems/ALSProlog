@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.40 1998/03/13 01:56:12 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.41 1998/03/14 02:03:59 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -340,9 +340,9 @@ proc set_top_bindings { WinPath StreamAlias WaitVar DataVar } {
 	bind $WinPath <Control-u> \
 		"ctl-u_action $WinPath"
 
-	bindtags $WinPath "Text $WinPath .topals all"
-	bind Text <ButtonRelease-2> {} 
-	bind $WinPath <ButtonRelease-2> [list copy_paste_text $WinPath]
+#	bindtags $WinPath "Text $WinPath .topals all"
+#	bind Text <ButtonRelease-2> {} 
+#	bind $WinPath <ButtonRelease-2> [list copy_paste_text $WinPath]
 }
 
 	## Variable on which we execute 'tkwait variable ...' when we really
@@ -1133,8 +1133,6 @@ if {$tcl_platform(platform) == "macintosh"} {
 	. configure -menu .topals.mmenb
 }
 Window show .topals
-wm positionfrom .topals user
-wm geometry .topals $proenv(.topals,geometry)
 
 Window show .debug_settings
 Window hide .debug_settings
@@ -1146,5 +1144,7 @@ Window show .topals
 
 update idletasks
 raise .topals
+wm positionfrom .topals user
+wm geometry .topals $proenv(.topals,geometry)
 focus .topals.text
 
