@@ -48,7 +48,7 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	varproc.c vprintf.c wdisp.c wintcode.c \
 	winter.c security.c nopckg.c \
 	ieeemath.c pimain.c new_alspi.c engine.c \
-	relocate_code.c cexception.c cassert.c
+	relocate_code.c cexception.c cassert.c demo.c
 
 LIB_SOURCE = $(GENERIC_SOURCE) $(PROC_SOURCE) $(OS_SOURCE)
 
