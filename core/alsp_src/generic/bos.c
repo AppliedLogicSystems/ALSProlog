@@ -328,7 +328,7 @@ static int copy_file(const char *from_file, const char *to_file)
 
 #elif defined(MSWin32)
 
-    if (CopyFile(from_file, to_file, TRUE)) return 1;
+    if (CopyFile(from_file, to_file, FALSE)) return 1;
     else return 0;
 
 #elif defined(unix)
