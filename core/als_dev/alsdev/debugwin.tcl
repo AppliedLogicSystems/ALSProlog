@@ -6,8 +6,6 @@
 #################################
 # GLOBAL VARIABLES
 #
-global DebugWinButtonBack; 
-set DebugWinButtonBack #cee8e6
 
 global flat_print; 
 global widget; 
@@ -24,9 +22,6 @@ proc vTclWindow.debugwin {base} {
     if {[winfo exists $base]} {
         wm deiconify $base; return
     }
-	global DebugWinButtonBack; 
-	global alsstyl;
-
     ###################
     # CREATING WIDGETS
     ###################
@@ -40,6 +35,8 @@ proc vTclWindow.debugwin {base} {
     wm deiconify $base
     wm title $base "ALS Prolog Debugger"
 	wm protocol $base WM_DELETE_WINDOW hide_debugwin
+
+	bind $base <Configure> "debugwin_configure_event $base %h %w %W"
 
     frame $base.cpd17 \
         -borderwidth 1 -relief sunken 
@@ -104,23 +101,23 @@ set DBBpady 2
     frame $base.buttons \
         -borderwidth 1 -relief sunken
     button $base.buttons.creep \
-        -background $DebugWinButtonBack \
+        -background $proenv(debugwin_button,background) \
         -padx 4 -text creep -underline 0 \
 		-command { set DebugResponse Bc }
     button $base.buttons.skip \
-        -background $DebugWinButtonBack \
+        -background $proenv(debugwin_button,background) \
         -padx 4 -text skip -underline 0 \
 		-command { set DebugResponse Bs }
     button $base.buttons.leap \
-        -background $DebugWinButtonBack \
+        -background $proenv(debugwin_button,background) \
         -padx 4 -text leap -underline 0 \
 		-command { set DebugResponse Bl }
     button $base.buttons.retry \
-        -background $DebugWinButtonBack \
+        -background $proenv(debugwin_button,background) \
         -padx 0 -text retry -underline 0 \
 		-command { set DebugResponse Br }
     button $base.buttons.fail \
-        -background $DebugWinButtonBack \
+        -background $proenv(debugwin_button,background) \
         -padx 4 -text fail -underline 0 \
 		-command { set DebugResponse Bf }
 
@@ -164,8 +161,11 @@ set DBBpady 2
     scrollbar $base.textwin.02 \
         -borderwidth 1 -command {.debugwin.textwin.text yview} -orient vert 
     text $base.textwin.text \
-        -font alsstyl(text-font) \
-        -width 8 -yscrollcommand {.debugwin.textwin.02 set} 
+		-background $proenv(win_general,background) \
+		-foreground $proenv(win_general,foreground) \
+		-font $proenv(win_general,font) \
+        -width 40 -yscrollcommand {.debugwin.textwin.02 set} 
+
     ###################
     # SETTING GEOMETRY
     ###################
@@ -219,16 +219,20 @@ set DBBpady 2
         -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
     grid $base.textwin.text \
         -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
+
+	bind .debugwin <Unmap> {unmap_alsdev_debug}
+	bind .debugwin <Map>   {map_alsdev_debug}
 }
 
 proc vTclWindow.spywin {base} {
+	global array proenv
+
     set base .spywin
     if {[winfo exists $base]} {
         wm deiconify $base; return
     }
 	global SpyModuleMenu SpyModule
 	global SpyPredMenu SpyPred
-	global alsstyl;
     ###################
     # CREATING WIDGETS
     ###################
@@ -297,6 +301,8 @@ proc vTclWindow.spywin {base} {
 }
 
 proc vTclWindow.debug_source_trace {base Title} {
+	global array proenv
+
     if {$base == ""} {
         set base .debug_source_trace
     }
@@ -305,7 +311,9 @@ proc vTclWindow.debug_source_trace {base Title} {
     }
     if {[winfo exists $base]} {
         wm deiconify $base; return
-    }
+    } 
+
+	lappend proenv(debugwin,visible) $base
 
     ###################
     # CREATING WIDGETS
@@ -319,13 +327,17 @@ proc vTclWindow.debug_source_trace {base Title} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base $Title
+	wm protocol $base WM_DELETE_WINDOW "source_trace_closedown $base"
+
     frame $base.textwin \
         -borderwidth 1 -relief raised
     scrollbar $base.textwin.vsb \
         -borderwidth 1 -command [list $base.textwin.text yview] \
         -orient vert 
     text $base.textwin.text \
-        -font {system 10 normal} \
+		-background $proenv(win_general,background) \
+		-foreground $proenv(win_general,foreground) \
+		-font $proenv(win_general,font) \
         -width 8 -yscrollcommand [list $base.textwin.vsb set] 
     ###################
     # SETTING GEOMETRY

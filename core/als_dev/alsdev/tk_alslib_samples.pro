@@ -109,3 +109,23 @@ file_sel(3, File)
 		],
 		File).
 
+	%%------------------------------------
+	%%    Adding to the main menubar:
+	%%------------------------------------
+
+tamb(1)
+	:-
+	extend_main_menubar('Test Extend', 
+			['Test Entry #1', 'Test Entry #2']).
+
+tamb(2)
+	:-
+	extend_main_menubar('Test Extend', 
+			['Test Entry #1' + tcl('Window show .break_choices'), 
+			 'Test Entry #2' + test_write
+			]).
+
+test_write 
+	:-
+	printf(user_output, 'This is a test ...\n', []),
+	flush_input(user_input).
