@@ -369,17 +369,13 @@ punlink(void)
 int
 getDirEntries()
 {
-#if 0
     PWord v1, v2, v3;
     int   t1, t2, t3;
-    char *dirName, *pattern;
-    DIR  *dirp;
-    struct dirent *dirEntry;
-    PWord consCell, head, sym, pnil;
-    int   consType, headType, symType, nilType;
-#ifdef HAVE_REGCMP
-    char *regexComp;
-#endif
+    char *dirName, *pattern, path[MAX_PATH];
+    PWord prev, item, head, sym, nil;
+    int   prevType, itemType, headType, symType, nilType;
+    HANDLE findHandle;
+    WIN32_FIND_DATA findData;
 
     PI_getan(&v1, &t1, 1);
     PI_getan(&v2, &t2, 2);
@@ -390,67 +386,44 @@ getDirEntries()
      || !getstring((UCHAR **)&pattern, v2, t2))
 	PI_FAIL;
 
-#ifdef HAVE_REGCMP
-    if ((regexComp = regcmp(pattern, (char *) 0)) == NULL)
-{
-	PI_FAIL;
-}
-#else
-    if (re_comp(pattern) != NULL)
-{
-	PI_FAIL;
-}
-#endif
+    strncpy(path, dirName, MAX_PATH-1);
+    path[MAX_PATH-1] = 0;
+    
+    strncat(path, pattern, MAX_PATH-1-strlen(pattern));
+    path[MAX_PATH-1] = 0;
 
-    dirp = opendir(dirName);
-	if (dirp == NULL)
-{
-#ifdef HAVE_REGCMP
-	free(regexComp);
-#endif
-	PI_FAIL;
-}
-
-    for (dirEntry = readdir(dirp); dirEntry != NULL; dirEntry = readdir(dirp)) {
-#ifdef HAVE_REGCMP
-	if (regex(regexComp, dirEntry->d_name) != NULL)
-#else
-	if (re_exec(dirEntry->d_name) == 1)
-#endif
-	{
-	    PI_makelist(&consCell, &consType);
-	    if (!PI_unify(v3, t3, consCell, consType)) {
-#ifdef HAVE_REGCMP
-		free(regexComp);
-#endif
-    		closedir(dirp);
-		PI_FAIL;
-	    }
-	    PI_gethead(&head, &headType, consCell);
-	    PI_makeuia(&sym, &symType, dirEntry->d_name);
-	    if (!PI_unify(head, headType, sym, symType)) {
-#ifdef HAVE_REGCMP
-		free(regexComp);
-#endif
-    		closedir(dirp);
-		PI_FAIL;
-	    }
-	    PI_gettail(&v3, &t3, consCell);
-	}
+    PI_makesym(&nil, &nilType, "[]");
+    
+    findHandle = FindFirstFile(path, &findData); 
+    
+    if (findHandle != INVALID_HANDLE_VALUE) {
+    
+    	prev = v3; prevType = t3;
+    	
+    	while (FindNextFile(findHandle, &findData)) {
+    	
+    	    PI_makelist(&item, &itemType);
+    	    PI_gethead(&head, &headType, item);
+    	    PI_makeuia(&sym, &symType, findData.cFileName);
+    	    if (!PI_unify(prev, prevType, item, itemType) ||
+    	    	!PI_unify(head, headType, sym, symType)) {
+    	    	FindClose(findHandle);
+    	        PI_FAIL;
+    	    }
+    	    
+    	    PI_gettail(&prev, &prevType, item);    	    
+    	}
+    
+    	if (!PI_unify(prev, prevType, nil, nilType)) {
+    	    FindClose(findHandle);
+    	    PI_FAIL;
+    	}
+	if (!FindClose(findHandle)) PI_FAIL;
+    } else {
+    	if (!PI_unify(v3, t3, nil, nilType)) PI_FAIL;
     }
-    closedir(dirp);
-
-#ifdef HAVE_REGCMP
-    free(regexComp);
-#endif
-
-    PI_makesym(&pnil, &nilType, "[]");
-
-    if (!PI_unify(v3, t3, pnil, nilType))
-	PI_FAIL;
-#endif
-
-    PI_SUCCEED;
+        
+    PI_SUCCEED;     
 }
 
 
