@@ -11,8 +11,43 @@
  |	         Keith Hughes, Ilyas Cicekli
  |	Original Creation Date: 3/20/86
  *================================================================*/
+module debugger.
+
+:-	make_gv('Call'),		%% Debugger Call variable
+%	make_gv('Depth'),		%% Debugger Depth variable
+	make_gv('Depth',1),		%% Debugger Depth variable
+%	make_gv('Retry'), setRetry(0),	%% Retry variable
+	make_gv('Retry', 0),	%% Retry variable
+%	make_gv('DebugInterrupt'), setDebugInterrupt(debug_off).
+	make_gv('DebugInterrupt',debug_off).
+					%% DebugInterrupt is explicitly set
+					%% by goals which change the debugging
+					%% state.
+
+export setCall/1.
+export getCall/1.
+
+export setDepth/1.
+export getDepth/1.
+
+export setRetry/1.
+export getRetry/1.
+
+export getDebugInterrupt/1.
+export setDebugInterrupt/1.
+
+endmod.
+
 module builtins.
- 
+
+/*------------------------------------------------------------------*
+ * The following global variable access predicates are for use with the
+ * shell and with the debugger.
+ *------------------------------------------------------------------*/
+
+%:-	make_gv('_shell_level'), set_shell_level(0).	%% shell level
+:-	make_gv('_shell_level', 0).			
+
 export halt/0.
 halt :-
 	pbi_halt.
@@ -192,14 +227,43 @@ clauses(M,P,A,DBRef)
  *------------------------------------------------------------------*/
 
 :-	compiletime,
-	module_closure(make_det_gv,1).
+	module_closure(make_det_gv,1,make_det_gv1),
+	module_closure(make_det_gv,2,make_det_gv2).
 
-make_det_gv(Mod,Name) :- 
+make_det_gv1(Mod,Name) :- 
+	make_det_gv2(Mod,Name,0).
+
+make_det_gv2(Mod,Name,InitVal) 
+	:- 
+	atom(Name), 
+	global_gv_info:gvi(Name,VN,InitVal0),
+	!,
+	(InitVal0 = InitVal ->
+		true
+		;
+		global_gv_info:retract(gvi(Name,VN,Mod,InitVal0)),
+		global_gv_info:assert_at_load_time(gvi(Name,VN,Mod,InitVal))
+	).
+
+make_det_gv2(Mod,Name,InitVal) :- 
 	atom(Name), 
 	!, 
 	name(Name,NameList), 
-	make_det_gv(Mod, NameList).
-make_det_gv(Mod,Name) :-
+	make_det_gv2(Mod, NameList, 0).
+
+make_det_gv2(Mod,NameList,InitVal) 
+	:-
+	name(Name,NameList),
+	global_gv_info:gvi(Name,VN,Mod,InitVal0),
+	!,
+	(InitVal0 = InitVal ->
+		true
+		;
+		global_gv_info:retract(gvi(Name,VN,Mod,InitVal0)),
+		global_gv_info:assert_at_load_time(gvi(Name,VN,Mod,InitVal))
+	).
+
+make_det_gv2(Mod,Name,InitVal) :-
 	name(SetFunc,[0's, 0'e, 0't | Name]),
 	name(GetFunc,[0'g, 0'e, 0't | Name]),
 	functor(SetHead,SetFunc,1),
@@ -207,11 +271,17 @@ make_det_gv(Mod,Name) :-
 	arg(1,SetHead,SetVar),
 	arg(1,GetHead,GetVar),
 	gv_alloc(VN),
+	copy_term(InitVal,CopyInitVal),
+	gv_set(VN, CopyInitVal),
 	Mod:assert_at_load_time((GetHead :- gv_get(VN,GetVar))),
 	Mod:assert_at_load_time(
 			(SetHead :- 
 				copy_term(SetVar,CopySetVar),
-				gv_set(VN,CopySetVar))	).
+				gv_set(VN,CopySetVar))	),
+	name(AtomicName, Name),
+	copy_term(InitVal,CopyInitVal2),
+	global_gv_info:assert_at_load_time( gvi(AtomicName,VN,Mod,CopyInitVal2) ).
+
 
 /*------------------------------------------------------------------*
  | exec_file_command appends a command onto a file string and calls
@@ -594,36 +664,9 @@ sys_exclude(xconsult).
 
 %sys_exclude(objects).
 
-/*------------------------------------------------------------------*
- *
- * The following global variable access predicates are for use with the
- * shell and with the debugger.
- *------------------------------------------------------------------*/
-
-:-	make_gv('_shell_level'), set_shell_level(0).	%% shell level
+endmod.
 
 module debugger.
-
-:-	make_gv('Call'),		%% Debugger Call variable
-	make_gv('Depth'),		%% Debugger Depth variable
-	make_gv('Retry'), setRetry(0),	%% Retry variable
-	make_gv('DebugInterrupt'), setDebugInterrupt(debug_off).
-					%% DebugInterrupt is explicitly set
-					%% by goals which change the debugging
-					%% state.
-
-export setCall/1.
-export getCall/1.
-
-export setDepth/1.
-export getDepth/1.
-
-export setRetry/1.
-export getRetry/1.
-
-export getDebugInterrupt/1.
-export setDebugInterrupt/1.
-
 %%
 %% Establish the module closure for trace
 %%
@@ -639,6 +682,7 @@ export setDebugInterrupt/1.
 
 endmod.  % debugger
 
+module builtins.
 /*------------------------------------------------------------------* 
  * dbg_notrace is used to stop tracing.  It is detected by the debugger
  * explicitly.

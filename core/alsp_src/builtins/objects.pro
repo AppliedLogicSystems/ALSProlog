@@ -21,7 +21,41 @@ export defineClass/2.
 defineClass(Module, SpecList)
 	:-
 	defineClass(Module, SpecList, Assertions),
-	xconsult:addclauses(Assertions, Module).
+	do_the_asserts(Assertions, [Module]).
+
+
+do_the_asserts([], _).
+do_the_asserts([Item | Assertions], ModStack)
+	:-
+	process_assert(Item, ModStack, NewModStack),
+	do_the_asserts(Assertions, NewModStack).
+
+process_assert((module M), ModStack, [M | ModStack])
+	:-!,
+	create_new_module(M).
+
+process_assert(endmod, [_ | ModStack], ModStack)
+	:-!.
+
+process_assert((export ExportList), ModStack, ModStack)
+	:-!,
+	ModStack = [Mod | _],
+	export_from(Mod, ExportList).
+
+process_assert((use UseList), ModStack, ModStack)
+	:-!,
+	ModStack = [Mod | _],
+	use_by_mod(UseList, Mod).
+
+process_assert(dynamic(P,A), ModStack, ModStack)
+	:-!,
+	ModStack = [Mod | _],
+	builtins:'$dynamic'(Mod,P,A).
+
+process_assert(Item, ModStack, ModStack)
+	:-
+	ModStack = [Mod | _],
+	Mod:assertz(Item).
 
 /*!-----------------------------------------------------------------------
  |	defineClass/3
@@ -33,7 +67,6 @@ defineClass(Module, SpecList)
  |	  in a form suitable for addclauses/2 in xconsult.pro
  *-----------------------------------------------------------------------*/
 export defineClass/3.
-
 defineClass(Module, SpecList, Code)
 	:-
 	dmember(name=ClassName,SpecList),

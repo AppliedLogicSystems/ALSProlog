@@ -15,7 +15,7 @@
 module builtins.
 
 :- 
-	compiletime,
+%	compiletime,
 
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		%%%%%   ALS_SHL_MGR  ObjectPro CLASS DEFINITIONS    %%%%%
@@ -41,11 +41,13 @@ module builtins.
 				cslt_ctxt	= [],
 				break_level = [b(0,user,true)]
 		]
-	]),
+	]).
 
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		%%%%%  	Consulted File Manager CLASS DEFINITIONS    %%%%%
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+:- 
+%	compiletime,
 
         %% The manager for individual consulted files:
 	defineClass(builtins,
@@ -166,5 +168,97 @@ source_handlerAction(note_loaded(CG, Path), State)
 source_handlerAction( update_errors_wins(_), State).
 
 source_handlerAction( clear_errors_display, State).
+
+
+
+
+endmod.
+
+module alsdev.
+
+:- defineClass(alsdev,
+	[   name=als_ide_mgr,
+		subClassOf=als_shl_mgr,
+		module = alsdev,
+		addl_slots=
+			[ 
+				debugger_mgr,   %% debugger state object
+				cur_project,    %% current project manager object    
+				edit_files,     %% list of files open for editing
+				non_file_edits  %% list of non-file (new) windows open for editing
+			],
+		defaults= [ 
+			edit_files = [], 
+			non_file_edits = [] 
+		]
+	]).
+
+        %%   SHL_SOURCE_HANDLER:
+:- defineClass(alsdev,
+	[   name=shl_source_handler,
+		subClassOf=source_handler,
+		module = alsdev,
+		export = yes,
+		addl_slots= [ 
+			tcl_doc_path,		%% Tcl id of edit window
+			errors_display		%% nil / non-empty errs list
+		],
+		defaults= [ 
+			tcl_doc_path		= nil,
+			errors_display 		= nil
+		]
+	]).
+
+        %%   SOURCE_TRACE_MGR:
+:- defineClass(alsdev,
+	[   name=source_trace_mgr,
+		subClassOf=shl_source_handler,
+		module = alsdev,
+		addl_slots=
+			[
+				debugger_mgr,		%% home to daddy...
+				last_visual_load,	%% Time of last load of file text widget
+				num_lines,			%% num lines in the file
+				linesizes,			%% list of num chars in each line
+				invlineindex,		%% list of char offsets to start of each line
+				head_tag,			%% i(S,E) = last colored "matching head (aph)tag" lcn
+				call_tag			%% i(S,E) = last colored "matching_call (apg)tag" lcn
+			],
+		defaults= [ 
+			visible				= false,
+			last_visual_load 	= 0,
+			num_lines			= 0,
+			head_tag			= 0,
+			call_tag			= 0
+			]
+	]).
+
+:-defineClass(alsdev,
+	[   name=debugger_mgr,
+		subClassOf=genericObjects,
+		module = alsdev,
+		addl_slots=
+			[ 
+				debug_main_win, 			%% path to the ...
+				debug_visible,  			%% true/false: debug_main_win visible
+				src_trace_mgrs_by_file,		%% list of active mgrs, by file path
+				fcg_index_size,				%% size of array for src_trace_mgrs_by_fcg
+				src_trace_mgrs_by_fcg,		%% array (term) of active mgrs, by fcg
+				mrfcg,						%% most recent file clause group touched
+				stack_display_size,			%% size of stack to display
+				stack_display_stream,		%% stream to write stack to
+				stack_display_list			%% listbot to write stack to
+			],
+		defaults= [ 
+			debug_main_win			= '.debugwin',
+			debug_visible			=  false,
+			src_trace_mgrs_by_file	= [],
+			src_trace_mgrs_by_fcg	= [],
+			mrfcg = 0,
+			stack_display_size		= 20,
+			stack_display_stream	= debugger_output,
+			stack_display_list		= '.debugwin.stacklist'
+			]
+	]).
 
 endmod.

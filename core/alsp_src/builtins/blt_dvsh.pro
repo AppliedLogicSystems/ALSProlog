@@ -9,6 +9,8 @@
  |	Creation Date: 1997
  *=============================================================*/
 
+kk :- force_libload_all, save_image(alsdev, [start_goal(start_alsdev)]).
+
 		%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++
 		%!%!%! WARNING WARNING WARNING WARNING
 		%  THE RESATISFIABILITY % BUG
@@ -45,17 +47,19 @@ mkw32 :-
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 module builtins.
+
 use tcltk.
 use tk_alslib.
 
 :- abolish(halt,0).
+
 export halt/0.
 halt :-
 	tcl_call(shl_tcli, [exit_prolog], _).
 %	pbi_halt.
 
-:- abolish('$start',0).
-'$start' :- start_alsdev.
+%:- abolish('$start',0).
+%'$start' :- start_alsdev.
 
 :- abolish(continue_prolog_loop,1).
 
@@ -106,7 +110,20 @@ start_alsdev0
 	setup_init_ide_classes(ALS_IDE_Mgr),
 
 	library_setup,
-	init_tk_alslib(shl_tcli,Shared),
+%	init_tk_alslib(shl_tcli,Shared),
+	join_path([ALSDIRPath,shared], Shared),
+	join_path([Shared,'tclintf.psl'], PSL),
+	load_slib(PSL),
+	 catch(tk_new(shl_tcli),Ball1,fail),
+	 tcl_call(shl_tcli, [wm,withdraw,'.'], _),
+	 tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
+	 sys_env(OS, _, _),
+	(OS = macos ->
+		tcl_call(shl_tcli, 'source -rsrc als_tklib', _)
+		;
+		join_path([Shared,'als_tklib.tcl'],ALSTKLIB),
+		tcl_call(shl_tcli, [source, ALSTKLIB], _)
+	),
 	append(ALSDIRPathList, [shared], ImagesList),
 	join_path(ImagesList, ImagesPath),
 	alsdev_splash(ImagesPath),
@@ -145,7 +162,8 @@ pre_existing_srcmgrs(PreSM)
 	!.
 pre_existing_srcmgrs([]).
 
-:- defineClass(
+/*
+:- defineClass(alsdev,
 	[   name=als_ide_mgr,
 		subClassOf=als_shl_mgr,
 		module = alsdev,
@@ -199,6 +217,8 @@ pre_existing_srcmgrs([]).
 			call_tag			= 0
 			]
 	]).
+*/
+
 
 clone_stm(SSH, STM)
 	:-
@@ -261,7 +281,7 @@ disp_src_mgr(BN)
 
 %%%%%%%%%%----------------------------------------------------
 
-:- dynamic('$dv'/0).
+:- dynamic(dvf/0).
 
 
 	%% Warm startup (given that tty start_shell(prolog_shell) has run):
@@ -359,7 +379,7 @@ alsdev(Shared, ALS_IDE_Mgr)
 
 	get_cwd(CurDir),
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
-	('$dv' -> demo_init ; true),
+	(dvf -> demo_init ; true),
 	builtins:prolog_shell(ISS,OSS,alsdev).
 
 alsdev_splash(Path)
@@ -418,8 +438,6 @@ listener_prompt
 	:-
 	write(shl_tk_out_win, '?- '), 
 	flush_output(shl_tk_out_win).
-
-
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			ALARM MANAGEMENT
@@ -565,6 +583,7 @@ endmod.   % builtins
 module alsdev.
 use tcltk.
 use tk_alslib.
+use alsshell.
 
 	%%------------------------------------------
 	%% Command line processing
@@ -2204,8 +2223,10 @@ reset_this_spypoint(Mod,Pred,Arity)
 
 endmod.
 
+
 module alsdev.
 
+/*
 check_reload_consults
 	:-
 	builtins:get_primary_manager(ALSMgr),
@@ -2222,6 +2243,8 @@ check_reload_consults
 		Ans = 'No'
 	),
 	consult_all(LoadedFiles).
+*/
+
 
 consult_all([]).
 consult_all([F | Files])
@@ -2261,7 +2284,6 @@ process_oop
 
 
 endmod.
-
 
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
@@ -2344,7 +2366,6 @@ ide_rt_err_report(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), [])
 	write(shl_tk_out_win,'----------------------'),nl(shl_tk_out_win).
 
 endmod.
-
 
 module builtins.
 
@@ -2515,7 +2536,6 @@ als_advise(Stream, FormatString, Args)
 
 *********/
 endmod.
-
 
 module alsdev.
 

@@ -236,7 +236,8 @@ save_state(FileName)
 	:-
 	get_shell_level(CurLev),
 	set_shell_level(0),
-	package_global_variables,	%% create initialization pred
+%	package_global_variables,	%% create initialization pred
+	update_specific_global_vars,
 	set_shell_level(CurLev),
 		%% Defined at C level:
 	save_state_to_file(FileName).
@@ -247,7 +248,8 @@ attach_state(NewImageName)
 	:-
 	get_shell_level(CurLev),
 	set_shell_level(0),
-	package_global_variables,	%% create initialization pred
+%	package_global_variables,	%% create initialization pred
+	update_specific_global_vars,
 	set_shell_level(CurLev),
 		%% Defined at C level:
 	attach_state_to_file(NewImageName).
@@ -256,7 +258,8 @@ save_image_with_state(NewImageName)
 	:-
 	get_shell_level(CurLev),
 	set_shell_level(0),
-	package_global_variables,	%% create initialization pred
+%	package_global_variables,	%% create initialization pred
+	update_specific_global_vars,
 	set_shell_level(CurLev),
 		%% Defined at C level:
 	save_image_with_state_to_file(NewImageName).
@@ -272,7 +275,52 @@ pckg_init
 	:-
 	setInterruptVector('$interrupt'),
 	initialize_global_variables,
-	sio_pckg_init.
+	sio:sio_pckg_init,
+	set_object_handle(counter, 0),
+	init_prolog_flags.
+
+
+/*-------------------------------------------------------------------*
+ | When a package is created: The global variables which have
+ | been created by make_gv (the only way they should be creaated) 
+ | have been recorded using gvi/4 in module global_gv_info.
+ | gvi/4 stores:
+ |		gvi(VarName,VNum,Module,InitVarVal)
+ | update_specific_global_vars/0 is first used to update the
+ | InitVarVal for specific global variables whose current value
+ | must be passed on to the new package; at the time of this
+ | writing (V3.1.3; 8/6/99), this is only '_next_clause_group'
+ |
+ | initialize_global_variables/0 is used by the new package to
+ | init the values of its global variables from the values stored
+ | in gvi/4.
+ *-------------------------------------------------------------------*/
+
+initialize_global_variables
+	:-
+	findall(vv(VN,InitVal),
+		(global_gv_info:gvi(Name,VN,Mod,InitVal)),
+		L),
+	exec_all(L).
+
+exec_all([]).
+exec_all([vv(N,V) | L])
+	:-
+	gv_alloc_init(N,V),
+	exec_all(L).
+
+update_specific_global_vars
+	:-
+	get_next_clause_group(CGN),
+	global_gv_info:retract(gvi('_next_clause_group',VN,builtins,_)),
+	global_gv_info:assert(gvi('_next_clause_group',VN,builtins,CGN)).
+
+
+
+
+
+
+
 
 
 /*---------------------------------------------------------------*
@@ -333,6 +381,7 @@ process_image_option(init_goals(NewGoals))
 	:-!,
 	builtins:clause('$initialize',OldGoals),
 	builtins:abolish('$initialize',0),
+pbi_debug(about_to_assert( ('$initialize' :- OldGoals, user:NewGoals) ) ),
 	builtins:assert( ('$initialize'
 						:- OldGoals, user:NewGoals) ).
 
@@ -421,7 +470,7 @@ package(PckgName)
 
 package(PckgName,Opts)
 	:-
-	package_global_variables,
+%	package_global_variables,
 	check_default0(procs,Opts,[_],Procs),
 	check_default0(xprocs,Opts,[],XProcs),
 
@@ -953,13 +1002,6 @@ package_toktbl :-
 
 
 /*
- * Should a package be created, initialize_global_variables/0 will be
- * replaced with a clause which will initialize the globals.
- */
-
-initialize_global_variables.
-
-/*
  * package_global_variables/0
  *
  * This procedure just creates an initialization predicate which will be
@@ -967,11 +1009,53 @@ initialize_global_variables.
  */
 
 package_global_variables :-
-	gv_maxpossible(N),
-	package_global_variables(N,true,Out),
+%	gv_maxpossible(N),
+%	package_global_variables(N,true,Out),
+	new_package_global_vars(Out),
 	builtins:abolish(initialize_global_variables,0),
+
 	builtins:assert((initialize_global_variables :- Out)).
 
+new_package_global_vars(Out)
+	:-
+	findall(gv_alloc_init(VN,InitVal),
+		(global_gv_info:gvi(Name,VN,Mod,InitVal)),
+		L),
+	build_comma_listx(L, Out).
+
+	%% replicate the library version:
+build_comma_listx([Last], Last)
+	:-!. 
+build_comma_listx([Goal | SourceList], (Goal, ResultList))
+	:-
+	build_comma_listx(SourceList, ResultList).
+
+
+	%% Examining the variables:
+export dugv/0.
+dugv :-
+	open(gvr, write, SS, []),
+	gv_maxpossible(N),
+	pgvx(N,SS),
+	close(SS).
+
+pgvx(0, _) :-
+	!.
+pgvx(N, SS) :-
+	gv_isfree(N),
+	!,
+	NN is N-1,
+	pgvx(NN, SS).
+pgvx(N, SS) :-
+	gv_get(N,Val),
+	(global_gv_info:gvi(Name,N,Mod,InitVal),!; Name='??',InitVal='??'),
+	printf(SS, '%t[%t]:\n\t%t\n\t%t\n\n',[Name,N,InitVal,Val]),
+	NN is N-1,
+	pgvx(NN, SS).
+
+
+
+	%%Old:
 package_global_variables(0, Out, Out) :-
 	!.
 package_global_variables(N, Gs, Out) :-
@@ -983,9 +1067,6 @@ package_global_variables(N, Gs, Out) :-
 	gv_get(N,Val),
 	NN is N-1,
 	package_global_variables(NN, (gv_alloc_init(N,Val),Gs), Out).
-
-
-
 
 /************************************************************************
  * 					COFF Predicates										*

@@ -14,6 +14,12 @@
 module builtins.
 use xconsult.
 
+		%% This is a stack of copt structures:
+%:-  make_gv('_current_copts'), set_current_copts([]).
+:-  make_gv('_current_copts', []).
+%:-  make_gv('_next_clause_group'), set_next_clause_group(1).
+:-  make_gv('_next_clause_group', 1).
+
 /*--------------------------------------------------------------*
  |		Miscellaneous directives required by the
  |		ISO Standard.  May gravitate elsewhere if 
@@ -117,7 +123,7 @@ cgo_struct(
 	
 /*-----------------------------------------------------------------*
  | 	Create access methods to get at the global variable 
- | 	'_current_consult_directory'.  Primarily needed because consult
+ | 	'_current_copts'.  Primarily needed because consult
  |	can be recursively called from inside the subsidiary calls to
  |	xconsult.  Moreover, since we can execute :- goals inside
  |	files (ie, inside xconsult), we have no way of expressly passing
@@ -125,8 +131,6 @@ cgo_struct(
  |	We could use the Prolog database, but using global variables
  |	should be cleaner, and a tiny bit faster.
  *-----------------------------------------------------------------*/
-		%% This is a stack of copt structures:
-:-  make_gv('_current_copts'), set_current_copts([]).
 
 push_copt(Copt)
 	:-
@@ -528,7 +532,7 @@ record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr)
 	send(FileMgr, note_loaded(FCG, SourceFilePath)),
 	access_cslt_opts(obp_path, FCOpts, ObpFilePath), 
 	(ObpFilePath \= '' ->
-		send(FileMgr, set_value(obp_file,SourceFilePath))
+		send(FileMgr, set_value(obp_file,ObpFilePath))
 		;
 		true
 	),
@@ -1034,8 +1038,6 @@ simple_load(NoSuffixFile,Path)
 	%% FILE CLAUSE GROUP MANIPULATION
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:-  make_gv('_next_clause_group'), 
-	set_next_clause_group(1).
 
 /*-------------------------------------------------------------*
  | establish_fcg/4
