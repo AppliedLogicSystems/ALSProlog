@@ -271,7 +271,7 @@ setup_init_goal(CLInfo, ShellCall)
 		ShellCall = CLShellCall
 		;
 		ShellCall = 
-			catch(CmdLineGoal, _, CLShellCall)
+			(CmdLineGoal, CLShellCall)
 	).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
