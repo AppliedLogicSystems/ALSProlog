@@ -82,6 +82,7 @@ simple_menu(List, Choice, Options)
 	:-
 	sio:get_current_output_stream(OutS),
 	sio:get_current_input_stream(InS),
+	flush_input(InS),
 	simple_menu(List, Choice, Options, InS, OutS).
 
 export simple_menu/5.
