@@ -160,8 +160,12 @@ lib: $(GETDIR)/getDirectory.tcl $(GETDIR)/unix_pkgIndex.tcl $(GETFILES)/getFiles
 	cp -r $(GETFILES)/unix_pkgIndex.tcl lib/tk8.0/getFiles/pkgIndex.tcl
 
 ALSDEV_LIBS = -litcl3.0 -litk3.0 -ltcl8.0 -ltk8.0
-alsdev :  alsdir alsdir/images alsdir/shared alspro_b libalspro.a $(ALSDEV_OBJECTS) $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
+
+alsdev_b : libalspro.a $(ALSDEV_OBJECTS) $(MAKEFS)
 	$(CC) $(CFLAGS) -o alsdev_b  $(ALSDEV_OBJECTS) libalspro.a $(LIBS) -L$(ALS_BUILD_SUPPORT)/$(SUBOS)/lib -litcl3.0 -litk3.0 -ltcl8.0 -ltk8.0 -lX11
+
+
+alsdev :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
 	rm -f alsdir/builtins/*.obp
 	rm -f alsdir/library/*.obp
 	rm -f $(SUBOS)/*.obp
@@ -169,12 +173,12 @@ alsdev :  alsdir alsdir/images alsdir/shared alspro_b libalspro.a $(ALSDEV_OBJEC
 	./alsdev_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev.pro -g "bldit('$(CORE)',save_image(alsdev,[start_goal((builtins:start_alsdev))]))"
 
 
-studalsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
+studalsdev :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
 	rm -f alsdir/builtins/*.obp
 	rm -f alsdir/library/*.obp
 	rm -f $(SUBOS)/*.obp
 	rm -f *.obp
-	./alspro_b -q -b -obp -no_dot_alspro \
+	./alsdev_b -q -b -obp -no_dot_alspro \
 	$(ALSDEVDIR)/ldr_studalsdev.pro -g "bldit('$(CORE)',save_image(studalsdev,[start_goal((builtins:start_alsdev))]))"
 
 
@@ -186,14 +190,14 @@ studalsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFI
 #	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
 #	select_lib(library,[$(ALSDEVLIBS)])])'
 
-alsdev_demo :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
+alsdev_demo :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
 	rm -f alsdir/builtins/*.obp
 	rm -f alsdir/library/*.obp
 	rm -f $(SUBOS)/*.obp
 	rm -f *.obp
 	rm -f ../../als_dev/alsdev/demo15.obp
 	rm -f ../../als_dev/alsdev/serial_cmn.obp
-	./alspro_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev_demo.pro -g "bldit('$(CORE)',save_image(alsdev_demo,[start_goal((builtins:start_alsdev))]))"
+	./alsdev_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev_demo.pro -g "bldit('$(CORE)',save_image(alsdev_demo,[start_goal((builtins:start_alsdev))]))"
 
 
 #	./alspro_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev_demo.pro -g 'save_image(alsdev_demo,[start_goal((builtins:start_alsdev))])'
