@@ -41,15 +41,17 @@ start_shell(DefaultShellCall)
 	%% Get the raw command line and assert it.
 	abolish(command_line,1),
 	pbi_get_command_line(RawCommandLine),
-	assertz(command_line(RawCommandLine)),
+	
+	%% Strip off the image name if it exists.
+	(RawCommandLine = [_ | CommandLine]
+         ;
+         CommandLine = []),
 
-	%% get the command line, but ignore the image name
-	retract(command_line([ImageName|CommandLine])),
 	!,
 	CLInfo = clinfo(true,				/* -g: goal to run */
 					false,				/* -v/-q: verbosity */
 					[],					/* files to consult */
-					ImageName,
+					'', /* old ImageName */ 
 					default,			/* -nwd: debugger to set up */
 					[],					/* -s init search list */
 					DefaultShellCall,	/* shell/or not */
@@ -100,11 +102,12 @@ ss_parse_command_line([], [], CLInfo)
 ss_parse_command_line(['-p' | T], T, CLInfo)
 	:-!.
 
-	%% -p: Start application part of command line, pushing on image name:
+	%% -P: Start application part of command line, pushing on image name:
+/* No longer used
 ss_parse_command_line(['-P' | T], [ImageName | T], CLInfo)
 	:-!,
 	arg(4,CLInfo,ImageName).
-
+*/
 	%% -ind: "Indirect" file: open, read 1 line, process the line, & continue:
 ss_parse_command_line(['-ind', File | T], L, CLInfo)
 	:-!,
