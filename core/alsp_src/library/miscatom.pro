@@ -63,4 +63,30 @@ trim_atoms([InName | InNames],[NameSize | Sizes],[OutName | OutNames])
 	),
 	trim_atoms(InNames,Sizes,OutNames).
 
+/*!-----------------------------------------------------------------------
+ |	cat_together_seplines/2
+ |	cat_together_seplines(List, Result)
+ |	cat_together_seplines(+, -)
+ |
+ |	- convert list of atoms to single atom with nl separating atom entries
+ *-----------------------------------------------------------------------*/
+cat_together_seplines([], '').
+cat_together_seplines([Item | Rest], Result)
+	:-
+	cat_together_seplines(Rest, RestResult),
+	catenate([Item, '\n', RestResult], Result).
+
+/*!-----------------------------------------------------------------------
+ |	cat_together_spaced/2
+ |	cat_together_spaced(Rest, RestResult),
+ |	cat_together_spaced(+, -),
+ |
+ |	- convert list of atoms to single atom with space separating atom entries
+ *-----------------------------------------------------------------------*/
+cat_together_spaced([], '').
+cat_together_spaced([Item | Rest], Result)
+	:-
+	cat_together_spaced(Rest, RestResult),
+	catenate([Item, ' ', RestResult], Result).
+
 endmod.

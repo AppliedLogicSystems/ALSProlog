@@ -1,5 +1,5 @@
 libactivate(objects,[library,objects],
-    [defineObject/2,defineObject/3,defineClass/2,set_object_messages/1,opf/1,
+    [defineObject/1,defineClass/2,set_object_messages/1,opf/1,
         opf/0,objectProcessFile_cl/0,objectProcessFiles/1,
         objectProcessFile/2,objectProcessFile/3,do_objectProcess/4,
         do_objectProcess/5,mods_with_objs/1,mods_with_classes/1,
