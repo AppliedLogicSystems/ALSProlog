@@ -72,9 +72,9 @@ proc vTclWindow.alsdev_settings {base} {
 		# Save settings button:
 	frame $base.buttons -relief sunken -borderwidth 1
     button $base.buttons.save_settings \
-        -command save_alsdev_settings -pady 4 -text {Save} 
+        -command "save_fonts_and_colors .topals" -pady 2 -text {Save as Defaults} 
     button $base.buttons.cancel \
-        -command cancel_fonts_and_colors -pady 4 -text {Cancel} 
+        -command cancel_fonts_and_colors -pady 2 -text {Dismiss} 
 
     ###################
     # SETTING GEOMETRY

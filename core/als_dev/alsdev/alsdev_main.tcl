@@ -122,9 +122,25 @@ proc vTclWindow.dyn_flags {base} {
     wm title $base "Changable Prolog Flags"
 	wm protocol .dyn_flags WM_DELETE_WINDOW {wm withdraw .dyn_flags}
 
+	frame $base.buttons \
+		-borderwidth 1 -relief raised 
+    button $base.buttons.dismiss \
+		-padx 2 -text Dismiss \
+        -command {wm withdraw .dyn_flags}
+    button $base.buttons.save \
+		-padx 2 -text {Save as Defaults} \
+        -command {prolog call alsdev save_prolog_flags ; wm withdraw .dyn_flags}
+
     ###################
     # SETTING GEOMETRY
     ###################
+
+    pack $base.buttons \
+        -anchor center -expand 0 -fill x -side bottom 
+    pack $base.buttons.dismiss \
+        -anchor center -expand 0 -fill none -padx 2 -side left 
+    pack $base.buttons.save \
+        -anchor center -expand 0 -fill none -padx 2 -side right 
 
 }
 
