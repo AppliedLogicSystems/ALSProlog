@@ -159,10 +159,10 @@
     </OBJECT>
     <A HREF="file:alshelpleash1.htm">leash/1</A>
 <LI><OBJECT type="text/sitemap">
-    <param name="Name" value="listing/0">
-    <param name="Local" value="alshelplisting0.htm">
+    <param name="Name" value="listing/[0,1]">
+    <param name="Local" value="alshelplisting01.htm">
     </OBJECT>
-    <A HREF="file:alshelplisting0.htm">listing/0</A>
+    <A HREF="file:alshelplisting01.htm">listing/[0,1]</A>
 <LI><OBJECT type="text/sitemap">
     <param name="Name" value="make_gv/1">
     <param name="Local" value="alshelpmakegv1.htm">
@@ -240,9 +240,9 @@
     <A HREF="file:alshelpsystem1.htm">system/1</A>
 <LI><OBJECT type="text/sitemap">
     <param name="Name" value="datetime/2">
-    <param name="Local" value="alshelpdatetime200000113.htm">
+    <param name="Local" value="alshelpdatetime200000115.htm">
     </OBJECT>
-    <A HREF="file:alshelpdatetime200000113.htm">datetime/2</A>
+    <A HREF="file:alshelpdatetime200000115.htm">datetime/2</A>
 <LI><OBJECT type="text/sitemap">
     <param name="Name" value="trace/[0,1]">
     <param name="Local" value="alshelptrace01.htm">
@@ -283,6 +283,16 @@
     <param name="Local" value="alshelpatomchars2.htm">
     </OBJECT>
     <A HREF="file:alshelpatomchars2.htm">atom_chars/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="atom_concat/3">
+    <param name="Local" value="alshelpatomconcat3.htm">
+    </OBJECT>
+    <A HREF="file:alshelpatomconcat3.htm">atom_concat/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="atom_length/2">
+    <param name="Local" value="alshelpatomlength2.htm">
+    </OBJECT>
+    <A HREF="file:alshelpatomlength2.htm">atom_length/2</A>
 <LI><OBJECT type="text/sitemap">
     <param name="Name" value="char_code/2">
     <param name="Local" value="alshelpcharcode2.htm">
@@ -384,10 +394,10 @@
     </OBJECT>
     <A HREF="file:alshelpaccess2.htm">'$access/2'</A>
 <LI><OBJECT type="text/sitemap">
-    <param name="Name" value="at_end_of_stream[0,1]">
+    <param name="Name" value="at_end_of_stream/[0,1]">
     <param name="Local" value="alshelpatendofstream01.htm">
     </OBJECT>
-    <A HREF="file:alshelpatendofstream01.htm">at_end_of_stream[0,1]</A>
+    <A HREF="file:alshelpatendofstream01.htm">at_end_of_stream/[0,1]</A>
 <LI><OBJECT type="text/sitemap">
     <param name="Name" value="bufread/[2,4]">
     <param name="Local" value="alshelpbufread24.htm">
@@ -399,10 +409,10 @@
     </OBJECT>
     <A HREF="file:alshelpchdir1.htm">chdir/1</A>
 <LI><OBJECT type="text/sitemap">
-    <param name="Name" value="close/1">
-    <param name="Local" value="alshelpclose1.htm">
+    <param name="Name" value="close/[1,2]">
+    <param name="Local" value="alshelpclose12.htm">
     </OBJECT>
-    <A HREF="file:alshelpclose1.htm">close/1</A>
+    <A HREF="file:alshelpclose12.htm">close/[1,2]</A>
 <LI><OBJECT type="text/sitemap">
     <param name="Name" value="consult/[1,2]">
     <param name="Local" value="alshelpconsult12.htm">
@@ -569,11 +579,6 @@
     </OBJECT>
     <A HREF="file:alshelpcreateobject2.htm">create_object/2</A>
 <LI><OBJECT type="text/sitemap">
-    <param name="Name" value="create_object/2 -  create an object">
-    <param name="Local" value="alshelpcreateobject2___create_an_object.htm">
-    </OBJECT>
-    <A HREF="file:alshelpcreateobject2___create_an_object.htm">create_object/2 -  create an object</A>
-<LI><OBJECT type="text/sitemap">
     <param name="Name" value="defineClass/1">
     <param name="Local" value="alshelpdefineClass1.htm">
     </OBJECT>
@@ -614,10 +619,10 @@
     </OBJECT>
     <A HREF="file:alshelpEdit_Menu.htm">Edit Menu</A>
 <LI><OBJECT type="text/sitemap">
-    <param name="Name" value="The Find  dialog::">
-    <param name="Local" value="alshelpThe_Find__dialog.htm">
+    <param name="Name" value="Find  dialog:">
+    <param name="Local" value="alshelpFind__dialog.htm">
     </OBJECT>
-    <A HREF="file:alshelpThe_Find__dialog.htm">The Find  dialog::</A>
+    <A HREF="file:alshelpFind__dialog.htm">Find  dialog:</A>
 <LI><OBJECT type="text/sitemap">
     <param name="Name" value="Preferences Dialog:">
     <param name="Local" value="alshelpPreferences_Dialog.htm">
@@ -633,6 +638,11 @@
     <param name="Local" value="alshelpTools_Menu.htm">
     </OBJECT>
     <A HREF="file:alshelpTools_Menu.htm">Tools Menu</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Windows Menu">
+    <param name="Local" value="alshelpWindows_Menu.htm">
+    </OBJECT>
+    <A HREF="file:alshelpWindows_Menu.htm">Windows Menu</A>
 </UL>
 <LI><OBJECT type="text/sitemap">
     <param name="Name" value="GUI Library">
@@ -708,11 +718,6 @@
     <param name="Local" value="alshelpprolog.htm">
     </OBJECT>
     <A HREF="file:alshelpprolog.htm">prolog</A>
-<LI><OBJECT type="text/sitemap">
-    <param name="Name" value="Prolog to Tcl Type Conversion">
-    <param name="Local" value="alshelpProlog_to_Tcl_Type_Conversion.htm">
-    </OBJECT>
-    <A HREF="file:alshelpProlog_to_Tcl_Type_Conversion.htm">Prolog to Tcl Type Conversion</A>
 </UL>
 </UL>
 </HTML>

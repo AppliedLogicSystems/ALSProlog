@@ -8,7 +8,7 @@
 <P></P>
 <A NAME="b0caf99c"></A><B>FORMS
 <P></P>
-<A NAME="b0caf97a"></A><A NAME="b0c60954"></A></B>popup_select_items(SourceList, ChoiceList)
+<A NAME="b0caf97a"></A></B>popup_select_items(SourceList, ChoiceList)
 <P></P>
 <A NAME="d8e2c10e"></A>popup_select_items(SourceList, Options, ChoiceList)
 <P></P>
@@ -53,11 +53,11 @@ items.    The shorter versions are defined by
 <P></P>
   <A NAME="b0cb00da"></A>browse  single   multiple   extended
 <P></P>
-<A NAME="b0cb015d"></A>If the selection mode is <A NAME="b0cb015b"></A><I>single<A NAME="b0cb015c"></A><A NAME="b0cb015c"></A></I> or <A NAME="b0cb015e"></A><I>brow<A NAME="b0cb018a"></A>se</I>, at most one  element can be selected in the listbox at once.  In both of
+<A NAME="b0cb015d"></A>If the selection mode is <A NAME="b0cb015b"></A><I>single<A NAME="b0cb015c"></A><A NAME="b0cb015c"></A></I> or <A NAME="b0cb015e"></A><I>brow<A NAME="b0cb018a"></A><A NAME="b0cb018a"></A>se</I>, at most one  element can be selected in the listbox at once.  In both of
 these modes, clicking button 1 on an element selects it and deselects any other 
 selected item.  In <I>browse</I> mode it is also possible to drag the selection with button 1.
 <P></P>
-<A NAME="b0cb0183"></A>If the selection mode is <A NAME="b0cb0181"></A><I>multipl<A NAME="b0cb0182"></A>e</I> or <A NAME="b0cb0184"></A><I>exten<A NAME="b0cb0185"></A>ded</I>, any number of elements  may  be  selected at once, including discontiguous
+<A NAME="b0cb0183"></A>If the selection mode is <A NAME="b0cb0181"></A><I>multipl<A NAME="b0cb0182"></A><A NAME="b0cb0182"></A>e</I> or <A NAME="b0cb0184"></A><I>exten<A NAME="b0cb0185"></A><A NAME="b0cb0185"></A>ded</I>, any number of elements  may  be  selected at once, including discontiguous
 ranges.  In <I>multiple</I> mode, clicking button 1 on  an  element toggles its selection state without
 affecting any other elements.  In <I>extended</I> mode, pressing button 1  on  an  element selects  it,  deselects everything
 else, and sets the anchor to the element under the mouse;   dragging  the  mouse
@@ -87,7 +87,9 @@ selected “Item three” and clicked OK, the result would be:
 <P></P>
   <A NAME="b0d118ca"></A>Selection = [Item three].
 <P></P>
-<A NAME="b0d118f6"></A>Even though in this case the user was restricted to selection of one item, the <A NAME="b0c60983"></A>popup_select_items/_  predicate returns a list of the selected items.  The Options argument for popup_select_items/[3,4] allows the programmer to place the
+<A NAME="b0d118f6"></A>Even though in this case the user was restricted to selection of one item, the
+<P></P>
+<A NAME="b0cd3b17"></A>popup_select_items/_  predicate returns a list of the selected items.  The Options argument for popup_select_items/[3,4] allows the programmer to place the
 popup list box in any of the other standard Tk listbox selection modes.  For
 example,  the call
 <P></P>
