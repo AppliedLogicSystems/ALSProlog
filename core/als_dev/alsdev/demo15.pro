@@ -1,3 +1,6 @@
+ff :-
+builtins:first_enter_key(fookey).
+
 module builtins.
 
 export demo_init/0.
@@ -14,26 +17,24 @@ demo_init
 qkc :-
 	builtins:sys_searchdir(SSD),
 	join_path([SSD, 'alspro.key'], KeyPath),
+%KeyPath='alspro.key',
 	exists_file(KeyPath),
 	open(KeyPath, read, IS, []),
 	get_line(IS, KeyAtom),
 	close(IS),
 	check_key_type(KeyAtom, KeyType, KeyInfo, KeyPath),
-	(KeyPath = permanent -> 
+	(KeyType = permanent -> 
 		true
 		;
-		(KeyPath = day30 ->
+		(KeyType = day30-_ ->
 			date(Today),
-			date_less(Today, QDate)
+			date_less(Today, KeyInfo)
 			;
 			printf(user_output, 'Missing valid key; use ALS Prolog (alsdev) first\n', []),
 			halt
 		)
 	).
 		
-
-
-
 no_key_file(KeyPath)
 	:-
 	sprintf(atom(Msg),'%t\n%t\n%t',[
@@ -46,15 +47,15 @@ no_key_file(KeyPath)
 	no_key_file_cont(Ans, KeyPath).
 
 no_key_file_cont('I have a key', KeyPath)
-	:-
+	:-!,
 	first_enter_key(KeyPath).
 
 no_key_file_cont(_, _)
 	:-
 	demo15_year_check,
 	!,
-%	M15 is 15 * 60 * 1000, 
-	M15 is 30 * 1000, 
+	M15 is 15 * 60 * 1000, 
+%	M15 is 30 * 1000, 
 	tcl_call(shl_tcli, [after,M15,'prolog call builtins demo_shutdown'],_),
 	setup_demo_examples,
 	sprintf(atom(Msg2),'%t\n%t\n%t',[
@@ -108,8 +109,17 @@ first_enter_key(KeyPath)
 	Msg = 'Please input your 16-digit registration number:',
 	Title = 'Registration Key Input',	
 	atomic_input_dialog(shl_tcli, Msg, Title, KeyAtom),
+	try_enter_key(KeyAtom, KeyPath).
+
+try_enter_key(KeyAtom, KeyPath)
+	:-
 	check_key_type(KeyAtom, KeyType, KeyInfo, KeyPath),
+	!,
 	first_acton_key(KeyType, KeyInfo, KeyAtom, KeyPath).
+
+try_enter_key(KeyAtom, KeyPath)
+	:-
+	sorry_no_go(KeyAtom).
 
 first_acton_key(permanent-_, PersonalInfo, KeyAtom, KeyPath)
 	:-!,
@@ -129,14 +139,27 @@ first_acton_key(permanent-_, PersonalInfo, KeyAtom, KeyPath)
 	tcl_call(shl_tcli,
 		[tk_dialog,'.ddtop', 'ALS Prolog',Msg,'',0,'OK'],_).
 
-first_acton_key(day30-_, PersonalInfo, KeyAtom, KeyPath)
+first_acton_key(day30-_, QDate, KeyAtom, KeyPath)
 	:-
+	date(Today),
+	date_less(Today, QDate),
+	!,
 	open(KeyPath, write, OS, []),
 	write(OS, KeyAtom),
 	close(OS),
-	cont_has_key_file(day30, QDate, KeyAtom, KeyPath).
+	cont_has_key_file(day30-_, QDate, KeyAtom, KeyPath).
 
+first_acton_key(_, _, KeyAtom, _)
+	:-
+	sorry_no_go(KeyAtom).
 
+sorry_no_go(KeyAtom)
+	:-
+	sprintf(atom(Msg),'Sorry, the key\n    %t\nis invalid.',[KeyAtom]),
+	tcl_call(shl_tcli,
+		[tk_dialog,'.ddt2', 'Invalid Key',Msg,'',0,'OK'],_),
+	tcl_call(shl_tcli,[exit], _).
+	
 	%% A stub for now:
 setup_personalization(_).
 
@@ -182,70 +205,6 @@ cont_has_key_file(_, _, _, _)
 	tcl_call(shl_tcli,
 		[tk_dialog,'.ddtop', 'ALS Prolog Demo',Msg,'',0,'OK'],_),
 	tcl_call(shl_tcli, [exit], _).
-/*
-check_key_type(KeyAtom, KeyType, KeyInfo, KeyPath)
-	:-
-	atom_codes(KeyAtom, KCs),
-	length(KCs, Len),
-	check_key_type0(Len, KCs, KeyType, KeyInfo).
-
-check_key_type0(16, KCs, KeyType, KeyInfo)
-	:-!,
-	split4(KCs, G1,G2,G3,G4),
-	key_type(G1, KeyType),
-	fin_key_type0(G1,G2,G3,G4,KeyType,KeyInfo).
-
-check_key_type0(19, KCs, KeyType, KeyInfo)
-	:-!,
-	split4dash(KCs, G1,G2,G3,G4),
-	fin_key_type0(G1,G2,G3,G4,KeyType,KeyInfo).
-
-fin_key_type0(G1,G2,G3,G4,KeyType,KeyInfo)
-	:-
-	krspnd(G1, G2),
-	krspnd(G4, G3),
-	key_type(G1, KeyType),
-	key_info(KeyType, G1,G2,G3,G4, KeyInfo).
-
-split4([C0,C1,C2,C3,C4,C5,C6,C7,C8,C9,C10,C11,C12,C13,C14,C15], 
-		[C0,C1,C2,C3],[C4,C5,C6,C7],[C8,C9,C10,C11],[C12,C13,C14,C15]). 
-
-split4dash(
-	[C0,C1,C2,C3,0'-,C4,C5,C6,C7,0'-,C8,C9,C10,C11,0'-,C12,C13,C14,C15], 
-		[C0,C1,C2,C3],[C4,C5,C6,C7],[C8,C9,C10,C11],[C12,C13,C14,C15]). 
-
-key_type([_,_,_,C3], KeyType)
-	:-
-	key_types(C3, KeyType).
-
-key_types(57, permanent-prof).
-key_types(56, permanent-stud).
-key_types(55, day30-prof).
-key_types(54, day30-stud).
-
-key_info(day30-_, G1,G2,G3,G4, KeyInfo)
-	:-
-	G1 = [C0,C1,C2,_],
-	Y is C1 - 0'A +1995,
-	M is (0'Z - C2),
-	(dmember(C0, [0'3,0'4,0'5,0'6,0'7]) ->
-		D is 0'8- C0
-		;
-		D is (0'Z - C0) + 6
-	),
-	KeyInfo = Y/M/D.
-
-key_info(permanent-_, G1,G2,G3,G4, 'Ken Bowen')
-	:-!.
-
-krspnd([C1,C2,C3,C4],[D1,D2,D3,D4])
-	:-
-	[J2,J4,J3,J1] = [C1,C2,C3,C4],
-	D1 is  (((J1 - 0'A) + 3) mod 26 ) + 0'A,
-	D2 is  (((J2 - 0'A) + 3) mod 26 ) + 0'A,
-	D3 is  (((J3 - 0'A) + 3) mod 26 ) + 0'A,
-	D4 is  (((J4 - 0'A) + 3) mod 26 ) + 0'A.
-*/
 
 
 :- dynamic(menu_setup_done/0).
@@ -298,7 +257,8 @@ demo_chat_80
 	join_path([C80Path, 'load'], F2),
 	consult(F2),
 	user:hi,
-	nl, alsdev:clear_workspace, nl, flush_input, flush_output.
+	nl, alsdev:clear_workspace, nl, 
+	flush_input(user_input), flush_output.
 
 demo_nrev 
 	:- 
@@ -307,7 +267,8 @@ demo_nrev
 	consult(NrevPath), 
 	printf('\nThis is the classical Naive Reverse (speed test) example...\n\n', []), 
 	user:nrev, 
-	nl, alsdev:clear_workspace, nl, flush_input, flush_output.  
+	nl, alsdev:clear_workspace, nl, 
+	flush_input(user_input), flush_output.  
 	
 demo_p1k 
 	:- 
@@ -328,7 +289,8 @@ demo_p1k
 	printf('Hit RETURN to finish...', []),
 	get_code(_),
 	change_cwd(CurDir),
-	nl, alsdev:clear_workspace, nl, flush_input, flush_output.  
+	nl, alsdev:clear_workspace, nl, 
+	flush_input(user_input), flush_output.  
 
 demo_vqueens 
 	:- 
@@ -341,7 +303,8 @@ demo_vqueens
 	consult(VQPath), 
 	user:all_queens, 
 	change_cwd(CurDir),
-	nl, alsdev:clear_workspace, nl, flush_input, flush_output.  
+	nl, alsdev:clear_workspace, nl, 
+	flush_input(user_input), flush_output.  
 	
 demo_vdc 
 	:- 
@@ -358,7 +321,8 @@ demo_vdc
 	printf('Hit RETURN to finish...', []),
 	change_cwd(CurDir),
 	get_code(_),
-	nl, alsdev:clear_workspace, nl, flush_input, flush_output.  
+	nl, alsdev:clear_workspace, nl, 
+	flush_input(user_input), flush_output.  
 	
 demo_drawing 
 	:- 
@@ -385,7 +349,8 @@ demo_drawing
 	 printf('Hit RETURN to finish...', []),
 	 get_code(_),
 	change_cwd(CurDir),
-	nl, alsdev:clear_workspace, nl, flush_input, flush_output.  
+	nl, alsdev:clear_workspace, nl, 
+	flush_input(user_input), flush_output.  
 	
 demo_hickid 
 	:- 
@@ -408,7 +373,8 @@ demo_hickid
 	printf('Hit RETURN to finish...', []),
 	get_code(_),
 	change_cwd(CurDir),
-	nl, alsdev:clear_workspace, nl, flush_input, flush_output.  
+	nl, alsdev:clear_workspace, nl, 
+	flush_input(user_input), flush_output.  
 
 demo_vnim 
 	:- 
@@ -423,7 +389,8 @@ demo_vnim
 	printf('Hit RETURN to finish...', []),
 	change_cwd(CurDir),
 	get_code(_),
-	nl, alsdev:clear_workspace, nl, flush_input, flush_output.  
+	nl, alsdev:clear_workspace, nl, 
+	flush_input(user_input), flush_output.  
 	
 
 about_demos
