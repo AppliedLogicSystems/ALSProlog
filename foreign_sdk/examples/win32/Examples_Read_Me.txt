@@ -10,7 +10,7 @@ Building the Examples
 ---------------------
 
 All the examples in this directory have project files for both Metrowerk's
-CodeWarrior Pro 2 and Microsoft Visual C++ 2.0. It should be possible to build
+CodeWarrior Pro 4 and Microsoft Visual C++ 2.0. It should be possible to build
 the examples using other development systems, with little or no modification
 to the source code.
 
