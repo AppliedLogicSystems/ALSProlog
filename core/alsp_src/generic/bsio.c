@@ -22,12 +22,11 @@
  |
  |  SysVIPC             -- Unix System V IPC message queues
  |  SSBQ                -- Software Services Backplane Queues
- |  HAVE_SOCKET         -- sockets (should include DOS/FTP & Mac)
- |    Subsidiary params for sockets:
- |      UNIX  -- various flavors of unix; if your brand of unix doesn't
- |		 		 support sockets, then don't define HAVE_SOCKET.
- |      DOS   -- stuff for PC-FTP TCP/IP sockets
- |	    MacOS -- sockets on the mac
+ |  HAVE_SOCKET         -- sockets (should include Berkeley, DOS/FTP, etc)
+ |   Subsidiary params for sockets:
+ |     BERKELEY_SOCKETS -- The Berkely socket API found on various flavors of unix,
+ |                         MacOS and DOS/Windows.
+ |     PCFTP_SOCKETS    -- The PC-FTP TCP/IP sockets library found on DOS.
  *=======================================================================*/
 #include "defs.h"
 
@@ -36,11 +35,15 @@
 #include <fcntl.h>
 #endif
 
-#if !defined(MPW_TOOL) && defined(__MWERKS__)
-#include <unix.h>
-/* MetroWerks does not define the EINTR error code. */
-#define EINTR           4
-#endif
+#ifdef MacOS
+    #ifdef HAVE_GUSI
+	//#include <GUSI.h>
+	#include <sys/errno.h>
+    #else
+	#include <unix.h>
+	#define EINTR	4	/* MetroWerks does not define the EINTR error code. */
+    #endif
+#endif /* MacOS */
 
 #ifdef DOS
 #include <types.h>
@@ -78,34 +81,37 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 
 #ifdef HAVE_SOCKET		/* For sockets: */
 
-#ifdef UNIX
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <sys/param.h>
-#ifndef SCO_UNIX
-#include <sys/un.h>
-#endif /* SCO_UNIX */
-#endif /* UNIX */
+    #if defined(BERKELEY_SOCKETS)
 
-#ifdef DOS			/* use PC/TCP Developement Kit for DOS */
-#include <sys/types.h>		/* C compiler header file */
-#include <netinet/in.h>		/* PC/TCP header files with */
-#include <netdb.h>		/* same names as BSDUNIX ones */
-#include <pctcp/types.h>
-#include <pctcp/pctcp.h>
-#include <pctcp/sockets.h>
-#include <pctcp/options.h>
-#include <pctcp/error.h>
-#endif /* DOS */
+	#if defined(UNIX)
+	    #include <sys/socket.h>
+	    #include <sys/time.h>
+	    #include <netinet/in.h>
+	    #include <arpa/inet.h>
+	    #include <netdb.h>
+	    #include <sys/param.h>
+	    #ifndef SCO_UNIX
+	       #include <sys/un.h>
+	    #endif /* SCO_UNIX */
 
-#ifdef MacOS
+	#elif defined(MacOS) && defined(HAVE_GUSI)
+	    #include <GUSI.h>
+	#else
+	    #error
+	#endif /* UNIX, MacOS-GUSI */
 
-#include <GUSI.h>
-
-#endif /* MacOS */
+    #elif defined(PCFTP_SOCKETS)	/* use PC/TCP Developement Kit for DOS */
+	#include <sys/types.h>		/* C compiler header file */
+	#include <netinet/in.h>		/* PC/TCP header files with */
+	#include <netdb.h>		/* same names as BSDUNIX ones */
+	#include <pctcp/types.h>
+	#include <pctcp/pctcp.h>
+	#include <pctcp/sockets.h>
+	#include <pctcp/options.h>
+	#include <pctcp/error.h>
+    #else
+	#error
+    #endif /* BERKELEY_SOCKETS, PCFTP_SOCKETS */
 
 #endif /* HAVE_SOCKET */
 
@@ -139,7 +145,7 @@ extern	int	socket		PARAMS(( int, int, int ));
 extern	int	bind		PARAMS(( int, struct sockaddr *, int ));
 #endif
 #ifdef MISSING_EXTERN_CONNECT
-extern	int	connect		PARAMS(( int, struct sockaddr *, int ));
+extern	int	connect 	PARAMS(( int, struct sockaddr *, int ));
 #endif
 #ifdef MISSING_EXTERN_LISTEN
 extern	int	listen		PARAMS(( int, int ));
@@ -923,7 +929,7 @@ sio_file_open()
 #ifdef THINK_C
 	    /* Open files as text files to insure CR/NL conversion. */
 	    if ((SIO_FD(buf) = open((char *)filename, flags | O_TEXT)) == -1) {	/* } */
-#elif defined(__MWERKS__) && !__POWERPC__
+#elif defined(__MWERKS__) && !__POWERPC__ && 0
 	    extern int metrowerks_open_patch(const char *filename, int mode);
 	    if ((SIO_FD(buf) = metrowerks_open_patch((char *)filename, flags)) == -1) {/* } */
 #else
@@ -1170,23 +1176,19 @@ sio_socket_open()
     int status = 0;
     int isserver = 0;
 
-#ifdef UNIX
+#if defined(BERKELEY_SOCKETS)
     struct sockaddr_in sockname_in;	/* Internet socket addresses */
     struct hostent *hp;
 
 #ifdef AF_UNIX
     struct sockaddr_un sockname_un;	/* Unix socket addresses */
 #endif /* AF_UNIX */
-#endif /* UNIX */
 
-#ifdef DOS
+#elif defined(PCFTP_SOCKETS)
     struct addr sockname;
-#endif /* DOS */
-
-#ifdef MacOS
-    struct sockaddr_in sockname_in; /* Internet socket addresses */
-    struct hostent *hp;
-#endif /* MacOS */
+#else
+    #error
+#endif /* BERKELEY_SOCKETS, PCFTP_SOCKETS */
 
     w_get_An(&v1, &t1, 1);	/* Host name or path name (may be var) */
     w_get_An(&v2, &t2, 2);	/* Port to connect to (may be var) */
@@ -1272,7 +1274,7 @@ sio_socket_open()
 	SUCCEED;
     }
 
-#ifdef UNIX
+#if defined(BERKELEY_SOCKETS)
 
     if ((SIO_FD(buf) = socket(domain, socktype, 0)) == -1) {
 	SIO_ERRCODE(buf) = SIOE_SYSCALL;
@@ -1319,7 +1321,7 @@ sio_socket_open()
 		    memmove((UCHAR *) &sockname_in.sin_addr,
 			    (UCHAR *) hp->h_addr,
 			    (size_t) hp->h_length);
-#ifdef DGUX
+#if defined(DGUX) || (defined(MacOS) && defined(HAVE_GUSI))
 		else if ((sockname_in.sin_addr.s_addr = inet_addr(host_or_path).s_addr)
 #else
 		else if ((sockname_in.sin_addr.s_addr = inet_addr(host_or_path))
@@ -1350,7 +1352,7 @@ sio_socket_open()
 	    SIO_TYPE(buf) = SIO_TYPE_SOCKET_DGRAM;
 	    if (isserver && domain == AF_INET) {
 		struct sockaddr_in *sa;
-		SIO_SOCKET_ADDRESS(buf) = malloc(sizeof (struct sockaddr_in));
+		SIO_SOCKET_ADDRESS(buf) = (long) malloc(sizeof (struct sockaddr_in));
 		SIO_SOCKET_ADDRESS_LEN(buf) = sizeof (struct sockaddr_in);
 		sa = (struct sockaddr_in *) SIO_SOCKET_ADDRESS(buf);
 		memset(sa, 0, sizeof (struct sockaddr_in *));
@@ -1362,10 +1364,9 @@ sio_socket_open()
 	    break;
     }
 
-#endif /* UNIX */
+/* FIXME: PCFTP_SOCKETS needs to be updated to match the unix rewrite */
+#elif defined(PCFTP_SOCKETS)
 
-/* FIXME: DOS and MacOS need to be updated to match the unix rewrite */
-#ifdef DOS
     switch (socktype) {
 	case ALS_STREAM:
 	    SIO_TYPE(buf) = SIO_TYPE_SOCKET_STREAM;
@@ -1421,76 +1422,10 @@ sio_socket_open()
 	default:
 	    FAIL;
     }
-#endif /* DOS */
 
-#ifdef MacOS
-
-    if ((SIO_FD(buf) = socket(domain, socktype, 0)) == -1) {
-    SIO_ERRCODE(buf) = SIOE_SYSCALL;
-    SIO_ERRNO(buf) = errno;
-    FAIL;
-    }
-
-    switch (domain) {
-    case AF_INET :
-        gethostname(myhostname, MAXHOSTNAMELEN);
-        memset(&sockname_in, 0, sizeof sockname_in);
-        sockname_in.sin_family = AF_INET;
-        sockname_in.sin_addr.s_addr = INADDR_ANY;
-        sockname_in.sin_port = htons((u_short)portnum);
-
-        if ( (host_or_path == NULL || strcmp(myhostname,host_or_path) == 0)
-         && bind(SIO_FD(buf), (struct sockaddr *) &sockname_in,
-                 sizeof (struct sockaddr_in)) == 0 ) {
-        isserver = 1;
-        }
-        else {
-        if (host_or_path == NULL)
-            host_or_path = myhostname;
-
-        if ( (hp = gethostbyname((UCHAR *) host_or_path)) )
-            memmove((UCHAR *) &sockname_in.sin_addr,
-                (UCHAR *) hp->h_addr,
-                (size_t) hp->h_length);
-        else if ((sockname_in.sin_addr.s_addr = inet_addr(host_or_path).s_addr)
-                == (unsigned long) -1) {
-            status = -1;
-            break;  /* break early */
-        }
-
-        sockname_in.sin_port = htons((u_short)portnum);
-
-        status = connect(SIO_FD(buf),
-                 (struct sockaddr *) &sockname_in,
-                 sizeof (struct sockaddr_in));
-        }
-        break;
-    }
-
-    switch (socktype) {
-    case SOCK_STREAM :
-        SIO_TYPE(buf) = SIO_TYPE_SOCKET_STREAM;
-        if (isserver) {
-        status = listen(SIO_FD(buf), v7);
-        SIO_FLAGS(buf) |= SIOF_NEEDACCEPT;
-        }
-        break;
-    case SOCK_DGRAM :
-        SIO_TYPE(buf) = SIO_TYPE_SOCKET_DGRAM;
-        if (isserver && domain == AF_INET) {
-        struct sockaddr_in *sa;
-        SIO_SOCKET_ADDRESS(buf) = (long) malloc(sizeof (struct sockaddr_in));
-        SIO_SOCKET_ADDRESS_LEN(buf) = sizeof (struct sockaddr_in);
-        sa = (struct sockaddr_in *) SIO_SOCKET_ADDRESS(buf);
-        memset(sa, 0, sizeof (struct sockaddr_in *));
-        sa->sin_family = AF_INET;
-        sa->sin_addr.s_addr = INADDR_ANY;
-        /* any initial writes will go to the discard service (port 9) */
-        sa->sin_port = 9;
-        }
-        break;
-    }
-#endif /* MacOS */
+#else
+    #error
+#endif /* BERKELEY_SOCKETS, PCFTP_SOCKETS */
 
     if (status == -1) {
 	if (errno == EINTR)
@@ -2283,19 +2218,18 @@ write_buf(vsd,buf)
 		break;		/* break early */
 	    }
 
-#ifdef UNIX
+#if defined(BERKELEY_SOCKETS)
 	    writeflg = write(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
-#elif defined(DOS)
+#elif defined(PCFTP_SOCKETS)
 	    writeflg = net_write(SIO_FD(buf), SIO_BUFFER(buf),
 				 SIO_LPOS(buf), 0);
-#elif defined(MacOS)
-            writeflg = write(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf))
-;
-#endif /* UNIX */
+#else
+#error
+#endif /* BERKELEY_SOCKETS, PCFTP_SOCKETS */
 	    break;
 
 	case SIO_TYPE_SOCKET_DGRAM:
-#ifdef UNIX
+#if defined(BERKELEY_SOCKETS)
 	    if (SIO_SOCKET_ADDRESS(buf))
 		writeflg = sendto(SIO_FD(buf),
 				  SIO_BUFFER(buf),
@@ -2304,23 +2238,16 @@ write_buf(vsd,buf)
 				  SIO_SOCKET_ADDRESS_LEN(buf));
 	    else
 		writeflg = write(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
-#elif defined(DOS)
+#elif defined(PCFTP_SOCKETS)
 	    /* FIXME: SIO_SOCKET_ADDRESS(buf) == 0 */
 	    writeflg = net_writeto(SIO_FD(buf),
 				   SIO_BUFFER(buf),
 				   SIO_LPOS(buf),
 				   SIO_SOCKET_ADDRESS(buf),
 				   0);
-#elif defined(MacOS)
-            if (SIO_SOCKET_ADDRESS(buf))
-                writeflg = sendto(SIO_FD(buf),
-                                  SIO_BUFFER(buf),
-                                  SIO_LPOS(buf), 0,
-                                  (struct sockaddr *) SIO_SOCKET_ADDRESS(buf),
-                                  SIO_SOCKET_ADDRESS_LEN(buf));
-            else
-                writeflg = write(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
-#endif /* UNIX, DOS, MacOS */
+#else
+#error
+#endif /* BERKELEY_SOCKETS, PCFTP_SOCKETS */
 	    break;
 #endif /* HAVE_SOCKET */
 
@@ -2420,27 +2347,23 @@ close_socket:
 		if (SIO_FLAGS(buf) & SIOF_NEEDACCEPT)
 		    delete_stream_name(v1);
 
-#ifdef UNIX
+#if defined(BERKELEY_SOCKETS)
 		if (SIO_TYPE(buf) == SIO_TYPE_SOCKET_DGRAM)
 		    closeflg = close(SIO_FD(buf));
 		else {
 /* FIXME: Figure out how to check for broken shutdown */
-#if defined(SysVR3)
+#if defined(SysVR3) || (defined(MacOS) && defined(HAVE_GUSI))
 		    /* shutdown seems to be broken on svr3 */
 		    closeflg = close(SIO_FD(buf));
-#else /* SysVR3 */
+#else /* SysVR3, MacOS-GUSI */
 		    closeflg = shutdown(SIO_FD(buf),2);
-#endif /* SysVR3 */
+#endif /* SysVR3, MacOS-GUSI */
 		}
-#elif defined(DOS)
+#elif defined(PCFTP_SOCKETS)
 		closeflg = net_release(SIO_FD(buf));
-#elif defined(MacOS)
-                if (SIO_TYPE(buf) == SIO_TYPE_SOCKET_DGRAM)
-                    closeflg = close(SIO_FD(buf));
-                else {
-                    closeflg = shutdown(SIO_FD(buf),2);
-                }
-#endif /* MacOS */
+#else
+#error
+#endif /* BERKELEY_SOCKETS, PCFTP_SOCKETS */
 		if (SIO_SOCKET_ADDRESS(buf))
 		    free((char *) SIO_SOCKET_ADDRESS(buf));
 	    }
@@ -2540,22 +2463,22 @@ sio_put_byte()
     w_get_An(&v2, &t2, 2);
 
     if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
-		FAIL;
+	FAIL;
 
     if (!(SIO_FLAGS(buf) & SIOF_WRITE)) {
-		SIO_ERRCODE(buf) = SIOE_ILLWRITE;
-		FAIL;
+	SIO_ERRCODE(buf) = SIOE_ILLWRITE;
+	FAIL;
     }
 
     if ((SIO_FLAGS(buf) & (SIOF_READ | SIOF_EOF)) == SIOF_READ &&
 	SIO_LPOS(buf) == 0) {
-		SIO_ERRCODE(buf) = SIOE_READ;
-		FAIL;
+	SIO_ERRCODE(buf) = SIOE_READ;
+	FAIL;
     }
 
     if (t2 != WTP_INTEGER) {
-		SIO_ERRCODE(buf) = SIOE_INARG;
-		FAIL;
+	SIO_ERRCODE(buf) = SIOE_INARG;
+	FAIL;
     }
 
     pos = SIO_CPOS(buf);
@@ -2563,14 +2486,14 @@ sio_put_byte()
     pos++;
     SIO_CPOS(buf) = pos;
     if (pos > SIO_LPOS(buf))
-		SIO_LPOS(buf) = pos;
+	SIO_LPOS(buf) = pos;
     SIO_FLAGS(buf) |= SIOF_DIRTY;
 
     if ((SIO_FLAGS(buf) & SIOF_BBYTE) ||
 	((SIO_FLAGS(buf) & SIOF_BLINE) && v2 == '\n') ||
 	(SIO_LPOS(buf) == SIO_BFSIZE(buf))) {
-		SIO_ERRCODE(buf) = SIOE_WRITE;
-		FAIL;
+	SIO_ERRCODE(buf) = SIOE_WRITE;
+	FAIL;
     }
 
     SIO_ERRCODE(buf) = SIOE_NORMAL;
@@ -2791,18 +2714,18 @@ sio_readbuffer()
 		return 0;
 	    }
 		
-#if defined(UNIX)
+#if defined(BERKELEY_SOCKETS)
 	    nchars = read(SIO_FD(buf), buffer, (size_t)nchars);
-#elif defined(DOS)
+#elif defined(PCFTP_SOCKETS)
 	    /* FIXME! */
 	    nchars = net_read(SIO_FD(buf), buffer, nchars, &a, 0);
-#elif defined(MacOS)
-            nchars = read(SIO_FD(buf), buffer, (size_t)nchars);
-#endif
+#else
+#error
+#endif /* BERKELEY_SOCKETS, PCFTP_SOCKETS */
 	    break;
 
 	case SIO_TYPE_SOCKET_DGRAM:
-#if defined(UNIX)
+#if defined(BERKELEY_SOCKETS)
 	    if (SIO_SOCKET_ADDRESS(buf)) {
 		int len = SIO_SOCKET_ADDRESS_LEN(buf);
 		nchars = recvfrom(SIO_FD(buf), buffer,nchars, 0,
@@ -2811,19 +2734,12 @@ sio_readbuffer()
 	    }
 	    else
 		nchars = read(SIO_FD(buf), buffer, (size_t)nchars);
-#elif defined(DOS)
+#elif defined(PCFTP_SOCKETS)
 	    /* FIXME! */
 	    nchars = net_read(SIO_FD(buf), buffer, nchars, &a, 0);
-#elif defined(MacOS)
-            if (SIO_SOCKET_ADDRESS(buf)) {
-                int len = SIO_SOCKET_ADDRESS_LEN(buf);
-                nchars = recvfrom(SIO_FD(buf), buffer,nchars, 0,
-                                  (struct sockaddr *) SIO_SOCKET_ADDRESS(buf),
-                                  &len);
-            }
-            else
-                nchars = read(SIO_FD(buf), buffer, (size_t)nchars);
-#endif
+#else
+#error
+#endif /* BERKELEY_SOCKETS, PCFTP_SOCKETS */
 	    SIO_FLAGS(buf) |= SIOF_EOF;	/* each packet is self contained */
 	    break;
 #endif /* HAVE_SOCKET */

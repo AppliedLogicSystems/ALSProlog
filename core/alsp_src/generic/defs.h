@@ -235,6 +235,9 @@
 #endif	/* HAVE_SIGACTION && !SA_SIGINFO */
 
 #include "missing.h"		/* extern decls missing from header files */
+
+#define BERKELEY_SOCKETS 1
+
 #endif	/* UNIX */
 
 /*---------------------------------------------------------------------*
@@ -371,14 +374,37 @@ extern	void	PI_oputchar	PARAMS(( int ));
 
 /* ----------   fsdos.c, fsmac.c, fsunix.c, or fsvms.c ----------   */
 extern	void	init_fsutils	PARAMS(( void ));
-#if MacOS
+
+extern	int	pgetcwd		PARAMS(( void ));
+extern	int	pchdir		PARAMS(( void ));
+extern	int	punlink		PARAMS(( void ));
+
+#ifdef FSACCESS
+extern	int	getDirEntries	PARAMS(( void ));
+extern	int	getFileStatus	PARAMS(( void ));
+extern	int	read_link	PARAMS(( void ));
+extern	int	make_symlink	PARAMS(( void ));
+extern	int	pcmp_fs		PARAMS(( void ));
+extern	int	prmdir		PARAMS(( void ));
+extern	int	pmkdir		PARAMS(( void ));
+extern	char *	canonical_pathname PARAMS(( char *, char ** ));
+extern	int	canonicalize_pathname PARAMS(( void ));
+extern	int	pgetpid		PARAMS(( void ));
+#endif /* FSACCESS */
+
 extern	long	get_file_modified_time	PARAMS((CONST char * ));
 extern	int	isdir			PARAMS((CONST char * ));
+
+#if MacOS
 extern	int	absolute_pathname	PARAMS((CONST char *name));
-#ifndef GUSI
-extern  int access PARAMS((CONST char *, int x));
-extern  int chdir PARAMS((CONST char *dirname));
-extern  char *getcwd PARAMS((char *, int));
+extern	char *	re_comp			PARAMS((CONST char *pattern));
+extern	int	re_exec			PARAMS((CONST char *s));
+
+
+#ifndef HAVE_GUSI
+extern  int	access			PARAMS((CONST char *, int x));
+extern  int	chdir			PARAMS((CONST char *dirname));
+extern  char *	getcwd			PARAMS((char *, int));
 #endif
 #endif
 
