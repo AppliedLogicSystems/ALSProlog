@@ -930,7 +930,9 @@ endmod.		%% blt_shl.pro: Development shell
 module debugger.
 
 :- abolish(ensure_db_showing, 0).
-ensure_db_showing.
+ensure_db_showing
+	:-
+	pbi_write(ensure_db_showing_called),pbi_nl,pbi_ttyflush.
 
 endmod.
 
