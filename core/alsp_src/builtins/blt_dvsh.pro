@@ -662,7 +662,7 @@ special_cl_processing(prolog_script, File, NoSuffixFile, Ext)
 	:-!,
 	canon_path(File, CanonSrcPath),
 	exists_file(CanonSrcPath),
-	builtins:simple_load(NoSuffixFile, CanonSrcPath).
+	builtins:simple_load3(NoSuffixFile, CanonSrcPath, alsdev).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -55,45 +55,47 @@ init_tk_alslib(Interp,Shared)
 	tcl_interp_created(Interp),
 	!,
 	builtins:sys_searchdir(ALSDIR),
-%	extendPath(ALSDIR, shared, Shared).
-	split_path(ALSDIR, ALSDIRElts),
-	dappend(ALSDIRElts, [shared], SharedElts),
-	join_path(SharedElts, Shared).
+	join_path([ALSDIR, shared], Shared).
 
 init_tk_alslib(Interp,Shared)
 	:-
-	(all_procedures(tcltk,read_eval_results,2,_) ->
-		true
-		;
-		consult(tcltk)
+	builtins:sys_searchdir(ALSDIR),
+	join_path([ALSDIR,shared], InitShared),
+	(exists_file(InitShared) -> 
+		Shared = InitShared
+		; 
+		join_path([ALSDIR,'..'], Shared)
 	),
+	sys_env(OS,_,_),
+	load_tclintf(OS, Shared),
+
 	catch(tk_new(Interp),Ball1,check_tcl_error(Ball1)),
 	tcl_call(Interp, [wm,withdraw,'.'], _),
-	builtins:sys_searchdir(ALSDIR),
-%	extendPath(ALSDIR, shared, Shared),
-	split_path(ALSDIR, ALSDIRElts),
-	dappend(ALSDIRElts, [shared], SharedElts),
-	join_path(SharedElts, Shared),
 	tcl_call(Interp, [set,'ALSTCLPATH',Shared], _),
-	sys_env(OS, _, _),
+
 	(OS = macos ->
 		tcl_call(Interp, 'source -rsrc als_tklib', _)
 		;
-%		( pathPlusFile(Shared, 'als_tklib.tcl', ALSTKLIB),
-		split_path(Shared, SharedElts),
-		dappend(SharedElts, ['als_tklib.tcl'], ALSTKLIBElts),
-		join_path(ALSTKLIBElts, ALSTKLIB),
+		join_path([Shared,'als_tklib.tcl'], ALSTKLIB),
 		tcl_call(Interp, [source, ALSTKLIB], _)
 	),
 	(tcl_interp_created(Interp) ->
 		true
 		;
-		(Interp \= shl_tcli -> 
-			assert(tcl_interp_created(Interp))
-			;
-			true
-		)
+		assert(tcl_interp_created(Interp))
 	).
+
+load_tclintf(mswin32, _) :-!.
+load_tclintf(macos, _) :-!.
+load_tclintf(_, Shared)
+	:-
+	join_path([Shared,'tclintf.psl'], SharedPSLPath),
+	exists_file(SharedPSLPath),
+	!,
+	consult(SharedPSLPath).
+load_tclintf(_, Shared, ExecDir)
+	:-
+	throw(no_tclintf_psl).
 
 check_tcl_error(Ball1)
 	:-
@@ -104,7 +106,6 @@ check_tcl_error(error(permission_error(create,tcl_interpreter,TI),_))
 %	builtins:prolog_system_warning(error(permission_error(create,tcl_interpreter,TI)),_).
 	printf(user_output,'Warning: Attempting tk_new on existing interpreter: %t\n',
 			[TI]).
-
 
 check_tcl_error(Ball1)
 	:-

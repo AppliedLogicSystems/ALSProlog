@@ -1025,12 +1025,24 @@ attempt_load_source_object(CanonSrcPath,BaseFile,OPath,FCOpts,FileMgr)
 
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/ 
-simple_load(NoSuffixFile,Path)
+:- module_closure(simple_load,1).
+simple_load(Mod, FullPath)
 	:-
-	get_reconsult_flag(RFlag),
-	establish_fcg(NoSuffixFile,RFlag,CG),
+	path_directory_tail(FullPath,Dir,FileTail),
+	(file_extension(FileTail,NoSuffixFile,_) -> 
+		true ; NoSuffixFile = FileTail),
+	simple_load3(NoSuffixFile,FullPath,Mod,_).
+
+export simple_load3/4.
+simple_load3(NoSuffixFile, Path, Mod,CG)
+	:-
+	establish_fcg(true, NoSuffixFile, no_reconsult, CG),
 	obp_push_stop,
-	catch(xconsult(Path,_,_),_, reset_fcg(_)),
+	open(Path, read, Stream, []),
+	catch(load_source0(Stream, Mod, no_debugging, '', Path, ErrsList),
+			_, 
+			(reset_fcg(_),close(Stream))),
+	close(Stream),
 	obp_pop,
 	reset_fcg(_).
 
@@ -1193,7 +1205,7 @@ obp_mode_end(OPath)
 	obp_close.
 
 /*-------------------------------------------------------------*
- | For loading source (.pro) files 
+ | For loading source (.pro, .pl) files 
  |
  |	load_source0/6
  |	load_source0(Stream, TgtMod, DebugMode, OPath, Path,ErrsList) 
