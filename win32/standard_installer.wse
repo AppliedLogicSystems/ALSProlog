@@ -921,6 +921,3781 @@ item: Include Script
   Pathname=%_WISE_%\INCLUDE\uninstal.wse
 end
 item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\Generic ALS App Stub.exe
+  Destination=%MAINDIR%\Generic ALS App Stub.exe
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alspro.dll
+  Destination=%MAINDIR%\alspro.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS Prolog.exe
+  Destination=%MAINDIR%\ALS Prolog.exe
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\msvcrt.dll
+  Destination=%MAINDIR%\msvcrt.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\tcl80.dll
+  Destination=%MAINDIR%\tcl80.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\tk80.dll
+  Destination=%MAINDIR%\tk80.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\tclpip80.dll
+  Destination=%MAINDIR%\tclpip80.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\als_document.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_document.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\als_menu.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_menu.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\als_projects.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_projects.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\als_settings.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_settings.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\als_splash.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_splash.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\als_tkfbox.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_tkfbox.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\als_tklib.tcl
+  Destination=%MAINDIR%\alsdir\shared\als_tklib.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\alsdev.tcl
+  Destination=%MAINDIR%\alsdir\shared\alsdev.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\alsdev_main.tcl
+  Destination=%MAINDIR%\alsdir\shared\alsdev_main.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\debugwin.tcl
+  Destination=%MAINDIR%\alsdir\shared\debugwin.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\defstr.tcl
+  Destination=%MAINDIR%\alsdir\shared\defstr.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\tables.tcl
+  Destination=%MAINDIR%\alsdir\shared\tables.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\tables.tcl~
+  Destination=%MAINDIR%\alsdir\shared\tables.tcl~
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\Copy of uidpw.tcl
+  Destination=%MAINDIR%\alsdir\shared\Copy of uidpw.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\uidpw.tcl~
+  Destination=%MAINDIR%\alsdir\shared\uidpw.tcl~
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\uidpw.tcl
+  Destination=%MAINDIR%\alsdir\shared\uidpw.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\shared\als_tklib.tcl~
+  Destination=%MAINDIR%\alsdir\shared\als_tklib.tcl~
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\closed_mac.gif
+  Destination=%MAINDIR%\alsdir\images\closed_mac.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\closed_ptr.gif
+  Destination=%MAINDIR%\alsdir\images\closed_ptr.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\closed_unix.gif
+  Destination=%MAINDIR%\alsdir\images\closed_unix.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\closed_wins.gif
+  Destination=%MAINDIR%\alsdir\images\closed_wins.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\down-arrow-blue.gif
+  Destination=%MAINDIR%\alsdir\images\down-arrow-blue.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\left-arrow-blue.gif
+  Destination=%MAINDIR%\alsdir\images\left-arrow-blue.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\open_mac.gif
+  Destination=%MAINDIR%\alsdir\images\open_mac.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\open_ptr.gif
+  Destination=%MAINDIR%\alsdir\images\open_ptr.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\open_unix.gif
+  Destination=%MAINDIR%\alsdir\images\open_unix.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\open_wins.gif
+  Destination=%MAINDIR%\alsdir\images\open_wins.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\right-arrow-blue.gif
+  Destination=%MAINDIR%\alsdir\images\right-arrow-blue.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\turnstile_splash.gif
+  Destination=%MAINDIR%\alsdir\images\turnstile_splash.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\images\up-arrow-blue.gif
+  Destination=%MAINDIR%\alsdir\images\up-arrow-blue.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\Cvs\Root
+  Destination=%MAINDIR%\alsdir\xlibrary\Cvs\Root
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\Cvs\Repository
+  Destination=%MAINDIR%\alsdir\xlibrary\Cvs\Repository
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\Cvs\Entries
+  Destination=%MAINDIR%\alsdir\xlibrary\Cvs\Entries
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\arithx1.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\arithx1.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\arithx1.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\arithx1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\avl.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\avl.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\avl.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\avl.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\cmdline.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\cmdline.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\cmdline.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\cmdline.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\cmpdirs.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\cmpdirs.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\cmpdirs.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\cmpdirs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\commal.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\commal.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\commal.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\commal.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\control.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\control.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\control.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\control.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\cref.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\cref.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\cref.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\cref.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\crefxtra.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\crefxtra.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\crefxtra.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\crefxtra.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\filemisc.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\filemisc.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\filemisc.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\filemisc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\headers.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\headers.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\headers.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\headers.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\iolayer.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\iolayer.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\iolayer.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\iolayer.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\libmaint.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\libmaint.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\listutl1.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\listutl1.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\listutl1.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\listutl1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\listutl2.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\listutl2.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\listutl2.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\listutl2.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\listutl3.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\listutl3.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\listutl3.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\listutl3.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\listutl4.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\listutl4.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\listutl4.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\listutl4.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\macro.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\macro.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\macro.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\macro.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\misc_db.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\misc_db.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\misc_db.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\misc_db.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\miscatom.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\miscatom.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\miscatom.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\miscatom.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\miscterm.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\miscterm.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\miscterm.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\miscterm.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\msc_ioin.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\msc_ioin.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\msc_ioin.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\msc_ioin.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\mscioout.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\mscioout.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\mscioout.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\mscioout.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\progdoc.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\progdoc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\sconfig.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\sconfig.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\sconfig.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\sconfig.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\shellmak.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\shellmak.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\shellmak.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\shellmak.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\sio_misc.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\sio_misc.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\sio_misc.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\sio_misc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\slashes.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\slashes.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\slashes.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\slashes.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\srchf.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\srchf.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\srchf.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\srchf.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\strctutl.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\strctutl.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\strctutl.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\strctutl.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\strings.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\strings.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\strings.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\strings.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\tables.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\tables.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\tcl_sppt.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\tcl_sppt.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\tcl_sppt.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\tcl_sppt.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\tk_alslib.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\tk_alslib.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\tk_alslib.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\tk_alslib.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\ttyshlmk.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\ttyshlmk.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\ttyshlmk.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\ttyshlmk.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\typecomp.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\typecomp.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\typecomp.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\typecomp.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\xlists.alb
+  Destination=%MAINDIR%\alsdir\xlibrary\xlists.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\xlists.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\xlists.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\tables.pro~
+  Destination=%MAINDIR%\alsdir\xlibrary\tables.pro~
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xlibrary\tables.pro
+  Destination=%MAINDIR%\alsdir\xlibrary\tables.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\Cvs\Root
+  Destination=%MAINDIR%\alsdir\xbuiltins\Cvs\Root
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\Cvs\Repository
+  Destination=%MAINDIR%\alsdir\xbuiltins\Cvs\Repository
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\Cvs\Entries
+  Destination=%MAINDIR%\alsdir\xbuiltins\Cvs\Entries
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_als.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_als.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_atom.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_atom.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_brk.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_brk.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_ctl.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_ctl.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_db.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_db.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_evt.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_evt.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_flgs.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_flgs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_frez.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_frez.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_io.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_io.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_is.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_is.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_lib.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_lib.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_misc.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_misc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_msg.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_msg.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_pckg.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_pckg.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_shl.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_shl.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_shlc.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_shlc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_shlr.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_shlr.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_std.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_std.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_stk.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_stk.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_sys.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_sys.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_term.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_term.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\builtins.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\builtins.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\comp_d10.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\comp_d10.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\cutils.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\cutils.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\db_srctr.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\db_srctr.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\db_srctr.typ
+  Destination=%MAINDIR%\alsdir\xbuiltins\db_srctr.typ
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\dbg_class.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\dbg_class.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\dcgs.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\dcgs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\filepath.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\filepath.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\fsdos.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\fsdos.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\fswin32.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\fswin32.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\int_cstr.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\int_cstr.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\math88k.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\math88k.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\module.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\module.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\objects.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\objects.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\objs_run.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\objs_run.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\ra_basis.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\ra_basis.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\shlclass.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\shlclass.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\simplio.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\simplio.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\sio_d10.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\sio_d10.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\sio_rt.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\sio_rt.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\sio_wt.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\sio_wt.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\tc_base.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\tc_base.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_dvsh.pro~
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_dvsh.pro~
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_dvsh.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_dvsh.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\fsunix.pro~
+  Destination=%MAINDIR%\alsdir\xbuiltins\fsunix.pro~
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\fsunix.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\fsunix.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\fs_cmn.pro~
+  Destination=%MAINDIR%\alsdir\xbuiltins\fs_cmn.pro~
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\fs_cmn.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\fs_cmn.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\sio.pro~
+  Destination=%MAINDIR%\alsdir\xbuiltins\sio.pro~
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\sio.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\sio.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\debugger.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\debugger.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\xconsult.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\xconsult.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\projects.pro~
+  Destination=%MAINDIR%\alsdir\xbuiltins\projects.pro~
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\projects.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\projects.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\fsmac.pro~
+  Destination=%MAINDIR%\alsdir\xbuiltins\fsmac.pro~
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\fsmac.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\fsmac.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_cslt.pro~
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_cslt.pro~
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_cslt.pro
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_cslt.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\builtins.obp
+  Destination=%MAINDIR%\alsdir\xbuiltins\builtins.obp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\sio_rt.obp
+  Destination=%MAINDIR%\alsdir\xbuiltins\sio_rt.obp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_evt.obp
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_evt.obp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_term.obp
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_term.obp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_db.obp
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_db.obp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\filepath.obp
+  Destination=%MAINDIR%\alsdir\xbuiltins\filepath.obp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\xconsult.obp
+  Destination=%MAINDIR%\alsdir\xbuiltins\xconsult.obp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\fswin32.obp
+  Destination=%MAINDIR%\alsdir\xbuiltins\fswin32.obp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\blt_atom.obp
+  Destination=%MAINDIR%\alsdir\xbuiltins\blt_atom.obp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\xbuiltins\sio.obp
+  Destination=%MAINDIR%\alsdir\xbuiltins\sio.obp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_als.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_als.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_atom.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_atom.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_brk.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_brk.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_cslt.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_cslt.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_ctl.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_ctl.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_db.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_db.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_evt.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_evt.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_flgs.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_flgs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_frez.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_frez.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_io.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_io.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_is.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_is.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_lib.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_lib.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_misc.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_misc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_msg.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_msg.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_pckg.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_pckg.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_shlc.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_shlc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_shlr.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_shlr.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_std.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_std.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_stk.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_stk.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_sys.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_sys.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\blt_term.pro
+  Destination=%MAINDIR%\alsdir\builtins\blt_term.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\builtins.pro
+  Destination=%MAINDIR%\alsdir\builtins\builtins.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\comp_d10.pro
+  Destination=%MAINDIR%\alsdir\builtins\comp_d10.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\cutils.pro
+  Destination=%MAINDIR%\alsdir\builtins\cutils.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\db_srctr.pro
+  Destination=%MAINDIR%\alsdir\builtins\db_srctr.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\dbg_class.pro
+  Destination=%MAINDIR%\alsdir\builtins\dbg_class.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\dcgs.pro
+  Destination=%MAINDIR%\alsdir\builtins\dcgs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\debugger.pro
+  Destination=%MAINDIR%\alsdir\builtins\debugger.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\filepath.pro
+  Destination=%MAINDIR%\alsdir\builtins\filepath.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\fs_cmn.pro
+  Destination=%MAINDIR%\alsdir\builtins\fs_cmn.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\fsdos.pro
+  Destination=%MAINDIR%\alsdir\builtins\fsdos.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\fsmac.pro
+  Destination=%MAINDIR%\alsdir\builtins\fsmac.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\fsunix.pro
+  Destination=%MAINDIR%\alsdir\builtins\fsunix.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\fswin32.pro
+  Destination=%MAINDIR%\alsdir\builtins\fswin32.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\math88k.pro
+  Destination=%MAINDIR%\alsdir\builtins\math88k.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\module.pro
+  Destination=%MAINDIR%\alsdir\builtins\module.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\objects.pro
+  Destination=%MAINDIR%\alsdir\builtins\objects.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\objs_run.pro
+  Destination=%MAINDIR%\alsdir\builtins\objs_run.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\projects.pro
+  Destination=%MAINDIR%\alsdir\builtins\projects.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\shlclass.pro
+  Destination=%MAINDIR%\alsdir\builtins\shlclass.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\simplio.pro
+  Destination=%MAINDIR%\alsdir\builtins\simplio.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\sio.pro
+  Destination=%MAINDIR%\alsdir\builtins\sio.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\sio_d10.pro
+  Destination=%MAINDIR%\alsdir\builtins\sio_d10.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\sio_rt.pro
+  Destination=%MAINDIR%\alsdir\builtins\sio_rt.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\sio_wt.pro
+  Destination=%MAINDIR%\alsdir\builtins\sio_wt.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\tc_base.pro
+  Destination=%MAINDIR%\alsdir\builtins\tc_base.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\builtins\xconsult.pro
+  Destination=%MAINDIR%\alsdir\builtins\xconsult.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\arithx1.pro
+  Destination=%MAINDIR%\alsdir\library\arithx1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\avl.pro
+  Destination=%MAINDIR%\alsdir\library\avl.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\cmdline.pro
+  Destination=%MAINDIR%\alsdir\library\cmdline.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\cmpdirs.pro
+  Destination=%MAINDIR%\alsdir\library\cmpdirs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\commal.pro
+  Destination=%MAINDIR%\alsdir\library\commal.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\control.pro
+  Destination=%MAINDIR%\alsdir\library\control.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\cref.pro
+  Destination=%MAINDIR%\alsdir\library\cref.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\crefxtra.pro
+  Destination=%MAINDIR%\alsdir\library\crefxtra.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\filemisc.pro
+  Destination=%MAINDIR%\alsdir\library\filemisc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\headers.pro
+  Destination=%MAINDIR%\alsdir\library\headers.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\iolayer.pro
+  Destination=%MAINDIR%\alsdir\library\iolayer.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\libmaint.pro
+  Destination=%MAINDIR%\alsdir\library\libmaint.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\listutl1.pro
+  Destination=%MAINDIR%\alsdir\library\listutl1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\listutl2.pro
+  Destination=%MAINDIR%\alsdir\library\listutl2.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\listutl3.pro
+  Destination=%MAINDIR%\alsdir\library\listutl3.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\listutl4.pro
+  Destination=%MAINDIR%\alsdir\library\listutl4.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\macro.pro
+  Destination=%MAINDIR%\alsdir\library\macro.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\misc_db.pro
+  Destination=%MAINDIR%\alsdir\library\misc_db.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\miscatom.pro
+  Destination=%MAINDIR%\alsdir\library\miscatom.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\miscterm.pro
+  Destination=%MAINDIR%\alsdir\library\miscterm.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\msc_ioin.pro
+  Destination=%MAINDIR%\alsdir\library\msc_ioin.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\mscioout.pro
+  Destination=%MAINDIR%\alsdir\library\mscioout.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\progdoc.pro
+  Destination=%MAINDIR%\alsdir\library\progdoc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\sconfig.pro
+  Destination=%MAINDIR%\alsdir\library\sconfig.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\shellmak.pro
+  Destination=%MAINDIR%\alsdir\library\shellmak.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\sio_misc.pro
+  Destination=%MAINDIR%\alsdir\library\sio_misc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\slashes.pro
+  Destination=%MAINDIR%\alsdir\library\slashes.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\srchf.pro
+  Destination=%MAINDIR%\alsdir\library\srchf.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\strctutl.pro
+  Destination=%MAINDIR%\alsdir\library\strctutl.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\strings.pro
+  Destination=%MAINDIR%\alsdir\library\strings.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\tables.pro
+  Destination=%MAINDIR%\alsdir\library\tables.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\tcl_sppt.pro
+  Destination=%MAINDIR%\alsdir\library\tcl_sppt.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\tk_alslib.pro
+  Destination=%MAINDIR%\alsdir\library\tk_alslib.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\ttyshlmk.pro
+  Destination=%MAINDIR%\alsdir\library\ttyshlmk.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\typecomp.pro
+  Destination=%MAINDIR%\alsdir\library\typecomp.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\xlists.pro
+  Destination=%MAINDIR%\alsdir\library\xlists.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\arithx1.alb
+  Destination=%MAINDIR%\alsdir\library\arithx1.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\avl.alb
+  Destination=%MAINDIR%\alsdir\library\avl.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\cmdline.alb
+  Destination=%MAINDIR%\alsdir\library\cmdline.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\cmpdirs.alb
+  Destination=%MAINDIR%\alsdir\library\cmpdirs.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\commal.alb
+  Destination=%MAINDIR%\alsdir\library\commal.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\control.alb
+  Destination=%MAINDIR%\alsdir\library\control.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\cref.alb
+  Destination=%MAINDIR%\alsdir\library\cref.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\crefxtra.alb
+  Destination=%MAINDIR%\alsdir\library\crefxtra.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\filemisc.alb
+  Destination=%MAINDIR%\alsdir\library\filemisc.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\headers.alb
+  Destination=%MAINDIR%\alsdir\library\headers.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\iolayer.alb
+  Destination=%MAINDIR%\alsdir\library\iolayer.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\listutl1.alb
+  Destination=%MAINDIR%\alsdir\library\listutl1.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\listutl2.alb
+  Destination=%MAINDIR%\alsdir\library\listutl2.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\listutl3.alb
+  Destination=%MAINDIR%\alsdir\library\listutl3.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\listutl4.alb
+  Destination=%MAINDIR%\alsdir\library\listutl4.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\macro.alb
+  Destination=%MAINDIR%\alsdir\library\macro.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\misc_db.alb
+  Destination=%MAINDIR%\alsdir\library\misc_db.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\miscatom.alb
+  Destination=%MAINDIR%\alsdir\library\miscatom.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\miscterm.alb
+  Destination=%MAINDIR%\alsdir\library\miscterm.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\msc_ioin.alb
+  Destination=%MAINDIR%\alsdir\library\msc_ioin.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\mscioout.alb
+  Destination=%MAINDIR%\alsdir\library\mscioout.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\sconfig.alb
+  Destination=%MAINDIR%\alsdir\library\sconfig.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\shellmak.alb
+  Destination=%MAINDIR%\alsdir\library\shellmak.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\sio_misc.alb
+  Destination=%MAINDIR%\alsdir\library\sio_misc.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\slashes.alb
+  Destination=%MAINDIR%\alsdir\library\slashes.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\srchf.alb
+  Destination=%MAINDIR%\alsdir\library\srchf.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\strctutl.alb
+  Destination=%MAINDIR%\alsdir\library\strctutl.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\strings.alb
+  Destination=%MAINDIR%\alsdir\library\strings.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\tables.alb
+  Destination=%MAINDIR%\alsdir\library\tables.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\tcl_sppt.alb
+  Destination=%MAINDIR%\alsdir\library\tcl_sppt.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\tk_alslib.alb
+  Destination=%MAINDIR%\alsdir\library\tk_alslib.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\ttyshlmk.alb
+  Destination=%MAINDIR%\alsdir\library\ttyshlmk.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\typecomp.alb
+  Destination=%MAINDIR%\alsdir\library\typecomp.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alsdir\library\xlists.alb
+  Destination=%MAINDIR%\alsdir\library\xlists.alb
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\history.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\history.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\init.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\init.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\parray.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\parray.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\safe.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\safe.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\tclIndex
+  Destination=%MAINDIR%\lib\tcl8.0\tclIndex
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\word.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\word.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\http1.0\http.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\http1.0\http.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\http1.0\pkgIndex.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\http1.0\pkgIndex.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\http2.0\http.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\http2.0\http.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\http2.0\pkgIndex.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\http2.0\pkgIndex.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\opt0.1\optparse.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\opt0.1\optparse.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\opt0.1\pkgIndex.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\opt0.1\pkgIndex.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\reg1.0\pkgIndex.tcl
+  Destination=%MAINDIR%\lib\tcl8.0\reg1.0\pkgIndex.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tcl8.0\reg1.0\tclreg80.dll
+  Destination=%MAINDIR%\lib\tcl8.0\reg1.0\tclreg80.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\bgerror.tcl
+  Destination=%MAINDIR%\lib\tk8.0\bgerror.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\button.tcl
+  Destination=%MAINDIR%\lib\tk8.0\button.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\clrpick.tcl
+  Destination=%MAINDIR%\lib\tk8.0\clrpick.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\comdlg.tcl
+  Destination=%MAINDIR%\lib\tk8.0\comdlg.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\console.tcl
+  Destination=%MAINDIR%\lib\tk8.0\console.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\dialog.tcl
+  Destination=%MAINDIR%\lib\tk8.0\dialog.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\entry.tcl
+  Destination=%MAINDIR%\lib\tk8.0\entry.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\focus.tcl
+  Destination=%MAINDIR%\lib\tk8.0\focus.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\listbox.tcl
+  Destination=%MAINDIR%\lib\tk8.0\listbox.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\menu.tcl
+  Destination=%MAINDIR%\lib\tk8.0\menu.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\msgbox.tcl
+  Destination=%MAINDIR%\lib\tk8.0\msgbox.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\obsolete.tcl
+  Destination=%MAINDIR%\lib\tk8.0\obsolete.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\optMenu.tcl
+  Destination=%MAINDIR%\lib\tk8.0\optMenu.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\palette.tcl
+  Destination=%MAINDIR%\lib\tk8.0\palette.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\prolog.ps
+  Destination=%MAINDIR%\lib\tk8.0\prolog.ps
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\safetk.tcl
+  Destination=%MAINDIR%\lib\tk8.0\safetk.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\scale.tcl
+  Destination=%MAINDIR%\lib\tk8.0\scale.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\scrlbar.tcl
+  Destination=%MAINDIR%\lib\tk8.0\scrlbar.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\tclIndex
+  Destination=%MAINDIR%\lib\tk8.0\tclIndex
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\tearoff.tcl
+  Destination=%MAINDIR%\lib\tk8.0\tearoff.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\text.tcl
+  Destination=%MAINDIR%\lib\tk8.0\text.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\tk.tcl
+  Destination=%MAINDIR%\lib\tk8.0\tk.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\tkfbox.tcl
+  Destination=%MAINDIR%\lib\tk8.0\tkfbox.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\tk8.0\xmfbox.tcl
+  Destination=%MAINDIR%\lib\tk8.0\xmfbox.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\itcl3.0\itcl.tcl
+  Destination=%MAINDIR%\lib\itcl3.0\itcl.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\itcl3.0\pkgIndex.tcl
+  Destination=%MAINDIR%\lib\itcl3.0\pkgIndex.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\itcl3.0\itcl30.dll
+  Destination=%MAINDIR%\lib\itcl3.0\itcl30.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\itk3.0\pkgIndex.tcl
+  Destination=%MAINDIR%\lib\itk3.0\pkgIndex.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\itk3.0\itk30.dll
+  Destination=%MAINDIR%\lib\itk3.0\itk30.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\itk3.0\Archetype.itk
+  Destination=%MAINDIR%\lib\itk3.0\Archetype.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\itk3.0\itk.tcl
+  Destination=%MAINDIR%\lib\itk3.0\itk.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\itk3.0\tclIndex
+  Destination=%MAINDIR%\lib\itk3.0\tclIndex
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\itk3.0\Toplevel.itk
+  Destination=%MAINDIR%\lib\itk3.0\Toplevel.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\itk3.0\Widget.itk
+  Destination=%MAINDIR%\lib\itk3.0\Widget.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\iwidgets.tcl
+  Destination=%MAINDIR%\lib\iwidgets3.0\iwidgets.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\pkgIndex.tcl
+  Destination=%MAINDIR%\lib\iwidgets3.0\pkgIndex.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\checkbox.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\checkbox.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\calendar.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\calendar.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\canvasprintbox.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\canvasprintbox.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\canvasprintdialog.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\canvasprintdialog.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\buttonbox.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\buttonbox.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\colors.itcl
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\colors.itcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\combobox.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\combobox.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\dateentry.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\dateentry.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\datefield.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\datefield.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\dialog.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\dialog.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\dialogshell.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\dialogshell.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\disjointlistbox.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\disjointlistbox.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\entryfield.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\entryfield.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\extfileselectionbox.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\extfileselectionbox.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\extfileselectiondialog.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\extfileselectiondialog.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\feedback.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\feedback.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\fileselectionbox.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\fileselectionbox.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\fileselectiondialog.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\fileselectiondialog.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\finddialog.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\finddialog.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\hierarchy.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\hierarchy.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\hyperhelp.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\hyperhelp.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\labeledframe.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\labeledframe.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\labeledwidget.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\labeledwidget.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\mainwindow.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\mainwindow.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\menubar.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\menubar.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\messagebox.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\messagebox.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\messagedialog.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\messagedialog.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\notebook.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\notebook.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\optionmenu.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\optionmenu.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\pane.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\pane.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\panedwindow.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\panedwindow.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\promptdialog.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\promptdialog.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\pushbutton.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\pushbutton.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\radiobox.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\radiobox.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\regexpfield.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\regexpfield.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\roman.itcl
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\roman.itcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\scopedobject.itcl
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\scopedobject.itcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\scopedobject.tcl
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\scopedobject.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\shell.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\shell.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\scrolledcanvas.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\scrolledcanvas.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\scrolledframe.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\scrolledframe.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\scrolledhtml.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\scrolledhtml.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\scrolledlistbox.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\scrolledlistbox.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\scrolledtext.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\scrolledtext.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\scrolledwidget.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\scrolledwidget.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\selectionbox.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\selectionbox.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\selectiondialog.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\selectiondialog.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\spindate.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\spindate.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\spinint.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\spinint.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\spinner.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\spinner.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\spintime.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\spintime.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\tabnotebook.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\tabnotebook.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\tabset.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\tabset.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\tclIndex
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\tclIndex
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\timeentry.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\timeentry.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\timefield.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\timefield.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\toolbar.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\toolbar.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\unknownimage.gif
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\unknownimage.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\lib\iwidgets3.0\scripts\watch.itk
+  Destination=%MAINDIR%\lib\iwidgets3.0\scripts\watch.itk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\itcl30.dll
+  Destination=%MAINDIR%\itcl30.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\itk30.dll
+  Destination=%MAINDIR%\itk30.dll
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\Cvs\Root
+  Destination=%MAINDIR%\examples\als\Cvs\Root
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\Cvs\Repository
+  Destination=%MAINDIR%\examples\als\Cvs\Repository
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\Cvs\Entries
+  Destination=%MAINDIR%\examples\als\Cvs\Entries
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\Readme
+  Destination=%MAINDIR%\examples\als\Readme
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\bench.pro
+  Destination=%MAINDIR%\examples\als\bench.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\dc.pro
+  Destination=%MAINDIR%\examples\als\dc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\diff.pro
+  Destination=%MAINDIR%\examples\als\diff.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\hickory.pro
+  Destination=%MAINDIR%\examples\als\hickory.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\id.pro
+  Destination=%MAINDIR%\examples\als\id.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\jobs.pro
+  Destination=%MAINDIR%\examples\als\jobs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\mission.pro
+  Destination=%MAINDIR%\examples\als\mission.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\nim.pro
+  Destination=%MAINDIR%\examples\als\nim.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\nrev.pro
+  Destination=%MAINDIR%\examples\als\nrev.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\als\queens.pro
+  Destination=%MAINDIR%\examples\als\queens.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\Cvs\Root
+  Destination=%MAINDIR%\examples\pxs\Cvs\Root
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\Cvs\Repository
+  Destination=%MAINDIR%\examples\pxs\Cvs\Repository
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\Cvs\Entries
+  Destination=%MAINDIR%\examples\pxs\Cvs\Entries
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\Readme
+  Destination=%MAINDIR%\examples\pxs\Readme
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\asking.pro
+  Destination=%MAINDIR%\examples\pxs\asking.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\assoc.pro
+  Destination=%MAINDIR%\examples\pxs\assoc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\circuit.pro
+  Destination=%MAINDIR%\examples\pxs\circuit.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\dirgrph1.pro
+  Destination=%MAINDIR%\examples\pxs\dirgrph1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\drugs.pro
+  Destination=%MAINDIR%\examples\pxs\drugs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\georgew.pro
+  Destination=%MAINDIR%\examples\pxs\georgew.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\grammr.pro
+  Destination=%MAINDIR%\examples\pxs\grammr.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\greeks.pro
+  Destination=%MAINDIR%\examples\pxs\greeks.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\hickgram.pro
+  Destination=%MAINDIR%\examples\pxs\hickgram.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\hickid1.pro
+  Destination=%MAINDIR%\examples\pxs\hickid1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\hickid2.pro
+  Destination=%MAINDIR%\examples\pxs\hickid2.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\jobs.pro
+  Destination=%MAINDIR%\examples\pxs\jobs.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\lists.pro
+  Destination=%MAINDIR%\examples\pxs\lists.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\medic1.pro
+  Destination=%MAINDIR%\examples\pxs\medic1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\medic2.pro
+  Destination=%MAINDIR%\examples\pxs\medic2.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\medic3.pro
+  Destination=%MAINDIR%\examples\pxs\medic3.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\medic4.pro
+  Destination=%MAINDIR%\examples\pxs\medic4.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\medic5.pro
+  Destination=%MAINDIR%\examples\pxs\medic5.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\prointrp.pro
+  Destination=%MAINDIR%\examples\pxs\prointrp.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\readsent.pro
+  Destination=%MAINDIR%\examples\pxs\readsent.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\russian2.pro
+  Destination=%MAINDIR%\examples\pxs\russian2.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\russians.pro
+  Destination=%MAINDIR%\examples\pxs\russians.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\solve.pro
+  Destination=%MAINDIR%\examples\pxs\solve.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\solve2.pro
+  Destination=%MAINDIR%\examples\pxs\solve2.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\traits.pro
+  Destination=%MAINDIR%\examples\pxs\traits.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\trees.pro
+  Destination=%MAINDIR%\examples\pxs\trees.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\pxs\xgram.pro
+  Destination=%MAINDIR%\examples\pxs\xgram.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\more\Cvs\Root
+  Destination=%MAINDIR%\examples\more\Cvs\Root
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\more\Cvs\Repository
+  Destination=%MAINDIR%\examples\more\Cvs\Repository
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\more\Cvs\Entries
+  Destination=%MAINDIR%\examples\more\Cvs\Entries
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\more\finger.pro
+  Destination=%MAINDIR%\examples\more\finger.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\more\freeze.pro
+  Destination=%MAINDIR%\examples\more\freeze.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\more\mathserv1.pro
+  Destination=%MAINDIR%\examples\more\mathserv1.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\more\mathserv2.pro
+  Destination=%MAINDIR%\examples\more\mathserv2.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\objectpro\Cvs\Root
+  Destination=%MAINDIR%\examples\objectpro\Cvs\Root
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\objectpro\Cvs\Repository
+  Destination=%MAINDIR%\examples\objectpro\Cvs\Repository
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\objectpro\Cvs\Entries
+  Destination=%MAINDIR%\examples\objectpro\Cvs\Entries
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\objectpro\oopex_stack.oop
+  Destination=%MAINDIR%\examples\objectpro\oopex_stack.oop
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\objectpro\oopex_vehicles.oop
+  Destination=%MAINDIR%\examples\objectpro\oopex_vehicles.oop
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\Cvs\Root
+  Destination=%MAINDIR%\examples\visual\Cvs\Root
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\Cvs\Repository
+  Destination=%MAINDIR%\examples\visual\Cvs\Repository
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\Cvs\Entries
+  Destination=%MAINDIR%\examples\visual\Cvs\Entries
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\blank_crown_icon.gif
+  Destination=%MAINDIR%\examples\visual\blank_crown_icon.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\default.gif
+  Destination=%MAINDIR%\examples\visual\default.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\draw.ppj
+  Destination=%MAINDIR%\examples\visual\draw.ppj
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\drawing.pro
+  Destination=%MAINDIR%\examples\visual\drawing.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\drawing.tcl
+  Destination=%MAINDIR%\examples\visual\drawing.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\hickory.pro
+  Destination=%MAINDIR%\examples\visual\hickory.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\id.pro
+  Destination=%MAINDIR%\examples\visual\id.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\mainwin.ppj
+  Destination=%MAINDIR%\examples\visual\mainwin.ppj
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\mainwin.pro
+  Destination=%MAINDIR%\examples\visual\mainwin.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\mainwin.tcl
+  Destination=%MAINDIR%\examples\visual\mainwin.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\queen_crown_icon.gif
+  Destination=%MAINDIR%\examples\visual\queen_crown_icon.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\tm_tree.itcl
+  Destination=%MAINDIR%\examples\visual\tm_tree.itcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\tm_tree.pro
+  Destination=%MAINDIR%\examples\visual\tm_tree.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\twigs.ppj
+  Destination=%MAINDIR%\examples\visual\twigs.ppj
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\twigs_id.tcl
+  Destination=%MAINDIR%\examples\visual\twigs_id.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\vdc.ppj
+  Destination=%MAINDIR%\examples\visual\vdc.ppj
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\vdc.pro
+  Destination=%MAINDIR%\examples\visual\vdc.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\vdc.tcl
+  Destination=%MAINDIR%\examples\visual\vdc.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\vn.tcl
+  Destination=%MAINDIR%\examples\visual\vn.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\vnim.ppj
+  Destination=%MAINDIR%\examples\visual\vnim.ppj
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\vnim.pro
+  Destination=%MAINDIR%\examples\visual\vnim.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\vq.tcl
+  Destination=%MAINDIR%\examples\visual\vq.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\vqueens.ppj
+  Destination=%MAINDIR%\examples\visual\vqueens.ppj
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\visual\vqueens.pro
+  Destination=%MAINDIR%\examples\visual\vqueens.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\Cvs\Root
+  Destination=%MAINDIR%\examples\Prolog1000\Cvs\Root
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\Cvs\Repository
+  Destination=%MAINDIR%\examples\Prolog1000\Cvs\Repository
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\Cvs\Entries
+  Destination=%MAINDIR%\examples\Prolog1000\Cvs\Entries
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\closed_ptr.gif
+  Destination=%MAINDIR%\examples\Prolog1000\closed_ptr.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\closed_wins.gif
+  Destination=%MAINDIR%\examples\Prolog1000\closed_wins.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\dbform.tcl
+  Destination=%MAINDIR%\examples\Prolog1000\dbform.tcl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\open_ptr.gif
+  Destination=%MAINDIR%\examples\Prolog1000\open_ptr.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\open_wins.gif
+  Destination=%MAINDIR%\examples\Prolog1000\open_wins.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\p1000.db
+  Destination=%MAINDIR%\examples\Prolog1000\p1000.db
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\p1000.pro
+  Destination=%MAINDIR%\examples\Prolog1000\p1000.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\p1000.url
+  Destination=%MAINDIR%\examples\Prolog1000\p1000.url
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\p1k_db.ppj
+  Destination=%MAINDIR%\examples\Prolog1000\p1k_db.ppj
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\p1k_db.pro
+  Destination=%MAINDIR%\examples\Prolog1000\p1k_db.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Prolog1000\prolog1000.orig
+  Destination=%MAINDIR%\examples\Prolog1000\prolog1000.orig
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\Cvs\Root
+  Destination=%MAINDIR%\examples\Chat80\Cvs\Root
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\Cvs\Repository
+  Destination=%MAINDIR%\examples\Chat80\Cvs\Repository
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\Cvs\Entries
+  Destination=%MAINDIR%\examples\Chat80\Cvs\Entries
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\Readme.orig
+  Destination=%MAINDIR%\examples\Chat80\Readme.orig
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\aggreg.pl
+  Destination=%MAINDIR%\examples\Chat80\aggreg.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\als_chat.pro
+  Destination=%MAINDIR%\examples\Chat80\als_chat.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\borders.pl
+  Destination=%MAINDIR%\examples\Chat80\borders.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\chat80.ppj
+  Destination=%MAINDIR%\examples\Chat80\chat80.ppj
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\cities.pl
+  Destination=%MAINDIR%\examples\Chat80\cities.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\clone.xg
+  Destination=%MAINDIR%\examples\Chat80\clone.xg
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\clotab.pl
+  Destination=%MAINDIR%\examples\Chat80\clotab.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\contain.pl
+  Destination=%MAINDIR%\examples\Chat80\contain.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\countries.pl
+  Destination=%MAINDIR%\examples\Chat80\countries.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\demo
+  Destination=%MAINDIR%\examples\Chat80\demo
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\lex.xg
+  Destination=%MAINDIR%\examples\Chat80\lex.xg
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\load.pl
+  Destination=%MAINDIR%\examples\Chat80\load.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\ndtabl.pl
+  Destination=%MAINDIR%\examples\Chat80\ndtabl.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\newdict.pl
+  Destination=%MAINDIR%\examples\Chat80\newdict.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\newg.pl
+  Destination=%MAINDIR%\examples\Chat80\newg.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\newtop.pl
+  Destination=%MAINDIR%\examples\Chat80\newtop.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\portray.pl
+  Destination=%MAINDIR%\examples\Chat80\portray.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\ptree.pl
+  Destination=%MAINDIR%\examples\Chat80\ptree.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\qplan.pl
+  Destination=%MAINDIR%\examples\Chat80\qplan.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\readin.pl
+  Destination=%MAINDIR%\examples\Chat80\readin.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\rivers.pl
+  Destination=%MAINDIR%\examples\Chat80\rivers.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\scopes.pl
+  Destination=%MAINDIR%\examples\Chat80\scopes.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\slots.pl
+  Destination=%MAINDIR%\examples\Chat80\slots.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\talkr.pl
+  Destination=%MAINDIR%\examples\Chat80\talkr.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\templa.pl
+  Destination=%MAINDIR%\examples\Chat80\templa.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\world0.pl
+  Destination=%MAINDIR%\examples\Chat80\world0.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\xgproc.pl
+  Destination=%MAINDIR%\examples\Chat80\xgproc.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\examples\Chat80\xgrun.pl
+  Destination=%MAINDIR%\examples\Chat80\xgrun.pl
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\Welcome.txt
+  Destination=%MAINDIR%\Welcome.txt
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\Copying ALS.txt
+  Destination=%MAINDIR%\Copying ALS.txt
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS Prolog Manual.pdf
+  Destination=%MAINDIR%\ALS Prolog Manual.pdf
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\Bullet.gif
+  Destination=%MAINDIR%\help\Bullet.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\Cvs\Root
+  Destination=%MAINDIR%\help\Cvs\Root
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\Cvs\Repository
+  Destination=%MAINDIR%\help\Cvs\Repository
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\Cvs\Entries
+  Destination=%MAINDIR%\help\Cvs\Entries
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\WebHelp.cab
+  Destination=%MAINDIR%\help\WebHelp.cab
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\WebHelp.zip
+  Destination=%MAINDIR%\help\WebHelp.zip
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alsdev_main-mac.gif
+  Destination=%MAINDIR%\help\alsdev_main-mac.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alsdev_main_unix.gif
+  Destination=%MAINDIR%\help\alsdev_main_unix.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alsdev_main_wins.gif
+  Destination=%MAINDIR%\help\alsdev_main_wins.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alsdev_main_wins_notes.gif
+  Destination=%MAINDIR%\help\alsdev_main_wins_notes.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelp00000001.gif
+  Destination=%MAINDIR%\help\alshelp00000001.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelp00000021.gif
+  Destination=%MAINDIR%\help\alshelp00000021.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelp0_cut.htm
+  Destination=%MAINDIR%\help\alshelp0_cut.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelp2.htm
+  Destination=%MAINDIR%\help\alshelp2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelp200000041.htm
+  Destination=%MAINDIR%\help\alshelp200000041.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelp200000043.htm
+  Destination=%MAINDIR%\help\alshelp200000043.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelp200000044.htm
+  Destination=%MAINDIR%\help\alshelp200000044.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelp200000074.htm
+  Destination=%MAINDIR%\help\alshelp200000074.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelp2_arrow.htm
+  Destination=%MAINDIR%\help\alshelp2_arrow.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelp2_colon.htm
+  Destination=%MAINDIR%\help\alshelp2_colon.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelp2_comma.htm
+  Destination=%MAINDIR%\help\alshelp2_comma.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelp2_semicolon.htm
+  Destination=%MAINDIR%\help\alshelp2_semicolon.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpASCII_Table.htm
+  Destination=%MAINDIR%\help\alshelpASCII_Table.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpEdit_Menu.htm
+  Destination=%MAINDIR%\help\alshelpEdit_Menu.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpFile_Menu.htm
+  Destination=%MAINDIR%\help\alshelpFile_Menu.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpListener_Window.htm
+  Destination=%MAINDIR%\help\alshelpListener_Window.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpPreferences_Dialog.htm
+  Destination=%MAINDIR%\help\alshelpPreferences_Dialog.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpProlog_Menu.htm
+  Destination=%MAINDIR%\help\alshelpProlog_Menu.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpProlog_to_Tcl_Type_Conversion.htm
+  Destination=%MAINDIR%\help\alshelpProlog_to_Tcl_Type_Conversion.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpThe_Find__dialog.htm
+  Destination=%MAINDIR%\help\alshelpThe_Find__dialog.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpTools_Menu.htm
+  Destination=%MAINDIR%\help\alshelpTools_Menu.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpWelcome.htm
+  Destination=%MAINDIR%\help\alshelpWelcome.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpabolish2.htm
+  Destination=%MAINDIR%\help\alshelpabolish2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpabort0.htm
+  Destination=%MAINDIR%\help\alshelpabort0.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpaccess2.htm
+  Destination=%MAINDIR%\help\alshelpaccess2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpalssystem1.htm
+  Destination=%MAINDIR%\help\alshelpalssystem1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpappend3.htm
+  Destination=%MAINDIR%\help\alshelpappend3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelparg3.htm
+  Destination=%MAINDIR%\help\alshelparg3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpassert12.htm
+  Destination=%MAINDIR%\help\alshelpassert12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpatendofstream01.htm
+  Destination=%MAINDIR%\help\alshelpatendofstream01.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpatom1.htm
+  Destination=%MAINDIR%\help\alshelpatom1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpatomchars2.htm
+  Destination=%MAINDIR%\help\alshelpatomchars2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpatomicinputdialog234.htm
+  Destination=%MAINDIR%\help\alshelpatomicinputdialog234.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpbufread24.htm
+  Destination=%MAINDIR%\help\alshelpbufread24.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcall1.htm
+  Destination=%MAINDIR%\help\alshelpcall1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcatch3.htm
+  Destination=%MAINDIR%\help\alshelpcatch3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcharcode2.htm
+  Destination=%MAINDIR%\help\alshelpcharcode2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpchdir1.htm
+  Destination=%MAINDIR%\help\alshelpchdir1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpclause23.htm
+  Destination=%MAINDIR%\help\alshelpclause23.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpclose1.htm
+  Destination=%MAINDIR%\help\alshelpclose1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcmalloc2.htm
+  Destination=%MAINDIR%\help\alshelpcmalloc2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcommandline1.htm
+  Destination=%MAINDIR%\help\alshelpcommandline1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcompare3.htm
+  Destination=%MAINDIR%\help\alshelpcompare3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcompiletime0.htm
+  Destination=%MAINDIR%\help\alshelpcompiletime0.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpconsult12.htm
+  Destination=%MAINDIR%\help\alshelpconsult12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcopyterm1.htm
+  Destination=%MAINDIR%\help\alshelpcopyterm1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcreateobject2.htm
+  Destination=%MAINDIR%\help\alshelpcreateobject2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcreateobject2___create_an_object.htm
+  Destination=%MAINDIR%\help\alshelpcreateobject2___create_an_object.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcurmod1.htm
+  Destination=%MAINDIR%\help\alshelpcurmod1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcurrentinput1.htm
+  Destination=%MAINDIR%\help\alshelpcurrentinput1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcurrentop3.htm
+  Destination=%MAINDIR%\help\alshelpcurrentop3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpcurrentprologflag2.htm
+  Destination=%MAINDIR%\help\alshelpcurrentprologflag2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpdatetime200000036.htm
+  Destination=%MAINDIR%\help\alshelpdatetime200000036.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpdatetime200000113.htm
+  Destination=%MAINDIR%\help\alshelpdatetime200000113.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpdefStruct2.htm
+  Destination=%MAINDIR%\help\alshelpdefStruct2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpdefineClass1.htm
+  Destination=%MAINDIR%\help\alshelpdefineClass1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpdisplayimage13.htm
+  Destination=%MAINDIR%\help\alshelpdisplayimage13.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpdynamic1.htm
+  Destination=%MAINDIR%\help\alshelpdynamic1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpexistsfile1.htm
+  Destination=%MAINDIR%\help\alshelpexistsfile1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpextendmainmenubar2.htm
+  Destination=%MAINDIR%\help\alshelpextendmainmenubar2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpfail0.htm
+  Destination=%MAINDIR%\help\alshelpfail0.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpfileselectdialog123.htm
+  Destination=%MAINDIR%\help\alshelpfileselectdialog123.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpfindterm5.htm
+  Destination=%MAINDIR%\help\alshelpfindterm5.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpflushinput1.htm
+  Destination=%MAINDIR%\help\alshelpflushinput1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpflushoutput01.htm
+  Destination=%MAINDIR%\help\alshelpflushoutput01.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpforcePrologInterrupt0.htm
+  Destination=%MAINDIR%\help\alshelpforcePrologInterrupt0.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpfunctor3.htm
+  Destination=%MAINDIR%\help\alshelpfunctor3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpgc0.htm
+  Destination=%MAINDIR%\help\alshelpgc0.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpgensym2.htm
+  Destination=%MAINDIR%\help\alshelpgensym2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpget01.htm
+  Destination=%MAINDIR%\help\alshelpget01.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpgetchar12.htm
+  Destination=%MAINDIR%\help\alshelpgetchar12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpgetcode12.htm
+  Destination=%MAINDIR%\help\alshelpgetcode12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpgetenv2.htm
+  Destination=%MAINDIR%\help\alshelpgetenv2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelphalt0.htm
+  Destination=%MAINDIR%\help\alshelphalt0.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpinfodialog123.htm
+  Destination=%MAINDIR%\help\alshelpinfodialog123.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpinittkalslib012.htm
+  Destination=%MAINDIR%\help\alshelpinittkalslib012.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpis2.htm
+  Destination=%MAINDIR%\help\alshelpis2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpleash1.htm
+  Destination=%MAINDIR%\help\alshelpleash1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelplength2.htm
+  Destination=%MAINDIR%\help\alshelplength2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelplisting0.htm
+  Destination=%MAINDIR%\help\alshelplisting0.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpmakegv1.htm
+  Destination=%MAINDIR%\help\alshelpmakegv1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpmakehashtable1.htm
+  Destination=%MAINDIR%\help\alshelpmakehashtable1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpmangle3.htm
+  Destination=%MAINDIR%\help\alshelpmangle3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpmember2.htm
+  Destination=%MAINDIR%\help\alshelpmember2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpmoduleclosure23.htm
+  Destination=%MAINDIR%\help\alshelpmoduleclosure23.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpname2.htm
+  Destination=%MAINDIR%\help\alshelpname2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpnot1.htm
+  Destination=%MAINDIR%\help\alshelpnot1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpnumberchars2.htm
+  Destination=%MAINDIR%\help\alshelpnumberchars2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpop3.htm
+  Destination=%MAINDIR%\help\alshelpop3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpopen34.htm
+  Destination=%MAINDIR%\help\alshelpopen34.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelppeekchar12.htm
+  Destination=%MAINDIR%\help\alshelppeekchar12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelppeekcode12.htm
+  Destination=%MAINDIR%\help\alshelppeekcode12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelppoll2.htm
+  Destination=%MAINDIR%\help\alshelppoll2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelppopupselectitems234.htm
+  Destination=%MAINDIR%\help\alshelppopupselectitems234.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpprintf1234.htm
+  Destination=%MAINDIR%\help\alshelpprintf1234.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpprocedures4.htm
+  Destination=%MAINDIR%\help\alshelpprocedures4.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpprocinfo5.htm
+  Destination=%MAINDIR%\help\alshelpprocinfo5.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpprolog.htm
+  Destination=%MAINDIR%\help\alshelpprolog.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpput1.htm
+  Destination=%MAINDIR%\help\alshelpput1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpputatom12.htm
+  Destination=%MAINDIR%\help\alshelpputatom12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpputchar12.htm
+  Destination=%MAINDIR%\help\alshelpputchar12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpputcode12.htm
+  Destination=%MAINDIR%\help\alshelpputcode12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpputstring12.htm
+  Destination=%MAINDIR%\help\alshelpputstring12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpread12.htm
+  Destination=%MAINDIR%\help\alshelpread12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelprecorda3.htm
+  Destination=%MAINDIR%\help\alshelprecorda3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelprepeat0.htm
+  Destination=%MAINDIR%\help\alshelprepeat0.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpretract12.htm
+  Destination=%MAINDIR%\help\alshelpretract12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpreverse2.htm
+  Destination=%MAINDIR%\help\alshelpreverse2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelprexec2.htm
+  Destination=%MAINDIR%\help\alshelprexec2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsaveimage2.htm
+  Destination=%MAINDIR%\help\alshelpsaveimage2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsee1.htm
+  Destination=%MAINDIR%\help\alshelpsee1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsend2.htm
+  Destination=%MAINDIR%\help\alshelpsend2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsetObjStruct3.htm
+  Destination=%MAINDIR%\help\alshelpsetObjStruct3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsetPrologInterrupt1.htm
+  Destination=%MAINDIR%\help\alshelpsetPrologInterrupt1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsetinput1.htm
+  Destination=%MAINDIR%\help\alshelpsetinput1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsetlinelength2.htm
+  Destination=%MAINDIR%\help\alshelpsetlinelength2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsetof3.htm
+  Destination=%MAINDIR%\help\alshelpsetof3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsetstreamposition2.htm
+  Destination=%MAINDIR%\help\alshelpsetstreamposition2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpskip1.htm
+  Destination=%MAINDIR%\help\alshelpskip1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsort2.htm
+  Destination=%MAINDIR%\help\alshelpsort2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsprintf3.htm
+  Destination=%MAINDIR%\help\alshelpsprintf3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpspy01.htm
+  Destination=%MAINDIR%\help\alshelpspy01.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpstatistics02.htm
+  Destination=%MAINDIR%\help\alshelpstatistics02.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpstreamposition3.htm
+  Destination=%MAINDIR%\help\alshelpstreamposition3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpstreamproperty2.htm
+  Destination=%MAINDIR%\help\alshelpstreamproperty2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsubatom5.htm
+  Destination=%MAINDIR%\help\alshelpsubatom5.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpsystem1.htm
+  Destination=%MAINDIR%\help\alshelpsystem1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelptclcall3.htm
+  Destination=%MAINDIR%\help\alshelptclcall3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelptclcoercenumber3.htm
+  Destination=%MAINDIR%\help\alshelptclcoercenumber3.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelptcldelete1.htm
+  Destination=%MAINDIR%\help\alshelptcldelete1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelptclnew1.htm
+  Destination=%MAINDIR%\help\alshelptclnew1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelptell1.htm
+  Destination=%MAINDIR%\help\alshelptell1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelptermchars2.htm
+  Destination=%MAINDIR%\help\alshelptermchars2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelptrace01.htm
+  Destination=%MAINDIR%\help\alshelptrace01.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelptrue0.htm
+  Destination=%MAINDIR%\help\alshelptrue0.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpttyflush0.htm
+  Destination=%MAINDIR%\help\alshelpttyflush0.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuiaalloc2.htm
+  Destination=%MAINDIR%\help\alshelpuiaalloc2.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled.htm
+  Destination=%MAINDIR%\help\alshelpuntitled.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000001.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000001.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000002.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000002.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000039.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000039.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000040.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000040.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000067.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000067.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000068.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000068.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000117.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000117.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000118.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000118.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000125.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000125.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000126.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000126.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000135.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000135.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000144.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000144.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000145.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000145.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpuntitled00000152.htm
+  Destination=%MAINDIR%\help\alshelpuntitled00000152.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpvar1.htm
+  Destination=%MAINDIR%\help\alshelpvar1.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpwrite12.htm
+  Destination=%MAINDIR%\help\alshelpwrite12.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\alshelpyesnodialog234.htm
+  Destination=%MAINDIR%\help\alshelpyesnodialog234.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\atomic_input.gif
+  Destination=%MAINDIR%\help\atomic_input.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\edit_menu_notes.gif
+  Destination=%MAINDIR%\help\edit_menu_notes.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\error_win.gif
+  Destination=%MAINDIR%\help\error_win.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\file_menu_notes.gif
+  Destination=%MAINDIR%\help\file_menu_notes.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\file_sel-1.gif
+  Destination=%MAINDIR%\help\file_sel-1.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\find_dialog.gif
+  Destination=%MAINDIR%\help\find_dialog.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\help.hhh
+  Destination=%MAINDIR%\help\help.hhh
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\hh_ndx.htm
+  Destination=%MAINDIR%\help\hh_ndx.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\hh_ndxf.htm
+  Destination=%MAINDIR%\help\hh_ndxf.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\hh_toc.htm
+  Destination=%MAINDIR%\help\hh_toc.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\hh_tocf.htm
+  Destination=%MAINDIR%\help\hh_tocf.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\ide_settings.gif
+  Destination=%MAINDIR%\help\ide_settings.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\index.hhk
+  Destination=%MAINDIR%\help\index.hhk
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\info_dialog_box.gif
+  Destination=%MAINDIR%\help\info_dialog_box.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\logfile.htm
+  Destination=%MAINDIR%\help\logfile.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\popup_list_choice-2.gif
+  Destination=%MAINDIR%\help\popup_list_choice-2.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\popup_list_select-1.gif
+  Destination=%MAINDIR%\help\popup_list_select-1.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\pow_wow_dancer.gif
+  Destination=%MAINDIR%\help\pow_wow_dancer.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\preferences.gif
+  Destination=%MAINDIR%\help\preferences.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\prolog_menu_notes.gif
+  Destination=%MAINDIR%\help\prolog_menu_notes.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\start.htm
+  Destination=%MAINDIR%\help\start.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\start_i.htm
+  Destination=%MAINDIR%\help\start_i.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\toc.hhc
+  Destination=%MAINDIR%\help\toc.hhc
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\tools_menu_notes.gif
+  Destination=%MAINDIR%\help\tools_menu_notes.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\x_menu-1.gif
+  Destination=%MAINDIR%\help\x_menu-1.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\yes_no-1.gif
+  Destination=%MAINDIR%\help\yes_no-1.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\help\yes_no-2.gif
+  Destination=%MAINDIR%\help\yes_no-2.gif
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\als_help.htm
+  Destination=%MAINDIR%\als_help.htm
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\ALS_Prolog_Support\alspro.lib
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\ALS_Prolog_Support\alspro.lib
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\ALS_Prolog_Support\alspi.h
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\ALS_Prolog_Support\alspi.h
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\ALS_Prolog_Support\alspi_slib.h
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\ALS_Prolog_Support\alspi_slib.h
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\ALS_Prolog_Support\alspi_slib.c
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\ALS_Prolog_Support\alspi_slib.c
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Documentation\Foreign Interface Manual.pdf
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Documentation\Foreign Interface Manual.pdf
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Documentation\Foreign Interface Reference.pdf
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Documentation\Foreign Interface Reference.pdf
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Examples\Examples Read Me.txt
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Examples\Examples Read Me.txt
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Examples\Even_Example\even.c
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Examples\Even_Example\even.c
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Examples\Even_Example\even.mak
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Examples\Even_Example\even.mak
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Examples\Even_Example\even_x86.mcp
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Examples\Even_Example\even_x86.mcp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Examples\QA_Example\qa.c
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Examples\QA_Example\qa.c
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Examples\QA_Example\know.pro
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Examples\QA_Example\know.pro
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Examples\QA_Example\Q_and_A_x86.mcp
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Examples\QA_Example\Q_and_A_x86.mcp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Examples\QA_Example\qa.mak
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Examples\QA_Example\qa.mak
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Examples\Tutorial_Example\examples.c
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Examples\Tutorial_Example\examples.c
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Examples\Tutorial_Example\examples_x86.mcp
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Examples\Tutorial_Example\examples_x86.mcp
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\ALS_Prolog_Foreign_SDK\Examples\Tutorial_Example\examples.mak
+  Destination=%MAINDIR%\ALS_Prolog_Foreign_SDK\Examples\Tutorial_Example\examples.mak
+  Flags=0000000000000010
+end
+item: Install File
+  Source=d:\als_prolog\win32\ALS Prolog\alspro.exe
+  Destination=%MAINDIR%\alspro.exe
+  Flags=0000000000000010
+end
+item: Install File
   Source=.\Unwise.exe
   Destination=%MAINDIR%\Unwise.exe
   Flags=0000000000000010

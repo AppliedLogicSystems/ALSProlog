@@ -16,31 +16,43 @@
  |	X can be alpha-numeric; alphas are all UC.
  |
  *============================================================*/
-sn :- write('Type [30,perm] = '), read(Type), dsn(Type).
-dsn(30) :-
-	date(D0),
-	date_plus_30(D0, D),
-	serial_nums:gen_30day(D, day30-prof, Key),
-	write(key=Key),nl.
+module serial_nums.
 
-	%% Junk, for now (get library stuff from PM project):
-date_plus_30(YY/MM0/DD, YY/MM/DD)
-	:-
-	MM0 < 12, !, MM is MM0+1.
-date_plus_30(YY0/1/DD, N, YY/MM/DD)
-	:-
-	YY is YY0+1.
+dp30(1999/12/DD, 1999/12/31) :-!.
+dp30(1999/11/DD, 1999/12/DD) :-!.
+dp30(1999/10/31, 1999/11/30) :-!.
+dp30(1999/10/DD, 1999/11/DD) :- DD =< 30, !.
+dp30(1999/9/DD, 1999/10/DD) :-!.
+
+
+endmod.
 
 module serial_nums.
 
+/****
 export xt/0.
 xt :-
 	gen_30day(1999/10/29, day30-prof, Key),
 	write(Key),nl.
 
+export xy/0.
+xy :-
+%	gen_30day(1999/10/29, permanent-prof, Key),
+	date(Today),
+	gen_k_1(Today, permanent-prof, G1, G4),
+	krspnd(G1, G2),
+	krspnd(G4, G3),
+	builtins:split4dash(KCs, G1,G2,G3,G4),
+	atom_codes(Key, KCs),
+
+	write(Key),nl.
+****/
+
+
 gen_30day(Y/M/D, Type, Key)
 	:-
-	gen_k_1(Y/M/D, Type, G1, G4),
+dp30(Y/M/D,ND30),
+	gen_k_1(ND30, Type, G1, G4),
 	krspnd(G1, G2),
 	krspnd(G4, G3),
 	builtins:split4dash(KCs, G1,G2,G3,G4),
