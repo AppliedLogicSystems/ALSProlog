@@ -30,14 +30,42 @@ use tk_alslib.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% 			TCLTK-BASED SHELL STARTUP			%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	%% Cold startup in saved image, from TTY-command line start (i.e,unix):
+export start_alsdev/0.
+start_alsdev
+	:-
+	init_tk_alslib(shl_tcli,Shared),
+	alsdev_splash(Shared),
+	make_clinfo(CLInfo, alsdev, true), 	% verbosity = quiet
+	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,CLInfo),
+	assertz(command_line(ResidualCommandLine)),
+	setup_debugger_stubs,
+	setup_search_dirs(CLInfo),
+	ss_load_dot_alspro(CLInfo),
+	library_setup,
+	load_cl_files(CLInfo),
+	process_cl_asserts(CLInfo),
+	alsdev(Shared).
+
+	%% Warm startup (given that tty start_shell(prolog_shell) has run):
 export alsdev/0.
 alsdev
 	:-
+	consultmessage(CurValue),
+	set_consult_messages(true),
 	init_tk_alslib(shl_tcli,Shared),
+	set_consult_messages(CurValue),
+	alsdev(Shared).
 
+export alsdev/1.
+alsdev(Shared)
+	:-
 	pathPlusFile(Shared, 'alsdev.tcl', ALSDEVTCL),
 	tcl_call(shl_tcli, [source, ALSDEVTCL], _),
 		%% At this point, the windows have been created;
+
+	tcl_call(shl_tcli, [destroy,'.als_splash_screen'], _),
 
 	open(tk_win(shl_tcli, '.topals.txwin.text'), read, ISS, 
 		[alias(shl_tk_in_win)
@@ -131,6 +159,35 @@ alsdev
 	change_debug_io(debugwin),
 
 	builtins:prolog_shell(ISS,OSS,alsdev).
+
+
+alsdev_splash(TclPath)
+	:-
+%	subPath(TPL, TclPath),
+%	append(TPL, [images,'turnstile_splash.gif'], TPLI),
+%	tcl_call(shl_tcli, [file,join | TPLI], SPP),
+	tcl_call(shl_tcli, [file,join,TclPath,'turnstile_splash.gif'], SPP),
+
+	catenate('image create photo als_splash_gif -file ',SPP,Splashy),
+	CL= [
+		'wm withdraw .',
+		'toplevel .als_splash_screen -bd 2 -relief flat',
+		'wm withdraw .als_splash_screen ',
+		Splashy,
+		'wm overrideredirect .als_splash_screen 1 ',
+		'label .als_splash_screen.label -image als_splash_gif -bd 1 -relief flat ',
+		'pack .als_splash_screen.label -side top -expand 1 -fill both ',
+		'wm geometry .als_splash_screen +270+200 ',
+		'wm deiconify .als_splash_screen ',
+		'update idletasks '],
+	list_tcl_eval(CL, shl_tcli, _),
+	tcl_call(shl_tcli, [update],_).
+
+
+
+
+
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			ALARM MANAGEMENT
@@ -466,7 +523,7 @@ start_src_trace(FileName)
 	add_src_trace_rec(Rec),
 	get_dbfr_tbl(DBFRTBL),
 	mangle(FCG, DBFRTBL, Rec),
-
+	!,
 	tcl_call(shl_tcli, [wm,deiconify,WinName], _).
 
 inverted_index(LineIndex, InvertedLineIndex)
@@ -538,7 +595,14 @@ showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-!,
 %printf('+#+%t: $dbg_aph(%t,%t,%t)\n',[fail,ClsGrp,Start,End]),flush_output,
-	color_my_port(ClsGrp,Start,End,fail,head_tag).
+	color_my_port(ClsGrp,Start,End,fail,head_tag),
+	fail.
+	
+showGoalToUserWin(redo,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
+	:-!,
+%printf('+#+%t: $dbg_aph(%t,%t,%t)\n',[fail,ClsGrp,Start,End]),flush_output,
+	color_my_port(ClsGrp,Start,End,redo,head_tag),
+	fail.
 	
 showGoalToUserWin(Port,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-!.
@@ -556,7 +620,13 @@ showGoalToUserWin(call,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 showGoalToUserWin(redo,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 	:-!,
 %printf('-#-%t: $dbg_aphe(%t,%t,%t)\n',[Port,ClsGrp,Start,End]),flush_output,
-	clear_my_tag(ClsGrp,Start,End,TagName).
+	color_my_port(ClsGrp,Start,End,redo,head_tag),
+%	clear_my_tag(ClsGrp,Start,End,TagName),
+	fail.
+
+showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
+	:-!,
+	fail.
 
 showGoalToUserWin(Port,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 	:-!.
@@ -652,7 +722,9 @@ showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
 	write_term(debugger_output, Module:XGoal,    [lettervars(false)]),
 	flush_output(debugger_output),
 	get_mrfcg(MRFCG),
+
 %printf('AllOthers:Port=%t MRFCG=%t\n',[Port,MRFCG]),
+
 	(MRFCG = 0 -> true
 		;
 		((Port=call; Port=redo) -> true
@@ -661,6 +733,7 @@ showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
 		)
 	),
 	tcl_call(shl_tcli, [set_status_debugwin,Port,Box,Depth], _),
+	!,
 	getResponse(tcltk,Port,Box,Depth, Module, XGoal, Response).
 
 
@@ -745,6 +818,7 @@ display_st_record(StartLine,StartChar,EndLine,EndChar,
 						Color,TextWin, TagName, Rec)
 	:-
 	configure_tag(TagName, TextWin,['-background',Color]),
+	tcl_call(shl_tcli,[see_text,TextWin,StartLine,StartChar,EndLine,EndChar],_),
 	!,
 	set_dbstr(TagName, Rec, i(StartLine,StartChar,EndLine,EndChar)).
 

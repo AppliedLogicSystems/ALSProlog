@@ -1540,6 +1540,7 @@ check_file_setup(Module, Pred, Arity, SrcFilePath, DebugType)
 	all_procedures(Module, Pred, Arity, DBRef),
 	'$clauseinfo'(DBRef,_,_,ClauseGroup),
 	builtins:file_clause_group(BaseFileName, ClauseGroup),
+	!,
 	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options).
 
 reload_debug(normal, SrcFilePath)

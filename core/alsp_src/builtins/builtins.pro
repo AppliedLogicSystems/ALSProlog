@@ -495,6 +495,16 @@ export getPrologInterrupt/1.
  |
  | The source extracter
  *------------------------------------------------------------------*/
+ /*
+:-dynamic(doitt/0).
+internal_debug(Item)
+	:-
+	doitt,
+	!.
+internal_debug(Item)
+	:-
+	pbi_write(Item),pbi_nl,pbi_ttyflush.
+*/
 
 '$source'(DBRef,Clause)
 	:-
@@ -515,37 +525,31 @@ export getPrologInterrupt/1.
 		% it here simplifies the failing behaviour of
 		% '$source' by not having anything fail until after
 		% the '$endSource'/1.
-
 	'$clauseinfo'(DBRef,_,ProcHandle,_),
 	'$procinfo'(ProcHandle,CMod,F,A,_,_),
 	functor(Head,F,A),
 
 		% Set the s/2 interrupt. We have no subgoals and
 		% ForReal is used to stop the decompiler.
-
 	setPrologInterrupt('$source'(ForReal,CMod,[])),
 
 		% Start extracting.
-
 	callWithDelayedInterrupt(builtins,jump(DBRef,Head)),
 
 		% This goal is never run, but is used to stop the
 		% extracter.
-
 	'$endSource'(ForReal),
 	getPrologInterrupt('$source'(_,_,Goals)),
 
 		% Make the clause to be returned.
-
 	fixBody(Goals,Head,Clause,Mode),
 
 		% Reset old magic value.
-
 	setPrologInterrupt(OldMagic).
+
 
     	%% Failed for some reason. Fix interrupt 
 		%% register and really die:
-
 '$source'(DBRef,ForReal,Clause,OldMagic,Mode)
 	:-
 		% Reset old magic value.
@@ -556,14 +560,24 @@ export getPrologInterrupt/1.
 
 fixBody([],Head,Head,Mode)
 	:- !.
+/*   $dbg_aph no longer occurs as the goal in
+	a "fact body" -- replaced by $dbg_apf;
+
 fixBody(['$dbg_aph'(_,_,_)],Head,Head,Mode)
 	:- !.
+*/
 fixBody(['$dbg_apf'(_,_,_)],Head,Head,Mode)
 	:- !.
+
 fixBody([First|Rest],Head,(Head :- Body),Mode)
 	:-
 	goalFix(First,XFirst,Mode),
+	!,
 	fixBody0(Rest,XFirst,Body,Mode).
+
+fixBody([_|Rest],Head,Clause,Mode)
+	:-
+	fixBody(Rest,Head,Clause,Mode).
  
 fixBody0([],Last,Last,Mode)
 	:- !.

@@ -37,10 +37,11 @@ start_shell(DefaultShellCall)
 start_shell0(DefaultShellCall)
 	:-
 	setup_debugger_stubs,
+	make_clinfo(CLInfo, DefaultShellCall, false),	% verbosity = verbose
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,CLInfo),
 	assertz(command_line(ResidualCommandLine)),
 	setup_search_dirs(CLInfo),
-	ss_load_dot_alspro,
+	ss_load_dot_alspro(CLInfo),
 	output_system_banner(CLInfo),
 	library_setup,
 	load_cl_files(CLInfo),
@@ -50,6 +51,10 @@ start_shell0(DefaultShellCall)
 	user:ShellCall.
 
 start_shell0(_).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% "Early" shell setup support routines
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 setup_debugger_stubs
 	:-
@@ -62,6 +67,19 @@ setup_debugger_stubs
 		  		  (spyWhen)/2, (nospy)/0, (nospy)/1, (nospy)/3,
 		  		  spying/0, debugging/0, list_spypoints/0,set_debug_io/1 ]).
 
+make_clinfo( CLInfo, DefaultShellCall, Verbosity)
+	:-
+	CLInfo = clinfo(true,				/* -g: goal to run */
+					Verbosity,			/* -v/-q: verbosity */
+					[],					/* files to consult */
+					ImageName,
+					default,			/* -nwd: debugger to set up */
+					[],					/* -s init search list */
+					DefaultShellCall,	/* shell/or not */
+					[], 				/* Command-line asserts */
+					true				/* Load .alspro: true = do it */
+					). 				
+
 get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,CLInfo)
 	:-
 	%% Get the raw command line and assert it.
@@ -71,14 +89,6 @@ get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,CLInfo)
 	%% get the command line, but ignore the image name
 	(RawCommandLine = [Image | CommandLine] ; CommandLine = []),
 	!,
-	CLInfo = clinfo(true,				/* -g: goal to run */
-					false,				/* -v/-q: verbosity */
-					[],					/* files to consult */
-					ImageName,
-					default,			/* -nwd: debugger to set up */
-					[],					/* -s init search list */
-					DefaultShellCall,	/* shell/or not */
-					[]),				/* Command-line asserts */
 	ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo).
 
 setup_search_dirs(CLInfo)
@@ -110,8 +120,9 @@ library_setup
 
 load_cl_files(CLInfo)
 	:-
+	arg(2, CLInfo, Verbosity),
 	arg(3, CLInfo, Files),
-	set_consult_messages(ConsultNoise),
+	set_consult_messages(Verbosity),
 	ss_load_files(Files).
 
 process_cl_asserts(CLInfo)
@@ -276,6 +287,12 @@ ss_parse_command_line(['-shell', ShellName | T], L, CLInfo)
 	mangle(7, CLInfo, ShellName),
 	ss_parse_command_line(T, L, CLInfo).
 
+	%% -no_dot_alspro: suppress loading .alspro (or alspro.pro):
+ss_parse_command_line(['-no_dot_alspro' | T], L, CLInfo)
+	:-!,
+	mangle(9, CLInfo, false),
+	ss_parse_command_line(T, RestL, CLInfo).
+
 	%% Otherwise: should be a file to be loaded:
 ss_parse_command_line([File | T], L, CLInfo)
 	:-
@@ -380,39 +397,45 @@ ss_load_files([F | T])
 /*---------------------------------------
  |	ss_load_dot_alspro
  *--------------------------------------*/
-ss_load_dot_alspro
+ss_load_dot_alspro(CLInfo)
 	:-
+	arg(9, CLInfo, false),
+	!.
+
+ss_load_dot_alspro(CLInfo)
+	:-
+	arg(2, CLInfo, Verbosity),
 	als_system(L),
 	dmember(os=OS, L),
 	(OS = macos -> Files = ['alspro.pro'] ;
 		OS = mswin32 -> Files = ['alspro.pro'] ;
 			Files = ['alspro.pro','.alspro']
 	),
-	ss_load_dot_alspros(Files).
+	ss_load_dot_alspros(Files, Verbosity).
 
-ss_load_dot_alspros([]).
-ss_load_dot_alspros([File | Files])
+ss_load_dot_alspros([], _).
+ss_load_dot_alspros([File | Files], Verbosity)
 	:-
-	ss_load_dot_alspro(File),
+	ss_load_the_dot_alspro(File, Verbosity),
 	!,
-	ss_load_dot_alspros(Files).
+	ss_load_dot_alspros(Files, Verbosity).
 
-ss_load_dot_alspro(AutoFile)
+ss_load_the_dot_alspro(AutoFile, Verbosity)
 	:-
 	exists_file(AutoFile),
 	!,
-	reconsult(AutoFile).
+	consult(AutoFile, [consult(false),quiet(Verbosity)]).
 
-ss_load_dot_alspro(AutoFile)
+ss_load_the_dot_alspro(AutoFile, Verbosity)
 	:-
 		%% What about DOS (also Mac, etc.) here?:
 	getenv('HOME',HOME),
 	pathPlusFile(HOME,AutoFile,File),
 	exists_file(File),
 	!,
-	reconsult(File).
+	consult(File, [consult(false),quiet(Verbosity)]).
 
-ss_load_dot_alspro(_).
+ss_load_the_dot_alspro(_, _).
 
 /*-------------------------------------------------
  | print_banner/2
