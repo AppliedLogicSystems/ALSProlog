@@ -6,6 +6,7 @@ Contents:
    - WARRANTY
    - CD ORGANIZATION
    - MANUAL
+   - HELP SYSTEM
    - COPYING ALS
 
 LICENSE
@@ -132,10 +133,15 @@ After the installation is complete, the ALS Prolog HELP system is contained in t
 	help
 
 directory inside the installation directory.  It consists of a large number of
-*.htm and *.gif files, together with a number of additonal files.  To view
-the ALS Prolog Help system, simply open the file
+*.htm and *.gif files, together with a number of additonal files.  In addition,
+there is one file
 
-	start.htm
+	als_help.htm 
+
+in the installation directory.  To view the ALS Prolog Help system, simply open the 
+file
+
+	als_help.htm
 
 in your browser.
 
@@ -150,6 +156,7 @@ is included with this distribution.
 
        Applied Logic Systems, Inc.
        PO Box 400175, Cambridge, MA 02140 USA
-       Email: support@als.com   Web: http://www.als.com
+	   Web: http://www.als.com
+       Email: support@als.com   
        Fax: (617) 497-3963 Tel: (617) 497-0100   
 
