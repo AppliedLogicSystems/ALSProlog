@@ -1,0 +1,15 @@
+SDK_DIR = ../../alsp_src/generic
+
+VPATH=../common
+
+all: security.psl
+
+security.psl: ../common/security.c ../common/generic_makefile Makefile
+	gcc -fpic -shared $(PSL_LINK) \
+	-o security.psl -I$(SDK_DIR) \
+	    ../common/security.c $(SDK_DIR)/alspi_slib.c \
+	/usr/local/lib/unix_e.o /usr/local/lib/unix_m2.o \
+	/usr/local/lib/low_io.o -lc
+
+clean:
+	rm -f security.psl

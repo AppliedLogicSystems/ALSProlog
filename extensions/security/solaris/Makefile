@@ -1,0 +1,10 @@
+# In order to avoid unwanted runtime linking with the main ALS Prolog
+# executable, use the -B symbolic switch.
+PSL_LINK = -Xlinker -s
+#-Xlinker -B -Xlinker symbolic
+
+# By default Solaris does not search /usr/local/lib for shared objects.
+# The work around is to have the linker add the path.
+RUNTIME_LINK = -Xlinker -R/usr/local/lib
+
+include ../common/generic_makefile
