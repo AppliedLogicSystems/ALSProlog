@@ -1,9 +1,9 @@
 /*===============================================================*
  *                      version.h
- *       Copyright (c) 1990-1995 by Applied Logic Systems, Inc.
+ *       Copyright (c) 1990-1996 by Applied Logic Systems, Inc.
  *
- *          Version number - Sun Feb 4 18:29:07 EST 1996
+ *          Version number - Thu Apr 4 09:28:36 EST 1996
  *===============================================================*/
 #ifndef SysVersionNum
-#define SysVersionNum "1-76"
+#define SysVersionNum "2.0"
 #endif /* SysVersionNum */
