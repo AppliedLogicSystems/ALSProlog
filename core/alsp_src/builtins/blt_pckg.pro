@@ -64,6 +64,7 @@ base_obp_list([
     ':alsdir:builtins:blt_io.obp',
     ':alsdir:builtins:blt_lib.obp',
     ':alsdir:builtins:blt_msg.obp',
+    ':alsdir:builtins:blt_misc.obp',
     ':alsdir:builtins:blt_pckg.obp',
     ':alsdir:builtins:blt_shl.obp',
     ':alsdir:builtins:blt_std.obp',
