@@ -487,12 +487,17 @@ synth_unit(actions, XSpcTerms, Code, CodeTail)
 	:-
 	bagof(action(Act,X)-B, member(action(Act,X)=B, XSpcTerms), InitActList),
 	!,
-	((dmember(action(quit,_)-_, InitActList); 
-			dmember(quit_action=QA, XSpcTerms), dmember(action(QA,_)-_,InitActList))
-		->
-		ActList = InitActList
+	(dmember(action(quit,_)-_, InitActList) ->
+		ActList = InitActList,
+		XXSpcTerms = XSpcTerms
 		;
-		ActList = [action(quit,Info)-true | InitActList]
+		((dmember(quit_action=QA, XSpcTerms), dmember(action(QA,_)-_,InitActList)) ->
+			ActList = InitialActList,
+			XXSpcTerms = [quit_alias(QAA) | XSpcTerms]
+			;
+			ActList = [action(quit,Info)-true | InitActList],
+			XXSpcTerms = XSpcTerms
+		)
 	),
 	bagof(A, [X,B]^member(action(A,X)-B,ActList), Acts),
 
@@ -500,24 +505,14 @@ synth_unit(actions, XSpcTerms, Code, CodeTail)
 	dmember(act_on=ActOnName, XSpcTerms),
 	GInfoVar = '%lettervar%'('Info'),
 	build_act_clauses(ActList,  GInfoVar, LoopName, ActOnName, 
-						CodeTail, XSpcTerms, ActClauses),
+						CodeTail, XXSpcTerms, ActClauses),
 	Code = [nl,action_list(Acts),nl | ActClauses].
 
 synth_unit(actions, XSpcTerms, Code, CodeTail)
 	:-
 	bagof(action(ACd,Act,X)-B, member(action(ACd,Act,X)=B, XSpcTerms), InitActList),
 	!,
-	((dmember(action(quit,_)-_, InitActList) 
-			;
-			dmember(quit_action=QA, XSpcTerms), dmember(action(QA,_)-_,InitActList)
-			;
-			dmember(quit_action=QA, XSpcTerms), 
-				(dmember(action(QA,_,_)-_,InitActList) ; dmember(action(_,QA,_)-_,InitActList)))
-		->
-		ActList = InitActList
-		;
-		ActList = [action(quit,Info)-true | InitActList]
-	),
+	setup_quit2(InitActList, XSpcTerms, ActList, XXSpcTerms),
 	bagof(A, [C,X,B]^member(action(C,A,X)-B,ActList), Acts),
 	bagof(C, [A,X,B]^member(action(C,A,X)-B,ActList), Codes),
 
@@ -525,8 +520,23 @@ synth_unit(actions, XSpcTerms, Code, CodeTail)
 	dmember(act_on=ActOnName, XSpcTerms),
 	GInfoVar = '%lettervar%'('Info'),
 	build_act_clauses(ActList,  GInfoVar, LoopName, ActOnName, 
-						CodeTail, XSpcTerms, ActClauses),
+						CodeTail, XXSpcTerms, ActClauses),
 	Code = [nl,action_list(Acts),nl,code_list(Codes) | ActClauses].
+
+setup_quit2(InitActList, XSpcTerms, InitActList, XSpcTerms)
+	:-
+	dmember(action(quit,_)-_, InitActList), !.
+
+setup_quit2(InitActList, XSpcTerms, InitActList, [quit_alias(QAA) | XSpcTerms])
+	:-
+	dmember(quit_action=QA, XSpcTerms), 
+	(dmember(action(QA,QAA,_)-_,InitActList) 
+		; dmember(action(_,QA,QAA)-_,InitActList)),
+	!.
+
+setup_quit2(InitActList, XSpcTerms, [action(quit,Info)-true | InitActList], XSpcTerms).
+
+
 
 build_act_clauses([], _, LoopName,ActOnName,CodeTail, _, [DefaultClause | CodeTail])
 	:-
@@ -572,9 +582,34 @@ build_act(default,default,GInfoVar,default,LoopName,ActOnName,XSpcTerms,DefaultC
 	(What = '$badInput$'(OutWhat) -> true ; OutWhat = What),
 	Body = (printf('Unknown request: %t\n\n',[OutWhat]), ALoop).
 
+build_act(Act,LInfoVar,GInfoVar,QB,LoopName,ActOnName,XSpcTerms,AClause)
+	:-
+	dmember(quit_alias(Act), XSpcTerms),
+	!,
+	AClause = (AHead :- Body),
+	(var(LInfoVar) ->
+		LInfoVar = GInfoVar
+		;
+		true
+	),
+	AHead =.. [ActOnName, Act, LInfoVar],
+	dmember(banner=Banner,XSpcTerms),
+	catenate(['Exiting ',Banner,'\n'],Msg),
+	(QB = true ->
+		Body = printf(Msg,[])
+		;
+		Body = (QB,printf(Msg,[]))
+	).
+
 build_act(Act,LInfoVar,GInfoVar,Body,LoopName,ActOnName,XSpcTerms,AClause)
 	:-
-	AClause = (AHead :- Body, ALoop),
+	(dmember(top_catch = top_catch(CBall,LInfoVar,ErrExp), XSpcTerms) ->
+		AClause = (AHead :- CatchBody, ALoop),
+		CatchBody = catch(Body, CBall, ErrExp),
+		CBall = '%lettervar%'('Ball')
+		;
+		AClause = (AHead :- Body, ALoop)
+	),
 	(var(LInfoVar) ->
 		LInfoVar = GInfoVar
 		;

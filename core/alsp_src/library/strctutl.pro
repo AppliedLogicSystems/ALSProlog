@@ -13,6 +13,7 @@
 module builtins.
 export locate_struct/3.
 export delete_struct/3.
+export set_all_args/4.
 
 /*!------------------------------------------------------------*
  |	locate_struct/3
@@ -76,6 +77,25 @@ delete_struct0(Tail, List, Key, Term)
 	:-
 	Tail = [_|MoreTail],
 	delete_struct0(MoreTail, Tail, Key, Term).
+
+/*!---------------------------------------------------------------
+ |	set_all_args/4
+ |	set_all_args(Start,End,Term,ArgVal)	
+ |	set_all_args(+,+,+,+)	
+ |
+ |	-	sets args Start to End of Term to ArgVal using arg/3
+ *!--------------------------------------------------------------*/
+
+set_all_args(Cur,Size,FF,ArgVal)
+	:-
+	Cur > Size, 
+	!. 
+
+set_all_args(Cur,Size,FF,ArgVal)
+	:-
+	arg(Cur,FF,ArgVal),
+	Next is Cur +1,
+	set_all_args(Next,Size,FF,ArgVal).
 
 endmod.
 
