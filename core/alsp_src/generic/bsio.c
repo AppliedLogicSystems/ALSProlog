@@ -371,7 +371,7 @@ static int console_io(int port, char *buf, size_t size)
 	}
 #endif
     	if (console_read) return console_read(buf, size);
-    	else return -1;
+    	else return 0;
     	break;
     case CONSOLE_WRITE:
 	if (console_write) return console_write(buf, size);

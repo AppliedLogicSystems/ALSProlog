@@ -83,3 +83,8 @@ double os_realtime(void)
 	Microseconds(&now);
 	return UW2SEC(now) - process_start_time;	
 }
+
+int os_set_timer(double initial, double interval)
+{
+	return 1;
+}
