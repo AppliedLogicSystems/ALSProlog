@@ -315,7 +315,7 @@ pbi_statistics()
 	 (PWord) ((unsigned long) wm_gvbase - (unsigned long) wm_trailbase),
 		   WTP_INTEGER);
     w_install_argn(item, 5,
-	  (PWord) ((unsigned long) wm_gvbase - (unsigned long) wm_heapbase),
+	  (PWord) ((unsigned long) wm_gvbase - (unsigned long) wm_heapbase + 4),
 		   WTP_INTEGER);
 
     w_mk_list(&lv, &lt);
