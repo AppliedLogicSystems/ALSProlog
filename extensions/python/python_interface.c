@@ -7,7 +7,7 @@ See als_python_guide.html for documentation.
 5/3 1
 5/4 8-9 3-7 10-12
 5/5 12-130
-5/5 7
+5/5 7-11 1-6
 
 */
 
