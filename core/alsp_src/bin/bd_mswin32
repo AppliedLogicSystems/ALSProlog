@@ -20,6 +20,7 @@ cp $1/bld-port/tconfig.in $2/bld-port/tconfig.h
 cp $1/port/mswin32/alspro_lib.prj.sit.hqx $2/bld-port/
 cp $1/port/mswin32/alspro_dll.prj.sit.hqx $2/bld-port/
 cp $1/port/mswin32/alspro_b.prj.sit.hqx $2/bld-port/
+cp $1/port/mswin32/testdll.x86.prj.sit.hqx $2/bld-port/
 
 cp $1/port/mswin32/package.bat $2/bld-port/
 cp $1/port/mswin32/testrun.bat $2/bld-port/
