@@ -163,7 +163,7 @@ alsdev(Shared)
 alsdev_splash(TclPath)
 	:-
 	tcl_call(shl_tcli, [file,join,TclPath,'turnstile_splash.gif'], SPP),
-	catenate(['image create photo als_splash_gif -file \{',SPP,'\}'],Splashy),
+	catenate(['image create photo als_splash_gif -file \\{',SPP,'\\}'],Splashy),
 	CL= [
 		'wm withdraw .',
 		'toplevel .als_splash_screen -bd 2 -relief flat',
