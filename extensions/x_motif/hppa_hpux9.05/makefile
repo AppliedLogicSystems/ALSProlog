@@ -10,6 +10,7 @@ export CC = gcc
 export LINK = -shared -fPIC -Xlinker -s
 export LIBS =	-L/usr/lib/X11R5  -L/usr/lib/Motif1.2 \
 		-lX11 -lXm -lXt
+export LIBEXT = sl
 
 all:
 	make -f ../common/x_motif_make
