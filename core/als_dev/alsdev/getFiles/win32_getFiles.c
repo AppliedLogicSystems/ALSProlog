@@ -40,7 +40,7 @@ int GetFiles(Tcl_Interp *interp, Tcl_DString *initdir,
 	if (GetOpenFileName(&of)) {
 		char *prefix, *f, path[MAX_PATH];
 		
-		for (prefix = of.lpstrFile, f = prefix+strlen(prefix)+1;
+		for (prefix = of.lpstrFile, f = prefix+of.nFileOffset;
 			 *f; f += strlen(f)+1) {
 			strcpy(path, prefix);
 			strcat(path, "\\");
