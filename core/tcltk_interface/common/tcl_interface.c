@@ -16,6 +16,18 @@
 #include <tcl.h>
 #include <tk.h>
 
+#ifdef ITCL
+#include <itcl.h>
+//#include <itk.h>
+
+/* These prototypes are from tclInt.h */
+int		Tcl_Import _ANSI_ARGS_((Tcl_Interp *interp,
+			    Tcl_Namespace *nsPtr, char *pattern,
+			    int allowOverwrite));
+Tcl_Namespace *	Tcl_GetGlobalNamespace _ANSI_ARGS_((
+			    Tcl_Interp *interp));
+#endif
+
 #include "alspi.h"
 #include "new_alspi.h"
 
@@ -487,6 +499,34 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 		goto error_delete;
 	}
 
+#ifdef ITCL
+	r = Itcl_Init(interp);
+
+	if (r != TCL_OK) {
+		TclToPrologResult(w, NULL, interp, r);
+		goto error_delete;
+	}
+	Tcl_StaticPackage(interp, "Itcl", Itcl_Init, Itcl_SafeInit);
+
+	r = Tcl_Import(interp, Tcl_GetGlobalNamespace(interp),
+		       "::itcl::*", /* allowOverwrite */ 1);
+
+	if (r != TCL_OK) {
+	  TclToPrologResult(w, NULL, interp, r);
+	  goto error_delete;
+	  return TCL_ERROR;
+	}
+
+	r = Tcl_Eval(interp,
+"auto_mkindex_parser::slavehook { _%@namespace import -force ::itcl::* }");
+
+	if (r != TCL_OK) {
+	  TclToPrologResult(w, NULL, interp, r);
+	  goto error_delete;
+	  return TCL_ERROR;
+	}
+#endif
+
 	if (pre_named) {
 		namep = AP_GetAtomStr(w, *interp_name);
 	} else {
@@ -563,6 +603,28 @@ static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 			TclToPrologResult(w, NULL, interp, r);
 			return AP_EXCEPTION;
 		}
+
+
+#ifdef ITCL
+		r = Itk_Init(interp);
+		if (r != TCL_OK) {
+		  TclToPrologResult(w, NULL, interp, r);
+		  return AP_EXCEPTION;
+		}
+		Tcl_StaticPackage(interp, "Itk", Itk_Init, (Tcl_PackageInitProc *) NULL);
+		r = Tcl_Import(interp, Tcl_GetGlobalNamespace(interp),
+			       "::itk::*", /* allowOverwrite */ 1);
+		if (r != TCL_OK) {
+		  TclToPrologResult(w, NULL, interp, r);
+		  return AP_EXCEPTION;
+		}
+
+		r = Tcl_Eval(interp, "auto_mkindex_parser::slavehook { _%@namespace import -force ::itcl::* ::itk::* }");
+		if (r != TCL_OK) {
+		  TclToPrologResult(w, NULL, interp, r);
+		  return AP_EXCEPTION;
+		}
+#endif
 
 		/*Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);*/
 

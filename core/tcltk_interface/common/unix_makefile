@@ -11,11 +11,11 @@ VPATH = ../common:$(ALSP_SOURCE)
 
 CPPFLAGS = -I ../common -I $(ALSP_SOURCE) -isystem $(ALS_BUILD_SUPPORT)/include -I /usr/include/X11R5 -DUNIX -DUNIX_NAME='"$(UNIX_NAME)"'
 
-CFLAGS = -Wall -MD -fPIC
+CFLAGS = -Wall -MD -fPIC -DITCL
 
 LDFLAGS = -shared
 
-LIBS = -ltcl8.0 -ltk8.0 -lX11 -lc
+LIBS = -litcl3.0 -litk3.0 -ltcl8.0 -ltk8.0 -lX11 -lc
 
 source = alspi_slib.c new_alspi.c tcl_interface.c
 
