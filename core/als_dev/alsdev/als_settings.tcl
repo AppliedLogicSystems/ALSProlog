@@ -6,7 +6,7 @@ proc vTclWindow.alsdev_settings {base} {
         set base .alsdev_settings
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; return
+        wm deiconify $base ; return
     }
     ###################
     # CREATING WIDGETS
@@ -25,21 +25,41 @@ proc vTclWindow.alsdev_settings {base} {
 		# Text Font Description:
     frame $base.font_desc \
         -borderwidth 1 -relief sunken
+
     label $base.font_desc.family_label -text {Font Family:} 
 	set FamilyMenuCmd \
 		[concat tk_optionMenu $base.font_desc.familymenu proenv(text,family) [font families]]
 	set FamilyMenu [eval $FamilyMenuCmd]
+	set MenuEndNum [$FamilyMenu index end]
+	for {set iii 0} {$iii <= $MenuEndNum} {incr iii} {
+		$FamilyMenu entryconfigure $iii \
+			-command "font_family_choice \"[$FamilyMenu entrycget $iii -label]\""
+	}
+
     label $base.font_desc.size_label -text {Size:} 
 	set SizeMenu [tk_optionMenu $base.font_desc.sizemenu proenv(text,size) \
 		6 8 10 12 14 16 18 20 22 24]
+	set MenuEndNum [$SizeMenu index end]
+	for {set iii 0} {$iii <= $MenuEndNum} {incr iii} {
+		$SizeMenu entryconfigure $iii \
+			-command "font_size_choice [$SizeMenu entrycget $iii -label]"
+	}
+
 	set SizeUnitsMenu  [tk_optionMenu $base.font_desc.sizeunitsmenu proenv(text,sizeunits) \
 		pixels points]
+	$SizeUnitsMenu entryconfigure 0 -command "font_size_units_choice pixels"
+	$SizeUnitsMenu entryconfigure 1 -command "font_size_units_choice points"
+
     label $base.font_desc.style_label -text {Style:} 
 	set StyleMenu [tk_optionMenu $base.font_desc.stylemenu proenv(text,style) \
 		normal bold italic ]
-    frame $base.font_desc.spacer1 -borderwidth 1 -relief flat -width 3 -background Black
-    button $base.font_desc.install \
-        -command install_font -padx 2 -text Install
+	$StyleMenu entryconfigure 0 -command "font_style_choice normal"
+	$StyleMenu entryconfigure 1 -command "font_style_choice bold"
+	$StyleMenu entryconfigure 2 -command "font_style_choice italic"
+
+#    frame $base.font_desc.spacer1 -borderwidth 1 -relief flat -width 3 -background Black
+#    button $base.font_desc.install \
+#        -command install_font -padx 2 -text Install
 
 		# Text Color Description:
     frame $base.color_desc \
@@ -89,10 +109,11 @@ proc vTclWindow.alsdev_settings {base} {
         -anchor center -expand 0 -fill none -side left 
     pack $base.font_desc.stylemenu \
         -anchor center -expand 0 -fill none -side left 
-    pack $base.font_desc.spacer1 \
-        -anchor center -expand 0 -fill y -padx 3 -side left 
-    pack $base.font_desc.install \
-        -anchor center -expand 0 -fill none -side left 
+
+#    pack $base.font_desc.spacer1 \
+#        -anchor center -expand 0 -fill y -padx 3 -side left 
+#    pack $base.font_desc.install \
+#        -anchor center -expand 0 -fill none -side left 
 
     pack $base.color_desc \
         -anchor center -expand 0 -fill x -pady 4 -side top 

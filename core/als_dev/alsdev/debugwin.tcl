@@ -265,7 +265,7 @@ proc vTclWindow.spywin {base} {
     ###################
     toplevel $base -class Toplevel
     wm focusmodel $base passive
-    wm geometry $base 421x200+278+184
+    wm geometry $base 421x231+278+184
     wm maxsize $base 1137 870
     wm minsize $base 1 1
     wm overrideredirect $base 0
@@ -277,18 +277,19 @@ proc vTclWindow.spywin {base} {
     label $base.typein_label \
         -text {Type in predicate info:} 
     entry $base.pred_entry
+    frame $base.spacer1 \
+        -borderwidth 1 -height 2 -relief sunken  -background black
     label $base.or_label \
         -text {Or select by menus:} 
     frame $base.modules \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
+        -borderwidth 1 -height 30 -relief flat -width 30 
     label $base.modules.module_label \
-        -text module: 
+        -text Module: 
 	set SpyModuleMenu [tk_optionMenu $base.modules.mods SpyModule user]
-    frame $base.predicates \
-        -borderwidth 1 -height 30 -relief sunken -width 30 
-    label $base.predicates.pred_label \
-        -text predicate: 
-	set SpyPredMenu [tk_optionMenu $base.predicates.preds SpyPred ??/?]
+    frame $base.spacer2 \
+        -borderwidth 1 -height 2 -relief sunken  -background black
+	button $base.predicates \
+        -command popup_spypoint_choice -padx 11 -pady 4 -text Predicates 
     frame $base.buttons \
         -borderwidth 1 -height 30 -width 30 
     button $base.buttons.ok \
@@ -302,8 +303,10 @@ proc vTclWindow.spywin {base} {
         -anchor w -expand 0 -fill none -pady 4 -side top 
     pack $base.pred_entry \
         -anchor center -expand 0 -fill x -padx 12 -side top 
+    pack $base.spacer1 \
+        -anchor center -expand 0 -fill x -side top -pady 8
     pack $base.or_label \
-        -anchor center -expand 0 -fill none -pady 4 -side top 
+        -anchor w -expand 0 -fill none -pady 4 -side top 
 
     pack $base.modules \
         -anchor w -expand 0 -fill x -padx 25 -pady 4 -side top 
@@ -311,14 +314,11 @@ proc vTclWindow.spywin {base} {
         -anchor center -expand 0 -fill none -padx 12 -side left 
 	pack $base.modules.mods \
         -anchor center -expand 1 -fill x -padx 12 -side left 
-
     pack $base.predicates \
-        -anchor w -expand 0 -fill x -pady 4 -side top 
-    pack $base.predicates.pred_label \
-        -anchor center -expand 0 -fill none -padx 12 -side left 
-    pack $base.predicates.preds \
-        -anchor center -expand 1 -fill x -padx 12 -side left 
+        -anchor w -expand 0 -fill x -pady 4 -padx 35 -side top 
 
+    pack $base.spacer2 \
+        -anchor center -expand 0 -fill x -side top -pady 8
     pack $base.buttons \
         -anchor center -expand 0 -fill x -padx 65 -pady 8 -side top 
     pack $base.buttons.ok \
@@ -396,3 +396,75 @@ proc vTclWindow.debug_source_trace {base Title} {
         -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
 }
 
+proc vTclWindow.spychoose {base} {
+    if {$base == ""} {
+        set base .spychoose
+    }
+    if {[winfo exists $base]} {
+        wm deiconify $base; return
+    }
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel
+    wm focusmodel $base passive
+    wm geometry $base 172x364+226+178
+    wm maxsize $base 1137 870
+    wm minsize $base 1 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 1
+    wm deiconify $base
+    wm title $base "Spy Points"
+	wm protocol $base WM_DELETE_WINDOW {hide_me .spychoose}
+
+    frame $base.modid \
+        -borderwidth 1 -height 30 -relief sunken -width 30 
+    label $base.modid.label \
+        -text {Module: } 
+    label $base.modid.module \
+        -relief groove -text user 
+    frame $base.slist \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    listbox $base.slist.listbox \
+		-selectmode multiple \
+        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
+        -xscrollcommand {.spychoose.slist.hscroll set} \
+        -yscrollcommand {.spychoose.slist.vscroll set} 
+    scrollbar $base.slist.hscroll \
+        -borderwidth 1 -command {.spychoose.slist.listbox xview} -orient horiz \
+        -width 10 
+    scrollbar $base.slist.vscroll \
+        -borderwidth 1 -command {.spychoose.slist.listbox yview} -orient vert \
+        -width 10 
+    frame $base.buttons \
+        -borderwidth 1 -height 30 -relief sunken -width 30 
+    button $base.buttons.ok \
+        -padx 11 -pady 4 -text OK -command {do_spychoose ok}
+    button $base.buttons.cancel \
+        -padx 11 -pady 4 -text Cancel -command {do_spychoose cancel}
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.modid \
+        -anchor center -expand 0 -fill x -side top 
+    pack $base.modid.label \
+        -anchor center -expand 0 -fill none -side left 
+    pack $base.modid.module \
+        -anchor center -expand 0 -fill x -side top 
+    pack $base.slist \
+        -anchor center -expand 1 -fill both -side top 
+    grid columnconf $base.slist 0 -weight 1
+    grid rowconf $base.slist 0 -weight 1
+    grid $base.slist.listbox \
+        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
+    grid $base.slist.hscroll \
+        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew 
+    grid $base.slist.vscroll \
+        -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
+    pack $base.buttons \
+        -anchor center -expand 0 -fill x -side bottom 
+    pack $base.buttons.ok \
+        -anchor center -expand 0 -fill none -padx 2 -side left 
+    pack $base.buttons.cancel \
+        -anchor center -expand 0 -fill none -padx 2 -side right 
+}

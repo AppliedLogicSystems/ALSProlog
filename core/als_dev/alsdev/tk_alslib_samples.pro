@@ -75,7 +75,7 @@ aind(1, Atom)
 	:-
 	atom_input_dialog('Please input something:', Atom).
 
-aind(1, Atom)
+aind(2, Atom)
 	:-
 	atom_input_dialog('Please input something:', 'Dialog Box Title', Atom).
 
@@ -129,3 +129,4 @@ test_write
 	:-
 	printf(user_output, 'This is a test ...\n', []),
 	flush_input(user_input).
+
