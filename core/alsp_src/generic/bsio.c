@@ -3382,6 +3382,7 @@ next_token0(buf, vpTokType, tpTokType, vpTokVal, tpTokVal)
     UCHAR *p, *lim, *tokstart;
     int   eossave;
 	int ty;
+	double dec_val;
 
     *tpTokType = WTP_SYMBOL;
     if (!skip_layout(buf)) {
@@ -3541,10 +3542,16 @@ makesym:
 		    }
 #endif /* SIO_ZERO_QUOTE_FOR_CHAR_CONSTS */
 		    else
-			make_numberx(vpTokVal, tpTokVal, decimal(&p,&ty),ty);
+			{
+				dec_val = decimal(&p, &ty);
+				make_numberx(vpTokVal, tpTokVal, dec_val,ty);
+			}
 		}
 		else
-		    make_numberx(vpTokVal, tpTokVal, decimal(&p,&ty),ty); 
+		{
+			dec_val = decimal(&p, &ty);
+			make_numberx(vpTokVal, tpTokVal, dec_val,ty);
+		}
 		CHECK_FOR_POSSIBLE_SPLIT(*p ? p+1 : p);
 		break;
 	    case SIOC_SPECIAL:

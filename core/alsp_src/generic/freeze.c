@@ -24,6 +24,7 @@
 int	pbi_delay			PARAMS(( void ));
 int	update_chpt_slots	PARAMS(( PWord ));
 int	pbi_clct_tr			PARAMS(( void ));
+int 	pbi_del_tm_for		PARAMS(( void ));
 /* int	pbi_collect_thawed	PARAMS(( void )); */
 
 /*---------------------------------------------------------------*
@@ -98,7 +99,7 @@ deref_2(w)
 
 	w2 = w;
     while (M_ISVAR(w) && (x = M_VARVAL(w)) != w)
-	{w2 = w; w = x;}
+		{w2 = w; w = x;}
 
     return w2;
 }
@@ -123,7 +124,7 @@ pbi_clct_tr()
 		{
 			DrT = deref_2(*CurT);
 			printf("[%x]Delay VAR! <%x | %x> ",
-						(int)*CurT,(int)(**CurT),(int)deref_2(*CurT));
+					(int)*CurT,(int)(**CurT),(int)deref_2(*CurT));
 			Forw1 = (PWord *)DrT + 1;
 			if (M_ISVAR(*Forw1) && (M_VARVAL(*Forw1) == (PWord)Forw1)) 
 			{
@@ -163,7 +164,30 @@ pbi_clct_tr()
 	else
 		FAIL;
 }
-	
+
+int
+pbi_del_tm_for()
+{
+	PWord *Back1, v1,v2,DrT,tms;
+	int t1,t2;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+
+	if (CHK_DELAY((PWord *)v1))
+	{
+		DrT = deref_2((PWord)v1);
+		Back1 = (PWord *)DrT-1;
+		w_install(&tms, (int)Back1, WTP_STRUCTURE);
+		if (w_unify(v2, t2, tms, WTP_STRUCTURE))  
+			SUCCEED;
+		else
+			FAIL;
+	}
+	else
+		FAIL;
+}
+
 
 
 int

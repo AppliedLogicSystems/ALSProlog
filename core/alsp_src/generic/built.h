@@ -155,9 +155,10 @@ extern	int	pbi_collectcode	PARAMS(( void ));
 extern	int	pbi_cptx		PARAMS(( void ));
 extern	int	disp_heap		PARAMS(( void ));
 extern	int	pbi_swp_tr		PARAMS(( void ));
-extern	int	pbi_walk_cps	PARAMS(( void ));
+extern	int	pbi_walk_cps		PARAMS(( void ));
 extern	int	pbi_delay		PARAMS(( void ));
-extern	int pbi_clct_tr 	PARAMS(( void ));
+extern	int 	pbi_clct_tr 		PARAMS(( void ));
+extern	int 	pbi_del_tm_for		PARAMS(( void ));
 /* extern	int	pbi_collect_thawed	PARAMS(( void )); */
 
 /* bdbg.c */
