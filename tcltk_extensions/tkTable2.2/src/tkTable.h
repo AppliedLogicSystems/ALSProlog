@@ -17,7 +17,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <tk.h>
+#ifdef MAC_TCL
+#include <Xatom.h>
+#else
 #include <X11/Xatom.h>
+#endif
 
 #include "cmd.h"
 
@@ -45,7 +49,13 @@
 /* Necessary to get XSync call defined */
 #   include <tkInt.h>
 
-#else	/* ! WIN32 */
+#elif defined(MAC_TCL)
+
+/* Necessary to get XSync call defined */
+#   include <tkInt.h>
+
+#   define EXPORT(a,b) a b
+#else
 #   define EXPORT(a,b) a b
 #endif	/* WIN32 */
 

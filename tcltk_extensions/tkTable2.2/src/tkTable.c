@@ -23,6 +23,10 @@
 
 #include "tkTable.h"
 
+#if !defined(WIN32) && !defined(macintosh)
+#define X_WINDOWS
+#endif
+
 INLINE static void	TableFlushCache _ANSI_ARGS_((Table *tablePtr));
 static int	TableClear _ANSI_ARGS_((register Table *tablePtr, int mode,
 					char *first, char *last));
@@ -781,10 +785,10 @@ TableDisplay(ClientData clientdata)
   Tk_Window tkwin = tablePtr->tkwin;
   Display *display = tablePtr->display;
   Drawable window;
-#ifdef WIN32
-  Drawable clipWind;
-#else
+#ifdef X_WINDOWS
   XRectangle clipRect;
+#else
+  Drawable clipWind;
 #endif
   int rowFrom, rowTo, colFrom, colTo,
     invalidX, invalidY, invalidWidth, invalidHeight,
@@ -828,7 +832,7 @@ TableDisplay(ClientData clientdata)
   } else {
     window = Tk_WindowId(tkwin);
   }
-#ifdef WIN32
+#ifndef X_WINDOWS
   clipWind = Tk_GetPixmap(display, window,
 			  invalidWidth, invalidHeight, Tk_Depth(tkwin));
 #endif
@@ -1162,7 +1166,14 @@ TableDisplay(ClientData clientdata)
 	if ((clipRectSet = ((originX < bd) || (originY < bd)
 			    || (originX+itemW > width-bd)
 			    || (originY+itemH > height-bd)))) {
-#ifdef WIN32
+#ifdef X_WINDOWS
+	  /* set the clipping rectangle */
+	  clipRect.x = x;
+	  clipRect.y = y;
+	  clipRect.width = width;
+	  clipRect.height = height;
+	  XSetClipRectangles(display, tagGc, 0, 0, &clipRect, 1, Unsorted);
+#else
 	  /* We always draw in the upper-left corner of the clipWind */
 	  Tk_Fill3DRectangle(tkwin, clipWind, tagPtr->bg, 0, 0,
 			     width, height, bd, TK_RELIEF_FLAT);
@@ -1170,23 +1181,16 @@ TableDisplay(ClientData clientdata)
 			    originX+bd, originY+bd, 0, -1);
 	  XCopyArea(display, clipWind, window, tagGc, 0, 0,
 		    width, height, x, y);
-#else
-	  /* set the clipping rectangle */
-	  clipRect.x = x;
-	  clipRect.y = y;
-	  clipRect.width = width;
-	  clipRect.height = height;
-	  XSetClipRectangles(display, tagGc, 0, 0, &clipRect, 1, Unsorted);
 #endif
 	}
 
-#ifdef WIN32	/* no cliprect on windows */
+#ifndef X_WINDOWS	/* cliprect only on x-windows */
 	if (!clipRectSet)
 #endif
 	  Tk_DrawTextLayout(display, window, tagGc, textLayout,
 			    x+originX+bd, y+originY+bd, 0, -1);
 
-#ifndef WIN32	/* no cliprect on windows */
+#ifdef X_WINDOWS	/* cliprect only on x-windows */
 	/* reset the clip mask */
 	if (clipRectSet) {
 	  XSetClipMask(display, tagGc, None);
@@ -1271,7 +1275,7 @@ TableDisplay(ClientData clientdata)
       }
     }
   }
-#ifdef WIN32
+#ifndef X_WINDOWS
   Tk_FreePixmap(display, clipWind);
 #endif
 
@@ -4843,13 +4847,25 @@ TableCmd(clientData, interp, argc, argv)
 
 /* Function to call on loading the Table module */
 
+#ifdef MAC_TCL
+#pragma export on
+#endif
 EXPORT(int,Tktable_Init)(interp)
     Tcl_Interp *interp;
+#ifdef MAC_TCL
+#pragma export reset
+#endif
 {
   static char init_script[] =
+#ifdef MAC_TCL
+    "if [catch {source [lindex $tcl_pkgPath 0]/Tktable/tkTable.tcl}] {\n"
+	"source -rsrc tkTable"
+    "}\n";
+#else
     "if {[catch {source \"" TCL_RUNTIME "\"}]} {\n"
 #include "tkTabletcl.h"
     "}\n";
+#endif
   if (Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 0) == NULL ||
       Tcl_PkgRequire(interp, "Tk", TK_VERSION, 0) == NULL ||
       Tcl_PkgProvide(interp, "Tktable", TBL_VERSION) != TCL_OK) {
@@ -4862,8 +4878,14 @@ EXPORT(int,Tktable_Init)(interp)
   return Tcl_Eval(interp, init_script);
 }
 
+#ifdef MAC_TCL
+#pragma export on
+#endif
 EXPORT(int,Tktable_SafeInit)(interp)
     Tcl_Interp *interp;
+#ifdef MAC_TCL
+#pragma export reset
+#endif
 {
   return Tktable_Init(interp);
 }
