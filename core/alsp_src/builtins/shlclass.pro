@@ -76,10 +76,12 @@ module builtins.
 	%% GETTING A SOURCE MANAGER
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+:- make_gv('_my_global'), set_my_global(0).
+
 als_shl_mgrAction(obtain_src_mgr(BaseFileName, FileMgr), State) 
 	:-!,
 	accessObjStruct(source_mgrs, State, PrevMgrsList),
-%%pbi_write(prev_source_mgrs=PrevMgrsList),pbi_nl,pbi_nl, pbi_ttyflush,
+%pbi_write(obtain_src_mgrs=PrevMgrsList),pbi_nl,pbi_nl, pbi_ttyflush,
 	finish_obtain_src_mgr(BaseFileName, PrevMgrsList, State, FileMgr).
 
 finish_obtain_src_mgr(BaseFileName, PrevMgrsList, State, FileMgr)
@@ -104,29 +106,26 @@ finish_obtain_src_mgr(BaseFileName, PrevMgrsList, State, FileMgr)
 			]
 		],
 		FileMgr ),
-
-% The last element [] of the NewSrcMgrs list created here is
-% blown away to an uninstantiated variable by the throw/catch
-% which is marked in blt_cslt.pro, when one tries to consult
-% a non-existent file.  This happens __EVEN__ when one sets
-%
-% NewSrcMgrs = [a,b],
-%
-% instead of what it should be!!!!!
-%
-% dappend(PrevMgrsList, [fm(BaseFileName, FileMgr)], NewSrcMgrs),
-%
-%	setObjStruct(source_mgrs, State, [fm(BaseFileName, FileMgr) | PrevMgrsList]),
-%
-	copy_term([fm(BaseFileName, FileMgr) | PrevMgrsList], NewSrcMgrs),
-%pbi_write(setting_src_mgrs=NewSrcMgrs),pbi_nl,pbi_nl, pbi_ttyflush,
-	setObjStruct(source_mgrs, State, NewSrcMgrs),
+	!,
 	(clause(alsdev_running,true) -> 
 		accessObjStruct(debugger_mgr,  State, DBGMGR),
 		setObjStruct(debugger_mgr,  FileMgr, DBGMGR)
 		;
 		true
 	).
+
+als_shl_mgrAction(record_src_mgr(BaseFileName, FileMgr), State) 
+	:-!,
+	accessObjStruct(source_mgrs, State, PrevMgrsList),
+	finish_record_src_mgr(BaseFileName, PrevMgrsList, State, FileMgr).
+
+finish_record_src_mgr(BaseFileName, PrevMgrsList, State, FileMgr)
+	:-
+	dmember(fm(BaseFileName, FileMgr), PrevMgrsList),
+	!.
+finish_record_src_mgr(BaseFileName, PrevMgrsList, State, FileMgr)
+	:-
+	setObjStruct(source_mgrs, State, [fm(BaseFileName, FileMgr) | PrevMgrsList]).
 
 als_shl_mgrAction(obtain_src_mgr_by_cg(CG, FileMgr), State) 
 	:-!,
