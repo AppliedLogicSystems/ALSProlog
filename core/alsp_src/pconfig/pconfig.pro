@@ -431,7 +431,7 @@ search_includes(Subdir,Incs)
 	sort(InitBaseIncs, InterBaseIncs1),
 	dreverse(InterBaseIncs1, BaseIncs),
 	!,
-	bagof(IF, [F,FP]^(member(F,BaseIncs),
+	bagOf(IF, [F,FP]^(member(F,BaseIncs),
 			pathPlusFile('/usr/include',F,FP),
 			catenate('-I',FP,IF) ),
 		Incs).

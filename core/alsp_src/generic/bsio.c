@@ -1859,8 +1859,6 @@ set_win_insert_pos()
   int t1,t2;
   UCHAR *buf;
   
-printf("Enter set_window_insert_pos: ");
-
   w_get_An(&v1,&t1,1);
   w_get_An(&v2,&t2,2);
 

@@ -111,7 +111,7 @@ void change_bound(IntStruct, PtrFP, Which)
 		while(TK_COMMA == functor )
 		{
 			w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)CstrTm, 1);
-            w_get_functor(&functor, (PWord)CstrTm);
+			w_get_functor(&functor, (PWord)CstrTm);
 		}
 		
 			/* CstrTm should be intvl(Type,Var,_,L,U)

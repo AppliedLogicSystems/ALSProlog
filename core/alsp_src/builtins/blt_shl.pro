@@ -27,8 +27,8 @@ start_shell(DefaultShellCall)
 	:-
 	%% Setup debugger entries (needs to be done early because
 	%% ss_parse_command_line can cause debugger to be called
-	%% [if it sees switch -nwd] ):
-	builtins:libhide(debugger,[builtins,debugger],
+	%% [if it sees switch -nwd] )
+	builtins:libhide(debugger, [builtins,debugger],
 				[ (trace)/0, (trace)/2, toggle_mod_show/1, leash/1,
 		  		  (spy)/0, (spy)/1, (spy)/2, (spy_pat)/3, (spyWhen)/1,
 		  		  (spyWhen)/2, (nospy)/0, (nospy)/1, (nospy)/3,
@@ -44,6 +44,7 @@ start_shell(DefaultShellCall)
 					default,			/* debugger to set up */
 					other_flags),		/* room for expansion */
 
+	debugger:nospy,
 	ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo),
 	assertz(command_line(ResidualCommandLine)),
 

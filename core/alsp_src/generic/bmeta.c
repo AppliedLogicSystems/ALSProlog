@@ -176,6 +176,98 @@ pbi_mangle()
 
 }
 
+
+#ifdef 0
+int
+pbi_trailed_mangle()
+{				/* trailed_mangle(ArgN,Struct,Arg) */
+    PWord v1, v2, v3;
+    int   t1, t2, t3;
+    int   arity;
+    PWord *argaddr;
+    PWord *b;
+    PWord *newv3 = NULL;	/* stifle -Wall */
+
+    w_get_An(&v1, &t1, 1);	/* Get argument number  */
+    w_get_An(&v2, &t2, 2);	/* Get structure or list */
+    w_get_An(&v3, &t3, 3);	/* Get argument to mangle */
+
+    if ((t1 != WTP_INTEGER) || (t3 == WTP_UNBOUND))
+	FAIL;
+
+    switch (t2) {
+	case WTP_STRUCTURE:
+	    w_get_arity(&arity, v2);
+	    if (v1 > arity || v1 < 1)
+		FAIL;
+	    w_get_argaddr(argaddr, v2, (int) v1, arity);
+	    break;
+
+	case WTP_LIST:
+	    if (v1 == 1)
+		w_get_caraddr(argaddr, v2);
+	    else if (v1 == 2)
+		w_get_cdraddr(argaddr, v2);
+	    else
+		FAIL;
+	    break;
+
+	default:
+	    FAIL;
+    }
+	/* argaddr is the location to be modified;
+	   Need to trail this location and move its
+           value onto the trail before we modify it
+	 */
+
+    w_install(argaddr, v3, t3);	/* mangle the new argument */
+
+    /*
+     * if the object is an integer, or a symbol, we are done.
+     * Otherwise the object is a list, a structure, or an uia.
+     * In that case, if the object is above the slot in the heap
+     * we have to update "HB" registers and HB values in choice
+     * points.
+     */
+
+    if ((t3 != WTP_INTEGER) && (t3 != WTP_SYMBOL)) {
+
+	switch (t3) {
+	    case WTP_LIST:
+	    case WTP_STRUCTURE:
+		newv3 = (PWord *) MBIAS(v3);
+		break;
+	    case WTP_UIA:
+		newv3 = (PWord *) MBIAS(M_FIRSTUIAWORD(v3));
+		break;
+	}
+
+	if (argaddr < newv3) {
+	    /*
+	     * The object is a list, a structure or an uia, and,
+	     * the object is above the slot
+	     */
+	    gv_setcnt++;
+	    wm_HB = wm_H;
+	    b = wm_B;
+	    while (b != (PWord *) 0 && (PWord) chpt_HB(b) >= (PWord) argaddr) {
+		chpt_HB(b) = wm_H;
+		chpt_SPB(b) = (PWord *) (((long) chpt_SPB(b)) & ~3);
+		b = chpt_B(b);
+	    }
+	}
+    }
+
+    SUCCEED;
+
+}
+
+#endif
+
+
+
+
+
 int
 pbi_functor()
 {				/* functor(Struct,F,A)  */

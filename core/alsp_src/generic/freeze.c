@@ -136,10 +136,18 @@ pbi_clct_tr()
 
 #ifdef DEBUGFREEZE
 	printf("clct: wm_TR=%x BStop (=B) =%x\n",(int)wm_TR,(int)BStop);
-	for (CurT = (PWord **)wm_TR; CurT < (PWord **)BStop; CurT += 1)
+/*	for (CurT = (PWord **)wm_TR; CurT < (PWord **)BStop; CurT += 1)  */
+	for (CurT = (PWord **)BStop-1; CurT >= (PWord **)wm_TR; CurT -= 1)
 	{
 		printf("%x-", (int)CurT);
+#ifdef TRAILVALS
+			/* Delay term not allowed to be resettable: */
+		if (1 & (unsigned long)*CurT)
+			CurT -= 1;
+		else if (CHK_DELAY(*CurT))
+#else
 		if (CHK_DELAY(*CurT))
+#endif
 		{
 			DrT = deref_2(*CurT);
 			printf("[%x]Delay VAR! <%x | %x> ",
@@ -160,9 +168,17 @@ pbi_clct_tr()
 			printf("\n");
 	}
 #else
-	for (CurT = (PWord **)wm_TR; CurT < (PWord **)BStop; CurT += 1)
+/*	for (CurT = (PWord **)wm_TR; CurT < (PWord **)BStop; CurT += 1) */
+	for (CurT = (PWord **)BStop-1; CurT >= (PWord **)wm_TR; CurT -= 1)
 	{
+#ifdef TRAILVALS
+			/* Delay term not allowed to be resettable: */
+		if (1 & (unsigned long)*CurT)
+			CurT -= 1;
+		else if (CHK_DELAY(*CurT))
+#else
 		if (CHK_DELAY(*CurT))
+#endif
 		{
 			DrT = deref_2((PWord)*CurT);
 			Forw1 = (PWord *)DrT + 1;
@@ -262,13 +278,13 @@ printf("combin_dels:r=_%lu f=_%lu \n",
  *========================================================================*/
 
 int	pbi_walk_cps	PARAMS(( void ));
-int	disp_heap_item	PARAMS(( PWord * ));
+void	disp_heap_item	PARAMS(( PWord * ));
 int	pbi_swp_tr		PARAMS(( void ));
 int	disp_heap 		PARAMS(( void ));
 
 	/*-------------------------------------------------*
 	 | Walk the choice point stack,from newest to
-     | oldest, printing out the choice points;
+     	 | oldest, printing out the choice points;
 	 *-------------------------------------------------*/
 
 int
@@ -307,7 +323,7 @@ pbi_cptx()
 	 | Display an individiual heap entity
 	 *-------------------------------------------------*/
 
-int
+void
 disp_heap_item(CurT)
   PWord *CurT;
 {
@@ -323,7 +339,7 @@ disp_heap_item(CurT)
 			if (CTagg == (PWord)CurT)
 				printf("unbound\n");
 			else
-				printf("Ref->%x\n",CTagg);
+				printf("Ref->%x\n",(int)CTagg);
 			break;
 		case MTP_STRUCT:
 			printf("structure:");
@@ -345,15 +361,15 @@ disp_heap_item(CurT)
 		case MTP_CONST:
 		{
 			CTagg = (int)MTP_CONSTTAG( (*CurT ) );
-			printf("constant: (%d)",CTagg);
+			printf("constant: (%d)",(int)CTagg);
 			switch (CTagg) {
 			case MTP_INT:
-				printf("-integer=%d\n",MINTEGER(*CurT));
+				printf("-integer=%d\n",(int)MINTEGER(*CurT));
 				break;
 			case MTP_SYM:
 				if (MSYMBOL((*CurT)) < tok_table_size() )
 					printf("-symbol=%d/%s\n",MSYMBOL((*CurT)),
-							TOKNAME(MSYMBOL((*CurT))));
+							(int)TOKNAME(MSYMBOL((*CurT))));
 				else
 					printf("-weird sym(as fctr:%x/%x)\n",
 							(int)MFUNCTOR_TOKID(*CurT),(int)MFUNCTOR_ARITY(*CurT));
@@ -370,7 +386,7 @@ disp_heap_item(CurT)
 		}
 			break;
 		default:
-			printf("unknown quantity: %d\n",Tagg);
+			printf("unknown quantity: %d\n",(int)Tagg);
 		}
 }
 
@@ -380,16 +396,16 @@ disp_heap_item(CurT)
 	 *-------------------------------------------------*/
 
 int
-pbi_swp_tr()
+pbi_swp_tr(void)
 {
 	PWord **CurT, *Back1, BStop;
 
 	BStop = (PWord) wm_B;
-	printf("BStop (=B) =%x\n",BStop);
+	printf("BStop (=B) =%lx\n",(long)BStop);
 
 	for (CurT = (PWord **)wm_TR; CurT < (PWord **)BStop; CurT += 1)
 	{
-		printf("%x->", (int)CurT);
+		printf("%lx[%lx]->", (long)CurT,(long)(1 & (long)CurT) );
 		disp_heap_item(*CurT);
 		Back1 = (*CurT)-1;
 		if ((MFUNCTOR_TOKID(*Back1) == TK_DELAY) &&
@@ -400,6 +416,9 @@ pbi_swp_tr()
 	}
 	SUCCEED;
 }
+
+
+
 
 	/*-------------------------------------------------*
 	 | Sweep the heap from newest backwards,

@@ -70,10 +70,12 @@ free(room,
         period('Fri',   10:30, 12)  
           ] ).
 
+/*
 member(X, [X | _]).
 member(X, [_ | T])
     :-
     member(X, T).
+*/
 
     %%
     %% Find a single (= the first) day and time
@@ -82,11 +84,7 @@ find_one_time(CommonDay, CommonTime)
     :-
     execs_free(ListOfFreeTimes),
     CommonTime::real,
-
-    find_common(ListOfFreeTimes, CommonDay, CommonTime),
-write(day=CommonDay),write(' -- '),
-show_variable(CommonTime),nl,flush_output,
-    {0.75 =< delta(CommonTime) }.
+    find_common(ListOfFreeTimes, 0.75, CommonDay, CommonTime).
 
     %%
     %% Find and output a (the first) day & time
@@ -125,12 +123,13 @@ execs_free([E |Es], [FL | FLs])
     execs_free(Es, FLs).
 
     /*-----------------------------------------------------------
-     | find_common/3
-     | find_common(ListOfFreeTimes, CommonDay, CommonTime)
+     | find_common/4
+     | find_common(ListOfFreeTimes, Delta, CommonDay, CommonTime)
      | find_common(+, -, +)
      |
      | + ListOfFreeTimes is a list of sublists, where each
      |   sublist contains period(Day,Start,End) terms;
+     | + Delta is the minimum common time to find;
      | + CommonDay is an atom (normally uninstantiated)
      | + CommonTime is a real interval, normally with 
      |   indefinite (i.e., maximal) endpoints;
@@ -143,15 +142,17 @@ execs_free([E |Es], [FL | FLs])
      |  Si (resp., Ei).
      *----------------------------------------------------------*/
 
-find_common([], CommonDay, CommonTime).
+find_common([], Delta, CommonDay, CommonTime).
 
-find_common([Frees | ListOfFreeTimes], CommonDay, CommonTime)
+find_common([Frees | ListOfFreeTimes], MinDelta, CommonDay, CommonTime)
     :-
     member(period(CommonDay, Begin, End), Frees),
     time2dec(Begin, DecBegin),
     time2dec(End, DecEnd),
     CommonTime :: real(DecBegin, DecEnd),
-    find_common(ListOfFreeTimes, CommonDay, CommonTime).
+show_variable(CommonTime),
+    {delta(CommonTime) >= MinDelta },
+    find_common(ListOfFreeTimes, MinDelta, CommonDay, CommonTime).
 
 output_time(CommonDay, CommonTime)
     :-
@@ -159,7 +160,7 @@ output_time(CommonDay, CommonTime)
     dec2time(Start, StartTime),
     dec2time(End, EndTime),
     nl, 
-    write(CommonDay, ' - ', StartTime, ' to ', EndTime), nl.
+    printf('%t - %t to %t\n', [CommonDay, StartTime, EndTime]).
 
     %%
     %% Conversions between hh:mm times and decimal times

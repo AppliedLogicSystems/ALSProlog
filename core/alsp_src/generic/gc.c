@@ -141,7 +141,7 @@ gc()
     long *b;
     long *ap;
     long *apb;
-    long *tr;
+    long *tr, *tr2;
     long *oldest_ap;
     Code *ra;			/* return address */
     register int i;
@@ -291,11 +291,32 @@ gc()
 	    	}  /* while (e < apb)  */
 		}      /* if (apb <= e)-else */
 
+#ifdef TRAILVALS
+		tr2 = tr;
+		for (tr=b-1; tr >= tr2; tr--) {
+			if (1 & (unsigned long)*tr)
+			{
+	    		ap = (~(unsigned long)1 & (long *)*tr);	
+	    		if (oldest_ap <= ap && ap < heap_low)
+				{
+					mark_from(ap);
+					mark_from(*--tr);
+				}
+			}
+			else
+			{
+	    		ap = (long *) *tr;	/* tr is not biased */
+	    		if (oldest_ap <= ap && ap < heap_low)
+					mark_from(ap);
+			}
+		}
+#else
 		for (; tr < b; tr++) {
 	    	ap = (long *) *tr;	/* tr is not biased */
 	    	if (oldest_ap <= ap && ap < heap_low)
 				mark_from(ap);
 		}
+#endif
 		ap = apb;
 
 #ifdef ChptBeforeTrail
@@ -840,10 +861,10 @@ mark_backup:
 
 
 #ifdef PRIM_DBG
-void pwrite PARAMS ((long));
+void ppwrite PARAMS ((long));
 
 void
-pwrite(long pv)
+ppwrite(long pv)
 {
     long  v, t;
 

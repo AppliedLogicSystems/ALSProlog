@@ -1,1 +1,4 @@
 mytrans(I,O) :- name(O,[0'x ,0'_ |I]).
+module pro2intf.
+mytrans(I,O) :- name(O,[0'x ,0'_ |I]).
+endmod.

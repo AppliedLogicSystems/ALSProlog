@@ -6,6 +6,8 @@
  |
  | Author: Prabhakaran Raman
  | Creation: 5/26/92
+ |
+ | Macroized 'unwind trail' code
  *===========================================================================*/
 
 #include "defs.h"
@@ -216,6 +218,20 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 #define DEREF(v)  \
   { while( M_ISVAR(PWORD(v)) && (v) != *(PWord **)(v)) \
 	  (v) = *(PWord **)(v); }
+
+/*
+#define UNWINDTRAIL for (reg1 = mr_TR; reg1 < mr_B; reg1++){ \
+*/
+#ifdef TRAILVALS
+#define UNWINDTRAIL for (reg1 = (mr_B - 1); reg1 >= mr_TR; reg1--){ \
+	if (1 & *reg1) \
+		*PWPTR(~(unsigned long)1 & *reg1) = *(--reg1); \
+	else \
+		*PWPTR(*reg1) = MMK_VAR(*reg1);\
+	}
+#else
+#define UNWINDTRAIL for (reg1 = mr_TR; reg1 < mr_B; reg1++){ *PWPTR(*reg1) = MMK_VAR(*reg1);}
+#endif
 
 /*---------------------------------------------------------------*
  * WAM Instruction and Data fields
@@ -1331,9 +1347,8 @@ CASE(W_TRY_ME_JUMP):
 	    DISPATCH;
 
 CASE(W_RETRY_ME):				/* retry_me_else  [align],L */
-	    for (reg1 = mr_TR; reg1 < mr_B; reg1++) {	/* unwind trail */
-		*PWPTR(*reg1) = MMK_VAR(*reg1);
-	    }
+		/* unwind trail */
+	    UNWINDTRAIL;
 	    mr_TR = mr_B;			/* reset trail */
 	    mr_H = mr_HB;
 	    mr_SP = mr_E = mr_SPB;
@@ -1342,9 +1357,8 @@ CASE(W_RETRY_ME):				/* retry_me_else  [align],L */
 	    DISPATCH;
 
 CASE(W_TRUST_ME):		/* trust_me_else  [align],fail  */
-	    for (reg1 = mr_TR; reg1 < mr_B; reg1++) {	/* unwind trail */
-		*PWPTR(*reg1) = MMK_VAR(*reg1);
-	    }
+		/* unwind trail */
+	    UNWINDTRAIL;
 	    mr_H = mr_HB;
 	    mr_E = mr_SP = mr_SPB;
 	    mr_TR = mr_B + 4;	/* remove chioce pt  */
@@ -1366,9 +1380,8 @@ CASE(W_TRY):			/* try  [align],addr      */
 	    DISPATCH;
 
 CASE(W_RETRY):			/* retry [align],addr        */
-	    for (reg1 = mr_TR; reg1 < mr_B; reg1++) {	/* unwind trail */
-		*PWPTR(*reg1) = MMK_VAR(*reg1);
-	    }
+		/* unwind trail */
+	    UNWINDTRAIL;
 	    mr_TR = mr_B;
 	    mr_H = mr_HB;
 	    mr_SP = mr_E = mr_SPB;
@@ -1377,9 +1390,8 @@ CASE(W_RETRY):			/* retry [align],addr        */
 	    DISPATCH;
 
 CASE(W_TRUST):			/* trust   [align],addr */
-	    for (reg1 = mr_TR; reg1 < mr_B; reg1++) {	/* unwind trail */
-		*PWPTR(*reg1) = MMK_VAR(*reg1);
-	    }
+		/* unwind trail */
+	    UNWINDTRAIL;
 	    mr_H = mr_HB;
 	    mr_E = mr_SP = mr_SPB;
 	    mr_TR = mr_B + 4;	/* remove choice pt */

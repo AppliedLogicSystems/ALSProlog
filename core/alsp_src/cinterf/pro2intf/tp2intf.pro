@@ -753,7 +753,8 @@ emit_unify([farptr|Rest],OutStream)
 emit_unify(TypeList,OutStream)
 	:-
 	calc_return_arg_num(TypeList,1,RetArg),
-	printf(OutStream,'\tPI_makedouble(&rval,&rtype,(double) retval);\n',[]),
+/*	printf(OutStream,'\tPI_makedouble(&rval,&rtype,(double) retval);\n',[]), */
+	printf(OutStream,'\tmake_number(&rval,&rtype,(double) retval);\n',[]),
 	printf(OutStream,'\tif (PI_unify(arg%d,type%d,rval,rtype))\n',[RetArg,RetArg]),
 	printf(OutStream,'\t\tPI_SUCCEED;\n',[]),
 	printf(OutStream,'\tPI_FAIL;\n',[]).
@@ -1113,7 +1114,11 @@ translate_func_name(FuncName,TranslatedName,State)
 	accessP2I(tPred, State, UserTransName), 	% User has specified a translator
 	!,
 	UserCall =.. [UserTransName,FNL,TranslatedName],
-	user:call(UserCall).
+	(call(UserCall) ->
+		true
+		;
+		user:call(UserCall)
+	).
 
 translate_func_name(FuncName,TranslatedName,State)
 	:-

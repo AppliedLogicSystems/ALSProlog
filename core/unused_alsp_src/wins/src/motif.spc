@@ -16,7 +16,7 @@
 #exclude "/jarrett/usr_include/sys/?"
 */
 	/* The machinery needs to be extended
-	   so that the exclues (and later includes
+	   so that the excludes (and later includes
 	   from "motif.h" can be given in a form
 	   something like:
 			#exclude "* /include/?"
@@ -41,6 +41,7 @@
 #exclude <X11/cursorfont.h>
 #exclude <X11/Xresource.h>
 #exclude <X11/keysym.h>
+#exclude <X11/StringDefs.h>
 #exclude <Xm/CutPasteP.h>
 
 #exclude <X11/ *>/func

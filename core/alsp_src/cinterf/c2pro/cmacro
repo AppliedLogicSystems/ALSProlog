@@ -203,11 +203,13 @@ exclude_list([ident(What)|Rest],[What|TypeL])
  *-----------------------------------------------*/
 
 undef([ident(Id)],State) :- 
-	accessC2P(info_table, State, InTable),
+%	accessC2P(info_table, State, InTable),
+	getInfoTable(InTable),
 	avl_search(Id,_,InTable),
 	avl_insert(Id,unDefined,InTable,OutTable),
 %pbi_write(avli=Id),pbi_nl,
-	setC2P(info_table, State, OutTable),
+%	setC2P(info_table, State, OutTable),
+	setInfoTable(OutTable),
 	!.
 undef([ident(_)],State) :- !.
 undef(Whatever,State) :-
@@ -217,41 +219,60 @@ undef(Whatever,State) :-
  | define/4		-- handle #defines
  *-----------------------------------------------*/
 
-define([ident(Id)|Defn],State) :- !,
+define([ident(Id),ident(RefKey)],State) 
+	:- 
+	Id \= RefKey,
+	getInfoTable(InTable),
+	avl_search(RefKey,d(RefData),InTable),
+	RefData \= unDefined,
+	!,
+	define([ident(Id)|RefData],State).
+
+define([ident(Id)|Defn],State) 
+	:- !,
+%pbi_write(define(Id,Defn)),pbi_nl,pbi_ttyflush,
 	check_const(Id,Defn,State),
-	accessC2P(info_table, State, InTable),
+	getInfoTable(InTable),
 	addToTable(Id,d(Defn),State,InTable,OutTable),
-	setC2P(info_table, State, OutTable).
-define([fident(Id)|ArgsAndDefn],State) :-
+	setInfoTable(OutTable).
+
+define([fident(Id)|ArgsAndDefn],State) 
+	:-
 	getArgs(Args,ArgsAndDefn,Defn),
 	!,
 	output_macro(Id,State),
-	accessC2P(info_table, State, InTable),
+	getInfoTable(InTable),
 	addToTable(Id,da(Args,Defn),State,InTable,OutTable),
-	setC2P(info_table, State, OutTable).
-define(Whatever,State) :-
+	setInfoTable(OutTable).
+
+define(Whatever,State) 
+	:-
 	error('Bad #define : %t\n',[Whatever],State).
 
 %-------------------------------
 % check_const/4
 %-------------------------------
 
-check_const(Id,[string(_)|_],State) :-
+check_const(Id,[string(_)|_],State) 
+	:-
 	!,
 	output_const(Id,str,State).
-check_const(Id,Defn,State) :-
+
+check_const(Id,Defn,State) 
+	:-
 	macro_expand(single,Defn,OutDefn, State),
 	expression(Val,State,OutDefn,_),
 	const_type(Val,Type),
 	!,
 	output_const(Id,Type,State).
+
 check_const(Id,Defn,State).
 
 const_type(Val,int) :- integer(Val), !.
 const_type(Val,double) :- float(Val).
 
 /*---------------------------------------------------------------------*
- | addToTable(Key,State,Defn,InTab,OutTab)
+ | addToTable(Key,Defn,State,InTab,OutTab)
  |
  |		Tests for the presence of Key in the macro defn table.  If
  |		Key is already in the macro definition table, an error is
@@ -260,13 +281,26 @@ const_type(Val,double) :- float(Val).
  |		to produce OutTab.
  *---------------------------------------------------------------------*/
 
-addToTable(Key,Defn,State,Table,Table) :-
+addToTable(Key,Defn,State,Table,Table) 
+	:-
 %(Key = ident('XEvent') -> trace ; true),
 	avl_search(Key,Data,Table),
 	Data \= unDefined,
 	!,
 	error(' %t defined again\n',[Key],State).
-addToTable(Key,Defn,State,InTable,OutTable) :-
+
+/*
+addToTable(Key,d([ident(RefKey)]),State,InTable,OutTable) 
+	:-
+	avl_search(RefKey,RefData,InTable),
+	RefData \= unDefined,
+	!,
+%pbi_write(ref_addToTable(Key,d([ident(RefKey)]),RefData)),
+	avl_insert(Key,RefData,InTable,OutTable).
+*/
+
+addToTable(Key,Defn,State,InTable,OutTable) 
+	:-
 %pbi_write(avli=Key),pbi_nl,
 	avl_insert(Key,Defn,InTable,OutTable).
 
@@ -344,7 +378,8 @@ endif_else_or_elif(Which,State) :-
 %-------------------------------
 
 do_ifdef(Id,State) :-
-	accessC2P(info_table, State, InTable),
+%	accessC2P(info_table, State, InTable),
+	getInfoTable(InTable),
 	avl_search(Id,Data,InTable),
 	Data \= unDefined,
 	!,
@@ -360,7 +395,8 @@ do_ifdef(Id,State) :-
 %-------------------------------
 
 do_ifndef(Id,State) :-
-	accessC2P(info_table, State, InTable),
+%	accessC2P(info_table, State, InTable),
+	getInfoTable(InTable),
 	avl_search(Id,Data,InTable),
 	Data \= unDefined,
 	!,
@@ -478,7 +514,8 @@ replace_defined( [ Tok | IL ], [ Tok | OL ], State) :-
 	replace_defined(IL,OL,State).
 
 defined_val(Id,State,1) :- 
-	accessC2P(info_table, State, Table),
+%	accessC2P(info_table, State, Table),
+	getInfoTable(Table),
 	avl_search(Id,Data,Table),
 	Data \= unDefined,
 	!.
@@ -516,7 +553,8 @@ macro_expand(Mode,[Head|Rest],EL,State) :-
 
 macro_expand(Mode,Tok,Rest,EL,State) :-    /* simple macro replacement */
 	is_identifier(Tok,Id),
-	accessC2P(info_table, State, Table),
+%	accessC2P(info_table, State, Table),
+	getInfoTable(Table),
 	avl_search(Id,Defn,Table),
 	!,
 	do_expand(Mode,Defn,Tok,Rest,EL,State).

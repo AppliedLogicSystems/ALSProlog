@@ -550,12 +550,17 @@ consis_and_change(S)
 	printf(S, '\telse if ( xl > xh ) FAIL;\n',[]),
 	printf(S, '\telse if ( yl > yh ) FAIL;\n',[]),
 
+/*
 	printf(S, '\tif (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);\n',[]),
 	printf(S, '\tif (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);\n',[]),
 	printf(S, '\tif (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);\n',[]),
 	printf(S, '\tif (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);\n',[]),
 	printf(S, '\tif (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);\n',[]),
 	printf(S, '\tif (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);\n\n',[]).
+*/
+	printf(S, '\tif ((zlchange & status) || (zhchange & status)) \
+			
+\n',[]),
 
 consis_and_change2(S)
 	:-

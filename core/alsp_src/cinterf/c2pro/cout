@@ -199,7 +199,8 @@ output_macro(Id,State)
 
 output_func_gvar(DSpec,Declt,State)
 	:-
-	accessC2P(info_table, State, Tab),
+%	accessC2P(info_table, State, Tab),
+	getInfoTable(Tab),
 	deref(DSpec,Tab,RSpec,RDeclt,PSpec),
 	scan_declt(Declt,ident(Name),ADeclt,PDeclt),
 	append(PDeclt,PSpec,PType),
@@ -260,7 +261,8 @@ output_neparams( [ param(DSpec,Declt) | Rest ] ,State)
 	dspec_to_str(DSpec,DSpecStr),
 	scan_declt(Declt,ident(_),ADeclt,PDeclt),
 	adeclt_to_str(ADeclt,ADecltStr),
-	accessC2P(info_table,State,Tab),
+%	accessC2P(info_table,State,Tab),
+	getInfoTable(Tab),
 	deref(DSpec,Tab,_,_,PSpec),
 	append(PDeclt,PSpec,PType),
 	accessC2P(outStream,State,OutStream),
@@ -295,7 +297,8 @@ output_type(Name,DSpec,Declt,State)
 	(silent; skip_item(_,all); skip_item(_,ctype)), !.
 output_type(Name,DSpec,Declt,State)
 	:-
-	accessC2P(info_table,State,Tab),
+%	accessC2P(info_table,State,Tab),
+	getInfoTable(Tab),
 	deref(DSpec,Tab,RSpec,RDeclt,PSpec),
 	scan_declt(Declt,ident(Name),ADeclt,PDeclt),
 	append(PDeclt,PSpec,PType),
@@ -306,7 +309,8 @@ output_type(Name,RSpec,RDeclt,PType,State)
 	( PType = [struct|_]; PType = [union|_]),
 	get_type(RSpec,Type),
 	get_struct(Type,SSpec,What),
-	accessC2P(info_table,State,Tab),
+%	accessC2P(info_table,State,Tab),
+	getInfoTable(Tab),
 	get_structdef(SSpec,What,Tab,Fields),
 	!,
 	output_struct(Name,Fields,State).
@@ -319,7 +323,8 @@ output_struct(Name,Fields,State)
 	:-
 	accessC2P(outStream,State,OutStream),
 	printf(OutStream,'\nals_struct(\'%t\',[',[Name]),
-	accessC2P(info_table,State,Tab),
+%	accessC2P(info_table,State,Tab),
+	getInfoTable(Tab),
 	output_components(Fields,'',State),
 	printf(OutStream,']).\n',[]),
 	!.
@@ -330,7 +335,8 @@ output_struct(Name,Fields,State)
 output_components( [] ,_,_).
 output_components( [ field(DSpec,Declts) | Rest ] ,Prefix,State)
 	:-
-	accessC2P(info_table,State,Tab),
+%	accessC2P(info_table,State,Tab),
+	getInfoTable(Tab),
 	deref(DSpec,Tab,_,_,PSpec),
 	output_fields(Declts,DSpec,PSpec,Prefix,State),
 	print_comma_cond(Rest,State),

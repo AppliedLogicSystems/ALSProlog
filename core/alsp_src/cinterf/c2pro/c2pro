@@ -52,6 +52,8 @@ cur_debug_level(1).
 :-dynamic(imported/1).
 :-dynamic(trace_enter_file/1).
 
+:- make_gv("InfoTable").
+
 	%-------------------------------------
 	% OS-Specific File Loading (to disappear):
 	%-------------------------------------
@@ -637,7 +639,8 @@ init_state(InName, OutName, State)
 	setC2P(outStream, State, OutStream),
 	gen_file_header(OutStream,InName,OutName),
 	avl_create(Table),
-	setC2P(info_table, State, Table).
+%	setC2P(info_table, State, Table).
+	setInfoTable(Table).
 
 	%---------------------------------
 	% do_c2pro/3.

@@ -141,7 +141,7 @@
  *      12 -- float
  *      13 -- double
  *      14 -- far pointer  (DOS only)
- *		15 -- raw data of given length
+ *	15 -- raw data of given length
  */
 
 module builtins.
