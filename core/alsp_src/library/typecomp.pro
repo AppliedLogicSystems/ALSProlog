@@ -39,7 +39,7 @@ use windows.
 export comptype_cl/0.
 comptype_cl :-
 	builtins:command_line(Files),
-	set_prolog_flag(unkown, fail),
+	set_prolog_flag(unknown, fail),
 	!,
 	comptype_files(Files).
 
@@ -54,7 +54,7 @@ comptype_files([File | Files])
  *--------------------------------------------------------------------------*/
 export comptype/0.
 comptype :-
-	set_prolog_flag(unkown, fail),
+	set_prolog_flag(unknown, fail),
 	chooseFile(_,'*.typ',FileName),
 	!,
 	comptype(FileName).
