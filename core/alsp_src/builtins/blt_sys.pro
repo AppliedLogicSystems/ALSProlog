@@ -413,7 +413,6 @@ lib_load(FileName, Module, P,A, Module,Call)
 	:-
 	als_lib_lcn(ALSLibPathHead),
 	extendPath(ALSLibPathHead, FileName, FullFileName),
-%pbi_write( lib_load_6(FullFileName)  ), pbi_nl, pbi_ttyflush,
 	sys_env(OS,_,_),
 	(   OS = macos, !, Sepr = ':'
 		;   OS = mswin32, !, Sepr = '\\'
@@ -421,7 +420,6 @@ lib_load(FileName, Module, P,A, Module,Call)
 	),
     '$atom_concat'(FullFileName,'.pro',FilePathPro),
 	'$atom_concat'(FullFileName,'.obp',FilePathObp),
-%pbi_write( lib_load_6(FilePathPro,FilePathObp)  ), pbi_nl, pbi_ttyflush,
 	(cslt_lib_ld(FileName, FilePathPro,FilePathObp)
 		; 
 		existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) 

@@ -10,6 +10,7 @@
  |	Date: 5/96
  *====================================================================*/
 
+
 module builtins.
 
 export current_prolog_flag/2.
@@ -204,8 +205,23 @@ changeable(windows_system, no).
 	%%---------------------------------
 prolog_flag_value_check(anonymous_solutions, true).
 prolog_flag_value_check(anonymous_solutions, false).
+
 default_prolog_flag_value(anonymous_solutions, false).
+
 changeable(anonymous_solutions, yes).
+
+	%%---------------------------------
+	%%	default syntax error behavior:
+	%%---------------------------------
+prolog_flag_value_check(syntax_errors, fail).
+prolog_flag_value_check(syntax_errors, error).
+prolog_flag_value_check(syntax_errors, quiet).
+prolog_flag_value_check(syntax_errors, dec10).
+
+default_prolog_flag_value(syntax_errors, error).
+
+changeable(syntax_errors, yes).
+
 
 	%%---------------------------------
 	%%	freeze
@@ -241,7 +257,14 @@ default_prolog_flag_value(constraints, Value)
 	).
 changeable(constraints, no).
 
-#if (syscfg:intconstr)
+/*
+:-syscfg:dynamic(instconstr/0).
+
+%#if (syscfg:intconstr)
+
+*/
+
+#if (all_procedures(syscfg,intconstr,0,_))
 
 	%%-----------------------------------------------------
 	%% For CLP(BNR): 
@@ -285,13 +308,31 @@ changable_flags_info(List)
 	:-
 	findall(Info, changable_flag_info(Info), List).
 
-changable_flag_info(f(Flag,PossVals,Value))
+changable_flag_info([Flag,PossVals,Value])
 	:-
 	changeable(Flag, yes),
 	findall(V, prolog_flag_value_check(Flag, V), PossVals),
 	current_prolog_flag(Flag, Value).
 
-
 endmod.		%% blt_flts.pro: Prolog Flags Builtins File
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%% FIXUP rt_defaults:
+	%%% This has to be done here, else we
+	%%% can't load.....
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+module sio.
+
+:- asserta(
+	(rt_defaults(rt_opts(vt([]),ErrMech, linestuff(FinalToks,S,E))) :-
+		current_prolog_flag(syntax_errors, ErrMech),!) ).
+
+endmod.
+
+
+
 
 

@@ -372,8 +372,6 @@ exec_consult(user, FCOpts)
 	sio:set_stream_extra(Stream,''),
 	sio:sio_reset_eof(Stream).
 
-%pbi_write('EXITING EXEC_CONSULT/2'),pbi_nl,pbi_ttyflush.
-
 exec_consult(BaseFile, FCOpts)
 	:-
 	arg(1, FCOpts, Nature),
@@ -563,6 +561,13 @@ load_from_file(_,obp,BaseFile,CanonSrcPath,_,FCOpts)
 	:-!,
 	obp_load_file(CanonSrcPath, BaseFile, FCOpts).
 
+		%% Nature = source => force (attempted) loading from .pro:
+load_from_file(_,source,BaseFile,CanonSrcPath,_,FCOpts)
+	:-!,
+	outFilePath(obp, CanonSrcPath, BaseFile, ObpPath),
+	load_source(CanonSrcPath,BaseFile,ObpPath),
+	note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath).
+
 load_from_file(no(extension),_,BaseFile,CanonSrcPath,no(extension),FCOpts)
 	:-!,
 	outFilePath(obp, CanonSrcPath, BaseFile, OutFilePath),
@@ -579,8 +584,8 @@ load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WkExt,FCOpts)
 
 load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WkExt,FCOpts)
 	:-
-	load_source(CanonSrcPath,BaseFile,ObpPath),
 	ObpPath = none,
+	load_source(CanonSrcPath,BaseFile,ObpPath),
 	note_paths(FCOpts, CanonSrcPath, ObpPath, CanonSrcPath).
 
 fin_load_from_file(obp,Nature,BaseFile,CanonSrcPath,OutFilePath,
@@ -873,6 +878,7 @@ set_consult_messages(Value)
 load_source(Path,BaseFile,Type) :-
 	(filePlusExt(NoSuffixPath, _, Path),!; NoSuffixPath = Path),
 %	establish_fcg(NoSuffixPath),
+write(load_source_NO_OBP(Path,BaseFile,Type)),nl,flush_output,
 	establish_fcg(BaseFile),
 	obp_push_stop,
 	xconsult(Path,NErrs),

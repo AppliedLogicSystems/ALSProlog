@@ -1,6 +1,6 @@
-/*=================================================================
+/*================================================================*
  | 		debugger.pro  
- |	Copyright (c) 1988-96 Applied Logic Systems, Inc.
+ |	Copyright (c) 1988-97 Applied Logic Systems, Inc.
  |		Distribution rights per Copying ALS
  |
  |	Non-interpretive debugger for Prolog
@@ -48,6 +48,7 @@ export trace/2.
 
 trace(Module,Goal) :-
 	check_debug_io,
+	setup_debug(Module, Goal),
 	getPrologInterrupt(OldMagic),
 	catch(trace0(Module,Goal), Reason, 
 	      (dbg_notrace,setPrologInterrupt(OldMagic),throw(Reason))).
@@ -407,6 +408,9 @@ dogoal(Box,Depth,Magic,Module,Goal) :-
  *-------------------------------------------------------------------------*/
 execute(_,_,'$dbg_aph'(_,_,_)) :-!.
 execute(_,_,'$dbg_apg'(_,_,_)) :-!.
+execute(_,_,'$dbg_aphe'(_,_,_)) :-!.
+execute(_,_,'$dbg_apge'(_,_,_)) :-!.
+execute(_,_,'$dbg_apf'(_,_,_)) :-!.
 
 %% === User said to trace the goal:
 execute(debug,Module,Goal) :- !,
@@ -795,8 +799,11 @@ noshow_module(xconsult).
 	%% Add any others (or can mtfapi go away now?):
 noshow_module(mtfapi).
 %noshow_module(objects).
-noshow_module(windows).
-noshow_module(alsshell).
+
+noshow_module(tk_alslib).
+
+%noshow_module(windows).
+%noshow_module(alsshell).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Skip any sends in these modules:
@@ -1093,7 +1100,8 @@ spy(Pred,Arity) :-
 
 export 'spy_pat'/3.
 
-spy_pat(Module,Pred,Arity) :-
+spy_pat(Module,Pred,Arity) 
+	:-
 	check_debug_io,
     findall(Module:Pred/Arity, all_ntbl_entries(Module,Pred,Arity,_), SpyList),
     SpyList \= [],
@@ -1104,24 +1112,32 @@ spy_pat(Module,Pred,Arity) :-
     setDebugInterrupt(spying),
     printf(debugger_output,'Spy points set on: %t.\n', [SpyList]),
     dbg_spyon.
-spy_pat(Module,Pred,Arity) :-
+
+spy_pat(Module,Pred,Arity) 
+	:-
     printf(debugger_output,'No predicates match pattern %t.\n',[Module:Pred/Arity]).
 
 install_spypoints([], Pred, Arity) :- !.
-install_spypoints([Mod | RestModules], Pred, Arity) :-
+
+install_spypoints([Mod | RestModules], Pred, Arity) 
+	:-
     install_spypoint(Mod,Pred,Arity),
     install_spypoints(RestModules, Pred, Arity).
 
 install_spypoints([]) :- !.
-install_spypoints([ M:P/A | RestSpyPoints]) :-
+install_spypoints([ M:P/A | RestSpyPoints]) 
+	:-
     install_spypoint(M,P,A),
     install_spypoints(RestSpyPoints).
 
-install_spypoint(Mod,Pred,Arity) :-
+install_spypoint(Mod,Pred,Arity) 
+	:-
     functor(CallForm,Pred,Arity),
     clause(spying_on(CallForm,Mod),true),
     !.
-install_spypoint(Mod,Pred,Arity) :-
+
+install_spypoint(Mod,Pred,Arity) 
+	:-
     functor(CallForm,Pred,Arity),
     assert(spying_on(CallForm,Mod)),
     builtins:dbg_spy(Mod,Pred,Arity).
@@ -1157,6 +1173,7 @@ spy(Module,Predicate,Arity) :-
     check_existence(Module,Predicate,Arity,UMod),
     !,
     dbg_spyoff,
+	setup_debug(Module, Predicate, Arity),
     functor(CallForm,Predicate,Arity),
     assert(spying_on(CallForm,Module)),
     builtins:dbg_spy(Module,Predicate,Arity),
@@ -1466,36 +1483,7 @@ list_spypoints :-
 list_spypoints :-
 	printf(debugger_output, "No spypoints.\n", []).
 
-
-
-lcn_for_dfn(Call, Module, FullFile, TrimFile)
-	:-
-	functor(Call, Fct, Arity),
-	pgm_info:export_from(Fct/Arity, FullFile),
-	!,
-	(filePlusExt(TrimFile,_,FullFile) ->
-		true
-		;
-	 	TrimFile = FullFile).
-
-lcn_for_dfn(Call, Module, FullFile, TrimFile)
-	:-
-	functor(Call, Fct, Arity),
-	all_procedures(Module,Fct,Arity,_),
-	pgm_info:module_lcn(Module, FullFile),
-	(filePlusExt(TrimFile,_,FullFile) ->
-		true
-		;
-	 	TrimFile = FullFile).
-
-check_file_setup(Module, Call,UsedFiles)
-	:-
-	lcn_for_dfn(Call, Module, FullFile, TrimFile),
-	setof(Mod, (pgm_info:module_lcn(Mod, FullFile)), Mods),
-	close_under_use(Mods, [], UsedMods),
-	setof(FF, MM^(member(MM,UsedMods),pgm_info:module_lcn(MM,FF)), UsedFiles).
-
-
+/***********************
 close_under_use([], Final, Final).
 
 close_under_use([user | Mods], Seen, UsedMods)
@@ -1524,26 +1512,46 @@ close_under_use([M | Mods], Seen, UsedMods)
 close_under_use([M | Mods], Seen, UsedMods)
 	:-
 	close_under_use(Mods, [M | Seen ], UsedMods).
+***********************/
 
 export setup_debug/2.
+export setup_debug/3.
 setup_debug(Module, Call)
 	:-
-	check_file_setup(Module, Call,UsedFiles),
-	reload_debug(UsedFiles),
-	als_advise("Reloaded (debug) files = %t\n",[UsedFiles]).
+	functor(Call, Pred, Arity),
+	setup_debug(Module, Predicate, Arity).
 
-reload_debug([]).
-reload_debug([File | Files])
+setup_debug(Module, Predicate, Arity)
 	:-
-	(filePlusExt(NoSuff,_,File),!; NoSuff = File),
-	builtins:consulted(NoSuff, _, ConsultType),
+%	change_source_level_debugging(on),
+	check_file_setup(Module, Predicate, Arity, SrcFilePath, DebugType),
+	reload_debug(DebugType, SrcFilePath),
 	!,
-	(ConsultType = debug ->
-		true
+	(debug_io(tcltk) ->
+		(pathPlusFile(_,FF,SrcFilePath) -> true ; FF = SrcFilePath),
+		(filePlusExt(FileName,_,FF) -> true ; FileName = FF),
+		start_src_trace(SrcFilePath)
 		;
-		reconsultd(source(NoSuff))
-	),
-	reload_debug(Files).
+		true
+	).
+
+check_file_setup(Module, Pred, Arity, SrcFilePath, DebugType)
+	:-
+	all_procedures(Module, Pred, Arity, DBRef),
+	'$clauseinfo'(DBRef,_,_,ClauseGroup),
+	builtins:file_clause_group(BaseFileName, ClauseGroup),
+	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options).
+
+reload_debug(normal, SrcFilePath)
+	:-
+	source_level_debugging(on),
+	!,
+	(filePlusExt(NoSuff,_,SrcFilePath),!; NoSuff = SrcFilePath),
+	reconsult(source(NoSuff)),
+	als_advise("Reloaded (debug) files = %t\n",[SrcFilePath]).
+
+reload_debug(DebugType, SrcFilePath).
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%    I/O Hooks    %%%%%%%%%%%%%%%%%%%%%%%%
@@ -1556,10 +1564,8 @@ toggle_debug_io
 	abolish(debug_io,1),
 	dbg_io_opp(Current, Next),
 	assert(debug_io(Next)).
-%	printf(debugger_output,'Debugger i/o set to: %t\n',[Next]).
 
 	%% Default:
-
 debug_io(nowins).
 
 dbg_io_opp(nowins, WhichWins)
@@ -1572,7 +1578,6 @@ set_debug_io(Where)
 	:-
 	abolish(debug_io,1),
 	assert(debug_io(Where)).
-%	printf(debugger_output,'Debugger i/o set to: %t\n',[Where]).
 
 check_debug_io
 	:-
@@ -1696,9 +1701,15 @@ short_deb_resps([
 
 showGoalToUserTTY(exit,_,_,_,'$dbg_aph'(_,_,_),debug) :-!.
 showGoalToUserTTY(exit,_,_,_,'$dbg_apg'(_,_,_),debug) :-!.
+showGoalToUserTTY(exit,_,_,_,'$dbg_aphe'(_,_,_),debug) :-!.
+showGoalToUserTTY(exit,_,_,_,'$dbg_apge'(_,_,_),debug) :-!.
+showGoalToUserTTY(exit,_,_,_,'$dbg_apf'(_,_,_),debug) :-!.
 
 showGoalToUserTTY(_,_,_,_,'$dbg_aph'(_,_,_),skip) :-!.
 showGoalToUserTTY(_,_,_,_,'$dbg_apg'(_,_,_),skip) :-!.
+showGoalToUserTTY(_,_,_,_,'$dbg_aphe'(_,_,_),skip) :-!.
+showGoalToUserTTY(_,_,_,_,'$dbg_apge'(_,_,_),skip) :-!.
+showGoalToUserTTY(_,_,_,_,'$dbg_apf'(_,_,_),skip) :-!.
 
 showGoalToUserTTY(Port,Box,Depth, Module, XGoal, Response)
 	:-
@@ -1937,9 +1948,15 @@ alsdev_step(What)
 
 showGoalToUserPBI(exit,_,_,_,'$dbg_aph'(_,_,_),debug) :-!.
 showGoalToUserPBI(exit,_,_,_,'$dbg_apg'(_,_,_),debug) :-!.
+showGoalToUserPBI(exit,_,_,_,'$dbg_aphe'(_,_,_),debug) :-!.
+showGoalToUserPBI(exit,_,_,_,'$dbg_apge'(_,_,_),debug) :-!.
+showGoalToUserPBI(exit,_,_,_,'$dbg_apf'(_,_,_),debug) :-!.
 
 showGoalToUserPBI(_,_,_,_,'$dbg_aph'(_,_,_),skip) :-!.
 showGoalToUserPBI(_,_,_,_,'$dbg_apg'(_,_,_),skip) :-!.
+showGoalToUserPBI(_,_,_,_,'$dbg_aphe'(_,_,_),skip) :-!.
+showGoalToUserPBI(_,_,_,_,'$dbg_apge'(_,_,_),skip) :-!.
+showGoalToUserPBI(_,_,_,_,'$dbg_apf'(_,_,_),skip) :-!.
 
 showGoalToUserPBI(Port,Box,Depth, Module, XGoal, Response)
 	:-

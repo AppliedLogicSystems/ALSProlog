@@ -377,6 +377,13 @@ export getPrologInterrupt/1.
  | The non-0 value 3 was added to support freeze and constraint mgmt.
  *---------------------------------------------------------------------------*/
 
+/*
+'$interrupt'(N,M,G) 			
+	:-
+	pbi_write('$INTERRUPT'(N,M,G)),pbi_nl,pbi_ttyflush,
+	fail.
+*/
+
 		%% -------------------------------------
 		%% Interrupt called as a result of
 		%% forcePrologInterrupt (= old ouch):
@@ -551,6 +558,8 @@ fixBody([],Head,Head,Mode)
 	:- !.
 fixBody(['$dbg_aph'(_,_,_)],Head,Head,Mode)
 	:- !.
+fixBody(['$dbg_apf'(_,_,_)],Head,Head,Mode)
+	:- !.
 fixBody([First|Rest],Head,(Head :- Body),Mode)
 	:-
 	goalFix(First,XFirst,Mode),
@@ -579,8 +588,15 @@ goalFix('|'(A,S,_),(A|S),Mode)	:- !.
 goalFix(dbg_call(M,G,_),dbg_call(M,G),Mode)			 :- !.
 goalFix('$dbg_aph'(A,B,C),'$dbg_aph'(A,B,C),show_pp) :- !.
 goalFix('$dbg_apg'(A,B,C),'$dbg_apg'(A,B,C),show_pp) :- !.
+goalFix('$dbg_aphe'(A,B,C),'$dbg_aphe'(A,B,C),show_pp) :- !.
+goalFix('$dbg_apge'(A,B,C),'$dbg_apge'(A,B,C),show_pp) :- !.
+goalFix('$dbg_apf'(A,B,C),'$dbg_apf'(A,B,C),show_pp) :- !.
+
 goalFix('$dbg_aph'(_,_,_),_,hide_pp) :- !, fail.
 goalFix('$dbg_apg'(_,_,_),_,hide_pp) :- !, fail.
+goalFix('$dbg_aphe'(_,_,_),_,hide_pp) :- !, fail.
+goalFix('$dbg_apge'(_,_,_),_,hide_pp) :- !, fail.
+goalFix('$dbg_apf'(_,_,_),_,hide_pp) :- !, fail.
 goalFix(callWithDelayedInterrupt(M,G,_),callWithDelayedInterrupt(M,G),Mode) :- !.
 goalFix(freeze_list_ground(_,_,Goal),'{}'(Goal),Mode) :-!.
 goalFix(freeze_list_ground(_,Goal),'{}'(Goal),Mode) :-!.
@@ -1042,7 +1058,6 @@ ld_fs(OS)
 	consult_builtins(BDir, cutils),
 	consult_builtins(BDir, sio_wt),
 	consult_builtins(BDir, sio_d10),
-%	consult_builtins(BDir, blt_lib), 
 	consult_builtins(BDir, blt_msg),
 	consult_builtins(BDir, blt_brk),
 	consult_builtins(BDir, blt_io),				%%%% cleanup <<
@@ -1056,8 +1071,10 @@ ld_fs(OS)
 		%% ALS shell stuff starts here:
 	consult_builtins(BDir, blt_shlr),			
 	consult_builtins(BDir, blt_cslt),			
-	consult_builtins(BDir, blt_shl),
-	consult_builtins(BDir, blt_dvsh).
+	consult_builtins(BDir, blt_shl).
+
+%	consult_builtins(BDir, blt_dvsh).
+
 
 %%--------------------------------------------
 %% set up the operators (stream io stuff needs to be 

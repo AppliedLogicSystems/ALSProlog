@@ -30,9 +30,11 @@ export read/1.
  * read(Term)
  */
 
-read(Term) :-
+read(Term) 
+	:-
 	current_input(Stream),
-	read_term(Stream,Term,dec10,vt([])).
+	rt_defaults(rt_opts(VT,ErrMech, _)),
+	read_term(Stream,Term,ErrMech,VT).
 
 /*
  * read_term(Term,Options)
@@ -40,7 +42,8 @@ read(Term) :-
 
 export read_term/2.
 
-read_term(Term,Options) :-
+read_term(Term,Options) 
+	:-
 	current_input(Stream),
 	read_term(Stream,Term,Options).
 
@@ -154,7 +157,18 @@ do_rt_opt_singletons([_ | VL], InVNL, OutVNL) :-
 
 %% rt_defaults(rt_opts(VT,SEMech))
 
-rt_defaults(rt_opts(vt([]),dec10, linestuff(FinalToks,S,E))).
+/*   The real clause is :
+
+rt_defaults(rt_opts(vt([]),ErrMech, linestuff(FinalToks,S,E)))
+	:-
+	current_prolog_flag(syntax_errors, ErrMech).
+
+However, this won't work when loading the system, since blt_flgs is loaded
+after sio_rt.  So we start with a temporary (below), which is retracted and
+the one above asserted at the end of loading blt_flgs.pro.
+*/
+rt_defaults(rt_opts(vt([]), fail, linestuff(FinalToks,S,E))).
+
 
 %%%%%%%%%%%%%%%%%%
 %% check_rt_options(Options,Stream,OptStruct,VT,InGoals,OutGoals)
@@ -343,13 +357,14 @@ ending_line([_ | Toks],S,E)
 %%
 
 export read/2.
-
-read(Stream_or_alias,Term) :-
+read(Stream_or_alias,Term) 
+	:-
 	input_stream_or_alias_ok(Stream_or_alias,Stream),
-	nonvar(Stream_or_alias),	%% force second usage of
-					%% Stream_or_alias for error
-					%% checking code
-	read_term(Stream,Term,dec10,vt([])),
+	nonvar(Stream_or_alias),	%% force second usage of Stream_or_alias 
+								%% for error checking code
+
+	rt_defaults(rt_opts(VT,ErrMech, _)),
+	read_term(Stream,Term,ErrMech,VT),
 	!.				%% cut catch in read_term/4
 
 
@@ -430,11 +445,6 @@ rt_err(throw(FF),Token,ErrorMessage,Tokens,Stream,VT,Term) :-
 	!,
 	Rock =.. [FF,[FI,Info]],
 	throw(Rock).
-/*
-	builtins:setPrologError(error(syntax_error,[FI,Info])),
-	forcePrologError.
-*/
-
 
 rt_err_print(Token,ErrorMessage,Tokens,Stream) :-
 	rt_err_info(Token,ErrorMessage,Tokens,Stream, Info),
@@ -1601,58 +1611,121 @@ pp_flatten_struct(A,S,FS) :-
 pp_flatten_struct(_,_,_).
 
 /*-------------------------------------------------------------------------------*
- * pp_xform_clause is given a term (clause) produced by the positional parser.
- * It returns as its third argument a clause suitably transformed with
- * positional information remaining for head and goals.  The remaining
- * positional information will take the form of goals which announce the
- * position after a head match and before each goal is executed.  Thus
- * a fact will be transformed into a rule with a single goal, that goal
- * being the goal announcing the fact that the head has been matched.
- * A rule with N goals will be transformed into a rule with 2N+1 goals,
- * the first goal announcing the fact that the head has successfully matched.
- * Each goal in the orignal clause will be preceded by a goal announcing
- * the file position of the upcoming original goal.
- *
- * It is the responsiblity of the debugger to handle these announcement
- * goals.   The form of a positional announcement goal for a head will be
- *
- *	'$dbg_aph'(ClauseGroupId,StartPos,EndPos)
- *
- * A goal will take a similar form except that the functor is '$dbg_apg'.
+ | Original Version:
+ | pp_xform_clause is given a term (clause) produced by the positional parser.
+ | It returns as its third argument a clause suitably transformed with
+ | positional information remaining for head and goals.  The remaining
+ | positional information will take the form of goals which announce the
+ | position after a head match and before each goal is executed.  Thus
+ | a fact will be transformed into a rule with a single goal, that goal
+ | being the goal announcing the fact that the head has been matched.
+ | A rule with N goals will be transformed into a rule with 2N+1 goals,
+ | the first goal announcing the fact that the head has successfully matched.
+ | Each goal in the orignal clause will be preceded by a goal announcing
+ | the file position of the upcoming original goal.
+ |
+ | It is the responsiblity of the debugger to handle these announcement
+ | goals.   The form of a positional announcement goal for a head will be
+ |
+ |	'$dbg_aph'(ClauseGroupId,StartPos,EndPos)
+ |
+ | A goal will take a similar form except that the functor is '$dbg_apg'.
+ |
+ | Extension/Modification:
+ | Besides the $dbg_aph and $dbg_apg goals as described above, we will also
+ | insert two more goals $dbg_aphe and $dbg_apge ("e" for exit) as follows:
+ |
+ |	Head :- dbg_aph,dbg_apg,G1,dbg_apge,dbg_apg,G2,...,dbg_apg,Gn,dbg_apge,dbg_aphe.
+ |
+ | The arguments of  $dbg_aph and  $dbg_aphe are identical, as are the arguments
+ | of the corresponding $dbg_apg and $dbg_apge before and after each Gi.
+ |
+ | Essentially, we need information about a goal both before the goal (for call
+ | and fail ports), and after (for exit and redo ports); similarly for the
+ | head information which locates the clause.
+ |
+ |	In addition, a Fact will be transformed into Fact :- '$dbg_apf'(_,_,_). 
+ |  so as to enable recognition of the situation by the debugger.
  *-------------------------------------------------------------------------------*/
 
 export pp_xform_clause/3.
 
-pp_xform_clause(end_of_file,_,end_of_file) :-
-	!.
-pp_xform_clause(struct((H :- B),_,_),CID, (XH :- '$dbg_aph'(CID,SH,EH),XB)) :-
-	!,
+pp_xform_clause(end_of_file,_,end_of_file) 
+	:-!.
+
+pp_xform_clause(struct((H :- B),_,_),CID, 
+				(XH :- '$dbg_aph'(CID,SH,EH),XB,'$dbg_aphe'(CID,SH,EH))) 
+	:-!,
 	pp_flatten(H,XH),
 	arg(2,H,SH),
 	arg(3,H,EH),
 	pp_xform_body(B,CID,XB).
-pp_xform_clause(H, CID, (XH :- '$dbg_aph'(CID,SH,EH))) :-
-	!,
+
+pp_xform_clause(H, CID, (XH :- '$dbg_apf'(CID,SH,EH))) 
+	:-!,
 	arg(2,H,SH),
 	arg(3,H,EH),
 	pp_flatten(H,XH).
 
-pp_xform_body(struct((G1,G2),_,_),CID,(XG1,XG2)) :-
-	!,
+pp_xform_body(struct((G1,G2),_,_),CID,(XG1,XG2)) 
+	:-!,
 	pp_xform_body(G1,CID,XG1),
 	pp_xform_body(G2,CID,XG2).
-pp_xform_body(struct((G1;G2),_,_),CID,(XG1;XG2)) :-
-	!,
+
+pp_xform_body(struct((G1;G2),_,_),CID,(XG1;XG2)) 
+	:-!,
 	pp_xform_body(G1,CID,XG1),
 	pp_xform_body(G2,CID,XG2).
-pp_xform_body(struct((G1->G2),_,_),CID,(XG1->XG2)) :-
-	!,
+
+pp_xform_body(struct((G1->G2),_,_),CID,(XG1->XG2)) 
+	:-!,
 	pp_xform_body(G1,CID,XG1),
 	pp_xform_body(G2,CID,XG2).
-pp_xform_body(G,CID,('$dbg_apg'(CID,SG,EG),XG)) :-
+
+pp_xform_body(G,CID,('$dbg_apg'(CID,SG,EG),XG,'$dbg_apge'(CID,SG,EG))) 
+	:-
 	arg(2,G,SG),
 	arg(3,G,EG),
 	pp_flatten(G,XG).
+
+/***
+pp_xform_clause(end_of_file,_,end_of_file) 
+	:-!.
+
+pp_xform_clause(struct((H :- B),_,_),CID, (XH :- '$dbg_aph'(CID,SH,EH),XB)) 
+	:-!,
+	pp_flatten(H,XH),
+	arg(2,H,SH),
+	arg(3,H,EH),
+	pp_xform_body(B,CID,XB).
+
+pp_xform_clause(H, CID, (XH :- '$dbg_aph'(CID,SH,EH))) 
+	:-!,
+	arg(2,H,SH),
+	arg(3,H,EH),
+	pp_flatten(H,XH).
+
+pp_xform_body(struct((G1,G2),_,_),CID,(XG1,XG2)) 
+	:-!,
+	pp_xform_body(G1,CID,XG1),
+	pp_xform_body(G2,CID,XG2).
+
+pp_xform_body(struct((G1;G2),_,_),CID,(XG1;XG2)) 
+	:-!,
+	pp_xform_body(G1,CID,XG1),
+	pp_xform_body(G2,CID,XG2).
+
+pp_xform_body(struct((G1->G2),_,_),CID,(XG1->XG2)) 
+	:-!,
+	pp_xform_body(G1,CID,XG1),
+	pp_xform_body(G2,CID,XG2).
+
+pp_xform_body(G,CID,('$dbg_apg'(CID,SG,EG),XG)) 
+	:-
+	arg(2,G,SG),
+	arg(3,G,EG),
+	pp_flatten(G,XG).
+***/
 
 /*---------------------------------------------------------------------------*
  * Token Preprocessor
@@ -1946,8 +2019,14 @@ module builtins.
 
 export '$dbg_apg'/3.
 export '$dbg_aph'/3.
+export '$dbg_apge'/3.
+export '$dbg_aphe'/3.
+export '$dbg_apf'/3.
 
 '$dbg_apg'(_,_,_).
 '$dbg_aph'(_,_,_).
+'$dbg_apge'(_,_,_).
+'$dbg_aphe'(_,_,_).
+'$dbg_apf'(_,_,_).
 
 endmod.
