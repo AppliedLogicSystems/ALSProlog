@@ -127,7 +127,7 @@ extern	int	PI_rungoal_with_update	PARAMS(( PWord, PWord *, int * ));
 extern	int	PI_unify	PARAMS(( PWord , int, PWord , int ));
 extern	void	PrologInit	PARAMS(( PSTRUCT * ));
 extern	void	PI_shutdown	PARAMS(( void ));
-extern	int	PI_toplevel	PARAMS(( void ));
+extern	int	PI_toplevel	PARAMS(( int * ));
 extern	int	PI_prolog_init	PARAMS((int, char ** ));
 
 #ifdef APP_PRINTF_CALLBACK

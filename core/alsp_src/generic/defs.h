@@ -211,6 +211,9 @@
 #define EXIT_SUCCESS 0
 #endif
 
+/* Defined EXIT_ERROR for reporting invalid options, etc. */
+#define EXIT_ERROR 2
+
 #include <stdio.h>
 
 #if defined(HAVE_STDARG_H)
