@@ -1932,6 +1932,7 @@ int sio_nsocketpair(void)
 {
 #ifdef MISSING_UNIX_DOMAIN_SOCKETS
    PWord result; int result_t;
+  PI_getan(&result, &result_t, 3);
   (void) PI_unify(result, result_t, -1, PI_INT);
 
   SUCCEED;
