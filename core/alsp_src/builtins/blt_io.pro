@@ -430,6 +430,12 @@ obp_in_cur
 	directory_self(Self),
 	asserta(obpLocation(_,Self)).
 
+export obp_in_locn/1.
+obp_in_locn(DirPath) 
+	:-
+	abolish(obpLocation,2),
+	asserta(obpLocation(_,DirPath)).
+
 obpPath(Path,OPath)
 	:-
 	pathPlusFile(PurePath,File,Path),

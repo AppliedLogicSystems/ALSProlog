@@ -167,6 +167,11 @@ ss_parse_command_line(['-obp' | T], L, CLInfo)
 	obp_in_cur,
 	ss_parse_command_line(T, L, CLInfo).
 
+	%% -obplcn: Keep obp files in absolute path directory:
+ss_parse_command_line(['-obplcn', Path | T], L, CLInfo)
+	:-!,
+	obp_in_locn(Path),
+	ss_parse_command_line(T, L, CLInfo).
 
 	%% -nwd: Set debugger to "nowins"
 ss_parse_command_line(['-nwd' | T], L, CLInfo)

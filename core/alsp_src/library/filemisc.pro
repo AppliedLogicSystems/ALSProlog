@@ -25,19 +25,38 @@ grab_lines(SS, []).
 
 copy_dir_files_nl(SourceDir, TgtDir, NL_type)
 	:-
+	copy_dir_files_nl(SourceDir, TgtDir, NL_type, new).
+
+copy_dir_files_nl(SourceDir, TgtDir, NL_type, NewUp)
+	:-
 	pathPlusFile(SourceDir, '*', SourcePattern),
 	files(SourcePattern, FileList),
-	copy_fileslist_nl(FileList, SourceDir, TgtDir, NL_type).
+	copy_fileslist_nl(FileList, SourceDir, TgtDir, NL_type, NewUp).
 
+copy_fileslist_nl(FileList, SourceDir, TgtDir, NL_type)
+	:-
+	copy_fileslist_nl(FileList, SourceDir, TgtDir, NL_type, new).
 
-copy_fileslist_nl([], SrcPath, DestDir, NL_type).
+copy_fileslist_nl([], SrcPath, DestDir, NL_type, _).
 
-copy_fileslist_nl([SrcFileName | SrcFileNamesList], SrcPath, DestDir, NL_type)
+copy_fileslist_nl([SrcFileName | SrcFileNamesList], SrcPath, DestDir, NL_type, NewUp)
 	:-
 	pathPlusFile(SrcPath, SrcFileName, SrcFile),
 	pathPlusFile(DestDir, SrcFileName, DestFile),
-	copy_file_nl(SrcFile, DestFile, NL_type),
-	copy_fileslist_nl(SrcFileNamesList, SrcPath, DestDir, NL_type).
+	check_copy_file_nl(NewUp, SrcFile, DestFile, NL_type),
+	copy_fileslist_nl(SrcFileNamesList, SrcPath, DestDir, NL_type, NewUp).
+
+check_copy_file_nl(new, SrcFile, DestFile, NL_type)
+	:-!,
+	copy_file_nl(SrcFile, DestFile, NL_type).
+
+check_copy_file_nl(_, SrcFile, DestFile, NL_type)
+	:-
+	(comp_file_times(SrcFile, DestFile) ->
+		true
+		;
+		copy_file_nl(SrcFile, DestFile, NL_type)
+	).
 
 copy_file_nl(SrcFileName, DestFileName, NL_type)
 	:-
@@ -61,12 +80,17 @@ output_nl(unix, TgtS)
 	:-
 	nl(TgtS).
 
+output_nl(mswins32, TgtS)
+	:-
+	put_code(TgtS, 13),
+	put_code(TgtS, 10).
+
 output_nl(dos, TgtS)
 	:-
 	put_code(TgtS, 13),
 	put_code(TgtS, 10).
 
-output_nl(mac, TgtS)
+output_nl(macos, TgtS)
 	:-
 	put_code(TgtS, 13).
 
