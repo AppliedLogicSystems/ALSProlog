@@ -24,6 +24,7 @@ read 'TEXT' (205, "defstr", purgeable, preload) "defstr.tcl";
 read 'TEXT' (206, "als_document", purgeable, preload) "als_document.tcl";
 read 'TEXT' (207, "als_menu", purgeable, preload) "als_menu.tcl";
 read 'TEXT' (208, "als_splash", purgeable, preload) "als_splash.tcl";
+read 'TEXT' (209, "als_tkfbox", purgeable, preload) "als_tkfbox.tcl";
 
 read 'GIFf' (200, "turnstile_splash", purgeable, preload) "turnstile_splash.b64";
 read 'GIFf' (201, "down-arrow-blue", purgeable, preload) "down-arrow-blue.b64";
