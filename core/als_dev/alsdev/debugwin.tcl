@@ -39,7 +39,7 @@ proc vTclWindow.debugwin {base} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "ALS Prolog Debugger"
-	wm protocol $base WM_DELETE_WINDOW unmap_alsdev_debug
+	wm protocol $base WM_DELETE_WINDOW "wm withdraw $base"
 
 
 	bind $base <Configure> "debugwin_configure_event $base %h %w %W"
