@@ -977,7 +977,8 @@ fin_load_from_file([],CanonSrcPath,OPath,CG,FCOpts,FileMgr)
 
 fin_load_from_file(ErrsList,CanonSrcPath,OPath,CG,FCOpts,FileMgr)
 	:-
-	throw(error(consult_load, [src_load,CanonSrcPath,ErrsList])).
+	copy_term(ErrsList, CErrsList),
+	throw(error(consult_load, [src_load,CanonSrcPath,CErrsList])).
 
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/ 

@@ -782,7 +782,7 @@ spit_the_error(
 
 spit_the_error(error(Error, Args), Stream)
 	:-
-	prolog_system_error(Error, Args).
+	tty_prolog_system_error(Error, Args).
 
 spit_the_error(prolog_system_error(Error, Args), Stream)
 	:-
@@ -818,7 +818,7 @@ tty_prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream),
 
 tty_prolog_system_error(s(ErrorCode,Stream), Args) 
 	:-
-	expand_code(ErrorCode, Pattern, EType),
+	builtins:expand_code(ErrorCode, Pattern, EType),
 	!,
 	sio:stream_type(Stream,StreamType),
 	sio_linenumber(Stream,LineNumber),
@@ -832,7 +832,7 @@ tty_prolog_system_error(s(ErrorCode,Stream), Args)
 
 tty_prolog_system_error(qc_failed(ErrorCode,Name,LineNumber),Args) 
 	:-
-	expand_code(ErrorCode, Pattern, EType),
+	builtins:expand_code(ErrorCode, Pattern, EType),
 	!,
 	catenate('%t,line %t: ', Pattern, OutPattern),
 	OutArgs = [Name,LineNumber | Args],
@@ -852,8 +852,15 @@ tty_prolog_system_error(error(W,L),_)
 	
 tty_prolog_system_error(ErrorCode, Args) 
 	:-
-	expand_code(ErrorCode, Pattern, EType),
+	builtins:expand_code(ErrorCode, Pattern, EType),
+	!,
 	pse_out(error_stream, EType, Pattern, Args),
+	flush_output(error_stream).
+
+tty_prolog_system_error(ErrorCode, Args) 
+	:-
+	decode_error(ErrorCode, Args, Pattern, MArgs),
+	pse_out(error_stream, '', Pattern, MArgs),
 	flush_output(error_stream).
 
 pse_out(Stream, EType, Pattern, Args)
@@ -913,7 +920,7 @@ tty_prolog_system_warning(error(W,L),_)
 
 tty_prolog_system_warning(ErrorCode, Args) 
 	:-
-	expand_code(ErrorCode, Pattern, EType),
+	builtins:expand_code(ErrorCode, Pattern, EType),
 	printf(warning_output, '%t',[EType]),
 	printf(warning_output, Pattern, Args, [quoted(true), maxdepth(9)]),
 	flush_output(warning_output).

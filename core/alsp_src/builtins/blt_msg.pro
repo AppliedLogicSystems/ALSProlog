@@ -408,7 +408,12 @@ decode_error(resource_error(Resource),_,
 	%%-------------------------
 decode_error(syntax_error, _, 'Syntax error.\n',[]).
 
-decode_error(system_error, _, 'System error.\n',[]).
+	%%-------------------------
+	%% System Error:
+	%%-------------------------
+decode_error(system_error, [], 'System error.\n',[]) :-!.
+decode_error(system_error, [A | As], 'System error: %t\n', [A | As]).
+decode_error(system_error, A, 'System error: %t\n', [A]).
 
 	%%-------------------------
 	%% Other Error:
