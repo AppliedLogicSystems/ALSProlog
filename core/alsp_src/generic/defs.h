@@ -150,6 +150,10 @@
 #define SIMPLE_MICS 1
 #define HAVE_LIBELF 1
 #endif
+#ifdef SOLARIS
+#define SIMPLE_MICS 1
+#define USE_ELF_SECTION_FOR_IMAGE 1
+#endif
 #endif /* KERNAL */
 
 /*---------------------------------------------------------------------*
@@ -291,7 +295,7 @@
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-#if (defined(__sgi) && defined(__mips)) || defined(__linux__)
+#if (defined(__sgi) && defined(__mips))
 #define __BIT_TYPES_DEFINED__ 1
 #endif
 

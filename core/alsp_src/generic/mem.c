@@ -53,6 +53,9 @@ static	void	coredump_cleanup	PARAMS(( int ));
 
 static	int	pgsize = 8192;	/* A guess at the page size */
 
+/* MAX_PAGE_SIZE is the largest possible page size of the OS */
+#define MAX_PAGE_SIZE 0x10000
+
 #ifdef PARAMREVBIT
 unsigned long AddressHiBit = 0x0;
 unsigned long ReversedHiBit = 0x80000000;
@@ -733,7 +736,7 @@ static long *als_mem;
 static	long *	alloc_big_block		PARAMS(( size_t, int ));
 static	long *	ss_malloc0		PARAMS(( size_t, int, int, long * ));
 #ifndef PURE_ANSI
-static	void	ss_restore_state	PARAMS(( char *, long ));
+static	void	ss_restore_state	PARAMS(( const char *, long ));
 #endif /* PURE_ANSI */
 static	int	ss_saved_state_present	PARAMS(( void ));
 
@@ -1214,7 +1217,115 @@ static unsigned long image_end(int image_file)
     return head.som_length;
 }
 
-#elif defined(HAVE_LIBELF)
+#endif /* HP_AOUT_800 */
+
+#define IMAGENAME_MAX	64
+#define IMAGEDIR_MAX	1024
+extern char  imagename[IMAGENAME_MAX];
+extern char  imagedir[IMAGEDIR_MAX];
+
+#ifdef USE_ELF_SECTION_FOR_IMAGE
+
+#include <libelf.h>
+
+static Elf_Scn *find_named_section(Elf *elf, const char *name, int create)
+{
+    Elf32_Ehdr *header;
+    Elf32_Half secstr_index;
+    Elf_Scn *section, *str_section;
+    Elf32_Shdr *section_header;
+    char *section_name;
+    Elf_Data *str_data;
+    void *new_d_buf;
+    Elf32_Word name_offset;
+    size_t name_size, new_d_size;
+    
+    header = elf32_getehdr(elf);
+    if (!header) return NULL;
+    
+    secstr_index = header->e_shstrndx;
+    section = NULL;
+
+    while ((section = elf_nextscn(elf, section))) {
+    	section_header = elf32_getshdr(section);
+    	if (!section_header) return NULL;
+    	section_name = elf_strptr(elf, secstr_index, section_header->sh_name);
+    	if (!section_name) return NULL;
+    	if (strcmp(name, section_name) == 0) return section;
+    }
+
+    if (create) {
+    	name_size = strlen(name)+1;
+    	
+    	str_section = elf_getscn(elf, secstr_index);
+    	str_data = elf_getdata(str_section, NULL);
+    	new_d_size = str_data->d_size + name_size;
+    	new_d_buf = malloc(new_d_size);
+    	if (!new_d_buf) return NULL;
+    	memcpy(new_d_buf, str_data->d_buf, str_data->d_size);
+    	memcpy(new_d_buf+str_data->d_size, name, name_size);
+    	name_offset = str_data->d_size;
+    	
+    	str_data->d_buf = new_d_buf;
+    	str_data->d_size = new_d_size;
+    	
+    	elf_flagdata(str_data, ELF_C_SET, ELF_F_DIRTY);
+    	
+    	section = elf_newscn(elf);
+    	if (!section) return NULL;
+    	section_header = elf32_getshdr(section);
+    	if (!section_header) return NULL;
+    	
+    	section_header->sh_name = name_offset;
+    	
+    	return section;
+    } else return NULL;
+}
+
+long ss_image_offset(void)
+{
+  char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
+  int image_file, r;
+  Elf *elf;
+  Elf_Scn *scn;
+  Elf32_Shdr *shdr;
+  long image_offset;
+
+  if (imagepath == NULL)
+    return 0;
+
+  if (elf_version(EV_CURRENT) == EV_NONE) return 0;
+    
+  strcpy(imagepath,imagedir);
+  strcat(imagepath,imagename);
+
+  image_file = open(imagepath, O_RDONLY);
+  if (image_file == -1)
+    fatal_error(FE_SS_OPENERR,(long)imagepath);
+    
+  elf = elf_begin(image_file, ELF_C_READ, NULL);
+  if (elf == NULL)
+    fatal_error(FE_SS_OPENERR,(long)imagepath);
+
+  free(imagepath);
+
+  scn = find_named_section(elf, "ALS Prolog State", 0);
+  if (scn == NULL) image_offset = 0;
+  else {
+    shdr = elf32_getshdr(scn);
+    if (shdr == NULL) image_offset =  0;
+    else image_offset = shdr->sh_offset;
+  }
+
+  elf_end(elf);
+
+  r = close(image_file);
+  if (r == -1)
+    fatal_error(FE_SS_OPENERR,(long)imagepath);
+
+  return image_offset;
+}
+#else
 
 #include <libelf.h>
 
@@ -1251,18 +1362,8 @@ static unsigned long image_end(int image_file)
     return end;
 }
 
-#else
-#error
-#endif /* HP_AOUT_800, HAVE_LIBELF */
-
-#define IMAGENAME_MAX	64
-#define IMAGEDIR_MAX	1024
-extern char  imagename[IMAGENAME_MAX];
-extern char  imagedir[IMAGEDIR_MAX];
-
 long ss_image_offset(void)
 {
-
     char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
     unsigned long image_size, elf_size;
     int image_file, fstat_result;
@@ -1295,6 +1396,7 @@ long ss_image_offset(void)
 	return elf_size;
     else return 0;
 }
+#endif
 
 static int copy(const char *filename, const char *copyname)
 {
@@ -1346,6 +1448,83 @@ static int copy(const char *filename, const char *copyname)
     return 0;
 }
 
+#ifdef USE_ELF_SECTION_FOR_IMAGE
+int ss_save_image_with_state(const char * new_image_name)
+{
+    char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
+    char tmp_name[L_tmpnam];
+    mem_file_info tmp_mmap;
+    int fd, r;
+    Elf *elf;
+    Elf_Scn *scn;
+    Elf32_Shdr *shdr;
+    Elf_Data *data;
+    
+    if (imagepath == NULL)
+	return 0;
+    
+    strcpy(imagepath,imagedir);
+    strcat(imagepath,imagename);
+
+    if (copy(imagepath, new_image_name) != 0) {
+    	free(imagepath);
+	printf("ss_save_image: Couldn't copy %s to %s\n", imagepath, new_image_name);
+    	return 0;
+    }
+    
+    free(imagepath);
+
+    tmpnam(tmp_name);
+
+    ss_save_state(tmp_name, 0);
+
+    if (!open_memory_file(tmp_name, &tmp_mmap)) return 0;
+
+    if (elf_version(EV_CURRENT) == EV_NONE) return 0;
+
+    fd = open(new_image_name, O_RDWR);
+    if (fd == -1) return 0;
+
+    elf = elf_begin(fd, ELF_C_RDWR, NULL);
+    if (elf == NULL) return 0;
+
+    scn = find_named_section(elf, "ALS Prolog State", 1);
+    if (scn == NULL) return 0;
+
+    shdr = elf32_getshdr(scn);
+    if (shdr == NULL) return 0;
+
+    shdr->sh_type = SHT_PROGBITS;
+  
+    data = elf_getdata(scn, NULL);
+    if (!data) {
+      data = elf_newdata(scn);
+      if (data == NULL) return 0;
+    }
+  
+    data->d_buf = tmp_mmap.start;
+    data->d_size = tmp_mmap.length;
+    data->d_align = MAX_PAGE_SIZE;
+    data->d_type = ELF_T_WORD;
+
+    elf_flagdata(data, ELF_C_SET, ELF_F_DIRTY);
+  
+    r = elf_update(elf, ELF_C_WRITE);
+    if (r == -1) return 0;
+  
+    elf_end(elf);
+
+    r = close(fd);
+    if (r == -1) return 0;
+
+    close_memory_file(&tmp_mmap);
+
+    remove(tmp_name);
+
+    return 1;
+}
+
+#else
 int ss_save_image_with_state(const char * new_image_name)
 {
     char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
@@ -1383,6 +1562,7 @@ int ss_save_image_with_state(const char * new_image_name)
         
     return ss_save_state(new_image_name, state_offset);
 }
+#endif
 
 #endif /* UNIX */
 
@@ -1394,6 +1574,9 @@ ss_save_state(const char *filename, long offset)
 {
     int   ssfd;
     int   bnum = 0, gnum;
+#if defined(SIMPLE_MICS)
+    long delta_offset;
+#endif
 
     /*
      * Open the saved state file.
@@ -1401,7 +1584,8 @@ ss_save_state(const char *filename, long offset)
 #if defined(SIMPLE_MICS)
 #ifdef UNIX
     ssfd = open(filename, O_WRONLY);
-    if (ssfd == -1) ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+    if (ssfd == -1)
+      ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0777);
 #else
     ssfd = open(filename, O_WRONLY | O_BINARY);
     if (ssfd == -1) ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY);
@@ -1411,15 +1595,15 @@ ss_save_state(const char *filename, long offset)
 #else
     ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0777);
 #endif
-printf("Save_state:opened %s %d\n",filename, ssfd);
     if (ssfd < 0)
 	return 0;
 
 #if defined(SIMPLE_MICS)    
     if (lseek(ssfd, offset, 0) != offset) goto ss_err;
     
-    offset = round_up(offset+sizeof(offset), pgsize);
-    if (write(ssfd, (char *)&offset, sizeof(offset)) < 0) goto ss_err;
+    delta_offset = round_up(offset+sizeof(offset), MAX_PAGE_SIZE) - offset;
+    if (write(ssfd, (char *)&delta_offset, sizeof(delta_offset)) < 0) goto ss_err;
+    offset += delta_offset;
 #endif
 
     if (lseek(ssfd, offset, 0) != offset) goto ss_err;
@@ -1431,7 +1615,6 @@ printf("Save_state:opened %s %d\n",filename, ssfd);
     for (gnum=0; gnum < amheader.nglobals; gnum++)
 	amheader.globals[gnum].value = *amheader.globals[gnum].addr;
 
-printf("Finished globals: nglobals=%ld nblocks=%ld\n",amheader.nglobals,amheader.nblocks);
     
     /*
      * Compute the fsize values for each block.  The fsize value is the
@@ -1461,7 +1644,6 @@ printf("Finished globals: nglobals=%ld nblocks=%ld\n",amheader.nglobals,amheader
 #endif /* HAVE_MMAP */
 
     }
-printf("Finished computing blocks\n");
 
 
     /*
@@ -1474,7 +1656,6 @@ printf("Finished computing blocks\n");
 		  (size_t)amheader.blocks[bnum].fsize) < 0)
 	    goto ss_err;
     
-printf("Wrote blocks to file\n");
 
     close(ssfd);
     return 1;
@@ -1491,10 +1672,13 @@ ss_err:
 
 static void
 ss_restore_state(filename,offset)
-    char *filename;
+    const char *filename;
     long offset;
 {
     int ssfd, gnum;
+#ifdef SIMPLE_MICS
+    long delta_offset;
+#endif
 #if defined(HAVE_MMAP) || defined(MSWin32) || defined(MACH_SUBSTRATE)
     int  bnum;
 #endif
@@ -1525,7 +1709,8 @@ ss_restore_state(filename,offset)
     if (lseek(ssfd, offset, 0) < 0)
 	goto ss_err;
 
-    if (read(ssfd, (char *)&offset, sizeof(offset)) < 0) goto ss_err;
+    if (read(ssfd, (char *)&delta_offset, sizeof(delta_offset)) < 0) goto ss_err;
+    offset += delta_offset;
 #endif
 
     /* Seek to amheader, get amheader, and seek back to amheader */
@@ -1536,7 +1721,7 @@ ss_restore_state(filename,offset)
 	goto ss_err;
     
     if (lseek(ssfd, offset, 0) < 0)
-	goto ss_err;
+        goto ss_err;
     
     /* Check integrity information */
 
