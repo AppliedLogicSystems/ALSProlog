@@ -258,6 +258,28 @@ void (*get_demo_key)(char *key, int max) = console_get_demo_key;
 
 #define KEY_MAX 40
 
+static int rotate(int n, int r)
+{
+	int n1,n2,n3,n4,r1,r2,r3,r4;
+	
+	n1 = (n % 10)/1;
+	n2 = (n % 100)/10;
+	n3 = (n % 1000)/100;
+	n4 = (n % 10000)/1000;
+
+	r1 = (r % 10)/1;
+	r2 = (r % 100)/10;
+	r3 = (r % 1000)/100;
+	r4 = (r % 10000)/1000;
+	
+	n1 = (n1 + r1) % 10;
+	n2 = (n2 + r2) % 10;
+	n3 = (n3 + r3) % 10;
+	n4 = (n4 + r4) % 10;
+	
+	return (n1 + n2*10 + n3*100 + n4*1000);
+}
+
 static int valid_demo_key(const char *key)
 {
 	int a,b,c,d, duration;
@@ -269,11 +291,11 @@ static int valid_demo_key(const char *key)
 
 	if (d != calculate_checksum(a ^ b ^ c)) return 0;
 
-/*	
-	a = rotate(a);
-	b = rotate(b);
-	c = rotate(c);
-*/
+	a = rotate(a, 4935);
+	b = rotate(b, 6723);
+	c = rotate(c, 2385); 
+	
+
 	start_tm.tm_mon = (a/100)%100 - 1;
 	start_tm.tm_mday = a%100;
 	start_tm.tm_year = (b/100)%100 + 98;
