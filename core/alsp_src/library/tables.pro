@@ -45,7 +45,7 @@
  |			  options (passed to the TkTable package):
  |		numcols,		colheadings, 	titlerows,	roworigin,	
  |		numrows, 		rowheadings,	titlecols,	colorigin,	
- |		title,			tablefont,		foreground,	background, 
+ |		title,			font,		foreground,	background, 
  |		selectmode,		rowstretch,		colstretch,	flashmode,	
  |
  |			- returns TableArrayName in R
@@ -91,57 +91,6 @@
  *========================================================================*/
 
 
-/*--------------------
-module tt.
-
-use tk_alslib.
-use tcltk.
-
-export tbl1/0.
-tbl1
-	:-
-	load_table_package,
-	create_table(foobar,
-		[numrows=9,
-		 rowheadings=[row_1,'Row 2',r3,r4,r5,r6,r7,r8,r9],
-		 colheadings=['First','Second',third,fourth],
-		 numcols = 7,
-		 title='My Test'
-		 ]).
-
-tt1 :-
-	table_set_tag(foobar, title, 
-				[background=yellow,
-				 foreground=black,
-				 relief=groove]).
-
-tt2 :-
-	table_set_tag(foobar, z1, 
-				[background=green,
-				 foreground=black]).
-
-tt3 :-
-	table_tag_region(foobar, z1, cell(2,2)).
-
-tt4 :-
-	set_foobar_col(1,2,[9,8,7,6,5,4,3,2,1,2,3,4,5]).
-
-export tbl1r/0.
-
-tbl1r
-	:-
-	load_table_package,
-	create_table_r(foobar,
-		[numrows=9,
-		 rowheadings=[row_1,'Row 2',r3,r4,r5,r6,r7,r8,r9],
-		 colheadings=['First','Second',third,fourth],
-		 numcols = 7,
-		 title='My Test'
-		 ],R),
-	write(r=R),nl.
-
-endmod.
-*--------------------*/
 
 module tk_alslib.
 use tcltk.
@@ -173,7 +122,6 @@ load_table_package(Interp)
 	join_path(TablesTclList, TablesTclPath),
 	tcl_call(Interp, [source,TablesTclPath], _),
 	tcl_call(Interp, [load_table_package, [SharedList]], X),
-%	assert(table_package_loaded(Interp)).
 	assert(packages_loaded(Interp,table_package)).
 
 /*-------------------------------------------------------------------*
@@ -190,20 +138,21 @@ create_table3(Mod, TableName, Options)
 
 create_table4(Mod, TableName, Options, Interp)
 	:-
-	create_table4_r(Mod, TableName, Options, Interp, _).
+	create_table4_r(Mod, TableName, Options, Interp, [], _).
 
 create_table3_r(Mod, TableName, Options, R)
 	:-
-	create_table4_r(Mod, TableName, Options, tcli, R).
+	create_table4_r(Mod, TableName, Options, tcli, [], R).
 
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
-create_table4_r(Mod, TableName, Options, Interp, TableArrayName)
+create_table4_r(Mod, TableName, Options, Interp, XOpts,BTR)
 	:-
 	((dmember(colheadings=ColHeadings, Options),
 		ColHeadings \= [])
 		->
-		length(ColHeadings, NCols),
+		length(ColHeadings, NCols0),
+		NCols is NCols0+1,
 		NTitleRows = 1,
 		Roworigin = -1 
 		;
@@ -215,7 +164,8 @@ create_table4_r(Mod, TableName, Options, Interp, TableArrayName)
 	((dmember(rowheadings=RowHeadings, Options),
 		RowHeadings \= [])
 		->
-		length(RowHeadings, NRows),
+		length(RowHeadings, NRows0),
+		NRows is NRows0+1,
 		NTitleCols = 1,
 		Colorigin = -1
 		;
@@ -225,36 +175,71 @@ create_table4_r(Mod, TableName, Options, Interp, TableArrayName)
 		Colorigin =  0
 	),
 	check_default(Options, title,		'',			Title),
-	check_default(Options, tablefont,	['Times', 9, normal], Tablefont),
+	check_default(Options, font,	['Times', 9, normal], Tablefont),
 	check_default(Options, foreground,	black,		Foreground),
 	check_default(Options, background, '#b9b9b9',	Background),
 	check_default(Options, selectmode,	extended,	Selectmode),
 	check_default(Options, rowstretch,	unset,		Rowstretch),
-	check_default(Options, colstretch,	all,		Colstretch),
+	check_default(Options, colstretch,	unset,		Colstretch),
 	check_default(Options, flashmode,	on,			Flashmode),
+	check_default(Options, width,		NCols,		Width),
+	check_default(Options, height,		NRows,		Height),
 
+	to_tcl_opts(XOpts, XXOpts),
+	catenate(TableName, '_info', TableInfoArrayName),
+/*
 	OptionsList = [
-		numcols,		NCols,
-		colheadings, ColHeadings,
+		cols,		NCols,
+		width,		Width,
 		titlerows,	NTitleRows,
 		roworigin,	Roworigin,
-		numrows,		NRows,
-		rowheadings, RowHeadings,
+		rows,		NRows,
+		height,		Height,
 		titlecols,	NTitleCols,
 		colorigin,	Colorigin,
-		title,		Title,
-		tablefont,	Tablefont,
+		font,		Tablefont,
 		foreground,	Foreground,
 		background, Background,
 		selectmode,	Selectmode,
 		rowstretch,	Rowstretch,
 		colstretch,	Colstretch,
 		flashmode,	Flashmode
+		| XXOpts
 	],
-
-	catenate(TableName, '_info', TableInfoArrayName),
+	OthersList = [
+		colheadings, ColHeadings,
+		rowheadings, RowHeadings,
+		title,		Title
+		],
 	tcl_call(Interp, 
-				[build_table,TableName,TableInfoArrayName,OptionsList],_),
+			[build_table4,TableName,TableInfoArrayName,
+					OptionsList,OthersList],
+			BTR),
+*/
+	OptionsList = [
+		colheadings, ColHeadings,
+		rowheadings, RowHeadings,
+		title,		Title,
+		cols,		NCols,
+		width,		Width,
+		titlerows,	NTitleRows,
+		roworigin,	Roworigin,
+		rows,		NRows,
+		height,		Height,
+		titlecols,	NTitleCols,
+		colorigin,	Colorigin,
+		font,		Tablefont,
+		foreground,	Foreground,
+		background, Background,
+		selectmode,	Selectmode,
+		rowstretch,	Rowstretch,
+		colstretch,	Colstretch,
+		flashmode,	Flashmode
+		| XXOpts
+	],
+	tcl_call(Interp, 
+			[build_table,TableName,TableInfoArrayName,OptionsList],
+			BTR),
 
 	catenate(TableName, '_array', TableArrayName),
 	catenate(['set_', TableName, '_table'], SetTableArrayPred),
@@ -285,6 +270,14 @@ create_table4_r(Mod, TableName, Options, Interp, TableArrayName)
 		Lim is NRows - RowStart,
 		tcl_call(Interp, [write_table_col,TableArrayName,ColN,RowStart,Lim,ValsList], _)
 		) ).
+
+to_tcl_opts([], []).
+to_tcl_opts([Tag=Value | XOpts], [Tag, Value | XXOpts])
+	:-!,
+	to_tcl_opts(XOpts, XXOpts).
+to_tcl_opts([_ | XOpts], XXOpts)
+	:-
+	to_tcl_opts(XOpts, XXOpts).
 
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
