@@ -21,16 +21,18 @@ defStruct(base_connection_info, [
 				%% continue MUST be the very first slot, and
 				%% expect   MUST be the second slot:
 			continue/continue,		%% continue/done
-			expect/nil,				%% nil/expect(What)
-            ip_num/0,               %% source IP number
+			expect/nil,				%% nil/expect(What) or busy(...)
+            ip_num/0,               %% source machine IP number
+			hostname/'noname',		%% source machine internet name
 			port/0,                 %% port number
 			conn_date/(0/0/0),      %% connect date
 			conn_time/(0:0:0),      %% connect time
 			disconn_date/(0/0/0),   %% disconnect date
 			disconn_time/(0:0:0),   %% disconnect time
-			socket_in/nil,			%% input read socket
-			socket_out/nil,			%% input write socket
-			socket_id/nil			%% id of connected clone socket: s(Port,FID)
+%			socket_in/nil,			%% input read socket
+%			socket_out/nil,			%% input write socket
+			socket_id/nil,			%% id of connected clone socket: s(Port,FID)
+			pid/nil					%% pid of worker when this is a worker...
 			],
 		accessPred = access_base_connection_info,
 		setPred =    set_base_connection_info,

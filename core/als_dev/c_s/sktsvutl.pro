@@ -124,6 +124,9 @@ server_warning_msg(remote_termination,
 	%% server_warning(unknown_config, [Expr])
 server_warning_msg(unknown_config, 'Warning: Unrecognized config file entry: %t').
 
+	%% server_warning(dynamic_load_fail, [File], SInfo).
+server_warning_msg(dynamic_load_fail, 'Dynamic load: can\'t find file: %t').
+
 	%% server_warning(done_init, [], SInfo).
 server_warning_msg(done_init, 'Init file read, and log file started...').
 

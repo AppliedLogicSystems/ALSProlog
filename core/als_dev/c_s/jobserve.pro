@@ -388,12 +388,14 @@ handle_request(done,SR,SW,done,SInfo)
 handle_request(stop_yourself,SR,SW,stop_yourself,SInfo) 
 	:- !.
 
+/*
 handle_request(are_you_ready,SR,SW,continue,SInfo) 
 	:-!,
 	flush_input(SR),
 	getpid(PID),
 	printf(SW,'ready_for_business(%t).\n', [PID]),
 	flush_output(SW).
+*/
 
 handle_request(Job, SR,SW,Flag,SInfo) 
 	:-

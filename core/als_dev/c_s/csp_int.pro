@@ -43,14 +43,14 @@ export run_script/4.
  |								printf(SW, Pattern, []),nl(SW),fo(SW)
  |	respond(Pattern,Args)	- printf(SW,Pattern,Args),nl(SW),fo(SW)
  |	respond_prolog(Pattern)	- 
- |					printf(SW, Pattern, [], [quoted(true), line_length(5000)]),
+ |					printf(SW, Pattern, [], [quoted(true), line_length(500000)]),
  |					nl(SW), flush_output(SW)
  |	respond_prolog(Pattern, Args)	- 
- |					printf(SW, Pattern, Args, [quoted(true), line_length(5000)]),
+ |					printf(SW, Pattern, Args, [quoted(true), line_length(500000)]),
  |					nl(SW), flush_output(SW)
  |	Note NO nl on the following:
  |	respond_xnl(Pattern,Args)	- 
- |					printf(SW,Pattern,Args,[line_length(5000)]),
+ |					printf(SW,Pattern,Args,[line_length(500000)]),
  |					flush_output(SW)
  |	send_file_lines(FileName)	- effectively applies the following to
  |								  each line of file FileName:
@@ -235,7 +235,7 @@ interact(respond(Pattern), Mod, TaskEnv, true, SInfo)
 	stream_open_status(SW, open),
 	!,
 	(stream_open_status(SW, open) -> 
-		printf(SW, Pattern, [], [line_length(5000)]),
+		printf(SW, Pattern, [], [line_length(500000)]),
 		nl(SW)
 		; 
 		(stream_open_status(SW, open) -> 
@@ -249,7 +249,7 @@ interact(respond(Pattern), Mod, TaskEnv, true, SInfo)
 	),
 	
 nl(user_output),
-printf(user_output, Pattern, [], [line_length(5000)]),
+printf(user_output, Pattern, [], [line_length(500000)]),
 nl(user_output), flush_output(user_output).
 
 interact(respond(Pattern), Mod, TaskEnv, true, SInfo)
@@ -260,10 +260,21 @@ interact(respond(Pattern, Args), Mod, TaskEnv, true, SInfo)
 	access_tsk_env(write_s, TaskEnv, SW),
 	stream_open_status(SW, open),
 	!,
-	printf(SW, Pattern, Args, [line_length(5000)]),
+	printf(SW, Pattern, Args, [line_length(500000)]),
 	nl(SW), flush_output(SW).
 
 interact(respond(Pattern, Args), Mod, TaskEnv, true, SInfo)
+	:-!.
+
+interact(respond(Pattern, Args, Options), Mod, TaskEnv, true, SInfo)
+	:-
+	access_tsk_env(write_s, TaskEnv, SW),
+	stream_open_status(SW, open),
+	!,
+	printf(SW, Pattern, Args, [line_length(500000) | Options]),
+	nl(SW), flush_output(SW).
+
+interact(respond(Pattern, Args, Options), Mod, TaskEnv, true, SInfo)
 	:-!.
 
 interact(respond_xnl(Pattern, Args), Mod, TaskEnv, true, SInfo)
@@ -271,7 +282,7 @@ interact(respond_xnl(Pattern, Args), Mod, TaskEnv, true, SInfo)
 	access_tsk_env(write_s, TaskEnv, SW),
 	stream_open_status(SW, open),
 	!,
-	printf(SW, Pattern, Args, [line_length(5000)]),
+	printf(SW, Pattern, Args, [line_length(500000)]),
 	flush_output(SW).
 
 interact(respond_xnl(Pattern, Args), Mod, TaskEnv, true, SInfo)
@@ -282,7 +293,7 @@ interact(respond_prolog(Pattern), Mod, TaskEnv, true, SInfo)
 	access_tsk_env(write_s, TaskEnv, SW),
 	stream_open_status(SW, open),
 	!,
-	printf(SW, Pattern, [], [quoted(true), line_length(5000)]),
+	printf(SW, Pattern, [], [quoted(true), line_length(500000)]),
 	nl(SW), flush_output(SW).
 
 interact(respond_prolog(Pattern), Mod, TaskEnv, true, SInfo)
@@ -293,7 +304,7 @@ interact(respond_prolog(Pattern, Args), Mod, TaskEnv, true, SInfo)
 	access_tsk_env(write_s, TaskEnv, SW),
 	stream_open_status(SW, open),
 	!,
-	printf(SW, Pattern, Args, [quoted(true),line_length(5000)]),
+	printf(SW, Pattern, Args, [quoted(true),line_length(500000)]),
 	nl(SW), flush_output(SW).
 
 interact(respond_prolog(Pattern, Args), SR, SW, Mod, TaskEnv, true, SInfo)

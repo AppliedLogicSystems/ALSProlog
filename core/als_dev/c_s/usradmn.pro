@@ -264,7 +264,7 @@ end_check_user_logon(ID,SR,SW,RestEntry,State,SInfo,ok_logged_in,Date,Time)
 	extendPath(UserDir, ID, ThisUserArea),
 	exists_file(ThisUserArea),
 	!,
-	set_login_connection_info(users_area, State, UserDir),
+%	set_login_connection_info(users_area, State, UserDir),
 	set_login_connection_info(user_area, State, ThisUserArea),
 	filePlusExt(ID, log, BaseLogFile),
 	pathPlusFile(ThisUserArea,BaseLogFile,LogFile),

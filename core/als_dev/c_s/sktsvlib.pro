@@ -24,9 +24,26 @@ export break_connection/6.
 init_server_info_and_queue(Queue, QueueTail, SInfo)
 	:-
 	make_server_info(SInfo),
+	sio_gethostname(InitHN),
+	gethostbyname(InitHN,_,_,[IP | _]),
+	set_server_info(host_ip, SInfo, IP),
+	gethostbyaddr(IP,_,[HostName|_],_),
+	set_server_info(host_name, SInfo, HostName),
 	pbi_get_command_line(InitCmdLine),
 	parse_cmd_line(InitCmdLine, CmdLine),
-	disp_init_cmdline(CmdLine, Queue, QueueTail, SInfo).
+	(dmember(dir = MyDir, CmdLine) ->
+		change_cwd(MyDir)
+		;
+		true
+	),
+	initialize_server(CmdLine, SInfo),
+	begin_free_worker(CmdLine, SInfo),
+	app_specific_init(CmdLine, SInfo),
+	access_server_info(ports_list, SInfo, Ports),
+	start_server_ports(Ports,  Queue, InitQueueTail, Started, SInfo),
+	Started = [FirstServerPort | _],
+	worker_initialize(CmdLine, FirstServerPort, SInfo),
+	check_master_connect(CmdLine, InitQueueTail, QueueTail, SInfo).
 
 /*!---------------------------------------------------------------*
  |	parse_cmd_line/2
@@ -49,19 +66,24 @@ skip_cl_head([], []).
 parse_cmd_line0([], []).
 parse_cmd_line0([Item  | RestInitCmdLine ], OutCmdLine)
 	:-
-	parse_cmd_line_item(Item, RestInitCmdLine, InitCmdLineTail, OutCmdLine, OutCmdLineTail),
+	parse_cmd_line_item(Item, RestInitCmdLine, InitCmdLineTail, 
+						OutCmdLine, OutCmdLineTail),
 	parse_cmd_line0(InitCmdLineTail, OutCmdLineTail).
 
-parse_cmd_line_item(Item, RestInitCmdLine, InitCmdLineTail, OutCmdLine, OutCmdLineTail)
+parse_cmd_line_item(Item, RestInitCmdLine, InitCmdLineTail, 
+					OutCmdLine, OutCmdLineTail)
 	:-
 	'$uia_peekb'(Item, 0, 0'-),
 	!,
 	atom_codes(Item, [_ | ItemCs]),
-	p_cl_i(ItemCs, RestInitCmdLine, InitCmdLineTail, OutCmdLine, OutCmdLineTail).
+	p_cl_i(ItemCs, RestInitCmdLine, InitCmdLineTail, 
+						OutCmdLine, OutCmdLineTail).
 
-parse_cmd_line_item(_, RestInitCmdLine, RestInitCmdLine, OutCmdLine, OutCmdLine).
+parse_cmd_line_item(_, RestInitCmdLine, RestInitCmdLine, 
+					OutCmdLine, OutCmdLine).
 
-p_cl_i(ItemCs, InitCmdLineTail, InitCmdLineTail, OutCmdLine, OutCmdLineTail)
+p_cl_i(ItemCs, InitCmdLineTail, InitCmdLineTail, 
+					OutCmdLine, OutCmdLineTail)
 	:-
 	asplit0(ItemCs, 0'=, LeftCs, RightCs),
 	!,
@@ -69,54 +91,27 @@ p_cl_i(ItemCs, InitCmdLineTail, InitCmdLineTail, OutCmdLine, OutCmdLineTail)
 	atom_codes(Tag, LeftCs),
 	bufread(RightCs, Value).
 
-p_cl_i(ItemCs, InitCmdLineTail, InitCmdLineTail, OutCmdLine, OutCmdLineTail)
+p_cl_i(ItemCs, InitCmdLineTail, InitCmdLineTail, 
+					OutCmdLine, OutCmdLineTail)
 	:-
 	atom_codes(Item, ItemCs),
 	single_cmd(Item),
 	OutCmdLine = [Item=true | OutCmdLineTail].
 
-p_cl_i(ItemCs, [Item2 | InitCmdLineTail], InitCmdLineTail, OutCmdLine, OutCmdLineTail)
+p_cl_i(ItemCs, [Item2 | InitCmdLineTail], InitCmdLineTail, 
+					OutCmdLine, OutCmdLineTail)
 	:-!,
 	atom_codes(Item, ItemCs),
 	OutCmdLine = [Item = Item2 | OutCmdLineTail].
 
-p_cl_i(_, InitCmdLineTail, InitCmdLineTail, OutCmdLineTail, OutCmdLineTail).
+p_cl_i(_, InitCmdLineTail, InitCmdLineTail, 
+					OutCmdLineTail, OutCmdLineTail).
 
 single_cmd(localterm).
 single_cmd(rexec).
 
 /*!---------------------------------------------------------------*
- |	disp_init_cmdline/4
- |	disp_init_cmdline(CmdLine, Queue, QueueTail, SInfo)
- |	disp_init_cmdline(+, -, -, +)
  *----------------------------------------------------------------*/
-
-	%% Free worker case:
-disp_init_cmdline(CmdLine, Queue, QueueTail, SInfo)
-	:-
-	dmember(st=fws, CmdLine),
-	!,
-	begin_free_worker(CmdLine, Queue, QueueTail, SInfo).
-
-%getpid(YYY), write(after_begin_free_worker(YYY)),nl,nl,flush_output.
-
-/*
-	%% Located worker case:
-disp_init_cmdline(CmdLine, Queue, QueueTail, SInfo)
-	:-
-	dmember(st=lws, CmdLine),
-	!,
-*/
-
-
-	%% "Default" case: Start the standard server:
-disp_init_cmdline(CmdLine, Queue, QueueTail, SInfo)
-	:-
-	initialize_server(CmdLine, Ports, SInfo),
-	start_server_ports(Ports,  Queue, QueueTail, Started, SInfo),
-	Started = [FirstServerPort | _],
-	worker_initialize(CmdLine, FirstServerPort, SInfo).
-
 start_server_ports([localhost(Descrip)],  Queue, QueueTail, [], SInfo)
 	:-!,
 	open_local(Descrip, S, SInfo),
@@ -136,8 +131,8 @@ start_server_ports(Ports,  Queue, QueueTail, StartedPorts, SInfo)
 
 /*!---------------------------------------------------------------*
  |	initialize_server/2
- |	initialize_server(Ports, SInfo)
- |	initialize_server(-, -)
+ |	initialize_server(CmdLine, SInfo)
+ |	initialize_server(+, +)
  |
  |	- shell for server initialization
  |
@@ -163,22 +158,20 @@ start_server_ports(Ports,  Queue, QueueTail, StartedPorts, SInfo)
  |	Ports gets set when this line is read.
  *----------------------------------------------------------------*/
 
-initialize_server(CmdLine, Ports, SInfo)
+initialize_server(CmdLine, SInfo)
 	:-
 	get_config_file_and_type(CmdLine, CfgFile, CfgType),
 	(exists_file(CfgFile) ->
-		true
+		(CfgType = terms ->
+			grab_terms(CfgFile, CfgSrcItems)
+			;
+			grab_lines(CfgFile, CfgSrcItems)
+		)
 		;
-		server_error(missing_cfg, [CfgFile], SInfo)
+			%% assumed to be CfgType = terms:
+		app_default_config(CmdLine, CfgSrcItems)
 	),
-	open(CfgFile, read, CfgStream, []),
-	(CfgType = terms ->
-		read_terms(CfgStream, CfgSrcItems)
-		;
-		read_lines(CfgStream, CfgSrcItems)
-	),
-	close(CfgStream),
-	getpid(PID), 
+	getpid(PID0), PID is floor(PID0), 
 	(dmember(server_name=SName, CfgSrcItems) -> 
 		true
 		;
@@ -202,7 +195,6 @@ initialize_server(CmdLine, Ports, SInfo)
 				'\n====== Server log started: %t  %t Running on: %t PID: %t ======\n', 
 				[Date,Time,Hostname,PID])
 	),
-%	application_initialize(CfgSrcItems, SInfo, LogFile),
 	assert(configs_terms(CfgSrcItems)),
 	server_warning(done_init, [], SInfo).
 
@@ -262,20 +254,28 @@ process_server_config([Item | CfgSrcItems], CmdLine, SInfo, ASIn, ASOut, Ports)
 	 *----------------------------------------------------------------*/
 process_config_item(ports_list=FilePorts, CmdLine, SInfo, ASIn, AllPorts)
 	:-!,
-	(dmember(ports_list=Ports, CmdLine) -> true ; Ports = FilePorts),
+	(dmember(ports_list=PortsExpr, CmdLine) -> 
+		atomread(PortsExpr, Ports)
+		; 
+		Ports = FilePorts
+	),
 	sort_out_ports(Ports, NonLoginPorts, AllPorts),
 	set_server_info(ports_list, SInfo, AllPorts),
 	set_server_info(non_login_ports, SInfo, NonLoginPorts).
 
 process_config_item(dynamic_loads=LoadsList, CmdLine, SInfo, ASIn, AllPorts)
 	:-!,
-	load_dynamic_list(LoadsList).
+	load_dynamic_list(LoadsList,SInfo).
 
-load_dynamic_list([]).
-load_dynamic_list([File | LoadsList])
+load_dynamic_list([],_).
+load_dynamic_list([File | LoadsList],SInfo)
 	:-
-	consult(File),
-	load_dynamic_list(LoadsList).
+	(exists(File) ->
+		consult(File)
+		;
+		server_warning(dynamic_load_fail, [File], SInfo)
+	),
+	load_dynamic_list(LoadsList,SInfo).
 
 	%% Look for application-specific processing:
 :-dynamic(application_config_item/5).
@@ -306,25 +306,6 @@ process_config_item(Tag=Value, CmdLine, SInfo, ASIn, _)
 		access_server_info(extension_slot, SInfo, XTNSlotList),
 		set_server_info(extension_slot, SInfo, [Tag=FinalValue | XTNSlotList])
 	).
-
-/*
-	%% General default, standard slots:
-process_config_item(Tag=Value, CmdLine, SInfo, ASIn, _)
-	:-
-	set_server_info(Tag, SInfo, Value),
-	!.
-
-	%% General default, non-standard slots:
-process_config_item(Tag=Value, CmdLine, SInfo, ASIn, _)
-	:-
-	(atom(Value) ->
-		pci_deref(Value,ASIn,SInfo,FinalValue)
-		;
-		FinalValue = Value
-	),
-	access_server_info(extension_slot, SInfo, XTNSlotList),
-	set_server_info(extension_slot, SInfo, [Tag=FinalValue | XTNSlotList]).
-*/
 
 pci_deref(InFileValue,AS,SInfo,FileValue)
 	:-
@@ -515,88 +496,9 @@ remote_execute(Goal,Mod,Args,yes(Args))
 
 remote_execute(Goal,Mod,Args,no).
 
-
-
-
-/*************************
-
-administration_task(switch_local(Where),SR,SW,State,CT,QT,NewQT, continue,SInfo)
-	:-!,
-	change_server_local_streams(Where, State, SInfo),
-	QT = [c(SR,SW,State,CT) | NewQT].
-
-change_server_local_streams(default, State, SInfo)
-	:-!,
-	set_server_info(local_read_stream,  SInfo, user_input),
-	set_server_info(local_write_stream, SInfo, user_output).
-
-change_server_local_streams(here, State, SInfo)
-	:-!,
-	access_login_connection_info(socket_in, State, SR), 
-	access_login_connection_info(socket_out, State, SW), 
-	set_server_info(local_read_stream,  SInfo, SR),
-	set_server_info(local_write_stream, SInfo, SW).
-
-administration_task(spy(What),SR,SW,State,CT,QT, NewQT, continue,SInfo)
-	:-
-	spy(What),
-	!,
-	QT = [c(SR,SW,State,CT) | NewQT].
-administration_task(spy(What),SR,SW,State,CT,QT, NewQT, continue,SInfo)
-	:-!,
-	QT = [c(SR,SW,State,CT) | NewQT].
-
-administration_task(reconsult(What),SR,SW,State,CT,QT,NewQT, continue,SInfo)
-	:-!,
-	reconsult(What),
-	QT = [c(SR,SW,State,CT) | NewQT].
-
-/*
-administration_task(switch_debugger(Where),SR,SW,State,CT,QT,NewQT, continue,SInfo)
-	:-!,
-	QT = [c(SR,SW,State,CT) | NewQT].
-*/
-
-administration_task(rex(Goal,Args),SR,SW,State,CT,QT,NewQT, continue,SInfo)
-	:-!,
-	remote_execute(Goal,user,Args,SR,SW,State,Flag,SInfo),
-	QT = [c(SR,SW,State,CT) | NewQT].
-
-administration_task(rex(Goal,Mod,Args),SR,SW,State,CT,QT,NewQT, continue,SInfo)
-	:-!,
-	remote_execute(Goal,Mod,Args,SR,SW,State,Flag,SInfo),
-	QT = [c(SR,SW,State,CT) | NewQT].
-
-administration_task(rst(Slot),SR,SW,State,CT,QT,NewQT, continue,SInfo)
-	:-!,
-	remote_execute( access_server_info(Slot,SInfo,Val),socket_comms,[Val],
-					SR,SW,State,continue,SInfo),
-	QT = [c(SR,SW,State,CT) | NewQT].
-
-		%%----------------------------%%
-		%% REMOTE EXECUTION PREDICATES
-		%%----------------------------%%
-
-remote_execute(Goal,Mod,Args,SR,SW,State,continue,SInfo)
-	:-
-	Mod:Goal,
-	!,
-	printf(SW,'yes(%t).\n',[Args],[quoted(true)]),
-	flush_output(SW).
-
-remote_execute(Goal,Mod,Args,SR,SW,State,continue,SInfo)
-	:-
-	printf(SW,'no.\n',[]),
-	flush_output(SW).
-
-*********************/
-
-
-
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		%% Connection-level utilities and default procedures
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 	/*----------------------------------------------*
 	 |	Default Last chance error/exception handler
@@ -636,8 +538,8 @@ initial_state(ConnType,IPNum, SR,SW,InitialState,State,continue,SInfo)
 	),
 	set_login_connection_info(port, State, Port),
 	set_login_connection_info(socket_id, State, FID),
-	set_login_connection_info(socket_in, State, SR),
-	set_login_connection_info(socket_out, State, SW),
+%	set_login_connection_info(socket_in, State, SR),
+%	set_login_connection_info(socket_out, State, SW),
 	server_info_out(new_connection_fin, SR, [IPNum,Time,Date], SInfo).
 
 /*!----------------------------------------------------------------------*
@@ -696,53 +598,6 @@ break_connection(Reason,Args,SR,SW,State,SInfo)
 	(UserID \= nil -> accounting(logout, State, SInfo) ; true ),
 	(stream_open_status(SW, open) -> close(SW) ; true),
 	(stream_open_status(SR, open) -> close(SR) ; true).
-
-worker_initialize(CmdLine, FSP, SInfo)
-	:-
-	access_server_info(log_file, SInfo, LogFile),
-	configs_terms(CfgSrcItems),
-	server_warning(checking_workers, [], SInfo),
-	worker_initialize(CfgSrcItems, CmdLine, FSP, SInfo, LogFile),
-	server_warning(workers_check_done, [], SInfo).
-
-worker_initialize(CfgSrcItems, CmdLine, SP, SInfo, LogFile)
-	:-
-	preliminary_max_num_wkrs(CfgSrcItems, MaxNumWkrs),
-	set_server_info(max_num_wkrs, SInfo, MaxNumWkrs),
-	init_worker_framework(MaxNumWkrs),
-
-	(MaxNumWkrs > 0 ->
-%		init_workers(MaxNumWkrs, CmdLine, CfgSrcItems, SInfo, LogFile, ActualNumWkrs)
-		start_workers(MaxNumWkrs, FinalNWs, CfgSrcItems, CmdLine, WrkDB, SP, SInfo, WkrRecsList),
-		ActualNumWkrs = FinalNWs
-		;
-		ActualNumWkrs = 0
-	),
-
-assert(pending_wkr(ken_ok,'hilbert.als.com',30002,
-	m('hilbert.als.com','204.5.42.8',ken,logical,30002,
-	'/dakota/ken/zparc/eng/servers/builds/solaris/zsd-solaris',
-	'/dakota/ken/zparc/eng/servers/builds/solaris')  )),
-
-	(ActualNumWkrs > 0 ->
-		task_intf:assert(use_workers)
-		;
-		true
-	).
-
-:- dynamic(worker_num_override/1).
-
-preliminary_max_num_wkrs(CfgSrcItems, MaxNumWkrs)
-	:-
-	dmember(max_num_wkrs = MaxNumWkrs, CfgSrcItems),
-	!.
-preliminary_max_num_wkrs(_, MaxNumWkrs)
-	:-
-	worker_num_override(MaxNumWkrs),
-	!.
-preliminary_max_num_wkrs(_, MaxNumWkrs)
-	:-
-	outer_max_num_workers(MaxNumWkrs).
 
 
 
