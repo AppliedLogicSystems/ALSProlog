@@ -396,12 +396,15 @@ proc init_prj_spec \
     ###################
     toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
-    wm maxsize $base [expr - [winfo screenwidth .] - 80] [expr [winfo screenheight .] - 80]
+    wm maxsize $base \
+		[expr [winfo screenwidth .] - 80] \
+		[expr [winfo screenheight .] - 80]
     wm minsize $base 1 1
     wm overrideredirect $base 0
     wm resizable $base 1 0
     wm deiconify $base
     wm title $base "Project Specification"
+	wm protocol $base WM_DELETE_WINDOW "close_project"
 
     frame $base.title \
         -borderwidth 1 -height 30 -relief raised -width 30 
@@ -732,10 +735,21 @@ proc toggle_files_list {Win Which} {
     	pack $Win.$Which  \
 			-after $Win.ctl_$Which \
         	-anchor center -expand 0 -fill x -side top 
+		set XX [winfo x $Win]
+		set YY [winfo y $Win]
+		set Ht [expr [winfo screenheight .] - $YY - 80] 
+		wm geometry $Win ""
+		update
+		set RHt [winfo reqheight $Win]
+		if { $RHt < $Ht } then { set Ht $RHt }
+		set Wd [winfo width $Win]
+		append GG $Wd x $Ht + $XX + $YY
+		wm geometry $Win $GG
 	} else {
     	$Win.ctl_$Which.open_btn configure -image closed_ptr
 		set proenv($Which) closed
     	pack forget $Win.$Which 
+		wm geometry $Win ""
 	}
 }
 
@@ -769,22 +783,24 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
 		-height 0
     scrollbar $Win.$Which.02 \
         -borderwidth 1 -command "$Win.$Which.listbox xview" \
-        -orient horiz -width 10 
+        -orient horiz 
     scrollbar $Win.$Which.03 \
         -borderwidth 1 -command "$Win.$Which.listbox yview" \
-        -orient vert -width 10 
+        -orient vert 
     frame $Win.$Which.buttons \
         -borderwidth 1 -height 30 -relief sunken -width 30 
 
     button $Win.$Which.buttons.add \
-        -command $Add -padx 11 -pady 4 -text {Add} 
+        -command $Add -padx 11 -pady 1 -text {Add} 
     button $Win.$Which.buttons.del \
-        -command $Del -padx 11 -pady 4 -text {Delete} 
+        -command $Del -padx 11 -pady 1 -text {Delete} 
 
     button $Win.$Which.buttons.up \
-        -command $Up -padx 11 -pady 4 -text {} -image up_arrow_gif
+        -command $Up -padx 11 -pady 1 -text {} -image up_arrow_gif \
+		-borderwidth 0
     button $Win.$Which.buttons.down \
-        -command $Down -padx 11 -pady 4 -text {} -image down_arrow_gif
+        -command $Down -padx 11 -pady 1 -text {} -image down_arrow_gif \
+		-borderwidth 0
 
 	set proenv($Which) closed
     ###################
