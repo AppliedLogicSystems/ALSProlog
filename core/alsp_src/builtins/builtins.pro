@@ -710,7 +710,7 @@ gv_number(Mod,Name,VN)
  *----------------------------------------------------------------*/
 
 /*-------------------------------------------------------------*
- | sys_env(OS,Processor) is a short form of the environment
+ | sys_env(OS,MinorOS,Processor) is a short form of the environment
  | information.  It is calculated from the als_system/1 values.
  *-------------------------------------------------------------*/
 

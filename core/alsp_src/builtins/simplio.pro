@@ -111,7 +111,14 @@ themenu(List, ChoiceNum, Options,InS,OutS)
 		;
 		true
 	),
-	output_prolog_list(List,OutS,Indent,Termin,Spacer,DefaultContent),
+	(dmember(dflt_mark=DfltMark, Options) ->
+		true
+		;
+		DfltMark = ' *'
+	),
+
+	output_prolog_list(List,OutS,Indent,Termin,Spacer,DefaultContent,DfltMark),
+
 	(dmember(prompt=Prompt, Options) ->
 		true
 		;
@@ -140,27 +147,27 @@ export output_prolog_list/1.
 output_prolog_list(List)
 	:-
 	current_output(Stream),
-	output_prolog_list(Stream, List,'','.',' - ','').
-
-export output_prolog_list/5.
-output_prolog_list(List,Indent,Term,Spacer,DefaultContent)
-	:-
-	current_output(Stream),
-	output_prolog_list(List,Stream,Indent,Term,Spacer,DefaultContent).
+	output_prolog_list(Stream, List,'','.',' - ','',' *').
 
 export output_prolog_list/6.
-output_prolog_list([],Stream,Indent,Term,Spacer,DefaultContent).
-output_prolog_list([Item | RestList],Stream,Indent,Term,Spacer,DefaultContent)
+output_prolog_list(List,Indent,Term,Spacer,DefaultContent,DfltMark)
+	:-
+	current_output(Stream),
+	output_prolog_list(List,Stream,Indent,Term,Spacer,DefaultContent,DfltMark).
+
+export output_prolog_list/7.
+output_prolog_list([],Stream,Indent,Term,Spacer,DefaultContent,DfltMark).
+output_prolog_list([Item | RestList],Stream,Indent,Term,Spacer,DefaultContent,DfltMark)
 	:-
 	(Item = (Code-Content) ->
 		printf(Stream,"%t%t%t%t%t",[Indent,Code,Spacer,Content,Term]),
-		(Content=DefaultContent -> put_code(Stream,0'*);true)
+		(Content=DefaultContent -> write(Stream,DfltMark);true)
 		;
 		printf(Stream,"%t%t%t",[Indent,Item,Term]),
-		(Iterm=DefaultContent -> put_code(Stream,0'*);true)
+		(Iterm=DefaultContent -> write(Stream,DfltMark);true)
 	),
 	nl(Stream),
-	output_prolog_list(RestList,Stream,Indent,Term,Spacer,DefaultContent).
+	output_prolog_list(RestList,Stream,Indent,Term,Spacer,DefaultContent,DfltMark).
 
 
 /*!---------------------------------------------------------------------
