@@ -4,12 +4,6 @@ ALS Prolog to Python Interface
 
 See als_python_guide.html for documentation.
 
-5/3 1
-5/4 8-9 3-7 10-12
-5/5 12-130
-5/5 7-11 1-6
-
-5/16 2-7
 */
 
 #include "Python.h"
@@ -92,13 +86,16 @@ static PyObject *PrologToPythonObj(AP_World *w, AP_Obj pro)
 	case AP_LIST:
 		py = PyList_New(0);
 		for (pi = pro; !AP_IsNullList(w, pi); pi = AP_ListTail(w, pi)) {
-			PyList_Append(py, PrologToPythonObj(w, AP_ListHead(w, pi)));
+			PyObject *tail = PrologToPythonObj(w, AP_ListHead(w, pi));
+			PyList_Append(py, tail);
+			Py_DECREF(tail);
 		}
 		break;
 
 	case AP_STRUCTURE: {
 		AP_Obj comma = AP_NewSymbolFromStr(w, ",");
 		if (AP_Unify(w, comma, AP_GetStructureFunctor(w, pro)) == AP_SUCCESS) {
+			PyObject *item;
 			int i, length;
 			
 			for (pi = pro, length = 0 ;
@@ -109,10 +106,12 @@ static PyObject *PrologToPythonObj(AP_World *w, AP_Obj pro)
 				
 			py = PyTuple_New(length);
 			for (pi = pro, i = 0; i < length; i++, pi = AP_GetArgument(w, pi, 2)) {
-				PyTuple_SetItem(py, i, PrologToPythonObj(w, AP_GetArgument(w, pi, 1)));
+				item = PrologToPythonObj(w, AP_GetArgument(w, pi, 1));
+				PyTuple_SetItem(py, i, item);
 			}
 			
-			PyTuple_SetItem(py, length, PrologToPythonObj(w, AP_GetArgument(w, pi, 2)));
+			item = PrologToPythonObj(w, AP_GetArgument(w, pi, 2));
+			PyTuple_SetItem(py, length, item);
 		} else {
 			py = NULL;
 		}
@@ -164,6 +163,8 @@ static AP_Result py_exec(AP_World *w, AP_Obj command)
 	if (r == NULL) {
 		return PythonToPrologException(w);
 	}
+	
+	Py_DECREF(r);
 		
 	return AP_SUCCESS;
 }
@@ -171,6 +172,7 @@ static AP_Result py_exec(AP_World *w, AP_Obj command)
 static AP_Result py_eval(AP_World *w, AP_Obj command, AP_Obj result)
 {
 	PyObject *m, *d, *r;
+	AP_Result pr;
 	
 	if (AP_ObjType(w, command) != AP_ATOM) {
 		AP_SetStandardError(w, AP_TYPE_ERROR,
@@ -186,7 +188,11 @@ static AP_Result py_eval(AP_World *w, AP_Obj command, AP_Obj result)
 		return PythonToPrologException(w);
 	}
 	
-	return AP_Unify(w, result, PythonToPrologObj(r, w));	
+	pr = AP_Unify(w, result, PythonToPrologObj(r, w));	
+	
+	Py_DECREF(r);
+	
+	return pr;
 }
 
 static int IsKeywordArg(AP_World *w, AP_Obj call, int i)
@@ -201,8 +207,9 @@ static int IsKeywordArg(AP_World *w, AP_Obj call, int i)
 
 static AP_Result py_call3(AP_World *w, AP_Obj module_name, AP_Obj call, AP_Obj result)
 {
-	PyObject *module, *func, *args, *key_args, *r, *apply, *apply_args;
+	PyObject *builtin_mod, *module, *func, *args, *key_args, *r, *apply, *apply_args;
 	int arity, i;
+	AP_Result pr;
 
 	if (AP_ObjType(w, module_name) != AP_ATOM) {
 		AP_SetStandardError(w, AP_TYPE_ERROR,
@@ -215,8 +222,9 @@ static AP_Result py_call3(AP_World *w, AP_Obj module_name, AP_Obj call, AP_Obj r
 					AP_NewSymbolFromStr(w, "compond"), call);
 		return AP_EXCEPTION;
 	}
-	
-	apply = PyObject_GetAttrString(PyImport_ImportModule("__builtin__"), "apply");
+
+	builtin_mod = PyImport_ImportModule("__builtin__");
+	apply = PyObject_GetAttrString(builtin_mod, "apply");
 	
 	module = PyImport_ImportModule((char *)AP_GetAtomStr(w, module_name));
 	if (!module) {
@@ -235,10 +243,17 @@ static AP_Result py_call3(AP_World *w, AP_Obj module_name, AP_Obj call, AP_Obj r
 	key_args = PyDict_New();
 	for ( ; arity > 0 && IsKeywordArg(w, call, arity) ; arity--) {
 		AP_Obj key, value;
+		PyObject *pykey, *pyvalue;
+
 		key = AP_GetArgument(w, AP_GetArgument(w, call, arity), 1);
 		value = AP_GetArgument(w, AP_GetArgument(w, call, arity), 2);
+		pykey = PrologToPythonObj(w, key);
+		pyvalue = PrologToPythonObj(w, value);
 		
-		PyDict_SetItem(key_args, PrologToPythonObj(w, key), PrologToPythonObj(w, value));
+		PyDict_SetItem(key_args, pykey, pyvalue);
+		
+		Py_DECREF(pykey);
+		Py_DECREF(pyvalue);
 	}
 
 	args = PyTuple_New(arity);
@@ -258,7 +273,15 @@ static AP_Result py_call3(AP_World *w, AP_Obj module_name, AP_Obj call, AP_Obj r
 		return PythonToPrologException(w);
 	}
 	
-	return AP_Unify(w, result, PythonToPrologObj(r, w));
+	pr = AP_Unify(w, result, PythonToPrologObj(r, w));
+
+	Py_DECREF(builtin_mod);
+	Py_DECREF(module);
+	Py_DECREF(apply);
+	Py_DECREF(apply_args);
+	Py_DECREF(r);
+	
+	return pr;
 }
 
 static AP_Result py_call2(AP_World *w, AP_Obj call, AP_Obj result)
