@@ -363,7 +363,7 @@ shared_lib_exts(Exts)
 exec_consult(user, FCOpts)
 	:-!,
 	adjust_recon_flag(FCOpts),
-	load_source(user,user,_),
+	load_source(user,user,_,FCOpts),
 	mangle(12, FCOpts, user),
 	set_reconsult_flag(1),
 
@@ -565,7 +565,7 @@ load_from_file(_,obp,BaseFile,CanonSrcPath,_,FCOpts)
 load_from_file(_,source,BaseFile,CanonSrcPath,_,FCOpts)
 	:-!,
 	outFilePath(obp, CanonSrcPath, BaseFile, ObpPath),
-	load_source(CanonSrcPath,BaseFile,ObpPath),
+	load_source(CanonSrcPath,BaseFile,ObpPath,FCOpts),
 	note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath).
 
 load_from_file(no(extension),_,BaseFile,CanonSrcPath,no(extension),FCOpts)
@@ -585,7 +585,7 @@ load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WkExt,FCOpts)
 load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WkExt,FCOpts)
 	:-
 	ObpPath = none,
-	load_source(CanonSrcPath,BaseFile,ObpPath),
+	load_source(CanonSrcPath,BaseFile,ObpPath,FCOpts),
 	note_paths(FCOpts, CanonSrcPath, ObpPath, CanonSrcPath).
 
 fin_load_from_file(obp,Nature,BaseFile,CanonSrcPath,OutFilePath,
@@ -875,19 +875,51 @@ set_consult_messages(Value)
 /*-------------------------------------------------------------*
  | For loading source (.pro) files without writing the .obp file:
  *-------------------------------------------------------------*/ 
-load_source(Path,BaseFile,Type) :-
+load_source(Path,BaseFile,Type,FCOpts) :-
 	(filePlusExt(NoSuffixPath, _, Path),!; NoSuffixPath = Path),
 %	establish_fcg(NoSuffixPath),
 	establish_fcg(BaseFile),
 	obp_push_stop,
+
+	check_set_tgt_mod(FCOpts,TgtModFlag),
 	xconsult(Path,NErrs),
+	check_unset_tgt_mod(TgtModFlag),
+
 	obp_pop,
 	reset_fcg(_),
 	!.
-load_source(_,_,_) :-
+load_source(_,_,_,_) :-
 	obp_pop,
 		%% ld_src_err: "Internal error in load_source for file %t\n"
 	prolog_system_error(ld_src_err, []).
+
+/*
+check_set_tgt_mod(FCOpts,true)
+	:-
+	arg(8, FCOpts, TgtMod),
+	atom(TgtMod),
+	TgtMod \= user,
+write(check_set_tgt_mod=TgtMod),nl,
+	!,
+	functor(MM,TgtMod,0),		/* intern it */
+	'$icode'(-10,MM,0,0,0).		/* new module */
+*/
+check_set_tgt_mod(FCOpts,true)
+	:-
+	arg(8, FCOpts, TgtMod),
+	xconsult:pushmod(TgtMod).
+
+check_set_tgt_mod(FCOpts,false).
+
+/*
+check_unset_tgt_mod(true)
+	:-!,
+	'$icode'(-9,0,0,0,0).		/* end module */
+*/
+check_unset_tgt_mod(true)
+	:-!,
+	xconsult:popmod.
+check_unset_tgt_mod(_).
 
 /*-------------------------------------------------------------*
  |	For loading source (.pro) files AND writing the .obp file:
