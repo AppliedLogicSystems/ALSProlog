@@ -26,10 +26,6 @@
 #define GCDEBUG 1
 */
 
-#ifdef SSI_UNIKEY
-#include <ssi_cw32.h>
-#endif
-
 #ifdef GCDEBUG
 #include <time.h>
 #endif
@@ -185,18 +181,8 @@ gc()
      | These will be unbiased on exit from gc.
      *---------------------------------------------------------------*/
 
-#ifdef SSI_UNIKEY
-    if (SSI_Check(0)) {
-	PI_app_printf(PI_app_printf_error,
-"\
-Error: UniKey Hardware key required.\n\
-This demo version of ALS Prolog requires a UniKey hardware key.\n\
-Please check that the hardware key is correctly attached to the parallel port.\n\
-Exiting ALS Prolog.\n\
-"
-	);
-	exit(1);
-    }
+#ifdef HARDWARE_KEY
+    check_hardware_key();
 #endif
 
     wm_heapbase -= BIAS;

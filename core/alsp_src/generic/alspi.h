@@ -129,7 +129,7 @@ extern	int	PI_unify	PARAMS(( PWord , int, PWord , int ));
 extern	void	PrologInit	PARAMS(( PSTRUCT * ));
 extern	void	PI_shutdown	PARAMS(( void ));
 extern	int	PI_toplevel	PARAMS(( void ));
-extern	int	PI_prolog_init	PARAMS(( char *, int, char ** ));
+extern	int	PI_prolog_init	PARAMS((int, char ** ));
 
 #ifdef APP_PRINTF_CALLBACK
 extern	void	PI_set_app_printf_callback(void (*callback)(int, va_list));

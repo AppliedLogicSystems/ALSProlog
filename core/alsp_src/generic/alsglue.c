@@ -47,7 +47,7 @@ PI_alsglue(void)
 	(void) PrologInit( (PSTRUCT *) 0 );
 	(void) PI_shutdown();
 	(void) PI_toplevel();
-	(void) PI_prolog_init( (char *) 0, (int) 0, (char **) 0 );
+	(void) PI_prolog_init((int) 0, (char **) 0 );
 	(void) PI_app_printf( 0 );
     }
 }

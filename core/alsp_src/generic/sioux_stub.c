@@ -1,0 +1,1 @@
+#include <console.h>#include <SIOUX.h>int ccommand(char ***){	return 0;}short SIOUXHandleOneEvent(struct EventRecord *){	return 0;}
