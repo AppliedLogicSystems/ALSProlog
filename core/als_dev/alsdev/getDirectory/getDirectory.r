@@ -1,7 +1,7 @@
 #include <Types.r>
 #include <SysTypes.r>
 
-#include "version.h"
+#include "getDir_version.h"
 
 resource 'vers' (1) {
 	VERSION_MAJOR, VERSION_MINOR << 4 | VERSION_PATCH,
