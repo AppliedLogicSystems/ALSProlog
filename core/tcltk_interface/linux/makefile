@@ -4,4 +4,4 @@ UNIX_NAME=Linux
 
 include ../common/unix_makefile
 
-LDFLAGS += -L/usr/X11R6/lib -Xlinker -s
+LDFLAGS += -Xlinker -rpath -Xlinker . -L/usr/X11R6/lib -L../../linux -Xlinker -s
