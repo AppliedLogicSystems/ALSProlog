@@ -16,19 +16,48 @@
 */
 
 
-
-#ifdef WIN32
-#define LITTLE_ENDIAN
-#define HIGH_WORD 1
-#define LOW_WORD 0
-#define NOFPSETROUND
-
+#if defined(macintosh)
+#define ALS_BIG_ENDIAN
+#elif defined(WIN32)
+#define ALS_LITTLE_ENDIAN
+#elif defined(UNIX)
+    #if defined(UNIX_LINUX)
+        #include <endian.h>
+        #if __BYTE_ORDER == __LITTLE_ENDIAN
+        #define ALS_LITTLE_ENDIAN
+        #else
+        #define ALS_BIG_ENDIAN
+        #endif
+    #elif defined(SOLARIS_LINUX)
+        #if defined(_BIG_ENDIAN)
+        #define ALS_BIG_ENDIAN
+        #elif defined(_LITTLE_ENDIAN)
+        #define ALS_LITTLE_ENDIAN
+        #else
+        #error
+        #endif
+    #elif defined(HPUX_LINUX) || defined(IRIX_LINUX)
+    #define ALS_BIG_ENDIAN
+    #else
+    #error
+    #endif
 #else
-#define BIG_ENDIAN
-#define HIGH_WORD 0
-#define LOW_WORD 1
+#error
 #endif
 
+#if defined (ALS_LITTLE_ENDIAN)
+#define HIGH_WORD 1
+#define LOW_WORD 0
+#elif defined(ALS_BIG_ENDIAN)
+#define HIGH_WORD 0
+#define LOW_WORD 1
+#else
+#error
+#endif
+
+#ifdef WIN32
+#define NOFPSETROUND
+#endif
 
 #ifdef macintosh
 #include <fp.h>
