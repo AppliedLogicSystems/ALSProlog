@@ -292,9 +292,6 @@ cslt_path_x(FileDesc, Drive+SrcPathList, BaseFile, Ext)
  *-------------------------------------------------------------*/ 
 do_consult(BaseFile, FCOpts)
 	:-
-	arg(7, FCOpts, Quiet),		%%	7		- Quiet 
-	arg(6, FCOpts, Ext),		%%	7		- Extension 
-	consult_msg(Quiet, Ext, BaseFile, start_consult, FCOpts),
 	get_current_consult_directory(OldCCD),
 	catch( exec_consult(BaseFile, FCOpts),
 			Ball,
@@ -306,6 +303,8 @@ do_consult(BaseFile, FCOpts)
 	record_consult(BaseFile, FCOpts),
 	cleanup_cslt,
 	!,
+	arg(7, FCOpts, Quiet),		%%	7		- Quiet 
+	arg(6, FCOpts, Ext),		%%	7		- Extension 
 	consult_msg(Quiet, Ext, BaseFile, end_consult, FCOpts).
 
 		%% true = "be quiet"
@@ -509,6 +508,9 @@ cont_consult(SrcExt, Nature, NewDrive, NewPathList, BaseFile, FCOpts)
 			%% extension, if appropriate; hence, so it CanonSrcPath:
 	canon_path(ExistingSrcFilePath, CanonSrcPath),
 		%%% Change the Drive+Path current_consult global variable:
+	arg(7, FCOpts, Quiet),		%%	7		- Quiet 
+	arg(6, FCOpts, Ext),		%%	7		- Extension 
+	consult_msg(Quiet, Ext, CanonSrcPath, start_consult, FCOpts),
 	get_current_consult_directory(OldCCD),
 	(   
 	    set_current_consult_directory(NewDrive+NewPathList)
