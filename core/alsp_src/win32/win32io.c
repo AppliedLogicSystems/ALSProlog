@@ -64,3 +64,61 @@ double os_realtime(void)
 	SystemTimeToFileTime(&now, &ft_now);
 	return FT2SEC(ft_now) - process_start_time;
 }
+
+
+static BOOL timer_initialized = FALSE;
+
+static struct {
+	DWORD initial;
+	DWORD interval;
+} timer_state;
+
+static HANDLE timer_state_mutex;
+
+static DWORD WINAPI timer_thread( LPVOID )
+{
+	DWORD time_out, next_time_out;
+		
+	time_out = next_time_out = INFINITE;
+	
+	while (1) {
+		switch (WaitForSingleObject(timer_state_mutex, time_out)) {
+		case WAIT_OBJECT_0:
+			time_out = timer_state.initial ? timer_state.initial : INFINITE;
+			next_time_out = timer_state.interval ? timer_state.interval : INFINITE;
+			ReleaseMutex(timer_state_mutex);
+			break;
+		case WAIT_TIMEOUT:
+			wm_safety = -1;
+			wm_interrupt_caught = ALSSIG_ALARM;
+			time_out = next_time_out;
+			break;
+		}
+	}
+	
+	return 0;
+}
+
+static void initialize_timer(void)
+{
+	DWORD id;
+	
+	timer_state.initial = 0;
+	timer_state.interval = 0;
+	timer_state_mutex = CreateMutex(NULL, TRUE, NULL);
+	CreateThread(NULL, 0, timer_thread, NULL, 0, &id);
+	timer_initialized = TRUE;
+} 
+
+int os_set_timer(double initial, double interval)
+{
+	if (!timer_initialized) initialize_timer();
+	
+	timer_state.initial = initial * 1000.0;
+	timer_state.interval = interval * 1000.0;
+	
+	ReleaseMutex(timer_state_mutex);
+	WaitForSingleObject(timer_state_mutex, INFINITE);
+	
+	return 0;
+}

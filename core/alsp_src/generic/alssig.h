@@ -35,7 +35,8 @@
 #define ALSSIG_HEAP_OVERFLOW	67
 #define ALSSIG_ERROR			68
 #define ALSSIG_UNDEFINED_PRED	69
+#define ALSSIG_ALARM			70
 
-#define MAX_ALS_SIG 70
+#define MAX_ALS_SIG 71
 
 #endif /* _ALSSIG_H_INCLUDED_ */

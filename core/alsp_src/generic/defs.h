@@ -433,6 +433,8 @@ void os_init_time(void);
 double os_cputime(void);
 double os_realtime(void);
 
+int os_set_timer(double initial, double interval);
+
 /* ----------   main.c ----------   */
 #ifdef MSWin32
 extern	char	*MinorOSStr;
