@@ -29,5 +29,4 @@ alsdir
 	shared
 		als_tklib.tcl
 		tcltk.pro
-		tk_alslib_samples.pro
 		turnstile_splash.gif

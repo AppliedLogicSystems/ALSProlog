@@ -74,6 +74,10 @@ proc create_document_window {title} {
 }
 
 proc bind_accelerators {w mod type} {
+	global tcl_platform
+	
+	if {"$tcl_platform(platform)" == "macintosh"} return;
+	
 	if {"$mod"=="Ctrl"} then { set MMD Control } else { set MMD $mod }
 
 		# file menu:

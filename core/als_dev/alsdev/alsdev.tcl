@@ -348,7 +348,12 @@ proc wake_up_look_around { } {
 
 proc interrupt_action {} {
 	global WakeUpLookAround
-	set WakeUpLookAround -1
+	global tcl_platform
+	if {$tcl_platform(platform) == "macintosh"} {
+		prolog interrupt
+	} else {
+		set WakeUpLookAround -1
+	}
 }
 
 proc ctl-d_action { TxtWin StreamAlias } {
