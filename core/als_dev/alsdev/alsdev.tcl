@@ -225,7 +225,7 @@ load_source $ALSTCLPATH {debugwin}
 load_source $ALSTCLPATH {defstr}
 load_source $ALSTCLPATH {als_menu}
 load_source $ALSTCLPATH {als_document}
-
+load_source $ALSTCLPATH {als_tkfbox}
 
 proc load_photo {image_name base_name} {
 	global tcl_platform ALSTCLPATH
@@ -453,7 +453,11 @@ proc source_tcl { } {
 
 proc set_directory { } {
 	set CWD [pwd]
-	set NewDir [tkFDialog]
+
+#	set NewDir [tkFDialog]
+
+puts "calling alstkFDialog"
+	set NewDir [alstkFDialog]
 	if { "$NewDir" !="" } {
 		cd $NewDir
 		show_dir_on_main $NewDir
