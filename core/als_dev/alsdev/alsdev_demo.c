@@ -54,7 +54,7 @@ static void alsdev_get_demo_key(char *key, int max)
 	r = Tcl_Eval(demo_interp, get_key_script);
 	if (r == TCL_OK) {
 		strncpy(key, Tcl_GetStringResult(demo_interp), max);
-		key[max] = 0; 
+		key[max-1] = 0; 
 	}
 }
 
