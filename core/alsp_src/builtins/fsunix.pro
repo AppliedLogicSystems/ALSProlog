@@ -165,9 +165,10 @@ files(Directory, Pattern, List)
 	name(Regex, [0'^ | RegexChars]),
 	getDirEntries(Directory, Regex, FirstResult),
 	!,
-	rootPlusPath(Disk, PathList, Directory),
+%	rootPlusPath(Disk, PathList, Directory),
+	split_path(Directory, [Disk | PathList]),
 	fixFileType(regular, InternalFileType),
-	filterForFileType(FirstResult, Disk, PathList, InternalFileType, List).
+	filterForFileType(FirstResult, Disk, [Disk | PathList], InternalFileType, List).
 
 /*!----------------------------------------------------------------
  |	subdirs/1
@@ -286,8 +287,12 @@ directory([], FileType, []) :-!.
 directory(Pattern, FileType, List) 
 	:-
 	atom(Pattern), 
-	rootPathFile(Disk, PathList, FilePattern, Pattern),
-	subPath(PathList, InitPath),
+%	rootPathFile(Disk, PathList, FilePattern, Pattern),
+	split_path(Pattern, [Disk | PatternElts]),
+	dreverse(PatternElts, [FilePattern | RevPathElts]),
+	dreverse(RevPathElts, PathElts),
+%	subPath(PathList, InitPath),
+	join_path([Disk | PathElts], InitPath),
 	(InitPath = '', !; must_exists_file(InitPath)),
 	!,
 	name(FilePattern, PatternChars),
@@ -298,10 +303,10 @@ directory(Pattern, FileType, List)
 	(InitPath = '' -> Path = '.' ; Path = InitPath),
 
 	getDirEntries(Path, Regex, FirstResult),
-
 	!,
 	fixFileType(FileType, InternalFileType),
-	filterForFileType(FirstResult, Disk, PathList, InternalFileType, List).
+%	filterForFileType(FirstResult, Disk, PathList, InternalFileType, List).
+	filterForFileType(FirstResult, Disk, [Disk | PathElts], InternalFileType, List).
 
 	%% If no match was found for the file pattern, return no elements:
 directory(_,_,[]).
@@ -337,7 +342,9 @@ filterForFileType([FileName | Files], Disk, PathList, FileType, List)
 
 filter_file(FileName, Disk, PathList, FileType, [FileName | ListTail], ListTail)
 	:-
-	rootPathFile(Disk, PathList, FileName, FullFile),
+%	rootPathFile(Disk, PathList, FileName, FullFile),
+	dappend(PathList, [FileName], L0),
+	join_path(L0, FullFile),
 	'$getFileStatus'(FullFile, StatusTerm),
 	arg(1, StatusTerm, ThisFileType),
 	fflt_ck(ThisFileType, FileType, PathList, FullFile),
@@ -368,7 +375,13 @@ disp_follow_link(symbolic_link, File, _, SrcPathList, FinalFile, FinalTypeCode)
 	:-!,
 	get_cwd(CWD),
 	read_link(File, LinkTarget),
-	pathPlusFile(Path,TFile,LinkTarget),
+%	pathPlusFile(Path,TFile,LinkTarget),
+	split_path(LinkTarget,LinkTgtElts),
+	dreverse(LinkTgtElts, [TFile | RevPathElts]),
+	dreverse(RevPathElts, PathElts),
+	join_path(PathElts, Path),
+
+/*
 	(Path \= '' -> 
 		subPath(PathList, Path),
 		(is_absolute_pathname(Path) ->
@@ -380,7 +393,24 @@ disp_follow_link(symbolic_link, File, _, SrcPathList, FinalFile, FinalTypeCode)
 			change_cwd(NextPath)
 		)
 		; 
-		NextPathList = SrcPathList),
+		NextPathList = SrcPathList
+	),
+*/
+	(Path \= '' -> 
+%		subPath(PathList, Path),
+		(is_absolute_path(Path) ->
+			change_cwd(Path),
+			NextPathList = PathElts 
+			;
+			append(SrcPathList,PathElts,NextPathList),
+%			subPath(NextPathList,NextPath),
+			join_path(NextPathList, NextPath),
+			change_cwd(NextPath)
+		)
+		; 
+		NextPathList = SrcPathList
+	),
+
 	fin_disp_follow_link(TFile, FinalFile, CWD, NextPathList, FinalTypeCode).
 
 

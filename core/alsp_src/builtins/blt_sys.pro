@@ -431,7 +431,7 @@ lib_load(Module,Call)
 
 lib_load(FileName, Module, P,A, Module,Call)
 	:-
-	is_absolute_pathname(FileName),
+	is_absolute_path(FileName),
 	!,
 	(resource_load(FileName)
 		; load(FileName,1,_,obp,_,_)
@@ -443,7 +443,10 @@ lib_load(FileName, Module, P,A, Module,Call)
 lib_load(FileName, Module, P,A, Module,Call)
 	:-
 	als_lib_lcn(ALSLibPathHead),
-	extendPath(ALSLibPathHead, FileName, FullFileName),
+%	extendPath(ALSLibPathHead, FileName, FullFileName),
+	split_path(ALSLibPathHead, PathHeadElts),
+	dappend(PathHeadElts, [FileName], FFNElts),
+	join_path(FFNElts, FullFileName),
 	sys_env(OS,_,_),
 	(   OS = macos, !, Sepr = ':'
 		;   OS = mswin32, !, Sepr = '\\'
@@ -485,7 +488,10 @@ force_libload_all(Files)
 force_libload_all_lib(Files,Library) 
 	:-
 	sys_searchdir(ALSDIR),
-	extendPath(ALSDIR,Library,LibPath),
+%	extendPath(ALSDIR,Library,LibPath),
+	split_path(ALSDIR, ALSDIRElts),
+	dappend(ALSDIRElts, [Library], LPElts),
+	join_path(LPElts, LibPath),
 	force_libload_all(Files,LibPath).
 
 force_libload_all([],_).
@@ -497,6 +503,10 @@ force_libload_all([File|Files],DirDC)
 force_libload_file(File,DirDC)
 	:-
 	extendPath(DirDC,File,FileName),
+	split_path(DirDC, DirDCElts),
+	dappend(DirDCElts, [File], FNElts),
+	join_path(FNElts, FileName),
+
 	als_advise('Loading %s\n',[FileName]),
     '$atom_concat'(FileName,'.pro',FilePathPro),
 	'$atom_concat'(FileName,'.obp',FilePathObp),
@@ -547,7 +557,8 @@ do_mc( module_closure(UserPredicate,Arity, Procedure), M, Procedure, Arity1)
 
 libhide(M,List,PredList) 
 	:-
-	subPath(List, LibFileName),
+%	subPath(List, LibFileName),
+	join_path(List, LibFileName),
 	libhide0(PredList,M,LibFileName).
 
 libhide0([],M,LibFileName) 

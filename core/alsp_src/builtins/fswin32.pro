@@ -230,7 +230,13 @@ directory(Pattern, FileType, List)
 	:-
 	atom(Pattern), 
 	rootPathFile(Disk, PathList, FilePattern, Pattern),
-	rootPlusPath(Disk,PathList,InitPath),
+%	rootPathFile(Disk, PathList, FilePattern, Pattern),
+	split_path(Pattern, [Disk | PatternElts]),
+	dreverse(PatternElts, [FilePattern | RevPathElts]),
+	dreverse(RevPathElts, PathElts),
+%	rootPlusPath(Disk,PathList,InitPath),
+	join_path([Dist | PathElts], InitPath),
+
 	(InitPath='',!; exists_file(InitPath)),
 	!,
 	(InitPath = '' -> Path = '.' ; Path = InitPath),
@@ -273,7 +279,9 @@ filterForFileType([FileName | Files], Disk, PathList, FileType, List)
 
 filter_file(FileName, Disk, PathList, FileType, [FileName | ListTail], ListTail)
 	:-
-	rootPathFile(Disk, PathList, FileName, FullFile),
+%	rootPathFile(Disk, PathList, FileName, FullFile),
+	dappend(PathList, [FileName], L0),
+	join_path([Disk | L0], FullFile),
 	'$getFileStatus'(FullFile, StatusTerm),
 	arg(1, StatusTerm, ThisFileType),
 	fflt_ck(ThisFileType, FileType, FullFile),
@@ -341,7 +349,8 @@ file_size(_,0)
 get_current_drive(Drive)
 	:-
 	getcwd(Path),
-	rootPathFile(Drive,_,_,Path).
+%	rootPathFile(Drive,_,_,Path).
+	split_path(Path, [Drive | _]).
 
 %--------------------------------------------------------------------
 %	change_current_drive/1.

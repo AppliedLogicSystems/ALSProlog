@@ -236,7 +236,8 @@ ss_load_the_dot_alspro(AutoFile, Verbosity)
 	:-
 		%% What about DOS (also Mac, etc.) here?:
 	getenv('HOME',HOME),
-	pathPlusFile(HOME,AutoFile,File),
+%	pathPlusFile(HOME,AutoFile,File),
+	join_path([HOME,AutoFile],File),
 	exists_file(File),
 	!,
 	consult(File, [consult(false),quiet(Verbosity)]).

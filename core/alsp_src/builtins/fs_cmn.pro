@@ -230,23 +230,6 @@ datetime_less((Date0,Time0), (Date1,Time1))
  |	sense that all symbolic links  in the path (to either subdirs
  |	or the file at the end) are dereferenced out;
  *!--------------------------------------------------------------*/
-/*
-canon_path(SrcPath,CanonPath)
-	:-
-	get_cwd(WeAreHere),
-
-	rootPathFile(Disk,SubDirList,EndPathFile,SrcPath),
-	(change_cwd(SrcPath) ->
-		get_cwd(CanonPath)
-		;
-		rootPathFile(Disk,SubDirList,'',ShortSrcPath),
-		change_cwd(ShortSrcPath),
-		get_cwd(ShortCanonPath),
-		subPath(ShortSubDirList,ShortCanonPath),
-		rootPathFile(_,ShortSubDirList,EndPathFile,CanonPath)
-	),
-	change_cwd(WeAreHere).
-*/
 
 /* canon_path needs a version of change_cwd that will return
    false if the directory doesn't exist.  This should use
@@ -260,17 +243,24 @@ canon_path(SrcPath,CanonPath)
 	:-
 	get_cwd(WeAreHere),
 
-	rootPathFile(Disk,SubDirList,EndPathFile,SrcPath),
+%	rootPathFile(Disk,SubDirList,EndPathFile,SrcPath),
+	
 	(test_and_change_cwd(SrcPath) ->
 		get_cwd(CanonPath)
 		;
-		rootPathFile(Disk,SubDirList,'',ShortSrcPath),
+		split_path(SrcPath, [Disk | PathElts]),
+		dreverse(PathElts, [EndPathFile | RevSubDirList]),
+		dreverse(RevSubDirList, SubDirList),
+
+%		rootPathFile(Disk,SubDirList,'',ShortSrcPath),
+		join_path([Disk | SubDirList], ShortSrcPath),
 		(ShortSrcPath \= '' ->
 			change_cwd(ShortSrcPath)
 			;
 			true
 		),
 		get_cwd(ShortCanonPath),
+/*
 		rootPathFile(Drive,ShortSubDirList,FF,ShortCanonPath),
 		(FF = '' ->
 			AddOn = []
@@ -279,6 +269,8 @@ canon_path(SrcPath,CanonPath)
 		),
 		dappend(ShortSubDirList, AddOn, TheSubdirList),
 		rootPathFile(Drive,TheSubdirList,EndPathFile,CanonPath)
+*/
+		join_path([ShortCanonPath, EndPathFile], CanonPath)
 	),
 	change_cwd(WeAreHere).
 

@@ -2934,7 +2934,7 @@ move_queue_seg_to_buffer(CurQueue,CQL,BufSize,Offset,SD,NumCs,NewQueue)
 	copy_into_uia(0,CQL,CurQueue,Offset,BufSize,SD,NumCs),
 	(NumCs < CQL ->
 		Start is NumCs + 1,
-		sub_atom(CurQueue, Start, CQL, NewQueue)
+		sub_atom(CurQueue, Start, CQL, _, NewQueue)
 		;
 		NewQueue = ''
 	).

@@ -270,7 +270,8 @@ filterForFileType([FileName | Files], Dir, FileType, List)
 
 filter_file(FileName, Dir, FileType, [FileName | ListTail], ListTail)
 	:-
-	pathPlusFile(Dir, FileName, FullFile),
+%	pathPlusFile(Dir, FileName, FullFile),
+	join_file([Dir, FileName], FullFile),
 	'$getFileStatus'(FullFile, StatusTerm),
 	arg(1, StatusTerm, ThisFileType),
 	fflt_ck(ThisFileType, FileType, FullFile),
@@ -338,7 +339,8 @@ file_size(_,0)
 get_current_drive(Drive)
 	:-
 	getcwd(Path),
-	rootPathFile(Drive,_,_,Path).
+%	rootPathFile(Drive,_,_,Path).
+	split_path(Path, [Drive | _]).
 
 %--------------------------------------------------------------------
 %	change_current_drive/1.

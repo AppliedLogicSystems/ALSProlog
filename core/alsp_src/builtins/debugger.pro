@@ -1593,7 +1593,8 @@ check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, Claus
 reload_debug(user,_, _,CG,nofile(user)) :-!.
 reload_debug(BaseFileName,SrcFilePath, normal,CG,file)
 	:-
-	(filePlusExt(NoSuff,_,SrcFilePath),!; NoSuff = SrcFilePath),
+%	(filePlusExt(NoSuff,_,SrcFilePath),!; NoSuff = SrcFilePath),
+	(file_extension(NoSuff,Ext,SrcFilePath), Ext \= '', !; NoSuff = SrcFilePath),
 			%% Need to pass CG into consult:
 	exists_file(SrcFilePath),
 	!,
