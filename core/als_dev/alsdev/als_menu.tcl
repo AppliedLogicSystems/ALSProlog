@@ -191,15 +191,13 @@ proc add_windows_menu {menubar type window} {
 	global elipsis
 	global proenv
 
-	if {$type == "document"} then { return }	
+#	if {$type == "document"} then { return }	
 
 	set TearOff 0
-	menu $menubar.windows -tearoff $TearOff -title Windows
+#	menu $menubar.windows -tearoff $TearOff -title Windows
 
-	if {$type == "listener"} then {
-		$menubar.windows add separator 
-	}
-	$menubar add cascade -label "Windows" -menu $menubar.windows -underline 0
+#	$menubar add cascade -label "Windows" -menu $menubar.windows -underline 0
+	$menubar add cascade -label "Windows" -menu .topals.mmenb.windows -underline 0
 }
 
 proc add_help_menu {menubar} {

@@ -70,6 +70,7 @@ proc create_document_window {title} {
 	add_edit_menu $w.menubar document $w
 	add_prolog_menu $w.menubar document $w
 	add_tools_menu $w.menubar document $w
+	add_windows_menu $w.menubar document $w
 	add_help_menu $w.menubar
 		
 	$w configure -menu $w.menubar		
@@ -390,7 +391,7 @@ proc post_open_document {Title Win} {
 	if {[lsearch -exact $proenv(posted_vis) $Title] < 0} then {
 		lappend proenv(posted_vis) $Title
 		.topals.mmenb.windows add command \
-			-label $Title -font {Helvetica 10 italic} -command "show_window $Win"
+			-label $Title -command "show_window $Win"
 	}
 }
 
@@ -437,7 +438,7 @@ proc document.open args {
 	}
 	foreach file $file_list {
 		set FT [file tail $file]
-		set BaseFile [file rootname [file tail $file]],
+		set BaseFile [file rootname [file tail $file]]
 		set Ext [file extension $file],
 		send_prolog_t als_ide_mgr [list open_edit_win $file $BaseFile $Ext] list
 			## prolog source_handler will call back to do:
@@ -594,19 +595,38 @@ proc document.preferences {w} {
 }
 
 proc document.consult {w} {
-	global array proenv
+	global proenv tcl_platform
 
-	set file $proenv($w,file)
-	
+	if [info exists proenv($w,file)] then {
+		set file $proenv($w,file)
+	} else {
+		set file ""
+	}
+	if {$tcl_platform(platform) == "macintosh"} {
+		set icon caution
+	} else {
+		set icon warning
+	}
+	set title [wm title $w]
 	if {$file == ""} {
-		if {![document.save $w]} {return}
+		set answer [tk_dialog .document_save_dialog "" \
+			"Save document \"$title\" to file in order to consult?" \
+			$icon \
+			1 "Cancel" "Save"]
+		if { $answer == 1 } then {
+			document.save $w
+			set file $proenv($w,file)
+		} else {
+			return
+		}
 	}
 	if {$proenv($w,dirty)} {
 		bell
-		set ans [tk_messageBox -icon warning -parent .topals \
-					-title "Save File?" -message "Save File $file?" \
-					-type yesno -default yes]
-		if {$ans == "yes"} then {
+		set answer [tk_dialog .document_save_dialog "" \
+			"Save changes to the document \"$title\" in order to consult?" \
+			$icon \
+			1 "Cancel" "Save"]
+		if { $answer == 1 } then {
 			document.save $w
 		} else {
 			return
