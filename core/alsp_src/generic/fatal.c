@@ -9,7 +9,7 @@
  *===================================================================*/
 #include "defs.h"
 
-static char *errors[] =
+static const char *errors[] =
 {
   "symbol table full",									/* FE_SYMSPACE */
   "string area for symbol table exhausted",				/* FE_STRSPACE */
