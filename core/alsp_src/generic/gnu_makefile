@@ -85,7 +85,7 @@ alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a $(MAKEFILES)
 
 alspro :  alsdir alspro_b $(BUILTINS) $(MAKEFILES)
 	./alspro_b -q -b -obp \
-	-g 'save_image(alspro,[select_lib(builtins,[debugger])])'
+	-g 'save_image(alspro,[])'
 
 ifndef NO_STATIC_LIB
 libalspro.a : alsdir $(STATIC_OBJECTS) $(LIB_OBJECTS) $(MAKEFILES)
@@ -146,7 +146,7 @@ ALSDEVLIBPS =listutl1.pro miscterm.pro msc_ioin.pro strctutl.pro strings.pro \
 alsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS)
 	./alspro_b -q -b -obp -no_dot_alspro \
 	-g 'save_image(alsdev,[start_goal((builtins:start_alsdev)), \
-	select_lib(builtins, [debugger,blt_dvsh,dbg_class,projects]), \
+	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
 	select_lib(library,[$(ALSDEVLIBS)])])'
 
 clean :
