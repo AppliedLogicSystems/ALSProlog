@@ -11,6 +11,8 @@
 #define USE_RE_COMP 1
 #define SIMPLE_MICS 1
 #define SUNOS_AOUT 1
+#define MISSING_EXTERN_CRYPT 1
+
 
 #define MinorOSStr	"sunos4.1.3"
 #define DIRENT	1
