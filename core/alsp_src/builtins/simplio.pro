@@ -51,7 +51,11 @@ simple_menu(List, Choice, Options,InS,OutS)
 	!,
 	encode_list(List, ListOfCodes, CodedList),
 	themenu(CodedList, ChoiceNum, Options,InS,OutS),
-	fin_simple_menu_num(ChoiceNum, CodedList, Options, Choice).
+	(dmember(return_code=true, Options) ->
+		Choice = ChoiceNum
+		;
+		fin_simple_menu_num(ChoiceNum, CodedList, Options, Choice)
+	).
 
 simple_menu(List, Choice, Options,InS,OutS) 
 	:-
