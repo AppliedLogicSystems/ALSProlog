@@ -143,9 +143,6 @@ static void
 fio_nxln(lbp)
     lxi_but *lbp;
 {
-
-    extern long wm_interrupt_caught;
-    extern int wm_regidx;
     register char *b = seetbl[(lbp->see_idx)].buffer;
 
     if (lbp->see_idx == USRSEEI)
