@@ -10,6 +10,7 @@
 #ifdef MacOS
 #include <fp.h>
 #elif defined(MSWin32)
+#include <math.h>
 #endif
 
 int is_ieee_nan PARAMS( (double) );
