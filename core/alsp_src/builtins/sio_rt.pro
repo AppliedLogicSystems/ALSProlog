@@ -417,6 +417,19 @@ rt_err(error,Token,ErrorMessage,Tokens,Stream,VT,Term) :-
 	builtins:setPrologError(error(syntax_error,[FI,Info])),
 	forcePrologError.
 
+rt_err(throw(FF),Token,ErrorMessage,Tokens,Stream,VT,Term) :-
+	inc_error_count(Stream),
+	frame_info(3,FI),
+	rt_err_info(Token,ErrorMessage,Tokens,Stream, Info),
+	!,
+	Rock =.. [FF,[FI,Info]],
+	throw(Rock).
+/*
+	builtins:setPrologError(error(syntax_error,[FI,Info])),
+	forcePrologError.
+*/
+
+
 rt_err_print(Token,ErrorMessage,Tokens,Stream) :-
 	rt_err_info(Token,ErrorMessage,Tokens,Stream, Info),
 	prolog_system_error(Info, []).

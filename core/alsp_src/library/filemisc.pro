@@ -7,6 +7,21 @@
 
 module builtins.
 
+get_lines(SrcF,Lines)
+	:-
+	open(SrcF,read,SS,[]),
+	grab_lines(SS,Lines),
+	close(SS).
+				 
+grab_lines(SS,[Line | Lines])
+	:-
+	get_line(SS,Line),
+	!,
+	grab_lines(SS, Lines).
+
+grab_lines(SS, []).
+
+
 copy_dir_files_nl(SourceDir, TgtDir, NL_type)
 	:-
 	pathPlusFile(SourceDir, '*', SourcePattern),

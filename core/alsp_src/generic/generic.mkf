@@ -114,7 +114,6 @@ gfiles_h =  	alloc.h \
 	icodegen.h \
 	icom.h \
 	intrv.h \
-	intrv_pr.h \
 	istr.h \
 	lexan.h \
 	lexinit.h \
@@ -145,6 +144,7 @@ gfiles_h =  	alloc.h \
 	wintidx.h \
 	wntbl.h
 
+#	intrv_pr.h \
 
 OTHERFILES =   alsglue.c
 
@@ -305,7 +305,10 @@ winter.o : winter.h
 #	als-mics stuff
 # 
 
-exeformat :=   $(shell ($(CC) -o /tmp/which-exe $(srcdir)/utils/which-exe.c					 >/dev/null 2>&1) ; /tmp/which-exe ; rm -f /tmp/which-exe)
+exeformat :=  $(shell ($(CC) -o /tmp/which-exe $(srcdir)/utils/which-exe.c \
+	>/dev/null 2>&1) ; /tmp/which-exe ; rm -f /tmp/which-exe)
+
+
 
 alsmics_c =   $(exeformat)mics.c
 

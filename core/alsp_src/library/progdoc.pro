@@ -7,31 +7,37 @@
  |
  |	Date: October, 1991
  |	Author: Ken Bowen
- |	Revised: May 1993
+ |	Revised: May 1993; Dec 1995
  *==================================================================*/
 
 module sys_maint.
 
-export dt/0.
-dt :-
-	InSourceFile = '/elvis/prolog/Utils/misc_db.pro',
-	lib_man_info(Stream, FileName, LibraryKey, ExportList, Module,
-			 DocumentedPredsList, GroupsInfo).
-
 		/*-----------------------------------------
 		 |    LIBRARY DOCUMENTATION PROCESSING
 		 *----------------------------------------*/
-/*------------------------------------------
- *-----------------------------------------*/
-lib_man_info(SourceFile, FileName, LibraryKey, ExportList, Module,
+export prog_doc/3.
+
+prog_doc(SourceFile, OutBrfFile, OutTgtFile)
+	:-
+	lib_man_info(SourceFile, OutBrfFile, OutTgtFile, _, _, _, _, _).
+
+/*!-----------------------------------------------------------------------------
+ *!----------------------------------------------------------------------------*/
+lib_man_info(SourceFile, OutBrfFile, OutTgtFile, LibraryKey, ExportList, Module,
 			 DocumentedPredsList, GroupsInfo)
 	:-
 	open(SourceFile, read, InStream, []),
-	assemble_documentation(InStream, NamesList, FormsList,  DescriptionsList, 
-	                       DocumentedPredsList, GroupsInfo),
+	assemble_documentation(InStream, SortedDocList, NamesList, FormsList,
+						DescriptionsList,DocumentedPredsList, GroupsInfo),
 	close(InStream),
-	write_documentation(NamesList, FormsList, 
-                    DescriptionsList, DocumentedPredsList).
+
+	open(OutBrfFile, write, OutBrfStream, []),
+	write_names_list(NamesList,OutBrfStream),
+	close(OutBrfStream),
+
+	open(OutTgtFile, write, OutTgtStream, []),
+	write_full_doc(SortedDocList, SourceFile, OutTgtFile, OutTgtStream),
+	close(OutTgtStream).
 
 eof_char(-1).
 eoln_char(13).
@@ -39,7 +45,7 @@ eoln_char(10).
 
 /*------------------------------------------
  *-----------------------------------------*/
-assemble_documentation(Stream, NamesList, FormsList, 
+assemble_documentation(Stream, SortedDocList, NamesList, FormsList, 
                        DescriptionsList, DocumentedPredsList, GroupsInfo)
 	:-
 	get_all_doc(Stream, FirstDocList, GroupsInfo),
@@ -142,24 +148,22 @@ strip_leader(Tail,Tail,_).
  *-----------------------------------------*/
 get_pred_doc(Stream, FirstLine, Doc)
 	:-
-	bufread(FirstLine, ReadResult),
-	((ReadResult = [ErrMsg | Pos],integer(Pos)) ->
-		PredDesc = '??'/'?',
-		cur_lib_file(CurLibFile),
-		lib_error(parse(CurLibFile, FirstLine, ErrMsg, Pos));
-		ReadResult = [PredDesc | Vars]
-	),
+	get_pred_desc(FirstLine,PredDesc),
+
 	get_header_doc(Stream, HeaderDoc),
 	(dmember(end_of_comment, HeaderDoc) ->
-		BriefDescrip = end_of_comment;
+		BriefDescrip = end_of_comment
+		;
 		get_brief_descrip(Stream, BriefDescrip)
 	),
 	(BriefDescrip = end_of_comment ->
-		ExtendedDescrip = end_of_comment;
+		ExtendedDescrip = end_of_comment
+		;
 		get_extended_descrip(Stream, ExtendedDescrip)
 	),
 	(HeaderDoc = [TextPredDesc |  CallingForm_IOPatterns] ->
-		true;
+		true
+		;
 		TextPredDesc = '??',
 		CallingForm_IOPatterns = []
 	),
@@ -167,11 +171,17 @@ get_pred_doc(Stream, FirstLine, Doc)
 	Doc = doc(PredDesc, (TextPredDesc, BriefDescrip), 
 	          CallingForm_IOPatterns, [TextPredDesc | ExtendedDescrip]).
 
+get_pred_desc(FirstLine,PredDesc)
+	:-
+	bufread(FirstLine, PredDesc, [syntax_errors(fail)]),
+	!.
+
+get_pred_desc(FirstLine,'??'/'?').
+
 /*------------------------------------------
  *-----------------------------------------*/
 get_header_doc(Stream, HeaderDoc)
 	:-
-%	readline(NextLine),
 	get_line(Stream, NextLineUIA),
 	name(NextLineUIA,NextLineChars),
 	strip_leader(NextLineChars, StrippedNextLine, [0' ,9,0'|,0'*]),
@@ -179,22 +189,22 @@ get_header_doc(Stream, HeaderDoc)
 
 disp_get_header_doc([], [], Stream) :-!.
 disp_get_header_doc([0'! | _], [end_of_comment], Stream) :-!.
-disp_get_header_doc(StrippedNextLine, 
+disp_get_header_doc(StrippedNextLineCs, 
 					[StrippedNextLine | RestHeaderDoc], Stream)
 	:-
+	atom_codes(StrippedNextLine, StrippedNextLineCs),
 	get_header_doc(Stream, RestHeaderDoc).
 
 /*------------------------------------------
  *-----------------------------------------*/
 get_brief_descrip(Stream, BriefDescrip)
 	:-
-%	readline(NextLine),
 	get_line(Stream, NextLineUIA),
 	name(NextLineUIA,NextLineChars),
 	strip_leader(NextLineChars, StrippedNextLine, [0' ,9,0'|,0'*, 0'-]),
-	disp_get_brief_descrip(StrippedNextLine, BriefDescrip,Stream).
+	disp_get_brief_descrip(StrippedNextLine, BriefDescripCs, Stream),
+	atom_codes(BriefDescrip, BriefDescripCs).
 
-%disp_get_brief_descrip([], BriefDescrip,Stream)
 disp_get_brief_descrip('', BriefDescrip,Stream)
 	:-!,
 	get_brief_descrip(Stream, BriefDescrip).
@@ -204,19 +214,30 @@ disp_get_brief_descrip(BriefDescrip, BriefDescrip,Stream).
  *-----------------------------------------*/
 get_extended_descrip(Stream, ExtendedDescrip)
 	:-
-%	readline(NextLine),
 	get_line(Stream, NextLineUIA),
 	name(NextLineUIA,NextLineChars),
-	strip_leader(NextLineChars, StrippedNextLine, [0' ,9,0'|,0'*]),
+	disp_get_x2(NextLineChars, ExtendedDescrip, Stream).
+
+disp_get_x2([0' ,0'*, 0'- | _], [], Stream)
+	:-!.
+
+disp_get_x2([0'	,0'*, 0'- | _], [], Stream)  %% tab
+	:-!.
+
+disp_get_x2(NextLineChars, ExtendedDescrip, Stream)
+	:-
+	strip_leader(NextLineChars, StrippedNextLine0, [0' ,9]),
+	StrippedNextLine0 = [_ | StrippedNextLine ],
 	disp_get_extended_descrip(StrippedNextLine,ExtendedDescrip,Stream).
 
 disp_get_extended_descrip(StrippedNextLine,[],Stream)
 	:-
 	StrippedNextLine = [0'! | _], !.
 
-disp_get_extended_descrip(StrippedNextLine,
+disp_get_extended_descrip(StrippedNextLineCs,
                           [StrippedNextLine | RestExtendedDescrip],Stream)
 	:-
+	atom_codes(StrippedNextLine, StrippedNextLineCs),
 	get_extended_descrip(Stream, RestExtendedDescrip).
 
 /*------------------------------------------
@@ -245,26 +266,12 @@ combine_docs([_ | RestSortedDocList], NamesList, FormsList,
 
 /*------------------------------------------
  *-----------------------------------------*/
-write_documentation(Stm, NamesList, FormsList, 
-                    DescriptionsList, DocumentedPredsList)
-	:-
-	printf(Stm,"\n@-----Name/Brief Description-----\n\n",[]),
-	write_names_list(NamesList,Stm),
-
-	printf(Stm,"\n@-----Forms & I/O Patterns-----\n\n",[]),
-	write_string_list(FormsList,Stm),
-
-	printf(Stm,"\n@-----Description-----\n\n",[]),
-	write_descrips_list(DescriptionsList,Stm).
-
-/*------------------------------------------
- *-----------------------------------------*/
 write_names_list([],_).
 write_names_list([(PredDesc,BriefDescrip) | RestNamesList],Stm)
 	:-
     PredDesc \= end_of_comment,
 	!,
-	printf(Stm,"%t -- %t\n",[PredDesc,BriefDescrip]),
+	printf(Stm,'%t - %t.\n',[PredDesc,BriefDescrip],[quoted(true)]),
 	write_names_list(RestNamesList,Stm).
 write_names_list([_ | RestNamesList],Stm)
 	:-
@@ -272,225 +279,259 @@ write_names_list([_ | RestNamesList],Stm)
 
 /*------------------------------------------
  *-----------------------------------------*/
-write_descrips_list([],_).
-write_descrips_list([Descrip | RestDescriptionsList],Stm)
+:- dynamic(user_write_full_doc/4).
+
+write_full_doc(DocList, SourceFile, OutTgtFile, OutTgtStream)
 	:-
-    Descrip \= [end_of_comment | _],
-	!,
-	write_string_list(Descrip,Stm),nl(Stm),nl(Stm),
-	write_descrips_list(RestDescriptionsList,Stm).
-write_descrips_list([_ | RestDescriptionsList],Stm)
+	user_write_full_doc(DocList, SourceFile, OutTgtFile, OutTgtStream),
+	!.
+
+write_full_doc(DocList, SourceFile, OutTgtFile, OutTgtStream)
 	:-
-	write_descrips_list(RestDescriptionsList,Stm).
+	fm_write_full_doc(DocList, SourceFile, OutTgtFile, OutTgtStream).
+	
 
-write_string_list([],_).
-write_string_list([String | Strings],Stm)
+/*------------------------------------------
+ *-----------------------------------------*/
+dflt_write_full_doc([], OutStream).
+dflt_write_full_doc([Doc | SortedDocList], OutStream)
 	:-
-	printf(Stm,"%t\n",[String]),
-	write_string_list(Strings,Stm).
+	printf(OutStream, '%t.\n', [Doc],[quoted(true)]),
+	dflt_write_full_doc(SortedDocList, OutStream).
 
-lib_error(multi_module(CurLibFile))
+
+/*------------------------------------------
+ *-----------------------------------------*/
+write_documentation(Stm, NamesList, FormsList, 
+                    DescriptionsList, DocumentedPredsList)
 	:-
-	error_message("Error: Multiple modules declared in library file %t\n",
-				  [CurLibFile]).
-lib_error(multi_key(CurLibFile))
-	:-
-	error_message("Error: Multiple library keys declared in library file %t\n",
-				  [CurLibFile]).
-lib_error(parse(CurLibFile, Line, ErrMsg, Pos))
-	:-
-	error_message("Error: Bad parse in library file %t: \n%s\nPos=%t: %s\n",
-				  [CurLibFile,Line,Pos,ErrMsg]).
+	printf(Stm,'\n''@-----Name/Brief Description-----''.\n\n',[quoted(true)]),
+	write_names_list(NamesList,Stm).
 
-lib_error(unknown(InputFileName))
-	:-
-	error_message("Error in processing library file: %t\n",[InputFileName]).
+%	printf(Stm,'\n''@-----Forms & I/O Patterns-----''.\n\n',[quoted(true)]),
+%	write_string_list(FormsList,Stm),
 
-lib_error(bad_mod_close(TagSortMCs))
-	:-
-	MessageList = [
-		"Mismatch on module closures:\n"-[],
-		common_pattern("%t\n",TagSortMCs)  ],
-	error_messages(MessageList).
-
-lib_error(bad_exports(CommonExports,UncommonExports))
-	:-
-	MessageList = [
-		"Mismatch on predicate exports--\n"-[],
-		"Common exports are:\n%t\n=======\n"-[CommonExports],
-		"Differences are:\n"-[],
-		common_pattern("%t\n-----\n",UncommonExports)   ],
-	error_messages(MessageList).
-
-error_message(Pattern, Values)
-	:-
-    telling(Where), tell(user),
-	printf(Pattern, Values),
-    tell(Where).
-
-error_messages([]) :-!.
-error_messages(MessageList)
-	:-
-	telling(Where), tell(user),
-	error_messages0(MessageList),
-	tell(Where).
-
-error_messages0([]).
-error_messages0([Pattern-Data | MessageList])
-	:-!,
-	error_message(Pattern,Data),
-	error_messages0(MessageList).
-error_messages0([common_pattern(Pattern,DataList) | MessageList])
-	:-!,
-	error_messages1(DataList,Pattern),
-	error_messages0(MessageList).
-
-error_messages1([],_).
-error_messages1([Datum | DataList],Pattern)
-	:-
-	error_message(Pattern, Datum),
-	error_messages1(DataList,Pattern).
-
-
-
-
-err_messages([],_).
-err_messages([Datum | Data],Pattern)
-	:-
-	error_message(Pattern,Datum),
-	err_messages(Data,Pattern).
-
-export tc/0.
-tc :-
-install_lib([unix,fsunix,dos386,fsdos386], '/u/prolog/Utils/Develop',
-		    LoadConditon, ReturnVar).
-
-export install_lib/4.
-install_lib(CondFilesList, SourceDir, LoadConditon, ReturnVar)
-    :-
-	lib_analyze_all(CondFilesList, SourceDir, Exports, 
-					ModuleCloseups, Modules, LibraryKeys),
-
-	consis_analyze(Exports, ModuleCloseups, Modules, LibraryKeys,
-					TheExports, TheModuleClosures, Module, LibraryKey),
-
-	lib_location(Disk, ALSDIR_Path, LibPath),
-	dappend(LibPath,[info], LibInfoDirPath),
-
-			%% get path to blt_lib.pro:
-	rootPathFile(Disk,ALSDIR_Path,[blt_lib,pro],BltLibFile),
-
-			%% Save all prev info in blt_lib.pro:
-	collect_lib_load_info(BltLibFile, PrevLibInfo).
-
-
-install_lib(CondFilesList, SourceDir, LoadConditon, ReturnVar)
-    :-
-	lib_error(unknown(CondFilesList)).
-
-lib_analyze_all([], _, [], [],[], []).
-lib_analyze_all([Item,InputFileName | RestCondFilesList], SourceDir,
-			    Exports, ModuleCloseups,Modules, LibraryKeys)
-	:-
-	(filePlusExt(_,_,InputFileName) ->
-		FileName = InputFileName;
-		filePlusExt(InputFileName,pro,FileName)
-	),
-    pathPlusFile(SourceDir,FileName,SourceFile),
-	(exists_file(SourceFile) ->
-        true;
-        printf("Source file %t does not exist.\n",[SourceFile]),
-        fail
-    ),
-
-	see(SourceFile),
-	lib_analyze(ExportList, ModuleClosures,Module, LibraryKey),
-	seen,
-	!,
-
-   	(var(Module) ->
-      	Module = user; true),
-
-   	(var(LibraryKey) ->
-      	LibraryKey = FileName; true),
-
-	Exports = [Item-ExportList | RestExports],
-	ModuleCloseups = [Item-ModuleClosures | RestModuleCloseups],
-	Modules = [Item-Module | RestModules],
-	LibraryKeys = [Item-LibraryKey | RestLibraryKeys],
-	lib_analyze_all(RestCondFilesList, SourceDir, RestExports, 
-					RestModuleCloseups, RestModules, RestLibraryKeys).
-
-lib_analyze_all([_,InputFileName | RestCondFilesList], SourceDir,
-			    Exports, ModuleCloseups,Modules, LibraryKeys)
-	:-
-	lib_error(unknown(InputFileName)),
-	lib_analyze_all(RestCondFilesList, SourceDir, Exports, 
-					ModuleCloseups, Modules, LibraryKeys).
-
-consis_analyze(TagExports, TagModuleClosures, TagModules, TagLibraryKeys,
-				TheExports, TheModuleClosures, Module, LibraryKey)
-	:-
-	remove_item_tags(TagModules, Modules),
-	sort(Modules, ModulesResidue),
-	(ModulesResidue = [Module] ->
-		true;
-		lib_error(multi_module(Modules)), fail
-	),
-
-	remove_item_tags(TagLibraryKeys, LibraryKeys),
-	sort(LibraryKeys, LibraryKeysResidue),
-	(LibraryKeysResidue = [LibraryKey] ->
-		true;
-		lib_error(multi_key(LibraryKeys)), fail
-	),
-
-	remove_item_tags(TagModuleClosures, ModuleClosures),
-	sort_each(ModuleClosures, SortedModuleClosures),
-	sort(SortedModuleClosures, ModuleClosuresResidue),
-	(ModuleClosuresResidue = [TheModuleClosures] ->
-		true;
-		retag(TagModuleClosures,SortedModuleClosures,TagSortMCs),
-		lib_error(bad_mod_close(TagSortMCs)), fail
-	),
-
-	remove_item_tags(TagExports, Exports),
-	sort_each(Exports, SortedExports),
-	sort(SortedExports, ExportsResidue),
-	(ExportsResidue = [TheExports] ->
-		true;
-		intersect(ExportsResidue, CommonExports),
-		all_list_diffs(TagExports, CommonExports, UncommonExports),
-		lib_error(bad_exports(CommonExports,UncommonExports)), 
-		fail
-	).
-
-
-
-remove_item_tags([], []).
-remove_item_tags([_-Item | TagItems], [Item | Items])
-	:-
-	remove_item_tags(TagItems, Items).
-
-sort_each([], []).
-sort_each([List | Lists], [SortedList | SortedLists])
-	:-
-	sort(List, SortedList),
-	sort_each(Lists, SortedLists).
-
-retag([],[],[]).
-retag([Tag-_ | RestTagged],[New | RestNew],[[Tag-New] | RestTaggedNew])
-	:-
-	retag(RestTagged,RestNew,RestTaggedNew).
-
-all_list_diffs([], _, []).
-all_list_diffs([Tag-ThisExports | TagExports], CommonExports, 
-			   [[Tag-ThisDiff] | UncommonExports])
-	:-
-	list_diff(ThisExports, CommonExports, ThisDiff),
-	all_list_diffs(TagExports, CommonExports, UncommonExports).
+%	printf(Stm,'\n''@-----Description-----''.\n\n',[quoted(true)]),
+%	write_descrips_list(DescriptionsList,Stm).
 
 endmod.
 
 
+/*==================================================================
+ |		fmt_fm.pro
+ |	Copyright (c) 1995 Applied Logic Systems, Inc.
+ |
+ |	FrameMaker ALS Man page formatting for progdoc.pro
+ |
+ |	Date: December, 1995
+ |	Author: Ken Bowen
+ *==================================================================*/
+
+ta :-
+	fm_doc('/mailbox3/als_libs/accsys/addlp/accsysul.pro').
+
+module sys_maint.
+
+/*!-----------------------------------------------------------------------------
+ *!----------------------------------------------------------------------------*/
+
+export fm_doc/1.
+fm_doc(InitSrcFile)
+	:-
+	pathPlusFile(Path,File,InitSrcFile),
+	(filePlusExt(BaseFile,Ext,File) ->
+		true
+		;
+		BaseFile = File, Ext = pro
+	),
+	filePlusExt(BaseFile,Ext,FF),
+	pathPlusFile(Path,FF,SrcFile),
+	filePlusExt(BaseFile,brf,BriefTgt),
+	filePlusExt(BaseFile,mml,MMLTgt),
+
+	lib_man_info(SrcFile, BriefTgt, MMLTgt, _, _, _, _, _).
+
+/*!-----------------------------------------------------------------------------
+ *!----------------------------------------------------------------------------*/
+fm_write_full_doc(SortedDocList, SourceFile, OutTgtFile, OutStream)
+	:-
+	printf(OutStream, '<MML>\n',[]),
+	printf(OutStream, '<Comment -- MML file %t>\n',[OutTgtFile]),
+	printf(OutStream, '<Comment -- Generated from %t>\n\n',[SourceFile]),
+	printf(OutStream, '<Comment -- Macro tags:>\n',[]),
+
+	printf(OutStream, '<!DefineTag BltGuide1>\n',[]),
+	printf(OutStream, '<!DefineTag BltGuide>\n',[]),
+	printf(OutStream, '<!DefineTag BltCode>\n',[]),
+	printf(OutStream, '<!DefineTag BltDesc>\n',[]),
+	printf(OutStream, '<!DefineTag BltForms>\n',[]),
+	printf(OutStream, '<!DefineTag BltBody>\n',[]),
+	printf(OutStream, '<!DefineTag BltCmtBody>\n',[]),
+	printf(OutStream, '<!DefineTag BltFirstCmtBody>\n',[]),
+	printf(OutStream, '<!DefineTag BltArgs>\n',[]),
+	printf(OutStream, '<!DefineTag BltIO_Head>\n',[]),
+	printf(OutStream, '<!DefineTag BltName>\n',[]),
+	printf(OutStream, '<!DefineTag BltStart>\n',[]),
+	printf(OutStream, '<!DefineTag BltNameBody>\n',[]),
+	printf(OutStream, '<!DefineTag Body>\n',[]),
+	printf(OutStream, '<!DefineTag 2Heading>\n',[]),
+
+	printf(OutStream, '<Comment -- Text Content:>\n\n',[]),
+
+	pathPlusFile(Path,BaseFile,SourceFile),
+	printf(OutStream, '<2Heading>\nSourceFile: %t\n<Body>\n', [BaseFile]),
+
+	fm_write_full_doc(SortedDocList, OutStream).
+
+/*------------------------------------------
+ *-----------------------------------------*/
+
+fm_write_full_doc([], OutStream).
+fm_write_full_doc([Doc | DocList], OutStream)
+	:-
+	man_fmt_doc(Doc, OutStream),
+	fm_write_full_doc(DocList, OutStream).
+
+/*------------------------------------------
+ *-----------------------------------------*/
+man_fmt_doc(Doc, SS)
+	:-
+	Doc = doc(PredDesc, (TextPredDesc, BriefDescrip), 
+	          CallingForm_IOPatterns, [TextPredDesc | ExtendedDescrip]),
+
+	nl(SS),nl(SS),
+	printf(SS, '<Comment ***** ----- %t ----->\n', [PredDesc]),
+	printf(SS, '<BltName>:\n', []),
+	printf(SS, '<BltNameBody>\n', []),
+	printf(SS, '%t\t%t\n', [PredDesc,BriefDescrip]),
+	printf(SS, '<BltForms>:\n', []),
+	printf(SS, '<BltCode>\n', []),
+	printf(SS, '%t\n<par>\n', [TextPredDesc]),
+	out_all(CallingForm_IOPatterns,SS),
+	nl(SS),
+	printf(SS, '<BltDesc>:\n', []),
+	printf(SS, '<BltFirstCmtBody>\n', []),
+	xdesc(ExtendedDescrip,SS),
+	nl(SS).
+
+/*------------------------------------------
+ *-----------------------------------------*/
+out_all([],SS).
+out_all([Line | Lines], SS)
+	:-
+	slashify_line(Line, XLine),
+	printf(SS, '%t\n<par>\n', [XLine]),
+	out_all(Lines, SS).
+
+/*------------------------------------------
+ *-----------------------------------------*/
+xdesc([],SS).
+
+xdesc([Line | ExtendedDescrip],SS)
+	:-
+	io_line(Line),
+	!,
+	printf(SS, '<par><BltIO_Head>\n%t\n<BltArgs>\n', [Line]),
+	xdesc_args(ExtendedDescrip,SS).
+
+xdesc([Line | ExtendedDescrip],SS)
+	:-
+	slashify_line(Line, XLine),
+	printf(SS, '%t\n<par>\n<BltCmtBody>\n', [XLine]),
+	xdesc(ExtendedDescrip,SS).
+
+/*------------------------------------------
+ *-----------------------------------------*/
+xdesc_args([],SS).
+xdesc_args([Line | ExtendedDescrip],SS)
+	:-
+	is_null_line(Line),
+	printf(SS, '<par>\n<BltFirstCmtBody>\n', []),
+	!,
+	xdesc(ExtendedDescrip,SS).
+xdesc_args([Line | ExtendedDescrip],SS)
+	:-
+	io_line(Line),
+	printf(SS, '<par><BltIO_Head>\n%t\n<BltArgs>\n', [Line]),
+	xdesc_args(ExtendedDescrip,SS).
+xdesc_args([Line | ExtendedDescrip],SS)
+	:-
+	slashify_line(Line, XLine),
+	printf(SS, '%t\n<par>\n', [XLine]),
+	xdesc_args(ExtendedDescrip,SS).
+
+/*------------------------------------------
+ *-----------------------------------------*/
+io_line('Inputs:') :-!.
+io_line('Outputs:') :-!.
+io_line(Line)
+	:-
+	atom_length(Line,LL),
+	Stop is LL - 5,
+	io_line(Line,1,5,Stop,'Input').
+io_line(Line)
+	:-
+	atom_length(Line,LL),
+	Stop is LL - 6,
+	io_line(Line,1,6,Stop,'Output').
+
+io_line(Line,Start,Size,Stop,SubAtom)
+	:-
+	sub_atom(Line,Start,Size,SubAtom),!.
+
+io_line(Line,Start,Size,Stop,SubAtom)
+	:-
+	Start < Stop,
+	NextStart is Start + 1,
+	io_line(Line,NextStart,Size,Stop,SubAtom).
+
+/*------------------------------------------
+ *-----------------------------------------*/
+slashify_line(Line, XLine)
+	:-
+	atom_codes(Line, LCs),
+	slash_stuff(LCs, XLCs),
+	atom_codes(XLine, XLCs).
+
+/*------------------------------------------
+ *-----------------------------------------*/
+slash_stuff([], []).
+slash_stuff([C | LCs], [0'\\, C | XLCs])
+	:-
+	needs_slash(C),
+	!,
+	slash_stuff(LCs, XLCs).
+slash_stuff([C | LCs], [C | XLCs])
+	:-
+	slash_stuff(LCs, XLCs).
+
+/*------------------------------------------
+ *-----------------------------------------*/
+needs_slash(0'<).
+needs_slash(0'>).
+needs_slash(0'\\).
+
+/*------------------------------------------
+ *-----------------------------------------*/
+is_null_line('').
+is_null_line(' ').
+is_null_line('  ').
+is_null_line('\t').
+is_null_line('\t\t').
+is_null_line('|').
+is_null_line('\t|').
+is_null_line(' |').
+is_null_line('\t|').
+is_null_line('| ').
+is_null_line('|\t').
+is_null_line(' | ').
+is_null_line('\t| ').
+is_null_line('|  ').
+is_null_line('|\t ').
+is_null_line(' |\t').
+is_null_line('\t|\t').
+is_null_line('| \t').
+is_null_line('|\t\t').
+
+endmod.
 

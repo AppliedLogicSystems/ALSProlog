@@ -102,7 +102,7 @@ schema([
 			depends_list(&(object))] )]),
 
 	case(&(context_name),[
-		(msw31:noop),
+		(w31:noop),
 		(mac: [rule(alstest)]),
 		(_:[
 			cmnt(mics),
@@ -400,7 +400,7 @@ rule(alsmics,
 			['echo exeformat=$(exeformat)',
 		 	 '$(CC) -o alsmics ' + '$(srcdir)'/utils/'$(alsmics_c) ' + '$(CPPFLAGS) $(micsflags)',
 		 	 '-cp alsmics ' + alsdir/'als-mics'] ),
-		 (msw31:
+		 (w31:
 			['echo exeformat=$(exeformat)',
 		 	 '$(CC) -o alsmics ' + '$(srcdir)'/utils/'$(alsmics_c) ' + '$(CPPFLAGS) $(micsflags)',
 		 	 '-cp alsmics ' + alsdir/'als-mics'] ),

@@ -124,7 +124,8 @@
 	 write_lines/1, write_lines/2, write_lines_nl/3, write_lines_nl/4,
 	 write_lines_opt/2,write_lines_opt/3,
 	 write_clause/1, write_clause/2, write_clause/3,
-	 write_clauses/1, write_clauses/2, write_clauses/3
+	 write_clauses/1, write_clauses/2, write_clauses/3,
+	 get_lines/2, grab_lines/2
 	 ], [] ).
 
 :-libactivate(builtins,['library',sconfig],
@@ -147,6 +148,11 @@
 		 strip_prefix/3,prefix_undefs_basis/2,
 		 prefix_undefs_basis_filt/1], [] ).
 
-:-libactivate(cref,['library',miscatom], 
+:-libactivate(builtins,['library',miscatom], 
 		[atm_tail/3, trim_atoms/3
 		], [] ).
+
+:-libactivate(builtins,['library',progdoc], 
+		[prog_doc/3, fm_doc/1
+		], [] ).
+

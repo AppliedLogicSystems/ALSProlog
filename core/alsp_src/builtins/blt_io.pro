@@ -976,10 +976,12 @@ old_bufread(String,[Term|VarNames]) :-
 		  [attach_fullstop(true),vars_and_names(_,VarNames)]),
 	close(Stream).
 
-bufread(String,Term) :-
+bufread(String,Term) 
+	:-
 	bufread(String,Term,[]).
 
-bufread(String,Term,Options) :-
+bufread(String,Term,Options) 
+	:-
 	open(string(String),read,Stream),
 	read_term(Stream,Term,[attach_fullstop(true)|Options]),
 	close(Stream).
@@ -987,10 +989,12 @@ bufread(String,Term,Options) :-
 export atomread/2.
 export atomread/3.
 
-atomread(Atom,Term) :-
+atomread(Atom,Term) 
+	:-
 	atomread(Atom,Term,[]).
 
-atomread(Atom,Term,Options) :-
+atomread(Atom,Term,Options) 
+	:-
 	open(atom(Atom),read,Stream),
 	read_term(Stream,Term,[attach_fullstop(true)|Options]),
 	close(Stream).

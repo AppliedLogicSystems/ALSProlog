@@ -173,7 +173,7 @@ fprintf(stderr,"Done Step 2: %s\n",ssname);
      * Step 3:  Read the file header and a.out header
      */
     
-    if (   lseek(oifd, 0, 0) < 0)
+/*    if (   lseek(oifd, 0, 0) < 0)    */
 	while (1)
 	{
 	  unsigned char buf[6];
