@@ -3,32 +3,50 @@
 
 #include <time.h>
 
+static long GetLongFromNumber(AP_World *w, AP_Obj number)
+{
+	switch (AP_ObjType(w, number)) {
+	case AP_INTEGER:
+		return AP_GetLong(w, number);
+	default:
+		return (long) AP_GetDouble(w, number);
+	}
+}
+
+
 static AP_Result p_mktime(AP_World *w, AP_Obj tm_struct, AP_Obj time)
 {
 	struct tm tr;
 	time_t t;
 	
-	tr.tm_sec = AP_GetLong(w, AP_GetArgument(w, tm_struct, 1));
-	tr.tm_min = AP_GetLong(w, AP_GetArgument(w, tm_struct, 2));
-	tr.tm_hour = AP_GetLong(w, AP_GetArgument(w, tm_struct, 3));
-	tr.tm_mday = AP_GetLong(w, AP_GetArgument(w, tm_struct, 4));
-	tr.tm_mon = AP_GetLong(w, AP_GetArgument(w, tm_struct, 5));
-	tr.tm_year = AP_GetLong(w, AP_GetArgument(w, tm_struct, 6));
-	tr.tm_wday = AP_GetLong(w, AP_GetArgument(w, tm_struct, 7));
-	tr.tm_yday = AP_GetLong(w, AP_GetArgument(w, tm_struct, 8));
-	tr.tm_isdst = AP_GetLong(w, AP_GetArgument(w, tm_struct, 9));	
+	if (AP_ObjType(w, tm_struct) != AP_STRUCTURE
+		|| AP_Unify(w, AP_GetStructureFunctor(w, tm_struct), AP_NewSymbolFromStr(w, "tm")) != AP_SUCCESS
+		|| AP_GetStructureArity(w, tm_struct) != 9) {
+		return AP_SetStandardError(w, AP_TYPE_ERROR, AP_NewSymbolFromStr(w, "tm_structure"), tm_struct);
+	}
+	
+	tr.tm_sec = GetLongFromNumber(w, AP_GetArgument(w, tm_struct, 1));
+	tr.tm_min = GetLongFromNumber(w, AP_GetArgument(w, tm_struct, 2));
+	tr.tm_hour = GetLongFromNumber(w, AP_GetArgument(w, tm_struct, 3));
+	tr.tm_mday = GetLongFromNumber(w, AP_GetArgument(w, tm_struct, 4));
+	tr.tm_mon = GetLongFromNumber(w, AP_GetArgument(w, tm_struct, 5));
+	tr.tm_year = GetLongFromNumber(w, AP_GetArgument(w, tm_struct, 6));
+	tr.tm_wday = GetLongFromNumber(w, AP_GetArgument(w, tm_struct, 7));
+	tr.tm_yday = GetLongFromNumber(w, AP_GetArgument(w, tm_struct, 8));
+	tr.tm_isdst = GetLongFromNumber(w, AP_GetArgument(w, tm_struct, 9));	
 	
 	t = mktime(&tr);
 	
 	return AP_Unify(w, AP_NewNumberFromLong(w, t), time);
 }
 
+
 static AP_Result p_gmtime(AP_World *w, AP_Obj time, AP_Obj result)
 {
 	AP_Obj tm_struct;
 	struct tm *tr;
 
-	time_t t = AP_GetLong(w, time);
+	time_t t = GetLongFromNumber(w, time);
 	
 	tr = gmtime(&t);
 		
@@ -53,7 +71,7 @@ static AP_Result p_localtime(AP_World *w, AP_Obj time, AP_Obj result)
 	AP_Obj tm_struct;
 	struct tm *tr;
 
-	time_t t = AP_GetLong(w, time);
+	time_t t = GetLongFromNumber(w, time);
 	
 	tr = localtime(&t);
 		
