@@ -75,7 +75,7 @@ extern	int	sym_insert_2long PARAMS(( char *, int, long, long ));
 extern	int	sym_insert_dbl	PARAMS(( char *, int, double ));
 /* FIXME: Do these need to be extern?? */
 extern	void	CI_makefar	PARAMS(( PWord *, int *, unsigned short * ));
-extern	int	CI_get_integer	PARAMS(( unsigned long  *, unsigned long ));
+extern	int	CI_get_integer	PARAMS(( PWord *, int ));
 extern	int	CI_get_double	PARAMS(( double *, unsigned long, unsigned long ));
 
 extern	const char *find_callback(void *func, void *object);
