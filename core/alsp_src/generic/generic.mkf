@@ -36,7 +36,7 @@ CPPFLAGS =   -I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(srcdir)/$(ARCH
 
 gforfiles_c =  
 
-#ifeq ($(TH_INTRV),1)
+ifeq ($(TH_INTRV),1)
 smathfiles_c =  	th_intrv.c \
 	IAbool.c \
 	IAexp.c \
@@ -51,10 +51,10 @@ smathfiles_c =  	th_intrv.c \
 	trig.c
 
 
-#else
-#smathfiles_c =  
+else
+smathfiles_c =  
 
-#endif
+endif
 
 gpckgfiles_c =  	nopckg.c
 
