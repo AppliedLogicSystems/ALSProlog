@@ -319,7 +319,6 @@ source_trace_mgrAction(start_src_trace(BaseFileName, SrcFilePath, FCG), State)
 source_trace_mgrAction(start_src_trace, State)
 	:-
 	accessObjStruct(source_file, State, SrcFilePath),
-write(stmA_start),nl,flush_output,
 	fin_mgr_start_source_trace(SrcFilePath, State).
 
 fin_mgr_start_source_trace(SrcFilePath, State)
