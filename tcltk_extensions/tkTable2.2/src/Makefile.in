@@ -1,0 +1,131 @@
+# version info
+include version.in
+
+# This sets the name that tkTable will define for itself when loaded
+# If you change this, then the demos won't work, but it might be necessary
+# for those with another built-in "table" command
+TBL_COMMAND	= table
+
+SRCDIR		= @srcdir@
+TOPDIR		= @srcdir@/..
+LIBDIR		= $(TOPDIR)/lib
+DOCDIR		= $(TOPDIR)/doc
+
+PACKAGE		= Tktable
+OBJS		= tkTable.o tkTableWin.o tkTableTag.o \
+			tkTableCell.o cmd.o
+MANS		= tkTable.n
+
+#-------------------------------------------------
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+
+TCL_VERSION	= @TCL_VERSION@
+TK_VERSION	= @TK_VERSION@
+WISH		= wish$(TK_VERSION)
+
+TCL_SRC_DIR 	= @TCL_SRC_DIR@
+TK_SRC_DIR 	= @TK_SRC_DIR@
+
+TCL_BUILD_LIB_SPEC	= @TCL_BUILD_LIB_SPEC@
+TK_BUILD_LIB_SPEC	= @TK_BUILD_LIB_SPEC@
+
+TCL_LIB_SPEC	= @TCL_LIB_SPEC@
+TK_LIB_SPEC	= @TK_LIB_SPEC@
+
+TCL_LIBS	= @TCL_LIBS@
+TK_LIBS		= @TK_LIBS@
+
+INSTALL		= @INSTALL@
+INSTALL_PROGRAM	= @INSTALL_PROGRAM@
+INSTALL_DATA	= @INSTALL_DATA@
+CC		= @CC@
+RM		= rm -f
+RANLIB		= @TCL_RANLIB@
+SHLIB_CFLAGS	= @TCL_SHLIB_CFLAGS@
+SHLIB_SUFFIX	= @TCL_SHLIB_SUFFIX@
+SHLIB_LD	= @TCL_SHLIB_LD@
+TCL_PREFIX	= @TCL_PREFIX@
+## HP cc sometimes requires -Aa for proper ansi compilation
+TCL_CFLAGS	= -O @TCL_DEFS@ @TCL_CFLAGS@
+TCL_LD_FLAGS	= @TCL_LD_FLAGS@
+TK_LD_SEARCH_FLAGS = @TK_LD_SEARCH_FLAGS@
+TK_XINCLUDES	= @TK_XINCLUDES@
+
+#TCL_CFLAGS	+= -DDEBUG -g -Wall -Wno-implicit
+
+LIB_RUNTIME_DIR = @libdir@
+
+INCLUDES	= -I@includedir@ $(TK_XINCLUDES)\
+		  -I$(TCL_SRC_DIR)/generic\
+		  -I$(TK_SRC_DIR)/generic
+
+DLL		= $(PACKAGE)$(SHLIB_SUFFIX)
+STATIC_LIB	= $(PACKAGE).a
+PACKAGEDIR	= $(PACKAGE)$(TBL_VERSION)
+STATIC_EXEC	= tablewish
+DLLDIR		= ${exec_prefix}/lib/$(PACKAGEDIR)
+RTDIR		= ${prefix}/lib/$(PACKAGEDIR)
+
+CFLAGS		= -I. -I$(SRCDIR) $(TCL_CFLAGS) $(SHLIB_CFLAGS) $(INCLUDES)\
+		  -DTBL_VERSION=\"$(TBL_VERSION)\"\
+		  -DTBL_COMMAND=\"$(TBL_COMMAND)\"\
+		  -DTCL_RUNTIME=\"$(RTDIR)/tkTable.tcl\"
+
+MAN_INSTALL_DIR = @mandir@/mann
+
+all: $(DLL) pkgIndex.tcl
+
+$(DLL): $(OBJS)
+	$(SHLIB_LD) -o $@ $(OBJS)
+
+static $(STATIC_LIB): $(OBJS) pkgIndex.tcl
+	$(RM) $(STATIC_LIB)
+	ar cr $(STATIC_LIB) $(OBJS)
+	$(RANLIB) $(STATIC_LIB)
+
+cmd.o:		$(SRCDIR)/cmd.h $(SRCDIR)/cmd.c
+tkTable.o:	$(SRCDIR)/tkTable.h $(SRCDIR)/tkTable.c tkTabletcl.h
+tkTableCell.o:	$(SRCDIR)/tkTable.h $(SRCDIR)/tkTableCell.c
+tkTablePs.o:	$(SRCDIR)/tkTable.h $(SRCDIR)/tkTablePs.c
+tkTableTag.o:	$(SRCDIR)/tkTable.h $(SRCDIR)/tkTableTag.c
+tkTableWin.o:	$(SRCDIR)/tkTable.h $(SRCDIR)/tkTableWin.c
+tkAppInit.o:	$(SRCDIR)/tkAppInit.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(SRCDIR)/$*.c
+
+pkgIndex.tcl:
+	(\
+	echo 'if {[catch {package require Tcl $(TCL_VERSION)}]} return';\
+	echo 'package ifneeded $(PACKAGE) $(TBL_VERSION)\
+	    "package require Tk $(TK_VERSION);\
+	     [list load [file join $$dir $(DLL).$(TBL_VERSION)] $(PACKAGE)]"'\
+	) > pkgIndex.tcl
+
+install: all
+	if test ! -d "$(DLLDIR)"; then mkdir "$(DLLDIR)"; fi
+	if test ! -d "$(RTDIR)"; then mkdir "$(RTDIR)"; fi
+	$(INSTALL_PROGRAM) $(DLL) "$(DLLDIR)/$(DLL).$(TBL_VERSION)"
+	$(INSTALL_DATA) pkgIndex.tcl "$(DLLDIR)/pkgIndex.tcl"
+	$(INSTALL_DATA) $(LIBDIR)/tkTable.tcl "$(RTDIR)/tkTable.tcl"
+	$(INSTALL_DATA) $(DOCDIR)/$(MANS) $(MAN_INSTALL_DIR)/
+
+# Leaves behind created directories
+uninstall:
+	$(RM) "$(DLLDIR)/$(DLL).$(TBL_VERSION)" "$(DLLDIR)/pkgIndex.tcl" "$(RTDIR)/tkTable.tcl" $(MAN_INSTALL_DIR)/$(MANS)
+
+test: all
+	wish$(TK_VERSION) ../demos/basic.tcl
+
+clean: 
+	$(RM) *.o $(DLL) $(STATIC_LIB) $(STATIC_EXEC) core pkgIndex.tcl tkTabletcl.h
+
+distclean: clean
+	$(RM) Makefile config.cache config.log config.status
+
+tkTabletcl.h: $(LIBDIR)/tkTable.tcl
+	sed -e '/^$\#/d' -e '/^$$/d' -e 's/\"/\\"/g' -e 's/^/"/' -e 's/$$/\\n"/' <$(LIBDIR)/tkTable.tcl > $(SRCDIR)/tkTabletcl.h || $(RM) $(SRCDIR)/tkTabletcl.h
+
+tablewish: tkAppInit.o $(OBJS)
+wish: tkAppInit.o $(OBJS)
+	$(CC) $(TK_LD_SEARCH_FLAGS) -o $(STATIC_EXEC) tkAppInit.o $(OBJS) \
+	  $(LIBS) $(TK_BUILD_LIB_SPEC) $(TK_LIB_SPEC) $(TCL_BUILD_LIB_SPEC) $(TCL_LIB_SPEC) $(TK_LIBS) $(TCL_LIBS)
