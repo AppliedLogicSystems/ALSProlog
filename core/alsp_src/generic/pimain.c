@@ -11,6 +11,7 @@
 
 #include "defs.h"
 #include <limits.h>
+#include <ctype.h>
 
 #ifdef MacOS
 #include <Errors.h>
@@ -103,8 +104,9 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 
     /* Scan for -heap and -stack command line arguments. */ 
     {
-    	int i, r;
+    	int i;
     	unsigned long value;
+	char *arg_end;
     	enum {arg_scan, heap_scan, stack_scan, finished} state;
     	
     	for (state = arg_scan, i = 0; state != finished && i < argc; i++) {
@@ -115,8 +117,9 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     	    	else if (strcmp(argv[i], "-stack") == 0) state = stack_scan;
     	    	break;
     	    case heap_scan:
-    	    	r = sscanf(argv[i], "%lu", &value);
-    	    	if (r != 1 || value == 0 || value > ULONG_MAX/256) {
+    	    	value = strtoul(argv[i], &arg_end, 10);
+    	    	if ((*arg_end && !isspace(*arg_end))
+		    || value == 0 || value > ULONG_MAX/256) {
     	    	    fprintf(stderr, "Usage: -heap N\n");
     	    	    exit(EXIT_ERROR);
     	    	} else {
@@ -125,8 +128,9 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     	    	}
     	    	break;
     	    case stack_scan:
-    	    	r = sscanf(argv[i], "%lu", &value);
-    	    	if (r != 1 || value == 0 || value > ULONG_MAX/256) {
+    	    	value = strtoul(argv[i], &arg_end, 10);
+    	    	if ((*arg_end && !isspace(*arg_end))
+		    || value == 0 || value > ULONG_MAX/256) {
     	    	    fprintf(stderr, "Usage: -stack N\n");
     	    	    exit(EXIT_ERROR);
     	    	} else {
