@@ -64,13 +64,10 @@ static int AEPackageInit(Tcl_Interp *interp)
 void
 main(void)
 {
-	Tcl_Interp *interp;
-	extern void TkMenuInit(void);
-	
 	/* Initialize the Macintosh */
-    if (MacintoshInit()  != TCL_OK) {
-	Tcl_Exit(1);
-    }
+	if (MacintoshInit()  != TCL_OK) {
+		Tcl_Exit(1);
+	}
 
 
 	/* Initialize Tcl/Tk */
@@ -82,7 +79,7 @@ main(void)
     TkMacInitMenus(NULL);
 
 	/* Install an Apple Events package */
-	Tcl_StaticPackage(interp, "appleevents", AEPackageInit, NULL);
+	Tcl_StaticPackage(NULL, "appleevents", AEPackageInit, NULL);
 
 	SetupALSProlog();
 }
@@ -350,11 +347,12 @@ void SetupALSProlog(void)
 
     pi_init();
 
+/*
     term = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "consult"),
 		1, AP_NewSymbolFromStr(w, "blt_dvsh"));
 		
     AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
-
+*/
 	PI_set_yield_proc(tcltk_yield);
 
     term = AP_NewSymbolFromStr(w, "start_alsdev");

@@ -210,37 +210,36 @@ proc map_alsdev_debug {} {
 }
 
 
-if {$tcl_platform(platform) == "macintosh"} {
-	source -rsrc {alsdev_main}
-	source -rsrc {als_settings}
-	source -rsrc {debugwin}
-	source -rsrc {defstr}
-	source -rsrc {als_menu}
-	source -rsrc {als_document}
-} else {
-	source [file join $ALSTCLPATH alsdev_main.tcl]
-	source [file join $ALSTCLPATH als_settings.tcl]
-	source [file join $ALSTCLPATH debugwin.tcl]
-	source [file join $ALSTCLPATH defstr.tcl]
-	source [file join $ALSTCLPATH als_menu.tcl]
-	source [file join $ALSTCLPATH als_document.tcl]
-}
-
-proc init_photos {base} {
-	image create photo up_arrow_gif \
-		-file [file join $base up-arrow-blue.gif]
-	image create photo down_arrow_gif \
-		-file [file join $base down-arrow-blue.gif]
-	image create photo right_gif \
-		-file [file join $base right-arrow-blue.gif]
-	image create photo left_gif \
-		-file [file join $base left-arrow-blue.gif]
+proc load_source {path name} {
+	global tcl_platform
+	if {$tcl_platform(platform) == "macintosh"} {
+		uplevel "source -rsrc {$name}"
+	} else {
+		uplevel "source [file join {$path} {$name.tcl}]"
 	}
-
-if {$tcl_platform(platform) == "macintosh"} {
-} else {
-	init_photos [file join $ALSTCLPATH .. images ]
 }
+
+load_source $ALSTCLPATH {alsdev_main}
+load_source $ALSTCLPATH {als_settings}
+load_source $ALSTCLPATH {debugwin}
+load_source $ALSTCLPATH {defstr}
+load_source $ALSTCLPATH {als_menu}
+load_source $ALSTCLPATH {als_document}
+
+
+proc load_photo {image_name base_name} {
+	global tcl_platform
+	if {$tcl_platform(platform) == "macintosh"} {
+		image create photo $image_name -format gif -data [resource read GIFf $base_name]
+	} else {
+		image create photo $image_name -file [file join $ALSTCLPATH .. images $base_name.gif]
+	}
+}
+
+load_photo up_arrow_gif up-arrow-blue
+load_photo down_arrow_gif down-arrow-blue
+load_photo right_gif right-arrow-blue
+load_photo left_gif left-arrow-blue
 
 	## source any other needed files here.....
 

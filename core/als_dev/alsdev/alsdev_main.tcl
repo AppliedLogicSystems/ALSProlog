@@ -34,11 +34,6 @@ proc vTclWindow.topals {args} {
 		##------------------
 		## Main menubar:
 		##------------------
-	if {$tcl_platform(platform) == "macintosh"} {
-		set elipsis "É"
-	} else {
-		set elipsis "..."
-	}
 	
     menu .topals.mmenb -relief sunken -tearoff 0
 
