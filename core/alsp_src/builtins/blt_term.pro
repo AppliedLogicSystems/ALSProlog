@@ -190,16 +190,90 @@ comprises([X|L],X,L).
 
 export '=..'/2.
 
+list(L) :-
+	nonvar(L),
+	list0(L).
+list0([_ | T]) :-
+	nonvar(T),
+	list0(T).
+list0([]).
+
+partial_list(L) :-
+	nonvar(L),
+	partial_list0(L).
+partial_list0(L) :- var(L).
+partial_list0([H|T]) :- partial_list0(T).
+
 S =.. [F|Args] :-
+	nonvar(S),
     functor(S,F,A),
     !,
     univ_install(S,1,A,Args).
 S =.. [F|Args] :-
+	var(S),
     atomic(F),
+    list(Args),
     length(Args,Arity),
     !,
     functor(S,F,Arity),
     univ_install(S,1,Arity,Args).
+S =.. [F|Args] :-
+	nonvar(S),
+    atomic(F),
+    %%list(Args),
+    length(Args,Arity),
+    !,
+    functor(S,F,Arity),
+    univ_install(S,1,Arity,Args).
+S =.. L :-
+	var(S),
+	partial_list(L),
+	instantiation_error(2).	
+S =.. [F|_] :-
+	var(S),
+	var(F),
+	instantiation_error(2).
+S =.. [] :-
+	var(S),
+	domain_error(non_empty_list, [], 2).
+S =.. L :-
+	var(S),
+	list(L),
+	length(L, Length),
+	Length > 255,
+	representation_error(max_arity, 2).
+_ =.. [H|T] :-
+	nonvar(H),
+	not(atom(H)),
+	T \= [],
+	type_error(atom, H, 2).
+_ =.. [H] :-
+	compound(H),
+	type_error(atomic, H, 2).
+_ =.. L :-
+	type_error(list, L, 2).
+	
+/*	
+S =.. [F|Args] :-
+	var(S),
+	nonvar(F),
+	not(atom(F)),
+	Arg \= [],
+	type_error(atom, F, 2).
+S =.. [F] :-
+	var(S),
+	nonvar(F),
+	not(atomic(F)),
+	type_error(atomic, F, 2).
+S =.. X :-
+	var(X),
+	instantiation_error(2).
+S =.. [X] :-
+	compound(X),
+	type_error(list, X, 2).
+S =.. X :-
+	type_error(list, X, 2).
+*/
 
 univ_install(_,N,Arity,[]) :-
     N > Arity,

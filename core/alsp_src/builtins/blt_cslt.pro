@@ -1213,5 +1213,19 @@ setup_tcltk(Interp)
 	tcl_eval(Interp, 'set TkLib $tk_library', TkLibPath),
 	sprintf(atom(Cmd1), 'source "%t/tk.tcl"', [TkLibPath]),
 	tcl_eval(Interp, Cmd1, _).
+	
+/* Some definitions for standard */
+
+export multifile/1.
+multifile(_).
+
+export discontiguous/1.
+discontiguous(_).
+
+export include/1.
+include(F) :- consult(F).
+
+export ensure_loaded/1.
+ensure_loaded(F) :- consult(F, [ensure_loaded(true)]).
 
 endmod.		%% blt_cslt.pro: Consult 
