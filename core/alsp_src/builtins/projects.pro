@@ -3,7 +3,7 @@
  |		Copyright (c) 1998 Applied Logic Systems, Inc.
  |
  |			Prolog Project Management
- |			"$Id: projects.pro,v 1.1 1998/03/13 01:56:47 ken Exp $"
+ |			"$Id: projects.pro,v 1.2 1998/03/14 02:05:24 ken Exp $"
  *=============================================================*/
 
 module alsdev.
@@ -16,16 +16,22 @@ ppj
 		[ 'Open Project' + tcl(open_project) ]
 	).
 
-
-:- make_gv('_curProject'), set_curProject([]).
+export tp/1.
+tp(X) :-
+	grab_terms('pm.ppj', X).
 
 open_project_file(ProjectFilePath,BaseFile)
 	:-
-	printf('Loading project from file %t\n', [BaseFile]),
+	printf('Loading project from file %t [%t]\n', [BaseFile,ProjectFilePath]),
 	get_curProject(OldProject),
+write(op=OldProject),nl,
 	close_previous_project(OldProject),
+write(done_close),nl,
 	set_curProject([]),
+write(call(gt(ProjectFilePath))),nl,flush_output,
+write(zing),nl,
 	grab_terms(ProjectFilePath, CurProject),
+write(gt=CurProject),nl,flush_output,
 	set_curProject(CurProject),
 	open_the_project(CurProject, BaseFile).
 
@@ -41,6 +47,8 @@ open_project_file(ProjectFilePath,BaseFile)
 	 *-----------------------------------------------------------*/
 open_the_project(ProjList, BaseFile)
 	:-
+write(open_the_project(ProjList, BaseFile)),nl,flush_output,
+
 	check_default(ProjList, name,  BaseFile, ProjName),
 	check_default(ProjList, search_dirs,  [], SearchDirs),
 	check_default(ProjList, search_trees,  [], SearchTrees),
@@ -75,7 +83,11 @@ assert_searchdirs(Dir)
 consult_files([]).
 consult_files([File | PrologFiles])
 	:-
-	consult(File),
+	(exists_file(File) -> 
+		consult(File) 
+		; 
+		printf(user_output, 'Can\'t find file %t .. skipping ..\n', [File])
+	),
 	consult_files(PrologFiles).
 consult_files(File)
 	:-

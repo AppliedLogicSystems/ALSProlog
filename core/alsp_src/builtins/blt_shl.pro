@@ -619,7 +619,6 @@ shell_read(InStream,OutStream,G,N,V)
 		  shell_read0_err_disp(Ball,InStream,OutStream,G,N,V)
 		  ).
 
-
 shell_read0(Prompt1,Prompt2,InStream,G,N,V) 
 	:- !,
 	sio:get_user_prompt(OldPrompt),
