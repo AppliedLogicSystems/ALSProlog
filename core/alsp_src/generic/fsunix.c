@@ -13,7 +13,9 @@
  *===========================================================================*/
 #include "defs.h"
 
-#if defined(UNIX) && !defined(__GO32__) && !defined(OS2)
+#if (defined(UNIX) || (defined(MacOS) && defined(HAVE_GUSI))) && !defined(__GO32__) && !defined(OS2)
+
+#if defined(UNIX)
 
 #include <sys/param.h>
 
@@ -86,25 +88,22 @@
 #define S_ISFIFO(m) (((m)& S_IFMT) == S_IFIFO)
 #endif
 
-static	int	pgetcwd		PARAMS(( void ));
-static	int	pchdir		PARAMS(( void ));
-static	int	punlink		PARAMS(( void ));
+#elif defined(MacOS) && defined(HAVE_GUSI)
+#include <ctype.h>
+#include <GUSI.h>
 
-#ifdef FSACCESS
-static	int	getDirEntries	PARAMS(( void ));
-static	int	getFileStatus	PARAMS(( void ));
-static	int	read_link	PARAMS(( void ));
-static	int	make_symlink	PARAMS(( void ));
-static	int	pcmp_fs		PARAMS(( void ));
-static	int	prmdir		PARAMS(( void ));
-static	int	pmkdir		PARAMS(( void ));
-static	char *	canonical_pathname PARAMS(( char *, char ** ));
-static	int	canonicalize_pathname PARAMS(( void ));
-static	int	pgetpid		PARAMS(( void ));
-#endif /* FSACCESS */
+#endif /* MacOS-GUSI, defined(UNIX) && !defined(__GO32__)  && !defined(OS2) */
 
-static int
-pgetcwd()
+#ifndef MAXPATHLEN
+#ifdef PATHSIZE
+#define MAXPATHLEN  PATHSIZE
+#else
+#define MAXPATHLEN  1024
+#endif
+#endif
+
+int
+pgetcwd(void)
 {
     PWord v1, sym;
     int   t1, symType;
@@ -139,7 +138,7 @@ pgetcwd()
  * Changes the current working directory to be that given by the input.
  */
 
-static int
+int
 pchdir()
 {
     PWord v1;
@@ -166,8 +165,8 @@ pchdir()
  * Unlinks the indicated file from the file system
  */
 
-static int
-punlink()
+int
+punlink(void)
 {
     PWord v1;
     int   t1;
@@ -200,7 +199,7 @@ punlink()
  *				(cf. directory/3 in fsunix.pro)
  */
 
-static int
+int
 getDirEntries()
 {
     PWord v1, v2, v3;
@@ -208,7 +207,7 @@ getDirEntries()
     char *dirName, *pattern;
     DIR  *dirp;
     struct dirent *dirEntry;
-    PWord consCell, head, sym, nil;
+    PWord consCell, head, sym, pnil;
     int   consType, headType, symType, nilType;
 #ifdef HAVE_REGCMP
     char *regexComp;
@@ -277,9 +276,9 @@ getDirEntries()
     free(regexComp);
 #endif
 
-    PI_makesym(&nil, &nilType, "[]");
+    PI_makesym(&pnil, &nilType, "[]");
 
-    if (!PI_unify(v3, t3, nil, nilType))
+    if (!PI_unify(v3, t3, pnil, nilType))
 	PI_FAIL;
 
 
@@ -299,8 +298,8 @@ getDirEntries()
  *		fileStatus(FileType,ModTime,OwnPermiss,ByteSize,Blocks)
  */
 
-static int
-getFileStatus()
+int
+getFileStatus(void)
 {
     PWord v1, v2, vtime;
     int   t1, t2, ttime;
@@ -401,8 +400,8 @@ getFileStatus()
  *	ResultPath	-- path to the file = value of the link
  */
 
-static int
-read_link()
+int
+read_link(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -446,8 +445,8 @@ read_link()
  *		make_symlink('./foo','./bar')
  */
 
-static int
-make_symlink()
+int
+make_symlink(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -483,8 +482,8 @@ make_symlink()
  * last modification time of File2.
  */
 
-static int
-pcmp_fs()
+int
+pcmp_fs(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -517,7 +516,7 @@ pcmp_fs()
  * Removes the indicated directory
  */
 
-static int
+int
 prmdir()
 {
     PWord v1;
@@ -559,20 +558,17 @@ pmkdir()
 		t2 != PI_INT)
 	PI_FAIL;
 
+#ifdef MacOS
+    if (mkdir(pathName) == -1)
+#else
     if (mkdir(pathName, v2) == -1)
+#endif
 	PI_FAIL;
 
     PI_SUCCEED;
 }
 
 
-#ifndef MAXPATHLEN
-#ifdef PATHSIZE
-#define MAXPATHLEN  PATHSIZE
-#else
-#define MAXPATHLEN  1024
-#endif
-#endif
 
 
 
@@ -906,13 +902,9 @@ canonicalize_pathname()
 }
 #endif /* CCANONP */
 
-static	long	get_file_modified_time	PARAMS(( char * ));
-static	int	isdir			PARAMS(( char * ));
-
-
-static long 
+long 
 get_file_modified_time(fname)
-    char *fname;
+    CONST char *fname;
 {
     struct stat buf;
 
@@ -926,9 +918,9 @@ get_file_modified_time(fname)
  * Returns 1 if fname is a directory, 0 otherwise.
  *
  */
-static int
+int
 isdir(fname)
-    char *fname;
+    CONST char *fname;
 {
     struct stat buf;
 
@@ -938,7 +930,8 @@ isdir(fname)
     return (buf.st_mode & S_IFDIR);
 }
 
-static int
+#ifndef MacOS
+int
 pgetpid()
 {
     PWord v1, vpid;
@@ -951,8 +944,10 @@ pgetpid()
     else
 	PI_FAIL;
 }
+#endif
 #endif /* FSACCESS */
 
+#endif /* (defined(UNIX) || (defined(MacOS) && defined(HAVE_GUSI) && !defined(__GO32__) && !defined(OS2) */
 
 /* *INDENT-OFF* */
 PI_BEGIN
@@ -983,4 +978,3 @@ init_fsutils()
     PI_INIT;
 }
 
-#endif /* defined(UNIX) && !defined(__GO32__)  && !defined(OS2) */

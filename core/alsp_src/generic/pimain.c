@@ -73,15 +73,20 @@ main(int argc, char ** argv)
     int   exit_status;
 
 #ifdef MacOS
-#ifdef HAVE_GUSI
+
 #ifdef MPW_TOOL
+    InitGraf((Ptr) &qd.thePort);
+    InitCursorCtl(NULL);
+#endif
+
+#ifdef HAVE_GUSI
         GUSISetup(GUSIwithAppleTalkSockets);
         GUSISetup(GUSIwithInternetSockets);
         GUSISetup(GUSIwithPAPSockets);
         GUSISetup(GUSIwithPPCSockets);
         GUSISetup(GUSIwithUnixSockets);
-#else
-        GUSIDefaultSetup();
+#ifndef MPW_TOOL
+	GUSISetup(GUSIwithSIOUXSockets);
 #endif
 #endif
 
@@ -95,9 +100,6 @@ main(int argc, char ** argv)
     printf("Avoid Control-D, because this will terminate the application.\n\n");
 #endif 
 
-#ifdef MPW_TOOL
-    InitCursorCtl(NULL);
-#endif
 
 #endif /* MacOS */
 
@@ -157,6 +159,7 @@ const char *PI_get_options(void)
     return getenv("ALS_OPTIONS");
 #endif
 }
+
 /*
  * PI_app_printf is called from the prolog environment to display error and
  * warning messages.  The first parameter, messtype, describes the type
@@ -237,7 +240,7 @@ void	PI_yield_time(void)
     long tick;
     tick = TickCount();
 #ifdef MPW_TOOL
-    SpinCursor(32);
+    SpinCursor(1);
 #endif
 #if defined(__MWERKS__) && !defined(MPW_TOOL)
     SIOUXHandleOneEvent(NULL);
@@ -254,7 +257,7 @@ void	PI_yield_time(void)
     last_yield = tick;
 }
 
-#ifdef __MWERKS__
+#if defined( __MWERKS__) && !defined(HAVE_GUSI)
 
 #ifdef MPW_TOOL
 #if __POWERPC__

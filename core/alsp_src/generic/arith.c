@@ -28,6 +28,7 @@
 
 #else  /* VMS */
 #ifdef MacOS
+#include <errno.h>
 #ifdef HAVE_GUSI
 #include <GUSI.h>
 #else
@@ -35,7 +36,6 @@
 #ifndef MPW_TOOL
 #include <unix.h>
 #endif
-#include <errno.h>
 #endif
 #else  /* MacOS */
 #include <errno.h>

@@ -11,8 +11,7 @@ schema([
 	afiles_c =	['disassem.c','icode1.c','icode2.c','wam.c'],
 	case(&(context_name),[
 		(mac: [afiles_68k_o =	['disassem.68k.o','icode1.68k.o','icode2.68k.o','wam.68k.o'],
-			afiles_ppc_o =	['disassem.ppc.o','icode1.ppc.o','icode2.ppc.o','wam.ppc.o'],
-			afiles_mpw_ppc_o =	['disassem.mpw_ppc.o','icode1.mpw_ppc.o','icode2.mpw_ppc.o','wam.mpw_ppc.o'] ]),
+			afiles_ppc_o =	['disassem.ppc.o','icode1.ppc.o','icode2.ppc.o','wam.ppc.o'] ]),
 
 		(_: afiles_o =	'$(afiles_c:.c=.' + &(object) + ')')
 		]),

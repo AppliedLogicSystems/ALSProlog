@@ -24,7 +24,7 @@
 #define MinorOSStr	"macintosh"
 #define MacOS		1
 
-//#define HAVE_GUSI
+#define HAVE_GUSI	1
 #define STDC_HEADERS	1
 
 #ifdef THINK_C
@@ -33,9 +33,9 @@
 #ifdef applec
 #define HAVE_FCNTL_H	1
 #endif
-#ifdef MPW_TOOL
-#define HAVE_FCNTL_H	1
-#endif
+//#ifdef MPW_TOOL
+//#define HAVE_FCNTL_H	1
+//#endif
 
 #define HAVE_STDARG_H	1
 #define HAVE_STDDEF_H	1
@@ -49,9 +49,9 @@
 
 #define HAVE_MEMMOVE	1
 
-#ifdef MPW_TOOL
-#define HAVE_RINT	1
-#endif
+//#ifdef MPW_TOOL
+//#define HAVE_RINT	1
+//#endif
 
 #define HAVE_SRAND	1
 
@@ -66,7 +66,10 @@
 // defs for GUSI
 #ifdef HAVE_GUSI
 #define HAVE_FCNTL_H	1
+#define HAVE_UNIXLIB	1
 #define HAVE_SOCKET		1
+#define BERKELEY_SOCKETS	1
+#define HAVE_SELECT		1
 #define HAVE_UNISTD_H	1
 #endif
 //#define HAVE_SYS_TYPES_H	1

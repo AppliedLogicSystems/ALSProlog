@@ -554,6 +554,8 @@ obp_pop()
 
 #endif	/* OBP */
 
+#if 0
+
 #ifndef MacOS
 
 static	long	get_file_modified_time	PARAMS(( char * ));
@@ -621,6 +623,8 @@ isdir(fname)
 }
 
 #endif /* not MacOS */
+
+#endif /* 0000 */
 
 
 

@@ -1,5 +1,5 @@
 /*===========================================================================*
- |              fsunix.c
+ |              fsmac.c
  |      Copyright (c) 1991-1994 Applied Logic Systems, Inc.
  |
  |      -- File System Access & Manipulation -- Mac
@@ -19,15 +19,76 @@
 
 #ifdef MacOS
 
-#ifdef HAVE_GUSI
+#include <Processes.h>
+#include <ctype.h>
+#include <limits.h>
 #include <GUSI.h>
 
-static Boolean MatchName(const char * name, const char * pattern)
+int absolute_pathname(const char *name)
+{    
+    return *name != ':' && (strchr(name, ':') != NULL);
+}
+
+/* ceh - I'm not really sure what cononicalize_pathname does, or wether it really applies
+   on the Mac.  This function is a NOP. */
+static int canonicalize_pathname(void)
+{
+    PWord v1, v2, vp;
+    int   t1, t2, tp;
+    char *inpath;
+    char *outpath;
+    char *filename;
+
+    PI_getan(&v1, &t1, 1);
+    PI_getan(&v2, &t2, 2);
+
+    if (!getstring((UCHAR **)&inpath, v1, t1))
+	PI_FAIL;
+
+    filename = inpath;
+    outpath = "";
+    
+    if (filename) {
+	int plen = strlen(outpath);
+	char *hs;
+	PI_allocuia(&vp, &tp, (int)(plen+strlen(filename)+1));
+	hs = PI_getuianame(0,vp,0);
+	memcpy(hs,outpath,(size_t)plen);
+	strcpy(hs+plen,filename);
+    }
+    else
+	PI_makeuia(&vp, &tp, outpath);
+
+    if (PI_unify(v2, t2, vp, tp))
+	PI_SUCCEED;
+    else
+	PI_FAIL;
+}
+
+int pgetpid(void)
+{
+    PWord v1, vpid;
+    int   t1, tpid;
+	ProcessSerialNumber PSN;
+
+    PI_getan(&v1, &t1, 1);
+	
+	if(GetCurrentProcess(&PSN) != noErr) PI_FAIL;
+	
+	PI_makedouble(&vpid, &tpid, (double)PSN.highLongOfPSN * ULONG_MAX + (double)PSN.lowLongOfPSN);
+
+    if (PI_unify(v1, t1, vpid, tpid))
+	PI_SUCCEED;
+    else
+	PI_FAIL;
+}
+
+static int match(const char * name, const char * pattern)
 {
     while (*pattern) {
 	switch (*pattern) {
 	case '\\':
-	case '¶':
+	case '\0xb6':
 	   if (!*++pattern)
 			--pattern;	// special case at end of pattern
 	// Fall through
@@ -45,8 +106,8 @@ static Boolean MatchName(const char * name, const char * pattern)
 			
 	    break;
 	case '*':
-	case 'Å':
-	    while (!MatchName(name, pattern+1)) {
+	case '\0xc5':
+	    while (!match(name, pattern+1)) {
 		if (!*name)
 		    return false;	// "a", "*b"
 		++name;			// "ba", "*a"  or "ba", "*b"
@@ -58,458 +119,23 @@ static Boolean MatchName(const char * name, const char * pattern)
     return !*pattern && !*name;
 }
 
-/*
- * $getDirEntries/3 (--> getDirEntries/3 )
- * $getDirEntries(DirName, FilePattern, List)
- *
- * Input:
- *	DirName		-- UIA giving a directory path
- *	FilePattern	-- UIA giving a regular expression created via
- *			   make_reg_exp/2;
- * Output:
- *	List		-- List of UIAs giving file names of files residing
- *                         in DirName and matching FilePattern
- *				(cf. directory/3 in fsunix.pro)
- */
+#define PATTERN_MAX	100
 
-static int
-getDirEntries()
+static char re_comp_pattern[PATTERN_MAX];
+
+char *re_comp(const char *pattern)
 {
-    PWord v1, v2, v3;
-    int   t1, t2, t3;
-    char *dirName, *pattern;
-    DIR  *dirp;
-    struct dirent *dirEntry;
-    PWord consCell, head, sym, nil;
-    int   consType, headType, symType, nilType;
-#ifdef HAVE_REGCMP
-    char *regexComp;
-#endif
-
-    PI_getan(&v1, &t1, 1);
-    PI_getan(&v2, &t2, 2);
-    PI_getan(&v3, &t3, 3);
-
-    /* Make sure file name & pattern are atoms or UIAs */
-    if (!getstring((UCHAR **)&dirName, v1, t1)
-     || !getstring((UCHAR **)&pattern, v2, t2))
-	PI_FAIL;
-
-#ifdef HAVE_REGCMP
-    if ((regexComp = regcmp(pattern, (char *) 0)) == NULL)
-	{
-		PI_FAIL;
-	}
-#else
-#ifndef MacOS
-    if (re_comp(pattern) != NULL)
-	{
-		PI_FAIL;
-	}
-#endif
-#endif
-
-    dirp = opendir(dirName);
-	if (dirp == NULL)
-	{
-#ifdef HAVE_REGCMP
-		free(regexComp);
-#endif
-		PI_FAIL;
-	}
-
-    for (dirEntry = readdir(dirp); dirEntry != NULL; dirEntry = readdir(dirp)) {
-#ifdef HAVE_REGCMP
-	if (regex(regexComp, dirEntry->d_name) != NULL)
-#else
-#ifdef MacOS
-	if (MatchName(dirEntry->d_name, pattern))
-#else
-	if (re_exec(dirEntry->d_name) == 1)
-#endif
-#endif
-	{
-	    PI_makelist(&consCell, &consType);
-	    if (!PI_unify(v3, t3, consCell, consType)) {
-#ifdef HAVE_REGCMP
-		free(regexComp);
-#endif
-    		closedir(dirp);
-		PI_FAIL;
-	    }
-	    PI_gethead(&head, &headType, consCell);
-	    PI_makeuia(&sym, &symType, dirEntry->d_name);
-	    if (!PI_unify(head, headType, sym, symType)) {
-#ifdef HAVE_REGCMP
-		free(regexComp);
-#endif
-    		closedir(dirp);
-		PI_FAIL;
-	    }
-	    PI_gettail(&v3, &t3, consCell);
-	}
-    }
-    closedir(dirp);
-
-#ifdef HAVE_REGCMP
-    free(regexComp);
-#endif
-
-    PI_makesym(&nil, &nilType, "[]");
-
-    if (!PI_unify(v3, t3, nil, nilType))
-	PI_FAIL;
-
-
-    PI_SUCCEED;
+	strncpy(re_comp_pattern, pattern, PATTERN_MAX-1);
+	if (strlen(pattern) >= PATTERN_MAX) return re_comp_pattern;
+	else return NULL;
 }
 
-/*
- * $getFileStatus/2 (--> getFileStatus/2 )
- * $getFileStatus(FilePath, StatusTerm)
- *
- * Input:
- *	FilePath	-- UIA giving a path to file;
- * Output:
- *	StatusTerm	-- a 5-ary term providing info about the file:
- *
- *		fileStatus(FileType,ModTime,OwnPermiss,ByteSize,Blocks)
- */
-
-static int getFileStatus(void)
+int re_exec(const char *s)
 {
-    PWord v1, v2, vtime;
-    int   t1, t2, ttime;
-    char *pathName;
-    struct stat fileStats;
-    PWord sTag, pstructure, arg;
-    int   sTagType, pstructureType, argType;
-    int   fileMode, fileType, ownerPermiss;
-
-    PI_getan(&v1, &t1, 1);
-    PI_getan(&v2, &t2, 2);
-
-    	/* Make sure file name & pattern are atoms or UIAs */
-    if (!getstring((UCHAR **)&pathName, v1, t1))
-	PI_FAIL;
-
-    if (lstat(pathName, &fileStats) == -1)
-	PI_FAIL;
-
-    fileMode = fileStats.st_mode;
-
-    PI_makesym(&sTag, &sTagType, "fileStatus");
-    PI_makestruct(&pstructure, &pstructureType, sTag, 5);
-    if (!PI_unify(v2, t2, pstructure, pstructureType))
-	PI_FAIL;
-
-    if (S_ISDIR(fileMode))
-	fileType = 1;
-    else if (S_ISCHR(fileMode))
-	fileType = 2;
-    else if (S_ISBLK(fileMode))
-	fileType = 3;
-    else if (S_ISREG(fileMode))
-	fileType = 4;
-    else if (S_ISLNK(fileMode))
-	fileType = 5;
-    else if (S_ISSOCK(fileMode))
-	fileType = 6;
-    else if (S_ISFIFO(fileMode))
-	fileType = 7;
-    else
-	fileType = 0;
-
-    ownerPermiss = (((fileMode & S_IRUSR) > 0) << 2) |
-	(((fileMode & S_IWUSR) > 0) << 1) |
-	((fileMode & S_IXUSR) > 0);
-
-    /* File Type: */
-    PI_getargn(&arg, &argType, pstructure, 1);
-    if (!PI_unify(arg, argType, fileType, PI_INT))
-	PI_FAIL;
-
-    /* File Mod Time: */
-    PI_getargn(&arg, &argType, pstructure, 2);
-    PI_makedouble(&vtime, &ttime, (double) fileStats.st_mtime);
-    if (!PI_unify(arg, argType, vtime, ttime))
-	PI_FAIL;
-
-    /* File Owner Permissions: */
-    PI_getargn(&arg, &argType, pstructure, 3);
-    if (!PI_unify(arg, argType, ownerPermiss, PI_INT))
-	PI_FAIL;
-
-    /* File Byte Size: */
-    PI_getargn(&arg, &argType, pstructure, 4);
-    if (!PI_unify(arg, argType, fileStats.st_size, PI_INT))
-	PI_FAIL;
-
-    /* File Blocks Allocated: */
-    PI_getargn(&arg, &argType, pstructure, 5);
-    if (!PI_unify(arg, argType, fileStats.st_blocks, PI_INT))
-	PI_FAIL;
-
-    PI_SUCCEED;
+	return match(s, re_comp_pattern);
 }
 
-
-/*
- * read_link/2
- * read_link(SourcePath, ResultPath)
- *
- * Input:
- *	SourcePath	-- UIA giving a path to file which is a symbolic link;
- *			   Assumes we have already determined that SourcePath
- *			   is a symbolic link
- * Output:
- *	ResultPath	-- path to the file = value of the link
- */
-
-static int
-read_link()
-{
-    PWord v1, v2;
-    int   t1, t2;
-    char *pathName;
-    PWord sym;
-    int   symType;
-    int   pathSize;
-    char  buffer1[1024];
-
-    PI_getan(&v1, &t1, 1);
-    PI_getan(&v2, &t2, 2);
-
-    /* Make sure SourcePath name is an atom or UIA */
-    if (!getstring((UCHAR **)&pathName, v1, t1))
-	PI_FAIL;
-
-    pathSize = readlink(pathName, buffer1, 1024);
-	if (pathSize == -1)
-	PI_FAIL;
-	buffer1[pathSize] = 0;
-
-    PI_makeuia(&sym, &symType, buffer1);
-    if (!PI_unify(v2, t2, sym, symType))
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
-
-/*
- * make_symlink/2
- * make_symlink(SourcePath, LinkPath)
- *
- * Inputs:
- *	SourcePath	-- UIA giving a path to file which is a to be the
- *			   target of the symbolic link;
- *	LinkPath	-- path to the file which will be the symbolic link
- * Note:
- *	The call
- *		make_symlink(foo,bar)
- *	will fail;  one needs a more complete path, such as:
- *		make_symlink('./foo','./bar')
- */
-
-static int
-make_symlink()
-{
-    PWord v1, v2;
-    int   t1, t2;
-    char *pathName1, *pathName2;
-
-    PI_getan(&v1, &t1, 1);
-    PI_getan(&v2, &t2, 2);
-
-    /* Make sure SourcePath name is an atom or UIA */
-    if (!getstring((UCHAR **)&pathName1, v1, t1)
-     || !getstring((UCHAR **)&pathName2, v2, t2))
-	PI_FAIL;
-
-    if (symlink(pathName1, pathName2))
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
-
-/*
- * comp_file_times/2       (--> pcmp_fs/2)
- * comp_file_times(+File1, +File2)
- *
- * Succeeds if the last modification time of File1 is earlier than the
- * last modification time of File2.
- */
-
-static int
-pcmp_fs()
-{
-    PWord v1, v2;
-    int   t1, t2;
-    char *pathName1, *pathName2;
-    struct stat fileStats1, fileStats2;
-
-    PI_getan(&v1, &t1, 1);
-    PI_getan(&v2, &t2, 2);
-
-    /* Make sure file name & pattern are atoms or UIAs */
-    if (!getstring((UCHAR **)&pathName1, v1, t1)
-     || !getstring((UCHAR **)&pathName2, v2, t2))
-	PI_FAIL;
-
-    if ((stat(pathName1, &fileStats1) == -1) ||
-	(stat(pathName2, &fileStats2) == -1))
-	PI_FAIL;
-
-    if (fileStats1.st_mtime < fileStats2.st_mtime)
-	PI_SUCCEED;
-
-    PI_FAIL;
-}
-
-/*
- * rmdir/1 (--> prmdir/1 )
- * rmdir(+DirPath)
- *
- * Removes the indicated directory
- */
-
-static int
-prmdir()
-{
-    PWord v1;
-    int   t1;
-    char *pathName;
-
-    PI_getan(&v1, &t1, 1);
-
-    /* Make sure file name & pattern are atoms or UIAs */
-    if (!getstring((UCHAR **)&pathName, v1, t1))
-	PI_FAIL;
-
-    if (rmdir(pathName) == -1)
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
-
-
-/*
- *      mkdir/2 (--> pmkdir/2 )
- *      mkdir(+DirPath,+Permissions)
- *
- *      Creates the indicated directory.
- */
-
-static int pmkdir(void)
-{
-    PWord v1,v2;
-    int   t1,t2;
-    char *pathName;
-
-    PI_getan(&v1, &t1, 1);
-    PI_getan(&v2, &t2, 2);
-
-    /* Make sure file name & pattern are atoms or UIAs */
-    if ((!getstring((UCHAR **)&pathName, v1, t1)) ||
-		t2 != PI_INT)
-	PI_FAIL;
-
-#ifdef MacOS
-    if (mkdir(pathName) == -1)
-#else
-    if (mkdir(pathName, v2) == -1)
-#endif
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
-
-/*
- * Returns 1 if fname is a directory, 0 otherwise.
- *
- */
-int isdir(CONST char *fname)
-{
-    struct stat buf;
-
-    if (stat(fname, &buf) == -1)
-	return (0);
-
-    return (buf.st_mode & S_IFDIR);
-}
-
-long 
-get_file_modified_time(fname)
-    char *fname;
-{
-    struct stat buf;
-
-    if (stat(fname, &buf) == -1 || buf.st_mode & S_IFDIR)
-	return (long) 0;
-
-    return buf.st_mtime;
-}
-
-
-/*
- * rmdir/1 (--> prmdir/1 )
- * rmdir(+DirPath)
- *
- * Removes the indicated directory
- */
-
-static int prmdir(void)
-{
-    PWord v1;
-    int   t1;
-    char *pathName;
-
-    PI_getan(&v1, &t1, 1);
-
-    /* Make sure file name & pattern are atoms or UIAs */
-    if (!getstring((UCHAR **)&pathName, v1, t1))
-	PI_FAIL;
-
-    if (rmdir(pathName) == -1)
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
-
-static int pgetpid(void)
-{
-    PWord v1, vpid;
-    int   t1, tpid;
-
-    PI_getan(&v1, &t1, 1);
-#ifdef MacOS
-    {
-	ProcessSerialNumber PSN;
-	
-	if(GetCurrentProcess(&PSN) != noErr) PI_FAIL;
-	
-	PI_makedouble(&vpid, &tpid, (double)PSN.highLongOfPSN * ULONG_MAX + (double)PSN.lowLongOfPSN);
-    }
-#else
-    PI_makedouble(&vpid, &tpid, (double) getpid());
-#endif
-    if (PI_unify(v1, t1, vpid, tpid))
-	PI_SUCCEED;
-    else
-	PI_FAIL;
-}
-
-
-
-
-
-
-
-
-
-
-
-#else /* GUSI */
+#ifndef HAVE_GUSI
 
 #include <ctype.h>
 
@@ -1177,40 +803,6 @@ pcmp_fs(void)
     PI_FAIL;
 }
 
-
-#endif /* HAVE_GUSI */
-
-
-
-/* *INDENT-OFF* */
-PI_BEGIN
-    PI_PDEFINE("getcwd",1,pgetcwd,"_pgetcwd")
-    PI_PDEFINE("chdir",1,pchdir,"_pchdir")
-    PI_PDEFINE("unlink", 1, punlink, "_punlink")
-
-#ifdef HAVE_GUSI
-    PI_PDEFINE("$getDirEntries", 3, getDirEntries, "_getDirEntries")
-    PI_PDEFINE("$getFileStatus",2,getFileStatus,"_getFileStatus") 
-    PI_PDEFINE("comp_file_times", 2, pcmp_fs, "_pcmp_fs")
-    PI_PDEFINE("rmdir", 1, prmdir, "_prmdir")
-    PI_PDEFINE("mkdir", 2, pmkdir, "_pmkdir")
-
-    PI_PDEFINE("read_link", 2, read_link, "_read_link")
-    PI_PDEFINE("make_symlink", 2, make_symlink, "_make_symlink")
-#else
-    PI_PDEFINE("$getFileStatus",2,getFileStatus,"_getFileStatus") 
-    PI_PDEFINE("comp_file_times", 2, pcmp_fs, "_pcmp_fs")
-#endif
-
-    PI_PDEFINE("canonicalize_pathname", 2, canonicalize_pathname, "_canonicalize_pathname")
-    PI_PDEFINE("getpid",1,pgetpid,"_pgetpid")
-PI_END
-/* *INDENT-ON* */
-
-void init_fsutils(void)
-{
-    PI_INIT;
-}
-
+#endif /* not HAVE_GUSI */
 
 #endif /* MacOS */
