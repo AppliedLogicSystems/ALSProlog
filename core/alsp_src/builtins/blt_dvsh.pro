@@ -619,10 +619,7 @@ do_special_processing([Item | SFiles])
 
 special_cl_processing(prolog_project, File, NoSuffixFile, Ext)
 	:-!,
-	canon_path(File, CanonSrcPath),
-	exists_file(CanonSrcPath),
-	builtins:get_primary_manager(ALSIDEMGR),
-	send(ALSIDEMGR, open_project_file(CanonSrcPath)).
+	tcl_call(shl_tcli, [tkOpenDocument, File], _).
 
 special_cl_processing(prolog_source, File, NoSuffixFile, Ext)
 	:-!,

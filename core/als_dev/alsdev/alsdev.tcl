@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.83 1999/03/07 20:46:56 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.84 1999/03/09 22:17:13 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -1662,7 +1662,11 @@ proc tkOpenDocument args {
 		if {$tcl_platform(platform) == "windows"} {
 			set file [file attributes "$file" -longname]
 		}
-		document.open $file
+		if { [file extension "$file"] == ".ppj" } then {
+			prolog call alsdev launch_project -atom $file
+		} else {
+			document.open $file
+		}
 	}
 }
 

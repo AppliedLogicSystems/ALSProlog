@@ -351,36 +351,54 @@ check_ppj(InitFilePath, FilePath, State)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%% 		OPEN PROJECT		%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+export launch_project/1.
+launch_project(File)
+	:-
+	canon_path(File, CanonSrcPath),
+	exists_file(CanonSrcPath),
+	builtins:get_primary_manager(ALSIDEMGR),
+	send(ALSIDEMGR, open_this_project(CanonSrcPath)).
+
+als_ide_mgrAction(open_this_project(FilePath), ALSIDEObject)
+	:-
+	accessObjStruct(cur_project,ALSIDEObject,PrevProject),
+	open_project(PrevProject, FilePath, ALSIDEObject).
 
 als_ide_mgrAction(open_project, ALSIDEObject)
 	:-
 	accessObjStruct(cur_project,ALSIDEObject,PrevProject),
-	open_project(PrevProject, ALSIDEObject).
+	open_project(PrevProject, nil, ALSIDEObject).
 
-open_project(nil, ALSIDEObject)
+open_project(nil, FilePath, ALSIDEObject)
 	:-!,
-	proceed_open_another_project(ALSIDEObject).
+	proceed_open_another_project(FilePath, ALSIDEObject).
 
-open_project(PrevProject, ALSIDEObject)
+open_project(PrevProject, FilePath, ALSIDEObject)
 	:-
 	accessObjStruct(title,PrevProject,ProjName),
 	sprintf(atom(Msg), 'Close project %t ?', [ProjName]),
 	yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer),
-	close_old_open_another_project(Answer, PrevProject, ALSIDEObject).
+	close_old_open_another_project(Answer, PrevProject, FilePath, ALSIDEObject).
 
-close_old_open_another_project('No', PrevProject, ALSIDEObject)
+close_old_open_another_project('No', PrevProject, FilePath, ALSIDEObject)
 	:-!.
 
-close_old_open_another_project(Answer, PrevProject, ALSIDEObject)
+close_old_open_another_project(Answer, PrevProject, FilePath, ALSIDEObject)
 	:-
 	send(PrevProject, close_project),
-	proceed_open_another_project(ALSIDEObject).
+	proceed_open_another_project(FilePath, ALSIDEObject).
 
-proceed_open_another_project(ALSIDEObject)
-	:-
+proceed_open_another_project(nil, ALSIDEObject)
+	:-!,
 	tcl_call(shl_tcli, [select_project_file], FileSpec),
 	cont_open_another_project(FileSpec, ALSIDEObject, _).
 
+proceed_open_another_project(FilePath, ALSIDEObject)
+	:-
+	split_path(FilePath, PathList),
+	dreverse(PathList, [File | RDirL]),
+	dreverse(RDirL, DirList),
+	cont_open_another_project([File, DirList], ALSIDEObject, _).
 
 als_ide_mgrAction(open_project_file(FilePath), ALSIDEObject)
 	:-
