@@ -877,8 +877,7 @@ load_builtins(BDir, File)
 	'$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
 %pbi_write(FileAndPath), pbi_nl,pbi_ttyflush,
-%	(resource_load(File) ; '$load'(FileAndPath, 0)).
-	'$load'(FileAndPath, 0).
+	(resource_load(File) ; '$load'(FileAndPath, 0)).
 
 consult_builtins(File) 
 	:-
@@ -897,8 +896,7 @@ consult_builtins(BDir, File)
 %pbi_write(consult_builtins=FileAndPath), pbi_nl,pbi_ttyflush,
 	'$atom_concat'(FileAndPath,'.pro',FilePathPro),
 	'$atom_concat'(FileAndPath,'.obp',FilePathObp),
-%	(resource_load(File) ;load4(FilePathPro,FilePathObp,1,obp,_)).
-	load4(FilePathPro,FilePathObp,1,obp,_).
+	(resource_load(File) ;load4(FilePathPro,FilePathObp,1,obp,_)).
 
 :-	auto_use(sio).
 :-	auto_use(debugger).
