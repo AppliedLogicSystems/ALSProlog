@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.48 1998/08/18 19:05:40 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.49 1998/08/23 18:31:39 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -56,6 +56,8 @@ proc send_prolog_t {Obj Msg Type} {
 	global proenv
 	prolog call $proenv(dflt_mod) send -number $proenv($Obj) -$Type $Msg
 }
+
+										 
 										 
 set argc 0
 set argv ""
