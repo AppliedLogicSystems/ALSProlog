@@ -530,27 +530,6 @@ proc debugwin.open {}  { document.open }
 proc debugwin.close {w} { bell }
 proc debugwin.save {w}  { bell }
 
-		# edit menu:
-proc listener.undo {w}  { bell }
-proc listener.cut {w}   { bell }
-proc listener.copy {w} { 
-}
-proc listener.paste {w} {
-}
-proc listener.select_all {w} {
-}
-
-proc debugwin.undo {w}  { bell }
-proc debugwin.cut {w}   { bell }
-proc debugwin.copy {w} { 
-}
-proc debugwin.paste {w} {
-}
-proc debugwin.select_all {w} {
-}
-
-
-
 
 #################################################
 #####	Utilities & Environment Settings       ##

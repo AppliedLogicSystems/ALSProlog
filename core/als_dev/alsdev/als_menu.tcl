@@ -178,3 +178,73 @@ proc add_help_menu {menubar} {
 
 }
 
+		# listener -- edit menu:
+proc listener.cut {xw} {
+	set w .topals
+ 	if {![catch {set data [$w.text get sel.first sel.last]}]} {
+	    clipboard clear -displayof $w
+	    clipboard append -displayof $w $data
+		$w.text delete sel.first sel.last
+	}
+}
+
+proc listener.copy {xw} {
+	set w .topals
+ 	if {![catch {set data [$w.text get sel.first sel.last]}]} {
+	    clipboard clear -displayof $w
+	    clipboard append -displayof $w $data
+	}
+}
+
+proc listener.paste {xw} {
+	set w .topals
+	catch {$w.text delete sel.first sel.last}
+	$w.text insert insert [selection get -displayof $w -selection CLIPBOARD]
+	set proenv($w,dirty) true
+}
+
+proc listener.clear {xw} {
+	set w .topals
+	global array proenv
+	catch {$w.text delete sel.first sel.last}
+	set proenv($w,dirty) true
+}
+
+proc listener.select_all {xw} {
+	set w .topals
+	$w.text tag add sel 1.0 end
+}
+
+proc debugwin.undo {w}  { bell }
+proc debugwin.cut {xw}   { 
+	set w .debugwin
+ 	if {![catch {set data [$w.text get sel.first sel.last]}]} {
+	    clipboard clear -displayof $w
+	    clipboard append -displayof $w $data
+		$w.text delete sel.first sel.last
+	}
+}
+proc debugwin.copy {w} { 
+	set w .debugwin
+ 	if {![catch {set data [$w.text get sel.first sel.last]}]} {
+	    clipboard clear -displayof $w
+	    clipboard append -displayof $w $data
+	}
+}
+proc debugwin.paste {xw} { 
+	set w .debugwin
+	global array proenv
+	catch {$w.text delete sel.first sel.last}
+	set proenv($w,dirty) true
+}
+proc debugwin.clear {xw} {
+	set w .debugwin
+	global array proenv
+	catch {$w.text delete sel.first sel.last}
+	set proenv($w,dirty) true
+}
+proc debugwin.select_all {xw} {
+	set w .debugwin
+	$w.text tag add sel 1.0 end
+}
+
