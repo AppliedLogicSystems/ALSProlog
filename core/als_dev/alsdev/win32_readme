@@ -22,7 +22,7 @@ Open win32_alsdev.mcp, and make "Win32 Build" to create "ALS Prolog Base.exe"
 
 Create a new image from "ALS Prolog Base.exe" with the following command:
 
-save_image('ALS Prolog', [select_lib(builtins, [debugger,blt_dvsh]),
+save_image('ALS Prolog', [select_lib(builtins, [debugger]),
 	select_lib(library,[miscterm,msc_ioin,strctutl,strings,tcl_sppt,tk_alslib, listutl1])]).
 
 
