@@ -5,6 +5,4 @@
 // Icon
 //
 
-#define ALSPROICON            400
-
-ALSPROICON                 ICON    DISCARDABLE     "ALSPRO.ICO"
+ALSPRO                 ICON    DISCARDABLE     "ALSPRO.ICO"
