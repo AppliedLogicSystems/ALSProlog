@@ -1,7 +1,6 @@
 Welcome to the ALS Prolog Source Tree
 =====================================
 
-
 The ALS Prolog source tree is divided into core and peripheral
 directories.  The core directory contains the source for the Prolog
 compiler, runtime, and IDE.  The peripheral directories contain manuals,
