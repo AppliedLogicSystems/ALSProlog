@@ -16,10 +16,9 @@
 
 #include "alspi.h"
 #include "new_alspi.h"
-
-#ifdef UNIX
 #include "version.h"
 
+#ifdef UNIX
 char *version[2] = {
   "@(#)(c) 1997 Applied Logic Systems, Inc.",
   "@(#)ALS Prolog Tcl-Tk Interface " VERSION_STRING " for " UNIX_NAME,
@@ -528,7 +527,7 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 	Tcl_SetHashValue(entry, interp);
 
 
-	if (!ALSProlog_Package_Init(interp, w)) {
+	if (ALSProlog_Package_Init(interp, w) != TCL_OK) {
 		AP_SetError(w, AP_NewSymbolFromStr(w, "tcl_create_command_error"));
 		goto error_delete;
 	}
