@@ -18,6 +18,7 @@ global DebugResponse
 proc vTclWindow.debugwin {base} {
 	global array proenv
 	global tcl_platform
+	global DebugResponse
 
     set base .debugwin
     if {[winfo exists $base]} {
@@ -42,79 +43,14 @@ proc vTclWindow.debugwin {base} {
 
 	bind $base <Configure> "debugwin_configure_event $base %h %w %W"
 
-    frame $base.cpd17 \
-        -borderwidth 1 -relief sunken 
-
 	menu $base.menubar -tearoff 0 -relief sunken
 
-	if {$tcl_platform(platform) == "macintosh"} {
-		menu $base.menubar.apple -tearoff 0
-		$base.menubar.apple add command -label "About ALS Prolog…" -command {Window show .about ; raise .about}
-		$base.menubar add cascade -menu $base.menubar.apple
-		$base.menubar add cascade -menu .topals.mmenb.file -label "File"
-		$base.menubar add cascade -menu .topals.mmenb.edit -label "Edit"
-		$base.menubar add cascade -menu .topals.mmenb.project -label "Project"
-		$base.menubar add cascade -menu .topals.mmenb.settings -label "Settings"
-		$base.menubar add cascade -menu .topals.mmenb.tools -label "Tools"
-	}
-	###########
-	# Spy
-	###########
-	menu $base.menubar.spy -relief raised
-	$base.menubar add cascade -label Spy -menu $base.menubar.spy
-    $base.menubar.spy add checkbutton \
-        -label {Spy [on predicate]} \
-		-command exec_toggle_spywin \
-		-variable proenv(spywin)
-    $base.menubar.spy add command \
-        -label {Nospy [on predicate]} -state disabled
-    $base.menubar.spy add command \
-        -label {Spy When} -state disabled
-    $base.menubar.spy add separator
-    $base.menubar.spy add command \
-        -label {Exit Debugger} -command exit_debugger
-
-	###########
-	# Settings
-	###########
-	menu $base.menubar.settings -relief raised
-	$base.menubar add cascade -label Settings -menu $base.menubar.settings
-    $base.menubar.settings add command \
-        -label {Set Print Depth} 
-	$base.menubar.settings add command \
-		-label {Toggle Flat Print} -command { set DebugResponse Bm }
-    $base.menubar.settings add cascade \
-        -label {Leashing}  \
-		-menu $base.menubar.settings.leashing
-	menu $base.menubar.settings.leashing -relief raised
-	$base.menubar.settings.leashing add checkbutton \
-        -label {call} \
-		-command {exec_toggle_leash call} \
-		-variable proenv(leash,call)
-	$base.menubar.settings.leashing add checkbutton \
-        -label {exit} \
-		-command {exec_toggle_leash exit} \
-		-variable proenv(leash,exit)
-	$base.menubar.settings.leashing add checkbutton \
-        -label {redo} \
-		-command {exec_toggle_leash redo} \
-		-variable proenv(leash,redo)
-	$base.menubar.settings.leashing add checkbutton \
-        -label {fail} \
-		-command {exec_toggle_leash fail} \
-		-variable proenv(leash,fail)
-
-	###########
-	# Help
-	###########
-	if {$tcl_platform(platform) != "macintosh"} {
-		menu $base.menubar.help -relief raised
-		$base.menubar add cascade -label Help -menu $base.menubar.help
-	}
-	
-	global DebugResponse
-
-set DBBpady 2
+	add_default_menus .$base.menubar
+	add_file_menu $base.menubar debugwin $base
+	add_edit_menu $base.menubar debugwin $base
+	add_prolog_menu $base.menubar debugwin $base
+	add_tools_menu $base.menubar debugwin $base
+	add_help_menu $base.menubar
 
     frame $base.buttons \
         -borderwidth 1 -relief sunken
@@ -146,15 +82,12 @@ set DBBpady 2
         -padx 2 -text stack \
 		-command { set DebugResponse Bt }
 
-    button $base.buttons.abort \
-        -text abort -underline 0 -padx 4 \
-        -command { set DebugResponse Ba }
-    button $base.buttons.break \
-        -text break -underline 0 -padx 4 \
-		-command { set DebugResponse Bb }
-    button $base.buttons.exit \
-        -text exit -underline 0 -padx 4 \
-		-command { set DebugResponse Be }
+#    button $base.buttons.abort \
+#        -text abort -underline 0 -padx 4 \
+#        -command { set DebugResponse Ba }
+#    button $base.buttons.break \
+#        -text break -underline 0 -padx 4 \
+#		-command { set DebugResponse Bb }
 
     frame $base.debug_status \
         -borderwidth 1 -relief sunken 
@@ -179,9 +112,9 @@ set DBBpady 2
 	        -borderwidth 1 -command {.debugwin.text yview} -orient vert 
 	}
     text $base.text \
-		-background $proenv(debugwin,background) \
-		-foreground $proenv(debugwin,foreground) \
-		-font $proenv(debugwin,font) \
+		-background $proenv(.debugwin,background) \
+		-foreground $proenv(.debugwin,foreground) \
+		-font $proenv(.debugwin,font) \
         -width 40 -yscrollcommand {.debugwin.vsb set} 
 
     if {$tcl_platform(platform) == "macintosh"} {
@@ -210,12 +143,7 @@ set DBBpady 2
         -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.stack_trace \
         -anchor center -expand 0 -fill none -side left 
-    pack $base.buttons.exit \
-        -anchor center -expand 0 -fill none -side right 
-    pack $base.buttons.break \
-        -anchor center -expand 0 -fill none -side right 
-    pack $base.buttons.abort \
-        -anchor center -expand 0 -fill none -side right 
+
     pack $base.debug_status \
         -anchor center -expand 0 -fill x -side top 
     pack $base.debug_status.port_label \
@@ -360,9 +288,9 @@ proc vTclWindow.debug_source_trace {base Title} {
 	        -orient vert 
 	}
     text $base.textwin.text \
-		-background $proenv(debugwin,background) \
-		-foreground $proenv(debugwin,foreground) \
-		-font $proenv(debugwin,font) \
+		-background $proenv(.debugwin,background) \
+		-foreground $proenv(.debugwin,foreground) \
+		-font $proenv(.debugwin,font) \
         -width 8 -yscrollcommand [list $base.textwin.vsb set] 
 
     if {$tcl_platform(platform) == "macintosh"} {

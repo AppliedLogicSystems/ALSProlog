@@ -49,8 +49,8 @@ set proenv(defstr_ld)			false
 
 set proenv(debugwin_button,background)	#cee8e6
 set proenv(interrupt_button,foreground)	#ff0000
-set proenv(topals,background)       #d9d9d9
-set proenv(topals,font) {user 10 normal}
+set proenv(.topals,background)       #d9d9d9
+set proenv(.topals,font) {user 10 normal}
 set proenv(debugwin,font)   {user 10 normal}
 set proenv(edit,font)       {user 10 normal}
 
@@ -132,9 +132,17 @@ proc grab_defaults {Win} {
 
 proc establish_defaults {} {
     text .tmp_test_text -height 2 -width 2 
-	set TextDEFAULTS [grab_defaults .tmp_test_text]
+	set Window .tmp_test_text
+	set Background [$Window cget -background ]
+	set Foreground [$Window cget -foreground ]
+	set SelectBackground [$Window cget -selectbackground ]
+	set SelectForeground [$Window cget -selectforeground ]
+	set Font [$Window cget -font ]
+	set Tabs [$Window cget -tabs]
 	destroy .tmp_test_text
-	prolog call alsdev alsdev_default_setup -list $TextDEFAULTS
+
+	set Vals [list $Background $Foreground $SelectBackground $SelectForeground $Font $Tabs]
+	prolog call alsdev alsdev_default_setup -list $Vals
 }
 
 proc set_proenv {Left Right Value} {
@@ -145,12 +153,12 @@ proc set_proenv {Left Right Value} {
 proc return_proenv_defaults {} {
 	global array proenv
 	lappend Defs \
-		$proenv(topals,background) \
-		$proenv(topals,foreground) \
-		$proenv(topals,selectbackground) \
-		$proenv(topals,selectforeground) \
-		$proenv(topals,font) \
-		$proenv(topals,tabs) \
+		$proenv(.topals,background) \
+		$proenv(.topals,foreground) \
+		$proenv(.topals,selectbackground) \
+		$proenv(.topals,selectforeground) \
+		$proenv(.topals,font) \
+		$proenv(.topals,tabs) \
 
 	return $Defs
 }
@@ -401,16 +409,6 @@ proc copy_paste_text { TxtWin } {
 	focus $TxtWin
 }
 
-proc reconsult { } {
-	set file [tk_getOpenFile \
-		-defaultextension pro \
-		-title "Consult File" \
-		-filetypes {{"Prolog Files" {.pro .pl } } {{All Files} {*} } } ]
-	if { "$file"== "" } then { return }
-	prolog call alsdev do_reconsult -atom $file
-	insert_prompt  .topals.text "\n?-" 
-}
-
 proc source_tcl { } {
 	set file [tk_getOpenFile \
 		-defaultextension tcl \
@@ -468,6 +466,28 @@ proc mk_labeled_option_button { Label ParentWin Vals TopVal GlblVar } {
 	pack $Frame.btn -anchor center -expand 0 -fill none -padx 7 -side right
 }
 
+proc listener.consult { Window } {
+	consult_file
+}
+proc debugwin.consult { Window } {
+	consult_file
+}
+
+proc consult_file {} {
+	set file [tk_getOpenFile \
+		-defaultextension pro \
+		-title "Consult File" \
+		-filetypes {{"Prolog Files" {.pro .pl } } {{All Files} {*} } } ]
+	if { "$file"== "" } then { return }
+	prolog call alsdev do_reconsult -atom $file
+#	insert_prompt  .topals.text "\n?-" 
+}
+
+proc clear_workspace { } {
+	prolog call alsdev clear_workspace 
+#	insert_prompt  .topals.text "\n?-" 
+}
+
 #################################################
 #####	Utilities & Environment Settings       ##
 #################################################
@@ -476,70 +496,52 @@ proc iconify_me {Win} {
 	wm iconify $Win
 }
 	 
-#proc hide_me {Win} {
-#	unmap_alsdev_main
-#	Window hide $Win
-#}
-
 proc careful_withdraw {Win} {
 	if "[winfo exists $Win]>1" then { wm withdraw $Win }
 }
 
-proc choose_background_color {} {
+proc choose_background_color {Window} {
 	global array proenv
 
 	set COLOR [tk_chooseColor \
-		-title "Choose Background Color" -initialcolor $proenv(topals,background)]
+		-title "Choose Background Color" -initialcolor $proenv(.topals,background)]
 	if {"$COLOR" == ""} then {return}
-	set FrontWin [text_front_win]
-	if {"$FrontWin"=="" } then { return }
-	.alsdev_settings.color_desc.background configure -background $COLOR
-	$FrontWin.text configure -background $COLOR
+	.alsdev_settings.background configure -background $COLOR
+	$Window.text configure -background $COLOR
 }
 
-proc choose_foreground_color {} {
+proc choose_foreground_color {Window} {
 	global array proenv
 
 	set COLOR [tk_chooseColor \
-		-title "Choose Foreground Color" -initialcolor $proenv(topals,foreground)]
+		-title "Choose Foreground Color" -initialcolor $proenv(.topals,foreground)]
 	if {"$COLOR" == ""} then {return}
-	set FrontWin [text_front_win]
-	if {"$FrontWin"=="" } then { return }
-	.alsdev_settings.color_desc.foreground configure -foreground $COLOR
-	$FrontWin.text configure -foreground $COLOR
+	.alsdev_settings.foreground configure -foreground $COLOR
+	$Window.text configure -foreground $COLOR
 }
 
-proc font_family_choice { Family } {
+proc font_family_choice { Family Window } {
 	global array proenv
 
-	set FrontWin [text_front_win]
-	if {"$FrontWin"=="" } then { return }
-
-	set PrevFont [$FrontWin.text cget -font]
+	set PrevFont [$Window.text cget -font]
 	set NewFont [list $Family [lindex $PrevFont 1] [lindex $PrevFont 2]]
-	$FrontWin.text configure -font $NewFont
+	$Window.text configure -font $NewFont
 }
 
-proc font_size_choice { Size } {
+proc font_size_choice { Size Window } {
 	global array proenv
 
-    set FrontWin [text_front_win]
-	if {"$FrontWin"=="" } then { return }
-				 
-	set PrevFont [$FrontWin.text cget -font]
+	set PrevFont [$Window.text cget -font]
 	set NewFont [list [lindex $PrevFont 0] $Size [lindex $PrevFont 2]]
-	$FrontWin.text configure -font $NewFont
+	$Window.text configure -font $NewFont
 }
 
-proc font_style_choice { Style } {
+proc font_style_choice { Style Window } {
 	global array proenv
 
-    set FrontWin [text_front_win]
-	if {"$FrontWin"=="" } then { return }
-		 
-	set PrevFont [$FrontWin.text cget -font]
+	set PrevFont [$Window.text cget -font]
 	set NewFont [list [lindex $PrevFont 0] [lindex $PrevFont 1] $Style ]
-	$FrontWin.text configure -font $NewFont
+	$Window.text configure -font $NewFont
 }
 
 proc text_front_win {} {
@@ -565,7 +567,6 @@ proc save_alsdev_settings {} {
 		set Grp $FrontWin
 	}
 	set TgtTextWin $FrontWin.text
-	set Vals [grab_defaults $TgtTextWin]
 
 	set proenv($Grp,background)         [lindex $Vals 0]
 	set proenv($Grp,foreground)         [lindex $Vals 1]
@@ -573,9 +574,68 @@ proc save_alsdev_settings {} {
 	set proenv($Grp,selectbackground)   [lindex $Vals 3]
 	set proenv($Grp,font)               [lindex $Vals 4]
 	set proenv($Grp,tabs)               [lindex $Vals 5]
+	prolog call alsdev change_settings -list $Vals -atom $Grp
+
+	Window hide .alsdev_settings
+}
+
+proc fonts_and_colors { Window } {
+	global proenv
+
+	set proenv(fonts_and_colors) $Window
+
+	set SelectBackground [$Window.text cget -selectbackground ]
+	set SelectForeground [$Window.text cget -selectforeground ]
+	set Font [$Window.text cget -font ]
+	set proenv(text,family)  [lindex $Font 0]
+	set proenv(text,size)  [lindex $Font 1]
+	set proenv(text,style)  [lindex $Font 2]
+	if {"$proenv(text,style)"==""} then {set proenv(text,style) normal}
+	set Tabs [$Window.text cget -tabs]
+
+	Window show .alsdev_settings
+	.alsdev_settings.buttons.save_settings configure \
+		-command "save_fonts_and_colors $Window"
+	wm title .alsdev_settings "Fonts&Colors: $Window"
+    .alsdev_settings.background configure -background [$Window.text cget -background ]
+    .alsdev_settings.foreground configure -foreground [$Window.text cget -foreground ]
+
+	grab set .alsdev_settings
+}
+
+proc cancel_fonts_and_colors { } {
+	grab release .alsdev_settings
+	Window hide .alsdev_settings
+}
+
+proc save_fonts_and_colors { Window } {
+	global array proenv
+	
+	switch $Window {
+		.topals { set Grp .topals }
+		.debugwin { set Grp .debugwin }
+		default { set Grp .document }
+	}
+	set Background [$Window.text cget -background ]
+	set Foreground [$Window.text cget -foreground ]
+	set SelectBackground [$Window.text cget -selectbackground ]
+	set SelectForeground [$Window.text cget -selectforeground ]
+	set Font [$Window.text cget -font ]
+	set Tabs [$Window.text cget -tabs]
+
+	set Vals [list $Background $Foreground $SelectBackground $SelectForeground $Font $Tabs]
+
+	set proenv($Grp,background)         $Background
+	set proenv($Grp,foreground)         $Foreground
+	set proenv($Grp,selectbackground)   $SelectBackground
+	set proenv($Grp,selectbackground)   $SelectForeground
+	set proenv($Grp,font)               $Font
+	set proenv($Grp,tabs)               $Tabs
+
+	grab release .alsdev_settings
+	Window hide .alsdev_settings
 
 	prolog call alsdev change_settings -list $Vals -atom $Grp
-	Window hide .alsdev_settings
 }
 
 #################################################
@@ -642,61 +702,6 @@ proc change_prolog_flags {} {
 				-atom $FlagName -atom $proenv($FlagName)
 		}
 	}
-}
-
-
-#################################################
-#####				PROJECTS				#####
-##                                             ##
-##	Project files have extensions: *.ppj       ##
-#################################################
-
-proc clear_workspace { } {
-	prolog call alsdev clear_workspace 
-	insert_prompt  .topals.text "\n?-" 
-}
-
-proc open_project { } {
-	set file [tk_getOpenFile \
-		-defaultextension ppj \
-		-title "Open Prolog Project" \
-		-filetypes {{"Prolog Files" {.ppj} } {{All Files} {*} } } ]
-	if { "$file"== "" } then { return }
-	prolog call alsdev open_project -atom $file
-}
-
-proc new_project { } {
-	prolog call alsdev new_project 
-}
-
-proc save_project { } {
-	prolog call alsdev save_project 
-}
-
-proc save_as_project { } {
-	set file [tk_getSaveFile \
-		-defaultextension ppj \
-		-title "Open Prolog Project" \
-		-filetypes {{"Prolog Files" {.ppj} } {{All Files} {*} } } ]
-	if { "$file"== "" } then { return }
-	prolog call alsdev save_as_project -atom $file
-}
-
-proc close_project { } {
-	prolog call alsdev close_project 
-}
-
-proc add_file_to_project { } {
-	set file [tk_getOpenFile \
-		-defaultextension pro \
-		-title "Open Prolog Project" \
-		-filetypes {{"Prolog Files" {.pro .pl } } {{All Files} {*} } } ]
-	if { "$file"== "" } then { return }
-	prolog call alsdev add_file_to_project -atom $file
-}
-
-proc delete_file_from_project { } {
-	prolog call alsdev delete_file_from_project 
 }
 
 
@@ -961,6 +966,26 @@ proc load_stream_to_win {Stream TextWinName} {
 	return [list [expr $LineCount - 1] $LineCsList]
 }
 
+proc line_index_file {FileName } {
+	set SI [open $FileName r]
+	set Index [line_index_stream $SI ]
+	close $SI
+	return $Index
+}
+
+proc line_index_stream {Stream } {
+	set LineCount 1
+	set LineCsList ""
+	while {  [eof $Stream]==0 } {
+		set NumCs [gets $Stream Line]
+		if { $NumCs >= 0 } then {
+			lappend LineCsList $NumCs
+			incr LineCount
+		}
+	}
+	return [list [expr $LineCount - 1] $LineCsList]
+}
+
 proc assign_tag {TextWinName TagName StartLine StartChar EndLine EndChar} {
 	$TextWinName tag add $TagName $StartLine.$StartChar $EndLine.$EndChar
 }
@@ -992,26 +1017,6 @@ proc debugwin_configure_event {Win Ht Wd WW} {
 
 
 
-
-global argv0 
-set argv0 alsdev_jedit
-
-global argv 
-set argv {}
-
-global argc
-set argc 0
-
-
-proc alsdev_jedit {} {
-	global argv0 argv argc
-
-	set argv {}
-	set argc 0
-	set argv0 alsdev_jedit
-
-	jedit:jedit -embedded 1 -window .jedit_w1 -mode prolog
-}
 
 proc tkOpenDocument args {
 	foreach file $args {

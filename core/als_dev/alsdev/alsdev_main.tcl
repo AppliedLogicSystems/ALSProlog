@@ -17,7 +17,7 @@ proc vTclWindow.topals {args} {
     # CREATING WIDGETS
     ###################
     toplevel .topals -class Toplevel \
-		-background $proenv(topals,background) 
+		-background $proenv(.topals,background) 
     wm focusmodel .topals passive
     wm geometry .topals 559x567+149+178
     wm maxsize .topals 1265 994
@@ -45,7 +45,7 @@ proc vTclWindow.topals {args} {
 	add_default_menus .topals.mmenb
 	add_file_menu .topals.mmenb listener .topals
 	add_edit_menu .topals.mmenb listener .topals
-	add_project_menu .topals.mmenb listener .topals
+	add_prolog_menu .topals.mmenb listener .topals
 	add_tools_menu .topals.mmenb listener .topals
 	add_help_menu .topals.mmenb
 
@@ -70,12 +70,12 @@ proc vTclWindow.topals {args} {
         -orient vert 
     text .topals.text \
         -height 26 -width 8 \
-		-background $proenv(topals,background) \
-		-foreground $proenv(topals,foreground) \
-		-selectbackground $proenv(topals,selectbackground) \
-		-selectforeground $proenv(topals,selectforeground) \
-		-font $proenv(topals,font) \
-		-tabs $proenv(topals,tabs) \
+		-background $proenv(.topals,background) \
+		-foreground $proenv(.topals,foreground) \
+		-selectbackground $proenv(.topals,selectbackground) \
+		-selectforeground $proenv(.topals,selectforeground) \
+		-font $proenv(.topals,font) \
+		-tabs $proenv(.topals,tabs) \
         -yscrollcommand {.topals.vsb set} \
 		-exportselection true
 
