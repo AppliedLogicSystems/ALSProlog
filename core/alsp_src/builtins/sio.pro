@@ -614,10 +614,10 @@ check_source_sink_and_mode(Source_sink,Mode) :-
 	var(Source_sink),
 	!,
 	instantiation_error(2).
-check_source_sink_and_mode(null_stream,Mode) :-
+check_source_sink_and_mode(null_stream(_),Mode) :-
 	!,
-%	check_mode(Mode,file_modes(Mode,_,_)).
-	dmember(Mode, [write]).
+	check_mode(Mode,read_write_modes(Mode,_,_)).
+%	dmember(Mode, [write]).
 check_source_sink_and_mode(Source_sink,Mode) :-
 	atom(Source_sink),
 	!,
@@ -797,12 +797,6 @@ check_repositionability(A,_,_) :-
 
 is_repositionable(FileName,_) :-
 	atom(FileName),
-    %% FIXME:  There is probably a better way to do this.  Also this may
-    %% be inaccurate since not all files in the file system are seekable.
-	FileName \= '$stdin',
-	FileName \= '$stdout',
-	FileName \= '$stderr',
-	FileName \= 'null_stream',
 	!.
 
 /*
@@ -811,9 +805,9 @@ is_repositionable(FileName,_) :-
  *	Performs the open of Source_sink.
  */
 
-open_stream(null_stream,Mode,Options,Stream) 
+open_stream(null_stream(Name),Mode,Options,Stream) 
 	:-!,
-	open_null_stream(null_stream,Mode,Options,Stream).
+	open_null_stream(Name,Mode,Options,Stream).
 
 open_stream(Source_sink,Mode,Options,Stream) 
 	:-
@@ -883,6 +877,8 @@ open_null_stream(Source_sink,Mode,Options,Stream)
 	buffering(Options,NBuffering),
 	eoln_modes(null_stream, Options, NEoln),
 	sio_generic_open(0,Stream,NMode,NBuffering,NEoln).
+open_null_stream(Source_sink,Mode,Options,Stream) :-
+	permission_error(open,source_sink,Source_sink,2).
 
 		/*---------*
 		 |   FILES |
@@ -2159,6 +2155,22 @@ read_buffer(string,Stream) :-
 	sio_bufshift(Stream),
 	read_string(Stream).
 
+read_buffer(null_stream, Stream) :-
+	!,
+	sio_set_eof(Stream),
+	fail.	
+
+/*
+read_buffer(console,Stream) :-
+	!,
+	get_user_prompt(Prompt),
+	sio_editline(
+	stream_pgoals(Stream,PromptGoal),
+	call(PromptGoal),
+	read_buffer(Stream).
+	.
+*/
+
 read_buffer(window,Stream) 
 	:-
 	stream_extra(Stream,Tail),
@@ -3375,65 +3387,33 @@ sio_pckg_init :-
     reset_alias,
     reset_stream_table,
     set_next_stream_identifier(0),
+
     %% User Input/Output Streams
     set_user_prompt(''),
 
-    als_system(L),
-    dmember(os=OS, L),
+    open(console('standard output'),write,OutStream,
+	 ['$stream_identifier'(-2), alias(user_output),
+	 buffering(line), type(text)]),
+    open(console('standard input'), read, InStream, 
+	 ['$stream_identifier'(-1), alias(user_input),
+	 prompt_goal(user_prompt_goal(user_output))]),
 
-    ((OS=unix ->
+    %% Debugger streams
 
-	open('$stdout',write,OutStream,
-		   ['$stream_identifier'(-2), alias(user_output),
-		    buffering(line), type(text)]),
-	open('$stdin', read, InStream, 
-	 [ '$stream_identifier'(-1), alias(user_input),
-	   prompt_goal(user_prompt_goal(user_output))]),
+    open(console('debugger output'),write, OutDStream,
+	 ['$stream_identifier'(-4), alias(debugger_output),
+	 buffering(line),type(text),
+	 maxdepth(8), line_length(76),
+	 depth_computation(nonflat)]),
+    open(console('debugger input'), read, InDStream,
+	 ['$stream_identifier'(-3), alias(debugger_input),
+	 prompt_goal(flush_output(debugger_output))]),
 
-	%% Debugger streams
-	
-	open('$stdout',write, OutDStream,
-	 [	'$stream_identifier'(-4), alias(debugger_output),
-		buffering(line),type(text),
-		maxdepth(8), line_length(76),
-		depth_computation(nonflat)]),
-	open('$stdin', read, InDStream,
-	 [	'$stream_identifier'(-3), alias(debugger_input),
-		prompt_goal(flush_output(debugger_output))]),
+    %% Error stream
 
-	%% Error stream
-
-	open('$stderr',write,OutEStream,
-	 [	'$stream_identifier'(-5), alias(error_stream),
-		buffering(line),type(text)])
-     )
-    ;
-     (
-	open(console('standard output'),write,OutStream,
-		   ['$stream_identifier'(-2), alias(user_output),
-		    buffering(line), type(text)]),
-	open(console('standard input'), read, InStream, 
-	 [ '$stream_identifier'(-1), alias(user_input),
-	   prompt_goal(user_prompt_goal(user_output))]),
-
-	%% Debugger streams
-
-	open(console('debugger output'),write, OutDStream,
-	 [	'$stream_identifier'(-4), alias(debugger_output),
-		buffering(line),type(text),
-		maxdepth(8), line_length(76),
-		depth_computation(nonflat)]),
-	open(console('debugger input'), read, InDStream,
-	 [	'$stream_identifier'(-3), alias(debugger_input),
-		prompt_goal(flush_output(debugger_output))]),
-
-	%% Error stream
-
-	open(console_error('error output'),write,OutEStream,
-	 [	'$stream_identifier'(-5), alias(error_stream),
-		buffering(line),type(text)])
-
-    )),
+    open(console_error('error output'),write,OutEStream,
+	 ['$stream_identifier'(-5), alias(error_stream),
+	 buffering(line),type(text)]),
 
     set_input(InStream),
     set_output(OutStream),
