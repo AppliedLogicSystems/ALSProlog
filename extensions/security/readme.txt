@@ -1,12 +1,12 @@
-security.psl
-============
+Security Extension: security.psl
+================================
 
 The security.psl file provides the check_security/2 predicate
 described below.  Currently the Unikey and Unikey/S hardware keys
-are supported.
+are supported on Windows and Solaris.
 
-In order to use Unikey keys on Windows, you may need to install
-drivers/device
+Please see the Software Security (now Rainbow) documentation
+for information about installing the hardware keys.
 
 
 
@@ -39,9 +39,22 @@ Atom                        Description
 no_error                    Security check was successful.
 general_error               A general error occured.
 device_name_error           Device is not an atom.
-device_permisson_error      Insufficient permission to access Device.
+device_permisson_error      Insufficient permission to access
+                            or missing Device.
 hardware_key_error          Missing or incorrect hardware key.
 system_service_error        Hardware key system services are not
                             correctly installed (Windows only).
 
+Example:
+-------
+
+allow :- 
+      getenv('KEY_DEVICE', Device),
+      check_security(Device, Result),
+      handle_result(Result).
+
+handle_result(no_error) :- true.
+handle_result(hardware_key_error) :-
+	write('Incorrect or Missing hardware key!'), nl, exit.
+handle_result(_) :- exit.
 
