@@ -693,6 +693,13 @@ static unsigned long image_end(int image_file)
 #endif /* USE_ELF_SECTION_FOR_IMAGE */
 #endif /* HAVE_LIBELF */
 
+#ifdef NO_IMAGE_STATE
+static unsigned long image_end(int image_file)
+{
+  return 0;
+}
+#endif
+
 #ifndef USE_ELF_SECTION_FOR_IMAGE
 long ss_image_offset(const char *imagepath)
 {

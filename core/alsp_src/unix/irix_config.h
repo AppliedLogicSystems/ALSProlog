@@ -1,7 +1,7 @@
 
 #define MinorOSStr	"irix"
 
-/*#define HAVE_LIBELF 1*/
+#define NO_IMAGE_STATE
 #define USE_RE_COMP
 
 #if 0
@@ -44,7 +44,6 @@
 #define HAVE_LIBC	1
 #define HAVE_LIBNSL	1
 #define HAVE_LIBSOCKET	1
-#define HAVE_LIBELF	1
 #define UNIX	1
 #define HAVE_DEV_ZERO	1
 #define HAVE_BCOPY	1
