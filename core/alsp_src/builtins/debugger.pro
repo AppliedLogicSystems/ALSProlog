@@ -51,6 +51,7 @@ export trace/2.
 trace(Module,Goal) :-
 	check_debug_io,
 	setup_debug(Module, Goal),
+%write(exit_setup_debug),nl,flush_output,
 	getPrologInterrupt(OldMagic),
 	catch(trace0(Module,Goal), Reason, 
 	      (dbg_notrace,setPrologInterrupt(OldMagic),throw(Reason))).
@@ -1553,6 +1554,7 @@ fin_setup_debug(ClauseGroup, Module, Predicate, Arity,
 					ALSMgr, SrcMgr),
 	reload_debug(BaseFileName, SrcFilePath, DebugType, ClauseGroup, Flag),
 	!,
+%write(fsd_sst),nl,flush_output,
 	start_src_trace(Flag,BaseFileName, SrcFilePath, ClauseGroup, ALSMgr, SrcMgr).
 
 fin_setup_debug(ClauseGroup, _, _, _, CGsSetup, [ClauseGroup | CGsSetup]).
