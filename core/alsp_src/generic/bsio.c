@@ -1814,9 +1814,6 @@ int sio_nsocket_select(void)
     PI_getan(&result, &result_t, 9);
     
     
-    if (read_mark_t != PI_VAR || write_mark_t != PI_VAR || except_mark_t != PI_VAR)
-        error = SOCKET_ERROR;
-    
     FD_ZERO(&read_set);
     FD_ZERO(&write_set);
     FD_ZERO(&exception_set);
