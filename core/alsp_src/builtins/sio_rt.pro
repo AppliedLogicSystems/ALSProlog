@@ -834,12 +834,19 @@ rt_primary('('(_,_,_),[W1|WR],VT,Prec,TR,Ans) :-
 	rt_rops(Y1,YR, S,0, VT,Prec, TR,Ans).
 rt_primary('{'(_,_,_),[W1|WR],VT,Prec,TR,Ans) :-
 	!,
-	rt_primary(W1,WR,VT,1200,[X1|XR],S),
-	rt_rcurly(X1,XR,[Y1|YR]),
-	rt_rops(Y1,YR, '{}'(S),0, VT,Prec, TR,Ans).
+	rt_curlystruct(W1,WR,VT,[X1|XR],S),
+	rt_rops(X1,XR, S,0, VT,Prec, TR,Ans).
 rt_primary(W1,WR, VT,Prec,TR,Ans) :-
 	parser_error(W1,'Term expected').
 
+rt_curlystruct(lineinfo(_,_,_),[X1|XR],VT,TR,S) :-
+	!,
+	rt_curlystruct(X1,XR,VT,TR,S).
+rt_curlystruct('}'(_,_,_), TR, VT, TR, '{}') :-
+	!.
+rt_curlystruct(W1,WR, VT, TR, '{}'(Arg)) :-
+	rt_primary(W1,WR, VT,1200, [X1|XR], Arg),
+	rt_rcurly(X1, XR, TR).
 
 pp_rt_primary(lineinfo(_,_,_),[X1|XR], VT,Prec, TR, Ans) :-
 	!,
