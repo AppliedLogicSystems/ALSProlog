@@ -29,6 +29,275 @@
  *================================================================*/
 module builtins.
 
+
+export file_extension/3.
+export path_elements/2.
+export split_path/2.
+export split_path/3.
+export join_path/2.
+export join_path/3.
+export tilda_expand/2.
+
+file_extension(Name, Ext, FullName) :-
+	nonvar(FullName),
+	!,
+	once((
+		rev_sub_atom(FullName, Before, 1, After, '.')
+		;
+		(atom_length(FullName, Before), After = 0)
+	)),
+	sub_atom(FullName, 0, Before, _, Name),
+	sub_atom(FullName, _, After, 0, Ext).
+file_extension(FileName,Ext,FullName) :-
+	atom_concat(FileName,'.',FileNameDot),
+	atom_concat(FileNameDot, Ext, FullName).
+
+path_elements(Path, Elements) :-
+	var(Path),
+	!,
+	join_path(Elements, Path).
+path_elements(Path, Elements) :-
+	split_path(Path, Elements).
+
+split_path(Path, List) :-
+	sys_env(OS, _, _),
+	split_path(OS, Path, List).
+	
+join_path(List, Path) :-
+	sys_env(OS, _, _),
+	join_path(OS, List, Path).
+
+split_path(unix, Path, List) :- unix_split_path(Path, List).
+split_path(macos, Path, List) :- macos_split_path(Path, List).
+split_path(mswin32, Path, List) :- win32_split_path(Path, List).
+split_path(win32, Path, List) :- win32_split_path(Path, List).
+
+join_path(unix, List, Path) :- unix_join_path(List, Path).
+join_path(macos, List, Path) :- macos_join_path(List, Path).
+join_path(mswin32, List, Path) :- win32_join_path(List, Path).
+join_path(win32, List, Path) :- win32_join_path(List, Path).
+
+unix_split_path(Path, ['/' | Tail]) :-
+	sub_atom(Path, 0, 1, _, '/'),
+	!,
+	sub_atom(Path, 1, _, 0, Remainder),
+	unix_split_relpath(Remainder, Tail).
+unix_split_path(Path, List) :-
+	unix_split_relpath(Path, List).
+ 
+unix_split_relpath('', []) :- !.
+unix_split_relpath(Path, [Head | Tail]) :-
+	sub_atom(Path, Before, 1, After, '/'),
+	!,
+	sub_atom(Path, 0, Before, _, Head),
+	sub_atom(Path, _, After, 0, Remainder),
+	unix_split_relpath(Remainder, Tail).
+unix_split_relpath(Path, [Path]).
+
+unix_join_path([], '').
+unix_join_path([Path], Path) :- !.
+unix_join_path([A, B], Path) :-
+	!,
+	unix_join_path(A, B, Path).
+unix_join_path([Head | Tail], Path) :-
+	unix_join_path(Tail, TailPath),
+	unix_join_path([Head, TailPath], Path).
+
+unix_join_path('/', B, Path) :-
+	atom_concat('/', B, Path).
+unix_join_path(A, B, Path) :-
+	sub_atom(A, _, 1, 0, '/'),
+	!,
+	atom_concat(A, B, Path).
+unix_join_path(A, B, Path) :-
+	atom_concat(A, '/', AHead),
+	atom_concat(AHead, B, Path).
+
+macos_split_path(':', [':']) :- !.
+macos_split_path(Path, [Drive | Tail]) :-
+	once(sub_atom(Path, Before, 1, After, ':')),
+	Before > 0,
+	!,
+	DriveLen is Before + 1,
+	sub_atom(Path, 0, DriveLen, _, Drive),
+	sub_atom(Path, _, After, 0, Remainder),
+	macos_split_relpath(Remainder, Tail).
+macos_split_path(Path, List) :-
+	macos_split_relpath(Path, List).
+
+macos_split_relpath('', []) :- !.
+macos_split_relpath(Path, ['::' | Tail]) :-
+	sub_atom(Path, 0, 2, After, '::'),
+	!,
+	SubLen is After+1,
+	sub_atom(Path, _, SubLen, 0, Remainder),
+	macos_split_relpath(Remainder, Tail).
+macos_split_relpath(Path, List) :-
+	sub_atom(Path, 0, 1, After, ':'),
+	!,
+	sub_atom(Path, _, After, 0, Remainder),
+	macos_split_relpath(Remainder, List).
+macos_split_relpath(Path, [Head | Tail]) :-
+	sub_atom(Path, Before, 1, After, ':'),
+	!,
+	sub_atom(Path, 0, Before, _, Head),
+	SubLen is After+1,
+	sub_atom(Path, _, SubLen, 0, Remainder),
+	macos_split_relpath(Remainder, Tail).
+macos_split_relpath(Path, [Path]).
+
+
+macos_join_path([], '').
+macos_join_path([Path], Path) :- !.
+macos_join_path([A, B], Path) :-
+	!,
+	macos_join_path(A, B, Path).
+macos_join_path([Head | Tail], Path) :-
+	macos_join_path(Tail, TailPath),
+	macos_join_path([Head, TailPath], Path).
+
+macos_join_path(A, B, Path) :-
+	once(sub_atom(A, Before, 1, _, ':')),
+	Before >= 0,
+	!,
+	macos_join_path0(A, B, Path).
+macos_join_path(A, B, Path) :-
+	atom_concat(':', A, AHead),
+	macos_join_path0(AHead, B, Path).
+	
+macos_join_path0(A, B, Path) :-
+	sub_atom(A, Before, 1, 0, ':'),
+	sub_atom(B, 0, 1, _, ':'),
+	!,
+	sub_atom(A, 0, Before, _, AHead),  
+	atom_concat(AHead, B, Path).
+macos_join_path0(A, B, Path) :-
+	not(sub_atom(A, Before, 1, 0, ':')),
+	not(sub_atom(B, 0, 1, _, ':')),
+	!,
+	atom_concat(A, ':', AHead),
+	atom_concat(AHead, B, Path).
+macos_join_path0(A, B, Path) :-
+	atom_concat(A, B, Path).	
+
+	 
+win32_split_path(Path, [Drive | Tail]) :-
+	find_sub(Path, 1, _, [':/', ':\\']),
+	!,
+	sub_atom(Path, 0, 3, _, Drive),
+	sub_atom(Path, 3, _, 0, Remainder),
+	win32_split_relpath(Remainder, Tail).
+win32_split_path(Path, [DriveRel | Tail]) :-
+	sub_atom(Path, 1, 1, _, ':'),
+	!,
+	sub_atom(Path, 0, 2, _, DriveRel),
+	sub_atom(Path, 2, _, 0, Remainder),
+	win32_split_relpath(Remainder, Tail).
+win32_split_path(Path, [HostShare | Tail]) :-
+	find_sub(Path, 0, _, ['//', '\\\\', '/\\', '\\/']),
+	!,
+	sub_atom(Path, 2, _, 0, HostPath),
+	find_sub(HostPath, Before, _, ['/', '\\']),
+	!,
+	ShareStart is Before + 1,
+	sub_atom(HostPath, ShareStart, _, 0, SharePath),
+	find_sub(SharePath, RootBefore, _, ['/', '\\']),
+	!,
+	HostShareLength is RootBefore + ShareStart + 3,
+	sub_atom(Path, 0, HostShareLength, _, HostShare),
+	sub_atom(Path, HostShareLength, _, 0, Remainder),
+	win32_split_relpath(Remainder, Tail).
+win32_split_path(Path, ['/' | Tail]) :-
+	sub_atom(Path, 0, 1, _, '/'),
+	!,
+	sub_atom(Path, 1, _, 0, Remainder),
+	win32_split_relpath(Remainder, Tail).
+win32_split_path(Path, ['\\' | Tail]) :-
+	sub_atom(Path, 0, 1, _, '\\'),
+	!,
+	sub_atom(Path, 1, _, 0, Remainder),
+	win32_split_relpath(Remainder, Tail).
+win32_split_path(Path, List) :-
+	win32_split_relpath(Path, List).
+
+win32_split_relpath('', []) :- !.
+win32_split_relpath(Path, [Head | Tail]) :-
+	find_sub(Path, Before, After, ['/', '\\']),
+	!,
+	sub_atom(Path, 0, Before, _, Head),
+	sub_atom(Path, _, After, 0, Remainder),
+	win32_split_relpath(Remainder, Tail).
+win32_split_relpath(Path, [Path]).
+
+win32_join_path([], '').
+win32_join_path([Path], Path).
+win32_join_path([A, B], Path) :-
+	!,
+	win32_join_path(A, B, Path).
+win32_join_path([Head | Tail], Path) :-
+	win32_join_path(Tail, TailPath),
+	win32_join_path([Head, TailPath], Path).
+
+win32_join_path('/', B, Path) :-
+	atom_concat('/', B, Path).
+win32_join_path('\\', B, Path) :-
+	atom_concat('\\', B, Path).
+win32_join_path(A, B, Path) :-
+	sub_atom(A, 1, 1, 0, ':'),
+	!,
+	atom_concat(A, B, Path).
+win32_join_path(A, B, Path) :-
+	(sub_atom(A, _, 1, 0, '/') ; sub_atom(A, _, 1, 0, '\\')),
+	!,
+	atom_concat(A, B, Path).
+win32_join_path(A, B, Path) :-
+	atom_concat(A, '\\', AHead),
+	atom_concat(AHead, B, Path).
+
+
+% Utility routine.
+
+find_sub(_, _, _, []) :- !, fail.
+find_sub(Atom, Before, After, [SubAtom | Tail]) :-
+	!,
+	(sub_atom(Atom, Before1, _, After1, SubAtom)
+	; (Before1 = Before2, After1 = After2)),
+	(find_sub(Atom, Before2, After2, Tail) ;
+	(Before2 = Before1, After2 = After1)),
+	nonvar(Before1), nonvar(Before2),
+	!,
+	(Before1 =< Before2 ->
+		(Before = Before1, After = After1)
+		;
+		(Before = Before2, After = After2)).
+find_sub(Atom, Before, After, SubAtom) :-
+	!,
+	sub_atom(Atom, Before, _, After, SubAtom).
+
+
+rev_sub_atom(Atom, Before, Length, After, SubAtom) :-
+	sub_atom(Atom, LBefore, Length, LAfter, SubAtom),
+	!,
+	sub_atom(Atom, _, LAfter, 0, Right),
+	((rev_sub_atom(Right, RBefore, Length, After, SubAtom),
+	 Before is LBefore + Length + RBefore) ; 
+	(Before = LBefore, After = LAfter)).
+rev_sub_atom(_, _, _, _, _) :- fail.
+
+
+tilda_expand(TildaPath, Path) :-
+	sub_atom(TildaPath, 0, 1, _, '~'),
+	split_path(TildaPath, [Head | Rest]),
+	sub_atom(Head, 0, 1, After, '~'), 
+	sub_atom(Head, 1, After, 0, Name),
+	(After = 0 -> getenv('HOME', Home) ; get_user_home(Name, Home)),
+	!,
+	(Home = '' -> Path = TildaPath ; join_path([Home | Rest], Path)).
+tilda_expand(Path, Path).
+
+% BELOW IS OBSOLETE 
+
+
 export filePlusExt/3.
 export pathPlusFile/3.
 export subPath/2.
@@ -208,7 +477,8 @@ dirFilePath(Dir, File, Path) :-
 	FileName proper and the extension, Ext;
 	(e.g., 'foo.bar' --> foo, bar ).  If FullName does not
 	have an extension (e.g., 'foo'), fails.
- *!-------------------------------------------------------*/
+ *!-------------------------------------------------------*/	
+
 
 filePlusExt(FileName,Ext,FullName) :-
 	nonvar(FullName),!,
