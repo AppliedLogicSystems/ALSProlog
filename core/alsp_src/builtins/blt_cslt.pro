@@ -509,9 +509,9 @@ consult_msg(fail_consult, FCOpts)
 
 record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr)
 	:-
-write(enter_record_consult(BaseFile, FCOpts, Ball)),nl,flush_output,
+%write(enter_record_consult(BaseFile, FCOpts, Ball)),nl,flush_output,
 	send(ALSMgr, record_src_mgr(BaseFile, FileMgr)),
-write(a1),nl,flush_output,
+%write(a1),nl,flush_output,
 	access_cslt_opts(fcg, FCOpts, FCG), 
 
 /*
@@ -534,12 +534,12 @@ write(a1),nl,flush_output,
 */
 
 	send(ALSMgr, insert_src_mgr_by_cg(FCG, FileMgr)),
-write(a2),nl,flush_output,
+%write(a2),nl,flush_output,
 	access_cslt_opts(srcfilepath, FCOpts, SourceFilePath), 
 	send(FileMgr, note_loaded(FCG, SourceFilePath)),
-write(a3),nl,flush_output,
+%write(a3),nl,flush_output,
 	access_cslt_opts(obp_path, FCOpts, ObpFilePath), 
-write(record_cons(fcg=FCG,SourceFilePath,ObpFilePath)),nl,flush_output,
+%write(record_cons(fcg=FCG,SourceFilePath,ObpFilePath)),nl,flush_output,
 	(ObpFilePath \= '' ->
 		send(FileMgr, set_value(obp_file,SourceFilePath))
 		;
