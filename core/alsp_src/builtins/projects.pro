@@ -20,6 +20,10 @@ als_ide_mgrAction(start_new_project, ALSIDEObject)
 	accessObjStruct(cur_project,ALSIDEObject,PrevProject),
 	start_new_project(PrevProject, ALSIDEObject).
 
+start_new_project('', ALSIDEObject)
+	:-!,
+	proceed_start_new_project(ALSIDEObject).
+
 start_new_project(nil, ALSIDEObject)
 	:-!,
 	proceed_start_new_project(ALSIDEObject).
@@ -36,7 +40,6 @@ close_old_start_new_project('No', PrevProject, ALSIDEObject)
 close_old_start_new_project(Answer, PrevProject, ALSIDEObject)
 	:-
 	als_ide_mgrAction(close_project, ALSIDEObject),
-%	close_project(PrevProject, ALSIDEObject),
 	proceed_start_new_project(ALSIDEObject).
 
 proceed_start_new_project(ALSIDEObject)
@@ -78,6 +81,8 @@ proceed_start_new_project(ALSIDEObject)
 			], 
 		defaults=
 			[
+				title = '',
+				project_file = '',
 				list_of_files_slots = [],
 				list_slots = [],
 				text_slots = [],
@@ -240,15 +245,19 @@ als_ide_mgrAction(close_project, ALSIDEObject)
 	:-
 	yes_no_dialog(shl_tcli, 'Save Project First?', 'Save??', 'Yes', 'No', Answer),
 	(Answer = 'Yes' ->
-		als_ide_mgrAction(save_project, ALSIDEObject)
+		als_ide_mgrAction(save_project(SaveFlag), ALSIDEObject)
 		;
 		true
 	),
-	accessObjStruct(cur_project,ALSIDEObject,CurProject),
-	send(CurProject, close_project),
-	setObjStruct(cur_project,ALSIDEObject,nil),
-	accessObjStruct(initial_dir, ALSIDEObject, InitialDir),
-	change_cwd(InitialDir).
+	(SaveFlag = ok ->
+		accessObjStruct(cur_project,ALSIDEObject,CurProject),
+		send(CurProject, close_project),
+		setObjStruct(cur_project,ALSIDEObject,nil),
+		accessObjStruct(initial_dir, ALSIDEObject, InitialDir),
+		change_cwd(InitialDir)
+		;
+		true
+	).
 
 gen_project_mgrAction(close_project, State)
 	:-
@@ -262,12 +271,39 @@ gen_project_mgrAction(close_project, State)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 als_ide_mgrAction(save_project, ALSIDEObject)
 	:-
+	als_ide_mgrAction(save_project(_), ALSIDEObject).
+
+als_ide_mgrAction(save_project(Flag), ALSIDEObject)
+	:-
 	accessObjStruct(cur_project,ALSIDEObject,CurProject),
-	send(CurProject, save_to_file).
+	send(CurProject, update_check_complete(Flag)),
+	(Flag = ok ->
+		send(CurProject, save_to_file)
+		;
+		true
+	).
+
+gen_project_mgrAction(update_check_complete(ok), State)
+	:-
+	gen_project_mgrAction(read_gui_spec, State),
+	accessObjStruct(title, State, ProjTitle),
+	ProjTitle \= '', ProjTitle \= nil,
+	accessObjStruct(project_file, State, InitFilePath),
+	InitFilePath \= '', InitFilePath \= nil,
+	!,
+	accessObjStruct(gui_spec, State, GuiPath),
+	tcl_call(shl_tcli, [post_open_project,ProjTitle, GuiPath], _).
+
+
+gen_project_mgrAction(update_check_complete(fail), State)
+	:-
+	Title = 'Incomplete Project',
+	Msg = 'Project must have title and file name',
+	info_dialog(shl_tcli, Msg, Title).
 
 gen_project_mgrAction(save_to_file, State)
 	:-
-	gen_project_mgrAction(read_gui_spec, State),
+%	gen_project_mgrAction(read_gui_spec, State),
 	check_ppj(State, FilePath),
 	forbidden_slots(Forbidden),
 	dump_object(State, Forbidden, Eqns),
