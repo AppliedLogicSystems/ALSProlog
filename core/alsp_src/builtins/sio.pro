@@ -2086,6 +2086,58 @@ peek_code(Stream_or_alias, Char) :-
 	sio_errcode(Stream, FailCode),
 	get_failure(FailCode,Stream,peek_code(Stream_or_alias,Char)).
 
+/*
+ * get_atomic_nonblank_char(Char)
+ *
+ *	Unifies Char with the atomic form of the next non-whitespace character 
+ *  obtained from the default input stream, if that occurs before the next 
+ *	end of line, and unifies Char with the atom
+ *				end_of_line
+ *	otherwise.
+ */
+
+export get_atomic_nonblank_char/1.
+
+get_atomic_nonblank_char(Char) :-
+	get_current_input_stream(Stream),
+	get_atomic_nonblank_char(Stream,Char).
+
+/*
+ * get_atomic_nonblank_char(Stream_or_alias, Char)
+ *
+ *	Unifies Char with the atomic form of the next non-whitespace character 
+ *	obtained from the input stream associated with Stream_or_alias, if that 
+ *	occurs before the next end of line, and unifies Char with the atom
+ *				end_of_line
+ *	otherwise.
+ */
+
+export get_atomic_nonblank_char/2.
+
+/*
+get_atomic_nonblank_char(Stream,Char)
+	:-
+	get_nonblank_char(Stream,Char0),
+	(Char0 = end_of_line ->
+		Char0 = Char
+		;
+		name(Char, [Char0])
+	).
+*/
+
+get_atomic_nonblank_char(Stream,Char)
+	:-
+	get_line(Stream, Line),
+	atom_codes(Line, CharList),
+	first_nonblank_char(CharList, Char0),
+	atom_codes(Char, [Char0]).
+get_atomic_nonblank_char(Stream, end_of_line).
+
+first_nonblank_char([Char | Rest], Char) :-
+	Char > 32.
+first_nonblank_char([_ | Rest], Char) :-
+	first_nonblank_char(Rest, Char).
+
 
 
 /*
