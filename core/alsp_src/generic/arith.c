@@ -205,6 +205,7 @@ double exp10(d)
 
 #endif
 
+#if 0
 #if defined(HAVE_LGAMMA) && !defined(HAVE_GAMMA)
 /*
  * NeXT manual page documentation suggests the following to get the gamma
@@ -218,6 +219,7 @@ gamma(double x)
     return lgamma(x);
 }
 
+#endif
 #endif
 
 /*------------------------------------------------------------------------------*

@@ -410,7 +410,7 @@ obp_close()
 
 #define CBUFSIZ 1024
 
-#if defined(sparc) || defined(__hp9000s800)
+#if defined(sparc) || defined(__hp9000s800) || defined(UNIX_IRIX)
 #define USHORT(p) (*(p) << 8 | *(p+1)) 
 #else
 #define USHORT(p) (*((unsigned short *)(p)))

@@ -114,7 +114,10 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	    #ifndef SCO_UNIX
 	       #include <sys/un.h>
 	    #endif /* SCO_UNIX */
-	    
+	    #ifdef UNIX_IRIX
+            /* Required for definition of bzero(). */
+               #include <bstring.h>
+            #endif
 	#elif defined(MacOS) && defined(HAVE_GUSI)
 	    #include <GUSI.h>
 	#elif defined(MSWin32)

@@ -21,7 +21,7 @@
 #define AM_MAXGLOBALS		64
 #else
 /* AM_BLOCKSIZE is the default block size to allocate */
-#ifdef _AIX
+#if defined(_AIX) || defined(UNIX_IRIX)
 #define AM_BLOCKSIZE		(0x00200000*0x10)	/* about 2 meg */
 #else
 #define AM_BLOCKSIZE		0x00200000	/* about 2 meg */
