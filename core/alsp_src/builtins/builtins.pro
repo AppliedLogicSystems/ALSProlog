@@ -1142,6 +1142,7 @@ ld_fs(OS)
 	load_builtins(BDir, blt_atom),
 	load_builtins(BDir, sio),
 
+(all_procedures(syscfg,intconstr,0,_) -> pbi_write(ding_1),pbi_nl,pbi_ttyflush ; true),
 	consult_builtins(BDir, blt_ctl) ,
 	consult_builtins(BDir, blt_sys),
 	consult_builtins(BDir, blt_std),
@@ -1158,7 +1159,9 @@ ld_fs(OS)
 	consult_builtins(BDir, blt_pckg),
 	consult_builtins(BDir, blt_frez),
 	consult_builtins(BDir, simplio),
+(all_procedures(syscfg,intconstr,0,_) -> pbi_write(ding_2),pbi_nl,pbi_ttyflush ; true),
 	consult_builtins(BDir, blt_flgs),
+(all_procedures(syscfg,intconstr,0,_) -> pbi_write(ding_3),pbi_nl,pbi_ttyflush ; true),
 	consult_builtins(BDir, blt_misc),
 	consult_builtins(BDir, objs_run),
 

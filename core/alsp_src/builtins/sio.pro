@@ -714,7 +714,7 @@ check_source_sink_and_mode(console_error(_),Mode) :-
 	check_mode(Mode,read_write_modes(Mode,_,_)).
 check_source_sink_and_mode(tk_win(_,_),Mode) :-
 	!,
-	(Mode = read_write; Mode = read ; Mode = Write ).
+	(Mode = read_write; Mode = read ; Mode = write ).
 %	check_mode(Mode,read_write_modes(Mode,_,_)).
 check_source_sink_and_mode(window(_),Mode) :-
 	!,
@@ -1699,6 +1699,7 @@ wait_data(tcltk, Stream, Call)
 		[bind,WinID,'<Return>', [ xmit_line_plain,WinID,Alias,WaitVarName]], _),
 	tcl_call(Interp, [set,WaitVarName,0], _),
 	tcl_call(Interp, [wait_for_line1, WaitVarName], WaitRes),
+pbi_write(wd_tcltk_A),pbi_nl,pbi_ttyflush,
 	finish_wait_data_tcltk(WaitRes, Stream, Call).
 
 	%% Returned -1: Got a ^C:
@@ -1712,10 +1713,12 @@ finish_wait_data_tcltk(-3, Stream, Call)
 	stream_extra(Stream,XTRA),
 	set_stream_extra(Stream,eof(XTRA)),
 	sio_set_eof(Stream),
+pbi_write(wd_tcltk_CTLD),pbi_nl,pbi_ttyflush,
 	sio_set_errcode(Stream,8).			% SIO_INTERR
 
 finish_wait_data_tcltk(WaitRes, Stream, Call)
 	:-
+pbi_write(wd_tcltk_default(Call)),pbi_nl,pbi_ttyflush,
 	call(Call).
 
 force_control_c_during_read(StreamAlias)
@@ -4054,7 +4057,7 @@ stream_property0(end_of_stream(E), Stream) :-
 	stream_mode(Stream, [input|_]),
 	(   sio_errcode(Stream,8) ->  E=past
 	;   at_end_of_stream(Stream) ->  E=at 
-	;   E=no).
+	;   E=not).
 
 stream_property0(eof_action(A), Stream) :-
 	stream_eof_action(Stream,A).
