@@ -94,6 +94,9 @@ proc vTclWindow.debugwin {base} {
     button $base.buttons.break \
         -padx 2 -text Break \
 		-command { set DebugResponse Bb }
+    button $base.buttons.respy \
+        -padx 2 -text {Re-Spy} \
+		-command reset_all_spypoints
 
     button $base.buttons.interrupt \
         -font {lucida 10 bold} \
@@ -183,6 +186,27 @@ proc vTclWindow.debugwin {base} {
         -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.break \
         -anchor center -expand 0 -fill none -side left 
+    pack $base.buttons.respy \
+        -anchor center -expand 0 -fill none -side left 
+    pack $base.buttons.interrupt \
+        -anchor center -expand 0 -fill none -side right 
+
+    grid $base.debug_status \
+        -column 0 -row 1 -columnspan 2 -rowspan 1 -sticky ew
+
+    pack $base.debug_status.port_label \
+        -anchor center -expand 0 -fill none -side left 
+    pack $base.debug_status.port \
+        -anchor center -expand 0 -fill none -side left 
+    pack $base.debug_status.depth_label \
+        -anchor center -expand 0 -fill none -side left 
+    pack $base.debug_status.depth \
+        -anchor center -expand 0 -fill none -side left 
+    pack $base.debug_status.call_num_label \
+        -anchor center -expand 0 -fill none -side left 
+    pack $base.debug_status.call_num \
+        -anchor center -expand 0 -fill none -side left 
+
     pack $base.buttons.interrupt \
         -anchor center -expand 0 -fill none -side right 
 
