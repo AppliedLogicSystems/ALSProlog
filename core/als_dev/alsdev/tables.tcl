@@ -10,6 +10,7 @@
 #======================================================================
 
 proc load_table_package {DirsList} {
+	set Result 1
 	if {[string match {} [info commands table]] && \
 		[catch {package require Tktable} err]} {
 		append TkTFile Tktable [info sharedlibext]
@@ -17,14 +18,22 @@ proc load_table_package {DirsList} {
 		set Flag 0
 		set DirNum 0
 		set Result 1
-#puts "load_table_package: searching $DirsList for $TkTFile"
 		while {[expr $DirNum<$NumDirs] && [expr $Flag==0]} {
-			set Result [catch {load [file join [lindex $DirsList $DirNum] $TkTFile]}]
+			set Where [eval file join [concat [lindex $DirsList $DirNum] $TkTFile]]
+			set Result [catch {load $Where }]
 			incr DirNum
 		}
 	}
 	return $Result
 }
+
+#puts "load_table_package: searching $DirsList for $TkTFile"
+#set QQ [concat [lindex $DirsList 0]]
+#puts "QQ=$QQ"
+#set ZZ [concat file join $QQ]
+#puts "ND=$NumDirs - ZZ=$ZZ"
+#set DD 	[eval $ZZ]
+#puts "DD=$DD"
 
 	## Create a table 
 
