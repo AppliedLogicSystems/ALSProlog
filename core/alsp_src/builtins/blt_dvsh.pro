@@ -1439,12 +1439,12 @@ check_presence_and_cleanup(SrcMgr, MRFCG, DBGMGR)
 	%%    of the clause.
 	%%---------------------------------------------------
 
-%/*----- For debugging:
+/*----- For debugging:
 showGoalToUserWin(Port,Box,Depth, Module, Goal, debug, DBGMGR, SrcMgr)
 	:-
 printf('%t-%t(%t) %t \n',[Box,Depth,Port,Goal]),flush_output,
 	fail.
-%*/
+*/
 
 	%% '$dbg_aph' ::
 
