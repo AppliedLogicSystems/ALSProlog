@@ -161,14 +161,16 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 			printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",l,(int)r,(int)mr_TR-1); \
 	    	wm_safety = -2; wm_interrupt_caught = 3; } } } 
 
-#define VVBIND(r,f)   { \
+#define VVBIND(r,f,lnn)   { \
   { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
 	  *--mr_TR = PWORD(r); \
 	  if ( CHK_DELAY(r) ) { \
-			printf("vvb@@@ [ln=%d] r=%x  mr_TR=%x\n",0,(int)r,(int)mr_TR-1); \
-	  		if ( CHK_DELAY(f) ) { printf("   match is delay [f=%x]\n",(int)f); \
-				combine_delays((PWord)r,(PWord)f); }  } } }; \
-		*(r) = PWORD(f); }
+			printf("vvb@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x\n",lnn, \
+					(int)r,(long) (((PWord *) r) - wm_heapbase),(int)mr_TR-1); \
+	  		if ( CHK_DELAY(f) && r != f ) { \
+			  printf("   match is delay [f=%x[_%lu]]\n",(int)f,(long)(((PWord *) f) - wm_heapbase)); \
+				combin_dels((PWord)r,(PWord)f); }  } } }; \
+  *(r) = PWORD(f); }
 
 #else /*=== no-DEBUGFREEZE ===*/
 
@@ -178,13 +180,26 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 	  if ( CHK_DELAY(r) ) { \
 			wm_safety = -2; wm_interrupt_caught = 3; } } }
 
-#define VVBIND(r,f)   { \
+#define VVBIND(r,f,lln)   { \
   { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
 	  *--mr_TR = PWORD(r); \
 	  if ( CHK_DELAY(r) ) { \
-	  		if ( CHK_DELAY(f) ) { \
-				combine_delays((PWord)r,(PWord)f); }  } } }; \
-		*(r) = PWORD(f); }
+	  		if ( CHK_DELAY(f) && r != f ) { \
+				combin_dels((PWord)r,(PWord)f); }  } } }; \
+  *(r) = PWORD(f); }
+
+/*
+#define VVBIND(r,f,lln)   { \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *--mr_TR = PWORD(r); \
+	  if ( CHK_DELAY(r) ) { \
+		printf("vvb@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x\n",lln, \
+			(int)r,(long) (((PWord *) r) - wm_heapbase),(int)mr_TR-1); \
+	  		if ( CHK_DELAY(f) && r != f ) { \
+			  printf("   match is delay [f=%x[_%lu]]\n",(int)f,(long)(((PWord *) f) - wm_heapbase)); \
+				combin_dels((PWord)r,(PWord)f); }  } } }; \
+  *(r) = PWORD(f); }
+*/
 
 #endif /*=== DEBUGFREEZE ===*/
 
@@ -194,7 +209,7 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
   { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) \
 	  *--mr_TR = PWORD(r); }
 
-#define VVBIND(r,f)   { TRAIL(r,0); *(r) = PWORD(f); }
+#define VVBIND(r,f,lln)   { TRAIL(r,0); *(r) = PWORD(f); }
 
 #endif /*===== FREEZE =====*/
 
@@ -260,14 +275,14 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 	if( M_ISVAR(f2)){                \
       if( f1 < f2 ){                 \
 	    if( f1 >= wm_heapbase )      \
-	       VVBIND(f2,f1)             \
+	       VVBIND(f2,f1,111)             \
 	    else                         \
-	       VVBIND(f1,f2)             \
+	       VVBIND(f1,f2,222)             \
       }else{                         \
 	    if( f2 >= wm_heapbase )      \
-	       VVBIND(f1,f2)             \
+	       VVBIND(f1,f2,333)             \
 	    else                         \
-	       VVBIND(f2,f1)             \
+	       VVBIND(f2,f1,444)             \
       }                              \
       DISPATCH;                      \
     }                                \
@@ -1761,10 +1776,10 @@ wam_unify(f1, f2)
 	    }
 
 	    if (f2 >= wm_heapbase) {
-		VVBIND(f1, f2);
+		VVBIND(f1, f2,555);
 	    }
 	    else {
-		VVBIND(f2, f1);
+		VVBIND(f2, f1,666);
 	    }
 	}
 	else {
@@ -1875,3 +1890,32 @@ _w_unify(f1, f2)
 
     return (retval);
 }
+
+/*---------------------------------------------------------------*
+ |  Function call to bind vars without invoking any
+ |  interrupt or vvbind constraint mechanisms; used in
+ |  implementing the binding of two interval constraint
+ |  delay vars:
+ *---------------------------------------------------------------*/
+#define PLAINTRAIL(r) \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) \
+	  *--mr_TR = PWORD(r); }
+
+int     pbi_bind_vars           PARAMS(( void ));
+
+int
+pbi_bind_vars()
+{
+        PWord *r,  g;
+        int   rt, gt;
+
+    w_get_An(&r, &rt, 1);
+    w_get_An(&g, &gt, 2);
+
+    *(r) = g;
+    PLAINTRAIL(r);
+
+    SUCCEED;
+
+}
+

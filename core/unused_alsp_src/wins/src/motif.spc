@@ -1,11 +1,36 @@
-/*
- * motif.spc
- */
+/*--------------------------------------------------*
+ |			motif.spc
+ |
+ |		Specification for the broad interface to 
+ |		Motif.  Assumes that interface generation
+ |		(and compilation) is done with the define
+ |			-D__NO_PROTO
+ |
+ |	Note: For Motif1.2, we should explore whether or
+ |	not it might work better to generate and compile
+ |	with -U_NO_PROTO   ???
+ *--------------------------------------------------*/
 
 /*
 #exclude "/jarrett/usr_include/?"
 #exclude "/jarrett/usr_include/sys/?"
 */
+	/* The machinery needs to be extended
+	   so that the exclues (and later includes
+	   from "motif.h" can be given in a form
+	   something like:
+			#exclude "* /include/?"
+			#exclude <* /X11/Xutil.h>
+			#include <* /Xm/Protocols.h>
+	   and the interface generator will fill
+	   in the head path ' "* / ' or ' <* / '
+	   appropriately from information it is supplied
+	   on the command line.  This need is because the
+	   locations of X11R5, Motif1.2 on AIX and HP-UX
+	   (and maybe elsewhere) are in other places, as
+	   are even X11 and Motif1.1 on DV/X
+	 */
+
 #exclude "/usr/include/?"
 #exclude "/usr/include/sys/?"
 #exclude "/usr/include/ansi/?"
@@ -790,6 +815,9 @@ extern XmString XmStringCopy (
 extern XmString XmStringCreate (
 	char        * text,
 	XmStringCharSet charset);
+
+extern XmString XmStringCreateSimple (
+	char        * text);
 
 extern XmString XmStringCreateLtoR (
 	char        * text,
@@ -1767,4 +1795,67 @@ extern void "XtSetArg"(
 	Arg arg, 
 	String resource_name, 
 	XtArgVal value);
+
+extern Widget "XmCreateSimpleCheckBox"(
+	Widget parent,
+	String name,
+	ArgList args,
+	Cardinal arg_count) ;
+
+extern Widget "XmCreateTextField"(
+	Widget parent,
+	char *name,
+	ArgList arglist,
+	Cardinal argcount) ;
+
+extern XmTextPosition "XmTextFieldGetLastPosition"(
+	Widget w) ;
+
+extern char * "XmTextFieldGetString"(
+	Widget w) ;
+
+extern void "XmTextFieldReplace"(
+	Widget w,
+	XmTextPosition from_pos,
+	XmTextPosition to_pos,
+	char *value) ;
+
+extern XmTextPosition XmTextGetLastPosition(
+	Widget widget) ;
+
+extern XmTextPosition "XmTextGetTopCharacter"(
+	Widget widget) ;
+
+extern void "XmTextSetTopCharacter"(
+	Widget widget,
+	XmTextPosition top_character) ;
+
+extern XmTextPosition "XmTextGetCursorPosition"(
+	Widget widget) ;
+
+extern XmTextPosition "XmTextGetInsertionPosition"(
+	Widget widget) ;
+
+extern void "XmTextSetInsertionPosition"(
+	Widget widget,
+	XmTextPosition position) ;
+
+extern void "XmTextSetCursorPosition"(
+	Widget widget,
+	XmTextPosition position) ;
+
+extern void "XmTextInsert"(
+	Widget widget,
+	XmTextPosition position,
+	char *value) ;
+
+extern void "XmTextScroll"(
+	Widget widget,
+	int n) ;
+
+extern XmFontList "XmFontListCopy"(
+	XmFontList fontlist) ;
+
+extern void "XmListDeleteAllItems"(
+	Widget w) ;
 

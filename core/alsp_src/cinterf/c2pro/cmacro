@@ -17,11 +17,13 @@ module c2pro.
 	% process_line(InLine,OutLine,InFD,OutFD,InTab,OutTab)
 	%-------------------------------------------------------
 
-process_line([],[],State) :- !.
-process_line([pound, Tok | Rest ],[],State) :-
-	!,
+process_line([],[],State) 
+	:- !.
+process_line([pound, Tok | Rest ],[],State) 
+	:-!,
 	macro_statement0(Tok,Rest,State).
-process_line(Line, OutLine, State) :-
+process_line(Line, OutLine, State) 
+	:-
 	macro_expand(multiple, Line, OutLine, State).
 
 /*-----------------------------------------------------------*
@@ -35,38 +37,52 @@ process_line(Line, OutLine, State) :-
  *		OutTab	-- the macro definition symbol table to return
  *-----------------------------------------------------------*/
 
-macro_statement0(ident(Id),Rest,State) :- !,
+macro_statement0(ident(Id),Rest,State) 
+	:-!,
 	macro_statement(Id,Rest,State).
-macro_statement0(Tok,Rest,State) :-
+macro_statement0(Tok,Rest,State) 
+	:-
 	error('Unknown directive: %t\n',[Tok],State).
 
-
-macro_statement(import,Rest,State) :- !,
+macro_statement(import,Rest,State) 
+	:- !,
 	macro_expand(single,Rest,Rest0,State),
 	import(Rest0,State).				% for Obj-C
-macro_statement(include,Rest,State) :- !,
+macro_statement(include,Rest,State) 
+	:- !,
 	macro_expand(single,Rest,Rest0,State),
 	import(Rest0,State).	            % include is import
-macro_statement(exclude,Rest,State) :- !,
+macro_statement(exclude,Rest,State) 
+	:- !,
 	exclude(Rest,State).				% special
-macro_statement(define,Rest,State) :- !,
+macro_statement(define,Rest,State) 
+	:- !,
 	define(Rest,State).
-macro_statement(ifdef,Rest,State) :- !,
+macro_statement(ifdef,Rest,State) 
+	:- !,
 	ifdef(Rest,State).
-macro_statement(if,Rest,State) :- !,
+macro_statement(if,Rest,State) 
+	:- !,
 	if(Rest,State).
-macro_statement(ifndef,Rest,State) :- !,
+macro_statement(ifndef,Rest,State) 
+	:- !,
 	ifndef(Rest,State).
-macro_statement(endif,_,State) :- !,
+macro_statement(endif,_,State) 
+	:- !,
 	endif_else_or_elif(endif,State).
-macro_statement(elif,_,State) :- !,
+macro_statement(elif,_,State) 
+	:- !,
 	endif_else_or_elif(elif(_),State).
-macro_statement(else,_,State) :- !,
+macro_statement(else,_,State) 
+	:- !,
 	endif_else_or_elif(else,State).
-macro_statement(undef,Rest,State) :- !,
+macro_statement(undef,Rest,State) 
+	:- !,
 	undef(Rest,State).
-macro_statement(ident, Rest,State) :- !.		% SCCS tags
-	macro_statement(pragma,_,State) :- !.		% consume pragmas
+macro_statement(ident, Rest,State) 
+	:- !.		% SCCS tags
+	macro_statement(pragma,_,State) 
+	:- !.		% consume pragmas
 macro_statement(Tok,Rest,State) :- !,
 	error('Unknown directive: %t\n',[Tok],State).
 
@@ -93,11 +109,13 @@ import(Whatever,State)
 	:-
 	error('Bad #include or #import: %t\n',[Whatever],State).
 
+
 user_import(FileName,State) 
 	:-
 	findUserFile(FileName,NFileName,State),
 	!,
 	dispatch_import(NFileName,user,State).
+
 user_import(FileName,State) 
 	:-
 	error('Bad #include or #import: %t\n',[FileName],State).
@@ -110,6 +128,7 @@ sys_import(PathSpec,State)
 	findSysFile(Disk,CompList,PathType,FileName),
 	!,
 	dispatch_import(FileName,system,State).
+
 sys_import(Whatever,State) 
 	:-
 	error('Bad #include or #import: %t\n',[Whatever],State).
@@ -151,12 +170,14 @@ exclude([string(FileName)|Rest],State)
 	parsePathStr(FileStr,OS,Disk,Comps,PathType),
 	!,
 	dispatch_exclude(user,Disk,Comps,PathType,Rest,State).
+
 exclude([langle|PathSpec],State) 		% #exclude <foo>
 	:-			
 	accessC2P(tgt_os, State, OS),
 	parsePathTokList(PathSpec,OS,Disk,Comps,PathType,[rangle|Rest]),	
 	!,
 	dispatch_exclude(system,Disk,Comps,PathType,Rest,State).
+
 exclude(Whatever,State) 
 	:-
 	error('Bad #exclude : %t\n',[Whatever],State).

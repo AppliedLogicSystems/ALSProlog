@@ -12,6 +12,7 @@
  *=====================================================================*/
 #include "defs.h"
 
+/*#undef DynamicForeign */
 #ifdef DynamicForeign
 
 extern char imagename[];	/* name of image we are running - initial path */

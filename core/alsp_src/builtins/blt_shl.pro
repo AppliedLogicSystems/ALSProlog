@@ -217,7 +217,7 @@ ss_load_dot_alspro(_).
  | print_banner/1
  |		- prints out the initial banner
  *------------------------------------------------*/
-print_banner(L) 
+print_banner(OutS,L) 
 	:-
 	system_name(L, Name),
 	dmember(os_variation = OSVar, L),
@@ -227,8 +227,12 @@ print_banner(L)
 	UInC is InC - 32,
 	name(WBan, [UInC | WNCs]),
 	!,
+/*
 	als_advise('%s Version %s [%s] (%s)\n', [Name,Version,OSVar,WBan]),
 	als_advise('   Copyright (c) 1987-95 Applied Logic Systems, Inc.\n\n',[]).
+*/
+	printf(OutS,'%s Version %s [%s] (%s)\n',[Name,Version,OSVar,WBan]),
+	printf(OutS,'   Copyright (c) 1987-95 Applied Logic Systems, Inc.\n\n',[]).
 
 system_name(L, Name)
 	:-
@@ -296,7 +300,8 @@ init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 		%% can't hold on to them:
 	get_shell_prompts( CurPromptsStack ),
 	set_shell_prompts( [(Prompt1,Prompt2) | CurPromptsStack] ),
-	print_banner(SysList),
+%	print_banner(SysList),
+	print_banner(OutStream,SysList),
 	dmember(wins=Wins, SysList),
 	push_prompt(Wins,OutStream,Prompt1).
 

@@ -78,11 +78,14 @@ addIncludePath(Str,State)
 %	in the system include directories
 %---------------------------------------------------------------
 
+	%% absolute pathname or found locally
 findUserFile(FileName,FileName,State) 
 	:-	
-	exists_file(FileName),			% abs pathname or found locally
+	exists_file(FileName),			
 	!.
-findUserFile(PathName,ExpandedName,State) 		% use possiblePath
+
+	%% use possiblePath
+findUserFile(PathName,ExpandedName,State) 		
 	:-		
 	name(PathName,PathStr),
 	accessC2P(tgt_os, State, OS),
@@ -94,6 +97,7 @@ findUserFile(PathName,ExpandedName,State) 		% use possiblePath
 	pathListToName(Disk2,CompList,PathType2,ExpandedName),
 	exists_file(ExpandedName),
 	!.
+
 findUserFile(File,ExpandedName,State) 
 	:-		
 	sourcePath(Path),
@@ -106,19 +110,43 @@ findUserFile(File,ExpandedName,State)
 %	in the system include paths.
 %---------------------------------------------------------------
 
+	%% absolute pathname, or exists in cur directory:
 findSysFile(Disk,CompList,abs,AbsName) 
 	:-
 	!,
 	pathListToName(Disk,CompList,abs,AbsName),
 	exists_file(AbsName).
+
+	%% Not in cur dir, or absolute, but doesn't exist:
 findSysFile(Disk1,CompList1,rel,AbsName) 
 	:-
 	CompList1 \= [],
-	possiblePath(Disk2,CompList2,PathType),
-	dappend(CompList2,CompList1,CompList),
+	resolve_sys_paths(Disk1,CompList1,Disk2,CompList,PathType),
 	pathListToName(Disk2,CompList,PathType,AbsName),
 	exists_file(AbsName),
 	!.
+
+resolve_sys_paths(Disk1,CompList1,Disk2,CompList,PathType)
+	:-
+	res_sys_p(Disk1,CompList1,Disk2,CompList,PathType).
+
+resolve_sys_paths(Disk1,[Dir | RestP], Disk2,CompList,PathType)
+	:-
+	sysAlternate(Dir, ADir),
+	res_sys_p(Disk1,[ADir | RestP],Disk2,CompList,PathType).
+
+resolve_sys_paths(Disk1,[Dir | RestP], Disk2,CompList,PathType)
+	:-
+	sysAlternate(Dir, ADir),
+	res_sys_p(Disk1,[ADir, Dir | RestP],Disk2,CompList,PathType).
+
+res_sys_p(Disk1,CompList1,Disk2,CompList,PathType)
+	:-
+	possiblePath(Disk2,CompList2,PathType),
+	dappend(CompList2,CompList1,CompList0),
+	(CompList = CompList0 ;
+		sysPathPrefix(PrefixList),
+		dappend(PrefixList, CompList0, CompList)).
 
 possiblePath(Disk,Comps,PathType) 
 	:- 

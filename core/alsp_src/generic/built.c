@@ -202,8 +202,9 @@ static struct blt_struct {
 	BLT("clct_tr", 1, pbi_clct_tr, "_pbi_clct_tr"),
 	BLT("walk_cps", 0, pbi_walk_cps, "_pbi_walk_cps"),
 	BLT("$delay", 4, pbi_delay, "_pbi_delay"),
+	BLT("$is_delay_var", 1, pbi_is_delay_var, "_pbi_is_delay_var"),
 	BLT("$delay_term_for", 2, pbi_del_tm_for, "_pbi_del_tm_for"),
-/*	BLT("collect_thawed", 1, pbi_collect_thawed, "_pbi_collect_thawed"),  */
+	BLT("$bind_vars", 2, pbi_bind_vars, "_pbi_bind_vars"),
 #endif /* FREEZE */
 
 #ifdef SCO_UNIX			/* procedure names must be < 32 chars */
@@ -337,8 +338,8 @@ static struct blt_struct {
 	BLT("sio_increment_bufpos", 1, sio_increment_bufpos, "_sio_increment_bufpos"),
 	BLT("sio_set_position", 3, sio_set_position, "_sio_set_position"),
 	BLT("sio_file_open", 4, sio_file_open, "_sio_file_open"),
-	BLT("window_insert_pos", 2, window_insert_pos, "_window_insert_pos"),
-	BLT("set_window_insert_pos", 2, set_window_insert_pos, "_set_window_insert_pos"),
+	BLT("window_insert_pos", 2, win_insert_pos, "_win_insert_pos"),
+	BLT("set_window_insert_pos", 2, set_win_insert_pos, "_set_win_insert_pos"),
 	BLT("sio_set_eof", 1, sio_set_eof, "_sio_set_eof"),
 	BLT("sio_reset_eof", 1, sio_reset_eof, "_sio_reset_eof"),
 #ifdef SysVIPC

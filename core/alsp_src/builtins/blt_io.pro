@@ -788,6 +788,14 @@ printf0([0'%,0'% | Format], Stream, ArgList,Options) :-
 	put_code(Stream,0'%),
 	printf0(Format, Stream, ArgList,Options).
 
+%%%%		%% -- special case newlines (quoted or not):
+printf0([0'\n | Format], Stream, ArgList,Options) 
+	:-!,
+	(dmember(line_end(false), Options) ->
+		put_byte(Stream, 0'\\) ; true ),
+	nl(Stream),
+	printf0(Format, Stream, ArgList,Options).
+
 %%%%		All other formats
 printf0([0'% | Format], Stream, [Arg | ArgList],Options) :-
 	isformat(Format,CFormat,RestFormat),

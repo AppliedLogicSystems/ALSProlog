@@ -2043,7 +2043,7 @@ for ac_func in aint bcopy dlopen exp10 \
 	gamma getcwd gethostname getpagesize getwd \
 	lgamma memmove mkdir mmap mprotect poll \
 	re_comp regcmp rexec rint \
-	select setitimer setsid sigaction sigaltstack sigstack sigvec \
+	select setitimer setsid sigaction sigaltstack sigstack sigvec sigvector \
 	socket srand srand48 srandom \
 	strcspn strdup strspn strtok \
 	symlink sysconf \
@@ -2082,6 +2082,16 @@ DEFS="$DEFS -D${ac_tr_func}=1"
 fi
 rm -f conftest*
 done
+
+### check for /dev/zero
+echo CHECKING FOR /dev/zero...
+if test -f /dev/zero; then
+echo "#define" HAVE_DEV_ZERO "1" >> confdefs.h
+DEFS="$DEFS -DHAVE_DEV_ZERO=1"
+echo /dev/zero present
+else
+echo /dev/zero not present
+fi
 
 
 ###	checks for missing headers

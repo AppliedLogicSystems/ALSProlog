@@ -209,26 +209,26 @@ sym_insert_2long(symbol, type, longval1, longval2)
 
 
 
-/*
- * The CI_get_integer function will take a pointer to an argument
- * (which is a prolog object) and try to change it to a 32-bit integer.
- * If successful, the function returns "1", otherwise it returns "0".
- * Conversion is attempted in the following way:
- *
- * PI_ TYPE          CONVERSION
- * ========          ==========
- * PI_DOUBLE         Double is extracted an coerced into a C "unsigned long"
- * PI_UIA            Pointer to start of UIA body
- * PI_STRUCT         if principal functor is c/1, and sole argument is
- *                      PI_SYM or PI_UIA, do constant lookup on argument.  If
- *                      found, return the constant.  Otherwise, return "0".
- * PI_LIST           Take first four elements of list and use the lowest byte
- *                      of each to construct your 32-bit integer using the low
- *                      byte from the first element to be the highest byte of
- *                      the 32-bit int.
- * PI_SYM            None.  Return 0.
- * PI_VAR            None.  Return 0.
- */
+/*---------------------------------------------------------------------------*
+ | The CI_get_integer function will take a pointer to an argument
+ | (which is a prolog object) and try to change it to a 32-bit integer.
+ | If successful, the function returns "1", otherwise it returns "0".
+ | Conversion is attempted in the following way:
+ |
+ | PI_ TYPE          CONVERSION
+ | ========          ==========
+ | PI_DOUBLE         Double is extracted an coerced into a C "unsigned long"
+ | PI_UIA            Pointer to start of UIA body
+ | PI_STRUCT         if principal functor is c/1, and sole argument is
+ |                      PI_SYM or PI_UIA, do constant lookup on argument.  If
+ |                      found, return the constant.  Otherwise, return "0".
+ | PI_LIST           Take first four elements of list and use the lowest byte
+ |                      of each to construct your 32-bit integer using the low
+ |                      byte from the first element to be the highest byte of
+ |                      the 32-bit int.
+ | PI_SYM            None.  Return 0.
+ | PI_VAR            None.  Return 0.
+ *---------------------------------------------------------------------------*/
 
 int
 CI_get_integer(arg, type)

@@ -22,6 +22,9 @@ extern	void	signal_handler	PARAMS(( int, struct siginfo * ));
 #elif defined(HAVE_SIGVEC)
 extern	void  signal_handler	PARAMS(( int, int, struct sigcontext *, char * ));
 
+#elif defined(HAVE_SIGVECTOR)
+extern	void  signal_handler	PARAMS(( int, int, struct sigcontext *, char * ));
+
 #elif defined(VMS)
 extern	void  signal_handler	PARAMS(( char ));	/* !!? */
 
