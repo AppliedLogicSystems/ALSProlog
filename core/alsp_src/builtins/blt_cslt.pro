@@ -178,7 +178,12 @@ cgo_struct(
 consult_global_options(Options, COpts)
 	:-
 	cgo_struct(COpts),
-	proc_cgo(Options, COpts).
+	(xconsult:source_level_debugging(on) ->
+		XOptions = [source(true) | Options]
+		;
+		XOptions = Options
+	),
+	proc_cgo(XOptions, COpts).
 
 proc_cgo([], _).
 proc_cgo([Opt | Options], COpts)
