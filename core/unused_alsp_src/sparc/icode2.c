@@ -11,6 +11,7 @@
 
 #include "defs.h"
 #include "compile.h"
+#include "icode.h"
 #include "wintcode.h"
 #include "module.h"
 #include "codegen.h"

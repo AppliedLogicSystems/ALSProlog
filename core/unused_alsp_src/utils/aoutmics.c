@@ -128,6 +128,9 @@ main(int argc,char **argv)
     
     nbytes = ehdr.a_syms;
     symtab = (struct nlist *) malloc(nbytes);
+fprintf(stderr,"ehdr.a_syms=%d  nbytes=%d  symtab=%d\n",
+    			ehdr.a_syms, nbytes,symtab);
+
 
     if (!symtab)
 	fe("Unable to allocate sufficient space for symbol table", 0);

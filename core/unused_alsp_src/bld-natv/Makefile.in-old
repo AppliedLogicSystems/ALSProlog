@@ -5,10 +5,11 @@
 
 systype = natv
 srcdir = @srcdir@/..
-VPATH  = @srcdir@/../generic:@srcdir@/../@ARCH@:..
+VPATH  = @srcdir@/../generic:@srcdir@/../@ARCH@:@srcdir@/../@ARCH@/@SOS@:..
 
 ARCH		= @ARCH@
 OS		= @OS@
+SOS		= @SOS@
 
 CC		= @CC@
 LINK		= $(CC)
@@ -37,7 +38,8 @@ PROLOG		= ../bld-port/alspro
 
 include $(srcdir)/generic/generic.mkf
 include $(srcdir)/$(ARCH)/$(ARCH).mkf
-include $(srcdir)/$(ARCH)/$(basename $(basename $(OS)))/$(basename $(basename $(OS))).mkf
+#include $(srcdir)/$(ARCH)/$(basename $(basename $(OS)))/$(basename $(basename $(OS))).mkf
+include $(srcdir)/$(ARCH)/$(SOS)/$(SOS).mkf
 
 objects = $(gfiles_o) $(afiles_o)
 
@@ -54,13 +56,13 @@ alspro.a: setup $(objects)
 	ar ruv alspro.a $(objects)
 	-ranlib alspro.a
 
-alspro_basis: pimain.o alspro.a 
-	$(CC) -o alspro_basis $^ $(LDFLAGS) $(LIBS)
+alspro_b: pimain.o alspro.a 
+	$(CC) -o alspro_b $^ $(LDFLAGS) $(LIBS)
 
 IMGOPTS = select_lib(builtins,[debugger])
 
-alspro: alspro_basis
-	alspro_basis -obp -g 'save_image(alspro,[$(IMGOPTS)])'
+alspro: alspro_b
+	alspro_b -obp -g 'save_image(alspro,[$(IMGOPTS)])'
 
 testdir	= $(srcdir)/tests
 
@@ -75,12 +77,12 @@ atrans: $(srcdir)/generate/atrans
 	if [ `echo $(srcdir) | sed -e 's/^\(.\).*/\1/'` = "/" ]; then	\
 		$(LN_S) $(srcdir)/generate/atrans/*.pro atrans;		\
 		$(LN_S) $(srcdir)/$(ARCH)/atr_*.pro atrans;		\
-		$(LN_S) $(srcdir)/$(ARCH)/$(OS)/atr_*.pro atrans;	\
+		$(LN_S) $(srcdir)/$(ARCH)/$(SOS)/atr_*.pro atrans;	\
 	else								\
 	    (	cd atrans; 						\
 		$(LN_S) ../$(srcdir)/generate/atrans/*.pro . ;		\
 		$(LN_S) ../$(srcdir)/$(ARCH)/atr_*.pro . ;		\
-		$(LN_S) ../$(srcdir)/$(ARCH)/$(OS)/atr_*.pro . ;	\
+		$(LN_S) ../$(srcdir)/$(ARCH)/$(SOS)/atr_*.pro . ;	\
 	    );								\
 	fi
 

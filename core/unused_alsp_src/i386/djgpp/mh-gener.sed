@@ -22,4 +22,5 @@ s/`date`/YY\/MM\/DD/g
 s/echo >>/echo. >>/
 
 /cp alsmics/ a\
-	coff2exe alsdir/als-mics alsmics
+	coff2exe alsmics \
+	-cp alsmics.exe alsdir/als-mics.exe

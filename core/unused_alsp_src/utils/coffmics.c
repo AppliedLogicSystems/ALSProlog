@@ -115,6 +115,8 @@ main(int argc,char **argv)
 #   define ssname argv[2]
 #   define oiname argv[3]
 
+fprintf(stderr,"Starting coffmics main...\n");
+
 
     if (argc != 4) 
 	fe("Usage: als-mics image-name saved-state-name output-image-name", 0);
@@ -127,6 +129,8 @@ main(int argc,char **argv)
     /*
      * Step 1: Copy the input image to the output image.
      */
+
+fprintf(stderr,"Starting coffmics Step 1\n");
     
     iifd = open(iiname, O_RDONLY);
     if (iifd < 0)
@@ -146,6 +150,8 @@ main(int argc,char **argv)
 
     close(iifd);
 
+fprintf(stderr,"Done Step 1: %s\n",iiname);
+
 
     /*
      * Step 2:  Open the save state file and stat it for future processing
@@ -157,6 +163,7 @@ main(int argc,char **argv)
     if (fstat(ssfd, &ss_statbuf) < 0)
 	fe("Cannot fstat file descriptor associated with %s", ssname);
     
+fprintf(stderr,"Done Step 2: %s\n",ssname);
     /*
      * Step 3:  Read the file header and a.out header
      */
@@ -181,6 +188,8 @@ main(int argc,char **argv)
 #else
 #error No magic value to compare against
 #endif
+
+fprintf(stderr,"Done Step 3: Header Info\n");
     
     /*
      * Step 4: Read symbol and string tables
@@ -188,6 +197,9 @@ main(int argc,char **argv)
 
     nbytes = fhdr.f_nsyms * SYMESZ;
     symtab = (struct syment *) malloc(nbytes);
+
+fprintf(stderr,"Step 4:fhdr.f_nsyms=%d SYMESZ=%d nbytes=%d symtab=%d\n",
+	 	fhdr.f_nsyms, SYMESZ, nbytes, symtab);
 
     if (!symtab)
 	fe("Unable to allocate sufficient space for symbol table", 0);

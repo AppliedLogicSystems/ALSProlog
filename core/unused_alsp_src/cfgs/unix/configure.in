@@ -9,11 +9,12 @@ echo Configuring for $arch_mach_os ...
 echo
 
 ARCH=`echo $arch_mach_os | sed -e 's/-.*//'`
-#OS=`echo $arch_mach_os | sed -e 's/.*-//' -e 's/\..*$//'`
+SOS=`echo $arch_mach_os | sed -e 's/.*-//' -e 's/\..*$//'`
 OS=`echo $arch_mach_os | sed -e 's/.*-//'`
 
 AC_SUBST(ARCH)
 AC_SUBST(OS)
+AC_SUBST(SOS)
 AC_DEFINE(MinorOSStr,\"$OS\")
 
 ###	checks for alternative programs
@@ -233,7 +234,7 @@ write		\
 
 ###	output Makefile and config.h
 changequote({,})dnl
-AC_OUTPUT(Makefile bld-port/Makefile bld-natv/Makefile config.d,
+AC_OUTPUT(Makefile bld-port/makefile bld-port/tconfig.h bld-natv/makefile bld-natv/tconfig.h config.d,
 {
 echo creating config.h
 sed	-e '/^# /d' \

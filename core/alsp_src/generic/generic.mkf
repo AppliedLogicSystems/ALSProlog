@@ -16,7 +16,7 @@ all:	alsdir alsmics alspro alstest
 # Define CPPFLAGS and the default rule for translating .c files to .o files
 #
 
-CPPFLAGS	= -I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -DHAVE_CONFIG_H
+CPPFLAGS	= -I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(srcdir)/$(ARCH)/$(SOS) -DHAVE_CONFIG_H
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(X_CFLAGS) $<
 
@@ -154,22 +154,22 @@ tokini2.h:	tokens.h
 tokens.h:	generate/bldtok.c tokini.h parser.h
 	${CC} $(CPPFLAGS) -o bldtok $(srcdir)/generic/generate/bldtok.c
 	./bldtok
-	rm bldtok
+	-rm bldtok
 
 lexinit.h:	generate/lexinit.c lexan.h
 	$(CC) $(CPPFLAGS) -o lexinit $(srcdir)/generic/generate/lexinit.c
 	./lexinit >lexinit.h
-	rm ./lexinit
+	-rm ./lexinit
 
 siolex.h:	generate/sioinit.c bsio.h
 	$(CC) $(CPPFLAGS) -o sioinit $(srcdir)/generic/generate/sioinit.c
 	./sioinit >siolex.h
-	rm ./sioinit
+	-rm ./sioinit
 
 icode.h:	icodedef.h generate/icode.c
 	$(CC) $(CPPFLAGS) -o icode $(srcdir)/generic/generate/icode.c
 	./icode >icode.h
-	rm -rf ./icode
+	-rm -rf ./icode
 
 #
 # generic dependencies
@@ -234,6 +234,7 @@ micsflags	= -lelf
 endif
 
 alsmics: alsdir $(srcdir)/utils/$(alsmics_c)
+	echo exeformat=$(exeformat)
 	$(CC) -o alsmics $(srcdir)/utils/$(alsmics_c) $(CPPFLAGS) $(micsflags)
 	-cp alsmics alsdir/als-mics
 

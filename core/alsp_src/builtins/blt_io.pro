@@ -759,8 +759,7 @@ printf_check_format(Culprit,_) :-
 	type_error(list,Culprit,2).
 
 
-printf0([],_,_,_) :-
-	!.
+printf0([],_,_,_) :- !.
 
 %%%%		%t -- print Prolog term
 printf0([0'%,0't |Format], Stream, [Term|ArgList],Options) :-
