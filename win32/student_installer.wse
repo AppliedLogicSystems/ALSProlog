@@ -35,7 +35,7 @@ item: Get Temporary Filename
   Variable=READMEFILE
 end
 item: Install File
-  Source=D:\als_prolog\win32\ALS Student Prolog\Welcome.txt
+  Source=.\ALS Student Prolog\Welcome.txt
   Destination=%TEMP%\%READMEFILE%
   Flags=0000000000100010
 end
