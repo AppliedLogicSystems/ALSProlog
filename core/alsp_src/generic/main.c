@@ -523,6 +523,9 @@ PI_prolog_init0(argc, argv)
     assert_atom_in_module("syscfg","freeze");
 #endif
 
+    /* Initilize any libraries. */
+    pi_init();
+
     /*---------------------------------------*
      | Load the builtins
      *---------------------------------------*/
@@ -575,9 +578,6 @@ PI_prolog_init0(argc, argv)
      * Establish the Control/C (or Control/BREAK) handler
      *---------------------------------------*/
     init_sigint();
-
-    /* Initilize any libraries. */
-    pi_init();
     
     return (0);
 }
