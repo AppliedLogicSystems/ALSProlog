@@ -66,12 +66,13 @@
 	 * The following tokens appear as unary operators or functions in
 	 * arithmetic expressions.  Note that there is an overlap between
 	 * these and the binary operators.  The first is TK_NOT and
-	 * the last is TK_TRUNC.
+	 * the last is TK_TRUNCATE.
 	 *------------------------------------------------------------------*/
 
         OP(TK_NOT,"not",OP_FY(900),0),
 	TK(TK_BACKSLASH,"\\"),
 	TK(TK_ABS,"abs"),
+	TK(TK_SIGN, "sign"),
 	TK(TK_SIN,"sin"),
 	TK(TK_SINH,"sinh"),
 	TK(TK_COS,"cos"),
@@ -88,7 +89,9 @@
 	TK(TK_LOG10,"log10"),
 	TK(TK_FLOOR,"floor"),
 	TK(TK_ROUND,"round"),
-	TK(TK_CEIL,"ceil"),
+	TK(TK_CEILING,"ceiling"),
+	TK(TK_FLOAT_INTEGER_PART, "float_integer_part"),
+	TK(TK_FLOAT_FRACTIONAL_PART, "float_fractional_part"),
 	TK(TK_ERF,"erf"),
 	TK(TK_ERFC,"erfc"),
 	TK(TK_GAMMA,"gamma"),
@@ -97,7 +100,7 @@
 	TK(TK_Y0,"y0"),
 	TK(TK_Y1,"y1"),
 
-	TK(TK_TRUNC,"trunc"),
+	TK(TK_TRUNCATE,"truncate"),
 
 	/*------------------------------------------------------------------*
 	 * TK_PLUS and TK_MINUS may appear as both unary an binary operators
@@ -121,7 +124,8 @@
         OP(TK_STAR,"*",0,OP_YFX(400)),
         OP(TK_SLASHSLASH,"//",0,OP_YFX(400)),
         OP(TK_DIV,"div",0,OP_YFX(400)),
-        OP(TK_MOD,"mod",0,OP_YFX(300)),
+        OP(TK_MOD,"mod",0,OP_YFX(400)),
+        OP(TK_REM,"rem",0,OP_YFX(400)),
         OP(TK_BAND,"/\\",0,OP_YFX(500)),
         OP(TK_BOR,"\\/",0,OP_YFX(500)),
 		OP(TK_BXOR,"xor",0,OP_YFX(500)),
@@ -284,7 +288,7 @@
 	TK(TK_EXISTENCE_ERROR,"existence_error"),
 	TK(TK_PERMISSION_ERROR,"permission_error"),
 	TK(TK_REPRESENTATION_ERROR,"representation_error"),
-	TK(TK_CALCULATION_ERROR,"calculation_error"),
+	TK(TK_EVALUATION_ERROR,"evaluation_error"),
 	TK(TK_RESOURCE_ERROR,"resource_error"),
 	TK(TK_SYNTAX_ERROR,"syntax_error"),
 	TK(TK_SYSTEM_ERROR,"system_error"),

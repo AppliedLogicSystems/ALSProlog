@@ -53,9 +53,18 @@ pbi_arg()
     w_get_An(&v2, &t2, 2);	/* Get structure or list */
     w_get_An(&v3, &t3, 3);	/* Get argument to unify with */
 
-    if (t1 != WTP_INTEGER)
-		FAIL;
-
+    switch (t1) {
+    case WTP_UNBOUND:
+    	PERR_INSTANTIATION(find_token("arg"), 3);
+    	break;
+    case WTP_INTEGER:
+    	if (v1 < 0)
+    	   PERR_DOMAIN(find_token("arg"), 3, find_token("not_less_than_zero"), v1, t1);
+    	break;
+    default:
+        PERR_TYPE(find_token("arg"), 3, TK_INTEGER, v1, t1);
+    }
+    
     switch (t2) {
 	case WTP_STRUCTURE:
 	    w_get_functor(&functor, v2);
@@ -77,8 +86,11 @@ pbi_arg()
 
 	    break;
 
+	case WTP_UNBOUND:
+	    PERR_INSTANTIATION(find_token("arg"), 3);
+    	break;
 	default:
-	    FAIL;
+	    PERR_TYPE(find_token("arg"), 3, find_token("compound"), v2, t2);
     }
 
  	if (w_unify(argval, argtype, v3, t3))
@@ -409,18 +421,25 @@ pbi_functor()
 	    }
 	    /* fall thru to WTP_SYMBOL case */
 	case WTP_SYMBOL:
+	case WTP_INTEGER:
 	    if (w_unify(v1, t1, v2, t2) &&
 		w_unify((PWord) 0, WTP_INTEGER, v3, t3))
 		SUCCEED;
 	    else
 		FAIL;
 	    break;
-
+	
 	case WTP_STRUCTURE:
 	    w_get_functor(&f, v1);
 	    w_get_arity(&a, v1);
 
-	    if (w_unify(f, WTP_SYMBOL, v2, t2) &&
+	    if (f == TK_DDOUBLE && a == 4) {
+		if (w_unify(v1, t1, v2, t2) &&
+		    w_unify((PWord) 0, WTP_INTEGER, v3, t3))
+		   SUCCEED;
+		else
+		   FAIL;
+	    } else if (w_unify(f, WTP_SYMBOL, v2, t2) &&
 		w_unify((PWord) a, WTP_INTEGER, v3, t3))
 		SUCCEED;
 	    else
@@ -429,7 +448,19 @@ pbi_functor()
 	    break;
 
 	case WTP_UNBOUND:
-	    if (t3 == WTP_INTEGER && force_uia(&v2, &t2)) {
+	    if (t3 == WTP_INTEGER && v3 == 0 && t2 == WTP_INTEGER) {
+	    	if (w_unify(v1, t1, v2, t2)) SUCCEED;
+	    	else FAIL;
+	    } else if (t3 == WTP_INTEGER && v3 == 0 && t2 == WTP_STRUCTURE) {
+		w_get_functor(&f, v2);
+		w_get_arity(&a, v2);
+
+		if (f == TK_DDOUBLE && a == 4) {
+	    	    if (w_unify(v1, t1, v2, t2)) SUCCEED;
+	    	    else FAIL;
+	    	} else FAIL;
+	    	
+	    } else if (t3 == WTP_INTEGER  && v3 >= 0 && force_uia(&v2, &t2)) {
 		PWord s;
 		int   t;
 		int   i;
@@ -458,9 +489,28 @@ pbi_functor()
 		    FAIL;
 
 	    }
-	    else
-		FAIL;
+	    else {
+	    	if (t2 == WTP_UNBOUND || t3 == WTP_UNBOUND)
+	    	    PERR_INSTANTIATION(TK_FUNCTOR, 3);
+	    	else if (t2 != WTP_UIA && t2 != WTP_SYMBOL && t2 != WTP_INTEGER) {
+	    	    if (t2 == WTP_STRUCTURE) {
+			w_get_functor(&f, v2);
+	    		w_get_arity(&a, v2);
 
+	   		if (f == TK_DDOUBLE && a == 4 && t3 == WTP_INTEGER && v3 > 0)
+	   		    PERR_TYPE(TK_FUNCTOR, 3, TK_ATOM, v2, t2);
+	   		else PERR_TYPE(TK_FUNCTOR, 3, find_token("atomic"), v2, t2);
+	    	    } else PERR_TYPE(TK_FUNCTOR, 3, find_token("atomic"), v2, t2);
+	    	} else if (t3 != WTP_INTEGER)
+	    	    PERR_TYPE(TK_FUNCTOR, 3, TK_INTEGER, v3, t3);
+	    	else if ((t2 == WTP_INTEGER || t2 == WTP_STRUCTURE) && t3 == WTP_INTEGER && v3 != 0)
+	    	    PERR_TYPE(TK_FUNCTOR, 3, TK_ATOM, v2, t2);
+	    	else if (t3 == WTP_INTEGER && v3 < 0)
+	    	    PERR_DOMAIN(TK_FUNCTOR, 3, find_token("not_less_than_zero"), v3, t3);
+	    	    
+	    	else
+	    	    FAIL;
+	    }
 	    break;
 
 	case WTP_LIST:
@@ -686,6 +736,39 @@ pbi_atomic()
 	FAIL;
 }
 
+int
+pbi_compound(void)
+{
+    PWord va1;
+    int   ta1;
+
+    w_get_An(&va1, &ta1, 1);
+
+    switch (ta1) {
+    case WTP_STRUCTURE:
+    	{
+#ifdef DoubleType
+	    SUCCEED;
+#else
+	    PWord functor;
+	    int   arity;
+
+	    w_get_arity(&arity, va1);
+	    w_get_functor(&functor, va1);
+
+	    if (arity == 4 && functor == TK_DDOUBLE) FAIL;
+	    else SUCCEED;
+	}
+#endif
+	break;
+    case WTP_LIST:
+    	SUCCEED;
+    	break;
+    default:
+    	FAIL;
+    	break;
+    }
+}
 #endif /* CMeta */
 
 
