@@ -8,6 +8,7 @@
  |	Author: Ken Bowen
  |	Creation Date: 1997
  *=============================================================*/
+ %% Loaded separately:
 %:-[db_srctr].
 
 module builtins.
@@ -62,21 +63,21 @@ alsdev(Shared)
 
 	tcl_call(shl_tcli, [destroy,'.als_splash_screen'], _),
 
-	open(tk_win(shl_tcli, '.topals.txwin.text'), read, ISS, 
+	open(tk_win(shl_tcli, '.topals.text'), read, ISS, 
 		[alias(shl_tk_in_win)
 			,prompt_goal(user_prompt_goal(shl_tk_out_win))
 		]),
-	open(tk_win(shl_tcli, '.topals.txwin.text'), write, OSS, 
+	open(tk_win(shl_tcli, '.topals.text'), write, OSS, 
 		[alias(shl_tk_out_win),write_eoln_type(lf)
 		]),
 	set_associated_output_alias(shl_tk_in_win, shl_tk_out_win),
-	catenate('WaitForLine','.topals.txwin.text',WaitVar),
-	catenate('DataLine','.topals.txwin.text',DataVar),
+	catenate('WaitForLine','.topals.text',WaitVar),
+	catenate('DataLine','.topals.text',DataVar),
 
 	tcl_call(shl_tcli, [set,WaitVar,0],_),
 	tcl_call(shl_tcli, [set,DataVar,""],_),
 	tcl_call(shl_tcli, 
-		[set_top_bindings,'.topals.txwin.text',shl_tk_in_win,WaitVar,DataVar],_),
+		[set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_),
     sio:set_input(ISS),
     sio:set_output(OSS),
 
@@ -86,7 +87,7 @@ alsdev(Shared)
 /*****
 		%	open(console('debugger output'),write, OutDStream,
 	cancel_alias(debugger_output),
-    open(tk_win(shl_tcli, '.topals.txwin.text'),write, OutDStream,
+    open(tk_win(shl_tcli, '.topals.text'),write, OutDStream,
 	 ['$stream_identifier'(-4), % alias(debugger_output),
 	 	buffering(line),type(text), alias(console_debugger_output),
 	 	maxdepth(8), line_length(76),
@@ -95,7 +96,7 @@ alsdev(Shared)
 
 		%	open(console('debugger input'), read, InDStream,
 	cancel_alias(debugger_input),
-    open(tk_win(shl_tcli, '.topals.txwin.text'), read, InDStream,
+    open(tk_win(shl_tcli, '.topals.text'), read, InDStream,
 	 ['$stream_identifier'(-3), % alias(debugger_input),
 	  	blocking(true), alias(console_debugger_input),
 	 	prompt_goal(flush_output(debugger_output))]),
@@ -109,7 +110,7 @@ alsdev(Shared)
 
 		%	open(console('debugger output'),write, OutGuiDStream,
 	cancel_alias(debugger_output),
-    open(tk_win(shl_tcli, '.debugwin.textwin.text'),write, OutGuiDStream,
+    open(tk_win(shl_tcli, '.debugwin.text'),write, OutGuiDStream,
 	 ['$stream_identifier'(-8), alias(gui_debugger_output),
 	 	buffering(line),type(text),
 	 	maxdepth(8), line_length(76),
@@ -118,15 +119,14 @@ alsdev(Shared)
 
 		%	open(console('debugger input'), read, InGuiDStream,
 	cancel_alias(debugger_input),
-    open(tk_win(shl_tcli, '.debugwin.textwin.text'), read, InGuiDStream,
+    open(tk_win(shl_tcli, '.debugwin.text'), read, InGuiDStream,
 	 ['$stream_identifier'(-7), blocking(true),alias(gui_debugger_input),
 	 	prompt_goal(flush_output(debugger_output))]),
 	assign_alias(debugger_input, InGuiDStream),
-
     %% Error stream
 		%	open(console_error('error output'),write,OutEStream,
 	cancel_alias(error_stream),
-    open(tk_win(shl_tcli, '.topals.txwin.text'),write,OutEStream,
+    open(tk_win(shl_tcli, '.topals.text'),write,OutEStream,
 	 ['$stream_identifier'(-5), alias(error_stream),
 	 	buffering(line),type(text)]),
 
@@ -153,13 +153,16 @@ alsdev(Shared)
 	debugger:init_visual_debugger,
 	change_debug_io(debugwin),
 
+	get_cwd(CurDir),
+	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
+
 	builtins:prolog_shell(ISS,OSS,alsdev).
 
 
 alsdev_splash(TclPath)
 	:-
 	tcl_call(shl_tcli, [file,join,TclPath,'turnstile_splash.gif'], SPP),
-	catenate('image create photo als_splash_gif -file ',SPP,Splashy),
+	catenate(['image create photo als_splash_gif -file \{',SPP,'\}'],Splashy),
 	CL= [
 		'wm withdraw .',
 		'toplevel .als_splash_screen -bd 2 -relief flat',
@@ -174,6 +177,11 @@ alsdev_splash(TclPath)
 	list_tcl_eval(CL, shl_tcli, _),
 	tcl_call(shl_tcli, [update],_).
 
+push_prompt(tcltk,OutStream,Prompt1)
+	:-!,
+	nl(OutStream),
+	flush_output(OutStream),
+	tcl_call(shl_tcli, [set_prompt_mark, '.topals.text'], _).
 
 
 
@@ -216,9 +224,10 @@ setup_prolog_flags
 	:-
 	sys_env(OS, _, _),
 	not (OS = macos), 
+	!,
 	static_flags_info(StaticEqsList),
 	add_static_items_to_menu(StaticEqsList, 
-				shl_tcli, '.topals.mmenb.settings.flags.static').
+				shl_tcli, '.topals.mmenb.project.static').
 setup_prolog_flags.
 
 add_static_items_to_menu([], Interp, MenuPath).
@@ -242,13 +251,16 @@ use tk_alslib.
 alsdev_default_setup(SystemDefaults)
 	:-
 	find_alsdev_ini(Items),
-	(dmember(window_settings(IniSettings), Items) -> true ; IniSettings = []),
-	establish_window_defaults(IniSettings, SystemDefaults),
+	window_defaults_setup(topals,Items,SystemDefaults),
+	window_defaults_setup(debugwin,Items,SystemDefaults),
+	window_defaults_setup(edit,Items,SystemDefaults).
+/*
 	(dmember(text_settings(TextSettings), Items) ->
 		setup_defaults(TextSettings, text)
 		;
 		true
 	).
+*/
 
 :- dynamic(alsdev_ini_path/1).
 
@@ -261,7 +273,15 @@ find_alsdev_ini(Items)
 
 find_alsdev_ini([]).
 
-establish_window_defaults(Ini, SystemDefaults)
+window_defaults_setup(WinGroup,Items,SystemDefaults)
+	:-
+	(dmember(window_settings(WinGroup,IniSettings), Items) -> 
+		true 
+		; 
+		IniSettings = []),
+	establish_window_defaults(IniSettings, SystemDefaults, WinGroup).
+
+establish_window_defaults(Ini, SystemDefaults, WinGroup)
 	:-
 	setup_win_default(background,Back,Ini,SystemDefaults),
 	setup_win_default(foreground,Fore,Ini,SystemDefaults),
@@ -270,12 +290,12 @@ establish_window_defaults(Ini, SystemDefaults)
 	setup_win_default(font,Font,Ini,SystemDefaults),
 	setup_win_default(tabs,Tabs,Ini,SystemDefaults),
 
-	tcl_call(shl_tcli, [set_proenv,win_general,background,Back], _),
-	tcl_call(shl_tcli, [set_proenv,win_general,foreground,Fore], _),
-	tcl_call(shl_tcli, [set_proenv,win_general,selectbackground,SelectBack], _),
-	tcl_call(shl_tcli, [set_proenv,win_general,selectforeground,SelectFore], _),
-	tcl_call(shl_tcli, [set_proenv,win_general,font,Font], _),
-	tcl_call(shl_tcli, [set_proenv,win_general,tabs,Tabs], _).
+	tcl_call(shl_tcli, [set_proenv,WinGroup,background,Back], _),
+	tcl_call(shl_tcli, [set_proenv,WinGroup,foreground,Fore], _),
+	tcl_call(shl_tcli, [set_proenv,WinGroup,selectbackground,SelectBack], _),
+	tcl_call(shl_tcli, [set_proenv,WinGroup,selectforeground,SelectFore], _),
+	tcl_call(shl_tcli, [set_proenv,WinGroup,font,Font], _),
+	tcl_call(shl_tcli, [set_proenv,WinGroup,tabs,Tabs], _).
 
 
 setup_win_default(What,Var,Ini,SystemDefaults)
@@ -291,51 +311,60 @@ setup_win_default(background,'#d9d9d9', _,_).
 setup_win_default(foreground,'Black', _,_).
 setup_win_default(selectbackground,'#c3c3c3', _,_).
 setup_win_default(selectforeground,'Black', _,_).
-setup_win_default(font,'Courier 12', _,_).
+setup_win_default(font,'user 10 normal', _,_).
 setup_win_default(tabs,'', _,_).
 
-change_settings(WinSettingsVals, TextSettingsVals)
+change_settings(WinSettingsVals, WinGroup)
 	:-
+write(change_settings(WinSettingsVals, WinGroup)),nl,flush_output,
 	WinSettingsVals = [Back, Fore, SelectBack, SelectFore, Font, Tabs],
-
 	WinSettings = 
-		window_settings([background=Back, foreground=Fore, 
-						 selectbackground=SelectBack, selectforeground=SelectFore, 
-						 font=Font, tabs=Tabs ]),
-
-	TextSettingsVals = [Family, Size, SizeUnits, Style],
+		window_settings(WinGroup, [background=Back, foreground=Fore, 
+					 selectbackground=SelectBack, selectforeground=SelectFore, 
+					 font=Font, tabs=Tabs ]),
+/*
+	TextSettingsVals = [Family, Size, Style],
 	TextSettings = 
-		text_settings([family=Family,size=Size,sizeunits=SizeUnits,style=Style]),
-
+		text_settings([family=Family,size=Size,style=Style]),
 	modify_settings([WinSettings,TextSettings]).
+*/
+	modify_settings(WinSettings,window_settings, 2, WinGroup).
 
-modify_settings(WinSettings)
+modify_settings(NewTerm, Functor, Arity, Arg1)
 	:-
 	alsdev_ini_path(ALSDEVINIPath),
 	!,
 	grab_terms(ALSDEVINIPath, OldTerms),
-	replace_items(OldTerms, WinSettings, NewTerms),
+	replace_items(OldTerms, NewTerm, Functor, Arity, Arg1, NewTerms),
 	open(ALSDEVINIPath, write, OutS, []),
 	write_clauses(OutS, NewTerms, [quoted(true)]),
 	close(OutS).
 
-modify_settings(Terms)
+%modify_settings(Terms)
+modify_settings(NewTerm, Functor, Arity, Arg1)
 	:-
 	open('alsdev.ini', write, OutS, []),
-	write_clauses(OutS, Terms),
+	write_clauses(OutS, [NewTerm]),
 	close(OutS).
 
-replace_items(OldTerms, NewSettings, NewTerms)
+/*
+replace_items(OldTerms, NewTerm, Functor, Arity, Arg1, NewTerms)
 	:-
-	replace_items(OldTerms, NewSettings, UnusedNew, ModifiedTerms),
-	append(UnusedNew, ModifiedTerms, NewTerms).
+	replace_items(OldTerms, NewTerm, Functor, Arity, Arg1, NewTerms).
+*/
 
-replace_items([], Unused, Unused, []).
-replace_items([Old | OldTerms], Replacements, UnusedReps, [New | NewTerms])
+replace_items([],  NewTerm, Functor, Arity, Arg1,  [NewTerm]).
+replace_items([Old | OldTerms],  NewTerm, Functor, Arity, Arg1,  [NewTerm | OldTerms])
 	:-
-	replacement(Old, Replacements, InterReps, New),
-	replace_items(OldTerms, InterReps, UnusedReps, NewTerms).
+%	replacement(Old, Replacements, InterReps, New),
+	functor(Old, Functor, Arity),
+	arg(1, Old, Arg1),
+	!.
+replace_items([Old | OldTerms],  NewTerm, Functor, Arity, Arg1,  [Old | NewTerms])
+	:-
+	replace_items(OldTerms,  NewTerm, Functor, Arity, Arg1,  NewTerms).
 
+/*
 replacement(Old, Replacements, InterRep, New)
 	:-
 	functor(Old, FF, A),
@@ -344,6 +373,7 @@ replacement(Old, Replacements, InterRep, New)
 	!,
 	list_delete(Replacements, New, InterRep).
 replacement(Old, Rep, Rep, Old).
+*/
 
 setup_defaults([], _).
 setup_defaults([Tag=Value | TextSettings], Group)
@@ -755,28 +785,29 @@ get_st_rec_by_fcg(FCGNum, Rec)
 	arg(FCGNum, DBFRTBL, Rec).
 
 
-start_src_trace(FileName)
+start_src_trace(BaseFileName, SrcFilePath)
 	:-
 	init_visual_debugger,
 	tcl_call(shl_tcli, [ensure_db_showing], _),
 		%% Old Rec exists, but window has been destroyed, so
 		%% remove old rec, and start over:
-	continue_start_src_trace(FileName).
+	continue_start_src_trace(BaseFileName, SrcFilePath).
 
-continue_start_src_trace(FileName)
+continue_start_src_trace(BaseFileName, SrcFilePath)
 	:-
-	(get_src_trace_rec(FileName, OldRec) ->
+%write(continue_start_src_trace(BaseFileName, SrcFilePath)),nl,flush_output,
+	(get_src_trace_rec(SrcFilePath, OldRec) ->
 		access_dbstr(winname, OldRec, OldWinName),
 		tcl_call(shl_tcli, [careful_withdraw,OldWinName], _),
 		remove_src_trace_rec(OldRec)
 		;
 		true),
-	create_src_trace(FileName, WinName, TextWinName, BaseFileName, 
+	create_src_trace(SrcFilePath, WinName, TextWinName, BaseFileName, 
 					 NumLines, LineIndex),
 	inverted_index(LineIndex, InvertedLineIndex),
 	builtins:file_clause_group(BaseFileName, FCG),
 	xmake_dbstr(Rec,
-		[FileName,FCG,WinName, TextWinName,NumLines, 
+		[SrcFilePath,FCG,WinName, TextWinName,NumLines, 
 			LineIndex,InvertedLineIndex,0,0]),
 	add_src_trace_rec(Rec),
 	get_dbfr_tbl(DBFRTBL),
@@ -796,9 +827,10 @@ inverted_index([NLCs | LineIndex], CurCharCount, [CurCharCount | List])
 	inverted_index(LineIndex, NxtCharCount, List).
 
 
-create_src_trace(FileName, WinName, TextWinName, BaseFileName, 
+create_src_trace(SrcFilePath, WinName, TextWinName, BaseFileName, 
 				 NumLines, LineIndex)
 	:-
+/*
 		%% deal with extension, full path completely (later):
 	pathPlusFile(_,FF,FileName),
 	(filePlusExt(BaseFileName,Ext,FF) ->
@@ -806,13 +838,24 @@ create_src_trace(FileName, WinName, TextWinName, BaseFileName,
 		;
 		BaseFileName = FF
 	),
+*/
 	catenate('.debug_st_',BaseFileName,WinName),
 	catenate(WinName, '.textwin.text', TextWinName),
+%	catenate('Source Trace: ',FF, Title),
+	(BaseFileName = user -> FF = '\[user\]' ; FF = SrcFilePath),
 	catenate('Source Trace: ',FF, Title),
 	tcl_call(shl_tcli, ['vTclWindow.debug_source_trace',WinName,Title],R),
 	tcl_call(shl_tcli, [TextWinName,delete,'1.0',end], _),
-	tcl_call(shl_tcli, [load_file_to_win,FileName,TextWinName],LoadRes),
-	LoadRes = [NumLines, LineIndex].
+	(BaseFileName = user -> 
+		LoadRes = [0, []]
+		;
+		tcl_call(shl_tcli, [load_file_to_win,SrcFilePath,TextWinName],LoadRes),
+		LoadRes = [NumLines, LineIndex]
+	),
+%write(cst_done),nl,flush_output,
+	tcl_call(shl_tcli, [TextWinName,configure,'-state',disabled],_),
+	tcl_call(shl_tcli, [raise,'.debugwin',WinName],_).
+
 
 check_leashing(Call,Exit,Redo,Fail)
 	:-
@@ -854,6 +897,13 @@ set_debugwin_width(M5Size, MainWinSize)
 	%% - (Start,End) are the file offsets of the head
 	%%    of the clause.
 	%%---------------------------------------------------
+/*** Test debugging clause:
+showGoalToUserWin(Port,Box,Depth, Module, Goal, debug)
+	:-
+	write(tRY_showGoalToUserWin(Port,Box,Depth, Module, Goal, debug)),nl,
+	flush_output,
+	fail.
+ ***/
 
 	%% '$dbg_aph' ::
 
@@ -872,7 +922,7 @@ showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	builtins:file_clause_group(BaseFileName, ClsGrp),
 	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options),
 	reload_debug(DebugType, SrcFilePath),
-	continue_start_src_trace(SrcFilePath),
+	continue_start_src_trace(BaseFileName, SrcFilePath),
 	!.
 
 
