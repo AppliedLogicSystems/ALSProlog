@@ -110,6 +110,7 @@ pre_existing_srcmgrs(PreSM)
 	:-
 	clause(get_primary_manager(_), _),
 	get_primary_manager(OldMgr),
+	OldMgr \= 0,
 	accessObjStruct(source_mgrs, OldMgr, PreSM),
 	!.
 pre_existing_srcmgrs([]).
@@ -508,10 +509,14 @@ do_special_processing([s(FileType, File, NoSuffixFile, Ext) | SFiles])
 	!,
 	do_special_processing(SFiles).
 do_special_processing([s(FileType, File, NoSuffixFile, Ext) | SFiles])
-	:-
+	:-!,
 	printf(user_output,
 		   'There was an error processing the %t command line file: %t\n',
 		   [FileType, File]),
+	do_special_processing(SFiles).
+do_special_processing([Item | SFiles])
+	:-!,
+	printf(user_output, 'Error processing command line item: %t\n', [Item]),
 	do_special_processing(SFiles).
 
 special_cl_processing(prolog_project, File, NoSuffixFile, Ext)
