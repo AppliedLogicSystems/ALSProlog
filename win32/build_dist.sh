@@ -9,7 +9,7 @@ LIB=$ALS_PROLOG/core/alsp_src/library
 BUILTINS=$ALS_PROLOG/core/alsp_src/builtins
 EXAMPLES=$ALS_PROLOG/examples
 MAN=$ALS_PROLOG/manual
-EXTRAS=\\als_addl_software
+EXTRAS=$ALS_PROLOG/../als_addl_software
 ODBC=$ALS_PROLOG/extensions/odbc
 PYTHON=$ALS_PROLOG/extensions/python
 

@@ -147,6 +147,8 @@ read_tokens_lines([Line | Lines], Flag, Tokens)
 	:-
 	open(atom(Line),read,S,[]),
 	read_tokens(Flag, S,  Tokens, InterTail, InterFlag),
+%write('['), write(Flag), write('] '),
+%write(Tokens),nl,
 	close(S),
 	read_tokens_lines(Lines, InterFlag, InterTail).
 
@@ -470,7 +472,14 @@ next_token(0'', S, '\'',NxtC)
     %% Read a character reference:
 next_token(0'&, S, T, NxtC)
 	:-!,
-	read_to_semi(S, Cs, NxtC),
+	get_code(S,NNxtC),
+	((NNxtC=0' ; NNxtC=0'	; NNxtC=10; NNxtC=13) ->
+		Cs = [], NxtC = NNxtC
+		;
+		dispatch_read_to_semi(NNxtC, S, Cs, NxtC),
+		get_code(S,NxtC)
+	),
+%	read_to_semi(S, Cs, NxtC),
 	atom_codes(T, [0'& | Cs]).
 
 next_token(C1, S, T,NxtC)
@@ -500,7 +509,7 @@ dispatch_read_to_terminator(C, S, [], C)
 read_to_semi(S, Cs, NxtC)
 	:-
 	get_code(S, C),
-put_code(C),nl,
+%put_code(C),nl,
 	dispatch_read_to_semi(C, S, Cs, NxtC).
 
 dispatch_read_to_semi(0';, S, [0';], NxtC)
@@ -509,6 +518,10 @@ dispatch_read_to_semi(0';, S, [0';], NxtC)
 dispatch_read_to_semi(C, S, [C | Cs], NxtC)
 	:-
 	read_to_semi(S, Cs, NxtC).
+
+
+
+
 
 
 /*  ADDITION FOR DTDs */
@@ -574,12 +587,21 @@ get_cmt_inter(eol,  Cs, S, Tokens, Tail, comment)
 	atom_codes(Tok, Cs),
 	Tokens = [Tok | Tail].
 
-get_cmt_inter('--',  Cs, S, Tokens, Tail, normal)
+%get_cmt_inter('--',  Cs, S, Tokens, Tail, normal)
+get_cmt_inter('--',  Cs, S, Tokens, Tail, FlagOut)
 	:-!,
 	atom_codes(Tok, Cs),
 	get_code(S, C),
+	(C = 0'> ->
+		Tokens = [Tok, '--', '>' | Tail],
+		FlagOut = normal
+		;
+		Tokens = [Tok, '--',  InterTokens],
+		Flag = comment,
+		read_tokens(comment, C, S, InterTokens, Tail, FlagOut)
+	).
+
 		%% if C \= 0'>, raise error...
-	Tokens = [Tok, '--', '>' | Tail].
 
 /*
 	%% raise eof error:
