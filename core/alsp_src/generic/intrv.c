@@ -1382,9 +1382,9 @@ i_wrap()
 	ul = 2;
 	ul = ul*yh;
 	lowerbd(xl/ul,vl);
-	vl = round(vl);
+	vl = int_round(vl);
 	lowerbd(xh/ul,vh);
-	vh = round(vh);
+	vh = int_round(vh);
 	if (vl GT vh)  iaerror();
 	if (vl EQ vh)  goto w_Same;
 	ul = -yh;

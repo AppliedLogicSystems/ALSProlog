@@ -316,10 +316,10 @@ void deact()
 
 /* -------------------- ^^ Dummy for now ^^ -------------------- */
 
-fp round	PARAMS( (fp) );
+fp int_round	PARAMS( (fp) );
 
 	/* -- Round double to nearest longint -- */
-fp round(num)
+fp int_round(num)
 	fp num;
 {
 	fp ffl;
