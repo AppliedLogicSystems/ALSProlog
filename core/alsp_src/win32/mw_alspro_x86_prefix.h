@@ -5,4 +5,5 @@
 
 #define CONFIGLESS 1
 
+#define CW_INTEL_REGISTER_COLOR_BUG 1
 #include "prefix.h"
