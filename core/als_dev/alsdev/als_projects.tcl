@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.18 1999/01/14 20:32:24 choupt Exp $"
+#|		"$Id: als_projects.tcl,v 1.19 1999/01/21 20:02:36 choupt Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -69,9 +69,9 @@ proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
 
 	set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
 	set DFT [list -filetypes $types]
-	set NewFilePath [eval getFiles $DFT \
-			{-title "Files to Add to Project"} \
-			[list "-initialdir" $DfltDir] ]
+	# DFT currently not used.
+	# -title "Files to Add to Project" not used.
+	set NewFilePath [getFiles -initialdir $DfltDir]
 	set BaseNewFile [file tail $NewFilePath]
 	set Prev [$Listbox get 0 end]
 	if {[lsearch -exact $Prev $BaseNewFile] == -1} then {
