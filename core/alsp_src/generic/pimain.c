@@ -13,6 +13,9 @@
 	/* Not in ALS-Prolog source tree... */
 #include "alspi.h"
 #include <stdio.h>
+#ifndef NO_STDARG_H
+#define HAVE_STDARG_H
+#endif
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #else

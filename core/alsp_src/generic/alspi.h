@@ -64,11 +64,12 @@ typedef struct {
 
 extern char *WinsTypeStr;
 
+#define X_WIN_STR   "xwins"
 #define MOTIF_WIN_STR "motif"
 #define OL_WIN_STR    "openlook"
 #define DEC_WIN_STR   "decwins"
-#define NEXT_WIN_STR  "nextwins"
-#define DOS_WIN_STR   "doswins"
+#define NEXT_WIN_STR  "nextstep"
+#define MS_WIN_STR   "mswins"
 #define MAC_WIN_STR   "macwins"
 #define NO_WIN_STR    "nowins"
 
