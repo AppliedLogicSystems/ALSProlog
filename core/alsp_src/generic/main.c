@@ -1159,16 +1159,6 @@ int MPW_Tool;
 #include <console.h>
 #include <SIOUX.h>
 
-
-#ifdef NO_SIOUX_MENU
-tSIOUXSettings  SIOUXSettings =
-        {0, 0, 0, 0, 0, 0, 4, 80, 24, 0, 0, 22, 12, 0};
-#else
-tSIOUXSettings  SIOUXSettings =
-        {1, 1, 1, 0, 0, 0, 4, 80, 24, 0, 0, 22, 12, 0};
-#endif
-#endif			/* __MWERKS__ */
-
 #include <Events.h>
 #endif	/* MacOS */
 

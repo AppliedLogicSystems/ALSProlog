@@ -57,6 +57,9 @@ void os_init_time(void)
 
 double os_cputime(void)
 {
+/* Sometime I'll update this to subtract suspended time. */
+	return os_realtime();
+/*	
 	ProcessSerialNumber PSN;
 	ProcessInfoRec InfoRec;
 
@@ -69,6 +72,7 @@ double os_cputime(void)
 	if (GetProcessInformation(&PSN, &InfoRec) == noErr)
 		return (double) InfoRec.processActiveTime / 60.0;
 	else return 0.0;
+*/
 }
 
 
