@@ -238,13 +238,10 @@ export alsdev/0.
 alsdev
 	:-
 		%% For ALS IDE Project system:
-%	alsdev:setup_als_ide_mgr(ALS_IDE_Mgr),
 	setup_init_ide_classes(ALS_IDE_Mgr),
 		%% Since we're starting warm:
 		% make_gv('_primary_manager'),
 	set_primary_manager(ALS_IDE_Mgr),
-
-%	consultmessage(CurValue),
 	init_tk_alslib(shl_tcli,Shared),
 	alsdev(Shared, ALS_IDE_Mgr).
 
@@ -2589,5 +2586,51 @@ indic_err(prolog_system_error(s(ErrCode,Stream),[LineNumber|_]), DocID, ErrWin)
 indic_err(Error, DocID, ErrWin).
 
 
+export showsm/1.
+showsm(BaseFile)
+	:-
+	builtins:get_primary_manager(ALSMgr),
+	send(ALSMgr, obtain_src_mgr(BaseFile, FileMgr)),
+	accessObjStruct(source_file, FileMgr, SF),
+	accessObjStruct(base_file,FileMgr, BF),
+	accessObjStruct(obp_file,FileMgr, OF),
+	accessObjStruct(fcg,FileMgr, FCG),
+	accessObjStruct(consult_mode,FileMgr, CM),
+	accessObjStruct(last_consult, FileMgr, LC),
+	accessObjStruct(tcl_doc_path,FileMgr, TDP),
+	accessObjStruct(errors_display, FileMgr, ED),
+
+	write_clauses([ source_file = SF, base_file = BF,
+		obp_file = OF, fcg = FCG, consult_mode = CM,
+		last_consult = LC, tcl_doc_path = TDP, errors_display = ED]).
+
+/*
+export showsms/0.
+showsms
+	:-
+	builtins:get_primary_manager(ALSMgr),
+	accessObjStruct(source_mgrs, ALSMgr, SrcMgrsList),
+write(start_sm_list),nl,flush_output,
+	show_sm_list(SrcMgrsList).
+
+show_sm_list(V)
+	:-
+	var(V),
+	!,
+	printf(user_output,'!!SMList tail is variable!!\n',[]),flush_output.
+
+show_sm_list([]).
+show_sm_list([SrcM | SrcMgrsList])
+	:-
+write(*),nl,flush_output,
+	short_show_sm(SrcM),
+	show_sm_list(SrcMgrsList).
+
+short_show_sm(SrcM)
+	:-
+write(ss_sm),nl,flush_output,
+	accessObjStruct(base_file,SrcM, BF),
+	write_clause(bf=BF), flush_output.
+*/
 
 endmod.

@@ -452,18 +452,6 @@ cslt_info_recon(FileDesc, Nature, Nature, Recon, Recon, FileDesc).
  |
  *-------------------------------------------------------------*/ 
 
-/***
-	%% Don't reload builtins or library files:
-do_consult(BaseFile, FCOpts)
-	:-
-	builtins:loaded_builtins_file(BaseFile,SysDir),
-	access_cslt_opts(orig_dir, FCOpts,OrigDir),
-	split_path(OrigDir, OrigDirElts),
-	dreverse(OrigDirElts, [SysDir | _]),
-	!,
-	consult_msg(loaded_builtins_file, FCOpts).
-***/
-
 do_consult(BaseFile, FCOpts)
 	:-
 	builtins:get_primary_manager(ALSMgr),
@@ -521,13 +509,37 @@ consult_msg(fail_consult, FCOpts)
 
 record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr)
 	:-
+write(enter_record_consult(BaseFile, FCOpts, Ball)),nl,flush_output,
 	send(ALSMgr, record_src_mgr(BaseFile, FileMgr)),
+write(a1),nl,flush_output,
 	access_cslt_opts(fcg, FCOpts, FCG), 
+
+/*
+		nature/default,		%%	- Nature: source/default/obp/ensure_loaded
+		obp_path/'',		%%	- ObpPath
+		recon/reconsult,	%%	- Reconsult flag: reconsult/no_reconsult
+		base_file/'',		%%	- BaseFile 
+		orig_dir/'',		%%	- OrigDir 
+		ext/'',				%%	- Ext 
+		verbosity/noisy,	%%	- quiet/noisy
+		tgt_mod/user,		%%	- TgtMod 
+		searchpath/[],		%%	- Search List for Directory Paths
+		origfile/'',		%%	- OrigFileDesc 
+		srcfilepath/'',		%%	- SrcFilePath - complete path
+		loadedpath/'',		%%	- Path actually loaded (obp, etc)
+		debug_type/no_debugging,	%%	- DebugType: debugging/no_debugging
+		cg_flag/true,		%%  - true/false Whether CGs are being used
+		obp_locn/giac,		%%  - Obp location: gis/gic/gias/giac/no_obp
+		fcg/''				%%  - FCG: File Clause Group (for return to caller)
+*/
+
 	send(ALSMgr, insert_src_mgr_by_cg(FCG, FileMgr)),
+write(a2),nl,flush_output,
 	access_cslt_opts(srcfilepath, FCOpts, SourceFilePath), 
 	send(FileMgr, note_loaded(FCG, SourceFilePath)),
-
+write(a3),nl,flush_output,
 	access_cslt_opts(obp_path, FCOpts, ObpFilePath), 
+write(record_cons(fcg=FCG,SourceFilePath,ObpFilePath)),nl,flush_output,
 	(ObpFilePath \= '' ->
 		send(FileMgr, set_value(obp_file,SourceFilePath))
 		;
@@ -537,14 +549,12 @@ record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr)
 
 consult_except_resp(loaded_builtins_file(File,Dir),FCOpts,FileMgr,end_consult)
 	:-!.
-%	consult_msg(loaded_builtins_file(File,Dir), FCOpts).
 
 consult_except_resp( failed_xxconsult(Path), FCOpts,FileMgr,fail_consult)
 	:-!.
 
 consult_except_resp(Ball,FCOpts,FileMgr,partial_consult)
 	:-
-write(cer(Ball)),nl,flush_output,
 	Ball = error(consult_load, [src_load, SrcFilePath, ErrList] ),
 	!,
 	length(ErrList, NErrs),
@@ -1213,12 +1223,9 @@ load_source0(Stream, TgtMod, DebugMode, OPath, Path,ErrsList)
 	:-
 	obp_mode_start(OPath),
 	xconsult:pushmod(TgtMod),
-write(calling_xxconsult(Path,DebugMode,ErrsList)),nl,flush_output,
 	catch(xxconsult(Stream, Path, DebugMode, ErrsList),
 			Ball, 
-			( 
-write(user_output,xxconsult_xcept(Ball)),nl(user_output),flush_output(user_output),
-			xconsult:popmod, 
+			( xconsult:popmod, 
 			  obp_mode_end(OPath),
 			  throw(Ball)   )
 		),
@@ -1228,7 +1235,6 @@ write(user_output,xxconsult_xcept(Ball)),nl(user_output),flush_output(user_outpu
 
 load_source0(_,_,_,OPath,Path,_) 
 	:-
-write(failed_xxconsult(Path)),nl,flush_output,
 	xconsult:popmod,
 	obp_mode_end(OPath),
 	!,
