@@ -48,6 +48,8 @@ proceed_start_new_project(ALSIDEObject)
 		[instanceOf=project_mgr,
 		 handle=true ], 
 		ProjectMgr),
+	get_cwd(CurDir),
+	setObjStruct(primary_project_dir,ProjectMgr,CurDir),
 	setObjStruct(cur_project,ALSIDEObject,ProjectMgr),
 	send(ProjectMgr, init_gui).
 
@@ -509,10 +511,24 @@ check_root([Head | Elts], ProjectDirList)
 
 load_the_project(ProjectMgr)
 	:-
-	accessObjStruct(prolog_files, ProjectMgr, PrologFiles),
+	accessObjStruct(prolog_files, ProjectMgr, ProjectFiles),
+	filter_prolog_files(ProjectFiles, PrologFiles),
 	accessObjStruct(search_dirs, ProjectMgr, SearchDirs),
 	consult(PrologFiles, [search_path(SearchDirs)]),
 	setObjStruct(project_loaded, ProjectMgr, true).
+
+filter_prolog_files([], []).
+
+filter_prolog_files([ProjFile | ProjectFiles], [ProjFile | PrologFiles])
+	:-
+	file_extension(_, Ext, ProjFile),
+	dmember(Ext, [pro, pl]),
+	!,
+	filter_prolog_files(ProjectFiles, PrologFiles).
+
+filter_prolog_files([_ | ProjectFiles], PrologFiles)
+	:-
+	filter_prolog_files(ProjectFiles, PrologFiles).
 
 add_mult_files(PrevFiles, ListBoxWin)
 	:-
