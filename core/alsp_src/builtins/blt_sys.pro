@@ -242,6 +242,11 @@ ls(Dir) :-
 		assert_at_load_time( ((dir) :- system(dir)) ),
 		assert_at_load_time( (dir(Dir) :- exec_file_command(dir,Dir)) )
 	;
+	(OS=mswin32, !,
+		assert_at_load_time( ((dir) :- system(dir)) ),
+		assert_at_load_time( (dir(Dir) :- exec_file_command(dir,Dir)) )
+	)
+	;
 	    true).
 
 :-	als_system(ALS_Info),
@@ -251,6 +256,11 @@ ls(Dir) :-
 		assert_at_load_time( ((cd) :- system('cd')) ),
 		assert_at_load_time( ((os) :- system('command')) )
 	 %% end DOS
+	 ;
+	 (OS=mswin32, !,
+		assert_at_load_time( ((cd) :- system('cd')) ),
+		assert_at_load_time( ((os) :- system('command')) )
+	 )
 	 ;
 	 (OS=unix, !,
 		assert_at_load_time( ((cd) :- getenv('HOME',Env), '$chdir'(Env))  ), 
@@ -482,6 +492,8 @@ notrace :-
 	dbg_notrace,
 	setDebugInterrupt(spying),
 	setPrologInterrupt(spying).
+
+/*************************
 /*
  * xform_command_or_query(InGoal,OutGoal)
  *
@@ -531,5 +543,6 @@ xform_file_list(File1,[File2|Files],(consult(File1),Consults)) :-
 xform_file_list(File,_,consult(File)).
 
 
+*************************/
 
 endmod.		%% blt_sys.pro: System-type builtins.

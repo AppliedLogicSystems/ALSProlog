@@ -218,7 +218,7 @@ diskOfPathTokList('')   --> [].
 
 typeOfPathStr(unix,Disk, [0'/ |_], abs) :- !.
 typeOfPathStr(macos, Disk, CompStr,  abs) :- Disk \= '', !.
-typeOfPathStr(msw95, Disk, [0'\\ |_], abs) :- !.
+typeOfPathStr(mswin32, Disk, [0'\\ |_], abs) :- !.
 typeOfPathStr(dos, Disk, [0'\\ |_], abs) :- !.
 typeOfPathStr(vms, Disk, [0'/ |_], abs) :- !.
 typeOfPathStr(_,   Disk, CompStr,  rel).
@@ -229,7 +229,7 @@ typeOfPathStr(_,   Disk, CompStr,  rel).
 
 typeOfPathTokList(unix,Disk,[slash|_],    abs) :- !.
 typeOfPathTokList(macos, Disk,CompTokList,  abs) :- Disk \= '', !.
-typeOfPathTokList(msw95, Disk,[backslash|_],abs) :- !.
+typeOfPathTokList(mswin32, Disk,[backslash|_],abs) :- !.
 typeOfPathTokList(dos, Disk,[backslash|_],abs) :- !.
 typeOfPathTokList(vms, Disk,[slash|_],    abs) :- !.
 typeOfPathTokList(_,   Disk,CompTokList,  rel).
@@ -248,7 +248,7 @@ typeOfPathTokList(_,   Disk,CompTokList,  rel).
 compsOfPathStr(unix, Comps)		  --> [0'/ ], !,    compsOfPathStr(unix,Comps).
 compsOfPathStr(macos, ['::'|Comps]) --> [0': ,0': ],!,compsOfPathStr(macos, Comps).
 compsOfPathStr(macos, [':'|Comps])  --> [0': ], !,    compsOfPathStr(macos, Comps).
-compsOfPathStr(msw95, Comps) 		  --> [0'\\ ], !,    compsOfPathStr(msw95, Comps).
+compsOfPathStr(mswin32, Comps) 		  --> [0'\\ ], !,    compsOfPathStr(mswin32, Comps).
 compsOfPathStr(dos, Comps) 		  --> [0'\\ ], !,    compsOfPathStr(dos, Comps).
 compsOfPathStr(vms, Comps) 		  --> [0'/ ], !,    compsOfPathStr(vms, Comps).
 
@@ -261,7 +261,7 @@ compsOfPathStr( _, [])			  --> [].
 moreComps(unix,Comps)		 --> [0'/ ], !,    compsOfPathStr(unix,Comps).
 moreComps(macos, ['::'|Comps]) --> [0': ,0': ],!,compsOfPathStr(macos, Comps).
 moreComps(macos, Comps)		 --> [0': ], !,    compsOfPathStr(macos, Comps).
-moreComps(msw95, Comps)		 --> [0'\\ ], !,    compsOfPathStr(msw95, Comps).
+moreComps(mswin32, Comps)		 --> [0'\\ ], !,    compsOfPathStr(mswin32, Comps).
 moreComps(dos, Comps)		 --> [0'\\ ], !,    compsOfPathStr(dos, Comps).
 moreComps(vms, Comps)		 --> [0'/ ], !,    compsOfPathStr(vms, Comps).
 moreComps( _,  [])		 	 --> [].
@@ -285,7 +285,7 @@ endQuote([Char|Rest]) --> [Char], endQuote(Rest).
 compsOfPathTokList(unix,Comps) 		  --> [slash],     !,compsOfPathTokList(unix,Comps).
 compsOfPathTokList(macos, ['::'|Comps]) --> [coloncolon],!,compsOfPathTokList(macos,Comps).
 compsOfPathTokList(macos, [':' |Comps]) --> [colon],     !,compsOfPathTokList(macos,Comps).
-compsOfPathTokList(msw95, Comps)        --> [backslash], !,compsOfPathTokList(msw95,Comps).
+compsOfPathTokList(mswin32, Comps)        --> [backslash], !,compsOfPathTokList(mswin32,Comps).
 compsOfPathTokList(dos, Comps)        --> [backslash], !,compsOfPathTokList(dos,Comps).
 compsOfPathTokList(vms, Comps)        --> [slash],     !,compsOfPathTokList(vms,Comps).
 
@@ -328,10 +328,10 @@ diskSym(X,[X,':']).
 
 absMark(macos, abs,['']).
 absMark(unix, abs,['/']).
-absMark(msw95, abs,['\\']).
+absMark(mswin32, abs,['\\']).
 absMark(macos, rel,[':']).
 absMark(unix, rel,[]).
-absMark(msw95, rel,[]).
+absMark(mswin32, rel,[]).
 
 addPathSep([],[], _).
 addPathSep([File|IList],[File|OList], OS) :-
@@ -341,6 +341,6 @@ addPathSep([File|IList],[File|OList], OS) :-
 possPathSep([],L,L, _).
 possPathSep([_|_],['/'|L],L, unix).
 possPathSep([_|_],[':'|L],L, macos).
-possPathSep([_|_],['\\'|L],L, msw95).
+possPathSep([_|_],['\\'|L],L, mswin32).
 
 endmod.

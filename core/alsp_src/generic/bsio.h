@@ -129,6 +129,9 @@
 #define SIO_TYPE_SOCKET_DGRAM	5
 #define SIO_TYPE_PROLOG_MANAGED	6
 
+#define SIO_TYPE_CONSOLE	7
+
+
 #define NONSEEKABLE(x) ((x) != SIO_TYPE_FILE)
 
 /*-------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 #include "defs.h"
 
-#ifdef WIN32
+#ifdef MSWin32
 #include "fswin32.h"
 #include <windows.h>
 
@@ -518,7 +518,7 @@ pmkdir()
 		t2 != PI_INT)
 	PI_FAIL;
 
-#if defined(MacOS) || defined(WIN32)
+#if defined(MacOS) || defined(MSWin32)
     if (mkdir(pathName) == -1)
 #else
     if (mkdir(pathName, v2) == -1)

@@ -542,21 +542,7 @@ deref_file_type(Path,FType)
 disp_deref_file_type(symbolic_link,Path,FType) 
 	:-!,
 	read_link(Path, LinkTarget),
-	disp_deref_file_type_symbolic_link(LinkTarget,Path,FType).
-
-disp_deref_file_type_symbolic_link(LinkTarget,Path,FType)
-	:-
-	is_absolute_pathname(LinkTarget),
-	!,
 	deref_file_type(LinkTarget,FType).
-
-disp_deref_file_type_symbolic_link(LinkTarget,Path,FType)
-	:-
-	pathPlusFile(HeadPath,_,Path),
-	extendPath(HeadPath,LinkTarget,FullPath),
-	deref_file_type(FullPath,FType).
-
-
 
 disp_deref_file_type(FType,Path,FType) :-!.
 

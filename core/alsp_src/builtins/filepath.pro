@@ -78,7 +78,7 @@ identify_case(dos).
 					 sub_atom(Path,1,_,DS), !) ),
 		addclause(builtins,directory_self('.'))
 		
-    ; OS = msw95, !,		%% Microsoft Windows95
+    ; OS = mswin32, !,		%% Microsoft Win32
 		addclause(builtins,file_separator('.')),
 		addclause(builtins,directory_separator('\\')),
 		addclause(builtins,disk_separator(':')),

@@ -1,6 +1,6 @@
 echo '/*===============================================================*'>/mailbox3/alsp_src/generic/version.h
 echo ' *                      version.h'>>/mailbox3/alsp_src/generic/version.h
-echo ' *       Copyright (c) 1990-1995 by Applied Logic Systems, Inc.'>>/mailbox3/alsp_src/generic/version.h
+echo ' *       Copyright (c) 1990-1996 by Applied Logic Systems, Inc.'>>/mailbox3/alsp_src/generic/version.h
 echo ' *'>>/mailbox3/alsp_src/generic/version.h
 echo ' *          Version number - '`date`>>/mailbox3/alsp_src/generic/version.h
 echo ' *===============================================================*/'>>/mailbox3/alsp_src/generic/version.h

@@ -13,7 +13,7 @@
  *===========================================================================*/
 #include "defs.h"
 
-#if (defined(UNIX) || defined(WIN32) || (defined(MacOS) && defined(HAVE_GUSI))) && !defined(__GO32__) && !defined(OS2)
+#if (defined(UNIX) || defined(MSWin32) || (defined(MacOS) && defined(HAVE_GUSI))) && !defined(__GO32__) && !defined(OS2)
 
 #if defined(UNIX)
 
@@ -105,7 +105,7 @@
 
 #define HAVE_DIRENT	1
 
-#elif defined(WIN32)
+#elif defined(MSWin32)
 #include "fswin32.h"
 
 #else
@@ -578,7 +578,7 @@ pmkdir()
 		t2 != PI_INT)
 	PI_FAIL;
 
-#if defined(MacOS) || defined(WIN32)
+#if defined(MacOS) || defined(MSWin32)
     if (mkdir(pathName) == -1)
 #else
     if (mkdir(pathName, v2) == -1)

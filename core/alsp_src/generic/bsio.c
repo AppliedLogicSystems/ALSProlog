@@ -58,7 +58,7 @@
 #define write   _write
 #endif /* DOS */
 
-#ifdef WIN32
+#ifdef MSWin32
 #include "fswin32.h"
 #endif
 
@@ -102,7 +102,7 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	    
 	#elif defined(MacOS) && defined(HAVE_GUSI)
 	    #include <GUSI.h>
-	#elif defined(WIN32)
+	#elif defined(MSWin32)
 	    #include <winsock.h>
 	    #undef AF_UNIX
 	    
@@ -127,7 +127,7 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	#define INVALID_SOCKET	-1
 	#define SOCKET_ERROR	-1
 	
-	#elif defined(WIN32)
+	#elif defined(MSWin32)
 	#define readsocket(a,b,c)	recv((a), (b), (c), 0)
 	#define writesocket(a,b,c)	send((a), (b), (c), 0)
 	#define socket_errno		WSAGetLastError()
@@ -237,6 +237,30 @@ static	int	next_token0	PARAMS(( UCHAR *, PWord *, int *, PWord *, int * ));
 static	int	format_type	PARAMS(( UCHAR * ));
 static  int int_or_float    PARAMS((int, PWord));
 
+static int standard_console_io(int port, char *buf, size_t size)
+{
+    switch(port) {
+    case CONSOLE_READ:
+    	return read(STDIN_FILENO, buf, size);
+    	break;
+    case CONSOLE_WRITE:
+	return write(STDOUT_FILENO, buf, size);
+    	break;
+    case CONSOLE_ERROR:
+	return write(STDERR_FILENO, buf, size);
+    	break;
+    }
+    
+}
+
+
+int (*console_io)(int, char *, size_t) = standard_console_io;
+
+void PI_set_console_callback(int (*con_io)(int, char *, size_t))
+{
+	console_io = con_io;
+}
+
 /*
  * sio_mkstream(BufSize,Stream)
  *
@@ -282,7 +306,7 @@ sio_mkstream()
     SIO_EOLNTYPE(buf) = SIOEOLN_READ_UNIV | SIOEOLN_WRITE_CR;
 #elif defined(UNIX)
     SIO_EOLNTYPE(buf) = SIOEOLN_READ_UNIV | SIOEOLN_WRITE_LF;
-#elif defined(WIN32)
+#elif defined(MSWin32)
     SIO_EOLNTYPE(buf) = SIOEOLN_READ_UNIV | SIOEOLN_WRITE_CRLF;
 #else
 #error
@@ -721,7 +745,7 @@ sio_lpos()
 
 #ifdef __MWERKS__
 /* This is a problem common to all systems that use MetroWerks ANSI Libraries open. */
-/* Currently MacOS and Win32 */
+/* Currently MacOS and MSWin32 */
 
 /* Merge the Mac and Unix versions of this someday. */
 
@@ -972,9 +996,9 @@ sio_file_open()
     else if (strcmp((char *)filename, "$stderr") == 0)
 	SIO_FD(buf) = STDERR_FILENO;
     else {
-#if	defined(DOS) /* || defined(WIN32) */
+#if	defined(DOS) /* || defined(MSWin32) */
 	if ((SIO_FD(buf) = open(filename, flags | O_BINARY, (S_IWRITE | S_IREAD))) == -1)
-#elif	defined(MacOS) || defined(WIN32)
+#elif	defined(MacOS) || defined(MSWin32)
 	if ((SIO_FD(buf) = open((char *)filename, flags)) == -1)
 #elif defined(__GO32__) || defined(OS2)
 	if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1)
@@ -995,6 +1019,54 @@ sio_file_open()
     }
 
     incr_fdrefcnt(SIO_FD(buf));
+    SIO_ERRCODE(buf) = SIOE_NORMAL;
+    SUCCEED;
+}
+
+
+int
+sio_console_open()
+{
+    PWord v1, v2, v3, v4, v5, v6;
+    int   t1, t2, t3, t4, t5, t6;
+    UCHAR *buf;
+    int   flags = 0;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+    w_get_An(&v3, &t3, 3);
+    w_get_An(&v4, &t4, 4);
+    w_get_An(&v5, &t5, 5);
+    w_get_An(&v6, &t6, 6);
+
+    if ((buf = get_stream_buffer(v2, t2)) == (UCHAR *) 0)
+	FAIL;
+
+    if (t3 != WTP_INTEGER ||
+	t4 != WTP_INTEGER || t5 != WTP_INTEGER) {
+	SIO_ERRCODE(buf) = SIOE_INARG;
+	FAIL;
+    }
+    SIO_TYPE(buf) = SIO_TYPE_CONSOLE;
+
+    if (compute_flags((char *)buf,v3,v4) < 0)
+	FAIL;
+
+    if (v6 == 1) {
+    	if (v3 != SIOM_WRITE) FAIL;
+	SIO_FD(buf) = CONSOLE_ERROR;
+    }
+    switch (v3) {
+	case SIOM_READ:
+	    SIO_FD(buf) = CONSOLE_READ;
+	    break;
+	case SIOM_WRITE:
+	    SIO_FD(buf) = CONSOLE_WRITE;
+	    break;
+    }
+
+    SIO_EOLNTYPE(buf) = v5;
+
     SIO_ERRCODE(buf) = SIOE_NORMAL;
     SUCCEED;
 }
@@ -2378,6 +2450,11 @@ write_buf(vsd,buf)
 	    break;
 #endif /* HAVE_SOCKET */
 
+	case SIO_TYPE_CONSOLE:
+	    if (console_io) writeflg = console_io(SIO_FD(buf), SIO_BUFFER(buf), SIO_LPOS(buf));
+	    else { writeflg = SIO_LPOS(buf); }
+	    break;
+
 	default:
 	    SIO_ERRCODE(buf) = SIOE_INVALIDTYPE;
 	    return 0;
@@ -2495,7 +2572,7 @@ close_socket:
 		    closeflg = closesocket(SIO_FD(buf));
 		else {
 /* FIXME: Figure out how to check for broken shutdown */
-#if defined(SysVR3) || (defined(MacOS) && defined(HAVE_GUSI) || defined(WIN32))
+#if defined(SysVR3) || (defined(MacOS) && defined(HAVE_GUSI) || defined(MSWin32))
 		    /* shutdown seems to be broken on svr3 */
 		    closeflg = closesocket(SIO_FD(buf));
 #else /* SysVR3, MacOS-GUSI */
@@ -2942,6 +3019,11 @@ sio_readbuffer()
 	    break;
 #endif /* HAVE_SOCKET */
 
+	case SIO_TYPE_CONSOLE:
+	    if (console_io) nchars = console_io(SIO_FD(buf), buffer, nchars);
+	    else { nchars = 0; }
+	    break;
+	   
 	default:
 	    SIO_ERRCODE(buf) = SIOE_INVALIDTYPE;
 	    FAIL;

@@ -62,9 +62,14 @@
 				[flatten_comma_list/2, build_comma_list/2],[]).
 
 :-libactivate(builtins, ['library',misc_db],
-	[assert_all/2,assert_all_refs/3,erase_all/1,abolish_list/1,
-	 abolish_list/2, retract_all/1],
-	[module_closure(assert_all,1),module_closure(assert_all_refs,2)]
+	[assert_all/2,assert_all_refs/3,erase_all/1,
+	 abolish_list/2, retract_all/2, retract_each/2],
+	[module_closure(assert_all,1),
+	 module_closure(assert_all_refs,2),
+	 module_closure(retract_all,1),
+	 module_closure(retract_each,1),
+	 module_closure(abolish_list,1)
+	]
 	).
 
 %:-module_closure(assert_all,1), module_closure(assert_all_refs,2).

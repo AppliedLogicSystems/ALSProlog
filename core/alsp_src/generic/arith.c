@@ -38,8 +38,6 @@
 #include <sys/types.h>
 #include <sys/param.h>
 
-#else
-#error
 #endif
 
 #include <time.h>
@@ -141,7 +139,7 @@ init_time()
 #ifdef	_SC_CLK_TCK
     clock_ticks_per_second = sysconf(_SC_CLK_TCK);
 #else	/* HAVE_UNISTD_H */
-#if defined(MacOS) || defined(WIN32)
+#if defined(MacOS) || defined(MSWin32)
     clock_ticks_per_second = CLOCKS_PER_SEC;
 #else	/* MacOS */
     clock_ticks_per_second = HZ;

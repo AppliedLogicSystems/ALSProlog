@@ -50,7 +50,7 @@ use windows.
    assert(default_read_eoln_type(universal)),
    dmember(os=OS, L),
    (
-	OS=msw95 -> assert(default_write_eoln_type(crlf))
+	OS=mswin32 -> assert(default_write_eoln_type(crlf))
 	;
 	OS=macos -> assert(default_write_eoln_type(cr))
 	;
@@ -643,6 +643,12 @@ check_source_sink_and_mode(code_list(_),Mode) :-
 check_source_sink_and_mode(atom(_),Mode) :-
 	!,
 	check_mode(Mode,read_write_modes(Mode,_,_)).
+check_source_sink_and_mode(console(_),Mode) :-
+	!,
+	check_mode(Mode,read_write_modes(Mode,_,_)).
+check_source_sink_and_mode(console_error(_),Mode) :-
+	!,
+	check_mode(Mode,read_write_modes(Mode,_,_)).
 check_source_sink_and_mode(window(_),Mode) :-
 	!,
 	check_mode(Mode,read_write_modes(Mode,_,_)).
@@ -833,9 +839,18 @@ open_stream(window(WinName),Mode,Options,Stream) :-
 	!,
 	open_window_stream(WinName,Mode,Options,Stream).
 
+open_stream(console(Name), Mode, Options, Stream) :-
+	!,
+	open_console_stream(Name, Mode, 0, Options, Stream).
+	
+open_stream(console_error(Name), Mode, Options, Stream) :-
+	!,
+	open_console_stream(Name, Mode, 1, Options, Stream).
+
 %%
 %% This is the place to put in clauses for dealing with other types of streams
 %%
+
 
 		/*---------*
 		 |   FILES |
@@ -1158,6 +1173,7 @@ no_immed_streams([S | Streams])
 always_ready(file).
 always_ready(string).
 always_ready(atom).
+always_ready(console).
 
 		/*------------*
 		 |   REXEC    |
@@ -1296,6 +1312,23 @@ open_atom_stream(Source_sink,write,Options,Stream) :-
 	sio_generic_open(0,Stream,NMode,NBuffering,NEoln),
 	!.
 open_atom_stream(Source_sink,Mode,Options,Stream) :-
+	permission_error(open,source_sink,Source_sink,2).
+
+
+/*
+	CONSOLES
+*/
+
+open_console_stream(Source_sink, Mode, ErrorMode, Options, Stream)
+	:-
+	initialize_stream(console, Source_sink, Options, Stream),
+	file_modes(Mode,NMode,SMode),
+	set_stream_mode(Stream,SMode),
+	buffering(Options,NBuffering),
+	eoln_modes(Options, NEoln),
+	sio_console_open(Source_sink,Stream,NMode,NBuffering,NEoln,ErrorMode),
+	!.
+open_console_stream(Source_sink,Mode,ErrorMode,Options,Stream) :-
 	permission_error(open,source_sink,Source_sink,2).
 
 
@@ -3451,30 +3484,67 @@ sio_pckg_init :-
     set_next_stream_identifier(0),
     %% User Input/Output Streams
     set_user_prompt(''),
-    open('$stdout',write,OutStream,
+
+
+    als_system(L),
+    dmember(os=OS, L),
+
+    ((OS=unix ->
+
+	open('$stdout',write,OutStream,
 		   ['$stream_identifier'(-2), alias(user_output),
 		    buffering(line), type(text)]),
-    open('$stdin', read, InStream, 
+	open('$stdin', read, InStream, 
 	 [ '$stream_identifier'(-1), alias(user_input),
 	   prompt_goal(user_prompt_goal(user_output))]),
-    set_input(InStream),
-    set_output(OutStream),
 
-
-    %% Debugger streams
-    open('$stdout',write, OutDStream,
+	%% Debugger streams
+	
+	open('$stdout',write, OutDStream,
 	 [	'$stream_identifier'(-4), alias(debugger_output),
 		buffering(line),type(text),
 		maxdepth(8), line_length(76),
 		depth_computation(nonflat)]),
-    open('$stdin', read, InDStream,
+	open('$stdin', read, InDStream,
 	 [	'$stream_identifier'(-3), alias(debugger_input),
 		prompt_goal(flush_output(debugger_output))]),
 
-    %% Error stream
-    open('$stderr',write,OutEStream,
+	%% Error stream
+
+	open('$stderr',write,OutEStream,
 	 [	'$stream_identifier'(-5), alias(error_stream),
-		buffering(line),type(text)]),
+		buffering(line),type(text)])
+     )
+    ;
+     (
+	open(console('standard output'),write,OutStream,
+		   ['$stream_identifier'(-2), alias(user_output),
+		    buffering(line), type(text)]),
+	open(console('standard input'), read, InStream, 
+	 [ '$stream_identifier'(-1), alias(user_input),
+	   prompt_goal(user_prompt_goal(user_output))]),
+
+	%% Debugger streams
+
+	open(console('debugger output'),write, OutDStream,
+	 [	'$stream_identifier'(-4), alias(debugger_output),
+		buffering(line),type(text),
+		maxdepth(8), line_length(76),
+		depth_computation(nonflat)]),
+	open(console('debugger input'), read, InDStream,
+	 [	'$stream_identifier'(-3), alias(debugger_input),
+		prompt_goal(flush_output(debugger_output))]),
+
+	%% Error stream
+
+	open(console_error('error output'),write,OutEStream,
+	 [	'$stream_identifier'(-5), alias(error_stream),
+		buffering(line),type(text)])
+
+    )),
+
+    set_input(InStream),
+    set_output(OutStream),
 
     %% Establish additional aliases
     set_alias(warning_input, InDStream),

@@ -76,7 +76,7 @@ CI_makefar(vp, tp, ptr)
  * SYMBOL TABLE
  */
 
-#if defined(MacOS) || defined(WIN32)
+#if defined(MacOS) || defined(MSWin32)
 /* The MacOS interface is huge, give it more space for symbols. */
 #define SYMTBLSZ   8191		/* this number must be prime */
 #else

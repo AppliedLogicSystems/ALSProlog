@@ -29,9 +29,10 @@ use debugger.
  |
  |	Property		Values
  |	--------		------
- |	os			unix, dos, vms, mac
+ |	os			unix, dos, vms, macos, mswin32 
  |	os_variation	(unix): bsd, systemV, xenix
- |			(dos):	plain, eclipse, pharlap
+ |			 (dos):	plain, eclipse, pharlap
+ |		     (mswin32): mswinnt, mswin95, mswin32s
  |	os_version		-- 'nnn.mm' ---
  |	processor		i8086, i286, i386, i486
  |					m68k, m88k, vax, ...
@@ -864,7 +865,7 @@ load_builtins(File)
 	:-
 	sys_env(OS,_,_),
 	(  OS = macos, !, Sepr = ':'
-	 ; OS = msw95, !, Sepr = '\\'
+	 ; OS = mswin32, !, Sepr = '\\'
 	 ; Sepr = '/'),
 	'$atom_concat'('builtins',Sepr, BDir),
 	load_builtins(BDir, File).
@@ -881,7 +882,7 @@ consult_builtins(File)
 	:-
 	sys_env(OS,_,_),
 	(  OS = macos, !, Sepr = ':'
-	 ; OS = msw95, !, Sepr = '\\'
+	 ; OS = mswin32, !, Sepr = '\\'
 	 ; Sepr = '/'),
 	'$atom_concat'('builtins',Sepr, BDir),
 	consult_builtins(BDir, File).
@@ -906,15 +907,15 @@ ld_fs(OS)
 	:-	
 	(   OS = unix -> load_builtins(fsunix)
 	;   OS = dos  -> load_builtins(fsdos)
-	;   OS = msw95  -> load_builtins(fsmsw95)
-	;	OS = macos -> load_builtins(fsmac)
+	;   OS = mswin32  -> load_builtins(fswin32)
+	;   OS = macos -> load_builtins(fsmac)
 	;   true		%% Extend to other OS's
 	).
 
 :-
 	sys_env(OS,_,_),
 	(   OS = macos, !, Sepr = ':'
-	;   OS = msw95, !, Sepr = '\\'
+	;   OS = mswin32, !, Sepr = '\\'
 	;	Sepr = '/'
 	),
 	'$atom_concat'('builtins',Sepr, BDir),
@@ -926,7 +927,6 @@ ld_fs(OS)
 	load_builtins(BDir, filepath),		%% also must come before blt_sys
 	load_builtins(BDir, blt_io),
 	load_builtins(BDir, xconsult),
-	load_builtins(BDir, blt_atom),
 	ld_fs(OS),
 	load_builtins(BDir, sio),
 
@@ -935,7 +935,7 @@ ld_fs(OS)
 	consult_builtins(BDir, blt_std),
 	consult_builtins(BDir, blt_stk),
 	consult_builtins(BDir, blt_als),
-%	consult_builtins(BDir, blt_atom),
+	consult_builtins(BDir, blt_atom),
 	consult_builtins(BDir, cutils),
 	consult_builtins(BDir, sio_wt),
 	consult_builtins(BDir, sio_d10),
