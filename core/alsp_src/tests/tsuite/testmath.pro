@@ -5946,7 +5946,7 @@ v_round(2.25,2).
 v_round(2.3,2).
 
 
-mf(trunc(_34),v_trunc(_34,_56),_56).
+mf(truncate(_34),v_trunc(_34,_56),_56).
 v_trunc(-2.3,-2).
 v_trunc(-2.25,-2).
 v_trunc(-2.2,-2).
