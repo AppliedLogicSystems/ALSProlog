@@ -446,7 +446,6 @@ var_or_nonneg_integer_ok(Other) :-
 	integer(Other),
 	domain_error(not_less_than_zero, Other, 2).
 var_or_nonneg_integer_ok(Other) :-
-	integer(Other),
 	type_error(integer,Other,2).
 
 export var_ok/1.
