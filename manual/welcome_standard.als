@@ -33,40 +33,112 @@ through the use of this program.
 
 CD ORGANIZATION
 ===============
-The ALS Prolog Standard Edition CD contains the following file 
-and directories:
+The ALS Prolog Standard Edition CD contains the following files:
 
-     ALS Prolog 3.1 Installer (file)
-     ALS Prolog (directory)
-     Acrobat (directory)
+     ALS Prolog 3.1 Installer 
+     Acrobat Reader Installer 
+	 Welcome - this file
 
-The directory "ALS Prolog" is an expanded version of the 
-installer.  That is, "ALS Prolog 3.1 Installer" will create 
-an installation directory identical to "ALS Prolog".  You 
-can run ALS Prolog directly from the CD.  To install ALS Prolog on 
-your hard drive, simply double-click on the icon for
+On Macintosh and Windows, ALS Prolog 3.1 Installer is a standard
+system installer (on Windows, it is ALS Prolog 3.1 Installer.EXE).
+Simply double-click on the icon for
 
-     ALS Prolog 3.1 Installer
+	ALS Prolog 3.1 Installer, 
 
-and follow the simple directions.
+and follow the simple directions to install ALS Prolog on your 
+hard drive.
+
+On Unix, ALS Prolog 3.1 Installer is a gzipped tar file whose name
+is of the form
+
+	als-prolog-<ARCH>.tgz
+
+where <ARCH> is your target OS (e.g., solaris, hpux, irix, linux).
+Choose the directory in which you want to install ALS Prolog, and
+copy als-prolog-<ARCH>.tgz to that directory.  Then perform:
+
+	gzip -d als-prolog-<ARCH>.tgz
+	tar -xf ./als-prolog-<ARCH>.tar
+
+If you do not have gzip on your system, a copy is included on the
+CD for your convenience.
+
+After installation on Unix, set your search paths appropriately.
 
 MANUAL
 ======
-The manual for the standard edition of ALS Prolog is provided
+The User Manual for the standard edition of ALS Prolog is provided
 by the file
 
     ALS Prolog Manual.pdf
 
-in the installation directory ALS Prolog.  This is an Adobe 
-Acrobat(r) file.  A copy of an installer for Acrobat is included in 
-the Acrobat directory.  To install Acrobat, change directory into the 
-Acrobat subdirectory, and double-click on "setup.exe".  Follow the 
-directions for the installation.  After Acrobat is installed, just 
-double-click on the icon for
+in the installation directory for ALS Prolog.  This is an Adobe 
+Acrobat(r) file.  A copy of an installer for Acrobat is included on 
+the CD.  The installer is named:
+
+	Macintosh: Reader 3.02 Installer 
+	Windows:   ar302.exe
+	Unix:      ar302XXX.tar.Z  (XXX appropriate for the platform)
+
+To install Acrobat:
+	On Windows and Macintosh, double click on the icon for the
+	Acrobat Installer, and follow the simple directions.
+
+	On Unix, choose a temporary directory, and copy ar302XXX.tar.Z to
+	that directory.  Then perform:
+
+		gzip -d ar302XXX.tar.Z
+		tar -xf ar302XXX.tar
+
+	Then execute
+
+
+	and follow the simple directions.
+
+To read the ALS Prolog manual.  After Acrobat has been installed, on
+Windows and Macintosh, simply double-click on the icon for
 
     ALS Prolog Manual.pdf
 
-to read the ALS Prolog documentation.
+On Unix, execute
+
+	acroread
+
+and then open ALS Prolog Manual.pdf.  If <MP> is a path to the directory containing
+ALS Prolog Manual.pdf, then executing
+
+	acroread <MP>/ALS Prolog Manual.pdf
+
+will start the Acrobat Reader and load ALS Prolog Manual.pdf.
+
+HELP SYSTEM
+===========
+
+The Reference Manual for ALS Prolog is implemented as an HTML-based HELP system.
+You will need fairly recent versions of the Netscape or Internet Explorer browsers
+to read the help files, as follows:
+
+	Macintosh:  Netscape Navigator 4.0+
+	---------   { IE exibits difficulties on Macintosh }
+
+	Windows:    Netscape Navigator 4.06+
+	-------     Internet Explorer 4.0+
+
+	Unix:       Netscape Navigator 4.07+
+	----
+
+After the installation is complete, the ALS Prolog HELP system is contained in the
+
+	help
+
+directory inside the installation directory.  It consists of a large number of
+*.htm and *.gif files, together with a number of additonal files.  To view
+the ALS Prolog Help system, simply open the file
+
+	start.htm
+
+in your browser.
+
 
 COPYING ALS
 ===========
