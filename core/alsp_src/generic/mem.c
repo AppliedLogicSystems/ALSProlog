@@ -1810,6 +1810,11 @@ static OSErr DuplicateThisApplication(ConstStr255Param newAppName)
     err = FSMakeFSSpec(0, 0, newAppName, &NewAppSpec);
     if (err != noErr && err != fnfErr) return err;
     
+    if (err == noErr) {
+    	err = FSpDelete(&NewAppSpec);
+    	if (err != noErr) return err;
+    }
+    
     err = FSMakeFSSpec(NewAppSpec.vRefNum, NewAppSpec.parID, "\p", &DirSpec);
     if (err != noErr && err != fnfErr) return err;
 
