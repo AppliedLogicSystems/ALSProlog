@@ -479,7 +479,11 @@ shell_execute(InStream,OutStream,InitGoal,[],[],Wins,continue)
 	InitGoal = stream_not_ready,
 	!.
 
-%:-alsshell:dynamic(getTracingFlag/1).
+module alsshell.
+dummy.
+:-dynamic(getTracingFlag/1).
+endmod.
+
 :-dynamic(getTracingFlag/1).
 
 shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,InWins,Status)
