@@ -65,6 +65,8 @@ start_shell(DefaultShellCall)
 	ss_init_searchdir(CmdLineSearch),
 	ss_load_dot_alspro,
 
+	setup_libraries,
+
 	arg(3, CLInfo, Files),
 	(arg(2,CLInfo,true) -> consultmessage(on) ; consultmessage(off)),
 	ss_load_files(Files),
@@ -303,7 +305,11 @@ print_banner(OutS,L)
 	UInC is InC - 32,
 	name(WBan, [UInC | WNCs]),
 	!,
+#if (syscfg:intconstr)
+	printf(OutS,'CLP(BNR)(r) [%s Version %s [%s] (%s)]\n',[Name,Version,OSVar,WBan]),
+#else
 	printf(OutS,'%s Version %s [%s] (%s)\n',[Name,Version,OSVar,WBan]),
+#endif
 	printf(OutS,'   Copyright (c) 1987-96 Applied Logic Systems, Inc.\n\n',[]).
 
 system_name(L, Name)
@@ -362,6 +368,7 @@ export init_prolog_shell/6.
 init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	:-
 	enable_security,
+	gc,
 	als_system(SysList),
 	sio:input_stream_or_alias_ok(InStream, RealInStream),
 	set_stream_pgoals(RealInStream, user_prompt_goal(OutStream) ),
@@ -797,5 +804,161 @@ export abort/0.
 abort 
 	:- 
 	throw(abort).
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% General library setup (called when shell
+	%% starts up; blt_lib.pro is (to be) no 
+	%% longer loaded as part of builtins:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+export setup_libraries/0.
+setup_libraries
+	:-
+	sys_searchdir(ALSDIRPath),
+	pathPlusFile(ALSDIRPath, '*', ALSDIRPattern),
+	directory(ALSDIRPattern,1,SubdirList0),
+	list_delete(SubdirList0, '.', SubdirList1),
+	list_delete(SubdirList1, '..', SubdirList2),
+	list_delete(SubdirList2, builtins, SubdirList),
+	setup_local_libraries(SubdirList, ALSDIRPath),
+
+	(getenv('ALS_LIBS', EnvLibsString) ->
+		atom_codes(EnvLibsString, ELSCs),
+		asplit0_all(ELSCs, 0',, EnvLibsStrings),
+		all_to_atoms(EnvLibsStrings, EnvLibsList),
+		setup_remote_libraries(EnvLibsList)
+		;
+		true
+	).
+
+setup_local_libraries([], _).
+setup_local_libraries([Lib | LibsList], DirPath)
+	:-
+	pathPlusFile(DirPath, Lib, LibPath),
+	setup_lib(LibPath),
+	setup_local_libraries(LibsList, DirPath).
+
+setup_remote_libraries([]).
+setup_remote_libraries([LibPath | LibsList])
+	:-
+	setup_lib(LibPath),
+	setup_remote_libraries(LibsList).
+
+lib_extension(alb).
+
+:- dynamic(als_lib_lcn/1).
+
+export setup_lib/1.
+setup_lib(LibPath)
+	:-
+	exists_file(LibPath),
+	!,
+	pathPlusFile(PathHead,LibDirName,LibPath),
+	disp_setup_lib(LibDirName,LibPath,PathHead).
+
+disp_setup_lib(library,LibPath,PathHead)
+	:-
+	als_lib_lcn(_),
+	!.
+
+disp_setup_lib(LibDirName,LibPath,PathHead)
+	:-
+	lib_extension(LibExt),
+	filePlusExt('*',LibExt,Pattern),
+	files(LibPath, Pattern, LibFileHeaders),
+	install_lib_files(LibFileHeaders, LibPath),
+	(LibDirName = library ->
+		assert(als_lib_lcn(PathHead)) 
+		; 
+		true
+	).
+
+setup_lib(LibPath)
+	:-
+	write(setup_lib_file_bad_path=LibPath),nl, flush_output,!,
+	prolog_system_warning(lib_pth, [LibPath] ).
+
+install_lib_files([], LibPath).
+install_lib_files([LibFileHd | LibFileHeaders], LibPath)
+	:-
+	install_lib_f(LibFileHd, LibPath),
+	install_lib_files(LibFileHeaders, LibPath).
+
+install_lib_f(LibFileHd, LibDirPath)
+	:-
+	pathPlusFile(LibDirPath, LibFileHd, HeaderFile),
+	open(HeaderFile, read, IS, []),
+	read(IS, LHTerm0),
+	close(IS),
+	(LHTerm0 = (:- LHTerm) ->
+		call(builtins:LHTerm)
+		;
+		call(builtins:LHTerm0)
+	).
+
+
+
+/*!---------------------------------------------------------------------
+ |	asplit0/4
+ |	asplit0(AtomCs,Splitter,LeftPartCs,RightPartCs) 
+ |	asplit0(+,+,-,-) 
+ |
+ |	- divides a list of character codes as determined by a character code
+ |
+ |	If AtomCs is a list of character codes, and if Splitter is the character 
+ |	code of of a character, then, if the character with code Splitter occurs in
+ |	AtomCs, LeftPart is the list consisting of that part of AtomCs from the
+ |	left up to and including the leftmost occurrence of Splitter,
+ |	and RightPart is the atom consisting of that part of AtomCs extending 
+ |	from immediately after the end of LeftPart to the end of AtomCs.
+ *!--------------------------------------------------------------------*/
+export asplit0/4.
+asplit0([Char|Rest],Splitter,[Char|R1],String2) 
+	:-
+	Char \= Splitter,!,
+	asplit0(Rest,Splitter,R1,String2).
+
+asplit0([Splitter|Rest],Splitter,[],Rest).
+
+
+
+asplit0_all(Chars, Splitter, [Head | List])
+	:-
+	asplit0(Chars, Splitter, Head, Tail),
+	!,
+	asplit0_all(Tail, Splitter, List).
+
+asplit0_all(Chars, Splitter, [Chars]).
+
+all_to_atoms([], []).
+all_to_atoms([String | Strings], [Atom | Atoms])
+	:-
+	atom_codes(Atom, String),
+	all_to_atoms(Strings, Atoms).
+
+
+/*!---------------------------------------------------------------------
+ |	list_delete/3
+ |	list_delete(List, Item, ResultList)
+ |	list_delete(+, +, -)
+ |
+ |	- deletes all occurrences of an item from a list
+ |
+ |	If List is a list, and Item is any object, ResultList is obtained
+ |	by deleting all occurrences of Item from List.
+ *!--------------------------------------------------------------------*/
+list_delete(X, _, X) :- var(X),!.
+list_delete([], _, []).
+list_delete([Item | Rest_In_List], Item, Out_List)
+	:-!,
+	list_delete(Rest_In_List, Item, Out_List).
+list_delete([Keep | Rest_In_List], Item, [Keep | Rest_Out_List])
+	:-
+	list_delete(Rest_In_List, Item, Rest_Out_List).
+
+
+
+
 
 endmod.		%% blt_shl.pro: Development shell

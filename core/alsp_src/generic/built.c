@@ -193,6 +193,7 @@ static struct blt_struct {
 	    "_pbi_listasm_ntblentry"),
 #endif /* KERNAL */
 	BLT("$next_module", 4, pbi_next_module, "_pbi_next_module"),
+	BLT("$create_mod_close", 4, pbi_cr_mod_close, "_pbi_cr_mod_close"),
 	BLT("$nextproc", 3, pbi_nextproc, "_pbi_nextproc"),
 	BLT("$procinfo", 6, pbi_procinfo, "_pbi_procinfo"),
 	BLT("abolish", 3, pbi_abolish, "_pbi_abolish"),
@@ -218,6 +219,9 @@ static struct blt_struct {
 #ifdef INTCONSTR
 	BLT("fuzz_float",  3, pbi_fuzz, "_pbi_fuzz"),
 	BLT("$iter_link_net",  5, ilinknet, "_ilinknet"),
+	BLT("reset_cstr_ctrs",  0, reset_cstr_ctrs, "_reset_cstr_ctrs"),
+	BLT("get_cstr_ctrs",    2, get_cstr_ctrs_vals, "_get_cstr_ctrs_vals"),
+	BLT("set_max_iters",    1, set_max_iters_val, "_set_max_iters_val"),
 #endif /* INTCONSTR */
 
 #ifdef CONSTRDEBUG

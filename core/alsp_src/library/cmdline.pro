@@ -14,6 +14,7 @@ module builtins.
 export get_cmdline_vals/1.
 export cmdline_vals/2.
 export eat_cmd_line/3.
+export pull_out_nullswitches/3.
 
 /*!-----------------------------------------------------------------------*
  |	get_cmdline_vals/1

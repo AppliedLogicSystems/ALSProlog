@@ -1,0 +1,2 @@
+libactivate(windows,[library,simplio],
+    [query_user/3,query_user/5,simple_menu/3],[]).

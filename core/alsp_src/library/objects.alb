@@ -1,0 +1,9 @@
+libactivate(objects,[library,objects],
+    [defineObject/2,defineObject/3,defineClass/2,set_object_messages/1,opf/1,
+        opf/0,objectProcessFile_cl/0,objectProcessFiles/1,
+        objectProcessFile/2,objectProcessFile/3,do_objectProcess/4,
+        do_objectProcess/5,mods_with_objs/1,mods_with_classes/1,
+        objs_in_mod/2,classes_in_mod/2,dpos/1,don/1,dump_object_by_name/2,
+        sdos/1,selective_dump_object_by_state/2,sdon/1,
+        selective_dump_object_by_name/2,set_obj_profile/2,obj_slots/2],
+    []).

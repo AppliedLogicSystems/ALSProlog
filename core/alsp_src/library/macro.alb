@@ -1,0 +1,4 @@
+libactivate(macroxp,[library,macro],
+    [mx_cl/0,mx/0,macro_expand/0,mx/1,macro_expand_files/2,
+        macro_expand_files/3,macro_expand/2,expand_macros/2,define_macro/1],
+    []).

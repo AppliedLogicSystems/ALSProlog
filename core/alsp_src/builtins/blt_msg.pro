@@ -133,15 +133,18 @@ print_error_goal_attribute(Other)
 
 export prolog_system_warning/2.
 
+
 prolog_system_warning(error(W,L),_) 
 	:-
 	decode_error(W, L, Pattern, Args),
 	!,
 	pse_out(error_stream, 'Warning', Pattern, Args),
 	print_error_goal_attributes(L),
+/*
 	printf(error_stream,'- %-14s %t\n',
 		['Throw pattern:',error(W,L)],
 		[quoted(true),maxdepth(4),indent(17)]),
+*/
 	flush_output(error_stream).
 
 prolog_system_warning(ErrorCode, Args) 
@@ -398,8 +401,13 @@ warning_code(abort_ctlc,	'Aborting from Control-C or Control-Break.\n').
 
 warning_code(exit_ctlc,		'Exiting Prolog from Control-C or Control-Break.\n').
 
+
 warning_code(mods_open,
 		'At end of file %t: following modules are open:\n\t%t\n').
+
+warning_code(lib_act,		'Error activating library: %t %t %t-%t\n').
+warning_code(lib_pth,		'Non-existent library path: %t\n').
+warning_code(loc_alslib, 	'Can\'t locate ALS library in ALSDIR: %t\n').
 
 warning_code(nyi, 			'%t not yet implemented on %t.\n').
 

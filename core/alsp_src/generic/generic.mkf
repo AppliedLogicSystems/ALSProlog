@@ -70,6 +70,7 @@ glibfiles_c =  	alloc.c \
 	index.c \
 	intaux.c \
 	int_net.c \
+	intrv.c \
 	lexan.c \
 	lforeign.c \
 	loadfile.c \
@@ -269,7 +270,9 @@ index.o : icodegen.h icom.h
 
 intaux.o : intrv.h freeze.h 
 
-int_net.o : intrv.h freeze.h intrv_pr.h intrv.c 
+int_net.o : intrv.h freeze.h intrv_pr.h
+
+intrv.o : intrv.h freeze.h intrv_pr.h
 
 lexan.o : lexan.h lexinit.h 
 

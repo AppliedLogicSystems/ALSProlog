@@ -319,28 +319,49 @@ heap_status(Hleft) :-
 	dmember(heap(Hleft,Hused,Tused,GValloced,Halloced),Stat).
 
 /*---------------------------------------------------------------------
- * Library loading facilities
- *
- * Information pertaining to a library is stored in a hash table.  We build
- * this hash table with the call to make_hash_table.
+ | Library management and loading facilities
+ |
+ | Information pertaining to a library is stored in a hash table.  We build
+ | this hash table with the call to make_hash_table.
  *---------------------------------------------------------------------*/
 
 :- make_hash_table('_libinfo').
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Load an individual library file as
+	%% driven by a given Call (in a Module):
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 lib_load(Module,Call) 
 	:-
 	functor(Call,P,A),
 	get_libinfo(Module:P/A,FileName),
 	(pdel_libinfo(_,FileName), fail ; true),
-	sys_searchdir(ALSDIR),
-	'$atom_concat'(ALSDIR,FileName,FullFileName),
-%	Module:abolish(P,A),
+	lib_load(FileName, Module, P,A, Module,Call).
+
+lib_load(FileName, Module, P,A, Module,Call)
+	:-
+	is_absolute_pathname(FileName),
+	!,
 	(resource_load(FileName); load(FullFileName,1,_,obp,_)
 		; existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) ),
 	!,
 	Module:call(Call).
 
 
+lib_load(FileName, Module, P,A, Module,Call)
+	:-
+	als_lib_lcn(ALSLibPathHead),
+	extendPath(ALSLibPathHead, FileName, FullFileName),
+	(resource_load(FileName); load(FullFileName,1,_,obp,_)
+		; existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) ),
+	!,
+	Module:call(Call).
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Force one or more library files to be 
+	%% loaded (for use when packaging):
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 export force_libload_all/0.
 export force_libload_all/1.
 export force_libload_all/2.
@@ -364,11 +385,6 @@ force_libload_all([File|Files],DirDC)
 
 force_libload_file(File,DirDC)
 	:-
-%	lib_path_rec(LibHeader,LibList),
-%	dmember(File,LibList),
-%	subPath(DirDCList,DirDC),
-%	append(DirDCList,[LibHeader,File],XDirDCList),
-%	subPath(XDirDCList,FileName),
 	extendPath(DirDC,File,FileName),
 	als_advise('Loading %s\n',[FileName]),
 	(load(FileName,1,_,obp,_) ->
@@ -378,40 +394,46 @@ force_libload_file(File,DirDC)
 		als_advise('\n!!WARNING File %s NOT LOADED!\n',[FileName])
 	).
 
-:-dynamic(lib_path_rec/2).
+%:-dynamic(lib_path_rec/2).
 
-/*
-lib_recording(LH,LT)
-	:-
-pbi_write(lib_rec_try_lib_path_rec(LH,LT)),pbi_nl,pbi_ttyflush,
-	lib_path_rec(LH,LT),
-pbi_write(lib_rec_OK_lib_path_rec(LH,LT)),pbi_nl,pbi_ttyflush,
-	!.
-
-lib_recording(LH,LT)
-	:-
-pbi_write(lib_rec_try_lib_path_rec_CLAUSE2(LH,LT)),pbi_nl,pbi_ttyflush,
- 	assert_at_load_time(lib_path_rec(LH,LT)),
-pbi_write(lib_rec_try_lib_path_rec_CLAUSE2_DONE(LH,LT)),pbi_nl,pbi_ttyflush.
-*/
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Set up an individual predicate library 
+	%% entry (name table and libinfo hash table):
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 export libactivate/4.
 libactivate(M,[LH|LT],PredList,ModClosures) 
 	:-
+curmod(CurMod),
 	libhide(M,[LH|LT],PredList),
-	mc_all(ModClosures).
-	
-mc_all([]).
-mc_all([ModClose | ModClosures])
+	mc_all(ModClosures, M, [LH | LT]),
+	!.
+	%% warning_code(lib_act, 'Error activating library: %t %t %t-%t\n').
+libactivate(M,LH_LT,PredList,ModClosures) 
 	:-
-	call(ModClose),
-	mc_all(ModClosures).
+	prolog_system_warning(lib_act, [M,LH_LT,PredList,ModClosures] ).
 
-libhide(M,[LH|LT],PredList) 
+	
+mc_all([], M, [LH | LT]).
+mc_all([ModClose | ModClosures], M, [LH | LT])
 	:-
-%	lib_recording(LH,LT),
-	directory_separator(DS),
-	mklibpath(LT,DS,LH,LibFileName),
+	do_mc(ModClose, M, XP,XA),
+	libhide(M,[LH|LT],[XP/XA]), 
+	mc_all(ModClosures, M, [LH | LT]).
+
+do_mc( module_closure(UserPredicate,Arity), M, UserPredicate, Arity1)
+	:-!,
+	'$create_mod_close'(M, UserPredicate,Arity, UserPredicate),
+	Arity1 is Arity + 1.
+
+do_mc( module_closure(UserPredicate,Arity, Procedure), M, Procedure, Arity1)
+	:-
+	'$create_mod_close'(M, UserPredicate,Arity, Procedure),
+	Arity1 is Arity + 1.
+
+libhide(M,List,PredList) 
+	:-
+	subPath(List, LibFileName),
 	libhide0(PredList,M,LibFileName).
 
 libhide0([],M,LibFileName) 
@@ -425,13 +447,10 @@ libhide0([P/A | Rest], M, LibFileName)
 	endmodule,
 	libhide0(Rest,M,LibFileName).
 
-mklibpath([],DS,Name,Name) 
-	:- !.
-mklibpath([H|T],DS,Prefix,OutName) 
-	:-
-	'$atom_concat'(Prefix,DS,PrefixDS),
-	'$atom_concat'(PrefixDS,H,NewPrefix),
-	mklibpath(T,DS,NewPrefix,OutName).
+
+/*---------------------------------------------------------------------
+ * END: Library loading facilities
+ *---------------------------------------------------------------------*/
 
 :-op(800,fx,trace).
 :-op(800,fx,spy).
@@ -516,6 +535,8 @@ debug_sys_features(cstrupxt, 	8).
 debug_sys_features(gcintr, 		9).
 debug_sys_features(cstrbpuf,	10).
 debug_sys_features(frezbv,		11).
+debug_sys_features(cut_rsb,		12).
+debug_sys_features(cut_cpctr,	13).
 
 debug_sys_tag(cstr_ig,  rel_arith).
 debug_sys_tag(cstrislv, rel_arith).

@@ -1,0 +1,4 @@
+libactivate(cref,[library,crefxtra],
+    [union_files_calls/2,union_files_defs/2,prefix_undefs/2,prefix_subset/3,
+        prefix_undefs_basis/2,prefix_undefs_basis_filt/1],
+    []).

@@ -13,17 +13,24 @@ module builtins.
 
 export slash2list/2.
 
-slash2list(DestDirDesc, DestDirList)
+/*!------------------------------------------------------------*
+ |	slash2list/2
+ |	slash2list(DestDirDesc, DestDirList)
+ |	slash2list(DestDirDesc, DestDirList)
+ |
+ | - convert a slash term to a list
+ *!------------------------------------------------------------*/
+slash2list(SlashTerm, ResultList)
 	:-
-	slash2list(DestDirDesc, [], DestDirList).
+	slash2list(SlashTerm, [], ResultList).
 
-slash2list((A/ (B/C) ), Accum, DestDirList)
+slash2list((A/ (B/C) ), Accum, ResultList)
 	:-!,
-	slash2list(( (A/B) / C ), Accum, DestDirList).
+	slash2list(( (A/B) / C ), Accum, ResultList).
 
-slash2list(( A/B ), Accum, DestDirList)
+slash2list(( A/B ), Accum, ResultList)
 	:-!,
-	slash2list( A, [B | Accum], DestDirList).
+	slash2list( A, [B | Accum], ResultList).
 
 slash2list( A, Accum, NewAccum)
 	:-

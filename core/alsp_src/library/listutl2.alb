@@ -1,0 +1,4 @@
+libactivate(builtins,[library,listutl2],
+    [deleteNth/3,change_nth/3,subst_nth/4,nth_tail/4,at_most_n/3,
+        get_list_tail/3,sublist/4,last/2],
+    []).

@@ -1,0 +1,4 @@
+libactivate(cref,[library,cref],
+    [cref/1,cref/2,cref_shell/0,start_cref_shell/2,rcs/0,
+        restart_cref_shell/0,cx/1],
+    []).

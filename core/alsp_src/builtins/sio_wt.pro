@@ -439,6 +439,13 @@ wd(Exp,Depth,L1,Hole,WInfo)
      | in the event that the write depth is exceeded etc.
      *----------------------------------------------------------------------------*/
 
+wd(Var, Lev, Depth, _, nospace,[VarAtom|Hole],Hole,BP,WInfo) 
+	:-
+	'$is_delay_var'(Var),
+	!,
+	sio_var_to_atom(Var,VarAtom0),
+	'$atom_concat'('_$',VarAtom0,VarAtom).
+
     %% == Write out variables (lettervar option, first occurrence of variable)
 wd(Var, Lev, Depth, _, nospace,[VarAtom|Hole],Hole,BP,WInfo) 
 	:-

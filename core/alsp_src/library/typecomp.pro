@@ -34,10 +34,24 @@
 module builtins.
 use windows.
 
-%% Needed for the macro stuff; actually executed in blt_lib.pro:
+%% Needed for the macro stuff; now in sio_rt.pro:
 %% :-op(1200,xfx,=>).		
 
+export comptype/0.
+export comptype/1.
 export comptype_cl/0.
+
+/*!----------------------------------------------------------
+ |	comptype_cl/0
+ |	comptype_cl
+ |	comptype_cl
+ |
+ |	- invokes defStruct processing on files from command line
+ |
+ |	Files and switches must be rightwards of -p 
+ |	All entries on the command line are taken to be names of
+ |	files for defStruct processing.
+ *-----------------------------------------------------------*/
 comptype_cl :-
 	builtins:command_line(Files),
 	set_prolog_flag(unknown, fail),
@@ -51,9 +65,13 @@ comptype_files([File | Files])
 	comptype_files(Files).
 
 
-/*--------------------------------------------------------------------------*
- *--------------------------------------------------------------------------*/
-export comptype/0.
+/*!----------------------------------------------------------
+ |	comptype/0
+ |	comptype
+ |	comptype
+ |
+ |	- prompts for a file name, and invokes defStruct processing
+ *-----------------------------------------------------------*/
 comptype :-
 	set_prolog_flag(unknown, fail),
 	chooseFile(_,'*.typ',FileName),
@@ -64,9 +82,13 @@ comptype :-
 	ct_err("Can't see any *.typ files!").
 
 
-/*--------------------------------------------------------------------------*
- *--------------------------------------------------------------------------*/
-export comptype/1.
+/*!----------------------------------------------------------
+ |	comptype/1
+ |	comptype(File)
+ |	comptype(+)
+ |	
+ |	- invokes defStruct processing on File
+ *-----------------------------------------------------------*/
 comptype(InputFileDescrip)
 	:-
 	(filePlusExt(FileName, Ext, InputFileDescrip) ->

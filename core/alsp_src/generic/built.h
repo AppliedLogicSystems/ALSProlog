@@ -146,6 +146,7 @@ extern	int	pbi_firstargkey	PARAMS(( void ));
 extern	int	pbi_resolve_module	PARAMS(( void ));
 extern	int	pbi_exported_proc	PARAMS(( void ));
 extern	int	pbi_next_module	PARAMS(( void ));
+extern	int	pbi_cr_mod_close	PARAMS(( void ));
 extern	int	pbi_libbreak	PARAMS(( void ));
 extern	int	pbi_listasm_clause	PARAMS(( void ));
 extern	int	pbi_listasm_ntblentry	PARAMS(( void ));
@@ -172,6 +173,9 @@ extern int	pbi_fuzz	PARAMS((void));
 
 	/* int_net.c */
 extern int  ilinknet	PARAMS((void));
+extern int reset_cstr_ctrs		PARAMS (( void ));
+extern int get_cstr_ctrs_vals	PARAMS (( void ));
+extern int set_max_iters_val	PARAMS (( void ));
 
 #endif /* INTCONSTR */
 

@@ -21,7 +21,7 @@ cd $ac_file;
 		rm -rf alsdir/library;		
 		mkdir alsdir/library;		
 	fi
-	if [ `echo $srcdir | sed -e 's/^\(.\).*/\1/'` = "/" ]; then
+	if [ "`echo $srcdir | sed -e 's/^\(.\).*/\1/'`" = "/" ]; then
 		echo  Using absolute paths;
 		$LN_S $srcdir/builtins/*.pro alsdir/builtins;	
 		$LN_S $srcdir/library/*.pro alsdir/library; 
@@ -31,6 +31,7 @@ cd $ac_file;
 		$LN_S ../../../$srcdir/builtins/*.pro . ;	
 	    cd ../library ; 
 		$LN_S ../../../$srcdir/library/*.pro . ;
+		$LN_S ../../../$srcdir/library/*.alb . ;
 		cd ../..
 	fi
 cd ..

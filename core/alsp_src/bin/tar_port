@@ -1,0 +1,4 @@
+tar cvfX ../portable.tar ./bin/port.tar.xcl aclocal.m4 bin bld-natv \
+	bld-port builtins cfgs cinterf config.d.in config.guess configur.bat \
+	configure doc generate generic install.sh library local makefile.in \
+	misc pconfig port problems readme tests utils wins 

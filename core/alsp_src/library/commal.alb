@@ -1,0 +1,2 @@
+libactivate(builtins,[library,commal],
+    [flatten_comma_list/2,build_comma_list/2],[]).

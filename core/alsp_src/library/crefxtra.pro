@@ -12,7 +12,18 @@
 module cref.
 
 export union_files_calls/2.
+export union_files_defs/2.
+export prefix_undefs/2.
+export prefix_subset/3.
+export prefix_undefs_basis/2.
 
+/*!-----------------------------------------------------------------------
+ |	union_files_calls/2
+ |	union_files_calls(FileList, Result)
+ |	union_files_calls(+, -)
+ |
+ |	- union of cref-generated calls from files on FileList
+ *-----------------------------------------------------------------------*/
 union_files_calls(FileList, Result)
 	:-
 	getMiscInfo(MIS),
@@ -29,6 +40,13 @@ union_files_calls(FileList, MIS, Result)
 			
 export union_files_defs/2.
 
+/*!-----------------------------------------------------------------------
+ |	union_files_defs/2
+ |	union_files_defs(FileList, Result)
+ |	union_files_defs(+, -)
+ |
+ |	- union of (cref-generated) definitions from (list of) files on FileList
+ *-----------------------------------------------------------------------*/
 union_files_defs(FileList, Result)
 	:-
 	getMiscInfo(MIS),
@@ -43,13 +61,25 @@ union_files_defs(FileList, MIS, Result)
 		FDsList),
 	sorted_merge(FDsList, Result).
 
-export prefix_undefs/2.
+/*!-----------------------------------------------------------------------
+ |	prefix_undefs/2
+ |	prefix_undefs(Prefix, Result)
+ |	prefix_undefs(+, -)
+ |
+ |	- list of all undefined preds in cref context beginning with Prefix
+ *-----------------------------------------------------------------------*/
 prefix_undefs(Prefix, Result)
 	:-
 	user:undefs(Undefs),
 	prefix_subset(Undefs, Prefix, Result).
 
-export prefix_subset/3.
+/*!-----------------------------------------------------------------------
+ |	prefix_subset/3
+ |	prefix_subset(SrcList, Prefix, Result)
+ |	prefix_subset(+, +, -)
+ |
+ |	- list of all P/A on SrcList beginning with Prefix
+ *-----------------------------------------------------------------------*/
 prefix_subset(SrcList, Prefix, Result)
 	:-
 	atom_length(Prefix, Len),
@@ -65,35 +95,25 @@ prefix_subset([_ | SrcList], Prefix, Len, Result)
 	:-
 	prefix_subset(SrcList, Prefix, Len, Result).
 			
-export strip_prefix/3.
-strip_prefix(List, Prefix, Result)
-	:-
-	atom_length(Prefix, PLen),
-	PLen0 is PLen+1,
-	strip_prefix0(List, PLen0, Result).
-
-strip_prefix0([], _, []).
-strip_prefix0([P/A | List], Start, [SP | Result])
-	:-!,
-	atom_length(P, PL),
-	TailLen is PL - Start + 1,
-	sub_atom(P,Start,TailLen,SP),
-	strip_prefix0(List, Start,  Result).
-strip_prefix0([P | List], Start, [SP | Result])
-	:-!,
-	atom_length(P, PL),
-	sub_atom(P,Start,PL,SP),
-	strip_prefix0(List, Start, Result).
-strip_prefix0([_ | List], Start, Result)
-	:-
-	strip_prefix0(List, Start, Result).
-	
-export prefix_undefs_basis/2.
+/*!-----------------------------------------------------------------------
+ |	prefix_undefs_basis/2
+ |	prefix_undefs_basis(Prefix, Result)
+ |	prefix_undefs_basis(+, -)
+ |
+ |	- get undefined preds beginning with Prefix, with Prefix stripped off
+ *-----------------------------------------------------------------------*/
 prefix_undefs_basis(Prefix, Result)
 	:-
 	prefix_undefs(Prefix, PUndefs),
 	strip_prefix(PUndefs, Prefix, Result).
 
+/*!-----------------------------------------------------------------------
+ |	prefix_undefs_basis_filt/1
+ |	prefix_undefs_basis_filt(Prefix)
+ |	prefix_undefs_basis_filt(+)
+ |
+ |	- write a c2pro filter file for undefines starting with Prefix
+ *-----------------------------------------------------------------------*/
 export prefix_undefs_basis_filt/1.
 prefix_undefs_basis_filt(Prefix)
 	:-
@@ -104,9 +124,6 @@ prefix_undefs_basis_filt(Prefix)
 	open(FiltFile,write,OutS,[]),
 	write_clause(OutS, SuiteName=PUndefs),
 	close(OutS).
-
-
-
 
 endmod.
 

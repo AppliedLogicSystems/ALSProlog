@@ -345,6 +345,10 @@ pbi_nextproc()
     FAIL;
 }
 
+
+
+
+
 /*-------------------------------------------------------------------------
  * pbi_procinfo is called from Prolog as $procinfo(N,M,P,A,DBRef,ProcType)
  *
@@ -518,6 +522,32 @@ pbi_next_module()
     else
 	FAIL;
 }
+
+/*-------------------------------------------------------------*
+ |	pbi_cr_mod_close()
+ |	$cr_mod_close(Mod,Pred,Arity,TProc)
+ *-------------------------------------------------------------*/
+int
+pbi_cr_mod_close()
+{				
+    PWord v1, v2, v3, v4;
+    int   t1, t2, t3, t4;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+    w_get_An(&v3, &t3, 3);
+    w_get_An(&v4, &t4, 4);
+
+	if ((t1 != WTP_SYMBOL) || (t2 != WTP_SYMBOL) ||
+		(t3 != WTP_INTEGER) || (t4 != WTP_SYMBOL))
+		FAIL;
+
+	if (createModCloseProc(v1, v2, v3, v4))
+		SUCCEED;
+	else
+		FAIL;
+}
+
 
 int
 pbi_listasm_clause()

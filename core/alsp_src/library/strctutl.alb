@@ -1,0 +1,2 @@
+libactivate(builtins,[library,strctutl],
+    [locate_struct/3,delete_struct/3,delete_struct/4,set_all_args/4],[]).

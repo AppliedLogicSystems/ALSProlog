@@ -131,20 +131,25 @@ static	void	release_bottom_stack_page	PARAMS(( void ));
 
 
 #if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
-static	void	stack_overflow	PARAMS(( int, struct siginfo *, struct ucontext * ));
-static void
+void	stack_overflow	PARAMS(( int, struct siginfo *, struct ucontext * ));
+void
 stack_overflow(signum, siginf, sigcon)
     int   signum;
     struct siginfo *siginf;
     struct ucontext *sigcon;
 
 #elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
-static	void	stack_overflow	PARAMS(( int, int, struct sigcontext *, caddr_t ));
-static void
+void	stack_overflow	PARAMS(( int, int, struct sigcontext *, caddr_t ));
+void
 stack_overflow(signum, code, scp, addr)
     int   signum, code;
     struct sigcontext *scp;
     caddr_t addr;
+#elif defined(Portable)
+void   stack_overflow  PARAMS(( int ));
+void
+stack_overflow(signum)
+    int   signum;
 
 #else
     die
@@ -174,6 +179,8 @@ stack_overflow(signum, code, scp, addr)
 	signal_handler(ALSSIG_STACK_OVERFLOW, siginf, sigcon);
 #elif defined (HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
 	signal_handler(ALSSIG_STACK_OVERFLOW, code, scp, addr);
+#elif defined(Portable)
+   signal_handler(ALSSIG_STACK_OVERFLOW);
 #else
 	die
 #endif
@@ -207,6 +214,8 @@ stack_overflow(signum, code, scp, addr)
 	sigvec(signum, &v, 0);
 #endif
 
+#elif defined(Portable)
+   signal(signum, SIG_DFL);
 #else
 	die
 #endif
@@ -365,6 +374,7 @@ release_bottom_stack_page()
 #define CODESTART	0x06000000
 #define NPROTECTED	5
 
+
 static void release_bottom_stack_page(void)
 {
     DWORD OldProtection;
@@ -457,7 +467,9 @@ allocate_prolog_heap_and_stack(size)
 #define CODESTART	0x06000000
 #define NPROTECTED	1
 
+#if defined(HAVE_SIGACTION) || defined(HAVE_SIGVEC)
 static long signal_stack[SIGSTKSIZE];
+#endif
 
 static	void	release_bottom_stack_page	PARAMS(( void ));
 
@@ -557,10 +569,11 @@ release_bottom_stack_page()
 /*------ All other operating systems and architectures --------*/
 
 #if	defined(Portable) || defined(arch_m88k) || defined(arch_m68k)
-void stack_overflow(void);
+void stack_overflow PARAMS((int));
 
 void
-stack_overflow(void)
+stack_overflow(signum)
+	int signum;
 {
     fatal_error(FE_STKOVERFLOW, 0);
 }

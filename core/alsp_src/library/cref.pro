@@ -1,206 +1,1182 @@
-/*-------------------------------------------------------------*
-                    crefstrt.pro
-               defStruct Type definitions generated from file:
-                    crefstrt.typ
-               by ALS defStruct Type Generator
-               Macros written to file: crefstrt.mac
- *-------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+ |			crefmain.pro
+ |	Copyright (c) 1989-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |		Prolog cross-referencer
+ |
+ | Author(s): Ken Bowen, Aida Batarekh
+ | Date(s):	November, 1988 (KAB - original)
+ |		January, 1989 (Expansion - Aida Batarekh) 	
+ |		AVL tree tools added July 1991 (KAB)
+ *--------------------------------------------------------------------*/
 
-module utilities.
-use cref.
-endmod.
-
+	/*-------------------------*
+	 |	cref
+ 	 *-------------------------*/
 module cref.
-use utilities.
+
+export cref/1.
+export cref/2.
+	%% From cref_avl.pro:
+export cref_shell/0.
+export start_cref_shell/2.
+export rcs/0.
+export restart_cref_shell/0.
+export cx/1.
+
+	/*-------------------------------------------------------
+   	 |	Global variables which hold the AVL trees
+ 	 *--------------------------------------------------------*/
+
+:-make_gv('CallsTree'),avl_create(T),setCallsTree(T).
+:-make_gv('ShellStruct'), makeCRSH(S), setShellStruct(S).
+:-make_gv('MiscInfo'), makeMI(S), setMiscInfo(S).
+
+:- dynamic(suite_info/4).
+
+	%% For testing:
+	%% Later this will be set up to manage a "master" database:
+suite_info(suite,ken,['ken.pro'],user_output).
+suite_info(suite,cref,['crefmain.pro','crefavl.pro','crefstrt.pro'],'cref.xrf').
+suite_info(suite,gentools,['gentools.pro'],'gentools.xrf').
+suite_info(suite,c2pro,
+			'/mailbox3/alsp_src/cinterf/c2pro'+
+			  [c2pro,cexp,cfiles,cmacro,cmisc,cout,cparse,ctoken,cunix],
+			  'c2pro.xrf').
+
+suite_info(suite,SuiteName,Directory+FilesList,TargetFile, [])
+        :-
+        suite_info(suite,SuiteName,Directory+FilesList,TargetFile).
+
+get_make_info(suite,SuiteName,Directory,FilesList,TargetFile, ConfigInfo)
+	:-
+	suite_info(suite,SuiteName,Directory+FilesList,TargetFile, ConfigInfo), 
+	!.
+
+get_make_info(suite,SuiteName,'.',FilesList,TargetFile, ConfigInfo)
+	:-
+	suite_info(suite,SuiteName,FilesList,TargetFile, ConfigInfo), 
+	!.
+
+get_make_info(suite,SuiteName,Directory,FilesList,TargetFile, ConfigInfo)
+	:-
+	filePlusExt(SuiteName,crf,IndirSourceFile),
+	exists_file(IndirSourceFile),
+	open(IndirSourceFile,read,ISS,[]),
+	!,
+	read_terms(ISS,SpecList),
+	close(ISS),
+	(dmember(dir=Directory, SpecList) ->
+                true
+                ;
+                get_cwd(Directory)
+        ),
+	dmember(files=FilesList,SpecList),
+        (dmember(config=ConfigInfo, SpecList) ->
+                true
+                ;
+                ConfigInfo = nil
+        ),
+	filePlusExt(SuiteName,xrf,TargetFile).
+
+get_make_info(suite,SuiteName,'.',FilesList,TargetFile, nil)
+	:-
+	filePlusExt(BaseName,pro,SuiteName),
+	!,
+	FilesList = [SuiteName],
+	filePlusExt(BaseName,xrf,TargetFile).
+
+get_make_info(suite,SuiteName,'.',FilesList,TargetFile, nil)
+	:-
+	filePlusExt(SuiteName,pro,SourceFile),
+	FilesList = [SourceFile],
+	filePlusExt(SuiteName,xrf,TargetFile).
+
+setup_config(cfg(Module,ClauseList), RefsList)
+        :-!,
+        assert_all_refs(Module,ClauseList, RefsList).
+
+setup_config(_, _).
+
+/*!-----------------------------------------------------------------------
+ |	cref/1
+ |	cref(SuiteName) 
+ |	cref(+) 
+ |
+ |	- perform cref processing on program suite SuiteName
+ *-----------------------------------------------------------------------*/
+cref(SuiteName) 
+	:-
+	cref(SuiteName, []).
+
+/*!-----------------------------------------------------------------------
+ |	cref/2
+ |	cref(SuiteName, Options) 
+ |	cref(+, +) 
+ |
+ |	- perform cref processing on program suite SuiteName, using Options
+ *-----------------------------------------------------------------------*/
+cref(SuiteName, Options) 
+	:-
+	process_options(Options),
+	clean_up_me,
+		%%  Clear out the calls tree in case we are re-running:
+	avl_create(ET),setCallsTree(ET),
+
+	get_make_info(suite,SuiteName,Directory,FilesList,TargetFile, ConfigInfo),
+	get_cwd(CurDir),
+	change_cwd(Directory),
+	setup_config(ConfigInfo, CfgDBRefs),
+	do_cref(FilesList),
+        erase_all(CfgDBRefs),
+	change_cwd(CurDir),
+	als_advise('Cref: Finished with %t\n',[SuiteName]),
+	start_cref_shell(SuiteName, [dir=Directory, files=FilesList | Options]).
+/*
+	(dmember(TargetFile,[user,user_output]) ->
+		OutSt = user_output
+		;
+		open(TargetFile, write, OutSt, [])
+	),
+	gen_file_header(OutSt,cref_suite-SuiteName,TargetFile, 
+	printf(OutSt,'\t--by cref\n\tsuite files:%t\n',[FilesList])),
+	getCallsTree(CallsTree),
+	write_cref_file(FilesList,CallsTree,OutSt),
+	(dmember(TargetFile,[user,user_output]) ->
+		true
+		;
+		close(OutSt)
+	),
+	als_advise('Cref: Finished with %t\n',[SuiteName]).
+*/
+
+process_options([]) :-!.
+process_options([Opt | Options])
+	:-!,
+	process_opt(Opt),
+	process_options(Options).
+process_options(Options)
+	:-
+	process_options([Options]).
+
+process_opt(include_mods=List)
+	:-
+	process_include_mods(List),
+	!.
+process_opt(Opt)
+	:-
+	als_advise('Unknown cref option: %t\n', [Opt]).
+
+process_include_mods([]) :-!.
+process_include_mods([Mod | List])
+	:-!,
+	(retract(excluded_mod(Mod)) ; 
+		als_advise('Options: Module %t not excluded\n',[Mod])),
+	!,
+	process_include_mods(List).
+process_include_mods(List)
+	:-
+	process_include_mods([List]).
 
 
-%--- crefStructs defStruct ---
+do_cref(Files)
+	:-
+	do_cref(Files, [user]).
 
-export accessCRF/3.
-export setCRF/3.
-accessCRF(pred,_A,_B) :- arg(1,_A,_B).
-setCRF(pred,_A,_B) :- mangle(1,_A,_B).
+do_cref([], [user])
+	:-!.
+do_cref([], [])
+	:-!,
+	als_advise('!!Warning: Too many endmods (at closing last file)',[]).
+do_cref([], Mods)
+	:-!,
+	list_delete(Mods, user, DMods),
+	als_advise('!!Warning: At closing the last file, the following modules\n',[]), 
+	als_advise('           are still open:%t\n\n',[DMods]).
 
-accessCRF(arity,_A,_B) :- arg(2,_A,_B).
-setCRF(arity,_A,_B) :- mangle(2,_A,_B).
+do_cref([File | Files], OpenMods)
+	:-
+	resolve_file(File, FileName),
+		
+	als_advise('>>Starting file %t\n',[FileName]),
+	!,
+	open(FileName, read, InS, []),
+	cross_ref(OpenMods,NewOpenMods,FileName, AddlFiles, InS),
+	close(InS),
+ 	rcrd(file(FileName)),
+	als_advise('\n<<Finished file %t\n',[FileName]),
+	append(Files, AddlFiles, NewFiles),
+	do_cref(NewFiles, NewOpenMods).
 
-accessCRF(mod,_A,_B) :- arg(3,_A,_B).
-setCRF(mod,_A,_B) :- mangle(3,_A,_B).
+do_cref([File | Files], OpenMods)
+	:-
+	als_advise('!!!>>!!! ERROR: File %t does not exist!\n',[File]),
+	do_cref(Files, OpenMods).
 
-accessCRF(files,_A,_B) :- arg(4,_A,_B).
-setCRF(files,_A,_B) :- mangle(4,_A,_B).
+resolve_file(File, File)
+	:-
+	exists_file(File),
+	!.
 
-accessCRF(exported,_A,_B) :- arg(5,_A,_B).
-setCRF(exported,_A,_B) :- mangle(5,_A,_B).
+resolve_file(File, FileName)
+	:-
+	filePlusExt(File,pro,FileName),
+	exists_file(FileName),
+	!.
 
-accessCRF(calls,_A,_B) :- arg(6,_A,_B).
-setCRF(calls,_A,_B) :- mangle(6,_A,_B).
+write_cref_file(Source,CallsTree,OutSt) 
+	:-
+ 	group(CallsTree,OutSt),
+	modules(OutSt),
+ 	asserteds(OutSt),
+	uncalleds(OutSt),
+ 	undefs_importeds(OutSt).
 
-accessCRF(basis,_A,_B) :- arg(7,_A,_B).
-setCRF(basis,_A,_B) :- mangle(7,_A,_B).
+	/*-----------------------------------------------------
+	 |	MAIN PROCESSING LOOP:
+  	 *------------------------------------------------------*/
+cross_ref(OMs, NOMs, File, AddlFs, InS)
+	:-
+	read_term(InS,Item, []),
+%pbi_write(Item),pbi_nl,pbi_ttyflush,
+	disp_cross_ref(Item, OMs, NOMs, File, AddlFs, InS).
 
-accessCRF(calledby,_A,_B) :- arg(8,_A,_B).
-setCRF(calledby,_A,_B) :- mangle(8,_A,_B).
+disp_cross_ref(end_of_file, OMs, OMs, File, [], InS)
+	:-!.
 
-accessCRF(calledcount,_A,_B) :- arg(9,_A,_B).
-setCRF(calledcount,_A,_B) :- mangle(9,_A,_B).
+disp_cross_ref(Item,OMs,NOMs,File, AddlFs, InS)
+	:-
+	act_cross_ref(Item, OMs, NextOMs, File, AddlFs, AddlFsTail),
+	!,
+	put_code(0'.),flush_output,
+	cross_ref(NextOMs,NOMs,File, AddlFsTail, InS).
 
-accessCRF(factcount,_A,_B) :- arg(10,_A,_B).
-setCRF(factcount,_A,_B) :- mangle(10,_A,_B).
+	%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% DISPATCH FOR MAIN LOOP:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-accessCRF(clausecount,_A,_B) :- arg(11,_A,_B).
-setCRF(clausecount,_A,_B) :- mangle(11,_A,_B).
+	% Goal in file:
+act_cross_ref(':-'(Goal),OMs,OMs,File,AFs,AFsT) 
+	:-!,
+	process_goal(Goal,OMs,File,AFs,AFsT).
 
-accessCRF(depthcount,_A,_B) :- arg(12,_A,_B).
-setCRF(depthcount,_A,_B) :- mangle(12,_A,_B).
+	%% Clause with body:
+act_cross_ref((Head :- Body),OMs,OMs,File,AFs,AFs) 
+	:-!,
+ 	functor(Head, F, N),
+	OMs = [Mod | _], 
+ 	rcrd(inc_clause_cnt(F,N,Mod,File)),
+ 	analyze_clause(Body, F,N,Mod,File).
 
-accessCRF(callinmod,_A,_B) :- arg(13,_A,_B).
-setCRF(callinmod,_A,_B) :- mangle(13,_A,_B).
+	%% DCG rule:
+act_cross_ref((Head --> Body),OMs,OMs,File,AFs,AFs) 
+	:-!,
+	dcg_expand((Head --> Body), XDCG),
+	act_cross_ref(XDCG,OMs,OMs,File,AFs,AFs).
 
-accessCRF(importto,_A,_B) :- arg(14,_A,_B).
-setCRF(importto,_A,_B) :- mangle(14,_A,_B).
+	%% module declarations:
+act_cross_ref((module Mod),OMs,[Mod | OMs],File,AFs,AFs)
+	:-!,
+ 	rcrd(module(Mod,File)).
 
-accessCRF(dependson,_A,_B) :- arg(15,_A,_B).
-setCRF(dependson,_A,_B) :- mangle(15,_A,_B).
+act_cross_ref((endmod),[_ | OMs], OMs,File,AFs,AFs)
+	:-!.
 
-accessCRF(whereasserted,_A,_B) :- arg(16,_A,_B).
-setCRF(whereasserted,_A,_B) :- mangle(16,_A,_B).
+act_cross_ref((export A),OMs,OMs,File,AFs,AFs)
+	:-!,
+	OMs = [Mod | _],
+	record_exports(A, Mod, File).
 
-export makeCRF/1.
-makeCRF(_A) :-
-        _A=..[crfCRF,_B,_C,user,[],false,[],nil,[],0,0,0,0,[],[],nil,[]].
+act_cross_ref((use A), OMs, OMs,File,AFs,AFs)
+	:-!,
+	OMs = [Mod | _],
+	record_uses(A, Mod, File).
+	
+	%% A Fact (default):
+act_cross_ref(Fact,OMs,OMs,File,AFs,AFs) 
+	:-
+ 	functor(Fact, F, N),
+	OMs = [Mod | _],
+ 	rcrd(fact(F,N,Mod,File)).
 
-export makeCRF/2.
-makeCRF(_A,_B) :-
-        struct_lookup_subst(
-            [pred,arity,mod,files,exported,calls,basis,calledby,calledcount,
-                factcount,clausecount,depthcount,callinmod,importto,
-                dependson,whereasserted],
-            [_C,_D,user,[],false,[],nil,[],0,0,0,0,[],[],nil,[]],_B,_E),
-        _A=..[crfCRF|_E].
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Processing: Goal in file:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-export xmakeCRF/2.
-xmakeCRF(crfCRF(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L,_M,_N,_O,_P),
-    [_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L,_M,_N,_O,_P]).
+process_goal(Goal,OMs,File,AFs,AFsT)
+	:-
+	Goal = [_ | _],
+	!,
+	open_tail(Goal, AFs, AFsT).
 
+process_goal((Goal_A, Goal_B), OMs,File,AFs,AFsT)
+	:-!,
+	process_goal(Goal_A, OMs,File,AFs,InterAFs),
+	process_goal(Goal_B, OMs,File,InterAFs,AFsT).
 
-%--- cshls defStruct ---
-
-export accessCRSH/3.
-export setCRSH/3.
-accessCRSH(cycle,_A,_B) :- arg(1,_A,_B).
-setCRSH(cycle,_A,_B) :- mangle(1,_A,_B).
-
-accessCRSH(history,_A,_B) :- arg(2,_A,_B).
-setCRSH(history,_A,_B) :- mangle(2,_A,_B).
-
-accessCRSH(outputs,_A,_B) :- arg(3,_A,_B).
-setCRSH(outputs,_A,_B) :- mangle(3,_A,_B).
-
-accessCRSH(suite,_A,_B) :- arg(4,_A,_B).
-setCRSH(suite,_A,_B) :- mangle(4,_A,_B).
-
-accessCRSH(options,_A,_B) :- arg(5,_A,_B).
-setCRSH(options,_A,_B) :- mangle(5,_A,_B).
-
-accessCRSH(context_stack,_A,_B) :- arg(6,_A,_B).
-setCRSH(context_stack,_A,_B) :- mangle(6,_A,_B).
-
-accessCRSH(in_stream,_A,_B) :- arg(7,_A,_B).
-setCRSH(in_stream,_A,_B) :- mangle(7,_A,_B).
-
-accessCRSH(out_stream,_A,_B) :- arg(8,_A,_B).
-setCRSH(out_stream,_A,_B) :- mangle(8,_A,_B).
-
-export makeCRSH/1.
-makeCRSH(_A) :- _A=..[crfCRSH,0,[],[],unknown,[],[],user_input,user_output].
-
-export makeCRSH/2.
-makeCRSH(_A,_B) :-
-        struct_lookup_subst(
-            [cycle,history,outputs,suite,options,context_stack,in_stream,
-                out_stream],
-            [0,[],[],unknown,[],[],user_input,user_output],_B,_C),
-        _A=..[crfCRSH|_C].
-
-export xmakeCRSH/2.
-xmakeCRSH(crfCRSH(_A,_B,_C,_D,_E,_F,_G,_H),[_A,_B,_C,_D,_E,_F,_G,_H]).
+process_goal(consult(F), OMs, File, [F | AFsT], AFsT)
+	:-!.
 
 
-%--- mi defStruct ---
+process_goal(Goal, OMs,File,AFs,AFs)
+	:-
+	functor(Goal,op,3),
+	!,
+	call(Goal).
 
-export accessMI/3.
-export setMI/3.
-accessMI(files,_A,_B) :- arg(1,_A,_B).
-setMI(files,_A,_B) :- mangle(1,_A,_B).
+process_goal(make_gv(Tag), OMs,File,AFs,AFs)
+	:-!,
+	catenate(get,Tag,GetCall), functor(GetHead,GetCall,1),
+	act_cross_ref((GetHead :- gv_get(_,_)),OMs,OMs,File,AFs,AFs),
+	catenate(set,Tag,SetCall), functor(SetHead,SetCall,1),
+	act_cross_ref((SetHead :- gv_set(_,_)),OMs,OMs,File,AFs,AFs).
 
-accessMI(files_mods,_A,_B) :- arg(2,_A,_B).
-setMI(files_mods,_A,_B) :- mangle(2,_A,_B).
+process_goal(Goal, OMs,File,AFs,AFs).
 
-accessMI(files_d_preds,_A,_B) :- arg(3,_A,_B).
-setMI(files_d_preds,_A,_B) :- mangle(3,_A,_B).
+open_tail([], AFs, AFs).
+open_tail([H | T], [H | RO], AFsT)
+	:-
+	open_tail(T, RO, AFsT).
 
-accessMI(files_c_preds,_A,_B) :- arg(4,_A,_B).
-setMI(files_c_preds,_A,_B) :- mangle(4,_A,_B).
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Recording export declarations:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-accessMI(mods,_A,_B) :- arg(5,_A,_B).
-setMI(mods,_A,_B) :- mangle(5,_A,_B).
+record_exports([], _, _).
+record_exports([A | T], Mod, File)
+	:-!,
+	rcrd(export(Mod,A,File)),
+	record_exports(T, Mod, File).
 
-accessMI(mods_files,_A,_B) :- arg(6,_A,_B).
-setMI(mods_files,_A,_B) :- mangle(6,_A,_B).
+record_exports(A, Mod, File)
+	:-
+	rcrd(export(Mod,A,File)).
 
-accessMI(mods_use,_A,_B) :- arg(7,_A,_B).
-setMI(mods_use,_A,_B) :- mangle(7,_A,_B).
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Recording use declarations:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-accessMI(mods_d_preds,_A,_B) :- arg(8,_A,_B).
-setMI(mods_d_preds,_A,_B) :- mangle(8,_A,_B).
+record_uses([], Mod, File).
+record_uses([A | T], Mod, File)
+	:-!,
+ 	rcrd(use(Mod,A,File)),
+	record_uses(T, Mod, File).
 
-accessMI(mods_c_preds,_A,_B) :- arg(9,_A,_B).
-setMI(mods_c_preds,_A,_B) :- mangle(9,_A,_B).
+record_uses(A, Mod, File)
+	:-
+ 	rcrd(use(Mod,A,File)).
 
-accessMI(mods_exp_preds,_A,_B) :- arg(10,_A,_B).
-setMI(mods_exp_preds,_A,_B) :- mangle(10,_A,_B).
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Analyzing clause bodies:
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-accessMI(mods_imp_preds,_A,_B) :- arg(11,_A,_B).
-setMI(mods_imp_preds,_A,_B) :- mangle(11,_A,_B).
+	%% ---------------------------
+	%% -- Skip uninstantiated goals:
+analyze_clause(X,_,_,_,_)
+	:- var(X),!.
 
-export makeMI/1.
-makeMI(_A) :- _A=..[crfMI,[],[],[],[],[],[],[],[],[],[],[]].
+	%% ---------------------------
+	%% -- Disjunction:
+analyze_clause(  ( (SG1; SG2); H), F, N, Mod,CurFile) 
+	:-!,
+ 	analyze_clause(SG1, F, N, Mod,CurFile),
+ 	analyze_clause(SG2, F, N, Mod,CurFile),
+ 	analyze_clause(H, F, N, Mod,CurFile).
 
-export makeMI/2.
-makeMI(_A,_B) :-
-        struct_lookup_subst(
-            [files,files_mods,files_d_preds,files_c_preds,mods,mods_files,
-                mods_use,mods_d_preds,mods_c_preds,mods_exp_preds,
-                mods_imp_preds],
-            [[],[],[],[],[],[],[],[],[],[],[]],_B,_C),
-        _A=..[crfMI|_C].
+analyze_clause( (G; H), F, N, Mod,CurFile) 
+	:-!,
+ 	analyze_clause(G, F, N, Mod,CurFile),
+ 	analyze_clause(H, F, N, Mod,CurFile).
 
-export xmakeMI/2.
-xmakeMI(crfMI(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K),
-    [_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K]).
+	%% ---------------------------
+	%% -- Conditional:
+analyze_clause(  (Head -> If; Else), F, N, Mod,CurFile) 
+	:-!,
+ 	analyze_clause(Head, F, N, Mod,CurFile),
+ 	analyze_clause(If,   F, N, Mod,CurFile),
+ 	analyze_clause(Else, F, N, Mod,CurFile).
+
+analyze_clause(  (Head -> If), F, N, Mod,CurFile) 
+	:-!,
+ 	analyze_clause(Head, F, N, Mod,CurFile),
+ 	analyze_clause(If,   F, N, Mod,CurFile).
+
+	%% ---------------------------
+	%% -- Conjunction:
+analyze_clause(  ( (SG1, SG2), H), F, N, Mod,CurFile) 
+	:-!,
+ 	analyze_clause(SG1, F, N, Mod,CurFile),
+ 	analyze_clause(SG2, F, N, Mod,CurFile),
+ 	analyze_clause(H, F, N, Mod,CurFile).
+
+analyze_clause( (G, H), F, N, Mod,CurFile) 
+	:-!,
+ 	analyze_clause(G, F, N, Mod,CurFile),
+ 	analyze_clause(H, F, N, Mod,CurFile).
+
+	%% ---------------------------
+	%% -- Special Builtins - setof,setOf,bagof bagOf:
+analyze_clause(setOf(_, G, _), F, N, Mod,CurFile) 
+	:-
+ 	nonvar(G), !,
+ 	rcrd(rule(F,N,setOf,3,Mod,CurFile)), 
+ 	analyze_clause_special(G, F, N, Mod,CurFile).
+
+analyze_clause(setOf(_, G, _), F, N, Mod,CurFile) 
+	:-
+ 	rcrd(rule(F,N,setOf,3,Mod,CurFile)). 
+
+analyze_clause(setof(_, G, _), F, N, Mod,CurFile) 
+	:-
+ 	nonvar(G),
+ 	analyze_clause_special(G, F, N, Mod,CurFile).
+
+analyze_clause(bagOf(_, G, _), F, N, Mod,CurFile) 
+	:-
+ 	nonvar(G), !,
+ 	rcrd(rule(F,N,bagOf,3,Mod,CurFile)), 
+ 	analyze_clause_special(G, F, N, Mod,CurFile).
+
+analyze_clause(bagOf(_, G, _), F, N, Mod,CurFile) 
+	:-
+ 	rcrd(rule(F,N,bagOf,3,Mod,CurFile)). 
+
+analyze_clause(bagof(_, G, _), F, N, Mod,CurFile) 
+	:-
+ 	nonvar(G),
+ 	analyze_clause_special(G, F, N, Mod,CurFile).
+
+analyze_clause_special(X^G, F, N, Mod,CurFile)
+	:- !,
+ 	analyze_clause(G,F,N,Mod,CurFile).
+
+analyze_clause_special(G, F, N, Mod,CurFile)
+	:- 
+ 	analyze_clause(G,F,N,Mod,CurFile).
+
+	%% ---------------------------
+	%% -- call:
+analyze_clause(call(G), F, N, Mod,CurFile) 
+	:-
+ 	nonvar(G),
+ 	analyze_clause(G, F, N, Mod,CurFile).
+
+	%% ---------------------------
+	%% -- assert:
+analyze_clause(assertz(G), F, N, Mod,CurFile) 
+	:-
+ 	nonvar(G),
+ 	functor(G,FG,NG),
+ 	rcrd(assert(FG,NG, Mod,CurFile)).
+
+analyze_clause(asserta(G), F, N, Mod,CurFile) 
+	:-
+ 	nonvar(G),
+ 	functor(G,FG,NG),
+ 	rcrd(assert(FG,NG, Mod,CurFile)).
+
+analyze_clause(assert(G), F, N, Mod,CurFile) 
+	:-
+ 	nonvar(G),
+ 	functor(G,FG,NG),
+ 	rcrd(assert(FG,NG, Mod,CurFile)).
+
+	%% ---------------------------
+	%% -- Explicit import from a module:
+analyze_clause(Module:not(G), F, N, Mod,CurFile) 
+	:-!,
+	functor(G, FG, NG),
+	rcrd(import(Mod,FG,NG,Module,CurFile)),
+	rcrd(rule(F, N, Module:not(FG), NG, Mod,CurFile)).
+
+analyze_clause(Module:G, F, N, Mod,CurFile) 
+	:-
+	functor(G, FG, NG),
+	rcrd(import(Mod,FG,NG,Module,CurFile)),
+	rcrd(rule(F, N, Module:FG, NG, Mod,CurFile)).
+
+	%% ---------------------------
+	%% -- Negation:
+analyze_clause(not(Module:G), F, N, Mod,CurFile)
+	:-!,
+	functor(G, FG, NG),
+	rcrd(import(Mod,FG,NG,Module,CurFile)),
+	rcrd(rule(F, N, Module:not(FG), NG, Mod,CurFile)).
+
+analyze_clause(not(G), F, N, Mod,CurFile)
+	:-
+	functor(G, FG, NG),
+	rcrd(rule(F, N, not(FG),NG, Mod,CurFile)).
+ 
+	%% ---------------------------
+	%% -- Default (ordinary call):
+analyze_clause(G, F, N, Mod,CurFile) 
+	:-
+	functor(G, FG, NG),
+	rcrd(rule(F, N, FG, NG, Mod,CurFile)),
+ 	rcrd(inc_called_cnt(FG,NG,F/N,Mod,CurFile)).
+
+
+	/*-------------------------------------------------
+	 |   recording needed info
+	 *------------------------------------------------*/
+
+rcrd(file(File))
+	:-
+	getMiscInfo(MIS),
+	accessMI(files, MIS, Files),
+	(dmember(File, Files) ->
+		true
+		;
+		setMI(files, MIS, [File | Files])
+	).
+
+:-dynamic(excluded_file/1).
+:-dynamic(excluded_mod/1).
+
+excluded_head(F, N, Mod, CurFile)
+	:-
+	(excluded_file(CurFile) ; excluded_mod(Mod)),
+	!.
+
+excluded_call(FG, NG)
+	:-
+	all_procedures(MG, FG, NG, _),
+	excluded_mod(MG),
+	!.
+
+	%% default:
+excluded_mod(builtins).
+excluded_mod(sio).
+
+rcrd(inc_clause_cnt(F,N,Mod,File))
+	:-
+	getCallsTree(CurCallsTree),
+	avl_insert(F/N, inc_clause_cnt(F,N,Mod,File),CurCallsTree,NewCallsTree),
+	setCallsTree(NewCallsTree).
+
+rcrd(inc_called_cnt(F,N,_,_,_))
+	:-
+	excluded_call(F, N),
+	!.
+
+rcrd(inc_called_cnt(F,N,CalledBy,Mod,File))
+	:-
+	getCallsTree(CurCallsTree),
+	avl_insert(F/N, inc_called_cnt(F,N,CalledBy,Mod,File),CurCallsTree,NewCallsTree),
+	setCallsTree(NewCallsTree).
+
+rcrd(rule(F, N, FG, NG, Mod,CurFile)) 
+	:-
+	excluded_head(F, N, Mod, CurFile),
+	!.
+
+rcrd(rule(F, N, FG, NG, Mod,CurFile)) 
+	:-
+	excluded_call(FG, NG),
+	!.
+
+rcrd(rule(F, N, FG, NG, Mod,CurFile)) 
+	:-
+	getCallsTree(CurCallsTree),
+	avl_insert(F/N, calls(F,N,FG,NG, Mod,CurFile),CurCallsTree,NewCallsTree),
+	setCallsTree(NewCallsTree).
+
+rcrd(fact(F, N, Mod,CurFile)) 
+	:-
+	excluded_head(F, N, Mod, CurFile),
+	!.
+
+rcrd(fact(F,N, Mod,CurFile)) 
+	:-
+	getCallsTree(CurCallsTree),
+	avl_insert(F/N, fact(F,N,Mod,CurFile),CurCallsTree,NewCallsTree),
+	setCallsTree(NewCallsTree).
+
+rcrd(export(Mod,P/N,CurFile))
+	:-
+	getCallsTree(CurCallsTree),
+	avl_insert(P/N, export(P,N,Mod,CurFile),CurCallsTree,NewCallsTree),
+	setCallsTree(NewCallsTree).
+
+rcrd(import(Mod,P/N,CurFile))
+	:-
+	getCallsTree(CurCallsTree),
+	avl_insert(P/N, import(P,N,Mod,CurFile),CurCallsTree,NewCallsTree),
+	setCallsTree(NewCallsTree).
+
+rcrd(module(Mod,CurFile))
+	:-
+	getMiscInfo(MIS),
+	accessMI(mods, MIS, Mods),
+	accessMI(mods_files, MIS, ModsFiles),
+	(dmember(Mod, Mods) ->
+		true
+		;
+		setMI(mods, MIS, [Mod | Mods])
+	),
+	enter_in(ModsFiles, Mod, mods_files, MIS, CurFile),
+	accessMI(files_mods, MIS, FilesMods),
+	enter_in(FilesMods, CurFile, files_mods, MIS, Mod).
+
+rcrd(assert(FG,NG, Mod,CurFile)) 
+	:-
+	getCallsTree(CurCallsTree),
+	avl_insert(FG/NG, assert(FG,NG,Mod,CurFile),CurCallsTree,NewCallsTree),
+	setCallsTree(NewCallsTree).
+
+/*
+rcrd(assert(FG,NG, Mod,CurFile)) 
+	:-
+ 	'$asserted'(FG,NG, Mod,CurFile),!.
+rcrd(assert(FG,NG, Mod,CurFile)) 
+	:-
+ 	assert('$asserted'(FG,NG, Mod,CurFile)).
+*/
+
+/*
+rcrd(undefined(not(P),N,Module,CurFile))
+	:-
+ 	'$undefined'(P,N,Module,CurFile),!.
+rcrd(undefined(not(P),N,Module,CurFile))
+	:-
+ 	assert('$undefined'(P,N,Module,CurFile)).
+rcrd(undefined(P,N,Module,CurFile))
+	:-
+ 	'$undefined'(P,N,Module,CurFile),!.
+rcrd(undefined(P,N,Module,CurFile))
+	:-
+ 	assert('$undefined'(P,N,Module,CurFile)). 
+*/
+
+	/*----------------------------------------------------------------
+	 |	NOTE: -- validate when switching to avl trees:
+	 |	If Module  uses predicates from other modules,
+	 |	'asserta' (instead of 'assert') is used to record the modules 
+	 |	used by Mod. Predicates called by Module but not defined
+	 |	inside Module will be searched for using the recorded info
+	 |	(searched in the correct order).
+	 *----------------------------------------------------------------*/
+
+/*
+rcrd(use(Mod,Module,CurFile))
+	:-
+   '$use'(Mod,Module,CurFile),!.
+rcrd(use(Mod,Module,CurFile))
+	:-
+   asserta('$use'(Mod,Module,CurFile)).      
+*/
+rcrd(use(Mod,Module,CurFile))
+	:-
+	getMiscInfo(MIS),
+	accessMI(mods_use, MIS, ModUse),
+	enter_in(ModUse, Mod, mods_use, MIS, Module).
+
+enter_in(PlusList, Mod, Tag, MIS, Item)
+	:-
+	locm(PlusList, Mod, Entry),
+	!,
+	Entry = Mod+ItemList,
+	(dmember(Item, ItemList) ->
+		true
+		;
+		(Tag=end(_) -> 
+			append(ItemList, [Item], NewList)
+			;
+			NewList = [Item | ItemList]
+		),
+		mangle(2,Entry,NewList)
+	).
+
+enter_in(PlusList, Mod, end(Tag), MIS, Item)
+	:-!,
+	setMI(Tag, MIS, [Mod+[Item] | PlusList]).
+enter_in(PlusList, Mod, Tag, MIS, Item)
+	:-
+	setMI(Tag, MIS, [Mod+[Item] | PlusList]).
+
+
+locm([Entry | _], Mod, Entry)
+	:-
+	Entry = Mod+_,
+	!.
+locm([_ | Mods], Mod, Entry)
+	:-
+	locm(Mods, Mod, Entry).
+
+
+	/*-----------excluded predicates---------------------------------*/
+excluded(functor,3).
+excluded(arg,3).
+excluded(';',2).
+excluded(see,1).
+excluded(read,1).
+excluded(assert,1).
+excluded('=',2).
+
+	/*----------defined predicates ----------------------------------*/
+defined_predicates(DefinedPreds) 
+	:-
+  % setOf(p(Mod:P,N,File), Q^M^'$calls'(P,N,Q,M,Mod,File), DefinedPreds).
+   setOf(p(Mod:P,N,File), Q^M^calls(P,N,Q,M,Mod,File), DefinedPreds).
+
+
+	/*----------------------------------------------------------
+	 |	group: lists each defined predicate together with 
+	 |	       all the predicates it eventually calls.
+	 *----------------------------------------------------------*/
+
+group(CallsTree,OutSt) 
+	:-
+	inorder_defined(CallsTree,DefsWithUses),
+/*
+   setOf('$depends_on'(P,N,Mod,UseList,Files),
+				SomeFile^
+				(memb(Mod:P,N,SomeFile,DefinedPreds),
+					setOf(FF, memb(Mod:P,N,FF,DefinedPreds),Files),
+					uses_list(P,N,Mod,UseList)  ),
+		 		ListOfUseLists),
+*/
+	dependency_header(OutSt),
+	cref_out(ListOfUseLists,OutSt),
+	nl(OutSt).
+
+group(OutSt) 
+	:-
+   defined_predicates(DefinedPreds),
+   setOf('$depends_on'(P,N,Mod,UseList,Files),
+				SomeFile^
+				(memb(Mod:P,N,SomeFile,DefinedPreds),
+					setOf(FF, memb(Mod:P,N,FF,DefinedPreds),Files),
+					uses_list(P,N,Mod,UseList)  ),
+		 		ListOfUseLists),
+   dependency_header(OutSt),
+   cref_out(ListOfUseLists,OutSt),
+   nl(OutSt).
+
+uses_list(P,N,Mod,UseList) 
+	:-
+%   setOf(p(Q,M,F), '$calls'(P,N,Q,M,Mod,F), BodyListForP),
+   setOf(p(Q,M,F), calls(P,N,Q,M,Mod,F), BodyListForP),
+   get_defs(BodyListForP,Mod, UseList,UseList,[],p(Mod:P,N)),
+   !.
+
+essence(not(P),P)
+	:- !.
+essence(P,P).
+
+get_defs([],_,UseList,CurTail,CurTail,p(ModPred:Pred,NPred))
+	:-!.
+
+get_defs([p(Mod:P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
+				p(ModPred:Pred,NPred) )
+	:-
+   non_mem(Mod:P,N,F,UseList),!,
+   essence(P,PE),
+   rcrd(import(Module,PE,N,Mod,F)),
+
+%   setOf(p(Q,M,FF), '$calls'(PE,N,Q,M,Mod,FF), BodyListforP),
+   setOf(p(Q,M,FF), calls(PE,N,Q,M,Mod,FF), BodyListforP),
+   CurTail = [p(Mod:P,N,F) | NextTail],
+
+		%%%%% search Mod for definitions of predicates in BodyListforP
+   get_defs(BodyListforP,Mod,UseList,NextTail,InterTail,
+						p(ModPred:Pred,NPred)),
+
+		%%%%% search Module for definitions of predicates in RestStack
+   get_defs(RestStack, Module, UseList,InterTail,ResultTail,
+						p(ModPred:Pred,NPred)	).
+
+	%%%%% p(Mod:P,N,F) is already in UseList
+get_defs([p(Mod:P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
+				p(ModPred:Pred,NPred) ) 
+	:-!,
+   get_defs(RestStack,Module,UseList,CurTail,ResultTail,
+					p(ModPred:Pred,NPred)).
+
+	
+
+		%%%% P is not of the form Mod:P 
+
+		%%%% P is a rule in Module:
+
+get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
+					p(ModPred:Pred,NPred) )
+	:-
+   essence(P,PE),
+   '$calls'(PE,N,Q,M,Module,F),
+   non_mem(Module:P,N,F,UseList),
+   !, 
+%   setOf(p(QQ,MM,FF), '$calls'(PE,N,QQ,MM,Module,FF), BodyListforP),
+   setOf(p(QQ,MM,FF), '$calls'(PE,N,QQ,MM,Module,FF), BodyListforP),
+   CurTail = [p(Module:P,N,F) | NextTail],
+	
+		%%%%% search Module for definitions of predicates in BodyListforP
+   get_defs(BodyListforP,Module,UseList,NextTail,InterTail,
+					p(ModPred:Pred,NPred)	), 
+		%%%%% search Module for definitions of predicates in RestStack   
+   get_defs(RestStack, Module, UseList,InterTail,ResultTail,
+					p(ModPred:Pred,NPred)   ). 
+
+		%%%% P is a fact in Module:
+
+get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
+					p(ModPred:Pred,NPred)   )
+	:-
+   essence(P,PE),
+   '$fact'(PE,N,Module,F),
+   non_mem(Module:P,N,F,UseList),
+   !, 
+   CurTail = [p(Module:P,N,F)|NextTail],
+   get_defs(RestStack, Module, UseList,NextTail,ResultTail,
+						p(ModPred:Pred,NPred)). 
+
+		%%%%% P is  already in UseList and its definition is recursive	        
+
+get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
+						p(Module:PPP,N)  )
+	:-
+   ( P = PPP ; P = not(PPP) ),
+   ( ( vvmember(p(Module:P,N,F), UseList), !,
+	 		get_defs(RestStack,Module,UseList,CurTail,ResultTail,
+							p(Module:P,N)) 
+		) 
+		;
+      ( CurTail = [p(Module:P,N,F) | NextTail],
+	 		get_defs(RestStack,Module,UseList,NextTail,ResultTail,
+						p(Module:P,N))  
+		)    
+	 ).
+
+		%%%%% P  is already in UseList (and its definition is not recursive).
+
+get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
+					p(ModPred:Pred,NPred)  )
+	:-
+    vvmember(p(Module:P,N,F), UseList), !,
+    get_defs(RestStack,Module,UseList,CurTail,ResultTail,
+					p(ModPred:Pred,NPred) ).
+  	
+		%%%%% definition of P is not in Module, 
+		%%%%% but in some other module in the use list of Module
+		%%%%% search the use list of Module 
+
+get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
+					p(ModPred:Pred,NPred) )
+	:-
+   '$use'(Module,Mod,_),
+   essence(P,PE),
+   '$export'(Mod,PE/N,_), !,
+ 	( ( non_mem(Mod:P,N,F,UseList),
+ 		 rcrd(import(Module,PE,N,Mod,F)),
+
+				%%%%% look in Mod for defintions
+ 		 setOf(p(Q,M,FF), '$calls'(P,N,Q,M,Mod,FF), BodyListforP),
+ 		 CurTail = [p(Mod:P,N,F) | NextTail],
+
+				%%%%% look in Mod for definitions
+ 		 get_defs(BodyListforP,Mod,UseList,NextTail,InterTail,
+							p(ModPred:Pred,NPred) ), 
+				%%%%% look in Module
+ 		 get_defs(RestStack, Module, UseList,InterTail,ResultTail,
+							p(ModPred:Pred,NPred) )  
+ 	   )
+		;
+ 		(
+				%%%%% definition is  already in UseList
+ 		   vvmember(p(Mod:P,N,F),UseList),
+ 		   get_defs(RestStack,Module,UseList,CurTail,ResultTail,
+							p(ModPred:Pred,NPred) )
+ 		 ) 
+		).
+
+
+
+		%%%%% P is undefined
+
+get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
+					p(ModPred:Pred,NPred) )
+	:-!,
+ 	rcrd(undefined(P,N,Module,F)),
+ 	CurTail = [p(Module:P,N,F) | NextTail],
+ 	get_defs(RestStack,Module,UseList,NextTail,ResultTail,
+						p(ModPred:Pred,NPred) ).
+
+	/*------------- modules appearing --------------------------*/
+modules(OutS)
+	:-
+ 	setOf( Module+[files=Fs,uses_mods:UMs],
+				SomeF^
+				('$module'(Module,SomeF),
+				 setOf(FF, '$module'(Module,FF),Fs),
+				 setOf(UM, F^'$use'(Module,UM,F), UMs)
+				),
+			 Modules),
+	setup_report(Modules, 'No Modules Defined', 'Defined Modules:', OutS).
+
+	/*------------ asserted predicates -------------------------*/
+asserteds(OutS)
+	:-
+	setOf(Mod+Assertions,
+			[PP,NN,FF]^
+			('$asserted'(PP,NN,Mod,FF),
+ 				setOf(P/N, F^'$asserted'(P,N,Mod,F), Assertions)
+			),
+			Asserteds),
+	setup_report(Asserteds, 'No Asserted Predicates', 
+											'Asserted Predicates', OutS).
+
+	/*------------- uncalled predicates --------------------------*/
+uncalleds(OutS)
+	:-
+	setOf(Mod+ModUncalleds,
+			[PP,NN,FF]^
+			(uncalled(PP,NN,Mod,FF),
+ 				setOf(P/N, F^uncalled(P,N,Mod,F), ModUncalleds)
+			),
+			Uncalleds),
+	setup_report(Uncalleds, 'No Uncalled Predicates', 
+											'Uncalled Predicates',OutS).
+
+uncalled(P,N,Mod,F) 
+	:-
+ 	'$calls'(P,N,_,_,Mod,F),
+ 	not('$import'(Module,P,N,Mod,_)),
+ 	not(called_by_other_than_self(P,N,Mod,_)).
+
+called_by_other_than_self(P,N,Mod,_)
+	:-
+	'$calls'(Q,M,P,N,Mod,_), 
+	( Q \== P  ; M \== N ).
+
+called_by_other_than_self(P,N,Mod,_)
+	:-
+ 	'$calls'(Q,M,not(P),N,Mod,_).
+
+uncalled(P,N,Mod,_) 
+	:-
+ 	'$fact'(P,N,Mod,_),
+ 	not('$import'(Module,P,N,Mod,_)),
+ 	not('$import'(Module,not(P),N,Mod,_)),
+ 	not('$calls'(Q,M,P,N,Mod,_)) ,
+ 	not('$calls'(Q,M,not(P),N,Mod,_)).
+
+	/*-------------------------------------------------------
+ 	 |	undefs_importeds
+	 *-------------------------------------------------------*/
+
+undefs_importeds(OutS)
+	:-
+ 	setOf(Module,F^'$module'(Module,F),Modules),
+	setOf(Mod+ModExplicitImports,
+ 				(member(Mod,Modules), imports(Mod,ModExplicitImports) ),
+			ExplicitImports), 
+	setOf(Mod+ModUndefs1, 
+				(member(Mod,Modules), mod_undefs1(Mod, ModUndefs1) ),
+				InterUndefs),
+	split_undefs_imports(InterUndefs, Undefs, ImplicitImports),
+	setup_report(ExplicitImports, 'No Explicit Imports', 
+									'Explicitly Imported Predicates',OutS),
+	setup_report(ImplicitImports, 'No Implicit Imports', 
+									'Implicitly Imported Predicates',OutS),
+	setup_report(Undefs, 'No Undefined Predicates', 
+									'Undefined Predicates',OutS).
+
+imports(Module,Imports)
+	:-
+ 	setOf(P/N-(mod=Mod)-(file=F), '$import'(Module,P,N,Mod,F),Imports).
+
+mod_undefs1(Mod, ModUndefs1)
+	:-
+	setOf(Q/M, F^'$undefined'(Q,M,Mod,F), ModUndefs0),
+	imports(Mod, ModExplicitImports),
+	setOf(Item, 
+				(member(Item, ModUndefs0),
+						not(member(Item, ModExplicitImports))),
+				ModUndefs1).
+
+split_undefs_imports([], [], []).
+split_undefs_imports([Mod+ModInterUndefs | RestInterUndefs], 
+							[Mod+ModUndefs | RestUndefs], 
+							[Mod+ModImplicitImports | RestImplicitImports])
+	:-
+	setOf(UM, F^'$use'(Mod,UM,F), UMs),
+	split_undefs_imports(ModInterUndefs, ModUndefs, ModImplicitImports,
+								Mod,ModUseList),
+	split_undefs_imports(RestInterUndefs, RestUndefs, RestImplicitImports).
+
+split_undefs_imports([], [], [],_,_).
+split_undefs_imports([P/N | RestModInterUndefs], 
+							ModUndefs, 
+							[P/N-PMod | RestModImplicitImports],
+							Mod,ModUseList)
+	:-
+	(procedures(PMod,P,N,_);
+ 		'$fact'(P,N,PMod,_); '$calls'(P,N,_,_,PMod,_)),
+	PMod \= Mod,
+	member(PMod, ModUseList),!,
+	split_undefs_imports(RestModInterUndefs, ModUndefs, 
+								RestModImplicitImports,Mod,ModUseList).
+split_undefs_imports([P/N | RestModInterUndefs], 
+							[P/N | RestModUndefs], 
+							ModImplicitImports,
+							Mod,ModUseList)
+	:-
+	split_undefs_imports(RestModInterUndefs, RestModUndefs, 
+								ModImplicitImports,Mod,ModUseList).
+
+%%%% ============== OUTPUT PREDICATES =========================
+
+%%--------------- Dependency Header -----------------------------
+
+dependency_header(OutS)
+	:-
+   printf(OutS,' ==============================\n',[]),
+   printf(OutS,' Predicate Dependencies & Calls:\n',[]),
+   printf(OutS,' ==============================\n\n',[]).
+
+%%--------------- Report Output -----------------------------
+
+setup_report(List, NoItemsMessage, ItemsMessage, OutS)
+	:-
+ 	printf(OutS,'\n ==============================\n',[]),
+ 	(List = [] ->
+ 		printf(OutS,'%t\n',[NoItemsMessage])
+		;
+ 		printf(OutS,'%t\n',[ItemsMessage]),
+		write_list_display(4, List, OutS)
+	),
+ 	printf(OutS,'\n ==============================',[]),
+	printf(OutS,'\n',[]).
+
+/*------------------------------------------------------------------------
+	cref_out 
+ *------------------------------------------------------------------------*/
+cref_out([],_).
+
+cref_out(['$depends_on'(P,N,Mod,UseList,F) | Rest],OutS) 
+	:-
+	fixUseListNice(UseList,NiceUseList),
+	printf(OutS,'%t/N ',[P,N]),
+	(member(P/N, NiceUseList) ->
+		printf(OutS,'--recursive-- { ',[]) ;
+		printf(OutS,'              { ',[])
+	),
+	printf(OutS,'module=%t',[Mod]),
+	('$export'(Mod,P/N,_) ->
+		printf(OutS,' --exported }',[]) ;
+		printf(OutS,' }',[])
+	),
+	printf(OutS,
+		   '\n          {files=%t}\n  * Depends on:\n   %t\n',
+			[F,NiceUseList]),
+	setOf(PP/NN, [MMod,FF]^'$calls'(PP,NN,P,N,Mod,FF), CalledBys),
+	printf(OutS,'  * Called by:\n   %t\n',[CalledBys]),
+ 	cref_out(Rest,OutS).
+
+fixUseListNice([],[]).
+fixUseListNice([p(Mod:Q,N,F) | RestUseList],
+					[Q/N | RestNiceUseList])
+	:-
+	fixUseListNice(RestUseList,RestNiceUseList).
+
+use_list_out_2([]).
+use_list_out_2([p(Module,File,[])|Rest]) 
+	:- !,
+	use_list_out_2(Rest).
+use_list_out_2([p(Module,File,ImportList)|Rest]) 
+	:-
+ 	write(Module), write(' imports :'), 
+ 	write_list(5,ImportList),
+ 	use_list_out_2(Rest).
+
+write_list(_,[]).
+write_list(Tab,[p(Mod,P,N,F)|Rest])
+	:-
+ 	nl, tab(Tab),
+ 	write(Mod:P), write('/'),write(N),
+ 	write_list(Tab,Rest).
+
+write_list_display(_,[], _).
+write_list_display(Tab,[Mod+List|Rest],OutS)
+	:-
+	printf(OutS,'%t:\n\t%t\n',[Mod,List]),
+ 	write_list_display(Tab,Rest,OutS).
+
+use_special_list_out(List,Tab)
+	:-
+	use_list_out(List,Tab,'$crefcrefcrefaida$').
+
+use_list_out([],_,_).
+use_list_out([p(Mod:Q,N,F)],J,Mod) 
+	:-
+ 	(J = 5, !, nl, tab(5); true),
+ 	write(Q),write('/'),write(N).
+use_list_out([p(M:Q,N,F)],J,Mod) 
+	:-
+ 	Mod \== M,
+ 	(J = 5, !, nl, tab(5); true),
+ 	write(M:Q),write('/'),write(N).
+
+use_list_out([p(Mod:Q,N,F) | Rest],J,Mod) 
+	:-
+ 	(J = 5, !, nl, tab(5), K is 1; K is J+1),
+ 	write(Q),write('/'),write(N), write(', '),
+ 	use_list_out(Rest,K,Mod).
+use_list_out([p(M:Q,N,F) | Rest],J,Mod) 
+	:-
+ 	Mod \== M,
+ 	(J = 5, !, nl, tab(5), K is 1; K is J+1),
+ 	write(M:Q),write('/'),write(N), write(', '),
+ 	use_list_out(Rest,K,Mod).
+
+	/*----------Miscellaneous---------------------------------*/
+
+
+vvmember(P,[H| _])
+	:-	
+	nonvar(H), P=H,!.
+vvmember(P,[H | Rest])
+	:- 
+	nonvar(H),
+	vvmember(P,Rest).
+
+memb(P,N,F,[p(P,N,F) | _]).
+memb(P,N,F,[_ | Rest]) 
+	:- 
+	memb(P,N,F,Rest).
+non_mem(_,_,_,L) 
+	:- 
+	var(L),!.
+non_mem(P,N,F,[p(P,N,F) | _]) 
+	:-!,fail.
+non_mem(P,N,F,[p(Mod:P,N,F) | _] ) 
+	:-!,fail.
+non_mem(P,N,F,[_ | Rest]) 
+	:- 
+	non_mem(P,N,F,Rest).
+
+
+clean_up_me
+	:-
+	abolish('$calls',6),
+	abolish('$fact',4),
+	abolish('$asserted',4),
+	abolish('$export',3),
+	abolish('$import',5),
+	abolish('$module',2),
+	abolish('$undefined',4),
+	abolish('$use',3).
+
+
 
 endmod.
 
-module utilities.
-typeProperties(crefStructs,
-    [pred,arity,mod,user,files,[],exported,false,calls,[],basis,nil,calledby,
-        [],calledcount,0,factcount,0,clausecount,0,depthcount,0,callinmod,[],
-        importto,[],dependson,nil,whereasserted,[]]).
-noteOptionValue(crefStructs,_A,_B,_C) :- setCRF(_A,_C,_B).
-typeProperties(cshls,
-    [cycle,0,history,[],outputs,[],suite,unknown,options,[],context_stack,[],
-        in_stream,user_input,out_stream,user_output]).
-noteOptionValue(cshls,_A,_B,_C) :- setCRSH(_A,_C,_B).
-typeProperties(mi,
-    [files,[],files_mods,[],files_d_preds,[],files_c_preds,[],mods,[],
-        mods_files,[],mods_use,[],mods_d_preds,[],mods_c_preds,[],
-        mods_exp_preds,[],mods_imp_preds,[]]).
-noteOptionValue(mi,_A,_B,_C) :- setMI(_A,_C,_B).
-endmod.
 /*===================================================================*
  | 		crefavl.pro		
- |	Copyright (c) 1990,94 Applied Logic Systems, Inc.
+ |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		-- avl tree program: customized for cref
  |
@@ -251,14 +1227,16 @@ endmod.
 
 module cref.
 
-	/*
- 	 * cref_shell/0	--	a shell for exploring the analyzed program
- 	 *
- 	 */
- 	
-export cref_shell/0.
-	%% Enter the cref shell with Calls Tree & MIS Struct pulled from
-	%% global vars, but shell struct restarted:
+/*!-----------------------------------------------------------------------
+ |	cref_shell/0
+ |	cref_shell
+ |	cref_shell
+ |
+ |	- enter the cref shell for exploring analyzed programs
+ |
+ |	Enter the cref shell with Calls Tree & MIS Struct pulled from
+ |	global vars, but shell struct restarted:
+ *-----------------------------------------------------------------------*/
 cref_shell 
 	:- 
 	OutS = user_output,
@@ -277,8 +1255,13 @@ cref_shell
 	setShellStruct(Struct),
 	cref_shell(CallsTree, MIS, InS, OutS, Struct).
 
-export start_cref_shell/2.
-	%% Start the cref_shell, with possible options:
+/*!-----------------------------------------------------------------------
+ |	start_cref_shell/2
+ |	start_cref_shell(SuiteName, Options)
+ |	start_cref_shell(+, +)
+ |
+ |	- Start the cref_shell on a suite, with possible options
+ *-----------------------------------------------------------------------*/
 start_cref_shell(SuiteName, Options)
 	:- 
 	check_default(Options, shell_struct, Struct^(cref:makeCRSH(Struct)), Struct),
@@ -292,14 +1275,28 @@ start_cref_shell(SuiteName, Options)
 
 	begin_cref_shell(CallsTree, MIS, InS, OutS, Struct).
 
-export rcs/0.
-rcs 	:- 
+/*!-----------------------------------------------------------------------
+ |	rcs/0
+ |	rcs
+ |	rcs
+ |
+ | - invoke restart_cref_shell/0
+ *-----------------------------------------------------------------------*/
+rcs 	
+	:- 
 	restart_cref_shell.
 
-        %% Warm start:
-        %% Enter the cref shell with Calls Tree & MIS Struct & ShellStruct
-        %% pulled from global vars (keeps previous history, etc.):
-export restart_cref_shell/0.
+/*!-----------------------------------------------------------------------
+ |	restart_cref_shell/0.
+ |	restart_cref_shell
+ |	restart_cref_shell
+ |
+ |	- do a warm re-start of the cref shell
+ |
+ |	Warm start:
+ |	Enter the cref shell with Calls Tree & MIS Struct & ShellStruct
+ |	pulled from global vars (keeps previous history, etc.):
+ *-----------------------------------------------------------------------*/
 restart_cref_shell
 	:- 
 	getShellStruct(Struct),
@@ -310,7 +1307,19 @@ restart_cref_shell
 	check_default(Options, instream, user_input, InS),
 	cref_shell(CallsTree, MIS, InS, OutS, Struct).
 
-export cx/1.
+/*!-----------------------------------------------------------------------
+ |	cx/1
+ |	cx(Command)
+ |	cx(+)
+ |
+ |	- execute cref shell Command in current context
+ | 	
+ |	In effect, do a warm start, without really entereing the shell,
+ |	and then execute command;
+ |	Enter the cref shell with Calls Tree & MIS Struct & ShellStruct
+ |	pulled from global vars (keeps previous history, etc.), and the
+ |	execute command, and exit the shell.
+ *-----------------------------------------------------------------------*/
 cx(Command)
 	:- 
 	getShellStruct(Struct),
@@ -406,7 +1415,10 @@ get_command(Tree, MIS, InS, OutS, Struct, Command)
 	accessCRSH(cycle,Struct, M),
 	N is M+1,
 	printf(OutS,'cref(%t): ',[N]),
-%	read_term(InS,Command,[]).
+			%% Later: soup this up, so that a separate text window
+			%% is used for crefshell interaction in windows mode,
+			%% and the interaction is non-blocking, like the 
+			%% main shell (create a general facility).
 	read_term(InS,Command,[blocking(true)]).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1671,1156 +2683,203 @@ ino(Node, TreeTop, Key, MIS, [Key | Tail], Tail).
 
 
 endmod.
-/*--------------------------------------------------------------------
- |			crefmain.pro
- |	Copyright (c) 1989-94 Applied Logic Systems, Inc.
- |
- |		Prolog cross-referencer
- |
- | Author(s): Ken Bowen, Aida Batarekh
- | Date(s):	November, 1988 (KAB - original)
- |		January, 1989 (Expansion - Aida) 	
- |		AVL tree tools added July 1991 (KAB)
- *--------------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+                    crefstrt.pro
+               defStruct Type definitions generated from file:
+                    crefstrt.typ
+               by ALS defStruct Type Generator
+               Macros written to file: crefstrt.mac
+ *-------------------------------------------------------------*/
 
-	/*-------------------------*
-	 |	cref
- 	 *-------------------------*/
+module utilities.
+use cref.
+endmod.
+
 module cref.
+use utilities.
 
-	/*-------------------------------------------------------
-   	 |	Global variables which hold the AVL trees
- 	 *--------------------------------------------------------*/
-
-:-make_gv('CallsTree'),avl_create(T),setCallsTree(T).
-:-make_gv('ShellStruct'), makeCRSH(S), setShellStruct(S).
-:-make_gv('MiscInfo'), makeMI(S), setMiscInfo(S).
-
-:- dynamic(suite_info/4).
-
-	%% For testing:
-	%% Later this will be set up to manage a "master" database:
-suite_info(suite,ken,['ken.pro'],user_output).
-suite_info(suite,cref,['crefmain.pro','crefavl.pro','crefstrt.pro'],'cref.xrf').
-suite_info(suite,gentools,['gentools.pro'],'gentools.xrf').
-suite_info(suite,c2pro,
-			'/mailbox3/alsp_src/cinterf/c2pro'+
-			  [c2pro,cexp,cfiles,cmacro,cmisc,cout,cparse,ctoken,cunix],
-			  'c2pro.xrf').
-
-suite_info(suite,SuiteName,Directory+FilesList,TargetFile, [])
-        :-
-        suite_info(suite,SuiteName,Directory+FilesList,TargetFile).
-
-get_make_info(suite,SuiteName,Directory,FilesList,TargetFile, ConfigInfo)
-	:-
-	suite_info(suite,SuiteName,Directory+FilesList,TargetFile, ConfigInfo), 
-	!.
-
-get_make_info(suite,SuiteName,'.',FilesList,TargetFile, ConfigInfo)
-	:-
-	suite_info(suite,SuiteName,FilesList,TargetFile, ConfigInfo), 
-	!.
-
-get_make_info(suite,SuiteName,Directory,FilesList,TargetFile, ConfigInfo)
-	:-
-	filePlusExt(SuiteName,crf,IndirSourceFile),
-	exists_file(IndirSourceFile),
-	open(IndirSourceFile,read,ISS,[]),
-	!,
-	read_terms(ISS,SpecList),
-	close(ISS),
-	(dmember(dir=Directory, SpecList) ->
-                true
-                ;
-                get_cwd(Directory)
-        ),
-	dmember(files=FilesList,SpecList),
-        (dmember(config=ConfigInfo, SpecList) ->
-                true
-                ;
-                ConfigInfo = nil
-        ),
-	filePlusExt(SuiteName,xrf,TargetFile).
-
-get_make_info(suite,SuiteName,'.',FilesList,TargetFile, nil)
-	:-
-	filePlusExt(BaseName,pro,SuiteName),
-	!,
-	FilesList = [SuiteName],
-	filePlusExt(BaseName,xrf,TargetFile).
-
-get_make_info(suite,SuiteName,'.',FilesList,TargetFile, nil)
-	:-
-	filePlusExt(SuiteName,pro,SourceFile),
-	FilesList = [SourceFile],
-	filePlusExt(SuiteName,xrf,TargetFile).
-
-setup_config(cfg(Module,ClauseList), RefsList)
-        :-!,
-        assert_all_refs(Module,ClauseList, RefsList).
-
-setup_config(_, _).
-
-export cref/1.
-cref(SuiteName) 
-	:-
-	cref(SuiteName, []).
-
-export cref/2.
-cref(SuiteName, Options) 
-	:-
-	process_options(Options),
-	clean_up_me,
-		%%  Clear out the calls tree in case we are re-running:
-	avl_create(ET),setCallsTree(ET),
-
-	get_make_info(suite,SuiteName,Directory,FilesList,TargetFile, ConfigInfo),
-	get_cwd(CurDir),
-	change_cwd(Directory),
-	setup_config(ConfigInfo, CfgDBRefs),
-	do_cref(FilesList),
-        erase_all(CfgDBRefs),
-	change_cwd(CurDir),
-	als_advise('Cref: Finished with %t\n',[SuiteName]),
-	start_cref_shell(SuiteName, [dir=Directory, files=FilesList | Options]).
-/*
-	(dmember(TargetFile,[user,user_output]) ->
-		OutSt = user_output
-		;
-		open(TargetFile, write, OutSt, [])
-	),
-	gen_file_header(OutSt,cref_suite-SuiteName,TargetFile, 
-	printf(OutSt,'\t--by cref\n\tsuite files:%t\n',[FilesList])),
-	getCallsTree(CallsTree),
-	write_cref_file(FilesList,CallsTree,OutSt),
-	(dmember(TargetFile,[user,user_output]) ->
-		true
-		;
-		close(OutSt)
-	),
-	als_advise('Cref: Finished with %t\n',[SuiteName]).
-*/
-
-process_options([]) :-!.
-process_options([Opt | Options])
-	:-!,
-	process_opt(Opt),
-	process_options(Options).
-process_options(Options)
-	:-
-	process_options([Options]).
-
-process_opt(include_mods=List)
-	:-
-	process_include_mods(List),
-	!.
-process_opt(Opt)
-	:-
-	als_advise('Unknown cref option: %t\n', [Opt]).
-
-process_include_mods([]) :-!.
-process_include_mods([Mod | List])
-	:-!,
-	(retract(excluded_mod(Mod)) ; 
-		als_advise('Options: Module %t not excluded\n',[Mod])),
-	!,
-	process_include_mods(List).
-process_include_mods(List)
-	:-
-	process_include_mods([List]).
-
-
-do_cref(Files)
-	:-
-	do_cref(Files, [user]).
-
-do_cref([], [user])
-	:-!.
-do_cref([], [])
-	:-!,
-	als_advise('!!Warning: Too many endmods (at closing last file)',[]).
-do_cref([], Mods)
-	:-!,
-	list_delete(Mods, user, DMods),
-	als_advise('!!Warning: At closing the last file, the following modules\n',[]), 
-	als_advise('           are still open:%t\n\n',[DMods]).
-
-do_cref([File | Files], OpenMods)
-	:-
-	resolve_file(File, FileName),
-		
-	als_advise('>>Starting file %t\n',[FileName]),
-	!,
-	open(FileName, read, InS, []),
-	cross_ref(OpenMods,NewOpenMods,FileName, AddlFiles, InS),
-	close(InS),
- 	rcrd(file(FileName)),
-	als_advise('\n<<Finished file %t\n',[FileName]),
-	append(Files, AddlFiles, NewFiles),
-	do_cref(NewFiles, NewOpenMods).
-
-do_cref([File | Files], OpenMods)
-	:-
-	als_advise('!!!>>!!! ERROR: File %t does not exist!\n',[File]),
-	do_cref(Files, OpenMods).
-
-resolve_file(File, File)
-	:-
-	exists_file(File),
-	!.
-
-resolve_file(File, FileName)
-	:-
-	filePlusExt(File,pro,FileName),
-	exists_file(FileName),
-	!.
-
-write_cref_file(Source,CallsTree,OutSt) 
-	:-
- 	group(CallsTree,OutSt),
-	modules(OutSt),
- 	asserteds(OutSt),
-	uncalleds(OutSt),
- 	undefs_importeds(OutSt).
-
-	/*-----------------------------------------------------
-	 |	MAIN PROCESSING LOOP:
-  	 *------------------------------------------------------*/
-cross_ref(OMs, NOMs, File, AddlFs, InS)
-	:-
-	read_term(InS,Item, []),
-%pbi_write(Item),pbi_nl,pbi_ttyflush,
-	disp_cross_ref(Item, OMs, NOMs, File, AddlFs, InS).
-
-disp_cross_ref(end_of_file, OMs, OMs, File, [], InS)
-	:-!.
-
-disp_cross_ref(Item,OMs,NOMs,File, AddlFs, InS)
-	:-
-	act_cross_ref(Item, OMs, NextOMs, File, AddlFs, AddlFsTail),
-	!,
-	put_code(0'.),flush_output,
-	cross_ref(NextOMs,NOMs,File, AddlFsTail, InS).
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% DISPATCH FOR MAIN LOOP:
-	%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-	% Goal in file:
-act_cross_ref(':-'(Goal),OMs,OMs,File,AFs,AFsT) 
-	:-!,
-	process_goal(Goal,OMs,File,AFs,AFsT).
-
-	%% Clause with body:
-act_cross_ref((Head :- Body),OMs,OMs,File,AFs,AFs) 
-	:-!,
- 	functor(Head, F, N),
-	OMs = [Mod | _], 
- 	rcrd(inc_clause_cnt(F,N,Mod,File)),
- 	analyze_clause(Body, F,N,Mod,File).
-
-	%% DCG rule:
-act_cross_ref((Head --> Body),OMs,OMs,File,AFs,AFs) 
-	:-!,
-	dcg_expand((Head --> Body), XDCG),
-	act_cross_ref(XDCG,OMs,OMs,File,AFs,AFs).
-
-	%% module declarations:
-act_cross_ref((module Mod),OMs,[Mod | OMs],File,AFs,AFs)
-	:-!,
- 	rcrd(module(Mod,File)).
-
-act_cross_ref((endmod),[_ | OMs], OMs,File,AFs,AFs)
-	:-!.
-
-act_cross_ref((export A),OMs,OMs,File,AFs,AFs)
-	:-!,
-	OMs = [Mod | _],
-	record_exports(A, Mod, File).
-
-act_cross_ref((use A), OMs, OMs,File,AFs,AFs)
-	:-!,
-	OMs = [Mod | _],
-	record_uses(A, Mod, File).
-	
-	%% A Fact (default):
-act_cross_ref(Fact,OMs,OMs,File,AFs,AFs) 
-	:-
- 	functor(Fact, F, N),
-	OMs = [Mod | _],
- 	rcrd(fact(F,N,Mod,File)).
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% Processing: Goal in file:
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-process_goal(Goal,OMs,File,AFs,AFsT)
-	:-
-	Goal = [_ | _],
-	!,
-	open_tail(Goal, AFs, AFsT).
-
-process_goal((Goal_A, Goal_B), OMs,File,AFs,AFsT)
-	:-!,
-	process_goal(Goal_A, OMs,File,AFs,InterAFs),
-	process_goal(Goal_B, OMs,File,InterAFs,AFsT).
-
-process_goal(consult(F), OMs, File, [F | AFsT], AFsT)
-	:-!.
-
-
-process_goal(Goal, OMs,File,AFs,AFs)
-	:-
-	functor(Goal,op,3),
-	!,
-	call(Goal).
-
-process_goal(make_gv(Tag), OMs,File,AFs,AFs)
-	:-!,
-	catenate(get,Tag,GetCall), functor(GetHead,GetCall,1),
-	act_cross_ref((GetHead :- gv_get(_,_)),OMs,OMs,File,AFs,AFs),
-	catenate(set,Tag,SetCall), functor(SetHead,SetCall,1),
-	act_cross_ref((SetHead :- gv_set(_,_)),OMs,OMs,File,AFs,AFs).
-
-process_goal(Goal, OMs,File,AFs,AFs).
-
-open_tail([], AFs, AFs).
-open_tail([H | T], [H | RO], AFsT)
-	:-
-	open_tail(T, RO, AFsT).
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% Recording export declarations:
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-record_exports([], _, _).
-record_exports([A | T], Mod, File)
-	:-!,
-	rcrd(export(Mod,A,File)),
-	record_exports(T, Mod, File).
-
-record_exports(A, Mod, File)
-	:-
-	rcrd(export(Mod,A,File)).
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% Recording use declarations:
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-record_uses([], Mod, File).
-record_uses([A | T], Mod, File)
-	:-!,
- 	rcrd(use(Mod,A,File)),
-	record_uses(T, Mod, File).
-
-record_uses(A, Mod, File)
-	:-
- 	rcrd(use(Mod,A,File)).
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% Analyzing clause bodies:
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-	%% ---------------------------
-	%% -- Skip uninstantiated goals:
-analyze_clause(X,_,_,_,_)
-	:- var(X),!.
-
-	%% ---------------------------
-	%% -- Disjunction:
-analyze_clause(  ( (SG1; SG2); H), F, N, Mod,CurFile) 
-	:-!,
- 	analyze_clause(SG1, F, N, Mod,CurFile),
- 	analyze_clause(SG2, F, N, Mod,CurFile),
- 	analyze_clause(H, F, N, Mod,CurFile).
-
-analyze_clause( (G; H), F, N, Mod,CurFile) 
-	:-!,
- 	analyze_clause(G, F, N, Mod,CurFile),
- 	analyze_clause(H, F, N, Mod,CurFile).
-
-	%% ---------------------------
-	%% -- Conditional:
-analyze_clause(  (Head -> If; Else), F, N, Mod,CurFile) 
-	:-!,
- 	analyze_clause(Head, F, N, Mod,CurFile),
- 	analyze_clause(If,   F, N, Mod,CurFile),
- 	analyze_clause(Else, F, N, Mod,CurFile).
-
-analyze_clause(  (Head -> If), F, N, Mod,CurFile) 
-	:-!,
- 	analyze_clause(Head, F, N, Mod,CurFile),
- 	analyze_clause(If,   F, N, Mod,CurFile).
-
-	%% ---------------------------
-	%% -- Conjunction:
-analyze_clause(  ( (SG1, SG2), H), F, N, Mod,CurFile) 
-	:-!,
- 	analyze_clause(SG1, F, N, Mod,CurFile),
- 	analyze_clause(SG2, F, N, Mod,CurFile),
- 	analyze_clause(H, F, N, Mod,CurFile).
-
-analyze_clause( (G, H), F, N, Mod,CurFile) 
-	:-!,
- 	analyze_clause(G, F, N, Mod,CurFile),
- 	analyze_clause(H, F, N, Mod,CurFile).
-
-	%% ---------------------------
-	%% -- Special Builtins - setof,setOf,bagof bagOf:
-analyze_clause(setOf(_, G, _), F, N, Mod,CurFile) 
-	:-
- 	nonvar(G), !,
- 	rcrd(rule(F,N,setOf,3,Mod,CurFile)), 
- 	analyze_clause_special(G, F, N, Mod,CurFile).
-
-analyze_clause(setOf(_, G, _), F, N, Mod,CurFile) 
-	:-
- 	rcrd(rule(F,N,setOf,3,Mod,CurFile)). 
-
-analyze_clause(setof(_, G, _), F, N, Mod,CurFile) 
-	:-
- 	nonvar(G),
- 	analyze_clause_special(G, F, N, Mod,CurFile).
-
-analyze_clause(bagOf(_, G, _), F, N, Mod,CurFile) 
-	:-
- 	nonvar(G), !,
- 	rcrd(rule(F,N,bagOf,3,Mod,CurFile)), 
- 	analyze_clause_special(G, F, N, Mod,CurFile).
-
-analyze_clause(bagOf(_, G, _), F, N, Mod,CurFile) 
-	:-
- 	rcrd(rule(F,N,bagOf,3,Mod,CurFile)). 
-
-analyze_clause(bagof(_, G, _), F, N, Mod,CurFile) 
-	:-
- 	nonvar(G),
- 	analyze_clause_special(G, F, N, Mod,CurFile).
-
-analyze_clause_special(X^G, F, N, Mod,CurFile)
-	:- !,
- 	analyze_clause(G,F,N,Mod,CurFile).
-
-analyze_clause_special(G, F, N, Mod,CurFile)
-	:- 
- 	analyze_clause(G,F,N,Mod,CurFile).
-
-	%% ---------------------------
-	%% -- call:
-analyze_clause(call(G), F, N, Mod,CurFile) 
-	:-
- 	nonvar(G),
- 	analyze_clause(G, F, N, Mod,CurFile).
-
-	%% ---------------------------
-	%% -- assert:
-analyze_clause(assertz(G), F, N, Mod,CurFile) 
-	:-
- 	nonvar(G),
- 	functor(G,FG,NG),
- 	rcrd(assert(FG,NG, Mod,CurFile)).
-
-analyze_clause(asserta(G), F, N, Mod,CurFile) 
-	:-
- 	nonvar(G),
- 	functor(G,FG,NG),
- 	rcrd(assert(FG,NG, Mod,CurFile)).
-
-analyze_clause(assert(G), F, N, Mod,CurFile) 
-	:-
- 	nonvar(G),
- 	functor(G,FG,NG),
- 	rcrd(assert(FG,NG, Mod,CurFile)).
-
-	%% ---------------------------
-	%% -- Explicit import from a module:
-analyze_clause(Module:not(G), F, N, Mod,CurFile) 
-	:-!,
-	functor(G, FG, NG),
-	rcrd(import(Mod,FG,NG,Module,CurFile)),
-	rcrd(rule(F, N, Module:not(FG), NG, Mod,CurFile)).
-
-analyze_clause(Module:G, F, N, Mod,CurFile) 
-	:-
-	functor(G, FG, NG),
-	rcrd(import(Mod,FG,NG,Module,CurFile)),
-	rcrd(rule(F, N, Module:FG, NG, Mod,CurFile)).
-
-	%% ---------------------------
-	%% -- Negation:
-analyze_clause(not(Module:G), F, N, Mod,CurFile)
-	:-!,
-	functor(G, FG, NG),
-	rcrd(import(Mod,FG,NG,Module,CurFile)),
-	rcrd(rule(F, N, Module:not(FG), NG, Mod,CurFile)).
-
-analyze_clause(not(G), F, N, Mod,CurFile)
-	:-
-	functor(G, FG, NG),
-	rcrd(rule(F, N, not(FG),NG, Mod,CurFile)).
- 
-	%% ---------------------------
-	%% -- Default (ordinary call):
-analyze_clause(G, F, N, Mod,CurFile) 
-	:-
-	functor(G, FG, NG),
-	rcrd(rule(F, N, FG, NG, Mod,CurFile)),
- 	rcrd(inc_called_cnt(FG,NG,F/N,Mod,CurFile)).
-
-
-	/*-------------------------------------------------
-	 |   recording needed info
-	 *------------------------------------------------*/
-
-rcrd(file(File))
-	:-
-	getMiscInfo(MIS),
-	accessMI(files, MIS, Files),
-	(dmember(File, Files) ->
-		true
-		;
-		setMI(files, MIS, [File | Files])
-	).
-
-:-dynamic(excluded_file/1).
-:-dynamic(excluded_mod/1).
-
-excluded_head(F, N, Mod, CurFile)
-	:-
-	(excluded_file(CurFile) ; excluded_mod(Mod)),
-	!.
-
-excluded_call(FG, NG)
-	:-
-	all_procedures(MG, FG, NG, _),
-	excluded_mod(MG),
-	!.
-
-	%% default:
-excluded_mod(builtins).
-excluded_mod(sio).
-
-rcrd(inc_clause_cnt(F,N,Mod,File))
-	:-
-	getCallsTree(CurCallsTree),
-	avl_insert(F/N, inc_clause_cnt(F,N,Mod,File),CurCallsTree,NewCallsTree),
-	setCallsTree(NewCallsTree).
-
-rcrd(inc_called_cnt(F,N,_,_,_))
-	:-
-	excluded_call(F, N),
-	!.
-
-rcrd(inc_called_cnt(F,N,CalledBy,Mod,File))
-	:-
-	getCallsTree(CurCallsTree),
-	avl_insert(F/N, inc_called_cnt(F,N,CalledBy,Mod,File),CurCallsTree,NewCallsTree),
-	setCallsTree(NewCallsTree).
-
-rcrd(rule(F, N, FG, NG, Mod,CurFile)) 
-	:-
-	excluded_head(F, N, Mod, CurFile),
-	!.
-
-rcrd(rule(F, N, FG, NG, Mod,CurFile)) 
-	:-
-	excluded_call(FG, NG),
-	!.
-
-rcrd(rule(F, N, FG, NG, Mod,CurFile)) 
-	:-
-	getCallsTree(CurCallsTree),
-	avl_insert(F/N, calls(F,N,FG,NG, Mod,CurFile),CurCallsTree,NewCallsTree),
-	setCallsTree(NewCallsTree).
-
-rcrd(fact(F, N, Mod,CurFile)) 
-	:-
-	excluded_head(F, N, Mod, CurFile),
-	!.
-
-rcrd(fact(F,N, Mod,CurFile)) 
-	:-
-	getCallsTree(CurCallsTree),
-	avl_insert(F/N, fact(F,N,Mod,CurFile),CurCallsTree,NewCallsTree),
-	setCallsTree(NewCallsTree).
-
-rcrd(export(Mod,P/N,CurFile))
-	:-
-	getCallsTree(CurCallsTree),
-	avl_insert(P/N, export(P,N,Mod,CurFile),CurCallsTree,NewCallsTree),
-	setCallsTree(NewCallsTree).
-
-rcrd(import(Mod,P/N,CurFile))
-	:-
-	getCallsTree(CurCallsTree),
-	avl_insert(P/N, import(P,N,Mod,CurFile),CurCallsTree,NewCallsTree),
-	setCallsTree(NewCallsTree).
-
-rcrd(module(Mod,CurFile))
-	:-
-	getMiscInfo(MIS),
-	accessMI(mods, MIS, Mods),
-	accessMI(mods_files, MIS, ModsFiles),
-	(dmember(Mod, Mods) ->
-		true
-		;
-		setMI(mods, MIS, [Mod | Mods])
-	),
-	enter_in(ModsFiles, Mod, mods_files, MIS, CurFile),
-	accessMI(files_mods, MIS, FilesMods),
-	enter_in(FilesMods, CurFile, files_mods, MIS, Mod).
-
-rcrd(assert(FG,NG, Mod,CurFile)) 
-	:-
-	getCallsTree(CurCallsTree),
-	avl_insert(FG/NG, assert(FG,NG,Mod,CurFile),CurCallsTree,NewCallsTree),
-	setCallsTree(NewCallsTree).
-
-/*
-rcrd(assert(FG,NG, Mod,CurFile)) 
-	:-
- 	'$asserted'(FG,NG, Mod,CurFile),!.
-rcrd(assert(FG,NG, Mod,CurFile)) 
-	:-
- 	assert('$asserted'(FG,NG, Mod,CurFile)).
-*/
-
-/*
-rcrd(undefined(not(P),N,Module,CurFile))
-	:-
- 	'$undefined'(P,N,Module,CurFile),!.
-rcrd(undefined(not(P),N,Module,CurFile))
-	:-
- 	assert('$undefined'(P,N,Module,CurFile)).
-rcrd(undefined(P,N,Module,CurFile))
-	:-
- 	'$undefined'(P,N,Module,CurFile),!.
-rcrd(undefined(P,N,Module,CurFile))
-	:-
- 	assert('$undefined'(P,N,Module,CurFile)). 
-*/
-
-	/*----------------------------------------------------------------
-	 |	NOTE: -- validate when switching to avl trees:
-	 |	If Module  uses predicates from other modules,
-	 |	'asserta' (instead of 'assert') is used to record the modules 
-	 |	used by Mod. Predicates called by Module but not defined
-	 |	inside Module will be searched for using the recorded info
-	 |	(searched in the correct order).
-	 *----------------------------------------------------------------*/
-
-/*
-rcrd(use(Mod,Module,CurFile))
-	:-
-   '$use'(Mod,Module,CurFile),!.
-rcrd(use(Mod,Module,CurFile))
-	:-
-   asserta('$use'(Mod,Module,CurFile)).      
-*/
-rcrd(use(Mod,Module,CurFile))
-	:-
-	getMiscInfo(MIS),
-	accessMI(mods_use, MIS, ModUse),
-	enter_in(ModUse, Mod, mods_use, MIS, Module).
-
-enter_in(PlusList, Mod, Tag, MIS, Item)
-	:-
-	locm(PlusList, Mod, Entry),
-	!,
-	Entry = Mod+ItemList,
-	(dmember(Item, ItemList) ->
-		true
-		;
-		(Tag=end(_) -> 
-			append(ItemList, [Item], NewList)
-			;
-			NewList = [Item | ItemList]
-		),
-		mangle(2,Entry,NewList)
-	).
-
-enter_in(PlusList, Mod, end(Tag), MIS, Item)
-	:-!,
-	setMI(Tag, MIS, [Mod+[Item] | PlusList]).
-enter_in(PlusList, Mod, Tag, MIS, Item)
-	:-
-	setMI(Tag, MIS, [Mod+[Item] | PlusList]).
-
-
-locm([Entry | _], Mod, Entry)
-	:-
-	Entry = Mod+_,
-	!.
-locm([_ | Mods], Mod, Entry)
-	:-
-	locm(Mods, Mod, Entry).
-
-
-	/*-----------excluded predicates---------------------------------*/
-excluded(functor,3).
-excluded(arg,3).
-excluded(';',2).
-excluded(see,1).
-excluded(read,1).
-excluded(assert,1).
-excluded('=',2).
-
-	/*----------defined predicates ----------------------------------*/
-defined_predicates(DefinedPreds) 
-	:-
-  % setOf(p(Mod:P,N,File), Q^M^'$calls'(P,N,Q,M,Mod,File), DefinedPreds).
-   setOf(p(Mod:P,N,File), Q^M^calls(P,N,Q,M,Mod,File), DefinedPreds).
-
-
-	/*----------------------------------------------------------
-	 |	group: lists each defined predicate together with 
-	 |	       all the predicates it eventually calls.
-	 *----------------------------------------------------------*/
-
-group(CallsTree,OutSt) 
-	:-
-	inorder_defined(CallsTree,DefsWithUses),
-/*
-   setOf('$depends_on'(P,N,Mod,UseList,Files),
-				SomeFile^
-				(memb(Mod:P,N,SomeFile,DefinedPreds),
-					setOf(FF, memb(Mod:P,N,FF,DefinedPreds),Files),
-					uses_list(P,N,Mod,UseList)  ),
-		 		ListOfUseLists),
-*/
-	dependency_header(OutSt),
-	cref_out(ListOfUseLists,OutSt),
-	nl(OutSt).
-
-group(OutSt) 
-	:-
-   defined_predicates(DefinedPreds),
-   setOf('$depends_on'(P,N,Mod,UseList,Files),
-				SomeFile^
-				(memb(Mod:P,N,SomeFile,DefinedPreds),
-					setOf(FF, memb(Mod:P,N,FF,DefinedPreds),Files),
-					uses_list(P,N,Mod,UseList)  ),
-		 		ListOfUseLists),
-   dependency_header(OutSt),
-   cref_out(ListOfUseLists,OutSt),
-   nl(OutSt).
-
-uses_list(P,N,Mod,UseList) 
-	:-
-%   setOf(p(Q,M,F), '$calls'(P,N,Q,M,Mod,F), BodyListForP),
-   setOf(p(Q,M,F), calls(P,N,Q,M,Mod,F), BodyListForP),
-   get_defs(BodyListForP,Mod, UseList,UseList,[],p(Mod:P,N)),
-   !.
-
-essence(not(P),P)
-	:- !.
-essence(P,P).
-
-get_defs([],_,UseList,CurTail,CurTail,p(ModPred:Pred,NPred))
-	:-!.
-
-get_defs([p(Mod:P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
-				p(ModPred:Pred,NPred) )
-	:-
-   non_mem(Mod:P,N,F,UseList),!,
-   essence(P,PE),
-   rcrd(import(Module,PE,N,Mod,F)),
-
-%   setOf(p(Q,M,FF), '$calls'(PE,N,Q,M,Mod,FF), BodyListforP),
-   setOf(p(Q,M,FF), calls(PE,N,Q,M,Mod,FF), BodyListforP),
-   CurTail = [p(Mod:P,N,F) | NextTail],
-
-		%%%%% search Mod for definitions of predicates in BodyListforP
-   get_defs(BodyListforP,Mod,UseList,NextTail,InterTail,
-						p(ModPred:Pred,NPred)),
-
-		%%%%% search Module for definitions of predicates in RestStack
-   get_defs(RestStack, Module, UseList,InterTail,ResultTail,
-						p(ModPred:Pred,NPred)	).
-
-	%%%%% p(Mod:P,N,F) is already in UseList
-get_defs([p(Mod:P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
-				p(ModPred:Pred,NPred) ) 
-	:-!,
-   get_defs(RestStack,Module,UseList,CurTail,ResultTail,
-					p(ModPred:Pred,NPred)).
-
-	
-
-		%%%% P is not of the form Mod:P 
-
-		%%%% P is a rule in Module:
-
-get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
-					p(ModPred:Pred,NPred) )
-	:-
-   essence(P,PE),
-   '$calls'(PE,N,Q,M,Module,F),
-   non_mem(Module:P,N,F,UseList),
-   !, 
-%   setOf(p(QQ,MM,FF), '$calls'(PE,N,QQ,MM,Module,FF), BodyListforP),
-   setOf(p(QQ,MM,FF), '$calls'(PE,N,QQ,MM,Module,FF), BodyListforP),
-   CurTail = [p(Module:P,N,F) | NextTail],
-	
-		%%%%% search Module for definitions of predicates in BodyListforP
-   get_defs(BodyListforP,Module,UseList,NextTail,InterTail,
-					p(ModPred:Pred,NPred)	), 
-		%%%%% search Module for definitions of predicates in RestStack   
-   get_defs(RestStack, Module, UseList,InterTail,ResultTail,
-					p(ModPred:Pred,NPred)   ). 
-
-		%%%% P is a fact in Module:
-
-get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
-					p(ModPred:Pred,NPred)   )
-	:-
-   essence(P,PE),
-   '$fact'(PE,N,Module,F),
-   non_mem(Module:P,N,F,UseList),
-   !, 
-   CurTail = [p(Module:P,N,F)|NextTail],
-   get_defs(RestStack, Module, UseList,NextTail,ResultTail,
-						p(ModPred:Pred,NPred)). 
-
-		%%%%% P is  already in UseList and its definition is recursive	        
-
-get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
-						p(Module:PPP,N)  )
-	:-
-   ( P = PPP ; P = not(PPP) ),
-   ( ( vvmember(p(Module:P,N,F), UseList), !,
-	 		get_defs(RestStack,Module,UseList,CurTail,ResultTail,
-							p(Module:P,N)) 
-		) 
-		;
-      ( CurTail = [p(Module:P,N,F) | NextTail],
-	 		get_defs(RestStack,Module,UseList,NextTail,ResultTail,
-						p(Module:P,N))  
-		)    
-	 ).
-
-		%%%%% P  is already in UseList (and its definition is not recursive).
-
-get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
-					p(ModPred:Pred,NPred)  )
-	:-
-    vvmember(p(Module:P,N,F), UseList), !,
-    get_defs(RestStack,Module,UseList,CurTail,ResultTail,
-					p(ModPred:Pred,NPred) ).
-  	
-		%%%%% definition of P is not in Module, 
-		%%%%% but in some other module in the use list of Module
-		%%%%% search the use list of Module 
-
-get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
-					p(ModPred:Pred,NPred) )
-	:-
-   '$use'(Module,Mod,_),
-   essence(P,PE),
-   '$export'(Mod,PE/N,_), !,
- 	( ( non_mem(Mod:P,N,F,UseList),
- 		 rcrd(import(Module,PE,N,Mod,F)),
-
-				%%%%% look in Mod for defintions
- 		 setOf(p(Q,M,FF), '$calls'(P,N,Q,M,Mod,FF), BodyListforP),
- 		 CurTail = [p(Mod:P,N,F) | NextTail],
-
-				%%%%% look in Mod for definitions
- 		 get_defs(BodyListforP,Mod,UseList,NextTail,InterTail,
-							p(ModPred:Pred,NPred) ), 
-				%%%%% look in Module
- 		 get_defs(RestStack, Module, UseList,InterTail,ResultTail,
-							p(ModPred:Pred,NPred) )  
- 	   )
-		;
- 		(
-				%%%%% definition is  already in UseList
- 		   vvmember(p(Mod:P,N,F),UseList),
- 		   get_defs(RestStack,Module,UseList,CurTail,ResultTail,
-							p(ModPred:Pred,NPred) )
- 		 ) 
-		).
-
-
-
-		%%%%% P is undefined
-
-get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
-					p(ModPred:Pred,NPred) )
-	:-!,
- 	rcrd(undefined(P,N,Module,F)),
- 	CurTail = [p(Module:P,N,F) | NextTail],
- 	get_defs(RestStack,Module,UseList,NextTail,ResultTail,
-						p(ModPred:Pred,NPred) ).
-
-	/*------------- modules appearing --------------------------*/
-modules(OutS)
-	:-
- 	setOf( Module+[files=Fs,uses_mods:UMs],
-				SomeF^
-				('$module'(Module,SomeF),
-				 setOf(FF, '$module'(Module,FF),Fs),
-				 setOf(UM, F^'$use'(Module,UM,F), UMs)
-				),
-			 Modules),
-	setup_report(Modules, 'No Modules Defined', 'Defined Modules:', OutS).
-
-	/*------------ asserted predicates -------------------------*/
-asserteds(OutS)
-	:-
-	setOf(Mod+Assertions,
-			[PP,NN,FF]^
-			('$asserted'(PP,NN,Mod,FF),
- 				setOf(P/N, F^'$asserted'(P,N,Mod,F), Assertions)
-			),
-			Asserteds),
-	setup_report(Asserteds, 'No Asserted Predicates', 
-											'Asserted Predicates', OutS).
-
-	/*------------- uncalled predicates --------------------------*/
-uncalleds(OutS)
-	:-
-	setOf(Mod+ModUncalleds,
-			[PP,NN,FF]^
-			(uncalled(PP,NN,Mod,FF),
- 				setOf(P/N, F^uncalled(P,N,Mod,F), ModUncalleds)
-			),
-			Uncalleds),
-	setup_report(Uncalleds, 'No Uncalled Predicates', 
-											'Uncalled Predicates',OutS).
-
-uncalled(P,N,Mod,F) 
-	:-
- 	'$calls'(P,N,_,_,Mod,F),
- 	not('$import'(Module,P,N,Mod,_)),
- 	not(called_by_other_than_self(P,N,Mod,_)).
-
-called_by_other_than_self(P,N,Mod,_)
-	:-
-	'$calls'(Q,M,P,N,Mod,_), 
-	( Q \== P  ; M \== N ).
-
-called_by_other_than_self(P,N,Mod,_)
-	:-
- 	'$calls'(Q,M,not(P),N,Mod,_).
-
-uncalled(P,N,Mod,_) 
-	:-
- 	'$fact'(P,N,Mod,_),
- 	not('$import'(Module,P,N,Mod,_)),
- 	not('$import'(Module,not(P),N,Mod,_)),
- 	not('$calls'(Q,M,P,N,Mod,_)) ,
- 	not('$calls'(Q,M,not(P),N,Mod,_)).
-
-	/*-------------------------------------------------------
- 	 |	undefs_importeds
-	 *-------------------------------------------------------*/
-
-undefs_importeds(OutS)
-	:-
- 	setOf(Module,F^'$module'(Module,F),Modules),
-	setOf(Mod+ModExplicitImports,
- 				(member(Mod,Modules), imports(Mod,ModExplicitImports) ),
-			ExplicitImports), 
-	setOf(Mod+ModUndefs1, 
-				(member(Mod,Modules), mod_undefs1(Mod, ModUndefs1) ),
-				InterUndefs),
-	split_undefs_imports(InterUndefs, Undefs, ImplicitImports),
-	setup_report(ExplicitImports, 'No Explicit Imports', 
-									'Explicitly Imported Predicates',OutS),
-	setup_report(ImplicitImports, 'No Implicit Imports', 
-									'Implicitly Imported Predicates',OutS),
-	setup_report(Undefs, 'No Undefined Predicates', 
-									'Undefined Predicates',OutS).
-
-imports(Module,Imports)
-	:-
- 	setOf(P/N-(mod=Mod)-(file=F), '$import'(Module,P,N,Mod,F),Imports).
-
-mod_undefs1(Mod, ModUndefs1)
-	:-
-	setOf(Q/M, F^'$undefined'(Q,M,Mod,F), ModUndefs0),
-	imports(Mod, ModExplicitImports),
-	setOf(Item, 
-				(member(Item, ModUndefs0),
-						not(member(Item, ModExplicitImports))),
-				ModUndefs1).
-
-split_undefs_imports([], [], []).
-split_undefs_imports([Mod+ModInterUndefs | RestInterUndefs], 
-							[Mod+ModUndefs | RestUndefs], 
-							[Mod+ModImplicitImports | RestImplicitImports])
-	:-
-	setOf(UM, F^'$use'(Mod,UM,F), UMs),
-	split_undefs_imports(ModInterUndefs, ModUndefs, ModImplicitImports,
-								Mod,ModUseList),
-	split_undefs_imports(RestInterUndefs, RestUndefs, RestImplicitImports).
-
-split_undefs_imports([], [], [],_,_).
-split_undefs_imports([P/N | RestModInterUndefs], 
-							ModUndefs, 
-							[P/N-PMod | RestModImplicitImports],
-							Mod,ModUseList)
-	:-
-	(procedures(PMod,P,N,_);
- 		'$fact'(P,N,PMod,_); '$calls'(P,N,_,_,PMod,_)),
-	PMod \= Mod,
-	member(PMod, ModUseList),!,
-	split_undefs_imports(RestModInterUndefs, ModUndefs, 
-								RestModImplicitImports,Mod,ModUseList).
-split_undefs_imports([P/N | RestModInterUndefs], 
-							[P/N | RestModUndefs], 
-							ModImplicitImports,
-							Mod,ModUseList)
-	:-
-	split_undefs_imports(RestModInterUndefs, RestModUndefs, 
-								ModImplicitImports,Mod,ModUseList).
-
-%%%% ============== OUTPUT PREDICATES =========================
-
-%%--------------- Dependency Header -----------------------------
-
-dependency_header(OutS)
-	:-
-   printf(OutS,' ==============================\n',[]),
-   printf(OutS,' Predicate Dependencies & Calls:\n',[]),
-   printf(OutS,' ==============================\n\n',[]).
-
-%%--------------- Report Output -----------------------------
-
-setup_report(List, NoItemsMessage, ItemsMessage, OutS)
-	:-
- 	printf(OutS,'\n ==============================\n',[]),
- 	(List = [] ->
- 		printf(OutS,'%t\n',[NoItemsMessage])
-		;
- 		printf(OutS,'%t\n',[ItemsMessage]),
-		write_list_display(4, List, OutS)
-	),
- 	printf(OutS,'\n ==============================',[]),
-	printf(OutS,'\n',[]).
-
-/*------------------------------------------------------------------------
-	cref_out 
- *------------------------------------------------------------------------*/
-cref_out([],_).
-
-cref_out(['$depends_on'(P,N,Mod,UseList,F) | Rest],OutS) 
-	:-
-	fixUseListNice(UseList,NiceUseList),
-	printf(OutS,'%t/N ',[P,N]),
-	(member(P/N, NiceUseList) ->
-		printf(OutS,'--recursive-- { ',[]) ;
-		printf(OutS,'              { ',[])
-	),
-	printf(OutS,'module=%t',[Mod]),
-	('$export'(Mod,P/N,_) ->
-		printf(OutS,' --exported }',[]) ;
-		printf(OutS,' }',[])
-	),
-	printf(OutS,
-		   '\n          {files=%t}\n  * Depends on:\n   %t\n',
-			[F,NiceUseList]),
-	setOf(PP/NN, [MMod,FF]^'$calls'(PP,NN,P,N,Mod,FF), CalledBys),
-	printf(OutS,'  * Called by:\n   %t\n',[CalledBys]),
- 	cref_out(Rest,OutS).
-
-fixUseListNice([],[]).
-fixUseListNice([p(Mod:Q,N,F) | RestUseList],
-					[Q/N | RestNiceUseList])
-	:-
-	fixUseListNice(RestUseList,RestNiceUseList).
-
-use_list_out_2([]).
-use_list_out_2([p(Module,File,[])|Rest]) 
-	:- !,
-	use_list_out_2(Rest).
-use_list_out_2([p(Module,File,ImportList)|Rest]) 
-	:-
- 	write(Module), write(' imports :'), 
- 	write_list(5,ImportList),
- 	use_list_out_2(Rest).
-
-write_list(_,[]).
-write_list(Tab,[p(Mod,P,N,F)|Rest])
-	:-
- 	nl, tab(Tab),
- 	write(Mod:P), write('/'),write(N),
- 	write_list(Tab,Rest).
-
-write_list_display(_,[], _).
-write_list_display(Tab,[Mod+List|Rest],OutS)
-	:-
-	printf(OutS,'%t:\n\t%t\n',[Mod,List]),
- 	write_list_display(Tab,Rest,OutS).
-
-use_special_list_out(List,Tab)
-	:-
-	use_list_out(List,Tab,'$crefcrefcrefaida$').
-
-use_list_out([],_,_).
-use_list_out([p(Mod:Q,N,F)],J,Mod) 
-	:-
- 	(J = 5, !, nl, tab(5); true),
- 	write(Q),write('/'),write(N).
-use_list_out([p(M:Q,N,F)],J,Mod) 
-	:-
- 	Mod \== M,
- 	(J = 5, !, nl, tab(5); true),
- 	write(M:Q),write('/'),write(N).
-
-use_list_out([p(Mod:Q,N,F) | Rest],J,Mod) 
-	:-
- 	(J = 5, !, nl, tab(5), K is 1; K is J+1),
- 	write(Q),write('/'),write(N), write(', '),
- 	use_list_out(Rest,K,Mod).
-use_list_out([p(M:Q,N,F) | Rest],J,Mod) 
-	:-
- 	Mod \== M,
- 	(J = 5, !, nl, tab(5), K is 1; K is J+1),
- 	write(M:Q),write('/'),write(N), write(', '),
- 	use_list_out(Rest,K,Mod).
-
-	/*----------Miscellaneous---------------------------------*/
-
-
-vvmember(P,[H| _])
-	:-	
-	nonvar(H), P=H,!.
-vvmember(P,[H | Rest])
-	:- 
-	nonvar(H),
-	vvmember(P,Rest).
-
-memb(P,N,F,[p(P,N,F) | _]).
-memb(P,N,F,[_ | Rest]) 
-	:- 
-	memb(P,N,F,Rest).
-non_mem(_,_,_,L) 
-	:- 
-	var(L),!.
-non_mem(P,N,F,[p(P,N,F) | _]) 
-	:-!,fail.
-non_mem(P,N,F,[p(Mod:P,N,F) | _] ) 
-	:-!,fail.
-non_mem(P,N,F,[_ | Rest]) 
-	:- 
-	non_mem(P,N,F,Rest).
-
-
-clean_up_me
-	:-
-	abolish('$calls',6),
-	abolish('$fact',4),
-	abolish('$asserted',4),
-	abolish('$export',3),
-	abolish('$import',5),
-	abolish('$module',2),
-	abolish('$undefined',4),
-	abolish('$use',3).
 
+%--- crefStructs defStruct ---
 
+export accessCRF/3.
+export setCRF/3.
+accessCRF(pred,_A,_B) :- arg(1,_A,_B).
+setCRF(pred,_A,_B) :- mangle(1,_A,_B).
+
+accessCRF(arity,_A,_B) :- arg(2,_A,_B).
+setCRF(arity,_A,_B) :- mangle(2,_A,_B).
+
+accessCRF(mod,_A,_B) :- arg(3,_A,_B).
+setCRF(mod,_A,_B) :- mangle(3,_A,_B).
+
+accessCRF(files,_A,_B) :- arg(4,_A,_B).
+setCRF(files,_A,_B) :- mangle(4,_A,_B).
+
+accessCRF(exported,_A,_B) :- arg(5,_A,_B).
+setCRF(exported,_A,_B) :- mangle(5,_A,_B).
+
+accessCRF(calls,_A,_B) :- arg(6,_A,_B).
+setCRF(calls,_A,_B) :- mangle(6,_A,_B).
+
+accessCRF(basis,_A,_B) :- arg(7,_A,_B).
+setCRF(basis,_A,_B) :- mangle(7,_A,_B).
+
+accessCRF(calledby,_A,_B) :- arg(8,_A,_B).
+setCRF(calledby,_A,_B) :- mangle(8,_A,_B).
+
+accessCRF(calledcount,_A,_B) :- arg(9,_A,_B).
+setCRF(calledcount,_A,_B) :- mangle(9,_A,_B).
+
+accessCRF(factcount,_A,_B) :- arg(10,_A,_B).
+setCRF(factcount,_A,_B) :- mangle(10,_A,_B).
+
+accessCRF(clausecount,_A,_B) :- arg(11,_A,_B).
+setCRF(clausecount,_A,_B) :- mangle(11,_A,_B).
+
+accessCRF(depthcount,_A,_B) :- arg(12,_A,_B).
+setCRF(depthcount,_A,_B) :- mangle(12,_A,_B).
+
+accessCRF(callinmod,_A,_B) :- arg(13,_A,_B).
+setCRF(callinmod,_A,_B) :- mangle(13,_A,_B).
+
+accessCRF(importto,_A,_B) :- arg(14,_A,_B).
+setCRF(importto,_A,_B) :- mangle(14,_A,_B).
+
+accessCRF(dependson,_A,_B) :- arg(15,_A,_B).
+setCRF(dependson,_A,_B) :- mangle(15,_A,_B).
+
+accessCRF(whereasserted,_A,_B) :- arg(16,_A,_B).
+setCRF(whereasserted,_A,_B) :- mangle(16,_A,_B).
+
+export makeCRF/1.
+makeCRF(_A) :-
+        _A=..[crfCRF,_B,_C,user,[],false,[],nil,[],0,0,0,0,[],[],nil,[]].
+
+export makeCRF/2.
+makeCRF(_A,_B) :-
+        struct_lookup_subst(
+            [pred,arity,mod,files,exported,calls,basis,calledby,calledcount,
+                factcount,clausecount,depthcount,callinmod,importto,
+                dependson,whereasserted],
+            [_C,_D,user,[],false,[],nil,[],0,0,0,0,[],[],nil,[]],_B,_E),
+        _A=..[crfCRF|_E].
+
+export xmakeCRF/2.
+xmakeCRF(crfCRF(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L,_M,_N,_O,_P),
+    [_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L,_M,_N,_O,_P]).
+
+
+%--- cshls defStruct ---
+
+export accessCRSH/3.
+export setCRSH/3.
+accessCRSH(cycle,_A,_B) :- arg(1,_A,_B).
+setCRSH(cycle,_A,_B) :- mangle(1,_A,_B).
+
+accessCRSH(history,_A,_B) :- arg(2,_A,_B).
+setCRSH(history,_A,_B) :- mangle(2,_A,_B).
+
+accessCRSH(outputs,_A,_B) :- arg(3,_A,_B).
+setCRSH(outputs,_A,_B) :- mangle(3,_A,_B).
+
+accessCRSH(suite,_A,_B) :- arg(4,_A,_B).
+setCRSH(suite,_A,_B) :- mangle(4,_A,_B).
+
+accessCRSH(options,_A,_B) :- arg(5,_A,_B).
+setCRSH(options,_A,_B) :- mangle(5,_A,_B).
+
+accessCRSH(context_stack,_A,_B) :- arg(6,_A,_B).
+setCRSH(context_stack,_A,_B) :- mangle(6,_A,_B).
+
+accessCRSH(in_stream,_A,_B) :- arg(7,_A,_B).
+setCRSH(in_stream,_A,_B) :- mangle(7,_A,_B).
+
+accessCRSH(out_stream,_A,_B) :- arg(8,_A,_B).
+setCRSH(out_stream,_A,_B) :- mangle(8,_A,_B).
+
+export makeCRSH/1.
+makeCRSH(_A) :- _A=..[crfCRSH,0,[],[],unknown,[],[],user_input,user_output].
+
+export makeCRSH/2.
+makeCRSH(_A,_B) :-
+        struct_lookup_subst(
+            [cycle,history,outputs,suite,options,context_stack,in_stream,
+                out_stream],
+            [0,[],[],unknown,[],[],user_input,user_output],_B,_C),
+        _A=..[crfCRSH|_C].
+
+export xmakeCRSH/2.
+xmakeCRSH(crfCRSH(_A,_B,_C,_D,_E,_F,_G,_H),[_A,_B,_C,_D,_E,_F,_G,_H]).
+
+
+%--- mi defStruct ---
+
+export accessMI/3.
+export setMI/3.
+accessMI(files,_A,_B) :- arg(1,_A,_B).
+setMI(files,_A,_B) :- mangle(1,_A,_B).
+
+accessMI(files_mods,_A,_B) :- arg(2,_A,_B).
+setMI(files_mods,_A,_B) :- mangle(2,_A,_B).
+
+accessMI(files_d_preds,_A,_B) :- arg(3,_A,_B).
+setMI(files_d_preds,_A,_B) :- mangle(3,_A,_B).
+
+accessMI(files_c_preds,_A,_B) :- arg(4,_A,_B).
+setMI(files_c_preds,_A,_B) :- mangle(4,_A,_B).
+
+accessMI(mods,_A,_B) :- arg(5,_A,_B).
+setMI(mods,_A,_B) :- mangle(5,_A,_B).
+
+accessMI(mods_files,_A,_B) :- arg(6,_A,_B).
+setMI(mods_files,_A,_B) :- mangle(6,_A,_B).
+
+accessMI(mods_use,_A,_B) :- arg(7,_A,_B).
+setMI(mods_use,_A,_B) :- mangle(7,_A,_B).
+
+accessMI(mods_d_preds,_A,_B) :- arg(8,_A,_B).
+setMI(mods_d_preds,_A,_B) :- mangle(8,_A,_B).
+
+accessMI(mods_c_preds,_A,_B) :- arg(9,_A,_B).
+setMI(mods_c_preds,_A,_B) :- mangle(9,_A,_B).
+
+accessMI(mods_exp_preds,_A,_B) :- arg(10,_A,_B).
+setMI(mods_exp_preds,_A,_B) :- mangle(10,_A,_B).
+
+accessMI(mods_imp_preds,_A,_B) :- arg(11,_A,_B).
+setMI(mods_imp_preds,_A,_B) :- mangle(11,_A,_B).
+
+export makeMI/1.
+makeMI(_A) :- _A=..[crfMI,[],[],[],[],[],[],[],[],[],[],[]].
+
+export makeMI/2.
+makeMI(_A,_B) :-
+        struct_lookup_subst(
+            [files,files_mods,files_d_preds,files_c_preds,mods,mods_files,
+                mods_use,mods_d_preds,mods_c_preds,mods_exp_preds,
+                mods_imp_preds],
+            [[],[],[],[],[],[],[],[],[],[],[]],_B,_C),
+        _A=..[crfMI|_C].
+
+export xmakeMI/2.
+xmakeMI(crfMI(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K),
+    [_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K]).
 
 endmod.
 
+module utilities.
+typeProperties(crefStructs,
+    [pred,arity,mod,user,files,[],exported,false,calls,[],basis,nil,calledby,
+        [],calledcount,0,factcount,0,clausecount,0,depthcount,0,callinmod,[],
+        importto,[],dependson,nil,whereasserted,[]]).
+noteOptionValue(crefStructs,_A,_B,_C) :- setCRF(_A,_C,_B).
+typeProperties(cshls,
+    [cycle,0,history,[],outputs,[],suite,unknown,options,[],context_stack,[],
+        in_stream,user_input,out_stream,user_output]).
+noteOptionValue(cshls,_A,_B,_C) :- setCRSH(_A,_C,_B).
+typeProperties(mi,
+    [files,[],files_mods,[],files_d_preds,[],files_c_preds,[],mods,[],
+        mods_files,[],mods_use,[],mods_d_preds,[],mods_c_preds,[],
+        mods_exp_preds,[],mods_imp_preds,[]]).
+noteOptionValue(mi,_A,_B,_C) :- setMI(_A,_C,_B).
+endmod.

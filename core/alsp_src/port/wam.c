@@ -1595,6 +1595,12 @@ cut_no_ovflow_check:
 			   and mr_SPB values from the choice point
 			   frames until mr_SPB > reg1 
 			 */
+#ifdef DEBUGSYS
+	if (debug_system[CUT_RSB])
+	{	printf("cut:reset mr_B init=%x \n", mr_B); 
+		fflush(stderr);	}
+#endif
+
 	    while (mr_SPB <= reg1) {
 			mr_B = cp_B(mr_B);
 			mr_SPB = cp_SPBm(mr_B);
@@ -1602,6 +1608,12 @@ cut_no_ovflow_check:
 
 			/* Reset mr_HB from new choice point: */
 	    mr_HB = cp_HB(mr_B);
+
+#ifdef DEBUGSYS
+	if (debug_system[CUT_CPCTR])
+	{	fprintf(stderr,"cut:compact trail mr_B=%x mr_TR=%x mr_H=%H mr_HB=%x\n", mr_B,mr_TR,mr_H,mr_HB); 
+		fflush(stderr);	}
+#endif
 
 			/* Now have to compact the trail from the
 			   old top of trail to the new choice point;
@@ -1650,6 +1662,10 @@ cut_no_ovflow_check:
 	    /* weird_jump, resolve_reference                */
 
 CASE(W_CUTMACRO):		/* cutmacro srcreg, dstreg */
+			/* #define OPSIZE          1											*/
+			/* #define getpwrd(d)   *PWPTR(P+(d))									*/
+			/* #define getreg(d)    ((*(P+(d))? mr_E: mr_SP)+ getpwrd((d)+OPSIZE))	*/
+
 	    reg1 = getreg(OPSIZE);
 	    *getreg(OPSIZE + REGSIZE) = MMK_INT(wm_heapbase - reg1);
 	    P += OPSIZE + 2 * REGSIZE;

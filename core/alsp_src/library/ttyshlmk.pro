@@ -13,34 +13,65 @@
 
 module ttyshlmk.
 
+export mk_tty_shell_cl/0.
+export mk_tty_shell_list/1.
+export ttyshlmk/1.
+export mk_tty_shell/1.
+export setup_ttyshl/0.
+export setup_ttyshl/2.
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Run it from the command line - format:
 	%%	alspro -p File1 File2 ...
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-export mk_tty_shell_cl/0.
 
+/*!-----------------------------------------------------------------------
+ |	mk_tty_shell_cl/0
+ |	mk_tty_shell_cl
+ |	mk_tty_shell_cl
+ |
+ |	- invoke command line version of tty shell spec processing
+ |
+ |	Invoke command line version of tty shell spec processing; takes
+ |	all entries rightwards of -p on the command line as being files
+ |	to be processed.
+ *-----------------------------------------------------------------------*/
 mk_tty_shell_cl
 	:-
 	builtins:command_line(Files),
 	mk_tty_shell_list(Files).
 
-export mk_tty_shell_list/1.
-
+/*!-----------------------------------------------------------------------
+ |	mk_tty_shell_list/1
+ |	mk_tty_shell_list()
+ |	mk_tty_shell_list(+)
+ |
+ |	- perform tty shell spec processing on a list of files
+ *-----------------------------------------------------------------------*/
 mk_tty_shell_list([]).
 mk_tty_shell_list([File | Files])
 	:-
 	mk_tty_shell(File),
 	mk_tty_shell_list(Files).
 
-
-export ttyshlmk/1.
-
+/*!-----------------------------------------------------------------------
+ |	ttyshlmk/1
+ |	ttyshlmk(InSrcFile)
+ |	ttyshlmk(+)
+ |
+ |	- perform tty shell spec processing on a file
+ *-----------------------------------------------------------------------*/
 ttyshlmk(InSrcFile)
 	:-
 	mk_tty_shell(InSrcFile).
 
-export mk_tty_shell/1.
-
+/*!-----------------------------------------------------------------------
+ |	mk_tty_shell/1
+ |	mk_tty_shell(InSrcFile)
+ |	mk_tty_shell(+)
+ |
+ |	- perform tty shell spec processing on a file
+ *-----------------------------------------------------------------------*/
 mk_tty_shell(InSrcFile)
 	:-
 		%% setup correct file names:
@@ -128,7 +159,6 @@ synth_shell_units(SpcTerms, InSrcFile, TgtFile)
 		%% output code:
 	open(TgtFile, write, TgtS, []),
 	gen_file_header(TgtS, InSrcFile, TgtFile),
-%	ssu_header(TgtS, InSrcFile, TgtFile),
 	write_clauses(TgtS, XSpcCode, [quoted(true)]),
 	close(TgtS).
 
@@ -334,7 +364,14 @@ tty_shell_units([
 
 	%% Recurse down the list of units, builting each code
 	%% fragment:
-ssu([], _, [endmod]).
+ssu([], _, 
+		[
+		 (quit_to_prolog(_) :- system('rm *.obp'),
+				   printf('Exiting to Prolog...\n',[]), !, fail),
+		 (exit_to_os(_) :- system('rm *.obp'),
+				printf('Exiting to Operating System...\n',[]), !, halt),
+		 endmod ]).
+
 ssu([Unit | UnitList], XSpcTerms, XSpcCode)
 	:-
 	synth_unit(Unit, XSpcTerms, XSpcCode, XSpcCodeTail),
@@ -431,9 +468,6 @@ synth_unit(start, XSpcTerms,
 		 LoopCall
 		).
 
-
-
-
 synth_unit(stock_code, XSpcTerms, Code, CodeTail)
 	:-!,
 	dmember(loop=LoopName, XSpcTerms),
@@ -466,21 +500,31 @@ synth_unit(stock_code, XSpcTerms, Code, CodeTail)
 							[codes='%lettervar%'('CodeList')]) )
 	),
 
-	Code = [ 
-		(LoopCall 
-			:-
-			get_shell_request('%lettervar%'('Request'),'%lettervar%'('Info')),
-			'%lettervar%'('Request') \= '$noChoice',
-			!,
-		 	ActOnCall ), nl,
-					 
-		(LoopCall 
-			:-
-			ActOnQuit), nl,
+	((dmember(loop_notice=LoopNotice, XSpcTerms), LoopNotice\=nil) ->
+		NoticeCall =..[LoopNotice , '%lettervar%'('Info')],
+		MainLoopClause = 
+			(LoopCall :- 
+				NoticeCall,
+				get_shell_request('%lettervar%'('Request'),'%lettervar%'('Info')),
+				'%lettervar%'('Request') \= '$noChoice',
+				!,
+		 		ActOnCall) 
+		;
+		MainLoopClause = 
+			(LoopCall :- 
+				get_shell_request('%lettervar%'('Request'),'%lettervar%'('Info')),
+				'%lettervar%'('Request') \= '$noChoice',
+				!,
+		 		ActOnCall) 
+	),	
 
-		GetRequestClause,
-							  
-		nl | CodeTail].
+	Code = [ 
+
+		MainLoopClause, nl,
+
+		(LoopCall :- ActOnQuit), nl,
+
+		GetRequestClause, nl | CodeTail].
 
 
 synth_unit(actions, XSpcTerms, Code, CodeTail)
@@ -865,9 +909,12 @@ spc_makefile(SrcFile,BaseSrcFile,TgtFile)
 	:-
 	exists_file('makefile.spc'),
 	!,
+/*
 	open('makefile.spc', read, MSI, []),
 	read_lines(MSI, Lines),
 	close(MSI),
+*/
+	grab_lines('makefile.spc', Lines),
 	(present_dep(Lines, TgtFile, BaseSrcFile,SrcFile) ->
 		true
 		;
@@ -890,7 +937,6 @@ present_dep(Lines, TgtFile, BaseName, SrcFile)
 
 present_dep0([Line | Lines], BaseName, TgtExt, SrcExt)
 	:-
-%	atomread(Line, ([BaseName | TgtExt]:[BaseName | SrcExt]) ),
 	asplit(Line, 0':, Left, Right),
 	atomread(Left, [BaseName | TgtExt]),
  	read_as_list(Right, DepsList,[]),
@@ -901,5 +947,212 @@ present_dep0([Line | Lines], BaseName, TgtExt, SrcExt)
 present_dep0([_ | Lines], BaseName, TgtExt, SrcExt)
 	:-
 	present_dep0(Lines, BaseName, TgtExt, SrcExt).
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Initial Shell Spec Setup Wizard
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+/*!-----------------------------------------------------------------------
+ |	setup_ttyshl/0
+ |	setup_ttyshl
+ |	setup_ttyshl
+ |
+ |	- interactive setup of tty shell specifications, on standard in/out
+ *-----------------------------------------------------------------------*/
+setup_ttyshl
+	:-
+	setup_ttyshl(user_input,user_output).
+
+/*!-----------------------------------------------------------------------
+ |	setup_ttyshl/2
+ |	setup_ttyshl(IS, OS)
+ |	setup_ttyshl(+, +)
+ |
+ |	- interactive setup of tty shell specifications, i/o on IS/OS
+ *-----------------------------------------------------------------------*/
+setup_ttyshl(IS,OS)
+	:-
+	printf(OS, 'Creating ttyshl spec:\n',[]),
+	printf(OS, 'System name = ', []),
+	get_line(IS, Name0),
+	strip_clean(Name0, Name),
+
+	get_value_for(OS,IS,'System defStruct name [%t]=',Name,TypeName),
+	(TypeName \= Name ->
+		DefTypeFile = TypeName
+		;
+		catenate(TypeName, '_typ.typ', DefTypeFile)
+	),
+	get_value_for(OS,IS,'defStruct file name [%t]=',DefTypeFile,TypeFile),
+	get_value_for(OS,IS,'Module name [%t]=',Name,Module),
+	get_value_for(OS,IS,'Start (entry) predicate [%t]=',start,Start),
+
+	printf(OS, 
+			'Other modules to use [hit return for blank line when finished]:\n',
+			[]),
+	get_lines_to_blank(OS,IS,'>',UseList),
+
+	printf(OS, 
+			'Files to consult [hit return for blank line when finished]:\n',
+			[]),
+	get_lines_to_blank(OS,IS,'>',ConsultList),
+
+	catenate(Name, '_init', DefInitPred),
+	get_value_for(OS,IS,'Initialization predicate [%t]=',DefInitPred,InitPred),
+
+	ValList = [
+		name = Name,
+		type_name	= TypeName,
+		type_file	= TypeFile,
+		module 		= Module,
+		start		= Start,
+		use			= UseList,
+		consults	= ConsultList,
+		info_initialize = InitPred,
+		banner = ' X X X - M A N A G E M E N T ',
+		choice_banner = 'Choose menu item =====>\n'
+		],
+
+	build_tty_spc_files(ValList,OS,IS).
+
+get_value_for(OS,IS,Pattern,Default,Result)
+	:-
+	printf(OS, Pattern, [Default]),
+	get_line(IS, Result0),
+	disp_get_value_for(Result0, OS,IS,Pattern,Default,Result).
+
+disp_get_value_for('', OS,IS,Pattern,Default,Default) :-!.
+disp_get_value_for(Result0, OS,IS,Pattern,Default,Result)
+	:-
+	strip_clean(Result0, Result).
+
+get_lines_to_blank(OS,IS,Prompt,ConsultList)
+	:-
+	write(OS, Prompt),
+	get_line(IS, Result0),
+	disp_get_lines_to_blank(Result0,OS,IS,Prompt,ConsultList).
+
+disp_get_lines_to_blank('',OS,IS,Prompt,[]) :-!.
+disp_get_lines_to_blank(Result0,OS,IS,Prompt,[Result | ConsultList])
+	:-
+	strip_clean(Result0, Result),
+	get_lines_to_blank(OS,IS,Prompt,ConsultList).
+
+strip_clean(Result0, Result)
+	:-
+	atom_codes(Result0, N0Cs),
+	strip_white(N0Cs, N1Cs),
+	dreverse(N1Cs, RN1Cs),
+	strip_white(RN1Cs, RN2Cs),
+	(RN2Cs = [0'. | RN3Cs] -> true ; RN3Cs = RN2Cs),
+	dreverse(RN3Cs, N3Cs),
+	atom_codes(Result, N3Cs).
+
+build_tty_spc_files(ValList,OS,IS)
+	:-
+	dmember(name=Name, ValList),
+	filePlusExt(Name,spc,SpecFile),
+	dmember(type_file=InitTypeFile, ValList),
+	(filePlusExt(BaseFile,typ,InitTypeFile) ->
+		TypeFile = InitTypeFile
+		;
+		filePlusExt(InitTypeFile,typ,TypeFile)
+	),
+	printf(OS, 'Writing %t ...',[TypeFile]),
+	build_type_file(Name,TypeFile,ValList),
+	printf(OS, '...done\n', []),
+
+	printf(OS, 'Writing %t ...',[makefiles]),
+	build_makefiles(Name,TypeFile,SpecFile,ValList),
+	printf(OS, '...done\n', []),
+
+	printf(OS, 'Writing %t ...',[SpecFile]),
+	build_specfile(Name, SpecFile, TypeFile, ValList),
+	printf(OS, '...done\n', []),
+
+	printf(OS, '\nFinished.\n', []).
+
+
+
+
+
+build_type_file(Name,TypeFile,ValList)
+	:-
+	dmember(type_name = TypeName, ValList),
+	dmember(module = Module, ValList),
+
+	atom_codes(TypeName, TNCs),
+	at_most_n(TNCs, 5, TNC5),
+	make_uc(TNC5, UCTNC5),
+	atom_codes(AccessID, UCTNC5),
+
+	open(TypeFile, write, TypeOS, []),
+	gen_file_header(TypeOS,interaction,TypeFile),
+
+	printf(TypeOS, '\nmodule %t.\n\n',[Module]),
+	printf(TypeOS,'defStruct(%t,[\n',[TypeName]),
+	printf(TypeOS, '\tpropertiesList = [\n',[]),
+	printf(TypeOS, '\t\tcur_new_files_list/[],\n',[]),
+	printf(TypeOS, '\t\tin_stream/user_input,\n',[]),
+	printf(TypeOS, '\t\tout_stream/user_output\n',[]),
+	printf(TypeOS, '\t\t],\n',[]),
+	printf(TypeOS, '\taccessPred = access%tinfo,\n',[AccessID]),
+	printf(TypeOS, '\tsetPred = set%tinfo,\n',[AccessID]),
+	printf(TypeOS, '\tmakePred = make%tinfo,\n',[AccessID]),
+	printf(TypeOS, '\tstructLabel = %t\n',[TypeName]),
+	printf(TypeOS, '\t]  ).\n',[]),
+	printf(TypeOS, '\nendmod.\n',[]),
+
+	close(TypeOS).
+
+build_makefiles(Name,TypeFile,SpecFile,ValList)
+	:-
+	filePlusExt(TypeBase,typ,TypeFile),
+	filePlusExt(TypeBase,pro,TypePro), 
+
+	open('makefile.typ', write, MTOS, []),
+	printf(MTOS, 'TYPES=%t\n\n', [TypePro]),
+	printf(MTOS, 'types: $(TYPES)\n\n', []),
+	printf(MTOS, '%t: %t\n', [TypePro, TypeFile]),
+	close(MTOS),
+
+	filePlusExt(Name,spc,SpecFile),
+	filePlusExt(Name,pro,SpecProFile),
+	open('makefile.spc', write, MSOS, []),
+	printf(MSOS, '%t: %t\n', [SpecProFile, SpecFile]),
+	close(MSOS),
+
+
+	open(makefile, write, MFOS, []),
+	printf(MFOS, '#\n#   Makefile for %t programs\n#\n\n',[Name]),
+	printf(MFOS, 'ALSPRO=alspro\n\n', []),
+
+	printf(MFOS, '\n%.pro:%.typ\n',[]),
+	printf(MFOS, '\t$(ALSPRO) -b -g comptype_cl -p $<',[]),
+	printf(MFOS, '\n%.pro:%.spc\n',[]),
+	printf(MFOS, '\t$(ALSPRO) -b -g mk_tty_shell_cl -p $<',[]),
+	printf(MFOS, '\n%.pro:%.oop',[]),
+	printf(MFOS, '\t$(ALSPRO) -b -obp -g objectProcessFile_cl -p -oopf $<\n',[]),
+	printf(MFOS, '\n\ninclude makefile.typ\n',[]),
+	printf(MFOS, '\n\ninclude makefile.spc\n',[]),
+	close(MFOS).
+
+build_specfile(Name, SpecFile, TypeFile, ValList)
+	:-
+	open(SpecFile, write, SFOS, []),
+	CmtCmd = printf(SFOS,CCPattern,CCArgs),
+	CCPattern = 
+	  '\n\t%t program shell\n\n\tProper command line to build code from this is:\n\n\t\tmk_tty_shell_cl -p %t.spc\n\n\tUsing the makefile, just:\n\t\tmake %t.pro\n\n',
+	CCArgs = [Name,Name,Name],
+	gen_file_header(SFOS,interaction,SpecFile,CmtCmd),
+
+	write_clauses(SFOS, ValList),
+	nl(SFOS),
+	write_clauses(SFOS, [loop_notice=nil]),
+	printf(SFOS,'action(q,\'Quit to Prolog\', Info)\t= quit_to_prolog(Info).\n',[]),
+	printf(SFOS,'action(h,\'Halt Prolog to OS\', Info)\t= exit_to_os(Info).\n',[]),
+
+	close(SFOS).
 
 endmod.

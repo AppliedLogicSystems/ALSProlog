@@ -29,9 +29,15 @@ int 	pbi_del_tm_for		PARAMS(( void ));
 
 /*---------------------------------------------------------------*
  | pbi_delay()
+ |	Prolog call: '$delay'(Var,Mod,Goal,DelayTerm),
  |
  | creates a delay term on the heap, given 3 input args from
- | the prolog heap:
+ | the prolog heap:  
+ |	- the var on which to delay
+ |	- the module
+ |	- the Goal (containing Var) to delay
+ |
+ |	returns DelayTerm = the constructed delay term on the heap
  *---------------------------------------------------------------*/
 
 int
@@ -77,7 +83,23 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 	w_install_argn(vv, 3, m,mt);
 	w_install_argn(vv, 4, g,gt);  
 
-	/* Now we have to bind the incoming argument on
+	/* ------------------------------------------------------*
+	   Next, we have to trail the binding we will install
+	   in dv, so that if we backtrack over this, it will
+	   be properly undone:
+	 * ------------------------------------------------------*/
+
+#ifdef TRAILVALS
+	*--wm_TR = ((PWord) (dv));
+	*--wm_TR = *(dv);
+
+#else
+	*--wm_TR = (PWord)(dv);
+
+#endif /* TRAILVALS */
+
+	/* ------------------------------------------------------*
+	   Now we have to bind the incoming argument on
 	   which the freeze was executed (dv) to the
 	   newly created unbound variable, one.  Since the
 	   incoming argument dv is older than the newly 
@@ -91,11 +113,9 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 	   problems we have to solve below.
 
 	   The correct binding is accomplished by:
+
 			w_install((PWord *)dv,(int)one,MTP_UNBOUND);
-	  */
 
-
-	/*
 	   If dv was an ordinary unbound variable, thie is
 	   all we would have to do.  However, dv might itself 
 	   be an already created delay variable; e.g., we 
@@ -121,11 +141,12 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 	   Note that we can assume that dv is uninstatiated,
 	   due to the test performed by freeze/3 in
 	   blt_frez.pro.
-	 */
+	 * ------------------------------------------------------*/
 
 	w_install(dv,(int)one,MTP_UNBOUND);
 
 /* printf("Calling update_chpt_slots(h=%x,hb=%x)\n",wm_H,wm_HB); */
+
 	update_chpt_slots((PWord)wm_H);
 	wm_HB = wm_H;
 
