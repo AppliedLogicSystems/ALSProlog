@@ -138,7 +138,12 @@ proc vTclWindow.input_popup {base} {
         set base .input_popup
     }
     if {[winfo exists $base]} {
-        show_window $base; return
+		raise $base
+		if {$tcl_platform(platform) == "windows"} {
+			focus -force $base
+		}
+		wm deiconify $base
+		return
     }
     ###################
     # CREATING WIDGETS
@@ -272,7 +277,14 @@ proc vTclWindow.popup_select_widget {base} {
         set base .popup_select_widget
     }
     if {[winfo exists $base]} {
-        show_window $base; return
+#        show_window $base; return
+
+		raise $base
+		if {$tcl_platform(platform) == "windows"} {
+			focus -force $base
+		}
+		wm deiconify $base
+		return
     }
 
     ###################
