@@ -285,8 +285,6 @@ disp_src_mgr(BN)
 
 %%%%%%%%%%----------------------------------------------------
 
-:- dynamic(dvf/0).
-
 
 	%% Warm startup (given that tty start_shell(prolog_shell) has run):
 export alsdev/0.
@@ -299,6 +297,8 @@ alsdev
 	set_primary_manager(ALS_IDE_Mgr),
 	init_tk_alslib(shl_tcli,Shared),
 	alsdev(Shared, ALS_IDE_Mgr).
+
+:- dynamic(dvf/0).
 
 export alsdev/2.
 alsdev(Shared, ALS_IDE_Mgr)
@@ -383,7 +383,8 @@ alsdev(Shared, ALS_IDE_Mgr)
 
 	get_cwd(CurDir),
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
-	(dvf -> demo_init ; true),
+%	(clause(dvf,_) -> demo_init ; true),
+tdvf,
 	builtins:prolog_shell(ISS,OSS,alsdev).
 
 alsdev_splash(Path)
