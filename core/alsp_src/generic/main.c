@@ -27,7 +27,6 @@
  |			   -- Added PI_yield_time() to give other programs time.
 *=============================================================*/
 #include "defs.h"
-#include "pi_init.h"
 #include <setjmp.h>
 /* #include "winter.h" */
 
@@ -121,11 +120,12 @@ static	void	panic_fail	PARAMS(( void ));
 #ifdef arch_m88k
 static	void	panic_continue	PARAMS(( void ));
 #endif
-static	void	abolish_predicate PARAMS(( char *, char *, int ));
+static	void	abolish_predicate PARAMS(( const char *, const char *, int ));
 static	void	assert_sys_searchdir PARAMS(( char * ));
-static	void	assert_als_system PARAMS(( char *, char *, char *, char *,
-				    char *));
-static	void	assert_atom_in_module PARAMS(( char*, char * ));
+static	void	assert_als_system PARAMS((const char *, const char *,
+					  const char *, const char *,
+					  const char *));
+static	void	assert_atom_in_module PARAMS(( const char*, const char * ));
 #ifndef MacOS
 static	int	absolute_pathname PARAMS((CONST char * ));
 #endif
@@ -529,8 +529,8 @@ static int PI_prolog_init0(const PI_system_setup *setup)
  */
 static void
 abolish_predicate(module, pred, arity)
-    char *module;
-    char *pred;
+    const char *module;
+    const char *pred;
     int   arity;
 {
     char  command[2048];
@@ -585,8 +585,8 @@ assert_sys_searchdir(name)
  *-----------------------------------------------------------------------------*/
 static void
 assert_atom_in_module(mod_name,atom_name)
-    char *mod_name;
-    char *atom_name;
+    const char *mod_name;
+    const char *atom_name;
 {
     char  command[2048];
 
@@ -603,7 +603,7 @@ assert_atom_in_module(mod_name,atom_name)
  *-----------------------------------------------------------------------------*/
 static void
 assert_als_system(os, os_var, proc, man, ver)
-    char *os, *os_var, *proc, *man, *ver;
+    const char *os, *os_var, *proc, *man, *ver;
 {
     char  command[2048];
 
@@ -701,45 +701,51 @@ static void locate_executable(int argc, char *argv[])
     *endpath = 0;
 #elif MacOS
     if (MPW_Tool) {
-    	command_line_locate_executable(argc, argv);
+		command_line_locate_executable(argc, argv);
     } else {
-    	/* FIX Shared Libraries need to be handled in a different way. */
-	OSErr err;
-	ProcessSerialNumber PSN;
-	ProcessInfoRec info;
-	FSSpec AppSpec, DirSpec;
-	short DirPathLength;
-	Handle DirPathHandle;
-	
-    	
-    	/* Get the FSSpec for this application. */    
-	PSN.highLongOfPSN = 0;
-	PSN.lowLongOfPSN = kCurrentProcess;
-	
-	info.processInfoLength = sizeof(ProcessInfoRec);
-	info.processName = NULL;
-	info.processAppSpec = &AppSpec;
-	
-	err = GetProcessInformation(&PSN, &info);
-	if (err != noErr) fatal_error(FE_INFND, 0);
-	
-	p2cstrcpy(imagename, AppSpec.name);
-	
-	err = FSMakeFSSpec(AppSpec.vRefNum, AppSpec.parID, "\p", &DirSpec);
-	if (err != noErr && err != fnfErr)  fatal_error(FE_INFND, 0);
+		OSErr err;
+		ProcessSerialNumber PSN;
+		ProcessInfoRec info;
+		FSSpec AppSpec, DirSpec;
+		const FSSpec *BinSpec;
+		short DirPathLength;
+		Handle DirPathHandle;
+		
+		extern shlib_found;
+		extern FSSpec shlib_location;
+		
 
-	err = FSpGetFullPath(&DirSpec, &DirPathLength, &DirPathHandle);
-	if (err != noErr) fatal_error(FE_INFND, 0);
-	
-	if (DirPathLength >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
-	
-	HLock(DirPathHandle);
-	if (MemError() != noErr) fatal_error(FE_INFND, 0);
+	    /* Get the FSSpec for this application. */    
+		PSN.highLongOfPSN = 0;
+		PSN.lowLongOfPSN = kCurrentProcess;
+		
+		info.processInfoLength = sizeof(ProcessInfoRec);
+		info.processName = NULL;
+		info.processAppSpec = &AppSpec;
+		
+		err = GetProcessInformation(&PSN, &info);
+		if (err != noErr) fatal_error(FE_INFND, 0);
+		
+		p2cstrcpy(imagename, AppSpec.name);
+		
+		if (shlib_found) BinSpec = &shlib_location;
+		else BinSpec = &AppSpec;
+		
+		err = FSMakeFSSpec(BinSpec->vRefNum, BinSpec->parID, "\p", &DirSpec);
+		if (err != noErr && err != fnfErr)  fatal_error(FE_INFND, 0);
 
-	strncpy(imagedir, *DirPathHandle, DirPathLength);
+		err = FSpGetFullPath(&DirSpec, &DirPathLength, &DirPathHandle);
+		if (err != noErr) fatal_error(FE_INFND, 0);
+		
+		if (DirPathLength >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
+		
+		HLock(DirPathHandle);
+		if (MemError() != noErr) fatal_error(FE_INFND, 0);
 
-	DisposeHandle(DirPathHandle);
-	if (MemError() != noErr) fatal_error(FE_INFND, 0);
+		strncpy(imagedir, *DirPathHandle, DirPathLength);
+
+		DisposeHandle(DirPathHandle);
+		if (MemError() != noErr) fatal_error(FE_INFND, 0);
     }
 #elif UNIX
     command_line_locate_executable(argc, argv);
@@ -1227,6 +1233,7 @@ int MPW_Tool;
 #include <console.h>
 #include <SIOUX.h>
 
+
 #ifdef NO_SIOUX_MENU
 tSIOUXSettings  SIOUXSettings =
         {0, 0, 0, 0, 0, 0, 4, 80, 24, 0, 0, 22, 12, 0};
@@ -1234,7 +1241,6 @@ tSIOUXSettings  SIOUXSettings =
 tSIOUXSettings  SIOUXSettings =
         {1, 1, 1, 0, 0, 0, 4, 80, 24, 0, 0, 22, 12, 0};
 #endif
-
 #endif			/* __MWERKS__ */
 
 #include <Events.h>
@@ -1307,9 +1313,10 @@ PI_prolog_init(int argc, char *argv[])
     return PI_startup(&setup);
 }
 
-
+#ifdef MacOS
 static void StartCoop(void);
 static void EndCoop(void);
+#endif
 
 ALSPI_API(int)
 PI_startup(const PI_system_setup *setup)
@@ -1346,9 +1353,6 @@ PI_startup(const PI_system_setup *setup)
     GUSISetup(GUSIwithUnixSockets);
     if (!MPW_Tool) GUSISetup(GUSIwithSIOUXSockets);
 #endif
-
-   InstallConsole(0);
-   SIOUXSetTitle("\pALS Prolog");
 
    StartCoop();
 #endif /* MacOS */
@@ -1424,10 +1428,6 @@ PI_shutdown(void)
 
 #ifdef MacOS
 	EndCoop();
-#endif
-
-#if defined (MacOS) && defined(__MWERKS__)
-    if (!MPW_Tool) printf("Exiting ALS Prolog.\n");
 #endif
 
 }
@@ -1585,13 +1585,7 @@ int metrowerks_open_patch(const char *filename, int mode)
 void app_printf(int messtype, va_list args)
 #else
 ALSPI_API(void)
-#ifdef HAVE_STDARG_H
 PI_app_printf(int messtype, ...)
-#else
-PI_app_printf(messtype,va_alist)
-    int messtype;
-    va_dcl
-#endif
 #endif
 {
 #ifndef APP_PRINTF_CALLBACK
@@ -1604,11 +1598,7 @@ PI_app_printf(messtype,va_alist)
 #endif
 
 #ifndef APP_PRINTF_CALLBACK
-#ifdef HAVE_STDARG_H
     va_start(args, messtype);
-#else
-    va_start(args);
-#endif
 #endif /* APP_PRINTF_CALLBACK */
 
     fmt = va_arg(args, char *);
