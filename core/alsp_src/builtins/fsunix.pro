@@ -441,7 +441,7 @@ disp_follow_link(symbolic_link, File, _, FinalFile, FinalTypeCode)
 	get_cwd(CWD),
 	read_link(File, LinkTarget),
 	pathPlusFile(Path,TFile,LinkTarget),
-	change_cwd(Path),
+	(Path \= '' -> change_cwd(Path) ; true),
 	fin_disp_follow_link(TFile, FinalFile, CWD, FinalTypeCode).
 
 
