@@ -206,7 +206,7 @@ pbi_time()
 	w_unify(vhour, thour, (PWord) tp->tm_hour, WTP_INTEGER) &&
 	w_unify(vmday, tmday, (PWord) tp->tm_mday, WTP_INTEGER) &&
 	w_unify(vmon, tmon, (PWord) tp->tm_mon, WTP_INTEGER) &&
-	w_unify(vyear, tyear, (PWord) tp->tm_year, WTP_INTEGER) &&
+	w_unify(vyear, tyear, (PWord) (1900+tp->tm_year), WTP_INTEGER) &&
 	w_unify(vwday, twday, (PWord) tp->tm_wday, WTP_INTEGER) &&
 	w_unify(vyday, tyday, (PWord) tp->tm_yday, WTP_INTEGER) &&
 	w_unify(visdst, tisdst, (PWord) tp->tm_isdst, WTP_INTEGER))
