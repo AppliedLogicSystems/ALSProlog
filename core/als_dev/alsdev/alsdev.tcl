@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.64 1998/11/15 02:41:49 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.65 1998/11/17 23:32:12 choupt Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -34,6 +34,7 @@ if {$tcl_platform(platform) == "windows"} {
 if {$tcl_platform(platform) == "macintosh"} {
 	load {} {appleevents}
 	load {} {getDirectory}
+	load {} {getFiles}
 }
 
 package require getDirectory
