@@ -1,4 +1,4 @@
-.TH alspro 1 "20 January 1994" "ALS"
+.TH alspro 1 "18 October 1996" "ALS"
 .SH NAME
 alspro \- Prolog compiler and interactive shell
 .SH SYNOPSIS
@@ -10,9 +10,14 @@ alspro \- Prolog compiler and interactive shell
 [
 .B \-v
 ]
+.if n .ti +7n
+[ \fB\-heap \fInumber\fR ]
+[ \fB\-stack \fInumber\fR ]
+.if n .ti +7n
 [
 .IR sourcefile\| .\|.\|.
 ]
+.if n .ti +7n
 [
 .B \-p
 .IR appargs\| .\|.\|.
@@ -73,6 +78,16 @@ into standalone applications.
 .B \-v
 turns on verbose mode. This causes all system loading messages, including 
 some which are normally suppressed, to be printed.
+.TP
+.B \-heap \fInumber\fR
+sets the initial heap size to \fInumber\fR Kilobytes. The
+.B \-heap
+option overrides the ALS_OPTIONS environment varaible's heap_size option. 
+.TP
+.B \-stack \fInumber\fR
+sets the initial stack size to \fInumber\fR Kilobytes. The
+.B \-stack
+options overrides the ALS_OPTIONS enviromnent variable's stack_size option.
 .LP
 The
 .B ALS_OPTIONS
@@ -116,6 +131,20 @@ heap and a two megabyte stack:
 ALS_OPTIONS=heap_size:4096,stack_size:2048
 .br
 export ALS_OPTIONS
+.SH RETURN VALUE
+Exit status is:
+.RS 3
+.TP 5
+0
+Normal termination
+.PD 0
+.TP
+1
+(not used yet)
+.TP
+2
+Abnormal termination: incorrect command line option, fatal error, etc.
+.PD
 .RE
 .SH FILES
 .DT
