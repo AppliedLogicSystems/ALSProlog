@@ -6,6 +6,8 @@
 		':alsdir:library:tk_alslib',
 		':alsdir:library:miscterm',
 		':alsdir:library:tcl_sppt',
-		':alsdir:library:listutl1'
+		':alsdir:library:listutl1',
+		':alsdir:library:msc_ioin',
+		':alsdir:library:mscioout'
 		]).
 	

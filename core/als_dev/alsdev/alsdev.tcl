@@ -30,6 +30,31 @@ proc xpe2 { What1 What2 } {
 set argc 0
 set argv ""
 
+# Error handling Procedures
+
+# re - Report Errors: Forces the reporting of errors
+proc re {a} {
+	if {[catch {uplevel $a} result]} then {
+		bgerror $result
+		error $result
+	}
+}
+
+# Basic try control structure for handling exceptions. Two forms are supported:
+# try A always B = Always execute B after A, even if A fails (ie causes exception).
+# try A fail B   = Execute B only when A fails (ie causes exeception).
+
+proc try {a selector b} {
+	if {$selector != "always" && $selector != "fail"} then {
+		error "bad option \"$selector\": must be always or fail"
+	}
+	if {[catch {uplevel $a} result] == 0} then {
+		if {$selector == "always"} then {uplevel $b}
+	} else {
+		uplevel $b
+		error $result
+	}
+}
 
 if {[info exists ALSTCLPATH]==0} then { set ALSTCLPATH . }
 #puts "LOADING ALSDEV.TCL: ALSTCLPATH=$ALSTCLPATH"
@@ -64,8 +89,13 @@ set proenv(defstr_ld)			false
 set proenv(debugwin_button,background)	#cee8e6
 set proenv(interrupt_button,foreground)	#ff0000
 
-set proenv(.topals,geometry)	400x300+0+0
-set proenv(.debugwin,geometry)	400x300+300+0
+if {$tcl_platform(platform) == "macintosh"} then {
+	set proenv(.topals,geometry)	400x300+3+22
+	set proenv(.debugwin,geometry)	400x300+300+22
+} else {
+	set proenv(.topals,geometry)	400x300+0+0
+	set proenv(.debugwin,geometry)	400x300+300+0
+}
 
 set proenv(.topals,foreground)	black
 set proenv(.debugwin,foreground)	black
@@ -983,39 +1013,13 @@ proc reset_st_win {WinName} {
 	raise $WinName
 }
 
-proc load_file_to_win {FileName TextWinName} {
-	set SI [open $FileName r]
-	set NumRows [load_stream_to_win $SI $TextWinName]
-	close $SI
-	return $NumRows
-}
-
-proc save_win_to_file {TextWinName FileName} {
-	set SI [open $FileName w]
-	save_stream_to_win $SI $TextWinName
-	close $SI
-	file attributes $FileName -creator ALS4 -type TEXT
-}
-
-proc load_stream_to_win {Stream TextWinName} {
-	set LineCount 1
-	set LineCsList ""
-	while {  [eof $Stream]==0 } {
-		set NumCs [gets $Stream Line]
-		if { $NumCs >= 0 } then {
-			$TextWinName insert end $Line
-			$TextWinName insert end "\n"
-			lappend LineCsList $NumCs
-			incr LineCount
-		}
-	}
-	return [list [expr $LineCount - 1] $LineCsList]
-}
-
 proc line_index_file {FileName } {
 	set SI [open $FileName r]
-	set Index [line_index_stream $SI ]
-	close $SI
+	try {
+		set Index [line_index_stream $SI ]
+	} always {
+		close $SI
+	}
 	return $Index
 }
 

@@ -1,5 +1,5 @@
 ##=================================================================================
-# 		document.tcl
+# 		als_document.tcl
 # 		Copyright (c) 1998 Applied Logic Systems, Inc.
 #
 # IDE Document windows.
@@ -164,16 +164,22 @@ proc dispose_document_window {w} {
 
 proc load_text {file text} {
 	set s [open $file r]
-	set data [read -nonewline $s]
+	try {
+		set data [read -nonewline $s]
+	} always {
+		close $s
+	}
 	$text insert end $data
-	close $s
 }
 
 proc store_text {text file} {
 	set s [open $file w]
-	set data [$text get 1.0 end]
-	puts -nonewline $s $data
-	close $s
+	try {
+		set data [$text get 1.0 end]
+		puts -nonewline $s $data
+	} always {
+		close $s
+	}
 }
 
 proc load_document {file} {
@@ -183,9 +189,13 @@ proc load_document {file} {
 	} else {
 		set file_name [lindex [file split $file] end]
 		set w [create_document_window $file_name]		
-		load_text $file $w.text
-		set proenv($w,file) $file
-		set proenv(document,$file) $w
+		try {
+			load_text $file $w.text
+			set proenv($w,file) $file
+			set proenv(document,$file) $w
+		} fail {
+			dispose_document_window $w
+		}
 	}
 	return $proenv(document,$file)
 }
@@ -260,6 +270,7 @@ proc document.close_all {} {
 	}
 	return true
 }
+
 
 proc document.save {w} {
 	global array proenv

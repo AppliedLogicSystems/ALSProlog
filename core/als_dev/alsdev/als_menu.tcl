@@ -36,21 +36,21 @@ proc add_file_menu {menubar type window} {
 	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
 	menu $menubar.file -tearoff $TearOff -title File
 	
-    $menubar.file add command -label New -accelerator "$mod-N" -command document.new
-    $menubar.file add command -label "Open$elipsis" -accelerator "$mod-O" -command document.open
-    $menubar.file add command -label Close -accelerator "$mod-W" -command "$type.close $window"
+    $menubar.file add command -label New -accelerator "$mod-N" -command {re document.new}
+    $menubar.file add command -label "Open$elipsis" -accelerator "$mod-O" -command {re document.open}
+    $menubar.file add command -label Close -accelerator "$mod-W" -command "re {$type.close $window}"
     $menubar.file add separator
-    $menubar.file add command -label Save -accelerator "$mod-S" -command "$type.save $window"
-    $menubar.file add command -label "Save As$elipsis" -command "$type.save_as $window"
+    $menubar.file add command -label Save -accelerator "$mod-S" -command "re {$type.save $window}"
+    $menubar.file add command -label "Save As$elipsis" -command "re {$type.save_as $window}"
 
 #    $menubar.file add separator
 #    $menubar.file add command -label "Page Setup$elipsis" \
-#		-command "$type.page_setup $window" -state disabled
+#		-command "re {$type.page_setup $window}" -state disabled
 #    $menubar.file add command -label "Print$elipsis" -accelerator "$mod-P"\
-#		-command "$type.print $window" -state disabled
+#		-command "re {$type.print $window}" -state disabled
 
     $menubar.file add separator
-    $menubar.file add command -label "Quit" -accelerator "$mod-Q" -command exit_prolog
+    $menubar.file add command -label "Quit" -accelerator "$mod-Q" -command {re exit_prolog}
 
 	$menubar add cascade -menu $menubar.file -label "File"
 }
@@ -65,22 +65,22 @@ proc add_edit_menu {menubar type window} {
 	menu $menubar.edit -tearoff $TearOff -title Edit
 	
     $menubar.edit add command \
-        -label Undo -accelerator "$mod-Z" -command "$type.undo $window" -state disabled
+        -label Undo -accelerator "$mod-Z" -command "re {$type.undo $window}" -state disabled
     $menubar.edit add separator
     $menubar.edit add command -label Cut \
-		-accelerator "$mod-X" -command "$type.cut $window"
+		-accelerator "$mod-X" -command "re {$type.cut $window}"
     $menubar.edit add command \
-        -label Copy -accelerator "$mod-C" -command "$type.copy $window"
+        -label Copy -accelerator "$mod-C" -command "re {$type.copy $window}"
     $menubar.edit add command \
-        -label Paste -accelerator "$mod-V" -command "$type.paste $window"
+        -label Paste -accelerator "$mod-V" -command "re {$type.paste $window}"
     $menubar.edit add command \
-        -label Clear -command "$type.clear $window"
+        -label Clear -command "re {$type.clear $window}"
     $menubar.edit add separator
     $menubar.edit add command \
-        -label {Select All} -accelerator "$mod-A" -command "$type.select_all $window"
+        -label {Select All} -accelerator "$mod-A" -command "re {$type.select_all $window}"
     $menubar.edit add separator
     $menubar.edit add command \
-		-label "Preferences$elipsis" -command "fonts_and_colors $window"
+		-label "Preferences$elipsis" -command "re {fonts_and_colors $window}"
 
 	$menubar add cascade -menu $menubar.edit -label "Edit"
 }
@@ -93,26 +93,26 @@ proc add_prolog_menu {menubar type window} {
 	if {"$type"=="listener"} then { set TearOff 1 } else { set TearOff 0 }
 	menu $menubar.prolog -tearoff $TearOff -title Prolog
 
-    $menubar.prolog add command -label "Consult" -accelerator "$mod-K" -command "$type.consult $window"
+    $menubar.prolog add command -label "Consult" -accelerator "$mod-K" -command "re {$type.consult $window}"
 	$menubar.prolog add command \
-		-label "Clear Workspace" -command clear_workspace
+		-label "Clear Workspace" -command {re clear_workspace}
 
 	if {"$type"=="listener"} then { 
     	$menubar.prolog add separator
     	$menubar.prolog add command \
-        	-label "Set Directory$elipsis" -command set_directory 
+        	-label "Set Directory$elipsis" -command {re set_directory} 
 
     	$menubar.prolog add separator
 		$menubar.prolog add command \
-			-label "Dynamic Flags" -command show_dynamic_flags
+			-label "Dynamic Flags" -command {re show_dynamic_flags}
 		$menubar.prolog add command \
-			-label "Static Flags" -command show_static_flags
+			-label "Static Flags" -command {re show_static_flags}
 	} elseif {"$type"=="debugwin"} then {
     	$menubar.prolog add separator
     	$menubar.prolog add command -label {Abort} \
-        	-command { set DebugResponse Ba }
+        	-command {re { set DebugResponse Ba }}
     	$menubar.prolog add command -label {Break} \
-			-command { set DebugResponse Bb }
+			-command {re { set DebugResponse Bb }}
 	}
 	$menubar add cascade -label "Prolog" -menu $menubar.prolog
 }
@@ -131,8 +131,8 @@ proc add_tools_menu {menubar type window} {
 	if {"$type"=="listener"} then {
 		$menubar.tools add checkbutton \
 			-label Debugger -command exec_toggle_debugwin -variable proenv(debugwin)
-    	$menubar.tools add command -label "Source Tcl$elipsis" -command source_tcl 
-#    	$menubar.tools add command -label "Tcl Shell" -command tcl_shell 
+    	$menubar.tools add command -label "Source Tcl$elipsis" -command {re source_tcl} 
+#    	$menubar.tools add command -label "Tcl Shell" -command {re tcl_shell} 
 
 		$menubar.tools add separator 
 		## DefStructs:
@@ -140,24 +140,24 @@ proc add_tools_menu {menubar type window} {
 		$menubar.tools add cascade \
 			-label {Structs} -menu $menubar.tools.defstr
 		$menubar.tools.defstr add command \
-			-label "Define New" -command new_defstruct
+			-label "Define New" -command {re new_defstruct}
 #		$menubar.tools.defstr add command \
-#			-label "Edit" -command edit_defstruct 
+#			-label "Edit" -command {re edit_defstruct} 
 	} else {
 
 		# Spy
 		$menubar.tools add command  -label "Spy$elipsis" \
-			-command toggle_spywin 
+			-command {re toggle_spywin} 
 #		$menubar.tools add checkbutton  -label {Spy$elipsis} \
 #			-command exec_toggle_spywin -variable proenv(spywin)
 		$menubar.tools add command  -label {NoSpy all } \
-			-command {prolog call debugger nospy } 
+			-command {re {prolog call debugger nospy }} 
 
 #		$menubar.tools add command  -label {Spy When} -state disabled
 
 		$menubar.tools add separator
 		$menubar.tools add command  -label {Debug Settings } \
-			-command {show_debug_settings}
+			-command {re {show_debug_settings}}
 	}
 	$menubar add cascade -label "Tools" -menu $menubar.tools
 }
