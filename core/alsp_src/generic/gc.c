@@ -740,6 +740,7 @@ mark_top:
 
 	case MTP_UNBOUND:
 
+#ifdef FREEZE
 				/* If the var is a delay var, mark the 
 				   whole delay term containing it:
 				 */
@@ -756,6 +757,7 @@ mark_top:
     		fflush(stdout);
 #endif
 			}
+#endif
 
 	    if (MARKED(ptr))
 			goto mark_backup;
