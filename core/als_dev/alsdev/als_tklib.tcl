@@ -27,27 +27,27 @@ global vTcl
 	set newname [lindex $args 2]
 	set rest [lrange $args 3 end]
     if {$name == "" || $cmd == ""} {return}
-	if {$newname == ""} {
-		set newname $name
-	}
-    set exists [winfo exists $newname]
+    set exists [winfo exists $name]
     switch $cmd {
-        show {
-            if {[info procs vTclWindow(pre)$name] != ""} {
-                eval "vTclWindow(pre)$name $newname $rest"
-            }
-            if {[info procs vTclWindow$name] != ""} {
-                eval "vTclWindow$name $newname $rest"
-            }
-            if {[info procs vTclWindow(post)$name] != ""} {
-                eval "vTclWindow(post)$name $newname $rest"
-            }
-        }
-        hide    { if $exists {wm withdraw $newname; return} }
-        iconify { if $exists {wm iconify $newname; return} }
-        destroy { if $exists {destroy $newname; return} }
+        show { eval "vTclWindow$name $name" }
+        hide    { if $exists {wm withdraw $name; return} }
+        iconify { if $exists {wm iconify $name; return} }
+        destroy { if $exists {destroy $name; return} }
     }
 }
+
+#            if {[info procs vTclWindow(pre)$name] != ""} {
+#                eval "vTclWindow(pre)$name $newname $rest"
+#            }
+#            if {[info procs vTclWindow$name] != ""} {
+#                eval "vTclWindow$name $newname $rest"
+#            }
+#            if {[info procs vTclWindow(post)$name] != ""} {
+#                eval "vTclWindow(post)$name $newname $rest"
+#            }
+
+
+
 
 }
 
@@ -67,6 +67,89 @@ proc vTclWindow. {base} {
     wm title $base "vt.tcl"
 }
 
+}
+
+##################################################################################
+######### POPUP INPUT
+##################################################################################
+
+proc vTclWindow.input_popup {base} {
+	global array proenv
+
+    if {$base == ""} {
+        set base .input_popup
+    }
+    if {[winfo exists $base]} {
+        wm deiconify $base; return
+    }
+    ###################
+    # CREATING WIDGETS
+    ###################
+
+    toplevel $base -class Toplevel 
+    wm focusmodel $base passive
+    wm geometry $base 407x130+50+317
+    wm maxsize $base 1265 994
+    wm minsize $base 1 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 1
+    wm deiconify $base
+    wm title $base "input_popup"
+
+    frame $base.input_p \
+        -borderwidth 1 -relief sunken
+    label $base.input_p.input_popup_head \
+        -borderwidth 2 \
+        -relief groove \
+        -text {Type the name of the configuration:} 
+    entry $base.input_p.input_popup_entry \
+        -foreground #000000000000 
+	bind $base.input_p.input_popup_entry <Return> \
+		[list fin_input_popup ok $base ]
+    frame $base.input_p.btns \
+        -borderwidth 1 -relief flat
+    button $base.input_p.btns.ok \
+        -command "fin_input_popup ok $base" \
+        -padx 11 -pady 4 -text OK 
+    button $base.input_p.btns.cancel \
+        -command "fin_input_popup cancel $base"\
+        -padx 11 -pady 4 -text Cancel 
+    ###################
+    # SETTING GEOMETRY
+    ###################
+
+    pack $base.input_p \
+		-anchor w -expand 1 -fill both  -side top -padx 4 -pady 4
+    pack $base.input_p.input_popup_head \
+        -anchor center -expand 0 -fill none -side top -pady 8 
+    pack $base.input_p.input_popup_entry \
+        -anchor center -expand 0 -fill x -side top -pady 8 -padx 8
+    pack $base.input_p.btns \
+        -anchor w -expand 1 -fill x -side top -padx 25 
+    pack $base.input_p.btns.ok \
+        -anchor center -expand 0 -fill none -padx 4 -side left 
+    pack $base.input_p.btns.cancel \
+        -anchor center -expand 0 -fill none -padx 4 -side right 
+}
+
+proc fin_input_popup {Which base} {
+	global proenv
+	switch $Which {
+	ok { set proenv($base) [$base.input_p.input_popup_entry get] }
+	cancel { set proenv($base) "" }
+	}
+	Window destroy $base
+}
+
+proc do_popup_input {Prompt Title} {
+	global proenv 
+
+	set proenv(.input_popup) ""
+	Window show .input_popup
+	wm title .input_popup $Title
+    .input_popup.input_p.input_popup_head configure -text $Prompt
+	tkwait variable proenv(.input_popup)
+	return $proenv(.input_popup)
 }
 
 ##################################################################################
@@ -169,5 +252,3 @@ proc vTclWindow.popup_select_widget {base} {
         -anchor center -expand 0 -fill none -padx 10 -side right 
 }
 
-Window show .popup_select_widget
-Window hide .popup_select_widget

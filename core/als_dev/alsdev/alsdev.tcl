@@ -20,18 +20,48 @@
 set argc 0
 set argv ""
 
-set CurrentDirectory [pwd]
+global array proenv
+
+#
+#	proenv(...)					Usage
+#	------------			-------------------------
+#	proenv(defstr_ld)		Defstruct loaded/not [true/false]
+#	proenv(cwd)				Current Working Directory
+#	proenv(debugger_ld)		Debugger loaded/not [true/false]
+#	proenv(debugwin)		Debug Win showing/not (1/0) 
+#	proenv(spywin)			Spypoint Win showing/not (1/0) 
+
+
+
+set proenv(cwd) 		[pwd]
+set proenv(debugger_ld)	false
+set	proenv(debugwin)	0
+set	proenv(spywin)		0
+
+set proenv(defstr_ld)	false
+
 
 if {[info exists ALSTCLPATH]==0} then { set ALSTCLPATH . }
-puts "LOADING ALSDEV.TCL: ALSTCLPATH=$ALSTCLPATH"
+#puts "LOADING ALSDEV.TCL: ALSTCLPATH=$ALSTCLPATH"
 
 source [file join $ALSTCLPATH alsdev_main.tcl]
 source [file join $ALSTCLPATH debugwin.tcl]
+source [file join $ALSTCLPATH defstr.tcl]
 
-Window show .debugger_win
-Window hide .debugger_win
-Window show .spy_select
-Window hide .spy_select
+Window show .debugwin
+Window hide .debugwin
+Window show .spywin
+Window hide .spywin
+#Window show .dyn_flags
+#Window hide .dyn_flags
+
+#Window show .
+Window show .topals
+update idletasks
+raise .topals
+
+#wm withdraw .topals 
+#after 500 {wm deiconify .topals}
 
 	## source any other needed files here.....
 
@@ -47,13 +77,11 @@ proc set_top_bindings { WinPath StreamAlias WaitVar DataVar } {
 	bind $WinPath <Control-d> \
 		"ctl-d_action $WinPath $StreamAlias "
 	bind $WinPath <Control-c> \
-		"prolog call builtins forceCtlC"
+		"ctl-c_action_during_read $WinPath $StreamAlias $WaitVar"
 	bind $WinPath <Control-u> \
 		"ctl-u_action $WinPath"
 	bindtags $WinPath "Text $WinPath .topals all"
 }
-#		"xmit_line $WinPath $StreamAlias "
-
 
 	## Variable on which we execute 'tkwait variable ...' when we really
 	## have to wait for input (e.g., getting the user's response during 
@@ -96,9 +124,6 @@ proc xmit_line0 { TxtWin StreamAlias WaitVar DataVar} {
 	global $WaitVar 
 
 	set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -2 chars} ]
-#	set WaitForLine ''
-#	prolog call builtins als_exec -atom $ThisLine\n -atom $StreamAlias -atom tcltk
-
 	prolog call builtins add_to_stream_buffer -atom $StreamAlias -atom $ThisLine\n
 	$TxtWin mark set lastPrompt {insert -1 chars}
 	set WaitVar 1
@@ -107,8 +132,10 @@ proc xmit_line0 { TxtWin StreamAlias WaitVar DataVar} {
 proc wait_for_line0 { } {
 	global WaitForLine
 
-	while { "$WaitForLine"!=1 } { dooneevent wait }
+	while { "$WaitForLine"==0 } { dooneevent wait }
+	set ReturnValue $WaitForLine
 	set WaitForLine 0
+	return $ReturnValue
 }
 
 	# Transmits a 'line' when the user hits <Return> at points
@@ -119,9 +146,42 @@ proc xmit_line_plain { TxtWin StreamAlias } {
 
 	set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -2 chars} ]
 	set WaitForLine 1
-
-#	bind $TxtWin <Return> [list xmit_line $TxtWin $StreamAlias ]
 	prolog call builtins add_to_stream_buffer -atom $StreamAlias -atom $ThisLine\n
+}
+
+proc ctl-c_action_during_read { WinPath StreamAlias WaitVar } {
+	global WaitForLine
+
+	set WaitForLine -1
+}
+
+global WakeUpLookAround; set WakeUpLookAround 0
+
+proc wake_up_look_around { } {
+	global WakeUpLookAround
+
+	set CountDown 100
+	set NEvnt [dooneevent dont_wait]
+	while {$CountDown>0} {
+		if {$WakeUpLookAround!=0} then {
+			set SaveIt $WakeUpLookAround
+			set WakeUpLookAround 0
+			return $SaveIt
+		}
+		if {$NEvnt==0} then {
+			set SaveIt $WakeUpLookAround
+			set WakeUpLookAround 0
+			return $WakeUpLookAround
+		}
+		set NEvnt [dooneevent dont_wait]
+		incr CountDown -1
+	}
+	return $WakeUpLookAround
+}
+
+proc interrupt_action {} {
+	global WakeUpLookAround
+	set WakeUpLookAround -1
 }
 
 proc ctl-d_action { TxtWin StreamAlias } {
@@ -186,6 +246,13 @@ proc source_tcl { } {
 }
 
 proc set_directory { } {
+	set CWD [pwd]
+	set NewDir [tkFDialog]
+	if { "$NewDir" !="" } {
+		cd $NewDir
+		.topals.cpd19.02 delete 0 end
+		.topals.cpd19.02 insert end $NewDir
+	}
 }
 
 proc exit_prolog { } {
@@ -198,10 +265,6 @@ proc exit_prolog { } {
 		prolog call builtins halt
 	}
 }
-
-wm withdraw .topals 
-update idletasks
-after 500 {wm deiconify .topals}
 
 proc input_item { } {
 	global  input_popup_wait
@@ -222,6 +285,84 @@ proc mk_labeled_option_button { Label ParentWin Vals TopVal GlblVar } {
 	pack $Frame -anchor center -expand 0 -fill x -side top
 	pack $Frame.label  -anchor center -expand 0 -fill none -side left
 	pack $Frame.btn -anchor center -expand 0 -fill none -padx 7 -side right
+}
+
+#################################################
+#####			Utilities				       ##
+#################################################
+
+proc iconify_me {Win} {
+	wm iconify $Win
+}
+	 
+proc hide_me {Win} {
+	 Window hide $Win
+}
+
+#################################################
+#####			Prolog Flags				   ##
+##                                             ##
+##			Dynamic Prolog Flags			   ##
+#################################################
+
+proc show_dynamic_flags {} {
+	global array proenv
+
+	if {[winfo exists .dyn_flags]} then {
+		Window show .dyn_flags
+	} else {
+		Window show .dyn_flags
+		prolog call builtins changable_flags_info -var InfoList
+		foreach info $InfoList {
+			create_dyn_flag_entry $info
+		}
+	}
+}
+
+proc create_dyn_flag_entry { info } {
+	global array proenv
+
+	set FlagName [lindex $info 0]
+	set PosVals [lindex $info 1]
+	set CurVal [lindex $info 2]
+
+	set ff [frame .dyn_flags.$FlagName -borderwidth 1 -relief sunken]
+	label $ff.label \
+        -borderwidth 0 -font {lucida 10 bold} \
+        -relief flat -width 18 -justify right \
+        -text $FlagName
+
+	set Cmd [concat tk_optionMenu "$ff.opts_menu" proenv($FlagName) $PosVals]
+	set proenv($FlagName) $CurVal  
+	set MM [eval $Cmd]
+
+	pack $ff  \
+        -anchor center -expand 0 -fill x -side top 
+	pack $ff.label  \
+        -anchor center -expand 0 -fill none -side left 
+	pack $ff.opts_menu  \
+        -anchor center -expand 0 -fill x -side left 
+
+	set Last [$MM index end]
+	for {set ii 0} {$ii <= $Last} {incr ii} {
+		set Cmd [list prolog call builtins \
+			set_prolog_flag -atom $FlagName -atom [lindex $PosVals $ii] ]
+		$MM entryconfigure $ii -command $Cmd
+	}
+
+}
+
+proc change_prolog_flags {} {
+	global array proenv
+
+	prolog call builtins changable_flags_info -var InfoList
+	foreach info $InfoList {
+		set FlagName [lindex $info 0]
+		if {[lindex $info 2]!=$proenv($FlagName)} then {
+			prolog call builtins set_prolog_flag \
+				-atom $FlagName -atom $proenv($FlagName)
+		}
+	}
 }
 
 #################################################
@@ -279,61 +420,112 @@ proc delete_file_from_project { } {
 #################################################
 
 proc toggle_debugwin {} {
-	global debugwin_showing
+	global array proenv
 
-	if {"$debugwin_showing"==0} then {
-		Window hide .debugger_win
-		prolog call builtins change_debug_io -atom console
+	set proenv(debugwin) [expr 1 - $proenv(debugwin)]
+	exec_toggle_debugwin
+}
+
+proc exec_toggle_debugwin {} {
+	global array proenv
+
+	if {"$proenv(debugwin)"==0} then {
+		hide_debugwin
 	} else {
-		Window show .debugger_win
-		raise .debugger_win
-		prolog call builtins change_debug_io -atom debugwin
+		show_debugwin
 	}
 }
 
-proc exit_debugger {} {
-	global debugwin_showing
-
-	prolog call debugger exit_debugger
-	set debugwin_showing 0
-	toggle_debugwin
+proc ensure_db_showing {} {
+	global array proenv
+		
+	.debugwin.textwin.text delete 1.0 end
+	show_debugwin
 }
 
+proc show_debugwin {} {
+	global array proenv
+		
+	Window show .debugwin
+	raise .debugwin
+	prolog call builtins change_debug_io -atom debugwin
+	check_leashing
+	set proenv(debugwin) 1
+
+#	prolog call xconsult change_source_level_debugging -atom on
+
+}
+
+proc hide_debugwin {} {
+	global array proenv
+
+	hide_spywin
+	Window hide .debugwin
+	set proenv(debugwin) 0
+
+#	prolog call xconsult change_source_level_debugging -atom off
+}
+
+proc exit_debugger {} {
+	global array proenv
+
+	prolog call debugger exit_debugger
+	hide_spywin
+	hide_debugwin
+}
+
+		###############################
+		######### SPYPOINTS
+		###############################
 global SpyModule SpyModuleMenu 
 global SpyPred SpyPredMenu
 
-proc toggle_spy_win {} {
-	global spywin_showing
+proc toggle_spywin {} {
+	global array proenv
+
+	set proenv(spywin) [expr 1 - $proenv(spywin)]
+	exec_toggle_spywin
+}
+
+proc hide_spywin {} {
+	global array proenv
+
+	set proenv(spywin) 0
+	Window hide .spywin
+}
+
+proc exec_toggle_spywin {} {
+	global array proenv
 	global SpyModule SpyModuleMenu SpyPred SpyPredMenu
 	
-	if {"$spywin_showing"==0} then {
-		Window hide .spy_select
+	if {"$proenv(spywin)"==0} then {
+		Window hide .spywin
 	} else {
 		prolog call builtins non_sys_modules -var NonSysMods
-		destroy .spy_select.modules.mods
+		destroy .spywin.modules.mods
 		destroy $SpyModuleMenu 
-		set SpyModuleMenu [eval "tk_optionMenu .spy_select.modules.mods SpyModule" $NonSysMods]
+		set SpyModuleMenu [eval "tk_optionMenu .spywin.modules.mods SpyModule" $NonSysMods]
 		set LL [llength $NonSysMods]
 		for {set LI 0} {$LI < $LL} {incr LI} {
 			$SpyModuleMenu entryconfigure $LI \
 				-command "chng_spy_preds_menu [lindex $NonSysMods $LI]"
 		}
-		pack .spy_select.modules.mods \
-			-after .spy_select.modules.module_label \
+		pack .spywin.modules.mods \
+			-after .spywin.modules.module_label \
 			-anchor center -expand 1 -fill x -padx 12 -side left
 		set SpyModule user
 
 		prolog call builtins module_preds -atom $SpyModule -var PredsList
-		destroy .spy_select.predicates.preds
+		destroy .spywin.predicates.preds
 		destroy $SpyPredMenu
 		set SpyPred [lindex $PredsList 0]
-		set SpyPredMenu [eval "tk_optionMenu .spy_select.predicates.preds SpyPred" $PredsList]
-		pack .spy_select.predicates.preds \
-		-after .spy_select.predicates.pred_label \
+		set SpyPredMenu [eval "tk_optionMenu .spywin.predicates.preds SpyPred" $PredsList]
+		pack .spywin.predicates.preds \
+		-after .spywin.predicates.pred_label \
 		-anchor center -expand 1 -fill x -padx 12 -side left
 
-		Window show .spy_select
-		raise .spy_select
+		Window show .spywin
+		raise .spywin
 	}
 }
 
@@ -342,18 +534,56 @@ proc chng_spy_preds_menu {Mod} {
 
 	prolog call builtins module_preds -atom $SpyModule -var PredsList
 	set SpyPred [lindex $PredsList 0]
-	destroy .spy_select.predicates.preds
+	destroy .spywin.predicates.preds
 	destroy $SpyPredMenu
-	set SpyPredMenu [eval "tk_optionMenu .spy_select.predicates.preds SpyPred" $PredsList]
-	pack .spy_select.predicates.preds \
-		-after .spy_select.predicates.pred_label \
+	set SpyPredMenu [eval "tk_optionMenu .spywin.predicates.preds SpyPred" $PredsList]
+	pack .spywin.predicates.preds \
+		-after .spywin.predicates.pred_label \
 		-anchor center -expand 1 -fill x -padx 12 -side left
 }
 
+proc spy_point {Action} {
+	global SpyModule SpyPred 
+
+	switch $Action {
+	cancel { toggle_spywin }
+	ok {
+		prolog call debugger gui_spy -atom $SpyModule -atom $SpyPred
+		toggle_spywin
+	}
+	}
+}
+
+proc check_leashing {} {
+	global array proenv
+
+	prolog call debugger check_leashing -var Call -var Exit -var Redo -var Fail
+	set proenv(leash,call) $Call
+	set proenv(leash,exit) $Exit
+	set proenv(leash,redo) $Redo
+	set proenv(leash,fail) $Fail
+
+}
+
+#proc show_ll {} {
+#	global array proenv
+#
+#puts "call=$proenv(leash,call) exit=$proenv(leash,exit) redo=$proenv(leash,redo) fail=$proenv(leash,fail)"
+#}
+
+proc exec_toggle_leash {Which} {
+	global array proenv
+
+	prolog call debugger exec_toggle_leash -atom $Which
+}
+		###############################
+		######### TRACING,ETC.
+		###############################
+
 proc set_status_debugwin {Port Box Depth} {
-    .debugger_win.debug_status.port configure -text $Port
-    .debugger_win.debug_status.call_num configure -text $Box
-    .debugger_win.debug_status.depth configure -text $Depth
+    .debugwin.debug_status.port configure -text $Port
+    .debugwin.debug_status.call_num configure -text $Box
+    .debugwin.debug_status.depth configure -text $Depth
 }
 
 proc wait_for_debug_response {} {
@@ -361,4 +591,63 @@ proc wait_for_debug_response {} {
 
 	tkwait variable DebugResponse
 	return $DebugResponse
+}
+
+		###############################
+		######### SOURCE TRACE
+		###############################
+
+proc win_exists {WinName} {
+	if {[winfo exists $WinName]==1} then {
+		return true
+	} else {
+		return false
+	}
+}
+proc reset_st_win {WinName} {
+	clear_tag head_tag $WinName.textwin.text
+	$WinName.textwin.text tag delete head_tag
+	clear_tag call_tag $WinName.textwin.text
+	$WinName.textwin.text tag delete call_tag
+	wm deiconify $WinName
+	raise $WinName
+}
+
+proc load_file_to_win {FileName TextWinName} {
+	set SI [open $FileName r]
+	set NumRows [load_stream_to_win $SI $TextWinName]
+	close $SI
+	return $NumRows
+
+}
+
+proc load_stream_to_win {Stream TextWinName} {
+	set LineCount 1
+	set LineCsList ""
+	while {  [eof $Stream]==0 } {
+		set NumCs [gets $Stream Line]
+		if { $NumCs >= 0 } then {
+			$TextWinName insert end $Line
+			$TextWinName insert end "\n"
+			lappend LineCsList $NumCs
+			incr LineCount
+		}
+	}
+	return [list [expr $LineCount - 1] $LineCsList]
+}
+
+proc assign_tag {TextWinName TagName StartLine StartChar EndLine EndChar} {
+
+	$TextWinName tag add $TagName $StartLine.$StartChar $EndLine.$EndChar
+#puts "TCL: $TextWinName tag add $TagName StartLine.StartChar EndLine.EndChar"
+}
+
+proc clear_tag { TagName TextWinName } {
+	$TextWinName tag configure $TagName -background [$TextWinName cget -background]
+}
+
+
+proc testitall {} {
+	prolog call builtins non_sys_modules -var Mods
+	puts "got $Mods"
 }

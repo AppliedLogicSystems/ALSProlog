@@ -17,8 +17,10 @@ global widget;
 #
 
 global DebugResponse
-proc vTclWindow.debugger_win {} {
-    set base .debugger_win
+proc vTclWindow.debugwin {base} {
+	global array proenv
+
+    set base .debugwin
     if {[winfo exists $base]} {
         wm deiconify $base; return
     }
@@ -37,6 +39,7 @@ proc vTclWindow.debugger_win {} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "ALS Prolog Debugger"
+	wm protocol $base WM_DELETE_WINDOW hide_debugwin
 
     frame $base.cpd17 \
         -borderwidth 1 -relief sunken 
@@ -49,8 +52,9 @@ proc vTclWindow.debugger_win {} {
 	menu $base.menubar.spy -relief raised
 	$base.menubar add cascade -label Spy -menu $base.menubar.spy
     $base.menubar.spy add checkbutton \
-        -label {Spy [on predicate]} -command toggle_spy_win \
-		-variable spywin_showing
+        -label {Spy [on predicate]} \
+		-command exec_toggle_spywin \
+		-variable proenv(spywin)
     $base.menubar.spy add command \
         -label {Nospy [on predicate]} -state disabled
     $base.menubar.spy add command \
@@ -66,6 +70,26 @@ proc vTclWindow.debugger_win {} {
 	$base.menubar add cascade -label Settings -menu $base.menubar.settings
     $base.menubar.settings add command \
         -label {Set Print Depth} 
+    $base.menubar.settings add cascade \
+        -label {Leashing}  \
+		-menu $base.menubar.settings.leashing
+	menu $base.menubar.settings.leashing -relief raised
+	$base.menubar.settings.leashing add checkbutton \
+        -label {call} \
+		-command {exec_toggle_leash call} \
+		-variable proenv(leash,call)
+	$base.menubar.settings.leashing add checkbutton \
+        -label {exit} \
+		-command {exec_toggle_leash exit} \
+		-variable proenv(leash,exit)
+	$base.menubar.settings.leashing add checkbutton \
+        -label {redo} \
+		-command {exec_toggle_leash redo} \
+		-variable proenv(leash,redo)
+	$base.menubar.settings.leashing add checkbutton \
+        -label {fail} \
+		-command {exec_toggle_leash fail} \
+		-variable proenv(leash,fail)
 
 	###########
 	# Help
@@ -138,10 +162,10 @@ set DBBpady 2
     frame $base.textwin \
         -borderwidth 1 -relief raised 
     scrollbar $base.textwin.02 \
-        -borderwidth 1 -command {.debugger_win.textwin.text yview} -orient vert 
+        -borderwidth 1 -command {.debugwin.textwin.text yview} -orient vert 
     text $base.textwin.text \
         -font alsstyl(text-font) \
-        -width 8 -yscrollcommand {.debugger_win.textwin.02 set} 
+        -width 8 -yscrollcommand {.debugwin.textwin.02 set} 
     ###################
     # SETTING GEOMETRY
     ###################
@@ -166,11 +190,11 @@ set DBBpady 2
         -anchor center -expand 0 -fill none -side left 
     pack $base.buttons.stack_trace \
         -anchor center -expand 0 -fill none -side left 
-    pack $base.buttons.abort \
+    pack $base.buttons.exit \
         -anchor center -expand 0 -fill none -side right 
     pack $base.buttons.break \
         -anchor center -expand 0 -fill none -side right 
-    pack $base.buttons.exit \
+    pack $base.buttons.abort \
         -anchor center -expand 0 -fill none -side right 
     pack $base.debug_status \
         -anchor center -expand 0 -fill x -side top 
@@ -197,8 +221,8 @@ set DBBpady 2
         -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
 }
 
-proc vTclWindow.spy_select {} {
-    set base .spy_select
+proc vTclWindow.spywin {base} {
+    set base .spywin
     if {[winfo exists $base]} {
         wm deiconify $base; return
     }
@@ -217,6 +241,8 @@ proc vTclWindow.spy_select {} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Spy Point Selection"
+	wm protocol $base WM_DELETE_WINDOW hide_spywin
+
     label $base.typein_label \
         -text {Type in predicate info:} 
     entry $base.pred_entry
@@ -270,4 +296,47 @@ proc vTclWindow.spy_select {} {
         -anchor center -expand 0 -fill none -side right 
 }
 
+proc vTclWindow.debug_source_trace {base Title} {
+    if {$base == ""} {
+        set base .debug_source_trace
+    }
+    if {$Title == ""} {
+        set Title "Source Trace: Unknown File"
+    }
+    if {[winfo exists $base]} {
+        wm deiconify $base; return
+    }
+
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel
+    wm focusmodel $base passive
+    wm geometry $base 467x542+504+47
+    wm maxsize $base 1137 870
+    wm minsize $base 1 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 1
+    wm deiconify $base
+    wm title $base $Title
+    frame $base.textwin \
+        -borderwidth 1 -relief raised
+    scrollbar $base.textwin.vsb \
+        -borderwidth 1 -command [list $base.textwin.text yview] \
+        -orient vert 
+    text $base.textwin.text \
+        -font {system 10 normal} \
+        -width 8 -yscrollcommand [list $base.textwin.vsb set] 
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.textwin \
+        -anchor center -expand 1 -fill both -side top 
+    grid columnconf $base.textwin 0 -weight 1
+    grid rowconf $base.textwin 0 -weight 1
+    grid $base.textwin.vsb \
+        -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns 
+    grid $base.textwin.text \
+        -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw 
+}
 
