@@ -75,9 +75,9 @@ $(IMAGE)0: pimain.o pi_init.o $(PROLIB) $(WINTLIB)
 		$(LIBS)	\
 		$(X_EXTRA_LIBS)
 
-$(IMAGE): $(IMAGE)0 $($(WIN)PROFILES)
+$(IMAGE): $(IMAGE)0 
 	ALSPATH=$(WLD); export ALSPATH; \
-	$(IMAGE)0 $($(WIN)PROFILES) \
+	$(IMAGE)0 *.pro \
 		-g 'save_image($(IMAGE),[libload(true)])'
 
 all: library image
