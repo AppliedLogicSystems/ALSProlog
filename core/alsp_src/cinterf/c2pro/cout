@@ -227,12 +227,46 @@ output_func_gvar([func|PRetType],Name,DSpec,Declt,
 output_func_gvar(PRetType,Name,DSpec,Declt, RSpec,RDeclt,ADeclt,State)
 	:-
 	output_gvar(Name,DSpec,Declt,ADeclt,PRetType,State).
-	
+
+/* output_func has as evil hack attached to it to handle MSWin32
+   headers.  This hack is controlled by the -mswin32funcmacros
+   option.
+   
+   Most functions that handle text in MSWin32 have ANSI and Wide (Unicode)
+   versions.  Output_func skips the Wide versions and strips the A from
+   ANSI versions. */
+
 output_func(Name,_,_,_,_,State)
 	:-
 	(silent; skip_item(_,all); skip_item(_,func)), !.
-
+output_func(Name,_,_,_,_,State)
+	:-
+	output:win32funcmacros,
+	%%accessC2P(tgt_os, State, OS),
+	%%OS = mswin32,	
+	atom_length(Name, Length),
+	sub_atom(Name, Length, 1, LastChar),
+	LastChar = 'W', !.
 output_func(Name,DSpec,ADeclt,Params,PRetType,State)
+	:-
+	output:win32funcmacros,
+	%%accessC2P(tgt_os, State, OS),
+	%%OS = mswin32,	
+	atom_length(Name, Length),
+	sub_atom(Name, Length, 1, LastChar),
+	LastChar = 'A',
+	Name \== 'CharPrevExA',
+	Name \== 'CharNextExA',
+	Name \== 'GetStringTypeA',
+	Name \== 'LineDDA',
+	ShortLen is Length - 1,
+	sub_atom(Name, 1, ShortLen, NewName),
+	output_func0(NewName,DSpec,ADeclt,Params,PRetType,State).
+output_func(Name,DSpec,ADeclt,Params,PRetType,State)
+	:-
+	output_func0(Name,DSpec,ADeclt,Params,PRetType,State).
+	
+output_func0(Name,DSpec,ADeclt,Params,PRetType,State)
 	:- 
 	dspec_to_str(DSpec,DSpecStr),
 	adeclt_to_str(ADeclt,ADecltStr),
@@ -243,7 +277,7 @@ output_func(Name,DSpec,ADeclt,Params,PRetType,State)
 	pathPlusFile(_,File,FName),
 	!,
 	printf(OutStream,')/\'%t\'.\n',[File]).
-output_func(Name,_,_,_,_,State)
+output_func0(Name,_,_,_,_,State)
 	:-
 	error('output_func for %t failed\n',[Name],State).
 
@@ -295,6 +329,7 @@ output_gvar(Name,DSpec,Declt,ADeclt,PType,State)
 output_type(Name,DSpec,Declt,State)
 	:-
 	(silent; skip_item(_,all); skip_item(_,ctype)), !.
+
 output_type(Name,DSpec,Declt,State)
 	:-
 %	accessC2P(info_table,State,Tab),
