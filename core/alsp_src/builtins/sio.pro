@@ -2633,28 +2633,28 @@ put_code(Stream_or_alias,Code)
 
 
 /*
- *	putString/[1,2]
+ *	put_string/[1,2]
  *
  *  Recursively calls put_code on its string argument.
  */
 
-export putString/1.
+export put_string/1.
 
-putString(String) :-
+put_string(String) :-
 	get_current_output_stream(Stream),
-	putString(Stream, String).
+	put_string(Stream, String).
 
-export putString/2.
+export put_string/2.
 
-putString(Stream_or_alias, String) :-
+put_string(Stream_or_alias, String) :-
 	is_stream(Stream_or_alias,Stream),
 	is_output_stream(Stream),
-	putString0(String, Stream).
+	put_string0(String, Stream).
 
-putString0([], _).
-putString0([C | String], Stream) :-
+put_string0([], _).
+put_string0([C | String], Stream) :-
 	put_code(Stream,C),
-	putString0(String, Stream).
+	put_string0(String, Stream).
 	
 
 /*
