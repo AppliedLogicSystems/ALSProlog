@@ -129,30 +129,22 @@ static	void	release_bottom_stack_page	PARAMS(( void ));
  * caught.
  *-------------------------------------------------------------------*/
 
-
 #if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
 void	stack_overflow	PARAMS(( int, struct siginfo *, struct ucontext * ));
 void
-stack_overflow(signum, siginf, sigcon)
-    int   signum;
-    struct siginfo *siginf;
-    struct ucontext *sigcon;
+stack_overflow(int signum, struct siginfo *siginf, struct ucontext *sigcon)
 
 #elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
 void	stack_overflow	PARAMS(( int, int, struct sigcontext *, caddr_t ));
 void
-stack_overflow(signum, code, scp, addr)
-    int   signum, code;
-    struct sigcontext *scp;
-    caddr_t addr;
+stack_overflow(int signum, int code, struct sigcontext *scp, caddr_t addr)
 #elif defined(Portable)
 void   stack_overflow  PARAMS(( int ));
 void
-stack_overflow(signum)
-    int   signum;
+stack_overflow(int signum)
 
 #else
-    die
+#error
 #endif
 
 {
@@ -182,7 +174,7 @@ stack_overflow(signum)
 #elif defined(Portable)
    signal_handler(ALSSIG_STACK_OVERFLOW);
 #else
-	die
+#error
 #endif
 
     }
@@ -215,9 +207,9 @@ stack_overflow(signum)
 #endif
 
 #elif defined(Portable)
-   signal(signum, SIG_DFL);
+	signal(signum, SIG_DFL);
 #else
-	die
+#error
 #endif
 
 	coredump_cleanup(-1);
@@ -230,7 +222,9 @@ PWord *
 allocate_prolog_heap_and_stack(size)
     size_t size;		/* number of PWords to allocate */
 {
+#ifndef HAVE_MMAP_ZERO
     int   fd;
+#endif
     PWord *retval;
 
 #if defined(HAVE_SIGACTION)
@@ -353,7 +347,7 @@ void
 protect_bottom_stack_page()
 {
     int result;
-    mprotect((caddr_t) STACKSTART, (size_t)(NPROTECTED * pgsize), PROT_NONE);
+    result = mprotect((caddr_t) STACKSTART, (size_t)(NPROTECTED * pgsize), PROT_NONE);
     if (result == -1)
         fatal_error(FE_BIGSTACK, 0);
     bottom_stack_page_is_protected = 1;
@@ -737,13 +731,16 @@ static	void	ss_restore_state	PARAMS(( char *, long ));
 #endif /* PURE_ANSI */
 static	int	ss_saved_state_present	PARAMS(( void ));
 
-#define header (* (struct am_header *) als_mem)
+#define amheader (* (struct am_header *) als_mem)
 
 #define FB_SIZE(p)  (* (long *) p)
 #define FB_NEXT(p)  (* ((long **) p + 1))
 
 #undef round
 #define round(x,s) ((((long) (x) - 1) & ~(long)((s)-1)) + (s))
+
+#define round_up(x, s)		((((size_t)(x)) / ((size_t)(s)) + 1) * ((size_t)(s)))
+#define round_down(x, s)	((((size_t)(x)) / ((size_t)(s))) * ((size_t)(s)))
 
 /* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
 #if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) \
@@ -902,25 +899,25 @@ als_mem_init(file,offset)
 
 	als_mem = alloc_big_block(AM_BLOCKSIZE, FE_ALS_MEM_INIT);
 
-	header.nblocks = 1;
-	header.totsize = AM_BLOCKSIZE;
-	header.nglobals = 0;
-	header.blocks[0].start = als_mem;
-	header.blocks[0].asize = AM_BLOCKSIZE;
+	amheader.nblocks = 1;
+	amheader.totsize = AM_BLOCKSIZE;
+	amheader.nglobals = 0;
+	amheader.blocks[0].start = als_mem;
+	amheader.blocks[0].asize = AM_BLOCKSIZE;
 
-	header.freelist = (long *) 
+	amheader.freelist = (long *) 
 		((char *) als_mem + sizeof (struct am_header));
-	FB_SIZE(header.freelist) = 
-		header.blocks[0].asize - sizeof (struct am_header);
-	FB_NEXT(header.freelist) = (long *) 0;
+	FB_SIZE(amheader.freelist) = 
+		amheader.blocks[0].asize - sizeof (struct am_header);
+	FB_NEXT(amheader.freelist) = (long *) 0;
 
 	/* Set integrity information in case saved state is created */
-	header.integ_als_mem = &als_mem;
-	header.integ_als_mem_init = als_mem_init;
-	header.integ_w_unify = w_unify;
-	strcpy(header.integ_version_num, SysVersionNum);
-	strcpy(header.integ_processor, ProcStr);
-	strcpy(header.integ_minor_os, MinorOSStr);
+	amheader.integ_als_mem = &als_mem;
+	amheader.integ_als_mem_init = als_mem_init;
+	amheader.integ_w_unify = w_unify;
+	strcpy(amheader.integ_version_num, SysVersionNum);
+	strcpy(amheader.integ_processor, ProcStr);
+	strcpy(amheader.integ_minor_os, MinorOSStr);
 
 /* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
 #if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || \
@@ -961,7 +958,7 @@ ss_malloc0(size, align, fe_num, actual_sizep)
 	size = round(size,8);
     
     p_diff = 0;
-    for (pp = &header.freelist; *pp; pp = &FB_NEXT(*pp)) {
+    for (pp = &amheader.freelist; *pp; pp = &FB_NEXT(*pp)) {
 	if (align)
 	    p_diff = (char *) round(*pp, pgsize) - (char *) *pp;
 	p_size = FB_SIZE(*pp) - p_diff;
@@ -981,18 +978,18 @@ ss_malloc0(size, align, fe_num, actual_sizep)
 	if (size > newsize)
 	    newsize = round(size, pgsize);
 
-	if (header.nblocks >= AM_MAXBLOCKS)
+	if (amheader.nblocks >= AM_MAXBLOCKS)
 	    fatal_error(fe_num, 0);
 
 	newblock = alloc_big_block((size_t)newsize, fe_num);
 
-	FB_NEXT(newblock) = header.freelist;
+	FB_NEXT(newblock) = amheader.freelist;
 	FB_SIZE(newblock) = newsize;
-	header.freelist = newblock;
-	bestp = &header.freelist;
-	header.blocks[header.nblocks].start = newblock;
-	header.blocks[header.nblocks].asize = newsize;
-	header.nblocks++;
+	amheader.freelist = newblock;
+	bestp = &amheader.freelist;
+	amheader.blocks[amheader.nblocks].start = newblock;
+	amheader.blocks[amheader.nblocks].asize = newsize;
+	amheader.nblocks++;
 	best_size = newsize;
 	best_diff = 0;		/* newblock is aligned properly */
     }
@@ -1008,8 +1005,8 @@ ss_malloc0(size, align, fe_num, actual_sizep)
     if (best_size - size >= SMALLEST_BLOCK_SIZE) {
 	long *fb = (long *) ((char *) retblock + size);
 	FB_SIZE(fb) = best_size - size;
-	FB_NEXT(fb) = header.freelist;
-	header.freelist = fb;
+	FB_NEXT(fb) = amheader.freelist;
+	amheader.freelist = fb;
     }
 
     if (actual_sizep)
@@ -1074,9 +1071,9 @@ ss_fmalloc(size)
     size = round(size,pgsize);
     newblock = alloc_big_block(size,FE_SS_FMALLOC);
 
-    header.blocks[header.nblocks].start = newblock;
-    header.blocks[header.nblocks].asize = size;
-    header.nblocks++;
+    amheader.blocks[amheader.nblocks].start = newblock;
+    amheader.blocks[amheader.nblocks].asize = size;
+    amheader.nblocks++;
     return newblock;
 }
 
@@ -1084,10 +1081,10 @@ void
 ss_register_global(addr)
     long *addr;
 {
-    if (header.nglobals > AM_MAXGLOBALS)
+    if (amheader.nglobals > AM_MAXGLOBALS)
 	fatal_error(FE_SS_MAXGLOBALS,0);
-    header.globals[header.nglobals].addr = addr;
-    header.nglobals++;
+    amheader.globals[amheader.nglobals].addr = addr;
+    amheader.nglobals++;
 }
 
 #ifdef SIMPLE_MICS
@@ -1197,65 +1194,13 @@ int ss_save_image_with_state(const char * new_image_name)
 
 #ifdef UNIX
 #if defined(HP_AOUT_800)
-struct sys_clock {
-    unsigned int secs;
-    unsigned int nanosec;
-};
 
-struct foobar {
-        short int system_id;                 /* magic number - system        */
-        short int a_magic;                   /* magic number - file type     */
-        unsigned int version_id;             /* version id; format= YYMMDDHH */
-        struct sys_clock file_time;          /* system clock- zero if unused */
-        unsigned int entry_space;            /* index of space containing
-                                                entry point                  */
-        unsigned int entry_subspace;         /* index of subspace for
-                                                entry point                  */
-        unsigned int entry_offset;           /* offset of entry point        */
-        unsigned int aux_header_location;    /* auxiliary header location    */
-        unsigned int aux_header_size;        /* auxiliary header size        */
-        unsigned int som_length;             /* length in bytes of entire som*/
-        unsigned int presumed_dp;            /* DP value assumed during
-                                                compilation                  */
-        unsigned int space_location;         /* location in file of space
-                                                dictionary                   */
-        unsigned int space_total;            /* number of space entries      */
-        unsigned int subspace_location;      /* location of subspace entries */
-        unsigned int subspace_total;         /* number of subspace entries   */
-        unsigned int loader_fixup_location;  /* space reference array        */
-        unsigned int loader_fixup_total;     /* total number of space
-                                                reference records            */
-        unsigned int space_strings_location; /* file location of string area
-                                                for space and subspace names */
-        unsigned int space_strings_size;     /* size of string area for space
-                                                 and subspace names          */
-        unsigned int init_array_location;    /* location in file of
-                                                initialization pointers      */
-        unsigned int init_array_total;       /* number of init. pointers     */
-        unsigned int compiler_location;      /* location in file of module
-                                                dictionary                   */
-        unsigned int compiler_total;         /* number of modules            */
-        unsigned int symbol_location;        /* location in file of symbol
-                                                dictionary                   */
-        unsigned int symbol_total;           /* number of symbol records     */
-        unsigned int fixup_request_location; /* location in file of fix_up
-                                                requests                     */
-        unsigned int fixup_request_total;    /* number of fixup requests     */
-        unsigned int symbol_strings_location;/* file location of string area
-                                                for module and symbol names  */
-        unsigned int symbol_strings_size;    /* size of string area for
-                                                module and symbol names      */
-        unsigned int unloadable_sp_location; /* byte offset of first byte of
-                                                data for unloadable spaces   */
-        unsigned int unloadable_sp_size;     /* byte length of data for
-                                                unloadable spaces            */
-        unsigned int checksum;
-};
+#include <filehdr.h>
 
 static unsigned long image_end(int image_file)
 {
     size_t r;
-    struct foobar head;
+    struct header head;
     
     r = read(image_file, &head, sizeof(head));
     if (r != sizeof(head)) return 0;
@@ -1330,7 +1275,7 @@ long ss_image_offset(void)
 
     elf_size = image_end(image_file);
     fstat_result = fstat(image_file, &image_status);
-    
+        
     close(image_file);
 
     if (fstat_result != 0)
@@ -1339,16 +1284,9 @@ long ss_image_offset(void)
     free(imagepath);
 
     image_size = image_status.st_size;
-#ifdef _SC_PAGESIZE
-    pgsize = sysconf(_SC_PAGESIZE);
-#elif defined(_SC_PAGE_SIZE)
-    pgsize = sysconf(_SC_PAGE_SIZE);
-#elif defined(HAVE_GETPAGESIZE)
-    pgsize = getpagesize();
-#endif  /* _SC_PAGESIZE */
  
     if (image_size > elf_size)
-      return round(elf_size, pgsize);
+	return elf_size;
     else return 0;
 }
 
@@ -1406,7 +1344,7 @@ int ss_save_image_with_state(const char * new_image_name)
 {
     char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
     int new_image_file;
-    unsigned long state_offset;
+    long state_offset;
     
     if (imagepath == NULL)
 	return 0;
@@ -1428,7 +1366,7 @@ int ss_save_image_with_state(const char * new_image_name)
     	return 0;
     }
    
-    state_offset = round(image_end(new_image_file), pgsize);
+    state_offset = image_end(new_image_file);
 
     close(new_image_file);
 
@@ -1449,7 +1387,7 @@ int
 ss_save_state(const char *filename, long offset)
 {
     int   ssfd;
-    int   bnum, gnum;
+    int   bnum = 0, gnum;
 
     /*
      * Open the saved state file.
@@ -1470,17 +1408,24 @@ ss_save_state(const char *filename, long offset)
 printf("Save_state:opened %s %d\n",filename, ssfd);
     if (ssfd < 0)
 	return 0;
+
+#if defined(SIMPLE_MICS)    
+    if (lseek(ssfd, offset, 0) != offset) goto ss_err;
     
+    offset = round_up(offset+sizeof(offset), pgsize);
+    if (write(ssfd, &offset, sizeof(offset)) < 0) goto ss_err;
+#endif
+
     if (lseek(ssfd, offset, 0) != offset) goto ss_err;
     
     /*
-     * Get the global values and save in header
+     * Get the global values and save in amheader
      */
 
-    for (gnum=0; gnum < header.nglobals; gnum++)
-	header.globals[gnum].value = *header.globals[gnum].addr;
+    for (gnum=0; gnum < amheader.nglobals; gnum++)
+	amheader.globals[gnum].value = *amheader.globals[gnum].addr;
 
-printf("Finished globals: nglobals=%ld nblocks=%ld\n",header.nglobals,header.nblocks);
+printf("Finished globals: nglobals=%ld nblocks=%ld\n",amheader.nglobals,amheader.nblocks);
     
     /*
      * Compute the fsize values for each block.  The fsize value is the
@@ -1494,19 +1439,19 @@ printf("Finished globals: nglobals=%ld nblocks=%ld\n",header.nglobals,header.nbl
      * we will need to round this size up as well. 
      */
 
-    for (bnum=0; bnum < header.nblocks; bnum++) {
-	char *fb = (char *) header.freelist;
-	char *blockstart = (char *) header.blocks[bnum].start;
-	char *blockend = blockstart + header.blocks[bnum].asize;
+    for (bnum=0; bnum < amheader.nblocks; bnum++) {
+	char *fb = (char *) amheader.freelist;
+	char *blockstart = (char *) amheader.blocks[bnum].start;
+	char *blockend = blockstart + amheader.blocks[bnum].asize;
 
 	while (fb && (fb + FB_SIZE(fb) != blockend))
 	    fb = (char *) FB_NEXT(fb);
 	
-	header.blocks[bnum].fsize = (fb) ? fb - blockstart +  2*sizeof(long)
-					: header.blocks[bnum].asize;
+	amheader.blocks[bnum].fsize = (fb) ? fb - blockstart +  2*sizeof(long)
+					: amheader.blocks[bnum].asize;
 /* #ifdef HAVE_MMAP */
 #if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
-	header.blocks[bnum].fsize = round(header.blocks[bnum].fsize, pgsize);
+	amheader.blocks[bnum].fsize = round(amheader.blocks[bnum].fsize, pgsize);
 #endif /* HAVE_MMAP */
 
     }
@@ -1517,10 +1462,10 @@ printf("Finished computing blocks\n");
      * Save the blocks to the save file.
      */
     
-    for (bnum=0; bnum < header.nblocks; bnum++)
+    for (bnum=0; bnum < amheader.nblocks; bnum++)
 	if (write(ssfd,
-		  (char *)header.blocks[bnum].start,
-		  (size_t)header.blocks[bnum].fsize) < 0)
+		  (char *)amheader.blocks[bnum].start,
+		  (size_t)amheader.blocks[bnum].fsize) < 0)
 	    goto ss_err;
     
 printf("Wrote blocks to file\n");
@@ -1570,7 +1515,14 @@ ss_restore_state(filename,offset)
 	}
 #endif
 
-    /* Seek to header, get header, and seek back to header */
+#if defined(SIMPLE_MICS)
+    if (lseek(ssfd, offset, 0) < 0)
+	goto ss_err;
+
+    if (read(ssfd, &offset, sizeof(offset)) < 0) goto ss_err;
+#endif
+
+    /* Seek to amheader, get amheader, and seek back to amheader */
     if (lseek(ssfd, offset, 0) < 0)
 	goto ss_err;
     
@@ -1594,25 +1546,30 @@ ss_restore_state(filename,offset)
 #if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
     /* Get the blocks */
     for (bnum = 0; bnum < hdr.nblocks; bnum++) {
-
+	caddr_t mem_start;
+	size_t mem_len;
+	long file_offset;
+	mem_start = (caddr_t) round_down(hdr.blocks[bnum].start, pgsize);
+	mem_len = hdr.blocks[bnum].fsize + ((size_t)hdr.blocks[bnum].start - (size_t)mem_start);
+	file_offset = round_down(offset, pgsize);
 #ifdef HAVE_MMAP_ZERO
-	if ((long *) mmap((caddr_t) hdr.blocks[bnum].start,
-			    (size_t)hdr.blocks[bnum].fsize,
+	if (mmap(mem_start,
+			    mem_len,
 			    PROT_READ | PROT_WRITE,
 			    MAP_FILE | MAP_PRIVATE | MAP_FIXED,
 			    ssfd,
-			    offset) != hdr.blocks[bnum].start)
+			    file_offset) != mem_start)
 	    goto ss_err;
 #else
-	if ((long *) mmap((caddr_t) hdr.blocks[bnum].start,
-			    (size_t)hdr.blocks[bnum].fsize,
+	if (mmap(mem_start,
+			    mem_len,
 #if defined(arch_sparc)
 			    PROT_EXEC |
 #endif  /* arch_sparc */
 			    PROT_READ | PROT_WRITE,
 			    MAP_PRIVATE | MAP_FIXED,
 			    ssfd,
-			    offset) != hdr.blocks[bnum].start)
+			    file_offset) != mem_start)
 	    goto ss_err;
 #endif
 	offset += hdr.blocks[bnum].fsize;
@@ -1624,25 +1581,25 @@ ss_restore_state(filename,offset)
 	 */
 
 	if (hdr.blocks[bnum].asize != hdr.blocks[bnum].fsize) {
-	    caddr_t np;
+	    caddr_t np, zmem_start, block_end;
+	    size_t zmem_len;
+	    zmem_start = (caddr_t)round_up(mem_start + mem_len, pgsize);
+	    block_end = (caddr_t)hdr.blocks[bnum].start + hdr.blocks[bnum].asize;
+	    zmem_len = block_end - zmem_start;
+	    if (zmem_start < block_end) {
 #ifdef HAVE_MMAP_ZERO
-	    np = (caddr_t) mmap((caddr_t) hdr.blocks[bnum].start 
-	                                  + hdr.blocks[bnum].fsize,
-				(size_t)(hdr.blocks[bnum].asize 
-				         - hdr.blocks[bnum].fsize),
+	    	np = mmap(zmem_start,
+	  			zmem_len,
 				PROT_READ | PROT_WRITE,
 				MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
 				-1,
 				0);
 #else
-	    int zfd;
-	    if ((zfd = open("/dev/zero", O_RDWR)) == -1)
-		goto ss_err;
+	    	int zfd;
+	    	if ((zfd = open("/dev/zero", O_RDWR)) == -1)
+		    goto ss_err;
 
-	    np = (caddr_t) mmap((caddr_t) hdr.blocks[bnum].start 
-	                                  + hdr.blocks[bnum].fsize,
-				(size_t)(hdr.blocks[bnum].asize 
-				         - hdr.blocks[bnum].fsize),
+	    	np = mmap(zmem_start, zmem_len, 
 #if defined(arch_sparc)
 				PROT_EXEC |
 #endif  /* arch_sparc */
@@ -1651,10 +1608,11 @@ ss_restore_state(filename,offset)
 				zfd,
 				0);
 
-	    close(zfd);			/* close /dev/zero */
+	    	close(zfd);			/* close /dev/zero */
 #endif
-	    if (np != (caddr_t) hdr.blocks[bnum].start + hdr.blocks[bnum].fsize)
-		goto ss_err;
+	    	if (np != zmem_start)
+		    goto ss_err;
+	    }
 	}
     }
 
@@ -1805,8 +1763,8 @@ ss_saved_state_present()
 	als_mem = (long *) CODESTART;
 
 	/* Initialize the globals */
-	for (gnum=0; gnum < header.nglobals; gnum++)
-	    *header.globals[gnum].addr = header.globals[gnum].value;
+	for (gnum=0; gnum < amheader.nglobals; gnum++)
+	    *amheader.globals[gnum].addr = amheader.globals[gnum].value;
 
 	return 1;
     }
