@@ -95,8 +95,8 @@ proc vTclWindow.topals {args} {
     pack .topals.vsb -side right -fill both
     pack .topals.text -fill both -expand 1 -side left
 
-	bind .topals <Unmap> {unmap_alsdev_main}
-	bind .topals <Map> {map_alsdev_main}
+#	bind .topals.text <Unmap> {unmap_alsdev_main}
+#	bind .topals.text <Map> {map_alsdev_main}
 
 	# accelerators
 	bind_accelerators .topals $mod listener

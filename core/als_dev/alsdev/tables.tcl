@@ -41,7 +41,6 @@ proc build_table {BaseName InfoArrayName List} {
 	append IA(table) $IA(tabletop) ".table"
 	append DataArrayName $BaseName _array
 
-
 	set IA(numrows) 6
 	set IA(titlerows) 1
 	set IA(numcols) 6
@@ -81,7 +80,6 @@ proc build_table {BaseName InfoArrayName List} {
 			set ff($i,-1) [lindex $IA(rowheadings) $i] 
 		}
 	}
-
 	table_object $InfoArrayName
 	update
 	return $DataArrayName
@@ -90,10 +88,17 @@ proc build_table {BaseName InfoArrayName List} {
 
 proc table_object {InfoArrayName } {
 	upvar #0 $InfoArrayName IA
+	global array tcl_platform
 
 	append YSB $IA(tabletop) ".sy"
 	append XSB $IA(tabletop) ".sx"
-	toplevel_patch $IA(tabletop)
+
+#	toplevel_patch $IA(tabletop)
+
+	eval toplevel $IA(tabletop)
+	if {$tcl_platform(platform) == "windows"} {
+		focus -force $IA(tabletop)
+	}
 	wm title $IA(tabletop) $IA(title)
 
 	table $IA(table) \

@@ -38,7 +38,7 @@ proc vTclWindow.debugwin {base} {
 	}
     wm resizable $base 1 1
     wm deiconify $base
-    wm title $base "ALS Prolog Debugger"
+    wm title $base "Debugger for ALS Prolog"
 	wm protocol $base WM_DELETE_WINDOW "wm withdraw $base"
 
 
@@ -240,8 +240,8 @@ proc vTclWindow.debugwin {base} {
 #    grid $base.stacklist_vsb \
 #        -column 1 -row 4 -columnspan 1 -rowspan 1 -sticky ns
 
-	bind .debugwin <Unmap> {unmap_alsdev_debug}
-	bind .debugwin <Map>   {map_alsdev_debug}
+#	bind .debugwin.text <Unmap> {unmap_alsdev_debug}
+#	bind .debugwin.text <Map>   {map_alsdev_debug}
 	bind .debugwin.text <KeyPress> {bell; .debugwin.text delete {insert-1 chars} insert}
 	bindtags .debugwin.text {Text .debugwin.text .debugwin all}
 
