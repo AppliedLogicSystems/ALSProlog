@@ -58,7 +58,7 @@ proc create_document_window {title} {
 	
 		# Create window:
 
-	toplevel $w
+	toplevel_patch $w
 	wm title $w $title
 	wm protocol $w WM_DELETE_WINDOW "document.close $w"
 
@@ -311,7 +311,7 @@ proc store_text {text file} {
 proc load_document {file} {
 	global array proenv 
 	if {[info exists proenv(document,$file)]} {
-		raise $proenv(document,$file)
+		raise_patch $proenv(document,$file)
 	} else {
 		set file_name [lindex [file split $file] end]
 		set w [create_document_window $file_name]		
@@ -335,7 +335,7 @@ proc post_open_document {Title Win} {
 	.topals.mmenb.file delete last
 	.topals.mmenb.file delete last
 	.topals.mmenb.file add command \
-		-label $Title -font {Helvetica 10 italic} -command [list bringup $Win]
+		-label $Title -font {Helvetica 10 italic} -command "show_window $Win"
     .topals.mmenb.file add separator
 	if {$tcl_platform(platform) == "windows"} {
     	.topals.mmenb.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_prolog}
@@ -392,7 +392,7 @@ proc save_check {w} {
 	global tcl_platform
 	global array proenv
 	if {$proenv($w,dirty)} then {
-		raise $w
+		raise_patch $w
 		set title [wm title $w]
 		if {$tcl_platform(platform) == "macintosh"} {
 			set icon caution

@@ -12,12 +12,12 @@ proc vTclWindow.topals {args} {
 
     set base .topals
     if {[winfo exists .topals]} {
-        wm deiconify .topals ; raise .topals ; return
+    	show_window .topals ; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel .topals -class Toplevel -background $proenv(.topals,background) 
+    toplevel_patch .topals -class Toplevel -background $proenv(.topals,background) 
     wm focusmodel .topals passive
     wm geometry .topals $proenv(.topals,geometry)
 	wm positionfrom .topals user
@@ -108,12 +108,12 @@ proc vTclWindow.dyn_flags {base} {
 
     set base .dyn_flags
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base ; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     # Withdraw the window so that it doesn't appear during prolog heartbeat
     wm withdraw $base
     wm focusmodel $base passive
@@ -203,12 +203,12 @@ proc vTclWindow.about {base} {
         set base .about
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 171x205
     center $base
@@ -286,12 +286,12 @@ proc vTclWindow.break_choices {base} {
         set base .break_choices
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base ; return
+        show_window $base ; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 155x260+109+214
     wm maxsize $base 1137 870
@@ -352,12 +352,13 @@ proc vTclWindow.static_flags {base} {
         set base .static_flags
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base
+    toplevel_patch $base
+    wm withdraw $base
 
     wm title $base "Static Prolog Flags"
 	wm protocol .static_flags WM_DELETE_WINDOW {wm withdraw .static_flags}
@@ -366,6 +367,9 @@ proc vTclWindow.static_flags {base} {
 	foreach info $InfoList {
 		create_static_flag_entry $info
 	}
+	
+	update idletask
+	wm deiconify $base
 }
 
 proc create_static_flag_entry { info } {
@@ -386,7 +390,7 @@ proc init_prj_spec \
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     #wm geometry $base 318x686+290+82
     wm maxsize $base 1137 870
@@ -848,12 +852,12 @@ proc vTclWindow.ide_settings {base} {
         set base .ide_settings
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base
+    toplevel_patch $base
     #wm focusmodel $base passive
     #wm geometry $base 374x208+269+255
     #wm maxsize $base 1137 870
@@ -1030,12 +1034,12 @@ proc vTclWindow.find_repl {base} {
         set base .find_repl
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 510x200+140+392
     wm maxsize $base 1137 870
@@ -1198,12 +1202,12 @@ proc vTclWindow.syn_errors {base} {
         set base .syn_errors
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 521x247+261+300
     wm maxsize $base 1137 870

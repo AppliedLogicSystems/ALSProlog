@@ -802,7 +802,7 @@ proc tkFDialog_Create {w} {
     upvar #0 $dataName data
     global tk_library
 
-    toplevel $w -class TkFDialog
+    toplevel_patch $w -class TkFDialog
 
     # f1: the frame with the directory option menu
     #

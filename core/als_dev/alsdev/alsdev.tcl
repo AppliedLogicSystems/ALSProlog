@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.57 1998/10/16 02:36:16 choupt Exp $"
+#|		"$Id: alsdev.tcl,v 1.58 1998/10/19 20:41:48 choupt Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -220,6 +220,31 @@ set proenv(main_depth_type) nonflat
 proc main {argc argv} {
 }
 
+# Patches for Windows to make toplevel and raise activate the window.
+
+proc toplevel_patch {w args} {
+	global tcl_platform
+
+	eval toplevel $w $args
+	if {$tcl_platform(platform) == "windows"} {
+		focus -force $w
+	}
+}
+
+proc raise_patch {w args} {
+	global tcl_platform
+
+	eval raise $w $args
+	if {$tcl_platform(platform) == "windows"} {
+		focus -force $w
+	}
+}
+
+proc show_window {w} {
+	raise_patch $w
+	wm deiconify $w
+}
+
 proc Window {args} {
 	global array proenv
 	global vTcl
@@ -255,10 +280,6 @@ proc vTclWindow. {args} {
     ###################
 } 
 
-proc bringup {Win} {
-	wm deiconify $Win
-	raise $Win
-}
 	#################################
 	# 		INITIAL SETUP
 	#--------------------------------
@@ -914,8 +935,7 @@ proc ensure_db_showing {} {
 proc show_debugwin {} {
 	global array proenv
 		
-    wm deiconify .debugwin
-	raise .debugwin
+    show_window .debugwin
 	prolog call builtins change_debug_io -atom debugwin
 	check_leashing
 	foreach Win  $proenv(debugwin,visible) {
@@ -1251,8 +1271,7 @@ proc reset_st_win {WinName} {
 	$WinName.text tag delete head_tag
 	clear_tag call_tag $WinName.text
 	$WinName.text tag delete call_tag
-	wm deiconify $WinName
-	raise $WinName
+	show_window $WinName
 }
 
 proc line_index_file {FileName } {
@@ -1530,7 +1549,7 @@ if {$tcl_platform(platform) == "windows"} then {
 	update idletasks
 }
 
-raise .topals
+raise_patch .topals
 wm positionfrom .topals user
 wm geometry .topals $proenv(.topals,geometry)
 focus .topals.text

@@ -22,12 +22,12 @@ proc vTclWindow.debugwin {base} {
 
     set base .debugwin
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base $proenv(.debugwin,geometry)
     wm maxsize $base 1137 870
@@ -236,14 +236,14 @@ proc vTclWindow.debug_source_trace {base Title} {
         set Title "Source Trace: Unknown File"
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     } 
 	lappend proenv(debugwin,visible) $base
 
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 467x542+504+47
     wm maxsize $base 1137 870
@@ -300,12 +300,12 @@ proc vTclWindow.debug_settings {base} {
         set base .debug_settings
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
 #    wm geometry $base 284x51+152+178
 #    wm maxsize $base 1137 870
@@ -392,12 +392,12 @@ proc vTclWindow.pred_info {base} {
         set base .pred_info
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm maxsize $base 1137 870
     wm overrideredirect $base 0
@@ -651,7 +651,7 @@ proc spy_preds_in_module {base module} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel 
+    toplevel_patch $base -class Toplevel 
     wm focusmodel $base passive
     wm geometry $base 350x250+384+076
     wm maxsize $base 1265 994
@@ -783,13 +783,12 @@ proc module_choose {ModsList} {
     if {[winfo exists $base]} {
 		$base.listbox delete 0 end
 		eval $base.listbox insert end $ModsList
-        wm deiconify $base; return
-		raise $base
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 170x150+152+178
     wm maxsize $base 1137 870
@@ -846,12 +845,12 @@ proc vTclWindow.sys_mods {base} {
         set base .sys_mods
     }
     if {[winfo exists $base]} {
-        wm deiconify $base; raise $base; return
+        show_window $base; return
     }
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel $base -class Toplevel
+    toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 144x149+193+203
     wm maxsize $base 1137 870
