@@ -696,21 +696,24 @@ throw(Pat)
 	setCatchVariable(Pat),
 	throw.
 
-export unwind_protect/2.
-	%% "Always do B":
-unwind_protect(A, B) 
-	:-
-	catch(A, Exception, handle_unwind_exception(B, Exception)),
-	!,
-	call(B).
-unwind_protect(A, B) 
-	:-
-	call(B), !, fail.
+%export unwind_protect/2.
+:- compiletime,
+	module_closure(unwind_protect,2).
 
-handle_unwind_exception(B, Exception)
+	%% "Try to run A in M, and always do B":
+unwind_protect(M, A, B) 
 	:-
-	catch(B, _, true), !, throw(Exception).
-handle_unwind_exception(B, Exception)
+	catch((M:A), Exception, handle_unwind_exception(M, B, Exception)),
+	!,
+	call((M:B)).
+unwind_protect(M, A, B) 
+	:-
+	call((M:B)), !, fail.
+
+handle_unwind_exception(M, B, Exception)
+	:-
+	catch((M:B), _, true), !, throw(Exception).
+handle_unwind_exception(M, B, Exception)
 	:-
 	throw(Exception).
 
