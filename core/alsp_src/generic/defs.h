@@ -146,9 +146,9 @@
 #define HP_AOUT_800 1
 #define HAVE_MMAP_ZERO 1
 #endif
-#if defined(__sgi) && defined(__mips)
+#if (defined(__sgi) && defined(__mips)) || defined(__linux__)
 #define SIMPLE_MICS 1
-#define MIPS_IRIX53 1
+#define HAVE_LIBELF 1
 #endif
 #endif /* KERNAL */
 
