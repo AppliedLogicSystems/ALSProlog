@@ -1,11 +1,14 @@
-1. Run the unix_setup script with the following arguments:
+1. Run the unix_setup script with the following arguments, to create a
+   build directory:
 	- Source directory
 	- OS name
 	- optional gcc compiler flags
 
-% ../alsp_src/unix/unix_setup ../alsp_src hpux -g -DINTCONSTR
+   Exampe: % ../alsp_src/unix/unix_setup ../alsp_src hpux -g -DINTCONSTR
 
-2. Execute make.
+   The OS option can also be "all", which creates build directories for
+   all the supported Unix OSs. 
 
-% make
+2. Enter the created build directory and execute make.
 
+   Example: % make
