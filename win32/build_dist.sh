@@ -9,6 +9,8 @@ LIB=$ALS_PROLOG/core/alsp_src/library
 BUILTINS=$ALS_PROLOG/core/alsp_src/builtins
 EXAMPLES=$ALS_PROLOG/examples
 MAN=$ALS_PROLOG/manual
+EXTRAS=\\\\JARRETT\\apache\\als_addl_software
+ODBC=$ALS_PROLOG/extensions/odbc
 
 if test $# -ne 1
 then
@@ -88,6 +90,17 @@ rm -f "$DISTDIR/alsdir/builtins/blt_dvsh.pro"
 rm -f "$DISTDIR/alsdir/builtins/ra_basis.pro"
 rm -f "$DISTDIR/alsdir/builtins/int_cstr.pro"
 
+EXTRATCL=`ls $EXTRAS/common/tcltk`
+for XX in $EXTRATCL 
+do
+cp -pr "$EXTRAS/common/tcltk/$XX" "$DISTDIR/lib"
+done
+IWIDGETS=`ls $EXTRAS/common/iwidgets`
+for XX in $IWIDGETS 
+do
+cp -pr "$EXTRAS/common/iwidgets/$XX" "$DISTDIR/lib/iwidgets3.0/scripts"
+done
+
 if test $EDITION = standard
 then
 	cp -pr "$ALS_PROLOG/foreign_sdk/win32/ALS_Prolog_Foreign_SDK" "$DISTDIR"
@@ -102,6 +115,20 @@ then
 	cp -pr "$BIN/alspro_demo.exe" "$DISTDIR/alspro.exe"
 	cp -pr "$BIN/alspro.dll" "$DISTDIR"
 	cp -pr "$BIN/Generic ALS App Stub.exe" "$DISTDIR"
+fi
+
+if test $EDITION = standard -o $EDITION = demo
+then
+	mkdir "$DISTDIR/odbc"
+	cp -pr "$ODBC/common/odbc.pro" "$DISTDIR/odbc"
+	cp -pr "$ODBC/examples/odbc_samples.pro" "$DISTDIR/odbc"
+	cp -pr "$ODBC/examples/sql_shell.pro" "$DISTDIR/odbc"
+	cp -pr "$ODBC/examples/sql_shell.ppj" "$DISTDIR/odbc"
+	cp -pr "$ODBC/examples/economics.mdb" "$DISTDIR/odbc"
+	cp -pr "$ODBC/src/meta_odbc.pro" "$DISTDIR/odbc"
+	cp -pr "$ODBC/src/prolog_odbc.pro" "$DISTDIR/odbc"
+	cp -pr "$ODBC/i386_mswin32/odbcintf.psl" "$DISTDIR/alsdir/shared"
+	cp -pr "$ODBC/doc/odbc.pdf" "$DISTDIR/odbc"
 fi
 
 
