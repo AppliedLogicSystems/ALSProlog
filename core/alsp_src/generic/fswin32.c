@@ -9,6 +9,8 @@ int system_patch(const char *command)
 {
     #define COM_MAX 1024
     TCHAR commandLine[COM_MAX] = "COMMAND.COM";
+    TCHAR title[MAX_PATH];
+    DWORD got_title;
     STARTUPINFO startInfo;
     PROCESS_INFORMATION procInfo;
     DWORD result;
@@ -27,12 +29,19 @@ int system_patch(const char *command)
     startInfo.cbReserved2 = 0;
     startInfo.lpReserved2 = NULL;
     
+    /* Some commands (for example Unix95's ls) change the console title without
+       restoring it, so lets save and restore the title. */
+    got_title = GetConsoleTitle(title, MAX_PATH);
+    
     if (!CreateProcess(NULL, commandLine, NULL, NULL, TRUE, 0, NULL, NULL,
     			&startInfo, &procInfo)) return 0;
     
-    if (WaitForSingleObject(procInfo.hProcess, INFINITE) == WAIT_OBJECT_0
-    	&& GetExitCodeProcess(procInfo.hProcess, &result)) return result;
-    else return 0;
+    if (WaitForSingleObject(procInfo.hProcess, INFINITE) != WAIT_OBJECT_0
+    	|| !GetExitCodeProcess(procInfo.hProcess, &result)) result = 0;
+    
+    if (got_title) SetConsoleTitle(title);
+    
+    return result;
 }
 
 
