@@ -978,7 +978,7 @@ disp_setup_lib(LibDirName,LibPath,PathHead)
 	filePlusExt('*',LibExt,Pattern),
 	files(LibPath, Pattern, LibFileHeaders),
 	install_lib_files(LibFileHeaders, LibPath),
-	(LibDirName = library ->
+	(filename_equal(LibDirName,library) ->
 		assert(als_lib_lcn(PathHead)) 
 		; 
 		true
