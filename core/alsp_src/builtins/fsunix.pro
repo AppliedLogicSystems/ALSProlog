@@ -338,9 +338,8 @@ filter_file(FileName, Path, FileType, [FileName | ListTail], ListTail)
 	arg(1, StatusTerm, ThisFileType),
 	fflt_ck(ThisFileType, FileType, Path, FullFile),
 	!.
-filter_file(FileName, PathList, FileType, Path, FullFile)
-	:-
-	join_path([Path, FileName], FullFile).
+
+filter_file(FileName, Path, FileType, List, List).
 
 fflt_ck(FileType, FileType, SrcPathList, FullFile) :-!.
 fflt_ck(ThisFileType, FileType, SrcPathList, FullFile)
