@@ -3,4 +3,4 @@ CPPFLAGS += -DUNIX_LINUX -I /usr/include/libelf
 # object, depending on the particular linix setup.  We staticly link
 # it to avoid problems.
 CCOMP=egcs
-OS_LIBS = -lm -ldl /usr/lib/libcrypt.a
+OS_LIBS = -lm -ldl -lcrypt
