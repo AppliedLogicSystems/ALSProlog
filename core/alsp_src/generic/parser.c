@@ -571,8 +571,8 @@ nt_listexpr()
 static void
 nt_args(void)
 {
-// Special metrowerks 4 bug.  If the second call to nt_term uses 999
-// instead of i, compiler crashes
+/* Special metrowerks 4 bug.  If the second call to nt_term uses 999
+   instead of i, compiler crashes  */
 	int i = 999;
     nt_term(999);
 
