@@ -149,6 +149,7 @@ noshowmod(builtins).
 noshowmod(sio).
 noshowmod(syscfg).
 noshowmod(xconsult).
+noshowmod(global_gv_info).
 noshowmod(alsdev).
 noshowmod(alsshell).
 noshowmod(debugger).
