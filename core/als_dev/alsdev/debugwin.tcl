@@ -39,19 +39,17 @@ proc vTclWindow.debugwin {base} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Debugger for ALS Prolog"
-	wm protocol $base WM_DELETE_WINDOW "wm withdraw $base"
+    wm protocol $base WM_DELETE_WINDOW "wm withdraw $base"
 
 
-	bind $base <Configure> "debugwin_configure_event $base %h %w %W"
+    menu $base.menubar -tearoff 0 -relief sunken
 
-	menu $base.menubar -tearoff 0 -relief sunken
-
-	add_default_menus $base.menubar
-	add_file_menu $base.menubar debugwin $base
-	add_edit_menu $base.menubar debugwin $base
-	add_prolog_menu $base.menubar debugwin $base
-	add_tools_menu $base.menubar debugwin $base
-	add_help_menu $base.menubar
+    add_default_menus $base.menubar
+    add_file_menu $base.menubar debugwin $base
+    add_edit_menu $base.menubar debugwin $base
+    add_prolog_menu $base.menubar debugwin $base
+    add_tools_menu $base.menubar debugwin $base
+    add_help_menu $base.menubar
 
 
     frame $base.buttons \
@@ -131,6 +129,8 @@ proc vTclWindow.debugwin {base} {
 		-foreground $proenv(.debugwin,foreground) \
 		-font $proenv(.debugwin,font) \
         -width 40 -yscrollcommand {.debugwin.vsb set} 
+    bind $base.text <Configure> "debugwin_configure_event $base %h %w %W"
+
 
     frame $base.stacklabel \
         -borderwidth 1 -relief raised 

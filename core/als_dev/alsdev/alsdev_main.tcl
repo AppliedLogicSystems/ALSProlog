@@ -31,7 +31,7 @@ proc vTclWindow.topals {args} {
     wm deiconify .topals
     wm title .topals "ALS Prolog Environment"
 
-	wm protocol $base WM_DELETE_WINDOW {exit_prolog}
+    wm protocol $base WM_DELETE_WINDOW {exit_prolog}
 		##------------------
 		## Main menubar:
 		##------------------

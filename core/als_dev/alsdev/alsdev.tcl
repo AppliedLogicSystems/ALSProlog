@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.71 1999/01/14 20:32:29 choupt Exp $"
+#|		"$Id: alsdev.tcl,v 1.72 1999/01/25 13:50:27 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -306,10 +306,13 @@ proc establish_defaults {} {
 	global array proenv
 
 	prolog call alsdev alsdev_ini_defaults  \
-		-var DefaultVals -var TopGeom -var DebugGeom
+		-var DefaultVals -var TopGeom -var DebugGeom -var DebugVis
 	reset_default_values $DefaultVals
 	if {$TopGeom != ""} then { set proenv(.topals,geometry) $TopGeom }
-	if {$DebugGeom != ""} then { set proenv(.debugwin,geometry) $DebugGeom }
+	if {$DebugGeom != ""} then { 
+		set proenv(.debugwin,geometry) $DebugGeom 
+		set proenv(debugwin) $DebugVis 
+	}
 }
 
 proc reset_default_values { DefaultValsList } {
@@ -972,6 +975,7 @@ proc exec_toggle_debugwin {} {
 	send_prolog debugger_mgr toggle_visibility
 }
 
+
 proc ensure_db_showing {} {
 	global array proenv
 
@@ -985,6 +989,16 @@ proc ensure_db_showing {} {
 	}
 }
 
+proc hide_debugwin {} {
+	global array proenv
+	foreach Win  $proenv(debugwin,visible) {
+		wm iconify $Win
+	}
+	Window iconify .debugwin
+	set proenv(debugwin) 0
+}
+
+
 proc show_debugwin {} {
 	global array proenv
     show_window .debugwin
@@ -994,15 +1008,6 @@ proc show_debugwin {} {
 		wm deiconify $Win
 	}
 	set proenv(debugwin) 1
-}
-
-proc hide_debugwin {} {
-	global array proenv
-	foreach Win  $proenv(debugwin,visible) {
-		wm iconify $Win
-	}
-	Window iconify .debugwin
-	set proenv(debugwin) 0
 }
 
 proc exit_debugger {} {
@@ -1145,6 +1150,7 @@ proc remove_from_spying_list {} {
 	global array proenv
 
 	set PrevNonSpying [.pred_info.preds.listbox get 0 end]
+	set NewNonSpying {}
 	set IXs [.pred_info.spying.listbox curselection]
 	.pred_info.spying.listbox selection clear 0 end
 	foreach  Idx $IXs {
@@ -1376,12 +1382,10 @@ proc source_trace_closedown {STWin} {
 }
 
 proc debugwin_configure_event {Win Ht Wd WW} {
-	if {$WW == ".debugwin.text"} then {
-		set FD [.debugwin.text cget -font]
-		set FM [font measure .debugwin.text mmmmm]
-		set WWD [.debugwin.text cget -width]
-		prolog call debugger set_debugwin_width -number $FM -number $Wd
-	}
+	set FD [$WW cget -font]
+	set FM [font measure $FD -displayof $WW m]
+	set WWD [winfo width $WW]
+	prolog call debugger set_debugwin_width -number $FM -number $WWD
 }
 
 proc show_debug_settings {} {
