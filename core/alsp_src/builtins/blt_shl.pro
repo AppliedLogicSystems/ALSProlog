@@ -226,6 +226,15 @@ ss_parse_command_line(['-nwd' | T], L, CLInfo)
 	(debugger:set_debug_io(nowins),!;true),
 	ss_parse_command_line(T, L, CLInfo).
 
+/* Skip -heap and -stack arguments because they must be handled
+   at the C level. */
+ss_parse_command_line(['-heap', _ | T], L, CLInfo)
+	:-!,
+	ss_parse_command_line(T, L, CLInfo).
+
+ss_parse_command_line(['-stack', _ | T], L, CLInfo)
+	:-!,
+	ss_parse_command_line(T, L, CLInfo).
 
 	%% Otherwise: should be a file to be loaded:
 ss_parse_command_line([File | T], L, CLInfo)
