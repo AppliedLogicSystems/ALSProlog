@@ -232,6 +232,8 @@ proc listener.copy {xw} {
 }
 
 proc listener.paste {xw} {
+	global proenv
+	
 	set w .topals
 	$w.text insert end [selection get -displayof $w -selection CLIPBOARD]
 	set proenv($w,dirty) true
@@ -255,6 +257,7 @@ proc listener.select_all {xw} {
 
 proc listener.copy_paste { xw } {
 	global tcl_platform
+	glocal proenv
 	set w .topals
 
 	if  {$tcl_platform(platform) == "unix"} {
