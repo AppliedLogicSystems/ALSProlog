@@ -736,6 +736,7 @@ int prolog_load_plugin(void)
 #elif defined(HAVE_DL_H)
 #include <dl.h>
 #elif defined(HAVE_DLFCN_H)
+#include <errno.h>
 #include <dlfcn.h>
 #endif
 
@@ -901,15 +902,30 @@ static plugin_error os_load_plugin(const char *lib_name,
 {
     void *object, *sym_addr = NULL;
     const char *err = NULL;
-    char *full_name;
+    char current_dir[1000], *full_name;
     plugin_error result = {no_error, 0, NULL};
     
+    /* Set the current directory to the library_path, so that shared
+       objects in the executable's directory are loaded first. */
+
+    if (getcwd(current_dir, 1000) == NULL) {
+      result.type = unknown_error;
+      goto exit;
+    }
+
+    
+    if (chdir(library_dir) != 0) {
+      result.type = unknown_error;
+      result.native_code = errno;
+      goto exit;
+    }
+
     /* Make a copy of the lib_name, so we can add prefixes. */
 
     full_name = malloc(strlen(lib_name)+3); /* leave room for "./" */
     if (full_name == NULL) {
     	result.type = memory_error;
-    	return result;
+	goto exit;
     }
 
     /* Solaris and Linux both have a funny rule about
@@ -935,13 +951,11 @@ static plugin_error os_load_plugin(const char *lib_name,
     object = dlopen(full_name, RTLD_LAZY);
     if (object == NULL) err = dlerror();
 
-    free(full_name);
-    
     if (err == NULL) {
     	sym_addr = dlsym(object, "alspi_dlib_init");
     	if (sym_addr == NULL) err = dlerror();
     }
-    
+
     if (err == NULL) {
 	*library = (unsigned long)object;
 	*library_init = sym_addr;
@@ -949,6 +963,10 @@ static plugin_error os_load_plugin(const char *lib_name,
     	result.type = unknown_error;
     	result.native_message = err;
     }
+
+    chdir(current_dir);
+
+    exit:
 
     return result;
 }
