@@ -52,6 +52,9 @@ proc build_table {BaseName InfoArrayName OptsList} {
 	set IA(selectmode) extended
 	set IA(rowstretch) unset
 	set IA(colstretch) unset
+	set IA(menu) ""
+	set IA(upperpane) ""
+	set IA(lowerpane) ""
 
 	set IA(variable) $IA(array)
 	append IA(yscrollbar) $IA(tabletop) ".sy"
@@ -112,32 +115,52 @@ proc build_table {BaseName InfoArrayName OptsList} {
 	scrollbar $IA(yscrollbar) -command [list $IA(table) yview]  
 	scrollbar $IA(xscrollbar) -command [list $IA(table) xview] -orient horizontal 
 
-	set RetL [list $IA(table) $DataArrayName $InfoArrayName $IA(tabletop)]
-
-	grid columnconfig $IA(tabletop) 0 -weight 1
-	grid rowconfig $IA(tabletop) 0 -weight 1
+	if {$IA(menu) != "" } then {
+		set IA(menu) ""
+		append IA(menu) $IA(tabletop) ".menu"
+    	menu $IA(menu) -relief sunken -tearoff 0
+		$IA(tabletop) configure -menu $IA(menu)
+	}
 	set RowC 0
 	set ColC 0
+	if {$IA(upperpane) != "" } then {
+		set IA(upperpane) ""
+		append IA(upperpane) $IA(tabletop) ".upperpane"
+		frame $IA(upperpane) -background $IA(background) -relief flat
+		grid $IA(upperpane) \
+			-column 0 -row $RowC -columnspan 2 -rowspan 1 -sticky nesw
+		grid rowconfig $IA(tabletop) $RowC -weight 0
+		incr RowC
+	}
+
+	grid columnconfig $IA(tabletop) $ColC -weight 1
+	grid rowconfig $IA(tabletop) $RowC -weight 1
 	grid $IA(table) \
 		-column $ColC -row $RowC -columnspan 1 -rowspan 1 -sticky nesw
 	grid $IA(yscrollbar) \
 		 -column [expr 1 + $ColC] -row $RowC -columnspan 1 -rowspan 1 -sticky ns
 	grid $IA(xscrollbar) \
 		-column $ColC -row [expr 1 + $RowC] -columnspan 1 -rowspan 1 -sticky ew
-	incr ColC
 	incr RowC
-	if {[info exists IA(lowerpane)] == 1} then {
-tk_dialog .jjj "--" "lowerpane exists" "" 0 OK
-		append IA(lowerpane) $IA(tabletop) "." lowerpane
+	incr RowC
+
+	if {$IA(lowerpane) != "" } then {
+		set IA(lowerpane) ""
+		append IA(lowerpane) $IA(tabletop) ".lowerpane"
 		frame $IA(lowerpane) -background $IA(background) -relief flat
 		grid $IA(lowerpane) \
 			-column 0 -row $RowC -columnspan 2 -rowspan 1 -sticky nesw
-		append $RetL [list " lowerpane " $IA(lowerpane)]
+		grid rowconfig $IA(tabletop) $RowC -weight 0
+		incr RowC
 	}
 
 	wm title $IA(tabletop) $IA(title)
 	update
 #	return [list $IA(table) $DataArrayName $InfoArrayName $IA(tabletop)]
+
+	set RetL [list $IA(table) $DataArrayName $InfoArrayName $IA(tabletop) \
+			$IA(menu) $IA(upperpane) $IA(lowerpane)	]
+
 	return $RetL
 }
 }
