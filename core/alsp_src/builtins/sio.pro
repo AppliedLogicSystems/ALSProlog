@@ -2643,7 +2643,6 @@ push_prompt(Stream_or_alias)
 export add_to_stream_buffer/2.
 add_to_stream_buffer(StreamOrAlias, InputLine)
 	:-
-%pbi_write(add_to_stream_buffer(StreamOrAlias, InputLine)),pbi_nl,pbi_ttyflush,
 	is_stream(StreamOrAlias, Stream),
 	stream_extra(Stream, CurBuffer),
 	'$atom_concat'(CurBuffer, InputLine, NewBuffer),
