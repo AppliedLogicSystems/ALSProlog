@@ -398,7 +398,7 @@ exec_consult(BaseFile, FCOpts)
 		%%--------------------------------
 exec_consult(['' | RestPathList], Drive, BaseFile, Nature, SrcExt, FCOpts)
 	:-!,
-	(cont_consult(SrcExt, Nature, Drive+['' | RestPathList], BaseFile, FCOpts) ->
+	(cont_consult(SrcExt, Nature, Drive, ['' | RestPathList], BaseFile, FCOpts) ->
 		true
 		;
 			%% Can't find file -- Throw exception:
