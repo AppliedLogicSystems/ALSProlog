@@ -13,14 +13,14 @@
 #	How to build everything
 # 
 
-all:  alsdir setup generated alspro_b alsmics alspro key_alspro_b key_alspro alstest
+all:  alsdir setup alspro_b alsmics alspro key_alspro_b key_alspro alstest
 
 # 
 #	Define CPPFLAGS and the default rule for translating
 #	C source files to object files
 # 
 
-CPPFLAGS =   -I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(srcdir)/$(ARCH)/$(SOS) -I$(srcdir)/smath -DHAVE_CONFIG_H
+CPPFLAGS =   -I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(srcdir)/$(ARCH)/$(SOS) -I$(srcdir)/smath -DHAVE_CONFIG_H -fwritable-strings
 
 %.o:%.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(X_CFLAGS) $<

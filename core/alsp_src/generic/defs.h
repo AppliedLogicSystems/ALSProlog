@@ -366,7 +366,7 @@
 #include "alloc.h"
 #include "fileio.h"	/* candidate for eventual elimination */
 #include "parser.h"
-#include "tokens.h"
+#include "newtokens.h"
 #include "sig.h"
 #include "winter.h"
 #include "fatal.h"

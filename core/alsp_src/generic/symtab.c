@@ -99,11 +99,16 @@ int tok_table_size(void)
 #ifdef __MWERKS__
 #pragma cplusplus on
 #endif
+#define TK(ppsym, name) {(UCHAR *) "\0" ## name + 1, 0, 0}
+#define OP(ppsym, name, a, b) {(UCHAR *) "\0" ## name + 1, a, b}
 static tkentry initial_table[] =
 {
     {(UCHAR *) "\0\0used up entry" + 1, 0, 0},
-#include "tokini2.h"            /* initial definitions of tokens */
+#include "newtokini.h"            /* initial definitions of tokens */
 };
+#undef TK
+#undef OP
+
 #ifdef __MWERKS__
 #pragma cplusplus reset
 #endif
@@ -415,10 +420,16 @@ symtab_init()
     if (!toktable) {
 	/* allocate space for the token table */
 	toktable = (tkentry *) ss_malloc(sizeof (tkentry) * ts_allocated,
-			 							FE_SYMTAB_INIT);
+			 			FE_SYMTAB_INIT);
+
+	/* Adjust the symbol length bytes */
+	for (i = 1; i < sizeof(initial_table)/sizeof(tkentry); i++)
+		initial_table[i].tkname[-1] = strlen(initial_table[i].tkname);
+
 	/* Copy initial_table to toktable */
 	memcpy((char *) toktable, (char *) initial_table, sizeof initial_table);
 
+	
 	/* malloc space for the hash table */
 	hashtable = (tkentry **) ss_malloc(ts_allocated * sizeof (tkentry **),
 					   FE_SYMTAB_INIT);

@@ -24,7 +24,7 @@
  * Lexical Analysis Global Variables
  */
 
-#include "lexinit.h"		/* Get initial lex table */
+#include "newlexinit.h"		/* Get initial lex table */
 
 lxi_but *lexbdp = &seetbl[USRSEEI].lb;	/* pointer to buffer descriptor */
 
