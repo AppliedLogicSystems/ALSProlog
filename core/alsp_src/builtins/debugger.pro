@@ -797,10 +797,10 @@ noshow_module(debugger).
 noshow_module(sio).
 noshow_module(xconsult).
 	%% Add any others (or can mtfapi go away now?):
-noshow_module(mtfapi).
-%noshow_module(objects).
-
+noshow_module(alsdev).
 noshow_module(tk_alslib).
+
+%noshow_module(objects).
 
 %noshow_module(windows).
 %noshow_module(alsshell).

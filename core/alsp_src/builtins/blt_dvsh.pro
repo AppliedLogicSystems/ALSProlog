@@ -29,7 +29,7 @@ start_alsdev
 	assertz(command_line(ResidualCommandLine)),
 	setup_debugger_stubs,
 	setup_search_dirs(CLInfo),
-	ss_load_dot_alspro(CLInfo),
+	assert(save_clinfo(CLInfo)),
 	library_setup,
 	init_tk_alslib(shl_tcli,Shared),
 builtins:sys_searchdir(ALSDIRPath),
@@ -149,6 +149,8 @@ alsdev(Shared)
 	current_prolog_flag(windows_system, Which),
 	set_consult_messages(false),
 
+	retract(save_clinfo(CLInfo)),
+	ss_load_dot_alspro(CLInfo),
 %	setup_prolog_flags,
 
 	install_alarm_handler,
@@ -691,7 +693,7 @@ change_debug_io(debugwin)
 export sys_modules/1.
 sys_modules([
 	builtins,syscfg,rel_arith,xconsult,sio,
-	pgm_info,debugger,tcltk,windows,tk_alslib,
+	pgm_info,debugger,tcltk,windows,tk_alslib,alsdev,utilities,
 	alsshell,avl,cref,macroxp,objects,shellmak,ttyshlmk
 	]).
 
@@ -905,17 +907,19 @@ set_debugwin_width(M5Size, MainWinSize)
 	%% - (Start,End) are the file offsets of the head
 	%%    of the clause.
 	%%---------------------------------------------------
+
+/*
 showGoalToUserWin(Port,Box,Depth, Module, Goal, debug)
 	:-
 	get_mrfcg(ClsGrp),
-%printf('%t-%t(%t) %t <%t>\n',[Box,Depth,Port,Goal,ClsGrp]),flush_output,
+printf('%t-%t(%t) %t <%t>\n',[Box,Depth,Port,Goal,ClsGrp]),flush_output,
 	fail.
+*/
 
 	%% '$dbg_aph' ::
 
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-
-%printf('+#+%t: $dbg_aph(%t,%t,%t,%t,%t)\n',[call,ClsGrp,Start,End,Box,Depth]),flush_output,
 	color_my_port(ClsGrp,Start,End,call,head_tag),
 	!.
 
@@ -923,30 +927,23 @@ showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	%% a predicate defined in a file which has not yet been set up for
 	%% debugging; this alternate clause tries to get the file set up:
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
-	:-
-%write(zero_rec_for_clsgrp=[ClsGrp,BaseFileName,SrcFilePath]),nl,
+	:-!,
 	builtins:file_clause_group(BaseFileName, ClsGrp),
 	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options),
-%	reload_debug(BaseFileName, SrcFilePath, DebugType),
 	continue_start_src_trace(BaseFileName, SrcFilePath),
 	!,
 	color_my_port(ClsGrp,Start,End,call,head_tag).
 
 showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('+#+%t: $dbg_aph(%t,%t,%t,%t,%t)\n',[fail,ClsGrp,Start,End,Box,Depth]),flush_output,
-	color_my_port(ClsGrp,Start,End,fail,head_tag),
-	fail.
+	color_my_port(ClsGrp,Start,End,fail,head_tag).
 	
 showGoalToUserWin(redo,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('+#+%t: $dbg_aph(%t,%t,%t,%t,%t)\n',[redo,ClsGrp,Start,End,Box,Depth]),flush_output,
-	color_my_port(ClsGrp,Start,End,redo,head_tag),
-	fail.
+	color_my_port(ClsGrp,Start,End,redo,head_tag).
 	
-showGoalToUserWin(Port,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
+showGoalToUserWin(exit,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('+#+%t: $dbg_aph(%t,%t,%t,%t,%t)\n',[Port,ClsGrp,Start,End,Box,Depth]),flush_output,
 	fcg_change(Port,'$dbg_aph',ClsGrp,Start,End).
 
 	%% '$dbg_aphe' ::
@@ -954,22 +951,17 @@ showGoalToUserWin(Port,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	% "call" here is successful exit from the clause:
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('-#-%t: $dbg_aphe(%t,%t,%t)\n',[Port,ClsGrp,Start,End]),flush_output,
 	color_my_port(ClsGrp,Start,End,exit,head_tag).
 
 showGoalToUserWin(redo,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('-#-%t: $dbg_aphe(%t,%t,%t)\n',[redo,ClsGrp,Start,End]),flush_output,
-	color_my_port(ClsGrp,Start,End,redo,head_tag),
-	fail.
+	color_my_port(ClsGrp,Start,End,redo,head_tag).
 
 showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
-	:-!,
-	fail.
-
-showGoalToUserWin(Port,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 	:-!.
-%printf('-#-%t: $dbg_aphe(%t,%t,%t,%t,%t)\n',[Port,ClsGrp,Start,End,Box,Depth]),flush_output.
+
+showGoalToUserWin(exit,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
+	:-!.
 
 	%%---------------------------------------------------
 	%% 		'$dbg_apf'
@@ -984,17 +976,13 @@ showGoalToUserWin(Port,Box,Depth, Module, '$dbg_aphe'(ClsGrp,Start,End), debug)
 
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('###call: $dbg_apf(%t,%t,%t,%t,%t)\n',[ClsGrp,Start,End,Box,Depth]),flush_output,
 	color_my_port(ClsGrp,Start,End,exit,head_tag).
 
 showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
-	:-!,
-%printf('###redo: $dbg_apf(%t,%t,%t,%t,%t)\n',[ClsGrp,Start,End,Box,Depth]),flush_output,
-	fail.
+	:-!.
 
 showGoalToUserWin(Port,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
 	:-!.
-%printf('##%t: $dbg_apf(%t,%t,%t,%t,%t)\n',[Port,ClsGrp,Start,End,Box,Depth]),flush_output.
 
 	%%--------------------------------------------------------------------
 	%% 		'$dbg_apg' and  '$dbg_apge'
@@ -1021,37 +1009,31 @@ showGoalToUserWin(Port,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
 	%% This is real call: first entry to the goal
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_apg'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('###call: $dbg_apg(%t,%t,%t)\n',[ClsGrp,Start,End]),flush_output,
 	color_my_port(ClsGrp,Start,End,call,call_tag),
 	!.
 
 	%% "redo" here is actually failure of the acutal goal:
 showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apg'(ClsGrp,Start,End), debug)
 	:-!,
-	color_my_port(ClsGrp,Start,End,fail,call_tag),
-	fail.
+	color_my_port(ClsGrp,Start,End,fail,call_tag).
 
 showGoalToUserWin(Port,Box,Depth, Module, '$dbg_apg'(ClsGrp,Start,End), debug)
 	:-!.
-%printf('-#-%t: $dbg_apg(%t,%t,%t)\n',[Port,ClsGrp,Start,End]),flush_output.
 
 	%% '$dbg_apge' ::
 
 	%% "call" here is really exit for the acutal goal:
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('###call: $dbg_apge(%t,%t,%t)\n',[ClsGrp,Start,End]),flush_output,
 	color_my_port(ClsGrp,Start,End,exit,call_tag).
 
 	%% "redo" here is really redo for the acutal goal:
 showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('###redo: $dbg_apge(%t,%t,%t)\n',[ClsGrp,Start,End]),flush_output,
 	color_my_port(ClsGrp,Start,End,redo,call_tag).
 
 showGoalToUserWin(_,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug)
 	:-!.
-%printf('-#-%t: $dbg_apge(%t,%t,%t)\n',[Port,ClsGrp,Start,End]),flush_output.
 
 	%%---------------------------------------------------
 	%%		ALL OTHERS
@@ -1086,7 +1068,6 @@ showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
 
 color_my_port(ClsGrp,Start,End,Port,TagName)
 	:-
-%write(color_my_port(ClsGrp,Start,End,Port,TagName)),nl,
 	tktxt_info(ClsGrp,TextWin,Start,End,STRec,
 				StartLine,StartChar,EndLine,EndChar),
 	access_dbstr(TagName, STRec, LastCallTag),
@@ -1098,7 +1079,6 @@ color_my_port(ClsGrp,Start,End,Port,TagName)
 	fcg_change(Port,'??',ClsGrp,Start,End),
 	set_mrfcg(ClsGrp),
 	!,
-%write(cmp_x),nl,
 	display_st_record(StartLine,StartChar,EndLine,EndChar, 
 						Color,TextWin, TagName, STRec).
 
@@ -1280,32 +1260,22 @@ clear_source_trace_wins([Rec | RecsList])
 	clean_up_src_win(FCG),
 	clear_source_trace_wins(RecsList).
 
-
-reset_spypoints(Module, NewSpyListIn, NewNoSpyList)
+	%%-------------------------------------------------
+	%		SPYPOINTS
+	%%-------------------------------------------------
+install_new_spypoints([], _) :-!.
+install_new_spypoints(NewSpyListIn, Module)
 	:-
 	fixup_tcltk_pa_descs(NewSpyListIn, NewSpyList),
-	(NewSpyList = [] ->
-		true
-		;
-    	dbg_spyoff,
-		install_spypoints_in_mod(NewSpyList, Module),
-    	setPrologInterrupt(spying),
-    	setDebugInterrupt(spying),
-		printf(debugger_output,
-				'Spypoints set in module %t on:\n\t%t\n',
-				[Module, NewSpyList]),
-    	dbg_spyon
-	),
-	remove_old_spypoints(Module, NewSpyList, OldSpyList),
-/*
-	(OldSpyList = [] -> true 
-		;
-		printf(debugger_output,
-				'Spypoints removed in module %t from:\n\t%t\n',
-					[Module, OldSpyList])
-	),
-*/
-    check_spyoff.
+    dbg_spyoff,
+	install_spypoints_in_mod(NewSpyList, Module),
+    setPrologInterrupt(spying),
+    setDebugInterrupt(spying),
+	printf(debugger_output,
+			'Spypoints set in module %t on:\n\t%t\n',
+			[Module, NewSpyList]),
+    dbg_spyon.
+
 
 fixup_tcltk_pa_descs([], []).
 fixup_tcltk_pa_descs([Desc | ListIn], [P/A | List])
@@ -1319,23 +1289,29 @@ install_spypoints_in_mod([P/A | NewSpyList], Module)
     install_spypoint(Module,P,A),
 	install_spypoints_in_mod(NewSpyList, Module).
 
-remove_old_spypoints(Module, NewSpyList, OldSpyList)
+remove_old_spypoints(OldSpyListIn, Module)
 	:-
-	findall(PA,  oldspy(PA, Module, NewSpyList), OldSpyList),
-	remove_spypoints_in_mod(OldSpyList, Module).
-
-
-oldspy(P/A, Module, NewSpyList)
-	:-
-	spying_on(Pat, Module),
-	functor(Pat, P, A),
-	not(dmember(P/A, NewSpyList)).
+	fixup_tcltk_pa_descs(OldSpyListIn, OldSpyList),
+	remove_spypoints_in_mod(OldSpyList, Module),
+    check_spyoff.
 
 remove_spypoints_in_mod([], Module).
 remove_spypoints_in_mod([P/A | NewNoSpyList], Module)
 	:-
 	nospy(Module,P,A),
 	remove_spypoints_in_mod(NewNoSpyList, Module).
+
+	%% dumps procedure clauses with complete info, 
+	%% including hidden debug calls:
+
+export debug_dump/1.
+debug_dump(PA) 
+	:-
+	builtins:clauses_for_listing(PA,DBR),
+	builtins:'$source'(DBR,S,show_pp),
+	builtins:write_out(S),
+	fail.
+debug_dump(_).
 
 
 endmod.
