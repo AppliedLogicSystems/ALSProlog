@@ -299,14 +299,11 @@ module alsdev.
 		subClassOf=gen_project_mgr,
 		addl_slots=
 			[
-%				production_goal,
-%				debug_goal,
+				production_goal,
+				debug_goal,
 				executable_name,
 				prolog_files,
-%				library_files,
-%				tcltk_files,
-%				tcltk_interpreters,
-%				c_files,
+				library_files,
 				file_types,
 				default_dirs,
 				project_loaded			%% true/fail
@@ -317,29 +314,17 @@ module alsdev.
 				list_of_files_slots = [
 					prolog_files
 %					,library_files,
-%					tcltk_files,
-%					c_files
 					],
-				list_slots = [ 
-%					tcltk_interpreters 
-					],
-				text_slots = [
-%					production_goal,
-%					debug_goal
-					],
+				list_slots = [ ],
+				text_slots = [ ],
 				production_goal = start_,
 				debug_goal = debug_start_,
 				prolog_files = [],
-%				library_files = [],
-%				tcltk_files = [],
-%				tcltk_interpreters = [tcli],
-%				c_files = [],
+				library_files = [],
 				file_types =  [ 
 %					[prolog_files, ['.pro', '.pl'] ]
 					[prolog_files, ['.*'] ]
 %					,[prolog_library_files, ['.pro'] ],
-%					[tcltk_files, ['.tcl'] ],
-%					[c_files, ['.c'] ] 
 				],
 				default_dirs = [],
 				slot_names = [
@@ -348,9 +333,6 @@ module alsdev.
 					[executable_name, 	'Image Name:'],
 					[prolog_files, 		'Files:']
 %					,[library_files, 	'Library Files:'],
-%					[tcltk_files, 		'Tcl/Tk Files:'],
-%					[tcltk_interpreters,'Tcl/Tk Interps:'],
-%					[c_files, 			'C Files:']
 				]
 			]
 	]).
