@@ -188,7 +188,7 @@ ws_vars(nextstep, ARCH, OS, WSHeaderLines)
 		'WIN'		= nextstep,
 		'C2PFILT'	= all,
 		'XINCLUDES'	= '-I/usr/include/ansi -I/usr/include/bsd \
-				   -I/usr/include/appkit'
+				   		-I/usr/include/appkit',
 		'ADDL_CS' 	= [] ,
 		'CFLAGS'	= '-D_NO_PROTO' ,
 		'$(WIN)LIBS' 	= '-lXm -lMrm -lXt -lX11' ,

@@ -1720,7 +1720,6 @@ w_assert_foreign(modid, name, arity, builtin)
 
 }
 
-
 void
 w_dynamic(m, p, a)
     PWord m, p;
@@ -1730,9 +1729,8 @@ w_dynamic(m, p, a)
 
     ent->flags |= NMSK_DYNAMIC;
     if ((ent->flags & NMSK_USAGE) == NFLG_UNDEFINED)
-	ic_install_fail(ent);
+		ic_install_fail(ent);
 }
-
 
 int
 w_spy(m, p, a)
@@ -1741,14 +1739,13 @@ w_spy(m, p, a)
 {
     ntbl_entry *ent;
 
-
     if ((ent = w_nameentry(m, p, a)) != (ntbl_entry *) 0) {
-	ent->flags |= NMSK_SPYSET;
-	ic_install_spy(ent);
-	return 1;
+		ent->flags |= NMSK_SPYSET;
+		ic_install_spy(ent);
+		return 1;
     }
     else
-	return 0;
+		return 0;
 
 }
 
@@ -1760,12 +1757,12 @@ w_nospy(m, p, a)
     ntbl_entry *ent;
 
     if ((ent = w_nameprobe(m, p, a)) != (ntbl_entry *) 0) {
-	ent->flags &= ~NMSK_SPYSET;
-	ic_install_normal_exec_entry(ent);
-	return 1;
+		ent->flags &= ~NMSK_SPYSET;
+		ic_install_normal_exec_entry(ent);
+		return 1;
     }
     else
-	return 0;
+		return 0;
 
 }
 
@@ -1779,8 +1776,8 @@ w_libbreak(m, p, a, i)
 
     ent = w_nametable[w_namelookup(m, p, a)];
     if ((ent->flags & NMSK_USAGE) == NFLG_UNDEFINED) {
-	ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_LIBBREAK;
-	ic_install_libbreak(ent, i);
+		ent->flags = (ent->flags & ~NMSK_USAGE) | NFLG_LIBBREAK;
+		ic_install_libbreak(ent, i);
     }
 }
 

@@ -258,6 +258,7 @@
  * Include commonly needed Generic include files
  */
 
+#include "wd_size.h"	
 #include "mtypes.h"	/* not generic, but every platform has one */
 #include "alstypes.h"
 #include "alloc.h"

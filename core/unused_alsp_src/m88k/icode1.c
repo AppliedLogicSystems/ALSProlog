@@ -11,11 +11,24 @@
  *
  */
 
+/*
 #include "defs.h"
-#include "wintcode.h"
 #include "icode.h"
-#include "icodegen.h"
 #include "compile.h"
+#include "icodegen.h"
+#include "wintcode.h"
+#include "module.h"
+#include "machinst.h"
+#include "codegen.h"
+#include "rinfo.h"
+*/
+#include <stdio.h>
+
+#include "defs.h"
+#include "icom.h"
+#include "icode.h"
+#include "compile.h"
+#include "varproc.h"
 #include "module.h"
 #include "machinst.h"
 #include "codegen.h"
@@ -87,7 +100,10 @@ static long envsavemask;	/*
 static int capturemode = WRITEMODE;
 
 Code  icode_buf[ICBUFSIZE];
+/*
 Code *ic_ptr;
+*/
+ic_uptr_type ic_uptr;
 
 extern char *regnames[];
 

@@ -91,8 +91,8 @@ list_asm(addr, n)
 		break;
 	}
 
-/*	printf("[%02.0d]%x[%03.0o|% 3.0d]: %-16s",(int)(ip-addr),ip,instr,instr,ic_array[instr].instr_name); */
-	printf("[%02.0d]%x: %-16s",(int)(ip-addr),ip,ic_array[instr].instr_name); 
+/*	printf("[%03.0d]%x[%03.0o|% 3.0d]: %-16s",(int)(ip-addr),ip,instr,instr,ic_array[instr].instr_name); */
+	printf("[%03.0d]%x: %-16s",(int)(ip-addr),ip,ic_array[instr].instr_name); 
 	fflush(stdout);
 
 #define COMMA if (need_comma++) printf(",\t")

@@ -169,13 +169,16 @@ filePlusExt(FileName,Ext,FullName) :-
 	'/u/prolog/alsdir', 'builtins.pro' ).
  *!-------------------------------------------------------*/
 
-pathPlusFile(Path,File,CompletePath) :-
+pathPlusFile(Path,File,CompletePath)
+	:-
 	var(CompletePath),
 	!,
 	subPath(PathList, Path),
 	dappend(PathList, [File], CompletePathList),
 	subPath(CompletePathList, CompletePath).
-pathPlusFile(Path,File,CompletePath) :-
+
+pathPlusFile(Path,File,CompletePath)
+	:-
 	subPath(CompletePathList,CompletePath),
 	dappend(PathList, [File], CompletePathList),
 	subPath(PathList, Path).

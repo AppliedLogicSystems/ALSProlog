@@ -20,7 +20,8 @@ extern Code *icode_buf;
 extern Code icode_buf[];
 #endif
 
-/* Define the Instruction Pointer (ic_uptr) as a union so that it can be used
+/* 
+   Define the Instruction Pointer (ic_uptr) as a union so that it can be used
    as both a short and long pointer.
 */
 
