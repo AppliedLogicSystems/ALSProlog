@@ -1,3 +1,4 @@
+#include <Types.r>
 #include <SysTypes.r>
 
 #include "version.h"
