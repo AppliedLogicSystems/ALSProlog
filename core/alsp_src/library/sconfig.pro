@@ -171,12 +171,20 @@ ws_vars_variable(dvx,_,ARCH,OS,VARIABLE_LINES)
 	[
 		'XINCLUDES' = '-I djgpp/include'
 	].
+ws_vars_variable(unix,_,mips,irix,VARIABLE_LINES)
+	:-
+	VARIABLE_LINES =
+	[
+		'XINCLUDES' = '-I /usr/include',
+		'XDEFINES' = '-D_LANGUAGE_C -D_MIPS_SZINT=32 -D_MIPS_SZLONG=32 -DMips -Dsgi -D__sgi'
+	].
 ws_vars_variable(unix,_,ARCH,OS,VARIABLE_LINES)
 	:-
 	VARIABLE_LINES =
 	[
 		'XINCLUDES' = '-I /usr/include'
 	].
+
 
 
 ws_vars(motif, ARCH, OS, SwitchInfo, WSHeaderLines)
@@ -262,7 +270,7 @@ characteristic_files(wxwin, lib, ['libwx_motif.a', 'libwxextend_motif.a']).
 
 export possible_dir_for/4.
 
-possible_dir_for(motif,include,_,'/usr/include').
+%%possible_dir_for(motif,include,_,'/usr/include').
 possible_dir_for(motif,lib,_,'/usr/lib').
 possible_dir_for(motif,lib,_,'/usr/lib/X11R5').
 possible_dir_for(motif,lib,solaris,'/usr/dt/lib').
