@@ -239,7 +239,7 @@ directory([], FileType, []) :-!.
 directory(FileNamePattern, FileType, List) 
 	:-
 	fileTypeToAttr(FileType, Attribute),
-	'$getDirEntries'(FileNamePattern, Attribute, List).
+	getDirEntries(FileNamePattern, Attribute, List).
 
 fileTypeToAttr(Attr, Attr) :-
 	integer(Attr),

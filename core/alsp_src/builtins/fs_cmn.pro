@@ -29,6 +29,9 @@ export get_cwd/1.
 export change_cwd/1.
 export remove_file/1.
 
+export getDirEntries/3.
+export must_exist_file/1.
+
 /*!--------------------------------------------------------------
  |	date_less/2
  |	date_less(Date0, Date1)
@@ -267,5 +270,19 @@ remove_file(FileName)
 	:-
 	system_error([unlink(FileName)]).
 
+getDirEntries(Path, FilePattern, FirstResult)
+	:-
+	'$getDirEntries'(Path, FilePattern, FirstResult), !.
+getDirEntries(Path, FilePattern, FirstResult)
+	:-
+	system_error([getDirEntries(Path, FilePattern, FirstResult)]).
+
+must_exists_file(File)
+	:- exists_file(File), !.
+must_exists_file(File)
+	:-
+	system_error([must_exist_file(File)]).
 
 endmod.
+
+

@@ -145,7 +145,7 @@ files(Pattern, FileList)
  
  files(Directory, Pattern, List) 
 	:-
-	'$getDirEntries'(Directory, Pattern, FirstResult),
+	getDirEntries(Directory, Pattern, FirstResult),
 	!,
 	rootPlusPath(Disk, PathList, Directory),
 	fixFileType(regular, InternalFileType),
@@ -267,7 +267,7 @@ directory(Pattern, FileType, List)
 	(InitPath='',!; exists_file(InitPath)),
 	!,
 	(InitPath = '' -> Path = '.' ; Path = InitPath),
-	'$getDirEntries'(Path, FilePattern, FirstResult),
+	getDirEntries(Path, FilePattern, FirstResult),
 	!,
 	fixFileType(FileType, InternalFileType),
 	filterForFileType(FirstResult, Disk, PathList, InternalFileType, List).

@@ -151,7 +151,7 @@ files(Pattern, FileList)
  
  files(Directory, Pattern, List) 
 	:-
-	'$getDirEntries'(Directory, Pattern, FirstResult),
+	getDirEntries(Directory, Pattern, FirstResult),
 	!,
 	fixFileType(regular, InternalFileType),
 	filterForFileType(FirstResult, Directory, InternalFileType, List).
@@ -265,21 +265,10 @@ directory(PathPattern, FileType, List)
 	:-
 	atom(PathPattern),
 	dirFilePath(Dir, FilePattern, PathPattern),
-	correctGetDirEntries(Dir, FilePattern, FirstResult),
+	getDirEntries(Dir, FilePattern, FirstResult),
 	!,
 	fixFileType(FileType, InternalFileType),
 	filterForFileType(FirstResult, Dir, InternalFileType, List).
-
-must_exists_file(File)
-	:- exists_file(File), !.
-must_exists_file(_) :- throw(must_exist_threw).
-
-correctGetDirEntries(Path, FilePattern, FirstResult)
-	:-
-	'$getDirEntries'(Path, FilePattern, FirstResult), !.
-correctGetDirEntries(Path, FilePattern, FirstResult)
-	:-
-	throw(get_dir_entry_failed(Path, FilePattern)).
 
 %% If no match was found for the file pattern, return no elements:
 directory(_,_,[]).

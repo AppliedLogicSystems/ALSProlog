@@ -194,7 +194,7 @@ files(Directory, Pattern, List)
 	name(Pattern, PatternChars),
 	make_reg_exp(PatternChars, RegexChars),
 	name(Regex, [0'^ | RegexChars]),
-	'$getDirEntries'(Directory, Regex, FirstResult),
+	getDirEntries(Directory, Regex, FirstResult),
 	!,
 	rootPlusPath(Disk, PathList, Directory),
 	fixFileType(regular, InternalFileType),
@@ -321,7 +321,7 @@ directory(Pattern, FileType, List)
 %	subPath(PathList,ThePath),
 %	exists_file(ThePath),
 	subPath(PathList, InitPath),
-	(InitPath = '', !; exists_file(InitPath)),
+	(InitPath = '', !; must_exists_file(InitPath)),
 	!,
 	name(FilePattern, PatternChars),
 	make_reg_exp(PatternChars, RegexChars),
@@ -329,7 +329,7 @@ directory(Pattern, FileType, List)
 
 	(InitPath = '' -> Path = '.' ; Path = InitPath),
 
-	'$getDirEntries'(Path, Regex, FirstResult),
+	getDirEntries(Path, Regex, FirstResult),
 
 	!,
 	fixFileType(FileType, InternalFileType),
