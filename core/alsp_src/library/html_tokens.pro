@@ -186,11 +186,13 @@ read_tokens_lines(Lines, Tokens)
 read_tokens_lines([], _, []).
 read_tokens_lines([Line | Lines], Flag, Tokens)
 	:-
+%write(Line),write('  ||  '),
 	open(atom(Line),read,S,[]),
 	read_tokens(Flag, S,  Tokens, InterTail, InterFlag),
 %write('['), write(Flag), write('] '),
 %write(Tokens),nl,
 	close(S),
+%trace,
 	read_tokens_lines(Lines, InterFlag, InterTail).
 
 export read_tokens/2.
@@ -220,6 +222,9 @@ read_tokens(S, Tokens)
  |    the interior of a comment;
  | if FlagIn = n1, an opening '<' has been read, which __might__
  |    be follwed by '--', starting a comment (or might not);
+ | if FlagIn = href(T, Tokens), an opening 'T=' (T=href/src/alt) has been read, 
+ |    so we must process the stream following in a manner appropriate 
+ |    for the context 'href=...'
  | FlagOut is the mode current when the last token is read.
  *----------------------------------------------------------------*/
 export read_tokens/5.
@@ -232,6 +237,11 @@ read_tokens(comment, S, Tokens, Tail, FlagOut)
 	start_get_comment(C, S, Tokens, InterTail, InterFlagOut),
 	read_tokens(InterFlagOut, S, InterTail, Tail, FlagOut).
 
+read_tokens(href(T, Tokens), S, Tokens, Tail, FlagOut)
+	:-!,
+	scoop_href(T, 0'=, S, Tokens, InterTokens, NxtC0, normal, FlagInter0),
+	read_tokens(FlagInter0, NxtC0, S, InterTokens, Tail, FlagOut).
+
 read_tokens(FlagIn, S, [T | Tokens], Tail, FlagOut)
 	:-
 	cross_white(S, NextNonblankChar),
@@ -239,11 +249,27 @@ read_tokens(FlagIn, S, [T | Tokens], Tail, FlagOut)
 	next_token(NextNonblankChar, FlagIn, S, T, NxtC, FlagInter),
 	    %% if an 'href' token was encountered, process the stream following
 	    %% in a manner appropriate for the context 'href=..."
+	scoop_href_and_go(T, NxtC, S, Tokens, FlagInter, Tail, FlagOut).
+/*
 	scoop_href(T, NxtC, S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0),
 	read_tokens(FlagInter0, NxtC0, S, InterTokens, Tail, FlagOut).
+*/
 
 read_tokens(Flag, S, Tail, Tail, Flag).
 
+scoop_href_and_go(T, NxtC, S, Tokens, FlagInter, Tail, FlagOut)
+	:-
+	peek_code(S, C),
+	(C = -1 ->
+		Tokens = Tail,
+		FlagOut = href(T, Tail)
+		;
+		scoop_href(T, NxtC, S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0),
+		read_tokens(FlagInter0, NxtC0, S, InterTokens, Tail, FlagOut)
+	).
+
+
+/*
 scoop_href(href, 0'=, S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0)
 	:-!,
 	scoop_0(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0).
@@ -255,6 +281,14 @@ scoop_href(src, 0'=, S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0)
 scoop_href(alt, 0'=, S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0)
 	:-!,
 	scoop_0(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0).
+*/
+
+scoop_href(T, 0'=, S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0)
+	:-
+	dmember(T, [href, src, alt, content]),
+	scoop_0(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0).
+
+
 
 scoop_href(T, NxtC, S, Tokens, Tokens, NxtC, FlagInter, FlagInter).
 
@@ -271,7 +305,6 @@ scoop_0(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0)
 	),
 	atom_codes(StringToken, StringChars),
 	FlagInter0 = FlagInter.
-
 
 /*
 scoop_0(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0)
