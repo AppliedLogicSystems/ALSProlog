@@ -34,7 +34,13 @@ typedef struct {
     ALSPI_API(const char *)(*find_callback)		( void *, void * );
     ALSPI_API(void)	(*PI_throw)			(PWord, int);
     ALSPI_API(void)	(*PI_getball)			(PWord *, int *);
-    		
+
+#ifdef macintosh
+	Boolean (*SIOUXIsAppWindow)(WindowPtr w);
+	short (*SIOUXHandleOneEvent)(EventRecord *event);
+	void (*SIOUXSetEventVector)(short (*handler)(EventRecord *));
+	QDGlobals *(*GetQD)(void);
+#endif    		
 } alspi_func_ptrs;
 
 typedef struct {

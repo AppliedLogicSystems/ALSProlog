@@ -217,7 +217,22 @@ ALSPI_API(void) PI_getball( PWord *a, int *b )
     alspi_funcs->PI_getball(a,b);
 }
 
-#ifdef macintosh
-void main(void)
-{}
-#endif
+Boolean SIOUXIsAppWindow(WindowPtr w)
+{
+	return alspi_funcs->SIOUXIsAppWindow(w);
+}
+
+short SIOUXHandleOneEvent(EventRecord *event)
+{
+	return alspi_funcs->SIOUXHandleOneEvent(event);
+}
+
+void SIOUXSetEventVector(short (*handler)(EventRecord *))
+{
+	alspi_funcs->SIOUXSetEventVector(handler);
+}
+
+QDGlobals *GetQD(void)
+{
+    return alspi_funcs->GetQD();
+}
