@@ -10,6 +10,7 @@
  *=============================================================*/
 
 
+/*
 t(X) :-
 	popup_select_items([aa,bb,cc,dd,ee], X).
 
@@ -20,6 +21,7 @@ u(X) :-
 v(X) :-
 	popup_select_items([aa,bb,cc,dd,ee], 
 		[mode=multiple,title='Multiple Mode Selection'],X).
+*/
 
 module tk_alslib.
 use tcltk.
@@ -39,9 +41,9 @@ export extend_menubar_cascade/4.
 
 init_tk_alslib
 	:-
-	init_tk_alslib(tcli).
+	init_tk_alslib(tcli,_).
 
-init_tk_alslib(Interp)
+init_tk_alslib(Interp,Shared)
 	:-
 	(all_procedures(tcltk,read_eval_results,2,_) ->
 		true
@@ -52,12 +54,17 @@ init_tk_alslib(Interp)
 	tcl_call(Interp, [wm,withdraw,'.'], _),
 	builtins:sys_searchdir(ALSDIR),
 	extendPath(ALSDIR, shared, Shared),
-	pathPlusFile(Shared, 'als_tklib.tcl', ALSTKLIB),
 	tcl_call(Interp, [set,'ALSTCLPATH',Shared], _),
+
+	pathPlusFile(Shared, 'als_tklib.tcl', ALSTKLIB),
 	tcl_call(Interp, [source, ALSTKLIB], _).
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%% 		POPUP SELECTION LISTS 			%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-	
 /*------------------------------------------------------------*
  |	popup_select_items/2.
  |	popup_select_items(SourceList, ChoiceList)
@@ -112,9 +119,190 @@ popup_select_items(SourceList, Options, ChoiceList)
 	mk_tcl_atom_list(SourceList, TclSourceList),
 	tcl_call(Interp, [do_select_items,BaseName,Mode,Title,TclSourceList],ChoiceList).
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%% 				DIALOGS 				%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	/*----------------------------------------------------*
+	 |	Note: available bitmaps for use in dialogs are:
+	 |
+	 |	question	?
+	 |	questhead	? inside a sunken human head
+	 |	warning		!
+	 |	info		sunken i
+	 |	hourglass	sunken hourglass
+	 |	error		sunken european "forbidden" roadsign
+	 *----------------------------------------------------*/
+
 /*------------------------------------------------------------*
+ |	info_dialog/1
+ |	info_dialog(Msg)
+ |	info_dialog(+)
+ |
+ |	info_dialog/2
+ |	info_dialog(Msg, Title)
+ |	info_dialog(+, +)
+ |
+ |	info_dialog/3
+ |	info_dialog(Interp, Msg, Title)
+ |	info_dialog(+, +, +)
+ |
+ |	Pops up a informational dialog (just an OK button)
+ |	displaying the input message (Msg). Title is the dialog
+ |	window title; it defaults to "Info"
  *------------------------------------------------------------*/
 
+export info_dialog/1.
+export info_dialog/2.
+export info_dialog/3.
+
+info_dialog(Msg)
+	:-
+	info_dialog(Msg, 'Info').
+
+info_dialog(Msg, Title)
+	:-
+	info_dialog(tcli, Msg, Title).
+
+info_dialog(Interp, Msg, Title)
+	:-
+	tcl_call(Interp, [tk_dialog, '.quit_dialog', Title, Msg, '', 0, 'OK'], _).
+
+/*------------------------------------------------------------*
+ |	yes_no_dialog/2
+ |	yes_no_dialog(Msg, Answer)
+ |	yes_no_dialog(+, -)
+ |
+ |	yes_no_dialog/3
+ |	yes_no_dialog(Msg, Title, Answer)
+ |	yes_no_dialog(+, +, -)
+ |
+ |	yes_no_dialog/4
+ |	yes_no_dialog(Interp, Msg, Title, Answer)
+ |	yes_no_dialog(+, +, +, -)
+ |
+ |	Pops up a yes-no dialog (with Yes/No buttons)
+ |	displaying the input message (Msg). Title is the dialog
+ |	window title; it defaults to "Info" The extended forms
+ |	allow customization of the buttons:
+ |
+ |	yes_no_dialog/6
+ |	yes_no_dialog(Interp, Msg, Title, YesLabel, NoLabel, Answer)
+ |	yes_no_dialog(+, +, +, +, +, -)
+ |
+ |	Yes = label for the left (Yes; default) button
+ |	No =  label for the right (No) button
+ |
+ |	Answer is either YesName or NoName
+ *------------------------------------------------------------*/
+
+export yes_no_dialog/2.
+export yes_no_dialog/3.
+export yes_no_dialog/4.
+
+yes_no_dialog(Msg, Answer)
+	:-
+	yes_no_dialog(Msg, 'Info', Answer).
+
+yes_no_dialog(Msg, Title, Answer)
+	:-
+	yes_no_dialog(tcli, Msg, Title, Answer).
+
+yes_no_dialog(Interp, Msg, Title, Answer)
+	:-
+	yes_no_dialog(Interp, Msg, Title, 'Yes', 'No', Answer).
+
+yes_no_dialog(Interp, Msg, Title, YesLabel, NoLabel, Answer)
+	:-
+	tcl_call(Interp, [tk_dialog, '.quit_dialog', Title, Msg, 
+						question, 0, YesLabel, NoLabel], InitAns),
+	(InitAns =  0 -> Answer = YesLabel ; Answer = NoLabel).
+
+/*------------------------------------------------------------*
+ |	atom_input_dialog/2
+ |	atom_input_dialog(Msg, Atom)
+ |	atom_input_dialog(+, -)
+ |
+ |	atom_input_dialog/3
+ |	atom_input_dialog(Msg, Title, Atom)
+ |	atom_input_dialog(+, +, -)
+ |
+ |	atom_input_dialog/4
+ |	atom_input_dialog(Interp, Msg, Title, Atom)
+ |	atom_input_dialog(+, +, +, -)
+ *------------------------------------------------------------*/
+export atom_input_dialog/2.
+export atom_input_dialog/3.
+export atom_input_dialog/4.
+
+atom_input_dialog(Msg, Atom)
+	:-
+	atom_input_dialog(Msg, 'Input', Atom).
+
+atom_input_dialog(Msg, Title, Atom)
+	:-
+	atom_input_dialog(tcli, Msg, Title, Atom).
+
+atom_input_dialog(Interp, Msg, Title, Atom)
+	:-
+	tcl_call(Interp, [do_popup_input, Msg, Title], InitResult),
+	(atom(InitResult) ->
+		Atom = InitResult
+		;
+		atomread(InitResult, Atom)
+	).
+
+/*------------------------------------------------------------*
+ |	file_select_dialog/2
+ |	file_select_dialog(Prompt, FileName)
+ |	file_select_dialog(+, -)
+ |
+ |	file_select_dialog/4
+ |	file_select_dialog(Interp, Prompt, Options, FileName)
+ |	file_select_dialog(+, +, +, -)
+ |
+ |	Options:
+ |		default = <Default file name>
+ |		ext		= Ext to either add, or use for selection
+ |		mode	= new/select/save_as (default = select)
+ |		initialdir = 	initial dir in which to begin...
+ *------------------------------------------------------------*/
+
+file_select_dialog(Prompt, FileName)
+	:-
+	file_select_dialog(tcli, Prompt, FileName, []).
+
+file_select_dialog(Interp, Prompt, FileName, Options)
+	:-
+	fselect_modes(Options, DefaultName, Ext, Mode, IDir),
+
+		%% Need to extend this to file types broadly, including the
+		%% Mac special stuff;
+	
+	cont_file_select(Mode, DefaultName, Ext, IDir, FileName).
+
+/*
+cont_file_select(save_as, DefaultName, Ext, IDir FileName)
+	:-!,
+
+cont_file_select(select, DefaultName, Ext, IDir FileName)
+	:-!,
+	tcl_call(Interp, 
+				[tk_getOpenFile,'-title','Select File to Open' | FileTypes], 
+				FileName).
+*/
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%	  ADDING ITEMS TO THE MENU BAR		%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
 extend_main_menubar(Label, MenuEntriesList)
 	:-
 	extend_menubar('.topals.mmenb', Label, MenuEntriesList).
@@ -208,40 +396,6 @@ insert_tcl_call_arg(Arg, CmdS)
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%% 	SUPPORTING LOW-LEVEL ROUTINES 		%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-/*********************
-/*------------------------------------------------------------*
- |	mk_tcl_list/2
- |	mk_tcl_list(ProList, TclList)
- |	mk_tcl_list(+, -)
- |
- |	ProList = Prolog list of atoms of form [A1,A2,...]
- |	TclList = atom of the form { A1 A2 ... }
- *------------------------------------------------------------*/
-export mk_tcl_list/2.
-mk_tcl_list([], "").
-mk_tcl_list(InProList, TclList)
-	:-
-	open(atom(TclList),write,TLS,[]),
-	write_tcl_list(InProList, TLS),
-	close(TLS).
-
-write_tcl_list([], TLS).
-write_tcl_list([Atom | InProList], TLS)
-	:-
-	put_code(TLS, 0'{),
-	put_atom(TLS, Atom), 
-	put_code(TLS, 0'}),
-	put_code(TLS, 0' ),
-	write_tcl_list(InProList, TLS).
-*********************/
 
 
 /*------------------------------------------------------------*
