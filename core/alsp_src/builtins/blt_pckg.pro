@@ -103,7 +103,9 @@ save_image0(ImageName, Options)
  |	named ImageName.
  *---------------------------------------------------------------*/
 
-	
+:- dynamic(alsdev_ini_path/1).
+:- dynamic(save_clinfo/1).
+
 attach_image0(NewImageName, DevelopFlag)
 	:-
 	adjust_sys_search_for_save(ALSDIR, OrigALSDIR),
@@ -159,8 +161,8 @@ attach_image0(NewImageName, DevelopFlag)
 		true   	%% DevelopFlag = develop
 	),
 
-	(ADIP=no_path -> true ; assert(alsdev_ini_path(ADIP))),
-	(CLInfo=no_info -> true ; assert(save_clinfo(CLInfo))),
+%	(ADIP=no_path -> true ; assert(alsdev_ini_path(ADIP))),
+%	(CLInfo=no_info -> true ; assert(save_clinfo(CLInfo))),
 	assert(command_line(CmdLine)).
 
 save_image_develop(NewImageName)
