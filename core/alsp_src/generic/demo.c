@@ -7,9 +7,7 @@
 static long calculate_checksum(long n)
 {
 	long s, d1, d2, d3, d4;
-	
-	printf("n is %d\n", n);
-	
+		
 	s = n + 247;
 	
 	d1 = (s % 10)/1;
@@ -139,9 +137,7 @@ static void write_demo_key_info(char *key)
 	HKEY reg_key;
 	LONG err;
 	DWORD disposition;
-	
-	printf("in write demo key\n");
-	
+		
 	err = RegCreateKeyEx(HKEY_CURRENT_USER, ALS_SUB_KEY, 0, "", REG_OPTION_NON_VOLATILE, 
 				KEY_WRITE, NULL, &reg_key, &disposition);
 	if (err == ERROR_SUCCESS) {
@@ -271,9 +267,6 @@ static int valid_demo_key(const char *key)
 	
 	sscanf(key, "%d-%d-%d-%d", &a, &b, &c, &d);
 
-	printf("%d-%d-%d-%d\n", a, b, c, d);
-	printf("calculated checksum: %d\n", calculate_checksum(a ^ b ^ c));
-
 	if (d != calculate_checksum(a ^ b ^ c)) return 0;
 
 /*	
@@ -292,8 +285,6 @@ static int valid_demo_key(const char *key)
 	duration = b%100;
 	
 	diff = difftime(time(NULL), start_time);
-	
-	printf("diff %f\n", diff);
 	
 	return diff > 0.0 && diff < duration * 24.0 * 60.0 * 60.0;
 }
