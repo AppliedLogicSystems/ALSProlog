@@ -35,6 +35,14 @@ send('$no$Object$', Message)
 	:-!,
 	send_to_null_object(Message).
 
+send(anyone, Message)
+	:-!,
+	queue_oop_event(Message).
+
+send(any_object, Message)
+	:-!,
+	queue_oop_event(Message).
+
 send(Object, Message)
 	:-
 	atom(Object),
@@ -188,26 +196,68 @@ queue_object_call(Object,Event,Module,Message)
 
 :-make_gv('_OOP_EventQueue').
 
-%% export queue_oop_event/1.
-queue_oop_event(Event)
+/*!-------------------------------------------------------
+ |	queue_oop_event/1.
+ |	queue_oop_event(Message)
+ |	queue_oop_event(+)
+ |
+ |	- broadcasts an oop event on the appropriate queues
+ |
+ |	This predicate causes the oop Message to be placed on all 
+ |	oop event queues which it matches, with the effect that 
+ |	Message is sent (via send/2) to all objects for which an 
+ |	expression of interest has been made (via insert_oop_request/2).
+ |	Note that, for convenience, both of the following are
+ |	equivalent to queue_oop_event(Message):
+ |		send(anyone, Message)
+ |		send(any_object, Message)
+ *!------------------------------------------------------*/
+export queue_oop_event/1.
+queue_oop_event(Message)
 	:-
 	get_OOP_EventQueue(QueueList),
-	find_matching_subqueue(QueueList, Event, SubQueue),
+	bagof(SubQueue,
+			find_matching_subqueue(QueueList, Message, SubQueue),
+			SubQs),
 	!,
-	send_each(SubQueue, Event).
-queue_oop_event(Event).
+	send_to_each_q(SubQs, Message).
+queue_oop_event(_).
 
-%% export insert_oop_event_request/2.
+send_to_each_q([], Message).
+send_to_each_q([SubQueue | SubQs], Message)
+	:-
+	send_each(SubQueue, Message),
+	send_to_each_q(SubQs, Message).
+
+/*!-------------------------------------------------------
+ |	insert_oop_event_request/2
+ |	insert_oop_event_request(EventForm, Object)
+ |	insert_oop_event_request(+, +)
+ |
+ |	- Inserts a request for messages of form EventForm
+ |
+ |	This predicate causes a request to be entered from Object 
+ |	to be send all broadcasts of oop message events of the form 
+ |	EventForm.  Note that this does not cause all messages of the 
+ |	form EventForm to be direct ed to Object, only those which 
+ |	are broadcast (using queue_oop_event/1).  Also note that since 
+ |	this is a Prolog predicate, it can be invoked either from 
+ |	within an object method, or can be invoked directly in Prolog code.
+ *!------------------------------------------------------*/
+export insert_oop_event_request/2.
 insert_oop_event_request(Event, Object)
 	:-
 	get_OOP_EventQueue(QueueList),
-	find_matching_subqueue(QueueList, Event, SubQueue),
+	bagof(SubQueue,
+			find_matching_subqueue(QueueList, Event, SubQueue),
+			SubQs),
 	!,
-		%% must be at least one item it call succeeded:
-	SubQueue = [First | Rest],
-	mangle(2, SubQueue, [Object | Rest]).
+		%% Matching subqueues exist:
+	insert_in_each_q(SubQs, Object).
+
 insert_oop_event_request(Event, Object)
 	:-
+		%% No matching subqueues exist:
 	get_OOP_EventQueue(QueueList),
 	copy_term(Event,EventCopy),
 	(QueueList = 0 ->
@@ -215,6 +265,15 @@ insert_oop_event_request(Event, Object)
 		;
 		set_OOP_EventQueue([ [EventCopy, Object] |  QueueList])
 	).
+
+insert_in_each_q([], Object).
+insert_in_each_q([SubQueue | SubQs], Object)
+	:-
+		%% must be at least one item on the queue if the call succeeded:
+		%% {the head item is the pattern):
+	SubQueue = [Pattern | Rest],
+	mangle(2, SubQueue, [Object | Rest]).
+	insert_in_each_q(SubQs, Object).
 
 	%% This could be done with one-sided unification, or
 	%% etc....

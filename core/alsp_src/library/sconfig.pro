@@ -84,6 +84,28 @@ lib_extension( OS, LExt )
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Window system information
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+export determine_default_ws/1.
+determine_default_ws(WS)
+	:-
+	builtins:als_system(SysProps),
+	dmember(wins=WS0,SysProps),
+	catenate(WS0,'_ws',WS).
+
+export known_ws/1.
+
+known_ws(motif).
+/*
+known_ws(openlook).
+known_ws(nextstep).
+known_ws(decwins).
+known_ws(dv_x).
+known_ws(mac_os).
+known_ws(ms_wins3).
+known_ws(ms_wins95).
+known_ws(present_man).
+*/
+
 export winsystems_for/2.
 winsystems_for(Arch_OS, WSL)
 	:-
@@ -104,7 +126,7 @@ winsystems_for(Arch, OSString, WSL)
 		gen_winsystems(GOS, WSL)
 	).
 
-gen_winsystems(unix, [x, motif]).
+gen_winsystems(unix, [motif, x]).
 
 specif_winsystems_for(_, nextstep, [nextstep]).
 

@@ -11,26 +11,9 @@
 
 tt :- install_lib('/elvis/prolog/Utils/misc_db.pro').
 
-module sys_maint.
-
-export t2/0.
-
-t2 :-
-	setupt2(FileName,Disk,LibPath,SourceFile,LibManFile, LibInfoFile),
-	install_lib(FileName,Disk,LibPath,SourceFile,LibManFile,LibInfoFile).
-
-setupt2(FileName,Disk,LibPath,SourceFile,LibManFile, LibInfoFile)
-	:-
-	InSourceFile = '/elvis/prolog/Utils/misc_db.pro',
-
-	full_source_file_path(InSourceFile,_,Disk,FileName,SourceFile),
-	LibPath = ['',usr2,dbi,'Concept','LibTest'],
-	sys_lib_man_path(LibPath,Disk, FileName, LibManFile),
-	sys_lib_info_path(LibPath,Disk,FileName,LibInfoFile).
+module builtins.
 
 export install_lib/0.
-export install_lib/1.
-export install_lib/2.
 
 /*!-----------------------------------------------------------------
  | install_lib/0
@@ -42,9 +25,60 @@ export install_lib/2.
 install_lib
    :-
    builtins:command_line(CmdLine),
-   find_file_name(CmdLine,FileName),
-   install_lib(FileName),
-   als_advise("Library file %t.pro installed in ALS Library\n",[FileName]).
+   find_file_names(CmdLine,FileNames),
+	builtins:sys_searchdir(SD),
+	name(SD,SDCs),
+	dappend(SDCs,"builtins/blt_lib.pro",BLCs),
+	name(BLPath,BLCs),
+	file_status(BLPath,BLStatus),
+	dmember(mod_time=BLTime,BLStatus),
+	dappend(SDCs,"library",LPCs),
+	name(LibPath,LPCs),
+   install_libs(FileNames, BLTime, LibPath, BLPath),
+   als_advise('Library file(s) %t.pro installed in ALS Library\n',[FileNames]).
+
+	%% Need this here for booting the library:
+find_file_names([],[]).
+find_file_names([One, Two | CmdLine], FileNames)
+	:-
+	sub_atom(One, 1, 1, '-'),
+	!,
+	find_file_names(CmdLine,FileNames).
+find_file_names([File | CmdLine], [File FileNames])
+	:-
+	find_file_names(CmdLine,FileNames).
+
+install_libs([],_,_,_).
+install_libs([File | FileNames],BLTime,LibPath,BLPath)
+	:-
+	install_lib_file(File,BLTime,LibPath,BLPath),
+	install_libs(FileNames,BLTime,LibPath,BLPath).
+
+install_lib_file(File,BLTime,LibPath,BLPath)
+	:-
+	file_status(File,FileStatus),
+	dmember(mod_time=FileTime,FileStatus),
+	install_lib_file(FileTime,File,BLTime,LibPath,BLPath).
+
+install_lib_file(FileTime,File,BLTime,LibPath,BLPath)
+	:-
+	FileTime=< BLTime,
+	!,
+   als_advise('Library file %t.pro earlier than %t .. no action\n',[File,BLPath]).
+install_lib_file(FileTime,File,BLTime,LibPath,BLPath)
+	:-
+    als_advise('Processing library file %t.pro\n',[File]),
+	install_lib_file(File, LibPath, BLPath).
+		
+
+
+
+
+
+
+
+
+
 
 /*!-----------------------------------------------------------------
  |  install_lib/1
@@ -74,6 +108,7 @@ install_lib
  |      d.  Installs copies of FileName.pro and FileName.obp
  |          in the library subdirectory under alsdir.
  *!----------------------------------------------------------------*/
+/*
 install_lib([]) :-!.
 install_lib([InputFileName | Files])
     :-!,
@@ -89,6 +124,17 @@ install_lib(InputFileName)
 	sys_lib_info_path(LibPath,Disk,FileName,LibInfoFile),
 	install_lib(FileName,Disk,LibPath,SourceFile,
 				LibManFile,LibInfoFile,BltLibFile).
+*/
+install_lib_file(File, LibPath, BLPath)
+	:-
+	(filePlusExt(FileName, _, File) ->
+		true
+		;
+		FileName = File
+	),
+	extendPath(LibPath, man, ManPath),
+	filePlusExt(FileName, man, ManFileName),
+	pathPlusFile(ManPath, ManFileName, LibManFile),
 
 install_lib(FileName,Disk,LibPath,SourceFile,LibManFile,LibInfoFile,BltLibFile)
 	:-
@@ -224,7 +270,7 @@ full_source_file_path(InputFileName,LibPath,Disk,FileName,
 
 	(exists_file(SourceFile) ->
         true;
-        printf("Source file %t does not exist.\n",[SourceFile]),
+        printf('Source file %t does not exist.\n',[SourceFile]),
         fail
     ).
 /*
@@ -243,13 +289,13 @@ full_source_file_path(InputFileName,LibPath,Disk,FileName,
         	dappend("ln -s ", SFCs, Tmp0cs),
         	dappend(Tmp0cs, [0' | FLPCs], LnkCmd),
 	    	(system(LnkCmd) ->
-				printf("Installed Link from Library to %t.\n",[SourceFile]);
-				printf("Can't install link from Library to %t.\n",[SourceFile]),
-            	printf("Copying %t to %t\n",[SourceFile,TargetFile]),
+				printf('Installed Link from Library to %t.\n',[SourceFile]);
+				printf('Can't install link from Library to %t.\n',[SourceFile]),
+            	printf('Copying %t to %t\n',[SourceFile,TargetFile]),
 		    	copy_file(SourceFile,TargetFile)
         	)
         	;
-        	printf("Copying %t to %t\n",[SourceFile,TargetFile]),
+        	printf('Copying %t to %t\n',[SourceFile,TargetFile]),
 			copy_file(SourceFile,TargetFile)
 		)
     ).
@@ -470,18 +516,18 @@ report_exports_docs(ExportSide, DocSide)
 
 report_exp_nodoc([])
 	:-!,
-	printf("All exported predicates are documented.\n").
+	printf('All exported predicates are documented.\n').
 report_exp_nodoc(ExportSide)
 	:-
-	printf("The following are exported, but not documented:\n\t%t\n",
+	printf('The following are exported, but not documented:\n\t%t\n',
 		   [ExportSide]).
 
 report_doc_noexp([])
 	:-!,
-	printf("All documented predicates are exported.\n").
+	printf('All documented predicates are exported.\n').
 report_doc_noexp(DocSide)
 	:-
-	printf("The following are documented, but not exported:\n\t%t\n",
+	printf('The following are documented, but not exported:\n\t%t\n',
 		   [DocSide]).
 
 /*------------------------------------------
@@ -877,13 +923,13 @@ combine_docs([_ | RestSortedDocList], NamesList, FormsList,
 write_documentation(Stm, NamesList, FormsList, 
                     DescriptionsList, DocumentedPredsList)
 	:-
-	printf(Stm,"\n@-----Name/Brief Description-----\n\n",[]),
+	printf(Stm,'\n@-----Name/Brief Description-----\n\n',[]),
 	write_names_list(NamesList,Stm),
 
-	printf(Stm,"\n@-----Forms & I/O Patterns-----\n\n",[]),
+	printf(Stm,'\n@-----Forms & I/O Patterns-----\n\n',[]),
 	write_string_list(FormsList,Stm),
 
-	printf(Stm,"\n@-----Description-----\n\n",[]),
+	printf(Stm,'\n@-----Description-----\n\n',[]),
 	write_descrips_list(DescriptionsList,Stm).
 
 /*------------------------------------------
@@ -893,7 +939,7 @@ write_names_list([(PredDesc,BriefDescrip) | RestNamesList],Stm)
 	:-
     PredDesc \= end_of_comment,
 	!,
-	printf(Stm,"%t -- %t\n",[PredDesc,BriefDescrip]),
+	printf(Stm,'%t -- %t\n',[PredDesc,BriefDescrip]),
 	write_names_list(RestNamesList,Stm).
 write_names_list([_ | RestNamesList],Stm)
 	:-
@@ -915,40 +961,40 @@ write_descrips_list([_ | RestDescriptionsList],Stm)
 write_string_list([],_).
 write_string_list([String | Strings],Stm)
 	:-
-	printf(Stm,"%t\n",[String]),
+	printf(Stm,'%t\n',[String]),
 	write_string_list(Strings,Stm).
 
 lib_error(multi_module(CurLibFile))
 	:-
-	error_message("Error: Multiple modules declared in library file %t\n",
+	error_message('Error: Multiple modules declared in library file %t\n',
 				  [CurLibFile]).
 lib_error(multi_key(CurLibFile))
 	:-
-	error_message("Error: Multiple library keys declared in library file %t\n",
+	error_message('Error: Multiple library keys declared in library file %t\n',
 				  [CurLibFile]).
 lib_error(parse(CurLibFile, Line, ErrMsg, Pos))
 	:-
-	error_message("Error: Bad parse in library file %t: \n%s\nPos=%t: %s\n",
+	error_message('Error: Bad parse in library file %t: \n%s\nPos=%t: %s\n',
 				  [CurLibFile,Line,Pos,ErrMsg]).
 
 lib_error(unknown(InputFileName))
 	:-
-	error_message("Error in processing library file: %t\n",[InputFileName]).
+	error_message('Error in processing library file: %t\n',[InputFileName]).
 
 lib_error(bad_mod_close(TagSortMCs))
 	:-
 	MessageList = [
-		"Mismatch on module closures:\n"-[],
-		common_pattern("%t\n",TagSortMCs)  ],
+		'Mismatch on module closures:\n'-[],
+		common_pattern('%t\n',TagSortMCs)  ],
 	error_messages(MessageList).
 
 lib_error(bad_exports(CommonExports,UncommonExports))
 	:-
 	MessageList = [
-		"Mismatch on predicate exports--\n"-[],
-		"Common exports are:\n%t\n=======\n"-[CommonExports],
-		"Differences are:\n"-[],
-		common_pattern("%t\n-----\n",UncommonExports)   ],
+		'Mismatch on predicate exports--\n'-[],
+		'Common exports are:\n%t\n=======\n'-[CommonExports],
+		'Differences are:\n'-[],
+		common_pattern('%t\n-----\n',UncommonExports)   ],
 	error_messages(MessageList).
 
 error_message(Pattern, Values)
@@ -1028,7 +1074,7 @@ lib_analyze_all([Item,InputFileName | RestCondFilesList], SourceDir,
     pathPlusFile(SourceDir,FileName,SourceFile),
 	(exists_file(SourceFile) ->
         true;
-        printf("Source file %t does not exist.\n",[SourceFile]),
+        printf('Source file %t does not exist.\n',[SourceFile]),
         fail
     ),
 

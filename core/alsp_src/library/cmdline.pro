@@ -12,7 +12,33 @@ module builtins.
 
 export get_cmdline_vals/1.
 export cmdline_vals/2.
+export eat_cmd_line/3.
 
+/*!-----------------------------------------------------------------------*
+ |	get_cmdline_vals/1
+ |	get_cmdline_vals(SwitchVals)
+ |	get_cmdline_vals(-)
+ |
+ |	- obtains the list of command line arguments
+ |
+ |	get_cmdline_vals/1 calls builtins:command_line(CmdLine), and parses
+ |	CmdLine into a list SwitchVals of sublists of one of the forms
+ |		[SwitchName, SwitchVal] or [SwitchName]
+ |	for each expression -S or V following -p on the command line,
+ |	as follows:
+ |	i)   if -S is followed by a -T, the expression for -S is ['-S'];
+ |	ii)  if -S is followed by V which is NOT of the form -T, then
+ |		 the expression for the pair -S V is ['-S','V'];
+ |	iii) if V is NOT preceeded by an expression of the form -S, then
+ |		 the expression corresponding to V is ['-null_switch', 'V'] 
+ |	For example, given the invocation
+ |		alspro -p foo -gg a b c -f -h -k e3 e4
+ |
+ |	?- get_cmdline_vals(X).
+ |
+ |	X = [['-null_switch',foo],['-gg',a],['-null_switch',b],['-null_switch',c],
+ |        ['-f'],['-h'],['-k',e3],['-null_switch',e4]]
+ *!-----------------------------------------------------------------------*/
 get_cmdline_vals(SwitchVals)
 	:-
 	command_line(CmdLine),
@@ -49,5 +75,25 @@ cmd_item_arg([Arg | TailCmdLine], [Arg], TailCmdLine)
 	!.
 cmd_item_arg(RestCmdLine, [], RestCmdLine).
 
+/*!-----------------------------------------------------------------------*
+ |	eat_cmd_line/3
+ |	eat_cmd_line(CmdLine, Items, CmdLineTail)
+ |	eat_cmd_line(+, -, -)
+ |	
+ |	- splits CmdLine into an initial null switch segment and remainder
+ |
+ |	CmdLine  -  a (possibly tail of) a command line, as produced by 
+ |				get_cmdline_vals/1;
+ |	Items  - 	the longest list of Atoms corresponding, in order, to
+ |				the longest initial segment (possibly empty) of CmdLine 
+ |				of entries of the form  ['-null_switch Atom];
+ |	CmdLineTail - the tail of CmdLine following the segment generating Items.
+ *!-----------------------------------------------------------------------*/
+eat_cmd_line([],[], []).
+eat_cmd_line([['-null_switch',Item] | RestCommandLine], 
+				[Item | RestItems], CmdLineTail)
+	:-!,
+	eat_cmd_line(RestCommandLine, RestItems, CmdLineTail).
+eat_cmd_line(CmdLineTail, [], CmdLineTail).
 
 endmod.

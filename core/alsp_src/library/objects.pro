@@ -834,9 +834,29 @@ export objectProcessFile_cl/0.
 objectProcessFile_cl
 	:-
 	set_prolog_flag(undefined_predicate, fail),
-	builtins:command_line(Files),
+	get_cmdline_vals(SwitchVals),
+	oop_switches_and_files(SwitchVals,Files,Xtras),
 	!,
 	objectProcessFiles(Files).
+
+	
+oop_switches_and_files([],[],[]).
+oop_switches_and_files([['-oopf', FirstFile] | RestCmdLine],
+							[FirstFile | RestFiles], Xtras)
+	:-!,
+	eat_cmd_line(RestCmdLine, RestFiles, CmdLineTail),
+	oop_switches_and_files(CmdLineTail,Files,Xtras).
+oop_switches_and_files([['-I', IncludeDir] | RestCmdLine],Files,Xtras)
+	:-!,
+	( oop_include_dir(IncludeDir) ->
+		true
+		;
+		assert(oop_include_dir(IncludeDir))
+	),
+	oop_switches_and_files(RestCmdLine,Files,Xtras).
+oop_switches_and_files([Item | RestCmdLine],Files,Xtras)
+	:-
+	oop_switches_and_files(RestCmdLine,Files,Xtras).
 
 
 export objectProcessFiles/1.
@@ -869,15 +889,16 @@ export objectProcessFile/3.
 objectProcessFile(SourceFile, TargetFile,
 				  objinfo(SourceFile,TargetFile,RecordInfo))
 	:-
+	objects_advise('\n>Processing object file: %t\n', [SourceFile]),
 	open(SourceFile,read,SourceStream,[]),
 	read_terms(SourceStream, SourceTerms),
 	close(SourceStream),
 	do_objectProcess(SourceTerms,SinkList, [], RecordInfo),
-%	assert_clauses_for_mod(SinkList,objects),
 	open(TargetFile,write,TargetStream,[]),
 	write_clause(TargetStream, (:- op(600,xfy,'%lettervar%'(''':='''))),[]),
 	write_clauses(TargetStream, SinkList, [line_length(63)]),
 	close(TargetStream),
+	objects_advise('\n<Object code written to file: %t\n\n', [TargetFile]),
 	abolish(slot_default,3),
 	abolish(slot_constraint,4).
 objectProcessFile(SourceFile, TargetFile)
@@ -1052,11 +1073,21 @@ object_load_required([File | Files])
 	object_load_required(Files).
 object_load_required(File)
 	:-
-	(object_loaded_file(File) ; gui_loaded_file(File)),!.
+	(SearchDir = '.' ; oop_include_dir(SearchDir)),
+	pathPlusFile(SearchDir,File,FileName),
+	(filePlusExt(_,pro,FileName) ->
+		FullFileName = FileName
+		;
+		filePlusExt(FileName,pro,FullFileName)
+	),
+	(exists_file(FullFileName) ->
+		consult(FileName)
+		;
+		fail
+	), !.
 object_load_required(File)
 	:-
-	consult(File),
-	assert(object_loaded_file(File)).
+	objects_advise('Warning! Required file %t not located!\n', [File]).
 
 sort_code([], _, _, [nl,endmod,nl], _, []).
 sort_code([Item | RestCode], ModStack, LeftMod, LeftCode, RightMod, RightCode)
@@ -1115,12 +1146,12 @@ objs_def_msg(Tag, Args, Mod)
 	flush_output.
 
 objs_msg_setup(item_defined, [defineClass(PList)],  Mod,
-				"\n>DefineClass: %t in mod=%t", [Name,Mod])
+				"\n--DefineClass: %t in mod=%t", [Name,Mod])
 	:-!,
 	dmember(name=Name, PList).
 
 objs_msg_setup(item_defined, [defineObject(PList)],  Mod,
-				"--DefineObject: %t Type=%t in mod=%t\n", [Name,Class,Mod])
+				"\n--DefineObject: %t Type=%t in mod=%t\n", [Name,Class,Mod])
 	:-!,
 	dmember(name=Name, PList),
 	dmember(instanceOf=Class, PList).

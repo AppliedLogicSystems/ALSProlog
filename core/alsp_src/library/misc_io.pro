@@ -7,8 +7,8 @@
 
 module builtins.
 
-export copyFiles/2.
-export copy_file/2.
+%export copyFiles/2.
+%export copy_file/2.
 export readline/1.
 export readline/2.
 export read_terms/1.
@@ -19,6 +19,7 @@ export putc_n_of/3.
 export gen_file_header/3.
 export gen_file_header/4.
 
+/**************************************************
 /*!---------------------------------------------------------------
  |	copyFiles/2
  |	copyFiles(SourceFilesList, TargetSubDirPath)
@@ -54,7 +55,6 @@ copyFiles0([File | SourceFilesList], TargetSubDirPathChars)
 %%% to a little C routine which just copies chars over until
 %%% eof is reached.
 
-/**************************************************
 /*!---------------------------------------------------------------
  |	copy_file/2
  |	copy_file(SourceFile,TargetFile)
