@@ -140,13 +140,26 @@ nullablity of a column in a table. */
 
 /* environment specific definitions */
 #ifndef EXPORT
-#define EXPORT  _export
+/* #define EXPORT  _export */
+#define EXPORT
+#endif
+
+#ifndef CALLBACK
+#define CALLBACK
+#endif
+
+#ifndef FAR
+#define FAR
 #endif
 
 #ifdef WIN32
 #define SQL_API __stdcall
 #else
 #define SQL_API EXPORT CALLBACK
+#endif
+
+#ifndef WIN32
+#define HWND void *
 #endif
 
 #ifndef RC_INVOKED
