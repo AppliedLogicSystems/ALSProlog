@@ -10,6 +10,8 @@
 //#include "tkMacInt.h"
 //#include "tclMac.h"
 
+extern void tcl_interface_init(void);
+
 int 	TkMacConvertEvent _ANSI_ARGS_((EventRecord *eventPtr));
 
 /*
@@ -383,7 +385,7 @@ void SetupALSProlog(void)
 #ifdef DEMO
 	shutdown_alsdev_demo();
 #endif
-    pi_init();
+    tcl_interface_init();
 
 	PI_INIT;
 {
