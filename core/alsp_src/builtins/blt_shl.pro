@@ -24,7 +24,11 @@ use sio.
  | is the shell call to make.
  *-------------------------------------------------------------------------------*/
 
-start_shell(DefaultShellCall)
+start_shell(DefaultShellCall) :-
+	catch(start_shell0(builtins:prolog_shell), E,
+	(shell_exception(E), fail)).
+
+start_shell0(DefaultShellCall)
 	:-
 	%% Setup debugger entries (needs to be done early because
 	%% ss_parse_command_line can cause debugger to be called
@@ -84,7 +88,7 @@ start_shell(DefaultShellCall)
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
 
-start_shell(_).
+start_shell0(_).
 
 	%%%%%%%
 
