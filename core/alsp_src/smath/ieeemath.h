@@ -42,7 +42,9 @@
 
 #else
 #include <math.h>
+#if HAVE_IEEEFP
 #include <ieeefp.h>
+#endif
 #endif
 
 #define FAIL 0
@@ -198,6 +200,7 @@ typedef struct ext_prec {
   NEWINTERVAL b;
 } EXT_PREC;
 
+extern NEWDOUBLE NAN_REAL, POS_INF;
 
 
 
