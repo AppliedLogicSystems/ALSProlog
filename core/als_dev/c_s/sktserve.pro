@@ -42,13 +42,6 @@ start_server
 	:-
 	write(total_panic_exit),nl, halt.
 
-/*
-start_server 
-	:-
-	server_warning(startup_error, [], SInfo),
-	panic_exit(startup_error, '?', SInfo).
-*/
-
 	/*!------------------------------------------------------------*
 	 |	start_server/5
 	 |	start_server(Ports, Queue, QueueTail, StartedPorts, Sinfo)
@@ -363,13 +356,6 @@ serve_ready_stream(c(SR,SW,State,ConnType), QT, NewQT, Flag, SInfo)
 	!,
 	arg(1, State, Flag).
 
-		%% Try to service a request on a worker socket:
-serve_ready_stream(QueueRec, QT, NewQT, Flag, SInfo) 
-	:-
-	functor(QueueRec, wkr_rec, _),
-	!,
-	service_worker(QueueRec, QT, NewQT, Flag, SInfo).
-
 		%% Couldn't service the request on a socket,
 		%% so respond to that by closing the socket:
 serve_ready_stream(c(SR,SW,State,ConnType), QT, QT,done, SInfo) 
@@ -472,11 +458,22 @@ disp_service_request(stream_not_ready,SR,SW,State,ConnType,QT,NewQT,SInfo)
 	:-!,
 	QT = [c(SR,SW,State,ConnType) | NewQT].
 
+	%% Receiving return value from job submitted to remote worker:
+disp_service_request(Request,SR,SW, State,ConnType,QT,QT,SInfo) 
+	:-
+	functor(Request,worker_done,_),
+	arg(2, State, worker_wait(Value)),
+	!,
+		%% unify return value with the waiting variable 'Value':
+	Request = worker_done(Value),
+	mangle(2, State, nil),
+	push_idle_worker(c(SR,SW,State,ConnType)).
+
+
 	%% Explicit delaying of jobs by the queue manager; wake-up here:
 	%% This is is the single-variable case:
 disp_service_request(wake_job,SR,SW, State,ConnType,QT,NewQT,SInfo) 
 	:-
-%	(debug_wake_job -> trace ; true),
 		%% State is REQUIRED to have slot #2 = the "expect" slot:
 	arg(2, State, expect(Var,Goal)),
 	nonvar(Var),
@@ -491,10 +488,8 @@ disp_service_request(wake_job,SR,SW, State,ConnType,QT,NewQT,SInfo)
 	%% This is is the list-of-variables case:
 disp_service_request(wake_job,SR,SW, State,ConnType,QT,NewQT,SInfo) 
 	:-
-%	(debug_wake_job -> trace ; true),
 		%% State is REQUIRED to have slot #2 = the "expect" slot:
 	arg(2, State, list_expect(ListOfVars,Goal)),
-%	nonvar(Var),
 	all_instantiated(ListOfVars),
 	!,
 		%% Immediately reset the expect slot:
@@ -509,6 +504,7 @@ all_instantiated([Var | ListOfVars])
 	nonvar(Var),
 	all_instantiated(ListOfVars).
 
+/***********
 	%% Attempt to do our delays using a frozen Var:
 disp_service_request(Request,SR,SW, State,ConnType,QT,NewQT,SInfo) 
 	:-
@@ -520,42 +516,7 @@ disp_service_request(Request,SR,SW, State,ConnType,QT,NewQT,SInfo)
 		%% should melt the freeze:
 	Var = Request,
 	finish_server_request(Request,SR,SW,State,ConnType,QT,NewQT,SInfo).
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% LOGIN/LOGOUT
-	%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-disp_service_request(Request,SR,SW, State,ConnType,QT,NewQT,SInfo) 
-	:-
-	usrlog_script(Request, [ID,PW,SInfo],[_,_,SR,SW,State], Script, _),
-	!,
-	xmake_tsk_env(TaskEnv, [no_worker,_,_,SR,SW,State]),
-	run_script(Script,usradmn, TaskEnv,SInfo),
-	finish_server_request(Request,SR,SW,State,login,QT,NewQT,SInfo).
-
-/*********************************
-	%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% SUB-JOB CONTROL
-	%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-	%% Request for job control:
-disp_service_request(job_control(start,Request,Vars),SR,SW,State,
-						login,QT,NewQT,Flag,SInfo) 
-	:-!,
-	access_login_connection_info(logged_in, State, ID),
-	ID \= nil,
-	job_control(start,Request,Vars,SR,SW,State,QT,NewQT,Flag,SInfo).
-
-disp_service_request(job_finished(Status,Cookie,Vars),SR,SW,State,
-						rem_job,QT,NewQT,Flag,SInfo)
-	:-!,
-	rem_job_finished(Status,Cookie,Vars,SR,SW,State,QT,NewQT,Flag,SInfo).
-
-disp_service_request(request_received,SR,SW,JobInfo, waiting_start_confirm,
-						QT,NewQT,Flag,SInfo)
-	:-!,
-	check_start_confirm(SR,SW,JobInfo,QT,NewQT,Flag,SInfo).
-*********************************/
+***********/
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% GENERAL ADMINISTRATION
@@ -569,6 +530,18 @@ disp_service_request(Request,SR,SW, State,ConnType,QT,NewQT,SInfo)
 	!.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% LOGIN/LOGOUT (CLIENTS)
+	%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+disp_service_request(Request,SR,SW, State,ConnType,QT,NewQT,SInfo) 
+	:-
+	usrlog_script(Request, [ID,PW,SInfo],[_,_,SR,SW,State], Script, _),
+	!,
+	xmake_tsk_env(TaskEnv, [no_worker,_,_,SR,SW,State]),
+	run_script(Script,usradmn, TaskEnv,SInfo),
+	finish_server_request(Request,SR,SW,State,login,QT,NewQT,SInfo).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% WORKER COMMUNICATION
 	%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -576,52 +549,126 @@ disp_service_request(Request,SR,SW, State,ConnType,QT,NewQT,SInfo)
 		%% Initial connection/handshake
 		%%+++++++++++++++++++++++++++++++++
 
+	%%--------------------------------------------------------
+	%% Reqest from master to independent (free-running) worker
+	%% for adoption by the master; this clause implements the
+	%% worker response:
+	%% [ master server --> independent slave worker ]:
+	%% Request = are_you_available(MasterIP,MasterPort,WID):
+	%%--------------------------------------------------------
+disp_service_request(Request,SR,SW,IState,IConnType,QT,NewQT,SInfo)
+	:-
+	functor(Request,are_you_available,_),
+	!,
+	Request = are_you_available(MasterIP,MasterPort,WID),
+	set_server_info(master_host,SInfo,MasterIP),
+	set_server_info(master_port,SInfo,MasterPort),
+	set_server_info(worker_id,SInfo,WID),
+	special_connect_job(MasterIP, MasterPort, 0, JobRec, SInfo),
+	JobRec = c(MRS,MWS,State,CType),
+	getpid(PID0), PID is floor(PID0),
+	sio_gethostname(InitHN),
+	gethostbyname(InitHN,_,_,[MyIP | _]),
+	access_server_info(ports_list, SInfo, [MyPort|_]),
+	printf(MWS, 'worker_connect_init(\'%t\',\'%t\',%t,%t).\n',
+				[WID,MyIP,MyPort,PID]),
+	flush_output(MWS),
+	QT = [JobRec | NewQT],
+	mangle(1, State, continue).
+
+	%%--------------------------------------------------------
 	%% Reqest from worker to server for initial connection:
-	%% [request sent by slave worker; response by master server]:
-	%% [ master server <-- slave worker ]:
-		%% Request = worker_connect_init(ID,WHost,WPort),
-disp_service_request(Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
+	%% [request is sent by slave worker; this clause implements
+	%% the response by master server; 
+	%%		master server <-- slave worker ]:
+	%% Request = worker_connect_init(ID,WHost,WPort,PID),
+	%%--------------------------------------------------------
+disp_service_request(Request,SR,SW,IState,IConnType,QT,NewQT,SInfo)
 	:-
 	functor(Request,worker_connect_init,_),
 	!,
-		%% See wkr_mgmt.pro:
-	init_worker_state(Request,SR,SW,State,ConnType,SInfo,NewSR,NewSW,NewState),
-	finish_server_request(Request,NewSR,NewSW,NewState,login,QT,NewQT,SInfo).
-
-	%% Acknowledgement of worker install from server back to worker:
-	%% [message sent by master server; response by slave worker]:
-	%% [ master server --> slave worker ]:
-disp_service_request(worker_installed,SR,SW,State,ConnType,QT,NewQT,SInfo)
-	:-
-	mangle(1, State, done),
-	retract(waiting_for_handshake),
-	access_login_connection_info(port, State, WPort),
-	access_login_connection_info(ip_num, State, WIPNum),
-	printf(SW, 'worker_handshake_done(\'%t\',%t).\n', [WIPNum,WPort]),
-	flush_output(SW),
-	finish_server_request(worker_installed,SR,SW,State,login,QT,NewQT,SInfo).
-
-	%% Completion of server/worker handshake:
-	%% [message sent by slave worker; no response by master server]:
-	%% [ master server <-- slave worker ]:
-disp_service_request(worker_handshake_done(WHost,WPort),SR,SW,State,ConnType,QT,NewQT,SInfo)
-	:-
-	mangle(1, State, done),
-	server_info_out(worker_connect_done, SR, [WHost,WPort], SInfo),
-	finish_server_request(handshake_done,SR,SW,State,login,QT,NewQT,SInfo).
+	Request = worker_connect_init(WID,WHost,WPort,PID),
+	special_connect_job(WHost, WPort, PID, WkrRec, SInfo),
+	WkrRec = c(WRS,WWS,State,CType),
+	QT = [WkrRec | NewQT],
+	mangle(1, State, continue),
+		%% add to master list:
+	add_worker(WkrRec),
+		%% add to idle list:
+	push_idle_worker(WkrRec),
+		%% modify task_intf:use_workers status if this is 
+		%% the first worker being started:
+	(task_intf:use_workers ->
+		true
+		;
+		task_intf:assert(use_workers)
+	).
 
 		%%+++++++++++++++++++++++++++++++++
-		%% All other worker comms:
-		%% 	[See wkr_mgmt.pro]:
+		%% 
 		%%+++++++++++++++++++++++++++++++++
 
 disp_service_request(Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
 	:-
-	worker_comm_req(Request),
+	remote_proc(Request,SR,SW,State,ConnType,QT,NewQT,SInfo).
+
+disp_service_request(Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
+	:-
+		%% 'sibling_job(%t,%t,%t).\n', [OrigRequest,UserID,JobID],
+	functor(Request,sibling_job,_),
 	!,
-	disp_worker_service_request(Request,SR,SW,State,ConnType,QT,NewQT,SInfo),
+	Request = sibling_job(OrigRequest, UserID, JobID),
+	set_login_connection_info(logged_in, State, UserID),
+	xmake_tsk_env(TaskEnv, [no_worker,JobID,UserID,SR,SW,State]),
+	OrigRequest =.. [TaskName | TaskArgs],
+	access_server_info(users_area,SInfo,UsersArea),
+	(var(UsersArea) -> UsersArea = users ; true),
+	get_cwd(CurPath),
+		%% 	CfgTerms = [],
+		%% do_defaults(CfgTerms),
+		%% do_logicals(CfgTerms),
+	change_cwd(UsersArea),
+	(exists_file(UserID) -> true ; make_subdir(UserID)),
+	change_cwd(UserID),
+	open(null_stream(foobar),write,LogS, []),
+	set_login_connection_info(user_log_stream, State, LogS),
+
+	setup_remote_script(OrigRequest,TaskEnv,ReqScript),
+
+	run_script(ReqScript, Mod, TaskEnv, SInfo),
+	change_cwd(CurPath),
 	finish_server_request(Request,SR,SW,State,ConnType,QT,NewQT,SInfo).
 
+setup_remote_script(Request,TaskEnv,ReqScript)
+	:-
+	task_intf:get_csp_script(Request, [], TaskEnv, Mod,  
+								Prelude, Compute, Postlude),
+	Postlude = [V1 | RestVs]^[_|_],
+	!,
+	NewTail = 
+		[full_delay(V1)^
+			respond('worker_done(%t).',[[V1 | RestVs]],[quoted(true)])],
+	append(Compute, NewTail, ReqScript).
+
+setup_remote_script(Request,TaskEnv,ReqScript)
+	:-
+	task_intf:get_csp_script(Request, [], TaskEnv, Mod,  
+								Prelude, Compute, Postlude),
+	NewTail = 
+		[full_delay(V1)^
+			respond('worker_done(%t).',[[V1 | RestVs]],[quoted(true)])],
+	append(Compute, NewTail, ReqScript).
+
+setup_remote_script(OrigRequest,TaskEnv,ReqScript)
+	:-
+	task_intf:get_csp_script(OrigRequest, [], TaskEnv, Mod, ReqScript0),
+	ReqScript0 = ScriptHead+ScriptTail,
+		%% Assumes ResponseScript is of form full_delay(V1)^[....,respond(...)]:
+	ScriptTail = [V1 | RestVs]^[_|_],
+	NewTail = 
+		[full_delay(V1)^
+			respond('worker_done(%t).',[[V1 | RestVs]],[quoted(true)])],
+	append(ScriptHead, NewTail, ReqScript).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% GENERAL REQUESTS
@@ -639,10 +686,6 @@ disp_service_request(Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
 	 |
 	 |	- completion of disp_service_request/8
 	 *-------------------------------------------------------------*/
-fin_disp_service_request(outbound_attempt,Request,SR,SW,State,QT,NewQT,SInfo)
-	:-!,
-	check_outb_atmpt(Request,SR,SW,State,QT,NewQT,SInfo).
-
 fin_disp_service_request(non_login,Request,SR,SW,State,QT,QT,SInfo)
 	:-!,
 	act_on_server_request(Request,SR,SW,State,_,SInfo),
@@ -700,6 +743,72 @@ do_fin_server_req(add_to_queue(Rec),Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
 	mangle(1, State, continue).
 
 	/*--------------------------------------------------------------
+	 |		SENDING A REQUEST FOR REMOTE PROCESSING
+	 *-------------------------------------------------------------*/
+remote_proc(Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
+	:-
+	task_intf:use_workers,
+	Request =.. [TaskName | TaskArgs],
+		%% Policy for this is set by application:
+	task_intf:allow_remote(TaskName),
+	pop_idle_sibling_worker(Worker,SInfo),
+	access_login_connection_info(logged_in,State,UserID),
+	assign_job_id(Request, UserID, JobID),
+	xmake_tsk_env(TaskEnv, [worker_job,JobID,UserID,SR,SW,State]),
+
+	Client = c(SR,SW,State,ConnType), 
+	Worker = c(WR,WW,WState,WConn),
+	mangle(2, WState, worker_wait(Value)),
+	QT = [Worker,Client | NewQT],
+
+	setup_fin_remote_proc(Request, TaskEnv, Value, State, SInfo, Mod, Prelude),
+	run_script(Prelude, Mod, TaskEnv, SInfo),
+	printf(WW, 'sibling_job(%t,%t,%t).\n', 
+				[Request,UserID,JobID],[quoted(true)]),
+	flush_output(WW).
+
+
+setup_fin_remote_proc(Request, TaskEnv, Value, State, SInfo, Mod, Prelude)
+	:-
+	task_intf:get_csp_script(Request, [], TaskEnv, Mod,  
+								Prelude, Compute, Postlude),
+	!,
+	(Postlude = RespondVars^RespondScript ->
+		RespondVars = [V1 | Vs],
+		mangle(2, State, 
+			expect(Value, 
+				(Value=RespondVars,
+					run_script(RespondScript, user, TaskEnv,SInfo))
+			   ))
+		;
+		RespondScript=Postlude,
+		mangle(2, State, 
+			expect(true, run_script(RespondScript, user, TaskEnv,SInfo))
+			  )
+	).
+
+setup_fin_remote_proc(Request, TaskEnv, Value, State, SInfo, Mod, [])
+	:-
+	task_intf:get_csp_script(Request, [], TaskEnv, Mod, ReqScript0),
+	ReqScript0 = ScriptHead+ScriptTail,
+	ScriptTail = RespondVars^RespondScript,
+	RespondVars = [V1 | Vs],
+	mangle(2, 
+		State, 
+		expect(Value, 
+				(Value=RespondVars,
+					run_script(RespondScript, Mod, TaskEnv,SInfo))
+			  )).
+
+
+
+
+	%% Needs real implementation:
+pop_idle_sibling_worker(Worker,SInfo)
+	:-
+	pop_idle_worker(Worker).
+
+	/*--------------------------------------------------------------
 	 |		CLOSING DOWN THE QUEUE
 	 *-------------------------------------------------------------*/
 close_all(Queue, _)
@@ -744,31 +853,6 @@ close_all([_ | RQ], SInfo)
 	 |	initialization file.
 	 *-------------------------------------------------------------*/
 default_portnums(6000).
-
-	/*!-------------------------------------------------------------
-	 |	init_server_info/2
-	 |	init_server_info(Ports, SInfo)
-	 |	init_server_info(-, -)
-	 |
-	 |	- initialize server info (SInfo), by reading a config file
-	 |
-	 |	initialize_server/2 is defined in sktsvlib.pro
-	 *-------------------------------------------------------------*/
-
-init_server_info(Ports, SInfo)
-	:-
-	initialize_server(Ports, SInfo),
-	!,
-	(nonvar(Ports) ->
-		true
-		;
-		bagOf(Port, default_portnums(Port), Ports)
-	).
-
-	%% default:
-init_server_info(Ports, nil)
-	:-
-	bagof(Port, default_portnums(Port), Ports).
 
 	/*!-------------------------------------------------------------
 	 |	shutdown_server/2

@@ -12,182 +12,237 @@
 
 module socket_comms.
 
-	/*--------------------------------------------------------------*
-	 |	
-	 *--------------------------------------------------------------*/
-begin_free_worker(CmdLine, Queue, QueueTail, SInfo)
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%% GLOBAL WORKER VARIABLES
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	%% Don't remake them if we are restarting:
+make_worker_globals
 	:-
-getpid(XXX), write(begin_free_worker(XXX,CmdLine)),nl,
+	clause(get_worker_dbs(_),_),
+	!.
+
+make_worker_globals
+	:-
+	make_gv('_worker_dbs'), set_worker_dbs([]),
+	make_gv('_idle_workers'), set_idle_workers([]),
+	make_gv('_waiting_job_queue'), set_waiting_job_queue((Var,Var)).
+
+	%%-----------------------------------------------------
+	%% Master (static) list of all workers; this is just
+	%% a list pointing at all of the worker records which
+	%% have been created; the worker records are just the
+	%% Rec's entered on the server's main queue; workers
+	%% get put on this list when (and only when) they
+	%% are created; this can happen in start_all_workers/_,
+	%% or can happen in sktserve.pro at the clause for
+	%% disp_service_request/8 which handles the message
+	%%		worker_connect_init(_,_,_)
+	%%-----------------------------------------------------
+%% :- make_gv('_worker_dbs'), set_worker_dbs([]).
+
+add_worker(Worker)
+	:-
+	get_worker_dbs(CurWkrRecs),
+	set_worker_dbs([Worker | CurWkrRecs]).
+
+	%%-----------------------------------------------------
+	%% List of all currently available (idle) workers:
+	%%-----------------------------------------------------
+%% :- make_gv('_idle_workers'), set_idle_workers([]).
+
+pop_idle_worker(Worker)
+	:-
+	get_idle_workers([Worker | RestWkrRecs]),
+	set_idle_workers(RestWkrRecs).
+
+push_idle_worker(Worker)
+	:-
+	get_idle_workers(CurWkrRecs),
+	set_idle_workers([Worker | CurWkrRecs]).
+
+	%%-----------------------------------------------------
+	%% Queue of submitted jobs not yet sent to any worker (and
+	%% not being performed by the master server):
+	%%-----------------------------------------------------
+%% :- make_gv('_waiting_job_queue'), set_waiting_job_queue((Var,Var)).
+
+pop_next_job(Job)
+	:-
+	get_waiting_job_queue(JobQueue),
+	JobQueue = (Head, Tail),
+	nonvar(Head),
+	Head = [Job | RestHead],
+	!,
+	set_waiting_job_queue(RestHead, Tail).
+							 
+pop_next_job(job_queue_empty).
+							  
+push_next_job(Job)
+	:-
+	get_waiting_job_queue(JobQueue),
+	JobQueue = (Head, Tail),
+	Tail = [Job | NewTail],
+	set_waiting_job_queue(Head, NewTail).
+												   
+queue_up_job_req(QJ, State)
+	:-
+	get_job_queue((GQHead, GQTail)),
+	Tail = [QJ | NewGQTail],
+	set_job_queue((GQHead, NewGQTail)),
+	add_job_rec(QJ, State).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%% STARTING WORKERS
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	/*------------------------------------------------------*
+	 |	Try to start any workers which are listed in
+	 |	the *.ini file, modulo any qualification on
+	 |	the command line:
+	 *------------------------------------------------------*/
+worker_initialize(CmdLine, ServerPort, SInfo)
+	:-
+	make_worker_globals,
+	access_server_info(log_file, SInfo, LogFile),
+	configs_terms(CfgSrcItems),
+	server_warning(checking_workers, [], SInfo),
+	worker_initialize(CfgSrcItems, CmdLine, ServerPort, SInfo, LogFile),
+	server_warning(workers_check_done, [], SInfo).
+
+worker_initialize(CfgSrcItems, CmdLine, SP, SInfo, LogFile)
+	:-
+	minimum_num_workers(CfgSrcItems, CmdLine, MinNumWorkers),
+	(MinNumWorkers = 0 ->
+		task_intf:abolish(use_workers,0)
+		;
+		task_intf:assert(use_workers),
+		start_workers(MinNumWorkers, CfgSrcItems, CmdLine, SP, SInfo, NW)
+	).
+
+	%% Command-line value overrides anything else:
+minimum_num_workers(CfgSrcItems, CmdLine, MinNumWorkers)
+	:-
+	dmember(min_workers=MinNumWorkersAtom,CmdLine),
+	atomread(MinNumWorkersAtom, MinNumWorkers),
+	!.
+
+minimum_num_workers(CfgSrcItems, CmdLine, MinNumWorkers)
+	:-
+	dmember(min_workers=MinNumWorkers, CfgSrcItems),
+	!.
+
+	%% Normally need to start at least one, for batch jobs:
+minimum_num_workers(CfgSrcItems, CmdLine, 1).
+
+	/*------------------------------------------------------*
+	 |	Check to determine whether the server process
+	 |	being started is in fact being started as some
+	 |	sort of worker process:
+	 *------------------------------------------------------*/
+
+begin_free_worker(CmdLine, SInfo)
+	:-
+	dmember(st=fws, CmdLine),
+	!,
+%printf(user_output,'ENTER: begin_free_worker\n',[]),flush_output(user_output),
+	getpid(MyPID0), MyPID is floor(MyPID0), 
 		%% Get initial necessary info from commandline:
+	dmember(uport=MyPortAtom,CmdLine),
+	dmember(uhost=MyHost,CmdLine),
+	atomread(MyPortAtom, MyPort),
+	set_server_info(ports_list, SInfo, [MyPort]),
+	master_info_cmd_line(CmdLine, SInfo).
+
+begin_free_worker(CmdLine, SInfo).
+
+master_info_cmd_line(CmdLine, SInfo)
+	:-
 	dmember(chost=MasterHost,CmdLine),
 	dmember(cport=ICPortAtom,CmdLine),
+	dmember(id=MyID,CmdLine),
+	!,
+	atomread(ICPortAtom, ICPort),
+	set_server_info(master_host,SInfo,MasterHost),
+	set_server_info(master_port,SInfo,ICPort),
+	set_server_info(worker_id,SInfo,MyID).
+
+master_info_cmd_line(CmdLine, SInfo).
+
+	/*------------------------------------------------------*
+	 |	If we (the server process being started) are being
+	 |	started as a worker process (as determined from the 
+	 |	command-line driven, check to see whether we are
+	 |	already connected to the master process, and make the
+	 |	connection if we are not.
+	 *------------------------------------------------------*/
+
+check_master_connect(CmdLine,InitQueueTail, QueueTail, SInfo)
+	:-
+%printf('TRY:check_master_connect:cmdline= ||%t||\n',[CmdLine]),flush_output,
+	dmember(chost=MasterHost,CmdLine),
+	dmember(cport=MasterPortAtom,CmdLine),
+	atomread(MasterPortAtom, MasterPort),
+	!,
+%printf('check_master_connect-call: special_connect_job\n',[]),flush_output,
+	getpid(PID0), PID is floor(PID0),
+	special_connect_job(MasterHost, MasterPort, PID, JobRec, SInfo),
+	InitQueueTail = QueueTail,
+	JobRec = c(_,MWS,_,_),
+	access_server_info(worker_id,SInfo,MyID),
 	dmember(uport=MyPortAtom,CmdLine),
 	dmember(uhost=MyHost,CmdLine),
 	dmember(id=MyID,CmdLine),
-	atomread(ICPortAtom, ICPort),
-		%% Open the (client) socket back to the master server on the
-		%% master server's port:
-	catch(open(socket(inet_stream,MasterHost,ICPort),read,ICRS,[]),
+%printf('check_master_connect-issue: worker_connect_init\n',[]),flush_output,
+	printf(MWS, 'worker_connect_init(\'%t\',\'%t\',%t,%t).\n',
+						[MyID,MyHost,MyPortAtom,PID]),
+	flush_output(MWS).
+
+check_master_connect(CmdLine, QueueTail, QueueTail, SInfo).
+
+	/*------------------------------------------------------*
+	 |	Actually open the sockets back to the master server,
+	 |	and build the queue Rec we will maintain for this
+	 |	connection (remember that the worker process is just
+	 |	another server):
+	 *------------------------------------------------------*/
+
+	%%------------------------------------------------------
+	%% Initial version: running on same machine as master
+	%% server, in same user areas:
+	%%------------------------------------------------------
+special_connect_job(Host, Port, PID, JobRec, SInfo)
+	:-
+%printf('>1-special_connect(%t,%t,%t)\n',[Host, Port, PID]),flush_output,
+	catch(open(socket(inet_stream,Host,Port),read,MRS,
+						[read_eoln_type(lf),snr_action(snr_code)]),
 			_,
+					%% Make into better error dianostics: 
 			fail),
-	(is_server_socket(ICRS) ->
-		close(ICRS),
+	(is_server_socket(MRS) ->
+		close(MRS),
+					%% Make into better error dianostics: 
 		fail
 		;
-		open(socket(clone,ICRS),write,ICWS,[])
+		open(socket(clone,MRS),write,MWS,[write_eoln_type(lf)])
 	),
-	cont_free_work(MyPortAtom,MyHost,ICRS,ICWS,MyID,Queue,QueueTail,SInfo).
+	JobRec = c(MRS,MWS,InitState,login),
+	ConnectAddr = Host,
+	initial_state(login,ConnectAddr,MRS,MWS,
+					initial_state(ConnectAddr),InitState,Flag,SInfo),
+	set_login_connection_info(ip_num, InitState, Host),
 
-	%% Now open a server socket on MyPort; we will act as
-	%% server on this socket (and the master server will act
-	%% as a client on it):
-cont_free_work(MyPortAtom,MyHost,ICRS,ICWS,MyID,Queue,QueueTail,SInfo)
-	:-
-	atomread(MyPortAtom, MyPort),
-%	start_server_ports([MyPort], Queue, QueueTail, Res, SInfo),
-%	Res \= [],
-
-	MyPortTop is MyPort + 100,
-	start_server_port_range(MyPort, MyPortTop, Queue, QueueTail, ThePort, SInfo),
-write(cont_free_work(XXX,start_server_ports_done(ThePort,Res))),nl,flush_output,
-	!,
-	assert(waiting_for_handshake),
-		%% send Request: worker_connect_init(_,_,_)
-		%% on master server's (listening) socket;
-	printf(ICWS, 'worker_connect_init(\'%t\',\'%t\',%t).\n',[MyID,MyHost,ThePort]),
-	flush_output(ICWS).
-
-	%% Failed to open our socket; close down & quit:
-cont_free_work(MyPortAtom,MyHost,ICRS,ICWS,MyID,Queue,QueueTail,SInfo)
-	:-
-	printf(ICWS, 'worker_init_failure(%t,%t,%t).',[MyID,MyHost,MyPortAtom]),
-	flush_output(ICWS),
-	close(ICRS),
-	close(ICWS),
-	halt.
-
-%worker_init_req(worker_connect_init(_,_,_)).
-
-start_server_port_range(CurPort, TopPort, Queue, QueueTail, CurPort, SInfo)
-	:-
-write(wkr_sspr(CurPort)),nl,
-	catch(start_server_on_port(CurPort, Queue, QueueTail, SInfo),
-			_,
-			sspr_fail(CurPort)
-	),
-	!.
-
-start_server_port_range(CurPort, TopPort, Queue, QueueTail, ThePort, SInfo)
-	:-
-write(wkr_sspr_c2(CurPort,TopPort)),nl,
-	CurPort < TopPort,
-	NextPort is CurPort + 1,
-	start_server_port_range(NextPort, TopPort, Queue, QueueTail, ThePort, SInfo).
-
-sspr_fail(CurPort)
-	:-
-	write(sspr_fail(CurPort)),nl,
-	fail.
+	gethostbyaddr(Host,_,[HostName | _],_),
+%printf('>2-special_connect-HostName=%t\n',[HostName]),flush_output,
+	set_login_connection_info(hostname, InitState, HostName),
+	set_login_connection_info(pid, InitState, PID),
+%printf('>3-special_connect\n',[]),flush_output,
+	open(null_stream(foobar),write,LogS, []),
+	set_login_connection_info(user_log_stream, InitState, LogS).
 
 	/*--------------------------------------------------------------*
 	 |	
 	 *--------------------------------------------------------------*/
-
-init_worker_state(worker_connect_init(ID,WHost,WPort),SR,SW,State,ConnType,SInfo,
-					NewRS,NewWS,State)
-	:-
-	(pending_worker_setup(ID, WHost,WPort,WkrNum, WkrCfg); 
-		special_worker_setup(ID, WHost,WPort,WkrNum, WkrCfg)),
-	catch(open(socket(inet_stream,WHost,WPort),read,NewRS,[]),
-			_,
-			fail),
-	(is_server_socket(NewRS) ->
-		close(NewRS),
-		fail
-		;
-		open(socket(clone,NewRS),write,NewWS,[])
-	),
-		%% Temporary (??):
-	socket_stream_info(NewRS, WWHost,WWPort,_,_),
-	sio_fd(SR, FID),
-	set_login_connection_info(port, State, WWPort),
-	set_login_connection_info(socket_id, State, FID),
-	set_login_connection_info(socket_in, State, NewRS),
-	set_login_connection_info(socket_out, State, NewWS),
-
-%write(init_worker_connect(WHost/WWHost,WPort/WWPort,fid=FID)),nl, flush_output,
-	server_info_out(worker_connect, NewRS, [WHost,WPort], SInfo),
-
-	%% Put record in wdbs, and send message back to the worker for handshake:
-
-	InitWorker = m(WWHost,IP,User,PW,WWPort,NewRS,NewWS,PID),
-	xmake_wkr_rec(Worker, [NewRS, NewWS, idle, WkrNum, InitWorker]),
-	get_worker_dbs(WrkDB),
-	mangle(WkrNum, WrkDB, Worker),
-
-	get_idle_workers(PrevIdle),
-	set_idle_workers([Worker | PrevIdle]),
-
-	printf(NewWS, 'worker_installed.\n', []),
-	flush_output(NewWS).
-
-	/*--------------------------------------------------------------*
-	 |	
-	 *--------------------------------------------------------------*/
-
-outer_max_num_workers(100).
-
-init_worker_framework(NumWkrs)
-	:-
-	make_gv('_idle_workers'),
-		set_idle_workers([]),
-	make_gv('_worker_dbs'),
-	make_gv('_job_queue'), 
-		set_job_queue((Var,Var)),
-	functor(WrkDB, wdb, NumWkrs),
-	set_all_args(1,NumWkrs,WrkDB, 0),
-		set_worker_dbs(WrkDB).
-
-init_workers(MaxNumWkrs, CmdLine, CfgSrcItems, SInfo, LogFile, FinalNWs)
-	:-
-	start_workers(MaxNumWkrs, FinalNWs, CfgSrcItems, CmdLine, WrkDB, SInfo, WkrRecsList),
-assert(pending_wkr(ken_ok,'hilbert.als.com',30002,
-		 m('hilbert.als.com','204.5.42.8',ken,logical,30002,
-			'/dakota/ken/zparc/eng/servers/builds/solaris/zsd-solaris',
-			'/dakota/ken/zparc/eng/servers/builds/solaris')  )),
-	set_idle_workers(WkrRecsList).
-
-special_worker_setup(ken_ok, WHost,WPort,WkrNum, WkrCfg)
-	:-
-	get_worker_dbs(WrkDB),
-	functor(WrkDB, _, NumWkrs),
-	first_free(1,NumWkrs,WrkDB,WkrNum).
-
-pending_worker_setup(ID, WHost,WPort,WkrNum, WkrCfg)
-	:-
-	pending_wkr(ID,WHost,WPort,WkrCfg),
-	get_worker_dbs(WrkDB),
-	functor(WrkDB, _, NumWkrs),
-	first_free(1,NumWkrs,WrkDB,WkrNum),
-	retract(pending_wkr(ID,WHost,WPort,WkrCfg)).
-
-	/*--------------------------------------------------------------*
-	 |	Locate the index of the first free (= 0) arg in
-	 |	the worker_dbs (database) term:
-	 *--------------------------------------------------------------*/
-first_free(CurArgN, NumWkrs, WrkDB, WkrNum)
-	:-
-	arg(CurArgN, WrkDB, WRec),
-	disp_first_free(WRec, CurArgN, NumWkrs,WrkDB, WkrNum).
-
-disp_first_free(0, WkrNum, NumWkrs, WrkDB, WkrNum).
-disp_first_free(WRec, CurArgN, WrkDB, WkrNum)
-	:-
-	WRec \= 0, 
-	CurArgN < NumWkrs,
-	!,
-	NextArgN is CurArgN + 1,
-	first_free(NextArgN, NumWkrs, WrkDB, WkrNum).
 
 	/*--------------------------------------------------------------*
 	 |	Build a list of descriptions of individual worker
@@ -201,258 +256,149 @@ config_worker_descs(ConfigsTerms, WorkerConfigs)
 	bld_wrkcfgs(BWDL, DfltWorkerCmd, DfltWorkerDir, WorkerConfigs).
 
 bld_wrkcfgs([], DfltWorkerCmd, DfltWorkerDir, []).
-bld_wrkcfgs([BWD | BWDL], DfltWorkerCmd, DfltWorkerDir, WorkerConfigs)
+bld_wrkcfgs([BWD | BWDL], DfltWorkerCmd, DfltWorkerDir, [WCF | WorkerConfigs])
 	:-
-	bld_some_wcfgs(BWD, DfltWorkerCmd, DfltWorkerDir, WorkerConfigs, InterWorkerConfigs),
-	bld_wrkcfgs(BWDL, DfltWorkerCmd, DfltWorkerDir, InterWorkerConfigs).
+	bld_wcfg(BWD, DfltWorkerCmd, DfltWorkerDir, WCF),
+	bld_wrkcfgs(BWDL, DfltWorkerCmd, DfltWorkerDir, WorkerConfigs).
 
-bld_some_wcfgs(BWD, DfltWorkerCmd, DfltWorkerDir, WrCfigs, IntWrCfigs)
+bld_wcfg(BWD, DfltWorkerCmd, DfltWorkerDir, WCF)
 	:-
-	(BWD = m(HostName,IP,UserAcct,PW,PortsList) ->
+	(BWD = m(HostName,IP,UserAcct,PW,Port) ->
 		WorkerCmd = DfltWorkerCmd,
 		WorkerDir = DfltWorkerDir
 		;
-		(BWD = m(HostName,IP,UserAcct,PW,PortsList,WorkerCmd) ->
+		(BWD = m(HostName,IP,UserAcct,PW,Port,WorkerCmd) ->
 			WorkerDir = DfltWorkerDir
 			;
-			BWD = m(HostName,IP,UserAcct,PW,PortsList,WorkerCmd,WorkerDir)
+			BWD = m(HostName,IP,UserAcct,PW,Port,WorkerCmd,WorkerDir)
 		)
 	),
-	bldws(PortsList,HostName,IP,UserAcct,PW, WorkerCmd, WorkerDir, WrCfigs, IntWrCfigs).
-
-bldws([],HostName,IP,UserAcct,PW, WorkerCmd, WorkerDir, WrCfigs, WrCfigs).
-bldws([Port | PortsList],HostName,IP,UserAcct,PW, 
-		WorkerCmd, WorkerDir, WrCfigs, WrCfigsTail)
-	:-
-	WrCfigs = [WCF | InterWrCfigs],
-	WCF = m(HostName,IP,Port,UserAcct,PW, WorkerCmd, WorkerDir),
-	bldws(PortsList,HostName,IP,UserAcct,PW, 
-			WorkerCmd, WorkerDir, InterWrCfigs, WrCfigsTail).
-bldws(Port,HostName,IP,UserAcct,PW, 
-		WorkerCmd, WorkerDir, WrCfigs, WrCfigsTail)
-	:-
-	atomic(Port),
-	!,
-	WrCfigs = [WCF],
 	WCF = m(HostName,IP,Port,UserAcct,PW, WorkerCmd, WorkerDir).
 
 	/*--------------------------------------------------------------*
-	 |	If the parsed CommandLine contains "noworker=true", don't 
-	 |	really startup anything, just set NumWorkers=1, and make the 
-	 |	single worker record a dummy (used for development); ,
-	 |	otherwise, build the list of worker descriptions from zparc.ini, 
-	 |	and start each of the described worker processes, up to the
-	 |	specificied max:
 	 *--------------------------------------------------------------*/
-start_workers(MaxNWs, 1, ConfigsTerms, CommandLine, WrkDB, SP, SInfo, [Worker])
+start_workers(MinNumWorkers, CfgSrcItems, CmdLine, SP, SInfo, NW)
 	:-
-	dmember(noworker=true, CommandLine),
-	!,
-	xmake_wkr_rec(Worker, [nil,nil,nil,0,nil]),
-	arg(1, WrkDB, Worker).
+	config_worker_descs(CfgSrcItems, SrcWorkerConfigs),
+	length(SrcWorkerConfigs, NumSrcCfgs),
+	Diff is MinNumWorkers - NumSrcCfgs,
+	max(Diff, 0, MissingNumCfgs),
+	synth_local_clones(MissingNumCfgs, SInfo, ExtraCfgs),
+	append(SrcWorkerConfigs, ExtraCfgs, WorkerConfigs),
+	access_server_info(host_ip, SInfo, ThisHost),
+	start_all_workers(WorkerConfigs, 0, NW, ThisHost, SP, SInfo).
 
-start_workers(MaxNWs, FinalNWs, ConfigsTerms, CommandLine, WrkDB, SP, SInfo, WkrRecsList)
+synth_local_clones(Num, SInfo, ExtraCfgs)
 	:-
-		% 'Starting worker processes. Please wait...\n'
-%	server_info_out(start_wkrs, 0, [], SInfo),
-	config_worker_descs(ConfigsTerms, WorkerConfigs),
-	!,
-	sio_gethostname(InitHN),
-	gethostbyname(InitHN,_,FHN,_),
-	(atomic(FHN) -> ThisHost = FHN ; FHN = [ThisHost | _]),
-	start_all_workers(WorkerConfigs, 0, MaxNWs, FinalNWs,ThisHost,WrkDB, SP, SInfo, WkrRecsList),
-	fin_start_all_workers(FinalNWs, WorkerConfigs, WrkDB, SInfo, WkrRecsList).
+	access_server_info(host_ip, SInfo, ThisHost),
+	get_cwd(WDir),
+	access_server_info(self_start, SInfo, WCmd),
+	access_server_info(ports_list, SInfo, SPorts),
+	maximum(SPorts, MaxSPort),
+		%% Need to raise exception if this fails:
+	MaxSPort + Num < 65536,
+	FirstPort is MaxSPort + 1,
+	synth_local_clones(Num,FirstPort,ThisHost,WCmd,WDir,SInfo,ExtraCfgs).
 
-/*
-fin_start_all_workers(0, WorkerConfigs, WrkDB, SInfo, WkrRecsList)
+synth_local_clones(0, _, _, _,_,_, []) :-!.
+synth_local_clones(CurNum,CurPort,ThisHost,WCmd,WDir,SInfo,[Cfg|ExtraCfgs])
 	:-
-	set_idle_workers([]),
-	set_worker_dbs(wdb),
-	set_job_queue(nil),
-	server_info_out(wkrs_started, 0, [0], SInfo).
-*/
+	Cfg = m(ThisHost,ThisHost,CurPort,x,x, WCmd,WDir),
+	NxtNum is CurNum - 1,
+	NxtPort is CurPort + 1,
+	synth_local_clones(NxtNum,NxtPort,ThisHost,WCmd,WDir,SInfo,ExtraCfgs).
+	
 
-fin_start_all_workers(FinalNWs, WorkerConfigs, WrkDB, SInfo, WkrRecsList)
+
+start_all_workers([], NW, NW, ThisHost,SP, SInfo).
+
+start_all_workers([WCfg | WorkerConfigs], CurN, NW, ThisHost, SP, SInfo)
 	:-
-	server_info_out(wkrs_started, 0, [FinalNWs], SInfo).
-
-	/*--------------------------------------------------------------*
-	 |	Main recursion for starting/connecting to the workers:
-	 |
-	 |	Also creates the list (WkrRecsList) of records concerning
-	 |	the started workers; this is later accessed using:
-	 |		worker_avail/1   and return_to_idle/1
-	 |
-	 |	Also sets the WrkDB info.
-	 *--------------------------------------------------------------*/
-start_all_workers([], FinalNWs, MaxNWs, FinalNWs, ThisHost,WrkDB, SP, SInfo, []).
-
-start_all_workers([WCfg | WorkerConfigs], CurN, MaxNWs, FinalNWs, 
-				ThisHost,WrkDB, SP, SInfo, WkrRecsList)
-	:-
-	CurN < MaxNWs,
-	!,
-/*
-	TryNextN is CurN + 1,
-	(start_worker(WCfg, TryNextN, SInfo, Worker) ->
-		NextN is CurN + 1,
-		mangle(NextN, WrkDB, Worker),
-			%	'Wkr#%d started. '
-		server_info_out(a_wkr_started, 0, [NextN], SInfo),
-		WkrRecsList = [Worker | WkrRecsListTail]
-		;
-		NextN = CurN,
-		WkrRecsList = WkrRecsListTail
-	),
-	*/
-	start_worker(WCfg, ThisHost, NextN, SP, SInfo, Worker),
+	gensym(det_wkr,WID),
+	issue_start_worker(WCfg, ThisHost, SP, WID, SInfo),
 	NextN is CurN + 1,
-	WkrRecsList = [Worker | WkrRecsListTail],
-	start_all_workers(WorkerConfigs, NextN, MaxNWs, FinalNWs, 
-						ThisHost,WrkDB, SP, SInfo, WkrRecsListTail).
-
-start_all_workers(_, FinalNWs, MaxNWs, FinalNWs, ThisHost, WrkDB, SP, SInfo, []).
+	start_all_workers(WorkerConfigs, NextN, NW, ThisHost, SP, SInfo).
 
 	/*--------------------------------------------------------------*
-	 |	start_worker/5
-	 |	start_worker(WCfg, ThisHost, CurN, SP, SInfo, Worker)
-	 |	start_worker(+, +, +, +, -)
+	 |	issue_start_worker/5
+	 |	issue_start_worker(WCfg, ThisHost, SP, WID, SInfo)
+	 |	issue_start_worker(+, +, +, +, +)
 	 |
 	 |	Try to start/connect to an individual worker:
 	 |
-	 |	Success: Returns
-	 |	Worker = record made with xmake_wkr_rec/2:
-	 |		xmake_wkr_rec(Worker, [WkRS, WkWS, idle, CurN, InitWorker])
-	 |	
+	 |	Success: Issues appropriate messages; real connection
+	 |	occurs when the candidate worker responds with
+	 |		worker_connect_init     message.
 	 *--------------------------------------------------------------*/
 	%% Can we connect to the port?
-start_worker(WCfg, ThisHost, CurN, SP, SInfo, Worker)
+issue_start_worker(WCfg, ThisHost, SP, WID, SInfo)
 	:-
-	WCfg =  m(HostName,IP,Port,UserAcct,PW, WorkerCmd,WorkerDir),
+	WCfg =  m(WorkerHost,IP,WPort,UserAcct,PW, WorkerCmd,WorkerDir),
 			%% Can we open a read socket on the port?
-	WorkerHost = HostName,
-	catch(open(socket(inet_stream,WorkerHost,Port),read,WkRS,
+	catch(open(socket(inet_stream,WorkerHost,WPort),read,WkRS,
 			[read_eoln_type(lf),snr_action(snr_code)]),
 			_,
 		 	fail
 	),
 			%% Yes; Is there a process & can we connect:
-	(proceed_start_worker(WkRS, Port, WCfg, CurN, SInfo, Worker) ->
+	(proceed_start_worker(WkRS, WPort, WCfg, ThisHost, SP, WID, SInfo) ->
 		true
 		;
-		server_info_out(running_no_connect, 0, [HostName,Port], SInfo),
+		server_info_out(running_no_connect, 0, [WorkerHost,WPort], SInfo),
 		fail
 	).
 
 	%% No worker running that we can connect to; Setup start worker process:
-start_worker(WCfg, ThisHost, CurN, SP, SInfo, Worker)
+issue_start_worker(WCfg, ThisHost, SP, WID, SInfo)
 	:-
-	WCfg =  m(HostName,IP,WorkerPort,User,PW, WorkerCmd,WorkerDir),
-	gensym(det_wkr,WID),
-	spawn_free_worker(ThisHost,HostName,WID,SP, WCfg, SInfo),
-	assert(pending_wkr(WID,HostName,WorkerPort,WkrCfg)).
-
+	WCfg =  m(WHostName,IP,WorkerPort,User,PW, WorkerCmd,WorkerDir),
+	spawn_free_worker(ThisHost,SP,WHostName,WID,WCfg, SInfo).
 
 	%% Worker process is to run on the same machine as this server:
-spawn_free_worker(Host,Host,WID,SP, WCfg, SInfo)
+spawn_free_worker(SHost,SP,WHost,WID,WCfg, SInfo)
 	:-
-	WCfg =  m(Host,IP,Port,UserAcct,PW, WorkerCmd,WorkerDir),
+	WCfg =  m(WHost,WIP,WPort,UserAcct,PW, WorkerCmd,WorkerDir),
 	sprintf(atom(Cmd),
-	'%t -g start_server -p -st fws -chost %t -cport %t -uhost %t -uport %t -id %t &',
-		[WorkerCmd,Host,SP,Host,Port,WID]),
+	'%t -g start_server -p -st fws -chost %t -cport %t -uhost %t -uport %t -id %t -dir %t -min_workers 0 &',
+		[WorkerCmd,SHost,SP,WIP,WPort,WID,WorkerDir]),
 
-	server_info_out(spawn_attempt, 0, [Host,IP,WID], SInfo),
-%getpid(XXX), write(pid(XXX)),write('system_call:'),nl, write(Cmd),nl,nl,
-
+	server_info_out(spawn_attempt, 0, [WHost,WPort,WID], SInfo),
 	system(Cmd).
 
-
-/*
-	%% Worker process is to run on a different machine than this server:
-spawn_free_worker(_,_,WID,SP, WCfg)
-	:-
-	WCfg =  m(HostName,IP,Port,UserAcct,PW, WorkerCmd,WorkerDir),
-*/
-
-
-/***********
-	%% No worker running that we can connect to; Try to start worker process:
-start_worker(WCfg, CurN, SInfo, Worker)
-	:-
-	WCfg =  m(HostName,IP,WorkerPort,User,PW, WorkerCmd,WorkerDir),
-	server_info_out(try_start, 0, [HostName,WorkerPort], SInfo),
-
-	sprintf(atom(FullCmd), 
-		'%t -gias -g jobserve:jobserve -p -rexec -port %t -dir %t', 
-			[WorkerCmd, WorkerPort, WorkerDir]),
-
-printf('Trying rexec: %t\n',[FullCmd]), flush_output,
-	rexec(FullCmd, [host(IP),username(User),password(PW),
-					rstream(WkIRS,[snr_action(snr_code)]),wstream(WkIWS,[])]),
-printf('rexec OK\n',[]), flush_output,
-	check_connect(25,WkIRS,WkIWS,1000000,ConnectCheckResultLine),
-	atomread(ConnectCheckResultLine, ConnectCheckResult),
-	ConnectCheckResult = ready_for_business(PID),
-	InitWorker = m(HostName,IP,User,PW,WorkerPort,WkIRS,WkIWS,PID),
-	make_worker_conns(InitWorker, CurN, SInfo, Worker),
-	!.
-
-start_worker(WCfg, CurN, SInfo, Worker)
-	:-
-	WCfg = m(HostName,IP,Port,UserAcct,PW, WorkerCmd,WorkerDir),
-		%	'Can\'t start service worker on host %t(%t) as %t at port %t...Skipping\n'
-	server_info_out(skip_wkr, 0, [HostName,IP,UserAcct,Port], SInfo),
-	!,
-	fail.
-***********/
-
 	/*--------------------------------------------------------------*
-	 |	proceed_start_worker/6
-	 |	proceed_start_worker(WkRS, Port, WCfg, CurN, SInfo, Worker)
-	 |	proceed_start_worker(+, +, +, +, +, -)
+	 |	proceed_start_worker/7
+	 |	proceed_start_worker(WkRS, Port, WCfg, ThisHost, SP, WID, SInfo)
+	 |	proceed_start_worker(+, +, +, +, +, +, +)
 	 |
 	 |	Try to connect to a running worker process:
-	 |
-	 |	Success: Returns
-	 |	Worker = record made with xmake_wkr_rec/2:
-	 |		xmake_wkr_rec(Worker, [WkRS, WkWS, idle, CurN, InitWorker])
-	 |	
 	 *--------------------------------------------------------------*/
 			%% Opened socket; Is it a server socket? - If so, QUIT:
-proceed_start_worker(WkRS, Port, WCfg, CurN, SInfo, Worker)
+proceed_start_worker(WkRS, Port, WCfg, ThisHost, SP, WID, SInfo)
 	:-
 	is_server_socket(WkRS),
 	!,
 	close(WkRS),
 	fail.
 
-			%% Not a server socket (we're a client); Try to connect to it:
-proceed_start_worker(WkRS, WorkerPort, WCfg, CurN, SInfo, Worker)
+		%% Not a server socket (we're a client); Try to connect to it:
+proceed_start_worker(WkRS, WorkerPort, WCfg, ThisHost, SP, WID, SInfo)
 	:-
 	flush_input(WkRS),
 	open(socket(clone,WkRS),write,WkWS,[write_eoln_type(lf)]),
-	catch( (printf(WkWS, 'are_you_ready.\n', []), flush_output(WkWS)),
+	special_connect_job(WHost, WorkerPort, 0, Worker, SInfo),
+	catch( (printf(WkWS, 'are_you_available(\'%t\',%t,\'%t\').\n', 
+							[ThisHost,SP,WID]), 
+			flush_output(WkWS)),
 		   _,
-		   fail),
-	check_connect(25,WkRS,WkWS,100000,ConnectCheckResultLine),
-	atomread(ConnectCheckResultLine, ConnectCheckResult),
-	ConnectCheckResult = ready_for_business(PID),
-	!,
-	WCfg =  m(HostName,IP,_,User,PW, _,_),
-	InitWorker = m(HostName,IP,User,PW,WorkerPort,WkIRS,WkIWS,PID),
-	xmake_wkr_rec(Worker, [WkRS, WkWS, idle, CurN, InitWorker]),
-	server_info_out(connect_wkr, 0, [HostName,IP,PID,User,WorkerPort], SInfo).
-
+		   fail).
 
 	/*--------------------------------------------------------------*
 	 |	Kill all workers (if running)
 	 *--------------------------------------------------------------*/
 kill_all_workers
 	:-
-%	num_workers(NWs),
 	get_worker_dbs(WrkDB),
 	functor(WrkDB, wdb, NumWkrs),
-%	WrkDB =.. [wdb | WkrRecList],
 	!,
 	kill_all_workers(1, NumWkrs, WrkDB).
 kill_all_workers.
@@ -492,16 +438,6 @@ kill_off_wkr(Worker).
 
 	%% remove when any real ones are installed:
 worker_comm_req(worker_dummy_request).
-/*
-worker_comm_req(Request).
-disp_worker_service_request(Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
-	:-
-
-*/
-
-
-
-
 
 	/*--------------------------------------------------------------*
 	 |	Job queue handling, etc....
@@ -519,10 +455,6 @@ appl_exec(Task,TaskArgs,Mod,TaskEnv,SInfo)
 
 job_submit(Task,TaskArgs,Mod,TaskEnv,SInfo,WorkerRec)
 	:-
-		%% WorkerRec was made with:
-		%% xmake_wkr_rec(WorkerRec, [WkRS, WkWS, idle, ID, WorkerInfo])
-		%% WorkerInfo = m(HostName,IP,User,PW,WorkerPort,WkIRS,WkIWS,PID),
-
 		%% Get top level var/nonvar pattern from TaskArgs to use
 		%% for matching up the return value list from the worker;
 		%% this puts the computed values (e.g., "Result") back into
@@ -537,12 +469,9 @@ job_submit(Task,TaskArgs,Mod,TaskEnv,SInfo,WorkerRec)
 
 		%% Transmit job to worker:
 	mk_job_rec(Task,TaskArgs,Mod,TaskEnv,Job),
-	access_wkr_rec(write_s,WorkerRec,WkWS),
+	WorkerRec = c(_,WkWS,_,_),
 	printf(WkWS, '%t.\n', [Job], [quoted(true)]),
-
-	access_wkr_rec(workerID,WorkerRec,N),
-		%	'Submitted to worker %t: %t \n'
-	server_info_out(job_sub, 0, [N, Job], SInfo).
+	flush_output(WkWS).
 
 get_var_mask([], []).
 get_var_mask([TA | TaskArgs], [TA | TaskArgsVarMask])
@@ -554,40 +483,6 @@ get_var_mask([TA | TaskArgs], [_ | TaskArgsVarMask])
 	:-
 	get_var_mask(TaskArgs, TaskArgsVarMask).
 
-pop_next_job(Job)
-	:-
-	get_job_queue(JobQueue),
-	JobQueue = (Head, Tail),
-	nonvar(Head),
-	Head = [Job | RestHead],
-	!,
-	set_job_queue(RestHead, Tail).
-							 
-pop_next_job(job_queue_empty).
-							  
-push_next_job(Job)
-	:-
-	get_job_queue(JobQueue),
-	JobQueue = (Head, Tail),
-	Tail = [Job | NewTail],
-	set_job_queue(Head, NewTail).
-												   
-worker_avail(Worker)
-	:-
-	get_idle_workers([Worker | RestWkrRecs]),
-	set_idle_workers(RestWkrRecs).
-
-return_to_idle(Worker)
-	:-
-	get_idle_workers(CurWkrRecs),
-	set_idle_workers([Worker | CurWkrRecs]).
-
-queue_up_job_req(QJ, State)
-	:-
-	get_job_queue((GQHead, GQTail)),
-	Tail = [QJ | NewGQTail],
-	set_job_queue((GQHead, NewGQTail)),
-	add_job_rec(QJ, State).
 
 	/*--------------------------------------------------------------*
 	 |	Messages codes relating to worker management
@@ -676,16 +571,8 @@ handle_task(no_worker,Task,TaskArgs,Mod,TaskEnv,SInfo)
 		 
 handle_task(worker_job,Task,TaskArgs,Mod,TaskEnv,SInfo)
 	:-
-
-		%% returns Worker record made with:
-		%%	xmake_wkr_rec(Worker, [WkRS, WkWS, idle, N, InitWorker])
-	worker_avail(Worker),
+	pop_idle_worker(Worker),
 	!,
-		% Put the worker record in the queue first:
-		%   Flag = add_to_queue(Worker).
-	access_tsk_env(state, TaskEnv, State),
-	mangle(1, State, add_to_queue(Worker) ),
-
 		%% Now submit the job:
 	job_submit(Task,TaskArgs,Mod,TaskEnv,SInfo,Worker).
 
@@ -715,60 +602,6 @@ pop_job_rec(Job, State)
 	Head = [Job | NewHead],
 	set_login_connection_info(waiting_jobs, State, (NewHead, Tail)).
 
-service_worker(QueueRec, QT, NewQT, Flag, SInfo)
-	:-
-	access_wkr_rec(read_s,QueueRec,WkRS),
-%	access_wkr_rec(write_s,QueueRec,WkWS),
-%	access_wkr_rec(state,QueueRec,CurState),
-%	access_wkr_rec(workerID,QueueRec,N),
-%	access_wkr_rec(worker_info,QueueRec,WorkerInfo),
-
-	read(WkRS, Request),
-	(Request \= stream_not_ready ->
-		server_info_out(service_wkr, WkRS,[], SInfo)
-		;
-		true
-	),
-	!,
-	handle_worker(Request, QueueRec, WFlag),
-	dispose_worker(WFlag, QueueRec, QT, NewQT, Flag).
-
-    /*--------------------------------------------------------------*
-	 |  Deal with worker responses:
-	 *--------------------------------------------------------------*/
-handle_worker(job_done(JobID, UserID, ReturnTaskArgs), QueueRec, return_to_idle)
-	:-!,
-	access_wkr_rec(state,QueueRec,CurState),
-	CurState =.. [busy | TaskVarArgsMask],
-	TaskVarArgsMask = ReturnTaskArgs,
-	set_wkr_rec(state,QueueRec,idle).
-								   
-handle_worker(end_of_file, QueueRec, done)
-	:-!.
-												
-handle_worker(Request, QueueRec, continue).
-
-dispose_worker(Flag, QueueRec, QT, NewQT, continue)
-	:-
-	var(Flag),
-	!,
-	QT = [QueueRec | NewQT].
-					 
-dispose_worker(return_to_idle, QueueRec, QT, NewQT, done)
-	:-!,
-	return_to_idle(QueueRec),
-	QT = NewQT.
-								  
-dispose_worker(done, QueueRec, QT, NewQT, done)
-	:-!,
-	QT = NewQT.
-
-dispose_worker(continue, QueueRec, QT, NewQT, continue)
-	:-!,
-	QT = [QueueRec | NewQT],
-	Flag=continue.
-														
-
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/
 
@@ -777,7 +610,6 @@ mk_job_rec(Task,TaskArgs,Mod,TaskEnv,Job)
 	access_tsk_env(state, TaskEnv, State),
 	access_tsk_env(jobID, TaskEnv, JobID),
 	access_tsk_env(userID, TaskEnv, UserID),
-	access_login_connection_info(user_area, State, UserAreaPath),
 	xmake_job_rec(Job,[Task,TaskArgs,Mod,State,JobID,UserID,UserAreaPath]).
 
 endmod.
@@ -789,22 +621,20 @@ endmod.
 module task_intf.
 
 export csp_script/4.
-csp_script(send_cur_main_queue,
-			[],
-			TaskEnv,
-			[
-			 server_info(SInfo),
-			 task(current_queue(RawQ)),
-			 full_delay(RawQ)^[
-			 	queue_representation(RawQ, QEntries),
-			 	length(QEntries, NumEntries),
-			 	pack_for_client(QEntries, QEntriesExpr),
+
+csp_script(send_cur_main_queue, [], TaskEnv,
+	[
+	 server_info(SInfo),
+	 task(current_queue(RawQ)),
+	 full_delay(RawQ)^[
+	 	queue_representation(RawQ, QEntries),
+	 	length(QEntries, NumEntries),
+		pack_for_client(QEntries, QEntriesExpr),
 printf(user_output,'&&&>**admin_resp@cur_main_queue@%t@%t\n',[NumEntries, QEntriesExpr]),
 flush_output(user_output),
-			  	respond('**admin_resp@cur_main_queue@%t@%t',[NumEntries, QEntriesExpr])
-				]
-			]
-		).
+		respond('**admin_resp@cur_main_queue@%t@%t',[NumEntries, QEntriesExpr])
+					]
+	 ] ).
 
 csp_script(send_known_workers,
 			[],
@@ -814,30 +644,11 @@ csp_script(send_known_workers,
 			 full_delay(WrkrList)^[
 			 	length(WrkrList, NumWrkrs),
 			 	pack_for_client(WrkrList, WrkrListExpr),
-printf(user_output,'&&&>**admin_resp@known_workers@%t@%t\n',[NumWrkrs, WrkrListExpr]),
-flush_output(user_output),
+%printf(user_output,'&&&>**admin_resp@known_workers@%t@%t\n',[NumWrkrs, WrkrListExpr]), flush_output(user_output),
 			  	respond('**admin_resp@known_workers@%t@%t',[NumWrkrs, WrkrListExpr])
 				]
 			]
 		).
-
-/*
-csp_script(send_active_workers,
-			[],
-			TaskEnv,
-			[
-			 server_info(SInfo),
-			 task(active_workers(WrkrList)),
-			 full_delay(WrkrList)^[
-			 	length(WrkrList, NumWrkrs),
-			 	pack_for_client(WrkrList, WrkrListExpr),
-printf(user_output,'&&&>**admin_resp@active_workers@%t@%t\n',[NumWrkrs, WrkrListExpr]),
-flush_output(user_output),
-			  	respond('**admin_resp@active_workers@%t@%t',[NumWrkrs, WrkrListExpr])
-				]
-			]
-		).
-*/
 
 endmod.
 
@@ -901,81 +712,33 @@ queue_rep(Item, '?').
  |	known_workers(-)
  *-----------------------------------------------------------------------*/
 export known_workers/1.
-known_workers(WrkrList)
+known_workers([Titles | WrkrList])
 	:-
-	configs_terms(CfgSrcItems),
-	findall(WI, member(worker_info=WI, CfgSrcItems),  RawWkrs),
-
-	get_worker_dbs(WrkDB),
-	functor(WrkDB, wdb, NumWkrs),
-	WrkDB =.. [wdb | WkrRecList],
-	WrkrList = [Titles | WrkrList0],
+	get_worker_dbs(AllWorkers),
+	get_idle_workers(IdleWorkers),
 	worker_titles(Titles),
-	active_wrkr_info(WkrRecList, RawWkrs, WrkrList0,  WrkrListTail, 
-					ActiveWkrsInfo),
 
-	inactive_wrkr_info(RawWkrs, ActiveWkrsInfo, WrkrListTail).
+	setup_worker_info(AllWorkers, IdleWorkers, WrkrList).
 
-active_wrkr_info([], RawWkrs, WrkrListTail,  WrkrListTail, []).
-
-active_wrkr_info([0 | WkrRecList], RawWkrs, WrkrList,  WrkrListTail, RawActiveWkrs)
-	:-!,
-	active_wrkr_info(WkrRecList, RawWkrs, WrkrList,  WrkrListTail, RawActiveWkrs).
-
-active_wrkr_info([WR | WkrRecList], RawWkrs, [WRInfo | WrkrList0],  WrkrListTail, 
-					[AWI | RawActiveWkrs])
+setup_worker_info([], _, []).
+setup_worker_info([WkrRec | AllWorkers], IdleWorkers, [WRInfo | WorkersInfo])
 	:-
-	access_wkr_rec(worker_info,WR,AWI),
-	active_inst(WR, AWI, RawWkrs, WRInfo),
-	active_wrkr_info(WkrRecList, RawWkrs, WrkrList0,  WrkrListTail, RawActiveWkrs).
+	WkrRec = c(SR,SW,WState,CType),
+	access_login_connection_info(ip_num, WState, IP),
+	access_login_connection_info(port, WState, Port),
+	access_login_connection_info(pid, WState, PID),
+	gethostbyaddr(IP,_,[Name|_],_),
 
-active_inst(WR, AWI, RawWkrs, WRInfo)
-	:-
-	access_wkr_info(host_name,AWI,Name),		%% Host (normal) name
-	access_wkr_info(host_ip,AWI,IP),			%% Host IP address
-	access_wkr_info(login_name,AWI,Usr),		%% Name of account to login under
-	access_wkr_info(port,AWI,Port),				%% Port to connect on
-	access_wkr_info(pid,AWI,PID),				%% Process ID
-	access_wkr_rec(state,WR,State),
-	access_wkr_rec(workerID,WR,N),
-
-	member(m(Name,IP,Usr,_,Port,Exe,Dir),RawWkrs),
-	wxdir(Exe,Dir,DispDir,DispX),
-	ACT = '+ ',
-	(State = idle -> DState = '- '; DState = '+ '),
 	worker_info_pattern(Pat),
-	instantiate_all_entries([Name,IP,N,ACT,DState,PID,Port,Usr,DispDir]),
+	(dmember(WkrRec, IdleWorkers) ->
+		DState = ' - ' 
+		;
+		DState = ' + ' 
+	),
+	instantiate_all_entries([Name,IP,DState,PID,Port,Usr,DispDir]),
 	sprintf(atom(WRInfo),Pat,
-		[Name,IP,N,ACT,DState,PID,Port,Usr,DispDir]).
-
-inactive_wrkr_info([], ActiveWkrsInfo, []).
-inactive_wrkr_info([WI | RawWkrs], ActiveWkrsInfo, InactiveWrkrList)
-	:-
-	WI = m(Name,IP,Usr,_,Port,_,_),
-	member(AWI, ActiveWkrsInfo),
-	access_wkr_info(host_name,AWI,Name),		%% Host (normal) name
-	access_wkr_info(host_ip,AWI,IP),			%% Host IP address
-	access_wkr_info(login_name,AWI,Usr),		%% Name of account to login under
-	access_wkr_info(port,AWI,Port),				%% Port to connect on
-	!,
-	inactive_wrkr_info(RawWkrs, ActiveWkrsInfo, InactiveWrkrList).
-inactive_wrkr_info([WI | RawWkrs], ActiveWkrsInfo, 
-					[InactInst | InactiveWrkrList])
-	:-
-	inactive_inst(WI, InactInst),
-	inactive_wrkr_info(RawWkrs, ActiveWkrsInfo, InactiveWrkrList).
-
-inactive_inst(WI, InactInst)
-	:-
-	WI = m(WName,IP,Usr,_,[Skt|_],Exe,Dir),
-	wxdir(Exe,Dir,DispDir,DispX),
-	ACT = '- ',
-	DState = '- ',
-	N = 0,
-	PID = 0,
-	worker_info_pattern(Pat),
-	sprintf(atom(WInfo),Pat,
-		[WName,IP,N,ACT,DState,PID,Skt,Usr,DispDir]).
+		[Name,IP,DState,PID,Port,Usr,DispDir]),
+	setup_worker_info(AllWorkers, IdleWorkers, WorkersInfo).
 
 instantiate_all_entries([]).
 instantiate_all_entries([Item | Tail])
@@ -983,38 +746,16 @@ instantiate_all_entries([Item | Tail])
 	(nonvar(Item),! ; Item = '-'), 
 	instantiate_all_entries(Tail).
 
-/*------------------------------------------------------
- Raw worker info:
- m(calder,'204.5.42.24',ken,logical,[30003],
-			'/dakota/chem/eng/spc_skt/zparcwkr-hp9.05',
-			'/dakota/chem/eng/server_hp').
+worker_titles(Line)
+	:-
+	sprintf(atom(Line),
+		'{%t\t%t\t%t\t%t\t%t\t%t\t%t}',
+		['MachName','IP','Busy','PID','Socket','UserID','Dir'] ).
 
-    CurWkrRecs: listof WorkerRec, built by:
-
-  Worker Recs:
-  -----------
-	xmake_wkr_rec(WorkerRec, [WkRS, WkWS, idle, ID, WorkerInfo])
-	use:
-	access_wkr_rec(workerID,WorkerRec,N)
-            state/idle,			%% worker state (idle/...)
-			workerID/0,			%% assigned worker id (num)
-			worker_info/nil		%% detailed worker info structure
-
-  Worker Info in Worker Recs:
-  --------------------------
-	defStruct(wkr_info, [
-		propertiesList = [
-			host_name/nil,		%% Host (normal) name
-			host_ip/nil,		%% Host IP address
-            login_name/nil,		%% Name of account to login under
-			login_pw/nil,		%% Password for login
-			port/nil,			%% Port to connect on
-			std_in/nil,			%% Write (for server) socket to worker std_in
-			std_out/nil,		%% Read (for server) socket to worker std_out
-			pid/nil				%% Running process id
-		accessPred = access_wkr_info,
- *-------------------------------------------------------*/
-
+worker_info_pattern(
+		'{%t\t%t\t%t\t%t\t%t\t%t\t%t}'
+	).
+/*
 worker_titles(Line)
 	:-
 	sprintf(atom(Line),
@@ -1024,6 +765,7 @@ worker_titles(Line)
 worker_info_pattern(
 		'{%t\t%t\t%t\t%t\t%t\t%t\t%t\t%t\t%t}'
 	).
+*/
 
 
 wxdir(Exe,Dir,DispDir,DispX)
