@@ -317,6 +317,17 @@ static void tcltk_yield (void)
 	Tcl_DoOneEvent(TCL_DONT_WAIT);
 }
 
+static int enable_tcl_yield(void)
+{
+	PI_set_yield_proc(tcltk_yield);
+	PI_SUCCEED;
+}
+
+PI_BEGIN
+	PI_MODULE("builtins")
+	PI_DEFINE("enable_tcl_yield",0,enable_tcl_yield)
+PI_END
+
 #ifdef DEMO
 void setup_alsdev_demo(void);
 void shutdown_alsdev_demo(void);
@@ -374,6 +385,7 @@ void SetupALSProlog(void)
 #endif
     pi_init();
 
+	PI_INIT;
 {
 	extern char executable_path[1024];
 	extern long ss_image_offset(const char *image_name);
@@ -388,8 +400,6 @@ void SetupALSProlog(void)
 	    panic("This is a stub!");
 	}
 }
-
-	PI_set_yield_proc(tcltk_yield);
 
     term = AP_NewSymbolFromStr(w, "$start");
     {

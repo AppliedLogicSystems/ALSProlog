@@ -392,6 +392,10 @@ listener_prompt
 
 install_alarm_handler
 	:-
+	sys_env(macos, _, _),
+	enable_tcl_yield.
+install_alarm_handler
+	:-
 	asserta(global_handler(sigalrm,builtins,alarm_handler)).
 
 alarm_handler(EventId, Goal, Context) 
