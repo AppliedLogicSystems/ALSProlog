@@ -117,7 +117,9 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	#define socket_errno		errno
 	#define INVALID_SOCKET	-1
 	#define SOCKET_ERROR	-1
+        #ifndef INADDR_NONE /* HP-UX defines its own INADDR_NONE */
 	#define INADDR_NONE	-1
+        #endif /* INADDR_NONE */
 	
 	#elif defined(MacOS) && defined(HAVE_GUSI)
 	#define readsocket(a,b,c)	read((a), (b), (c))
@@ -269,6 +271,9 @@ static int standard_console_io(int port, char *buf, size_t size)
     case CONSOLE_ERROR:
 	return write(STDERR_FILENO, buf, size);
     	break;
+    default:
+	return -1;
+	break;
     }
     
 }
@@ -1037,7 +1042,6 @@ sio_file_open()
 	    FAIL;
 	}
     }
-
     incr_fdrefcnt(SIO_FD(buf));
     SIO_ERRCODE(buf) = SIOE_NORMAL;
     SUCCEED;
@@ -1661,7 +1665,7 @@ accept_connection(vsd, buf, sktaddr)
 				if (closesocket(SIO_FD(buf)) == SOCKET_ERROR)
 		    		perror("accept_connection");
 	    	}
-			*sktaddr = inet_ntoa(c_addr.sin_addr);
+		*sktaddr = inet_ntoa(c_addr.sin_addr);
 	    	SIO_FD(buf) = newfd;
 	    	incr_fdrefcnt(newfd);
 		}
@@ -1708,7 +1712,7 @@ sio_accept_socket_connection()
     PWord v1,v2,v3;
     int t1,t2,t3;
     UCHAR *buf;
-	char *sktaddr;
+    char *sktaddr;
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
@@ -2401,7 +2405,7 @@ write_buf(vsd,buf)
     UCHAR *buf;
 {
     int   writeflg = 0;
-	char *sktaddr;
+    char *sktaddr;
 
 #ifdef SysVIPC
     struct msgbuf *msgp;
@@ -2448,7 +2452,7 @@ write_buf(vsd,buf)
 
 #ifdef HAVE_SOCKET
 	case SIO_TYPE_SOCKET_STREAM:
-	    if (accept_connection(vsd, buf, sktaddr)) {
+	    if (accept_connection(vsd, buf, &sktaddr)) {
 		writeflg = SOCKET_ERROR;
 		break;		/* break early */
 	    }
@@ -2941,7 +2945,7 @@ sio_readbuffer()
     int   t1;
     int   nchars;
     UCHAR *buf, *buffer;
-	char *sktaddr;
+    char *sktaddr;
 
     w_get_An(&v1, &t1, 1);
 
@@ -3020,7 +3024,7 @@ sio_readbuffer()
 
 #ifdef HAVE_SOCKET
 	case SIO_TYPE_SOCKET_STREAM:
-	    if (accept_connection(v1,buf,sktaddr) < 0) {
+	    if (accept_connection(v1,buf,&sktaddr) < 0) {
 		nchars = -1;
 		break;			/* break early */
 	    }
