@@ -120,6 +120,7 @@ PI_getargn(PWord *val_ptr, int  *type_ptr, PWord struct_val, int arg_num)
 #endif
 }
 
+
 ALSPI_API(void)
 PI_gethead(PWord *val_ptr, int  *type_ptr, PWord list_val)
 {
@@ -405,6 +406,18 @@ PI_rungoal_with_update(PWord mod, PWord *gvp, int *gtp)
     return status;
 }
 
+ALSPI_API(int)
+PI_rungoal_with_update_and_catch(PWord mod, PWord *gvp, int *gtp, int *exception)
+{
+    int status, handle;
+    handle = gv_alloc();
+    gv_set(*gvp,*gtp,handle);
+    status = w_rungoal(mod, *gvp, *gtp);
+    gv_get(gvp,gtp,handle);
+    gv_free(handle);
+    *exception = wm_interrupt_caught != 0;
+    return status;
+}
 
 ALSPI_API(int)
 PI_unify(PWord val1, int type1, PWord val2, int type2)
@@ -458,4 +471,3 @@ PrologInit(PSTRUCT *ap)
 #ifdef macintosh
 #pragma export off
 #endif
-

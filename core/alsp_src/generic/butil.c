@@ -447,3 +447,18 @@ set_prolog_error(namtok,arity,rfunc,rarity,rsym,v2,t2,v3,t3)
 	wm_interrupt_caught = ALSSIG_ERROR;
     }
 }
+
+ALSPI_API(void)
+PI_throw(PWord obj, int objt)
+{
+	gv_set(obj, objt, get_gv_number((UCHAR *)"PrologError"));
+
+	wm_safety = -1;
+	wm_interrupt_caught = ALSSIG_ERROR;
+}
+
+ALSPI_API(void)
+PI_getball(PWord *obj, int *objt)
+{
+	gv_get(obj, objt, get_gv_number((UCHAR *)"PrologError"));
+}

@@ -590,13 +590,16 @@ const alspi_func_ptrs alspi_funcs = {
 #endif
     PI_rungoal,
     PI_rungoal_with_update,
+    PI_rungoal_with_update_and_catch,
     PI_unify,
     PrologInit,
     CI_get_integer,
     CI_get_double,
     sym_insert_2long,
     sym_insert_dbl,
-    find_callback
+    find_callback,
+    PI_throw,
+    PI_getball
 };
 
 typedef enum {
