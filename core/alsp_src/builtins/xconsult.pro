@@ -355,7 +355,6 @@ dodeclare((D1,D2))
 	dodeclare(D2).
 dodeclare(Var)
 	:-
-pbi_debug(dodeclare(Var)),
 	atom(Var),
 	!,
 	topmod(M),

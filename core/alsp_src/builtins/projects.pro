@@ -78,7 +78,7 @@ proceed_start_new_project(ALSIDEObject)
 				list_slots,
 				text_slots,
 				search_dirs,
-%				search_trees,
+				search_trees,
 				gui_spec,
 				slot_names
 			], 
@@ -90,7 +90,7 @@ proceed_start_new_project(ALSIDEObject)
 				list_slots = [],
 				text_slots = [],
 				search_dirs = [],
-%				search_trees = [],
+				search_trees = [],
 				slot_names = []
 			] 
 	]).
