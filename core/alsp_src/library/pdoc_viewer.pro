@@ -48,7 +48,8 @@ complete_prologdoc(Data, ModsPredsLists, General, Groups, CurDir, OneLiners)
 modules_focus_files([], _, _, _, _, []).
 modules_focus_files([Mod-ModPreds | ModsPredsLists], ModsDirList, DocTitle, KeyWords, DateTime, [ModEntries | RestModsEntries])
 	:-
-	preds_names_list(ModPreds, PredNames),
+	preds_names_list(ModPreds, PredNames0),
+	sort(PredNames0, PredNames),
 	dmember(Mod-ModDir, ModsDirList),
 	sprintf(atom(ModuleFramePath), '%t/module-frame.html', [ModDir]),
 	open(ModuleFramePath, write, OS),
