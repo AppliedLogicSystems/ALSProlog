@@ -88,6 +88,7 @@ then
 	cp -pr "$ALS_PROLOG/foreign_sdk/win32/ALS_Prolog_Foreign_SDK" "$DISTDIR"
 	cp -pr "$BIN/alspro.exe" "$DISTDIR"
 	cp -pr "$BIN/alspro.dll" "$DISTDIR"
+	cp -pr "$BIN/Generic ALS App Stub.exe" "$DISTDIR"
 fi
 
 if test $EDITION = demo
@@ -95,6 +96,7 @@ then
 	cp -pr "$ALS_PROLOG/foreign_sdk/win32/ALS_Prolog_Foreign_SDK" "$DISTDIR"
 	cp -pr "$BIN/alspro_demo.exe" "$DISTDIR/alspro.exe"
 	cp -pr "$BIN/alspro.dll" "$DISTDIR"
+	cp -pr "$BIN/Generic ALS App Stub.exe" "$DISTDIR"
 fi
 
 
