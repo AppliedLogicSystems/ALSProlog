@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.20 1999/01/25 13:50:26 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.21 1999/02/25 17:23:19 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -69,30 +69,36 @@ proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
 
 	set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
 	set DFT [list -filetypes $types]
-	# DFT currently not used.
-	# -title "Files to Add to Project" not used.
-	set NewFilePath [getFiles -initialdir $DfltDir]
-	set BaseNewFile [file tail $NewFilePath]
-	set Prev [$Listbox get 0 end]
-	if {[lsearch -exact $Prev $BaseNewFile] == -1} then {
-		$Listbox insert end $BaseNewFile
-	}
-}
-
-proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir} {
-	global tcl_platform
-
-	prolog call alsdev choose_mult_files \
-		-list $FileTypes -atom $FileKind -atom $DfltDir -var Choices
+		# DFT currently not used.
+		# -title "Files to Add to Project" not used.
+	set Choices [getFiles -initialdir $DfltDir]
 	if {$Choices != ""} then {
 		set Prev [$Listbox get 0 end]
 		foreach Entry $Choices {
-			if {[lsearch -exact $Prev $Entry] == -1} then {
-				$Listbox insert end $Entry
+			if {$Entry != ""} then {
+				set BaseNewFile [file tail $Entry]
+				if {[lsearch -exact $Prev $BaseNewFile] == -1} then {
+					$Listbox insert end $BaseNewFile
+				}
 			}
 		}
 	}
 }
+
+#proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir} {
+#	global tcl_platform
+#
+#	prolog call alsdev choose_mult_files \
+#		-list $FileTypes -atom $FileKind -atom $DfltDir -var Choices
+#	if {$Choices != ""} then {
+#		set Prev [$Listbox get 0 end]
+#		foreach Entry $Choices {
+#			if {[lsearch -exact $Prev $Entry] == -1} then {
+#				$Listbox insert end $Entry
+#			}
+#		}
+#	}
+#}
 
 proc del_from_files_list { Listbox } {
 	set SelNums [$Listbox curselection]
