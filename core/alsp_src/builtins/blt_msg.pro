@@ -18,8 +18,14 @@ module builtins.
 export prolog_system_error/2.
 
 	%% New rt_ reader:
-prolog_system_error(syntax(Context,ErrorMessage,LineNumber,Stream), Args) 
+prolog_system_error(
+	error(syntax_error,[_,syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream)]), [])
 	:-
+	prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), []).
+
+prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), _) 
+	:-
+write(syntax_pos_info=p(P1,P2,P3)),nl,flush_output,
 	sio:is_stream(Stream,Stream0),
 	sio:is_input_stream(Stream0),
 	!,
