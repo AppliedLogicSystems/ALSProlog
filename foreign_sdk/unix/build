@@ -4,13 +4,14 @@ then
 	rm -r ALS_Prolog_Foreign_SDK
 fi
 SDK=`pwd`/..
+GENERIC=../../../core/alsp_src/generic
 mkdir ALS_Prolog_Foreign_SDK
 cd ALS_Prolog_Foreign_SDK
 mkdir include
-cp $SDK/source/alspi.h include
-cp $SDK/source/alspi_slib.h include
+cp $GENERIC/alspi.h include
+cp $GENERIC/alspi_slib.h include
 mkdir source
-cp $SDK/source/alspi_slib.c source
+cp $GENERIC/alspi_slib.c source
 mkdir documentation
 cp $SDK/docs/FI_Manual.pdf documentation
 cp $SDK/docs/FI_Ref.pdf documentation
