@@ -9,4 +9,6 @@
 /* Define this to avoid complex #if statement in ConditionalMacros.h */
 #define PRAGMA_ALIGN_SUPPORTED	0
 
+#exclude <FixMath.h>
+
 #include "macos.h"
