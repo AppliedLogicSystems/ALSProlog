@@ -735,18 +735,23 @@ als_ide_mgrAction(close_edit_win, State)
 	accessObjStruct(edit_files, State, PrevEditFiles),
 	list_delete(PrevEditFiles, e(FileName,WinName), NewEditFiles),
 	setObjStruct(edit_files, State, NewEditFiles).
+***/
 
-als_ide_mgrAction([open_non_file_edit_win, WinName], State)
+als_ide_mgrAction([open_non_file_edit_win, WinName, Title], State)
 	:-
+	send_self(State, obtain_src_mgr(Title, FileMgr)),
+	send(FileMgr, open_edit_win('', BaseFileName, WinName)).
+
+/**
 	accessObjStruct(non_file_edits, State, PrevEdits),
 	setObjStruct(non_file_edits, State, [WinName | PrevEdits]).
-***/
 
 als_ide_mgrAction([close_non_file_edit_win, WinName], State)
 	:-
 	accessObjStruct(non_file_edits, State, PrevEdits),
 	list_delete(PrevEdits, WinName, NewEdits),
 	setObjStruct(non_file_edits, State, NewEdits).
+**/
 
 als_ide_mgrAction([save_doc_as, WinName], State)
 	:-
@@ -766,6 +771,32 @@ fin_save_as(FileName,WinName,State,PrevEditFiles,PrevEdits)
 	list_delete(PrevEdits, WinName, NewEdits),
 	setObjStruct(non_file_edits, State, NewEdits),
 	setObjStruct(edit_files, State, [e(FileName,WinName) | PrevEditFiles]).
+
+
+rename_anon_doc(TclWin, File, SrcHandlerHandle, Flag)
+	:-
+	builtins:get_primary_manager(State),
+	accessObjStruct(source_mgrs, State, PrevMgrsList),
+	split_path(File, PathElts),
+	dreverse(PathElts, [RootFile | _]),
+	(file_extension(BaseFile, Ext, RootFile) -> true ; BaseFile = RootFile, Ext=''),
+	fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,State).
+
+fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,State)
+	:-
+	dmember(fm(BaseFile, FileMgr), PrevMgrsList),
+	!,
+	Flag = not_ok.
+
+fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,State)
+	:-
+	send(SrcHandlerHandle, get_value(base_file, PrevName)),
+	list_delete(PrevMgrsList, fm(PrevName, FileMgr), NewEdits),
+	setObjStruct(source_mgrs, State, [fm(BaseFile, FileMgr) | NewEdits]),
+	setObjStruct(base_file, FileMgr, BaseFile),
+	setObjStruct(source_file, FileMgr, File),
+	setObjStruct(ext, FileMgr, Ext),
+	Flag = ok.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%											%%%%%
@@ -2149,6 +2180,8 @@ module alsdev.
 				last_consult		%% Time of last consult,
 			],
 		defaults= [ 
+			source_file		= '',
+			base_file		= '',
 			fcg				= 0,
 			consult_mode	= normal,
 			last_consult	= 0
@@ -2184,6 +2217,14 @@ shl_source_handlerAction(open_edit_win(FileName), State)
 	file_extension(BaseFileName, Ext, TF),
 	shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext), State).
 
+	%% Non-file document case:
+shl_source_handlerAction(open_edit_win('', BaseFileName, TclWin), State)
+	:-!,
+	setObjStruct(tcl_doc_path, State, TclWin),
+	accessObjStruct(myHandle, State, MyHandle),
+	tcl_call(shl_tcli, [set_tcl_ga2,proenv,TclWin,src_handler,MyHandle], _).
+
+	%% File document case:
 shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext), State)
 	:-
 	setObjStruct(source_file, State, FileName),
