@@ -1,0 +1,798 @@
+/*===============================================================*
+ | 		cmacro.pro
+ |	Copyright (c) 1990-95 Applied Logic Systems, Inc.
+ |
+ |		C macro processor
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 4/1/90
+ | 10/22/91 - P.Raman -- modified to parse subset of C
+ |	04/94 - K.Bowen - use streams; c2p typedef;
+ |	05/95 - K.Bowen - consolidate os-specific info
+ *===============================================================*/
+
+module c2pro.
+
+	%-------------------------------------------------------
+	% process_line(InLine,OutLine,InFD,OutFD,InTab,OutTab)
+	%-------------------------------------------------------
+
+process_line([],[],State) 
+	:- !.
+process_line([pound, Tok | Rest ],[],State) 
+	:-!,
+	macro_statement0(Tok,Rest,State).
+process_line(Line, OutLine, State) 
+	:-
+	macro_expand(multiple, Line, OutLine, State).
+
+/*-----------------------------------------------------------*
+ * macro_statement(Token,Rest,State)
+ *
+ *		Token	-- the token following the pound sign
+ *		Rest	-- the rest of the line after Token
+ *		InFD	-- the file stream descriptor (input)
+ *		OutFD	-- the file stream descriptor returned
+ *		InTab	-- the macro definition symbol table (input)
+ *		OutTab	-- the macro definition symbol table to return
+ *-----------------------------------------------------------*/
+
+macro_statement0(ident(Id),Rest,State) 
+	:-!,
+	macro_statement(Id,Rest,State).
+macro_statement0(fident(Id),Rest,State) 
+	:-!,
+	macro_statement(Id,Rest,State).
+macro_statement0(Tok,Rest,State) 
+	:-
+	error('Unknown directive: %t\n',[Tok],State).
+
+macro_statement(import,Rest,State) 
+	:- !,
+	macro_expand(single,Rest,Rest0,State),
+	import(Rest0,State).				% for Obj-C
+macro_statement(include,Rest,State) 
+	:- !,
+	macro_expand(single,Rest,Rest0,State),
+	import(Rest0,State).	            % include is import
+macro_statement(exclude,Rest,State) 
+	:- !,
+	exclude(Rest,State).				% special
+macro_statement(define,Rest,State) 
+	:- !,
+	define(Rest,State).
+macro_statement(ifdef,Rest,State) 
+	:- !,
+	ifdef(Rest,State).
+macro_statement(if,Rest,State) 
+	:- !,
+	if(Rest,State).
+macro_statement(ifndef,Rest,State) 
+	:- !,
+	ifndef(Rest,State).
+macro_statement(endif,_,State) 
+	:- !,
+	endif_else_or_elif(endif,State).
+macro_statement(elif,_,State) 
+	:- !,
+	endif_else_or_elif(elif(_),State).
+macro_statement(else,_,State) 
+	:- !,
+	endif_else_or_elif(else,State).
+macro_statement(undef,Rest,State) 
+	:- !,
+	undef(Rest,State).
+macro_statement(ident, Rest,State) 
+	:- !.		% SCCS tags
+	macro_statement(pragma,_,State) 
+	:- !.		% consume pragmas
+macro_statement(Tok,Rest,State) :- !,
+	error('Unknown directive: %t\n',[Tok],State).
+
+/*------------------------------------------------------------
+ | import/2
+ |	same as include except each imported file is imported
+ |  exactly once
+ *-----------------------------------------------------------*/
+
+import([string(FileName)],State) 	% #include "foo"
+	:-!,
+	user_import(FileName,State).
+import([langle|PathSpec],State) 	% #include <foo>
+	:-!,
+	sys_import(PathSpec,State).
+import(PathSpec,State) 
+	:-
+	accessC2P(tgt_os, State, OS),
+	parsePathTokList(PathSpec,OS,Disk,CompList,PathType),   % #include foo
+	findSysFile(Disk,CompList,PathType,FileName, State),
+	!,
+	dispatch_import(FileName,State).
+import(Whatever,State) 
+	:-
+	error('Bad #include or #import: %t\n',[Whatever],State).
+
+
+user_import(FileName,State) 
+	:-
+	findUserFile(FileName,NFileName,State),
+	!,
+	dispatch_import(NFileName,user,State).
+
+user_import(FileName,State) 
+	:-
+	error('Bad #include or #import: %t\n',[FileName],State).
+
+sys_import(PathSpec,State) 
+	:-
+	accessC2P(tgt_os, State, OS),
+	parsePathTokList(PathSpec,OS,Disk,CompList,PathType),
+	CompList \= [],
+	findSysFile(Disk,CompList,PathType,FileName, State),
+	!,
+	dispatch_import(FileName,system,State).
+
+sys_import(Whatever,State) 
+	:-
+	error('Bad #include or #import: %t\n',[Whatever],State).
+
+dispatch_import(FileName,IType,State) 
+	:-
+	imported(FileName),
+	!.
+dispatch_import(FileName,IType,State) 
+	:-
+	assert(imported(FileName)),
+	(trace_enter_file(FileName) ->
+	trace
+	;
+	true
+	),
+	openFile(FileName,State).
+
+/*-------------------------------------------------------------------------*
+ | exclude/2  
+ |
+ |	#exclude FileSpec/TypeSpec
+ |
+ |	where FielSpec can be "Pathname" or <Pathname>, and
+ |	PathName can have wild-cards "?" to match single pathh
+ |	component or a "*" to match any trailing components.
+ |	/TypeSpec is optional, and can be either a single group
+ |	from func,const,gvar,ctype or all to indicate all groups,
+ |	or it can be a list [group,...] that specifies the groups.
+ |
+ |	Output is suppressed for the specified groups from files
+ |	that match FileSpec.
+ *-------------------------------------------------------------------------*/
+
+exclude([string(FileName)|Rest],State) 
+	:-
+	name(FileName,FileStr),
+	accessC2P(tgt_os, State, OS),
+	parsePathStr(FileStr,OS,Disk,Comps,PathType),
+	!,
+	dispatch_exclude(user,Disk,Comps,PathType,Rest,State).
+
+exclude([langle|PathSpec],State) 		% #exclude <foo>
+	:-			
+	accessC2P(tgt_os, State, OS),
+	parsePathTokList(PathSpec,OS,Disk,Comps,PathType,[rangle|Rest]),	
+	!,
+	dispatch_exclude(system,Disk,Comps,PathType,Rest,State).
+
+exclude(Whatever,State) 
+	:-
+	error('Bad #exclude : %t\n',[Whatever],State).
+
+dispatch_exclude(ExclType,Disk,Comps,PathType,Rest,State) 
+	:-
+	after_exclude(Rest,What),
+	output_exclude(ExclType,Disk,Comps,PathType,What).
+
+after_exclude([slash,ident(What)], [What]) :- !.
+after_exclude([slash,lbrac|Rest], What) 
+	:- !,
+	exclude_list(Rest,What).
+after_exclude( _, all).
+
+exclude_list([rbrac|_],[]) :- !.
+exclude_list([ident(What)|Rest],[What|TypeL]) 
+	:- 
+	exclude_list(Rest,TypeL).
+
+/*-----------------------------------------------*
+ | undef/4		-- handle #undef
+ *-----------------------------------------------*/
+
+undef([ident(Id)],State) :- 
+%	accessC2P(info_table, State, InTable),
+	getInfoTable(InTable),
+	avl_search(Id,_,InTable),
+	avl_insert(Id,unDefined,InTable,OutTable),
+%pbi_write(avli=Id),pbi_nl,
+%	setC2P(info_table, State, OutTable),
+	setInfoTable(OutTable),
+	!.
+undef([ident(_)],State) :- !.
+undef(Whatever,State) :-
+	error('Illegal #undef argument : %t\n',[Whatever],State).
+
+/*-----------------------------------------------*
+ | define/4		-- handle #defines
+ *-----------------------------------------------*/
+
+define([ident(Id),ident(RefKey)],State) 
+	:- 
+	Id \= RefKey,
+	getInfoTable(InTable),
+	avl_search(RefKey,d(RefData),InTable),
+	RefData \= unDefined,
+	!,
+	define([ident(Id)|RefData],State).
+
+define([ident(Id)|Defn],State) 
+	:- !,
+%pbi_write(define(Id,Defn)),pbi_nl,pbi_ttyflush,
+	check_const(Id,Defn,State),
+	getInfoTable(InTable),
+	addToTable(Id,d(Defn),State,InTable,OutTable),
+	setInfoTable(OutTable).
+
+define([fident(Id)|ArgsAndDefn],State) 
+	:-
+	getArgs(Args,ArgsAndDefn,Defn),
+	!,
+	output_macro(Id,State),
+	getInfoTable(InTable),
+	addToTable(Id,da(Args,Defn),State,InTable,OutTable),
+	setInfoTable(OutTable).
+
+define(Whatever,State) 
+	:-
+	error('Bad #define : %t\n',[Whatever],State).
+
+%-------------------------------
+% check_const/4
+%-------------------------------
+
+check_const(Id,[string(_)|_],State) 
+	:-
+	!,
+	output_const(Id,str,State).
+
+check_const(Id,Defn,State) 
+	:-
+	macro_expand(single,Defn,OutDefn, State),
+	expression(Val,State,OutDefn,_),
+	const_type(Val,Type),
+	!,
+	output_const(Id,Type,State).
+
+check_const(Id,Defn,State).
+
+const_type(Val,int) :- integer(Val), !.
+const_type(Val,double) :- float(Val), !.
+const_type(Val,str) :- atom(Val).
+
+/*---------------------------------------------------------------------*
+ | addToTable(Key,Defn,State,InTab,OutTab)
+ |
+ |		Tests for the presence of Key in the macro defn table.  If
+ |		Key is already in the macro definition table, an error is
+ |		reported using LineNum.  Otherwise, the macro name and the
+ |		definition are added to the macro definition table (InTab)
+ |		to produce OutTab.
+ *---------------------------------------------------------------------*/
+
+addToTable(Key,Defn,State,Table,Table) 
+	:-
+%(Key = ident('XEvent') -> trace ; true),
+	avl_search(Key,Data,Table),
+	Data \= unDefined,
+	!,
+	error(' %t defined again\n',[Key],State).
+
+/*
+addToTable(Key,d([ident(RefKey)]),State,InTable,OutTable) 
+	:-
+	avl_search(RefKey,RefData,InTable),
+	RefData \= unDefined,
+	!,
+%pbi_write(ref_addToTable(Key,d([ident(RefKey)]),RefData)),
+	avl_insert(Key,RefData,InTable,OutTable).
+*/
+
+addToTable(Key,Defn,State,InTable,OutTable) 
+	:-
+%pbi_write(avli=Key),pbi_nl,
+	avl_insert(Key,Defn,InTable,OutTable).
+
+/*-------------------------------------------------------------------*
+ | getArgs/3	-- dcg rules for getting #define formal parameters
+ *-------------------------------------------------------------------*/
+
+getArgs([Arg|MoreArgs]) --> [lparen,ident(Arg)],!,moreArgs(MoreArgs).
+getArgs([]) --> [lparen,rparen].
+
+moreArgs([]) --> [rparen],!.
+moreArgs([Arg|MoreArgs]) --> [comma,ident(Arg)],moreArgs(MoreArgs).
+
+/*-------------------------------------------------------------------*
+ | ifdef(Rest,State)
+ |
+ |	-- handle ifdefs
+ *-------------------------------------------------------------------*/		
+
+%-----------------
+% ifdef/5
+%-----------------
+
+ifdef([Token|_],State) :-
+	is_identifier(Token,Id),
+	!,
+	do_ifdef(Id,State).
+ifdef(_,State) :-
+	error('Ill formed #ifdef, assume test fails\n',State),
+	skipLines(State,What),
+	check_elif(What,State).
+
+%-----------------
+% ifndef/5
+%-----------------
+
+ifndef([Token|_],State) :-
+	is_identifier(Token,Id),
+	!,
+	do_ifndef(Id,State).
+ifndef(_,State) :-
+	error('Ill formed #ifndef, assume test fails\n',State),
+	skipLines(State,What),
+	check_elif(What,State).
+
+%-----------------
+% if/5
+%-----------------
+
+if(Exp,State) :-
+	replace_defined(Exp, Exp1, State),
+	macro_expand(single, Exp1, Exp2, State),
+	replace_ident_with0(Exp2,Exp3),
+	expression(Value,State,Exp3,_),
+	!,
+	do_if(Value,State).
+if(_,State) :-
+	error('Ill formed #if, assume test fails\n',State),
+	do_if(0,State).
+
+%-------------------------------
+% endif_else_or_elif/5
+%-------------------------------
+
+endif_else_or_elif(Which,State) :-
+	skipMore(Which,State),
+	accessC2P(ifdef_stack, State, [[Lev|Rest] | Prev]),
+	!,
+	setC2P(ifdef_stack, State, [Rest | Prev]).
+endif_else_or_elif(Which,State) :-
+	error('Unmatched #endif\n',State).
+
+%-------------------------------
+% do_ifdef/5
+%-------------------------------
+
+do_ifdef(Id,State) :-
+%	accessC2P(info_table, State, InTable),
+	getInfoTable(InTable),
+	avl_search(Id,Data,InTable),
+	Data \= unDefined,
+	!,
+	accessC2P(ifdef_stack, State, [LevList | Prev]),
+	setC2P(ifdef_stack, State, [[_ | LevList] | Prev]).
+	
+do_ifdef(Id,State) :-
+	skipLines(State,What),
+	check_elif(What,State).
+
+%-------------------------------
+% do_ifndef/5
+%-------------------------------
+
+do_ifndef(Id,State) :-
+%	accessC2P(info_table, State, InTable),
+	getInfoTable(InTable),
+	avl_search(Id,Data,InTable),
+	Data \= unDefined,
+	!,
+	skipLines(State,What),
+	check_elif(What,State).
+do_ifndef(Id,State) 
+	:-
+	accessC2P(ifdef_stack, State, [LevList | Prev]),
+	setC2P(ifdef_stack, State, [[_|LevList] | Prev]).
+	
+/*
+%-------------------------------
+% check_else/5
+%-------------------------------
+
+check_else(else,State)
+	:-
+	accessC2P(ifdef_stack, State, [LevList | Prev]),
+	setC2P(ifdef_stack, State, [[endif|LevList] | Prev]).
+check_else(endif,State).
+*/
+
+%-------------------------------
+% do_if/5
+%-------------------------------
+
+do_if(0,State) :-
+	!,
+	skipLines(State,What),
+	check_elif(What,State).
+do_if(_,State)
+	:-
+	accessC2P(ifdef_stack, State, [LevList | Prev]),
+	setC2P(ifdef_stack, State, [[_|LevList] | Prev]).
+
+%-------------------------------
+% check_elif/5
+%-------------------------------
+
+check_elif(else,State)
+	:-
+	accessC2P(ifdef_stack, State, [LevList | Prev]),
+	setC2P(ifdef_stack, State, [[endif|LevList] | Prev]).
+check_elif(elif(Exp),State) :-
+	replace_defined(Exp, Exp1, State),
+	macro_expand(single, Exp1, Exp2, State),
+	replace_ident_with0(Exp2,Exp3),
+	expression(Value,State,Exp3,_),
+	Value =\= 0,
+	!,
+	accessC2P(ifdef_stack, State, [LevList | Prev]),
+	setC2P(ifdef_stack, State, [[_|LevList] | Prev]).
+check_elif(elif(_),State) :-
+	skipLines(State,What),
+	check_elif(What,State).
+check_elif(endif,State).
+
+%-------------------------------
+% skip_lines/3
+%-------------------------------
+
+skipLines(State,RetTok) :-
+	getLine(Line,State),
+	!,
+	skipLines(Line,State,RetTok).
+skipLines(State,endif) :-
+	error('Missing #endif\n',State).
+
+skipLines([pound,ident(endif) | _],State,endif) :- !.
+skipLines([pound,ident(else) | _],State,else) :- !.
+skipLines([pound,ident(elif) | Exp],State,elif(Exp)) :- !.
+skipLines([pound,ident(Cond) | _],State,RetTok) :-
+	conditional(Cond),
+	!,
+	skipLines(State,What),
+	skipMore(What,State),
+	skipLines(State,RetTok).
+skipLines([pound,fident(Cond) | _],State,RetTok) :-
+	conditional(Cond),
+	!,
+	skipLines(State,What),
+	skipMore(What,State),
+	skipLines(State,RetTok).
+skipLines(_,State,RetTok) :-
+	skipLines(State,RetTok).
+
+conditional(if).
+conditional(ifdef).
+conditional(ifndef).
+
+%----------------------------------------------------------------
+% skipMore/3
+%	called when we've discovered a nested ifdef, ifndef or if
+%----------------------------------------------------------------
+
+skipMore(endif,State).
+skipMore(elif(_),State) :- 
+	skipLines(State,What),
+	skipMore(What,State).
+skipMore(else,State) :-
+	skipLines(State,What),
+	skipMore(What,State).
+
+/*---------------------------------------------------------------*
+ | replace_defined/4
+ | 	replace defined(Id) tokens by number(0) or number(1)
+ |	depending on whether Id is defined or not.
+ *---------------------------------------------------------------*/
+
+replace_defined( [],[],_).
+replace_defined( [Tok,lparen,ident(Id),rparen | IL],[number(N)|OL],State) :-
+	is_identifier(Tok,defined),
+	!,
+	defined_val(Id,State,N),
+	replace_defined(IL,OL,State).
+replace_defined( [ident(defined),ident(Id) | IL],[number(N)|OL],State) :-
+	!,
+	defined_val(Id,State,N),
+	replace_defined(IL,OL,State).
+replace_defined( [ Tok | IL ], [ Tok | OL ], State) :-
+	replace_defined(IL,OL,State).
+
+defined_val(Id,State,1) :- 
+%	accessC2P(info_table, State, Table),
+	getInfoTable(Table),
+	avl_search(Id,Data,Table),
+	Data \= unDefined,
+	!.
+defined_val(_,_,0).
+
+/*---------------------------------------------------------*
+ | replace_ident_with0/2
+ | 	replace all ident(Id) tokens by number(0)
+ *---------------------------------------------------------*/
+
+replace_ident_with0([], []).
+replace_ident_with0( [ Tok | ILine], [ number(0) | OLine]) :-
+	is_identifier(Tok,_),
+	!,
+	replace_ident_with0(ILine,OLine).
+replace_ident_with0( [ Tok | ILine], [ Tok | OLine]) :-
+	replace_ident_with0(ILine,OLine).
+
+/*----------------------------------------------------------------------*
+ | macro_expand(Mode,Line,OutLine,State)
+ |
+ |	Takes a Line as the input and produces OutLine as the
+ |	output.  Mode is either single or multiple which determines
+ |  whether actual arguments of a macro should be found entirely
+ |	in the input line (#if and #include processing), or more lines can
+ |  be scanned (normal processing). IFD is the input file decriptor
+ |	and OFD is the final file descriptor. Tab is the macro expansion
+ |	symbol table.
+ *----------------------------------------------------------------------*/
+
+macro_expand(Mode,ILine,OLine,State) :- var(ILine), !, OLine = [].
+macro_expand(Mode,[],[],State) :- !.
+macro_expand(Mode,[Head|Rest],EL,State) :-
+	macro_expand(Mode,Head,Rest,EL,State).
+
+macro_expand(Mode,Tok,Rest,EL,State) :-    /* simple macro replacement */
+	is_identifier(Tok,Id),
+%	accessC2P(info_table, State, Table),
+	getInfoTable(Table),
+	avl_search(Id,Defn,Table),
+	!,
+	do_expand(Mode,Defn,Tok,Rest,EL,State).
+macro_expand(Mode,Token1,Rest,[Token|ER],State) :-  /* (##) concatenation */
+	nonvar(Rest),
+	Rest = [poundpound|Rest2],
+	macro_expand(Mode,Rest2,[Token2|ER],State),
+	concat_tokens([Token1,Token2],Token),
+	!.
+macro_expand(Mode,Token,Rest,[Token|ER],State) :-
+	macro_expand(Mode,Rest,ER,State).
+
+concat_tokens(TokList,Token) :-
+	concat_tokens(TokList,[],Str,What),
+	name(Name,Str),
+	Token =.. [What,Name].	
+	
+concat_tokens([Tok],InStr,OutStr,What) :-
+	!,
+	tok_to_list(Tok,Str,What),
+	append(InStr,Str,OutStr).
+concat_tokens([Tok|Rest],InStr,OutStr,What) :-
+	tok_to_list(Tok,Str,_),
+	append(InStr,Str,Str1),
+	concat_tokens(Rest,Str1,OutStr,What).
+
+%---------------------
+% do_expand/8
+%---------------------
+
+do_expand(Mode,d(Repl),_,Rest,EL,State) :-            % macro without arguments
+	!,
+	dappend(Repl,Rest,Again),
+	macro_expand(Mode,Again,EL,State).
+do_expand(Mode,da(FArgs,Defn),Token,Rest,EL,State) :- % macro with args
+	!,
+	append(Rest,_,RestOT),		% set tail to unbound
+	getMArgs(Mode,AArgs,RestOT,EndMark,State),
+	do_expand1(Mode,FArgs,AArgs,Defn,Token,RestOT,EndMark,EL,State).
+do_expand(Mode,_,Token,Rest,[Token|EL],State) :-      % undef'ed symbol
+	macro_expand(Mode,Rest,EL,State).
+
+%---------------------
+% do_expand1/11
+%---------------------
+
+do_expand1(Mode,FArgs,AArgs,Defn,Token,RestOT,EndMark,EL,State) :-
+	length(FArgs,NArgs),
+	length(AArgs,NArgs),
+	!,
+	do_expand_args(AArgs,EArgs,State),
+	do_subst(Defn,FArgs,EArgs,OutDefn),
+	dappend(OutDefn,EndMark,Again),
+	macro_expand(Mode,Again,EL0,State),
+	concat_adj_strings(EL0,EL).
+do_expand1(Mode,_, _, _, Token, Rest, Tail, [Token|ER],State) :-
+%	error('Mismatched arity in macro : %t\n',[Token],IFD),
+	macro_expand(Mode,Rest,ER,State).
+   
+%---------------------------------------------------------------------
+% do_expand_args/4
+%	prescan the actual arguments of a macro for macro substitutions
+%---------------------------------------------------------------------
+
+do_expand_args([],[],_).
+do_expand_args([Arg|IArgs],[EArg|OArgs],State) :-
+	macro_expand(single,Arg,EArg,STate),
+	do_expand_args(IArgs,OArgs,State).
+	
+/*-------------------------------------------------------------------------*
+ | getMArgs(Mode,Args,InList,RestList,State)
+ |
+ |	Called to get the left paren, the actual arguments, and the right paren
+ |	for a macro defined with a #define statement.
+ *-------------------------------------------------------------------------*/
+
+getMArgs(Mode,Args,ILine,RLine,State) :-
+	getmInput(Mode,ILine,State),
+	getMArgs1(Mode,Args,ILine,RLine,State).
+
+getMArgs1(Mode,Args,[lparen| IL],RL,State) :-
+	!,
+	getmInput(Mode,IL,State),
+	getMArgs2(Mode,Args,IL,RL,State).
+getMArgs1(Mode,noargs,L,L,State).
+
+getMArgs2(Mode,[],[rparen| L],L,State) :- !.
+getMArgs2(Mode,[FA|RA],IL,RL,State) :-
+	getMArg(Mode,FA,IL,L1,State),
+	getmInput(Mode,L1,State),
+	moreMArgs(Mode,RA,L1,RL,State).
+
+%--------------------
+% getMArg/6
+%--------------------
+
+getMArg(Mode,[],[rparen|T],[rparen|T],State) :- 
+	!.
+getMArg(Mode,[],[comma|T],[comma|T],State) :- 
+	!.
+getMArg(Mode,[lparen|More],[lparen|IL],OL,State) :-
+	!,
+	getmInput(Mode,IL,State),
+	consumeThruRight(Mode,More,Tail,IL,L1,State),
+	getmInput(Mode,L1,State),
+	getMArg(Mode,Tail,L1,OL,State).
+getMArg(Mode,[Any|More],[Any|IL],OL,State) :-
+	getmInput(Mode,IL,State),
+	getMArg(Mode,More,IL,OL,State).
+
+%--------------------
+% moreMArgs/6
+%--------------------
+
+moreMArgs(Mode,[],[rparen|L],L,State) :-
+	!.
+moreMArgs(Mode,[FA|RA],[comma|IL],OL,State) :-
+	getmInput(Mode,IL,State),
+	getMArg(Mode,FA,IL,L1,State),
+	getmInput(Mode,L1,State),
+	moreMArgs(Mode,RA,L1,OL,State).
+
+/*-------------------------------------------------------------------------*
+ | consumeThruRight/7 is used to consume all characters up to a right
+ |	paren (handling the case of nested left, right paren pairs) in
+ |	getMArgs and getIArgs above.
+ *-------------------------------------------------------------------------*/
+
+consumeThruRight(Mode,[rparen|Tail],Tail,[rparen|Line],Line,State) :- !.
+consumeThruRight(Mode,[lparen|More],Tail,[lparen|IL],OL,State) :-
+	!,
+	getmInput(Mode,IL,State),
+	consumeThruRight(Mode,More,ITail,IL,L1,State),
+	getmInput(Mode,L1,State),
+	consumeThruRight(Mode,ITail,Tail,L1,OL,State).
+consumeThruRight(Mode,[Any|More],Tail,[Any|IL],OL,State) :-
+	getmInput(Mode,IL,State),
+	consumeThruRight(Mode,More,Tail,IL,OL,State).
+
+%-------------------------------------------------------------------------
+% getmLines/3
+%	get more lines until we have a nonempty list of tokens
+%-------------------------------------------------------------------------
+
+getmLines(Line,State) :-
+	var(Line),
+	getLine(L,State),
+	!,
+	openTail(L,Line),
+	getmLines(Line,State).
+getmLines([],State) :- !.
+getmLines([Tok|Rest],State).
+
+openTail(L,Line)
+	:-
+	var(L), !, L=Line.
+
+openTail([Item],[Item | Tail])
+	:-!.
+
+openTail([Item | Rest], [Item | Tail])
+	:-
+	openTail(Rest, Tail).
+
+%-------------------------
+% getmInput/4
+%-------------------------
+
+getmInput(single,Line,State) :- var(Line), !, Line = [].
+getmInput(single,Line,State).
+getmInput(multiple,Line,State) :-
+	getmLines(Line,State).
+
+/*---------------------------------------------------------------------------*
+ | do_substs(InLines,FArgs,AArgs,OutLines)
+ |
+ |	Called to perform substitions in a list of lines where FArgs is
+ |	a list of the formal arguments and AArgs is a list (of same length)
+ |	of the actual arguments
+ *---------------------------------------------------------------------------*/
+
+do_substs([],_,_,[]) :- !.
+do_substs([Line|Lines],FArgs,AArgs,[OutLine|OutLines]) :-
+	do_subst(Line,FArgs,AArgs,OutLine),
+	do_substs(Lines,FArgs,AArgs,OutLines).
+
+/*--------------------------------------------------------------------------*
+ | do_subst(InLine,FArgs,AArgs,OutLine)
+ |
+ |	Called to perform substitions within a single line where FArgs is
+ |	a list of formal Arguments and AArgs is a list (of same length) of
+ |	the actual arguments.  The input line is InLine; the output line
+ |	is OutLine.
+ *--------------------------------------------------------------------------*/
+
+do_subst([],_,_,[]) :- !.
+do_subst(Line,[],_,Line) :- !.
+do_subst([pound,Tok|Rest],FArgs,AArgs,[string(String)|Result]) :-
+	is_identifier(Tok,Id),
+	assoc(Id,FArgs,AArgs,Subst),
+	concat_tokens(Subst,NewTok),
+	NewTok =.. [_,String],
+	!,
+	do_subst(Rest,FArgs,AArgs,Result).	
+do_subst([Tok|Rest],FArgs,AArgs,Result) :-
+	is_identifier(Tok,Id),
+	assoc(Id,FArgs,AArgs,Subst),
+	dappend(Subst,ResTail,Result),
+	!,
+	do_subst(Rest,FArgs,AArgs,ResTail).
+do_subst([Tok|Rest],FArgs,AArgs,[Tok|ResTail]) :-
+	do_subst(Rest,FArgs,AArgs,ResTail).
+
+concat_adj_strings([],[]).
+concat_adj_strings([string(Tok1),string(Tok2)|Rest],Result) :-
+	!,
+	atom_concat(Tok1,Tok2,Tok3),
+	concat_adj_strings([string(Tok3)|Rest],Result).
+concat_adj_strings([Tok|Rest],[Tok|Result]) :-
+	concat_adj_strings(Rest,Result).
+
+/*--------------------------------------------------------------------------*
+ | assoc/4			-- associate a value with a key.
+ *--------------------------------------------------------------------------*/
+
+assoc(Key,[Key|_],[RVal|_],RVal) :- 
+	!.
+assoc(Key,[_|T1],[_|T2],RVal) :- 
+	assoc(Key,T1,T2,RVal).
+
+endmod.
