@@ -116,8 +116,8 @@ static BOOL CheckInstance(LPSTR lpCmdLine)
 		SetForegroundWindow (w);
 		
 		data.dwData = 0; 
-    	data.cbData = strlen(lpCmdLine)+1; 
-    	data.lpData = lpCmdLine; 
+    	data.cbData = strlen(__argv[1])+1; 
+    	data.lpData = __argv[1]; 
 
 		SendMessage(w, WM_COPYDATA, 0, (long)&data);
 		return FALSE;
@@ -136,7 +136,11 @@ static Tcl_Interp *TkWindowInterp;
 static LRESULT CALLBACK OpenDocWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (message == WM_COPYDATA) {
-		if (Tcl_VarEval(TkWindowInterp, "tkOpenDocument ", ((COPYDATASTRUCT *)lParam)->lpData, NULL)
+		Tcl_Obj *list, *elements[2];
+		elements[0] = Tcl_NewStringObj("tkOpenDocument", -1);
+		elements[1] = Tcl_NewStringObj(((COPYDATASTRUCT *)lParam)->lpData, -1);
+		list = Tcl_NewListObj(2, elements);
+		if (Tcl_EvalObj(TkWindowInterp, list)
 			!= TCL_OK) Tcl_BackgroundError(TkWindowInterp);
 		return TRUE;
 	} else {
@@ -249,3 +253,4 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	
     PI_shutdown();
 }
+
