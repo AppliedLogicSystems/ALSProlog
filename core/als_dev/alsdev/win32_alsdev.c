@@ -104,7 +104,7 @@ communicating between instances of ALS Prolog.
    running.  If another copy exists, a copy-data message is sent with
    the command line for processing.
  */
-static BOOL CheckInstance(LPSTR lpCmdLine)
+static BOOL CheckInstance(void)
 {
 	HWND w;
 	
@@ -192,7 +192,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	AP_World *w = NULL;
 
 	/* Allow only one instance to run and have it process the command line. */
-	if (!CheckInstance(lpCmdLine)) return FALSE;
+	if (!CheckInstance()) return FALSE;
 
 	/* Make the OpenDocument package available to Tcl */
 	Tcl_StaticPackage(NULL, "Opendocument", Opendocument_Init, NULL);

@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.50 1998/08/25 22:26:55 choupt Exp $"
+#|		"$Id: alsdev.tcl,v 1.51 1998/08/26 22:23:21 choupt Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -1531,7 +1531,11 @@ proc run_cref  {} {
 
 
 proc tkOpenDocument args {
+	global tcl_platform
 	foreach file $args {
+		if {$tcl_platform(platform) == "windows"} {
+			set file [file attributes "$file" -longname]
+		}
 		document.open $file
 	}
 }
