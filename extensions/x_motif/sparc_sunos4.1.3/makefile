@@ -5,11 +5,11 @@
 
 export SRCDIR = /apache/alsp_src
 
-export C2PINCLUDES = -I /usr/include  -I /usr/include/X11R5 \
+export C2PINCLUDES = -I /usr/include  -I /usr/include/X11R6 \
 	-I /usr/include/Xm 
 export C2PDEFINES = -DXTSTRINGDEFINES -DXMSTRINGDEFINES
 CC = gcc
-CINCLUDES = -I /usr/include/X11R5
+CINCLUDES = -I /usr/include/X11R6
 LINK = ld
 LIBS = -lX11
 #export LIBS =	-lc -lm -L/usr/lib/X11  \

@@ -11,11 +11,11 @@
 /* Open file ../examples/x.h */
 
 
-/* Open file /usr/include/X11R5/X11/Xlib.h */
+/* Open file /usr/include/X11R6/X11/Xlib.h */
 
 als_const('XlibSpecificationRelease',int).
 
-/* Open file /usr/include/X11R5/X11/X.h */
+/* Open file /usr/include/X11R6/X11/X.h */
 
 als_const('X_PROTOCOL',int).
 als_const('X_PROTOCOL_REVISION',int).
@@ -391,21 +391,21 @@ als_const('DirectColor',int).
 als_const('LSBFirst',int).
 als_const('MSBFirst',int).
 
-/* Close file /usr/include/X11R5/X11/X.h */
+/* Close file /usr/include/X11R6/X11/X.h */
 
 
-/* Open file /usr/include/X11R5/X11/Xfuncproto.h */
+/* Open file /usr/include/X11R6/X11/Xfuncproto.h */
 
 als_const('NeedFunctionPrototypes',int).
 als_const('NeedVarargsPrototypes',int).
 
-/* Close file /usr/include/X11R5/X11/Xfuncproto.h */
+/* Close file /usr/include/X11R6/X11/Xfuncproto.h */
 
 
-/* Open file /usr/include/X11R5/X11/Xosdefs.h */
+/* Open file /usr/include/X11R6/X11/Xosdefs.h */
 
 
-/* Close file /usr/include/X11R5/X11/Xosdefs.h */
+/* Close file /usr/include/X11R6/X11/Xosdefs.h */
 
 
 als_type('XPointer',[ptr,char]).
@@ -1336,10 +1336,10 @@ als_type('XErrorHandler',[ptr,func,int]).
 
 als_type('XIOErrorHandler',[ptr,func,int]).
 
-/* Close file /usr/include/X11R5/X11/Xlib.h */
+/* Close file /usr/include/X11R6/X11/Xlib.h */
 
 
-/* Open file /usr/include/X11R5/X11/Xutil.h */
+/* Open file /usr/include/X11R6/X11/Xutil.h */
 
 als_const('NoValue',int).
 als_const('XValue',int).
@@ -1494,10 +1494,10 @@ als_macro('XStringToContext').
 
 ret('Region ')/[ptr,struct]='XCreateRegion'(void/[void])/'Xutil.h'.
 
-/* Close file /usr/include/X11R5/X11/Xutil.h */
+/* Close file /usr/include/X11R6/X11/Xutil.h */
 
 
-/* Open file /usr/include/X11R5/X11/Xatom.h */
+/* Open file /usr/include/X11R6/X11/Xatom.h */
 
 als_const('XATOM_H',int).
 als_const('XA_PRIMARY',int).
@@ -1570,10 +1570,10 @@ als_const('XA_WM_CLASS',int).
 als_const('XA_WM_TRANSIENT_FOR',int).
 als_const('XA_LAST_PREDEFINED',int).
 
-/* Close file /usr/include/X11R5/X11/Xatom.h */
+/* Close file /usr/include/X11R6/X11/Xatom.h */
 
 
-/* Open file /usr/include/X11R5/X11/cursorfont.h */
+/* Open file /usr/include/X11R6/X11/cursorfont.h */
 
 als_const('XC_num_glyphs',int).
 als_const('XC_X_cursor',int).
@@ -1654,10 +1654,10 @@ als_const('XC_ur_angle',int).
 als_const('XC_watch',int).
 als_const('XC_xterm',int).
 
-/* Close file /usr/include/X11R5/X11/cursorfont.h */
+/* Close file /usr/include/X11R6/X11/cursorfont.h */
 
 
-/* Open file /usr/include/X11R5/X11/Xresource.h */
+/* Open file /usr/include/X11R6/X11/Xresource.h */
 
 
 als_type('XrmQuark',[int]).
@@ -1727,13 +1727,13 @@ als_struct('XrmOptionDescRec',['option'=[ptr,char],
 
 als_type('XrmOptionDescList',[ptr,struct]).
 
-/* Close file /usr/include/X11R5/X11/Xresource.h */
+/* Close file /usr/include/X11R6/X11/Xresource.h */
 
 
-/* Open file /usr/include/X11R5/X11/keysym.h */
+/* Open file /usr/include/X11R6/X11/keysym.h */
 
 
-/* Open file /usr/include/X11R5/X11/keysymdef.h */
+/* Open file /usr/include/X11R6/X11/keysymdef.h */
 
 als_const('XK_VoidSymbol',int).
 als_const('XK_BackSpace',int).
@@ -2552,10 +2552,10 @@ als_const('XK_hebrew_taw',int).
 als_const('XK_hebrew_taf',int).
 als_const('XK_Hebrew_switch',int).
 
-/* Close file /usr/include/X11R5/X11/keysymdef.h */
+/* Close file /usr/include/X11R6/X11/keysymdef.h */
 
 
-/* Close file /usr/include/X11R5/X11/keysym.h */
+/* Close file /usr/include/X11R6/X11/keysym.h */
 
 
 /* Close file ../examples/x.h */
