@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.9 1998/08/25 02:21:35 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.10 1998/09/28 02:53:23 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -15,6 +15,17 @@ proc load_project {} {
 proc load_this_project {} {
 	send_prolog als_ide_mgr load_this_project
 }
+
+proc post_open_project {ProjTitle Win} {
+	.topals.mmenb.prolog add command \
+		-label $ProjTitle -command [list raise $Win]
+}
+
+proc unpost_open_project {ProjTitle} {
+	set PrjIdx [.topals.mmenb.prolog index $ProjTitle]
+	.topals.mmenb.prolog delete $PrjIdx
+}
+
 
 proc open_project {} {
 	send_prolog als_ide_mgr open_project

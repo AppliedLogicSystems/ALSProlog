@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.51 1998/08/26 22:23:21 choupt Exp $"
+#|		"$Id: alsdev.tcl,v 1.52 1998/09/28 02:53:24 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -56,6 +56,15 @@ proc xpe2 { What1 What2 } {
 	#       Mod = $proenv(dflt_mod)
 	#       $proenv($Obj) = a number which is an object handle for Obj
 	#       Msg is an atom
+	#
+	#### WARNING #### WARNING #### WARNING 
+	#
+	#	This procedure is identical with one in tk_alslib,
+	#	EXCEPT EXCEPT EXCEPT for the global variable "proenv"
+	#	{ which is agv in the tk_alslib version}.  The one
+	#	here is intended only for use in the shell tcl interpreter
+	#	shl_tcli, while the one from tk_alslib is intended to be
+	#	loaded into user-specificied tcl interpreters.
 	#--------------------------------------------------------------
 proc send_prolog {Obj Msg} {
 	global proenv
@@ -70,14 +79,15 @@ proc send_prolog {Obj Msg} {
 	#       $proenv($Obj) = a number which is an object handle for Obj
 	#       Msg is of type $Type
 	#               (normally use this with $Type = "list" )
+	#
+	#### WARNING #### WARNING #### WARNING 
+	#		..... SAME AS ABOVE
 	#--------------------------------------------------------------
 proc send_prolog_t {Obj Msg Type} {
 	global proenv
 	prolog call $proenv(dflt_mod) send -number $proenv($Obj) -$Type $Msg
 }
 
-										 
-										 
 set argc 0
 set argv ""
 
@@ -138,6 +148,7 @@ set	proenv(debugwin,visible)	{}
 set	proenv(spywin)				0
 set proenv(defstr_ld)			false
 set proenv(dflt_mod)			alsdev
+set proenv(untitled_counter)	0
 
 	## window appearance stuff - initial defaults:
 
@@ -957,6 +968,9 @@ proc exec_toggle_debugwin {} {
 	if {"$proenv(debugwin)"==0} then {
 		hide_debugwin
 	} else {
+		if {[winfo exists .debugwin]==0} then {
+			vTclWindow.debugwin ""
+		}
 		show_debugwin
 	}
 	send_prolog debugger_mgr toggle_visibility
@@ -968,34 +982,30 @@ proc ensure_db_showing {} {
 	if {[winfo exists .debugwin]==0} then { 
 		Window show .debugwin 
 	}
-	.debugwin.text delete 1.0 end
 	show_debugwin
 }
 
 proc show_debugwin {} {
 	global array proenv
 		
-	Window show .debugwin
-	wm geometry .debugwin $proenv(.debugwin,geometry)
+    wm deiconify .debugwin
 	raise .debugwin
 	prolog call builtins change_debug_io -atom debugwin
 	check_leashing
 	foreach Win  $proenv(debugwin,visible) {
 		wm deiconify $Win
 	}
-#	prolog call alsdev setup_for_debugging -atom on
 	set proenv(debugwin) 1
 }
 
 proc hide_debugwin {} {
 	global array proenv
 
-#	hide_spywin
 	foreach Win  $proenv(debugwin,visible) {
 		Window hide $Win
 	}
-#	prolog call alsdev setup_for_debugging -atom off
 	Window hide .debugwin
+	Window hide .pred_info
 	set proenv(debugwin) 0
 }
 
@@ -1003,7 +1013,6 @@ proc exit_debugger {} {
 	global array proenv
 
 	prolog call alsdev exit_debugger
-#	hide_spywin
 	hide_debugwin
 }
 
