@@ -79,7 +79,7 @@ proc vTclWindow.topals {args} {
 	    frame .topals.txwin \
 			-borderwidth 0 -height 30 -relief raised
 	} else {
-	    frame .topals.txwin \3
+	    frame .topals.txwin \
 			-borderwidth 1 -height 30 -relief raised 
 	}
     scrollbar .topals.txwin.02 \

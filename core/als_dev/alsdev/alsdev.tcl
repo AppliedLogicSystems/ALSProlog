@@ -50,6 +50,11 @@ set proenv(defstr_ld)			false
 set proenv(debugwin_button,background)	#cee8e6
 set proenv(interrupt_button,foreground)	#ff0000
 set proenv(win_general,background)		#d9d9d9
+set proenv(win_general,foreground)		#000000
+set proenv(win_general,selectbackground)		#d9d9d9
+set proenv(win_general,selectforeground)		#000000
+set proenv(win_general,font)		courier
+set proenv(win_general,tabs)		4
 set proenv(text,family)		courier
 set proenv(text,size)		10
 set proenv(text,sizeunits)	pixels
