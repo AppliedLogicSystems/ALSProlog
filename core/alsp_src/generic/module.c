@@ -724,6 +724,8 @@ createModCloseProc(tgtmod, name1, arity, name2)
     ic_install_module_closure(ent1, ent2->code);
 
     add_default_proc(name1, arity);
+    
+    return 1;
 }
 
 #ifdef debugging
