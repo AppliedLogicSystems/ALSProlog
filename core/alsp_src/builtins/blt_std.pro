@@ -12,69 +12,92 @@
 
 module builtins.
 
-/*
- * listing/0 and listing/1.
- */
+/*------------------------------------*
+ |	listing/[0,1,2] and listing_to/1.
+ |	dblisting/[1,2].
+ *------------------------------------*/
 
 export listing/0.
 export listing/1.
+export listing/2.
+export listing_to/1.
 
 listing :-
-	clauses_for_listing(_:_/_,DBref),
-	'$source'(DBref, Structure),
-	write_out(Structure),
-	fail.
-listing.
+	sio:get_current_output_stream(Stream),
+	listing_to(Stream).
 
-listing(X) :-
-	clauses_for_listing(X,DBref),
+listing_to(Stream) :-
+	clauses_for_listing(_:_/_,DBref, Stream),
 	'$source'(DBref, Structure),
-	write_out(Structure),
+	write_out(Stream, Structure),
 	fail.
-listing(X).  
+listing_to(_).
 
-export xlisting/1.
-xlisting(X) :-
-	clauses_for_listing(X,DBref),
-	'$source'(DBref, Structure,show_pp),
-	write_out(Structure),
+listing(X) 
+	:-
+	sio:get_current_output_stream(Stream),
+	listing(X, Stream, hide_pp).
+
+listing(X, Stream)
+	:-
+	listing(X, Stream, hide_pp).
+
+listing(X, Stream, Mode)
+	:-
+	clauses_for_listing(X,DBref,Stream),
+	'$source'(DBref, Structure, Mode),
+	write_out(Stream, Structure),
 	fail.
-xlisting(X).  
+listing(_, _, _).  
+
+export dblisting/1.
+dblisting(X) :-
+	sio:get_current_output_stream(Stream),
+	listing(X, Stream, show_pp).
 
 %%%%------ listing support predicates ----------
 
-clauses_for_listing(M:P/A,DBref) :-
+clauses_for_listing(X, DBref)
+	:-
+	sio:get_current_output_stream(Stream),
+	clauses_for_listing(X, DBref, Stream).
+
+clauses_for_listing(M:P/A, DBref, Stream) :-
 	var(M),
 	!,
 	procedures(M,P,A,First),
 	showmod(M),
 	nonsemi(P),
-	nl,write('% '),write(M:P/A),
-	check_exported(M,P,A),nl,
+	printf(Stream, '\n%% %t',[M:P/A]), 
+	check_exported(M,P,A,Stream),
+	nl(Stream),
 	clauses(First,DBref).
 
-clauses_for_listing(M:P/A,DBref) :-
+clauses_for_listing(M:P/A, DBref, Stream) :-
 	nonvar(M),
 	!,
 	procedures(M,P,A,First),
 	nonsemi(P),
-	nl,write('% '),write(M:P/A),
-	check_exported(M,P,A),nl,
+	printf(Stream, '\n%% %t',[M:P/A]), 
+	check_exported(M,P,A, Stream),
+	nl(Stream),
 	clauses(First,DBref).
 
-clauses_for_listing(P/A,DBref)   :-
+clauses_for_listing(P/A, DBref, Stream) :-
 	!,
-	clauses_for_listing(_:P/A,DBref).
+	clauses_for_listing(_:P/A, DBref, Stream).
 
-clauses_for_listing(P,DBref)     :-
+clauses_for_listing(P, DBref, Stream) :-
 	!,
-	clauses_for_listing(_:P/_,DBref).
+	clauses_for_listing(_:P/_, DBref, Stream).
  
 
-check_exported(M,P,A) :-
-	'$exported_proc'(M,P,A),!,
-	write('--exported').
-check_exported(_,_,_).
+check_exported(M,P,A, Stream) :-
+	'$exported_proc'(M,P,A),
+	!,
+	write_term(Stream,'--exported',[]).
+
+check_exported(_,_,_, Stream).
 
 showmod(M) :-
 	noshowmod(M),
