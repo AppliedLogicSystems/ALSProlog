@@ -116,8 +116,10 @@ do_mk_tty_shell(SrcFile, TgtFile, BaseSrcFile, Options)
 	read_terms(InS, SpcTerms),
 	close(InS),
 
+	pathPlusFile(SrcFileDir,_,SrcFile),
+
 	pathPlusFile(TgtDir, _, TgtFile),
-	synth_shell_units(SpcTerms, SrcFile, TgtFile),
+	synth_shell_units(SpcTerms, SrcFile, TgtFile, SrcFileDir),
 
 	pathPlusFile(TgtDir, makefile, MainMakefile),
 	main_makefile(MainMakefile),
@@ -143,7 +145,7 @@ tty_shell_items([
 	consults
 	]).
 
-synth_shell_units(SpcTerms, InSrcFile, TgtFile)
+synth_shell_units(SpcTerms, InSrcFile, TgtFile, SrcFileDir)
 	:-
 	dmember(name=Name,SpcTerms),
 	!,
@@ -157,7 +159,7 @@ synth_shell_units(SpcTerms, InSrcFile, TgtFile)
 
 		%% synthsize the code:
 	tty_shell_units(UnitsList),
-	ssu(UnitsList, XSpcTerms, XSpcCode),
+	ssu(UnitsList, XSpcTerms, SrcFileDir, XSpcCode),
 
 		%% output code:
 	open(TgtFile, write, TgtS, []),
@@ -165,7 +167,7 @@ synth_shell_units(SpcTerms, InSrcFile, TgtFile)
 	write_clauses(TgtS, XSpcCode, [quoted(true)]),
 	close(TgtS).
 
-synth_shell_units(_, _, _, _)
+synth_shell_units(_, _, _, _, _)
 	:-
 	(dmember(quiet(Quiet), Options),!; Quiet=false),
 	a_message(Quiet, 'Error: No name for shell!  Exiting.\n',[]).
@@ -356,7 +358,7 @@ tty_shell_units([
 
 	%% Recurse down the list of units, builting each code
 	%% fragment:
-ssu([], _, 
+ssu([], _, _, 
 		[
 		 (quit_to_prolog(_) :- system('rm *.obp'),
 				   printf('Exiting to Prolog...\n',[]), !, fail),
@@ -364,16 +366,16 @@ ssu([], _,
 				printf('Exiting to Operating System...\n',[]), !, halt),
 		 endmod ]).
 
-ssu([Unit | UnitList], XSpcTerms, XSpcCode)
+ssu([Unit | UnitList], XSpcTerms, SrcFileDir, XSpcCode)
 	:-
-	synth_unit(Unit, XSpcTerms, XSpcCode, XSpcCodeTail),
-	ssu(UnitList, XSpcTerms, XSpcCodeTail).
+	synth_unit(Unit, XSpcTerms, SrcFileDir, XSpcCode, XSpcCodeTail),
+	ssu(UnitList, XSpcTerms, SrcFileDir, XSpcCodeTail).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%% Synthesis for each unit fragment:
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-synth_unit(module, XSpcTerms, Code, CodeTail)
+synth_unit(module, XSpcTerms, SrcFileDir, Code, CodeTail)
 	:-!,
 	dmember(module=Mod, XSpcTerms),
 	dmember(consults=InitConsults, XSpcTerms),
@@ -386,7 +388,7 @@ synth_unit(module, XSpcTerms, Code, CodeTail)
 		Code = [(:- ReConsults),nl, (module Mod), (use windows),nl | CodeTail]
 	).
 
-synth_unit(use, XSpcTerms, Code, CodeTail)
+synth_unit(use, XSpcTerms, SrcFileDir, Code, CodeTail)
 	:-!,
 	dmember(use=UseList, XSpcTerms),
 	(UseList = [] ->
@@ -400,11 +402,11 @@ mk_uses_items([UseItem | UseList], [(use UseItem) | Code], CodeTail)
 	mk_uses_items(UseList, Code, CodeTail).
 mk_uses_items([], CodeTail, CodeTail).
 
-synth_unit(global_var, XSpcTerms, [(:- make_gv(GVarName)), nl | CodeTail], CodeTail)
+synth_unit(global_var, XSpcTerms, SrcFileDir, [(:- make_gv(GVarName)), nl | CodeTail], CodeTail)
 	:-!,
 	dmember(global_var=GVarName, XSpcTerms).
 
-synth_unit(start, XSpcTerms, 
+synth_unit(start, XSpcTerms, SrcFileDir, 
 			[(export StartName/0),(StartName :- StartBody), nl,
 				(export SSName/0), (SSName :- StartName), nl,
 				(export RSName/0), (RSName :- RSBody), nl,
@@ -459,7 +461,7 @@ synth_unit(start, XSpcTerms,
 		 LoopCall
 		).
 
-synth_unit(stock_code, XSpcTerms, Code, CodeTail)
+synth_unit(stock_code, XSpcTerms, SrcFileDir, Code, CodeTail)
 	:-!,
 	dmember(loop=LoopName, XSpcTerms),
 	LoopCall =..[LoopName, '%lettervar%'('Info')],
@@ -518,7 +520,7 @@ synth_unit(stock_code, XSpcTerms, Code, CodeTail)
 		GetRequestClause, nl | CodeTail].
 
 
-synth_unit(actions, XSpcTerms, Code, CodeTail)
+synth_unit(actions, XSpcTerms, SrcFileDir, Code, CodeTail)
 	:-
 	bagof(action(Act,X)-B, member(action(Act,X)=B, XSpcTerms), InitActList),
 	!,
@@ -543,7 +545,7 @@ synth_unit(actions, XSpcTerms, Code, CodeTail)
 						CodeTail, XXSpcTerms, ActClauses),
 	Code = [nl,action_list(Acts),nl | ActClauses].
 
-synth_unit(actions, XSpcTerms, Code, CodeTail)
+synth_unit(actions, XSpcTerms, SrcFileDir, Code, CodeTail)
 	:-
 	bagof(action(ACd,Act,X)-B, member(action(ACd,Act,X)=B, XSpcTerms), InitActList),
 	!,
@@ -655,10 +657,14 @@ build_act(Act,LInfoVar,GInfoVar,Body,LoopName,ActOnName,XSpcTerms,AClause)
 
 
 
-gen_type_spec(XSpcTerms, MakePred)
+gen_type_spec(XSpcTerms, SrcFileDir, MakePred)
 	:-
 	dmember(type_name=TypeName, XSpcTerms),
-	dmember(type_file=TypeFile, XSpcTerms),
+	dmember(type_file=InitTypeFile, XSpcTerms),
+	(TypeFile = InitTypeFile ;
+		pathPlusFile(_,BaseTypeFile,InitTypeFile),
+		pathPlusFile(SrcFileDir,BaseTypeFile,TypeFile)
+	),
 	exists_file(TypeFile),
 	!,
 	open(TypeFile, read, IS, []),
@@ -677,22 +683,22 @@ gen_type_spec(XSpcTerms, MakePred)
 					[TypeName,TypeFile])
 	).
 
-gen_type_spec(XSpcTerms, MakePred)
+gen_type_spec(XSpcTerms, SrcFileDir, MakePred)
 	:-
 	dmember(type_name=TypeName, XSpcTerms),
 	dmember(type_file=TypeFile, XSpcTerms),
 	!,
 	printf('Error! - File %t does not exist!\n', [TypeFile]).
 
-gen_type_spec(XSpcTerms, foobar)
+gen_type_spec(XSpcTerms, SrcFileDir, foobar)
 	:-
 	dmember(type_name=TypeName, XSpcTerms),
 	!,
 	printf('Error! - Missing type file name (type_file = <name>_\n', []).
 
-gen_type_spec(XSpcTerms, MakePred)
+gen_type_spec(XSpcTerms, SrcFileDir, MakePred)
 	:-
-	get_user_info_slots(XSpcTerms, UserInfoSlots),
+	get_user_info_slots(XSpcTerms, SrcFileDir, UserInfoSlots),
 	standard_info_slots(SIS),
 	append(UserInfoSlots, SIS, PropsList),
 
@@ -734,9 +740,9 @@ gen_type_spec(XSpcTerms, MakePred)
 		close(MTOS2)
 	).
 
-synth_unit(info_type, XSpcTerms, Code, CodeTail)
+synth_unit(info_type, XSpcTerms, SrcFileDir, Code, CodeTail)
 	:-!,
-	gen_type_spec(XSpcTerms, MakePred),
+	gen_type_spec(XSpcTerms, SrcFileDir, MakePred),
 	
 	Code = [SetupInfo,nl | CodeTail],
 	(dmember(init = InitCode-InfoVar, XSpcTerms) ->
@@ -773,34 +779,43 @@ locate_line(Atom, Len, Stream)
 		locate_line(Atom, Len, Stream)
 	).
 
-get_user_info_slots(XSpcTerms, UserInfoSlots)
+get_user_info_slots(XSpcTerms, SrcFileDir, UserInfoSlots)
 	:-
 	dmember(info_slots=UserInfoSlots0, XSpcTerms),
 	!,
-	fin_user_info_slots(UserInfoSlots0, UserInfoSlots).
+	fin_user_info_slots(UserInfoSlots0, SrcFileDir, UserInfoSlots).
 
-get_user_info_slots(_, []).
+get_user_info_slots(_, SrcFileDir, []).
 
-fin_user_info_slots(include(InfoSrcFile), UserInfoSlots)
+fin_user_info_slots(include(InfoSrcFile), SrcFileDir, UserInfoSlots)
 	:-
-	open(InfoSrcFile,read,ISFS,[]),
+	(WorkingInfoSrcFile = InfoSrcFile ;
+		pathPlusFile(_,BaseInfoSrcFile,InfoSrcFile),
+		pathPlusFile(SrcFileDir,BaseInfoSrcFile,WorkingInfoSrcFile)
+	),
+	open(WorkingInfoSrcFile,read,ISFS,[]),
 	read_terms(ISFS, ISFSTerms),
 	close(ISFS),
 	dmember(info_slots=UserInfoSlots, ISFSTerms).
 
-fin_user_info_slots(include(_), []) :-!.
+fin_user_info_slots(include(_), SrcFileDir, []) :-!.
 
-fin_user_info_slots(include(InfoSrcFile,DName), UserInfoSlots)
+fin_user_info_slots(include(InfoSrcFile,DName), SrcFileDir, UserInfoSlots)
 	:-
-	open(InfoSrcFile,read,ISFS,[]),
+	(WorkingInfoSrcFile = InfoSrcFile ;
+		pathPlusFile(_,BaseInfoSrcFile,InfoSrcFile),
+		pathPlusFile(SrcFileDir,BaseInfoSrcFile,WorkingInfoSrcFile)
+	),
+
+	open(WorkingInfoSrcFile,read,ISFS,[]),
 	read_terms(ISFS, ISFSTerms),
 	close(ISFS),
 	dmember(defStruct(DName, DList), ISFSTerms),
 	dmember(propertiesList = UserInfoSlots, DList).
 
-fin_user_info_slots(include(_,_), []) :-!.
+fin_user_info_slots(include(_,_), SrcFileDir, []) :-!.
 
-fin_user_info_slots(UserInfoSlots, UserInfoSlots).
+fin_user_info_slots(UserInfoSlots, SrcFileDir, UserInfoSlots).
 
 write_defStruct(TFS, defStruct(Name, DefList))
 	:-

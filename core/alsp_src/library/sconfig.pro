@@ -456,30 +456,5 @@ cat_together_spaced([Item | Rest], Result)
 	cat_together_spaced(Rest, RestResult),
 	catenate([Item, ' ', RestResult], Result).
 
-/*!-----------------------------------------------------------------------
- |	prefix_dir/3
- |	prefix_dir(List, Dir, XList)
- |	prefix_dir(+, +, -)
- |
- |	- prefix Dir to each (atomic) item on List
- *-----------------------------------------------------------------------*/
-prefix_dir([], _, []).
-prefix_dir([Item | List], WSDir, [XItem | XList])
-	:-
-	extendPath(WSDir, Item, XItem),
-	prefix_dir(List, WSDir, XList).
-
-/*!-----------------------------------------------------------------------
- |	prefix_to/3
- |	prefix_to(List, Atom, XList)
- |	prefix_to(+, +, -)
- |
- |	- catenate Atom to the front of each element on List
- *-----------------------------------------------------------------------*/
-prefix_to([], _, []).
-prefix_to([Item | List], Atom, [XItem | XList])
-	:-
-	catenate(Atom, Item, XItem),
-	prefix_to(List, Atom, XList).
 
 endmod.

@@ -69,12 +69,10 @@ save_image0(ImageName, Options)
 
 save_image(NewImageName)
 	:-
-	%% Must get rid of these so the image can create
-	%% them as it starts up; but don't throw them away...
-	sys_searchdir(ALSDIR),
-	abolish(sys_searchdir,1),
-	builtins:dynamic(sys_searchdir/1),
+	adjust_sys_search_for_save(ALSDIR, OrigALSDIR),
 
+		%% Must get rid of these so the image can create
+		%% them as it starts up; but don't throw them away...
 	(bagof(searchdir(SD0), searchdir(SD0), SDList0) -> true ; SDList0 = []),
 	abolish(searchdir,1),
 	builtins:dynamic(searchdir/1),
@@ -83,19 +81,23 @@ save_image(NewImageName)
 	abolish(als_lib_lcn,1),
 	builtins:dynamic(als_lib_lcn/1),
 
+	command_line(CmdLine),
+	abolish(command_line,1),
+
 	append(SDList0,  SDList1, SDList),
 
-	%% Save the new image based on OS
+		%% Save the new image based on OS
 	als_system(SystemList),
 	dmember(os = OS, SystemList),
 	dmember(os_variation = OSVariation, SystemList),
 	image_type(OS, OSVariation, Type),
-	save_image_type(Type, NewImageName, ALSDIR),
+	save_image_type(Type, NewImageName, OrigALSDIR),
 	
-	%% Re-install the search dir info:
+		%% Re-install the search dir info:
 	assert(sys_searchdir(ALSDIR)),
 	laa(SDList0),
-	laa(SDList1).
+	laa(SDList1),
+	assert(command_line(CmdLine)).
 
 	%% This is really just assert_all from the library, but it
 	%% needs to be written here since when it is run, the libary
@@ -106,6 +108,28 @@ laa([Item | Rest])
 	:-
 	builtins:assert(Item),
 	laa(Rest).
+
+	% Must save away the path to the original ALSDIR for
+	% possible use in subsequent save_image calls, since
+	% when the system starts up after a saved image,
+	% ALSDIR is set to the path to the directory in which
+	% the image resides:
+
+:- dynamic(orig_sys_searchdir/1).
+
+adjust_sys_search_for_save(ALSDIR,OrigALSDIR)
+	:-
+	(orig_sys_searchdir(OrigALSDIR) ->
+		true
+		;
+		sys_searchdir(ALSDIR),
+		OrigALSDIR = ALSDIR,
+		assert(orig_sys_searchdir(OrigALSDIR))
+	),
+		%% Must get rid of these so the image can create
+		%% them as it starts up; but don't throw them away...
+	abolish(sys_searchdir,1),
+	builtins:dynamic(sys_searchdir/1).
 
 /*!--------------------------------------------------------------*
  |	save_image_type/3

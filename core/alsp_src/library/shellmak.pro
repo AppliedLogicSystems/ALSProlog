@@ -24,6 +24,7 @@ export make_shell_cl/0.
 export make_shell/1.
 export make_shell/2.
 export make_shell_list/2.
+export mk_shell/3.
 export mk_shell/4.
 
 /*--------------------------------------------------------------------*
@@ -123,6 +124,7 @@ make_shell_list([File | Files], OpStr, Options)
  |
  |	Housekeeping setup for principal individual file routine
  *--------------------------------------------------------------------*/
+
 make_shell(InSrcFile, OpStr, Options)
 	:-
 		%% setup correct file names:
@@ -132,54 +134,64 @@ make_shell(InSrcFile, OpStr, Options)
 		filePlusExt(InSrcFile,spc,SrcFile),
 		BaseSrcFile = InSrcFile
 	),
-	filePlusExt(BaseSrcFile,pro,TgtFile),
-	mk_shell(SrcFile,TgtFile, BaseSrcFile, OpStr, Options).
+%	filePlusExt(BaseSrcFile,pro,TgtFile),
+	mk_shell(SrcFile, BaseSrcFile, Options).
 
 /*--------------------------------------------------------------------*
- |	mk_shell/4
- |	mk_shell(SrcFile,TgtFile, BaseSrcFile, Options)
- |	mk_shell(+,+, +, +)
+ |	mk_shell/3
+ |	mk_shell(SrcFile,BaseSrcFile, Options)
+ |	mk_shell(+, +, +)
  |
  |	Housekeeping setup for principal individual file routine
  *--------------------------------------------------------------------*/
-mk_shell(SrcFile,TgtFile, BaseSrcFile, Options)
+mk_shell(SrcFile, BaseSrcFile, Options)
 	:-
 	(dmember(quiet(Quiet), Options),!; Quiet=false),
 	(dmember(app_type(AppType), Options),!; AppType=tty),
 	OpStr = op(Quiet, AppType),
-	mk_shell(SrcFile,TgtFile, BaseSrcFile, OpStr, Options).
+	mk_shell(SrcFile, BaseSrcFile, OpStr, Options).
 
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
+
 quiet(op(Quiet, AppType), Quiet).
 app_type(op(Quiet, AppType), AppType).
 
 /*--------------------------------------------------------------------*
- |	mk_shell/5
- |	mk_shell(SrcFile,TgtFile, BaseSrcFile, OpStr, Options)
- |	mk_shell(+,+, +, +, +)
+ |	mk_shell/4
+ |	mk_shell(SrcFile,BaseSrcFile, OpStr, Options)
+ |	mk_shell(+, +, +, +)
  |
  |	catch-protected entry to principal individual file routine
  *--------------------------------------------------------------------*/
-mk_shell(SrcFile,TgtFile, BaseSrcFile, OpStr, Options)
+mk_shell(SrcFile, BaseSrcFile, OpStr, Options)
 	:-
 	catch(
-		x_mk_shell(SrcFile,TgtFile, BaseSrcFile, OpStr, Options),
+		x_mk_shell(SrcFile, BaseSrcFile, OpStr, Options),
 		Ball,
-		mk_shell_err_h(Ball,SrcFile,TgtFile, BaseSrcFile, OpStr, Options)
+		mk_shell_err_h(Ball,SrcFile, BaseSrcFile, OpStr, Options)
 	).
 
 /*--------------------------------------------------------------------*
  |	Check for existence of source file
  *--------------------------------------------------------------------*/
 
-x_mk_shell(SrcFile,TgtFile, BaseSrcFile, OpStr, Options)
+x_mk_shell(SrcFile, BaseSrcFile, OpStr, Options)
 	:-
 	exists_file(SrcFile),
 	!,
-	cont_x_mk_shell(SrcFile,TgtFile, BaseSrcFile, OpStr, Options).
+	pathPlusFile(SrcFileDir, UnderSrcFile, SrcFile),
+		%% setup correct file names:
+	(filePlusExt(BaseSrcFile, spc, UnderSrcFile) ->
+		true
+		;
+		BaseSrcFile = UnderSrcFile
+	),
+	filePlusExt(BaseSrcFile, pro, UnderTgtFile),
+	pathPlusFile(SrcFileDir, UnderTgtFile, TgtFile),
+	cont_x_mk_shell(SrcFile, TgtFile, BaseSrcFile, SrcFileDir, OpStr, Options).
 
-x_mk_shell(SrcFile, TgtFile, BaseSrcFile, OpStr, Options)
+x_mk_shell(SrcFile, BaseSrcFile, OpStr, Options)
 	:-
 	raise_mks_xcept('!!Error: File %t does not exist!\n',[SrcFile]).
 
@@ -188,16 +200,16 @@ x_mk_shell(SrcFile, TgtFile, BaseSrcFile, OpStr, Options)
  |	both source and target exist, and if source is older than
  |	target, do nothing; else go to work.
  *--------------------------------------------------------------------*/
-cont_x_mk_shell(SrcFile,TgtFile, BaseSrcFile, OpStr, Options)
+cont_x_mk_shell(SrcFile, TgtFile, BaseSrcFile, SrcFileDir, OpStr, Options)
 	:-
 			%% TgtFile exists & SrcFile is older:
 	comp_file_times(SrcFile, TgtFile).
 
-cont_x_mk_shell(SrcFile,TgtFile, BaseSrcFile, OpStr, Options)
+cont_x_mk_shell(SrcFile,TgtFile, BaseSrcFile, SrcFileDir, OpStr, Options)
 	:-
 	quiet(OpStr, Quiet),
 	a_message(Quiet, '\nProcessing spc file %t...\n', [SrcFile]),
-	do_mk_shell(SrcFile, TgtFile, BaseSrcFile, OpStr, Options),
+	do_mk_shell(SrcFile, TgtFile, BaseSrcFile, SrcFileDir, OpStr, Options),
 	a_message(Quiet, 'Done with spc file %t.\n', [SrcFile]).
 
 /*--------------------------------------------------------------------*
@@ -205,7 +217,7 @@ cont_x_mk_shell(SrcFile,TgtFile, BaseSrcFile, OpStr, Options)
  |	Do final fixup of tty/socket option based on SpcTerms & Options;
  |	Enter primary processed predicate.
  *--------------------------------------------------------------------*/
-do_mk_shell(SrcFile, TgtFile, BaseSrcFile, OpStr, Options)
+do_mk_shell(SrcFile, TgtFile, BaseSrcFile, SrcFileDir, OpStr, Options)
 	:-
 	grab_terms(SrcFile, SpcTerms),
 	OpStr = op(Quiet, AppType), 
@@ -213,10 +225,10 @@ do_mk_shell(SrcFile, TgtFile, BaseSrcFile, OpStr, Options)
 	(dmember(app_type=socket, SpcTerms) ->
 		NewAppType = socket ; NewAppType = AppType),
 	NewOpStr = op(Quiet, NewAppType) ,
-	synth_shell_units(NewAppType, SpcTerms, SrcFile, TgtFile, Quiet),
+	synth_shell_units(NewAppType, SpcTerms, SrcFile, TgtFile, SrcFileDir, Quiet),
 	!.
 
-do_mk_shell(SrcFile, TgtFile, BaseSrcFile, OpStr, Options)
+do_mk_shell(SrcFile, _, _, _, _, _)
 	:-
 	raise_mks_xcept('Error!! Unknown error in spc file %t -- not processed',[SrcFile]).
 
@@ -260,7 +272,7 @@ mk_tty_shell(SpcTerms, SrcFile, TgtFile, BaseSrcFile, OpStr, Options)
  |	- The core routine - organizes all work
  *-------------------------------------------------------------------------------*/
 
-synth_shell_units(AppTp, SpcTerms, InSrcFile, TgtFile, Quiet)
+synth_shell_units(AppTp, SpcTerms, InSrcFile, TgtFile, SrcFileDir, Quiet)
 	:-
 	dmember(name=Name,SpcTerms),
 	!,
@@ -275,7 +287,7 @@ synth_shell_units(AppTp, SpcTerms, InSrcFile, TgtFile, Quiet)
 
 		%% synthsize the code:
 	shell_units(AppTp, UnitsList),
-	ssu(UnitsList, XSpcTerms, AppTp, Quiet, XSpcCode),
+	ssu(UnitsList, XSpcTerms, AppTp, Quiet, SrcFileDir, XSpcCode),
 
 	dmember(module = TheModule, XSpcTerms),
 	append([module(socket_comms),use(TheModule),endmod,nl],
@@ -525,7 +537,7 @@ shell_units(socket,[
 	%%
 	%% Recurse down the list of units, builting each code fragment:
 	%%
-ssu([], _, _, _,
+ssu([], _, _, _, _,
 		[
 		 (quit_to_prolog(_) :- system('rm *.obp'),
 				   printf('Exiting to Prolog...\n',[]), !, fail),
@@ -533,10 +545,10 @@ ssu([], _, _, _,
 				printf('Exiting to Operating System...\n',[]), !, halt),
 		 endmod ]).
 
-ssu([Unit | UnitList], XSpcTerms, AppTp, Quiet, XSpcCode)
+ssu([Unit | UnitList], XSpcTerms, AppTp, Quiet, SrcFileDir, XSpcCode)
 	:-
-	synth_unit(Unit, XSpcTerms, AppTp, XSpcCode, XSpcCodeTail),
-	ssu(UnitList, XSpcTerms, AppTp, Quiet, XSpcCodeTail).
+	synth_unit(Unit, XSpcTerms, AppTp, SrcFileDir, XSpcCode, XSpcCodeTail),
+	ssu(UnitList, XSpcTerms, AppTp, Quiet, SrcFileDir, XSpcCodeTail).
 
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -549,7 +561,7 @@ ssu([Unit | UnitList], XSpcTerms, AppTp, Quiet, XSpcCode)
 	%%
 	%% module
 	%%
-synth_unit(module, XSpcTerms, AppTp, Code, CodeTail)
+synth_unit(module, XSpcTerms, AppTp, SrcFileDir, Code, CodeTail)
 	:-!,
 	dmember(module=Mod, XSpcTerms),
 	dmember(consults=InitConsults, XSpcTerms),
@@ -565,7 +577,7 @@ synth_unit(module, XSpcTerms, AppTp, Code, CodeTail)
 	%%
 	%% config_file_name_type
 	%%
-synth_unit(config_file_name_type, XSpcTerms, AppTp, Code, CodeTail)
+synth_unit(config_file_name_type, XSpcTerms, AppTp, SrcFileDir, Code, CodeTail)
 	:-!,
 	dmember(config_file_name_type=CFT, XSpcTerms),
 	Code = [(export config_file_name_type/2), CFT | CodeTail].
@@ -573,7 +585,7 @@ synth_unit(config_file_name_type, XSpcTerms, AppTp, Code, CodeTail)
 	%%
 	%% use
 	%%
-synth_unit(use, XSpcTerms, AppTp, Code, CodeTail)
+synth_unit(use, XSpcTerms, AppTp, SrcFileDir, Code, CodeTail)
 	:-!,
 	dmember(use=UseList, XSpcTerms),
 	(UseList = [] ->
@@ -591,7 +603,8 @@ mk_uses_items([], CodeTail, CodeTail).
 	%%
 	%% global_var
 	%%
-synth_unit(global_var, XSpcTerms, AppTp, [(:- make_gv(GVarName)), nl | CodeTail], CodeTail)
+synth_unit(global_var, XSpcTerms, AppTp, SrcFileDir, 
+			[(:- make_gv(GVarName)), nl | CodeTail], CodeTail)
 	:-!,
 	dmember(global_var=GVarName, XSpcTerms).
 
@@ -599,7 +612,8 @@ synth_unit(global_var, XSpcTerms, AppTp, [(:- make_gv(GVarName)), nl | CodeTail]
 	%% start
 	%%
 synth_unit(start, XSpcTerms, AppTp, 
-			[(export StartName/0),(StartName :- StartBody), nl,
+			SrcFileDir, 
+			   [(export StartName/0),(StartName :- StartBody), nl,
 				(export SSName/0), (SSName :- StartName), nl,
 				(export RSName/0), (RSName :- RSBody), nl,
 				(export SRSName/0), (SRSName :- RSName), nl
@@ -656,7 +670,7 @@ synth_unit(start, XSpcTerms, AppTp,
 	%%
 	%% stock_code
 	%%
-synth_unit(stock_code, XSpcTerms, AppTp, Code, CodeTail)
+synth_unit(stock_code, XSpcTerms, AppTp, SrcFileDir, Code, CodeTail)
 	:-!,
 	dmember(loop=LoopName, XSpcTerms),
 	LoopCall =..[LoopName, '%lettervar%'('Info')],
@@ -717,7 +731,7 @@ synth_unit(stock_code, XSpcTerms, AppTp, Code, CodeTail)
 	%%
 	%% actions -- for sockets:
 	%%
-synth_unit(actions, XSpcTerms, socket, Code, CodeTail)
+synth_unit(actions, XSpcTerms, socket, SrcFileDir, Code, CodeTail)
 	:-!,
 	assemble_init_acts(XSpcTerms, InitActList),
 	!,
@@ -762,7 +776,7 @@ xtenda(Act, B, XSpcTerms)
 	%%
 	%% actions -- for tty:
 	%%
-synth_unit(actions, XSpcTerms, AppTp, Code, CodeTail)
+synth_unit(actions, XSpcTerms, AppTp, SrcFileDir, Code, CodeTail)
 	:-
 	bagof(action(Act,X)-B, member(action(Act,X)=B, XSpcTerms), InitActList),
 	!,
@@ -787,7 +801,7 @@ synth_unit(actions, XSpcTerms, AppTp, Code, CodeTail)
 						CodeTail, XXSpcTerms, ActClauses),
 	Code = [nl,action_list(Acts),nl | ActClauses].
 
-synth_unit(actions, XSpcTerms, AppTp, Code, CodeTail)
+synth_unit(actions, XSpcTerms, AppTp, SrcFileDir, Code, CodeTail)
 	:-
 	bagof(action(ACd,Act,X)-B, member(action(ACd,Act,X)=B, XSpcTerms), InitActList),
 	!,
@@ -802,9 +816,9 @@ synth_unit(actions, XSpcTerms, AppTp, Code, CodeTail)
 						CodeTail, XXSpcTerms, ActClauses),
 	Code = [nl,action_list(Acts),nl,code_list(Codes) | ActClauses].
 
-synth_unit(info_type, XSpcTerms, AppTp, Code, CodeTail)
+synth_unit(info_type, XSpcTerms, AppTp, SrcFileDir, Code, CodeTail)
 	:-!,
-	gen_type_spec(XSpcTerms, MakePred, AppTp),
+	gen_type_spec(XSpcTerms, SrcFileDir, MakePred, AppTp),
 	!,
 	Code = [SetupInfo,nl | CodeTail],
 	(dmember(init = InitCode-InfoVar, XSpcTerms) ->
@@ -1028,7 +1042,7 @@ server_vars_sinfo([_,_,_,_,SInfo], SInfo).
 
 	%% Type file explicitly specified, and it exists -- make 
 	%% sure it has %% reasonable contents, & if so, do nothing:
-gen_type_spec(XSpcTerms, MakePred, AppTp)
+gen_type_spec(XSpcTerms, SrcFileDir, MakePred, AppTp)
 	:-
 	(AppTp = socket -> 
 		TypeName = server_info
@@ -1036,7 +1050,11 @@ gen_type_spec(XSpcTerms, MakePred, AppTp)
 		dmember(type_name=TypeName, XSpcTerms)
 	),
 	dmember(type_file=TypeFileName, XSpcTerms),
-	search_for_file(TypeFileName, TypeFile), 
+
+%	search_for_file(TypeFileName, TypeFile), 
+	pathPlusFile(_,BaseTypeFileName, TypeFileName),
+	pathPlusFile(SrcFileDir,BaseTypeFileName,TypeFile),
+
 	exists_file(TypeFile),
 	!,
 	grab_terms(TypeFile, ISTerms),
@@ -1054,7 +1072,7 @@ gen_type_spec(XSpcTerms, MakePred, AppTp)
 	).
 
 	%% Type file explicitly specified, but doesn't exist:
-gen_type_spec(XSpcTerms, MakePred, AppTp)
+gen_type_spec(XSpcTerms, SrcFileDir, MakePred, AppTp)
 	:-
 	dmember(type_name=TypeName, XSpcTerms),
 	dmember(type_file=TypeFile, XSpcTerms),
@@ -1063,7 +1081,7 @@ gen_type_spec(XSpcTerms, MakePred, AppTp)
 
 	%% Type name explicitly specified, but type file not
 	%% specified in source specifications:
-gen_type_spec(XSpcTerms, foobar, AppTp)
+gen_type_spec(XSpcTerms, SrcFileDir, foobar, AppTp)
 	:-
 	dmember(type_name=TypeName, XSpcTerms),
 	!,
@@ -1071,9 +1089,9 @@ gen_type_spec(XSpcTerms, foobar, AppTp)
 
 	%% Nothing about type file specified in source specifications;
 	%% Generate the appropriate type file:
-gen_type_spec(XSpcTerms, MakePred, AppTp)
+gen_type_spec(XSpcTerms, SrcFileDir, MakePred, AppTp)
 	:-
-	get_user_info_slots(XSpcTerms, UserInfoSlots),
+	get_user_info_slots(XSpcTerms, SrcFileDir, UserInfoSlots),
 	standard_info_slots(SIS),
 	append(UserInfoSlots, SIS, PropsList),
 
@@ -1091,7 +1109,11 @@ gen_type_spec(XSpcTerms, MakePred, AppTp)
 		makePred = MakePred,
 		structLabel = StructLabel ],
 
-	dmember(type_file=TypeFile, XSpcTerms),
+	dmember(type_file=TypeFileName, XSpcTerms),
+
+	pathPlusFile(_,BaseTypeFileName, TypeFileName),
+	pathPlusFile(SrcFileDir,BaseTypeFileName,TypeFile),
+
 	dmember(module=Mod, XSpcTerms),
 
 	open(TypeFile, write, TFS, []),
@@ -1137,34 +1159,44 @@ locate_line(Atom, Len, Stream)
 /*-------------------------------------------------------------------------------*
  *-------------------------------------------------------------------------------*/
 
-get_user_info_slots(XSpcTerms, UserInfoSlots)
+get_user_info_slots(XSpcTerms, SrcFileDir, UserInfoSlots)
 	:-
 	dmember(info_slots=UserInfoSlots0, XSpcTerms),
 	!,
-	fin_user_info_slots(UserInfoSlots0, UserInfoSlots).
+	fin_user_info_slots(UserInfoSlots0, SrcFileDir, UserInfoSlots).
 
-get_user_info_slots(_, []).
+get_user_info_slots(_, SrcFileDir, []).
 
-fin_user_info_slots(include(InfoSrcFile), UserInfoSlots)
+fin_user_info_slots(include(InfoSrcFile), SrcFileDir, UserInfoSlots)
 	:-
-	open(InfoSrcFile,read,ISFS,[]),
+	(WorkingInfoSrcFile = InfoSrcFile ;
+		pathPlusFile(_,BaseInfoSrcFile,InfoSrcFile),
+		pathPlusFile(SrcFileDir,BaseInfoSrcFile,WorkingInfoSrcFile)
+	),
+	exists_file(WorkingInfoSrcFile),
+	open(WorkingInfoSrcFile,read,ISFS,[]),
 	read_terms(ISFS, ISFSTerms),
 	close(ISFS),
 	dmember(info_slots=UserInfoSlots, ISFSTerms).
 
-fin_user_info_slots(include(_), []) :-!.
+fin_user_info_slots(include(_), SrcFileDir, []) :-!.
 
-fin_user_info_slots(include(InfoSrcFile,DName), UserInfoSlots)
+fin_user_info_slots(include(InfoSrcFile,DName), SrcFileDir, UserInfoSlots)
 	:-
-	open(InfoSrcFile,read,ISFS,[]),
+	(WorkingInfoSrcFile = InfoSrcFile ;
+		pathPlusFile(_,BaseInfoSrcFile,InfoSrcFile),
+		pathPlusFile(SrcFileDir,BaseInfoSrcFile,WorkingInfoSrcFile)
+	),
+	exists_file(WorkingInfoSrcFile),
+	open(WorkingInfoSrcFile,read,ISFS,[]),
 	read_terms(ISFS, ISFSTerms),
 	close(ISFS),
 	dmember(defStruct(DName, DList), ISFSTerms),
 	dmember(propertiesList = UserInfoSlots, DList).
 
-fin_user_info_slots(include(_,_), []) :-!.
+fin_user_info_slots(include(_,_), SrcFileDir, []) :-!.
 
-fin_user_info_slots(UserInfoSlots, UserInfoSlots).
+fin_user_info_slots(UserInfoSlots, SrcFileDir, UserInfoSlots).
 
 /*-------------------------------------------------------------------------------*
  *-------------------------------------------------------------------------------*/
@@ -1657,12 +1689,12 @@ raise_mks_xcept(Pattern, Args)
 	:-
 	throw(mk_shell_error(Pattern, Args)).
 
-mk_shell_err_h(mk_shell_error(Pattern,Args), SrcFile,TgtFile, BaseSrcFile, OpStr, Options)
+mk_shell_err_h(mk_shell_error(Pattern,Args), SrcFile, BaseSrcFile, OpStr, Options)
 	:-!,
 	quiet(OpStr, Quiet),
 	a_message(Quiet, Pattern, Args).
 
-mk_shell_err_h(Ball,SrcFile,TgtFile, BaseSrcFile, OpStr, Options)
+mk_shell_err_h(Ball,SrcFile, BaseSrcFile, OpStr, Options)
 	:-
 	throw(Ball).
 

@@ -140,7 +140,7 @@ ss_parse_command_line(['-b' | T], L, CLInfo)
 	%% -v: Turn on verbose mode:
 ss_parse_command_line(['-v' | T], L, CLInfo)
 	:-!,
-	mangle(2, CLInfo, true),
+	mangle(2, CLInfo, false),
 	ss_parse_command_line(T, L, CLInfo).
 
 	%% -q: Turn off verbose mode: (set = "true": be quiet)

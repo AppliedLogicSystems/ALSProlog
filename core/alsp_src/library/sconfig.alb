@@ -3,6 +3,6 @@ libactivate(builtins,[library,sconfig],
         winsystems_for/2,winsystems_for/3,specif_winsystems_for/3,ws_vars/3,
         ws_vars/5,system_dir_root/2,incl_req/3,characteristic_files/3,
         possible_dir_for/4,flatten_ws_lists/2,flatten_to_atom/2,
-        cat_together_seplines/2,cat_together_spaced/2,prefix_dir/3,
-        prefix_to/3],
+        cat_together_seplines/2,cat_together_spaced/2
+		],
     []).
