@@ -21,7 +21,7 @@ schema([
 			 irule(c,'ppc.o'),
 			 irule(c,'demo.68k.o'),
 			 irule(c,'demo.ppc.o')]),
-		  (_:irule(c) )
+		  (_: [irule(c), irule(c,'key.o')] )
 	] ),
 	cmnt(3),
 	case(&(context_name),[
@@ -42,7 +42,8 @@ schema([
 			 gpckgfiles_c = ext(gpckgfiles,c) qual one_per_line,
 			 glibfiles_c  = ext(glibfiles,c)  qual one_per_line,
 			 gfiles_c 	= ['$(gforfiles_c) $(gpckgfiles_c) $(glibfiles_c)'],
-			 gfiles_o = '$(gfiles_c:.c=.' + &(object) + ')' 
+			 gfiles_o = '$(gfiles_c:.c=.' + &(object) + ')',
+			 gkeyfiles_o = ['security.key.o'] 
 			] ) ] ),
 
 
@@ -146,7 +147,7 @@ cmnt(0)		= ['        generic.mkf',
 cmnt(1) 		= ['How to build everything'].
 
 
-all 	depends_on  [alsdir, setup, generated, alspro_b, alsmics, alspro, alstest].
+all 	depends_on  [alsdir, setup, generated, alspro_b, alsmics, alspro, key_alspro_b, key_alspro, alstest].
 
 macall	depends_on	[generated, mpw_alspro_b_ppc, sioux_alspro_b_68k, sioux_alspro_b_ppc, sioux_alspro_b, demo_sioux_alspro_b,
 			 alspro_b, alspro, sioux_alspro, demo_sioux_alspro, mpw_alspro, alstest].
@@ -185,6 +186,10 @@ irule(c,w31) =
 irule(c) = 
 	irule(c,&(object),
 		['$(CC) -c $(CPPFLAGS) $(CFLAGS) $(X_CFLAGS) $<']).
+
+irule(c,'key.o') = 
+	irule(c,'key.o',
+		['$(CC) -c -o $*.key.o $(CPPFLAGS) $(CFLAGS) -D HARDWARE_KEY $(X_CFLAGS) $<']).
 
 cmnt(3)			= ['C-defined files making up common part of system'].
 
@@ -458,7 +463,8 @@ depends_list(_) =
 			ext(gc,       EXT)	: ext([machinst,wintcode],h),
 			ext(index,    EXT)	: ext([icodegen,icom],h),
 			ext(intaux,    EXT)	: ext([intrv,freeze],h),
-			ext(int_net,    EXT)	: ext([intrv,freeze,intrv_pr],h) appnd ext([intrv],c),
+			ext(int_net,    EXT)	: ext([intrv,freeze,intrv_pr],h),
+			ext(intrv,    EXT)	: ext([intrv,freeze,intrv_pr],h),
 			ext(lexan,    EXT)	: ext([lexan,lexinit],h),
 			ext(loadfile, EXT)	: ext([wintcode,icodegen,magic,version],h),
 			ext(main,     EXT)	: ext([main,version,pckg,rinfo],h),
