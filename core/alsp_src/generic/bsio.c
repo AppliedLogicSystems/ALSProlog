@@ -228,7 +228,7 @@ static	long	stream_end	PARAMS(( UCHAR * ));
 static	int	skip_layout	PARAMS(( UCHAR * ));
 static	int	octal		PARAMS(( UCHAR ** ));
 static	int	hexadecimal	PARAMS(( UCHAR ** ));
-static	int	decimal		PARAMS(( UCHAR **, double *, int *));
+static	int	decimal		PARAMS(( UCHAR **, UCHAR *, double *, int *));
 static	int	escaped_char	PARAMS(( UCHAR ** ));
 static	void	quoted_atom	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *lim, UCHAR *buf));
 static	int	quoted_string	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *, UCHAR * ));
@@ -3574,7 +3574,7 @@ decimal(pp, ty)
 }
 */
 static int
-decimal(UCHAR **pp, double *dval, int *ty)
+decimal(UCHAR **pp, UCHAR *lim, double *dval, int *ty)
 {
     register UCHAR *p;
     double d, frac;
@@ -3605,7 +3605,7 @@ decimal(UCHAR **pp, double *dval, int *ty)
 		frac = frac / 10.0 + *s-- - '0';
 
 	    d += frac / 10;
-	} else if (*(p+1) == 0) success = 0;
+	} else if ((p+1) >= lim) success = 0;
     }
 
     if ((sio_chtb[*p] & SIOC_E)) {
@@ -3642,7 +3642,7 @@ decimal(UCHAR **pp, double *dval, int *ty)
 		d /= m;
 	    else
 		d *= m;
-    	} else if (*(p+1) == 0 || *(p+2) == 0) success = 0;
+    	} else if ((p+2) >= lim) success = 0;
     }
 
     if (success) {
@@ -4174,7 +4174,7 @@ makesym:
 #endif /* SIO_ZERO_QUOTE_FOR_CHAR_CONSTS */
 		    else
 			{
-				if (decimal(&p, &dec_val, &ty)) {
+				if (decimal(&p, lim, &dec_val, &ty)) {
 				    make_numberx(vpTokVal, tpTokVal, dec_val,ty);
 				} else {
 				    SIO_CPOS(buf) = tokstart - SIO_BUFFER(buf);
@@ -4185,7 +4185,7 @@ makesym:
 		}
 		else
 		{
-			if (decimal(&p, &dec_val, &ty)) {
+			if (decimal(&p, lim, &dec_val, &ty)) {
 			    make_numberx(vpTokVal, tpTokVal, dec_val,ty);
 			} else {
 			    SIO_CPOS(buf) = tokstart - SIO_BUFFER(buf);
