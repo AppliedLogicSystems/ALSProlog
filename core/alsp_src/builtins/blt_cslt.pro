@@ -892,6 +892,9 @@ check_plugin_result(not_plugin_error, File, NativeResult, Goal) :-
 	system_error(not_shared_library(File)).
 check_plugin_result(memory_error, File, NativeResult, _) :-
 	resource_error(shared_library_memory, [os_code(NativeResult)]).
+check_plugin_result(version_error, File, NativeResult, _) :-
+	system_error(shared_library_version_error(File,
+	incompatable_version(NativeResult))).
 check_plugin_result(init_error, File, NativeResult, _) :-
 	system_error(shared_library_init_error(File, os_code(NativeResult))).
 check_plugin_result(Error, File, NativeResult, _) :-
