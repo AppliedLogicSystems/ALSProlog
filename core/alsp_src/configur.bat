@@ -82,7 +82,7 @@ sed -f %sedmtg% generic.mkf > m
 update m generic.mkf
 del m
 
-copy %generdir%\pi_cfg bld-port\pi_cfg.h
+copy %generdir%\pi_cfg.in bld-port\pi_cfg.h
 copy %generdir%\pi_init.c bld-port\pi_init.c
 update %unixsrc%/i386/djgpp/config.h config.h
 
