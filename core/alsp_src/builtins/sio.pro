@@ -287,10 +287,14 @@ is_stream(Stream) :-
  * is_alias/1
  */
 
+is_alias(Object) :- atom(Object).
+
+/*
 is_alias(Alias) :-
 	nonvar(Alias),
 	get_alias(Alias,_),		%% hash table search
 	!.
+*/
 
 /*
  * is_output_alias/2
@@ -364,6 +368,16 @@ stream_or_alias_ok(user, Stream) :-
 stream_or_alias_ok(Culprit, _) :-
 	stream_or_alias_error(Culprit, _).
 
+stream_ok(Var) :-
+	var(Var),
+	!,
+	instantiation_error(2).
+stream_ok(Stream) :-
+	is_stream(Stream),
+	stream_open_status(Stream,open),
+	!.
+stream_ok(Culprit) :-
+	stream_error(Culprit).
 
 /*
  * input_stream_alias_ok(S_or_a,Stream)
@@ -398,6 +412,11 @@ stream_or_alias_error(Culprit, _) :-
 	is_not_stream_or_alias(Culprit),
 	!,
 	domain_error(stream_or_alias,Culprit,2).
+stream_or_alias_error(Culprit, _) :-
+	is_alias(Culprit),
+	not(get_alias(Culprit, _)),
+	!,
+	existence_error(stream, Culprit, 2).
 stream_or_alias_error(Culprit, Mode) :-
 	is_stream(Culprit,S),
 	stream_open_status(S,OpenStatus),
@@ -417,6 +436,21 @@ stream_or_alias_error(Culprit, output) :-
 	!,
 	permission_error(output, stream, Culprit, 2).
 
+stream_error(Culprit) :-
+	var(Culprit),
+	!,
+	instantiation_error(2).
+stream_error(Culprit) :-
+	is_not_stream_or_alias(Culprit),
+	!,
+	domain_error(stream,Culprit,2).
+stream_error(Culprit) :-
+	is_stream(Culprit,S),
+	stream_open_status(S,OpenStatus),
+	OpenStatus \= open,
+	!,
+	existence_error(stream, Culprit, 2).
+	
 
 /*
  * output_stream_or_alias_ok(S_or_a,Stream)
@@ -537,7 +571,10 @@ current_alias(Alias,Stream) :-
 export current_input/1.
 
 current_input(Stream) :-
+		(var(Stream) ; is_stream(Stream)), !,
         get_current_input_stream(Stream).
+current_input(Stream) :-
+        domain_error(stream, Stream, 1).
 
 /*
  * current_output(Stream)
@@ -548,8 +585,10 @@ current_input(Stream) :-
 export current_output/1.
 
 current_output(Stream) :-
+		(var(Stream) ; is_stream(Stream)), !,
         get_current_output_stream(Stream).
-
+current_output(Stream) :-
+        domain_error(stream, Stream, 1).
 
 /*
  * set_input(Stream_or_alias)
@@ -928,7 +967,8 @@ open_file_stream(Source_sink,Mode,Options,Stream)
 open_file_stream(Source_sink,Mode,Options,Stream) 
 	:-
 	%% FIXME: Incorporate errno into error.
-	permission_error(open,source_sink,Source_sink,2).
+	%%permission_error(open,source_sink,Source_sink,2).
+	existence_error(source_sink,Source_sink,2).
 
 initialize_stream(StreamType,Source_sink,Options,Stream) 
 	:-
@@ -3209,7 +3249,8 @@ nl :-
 
 export nl/1.
 
-nl(Stream) :-
+nl(Stream_or_alias) :-
+	output_stream_or_alias_ok(Stream_or_alias, Stream),
 	nl0(Stream),
 	flush_output(Stream).
 
@@ -3621,14 +3662,14 @@ stream_property(Stream, Property) :-
 	!,
 	pget_stream_table(Id,Stream),
 	stream_property0(Property,Stream).
-stream_property(Stream_or_alias, Property) :-
+stream_property(Stream, Property) :-
 	var(Property),
-	stream_or_alias_ok(Stream_or_alias, Stream),
+	stream_ok(Stream),
 	!,
 	stream_property0(Property, Stream).
 
-stream_property(Stream_or_alias, Property) :-
-	stream_or_alias_ok(Stream_or_alias, Stream),
+stream_property(Stream, Property) :-
+	stream_ok(Stream),
 	stream_property0(Property, Stream),
 	!.
 
@@ -3687,6 +3728,10 @@ stream_property0(depth_computation(DC), Stream) :-
 stream_property0(line_length(Length), Stream) :-
 	stream_mode(Stream, [_|output]),
 	stream_wt_line_length(Stream, Length).
+
+stream_property0(NonProperty, Stream) :-
+	nonvar(NonProperty),
+	domain_error(stream_property, NonProperty, 1).
 
 /*
  * What does this do??

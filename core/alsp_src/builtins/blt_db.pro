@@ -62,6 +62,9 @@ clause(Module,Head,Body,DBRef) :-
 
 	% Don't have a DBRef yet.
 clause(Module,Head,Body,DBRef) :-
+	nonvar(Head),
+	(atom(Head) ; compound(Head)),
+	!,
 	functor(Head,F,A),
 	get_firstarg(A,Head,FirstArg),
 			% Get the first clause of the procedure.
@@ -70,6 +73,14 @@ clause(Module,Head,Body,DBRef) :-
 	get_clauses(First,DBRef,FirstArg),
 	$source(DBRef,Clause),
 	clauseParts(Clause,Head,Body).
+clause(Module,Head,Body,DBRef) :-
+	var(Head),
+	instantiation_error(clause(Head,Body)).
+clause(Module,Head,Body,DBRef) :-
+	nonvar(Head), not(atom(Head)), not(compound(Head)),
+	type_error(callable, Head, clause(Head,Body)).
+clause(Module,Head,Body,DBRef) :-
+	permission_error(access, private_procedure, Head, clause(Head,Body)).
 
 clauseParts((Head :- Body),Head,Body) :- !.
 clauseParts(Head,Head,true).

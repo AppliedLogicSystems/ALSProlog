@@ -850,6 +850,7 @@ wd_infix(Op,Lev,A2,InSpace,OutSpace, [0'  | L1], Hole,BasePri,ILR,WInfo) :-
     %%    space before the infix operator for a balanced look.
 spaceahead(_,_,space,space) :- !.	%% already need space
 spaceahead(Lev,A2,_,space) :-
+    nonvar(A2),
     functor(A2,F,A),
     F \= '.',
     is_op(F,A,OLev,Assoc),

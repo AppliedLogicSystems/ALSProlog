@@ -40,8 +40,11 @@ export findall/3.
 export setof/3.
 export bagof/3.
 
+check_instantiation(Object) :- nonvar(Object), !.
+check_instantiation(Object) :- instantiation_error(2).
+
 findall(Module,Template,Goal,Bag) :-
-	nonvar(Goal),
+	check_instantiation(Goal),
 	S = [[]],
 	fa_(Module,Template,Goal,S),
 	arg(1,S,Bag).

@@ -490,7 +490,7 @@ char_list_ok([C|T]) :-
 	!,
 	char_list_ok(T).
 char_list_ok(Other) :-
-	domain_error(character_list,Other,2).
+	type_error(list,Other,2).
 
 character(C) :-			%% should write in C or assembler
 	atom(C),
@@ -518,6 +518,6 @@ code_list_ok([C|T]) :-
 	!,
 	code_list_ok(T).
 code_list_ok(Other) :-
-	domain_error(character_code_list,Other,2).
+	type_error(list,Other,2).
 
 endmod.

@@ -1517,12 +1517,24 @@ is_op_specifier(yf,postfix,0,0).
 export current_op/3.
 
 current_op(Priority,Specifier,Operator) :-
+	var(Specifier),
+	!,
+	current_op0(Priority,Specifier,Operator).
+current_op(Priority,Specifier,Operator) :-
+	is_op_specifier(Specifier,_,_,_),
+	!,
+	current_op0(Priority,Specifier,Operator).
+current_op(Priority,Specifier,Operator) :-
+	domain_error(operator_specifier, Specifier,
+		current_op(Priority,Specifier,Operator)).
+
+current_op0(Priority,Specifier,Operator) :-
 	binop(Operator,Priority,LeftPri,RightPri),
 	binop_specifier(Priority,LeftPri,RightPri,Specifier).
-current_op(Priority,Specifier,Operator) :-
+current_op0(Priority,Specifier,Operator) :-
 	preop(Operator,Priority,RightPri),
 	preop_specifier(Priority,RightPri,Specifier).
-current_op(Priority,Specifier,Operator) :-
+current_op0(Priority,Specifier,Operator) :-
 	postop(Operator,Priority,LeftPri),
 	postop_specifier(Priority,LeftPri,Specifier).
 
