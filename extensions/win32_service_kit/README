@@ -6,10 +6,10 @@ Materials
 
 Windows95 or WindowsNT computer.
 
-Metrowerks CodeWarrior Pro 1 for Windows
+Metrowerks CodeWarrior Pro 4 for Windows
 
-"ALS Prolog Support" folder installed in {Compiler f}..\
-	(contains alspi.h and alspro.dll.lib)
+"ALS Prolog Support" (containing alspi.h and alspro.lib) folder installed in:
+{Project f}..\..\foreign_sdk\win32\ALS_Prolog_Foreign_SDK
 
 Abobe FrameMaker 5.0
 
@@ -20,7 +20,7 @@ Instructions
 ------------
 
 1) Build Executables
-	Open Service_Kit_Project.mcp in CW Pro 1.
+	Open Service_Kit_Project.mcp in CodeWarrior.
 	Build "Service Test" Target.
 	Build "Service Package Stub" Target.
 
