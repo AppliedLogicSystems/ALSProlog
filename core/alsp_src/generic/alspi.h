@@ -57,10 +57,10 @@ typedef long PWord;
 #define PI_DOUBLE 	6
 
 typedef struct {
-		char *name;
+		CONST char *name;
 		int  arity;
 		int (*func) PARAMS((void));
-		char *funcname;
+		CONST char *funcname;
 } PSTRUCT;
 
 #define PI_BEGIN static PSTRUCT pi_init_array[] = {
@@ -158,6 +158,7 @@ extern	ALSPI_API(int)	PI_prolog_init	PARAMS(( int, char **));
 extern	ALSPI_API(int)	PI_startup	PARAMS(( CONST PI_system_setup *));
 extern	ALSPI_API(void)	PI_throw	PARAMS((PWord obj, int objt));
 extern	ALSPI_API(void)	PI_getball	PARAMS((PWord *obj, int *objt));
+extern	ALSPI_API(int)	PI_main		PARAMS((int argc, char *argv[], void (*init)(void)));
 
 
 #ifdef APP_PRINTF_CALLBACK
@@ -167,9 +168,10 @@ extern	ALSPI_API(void)	PI_app_printf	PARAMS(( int, ... ));
 extern  ALSPI_API(void)    PI_vapp_printf  PARAMS(( int, va_list ));
 extern	ALSPI_API(const char *)	PI_get_options	PARAMS(( void ));
 
-enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
+typedef long (*console_func)(char *, long);
 
-extern	ALSPI_API(void)	PI_set_console_callback(int (*con_io)(int, char *, size_t));
+extern ALSPI_API(void)	PI_set_console_functions(console_func read,
+								console_func write, console_func error);
 
 #ifdef MacOS
 extern	long	yield_interval;
@@ -378,5 +380,6 @@ extern	ALSPI_API(const char *) find_callback(void *func, void *object);
 }
 #endif
 
+void pi_init(void);
 
 #endif /* _ALSPI_H_INCLUDED_ */
