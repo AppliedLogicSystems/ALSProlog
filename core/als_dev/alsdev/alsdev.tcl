@@ -1061,6 +1061,7 @@ proc new_edit_window {file} {
 
 	text $w.text -yscrollcommand "$w.sb set" -setgrid true
 	scrollbar $w.sb -command "$w.text yview"
+	$w configure -menu $w.menubar
 	pack $w.sb -side right -fill both
 	pack $w.text -fill both -expand 1 -side left
 	$w.text configure -font {Monaco 9 normal} -highlightthickness 0
