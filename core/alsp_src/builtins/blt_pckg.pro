@@ -439,11 +439,16 @@ process_image_option(Unknown)
  |	add_lib_qual(FilesList, Library, QualFilesList)
  |	add_lib_qual(+,+,-)
  *---------------------------------------------------------------*/
-add_lib_qual([],_,[]).
+add_lib_qual([],_,[]) :-!.
 add_lib_qual([File | FilesList],Library,[QualFile | QualFilesList])
 	:-
 	extendPath(Library,File,QualFile),
 	add_lib_qual(FilesList,Library,QualFilesList).
+add_lib_qual(File,Library,[QualFile])
+	:-
+	atom(File),
+	extendPath(Library,File,QualFile).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
