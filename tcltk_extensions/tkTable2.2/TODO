@@ -1,0 +1,69 @@
+## TODO LIST
+##
+## updated 8 July 1998, jeff.hobbs@acm.org
+##
+
+These are recommendations, not all of the same priority, and not
+all necessarily will be implemented.  If you see something you
+feel is important, email me and say so.  Very democratic.
+
+* Tcl8 object model will be supported when it is supported in Tk
+  (or somewhere else that has good examples for widgets)
+
+* -rowstretchmode fill ignores initial # of rows, or config requests for more.
+* interpret 0 rows/cols to be FILL
+* add -colstretchmode fill
+* scratch stretchmode "fill" in favor of "dynamic" which would monitor
+  the max extent of row/col (difficult)
+
+* fix selection routines to properly handle title area movement
+
+* support smooth scrolling of rows/cols
+ 
+* add ability to index by tagname
+* overhaul tag mechanism (include way to query for tags on a cell, add
+  priority)
+
+* add internal sort procedures
+pathName  sort	-row	{the list of raw we want to sort | all}
+		-col	{the list of col we use for sorting}
+		-master row,col
+		-command _command_to_use_
+		-type	{for each column specifies the type of sort:
+			ascii | dictionary | integer | real }
+		-order	{for each column specify the order of sort:
+			increasing | decreasing | none }
+
+* row/column swap
+
+* use init script in Tcl style, with no more embedding of tkTable.tcl
+  in binary
+
+NOT BEING CONSIDERED:
+
+row/col spanning cells, an oft-requested feature, will not be implemented.
+There are several issues that would need to be overcome that resulted in
+my decision to avoid this feature.  Primarily, speed would be significantly
+affected.  The reconiciliation of how to characterize "hidden" cells also
+presents numerous issues.
+
+**** BUGS *****
+
+MAJOR:
+
+Sol2.5.1/gcc 2.8.1/Tk8.1a2 && WinNT/VC++5
+seg fault when you exit Tk without destroying or withdrawing
+the table first.  Dies trying to reference TableEventProc.
+Problem seems to be that TableEventProc gets unloaded before it can
+be called when not used in the primary interpreter, or used as a
+loadable library.  FIXED with hack that creates ExitHandler for each
+instance of table to make sure it is destroyed before Tcl exits.
+
+MINOR:
+
+Windows: With "-colstretchmode last", the scrollbar behaves oddly in
+	handling the space for the last cell properly when moving the
+	main part of the scrollbar with the mouse.  This seems to be
+	that even though the scrollbar receives the "set 0.6xxx 1",
+	the scrollbar immediately jumps back to what the mouse says,
+	although this isn't a problem in X...
