@@ -365,13 +365,15 @@ local_consult_options(File, BaseFile, COpts, FCOpts)
 	:- !,
 	access_cslt_opts(nature, COpts,GlobalNature), 
 	access_cslt_opts(recon,  COpts,GlobalRecon),
-	cslt_info_recon(File, GlobalNature, Nature, GlobalRecon, Recon, FileDesc),
 
+	cslt_info_recon(File, GlobalNature, InitNature, GlobalRecon, Recon, FileDesc),
 	file_extension(FF,Ext,FileDesc),
 	split_path(FF,FileElts),
 	dreverse(FileElts, [BaseFile | RDirElts]),
 	dreverse(RDirElts, DirElts),
 	join_path(DirElts, OrigDir),
+
+	(Ext = pro -> Nature = source ; Nature = InitNature),
 
 	copy_term(COpts, FCOpts),
 	set_cslt_opts(nature,   FCOpts,Nature), 
@@ -626,8 +628,8 @@ exec_consult(BaseFile, FCOpts, ALSMgr, FileMgr)
 
 /*-------------------------------------------------------------*
  |	exec_consult/8
- |	exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts, ALSMgr, FileMgr).
- |	exec_consult(+, +, +, +, +, +, +)
+ |	exec_consult(PathList, BaseFile, FCOpts, ALSMgr, FileMgr).
+ |	exec_consult(+, +, +, +, +)
  |
  |	- dispatches non-user consults:
  |
@@ -642,6 +644,7 @@ exec_consult(BaseFile, FCOpts, ALSMgr, FileMgr)
  |	drive+directory to attempt, and calls cont_consult/5.
  *-------------------------------------------------------------*/ 
 
+/******* OLD -- NEED REVISION:
 exec_consult(OrigFileDesc, BaseFile, FCOpts, ALSMgr, FileMgr)
 	:-
 	access_cslt_opts(nature, FCOpts, ensure_loaded), 
@@ -651,6 +654,7 @@ exec_consult(OrigFileDesc, BaseFile, FCOpts, ALSMgr, FileMgr)
 	ObpPath \= nil,
 	!,
 	note_paths(FCOpts, SrcPath, ObpPath, ObpPath).
+ **************/
 
 		%%--------------------------------
 		%% Incoming pathlist is absolute:
@@ -907,8 +911,11 @@ load_from_file(_,source,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr)
 	access_cslt_opts(recon, FCOpts, Recon), 	
 	access_cslt_opts(debug_type, FCOpts, DebugMode), 	
 	access_cslt_opts(cg_flag, FCOpts, CGFlag), 	
-	load_file_source(CanonSrcPath,BaseFile,TgtMod,Recon,DebugMode,OPath,CGFlag,CG,ErrsList),
-	fin_load_from_file(ErrsList,CanonSrcPath,OPath,CG,FCOpts,FileMgr).
+	load_file_source(CanonSrcPath,BaseFile,TgtMod,Recon,DebugMode,'',CGFlag,CG,ErrsList),
+	fin_load_from_file(ErrsList,CanonSrcPath,'',CG,FCOpts,FileMgr).
+
+%	load_file_source(CanonSrcPath,BaseFile,TgtMod,Recon,DebugMode,OPath,CGFlag,CG,ErrsList),
+%	fin_load_from_file(ErrsList,CanonSrcPath,OPath,CG,FCOpts,FileMgr).
 
 		%% No extension:
 load_from_file('',_,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr)
