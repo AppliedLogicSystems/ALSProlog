@@ -155,6 +155,99 @@ pgetcwd(void)
  *
  * Changes the current working directory to be that given by the input.
  */
+#if macintosh
+static OSErr	GetDirID(short vRefNum,
+						 long dirID,
+						 StringPtr name,
+						 long *theDirID,
+						 Boolean *isDirectory)
+{
+	CInfoPBRec pb;
+	OSErr error;
+
+	pb.hFileInfo.ioNamePtr = name;
+	pb.hFileInfo.ioVRefNum = vRefNum;
+	pb.hFileInfo.ioDirID = dirID;
+	pb.hFileInfo.ioFDirIndex = 0;	/* use ioNamePtr and ioDirID */
+	error = PBGetCatInfoSync(&pb);
+	*theDirID = pb.hFileInfo.ioDirID;
+	*isDirectory = (pb.hFileInfo.ioFlAttrib & ioDirMask) != 0;
+	return ( error );
+}
+
+static	OSErr	DirIDFromFSSpec(const FSSpec *spec,
+								long *theDirID,
+								Boolean *isDirectory)
+{
+	return ( GetDirID(spec->vRefNum, spec->parID, (StringPtr)spec->name,
+			 theDirID, isDirectory) );
+}
+
+static OSErr SetDirectoryFromPath(const char *path)
+{
+	Str255 ppath;
+    OSErr err;
+    WDPBRec pb;
+    long newWDDirID;
+    Boolean isDirectory;
+	FSSpec spec;
+	
+	
+	pb.ioCompletion = NULL;
+	pb.ioNamePtr = ppath;
+	err = PBHGetVol(&pb, false);
+	if (err != noErr) goto fail;
+
+	c2pstrcpy(ppath, path);
+	err = FSMakeFSSpec(pb.ioWDVRefNum, pb.ioWDDirID, ppath, &spec);
+	if (err != noErr) goto fail;
+	
+	err = DirIDFromFSSpec(&spec, &newWDDirID, &isDirectory);
+	if (err != noErr) goto fail;
+	
+	if (!isDirectory) {
+		err = fnfErr;
+		goto fail;
+	}
+	
+	pb.ioCompletion = NULL;
+	pb.ioNamePtr = NULL;
+	pb.ioVRefNum = spec.vRefNum;
+	pb.ioWDDirID = newWDDirID;
+	err = PBHSetVol(&pb, false);
+	if (err != noErr) goto fail;
+	
+fail:
+	
+	return err;
+}
+
+static int temp_chdir(const char *dirname)
+{
+    if (SetDirectoryFromPath(dirname) != noErr) return -1;
+    else return 0;
+}
+
+int
+pchdir()
+{
+    PWord v1;
+    int   t1;
+    char *pathName;
+
+    PI_getan(&v1, &t1, 1);
+
+    /* Make sure file name & pattern are atoms or UIAs */
+    if (!getstring((UCHAR **)&pathName, v1, t1))
+	PI_FAIL;
+
+    if (temp_chdir(pathName) == -1 || chdir(pathName) == -1)
+	PI_FAIL;
+
+    PI_SUCCEED;
+}
+
+#else
 
 int
 pchdir()
@@ -174,6 +267,7 @@ pchdir()
 
     PI_SUCCEED;
 }
+#endif
 
 
 /*
