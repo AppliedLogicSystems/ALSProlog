@@ -737,8 +737,6 @@ static void locate_executable(int argc, char *argv[])
 	if (MemError() != noErr) fatal_error(FE_INFND, 0);
 
 	strncpy(imagedir, *DirPathHandle, DirPathLength);
-	imagedir[DirPathLength] = ':';
-	imagedir[DirPathLength+1] = 0;
 
 	DisposeHandle(DirPathHandle);
 	if (MemError() != noErr) fatal_error(FE_INFND, 0);
@@ -1310,6 +1308,9 @@ PI_prolog_init(int argc, char *argv[])
 }
 
 
+static void StartCoop(void);
+static void EndCoop(void);
+
 ALSPI_API(int)
 PI_startup(const PI_system_setup *setup)
 {
@@ -1344,13 +1345,12 @@ PI_startup(const PI_system_setup *setup)
     GUSISetup(GUSIwithPPCSockets);
     GUSISetup(GUSIwithUnixSockets);
     if (!MPW_Tool) GUSISetup(GUSIwithSIOUXSockets);
-
-    GUSISetHook(GUSI_SpinHook, NULL);
 #endif
 
    InstallConsole(0);
    SIOUXSetTitle("\pALS Prolog");
 
+   StartCoop();
 #endif /* MacOS */
 
 #ifdef APP_PRINTF_CALLBACK 
@@ -1399,7 +1399,12 @@ PI_startup(const PI_system_setup *setup)
     /* Initilize copy-protection security. */
     init_security();
 
-    return PI_prolog_init0(setup);
+    {
+    int result = PI_prolog_init0(setup);
+
+    return result;
+    }
+
 }
 
 ALSPI_API(void)
@@ -1415,6 +1420,10 @@ PI_shutdown(void)
     if (WSACleanup() != 0) {
 	PI_app_printf(PI_app_printf_warning, "WinSock cleanup failed !\n");
     }
+#endif
+
+#ifdef MacOS
+	EndCoop();
 #endif
 
 #if defined (MacOS) && defined(__MWERKS__)
@@ -1439,6 +1448,8 @@ long yield_counter = 100;
 
 static long last_yield = 0;
 
+long coop_interupt = 0;
+
 void	PI_yield_time(void)
 {
     long tick;
@@ -1451,7 +1462,47 @@ void	PI_yield_time(void)
        yields.  */
     if (tick - last_yield <= 3) yield_interval += 100;
     last_yield = tick;
+    coop_interupt = 0;
 }
+
+#include <Timer.h>
+
+TimerUPP TimeProcUPP;
+
+TMTask gTask;
+#define foo 1000
+
+static pascal void TimeProc(TMTaskPtr task)
+{
+ 	wm_safety = -1;
+    coop_interupt = 1;
+   
+    task->tmAddr = TimeProcUPP;
+    task->tmWakeUp = 0;
+    task->tmReserved = 0;
+    
+    InsTime((QElemPtr)task);
+    PrimeTime((QElemPtr)task, foo);
+}
+
+static void StartCoop(void)
+{
+	TimeProcUPP = NewTimerProc(TimeProc);
+	
+    gTask.tmAddr = TimeProcUPP;
+    gTask.tmWakeUp = 0;
+    gTask.tmReserved = 0;
+
+    //InsTime((QElemPtr)&gTask);
+    //PrimeTime((QElemPtr)&gTask, foo);
+}
+
+static void EndCoop(void)
+{
+    //RmvTime((QElemPtr)&gTask);
+}
+
+
 
 #if defined( __MWERKS__) && !defined(HAVE_GUSI)
 
