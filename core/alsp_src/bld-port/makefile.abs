@@ -93,9 +93,14 @@ schema([
 		(mac:  [
 			'GUSIIncludes'	= '{MPW}Interfaces:GUSIIncludes:',
 			'GUSILibraries'	= '{MPW}Libraries:GUSILibraries:',
+			'MoreFilesIncludes' = '{MPW}Interfaces:MoreFilesIncludes:',
+			'MoreFilesLibraries' = '{MPW}Libraries:MoreFilesLibraries:',
 
-			'COMMONLIBS68K' = '"{MW68KLibraries}MathLib68K (4i/8d).Lib" "{MW68KLibraries}CPlusPlus.lib" \xB6\n\
-					   "{MW68KLibraries}ToolLibs.o" "{MW68KLibraries}PLStringFuncs.glue.lib"',
+			'COMMONLIBS68K' = '"{MW68KLibraries}MathLib68K (4i/8d).Lib"  \xB6\n\
+					   "{MW68KLibraries}CPlusPlus.lib" \xB6\n\
+					   "{MW68KLibraries}ToolLibs.o"  \xB6\n\
+					   "{MW68KLibraries}PLStringFuncs.glue.lib"  \xB6\n\
+					   "{MoreFilesLibraries}MoreFiles.68k"',
 
 			'MPWINITLIBS68K'= '"{MW68KLibraries}MPWRuntime.68K.lib" \xB6\n\
 					   "{MW68KLibraries}MacOS.Lib" \xB6\n\
@@ -114,8 +119,11 @@ schema([
 					   {COMMONLIBS68K}',
 
 			'COMMONLIBSPPC'	= '"{SharedLibraries}InterfaceLib" \xB6\n\
-					   "{MWPPCLibraries}ANSI (NL) C.PPC.Lib" "{MWPPCLibraries}MathLib" \xB6\n\
-					   "{MWPPCLibraries}PPCToolLibs.o" "{MWPPCLibraries}PLStringFuncsPPC.lib"',
+					   "{MWPPCLibraries}ANSI (NL) C.PPC.Lib"  \xB6\n\
+					   "{MWPPCLibraries}MathLib" \xB6\n\
+					   "{MWPPCLibraries}PPCToolLibs.o"  \xB6\n\
+					   "{MWPPCLibraries}PLStringFuncsPPC.lib"  \xB6\n\
+					   "{MoreFilesLibraries}MoreFiles.PPC"',
 
 			'MPWLIBSPPC'	= '"{SharedLibraries}InterfaceLib" \xB6\n\
 					   "{MWPPCLibraries}MathLib" \xB6\n\
@@ -124,7 +132,8 @@ schema([
 					   "{MWPPCLibraries}MPW ANSI.C.PPC.Lib" \xB6\n\
 					   "{MWPPCLibraries}MWMPWCRuntime.Lib" \xB6\n\
 					   "{MWPPCLibraries}PPCToolLibs.o" \xB6\n\
-					   "{MWPPCLibraries}PLStringFuncsPPC.lib"',
+					   "{MWPPCLibraries}PLStringFuncsPPC.lib" \xB6\n\
+					   "{MoreFilesLibraries}MoreFiles.PPC"',
 
 			'SIOUXLIBSPPC'	= '"{GUSILibraries}GUSI.Lib.PPC" \xB6\n\
 					   "{MWPPCLibraries}MWCRuntime.Lib" \xB6\n\
@@ -228,7 +237,10 @@ schema([
 				rule(sioux_alspro_b_ppc),
 				rule(mpw_alspro_b),
 				rule(sioux_alspro_b),
-				rule(alspro_b)
+				rule(alspro_b),
+				rule(mpw_alspro),
+				rule('builtins.r'),
+				rule(sioux_alspro)
 			      ]),
 			(_: rule('alspro_b'))]),
 
@@ -355,9 +367,9 @@ rule(mpw_alspro_b_ppc,
 	['{LINKPPC} -o mpw_alspro_b_ppc {TOOLLINKFLAGS} mpw_pimain.ppc.o alspro.ppc.lib {MPWLIBSPPC}']).
 
 rule('mpw_alspro_b',
-	[ext('mpw_pimain.68k',&(object)),'alspro.68k.lib',
+	[/*ext('mpw_pimain.68k',&(object)),'alspro.68k.lib', */
 	 ext('mpw_pimain.ppc',&(object)),'alspro.ppc.lib'],
-	['{LINK68K} -o mpw_alspro_b {TOOLLINKFLAGS} {MPWINITLIBS68K} mpw_pimain.68k.o alspro.68k.lib {MPWLIBS68K}',
+	[/*'{LINK68K} -o mpw_alspro_b {TOOLLINKFLAGS} {MPWINITLIBS68K} mpw_pimain.68k.o alspro.68k.lib {MPWLIBS68K}',*/
 	 '{LINKPPC} -o mpw_alspro_b {TOOLLINKFLAGS} mpw_pimain.ppc.o alspro.ppc.lib {MPWLIBSPPC}']).
 
 rule(sioux_alspro_b_68k,
@@ -381,6 +393,23 @@ rule('sioux_alspro_b',
 	 '{LINKPPC} -o sioux_alspro_b {SIOUXLINKFLAGS} sioux_pimain.ppc.o alspro.ppc.lib {SIOUXLIBSPPC}',
 	 'Rez -o sioux_alspro_b -a {srcdir}port:macos:alsres.r']).
 
+rule('sioux_alspro',
+	[sioux_alspro_b, 'builtins.r'],
+	['Duplicate sioux_alspro_b sioux_alspro', 'Rez -o sioux_alspro -a builtins.r']).
+	
+rule('builtins.r',
+	[mpw_alspro],
+	['DeRez mpw_alspro > builtins.r']).
+	 
+rule('sioux_alspro',
+	['sioux_alspro_b'],
+	['Delete -i sioux_alspro'
+	]).
+
+rule('mpw_alspro',
+	['mpw_alspro_b'],
+	['Delete -i mpw_alspro',
+	 'mpw_alspro_b -g ''save_base_package(mpw_alspro)''']).
 
 	%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% ALL Versions %%%
@@ -401,6 +430,8 @@ rule(alspro_b,
 rule(alspro,
 	[alspro_b],
 	case(&(context_name), [
+		(mac: ['Delete -i mpw_alspro',
+		       'alspro_b -g ''save_base_package(alspro)''']),
 		(djgpp1: ['alspro_b -obp -g ''save_image(alspro,[$(IMGOPTS)])''',
 				  'coff2exe alspro']),
 		(djgpp2: ['alspro_b -obp -g ''save_image(alspro,[$(IMGOPTS)])''',
@@ -412,8 +443,8 @@ rule(alspro,
 rule(testrun,
 	[],
 	case(&(context_name),[
-		(mac: ['alspro_b -obp -b {testdir}autotest {testdir}atest_db -g run_tests -p -srcdir {srcdir}']),
-		(_:[' alspro_b -obp -b $(testdir)/autotest $(testdir)/atest_db -g run_tests -p -srcdir $(srcdir)'])])).
+		(mac: ['alspro -obp -b {testdir}autotest {testdir}atest_db -g run_tests -p -srcdir {srcdir}']),
+		(_: ['alspro_b -obp -b $(testdir)/autotest $(testdir)/atest_db -g run_tests -p -srcdir $(srcdir)'])])).
 
 rule(cleanup,
 	[],
