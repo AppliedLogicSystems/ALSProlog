@@ -21,6 +21,10 @@
 extern "C" {
 #endif
 
+extern char library_dir[1024];
+extern char executable_path[1024];
+
+
 /*
  * Set up some macros for dealing with prototypes and other ANSI C features.
  */
