@@ -30,7 +30,7 @@ student)
 DISTNAME=als-student-prolog
 DISTDIR=$ARCH/$DISTNAME ;
 EXE="studalsdev" ;
-EXAMPLE_SET="als pxs" ;
+EXAMPLE_SET="als pxs chat80" ;
 WELCOME=welcome_student.als ;
 MANUAL=student_man.pdf ;
 MANUALNAME=student-manual.pdf ;
@@ -39,7 +39,7 @@ standard)
 DISTNAME=als-prolog
 DISTDIR=$ARCH/$DISTNAME ;
 EXE=alsdev ;
-EXAMPLE_SET="als pxs more objectpro tcltk" ;
+EXAMPLE_SET="als pxs more objectpro visual chat80 Prolog1000" ;
 WELCOME=welcome_standard.als ;
 MANUAL=student_man.pdf ; # standard manual is missing.
 MANUALNAME=als-prolog-manual.pdf ;
