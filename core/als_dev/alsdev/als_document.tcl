@@ -254,6 +254,7 @@ proc bind_accelerators {w mod type} {
 	 bind $w.text <$MMD-c> "$type.copy $w; break"
 	 bind $w.text <$MMD-v> "$type.paste $w; break"
 	 bind $w.text <$MMD-a> "$type.select_all $w; break"
+	 bind $w.text <$MMD-f> "$type.find $w; break"
 
 		# prolog menu:
 	bind $w.text <$MMD-k> "$type.consult $w"
@@ -476,6 +477,7 @@ proc document.save {w} {
 	prolog call alsdev send -number $proenv($w,src_handler) -atom clear_errors_display
 #		send_prolog  $proenv($w,src_handler) clear_errors_display
 	}
+	return true
 }
 
 proc document.save_as {w} {
@@ -558,10 +560,16 @@ proc document.consult {w} {
 	if {$file == ""} {
 		if {![document.save $w]} {return}
 	}
-	
 	if {$proenv($w,dirty)} {
 		bell
-		return
+		set ans [tk_messageBox -icon warning -parent .topals \
+					-title "Save File?" -message "Save File $file?" \
+					-type yesno -default yes]
+		if {$ans == "yes"} then {
+			document.save $w
+		} else {
+			return
+		}
 	}
 	catch { prolog call alsdev do_reconsult -atom $file }
 	insert_prompt  .topals.text "\n?-" 
