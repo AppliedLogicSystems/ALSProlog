@@ -1,0 +1,28 @@
+ALS Prolog for Macintosh and Windows Build Instructions
+=======================================================
+Author: Chuck Houpt Date: 17-Nov-1997
+
+Build Materials:
+----------------
+
+- Macintosh (68k or PowerPC) and Windows 95/NT x86 System.
+
+- Metrowerk's Code Warrior Professional Release 2 with the following libraries
+	installed in the MacOS Support folder:
+
+    - Code Warrior Grand Unified Socket Interface Library (CWGUSI) 1.81
+      from http://www.iis.ee.ethz.ch/~neeri
+      
+    - MoreFiles 1.4.6 from the MacOS Tools CD.
+    
+Build Instructions:
+-------------------
+
+1. Copy the "mwbuild" folder from the source tree to the
+   source tree's parent folder.
+   
+2. Modify the the prefix.h file to include any build options.
+
+3. Open the base.mcp project, select the "Build All" target, and make it.
+
+4. On Windows, run the make_image.bat batch file.
