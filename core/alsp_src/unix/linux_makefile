@@ -2,4 +2,4 @@ CPPFLAGS += -DUNIX_LINUX -I /usr/include/libelf
 # On Linix the crypt() function may or may not be in the libc shared
 # object, depending on the particular linix setup.  We staticly link
 # it to avoid problems.
-OS_LIBS = -lm -ldl -lelf /usr/lib/libcrypt.a
+OS_LIBS = -lm -ldl /usr/lib/libcrypt.a
