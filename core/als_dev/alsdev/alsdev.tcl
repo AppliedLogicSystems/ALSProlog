@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.59 1998/10/24 12:52:21 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.60 1998/11/02 03:19:34 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -345,38 +345,40 @@ proc return_proenv_defaults {} {
 
 establish_defaults
 
+proc do_main_als_bindings {} {
+	bind .topals.text <Unmap> {unmap_alsdev_main}
+	bind .topals.text <Map> {map_alsdev_main}
+}
+
 proc unmap_alsdev_main {} {
 	global array proenv
-
 	Window hide .dyn_flags
 	Window hide .alsdev_settings
 	Window hide .about
 	Window hide .break_choices
-
 	unmap_alsdev_debug
 }
+
 proc map_alsdev_main {} {
 	global array proenv
-
 	map_alsdev_debug
 }
 
 proc unmap_alsdev_debug {} {
 	global array proenv
 	if {[winfo exists .debugwin]} then {
-		if {$proenv(debugwin) == 1} then { hide_debugwin }
+		wm iconify .debugwin
 	}
+	send_prolog als_ide_mgr unmap_edit_wins
 }
+
 proc map_alsdev_debug {} {
 	global array proenv
 	if {[winfo exists .debugwin]} then {
-		if {$proenv(debugwin) == 0} then { 
-			wm geometry .debugwin $proenv(.debugwin,geometry)
-			show_debugwin 
-		}
+		wm deiconify .debugwin
 	} 
+	send_prolog als_ide_mgr map_edit_wins
 }
-
 
 proc load_source {path name} {
 	global tcl_platform
@@ -971,17 +973,23 @@ proc exec_toggle_debugwin {} {
 	} else {
 		if {[winfo exists .debugwin] == 0} then {
 			vTclWindow.debugwin ""
+			show_debugwin
+			bind .debugwin.text <Unmap> {unmap_alsdev_debug}
+			bind .debugwin.text <Map>   {map_alsdev_debug}
+		} else {
+			show_debugwin
 		}
-		show_debugwin
 	}
 	send_prolog debugger_mgr toggle_visibility
 }
 
 proc ensure_db_showing {} {
 	global array proenv
-		
+
 	if {[winfo exists .debugwin] == 0} then { 
 		Window show .debugwin 
+		bind .debugwin.text <Unmap> {unmap_alsdev_debug}
+		bind .debugwin.text <Map>   {map_alsdev_debug}
 	} else {
     	wm deiconify .debugwin
 		raise .debugwin

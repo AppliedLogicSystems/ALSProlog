@@ -328,6 +328,21 @@ proc load_document {file} {
 	return $proenv(document,$file)
 }
 
+proc close_and_reopen {w} {
+	global array proenv 
+	close_error_annotations $w
+	set file $proenv($w,file)
+	$w.text delete 1.0 end
+	try {
+		load_text $file $w.text
+		set proenv(document,$file) $w
+	} fail {
+		dispose_document_window $w
+	}
+	return $proenv(document,$file)
+}
+
+
 proc post_open_document {Title Win} {
 	global array tcl_platform 
 	global mod
@@ -455,6 +470,9 @@ proc document.save {w} {
 				return false
 			}
 		}
+	}
+	if {[info exists proenv($w,src_handler)]} then {
+		send_prolog  $proenv($w,src_handler) clear_errors_display
 	}
 }
 
