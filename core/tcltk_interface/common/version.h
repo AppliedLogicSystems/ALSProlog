@@ -1,5 +1,5 @@
-#define VERSION_STRING "1.01"
+#define VERSION_STRING "1.02"
 #define VERSION_MAJOR 1
 #define VERSION_MINOR 0
-#define VERSION_PATCH 1
+#define VERSION_PATCH 2
 
