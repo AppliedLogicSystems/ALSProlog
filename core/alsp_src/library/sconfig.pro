@@ -31,6 +31,12 @@ general_os(Arch, String, OS, unix)
 	dmember(OS,[aix,bsd,osf,ptx,sco]), 
 	!.
 
+general_os(Arch, String, OS, unix) 
+	:-
+	sub_atom(String,1,3,OS), 
+	dmember(OS,[dj1,dj2]), 
+	!.
+
 	%%
 	%% 4-char names: bosx,dgux,hpux,irix,mach,sysv
 	%%
@@ -49,6 +55,12 @@ general_os(Arch, String, OS, unix)
 	dmember(OS,[dynix,linux,sunos,djgpp]), 
 	!.
 
+general_os(Arch, String, OS, macos) 
+	:-
+	sub_atom(String,1,5,OS), 
+	dmember(OS,[macos]), 
+	!.
+
 	%%
 	%% 6-char names: hiuxwe,lynxos,netbsd,newsos,riscix,riscos,ultrix,unicos
 	%%
@@ -65,6 +77,12 @@ general_os(Arch, String, OS, unix)
 	:-
 	sub_atom(String,1,7,OS), 
 	dmember(OS,[solaris]), 
+	!.
+
+general_os(Arch, String, OS, mswin32) 
+	:-
+	sub_atom(String,1,7,OS), 
+	dmember(OS,[mswin32]), 
 	!.
 
 	%%
