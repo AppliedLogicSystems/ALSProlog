@@ -1,3 +1,12 @@
+/*
+
+Compile like this:
+
+% gcc -o prog_ssiwkey prog_ssiwskey.c /usr/local/lib/*.o -lsocket
+
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
