@@ -57,10 +57,10 @@ change_source_level_debugging(Value,Prev)
 	%% xconsult/2
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-export xxconsult/4.
-xxconsult(Stream, File, SDMode, FinalErrs)
+export xxconsult/5.
+xxconsult(Stream, File, SDMode, CGFlag, FinalErrs)
 	:- 
-	readFile(Stream, File, SDMode, [], [], InitFinalErrs),
+	readFile(Stream, File, SDMode, CGFlag, [], [], [], InitFinalErrs),
 	dreverse(InitFinalErrs, FinalErrs).
 
 export xconsult/2.
@@ -78,7 +78,9 @@ xconsult(File,NErrs, FinalErrs)
 	    	current_alias(user_input,Stream) ),
 	!,
 	(source_level_debugging(on) -> SDMode = debugging ; SDMode = no_debugging),
-	readFile(Stream, File, SDMode, [], [], InitFinalErrs),
+		%% repair if needed:
+	CGFlag = true,
+	readFile(Stream, File, SDMode, CGFlag, [], [], [], InitFinalErrs),
 	dreverse(InitFinalErrs, FinalErrs),
 	sio:stream_syntax_errors(Stream,NErrs),	%% get the number of errors
 	close(Stream).
@@ -92,7 +94,7 @@ xconsult(File,0)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%		MAIN LOOP			%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-readFile(Stream, File, SDMode, ModStack, CurErrs, FinalErrs) 
+readFile(Stream, File, SDMode, CGFlag, PredStack, ModStack, CurErrs, FinalErrs) 
 	:-
 	catch( ( readvnv(Stream,SDMode, Term,Names,Vars), Flag = ok),
 		   Ball,
@@ -101,17 +103,20 @@ readFile(Stream, File, SDMode, ModStack, CurErrs, FinalErrs)
 %	statistics,
 %	pbi_debug(Term),
 %	gc,
-	disp_process(Flag, Term,Names,Vars,Stream, File, SDMode, ModStack, CurErrs, FinalErrs).
 
+	disp_process(Flag, Term,Names,Vars,Stream, File, SDMode, CGFlag, PredStack, ModStack, CurErrs, FinalErrs).
+
+/**********************
 xc_process_list([], Stream, File, SDMode, ModStack, ModStack, CurErrs, CurErrs).
 
 xc_process_list([Term | List], Stream, File, SDMode, ModStack, FinalStack, CurErrs, FinalErrs)
 	:-
 	process(Term,[],[],Stream, File, ModStack, NewModStack, CurErrs, NewErrs, Flag), !,
 	xc_process_list(List, Stream, File, SDMode, NewModStack, FinalStack, NewCurErrs, FinalErrs).
+**********************/
 
 
-disp_process(ok, end_of_file, Names,Vars,Stream, File, SDMode, ModStack, CurErrs, FinalErrs)
+disp_process(ok, end_of_file, Names,Vars,Stream, File, SDMode, CGFlag, PredStack, ModStack, CurErrs, FinalErrs)
 	:-
 	(ModStack = [] ->
 		FinalErrs = CurErrs
@@ -121,29 +126,31 @@ disp_process(ok, end_of_file, Names,Vars,Stream, File, SDMode, ModStack, CurErrs
 
 	%% Accumulate syntax errors:
 disp_process(error(error(syntax_error,EL)), 
-				Term,Names,Vars,Stream, File, SDMode, ModStack, CurErrs, FinalErrs)
+				Term,Names,Vars,Stream, File, SDMode, CGFlag, PredStack, ModStack, CurErrs, FinalErrs)
 	:-!,
-	readFile(Stream, File, SDMode, ModStack, [error(syntax_error,EL) | CurErrs], FinalErrs).
+	readFile(Stream, File, SDMode, CGFlag, PredStack, ModStack, [error(syntax_error,EL) | CurErrs], FinalErrs).
 
 	%% Quit on any other type of error:
-disp_process(error(Error), Term,Names,Vars,Stream, File, SDMode, ModStack, 
+disp_process(error(Error), Term,Names,Vars,Stream, File, SDMode, CGFlag, PredStack, ModStack, 
 					CurErrs, [error(Error) | CurErrs])
 	:-!.
 
-disp_process(ok, Term,Names,Vars,Stream, File, SDMode, ModStack, CurErrs, FinalErrs)
+disp_process(ok, Term,Names,Vars,Stream, File, SDMode, CGFlag, PredStack, ModStack, CurErrs, FinalErrs)
 	:-
-	process(Term,Names,Vars,Stream, File, ModStack, NewModStack, CurErrs, NewErrs, Flag), !,
-	fin_process(Flag, Stream, File, SDMode, NewModStack, NewErrs, FinalErrs).
+	process(Term,Names,Vars,Stream, File, CGFlag, PredStack, NewPredStack, 
+							ModStack, NewModStack, CurErrs, NewErrs, Flag), 
+	!,
+	fin_process(Flag, Stream, File, SDMode, CGFlag, NewPredStack, NewModStack, NewErrs, FinalErrs).
 
-fin_process(ok, Stream, File, SDMode, NewModStack, NewErrs, FinalErrs)
+fin_process(ok, Stream, File, SDMode, CGFlag, NewPredStack, NewModStack, NewErrs, FinalErrs)
 	:- !,
-	readFile(Stream, File, SDMode, NewModStack, NewErrs, FinalErrs).
+	readFile(Stream, File, SDMode, CGFlag, NewPredStack, NewModStack, NewErrs, FinalErrs).
 
-fin_process(warning, Stream, File, SDMode, NewModStack, NewErrs, FinalErrs)
+fin_process(warning, Stream, File, SDMode, CGFlag, NewPredStack, NewModStack, NewErrs, FinalErrs)
 	:- !,
-	readFile(Stream, File, SDMode, NewModStack, NewErrs, FinalErrs).
+	readFile(Stream, File, SDMode, CGFlag, NewPredStack, NewModStack, NewErrs, FinalErrs).
 
-fin_process(error, Stream, File, SDMode, NewModStack, FinalErrs, FinalErrs).
+fin_process(error, Stream, File, SDMode, CGFlag, NewPredStack, NewModStack, FinalErrs, FinalErrs).
 
 readvnv(Stream, SDMode, Term,Names,Vars) 
 	:-
@@ -166,7 +173,7 @@ top_clausegroup(CID)
  |	process(+, +, +,+, +, +, +, -)
  *-------------------------------------------------------------------*/
 
-process('?-'(Command),Names,Vars,Stream, File, ModStack, ModStack, Errs, NewErrs, Flag)
+process('?-'(Command),Names,Vars,Stream, File, CGF,PS,PS, ModStack, ModStack, Errs, NewErrs, Flag)
 	:- 
 	topmod(Module),
 	!,
@@ -189,60 +196,61 @@ write(code=Code),nl,flush_output,
 **********************/
 
 
-process((':-'(Command) :- '$dbg_aph'(_,_,_)),Names,Vars,Stream, File, ModStack, ModStack, 
+process((':-'(Command) :- '$dbg_aph'(_,_,_)),Names,Vars,Stream, File, CGF,PS,PS, ModStack, ModStack, 
 				Errs, NewErrs, Flag)
 	:- 
 	topmod(Module),
 	!,
 	execute_command_or_query(Stream,cf,Module,Command, Errs, NewErrs, Flag).
 
-process((':-'(Command) :- '$dbg_apf'(_,_,_)),Names,Vars,Stream, File, ModStack, ModStack, 
+process((':-'(Command) :- '$dbg_apf'(_,_,_)),Names,Vars,Stream, File, CGF,PS,PS, ModStack, ModStack, 
 					Errs, NewErrs, Flag)
 	:- 
 	topmod(Module),
 	!,
 	execute_command_or_query(Stream,cf,Module,Command, Errs, NewErrs, Flag).
 
-process(':-'(Command),Names,Vars,Stream, File, ModStack, ModStack, Errs, NewErrs, Flag)
+process(':-'(Command),Names,Vars,Stream, File, CGF,PS,PS, ModStack, ModStack, Errs, NewErrs, Flag)
 	:- 
 	topmod(Module),
 	!,
 	execute_command_or_query(Stream,cf,Module,Command, Errs, NewErrs, Flag).
 
-process((module M),Names,Vars,Stream, File, ModStack, [M | ModStack], Errs, Errs, ok)
+process((module M),Names,Vars,Stream, File, CGF,PS,PS, ModStack, [M | ModStack], Errs, Errs, ok)
 	:- !,
 	pushmod(M).
 
-process(endmod,Names,Vars,Stream, File, [], [], 
+
+process(endmod,Names,Vars,Stream, File, CGF,PS,PS, [], [], 
 					Errs, [prolog_system_error(s(endmods,Stream),[]) | Errs], warning)
 	:- !.
 		%% endmods: "Too many endmods.\n"
 
-process(endmod,Names,Vars,Stream, File, [_ | ModStack], ModStack, Errs, Errs, ok)
+process(endmod,Names,Vars,Stream, File, CGF,PS,PS1, [_ | ModStack], ModStack, Errs, Errs, ok)
 	:- !,
 	killvars,
 	popmod.
 
-process((export ExportList),Names,Vars,Stream, File, ModStack, ModStack, Errs, Errs, ok)
+process((export ExportList),Names,Vars,Stream, File, CGF,PS,PS, ModStack, ModStack, Errs, Errs, ok)
 	:- !,
 	doexport(ExportList).
 
-process((use UseList),Names,Vars,Stream, File, ModStack, ModStack, Errs, Errs, ok)
+process((use UseList),Names,Vars,Stream, File, CGF,PS,PS, ModStack, ModStack, Errs, Errs, ok)
 	:- !,
 	douse(UseList).
 
-process((declare DeclareList),Names,Vars,Stream, File, ModStack, ModStack, Errs, Errs, ok)
+process((declare DeclareList),Names,Vars,Stream, File, CGF,PS,PS, ModStack, ModStack, Errs, Errs, ok)
 	:- !,
 	Names=Vars,
 	dodeclare(DeclareList).
 
-process((H --> B), Names, Vars,Stream, File, ModStack, NewStack, Errs, NewErrs, Flag)
+process((H --> B), Names, Vars,Stream, File, CGF,PS,NPS, ModStack, NewStack, Errs, NewErrs, Flag)
 	:-
 	builtins:dcg_expand((H-->B),OutClause),
 	!,
-	process(OutClause,Names,Vars,Stream, File, ModStack, NewStack, Errs, NewErrs, Flag).
+	process(OutClause,Names,Vars,Stream, File, CGF,PS,NPS, ModStack, NewStack, Errs, NewErrs, Flag).
 
-process((Head :- _),Names,Vars,Stream, File, ModStack, ModStack, 
+process((Head :- _),Names,Vars,Stream, File, CGF,PS,PS, ModStack, ModStack, 
 			Errs, [prolog_system_error(s(ErrCode,Stream),[LineNumber]) | Errs], warning)
 	:-
 	functor(Head, F, A),
@@ -250,12 +258,24 @@ process((Head :- _),Names,Vars,Stream, File, ModStack, ModStack,
 	!,
 	sio_linenumber(Stream,LineNumber).
 
-process((Head :- Body),Names,Vars,Stream, File, ModStack, ModStack, Errs, Errs, ok)
+process((Head :- Body),Names,Vars,Stream, File,  CGF,PS,NPS, ModStack, ModStack, Errs, Errs, ok)
 	:- !, 
+	(CGF ->
+		NPS = PS
+		;
+		functor(Head,HF,HA),
+		(dmember(HF/HA, PS) ->
+			NPS = PS
+			;
+			(ModStack = [MM|_]; MM=user),
+			MM:abolish(HF,HA),
+			NPS = [HF/HA | PS]
+		)
+	),
 	xform(Head,Body,NewBody,Names,Vars), 
 	addrule(Head,NewBody).
 
-process( Fact, Names,Vars,Stream, File, ModStack, ModStack, 
+process( Fact, Names,Vars,Stream, File,  CGF,PS,PS, ModStack, ModStack, 
 			Errs, [prolog_system_error(s(ErrCode,Stream),[LineNumber]) | Errs], warning)
 	:-
 	functor(Fact, F, A),
@@ -263,8 +283,20 @@ process( Fact, Names,Vars,Stream, File, ModStack, ModStack,
 	!,
 	sio_linenumber(Stream,LineNumber).
 
-process(Fact, Names, Vars,Stream, File, ModStack, ModStack, Errs, Errs, ok)
+process(Fact, Names, Vars,Stream, File,  CGF,PS,NPS, ModStack, ModStack, Errs, Errs, ok)
 	:-
+	(CGF ->
+		NPS = PS
+		;
+		functor(Fact,HF,HA),
+		(dmember(HF/HA, PS) ->
+			NPS = PS
+			;
+			(ModStack = [MM|_] ; MM=user),
+			MM:abolish(HF,HA),
+			NPS = [HF/HA | PS]
+		)
+	),
 	xform(Fact,true,NewBody,Names,Vars),
 	addrule(Fact,NewBody).
 
@@ -319,6 +351,7 @@ pushmod(M)
 	functor(MM,M,0),		/* intern it */
 	'$icode'(-10,MM,0,0,0),		/* new module */
 	asserta_at_load_time(topmod(MM)).
+
 pushmod(M)
 	:-
 	write(error_stream,'Invalid module name ``'), 
