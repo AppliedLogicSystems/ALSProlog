@@ -434,13 +434,17 @@ fselect_modes(Options, DefaultName, Ext, Mode, Title, IDir, FileTypes)
 	:-
 	(dmember(initialdir=IDir, Options) -> true ; IDir = ''),
 	(dmember(ext=InitExt, Options) -> 
-		(sub_atom(InitExt, 0,1,_,'.') ->
-			Ext = InitExt
+		((not atomic(InitExt)) ->
+			Ext = ''
 			;
-			catenate('.',InitExt,Ext)
+			(sub_atom(InitExt, 0,1,_,'.') ->
+				Ext = InitExt
+				;
+				catenate('.',InitExt,Ext)
+			)
+			; 
+			Ext = ''
 		)
-		; 
-		Ext = ''
 	),
 	(dmember(mode=Mode, Options) -> true ; Mode = select),
 	(dmember(title=Title, Options) -> 
@@ -456,14 +460,14 @@ fselect_modes(Options, DefaultName, Ext, Mode, Title, IDir, FileTypes)
 		(file_extension(InitDefaultName,_, _) ->
 			DefaultName = InitDefaultName
 			;
-			(dmember(ext=DfltExt, Options) ->
+			((dmember(ext=DfltExt, Options),atom(DfltExt)) ->
 				file_extension(DefaultName,InitDefaultName,DfltExt)
 				;
 				DefaultName = InitDefaultName
 			)
 		)
 		; 
-		(dmember(ext=DfltExt, Options) -> 
+		((dmember(ext=DfltExt, Options),atom(DfltExt)) -> 
 			file_extension(DefaultName,default,DfltExt)
 			;
 			DefaultName = default
@@ -479,21 +483,41 @@ fselect_ftypes(Options, FileTypes)
 fselect_ftypes(Options, FileTypes)
 	:-
 	dmember(ext=DfltExt, Options),
-	!,
-	(sub_atom(DfltExt, 0,1,_,'.') ->
-		Ext = DfltExt,
-		sub_atom(Ext,1,_,0,FN),
-		catenate('*',Ext,Pat),
-		catenate(FN, ' Files', DD)
-		;
-		catenate('*.',DfltExt,Pat),
-		catenate(DfltExt, ' Files', DD)
-	),
-	FileTypes = [[DD,[Pat]],['All Files',['*']]].
+	fext_pat_descs(DfltExt,List),
+	append(List, [['All Files',['*']]], FileTypes).
 
 fselect_ftypes(Options, FileTypes)
 	:-
 	FileTypes = [['All Files',['*']]].
+
+
+fext_pat_descs([],[]) :-!.
+
+fext_pat_descs(Ext, [[DD,[Pat]]] )
+	:-
+	atom(Ext),
+	!,
+	fext_pat_d(Ext,Pat,DD).
+
+fext_pat_descs([Ext | Exts], [ [DD,[Pat]] | List])
+	:-
+	fext_pat_d(Ext,Pat,DD),
+	fext_pat_descs(Exts, List).
+
+fext_pat_d(Ext,Pat,DD)
+	:-
+	atom(Ext),
+	sub_atom(Ext, 0,1,_,'.')
+	!,
+	sub_atom(Ext,1,_,0,FN),
+	catenate('*',Ext,Pat),
+	catenate(FN, ' Files', DD).
+
+fext_pat_d(Ext,Pat,DD)
+	:-
+	atom(Ext),
+	catenate('*.',Ext,Pat),
+	catenate(Ext, ' Files', DD).
 
 cont_file_select(select, DefaultName, Ext, IDir, Title, FileName, FileTypes, Interp)
 	:-!,
@@ -508,7 +532,6 @@ cont_file_select(save_as, DefaultName, Ext, IDir, Title, FileName, FileTypes, In
 				'-defaultextension', Ext, '-initialfile', DefaultName,
 				'-initialdir', IDir, '-filetypes', FileTypes], 
 				FileName).
-
 
 /*------------------------------------------------------------*
  |	create_image/2
