@@ -4,28 +4,26 @@
 </HEAD><BODY>
 <A NAME="0000e54a"></A><B>op/3
 <P></P>
-<A NAME="43fd47c1"></A><A NAME="4227dd33"></A></B>op/3 –  define operator associativity and precedence
+<A NAME="4227dd33"></A><A NAME="43fd47c1"></A></B>op/3 –  define operator associativity and precedence
 <P></P>
 <A NAME="43fd47c2"></A><B>FORMS
 <P></P>
 <A NAME="43fd47c3"></A></B>op(Precedence,Associativity,Atom) 
 <P></P>
-<A NAME="43fd481a"></A>op(Precedence,Associativity,[Atom|Atoms]) <A NAME="43fd47c4"></A><A NAME="43fd47c4"></A> <A NAME="43fd47c5"></A><A NAME="43fd47c5"></A> <A NAME="43fd47c6"></A><A NAME="43fd47c6"></A> <A NAME="43fd47c7"></A><A NAME="43fd47c7"></A> <A NAME="43fd47c8"></A><A NAME="43fd47c9"></A> <A NAME="43fd47f5"></A><A NAME="43fd47ec"></A> <A NAME="43fd47ed"></A><A NAME="43fd47ee"></A> <A NAME="43fd47f0"></A><A NAME="43fd47ef"></A> <A NAME="43fd47f1"></A><A NAME="43fd47f2"></A> <A NAME="43fd47f3"></A><A NAME="43fd47f4"></A> <A NAME="43fd4820"></A><A NAME="43fd4817"></A> <A NAME="43fd4818"></A><A NAME="43fd4818"></A> <A NAME="43fd4819"></A> 
+<A NAME="43fd481a"></A>op(Precedence,Associativity,[Atom|Atoms]) <A NAME="43fd47c4"></A><A NAME="43fd47c4"></A> <A NAME="43fd47c5"></A><A NAME="43fd47c5"></A> <A NAME="43fd47c6"></A><A NAME="43fd47c6"></A> <A NAME="43fd47c7"></A><A NAME="43fd47c7"></A> <A NAME="43fd47c8"></A> <A NAME="43fd47f5"></A> <A NAME="43fd47ed"></A> <A NAME="43fd47ef"></A> <A NAME="43fd47f1"></A> <A NAME="43fd47f3"></A> <A NAME="43fd4820"></A> <A NAME="43fd4818"></A><A NAME="43fd4818"></A> <A NAME="43fd4819"></A> 
 <P></P>
 <A NAME="43fd481b"></A><B>DESCRIPTION  
 <P></P>
-<A NAME="43fd481c"></A></B>If Precedence is instantiated to an integer between 0 and 1200 then Associativity must be one of the indicators found in <A NAME="43fd481e"></A><A HREF="alshelpop3.htm#e9954856">Table 9 (<I>Prolog Operator Types.</I>) </A>. Atom can be any atom, but should not require the use of single quotes (’) in order
+<A NAME="43fd481c"></A></B>If Precedence is instantiated to an integer between 0 and 1200 then Associativity must be one of the indicators found in <A NAME="43fd481e"></A><A HREF="start.htm">Table 9 (<I>Prolog Operator Types.</I>) </A>. Atom can be any atom, but should not require the use of single quotes (’) in order
 to be parsed.
 <P></P>
-<A NAME="43fd4e54"></A>
+ 
+<P></P>
+<A NAME="43fd4843"></A><B>Table 8: </B>Prolog Operator Types.
 <P></P>
  
 <P></P>
-<A NAME="43fd4843"></A><B>Table 8: 
-<P></P>
- 
-<P></P>
-</B><TABLE><TR VALIGN=TOP><TD><B><A NAME="43fd4847"></A></B>Indicator 
+<TABLE><TR VALIGN=TOP><TD><A NAME="43fd4847"></A>Indicator 
 <BR></TD><TD><A NAME="43fd4849"></A>Interpretation
 <BR></TD></TR><TR VALIGN=TOP><TD><A NAME="43fd4faf"></A>xfy 
 <BR></TD><TD><A NAME="43fd4fa7"></A>infix -- right associative
@@ -43,12 +41,8 @@ to be parsed.
 <BR></TD><TD><A NAME="43fd4e53"></A>postfix -- non-multiple
 <BR></TD></TR></TABLE> 
 <P></P>
-<A NAME="43fd4e56"></A>Table 9.  <A NAME="43fd4e55"></A><A NAME="e9954856"></A>Prolog Operator Types.
-<P></P>
-<A NAME="43fd4e82"></A>
-<P></P>
 <A NAME="43fd4e79"></A>If Precedence is uninstantiated, but Associativity and Atom correspond to an existing operator, Precedence will be unified with the previously declared precedence of the operator. The
-default operator precedences and associativities can be found in <A NAME="43fd4e7b"></A><A HREF="alshelpop3.htm#e8f17993">Table 11 (<I>Default Operator Associativity and Precedence.</I>) </A>. 
+default operator precedences and associativities can be found in <A NAME="43fd4e7b"></A><A HREF="alshelpop3.htm#e8f17993">Table 9 (<I>Default Operator Associativity and Precedence.</I>) </A>. 
 <P></P>
 <A NAME="43fd4e7d"></A>A number of convenience predicates are declared as prefix operators (fx) of precedence 1125. These include:
 <P></P>
@@ -58,11 +52,9 @@ default operator precedences and associativities can be found in <A NAME="43fd4e
 <P></P>
  
 <P></P>
-<A NAME="43fd4e81"></A><B>Table 10: 
-<P></P>
  
 <P></P>
-</B><TABLE><TR VALIGN=TOP><TD><B><A NAME="43fd4ea8"></A></B>Operator(s) 
+<TABLE><TR VALIGN=TOP><TD><A NAME="43fd4ea8"></A>Operator(s) 
 <BR></TD><TD><A NAME="43fd4eaa"></A>Associativity 
 <BR></TD><TD><A NAME="43fd4eac"></A>Precedence   
 <BR></TD></TR><TR VALIGN=TOP><TD><A NAME="43fd4ecf"></A>:- 
@@ -139,13 +131,11 @@ default operator precedences and associativities can be found in <A NAME="43fd4e
 <BR></TD><TD><A NAME="43fd56b6"></A> 200  
 <BR></TD></TR></TABLE> 
 <P></P>
-<A NAME="43fd56b9"></A>Table 11.  <A NAME="43fd56b8"></A><A NAME="e8f17993"></A>Default Operator Associativity and Precedence.
+<A NAME="43fd56b9"></A>Table 9.  <A NAME="43fd56b8"></A><A NAME="e8f17993"></A>Default Operator Associativity and Precedence.
 <P></P>
 <A NAME="43fd56ba"></A><B>EXAMPLES
 <P></P>
-<A NAME="43fd56bb"></A></B>
-<P></P>
-<A NAME="43fd56bc"></A>?- op(200,yfx,to), op(200,yfx,on). 
+<A NAME="43fd56bc"></A></B>?- op(200,yfx,to), op(200,yfx,on). 
 <P></P>
 <A NAME="43fd5e21"></A>
 <P></P>

@@ -2,9 +2,9 @@
 <HEAD>
 <TITLE>open/[3,4]</TITLE>
 </HEAD><BODY>
-<A NAME="1641f507"></A>open/\[3,4\]
+<A NAME="1641f507"></A>open/[3,4]
 <P></P>
-<A NAME="00e76e95"></A><A NAME="02bb92c5"></A>open/3 –  open a stream
+<A NAME="02bb92c5"></A><A NAME="00e76e95"></A>open/3 –  open a stream
 <P></P>
 <A NAME="02bb92c6"></A>open/4 –  open a stream with options
 <P></P>
@@ -12,7 +12,7 @@
 <P></P>
 <A NAME="02bb92c8"></A></B>open(Name,Mode,Stream) 
 <P></P>
-<A NAME="02bb92f8"></A>open(Name,Mode,Stream,Options) <A NAME="02bb92c9"></A>   <A NAME="02bb92ca"></A>   <A NAME="02bb92cb"></A>   <A NAME="02bb92cc"></A> 
+<A NAME="02bb92f8"></A>open(Name,Mode,Stream,Options) <A NAME="02bb92c9"></A><A NAME="02bb92c9"></A>   <A NAME="02bb92ca"></A><A NAME="02bb92ca"></A>   <A NAME="02bb92cb"></A><A NAME="02bb92cb"></A>   <A NAME="02bb92cc"></A> 
 <P></P>
 <A NAME="02bb92ef"></A><B>DESCRIPTION
 <P></P>
@@ -166,7 +166,7 @@ associated with the stream.  Predicates which deal with term output use this
 parameter to break the line at appropriate points when outputting a term which will
 span several lines.  Explicit options to write_term/3 may be used to override this option.
 <P></P>
-<A NAME="02bb9376"></A>write_eoln_type(Type) -  allows control over which end-of-line (eoln) characters are output by nl/1.  The values for Type and the corresponding eoln characters are: cr (“\r”), lf (“\n”), and crlf (“\r\n”). The default <IMG SRC="alshelp00000001.gif" ALT="alshelp00000001.gif" BORDER=0 WIDTH=261 HEIGHT=175> is determined by the operating system: MacOS (cr), Unix (lf), and Win32/DOS (crlf).
+<A NAME="02bb9376"></A>write_eoln_type(Type) -  allows control over which end-of-line (eoln) characters are output by nl/1.  The values for Type and the corresponding eoln characters are: cr (“\r”), lf (“\n”), and crlf (“\r\n”). The default <IMG SRC="alshelp00000001.gif" ALT="alshelp00000001.gif" BORDER=0 WIDTH=20 HEIGHT=15> is determined by the operating system: MacOS (cr), Unix (lf), and Win32/DOS (crlf).
 <P></P>
 <A NAME="02bb9377"></A>read_eoln_type(Type) - determines  what read/2 and get_line/3 recognize as an end-of-line.  The values for Type and the corresponding
 ends-of-line are: cr - carriage return (“\r”), lf -   line feed (“\n”), crlf - carriage return followed by a line feed (“\r\n”) , universal - indicates that any of the end-of-line types (cr, lf, crlf) should be interpreted as an end-of-line.  The default is universal since this allows the correct end-of-line interpretation for text files on

@@ -1,62 +1,65 @@
 <HTML>
 <HEAD>
-<TITLE>'=='/2</TITLE>
+<TITLE></2</TITLE>
 </HEAD><BODY>
-‘==’/2
+<B>&lt;/2
 <P></P>
-<A NAME="82df4738"></A><A NAME="a24666c8"></A><A NAME="a24666f4"></A><A NAME="0000f92f"></A>==/2 –  terms are identical
+<A NAME="4226c2ad"></A><A NAME="4405e98e"></A></B>&lt;/2 –  The left expression is <A NAME="4405e996"></A>less than the right expression    <A NAME="4405e98d"></A>
 <P></P>
-<A NAME="84be9a1c"></A><A NAME="a24666eb"></A>\==/2 –  terms are not identical
+<A NAME="4405e990"></A><A NAME="4405e994"></A>&gt;/2 –  The left expression is <A NAME="4405e98f"></A>greater than the right expression <A NAME="4405e991"></A>
 <P></P>
-<A NAME="a24666ec"></A><B>FORMS
+<A NAME="4405e9bb"></A><A NAME="4405e9b8"></A><A NAME="4405e9b8"></A>=:=/2 –  The left and right expressions are <A NAME="4405e9b9"></A>equal <A NAME="4405e9ba"></A>
 <P></P>
-<A NAME="a24666ed"></A></B>Term1  == Term2 
+<A NAME="4405e9e6"></A><A NAME="4405e9bf"></A><A NAME="4405e9bf"></A>=\=/2 –  The left and right expressions are <A NAME="4405e9bc"></A>not equal<A NAME="4405e9bd"></A>   <A NAME="4405e9be"></A>
 <P></P>
-<A NAME="a24666f1"></A>Term1 \== Term2 <A NAME="a24666ee"></A><A NAME="a24666ee"></A>   <A NAME="a24666ef"></A><A NAME="a24666ef"></A>   <A NAME="a24666f0"></A> 
+<A NAME="4405e9e3"></A><A NAME="4405e9e7"></A>=&lt;/2 –  The left expression is <A NAME="4405e9c0"></A>less than or equal to the right  <A NAME="4405e9ec"></A>
 <P></P>
-<A NAME="a24666f2"></A><B>DESCRIPTION 
+<A NAME="4405e9e8"></A><A NAME="23bf1a22"></A>&gt;=/2 –  The left expression is <A NAME="23bf1a21"></A>greater than or equal to the right <A NAME="23bf1a23"></A>
 <P></P>
-<A NAME="a24666f3"></A></B>Term1 is identical to Term2 (Term1 == Term2) if they can be unified, and variables occupying equivalent positions in both
-terms are identical.  For atoms and variables, this is an absolute identity
-check.  Viewing Prolog terms as trees in memory,  ==/2 determines whether Term1 and Term2 are isomorphic trees whose leaves are identical.  Unlike =/2, no variables are bound inside a call to   <A NAME="a246671f"></A>==/2. \== fails when == succeeds, and conversely.  
+<A NAME="23bf1a24"></A><B>FORMS
 <P></P>
-<A NAME="a2466717"></A><B>EXAMPLES 
+<A NAME="23bf1a25"></A></B>Expression1  &lt;   Expression2 
 <P></P>
-<A NAME="a2466718"></A></B>?- bar \== foo. 
+<A NAME="23bf1a26"></A>Expression1  &gt;   Expression2 
 <P></P>
-<A NAME="a2466719"></A>
+<A NAME="23bf1a27"></A>Expression1 =:=   Expression2 
 <P></P>
-<A NAME="a246671a"></A>yes. 
+<A NAME="23bf1a28"></A>Expression1 =\=   Expression2 
 <P></P>
-<A NAME="a246671b"></A>?- f(b) == f(b). 
+<A NAME="23bf1a54"></A>Expression1 =&lt;   Expression2 
 <P></P>
-<A NAME="a246671c"></A>
+<A NAME="23bf1a4b"></A>Expression1 &gt;=   Expression2 
 <P></P>
-<A NAME="a246671d"></A>yes. 
+<A NAME="23bf1a53"></A><A NAME="23bf1a4c"></A>    <A NAME="23bf1a4d"></A><A NAME="23bf1a4d"></A>     <A NAME="23bf1a4e"></A><A NAME="23bf1a4e"></A>    <A NAME="23bf1a4f"></A>    <A NAME="23bf1a50"></A><A NAME="23bf1a50"></A>    <A NAME="23bf1a51"></A><A NAME="23bf1a51"></A>     <A NAME="23bf1a52"></A>   
 <P></P>
-<A NAME="a246671e"></A>?- X == Y. 
+<A NAME="23bf1a7f"></A><B>DESCRIPTION 
 <P></P>
-<A NAME="a246674a"></A>
+<A NAME="23bf1a76"></A></B>Both arguments to each relational operator should be instantiated to
+expressions which can be evaluated by is/2. The relational operator succeeds if the relation holds for the value of the
+two arguments, and fails otherwise. A relational operator will fail if one or
+both of its arguments cannot be evaluated. 
 <P></P>
-<A NAME="a2466741"></A>no. 
+<A NAME="23bf1a77"></A><B>EXAMPLES 
 <P></P>
-<A NAME="a2466742"></A>?- f(X) \== f(X). 
+<A NAME="23bf1a78"></A></B>?- -7*0 =&lt; 1+1.
 <P></P>
-<A NAME="a2466743"></A>
+<A NAME="23bf1a79"></A>
 <P></P>
-<A NAME="a2466744"></A>no. 
+<A NAME="23bf1a7a"></A>yes. 
 <P></P>
-<A NAME="a2466745"></A>?- [a,b,c] \== [a,b,c]. 
+<A NAME="23bf1a7b"></A>
 <P></P>
-<A NAME="a2466746"></A>
+<A NAME="23bf1a7c"></A>?- 1+1 =&lt; 7*0. 
 <P></P>
-<A NAME="a2466747"></A>no. 
+<A NAME="23bf1a7d"></A>
 <P></P>
-<A NAME="a2466748"></A><B>SEE ALSO 
+<A NAME="23bf1a7e"></A>no. 
 <P></P>
-<A NAME="a2466749"></A></B>[Bowen 91, 7.4], [Clocksin 81, 6.8], [Bratko 86, 3.4]. 
+<A NAME="23bf1aaa"></A><B>ERRORS
 <P></P>
-<A NAME="84bac9b4"></A>
+<A NAME="44011729"></A></B>The ISO Prolog Standard requires that a calculation error be thrown when the
+arguments cannot be evaluated a for these operators.  At this time, ALS Prolog
+does not conform to this requirement.
 <P></P>
 </BODY>
 </HTML>

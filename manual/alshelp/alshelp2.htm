@@ -1,74 +1,62 @@
 <HTML>
 <HEAD>
-<TITLE>'=..'/2</TITLE>
+<TITLE>'=='/2</TITLE>
 </HEAD><BODY>
-<A NAME="82df4103"></A><B>‘=..’/2
+‘==’/2
 <P></P>
-<A NAME="82df4863"></A><A NAME="a24660bd"></A></B>=../2  <A NAME="84bd4546"></A>   <A NAME="84bd454d"></A> –  translates between lists and terms
+<A NAME="a24666c8"></A><A NAME="a24666f4"></A><A NAME="82df4738"></A><A NAME="0000f92f"></A>==/2 –  terms are identical
 <P></P>
-<A NAME="a24660b4"></A><B>FORMS
+<A NAME="84be9a1c"></A><A NAME="a24666eb"></A>\==/2 –  terms are not identical
 <P></P>
-<A NAME="a24660b5"></A></B>Term  =.. List
+<A NAME="a24666ec"></A><B>FORMS
 <P></P>
-<A NAME="a24660b6"></A><B>DESCRIPTION
+<A NAME="a24666ed"></A></B>Term1  == Term2 
 <P></P>
-<A NAME="a24660b7"></A></B>Either Term or List must be instantiated to a non-variable term. When Term is instantiated to a constant, List will be unified with the singleton list whose element is Term. If Term is a structured term, then List will be unified with a list whose head is the principal functor of Term and whose tail is the list of arguments in Term. 
+<A NAME="a24666f1"></A>Term1 \== Term2 <A NAME="a24666ee"></A><A NAME="a24666ee"></A>   <A NAME="a24666ef"></A><A NAME="a24666ef"></A>   <A NAME="a24666f0"></A> 
 <P></P>
-<A NAME="a24660b8"></A>When List is instantiated to a singleton list, whose element is an atom, then Term will be unified with the element. If List has at least two elements, the first of which is an atom, then Term will be unified with a term whose principal functor is the head of List and whose arguments are the remaining elements of List in order.  This predicate is commonly known as univ. 
+<A NAME="a24666f2"></A><B>DESCRIPTION 
 <P></P>
-<A NAME="a24660ba"></A><B>EXAMPLES
+<A NAME="a24666f3"></A></B>Term1 is identical to Term2 (Term1 == Term2) if they can be unified, and variables occupying equivalent positions in both
+terms are identical.  For atoms and variables, this is an absolute identity
+check.  Viewing Prolog terms as trees in memory,  ==/2 determines whether Term1 and Term2 are isomorphic trees whose leaves are identical.  Unlike =/2, no variables are bound inside a call to   <A NAME="a246671f"></A>==/2. \== fails when == succeeds, and conversely.  
 <P></P>
-<A NAME="a24660bb"></A></B>?- my_pred(tom,A+B,f(X)) =..[Functor|Args]. 
+<A NAME="a2466717"></A><B>EXAMPLES 
 <P></P>
-<A NAME="a24660bc"></A>Functor = my_pred 
+<A NAME="a2466718"></A></B>?- bar \== foo. 
 <P></P>
-<A NAME="a2466821"></A>Args = [tom,A+B,f(X)] 
+<A NAME="a2466719"></A>
 <P></P>
-<A NAME="a2466818"></A>A = _2 
+<A NAME="a246671a"></A>yes. 
 <P></P>
-<A NAME="a2466819"></A>B = _4 
+<A NAME="a246671b"></A>?- f(b) == f(b). 
 <P></P>
-<A NAME="a246681a"></A>X = _8 
+<A NAME="a246671c"></A>
 <P></P>
-<A NAME="a246681b"></A>
+<A NAME="a246671d"></A>yes. 
 <P></P>
-<A NAME="a246681c"></A>yes. 
+<A NAME="a246671e"></A>?- X == Y. 
 <P></P>
-<A NAME="a246681d"></A>?- X =.. [-,3,1]. 
+<A NAME="a246674a"></A>
 <P></P>
-<A NAME="a246681e"></A>X = 3-1 
+<A NAME="a2466741"></A>no. 
 <P></P>
-<A NAME="a246681f"></A>
+<A NAME="a2466742"></A>?- f(X) \== f(X). 
 <P></P>
-<A NAME="a2466820"></A>yes. 
+<A NAME="a2466743"></A>
 <P></P>
-<A NAME="a246669e"></A>?- 1 =.. [1]. 
+<A NAME="a2466744"></A>no. 
 <P></P>
-<A NAME="a2466695"></A>
+<A NAME="a2466745"></A>?- [a,b,c] \== [a,b,c]. 
 <P></P>
-<A NAME="a2466696"></A>yes. 
+<A NAME="a2466746"></A>
 <P></P>
-<A NAME="a2466697"></A><B>ERRORS 
+<A NAME="a2466747"></A>no. 
 <P></P>
-<A NAME="a2466698"></A></B>=../2 fails if: 
+<A NAME="a2466748"></A><B>SEE ALSO 
 <P></P>
-<A NAME="a2466699"></A><OL><LI> Neither Term nor List is instantiated
+<A NAME="a2466749"></A></B>[Bowen 91, 7.4], [Clocksin 81, 6.8], [Bratko 86, 3.4]. 
 <P></P>
-<A NAME="a246669a"></A><LI> List is not a proper list whose head is an atom
-<P></P>
-<A NAME="a246669b"></A><LI> List is unistantiated and Term is not an atom or a structure.
-<P></P>
-<A NAME="a246669c"></A></OL><B>NOTES
-<P></P>
-<A NAME="a246669d"></A></B>The ISO Prolog Standard requires that thes above error be thrown when the
-arguments cannot be evaluated a for these operators.  At this time, ALS Prolog does
-not conform to this requirement.
-<P></P>
-<A NAME="a24666c9"></A><B>SEE ALSO 
-<P></P>
-<A NAME="a24666c0"></A></B>functor/3, arg/3, 
-<P></P>
-<A NAME="a24666c1"></A>[Bowen 91, 7.6], [Bratko 86, 7.2], [Sterling 86, 9.2]. 
+<A NAME="84bac9b4"></A>
 <P></P>
 </BODY>
 </HTML>

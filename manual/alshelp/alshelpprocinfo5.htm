@@ -4,13 +4,13 @@
 </HEAD><BODY>
 <A NAME="f4f6dc01"></A><B>’$procinfo’/5
 <P></P>
-<A NAME="4227e395"></A><A NAME="43fd6c60"></A></B>’$procinfo’/5 –  retrieves information about the given procedure
+<A NAME="43fd6c60"></A><A NAME="4227e395"></A></B>’$procinfo’/5 –  retrieves information about the given procedure
 <P></P>
-<A NAME="42318a40"></A><A NAME="43fd6c61"></A>’$nextproc’/3 –  retrieves the next procedure in the name table
+<A NAME="422913fa"></A><A NAME="422913ce"></A>’$nextproc’/3 –  retrieves the next procedure in the name table
 <P></P>
-<A NAME="43fd6c62"></A>’<A NAME="42318a41"></A>$exported_proc’/3 –  checks whether the given procedure is exported
+<A NAME="422913f2"></A>’<A NAME="422913f1"></A>$exported_proc’/3 –  checks whether the given procedure is exported
 <P></P>
-<A NAME="42318a42"></A><A NAME="43fd6c63"></A>’$resolve_module’/4 –  finds the module which exports the given procedure 
+<A NAME="422913f4"></A><A NAME="422913f3"></A>’$resolve_module’/4 –  finds the module which exports the given procedure 
 <P></P>
 <A NAME="43fd6c64"></A><B>FORMS
 <P></P>
@@ -33,15 +33,11 @@ reference.  If NTblIndex is an uninstantiated variable, and Module, Pred and Ari
 <P></P>
 <A NAME="43fd73cb"></A>’$nextproc’/3 returns the name table index NTblIndex of the next name table entry following the input name table entry PreNTblIndex.  If PreNTblIndex is -1, the first name table entry index is returned. The argument Flag determines the type of the next name table entry to be chosen, as follows.
 <P></P>
-<A NAME="43fd7271"></A>
+ 
 <P></P>
  
 <P></P>
-<A NAME="43fd7241"></A><B>Table 12: 
-<P></P>
- 
-<P></P>
-</B><TABLE><TR VALIGN=TOP><TD><B><A NAME="43fd7245"></A></B>Flag=0
+<TABLE><TR VALIGN=TOP><TD><A NAME="43fd7245"></A>Flag=0
 <BR></TD><TD><A NAME="43fd7247"></A>The index of the name table entry of the next Prolog-defined procedure is
 returned.
 <BR></TD></TR><TR VALIGN=TOP><TD><A NAME="43fd7274"></A>Flag=1
@@ -51,9 +47,9 @@ is returned.
 <BR></TD><TD><A NAME="43fd7270"></A>The index of the next name table entry, regardless of its type, is returned.
 <BR></TD></TR></TABLE> 
 <P></P>
-<A NAME="43fd7273"></A>Table 13.  <A NAME="43fd7272"></A>Argument Flags.
+<A NAME="43fd7273"></A>Table 10.  <A NAME="43fd7272"></A>Argument Flags.
 <P></P>
-<A NAME="43fd729f"></A>
+<A NAME="42291424"></A>
 <P></P>
 <A NAME="43fd7296"></A>For ’$exported_proc’/3, if the procedure whose module name Module, predicate name Pred, and Arity are given is exported, ’$exported_proc’/3 succeeds; otherwise it fails.
 <P></P>
