@@ -162,6 +162,7 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
         #define getsocknamesocket(a,b,c) getsockname(a,b,c)
         #define recvfromsocket(a,b,c,d,e,f) recvfrom(a,b,c,d,e,f)
 	#define socket_errno		errno
+	#define h_errno	errno
 	#define INVALID_SOCKET	-1
 	#define SOCKET_ERROR	-1
 	
