@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.79 1999/02/09 16:48:11 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.80 1999/02/20 22:30:38 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -461,11 +461,9 @@ proc set_top_bindings { WinPath StreamAlias WaitVarName DataVar } {
 		## This is intended to be totally global in the IDE:
 	bind all <Control-period> interrupt_action
 
-#	bind all <Key-Break> interrupt_action
-
 	bind $WinPath <KeyPress> "listener.check_at_end .topals"
 	bind $WinPath <ButtonPress-2> "listener.copy_paste .topals"
-	bind Text <ButtonRelease-2> {} 
+	bind Text <ButtonRelease-2> " " 
 
 }
 

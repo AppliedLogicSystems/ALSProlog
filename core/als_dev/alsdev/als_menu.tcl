@@ -259,7 +259,7 @@ proc listener.select_all {xw} {
 
 proc listener.copy_paste { xw } {
 	global tcl_platform
-	glocal proenv
+	global proenv
 	set w .topals
 
 	if  {$tcl_platform(platform) == "unix"} {
