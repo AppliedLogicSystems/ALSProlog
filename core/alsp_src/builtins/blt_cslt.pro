@@ -113,20 +113,12 @@ consult_files(File, COpts)
 
 cslt_init(MessageValue,ReconFlg, FCGValue)
 	:-
-/*
-	get_cwd(CurDir),
-	subPath(CurDirPathList, CurDir),
-	get_current_drive(InitCurDrive),
-	(InitCurDrive = root -> CurDrive = '' ; CurDrive = InitCurDrive),
-    set_current_consult_directory(CurDrive+CurDirPathList),	
-*/
 	consultmessage(MessageValue),
 	file_clause_groups(FCGValue),
 	get_reconsult_flag(ReconFlg).
 
 cslt_cleanup(MessageValue,ReconFlg, FCGValue)
 	:-
-%    set_current_consult_directory(CCD),
 	set_consult_messages(MessageValue),
 	set_file_clause_groups(FCGValue),
 	set_reconsult_flag(ReconFlg).
@@ -416,6 +408,8 @@ cont_consult(SrcExt, Nature, Drive+PathList, BaseFile, FCOpts)
 	rootPathFile(NewDrive,NewPathList,SrcFileName,SrcFilePath),
 	s2s_ext(Exts2Try),
 	check_existence(SrcFilePath, Exts2Try,ExistingSrcFilePath, WorkingExt),
+			%% ExistingSrcFilePath is a complete path, including
+			%% extension, if appropriate; hence, so it CanonSrcPath:
 	canon_path(ExistingSrcFilePath, CanonSrcPath),
 		%%% Change the Drive+Path current_consult global variable:
 	get_current_consult_directory(OldCCD),
@@ -458,43 +452,44 @@ load_from_file(_,obp,BaseFile,CanonSrcPath,_,FCOpts)
 	:-!,
 	obp_load_file(CanonSrcPath, BaseFile, FCOpts).
 
-		%% SrcExt = pro => force (attempted) loading from .pro:
-		%% .pro extension + arbitrary Nature handled here:
-load_from_file(pro,_,BaseFile,CanonSrcPath,_,FCOpts)
-	:-!,
-	source_ld_file(BaseFile,CanonSrcPath,FCOpts).
-
 load_from_file(no(extension),_,BaseFile,CanonSrcPath,no(extension),FCOpts)
 	:-!,
-	source_ld_file(BaseFile,CanonSrcPath,FCOpts).
+	outFilePath(obp, CanonSrcPath, BaseFile, OutFilePath),
+	default_load(CanonSrcPath,BaseFile,OutFilePath,FCOpts).
 
-		%% No source extension + Nature = source =>
-		%% force (attempted) loading from .pro:
-load_from_file(no(extension),source,BaseFile,CanonSrcPath,WkExt,FCOpts)
-	:-!,
-	(WkExt = pro ->
-		load_from_file(pro,source,BaseFile,CanonSrcPath,WkExt,FCOpts)
-		;
-		load_from_other(WkExt,source,BaseFile,CanonSrcPath,FCOpts)
-	).
-
-		%% No source extension + Nature = default =>
-		%% compare .pro, .obp extensions by date/time:
-load_from_file(no(extension),default,BaseFile,CanonSrcPath,WkExt,FCOpts)
-	:-!,
-	(WkExt = pro ->
-		default_load(BaseFile,CanonSrcPath,FCOpts)
-		;
-		load_from_other(WkExt,default,BaseFile,CanonSrcPath,FCOpts)
-	).
-
-		%% SrcExt \= obp,  & SrcExt \= pro, & SrcExt \= no(extension), and
-		%% Nature \= obp, so Nature = source or Nature = default:
-		%% This is a hook for automatic application of source to
-		%% source transforms such as typecomp, objectPro, macro, etc.
 load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WkExt,FCOpts)
+	:-
+			%% Found in blt_shlr.pro:
+	transformer_db(WkExt, GenExt, DelFlag, ExtOpts), 
+	outFilePath(GenExt, CanonSrcPath, BaseFile, OutFilePath),
+	fin_load_from_file(GenExt,Nature,BaseFile,CanonSrcPath,
+						OutFilePath,WkExt,ExtOpts,DelFlag,FCOpts).
+
+fin_load_from_file(obp,Nature,BaseFile,CanonSrcPath,OutFilePath,
+					WkExt,ExtOpts,DelFlag,FCOpts)
 	:-!,
-	load_from_other(SrcExt,Nature,BaseFile,CanonSrcPath,FCOpts).
+	default_load(CanonSrcPath,BaseFile,OutFilePath,FCOpts).
+
+fin_load_from_file(GenExt,Nature,BaseFile,CanonSrcPath,OutFilePath,
+					WkExt,ExtOpts,DelFlag,FCOpts)
+	:-
+	comp_file_times(CanonSrcPath, OutFilePath),
+	!,
+	load_from_file(GenExt,Nature,BaseFile,OutFilePath,GenExt,FCOpts).
+
+fin_load_from_file(GenExt,Nature,BaseFile,SrcPath,OutFilePath,
+					WkExt,ExtOpts,DelFlag,FCOpts)
+	:-
+	extract_opts(FCOpts, FCOptions),
+	dappend(ExtOpts, FCOptions, Options),
+			%% Found in blt_shlr.pro:
+	src2src_inv(WkExt, BaseFile, SrcPath, OutFilePath, Options),
+	load_from_file(GenExt,Nature,BaseFile,OutFilePath,GenExt,FCOpts),
+	(DelFlag = no_del ->
+		true 
+		;
+		unlink(OutFilePath)
+	).
 
 /*-------------------------------------------------------------*
  |	Load from the obp file
@@ -529,38 +524,11 @@ obp_load_from_path(BaseFile,ObpPath, CanonSrcPath)
 	reset_fcg(_).
 
 /*-------------------------------------------------------------*
- |	Load from the source file
- *-------------------------------------------------------------*/ 
-source_ld_file(BaseFile,CanonSrcPath,FCOpts)
-	:-
- 	consulted(BaseFile, CanonSrcPath, ObpPath, _, _),
-	load_source(CanonSrcPath, ObpPath),
-	!,
-	note_paths(FCOpts, CanonSrcPath, ObpPath, CanonSrcPath).
-
-source_ld_file(BaseFile,CanonSrcPath,FCOpts)
-	:-
-	(filePlusExt(PureFilePath, _, CanonSrcPath) ->
-		true
-		;
-		PureFilePath = CanonSrcPath
-	),
-	obpPath(PureFilePath, ObpPath),
-	load_source(CanonSrcPath, ObpPath),
-	!,
-	note_paths(FCOpts, CanonSrcPath, ObpPath, CanonSrcPath).
-
-/*-------------------------------------------------------------*
  |	Load from either the source file or the .obp file,
  |	depending on date/time.
  *-------------------------------------------------------------*/ 
-default_load(BaseFile,CanonSrcPath,FCOpts)
+default_load(CanonSrcPath,BaseFile,ObpPath,FCOpts)
 	:-
- 	(consulted(BaseFile, CanonSrcPath, ObpPath, _, _)
-		;
-		filePlusExt(NosuffixCanonSrcPath, _, CanonSrcPath),
-		obpPath(NosuffixCanonSrcPath, ObpPath)
-	),
 	(comp_file_times( CanonSrcPath, ObpPath) ->
 		obp_load_from_path(BaseFile,ObpPath, CanonSrcPath),
 		note_paths(FCOpts, CanonSrcPath, ObpPath, ObpPath)
@@ -641,8 +609,7 @@ prepend_current_consult_directory(Drive,PathList,Drive,PathList).
 check_default_local('',[],NewDrive,NewPathList)
 	:-!,
 	get_cwd(NewPath),
-	subPath(NewPathList, NewPath),
-	get_current_drive(InitNewDrive),
+	rootPlusPath(InitNewDrive, NewPathList, NewPath),
 	(InitNewDrive = root -> NewDrive = '' ; NewDrive = InitNewDrive).
 
 check_default_local(Drive,PathList,Drive,PathList).
@@ -688,6 +655,7 @@ check_for_regular(Path)
 		follow_link(Path,_,FileCode),
 		fileTypeCode(FileTypeCode, regular)
 	).
+
 /*-----------------------------------------------------------*
  |	Databse structure for recording information about
  |	consulted files:
@@ -734,91 +702,6 @@ fin_record_consult(File, SrcFilePath, ObpPath, DebugType, Options)
 fin_record_consult(File, SrcFilePath, ObpPath, DebugType, Options)
 	:-
  	assert(consulted(File, SrcFilePath, ObpPath, DebugType, Options)).
-
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		%% OBP FILE LOCATION CONTROL
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-/*!----------------------------------------------------------------------*
- |	obp_with_pro/0.
- |	obp_with_pro
- |	obp_with_pro
- |
- |	-	store obp files in same directory with source pro files
- *!----------------------------------------------------------------------*/
-export obp_with_pro/0.
-obp_with_pro 
-	:-
-	abolish(obpLocation,2),
-	dynamic(obpLocation/2).
-
-/*!----------------------------------------------------------------------*
- |	obp_in_cur/0.
- |	obp_in_cur
- |	obp_in_cur
- |
- |	-	store obp files in the current directory
- *!----------------------------------------------------------------------*/
-export obp_in_cur/0.
-obp_in_cur 
-	:-
-	abolish(obpLocation,2),
-	directory_self(Self),
-	asserta(obpLocation(_,Self)).
-
-/*!----------------------------------------------------------------------*
- |	obp_in_locn/1
- |	obp_in_locn(DirPath)
- |	obp_in_locn(+)
- |
- |	-	store obp files in the directory DirPath
- *!----------------------------------------------------------------------*/
-export obp_in_locn/1.
-obp_in_locn(DirPath) 
-	:-
-	abolish(obpLocation,2),
-	asserta(obpLocation(_,DirPath)).
-
-/*-----------------------------------------------------------------------*
- |	obpPath/2
- |	obpPath(Path, ObpPath)
- |	obpPath(+, -)
- |
- |	- Determine where an obp file was/should be stored
- *-----------------------------------------------------------------------*/
-
-obpPath(Path,ObpPath)
-	:-
-	pathPlusFile(_,File,Path),
- 	consulted(File, OrigDir, ObpPath, DbgType, Options),
-	!.
-
-obpPath(Path,OPath)
-	:-
-	pathPlusFile(PurePath,File,Path),
-	obpLocation(PurePath,Dir),
-	!,
-	obpPath(Dir,File,OPath).
-
-obpPath(Path,OPath)
-	:-
-	filePlusExt(Path,obp,OPath).
-
-	%% The Dir for obp files is an absolute path:
-obpPath(Dir,File,OPath)
-	:-
-	is_absolute_pathname(Dir),
-	!,
-	filePlusExt(File,obp,ObpFile),
-	pathPlusFile(Dir,ObpFile,OPath).
-
-	%% The Dir for obp files is non-absolute:
-obpPath(Dir,File,OPath)
-	:-
-	get_cwd(CurPath),
-	filePlusExt(File,obp,ObpFile),
-	extendPath(CurPath, Dir, XPath),
-	pathPlusFile(XPath, ObpFile, OPath).
 
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		%% CONTROLLING MESSAGES
@@ -1047,28 +930,19 @@ reset_fcg(_)
 	:-
 	pop_clausegroup(_).
 
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% HOOKS FOR INVOKING SOURCE 2 SOURCE TRANSFORMERS
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% HOOKS FOR INVOKING TRANSFORMERS
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	/*--------------------------------------------------*
 	 |	These all assume that the ALS Prolog development
 	 |	shell is running, so that the library setup
 	 |	in blt_shl.pro has been carried out.
 	 |
-	 |	Location of generated .pro files is controlled
-	 |	by src2srcLocation/3, which is analogous to
-	 |	obpLocation/2. The default is put generated
-	 |	.pro files with their various source files.
+	 |	Location of generated files is controlled
+	 |	by genFileLocn/3.  The default is put generated
+	 |	files with their various source files.
 	 *--------------------------------------------------*/
-
-load_from_other(Ext,Nature,BaseFile,CanonSrcPath,FCOpts)
-	:-
-	pathPlusFile(PurePath, File, CanonSrcPath),
-	src2srcPath(Ext, PurePath, BaseFile, OutProPath),
-	extract_opts(FCOpts, Options),
-	src2src_inv(Ext, BaseFile, CanonSrcPath, OutProPath, Options),
-	default_load(BaseFile,OutProPath,FCOpts).
 
 extract_opts(FCOpts, [quiet(Value)])
 	:-
@@ -1084,107 +958,125 @@ extract_opts(FCOpts, [quiet(Value)])
 	 |	transformers.  This 
 	 *--------------------------------------------------*/
 
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		%% SRC2SRC FILE LOCATION CONTROL
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% GENERATED FILE LOCATION CONTROL (INCLUDING OBP)
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+:- dynamic(genFileLocn/3).
 
-/*!----------------------------------------------------------------------*
- |	src2src_with_pro/1.
- |	src2src_with_pro(Ext)
- |	src2src_with_pro(+)
- |
- |	-	store generated pro files in same directory with source Ext files
- *!----------------------------------------------------------------------*/
-export src2src_with_pro/1.
-src2src_with_pro(Ext)
+outFilePath(GenExt, CanonSrcPath, BaseFile, OutFilePath)
 	:-
-	src2srcLocation(Ext, _, _),
+	genFileLocn(CanonSrcPath, OutDir, OutDisk),
 	!,
-	retract_all([src2srcLocation(Ext, _, _)]).
-src2src_with_pro(_).
+	fin_o_f_path(OutDir, OutDisk, GenExt, CanonSrcPath, BaseFile, OutFilePath).
+
+outFilePath(GenExt, CanonSrcPath, BaseFile, OutFilePath)
+	:-
+	fin_o_f_path('', '', GenExt, CanonSrcPath, BaseFile, OutFilePath).
+
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+fin_o_f_path(subdir(cur), OutDisk, GenExt, CanonSrcPath, 
+				BaseFile, OutFilePath)
+	:-!,
+	filePlusExt(BaseFile, GenExt, OutFile),
+	get_cwd(CurDir),
+	extendPath(CurDir,OutFile,OutFilePath).
+
+fin_o_f_path(subdir(arch,Where), OutDisk, GenExt, CanonSrcPath, 
+				BaseFile, OutFilePath)
+	:-!,
+	filePlusExt(BaseFile, GenExt, OutFile),
+	rootPathFile(OrigDisk,OrigPathList,_,CanonSrcPath),
+	sys_env(OS,MinorOS,Proc),
+	SubDir = MinorOS,
+	(Where = src ->
+		append(OrigPathList, [SubDir], NewPathList)
+		;
+				%% take Where to be = cur (subdir of current):
+		get_cwd(CurDir),
+		subPath(OutDirList, CurDir),
+		append(OutDirList, [SubDir], NewPathList)
+	),
+	rootPlusPath(OrigDisk, NewPathList, OutDir),
+	(exists_file(OutDir) -> true ; make_subdir(OutDir) ),
+	rootPathFile(OrigDisk, NewPathList, OutFile, OutFilePath).
+
+fin_o_f_path(OutDir, OutDisk, GenExt, CanonSrcPath, BaseFile, OutFilePath)
+	:-
+	is_absolute_pathname(OutDir),
+	!,
+	filePlusExt(BaseFile, GenExt, OutFile),
+	rootPathFile(OutDisk, OutDir, OutFilePath).
+
+	%% OutDir is a relative path; paste onto CanonSrc..:
+fin_o_f_path(OutDir, OutDisk, GenExt, CanonSrcPath, BaseFile, OutFilePath)
+	:-
+	filePlusExt(BaseFile, GenExt, OutFile),
+	rootPathFile(OrigDisk,OrigPathList,_,CanonSrcPath),
+	subPath(OutDirList, OutDir),
+	append(OrigPathList, OutDirList, NewPathList),
+	rootPathFile(OrigDisk, NewPathList, OutFile, OutFilePath).
 
 /*!----------------------------------------------------------------------*
- |	src2src_in_cur/1.
- |	src2src_in_cur(Ext)
- |	src2src_in_cur(+)
+ |	generated_with_src/0.
+ |	generated_with_src
+ |	generated_with_src
  |
- |	-	store src2src files generated pro files in the current directory
+ |	-	store generated files in same directory with source files
  *!----------------------------------------------------------------------*/
-export src2src_in_cur/1.
-src2src_in_cur(Ext)
+	%%  genFileLocn(CanonSrcPath, OutDir, OutDisk),
+
+export generated_with_src/0.
+generated_with_src 
 	:-
-	(src2srcLocation(Ext, _, _) ->
-		retract_all([src2srcLocation(Ext, _, _)]) ; true),
-	directory_self(Self),
-	asserta(src2srcLocation(Ext,_,Self)).
+	abolish(genFileLocn,3),
+	dynamic(genFileLocn/3).
 
 /*!----------------------------------------------------------------------*
- |	src2src_in_locn/2
- |	src2src_in_locn(Ext, DirPath)
- |	src2src_in_locn(+,+)
+ |	generated_in_cur/0.
+ |	generated_in_cur
+ |	generated_in_cur
  |
- |	-	store generated src2src pro files for Ext files in directory DirPath
+ |	-	store generated files in the current directory
  *!----------------------------------------------------------------------*/
-export src2src_in_locn/2.
-src2src_in_locn(Ext, DirPath) 
+export generated_in_cur/0.
+generated_in_cur 
 	:-
-	(src2srcLocation(Ext, _, _) ->
-		retract_all([src2srcLocation(Ext, _, _)]) ; true),
-	asserta(src2srcLocation(Ext,_,DirPath)).
+	abolish(genFileLocn,3),
+	asserta(genFileLocn(_,subdir(cur), '')).
 
-/*-----------------------------------------------------------------------*
- |	src2srcPath/4
- |	src2srcPath(Ext, InPath, File, OutProPath)
- |	src2srcPath(+, +, +, -)
+/*!----------------------------------------------------------------------*
+ |	generated_in_locn/1
+ |	generated_in_locn(DirPath)
+ |	generated_in_locn(+)
  |
- |	- Determine where a generated pro file for an Ext file was/should be stored
+ |	-	store generated files in the directory DirPath
+ *!----------------------------------------------------------------------*/
+export generated_in_locn/1.
+generated_in_locn(DirPath) 
+	:-
+	rootPlusPath(Disk, PathList, DirPath),
+	subPath(PathList, Path),
+	abolish(genFileLocn,3),
+	asserta(genFileLocn(_,Path, Disk)).
+
+/*!----------------------------------------------------------------------*
+ |	generated_in_arch/1
+ |	generated_in_arch(Which)
+ |	generated_in_arch(+)
  |
- |	Ext is the source extension (typ, oop, etc.) 
- |	InPath is a pure path to a directory; it is absolute
- |	File is pure base file name (no extension)
- |	OutProPath is a complete path to a .pro file
- *-----------------------------------------------------------------------*/
-src2srcPath(Ext, InPath, File, OutProPath)
-	:-
-	src2srcDir(Ext, InPath, OutDirPath),
-	filePlusExt(File, pro, ProFile),
-	pathPlusFile(OutDirPath, ProFile, OutProPath).
-
-/*-----------------------------------------------------------------------*
- |	src2srcPath/3
- |	src2srcPath(Ext, InPath, OutProPath)
- |	src2srcPath(+, +, -)
+ |	-	store generated files in an architcture subdirectory 
  |
- |	- Determine where a generated pro file for an Ext file was/should be stored
- |
- |	Ext is the source extension (typ, oop, etc.) 
- |	InPath is a pure path to a directory; it is absolute
- |	File is pure base file name (no extension)
- |	OutProPath is a complete path to a .pro file
- *-----------------------------------------------------------------------*/
+ |	Which = {src/cur}; any input \= src is interpred as cur.
+ *!----------------------------------------------------------------------*/
 
-src2srcDir(Ext,PurePath,Dir)
+export generated_in_arch/1.
+generated_in_arch(Which)
 	:-
-	src2srcLocation(Ext,PurePath,InitDir),
-	src2srcFullDir(Ext,PurePath,InitDir,Dir).
-
-	%% Default: Keep with source:
-src2srcDir(Ext,PurePath,PurePath).
-
-	%% Dir is an absolute path:
-src2srcFullDir(Ext,PurePath,Dir,Dir)
-	:-
-	is_absolute_pathname(Dir),
-	!.
-
-	%% The Dir for src2src files is non-absolute:
-src2srcFullDir(Ext,PurePath,Dir,OutDir)
-	:-
-	extendPath(PurePath, Dir, OutDir).
-
-
-/*-----------------------------------------------------------------------*
- *-----------------------------------------------------------------------*/
-
+	abolish(genFileLocn,3),
+	(Which = src -> Place = src ; Place = cur),
+	asserta(genFileLocn(_,subdir(arch,Place), '')).
 
 endmod.		%% blt_cslt.pro: Consult 

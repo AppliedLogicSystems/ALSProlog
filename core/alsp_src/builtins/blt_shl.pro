@@ -54,8 +54,9 @@ start_shell(DefaultShellCall)
 					DefaultShellCall,	/* shell/or not */
 					other_flags),		/* room for expansion */
 
-	%%debugger:nospy,
-	obp_with_pro,
+%%debugger:nospy,
+%%obp_with_pro,
+	generated_with_src,
 	ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo),
 	assertz(command_line(ResidualCommandLine)),
 
@@ -64,16 +65,15 @@ start_shell(DefaultShellCall)
 	ss_init_searchdir(CmdLineSearch),
 	ss_load_dot_alspro,
 
-	als_advise('Setting up library indicies...may take a moment...'),
+	arg(2,CLInfo,ConsultNoise),
+	(ConsultNoise = true -> true ;
+		als_advise('Setting up library indicies...may take a moment...')),
 	setup_libraries,
-	als_advise('Done.\n'),
+	(ConsultNoise = true -> true ; als_advise('Done.\n')),
 
 	arg(3, CLInfo, Files),
-%	(arg(2,CLInfo,false) -> set_consult_messages(on) ; consultmessage(off)),
-	arg(2,CLInfo,ConsultNoise),
 	set_consult_messages(ConsultNoise),
 	ss_load_files(Files),
-%	(arg(2,CLInfo,quiet) -> consultmessage(off) ; consultmessage(on)),
 	!,
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
@@ -143,10 +143,10 @@ ss_parse_command_line(['-v' | T], L, CLInfo)
 	mangle(2, CLInfo, true),
 	ss_parse_command_line(T, L, CLInfo).
 
-	%% -q: Turn off verbose mode:
+	%% -q: Turn off verbose mode: (set = "true": be quiet)
 ss_parse_command_line(['-q' | T], L, CLInfo)
 	:-!,
-	mangle(2, CLInfo, quiet),
+	mangle(2, CLInfo, true),
 	ss_parse_command_line(T, L, CLInfo).
 
 	%% -s: Atom - File to add to search list;
@@ -168,6 +168,7 @@ ss_parse_command_line(['-a', Expr | T], L, CLInfo)
 	cmd_line_A(Expr),
 	ss_parse_command_line(T, L, CLInfo).
 
+/*
 	%% -obp: Keep obp files in directory where image is running:
 ss_parse_command_line(['-obp' | T], L, CLInfo)
 	:-!,
@@ -179,6 +180,44 @@ ss_parse_command_line(['-obplcn', Path | T], L, CLInfo)
 	:-!,
 	obp_in_locn(Path),
 	ss_parse_command_line(T, L, CLInfo).
+*/
+	%% For historical compatability:
+	%% -obp: Keep obp files in directory where image is running:
+ss_parse_command_line(['-obp' | T], L, CLInfo)
+	:-!,
+	generated_in_cur,
+	ss_parse_command_line(T, L, CLInfo).
+
+	%% -gic: Keep generated files in directory where image is running:
+ss_parse_command_line(['-gic' | T], L, CLInfo)
+	:-!,
+	generated_in_cur,
+	ss_parse_command_line(T, L, CLInfo).
+
+	%% -gis: Keep generated files in directory where sources reside:
+ss_parse_command_line(['-gis' | T], L, CLInfo)
+	:-!,
+	generated_with_src,
+	ss_parse_command_line(T, L, CLInfo).
+
+	%% -gias: Keep generated files in arch subdirectory where sources reside:
+ss_parse_command_line(['-gias' | T], L, CLInfo)
+	:-!,
+	generated_in_arch(src),
+	ss_parse_command_line(T, L, CLInfo).
+
+	%% -giac: Keep generated files in arch subdirectory of current dir:
+ss_parse_command_line(['-giac' | T], L, CLInfo)
+	:-!,
+	generated_in_arch(cur),
+	ss_parse_command_line(T, L, CLInfo).
+
+	%% -gil: Keep generated files in explict Path dir:
+ss_parse_command_line(['-gil', Path | T], L, CLInfo)
+	:-!,
+	generated_in_locn(Path),
+	ss_parse_command_line(T, L, CLInfo).
+
 
 	%% -nwd: Set debugger to "nowins"
 ss_parse_command_line(['-nwd' | T], L, CLInfo)
@@ -264,7 +303,10 @@ ss_load_files([])
 	:-!.
 ss_load_files([F | T])
 	:-
-	reconsult(F),
+	catch(	reconsult(F),
+	      	Reason,
+			shell_exception(Reason)
+		),
 	ss_load_files(T).
     
 /*---------------------------------------
@@ -389,7 +431,7 @@ init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 		%% can't hold on to them:
 	get_shell_prompts( CurPromptsStack ),
 	set_shell_prompts( [(Prompt1,Prompt2) | CurPromptsStack] ),
-	print_banner(OutStream,SysList),
+	(consultmessage(true) -> true ; print_banner(OutStream,SysList)),
 	current_prolog_flag(windows_system, InitWins),
 	dmember(os=OS, SysList),
 	dmember(os_variation=OSMinor, SysList),
@@ -941,30 +983,5 @@ all_to_atoms([String | Strings], [Atom | Atoms])
 	:-
 	atom_codes(Atom, String),
 	all_to_atoms(Strings, Atoms).
-
-/**********************************
-/*!---------------------------------------------------------------------
- |	list_delete/3
- |	list_delete(List, Item, ResultList)
- |	list_delete(+, +, -)
- |
- |	- deletes all occurrences of an item from a list
- |
- |	If List is a list, and Item is any object, ResultList is obtained
- |	by deleting all occurrences of Item from List.
- *!--------------------------------------------------------------------*/
-list_delete(X, _, X) :- var(X),!.
-list_delete([], _, []).
-list_delete([Item | Rest_In_List], Item, Out_List)
-	:-!,
-	list_delete(Rest_In_List, Item, Out_List).
-list_delete([Keep | Rest_In_List], Item, [Keep | Rest_Out_List])
-	:-
-	list_delete(Rest_In_List, Item, Rest_Out_List).
-
-**********************************/
-
-
-
 
 endmod.		%% blt_shl.pro: Development shell
