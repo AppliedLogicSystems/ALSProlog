@@ -40,6 +40,14 @@ unsigned char *c2pstrcpy(unsigned char *ps, const char *cs)
 	return ps;
 }
 
+char *p2cstrcpy(char *cs, const unsigned char *ps)
+{
+	strncpy(cs, ps+1, ps[0]);
+	cs[ps[0]] = 0;
+
+	return cs;	
+}
+
 /* ceh - I'm not really sure what cononicalize_pathname does, or wether it really applies
    on the Mac.  This function is a NOP. */
 static int canonicalize_pathname(void)
