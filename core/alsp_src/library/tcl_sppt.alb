@@ -1,0 +1,5 @@
+libactivate(tk_alslib,[library,tcl_sppt],
+	[mk_tcl_atom_list/2, mk_tcl_term_list/2
+		],
+    []).
+
