@@ -14,7 +14,7 @@
 #include "defs.h"
 #include "coerce.h"
 #include "mtypes.h"
-#include "tokens.h"
+#include "newtokens.h"
 #include "module.h"
 #include "labels.h"
 #include "icode.h"
