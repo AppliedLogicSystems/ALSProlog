@@ -29,8 +29,10 @@ extern "C" {
 #else		/* ----------- NON-KERNAL --------------------------*/
 #define DEFAULT_SAFETY		98304		/* bytes	*/
 
-#define DEFAULT_HEAP_SIZE	0x040000	/* long words (1 MBytes) */
-#define DEFAULT_STACK_SIZE	0x040000	/* long words (1 MBytes) */
+/* #define DEFAULT_HEAP_SIZE	0x040000	long words (1 MBytes) */
+#define DEFAULT_HEAP_SIZE	0x400000	/* long words (16 MBytes) */
+/* #define DEFAULT_STACK_SIZE	0x040000	 long words (1 MBytes) */
+#define DEFAULT_STACK_SIZE	0x200000	/* long words (8 MBytes) */
 
 #define	MIN_ICBUFSIZE		0x010000	/* 64k code words */
 #define MAX_ICBUFSIZE		0x100000	/* 1M code words */

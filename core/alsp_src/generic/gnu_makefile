@@ -120,11 +120,11 @@ test_suite: alspro
 iso_test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
 
-ALSDEVFILES = blt_dvsh.pro db_srctr.pro
+ALSDEVFILES = blt_dvsh.pro db_srctr.pro projects.pro
 alsdev :  alsdir alspro_b $(BUILTINS) $(ALSDEVFILES)
 	./alspro_b -q -b -obp -no_dot_alspro \
 	-g 'save_image(alsdev,[start_goal((builtins:start_alsdev)), \
-	select_lib(builtins, [debugger,blt_dvsh]), \
+	select_lib(builtins, [debugger,blt_dvsh,projects]), \
 	select_lib(library,[miscterm,msc_ioin,strctutl,strings,tcl_sppt,tk_alslib])])'
 
 clean :
