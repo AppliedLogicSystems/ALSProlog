@@ -18,7 +18,7 @@
 ######### General routines needing defining if interp \= shl_tcli
 ##################################################################################
 
-if {[info procs Window]==""} then {
+if {[info procs Window] == ""} then {
 proc Window {args} {
 global vTcl
 	set cmd [lindex $args 0]
@@ -45,7 +45,7 @@ global vTcl
 #            }
 }
 
-if {[info procs vTclWindow. ]==""} then {
+if {[info procs vTclWindow.] == ""} then {
 proc vTclWindow. {base} {
     if {$base == ""} {
         set base .
@@ -65,25 +65,25 @@ proc vTclWindow. {base} {
 	# in the text just after the prompt we just printed (etc.);
 	# this establishes the starting point of the 'line' (text
 	# segment) which will be transmitted after the next <Return>
-if {[info procs set_prompt_mark ]==""} then {
+if {[info procs set_prompt_mark] == ""} then {
 proc set_prompt_mark { TxtWin } {
 	$TxtWin mark set lastPrompt {insert -1 chars}
 	$TxtWin see end
 }
 }
 
-if {[info procs wait_for_line1 ]==""} then {
+if {[info procs wait_for_line1] == ""} then {
 proc wait_for_line1 { WaitVar } {
 	upvar #0 $WaitVar TheWaitVar
 	 
-	while { "$TheWaitVar"==0 } { dooneevent wait }
+	while {$TheWaitVar == 0} { dooneevent wait }
 	set ReturnValue $TheWaitVar
 	set TheWaitVar 0
 	return $ReturnValue
 }
 }
 
-if {[info procs xmit_line_plain ]==""} then {
+if {[info procs xmit_line_plain] == ""} then {
 proc xmit_line_plain { TxtWin StreamAlias WaitVarName} {
 	upvar #0 $WaitVarName WaitForLine
 	 
@@ -96,7 +96,7 @@ proc xmit_line_plain { TxtWin StreamAlias WaitVarName} {
 	set EndLine [string range $EndIndex 0 \
 						[expr [string first "." $EndIndex] - 1 ]]
 							
-	if { $EndLine == $InsertLine } then {
+	if {$EndLine == $InsertLine} then {
 		set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -1 chars} ]
 		set WaitForLine 1
 		prolog call builtins \
@@ -230,7 +230,7 @@ proc do_select_items { BaseName Mode Title SourceItemsList } {
 	Window show $BaseName
 	tkwait variable proenv(waitvar,$BaseName)
 
-	if {"$proenv(waitvar,$BaseName)"!=""} then {
+	if {$proenv(waitvar,$BaseName) != ""} then {
 		set Indicies [$BaseName.clist.listbox curselection]
 		set Result ""
 		foreach Item $Indicies {

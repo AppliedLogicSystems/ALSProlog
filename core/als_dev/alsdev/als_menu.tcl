@@ -49,7 +49,7 @@ proc add_file_menu {menubar type window} {
 #    $menubar.file add command -label "Print$elipsis" -accelerator "$mod-P"\
 #		-command "re {$type.print $window}" -state disabled
 
-	if {"$type"=="listener"} then { 
+	if {$type == "listener"} then { 
     	$menubar.file add separator
     	$menubar.file add separator
 	}
@@ -111,7 +111,7 @@ proc add_prolog_menu {menubar type window} {
 	$menubar.prolog add command \
 		-label "Clear Workspace" -underline 2 -command {re clear_workspace}
 
-	if {"$type"=="listener"} then { 
+	if {$type == "listener"} then { 
     	$menubar.prolog add separator
     	$menubar.prolog add command \
         	-label "Load Project$elipsis" -underline 0 -command {re load_project} 
@@ -137,7 +137,7 @@ proc add_prolog_menu {menubar type window} {
 #		$menubar.prolog add command \
 #			-label "Active Project:" -font {user 10 italic} 
 
-	} elseif {"$type"=="debugwin"} then {
+	} elseif {$type == "debugwin"} then {
     	$menubar.prolog add separator
     	$menubar.prolog add command -label {Abort} -underline 0 \
         	-command {re { set DebugResponse Ba }}
@@ -153,12 +153,12 @@ proc add_tools_menu {menubar type window} {
 	global elipsis
 	global proenv
 
-	if {"$type"=="document"} then { return }	
+	if {$type == "document"} then { return }	
 
 	set TearOff 0
 	menu $menubar.tools -tearoff $TearOff -title Tools
 
-	if {"$type"=="listener"} then {
+	if {$type == "listener"} then {
 		$menubar.tools add checkbutton \
 			-label Debugger -underline 0 -command exec_toggle_debugwin -variable proenv(debugwin)
 		$menubar.tools add separator 
@@ -220,7 +220,7 @@ proc listener.copy {xw} {
 }
 
 #proc copy_text { TxtWin } {
-#	if { [ $TxtWin tag nextrange sel 1.0 end ]!= "" } then {
+#	if {[$TxtWin tag nextrange sel 1.0 end] != ""} then {
 #		clipboard clear
 #		clipboard append [ $TxtWin get sel.first sel.last ]
 #	}
@@ -239,7 +239,7 @@ proc listener.paste {xw} {
 #proc paste_text { TxtWin } {
 #	global tcl_platform
 #
-#	if {"$tcl_platform(platform)" == "windows"} {
+#	if {$tcl_platform(platform) == "windows"} {
 #		$TxtWin insert end [ selection get -selection CLIPBOARD ]
 #	} else {
 #		$TxtWin insert end [ selection get ]
@@ -273,7 +273,7 @@ proc listener.copy_paste { xw } {
 		set WhichSel CLIPBOARD
 	}
 	set selflag [catch "selection get -displayof $w -selection $WhichSel" data]
-	if {"$selflag" == "0" } then {
+	if {$selflag == "0" } then {
 	    clipboard clear -displayof $w
 	    clipboard append -displayof $w $data
 		$w.text insert end [selection get -displayof $w -selection $WhichSel]
