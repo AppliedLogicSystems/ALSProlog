@@ -18,6 +18,26 @@
 ######### General routines needing defining if interp \= shl_tcli
 ##################################################################################
 
+# Patches for Windows to make toplevel and raise activate the window.
+
+proc toplevel_patch {w args} {
+	global tcl_platform
+
+	eval toplevel $w $args
+	if {$tcl_platform(platform) == "windows"} {
+		focus -force $w
+	}
+}
+
+proc raise_patch {w args} {
+	global tcl_platform
+
+	eval raise $w $args
+	if {$tcl_platform(platform) == "windows"} {
+		focus -force $w
+	}
+}
+
 if {[info procs Window] == ""} then {
 proc Window {args} {
 global vTcl
