@@ -1,3 +1,4 @@
+#!/usr/bin/wish
 
 set date [clock format [clock seconds] -format "%m/%d/%Y"]
 set duration 30
@@ -34,7 +35,7 @@ proc generate {date duration customer_id} {
 	# Use scanf to convert month-day to number because expr will interpret
 	# the string "0101" as an octal number.
 	scan [clock format $time -format "%m%d"] "%d" a
-	puts $a
+
 	set b [expr $year*100 + $duration]
 	set c $customer_id
 		
