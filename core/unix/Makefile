@@ -4,6 +4,7 @@ all test clean distclean:
 	"SunOS 5"*) 	ARCH=solaris 	;; \
 	Linux*) 	ARCH=linux 	;; \
 	"HP-UX"*)	ARCH=hpux	;; \
+	"IRIX"*)	ARCH=irix	;; \
 	*) 		echo "Unknown machine type..."; exit 1 ;; \
 	esac ; \
 	$(MAKE) -C ./$$ARCH $@
