@@ -296,6 +296,7 @@ rootPlusPath(Disk, PathList, DiskPlusPath) :-
 	atom_split(DiskPlusPath,DS,Disk,Path),
 	!,
 	subPath(PathList, Path).
+%rootPlusPath(Disk, [File], File) :-!.
 rootPlusPath(Disk, PathList, DiskPlusPath) :-
 	var(DiskPlusPath),
 	disk_separator(DS),

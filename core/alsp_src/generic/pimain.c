@@ -44,7 +44,9 @@ extern	void	main	PARAMS(( int, char ** ));
 #include "pi_cfg.h"
 
 #ifdef MacOS
+#ifdef HAVE_GUSI
 #include <GUSI.h>
+#endif
 
 #if THINK_C
 #include <console.h>
@@ -54,7 +56,7 @@ extern	void	main	PARAMS(( int, char ** ));
 #include <SIOUX.h>
 
 tSIOUXSettings  SIOUXSettings =
-        {1, 1, 1, 0, 0, 0, 4, 80, 24, 0, 0, 22, 12, 0};
+        {1, 1, 0, 0, 0, 0, 4, 80, 24, 0, 0, 22, 12, 0};
 
 #endif			/* __MWERKS__ */
 #ifdef MPW_TOOL
@@ -70,7 +72,18 @@ main(int argc, char ** argv)
     int   exit_status;
 
 #ifdef MacOS
+#ifdef HAVE_GUSI
+#ifdef MPW_TOOL
+        GUSISetup(GUSIwithAppleTalkSockets);
+        GUSISetup(GUSIwithInternetSockets);
+        GUSISetup(GUSIwithPAPSockets);
+        GUSISetup(GUSIwithPPCSockets);
+        GUSISetup(GUSIwithUnixSockets);
+#else
         GUSIDefaultSetup();
+#endif
+#endif
+
 
 #if (defined(THINK_C) || defined(__MWERKS__)) && !defined(MPW_TOOL)	
     argc = ccommand(&argv);
@@ -211,4 +224,49 @@ void	PI_yield_time(void)
     if (tick - last_yield <= 3) yield_interval += 100;
     last_yield = tick;
 }
+
+#ifdef __MWERKS__
+#include <unix.h>
+
+/* This a patch for metrowerk's open() function.  
+   Hopefully this can be removed in a future release.
+*/
+int metrowerks_open_patch(const char *filename, int mode)
+{
+#ifdef MPW_TOOL
+  int mpw_mode;
+
+/* MPW's open() mode values taken from {CIncludes}FCntl.h. */
+#define MPW_O_RDONLY		 0 		/* Bits 0 and 1 are used internally */
+#define MPW_O_WRONLY		 1 		/* Values 0..2 are historical */
+#define MPW_O_RDWR 			 2		/* NOTE: it goes 0, 1, 2, *!* 8, 16, 32, ... */
+#define MPW_O_APPEND	(1<< 3)		/* append (writes guaranteed at the end) */
+#define MPW_O_RSRC 		(1<< 4)		/* Open the resource fork */
+#define MPW_O_ALIAS		(1<< 5)		/* Open alias file */
+#define MPW_O_CREAT		(1<< 8)		/* Open with file create */
+#define MPW_O_TRUNC		(1<< 9)		/* Open with truncation */
+#define MPW_O_EXCL 		(1<<10) 	/* w/ O_CREAT:  Exclusive "create-only" */
+#define MPW_O_BINARY	(1<<11) 	/* Open as a binary stream */
+#define MPW_O_NRESOLVE	(1<<14)		/* Don't resolve any aliases */
+
+  switch(mode & 3) {
+  case O_RDWR: mpw_mode = MPW_O_RDWR; break;
+  case O_RDONLY: mpw_mode = MPW_O_RDONLY; break;
+  case O_WRONLY: mpw_mode = MPW_O_WRONLY; break;
+  };
+  
+  if (mode & O_APPEND) mpw_mode |= MPW_O_APPEND;
+  if (mode & O_CREAT) mpw_mode |= MPW_O_CREAT;
+  if (mode & O_EXCL) mpw_mode |= MPW_O_EXCL;
+  if (mode & O_TRUNC) mpw_mode |= MPW_O_TRUNC;
+  if (mode & O_BINARY) mpw_mode |= MPW_O_BINARY;
+	
+  mode = mpw_mode;
 #endif
+
+  return open(filename, mode);
+}
+
+#endif
+#endif
+

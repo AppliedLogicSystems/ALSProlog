@@ -138,11 +138,10 @@
         OP(TK_ISBI, "<=", 0, OP_XFX(600)),
         OP(TK_IBIP, "=>", 0, OP_XFX(600)),
 
-/*
         OP(TK_ISTG, "|=", 0, OP_XFX(600)),
         OP(TK_IETG, "=|", 0, OP_XFX(600)),
+
         OP(TK_IBNG, "~",  OP_FX(150), 0),
-*/
 
         OP(TK_2ST, "**", 0, OP_XFY(200)),
         OP(TK_HAT, "^",  0, OP_XFY(200)),

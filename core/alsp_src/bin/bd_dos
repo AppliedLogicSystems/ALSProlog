@@ -30,6 +30,8 @@ cp $1/bld-port/makefile.dj makefile
 cp $1/bld-port/tconfig.h.in tconfig.h
 echo - bld-port done
 
+/mailbox3/alsp_src/bin/gen2dos $2
+
 #cd $2/bld-natv
 #cp $1/bld-natv/makefile.dj makefile
 #cp $1/bld-natv/tconfig.h.in tconfig.h

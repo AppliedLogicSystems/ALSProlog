@@ -10,7 +10,10 @@
 schema([
 	cmnt(0),
 	cmnt(1),
-	dep(all),
+	case(&(context_name), [
+		(mac: dep(macall)),
+		(_: dep(all))
+	]),
 	cmnt(2),
 	'CPPFLAGS',
 	case(&(context_name), [
@@ -81,13 +84,17 @@ schema([
 	~defs_h = ext(defs_h,h) qual one_per_line,
 
 	case(&(context_name),[
-		 (mac: [
+		 (mac: noop
+/* 
+		     [
 				'{gfiles_' + '68k_o' + '}' : '{defs_h}',
 				(ext(&(gen_h_dep),'68k.o') qual single_line) : ext([module,wintcode,wntbl,wci], h) qual single_line,
 				depends_list('68k.o'),
 				'{gfiles_' + 'ppc_o' + '}' : '{defs_h}',
 				(ext(&(gen_h_dep),'ppc.o') qual single_line) : ext([module,wintcode,wntbl,wci], h) qual single_line,
-				depends_list('ppc.o') ]),
+				depends_list('ppc.o') ]
+*/
+		 ),
 		 ( _ :[ 
 			'$(gfiles_' + &(object) + ')' : '$(defs_h)',
 			(ext(&(gen_h_dep),&(object)) qual single_line) : ext([module,wintcode,wntbl,wci], h) qual single_line,
@@ -95,7 +102,7 @@ schema([
 
 	case(&(context_name),[
 		(msw31:noop),
-		(mac:noop),
+		(mac: [rule(alstest)]),
 		(_:[
 			cmnt(mics),
 			case(&(context_name),
@@ -132,7 +139,10 @@ cmnt(0)		= ['        generic.mkf',
 
 cmnt(1) 		= ['How to build everything'].
 
+
 all 	depends_on  [alsdir, setup, generated, alspro_b, alsmics, alspro, alstest].
+
+macall	depends_on	[mpw_alspro_b_68k, sioux_alspro_b_68k, sioux_alspro_b_ppc, alspro_b, alstest].
 
 cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 					'C source files to object files'].
@@ -143,7 +153,7 @@ cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 &(cpp_includes)	= case(&(context_name),
 		[
 		 (mac:
-			'-i : -i :: -i {srcdir}:generic -i {srcdir}:{ARCH} -i {srcdir}:{ARCH}:{SOS} -i {GUSI}include:' ),
+			'-i : -i :: -i {srcdir}generic -i {srcdir}{ARCH} -i {srcdir}{ARCH}:{SOS}' ),
 		 (djgpp: &(basic_unix_includes)+' -I$(srcdir)/i386/djgpp '),
 		 (_: &(basic_unix_includes) ) 
 		] ).
@@ -384,10 +394,15 @@ rule(alsmics,
 rule(alstest) =
 	rule(alstest,
 		[alspro_b],
-		[
+		case(&context_name, [
+		(mac: [
+		 'echo >> nrev_rcd',
+		 'alspro_b {srcdir}tests:snrev -g snrev >> nrev_rcd',
+		 'catenate nrev_rcd']),
+		(_: [
 		 'echo >> nrev_rcd',
 		 &(invoke) + ' ./alspro_b -obp $(srcdir)/tests/snrev -g snrev >> nrev_rcd',
-		 'cat nrev_rcd' ] ).
+		 'cat nrev_rcd' ] )])).
 
 depends_list(_) = 
 	depends_list(EXT,

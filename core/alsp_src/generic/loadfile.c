@@ -38,8 +38,11 @@
 #include <file.h>
 
 #elif   defined(MacOS)
+#ifdef HAVE_GUSI
 #include <GUSI.h>
-
+#else
+#include <unix.h>
+#endif
 #else /* must be unix */
 #include <errno.h>
 #include <sys/file.h>

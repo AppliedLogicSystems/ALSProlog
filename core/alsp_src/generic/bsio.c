@@ -819,6 +819,9 @@ sio_file_open()
 #ifdef THINK_C
 	    /* Open files as text files to insure CR/NL conversion. */
 	    if ((SIO_FD(buf) = open((char *)filename, flags | O_TEXT)) == -1) {	/* } */
+#elif defined(__MWERKS__)
+	    extern int metrowerks_open_patch(const char *filename, int mode);
+	    if ((SIO_FD(buf) = metrowerks_open_patch((char *)filename, flags)) == -1) {/* } */
 #else
 	    if ((SIO_FD(buf) = open((char *)filename, flags)) == -1) {	/* } */
 #endif

@@ -28,9 +28,13 @@
 
 #else  /* VMS */
 #ifdef MacOS
+#ifdef HAVE_GUSI
 #include <GUSI.h>
+#else
+#include <Events.h>
+#include <unix.h>
 #include <errno.h>
-
+#endif
 #else  /* MacOS */
 #include <errno.h>
 #include <sys/types.h>
