@@ -401,7 +401,7 @@ getDirEntries()
     
     pathLen = strlen(path);
     
-    if (path[pathLen-1] != '\\') {
+    if (pathLen > 0 && path[pathLen-1] != '\\') {
         strncat(path, "\\", MAX_PATH-1-pathLen);
         path[MAX_PATH-1] = 0;
         pathLen = strlen(path);
@@ -418,7 +418,7 @@ getDirEntries()
     
     	prev = v3; prevType = t3;
     	
-    	while (FindNextFile(findHandle, &findData)) {
+    	do {
     	
     	    PI_makelist(&item, &itemType);
     	    PI_gethead(&head, &headType, item);
@@ -430,7 +430,7 @@ getDirEntries()
     	    }
     	    
     	    PI_gettail(&prev, &prevType, item);    	    
-    	}
+    	} while (FindNextFile(findHandle, &findData));
     
     	if (!PI_unify(prev, prevType, nil, nilType)) {
     	    FindClose(findHandle);
