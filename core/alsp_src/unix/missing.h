@@ -316,4 +316,8 @@ extern char    *crypt           PARAMS((char *, char *));
 extern unsigned long int strtoul(const char *, char **, int base);
 #endif
 
+#ifdef MISSING_EXTERN_REALPATH
+extern char *realpath(const char *path, char resolved_path[]);
+#endif
+
 #endif /* _MISSING_H_INCLUDED_ */
