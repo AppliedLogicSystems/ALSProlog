@@ -115,6 +115,12 @@ check_tcl_error(Ball1)
 	:-
 	throw(Ball1).
 
+export destroy_tcl_interpreter/1.
+destroy_tcl_interpreter(I)
+	:-
+	tcl_delete(I),
+	retract(tcl_interp_created(I)).
+
 export destroy_all_tcl_interpreters/0.
 destroy_all_tcl_interpreters
 	:-

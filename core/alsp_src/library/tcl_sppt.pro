@@ -27,12 +27,9 @@ mk_tcl_atom_list(InProList, TclList)
 	close(TLS).
 						
 write_tcl_atom_list([], TLS).
-write_tcl_atom_list([Atom | InProList], TLS)
+write_tcl_atom_list([Item | InProList], TLS)
 	:-
-	put_code(TLS, 0'{),
-	put_atom(TLS, Atom),
-	put_code(TLS, 0'}),
-	put_code(TLS, 0' ),
+	printf(TLS, '{%t} ', [Item]),
 	write_tcl_atom_list(InProList, TLS).
 
 /*------------------------------------------------------------*
