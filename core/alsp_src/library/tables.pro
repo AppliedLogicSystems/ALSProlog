@@ -7,6 +7,12 @@
  |
  *========================================================================*/
 
+
+module tt.
+use tk_alslib.
+use tcltk.
+
+export tbl1/0.
 tbl1
 	:-
 	load_table_package,
@@ -35,6 +41,21 @@ tt3 :-
 tt4 :-
 	set_foobar_col(1,2,[9,8,7,6,5,4,3,2,1,2,3,4,5]).
 
+export tbl1r/0.
+
+tbl1r
+	:-
+	load_table_package,
+	create_table_r(foobar,
+		[numrows=9,
+		 rowheadings=[row_1,'Row 2',r3,r4,r5,r6,r7,r8,r9],
+		 colheadings=['First','Second',third,fourth],
+		 numcols = 7,
+		 title='My Test'
+		 ],R),
+	write(r=R),nl.
+
+endmod.
 
 module tk_alslib.
 use tcltk.
@@ -68,11 +89,22 @@ load_table_package(Interp)
 :- compiletime, module_closure( create_table, 2, create_table3).
 :- compiletime, module_closure( create_table, 3, create_table4).
 
+:- compiletime, module_closure( create_table_r, 3, create_table3_r).
+:- compiletime, module_closure( create_table_r, 4, create_table4_r).
+
 create_table3(Mod, TableName, Options)
 	:-
 	create_table4(Mod, TableName, Options, tcli).
 
 create_table4(Mod, TableName, Options, Interp)
+	:-
+	create_table4_r(Mod, TableName, Options, Interp, _).
+
+create_table3_r(Mod, TableName, Options, R)
+	:-
+	create_table4_r(Mod, TableName, Options, tcli, R).
+
+create_table4_r(Mod, TableName, Options, Interp, TableArrayName)
 	:-
 	((dmember(colheadings=ColHeadings, Options),
 		ColHeadings \= [])
@@ -157,7 +189,6 @@ create_table4(Mod, TableName, Options, Interp)
 	Mod:assert( (
 		SetColHead :-
 		Lim is NRows - RowStart,
-write(calling_tcl_call(Interp, [write_table_col,TableArrayName,ColN,RowStart,Lim,ValsList], _)),nl,flush_output,
 		tcl_call(Interp, [write_table_col,TableArrayName,ColN,RowStart,Lim,ValsList], _)
 		) ).
 
@@ -265,5 +296,17 @@ apply_region_tag(row(R), TablePath, TagName, Interp)
 apply_region_tag(col(C), TablePath, TagName, Interp)
 	:-
 	tcl_call(Interp,[TablePath,tag,col,TagName,C], _).
+
+apply_region_tag(colsblock(C,C), TablePath, TagName, Interp)
+	:-!,
+	tcl_call(Interp,[TablePath,tag,col,TagName,C], _).
+
+apply_region_tag(colsblock(C1,C2), TablePath, TagName, Interp)
+	:-
+	C1 < C2,
+	tcl_call(Interp,[TablePath,tag,col,TagName,C1], _),
+	C1N is C1 + 1,
+	apply_region_tag(colsblock(C1N,C2), TablePath, TagName, Interp).
+
 
 endmod.

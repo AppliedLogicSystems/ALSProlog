@@ -118,7 +118,7 @@ send(Module, Object, Message)
 	:-
 	atom(Object),!,
 	TheCall =.. [Object , Message],
-	builtins:do_object_goal(Module,TheCall),
+	objects:do_object_goal(Module,TheCall),
 	!.
 
 /*!-----------------------------------------------------------------------
@@ -158,7 +158,7 @@ finish_send_self(ObjectName,Message,ObjState)
 	:-
 	Call =.. [ObjectName, Message],
 	objects:objectModule(ObjectName, Module),
-	builtins:do_object_goal(Module,Call),
+	objects:do_object_goal(Module,Call),
 	!.
 
 /*!-----------------------------------------------------------------------
@@ -168,6 +168,8 @@ finish_send_self(ObjectName,Message,ObjState)
  |
  |	- toggles (on/off) notifications of sends to the null object
  *-----------------------------------------------------------------------*/
+:- dynamic(notify_null_send_flag/0).
+
 toggle_null_send_notify
 	:-
 	notify_null_send_flag,!,
@@ -316,7 +318,7 @@ inherit(Message,SuperClass,ObjState)
 	:-
 	classModule(SuperClass, Module),
 	TheCall =.. [SuperClass,Message,ObjState],
-	builtins:do_object_goal(Module,TheCall),
+	objects:do_object_goal(Module,TheCall),
 	!.
 			/*=================================
 			 |        BASIC
@@ -571,7 +573,7 @@ standardObject(ObjectName,ClassName)
  |
  |	:- defineClass(objects,[name=genericObjects,
  |					action=genObjs,
- |					subclassOf=[],
+ |					subClassOf=[],
  |					addl_slots=[myName],
  |					export = yes]).
  *!------------------------------------------------------*/

@@ -84,7 +84,7 @@ subst_nth(N, [Skip | List], NewItem, [Skip | NewList])
  |	 - returns the nth head and tail of a list
  |
  |	If List is a list and N is a non-negative integer, then Head is
- |  the portion of List up to but not including the Nth element,
+ |  the portion of List up to and including the Nth element,
  |  and tail is the portion of List from the Nth element to the end.
  *!--------------------------------------------------------------------*/
 nth_tail(0, L, [], L) :-!.
