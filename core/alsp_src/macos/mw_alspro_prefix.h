@@ -3,6 +3,6 @@
 #define HAVE_CONFIG_H
 #define PORT 1
 #define MACOS 1
-#define CONFIGLESS
+#define CONFIGLESS 1
 
 #include "prefix.h"
