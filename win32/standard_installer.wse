@@ -854,6 +854,16 @@ end
 item: Include Script
   Pathname=%_WISE_%\INCLUDE\uninstal.wse
 end
+item: Install File
+  Source=.\Unwise32.exe
+  Destination=%MAINDIR%\Unwise32.exe
+  Flags=0000000000000010
+end
+item: Install File
+  Source=.\Unwise.eng
+  Destination=%MAINDIR%\Unwise.eng
+  Flags=0000000000000010
+end
 item: Set Variable
   Variable=MAINDIR
   Value=%MAINDIR%
