@@ -841,7 +841,7 @@ proc show_debugwin {} {
 proc hide_debugwin {} {
 	global array proenv
 
-	hide_spywin
+#	hide_spywin
 	foreach Win  $proenv(debugwin,visible) {
 		Window hide $Win
 	}
@@ -854,7 +854,7 @@ proc exit_debugger {} {
 	global array proenv
 
 	prolog call debugger exit_debugger
-	hide_spywin
+#	hide_spywin
 	hide_debugwin
 }
 

@@ -219,7 +219,7 @@ proc document.close {w} {
 proc document.close_all {} {
 	global array proenv	
 	foreach w $proenv(document_list) {
-		if {![document.close $w]} then {return false}
+		if {[document.close $w]=="false"} then {return false}
 	}
 	return true
 }
