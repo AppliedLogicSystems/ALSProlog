@@ -72,9 +72,9 @@ static int ts_allocidx = 0;	/* index to look at in doing next allocation */
  */
 
 static long ts_allocated = 2048;	/* number of entries allocated */
-static long ts_prime = 2039;		/* actual size (the prime number) */
-static long ts_cutoff = 1712;		/* the cutoff point */
-static long ts_next = TK_EOF + 1;	/* the next token index */
+static unsigned long ts_prime = 2039;		/* actual size (the prime number) */
+static unsigned long ts_cutoff = 1712;		/* the cutoff point */
+static unsigned long ts_next = TK_EOF + 1;	/* the next token index */
 
 int tok_table_size(void)
 {
@@ -326,7 +326,7 @@ static void
 new_string_space(request)
     size_t request;
 {
-    if (strings_next && *strings_next > request) {
+    if (strings_next && *strings_next > (signed) request) {
 	strings = (UCHAR *) strings_next;
 	strings_last = ((UCHAR *) strings_next) + *strings_next;
 	strings_next = *(long **) (strings_next + 1);
@@ -357,7 +357,7 @@ static void
 increase_table_size()
 {
     tkentry *new_table;
-    register int i;
+    register unsigned int i;
 
 #ifdef DEBUG
     printf("tablesize = %d, collisions/searches=%g\n",
@@ -414,7 +414,7 @@ increase_table_size()
 void
 symtab_init()
 {
-    register int i;
+    register unsigned int i;
     char chtokstr[2];
 
     /* Adjust the symbol length bytes */

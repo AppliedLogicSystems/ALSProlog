@@ -127,9 +127,9 @@ static int
 lookup_c_sym(symbol)
     char *symbol;
 {
-    register unsigned long sum, acc, slen, i;
+    register unsigned long sum, acc, slen, i, start;
     register char *s;
-    int   inc, start;
+    int   inc;
 
 
     s = symbol;

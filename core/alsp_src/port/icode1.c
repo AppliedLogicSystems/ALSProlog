@@ -24,7 +24,7 @@
 #include "wintcode.h"
 #include "machinst.h"
 
-extern system_debugging;
+extern int system_debugging;
 
 #ifdef KERNAL
 #define MAXCALLS    80

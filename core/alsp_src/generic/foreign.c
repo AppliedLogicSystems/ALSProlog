@@ -50,7 +50,7 @@ tagFix(v, t)
 }
 #endif
 
-static PI_modid = MODULE_GLOBAL;
+static PWord PI_modid = MODULE_GLOBAL;
 
 int
 load_foreign(filename, libstr, initfcn)
@@ -167,7 +167,7 @@ PI_getsymname(char *buf_ptr, PWord sym_val, int size)
 {
     if (buf_ptr == (char *) 0)
 	return ((char *) TOKNAME(sym_val));
-    else if (strlen((char *)TOKNAME(sym_val)) <= size)
+    else if ((int)strlen((char *)TOKNAME(sym_val)) <= size)
 	return (strcpy(buf_ptr, (char *) TOKNAME(sym_val)));
     else
 	return ((char *) 0);	/* couldn't fit uia into buffer */

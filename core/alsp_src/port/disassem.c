@@ -83,7 +83,7 @@ list_asm(addr, n)
     for (ip = addr; ip < stopaddr; ) {
 
 	instr = decode_instr(*ip);
-	if (instr > ICNUM) 
+	if ((size_t)instr > ICNUM) 
 	{
 		printf("[%03d]%x: BAD INSTRUCTION: Content=%08o\n",
 			(int)(ip-addr), (unsigned int)ip, (unsigned int)*ip);
