@@ -36,16 +36,34 @@ start_shell(DefaultShellCall)
 
 start_shell0(DefaultShellCall)
 	:-
+	setup_debugger_stubs,
+	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,CLInfo),
+	assertz(command_line(ResidualCommandLine)),
+	setup_search_dirs(CLInfo),
+	ss_load_dot_alspro,
+	output_system_banner(CLInfo),
+	library_setup,
+	load_cl_files(CLInfo),
+	process_cl_asserts(CLInfo),
+	!,
+	setup_init_goal(CLInfo, ShellCall),
+	user:ShellCall.
+
+start_shell0(_).
+
+setup_debugger_stubs
+	:-
 	%% Setup debugger entries (needs to be done early because
 	%% ss_parse_command_line can cause debugger to be called
 	%% [if it sees switch -nwd] )
-		%% Conditional handles systems without alarm/2:
-	builtins:libhide(debugger, [builtins,debugger],
+	libhide(debugger, [builtins,debugger],
 				[ (trace)/0, (trace)/2, toggle_mod_show/1, leash/1,
 		  		  (spy)/0, (spy)/1, (spy)/2, (spy_pat)/3, (spyWhen)/1,
 		  		  (spyWhen)/2, (nospy)/0, (nospy)/1, (nospy)/3,
-		  		  spying/0, debugging/0, list_spypoints/0,set_debug_io/1 ]),
+		  		  spying/0, debugging/0, list_spypoints/0,set_debug_io/1 ]).
 
+get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,CLInfo)
+	:-
 	%% Get the raw command line and assert it.
 	abolish(command_line,1),
 	pbi_get_command_line(RawCommandLine),
@@ -61,41 +79,45 @@ start_shell0(DefaultShellCall)
 					[],					/* -s init search list */
 					DefaultShellCall,	/* shell/or not */
 					[]),				/* Command-line asserts */
+	ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo).
 
-	ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo),
-	assertz(command_line(ResidualCommandLine)),
-
+setup_search_dirs(CLInfo)
+	:-
 	arg(6, CLInfo, RevCmdLineSearch),
 	dreverse(RevCmdLineSearch, CmdLineSearch),
-	ss_init_searchdir(CmdLineSearch),
-	ss_load_dot_alspro,
+	ss_init_searchdir(CmdLineSearch).
 
+output_system_banner(CLInfo)
+	:-
 	arg(2,CLInfo,ConsultNoise),
 	OutputStream = user_output,
 	als_system(SysList),
 	(ConsultNoise = true -> 
 		true ; 
 		print_banner(OutputStream,SysList)
-	),
+	).
+
+library_setup
+	:-
 	(ConsultNoise = true -> true ;
 		als_advise(OutputStream, 'Setting up library indicies...may take a moment...',[])),
 	setup_libraries,
 	(ConsultNoise = true -> true ; 
 		als_advise(OutputStream, 'Done.\n',[]),
 		nl(OutputStream),
-		flush_output(OutputStream)),
+		flush_output(OutputStream)
+	).
 
+load_cl_files(CLInfo)
+	:-
 	arg(3, CLInfo, Files),
 	set_consult_messages(ConsultNoise),
-	ss_load_files(Files),
+	ss_load_files(Files).
 
+process_cl_asserts(CLInfo)
+	:-
 	arg(8, CLInfo, CLAsserts),
-	ss_cl_asserts(CLAsserts, OutputStream),
-	!,
-	setup_init_goal(CLInfo, ShellCall),
-	user:ShellCall.
-
-start_shell0(_).
+	ss_cl_asserts(CLAsserts, OutputStream).
 
 	%%%%%%%
 

@@ -87,7 +87,6 @@ readvnv(Stream,Term,Names,Vars)
 	top_clausegroup(CID),
 	sio:pp_xform_clause(Term0,CID,Term).
 
-
 readvnv(Stream,Term,Names,Vars) 
 	:-
 	read_term(Stream,Term,[vars_and_names(Vars,Names)]).
