@@ -75,7 +75,7 @@ global vTcl
     if {$name == "" || $cmd == ""} {return}
     set exists [winfo exists $name]
     switch $cmd {
-        show { eval "vTclWindow$name $name" }
+        show { eval "vTclWindow$name $name" ; raise $name }
         hide    { if $exists {wm withdraw $name; return} }
         iconify { if $exists {wm iconify $name; return} }
         destroy { if $exists {destroy $name; return} }
@@ -162,7 +162,7 @@ proc unmap_alsdev_main {} {
 	global array proenv
 
 	Window hide .dyn_flags
-	wm withdraw .alsdev_settings
+	Window hide .alsdev_settings
 	Window hide .about
 	Window hide .break_choices
 
@@ -427,9 +427,12 @@ proc set_directory { } {
 	set NewDir [tkFDialog]
 	if { "$NewDir" !="" } {
 		cd $NewDir
-		.topals.cpd19.02 delete 0 end
-		.topals.cpd19.02 insert end $NewDir
+		show_dir_on_main $NewDir
 	}
+}
+
+proc show_dir_on_main { Dir } {
+	.topals.cpd19.02 configure -text $Dir -anchor w
 }
 
 proc exit_prolog { } {
@@ -526,12 +529,62 @@ proc install_font {} {
 	}
 }
 
+proc apply_font {} {
+	global array proenv
+
+	set proenv(win_general,font) \
+		[list $proenv(text,family) $proenv(text,size) $proenv(text,style) ]
+	.topals.txwin.text configure -font $proenv(win_general,font)
+	if "[winfo exists .debugwin.txwin.text] > 0" then {
+		.debugwin.txwin.text configure -font $proenv(win_general,font)
+	}
+}
+
+proc font_family_choice { Family } {
+	global array proenv
+
+	set proenv(text,family) $Family
+	apply_font
+}
+
+proc font_size_choice { Size } {
+	global array proenv
+
+	if {"$proenv(text,sizeunits)"=="pixels"} then {
+		set proenv(text,size) [ expr 0 - $Size ]
+	} else {
+		set proenv(text,size) $Size
+	}
+	apply_font
+}
+
+proc font_size_units_choice { Units } {
+	global array proenv
+
+
+	if {"$proenv(text,sizeunits)"!="$Units"} then {
+		set proenv(text,size) [ expr 0 - $proenv(text,size) ]
+		set proenv(text,sizeunits) $Units
+		apply_font
+	} 
+}
+
+proc font_style_choice { Style } {
+	global array proenv
+
+	set proenv(text,style) $Style
+	apply_font
+}
+
+
+
 proc save_alsdev_settings {} {
 	global array proenv
 
 	set TextSettings [list $proenv(text,family) $proenv(text,size) \
 						$proenv(text,sizeunits) $proenv(text,style) ]
 	prolog call alsdev change_settings -list [return_proenv_defaults] -list $TextSettings
+	Window hide .alsdev_settings 
 }
 
 #################################################
@@ -600,6 +653,7 @@ proc change_prolog_flags {} {
 	}
 }
 
+
 #################################################
 #####				PROJECTS				#####
 ##                                             ##
@@ -610,7 +664,6 @@ proc clear_workspace { } {
 	prolog call alsdev clear_workspace 
 	insert_prompt  .topals.txwin.text "\n?-" 
 }
-
 
 proc open_project { } {
 	set file [tk_getOpenFile \
@@ -760,53 +813,79 @@ proc exec_toggle_spywin {} {
 		set SpyModuleMenu \
 			[eval "tk_optionMenu .spywin.modules.mods SpyModule" $NonSysMods]
 
+		set SpyModule user
 		set LL [llength $NonSysMods]
 		for {set LI 0} {$LI < $LL} {incr LI} {
-			$SpyModuleMenu entryconfigure $LI \
-				-command "chng_spy_preds_menu [lindex $NonSysMods $LI]"
+			$SpyModuleMenu entryconfigure $LI -command chng_spy_preds_menu
 		}
 		pack .spywin.modules.mods \
 			-after .spywin.modules.module_label \
 			-anchor center -expand 1 -fill x -padx 12 -side left
-		set SpyModule user
 
-		prolog call builtins module_preds -atom $SpyModule -var PredsList
-		destroy .spywin.predicates.preds
-		destroy $SpyPredMenu
-		set SpyPred [lindex $PredsList 0]
-		set SpyPredMenu [eval "tk_optionMenu .spywin.predicates.preds SpyPred" $PredsList]
-		pack .spywin.predicates.preds \
-		-after .spywin.predicates.pred_label \
-		-anchor center -expand 1 -fill x -padx 12 -side left
+		chng_spy_preds_menu
 
 		Window show .spywin
 		raise .spywin
 	}
 }
 
-proc chng_spy_preds_menu {Mod} {
+proc chng_spy_preds_menu {} {
 	global SpyModule SpyPred SpyPredMenu
 
 	prolog call builtins module_preds -atom $SpyModule -var PredsList
-	set SpyPred [lindex $PredsList 0]
-	destroy .spywin.predicates.preds
-	destroy $SpyPredMenu
-	set SpyPredMenu [eval "tk_optionMenu .spywin.predicates.preds SpyPred" $PredsList]
-	pack .spywin.predicates.preds \
-		-after .spywin.predicates.pred_label \
-		-anchor center -expand 1 -fill x -padx 12 -side left
+
+#	destroy .spywin.predicates.preds
+#	destroy $SpyPredMenu
+#	set SpyPred [lindex $PredsList 0]
+#	set SpyPredMenu [eval "tk_optionMenu .spywin.predicates.preds SpyPred" $PredsList]
+
+#	pack .spywin.predicates.preds \
+#		-after .spywin.predicates.pred_label \
+#		-anchor center -expand 1 -fill x -padx 12 -side left
 }
+
+proc popup_spypoint_choice {} {
+	global SpyModule 
+
+	Window show .spychoose
+	.spychoose.modid.module configure -text $SpyModule
+	prolog call builtins module_preds -atom $SpyModule -var PredList
+	.spychoose.slist.listbox delete 0 end
+	foreach P $PredList {
+		.spychoose.slist.listbox insert end $P
+	}
+}
+
+proc do_spychoose {Which} {
+	global SpyModule
+	 
+	Window hide .spychoose
+	if {"$Which"=="cancel"} then { return }
+
+	set SelIndicies [.spychoose.slist.listbox curselection]
+	if {"$SelIndicies"==""} then { return }
+
+	foreach PI $SelIndicies {
+		lappend SelItems [.spychoose.slist.listbox get $PI]
+	}
+	prolog call debugger set_chosen_spypoints -list $SelItems -atom $SpyModule 
+	.spychoose.slist.listbox delete 0 end
+}
+
 
 proc spy_point {Action} {
 	global SpyModule SpyPred 
 
-	switch $Action {
-	cancel { toggle_spywin }
-	ok {
-		prolog call debugger gui_spy -atom $SpyModule -atom $SpyPred
-		toggle_spywin
-	}
-	}
+#	switch $Action {
+#	cancel { toggle_spywin }
+#	ok {
+#		prolog call debugger gui_spy -atom $SpyModule -atom $SpyPred
+#		toggle_spywin
+#	}
+#	}
+
+	toggle_spywin
+
 }
 
 proc check_leashing {} {
