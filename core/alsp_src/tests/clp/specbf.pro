@@ -36,7 +36,6 @@ spec_b_fa_incr(NN,Bnd,Vars)
 	NxtN < Bnd,
 	!,
 	mangle(1,NN,NxtN),
-%	kill_freeze_list(Vars),
 	fail.
 													   
 spec_b_fa_incr(_,_,_).

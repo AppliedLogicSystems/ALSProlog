@@ -2393,6 +2393,60 @@ printf("types ok\n");
 #endif /* WINIOBASIS */
 
 
+
+
+int
+sio_tk_win_open()
+{
+    PWord v1, v2, v3, v4;
+    int   t1, t2, t3, t4;
+    unsigned char *buf;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+    w_get_An(&v3, &t3, 3);
+    w_get_An(&v4, &t4, 4);
+
+    if ((buf = get_stream_buffer(v2, t2)) == (unsigned char *) 0)
+		FAIL;
+
+    if ((t3 != WTP_INTEGER) || (t4 != WTP_INTEGER) ) {
+		SIO_ERRCODE(buf) = SIOE_INARG;
+		FAIL;
+    }
+
+/*
+	if (int_or_float(t1,v1) == 0) { 
+		SIO_ERRCODE(buf) = SIOE_INARG;
+	  	FAIL; 
+	}
+*/
+	
+
+    if (compute_flags((char *)buf,v3,v4) < 0)
+		FAIL;
+
+    SIO_FD(buf) = (unsigned long) v1;
+
+    SUCCEED;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
  * sio_generic_open(ID, Stream, Mode, Buffering)
  *

@@ -915,7 +915,7 @@ overflow_check0:
 				(ntbl_entry *) ((Code *)reg1 - OVFLOW_CHECK_BDISP);
 			PWord arg3;
 
-	                special_overflow = 0;
+                special_overflow = 0;
 			n = entfrom->nargs;
 
 			wm_safety = wm_normal;	/* reset interrupt */

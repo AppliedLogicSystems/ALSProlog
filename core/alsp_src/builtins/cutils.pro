@@ -568,4 +568,9 @@ read_eval_results(Atom, Results) :-
 	close(Stream),
 	call(Term).
 
+export eval_results/2.
+
+eval_results(Call, Vars) :-
+	call(user:Call).
+
 endmod.

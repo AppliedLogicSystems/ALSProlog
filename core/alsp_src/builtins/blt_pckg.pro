@@ -91,7 +91,16 @@ save_image(NewImageName)
 	dmember(os = OS, SystemList),
 	dmember(os_variation = OSVariation, SystemList),
 	image_type(OS, OSVariation, Type),
-	save_image_type(Type, NewImageName, OrigALSDIR),
+	(OS = mswin32 ->
+		(filePlusExt(_,_,NewImageName) ->
+			IMN = NewImageName
+			;
+			filePlusExt(NewImageName,exe,IMN)
+		)
+		;
+		IMN = NewImageName
+	),
+	save_image_type(Type, IMN, OrigALSDIR),
 	
 		%% Re-install the search dir info:
 	assert(sys_searchdir(ALSDIR)),

@@ -597,4 +597,198 @@ expect(3011, ['HList'], [
 		[[1,0,0],[0,0,1],[0,1,0]],[[1,0,0],[0,1,0],[0,0,1]]]
 		 ]).
 
+%------ Group D--------------------------------------------------------
+%               Scheduling
+%----------------------------------------------------------------------
+
+/*==========================================================================*
+ |                  pert2.pro
+ |  Critical path scheduling carried out using functional arithmetic and
+ |  general constraints (freeze/delay) -- Database oriented.
+ *==========================================================================*/
+
+:- op(700,xfx, preceeds).
+
+b(4001,[Schedule]) 
+	:- 
+	project(p1, S1),
+	builtins:spec_fa_copy(S1, Schedule, _).
+
+expect(4001, ['S'],
+	[[task(start, 0,             0),
+	 task(act_a,  [0.0,1e+100],  [10.0,1e+100]),
+	 task(act_b,  [0.0,1e+100],  [20.0,1e+100]),
+	 task(act_c,  [0.0,1e+100],  [30.0,1e+100]),
+	 task(act_d,  [20.0,1e+100], [38.0,1e+100]),
+	 task(act_e,  [30.0,1e+100], [38.0,1e+100]),
+	 task(act_f,  [38.0,1e+100], [41.0,1e+100]),
+	 task(act_g,  [41.0,1e+100], [45.0,1e+100]),
+	 task(finish, [45.0,1e+100], _B)]] ).
+
+b(4002,[Schedule]) 
+	:- 
+	good_project(p1, S1),
+	builtins:spec_fa_copy(S1, Schedule, _).
+
+expect(4002, ['S'],
+	[[task(start, 0,                     0),
+	 task(act_a,  [0.0,10.0],            [10.0,20.0]),
+	 task(act_b,  [0.0,3.552713679e-15], [20.0,20.0]),
+	 task(act_c,  [0.0,3.0],             [30.0,33.0]),
+	 task(act_d,  [20.0,20.0],           [38.0,38.0]),
+	 task(act_e,  [30.0,33.0],           [38.0,41.0]),
+	 task(act_f,  [38.0,38.0],           [41.0,41.0]),
+	 task(act_g,  [41.0,41.0],           [45.0,45.0]),
+	 task(finish, [45.0,45.0],           [45.0,45.0])]] ).
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %% Sample Project p1:
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+activity(act_a, p1, 10).
+activity(act_b, p1, 20).
+activity(act_c, p1, 30).
+activity(act_d, p1, 18).
+activity(act_e, p1,  8).
+activity(act_f, p1,  3).
+activity(act_g, p1,  4).
+
+act_a preceeds act_d.
+act_b preceeds act_d.
+act_b preceeds act_e.
+act_c preceeds act_e.
+act_d preceeds act_f.
+act_e preceeds act_g.
+act_f preceeds act_g.
+
+proj(ProjName)
+	:-
+	project(ProjName, Schedule),
+	display_sched(Schedule).
+
+good_project(ProjName)
+	:-
+	good_project(ProjName, Schedule),
+	display_sched(Schedule).
+
+    %% Top level entry to scheduler:
+project(ProjName, Schedule)
+    :-
+    findall(act(ActName,Duration), activity(ActName,ProjName,Duration), Activities),
+    schedule(Activities, Schedule).
+
+schedule(Activities, Schedule)
+    :-
+    Start =  task(start,0,0),
+    Finish = task(finish,FinishStart,FinishEnd),
+    schedule(Activities, Start, Finish, [Start], Schedule).
+
+good_project(ProjName, Schedule)
+    :-
+    project(ProjName, Schedule), 
+    last_task(Schedule,Last), 
+    Last = task(finish,FinSt,FinEnd), 
+    {FinEnd == FinSt + 0}, 
+	FinEnd::real(FELower, FEU), 
+	{FinEnd =< FELower}.
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %% Schedule each activity:
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+schedule([], Start, Finish, Accum, Schedule)
+    :-
+    reverse([Finish | Accum], Schedule).
+
+schedule([act(ActName,Dur) | Activities], Start, Finish, Accum, Schedule)
+    :-
+    {ActFinish == ActStart + Dur},
+    init_or_end(ActName, ActStart, ActFinish, Start, Finish),
+    precedence(Accum, ActName, ActStart, ActFinish),
+    schedule(Activities, Start, Finish, [task(ActName,ActStart,ActFinish) | Accum], Schedule).
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %% Handle start or end activities:
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
+init_or_end(ActName, ActStart, ActFinish, Start, Finish)
+    :-
+    init_act(ActName, ActStart, ActFinish, Start),
+    end_act(ActName, ActStart, ActFinish, Finish).
+    
+init_act(ActName, ActStart, ActFinish, _)
+    :-
+    SomeAct preceeds ActName,
+    !.
+
+init_act(ActName, ActStart, ActFinish, task(start,StartStart,StartFinish))
+    :-
+    { StartFinish =< ActStart }.
+
+end_act(ActName, ActStart, ActFinish, Finish)
+    :-
+    ActName preceeds SomeAct,
+    !.
+
+end_act(ActName, ActStart, ActFinish, task(finish,FinishStart,FinishEnd))
+    :-
+    { ActFinish =< FinishStart }.
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %% Handle precedence relations between the activity being
+    %% added and all of the previously added activities:
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+precedence([], ActName, ActStart, ActFinish).
+precedence([task(OA, OS, OF) | Accum], ActName, ActStart, ActFinish)
+    :-
+    do_prec(OA,OS,OF,ActName,ActStart,ActFinish),
+    precedence(Accum, ActName, ActStart, ActFinish).
+
+do_prec(OA,OS,OF,ActName,ActStart,ActFinish)
+    :-
+    OA preceeds ActName,
+    !,
+    { OF =< ActStart}.
+
+do_prec(OA,OS,OF,ActName,ActStart,ActFinish)
+    :-
+    ActName preceeds OA,
+    !,
+    {ActFinish =< OS}.
+
+do_prec(OA,OS,OF,ActName,ActStart,ActFinish).
+    
+    %%%%%%%%%%%%%%%%
+    %% Utilities:
+    %%%%%%%%%%%%%%%%
+
+last_task([task(finish,A,B) | _], task(finish,A,B)) :-!.
+last_task([_ | Schedule], T)
+    :-
+    last_task(Schedule, T).
+
+earliest( task(_,_,F))
+    :- 
+    lower_bound(F).
+
+display_sched([]).
+display_sched([Task | Schedule])
+	:-
+	display_task(Task),
+	display_sched(Schedule).
+
+display_task(task(TaskName,Start,Finish))
+	:-
+	printf('%t:\t',[TaskName]),
+	disp_num_int(Start),
+	disp_num_int(Finish),
+	nl.
+
+disp_num_int(Val)
+	:-
+	number(Val),
+	!,
+	printf('%t\t\t',[Val]).
+disp_num_int(Val)
+	:-
+	Val::real(V0,V1),
+	printf('[%t,%t]\t',[V0,V1]).
+
 endmod.

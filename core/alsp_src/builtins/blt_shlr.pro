@@ -24,7 +24,7 @@ transformer_db(mac, obp, no_del, []).
 transformer_db(pl,  obp, no_del, []).
 transformer_db(pro, obp, no_del, []).
 
-:- findall(Ext, transformer_db(Ext, _, _, _), LL),
+:- findall(Ext, transformer_db(Ext, _, _, _), LL0), dappend(LL0, [psl], LL),
 	assert_at_load_time(s2s_ext(LL)).
 
 /*---------------------------------------------------*		

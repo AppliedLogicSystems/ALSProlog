@@ -289,7 +289,8 @@ cslt_path_x(FileDesc, Drive+SrcPathList, BaseFile, Ext)
 do_consult(BaseFile, FCOpts)
 	:-
 	arg(7, FCOpts, Quiet),		%%	7		- Quiet 
-	consult_msg(Quiet, BaseFile, start_consult, FCOpts),
+	arg(6, FCOpts, Ext),		%%	7		- Extension 
+	consult_msg(Quiet, Ext, BaseFile, start_consult, FCOpts),
 	get_current_consult_directory(OldCCD),
 	catch( exec_consult(BaseFile, FCOpts),
 			Ball,
@@ -301,27 +302,54 @@ do_consult(BaseFile, FCOpts)
 	record_consult(BaseFile, FCOpts),
 	cleanup_cslt,
 	!,
-	consult_msg(Quiet, BaseFile, end_consult, FCOpts).
+	consult_msg(Quiet, Ext, BaseFile, end_consult, FCOpts).
 
 		%% true = "be quiet"
-consult_msg(true, BaseFile, FCOpts, MsgCode) :-!.
+consult_msg(true, _, BaseFile, FCOpts, MsgCode) :-!.
 
 		%% false = "write messages"
-consult_msg(false, BaseFile, MsgCode, FCOpts)
+consult_msg(false, Ext, BaseFile, MsgCode, FCOpts)
 	:-
-	consult_msg_args(MsgCode, FCOpts, Args),
-	prolog_system_warning(MsgCode, Args),
+	consult_msg_args(MsgCode, Ext, FCOpts, Args),
+	revise_cslt_msg_code(MsgCode, Ext, FCOpts, RevMsgCode),
+	prolog_system_warning(RevMsgCode, Args),
 	(BaseFile = user -> als_advise('\n') ; true).
 
-consult_msg_args(start_consult, FCOpts, [OrigFileDesc])
+consult_msg_args(start_consult, Ext, FCOpts, [OrigFileDesc])
 	:-
 	arg(10, FCOpts, OrigFileDesc).
 
-consult_msg_args(end_consult, FCOpts, [LoadedPath])
+consult_msg_args(end_consult, Ext, FCOpts, [LoadedPath])
 	:-
 	arg(12, FCOpts, LoadedPath).
 
 cleanup_cslt.
+
+revise_cslt_msg_code(start_consult, Ext, FCOpts, start_shared_load)
+	:-
+	(shared_file_ext(Ext); Ext=share),
+	!.
+revise_cslt_msg_code(end_consult, Ext, FCOpts, end_shared_load)
+	:-
+	(shared_file_ext(Ext); Ext=share;
+		Ext=no(extension),
+		arg(12, FCOpts, LoadedPath),
+		filePlusExt(_,LoadedExt,LoadedPath),
+		shared_file_ext(LoadedExt)
+	),
+	!.
+revise_cslt_msg_code(MsgCode, Ext, _, MsgCode).
+
+/*
+shared_file_ext(so).
+shared_file_ext(sl).
+shared_file_ext(dll).
+*/
+shared_file_ext(psl).
+
+shared_lib_exts(Exts)
+	:-
+	findall(Ext, shared_file_ext(Ext), Exts).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% MAIN GUTS OF CONSULT 
@@ -332,7 +360,7 @@ cleanup_cslt.
  | exec_consult(BaseFile, FileConsultOpts)
  | exec_consult(+, +)
  |
- |	- decides whether consult is from user or otherwise
+ |	- decides whether consult is from user or otherwise,
  *-------------------------------------------------------------*/ 
 exec_consult(user, FCOpts)
 	:-!,
@@ -367,6 +395,7 @@ exec_consult(BaseFile, FCOpts)
  *-------------------------------------------------------------*/ 
 
 		%% Incoming pathlist is absolute:
+		%%--------------------------------
 exec_consult(['' | RestPathList], Drive, BaseFile, Nature, SrcExt, FCOpts)
 	:-!,
 	(cont_consult(SrcExt, Nature, Drive+['' | RestPathList], BaseFile, FCOpts) ->
@@ -376,7 +405,81 @@ exec_consult(['' | RestPathList], Drive, BaseFile, Nature, SrcExt, FCOpts)
 		arg(10, FCOpts, OrigFileDesc), 		%%	10		- OrigFileDesc 
 		existence_error(file,OrigFileDesc,OrigFileDesc)
 	).
+		%%--------------------------------
+		%% Incoming pathlist is NOT absolute:
+		%%--------------------------------
 
+exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
+	:-
+	path_to_try(SrcExt,PathList, Drive,BaseFile,Nature,FCOpts,TryDrive,TryPath),
+	cont_consult(SrcExt, Nature, TryDrive, TryPath, BaseFile, FCOpts).
+
+
+:-dynamic(searchdir/1).
+:-dynamic(searchdir/2).
+
+
+	%% Try the local search path list:
+path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
+	:-
+	arg(9, FCOpts, LocalSearchPathLists),		%%	9		- SearchPath 
+	directory_self(SelfDir),
+	subPath(SelfDirPathList, SelfDir),
+	member(DD+PL, [Drive+SelfDirPathList | LocalSearchPathLists]), 
+	append(PL,PathList,SrcPathList),
+	prepend_current_consult_directory(Drive,PathList,TryDrive,TryPath).
+
+		%% SrcExt is a shared library extension;
+		%% Try loading from ALSDIR\shared first:
+path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
+	:-
+	(SrcExt = share; shared_file_ext(SrcExt)),
+	sys_searchdir(ALSDIR),
+	extendPath(ALSDIR, shared, SharedLibDir),
+	rootPlusPath(TryDrive,TryPath,SharedLibDir).
+
+		%% Try the global search path list, abstract form:
+path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
+	:-
+	searchdir(TryDrive, TryPath),
+	SDPathList = [_|_].
+
+		%% Try the global search path list, old form:
+path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
+	:-
+	searchdir(SearchDir),
+	rootPlusPath(TryDrive,SDPathList,SearchDir),
+	append(SDPathList,PathList,TryPath).
+
+		%% Try the system builtins directory:
+path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
+	:-
+	sys_searchdir(ALSDIR),
+	extendPath(ALSDIR, builtins, BuiltinsDir),
+	rootPlusPath(TryDrive,TryPath,BuiltinsDir).
+
+		%% Try the system shared directory (incoming had no extension):
+path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
+	:-
+	sys_searchdir(ALSDIR),
+	extendPath(ALSDIR, shared, BuiltinsDir),
+	rootPlusPath(TryDrive,TryPath,BuiltinsDir).
+
+		%% Try the original system builtins directory (for packages):
+path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
+	:-
+	orig_sys_searchdir(ALSDIR),
+	extendPath(ALSDIR, shared, SharedDir),
+	rootPlusPath(TryDrive,TryPath,SharedDir).
+
+		%% Can't find file
+		%% Throw exception:
+path_to_try(SrcExt,PathList, Drive, BaseFile, Nature,FCOpts,TryDrive,TryPath)
+	:-
+	arg(10, FCOpts, OrigFileDesc), 		%%	10		- OrigFileDesc 
+	existence_error(file,OrigFileDesc,OrigFileDesc).
+
+/**********************************
 		%% Incoming pathlist is NOT absolute:
 		%% Try the local search path list:
 exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
@@ -388,6 +491,17 @@ exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
 	append(PL,PathList,SrcPathList),
 	cont_consult(SrcExt, Nature, DD+SrcPathList, BaseFile, FCOpts).
 
+		%% Incoming pathlist is NOT absolute;
+		%% SrcExt is a shared library extension;
+		%% Try loading from ALSDIR\shared first:
+exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
+	:-
+	(SrcExt = share; shared_file_ext(SrcExt)),
+	sys_searchdir(ALSDIR),
+	extendPath(ALSDIR, shared, SharedLibDir),
+	rootPlusPath(SDDrive,SrcPathList,SharedLibDir),
+	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
+
 		%% Incoming pathlist is NOT absolute:
 		%% Try the global search path list:
 exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
@@ -397,11 +511,37 @@ exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
 	append(SDPathList,PathList,SrcPathList),
 	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
 
+exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
+	:-
+%	searchdir(SearchDir),
+%	rootPlusPath(SDDrive,SDPathList,SearchDir),
+	searchdir(SDDrive, SDPathList),
+	SDPathList = [_|_],
+	append(SDPathList,PathList,SrcPathList),
+	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
+
+
 		%% Try the system builtins directory:
 exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
 	:-
 	sys_searchdir(ALSDIR),
 	extendPath(ALSDIR, builtins, BuiltinsDir),
+	rootPlusPath(SDDrive,SrcPathList,BuiltinsDir),
+	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
+
+		%% Try the system shared directory:
+exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
+	:-
+	sys_searchdir(ALSDIR),
+	extendPath(ALSDIR, shared, BuiltinsDir),
+	rootPlusPath(SDDrive,SrcPathList,BuiltinsDir),
+	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
+
+		%% Try the original system builtins directory (for packages):
+exec_consult(PathList, Drive, BaseFile, Nature, SrcExt, FCOpts)
+	:-
+	orig_sys_searchdir(ALSDIR),
+	extendPath(ALSDIR, shared, BuiltinsDir),
 	rootPlusPath(SDDrive,SrcPathList,BuiltinsDir),
 	cont_consult(SrcExt, Nature, SDDrive+SrcPathList, BaseFile, FCOpts).
 
@@ -412,21 +552,31 @@ exec_consult(_, Drive, BaseFile, Nature, SrcExt, FCOpts)
 	arg(10, FCOpts, OrigFileDesc), 		%%	10		- OrigFileDesc 
 	existence_error(file,OrigFileDesc,OrigFileDesc).
 
+**********************************/
+
 /*-------------------------------------------------------------*
  |	- Determine real source file path, and setup global
  |	  information for this specific consult;
  |	- Do the loading with load_from_file/6
  |	- Restore appropriate global information.
  *-------------------------------------------------------------*/ 
-cont_consult(SrcExt, Nature, Drive+PathList, BaseFile, FCOpts)
+path_src_check(no(extension), BaseFile, NewDrive, NewPathList, SrcFilePath)
+	:-!,
+	rootPathFile(NewDrive,NewPathList,BaseFile,SrcFilePath).
+
+path_src_check(SrcExt, BaseFile, NewDrive, NewPathList, SrcFilePath)
 	:-
-	prepend_current_consult_directory(Drive,PathList,NewDrive,NewPathList),
-	(SrcExt = no(extension) ->
-		SrcFileName = BaseFile
-		;
-		filePlusExt(BaseFile, SrcExt, SrcFileName)
-	),
-	rootPathFile(NewDrive,NewPathList,SrcFileName,SrcFilePath),
+	filePlusExt(BaseFile, SrcExt, SrcFileName),
+	rootPathFile(NewDrive,NewPathList,SrcFileName,SrcFilePath).
+
+%cont_consult(SrcExt, Nature, Drive+PathList, BaseFile, FCOpts)
+cont_consult(SrcExt, Nature, NewDrive, NewPathList, BaseFile, FCOpts)
+	:-
+%	prepend_current_consult_directory(Drive,PathList,NewDrive,NewPathList),
+%NewDesc = NewDrive+NewPathList,
+path_src_check(SrcExt, BaseFile, NewDrive, NewPathList, SrcFilePath),
+
+
 	s2s_ext(Exts2Try),
 	check_existence(SrcFilePath, Exts2Try,ExistingSrcFilePath, WorkingExt),
 			%% ExistingSrcFilePath is a complete path, including
@@ -448,7 +598,12 @@ cont_consult(SrcExt, Nature, Drive+PathList, BaseFile, FCOpts)
 		%%% Handle reconsult flag here............
 	adjust_recon_flag(FCOpts),
 
-	load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WorkingExt,FCOpts),
+	(shared_file_ext(WorkingExt) ->
+		load_slib(CanonSrcPath),
+		mangle(12, FCOpts, CanonSrcPath)
+		;
+		load_from_file(SrcExt,Nature,BaseFile,CanonSrcPath,WorkingExt,FCOpts)
+	),
 
 		%%% Undo CCD global change here...................
 	set_current_consult_directory(OldCCD),
@@ -1111,5 +1266,22 @@ generated_in_arch(Which)
 	abolish(genFileLocn,3),
 	(Which = src -> Place = src ; Place = cur),
 	asserta(genFileLocn(_,subdir(arch,Place), '')).
+
+export setup_tcltk/0.
+setup_tcltk
+	:-
+	setup_tcltk(shl_tcli).
+
+setup_tcltk(Interp)
+	:-
+	consult('tclintf.psl'),
+	tcl_new(Interp),
+	tcl_eval(Interp, 'set TclLib [info library]', TclLibPath),
+	sprintf(atom(Cmd0), 'source "%t/init.tcl"', [TclLibPath]),
+	tcl_eval(Interp, Cmd0, _),
+
+	tcl_eval(Interp, 'set TkLib $tk_library', TkLibPath),
+	sprintf(atom(Cmd1), 'source "%t/tk.tcl"', [TkLibPath]),
+	tcl_eval(Interp, Cmd1, _).
 
 endmod.		%% blt_cslt.pro: Consult 

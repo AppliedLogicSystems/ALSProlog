@@ -1,1 +1,1 @@
-cvs update -I *.obp -I .AppleDouble
+cvs update -I *.obp -I .AppleDouble -I *.frame
