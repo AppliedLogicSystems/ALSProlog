@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -o errexit -o nounset
+set -eu
 
 case `uname -rs` in
     "SunOS 4"*)	ARCH=sunos ;;
@@ -50,7 +50,10 @@ rm -rf "$DISTDIR"
 mkdir -p "$DISTDIR"
 
 cp -pr "$BIN/$EXE" "$DISTDIR"
-cp -pr "$BIN/$EXE.pst" "$DISTDIR"
+if test -f "$BIN/$EXE.pst"
+then
+    cp -pr "$BIN/$EXE.pst" "$DISTDIR"
+fi
 cp -pr "$BIN/alsdir" "$DISTDIR"
 cp -pr "$BIN/lib" "$DISTDIR"
 
@@ -71,7 +74,10 @@ if test $EDITION = standard
 then
 	cp -pr "$ALS_PROLOG/foreign_sdk/unix/ALS_Prolog_Foreign_SDK" "$DISTDIR"
 	cp -pr "$BIN/alspro" "$DISTDIR"
-	cp -pr "$BIN/alspro.pst" "$DISTDIR"
+	if test -f "$BIN/alspro.pst"
+	then
+		cp -pr "$BIN/alspro.pst" "$DISTDIR"
+	fi
 fi
 
 tar -C $ARCH -czf $DISTNAME-$ARCH.tgz $DISTNAME
