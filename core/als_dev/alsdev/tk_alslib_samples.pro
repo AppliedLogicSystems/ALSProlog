@@ -130,3 +130,19 @@ test_write
 	printf(user_output, 'This is a test ...\n', []),
 	flush_input(user_input).
 
+tamb(3)
+	:-
+	SubCas =
+		['Sub Entry #1' + tcl('Window show .about'), 
+		 'Sub Entry #2' + test_write],
+	extend_main_menubar('Test Extend', 
+			['Test Entry #1' + tcl('Window show .break_choices'), 
+			 'Test Entry #2' + test_write,
+			 cascade('Test Cascade Entry', SubCas)
+			]).
+
+tamb(4)
+	:-
+	path_to_main_menu_entry(3,ToolsMenuPath),
+	extend_cascade('My Entry' + test_write, ToolsMenuPath, shl_tcli).
+

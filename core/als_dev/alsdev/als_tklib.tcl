@@ -483,26 +483,32 @@ proc two_col_display_choose {base LCap RCap Title} {
 }
 
 proc move_col_right {base} {
+	set MovedList ""
 	set SelIndicies [$base.cols_fr.l.leftlist.lstbx curselection]
 	set RevSelIndicies [lsort -decreasing $SelIndicies]
 	set LL [$base.cols_fr.r.rightlist.lstbx index end]
 	foreach Index $RevSelIndicies {
 		set Hold [$base.cols_fr.l.leftlist.lstbx get $Index]
+		lappend MovedList $Hold
 		$base.cols_fr.l.leftlist.lstbx delete $Index
 		$base.cols_fr.r.rightlist.lstbx insert $LL $Hold
 	}
+	return $MovedList
 }
 
 
 proc move_col_left {base} {
+	set MovedList ""
 	set SelIndicies [$base.cols_fr.r.rightlist.lstbx curselection]
 	set RevSelIndicies [lsort -decreasing $SelIndicies]
 	set LL [$base.cols_fr.l.leftlist.lstbx index end]
 	foreach Index $RevSelIndicies {
 		set Hold [$base.cols_fr.r.rightlist.lstbx get $Index]
+		lappend MovedList $Hold
 		$base.cols_fr.r.rightlist.lstbx delete $Index
 		$base.cols_fr.l.leftlist.lstbx insert $LL $Hold
 	}
+	return $MovedList
 }
 
 
@@ -604,4 +610,13 @@ proc move_leftlist_item {base Direction} {
 			$base.cols_fr.l.leftlist.lstbx selection set $FirstIndex1 
 		}
 	}
+}
+
+proc menu_entries_list {M} {
+	set Last [$M index end]
+	set List ""
+	for {set i 0} {$i <= $Last} {incr i} {
+		lappend List [$M entrycget $i -label]
+	}
+	return $List
 }
