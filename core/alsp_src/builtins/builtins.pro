@@ -402,10 +402,11 @@ export getPrologInterrupt/1.
 
 '$interrupt'(3,M,G) 
 	:-!,
-%pbi_write('--------$interrupt-3------'(M,G,magic=Magic)), pbi_nl, pbi_ttyflush,
-%pbi_write('----------$interrupt-3------'), pbi_nl, pbi_ttyflush,
+pbi_write('--------$interrupt-3------'(M,G)), pbi_nl, pbi_ttyflush,
 	clct_tr(ActiveDelays),
+pbi_write(active_delays=ActiveDelays), pbi_nl, pbi_ttyflush,
 	delay_handler(ActiveDelays),
+pbi_write('--------$interrupt-3---delay_handler-DONE'), pbi_nl, pbi_ttyflush,
 	M:G.
 
 		%% -------------------------------------
