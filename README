@@ -1,0 +1,16 @@
+Welcome to the ALS Prolog Source Tree
+
+
+Build Instructions
+
+Unix:
+
+In the als_prolog directory, run GNU Make.
+
+Macintosh
+
+In the als_prolog folder, run the AppleScript Build.
+
+Windows
+
+In the als_prolog directory, run the Batch script Build.bat.
