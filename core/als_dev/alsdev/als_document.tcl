@@ -53,9 +53,11 @@ proc create_document_window {title} {
 
 	# Setup text and scrollbars
 	
-	text $w.text -yscrollcommand "$w.sb set" -setgrid true
-	scrollbar $w.sb -command "$w.text yview"
-	pack $w.sb -side right -fill both
+	text $w.text -yscrollcommand "$w.yscrollbar set" -xscrollcommand "$w.xscrollbar set"  -wrap none -setgrid true
+	scrollbar $w.yscrollbar -orient vertical -command "$w.text yview"
+	scrollbar $w.xscrollbar -orient horizontal -command "$w.text xview"
+	pack $w.yscrollbar -side right -fill both
+	pack $w.xscrollbar -side bottom -fill both
 	pack $w.text -fill both -expand 1 -side left
 	$w.text configure -highlightthickness 0 \
 		-background $proenv(.document,background) \
@@ -140,6 +142,7 @@ proc store_text {text file} {
 	set data [$text get 1.0 end]
 	puts -nonewline $s $data
 	close $s
+	file attributes $file -creator ALS4 -type TEXT
 }
 
 proc load_document {file} {
@@ -163,13 +166,18 @@ proc document.new {} {
 }
 
 proc document.open args {
+	global tcl_platform
 	set file_list $args
 	if {$file_list == ""} then {
+		if {$tcl_platform(platform) == "macintosh"} {
+			set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
+		} else {
+			set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
+		}
 		set file [tk_getOpenFile \
-			-defaultextension pro \
 			-title "Open File" \
-			-filetypes {{"Prolog Files" {.pro .pl} TEXT} {{Tcl/Tk Files} {.tcl} TEXT} {{All Files} {*} TEXT} } ]
-		if { "$file" != "" } then {
+			-filetypes $types ] 
+		if { $file != "" } then {
 			set file_list [list $file]
 		}
 	}
@@ -185,7 +193,7 @@ proc save_check {w} {
 		set title [wm title $w]
 		set answer [tk_dialog .document_save_dialog "" \
 			"Save changes to the document \"$title\" before closing?" \
-			warning \
+			caution \
 			2 "Don't Save" "Cancel" "Save"]
 		if {$answer == 2} then {
 			set result [document.save $w]

@@ -1,5 +1,6 @@
 
 proc vTclWindow.alsdev_settings {base} {
+	global tcl_platform
 	global array proenv
 
     if {$base == ""} {
@@ -38,9 +39,14 @@ proc vTclWindow.alsdev_settings {base} {
 			-command "font_family_choice \"[$FamilyMenu entrycget $iii -label]\" \$proenv(fonts_and_colors)"
 	}
 
-    label $base.size_label -text {Size:} 
-	set SizeMenu [tk_optionMenu $base.sizemenu proenv(text,size) \
-		6 8 10 12 14 16 18 20 22 24]
+    label $base.size_label -text {Size:}
+    if {$tcl_platform(platform) == "macintosh"} then {
+		set SizeMenu [tk_optionMenu $base.sizemenu proenv(text,size) \
+			9 10 12 14 18 24 36]
+	} else {
+		set SizeMenu [tk_optionMenu $base.sizemenu proenv(text,size) \
+			6 8 10 12 14 16 18 20 22 24]
+	}
 	set MenuEndNum [$SizeMenu index end]
 	for {set iii 0} {$iii <= $MenuEndNum} {incr iii} {
 		$SizeMenu entryconfigure $iii \

@@ -1,17 +1,3 @@
-/* 
- * tkMacAppInit.c --
- *
- *	Provides a version of the Tcl_AppInit procedure for the example shell.
- *
- * Copyright (c) 1993-1994 Lockheed Missle & Space Company, AI Center
- * Copyright (c) 1995-1997 Sun Microsystems, Inc.
- *
- * See the file "license.terms" for information on usage and redistribution
- * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
- *
- * SCCS: @(#) tkMacAppInit.c 1.35 97/07/28 11:18:55
- */
- 
 #include <Gestalt.h>
 #include <ToolUtils.h>
 #include <Fonts.h>
@@ -23,17 +9,6 @@
 #include "tkInt.h"
 #include "tkMacInt.h"
 #include "tclMac.h"
-
-#ifdef TK_TEST
-EXTERN int		Tktest_Init _ANSI_ARGS_((Tcl_Interp *interp));
-#endif /* TK_TEST */
-
-#ifdef TCL_TEST
-EXTERN int		TclObjTest_Init _ANSI_ARGS_((Tcl_Interp *interp));
-EXTERN int		Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
-#endif /* TCL_TEST */
-
-Tcl_Interp *gStdoutInterp = NULL;
 
 int 	TkMacConvertEvent _ANSI_ARGS_((EventRecord *eventPtr));
 
@@ -60,7 +35,6 @@ EXTERN void		TkConsolePrint _ANSI_ARGS_((Tcl_Interp *interp,
  */
 
 static int		MacintoshInit _ANSI_ARGS_((void));
-static int		SetupMainInterp _ANSI_ARGS_((Tcl_Interp *interp));
 void SetupALSProlog(void);
 
 /*
@@ -81,29 +55,9 @@ void SetupALSProlog(void);
  *----------------------------------------------------------------------
  */
 
-
-static int SetupConsole(Tcl_Interp *interp)
+static int AEPackageInit(Tcl_Interp *interp)
 {
-    TkConsoleCreate();
-	
-    if (Tcl_Init(interp) == TCL_ERROR) {
-		return TCL_ERROR;
-    }
-    if (Tk_Init(interp) == TCL_ERROR) {
-		return TCL_ERROR;
-    }
-    Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);
-
-	Tcl_SetVar(interp, "tcl_interactive", "1", TCL_GLOBAL_ONLY);
-    
-    TkMacInitMenus(interp);
-
-	if (TkConsoleInit(interp) == TCL_ERROR) {
-	    return TCL_ERROR;
-	}
-
-    gStdoutInterp = interp;
-	
+	TkMacInitAppleEvents(interp);
 	return TCL_OK;
 }
 
@@ -111,6 +65,7 @@ void
 main(void)
 {
 	Tcl_Interp *interp;
+	extern void TkMenuInit(void);
 	
 	/* Initialize the Macintosh */
     if (MacintoshInit()  != TCL_OK) {
@@ -118,117 +73,24 @@ main(void)
     }
 
 
-	/* Initialize Tcl */
+	/* Initialize Tcl/Tk */
     tcl_macQdPtr = &qd;
     Tcl_MacSetEventProc(TkMacConvertEvent);
 
-
     Tcl_FindExecutable("foo");
     
-#if 0   
-    interp = Tcl_CreateInterp();
+    TkMacInitMenus(NULL);
 
-
-    if (SetupConsole(interp) != TCL_OK) {
-	TkpDisplayWarning(interp->result, "Application initialization failed");    
-    }
-#endif
+	/* Install an Apple Events package */
+	Tcl_StaticPackage(interp, "appleevents", AEPackageInit, NULL);
 
 	SetupALSProlog();
-    //Tk_MainLoop();
-    //Tcl_DeleteInterp(interp);
-    //Tcl_Exit(0);
 }
 
 
 Boolean SIOUXIsAppWindow(WindowPtr w)
 {
 return 0;
-}
-/*
- *----------------------------------------------------------------------
- *
- * Tcl_AppInit --
- *
- *	This procedure performs application-specific initialization.
- *	Most applications, especially those that incorporate additional
- *	packages, will have their own version of this procedure.
- *
- * Results:
- *	Returns a standard Tcl completion code, and leaves an error
- *	message in interp->result if an error occurs.
- *
- * Side effects:
- *	Depends on the startup script.
- *
- *----------------------------------------------------------------------
- */
-
-int
-Tcl_AppInit(
-    Tcl_Interp *interp)		/* Interpreter for application. */
-{
-    if (Tcl_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
-    }
-    if (Tk_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
-    }
-    Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);
-	
-    /*
-     * Call the init procedures for included packages.  Each call should
-     * look like this:
-     *
-     * if (Mod_Init(interp) == TCL_ERROR) {
-     *     return TCL_ERROR;
-     * }
-     *
-     * where "Mod" is the name of the module.
-     */
-
-#ifdef TCL_TEST
-    if (Tcltest_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
-    }
-    Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
-            (Tcl_PackageInitProc *) NULL);
-    if (TclObjTest_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
-    }
-#endif /* TCL_TEST */
-
-#ifdef TK_TEST
-    if (Tktest_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
-    }
-    Tcl_StaticPackage(interp, "Tktest", Tktest_Init,
-            (Tcl_PackageInitProc *) NULL);
-#endif /* TK_TEST */
-
-    /*
-     * Call Tcl_CreateCommand for application-specific commands, if
-     * they weren't already created by the init procedures called above.
-     * Each call would look like this:
-     *
-     * Tcl_CreateCommand(interp, "tclName", CFuncCmd, NULL, NULL);
-     */
-
-    SetupMainInterp(interp);
-
-    /*
-     * Specify a user-specific startup script to invoke if the application
-     * is run interactively.  On the Mac we can specifiy either a TEXT resource
-     * which contains the script or the more UNIX like file location
-     * may also used.  (I highly recommend using the resource method.)
-     */
-
-    Tcl_SetVar(interp, "tcl_rcRsrcName", "tclshrc", TCL_GLOBAL_ONLY);
-    /* Tcl_SetVar(interp, "tcl_rcFileName", "~/.tclshrc", TCL_GLOBAL_ONLY); */
-
-    SetupALSProlog();
-    
-    return TCL_OK;
 }
 
 /*
@@ -307,56 +169,6 @@ MacintoshInit()
     return TCL_OK;
 }
 
-/*
- *----------------------------------------------------------------------
- *
- * SetupMainInterp --
- *
- *	This procedure calls initalization routines require a Tcl 
- *	interp as an argument.  This call effectively makes the passed
- *	iterpreter the "main" interpreter for the application.
- *
- * Results:
- *	Returns TCL_OK if everything went fine.  If it didn't the 
- *	application should probably fail.
- *
- * Side effects:
- *	More initilization.
- *
- *----------------------------------------------------------------------
- */
-
-static int
-SetupMainInterp(
-    Tcl_Interp *interp)
-{
-    /*
-     * Initialize the console only if we are running as an interactive
-     * application.
-     */
-
-    TkMacInitAppleEvents(interp);
-    TkMacInitMenus(interp);
-
-    if (strcmp(Tcl_GetVar(interp, "tcl_interactive", TCL_GLOBAL_ONLY), "1")
-	    == 0) {
-	if (TkConsoleInit(interp) == TCL_ERROR) {
-	    goto error;
-	}
-    }
-
-    /*
-     * Attach the global interpreter to tk's expected global console
-     */
-
-    gStdoutInterp = interp;
-
-    return TCL_OK;
-
-error:
-    panic(interp->result);
-    return TCL_ERROR;
-}
 
 /*
  *----------------------------------------------------------------------
@@ -537,10 +349,6 @@ void SetupALSProlog(void)
     if ((exit_status = PI_startup(&setup)) != 0) return;
 
     pi_init();
-{
-int success;
-//PI_status_toplevel(&success);
-}
 
     term = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "consult"),
 		1, AP_NewSymbolFromStr(w, "blt_dvsh"));

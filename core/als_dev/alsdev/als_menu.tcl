@@ -37,9 +37,6 @@ proc add_file_menu {menubar type window} {
 	menu $menubar.file -tearoff $TearOff -title File
 	
     $menubar.file add command -label New -accelerator "$mod-N" -command document.new
-    if {$tcl_platform(platform) == "macintosh"} {
-    	$menubar.file add command -label "New Project" -state disabled
-    }
     $menubar.file add command -label "Open$elipsis" -accelerator "$mod-O" -command document.open
     $menubar.file add command -label Close -accelerator "$mod-W" -command "$type.close $window"
     $menubar.file add separator
@@ -83,7 +80,7 @@ proc add_edit_menu {menubar type window} {
         -label {Select All} -accelerator "$mod-A" -command "$type.select_all $window"
     $menubar.edit add separator
     $menubar.edit add command \
-		-label {Preferences} -command "fonts_and_colors $window"
+		-label "Preferences$elipsis" -command "fonts_and_colors $window"
 
 	$menubar add cascade -menu $menubar.edit -label "Edit"
 }
