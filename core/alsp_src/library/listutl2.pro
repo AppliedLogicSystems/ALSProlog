@@ -16,7 +16,6 @@ export at_most_n/3.
 %export position/3.	%% -- moved to simplio.pro in builtins
 %export position/4.	%% -- moved to simplio.pro in builtins
 export get_list_tail/3.
-export list_delete/3.
 export sublist/4.
 export last/2.
 
