@@ -375,7 +375,7 @@ void SetupALSProlog(void)
     pi_init();
 
 {
-	extern char executable_path[1000];
+	extern char executable_path[1024];
 	extern long ss_image_offset(const char *image_name);
 
 	if (!ss_image_offset(executable_path)) {
