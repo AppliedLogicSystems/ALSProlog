@@ -475,9 +475,10 @@ proc iconify_me {Win} {
 	wm iconify $Win
 }
 	 
-proc hide_me {Win} {
-	 Window hide $Win
-}
+#proc hide_me {Win} {
+#	unmap_alsdev_main
+#	Window hide $Win
+#}
 
 proc careful_withdraw {Win} {
 	if "[winfo exists $Win]>1" then { wm withdraw $Win }
@@ -947,6 +948,7 @@ proc load_file_to_win {FileName TextWinName} {
 	close $SI
 	return $NumRows
 
+#	$TextWinName configure -state disabled
 }
 
 proc load_stream_to_win {Stream TextWinName} {

@@ -26,7 +26,7 @@ proc vTclWindow.topals {args} {
     wm deiconify .topals
     wm title .topals "ALS Prolog Environment"
 
-	wm protocol $base WM_DELETE_WINDOW {hide_me .topals}
+	wm protocol $base WM_DELETE_WINDOW {wm iconify .topals ; unmap_alsdev_main }
 
 		##------------------
 		## Main menubar:
@@ -63,7 +63,6 @@ proc vTclWindow.topals {args} {
     .topals.mmenb add cascade -label Edit -menu .topals.mmenb.edit
     .topals.mmenb.edit add command \
         -label Undo -command undo_action -state disabled
-    .topals.mmenb.file add separator
     .topals.mmenb.edit add command -label Cut \
 		-command { cut_text .topals.txwin.text } -state disabled
     .topals.mmenb.edit add command \
