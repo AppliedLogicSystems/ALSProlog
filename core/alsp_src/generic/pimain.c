@@ -7,34 +7,22 @@
  |
  *=====================================================================*/
 
-#ifdef HAVE_CONFIG_H
 	/* In ALS-Prolog source tree */
 
 #include "defs.h"
-#include "pi_init.h"
-
-#else /* !HAVE_CONFIG_H */
-	/* Not in ALS-Prolog source tree... */
-
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "alspi.h"
-
-#endif /* !HAVE_CONFIG_H */
-
 #include <limits.h>
 
 #ifdef MacOS
 #include <Errors.h>
 #include <Processes.h>
 #endif
-#if defined(KERNAL) && defined(__MWERKS__) && defined(macintosh)
+#if defined(__MWERKS__) && defined(macintosh)
 #include <console.h>
+#include <SIOUX.h>
 #endif
 
 static char *
-isopt(char *opt, char *str)
+isopt(const char *opt, char *str)
 {
     size_t len = strlen(opt);
     if (strncmp(opt,str,len) == 0)
@@ -43,7 +31,7 @@ isopt(char *opt, char *str)
 	return 0;
 }
 
-void main(int argc, char *argv[])
+ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 {
     int   exit_status, success;
     char *als_opts;
@@ -180,6 +168,9 @@ void main(int argc, char *argv[])
         /* Based on 7MB partition with 0x40000 word heap */
 	setup.heap_size = setup.stack_size = info.processSize/28;
     }
+
+    InstallConsole(0);
+    SIOUXSetTitle("\pALS Prolog");
 #endif
 
 
@@ -188,7 +179,7 @@ void main(int argc, char *argv[])
 	exit(EXIT_ERROR);
     }
 
-    pi_init();
+    if (init) init();
 
     if ((exit_status = PI_toplevel(&success)) != 0) {
 	PI_app_printf(PI_app_printf_error, "Prolog shell crashed !\n");
@@ -196,10 +187,47 @@ void main(int argc, char *argv[])
     }
 
     PI_shutdown();
+
+#if defined (MacOS) && defined(__MWERKS__)
+    if (!MPW_Tool) printf("Exiting ALS Prolog.\n");
+#endif
        
     if (success) exit(EXIT_SUCCESS);
     else exit(EXIT_FAILURE);
 }
 
+int main(int argc, char *argv[])
+{
+    return PI_main(argc, argv, NULL);
+}
 
+#ifdef MacOS
+int shlib_found;
+FSSpec shlib_location;
 
+pascal OSErr __initialize(const CFragInitBlock *theInitBlock);
+pascal OSErr alspro_shlib_initialize(const CFragInitBlock *theInitBlock);
+pascal OSErr alspro_shlib_initialize(const CFragInitBlock *theInitBlock)
+{
+
+    switch (theInitBlock->fragLocator.where) {
+    case kDataForkCFragLocator:
+    	shlib_location = *theInitBlock->fragLocator.u.onDisk.fileSpec;
+    	shlib_found = 1;
+    	break;
+	case kResourceCFragLocator:
+    	shlib_location = *theInitBlock->fragLocator.u.inSegs.fileSpec;
+    	shlib_found = 1;
+    	break;
+    default:
+    	shlib_found = 0;
+    	break;
+    }
+	
+#ifdef __MWERKS__
+	return __initialize(theInitBlock);
+#else
+#error
+#endif
+}
+#endif
