@@ -333,7 +333,7 @@ static void init_hardware_key(void)
     
     if (!device) {
     	
-    	strncpy(dev_file_path, imagedir, DEVPATH_MAX);
+    	strncpy(dev_file_path, executable_path, DEVPATH_MAX);
     	dev_file_path[DEVPATH_MAX] = 0;
     	strncat(dev_file_path, "key_device", DEVPATH_MAX - strlen(dev_file_path));
     	dev_file_path[DEVPATH_MAX] = 0;
