@@ -42,7 +42,7 @@ RSC=rc.exe
 OUTDIR=.\WinRel
 INTDIR=.\WinRel
 
-ALL : .\even.psl .\WinRel\even.bsc
+ALL : .\even.psl $(OUTDIR)/even.bsc
 
 $(OUTDIR) : 
     if not exist $(OUTDIR)/nul mkdir $(OUTDIR)
@@ -51,9 +51,10 @@ $(OUTDIR) :
 # ADD MTL /nologo /D "NDEBUG" /win32
 MTL_PROJ=/nologo /D "NDEBUG" /win32 
 # ADD BASE CPP /nologo /MT /W3 /GX /YX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR /c
-# ADD CPP /nologo /MT /W3 /GX /YX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR /c
-CPP_PROJ=/nologo /MT /W3 /GX /YX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS"\
- /FR$(INTDIR)/ /Fp$(OUTDIR)/"even.pch" /Fo$(INTDIR)/ /c 
+# ADD CPP /nologo /MT /W3 /GX /YX /O2 /I "..\..\ALS_Prolog_Support" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR /c
+CPP_PROJ=/nologo /MT /W3 /GX /YX /O2 /I "..\..\ALS_Prolog_Support" /D "WIN32"\
+ /D "NDEBUG" /D "_WINDOWS" /FR$(INTDIR)/ /Fp$(OUTDIR)/"even.pch" /Fo$(INTDIR)/\
+ /c 
 CPP_OBJS=.\WinRel/
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -62,10 +63,10 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 BSC32_FLAGS=/nologo /o$(OUTDIR)/"even.bsc" 
 BSC32_SBRS= \
-	.\WinRel\even.sbr \
-	.\WinRel\alspi_slib.sbr
+	$(INTDIR)/even.sbr \
+	$(INTDIR)/alspi_slib.sbr
 
-.\WinRel\even.bsc : $(OUTDIR)  $(BSC32_SBRS)
+$(OUTDIR)/even.bsc : $(OUTDIR)  $(BSC32_SBRS)
     $(BSC32) @<<
   $(BSC32_FLAGS) $(BSC32_SBRS)
 <<
@@ -80,8 +81,8 @@ LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
  /IMPLIB:$(OUTDIR)/"even.lib" 
 DEF_FILE=
 LINK32_OBJS= \
-	.\WinRel\even.obj \
-	.\WinRel\alspi_slib.obj
+	$(INTDIR)/even.obj \
+	$(INTDIR)/alspi_slib.obj
 
 .\even.psl : $(OUTDIR)  $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -101,7 +102,7 @@ LINK32_OBJS= \
 OUTDIR=.\WinDebug
 INTDIR=.\WinDebug
 
-ALL : .\even.psl .\WinDebug\even.bsc
+ALL : .\even.psl $(OUTDIR)/even.bsc
 
 $(OUTDIR) : 
     if not exist $(OUTDIR)/nul mkdir $(OUTDIR)
@@ -110,10 +111,10 @@ $(OUTDIR) :
 # ADD MTL /nologo /D "_DEBUG" /win32
 MTL_PROJ=/nologo /D "_DEBUG" /win32 
 # ADD BASE CPP /nologo /MT /W3 /GX /Zi /YX /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /c
-# ADD CPP /nologo /MT /W3 /GX /Zi /YX /Od /I "..\..\..\include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /c
-CPP_PROJ=/nologo /MT /W3 /GX /Zi /YX /Od /I "..\..\..\include" /D "WIN32" /D\
- "_DEBUG" /D "_WINDOWS" /FR$(INTDIR)/ /Fp$(OUTDIR)/"even.pch" /Fo$(INTDIR)/\
- /Fd$(OUTDIR)/"even.pdb" /c 
+# ADD CPP /nologo /MT /W3 /GX /Zi /YX /Od /I "..\..\ALS_Prolog_Support" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /c
+CPP_PROJ=/nologo /MT /W3 /GX /Zi /YX /Od /I "..\..\ALS_Prolog_Support" /D\
+ "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR$(INTDIR)/ /Fp$(OUTDIR)/"even.pch"\
+ /Fo$(INTDIR)/ /Fd$(OUTDIR)/"even.pdb" /c 
 CPP_OBJS=.\WinDebug/
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -122,10 +123,10 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 BSC32_FLAGS=/nologo /o$(OUTDIR)/"even.bsc" 
 BSC32_SBRS= \
-	.\WinDebug\even.sbr \
-	.\WinDebug\alspi_slib.sbr
+	$(INTDIR)/even.sbr \
+	$(INTDIR)/alspi_slib.sbr
 
-.\WinDebug\even.bsc : $(OUTDIR)  $(BSC32_SBRS)
+$(OUTDIR)/even.bsc : $(OUTDIR)  $(BSC32_SBRS)
     $(BSC32) @<<
   $(BSC32_FLAGS) $(BSC32_SBRS)
 <<
@@ -140,8 +141,8 @@ LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
  /IMPLIB:$(OUTDIR)/"even.lib" 
 DEF_FILE=
 LINK32_OBJS= \
-	.\WinDebug\even.obj \
-	.\WinDebug\alspi_slib.obj
+	$(INTDIR)/even.obj \
+	$(INTDIR)/alspi_slib.obj
 
 .\even.psl : $(OUTDIR)  $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -167,33 +168,15 @@ LINK32_OBJS= \
 
 SOURCE=.\even.c
 
-!IF  "$(CFG)" == "Win32 Release"
-
-.\WinRel\even.obj :  $(SOURCE)  $(INTDIR)
-
-!ELSEIF  "$(CFG)" == "Win32 Debug"
-
-.\WinDebug\even.obj :  $(SOURCE)  $(INTDIR)
-
-!ENDIF 
+$(INTDIR)/even.obj :  $(SOURCE)  $(INTDIR)
 
 # End Source File
 ################################################################################
 # Begin Source File
 
-SOURCE=\Foreign_SDKs\Win32_Foreign_SDK\source\alspi_slib.c
+SOURCE=..\..\ALS_Prolog_Support\alspi_slib.c
 
-!IF  "$(CFG)" == "Win32 Release"
-
-.\WinRel\alspi_slib.obj :  $(SOURCE)  $(INTDIR)
-   $(CPP) $(CPP_PROJ)  $(SOURCE) 
-
-!ELSEIF  "$(CFG)" == "Win32 Debug"
-
-.\WinDebug\alspi_slib.obj :  $(SOURCE)  $(INTDIR)
-   $(CPP) $(CPP_PROJ)  $(SOURCE) 
-
-!ENDIF 
+$(INTDIR)/alspi_slib.obj :  $(SOURCE)  $(INTDIR)
 
 # End Source File
 # End Group
