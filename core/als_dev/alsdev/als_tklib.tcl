@@ -362,8 +362,6 @@ proc vTclWindow.popup_select_widget {base} {
         set base .popup_select_widget
     }
     if {[winfo exists $base]} {
-#        show_window $base; return
-
 		raise $base
 		if {$tcl_platform(platform) == "windows"} {
 			focus -force $base
@@ -382,7 +380,7 @@ proc vTclWindow.popup_select_widget {base} {
 	}
 
     wm focusmodel $base passive
-    wm geometry $base 188x382+401+165
+    wm geometry $base 188x312+401+165
     wm maxsize $base 1137 870
     wm minsize $base 1 1
     wm overrideredirect $base 0
@@ -395,6 +393,7 @@ proc vTclWindow.popup_select_widget {base} {
         -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
         -xscrollcommand {.popup_select_widget.clist.02 set} \
         -yscrollcommand {.popup_select_widget.clist.03 set} 
+	bind $base.clist.listbox <Double-Button-1> "fin_popup_list_box ok $base"
     scrollbar $base.clist.02 \
         -borderwidth 1 -command {.popup_select_widget.clist.listbox xview} \
         -orient horiz -width 10 
