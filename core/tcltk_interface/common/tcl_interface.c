@@ -510,8 +510,9 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 		elements[2] = "tcl" TCL_VERSION;
 		Tcl_JoinPath(3, elements, &path);
 		Tcl_SetVar(interp, "tcl_library", path.string, TCL_GLOBAL_ONLY);
+		Tcl_DStringSetLength(&path, 0);
 		Tcl_JoinPath(2, elements, &path);
-		Tcl_SetVar(interp, "tcl_pkgPath", path.string, TCL_GLOBAL_ONLY);
+		Tcl_SetVar(interp, "tcl_pkgPath", path.string, TCL_GLOBAL_ONLY|TCL_LIST_ELEMENT);
 		Tcl_SetVar(interp, "autopath", "", TCL_GLOBAL_ONLY);
 		Tcl_DStringFree(&path);
 	}
