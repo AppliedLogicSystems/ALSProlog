@@ -356,7 +356,7 @@ static int copy_file(const char *from_file, const char *to_file)
 int pbi_copy_file(void)
 {
     PWord v1, v2;
-    int   t1, t2, success;
+    int   t1, t2;
     char *from_file, *to_file;
 
     w_get_An(&v1, &t1, 1);
@@ -368,3 +368,4 @@ int pbi_copy_file(void)
     if (copy_file(from_file, to_file)) SUCCEED;
 	else FAIL;
 }
+
