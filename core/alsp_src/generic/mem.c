@@ -868,7 +868,7 @@ alloc_big_block(size, fe_num)
 
 int
 als_mem_init(file,offset)
-    char *file;
+    const char *file;
     long offset;
 {
 
@@ -1786,7 +1786,6 @@ static OSErr DuplicateThisApplication(ConstStr255Param newAppName)
     OSErr err;
     Str255 AppName;
     FSSpec AppSpec, NewAppSpec, DirSpec;
-    extern const int MPW_Tool;
     
     if (MPW_Tool) {
     	char name[256];

@@ -55,7 +55,7 @@ struct am_header {
 	/* Integrity information to make sure saved state matches image */
 
 	long **integ_als_mem;		/* address of als_mem variable */
-	int (*integ_als_mem_init) PARAMS((char *, long));
+	int (*integ_als_mem_init) PARAMS((CONST char *, long));
 					/* address of als_mem_init */
 	int (*integ_w_unify) PARAMS(( PWord, int, PWord, int ));
 					/* address of w_unify */
