@@ -513,14 +513,14 @@ ck_intvl_punch(r, fv, ft)
   { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) \
 	  *--mr_TR = PWORD(r); }
 
-#define VVBIND(r,f,lln)   { TRAIL(r,0); *(r) = PWORD(f); }
+#define VVBIND(r,f,_IGNORE_,lln)   { TRAIL(r,0); *(r) = PWORD(f); }
 
 #define BIND(r,f)     { BIND3(r,f,0) }
 
 #define BIND3(r,f,w)  { 								\
   if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 		\
 	  *(PWord *)--mr_TR = PWORD(r); 					\
-  } 
+  } \
   *(r) = PWORD(f);										\
 }
 #endif /*===== FREEZE =====*/
@@ -1776,7 +1776,7 @@ cut:
 		arg(mr_SP, 5) = PWORD(P);
 		arg(mr_SP, 4) = PWORD(mr_E);		/* fake call */
 		arg(mr_SP, 3) = MMK_STRUCTURE(mr_H);
-		*mr_H++ = MMK_FUNCTOR(PWORD(find_token("!")), 1);
+		*mr_H++ = MMK_FUNCTOR(PWORD(find_token((UCHAR *)"!")), 1);
 		*mr_H++ = MMK_INT(wm_heapbase - reg1);
 		arg(mr_SP, 2) = MMK_SYM(MODULE_BUILTINS);
 		arg(mr_SP, 1) = MMK_INT(wm_interrupt_caught);
