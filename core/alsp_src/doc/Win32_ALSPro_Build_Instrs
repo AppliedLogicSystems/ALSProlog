@@ -10,19 +10,23 @@ to as $SRCDIR, %SRCDIR% or {blddir} in this document.
 Build Materials:
 ----------------
 
-¥ Macintosh (68k or PowerPC) with at least 15 MB of available memory
+- Macintosh (68k or PowerPC) with at least 15 MB of available memory
 and at least 150 MB of available disk space.
 
-¥ x86 Windows95 or WindowsNT machine with at least X MB of memory and
+- x86 Windows95 or WindowsNT machine with at least X MB of memory and
 at least Y MB of available disk space.
 
-¥ Unix system.
+- Unix system.
 
-¥ Metrowerk's Code Warrior Gold 8 with the following options and
+- Metrowerk's Code Warrior Gold 8 with the following options and
 modifications:
 	- Install with at least this package: Metrowerks x86 C/C++ Compiler
 	- Put a copy of Microsoft Visual C++ 2.0's LIBC.LIB in the
 	  Win32/x86 Support:Libraries folder.
+
+- Software Security Inc.'s UniKey Library
+	- Put a "UniKey Library" folder with ssicm32n.lib and ssi_cw32.h in
+	  the Win32/x86 Support folder.
 
 Build Instructions:
 -------------------
@@ -68,6 +72,12 @@ Expander.  The following projects need expanding:
 	{blddir}bld-port:alspro_lib.prj.sit.hqx
 	{blddir}bld-port:alspro_b.prj.sit.hqx
 	{blddir}bld-port:alspro_dll.prj.sit.hqx
+	{blddir}bld-port:testdll.x86.prj.sit.hqx
+
+	{blddir}bld-port:demo_alspro_lib.prj.sit.hqx
+	{blddir}bld-port:demo_alspro_b.prj.sit.hqx
+	{blddir}bld-port:demo_alspro_dll.prj.sit.hqx
+	{blddir}bld-port:demo_testdll.x86.prj.sit.hqx
 	
 	{blddir}bld-wins:mswin32:mswin32intf_lib.prj.sit.hqx
 	{blddir}bld-wins:mswin32:alspro_mswin320.prj.sit.hqx
@@ -82,6 +92,14 @@ see the note above.
 3.2 Open alspro_b.prj, adjust access paths, Make.
 
 3.3 Open alspro_dll.prj, adjust access paths,
+    ***** ADJUST COMMAND PATH ***** (see note above),
+    Make.
+
+3.4 Open demo_alspro_lib.prj, adjust access paths, Make.
+
+3.5 Open demo_alspro_b.prj, adjust access paths, Make.
+
+3.6 Open deno_alspro_dll.prj, adjust access paths,
     ***** ADJUST COMMAND PATH ***** (see note above),
     Make.
 
@@ -105,11 +123,21 @@ batch file winpack.bat.
 Testing
 -------
 
-To test the portable version, from MS-DOS, change the directory to
+- To test the portable version, from MS-DOS, change the directory to
 %BLDDIR%\bld-port and run the batch file "testrun.bat".
 
 Note testrun requires that the ALSP_SRC environment variable is properly
 set.
+
+- To test the demo version, run demo_alspro_b and demo_alspro, both with
+  and without the hardware key - the demo should not run without the
+  hardware key.  Also test by removing the hardware key while in the
+  prolog shell, and execute a query - this should cause the program to
+  halt when it cannot detect the hardware key.
+
+- To test the DLL, open testdll.x86.prj, adjust access paths, and Make it.
+  Successfully running testdll.exe is enough to test the DLL. Repeat this
+  test for demo_testdll, testing both with and without the hardware key.
 
 Files generated:
 ----------------
@@ -120,10 +148,17 @@ Alspro libararies:
 {blddir}bld-port:alspro.dll
 {blddir}bld-port:alspro.dll.lib
 
+{blddir}bld-port:demo_alspro.lib
+{blddir}bld-port:demo_alspro.dll
+{blddir}bld-port:demo_alspro.dll.lib
+
 Console application:
 
 {blddir}bld-port:alspro_b.exe
 {blddir}bld-port:alspro.exe
+
+{blddir}bld-port:demo_alspro_b.exe
+{blddir}bld-port:demo_alspro.exe
 
 Win32 Interface Libraries:
 
