@@ -452,6 +452,33 @@ change_ide_depth_type(NewType)
     set_stream_wt_opts(Stream,NewWO).
 */
 
+export topals_settings_info/1.
+topals_settings_info(TopALSSettings)
+	:-
+	sio:stream_or_alias_ok(user_output, OSS),
+	sio:stream_wt_opts(OSS, DBGOPTs),
+	shell_alarm_interval(AlarmIntrv),
+	TopALSSettings = [stream_opts=DBGOPTs , heartbeat = AlarmIntrv].
+
+export set_topals_settings_info/1.
+set_topals_settings_info(TopALSSettings)
+	:-
+	(dmember( stream_opts=TopAlsOPTs, TopALSSettings) ->
+		sio:stream_or_alias_ok(user_output, OSS),
+		sio:set_stream_wt_opts(OSS, TopAlsOPTs)
+		;
+		true
+	),
+	(dmember(heartbeat = AlarmIntrv, TopALSSettings) ->
+		change_heartbeat(AlarmIntrv)
+		;
+		true
+	),
+	TopAlsOPTs = wt_opts(_,PrintDepth,DepthType),
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, heartbeat, AlarmIntrv], _),
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, main_printdepth, PrintDepth], _),
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, main_depth_type, DepthType], _).
+
 endmod.   % builtins
 
 
@@ -651,6 +678,11 @@ alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom, DebugVis)
 		;
 		true
 	),
+	(dmember(prolog_value(topals_settings,TopALSSettings),Items) ->
+		set_topals_settings_info(TopALSSettings)
+		;
+		true
+	),
 	(dmember(prolog_value(debug_settings,DebugSettings),Items) ->
 		set_debug_settings_info(DebugSettings)
 		;
@@ -801,9 +833,11 @@ win_positions_for_exit(TopGeom, DebugGeom)
 save_prolog_flags
 	:-
 	changable_flags_info(FlagsList),
+	topals_settings_info(TopALSSettings),
 	debug_settings_info(DebugSettings),
 	modify_settings(
 		[prolog_value(prolog_flags,FlagsList),
+		 prolog_value(topals_settings,TopALSSettings),
 		 prolog_value(debug_settings,DebugSettings)
 		]).
 
@@ -1508,6 +1542,7 @@ debug_settings_info(DebugSettings)
 export set_debug_settings_info/1.
 set_debug_settings_info(DebugSettings)
 	:-
+pbi_write(set_debug_settings_info(DebugSettings)),pbi_nl,pbi_ttyflush,
 	(dmember( stream_opts=DBGOPTs, DebugSettings) ->
 		sio:stream_or_alias_ok(debugger_output, OSS),
 		sio:set_stream_wt_opts(OSS, DBGOPTs)
@@ -1516,7 +1551,18 @@ set_debug_settings_info(DebugSettings)
 	),
 	findall(leashed(Port), member(leashed(Port), DebugSettings), Leashing),
 	abolish(leashed, 1),
-	assert_all(Leashing).
+	assert_all(Leashing),
+
+	check_leashing(Call,Exit,Redo,Fail),
+	tcl_call(shl_tcli, [set_tcl_ga2, proenv, leash, call, Call], _),
+	tcl_call(shl_tcli, [set_tcl_ga2, proenv, leash, exit, Exit], _),
+	tcl_call(shl_tcli, [set_tcl_ga2, proenv, leash, redo, Redo], _),
+	tcl_call(shl_tcli, [set_tcl_ga2, proenv, leash, fail, Fail], _),
+pbi_write(DBGOPTs),pbi_nl,pbi_ttyflush,
+	DBGOPTs = wt_opts(_,PrintDepth,DepthType),
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, debug_print_depth, PrintDepth], _),
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, db_flatness, DepthType], _).
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% THIS IS THE ACTUAL CALL FROM THE LOW-LEVEL DEBUGGER

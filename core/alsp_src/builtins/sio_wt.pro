@@ -1507,7 +1507,9 @@ cont_write_substs(Names,Substs,StreamOrAlias)
 	stream_or_alias_ok(StreamOrAlias,Stream),
 	stream_wt_maxdepth(Stream, MaxDepth),
 	subst_orig_toplevel_names(Names,Substs),
-	subst_gen_letter_names(Substs,MaxDepth,Substs0),
+	stream_wt_depth_computation(Stream, DC),
+	(DC = flat ->  DCC = 0 ; DCC = 1 ),
+	subst_gen_letter_names(Substs,MaxDepth,DCC,Substs0),
 	(Names = [] ->
 		nl(Stream),
 		(current_prolog_flag(anonymous_solutions, true) ->
@@ -1545,29 +1547,29 @@ set_eps_show(V)
 	assert(epsilon_show(V)).
 
 /*-------------------------------------------------------------
- |	subst_gen_letter_names/3
- |	subst_gen_letter_names(InTerm,Depth,OutTerm) 
- |	subst_gen_letter_names(+,-) 
+ |	subst_gen_letter_names/4
+ |	subst_gen_letter_names(InTerm,Depth,DCC,OutTerm) 
+ |	subst_gen_letter_names(+,+,+,-) 
  |
- |	subst_gen_letter_names/5
- |	subst_gen_letter_names(InTerm,InCounter,Depth,OutCounter) 
- |	subst_gen_letter_names(+,+,-,-) 
+ |	subst_gen_letter_names/6
+ |	subst_gen_letter_names(InTerm,InCounter,Depth,DCC,OutTerm,OutCounter) 
+ |	subst_gen_letter_names(+,+,+,+,-,-) 
  |
  |	Substitutes generated letter names for any variables
  |	occurring in Term; recurses through the structure of Term
  *-------------------------------------------------------------*/
 
-subst_gen_letter_names(InTerm,Depth,OutTerm) 
+subst_gen_letter_names(InTerm,Depth,DCC,OutTerm) 
 	:-
-	subst_gen_letter_names(InTerm,0,Depth,OutTerm,_). 
+	subst_gen_letter_names(InTerm,0,Depth,DCC,OutTerm,_). 
 
-subst_gen_letter_names(Var,Ctr,Depth,Var,Ctr) 
+subst_gen_letter_names(Var,Ctr,Depth,DCC,Var,Ctr) 
 	:-
 	var(Var),
 	'$is_delay_var'(Var),
 	!.
 
-subst_gen_letter_names(Var,VarNum,Depth,'%lettervar%'(VarAtom),NextVarNum)
+subst_gen_letter_names(Var,VarNum,Depth,DCC,'%lettervar%'(VarAtom),NextVarNum)
 	:-
 	var(Var),
 	!,
@@ -1576,28 +1578,29 @@ subst_gen_letter_names(Var,VarNum,Depth,'%lettervar%'(VarAtom),NextVarNum)
 	Var = '%lettervar%'(VarAtom),
 	NextVarNum is VarNum+1.
 
-subst_gen_letter_names(Atomic,Ctr,Depth,Atomic,Ctr) 
+subst_gen_letter_names(Atomic,Ctr,Depth,DCC,Atomic,Ctr) 
 	:-
 	atomic(Atomic),
 	!.
 
-subst_gen_letter_names([InHead | InTail], Ctr, 0, ['*'], Ctr) 
+%subst_gen_letter_names([InHead | InTail], Ctr, 0, ['*'], Ctr) 
+subst_gen_letter_names([InHead | InTail], Ctr, 0, DCC,['...'], Ctr) 
 	:-!.
 
-subst_gen_letter_names([InHead | InTail], InCtr, Depth,[OutHead | OutTail], OutCtr) 
+subst_gen_letter_names([InHead | InTail], InCtr, Depth,DCC,[OutHead | OutTail], OutCtr) 
 	:-!,
-	NewDepth is Depth - 1,
-	subst_gen_letter_names(InHead, InCtr, NewDepth, OutHead, InterCtr),
-	subst_gen_letter_names(InTail, InterCtr, NewDepth, OutTail, OutCtr).
+	NewDepth is Depth - DCC,
+	subst_gen_letter_names(InHead, InCtr, NewDepth, DCC,OutHead, InterCtr),
+	subst_gen_letter_names(InTail, InterCtr, NewDepth, DCC,OutTail, OutCtr).
 
-subst_gen_letter_names(InStruct,Ctr,0,'*',Ctr) 
+subst_gen_letter_names(InStruct,Ctr,0,DCC,'*',Ctr) 
 	:-!.
 
-subst_gen_letter_names(InStruct,InCtr,Depth,OutStruct,OutCtr) 
+subst_gen_letter_names(InStruct,InCtr,Depth,DCC,OutStruct,OutCtr) 
 	:-
-	NewDepth is Depth - 1,
+	NewDepth is Depth - DCC,
 	InStruct =.. [Functor | InArgs],
-	subst_gen_letter_names(InArgs, InCtr,NewDepth, OutArgs, OutCtr),
+	subst_gen_letter_names(InArgs, InCtr,NewDepth, DCC,OutArgs, OutCtr),
 	OutStruct =.. [Functor | OutArgs].
 
 export show_substs_ext/3.
