@@ -31,6 +31,9 @@ halt :-
 	tcl_call(shl_tcli, [exit_prolog], _),
 	pbi_halt.
 
+:- abolish('$start',0).
+'$start' :- start_alsdev.
+	
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% 			TCLTK-BASED SHELL STARTUP			%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
