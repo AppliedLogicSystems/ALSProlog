@@ -1,6 +1,6 @@
 :-
 	consult(
-		[tcltk,
+		[':::tcltk_interface:common:tcltk_util.pro',
 		 blt_dvsh, dbg_class, projects, 
 		':alsdir:library:listutl1',
 		':alsdir:library:miscterm',
