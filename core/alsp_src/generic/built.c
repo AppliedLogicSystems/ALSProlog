@@ -499,6 +499,7 @@ static struct blt_struct {
 	BLT("uncaught_interrupt", 3, pbi_uncaught_interrupt,
 	    "_pbi_uncaught_interrupt"),
 	BLT("forcePrologInterrupt", 0, pbi_ouch, "_pbi_ouch"),
+	BLT("forceCtlC", 0, pbi_forceCtlC, "_pbi_forceCtlC"),
 	BLT("forcePrologError", 0, pbi_forcePrologError,
 	    "_pbi_forcePrologError"),
 	BLT("reset_wm_normal", 0, pbi_reset_wm_normal, "_pbi_reset_wm_normal"),
