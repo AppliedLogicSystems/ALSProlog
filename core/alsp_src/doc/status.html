@@ -1127,6 +1127,11 @@ this a compiler option via a prolog flag </TD>
 <TR>
 <TD>read/1 does not produce syntax error exceptions and it prints messages to the screen </TD>
 </TR>
+<TR>
+<TD>We currently have two version of sub_atom: sub_atom/4 (ALS original) and
+sub_atom/5 (ISO standard).  Besides the confusion over number of arguments,
+the 2nd argument is 1-indexed in sub_atom/4 and 0-indexed in sub_atom/5. Chuck's recomendation is to remove sub_atom/4, Ken is not so sure.</TD>
+</TR>
 
 </TABLE>
 
