@@ -25,5 +25,5 @@ pimain.o: $(PIMAINC) pi_init.c pi_cfg.h
 	$(CC) -o pimain.o -c $(CPPFLAGS) $(CFLAGS) $(INTF_CFLAGS) $(PIMAINC) 
 
 $(TSYSN): $(TSYSN)_basis
-	$(TSYSN)_basis -obp -g 'save_image($(TSYSN),$(IMGOPTS))' $(PROFLS)
+	$(TSYSN)_basis -b -obp -g 'save_image($(TSYSN),$(IMGOPTS))' $(PROFLS)
 
