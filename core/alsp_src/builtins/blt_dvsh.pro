@@ -2543,7 +2543,7 @@ shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 	accessObjStruct(errors_display, State, PrevErrsList),
 	(PrevErrsList \= [] ->
 		accessObjStruct(tcl_doc_path, State, InitTclWin),
-		(TclWin \= nil ->
+		(InitTclWin \= nil ->
 			tcl_call(shl_tcli, [close_and_reopen, InitTclWin], _)
 			;
 			true
@@ -2556,6 +2556,7 @@ shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 	setObjStruct(source_file, State, SourceFile),
 	shl_source_handlerAction(open_edit_win(SourceFile), State),
 	accessObjStruct(tcl_doc_path, State, TclWin),
+write(dfe_tclwin=TclWin),nl,flush_output,
 	send_self(State, clear_decorations),
 	tcl_call(shl_tcli, [add_line_numbers_and_syn_errs,TclWin],_),
 	catenate([TclWin,'.listbox'], ErrListWin),

@@ -482,14 +482,16 @@ ide_rt_err(quiet,Token,ErrorMessage,Tokens,Stream,VT,Term)
 ide_rt_err(fail,Token,ErrorMessage,Tokens,Stream,VT,Term) 
 	:-
 	inc_error_count(Stream),
-	alsdev:ide_rt_err_report(Token,ErrorMessage,Tokens,Stream),
+%	alsdev:ide_rt_err_report(Token,ErrorMessage,Tokens,Stream),
+	rt_err_print(Token,ErrorMessage,Tokens,Stream),
 	!,
 	fail.
 
 ide_rt_err(dec10,Token,ErrorMessage,Tokens,Stream,VT,Term) :-
 	inc_error_count(Stream),
-	rt_err_info(Token,ErrorMessage,Tokens,Stream, Info),
-	ide_prolog_system_error(Info, _),
+%	rt_err_info(Token,ErrorMessage,Tokens,Stream, Info),
+%	builtins:prolog_system_error(Info, _),
+	rt_err_print(Token,ErrorMessage,Tokens,Stream),
 	!,
 	mangle(1,VT,[]),	/* reset variable table to empty list */
 	read_term(Stream,Term,dec10,VT).
