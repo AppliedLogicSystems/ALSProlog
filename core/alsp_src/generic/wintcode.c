@@ -24,7 +24,7 @@
 #include <OSUtils.h>		/* For the FlushInstructionCache function */
 #endif /* MacOS */
 
-#ifdef	HAVE_MMAP
+#if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
 #include <sys/mman.h>
 
 #if defined(HAVE_MPROTECT) && defined(MISSING_EXTERN_MPROTECT)
@@ -149,7 +149,8 @@ makerunable()
 {
 #if !defined(Portable) && !defined(arch_sparc)	
 			/* Portable doesn't need any of this stuff */
-#if	defined(HAVE_MMAP) || defined(arch_m88k)
+/* #if	defined(HAVE_MMAP) || defined(arch_m88k) */
+#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || defined(arch_m88k)
     register struct codeblock *cbp;
 
     for (cbp = codeblock_list; cbp; cbp = cbp->next) {
@@ -159,7 +160,7 @@ makerunable()
 	    fprintf(stderr, "makerunable: mprotect error\n");
 	    perror("mprotect");
 	}
-#else	/* inner HAVE_MMAP */
+#else	/* inner !HAVE_MMAP */
 	if (memctl(cbp->addr, cbp->size, 1) != 0) {
 	    fprintf(stderr, "makerunable: memctl error\n");
 	    perror("mctl");
@@ -178,9 +179,9 @@ makerunable()
 #elif	defined(arch_i386)
 #ifdef DOS
     refresh_code_window();
-#endif						/* DOS */
-#endif						/* arch_i386 */
-#endif 						/* not Portable and not arch_sparc */
+#endif			/* DOS */
+#endif			/* (defined(HAVE_MMAP) && (de.... */
+#endif 				/* not Portable and not arch_sparc */
 }
 
 /*-----------------------------------------------------------------*
@@ -192,7 +193,8 @@ makewritable()
 {
 #if !defined(Portable) && !defined(arch_sparc)	
 			/* Portable doesn't need any of this stuff */
-#if	defined(HAVE_MMAP) || defined(arch_m88k)
+/*#if	defined(HAVE_MMAP) || defined(arch_m88k) */
+#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || defined(arch_m88k)
     register struct codeblock *cbp;
 
     for (cbp = codeblock_list; cbp; cbp = cbp->next) {
@@ -209,8 +211,8 @@ makewritable()
 	}
 #endif 	/* HAVE_MMAP */
     }
-#endif						/* HAVE_MMAP || arch_m88k */
-#endif 						/* not Portable and not arch_sparc */
+#endif				/* (defined(HAVE_MMAP) && ....) || arch_m88k */
+#endif 				/* not Portable and not arch_sparc */
 }
 
 

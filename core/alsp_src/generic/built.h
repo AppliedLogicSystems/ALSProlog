@@ -157,9 +157,10 @@ extern	int	disp_heap		PARAMS(( void ));
 extern	int	pbi_swp_tr		PARAMS(( void ));
 extern	int	pbi_walk_cps		PARAMS(( void ));
 extern	int	pbi_delay		PARAMS(( void ));
+extern  int	pbi_is_delay_var	PARAMS(( void ));
 extern	int 	pbi_clct_tr 		PARAMS(( void ));
 extern	int 	pbi_del_tm_for		PARAMS(( void ));
-/* extern	int	pbi_collect_thawed	PARAMS(( void )); */
+extern	int	pbi_bind_vars		PARAMS(( void ));
 
 /* bdbg.c */
 extern	int	pbi_dbg_nospy	PARAMS(( void ));
@@ -301,10 +302,10 @@ extern	int	sio_ssbq_open	PARAMS(( void ));
 extern	int	sio_socket_open	PARAMS(( void ));
 extern	int	sio_is_server_socket	PARAMS(( void ));
 extern	int	sio_accept_socket_connection	PARAMS(( void ));
-extern	int	sio_poll	PARAMS(( void ));
+extern	int	sio_poll		PARAMS(( void ));
 #endif /* HAVE_SOCKET */
-extern	int	window_insert_pos	PARAMS(( void ));
-extern	int	set_window_insert_pos	PARAMS(( void ));
+extern	int	win_insert_pos		PARAMS(( void ));
+extern	int	set_win_insert_pos	PARAMS(( void ));
 extern	int	sio_window_open		PARAMS(( void ));
 extern	int	sio_rexec	PARAMS(( void ));
 extern	int	sio_generic_open	PARAMS(( void ));

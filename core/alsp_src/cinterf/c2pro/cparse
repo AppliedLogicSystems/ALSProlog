@@ -32,17 +32,16 @@
  | ------------------------
  |
  | #exclude FileSpec/TypeSpec
- |		inhibits output for one or more groups for the specified
+ |		Inhibits output for one or more groups for the specified
  |		file(s). FileSpec can be "PathName" or <PathName> with
  |		wild cards "?" (which matches a single directory component)
  |		and "*" (which matches any trailing components). TypeSpec
- |		is optional, and can be
- |			a single symbol from func, const, ctype, gvar
- |			the symbol "all" that stands for all the above symbols
- |			or a list [item,item,...] to be excluded.
+ |		is optional, and can be a single symbol from func, const, 
+ |		ctype, gvar the symbol "all" that stands for all the above 
+ |		symbols or a list [item,item,...] to be excluded.
  | als$begin_silent;
  | als$end_silent;
- |		they are used in pairs to suppress output between these two
+ |		These are used in pairs to suppress output between these two
  |		occurrences. The pair can straddle file boundaries and can
  |		also be nested.
  | als$ctype(Type)
@@ -72,7 +71,9 @@ read_file(InitInFile, State, Defines)
 	%---------------------------------------------
 
 load_defines([],State,Tab,Tab).
-load_defines([define(Id,Val)|Rest],State,ITab,OTab) :-
+
+load_defines([define(Id,Val)|Rest],State,ITab,OTab) 
+	:-
 	addToTable(Id,d(Val),State,ITab,Tab1),
 	load_defines(Rest,State,Tab1,OTab).
 
@@ -80,7 +81,8 @@ load_defines([define(Id,Val)|Rest],State,ITab,OTab) :-
 	% read_lines/2
 	%---------------------------------------------
 
-read_lines(Line, State) :-
+read_lines(Line, State) 
+	:-
 	get_statement(Line, Stmt, State),
 	!,
 	dot_debug(2,'\nPARSING STATEMENT : %t\n',[Stmt]),
@@ -90,7 +92,9 @@ read_lines(Line, State) :-
 		printf('Error parsing stmt: %t\n',[Stmt])
 	),
 	read_lines(Rest,State).
-read_lines(Line,State) :-
+
+read_lines(Line,State) 
+	:-
 	output_footer(State).
 
 %%--------------------------------------------------------------
@@ -186,14 +190,14 @@ matched_pair(ident(inline),inline).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-%%	parse statements that can be seen in a .spc file
-%%
+%	parse_statement/3    [DCG]
+%
+%	parse statements that can be seen in a .spc file
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	
-% parse_statement/5
 
-parse_statement(State) -->				% als$... stmts
+parse_statement(State) -->		% als$... stmts
 	als_statement(State),
 	!.
 parse_statement(State) -->		% Obj-C @stmts
@@ -207,13 +211,16 @@ parse_statement(State) -->
 	!,
 	{	decln_debug(3,DeclnSpec,DecltList,State),
 		process_decln(DeclnSpec,DecltList,State) }.
-parse_statement(State,Toks,[]) :-
+
+parse_statement(State,Toks,[]) 
+	:-
 	error('parse failed :\nDiscarded tokens %t\n',[Toks],State).
 
 consume_semicolon(State) --> [semicolon], !.
-consume_semicolon(State,Toks,[]) :-
+consume_semicolon(State,Toks,[]) 
+	:-
 	error('parse error\nParsed successfully %t\nI don\'t understand %t\nRemaining tokens %t\n\n',
-		[DSpec,Declt,Toks],State).
+		   [DSpec,Declt,Toks],State).
 
 %%-------------------------------------------------------
 %%
@@ -222,8 +229,10 @@ consume_semicolon(State,Toks,[]) :-
 %%-------------------------------------------------------
 
 %-----------------------------------------------------------
-% als_statement/4
-%	recognizes the following statements in the source file
+% als_statement/3
+%
+%	recognizes the following statements in the source file:
+%
 %	als$begin_silent;
 %	als$end_silent;
 %	als$ctype(Type);
@@ -233,9 +242,11 @@ consume_semicolon(State,Toks,[]) :-
 als_statement(State) -->
 	[ident('als$begin_silent'),semicolon], !,
 	{ output_begin_silent }.
+
 als_statement(State) --> 
 	[ident('als$end_silent'),semicolon],
 	{ output_end_silent }.
+
 als_statement(State) --> 
 	[fident('als$ctype'),lparen,ident(Name),rparen,semicolon], 
 	!,
@@ -244,6 +255,7 @@ als_statement(State) -->
 	  find_type(Name,Table,DSpec,Declt),
 	  output_type(Name,DSpec,Declt,State)
 	}.
+
 als_statement(State) -->
 	[fident('als$const'),lparen,string(CName),rparen,semicolon],
 	!,
@@ -255,7 +267,9 @@ als_statement(State) -->
 
 %-----------------------------------------------------------
 % objc_statement/5
-%	recognizes following Obj-C constructs
+%
+%	recognizes following Obj-C constructs:
+%
 %	@{interface/protocol} Name(Category) .... @end
 %	@{interface/protocol} Name [:SuperClass]
 %		[{ [@public fields] [@private fields]}] @end
@@ -268,6 +282,7 @@ objc_statement(State) -->
 	  is_identifier(Tok,Id) },
 	!,
 	check_for_end([at_end,stk_bot],_).
+
 objc_statement(State) -->
 	[ident(Type),Tok],
 	{ interfaceOrProtocol(Type),
@@ -282,6 +297,7 @@ objc_statement(State) -->
 	  setC2P(info_table,State,OutTab)
 	},
 	check_for_end([at_end,stk_bot],_).
+
 objc_statement(State) -->
 	[ident(class)],
 	declt_list(State,DecltList),
@@ -290,7 +306,9 @@ objc_statement(State) -->
 
 
 process_class_decln([],State).
-process_class_decln([Declt|Rest],State) :-
+
+process_class_decln([Declt|Rest],State) 
+	:-
 	scan_declt(Declt,ident(Name),_,_),
 	accessC2P(info_table,State,Table),
 	insert_type(ident(Name),[type=int],Declt,Table,OutTable),
@@ -304,6 +322,7 @@ instance_variables_opt(State,Public) --> [lcurly], !,
 	public_field_list_opt(State,Public),
 	other_field_lists_opt(State),
 	[rcurly].
+
 instance_variables_opt(State,[]) --> [].
 
 superclass_opt --> [ colon, ident(Id)], !.
@@ -313,6 +332,7 @@ public_field_list_opt(State,Public) -->
 	[at,ident(public)],
 	!,
 	field_list(State,Public).
+
 public_field_list_opt(State,[]) --> [].
 
 other_field_lists_opt(State) -->
@@ -320,6 +340,7 @@ other_field_lists_opt(State) -->
 	!,
 	field_list(State,_),
 	other_field_lists_opt(State).
+
 other_field_lists_opt(State) -->
 	field_list(State,_),
 	!.
@@ -349,7 +370,7 @@ decln_specs(State,[]) --> [].
 
 %-----------------------------------------------------------
 % decln_spec_more/6  (non deterministic)
-%	there is no ! in the first clause because
+%	there is no cut(!) in the first clause because
 %	we want to allow for the possiblity that the tokens
 %	we parsed as being additional declaration specifiers
 %	may in fact be part of the declarator.
@@ -805,7 +826,8 @@ type_spec_list_opt(State,[]) --> [].
 %% process_decln/3.
 %%-------------------------------------
 
-process_decln(DSpec,Declts,State) :-
+process_decln(DSpec,Declts,State) 
+	:-
 	is_typedef(DSpec),
 	!,
 	accessC2P(info_table, State, InTable),
@@ -813,7 +835,8 @@ process_decln(DSpec,Declts,State) :-
 	setC2P(info_table, State, OutTable),
 	process_typedef_declts(Declts,DSpec,State).
 
-process_decln(DSpec,Declts,State) :-
+process_decln(DSpec,Declts,State) 
+	:-
 	accessC2P(info_table, State, InTable),
 	check_tagged_structdef(DSpec,InTable,OutTable),
 	setC2P(info_table, State, OutTable),
@@ -831,7 +854,9 @@ check_tagged_structdef(_,Tab,Tab).
 %%-------------------------------------
 
 process_typedef_declts([],_,State).
-process_typedef_declts([Declt|Rest],DSpec,State) :-
+
+process_typedef_declts([Declt|Rest],DSpec,State) 
+	:-
 	scan_declt(Declt,ident(Name),_,_),
 	accessC2P(info_table, State, InTable),
 	insert_type(ident(Name),DSpec,Declt,InTable,OutTable),
@@ -845,11 +870,13 @@ process_typedef_declts([Declt|Rest],DSpec,State) :-
 
 process_declts( [] ,DSpec,_,State).
 
+/*
 		%% debugging:
 process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
 	:-
-%	printf('process_decl: %t \n',[Declt]),
+	printf('process_decl: %t \n',[Declt]),
 	fail.
+*/
 
 process_declts( [ Declt | Rest ] ,DSpec,FcnFilter,State) 
 	:-

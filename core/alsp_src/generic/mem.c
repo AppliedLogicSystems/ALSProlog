@@ -41,11 +41,16 @@ static	int	pgsize = 8192;	/* A guess at the page size */
 
 #define SIGSTKSIZE 8192		/* Size to use for a signal stack */
 
-#if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE)
-static	int	bottom_stack_page_is_protected = 0;
-#endif
+/* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
 
-#ifdef HAVE_MMAP
+#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || defined(MACH_SUBSTRATE)
+
+static	int	bottom_stack_page_is_protected = 0;
+
+#endif	/* defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
+
+/* #ifdef HAVE_MMAP */
+#if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
 /*----------------- Operating systems with mmap ---------------*/
 
 #include <sys/mman.h>
@@ -104,7 +109,7 @@ stack_overflow(signum, siginf, sigcon)
     struct siginfo *siginf;
     struct ucontext *sigcon;
 
-#elif defined(HAVE_SIGVEC)
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
 static	void	stack_overflow	PARAMS(( int, int, struct sigcontext *, caddr_t ));
 static void
 stack_overflow(signum, code, scp, addr)
@@ -115,6 +120,7 @@ stack_overflow(signum, code, scp, addr)
 #else
     die
 #endif
+
 {
 
     if (bottom_stack_page_is_protected) {
@@ -137,7 +143,7 @@ stack_overflow(signum, code, scp, addr)
 
 #if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
 	signal_handler(ALSSIG_STACK_OVERFLOW, siginf, sigcon);
-#elif defined (HAVE_SIGVEC)
+#elif defined (HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
 	signal_handler(ALSSIG_STACK_OVERFLOW, code, scp, addr);
 #else
 	die
@@ -160,13 +166,18 @@ stack_overflow(signum, code, scp, addr)
 	act.sa_handler = SIG_DFL;
 	act.sa_flags = SA_ONSTACK;
 	(void) sigaction(signum, &act, 0);
-#elif defined(HAVE_SIGVEC)
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
 	struct sigvec v;
 
 	v.sv_handler = SIG_DFL;
 	v.sv_mask = 0;
 	v.sv_flags = SV_ONSTACK;
+#ifdef HAVE_SIGVECTOR
+	sigvector(signum, &v, 0);
+#else
 	sigvec(signum, &v, 0);
+#endif
+
 #else
 	die
 #endif
@@ -202,7 +213,7 @@ allocate_prolog_heap_and_stack(size)
      * I don't know what the behavior will be for SVR4.
      *                                  Kev, 12/18/92
      *-------------------------------------------------------------*/
-#elif defined(HAVE_SIGVEC)
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
     struct sigstack si;
     struct sigvec v;
 
@@ -213,8 +224,13 @@ allocate_prolog_heap_and_stack(size)
     v.sv_handler = stack_overflow;
     v.sv_mask = 0;
     v.sv_flags = SV_ONSTACK;
+#ifdef HAVE_SIGVECTOR
+    sigvector(SIGBUS, &v, 0);	/* establish stack overflow */
+    sigvector(SIGSEGV, &v, 0);	/* signal handlers      */
+#else
     sigvec(SIGBUS, &v, 0);	/* establish stack overflow */
     sigvec(SIGSEGV, &v, 0);	/* signal handlers      */
+#endif
 #endif /* HAVE_SIGACTION, HAVE_SIGVEC */
 
 
@@ -327,7 +343,11 @@ stack_overflow(signum, code, scp, addr)
 	v.sv_handler = SIG_DFL;
 	v.sv_mask = 0;
 	v.sv_flags = SV_ONSTACK;
+#ifdef HAVE_SIGVECTOR
+	sigvector(signum, &v, 0);
+#else
 	sigvec(signum, &v, 0);
+#endif
 
 	coredump_cleanup(-1);
     }
@@ -349,7 +369,11 @@ allocate_prolog_heap_and_stack(size)
     v.sv_handler = stack_overflow;
     v.sv_mask = 0;
     v.sv_flags = SV_ONSTACK;
+#ifdef HAVE_SIGVECTOR
+    sigvector(SIGBUS, &v, 0);	/* establish stack overflow signal handler */
+#else
     sigvec(SIGBUS, &v, 0);	/* establish stack overflow signal handler */
+#endif
 
     pgsize = vm_page_size;
     retval = (PWord *) STACKSTART;
@@ -566,7 +590,8 @@ static	int	ss_saved_state_present	PARAMS(( void ));
 #undef round
 #define round(x,s) ((((long) (x) - 1) & ~(long)((s)-1)) + (s))
 
-#if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE)
+/* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
+#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || defined(MACH_SUBSTRATE)
 /*
  * next_big_block_addr is the location at which we will attempt to allocate
  * the next big block of memory that our prolog system requests.  Note that
@@ -575,7 +600,7 @@ static	int	ss_saved_state_present	PARAMS(( void ));
 
 static long next_big_block_addr;
 
-#endif
+#endif	/* defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
 
 static long *
 alloc_big_block(size, fe_num)
@@ -586,7 +611,8 @@ alloc_big_block(size, fe_num)
 
     size = round(size, pgsize);
 
-#ifdef HAVE_MMAP
+/* #if defined(HAVE_MMAP) && defined(HAVE_DEV_ZERO) */
+#if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
     {
 	int fd;
 	/*
@@ -607,7 +633,7 @@ alloc_big_block(size, fe_num)
 				size,
 #if defined(arch_sparc)
 				PROT_EXEC |
-#endif
+#endif  /* arch_sparc */
 				PROT_READ | PROT_WRITE,
 				MAP_PRIVATE | MAP_FIXED,
 				fd,
@@ -679,16 +705,17 @@ als_mem_init(file,offset)
 	return 1;	/* saved state loaded */
 
     else if (!file) {	/* no file specified */
-#if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE)
+/* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
+#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || defined(MACH_SUBSTRATE)
 	next_big_block_addr = CODESTART;
-#else /* HAVE_MMAP*/
+#else 
 	/* Leave malloc and friends some space to work with */
 	char *mp = malloc(AM_MALLOCSPACE);
 	if (mp)
 	    free(mp);
 	else
 	    fatal_error(FE_ALS_MEM_INIT,0);
-#endif /* HAVE_MMAP */
+#endif /* defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
 
 	als_mem = alloc_big_block(AM_BLOCKSIZE, FE_ALS_MEM_INIT);
 
@@ -712,9 +739,10 @@ als_mem_init(file,offset)
 	strcpy(header.integ_processor, ProcStr);
 	strcpy(header.integ_minor_os, MinorOSStr);
 
-#if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE)
+/* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
+#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || defined(MACH_SUBSTRATE)
 	ss_register_global(&next_big_block_addr);
-#endif	/* HAVE_MMAP */
+#endif	/* defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
 
 	return 0;	/* no saved state */
     }
@@ -836,14 +864,15 @@ long *
 ss_fmalloc_start()
 {
     long *retval;
-#if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE)
+/* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
+#if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) || defined(MACH_SUBSTRATE)
     retval = (long *) next_big_block_addr;
 #elif defined(HAVE_BRK)
     retval = (long *) sbrk(0);
     retval = (long *) round((long) retval,pgsize);
 #else
 	retval = (long *) -1;
-#endif	/* HAVE_MMAP */
+#endif	/* defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
     if (retval == (long *) -1)
 	fatal_error(FE_SS_FMALLOC,0);
     return retval;
@@ -880,6 +909,7 @@ ss_save_state(filename)
 {
     int   ssfd;
     int   bnum, gnum;
+	int errnum;
 
     /*
      * Open the saved state file.
@@ -890,6 +920,7 @@ ss_save_state(filename)
 #else
     ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0777);
 #endif
+printf("Save_state:opened %s %d\n",filename, ssfd);
     if (ssfd < 0)
 	return 0;
     
@@ -899,6 +930,8 @@ ss_save_state(filename)
 
     for (gnum=0; gnum < header.nglobals; gnum++)
 	header.globals[gnum].value = *header.globals[gnum].addr;
+
+printf("Finished globals: nglobals=%d nblocks=%d\n",header.nglobals,header.nblocks);
     
     /*
      * Compute the fsize values for each block.  The fsize value is the
@@ -922,11 +955,14 @@ ss_save_state(filename)
 	
 	header.blocks[bnum].fsize = (fb) ? fb - blockstart +  2*sizeof(long)
 					: header.blocks[bnum].asize;
-#ifdef HAVE_MMAP
+/* #ifdef HAVE_MMAP */
+#if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
 	header.blocks[bnum].fsize = round(header.blocks[bnum].fsize, pgsize);
 #endif /* HAVE_MMAP */
 
     }
+printf("Finished computing blocks\n");
+
 
     /*
      * Save the blocks to the save file.
@@ -938,11 +974,13 @@ ss_save_state(filename)
 		  (size_t)header.blocks[bnum].fsize) < 0)
 	    goto ss_err;
     
+printf("Wrote blocks to file\n");
+
     close(ssfd);
-    
     return 1;
 
 ss_err:
+    printf("!!Save_state error writing file: bnum=%d errno=% \n",bnum,errno);
     close(ssfd);
     unlink(filename);
     return 0;
@@ -985,7 +1023,8 @@ ss_restore_state(filename,offset)
 		strcmp(hdr.integ_minor_os, MinorOSStr) != 0)
 	fatal_error(FE_SS_INTEGRITY,0);
 
-#ifdef	HAVE_MMAP
+/* #if	defined(HAVE_MMAP) && defined(HAVE_DEV_ZERO) */
+#if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
     /* Get the blocks */
     for (bnum = 0; bnum < hdr.nblocks; bnum++) {
 
@@ -993,7 +1032,7 @@ ss_restore_state(filename,offset)
 			    (size_t)hdr.blocks[bnum].fsize,
 #if defined(arch_sparc)
 			    PROT_EXEC |
-#endif 
+#endif  /* arch_sparc */
 			    PROT_READ | PROT_WRITE,
 			    MAP_PRIVATE | MAP_FIXED,
 			    ssfd,
@@ -1019,7 +1058,7 @@ ss_restore_state(filename,offset)
 				         - hdr.blocks[bnum].fsize),
 #if defined(arch_sparc)
 				PROT_EXEC |
-#endif 
+#endif  /* arch_sparc */
 				PROT_READ | PROT_WRITE,
 				MAP_PRIVATE | MAP_FIXED,
 				zfd,

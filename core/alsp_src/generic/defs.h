@@ -136,6 +136,10 @@
 #include "oconfig.h"
 #include "config.h"
 
+#ifdef Bytecode
+#undef Threaded
+#endif
+
 #if defined(HAVE_VM_ALLOCATE) && defined(HAVE_VM_PROTECT)
 #define MACH_SUBSTRATE 1
 #undef HAVE_MMAP
@@ -260,7 +264,8 @@
  | supported.
  *---------------------------------------------------------------------*/
 
-#define DynamicForeign 1
+/*#define DynamicForeign 1   */
+#undef DynamicForeign
 #endif	/* HAVE_LIBDL || HAVE_LIBLD */
 
 /*---------------------------------------------------------------------*

@@ -588,7 +588,8 @@ fflt_ck(ThisFileType, FileType, FullFile)
 	read_link(FullFile, LinkTarget),
 	'$getFileStatus'(LinkTarget, LinkStatusTerm),
 	arg(1, LinkStatusTerm, LinkFileType),
-	fflt_ck(LinkFileType, FileType, FullFile).
+%	fflt_ck(LinkFileType, FileType, FullFile).
+	fflt_ck(LinkFileType, FileType, LinkTarget).
 
 
 export disj_to_string/2.

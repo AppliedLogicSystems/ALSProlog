@@ -447,6 +447,7 @@ sio_fd()
     PWord v1, v2;
     int   t1, t2;
     UCHAR *buf;
+	PWord rval; int rtype;
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
@@ -454,10 +455,20 @@ sio_fd()
     if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
+/* printf("sio_fd: SIO_FD(buf)=%d\n",SIO_FD(buf)); */
+
+/*
     if (w_unify(v2, t2, (PWord) SIO_FD(buf), WTP_INTEGER))
 	SUCCEED;
     else
 	FAIL;
+*/
+
+	PI_makedouble(&rval,&rtype,(double) SIO_FD(buf));
+	if (PI_unify(v2,t2,rval,rtype))
+		PI_SUCCEED;
+		PI_FAIL;
+
 
 }
 
@@ -1820,7 +1831,7 @@ sio_poll()
 
 
 int
-window_insert_pos()
+win_insert_pos()
 {
   PWord v1,v2;
   int t1,t2;
@@ -1839,21 +1850,60 @@ window_insert_pos()
 }
 
 int
-set_window_insert_pos()
+set_win_insert_pos()
 {
   PWord v1,v2;
   int t1,t2;
   UCHAR *buf;
   
+printf("Enter set_window_insert_pos: ");
+
   w_get_An(&v1,&t1,1);
   w_get_An(&v2,&t2,2);
-  
+
+printf("t1=%d  t2=%d\n",t1,t2);
+
   if ((buf=get_stream_buffer(v1,t1)) == (UCHAR *) 0 || t2 != WTP_INTEGER)
 	FAIL;
   
+printf("Buf & t2 ok\n");
+
   WINS_INSERT_POS(buf) = (int)v2;
   SUCCEED;
 }
+
+/* 
+   int_or_float(t,v)
+ */
+int
+int_or_float(t,v)
+	int t;
+	PWord v;
+{
+#ifdef DoubleType
+    if ( (t == WTP_INTEGER) || (t == WTP_DOUBLE))
+		return(1);
+	else
+		return(0);
+#else  /* DoubleType */
+	PWord functor;
+	int   arity;
+
+    if (t == WTP_INTEGER)
+		return(1);
+	else if (t != WTP_STRUCTURE)
+		return(0);
+	else
+		w_get_arity(&arity, v);
+		w_get_functor(&functor, v);
+
+		if (arity != 4 || functor != TK_DDOUBLE)
+			return(0);
+		else
+			return(1);
+#endif /* DoubleType */
+}
+
 
 
 /*
@@ -1888,21 +1938,73 @@ sio_window_open()
     w_get_An(&v5, &t5, 5);
     w_get_An(&v6, &t6, 6);
 
+printf("sio_w_o: types: t1=%d t2=%d t3=%d t4=%d t5=%d t6=%d\n",
+			t1, t2, t3, t4, t5, t6);
+
+
     if ((buf = get_stream_buffer(v2, t2)) == (unsigned char *) 0)
 	FAIL;
 
-    if (t1 != WTP_INTEGER || t3 != WTP_INTEGER || t4 != WTP_INTEGER
-	 || t5 != WTP_INTEGER || t6 != WTP_INTEGER
+printf("stream buf ok\n");
+
+    if ((t3 != WTP_INTEGER) || (t4 != WTP_INTEGER) || (t6 != WTP_INTEGER)
 	) {
 	SIO_ERRCODE(buf) = SIOE_INARG;
 	FAIL;
     }
+printf("t3,4,6 ok\n");
+
+	if (int_or_float(t1,v1) == 0)
+	{ SIO_ERRCODE(buf) = SIOE_INARG;
+	  FAIL; 
+	}
+printf("t1 ok\n");
+	if (int_or_float(t5,v5) == 0)
+	{ SIO_ERRCODE(buf) = SIOE_INARG;
+	  FAIL; 
+	}
+printf("t5 ok\n");
+printf("types ok\n");
 
     if (compute_flags((char *)buf,v3,v4) < 0)
 	FAIL;
+printf("flags ok\n");
 
     SIO_TYPE(buf) = SIO_TYPE_PROLOG_MANAGED;
-    SIO_FD(buf) = (int) v1;
+
+#ifdef DoubleType
+    	SIO_FD(buf) = (unsigned long) v1;
+#else
+	if (t1 == WTP_INTEGER)
+	{
+    	SIO_FD(buf) = (unsigned long) v1;
+		}
+	else /* v1 is a structure representing a float:
+    	    t1 == WTP_STRUCTURE)   */
+	{
+		PWord functor, vv;
+		int   arity, tt;
+		double uu=0;
+		int i;
+
+		w_get_arity(&arity, v1);
+		w_get_functor(&functor, v1);
+			/* Must have: arity == 4 && functor == TK_DDOUBLE */
+
+		for (i = 0; i < 4; i++) {
+		    w_get_argn(&vv, &tt, v1, i + 1);
+			*(((short *) &uu)+ i) = (short) vv;
+
+ printf("i=%d vv=%hd uu=%d\n",i,(short)vv,(unsigned long)uu); 
+		}
+    	SIO_FD(buf) = (unsigned long) uu;
+
+	}
+#endif	/* DoubleType */
+
+printf("SIO_FD(buf)=%d\n",SIO_FD(buf));
+
+
     SIO_ERRCODE(buf) = SIOE_NORMAL;
 
     WINS_INSERT_POS(buf) = (int)v5;

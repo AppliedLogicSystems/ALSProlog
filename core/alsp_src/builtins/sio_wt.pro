@@ -79,6 +79,9 @@ module sio.
  |		a term (or each sebsequent element of a list) will be considered to 
  |		be at a depth one greater than the preceding structure argument 
  |		(or list element).
+ |
+ |	line_end(Bool)  -- When true, nl(_) is normal; when false, 
+ |		line-breaks (new lines) are preceeded by a \
  *---------------------------------------------------------------------*/
 
 export write_term/2.
@@ -99,7 +102,6 @@ write_term(Stream_or_alias,Term,Options)
 	!,
 	write_term0(Stream,Term,WInfo).
 
-
 export write/1.
 export write/2.
 
@@ -116,15 +118,16 @@ write(Stream_or_alias,Term)
 	!,
 	write_term0(Stream,Term,WInfo).
 
-
 export writeq/1.
 export writeq/2.
 
-writeq(Term) :-
+writeq(Term) 
+	:-
 	get_current_output_stream(Stream),
 	writeq(Stream,Term).
 
-writeq(Stream_or_alias,Term) :-
+writeq(Stream_or_alias,Term) 
+	:-
 	output_stream_or_alias_ok(Stream_or_alias, Stream),
 	nonvar(Stream_or_alias),
 	winfo_writeq(Stream,WInfo),
@@ -134,11 +137,13 @@ writeq(Stream_or_alias,Term) :-
 export write_canonical/1.
 export write_canonical/2.
 
-write_canonical(Term) :-
+write_canonical(Term) 
+	:-
 	get_current_output_stream(Stream),
 	write_canonical(Stream,Term).
 
-write_canonical(Stream_or_alias,Term) :-
+write_canonical(Stream_or_alias,Term) 
+	:-
 	output_stream_or_alias_ok(Stream_or_alias, Stream),
 	nonvar(Stream_or_alias),	%% Preserve var for error reporting
 	winfo_write_canonical(Stream,WInfo),
@@ -148,81 +153,74 @@ write_canonical(Stream_or_alias,Term) :-
 export print/1.
 export print/2.
 
-print(Term) :-
+print(Term) 
+	:-
 	get_current_output_stream(Stream),
 	print(Stream,Term).
 
-print(Stream_or_alias,Term) :-
+print(Stream_or_alias,Term) 
+	:-
 	output_stream_or_alias_ok(Stream_or_alias, Stream),
 	nonvar(Stream_or_alias),	%% Preserve var for error reporting
 	winfo_print(Stream,WInfo),
 	!,
 	write_term0(Stream,Term,WInfo).
-	
 
-write_term0(Stream,Term,WInfo) :-
+write_term0(Stream,Term,WInfo) 
+	:-
 	winfo_depth_computation(WInfo,DC),
-	(   DC = flat
-	->  set_depth_computation_constant(0)
-	;   set_depth_computation_constant(1) ),
+	(DC = flat ->  
+		set_depth_computation_constant(0)
+		;
+		set_depth_computation_constant(1) 
+	),
 	winfo_maxdepth(WInfo,MaxDepth),
 	winfo_line_len(WInfo,Width),
 	wd(Term,MaxDepth,OutList,[],WInfo),
 	winfo_indent(WInfo,Indent),
-	output_string(Stream,OutList,Width,Indent),
+	winfo_line_end(WInfo,LineEnd),
+	output_string(Stream,OutList,Width,Indent,LineEnd),
 	fail.
+
 write_term0(Stream,Term,WInfo).
 
-write_options(Var,WInfo) :-
+write_options(Var,WInfo) 
+	:-
 	var(Var),
 	!,
 	instantiation_error(2).
 write_options([],WInfo) :- !.
-write_options([Option|Options],WInfo) :-
-	!,
+
+write_options([Option|Options],WInfo) 
+	:-!,
 	write_option(Option,WInfo),
 	write_options(Options,WInfo).
-write_options(Culprit, WInfo) :-
+
+write_options(Culprit, WInfo) 
+	:-
 	type_error(list,Culprit,2).
 
 is_bool(true).
 is_bool(false).
 
-write_option(Var, WInfo) :-
-	var(Var),
-	!,
-	instantiation_error(3).
-write_option(quoted(Val),WInfo) :-
-	is_bool(Val),
-	!,
-	set_winfo_quoted(WInfo,Val).
-write_option(ignore_ops(Val),WInfo) :-
-	is_bool(Val),
-	!,
-	set_winfo_ignore_ops(WInfo,Val).
-write_option(portrayed(Val),WInfo) :-
-	is_bool(Val),
-	!,
-	set_winfo_portrayed(WInfo,Val).
-write_option(numbervars(Val),WInfo) :-
-	is_bool(Val),
-	!,
-	set_winfo_numbervars(WInfo,Val).
-write_option(lettervars(Val),WInfo) :-
-	is_bool(Val),
-	!,
-	set_winfo_lettervars(WInfo,Val).
-write_option(quoted_strings(Val),WInfo) :-
-	is_bool(Val),
-	!,
-	set_winfo_quoted_strings(WInfo,Val).
-write_option(depth_computation(Val),WInfo) :-
+write_option( Var, 		           WInfo) :- var(Var), !,	 instantiation_error(3).
+write_option( quoted(Val),         WInfo) :- is_bool(Val),!, set_winfo_quoted(WInfo,Val).
+write_option( ignore_ops(Val),     WInfo) :- is_bool(Val),!, set_winfo_ignore_ops(WInfo,Val).
+write_option( portrayed(Val),      WInfo) :- is_bool(Val),!, set_winfo_portrayed(WInfo,Val).
+write_option( numbervars(Val),     WInfo) :- is_bool(Val),!, set_winfo_numbervars(WInfo,Val).
+write_option( lettervars(Val),     WInfo) :- is_bool(Val),!, set_winfo_lettervars(WInfo,Val).
+write_option( quoted_strings(Val), WInfo) :- is_bool(Val),!, set_winfo_quoted_strings(WInfo,Val).
+write_option( line_end(Val),       WInfo) :- is_bool(Val),!, set_winfo_line_end(WInfo,Val).
+
+write_option( depth_computation(Val), WInfo) 
+	:-
 	nonvar(Val),
 	(Val = flat ; Val = nonflat),
 	!,
 	set_winfo_depth_computation(WInfo,Val).
 
-write_option(maxdepth(N,Atom1,Atom2),WInfo) :-
+write_option(maxdepth(N,Atom1,Atom2),WInfo) 
+	:-
 	integer(N),
 	N > 0,
 	atom(Atom1),
@@ -231,123 +229,137 @@ write_option(maxdepth(N,Atom1,Atom2),WInfo) :-
 	set_winfo_maxdepth(WInfo,N),
 	set_winfo_maxdepth_atom(WInfo,Atom1),
 	set_winfo_maxdepth_listtail(WInfo,Atom2).
-write_option(maxdepth(N),WInfo) :-
+
+write_option(maxdepth(N),WInfo) 
+	:-
 	integer(N),
 	N > 0,
 	!,
 	set_winfo_maxdepth(WInfo,N).
-write_option(line_length(N),WInfo) :-
+
+write_option(line_length(N),WInfo) 
+	:-
 	integer(N),
 	N > 0,
 	!,
 	set_winfo_line_len(WInfo,N).
-write_option(indent(N),WInfo) :-
+
+write_option(indent(N),WInfo) 
+	:-
 	integer(N),
 	N > 0,
 	!,
 	set_winfo_indent(WInfo,N).
-write_option(Culprit, WInfo) :-
+
+write_option(Culprit, WInfo) 
+	:-
 	domain_error(write_option,Culprit,3).
 
-/*-----------------------------------------------------------------------*
+/*------------------------------------------------------------------------------------*
  |		winfo structure
  |
  |	The winfo structure (for write info) is a structure with winfo
  |	as the principal functor.  Arguments of the structure control the 
  |	manner in which a term is written out.
  |
- | 	winfo(	Quoted,
- |			Ignore_ops,
- |			Portrayed,
- |			Numbervars,
+ |			SlotName			PrimaryDefaultValue
+ |			========        	============
+ | 	winfo(	Quoted,					true
+ |			Ignore_ops,				true
+ |			Portrayed,				true
+ |			Numbervars,				true
  |			Maxdepth_atom,
  |			Listtail,
  |			Indent,
- |			Lettervars,
+ |			Lettervars,				true
  |			Varcounter,
- |			Quoted_strings,
- |			Wt_opts
+ |			Quoted_strings,			true
+ |			Wt_opts,
+			LineEnd
  |		 )
  |
  |	Wt_opts is a term of the form:
  |		
  |		wt_opts(Line_len, MaxDepth, Depth_computation)
  |			
- *-----------------------------------------------------------------------*/
+ |	The access routines below are grouped in triplets (or pairs), as
+ |	follows:
+ |	- winfo_<xxx>(Winfo, Val)		- access to <xxx>: unifies Val with winfo value
+ |	- winfo_<xxx>(Winfo)			- set primary default value for <xxx> (binds slot var)
+ |	- set_winfo_<xxx>(Winfo,Val)	- re-sets value for <xxx> (mangles slot var)
+ *------------------------------------------------------------------------------------*/
 
-winfo_quoted(WInfo,Value) :-		arg(1,WInfo,Value).
-winfo_quoted(WInfo) :-				arg(1,WInfo,true).
+winfo_quoted(WInfo,Value)				:-	arg(1,WInfo,Value).
+winfo_quoted(WInfo)						:-	arg(1,WInfo,true).
+set_winfo_quoted(WInfo,Value)			:-	mangle(1,WInfo,Value).
 
-winfo_ignore_ops(WInfo,Value) :- 	arg(2,WInfo,Value).
-winfo_ignore_ops(WInfo) :-			arg(2,WInfo,true).
+winfo_ignore_ops(WInfo,Value)			:- 	arg(2,WInfo,Value).
+winfo_ignore_ops(WInfo)					:-	arg(2,WInfo,true).
+set_winfo_ignore_ops(WInfo,Value) 		:-	mangle(2,WInfo,Value).
 
-winfo_portrayed(WInfo,Value) :- 	arg(3,WInfo,Value).
-winfo_portrayed(WInfo) :-			arg(3,WInfo,true).
+winfo_portrayed(WInfo,Value)			:-	arg(3,WInfo,Value).
+winfo_portrayed(WInfo)					:-	arg(3,WInfo,true).
+set_winfo_portrayed(WInfo,Value) 		:-	mangle(3,WInfo,Value).
 
-winfo_numbervars(WInfo,Value) :- 	arg(4,WInfo,Value).
-winfo_numbervars(WInfo) :-			arg(4,WInfo,true).
+winfo_numbervars(WInfo,Value)			:-	arg(4,WInfo,Value).
+winfo_numbervars(WInfo)					:-	arg(4,WInfo,true).
+set_winfo_numbervars(WInfo,Value) 		:-	mangle(4,WInfo,Value).
 
-winfo_maxdepth_atom(WInfo,Value) :- 	arg(5,WInfo,Value).
-winfo_maxdepth_listtail(WInfo,Value) :- arg(6,WInfo,Value).
+winfo_maxdepth_atom(WInfo,Value) 		:- 	arg(5,WInfo,Value).
+set_winfo_maxdepth_atom(WInfo,Value) 	:-	mangle(5,WInfo,Value).
 
-winfo_indent(WInfo,Value) :-		arg(7,WInfo,Value).
+winfo_maxdepth_listtail(WInfo,Value) 	:- 	arg(6,WInfo,Value).
+set_winfo_maxdepth_listtail(WInfo,Value):-	mangle(6,WInfo,Value).
 
-winfo_lettervars(WInfo,Value) :-	arg(8,WInfo,Value).
-winfo_lettervars(WInfo) :-			arg(8,WInfo,true).
+winfo_indent(WInfo,Value)				:-	arg(7,WInfo,Value).
+set_winfo_indent(WInfo,Value) 			:-	mangle(7,WInfo,Value).
 
-winfo_varcounter(WInfo,Value) :-	arg(9,WInfo,Value).
+winfo_lettervars(WInfo,Value)			:-	arg(8,WInfo,Value).
+winfo_lettervars(WInfo)					:-	arg(8,WInfo,true).
+set_winfo_lettervars(WInfo,Value) 		:-	mangle(8,WInfo,Value).
 
-winfo_quoted_strings(WInfo,Value) :-	arg(10,WInfo,Value).
-winfo_quoted_strings(WInfo) :-		arg(10,WInfo,true).
+winfo_varcounter(WInfo,Value) 			:-	arg(9,WInfo,Value).
+set_winfo_varcounter(WInfo,Value) 		:-	mangle(9,WInfo,Value).
 
-winfo_wt_opts(WInfo,WTOPTS) :-		arg(11,WInfo,WTOPTS).
-winfo_line_len(WInfo,Value) :-		arg(11,WInfo,WO), arg(1,WO,Value).
-winfo_maxdepth(WInfo,Value) :-		arg(11,WInfo,WO), arg(2,WO,Value).
-winfo_depth_computation(WInfo,Value) :- arg(11,WInfo,WO), arg(3,WO,Value).
+winfo_quoted_strings(WInfo,Value)		:-	arg(10,WInfo,Value).
+winfo_quoted_strings(WInfo) 			:-	arg(10,WInfo,true).
+set_winfo_quoted_strings(WInfo,Value)	:-	mangle(10,WInfo,Value).
 
+winfo_wt_opts(WInfo,WTOPTS) 			:-	arg(11,WInfo,WTOPTS).
 
-set_winfo_quoted(WInfo,Value) :-		mangle(1,WInfo,Value).
+winfo_line_len(WInfo,Value) 			:-	arg(11,WInfo,WO), arg(1,WO,Value).
+set_winfo_line_len(WInfo,Value) 		:-	arg(11,WInfo,WO), mangle(1,WO,Value).
 
-set_winfo_ignore_ops(WInfo,Value) :-	mangle(2,WInfo,Value).
+winfo_maxdepth(WInfo,Value) 			:-	arg(11,WInfo,WO), arg(2,WO,Value).
+set_winfo_maxdepth(WInfo,Value) 		:-	arg(11,WInfo,WO), mangle(2,WO,Value).
 
-set_winfo_portrayed(WInfo,Value) :-		mangle(3,WInfo,Value).
+winfo_depth_computation(WInfo,Value) 	:-	arg(11,WInfo,WO), arg(3,WO,Value).
+set_winfo_depth_computation(WInfo,Value) :- arg(11,WInfo,WO), mangle(3,WO,Value).
 
-set_winfo_numbervars(WInfo,Value) :-	mangle(4,WInfo,Value).
+winfo_line_end(WInfo,Value)				:-	arg(12,WInfo,Value).
+set_winfo_line_end(WInfo,Value)			:-	mangle(12,WInfo,Value).
 
-set_winfo_maxdepth_atom(WInfo,Value) :- mangle(5,WInfo,Value).
-set_winfo_maxdepth_listtail(WInfo,Value) :- mangle(6,WInfo,Value).
-
-set_winfo_indent(WInfo,Value) :-		mangle(7,WInfo,Value).
-
-set_winfo_lettervars(WInfo,Value) :-	mangle(8,WInfo,Value).
-
-set_winfo_varcounter(WInfo,Value) :-	mangle(9,WInfo,Value).
-
-set_winfo_quoted_strings(WInfo,Value):-	mangle(10,WInfo,Value).
-
-set_winfo_line_len(WInfo,Value) 
-	:-	
-	arg(11,WInfo,WO), mangle(1,WO,Value).
-set_winfo_maxdepth(WInfo,Value) 
-	:-	
-	arg(11,WInfo,WO), mangle(2,WO,Value).
-set_winfo_depth_computation(WInfo,Value) 
-	:- 
-	arg(11,WInfo,WO), mangle(3,WO,Value).
-
-	/*---------------------------------------------*
-	 | Default winfos
+	/*------------------------------------------------------------------------*
+	 | Default winfos 
+	 | - several alternate winfo structures for different default contexts.
 	 |
  	 | 	winfo(	Quoted, Ignore_ops, Portrayed, Numbervars,
  	 |			Maxdepth_atom, Listtail, Indent,
  	 |			Lettervars, Varcounter, Quoted_strings, 
- 	 |			wt_opts(Line_len, MaxDepth, Depth_computation)
+ 	 |			wt_opts(Line_len, MaxDepth, Depth_computation), LineEnd)
  	 |		 )
-	 *---------------------------------------------*/
+	 | Distinguished/presented by:
+ 	 |
+	 |	winfo_write_term(Stream, Winfo)
+	 |	winfo_write(Stream, Winfo)
+	 |	winfo_writeq(Stream, Winfo)
+	 |	winfo_write_canonical(Stream, Winfo)
+	 |	winfo_write_print(Stream, Winfo)
+	 *-------------------------------------------------------------------------*/
 
 		%% Quoted, Lettervars, Quoted_strings
 winfo_write_term( Stream,
-		winfo(true, false,false,false,'*','...',0,true,0,true,WO)) 
+			winfo(true, false,false,false,'*','...',0,true,0,true,WO,true)) 
 	:-
     WO = wt_opts(_,_,_),
     stream_wt_opts(Stream,WO).
@@ -355,81 +367,82 @@ winfo_write_term( Stream,
 		%% No quoting, Numbervars, No Lettervars, No Quoted_strings,
 		%% Very long lines 
 winfo_write( Stream,
-		winfo(false,false,false,true,'*','...',0,false,0,false,WO)) 
+			winfo(false,false,false,true,'*','...',0,false,0,false,WO,true)) 
 	:-
     WO = wt_opts(2047,Depth,DepthComputation),	%% override default length
     stream_wt_maxdepth(Stream,Depth),
     stream_wt_depth_computation(Stream,DepthComputation).
 
 winfo_writeq( Stream,
-		winfo(true, false,false,true, '*','...',0,true,0,true,WO)) 
+			winfo(true, false,false,true, '*','...',0,true,0,true,WO,true)) 
 	:-
     WO = wt_opts(_,_,_),
     stream_wt_opts(Stream,WO).
 
 winfo_write_canonical( Stream,
-		winfo(true, true, false,false,'*','...',0,true,0,false,WO)) 
+			winfo(true, true, false,false,'*','...',0,true,0,false,WO,true)) 
 	:-
     WO = wt_opts(_,_,_),
     stream_wt_opts(Stream,WO).
 
 winfo_print( Stream,
-		winfo(false,false,true, true, '*','...',0,false,0,false,WO)) 
+			winfo(false,false,true, true, '*','...',0,false,0,false,WO,true)) 
 	:-
     WO = wt_opts(2047,Depth,DepthComputation),	%% override default length
     stream_wt_maxdepth(Stream,Depth),
     stream_wt_depth_computation(Stream,DepthComputation).
 
 
-    /*
-     * wd/5
-     * wd(Term,Depth,List,Hole,WInfo)
-     *
-     * Write out the term to the depth given by the second argument.
-     */
+    /*---------------------------------------------------------------------*
+     | wd/5
+     | wd(Term,Depth,List,Hole,WInfo)
+     |
+     | Write out the term to the depth given by the second argument.
+     *---------------------------------------------------------------------*/
 
-
-wd(Exp,Depth,L1,Hole,WInfo) :-
+wd(Exp,Depth,L1,Hole,WInfo) 
+	:-
     wd(Exp,1200,Depth,nospace,Space,L1,L2,0,WInfo),
     wd_space(Space,L2,Hole).
 
 
-    /*
-     * wd/9
-     * wd(Term,Precedence,Depth,SpaceIn,SpaceOut,List,Hole,BP,WInfo)
-     *
-     * Term is the term to output.
-     *
-     * Precedence is the current precedence level of the term.  This is
-     * related to the operator for which the term is a subexpression of.  It
-     * will either be equal to the operators precedence or one less depending
-     * on the associativity.
-     *
-     * Depth is the maximum depth to write to.  When we get to zero, we either
-     * output a * or a ... depending upon where we are at.
-     *
-     * SpaceIn will either be one of two constants: space or nospace.  space
-     * indicates that previous output will require an operator (or negative
-     * number) to have a space in front of it.
-     *
-     * SpaceOut will be unified with one of nospace or space.
-     *
-     * List is the list of characters which we are producing to output
-     *
-     * Hole is the hole at the end of the list so that procedure which
-     * call this one may have easy access to the end of the list.
-     *
-     * BP is the base priority of the breaks which we will be putting
-     * into the output stream.  This base priority is used to compute the
-     * actual priority of a break.
-     *
-     * WInfo is a structure containing write information (things like the
-     * write depth, whether it is flat or non flat characters to write out
-     * in the event that the write depth is exceeded etc.
-     */
+    /*----------------------------------------------------------------------------*
+     | wd/9
+     | wd(Term,Precedence,Depth,SpaceIn,SpaceOut,List,Hole,BP,WInfo)
+     |
+     | Term is the term to output.
+     |
+     | Precedence is the current precedence level of the term.  This is
+     | related to the operator for which the term is a subexpression of.  It
+     | will either be equal to the operators precedence or one less depending
+     | on the associativity.
+     |
+     | Depth is the maximum depth to write to.  When we get to zero, we either
+     | output a * or a ... depending upon where we are at.
+     |
+     | SpaceIn will either be one of two constants: space or nospace.  space
+     | indicates that previous output will require an operator (or negative
+     | number) to have a space in front of it.
+     |
+     | SpaceOut will be unified with one of nospace or space.
+     |
+     | List is the list of characters which we are producing to output
+     |
+     | Hole is the hole at the end of the list so that procedure which
+     | call this one may have easy access to the end of the list.
+     |
+     | BP is the base priority of the breaks which we will be putting
+     | into the output stream.  This base priority is used to compute the
+     | actual priority of a break.
+     |
+     | WInfo is a structure containing write information (things like the
+     | write depth, whether it is flat or non flat characters to write out
+     | in the event that the write depth is exceeded etc.
+     *----------------------------------------------------------------------------*/
 
     %% == Write out variables (lettervar option, first occurrence of variable)
-wd(Var, Lev, Depth, _, nospace,[VarAtom|Hole],Hole,BP,WInfo) :-
+wd(Var, Lev, Depth, _, nospace,[VarAtom|Hole],Hole,BP,WInfo) 
+	:-
 	var(Var),
 	winfo_lettervars(WInfo),
 	!,
@@ -442,25 +455,29 @@ wd(Var, Lev, Depth, _, nospace,[VarAtom|Hole],Hole,BP,WInfo) :-
 
     %% == Write out variables (non-lettervar). Note that we still use the
     %%    lettervar mechanism in order to handle the gc problem.
-wd(Var, Lev, Depth, _, nospace,[VarAtom|Hole],Hole,BP,WInfo) :-
+wd(Var, Lev, Depth, _, nospace,[VarAtom|Hole],Hole,BP,WInfo) 
+	:-
 	var(Var),
 	!,
 	sio_var_to_atom(Var,VarAtom),
 	Var = '%lettervar%'(VarAtom).
 
     %% == Write out occurences of lettervar variables
-wd('%lettervar%'(Atom), Lev, Depth, _, nospace,[Atom|Hole],Hole,BP,WInfo) :-
+wd('%lettervar%'(Atom), Lev, Depth, _, nospace,[Atom|Hole],Hole,BP,WInfo) 
+	:-
 	atom(Atom),
 	!.
 
     %% == Handle numbervars terms
-wd('$VAR'(Num), Lev, Depth, _, nospace,[VarAtom|Hole],Hole,BP,WInfo) :-
+wd('$VAR'(Num), Lev, Depth, _, nospace,[VarAtom|Hole],Hole,BP,WInfo) 
+	:-
 	winfo_numbervars(WInfo),
 	sio_lettervar(Num,VarAtom),
 	!.
 
     %% == Handle negative integers.
-wd(Neg, Lev, Depth, SpaceIn, nospace,List,Hole,BP,WInfo) :-
+wd(Neg, Lev, Depth, SpaceIn, nospace,List,Hole,BP,WInfo) 
+	:-
 	integer(Neg),
 	Neg < 0,
 	!,
@@ -468,13 +485,15 @@ wd(Neg, Lev, Depth, SpaceIn, nospace,List,Hole,BP,WInfo) :-
 	sio_sprintf('%d',Neg,NegAtom,_).
 
     %% == Handle non-negative integers
-wd(Int, Lev, Depth, _, nospace,[IntAtom|Hole],Hole,BP,WInfo) :-
+wd(Int, Lev, Depth, _, nospace,[IntAtom|Hole],Hole,BP,WInfo) 
+	:-
 	integer(Int),
 	!,
 	sio_sprintf('%d',Int,IntAtom,_).
 
     %% == Handle negative floats
-wd(Flt, Lev, Depth, SpaceIn, nospace,List,Hole,BP,WInfo) :-
+wd(Flt, Lev, Depth, SpaceIn, nospace,List,Hole,BP,WInfo) 
+	:-
 	float(Flt),
 	Flt < 0,
 	!,
@@ -482,32 +501,36 @@ wd(Flt, Lev, Depth, SpaceIn, nospace,List,Hole,BP,WInfo) :-
 	sio_sprintf('%1.10g',Flt,NegAtom,_).
 
     %% == Handle non-negative floats
-wd(Flt, Lev, Depth, _, nospace,[FltAtom|Hole],Hole,BP,WInfo) :-
+wd(Flt, Lev, Depth, _, nospace,[FltAtom|Hole],Hole,BP,WInfo) 
+	:-
 	float(Flt),
 	!,
 	sio_sprintf('%1.10g',Flt,FltAtom,_).
 
     %% == Handle atoms
-wd(Atom, Lev, Depth, SpaceIn, SpaceOut,List,Hole,BP,WInfo) :-
+wd(Atom, Lev, Depth, SpaceIn, SpaceOut,List,Hole,BP,WInfo) 
+	:-
 	atom(Atom),
 	!,
 	winfo_quoted(WInfo,Quoted),
 	wd_atom(Quoted,Atom,SpaceIn,SpaceOut,List,Hole).
 
     %% == Write out a * if too deep
-wd(Term, Lev, 0, SpaceIn, space,List,Hole,BP,WInfo) :-
-    !,
+wd(Term, Lev, 0, SpaceIn, space,List,Hole,BP,WInfo) 
+	:-!,
     winfo_maxdepth_atom(WInfo,TooDeepAtom),
     wd_space(SpaceIn,List,[TooDeepAtom | Hole]).
 
     %% == Write out double quoted strings (lists of a special form)
-wd([H | T], Lev, Depth, _, nospace, [0'"| L1], Hole, BP,WInfo) :-
+wd([H | T], Lev, Depth, _, nospace, [0'"| L1], Hole, BP,WInfo) 
+	:-
     winfo_quoted_strings(WInfo),
     is_string(H,T,L1,[0'" | Hole]),
     !.
 
     %% == Write out lists
-wd([H | T], Lev, Depth, _, nospace, [0'[,Break | L1], Hole, BP,WInfo) :-
+wd([H | T], Lev, Depth, _, nospace, [0'[,Break | L1], Hole, BP,WInfo) 
+	:-
     winfo_ignore_ops(WInfo,false),
     !,
     bpup(BP,BPup),			%% up the base priority
@@ -517,15 +540,16 @@ wd([H | T], Lev, Depth, _, nospace, [0'[,Break | L1], Hole, BP,WInfo) :-
     wdlt(T, TailDepth, L2, [0'],ILRestore | Hole], BPup ,WInfo).
 
     %% == Write out curly bracketed terms
-wd({Term}, Lev, Depth, _, nospace, [0'{,Break | L1], Hole, BP, WInfo) :-
-    !,
+wd({Term}, Lev, Depth, _, nospace, [0'{,Break | L1], Hole, BP, WInfo) 
+	:-!,
     bpup(BP,BPup),
     left_break(BPup,Break,ILRestore),
     NewDepth is Depth-1,
     wd(Term,1200,NewDepth,nospace,_,L1,[0'},ILRestore | Hole],BP,WInfo).
 
     %% == Write out terms involving operators
-wd(OpTerm, Lev, Depth, SpaceIn, SpaceOut, List, Hole, BP,WInfo) :- 
+wd(OpTerm, Lev, Depth, SpaceIn, SpaceOut, List, Hole, BP,WInfo) 
+	:- 
     winfo_ignore_ops(WInfo,false),
     functor(OpTerm,F,A), 
     is_op(F,A,OLev,Assoc),
@@ -534,7 +558,8 @@ wd(OpTerm, Lev, Depth, SpaceIn, SpaceOut, List, Hole, BP,WInfo) :-
     wdop(Assoc,Lev,OLev,F,OpTerm,NewDepth,SpaceIn,SpaceOut,List,Hole,BP,WInfo).
 
     %% == Write out structures
-wd(Struct, Lev, Depth, SpaceIn, nospace, L1, Hole,BP,WInfo) :-
+wd(Struct, Lev, Depth, SpaceIn, nospace, L1, Hole,BP,WInfo) 
+	:-
     functor(Struct,F,A),
     bpup(BP,BPup),			%% up the base priority
     left_break(BPup,Break,ILRestore),
@@ -773,6 +798,7 @@ wd_infix(Op,Lev,A2,InSpace,nospace, [spop(Pri,_,Op,ILR) | Hole],Hole,
     Pri is BasePri + OPri,
     !.
 -- old code --*/
+
     %% == Operator is  ->/2
 wd_infix('->',Lev,A2,InSpace,nospace, [0' ,'->',space(Pri,_,1,ILR) | Hole],Hole,
         	BasePri, ILR,WInfo) :-
@@ -807,6 +833,7 @@ wd_infix('=',Lev,A2,InSpace,nospace, [0' ,'=',space(Pri,_,1,ILR) | Hole],
 
     %% == Operator has non-alpha characters (like '-')
 wd_infix(Op,Lev,A2,InSpace,OutSpace, L1,Hole, BasePri,ILR,WInfo) :- 
+%wd_infix(Op,Lev,A2,InSpace,OutSpace, [0' | L1], Hole, BasePri,ILR,WInfo) :- 
     sio_isgraphicatom(Op),
     !,
     spaceahead(Lev,A2,InSpace,IntSpace),
@@ -814,6 +841,7 @@ wd_infix(Op,Lev,A2,InSpace,OutSpace, L1,Hole, BasePri,ILR,WInfo) :-
     infix_ild(Op,ILD),
     winfo_quoted(WInfo,Quoted),
     wd_atom(Quoted,Op,IntSpace,OutSpace,L1,[break(Pri,_,ILD,ILR) | Hole]).
+%    wd_atom(Quoted,Op,IntSpace,OutSpace,L1,[space(Pri,_,ILD,ILR) | Hole]).
 
     %% == Operator is only alpha characters.
 wd_infix(Op,Lev,A2,InSpace,OutSpace, [0'  | L1], Hole,BasePri,ILR,WInfo) :-
@@ -964,94 +992,98 @@ op_pri(',',4).
 op_pri(_,5).
 
 
-    /*-------------------
-     *
-     * output_string/4
-     *
-     * This procedure and its subsidiary routines form the second component
-     * of the pretty printing package.  The first component, wd was
-     * responsible for the list which output_string receives.  wd has put
-     * in suggested positions for line breaks (probably far too many) in the
-     * output string.   output_string will output this string and put in the
-     * actual line breaks in addition to controlling the indentation.
-     *
-     * output_string(Stream,List,Width,StartIndent)
-     *		Stream	-- the stream to write to
-     *		List	-- list with the characters or atoms to output and
-     *			   suggested break positions
-     *		Width	-- the width of the line
-     *		InitialIndent -- the initial indentation in characters (spaces)
-     *			After the first break, the pretty printer will indent
-     *			by this number of spaces.  This is so that facilities
-     *			like showanswers or the debugger may get output
-     *			which is neatly lined up.
-     */
+    /*-------------------------------------------------------------------------------*
+     |
+     | output_string/5
+	 | output_string(Stream,List,Width,InitialIndent,LineEnd) 
+     |
+     | This procedure and its subsidiary routines form the second component
+     | of the pretty printing package.  The first component, wd was
+     | responsible for the list which output_string receives.  wd has put
+     | in suggested positions for line breaks (probably far too many) in the
+     | output string.   output_string will output this string and put in the
+     | actual line breaks in addition to controlling the indentation.
+     |
+     |	Stream	-- 	the stream to write to
+     |	List	-- 	list with the characters or atoms to output and
+     |			   	suggested break positions
+     |	Width	-- 	the width of the line
+     |	InitialIndent -- 
+	 |				the initial indentation in characters (spaces)
+     |				After the first break, the pretty printer will indent
+     |				by this number of spaces.  This is so that facilities
+     |				like showanswers or the debugger may get output
+     |				which is neatly lined up.
+ 	 |	LineEnd -- 	false/true: whether to quote eol with \ , or not
+     *-------------------------------------------------------------------------------*/
 
-output_string(Stream,List,Width,InitialIndent) :-
+output_string(Stream,List,Width,InitialIndent,LineEnd) 
+	:-
     NetWidth is Width-InitialIndent,
     sio_position_in_line(Stream,_,InitialPosition0),
     InitialPosition is InitialPosition0 - InitialIndent,
 	% FIXME: What if InitialPosition is less than 0
-    scan(List,InitialPosition,[],NetWidth,0,[]),
+    scan(List,InitialPosition,[],NetWidth,0,[],LineEnd),
 %    debug_write(List),nl,
     os(List,Stream,0,InitialIndent).
-
 
 debug_write([]) :- nl,!.
 debug_write([H|T]) :- integer(H), !, put(H), debug_write(T).
 debug_write([H|T]) :- put(0' ),write(H),put(0' ),debug_write(T).
 
 
-/*
- * scan/6, scan/7
- *
- * scan(List,Count,Breaks,LineLen,BreakLev,IL)
- * scan(Head,Tail,Count,Breaks,LineLen,BreakLev,IL)
- *
- * These procedures scan the list to be output and fill in the break
- * information as necessary.  The parameters are as follows:
- *
- *  List	-- List to scan and fill in break information
- *  Count	-- Number of characters in "line" so far.  The line in question
- *		   is the line considered from the last break with indentation.
- *  Breaks	-- information on where previous breaks are/can be.  This is
- *		   a list prioritized so that the first elements are the places
- *		   to cause line breaks at first.
- *  LineLen	-- The maximum length of a line.  This parameter is
- *		   constant throughout the scan procedure and will not vary.
- *  BreakLev	-- An integer which tells us whether or not to automatically
- *		   generate a break when a break is seen.  If the priority of
- *		   the break found is less than BreakLev, then a break is
- *		   generated.  Subsequent breaks will see a different break
- *		   level.  This mechanism will cause a significant break to
- *		   be generated after a relatively insignificant one.  Thus
- *		   the structure of the program will be somewhat more evident.
- *  ILL		-- Indentation Level; This is a list of even length, every
- *		   two elements of the list form one logical component (being
- *		   more space efficient than alternate methods).  The first
- *		   element is the position.  The second component is the
- *		   indentation level.  This component will often be a
- *		   variable.  As such, it will be ignored when determining
- *		   the actual indentation level for a break.  This structure
- *		   is necessary since it is possible to pass over many ilrestore
- *		   directives before determining that a break is necessary.
- *		   In order to easily add to the list, it is arranged that
- *		   more recent positions are added to the front of the list.
- *		
- */
+/*-----------------------------------------------------------------------------------*
+ | scan/7, scan/8
+ |
+ | scan(List,Count,Breaks,LineLen,BreakLev,IL,EL)
+ | scan(Head,Tail,Count,Breaks,LineLen,BreakLev,IL,EL)
+ |
+ | These procedures scan the list to be output and fill in the break
+ | information as necessary.  The parameters are as follows:
+ |
+ |  List	--	List to scan and fill in break information
+ |  Count	--	Number of characters in "line" so far.  The line in question
+ |		   		is the line considered from the last break with indentation.
+ |  Breaks	--	information on where previous breaks are/can be.  This is
+ |		   		a list prioritized so that the first elements are the places
+ |		   		to cause line breaks at first.
+ |  LineLen	--	The maximum length of a line.  This parameter is
+ |		   		constant throughout the scan procedure and will not vary.
+ |  BreakLev --	An integer which tells us whether or not to automatically
+ |		   		generate a break when a break is seen.  If the priority of
+ |		   		the break found is less than BreakLev, then a break is
+ |		   		generated.  Subsequent breaks will see a different break
+ |		   		level.  This mechanism will cause a significant break to
+ |		   		be generated after a relatively insignificant one.  Thus
+ |		   		the structure of the program will be somewhat more evident.
+ |  ILL		--	Indentation Level; This is a list of even length, every
+ |		   		two elements of the list form one logical component (being
+ |		   		more space efficient than alternate methods).  The first
+ |		   		element is the position.  The second component is the
+ |		   		indentation level.  This component will often be a
+ |		   		variable.  As such, it will be ignored when determining
+ |		   		the actual indentation level for a break.  This structure
+ |		   		is necessary since it is possible to pass over many ilrestore
+ |		   		directives before determining that a break is necessary.
+ |		   		In order to easily add to the list, it is arranged that
+ |		   		more recent positions are added to the front of the list.
+ |	EL		--	Boolean (true/false): whether end of lines are normal (true)
+ |				or extended (quoted with \) (false)
+ |		
+ *-----------------------------------------------------------------------------------*/
 
-scan([],Count,Break,LineLen,BreakLev,ILL) :- !.
-scan([H|T],Count,Breaks,LineLen,BreakLev,ILL) :-
-	scan(H,T,Count,Breaks,LineLen,BreakLev,ILL).
+scan([],Count,Break,LineLen,BreakLev,ILL,EL) :- !.
+scan([H|T],Count,Breaks,LineLen,BreakLev,ILL,EL) :-
+	scan(H,T,Count,Breaks,LineLen,BreakLev,ILL,EL).
 
 
 %% == Handle the ilrestore directives
-scan(ilrestore(ILRestore),T,Count,Breaks,LineLen,BreakLev,ILL) :-
+scan(ilrestore(ILRestore),T,Count,Breaks,LineLen,BreakLev,ILL,EL) :-
 	!,
-	scan(T,Count,Breaks,LineLen,BreakLev,[Count,ILRestore | ILL]).
+	scan(T,Count,Breaks,LineLen,BreakLev,[Count,ILRestore | ILL],EL).
 
 %% == Generate a break if we've gone too far.
-scan(H,T,Count,[b(Pos,Break) | MoreBreaks],LineLen,BreakLev,ILL) :-
+scan(H,T,Count,[b(Pos,Break) | MoreBreaks],LineLen,BreakLev,ILL,EL) :-
 	Count >= LineLen,
 	!,
 	indentation_level(ILL,Pos,IL),
@@ -1060,33 +1092,33 @@ scan(H,T,Count,[b(Pos,Break) | MoreBreaks],LineLen,BreakLev,ILL) :-
 	break_ILRestore(Break,IL),		%% set the level to restore to
 	break_Status(Break,Status),
 	ilNew(ILD,Priority,IL,BreakLev,NewIL),	%% Compute new indentation level
-	breakCount(Break,BreakCount),
+	breakCount(Break,EL,BreakCount),
 	AdjPos is Pos+BreakCount,		%% want stuff below to subtract
 						%% off the number of characters
 						%% occupied by the break
-	make_status(Pos,NewIL,Break,Status),
+	make_status(Pos,NewIL,Break,EL,Status),
 	fixBreaks(MoreBreaks,AdjPos,NewBreaks,NewIL),	%% fix the break info
 	fixILL(ILL,AdjPos,NewIL,NewILL),
 	NewCount is NewIL*4+Count-AdjPos,
-	scan([H|T],NewCount,NewBreaks,LineLen,Priority,NewILL).
+	scan([H|T],NewCount,NewBreaks,LineLen,Priority,NewILL,EL).
 
 %% == skip over actual characters and increment count
-scan(Char,T,Count,Breaks,LineLen,BreakLev,ILL) :-
+scan(Char,T,Count,Breaks,LineLen,BreakLev,ILL,EL) :-
 	integer(Char),
 	!,
 	NewCount is Count+1,
-	scan(T,NewCount,Breaks,LineLen,BreakLev,ILL).
+	scan(T,NewCount,Breaks,LineLen,BreakLev,ILL,EL).
 
 %% == skip over atom and increment count
-scan(Atom,T,Count,Breaks,LineLen,BreakLev,ILL) :-
+scan(Atom,T,Count,Breaks,LineLen,BreakLev,ILL,EL) :-
 	atom(Atom),
 	!,
 	$strlen(Atom,AtomLength),
 	NewCount is Count+AtomLength,
-	scan(T,NewCount,Breaks,LineLen,BreakLev,ILL).
+	scan(T,NewCount,Breaks,LineLen,BreakLev,ILL,EL).
 
 %% == Must have a break of some sort.  Handle mandatory break generation.
-scan(Break,T,Count,Breaks,LineLen,BreakLev,ILL) :-
+scan(Break,T,Count,Breaks,LineLen,BreakLev,ILL,EL) :-
 	break_Priority(Break,Priority),
 	Priority < BreakLev,
 	!,
@@ -1095,25 +1127,25 @@ scan(Break,T,Count,Breaks,LineLen,BreakLev,ILL) :-
 	break_ILRestore(Break,IL),
 	break_Status(Break,break),
 	ilNew(ILD,Priority,IL,BreakLev,NewIL),
-	breakCount(Break,BreakCount),
+	breakCount(Break,EL,BreakCount),
 	AdjCount is Count+BreakCount,
 	fixBreaks(Breaks,AdjCount,NewBreaks,NewIL),
 	fixILL(ILL,AdjCount,NewIL,NewILL),
 	NewCount is NewIL*4-BreakCount,
-	scan(T,NewCount,NewBreaks,LineLen,Priority,NewILL).
+	scan(T,NewCount,NewBreaks,LineLen,Priority,NewILL,EL).
 
 %% == Insert break into break list
-scan(Break,T,Count,Breaks,LineLen,BreakLev,ILL) :-
+scan(Break,T,Count,Breaks,LineLen,BreakLev,ILL,EL) :-
 	break_Priority(Break,Priority),
 	break_ILRestore(Break,ILRestore),
 	insertBreak(Breaks,Priority,b(Count,Break),NewBreaks),
-	breakCount(Break,BreakCount),
+	breakCount(Break,EL,BreakCount),
 	NewCount is Count+BreakCount,
-	scan(T,NewCount,NewBreaks,LineLen,BreakLev,[Count,ILRestore | ILL]).
+	scan(T,NewCount,NewBreaks,LineLen,BreakLev,[Count,ILRestore | ILL],EL).
 
 
     /*
-     * make_status(Pos,NewIL,Status)
+     * make_status(Pos,NewIL,EL,Status)
      *
      * Used to fill in the break status.  The usual thing to do is set the
      * status to break, but when there is still room on the line to do
@@ -1123,13 +1155,14 @@ scan(Break,T,Count,Breaks,LineLen,BreakLev,ILL) :-
      *
      */
 
-make_status(Pos,NewIL,BreakStruct,space(NSpaces)) :-
+make_status(Pos,NewIL,BreakStruct,_,space(NSpaces)) :-
     Pos =< NewIL*4,
     functor(BreakStruct,F,_),
     F \= spop,
     !,
     NSpaces is NewIL*4-Pos.
-make_status(_,_,_,break).
+make_status(_,_,_,false,qbreak) :-!.
+make_status(_,_,_,_,break).
 
 
     /*
@@ -1181,14 +1214,15 @@ insertBreak(_,Pri,H,T,Break,[H|NewT]) :-
 
 
     /*
-     * breakCount(Break,BreakCount)
+     * breakCount(Break,EL,BreakCount)
      *
      * Returns the number of characters occupied by a non-taken break.
      */
     
-breakCount(break(_,_,_,_),0) :- !.
-breakCount(spop(_,_,Atom,_),N) :- $strlen(Atom,NC), !, N is NC+2.
-breakCount(space(_,_,_,_),1).
+breakCount(break(_,_,_,_),false,1) :- !.
+breakCount(break(_,_,_,_),_,0) :- !.
+breakCount(spop(_,_,Atom,_),_,N) :- $strlen(Atom,NC), !, N is NC+2.
+breakCount(space(_,_,_,_),_,1).
 
 
     /*
@@ -1271,14 +1305,17 @@ os([],Stream,_,_) :-
 os([H | T],Stream,IL,II) :-
 	os2(H,T,Stream,IL,II).
 
-%% == Handle special operators (Operators to be written out AFTER a line break)
-os2(spop(Pri,nobreak,Atom,IL),T,Stream,IL,II) :- 
-	!,
+	%% == Handle special operators 
+	%% (Operators to be written out AFTER a line break)
+os2(spop(Pri,nobreak,Atom,IL),T,Stream,IL,II) 
+	:-!,
 	put_byte(Stream,0' ),
 	put_atom(Stream,Atom),
 	put_byte(Stream,0' ),
 	os(T,Stream,IL,II).
-os2(spop(Pri,break,Atom,_IL),T,Stream,IL,II) :-
+
+os2(spop(Pri,break,Atom,_IL),T,Stream,IL,II) 
+	:-
 	ILP is IL-1,
 	nl(Stream),
 	tab(Stream,II),
@@ -1290,56 +1327,70 @@ os2(spop(Pri,break,Atom,_IL),T,Stream,IL,II) :-
 	!,
 	os(T,Stream,IL,II).
 
-%% == Handle a break
-os2(break(Pri,nobreak,_,IL),T,Stream,IL,II) :-
-	!,
+	%% == Handle a break
+
+os2(break(Pri,nobreak,_,IL),T,Stream,IL,II) 
+	:-!,
 	os(T,Stream,IL,II).
-os2(break(_,break,ILD,_IL),T,Stream,IL,II) :-
+
+os2(break(_,BreakType,ILD,_IL),T,Stream,IL,II) 
+	:-
+	dmember(BreakType, [break,qbreak]),
 	ILNew is IL+ILD,
+	(BreakType = qbreak -> put_byte(Stream, 0'\\) ; true),
 	nl(Stream),
 	tab(Stream,II),
 	indent(Stream,ILNew),
 	eat_space(T,TT),
 	!,
 	os(TT,Stream,ILNew,II).
-os2(break(_,space(Spaces),ILD,_IL),T,Stream,IL,II) :-
+
+os2(break(_,space(Spaces),ILD,_IL),T,Stream,IL,II) 
+	:-
 	ILNew is IL+ILD,
 	tab(Stream,Spaces),
 	eat_space(T,TT),
 	!,
 	os(TT,Stream,ILNew,II).
 
-%% == Handle a space break
-os2(space(Pri,nobreak,_,IL),T,Stream,IL,II) :-
-	!,
+	%% == Handle a space break
+
+os2(space(Pri,nobreak,_,IL),T,Stream,IL,II) 
+	:-!,
 	put_byte(Stream,0' ),
 	os(T,Stream,IL,II).
-os2(space(_,break,ILD,_IL),T,Stream,IL,II) :-
+
+os2(space(_,break,ILD,_IL),T,Stream,IL,II) 
+	:-
 	ILNew is IL+ILD,
 	nl(Stream),
 	tab(Stream,II),
 	indent(Stream,ILNew),
 	!,
 	os(T,Stream,ILNew,II).
-os2(space(_,space(Spaces),ILD,_IL),T,Stream,IL,II) :-
+
+os2(space(_,space(Spaces),ILD,_IL),T,Stream,IL,II) 
+	:-
 	ILNew is IL+ILD,
 	tab(Stream,Spaces),
 	!,
 	os(T,Stream,ILNew,II).
 
-%% == do an ilrestore
-os2(ilrestore(IL),T,Stream,_,II) :- 
-	!,
+	%% == do an ilrestore
+
+os2(ilrestore(IL),T,Stream,_,II) 
+	:-!,
 	os(T,Stream,IL,II).
 
-%% == put out an atom
-os2(H,T,Stream,IL,II) :-
+	%% == put out an atom
+os2(H,T,Stream,IL,II) 
+	:-
 	atom(H),
 	!,
 	put_atom(Stream,H),
 	os(T,Stream,IL,II).
 
-%% == put out the character
+	%% == put out the character
 os2(H,T,Stream,IL,II) :- 
 	put_byte(Stream,H),
 	os(T,Stream,IL,II).

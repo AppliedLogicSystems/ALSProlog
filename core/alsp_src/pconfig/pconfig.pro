@@ -582,16 +582,25 @@ grl_vars(ARCH_NATV, OS, BLD_NATV_SRC_PATH , GrlHeaderLines)
 		%% This code should run after makes have been done in both
 		%% ../bld-natv and ../bld-port;  its purpose is
 		%% to check whether a native code version exists
+		%%    NOTE: $(ALSPRO) is used in PrologPath because the
+		%% value for ALSPRO is passed on the command line of the
+		%% make invocation;  this is so we can distinguish as
+		%% to whether alspro_b or alspro can be used to run things
+		%% The conditional below tests whether to use bld-port or
+		%% bld-natv ;
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 		%% This is running in:  <XXX>/bld-wins
-	(exists_file('../bld-natv/alspro') ->
+	((exists_file('../bld-natv/alspro') ; exists_file('../bld-natv/alspro_b')) 
+		->
 		ProLibPath = '../../bld-natv/alspro.a',
-		PrologPath = '../../bld-natv/alspro',
+%		PrologPath = '../../bld-natv/alspro',
+		PrologPath = '../../bld-natv/$(ALSPRO)',
 		ARCH = ARCH_NATV
 		;
 		ProLibPath = '../../bld-port/alspro.a',
-		PrologPath = '../../bld-port/alspro',
+%		PrologPath = '../../bld-port/alspro',
+		PrologPath = '../../bld-port/$(ALSPRO)',
 		ARCH = port
 	),
 

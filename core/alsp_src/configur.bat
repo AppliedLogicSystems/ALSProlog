@@ -1,4 +1,3 @@
-@echo off
 echo Starting....
 		rem  configur.bat
 		rem  Configuration program for DOS
@@ -54,6 +53,17 @@ sed -f %sedmtg% generic.mkf > m
 update m generic.mkf
 del m
 
+		rem create local modified copy of %dossrc%\port\port.mkf
+set portdir=%dossrc%\port
+echo source port dir = %portdir%
+
+		rem setup (modify) port.mkf:
+set sedmtg=%dosdjgpp%\mh-gener.sed
+copy %portdir%\port.mkf port.mkf
+sed -f %sedmtg% port.mkf > m
+update m port.mkf
+del m
+
 copy %dosdjgpp%\config.h config.h
 
 		rem create bld-port
@@ -69,6 +79,7 @@ sed -f %dosdjgpp%\d2qux.sed pd1.tmp > pd2.tmp
 sed -f %dosdjgpp%\at2ds.sed pd2.tmp > pathdir.sed
 rm *.tmp
 
+set sedmt=%dosi386%\djgpp\maketop.sed
 sed -f pathdir.sed %sedmt% > m
 update m mtbld.sed
 del m

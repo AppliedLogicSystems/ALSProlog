@@ -30,15 +30,36 @@
  *	in cl/2.
  */
 
+/*
 test :-
 	copylines('/etc/termcap','copylines.out').
+*/
+test :-
+	copylines(['/usr/include/stdio.h','/etc/termcap', '/etc/sendmail.cf'],
+			  'copylines.out').
 
-copylines(InFile,OutFile) :-
+
+copylines(InFileList,OutFile) 
+	:-
+	select_test_file(InFileList, InFile),
 	open(InFile,read,InStream),
 	open(OutFile,write,OutStream),
 	cl(InStream,OutStream),
 	close(InStream),
 	close(OutStream).
+
+copylines(InFile,OutFile) 
+	:-
+	printf('copylines: no input files exist!!\n', []).
+
+select_test_file([File | InFileList], File)
+	:-
+	exists_file(File),
+		!.
+
+select_test_file([_ | InFileList], File)
+	:-
+	select_test_file(InFileList, File).
 
 cl(InStream,OutStream) :- cl0(InStream,OutStream), !.
 cl(_,_).

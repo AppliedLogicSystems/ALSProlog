@@ -300,3 +300,76 @@ are kept to small bite-size chunks.  Not only does this lessen the pain,
 but it makes it more likely that changes to common source files will be
 tested on a range of architectures, and problems discovered.  [We need to
 learn to use the GNU patch tool, but haven't gotten that far yet.]
+
+PROBLEMS
+========
+
+A.  A common problem when attempting a build on a new Unix variant is a
+    missing oconfig.h file for this Unix variant.  The build looks
+    like this:
+
+spiro:~/als/build> ~/als/alsp1.74/configure
+
+Configuring for i486-unknown-linux ...
+
+checking for ln -s
+spiro:~/als/build> ~/als/alsp1.74/configure
+
+Configuring for i486-unknown-linux ...
+
+checking for ln -s
+...........
+Making alsdir in: /home/spiro/als/build/bld-natv
+Using absolute paths
+spiro:~/als/build> ls
+bld-natv/       config.d        config.status*
+bld-port/       config.h        makefile
+spiro:~/als/build> make
+(cd bld-port; make  all)
+make[1]: Entering directory `/home/spiro/als/build/bld-port'
+...........
+gcc -c -I. -I.. -I/home/spiro/als/alsp1.74/bld-port/../generic -I/home/spiro/als/alsp1.74/bld-port/../port -I/home/s
+piro/als/alsp1.74/bld-port/../port/linux -DHAVE_CONFIG_H -O -g -Wall -Wshadow -Wconversion -Wstrict-prototypes -Wmis
+sing-prototypes  /home/spiro/als/alsp1.74/bld-port/../generic/pimain.c
+In file included from /home/spiro/als/alsp1.74/bld-port/../generic/pimain.c:17:
+/home/spiro/als/alsp1.74/bld-port/../generic/defs.h:136: oconfig.h: No such file or directory
+                                                         ^^^^^^^^^^^^^^^^^^^
+Now, one can see what OS the build thinks it is working over from the
+first line of output:
+
+Configuring for i486-unknown-linux ...
+                             ^^^^^
+So, following in this particular example:
+
+In the directory
+
+        /home/spiro/als/alsp1.74/port
+
+create the subdirectory
+
+        /home/spiro/als/alsp1.74/port/linux
+                                      ^^^^^
+Copy the file
+
+        /home/spiro/als/alsp1.74/port/sunos4/oconfig.h
+                                             ^^^^^^^^^
+to
+
+        /home/spiro/als/alsp1.74/port/linux/oconfig.h
+                                      ^^^^^^^^^^^^^^^
+[It shouldn't need any change, but if you want, you can change
+ the occurrence of "SunOS 4(.1.3)" in the comment to "Linux".
+
+Now, return to the directory
+
+        /home/spiro/als/alsp1.74
+
+and issue 'make' again.
+
+A similar addition is necessary in the appropriate architecture subdirectory
+when a native code version is built.  In the example above, one would make
+a similar addition in 
+
+        /home/spiro/als/alsp1.74/i386
+
+

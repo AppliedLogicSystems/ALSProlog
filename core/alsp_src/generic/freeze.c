@@ -21,11 +21,11 @@
 #include "compile.h"
 #include "freeze.h"
 
-int	pbi_delay			PARAMS(( void ));
+int	pbi_delay		PARAMS(( void ));
+int	pbi_is_delay_var	PARAMS(( void ));
 int	update_chpt_slots	PARAMS(( PWord ));
-int	pbi_clct_tr			PARAMS(( void ));
+int	pbi_clct_tr		PARAMS(( void ));
 int 	pbi_del_tm_for		PARAMS(( void ));
-/* int	pbi_collect_thawed	PARAMS(( void )); */
 
 /*---------------------------------------------------------------*
  | pbi_delay()
@@ -83,6 +83,24 @@ printf("exit delay----wm_H=%x--real_dv=%x---------\n", (int)wm_H,(int)one);
 	else
 		FAIL;
 }
+
+int
+pbi_is_delay_var()
+{
+    PWord *dv;
+    int dvt;
+
+    w_get_An(&dv, &dvt, 1);
+
+    if (dvt != WTP_UNBOUND)
+	FAIL;
+
+    if (CHK_DELAY(dv))
+	SUCCEED;
+    else
+	FAIL;
+}
+
 
 	/*-------------------------------------------------*
 	 | Sweep the trail/cp stack, from top to first choice point,
@@ -188,8 +206,6 @@ pbi_del_tm_for()
 		FAIL;
 }
 
-
-
 int
 update_chpt_slots(hval)
 	PWord hval;
@@ -209,128 +225,34 @@ update_chpt_slots(hval)
 }
 
 	/*---------------------------------------------------------------
-	 | combine_delays(r,f)
+	 | combin_dels(r,f)
 	 |
-	 | r,f are known (uninstatiated) variables being bound together,
-     | and both are already known delay variables;  r is the newer
-	 | variable  -- a pointer to f is being installed in r;
+	 | Effectively performs:
+	 |		w_rungoal(builtins, '$combine_dvars'(r,f), WTP_STRUCTURE)
 	 |
-	 | Let the delay terms be:
-     |		'$delay'(r, _, _, Gr)
-     |		'$delay'(f, _, _, Gf)
-     | Then this function locates these terms (1 back from the var....),
-     | creates a term (Gf, Gr) [= H] [in that order] on the heap,
-     | mangles H into the 4th arg of both delay terms, and sweeps the
-     | choice points setting them up to the new top of heap.
+	 |  '$combine_dvars'/2 is defined in builtins/blt_frez.pro
 	 *--------------------------------------------------------------*/
 void
-combine_delays(r,f)
+combin_dels(r,f)
 	PWord r, f;
 {
-	PWord *rG,*fG,Conj,*one,*two;
-	int ConjT;
+	PWord mod,   goal,   cdfctr;
+	int   mod_t, goal_t, cdf_t;
 
-	rG = (PWord *)((PWord *)r+3);
-	fG = (PWord *)((PWord *)f+3);
-	
-/*
-#ifdef	BigStruct
-	one = (PWord *)((PWord *)((PWord *)wm_H + 1) + 1); 
-	two = (PWord *)((PWord *)((PWord *)wm_H + 1) + 2); 
-#else
-	one = (PWord *)((PWord *)wm_H + 1); 
-	two = (PWord *)((PWord *)wm_H + 2); 
-#endif  
-*/
-	one = (PWord *)((PWord *)wm_H + 1); 
-	two = (PWord *)((PWord *)wm_H + 2); 
+printf("combin_dels:r=_%lu f=_%lu \n",
+			(long)(((PWord *) r) - wm_heapbase),
+			(long)(((PWord *) f) - wm_heapbase)); 
 
-	w_mk_term(&Conj, &ConjT, TK_COMMA, 2);
-	*one = *fG;
-	*two = *rG;
-	
-	*rG = MMK_STRUCTURE(Conj);
-	*fG = MMK_STRUCTURE(Conj);
+	w_mk_sym(&mod,&mod_t,TK_BUILTINS);  
 
-	*(PWord *)((PWord *)r+1) = (PWord)(PWord *)((PWord *)f+1);
+	w_mk_sym(&cdfctr, &cdf_t, TK_CMBVARS);
+	w_mk_term(&goal, &goal_t, cdfctr, 2);
 
-	update_chpt_slots((PWord)wm_H);
+	w_install_argn(goal, 1, r, WTP_UNBOUND);
+	w_install_argn(goal, 2, f, WTP_UNBOUND);
 
-#ifdef DEBUGFREEZE
-	printf("combine:r=%x f=%x rG=%x fG=%x Conj=%x c1=%x  wm_H=%x\n",
-			(int)r,(int)f,(int)rG,(int)fG,(int)Conj,
-			(int)((PWord *)(((PWord *)Conj + 1) + 1)),(int)wm_H);
-#endif
+	w_rungoal(mod, goal, goal_t);
 }
-
-/*************
-void	
-collect_thawed()
-{
-  	PWord *CurP, *Stop, *CurSt;
-	PWord **CurT,*Back1,*Forw1;
-	PWord BStop,v1,u,l;
-	int t1,cvt,ut,lt;
-
-    w_get_An(&v1, &t1, 1);
-
-	CurP = (PWord *) wm_B;
-	CurSt = (PWord *)wm_TR;
-	Stop = (PWord *)wm_trailbase;
-	BStop = (PWord) CurP;
-
-	w_mk_sym(&l,&lt,TK_NIL);  
-
-	while (CurP != 0){
-#ifdef DEBUGFREEZE
-		printf("curP=%x  \n", (int)CurP );  
-		for (CurT = (PWord **)CurSt; CurT < (PWord **)CurP; CurT += 1)
-		{
-			printf("%x-", (int)CurT);    
-			if (CHK_DELAY(*CurT))
-			{
-				printf("%x-[%x]th-Delay VAR! <%x | %x> ",
-						(int)CurT,(int)*CurT,(int)(**CurT),(int)deref_2(*CurT));
-				Forw1 = (*CurT) + 1;
-				if (M_ISVAR(*Forw1) && (M_VARVAL(*Forw1) == (PWord)Forw1)) 
-					printf(" - Active\n");
-				else
-				{
-					printf(" - Dead\n");
-					w_mk_list(&u,&ut);
-					Back1 = (*CurT)-1;
-	    			w_install_car(u, Back1, WTP_STRUCTURE);
-	    			w_install_cdr(u, l, lt);
-					l = u;
-					lt = ut;
-				}
-			}
-			else
-				printf("\n");
-#else
-		for (CurT = (PWord **)CurSt; CurT < (PWord **)CurP; CurT += 1)
-		{
-			if (CHK_DELAY(*CurT))
-			{
-				Forw1 = (*CurT) + 1;
-				if (!M_ISVAR(*Forw1) || (M_VARVAL(*Forw1) != (PWord)Forw1)) 
-				{
-					w_mk_list(&u,&ut);
-					Back1 = (*CurT)-1;
-	    			w_install_car(u, (PWord)Back1, WTP_STRUCTURE);
-	    			w_install_cdr(u, l, lt);
-					l = (PWord)u;
-					lt = (int)ut;
-				}
-			}
-#endif
-		}
-		CurSt= (PWord *)(CurP + chpt_SIZE);
-		CurP = (PWord *)chpt_B(CurP);
-	}
-	w_unify(v1, t1, l, lt);
-}
-*************/
 
 /*========================================================================*
                                DEBUGGING FUNCTIONS

@@ -808,18 +808,21 @@ open_stream(window(WinName),Mode,Options,Stream) :-
 		 |   FILES |
 		 *---------*/
 
-open_file_stream(Source_sink,Mode,Options,Stream) :-
+open_file_stream(Source_sink,Mode,Options,Stream) 
+	:-
 	initialize_stream(file, Source_sink, Options, Stream),
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
 	sio_file_open(Source_sink,Stream,NMode,NBuffering),
 	!.
-open_file_stream(Source_sink,Mode,Options,Stream) :-
+open_file_stream(Source_sink,Mode,Options,Stream) 
+	:-
 	%% FIXME: Incorporate errno into error.
 	permission_error(open,source_sink,Source_sink,2).
 
-initialize_stream(StreamType,Source_sink,Options,Stream) :-
+initialize_stream(StreamType,Source_sink,Options,Stream) 
+	:-
 	bufsize(StreamType,Options,BufSize),
 	sio_mkstream(BufSize,Stream),
 	set_stream_open_status(Stream,open),
@@ -1238,6 +1241,7 @@ data_ready(Stream)
 						   ),
 		assert_at_load_time(
 			( write_buffer_to_win(output,BufUIA,NumCs,WinID,EndPos) :-
+pbi_write(w_b_2_win_winid=WinID),pbi_nl,
 				 x_XmTextGetLastPosition(WinID,StartPos),
 				 EndPos is StartPos + NumCs,
 				 x_XmTextReplace(WinID,StartPos,EndPos,BufUIA),
@@ -1334,6 +1338,8 @@ open_window_stream(Window,Mode,Options,Stream) :-
 	buffering(Options,NBuffering),
 	winsGetTextInsertionPosition(WinID, WinInsertPos),
 	%sio_window_open(WinID,Stream,WinInsertPos,NMode,NBuffering,WinPosGV),
+pbi_write(sio_window_open(WinID,Stream,NMode,NBuffering,WinInsertPos,WinPosGV)),
+pbi_nl,
 	sio_window_open(WinID,Stream,NMode,NBuffering,WinInsertPos,WinPosGV),
 
 	%%
@@ -2562,14 +2568,15 @@ write_buffer(window,Stream) :-
 	write_buffer_to_win(OutType,BufUIA,NumCs,WinID,EndPos),
 	sio_set_position(Stream, 0, 0),
 	stream_addl3(Stream, ReadStreamAlias),
-	(ReadStreamAlias \= 0 ->
-	    current_alias(ReadStreamAlias, ReadStream),
-	    set_window_insert_pos(ReadStream,EndPos)
-	;   true
-	).
+	endpos_2_readstream(ReadStreamAlias,EndPos).
 
-write_buffer(window,Stream) :-
-	!.
+write_buffer(window,Stream) :-!.
+
+endpos_2_readstream(0,_) :-!.
+endpos_2_readstream(ReadStreamAlias,EndPos)
+	:-
+	current_alias(ReadStreamAlias, ReadStream),
+	set_window_insert_pos(ReadStream,EndPos).
 
 write_buffer(atom,Stream) :-
 	sio_buf_params(Stream, BufStart, BufSize),

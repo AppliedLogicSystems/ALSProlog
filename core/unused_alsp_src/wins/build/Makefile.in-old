@@ -4,5 +4,7 @@
 all: $(LIBRARIES)
 
 $(LIBRARIES):
-	cd $@; $(MAKE) all
+	$(MAKE) -C $@ ALSPRO=$(ALSPRO) all 
+
+#	cd $@; $(MAKE) all
 

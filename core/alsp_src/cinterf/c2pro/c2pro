@@ -18,7 +18,7 @@
  | Each level adds to what was shown at the previous level:
  |	0 - silent;
  |	1 - show open/close of input files; dots for stmt processing;
- |	2 - show token list of statemnt begin parsed;
+ |	2 - show token list of statemnt being parsed;
  |	3 - show result of parsing;
  |	4 - show lines as read from source;
  | Levels are set by the command line switch:
@@ -48,6 +48,7 @@ cur_debug_level(1).
 :-dynamic(exclude_files/5).
 :-dynamic(includePath/3).
 :-dynamic(currentPath/3).
+:-dynamic(sysPathPrefix/1).
 :-dynamic(imported/1).
 :-dynamic(trace_enter_file/1).
 
@@ -67,13 +68,18 @@ os_specific_file(vms,	cvax).
 inSuffix('spc').
 outSuffix('src').
 
-%%-------------------------------------
+%%------------------------------------------------------------
 %% c2pro/0.
 %% command line goal:
-%% 	alspro c2pro -g c2pro -p file [file..] \
-%%		[-Dflag[=num]]* [-Ipathname]*  \
-%%		[-d debuglevel] [-b breakitem]
-%%-------------------------------------
+%% 	alspro c2pro -g c2pro -p file [file..] 
+%%		[-os Name]
+%%		[-Dflag[=num]]* [-Ipathname]*  
+%%		[-d debuglevel] [-b breakitem]*
+%% 		[-srcpath Path] [sys_pfx Path]
+%%		[-filterFile Path] [-filter FilterSpec]
+%%		[-info File]
+%%		[-master Name] 
+%%------------------------------------------------------------
 
 	%% old:
 export ctrans/0.
@@ -141,6 +147,9 @@ parse_options([FirstOpt | RestOpts], Defines, State)
  |	+Establish a source path:
  |		option:  -srcpath Path
  |
+ |	+Establish a prefix for <> includes/excludes
+ |		option:  -sys_pfx Path
+ |
  |	+Set path to a function filter spec file
  |		option:	 -filterFile Path
  |
@@ -159,6 +168,10 @@ parse_options([FirstOpt | RestOpts], Defines, State)
 	%% set debugging level:
 	%% option:  -d Level[=Num]
 install_option(['-d',InitLevel], Defines, Defines, State)
+	:-
+	set_debugging_level(InitLevel).
+
+set_debugging_level(InitLevel)
 	:-
 	(number(InitLevel) ->
 		Level = InitLevel
@@ -209,6 +222,17 @@ install_option(['-srcpath',Path], Defines, Defines, State)
 	:-
 	assert(sourcePath(Path)).
 
+	% option: -sys_pfx Path
+install_option(['-sys_pfx',Path], Defines, Defines, State)
+	:-
+	subPath(PathList, Path),
+	(sysPathPrefix(Old) ->
+		retract(sysPathPrefix(Old))
+		;
+		true
+	),
+	assert(sysPathPrefix(PathList)).
+
  	% option:	 -filterFile Path
 install_option(['-filterFile',Path], Defines, Defines, State)
 	:-
@@ -218,6 +242,27 @@ install_option(['-filterFile',Path], Defines, Defines, State)
 install_option(['-filter', Filter], Defines, Defines, State)
 	:-
 	set_filter_expr(Filter).
+
+	%% option: -info File -- must appear rightwards of -srcpath
+install_option(['-info', File], Defines, Defines, State)
+	:-
+	filePlusExt(File,pro,FilePro),
+	((exists_file(File) ; exists_file(FilePro))
+		->
+		FullFile = File
+		;
+		sourcePath(SrcPath),
+		extendPath(SrcPath,File,FullFile),
+		filePlusExt(FullFile,pro,FullFilePro),
+		((exists_file(FullFile) ; exists_file(FullFilePro))
+			-> 
+			true ;
+			printf('!Error (-info): Can''t find file: %t or %t\n',
+				[File, FullFile])
+		)
+	),
+	assert(info_file(FullFile)),
+	consult_to(c2pro, FullFile).
 
 install_option(['-master', MasterName], Defines, Defines, State)
 	:-

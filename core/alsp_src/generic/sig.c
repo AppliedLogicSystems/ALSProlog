@@ -21,7 +21,7 @@
 #define SIGINT 2
 #define CNTRLC_INTNUM	0x1B
 
-#else  /* DOS */
+#else  /* not-DOS */
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -62,8 +62,8 @@ static int cntrcl_init_flag = 0;
  * passes these on to ALS-Prolog.
  */
 
-
 #if defined(HAVE_UCONTEXT_H)
+
 #ifdef arch_sparc
 extern set_prolog_interrupt();
 unsigned long cntrl_c_resume;
@@ -78,7 +78,7 @@ void
 signal_handler(signum, siginf)
     int   signum;
     struct siginfo *siginf;
-#elif defined(HAVE_SIGVEC)
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
 extern set_prolog_interrupt();
 int   cntrl_c_resume;
 void  signal_handler(signum, code, scp, addr)
@@ -95,7 +95,7 @@ void  signal_handler(AST_param)
 extern int set_prolog_interrupt	PARAMS((void));
 void  signal_handler(signum)
     int   signum;
-#endif
+#endif 		/* defined(HAVE_UCONTEXT_H) */
 {
     if (wm_regidx != 0) {
 #if !defined(arch_i386) && !defined(Portable)
@@ -105,9 +105,9 @@ void  signal_handler(signum)
 	    sigcon->uc_mcontext.gregs[R_R22] = -1;
 	    sigcon->uc_checksum.ucs_flags = 0;
 	    sigcon->uc_checksum.ucs_checksum = 0;
-#else
+#else  
 	    siginf->si_r22 = -1;	/* r22 is the Safety register on 88k */
-#endif
+#endif /* HAVE_UCONTEXT_H */
 #endif /* arch_m88k */
 
 #ifdef	VMS
@@ -118,10 +118,10 @@ void  signal_handler(signum)
 #ifdef	HAVE_UCONTEXT_H
 #define SC_PC (unsigned long) (sigcon->uc_mcontext.gregs[REG_PC])
 #define SC_NPC (unsigned long) (sigcon->uc_mcontext.gregs[REG_nPC])
-#else	/* SunOS */
+#else	/* SunOS ; not-HAVE_UCONTEXT_H */
 #define SC_PC (unsigned long) scp->sc_pc
 #define SC_NPC (unsigned long) scp->sc_npc
-#endif
+#endif  /* HAVE_UCONTEXT_H */
 	    if ((((unsigned long) set_prolog_interrupt) <= SC_PC &&
 		 SC_PC <= ((int) set_prolog_interrupt) + 24) ||
 		(((int) set_prolog_interrupt) <= SC_NPC &&
@@ -170,16 +170,19 @@ void  signal_handler(signum)
 	act.sa_flags = SA_SIGINFO;
 	(void) sigaction(signum, &act, 0);
     }
-#elif defined(HAVE_SIGVEC)
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
     {
 	struct sigvec v;
 
 	v.sv_handler = signal_handler;
 	v.sv_mask = 0;
-	v.sv_flags = SV_INTERRUPT;	/* do not restart certain system
-					 * calls
-					 */
+#ifdef HAVE_SIGVECTOR
+	v.sv_flags = SV_BSDSIG;	/* do not restart certain system calls */
+	sigvector(signum, &v, 0);
+#else
+	v.sv_flags = SV_INTERRUPT;	/* do not restart certain system calls */
 	sigvec(signum, &v, 0);
+#endif
     }
 #else 
 	(void) signal(signum, signal_handler);
@@ -278,16 +281,19 @@ init_sigint()
 	(void) sigaction(SIGINT, &act, 0);
     }
 #else
-#ifdef HAVE_SIGVEC
+#if defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
     {
 	struct sigvec v;
 
 	v.sv_handler = signal_handler;
 	v.sv_mask = 0;
-	v.sv_flags = SV_INTERRUPT;	/* do not restart certain system
-					 * calls
-					 */
+#ifdef HAVE_SIGVECTOR
+	v.sv_flags = SV_BSDSIG;	/* do not restart certain system calls */
+	sigvector(SIGINT, &v, 0);
+#else
+	v.sv_flags = SV_INTERRUPT;	/* do not restart certain system calls */
 	sigvec(SIGINT, &v, 0);
+#endif
     }
 #else
     (void) signal(SIGINT, signal_handler);
@@ -379,16 +385,19 @@ pbi_alarm()
 	(void) sigaction(SIGALRM, &act, 0);
     }
 #else		  /* HAVE_SIGACTION ... */
-#ifdef HAVE_SIGVEC
+#if defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
     {
 	struct sigvec v;
 
 	v.sv_handler = signal_handler;
 	v.sv_mask = 0;
-	v.sv_flags = SV_INTERRUPT;	/* do not restart certain system
-					 * calls
-					 */
+#ifdef HAVE_SIGVECTOR
+	v.sv_flags = SV_BSDSIG;	/* do not restart certain system calls */
+	sigvector(SIGALRM, &v, 0);
+#else
+	v.sv_flags = SV_INTERRUPT;	/* do not restart certain system calls */
 	sigvec(SIGALRM, &v, 0);
+#endif
     }
 #else				/* !HAVE_SIGVEC */
     (void) signal(SIGALRM, signal_handler);
