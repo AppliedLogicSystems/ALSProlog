@@ -17,8 +17,8 @@ demo_init
 qkc :-
 	builtins:sys_searchdir(SSD),
 	join_path([SSD, 'alspro.key'], KeyPath),
-%KeyPath='alspro.key',
 	exists_file(KeyPath),
+	!,
 	open(KeyPath, read, IS, []),
 	get_line(IS, KeyAtom),
 	close(IS),
@@ -30,10 +30,13 @@ qkc :-
 			date(Today),
 			date_less(Today, KeyInfo)
 			;
-			printf(user_output, 'Missing valid key; use ALS Prolog (alsdev) first\n', []),
+			printf(user_output, 'Missing valid key: Run ALS Prolog (alsdev) first\n', []),
 			halt
 		)
 	).
+qkc :-
+	printf(user_output, 'Missing valid key: Run ALS Prolog (alsdev) first\n', []),
+	halt.
 		
 no_key_file(KeyPath)
 	:-
@@ -55,7 +58,6 @@ no_key_file_cont(_, _)
 	demo15_year_check,
 	!,
 	M15 is 15 * 60 * 1000, 
-%	M15 is 30 * 1000, 
 	tcl_call(shl_tcli, [after,M15,'prolog call builtins demo_shutdown'],_),
 	setup_demo_examples,
 	sprintf(atom(Msg2),'%t\n%t\n%t',[

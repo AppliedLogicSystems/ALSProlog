@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.86 1999/08/06 16:25:55 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.87 1999/09/14 16:25:02 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -167,7 +167,7 @@ if {$tcl_platform(platform) == "macintosh"} then {
 	set proenv(.topals,geometry)	400x300+3+22
 	set proenv(.debugwin,geometry)	400x300+300+22
 } else {
-	set proenv(.topals,geometry)	400x300+0+0
+	set proenv(.topals,geometry)	400x300+5+6
 	set proenv(.debugwin,geometry)	400x300+300+0
 }
 
