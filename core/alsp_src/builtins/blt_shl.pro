@@ -52,11 +52,6 @@ start_shell0(DefaultShellCall)
 	assert(save_clinfo(CLInfo)),
 	output_system_banner(CLInfo),
 
-	sys_searchdir(ALSDIRPath),
-	split_path(ALSDIRPath, ALSDIRPathList),
-	dappend(ALSDIRPathList, [library,'objects.pro'], ObjPathList),
-	join_path(ObjPathList, ObjectsPath),
-
 	library_setup,
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
