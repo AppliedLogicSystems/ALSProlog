@@ -29,10 +29,10 @@ remote_make () {
     os=$2
     echo "Starting $os build on $machine..."
     # Unfortunatly rsh does not return the result code of the command
-    # it executes, so the only way to detect an error is to look at the
-    # standard error stream.  Typical Unix lossage!
-    $RSH $machine "cd $dir/$os ; make -ksj 2 $make_args" > /dev/null 2> $os.err
-    if test -s $os.err
+    # it executes, so the only way to detect an error is to echo $? to
+    # a file and check. Typical Unix lossage!
+    $RSH $machine "cd $dir/$os ; make -kj 2 $make_args ; " 'echo $? 1>&2' > $os.err 2>&1
+    if test `tail -1 $os.err` -ne 0
     then
 	echo "ERROR: $os build on $machine failed."
 	echo "       See the file $os.err for details."
