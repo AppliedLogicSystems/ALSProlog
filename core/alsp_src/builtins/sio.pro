@@ -1674,6 +1674,10 @@ wait_data(tcltk, Stream, Call)
 finish_wait_data_tcltk(-1, Stream, Call)
 	:-!,
 	force_control_c_during_read(Stream).
+	%% Returned -3: User demanded  halt via tcl exit_prolog (ie, menu):
+finish_wait_data_tcltk(-3, Stream, Call)
+	:-!,
+	pbi_halt.
 finish_wait_data_tcltk(WaitRes, Stream, Call)
 	:-
 	call(Call).
