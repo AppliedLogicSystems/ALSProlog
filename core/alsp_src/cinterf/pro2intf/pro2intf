@@ -839,6 +839,8 @@ qualifier(far).
 qualifier(near).
 qualifier(huge).
 qualifier(pascal).
+qualifier(cdecl).
+qualifier(stdcall).
 
 %---------------------------------------
 % classifyType/2

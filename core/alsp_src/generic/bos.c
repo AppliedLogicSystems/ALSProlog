@@ -23,7 +23,7 @@
 #include <process.h>
 #endif
 
-#ifdef WIN32
+#ifdef MSWin32
 #include "fswin32.h"
 #endif
 
@@ -102,7 +102,7 @@ pbi_system()
     if (getstring(&str, v, t)
 	|| (t == WTP_LIST 
 	    && list_to_string((str = (UCHAR *) wm_H + 1), v, wm_normal - 256))) {
-#if defined(DOS) || defined(__GO32__) || defined(OS2) || defined(WIN32)
+#if defined(DOS) || defined(__GO32__) || defined(OS2) || defined(MSWin32)
       char *cp;
       int switching=1, switched=0;
       for (cp=str; *cp; cp++)

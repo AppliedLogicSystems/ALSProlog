@@ -311,6 +311,7 @@ extern	int	sio_set_position	PARAMS(( void ));
 extern	int	sio_set_eof	PARAMS(( void ));
 extern	int	sio_reset_eof	PARAMS(( void ));
 extern	int	sio_file_open	PARAMS(( void ));
+extern	int	sio_console_open	PARAMS(( void ));
 #ifdef SysVIPC
 extern	int	sio_sysVq_open	PARAMS(( void ));
 extern	int	pbi_ftok	PARAMS(( void ));

@@ -349,6 +349,7 @@ static struct blt_struct {
 	BLT("sio_increment_bufpos", 1, sio_increment_bufpos, "_sio_increment_bufpos"),
 	BLT("sio_set_position", 3, sio_set_position, "_sio_set_position"),
 	BLT("sio_file_open", 5, sio_file_open, "_sio_file_open"),
+	BLT("sio_console_open", 6, sio_console_open, "_sio_console_open"),
 	BLT("window_insert_pos", 2, win_insert_pos, "_win_insert_pos"),
 	BLT("set_window_insert_pos", 2, set_win_insert_pos, "_set_win_insert_pos"),
 	BLT("sio_set_eof", 1, sio_set_eof, "_sio_set_eof"),
@@ -703,7 +704,7 @@ builtin_init()
 	i = sizeof blt2_tab / sizeof (struct blt2_struct);
 	p2 = blt2_tab + i - 1;
 	for (; i > 0; i--, p2--) {
-#if defined(__MWERKS__) && defined(WIN32) && defined(Portable)
+#if defined(__MWERKS__) && defined(MSWin32) && defined(Portable)
 		/* There is a bug in MetroWerk's CodeWarrior 8 which doesn't properly
 		   initilize p2->p1 when an enum is being caste to a function pointer.
 		   This evil big of code works around the problem. */

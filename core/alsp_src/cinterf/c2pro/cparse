@@ -669,7 +669,11 @@ qualifier('_Near', near).
 qualifier(far, far).
 qualifier(near, near).
 qualifier(huge,huge).
+qualifier('_huge',huge).
 qualifier(pascal,pascal).
+qualifier('__cdecl',cdecl).
+qualifier('__stdcall',stdcall).
+
 
 %-----------------------------------------------------
 % things that can follow a function declarator

@@ -81,11 +81,11 @@ tSIOUXSettings  SIOUXSettings =
 #include <Events.h>
 #endif	/* MacOS */
 
-#ifdef WIN32
+#ifdef MSWin32
 #include <winsock.h>
 #ifdef __MWERKS__
 /* I'm not sure whose bug this is, but I suspect it's a MetroWerks problem.
-   When a Console UI Win32 program is launched from Windows95, the program
+   When a Console UI MSWin32 program is launched from Windows95, the program
    name on the simulated command line is enclosed in double-quotes because
    Win95 file name may have spaces in them.
    The argv list passed to main is not correctly parsed.  The double-quotes
@@ -174,9 +174,9 @@ main(int argc, char ** argv)
     PI_set_app_printf_callback(app_printf);
 #endif
 
-#ifdef WIN32
+#ifdef MSWin32
 #ifdef __MWERKS__
-    //FixArguments(argc, argv);
+    FixArguments(argc, argv);
     if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE))
     	PI_app_printf(PI_app_printf_warning, "SetConsoleCtrlHandler failed !\n");
 #endif
@@ -219,7 +219,7 @@ main(int argc, char ** argv)
 
     PI_shutdown();
     
-#ifdef WIN32
+#ifdef MSWin32
     if (WSACleanup() != 0) {
 	PI_app_printf(PI_app_printf_warning, "WinSock cleanup failed !\n");
     }

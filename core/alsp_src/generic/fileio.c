@@ -77,7 +77,7 @@ pptinfo prompts[3] =
 void
 fio_init()
 {
-#if !defined(DOS) && !defined(Portable) && !defined(VMS) && !defined(NeXTOS) && !defined(WIN32)
+#if !defined(DOS) && !defined(Portable) && !defined(VMS) && !defined(NeXTOS) && !defined(MSWin32)
 /* The Think C ANSI library has trouble with the setvbuf calls.  They seem
    to disable stdin. */
 #ifndef THINK_C

@@ -14,6 +14,8 @@
 #ifndef _ALSPI_H_INCLUDED_
 #define _ALSPI_H_INCLUDED_
 
+#include <stddef.h>
+
 #ifdef APP_PRINTF_CALLBACK
 #include <stdarg.h>
 #endif
@@ -134,6 +136,10 @@ extern	void	PI_set_app_printf_callback(void (*callback)(int, va_list));
 #endif
 extern	void	PI_app_printf	PARAMS(( int, ... ));
 extern	const char *	PI_get_options	PARAMS(( void ));
+
+enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
+
+extern	void	PI_set_console_callback(int (*con_io)(int, char *, size_t));
 
 #ifdef MacOS
 extern	long	yield_interval;

@@ -63,7 +63,8 @@
 #endif
 #endif
 
-#ifdef WIN32
+#ifdef MSWin32
+#include <windows.h>
 #include "fswin32.h"
 #include "ctype.h"
 #endif
@@ -98,6 +99,10 @@ char  imagename[64];
 char  imagedir[1024];
 static char alsdir[1024];	/* directory where ALS system resides */
 
+#ifdef MSWin32
+char *MinorOSStr = "mswindows";
+
+#endif
 
 static char versionNum[] = SysVersionNum;	/* from version.h */
 /* static char systemName[] = SysName;		from version.h */
@@ -451,6 +456,24 @@ PI_prolog_init(win_str, argc, argv)
     /*---------------------------------------*
      | Set up the als_system fact.
      *---------------------------------------*/
+     
+#ifdef MSWin32
+
+#if defined (WIN32)
+	#define IS_WIN32 TRUE
+#else
+	#define IS_WIN32 FALSE
+#endif
+#define IS_NT      IS_WIN32 && (BOOL)(GetVersion() < 0x80000000)
+#define IS_WIN32S  IS_WIN32 && (BOOL)(!(IS_NT) && (LOBYTE(LOWORD(GetVersion()))<4))
+#define IS_WIN95 (BOOL)(!(IS_NT) && !(IS_WIN32S)) && IS_WIN32
+
+    if (IS_NT) MinorOSStr = "mswinnt";
+    else if (IS_WIN32S) MinorOSStr = "mswin32s";
+    else if (IS_WIN95) MinorOSStr = "mswin95";
+
+#endif
+
     assert_als_system(OSStr, MinorOSStr, ProcStr,
 		      SysManufacturer, versionNum, win_str);
 
@@ -536,14 +559,14 @@ assert_sys_searchdir(name)
     char *name;
 {
     char  command[2048];
-#if defined(DOS) || defined(WIN32)
+#if defined(DOS) || defined(MSWin32)
     char  tbuf[2048], *tptr, *nptr;
 #endif
 
     if (noautoload && !pckgloaded)
 	return;
 
-#if defined(DOS) || defined(WIN32)
+#if defined(DOS) || defined(MSWin32)
     /* replace \ by \\ to make parser happy */
 
     for (tptr = tbuf, nptr = name; *nptr != '\0'; *tptr++ = *nptr++)
@@ -608,7 +631,7 @@ assert_als_system(os, os_var, proc, man, ver, winstype)
  * absolute_pathname tests to see if we have an absolute pathname or not
  *-----------------------------------------------------------------------------*/
 
-#if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(OS2) || defined(WIN32)
+#if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(OS2) || defined(MSWin32)
 
 static int
 absolute_pathname(name)
@@ -650,7 +673,7 @@ absolute_pathname(name)
 
 #endif
 
-#ifdef WIN32
+#ifdef MSWin32
 static const int num_ext = 2;
 static const char *program_extension[num_ext] = {".exe", ".com"};
 
@@ -677,7 +700,7 @@ static int has_program_extension(const char *path)
    (MS DOS/Windows), extensions are added if necessary. */
 static int access_program(const char *path)
 {
-#if defined(WIN32)
+#if defined(MSWin32)
     /* Under Microsoft Windows NT, the argv[0] passed from the command prompt
        does not have an extension unless it is explicit.
        
@@ -736,7 +759,7 @@ whereami(name)
 
 	t = imagedir;
 	if (!absolute_pathname(name)) {
-#if defined(WIN32)
+#if defined(MSWin32)
 	    if (*(name+1) == ':') {
 	    	if (getdcwd(toupper(*name)-'A'+1, imagedir, 1024) == NULL)
 		    fatal_error(FE_GETCWD, 0);
@@ -766,7 +789,7 @@ whereami(name)
 	    if (getcwd(newrbuf, drive) == 0) {
 		fatal_error(FE_GETCWD, 0);
 	    }
-#else  /* not WIN32 or DOS */
+#else  /* not MSWin32 or DOS */
 #ifdef HAVE_GETWD
 	    if (getwd(imagedir) == 0) {
 		fatal_error(FE_GETCWD, 0);
@@ -776,7 +799,7 @@ whereami(name)
 		fatal_error(FE_GETCWD, 0);
 	    }
 #endif /* !HAVE_GETWD */
-#endif /* WIN32, DOS */
+#endif /* MSWin32, DOS */
 
 	    for (; *t; t++)	/* Set t to end of buffer */
 		;
@@ -789,7 +812,7 @@ whereami(name)
 		*t++ = DIR_SEPARATOR;
 	    }
 	}
-#if (!defined(MacOS) && !defined(_DJGPP__) && !defined(__GO32__) && !defined(WIN32))
+#if (!defined(MacOS) && !defined(_DJGPP__) && !defined(__GO32__) && !defined(MSWin32))
 	else
 		(*t++ = DIR_SEPARATOR);
 #endif

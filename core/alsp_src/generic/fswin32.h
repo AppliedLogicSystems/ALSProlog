@@ -1,4 +1,4 @@
-/* Win32 CRT headers. */
+/* MSWin32 CRT headers. */
 
 #ifdef __MWERKS__
 
@@ -19,7 +19,7 @@ typedef long _dev_t;			/* device code */
 #include <direct.h>
 #include <stat.h>
 
-/* from Win32 SDK's <fcntl.h> */
+/* from MSWin32 SDK's <fcntl.h> */
 #ifdef __MWERKS__
 /* MetroWerks open() uses a strange mix of Mac CW UNIX and Microsoft CRT flags.
    These flags are taken from the MacOS Support version of fcntl.h */
@@ -43,7 +43,7 @@ typedef long _dev_t;			/* device code */
 #define O_SEQUENTIAL	_O_SEQUENTIAL
 #define O_RANDOM	_O_RANDOM
 
-/* from Win32 SDK's <io.h> */
+/* from MSWin32 SDK's <io.h> */
 #ifdef __MWERKS__
 #define access	   _access
 #define unlink	   _unlink
@@ -77,7 +77,7 @@ typedef long _dev_t;			/* device code */
 #define R_OK	4
 #define X_OK	F_OK
 
-/* from Win32 SDK's <direct.h> */
+/* from MSWin32 SDK's <direct.h> */
 #define chdir	_chdir
 #define getdcwd	_getdcwd
 #define getcwd	_getcwd
@@ -85,7 +85,7 @@ typedef long _dev_t;			/* device code */
 #define rmdir	_rmdir
 #define diskfree_t  _diskfree_t
 
-/* from Win32 SDK's <stat.h> */
+/* from MSWin32 SDK's <stat.h> */
 #define S_IFMT	 _S_IFMT
 #define S_IFDIR  _S_IFDIR
 #define S_IFCHR  _S_IFCHR

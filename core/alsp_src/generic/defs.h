@@ -268,7 +268,7 @@
 #define PATH_SEPERATOR	','
 #define DIR_SEPARATOR	']'
 
-#elif	defined(DOS) || defined(WIN32)
+#elif	defined(DOS) || defined(MSWin32)
 #define	PATH_SEPARATOR	';'
 #define DIR_SEPARATOR	'\\'
 
@@ -361,6 +361,10 @@ extern	long *	ss_fmalloc	PARAMS(( size_t ));
  *---------------------------------------------------------------------*/
 
 /* ----------   main.c ----------   */
+#ifdef MSWin32
+extern	char	*MinorOSStr;
+#endif
+
 extern	void	als_exit	PARAMS(( int ));
 extern	void	heap_overflow	PARAMS(( void ));
 

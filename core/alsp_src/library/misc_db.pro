@@ -76,23 +76,39 @@ erase_all([Ref | RefsList])
 	erase(Ref),
 	erase_all(RefsList).
 
+/*
 abolish_list([]).
 abolish_list([P/A | More]) :-
 	abolish(P,A),
 	abolish_list(More).
-
-abolish_list([],M).
-abolish_list([P/A | More],M) :-
-	M:abolish(P,A),
-	abolish_list(More,M).
-
-retract_all/1.
-retract_all(Pattern)
+*/
+abolish_list(Module, List)
 	:-
-	retract(Pattern),
+	abolish_list0(List, Module).
+
+abolish_list0([], Module).
+abolish_list0([P/A | More], Module) 
+	:-
+	Module:abolish(P,A),
+	abolish_list0(More, Module).
+
+retract_all(Module, Pattern)
+	:-
+	retract_all0(Pattern, Module).
+
+retract_all0(Pattern, Module)
+	:-
+	retract_each(Pattern, Module),
 	!,
-	retract_all(Pattern).
-retract_all(_).
+	retract_all0(Pattern, Module).
+retract_all0(_, _).
 	
+export retract_each/2.
+retract_each(Module, Pattern)
+	:-
+	Module:retract(Pattern),
+	fail.
+
+retract_each(_, _).
 
 endmod.
