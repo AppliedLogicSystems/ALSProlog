@@ -161,12 +161,24 @@ gc()
     register unsigned long *mp;
     register unsigned long m;
     int   compactionbit;
+#ifdef FREEZE
+    int dtgv;
+    long *dthead, *last_dt, *this_dt;
+#endif
+
 #ifdef DEBUGSYS /*--------------------------------------------------*/
     unsigned long start_tick = 0, finish_tick;
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 
 	/* For demos and hardware-key protected versions, check copy protection. */
     check_security();
+
+#ifdef FREEZE
+    dtgv = gv_alloc();
+    dthead = (PWord *)(wm_gvbase - dtgv);
+    *dthead = 0;
+    last_dt = *dthead;
+#endif
 
     /*---------------------------------------------------------------*
      | Force certain external variables to be biased for gc purposes.
@@ -324,45 +336,47 @@ gc()
 		}      /* if (apb <= e)-else */
 
 #ifdef TRAILVALS
-		/*------------------------------------------------------------------*
-		 | mark_from(L) expects L to be (an ordinary C) pointer to a location
-		 | holding a Prolog (heap) value; since tr points at a trail location,
-		 | then *tr is such a value for the ordinary (non-TRAILVALS) situtation;
-		 | However, in the TRAILVALS case, this is only true for the (upper)
-		 | one of each pair of entries on the trail.  In the lower member
-		 | of a trail pair, we have copied the contents of a heap location into
-		 | that trail position; hence *tr is incorrect for such a location;
-		 | instead, we want to just pass tr to mark_from in that case.
-		 |		Note that in this case, the contents of tr, being a heap
-		 |	value, could be biased; hence we use val_at(tr) in this case.
-		 |
-		 |     Now, tr is sweeping from lower (more recent) to upper locations
-		 | on the trail; thus it encounters the lower member (copied value
-		 | to be reset) first, then the upper regular type of trail location
-		 | second.  Note that any of these copied (2nd pair member) values
-		 | might be needed on backtracking, and so must be preserved under
-		 | gc.
-		 *------------------------------------------------------------------*/
-		for (; tr < b; tr++) {
-				/* mark the copied (2nd pair element) value): */
-/*			mark_from(tr);      */
-/*    		mark(val_at(tr));   */
-			tr1 = tr;
+	/*------------------------------------------------------------------*
+	 | mark_from(L) expects L to be (an ordinary C) pointer to a location
+	 | holding a Prolog (heap) value; since tr points at a trail location,
+	 | then *tr is such a value for the ordinary (non-TRAILVALS) situtation;
+	 | However, in the TRAILVALS case, this is only true for the (upper)
+	 | one of each pair of entries on the trail.  In the lower member
+	 | of a trail pair, we have copied the contents of a heap location into
+	 | that trail position; hence *tr is incorrect for such a location;
+	 | instead, we want to just pass tr to mark_from in that case.
+	 |		Note that in this case, the contents of tr, being a heap
+	 |	value, could be biased; hence we use val_at(tr) in this case.
+	 |
+	 |     Now, tr is sweeping from lower (more recent) to upper locations
+	 | on the trail; thus it encounters the lower member (copied value
+	 | to be reset) first, then the upper regular type of trail location
+	 | second.  Note that any of these copied (2nd pair member) values
+	 | might be needed on backtracking, and so must be preserved under
+	 | gc.
+	 *------------------------------------------------------------------*/
 
-				/* move up one element; now an "ordinary" trail value: */ 
+		for (; tr < b; tr++) {
+			/* hold onto the copied (2nd pair element) value): */
+		tr1 = tr;
+			/* move up one element; now an "ordinary" trail value: */ 
 	    	ap = (long *) *++tr;	/* tr is not biased */
 	    	if (oldest_ap <= ap && ap < heap_low)
 			{
 				mark_from(ap);
-    			mark(val_at(tr1));
+    				mark(val_at(tr1));
 			}
 		}
+
+
 #else /* no-TRAILVALS */
+
 		for (; tr < b; tr++) {
-	    	ap = (long *) *tr;					/* tr is not biased */
+	    	ap = (long *) *tr;			/* tr is not biased */
 	    	if (oldest_ap <= ap && ap < heap_low)
 				mark_from(ap);
 		}
+
 #endif    /* TRAILVALS */
 
 		ap = apb;
