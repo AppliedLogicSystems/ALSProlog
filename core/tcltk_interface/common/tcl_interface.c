@@ -338,6 +338,37 @@ Tcl_ALS_Prolog_ObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl
 	}
 }
 
+static int
+Tcl_DoOneEventCmd(ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
+{
+	int index, result;
+	
+	enum {EVENT_WAIT, EVENT_DONT_WAIT};
+    static char *eventOptions[] = {"wait", "dont_wait", (char *) NULL};
+
+	if (objc != 2) {
+		Tcl_WrongNumArgs(interp, 1, objv, "option");
+		return TCL_ERROR;
+	}
+	
+    if (Tcl_GetIndexFromObj(interp, objv[1], eventOptions, "option", 0, &index)
+	    != TCL_OK) {
+    	return TCL_ERROR;
+    }
+
+	switch (index) {
+	case EVENT_WAIT:
+		result = Tcl_DoOneEvent(0);
+		break;
+	case EVENT_DONT_WAIT:
+		result = Tcl_DoOneEvent(TCL_DONT_WAIT);
+		break;
+	}
+	
+	Tcl_SetObjResult(interp, Tcl_NewIntObj(result));
+	return TCL_OK;
+}
+
 /* Predicates for Prolog to Tcl Interface */
 
 static Tcl_HashTable tcl_interp_name_table;
@@ -440,6 +471,11 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 	Tcl_SetHashValue(entry, interp);
 
 	if (!Tcl_CreateObjCommand(interp, "prolog", Tcl_ALS_Prolog_ObjCmd, w, NULL)) {
+		AP_SetError(w, AP_NewSymbolFromStr(w, "tcl_create_command_error"));
+		goto error_delete;
+	}
+
+	if (!Tcl_CreateObjCommand(interp, "dooneevent", Tcl_DoOneEventCmd, w, NULL)) {
 		AP_SetError(w, AP_NewSymbolFromStr(w, "tcl_create_command_error"));
 		goto error_delete;
 	}
