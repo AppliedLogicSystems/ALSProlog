@@ -49,8 +49,15 @@ alsdev
 export alsdev/1.
 alsdev(Shared)
 	:-
-	pathPlusFile(Shared, 'alsdev.tcl', ALSDEVTCL),
-	tcl_call(shl_tcli, [source, ALSDEVTCL], _),
+	sys_env(OS, _, _),
+	(OS = macos ->
+		tcl_call(shl_tcli, [source, '-rsrc', 'alsdev'], _)
+	  ;
+	  (
+	    pathPlusFile(Shared, 'alsdev.tcl', ALSDEVTCL),
+	    tcl_call(shl_tcli, [source, ALSDEVTCL], _)
+	  )
+	),
 		%% At this point, the windows have been created;
 
 	tcl_call(shl_tcli, [destroy,'.als_splash_screen'], _),
@@ -207,10 +214,12 @@ shell_alarm_interval(1.05).
 
 setup_prolog_flags
 	:-
+	sys_env(OS, _, _),
+	not (OS = macos), 
 	static_flags_info(StaticEqsList),
 	add_static_items_to_menu(StaticEqsList, 
 				shl_tcli, '.topals.mmenb.settings.flags.static').
-
+setup_prolog_flags.
 
 add_static_items_to_menu([], Interp, MenuPath).
 add_static_items_to_menu([Item | List], Interp, MenuPath)
