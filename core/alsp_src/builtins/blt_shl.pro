@@ -169,9 +169,7 @@ setup_shell_windows(CLInfo, OSS)
 	mangle(7, CLInfo, prolog_shell(ISS,OSS)).
 
 	%% Should be: arg(7, CLInfo, prolog_shell)
-setup_shell_windows(CLInfo, user_output)
-	:-
-	open_addl_std_streams.
+setup_shell_windows(CLInfo, user_output).
 %unneeded	mangle(7, CLInfo, prolog_shell).
 
 
