@@ -1318,9 +1318,7 @@ annotate_showing([M | SysMs], [[M, S] | SMs])
 record_lib_load(Desc)
 	:-
 		%% the incoming Desc is an atom, looking like: Dir/File
-	sub_atom(Desc, Before, 1, After, '/'),
-	sub_atom(Desc, 0, Before, _, Dir),
-	sub_atom(Desc, _, After, 0, File),
+	split_path(Desc,[Dir,File]),
 	assertz(loaded_builtins_file(File,Dir)).
 
 
