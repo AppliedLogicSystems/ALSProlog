@@ -1526,12 +1526,14 @@ setup_debug(Module, Predicate, Arity)
 	debug_io(DebugIOChannel),
 	setup_debug(DebugIOChannel, Module, Predicate, Arity).
 
-setup_debug(nowins, Module, Predicate, Arity) :-!.
+setup_debug(nowins, Module, Predicate, Arity) 
+	:-!.
 setup_debug(DebugIOChannel, Module, Predicate, Arity)
 	:-
 	change_source_level_debugging(on),
 	check_file_setup(Module, Predicate, Arity, SrcFilePath, BaseFileName,DebugType),
 	reload_debug(BaseFileName, SrcFilePath, DebugType),
+	!,
 	start_src_trace(BaseFileName, SrcFilePath).
 
 check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType)

@@ -186,6 +186,14 @@ proc_cgo([Opt | Options], COpts)
 	proc_copt(Opt, COpts),
 	proc_cgo(Options, COpts).
 
+proc_copt(source(true), COpts)
+	:-!,
+	mangle(1, COpts, source).
+
+proc_copt(source(false), COpts)
+	:-!,
+	mangle(1, COpts, default).
+
 proc_copt(consult(true), COpts)
 	:-!,
 	mangle(3, COpts, 0).

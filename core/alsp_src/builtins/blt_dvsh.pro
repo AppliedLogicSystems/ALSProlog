@@ -32,7 +32,7 @@ start_alsdev
 	ss_load_dot_alspro(CLInfo),
 	library_setup,
 	init_tk_alslib(shl_tcli,Shared),
-%	alsdev_splash(Shared),
+%alsdev_splash(Shared),
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	alsdev(Shared).
@@ -332,40 +332,21 @@ modify_settings(NewTerm, Functor, Arity, Arg1)
 	write_clauses(OutS, NewTerms, [quoted(true)]),
 	close(OutS).
 
-%modify_settings(Terms)
 modify_settings(NewTerm, Functor, Arity, Arg1)
 	:-
 	open('alsdev.ini', write, OutS, []),
 	write_clauses(OutS, [NewTerm]),
 	close(OutS).
 
-/*
-replace_items(OldTerms, NewTerm, Functor, Arity, Arg1, NewTerms)
-	:-
-	replace_items(OldTerms, NewTerm, Functor, Arity, Arg1, NewTerms).
-*/
-
 replace_items([],  NewTerm, Functor, Arity, Arg1,  [NewTerm]).
 replace_items([Old | OldTerms],  NewTerm, Functor, Arity, Arg1,  [NewTerm | OldTerms])
 	:-
-%	replacement(Old, Replacements, InterReps, New),
 	functor(Old, Functor, Arity),
 	arg(1, Old, Arg1),
 	!.
 replace_items([Old | OldTerms],  NewTerm, Functor, Arity, Arg1,  [Old | NewTerms])
 	:-
 	replace_items(OldTerms,  NewTerm, Functor, Arity, Arg1,  NewTerms).
-
-/*
-replacement(Old, Replacements, InterRep, New)
-	:-
-	functor(Old, FF, A),
-	functor(New, FF, A),
-	dmember(New, Replacements),
-	!,
-	list_delete(Replacements, New, InterRep).
-replacement(Old, Rep, Rep, Old).
-*/
 
 setup_defaults([], _).
 setup_defaults([Tag=Value | TextSettings], Group)
@@ -379,6 +360,18 @@ setup_defaults([Tag=Value | TextSettings], Group)
 	%%%%%			RECONSULT ETC.						%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+/*
+do_reconsult(PathAtom)
+	:-
+	sys_env(OS,_,_),
+	(xconsult:source_level_debugging(on) ->
+		ThePath = source(PathAtom)
+		;
+		ThePath = PathAtom
+	),
+	perf_reconsult(OS, ThePath).
+*/
+
 do_reconsult(PathAtom)
 	:-
 	sys_env(OS,_,_),
@@ -386,19 +379,22 @@ do_reconsult(PathAtom)
 
 perf_reconsult(unix, PathAtom)
 	:-!,
-	reconsult(PathAtom).
+	consult(PathAtom,[consult(false),source(true)]).
 
 perf_reconsult(mswin32, PathAtom0)
 	:-!,
 		%% repair path (G:/ ...)
 	repair_path(PathAtom0, PathAtom),
-	reconsult(PathAtom).
+	consult(PathAtom,[consult(false),source(true)]).
 
 perf_reconsult(macos, PathAtom)
 	:-!,
 		%% any repairs ??
-	reconsult(PathAtom).
+	consult(PathAtom,[consult(false),source(true)]).
 
+repair_path(source(PathAtomIn), source(PathAtomOut))
+	:-!,
+	repair_path(PathAtomIn, PathAtomOut).
 repair_path(PathAtomIn, PathAtomOut)
 	:-
 	atom_codes(PathAtomIn, PAInCs),
@@ -412,9 +408,6 @@ repair_path0([0'/ | PAInCs], [0'\\ | PAOutCs])
 repair_path0([C | PAInCs], [C | PAOutCs])
 	:-
 	repair_path0(PAInCs, PAOutCs).
-
-
-
 
 clear_workspace
 	:-
@@ -734,7 +727,6 @@ endmod.	%% builtins
 	%%%%% 		  -- portions in module builtins		%%%%% 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 module debugger.
 use tcltk.
 
@@ -783,6 +775,7 @@ start_src_trace(BaseFileName, SrcFilePath)
 	tcl_call(shl_tcli, [ensure_db_showing], _),
 		%% Old Rec exists, but window has been destroyed, so
 		%% remove old rec, and start over:
+	!,
 	continue_start_src_trace(BaseFileName, SrcFilePath).
 
 continue_start_src_trace(BaseFileName, SrcFilePath)
@@ -818,7 +811,6 @@ inverted_index([NLCs | LineIndex], CurCharCount, [CurCharCount | List])
 	NxtCharCount is CurCharCount + NLCs + 1,
 	inverted_index(LineIndex, NxtCharCount, List).
 
-
 create_src_trace(SrcFilePath, WinName, TextWinName, BaseFileName, 
 				 NumLines, LineIndex)
 	:-
@@ -831,6 +823,7 @@ create_src_trace(SrcFilePath, WinName, TextWinName, BaseFileName,
 		LoadRes = [NumLines, LineIndex]
 	),
 	tcl_call(shl_tcli, [TextWinName,configure,'-state',disabled],_),
+	!,
 	tcl_call(shl_tcli, [raise,'.debugwin',WinName],_).
 
 check_leashing(Call,Exit,Redo,Fail)
@@ -873,20 +866,17 @@ set_debugwin_width(M5Size, MainWinSize)
 	%% - (Start,End) are the file offsets of the head
 	%%    of the clause.
 	%%---------------------------------------------------
-/*
 showGoalToUserWin(Port,Box,Depth, Module, Goal, debug)
 	:-
 	get_mrfcg(ClsGrp),
-printf('%t-%t(%t) %t <%t>\n',[Box,Depth,Port,Goal,ClsGrp]),flush_output,
+%printf('%t-%t(%t) %t <%t>\n',[Box,Depth,Port,Goal,ClsGrp]),flush_output,
 	fail.
-*/
 
 	%% '$dbg_aph' ::
 
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-
-%printf('+#+%t: $dbg_aph(%t,%t,%t)\n',[call,ClsGrp,Start,End]),flush_output,
-%	fcg_change(call,'$dbg_aph',ClsGrp,Start,End),
+%printf('+#+%t: $dbg_aph(%t,%t,%t,%t,%t)\n',[call,ClsGrp,Start,End,Box,Depth]),flush_output,
 	color_my_port(ClsGrp,Start,End,call,head_tag),
 	!.
 
@@ -898,38 +888,27 @@ showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 %write(zero_rec_for_clsgrp=[ClsGrp,BaseFileName,SrcFilePath]),nl,
 	builtins:file_clause_group(BaseFileName, ClsGrp),
 	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options),
-	reload_debug(BaseFileName, SrcFilePath, DebugType),
+%	reload_debug(BaseFileName, SrcFilePath, DebugType),
 	continue_start_src_trace(BaseFileName, SrcFilePath),
-	!.
+	!,
+	color_my_port(ClsGrp,Start,End,call,head_tag).
 
-
-	
 showGoalToUserWin(fail,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-!,
 %printf('+#+%t: $dbg_aph(%t,%t,%t,%t,%t)\n',[fail,ClsGrp,Start,End,Box,Depth]),flush_output,
-%	fcg_change(fail,'$dbg_aph',ClsGrp,Start,End),
 	color_my_port(ClsGrp,Start,End,fail,head_tag),
 	fail.
 	
 showGoalToUserWin(redo,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
 	:-!,
-%printf('+#+%t: $dbg_aph(%t,%t,%t)\n',[redo,ClsGrp,Start,End]),flush_output,
-%	fcg_change(redo,'$dbg_aph',ClsGrp,Start,End),
+%printf('+#+%t: $dbg_aph(%t,%t,%t,%t,%t)\n',[redo,ClsGrp,Start,End,Box,Depth]),flush_output,
 	color_my_port(ClsGrp,Start,End,redo,head_tag),
 	fail.
 	
 showGoalToUserWin(Port,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug)
-	:-!.
-%	fcg_change(Port,'$dbg_aph',ClsGrp,Start,End).
-%printf('+#+%t: $dbg_aph(%t,%t,%t,%t,%t)\n',[Port,ClsGrp,Start,End,Box,Depth]),flush_output.
-
-fcg_change(Port,DBG,ClsGrp,Start,End)
-	:-
-	get_mrfcg(MRFCG),
-	MRFCG \= ClsGrp,
-%	printf('+fcg_chg(%t): %t prev=%t cur=%t\n',[Port,DBG,MRFCG,ClsGrp]),
-	flush_output.
-fcg_change(Port,DBG,ClsGrp,Start,End).
+	:-!,
+%printf('+#+%t: $dbg_aph(%t,%t,%t,%t,%t)\n',[Port,ClsGrp,Start,End,Box,Depth]),flush_output,
+	fcg_change(Port,'$dbg_aph',ClsGrp,Start,End).
 
 	%% '$dbg_aphe' ::
 
@@ -974,9 +953,9 @@ showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
 %printf('###redo: $dbg_apf(%t,%t,%t,%t,%t)\n',[ClsGrp,Start,End,Box,Depth]),flush_output,
 	fail.
 
-showGoalToUserWin(_,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
+showGoalToUserWin(Port,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug)
 	:-!.
-%printf('----: $dbg_apf(%t,%t,%t,%t,%t)\n',[ClsGrp,Start,End,Box,Depth]),flush_output.
+%printf('##%t: $dbg_apf(%t,%t,%t,%t,%t)\n',[Port,ClsGrp,Start,End,Box,Depth]),flush_output.
 
 	%%--------------------------------------------------------------------
 	%% 		'$dbg_apg' and  '$dbg_apge'
@@ -1031,7 +1010,6 @@ showGoalToUserWin(redo,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug)
 %printf('###redo: $dbg_apge(%t,%t,%t)\n',[ClsGrp,Start,End]),flush_output,
 	color_my_port(ClsGrp,Start,End,redo,call_tag).
 
-
 showGoalToUserWin(_,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug)
 	:-!.
 %printf('-#-%t: $dbg_apge(%t,%t,%t)\n',[Port,ClsGrp,Start,End]),flush_output.
@@ -1042,10 +1020,14 @@ showGoalToUserWin(_,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug)
 showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
 	:-
 	printf(debugger_output,'(%d) %d %t: ', [Box,Depth,Port]),
-!,
+
+%% should not be necessary, but there is a bug somewhere
+%% in printf which allows it to be re-satisfied::!!::
+	!,
+
+	get_mrfcg(MRFCG),
 	write_term(debugger_output, Module:XGoal,    [lettervars(false)]),
 	flush_output(debugger_output),
-	get_mrfcg(MRFCG),
 	(MRFCG = 0 -> true
 		;
 		((Port=call; Port=redo) -> true
@@ -1053,8 +1035,6 @@ showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
 			re_color_port(Port, MRFCG, STRec)
 		)
 	),
-%printf('++Port=%t %t-%t <%t> %t\n',[Port,Box,Depth,MRFCG,XGoal]),flush_output,
-
 	(((Port = exit; Port = fail), Box = 1, Depth=1) ->
 		db_boundary(Box,Depth,general,Port,XGoal,MRFCG),
 		nl(debugger_output),
@@ -1062,21 +1042,12 @@ showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response)
 		;
 		tcl_call(shl_tcli, [set_status_debugwin,Port,Box,Depth], _),
 		getResponse(tcltk,Port,Box,Depth, Module, XGoal, Response)
-	).
-
-
-db_boundary(Box,Depth,Desc,Port,XGoal,MRFCG)
-	:-
-	Box=1,
-	Depth=1,
-	!,
-	((Port = exit; Port = fail) -> clean_up_src_win(MRFCG) ; true).
-
-db_boundary(Box,Depth,Desc,Port,XGoal,MRFCG).
-
+	),
+	!.
 
 color_my_port(ClsGrp,Start,End,Port,TagName)
 	:-
+%write(color_my_port(ClsGrp,Start,End,Port,TagName)),nl,
 	tktxt_info(ClsGrp,TextWin,Start,End,STRec,
 				StartLine,StartChar,EndLine,EndChar),
 	access_dbstr(TagName, STRec, LastCallTag),
@@ -1085,8 +1056,10 @@ color_my_port(ClsGrp,Start,End,Port,TagName)
 			[assign_tag,TextWin,TagName,StartLine,StartChar,EndLine,EndChar],
 			_),
 	port_color(Port, Color),
+	fcg_change(Port,'??',ClsGrp,Start,End),
 	set_mrfcg(ClsGrp),
 	!,
+%write(cmp_x),nl,
 	display_st_record(StartLine,StartChar,EndLine,EndChar, 
 						Color,TextWin, TagName, STRec).
 
@@ -1108,17 +1081,40 @@ re_color_port(Port, MRFCG, STRec)
 	port_color(Port, Color),
 	configure_tag(call_tag, TextWin,['-background',Color]).
 
-%port_color(call, blue).
+	%blue:
 port_color(call, '#00acff').
 port_color(exit, green).
-%port_color(fail, red).
+	%red:
 port_color(fail, '#fe0076').
 port_color(redo, yellow).
+
+db_boundary(Box,Depth,Desc,Port,XGoal,MRFCG)
+	:-
+	Box=1,
+	Depth=1,
+	!,
+	((Port = exit; Port = fail) -> clean_up_src_win(MRFCG) ; true).
+
+db_boundary(Box,Depth,Desc,Port,XGoal,MRFCG).
+
+fcg_change(Port,DBG,ClsGrp,Start,End)
+	:-
+	get_mrfcg(MRFCG),
+	MRFCG \= ClsGrp,
+	!,
+	flush_output,
+	((Port = exit; Port = fail) -> 
+		clean_up_src_win(MRFCG) 
+		; 
+		true).
+
+fcg_change(Port,DBG,ClsGrp,Start,End).
 
 clean_up_src_win(MRFCG)
 	:-
 	get_st_rec_by_fcg(MRFCG, Rec),
 	Rec \= 0,
+	!,
 	access_dbstr(textwin, Rec, TextWin),
 		% clear_tag(call_tag,TextWin),
 	tcl_call(shl_tcli, [clear_tag, call_tag, TextWin], _),
@@ -1126,6 +1122,8 @@ clean_up_src_win(MRFCG)
 		% clear_tag(head_tag,TextWin),
 	tcl_call(shl_tcli, [clear_tag, head_tag, TextWin], _),
 	tcl_call(shl_tcli, [TextWin,tag, delete, head_tag], _).
+
+clean_up_src_win(MRFCG).
 
 getresponse2(tcltk,Port,Box,Depth,Module,Goal,Response)
 	:-
@@ -1138,6 +1136,7 @@ getresponse2(tcltk,Port,Box,Depth,Module,Goal,Response)
 		RR=RawResponse
 	),
 	dmember(RR-Resp0,Resps),
+	!,
 	act_on_response(Resp0,Port,Box,Depth, Module,Goal,tcltk,Response).
 		
 
@@ -1188,16 +1187,14 @@ restore_remove(i(StartLine,StartChar,EndLine,EndChar), TextWin, TagName)
 
 restore_remove(_, _, _).
 
-
-
-
 assign_tag(TagName,TextWinName,StartIndex,EndIndex) 
 	:-
 	tcl_call(shl_tcli, [TextWinName,tag,add,TagName,StartIndex,EndIndex], _).
 
 configure_tag(TagName,TextWinName,Pairs)
 	:-
-	append([TextWinName,tag,configure,TagName],Pairs,Cmd),
+	dappend([TextWinName,tag,configure,TagName],Pairs,Cmd),
+	!,
 	tcl_call(shl_tcli, Cmd, _).
 
 clear_tag(TagName,TextWinName)
@@ -1231,7 +1228,18 @@ disp_find_line_pos(MidStart,MidLN,LowLN,HighLN,Offset,ILI,LN)
 	:-
 	find_line_pos(LowLN,MidLN,Offset,ILI,LN).
 
+clear_source_traces
+	:-
+	get_db_file_recs(RecsList),
+	clear_source_trace_wins(RecsList),
+	set_mrfcg(0).
 
+clear_source_trace_wins([]).
+clear_source_trace_wins([Rec | RecsList])
+	:-
+	access_dbstr(fcg_num,Rec,FCG),
+	clean_up_src_win(FCG),
+	clear_source_trace_wins(RecsList).
 
 endmod.
 
