@@ -1587,7 +1587,7 @@ check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, Claus
 	send(SrcMgr, get_value(base_file, BaseFileName)),
 	send(SrcMgr, get_value(source_file, SrcFilePath)),
 !,
-	file_extension(_,Ext,SrcFilePath),
+	file_extension(SrcFilePath,_,Ext),
 	Ext \= obp,
 	send(SrcMgr, get_value(consult_mode, DebugType)).
 
@@ -1595,7 +1595,7 @@ reload_debug(user,_, _,CG,nofile(user)) :-!.
 reload_debug(BaseFileName,SrcFilePath, normal,CG,file)
 	:-
 %	(filePlusExt(NoSuff,_,SrcFilePath),!; NoSuff = SrcFilePath),
-	(file_extension(NoSuff,Ext,SrcFilePath), Ext \= '', !; NoSuff = SrcFilePath),
+	(file_extension(SrcFilePath,NoSuff,Ext), Ext \= '', !; NoSuff = SrcFilePath),
 			%% Need to pass CG into consult:
 	exists_file(SrcFilePath),
 	!,

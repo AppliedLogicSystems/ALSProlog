@@ -480,27 +480,27 @@ special_ss_parse_command_line(File, Tail, [], CLInfo)
 
 special_file_type(File, prolog_project, NoSuffixFile, ppj)
 	:-
-	file_extension(NoSuffixFile, ppj, File),
+	file_extension(File, NoSuffixFile, ppj),
 	!.
 
 special_file_type(File, prolog_source, NoSuffixFile, pro)
 	:-
-	(file_extension(NoSuffixFile, pro, File) ; file_extension(NoSuffixFile, PRO, File)),
+	(file_extension(File, NoSuffixFile, pro) ; file_extension(File, NoSuffixFile, PRO)),
 	!.
 
 special_file_type(File, prolog_source, NoSuffixFile, pl)
 	:-
-	(file_extension(NoSuffixFile, pl, File) ; file_extension(NoSuffixFile, PL, File)),
+	(file_extension(File, NoSuffixFile, pl) ; file_extension(File, NoSuffixFile, PL)),
 	!.
 
 special_file_type(File, prolog_script, NoSuffixFile, prs)
 	:-
-	file_extension(NoSuffixFile, prs, File),
+	file_extension(File, NoSuffixFile, prs),
 	!.
 
 special_file_type(File, other, NoSuffixFile, Ext)
 	:-
-	file_extension(NoSuffixFile, Ext, File),
+	file_extension(File, NoSuffixFile, Ext),
 	!.
 
 store_special_file(FileType, File, NoSuffixFile, Ext, CLInfo)
@@ -816,12 +816,12 @@ als_ide_mgrAction(open_edit_win(FileName), State)
 	:-
 	split_path(FileName, PathCmpts),
 	dreverse(PathCmpts, [TF | _]),
-	file_extension(BaseFileName, Ext, TF),
+	file_extension(TF, BaseFileName, Ext),
 	als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State).
 
 als_ide_mgrAction(open_edit_win_by_root(RootFileName,SearchList), State)
 	:-
-	file_extension(BaseFileName, Ext, RootFileName),
+	file_extension(RootFileName, BaseFileName, Ext),
 	accessObjStruct(edit_files, State, PrevEditFiles),
 	send_self(State, obtain_src_mgr(BaseFileName, FileMgr)),
 	send(FileMgr, open_edit_win_by_base(BaseFileName, Ext, SearchList)),
@@ -907,7 +907,7 @@ rename_anon_doc(TclWin, File, SrcHandlerHandle, Flag)
 %write_term(user_output, pml=PrevMgrsList, [maxdepth(3)]),nl,flush_output,
 	split_path(File, PathElts),
 	dreverse(PathElts, [RootFile | _]),
-	(file_extension(BaseFile, Ext, RootFile) -> true ; BaseFile = RootFile, Ext=''),
+	(file_extension(RootFile, BaseFile, Ext) -> true ; BaseFile = RootFile, Ext=''),
 %write(base=BaseFile),nl,flush_output,
 	fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,State).
 
@@ -2442,7 +2442,7 @@ shl_source_handlerAction(open_edit_win(FileName), State)
 	:-
 	split_path(FileName, PathCmpts),
 	dreverse(PathCmpts, [TF | _]),
-	file_extension(BaseFileName, Ext, TF),
+	file_extension(TF, BaseFileName, Ext),
 	shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext), State).
 
 	%% Non-file document case:
@@ -2468,7 +2468,7 @@ shl_source_handlerAction(open_edit_win_by_base(BaseFileName, Ext, SearchList), S
 
 shl_source_handlerAction(open_edit_win_by_base(BaseFileName, Ext, SearchList), State)
 	:-
-	file_extension(BaseFileName, Ext, FileDesc),
+	file_extension(FileDesc, BaseFileName, Ext),
 	path_to_try_from_desc(SearchList, FileDesc, FileTryPath),
 	!,
 	shl_source_handlerAction(complete_open_edit_win(FileTryPath,TclWin), State),

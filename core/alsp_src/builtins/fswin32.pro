@@ -230,13 +230,13 @@ directory([], FileType, []) :-!.
 directory(Pattern, FileType, List) 
 	:-
 	atom(Pattern), 
-%	rootPathFile(Disk, PathList, FilePattern, Pattern),
+/*
 	split_path(Pattern, [Disk | PatternElts]),
 	dreverse(PatternElts, [FilePattern | RevPathElts]),
 	dreverse(RevPathElts, PathElts),
-%	rootPlusPath(Disk,PathList,InitPath),
 	join_path([Disk | PathElts], InitPath),
-
+*/
+	path_directory_tail(Pattern, InitPath, FilePattern),
 	(InitPath='',!; exists_file(InitPath)),
 	!,
 	(InitPath = '' -> Path = '.' ; Path = InitPath),

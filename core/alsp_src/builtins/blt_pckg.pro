@@ -179,11 +179,11 @@ save_image_develop(NewImageName)
 	image_type(OS, OSVariation, Type),
 	(OS = mswin32 ->
 %		(filePlusExt(_,_,NewImageName) ->
-		((file_extension(_,Ext,NewImageName), Ext \='') ->
+		((file_extension(NewImageName,_,Ext), Ext \='') ->
 			IMN = NewImageName
 			;
 %			filePlusExt(NewImageName,exe,IMN)
-			file_extension(NewImageName,exe,IMN)
+			file_extension(IMN,NewImageName,exe)
 		)
 		;
 		IMN = NewImageName

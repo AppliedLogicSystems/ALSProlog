@@ -340,12 +340,12 @@ check_ppj('', 'default.ppj', State)
 
 check_ppj(FilePath, FilePath, State)
 	:-
-	file_extension(_, ppj, FilePath),
+	file_extension(FilePath,_, ppj),
 	!.
 
 check_ppj(InitFilePath, FilePath, State)
 	:-
-	file_extension(InitFilePath, ppj, FilePath),
+	file_extension(FilePath,InitFilePath, ppj),
 	setObjStruct(project_file, State, FilePath).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -521,7 +521,7 @@ filter_prolog_files([], []).
 
 filter_prolog_files([ProjFile | ProjectFiles], [ProjFile | PrologFiles])
 	:-
-	file_extension(_, Ext, ProjFile),
+	file_extension(ProjFile,_, Ext),
 	dmember(Ext, [pro, pl]),
 	!,
 	filter_prolog_files(ProjectFiles, PrologFiles).
