@@ -77,7 +77,7 @@ alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a $(MAKEFS)
 alspro :  alsdir alspro_b $(BUILTINS) $(MAKEFS)
 	rm -f alsdir/builtins/*.obp
 	rm -f alsdir/library/*.obp
-	./alspro_b -q -b -obp -g 'save_image(alspro,[])'
+	./alspro_b -q -b -obp $(ALSDEVDIR)/ldr_alspro.pro -g 'save_image(alspro,[])'
 
 ifndef NO_STATIC_LIB
 libalspro.a : alsdir $(STATIC_OBJECTS) $(LIB_OBJECTS) $(MAKEFS)
@@ -162,11 +162,9 @@ alsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES)
 	rm -f alsdir/library/*.obp
 	rm -f $(SUBOS)/*.obp
 	rm -f *.obp
-	./alspro_b -q -b -obp -no_dot_alspro \
-	alsdir/shared/tcltk_util \
-	-g 'save_image(alsdev,[start_goal((builtins:start_alsdev)), \
-	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
-	select_lib(library,[$(ALSDEVLIBS)])])'
+	./alspro_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev.pro -g "bldit('$(CORE)',save_image(alsdev,[start_goal((builtins:start_alsdev))]))"
+
+#	./alspro_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev.pro -g 'save_image(alsdev,[start_goal((builtins:start_alsdev))])'
 
 studalsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
 	rm -f alsdir/builtins/*.obp
@@ -174,31 +172,38 @@ studalsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFI
 	rm -f $(SUBOS)/*.obp
 	rm -f *.obp
 	./alspro_b -q -b -obp -no_dot_alspro \
-	alsdir/shared/tcltk_util \
-	-g 'builtins:abolish(save_image,1), \
-	sio:abolish(open_socket_stream,4), \
-	save_image(studalsdev,[start_goal((builtins:start_alsdev)), \
-	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
-	select_lib(library,[$(ALSDEVLIBS)])])'
+	$(ALSDEVDIR)/ldr_studalsdev.pro -g "bldit('$(CORE)',save_image(studalsdev,[start_goal((builtins:start_alsdev))]))"
+
+
+
+#	alsdir/shared/tcltk_util \
+#	-g 'builtins:abolish(save_image,1), \
+#	sio:abolish(open_socket_stream,4), \
+#	save_image(studalsdev,[start_goal((builtins:start_alsdev)), \
+#	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
+#	select_lib(library,[$(ALSDEVLIBS)])])'
 
 alsdev_demo :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
 	rm -f alsdir/builtins/*.obp
 	rm -f alsdir/library/*.obp
 	rm -f $(SUBOS)/*.obp
 	rm -f *.obp
-	./alspro_b -q -b -obp -no_dot_alspro \
-	alsdir/shared/tcltk_util \
-	../../als_dev/alsdev/demo15 ../../als_dev/alsdev/serial_cmn \
-	-g '((builtins:assert(dvf)),save_image(alsdev_demo,[start_goal((builtins:start_alsdev)), \
-	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
-	select_lib(library,[$(ALSDEVLIBS)])]))'
+	rm -f ../../als_dev/alsdev/demo15.obp
+	rm -f ../../als_dev/alsdev/serial_cmn.obp
+	./alspro_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev_demo.pro -g "bldit('$(CORE)',save_image(alsdev_demo,[start_goal((builtins:start_alsdev))]))"
+
+
+#	./alspro_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev_demo.pro -g 'save_image(alsdev_demo,[start_goal((builtins:start_alsdev))])'
+
 
 alspro_demo :  alsdir alspro_b $(BUILTINS) $(MAKEFS) $(DEMOFILES)
 	rm -f alsdir/builtins/*.obp
 	rm -f alsdir/library/*.obp
 	rm -f $(SUBOS)/*.obp
 	rm -f *.obp
-	./alspro_b -q -b -obp $(ALSDEVDIR)/demo_ldr -g '((builtins:assert(dvf)),save_image(alspro_demo,[]))'
+	./alspro_b -q -b -obp $(ALSDEVDIR)/ldr_alspro_demo.pro -g "bldit('$(CORE)',save_image(alspro_demo,[]))"
+
+#	./alspro_b -q -b -obp $(ALSDEVDIR)/ldr_alspro_demo.pro -g 'save_image(alspro_demo,[])'
 
 
 clean :
