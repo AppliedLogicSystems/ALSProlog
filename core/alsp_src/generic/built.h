@@ -152,13 +152,13 @@ extern	int	pbi_pop_clausegroup	PARAMS(( void ));
 extern	int	pbi_collectcode	PARAMS(( void ));
 
 	/* freeze.c */
-extern	void	pbi_cptx	PARAMS(( void ));
-extern	int		disp_heap	PARAMS(( void ));
-extern	void	pbi_swp_tr	PARAMS(( void ));
-extern	void	pbi_walk_cps	PARAMS(( void ));
-extern	void	pbi_delay	PARAMS(( void ));
-extern	void 	pbi_clct_tr PARAMS(( void ));
-extern	void	pbi_collect_thawed	PARAMS(( void ));
+extern	int	pbi_cptx		PARAMS(( void ));
+extern	int	disp_heap		PARAMS(( void ));
+extern	int	pbi_swp_tr		PARAMS(( void ));
+extern	int	pbi_walk_cps	PARAMS(( void ));
+extern	int	pbi_delay		PARAMS(( void ));
+extern	int pbi_clct_tr 	PARAMS(( void ));
+/* extern	int	pbi_collect_thawed	PARAMS(( void )); */
 
 /* bdbg.c */
 extern	int	pbi_dbg_nospy	PARAMS(( void ));
