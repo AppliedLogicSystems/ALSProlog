@@ -9,6 +9,7 @@
  |
  | Author:	Kevin A. Buettner
  | Modifications(minor): Ken Bowen
+ | Mods to support {} clp usage: Ken Bowen - 05/09/95
  *=================================================================*/
 
 module xconsult.
@@ -19,6 +20,10 @@ export xconsult/2.
 	op(1200, fx, export),
 	op(1200, fx, declare),
 	op(1200, fx, use).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Source-level debugging hooks
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 export source_level_debugging/1.
 	%% Start up with source_level_debugging off here; 
@@ -42,6 +47,10 @@ change_source_level_debugging(What,Prev)
 	:-
 	retract(source_level_debugging(Prev)),
 	asserta(source_level_debugging(What)).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% xconsult/2
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 export xconsult/2.
 
@@ -319,15 +328,98 @@ addrule(Body,Head,M)
 	:-
 	addclause(M,(Head:-Body)).
 
-/* 
- * xform
- */
+/*-------------------------------------------------------------------*
+ | xform/5
+ | xform(Head, Body, NewBody, VNames, Vars)
+ | xform(+, +, -, -, -)
+ *-------------------------------------------------------------------*/
 
 xform(Head, Body, NewBody, VNames, Vars)
 	:-
 	gvextend(Body,Body1,VNames,Vars),
 	conjunctList(Body1,!,ConjunctList,MustExpand),
 	xform2(MustExpand,Head,ConjunctList,NewBody,cutneeded(_)).
+
+/*-----------------------------*
+ | gvextend/4
+ *-----------------------------*/
+
+/* -- removed until we have a need for it --
+gvextend(Body,NewBody,VNames,Vars)
+	:-
+	gvar(_,_,_),
+	!,
+	gvx(VNames,Vars,Body,NewBody).
+-- removed until we have a need for it -- */
+
+gvextend(Body,Body,_,_).
+
+gvx([],[],Body,Body)
+	:- !.
+gvx([Name|RestN],[Var|RestV],Body, (gv_get(Num,Var),Body1) )
+	:-
+	gvar(Name,Num,_),
+	!,
+	gvx(RestN,RestV,Body,Body1).
+gvx([_|RestN],[_|RestV],Body,Body1)
+	:-
+	gvx(RestN,RestV,Body,Body1).
+
+/*-------------------------------------------------------------------------*
+ | conjunctList/4
+ | conjunctList(Body,CutGoal,List,MustExpand)
+ | conjunctList(+,+,-,-)
+ |
+ | Takes a clause body (Body) and produces a list, each element of which
+ | is a goal in the Body.  If a disjunction or arrow shows up in the list
+ | then MustExpand will be set to yes.  If a cut is encountered, then
+ | it will be replaced by CutGoal.
+ *-------------------------------------------------------------------------*/
+
+conjunctList(Body,CutGoal,List,MustExpand)
+	:-
+	conjunctList(Body,CutGoal,List,[],MustExpand),
+	mustExpandFill(MustExpand).
+
+conjunctList(IsVar,CutGoal,[call(IsVar) | Hole],Hole,ME)
+	:-
+	var(IsVar),
+	!.
+conjunctList(!,CutGoal,[CutGoal | Hole],Hole,ME)
+	:- !.
+conjunctList((G1,G2),CutGoal,L,Hole,ME)
+	:- !,
+	conjunctList(G1,CutGoal,L,L1,ME),
+	conjunctList(G2,CutGoal,L1,Hole,ME).
+conjunctList(G,CutGoal,[G|Hole],Hole,MustExpand)
+	:-
+	functor(G,P,A),
+	mustExpand(P,A,MustExpand),
+	!.
+
+mustExpand(';',2,yes).
+mustExpand('->',2,yes).
+
+mustExpand('{}',1,yes).
+
+mustExpand(_,_,_).
+
+
+mustExpandFill(no)
+	:- !.
+mustExpandFill(yes).
+
+mustExpandOr(yes,_,yes)
+	:- !.
+mustExpandOr(_,yes,yes)
+	:- !.
+mustExpandOr(no,no,no).
+
+/*-----------------------------------------------------------------*
+ | xform2/5
+ | xform2(MustExpand,Head,ConjunctList,NewBody,CutVarInfo)
+ | xform2(+,+,+,-,+)
+ *-----------------------------------------------------------------*/
 
 xform2(no,Head,CJL,NewBody,_)
 	:- !, 		/* no further transformation needed */
@@ -339,10 +431,246 @@ xform2(yes,Head,CJL,NewBody,CVI)
 	vreorganize(Head,CJL,VL2,VL3),
 	xsemi(CJL,1,VL3,NewBody,CVO,_).
 
+/*-----------------------------------------------------------------------*
+ | listToConjuncts(L,C)
+ |
+ | Converts a list produced by conjunctList back to the comma form.  This
+ | is used by xform2 when no expansion is really necessary.  conjunctList
+ | occasionally does useful work for us (such as replacing ! with $cut/1)
+ | which we don't want to throw away.
+ *-----------------------------------------------------------------------*/
 
-/*
- * cutVarInfo(CutInfIn,ConjunctList,VLIn,CutInfOut,VLOut)
- */
+listToConjuncts([],true)
+	:- !.
+listToConjuncts([H|T],Conjuncts)
+	:-
+	listToConjuncts0(T,H,Conjuncts).
+
+listToConjuncts0([],Goal,Goal)
+	:- !.
+listToConjuncts0([H|T],Goal,(Goal,Conjuncts))
+	:-
+	listToConjuncts0(T,H,Conjuncts).
+
+/*----------------------------------------------------------------------*
+ | vcollect/2
+ | vcollect(TermList,VList) 
+ | vcollect(+,-) 
+ |
+ | Calls vcollect0/3 which recurses down TermList collecting 
+ | (via vcollect/3) information about the variables in TermList, and
+ | then terminates the dlist which vcollect0/3 utilized for collection.
+ | The terms in termlist are numbered with the first element being 0.
+ *----------------------------------------------------------------------*/
+
+vcollect(Term,VList)
+	:-
+	vcollect0(Term,VList,0),
+	vfill(VList).
+
+vcollect0([],_,_).
+vcollect0([H|T],VList,Id)
+	:-
+	vcollect(H,VList,Id),
+	IdN is Id+1,
+	vcollect0(T,VList,IdN).
+
+/*-----------------------------------------------------------------------*
+ | vcollect/3
+ | vcollect(Term,VarList,Id) 
+ | vcollect(+,-,+) 
+ |
+ | collects in VarList all of the variables in Term.  
+ | 
+ | Term		= an arbitrary Prolog term, typically a goal from a clause;
+ | VarList	= difference list containing terms of the following form:
+ | 					v(Var,IdList)
+ | Id 		= integer uniquely identifying Term in left-to-right sweep 
+ |				of source clause;
+ |
+ | In the term v(Var, IdList), Var is a variable occurring in Term,
+ | and IdList is the list of Id's of all terms in which this variable
+ | occurs.
+ |
+ | Neither VarList nor any of the IdLists will be [] terminated.  This
+ | can be done with vfill/1.
+ *-----------------------------------------------------------------------*/
+
+vcollect(Atomic,_,_)
+	:-
+	atomic(Atomic),
+	!.
+vcollect(Var,VL,Id)
+	:-
+	var(Var),
+	!,
+	addtoVL(Var,VL,Id).
+vcollect(Term,VL,Id)
+	:-
+	functor(Term,_,Arity),
+	vcollect(Arity,Term,VL,Id).
+
+vcollect(0,_,_,Id)
+	:- !.
+vcollect(N,S,VL,Id)
+	:-
+	arg(N,S,Arg),
+	vcollect(Arg,VL,Id),
+	NP is N-1,
+	vcollect(NP,S,VL,Id).
+
+addtoVL(Var,VL,Id)
+	:-
+	var(VL),
+	!,
+	VL=[v(Var,[Id|_]) | _].
+addtoVL(Var,[v(V,IDL)|_],Id)
+	:-
+	Var == V,
+	member(Id,IDL),
+	!.
+addtoVL(Var,[_|Rest],Id)
+	:-
+	addtoVL(Var,Rest,Id).
+
+vfill([])
+	:- !.
+vfill([v(_,IDL)|Rest])
+	:-
+	terminateList(IDL),vfill(Rest).
+
+terminateList([])
+	:- !.
+terminateList([_|Rest])
+	:-
+	terminateList(Rest).
+
+/*---------------------------------*
+ | vmember(V,VL,E)
+ |
+ *---------------------------------*/
+
+vmember(V1,[v(V2,L)|_],v(V2,L))
+	:-
+	V1 == V2, !.
+vmember(V1,[_|T],E)
+	:-
+	vmember(V1,T,E).
+
+/*---------------------------------------------------*
+ | lastelem(L,E,Count)
+ |
+ | Retrieves the last element E from list L.  
+ | Count is the length of the list.
+ *---------------------------------------------------*/
+
+lastelem([H|T],E,Count)
+	:-
+	lastelem(T,H,E,1,Count).
+
+lastelem([],E,E,Count,Count)
+	:- !.
+lastelem([H|T],_,E,InCount,OutCount)
+	:-
+	NextCount is InCount+1,
+	lastelem(T,H,E,NextCount,OutCount).
+
+/*---------------------------------*
+ | vremove(V,InVL,OutVL,E)
+ *---------------------------------*/
+
+vremove(V1,[v(V2,L) | Rest],Rest,v(V2,L))
+	:-
+	V1==V2, !.
+vremove(V,[H|T1],[H|T2],E)
+	:-
+	vremove(V,T1,T2,E).
+	
+/*-----------------------------------------------------------------------*
+ | vreorganize(Head,ConjunctList,InVL,OutVL)
+ |
+ | Reorganizes InVL producing OutVL so that head variable positions will 
+ | match up with resultant body positions for the final goal.
+ *-----------------------------------------------------------------------*/
+
+vreorganize(Head,ConjunctList,InVL,OutVL)
+	:-
+	lastelem(ConjunctList,LastGoal,GoalPosition),
+	arrow_or_semi(LastGoal),
+	!,
+	functor(Head,_,NArgs),
+	vrsplit(InVL,GoalPosition,GVL,OutVL,HVL),
+	vr0(NArgs,Head,GVL,HVL).
+vreorganize(_,_,VL,VL).
+
+vrsplit([],Pos,[],T,T)
+	:- !.
+vrsplit([v(V,L)|More],Pos,VLP,VLNP,VLH)
+	:-
+	vrsplit_decide(L,Pos,v(V,L),VLP,VLPT,VLNP,VLNPT),
+	vrsplit(More,Pos,VLPT,VLNPT,VLH).
+
+vrsplit_decide([_],_,_,VLP,VLP,VLNP,VLNP)
+	:- !.
+vrsplit_decide(L,Pos,E,[E|VLPT],VLPT,VLNP,VLNP)
+	:-
+	member(Pos,L),
+	!.
+vrsplit_decide(L,Pos,E,VLP,VLP,[E|VLNP],VLNP).
+
+vr0(NArgs,Head,VL,OutVL)
+	:-
+	length(VL,VLLen),
+	VLLen =< NArgs,
+	StopAt is NArgs-VLLen,
+	!,
+	vr1(StopAt,NArgs,Head,VL,[],OutVL).
+vr0(NArgs,Head,VL,OutVL)
+	:-
+	vr1(0,NArgs,Head,VL,[],OutVL).
+
+vr1(StopAt,StopAt,_,VL,SoFar,OutVL)
+	:-
+	vrfill(SoFar,VL,VLR),
+	append(VLR,SoFar,OutVL),
+	!.
+vr1(StopAt,N,Head,VL,SoFar,OutVL)
+	:-
+	arg(N,Head,Arg),
+	NP is N-1,
+	vr2(Arg,StopAt,NP,Head,VL,SoFar,OutVL).
+
+vr2(NV,StopAt,N,Head,VL,SoFar,OutVL)
+	:-
+	nonvar(NV),
+	!,
+	vr1(StopAt,N,Head,VL,[_|SoFar],OutVL).
+vr2(V,StopAt,N,Head,VL,SoFar,OutVL)
+	:-
+	vremove(V,VL,VL1,E),
+	!,
+	vr1(StopAt,N,Head,VL1,[E|SoFar],OutVL).
+vr2(V,StopAt,N,Head,VL,SoFar,OutVL)
+	:-
+	vr1(StopAt,N,Head,VL,[_|SoFar],OutVL).
+
+
+vrfill([],R,R)
+	:- !.
+vrfill([V|T1],[E|T2],T2)
+	:- 
+	var(V),
+	!,
+	V=E.
+vrfill([_|T],VL,VLR)
+	:-
+	vrfill(T,VL,VLR).
+
+/*-----------------------------------------------------------------*
+ | cutVarInfo/5
+ | cutVarInfo(CutInfIn,ConjunctList,VLIn,CutInfOut,VLOut)
+ | cutVarInfo(CutInfIn,ConjunctList,VLIn,CutInfOut,VLOut)
+ *-----------------------------------------------------------------*/
 
 cutVarInfo(nocutneeded,_,VL,nocutneeded,VL)
 	:- !.
@@ -371,40 +699,17 @@ cvi(Placements,CV,CVI,ConjunctList,VL,CVI,[v(CV,Placements) | VL])
 	!.
 cvi(_,_,_,_,VL,nocutneeded,VL).
 
-
-
-
 getCutVar(nocutneeded,_)
 	:- !.		/* makes life easier */
 getCutVar(cutneeded(CV),CV)
 	:- !.
 getCutVar(cutvar(CV),CV).
 
-
-/*
- * gvextend/4
- */
-
-/* -- removed until we have a need for it --
-gvextend(Body,NewBody,VNames,Vars)
-	:-
-	gvar(_,_,_),
-	!,
-	gvx(VNames,Vars,Body,NewBody).
--- removed until we have a need for it -- */
-gvextend(Body,Body,_,_).
-
-gvx([],[],Body,Body)
-	:- !.
-gvx([Name|RestN],[Var|RestV],Body, (gv_get(Num,Var),Body1) )
-	:-
-	gvar(Name,Num,_),
-	!,
-	gvx(RestN,RestV,Body,Body1).
-gvx([_|RestN],[_|RestV],Body,Body1)
-	:-
-	gvx(RestN,RestV,Body,Body1).
-
+/*-------------------------------------------------------------------*
+ | xsemi/6
+ | xsemi(Goals,GN,VL,O,InCV,OutCV),
+ | xsemi(+,+,+,-,+,-),
+ *-------------------------------------------------------------------*/
 
 xsemi([],_,_,true,CV,CV)
 	:- !.
@@ -415,6 +720,11 @@ xsemi([Goal|RestGoals],GN,VL,O,InCV,OutCV)
 	xsemi(RestGoals,NGN,VL,O2,ICV,OutCV),
 	makeConjunct(O1,O2,O).
 
+/*-------------------------------------------------------------------*
+ | xgoal/6
+ | xgoal(InGoal,GN,VL,SemiGoal,InCV,NCV)
+ | xgoal(+,+,+,-,+,-)
+ *-------------------------------------------------------------------*/
 xgoal(InGoal,GN,VL,SemiGoal,InCV,NCV)
 	:-
 	arrow_or_semi(InGoal),
@@ -422,22 +732,28 @@ xgoal(InGoal,GN,VL,SemiGoal,InCV,NCV)
 	cutpt(InCV,Head,SemiGoal,NCV),
 	semihead(VL,GN,Head),
 	builddisjuncts(InGoal,Head,NCV).
+
 xgoal(!,_,_,$cut(CV),CV,CV)
 	:-
 	var(CV),
 	!.
+
 xgoal(!,_,_,!,CV,CV).
+
+xgoal('{}'(Braced),GN,VL,Goal,InCV,NCV)
+	:-
+	xbrace(Braced,GN,VL,Goal,InCV,NCV).
+
 xgoal(G,_,_,G,CV,CV).
+
+/*---------------------------------------------------------------------------*
+ | semihead/3	-- build head/goal for semicolon
+ |
+ | semihead(VarLis,GoalNum,Head)
+ *---------------------------------------------------------------------------*/
 
 arrow_or_semi((_->_)).
 arrow_or_semi((_;_)).
-
-
-/*
- * semihead/3	-- build head/goal for semicolon
- *
- * semihead(VarLis,GoalNum,Head)
- */
 
 semihead(VarLis,GoalNum,Head)
 	:-
@@ -533,70 +849,6 @@ makeconj(G1,G2,(G1,G2)).
 
 
 
-/*
- * conjunctList(Body,CutGoal,List,MustExpand)
- *
- * Takes a clause body (Body) and produces a list, each element of which
- * is a goal in the Body.  If a disjunction or arrow shows up in the list
- * then MustExpand will be set to yes.  If a cut is encountered, then
- * it will be replaced by CutGoal.
- */
-
-conjunctList(Body,CutGoal,List,MustExpand)
-	:-
-	conjunctList(Body,CutGoal,List,[],MustExpand),
-	mustExpandFill(MustExpand).
-
-conjunctList(IsVar,CutGoal,[call(IsVar) | Hole],Hole,ME)
-	:-
-	var(IsVar),
-	!.
-conjunctList(!,CutGoal,[CutGoal | Hole],Hole,ME)
-	:- !.
-conjunctList((G1,G2),CutGoal,L,Hole,ME)
-	:- !,
-	conjunctList(G1,CutGoal,L,L1,ME),
-	conjunctList(G2,CutGoal,L1,Hole,ME).
-conjunctList(G,CutGoal,[G|Hole],Hole,MustExpand)
-	:-
-	functor(G,P,A),
-	mustExpand(P,A,MustExpand),
-	!.
-
-mustExpand(';',2,yes).
-mustExpand('->',2,yes).
-mustExpand(_,_,_).
-
-mustExpandFill(no)
-	:- !.
-mustExpandFill(yes).
-
-mustExpandOr(yes,_,yes)
-	:- !.
-mustExpandOr(_,yes,yes)
-	:- !.
-mustExpandOr(no,no,no).
-
-/*
- * listToConjuncts(L,C)
- *
- * Converts a list produced by conjunctList back to the comma form.  This
- * is used by xform2 when no expansion is really necessary.  conjunctList
- * occasionally does useful work for us (such as replacing ! with $cut/1)
- * which we don't want to throw away.
- */
-
-listToConjuncts([],true)
-	:- !.
-listToConjuncts([H|T],Conjuncts)
-	:-
-	listToConjuncts0(T,H,Conjuncts).
-
-listToConjuncts0([],Goal,Goal)
-	:- !.
-listToConjuncts0([H|T],Goal,(Goal,Conjuncts))
-	:-
-	listToConjuncts0(T,H,Conjuncts).
 
 
 /*
@@ -655,208 +907,28 @@ cP1(G,N,CL)
 	:-
 	cP0(G,N,CL).
 
+/*--------------------------------------------------------------------*
+ | xbrace/6
+ | xbrace(Braced,GN,VL,Goal,InCV,NCV)
+ | xbrace(+,+,+,-,+,-)
+ *--------------------------------------------------------------------*/
 
-
-/*
- * vcollect(TermList,VList) collects (via vcollect/3) information about
- * the variables in TermList.  The terms in termlist are numbered with
- * the first element being 0.
- */
-
-vcollect(Term,VList)
+xbrace(Braced,GN,VL,Goal,InCV,NCV)
 	:-
-	vcollect0(Term,VList,0),
-	vfill(VList).
+	NCV = InCV,
+	vars_in_this_goal(VL,GN,InGoalVs),
+	Goal = freeze_list_ground(InGoalVs, Braced).
 
-vcollect0([],_,_).
-vcollect0([H|T],VList,Id)
+vars_in_this_goal([], GN, []).
+vars_in_this_goal([v(Var,GL) | VL], GN, [Var | InGoalVs])
 	:-
-	vcollect(H,VList,Id),
-	IdN is Id+1,
-	vcollect0(T,VList,IdN).
-
-/*
- * vcollect(Term,VarList,Id) collects in VarList all of the variables
- * in Term.  VarList will contain terms of the following form.
- * v(Var,IdList).  IDList is a list containing the Ids (uniquely).
- *
- * Neither VarList nor any of the IDLists will be [] terminated.  This
- * can be done with vfill/1.
- */
-
-
-vcollect(Atomic,_,_)
-	:-
-	atomic(Atomic),
-	!.
-vcollect(Var,VL,Id)
-	:-
-	var(Var),
+	dmember(GN,GL),
 	!,
-	addtoVL(Var,VL,Id).
-vcollect(Term,VL,Id)
-	:-
-	functor(Term,_,Arity),
-	vcollect(Arity,Term,VL,Id).
+	vars_in_this_goal(VL, GN, InGoalVs).
 
-vcollect(0,_,_,Id)
-	:- !.
-vcollect(N,S,VL,Id)
+vars_in_this_goal([_ | VL], GN, InGoalVs)
 	:-
-	arg(N,S,Arg),
-	vcollect(Arg,VL,Id),
-	NP is N-1,
-	vcollect(NP,S,VL,Id).
-
-addtoVL(Var,VL,Id)
-	:-
-	var(VL),
-	!,
-	VL=[v(Var,[Id|_]) | _].
-addtoVL(Var,[v(V,IDL)|_],Id)
-	:-
-	Var == V,
-	member(Id,IDL),
-	!.
-addtoVL(Var,[_|Rest],Id)
-	:-
-	addtoVL(Var,Rest,Id).
-
-vfill([])
-	:- !.
-vfill([v(_,IDL)|Rest])
-	:-
-	terminateList(IDL),vfill(Rest).
-
-terminateList([])
-	:- !.
-terminateList([_|Rest])
-	:-
-	terminateList(Rest).
-
-/*
- * vmember(V,VL,E)
- *
- */
-
-vmember(V1,[v(V2,L)|_],v(V2,L))
-	:-
-	V1 == V2, !.
-vmember(V1,[_|T],E)
-	:-
-	vmember(V1,T,E).
-
-/*
- * lastelem(L,E,Count)
- *
- * Retrieves the last element E from list L.  Count is the length of the
- * list.
- */
-
-lastelem([H|T],E,Count)
-	:-
-	lastelem(T,H,E,1,Count).
-
-lastelem([],E,E,Count,Count)
-	:- !.
-lastelem([H|T],_,E,InCount,OutCount)
-	:-
-	NextCount is InCount+1,
-	lastelem(T,H,E,NextCount,OutCount).
-
-/*
- * vremove(V,InVL,OutVL,E)
- */
-
-vremove(V1,[v(V2,L) | Rest],Rest,v(V2,L))
-	:-
-	V1==V2, !.
-vremove(V,[H|T1],[H|T2],E)
-	:-
-	vremove(V,T1,T2,E).
-	
-
-/*
- * vreorganize(Head,ConjunctList,InVL,OutVL)
- *
- * Reorganizes InVL producing OutVL so that head variable positions will 
- * match up with resultant body positions for the final goal.
- */
-
-vreorganize(Head,ConjunctList,InVL,OutVL)
-	:-
-	lastelem(ConjunctList,LastGoal,GoalPosition),
-	arrow_or_semi(LastGoal),
-	!,
-	functor(Head,_,NArgs),
-	vrsplit(InVL,GoalPosition,GVL,OutVL,HVL),
-	vr0(NArgs,Head,GVL,HVL).
-vreorganize(_,_,VL,VL).
-
-vrsplit([],Pos,[],T,T)
-	:- !.
-vrsplit([v(V,L)|More],Pos,VLP,VLNP,VLH)
-	:-
-	vrsplit_decide(L,Pos,v(V,L),VLP,VLPT,VLNP,VLNPT),
-	vrsplit(More,Pos,VLPT,VLNPT,VLH).
-
-vrsplit_decide([_],_,_,VLP,VLP,VLNP,VLNP)
-	:- !.
-vrsplit_decide(L,Pos,E,[E|VLPT],VLPT,VLNP,VLNP)
-	:-
-	member(Pos,L),
-	!.
-vrsplit_decide(L,Pos,E,VLP,VLP,[E|VLNP],VLNP).
-
-vr0(NArgs,Head,VL,OutVL)
-	:-
-	length(VL,VLLen),
-	VLLen =< NArgs,
-	StopAt is NArgs-VLLen,
-	!,
-	vr1(StopAt,NArgs,Head,VL,[],OutVL).
-vr0(NArgs,Head,VL,OutVL)
-	:-
-	vr1(0,NArgs,Head,VL,[],OutVL).
-
-vr1(StopAt,StopAt,_,VL,SoFar,OutVL)
-	:-
-	vrfill(SoFar,VL,VLR),
-	append(VLR,SoFar,OutVL),
-	!.
-vr1(StopAt,N,Head,VL,SoFar,OutVL)
-	:-
-	arg(N,Head,Arg),
-	NP is N-1,
-	vr2(Arg,StopAt,NP,Head,VL,SoFar,OutVL).
-
-vr2(NV,StopAt,N,Head,VL,SoFar,OutVL)
-	:-
-	nonvar(NV),
-	!,
-	vr1(StopAt,N,Head,VL,[_|SoFar],OutVL).
-vr2(V,StopAt,N,Head,VL,SoFar,OutVL)
-	:-
-	vremove(V,VL,VL1,E),
-	!,
-	vr1(StopAt,N,Head,VL1,[E|SoFar],OutVL).
-vr2(V,StopAt,N,Head,VL,SoFar,OutVL)
-	:-
-	vr1(StopAt,N,Head,VL,[_|SoFar],OutVL).
-
-
-vrfill([],R,R)
-	:- !.
-vrfill([V|T1],[E|T2],T2)
-	:- 
-	var(V),
-	!,
-	V=E.
-vrfill([_|T],VL,VLR)
-	:-
-	vrfill(T,VL,VLR).
-
-
+	vars_in_this_goal(VL, GN, InGoalVs).
 
 /*---------------------------------------------------------------------------
  * listing fixup
@@ -904,7 +976,7 @@ sf0(_,_,Body,Body,Mode).
 
 %% === semiclause is given a clause reference and a head (which
 %%     will be unified with all the heads seen so far) and returns
-%%     the clause body after beeing fixed up so that it will contain
+%%     the clause body after being fixed up so that it will contain
 %%     arrow instead of ! and ! instead of $cut.
 semiclause(Ref,Head,FixedBody,Mode)
 	:-
@@ -970,10 +1042,9 @@ fixBody1(Goal,Rest,Top,Goals,Goal,TRest,Mode)
 
 
 
+endmod.
+
 module pgm_info.
 dummy.
 endmod.
 
-
-
-endmod.

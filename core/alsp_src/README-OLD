@@ -17,15 +17,20 @@ is used to create a number of versions of ALS Prolog, as follows:
 		to the functions of various window systems (e.g., X, Motif,
 		NextStep(soon), MSWindows(later), MacOS(later) etc.)
 
+	-	Various (orthogonal) variations, such as a system with freeze 
+		(delay), etc.
+
 The source tree machinery expects and heavily utilizes facilities found in
-GNU make and gcc (esp. threading).  Theoretically, other tools might work,
+GNU make and gcc.  Theoretically, other tools might work,
 but none have yet been brought to our attention.  The construction process
 is more or less automatic, following closely the approach utilized in most
-GNU tool packages.  When all goes well, it is as simple as the following:
+GNU tool packages.  When all goes well, it is as simple as the following
+(on Unix; almost this easy with DJGPP on DOS; more handcrafted using
+MetrWerks on the Mac):
 
 0.	Make sure the following GNU tools have been installed on your system:
 
-		make, gcc, shar/unshar
+		make, gcc (and others, as necessary; e.g., sed)
 
 1.	Unpack the source tree, however it has arrived.  If it is a collection
 	of shar archives, they are likely named als.01 ... als.0x   Put them
@@ -40,9 +45,10 @@ GNU tool packages.  When all goes well, it is as simple as the following:
 	in other directories.  [At ALS, we use one top-level directory
 	'builds' on the same filesystem as alsp_src, and then create 
 	directories inside 'build' where the various system-specific
-	builds take place (the filesystem is on our shared file-server).
-	Call this directory BUILD; locate yourself in
-	BUILD;
+	builds take place (the filesystem is on our shared file-server;
+	we also use another director at the same height/depth, called
+	bldtests, for more experimental builds and work).
+	Call this directory BUILD; locate yourself in BUILD;
 
 3.	Let PATH be a path to SOURCE;  It can either be an
 	absolute path to SOURCE, or a relative path from BUILD to SOURCE;
@@ -81,6 +87,8 @@ GNU tool packages.  When all goes well, it is as simple as the following:
 	to lots of *.o-files, etc):
 
 		bld-port ("portable" threaded code version):
+			tconfig.h	- Configuration file; #defines here control details
+						  of target system being constructed;
 			alspro.a	- ALS Prolog standard link library: portable version
 			alspro_b	- Portable version of ALS Prolog appropriate to
 						  the OS; this version loads the builtins files
@@ -93,6 +101,8 @@ GNU tool packages.  When all goes well, it is as simple as the following:
 						  alspro_b.
 
 		bld-natv (if native code is handled for this architecture/os):
+			tconfig.h	- Configuration file; #defines here control details
+						  of target system being constructed;
 			alspro.a	- ALS Prolog native code link library suitable for
 						  the OS and architecture;
 			alspro_b	- Portable version of ALS Prolog appropriate to
@@ -109,6 +119,8 @@ GNU tool packages.  When all goes well, it is as simple as the following:
 			Subdirs, corresponding to the window systems( e.g. motif, x)
 
 			Inside subdir nnnn:
+				tconfig.h	- 	Configuration file; #defines here control
+						  		details of target system being constructed;
 				nnnninterf.a -	link library for interface from ALS Prolog
 								to system nnnn (e.g., motifinterf.a)
 				alspro_nnnn0 -	extended  version of ALS prolog with the
@@ -122,13 +134,16 @@ GNU tool packages.  When all goes well, it is as simple as the following:
 								packaged into a single executable;
 
 There is some additional machinery living in the tree to accomplish a
-number of useful related tasks, most importantly:
+number of useful related tasks, including:
 
 	-	Packing the source tree into shar files of max size 500K for
 		transmission; one can select which architecture directories
 		are included;
 
 	-	Similary for the build tree.
+
+[This is important in some settings, but tar/gzip/ftp is a more desirable
+ transport scenario.]
 
 It is planned that a common pattern of usage of the facilities will be:
 
@@ -181,9 +196,15 @@ Top Level Directories / Non-architecture-specific
 			- sharbld		-	script which packs a build tree into
 								shar archive files of max 500K size;
 	- bld-natv 		-	contains the initial makefile.in prototype for
-						architecture-specific build directories;
+						architecture-specific build directories, together
+						with the inital (identical) config files tconfig.h.in 
+						(for configure/Unix) and tconfig.in (for
+						 configur.bat/DOS);
 	- bld-port		-	contains the initial makefile.in prototype for
-						the portable build directory;
+						the portable build directory, together
+						with the inital (identical) config files tconfig.h.in 
+						(for configure/Unix) and tconfig.in (for
+						 configur.bat/DOS);
 	- builtins 		-	code for Prolog-defined builtin predicates;
 	- cinterf 		-	code for the C-library interface generator;
 	- doc 			-	the ChangeLog and other misc documentation;
@@ -193,7 +214,8 @@ Top Level Directories / Non-architecture-specific
 	- library 		-	code for Prolog-defined library predicates;
 	- pconfig 		-	contains a Prolog-defined configuration tool
 						which is invoked by configure after it has
-						done its work; sets up the directories etc.
+						done its initial work (with at least alspro
+						created in bld-port); sets up the directories etc.
 						for the extended windows-linked versions;
 	- port 			-	C code defined the byte code interpreter WAM
 						which is threaded into the portable version;
@@ -212,6 +234,7 @@ compiler for the various architectures.  Some are empty, because
 those versions haven't been built yet.  Subdirectories within these
 architectures correspond to differing operating systems:
 
+	- alpha		-	DEC ALPHA-based systems;
 	- hppa		-	HP Precision Architecture-based systems;
 	- i386		-	all Intel-based systems
 					  dos(djgpp/pharlap)  sysv(SCO) mswins os2 nextstep
@@ -223,12 +246,12 @@ architectures correspond to differing operating systems:
 	- sparc		-	SPARC-based systems: sunos4  solaris2
 	- vax		-	VAX-based systems (not up to date; may never be);
 
-
 How It Looks At ALS:
 -------------------
 Some of the tools and the decisions behind them may be a bit clearer
 if one reflects on how things are set up at ALS.  We have a file server
 on the local ethernet which all machines (including DOS and Mac) can see.
+[We use Sun PCNFS for the PCs, and ALISATALK for the Macs.]
 The top level of the file system in which everything occurs happens to be 
 called /mailbox3 ; if you actually see this in a script, it is either
 a mistake (likely), or in a few cases, the value of a default setting
@@ -264,7 +287,7 @@ to a user -- obviously much less than occurs in the corresponding build
 subdir (no .o files, etc;), but also more (examples files, etc.).
 
 alsp_src is managed using CVS to handle version control.  When the tree
-is shipped, we to a complete export to a fresh directory, thereby leaving
+is shipped, we do a complete export to a fresh directory, thereby leaving
 behind all the CVS information.  We also make such exports for truly
 experimental work.  When changes to the source are shipped back, or
 incorporated from an experiment, there is a (painful) process of merging

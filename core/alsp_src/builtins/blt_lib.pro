@@ -106,7 +106,8 @@
 	[xlist_init/1, xlist_make/3,
 		 xlist_unit_c/2, xlist_unit_l/2,
 		 xlist_head/2, xlist_tail/2,
-		 xlist_append/3, xlist_append/2],[]).
+		 xlist_append/3, xlist_append/2,
+		 xlist_mem/2,xlist_dmem/2],[]).
 
 :-libactivate(sio,['library',sock_misc],
 	[bread/1,bread/2, bread/3, bread_term/3, bread_term/4], [] ).

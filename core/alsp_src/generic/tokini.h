@@ -129,6 +129,7 @@
         OP(TK_RSHFT,">>",0,OP_YFX(400)),
         OP(TK_SLASH,"/",0,OP_YFX(400)),
         OP(TK_HAT,"^",0,OP_XFY(200)),
+        OP(TK_IDCL,"::",0,OP_YFX(400)),
 
 	/*
 	 * Rest of the tokens
