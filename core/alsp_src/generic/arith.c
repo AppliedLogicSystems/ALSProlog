@@ -619,7 +619,7 @@ make_numberx(v, t, d, TP)
     int  *t, TP;
     double d;
 {
-	int fl;
+    int fl;
 
 if (TP == WTP_INTEGER) {
     if (MINPROLOGINT <= d && d <= MAXPROLOGINT) {
@@ -635,18 +635,9 @@ if (TP == WTP_INTEGER) {
 		goto return_as_double;
 	}
 else	/* TP != WTP_INTEGER */
-	{
-#ifndef DoubleType
-	int   i;
-
-return_as_double:
-	w_mk_term(v, t, (PWord) TK_DDOUBLE, 4);
-	for (i = 0; i < 4; i++)
-	    w_install_argn(*v, i + 1, (PWord) (*(((short *) &d) + i)), WTP_INTEGER);
-#else
+    {
 return_as_double:
     w_mk_double(v, t, d);
-#endif
     }
 }
 
@@ -661,18 +652,9 @@ make_ieee_nan(v, t)
     PWord *v;
     int  *t;
 {
-	double d;
-#ifndef DoubleType
-	int   i;
-
-	d = 0.0/0.0;
-	w_mk_term(v, t, (PWord) TK_DDOUBLE, 4);
-	for (i = 0; i < 4; i++)
-	    w_install_argn(*v, i + 1, (PWord) (*(((short *) &d) + i)), WTP_INTEGER);
-#else
-	d = 0.0/0.0;
+    double d;
+    d = 0.0/0.0;
     w_mk_double(v, t, d);
-#endif
 }
 
 void
@@ -681,17 +663,8 @@ make_ieee_inf(v, t)
     int  *t;
 {
 	double d;
-#ifndef DoubleType
-	int   i;
-
-	d = 1.0/0.0;
-	w_mk_term(v, t, (PWord) TK_DDOUBLE, 4);
-	for (i = 0; i < 4; i++)
-	    w_install_argn(*v, i + 1, (PWord) (*(((short *) &d) + i)), WTP_INTEGER);
-#else
 	d = 1.0/0.0;
     w_mk_double(v, t, d);
-#endif
 }
 
 /*---------------------------------------------------------------
