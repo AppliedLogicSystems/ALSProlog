@@ -99,6 +99,13 @@ alsdir/library : $(SOURCE_DIR)/library
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.pro .
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
 
+alsdir/shared : $(SOURCE_DIR)/../tcltk_interface  $(SOURCE_DIR)/../als_dev/alsdev
+	mkdir -p alsdir/shared
+	rm -f alsdir/shared/*.pro alsdir/shared/*.psl alsdir/shared/*.tcl
+	cd alsdir/shared ; ln -s ../../$(SOURCE_DIR)/../tcltk_interface/common/tcltk.pro . ;\
+		ln -s ../../$(SOURCE_DIR)/../tcltk_interface/$(SUBOS)/tclintf.psl .
+	cd alsdir/shared ; ln -s ../../$(SOURCE_DIR)/../als_dev/alsdev/*.tcl .
+
 TEST_DIR = $(SOURCE_DIR)/tests
 
 testrun : command_line_test iso_test_suite test_suite
@@ -116,7 +123,7 @@ ALSDEVFILES = blt_dvsh.pro db_srctr.pro
 alsdev :  alsdir alspro_b $(BUILTINS) $(ALSDEVFILES)
 	./alspro_b -q -b -obp -no_dot_alspro \
 	-g 'save_image(alsdev,[start_goal((builtins:start_alsdev)), \
-	select_lib(builtins, [debugger,blt_dvsh,db_srctr]), \
+	select_lib(builtins, [debugger,blt_dvsh]), \
 	select_lib(library,[miscterm,strctutl,strings,tcl_sppt,tk_alslib])])'
 
 clean :
