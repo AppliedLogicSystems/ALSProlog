@@ -2,5 +2,5 @@
 
 int main(int argc, char *argv[])
 {
-    return PI_main(argc, argv);
+    return PI_main(argc, argv, NULL);
 }
