@@ -225,7 +225,9 @@ subdirs(SubdirList)
  *!----------------------------------------------------------------*/
 subdirs_red(SubdirList)
 	:-
-	directory('*',directory, SubdirList). 
+	directory('*',1,SubdirList0),
+	list_delete(SubdirList0, '.', SubdirList1),
+	list_delete(SubdirList1, '..', SubdirList).
  
  /*---------------------------------------------------------------
  |	File types/attributes:
@@ -308,13 +310,8 @@ directory(Pattern, FileType, List)
 	:-
 	atom(Pattern), 
 	rootPathFile(Disk, PathList, FilePattern, Pattern),
-	subPath(PathList,ThePath),
-	exists_file(ThePath),
+	subPath(PathList, Path),
 	!,
-
-	subPath(PathList, InitPath),
-	(InitPath = '' -> Path = ':' ; Path = InitPath),
-
 	'$getDirEntries'(Path, FilePattern, FirstResult),
 	!,
 	fixFileType(FileType, InternalFileType),
@@ -452,3 +449,4 @@ move_file(Source, Target)
 
 
 endmod.
+
