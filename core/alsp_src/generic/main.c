@@ -1373,13 +1373,22 @@ static long last_yield = 0;
 
 long coop_interupt = 0;
 
+void (*yield_proc)(void) = NULL;
+
+ALSPI_API(void) PI_set_yield_proc(void (*p)(void))
+{
+	yield_proc = p;
+}
+
 void	PI_yield_time(void)
 {
     long tick;
     tick = TickCount();	
     
-    if (MPW_Tool) SpinCursor(1);
-    else SIOUXHandleOneEvent(NULL);
+    if (yield_proc) yield_proc();
+    
+    //if (MPW_Tool) SpinCursor(1);
+    //else SIOUXHandleOneEvent(NULL);
 
     /* Adjust the yield interval upwards until there are at least 3 ticks between
        yields.  */

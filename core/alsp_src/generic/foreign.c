@@ -401,6 +401,12 @@ PI_rungoal_with_update_and_catch(PWord mod, PWord *gvp, int *gtp, int *exception
     return status;
 }
 
+EXPORT ALSPI_API(void)
+PI_interrupt(void)
+{
+	pbi_forceCtlC();
+}
+
 EXPORT ALSPI_API(int)
 PI_unify(PWord val1, int type1, PWord val2, int type2)
 {
