@@ -119,11 +119,6 @@ ilinknet()
 /* printf("EXIT ilinknet\n"); */
 
 	return holdme;
-
-/*
-	return ilinkq(OpCd, Z, X, Y, Goal, Zt,Xt,Yt,Goalt);
-*/
-
 }
 
 
@@ -685,6 +680,7 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 	int   UList_t, LHead_t;
 	PWord IntUIA,   Link; 
 	int   IntUIA_t, Linkt; 
+	PWord *UIAPtr; 
 
 #ifdef DEBUGSYS
 	if (debug_system[CSTRUPDT]) {
@@ -735,6 +731,12 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 		printf("CASE#2\n");
 #endif
 		w_uia_alloc(&IntUIA, &IntUIA_t, (size_t)UIA_DIMENSION);
+/*
+                wm_H = (PWord *) MMK_UIAVAL(IntUIA);
+                UIAPtr = wm_H;
+		wm_H += 1;
+*/
+
 		w_uia_poke(IntUIA, (int) UIA_FIRST_POS,  (UCHAR *) &L, sizeof (double));
 		w_uia_poke(IntUIA, (int) UIA_SECOND_POS, (UCHAR *) &H, sizeof (double));
 		w_uia_poke(IntUIA, (int) UIA_THIRD_POS,  (UCHAR *) &IKind, sizeof (long));
@@ -744,13 +746,15 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 			the interval structure:
 	 	 *-------------------------------------------------------------*/
 /* printf("SPIRO: trailed mangle\n"); */
-		trailed_mangle0(UIA_POSITION, IntrvTm, WTP_STRUCTURE, IntUIA, WTP_UIA); 
+printf("inet_call_tm: %d %x %d %x %d\n", (int)UIA_POSITION, (int)IntrvTm, 
+			(int)WTP_STRUCTURE, (int)IntUIA, (int)WTP_UIA);     
+		trailed_mangle0((int)UIA_POSITION, IntrvTm, (int)WTP_STRUCTURE, IntUIA, (int)WTP_UIA);     
 	}
 
 #ifdef DEBUGSYS
 	if (debug_system[CSTRUPTM]) {
 		printf("UPDATE_PROP-TM:[L=%g H=%g K=%d] intuia=%0x wm_H=%0x wm_HB=%0x\n",
-								L,H,IKind,(int)(PWord)(IntUIA + wm_heapbase),(int)wm_H,(int)wm_HB);
+							L,H,IKind,(int)(PWord)(IntUIA + wm_heapbase),(int)wm_H,(int)wm_HB);
 		pbi_cptx();
 	}
 #endif /* DEBUGSYS */

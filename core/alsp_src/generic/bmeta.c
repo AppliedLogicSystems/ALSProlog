@@ -247,6 +247,10 @@ pbi_trailed_mangle(void)
  |	word #1 of the trail pair points to the position
  |	in v2 which was changed; word #2 in the pair points
  |	to the old value of that position.
+ |-------
+ | The call from int_net.c:
+ |
+ |	trailed_mangle0(UIA_POSITION, IntrvTm, WTP_STRUCTURE, IntUIA, WTP_UIA); 
  *---------------------------------------------------------------*/
 
 int
@@ -260,17 +264,15 @@ trailed_mangle0(v1,v2,t2,v3,t3)
   PWord *newv3 = NULL, oldarg = 0, *newoldarg = NULL;	/* stifle -Wall */
   int oldargt;
 
-  /*
-    printf("IN_tm:v1=%0x v2=%0x,t2=%d,v3=%0x,t3=%d\n",
-    (int)v1,(int)v2,(int)t2,(int)v3,(int)t3);
-    */
+	if (t3 == 5) 
+    printf("IN_tm:v1=%d v2=%x,t2=%d,v3=%x,t3=%d\n", (int)v1,(int)v2,(int)t2,(int)v3,(int)t3);
 
   switch (t2) {
   case WTP_STRUCTURE:
     w_get_arity(&arity, v2);
     if (v1 > arity || v1 < 1)
       FAIL;
-    w_get_argn(&oldarg, &oldargt, v2, (int) v1);
+/*    w_get_argn(&oldarg, &oldargt, v2, (int) v1);  */
     w_get_argaddr(argaddr, v2, (int) v1, arity);
     w_get(&oldarg, &oldargt, *argaddr);
     break;
@@ -332,7 +334,7 @@ trailed_mangle0(v1,v2,t2,v3,t3)
   wm_TR = (PWord *)wm_TR - 2;
 
   w_install(argaddr, v3, t3);	 /* mangle the new argument */
-
+  
   /*
     printf("--mangle done --\n");
     pbi_cptx();
@@ -393,7 +395,8 @@ trailed_mangle0(v1,v2,t2,v3,t3)
       if ((argaddr < newv3) || (argaddr < newoldarg)) {
 	/* Either the new object v3 or the old object oldarg is above the slot */
 	/*
-	  printf("-*-TM:CPupd:wm_HB(old)=%0x wm_H=%0x [argaddr=%0x newv3=0%x newoldarg=%0x]\n",wm_HB,wm_H,argaddr,newv3,newoldarg);
+	  printf("-*-TM:CPupd:wm_HB(old)=%0x wm_H=%0x [argaddr=%0x newv3=0%x newoldarg=%0x]\n",
+                                                    wm_HB,wm_H,argaddr,newv3,newoldarg);
 	  */
 	gv_setcnt++;
 	wm_HB = wm_H;

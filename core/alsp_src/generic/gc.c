@@ -356,8 +356,10 @@ core_gc()
 	    ap = (long *) *++tr;	/* tr is not biased */
 	    if (oldest_ap <= ap && ap < heap_low)
 			{
-				mark_from(ap);
-    			mark(val_at(tr1));
+/*			    mark_from(ap);
+   			mark(val_at(tr1));            */
+    			    mark_from(tr);
+    			    mark_from(tr1);
 			}
 		}
 
@@ -1061,11 +1063,11 @@ printf("Start new GC\n");
 
                     /* does the heap variable (location) ap contain a pointer (*ap) 
                        to a delay thing variable ? */
-            if (M_ISVAR(*ap) && CHK_DELAY(*ap)) {
+            if (M_ISVAR(*ap) && CHK_DELAY(*ap)) {   
                     /* this_dt is a C pointer to the TK_DELAY word of the delay thing structure */
                 this_dt = (PWord *)((PWord *)(*ap) -1);
-							/* printf(" - delay term: this_dt=%x ap=%x *ap=%x\n", 
-									(int)this_dt, (int)ap, (int)*ap ); */
+					printf(" - dt: this_dt=%x ap=%x *ap=%x\n", 
+									(int)this_dt, (int)ap, (int)*ap ); 
                     /* convert the contents *ap of location ap to be a prolog struct pointer to this_dt */
                     /* w_install(addr, val, tag) PWord *addr; PWord val; int   tag;  */
                 w_install(ap, (PWord)this_dt, WTP_STRUCTURE);
@@ -1076,7 +1078,8 @@ printf("Start new GC\n");
 
         for (; tr < b; tr++) {
             ap = (long *) *tr;			/* tr is not biased */
-            if (M_ISVAR(*ap) && CHK_DELAY(*ap)) {
+/*            if (M_ISVAR(*ap) && CHK_DELAY(*ap)) {     */
+            if (CHK_DELAY(*ap)) {
             this_dt = (PWord *)((PWord *)(*ap) -1);
             }
         }
@@ -1140,8 +1143,8 @@ core_gc();
                 {
                         /* So one word up is the original var of the delay thing to which *ap should point */
                     this_dt = (PWord *)((PWord *)this_dt + 1);
-							/* printf(" # delay term: this_dt=%x ap=%x *ap=%x\n", 
-									(int)this_dt, (int)ap, (int)*ap ); */
+		/*			printf(" # dt: this_dt=%x ap=%x *ap=%x\n", 
+									(int)this_dt, (int)ap, (int)*ap );  */
                         /* convert the contents *ap of location ap to be a prolog var-var pointer to this_dt */
                         /* w_install(addr, val, tag) PWord *addr; PWord val; int   tag;  */
 
