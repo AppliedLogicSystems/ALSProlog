@@ -24,7 +24,6 @@ use sio.
  | is the shell call to make.
  *-------------------------------------------------------------------------------*/
 
-
 start_shell(DefaultShellCall)
 	:-
 	%% Setup debugger entries (needs to be done early because
@@ -285,6 +284,7 @@ ss_load_dot_alspro(AutoFile)
 	exists_file(AutoFile),
 	!,
 	reconsult(AutoFile).
+
 ss_load_dot_alspro(AutoFile)
 	:-
 		%% What about DOS (also Mac, etc.) here?:
@@ -293,6 +293,7 @@ ss_load_dot_alspro(AutoFile)
 	exists_file(File),
 	!,
 	reconsult(File).
+
 ss_load_dot_alspro(_).
 
 /*-------------------------------------------------
@@ -661,6 +662,13 @@ do_shell_query(Goal0,VarNames,Vars,AlarmIntrv,InStream,OutStream)
 	showanswers(VarNames,Vars,InStream,OutStream),
 	!.
 
+do_shell_query(Goal,VarNames,Vars,AlarmIntrv,InStream,OutStream) 
+	:-
+	unset_alarm(AlarmIntrv),
+	dbg_notrace,
+	dbg_spyoff,
+	print_no(OutStream).
+
 set_alarm_clock((trace _),_) :-!.
 set_alarm_clock(_,0) :-!.
 set_alarm_clock(_,AlarmIntrv)
@@ -681,13 +689,6 @@ unset_alarm(AlarmIntrv)
 	alarm(AlarmIntrv,AlarmIntrv),
 	!,
 	fail.
-
-do_shell_query(Goal,VarNames,Vars,AlarmIntrv,InStream,OutStream) 
-	:-
-	unset_alarm(AlarmIntrv),
-	dbg_notrace,
-	dbg_spyoff,
-	print_no(OutStream).
 
 export do_shell_query2/2.
 do_shell_query2(Mod,Goal) 

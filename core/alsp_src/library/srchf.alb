@@ -1,0 +1,1 @@
+libactivate(builtins,[library,srchf],[search_for_file/2],[]).

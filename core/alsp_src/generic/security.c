@@ -4,6 +4,8 @@
  |
  | Hardware/software copy-protection security for timed-demos
  | and hardware-key protected versions of ALS Prolog.
+ |
+ | Author: Chuck Houpt
  *=============================================================*/
 
 #include <time.h>
@@ -11,8 +13,9 @@
 
 #include "defs.h"
 
-/* Hardware Key Abstraction Layer */
-
+/*-----------------------------------------* 
+	Hardware Key Abstraction Layer 
+ *-----------------------------------------*/
 
 #ifdef HARDWARE_KEY
 
@@ -153,6 +156,7 @@ static void set_eve3_long_gpr(short lgpr, unsigned long value)
 
 /* It might seem odd for this function to return the current time, but some
 hardware keys have builtin clocks. */
+
 static void get_hardware_key_times(unsigned long *now, unsigned long *start,
 			    unsigned long *end, unsigned long *duration)
 {
@@ -204,13 +208,13 @@ static void set_hardware_key_times(unsigned long start, unsigned long end)
 #endif
 }
 
-/* Hardware Key Abstract Check Level.
-
-This level implements the logic of hardware key checking.  Two types of hardware
-key are handled at the moment: simple keys and timed keys.  check_hardware_key
-determines which type of key is present, tests and updates the hardware key.
-
-*/
+/*-------------------------------------------------------------------------------------*
+ |		Hardware Key Abstract Check Level.
+ |	
+ |	This level implements the logic of hardware key checking.  Two types of hardware
+ |	key are handled at the moment: simple keys and timed keys.  check_hardware_key
+ |	determines which type of key is present, tests and updates the hardware key.
+ *-------------------------------------------------------------------------------------*/
 
 static void test_hardware_key_time_limit(void)
 {
@@ -289,33 +293,30 @@ static void init_hardware_key(void)
 
 #endif /* HARDWARE_KEY */
 
-/*
-
-Security Abstract Layer
-
-The top level abstract copy protection security interface.
-
-The security system is public to the rest of the ALS Prolog code and
-it implements a flexible means of checking security.
-
-The security system has three states:
-
-1) un-initilized - before security is initilized, and after security is
-   shutdown, the security system is in the un-initilized state.  The only
-   valid call for this state is init_security.
-   
-2) disabled - After the security system is initilized it is in the disabled
-   state.  Calls to check_security() are no-ops.  To enable the security system,
-   enable_security() must be called.
-
-3) enabled - After the security system is enabled, calls to check_security() will
-   perform a test of the software or hardware copy protection.
-
-init_security() - performs any necessary setup, and puts the security system into
-the disabled state.
-
-
-*/
+/*------------------------------------------------------------------------------------*
+ |			Security Abstract Layer
+ |	
+ |	The top level abstract copy protection security interface.
+ |	
+ |	The security system is public to the rest of the ALS Prolog code and
+ |	it implements a flexible means of checking security.
+ |	
+ |	The security system has three states:
+ |	
+ |	1) 	un-initilized - before security is initilized, and after security is
+ |   	shutdown, the security system is in the un-initilized state.  The only
+ |   	valid call for this state is init_security.
+ |   
+ |	2) 	disabled - After the security system is initilized it is in the disabled
+ |   	state.  Calls to check_security() are no-ops.  To enable the security system,
+ |   	enable_security() must be called.
+ |	
+ |	3) 	enabled - After the security system is enabled, calls to check_security() will
+ |	   	perform a test of the software or hardware copy protection.
+ |	
+ |	init_security() - performs any necessary setup, and puts the security system into
+ |					  the disabled state.
+ *------------------------------------------------------------------------------------*/
 
 enum {security_uninit, security_disabled, security_enabled} security_state = security_uninit;
 
@@ -362,17 +363,25 @@ void enable_security(void)
     }
 }
 
-#define DIEDAY 20
-#define DIEMON 8	/* jan = 0, feb = 1, .... */
-/* #define DIEYEAR 96 */
+	/* -------------------------------------------------------------------*
+		Date expiration when NOT using the hardware keys:
+		#define DIEYEAR 0 	-- normal, non-restricted version
+		#define DIEYEAR 96	-- year in which expiration occurs
+		#define DIEMON 		-- expiration month: jan = 0, feb = 1, ....
+		#define DIEDAY 		-- expiration day of month:  1,2,3,....
+	 * -------------------------------------------------------------------*/
+#ifndef DIEYEAR
+#define DIEDAY 1
+#define DIEMON 0
 #define DIEYEAR 0
+#endif
 
 void check_security(void)
 {
 #ifdef HARDWARE_KEY
     if (security_state == security_enabled) check_hardware_key();
-#endif
-/* kill Mac compiler::::
+#elif !defined(MacOS)
+/* kills Mac compiler (Windows too???):::: */
 	time_t tv;
 	struct tm *tp;
 
@@ -395,17 +404,13 @@ Exiting ALS Prolog.\n\
     );
 	exit(1);
 	}
-*/
-
-
+#endif
 
 }
 
-/* 
-
-Prolog builtin for enabling security.
-
-*/
+/* ---------------------------------------------*
+	Prolog builtin for enabling security.
+ * ---------------------------------------------*/
 
 int pbi_enable_security(void)
 {

@@ -59,5 +59,6 @@ p(a,X) :- foo(X).
 foo(X) :- write('In second p'),nl,write('X'=X),nl.
 
 main :- p(a,Y), nukefirst, write('Y'=Y),nl, fail.
+main :- write('no more clauses'),nl.
 
 nukefirst :- retract(p(a,1)),!.
