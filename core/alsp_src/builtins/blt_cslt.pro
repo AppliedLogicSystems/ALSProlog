@@ -369,7 +369,13 @@ exec_consult(BaseFile, FCOpts)
 		%% Incoming pathlist is absolute:
 exec_consult(['' | RestPathList], Drive, BaseFile, Nature, SrcExt, FCOpts)
 	:-!,
-	cont_consult(SrcExt, Nature, Drive+['' | RestPathList], BaseFile, FCOpts).
+	(cont_consult(SrcExt, Nature, Drive+['' | RestPathList], BaseFile, FCOpts) ->
+		true
+		;
+			%% Can't find file -- Throw exception:
+		arg(10, FCOpts, OrigFileDesc), 		%%	10		- OrigFileDesc 
+		existence_error(file,OrigFileDesc,OrigFileDesc)
+	).
 
 		%% Incoming pathlist is NOT absolute:
 		%% Try the local search path list:

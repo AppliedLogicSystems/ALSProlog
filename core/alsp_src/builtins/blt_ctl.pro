@@ -83,16 +83,10 @@ b_fa_incr(NN,Bnd,Vars)
 	NxtN < Bnd,
 	!,
 	mangle(1,NN,NxtN),
-	kill_freeze_list(Vars),
 	fail.
 
 b_fa_incr(_,_,_).
 
-kill_freeze_list([]).
-kill_freeze_list([Var | Vars])
-	:-
-	'$kill_freeze'(Var),
-	kill_freeze_list(Vars).
 
 /*-----------------------------------------------------------------------*
  | fa_call(Module,Goal) calls the goal Goal in module Module.  It was
@@ -115,23 +109,6 @@ fa_call(Module,Goal) :-
 export copy_term/2.
 copy_term(In,Out) :-
 	fa_copy(In,Out,_).
-
-:-  intconstr, !, 
-	asserta( ( 
-		fa_copy(VIn,VOut,VAssoc) :-
-			'$is_delay_var'(VIn), 
-			!,
-			fa_vassoc(VAssoc,VIn,VOut),
-			(eq(VIn, VOut) ->
-				true
-				;
-				'$delay_term_for'(VIn, VInDelT),
-				arg(3, VInDelT, Mod),
-				arg(4, VInDelT, InDelayedExpr),
-				fa_copy(InDelayedExpr, OutDelayedExpr, VAssoc),
-				'$delay'(VOut,Mod,OutDelayedExpr,_)
-			)
-			) ).
 
 fa_copy(VIn,VOut,VAssoc) 
 	:-
