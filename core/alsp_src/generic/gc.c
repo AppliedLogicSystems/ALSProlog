@@ -25,6 +25,7 @@
 #include <time.h>
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 
+#if 0 /* RH6 */
 #if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
 extern void stack_overflow  PARAMS(( int, siginfo_t *, ucontext_t * ));
 #elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
@@ -33,6 +34,7 @@ extern void    stack_overflow  PARAMS(( int, int, struct sigcontext *, caddr_t )
 extern void   stack_overflow  PARAMS(( int ));
 #else
 #error
+#endif
 #endif
 
 #undef mask
