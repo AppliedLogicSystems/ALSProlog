@@ -1,0 +1,1 @@
+/* macos Filter. */all_except([	/* Obsolete functions. */	'PBXGetVolInfoSync',	'PBXGetVolInfoAsync',	'GetEventMask',		/* Functions not found on both PPC and 68K. */	'GetTrapVector', 'StandardOpenDialog', 'TempInsertROMMap',	'MakeDataExecutable', 'CallOSTrapUniversalProc', 'CallUniversalProc',	'NewFatRoutineDescriptor',		'extended80']).
