@@ -21,10 +21,10 @@
 #include "compile.h"
 #include "freeze.h"
 
-void	pbi_delay			PARAMS(( void ));
-void	update_chpt_slots	PARAMS(( PWord ));
-void	pbi_clct_tr			PARAMS(( void ));
-void	pbi_collect_thawed	PARAMS(( void ));
+int	pbi_delay			PARAMS(( void ));
+int	update_chpt_slots	PARAMS(( PWord ));
+int	pbi_clct_tr			PARAMS(( void ));
+/* int	pbi_collect_thawed	PARAMS(( void )); */
 
 /*---------------------------------------------------------------*
  | pbi_delay()
@@ -33,7 +33,7 @@ void	pbi_collect_thawed	PARAMS(( void ));
  | the prolog heap:
  *---------------------------------------------------------------*/
 
-void
+int
 pbi_delay()
 {
 	PWord dv,m,g,vv,rdt,*one,*two;
@@ -72,12 +72,15 @@ printf("enter delay----wm_H=%x--TK_DELAY=%x-----------------\n",
 
 	update_chpt_slots((PWord)wm_H);
 
-	w_unify(rdt, rdtt, vv, vvt);
-
+	if (w_unify(rdt, rdtt, vv, vvt))
+	{
 #ifdef DEBUGFREEZE
 printf("exit delay----wm_H=%x--real_dv=%x---------\n", (int)wm_H,(int)one);
 #endif
-
+		SUCCEED;
+	}
+	else
+		FAIL;
 }
 
 	/*-------------------------------------------------*
@@ -100,7 +103,7 @@ deref_2(w)
     return w2;
 }
 
-void
+int
 pbi_clct_tr()
 {
 	PWord **CurT,*Back1,*Forw1;
@@ -155,12 +158,15 @@ pbi_clct_tr()
 		}
 	}
 #endif
-	w_unify(v1, t1, clctv, cvt);
+	if (w_unify(v1, t1, clctv, cvt))
+		SUCCEED;
+	else
+		FAIL;
 }
 	
 
 
-void
+int
 update_chpt_slots(hval)
 	PWord hval;
 {
@@ -175,6 +181,7 @@ update_chpt_slots(hval)
 		CurP = (PWord *)chpt_B(CurP);
 	}
 	wm_HB = (PWord *)hval;
+	SUCCEED;
 }
 
 	/*---------------------------------------------------------------
@@ -232,8 +239,9 @@ combine_delays(r,f)
 #endif
 }
 
+/*************
 void	
-pbi_collect_thawed()
+collect_thawed()
 {
   	PWord *CurP, *Stop, *CurSt;
 	PWord **CurT,*Back1,*Forw1;
@@ -284,7 +292,6 @@ pbi_collect_thawed()
 				if (!M_ISVAR(*Forw1) || (M_VARVAL(*Forw1) != (PWord)Forw1)) 
 				{
 					w_mk_list(&u,&ut);
-							/* adjust for BIGSTRUCTURE: */
 					Back1 = (*CurT)-1;
 	    			w_install_car(u, (PWord)Back1, WTP_STRUCTURE);
 	    			w_install_cdr(u, l, lt);
@@ -299,22 +306,23 @@ pbi_collect_thawed()
 	}
 	w_unify(v1, t1, l, lt);
 }
+*************/
 
 /*========================================================================*
                                DEBUGGING FUNCTIONS
  *========================================================================*/
 
-void	pbi_walk_cps	PARAMS(( void ));
-void	disp_heap_item	PARAMS(( PWord * ));
-void	pbi_swp_tr		PARAMS(( void ));
-int		disp_heap 		PARAMS(( void ));
+int	pbi_walk_cps	PARAMS(( void ));
+int	disp_heap_item	PARAMS(( PWord * ));
+int	pbi_swp_tr		PARAMS(( void ));
+int	disp_heap 		PARAMS(( void ));
 
 	/*-------------------------------------------------*
 	 | Walk the choice point stack,from newest to
      | oldest, printing out the choice points;
 	 *-------------------------------------------------*/
 
-void
+int
 pbi_walk_cps()
 {
   PWord *CurP, *Stop;
@@ -331,24 +339,26 @@ pbi_walk_cps()
 
 	CurP = (PWord *)chpt_B(CurP);
 	}
+	SUCCEED;
 }
 
 	/*-------------------------------------------------*
 	  Print out current values of WAM registers;
 	 *-------------------------------------------------*/
-void
+int
 pbi_cptx()
 {
 	printf("Tr_b= %x  B= %x  TR= %x  H= %x  HB= %x  H_b= %x\n",
 			(int)wm_trailbase,(int)wm_B,(int)wm_TR,
 			(int)wm_H,(int)wm_HB,(int)wm_heapbase);
+	SUCCEED;
 }
 
 	/*-------------------------------------------------*
 	 | Display an individiual heap entity
 	 *-------------------------------------------------*/
 
-void
+int
 disp_heap_item(CurT)
   PWord *CurT;
 {
@@ -420,7 +430,7 @@ disp_heap_item(CurT)
 	 | displaying each entry and the item it references
 	 *-------------------------------------------------*/
 
-void
+int
 pbi_swp_tr()
 {
 	PWord **CurT, *Back1, BStop;
@@ -439,6 +449,7 @@ pbi_swp_tr()
 		printf("         ");
 		disp_heap_item(Back1);
 	}
+	SUCCEED;
 }
 
 	/*-------------------------------------------------*
