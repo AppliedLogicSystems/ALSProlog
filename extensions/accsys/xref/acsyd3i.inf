@@ -1,0 +1,9 @@
+a_prims([
+        a_dDreccnt/3,a_dUdkto3i/4,a_dUleap/2,
+        a_dUnktod/3,a_d_recno/1,a_dUtoday/3,a_dUnftonk/5,a_dUnktoa/6,
+        a_dUnftod/3,a_dUdtonk/3,a_dUexpnm/3,a_dUdtonf/5,a_dUatonf/5,
+        a_dUdfto3i/4,a_dUdftodk/3,a_dDupdrec/4,a_dU3itodk/5,a_dUatocf/3,
+        a_dU3itodf/5,a_dDrecsta/3,a_dDrmrec/3,a_dDreclen/2,a_dDflush/2,
+        a_dDinsrec/4,a_dDopen/4,a_dDrclrec/3,a_dDgetrec/4,a_dDbuffs/3,
+        a_dDdelrec/3,a_dDfields/2,a_dDfldno/8,a_dDclose/2,a_dDapprec/3
+	]).
