@@ -6,6 +6,8 @@ echo "Starting Command Line Tests"
 
 prolog=$1
 
+error_count=0
+
 error () {
 	command=$1
 	expected_result=$2
@@ -15,6 +17,7 @@ error () {
     echo "  Command: $command"
     echo "  Expected Result: $expected_result But got: $result"
     echo
+    error_count=`expr $error_count + 1`
 }
 
 cl_test () {
@@ -60,10 +63,12 @@ then
 fi
 
 
-# test success/fail return value for -b -g options
+# test success/fail/exception return values for -b -g options
 
 cl_test "$prolog -q -b -g true" 0
 cl_test "$prolog -q -b -g fail" 1
+# fix this!
+#cl_test "$prolog -q -b -g 'throw(foo)'" 2
 
 # currently only tests error handling for -heap and -stack options
 
@@ -115,6 +120,11 @@ cl_test "$prolog -heap 1000 -stack 2000 -b -q -g 'statistics([_,stack(_,_,204800
 
 # Check correct functioning of Environment variables
 
-
-
-echo "Finished Command Line Tests"
+if test $error_count -ne 0
+then
+    echo "Errors Found in Command Line Tests"
+    exit 1
+else
+    echo "Finished Command Line Tests"
+    exit 0
+fi
