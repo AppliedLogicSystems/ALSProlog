@@ -286,7 +286,9 @@ extern	int	pbi_get_image_dir_and_name	PARAMS(( void ));
 extern int   argcount;
 extern char **argvector;
 extern	int pbi_command_line	PARAMS((void));
+#ifdef UNIX
 extern	int pbi_crypt			PARAMS((void));
+#endif
 extern	int pbi_copy_file		PARAMS((void));
 
 /* bparser.c */
