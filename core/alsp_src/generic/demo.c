@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#if 0
 static long CalculateCheckSum(long n)
 {
 	long s, d1, d2, d3, d4;
@@ -26,6 +27,7 @@ static long CalculateCheckSum(long n)
 	
 	return s;
 }
+#endif
 
 /*
 unix
@@ -182,20 +184,28 @@ static void delete_demo_key_info(void)
 #endif
 
 #ifdef UNIX
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 char *demo_file_path;
 #define DEMO_FILE ".alspro_demo_key"
 
 static void init_demo_key_info(void)
 {
-	const char *home;
-		if (	
-	getenv("HOME"
+  const char *home;
 	
-	demo_file_path = malloc(strlen(home)+1+strlen(DEMO_FILE)+1);
-	strcpy(demo_file_path, home);
-	strcat(demo_file_path, "/");
-	strcat(demo_file_path, DEMO_FILE);
+  home = getenv("HOME");
+  if (home) {
+    demo_file_path = malloc(strlen(home)+1+strlen(DEMO_FILE)+1);
+    strcpy(demo_file_path, home);
+    strcat(demo_file_path, "/");
+    strcat(demo_file_path, DEMO_FILE);
+  } else {
+    demo_file_path = malloc(strlen(DEMO_FILE)+1);
+    strcpy(demo_file_path, DEMO_FILE);
+  }
 }
 
 static int demo_key_info_exists(void)
@@ -221,11 +231,8 @@ static void read_demo_key_info(char *key, int max)
 static void write_demo_key_info(char *key)
 {
 	int f;
-	OSErr err;
-	short f;
-	long count;
 	
-	f = open(demo_file_path, O_WRONLY | O_CREAT);
+	f = creat(demo_file_path, S_IRUSR | S_IWUSR);
 	if (f != -1) {
 		write(f, key, strlen(key));
 		close(f);
@@ -276,12 +283,13 @@ void (*get_demo_key)(char *key, int max) = console_get_demo_key;
 #define KEY_DIGITS 16
 static int valid_demo_key(char *key)
 {
+#if 0
 	int a,b,c,d;
 	
-	sscanf(key, "%d-%d-%d-%d", a, b, c, d);
+	sscanf(key, "%d-%d-%d-%d", &a, &b, &c, &d);
 
 	//CalculateCheckSum
-	if (d != calculat_checksum(a | b | c)) return 0;
+	//if (d != calculate_checksum(a | b | c)) return 0;
 	
 	a = rotate(a);
 	b = rotate(b);
@@ -293,13 +301,14 @@ static int valid_demo_key(char *key)
 	duration = ;
 	
 	check time 
+#endif
+return 0;
 }
 
 void demo_check(void);
 void demo_check(void)
 {
 	char key[KEY_MAX];
-	int pass = false;
 	
 	init_demo_key_info();
 	
@@ -312,7 +321,7 @@ void demo_check(void)
 	} else {
 		get_demo_key(key, KEY_MAX);
 		if (!valid_demo_key(key)) {
-			demo_error("Invalid evaluation key, Please re-enter.");
+			demo_error("Invalid evaluation key.");
 		}
 		write_demo_key_info(key);
 	}

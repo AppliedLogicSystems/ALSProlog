@@ -1044,11 +1044,14 @@ static void StartCoop(void);
 static void EndCoop(void);
 #endif
 
+#ifdef DEMO
+extern void demo_check(void);
+#endif
+
 EXPORT ALSPI_API(int)
 PI_startup(const PI_system_setup *setup)
 {
 #ifdef DEMO
-	extern void demo_check(void);
 	demo_check();
 #endif
 #ifdef MacOS
