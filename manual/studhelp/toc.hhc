@@ -1,0 +1,653 @@
+<HTML>
+<!Sitemap 1.0>
+<OBJECT type="text/site properties">
+    <param name="FrameName" value="right">
+    </OBJECT>
+<UL>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="ALS Prolog Help Overview">
+    </OBJECT>
+<UL>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Welcome">
+    <param name="Local" value="studhelpWelcome.htm">
+    </OBJECT>
+    <A HREF="file:studhelpWelcome.htm">Welcome</A>
+</UL>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value=" Control and Prolog Database">
+    </OBJECT>
+<UL>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="!/0 (cut)">
+    <param name="Local" value="studhelp0_cut.htm">
+    </OBJECT>
+    <A HREF="file:studhelp0_cut.htm">!/0 (cut)</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value=",/2 (comma)">
+    <param name="Local" value="studhelp2_comma.htm">
+    </OBJECT>
+    <A HREF="file:studhelp2_comma.htm">,/2 (comma)</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="->/2 (arrow)">
+    <param name="Local" value="studhelp2_arrow.htm">
+    </OBJECT>
+    <A HREF="file:studhelp2_arrow.htm">->/2 (arrow)</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value=":/2 (colon)">
+    <param name="Local" value="studhelp2_colon.htm">
+    </OBJECT>
+    <A HREF="file:studhelp2_colon.htm">:/2 (colon)</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value=";/2 (semi-colon)">
+    <param name="Local" value="studhelp2_semicolon.htm">
+    </OBJECT>
+    <A HREF="file:studhelp2_semicolon.htm">;/2 (semi-colon)</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="</2">
+    <param name="Local" value="studhelp200000041.htm">
+    </OBJECT>
+    <A HREF="file:studhelp200000041.htm"></2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="abolish/2">
+    <param name="Local" value="studhelpabolish2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpabolish2.htm">abolish/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="abort/0">
+    <param name="Local" value="studhelpabort0.htm">
+    </OBJECT>
+    <A HREF="file:studhelpabort0.htm">abort/0</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="als_system/1">
+    <param name="Local" value="studhelpalssystem1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpalssystem1.htm">als_system/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="assert/[1,2]">
+    <param name="Local" value="studhelpassert12.htm">
+    </OBJECT>
+    <A HREF="file:studhelpassert12.htm">assert/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="'$c_malloc'/2">
+    <param name="Local" value="studhelpcmalloc2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcmalloc2.htm">'$c_malloc'/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="call/1">
+    <param name="Local" value="studhelpcall1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcall1.htm">call/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="catch/3">
+    <param name="Local" value="studhelpcatch3.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcatch3.htm">catch/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="clause/[2,3]">
+    <param name="Local" value="studhelpclause23.htm">
+    </OBJECT>
+    <A HREF="file:studhelpclause23.htm">clause/[2,3]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="command_line/1">
+    <param name="Local" value="studhelpcommandline1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcommandline1.htm">command_line/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="compiletime/0">
+    <param name="Local" value="studhelpcompiletime0.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcompiletime0.htm">compiletime/0</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="curmod/1">
+    <param name="Local" value="studhelpcurmod1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcurmod1.htm">curmod/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="current_op/3">
+    <param name="Local" value="studhelpcurrentop3.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcurrentop3.htm">current_op/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="current_prolog_flag/2">
+    <param name="Local" value="studhelpcurrentprologflag2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcurrentprologflag2.htm">current_prolog_flag/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="dynamic/1">
+    <param name="Local" value="studhelpdynamic1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpdynamic1.htm">dynamic/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="fail/0">
+    <param name="Local" value="studhelpfail0.htm">
+    </OBJECT>
+    <A HREF="file:studhelpfail0.htm">fail/0</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="'$findterm'/5">
+    <param name="Local" value="studhelpfindterm5.htm">
+    </OBJECT>
+    <A HREF="file:studhelpfindterm5.htm">'$findterm'/5</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="forcePrologInterrupt/0">
+    <param name="Local" value="studhelpforcePrologInterrupt0.htm">
+    </OBJECT>
+    <A HREF="file:studhelpforcePrologInterrupt0.htm">forcePrologInterrupt/0</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="gc/0">
+    <param name="Local" value="studhelpgc0.htm">
+    </OBJECT>
+    <A HREF="file:studhelpgc0.htm">gc/0</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="getenv/2">
+    <param name="Local" value="studhelpgetenv2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpgetenv2.htm">getenv/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="halt/0">
+    <param name="Local" value="studhelphalt0.htm">
+    </OBJECT>
+    <A HREF="file:studhelphalt0.htm">halt/0</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="is/2">
+    <param name="Local" value="studhelpis2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpis2.htm">is/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="leash/1">
+    <param name="Local" value="studhelpleash1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpleash1.htm">leash/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="listing/[0,1]">
+    <param name="Local" value="studhelplisting01.htm">
+    </OBJECT>
+    <A HREF="file:studhelplisting01.htm">listing/[0,1]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="make_gv/1">
+    <param name="Local" value="studhelpmakegv1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpmakegv1.htm">make_gv/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="module_closure/[2,3]">
+    <param name="Local" value="studhelpmoduleclosure23.htm">
+    </OBJECT>
+    <A HREF="file:studhelpmoduleclosure23.htm">module_closure/[2,3]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="not/1">
+    <param name="Local" value="studhelpnot1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpnot1.htm">not/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="op/3">
+    <param name="Local" value="studhelpop3.htm">
+    </OBJECT>
+    <A HREF="file:studhelpop3.htm">op/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="procedures/4">
+    <param name="Local" value="studhelpprocedures4.htm">
+    </OBJECT>
+    <A HREF="file:studhelpprocedures4.htm">procedures/4</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="'$procinfo'/5">
+    <param name="Local" value="studhelpprocinfo5.htm">
+    </OBJECT>
+    <A HREF="file:studhelpprocinfo5.htm">'$procinfo'/5</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="repeat/0">
+    <param name="Local" value="studhelprepeat0.htm">
+    </OBJECT>
+    <A HREF="file:studhelprepeat0.htm">repeat/0</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="retract/[1,2]">
+    <param name="Local" value="studhelpretract12.htm">
+    </OBJECT>
+    <A HREF="file:studhelpretract12.htm">retract/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="rexec/2">
+    <param name="Local" value="studhelprexec2.htm">
+    </OBJECT>
+    <A HREF="file:studhelprexec2.htm">rexec/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="save_image/2">
+    <param name="Local" value="studhelpsaveimage2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsaveimage2.htm">save_image/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="setof/3">
+    <param name="Local" value="studhelpsetof3.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsetof3.htm">setof/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="setPrologInterrupt/1">
+    <param name="Local" value="studhelpsetPrologInterrupt1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsetPrologInterrupt1.htm">setPrologInterrupt/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="spy/[0,1]">
+    <param name="Local" value="studhelpspy01.htm">
+    </OBJECT>
+    <A HREF="file:studhelpspy01.htm">spy/[0,1]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="statistics/[0,2]">
+    <param name="Local" value="studhelpstatistics02.htm">
+    </OBJECT>
+    <A HREF="file:studhelpstatistics02.htm">statistics/[0,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="system/1">
+    <param name="Local" value="studhelpsystem1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsystem1.htm">system/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="datetime/2">
+    <param name="Local" value="studhelpdatetime200000115.htm">
+    </OBJECT>
+    <A HREF="file:studhelpdatetime200000115.htm">datetime/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="trace/[0,1]">
+    <param name="Local" value="studhelptrace01.htm">
+    </OBJECT>
+    <A HREF="file:studhelptrace01.htm">trace/[0,1]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="true/0">
+    <param name="Local" value="studhelptrue0.htm">
+    </OBJECT>
+    <A HREF="file:studhelptrue0.htm">true/0</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="var/1">
+    <param name="Local" value="studhelpvar1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpvar1.htm">var/1</A>
+</UL>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Terms">
+    </OBJECT>
+<UL>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="append/3">
+    <param name="Local" value="studhelpappend3.htm">
+    </OBJECT>
+    <A HREF="file:studhelpappend3.htm">append/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="arg/3">
+    <param name="Local" value="studhelparg3.htm">
+    </OBJECT>
+    <A HREF="file:studhelparg3.htm">arg/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="atom/1">
+    <param name="Local" value="studhelpatom1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpatom1.htm">atom/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="atom_chars/2">
+    <param name="Local" value="studhelpatomchars2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpatomchars2.htm">atom_chars/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="atom_concat/3">
+    <param name="Local" value="studhelpatomconcat3.htm">
+    </OBJECT>
+    <A HREF="file:studhelpatomconcat3.htm">atom_concat/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="atom_length/2">
+    <param name="Local" value="studhelpatomlength2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpatomlength2.htm">atom_length/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="char_code/2">
+    <param name="Local" value="studhelpcharcode2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcharcode2.htm">char_code/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="compare/3">
+    <param name="Local" value="studhelpcompare3.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcompare3.htm">compare/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="copy_term/1">
+    <param name="Local" value="studhelpcopyterm1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcopyterm1.htm">copy_term/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="functor/3">
+    <param name="Local" value="studhelpfunctor3.htm">
+    </OBJECT>
+    <A HREF="file:studhelpfunctor3.htm">functor/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="gensym/2">
+    <param name="Local" value="studhelpgensym2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpgensym2.htm">gensym/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="length/2">
+    <param name="Local" value="studhelplength2.htm">
+    </OBJECT>
+    <A HREF="file:studhelplength2.htm">length/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="make_hash_table/1">
+    <param name="Local" value="studhelpmakehashtable1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpmakehashtable1.htm">make_hash_table/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="mangle/3">
+    <param name="Local" value="studhelpmangle3.htm">
+    </OBJECT>
+    <A HREF="file:studhelpmangle3.htm">mangle/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="member/2">
+    <param name="Local" value="studhelpmember2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpmember2.htm">member/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="name/2">
+    <param name="Local" value="studhelpname2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpname2.htm">name/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="number_chars/2">
+    <param name="Local" value="studhelpnumberchars2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpnumberchars2.htm">number_chars/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="recorda/3">
+    <param name="Local" value="studhelprecorda3.htm">
+    </OBJECT>
+    <A HREF="file:studhelprecorda3.htm">recorda/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="reverse/2">
+    <param name="Local" value="studhelpreverse2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpreverse2.htm">reverse/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="sort/2">
+    <param name="Local" value="studhelpsort2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsort2.htm">sort/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="sub_atom/5">
+    <param name="Local" value="studhelpsubatom5.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsubatom5.htm">sub_atom/5</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="term_chars/2">
+    <param name="Local" value="studhelptermchars2.htm">
+    </OBJECT>
+    <A HREF="file:studhelptermchars2.htm">term_chars/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="'$uia_alloc'/2">
+    <param name="Local" value="studhelpuiaalloc2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpuiaalloc2.htm">'$uia_alloc'/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="ASCII Table">
+    <param name="Local" value="studhelpASCII_Table.htm">
+    </OBJECT>
+    <A HREF="file:studhelpASCII_Table.htm">ASCII Table</A>
+</UL>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Input / Output">
+    </OBJECT>
+<UL>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="'$access/2'">
+    <param name="Local" value="studhelpaccess2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpaccess2.htm">'$access/2'</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="at_end_of_stream/[0,1]">
+    <param name="Local" value="studhelpatendofstream01.htm">
+    </OBJECT>
+    <A HREF="file:studhelpatendofstream01.htm">at_end_of_stream/[0,1]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="bufread/[2,4]">
+    <param name="Local" value="studhelpbufread24.htm">
+    </OBJECT>
+    <A HREF="file:studhelpbufread24.htm">bufread/[2,4]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="chdir/1">
+    <param name="Local" value="studhelpchdir1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpchdir1.htm">chdir/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="close/[1,2]">
+    <param name="Local" value="studhelpclose12.htm">
+    </OBJECT>
+    <A HREF="file:studhelpclose12.htm">close/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="consult/[1,2]">
+    <param name="Local" value="studhelpconsult12.htm">
+    </OBJECT>
+    <A HREF="file:studhelpconsult12.htm">consult/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="current_input/1">
+    <param name="Local" value="studhelpcurrentinput1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcurrentinput1.htm">current_input/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="exists_file/1">
+    <param name="Local" value="studhelpexistsfile1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpexistsfile1.htm">exists_file/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="flush_input/1">
+    <param name="Local" value="studhelpflushinput1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpflushinput1.htm">flush_input/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="flush_output/[0,1]">
+    <param name="Local" value="studhelpflushoutput01.htm">
+    </OBJECT>
+    <A HREF="file:studhelpflushoutput01.htm">flush_output/[0,1]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="get_char/[1,2]">
+    <param name="Local" value="studhelpgetchar12.htm">
+    </OBJECT>
+    <A HREF="file:studhelpgetchar12.htm">get_char/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="get_code/[1,2]">
+    <param name="Local" value="studhelpgetcode12.htm">
+    </OBJECT>
+    <A HREF="file:studhelpgetcode12.htm">get_code/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="get0/1">
+    <param name="Local" value="studhelpget01.htm">
+    </OBJECT>
+    <A HREF="file:studhelpget01.htm">get0/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="open/[3,4]">
+    <param name="Local" value="studhelpopen34.htm">
+    </OBJECT>
+    <A HREF="file:studhelpopen34.htm">open/[3,4]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="peek_char/[1,2]">
+    <param name="Local" value="studhelppeekchar12.htm">
+    </OBJECT>
+    <A HREF="file:studhelppeekchar12.htm">peek_char/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="peek_code/[1,2]">
+    <param name="Local" value="studhelppeekcode12.htm">
+    </OBJECT>
+    <A HREF="file:studhelppeekcode12.htm">peek_code/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="poll/2">
+    <param name="Local" value="studhelppoll2.htm">
+    </OBJECT>
+    <A HREF="file:studhelppoll2.htm">poll/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="printf/[1,2,3,4]">
+    <param name="Local" value="studhelpprintf1234.htm">
+    </OBJECT>
+    <A HREF="file:studhelpprintf1234.htm">printf/[1,2,3,4]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="put/1">
+    <param name="Local" value="studhelpput1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpput1.htm">put/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="put_atom/[1,2]">
+    <param name="Local" value="studhelpputatom12.htm">
+    </OBJECT>
+    <A HREF="file:studhelpputatom12.htm">put_atom/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="put_char/[1,2]">
+    <param name="Local" value="studhelpputchar12.htm">
+    </OBJECT>
+    <A HREF="file:studhelpputchar12.htm">put_char/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="put_code/[1,2]">
+    <param name="Local" value="studhelpputcode12.htm">
+    </OBJECT>
+    <A HREF="file:studhelpputcode12.htm">put_code/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="put_string/[1,2]">
+    <param name="Local" value="studhelpputstring12.htm">
+    </OBJECT>
+    <A HREF="file:studhelpputstring12.htm">put_string/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="read/[1,2]">
+    <param name="Local" value="studhelpread12.htm">
+    </OBJECT>
+    <A HREF="file:studhelpread12.htm">read/[1,2]</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="see/1">
+    <param name="Local" value="studhelpsee1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsee1.htm">see/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="set_input/1">
+    <param name="Local" value="studhelpsetinput1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsetinput1.htm">set_input/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="set_line_length/2">
+    <param name="Local" value="studhelpsetlinelength2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsetlinelength2.htm">set_line_length/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="set_stream_position/2">
+    <param name="Local" value="studhelpsetstreamposition2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsetstreamposition2.htm">set_stream_position/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="skip/1">
+    <param name="Local" value="studhelpskip1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpskip1.htm">skip/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="sprintf/3">
+    <param name="Local" value="studhelpsprintf3.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsprintf3.htm">sprintf/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="stream_position/3">
+    <param name="Local" value="studhelpstreamposition3.htm">
+    </OBJECT>
+    <A HREF="file:studhelpstreamposition3.htm">stream_position/3</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="stream_property/2">
+    <param name="Local" value="studhelpstreamproperty2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpstreamproperty2.htm">stream_property/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="tell/1">
+    <param name="Local" value="studhelptell1.htm">
+    </OBJECT>
+    <A HREF="file:studhelptell1.htm">tell/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="date_time/2">
+    <param name="Local" value="studhelpdatetime200000036.htm">
+    </OBJECT>
+    <A HREF="file:studhelpdatetime200000036.htm">date_time/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="ttyflush/0">
+    <param name="Local" value="studhelpttyflush0.htm">
+    </OBJECT>
+    <A HREF="file:studhelpttyflush0.htm">ttyflush/0</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="write/[1,2]">
+    <param name="Local" value="studhelpwrite12.htm">
+    </OBJECT>
+    <A HREF="file:studhelpwrite12.htm">write/[1,2]</A>
+</UL>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Prolog Objects">
+    </OBJECT>
+<UL>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="create_object/2">
+    <param name="Local" value="studhelpcreateobject2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcreateobject2.htm">create_object/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="create_object/2 -  create an object">
+    <param name="Local" value="studhelpcreateobject2___create_an_object.htm">
+    </OBJECT>
+    <A HREF="file:studhelpcreateobject2___create_an_object.htm">create_object/2 -  create an object</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="defineClass/1">
+    <param name="Local" value="studhelpdefineClass1.htm">
+    </OBJECT>
+    <A HREF="file:studhelpdefineClass1.htm">defineClass/1</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="defStruct/2">
+    <param name="Local" value="studhelpdefStruct2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpdefStruct2.htm">defStruct/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="send/2">
+    <param name="Local" value="studhelpsend2.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsend2.htm">send/2</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="setObjStruct/3">
+    <param name="Local" value="studhelpsetObjStruct3.htm">
+    </OBJECT>
+    <A HREF="file:studhelpsetObjStruct3.htm">setObjStruct/3</A>
+</UL>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Development Environment">
+    </OBJECT>
+<UL>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Listener Window">
+    <param name="Local" value="studhelpListener_Window.htm">
+    </OBJECT>
+    <A HREF="file:studhelpListener_Window.htm">Listener Window</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="File Menu">
+    <param name="Local" value="studhelpFile_Menu.htm">
+    </OBJECT>
+    <A HREF="file:studhelpFile_Menu.htm">File Menu</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Edit Menu">
+    <param name="Local" value="studhelpEdit_Menu.htm">
+    </OBJECT>
+    <A HREF="file:studhelpEdit_Menu.htm">Edit Menu</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Find  dialog:">
+    <param name="Local" value="studhelpFind__dialog.htm">
+    </OBJECT>
+    <A HREF="file:studhelpFind__dialog.htm">Find  dialog:</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Preferences Dialog:">
+    <param name="Local" value="studhelpPreferences_Dialog.htm">
+    </OBJECT>
+    <A HREF="file:studhelpPreferences_Dialog.htm">Preferences Dialog:</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Prolog Menu">
+    <param name="Local" value="studhelpProlog_Menu.htm">
+    </OBJECT>
+    <A HREF="file:studhelpProlog_Menu.htm">Prolog Menu</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Tools Menu">
+    <param name="Local" value="studhelpTools_Menu.htm">
+    </OBJECT>
+    <A HREF="file:studhelpTools_Menu.htm">Tools Menu</A>
+<LI><OBJECT type="text/sitemap">
+    <param name="Name" value="Windows Menu">
+    <param name="Local" value="studhelpWindows_Menu.htm">
+    </OBJECT>
+    <A HREF="file:studhelpWindows_Menu.htm">Windows Menu</A>
+</UL>
+</UL>
+</HTML>
