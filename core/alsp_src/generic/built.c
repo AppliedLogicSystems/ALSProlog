@@ -461,6 +461,7 @@ static struct blt_struct {
 	BLT("sio_var_to_atom", 2, sio_var_to_atom, "_sio_var_to_atom"),
 	BLT("sio_lettervar", 2, sio_lettervar, "_sio_lettervar"),
 	BLT("sio_sprintf", 4, sio_sprintf, "_sio_sprintf"),
+	BLT("sio_sprintf_number", 3, sio_sprintf_number, "_sio_sprintf_number"),
 	BLT("sio_isgraphicatom", 1, sio_isgraphicatom, "_sio_isgraphicatom"),
 	BLT("sio_nl", 1, sio_nl, "_sio_nl"),
 	BLT("sio_readln", 3, sio_readln, "_sio_readln"),

@@ -369,6 +369,7 @@ extern	int	sio_qatom	PARAMS(( void ));
 extern	int	sio_var_to_atom	PARAMS(( void ));
 extern	int	sio_lettervar	PARAMS(( void ));
 extern	int	sio_sprintf	PARAMS(( void ));
+extern	int sio_sprintf_number PARAMS((void));
 extern	int	sio_isgraphicatom	PARAMS(( void ));
 extern	int	sio_readln	PARAMS(( void ));
 extern	int	sio_nl	PARAMS(( void ));
