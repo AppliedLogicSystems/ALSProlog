@@ -222,10 +222,12 @@ static struct blt_struct {
 
 #ifdef INTCONSTR
 	BLT("fuzz_float",  4, pbi_fuzz, "_pbi_fuzz"),
-	BLT("$iter_link_net",  5, ilinknet, "_ilinknet"),
+/*	BLT("$iter_link_net",  5, ilinknet, "_ilinknet"),  */
 	BLT("reset_cstr_ctrs",  0, reset_cstr_ctrs, "_reset_cstr_ctrs"),
 	BLT("get_cstr_ctrs",    2, get_cstr_ctrs_vals, "_get_cstr_ctrs_vals"),
 	BLT("set_max_iters",    1, set_max_iters_val, "_set_max_iters_val"),
+	BLT("x_int_op",    6, x_int_op, "_x_int_op"),
+
 #if 0
 	BLT("$run_grteq_cstrs",    5, run_grteq_cstrs, "_run_grteq_cstrs"),
 #endif

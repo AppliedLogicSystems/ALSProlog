@@ -63,6 +63,9 @@
 #define zhchange    (1 << 8)
 #define redonode    (1 << 9)
 #define link    	(1 << 10)
+#define xcoalesce  	(1 << 11)
+#define ycoalesce  	(1 << 12)
+#define zcoalesce  	(1 << 13)
 
 #define x_changed (xflip | xlchange | xhchange)
 #define y_changed (yflip | ylchange | yhchange)
