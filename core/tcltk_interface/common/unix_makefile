@@ -16,12 +16,17 @@ source = alspi_slib.c new_alspi.c tcl_interface.c
 
 objects = $(source:.c=.o)
 
+all: tclintf.psl test
 
 tclintf.psl: $(objects)
 	$(CC) $(LINK) -L/usr/local/lib $(objects) \
 		-ltcl8.0 -ltk8.0 -lX11 -lm -lc -o tclintf.psl
 	
 $(objects) : makefile unix_makefile
+
+test : unix_makefile tclintf.psl
+	alspro -q -b ../common/tcltk.pro ./tclintf.psl ../common/tcl_test.pro \
+	-s . -g "test('../common/prolog_test.tcl')"
 
 -include *.d
 
@@ -30,3 +35,4 @@ clean :
 
 superclean: clean
 	rm -f tclintf.psl
+

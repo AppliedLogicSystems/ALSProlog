@@ -1,3 +1,37 @@
+:- [tcltk].
+
+:- tcl_new(i).
+
+test(TclTestPath) :-
+	tcl_call(i, [source, TclTestPath], _),
+	tcl_call(i, dotest, _).
+
+
+test_int(5).
+
+test_float(5.5).
+
+test_atom('a b').
+test_atom(a).
+test_atom('5').
+test_atom(' 5 ').
+test_atom('5.5').
+test_atom(' 5.5 ').
+test_atom('').
+
+test_list([a,b]).
+test_list([]).
+test_list([a]).
+test_list(['5']).
+test_list([' 5 ']).
+test_list(['5.5']).
+test_list([' 5.5' ]).
+
+test_var(X) :- var(X).
+
+large_arity(5, 5.5, a, 'a b', '5', ' 5 ', '5.5', ' 5.5 ', '', [a,b], [], [a], ['5']). %, [' 5 ']). %, ['5.5'], [' 5.5 ']).
+
+/*
 %#!alspro -r test
 
 %load tcl package
@@ -147,4 +181,5 @@ test(throw(foo), exception(foo)).
 test(append([1], [2], X), success(X = [1, 2])).
 test(append(X, Y, [1, 2]),
 	success(3, [X = [[], [1], [1, 2]], Y = [[1, 2], [2], []])).
+*/
 */
