@@ -165,6 +165,7 @@ ss_parse_command_line(['-nwd' | T], L, Mod,CLInfo)
 	:-!,
 	debugger:nospy,
 	(debugger:set_debug_io(nowins),!;true),
+	assert(cl_debug_io(nowins)),
 	ss_parse_command_line(T, L, Mod,CLInfo).
 
 	/* Skip -heap and -stack arguments because they 

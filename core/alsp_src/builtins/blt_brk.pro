@@ -116,6 +116,7 @@ break_handler(exit_prolog,M,G)
 break_handler(exit,M,G) 
 	:-!, 
 	getBreakLevel([b(Level,_,_)|_]),
+pbi_write(break_handler(exit,M,G,level=Level)),pbi_nl,pbi_ttyflush,
 	(Level < 0 ->
 			%% exit_ctlc: "Exiting Prolog from Control-C or Control-Break.\n"
 		prolog_system_error(exit_ctlc, []),

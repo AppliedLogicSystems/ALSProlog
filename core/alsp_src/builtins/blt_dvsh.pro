@@ -73,16 +73,6 @@ start_alsdev
 	dappend(ALSDIRPathList, [library,'objects.pro'], ObjPathList),
 	join_path(ObjPathList, ObjectsPath),
 
-/*
-	xconsult:pushmod(object_classes),
-	obp_push_stop,
-	xconsult(ObjectsPath,_),
-	obp_pop,
-	xconsult:popmod,
-	setup_init_ide_classes(ALS_IDE_Mgr),
-	abolish_module(object_classes),
-*/
-
 	setup_init_ide_classes(ALS_IDE_Mgr),
 
 	library_setup,
@@ -98,80 +88,6 @@ start_alsdev
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%       ALS_IDE  ObjectPro CLASS DEFINITIONS    %%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-/*************
-	/*--------------------------------------------
-	 |	setup_init_ide_classes/1
-	 |	setup_init_ide_classes(ALS_IDE_Mgr)
-	 |	setup_init_ide_classes(-)
-	 *-------------------------------------------*/
-
-setup_init_ide_classes(ALS_IDE_Mgr)
-	:-
-        %%   ALS_IDE_MGR:
-	object_classes:defineClass(
-	[   name=als_ide_mgr,
-		subClassOf=als_shl_mgr,
-		module = alsdev,
-		addl_slots=
-			[ 
-				debugger_mgr,   %% debugger state object
-				cur_project,    %% current project manager object    
-				edit_files,     %% list of files open for editing
-				non_file_edits  %% list of non-file (new) windows open for editing
-			],
-		defaults= [ 
-			edit_files = [], 
-			non_file_edits = [] 
-		]
-	]),
-
-		%% For ALS IDE Project system:
-	alsdev:setup_als_ide_mgr(ALS_IDE_Mgr),
-		%% Since we're starting cold:
-	make_gv('_primary_manager'),
-	set_primary_manager(ALS_IDE_Mgr),
-	send(ALS_IDE_Mgr, set_value(shell_module, alsdev)),
-
-        %%   SHL_SOURCE_HANDLER:
-	object_classes:defineClass(alsdev,
-	[   name=shl_source_handler,
-		subClassOf=source_handler,
-		export = yes,
-		addl_slots= [ 
-			tcl_doc_path,		%% Tcl id of edit window
-			errors_display		%% nil / non-empty errs list
-		],
-		defaults= [ 
-			tcl_doc_path		= nil,
-			errors_display 		= nil
-		]
-	]),
-
-        %%   SOURCE_TRACE_MGR:
-	object_classes:defineClass(alsdev,
-	[   name=source_trace_mgr,
-		subClassOf=shl_source_handler,
-		addl_slots=
-			[
-				debugger_mgr,		%% home to daddy...
-				last_visual_load,	%% Time of last load of file text widget
-				num_lines,			%% num lines in the file
-				linesizes,			%% list of num chars in each line
-				invlineindex,		%% list of char offsets to start of each line
-				head_tag,			%% i(S,E) = last colored "matching head (aph)tag" lcn
-				call_tag			%% i(S,E) = last colored "matching_call (apg)tag" lcn
-			],
-		defaults= [ 
-			visible				= false,
-			last_visual_load 	= 0,
-			num_lines			= 0,
-			head_tag			= 0,
-			call_tag			= 0
-			]
-	]).
-*************/
 
 setup_init_ide_classes(ALS_IDE_Mgr)
 	:-
@@ -238,7 +154,7 @@ setup_init_ide_classes(ALS_IDE_Mgr)
 			]
 	]).
 
-%%%%%%%%%5----------------------------------------------------
+%%%%%%%%%%----------------------------------------------------
 export disp_ide/0.
 disp_ide :-
 	builtins:get_primary_manager(ALSMgr),
@@ -266,7 +182,7 @@ disp_src_mgr(BN)
 
 
 
-%%%%%%%%%5----------------------------------------------------
+%%%%%%%%%%----------------------------------------------------
 
 
 
@@ -281,9 +197,7 @@ alsdev
 	set_primary_manager(ALS_IDE_Mgr),
 
 	consultmessage(CurValue),
-%	set_consult_messages(true),
 	init_tk_alslib(shl_tcli,Shared),
-%	set_consult_messages(CurValue),
 	alsdev(Shared, ALS_IDE_Mgr).
 
 export alsdev/2.
@@ -319,29 +233,7 @@ alsdev(Shared, ALS_IDE_Mgr)
     sio:set_input(ISS),
     sio:set_output(OSS),
 
-    %% Debugger streams: The debugger window text window:
-	%% Initially these don't have the debugger_[input,output] aliases;
-	%% we cancel_alias & set_alias between the two pairs of streams,
-	%% as the debugger window is popped up/down:
-
-
-		%	open(console('debugger output'),write, OutGuiDStream,
-	cancel_alias(debugger_output),
-    open(tk_win(shl_tcli, '.debugwin.text'),write, OutGuiDStream,
-	 ['$stream_identifier'(-8), alias(gui_debugger_output),
-	 	buffering(line),type(text),
-		line_length(76), 
-%		maxdepth(8), depth_computation(nonflat)
-		maxdepth(4), depth_computation(nonflat)
-		]),
-	assign_alias(debugger_output, OutGuiDStream),
-
-		%	open(console('debugger input'), read, InGuiDStream,
-	cancel_alias(debugger_input),
-    open(tk_win(shl_tcli, '.debugwin.text'), read, InGuiDStream,
-	 ['$stream_identifier'(-7), blocking(true),alias(gui_debugger_input),
-	 	prompt_goal(flush_output(debugger_output))]),
-	assign_alias(debugger_input, InGuiDStream),
+	setup_debugger_streams(ISS,OSS),
 
     %% Error stream
 		%	open(console_error('error output'),write,OutEStream,
@@ -377,7 +269,11 @@ alsdev(Shared, ALS_IDE_Mgr)
 	alarm(AlarmIntrv,AlarmIntrv),
 	tcl_call(shl_tcli, [set_tcl_ga, proenv, heartbeat, AlarmIntrv], _),
 
-	change_debug_io(debugwin),
+	(clause(cl_debug_io(nowins),true) ->
+		true
+		;
+		change_debug_io(debugwin)
+	),
 	set_prolog_flag(debug, on),
 	get_cwd(CurDir),
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
@@ -396,6 +292,38 @@ alsdev_splash(Path)
 		)
 	),
 	tcl_call(shl_tcli, [splash, Path], _).
+
+    %% Debugger streams: The debugger window text window:
+	%% Initially these don't have the debugger_[input,output] aliases;
+	%% we cancel_alias & set_alias between the two pairs of streams,
+	%% as the debugger window is popped up/down:
+
+setup_debugger_streams(ISS, OSS)
+	:-
+	clause(cl_debug_io(nowins),true),
+	!,
+	sio:set_alias(debugger_input, ISS),
+	sio:set_alias(debugger_output, OSS).
+
+setup_debugger_streams(_, _)
+	:-
+		%	open(console('debugger output'),write, OutGuiDStream,
+	cancel_alias(debugger_output),
+    open(tk_win(shl_tcli, '.debugwin.text'),write, OutGuiDStream,
+	 ['$stream_identifier'(-8), alias(gui_debugger_output),
+	 	buffering(line),type(text),
+		line_length(76), 
+%		maxdepth(8), depth_computation(nonflat)
+		maxdepth(4), depth_computation(nonflat)
+		]),
+	assign_alias(debugger_output, OutGuiDStream),
+
+		%	open(console('debugger input'), read, InGuiDStream,
+	cancel_alias(debugger_input),
+    open(tk_win(shl_tcli, '.debugwin.text'), read, InGuiDStream,
+	 ['$stream_identifier'(-7), blocking(true),alias(gui_debugger_input),
+	 	prompt_goal(flush_output(debugger_output))]),
+	assign_alias(debugger_input, InGuiDStream).
 
 push_prompt(tcltk,OutStream,Prompt1)
 	:-!,
