@@ -46,11 +46,6 @@ adjusting.  To change a path, click-select it and press the "Change"
 button.  Use the standard file dialog box to navigate to the correct
 directory.
 
-One special path that may need modifying is the command file for the
-alspro.dll library.  The command file for alspro.dll.prj should be
-{srcdir}generic:alspro_dll.exp.  The path to the command file is entered
-in the x86 linker preferences panel.
-
 A note on DOS batch files:
 
 All the DOS batch files assume that the environment variable %ALSP_SRC%
@@ -92,17 +87,13 @@ see the note above.
 
 3.2 Open alspro_b.prj, adjust access paths, Make.
 
-3.3 Open alspro_dll.prj, adjust access paths,
-    ***** ADJUST COMMAND PATH ***** (see note above),
-    Make.
+3.3 Open alspro_dll.prj, adjust access paths, Make.
 
 3.4 Open demo_alspro_lib.prj, adjust access paths, Make.
 
 3.5 Open demo_alspro_b.prj, adjust access paths, Make.
 
-3.6 Open deno_alspro_dll.prj, adjust access paths,
-    ***** ADJUST COMMAND PATH ***** (see note above),
-    Make.
+3.6 Open deno_alspro_dll.prj, adjust access paths, Make.
 
 4. From MS-DOS, set the ALSP_SRC environment variable.
 
