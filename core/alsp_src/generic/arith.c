@@ -345,19 +345,19 @@ gamma(double x)
  |	Symbolic floating point constants (also used in interval arithmetic)
  *------------------------------------------------------------------------------*/
 double sym_f_cnst[] = {
-	M_PI,			/* pi         */
-	M_PI_2,    		/* pi/2       */ 
-	M_E,       		/* e          */ 
-	M_PI_4, 		/* pi/4       */ 
-	M_1_PI,  		/* 1/pi       */
-	M_2_PI,  		/* 2/pi       */
-	M_2_SQRTPI,		/* 2/sqrt(pi) */
-	M_LOG2E, 		/* log2(e)    */
-	M_LOG10E,		/* log10(e)   */
-	M_LN2,  		/* ln(2)      */
-	M_LN10,			/* ln(10)     */
-	M_SQRT2,        /* sqrt(2)    */
-	M_SQRT1_2       /* sqrt(1/2)  */
+	D_PI,			/* pi         */
+	D_PI_2,    		/* pi/2       */ 
+	D_E,       		/* e          */ 
+	D_PI_4, 		/* pi/4       */ 
+	D_1_PI,  		/* 1/pi       */
+	D_2_PI,  		/* 2/pi       */
+	D_2_SQRTPI,		/* 2/sqrt(pi) */
+	D_LOG2E, 		/* log2(e)    */
+	D_LOG10E,		/* log10(e)   */
+	D_LN2,  		/* ln(2)      */
+	D_LN10,			/* ln(10)     */
+	D_SQRT2,        /* sqrt(2)    */
+	D_SQRT1_2       /* sqrt(1/2)  */
 };
 
 /*--------------------------------------------------------------------------------*
@@ -422,9 +422,9 @@ do_is(v, t, ty)
 		case TK_RANDOM:
 		    return als_random();
 		case TK_PI:
-		    return M_PI;
+		    return D_PI;
 		case TK_E:
-		    return M_E;
+		    return D_E;
 		default: 
 			error_functor = v; error_arity = 0;
 		   	longjmp(is_error, IS_EVALUABLE_TYPE_ERROR);
