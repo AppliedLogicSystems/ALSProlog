@@ -1206,7 +1206,7 @@ static unsigned long image_end(int image_file)
     return head.som_length;
 }
 
-#elif defined(MIPS_IRIX53)
+#elif defined(HAVE_LIBELF)
 
 #include <libelf.h>
 
@@ -1245,7 +1245,7 @@ static unsigned long image_end(int image_file)
 
 #else
 #error
-#endif /* HP_AOUT_800, MIPS_IRIX54 */
+#endif /* HP_AOUT_800, HAVE_LIBELF */
 
 #define IMAGENAME_MAX	64
 #define IMAGEDIR_MAX	1024
