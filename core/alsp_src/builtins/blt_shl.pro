@@ -329,7 +329,9 @@ ss_cl_assert_error(Expr, OutputStream)
 ss_cl_assert0((Mod:AX))
 	:-
 	(modules(Mod,_) -> true ; create_new_module(Mod)),
-	ss_cl_assert1(AX, Mod).
+	!,
+	ss_cl_assert1(AX, Mod),
+	'$icode'(-9,0,0,0,0).
 
 ss_cl_assert0(AX)
 	:-

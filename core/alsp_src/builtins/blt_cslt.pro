@@ -893,13 +893,13 @@ set_consult_messages(Value)
  *-------------------------------------------------------------*/ 
 load_source(Path,BaseFile,Type,FCOpts) :-
 	establish_fcg(BaseFile),
-	obp_push_stop,
 
 	check_set_tgt_mod(FCOpts,TgtModFlag),
+	obp_push_stop,
 	xconsult(Path,NErrs),
+	obp_pop,
 	check_unset_tgt_mod(TgtModFlag),
 
-	obp_pop,
 	reset_fcg(_),
 	!.
 
@@ -938,18 +938,17 @@ check_unset_tgt_mod(true)
 check_unset_tgt_mod(true)
 	:-!,
 	xconsult:popmod.
+
 check_unset_tgt_mod(_).
 
 /*-------------------------------------------------------------*
  |	For loading source (.pro) files AND writing the .obp file:
  *-------------------------------------------------------------*/ 
 load_source_object(SPath,BaseFile,OPath,FCOpts) :-
-%	(filePlusExt(NoSuffixPath, _, SPath),!; NoSuffixPath = SPath),
-%	establish_fcg(NoSuffixPath),
 	establish_fcg(BaseFile),
+	check_set_tgt_mod(FCOpts,TgtModFlag),
 	obp_open(OPath),
 	!,
-	check_set_tgt_mod(FCOpts,TgtModFlag),
 	catch(xconsult(SPath,NErrs), _, obp_close_cleanup(SPath,OPath)),
 	obp_close,
 	check_unset_tgt_mod(TgtModFlag),
