@@ -612,6 +612,10 @@ check_source_sink_and_mode(Source_sink,Mode) :-
 	var(Source_sink),
 	!,
 	instantiation_error(2).
+check_source_sink_and_mode(null_stream,Mode) :-
+	!,
+%	check_mode(Mode,file_modes(Mode,_,_)).
+	dmember(Mode, [write]).
 check_source_sink_and_mode(Source_sink,Mode) :-
 	atom(Source_sink),
 	!,
@@ -767,6 +771,7 @@ check_repositionability(Source_sink,Mode,Options,Positionability) :-
 	dmember(reposition(Positionability),Options),
 	!,
 	check_repositionability(Positionability,Source_sink,Mode).
+
 check_repositionability(Source_sink,Mode,Options,true) 
 	:-
 	is_repositionable(Source_sink,Mode),
@@ -795,6 +800,7 @@ is_repositionable(FileName,_) :-
 	FileName \= '$stdin',
 	FileName \= '$stdout',
 	FileName \= '$stderr',
+	FileName \= 'null_stream',
 	!.
 
 /*
@@ -803,54 +809,78 @@ is_repositionable(FileName,_) :-
  *	Performs the open of Source_sink.
  */
 
-open_stream(Source_sink,Mode,Options,Stream) :-
+open_stream(null_stream,Mode,Options,Stream) 
+	:-!,
+	open_null_stream(null_stream,Mode,Options,Stream).
+
+open_stream(Source_sink,Mode,Options,Stream) 
+	:-
 	atom(Source_sink),
 	!,
 	open_file_stream(Source_sink,Mode,Options,Stream).
 
-
-open_stream(sysV_queue(Key),Mode,Options,Stream) :-
-	!,
+open_stream(sysV_queue(Key),Mode,Options,Stream) 
+	:-!,
 	open_sysVq_stream(Key,Mode,Options,Stream).
-open_stream(ssbq(Q_Name),Mode,Options,Stream) :-
-	!,
+
+open_stream(ssbq(Q_Name),Mode,Options,Stream) 
+	:- !,
 	open_ssbq_stream(Q_Name,Mode,Options,Stream).
-open_stream(Socket,Mode,Options,Stream) :-
+
+open_stream(Socket,Mode,Options,Stream) 
+	:-
 	functor(Socket,socket,_),
 	!,
 	open_socket_stream(Socket,Mode,Options,Stream).
-open_stream(string(String),Mode,Options,Stream) :-
-	!,
+
+open_stream(string(String),Mode,Options,Stream) 
+	:- !,
 	(nonvar(String),!, String = [_|_]; true),
 	open_string_stream(String,Mode,Options,Stream).
-open_stream(code_list(String),Mode,Options,Stream) :-
-	!,
+
+open_stream(code_list(String),Mode,Options,Stream) 
+	:- !,
 	(nonvar(String),!, String = [_|_]; true),
 	open_string_stream(String,Mode,Options,Stream).
-open_stream(char_list(String),Mode,Options,Stream) :-
-	!,
+
+open_stream(char_list(String),Mode,Options,Stream) 
+	:- !,
 	(nonvar(String),!, String = [_|_]; true),
 	open_char_list_stream(String,Mode,Options,Stream).
-open_stream(atom(Atom),Mode,Options,Stream) :-
-	!,
+
+open_stream(atom(Atom),Mode,Options,Stream) 
+	:- !,
 	(nonvar(Atom),!,atom(Atom); true),
 	open_atom_stream(Atom,Mode,Options,Stream).
-open_stream(window(WinName),Mode,Options,Stream) :-
-	!,
+
+open_stream(window(WinName),Mode,Options,Stream) 
+	:- !,
 	open_window_stream(WinName,Mode,Options,Stream).
 
-open_stream(console(Name), Mode, Options, Stream) :-
-	!,
+open_stream(console(Name), Mode, Options, Stream) 
+	:- !,
 	open_console_stream(Name, Mode, 0, Options, Stream).
 	
-open_stream(console_error(Name), Mode, Options, Stream) :-
-	!,
+open_stream(console_error(Name), Mode, Options, Stream) 
+	:- !,
 	open_console_stream(Name, Mode, 1, Options, Stream).
 
 %%
 %% This is the place to put in clauses for dealing with other types of streams
 %%
 
+		/*-------------*
+		 | NULL STREAM
+		 *-------------*/
+
+open_null_stream(Source_sink,Mode,Options,Stream)
+	:-
+	initialize_stream(null_stream, Source_sink, Options, Stream),
+	file_modes(Mode,NMode,SMode),
+	set_stream_mode(Stream,SMode),
+	buffering(Options,NBuffering),
+	eoln_modes(Options, NEoln),
+	sio_generic_open(0,Stream,NMode,NBuffering,NEoln).
 
 		/*---------*
 		 |   FILES |
@@ -2752,7 +2782,8 @@ endpos_2_readstream(ReadStreamAlias,EndPos)
 	current_alias(ReadStreamAlias, ReadStream),
 	set_window_insert_pos(ReadStream,EndPos).
 
-write_buffer(atom,Stream) :-
+write_buffer(atom,Stream) 
+	:-
 	sio_buf_params(Stream, BufStart, BufSize),
 	stream_buffer(Stream,SD),
 	sio_lpos(Stream, NumCs),
@@ -2764,10 +2795,12 @@ write_buffer(atom,Stream) :-
 	set_stream_extra(Stream,NewAtom),
 	sio_increment_bufpos(Stream),
 	sio_set_position(Stream, 0, 0).
-write_buffer(atom,Stream) :-
-	!.
 
-write_buffer(string,Stream) :-
+write_buffer(atom,Stream) 
+	:-!.
+
+write_buffer(string,Stream) 
+	:-
 	sio_lpos(Stream, NumCs),
 	NumCs > 0,
 	!,
@@ -2777,15 +2810,22 @@ write_buffer(string,Stream) :-
 	stream_extra(Stream,WholeString),
 	stream_addl1(Stream,LastCell),
 	last_cell(List,NewLastCell),
-	(   WholeString = []
-	->  set_stream_extra(Stream,List)
-	;   mangle(2,LastCell,List)
+	(WholeString = [] ->  
+		set_stream_extra(Stream,List)
+		;   
+		mangle(2,LastCell,List)
 	),
 	set_stream_addl1(Stream,NewLastCell),
 	sio_increment_bufpos(Stream),
 	sio_set_position(Stream,0,0).
-write_buffer(string,_) :-
-	!.
+
+write_buffer(string,_) 
+	:-!.
+
+write_buffer(null_stream,Stream) 
+	:-
+	sio_set_position(Stream, 0, 0).
+
 
 %%
 %% This is the place to put write_buffer definitions for other types of

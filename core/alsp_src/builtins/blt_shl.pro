@@ -56,6 +56,7 @@ start_shell(DefaultShellCall)
 					other_flags),		/* room for expansion */
 
 	%%debugger:nospy,
+	obp_with_pro,
 	ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo),
 	assertz(command_line(ResidualCommandLine)),
 

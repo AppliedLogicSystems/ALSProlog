@@ -290,18 +290,59 @@ reconsult_assertz_at_load_time(M,P)
  * dynamic/1
  *-----------------*/
 
-:-
-	compiletime,
+:-  compiletime,
 	module_closure(dynamic,1).
 
-dynamic(M,P/A) :-
-	!,
+/*
+dynamic(M,P/A) 
+	:-!,
+		%% make sure P is interned as an atom:
 	functor(_,P,0),
 	'$dynamic'(M,P,A).
-dynamic(_,M:P/A) :-
+dynamic(_,M:P/A) 
+	:-!,
+	functor(_,P,0),
+	'$dynamic'(M,P,A).
+dynamic(_,[]) 
+	:-!.
+dynamic(M,[Head | Tail]) 
+	:-
+	dynamic(M,Head),
+	dynamic0(Tail,M).
+
+dynamic0([],M).
+dynamic0([Head | Tail],M)
+	:-
+	dynamic(M,Head),
+	dynamic0(Tail,M).
+*/
+dynamic(M,E) 
+	:-
+	dynamic0(E,M).
+
+dynamic0(P/A,M) 
+	:-!,
+		%% make sure P is interned as an atom:
 	functor(_,P,0),
 	'$dynamic'(M,P,A).
 
+dynamic0(M:P/A,_)
+	:-!,
+	functor(_,P,0),
+	'$dynamic'(M,P,A).
+
+dynamic0([],_) 
+	:-!.
+
+dynamic0([Head | Tail],M) 
+	:-
+	dynamic0(Head,M),
+	dynamic0(Tail,M).
+
+dynamic0( (Left , Right), M) 
+	:-
+	dynamic0(Left,  M),
+	dynamic0(Right,  M).
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%% Prolog Interrupt Initialization 
