@@ -3394,10 +3394,10 @@ skip_layout(buf)
 		        if (nl == -1) lim = p;
 		        else {
 			    p += nl;
-			SIO_LINENUM(buf)++;
-			startpos = p + 1;
-			SIO_COLUMN(buf) = 0;
-		    }
+			    SIO_LINENUM(buf)++;
+			    startpos = p + 1;
+			    SIO_COLUMN(buf) = 0;
+			}
 		    }
 		    else p++;
 		}
@@ -3407,12 +3407,13 @@ skip_layout(buf)
 		    if ((nl = get_eoln(p, lim, buf))) {
 		        if (nl == -1) lim = p;
 		        else {
+		            p += nl;
 			    SIO_LINENUM(buf)++;
 			    startpos = p + nl;
 			    SIO_COLUMN(buf) = 0;
 			}
 		    }
-		    p++;
+		    else p++;
 		}
 		if (p < lim) {
 		    if (*p == '%') {
