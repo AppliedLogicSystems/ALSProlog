@@ -1,3 +1,11 @@
+/*======================================================================*
+ |	Win32 Service.pro
+ |	Copyright (c) 1997 Applied Logic Systems, Inc.
+ |
+ |	-- Win32 Service Module.
+ |
+ *======================================================================*/
+
 :- dynamic(is_win32_service/0).
 
 module win32_service.
