@@ -388,7 +388,7 @@ proc init_prj_spec \
     ###################
     toplevel $base -class Toplevel
     wm focusmodel $base passive
-    wm geometry $base 318x686+290+82
+    #wm geometry $base 318x686+290+82
     wm maxsize $base 1137 870
     wm minsize $base 1 1
     wm overrideredirect $base 0
