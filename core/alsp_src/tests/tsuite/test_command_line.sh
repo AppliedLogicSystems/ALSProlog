@@ -15,7 +15,12 @@ echo "Starting Command Line Tests"
 
 prolog=$1
 
+# Set ALS_OPTIONS to the empty string so $prolog will use defaults.
+ALS_OPTIONS=
+export ALS_OPTIONS
+
 error_count=0
+
 
 error () {
 	command=$1
@@ -152,8 +157,6 @@ cl_test "$prolog -stack 2000 -stack 1000 -b -q -g 'statistics([_,stack(_,_,10240
 cl_test "$prolog -stack 1000 -stack 2000 -b -q -g 'statistics([_,stack(_,_,2048000),_,_])'" 0
 
 # test error handling of invalid ALS_OPTIONS
-
-export ALS_OPTIONS
 
 opt_test "xxx" "$prolog -b 2> /dev/null" 2
 opt_test "xxx,xxx" "$prolog -b 2> /dev/null" 2
