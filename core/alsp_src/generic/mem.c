@@ -739,8 +739,8 @@ static	int	ss_saved_state_present	PARAMS(( void ));
 #undef round
 #define round(x,s) ((((long) (x) - 1) & ~(long)((s)-1)) + (s))
 
-#define round_up(x, s)		((((size_t)(x)) / ((size_t)(s)) + 1) * ((size_t)(s)))
-#define round_down(x, s)	((((size_t)(x)) / ((size_t)(s))) * ((size_t)(s)))
+#define round_up(x,s) (((size_t)(x)) + (((size_t)(s)) - ((size_t)(x))%((size_t)(s)))%((size_t)(s)))
+#define round_down(x,s) (((size_t)(x)) - (((size_t)(x))%((size_t)(s))))
 
 /* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
 #if	(defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))) \
