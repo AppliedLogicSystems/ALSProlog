@@ -179,6 +179,13 @@ extern  long	yield_counter;
 extern	void	PI_yield_time	PARAMS(( void ));
 #endif
 
+#ifdef macintosh
+Boolean SIOUXIsAppWindow(WindowPtr w);
+short SIOUXHandleOneEvent(EventRecord *event);
+void SIOUXSetEventVector(short (*handler)(EventRecord *));
+QDGlobals *GetQD(void);
+
+#endif
 /* Error codes */
 
 #define FE_SYMSPACE		0	/* Out of symbol space */

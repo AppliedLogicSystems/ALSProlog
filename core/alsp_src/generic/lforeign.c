@@ -554,6 +554,11 @@ foreign_shutdown()
 #include "alspi_slib.h"
 #include "cinterf.h"
 
+static QDGlobals *GetQD(void)
+{
+    return &qd;
+}
+
 typedef unsigned long library_reference;
 
 typedef struct {
@@ -598,6 +603,13 @@ const alspi_func_ptrs alspi_funcs = {
     find_callback,
     PI_throw,
     PI_getball
+#ifdef macintosh
+    ,
+    SIOUXIsAppWindow,
+    SIOUXHandleOneEvent,
+    SIOUXSetEventVector,
+    GetQD
+#endif
 };
 
 typedef enum {
