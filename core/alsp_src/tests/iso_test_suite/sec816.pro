@@ -116,7 +116,8 @@ test_sub_atom :-
 	test_val(sub_atom(abracadabra, 0, 5, _, S1), S1, abrac),
         test_val(sub_atom(abracadabra, _, 5, 0, S2), S2, dabra),
         test_val(sub_atom(abracadabra,B,2,A, ab), B/A, 0/9),
-        test_val(setof(X, Y^Z^sub_atom(ab,Y,Z,_, X), ['', 'a', 'ab', 'b'])).
+        test_val(setof(X, B^L^A^sub_atom(ab, B, L, A, X), S), S,
+			['', 'a', 'ab', 'b']).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -126,8 +127,8 @@ test_sub_atom :-
 %      
 
 test_sub_atom_errors :-
-	error_test(subatom(A, B,C,D,E), instantiation_error),
-        error_test(subatom(abracadabra, -1, 3, 2, S), 
+	error_test(sub_atom(A, B,C,D,E), instantiation_error),
+        error_test(sub_atom(abracadabra, -1, 3, 2, S), 
                   domain_error(not_less_than_zero, -1)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -136,11 +137,11 @@ test_sub_atom_errors :-
 %
 
 test_sa :-	
-        defined(subatom/5)
+        defined(sub_atom/5)
         ->
         (test_sub_atom,test_sub_atom_errors)
         ;
-        ( log_nl, log( 'subatom/5 is not supported'), log_nl).
+        ( log_nl, log( 'sub_atom/5 is not supported'), log_nl).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -328,11 +329,11 @@ test_816 :-
         log_nl,
 	test_ac,
          log_nl,
-        log( 'testing atom_concat/2 done,testing subatom/5'),
+        log( 'testing atom_concat/2 done,testing sub_atom/5'),
         log_nl,
 	test_sa,
         log_nl,
-        log( 'testing subatom/5 done,testing atom_chars/2'),
+        log( 'testing sub_atom/5 done,testing atom_chars/2'),
         log_nl,
         test_a_chars,
         log_nl,
