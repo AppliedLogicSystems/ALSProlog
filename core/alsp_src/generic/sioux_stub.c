@@ -11,6 +11,11 @@ short SIOUXHandleOneEvent(struct EventRecord *)
 	return 0;
 }
 
+void SIOUXSetTitle(unsigned char title[256])
+{
+#pragma unused (title)
+}
+
 short InstallConsole(short fd)
 {
 #pragma unused (fd)

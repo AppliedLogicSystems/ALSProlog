@@ -25,7 +25,9 @@ int	pbi_delay		PARAMS(( void ));
 int	pbi_is_delay_var	PARAMS(( void ));
 int	update_chpt_slots	PARAMS(( PWord ));
 int	pbi_clct_tr		PARAMS(( void ));
-int 	pbi_del_tm_for		PARAMS(( void ));
+int pbi_del_tm_for		PARAMS(( void ));
+
+int pbi_kill_freeze		PARAMS(( void ));
 
 /*---------------------------------------------------------------*
  | pbi_delay()
@@ -174,12 +176,28 @@ pbi_is_delay_var()
     w_get_An((PWord *)&dv, &dvt, 1);
 
     if (dvt != WTP_UNBOUND)
-	FAIL;
+		FAIL;
 
     if (CHK_DELAY(dv))
-	SUCCEED;
+		SUCCEED;
     else
-	FAIL;
+		FAIL;
+}
+
+int pbi_kill_freeze()
+{
+    PWord *dv;
+    int dvt;
+
+    w_get_An((PWord *)&dv, &dvt, 1);
+
+    if (dvt != WTP_UNBOUND)
+		FAIL;
+
+    if (CHK_DELAY(dv))
+		(*(((PWord *)dv)-1)) = 0;
+
+	SUCCEED;
 }
 
 

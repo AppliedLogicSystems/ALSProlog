@@ -15,6 +15,10 @@
  |		
  *=========================================================================*/
 
+module user.
+use macroxp.
+endmod.
+
 module macroxp.
 
 		/*----------------------------------------
@@ -179,7 +183,8 @@ macro_expand_files(Source, Target)
 macro_expand_files(SourceFile, TargetFile, MacroFile)
 	:-
 	macroxp:abolish(macro_defn,6),
-	consult_to(macroxp, -MacroFile),
+%	consult_to(macroxp, -MacroFile),
+	consult(MacroFile, [tgtmod(macroexp)]),
 	macro_expand_files(SourceFile, TargetFile),
 	macroxp:abolish(macro_defn,6).
 

@@ -1,0 +1,85 @@
+A systematic approach to internal debugging (ie, placement of printf statements)
+has been adopted (though it hasn't been propagated through all portions of the 
+code yet.)  To use these facilities, one must add the following to the
+tconfig.h configuration file in the build directory:
+
+#define DEBUGSYS 1
+
+By itself, this has no perceptible effect.  However, it makes it possible to
+selectively turn various C-level printf statments on and off in the resulting 
+runtime system.  The control over these is exercised by several predicates 
+in the builtins file blt_sys.pro:
+
+debug_sys_features/2 -- the database of features controlled
+
+toggle_system_debug/1 -- turns a feature on/off.
+
+As of this writing, debug_sys_features/2 consists of:
+
+debug_sys_features(gcbeep,      0).
+debug_sys_features(gcinfo,      1).
+debug_sys_features(freezeinfo,  2).
+debug_sys_features(cstrprim,    3).
+debug_sys_features(cstrchng,    4).
+debug_sys_features(cstrupdt,    5).
+debug_sys_features(cstruptm,    6).
+debug_sys_features(cstrupad,    7).
+debug_sys_features(cstrupxt,    8).
+debug_sys_features(gcintr,      9).
+debug_sys_features(cstrbpuf,    10).
+debug_sys_features(frezbv,      11).
+debug_sys_features(cut_rsb,     12).
+debug_sys_features(cut_cpctr,   13).
+
+Submitting a goal
+
+	toggle_system_debug(WhichFeat)
+
+will toggle the printing for that feature on/off. The special goal
+
+	toggle_system_debug(cstr)
+
+is a shorthand for:
+
+		toggle_system_debug(cstrprim),
+		toggle_system_debug(cstrchng),
+		toggle_system_debug(cstrupdt),
+		toggle_system_debug(cstruptm),
+		toggle_system_debug(cstrupad),
+		toggle_system_debug(cstrupxt),
+		toggle_system_debug(cstrbpuf).
+
+Knowing which feature prints what, of course, is desirable.  In the absence of
+written documentation, here's how to find out.  First, in ~generic/debugsys.h,
+the following typedef enum occurs:
+
+typedef enum {
+	GCBEEP,         /* gcbeep       (0)     */
+	GCINFO,         /* gcinfo       (1)     */
+	FREEZEINFO,     /* freezeinfo   (2)     */
+	CSTRPRIM,       /* cstrprim     (3)     */
+	CSTRCHNG,       /* cstrchng     (4)     */
+	CSTRUPDT,       /* cstrupdt     (5)     */
+	CSTRUPTM,       /* cstruptm     (6)     */
+	CSTRUPAD,       /* cstrupad     (7)     */
+	CSTRUPXT,       /* cstrupxt     (8)     */
+	GCINTR,         /* gcintr       (9)     */
+	CSTRBPUF,       /* cstrbpuf     (10)    */
+	FREZBV,         /* frezbv       (11)    */
+	CUT_RSB,        /* cut_rsb      (12)    */
+	CUT_CPCTR,      /* cut_cpctr    (13)    */
+	MAX_DEBUG_FEATS
+	} debug_feats;
+
+[Adding a new debug feature requires adding an entry here, together with the
+corresponding entry in blt_sys.pro.]
+
+Now just use grep to perform a search for the target feature:
+
+hilbert% grep GCBEEP *.c
+gc.c:   if (debug_system[GCBEEP]) {
+
+Note that all of the CSTR<*> features control information for CLP(BNR) in
+the file int_net.c.
+
+

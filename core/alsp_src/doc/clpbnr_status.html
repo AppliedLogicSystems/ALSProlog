@@ -1,0 +1,70 @@
+<h1>CLP(BNR) Development Status</h1>
+<p>
+<a href="/apache/alsp_src/doc/status.html">ALS Status Page</a>
+
+<p>
+<table border=1>
+<th>Problem<th>Prior<th>Status</tr>
+<tr><td>
+<pre>
+--------------------------------------------------
+1) CLP intro [relarith], p. CLP-26:
+?- M::real(0.001,1),  T::real(0.5, 0.55),
+   magnetization(M, T).
+
+   M = [0.2423501393,0.3908810623]
+   T = [0.5,0.55]
+
+   OLD SOLUTION:<<<< CHECK BUG >>>>>>
+   print_interval(M).
+   [0.93552, 0.95751].
+   yes.
+[See which is right].
+</pre>
+<tr><td>
+<pre>
+--------------------------------------------------
+2). CLP intro [relarith], p CLP-31:
+
+?- [A, B]::real, {A - B == 1,A + B == 3}, solve(A).
+
+Should produce:
+
+A = 2.0
+B = 1.0
+yes.
+
+But fails.
+</pre>
+<tr><td>
+<pre>
+--------------------------------------------------
+The goal
+?-good_project(p1).
+from pert3.pro [/dakota/als_man/als_man.src/cstrs/examples] fails.
+{During the back propagation from the final goal of the constraint.}
+{See next entry -- probably a simpler version of this.}
+</pre>
+<tr><td>
+<pre>
+--------------------------------------------------
+?- [M,N]::integer(0,8), { M == 3*N}.
+M = [0,6]
+N = [0,2]
+ 
+yes.
+
+But:
+
+?-[M,N]:integer(0,8), { M == 3*N}, { M > 3}.
+
+no.
+This should give:
+M = 6
+N = 2.
+
+{Almost certainly a propagation problem.}
+</pre>
+<tr><td>
+
+</table>

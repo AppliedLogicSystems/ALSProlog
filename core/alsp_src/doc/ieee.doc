@@ -1,0 +1,24 @@
+
+
+The IEEE floating point standard provides for two useful extensions,
+"+/-Infinity" (positive and negative infinity), and NAN (not a number).
+
+These are (or shortly will be) supported in ALS Prolog, and in CLP(BNR),
+in particular providing for infinite intervals.  The declaration
+X::real then will have the effect of associating X with the interval
+	[-Infinity, +Infinity]
+
+These entities are allowed in Prolog expressions using the following
+syntax:
+
+NAN:          0nan or 0n
+
++Infinity:    0inf or 0i
+
+-Infinity:    -0inf or -0i
+
+[In building the system, one currently needs to add
+
+#define USE_IEEE_FP 1
+
+to the configuration file tconfig.h in the build directory. ]

@@ -655,8 +655,6 @@ return_as_double:
 	make_ieee_nan(v, t)
 	make_ieee_inf(v, t)
  *--------------------------------------------------------------*/
-void make_ieee_nan PARAMS( (PWord *, int *) );
-void make_ieee_inf PARAMS( (PWord *, int *) );
 
 void
 make_ieee_nan(v, t)

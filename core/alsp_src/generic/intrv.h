@@ -394,7 +394,7 @@ typedef struct {
 
    For SPARC/Solaris:
 
-   #define HAVE_IEEEFP     1
+   #define HAVE_IEEE_FP     1
    #define HAVE_NEXTAFTER  1
    #define HAVE_FPSETROUND 1
 

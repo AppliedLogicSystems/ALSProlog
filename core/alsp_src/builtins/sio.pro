@@ -1608,7 +1608,8 @@ wt_init_opt(_,_).
  * to in a stream descriptor.
  */
 
-wt_opts_default(wt_opts(78,40000,flat)).
+%wt_opts_default(wt_opts(78,40000,flat)).
+wt_opts_default(wt_opts(78,400,flat)).
 
 
 /*

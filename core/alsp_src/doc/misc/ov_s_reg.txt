@@ -1,0 +1,154 @@
+
+
+This bug appeared in the portable version; I don't know
+yet whether it also occurs in the native versions.  It
+eventually resolved itself into several errors.
+
+The symptoms:
+
+Running "large" nrev tests simply failed.  Originally, this
+was noticed by Nate  Finstein; eventually I concluded that
+similar things had been happening in the large training runs
+for the SPARC program.
+
+Some tracing showed that what was happening was that the
+immediate calls to nrev/2 were all succeeding, and that
+the pending calls to append/3 were begun.  However, at some
+point during the workout of the pending append/3 calls, 
+the heap was exhausted, gc was invoked, and then the immediately
+following call to append/3 failed.  Examination showed that
+the first argument of the call to append/3 had been trashed:
+Instead of being a list, it was now just the first element
+of the list it ought to have been!  
+
+Further examination finally showed that the problem lay
+in the fact that our gc does not update the WAM S register,
+yet on return from gc, we immediately start using it, and
+it is (in the bug case), pointing into hyperspace.  
+
+The problem occurs in the portable's W_OVSW_TERM instruction.
+The old code looked like this:
+
+CASE(W_OVSW_TERM):      /* ovsw_term sw_term varaddr,straddr,lisaddr,conaddr */
+	S = PWPTR(arg(mr_E, 1));
+	DEREF(S);
+	reg1 = (PWord *) P;
+	P = getaddr(OPSIZE + OPSIZE + MTP_TAG(S) * DATASIZE);
+	S = MLISTADDR(S);   /* needed for when we skip get_list */
+	goto overflow_check0;
+
+The gc happens at overflow_check0, and then we never reset S.
+
+There seem to be two approaches to this problem: 1), the intellectual
+highroad, is to rework gc so as to update S and any other registers
+that should be handled (and we'll eventually open this up), and 2)
+the hacker's low-road, is to add some spagetti code to the
+W_OVSW_TERM instruction:
+
+CASE(W_OVSW_TERM):      /* ovsw_term sw_term varaddr,straddr,lisaddr,conaddr */
+	special_overflow = 1;
+	goto overflow_check0;
+	special_finish:
+	special_overflow = 0;
+	S = PWPTR(arg(mr_E, 1));
+	DEREF(S);
+	reg1 = (PWord *) P;
+	P = getaddr(OPSIZE + OPSIZE + MTP_TAG(S) * DATASIZE);
+	S = MLISTADDR(S);   /* needed for when we skip get_list */
+	/*goto overflow_check0;*/
+	DISPATCH;
+
+The global is declared in wam.c: 
+
+int special_overflow = 0;
+
+And here is the old and new code at overflow_check0: (with some of the
+#ifdefs edited out):
+
+OLD:
+overflow_check0:
+	if (((unsigned long) mr_TR - (unsigned long) mr_H)
+			>= (unsigned long) wm_safety) {
+		DISPATCH;
+	}
+	if ((unsigned long) wm_safety <= (unsigned long) wm_normal) {
+		/* gc interrupt */
+		UNSHADOW_REGS;
+		gc();
+		SHADOW_REGS;
+		DISPATCH;
+	}
+	.....interrupt case....
+
+
+NEW:
+overflow_check0:
+	if (((unsigned long) mr_TR - (unsigned long) mr_H)
+		>= (unsigned long) wm_safety) {
+		if (special_overflow) goto special_finish;
+		DISPATCH;
+	}
+	if ((unsigned long) wm_safety <= (unsigned long) wm_normal) {
+		/* gc interrupt */
+		UNSHADOW_REGS;
+		gc();
+		SHADOW_REGS;
+		if (special_overflow) goto special_finish;
+		DISPATCH;
+	}
+	.....interrupt case....
+
+
+Once this was installed, we discovered two more problems which
+would occur when running the nrev tests with 1000 element lists
+and the heap set to various small (but not all) sizes.  
+
+A) Under certain circumstances, the top of heap could cross over
+into the safety margin, gc could happen, but the amount reclaimed
+would not be enough to get out of the safety margin, and this would
+not be detected.  Generally, it seemed that this was happening
+"one word at a time".  
+
+We are repairing this by a relatively principled check at the
+end of gc, resetting the margin enough to make the correct
+exception call if not enough space has been reclaimed.
+
+B)  If one ran the tests from a *.obp file, everything now worked
+fine, but if one ran the tests from a *.pro file, it would go into
+space and eventually coredump.  Examination showed that, once again,
+all the nrev calls had been made, and we were in the workout of
+the append/3 calls.  Morever, the heap was staying where one would
+expect, the environment stack was staying fixed, but the trail was 
+growing unbounded!
+
+Here, the problem turned out to be with our heuristic approach to 
+installing/not-installing indexing.  When a *.obp file is loaded, 
+indexing is immediately installed. When a *.pro file is loaded, no
+indexing is immediately installed, but a counter is set (=6) in 
+the procedure entry table for each procedure, and is decremented
+on each entry to the procedure until it reaches 0, when indexing
+is on-the-fly installed  (e.g, on append/3).  The problem appears
+to be that doing the on-the-fly installation of the indexing gets 
+the relationship between environments and choice points somehow
+messed up: the environment for append/3 which is used in the
+rest of the calls is being protected by one of the choice points
+which had been previously installed (before indexing), and so
+at each call, the same locations are being newly trailed at each
+call!  Wow!
+
+The working fix at the moment is to change the heuristic number
+(INITIAL_ICOUNT) from 6 to 1.  Then, indexing is installed the
+very first time a procedure is called, so no environment (for this
+procedure, which might be re-used under optimization) has yet
+been allocated, etc., etc.  
+
+These fixes appear to get at everything.  I've adjusted Nate's
+original bug code to use a list of length 1,000.  The original
+accepted an argument N to determine the number of times to run
+nrev.  I put a wrapper around this which runs the lips(N) from
+N=0 to the input, and have used this to drive it from N=0 to N=300
+on Solaris 2.4, HP/UX 9.05, and Windows 95.  {It takes hours,
+even on the HP 9000/735, and the poor Intel P90 took half the night!}
+Everything worked solidly.
+
+

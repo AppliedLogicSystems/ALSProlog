@@ -289,11 +289,18 @@
 #endif	/* UNIX */
 
 /*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
+
+#if (defined(__sgi) && defined(__mips)) || defined(__linux__)
+#define __BIT_TYPES_DEFINED__ 1
+#endif
+
+/*---------------------------------------------------------------------*
  | IEEEP FP Stuff
  *---------------------------------------------------------------------*/
 
-#ifdef SOLARIS
-#define HAVE_IEEEFP 1
+#if (defined(SOLARIS) || (defined(__sgi) && defined(__mips)))
+#define HAVE_IEEE_FP 1
 #endif
 
 /*---------------------------------------------------------------------*
@@ -436,6 +443,11 @@ extern	void	heap_overflow	PARAMS(( void ));
 #define IMAGEDIR_MAX	1024
 extern char imagename[];	/* name of image we are running - initial path */
 extern char imagedir[];		/* directory containing image with final slash */
+
+/* ----------   arith.c ----------   */
+void make_ieee_nan PARAMS( (PWord *, int *) );
+void make_ieee_inf PARAMS( (PWord *, int *) );
+
 
 /* ----------   disassem.c ----------   */
 extern	void	list_asm	PARAMS(( Code *, int ));

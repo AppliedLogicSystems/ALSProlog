@@ -20,6 +20,7 @@ use shellmak.
 transformer_db(typ, pro, no_del, []).
 transformer_db(ssp, pro, no_del, []).
 transformer_db(spc, pro, no_del, []).
+transformer_db(mac, obp, no_del, []).
 transformer_db(pl,  obp, no_del, []).
 transformer_db(pro, obp, no_del, []).
 

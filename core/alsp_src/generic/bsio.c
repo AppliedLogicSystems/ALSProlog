@@ -2081,7 +2081,7 @@ int
 sio_simple_select()
 {
     PWord v1, v2, st;
-    int t1, t2, stt;
+    int t1, t2, stt, wait_val;
 	fd_set rfds, wfds, efds;
 	struct timeval wait_time;
 	int bfd, nfds = 0;
@@ -2091,13 +2091,37 @@ sio_simple_select()
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
-    if (t2 != WTP_INTEGER)
-		FAIL;
-	if (t1 != WTP_LIST)
+	/* If v2 is a real, convert to integer: */
+#ifdef DoubleType
+    if (t2 == WTP_DOUBLE)
+		wait_val = (int) v2;
+#else  /* DoubleType */
+    if (t2 == WTP_STRUCTURE) {
+	PWord functor, d_arg;
+	int   arity, d_argt;
+	int   i;
+	double vvv;
+		w_get_arity(&arity, v2);
+		w_get_functor(&functor, v2);
+
+		if (arity == 4 && functor == TK_DDOUBLE) {
+			for (i = 0; i < 4; i++) {
+		    	w_get_argn(&d_arg, &d_argt, v2, i + 1);
+		    	*(((short *) &vvv) + i) = d_arg;
+			}
+			wait_val = (int) vvv;
+		}
+		else
+	    	FAIL;
+   	}
+#endif
+    else if (t2 == WTP_INTEGER)
+		wait_val = v2;
+	else
 		FAIL;
 
-	wait_time.tv_sec = v2 / 1000000;
-	wait_time.tv_usec = v2 % 1000000;
+	wait_time.tv_sec = wait_val / 1000000;
+	wait_time.tv_usec = wait_val % 1000000;
 
 	FD_ZERO(&rfds);
 	FD_ZERO(&wfds);
@@ -2112,8 +2136,6 @@ sio_simple_select()
 		nfds = max(nfds, bfd);
 		w_get_cdr(&v1,&t1,v1);
 	}
-
-/*	if (select(nfds+1, &rfds, &wfds, &efds, &wait_time)  >= 0) */
 
 	if (v2 > 0)
 		rrr = select(nfds+1, &rfds, &wfds, &efds, &wait_time);

@@ -1440,10 +1440,15 @@ write_out(Term) :-
     	nl(Stream).
 
 /*-----------------------------------------------------------------------*
- | write_substs(Stream,Names,Substs)
+ | write_substs/4
+ | write_substs(Stream,Names,Substs, NonAnonNames)
+ | write_substs(+,+,+, -)
  |
- |	write_substs/3 is called by showanswers to write out a list of 
- |	substitutions on output Stream.
+ |	write_substs/4 is called by showanswers to write out a list of 
+ |	substitutions on output Stream; it returns the list NonAnonNames
+ |	of names of non-anonymous variables for which values were output.
+ |	{Used by showanswers to avoid prompting for (return/;) when no
+ |	binds are output -- all vars in query are anoymous.}
  |
  |	Names and Substs are lists of the same length, with the items
  |	corresponding pairwise: An item N on Names is the atom which is the
@@ -1477,7 +1482,7 @@ write_out(Term) :-
 
 :- dynamic('$is_delay_var'/1).
 
-write_substs(Stream,Names,Substs) 
+write_substs(Stream,Names,Substs,NewNames) 
 	:-
 	delete_anon_vars(Names,Substs,NewNames,NewSubsts),
 	cont_write_substs(NewNames,NewSubsts,Stream).
@@ -1498,7 +1503,11 @@ cont_write_substs(Names,Substs,Stream)
 	subst_gen_letter_names(Substs,Substs0),
 	(Names = [] ->
 		nl(Stream),
-		write_term(Stream,'anonymous_solution',[])
+		(current_prolog_flag(anonymous_solutions, true) ->
+			write_term(Stream,'<Anonymous_Solution>',[])
+			;
+			true
+		)
 		;
 		show_substs_ext(Names,Substs0,Stream)
 	).
