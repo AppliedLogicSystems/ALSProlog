@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.88 1999/11/15 10:06:10 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.89 2000/03/22 16:42:57 choupt Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -709,8 +709,12 @@ proc exit_prolog { } {
 	if {$ans == "yes"} then {
 		prolog call alsdev possible_save_project
 		if {[document.close_all]} then {
-			save_window_positions
-			prolog call alsdev save_prolog_flags 
+			if {[catch {
+					save_window_positions
+					prolog call alsdev save_prolog_flags
+				} result]} then {
+				# maybe do "bgerror $result" or some other message here
+			}
 			exit
 #			set WaitForLine -3
 		}
