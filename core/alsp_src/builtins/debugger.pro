@@ -1406,20 +1406,20 @@ nospy([Pat|More]) :-
 	%%
 
 /*-------------------------------------------------------------------------*
- | getResponse/6
- | getResponse(Port,Box,Depth, Module, Goal, Response) 
+ | getResponse/7
+ | getResponse(Wins,Port,Box,Depth, Module, Goal, Response) 
  |
  | Prompt the user for what to do at this port.
  *-------------------------------------------------------------------------*/
 
 %% === Port is leashed, so interact:
-getResponse(Port,Box,Depth, Module, Goal, Response) :-
+getResponse(Wins,Port,Box,Depth, Module, Goal, Response) :-
     leashed(Port),
     !,
-    getresponse2(Port,Box,Depth,Module,Goal,Response).
+    getresponse2(Wins,Port,Box,Depth,Module,Goal,Response).
 
 %% === Not a leashed port -- Keep debugging:
-getResponse(_,Box,Depth,Module,Goal,debug) :- 				
+getResponse(Wins,_,Box,Depth,Module,Goal,debug) :- 				
     nl(debugger_output).
 
 
@@ -1546,8 +1546,8 @@ toggle_debug_io
 	debug_io(Current),
 	abolish(debug_io,1),
 	dbg_io_opp(Current, Next),
-	assert(debug_io(Next)),
-	printf(debugger_output,'Debugger i/o set to: %t\n',[Next]).
+	assert(debug_io(Next)).
+%	printf(debugger_output,'Debugger i/o set to: %t\n',[Next]).
 
 	%% Default:
 
@@ -1568,8 +1568,8 @@ export set_debug_io/1.
 set_debug_io(Where)
 	:-
 	abolish(debug_io,1),
-	assert(debug_io(Where)),
-	printf(debugger_output,'Debugger i/o set to: %t\n',[Where]).
+	assert(debug_io(Where)).
+%	printf(debugger_output,'Debugger i/o set to: %t\n',[Where]).
 
 check_debug_io
 	:-
@@ -1603,7 +1603,7 @@ showGoalToUserTTY(Port,Box,Depth, Module, XGoal, Response)
 					    %% Display the port:
     writeGoal(Box,Depth,Port,Module,XGoal),
 			   			%% And find out what do do:
-    getResponse(Port,Box,Depth, Module, XGoal, Response).
+    getResponse(tty,Port,Box,Depth, Module, XGoal, Response).
 
 		%% Items for debugger menu (menu/4 in Library: iolayer.pro)
 		%% Compare usage in break package (blt_brk.pro)
@@ -1697,24 +1697,27 @@ short_deb_resps([
 
 %% === Handle the interaction:
 
-	%% First try to act without loading the menu code:
-getresponse2(Port,Box,Depth,Module,Goal,Response) :-
-	short_deb_resps(Resps),
-	getresponse2(Port,Box,Depth,Module,Goal,Resps,RR),
-	!,
-    act_on_response(RR,Port,Box,Depth, Module,Goal,Response).
+	%%%%% TTY mode %%%%%
 
-getresponse2(Port,Box,Depth,Module,Goal,Resps,Response)
+getresponse2(tty,Port,Box,Depth,Module,Goal,Response) 
+	:-
+	short_deb_resps(Resps),
+	getresponse_cont(Port,Box,Depth,Module,Goal,Resps,RR),
+	!,
+    act_on_response(RR,Port,Box,Depth, Module,Goal,tty,Response).
+
+	%% First try to act without loading the menu code:
+getresponse_cont(Port,Box,Depth,Module,Goal,Resps,Response)
 	:-
 	put_code(debugger_output,0'\?),
 	flush_output(debugger_output),
 	get_atomic_nonblank_char(debugger_input, R),
 	dmember(R-Resp0,Resps),
 	!,
-	disp_getresponse2(Resp0, Port,Box,Depth,Module,Goal,Resps,Response).
+	disp_getresponse_cont(Resp0, Port,Box,Depth,Module,Goal,Resps,Response).
 	
 	%% Now we have to load the menu code:
-disp_getresponse2('$badInput$', Port,Box,Depth,Module,Goal,Resps,Response)
+disp_getresponse_cont('$badInput$', Port,Box,Depth,Module,Goal,Resps,Response)
 	:-
 	deb_choiceItems(DebItems),
 	deb_Options(Options),
@@ -1723,26 +1726,29 @@ disp_getresponse2('$badInput$', Port,Box,Depth,Module,Goal,Resps,Response)
 				[codes=ListOfCodes,return_code=true]),
 	dmember(R-Resp0,Resps),
 	!,
-	disp_getresponse2(Resp0, Port,Box,Depth,Module,Goal,Resps,Response).
+	disp_getresponse_cont(Resp0, Port,Box,Depth,Module,Goal,Resps,Response).
 
-disp_getresponse2(Response,Port,Box,Depth,Module,Goal,Resps,Response).
+disp_getresponse_cont(Response,Port,Box,Depth,Module,Goal,Resps,Response).
+
+
+	%%%%% tcltk mode %%%%%
 
 %% === User wants to break to subsidiary Prolog shell.
-act_on_response(break,Port,Box,Depth, Module,Goal,Response) :- !,
+act_on_response(break,Port,Box,Depth, Module,Goal,Wins,Response) :- !,
 	telling(CurOut),
 	tell(user_output),
 	builtins:prolog_shell,
 	tell(CurOut),
-	show_again(Port,Box,Depth,Module,Goal,Response).
+	show_again(Port,Box,Depth,Module,Goal,Wins,Response).
 
 %% === User wants to exit.
-act_on_response(exit,Port,Box,Depth, Module,Goal,Response) :- !,
+act_on_response(exit,Port,Box,Depth, Module,Goal,Wins,Response) :- !,
 	write(debugger_output,'Bye.'), 
 	nl(debugger_output), 
 	halt.
 
 %% === User wants to abort.
-act_on_response(abort,Port,Box,Depth, Module,Goal,nodebug) :- !,
+act_on_response(abort,Port,Box,Depth, Module,Goal,Wins,nodebug) :- !,
 	write(debugger_output,'Aborting from debugger.'),
 	nl(debugger_output),
 	dbg_notrace,
@@ -1750,7 +1756,7 @@ act_on_response(abort,Port,Box,Depth, Module,Goal,nodebug) :- !,
 	abort.
     
 %% === User wants to turn off tracing when in a break.
-act_on_response(break_trace_off,Port,Box,Depth, Module,Goal,nodebug) :- !,
+act_on_response(break_trace_off,Port,Box,Depth, Module,Goal,Wins,nodebug) :- !,
 	write(debugger_output,'Turning off tracing at:'),
 	writeq(debugger_output,Module:Goal),
 	nl(debugger_output),
@@ -1758,23 +1764,23 @@ act_on_response(break_trace_off,Port,Box,Depth, Module,Goal,nodebug) :- !,
 	throw(breakhandler_debug(Module,Goal)).
 
 %% === User wants to continue execution with tracing off
-act_on_response(trace_off,Port,Box,Depth,Module,Goal,nodebug) :-
+act_on_response(trace_off,Port,Box,Depth,Module,Goal,Wins,nodebug) :-
 	!,
 	suppress_spying.
     
 %% === User wants to creep, skip, leap, or fail.
-act_on_response(creep,Port,Box,Depth, Module,Goal,debug) :-  !.
-act_on_response(skip,Port,Box,Depth, Module,Goal,skip) :-  !. 
-act_on_response(leap,Port,Box,Depth, Module,Goal,leap) :-  !.
-act_on_response(fail,Port,Box,Depth, Module,Goal,fail) :-  !.
-act_on_response(jump,Port,Box,Depth, Module,Goal,jump) :-  !.
+act_on_response(creep,Port,Box,Depth, Module,Goal,Wins,debug) :-  !.
+act_on_response(skip,Port,Box,Depth, Module,Goal,Wins,skip) :-  !. 
+act_on_response(leap,Port,Box,Depth, Module,Goal,Wins,leap) :-  !.
+act_on_response(fail,Port,Box,Depth, Module,Goal,Wins,fail) :-  !.
+act_on_response(jump,Port,Box,Depth, Module,Goal,Wins,jump) :-  !.
 
 %% === User wants to do a retry.
-act_on_response(retry,Port,Box,Depth, Module,Goal,fail) :- !,
+act_on_response(retry,Port,Box,Depth, Module,Goal,Wins,fail) :- !,
 	setRetry(Box).
 
 %% === User wants to set the print depth.
-act_on_response(set_print_depth, Port,Box,Depth, Module,Goal,Response) :-
+act_on_response(set_print_depth, Port,Box,Depth, Module,Goal,Wins,Response) :-
 	!,
 	get_maxdepth(debugger_output,CurDepth),
 	write(debugger_output,'Cur depth '=CurDepth),
@@ -1782,10 +1788,10 @@ act_on_response(set_print_depth, Port,Box,Depth, Module,Goal,Response) :-
 	read(debugger_input,ND),
 	flush_input(debugger_input),
 	set_maxdepth(debugger_output,ND), !,
-	show_again(Port,Box,Depth,Module,Goal,Response).
+	show_again(Port,Box,Depth,Module,Goal,Wins,Response).
 
 %% === Changing the print mode
-act_on_response(change_print_mode, Port,Box,Depth, Module,Goal,Response) :-
+act_on_response(change_print_mode, Port,Box,Depth, Module,Goal,Wins,Response) :-
 	!,
 	get_depth_computation(debugger_output,DC0),
 	(   DC0=flat
@@ -1793,26 +1799,26 @@ act_on_response(change_print_mode, Port,Box,Depth, Module,Goal,Response) :-
 	;   DC1=flat),
 	set_depth_computation(debugger_output,DC1),
 	als_advise("Depth computation is now %s\n",[DC1]),
-	show_again(Port,Box,Depth,Module,Goal,Response).
+	show_again(Port,Box,Depth,Module,Goal,Wins,Response).
     
 %% === Print statistics
-act_on_response(statistics, Port,Box,Depth, Module,Goal,Response) :-
+act_on_response(statistics, Port,Box,Depth, Module,Goal,Wins,Response) :-
 	!,
 	statistics,
-	show_again(Port,Box,Depth,Module,Goal,Response).
+	show_again(Port,Box,Depth,Module,Goal,Wins,Response).
 
 %% === Print stack trace
-act_on_response(stack_trace, Port,Box,Depth, Module,Goal,Response) :-
+act_on_response(stack_trace, Port,Box,Depth, Module,Goal,Wins,Response) :-
 	!,
 	printf(debugger_output,'----begin stack trace----\n', []),
 	deb_stack_trace(1,1),
 	printf(debugger_output,'----end stack trace----\n', []),
-	show_again(Port,Box,Depth,Module,Goal,Response).
+	show_again(Port,Box,Depth,Module,Goal,Wins,Response).
 
 
-show_again(Port,Box,Depth,Module,Goal,Response) :-
+show_again(Port,Box,Depth,Module,Goal,Wins,Response) :-
 	writeGoal(Box,Depth,Port,Module,Goal),
-	getresponse2(Port,Box,Depth, Module, Goal, Response).
+	getresponse2(Wins,Port,Box,Depth, Module, Goal, Response).
 
 /*-------------------------------------------------------------------------*
  | writeGoal/5
@@ -1858,5 +1864,20 @@ deb_disp_stack_trace(FI, N,M)
 	:-
 	NN is N+1,
 	deb_stack_trace(NN,M).
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%			GUI DEBUGGER PROCEDURES			%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+exit_debugger
+	:-
+	nospy.
+
+alsdev_step(What)
+	:-
+	printf('alsdev_step = %t\n', [What]),
+	flush_output.
+
 
 endmod.					%% builtins:  debugger segment

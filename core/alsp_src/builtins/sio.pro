@@ -1838,7 +1838,8 @@ getWinGV(WinID,WinPosGV) :-      %% allocate a gvar for WinID if not previously 
 open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
 	:-
 	(atom(WinName) -> WinID = WinName ; sprintf(atom(WinID), '%t', [WinName]) ),
-	initialize_stream(tk_window,WinName,Options,Stream),
+	initialize_stream(tk_window,WinID,Options,Stream),
+%	initialize_stream(tk_window,WinName,Options,Stream),
 
 	(dmember(alias(Alias), Options) -> true ; Alias = WinName),
 		%% store the stream alias:
@@ -2559,6 +2560,8 @@ read_buffer(tk_window,Stream)
 	:- 
 	stream_extra(Stream,''),
 	!,
+	stream_pgoals(Stream,PromptGoal),
+	call(PromptGoal),
 	sio_set_errcode(Stream,14),		%% 14 =  SIOE_NOTREADY
 	fail.
 
@@ -3082,7 +3085,8 @@ write_buffer(tk_window,Stream) :-
 	stream_addl3(Stream, WinID),
 	sio_set_position(Stream, 0, 0),
 	catch(tcl_call(Interp, [WinID,insert,end,BufUIA], _),_,true),
-	catch(tcl_call(Interp, [update,idletasks], _),_,true).
+	catch(tcl_call(Interp, [WinID,see,end], _),_,true),
+	catch(tcl_call(Interp, [update], _),_,true).
 
 write_buffer(tk_window,Stream) :-!.
 

@@ -15,7 +15,6 @@
 module builtins.
 use sio.
  
-
 /*-------------------------------------------------------------------------------*
  | start_shell/1
  | start_shell(DefaultShellCall)
@@ -45,7 +44,7 @@ start_shell0(DefaultShellCall)
 				[ (trace)/0, (trace)/2, toggle_mod_show/1, leash/1,
 		  		  (spy)/0, (spy)/1, (spy)/2, (spy_pat)/3, (spyWhen)/1,
 		  		  (spyWhen)/2, (nospy)/0, (nospy)/1, (nospy)/3,
-		  		  spying/0, debugging/0, list_spypoints/0 ]),
+		  		  spying/0, debugging/0, list_spypoints/0,set_debug_io/1 ]),
 
 	%% Get the raw command line and assert it.
 	abolish(command_line,1),
@@ -63,10 +62,6 @@ start_shell0(DefaultShellCall)
 					DefaultShellCall,	/* shell/or not */
 					[]),				/* Command-line asserts */
 
-%%debugger:nospy,
-%%obp_with_pro,
-
-%	generated_with_src,
 	ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo),
 	assertz(command_line(ResidualCommandLine)),
 
@@ -75,14 +70,17 @@ start_shell0(DefaultShellCall)
 	ss_init_searchdir(CmdLineSearch),
 	ss_load_dot_alspro,
 
-	als_system(SysList),
-
-	consultmessage(CsltValue),
-	set_consult_messages(true),
-	setup_shell_windows(CLInfo, OutputStream),
-	set_consult_messages(CsltValue),
-
+%	arg(7, CLInfo, CLShellCall),
+%	arg(2,CLInfo,Verbosity),
+%	(CLShellCall=(builtins:prolog_shell) -> 
+%		ConsultNoise = Verbosity 
+%		;
+%		ConsultNoise = true
+%	),
 	arg(2,CLInfo,ConsultNoise),
+
+	OutputStream = user_output,
+	als_system(SysList),
 	(ConsultNoise = true -> 
 		true ; 
 		print_banner(OutputStream,SysList)
@@ -118,60 +116,6 @@ setup_init_goal(CLInfo, ShellCall)
 		;
 		ShellCall = (CmdLineGoal, CLShellCall)
 	).
-
-setup_shell_windows(CLInfo, OSS)
-	:-
-	arg(7, CLInfo, alsdev),
-	!,
-	setup_tcltk,
-	sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, shared, Shared),
-	pathPlusFile(Shared, 'alsdev.tcl', ALSDEVTCL),
-
-	tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
-	tcl_call(shl_tcli, [source, ALSDEVTCL], _),
-
-	open(tk_win(shl_tcli, '.topals.txwin.text'), read, ISS, [alias(shl_tk_in_win)]),
-	open(tk_win(shl_tcli, '.topals.txwin.text'), write, OSS, [alias(shl_tk_out_win)]),
-
-    set_input(ISS),
-    set_output(OSS),
-
-    %% Debugger streams
-
-%	open(console('debugger output'),write, OutDStream,
-    open(tk_win(shl_tcli, '.topals.txwin.text'),write, OutDStream,
-	 ['$stream_identifier'(-4), alias(debugger_output),
-	 	buffering(line),type(text),
-	 	maxdepth(8), line_length(76),
-	 	depth_computation(nonflat)]),
-
-%	open(console('debugger input'), read, InDStream,
-    open(tk_win(shl_tcli, '.topals.txwin.text'), read, InDStream,
-	 ['$stream_identifier'(-3), alias(debugger_input),blocking(true),
-	 	prompt_goal(flush_output(debugger_output))]),
-
-    %% Error stream
-
-%	open(console_error('error output'),write,OutEStream,
-    open(tk_win(shl_tcli, '.topals.txwin.text'),write,OutEStream,
-	 ['$stream_identifier'(-5), alias(error_stream),
-	 	buffering(line),type(text)]),
-
-    %% Establish additional aliases
-    sio:set_alias(warning_input, ISS),
-    sio:set_alias(warning_output, OSS),
-
-	sio:reset_user(ISS,OSS),
-
-	set_prolog_flag(windows_system, tcltk),
-	current_prolog_flag(windows_system, Which),
-	mangle(7, CLInfo, prolog_shell(ISS,OSS)).
-
-	%% Should be: arg(7, CLInfo, prolog_shell)
-setup_shell_windows(CLInfo, user_output).
-%unneeded	mangle(7, CLInfo, prolog_shell).
-
 
 /*-----------------------------------------------------------------*
  | ss_parse_command_line/3
@@ -246,24 +190,10 @@ ss_parse_command_line(['-A', Expr | T], L, CLInfo)
 
 ss_parse_command_line(['-a', Expr | T], L, CLInfo)
 	:-!,
-%	cmd_line_A(Expr),
 	arg(8, CLInfo, PrevCmdLineAsserts),
 	mangle(8, CLInfo, [Expr | PrevCmdLineAsserts]),
 	ss_parse_command_line(T, L, CLInfo).
 
-/*
-	%% -obp: Keep obp files in directory where image is running:
-ss_parse_command_line(['-obp' | T], L, CLInfo)
-	:-!,
-	obp_in_cur,
-	ss_parse_command_line(T, L, CLInfo).
-
-	%% -obplcn: Keep obp files in absolute path directory:
-ss_parse_command_line(['-obplcn', Path | T], L, CLInfo)
-	:-!,
-	obp_in_locn(Path),
-	ss_parse_command_line(T, L, CLInfo).
-*/
 	%% For historical compatability:
 	%% -obp: Keep obp files in directory where image is running:
 ss_parse_command_line(['-obp' | T], L, CLInfo)
@@ -380,29 +310,6 @@ ss_cl_assert1(AX, Mod)
 	:-
 	Mod:assertz(AX).
 
-
-/*
-cmd_line_A(Expr)
-	:-
-	atomread(Expr,Mod:AX),
-		%% Must intern the module:
-	functor(FF,Mod,0), functor(FF,SMod,0),
-	create_new_module(SMod),
-	in_assrt(AX, SMod).
-	
-cmd_line_A(Expr)
-	:-
-	user:assert(Expr).
-
-in_assrt((AX,BX), SMod)
-	:-!,
-	in_assrt(AX, SMod),
-	in_assrt(BX, SMod).
-
-in_assrt(AX, SMod)
-	:-
-	SMod:assert(AX).
-*/
 /*---------------------------------------
  |	ss_init_searchdir/1
  |	ss_init_searchdir(CmdLinePaths)
@@ -464,16 +371,23 @@ ss_load_dot_alspro
 	:-
 	als_system(L),
 	dmember(os=OS, L),
-	( OS = dos -> File = 'alspro.pro'
-	; OS = mswin32 -> File = 'alspro.pro'
-	; File = '.alspro' ),
-	ss_load_dot_alspro(File).
+	(OS = macos -> Files = ['alspro.pro'] ;
+		OS = mswin32 -> Files = ['alspro.pro'] ;
+			Files = ['alspro.pro','.alspro']
+	),
+	ss_load_dot_alspros(Files).
+
+ss_load_dot_alspros([]).
+ss_load_dot_alspros([File | Files])
+	:-
+	ss_load_dot_alspro(File),
+	!,
+	ss_load_dot_alspros(Files).
 
 ss_load_dot_alspro(AutoFile)
 	:-
 	exists_file(AutoFile),
 	!,
-%write(abc),nl,
 	reconsult(AutoFile).
 
 ss_load_dot_alspro(AutoFile)
@@ -488,7 +402,7 @@ ss_load_dot_alspro(AutoFile)
 ss_load_dot_alspro(_).
 
 /*-------------------------------------------------
- | print_banner/1
+ | print_banner/2
  |		- prints out the initial banner
  *------------------------------------------------*/
 print_banner(OutS,L) 
@@ -536,16 +450,16 @@ system_name_proc(_, 'ALS Prolog (Native)').
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 prolog_shell
 	:-
-	prolog_shell(user_input,user_output).
+	prolog_shell(user_input,user_output,alspro).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Used to start both the default system shells, and
 	%% also shells talking to windows:
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-prolog_shell(InStream,OutStream) 
+prolog_shell(InStream,OutStream,ID) 
 	:-
-	init_prolog_shell(InStream, OutStream,alspro,CurLevel,CurDebuggingState,Wins),
-	prolog_shell_loop(InStream,OutStream,Wins),
+	init_prolog_shell(InStream, OutStream,ID,CurLevel,CurDebuggingState,Wins),
+	prolog_shell_loop(Wins,InStream,OutStream),
 	shell_exit(InStream, OutStream,CurLevel,CurDebuggingState).
 
 /*-----------------------------------------------------------------------*
@@ -569,6 +483,7 @@ init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	sio:input_stream_or_alias_ok(InStream, RealInStream),
 	set_stream_pgoals(RealInStream, user_prompt_goal(OutStream) ),
 
+
 	get_debugging_state(CurDebuggingState),
 	set_debugging_state(debug_state(debug_off,0,1,0,debug_off)),
 	get_shell_level(CurLevel),
@@ -580,9 +495,11 @@ init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 		%% can't hold on to them:
 	get_shell_prompts( CurPromptsStack ),
 	set_shell_prompts( [(Prompt1,Prompt2) | CurPromptsStack] ),
+
 	current_prolog_flag(windows_system, Wins),
-	dmember(os=OS, SysList),
-	dmember(os_variation=OSMinor, SysList),
+	(Wins = tcltk -> print_banner(OutStream,SysList) ; true ),
+%	dmember(os=OS, SysList),
+%	dmember(os_variation=OSMinor, SysList),
 	push_prompt(Wins,OutStream,Prompt1).
 
 push_prompt(nowins,_,_) :-!.
@@ -591,13 +508,11 @@ push_prompt(tcltk,OutStream,Prompt1)
 	nl(OutStream),
 	put_atom(OutStream,Prompt1),
 	flush_output(OutStream),
-%	tcl_eval(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _).
 	tcl_call(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _).
 push_prompt(Wins,OutStream,Prompt1)
 	:-
 	put_atom(OutStream,Prompt1),
 	flush_output(OutStream).
-
 
 shell_exit(InStream, OutStream,Level,DebuggingState)
 	:-
@@ -625,7 +540,7 @@ shell_exit(InStream, OutStream,Level,DebuggingState)
 	%% to returns cause the stream to be read and the term
 	%% to be executed.
 	%%
-	%% So the organization of prolog_shell_loop/2 simply
+	%% So the organization of prolog_shell_loop/3 simply
 	%% reflects the need to support this breakup.  It 
 	%% allows us to still have the TTY version loop just
 	%% like it did before, but it allows the X version to
@@ -641,20 +556,19 @@ als_exec( InputLine, TextWinPath)
 	continue_prolog_loop(Status).
 
 
-prolog_shell_loop(InStream,OutStream,tcltk) 
+prolog_shell_loop(tcltk,InStream,OutStream) 
 	:-!,
-%	tcl_eval(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _),
 	tcl_call(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _),
 	tk_main_loop.
 
-prolog_shell_loop(InStream,OutStream,Wins) 
+prolog_shell_loop(Wins,InStream,OutStream) 
 	:-
 		%% Read one term and execute it:
 	shell_read_execute(InStream,OutStream,Wins,Status),
 		%% Decide whether to continue or exit:
 	continue_prolog_loop(Status),
 	!,
-	prolog_shell_loop(InStream,OutStream,Wins).
+	prolog_shell_loop(Wins,InStream,OutStream).
 
 prolog_shell_loop(_,_,_).
 
@@ -781,21 +695,6 @@ set_debugging_state(debug_state(Int,Call,Depth,Retry,DInt))
 	%% make_prompts is responsible for building the 
 	%% prompts to be displayed.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-/*
-make_prompts(nowins, N,Prompt1,Prompt2) 
-	:-
-	N > 0,
-	!,
-	sprintf(PL1,'Break (%d) ?- ',[N]),
-	sprintf(PL2,'          ?-_',[]),
-	name(Prompt1,PL1),
-	name(Prompt2,PL2).
-
-make_prompts(nowins, _,'?- ','?-_') 
-	:-!.
-make_prompts(Wins, N,'','').
-*/
 
 :-user:dynamic(make_shell_prompts/4).
 make_prompts(ID, N,Prompt1,Prompt2) 
@@ -1104,8 +1003,6 @@ install_lib_f(LibFileHd, LibDirPath)
 		call(builtins:LHTerm0)
 	).
 
-
-
 /*!---------------------------------------------------------------------
  |	asplit0/4
  |	asplit0(AtomCs,Splitter,LeftPartCs,RightPartCs) 
@@ -1128,8 +1025,6 @@ asplit0([Char|Rest],Splitter,[Char|R1],String2)
 
 asplit0([Splitter|Rest],Splitter,[],Rest).
 
-
-
 asplit0_all(Chars, Splitter, [Head | List])
 	:-
 	asplit0(Chars, Splitter, Head, Tail),
@@ -1145,3 +1040,4 @@ all_to_atoms([String | Strings], [Atom | Atoms])
 	all_to_atoms(Strings, Atoms).
 
 endmod.		%% blt_shl.pro: Development shell
+

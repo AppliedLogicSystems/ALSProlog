@@ -73,6 +73,7 @@ prolog_flag_value_check(bounded, true).
 prolog_flag_value_check(bounded, false).
 
 default_prolog_flag_value_check(bounded, true).
+changeable(bounded, no).
 
 	%%---------------------------------
 	%%	max_integer  (7.11.1.2)
@@ -80,19 +81,25 @@ default_prolog_flag_value_check(bounded, true).
 default_prolog_flag_value(max_integer, Value)
 	:-
 	max_iv(Value).
+changeable(max_integer, no).
 
 	%%---------------------------------
 	%%	min_integer  (7.11.1.3)
 	%%---------------------------------
 default_prolog_flag_value(min_integer, Value)
 	:-
-	max_iv(Value).
+	max_iv(MaxValue),
+	Value is - (MaxValue + 1).
+changeable(min_integer, no).
+
 
 	%%---------------------------------
 	%%	integer_rounding_function  (7.11.1.4)
 	%%---------------------------------
 prolog_flag_value_check(integer_rounding_function, down).  
 prolog_flag_value_check(integer_rounding_function, toward_zero).
+default_prolog_flag_value(integer_rounding_function, toward_zero).
+changeable(integer_rounding_function, no).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%	Other Flags (7.11.2)
@@ -103,12 +110,17 @@ prolog_flag_value_check(integer_rounding_function, toward_zero).
 	%%---------------------------------
 prolog_flag_value_check(char_conversion, on).  
 prolog_flag_value_check(char_conversion, off).  
+	%% should be: default_prolog_flag_value(char_conversion, on).
+default_prolog_flag_value(char_conversion, off).
+changeable(char_conversion, yes).
 
 	%%---------------------------------
 	%%	debug (7.11.2.2)
 	%%---------------------------------
 prolog_flag_value_check(debug, off).  
 prolog_flag_value_check(debug, on).  
+default_prolog_flag_value(debug,off).
+changeable(debug, yes).
 
 	%%---------------------------------
 	%%	max_arity (7.11.2.3)
@@ -116,6 +128,7 @@ prolog_flag_value_check(debug, on).
 default_prolog_flag_value(max_arity, Value)
 	:-
 	max_iv(Value).
+changeable(max_arity, no).
 
 	%%---------------------------------
 	%%	unknown		(7.11.2.4)
@@ -126,20 +139,13 @@ prolog_flag_value_check(unknown, error).
 prolog_flag_value_check(unknown, fail).
 prolog_flag_value_check(unknown, warning).
 prolog_flag_value_check(unknown, break).
-
-default_prolog_flag_value(unknown, warning).
+default_prolog_flag_value(unknown, error).
+changeable(unknown, yes).
 
 % Old compatability stuff:
 prolog_flag_value_check(undefined_predicate, Value) 
 	:- 
 	prolog_flag_value_check(unknown, Value).
-
-/*
-default_prolog_flag_value(undefined_predicate, Value)
-	:-
-	default_prolog_flag_value(unknown, Value).
-*/
-
 
 	%%---------------------------------
 	%%	double_quotes 	(7.11.2.5)
@@ -147,8 +153,8 @@ default_prolog_flag_value(undefined_predicate, Value)
 prolog_flag_value_check(double_quotes, chars).
 prolog_flag_value_check(double_quotes, codes).
 prolog_flag_value_check(double_quotes, atom).
-
 default_prolog_flag_value(double_quotes, codes).
+changeable(double_quotes, yes).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% ALS Extension Flags:
@@ -185,37 +191,55 @@ default_prolog_flag_value(windows_system, macwins)
 	:-
 	all_procedures(user,macos15,4,0), !.
 
-/*
-default_prolog_flag_value(windows_system, nextstep)
-	:-
-	all_procedures(user,?,?,0), !.
-
-default_prolog_flag_value(windows_system, wxwins)
-	:-
-	all_procedures(user,?,?,0), !.
-
-*/
 default_prolog_flag_value(windows_system, nowins).
 
 prolog_flag_value_check(windows_system, Which)
 	:-
 	clause(default_prolog_flag_value(windows_system,Which), _),
 	!.
+changeable(windows_system, no).
 
 	%%---------------------------------
 	%%	anonymous solution reporting
 	%%---------------------------------
 prolog_flag_value_check(anonymous_solutions, true).
 prolog_flag_value_check(anonymous_solutions, false).
-
 default_prolog_flag_value(anonymous_solutions, false).
+changeable(anonymous_solutions, yes).
 
+	%%---------------------------------
+	%%	freeze
+	%%
+	%%	true if freeze is available,
+	%%  false otherwise.
+	%%---------------------------------
+prolog_flag_value_check(freeze, true).
+prolog_flag_value_check(freeze, false).
+default_prolog_flag_value(freeze, Value)
+	:-
+	(all_procedures(builtins,'$delay',4,_) ->
+		Value = true
+		; 
+		Value = false
+	).
+changeable(freeze, no).
 
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% limits_info(MinInteger,MaxInteger,MaxArity)
-	%% 
-	%% - defined in C
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%---------------------------------
+	%%	constraints
+	%%
+	%%	true if constraints are available,
+	%%  false otherwise.
+	%%---------------------------------
+prolog_flag_value_check(constraints, true).
+prolog_flag_value_check(constraints, false).
+default_prolog_flag_value(constraints, Value)
+	:-
+	(all_procedures(_,'$iter_link_net',5,_) ->
+		Value = true
+		; 
+		Value = false
+	).
+changeable(constraints, no).
 
 #if (syscfg:intconstr)
 
@@ -234,8 +258,8 @@ prolog_flag_value_check(iters_max_exceeded, succeed).
 prolog_flag_value_check(iters_max_exceeded, fail).
 prolog_flag_value_check(iters_max_exceeded, warning).
 prolog_flag_value_check(iters_max_exceeded, exception).
-
 default_prolog_flag_value(iters_max_exceeded, succeed).
+changeable(iters_max_exceeded, yes).
 
 #endif
 
@@ -248,6 +272,25 @@ default_prolog_flag_value(iters_max_exceeded, succeed).
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- init_prolog_flags.
+
+export static_flags_info/1.
+static_flags_info(List)
+	:-
+	findall(Flag = Value, 
+			(changeable(Flag, no), current_prolog_flag(Flag, Value)), 
+			List).
+
+export changable_flags_info/1.
+changable_flags_info(List)
+	:-
+	findall(Info, changable_flag_info(Info), List).
+
+changable_flag_info(f(Flag,PossVals,Value))
+	:-
+	changeable(Flag, yes),
+	findall(V, prolog_flag_value_check(Flag, V), PossVals),
+	current_prolog_flag(Flag, Value).
+
 
 endmod.		%% blt_flts.pro: Prolog Flags Builtins File
 
