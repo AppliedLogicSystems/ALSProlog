@@ -16,10 +16,16 @@ static void alsdev_demo_error(const char *s)
 }
 
 static char *get_key_script = "\
+wm withdraw .\n\
 set w .get_demo_key\n\
 set key {}\n\
 \n\
 toplevel $w\n\
+wm withdraw $w\n\
+\n\
+if {$tcl_platform(platform) == {macintosh}} then {\n\
+	unsupported1 style $w movableDBoxProc\n\
+}\n\
 \n\
 label $w.text -justify left -text {ALS Prolog Evaluation System\n\
 \n\
@@ -27,20 +33,26 @@ This evaluation copy requires a serial number key in order to run.\n\
 If you do not have a key, please contact Applied Logic Systems to\n\
 receive an evaluation key.\n\
 \n\
-Web    http://www.als.com\n\
-E-Mail info@als.com\n\
-Voice  +1 (617) 497-0100\n\
-Fax    +1 (617) 497-3963\n\
-Mail   Applied Logic Systems, Inc.\n\
-       P.O. Box 175\n\
-       Cambridge, MA 02140\n\
-       USA\n\
+Web	http://www.als.com\n\
+E-Mail	info@als.com\n\
+Voice	+1 (617) 497-0100\n\
+Fax	+1 (617) 497-3963\n\
+Mail	Applied Logic Systems, Inc.\n\
+	P.O. Box 175\n\
+	Cambridge, MA 02140\n\
+	USA\n\
 }\n\
-label $w.label -text \"Demo Key:\"\n\
+label $w.label -text {Demo Key:}\n\
 entry $w.key -textvar key\n\
-button $w.button -text \"OK\" -command \"destroy $w\"\n\
+button $w.button -text OK -command \"destroy $w\"\n\
+\n\
 pack $w.text -padx 2m\n\
 pack $w.label $w.key $w.button -side left -padx 2m -pady 2m\n\
+update\n\
+wm geometry $w +[expr ([winfo screenwidth $w]-[winfo reqwidth $w])/2]+[expr ([winfo screenheight $w]-[winfo reqheight $w])/2]\n\
+\n\
+wm deiconify $w\n\
+focus $w.key\n\
 \n\
 tkwait window $w\n\
 \n\
