@@ -14,7 +14,7 @@ Build Materials:
 and at least 150 MB of available disk space.
 
 ¥ x86 Windows95 or WindowsNT machine with at least X MB of memory and
-at least Y MB or available disk space.
+at least Y MB of available disk space.
 
 ¥ Unix system.
 
@@ -27,7 +27,7 @@ modifications:
 Build Instructions:
 -------------------
 
-A note of access paths:
+A note of access and command paths:
 
 The Metrowerks projects will need to have their access paths adjusted if 
 the name of the ALS Prolog source directory has changed.
@@ -81,25 +81,32 @@ see the note above.
 
 3.2 Open alspro_b.prj, adjust access paths, Make.
 
-3.3 Open alspro_dll.prj, adjust access paths, adjust command path, Make.
+3.3 Open alspro_dll.prj, adjust access paths,
+    ***** ADJUST COMMAND PATH ***** (see note above),
+    Make.
 
-4. From MS-DOS, change the directory to %BLDDIR%\bld-port, and run the
+4. From MS-DOS, set the ALSP_SRC environment variable.
+
+5. From MS-DOS, change the directory to %BLDDIR%\bld-port, and run the
 batch file package.bat.
 
-5. From MS-DOS, change the directory to %BLDDIR%\bld-wins\mswin32, and
+6. From MS-DOS, change the directory to %BLDDIR%\bld-wins\mswin32, and
 run the batch file make_interf.bat.
 
-6. On the Mac, build the the Win32 Interface library and executable.
+7. On the Mac, build the the Win32 Interface library and executable.
 
-6.1 Open mswin32intf_lib.prj, adjust access paths, Make.
+7.1 Open mswin32intf_lib.prj, adjust access paths, Make.
 
-6.2 Open alspro_mswin32.prj, adjust access paths, Make.
+7.2 Open alspro_mswin32.prj, adjust access paths, Make.
 
 Testing
 -------
 
 To test the portable version, from MS-DOS, change the directory to
 %BLDDIR%\bld-port and run the batch file "testrun.bat".
+
+Note testrun requires that the ALSP_SRC environment variable is properly
+set.
 
 Files generated:
 ----------------
@@ -117,9 +124,10 @@ Console application:
 
 Win32 Interface Libraries:
 
-{blddir}bld-wins:mswin32:msWin32intf.lib
+{blddir}bld-wins:mswin32:mswin32intf.lib
 {blddir}bld-wins:mswin32:alspro_mswin32.exe
-{blddir}bld-wins:kernal32.pro
+
+{blddir}bld-wins:mswin32:kernal32.pro
 {blddir}bld-wins:mswin32:user32.pro
 {blddir}bld-wins:mswin32:gdi32.pro
 {blddir}bld-wins:mswin32:shell32.pro
