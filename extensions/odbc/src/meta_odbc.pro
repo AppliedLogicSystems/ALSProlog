@@ -1,77 +1,134 @@
-/* meta-odbc interface */
+/* ==============================================================*
+ |				meta-odbc interface 
+ |		Copyright (c) 1998-99 Applied Logic Systems, Inc.
+ |
+ |	Author: Chuck Houpt
+ |
+ |	Schematic example: 
+ |	
+ |	sql_init.
+ |	
+ |	sql_open_connection(C, 'sdk21-Access32', '', ''),
+ |	
+ |	sql_open_statement(C, 'select * from customer', S),
+ |	
+ |	sql_execute_statement(S),
+ |	
+ |	sql_fetch_row(S, R),
+ |	
+ |	sql_close_statement(S),
+ |	
+ |	sql_close_connection(C).
+ |	
+ |	sql_shutdown.
+ |	
+ |	R = ['bob', '203 Main St.', ...]
+ *-------------------------------------------------------------*/
 
+/*!--------------------------------------------------------------*
+ |	sql_init/1
+ |	sql_init(Env)
+ |	sql_init(-)
+ |
+ |	- set a global for the ODBC environment 
+ |
+ |	Books say this is global for each app;
+ |	Calls sql_alloc_env(Environment) to set this global, obtains
+ |	a handle Environment to it, and stores this in the prolog
+ |	global variable "_odbc_environment":
+ |
+ |			set_odbc_environment(Environment)
+ |			get_odbc_environment(Environment)
+ *--------------------------------------------------------------*/
 
-/*
-example: 
+:- 	clause(set_odbc_environment(_),true), ! ; 
+		make_gv('_odbc_environment').
 
-sql_init.
-
-sql_open_connection(C, 'sdk21-Access32', '', ''),
-
-sql_open_statement(C, 'select * from customer', S),
-
-sql_execute_statement(S),
-
-sql_fetch_row(S, R),
-
-sql_close_statement(S),
-
-sql_close_connection(C).
-
-sql_shutdown.
-
-R = ['bob', '203 Main St.', ...]
-
-*/
-
-/*
-init - sets a global for the enironment - books says it is global for each app.
-*/
-
-:- make_gv('_odbc_environment').
-
-sql_init :-
+sql_init 
+	:-
 	sql_alloc_env(Environment),
 	set_odbc_environment(Environment).
 
-sql_shutdown :-
+/*!--------------------------------------------------------------*
+ |	sql_shutdown/0
+ |	sql_shutdown
+ |	sql_shutdown
+ |	
+ |	deallocate an odbc global environment
+ *--------------------------------------------------------------*/
+sql_shutdown 
+	:-
 	get_odbc_environment(Environment),
 	sql_free_env(Environment),
 	set_odbc_environment(0).
 
-/* sql_alloc_connect/2 is already defined */
-
-sql_open_connection(DataSource, User, Password, Connection) :-
+/*!--------------------------------------------------------------*
+ |	sql_open_connection/4
+ |	sql_open_connection(DataSource, User, Password, Connection)
+ |	sql_open_connection(+, +, +, -)
+ |
+ |	- open a connection to a data source
+ |
+ |	Note that: sql_alloc_connect/2 is already defined
+ *--------------------------------------------------------------*/
+sql_open_connection(DataSource, User, Password, Connection) 
+	:-
 	get_odbc_environment(Environment),
 	sql_alloc_connect(Environment, Connection),
-	catch ((
-		sql_connect(Connection, DataSource, User, Password)
-	), ConnectError, (
-		sql_free_connect(Connection),
-		throw(ConnectError)
-	)).
+	catch(
+		sql_connect(Connection, DataSource, User, Password),
+		ConnectError, 
+		( sql_free_connect(Connection), throw(ConnectError) )
+		 ).
 
-sql_open_connection(ConString, OutString, Connection) :-
+/*!--------------------------------------------------------------*
+ |	sql_open_connection/3
+ |	sql_open_connection(ConString, OutString, Connection)
+ |	sql_open_connection(+, -, -)
+ |
+ |	- open a connection to a data source
+ |
+ |	Note that: sql_alloc_connect/2 is already defined
+ *--------------------------------------------------------------*/
+sql_open_connection(ConString, OutString, Connection) 
+	:-
 	get_odbc_environment(Environment),
 	sql_alloc_connect(Environment, Connection),
-	catch ((
-		sql_driver_connect(Connection, 0, ConString, OutString, 512, 'SQL_DRIVER_NOPROMPT')
-	), ConnectError, (
-		sql_free_connect(Connection),
-		throw(ConnectError)
-	)).
+	catch(
+		sql_driver_connect(Connection, 0, ConString, OutString, 
+										512, 'SQL_DRIVER_NOPROMPT'),
+		ConnectError, 
+		( sql_free_connect(Connection), throw(ConnectError) )
+	     ).
 
-sql_open_connection(Connection, ConnectionString) :-
+/*!--------------------------------------------------------------*
+ |	sql_open_connection/2
+ |	sql_open_connection(Connection, ConnectionString)
+ |	sql_open_connection(-, -)
+ |
+ |	- open a connection to a data source
+ |
+ |	Note that: sql_alloc_connect/2 is already defined
+ *--------------------------------------------------------------*/
+sql_open_connection(Connection, ConnectionString) 
+	:-
 	get_odbc_environment(Environment),
 	sql_alloc_connect(Environment, Connection),
-	catch ((
-		o_GetForegroundWindow(X),
-		sql_driver_connect(Connection, X, '', ConnectionString, 512, 'SQL_DRIVER_PROMPT')
-	), ConnectError, (
-		sql_free_connect(Connection),
-		throw(ConnectError)
-	)).
+	catch(
+		( o_GetForegroundWindow(X),
+		  sql_driver_connect(Connection, X, '', ConnectionString, 
+		  								512, 'SQL_DRIVER_PROMPT')), 
+		ConnectError, 
+		( sql_free_connect(Connection), throw(ConnectError) )
+	     ).
 
+/*!--------------------------------------------------------------*
+ |	sql_close_connection/1
+ |	sql_close_connection(Connection)
+ |	sql_close_connection(+)
+ |
+ |	-deallocate an SQL/ODBC connection
+ *--------------------------------------------------------------*/
 sql_close_connection(Connection) :-
 	catch ((
 		sql_disconnect(Connection)
@@ -81,23 +138,40 @@ sql_close_connection(Connection) :-
 	)),
 	sql_free_connect(Connection).
 
-sql_commit(Connection) :-
+/*!--------------------------------------------------------------*
+ |	sql_commit
+ |	sql_commit(Connection)
+ |	sql_commit(+)
+ |
+ |	- submit a statement 'SQL_COMMIT' to a data source
+ *--------------------------------------------------------------*/
+sql_commit(Connection) 
+	:-
 	get_odbc_environment(Environment),
 	sql_transact(Environment, Connection, 'SQL_COMMIT').
 	
-sql_open_statement(Connection, SQLQuery, StatementTerm) :-
+/*!--------------------------------------------------------------*
+ |	sql_open_statement/3
+ |	sql_open_statement(Connection, SQLQuery, StatementTerm) 
+ |	sql_open_statement(+, +, -) 
+ |
+ |	- allocate a statement data structure
+ *--------------------------------------------------------------*/
+sql_open_statement(Connection, SQLQuery, StatementTerm) 
+	:-
 	sql_alloc_stmt(Connection, StatementHandle),
-	catch ((
+	catch (
+		(
 		sql_prepare(StatementHandle, SQLQuery),
 		sql_num_result_cols(StatementHandle, NumColumns),
 		alloc_col_info(StatementHandle, 1, NumColumns, ColumnInfoList),
 		sql_num_params(StatementHandle, NumParams),
 		alloc_param_info(StatementHandle, 1, NumParams, ParamInfoList),
 		StatementTerm = statement(StatementHandle, ColumnInfoList, ParamInfoList)
-	), StatementError, (
-		sql_free_stmt(StatementHandle, 'SQL_DROP'),
-		throw(StatementError)
-	)).
+		), 
+		StatementError, 
+		( sql_free_stmt(StatementHandle, 'SQL_DROP'), throw(StatementError) )
+	).
 
 length_from_percision(Percision, Length) :-
 	Percision > 0,
@@ -163,8 +237,24 @@ alloc_datum('SQL_C_TIMESTAMP', Datum, _) :-
 	c_alloc_abs('TIMESTAMP_STRUCT', Datum).
 
 
-sql_close_statement(statement(StatementHandle, ColumnInfoList, ParamInfoList)) :-
-		catch ((
+/*!--------------------------------------------------------------*
+ |	sql_close_statement/1
+ |	sql_close_statement(StatementTerm)
+ |	sql_close_statement(+)
+ |
+ |	- deallocate an SQL statement data structure
+ |
+ |	StatementTerm must be a term returned by a call to
+ |
+ |			sql_open_statement/3
+ |
+ |	and is of the form
+ |
+ |		statement(StatementHandle, ColumnInfoList, ParamInfoList)
+ *--------------------------------------------------------------*/
+sql_close_statement(statement(StatementHandle, ColumnInfoList, ParamInfoList)) 
+	:-
+	catch ((
 			sql_free_stmt(StatementHandle, 'SQL_DROP')
 		), FreeError, (
 			free_col_info(ColumnInfoList),
@@ -184,10 +274,29 @@ free_param_info([param_info(_, _, Datum, Len) | Rest]) :-
 	c_free(Datum), c_free(Len),
 	free_param_info(Rest).
 	
-sql_execute_statement(statement(StatementHandle, _, _)) :-
+/*!--------------------------------------------------------------*
+ | sql_execute_statement/1
+ | sql_execute_statement(StatementTerm)
+ | sql_execute_statement(+)
+ |
+ |	-	Executes an SQL/ODBC statement term
+ |
+ |	StatementTerm must be a term returned by a call to
+ |
+ |			sql_open_statement/3
+ |
+ |	and is of the form
+ |
+ |		statement(StatementHandle, ColumnInfoList, ParamInfoList)
+ *--------------------------------------------------------------*/
+sql_execute_statement(statement(StatementHandle, _, _)) 
+	:-
 	sql_execute(StatementHandle).
 
-sql_bind_row(statement(StatementHandle, ColumnInfoList, ParamInfoList), Row) :-
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+sql_bind_row(statement(StatementHandle, ColumnInfoList, ParamInfoList), Row) 
+	:-
 	bind_item(Row, ColumnInfoList).
 
 bind_item(_, []).
@@ -208,13 +317,24 @@ put_data('SQL_C_TIMESTAMP', timestamp(Year, Month, Day, Hour, Minute, Second, Fr
 		[year, Year, month, Month, day, Day,
 	    hour, Hour, minute, Minute, second, Second, fraction, Fraction]).
 
-sql_fetch_row(statement(StatementHandle, [], _), Row) :- fail.
-sql_fetch_row(statement(StatementHandle, ColumnInfoList, _), Row) :-
+/*!--------------------------------------------------------------*
+ |	sql_fetch_row/2
+ |	sql_fetch_row(StatementTerm, Row)
+ |	sql_fetch_row(+, -)
+ |
+ |	- fetch a row of returned data from a StatementTerm
+ *--------------------------------------------------------------*/
+sql_fetch_row(statement(StatementHandle, [], _), Row) 
+	:- 
+	fail.
+sql_fetch_row(statement(StatementHandle, ColumnInfoList, _), Row) 
+	:-
 	sql_fetch(StatementHandle),
 	collect_results(ColumnInfoList, Row).
 
 collect_results([], []).
-collect_results([col_info(_, Type, Datum, _) | ColRest], [Result | ResultRest]) :-
+collect_results([col_info(_, Type, Datum, _) | ColRest], [Result | ResultRest]) 
+	:-
 	get_data(Type, Datum, Result),
 	collect_results(ColRest, ResultRest).
 	
@@ -238,3 +358,39 @@ get_data('SQL_C_TIMESTAMP', Datum, PrologData) :-
 	   [year, Year, month, Month, day, Day,
 	    hour, Hour, minute, Minute, second, Second, fraction, Fraction]),
 	PrologData = timestamp(Year, Month, Day, Hour, Minute, Second, Fraction).
+
+/*!--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+sql_tables(Connection, TablesList) 
+	:-
+	sql_alloc_stmt(Connection, StatementHandle),
+	o_SQLTables(StatementHandle,'',0,'',0,'',0,'',0,Result),
+	fetch_all_rows(StatementHandle, TablesList).
+
+fetch_all_rows(StatementHandle, [R | TablesList])
+	:-
+	sql_fetch_row(StatementHandle, R),
+	fetch_all_rows(StatementHandle, TablesList).
+
+fetch_all_rows(StatementHandle, []).
+
+ttb(TL)
+	:-
+	sql_open_connection(C, CS),
+	printf('Connected to: %s\n', [CS]),
+	sql_tables(C, TL).
+
+tcats(R)
+	:-
+	sql_open_connection(C, CS),
+	printf('Connected to: %s\n', [CS]),
+	must_c_const('SQL_CATALOG_NAME',CN),
+	c_allocn(char, 2, Buffer),
+	c_alloc(short, StrLenPtr),
+	o_SQLGetInfo(C, CN, Buffer, 1, StrLenPtr, Res),
+	c_examine(StrLenPtr, short, StrLen),
+printf('StrLen:%d\n',[StrLen]),
+	clip_uia(Buffer, StrLen),
+printf('Buffer=%s\n', [Buffer]).
+
+
