@@ -334,6 +334,229 @@ proc vTclWindow.debug_settings {base} {
     wm resizable $base 0 0
 }
 
+
+
+proc vTclWindow.pred_info {base} {
+    if {$base == ""} {
+        set base .pred_info
+    }
+    if {[winfo exists $base]} {
+        wm deiconify $base; return
+    }
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel
+    wm focusmodel $base passive
+    wm geometry $base 495x373+364+202
+    wm maxsize $base 1137 870
+    wm minsize $base 1 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 1
+    wm deiconify $base
+    wm title $base "Predicate Information"
+
+    frame $base.preds \
+        -borderwidth 1 -relief sunken  
+    label $base.preds.label \
+        -relief flat -text Predicates 
+    listbox $base.preds.listbox \
+        -height 14 \
+		-selectmode multiple \
+        -yscrollcommand "$base.preds.vscrollbar set" 
+    scrollbar $base.preds.vscrollbar \
+        -orient vert \
+        -command "$base.preds.listbox yview" 
+
+    frame $base.mods \
+        -borderwidth 1 -relief sunken  
+    label $base.mods.label \
+        -relief flat -text Modules 
+    frame $base.mods.l2 \
+        -borderwidth 1 -relief sunken  
+    label $base.mods.l2.l1 \
+        -relief flat -text {Focus: } 
+    label $base.mods.l2.modfocus \
+        -relief sunken -borderwidth 1  -text {   } 
+    listbox $base.mods.listbox \
+        -height 4 \
+		-selectmode browse \
+        -yscrollcommand "$base.mods.vscrollbar set" 
+    scrollbar $base.mods.vscrollbar \
+        -orient vert \
+        -command "$base.mods.listbox yview" 
+
+    frame $base.buttons \
+        -borderwidth 1 -relief sunken  
+    frame $base.buttons.f0 \
+        -borderwidth 0 -relief flat -height 15
+    label $base.buttons.label1 \
+        -relief flat -text {Action On} 
+    label $base.buttons.label2 \
+        -relief flat -text {Selection} 
+    frame $base.buttons.f1 \
+        -borderwidth 0 -relief flat -height 20
+    frame $base.buttons.spy \
+        -borderwidth 0 -relief flat  
+    button $base.buttons.spy.b1 \
+        -padx 11 -pady 2 -text Spy \
+        -command move_to_spying_list
+    button $base.buttons.spy.b2 \
+        -padx 11 -pady 2 -text arrow -image right_gif \
+        -command move_to_spying_list
+    frame $base.buttons.nospy \
+        -borderwidth 0 -relief flat  
+    button $base.buttons.nospy.b1 \
+        -padx 11 -pady 2 -text arrow -image left_gif \
+		-command remove_from_spying_list
+    button $base.buttons.nospy.b2 \
+        -padx 11 -pady 2 -text NoSpy \
+		-command remove_from_spying_list
+    button $base.buttons.find \
+        -padx 11 -pady 2 -state disabled -text Find 
+    button $base.buttons.listing \
+        -padx 11 -pady 2 -text Listing \
+		-command carry_out_listing
+    button $base.buttons.wamlisting \
+        -padx 11 -pady 2 -text {WAM Asm} \
+		-command carry_out_listasm
+    button $base.buttons.refreshpreds \
+        -padx 1 -pady 2 -text {Refresh Preds}
+    button $base.buttons.refreshmods \
+        -padx 1 -pady 2 -text {Refresh Mods} \
+		-command refresh_mods_list
+
+    frame $base.spying \
+        -borderwidth 1 -relief sunken  
+    label $base.spying.label \
+        -relief flat -text {Spying On} 
+    listbox $base.spying.listbox \
+		-selectmode multiple \
+        -yscrollcommand "$base.spying.vscrollbar set" 
+    scrollbar $base.spying.vscrollbar \
+        -orient vert \
+        -command "$base.spying.listbox yview" 
+    frame $base.spying.buttons \
+        -borderwidth 1 -relief sunken  
+    button $base.spying.buttons.reset \
+        -padx 11 -pady 4 -text {Reset All Spypoints} \
+		-command reset_all_spypoints
+    button $base.spying.buttons.nospy \
+        -padx 11 -pady 4 -text {Remove All Spypoints} \
+		-command remove_all_spypoints
+    ###################
+    # SETTING GEOMETRY
+    ###################
+
+	grid rowconf $base 0 -weight 1
+	grid rowconf $base 1 -weight 0
+
+	grid columnconf $base 0 -weight 1
+	grid columnconf $base 1 -weight 0
+	grid columnconf $base 2 -weight 1
+
+    grid $base.preds \
+        -column 0 -row 0 -columnspan 1 -rowspan 1 -padx 2 -sticky ewns 
+	grid rowconf $base.preds 0 -weight 0
+	grid rowconf $base.preds 1 -weight 1
+	grid columnconf $base.preds 0 -weight 1
+	grid columnconf $base.preds 1 -weight 0
+    grid $base.preds.label \
+        -column 0 -row 0 -columnspan 2 -rowspan 1 -sticky ew
+    grid $base.preds.listbox \
+        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky nsew
+    grid $base.preds.vscrollbar \
+        -column 1 -row 1 -columnspan 1 -rowspan 1 -padx 2 -sticky nse
+
+    grid $base.mods \
+        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ewns
+	grid rowconf $base.mods 0 -weight 0
+	grid rowconf $base.mods 1 -weight 0
+	grid rowconf $base.mods 2 -weight 1
+	grid columnconf $base.mods 0 -weight 1
+	grid columnconf $base.mods 1 -weight 0
+
+    grid $base.mods.label \
+        -column 0 -row 0 -columnspan 2 -rowspan 1 -sticky ew 
+
+    grid $base.mods.l2 \
+        -column 0 -row 1 -columnspan 2 -rowspan 1 -sticky ew  -padx 2
+    pack $base.mods.l2.l1 \
+		 -anchor center -expand 0 -fill none -side left 
+    pack $base.mods.l2.modfocus \
+		 -anchor center -expand 1 -fill x -side left 
+
+    grid $base.mods.listbox \
+        -column 0 -row 2 -columnspan 1 -rowspan 1 -sticky nsew
+    grid $base.mods.vscrollbar \
+        -column 1 -row 2 -columnspan 1 -rowspan 1 -sticky nse 
+
+    grid $base.buttons \
+        -column 1 -row 0 -columnspan 1 -rowspan 2 -padx 2 -sticky ns 
+
+    pack $base.buttons.f0 \
+		 -anchor center -expand 0 -fill x -side top 
+    pack $base.buttons.label1 \
+		 -anchor center -expand 0 -fill x -side top -pady 0
+    pack $base.buttons.label2 \
+		 -anchor center -expand 0 -fill x -side top -pady 0
+    pack $base.buttons.f1 \
+		 -anchor center -expand 0 -fill x -side top 
+
+    pack $base.buttons.spy \
+		 -anchor center -expand 0 -fill x -side top -pady 6
+    pack $base.buttons.spy.b2 \
+		-anchor w -expand 0 -fill none -side right
+    pack $base.buttons.spy.b1 \
+		-anchor w -expand 0 -fill none -side right
+
+    pack $base.buttons.nospy \
+		 -anchor center -expand 0 -fill x -side top -pady 6
+    pack $base.buttons.nospy.b1 \
+		-anchor w -expand 0 -fill none -side left
+    pack $base.buttons.nospy.b2 \
+		-anchor w -expand 0 -fill none -side left
+
+    pack $base.buttons.find \
+		 -anchor center -expand 0 -fill none -side top -pady 6
+    pack $base.buttons.listing \
+		 -anchor center -expand 0 -fill none -side top -pady 6
+    pack $base.buttons.wamlisting \
+		 -anchor center -expand 0 -fill none -side top -pady 6
+    pack $base.buttons.refreshpreds \
+		 -anchor center -expand 0 -fill none -side bottom -pady 6
+    pack $base.buttons.refreshmods \
+		 -anchor center -expand 0 -fill none -side bottom -pady 6
+
+    grid $base.spying \
+        -column 2 -row 0 -columnspan 1 -rowspan 2 -padx 2 -sticky nsew
+	grid rowconf $base.spying 0 -weight 0
+	grid rowconf $base.spying 1 -weight 1
+	grid rowconf $base.spying 2 -weight 0
+	grid columnconf $base.spying 0 -weight 1
+	grid columnconf $base.spying 1 -weight 0
+
+    grid $base.spying.label \
+        -column 0 -row 0 -columnspan 2 -rowspan 1 -sticky ew 
+    grid $base.spying.listbox \
+        -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky nsew
+    grid $base.spying.vscrollbar \
+        -column 1 -row 1 -columnspan 1 -rowspan 1 -sticky nse
+    grid $base.spying.buttons \
+        -column 0 -row 2 -columnspan 2 -rowspan 1 -sticky nsew 
+    pack $base.spying.buttons.nospy \
+		 -anchor center -expand 0 -fill x -side bottom -pady 6
+    pack $base.spying.buttons.reset \
+		 -anchor center -expand 0 -fill x -side bottom -pady 6
+
+	bind  $base.mods.listbox <Double-Button-1> \
+		{ set_module_focus [ get_selected_module ] }
+}
+
+
+
+##########################################################
+
 proc spy_preds_in_module {base module} {
 	global array proenv
 	global array cols2data
@@ -530,3 +753,7 @@ proc module_choose {ModsList} {
 			\[$base.listbox get \[lindex \[$base.listbox curselection \] 0 \] \]"
 
 }
+
+##########################################################
+
+

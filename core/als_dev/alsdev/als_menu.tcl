@@ -86,6 +86,10 @@ proc add_edit_menu {menubar type window} {
     $menubar.edit add separator
     $menubar.edit add command \
 		-label "Preferences$elipsis" -underline 3 -command "re {fonts_and_colors $window}"
+## Temp:
+    $menubar.edit add separator
+    $menubar.edit add command \
+        -label {Goto Line} -command "re {$type.goto_line $window}"
 
 	$menubar add cascade -menu $menubar.edit -label "Edit" -underline 0
 }
@@ -103,9 +107,13 @@ proc add_prolog_menu {menubar type window} {
 		-label "Clear Workspace" -underline 2 -command {re clear_workspace}
 
 	if {"$type"=="listener"} then { 
-#    	$menubar.prolog add separator
-#    	$menubar.prolog add command \
-#        	-label "Open Project" -underline 0 -command {re open_project} 
+    	$menubar.prolog add separator
+    	$menubar.prolog add command \
+        	-label "Load Project" -underline 0 -command {re load_project} 
+    	$menubar.prolog add command \
+        	-label "Open Project" -underline 0 -command {re open_project} 
+    	$menubar.prolog add command \
+        	-label "New Project" -underline 0 -command {re new_project} 
     	$menubar.prolog add separator
     	$menubar.prolog add command \
         	-label "Set Directory$elipsis" -underline 0 -command {re set_directory} 
@@ -145,35 +153,33 @@ proc add_tools_menu {menubar type window} {
 #    	$menubar.tools add command -label "Tcl Shell" -underline 0 -command {re tcl_shell} 
 
 		$menubar.tools add separator 
+		## Cref
+    	$menubar.tools add command -label "Cref" -underline 0 -command {re run_cref} 
+		$menubar.tools add separator 
 		## DefStructs:
 		menu $menubar.tools.defstr -relief raised -tearoff 0
 		$menubar.tools add cascade \
 			-label {Structs} -underline 1 -menu $menubar.tools.defstr
 		$menubar.tools.defstr add command \
 			-label "Define New" -underline 0 -command {re new_defstruct}
-#		$menubar.tools.defstr add command \
-#			-label "Edit" -underline 0 -command {re edit_defstruct} 
+		$menubar.tools.defstr add command \
+			-label "Edit" -underline 0 -command {re edit_defstruct} -state disabled
 		$menubar.tools.defstr add command \
 			-label "Process Typ File" -underline 0 -command {re process_typ}
-#		$menubar.tools add separator 
-#		## ObjectPro:
-#		menu $menubar.tools.objects -relief raised -tearoff 0
-#		$menubar.tools add cascade \
-#			-label {ObjectPro} -underline 1 -menu $menubar.tools.objects
-#		$menubar.tools.objects add command \
-#			-label "Process OOP File" -underline 0 -command {re process_oop}
+		$menubar.tools add separator 
+		## ObjectPro:
+		menu $menubar.tools.objects -relief raised -tearoff 0
+		$menubar.tools add cascade \
+			-label {ObjectPro} -underline 1 -menu $menubar.tools.objects
+		$menubar.tools.objects add command \
+			-label "Process OOP File" -underline 0 -command {re process_oop}
 	} else {
-
+	##  must be debugger:
 		# Spy
 		$menubar.tools add command  -label "Spy$elipsis" \
 			-underline 0 -command {re toggle_spywin} 
-#		$menubar.tools add checkbutton  -label {Spy$elipsis} \
-#			-command exec_toggle_spywin -variable proenv(spywin)
-		$menubar.tools add command  -label {NoSpy all } \
-			-underline 0 -command {re {prolog call debugger nospy }} 
-
-#		$menubar.tools add command  -label {Spy When} -underline 4 -state disabled
-
+		$menubar.tools add command  -label {NewSpy } \
+			-underline 0 -command {re {Window show .pred_info }} 
 		$menubar.tools add separator
 		$menubar.tools add command  -label {Debug Settings } \
 			-underline 0 -command {re {show_debug_settings}}

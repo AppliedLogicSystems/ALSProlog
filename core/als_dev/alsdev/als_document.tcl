@@ -356,3 +356,14 @@ proc document.consult {w} {
 	catch { prolog call alsdev do_reconsult -atom $file }
 	insert_prompt  .topals.text "\n?-" 
 }
+
+proc document.goto_line {w} {
+	global array proenv
+	
+	set N [do_popup_input "Input line number:" "Number?"]
+
+	$w.text tag delete focusline 
+	$w.text see $N.0
+	$w.text tag add focusline $N.0 $N.end
+	$w.text tag configure focusline -background yellow
+}

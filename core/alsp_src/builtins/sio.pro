@@ -2099,6 +2099,9 @@ close_stream(_,Stream) :-
 %% close code for other stream types should be placed here.
 %%
 
+
+
+
 export close_down_streams/1.
 close_down_streams(Type)
 	:-
@@ -2108,6 +2111,39 @@ close_down_streams(Type)
 	fail.
 
 close_down_streams(_).
+	
+system_stream_aliases([
+	user_input,
+	user_output,
+	warning_input,
+	warning_output,
+	error_stream,
+	shl_tk_in_win,
+	shl_tk_out_win,
+	gui_debugger_input,
+	gui_debugger_output,
+	debugger_input,
+	debugger_output
+	]).
+
+export close_down_nonsystem_streams/0.
+close_down_nonsystem_streams
+	:-
+	system_stream_aliases(SystemAliases),
+	pget_alias(Alias,Stream),
+	(dmember(Alias, SystemAliases) ->
+		true
+		;
+		(stream_open_status(Stream, open) ->
+			close(Stream),
+			pdel_alias(Alias,_)
+			;
+			true
+		)
+	),
+	fail.
+
+close_down_nonsystem_streams.
 	
 
 

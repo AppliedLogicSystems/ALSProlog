@@ -479,7 +479,7 @@ clear_workspace
 	:-
 	findall(MM, non_system_module(MM), UserMods),
 	clear_each_module(UserMods),
-	destroy_all_tcl_interpreters,
+	close_down_nonsystem_streams,
 	destroy_all_tcl_interpreters,
 	listener_prompt.
 
@@ -792,6 +792,23 @@ delete_sorted([H | L], Item, L)
 delete_sorted([H | L1], Item, [H | L2])
 	:-
 	delete_sorted(L1, Item, L2).
+
+carry_out_listing(Atom)
+	:-
+	atomread(Atom, M:P/A),
+	!,
+	listing(M:P/A).
+carry_out_listing(_).
+
+carry_out_listasm(Atom)
+	:-
+	atomread(Atom, M:P/A),
+	!,
+	list_asm(M:P/A).
+carry_out_listing(_).
+
+
+
 
 endmod.	%% builtins
 
@@ -1347,6 +1364,11 @@ remove_spypoints_in_mod([P/A | NewNoSpyList], Module)
 	:-
 	nospy(Module,P,A),
 	remove_spypoints_in_mod(NewNoSpyList, Module).
+
+remove_all_spypoints
+	:-
+	nospy.
+
 
 	%% dumps procedure clauses with complete info, 
 	%% including hidden debug calls:
