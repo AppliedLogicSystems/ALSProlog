@@ -68,6 +68,9 @@ typedef long BigOffset;
 typedef Code *CodePtr;
 #define CodeSize sizeof(Code)
 
+#ifndef MSWin32
+/* Also defined by Win32 headers. */
 typedef unsigned char UCHAR;	/* /usr/include/sys/types.h defines uchar_t */
+#endif
 
 #endif /* ALS_TYPES_INCLUDED */
