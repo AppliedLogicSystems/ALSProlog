@@ -2782,7 +2782,6 @@ stream_is_ready(buf, usec_to_wait)
 		return 1;
 	    else
 		{
-			printf("sel=%d\n",errno);
 		   return 0;
 		}
 #else
