@@ -764,7 +764,6 @@ printf_check_format(FormatList, FormatList) :-
 printf_check_format(Culprit,_) :-
 	type_error(list,Culprit,2).
 
-
 printf0([],_,_,_) :- !.
 
 %%%%		%t -- print Prolog term
@@ -802,10 +801,31 @@ printf0([0'\n | Format], Stream, ArgList,Options)
 	nl(Stream),
 	printf0(Format, Stream, ArgList,Options).
 
-%%%%		All other formats
-printf0([0'% | Format], Stream, [Arg | ArgList],Options) :-
-	isformat(Format,CFormat,RestFormat),
+%%%%		%k -- print interval
+printf0([0'%,0'k |Format], Stream, [PrintItem|ArgList],Options)  
+	:-!,
+	printf_intv(Stream, '%f', PrintItem, Options),
+	printf0(Format,Stream,ArgList,Options).
+
+%%%%		Handle remaining formats:
+printf0([0'% | Format], Stream, [Arg | ArgList],Options) 
+	:-
+	isformat(Format,CFormat,RestFormat,FormatStopper,EndSlot),
 	!,
+	disp_printf0(FormatStopper, CFormat, EndSlot, RestFormat, Stream, [Arg | ArgList],Options).
+
+%%%%		%<WP>k -- print interval, with width/precision:
+disp_printf0(0'k, KFormat, EndSlot, RestFormat, Stream, [Arg | ArgList],Options)
+	:-!,
+	EndSlot = 0'f,
+	atomicize_arg([0'% | KFormat], AFormat),
+	printf_intv(Stream, AFormat, Arg, Options),
+	printf0(RestFormat,Stream,ArgList,Options).
+
+%%%%		Pass all other formats to C (via sio_sprintf):
+disp_printf0(FormatStopper, CFormat, EndSlot, RestFormat, Stream, [Arg | ArgList],Options)
+	:-
+	EndSlot = FormatStopper,
 	atomicize_arg(Arg,AArg),
 	atomicize_arg([0'% | CFormat], ACFormat),
 	sio_sprintf(ACFormat,AArg,ArgBuf,_),
@@ -819,11 +839,13 @@ printf0([Char |Format], Stream, ArgList,Options)
 	printf0(Format,Stream,ArgList,Options).
 
 
-isformat([Char | RestFormat],[Char],RestFormat) :-
+isformat([Char | RestFormat],[End],RestFormat, Char, End) 
+	:-
 	isformatstopper(Char),
 	!.
-isformat([C | Cs], [C | Fs], RestFormat) :-
-	isformat(Cs,Fs,RestFormat).
+isformat([C | Cs], [C | Fs], RestFormat, Stopper, End) 
+	:-
+	isformat(Cs,Fs,RestFormat, Stopper, End).
 
 isformatstopper(0'd).
 isformatstopper(0'i).
@@ -838,15 +860,51 @@ isformatstopper(0'g).
 isformatstopper(0'G).
 isformatstopper(0'c).
 isformatstopper(0's).
+isformatstopper(0'k).
 
-atomicize_arg(Arg,Arg) :-
+atomicize_arg(Arg,Arg) 
+	:-
 	atomic(Arg),
 	Arg \= [],
 	!.
-atomicize_arg(List,Atom) :-
+atomicize_arg(List,Atom) 
+	:-
 	atom_codes(Atom,List),
 	!.
 atomicize_arg(_,bad_arg).
+
+printf_intv(Stream, Fmt, Item, Options)
+	:-
+	'$is_delay_var'(Item),
+	'$delay_term_for'(Item, Var_DelayTerm),
+	arg(4, Var_DelayTerm, ConstraintTerm),
+	rel_arith:domain_term_from_constr(ConstraintTerm, DomainTerm),
+	rel_arith:valid_domain(DomainTerm, Type, LArg, UArg),
+	!,
+	epsilon_show(Eps),
+	Width is abs(UArg - LArg),
+	(Width < Eps ->
+		SPrt is (UArg + LArg)/2,
+		sio_sprintf(Fmt, SPrt, Buf,_),
+		put_atom(Stream, Buf)
+		;
+		SPrt = [LArg, UArg],
+		sio_sprintf(Fmt, LArg, BufL,_),
+		sio_sprintf(Fmt, UArg, BufU,_),
+		put_code(Stream, 0'[),
+		put_atom(Stream, BufL),
+		put_code(Stream, 0',),
+		put_atom(Stream, BufU),
+		put_code(Stream, 0'])
+	).
+
+printf_intv(Stream, Fmt, Item, Options)
+	:-
+	put_atom(Stream, bad_arg).
+
+
+
+
 
 /*
  *
@@ -971,7 +1029,6 @@ member_identical(Item,[H1|_],H2,[H2|_]) :-
 	!.
 member_identical(Item,[_|L1],Item2,[_|L2]) :-
 	member_identical(Item,L1,Item2,L2).
-
 
 :-	compiletime,
 	module_closure(exec_to,2,exec_to).

@@ -351,7 +351,7 @@ export getPrologInterrupt/1.
 
 '$interrupt'(3,M,G) 
 	:-!,
-%		pbi_write('----------$interrupt-3------'(M,G) ), pbi_nl, pbi_ttyflush,
+%%pbi_write('----------$interrupt-3------'(M,G) ), pbi_nl, pbi_ttyflush,
 	clct_tr(ActiveDelays),
 	delay_handler(ActiveDelays),
 	M:G.
@@ -815,7 +815,7 @@ load_builtins(BDir, File)
 	sys_searchdir(Path),
         '$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
-%%pbi_write(FileAndPath),pbi_nl,pbi_ttyflush,
+%%pbi_write(FileAndPath), pbi_nl,pbi_ttyflush,
 	'$load'(FileAndPath, 0).
 
 :-	auto_use(sio).
@@ -825,9 +825,8 @@ load_builtins(BDir, File)
 :-	auto_use(rel_arith).
 
 :- 	command_line(CL), 
-	dmember('-nobuilt',CL),!	% ,pbi_write(nobuilts), pbi_nl
+	dmember('-nobuilt',CL),!	
 	;
-		%%pbi_write(loading_builts),pbi_nl,pbi_ttyflush,
 	sys_env(OS,_,_),
 	(OS = macos, !, Sepr = ':'; Sepr = '/'),
 	'$atom_concat'('builtins',Sepr, BDir),
@@ -904,7 +903,7 @@ ld_wins
 
 
 :-  command_line(CL), 
-	dmember('-nobuilt',CL),!	% ,pbi_write(nobuilts_no_endstuff), pbi_nl
+	dmember('-nobuilt',CL),!	
 	;
 	nops, 
 	ld_is, 
@@ -953,7 +952,7 @@ ld_wins
 '$start' 
 	:-
  	command_line(CL), 
-	dmember('-nobuilt',CL),!	% ,pbi_write(nobuilts_no_shell), pbi_nl
+	dmember('-nobuilt',CL),!
 	;
 	start_shell(builtins:prolog_shell).
 

@@ -265,6 +265,7 @@ gfiles_h =
 	icom,
 	intrv,
 	intrv_pr,
+	intrv_pb,
 	istr,
 	lexan,
 	lexinit,

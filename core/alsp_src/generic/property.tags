@@ -22,6 +22,8 @@ LIBBRK - prolog library mechanism code
 
 INTCONSTR - specific interval constraint code
 
+TRAILVALS - trail values (set by trailed_mangle)
+
 FREEZE - specific freeze code
 
 DEBUGFREEZE - debugging messages for freeze support code

@@ -18,6 +18,7 @@
  *=======================================================================*/
 module sio.
 
+
 :-	make_gv('_eof_acceptable_as_fullstop'),
 	set_eof_acceptable_as_fullstop(false).
 

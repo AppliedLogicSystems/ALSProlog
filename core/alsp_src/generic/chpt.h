@@ -60,7 +60,7 @@
 #define chpt_B(b)		(* (((PWord **) (b)) +3))
 
 
-#else /* arch_m68k */
+#else /* not-arch_m68k */
 
 /*
  * m88k, i386, vax, Portable, and Sparc choice point structure

@@ -1759,10 +1759,29 @@ show_again(Port,Box,Depth,Module,Goal,Response) :-
 
 writeGoal(Box,Depth,Port,Module,Goal) 
 	:-
-	printf(debugger_output, 	"(%d) %d %s: ", [Box,Depth,Port]),
-	write_term(debugger_output, Module:Goal,	[lettervars(false)]),
+
+/*
+	printf(debugger_output, 	"(%d) %d %t: ", [Box,Depth,Port]),
+%	pbi_write(Module:Goal),pbi_nl,pbi_ttyflush,
+%	write_term(debugger_output, Module:Goal,	[lettervars(false)]),
+Goal =.. [FCTR | ARGS],
+	write_term(debugger_output, Module:FCTR,	[lettervars(false)]),
+ARGS = [AA | TTT],
+	write_term(debugger_output, '--a'(AA),	[lettervars(false)]),
+AA =.. [AFF | AAargs],
+	write_term(debugger_output, '--aa'(AFF),	[lettervars(false)]),
+AAargs = [ BB | BBT],
+	write_term(debugger_output, '--aa-1'(BB),	[lettervars(false)]),
+	write_term(debugger_output, '--aa-2'(BBT),	[lettervars(false)]),
+
+	write_term(debugger_output, '--b'(TTT),	[lettervars(false)]),
 %% if mac:  nl(debugger_output),
 	flush_output(debugger_output).
+*/
+
+	printf(debugger_output, 	"(%d) %d %t: ", [Box,Depth,Port]),
+	flush_output(debugger_output),
+	pbi_write(Module:Goal),pbi_ttyflush.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%% Windows I/O Hooks %%%%%%%%%%%%%%%%%%%%%%

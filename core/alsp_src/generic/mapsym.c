@@ -351,15 +351,15 @@ sym_order(szp)
 	while (i < BBSZ) {
 	    v = mt[i];
 	    if (v == KEY_EMPTY)
-		i = BBSZ;	/* force exit on next iteration */
+			i = BBSZ;	/* force exit on next iteration */
 	    else if (v == KEY_BBPTR) {
-		mt = ((struct bucket_block *) kp[i])->map_tag;
-		kp = ((struct bucket_block *) kp[i])->key_ptr;
-		i = 0;
+			mt = ((struct bucket_block *) kp[i])->map_tag;
+			kp = ((struct bucket_block *) kp[i])->key_ptr;
+			i = 0;
 	    }
 	    else {
-		rv[v] = kp[i];
-		i++;
+			rv[v] = kp[i];
+			i++;
 	    }
 	}
     }

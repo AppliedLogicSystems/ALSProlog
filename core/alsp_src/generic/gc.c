@@ -291,32 +291,12 @@ gc()
 	    	}  /* while (e < apb)  */
 		}      /* if (apb <= e)-else */
 
-#ifdef TRAILVALS
-		tr2 = tr;
-		for (tr=b-1; tr >= tr2; tr--) {
-			if (1 & (unsigned long)*tr)
-			{
-	    		ap = (~(unsigned long)1 & (long *)*tr);	
-	    		if (oldest_ap <= ap && ap < heap_low)
-				{
-					mark_from(ap);
-					mark_from(*--tr);
-				}
-			}
-			else
-			{
-	    		ap = (long *) *tr;	/* tr is not biased */
-	    		if (oldest_ap <= ap && ap < heap_low)
-					mark_from(ap);
-			}
-		}
-#else
 		for (; tr < b; tr++) {
 	    	ap = (long *) *tr;	/* tr is not biased */
 	    	if (oldest_ap <= ap && ap < heap_low)
 				mark_from(ap);
 		}
-#endif
+
 		ap = apb;
 
 #ifdef ChptBeforeTrail
@@ -408,6 +388,25 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 
 			/* -- Process trail entries until we detect the bottom of a chpt */
 
+#ifdef TRAILVALS
+		while ((ap = (long *) *--b) < b) {		/* while ap is a trail entry */
+	    	if (heap_low <= ap && ap <= heap_high) {
+				if (MARKED(ap)) {
+		    		*--tr = (long) ap;			/* copy the trail entry */
+		    		REV(tr - BIAS);				/* and reverse it 		*/
+		    		*--tr = (long *) *--b;		/* copy the trail value entry */
+		    		REV(tr - BIAS);				/* and reverse it 		*/
+				}
+	    	}
+	    	else {								/* else in compacted heap or on stack */
+				*--tr = (long) ap;				/* copy the trail entry */
+		    	*--tr = (long) (long *) *--b;		/* copy the trail value entry */
+	    	}
+		}	/* while((ap = ...)) */
+
+
+#else /* no-TRAILVALS */
+
 		while ((ap = (long *) *--b) < b) {		/* while ap is a trail entry */
 	    	if (heap_low <= ap && ap <= heap_high) {
 				if (MARKED(ap)) {
@@ -419,6 +418,8 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 				*--tr = (long) ap;				/* copy the trail entry */
 	    	}
 		}	/* while((ap = ...)) */
+
+#endif    /* TRAILVALS */
 
 		b -= (chpt_SIZE - 1);					/* set b to start of chpt */
 
@@ -770,15 +771,15 @@ mark_top:
 #ifdef DEBUGFREEZE
     		printf("\ngc: Delay-val=%x tag=%d..",(int)val,(int)tag);
     		fflush(stdout);
-#endif
+#endif /* DBGFR */
 			xval = (long) MMK_STRUCTURE( ((PWord *)val)-1 );
 			mark(xval);   
 #ifdef DEBUGFREEZE
     		printf("--xval=%x marked\n",(int)xval);
     		fflush(stdout);
-#endif
+#endif /* DBGFR */
 			}
-#endif
+#endif /* FREEZE */
 
 	    if (MARKED(ptr))
 			goto mark_backup;

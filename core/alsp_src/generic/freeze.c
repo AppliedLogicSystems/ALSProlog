@@ -37,7 +37,7 @@ int 	pbi_del_tm_for		PARAMS(( void ));
 int
 pbi_delay()
 {
-	PWord dv,m,g,vv,rdt,*one,*two;
+	PWord *dv,m,g,vv,rdt,*one,*two;
 	int dvt,mt,gt,vvt,rdtt;
 
 #ifdef DEBUGFREEZE
@@ -46,10 +46,14 @@ printf("enter delay----wm_H=%x--TK_DELAY=%x-----------------\n",
 			(int)wm_H,TK_DELAY);
 #endif
 
-    w_get_An(&dv, &dvt, 1);
+    w_get_An((PWord *)&dv, &dvt, 1);
     w_get_An(&m, &mt, 2);
     w_get_An(&g, &gt, 3);
     w_get_An(&rdt, &rdtt, 4);
+#ifdef DEBUGFREEZE
+printf("   >incoming var: %x[_%lu]\n",(int)*dv,
+					(long)(((PWord *) *dv) - wm_heapbase));
+#endif
 	
 /*
 #ifdef	BigStruct
@@ -60,24 +64,78 @@ printf("enter delay----wm_H=%x--TK_DELAY=%x-----------------\n",
 	two = (PWord *)((PWord *)wm_H + 2); 
 #endif
 */
+		/* 1st two args of the delay term: */
 	one = (PWord *)((PWord *)wm_H + 1); 
-	two = (PWord *)((PWord *)wm_H + 2); 
-
-	w_mk_term(&vv, &vvt, TK_DELAY, 4);
-
 	w_install(one,(int)one,MTP_UNBOUND); 
-	w_install((PWord *)dv,(int)one,MTP_UNBOUND);
+	two = (PWord *)((PWord *)wm_H + 2); 
 	w_install(two,(int)two,MTP_UNBOUND);
+
+		/* make the delay term: */
+	w_mk_term(&vv, &vvt, TK_DELAY, 4);
+		/* the 2nd arg (=two) is ok -- it's unbound;
+		   install the module and goal args: */
 	w_install_argn(vv, 3, m,mt);
 	w_install_argn(vv, 4, g,gt);  
 
+	/* Now we have to bind the incoming argument on
+	   which the freeze was executed (dv) to the
+	   newly created unbound variable, one.  Since the
+	   incoming argument dv is older than the newly 
+	   allocated location one, normal practice would be
+	   to install a pointer in one --> dv;  however, the
+	   operation of our delay mechanism requires that 
+	   the binding be installed the other way 'round:
+			dv --> one
+	   So we cannont call on unify [_w_unify(dv, one) ] 
+	   even though this would handle the wake-up
+	   problems we have to solve below.
+
+	   The correct binding is accomplished by:
+			w_install((PWord *)dv,(int)one,MTP_UNBOUND);
+	  */
+
+
+	/*
+	   If dv was an ordinary unbound variable, thie is
+	   all we would have to do.  However, dv might itself 
+	   be an already created delay variable; e.g., we 
+	   could be the second freeze of this example:
+			freeze(X, foo1(X)),
+			freeze(X, foo2(X)),
+
+	   So we have to worry about the case in which
+	   dv is already a delay var; otherwise, nothing
+	   extra has to be done.
+
+	   When both dv and one are delay vars, if the
+	   binding of them together wenth thru the normal
+	   mechanism, eventually we would reach the point
+	   where we recognized that we had two uninstatiated
+	   delay vars which were being bound together. Since
+	   we must cope with the special cases of intervals
+	   (as opposed to non-interval delay vars), we
+	   simply call into Prolog on '$combine_dvars'/2
+	   [from blt_frez.pro] which is designed to do 
+	   exactly this.
+
+
+	   Note that we can assume that dv is uninstatiated,
+	   due to the test performed by freeze/3 in
+	   blt_frez.pro.
+	 */
+
+	w_install(dv,(int)one,MTP_UNBOUND);
+
 	update_chpt_slots((PWord)wm_H);
 
+		/* return the delay term in the 4th arg: */
 	if (w_unify(rdt, rdtt, vv, vvt))
 	{
 #ifdef DEBUGFREEZE
 pbi_cptx();
-printf("exit delay----wm_H=%x--real_dv=%x---------\n", (int)wm_H,(int)one); 
+printf("exit delay---wm_H=%x--real_dv=%x[_%lu]-------\n", 
+					(int)wm_H,  (int)one,
+					(long)(((PWord *) one) - wm_heapbase));
 #endif
 		SUCCEED;
 	}
@@ -136,49 +194,42 @@ pbi_clct_tr()
 
 #ifdef DEBUGFREEZE
 	printf("clct: wm_TR=%x BStop (=B) =%x\n",(int)wm_TR,(int)BStop);
-/*	for (CurT = (PWord **)wm_TR; CurT < (PWord **)BStop; CurT += 1)  */
-	for (CurT = (PWord **)BStop-1; CurT >= (PWord **)wm_TR; CurT -= 1)
-	{
-		printf("%x-", (int)CurT);
 #ifdef TRAILVALS
-			/* Delay term not allowed to be resettable: */
-		if (1 & (unsigned long)*CurT)
-			CurT -= 1;
-		else if (CHK_DELAY(*CurT))
+	for (CurT = (PWord **)wm_TR+1; CurT < (PWord **)BStop; (PWord *)CurT += 2)  
 #else
-		if (CHK_DELAY(*CurT))
+	for (CurT = (PWord **)wm_TR; CurT < (PWord **)BStop; CurT += 1)  
 #endif
+	{
+		printf("%x-[%x]", (int)CurT,(int)*CurT);
+			/* Delay term not allowed to be resettable: */
+		if (CHK_DELAY(*CurT))
 		{
 			DrT = deref_2(*CurT);
-			printf("[%x]Delay VAR! <%x | %x> ",
-					(int)*CurT,(int)(**CurT),(int)deref_2(*CurT));
+			printf("Delay VAR! <%x | %x> ",(int)(**CurT),(int)deref_2(*CurT));
 			Forw1 = (PWord *)DrT + 1;
 			if (M_ISVAR(*Forw1) && (M_VARVAL(*Forw1) == (PWord)Forw1)) 
-			{
+				{
 				printf(" - Active\n");
 				Back1 = (PWord *)DrT-1;
 				w_install_argn((int)Back1, 2, clctv, cvt);
 				w_install(&clctv, (int)Back1, WTP_STRUCTURE);
 				cvt = WTP_STRUCTURE;
-			}
+				}
 			else
-				break;
+				printf(" - InActive\n");
+		/*		break;    */
 		}
 		else
 			printf("\n");
 	}
-#else
-/*	for (CurT = (PWord **)wm_TR; CurT < (PWord **)BStop; CurT += 1) */
-	for (CurT = (PWord **)BStop-1; CurT >= (PWord **)wm_TR; CurT -= 1)
-	{
+#else  /* no-DEBUGFREEZE */
 #ifdef TRAILVALS
-			/* Delay term not allowed to be resettable: */
-		if (1 & (unsigned long)*CurT)
-			CurT -= 1;
-		else if (CHK_DELAY(*CurT))
+	for (CurT = (PWord **)wm_TR+1; CurT < (PWord **)BStop; CurT += 2) 
 #else
-		if (CHK_DELAY(*CurT))
+	for (CurT = (PWord **)wm_TR; CurT < (PWord **)BStop; CurT += 1) 
 #endif
+	{
+		if (CHK_DELAY(*CurT))
 		{
 			DrT = deref_2((PWord)*CurT);
 			Forw1 = (PWord *)DrT + 1;
@@ -248,6 +299,7 @@ update_chpt_slots(hval)
 	 |		w_rungoal(builtins, '$combine_dvars'(r,f), WTP_STRUCTURE)
 	 |
 	 |  '$combine_dvars'/2 is defined in builtins/blt_frez.pro
+	 |  Note that f should be the senior (older) of the two vars.
 	 *--------------------------------------------------------------*/
 void
 combin_dels(r,f)
@@ -273,6 +325,8 @@ printf("combin_dels:r=_%lu f=_%lu \n",
 	w_rungoal(mod, goal, goal_t);
 }
 
+
+
 /*========================================================================*
                                DEBUGGING FUNCTIONS
  *========================================================================*/
@@ -294,7 +348,8 @@ pbi_walk_cps()
 
 	CurP = (PWord *) wm_B;
 	Stop = (PWord *)wm_trailbase;
-	printf("wm_TR=%x  Init CurP (=B) =%x  wm_TRbase=%x\n",(int)CurP,(int)wm_TR,(int)Stop);
+	printf("wm_TR=%x  Init CurP (=B) =%x  wm_TRbase=%x\n",
+						(int)CurP,(int)wm_TR,(int)Stop);
 
 		/* see chpt.h for choice-point macros */
 	while (CurP != 0) {
@@ -332,7 +387,7 @@ disp_heap_item(CurT)
   char *FSt;
 
     	Tagg =  MTP_TAG( *CurT );
-		printf("%x - (%x)", (int)CurT,(int)*CurT);
+		printf("%lx - (%lx)[%d]", (long)CurT,(long)*CurT,(int)Tagg);
     	switch (Tagg) {
 		case MTP_UNBOUND:
 			CTagg = M_VARVAL(*CurT);
@@ -398,21 +453,33 @@ disp_heap_item(CurT)
 int
 pbi_swp_tr(void)
 {
-	PWord **CurT, *Back1, BStop;
+	PWord **CurT, *Back1, BStop, TrS;
 
 	BStop = (PWord) wm_B;
-	printf("BStop (=B) =%lx\n",(long)BStop);
+	TrS = (PWord) wm_TR;
+	printf("trail:wm_TR=%lx -> BStop (=B) =%lx\n",(long)TrS,(long)BStop);
 
+#ifdef TRAILVALS
+	for (CurT = (PWord **)wm_TR+1; CurT < (PWord **)BStop; CurT += 2)
+#else
 	for (CurT = (PWord **)wm_TR; CurT < (PWord **)BStop; CurT += 1)
+#endif
 	{
 		printf("%lx[%lx]->", (long)CurT,(long)(1 & (long)CurT) );
 		disp_heap_item(*CurT);
 		Back1 = (*CurT)-1;
 		if ((MFUNCTOR_TOKID(*Back1) == TK_DELAY) &&
 				(MFUNCTOR_ARITY(*Back1) == 4))
+		{
 			printf("Delay VAR!");
-		printf("         ");
-		disp_heap_item(Back1);
+			printf("         ");
+			disp_heap_item(*Back1);
+		}
+#ifdef TRAILVALS
+		printf("  +>%lx[%lx]->", (long)(CurT-1),(long)(1 & (long)(CurT-1)) );
+		disp_heap_item(*(CurT+1));
+#else
+#endif
 	}
 	SUCCEED;
 }
@@ -446,7 +513,7 @@ disp_heap()
 		start = (int)v1;
 
 	if (v2 == 0) 
-		stop = (int)wm_heapbase;
+		stop = (int)wm_heapbase+1;
 	else if (v2 < 0)
 	{
 		stop = start + (int)v2;

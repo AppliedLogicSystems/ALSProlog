@@ -182,7 +182,7 @@ w_install_argn(s, n, v, t)
 {
 #ifdef BigStruct
     if (MFUNCTOR_ARITY(*((PWord *) s)) == ESCAPE_ARITY) {
-	s = (PWord) (((PWord *) s) + 1);
+		s = (PWord) (((PWord *) s) + 1);
     }
 #endif
     w_install(((PWord *) s) + n, v, t);
@@ -195,7 +195,7 @@ w_install_unbound_argn(s, n)
 {
 #ifdef BigStruct
     if (MFUNCTOR_ARITY(*((PWord *) s)) == ESCAPE_ARITY) {
-	s = (PWord) (((PWord *) s) + 1);
+		s = (PWord) (((PWord *) s) + 1);
     }
 #endif
     w_install(((PWord *) s) + n, (PWord)(((PWord *) s) + n), WTP_UNBOUND);
@@ -210,7 +210,7 @@ w_get_argn(rval, rtag, s, argn)
 {
 #ifdef BigStruct
     if (MFUNCTOR_ARITY(*((PWord *) s)) == ESCAPE_ARITY) {
-	s = (PWord) (((PWord *) s) + 1);
+		s = (PWord) (((PWord *) s) + 1);
     }
 #endif
     w_get(rval, rtag, *(((PWord *) s) + argn));
@@ -230,13 +230,13 @@ w_mk_term(rval, rtag, func, arity)
     *rtag = WTP_STRUCTURE;
 #ifdef	BigStruct
     if (arity >= ESCAPE_ARITY) {
-	wm_H += arity + 2;
-	*p = MMK_FUNCTOR(func, ESCAPE_ARITY);
-	*(p + 1) = MMK_INT(arity);
+		wm_H += arity + 2;
+		*p = MMK_FUNCTOR(func, ESCAPE_ARITY);
+		*(p + 1) = MMK_INT(arity);
     }
     else {
-	wm_H += arity + 1;
-	*p = MMK_FUNCTOR(func, arity);
+		wm_H += arity + 1;
+		*p = MMK_FUNCTOR(func, arity);
     }
 #else  /* BigStruct */
     wm_H += arity + 1;
@@ -260,7 +260,7 @@ w_get_arity(rarity, saddr)
     *rarity = MFUNCTOR_ARITY(*((PWord *) saddr));
 #ifdef BigStruct
     if (*rarity == ESCAPE_ARITY) {
-	*rarity = MINTEGER(*(((PWord *) saddr) + 1));
+		*rarity = MINTEGER(*(((PWord *) saddr) + 1));
     }
 #endif /* BigStruct */
 }
