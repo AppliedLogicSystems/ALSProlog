@@ -91,17 +91,17 @@ schema([
 
 	case(&(context_name), [
 		(mac:  [
-			'GUSIIncludes'	= '{MPW}Interfaces:GUSIIncludes:',
-			'GUSILibraries'	= '{MPW}Libraries:GUSILibraries:',
-			'MoreFilesIncludes' = '{MPW}Interfaces:MoreFilesIncludes:',
-			'MoreFilesLibraries' = '{MPW}Libraries:MoreFilesLibraries:',
-			'Eve68KLibraries' = '{MPW}Libraries:Eve68KLibraries:',
-			'EvePPCLibraries' = '{MPW}Libraries:EvePPCLibraries:',
-			'EveIncludes' = '{MPW}Interfaces:EveIncludes:',
+			'GUSIIncludes'	= '{HeadersAndLibs}Interfaces:GUSIIncludes:',
+			'GUSILibraries'	= '{HeadersAndLibs}Libraries:GUSILibraries:',
+			'MoreFilesIncludes' = '{HeadersAndLibs}Interfaces:MoreFilesIncludes:',
+			'MoreFilesLibraries' = '{HeadersAndLibs}Libraries:MoreFilesLibraries:',
+			'Eve68KLibraries' = '{HeadersAndLibs}Libraries:Eve68KLibraries:',
+			'EvePPCLibraries' = '{HeadersAndLibs}Libraries:EvePPCLibraries:',
+			'EveIncludes' = '{HeadersAndLibs}Interfaces:EveIncludes:',
 
 			'COMMONLIBS68K' = '"{MW68KLibraries}MathLib68K (4i/8d).Lib"  \xB6\n\
 					   "{MW68KLibraries}CPlusPlus.lib" \xB6\n\
-					   "{MW68KLibraries}ToolLibs.o"  \xB6\n\
+					   "{Libraries}ToolLibs.o"  \xB6\n\
 					   "{MW68KLibraries}PLStringFuncs.glue.lib"  \xB6\n\
 					   "{MoreFilesLibraries}MoreFiles.68k"',
 
@@ -109,17 +109,17 @@ schema([
 					   "{MW68KLibraries}MacOS.Lib" \xB6\n\
 					   "{MW68KLibraries}MathLib68K (4i/8d).Lib" \xB6\n\
 					   "{MW68KLibraries}MPW ANSI (4i/8d) C.68K.Lib" \xB6\n\
-					   "{MW68KLibraries}ToolLibs.o" \xB6\n\
+					   "{Libraries}ToolLibs.o" \xB6\n\
 					   "{MW68KLibraries}PLStringFuncs.glue.lib"',
 
 %%			'MPWLIBS68K'	= '"{GUSILibraries}GUSI.Lib.68K" \xB6\n\
 %%					   {COMMONLIBS68K}',
 			'MPWLIBS68K'	= '',
 
-			'SIOUXLIBS68K'	= '"{MW68KLibraries}MacOS.Lib" "{GUSILibraries}GUSI.Lib.68K" \xB6\n\
+			'SIOUXLIBS68K'	= '{COMMONLIBS68K} \xB6\n\
+					   "{MW68KLibraries}MacOS.Lib" "{GUSILibraries}GUSI.Lib.68K" \xB6\n\
 					   "{MW68KLibraries}ANSI (N/4i/8d) C.68K.Lib" \xB6\n\
-					   "{MW68KLibraries}SIOUX.68K.Lib" \xB6\n\
-					   {COMMONLIBS68K}',
+					   "{MW68KLibraries}SIOUX.68K.Lib"',
 
 			'COMMONLIBSPPC'	= '"{SharedLibraries}InterfaceLib" \xB6\n\
 					   "{MWPPCLibraries}ANSI (NL) C.PPC.Lib"  \xB6\n\
@@ -136,8 +136,7 @@ schema([
 					   "{MWPPCLibraries}MWMPWCRuntime.Lib" \xB6\n\
 					   "{MWPPCLibraries}PPCToolLibs.o" \xB6\n\
 					   "{MWPPCLibraries}PLStringFuncsPPC.lib" \xB6\n\
-					   "{MoreFilesLibraries}MoreFiles.PPC" \xB6\n\
-					   "{MWPPCLibraries}console.stubs.c.o"',
+					   "{MoreFilesLibraries}MoreFiles.PPC"',
 
 			'SIOUXLIBSPPC'	= '"{GUSILibraries}GUSI.Lib.PPC" \xB6\n\
 					   "{MWPPCLibraries}MWCRuntime.Lib" \xB6\n\
