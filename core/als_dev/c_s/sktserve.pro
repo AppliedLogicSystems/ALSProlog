@@ -17,9 +17,14 @@ use usradmn.
 
 export start_server/0.
 export start_server/1.
-export server_info_out/4.
 export log_server_notify/4.
 export date_time_seg/4.
+
+	%% Should only be used when servicing a sigalarm interrupt
+	%% (by a worker process) to process incoming messages during
+	%% a deep computation:
+
+:- make_gv('_MainQ').
 
 	/*!------------------------------------------------------------*
 	 |	start_server/0.
@@ -153,12 +158,15 @@ service_loop([m(0) | RestQ], QT, SInfo)
 service_loop([m(1) | RestQ], QT, SInfo)
 	:-!,
 	(streams_from(RestQ, QS) ->
-		simple_select(QS, 0)
+		catch(simple_select(QS, 0),BALL,grider(BALL))
 		;
 		true
 	),
 	QT = [m(0) | NewQT],
 	service_loop(RestQ, NewQT, SInfo).
+
+	%% Need to convert this to a server_out_warning message:
+grider(BALL) :- pbi_write(grider(BALL)),pbi_nl,pbi_ttyflush.
 
 	%% Local job to handle:
 service_loop([local_job(Job) | RestQ], QT, SInfo)
@@ -462,12 +470,27 @@ disp_service_request(stream_not_ready,SR,SW,State,ConnType,QT,NewQT,SInfo)
 disp_service_request(Request,SR,SW, State,ConnType,QT,NewQT,SInfo) 
 	:-
 	functor(Request,worker_done,_),
+%	arg(2, State, XXXX),
 	arg(2, State, worker_wait(Value)),
+	server_info_out(continue(clone), SR, [ConnectAddr], SInfo),
 	!,
 		%% unify return value with the waiting variable 'Value':
 	Request = worker_done(Value),
 	mangle(2, State, nil),
 	push_idle_worker(c(SR,SW,State,ConnType)),
+
+		%% Get the invoking client info from the worker's State:
+	access_login_connection_info(job_connects,State,[JobID-Client]),
+	set_login_connection_info(job_connects,State,[]),
+
+	Client = c(CSR,CSW,CState,CConnType),
+	access_login_connection_info(job_connects,CState,CJobConnects),
+	(dmember(JobID-WRR, CJobConnects) ->
+		list_delete(CJobConnects,JobID-WRR,NewCJobConnects),
+		set_login_connection_info(job_connects,CState, NewCJobConnects)
+		;
+		true
+	),
 
 		%% Now see if there are waiting jobs:
 	(pop_next_job(ClientRec) ->
@@ -704,6 +727,7 @@ fin_disp_service_request(non_login,Request,SR,SW,State,QT,QT,SInfo)
 
 fin_disp_service_request(login,Request,SR,SW,State,QT,NewQT,SInfo)
 	:-!,
+	set_MainQ(q(QT,SInfo)),
 	act_on_server_request(Request,SR,SW,State,SInfo),
 	finish_server_request(Request,SR,SW,State,login,QT,NewQT,SInfo).
 
@@ -776,6 +800,13 @@ fin_remote_proc(TaskName,TaskArgs,Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
 	mangle(2, WState, worker_wait(Value)),
 	QT = [Worker,Client | NewQT],
 
+		%% Enter the worker record in the invoking client's State:
+	access_login_connection_info(job_connects,State,PrevCJobConnects),
+	set_login_connection_info(job_connects,State,[JobID-Worker | PrevCJobConnects]),
+
+		%% Enter the invoking client's record in the worker's State:
+	set_login_connection_info(job_connects,WState,[JobID-Client]),
+
 	setup_fin_remote_proc(Request, TaskEnv, Value, State, SInfo, Mod, Prelude),
 	run_script(Prelude, Mod, TaskEnv, SInfo),
 	printf(WW, 'sibling_job(%t,%t,%t).\n', 
@@ -793,6 +824,9 @@ fin_remote_proc(TaskName,TaskArgs,Request,SR,SW,State,ConnType,QT,NewQT,SInfo)
 	add_job_rec(Request, State),
 		%% push client Rec onto global queue of rec's with waiting jobs:
 	push_next_job(c(SR,SW,State,ConnType)).
+
+
+
 
 setup_fin_remote_proc(Request, TaskEnv, Value, State, SInfo, Mod, Prelude)
 	:-

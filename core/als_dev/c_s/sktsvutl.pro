@@ -187,7 +187,10 @@ server_info_out(InFormatCode, Socket, OtherArgs, SInfo)
 	append(OtherArgs, [ThePort,TheSID], AllArgs),
 	access_server_info(local_write_stream, SInfo, LocalOutput),
 	(verbose_server ->
-		printf(LocalOutput,MFormat, AllArgs),
+		getpid(PID0), PID is floor(PID0), 
+		access_server_info(host_name, SInfo, Host),
+		catenate(['[',Host,'-',PID,']',MFormat],XMFormat),
+		printf(LocalOutput,XMFormat, AllArgs),
 		flush_output(LocalOutput)
 		;
 		true
