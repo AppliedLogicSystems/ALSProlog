@@ -351,12 +351,9 @@ check_for_searchdirs(_, COpts)
 	:-
 	findall(SD, builtins:searchdir(SD), SDs),
 	builtins:sys_searchdir(SysSearchdir),
-	split_path(SysSearchdir, SSDElts),
-	dreverse(SSDElts, RSSDElts),
-	findall( SubDirPath, ( system_subdir(SubD), 
-					dreverse([SubD | RSSDElts], SubDElts),
-					join_path(SubDElts, SubDirPath)  ),
-				SSubDs),
+	findall(SubDirPath, 
+			(system_subdir(SubD), join_path([SysSearchdir,SubD],SubDirPath) ),
+			SSubDs),
 	append(SDs, SSubDs, NewSearchList),
 	directory_self(Self),
 	set_cslt_opts(searchpath, COpts, [Self | NewSearchList]). 	
@@ -373,10 +370,7 @@ local_consult_options(File, BaseFile, COpts, FCOpts)
 
 	cslt_info_recon(File, GlobalNature, InitNature, GlobalRecon, Recon, FileDesc),
 	file_extension(FileDesc,FF,Ext),
-	split_path(FF,FileElts),
-	dreverse(FileElts, [BaseFile | RDirElts]),
-	dreverse(RDirElts, DirElts),
-	join_path(DirElts, OrigDir),
+	path_directory_tail(FF, OrigDir, BaseFile),
 
 	(Ext = pro -> Nature = source ; Nature = InitNature),
 
@@ -407,10 +401,7 @@ check_for_sys_shared_first(FCOpts)
 	:-
 	access_cslt_opts(searchpath, COpts, PrevSearchList), 	
 	sys_searchdir(SysSearchdir),
-	split_path(SysSearchdir, SSDElts),
-	dreverse(SSDElts, RSSDElts),
-	dreverse([shared | RSSDElts], SubDElts),
-	join_path(SubDElts, SubDirPath),
+	join_path([SysSearchdir, shared], SubDirPath),
 		%% Probably should make sure it is also deleted from
 		%% previous path...
 	set_cslt_opts(searchpath, COpts, [SubDirPath | PrevSearchList]). 	
@@ -610,10 +601,7 @@ x_new_places([Place | ParentSearchPath], ThisSearchPath, [Place | New])
 rotate_locations(SrcPath, FCOpts)
 	:-
 	access_cslt_opts(searchpath, FCOpts, SP1),
-	split_path(SrcPath, PathElts),
-	dreverse(PathElts, [_ | RevDirPathElts]),
-	dreverse(RevDirPathElts, DirPathElts),
-	join_path(DirPathElts, DirPath),
+	path_directory_tail(SrcPath, DirPath, _),
 	fin_rotate_locations(SP1, DirPath, FCOpts).
 
 fin_rotate_locations(SP1, Path, FCOpts)
@@ -827,19 +815,16 @@ make_obp_locn(gic, FP, BaseFile, FCOpts, OPath)
 
 make_obp_locn(gias, FP, BaseFile, FCOpts, OPath)
 	:-
-	split_path(FP, FPElts),
-	dreverse(FPElts, [BaseName | RDirElts]),
+	path_directory_tail(FP, Dir, BaseName),
 	sys_env(_,MinorOS,_),
-	dreverse([MinorOS | RDirElts], XDirElts),
-	join_path(XDirElts, XDir),
+	join_path([Dir, MinorOS], XDir),
 	fin_arch_subdir(XDir, BaseName, MinorOS, RDirElts, OPath).
 
 fin_arch_subdir(XDir, BaseName, MinorOS, RDirElts, OPath)
 	:-
 	(exists_file(XDir) -> true ; make_subdir(XDir)),
 	!,
-	dreverse([BaseName, MinorOS | RDirElts], XFPElts),
-	join_path(XFPElts, XFP),
+	join_path([XDir,BaseName], XFP),
 	file_extension(OPath,XFP,obp).
 
 fin_arch_subdir(XDir, BaseName, MinorOS, RDirElts, '').

@@ -73,8 +73,6 @@ prolog_system_error(
 prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), 
 					Env, _, OutS) 
 	:-
-%sio:stream_name(Stream,StreamName),
-%write(syntax_pos_info=p(P1,P2,P3)-Env-StreamName),nl,flush_output,
 	sio:is_stream(Stream,Stream0),
 	sio:is_input_stream(Stream0),
 	!,
@@ -82,8 +80,7 @@ prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream),
 	sio:stream_type(Stream0,StreamType),
 	sio:stream_name(Stream0,StreamName),
 	(StreamType = file ->
-		split_path(StreamName, PathElts),
-		dreverse(PathElts, [File | _])
+		path_directory_tail(StreamName, _, File)
 		;	
 		File = StreamName
 	),
@@ -98,16 +95,6 @@ fin_prolog_syntax_error(_,Context,File,LineNumber,ErrorMessage,EType,
 	OutArgs = [File,LineNumber,ErrorMessage],
 	pse_out(error_stream, EType, OutPattern, OutArgs),
 	flush_output(error_stream).
-
-/*
-fin_prolog_syntax_error(alsdev,Context,File,LineNumber,ErrorMessage,EType,
-							OutPattern, OutArgs, OutS)
-	:-
-	sprintf(atom(EMsg), '%s\n%t: %t, line %d:\n%s\n',
-			[Context,EType,File,LineNumber,ErrorMessage]),
-	info_dialog(shl_tcli, EMsg, 'Syntax Error:').
-*/
-
 
 prolog_system_error(s(ErrorCode,Stream), Env, Args, OutS) 
 	:-

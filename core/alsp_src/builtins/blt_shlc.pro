@@ -211,8 +211,6 @@ output_system_banner(CLInfo)
 
 load_cl_files(CLInfo)
 	:-
-%	arg(2, CLInfo, Verbosity),
-%	set_consult_messages(Verbosity),
 	arg(3, CLInfo, Files),
 	ss_load_files(Files).
 
@@ -299,7 +297,6 @@ export setup_libraries/0.
 setup_libraries
 	:-
 	sys_searchdir(ALSDIRPath),
-%	pathPlusFile(ALSDIRPath, '*', ALSDIRPattern),
 	join_path([ALSDIRPath, '*'], ALSDIRPattern),
 	directory(ALSDIRPattern,1,SubdirList0),
 
@@ -320,7 +317,6 @@ setup_libraries
 setup_local_libraries([], _).
 setup_local_libraries([Lib | LibsList], DirPath)
 	:-
-%	pathPlusFile(DirPath, Lib, LibPath),
 	join_path([DirPath, Lib], LibPath),
 	setup_lib(LibPath),
 	setup_local_libraries(LibsList, DirPath).
@@ -340,11 +336,7 @@ setup_lib(LibPath)
 	:-
 	exists_file(LibPath),
 	!,
-%	pathPlusFile(PathHead,LibDirName,LibPath),
-	split_path(LibPath, LibPathElts),
-	dreverse(LibPathElts,[LibDirName | RevPathHeadElts]),
-	dreverse(RevPathHeadElts, PathHeadElts),
-	join_path(PathHeadElts, PathHead),
+	path_directory_tail(LibPath, PathHead, LibDirName),
 	disp_setup_lib(LibDirName,LibPath,PathHead).
 
 disp_setup_lib(library,LibPath,PathHead)
@@ -355,7 +347,6 @@ disp_setup_lib(library,LibPath,PathHead)
 disp_setup_lib(LibDirName,LibPath,PathHead)
 	:-
 	lib_extension(LibExt),
-%	filePlusExt('*',LibExt,Pattern),
 	file_extension(Pattern,'*',LibExt),
 	files(LibPath, Pattern, LibFileHeaders),
 	install_lib_files(LibFileHeaders, LibPath),
@@ -378,7 +369,6 @@ install_lib_files([LibFileHd | LibFileHeaders], LibPath)
 
 install_lib_f(LibFileHd, LibDirPath)
 	:-
-%	pathPlusFile(LibDirPath, LibFileHd, HeaderFile),
 	join_path([LibDirPath, LibFileHd], HeaderFile),
 	open(HeaderFile, read, IS, []),
 	read(IS, LHTerm0),
