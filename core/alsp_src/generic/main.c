@@ -162,12 +162,6 @@ panic_continue()
 }
 #endif /* arch_m88k */
 
-void
-heap_overflow()
-{
-    fatal_error(FE_OVER_HEAP, 0);
-}
-
 static char *
 isopt(opt,str)
     char *opt;

@@ -79,6 +79,7 @@ global_handler(reisscntrl_c,builtins,silent_abort).
 global_handler(libload,builtins,libload).
 global_handler(prolog_error,builtins,prolog_error).
 global_handler(undefined_predicate,builtins,undefined_predicate).
+global_handler(heap_overflow,builtins,heap_overflow).
 
 /*--------------------------------------------------*
  | call_handler(Event,Goal,Context,Module,Proc)
@@ -229,6 +230,13 @@ prolog_error(_,_,_)
 	:-
 	getPrologError(PE),
 	throw(PE).
+
+heap_overflow(_,Module:Goal,_)
+	:-
+	/* Remove the arguments from the Goal, because the args may be large
+	   and should be garbage collected. */
+	functor(Goal, F, N),
+	resource_error(heap_space, Module:F/N).
 
 undefined_predicate(_,Goal,_) 
 	:-
