@@ -297,6 +297,42 @@ long standard_console_error(char *buf, long n)
 {
     return fwrite(buf, sizeof(char), n, stderr);
 }
+#elif defined(MSWin32)
+
+// Quick fix for Control-C on NT
+extern HANDLE InteruptCompleteEvent;
+
+long standard_console_read(char *buf, long n)
+{
+	DWORD nr;
+	BOOL i;
+	
+	ResetEvent(InteruptCompleteEvent);
+	
+	i = ReadFile(GetStdHandle(STD_INPUT_HANDLE), buf, n, &nr, NULL);
+	
+	if (i) {
+		if (nr == 0 && GetLastError() == ERROR_OPERATION_ABORTED) {
+			WaitForSingleObject(InteruptCompleteEvent, INFINITE);
+			errno = EINTR;
+			return -1;
+		} else return nr;
+	} else {
+		return -1;
+	}
+	
+}
+
+long standard_console_write(char *buf, long n)
+{
+    return write(STDOUT_FILENO, buf, n);
+}
+
+long standard_console_error(char *buf, long n)
+{
+    return write(STDERR_FILENO, buf, n);
+}
+
 #else
 
 long standard_console_read(char *buf, long n)

@@ -1181,12 +1181,15 @@ int MPW_Tool;
 #ifdef __MWERKS__
 #include <signal.h>
 
+HANDLE InteruptCompleteEvent;
+
 BOOL CtrlHandler(DWORD fdwCtrlType);
 BOOL CtrlHandler(DWORD fdwCtrlType)
 {
     switch (fdwCtrlType) {
-    case CTRL_C_EVENT:    
+    case CTRL_C_EVENT:
 	raise(SIGINT);
+	SetEvent(InteruptCompleteEvent);
 	return TRUE;
     case CTRL_BREAK_EVENT:
    	abort();
@@ -1283,12 +1286,14 @@ PI_startup(const PI_system_setup *setup)
 #endif
 
 #ifdef MSWin32
-
+	
 // This should be moved to the dev system code
     if (!(IS_WIN32S)) {
 	if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE))
 	    PI_app_printf(PI_app_printf_warning, "SetConsoleCtrlHandler failed !\n");
     }
+    
+    InteruptCompleteEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     
     {
 	WORD wVersionRequested = MAKEWORD(1, 1);
