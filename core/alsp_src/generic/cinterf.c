@@ -176,7 +176,7 @@ lookup_c_sym(symbol)
 #endif
 
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 sym_insert_dbl(char *symbol, int type,  double doubleval)
 {
     int   idx;
@@ -194,7 +194,7 @@ sym_insert_dbl(char *symbol, int type,  double doubleval)
 }
 
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 sym_insert_2long(char *symbol, int type, long longval1, long longval2)
 {
     int   idx;
@@ -235,7 +235,7 @@ sym_insert_2long(char *symbol, int type, long longval1, long longval2)
  | PI_VAR            None.  Return 0.
  *---------------------------------------------------------------------------*/
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 CI_get_integer(PWord *arg, int type)
 {
     double adbl;
@@ -331,7 +331,7 @@ CI_get_integer(PWord *arg, int type)
  * int CI_get_double(double *,unsigned long, unsigned long)
  */
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 CI_get_double(double *dbl, unsigned long arg, unsigned long type)
 {
     switch (type) {
@@ -898,7 +898,7 @@ static void remove_callback(void *func, void *object, const char *term)
 #pragma export on
 #endif
 
-ALSPI_API(const char *)
+EXPORT ALSPI_API(const char *)
 find_callback(void *func, void *object)
 {
     int i;

@@ -346,7 +346,7 @@ static int console_io(int port, char *buf, size_t size)
 #pragma export on
 #endif
 
-ALSPI_API(void)	PI_set_console_functions(console_func read,
+EXPORT ALSPI_API(void)	PI_set_console_functions(console_func read,
 				console_func write, console_func error)
 {
 	console_read = read;

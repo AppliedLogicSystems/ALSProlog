@@ -82,7 +82,7 @@ load_foreign(filename, libstr, initfcn)
 #pragma export on
 #endif
 
-ALSPI_API(char *)
+EXPORT ALSPI_API(char *)
 PI_forceuia(PWord *val_ptr, int  *type_ptr)
 {
     if (force_uia(val_ptr, type_ptr))
@@ -92,7 +92,7 @@ PI_forceuia(PWord *val_ptr, int  *type_ptr)
 }
 
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_getan(PWord *val_ptr, int  *type_ptr, int arg_num)
 {
     w_get_An(val_ptr, type_ptr, arg_num);
@@ -101,7 +101,7 @@ PI_getan(PWord *val_ptr, int  *type_ptr, int arg_num)
 #endif
 }
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_getargn(PWord *val_ptr, int  *type_ptr, PWord struct_val, int arg_num)
 {
     w_get_argn(val_ptr, type_ptr, struct_val, arg_num);
@@ -111,7 +111,7 @@ PI_getargn(PWord *val_ptr, int  *type_ptr, PWord struct_val, int arg_num)
 }
 
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_gethead(PWord *val_ptr, int  *type_ptr, PWord list_val)
 {
     w_get_car(val_ptr, type_ptr, list_val);
@@ -120,7 +120,7 @@ PI_gethead(PWord *val_ptr, int  *type_ptr, PWord list_val)
 #endif
 }
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_gettail(PWord *val_ptr, int  *type_ptr, PWord list_val)
 {
     w_get_cdr(val_ptr, type_ptr, list_val);
@@ -129,7 +129,7 @@ PI_gettail(PWord *val_ptr, int  *type_ptr, PWord list_val)
 #endif
 }
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_getdouble(double *num, PWord v)
 {
 #ifndef DoubleType
@@ -146,7 +146,7 @@ PI_getdouble(double *num, PWord v)
 }
 
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_getstruct(PWord *func_ptr, int  *arity_ptr, PWord struct_val)
 {
     w_get_functor(func_ptr, struct_val);
@@ -162,7 +162,7 @@ PI_getstruct(PWord *func_ptr, int  *arity_ptr, PWord struct_val)
  *                              chris - 6/8/88
  */
 
-ALSPI_API(char *)
+EXPORT ALSPI_API(char *)
 PI_getsymname(char *buf_ptr, PWord sym_val, int size)
 {
     if (buf_ptr == (char *) 0)
@@ -181,7 +181,7 @@ PI_getsymname(char *buf_ptr, PWord sym_val, int size)
  * is zero.
  */
 
-ALSPI_API(char *)
+EXPORT ALSPI_API(char *)
 PI_getuianame(char *buf_ptr, PWord uia_val, int size)
 {
     if (buf_ptr == NULL)
@@ -193,7 +193,7 @@ PI_getuianame(char *buf_ptr, PWord uia_val, int size)
 }
 
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_getuiasize(PWord uia_val, int *size_ptr)
 {
     *size_ptr = (int) M_UIASIZE(uia_val);
@@ -204,7 +204,7 @@ PI_getuiasize(PWord uia_val, int *size_ptr)
  * need for it to be an address.  - chris 7/15/88
  */
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_makedouble(PWord *v, int *t, double n)
 {
     make_numberx(v, t, n, WTP_DOUBLE);
@@ -216,7 +216,7 @@ PI_makedouble(PWord *v, int *t, double n)
 
 /* Creation of lists and structures is fixed.   -- Ilyas & Raman 5/16/91 */
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_makelist(PWord *val_ptr, int *val_type)
 {
     w_mk_list(val_ptr, val_type);
@@ -226,7 +226,7 @@ PI_makelist(PWord *val_ptr, int *val_type)
 }
 
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_makestruct(PWord *val_ptr, int *val_type, PWord functor, int arity)
 {
     int   i;
@@ -238,7 +238,7 @@ PI_makestruct(PWord *val_ptr, int *val_type, PWord functor, int arity)
     }
 }
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_makesym(PWord *val_ptr, int  *val_type,  const char *buf_ptr)
 {
     *val_ptr = find_token((UCHAR *)buf_ptr);
@@ -246,7 +246,7 @@ PI_makesym(PWord *val_ptr, int  *val_type,  const char *buf_ptr)
 	*val_type = PI_SYM;
 }
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_makeuia(PWord *val_ptr, int  *val_type, const char *buf_ptr)
 {
     if ((*val_ptr = probe_token((UCHAR *)buf_ptr)) == 0)
@@ -255,7 +255,7 @@ PI_makeuia(PWord *val_ptr, int  *val_type, const char *buf_ptr)
 	*val_type = PI_SYM;
 }
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_allocuia(PWord *val_ptr, int *val_type, int size)
 {
     w_uia_alloc(val_ptr, val_type, (size_t)size);
@@ -269,7 +269,7 @@ PI_allocuia(PWord *val_ptr, int *val_type, int size)
  */
 
 /*VARARGS0 */
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 PI_printf(const char *fmt, ...)
 {
     va_list l;
@@ -282,7 +282,7 @@ PI_printf(const char *fmt, ...)
     return result;
 }
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 PI_vprintf(const char *fmt, va_list args)
 {
     char *buf;
@@ -308,7 +308,7 @@ PI_vprintf(const char *fmt, va_list args)
  */
 
 /*VARARGS0 */
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 PI_aprintf(const char *alias, const char *fmt, ...)
 {
     va_list l;
@@ -321,7 +321,7 @@ PI_aprintf(const char *alias, const char *fmt, ...)
     return result;
 }
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 PI_vaprintf(const char *alias, const char *fmt, va_list args)
 {
     char *buf;
@@ -344,13 +344,13 @@ PI_vaprintf(const char *alias, const char *fmt, va_list args)
 #ifdef APP_PRINTF_CALLBACK
 void (*PI_app_printf_callback)(int, va_list) = NULL;
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_set_app_printf_callback(void (*callback)(int, va_list))
 {
     PI_app_printf_callback = callback;
 }
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_vapp_printf(int messtype, va_list args)
 {
     if (PI_app_printf_callback) {
@@ -358,7 +358,7 @@ PI_vapp_printf(int messtype, va_list args)
     }    	
 }
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PI_app_printf(int messtype, ...)
 {
     if (PI_app_printf_callback) {
@@ -370,13 +370,13 @@ PI_app_printf(int messtype, ...)
 }
 #endif
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 PI_rungoal(PWord mod, PWord goal, int goaltype)
 {
     return w_rungoal(mod, goal, goaltype);
 }
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 PI_rungoal_with_update(PWord mod, PWord *gvp, int *gtp)
 {
     int status, handle;
@@ -388,7 +388,7 @@ PI_rungoal_with_update(PWord mod, PWord *gvp, int *gtp)
     return status;
 }
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 PI_rungoal_with_update_and_catch(PWord mod, PWord *gvp, int *gtp, int *exception)
 {
     int status, handle;
@@ -401,7 +401,7 @@ PI_rungoal_with_update_and_catch(PWord mod, PWord *gvp, int *gtp, int *exception
     return status;
 }
 
-ALSPI_API(int)
+EXPORT ALSPI_API(int)
 PI_unify(PWord val1, int type1, PWord val2, int type2)
 {
 #ifndef DoubleType
@@ -413,7 +413,7 @@ PI_unify(PWord val1, int type1, PWord val2, int type2)
 
 
 
-ALSPI_API(void)
+EXPORT ALSPI_API(void)
 PrologInit(PSTRUCT *ap)
 {
 

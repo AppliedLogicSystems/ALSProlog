@@ -175,6 +175,11 @@
 #endif /* KERNAL */
 #endif
 
+#if defined(__MWERKS__) && defined(WIN32)
+#define EXPORT __declspec(dllexport)
+#else
+#define EXPORT
+#endif
 /*---------------------------------------------------------------------*
  | Macros concerned with constraints, intervals, freeze, etc.
  |
