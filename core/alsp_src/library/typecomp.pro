@@ -613,5 +613,132 @@ ct_message(false, Message,Values)
 	printf(Message,Values),
 	flush_output.
 
-endmod.
 
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+/*--------------------------------------------------------------------------*
+	do_inline_defstruct(Def, Module)
+ *--------------------------------------------------------------------------*/
+
+
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
+
+export create_type_def/3.
+
+create_type_def(defStruct(TypeName,SpecsList), Mod, Result)
+	:-
+	dmember(accessPred=AccessPred, SpecsList),
+	dmember(setPred=SetPred, SpecsList),
+	dmember(makePred=MakePred, SpecsList),
+	dmember(structLabel=StructLabel, SpecsList),
+	dmember(propertiesList=InitPropertiesList, SpecsList),
+	expand_includes(InitPropertiesList, PropertiesList, Tail,Quiet,DefList),
+	Tail = [],
+
+	create_structDefs(TypeName, AccessPred, SetPred, MakePred, 
+					PropertiesList, StructLabel,Result).
+
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
+create_structDefs(TypeName, AccessPred, SetPred, Constructor, 
+				PropertiesList, StructLabel,Result)
+	:-
+	Result = [export(AccessPred/3),export(SetPred/3),
+				export(Constructor/1), export(XCons/2) | RT1],
+
+	create_accessPreds(PropertiesList, AccessPred, SetPred, 1, NP1, 
+						Defaults, RT1, RT2),
+	NumProps is NP1 - 1,
+
+	catenate(x, Constructor, XCons),
+	create_constructor(Constructor, XCons, StructLabel, NumProps,
+					Defaults, RT2, RT3, PropertiesList),
+	RT3 = [].
+
+
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
+create_accessPreds([],_,_, AccumNum, AccumNum,[],Tail,Tail).
+create_accessPreds([(Item/Default)-Comment | Rest], AccessPred, SetPred,AccumNum,
+				FinalNum,[AccumNum-Default | RestDefaults],
+				Result, ResultTail)
+	:-!,
+	create_accessPreds([Item/Default | Rest], AccessPred, SetPred,AccumNum,
+				FinalNum,[AccumNum-Default | RestDefaults],
+				Result, ResultTail).
+
+create_accessPreds([Item/Default | Rest], AccessPred, SetPred,AccumNum,
+				FinalNum,[AccumNum-Default | RestDefaults],
+				[Access,Set   | InterTail], ResultTail)
+	:-!,
+	create_accessPred(Item, AccessPred, SetPred, AccumNum, Access,Set),
+	NewAccumNum is AccumNum + 1,
+	create_accessPreds(Rest, AccessPred, SetPred, NewAccumNum, 
+						FinalNum,RestDefaults,
+						InterTail, ResultTail).
+
+create_accessPreds([Item - Comment | Rest], AccessPred, SetPred, 
+				AccumNum, FinalNum,Defaults,
+				Result, ResultTail)
+	:-!,
+	create_accessPreds([Item | Rest], AccessPred, SetPred, 
+				AccumNum, FinalNum,Defaults,
+				Result, ResultTail).
+
+create_accessPreds([Item | Rest], AccessPred, SetPred, 
+				AccumNum, FinalNum,Defaults,
+				[Access,Set   | InterTail], ResultTail)
+	:-
+	create_accessPred(Item, AccessPred, SetPred, AccumNum, Access,Set),
+	NewAccumNum is AccumNum + 1,
+	create_accessPreds(Rest, AccessPred, SetPred, 
+					NewAccumNum, FinalNum,Defaults,
+					InterTail, ResultTail).
+
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
+create_accessPred(Item, AccessPred, SetPred, AccumNum, Access, Set)
+	:-
+	AccessHead =.. [AccessPred, Item, Struct, Value],
+	Access = (AccessHead :- arg(AccumNum, Struct, Value)),
+	SetHead =.. [SetPred, Item, Struct, Value],
+	Set = (SetHead :- mangle(AccumNum, Struct, Value)).
+
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
+create_constructor(Constructor, XCons, StructLabel, NumProperties, Defaults, 
+				[(CHead :- CBody), CHead3 | Tail], Tail, 
+				PropertiesList)
+	:-
+	CHead =.. [Constructor, Structure],
+	constr_body(Defaults, Structure, StructLabel, NumProperties, CBody, SArgList),
+
+%	Structure =.. [StructLabel | SArgList],
+	length(SArgList, NN),
+	functor(XStructure, StructLabel, NN),
+	XStructure =.. [StructLabel | XArgList],
+
+%	CHead3 =.. [XCons, Structure, SArgList].
+	CHead3 =.. [XCons, XStructure, XArgList].
+
+
+
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
+constr_body([], Structure, StructLabel, NumProperties, Body, [])
+	:-!,
+	Body = functor(Structure, StructLabel, NumProperties).
+
+constr_body(Defaults, Structure, StructLabel, NumProperties, Body, ArgsList)
+	:-
+	build_cstr_args(1,NumProperties, Defaults, ArgsList),
+	Body =
+		(Structure =.. [StructLabel | ArgsList] ).
+
+endmod.

@@ -1,6 +1,0 @@
-libactivate(objects,[library,objs_run],
-    [send/2,send/3,send_self/2,toggle_null_send_notify/0,send_all/2,
-        send_each/2,queue_oop_event/1,insert_oop_event_request/2,inherit/3,
-        init_nil/2,accessObjStruct/3,setObjStruct/3,:= /2,set_slots0/4,
-        deref_val/3,standardObject/2,genericObjects/2,clone/2],
-    []).
