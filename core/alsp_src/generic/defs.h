@@ -427,6 +427,11 @@ extern	long *	ss_fmalloc	PARAMS(( size_t ));
  | Declare prototypes of other functions which have no obvious header file.
  *---------------------------------------------------------------------*/
 
+/* ----------   arith.c ----------   */
+
+void make_ieee_nan PARAMS( (PWord *, int *) );
+void make_ieee_inf PARAMS( (PWord *, int *) );
+
 /* ----------   main.c ----------   */
 #ifdef MSWin32
 extern	char	*MinorOSStr;
@@ -457,7 +462,7 @@ extern	void	list_asm	PARAMS(( Code *, int ));
 extern	void	f_icode		PARAMS(( int, long, long, long, long ));
 extern	int	obp_open	PARAMS(( char * ));
 extern	void	obp_close	PARAMS(( void ));
-extern	int	f_load		PARAMS(( char * ));
+extern	int	f_load		PARAMS(( CONST char * ));
 extern	int	load_file	PARAMS(( char *, int ));
 #ifdef MacOS
 extern	int	obpres_load	PARAMS((const char *fname));
@@ -512,6 +517,14 @@ extern  int	chdir			PARAMS((CONST char *dirname));
 extern  char *	getcwd			PARAMS((char *, int));
 #endif
 #endif
+
+typedef struct {
+    unsigned char *start;
+    unsigned long length;
+} mem_file_info;
+
+extern unsigned char *open_memory_file(const char *file_name, mem_file_info *info);
+extern void close_memory_file(mem_file_info *info);
 
 /* ----------   sig.c ----------   */
 extern	void	init_sigint	PARAMS(( void ));

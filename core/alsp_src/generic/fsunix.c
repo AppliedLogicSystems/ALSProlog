@@ -967,6 +967,55 @@ pgetpid()
 #endif
 #endif /* FSACCESS */
 
+#ifdef UNIX
+#include <sys/mman.h>
+#include <fcntl.h>
+
+#ifndef MAP_FAILED
+#define MAP_FAILED -1
+#endif
+
+unsigned char *open_memory_file(const char *file_name, mem_file_info *info)
+{
+    int file, r;
+    struct stat s;
+    unsigned char *mem;
+    
+    file = open(file_name,  O_RDONLY);
+    if (file == -1) goto error;
+
+    r = fstat(file, &s);
+    if (r != 0) goto close_error;
+    
+#ifdef HAVE_MMAP_ZERO
+    mem = mmap(NULL, s.st_size, PROT_READ, MAP_FILE | MAP_VARIABLE | MAP_PRIVATE, file, 0);
+    if (mem == (unsigned char *)-1) goto close_error;
+#else
+    mem = mmap(NULL, s.st_size, PROT_READ, MAP_PRIVATE, file, 0);
+    if (mem == MAP_FAILED) goto close_error;
+#endif
+    
+    close(file);
+
+    info->start = mem;
+    info->length = s.st_size;
+    
+    return mem;
+
+close_error:
+    close(file);
+error:
+    return NULL;
+
+}
+
+void close_memory_file(mem_file_info *info)
+{
+    munmap(info->start, info->length);
+}
+#endif
+
+
 #endif /* (defined(UNIX) || (defined(MacOS) && defined(HAVE_GUSI) && !defined(__GO32__) && !defined(OS2) */
 
 /* *INDENT-OFF* */

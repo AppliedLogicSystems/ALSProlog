@@ -827,4 +827,53 @@ pcmp_fs(void)
 
 #endif /* not HAVE_GUSI */
 
+#ifdef MacOS
+static unsigned char *open_memory_file(const char *file_name, mem_file_info *info)
+{
+    Str255 pfile_name;
+    FSSpec spec;
+    short ref;
+    OSErr err;
+    Ptr mem;
+    long size, count;
+    
+    c2pstrcpy(pfile_name, file_name);
+    
+    err = FSMakeFSSpec(0, 0, pfile_name, &spec);
+    if (err != noErr) goto error;
+    
+    err = FSpOpenDF(&spec, fsRdPerm, &ref);
+    if (err != noErr) goto error;
+    
+    err = GetEOF(ref, &size);
+    if (err != noErr) goto close_error;
+    
+    mem = NewPtr(size);
+    if (!mem) goto close_error;
+    
+    count = size;
+    err = FSRead(ref, &count, mem);
+    if (err != noErr || count != size) goto dispose_close_error;
+    
+    FSClose(ref);
+    
+    info->start = mem;
+    info->length = 0;
+    
+    return mem;
+    
+dispose_close_error:
+    DisposePtr(mem);
+close_error:
+    FSClose(ref);
+error:
+    return NULL;
+}
+
+static void close_memory_file(mem_file_info *info)
+{
+    DisposePtr(info->start);
+}
+#endif
+
 #endif /* MacOS */
