@@ -16,6 +16,8 @@
 #include <tcl.h>
 #include <tk.h>
 
+#define ITCL
+
 #ifdef ITCL
 #include <itcl.h>
 /* #include <itk.h> */
@@ -26,6 +28,10 @@ int		Tcl_Import _ANSI_ARGS_((Tcl_Interp *interp,
 			    int allowOverwrite));
 Tcl_Namespace *	Tcl_GetGlobalNamespace _ANSI_ARGS_((
 			    Tcl_Interp *interp));
+
+/* This prototype is from itk.h */
+int Itk_Init _ANSI_ARGS_((Tcl_Interp *interp));
+
 #endif
 
 #include "alspi.h"
@@ -514,7 +520,6 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 	if (r != TCL_OK) {
 	  TclToPrologResult(w, NULL, interp, r);
 	  goto error_delete;
-	  return TCL_ERROR;
 	}
 
 	r = Tcl_Eval(interp,
@@ -523,7 +528,6 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 	if (r != TCL_OK) {
 	  TclToPrologResult(w, NULL, interp, r);
 	  goto error_delete;
-	  return TCL_ERROR;
 	}
 #endif
 
