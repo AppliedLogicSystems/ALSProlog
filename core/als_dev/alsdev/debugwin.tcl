@@ -245,6 +245,9 @@ proc vTclWindow.debugwin {base} {
 proc do_the_debug_flag {} {
 	global array proenv
 	prolog call builtins do_set_prolog_flag -atom debug -atom $proenv(debug)
+	if {$proenv(debug) == "on" } then {
+		prolog call alsdev check_reload_consults
+	}
 }
 
 proc vTclWindow.debug_source_trace {base Title} {
