@@ -24,8 +24,14 @@ alsdir
 	builtins
 	libraries
 	shared
-		als_tklib.tcl
-		tcltk.pro
-		tk_alslib_samples.pro
 		turnstile_splash.gif
-		
+		tk_alslib_samples.pro
+		tcltk.pro
+		debugwin.tcl
+		als_menu.tcl
+		als_settings.tcl
+		als_tklib.tcl
+		alsdev.tcl
+		alsdev_main.tcl
+		als_document.tcl
+		defstr.tcl		
