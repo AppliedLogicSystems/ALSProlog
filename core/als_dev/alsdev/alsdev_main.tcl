@@ -19,7 +19,8 @@ proc vTclWindow.topals {args} {
     ###################
     toplevel .topals -class Toplevel -background $proenv(.topals,background) 
     wm focusmodel .topals passive
-    wm geometry .topals 559x567+149+178
+    wm geometry .topals $proenv(.topals,geometry)
+	wm positionfrom .topals user
     wm maxsize .topals 1265 994
     wm minsize .topals 1 1
     if {$tcl_platform(platform) != "macintosh"} {

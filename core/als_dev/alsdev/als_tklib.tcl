@@ -175,7 +175,7 @@ proc do_select_items { BaseName Mode Title SourceItemsList } {
 	set Indicies [$BaseName.clist.listbox curselection]
 	set Result ""
 	foreach Item $Indicies {
-		lappend Result [$BaseName.clist.listbox get $Item]
+		lappend Result "'[$BaseName.clist.listbox get $Item]'"
 	}
 	destroy $BaseName
 	return $Result
