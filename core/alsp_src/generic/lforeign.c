@@ -609,6 +609,7 @@ typedef enum {
     permission_error,
     not_plugin_error,
     memory_error,
+    version_error,
     init_error,
     unknown_error,
     error_count
@@ -621,6 +622,7 @@ const char *error_type_name[error_count] = {
     "permission_error",
     "not_plugin_error",
     "memory_error",
+    "version_error",
     "init_error",
     "unknown_error"
 };
@@ -662,7 +664,10 @@ int prolog_load_plugin(void)
     if (result.type == no_error) {
     	int version;
     	version = lib_info.library_init(NULL, NULL);
-    	if (version != ALSPI_DLIB_VERSION) result.type = init_error;
+    	if (version != ALSPI_DLIB_VERSION) {
+	  result.type = version_error;
+	  result.native_code = version;
+	}
     }
     
     /* Initialize the plugin. */
