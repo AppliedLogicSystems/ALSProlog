@@ -12,7 +12,7 @@ MAN=$ALS_PROLOG/manual
 
 if test $# -ne 1
 then
-    echo "Usage: $0 [student | standard]" 1>&2
+    echo "Usage: $0 [student | standard | demo]" 1>&2
     exit 2
 fi
 
@@ -22,6 +22,7 @@ case $EDITION in
 student)
 DISTDIR="ALS Student Prolog" ;
 EXE="ALS Student Prolog.exe" ;
+EXET="ALS Student Prolog.exe" ;
 EXAMPLE_SET="als pxs Chat80" ;
 WELCOME=welcome_student.als ;
 MANUAL=student_man.pdf ;
@@ -31,6 +32,17 @@ HELP="studhelp" ;
 standard)
 DISTDIR="ALS Prolog" ;
 EXE="ALS Prolog.exe" ;
+EXET="ALS Prolog.exe" ;
+EXAMPLE_SET="als pxs more objectpro visual Prolog1000 Chat80" ;
+WELCOME=welcome_standard.als ;
+MANUAL=als_man.pdf ; 
+MANUALNAME="ALS Prolog Manual.pdf" ;
+HELP="alshelp" ;
+;;
+demo)
+DISTDIR="ALS Prolog Demo" ;
+EXE="ALS Prolog Demo.exe" ;
+EXET="ALS Prolog.exe" ;
 EXAMPLE_SET="als pxs more objectpro visual Prolog1000 Chat80" ;
 WELCOME=welcome_standard.als ;
 MANUAL=als_man.pdf ; 
@@ -42,7 +54,7 @@ esac
 rm -rf "$DISTDIR"
 mkdir "$DISTDIR"
 
-cp -pr "$BIN/$EXE" "$DISTDIR"
+cp -pr "$BIN/$EXE" "$DISTDIR/$EXET"
 cp -pr "$BIN/msvcrt.dll" "$DISTDIR"
 cp -pr "$BIN/tcl80.dll" "$DISTDIR"
 cp -pr "$BIN/tk80.dll" "$DISTDIR"
@@ -77,6 +89,14 @@ then
 	cp -pr "$BIN/alspro.exe" "$DISTDIR"
 	cp -pr "$BIN/alspro.dll" "$DISTDIR"
 fi
+
+if test $EDITION = demo
+then
+	cp -pr "$ALS_PROLOG/foreign_sdk/win32/ALS_Prolog_Foreign_SDK" "$DISTDIR"
+	cp -pr "$BIN/alspro_demo.exe" "$DISTDIR/alspro.exe"
+	cp -pr "$BIN/alspro.dll" "$DISTDIR"
+fi
+
 
 echo "Build directory complete."
 echo "Please add the directory to the installer script and create installer."
