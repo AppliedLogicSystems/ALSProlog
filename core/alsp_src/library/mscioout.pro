@@ -141,20 +141,27 @@ write_lines_opt(List, Opts)
  *!------------------------------------------------------------*/
 write_lines(Stream, Lines, Options)
 	:-
-	write_lines0(Lines, Stream, Options).
+	(append(Left, [left_mar(AA) | Right], Options) ->
+		append(Left, Right, Options0)
+		;
+		Options0 = Options, AA = ''
+	),
+	write_lines0(Lines, AA, Stream, Options0).
 
-write_lines0([], _, _) :-!.
+write_lines0([], _, _, _) :-!.
 
-write_lines0([Line | Lines], Stream, Options)
+write_lines0([Line | Lines], AA, Stream, Options)
 	:-!,
+	put_atom(Stream, AA),
 	write_term(Stream, Line, Options),
 	nl(Stream),
-	write_lines0(Lines, Stream, Options).
+	write_lines0(Lines, AA, Stream, Options).
 
-write_lines0(Lines, Stream, Options)
+write_lines0(Lines, AA, Stream, Options)
 	:-
+	put_atom(Stream, AA),
 	atomic(Lines),
-	write_term(Stream, Lines, Options),
+	put_atom(Stream, Lines),
 	nl(Stream).
 
 /*!-------------------------------------------------------------
