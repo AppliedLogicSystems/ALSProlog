@@ -345,6 +345,8 @@ Tcl_ALS_Prolog_ObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl
 static int
 Tcl_DoOneEventCmd(ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
 {
+#pragma unused(data)
+
 	int index, result;
 	
 	enum {EVENT_WAIT, EVENT_DONT_WAIT};
