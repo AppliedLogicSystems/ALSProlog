@@ -1,0 +1,38 @@
+Win32 Service Kit Build Instructions
+------------------------------------
+
+Materials
+---------
+
+Windows95 or WindowsNT computer.
+
+Metrowerks CodeWarrior Pro 1 for Windows
+
+"ALS Prolog Support" folder installed in {Compiler f}..\
+	(contains alspi.h and alspro.dll.lib)
+
+Abobe FrameMaker 5.0
+
+Adobe Acrobat 3.0
+
+
+Instructions
+------------
+
+1) Build Executables
+	Open Service_Kit_Project.mcp in CW Pro 1.
+	Build "Service Test" Target.
+	Build "Service Package Stub" Target.
+
+2) Build Manual
+	Open Win32_Service_Kit.frame in FrameMaker 5.0
+	Print to a Postscript file.
+	Convert Postscript file to PDF with Acrobat 3.0
+
+3) Consutruct Distribution Package
+	Create a folder called "Win32 Service Kit" plus the version number,
+	with the following files in it (remove underscores where necessary):
+		Service Test.exe
+		Service Package Stub.exe
+		Win32 Service.pro
+		Simple Service.pro
