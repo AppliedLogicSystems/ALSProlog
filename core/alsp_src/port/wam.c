@@ -873,7 +873,8 @@ overflow_check:
 	    reg1 = (PWord *) P;
 	    P += OPSIZE;
 overflow_check0:
-#ifdef MacOS
+#if 0
+//#ifdef MacOS
 #ifdef DEBUG
 		if ((unsigned long) mr_SP < (unsigned long) wm_stackbot_safety)
 			stack_overflow();
@@ -889,6 +890,8 @@ overflow_check0:
 				if (special_overflow) goto special_finish;
 			DISPATCH;
 	    }
+
+
 	    if ((unsigned long) wm_safety <= (unsigned long) wm_normal) {
 				/* --------- ORDINARY GC INTERRUPT --------- */
 
@@ -915,6 +918,17 @@ overflow_check0:
 				(ntbl_entry *) ((Code *)reg1 - OVFLOW_CHECK_BDISP);
 			PWord arg3;
 
+#ifdef MacOS
+	{
+	extern long coop_interupt;
+	    if (coop_interupt) {
+	    	PI_yield_time();
+		wm_safety = wm_normal;	/* reset interrupt */
+		if (special_overflow) goto special_finish;
+	    	DISPATCH;
+	    }
+	}
+#endif
                 special_overflow = 0;
 			n = entfrom->nargs;
 
