@@ -232,7 +232,7 @@ winter.o:	winter.h
 #
 exeformat	:= $(shell ($(CC) -o /tmp/which-exe $(srcdir)/utils/which-exe.c >/dev/null 2>&1) ; /tmp/which-exe ; rm -f /tmp/which-exe)
 
-alsmics_c	= $(exeformat)-mics.c
+alsmics_c	= $(exeformat)mics.c
 ifeq (elf,$(exeformat))
 micsflags	= -lelf
 endif

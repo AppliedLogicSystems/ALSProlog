@@ -91,15 +91,14 @@ $(asrcext).s :
 .SUFFIXES:	$(asrcext)
 
 cleanup:
-	-rm *.o
-	-rm *.obp
-	-rm core
+	-rm -f *.o
+	-rm -f *.obp
+	-rm -f core
 
 super_clean:
-	-rm *.o
-	-rm *.h
-	-rm *.obp
-	-rm core
-	-rm alsmics
+	-rm -f *.o
+	-rm -f *.h
+	-rm -f *.obp
+	-rm -f core
 	-rm -r atrans
 	-rm -r alsdir

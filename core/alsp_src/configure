@@ -2488,6 +2488,7 @@ s%@top_srcdir@%$top_srcdir%g
 s%@prefix@%$prefix%g
 s%@exec_prefix@%$exec_prefix%g
 s%@DEFS@%$DEFS%
+s%@MKALSDIR@%$MKALSDIR%
 " $ac_given_srcdir/${ac_file}.in >> $ac_file
 fi; done
 
@@ -2505,4 +2506,7 @@ EOF
 chmod +x config.status
 # Some shells look in PATH for config.status without the "./".
 test -n "$no_create" || ${CONFIG_SHELL-/bin/sh} ./config.status
+
+# make alsdir in bld-port and bld-natv
+export srcdir ; export LN_S ; $srcdir/cfgs/malsdunx
 
