@@ -1347,8 +1347,11 @@ data_ready(Stream)
 :-dynamic(getStreamId/2).
 
 :-
-	builtins:als_system(SysVars),
-	dmember(wins=WinSys, SysVars),
+	/* For the moment, make this code assume nowins - we need to
+	   reorganize the loading order of the builtins in order to
+	   get flags working by the time sio is loaded. */
+	%%current_prolog_flag(windows_system, WinSys),
+	WinSys = nowins,
 	(WinSys = motif ->
 		assert_at_load_time(
 			( winsGetTextInsertionPosition(WinID, WinInsertPos) :-

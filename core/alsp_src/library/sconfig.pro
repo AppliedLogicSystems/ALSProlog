@@ -107,8 +107,7 @@ lib_extension( OS, LExt )
 export determine_default_ws/1.
 determine_default_ws(WS)
 	:-
-	builtins:als_system(SysProps),
-	dmember(wins=WS,SysProps).
+	current_prolog_flag(windows_system, WS).
 
 export known_ws/1.
 

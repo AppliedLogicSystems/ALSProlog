@@ -1545,8 +1545,7 @@ debug_io(Where)
 
 dbg_io_opp(nowins, WhichWins)
 	:-!,
-	als_system(L),
-	dmember(wins=WhichWins, L).
+	current_prolog_flag(windows_system, WhichWins).
 dbg_io_opp(_, nowins).
 
 export set_debug_io/1.
