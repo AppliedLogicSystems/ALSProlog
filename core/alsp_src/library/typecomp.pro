@@ -125,21 +125,31 @@ comptype(SourceFile, TgtFile, Options)
 	:-
 	exists_file(SourceFile),
 	!,
-	(dmember(quiet(Quiet), Options),!; Quiet=false),
 	(comp_file_times(SourceFile, TgtFile) ->
 			%% TgtFile exists & is newer than SourceFile - nothing to do
 		true
 		;
+		do_comptype(SourceFile, TgtFile, Options)
+/*
 			%% Either TgtFile doesn't exist or SourceFile is newer:
+		(dmember(quiet(Quiet), Options),!; Quiet=false),
 		filePlusExt(NoSuffixPath, _, TgtFile),
 		filePlusExt(NoSuffixPath, mac, MacFile),
 		cont_comptype(TgtFile,MacFile,SourceFile, Quiet)
+*/
 	).
 
 comptype(SourceFile, TgtFile, Options)
 	:-
 	(dmember(quiet(Quiet), Options),!; Quiet=false),
 	ct_message(Quiet,'\nError: File: %t does not exist!\n',[SourceFile]).
+
+do_comptype(SourceFile, TgtFile, Options)
+	:-
+	(dmember(quiet(Quiet), Options),!; Quiet=false),
+	filePlusExt(NoSuffixPath, _, TgtFile),
+	filePlusExt(NoSuffixPath, mac, MacFile),
+	cont_comptype(TgtFile,MacFile,SourceFile, Quiet).
 
 cont_comptype(TgtFile,MacFile,SourceFile, Quiet)
 	:-
