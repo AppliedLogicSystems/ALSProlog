@@ -419,6 +419,16 @@ static struct blt_struct {
 	BLT("sio_ssbq_open", 6, sio_ssbq_open, "_sio_ssbq_open"),
 #endif /* SSBQ */
 #ifdef HAVE_SOCKET
+	BLT("sio_nsocket", 5, sio_nsocket, "_sio_nsocket"),
+	BLT("sio_nsocket_connect", 5, sio_nsocket_connect, "_sio_nsocket_connect"),
+	BLT("sio_nsocket_bind", 4, sio_nsocket_bind, "_sio_nsocket_bind"),
+	BLT("sio_nsocket_listen", 4, sio_nsocket_listen, "_sio_nsocket_listen"),
+	BLT("sio_nsocket_accept", 5, sio_nsocket_accept, "_sio_nsocket_accept"),
+	BLT("sio_nsocket_close", 2, sio_nsocket_close, "_sio_nsocket_close"),
+	BLT("sio_nsocket_select", 9, sio_nsocket_select, "_sio_nsocket_select"),
+
+	BLT("sio_nsocket_open", 6, sio_nsocket_open, "_sio_nsocket_open"),
+
 	BLT("sio_gethostname",1,sio_gethostname,"_sio_gethostname"),
 	BLT("sio_socket_open", 10, sio_socket_open, "_sio_socket_open"),
 	BLT("sio_is_server_socket", 1, sio_is_server_socket,

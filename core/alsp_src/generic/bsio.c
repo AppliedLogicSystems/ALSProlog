@@ -1361,6 +1361,501 @@ sio_gethostname()
 		FAIL;
 }
 
+/* nsocket stuff */
+
+enum {internet_family, unix_family, appletalk_family};
+enum {socket_stream, socket_datagram};
+enum {default_protocol};
+
+#if 0
+/* How I'd like to write it: */
+
+
+typedef unsigned long PObj;
+typedef int PResult;
+#define SUCCESS 1
+
+double NPI_get_number(PObj o)
+{
+    switch (NPI_
+}
+
+int NPI_is_number(PObj o) 
+{
+    NPI_Type t = NPI_type(o);
+    
+    return (t == NPI_int_type || t == NPI_double_type);
+}
+
+int NPI_is_int(PObj o)
+{
+     double n = NPI_get_number(o);
+     
+     return (NPI_is_number(o) && n >= MIN_INIT && n <= MAX_INT);
+}
+
+int old_to_new_call(void (*new_func)(...), int arity)
+{
+    PObj arg[10];
+    
+    for (i = 1; i <= arity; i++) {
+    	arg[i-1] = *(wm_SP + i + 1);
+    } 
+    
+    switch (arity) {
+    case 0: return new_func(); break;
+    case 1: return new_func(); break;
+    case 2: return new_func(); break;
+    case 3: return new_func(); break;
+    case 4: return new_func(); break;
+    case 5: return new_func(arg[0], arg[1], arg[2], arg[3], arg[4], arg[5]); break;
+    }
+}
+
+static PResult true_sio_nsocket(PObj family, PObj type, PObj protocol, PObj descriptor, PObj result)
+{
+    int family_const, type_const, protocol_const, error = 0;
+
+    if (!(NPI_is_int(family) && NPI_is_int(type) && NPI_is_int(protocol))) error = -1;
+    
+    if (!error) {
+    	switch (NPI_get_int(family)) {
+    	case internet_family: family_const = AF_INET; break;
+    	default: error = -1; break;
+    	}
+    	
+    	switch (NPI_get_int(type)) {
+    	case stream: type_const = SOCK_STREAM; break;
+    	case datagram: type_const = SOCK_DGRAM; break;
+    	default: error = -1; break;
+    	}
+    	
+    	switch (NPI_get_int(protocol)) {
+    	case default_protocol: protocol_const = 0; break;
+    	default: error = -1; break;
+    	}
+    	
+    	if (!error) {
+    	    sd = socket(family_const, type_const, protocol_const);
+    	
+    	    if (sd) (void) NPI_unify(descriptor, NPI_make_number(sd));
+    	    else error = errno;
+    	}
+    }
+    
+    (void) NPI_unify(result, NPI_make_number(error));
+    
+    return SUCCESS;
+}
+#endif
+
+int sio_nsocket(void)
+{
+    PWord family, type, protocol, descriptor, result;
+    int family_t, type_t, protocol_t, descriptor_t, result_t;
+    int family_const, type_const, protocol_const, sd, error = 0;
+
+    PI_getan(&family, &family_t, 1);
+    PI_getan(&type, &type_t, 2);
+    PI_getan(&protocol, &protocol_t, 3);
+    PI_getan(&descriptor, &descriptor_t, 4);
+    PI_getan(&result, &result_t, 5);
+
+
+    if (!(family_t == PI_INT && type_t  == PI_INT
+    	&& protocol_t == PI_INT)) error = SOCKET_ERROR;
+    
+    if (!error) {
+    	switch (family) {
+    	case internet_family: family_const = AF_INET; break;
+    	default: family_const = 0; error = SOCKET_ERROR; break;
+    	}
+    	
+    	switch (type) {
+    	case socket_stream: type_const = SOCK_STREAM; break;
+    	case socket_datagram: type_const = SOCK_DGRAM; break;
+    	default: type_const = 0; error = SOCKET_ERROR; break;
+    	}
+    	
+    	switch (protocol) {
+    	case default_protocol: protocol_const = 0; break;
+    	default: protocol_const = 0; error = SOCKET_ERROR; break;
+    	}
+    	
+    	if (!error) {
+    	    sd = socket(family_const, type_const, protocol_const);
+    	
+    	    if (sd != SOCKET_ERROR) {
+    	    	PWord num; int num_t;
+    	    	PI_makedouble(&num, &num_t, sd);
+    	    	(void) PI_unify(descriptor, descriptor_t, num, num_t);
+    	    } else error = socket_errno;
+    	}
+    }
+    
+    (void) PI_unify(result, result_t, error, PI_INT);
+    
+    SUCCEED;
+}
+
+int sio_nsocket_connect(void)
+{
+    PWord family, descriptor, address, port, result;
+    int family_t, descriptor_t, address_t, port_t, result_t;
+    int family_const, error = 0;
+    char *host;
+    double sd;
+    struct sockaddr_in sockname_in;
+    struct hostent *hp;
+
+    PI_getan(&family, &family_t, 1);
+    PI_getan(&descriptor, &descriptor_t, 2);
+    PI_getan(&address, &address_t, 3);
+    PI_getan(&port, &port_t, 4);
+    PI_getan(&result, &result_t, 5);
+
+    if (!(family_t == PI_INT && port_t  == PI_INT)) error = SOCKET_ERROR;
+
+    if (!(host = PI_getsymname(NULL, address, 0))
+    	&& !(host = PI_getuianame(NULL, address, 0)))  error = SOCKET_ERROR;
+    
+    PI_getdouble(&sd, descriptor);
+    
+    if (!error) {
+
+	memset(&sockname_in, 0, sizeof sockname_in);
+
+    	if ( (hp = gethostbyname(host)) ) {
+	    memmove(&sockname_in.sin_addr, hp->h_addr, hp->h_length);
+	}
+#if defined(DGUX) || (defined(MacOS) && defined(HAVE_GUSI))
+    	else if ((sockname_in.sin_addr.s_addr = inet_addr(host).s_addr) == INADDR_NONE)
+#else
+    	else if ((sockname_in.sin_addr.s_addr = inet_addr(host)) == INADDR_NONE)
+#endif
+	{
+	    error = SOCKET_ERROR;
+    	}
+    	sockname_in.sin_family = AF_INET;
+    	sockname_in.sin_port = htons(port);
+    
+    	if (!error) {
+    	    error = connect(sd, (struct sockaddr *) &sockname_in, sizeof (struct sockaddr_in));
+    	    if (error == SOCKET_ERROR) {
+    	    	error = socket_errno;
+    	    }
+    	}
+    }
+        
+    (void) PI_unify(result, result_t, error, PI_INT);
+    
+    SUCCEED;
+}
+
+int sio_nsocket_bind(void)
+{
+    PWord family, descriptor, port, result;
+    int family_t, descriptor_t, port_t, result_t;
+    int family_const, error = 0;
+    double sd;
+    struct sockaddr_in sockport;
+
+    PI_getan(&family, &family_t, 1);
+    PI_getan(&descriptor, &descriptor_t, 2);
+    PI_getan(&port, &port_t, 3);
+    PI_getan(&result, &result_t, 4);
+
+    if (!(family_t == PI_INT && port_t  == PI_INT)) error = SOCKET_ERROR;
+
+    PI_getdouble(&sd, descriptor);
+    
+    if (!error) {
+
+	memset(&sockport, 0, sizeof sockport);
+	sockport.sin_family = AF_INET;
+	sockport.sin_addr.s_addr = INADDR_ANY;
+	sockport.sin_port = htons((unsigned short)port);
+
+	error = bind(sd, (struct sockaddr *) &sockport, sizeof(sockport));
+
+   	if (error == SOCKET_ERROR) {
+	    error = socket_errno;
+    	}
+    }
+        
+    (void) PI_unify(result, result_t, error, PI_INT);
+    
+    SUCCEED;
+}
+
+int sio_nsocket_listen(void)
+{
+    PWord family, descriptor, backlog, result;
+    int family_t, descriptor_t, backlog_t, result_t;
+    int family_const, error = 0;
+    double sd;
+
+    PI_getan(&family, &family_t, 1);
+    PI_getan(&descriptor, &descriptor_t, 2);
+    PI_getan(&backlog, &backlog_t, 3);
+    PI_getan(&result, &result_t, 4);
+
+    if (!(family_t == PI_INT && backlog_t  == PI_INT)) error = SOCKET_ERROR;
+
+    PI_getdouble(&sd, descriptor);
+    
+    if (!error) {
+
+
+	error = listen(sd, backlog);
+
+   	if (error == SOCKET_ERROR) {
+	    error = socket_errno;
+    	}
+    }
+        
+    (void) PI_unify(result, result_t, error, PI_INT);
+    
+    SUCCEED;
+}
+
+int sio_nsocket_accept(void)
+{
+    PWord family, descriptor, peer, new_descriptor, result, addr;
+    int family_t, descriptor_t, peer_t, new_descriptor_t, result_t, addr_t;
+    int family_const, error = 0;
+    double sd;
+    struct sockaddr_in cli_addr;
+    int cli_len, newfd;
+    
+
+    PI_getan(&family, &family_t, 1);
+    PI_getan(&descriptor, &descriptor_t, 2);
+    PI_getan(&peer, &peer_t, 3);
+    PI_getan(&new_descriptor, &new_descriptor_t, 4);
+    PI_getan(&result, &result_t, 5);
+
+    if (!(family_t == PI_INT && peer_t == PI_VAR)) error = SOCKET_ERROR;
+
+    PI_getdouble(&sd, descriptor);
+    
+    if (!error) {
+
+	cli_len = sizeof(cli_addr);
+	newfd = accept(sd, (struct sockaddr *) &cli_addr, &cli_len);
+
+    	if (newfd != SOCKET_ERROR) {
+    	    PWord num; int num_t;
+    	    PI_makedouble(&num, &num_t, newfd);
+    	    (void) PI_unify(new_descriptor, new_descriptor_t, num, num_t);
+    	} else error = socket_errno;
+    }
+    
+    PI_makedouble(&addr, &addr_t, cli_addr.sin_addr.s_addr);
+    (void) PI_unify(peer, peer_t, addr, addr_t);
+
+    (void) PI_unify(result, result_t, error, PI_INT);
+    
+    SUCCEED;
+}
+
+/* sio_nsocket_select(+[read], +[write], +[except], -[readmark], -[writemark],
+   -[exceptmark], +sec, +msec, -result) */
+int sio_nsocket_select(void)
+{
+    PWord read, write, exception, read_mark, write_mark, except_mark, sec, usec, result;
+    int read_t, write_t, exception_t, read_mark_t, write_mark_t, except_mark_t, sec_t, usec_t, result_t;
+    int max_sd, r, error = 0;
+    PWord l, item;
+    int l_t, item_t;
+    double sd;
+    struct timeval timeout, *timeout_ptr;
+    fd_set read_set, write_set, exception_set;
+    
+    PI_getan(&read, &read_t, 1);
+    PI_getan(&write, &write_t, 2);
+    PI_getan(&exception, &exception_t, 3);
+    PI_getan(&read_mark, &read_mark_t, 4);
+    PI_getan(&write_mark, &write_mark_t, 5);
+    PI_getan(&except_mark, &except_mark_t, 6);
+    PI_getan(&sec, &sec_t, 7);
+    PI_getan(&usec, &usec_t, 8);
+    PI_getan(&result, &result_t, 9);
+    
+    
+    if (read_mark_t != PI_VAR || write_mark_t != PI_VAR || except_mark_t != PI_VAR)
+        error = SOCKET_ERROR;
+    
+    FD_ZERO(&read_set);
+    FD_ZERO(&write_set);
+    FD_ZERO(&exception_set);
+    
+    max_sd = 0;
+    for (l = read, l_t = read_t; l_t == PI_LIST; PI_gettail(&l, &l_t, l)) {
+    	PI_gethead(&item, &item_t, l);
+    	PI_getdouble(&sd, item);
+    	FD_SET((int)sd, &read_set);
+    	max_sd = sd > max_sd ? sd : max_sd;
+    }
+
+    for (l = write, l_t = write_t; l_t == PI_LIST; PI_gettail(&l, &l_t, l)) {
+    	PI_gethead(&item, &item_t, l);
+    	PI_getdouble(&sd, item);
+    	FD_SET((int)sd, &write_set);
+    	max_sd = sd > max_sd ? sd : max_sd;
+    }
+
+    for (l = exception, l_t = exception_t; l_t == PI_LIST; PI_gettail(&l, &l_t, l)) {
+    	PI_gethead(&item, &item_t, l);
+    	PI_getdouble(&sd, item);
+    	FD_SET((int)sd, &exception_set);
+    	max_sd = sd > max_sd ? sd : max_sd;
+    }
+    
+    
+    if (sec_t == PI_SYM) timeout_ptr = NULL;
+    else if (sec_t == PI_INT && usec_t == PI_INT) {
+    	timeout.tv_sec = sec;
+    	timeout.tv_usec = usec;
+    	timeout_ptr = &timeout;
+    } else error = SOCKET_ERROR;
+    
+    
+    if (error != SOCKET_ERROR) {
+    	r = select(max_sd+1, &read_set, &write_set, &exception_set, timeout_ptr); 
+    
+    	if (r >= 0) {
+    	    /* Make the mark lists */
+    	    PWord nl, nlist, nitem, set_sym, unset_sym, nil_list;
+    	    int nl_t, nlist_t, nitem_t, set_sym_t, unset_sym_t, nil_list_t;
+    	    
+ 	    PI_makesym(&set_sym, &set_sym_t, "set");
+ 	    PI_makesym(&unset_sym, &unset_sym_t, "unset");
+ 	    PI_makesym(&nil_list, &nil_list_t, "[]");
+ 
+	    for (l = read, l_t = read_t, nl = read_mark, nl_t = read_mark_t;
+	         l_t == PI_LIST;
+	         PI_gettail(&l, &l_t, l), PI_unify(nl, nl_t, nlist, nlist_t),
+	         PI_gettail(&nl, &nl_t, nlist)) {
+	    	PI_gethead(&item, &item_t, l);
+	    	PI_getdouble(&sd, item);
+	    	PI_makelist(&nlist, &nlist_t);
+	    	PI_gethead(&nitem, &nitem_t, nlist);
+	    	if (FD_ISSET((int)sd, &read_set)) PI_unify(nitem, nitem_t, set_sym, set_sym_t);
+	    	else PI_unify(nitem, nitem_t, unset_sym, unset_sym_t);  
+	    }
+	    PI_unify(nl, nl_t, nil_list, nil_list_t);
+
+	    for (l = write, l_t = write_t, nl = write_mark, nl_t = write_mark_t;
+	         l_t == PI_LIST;
+	         PI_gettail(&l, &l_t, l), PI_unify(nl, nl_t, nlist, nlist_t),
+	         PI_gettail(&nl, &nl_t, nlist)) {
+	    	PI_gethead(&item, &item_t, l);
+	    	PI_getdouble(&sd, item);
+	    	PI_makelist(&nlist, &nlist_t);
+	    	PI_gethead(&nitem, &nitem_t, nlist);
+	    	if (FD_ISSET((int)sd, &read_set)) PI_unify(nitem, nitem_t, set_sym, set_sym_t);
+	    	else PI_unify(nitem, nitem_t, unset_sym, unset_sym_t);  
+	    }
+	    PI_unify(nl, nl_t, nil_list, nil_list_t);
+
+	    for (l = exception, l_t = exception_t, nl = except_mark, nl_t = except_mark_t;
+	         l_t == PI_LIST;
+	         PI_gettail(&l, &l_t, l), PI_unify(nl, nl_t, nlist, nlist_t),
+	         PI_gettail(&nl, &nl_t, nlist)) {
+	    	PI_gethead(&item, &item_t, l);
+	    	PI_getdouble(&sd, item);
+	    	PI_makelist(&nlist, &nlist_t);
+	    	PI_gethead(&nitem, &nitem_t, nlist);
+	    	if (FD_ISSET((int)sd, &read_set)) PI_unify(nitem, nitem_t, set_sym, set_sym_t);
+	    	else PI_unify(nitem, nitem_t, unset_sym, unset_sym_t);  
+	    }
+	    PI_unify(nl, nl_t, nil_list, nil_list_t);
+    
+    	} else error = socket_errno;
+    }
+    (void) PI_unify(result, result_t, error, PI_INT);
+    
+    SUCCEED;
+}
+
+int sio_nsocket_close(void)
+{
+    PWord descriptor, result;
+    int descriptor_t, result_t;
+    int error = 0;
+    double sd;
+
+    PI_getan(&descriptor, &descriptor_t, 1);
+    PI_getan(&result, &result_t, 2);
+    
+    PI_getdouble(&sd, descriptor);
+    
+    if (!error) {
+
+	error = closesocket(sd);
+	if (error == SOCKET_ERROR) error = socket_errno;
+    }
+        
+    (void) PI_unify(result, result_t, error, PI_INT);
+    
+    SUCCEED;
+}
+
+/* end nsocket stuff */
+
+
+int
+sio_nsocket_open()
+{
+    PWord descriptor, type, mode, buffering, eoln, stream;
+    int   descriptor_t, type_t, mode_t, buffering_t, eoln_t, stream_t;
+    UCHAR *buf;
+    double sd;
+
+
+    w_get_An(&descriptor, &descriptor_t, 1);
+    w_get_An(&type, &type_t, 2);
+    w_get_An(&mode, &mode_t, 3);
+    w_get_An(&buffering, &buffering_t, 4);
+    w_get_An(&eoln, &eoln_t, 5);
+    w_get_An(&stream, &stream_t, 6);
+
+    if ((buf = get_stream_buffer(stream, stream_t)) == (UCHAR *) 0)
+	FAIL;
+    
+    SIO_ERRCODE(buf) = SIOE_INARG;
+    
+    if (mode_t != WTP_INTEGER || buffering_t != WTP_INTEGER || eoln_t != WTP_INTEGER)
+	FAIL;
+
+    if (compute_flags(buf,mode,buffering) < 0)
+	FAIL;
+
+    SIO_EOLNTYPE(buf) = eoln;
+
+    SIO_SOCKET_ADDRESS(buf) = 0;
+    SIO_SOCKET_ADDRESS_LEN(buf) = 0;
+    SIO_ERRCODE(buf) = SIOE_NORMAL;
+
+    PI_getdouble(&sd, descriptor);
+
+    SIO_FD(buf) = sd;
+
+    switch (type) {
+	case socket_stream :
+	    SIO_TYPE(buf) = SIO_TYPE_SOCKET_STREAM;
+	    break;
+	case socket_datagram :
+	    SIO_TYPE(buf) = SIO_TYPE_SOCKET_DGRAM;
+	    break;
+    }
+
+    incr_fdrefcnt(SIO_FD(buf));
+    SUCCEED;
+}
+
+
 /*
  * sio_socket_open(HostOrPath,Port,Dom,Typ,NMode,NBuffering,QLen,SD,Stream)
  *
@@ -5517,7 +6012,7 @@ int sio_sprintf_number(void)
 
     switch (t1) {
 	case WTP_INTEGER:
-	    sprintf((char *)buf, "%d", (int)v1);
+	    sprintf((char *)buf, "%ld", v1);
 	    break;
 #ifndef DoubleType
 	case WTP_STRUCTURE:
