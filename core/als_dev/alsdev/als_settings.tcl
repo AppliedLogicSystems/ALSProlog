@@ -107,6 +107,6 @@ proc vTclWindow.alsdev_settings {base} {
 		 -anchor center -expand 0 -fill none -side left -padx 8
 
     wm geometry $base ""
-    wm resizable $base 0 1
+    wm resizable $base 0 0
 }
 

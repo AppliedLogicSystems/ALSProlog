@@ -97,7 +97,6 @@ proc add_prolog_menu {menubar type window} {
 	menu $menubar.prolog -tearoff $TearOff
 
     $menubar.prolog add command -label "Consult" -accelerator "$mod-K" -command "$type.consult $window"
-    $menubar.prolog add command -label "Source Tcl$elipsis" -command source_tcl -state disabled
 	$menubar.prolog add command \
 		-label "Clear Workspace" -command clear_workspace
 
@@ -139,15 +138,8 @@ proc add_tools_menu {menubar type window} {
 	if {"$type"=="listener"} then {
 		$menubar.tools add checkbutton \
 			-label Debugger -command exec_toggle_debugwin -variable proenv(debugwin)
-
-		menu $menubar.tools.tclshell -relief raised
-		$menubar.tools add cascade \
-			-label {Tcl Shell} -menu $menubar.tools.tclshell -state disabled
-		$menubar.tools.tclshell add command \
-			-label "User Defined" -command {prolog_tcltk_shell user_def_choice}
-		$menubar.tools.tclshell add command \
-			-label "shl_tcli (System - Danger!)" \
-			-command {prolog_tcltk_shell shl_tcli}
+    	$menubar.tools add command -label "Source Tcl$elipsis" -command source_tcl 
+#    	$menubar.tools add command -label "Tcl Shell" -command tcl_shell 
 
 		$menubar.tools add separator 
 		## DefStructs:
@@ -156,25 +148,28 @@ proc add_tools_menu {menubar type window} {
 			-label {Structs} -menu $menubar.tools.defstr
 		$menubar.tools.defstr add command \
 			-label "Define New" -command new_defstruct
-		$menubar.tools.defstr add command \
-			-label "Edit" -command edit_defstruct 
+#		$menubar.tools.defstr add command \
+#			-label "Edit" -command edit_defstruct 
 	} else {
 
 		# Spy
 		$menubar.tools add checkbutton  -label {Spy/NoSpy} \
 			-command exec_toggle_spywin -variable proenv(spywin)
 		$menubar.tools add command  -label {NoSpy all } \
-			-command nospy_all -state disabled
+			-command {prolog call debugger nospy } 
 		$menubar.tools add command  -label {Spy When} -state disabled
 
 		$menubar.tools add separator
 
-		menu $menubar.tools.settings -relief raised
-		$menubar.tools add cascade -label Settings -menu $menubar.tools.settings
-    	$menubar.tools.settings add command \
-        	-label {Set Print Depth} 
-		$menubar.tools.settings add command \
-			-label {Toggle Flat Print} -command { set DebugResponse Bm }
+#		menu $menubar.tools.settings -relief raised
+#		$menubar.tools add cascade -label Settings -menu $menubar.tools.settings
+#    	$menubar.tools.settings add command \
+#        	-label {Set Print Depth} 
+#		$menubar.tools.settings add command \
+#			-label {Toggle Flat Print} -command { set DebugResponse Bm }
+
+		$menubar.tools add command  -label {Debug Settings } \
+			-command {show_debug_settings}
 
 		menu $menubar.tools.leashing -relief raised
     	$menubar.tools add cascade \

@@ -419,10 +419,12 @@ proc source_tcl { } {
 		-defaultextension tcl \
 		-title "Consult File" \
 		-filetypes {{"Tcl/Tk Files" {.tcl } } {{All Files} {*} } } ]
-	if { "$file"== "" } then { return }
-	source $file
-	.topals.text insert end "File $file sourced."
-	insert_prompt  .topals.text "\n?-" 
+	if { "$file"== "" } then { bell ; return }
+	set TclInterp [do_popup_input "Input the name of the Tcl interpreter:" "Tcl Interp?"]
+	if { "$TclInterp"== "" } then { bell ; return }
+	if {[interp exists $TclInterp]==0} then {
+		prolog call alsdev do_source_tcl -atom $TclInterp -atom $file
+	} else { bell }
 }
 
 proc set_directory { } {
@@ -1078,7 +1080,36 @@ proc debugwin_configure_event {Win Ht Wd WW} {
 	}
 }
 
+proc show_debug_settings {} {
+	global array proenv
 
+	prolog call debugger get_maxdepth -atom debugger_output -var CurDepth
+	set proenv(debug_print_depth) $CurDepth
+
+	prolog call debugger get_depth_computation -atom debugger_output -var DC
+	set proenv(db_flatness) $DC
+
+	Window show .debug_settings
+}
+
+proc reset_print_depth {} {
+	global array proenv
+
+    set proenv(debug_print_depth) [.debug_settings.depth.value get]
+	prolog call debugger set_maxdepth -atom debugger_output -number $proenv(debug_print_depth)
+}
+
+proc toggle_debug_flatness {} {
+	global array proenv
+
+	prolog call debugger set_depth_computation -atom debugger_output -atom $proenv(db_flatness)
+}
+
+
+
+
+
+##############################
 
 
 proc tkOpenDocument args {
@@ -1091,6 +1122,13 @@ proc tkOpenDocument args {
 ###############________________________________##################
 
 Window show .topals
+
+Window show .debug_settings
+Window hide .debug_settings
+
+Window show .alsdev_settings
+Window hide .alsdev_settings
+
 if {$tcl_platform(platform) == "macintosh"} {
 	# Make .topals.mmenb the default menu for all windows.
 	. configure -menu .topals.mmenb

@@ -386,3 +386,64 @@ proc vTclWindow.spychoose {base} {
     pack $base.buttons.cancel \
         -anchor center -expand 0 -fill none -padx 2 -side right 
 }
+
+proc vTclWindow.debug_settings {base} {
+	global array proenv
+
+    if {$base == ""} {
+        set base .debug_settings
+    }
+    if {[winfo exists $base]} {
+        wm deiconify $base; return
+    }
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel
+    wm focusmodel $base passive
+    wm geometry $base 284x51+152+178
+    wm maxsize $base 1137 870
+    wm minsize $base 1 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 1
+    wm deiconify $base
+    wm title $base "Debugger Settings"
+	wm protocol .debug_settings WM_DELETE_WINDOW {wm withdraw .debug_settings}
+
+    frame $base.depth \
+        -borderwidth 1 -height 30 -relief sunken -width 92 
+    label $base.depth.label \
+        -text {Debug Print Depth:} 
+    entry $base.depth.value \
+        -textvariable proenv(debug_print_depth) 
+	bind $base.depth.value <Return> { reset_print_depth }
+    frame $base.flatness \
+        -borderwidth 1 -height 30 -relief sunken -width 30 
+    label $base.flatness.label \
+        -text {Debug Print Flatness:} 
+    radiobutton $base.flatness.on \
+        -text Flat -value flat -variable proenv(db_flatness) -command toggle_debug_flatness
+    radiobutton $base.flatness.off \
+        -text NonFlat -value nonflat -variable proenv(db_flatness) -command toggle_debug_flatness
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.depth \
+        -anchor w -expand 0 -fill x -side top 
+    pack $base.depth.label \
+        -anchor center -expand 0 -fill none -side left 
+    pack $base.depth.value \
+        -anchor center -expand 0 -fill none -side top 
+    pack $base.flatness \
+        -anchor n -expand 0 -fill x -side top 
+    pack $base.flatness.label \
+        -anchor center -expand 0 -fill none -side left 
+    pack $base.flatness.on \
+        -anchor center -expand 0 -fill none -side left 
+    pack $base.flatness.off \
+        -anchor center -expand 0 -fill none -side left 
+
+    wm geometry $base ""
+    wm resizable $base 0 0
+}
+

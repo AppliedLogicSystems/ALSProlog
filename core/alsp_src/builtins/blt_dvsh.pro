@@ -438,6 +438,10 @@ library_module(macroxp).
 library_module(shellmak).
 library_module(ttyshlmk).
 
+do_source_tcl(TclInterp, File)
+	:-
+	tcl_call(TclInterp, [source, File], X),
+	printf(user_output, 'Tcl file %t sourced in Tcl interpreter %t\n', [File,TclInterp]).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			DEFSTRUCT HANDLING					%%%%%
