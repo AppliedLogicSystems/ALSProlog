@@ -8,7 +8,7 @@ even.psl: even.c
 	    even.c $(SDK_DIR)/source/alspi_slib.c -lc
 
 even_alspro: even.c
-	gcc $(RUNTIME_LINK) \
+	gcc -DSTATIC $(RUNTIME_LINK) \
 	-o even_alspro -I$(SDK_DIR)/include \
 	    even.c -lalspro -lc
 
