@@ -180,6 +180,7 @@ schema([
 		(_: [
 			'LDFLAGS'		= '',
 			'LIBS'			= '@LIBS@',
+			'KEYLIBS'		= '/usr/local/lib/unix_e.o /usr/local/lib/unix_m2.o /usr/local/lib/low_io.o',
 			'X_CFLAGS'		= '@X_CFLAGS@',
 			'X_LIBS'		= '@X_LIBS@',
 			'X_EXTRA_LIBS'		= '@X_EXTRA_LIBS@',
@@ -217,8 +218,7 @@ schema([
 		  (_:	[
 			rule(cppflags),
 			rule(setup),
-			rule('pi_cfg.h'),
-			rule('pi_init.c')
+			rule('pi_cfg.h')
 				]) ]),
 
 	case(&(context_name), [
@@ -227,7 +227,7 @@ schema([
 			       rule('alspro.68k.lib'),
 			       rule('demo_alspro.ppc.lib'),
 			       rule('demo_alspro.68k.lib')] ),
-			(_: rule('alspro.a'))]),
+			(_: [rule('alspro.a'),rule('key_alspro.a')])]),
 
 	case(&(context_name), [
 			(mac: [
@@ -244,7 +244,7 @@ schema([
 				rule(sioux_alspro),
 				rule(demo_sioux_alspro)
 			      ]),
-			(_: rule('alspro_b'))]),
+			(_: [rule('alspro_b'),rule('key_alspro_b'),rule('key_alspro')])]),
 
 	'IMGOPTS' = 'select_lib(builtins,[debugger])',
 	rule(alspro),
@@ -293,7 +293,7 @@ rule(cppflags,
 	 'echo $(X_CFLAGS) >> cppflags' ]).
 
 rule(setup,
-	['pi_cfg.h', 'pi_init.c',cppflags],
+	['pi_cfg.h',cppflags],
 	['echo setup done > setup'] ).
 
 rule(mi,[],['$(srcdir)/bin/cmn_mkfi', 'mv cmn_info.mkf ..']).
@@ -304,17 +304,16 @@ rule('pi_cfg.h',
 		[(mac:(['Duplicate -y {srcdir}generic/pi_cfg.in pi_cfg.h'])),
 		 ( _ :(['cp $(srcdir)/generic/pi_cfg.in pi_cfg.h']))]) ).
 
-rule('pi_init.c',
- 	['$(srcdir)'/generic/'pi_init.c'],
-	case(&(context_name),
-		[(mac:(['cp $(srcdir)/generic/pi_init.c  pi_init.c'])),
-		 ( _ :(['cp $(srcdir)/generic/pi_init.c  pi_init.c'])) ]) ).
-
 	%% This needs more case/by/case analysis:
 rule('alspro.a',
 	['setup security.o $(objects)'],
 	['ar ruv alspro.a security.o $(objects)',
 	 '-ranlib alspro.a']).
+
+rule('key_alspro.a',
+	['setup security.key.o $(objects)'],
+	['ar ruv key_alspro.a security.key.o $(objects)',
+	 '-ranlib key_alspro.a']).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%% Macintosh Version Specifics %%%
@@ -423,6 +422,10 @@ rule(alspro_b,
 				 'coff2exe alspro_b' ]),
 		(_:['$(CC) -o alspro_b $^ $(LDFLAGS) $(LIBS)'])  ]) ).
 
+rule(key_alspro_b,
+		[ext(pimain,&(object)), 'key_alspro.a'],
+		['$(CC) -o key_alspro_b $^ $(LDFLAGS) $(LIBS) $(KEYLIBS)']).
+
 rule(alspro,
 	[alspro_b],
 	case(&(context_name), [
@@ -434,6 +437,10 @@ rule(alspro,
 		(_:['alspro_b -b -obp -g ''save_image(alspro,[$(IMGOPTS)])'''])
 		])
 	).
+
+rule(key_alspro,
+	[key_alspro_b],
+	['key_alspro_b -b -obp -g ''save_image(key_alspro,[$(IMGOPTS)])''']).
 
 rule(testrun,
 	[],
