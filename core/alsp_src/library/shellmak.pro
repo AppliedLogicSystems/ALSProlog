@@ -24,8 +24,8 @@ export make_shell_cl/0.
 export make_shell/1.
 export make_shell/2.
 export make_shell_list/2.
-export mk_shell/3.
 export mk_shell/4.
+export mk_shell/5.
 
 /*--------------------------------------------------------------------*
  |	make_shell_cl/0
@@ -138,18 +138,18 @@ make_shell(InSrcFile, OpStr, Options)
 	mk_shell(SrcFile, BaseSrcFile, Options).
 
 /*--------------------------------------------------------------------*
- |	mk_shell/3
- |	mk_shell(SrcFile,BaseSrcFile, Options)
- |	mk_shell(+, +, +)
+ |	mk_shell/4
+ |	mk_shell(SrcFile,BaseSrcFile, Options, OutFilePath)
+ |	mk_shell(+, +, +, +)
  |
  |	Housekeeping setup for principal individual file routine
  *--------------------------------------------------------------------*/
-mk_shell(SrcFile, BaseSrcFile, Options)
+mk_shell(SrcFile, BaseSrcFile, Options, OutFilePath)
 	:-
 	(dmember(quiet(Quiet), Options),!; Quiet=false),
 	(dmember(app_type(AppType), Options),!; AppType=tty),
 	OpStr = op(Quiet, AppType),
-	mk_shell(SrcFile, BaseSrcFile, OpStr, Options).
+	mk_shell(SrcFile, BaseSrcFile, OpStr, Options, OutFilePath).
 
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
@@ -158,16 +158,16 @@ quiet(op(Quiet, AppType), Quiet).
 app_type(op(Quiet, AppType), AppType).
 
 /*--------------------------------------------------------------------*
- |	mk_shell/4
- |	mk_shell(SrcFile,BaseSrcFile, OpStr, Options)
- |	mk_shell(+, +, +, +)
+ |	mk_shell/5
+ |	mk_shell(SrcFile,BaseSrcFile, OpStr, Options, OutFilePath)
+ |	mk_shell(+, +, +, +, +)
  |
  |	catch-protected entry to principal individual file routine
  *--------------------------------------------------------------------*/
-mk_shell(SrcFile, BaseSrcFile, OpStr, Options)
+mk_shell(SrcFile, BaseSrcFile, OpStr, Options, OutFilePath)
 	:-
 	catch(
-		x_mk_shell(SrcFile, BaseSrcFile, OpStr, Options),
+		x_mk_shell(SrcFile, BaseSrcFile, OpStr, Options, OutFilePath),
 		Ball,
 		mk_shell_err_h(Ball,SrcFile, BaseSrcFile, OpStr, Options)
 	).
@@ -176,7 +176,7 @@ mk_shell(SrcFile, BaseSrcFile, OpStr, Options)
  |	Check for existence of source file
  *--------------------------------------------------------------------*/
 
-x_mk_shell(SrcFile, BaseSrcFile, OpStr, Options)
+x_mk_shell(SrcFile, BaseSrcFile, OpStr, Options, OutFilePath)
 	:-
 	exists_file(SrcFile),
 	!,
@@ -187,11 +187,15 @@ x_mk_shell(SrcFile, BaseSrcFile, OpStr, Options)
 		;
 		BaseSrcFile = UnderSrcFile
 	),
-	filePlusExt(BaseSrcFile, pro, UnderTgtFile),
-	pathPlusFile(SrcFileDir, UnderTgtFile, TgtFile),
+	(OutFilePath = '' ->
+		filePlusExt(BaseSrcFile, pro, UnderTgtFile),
+		pathPlusFile(SrcFileDir, UnderTgtFile, TgtFile)
+		;
+		TgtFile = OutFilePath
+	),
 	cont_x_mk_shell(SrcFile, TgtFile, BaseSrcFile, SrcFileDir, OpStr, Options).
 
-x_mk_shell(SrcFile, BaseSrcFile, OpStr, Options)
+x_mk_shell(SrcFile, BaseSrcFile, OpStr, Options, _)
 	:-
 	raise_mks_xcept('!!Error: File %t does not exist!\n',[SrcFile]).
 
