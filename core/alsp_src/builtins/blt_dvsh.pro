@@ -1574,7 +1574,6 @@ debug_settings_info(DebugSettings)
 export set_debug_settings_info/1.
 set_debug_settings_info(DebugSettings)
 	:-
-pbi_write(set_debug_settings_info(DebugSettings)),pbi_nl,pbi_ttyflush,
 	(dmember( stream_opts=DBGOPTs, DebugSettings) ->
 		sio:stream_or_alias_ok(debugger_output, OSS),
 		sio:set_stream_wt_opts(OSS, DBGOPTs)
@@ -1590,7 +1589,6 @@ pbi_write(set_debug_settings_info(DebugSettings)),pbi_nl,pbi_ttyflush,
 	tcl_call(shl_tcli, [set_tcl_ga2, proenv, leash, exit, Exit], _),
 	tcl_call(shl_tcli, [set_tcl_ga2, proenv, leash, redo, Redo], _),
 	tcl_call(shl_tcli, [set_tcl_ga2, proenv, leash, fail, Fail], _),
-pbi_write(DBGOPTs),pbi_nl,pbi_ttyflush,
 	DBGOPTs = wt_opts(_,PrintDepth,DepthType),
 	tcl_call(shl_tcli, [set_tcl_ga, proenv, debug_print_depth, PrintDepth], _),
 	tcl_call(shl_tcli, [set_tcl_ga, proenv, db_flatness, DepthType], _).
