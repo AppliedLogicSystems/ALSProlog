@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.43 1998/04/02 16:14:28 choupt Exp $"
+#|		"$Id: alsdev.tcl,v 1.44 1998/05/08 22:33:35 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -338,19 +338,31 @@ load_photo left_gif left-arrow-blue
 
 	## Bindings for the main window:
 
-proc set_top_bindings { WinPath StreamAlias WaitVar DataVar } {
+proc set_top_bindings { WinPath StreamAlias WaitVarName DataVar } {
 	bind $WinPath <Return> \
-		"xmit_line_plain $WinPath $StreamAlias "
+		"xmit_line_plain $WinPath $StreamAlias $WaitVarName"
 	bind $WinPath <Control-d> \
 		"ctl-d_action $WinPath $StreamAlias "
 	bind $WinPath <Control-c> "listener.copy .topals"
 	bind $WinPath <Control-u> \
 		"ctl-u_action $WinPath"
 
-#	bindtags $WinPath "Text $WinPath .topals all"
-#	bind Text <ButtonRelease-2> {} 
-#	bind $WinPath <ButtonRelease-2> [list copy_paste_text $WinPath]
+		## This is intended to be totally global in the IDE:
+	bind all <Control-period> interrupt_action
+
+#	bind all <Key-Break> interrupt_action
+
+	bind $WinPath <KeyPress> "listener.check_at_end .topals"
+	bind $WinPath <ButtonPress-2> "listener.copy_paste .topals"
+	bind Text <ButtonRelease-2> {} 
+
 }
+
+proc listener.check_at_end {xw} {
+	set w .topals
+	$w.text mark set insert end 
+}
+
 
 	## Variable on which we execute 'tkwait variable ...' when we really
 	## have to wait for input (e.g., getting the user's response during 
@@ -407,11 +419,23 @@ proc wait_for_line0 { } {
 	return $ReturnValue
 }
 
+proc wait_for_line1 { WaitVar } {
+	upvar #0 $WaitVar TheWaitVar
+
+	while { "$TheWaitVar"==0 } { dooneevent wait }
+	set ReturnValue $TheWaitVar
+	set TheWaitVar 0
+	return $ReturnValue
+}
+
+
 	# Transmits a 'line' when the user hits <Return> at points
 	# other than the top-level:
 
-proc xmit_line_plain { TxtWin StreamAlias } {
-	global WaitForLine
+proc xmit_line_plain { TxtWin StreamAlias WaitVarName} {
+	upvar #0 $WaitVarName WaitForLine
+
+#puts "xmit_line_plain: TxtWin=$TxtWin Alias=$StreamAlias WaitVar=$WaitVarName"
 
 	set InsertIndex [$TxtWin index insert]
 	set InsertLine [string range $InsertIndex 0 [expr [string first "." $InsertIndex] - 1 ]]
@@ -445,16 +469,22 @@ proc wake_up_look_around { } {
 		if {$WakeUpLookAround!=0} then {
 			set SaveIt $WakeUpLookAround
 			set WakeUpLookAround 0
+#puts "wake_up_look_around return = $SaveIt"
+
 			return $SaveIt
 		}
 		if {$NEvnt==0} then {
 			set SaveIt $WakeUpLookAround
 			set WakeUpLookAround 0
+#puts "wake_up_look_around return = $WakeUpLookAround"
+
 			return $WakeUpLookAround
 		}
 		set NEvnt [dooneevent dont_wait]
 		incr CountDown -1
 	}
+#puts "wake_up_look_around return = $WakeUpLookAround"
+
 	return $WakeUpLookAround
 }
 
@@ -469,13 +499,14 @@ proc interrupt_action {} {
 }
 
 proc ctl-d_action { TxtWin StreamAlias } {
-	global WaitForLine
+	global WaitForLine.topals.text
 
 	set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -2 chars} ]
 	if { [llength $ThisLine]>0 } then {
 		return
-	} 
-	exit_prolog 
+	}
+#puts "d_action: TxtWin=$TxtWin StreamAlias=$StreamAlias"
+	set  WaitForLine.topals.text -3
 }
 
 proc ctl-u_action { WinPath } {
@@ -492,37 +523,10 @@ proc ctl-u_action { WinPath } {
 	}
 }
 
-proc copy_text { TxtWin } {
-	if { [ $TxtWin tag nextrange sel 1.0 end ]!= "" } then {
-		clipboard clear
-		clipboard append [ $TxtWin get sel.first sel.last ]
-	}
-}
-
-proc paste_text { TxtWin } {
-	global tcl_platform
-
-	if {"$tcl_platform(platform)" == "windows"} {
-		$TxtWin insert end [ selection get -selection CLIPBOARD ]
-	} else {
-		$TxtWin insert end [ selection get ]
-	}
-	$TxtWin see end
-	$TxtWin mark set insert end
-	focus $TxtWin
-}
-
-proc copy_paste_text { TxtWin } {
-	global tcl_platform
-
-	if {"$tcl_platform(platform)" == "windows"} {
-		$TxtWin insert end [ selection get -selection CLIPBOARD ]
-	} else {
-		$TxtWin insert end [ selection get ]
-	}
-	$TxtWin see end
-	$TxtWin mark set insert end
-	focus $TxtWin
+proc high_tide_flotsam { WinPath Text } {
+	$WinPath insert end $Text
+	$WinPath see end
+	update
 }
 
 proc source_tcl { } {
@@ -536,6 +540,10 @@ proc source_tcl { } {
 	if {[interp exists $TclInterp]==0} then {
 		prolog call alsdev do_source_tcl -atom $TclInterp -atom $file
 	} else { bell }
+}
+
+proc kill_tcl_interps  { } {
+	prolog call tk_alslib destroy_all_tcl_interpreters
 }
 
 proc set_directory { } {
@@ -1112,6 +1120,13 @@ proc toggle_debug_flatness {} {
 
 ##############################
 
+proc process_typ {} {
+	prolog call alsdev process_typ
+}
+
+proc process_oop {} {
+	prolog call alsdev process_oop
+}
 
 
 

@@ -103,6 +103,9 @@ proc add_prolog_menu {menubar type window} {
 		-label "Clear Workspace" -underline 2 -command {re clear_workspace}
 
 	if {"$type"=="listener"} then { 
+#    	$menubar.prolog add separator
+#    	$menubar.prolog add command \
+#        	-label "Open Project" -underline 0 -command {re open_project} 
     	$menubar.prolog add separator
     	$menubar.prolog add command \
         	-label "Set Directory$elipsis" -underline 0 -command {re set_directory} 
@@ -136,7 +139,9 @@ proc add_tools_menu {menubar type window} {
 	if {"$type"=="listener"} then {
 		$menubar.tools add checkbutton \
 			-label Debugger -underline 0 -command exec_toggle_debugwin -variable proenv(debugwin)
+		$menubar.tools add separator 
     	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} 
+    	$menubar.tools add command -label "Kill Tcl  Interps" -underline 0 -command {re kill_tcl_interps} 
 #    	$menubar.tools add command -label "Tcl Shell" -underline 0 -command {re tcl_shell} 
 
 		$menubar.tools add separator 
@@ -148,6 +153,15 @@ proc add_tools_menu {menubar type window} {
 			-label "Define New" -underline 0 -command {re new_defstruct}
 #		$menubar.tools.defstr add command \
 #			-label "Edit" -underline 0 -command {re edit_defstruct} 
+		$menubar.tools.defstr add command \
+			-label "Process Typ File" -underline 0 -command {re process_typ}
+#		$menubar.tools add separator 
+#		## ObjectPro:
+#		menu $menubar.tools.objects -relief raised -tearoff 0
+#		$menubar.tools add cascade \
+#			-label {ObjectPro} -underline 1 -menu $menubar.tools.objects
+#		$menubar.tools.objects add command \
+#			-label "Process OOP File" -underline 0 -command {re process_oop}
 	} else {
 
 		# Spy
@@ -201,12 +215,36 @@ proc listener.copy {xw} {
 	}
 }
 
+#proc copy_text { TxtWin } {
+#	if { [ $TxtWin tag nextrange sel 1.0 end ]!= "" } then {
+#		clipboard clear
+#		clipboard append [ $TxtWin get sel.first sel.last ]
+#	}
+#}
+
 proc listener.paste {xw} {
 	set w .topals
-	catch {$w.text delete sel.first sel.last}
-	$w.text insert insert [selection get -displayof $w -selection CLIPBOARD]
+#	catch {$w.text delete sel.first sel.last}
+	$w.text insert end [selection get -displayof $w -selection CLIPBOARD]
 	set proenv($w,dirty) true
+	$w see end
+	$w mark set insert end
+	focus $w
 }
+
+#proc paste_text { TxtWin } {
+#	global tcl_platform
+#
+#	if {"$tcl_platform(platform)" == "windows"} {
+#		$TxtWin insert end [ selection get -selection CLIPBOARD ]
+#	} else {
+#		$TxtWin insert end [ selection get ]
+#	}
+#	$TxtWin see end
+#	$TxtWin mark set insert end
+#	focus $TxtWin
+#}
+
 
 proc listener.clear {xw} {
 	set w .topals
@@ -220,28 +258,44 @@ proc listener.select_all {xw} {
 	$w.text tag add sel 1.0 end
 }
 
-proc debugwin.undo {w}  { bell }
-proc debugwin.cut {xw}   { 
-	set w .debugwin
- 	if {![catch {set data [$w.text get sel.first sel.last]}]} {
+
+proc listener.copy_paste { xw } {
+	global tcl_platform
+	set w .topals
+
+	if  {$tcl_platform(platform) == "unix"} {
+		set WhichSel PRIMARY
+	} else {
+		set WhichSel CLIPBOARD
+	}
+	set selflag [catch "selection get -displayof $w -selection $WhichSel" data]
+	if {"$selflag" == "0" } then {
 	    clipboard clear -displayof $w
 	    clipboard append -displayof $w $data
-		$w.text delete sel.first sel.last
+		$w.text insert end [selection get -displayof $w -selection $WhichSel]
+		set proenv($w,dirty) true
+		$w.text see end
+		$w.text mark set insert end
+		focus $w.text
 	}
 }
-proc debugwin.copy {w} { 
-	set w .debugwin
- 	if {![catch {set data [$w.text get sel.first sel.last]}]} {
-	    clipboard clear -displayof $w
-	    clipboard append -displayof $w $data
-	}
-}
-proc debugwin.paste {xw} { 
-	set w .debugwin
-	catch {$w.text delete sel.first sel.last}
-	$w.text insert insert [selection get -displayof $w -selection CLIPBOARD]
-	set proenv($w,dirty) true
-}
+
+# 	if {![catch {set data [selection get -displayof $w -selection $WhichSel]}]}{
+
+#proc copy_paste_text { TxtWin } {
+#	global tcl_platform
+#
+#	if {"$tcl_platform(platform)" == "windows"} {
+#	 $TxtWin insert end [ selection get -selection CLIPBOARD ]
+#	} else {
+#		$TxtWin insert end [ selection get ]
+#	}
+#	$TxtWin see end
+#	$TxtWin mark set insert end
+#	focus $TxtWin
+#}
+
+
 proc debugwin.clear {xw} {
 	set w .debugwin
 	global array proenv
@@ -252,4 +306,29 @@ proc debugwin.select_all {xw} {
 	set w .debugwin
 	$w.text tag add sel 1.0 end
 }
+proc debugwin.copy {w} { 
+	set w .debugwin
+ 	if {![catch {set data [$w.text get sel.first sel.last]}]} {
+	    clipboard clear -displayof $w
+	    clipboard append -displayof $w $data
+	}
+}
+proc debugwin.undo {w}  { bell }
+proc debugwin.cut {xw}   { bell }
+proc debugwin.paste {xw} { bell }
 
+#proc debugwin.cut {xw}   { 
+#	set w .debugwin
+# 	if {![catch {set data [$w.text get sel.first sel.last]}]} {
+#	    clipboard clear -displayof $w
+#	    clipboard append -displayof $w $data
+#		$w.text delete sel.first sel.last
+#	}
+#}
+#proc debugwin.paste {xw} { 
+#	set w .debugwin
+#	catch {$w.text delete sel.first sel.last}
+#	$w.text insert insert [selection get -displayof $w -selection CLIPBOARD]
+#	set proenv($w,dirty) true
+#}
+#

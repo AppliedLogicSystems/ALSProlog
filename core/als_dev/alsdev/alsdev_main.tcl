@@ -157,7 +157,7 @@ proc vTclWindow.about {base} {
     ###################
     toplevel $base -class Toplevel
     wm focusmodel $base passive
-    wm geometry $base 171x130+323+258
+    wm geometry $base 171x205+323+258
     wm maxsize $base 1137 870
     wm minsize $base 1 1
     wm overrideredirect $base 0
@@ -181,7 +181,21 @@ proc vTclWindow.about {base} {
     label $base.als \
         -text {Applied Logic Systems Inc.} 
     frame $base.f3 \
-        -borderwidth 1 -height 9 -width 30 
+        -borderwidth 1 -height 3 -relief sunken -width 30 
+    label $base.developed_by \
+        -font {helvetica 9 {}} -text {Developed by:}
+    label $base.developers_1 \
+        -font {helvetica 9 {}} -borderwidth 0 \
+		-text {Ken Bowen  Kevin Buettner}
+    label $base.developers_2 \
+        -font {helvetica 9 {}} -borderwidth 0 \
+		-text {Ilyas Cicekli  Chuck Houpt}
+    label $base.developers_3 \
+        -font {helvetica 9 {}} -borderwidth 0 \
+		-text {Keith Hughes  Prabu Raman}
+    label $base.developers_4 \
+        -font {helvetica 9 {}} -borderwidth 0 \
+		-text {Andy Turk}
     ###################
     # SETTING GEOMETRY
     ###################
@@ -201,6 +215,18 @@ proc vTclWindow.about {base} {
         -anchor center -expand 0 -fill none -padx 2 -side top 
     pack $base.f3 \
         -anchor center -expand 0 -fill none -side top 
+    pack $base.developed_by \
+        -anchor center -expand 0 -fill none -side top -pady 0 -ipady 0
+    pack $base.developers_1 \
+        -anchor center -expand 0 -fill none -side top -pady 0 -ipady 0
+    pack $base.developers_2 \
+        -anchor center -expand 0 -fill none -side top -pady 0 -ipady 0
+    pack $base.developers_3 \
+        -anchor center -expand 0 -fill none -side top -pady 0 -ipady 0
+    pack $base.developers_4 \
+        -anchor center -expand 0 -fill none -side top -pady 0 -ipady 0
+
+    wm geometry $base ""
 }
 
 proc vTclWindow.break_choices {base} {
