@@ -11,5 +11,5 @@ CC=gcc
 # -Wstrict-prototypes - Complains about arg-less function pointer like:
 #                       int (*func)(), which I think are legal.
 
-CFLAGS = -O -MMD -Wall -Werror -Wmissing-prototypes -Wwrite-strings \
+CFLAGS += -O -MMD -Wall -Werror -Wmissing-prototypes -Wwrite-strings \
 		 -Wnested-externs -Wpointer-arith
