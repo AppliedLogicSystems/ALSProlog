@@ -23,6 +23,7 @@ export write_clauses/1.
 export write_clauses/2.
 export write_clauses/3.
 
+
 /*!-------------------------------------------------------------
  |	colwrite/4
  |	colwrite(AtomList,ColPosList,CurPos,Stream)
@@ -283,5 +284,65 @@ write_clauses0([Clause | Clauses], Stream, Options)
 	:-
 	write_clause(Stream, Clause, Options),
 	write_clauses0(Clauses, Stream, Options).
+
+export write_items/1.
+export write_items_nl/1.
+export write_items/2.
+export write_items/3.
+export write_items/5.
+
+write_items(List)
+	:-
+	write_items(List, ' ', none).
+
+write_items_nl(List)
+	:-
+	write_items(List, '', nl).
+
+write_items(List, Spacer)
+	:-
+	write_items(List, Spacer, none).
+
+write_items(List, Spacer, EOL)
+	:-
+	sio:get_current_output_stream(Stream),
+	write_items(List, Spacer, EOL, [], Stream).
+
+write_items([], Spacer, EOL, Options, Stream).
+write_items([nl | List], Spacer, nl, Options, Stream)
+	:-!,
+	nl(Stream),
+	write_items(List, Spacer, EOL, Options, Stream).
+write_items([nl | List], Spacer, EOL, Options, Stream)
+	:-!,
+	write_items(List, Spacer, EOL, Options, Stream).
+write_items([nl(N) | List], Spacer, nl, Options, Stream)
+	:-
+	N > 0,
+	!,
+	nl(Stream),
+	M is N-1,
+	write_items([nl(M) | List], Spacer, nl, Options, Stream).
+write_items([nl(_) | List], Spacer, EOL, Options, Stream)
+	:-!,
+	write_items(List, Spacer, EOL, Options, Stream).
+
+write_items([Item | List], Spacer, EOL, Options, Stream)
+	:-
+	write_term(Stream, Item, Options),
+	put_atom(Stream, Spacer),
+	(EOL = nl -> nl(Stream) ; true),
+	write_items(List, Spacer, EOL, Options, Stream).
+
+printf_list1(ArgsList, Pattern)
+	:-
+	sio:get_current_output_stream(Stream),
+	printf_list1(ArgsList, Pattern, [], Stream).
+
+printf_list1([], Pattern, Options, Stream).
+printf_list1([Arg | ArgsList], Pattern, Options, Stream)
+	:-
+	printf(Stream, Pattern ,[Arg], Options),
+	printf_list1(ArgsList, Pattern, Options, Stream).
 
 endmod.
