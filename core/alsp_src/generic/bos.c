@@ -336,6 +336,7 @@ int pbi_get_current_image(PE)
 typedef struct {
   prolog_engine *hpe;
   PWord goal; int goalt;
+  int globals;
 } thread_info;
 
 static void *prolog_thread(void *data)
@@ -343,10 +344,13 @@ static void *prolog_thread(void *data)
   thread_info *info = data;
   PWord builtinsmod, init, usermod;
   int builtinsmod_t, init_t, usermod_t;
+	int i;
 
-  gv_alloc(info->hpe);
+	for (i = 0; i < info->globals; i++)  gv_alloc(info->hpe);
   PI_makesym_pe(info->hpe, &builtinsmod, &builtinsmod_t, "builtins");
-  PI_makesym_pe(info->hpe, &init, &init_t, "pckg_init");
+  PI_makesym_pe(info->hpe, &init, &init_t, "thread_init");
+//  PI_makesym_pe(info->hpe, &builtinsmod, &builtinsmod_t, "sio");
+//  PI_makesym_pe(info->hpe, &init, &init_t, "sio_pckg_init");
   PI_makesym_pe(info->hpe, &usermod, &usermod_t, "user");
 
   PI_rungoal_pe(info->hpe, builtinsmod, init, PI_SYM);
@@ -385,6 +389,7 @@ int pbi_new_thread(PE)
 	info = malloc(sizeof(*info));
 	info->hpe = hpe2;
 	simple_copy(hpe2, &info->goal, &info->goalt, hpe, v1, t1);
+	info->globals = wm_gvbase - wm_trailbase;
 
 #ifdef UNIX
 	pthread_create((pthread_t *)&id, NULL, prolog_thread, info);
