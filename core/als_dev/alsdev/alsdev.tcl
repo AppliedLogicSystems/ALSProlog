@@ -446,7 +446,8 @@ proc exit_prolog { } {
 	if {"$ans"==1} then {
 		return 0
 	} else {
-		prolog call builtins halt
+		destroy .
+		exit
 	}
 }
 
