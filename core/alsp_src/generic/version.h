@@ -5,7 +5,7 @@
  *          Version number - Thu Apr 4 09:28:36 EST 1996
  *===============================================================*/
 
-#define VERSION_STRING "3.0a1"
+#define VERSION_STRING "3.0a2"
 #define VERSION_MAJOR 3
 #define VERSION_MINOR 0
 #define VERSION_PATCH 0
