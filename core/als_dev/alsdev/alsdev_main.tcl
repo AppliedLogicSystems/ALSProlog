@@ -873,8 +873,7 @@ proc vTclWindow.ide_settings {base} {
         -borderwidth 2 -height 75 -relief groove -width 125 
     label $base.heartbeat.label \
         -borderwidth 1 -text {Heartbeat: } 
-    entry $base.heartbeat.entry \
-        -width 5 
+    entry $base.heartbeat.entry -width 5 -textvariable proenv(heartbeat)
     label $base.heartbeat.sec \
         -borderwidth 1 -text {sec.   0.0} 
     label $base.heartbeat.hl \
@@ -890,13 +889,12 @@ proc vTclWindow.ide_settings {base} {
     frame $base.printdepth \
         -borderwidth 2 -height 75 -relief groove -width 125 
     label $base.printdepth.max \
-        -borderwidth 1 -relief raised -text 500 
+        -borderwidth 1 -relief flat -text 500 
     label $base.printdepth.label \
-        -borderwidth 1 -relief raised -text {Print depth: } 
-    entry $base.printdepth.entry \
-        -width 5 
+        -borderwidth 1 -relief flat -text {Print depth: } 
+    entry $base.printdepth.entry -width 5 -textvariable proenv(main_printdepth) 
     label $base.printdepth.zero \
-        -borderwidth 1 -relief raised -text {       0} 
+        -borderwidth 1 -relief flat -text {       0} 
     scale $base.printdepth.slider \
         -orient horiz -showvalue 0 -from 0 -to 500 -resolution 1 \
 		-command slider_change_ide_printdepth \
@@ -1064,11 +1062,13 @@ proc vTclWindow.find_repl {base} {
     label $base.search.label \
         -borderwidth 1 -relief flat -text {Search for:} 
     entry $base.search.entry
+	bind $base.search.entry <Return> {edit_find_next}
     frame $base.replace \
         -borderwidth 2 -height 75 -relief groove -width 125 
     label $base.replace.label \
         -borderwidth 1 -relief flat -text {Replace by:} 
     entry $base.replace.entry 
+	bind $base.replace.entry <Return> {edit_find_next}
     frame $base.buttons \
         -borderwidth 0 -relief flat -width 125 
     button $base.buttons.find \

@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.75 1999/02/06 17:53:58 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.76 1999/02/06 22:23:06 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -1581,11 +1581,13 @@ proc edit_find_next {} {
 
 proc edit_replace {} {
 	set w [.find_repl.f1.whichwin cget -text]
-    set New [.find_repl.replace.entry  get]
-	$w.text mark set insert sel.first
- 	if {![catch {$w.text delete sel.first sel.last}]} {
-		$w.text insert insert $New
-		set proenv($w,dirty) true
+	if { [$w.text tag ranges sel] != "" } then {
+    	set New [.find_repl.replace.entry  get]
+		$w.text mark set insert sel.first
+ 		if {![catch {$w.text delete sel.first sel.last}]} {
+			$w.text insert insert $New
+			set proenv($w,dirty) true
+		}
 	}
 }
 
