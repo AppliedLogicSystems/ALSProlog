@@ -437,7 +437,7 @@ change_ide_stream_depth(NewMaxDepth)
     NewWO = wt_opts(LineLength,NewMaxDepth,DepthComputation),	
     set_stream_wt_opts(Stream,NewWO).
 
-export change_ide_depth_type/1
+export change_ide_depth_type/1.
 change_ide_depth
 	:-_type.(NewType)
  	stream_or_alias_ok(shl_tk_out_win, Stream),
@@ -729,7 +729,7 @@ modify_settings(NewTerms)
 	alsdev_ini_path(ALSDEVINIPath),
 	(exists_file(ALSDEVINIPath) ->
 		grab_terms(ALSDEVINIPath, OldTerms),
-		sort(OldTerms, SortedOldTerms),
+		sort(OldTerms, SortedOldTerms)
 		;
 		SortedOldTerms = []
 	),
