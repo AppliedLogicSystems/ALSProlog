@@ -1661,7 +1661,6 @@ showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 
 showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 	:-
-	% showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response).
 	v_showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -12,6 +12,7 @@
  |  Major revisions: 1995-96
  *=============================================================*/
 
+
 module builtins.
 use sio.
  
@@ -751,8 +752,6 @@ special_ss_parse_command_line(File, Tail, Tail, CLInfo)
 	%% ERROR OUTPUT PREDICATES
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%:- dynamic(shl_source_handlerAction/2).
-
 shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 	:-
 	display_file_errors(SPath, ErrsList, FileMgr).
@@ -769,165 +768,17 @@ spit_errors([Error | ErrsList], Stream)
 	spit_the_error(Error, Stream),
 	spit_errors(ErrsList, Stream).
 
-spit_the_error( 
-	error(syntax_error, [_,syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,FS)]),
-	Stream)
-	:-!,
-	EType = ' Syntax error',
-	printf(error_stream,'\n%s',[Context]),
-	OutPattern = '\n   - line %d: %s\n',
-	OutArgs = [LineNumber,ErrorMessage],
-	printf(Stream, '%t',[EType]),
-	printf(Stream, OutPattern, OutArgs, [quoted(true), maxdepth(6)]),
-	flush_output(Stream).
-
-spit_the_error(error(Error, Args), Stream)
+spit_the_error(abort, Stream)
 	:-
-	tty_prolog_system_error(Error, Args).
+	printf(Stream, 'Execution aborted.\n', []).
 
 spit_the_error(prolog_system_error(Error, Args), Stream)
-	:-
-	prolog_system_error(Error, Args).
-
-export tty_prolog_system_error/2.
-
-	%% New rt_ reader:
-tty_prolog_system_error(
-	error(syntax_error,[_,syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream)]), [])
-	:-
-	tty_prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), []).
-
-tty_prolog_system_error(syntax(Context,P1,P2,P3,ErrorMessage,LineNumber,Stream), _) 
-	:-
-%write(syntax_pos_info=p(P1,P2,P3)),nl,flush_output,
-	sio:is_stream(Stream,Stream0),
-	sio:is_input_stream(Stream0),
-	!,
-	EType = 'Syntax error',
-	sio:stream_type(Stream0,StreamType),
-	sio:stream_name(Stream0,StreamName),
-	(StreamType = file ->
-		pathPlusFile(_,File,StreamName)
-		;	
-		File = StreamName
-	),
-	printf(error_stream,'\n%s',[Context]),
-	OutPattern = '%t, line %d: %s\n',
-	OutArgs = [File,LineNumber,ErrorMessage],
-	pse_out(error_stream, EType, OutPattern, OutArgs),
-	flush_output(error_stream).
-
-tty_prolog_system_error(s(ErrorCode,Stream), Args) 
-	:-
-	builtins:expand_code(ErrorCode, Pattern, EType),
-	!,
-	sio:stream_type(Stream,StreamType),
-	sio_linenumber(Stream,LineNumber),
-	sio:stream_name(Stream,StreamName),
-
-	OutPattern = '%t: %t stream %t,line %d:\n     ',
-	OutArgs = [StreamType,StreamName,LineNumber],
-	pse_out(error_stream, EType, OutPattern, OutArgs),
-	printf(error_stream,Pattern, Args),
-	flush_output(error_stream).
-
-tty_prolog_system_error(qc_failed(ErrorCode,Name,LineNumber),Args) 
-	:-
-	builtins:expand_code(ErrorCode, Pattern, EType),
-	!,
-	catenate('%t,line %t: ', Pattern, OutPattern),
-	OutArgs = [Name,LineNumber | Args],
-	pse_out(error_stream, EType, OutPattern, OutArgs),
-	flush_output(error_stream).
-
-tty_prolog_system_error(error(W,L),_) 
-	:-
-	decode_error(W, L, Pattern, Args),
-	!,
-	pse_out(error_stream, 'Error: ', Pattern, Args),
-	print_error_goal_attributes(L),
-	printf(error_stream,'- %-14s %t\n',
-		['Throw pattern:',error(W,L)],
-		[quoted(true),maxdepth(4),indent(17)]),
-	flush_output(error_stream).
-	
-tty_prolog_system_error(ErrorCode, Args) 
-	:-
-	builtins:expand_code(ErrorCode, Pattern, EType),
-	!,
-	pse_out(error_stream, EType, Pattern, Args),
-	flush_output(error_stream).
-
-tty_prolog_system_error(ErrorCode, Args) 
-	:-
-	decode_error(ErrorCode, Args, Pattern, MArgs),
-	pse_out(error_stream, '', Pattern, MArgs),
-	flush_output(error_stream).
-
-pse_out(Stream, EType, Pattern, Args)
-	:-
-	printf(Stream, '%t',[EType]),
-	printf(Stream, Pattern, Args, [quoted(true), maxdepth(6)]).
-
-print_error_goal_attributes([]) :- !.
-print_error_goal_attributes([H|T]) 
-	:-
-	print_error_goal_attribute(H),
-	print_error_goal_attributes(T).
-print_error_goal_attributes(Other) 
-	:-
-	print_error_goal_attribute(Other).
-
-print_error_goal_attribute(M:G) 
 	:-!,
-	printf(error_stream,'- %-14s %t\n',
-		['Goal:',M:G],[quoted(true),maxdepth(5),indent(17)]),
-	flush_output(error_stream).
+	prolog_system_error(Error, alsshell, Args, Stream).
 
-print_error_goal_attribute(Huh) 
+spit_the_error(Error, Stream)
 	:-
-	functor(Huh,AttribName0,1),
-	!,
-	arg(1,Huh,AttribValue),
-	atom_concat(AttribName0,':',AttribName),
-	printf(error_stream,'- %-14s %t\n',
-			[AttribName,AttribValue], 
-			[quoted(true),maxdepth(5),indent(17)]),
-	flush_output(error_stream).
-
-print_error_goal_attribute(Other) 
-	:-
-	printf(error_stream,'- %-14s %t\n',
-			['Error Attribute:', Other],
-			[quoted(true),maxdepth(10),indent(17)]),
-	flush_output(error_stream).
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% WARNING OUTPUT PREDICATES
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
- 	%% Print all advisory and warning messages to
- 	%% warning_output stream.
-
-export tty_prolog_system_warning/2.
-
-tty_prolog_system_warning(error(W,L),_) 
-	:-
-	decode_error(W, L, Pattern, Args),
-	!,
-	pse_out(error_stream, 'Warning: ', Pattern, Args),
-	print_error_goal_attributes(L),
-	flush_output(error_stream).
-
-tty_prolog_system_warning(ErrorCode, Args) 
-	:-
-	builtins:expand_code(ErrorCode, Pattern, EType),
-	printf(warning_output, '%t',[EType]),
-	printf(warning_output, Pattern, Args, [quoted(true), maxdepth(9)]),
-	flush_output(warning_output).
-
-
-
+	prolog_system_error(Error, alsshell, [], Stream).
 
 
 endmod.		%% blt_shl.pro: Development shell
@@ -939,10 +790,7 @@ module debugger.
 
 :- abolish(ensure_db_showing, 0).
 ensure_db_showing.
-/*
-	:-
-	pbi_write(ensure_db_showing_called),pbi_nl,pbi_ttyflush.
-*/
+
 
 endmod.
 
@@ -958,4 +806,3 @@ record_lib_load(Desc)
 	assertz(loaded_builtins_file(File,Dir)).
 
 endmod.
-

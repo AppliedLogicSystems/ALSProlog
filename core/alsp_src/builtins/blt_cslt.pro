@@ -14,7 +14,11 @@
 module builtins.
 use xconsult.
 
-/* Some definitions for the ISO standard */
+/*--------------------------------------------------------------*
+ |		Miscellaneous directives required by the
+ |		ISO Standard.  May gravitate elsewhere if 
+ |		better support is required/developed.
+ *--------------------------------------------------------------*/
 
 export multifile/1.
 multifile(_).
