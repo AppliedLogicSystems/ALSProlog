@@ -2674,9 +2674,11 @@ shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 		true
 	).
 
+display_file_errors_here.
 		%% Here, ErrsList \= []:
 shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 	:-
+display_file_errors_here,
 	SourceFile = SPath,
 	accessObjStruct(tcl_doc_path, State, InitTclWin),
 	(InitTclWin \= nil ->
