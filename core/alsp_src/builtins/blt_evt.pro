@@ -59,11 +59,11 @@ add_event(EventId,Module,Proc)
  | global_handler/2 is the entry to the global handler.
  *-----------------------------------------------------------*/
 
-global_handler(EventId,Goal) :-
-
-%pbi_write(global_handler(EventId,Goal)),pbi_nl,pbi_ttyflush,
+global_handler(EventId,Goal) 
+	:-
 	global_handler(EventId,Module,Proc),
 	!,
+%pbi_write(global_handler(EventId,Goal)),pbi_nl,pbi_ttyflush,
 	call_handler(EventId,Goal,global_context,Module,Proc).
 global_handler(EventId,Goal) :-
 	ThrowTerm =.. [EventId,Goal],
@@ -104,7 +104,6 @@ call_handler(Event,Goal,Context,Module,Proc)
 
 signal_handler(SigNum,Module,Goal) 
 	:-
-%pbi_write(signal_handler(SigNum,Module,Goal)),pbi_nl,pbi_ttyflush,
 	signal_name(SigNum,SigName),
 	!,
 	get_context(Context),
@@ -121,7 +120,10 @@ export propagate_event/3.
 propagate_event(EventId,Goal,context(Module,Proc,PrevContext)) :-
 	!,
 	call_handler(EventId,Goal,PrevContext,Module,Proc).
-propagate_event(EventId,Goal,global_context) :-
+
+propagate_event(EventId,Goal,global_context) 
+	:-
+%pbi_write(propagate_event(EventId,Goal)),pbi_nl,pbi_ttyflush,
 	global_handler(EventId,Goal).
 
 /*-------------------------------------------------------*
@@ -132,7 +134,9 @@ propagate_event(EventId,Goal,global_context) :-
 export trigger_event/2.
 
 trigger_event(EventId,ModuleAndGoal) :-
+%pbi_write(trigger_event(EventId,ModuleAndGoal)),pbi_nl,pbi_ttyflush,
 	get_context(Context),
+%pbi_write(trigger_event_context=Context),pbi_nl,pbi_ttyflush,
 	propagate_event(EventId,ModuleAndGoal,Context).
 
 /*------------------------------------------------------------------*
@@ -155,7 +159,6 @@ trap(Module,Goal,Handler)
 	catch(	trap(Module,Goal,Handler,OldContext),
 		Anything,
 		(
-pbi_write(trap_catch(Module,Goal,Handler)),pbi_nl,pbi_ttyflush,
 			set_context(OldContext),throw(Anything)
 		)).
 
@@ -206,14 +209,13 @@ trap_exit(OldContext,NewContext)
 decompose_handler(M:P,_,M,P) :- !.
 decompose_handler(P,M,M,P).
 
-
 /*--------------------------*
  | Specific handlers
  *--------------------------*/
 
 default_cntrl_c_handler(_,M:G,_) 
 	:-
-%pbi_write(default_cntrl_c_handler),pbi_nl,pbi_ttyflush,
+%pbi_write(default_cntrl_c_handler(M:G)),pbi_nl,pbi_ttyflush,
 	breakhandler(M,G).
 
 silent_abort(_,_,_) :-
@@ -225,12 +227,16 @@ libload(_,M:G,_) :-
 ignore_cntrl_c(sigint,_,_) :- 
 	!,
 	flush_input(user).
+
 ignore_cntrl_c(Event,Goal,Context) :-
 	propagate_event(Event,Goal,Context).
 
-throw_cntrl_c(sigint,Goal,Context) :-
+throw_cntrl_c(sigint,Goal,Context) 
+	:-
 	throw(sigint(Goal)).
-throw_cntrl_c(Event,Goal,Context) :-
+
+throw_cntrl_c(Event,Goal,Context) 
+	:-
 	propagate_event(Event,Goal,Context).
 
 prolog_error(_,_,_) 

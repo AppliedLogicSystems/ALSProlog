@@ -82,7 +82,6 @@ breakhandler0(M,G)
 	options(ListOfCodes, Responses, Prompt, Options0),
 	Options = [io_streams=(warning_input,warning_output) | Options0],
 		%% Note: menu/4 defined in Library in iolayer.pro:
-%	menu(break_window,ChoiceItems,Response,Options),
 	simple_menu(ChoiceItems, Response, [0-'No Choice - Exit menu' | Options]),
 	position(ChoiceItems, Response, PosN),
 	nth(PosN, Responses, Resp),
@@ -103,6 +102,10 @@ break_handler(continue(M,G),M,G)
 	getBreakLevel([_ | PrevList]),
 	setBreakLevel(PrevList),
 /*
+	shell_alarm_interval(AlarmIntrv),
+	set_alarm_clock((M:G),AlarmIntrv),
+*/
+/*
 	(obtain_alarm_interval(Intrv) -> 
 %		write(breakhandler_resetting_alarm(Intrv,Intrv)),nl,flush_output,
 		alarm(Intrv, Intrv) 
@@ -110,6 +113,7 @@ break_handler(continue(M,G),M,G)
 		true),
 */
 	M:G.
+
 break_handler(debug(M,G),M,G) 
 	:-!,
 	catch(trace(M,G),

@@ -53,23 +53,24 @@ default_write_eoln_type(socket, crlf) :- !.
 
 :-	als_system(L),
 	dmember(os=OS, L),
-	(OS=mswin32 -> assert(default_write_eoln_type(_, crlf))
+	(OS=mswin32 -> assertz(default_write_eoln_type(_, crlf))
 		;
-		(OS=macos -> assert(default_write_eoln_type(_, cr))
+		(OS=macos -> assertz(default_write_eoln_type(_, cr))
 			;
 			(OS=unix ->
 				dmember(os_variation=OSM, L),
 				( (OSM=djgpp1 ; OSM=djgpp2) ->
-					assert(default_write_eoln_type(_, crlf))
+					assertz(default_write_eoln_type(_, crlf))
 					;
-					assert(default_write_eoln_type(_, lf))
+					assertz(default_write_eoln_type(_, lf))
 				)
 			)
 			;
-			assert(default_write_eoln_type(_, crlf))
-	)
+			assertz(default_write_eoln_type(_, crlf))
+	),
+	asserta((default_write_eoln_type(tk_window(_,_), crlf) :-!)),
+	asserta((default_write_eoln_type(tk_win(_,_), crlf) :-!))
 ).
-
 
 /*
  * next_stream_identifier/2 is used to retrieve the next stream identifier
@@ -1657,9 +1658,24 @@ wait_data(tcltk, Stream, Call)
 		[bind,WinID,'<Return>', [ xmit_line_plain,WinID,Alias]], _),
 
 	tcl_call(shl_tcli, [set,'WaitForLine',0], _),
-	tcl_call(shl_tcli, [wait_for_line0], _),
+	tcl_call(shl_tcli, [wait_for_line0], WaitRes),
+%pbi_write('Prolog:wait_for_line0'=WaitRes),pbi_nl,pbi_ttyflush,
+	finish_wait_data_tcltk(WaitRes, Stream, Call).
 
+	%% Returned -1: Got a ^C:
+finish_wait_data_tcltk(-1, Stream, Call)
+	:-!,
+	force_control_c_during_read(Stream).
+finish_wait_data_tcltk(WaitRes, Stream, Call)
+	:-
 	call(Call).
+
+force_control_c_during_read(StreamAlias)
+	:-
+%pbi_write(force_control_c_during_read(StreamAlias)),pbi_nl,pbi_ttyflush,
+	stream_or_alias_ok(StreamAlias, Stream),
+	sio_set_errcode(Stream,16),			% SIO_INTERR
+	forceCtlC.
 
 wait_data(sysV_queue, Stream, Call) 
 	:-!,
@@ -2540,7 +2556,7 @@ read_buffer(tk_window,Stream)
 	fail.
 
 read_buffer(tk_window,Stream) 
-	:- !,
+	:- 
 	stream_extra(Stream,InCurQueue),
 	(InCurQueue = eof(CurQueue) ->
 		EOFFlag = true
@@ -2563,7 +2579,13 @@ read_buffer(tk_window,Stream)
 		;
 		OutNewQueue = NewQueue
 	),
+	!,
 	set_stream_extra(Stream,OutNewQueue).
+
+read_buffer(tk_window,Stream) :-
+	sio_errcode(Stream,16),			%% 16 = SIOE_INTERRUPTED
+	!,
+	read_buffer(tk_window,Stream).
 
 set_extra_eof(StreamOrAlias)
 	:-
@@ -3360,14 +3382,6 @@ nl(Stream_or_alias) :-
 	output_stream_or_alias_ok(Stream_or_alias, Stream),
 	nl0(Stream),
 	flush_output(Stream).
-
-nl0(Stream) 
-	:-
-	stream_type(Stream,tk_window),
-	!,
-	stream_addl2(Stream, Interp),
-	stream_name(Stream, WinName),
-	tcl_eval(Interp, [WinName,' insert end "\n" ; update'], _).
 
 nl0(Stream) 
 	:-

@@ -12,6 +12,7 @@
  |  Major revisions: 1995-96
  *=============================================================*/
 
+
 module builtins.
 use sio.
  
@@ -39,7 +40,6 @@ start_shell0(DefaultShellCall)
 	%% ss_parse_command_line can cause debugger to be called
 	%% [if it sees switch -nwd] )
 		%% Conditional handles systems without alarm/2:
-	(alarm(0,0) -> true ; true),
 	builtins:libhide(debugger, [builtins,debugger],
 				[ (trace)/0, (trace)/2, toggle_mod_show/1, leash/1,
 		  		  (spy)/0, (spy)/1, (spy)/2, (spy_pat)/3, (spyWhen)/1,
@@ -70,15 +70,7 @@ start_shell0(DefaultShellCall)
 	ss_init_searchdir(CmdLineSearch),
 	ss_load_dot_alspro,
 
-%	arg(7, CLInfo, CLShellCall),
-%	arg(2,CLInfo,Verbosity),
-%	(CLShellCall=(builtins:prolog_shell) -> 
-%		ConsultNoise = Verbosity 
-%		;
-%		ConsultNoise = true
-%	),
 	arg(2,CLInfo,ConsultNoise),
-
 	OutputStream = user_output,
 	als_system(SysList),
 	(ConsultNoise = true -> 
@@ -114,7 +106,8 @@ setup_init_goal(CLInfo, ShellCall)
 	(CmdLineGoal = true ->	
 		ShellCall = CLShellCall
 		;
-		ShellCall = (CmdLineGoal, CLShellCall)
+		ShellCall = 
+			catch(CmdLineGoal, _, CLShellCall)
 	).
 
 /*-----------------------------------------------------------------*
@@ -268,8 +261,6 @@ ss_parse_command_line([File | T], L, CLInfo)
 	append(Files, [File], NewFiles),
 	mangle(3, CLInfo, NewFiles),
 	ss_parse_command_line(T, L, CLInfo).
-
-
 
 ss_cl_asserts([], OutputStream).
 ss_cl_asserts([Expr | CLAsserts], OutputStream)
@@ -468,12 +459,6 @@ prolog_shell(InStream,OutStream,ID)
  | init_prolog_shell(+, +,+,-,-,-)
  |
  *-----------------------------------------------------------------------*/
-module windows.
-
-endmod.
-
-:-dynamic(windows:'$toplevel$'/1).
-
 export init_prolog_shell/6.
 init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	:-
@@ -498,8 +483,6 @@ init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 
 	current_prolog_flag(windows_system, Wins),
 	(Wins = tcltk -> print_banner(OutStream,SysList) ; true ),
-%	dmember(os=OS, SysList),
-%	dmember(os_variation=OSMinor, SysList),
 	push_prompt(Wins,OutStream,Prompt1).
 
 push_prompt(nowins,_,_) :-!.
@@ -593,15 +576,13 @@ shell_read(InStream,OutStream,G,N,V)
 	flush_input(InStream),
 	catch(trap(shell_read0(Prompt1,Prompt2,InStream,G,N,V), 
 			   throw_cntrl_c),
-		  _,
-		  ( write(OutStream,' <input discarded>'),nl(OutStream),
-		      flush_output(OutStream),
-		      shell_read(InStream,OutStream,G,N,V)) 
-		 ).
+		  Ball,
+		  shell_read0_err_disp(Ball,InStream,OutStream,G,N,V)
+		  ).
+
 
 shell_read0(Prompt1,Prompt2,InStream,G,N,V) 
-	:-
-	!,
+	:- !,
 	sio:get_user_prompt(OldPrompt),
 	catch((
 		sio:set_user_prompt(Prompt1),
@@ -617,32 +598,35 @@ shell_read0(Prompt1,Prompt2,InStream,G,N,V)
 
 shell_read0(Prompt1,Prompt2,InStream,stream_not_ready,[],[]).
 
-	%% This contains the guts of the old shell2, following 
-	%% the shell_read:
+shell_read0_err_disp(Ball,InStream,OutStream,G,N,V)
+	:-
+	functor(Ball,error,_),
+	arg(1,Ball,syntax_error),
+	arg(2,Ball,[_, SyntaxErrInfo]),
+	prolog_system_error(SyntaxErrInfo,[]),
+	nl(OutStream),
+	flush_output(OutStream),
+	shell_read(InStream,OutStream,G,N,V).
+
+shell_read0_err_disp(Ball,InStream,OutStream,G,N,V)
+	:-
+	write(OutStream,' <input discarded>'),
+	nl(OutStream),
+	flush_output(OutStream),
+	shell_read(InStream,OutStream,G,N,V).
+
 shell_execute(InStream,OutStream,InitGoal,[],[],Wins,continue)
 	:-
 	nonvar(InitGoal),
 	InitGoal = stream_not_ready,
 	!.
 
-module alsshell.
-dummy.
-:-dynamic(getTracingFlag/1).
-endmod.
-
-:-dynamic(getTracingFlag/1).
-
-shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,InWins,Status)
+shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status)
 	:-
 	sio:get_user_prompt(UsersPrompt),
-	(alsshell:getTracingFlag(tracing) ->
-		Goal = (trace InitGoal)
-		;
-		Goal = InitGoal
-	),
+	Goal = InitGoal,
 	flush_input(InStream),
 	sio:set_user_prompt(UsersPrompt),
-	wins_wakeup(InWins, Wins, Alarm),
 	!,
 	((nonvar(Goal),Goal=halt) ->
 		Status = halt
@@ -660,10 +644,6 @@ shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,InWins,Status)
 		push_prompt(Wins,OutStream,Prompt1),
 		Status = continue
 	).
-
-wins_wakeup(nowins, nowins, 0) :-!.
-wins_wakeup(Wins/AlarmInterval, Wins, AlarmInterval) :-!.
-wins_wakeup(Wins, Wins, 0).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% get_debugging_state(State)
@@ -749,10 +729,8 @@ do_shell_query(Goal0,VarNames,Vars,Wins,AlarmIntrv,InStream,OutStream)
 	setCall(0),		%% Start Call,
 	setDepth(1),            %%    Depth
 	setRetry(0),            %%    and Retry in case of debugging.
-%	set_alarm_clock(Goal0,AlarmIntrv),
 	xform_command_or_query(Goal0,Goal1),
 	do_shell_query2(user,Goal1),
-%	unset_alarm(AlarmIntrv),
 	dbg_notrace,
 	dbg_spyoff,
 	showanswers(VarNames,Vars,Wins,InStream,OutStream),
@@ -760,37 +738,9 @@ do_shell_query(Goal0,VarNames,Vars,Wins,AlarmIntrv,InStream,OutStream)
 
 do_shell_query(Goal,VarNames,Vars,Wins,AlarmIntrv,InStream,OutStream) 
 	:-
-%	unset_alarm(AlarmIntrv),
 	dbg_notrace,
 	dbg_spyoff,
 	print_no(OutStream).
-
-set_alarm_clock((trace _),_) :-!.
-set_alarm_clock(_,0) :-!.
-set_alarm_clock(_,AlarmIntrv)
-	:-
-	AlarmIntrv > 0,
-	!,
-pbi_write(setting_alarm_clock(Goal0,AlarmIntrv)),pbi_nl,pbi_ttyflush,
-	windows:set_event_handler(sigalrm,dev_alarm),
-	alarm(AlarmIntrv,AlarmIntrv).
-set_alarm_clock(_,_) :-!.
-
-/*
-unset_alarm(0) :-!.
-unset_alarm(AlarmIntrv)
-	:-
-	alarm(0,0).
-unset_alarm(AlarmIntrv)
-	:-
-	alarm(AlarmIntrv,AlarmIntrv),
-	!,
-	fail.
-*/
-unset_alarm(0) :-!.
-unset_alarm(AlarmIntrv)
-	:-
-	alarm(0,0).
 
 export do_shell_query2/2.
 do_shell_query2(Mod,Goal) 
@@ -839,13 +789,6 @@ sa_cont(InStream,UsersPrompt,Wins,OutStream)
 	get_code(InStream,C,[blocking(true)]),
 	disp_sa_cont(C,Wins,InStream,UsersPrompt,OutStream).
 
-disp_sa_cont(-2,tcltk,InStream,UsersPrompt,OutStream)  %% stream not ready
-	:-!,
-	sio:wait_data(tcltk, InStream, get_code(InStream,C)),
-	sio:set_user_prompt(UsersPrompt),
-	flush_input(InStream),
-	succeed_or_fail(C,OutStream).
-
 disp_sa_cont(C,Wins,InStream,UsersPrompt,OutStream)
 	:-
 	sio:set_user_prompt(UsersPrompt),
@@ -856,13 +799,15 @@ print_no(OutStream)
 	:- 
 	nl(OutStream),
 	write(OutStream,'no.'),
-	nl(OutStream).
+	nl(OutStream),
+	flush_output(OutStream).
 
 print_yes(OutStream) 
 	:-
 	nl(OutStream),
 	write(OutStream,'yes.'),
-	nl(OutStream).
+	nl(OutStream),
+	flush_output(OutStream).
 
 succeed_or_fail(0';,_) 
 	:- !, fail.
@@ -978,7 +923,7 @@ disp_setup_lib(LibDirName,LibPath,PathHead)
 	filePlusExt('*',LibExt,Pattern),
 	files(LibPath, Pattern, LibFileHeaders),
 	install_lib_files(LibFileHeaders, LibPath),
-	(filename_equal(LibDirName,library) ->
+	(filename_equal(LibDirName, library) ->
 		assert(als_lib_lcn(PathHead)) 
 		; 
 		true

@@ -76,7 +76,7 @@ readFile(Stream, File, ModStack)
 	:-
 	readvnv(Stream,Term,Names,Vars),
 	!,
-%	gc,
+	gc,
 	process(Term,Names,Vars,Stream, File, ModStack).
 
 readvnv(Stream,Term,Names,Vars) 
@@ -86,6 +86,7 @@ readvnv(Stream,Term,Names,Vars)
 	read_term(Stream,Term0,[vars_and_names(Vars,Names),debugging]),
 	top_clausegroup(CID),
 	sio:pp_xform_clause(Term0,CID,Term).
+
 
 readvnv(Stream,Term,Names,Vars) 
 	:-
@@ -131,6 +132,19 @@ process((':-'(Command) :- '$dbg_aph'(_,_,_)),Names,Vars,Stream, File, ModStack)
 	readFile(Stream, File, ModStack).
 
 process((':-'(Command) :- '$dbg_aph'(_,_,_)),Names,Vars,Stream, File, ModStack)
+	:-!,
+		%% cf: "Command failed.\n"
+	prolog_system_error(s(cf,Stream),[Command]),
+	readFile(Stream, File, ModStack).
+
+process((':-'(Command) :- '$dbg_apf'(_,_,_)),Names,Vars,Stream, File, ModStack)
+	:- 
+	topmod(Module),
+	execute_command_or_query(Stream,cf,Module,Command),
+	!,
+	readFile(Stream, File, ModStack).
+
+process((':-'(Command) :- '$dbg_apf'(_,_,_)),Names,Vars,Stream, File, ModStack)
 	:-!,
 		%% cf: "Command failed.\n"
 	prolog_system_error(s(cf,Stream),[Command]),

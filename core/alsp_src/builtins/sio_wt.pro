@@ -1599,9 +1599,6 @@ show_substs_ext([],[],_,Stream)
 
 show_substs_ext([N|Ns],[S|Ss],VPairs,Stream) 
 	:-
-%pbi_write('----------'),pbi_nl,pbi_ttyflush,
-%trace,
-
 	wr_subs3(N,S,VPairs,Stream),
 	!,
 	show_substs_ext(Ns,Ss,VPairs,Stream).
@@ -1611,7 +1608,7 @@ show_substs_ext([N|Ns],[S|Ss],VPairs,Stream)
 	%%   -- defined in blt_frez.pro
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%/*
+/*
 wr_subs3(N,S,VPairs,Stream)
 	:-
 	'$is_delay_var'(S),
@@ -1622,7 +1619,7 @@ wr_subs3(N,S,VPairs,Stream)
 		;
 		show_delay_binding(N,S, VPairs, Stream)
 	).
-%*/
+*/
 /*
 wr_subs3(N,S,VPairs,Stream)
 	:-
@@ -1640,9 +1637,13 @@ wr_subs3(N,S,VPairs,Stream)
 
 wr_subs3(N,S,_,Stream)
 	:-
-%pbi_write(nl_for_wr_subs3(N)),pbi_nl,pbi_ttyflush,
-	nl(Stream),
+/*
+%put_atom(Stream,'+'),
+	nl(Stream),flush_output(Stream),
+%put_atom(Stream,'@'),
 	write_term(Stream,'%lettervar%'(N)=S,[]).
+*/
+	printf(Stream, '\n%t=%t ', ['%lettervar%'(N), S]).
 
 rpairs_list([],[],[]).
 
@@ -1666,4 +1667,5 @@ exact_lookup([ _ | DVarAtmsList], Term, Item)
 	exact_lookup(DVarAtmsList, Term, VName).
 
 endmod.		%% builtins
+
 endmod.		%% sio

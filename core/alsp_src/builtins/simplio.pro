@@ -186,7 +186,7 @@ themenu(List, ChoiceNum, Options,InS,OutS)
 	).
 
 /*!---------------------------------------------------------------------
- |	output_prolog_list/[1,5,6]
+ |	output_prolog_list/[1,6,7]
  |	output_prolog_list(List)
  |	output_prolog_list(+)
  |
@@ -209,7 +209,9 @@ output_prolog_list(List,Indent,Term,Spacer,DefaultContent,DfltMark)
 	current_output(Stream),
 	output_prolog_list(List,Stream,Indent,Term,Spacer,DefaultContent,DfltMark).
 
-output_prolog_list([],Stream,Indent,Term,Spacer,DefaultContent,DfltMark).
+output_prolog_list([],Stream,Indent,Term,Spacer,DefaultContent,DfltMark)
+	:-
+	flush_output(Stream).
 output_prolog_list([Item | RestList],Stream,Indent,Term,Spacer,DefaultContent,DfltMark)
 	:-
 	(Item = (Code-Content) ->
@@ -284,5 +286,23 @@ dca(X,Y)
 	put_code(user_output,0';),
 	write_term(user_output,Y,[]),
 	put_code(user_output,0'H).
+
+/*!---------------------------------------------------------------------
+ |	encode_list/3
+ |	encode_list(Items, Codes, CodedItems)
+ |	encode_list(+, +, -)
+ |
+ |	 - encodes the elements of a list with provided codes
+ |
+ |	If Items is a list, and Codes is a list of atoms with 
+ |	length(Items) = length(Codes), then CodedItems is
+ |	the list obtained by replacing each element X in Items by C-X,
+ |	where C is the element of Codes in the position of X in Items.
+ *!--------------------------------------------------------------------*/
+export encode_list/3.
+encode_list([], [], []).
+encode_list([Item | Items], [CurCode | RestCodes], [CurCode-Item | CodedItems])
+	:-
+	encode_list(Items, RestCodes, CodedItems).
 
 endmod.
