@@ -152,7 +152,8 @@ create_table4_r(Mod, TableName, Options, Interp, XOpts,BTR)
 		ColHeadings \= [])
 		->
 		length(ColHeadings, NCols0),
-		NCols is NCols0+1,
+%		NCols is NCols0+1,
+		NCols = NCols0,
 		NTitleRows = 1,
 		Roworigin = -1 
 		;
@@ -165,7 +166,8 @@ create_table4_r(Mod, TableName, Options, Interp, XOpts,BTR)
 		RowHeadings \= [])
 		->
 		length(RowHeadings, NRows0),
-		NRows is NRows0+1,
+%		NRows is NRows0+1,
+		NRows = NRows0,
 		NTitleCols = 1,
 		Colorigin = -1
 		;
