@@ -1052,7 +1052,9 @@ load_builtins(BDir, File)
 	'$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
 %pbi_write(load-FileAndPath), pbi_nl,pbi_ttyflush,
+	obp_push_stop,
 	(resource_load(File) ; '$load'(FileAndPath, 0)),
+	obp_pop,
 %pbi_write('...done'), pbi_nl,pbi_ttyflush,
 	assertz_at_load_time(loaded_builtins_file(File,builtins)).
 
@@ -1089,18 +1091,22 @@ cslt_blts_ld(File, FilePathPro,FilePathObp)
 	resource_load(File),
 	!.
 
+/*
 cslt_blts_ld(File, FilePathPro,FilePathObp)
 	:-
 	comp_file_times(FilePathPro,FilePathObp),
 	obp_load(FilePathObp, 1),
 	!.
+*/
 cslt_blts_ld(File, FilePathPro,FilePathObp)
 	:-
-	obp_open(FilePathObp),
+%	obp_open(FilePathObp),
+	obp_push_stop,
 %pbi_write('cslt_blts'=File), pbi_nl,pbi_ttyflush,
 	xconsult(FilePathPro, NErrs, ErrList),
 %pbi_write('..cslt_blts'=NErrs), pbi_nl,pbi_ttyflush,
-	obp_close,
+%	obp_close,
+	obp_pop,
 	(NErrs = 0, !; unlink(FilePathObp), fail).
 
 :-	auto_use(sio).
@@ -1184,6 +1190,7 @@ nops
 	op(900,fy,not),
 	op(900,fy,\+).
 
+
 ld_is
 	:-	
 	sys_env(_,_,Proc),
@@ -1253,6 +1260,7 @@ ld_wins
 '$initialize' 
 	:-
 	pckg_init.
+
 
 /*------------------------------------------------------------------------*
  | '$start' is the initial (shell) goal which is run by the prolog system.

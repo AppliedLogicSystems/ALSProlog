@@ -43,6 +43,8 @@ export join_path/3.
 export tilda_expand/2.
 export directory_self/1.
 export directory_self/2.
+export parent_path/1.
+export parent_path/2.
 
 file_extension(FullName, Name, Ext) :-
 	nonvar(FullName),
@@ -376,6 +378,16 @@ directory_self(unix, '.').
 directory_self(macos, ':').
 directory_self(mswin32, '.').
 directory_self(win32, '.').
+
+parent_path(PP) :-
+	sys_env(OS, _, _),
+	!,
+	parent_path(OS, PP).
+
+parent_path(unix, '..').
+parent_path(macos, '::').
+parent_path(mswin32, '..').
+parent_path(win32, '..').
 
 
 /*!-------------------------------------------------------*

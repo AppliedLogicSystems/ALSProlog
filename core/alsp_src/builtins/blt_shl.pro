@@ -40,7 +40,7 @@ use sio.
 		addl_slots= [ ]
 	]).
 
-:- dynamic(dvf/0).
+%:- dynamic(dvf/0).
 
 start_shell(DefaultShellCall) 
 	:-
@@ -63,11 +63,12 @@ start_shell0(DefaultShellCall)
 	output_system_banner(CLInfo),
 
 	library_setup,
+	(clause(dvf,_) -> qkc ; true),
+%	dvf,
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	!,
 		%% 
-	(dvf -> qkc ; true),
 	ss_load_dot_alspro(CLInfo),
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
@@ -200,7 +201,8 @@ ss_load_files([])
 	:-!.
 ss_load_files([F | T])
 	:-
-	catch(	reconsult(F),
+%	catch(	reconsult(F),
+	catch(	simple_load(user, F),
 	      	Reason,
 			shell_exception(Reason)
 		),
