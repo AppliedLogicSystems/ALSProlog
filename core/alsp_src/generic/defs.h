@@ -351,7 +351,11 @@ extern	int	als_mem_init	PARAMS(( char *file, long offset ));
 extern	long *	ss_pmalloc	PARAMS(( size_t size, int fe_num, long *asizep ));
 extern	long *	ss_malloc	PARAMS(( size_t size, int fe_num ));
 extern	void	ss_register_global PARAMS(( long *addr ));
-extern	int	ss_save_state	PARAMS(( char * ));
+#ifdef SIMPLE_MICS
+extern	long	ss_image_offset	PARAMS((void));
+extern	int	ss_save_image_with_state PARAMS((CONST char * ));
+#endif
+extern	int	ss_save_state	PARAMS((CONST char *, long ));
 extern	void	protect_bottom_stack_page PARAMS(( void ));
 extern	long *	ss_fmalloc_start PARAMS(( void ));
 extern	long *	ss_fmalloc	PARAMS(( size_t ));

@@ -15,11 +15,7 @@
 #define ALSMEM_H_INCLUDED
 
 /* AM_BLOCKSIZE is the default block size to allocate */
-#ifdef MacOS
-#define AM_BLOCKSIZE		0x00080000	/* about .5 meg */
-#else
 #define AM_BLOCKSIZE		0x00200000	/* about 2 meg */
-#endif
 
 /* AM_MALLOCSPACE is the space we attempt to leave malloc with at 
    initialization */

@@ -4,10 +4,8 @@
  * Author: Kevin A. Buettner
  *
  */
-#ifndef __GO32__
-#include <a.out.h>
+#if defined(__GO32__)
 
-#else
 #include <coff.h>
 
 /* #include <djcoff.h> */
@@ -21,14 +19,51 @@
 
 #define ISCOFF(x) ((x)==0x14c)
 
-#endif		/* __GO32__ */
+#elif defined(WIN32)
 
-#include <unistd.h>
+#define ISCOFF(x) ((x)==IMAGE_FILE_MACHINE_I386)
+
+#define f_magic Machine
+#define f_nsyms NumberOfSymbols
+#define f_symptr PointerToSymbolTable
+#define f_opthdr SizeOfOptionalHeader
+
+#define s_vaddr VirtualAddress
+#define s_size SizeOfRawData
+#define s_scnptr PointerToRawData
+
+#define n_scnum SectionNumber
+#define n_sclass StorageClass
+#define n_zeroes N.Name.Short
+#define n_name N.ShortName
+#define n_offset N.Name.Long
+#define n_numaux NumberOfAuxSymbols
+#define n_value Value
+
+#define N_DEBUG IMAGE_SYM_DEBUG
+
+#define C_EXT IMAGE_SYM_CLASS_EXTERNAL
+
+#define SYMESZ	sizeof(IMAGE_SYMBOL)
+#else
+
+#include <a.out.h>
+
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
+
+#if defined(WIN32)
+
+#include "fswin32.h"
+
+#else
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#endif
 
 #ifndef SYMESZ
 #define SYMESZ sizeof(struct syment)
@@ -96,21 +131,28 @@ main(int argc,char **argv)
     struct stat ss_statbuf;
     long ss_offset;
     long ss_size;
-	off_t coff_start = 0;
+    long coff_start = 0;
 
-#ifndef __GO32__
-    struct filehdr fhdr;
-    struct aouthdr ehdr;
-    struct scnhdr  shdr;
-
-    struct syment *symtab, *sym;
-#else
+#if defined(__GO32__)
     FILHDR fhdr;
     AOUTHDR ehdr;
     SCNHDR  shdr;
 
     SYMENT *symtab, *sym;
+#elif defined(WIN32)
+    IMAGE_FILE_HEADER fhdr;
+    IMAGE_OPTIONAL_HEADER ehdr;
+    IMAGE_SECTION_HEADER shdr;
+    
+    IMAGE_SYMBOL *symtab, *sym;
+#else
+    struct filehdr fhdr;
+    struct aouthdr ehdr;
+    struct scnhdr  shdr;
+
+    struct syment *symtab, *sym;
 #endif
+
     char *strtab, *name;
     long nsyms;
 
@@ -165,15 +207,29 @@ fprintf(stderr,"Done Step 1: %s\n",iiname);
     ssfd = open(ssname, O_RDONLY|O_BINARY);
     if (ssfd < 0)
 	fe("Error opening saved state file %s for read access", ssname);
+#ifdef WIN32
+    if (stat(ssname, &ss_statbuf) < 0)
+#else
     if (fstat(ssfd, &ss_statbuf) < 0)
+#endif
 	fe("Cannot fstat file descriptor associated with %s", ssname);
     
-fprintf(stderr,"Done Step 2: %s\n",ssname);
+    fprintf(stderr,"Done Step 2: %s\n",ssname);
     /*
      * Step 3:  Read the file header and a.out header
      */
     
 /*    if (   lseek(oifd, 0, 0) < 0)    */
+#ifdef WIN32
+    {
+    	unsigned char buf[0x40];
+    	lseek(oifd, 0, 0);
+    	read(oifd, buf, 0x40);
+    	if (*(unsigned short *)buf != IMAGE_DOS_SIGNATURE)
+    	    fe("Input file is not MS COFF", 0);
+    	coff_start = *(unsigned short *)&buf[0x3c] + 4;
+    }
+#else
 	while (1)
 	{
 	  unsigned char buf[6];
@@ -197,16 +253,21 @@ fprintf(stderr,"Done Step 2: %s\n",ssname);
 			break;
 	   }
    }
-	   
-	   if (   lseek(oifd, coff_start, 0) < 0
-#ifndef __GO32__
-	|| read(oifd, &fhdr, sizeof (struct filehdr)) < 0
-	|| read(oifd, &ehdr, sizeof (struct aouthdr)) < 0 )
-#else
-	|| read(oifd, &fhdr, FILHSZ) < 0
-	|| read(oifd, &ehdr, AOUTSZ) < 0 )
 #endif
-	fe("Cannot read header information",0);
+	   
+   if (    lseek(oifd, coff_start, 0) < 0
+#if defined(__GO32__)
+	|| read(oifd, &fhdr, FILHSZ) < 0
+	|| read(oifd, &ehdr, AOUTSZ) < 0
+#elif defined(WIN32)
+	|| read(oifd, &fhdr, sizeof(IMAGE_FILE_HEADER)) < 0
+	|| read(oifd, &ehdr, sizeof(IMAGE_OPTIONAL_HEADER)) < 0
+
+#else
+	|| read(oifd, &fhdr, sizeof (struct filehdr)) < 0
+	|| read(oifd, &ehdr, sizeof (struct aouthdr)) < 0
+#endif
+      ) fe("Cannot read header information",0);
     
 #ifdef ISCOFF
     if (!ISCOFF(fhdr.f_magic))
@@ -226,7 +287,11 @@ fprintf(stderr,"Done Step 3: Header Info\n");
      */
 
     nbytes = fhdr.f_nsyms * SYMESZ;
+#ifdef WIN32
+    symtab = (IMAGE_SYMBOL *) malloc(nbytes);
+#else
     symtab = (struct syment *) malloc(nbytes);
+#endif
 
 fprintf(stderr,"Step 4:fhdr.f_nsyms=%d SYMESZ=%d nbytes=%d symtab=%d\n",
 	 	fhdr.f_nsyms, SYMESZ, nbytes, symtab);
@@ -250,8 +315,12 @@ fprintf(stderr,"Step 4:fhdr.f_nsyms=%d SYMESZ=%d nbytes=%d symtab=%d\n",
     if (read(oifd, strtab+4, nbytes-4) != nbytes-4)
 	fe("Unable to read string table",0);
 
+#ifdef WIN32
+#define advsym(sym,n) ((sym) = (IMAGE_SYMBOL *) (((char *) (sym)) + SYMESZ*(n)))
+#else
 #define advsym(sym,n) ((sym) = (struct syment *) (((char *) (sym)) + SYMESZ*(n)))
-    
+#endif    
+
     for (sym = symtab, nsyms= fhdr.f_nsyms; nsyms>0; nsyms--,advsym(sym,1)) {
 	if (sym->n_scnum != N_DEBUG && sym->n_sclass == C_EXT) {
 	    if (sym->n_zeroes)
@@ -354,8 +423,10 @@ fprintf(stderr,"Step 4:fhdr.f_nsyms=%d SYMESZ=%d nbytes=%d symtab=%d\n",
      * input image file.
      */
 
+#ifndef WIN32
     if (stat(iiname, &ss_statbuf) == 0)
 	(void) chmod(oiname, ss_statbuf.st_mode);
+#endif
 
     exit(0);
 }

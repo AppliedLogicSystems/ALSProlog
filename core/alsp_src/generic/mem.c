@@ -40,6 +40,7 @@
 #endif
 
 #ifdef MSWin32
+#include <windows.h>
 #include "fswin32.h"
 #endif
 
@@ -261,6 +262,8 @@ allocate_prolog_heap_and_stack(size)
 
 #ifdef _SC_PAGESIZE
     pgsize = sysconf(_SC_PAGESIZE);
+#elif defined(_SC_PAGE_SIZE)
+    pgsize = sysconf(_SC_PAGE_SIZE);
 #elif defined(HAVE_GETPAGESIZE)
     pgsize = getpagesize();
 #endif  /* _SC_PAGESIZE */
@@ -270,8 +273,10 @@ allocate_prolog_heap_and_stack(size)
      * file of infinitely (or at least as many as we need) zeros.
      *-------------------------------------------------------------*/
 
+#ifndef HAVE_MMAP_ZERO
     if ((fd = open("/dev/zero", O_RDWR)) == -1)
 	fatal_error(FE_DEVZERO, 0);
+#endif
 
     /*-------------------------------------------------------------*
      * Call mmap to allocate the memory and map it to /dev/zero.  Note
@@ -290,7 +295,14 @@ allocate_prolog_heap_and_stack(size)
      * One advantage of having a fixed location for this region of memory
      * is that it will much easier to implement saved states.
      *-------------------------------------------------------------*/
-
+#ifdef HAVE_MMAP_ZERO
+    retval = (PWord *) mmap((caddr_t) STACKSTART,
+			    size * sizeof (PWord) + NPROTECTED * pgsize,
+			    PROT_READ | PROT_WRITE,
+			    MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
+			    -1,
+			    0);
+#else
     retval = (PWord *) mmap((caddr_t) STACKSTART,
 			    size * sizeof (PWord) + NPROTECTED * pgsize,
 			    PROT_READ | PROT_WRITE,
@@ -300,6 +312,7 @@ allocate_prolog_heap_and_stack(size)
 
 
     close(fd);			/* close /dev/zero */
+#endif
 
     /*
      * Error out if something went wrong with mmap call above
@@ -643,6 +656,14 @@ alloc_big_block(size, fe_num)
 /* #if defined(HAVE_MMAP) && defined(HAVE_DEV_ZERO) */
 #if	defined(HAVE_MMAP) && (defined(HAVE_DEV_ZERO) || defined(HAVE_MMAP_ZERO))
     {
+#ifdef HAVE_MMAP_ZERO
+	np = (long *) mmap((caddr_t) next_big_block_addr,
+				size,
+				PROT_READ | PROT_WRITE,
+				MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
+				-1,
+				0);
+#else
 	int fd;
 	/*
 	 * Open /dev/zero for read/write access.  /dev/zero is essentially a
@@ -669,7 +690,7 @@ alloc_big_block(size, fe_num)
 				0);
 
 	close(fd);			/* close /dev/zero */
-
+#endif
 	/*
 	 * Error out if something went wrong with mmap call above
 	 */
@@ -701,6 +722,13 @@ alloc_big_block(size, fe_num)
 	if (sbrk((int)size) == (char *) -1)
 	    fatal_error(fe_num, 0);
     }
+#elif defined(MSWin32)
+    
+    np = VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    
+    if (np == NULL)
+        fatal_error(fe_num, 0);
+    
 #else /* HAVE_BRK */
 	np = (long *)malloc(size);
 	
@@ -723,12 +751,13 @@ als_mem_init(file,offset)
 
 #ifdef _SC_PAGESIZE
     pgsize = sysconf(_SC_PAGESIZE);
+#elif _SC_PAGE_SIZE
+    pgsize = sysconf(_SC_PAGE_SIZE);
 #elif defined (MACH_SUBSTRATE)
     pgsize = vm_page_size;
 #elif defined(HAVE_GETPAGESIZE)
     pgsize = getpagesize();
 #endif  /* _SC_PAGESIZE */
-
 
     if (ss_saved_state_present())
 	return 1;	/* saved state loaded */
@@ -932,19 +961,328 @@ ss_register_global(addr)
     header.nglobals++;
 }
 
+#ifdef SIMPLE_MICS
+#ifdef MSWin32
+/* ms_pecoff_end calculated the offset to the end of a
+   Microsoft Portable-Executable/Common-Object-File-Format file.
+   
+   The result is the offset to the first byte AFTER the pe/coff data.
+ */
+static DWORD ms_pecoff_end(HANDLE image_file)
+{
+    DWORD r;
+    WORD head_offset;
+    IMAGE_FILE_HEADER head;
+    IMAGE_SECTION_HEADER section;
+    long end;
+    int s;
+    
+    r = SetFilePointer(image_file, 0x3c, NULL, FILE_BEGIN);
+    if (r == 0xFFFFFFFF) return 0;
+    
+    if (!ReadFile(image_file, &head_offset, sizeof(head_offset), &r, NULL)
+    	|| r != sizeof(head_offset)) return 0;
+    
+    r = SetFilePointer(image_file, head_offset+4, NULL, FILE_BEGIN);
+    if (r == 0xFFFFFFFF) return 0;
+    
+    if (!ReadFile(image_file, &head, sizeof(head), &r, NULL)
+    	|| r != sizeof(head)) return 0;
+    	
+    end = head_offset + 4 + sizeof(head) + head.SizeOfOptionalHeader;
+
+    r = SetFilePointer(image_file, end, NULL, FILE_BEGIN);
+    if (r == 0xFFFFFFFF) return 0;
+    
+    
+    for (s = 0; s < head.NumberOfSections; s++) {
+	if (!ReadFile(image_file, &section, sizeof(section), &r, NULL)
+	    || r != sizeof(section)) return 0;
+	end = max(end, section.PointerToRawData + section.SizeOfRawData);
+    }
+
+    return end;
+}
+
+long ss_image_offset(void)
+{
+    char image_name[MAX_PATH];
+    DWORD l, image_size, pecoff_size;
+    HANDLE image_file;
+    
+    l = GetModuleFileName(NULL, image_name, MAX_PATH);
+    if (l <= 0 || l >= MAX_PATH) return 0;
+    
+    image_file = CreateFile(image_name, GENERIC_READ, FILE_SHARE_READ, NULL,
+                            OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
+    if (image_file == INVALID_HANDLE_VALUE) return 0;
+
+    pecoff_size = ms_pecoff_end(image_file);
+    image_size = GetFileSize(image_file, NULL);
+    
+    CloseHandle(image_file);
+
+    if (image_size == 0xFFFFFFFF) return 0;
+    
+    if (image_size > pecoff_size) return pecoff_size;
+    else return 0;
+}
+
+int ss_save_image_with_state(const char * new_image_name)
+{
+    char image_name[MAX_PATH];
+    DWORD l, state_offset;
+    HANDLE new_image_file;
+    
+    l = GetModuleFileName(NULL, image_name, MAX_PATH);
+    if (l <= 0 || l >= MAX_PATH) {
+    	printf("ss_save_image: Couldn't get module name.\n");
+    	return 0;
+    }
+    
+    if (!CopyFile(image_name, new_image_name, TRUE)) {
+    	printf("ss_save_image: Couldn't copy %s to %s\n", image_name, new_image_name);
+    	return 0;
+    }
+    
+    new_image_file = CreateFile(new_image_name, GENERIC_READ, FILE_SHARE_READ, NULL,
+                            OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
+    if (new_image_file == INVALID_HANDLE_VALUE) {
+    	printf("ss_save_image: Couldn't open %s\n", new_image_name);
+    	return 0;
+    }
+   
+    state_offset = ms_pecoff_end(new_image_file);
+
+    CloseHandle(new_image_file);
+
+    if (state_offset == 0) {
+    	printf("ss_save_image: Couldn't find end of PE/COFF file %s\n", new_image_name);
+    	return 0;
+    }
+        
+    return ss_save_state(new_image_name, state_offset);
+}
+
+#endif /* MSWin32 */
+
+#ifdef HP_AOUT_800
+struct sys_clock {
+    unsigned int secs;
+    unsigned int nanosec;
+};
+
+struct foobar {
+        short int system_id;                 /* magic number - system        */
+        short int a_magic;                   /* magic number - file type     */
+        unsigned int version_id;             /* version id; format= YYMMDDHH */
+        struct sys_clock file_time;          /* system clock- zero if unused */
+        unsigned int entry_space;            /* index of space containing
+                                                entry point                  */
+        unsigned int entry_subspace;         /* index of subspace for
+                                                entry point                  */
+        unsigned int entry_offset;           /* offset of entry point        */
+        unsigned int aux_header_location;    /* auxiliary header location    */
+        unsigned int aux_header_size;        /* auxiliary header size        */
+        unsigned int som_length;             /* length in bytes of entire som*/
+        unsigned int presumed_dp;            /* DP value assumed during
+                                                compilation                  */
+        unsigned int space_location;         /* location in file of space
+                                                dictionary                   */
+        unsigned int space_total;            /* number of space entries      */
+        unsigned int subspace_location;      /* location of subspace entries */
+        unsigned int subspace_total;         /* number of subspace entries   */
+        unsigned int loader_fixup_location;  /* space reference array        */
+        unsigned int loader_fixup_total;     /* total number of space
+                                                reference records            */
+        unsigned int space_strings_location; /* file location of string area
+                                                for space and subspace names */
+        unsigned int space_strings_size;     /* size of string area for space
+                                                 and subspace names          */
+        unsigned int init_array_location;    /* location in file of
+                                                initialization pointers      */
+        unsigned int init_array_total;       /* number of init. pointers     */
+        unsigned int compiler_location;      /* location in file of module
+                                                dictionary                   */
+        unsigned int compiler_total;         /* number of modules            */
+        unsigned int symbol_location;        /* location in file of symbol
+                                                dictionary                   */
+        unsigned int symbol_total;           /* number of symbol records     */
+        unsigned int fixup_request_location; /* location in file of fix_up
+                                                requests                     */
+        unsigned int fixup_request_total;    /* number of fixup requests     */
+        unsigned int symbol_strings_location;/* file location of string area
+                                                for module and symbol names  */
+        unsigned int symbol_strings_size;    /* size of string area for
+                                                module and symbol names      */
+        unsigned int unloadable_sp_location; /* byte offset of first byte of
+                                                data for unloadable spaces   */
+        unsigned int unloadable_sp_size;     /* byte length of data for
+                                                unloadable spaces            */
+        unsigned int checksum;
+};
+
+static unsigned long hp_aout800_end(int image_file)
+{
+    size_t r;
+    struct foobar head;
+    
+    r = read(image_file, &head, sizeof(head));
+    if (r != sizeof(head)) return 0;
+    
+    return head.som_length;
+}
+
+#define IMAGENAME_MAX	64
+#define IMAGEDIR_MAX	1024
+extern char  imagename[IMAGENAME_MAX];
+extern char  imagedir[IMAGEDIR_MAX];
+
+long ss_image_offset(void)
+{
+
+    char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
+    unsigned long image_size, aout800_size;
+    int image_file, fstat_result;
+    struct stat image_status;
+
+    if (imagepath == NULL)
+	return 0;
+    
+    strcpy(imagepath,imagedir);
+    strcat(imagepath,imagename);
+
+    image_file = open(imagename, O_RDONLY);
+    
+    free(imagepath);
+    
+    if (image_file == -1) return 0;
+
+    aout800_size = hp_aout800_end(image_file);
+    fstat_result = fstat(image_file, &image_status);
+    
+    close(image_file);
+
+    if (fstat_result != 0) return 0;
+    image_size = image_status.st_size;
+       pgsize = sysconf(_SC_PAGE_SIZE);
+ 
+    if (image_size > aout800_size)
+      return round(aout800_size, sysconf(_SC_PAGE_SIZE));
+    else return 0;
+}
+
+static int copy(const char *filename, const char *copyname)
+{
+    unsigned char *buf;
+    int f, c, r;
+    struct stat s; 
+    
+    f = open(filename, O_RDONLY);
+    if (f == -1) return -1;
+    
+    r = fstat(f, &s);
+    if (r != 0) {
+    	close(f);
+        return -1;
+    }
+    
+    buf = malloc((size_t)s.st_size);
+    if (buf == NULL) {
+    	close(f);
+        return -1;
+    }
+    
+    r = read(f, buf, (size_t)s.st_size);
+    if (r != s.st_size) {
+    	free(buf);
+    	close(f);
+        return -1;
+    }
+
+    close(f);
+    
+    c = open(copyname, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+    if (c == -1) {
+    	free(buf);
+    	return -1;
+    }
+    
+    r = write(c, buf, (size_t)s.st_size);
+    if (r != s.st_size) {
+    	free(buf);
+        close(f);
+        return -1;
+    }
+    
+    close(c);
+    
+    free(buf);
+    
+    return 0;
+}
+
+int ss_save_image_with_state(const char * new_image_name)
+{
+    char *imagepath = (char *) malloc(strlen(imagename)+strlen(imagedir)+1);
+    int new_image_file;
+    unsigned long state_offset;
+    
+    if (imagepath == NULL)
+	return 0;
+    
+    strcpy(imagepath,imagedir);
+    strcat(imagepath,imagename);
+
+    if (copy(imagepath, new_image_name) != 0) {
+    	free(imagepath);
+	printf("ss_save_image: Couldn't copy %s to %s\n", imagepath, new_image_name);
+    	return 0;
+    }
+    
+    free(imagepath);
+
+    new_image_file = open(new_image_name, O_RDONLY);
+    if (new_image_file == -1) {
+    	printf("ss_save_image: Couldn't open %s\n", new_image_name);
+    	return 0;
+    }
+   
+    state_offset = round(hp_aout800_end(new_image_file), pgsize);
+
+    close(new_image_file);
+
+    if (state_offset == 0) {
+    	printf("ss_save_image: Couldn't find end of A.OUT800 file %s\n", new_image_name);
+    	return 0;
+    }
+        
+    return ss_save_state(new_image_name, state_offset);
+}
+
+#endif
+
+
+#endif /* SIMPLE_MICS */
+
 int
-ss_save_state(filename)
-    char *filename;
+ss_save_state(const char *filename, long offset)
 {
     int   ssfd;
     int   bnum, gnum;
-	int errnum;
 
     /*
      * Open the saved state file.
      */
-    
-#if defined(MacOS) || defined(MSWin32)
+#if defined(SIMPLE_MICS)
+#ifdef UNIX
+    ssfd = open(filename, O_WRONLY);
+    if (ssfd == -1) ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+#else
+    ssfd = open(filename, O_WRONLY);
+    if (ssfd == -1) ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC);
+#endif
+#elif defined(MacOS)
     ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC);
 #else
     ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0777);
@@ -953,6 +1291,8 @@ printf("Save_state:opened %s %d\n",filename, ssfd);
     if (ssfd < 0)
 	return 0;
     
+    if (lseek(ssfd, offset, 0) != offset) goto ss_err;
+    
     /*
      * Get the global values and save in header
      */
@@ -960,7 +1300,7 @@ printf("Save_state:opened %s %d\n",filename, ssfd);
     for (gnum=0; gnum < header.nglobals; gnum++)
 	header.globals[gnum].value = *header.globals[gnum].addr;
 
-printf("Finished globals: nglobals=%d nblocks=%d\n",header.nglobals,header.nblocks);
+printf("Finished globals: nglobals=%ld nblocks=%ld\n",header.nglobals,header.nblocks);
     
     /*
      * Compute the fsize values for each block.  The fsize value is the
@@ -1009,7 +1349,7 @@ printf("Wrote blocks to file\n");
     return 1;
 
 ss_err:
-    printf("!!Save_state error writing file: bnum=%d errno=% \n",bnum,errno);
+    printf("!!Save_state error writing file: bnum=%d errno=%d\n",bnum,errno);
     close(ssfd);
     unlink(filename);
     return 0;
@@ -1018,6 +1358,67 @@ ss_err:
 #define SS_MALLOCQUANT	4096
 #define SS_MALLOCDIST	16384
 
+#ifdef MSWin32
+/* MSWin32 requires a special version of this, because MetroWerks open() does
+   not open with FILE_SHARE_READ. */
+static void
+ss_restore_state(filename,offset)
+    char *filename;
+    long offset;
+{
+    HANDLE ssfd;
+    int  bnum, gnum;
+    struct am_header hdr;
+    DWORD r;
+
+    /* Open the file */
+    ssfd = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+                            OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+    if (ssfd == INVALID_HANDLE_VALUE) fatal_error(FE_SS_OPENERR,(long)filename);
+
+    r = SetFilePointer(ssfd, offset, NULL, FILE_BEGIN);
+    if (r == 0xFFFFFFFF) goto ss_err;
+    
+    if (!ReadFile(ssfd, &hdr, sizeof (struct am_header), &r, NULL)
+    	|| r != sizeof (struct am_header)) goto ss_err;
+
+    r = SetFilePointer(ssfd, offset, NULL, FILE_BEGIN);
+    if (r == 0xFFFFFFFF) goto ss_err;
+
+    /* Check integrity information */
+    
+    if (hdr.integ_als_mem != &als_mem ||
+		hdr.integ_als_mem_init != als_mem_init ||
+		hdr.integ_w_unify != w_unify ||
+		strcmp(hdr.integ_version_num, SysVersionNum) != 0 ||
+		strcmp(hdr.integ_processor, ProcStr) != 0 ||
+		strcmp(hdr.integ_minor_os, MinorOSStr) != 0)
+	fatal_error(FE_SS_INTEGRITY,0);
+
+    /* Get the blocks */
+    for (bnum=0; bnum < hdr.nblocks; bnum++) {
+
+	if (VirtualAlloc(hdr.blocks[bnum].start, hdr.blocks[bnum].asize,
+	    MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE) == NULL) goto ss_err;
+
+	if (!ReadFile(ssfd, hdr.blocks[bnum].start, hdr.blocks[bnum].fsize, &r, NULL)
+    	    || r != hdr.blocks[bnum].fsize) goto ss_err;
+    }	
+
+    /* Initialize the globals */
+    for (gnum=0; gnum < hdr.nglobals; gnum++)
+	*hdr.globals[gnum].addr = hdr.globals[gnum].value;
+    
+    als_mem = hdr.blocks[0].start;
+    
+    CloseHandle(ssfd);
+    return;
+
+ss_err:
+    CloseHandle(ssfd);
+    fatal_error(FE_ALS_MEM_INIT,0);
+}
+#else /* Non-MSWin32 */
 static void
 ss_restore_state(filename,offset)
     char *filename;
@@ -1032,6 +1433,7 @@ ss_restore_state(filename,offset)
 
     /* Open the file */
     ssfd = open(filename, O_RDONLY|O_BINARY);
+
     if (ssfd < 0)
 	fatal_error(FE_SS_OPENERR,(long)filename);
 
@@ -1058,7 +1460,7 @@ ss_restore_state(filename,offset)
 	goto ss_err;
     
     /* Check integrity information */
-    
+
     if (hdr.integ_als_mem != &als_mem ||
 		hdr.integ_als_mem_init != als_mem_init ||
 		hdr.integ_w_unify != w_unify ||
@@ -1072,6 +1474,15 @@ ss_restore_state(filename,offset)
     /* Get the blocks */
     for (bnum = 0; bnum < hdr.nblocks; bnum++) {
 
+#ifdef HAVE_MMAP_ZERO
+	if ((long *) mmap((caddr_t) hdr.blocks[bnum].start,
+			    (size_t)hdr.blocks[bnum].fsize,
+			    PROT_READ | PROT_WRITE,
+			    MAP_FILE | MAP_PRIVATE | MAP_FIXED,
+			    ssfd,
+			    offset) != hdr.blocks[bnum].start)
+	    goto ss_err;
+#else
 	if ((long *) mmap((caddr_t) hdr.blocks[bnum].start,
 			    (size_t)hdr.blocks[bnum].fsize,
 #if defined(arch_sparc)
@@ -1082,6 +1493,7 @@ ss_restore_state(filename,offset)
 			    ssfd,
 			    offset) != hdr.blocks[bnum].start)
 	    goto ss_err;
+#endif
 	offset += hdr.blocks[bnum].fsize;
 
 	/*
@@ -1091,8 +1503,18 @@ ss_restore_state(filename,offset)
 	 */
 
 	if (hdr.blocks[bnum].asize != hdr.blocks[bnum].fsize) {
-	    int zfd;
 	    caddr_t np;
+#ifdef HAVE_MMAP_ZERO
+	    np = (caddr_t) mmap((caddr_t) hdr.blocks[bnum].start 
+	                                  + hdr.blocks[bnum].fsize,
+				(size_t)(hdr.blocks[bnum].asize 
+				         - hdr.blocks[bnum].fsize),
+				PROT_READ | PROT_WRITE,
+				MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
+				-1,
+				0);
+#else
+	    int zfd;
 	    if ((zfd = open("/dev/zero", O_RDWR)) == -1)
 		goto ss_err;
 
@@ -1109,6 +1531,7 @@ ss_restore_state(filename,offset)
 				0);
 
 	    close(zfd);			/* close /dev/zero */
+#endif
 	    if (np != (caddr_t) hdr.blocks[bnum].start + hdr.blocks[bnum].fsize)
 		goto ss_err;
 	}
@@ -1182,6 +1605,7 @@ ss_err:
     close(ssfd);
     fatal_error(FE_ALS_MEM_INIT,0);
 }
+#endif /* MSWin32, Non-MSWin32 */
 
 /*
  * ss_saved_state_present will test to see if the saved state is already

@@ -21,6 +21,23 @@
 #include "icom.h"
 #include "wintcode.h"
 
+#ifdef SIMPLE_MICS
+
+int pbi_save_image_with_state_to_file(void)
+{
+    PWord v1;
+    int t1;
+    UCHAR *name;
+
+    w_get_An(&v1, &t1, 1);
+
+    if (getstring(&name, v1, t1) && ss_save_image_with_state((char *)name))
+	SUCCEED;
+    else
+	FAIL;
+}
+#endif
+
 int
 pbi_save_state_to_file()		/* save_state_to_file */
 {
@@ -30,7 +47,7 @@ pbi_save_state_to_file()		/* save_state_to_file */
 
     w_get_An(&v1, &t1, 1);
 
-    if (getstring(&name, v1, t1) && ss_save_state((char *)name))
+    if (getstring(&name, v1, t1) && ss_save_state((char *)name, 0))
 	SUCCEED;
     else
 	FAIL;

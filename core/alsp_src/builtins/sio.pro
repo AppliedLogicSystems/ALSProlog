@@ -3485,7 +3485,6 @@ sio_pckg_init :-
     %% User Input/Output Streams
     set_user_prompt(''),
 
-
     als_system(L),
     dmember(os=OS, L),
 

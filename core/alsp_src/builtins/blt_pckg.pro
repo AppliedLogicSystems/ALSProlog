@@ -52,6 +52,14 @@ save_state(FileName)
 	set_shell_level(CurLev),
 	save_state_to_file(FileName).
 
+save_image_with_state(NewImageName)
+	:-
+	get_shell_level(CurLev),
+	set_shell_level(0),
+	package_global_variables,	%% create initialization pred
+	set_shell_level(CurLev),
+	save_image_with_state_to_file(NewImageName).
+	
 /*---------------------------------------------------------------*
  |	save_image/1
  |	save_image(ImageName)
@@ -60,16 +68,19 @@ save_state(FileName)
  |	Create a saved code state and merge it with the current image 
  |	to make a new extended image.
  *---------------------------------------------------------------*/
+
 export save_image/1.
 
-save_image(NewImageName)
+save_image_type(simple_mics, NewImageName, _)
 	:-
-		%% Must get rid of these so the image can create
-		%% them as it starts up; but don't throw them away...
-	sys_searchdir(ALSDIR),
-	abolish(sys_searchdir,1),
-	(bagof(searchdir(SD), searchdir(SD), SDList) -> true ; SDList = []),
-	abolish(searchdir,1),
+	!,
+	printf(user_output,'Saving new image to: %s...',[NewImageName]),
+	save_image_with_state(NewImageName),
+	printf(user_output,'saved.\n',[]).
+	
+save_image_type(complex_mics, NewImageName, ALSDIR)
+	:-
+	!,
 	(tmpnam(SSName) ->
 	    printf(user_output,'Saving state to: %s...',[SSName])
 		;
@@ -79,11 +90,7 @@ save_image(NewImageName)
 	),
 	save_state(SSName),
 	    printf(user_output,'saved.\n',[]),
-
-		%% Re-install the search dir info:
-	assert(sys_searchdir(ALSDIR)),
-	assert_all(SDList),
-
+	    
 	get_image_dir_and_name(ImageDir,ImageName),
 	mics_cmd_fmt(MicsCmdFmt),
 	sprintf(CMD, MicsCmdFmt,
@@ -92,6 +99,31 @@ save_image(NewImageName)
 	    printf('Executing %s\n', [ACMD]),
 	system(ACMD),
 	unlink(SSName).
+
+image_type(mswin32, _, simple_mics) :- !.
+image_type(unix, 'hpux9.05', simple_mics) :- !.
+image_type(_, _, complex_mics) :- !.
+
+
+save_image(NewImageName)
+	:-
+	%% Must get rid of these so the image can create
+	%% them as it starts up; but don't throw them away...
+	sys_searchdir(ALSDIR),
+	abolish(sys_searchdir,1),
+	(bagof(searchdir(SD), searchdir(SD), SDList) -> true ; SDList = []),
+	abolish(searchdir,1),
+
+	%% Save the new image based on OS
+	als_system(SystemList),
+	dmember(os = OS, SystemList),
+	dmember(os_variation = OSVariation, SystemList),
+	image_type(OS, OSVariation, Type),
+	save_image_type(Type, NewImageName, ALSDIR),
+	
+	%% Re-install the search dir info:
+	assert(sys_searchdir(ALSDIR)),
+	assert_all(SDList).
 
 /*---------------------------------------------------------------*
  | mics_cmd_fmt/1
