@@ -1,0 +1,31 @@
+#include <winver.h>
+
+#include "version.h"
+
+1 VERSIONINFO
+ FILEVERSION VERSION_MAJOR,VERSION_MINOR,0,0
+ PRODUCTVERSION 0,0,0,0
+ FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+ FILEFLAGS 0x0L
+ FILEOS VOS__WINDOWS32
+ FILETYPE VFT_DLL
+ FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "CompanyName", "Applied Logic Systems, Inc.\0"
+            VALUE "FileDescription", "Tcl/Tk Interface for ALS Prolog\0"
+            VALUE "FileVersion", VERSION_STRING "\0"
+            VALUE "InternalName", "tclintf\0"
+            VALUE "LegalCopyright", "Copyright \251 Applied Logic Systems, Inc. 1997\0"
+            VALUE "ProductName", "Tcl/Tk Interface\0"
+            VALUE "ProductVersion", VERSION_STRING "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
