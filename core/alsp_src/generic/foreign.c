@@ -19,16 +19,6 @@
 #include "defs.h"
 #include "module.h"
 
-#ifdef PURE_ANSI
-#include <stdarg.h>
-#else
-#if HAVE_STDARG_H
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
-#endif /* PURE_ANSI */
-
 #ifndef DoubleType
 
 static	void	fixTag		PARAMS(( PWord *, int * ));
@@ -293,11 +283,7 @@ PI_printf(const char *fmt, ...)
 }
 
 ALSPI_API(int)
-#ifdef HAVE_STDARG_H
 PI_vprintf(const char *fmt, va_list args)
-#else
-PI_vprintf(char *fmt, va_list args)
-#endif
 {
     char *buf;
     PWord vArg, vFunctor, vStruct, vSIO;
@@ -307,7 +293,7 @@ PI_vprintf(char *fmt, va_list args)
     vsprintf(buf, fmt, args);
     PI_makeuia(&vArg, &tArg, buf);
     free(buf);
-    PI_makesym(&vFunctor, &tFunctor, "put_atom");
+    PI_makesym(&vFunctor, &tFunctor, "printf");
     PI_makestruct(&vStruct, &tStruct, vFunctor, 1);
     w_install_argn(vStruct, 1, vArg, tArg);
     PI_makesym(&vSIO, &tSIO, "sio");
@@ -336,11 +322,7 @@ PI_aprintf(const char *alias, const char *fmt, ...)
 }
 
 ALSPI_API(int)
-#ifdef HAVE_STDARG_H
 PI_vaprintf(const char *alias, const char *fmt, va_list args)
-#else
-PI_vaprintf(char *alias, char *fmt, va_list args)
-#endif
 {
     char *buf;
     PWord vArg, vFunctor, vStruct, vSIO;
@@ -350,7 +332,7 @@ PI_vaprintf(char *alias, char *fmt, va_list args)
     vsprintf(buf, fmt, args);
     PI_makeuia(&vArg, &tArg, buf);
     free(buf);
-    PI_makesym(&vFunctor, &tFunctor, "put_atom");
+    PI_makesym(&vFunctor, &tFunctor, "printf");
     PI_makestruct(&vStruct, &tStruct, vFunctor, 2);
     w_install_argn(vStruct, 2, vArg, tArg);
     PI_makesym(&vArg, &tArg, alias);
