@@ -338,7 +338,7 @@ Tcl_ALS_Prolog_ObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl
 		return Tcl_ALS_Prolog_Read_Call(prolog_world, interp, objc, objv);
 		break;
 	case PROLOG_INTERRUPT:
-		//PI_interrupt();
+		/* PI_interrupt();*/
 		return TCL_OK;
 		break;
 	}
@@ -822,6 +822,7 @@ void pi_init(void)
 	PI_INIT;
 }
 
+#if 0
 #pragma export on
 int Alsprolog_Init(Tcl_Interp *interp);
 int Alsprolog_Init(Tcl_Interp *interp)
@@ -838,3 +839,4 @@ int Alsprolog_Init(Tcl_Interp *interp)
   AP_Call(NULL, AP_NewSymbolFromStr(NULL, "builtins"), &consult);
   return ALSProlog_Package_Init(interp, NULL);
 }
+#endif
