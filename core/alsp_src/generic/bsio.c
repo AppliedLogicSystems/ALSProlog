@@ -1632,6 +1632,12 @@ int sio_nsocket_bind(void)
     
     if (!error) {
 
+#ifdef UNIX
+	int status = 1;
+	(void) setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *) &status,
+		sizeof(status));
+#endif
+
 	memset(&sockport, 0, sizeof sockport);
 	sockport.sin_family = AF_INET;
 	sockport.sin_addr.s_addr = INADDR_ANY;
@@ -2182,6 +2188,14 @@ sio_socket_open()
 	    sockname_in.sin_family = AF_INET;
 	    sockname_in.sin_addr.s_addr = INADDR_ANY;
 	    sockname_in.sin_port = htons((u_short)portnum);
+
+#ifdef UNIX
+	    {
+	      int status = 1;
+	      (void) setsockopt(SIO_FD(buf), SOL_SOCKET, SO_REUSEADDR,
+				(char *) &status, sizeof(status));
+	    }
+#endif
 
 /*
 	    if ( (host_or_path == NULL || strcmp(myhostname,host_or_path) == 0)
