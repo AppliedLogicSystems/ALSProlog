@@ -1136,6 +1136,7 @@ install_spypoint(Mod,Pred,Arity)
     clause(spying_on(CallForm,Mod),true),
     !.
 
+:- dynamic(spying_on/2).
 install_spypoint(Mod,Pred,Arity) 
 	:-
     functor(CallForm,Pred,Arity),

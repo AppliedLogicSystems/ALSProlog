@@ -696,6 +696,16 @@ throw(Pat)
 	setCatchVariable(Pat),
 	throw.
 
+export unwind_protect/2.
+	%% "Always do B":
+unwind_protect(A, B) 
+	:-
+	catch(A, 
+		  Exception, 
+		  (catch(B, _, true), throw(Exception))
+		),
+	call(B).
+
 /*------------------------------------------------------------*
  * Some predicates needed for the rest of the initialization.
  *------------------------------------------------------------*/
