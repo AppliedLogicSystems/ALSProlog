@@ -1,7 +1,7 @@
 Document Type: WSE
 item: Global
   Version=5.0
-  Title=ALS Prolog 3.1b1 Installation
+  Title=ALS Prolog 3.1 Installation
   Flags=00000100
   Languages=65 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
   Japanese Font Name=MS Gothic
@@ -36,14 +36,6 @@ item: Display Graphic
   Y Position=10
   Flags=0000000010111000
 end
-item: Get Temporary Filename
-  Variable=READMEFILE
-end
-item: Install File
-  Source=welcome.als.txt
-  Destination=%TEMP%\%READMEFILE%
-  Flags=0000000000100010
-end
 item: Open/Close INSTALL.LOG
   Flags=00000001
 end
@@ -59,7 +51,7 @@ item: End Block
 end
 item: Set Variable
   Variable=APPTITLE
-  Value=ALS Prolog 3.1b1
+  Value=ALS Prolog 3.1
 end
 item: Set Variable
   Variable=GROUP
@@ -72,7 +64,7 @@ item: Set Variable
 end
 item: Set Variable
   Variable=MAINDIR
-  Value=ALS_Prolog
+  Value=ALS Prolog
 end
 item: Check Configuration
   Flags=10111011
@@ -259,64 +251,6 @@ item: Custom Dialog Set
       Rectangle=8 180 256 181
       Action=3
       Create Flags=01010000000000000000000000000111
-    end
-  end
-end
-item: Custom Dialog Set
-  Name=Display ReadMe
-  Display Variable=DISPLAY
-  item: Dialog
-    Title=%APPTITLE% Installation
-    Title French=Installation de %APPTITLE%
-    Title German=Installation von %APPTITLE%
-    Title Spanish=Instalación de %APPTITLE%
-    Title Italian=Installazione di %APPTITLE%
-    Width=271
-    Height=224
-    Font Name=Helv
-    Font Size=8
-    item: Push Button
-      Rectangle=150 187 195 202
-      Variable=DIRECTION
-      Value=N
-      Create Flags=01010000000000010000000000000001
-      Text=&Next >
-      Text French=&Suite >
-      Text German=&Weiter >
-      Text Spanish=&Siguiente >
-      Text Italian=&Avanti >
-    end
-    item: Push Button
-      Rectangle=105 187 150 202
-      Variable=DIRECTION
-      Value=B
-      Create Flags=01010000000000010000000000000000
-      Text=< &Back
-      Text French=< &Retour
-      Text German=< &Zurück
-      Text Spanish=< &Atrás
-      Text Italian=< &Indietro
-    end
-    item: Push Button
-      Rectangle=211 187 256 202
-      Action=3
-      Create Flags=01010000000000010000000000000000
-      Text=&Cancel
-      Text French=&Annuler
-      Text German=&Abbrechen
-      Text Spanish=&Cancelar
-      Text Italian=&Annulla
-    end
-    item: Static
-      Rectangle=8 180 256 181
-      Action=3
-      Create Flags=01010000000000000000000000000111
-    end
-    item: Editbox
-      Rectangle=85 11 254 170
-      Value=%TEMP%\%READMEFILE%
-      Help Context=16711681
-      Create Flags=01010000101000000000100000000100
     end
   end
 end
@@ -996,40 +930,7 @@ item: Create Shortcut
   Destination=%GROUP%\ALS Prolog.lnk
   Icon Number=0
 end
-item: Create Shortcut
-  Source=%MAINDIR%\user_guide.pdf
-  Destination=%GROUP%\user_guide.lnk
-  Icon Number=0
-end
-item: Create Shortcut
-  Source=%MAINDIR%\dev_tools.pdf
-  Destination=%GROUP%\dev_tools.lnk
-  Icon Number=0
-end
-item: Create Shortcut
-  Source=%MAINDIR%\Alshelp.hlp
-  Destination=%GROUP%\Alshelp Help.lnk
-  Icon Number=0
-end
 item: Else Statement
-end
-item: Add ProgMan Icon
-  Group=%GROUP%
-  Icon Name=user_guide
-  Command Line=%MAINDIR%\user_guide.pdf
-  Flags=01000000
-end
-item: Add ProgMan Icon
-  Group=%GROUP%
-  Icon Name=dev_tools
-  Command Line=%MAINDIR%\dev_tools.pdf
-  Flags=01000000
-end
-item: Add ProgMan Icon
-  Group=%GROUP%
-  Icon Name=Alshelp Help
-  Command Line=%MAINDIR%\Alshelp.hlp
-  Flags=01000000
 end
 item: Add ProgMan Icon
   Group=%GROUP%
@@ -1062,6 +963,11 @@ item: Edit Registry
     Key=ALS Prolog.Document\shell\open\command
     New Value=%MAINDIR%\ALS Prolog.exe %%1
   end
+end
+item: Edit Registry
+  Total Keys=1
+  Key=.pro
+  New Value=ALS Prolog.Document
 end
 item: Wizard Block
   Direction Variable=DIRECTION

@@ -10,11 +10,14 @@ copy "%TCLTKPATH%\bin\msvcrt.dll" .
 copy "%TCLTKPATH%\bin\tclpip80.dll" .
 copy "%TCLTKPATH%\bin\tcl80.dll" .
 copy "%TCLTKPATH%\bin\tk80.dll" .
-xcopy /e /i "%TCLTKPATH%\lib" lib
+xcopy /e /i "%TCLTKPATH%\lib\tcl8.0" lib\tcl8.0
+mkdir lib\tk8.0
+copy  "%TCLTKPATH%\lib\tk8.0\*" lib\tk8.0
 mkdir alsdir
 mkdir alsdir\shared
 copy ..\als_dev\alsdev\*.tcl alsdir\shared
-xcopy /e /i ..\als_dev\alsdev\images alsdir\images
+mkdir alsdir\images
+xcopy ..\als_dev\alsdev\images\*.gif alsdir\images
 set DEV_ALSDIR=..\alsp_src
 alspro_b -b -g "(consult('..\\als_dev\\alsdev\\ldr_dvsh'), consult('..\\tcltk_interface\\common\\tcltk_util'), attach_image('ALS Prolog.exe'))"
 alspro_b -b -g "save_image(alspro)"
