@@ -8,8 +8,6 @@
 module builtins.
 
 export nobind_member/2.
-export output_prolog_list/1.
-export output_prolog_list/6.
 export flatten/2.
 export is_length/2.
 export n_of/3.
@@ -133,6 +131,18 @@ number_list([Item | Items], CurNum, [CurNum-Item | NumberedItems])
 	NextNum is CurNum+1,
 	number_list(Items, NextNum, NumberedItems).
 
+/*!---------------------------------------------------------------------
+ |	encode_list/3
+ |	encode_list(Items, Codes, CodedItems)
+ |	encode_list(+, +, -)
+ |
+ |	 - encodes the elements of a list with provided codes
+ |
+ |	If Items is a list, and Codes is a list of atoms with 
+ |	length(Items) = length(Codes), then CodedItems is
+ |	the list obtained by replacing each element X in Items by C-X,
+ |	where C is the element of Codes in the position of X in Items.
+ *!--------------------------------------------------------------------*/
 encode_list([], [], []).
 encode_list([Item | Items], [CurCode | RestCodes], [CurCode-Item | CodedItems])
 	:-
@@ -250,7 +260,7 @@ remove_tagged([Tag=Value | PList], TagsToRemove, [Tag = Value | RedPList])
  |	where:
  |	a)	If both of LVal and RVal are lists, then MVal is obtained by
  |		recursively calling merge_plists(LVal, RVal, MVal), or if
-		that fails, checking that they are identical;
+ |		that fails, checking that they are identical;
  |	b)	Otherwise, MVal is LVal.
  *!-----------------------------------------------------*/
 merge_plists(Left, [], Left) :-!.

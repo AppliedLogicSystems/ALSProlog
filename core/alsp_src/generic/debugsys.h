@@ -33,6 +33,8 @@ typedef enum {
 	GCINTR,			/* gcintr 		(9)		*/
 	CSTRBPUF,		/* cstrbpuf 	(10)	*/
 	FREZBV,			/* frezbv 		(11)	*/
+	CUT_RSB,		/* cut_rsb		(12)	*/
+	CUT_CPCTR,		/* cut_cpctr	(13)	*/
 	MAX_DEBUG_FEATS
 	} debug_feats;
 

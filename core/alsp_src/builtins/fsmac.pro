@@ -303,7 +303,7 @@ filterForFileType([FileName | Files], Dir, FileType, List)
 
 filter_file(FileName, Dir, FileType, [FileName | ListTail], ListTail)
 	:-
-	atom_concat(Dir, FileName, FullFile),
+	pathPlusFile(Dir, FileName, FullFile),
 	'$getFileStatus'(FullFile, StatusTerm),
 	arg(1, StatusTerm, ThisFileType),
 	fflt_ck(ThisFileType, FileType, FullFile),

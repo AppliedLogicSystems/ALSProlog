@@ -318,6 +318,8 @@ int BNRP_oldRM;
 
 /* QUEUE STUFF */
 
+#define MAXITERS 10000
+
 typedef struct {
 	int    opcd;
 	PWord  *z, *x, *y, *goal;
@@ -338,22 +340,6 @@ typedef struct {
 	long    pad;
 	double lower,upper;
 	} uia_dbls;
-
-	/*--------------------------------------------------------------* 
-	 |	Macro to check whether an incoming constraint argument 
-	 |	is in fact a symbol, which should be a symbolic constant
-	 |	naming a real number such as pi; in that case the
-	 |	value of the variable (Z, X, Y) currently holding the
-	 |	(symbol table offset of the symbol) is physically 
-	 |	overwritten with the appropriate float, and the corresponding
-	 |	type variable (Zt, Xt, Yt) is changed appropriately
-	 *--------------------------------------------------------------*/
-
-#define SYMB_CST(AA)
-/*
-	if (AA ## t == WTP_SYMBOL) {
-	}
-*/
 
 	/*--------------------------------------------------------------* 
 	 |	Macro to check whether an incoming constraint argument 

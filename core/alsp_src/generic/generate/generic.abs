@@ -227,6 +227,7 @@ glibfiles = [
 	gv,
 	index,
 	intaux,
+	intrv,
 	int_net,
 	lexan,
 	lforeign,

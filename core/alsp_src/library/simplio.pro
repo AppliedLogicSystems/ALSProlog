@@ -11,18 +11,34 @@
 
 module windows.
 
+export query_user/3.
+export query_user/5.
+export simple_menu/3.
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% query_user
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-export query_user/3.
+/*!-------------------------------------------------------------
+ |	query_user/3
+ |	query_user(FmtString,Args,Answer)
+ |	query_user(+,+,-)
+ |
+ |	- yes/no query user, using current io streams
+ *-------------------------------------------------------------*/
 query_user(FmtString,Args,Answer)
 	:-
 	sio:get_current_output_stream(OutStream),
 	sio:get_current_input_stream(InStream),
 	query_user(InStream,OutStream,FmtString,Args,Answer).
 
-export query_user/5.
+/*!-------------------------------------------------------------
+ |	query_user/5
+ |	query_user(InStream,OutStream,FmtString,Args,Answer)
+ |	query_user(+,+,+,+,-)
+ |
+ |	- yes/no query user, using given io streams
+ *-------------------------------------------------------------*/
 query_user(InStream,OutStream,FmtString,Args,Answer)
 	:-
 	catenate(FmtString,' (yes/no)?',XFmtString),
@@ -36,8 +52,13 @@ q_acton(y,yes).
 q_acton(_,no).
 
 
-export simple_menu/3.
-
+/*!-------------------------------------------------------------
+ |	simple_menu/3
+ |	simple_menu(List, Choice, Options) 
+ |	simple_menu(+, -, +) 
+ | 
+ |	- interactively make Choice from List, using Options
+ *-------------------------------------------------------------*/
 simple_menu([Choice], Choice, Options) :-!.
 simple_menu(List, Choice, Options) 
 	:-

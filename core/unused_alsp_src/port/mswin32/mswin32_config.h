@@ -25,3 +25,5 @@
 #define HAVE_STRCSPN	1
 #define HAVE_STRSPN	1
 #define HAVE_STRTOK	1
+
+#define REVERSE_ENDIAN 1

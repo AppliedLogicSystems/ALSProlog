@@ -1,3 +1,12 @@
+#include "defs.h"
+
+#ifdef INTCONSTR
+#include "intrv.h"
+#include "freeze.h"     
+#include "intrv_pr.h"
+	/*--- Vars for args to the primitives: ---*/
+extern double zl,zh,xl,xh,yl,yh,ul,uh,vl,vh;
+extern int status;
 /*================================================================
           intrv.c
           --Generated from: pseudoc.ode
@@ -1463,4 +1472,4 @@ i_xp()
    x_Exit:
 	return(0);
 }
-
+#endif

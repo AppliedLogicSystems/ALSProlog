@@ -21,7 +21,32 @@ module macroxp.
 		 |	File Processing
 		 *---------------------------------------*/
 
+%% Now in sio_rt.pro:
+% :- op(930, fx, `).
+% :- op(925, fx, ``).
+
 export mx_cl/0.
+export mx/0.
+export macro_expand/0.
+export mx/1.
+export macro_expand_files/2.
+export macro_expand_files/3.
+export macro_expand/2.
+export expand_macros/2.
+export define_macro/1.
+
+/*!----------------------------------------------------------
+ |	mx_cl/0
+ |	mx_cl
+ |	mx_cl
+ |
+ |	- invokes macro processing on files from command line
+ |
+ |	Files and switches must be rightwards of -p 
+ |	Entries other than the following are ignored:
+ |
+ |	   -s SourceFile   -t TargetFile  -m MacroFile
+ *-----------------------------------------------------------*/
 mx_cl :-
 	set_prolog_flag(unknown, fail),
 	builtins:command_line(CL),
@@ -55,11 +80,23 @@ mx_cl :-
 	),
 	macro_expand_files(SourceFile, TargetFile, MacroFile).
 			
-export mx/0.
+/*!----------------------------------------------------------
+ |	mx/0
+ |	mx
+ |	mx
+ |
+ |	- invoke macro_expand
+ *-----------------------------------------------------------*/
 mx :-
 	macro_expand.
 
-export macro_expand/0.
+/*!----------------------------------------------------------
+ |	macro_expand/0
+ |	macro_expand
+ |	macro_expand
+ |
+ |	- prompt for a file name & perform macro expansion
+ *-----------------------------------------------------------*/
 macro_expand
 	:-
 	set_prolog_flag(unknown, fail),
@@ -67,8 +104,13 @@ macro_expand
 	write('target='),read(Target),
 	macro_expand_files(Source, Target).
 
-
-export mx/1.
+/*!----------------------------------------------------------
+ |	mx/1
+ |	mx(File)
+ |	mx(+)
+ |
+ |	- perform macro expansion on File
+ *-----------------------------------------------------------*/
 mx(FileName)
 	:-
 	filePlusExt(BaseFile,Ext,FileName),
@@ -110,16 +152,13 @@ save_copy(ProFile,BaseFileName)
 	filePlusExt(BaseFileName,sav,SaveCopy),
 	move_file(ProFile, SaveCopy).
 
-
-
-
-
-
-
-
-
-
-export macro_expand_files/2.
+/*!----------------------------------------------------------
+ |	macro_expand_files/2
+ |	macro_expand_files(Source, Target)
+ |	macro_expand_files(+, +)
+ |
+ |	- perform macro expansion on Source, writing to Target
+ *-----------------------------------------------------------*/
 macro_expand_files(Source, Target)
 	:-
 		% see(Source),
@@ -130,12 +169,13 @@ macro_expand_files(Source, Target)
 	!,
 	close(SourceStream), close(TargetStream).
 
-
-
-
-
-
-export macro_expand_files/3.
+/*!----------------------------------------------------------
+ |	macro_expand_files/3
+ |	macro_expand_files(Source, Target, MacroFile)
+ |	macro_expand_files(+, +, +)
+ |
+ |	- macro expand Source, writing to Target, using MacroFile
+ *-----------------------------------------------------------*/
 macro_expand_files(SourceFile, TargetFile, MacroFile)
 	:-
 	macroxp:abolish(macro_defn,6),
@@ -143,7 +183,13 @@ macro_expand_files(SourceFile, TargetFile, MacroFile)
 	macro_expand_files(SourceFile, TargetFile),
 	macroxp:abolish(macro_defn,6).
 
-export macro_expand/2.
+/*!----------------------------------------------------------
+ |	macro_expand/2
+ |	macro_expand(SourceStream, TargetStream)
+ |	macro_expand(+, +)
+ |
+ |	- macro expand items from SourceStream, writing to TargetStream
+ *-----------------------------------------------------------*/
 macro_expand(SourceStream, TargetStream)
 	:-
 	read_term(SourceStream, Item, [vars_and_names(Vars,VNames)]),
@@ -183,8 +229,13 @@ endmod.
 
 module macroxp.
 
-export expand_macros/2.
-
+/*!----------------------------------------------------------
+ |	expand_macros/2
+ |	expand_macros(Clause, NewClause)
+ |	expand_macros(+, -)
+ |
+ |	- expand macros in Clause, creating NewClause
+ *-----------------------------------------------------------*/
 expand_macros((:- Body),NewClause)
 	:-!,
 	expand_macros([],Body,NewClause).
@@ -415,89 +466,106 @@ assert_clauses([Clause | Rest],Module)
 	Module:assert(Clause),
 	assert_clauses(Rest,Module).
 
-export define_macro/1.
+/**** Now in sio_rt.pro:
+:- op(1200,xfy,==>).
+:- op(1190,xfy,when).
+:- op(1180,xfy,where).
+:- op(1170,xfx,with).
+:- op(1160,xfy,if).
+ ****/
+
+/*!----------------------------------------------------------
+ |	define_macro/1.
+ |	define_macro(Expr
+ |	define_macro(+)
+ |
+ | - define a macro
+ |
+ |	Expr should be of the form:
+ |			Pattern ==> Replacement
+ *-----------------------------------------------------------*/
 		%% Clauses to handle all the possibilities for including
 		%% or omitting when,where,with,if:
-define_macro((Pattern => Replacement when WhenClause where WhereClause
+define_macro((Pattern ==> Replacement when WhenClause where WhereClause
 						with WithClause if IfClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,WhenClause,
 					WhereClause,WithClause,IfClause)),
 	!.
-define_macro((Pattern => Replacement where WhereClause
+define_macro((Pattern ==> Replacement where WhereClause
 						with WithClause if IfClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,true,
 					WhereClause,WithClause,IfClause)),
 	!.
-define_macro((Pattern => Replacement when WhenClause
+define_macro((Pattern ==> Replacement when WhenClause
 						with WithClause if IfClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,WhenClause,true,
 							WithClause,IfClause)),
 	!.
-define_macro((Pattern => Replacement when WhenClause where WhereClause
+define_macro((Pattern ==> Replacement when WhenClause where WhereClause
 								if IfClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,WhenClause,
 							WhereClause,IfClause)),
 	!.
-define_macro((Pattern => Replacement when WhenClause where WhereClause
+define_macro((Pattern ==> Replacement when WhenClause where WhereClause
 							with WithClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,WhenClause,
 					WhereClause,WithClause,true)),
 	!.
-define_macro((Pattern => Replacement with WithClause if IfClause))
+define_macro((Pattern ==> Replacement with WithClause if IfClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,true,true,
 							WithClause,IfClause)),
 	!.
-define_macro((Pattern => Replacement where WhereClause if IfClause))
+define_macro((Pattern ==> Replacement where WhereClause if IfClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,true,
 						WhereClause,[],IfClause)),
 	!.
-define_macro((Pattern => Replacement where WhereClause with WithClause))
+define_macro((Pattern ==> Replacement where WhereClause with WithClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,true,
 					WhereClause,WithClause,true)),
 	!.
-define_macro((Pattern => Replacement when WhenClause if IfClause))
+define_macro((Pattern ==> Replacement when WhenClause if IfClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,WhenClause,true,[],
 								IfClause)),
 	!.
-define_macro((Pattern => Replacement when WhenClause with WithClause))
+define_macro((Pattern ==> Replacement when WhenClause with WithClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,WhenClause,true,
 							WithClause,true)),
 	!.
-define_macro((Pattern => Replacement when WhenClause where WhereClause))
+define_macro((Pattern ==> Replacement when WhenClause where WhereClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,WhenClause,
 							WhereClause,[],true)),
 	!.
-define_macro((Pattern => Replacement when WhenClause))
+define_macro((Pattern ==> Replacement when WhenClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,WhenClause,true,[],
 									true)),
 	!.
-define_macro((Pattern => Replacement where WhereClause))
+define_macro((Pattern ==> Replacement where WhereClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,true,WhereClause,[],
 									true)),
 	!.
-define_macro((Pattern => Replacement with WithClause))
+define_macro((Pattern ==> Replacement with WithClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,true,true,WithClause,
 									true)),
 	!.
-define_macro((Pattern => Replacement if IfClause))
+define_macro((Pattern ==> Replacement if IfClause))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,true,true,[],IfClause)),
 	!.
-define_macro((Pattern => Replacement))
+define_macro((Pattern ==> Replacement))
 	:-
 	macroxp:assertz(macro_defn(Pattern,Replacement,true,true,[],true)),
 	!.

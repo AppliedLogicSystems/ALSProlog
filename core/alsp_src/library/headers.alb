@@ -1,0 +1,2 @@
+libactivate(builtins,[library,headers],[gen_file_header/3,gen_file_header/4],
+    []).

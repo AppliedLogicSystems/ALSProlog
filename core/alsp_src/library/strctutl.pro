@@ -13,6 +13,7 @@
 module builtins.
 export locate_struct/3.
 export delete_struct/3.
+export delete_struct/4.
 export set_all_args/4.
 
 /*!------------------------------------------------------------*
@@ -41,11 +42,18 @@ locate_struct([_ | RestTerms], TheKey, TheTerm)
  |	delete_struct(List, Key, ResultList)
  |	delete_struct(+, +, -)
  |
+ |	- Locates & deletes a term from a list, based on first arg of term
+ *!------------------------------------------------------------*/
+delete_struct(List, Key, ResultList)
+	:-
+	delete_struct(List, Key, ResultList, _).
+
+/*!------------------------------------------------------------*
  |	delete_struct/4
  |	delete_struct(List, Key, ResultList, Term)
  |	delete_struct(+, +, -, -)
  |
- |	Locates & deletes a term from a list, based on first arg of term
+ |	- Locates & deletes a term from a list, based on first arg of term
  |
  |	If List is a list of terms, and Key is any Prolog term, then
  |	ResultList is the result of deleting the leftmost occurrence
@@ -53,10 +61,6 @@ locate_struct([_ | RestTerms], TheKey, TheTerm)
  |	with Key;  fails if no such term occurs on List.  If List has 
  |	two or more elements, the deletion is done destructively via mangle.
  *!------------------------------------------------------------*/
-delete_struct(List, Key, ResultList)
-	:-
-	delete_struct(List, Key, ResultList, _).
-
 delete_struct([Term | Tail], Key, Tail, Term)
 	:-
 	arg(1,Term,Key),

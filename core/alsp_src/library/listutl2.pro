@@ -73,23 +73,6 @@ subst_nth(N, [Skip | List], NewItem, [Skip | NewList])
 	M is N-1,
 	subst_nth(M, List, NewItem, NewList).
 
-/*********************
-/*!---------------------------------------------------------------------
- |	nth/3
- |	nth(N, List, X)
- |	nth(+, +, -)
- |
- |	 - returns the nth element of a list
- |
- |	If List is a list and N is a non-negative integer, then X is
- |	the nth element of List.
- *!--------------------------------------------------------------------*/
-nth(0, [X | _], X) :-!.
-nth(M, [_ | T], X) :-
-	K is M-1,
-	nth(K, T, X).
-*******************/
-
 /*!---------------------------------------------------------------------
  |	nth_tail/4
  |	nth_tail(N, List, Head, Tail)
@@ -123,40 +106,6 @@ at_most_n([X | T], N, [X | R])
 	M is N-1,
 	at_most_n(T, M, R).
 
-/*********************
-/*!---------------------------------------------------------------------
- |	position/3
- |	position(List, Item, N)
- |	position(+, +, -)
- |
- |	-	returns the position number of an item in a list
- |
- |	If List is a list and Item occurs in List, N is the number of
- |	the leftmost occurrence of Item in List; fails if Item does not
- |	occur in List.
- *!--------------------------------------------------------------------*/
-position(List, Item, Nth)
-	:-
-	position(List, Item, 0, Nth).
-
-/*!---------------------------------------------------------------------
- |	position/4
- |	position(List, Item, M, N)
- |	position(+, +, +, -)
- |
- |	-	returns the position number of an item in a list
- |
- |	If List is a list and Item occurs in List, N-M is the number of
- |	the leftmost occurrence of Item in List; fails if Item does not
- |	occur in List.
- *!--------------------------------------------------------------------*/
-position([Item | _], Item, Nth, Nth) :-!.
-position([_ | ListTail], Item, Current, Nth)
-	:-
-	Next is Current+1,
-	position(ListTail, Item, Next, Nth).
-*******************/
-
 /*!---------------------------------------------------------------------
  |	get_list_tail/3
  |	get_list_tail(List, Item, Tail)
@@ -174,25 +123,6 @@ get_list_tail(List, Item, List)
 get_list_tail([_ | RestList], Item, Tail)
 	:-
 	get_list_tail(RestList, Item, Tail).
-
-/*!---------------------------------------------------------------------
- |	list_delete/3
- |	list_delete(List, Item, ResultList)
- |	list_delete(+, +, -)
- |
- |	- deletes all occurrences of an item from a list
- |
- |	If List is a list, and Item is any object, ResultList is obtained
- |	by deleting all occurrences of Item from List.
- *!--------------------------------------------------------------------*/
-list_delete(X, _, X) :- var(X),!.
-list_delete([], _, []).
-list_delete([Item | Rest_In_List], Item, Out_List)
-	:-!,
-	list_delete(Rest_In_List, Item, Out_List).
-list_delete([Keep | Rest_In_List], Item, [Keep | Rest_Out_List])
-	:-
-	list_delete(Rest_In_List, Item, Rest_Out_List).
 
 /*!---------------------------------------------------------------------
  | 	sublist/4

@@ -186,7 +186,7 @@ EOF
     i[34]86:NetBSD:*:*)
 	echo ${UNAME_MACHINE}-unknown-netbsd${UNAME_RELEASE}
 	exit 0 ;;
-    i[34]86:Linux:*:*)
+    i[345]86:Linux:*:*)
 	echo ${UNAME_MACHINE}-unknown-linux
 	exit 0 ;;
     i[34]86:UNIX_SV:4.*:*)

@@ -44,6 +44,8 @@ ln -s $1/builtins/*.pro $2/bld-port/alsdir/builtins/
 mkdir $2/bld-port/alsdir/library
 rm -f $2/bld-port/alsdir/library/*.pro
 ln -s $1/library/*.pro $2/bld-port/alsdir/library/
+rm -f $2/bld-port/alsdir/library/*.alb
+ln -s $1/library/*.alb $2/bld-port/alsdir/library/
 
 echo Making $2/bld-wins
 mkdir $2/bld-wins

@@ -49,6 +49,27 @@
 module builtins.
 
 export cmpdirs/3.
+/*!-----------------------------------------------------------------------
+ |	cmpdirs/3
+ |	cmpdirs(Old, New, TgtFile)
+ |	cmpdirs(+, +, +)
+ |
+ |	- recursively compare directories, writing report to TgtFile
+ |
+ |	Recursively traverses the two directory trees, producing a node-by-node
+ |	comparison; each pair of dirs visiting is noted, and:
+ |		i)	It lists items in the old dir, but not in the corresponding new;
+ |		ii)	It lists items in the new dir, but not in the old;
+ |		iii)If there are no differences, no further comment is made;
+ |
+ |	A partial example of the report appears as follows:
+ |
+ |		Dirs:  alsp_src [old]  nk [new]
+ |		 -Old {not new} items: [mailshar,powerpc,README,sharbld,mips]
+ |		 -New {not old} items: [bld-llib,tools]
+ |		    Dirs:  vax [old]  vax [new]
+ |		        Dirs:  vms [old]  vms [new]
+ *-----------------------------------------------------------------------*/
 cmpdirs(OldDesc, NewDesc, TgtFile)
 	:-
 	open(TgtFile,write,TgtS,[]),

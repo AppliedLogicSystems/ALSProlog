@@ -984,7 +984,7 @@ ld_fs(OS)
 	consult_builtins(BDir, cutils),
 	consult_builtins(BDir, sio_wt),
 	consult_builtins(BDir, sio_d10),
-	consult_builtins(BDir, blt_lib), 
+%	consult_builtins(BDir, blt_lib), 
 	consult_builtins(BDir, blt_msg),
 	consult_builtins(BDir, blt_brk),
 	consult_builtins(BDir, fs_cmn),

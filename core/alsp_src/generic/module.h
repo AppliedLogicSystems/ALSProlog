@@ -91,6 +91,7 @@ extern	void	add_default_proc PARAMS( (PWord, int) );
 extern	void	adduse		PARAMS( (int, int) );
 extern	void	export_pred	PARAMS( (PWord, PWord, int) );
 extern	void	createModuleClosureProcedure PARAMS( (PWord, int, PWord) );
+extern  int		createModCloseProc	PARAMS( (int, PWord, int, PWord) );
 extern	void	module_init	PARAMS( (void) );
 
 #endif /* _MODULE_H_INCLUDED_ */

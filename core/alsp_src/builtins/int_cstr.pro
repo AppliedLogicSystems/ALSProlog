@@ -20,7 +20,21 @@ module rel_arith.
 
 :- dynamic(debug_system_on/1).
 
-intvl(_,_,_,_).
+intvl(boolean,0, _, _) :-!.
+intvl(boolean,1, _, _) :-!.
+intvl(real,Var,_,UIA)
+	:-
+	'$uia_peekd'(UIA,0,LB),
+	LB =< Var,
+	'$uia_peekd'(UIA,8,UB),
+	Var =< UB.
+
+intvl(integer,Var,_,UIA)
+	:-
+	'$uia_peekd'(UIA,0,ILB), LB is floor(ILB),
+	LB =< Var,
+	'$uia_peekd'(UIA,8,IUB), UB is floor(IUB),
+	Var =< UB.
 
 /*---------------------------------------------------------------
 	type_and_bounds/5
@@ -97,8 +111,6 @@ new_type_interval(TypeDescrip,X)
 freeze_goal_for(real,    X, L1, U1, UIA, intvl(real,   X,[],UIA) ).
 freeze_goal_for(integer, X, L1, U1, UIA, intvl(integer,X,[],UIA) ).
 
-%freeze_goal_for(boolean, X, L1, U1, UIA, intvl(boolean,X,[],UIA) ).
-
 	%% NEED::: DEAL WITH BOOLEANS:
 new_combined_interval(TypeDescrip, X)
 	:-
@@ -149,6 +161,33 @@ access_used_by(Intvl, NewVal)
 update_used_by(Intvl, NewVal)
 	:-
 	trailed_mangle(3, Intvl, NewVal).
+
+/*---------------------------------------------------------------
+	update_uia_dbl(Intvl,0,NewVal). %% 0 = lower
+	update_uia_dbl(Intvl,1,NewVal). %% 1 = upper
+ *--------------------------------------------------------------*/
+
+update_uia_dbl(Intvl,Which,NewVal)
+	:-
+	arg(4, Intvl, OldUIA),
+	arg(1, Intvl, Type),
+	type_and_bounds(Type, BareType, _, _, _),
+	uia_space(BareType,NewUIA),
+
+	'$uia_peekd'(OldUIA,0,OldL),
+	'$uia_peekd'(OldUIA,8,OldU),
+	'$uia_peekl'(OldUIA,16,OldTC),
+
+	(Which = 0 ->
+		'$uia_poked'(NewUIA,0,NewVal),
+		'$uia_poked'(NewUIA,8,OldU)
+		;
+		'$uia_poked'(NewUIA,0,OldL),
+		'$uia_poked'(NewUIA,8,NewVal)
+	),
+	'$uia_pokel'(NewUIA,16,OldTC),
+	trailed_mangle(4, Intvl, NewUIA).
+
 
 /*---------------------------------------------------------------
  *--------------------------------------------------------------*/
@@ -343,8 +382,13 @@ valid_domain(Intrv, Type, LB, UB)
 		LB = 0, UB = 1
 		;
 		arg(4,Intrv,UIA),
-		'$uia_peekd'(UIA,0,LB),
-		'$uia_peekd'(UIA,8,UB)
+		(Type = real ->
+			'$uia_peekd'(UIA,0,LB),
+			'$uia_peekd'(UIA,8,UB)
+			;
+			'$uia_peekd'(UIA,0,ILB), LB is floor(ILB),
+			'$uia_peekd'(UIA,8,IUB), UB is floor(IUB)
+		)
 	).
 
 %%%%%%%%%%%%% NODE BUILDING%%%%%%%%%%%%%%%

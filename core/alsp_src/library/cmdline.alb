@@ -1,0 +1,2 @@
+libactivate(builtins,[library,cmdline],
+    [get_cmdline_vals/1,eat_cmd_line/3,pull_out_nullswitches/3],[]).

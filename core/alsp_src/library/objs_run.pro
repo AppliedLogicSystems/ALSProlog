@@ -13,8 +13,27 @@
 
 module objects.
 
-%% Declaration is in blt_lib.pro
-%%:-op(600,xfy,':=').
+%% Declaration is now in sio_rt.pro:
+%% :-op(600,xfy,':=').
+
+export send/2.
+export send/3.
+export send_self/2.
+export toggle_null_send_notify/0.
+export send_all/2.
+export send_each/2.
+export queue_oop_event/1.
+export insert_oop_event_request/2.
+export inherit/3.
+export init_nil/2.
+export accessObjStruct/3.
+export setObjStruct/3.
+export (':=')/2.
+export set_slots0/4.
+export deref_val/3.
+export standardObject/2.
+export genericObjects/2.
+export clone/2.
 
 			/*=================================
 			 |   MESSAGE SENDING
@@ -25,10 +44,7 @@ module objects.
  |	send(+, +)
  |
  |	- sends a message to an object
- |
- |
  *-----------------------------------------------------------------------*/
-%%export send/2.
 send('$no$Object$', Message)
 	:-!,
 	send(builtins,null_object,Message).
@@ -68,6 +84,13 @@ send(Object, Message)
 	!,
 	send(ObjectName, Message).
 
+/*!-----------------------------------------------------------------------
+ |	send/3
+ |	send(Module, Object, Message)
+ |	send(+, +)
+ |
+ |	- sends a message to an object
+ *-----------------------------------------------------------------------*/
 send(Module, null_object, Message)
 	:-!.
 
@@ -95,14 +118,15 @@ send(Module, Object, Message)
 	:-
 	atom(Object),!,
 	TheCall =.. [Object , Message],
-/*
-	% Module:TheCall,
-	 'als$cd'(0,'$colon'(Module,TheCall,CutPt),CutPt),
-*/
-	builtins:do_shell_query2(Module,TheCall),
+	builtins:do_object_goal(Module,TheCall),
 	!.
 
 /*!-----------------------------------------------------------------------
+ |	send_self/2
+ |	send_self(Message, ObjState)
+ |	send_self(+, +)
+ |
+ |	- object sends a message to self
  *-----------------------------------------------------------------------*/
 send_self(Message,ObjState)
 	:-
@@ -134,35 +158,16 @@ finish_send_self(ObjectName,Message,ObjState)
 	:-
 	Call =.. [ObjectName, Message],
 	objects:objectModule(ObjectName, Module),
-	builtins:do_shell_query2(Module,Call),
+	builtins:do_object_goal(Module,Call),
 	!.
-/*
-	% Module:Call,
-	'als$cd'(0,'$colon'(Module,Call,CutPt),CutPt),
-	!.
-*/
 
 /*!-----------------------------------------------------------------------
+ |	toggle_null_send_notify/0
+ |	toggle_null_send_notify
+ |	toggle_null_send_notify
+ |
+ |	- toggles (on/off) notifications of sends to the null object
  *-----------------------------------------------------------------------*/
-/*
-:-dynamic(notify_null_send_flag/0).
-
-send_to_null_object(Message)
-	:-
-	notify_null_send_flag,!,
-	notify_null_send(Message).
-
-send_to_null_object(Message).
-
-notify_null_send(Message)
-	:-
-	printf(warning_output,"Send to nullObject: %t\n",[Message]),
-	flush_output(warning_output).
-*/
-
-/*!-----------------------------------------------------------------------
- *-----------------------------------------------------------------------*/
-export toggle_null_send_notify/0.
 toggle_null_send_notify
 	:-
 	notify_null_send_flag,!,
@@ -172,28 +177,31 @@ toggle_null_send_notify
 	assert(notify_null_send_flag).
 
 /*!-----------------------------------------------------------------------
+ |	send_all/2
+ |	send_all(List, Msg)
+ |	send_all(+, +)
+ |	
+ |	- try to send Msg to all objects on List; fail if any fails
  *-----------------------------------------------------------------------*/
-%% export send_all/2.
 send_all([], _).
 send_all([Kid | Children], Msg)
     :-
     send(Kid, Msg),
     send_all(Children, Msg).
 
-%% export send_each/2.
+/*!-----------------------------------------------------------------------
+ |	send_each/2
+ |	send_each(List, Msg)
+ |	send_each(+, +)
+ |	
+ |	- send Msg to all objects on List independently of individual success/failure
+ *-----------------------------------------------------------------------*/
 send_each([], _).
 send_each([Kid | Children], Msg)
     :-
     (send(Kid, Msg) -> true ; true),
     send_each(Children, Msg).
 
-
-%% export queue_object_call/4.
-queue_object_call(Object,Event,Module,Message)
-	:-
-	TheCall =.. [Object, Message],
-	Module:TheCall,
-	!.
 
 			/*=================================
 			 |         EVENT QUEUING
@@ -218,7 +226,6 @@ queue_object_call(Object,Event,Module,Message)
  |		send(anyone, Message)
  |		send(any_object, Message)
  *!------------------------------------------------------*/
-export queue_oop_event/1.
 queue_oop_event(Message)
 	:-
 	get_OOP_EventQueue(QueueList),
@@ -250,7 +257,6 @@ send_to_each_q([SubQueue | SubQs], Message)
  |	this is a Prolog predicate, it can be invoked either from 
  |	within an object method, or can be invoked directly in Prolog code.
  *!------------------------------------------------------*/
-export insert_oop_event_request/2.
 insert_oop_event_request(Event, Object)
 	:-
 	get_OOP_EventQueue(QueueList),
@@ -293,33 +299,64 @@ find_matching_subqueue([_ | QueueList], Event, SubQueue)
 	:-
 	find_matching_subqueue(QueueList, Event, SubQueue).
 
-		%% Need a delete request call
-	
-
+%% Need a delete request call
 
 			/*=================================
 			 |         INHERITANCE
 			 *================================*/
 
-/*!-----------------------------------------------------------------------
- *-----------------------------------------------------------------------*/
-%% export inherit/3.
+/*!-------------------------------------------------------
+ |	inherit/3
+ |	inherit(Message,SuperClass,ObjState)
+ |	inherit(+, +, +)
+ |
+ |	- ObjState reacts to Message using method from SuperClass
+ *!------------------------------------------------------*/
 inherit(Message,SuperClass,ObjState)
 	:-
 	classModule(SuperClass, Module),
 	TheCall =.. [SuperClass,Message,ObjState],
-/*
-	% Module:Call.
-	'als$cd'(0,'$colon'(Module,TheCall,CutPt),CutPt).
-*/
-	builtins:do_shell_query2(Module,TheCall),
+	builtins:do_object_goal(Module,TheCall),
 	!.
+			/*=================================
+			 |        BASIC
+			 *================================*/
+	/*---------------------------------------*
+	 |	Essentially identical to 
+	 |	do_shell_query2 in blt_shl.pro; needs
+	 |	to be here in this form for applications
+	 |	packaged without the shell.
+	 *---------------------------------------*/
+do_object_goal(Mod,Goal)
+	:-
+	getPrologInterrupt(Int),
+	(Int=debug_user ; Int=debug_init),
+	!,
+	dbg_spyon,
+	callWithDelayedInterrupt(Mod,Mod:Goal).
+
+do_object_goal(Mod,Goal)
+	:-
+	getPrologInterrupt(Int),
+	(Int=spying ; Int=jumping),
+	!,
+	dbg_spyon,
+	Mod:Goal.
+
+do_object_goal(Mod,Goal)
+	:-
+	Mod:Goal.
 
 			/*=================================
 			 |        UTILITIES
 			 *================================*/
-
-%% export init_nil/2.
+/*!-------------------------------------------------------
+ |	init_nil/2
+ |	init_nil(Num, Structure)
+ |	init_nil(+, +)
+ |
+ | - init args from 1..Num of Structure to nil
+ *!------------------------------------------------------*/
 init_nil(1,Structure)
 	:-
 	arg(1,Structure,nil).
@@ -329,10 +366,22 @@ init_nil(Num,Structure)
 	NewNum is Num - 1,
 	init_nil(NewNum,Structure).
 
-
-/*!-----------------------------------------------------------------------
- *-----------------------------------------------------------------------*/
-%% export accessObjStruct/3.
+/*!-------------------------------------------------------
+ |	accessObjStruct/3
+ |	accessObjStruct(SlotExpr, Struct, Value)
+ |	accessObjStruct(+, +, -)
+ |
+ | - access the value of a slot of an object
+ |
+ |	If SlotExpr is the name of a primitive (non-object) 
+ |	slot of Struct, Value is unified with its (current) 
+ |	value;  If SlotExpr is of the form 
+ |		SlotName1^SlotName2
+ |	where SlotName1 is a slot of Struct which itself an 
+ |	object, obtains the object Value1 which is the current
+ |	value of SlotName1 in Struct, and recursively 
+ |	calls accessObjStruct(SlotName2, Value1, Value).
+ *!------------------------------------------------------*/
 accessObjStruct((SlotName1^SlotName2), Struct, Value)
 	:-!,
 	functor(Struct, Class, _),
@@ -345,11 +394,25 @@ accessObjStruct(SlotName, Struct, Value)
 	slot_num(Class, SlotName, Offset),
 	arg(Offset, Struct, Value).
 
-/*!-----------------------------------------------------------------------
- *-----------------------------------------------------------------------*/
+/*!-------------------------------------------------------
+ |	setObjStruct/3.
+ |	setObjStruct(SlotExpr, Struct, Value)
+ |	setObjStruct(+, +, +)
+ |
+ | - set (destructively) the value of a slot of an object
+ |
+ |	If SlotExpr is the name of a primitive (non-object) 
+ |	slot of Struct, the current value of SlotExpr is
+ |	destructively changed to Value using mangle/3;
+ |	If SlotExpr is of the form 
+ |		SlotName1^SlotName2
+ |	where SlotName1 is a slot of Struct which itself an 
+ |	object, obtains the object Value1 which is the current
+ |	value of SlotName1 in Struct, and recursively 
+ |	calls setObjStruct(SlotName2, Value1, Value).
+ *!------------------------------------------------------*/
 :-dynamic(slot_constraint/4).
 
-%% export setObjStruct/3.
 setObjStruct((SlotName1^SlotName2), Struct, Value)
 	:-!,
 	functor(Struct, Class, _),
@@ -371,7 +434,22 @@ satisfy_slot_constrs(Class,SlotName,Value)
 satisfy_slot_constrs(_,_,_).
 
 
-%% export (':=')/2.
+/*!-------------------------------------------------------
+ |	':='/2.
+ |	Expr1 := Expr2
+ |	? := +
+ |
+ | - set or access the value of an object slot
+ |
+ |	If Expr1 is a variable or a non-variable which NOT of
+ |	the form Struct^SlotExpr, then Expr2 must be of the form 
+ |	Struct^SlotExpr, and the value of SlotExpr in Struct 
+ |	is extracted and unified with Expr1;
+ |
+ |	If Expr1 is of the form A^SlotExpr, then A can either
+ |	be an object state Struct, or can be the name of an
+ |	object, and the value of SlotExpr in A is set to Value
+ *!------------------------------------------------------*/
 Var := Struct^SlotExpr
 	:-
 	var(Var),!,
@@ -393,6 +471,18 @@ Value := Struct^SlotExpr
 	:-
 	accessObjStruct(SlotExpr, Struct, Value).
 
+/*!-------------------------------------------------------
+ |	set_slots0/4
+ |	set_slots0(Vals,Code,State,Mod)
+ |	set_slots0(+,-,+,+)
+ |
+ | - create code for setting slots to values in object State
+ |
+ |	Vals is a list of expressions of the form s(Slot,Val);
+ |	Code will be a prolog term representing code which,
+ |	when executed, will set each of the Slots of object 
+ |	State to the corresponding Val, in module Mod.
+ *!------------------------------------------------------*/
 set_slots0([],true,_,_).
 set_slots0([s(Slot,Val)],Code,State,Mod)
 	:-!,
@@ -405,6 +495,26 @@ set_slots0([s(Slot,Val) | RestVals], (ThisCode, RestCode),State,Mod)
 					setObjStruct(Slot, State, RealVal) ),
 	set_slots0(RestVals,RestCode,State,Mod).
 
+/*!-------------------------------------------------------
+ |	deref_val/3
+ |	deref_val(OExpr, State, Mod)
+ |	deref_val(+, -, +)
+ |
+ | - 'dereference' an object description
+ |
+ |	If OExpr is of the form '$object'(OName), and
+ |	if OName is the name of defined object, then
+ |	if the state of OName has been initialized, returns
+ |	that state with State, and otherwise fails;
+ |
+ |	If OExpr is of the form defineObject(SpecList),
+ |	invokes object definition processing on SpecList,
+ |	then sends the resulting defined object an initialization
+ |	message, and unifies the resulting state with State, if succssful,
+ |	and fails otherwise;
+ |
+ |	In all other cases, unifies State with OExpr.
+ *!------------------------------------------------------*/
 deref_val('$object'(ObjectName), ObjectState,Mod)
 	:-!,
 	catenate('get_',ObjectName, GetPred),
@@ -426,9 +536,13 @@ deref_val(defineObject(SpecList), ObjectState,Mod)
 	Mod:call(GetCall).
 deref_val(Val, Val,_).
 
-/*!-----------------------------------------------------------------------
- *-----------------------------------------------------------------------*/
-%% export standardObject/2.
+/*!-------------------------------------------------------
+ |	standardObject/2
+ |	standardObject(OName, Class)
+ |	standardObject(+, +)
+ |
+ | - define an object, named OName, as an instance of Class
+ *!------------------------------------------------------*/
 standardObject(ObjectName,ClassName)
 	:-
 	classModule(ClassName, Module),
@@ -437,8 +551,16 @@ standardObject(ObjectName,ClassName)
 						instanceOf=[ClassName],
 						options=[]).
 
-/*-----------------------------------------------------------
- |		Top-most generic object class:
+
+			/*=================================
+ 			 | Top-most generic object class:
+			 *================================*/
+/*!-------------------------------------------------------
+ |	genericObjects/2
+ |	genericObjects(Message, State)
+ |	genericObjects(+,+)
+ |
+ | -	Top-most generic object class definition
  |
  |	Define the generic top-most object class; note that
  |	the name of the action predicate must be different 
@@ -452,32 +574,37 @@ standardObject(ObjectName,ClassName)
  |					subclassOf=[],
  |					addl_slots=[myName],
  |					export = yes]).
- |	This is installed in the file objs_generic.oop, and
+ *!------------------------------------------------------*/
+
+ /*
+ |
+ |	The above is installed in the file objs_generic.oop, and
  |	is processed with objectsProcessFile/1 to yield the
  |	file objs_generic.pro.  Remove the op declaration,
  |	the reconsult of objs_run.pro, and the module/endmod
  |	declarations, and include the result below:
- *-----------------------------------------------------------*/
+ */
 
 classModule(genericObjects,objects).
 make_pred(genericObjects,'makegenericObjectsStruct').
 slot_num(genericObjects,myName,1).
 slot_num(genericObjects,myDBRefs,2).
-makegenericObjectsStruct(_1554) :-
-        functor(_1554,genericObjects,2), 
+makegenericObjectsStruct(_1554) 
+	:-
+    functor(_1554,genericObjects,2), 
 	init_nil(1,_1554),
 	init_nil(2,_1554).
 slots_for(genericObjects,[myName,myDBRefs]).
+genericObjects(_1595,_1593) 
+	:- 
+	genObjs(_1595,_1593).
 
-%% export genericObjects/2.
-genericObjects(_1595,_1593) :- genObjs(_1595,_1593).
-
-/*
+/*----*
 		%% necessary for testing when modifying defineClass:
 		%% commented out when defineClass works:
 slots_for(genericObjects,[myName,myDBRefs]).
 classModule(genericObjects,objects).
-*/
+ *----*/
 
 genObjs(get_value(Slot,Value),State)
 	:-
@@ -555,12 +682,16 @@ dispose_obj_code(ObjDBRefs, ObjName, ObjModule)
 	catenate(dispatch_,ObjName,DispPred),
 	ObjModule:abolish(DispPred,2).
 		
-
-
-
-
-
-
+/*!-------------------------------------------------------
+ |	clone/2
+ |	clone(Obj1, Obj2)
+ |	clone(+, +)
+ |
+ | - clone an object
+ |
+ |	The values of all slots of Obj2 which are currently
+ |	nil are set to the corresponding values from Obj1.
+ *!------------------------------------------------------*/
 clone(Obj1, Obj2)
 	:-
 	send(Obj1, your_state(State1)),

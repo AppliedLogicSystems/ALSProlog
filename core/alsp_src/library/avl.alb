@@ -1,0 +1,4 @@
+libactivate(avl,[library,avl],
+    [avl_create/1,avl_inorder/2,avl_inorder_wdata/2,avl_insert/4,
+        avl_search/3],
+    []).

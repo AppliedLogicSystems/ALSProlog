@@ -99,7 +99,7 @@ export save_base_package/1.
 
 save_base_package(NewName) :-
 	force_libload_all(
-	  [':alsdir:builtins:debugger']),
+	  [':builtins:debugger']),
 	base_obp_list(BList),
 	save_app_with_obp(NewName, BList, [], '', '').
 
@@ -181,8 +181,14 @@ save_image(NewImageName)
 	%% them as it starts up; but don't throw them away...
 	sys_searchdir(ALSDIR),
 	abolish(sys_searchdir,1),
-	(bagof(searchdir(SD), searchdir(SD), SDList) -> true ; SDList = []),
+	abolish(als_lib_lcn,1),
 	abolish(searchdir,1),
+	(bagof(searchdir(SD0), searchdir(SD0), SDList0) -> true ; SDList0 = []),
+	(bagof(als_lib_lcn(SD1), searchdir(SD1), SDList1) -> true ; SDList1 = []),
+	(bagof(searchdir(SD2), searchdir(SD2), SDList2) -> true ; SDList2 = []),
+	append(SDList0,  SDList1, SDList01),
+	append(SDList01, SDList2, SDList),
+	builtins:dynamic(als_lib_lcn/1),
 
 	%% Save the new image based on OS
 	als_system(SystemList),

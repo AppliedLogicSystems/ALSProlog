@@ -13,18 +13,48 @@ module objects.
 use sio.
 use windows.
 
+export defineObject/2.
+export defineObject/3.
+export defineClass/2.
+export set_object_messages/1.
+export opf/0.
+export opf/1.
+export objectProcessFile_cl/0.
+export objectProcessFiles/1.
+export objectProcessFile/2.
+export objectProcessFile/3.
+export do_objectProcess/4.
+export do_objectProcess/5.
+export mods_with_objs/1.
+export mods_with_classes/1.
+export objs_in_mod/2.
+export classes_in_mod/2.
+export dpos/1.
+export don/1.
+export dump_object_by_name/2.
+export sdos/1.
+export selective_dump_object_by_state/2.
+export sdon/1.
+export selective_dump_object_by_name/2.
+export set_obj_profile/2.
+export obj_slots/2.
+
+/****
 		%% To force objs_run.pro (library file) to be loaded:
 :- a := b; true.
+ ****/
 
 			/*=================================
 			 |   OBJECT DEFINITION/CREATION
 			 *================================*/
 
 /*!-----------------------------------------------------------------------
+ |	defineObject/2
+ |	defineObject(Module, SpecList)
+ |	defineObject(+, +)
+ |
+ |	- defines an object in Module as specified by SpecList
  *-----------------------------------------------------------------------*/
-export defineObject/2.
-%:-module_closure(defineObject,1,defineObject).
-
 defineObject(Module, SpecList)
 	:-
 	dmember(name=ObjectName, SpecList),
@@ -64,7 +94,13 @@ defineObject(Module, SpecList)
 		true
 	).
  
-export defineObject/3.
+/*!-----------------------------------------------------------------------
+ |	defineObject/3
+ |	defineObject(Module, SpecList, Code)
+ |	defineObject(+, +, -)
+ |
+ |	- defines an object in Module as specified by SpecList, yielding Code
+ *-----------------------------------------------------------------------*/
 defineObject(Module, SpecList, Code) 
 	:-
 		%% get the object's name:
@@ -150,11 +186,9 @@ defineObject(Module, SpecList, Code)
 	object_values_init(Values, ObjInitVals),
 	merge_init_vals(ClassDefaultVals, ObjInitVals, InterInitVals),
 	merge_init_vals(InterInitVals, ClassInitVals, InitVals),
-%	append(ClassInitVals,ObjInitVals,InitVals),
 	GetStateCall_isNull =.. [GetStatePred, 0],
 	(InitVals = [] ->
 		InitBody0 = (GetStateCall_isNull,!,
-%					 ObjectClassModule:MakeStateCall,
 					 MakeStateCall,
 					 setObjStruct(myName,InitialState,ObjectName),
 					 SetInitStateCall
@@ -170,7 +204,6 @@ defineObject(Module, SpecList, Code)
 		GetStateCall3 =.. [GetStatePred, State3],
 		set_slots0(InitVals,SlotInitCode,State3,ObjectModule),
 		InitBody0 = (GetStateCall_isNull,!,
-%					 ObjectClassModule:MakeStateCall,
 					 MakeStateCall,
 					 SetInitStateCall,
 					 GetStateCall3,
@@ -260,7 +293,6 @@ make_inheritance_calls([Class | ClassList],DispatchPred, Module,ClassInfo,
 						   MessageVar,StateVar,SetStatePred,
 						   CodeInter,CodeOut).
 
-%ancestor(ClassA, ClassB)
 ancestor(Class, Class).
 ancestor(ClassA, ClassB)
 	:-
@@ -323,10 +355,12 @@ get_next_object_counter(1)
 			 *================================*/
 
 /*!-----------------------------------------------------------------------
+ |	defineClass/2
+ |	defineClass(Module, SpecList)
+ |	defineClass(+, +)
+ |
+ |	- defines a class in Module as specified by SpecList
  *-----------------------------------------------------------------------*/
-export defineClass/2.
-%:-module_closure(defineClass,1,defineClass).
-
 defineClass(_, SpecList)
 	:-
 	dmember(name=ClassName,SpecList),
@@ -579,15 +613,6 @@ create_class_make_pred(ClassName, MakePred)
 	:-
 	catenate([make,ClassName,'Struct'], MakePred).
 
-/*
-get_super_slots([],[],_).
-get_super_slots([Class | RestClassList],SuperSlots,ClassInfo)
-	:-
-	(slots_for(Class, ClassSlots),!;
-		dmember(slots_for(Class, ClassSlots),ClassInfo) ),
-	get_super_slots(RestClassList, RestSuperSlots, ClassInfo),
-	append(ClassSlots, RestSuperSlots, SuperSlots).
-*/
 get_super_slots(ClassList, SuperSlots, ClassInfo)
 	:-
 	get_super_slots(ClassList, [], SuperSlots, ClassInfo).
@@ -714,8 +739,12 @@ makeConstructor(Constructor, ClassName, NumProperties,
 
 
 /*!-----------------------------------------------------------------------
+ |	set_object_messages/1
+ |	set_object_messages(New)		
+ |	set_object_messages(New)		
+ |
+ |	- controls object processing messages with New = on,off
  *-----------------------------------------------------------------------*/
-export set_object_messages/1.
 set_object_messages(New)		%% on,off
 	:-
 	abolish(object_messages,1),
@@ -783,12 +812,8 @@ install_uses([uses(User,Used) | RestUses])
 	'$icode'(-9,0,0,0,0),
 	install_uses(RestUses).
 
-/*!----------------------------------------------------------
- *-----------------------------------------------------------*/
-
 get_source_file(FileName)
 	:-
-%	selectFile(gui_file_select_manager,'*.oop',FileName0),
 	chooseFile(_,'*.oop',FileName0),
 	(FileName0 = reconsult(FileName) ->
 		true ;
@@ -798,16 +823,27 @@ get_source_file(FileName)
 		)
 	).
 
-export opf/1.
+/*!----------------------------------------------------------
+ |	opf/1
+ |	opf(File)
+ |	opf(+)
+ |
+ |	- invokes object processing on File
+ *-----------------------------------------------------------*/
 opf(FileName) :- 
 	objectProcessFile(FileName,_).
 
-export opf/0.
+/*!----------------------------------------------------------
+ |	opf/0
+ |	opf
+ |	opf
+ |
+ |	- prompts for a file and invokes object processing on it
+ *-----------------------------------------------------------*/
 opf :-
 	set_prolog_flag(unknown, fail),
 	get_source_file(FileName),
 	disp_opf(FileName).
-
 
 disp_opf('$noChoice') 
 	:-!,
@@ -821,10 +857,21 @@ disp_opf(FileName)
 	nl,nl,
 	opf.
 
-
-
-
-export objectProcessFile_cl/0.
+/*!----------------------------------------------------------
+ |	objectProcessFile_cl/0
+ |	objectProcessFile_cl
+ |	objectProcessFile_cl
+ |
+ |	- invokes object processing on files from command line
+ |
+ |	Files and switches must be rightwards of -p 
+ |
+ |	Obtains files for processing from command line switches 
+ |	of the form:  -oopf FileName
+ |	
+ |	Uses include directories specified in the form: -I Dir
+ |	Ignores all other command line elements
+ *-----------------------------------------------------------*/
 objectProcessFile_cl
 	:-
 	set_prolog_flag(unknown, fail),
@@ -833,7 +880,6 @@ objectProcessFile_cl
 	!,
 	objectProcessFiles(Files).
 
-	
 oop_switches_and_files([],[],[]).
 oop_switches_and_files([['-oopf', FirstFile] | RestCmdLine],
 							[FirstFile | RestFiles], Xtras)
@@ -852,15 +898,26 @@ oop_switches_and_files([Item | RestCmdLine],Files,Xtras)
 	:-
 	oop_switches_and_files(RestCmdLine,Files,Xtras).
 
-
-export objectProcessFiles/1.
+/*!----------------------------------------------------------
+ |	objectProcessFiles/1
+ |	objectProcessFiles(FileNames)
+ |	objectProcessFiles(+)
+ |
+ |	- invokes object processing for each file on the list FileNames
+ *-----------------------------------------------------------*/
 objectProcessFiles([]) :-!.
 objectProcessFiles([FileName | FileNames])
 	:-!,
 	objectProcessFile(FileName,_),
 	objectProcessFiles(FileNames).
 
-export objectProcessFile/2.
+/*!----------------------------------------------------------
+ |	objectProcessFile/2
+ |	objectProcessFile(FileName, Records)
+ |	objectProcessFile(+, -)
+ |	
+ |	- supplies defaults and invokes objectProcessFile/3
+ *-----------------------------------------------------------*/
 objectProcessFile(FileName, Records)
 	:-
 	(filePlusExt(FN,XT,FileName) ->
@@ -871,15 +928,24 @@ objectProcessFile(FileName, Records)
 			filePlusExt(FN,ppo,TargetFile)
 		)
 		;
-		catenate(FileName, '.oop', SourceFile),
-		catenate(FileName, '.pro', TargetFile)
+		filePlusExt(FileName, '.oop', SourceFile),
+		filePlusExt(FileName, '.pro', TargetFile)
 	),
 	objectProcessFile(SourceFile, TargetFile, Records).
 
 /*!----------------------------------------------------------
+ |	objectProcessFile/3.
+ |	objectProcessFile(SourceFile, TargetFile, ObjinfoTerm)
+ |	objectProcessFile(+, +, -)
+ |
+ |	- object processes SourceFile to TargetFile, returning info
+ |
+ |	Reads the list of defineClass and defineObject expressions
+ |	(and relatives) from SourceFile, processes them, saves 
+ |	the information in ObjinfoTerm of the form
+ |			  objinfo(SourceFile,TargetFile,RecordInfo)
+ |	and writes the results to TargetFile.
  *-----------------------------------------------------------*/
-export objectProcessFile/3.
-
 objectProcessFile(SourceFile, TargetFile,
 				  objinfo(SourceFile,TargetFile,RecordInfo))
 	:-
@@ -895,17 +961,29 @@ objectProcessFile(SourceFile, TargetFile,
 	objects_advise('\n<Object code written to file: %t\n\n', [TargetFile]),
 	abolish(slot_default,3),
 	abolish(slot_constraint,4).
-objectProcessFile(SourceFile, TargetFile)
+objectProcessFile(SourceFile, TargetFile,_)
 	:-
 %%% needs fixing:
 	seen.
 
-export do_objectProcess/4.
+/*!----------------------------------------------------------
+ |	do_objectProcess/4
+ |	do_objectProcess(SourceList,SinkList,SinkListTail,RecordInfo)
+ |	do_objectProcess(+,-,-,-)
+ |
+ |	- invokes core object processing driver
+ *-----------------------------------------------------------*/
 do_objectProcess(SourceList,SinkList,SinkListTail,RecordInfo)
 	:-
 	objectProcess([user],[],SourceList,SinkList,SinkListTail,RecordInfo,[]).
 
-export do_objectProcess/5.
+/*!----------------------------------------------------------
+ |	do_objectProcess/5
+ |	do_objectProcess(SourceList,Module,SinkList,SinkListTail,RecordInfo)
+ |	do_objectProcess(+,+,-,-,-)
+ |
+ |	- core object processing driver
+ *-----------------------------------------------------------*/
 do_objectProcess(SourceList,Module,SinkList,SinkListTail,RecordInfo)
 	:-
 	objectProcess([Module,user],[],SourceList,SinkList,SinkListTail,
@@ -1120,19 +1198,6 @@ disp_sort_code(Item, CurModStack, CurModStack,
 		RightCode = [Item | NewRightCode]
 	).
 
-
-export merge_defaults/3.
-merge_defaults([],PrimaryDefaults,PrimaryDefaults).
-merge_defaults([Tag=Val | BaseDefaults],SpecDefaults,NewDefaults)
-	:-
-	dmember(Tag=_,SpecDefaults),
-	!,
-	merge_defaults(BaseDefaults,SpecDefaults,NewDefaults).
-merge_defaults([Tag=Val | BaseDefaults],SpecDefaults,[Tag=Val | NewDefaults])
-	:-
-	merge_defaults(BaseDefaults,SpecDefaults,NewDefaults).
-
-
 objs_def_msg(Tag, Args, Mod)
 	:-
 	objs_msg_setup(Tag, Args, Mod, Format, FixedArgs),
@@ -1192,31 +1257,57 @@ assert_clauses_to_endmod([Clause | List],Mod, TailList)
 	 |	SOME DEVELOPMENT TOOLS
 	 *============================================*/
 
-	%% List of all modules which have objects defined in them:
-export mods_with_objs/1.
+/*!----------------------------------------------------------
+ |	mods_with_objs/1
+ |	mods_with_objs(ModsList)
+ |	mods_with_objs(-)
+ |
+ | - return list of all modules having objects defined in them
+ *-----------------------------------------------------------*/
 mods_with_objs(ModsList)
 	:-
 	objects:setOf(M, Ob^objectModule(Ob,M), ModsList).
 
-	%% List of all modules which have classes defined in them:
-export mods_with_classes/1.
+/*!----------------------------------------------------------
+ |	mods_with_classes/1
+ |	mods_with_classes(ModsList)
+ |	mods_with_classes(-)
+ |
+ | -	return list of all modules having classes defined in them
+ *-----------------------------------------------------------*/
 mods_with_classes(ModsList)
 	:-
 	objects:setOf(M, Cl^classModule(Cl,M), ModsList).
 
-	%% List all objects defined in a module:
-export objs_in_mod/2.
+/*!----------------------------------------------------------
+ |	objs_in_mod/2
+ |	objs_in_mod(Mod, ObjsList)
+ |	objs_in_mod(+, -)
+ |
+ | -	return list of all objects defined in a module
+ *-----------------------------------------------------------*/
 objs_in_mod(Mod, ObjsList)
 	:-
 	objects:setOf(Ob, objectModule(Ob,Mod), ObjsList).
 
-	%% List all classes defined in a module:
-export classes_in_mod/2.
+/*!----------------------------------------------------------
+ |	classes_in_mod/2
+ |	classes_in_mod(Mod, ClassList)
+ |	classes_in_mod(+, -)
+ |
+ |  -	return list of all classes defined in a module
+ *-----------------------------------------------------------*/
 classes_in_mod(Mod, ClassList)
 	:-
 	objects:setOf(Cl, classModule(Cl,Mod), ClassList).
 
-export dpos/1.
+/*!----------------------------------------------------------
+ |	dpos/1
+ |	dpos(State)
+ |	dpos(+)
+ |
+ | - write list of equations (Slot=Val) for an object's State
+ *-----------------------------------------------------------*/
 dpos(State)
 	:-
 	dump_object_by_state(State, SlotEqns),
@@ -1230,13 +1321,25 @@ dump_object_by_state(State, SlotEqns)
 	objects:slots_for(ObjCl, SlotNameList),
 	dump_obj_eqns(SlotNameList, 1, State, SlotEqns).
 
-export don/1.
+/*!----------------------------------------------------------
+ |	don/1
+ |	don(ObjName)
+ |	don(+)
+ |
+ | - write list of equations (Slot=Val) for object named ObjName
+ *-----------------------------------------------------------*/
 don(ObjName)
 	:-
 	dump_object_by_name(ObjName, SlotEqns),
 	write_eqns(SlotEqns).
 
-export dump_object_by_name/2.
+/*!----------------------------------------------------------
+ |	dump_object_by_name/2
+ |	dump_object_by_name(ObjName, SlotEqns)
+ |	dump_object_by_name(+, -)
+ |
+ | - generate list of SlotEqns (Slot=Val) for object named ObjName
+ *-----------------------------------------------------------*/
 dump_object_by_name(ObjName, SlotEqns)
 	:-
 	objects:objectModule(ObjName, ObjMod),
@@ -1255,17 +1358,25 @@ dump_obj_eqns([SlotName | SlotNameList], SlotNum, State,
 	NextSlotNum is SlotNum + 1,
 	dump_obj_eqns(SlotNameList, NextSlotNum, State, SlotEqns).
 
-	% Generate selective list of eqns: slotName=slotVal, for an object:
-export sdo/1.
-sdo(Obj) :- selective_dump_object(Obj).
-
-export sdos/1.
+/*!----------------------------------------------------------
+ |	sdos/1
+ |	sdos(State)
+ |	sdos(+)
+ |
+ | -	write a selective dump of object equations for State
+ *-----------------------------------------------------------*/
 sdos(State)
 	:-
 	selective_dump_object_by_state(State, SlotEqns),
 	write_eqns(SlotEqns).
 
-export selective_dump_object_by_state/2.
+/*!----------------------------------------------------------
+ |	selective_dump_object_by_state/2
+ |	selective_dump_object_by_state(State, SlotEqns)
+ |	selective_dump_object_by_state(+, -)
+ |
+ | - SlotEqns is a selective dump of object equations for State
+ *-----------------------------------------------------------*/
 selective_dump_object_by_state(State, SlotEqns)
 	:-
 	ObjectName := State^myName,
@@ -1273,13 +1384,25 @@ selective_dump_object_by_state(State, SlotEqns)
 	objects:slots_profile_for(ObjectName, SlotProfileList),
 	dump_obj_eqns(SlotProfileList, State, SlotEqns).
 
-export sdon/1.
+/*!----------------------------------------------------------
+ |	sdon/1
+ |	sdon(ObjName)
+ |	sdon(+)
+ |
+ | - write a selective dump of object equations for object ObjName
+ *-----------------------------------------------------------*/
 sdon(ObjName)
 	:-
 	selective_dump_object_by_name(ObjName, SlotEqns),
 	write_eqns(SlotEqns).
 
-export selective_dump_object_by_name/2.
+/*!----------------------------------------------------------
+ |	selective_dump_object_by_name/2
+ |	selective_dump_object_by_name(ObjName, SlotEqns)
+ |	selective_dump_object_by_name(+, -)
+ |
+ | - SlotEqns is a selective dump of object equations for ObjName
+ *-----------------------------------------------------------*/
 selective_dump_object_by_name(ObjName, SlotEqns)
 	:-
 	objects:objectModule(ObjName, ObjMod),
@@ -1297,7 +1420,13 @@ dump_obj_eqns([SlotName=SlotNum | SlotProfileList], State,
 	arg(SlotNum, State, SlotVal),
 	dump_obj_eqns(SlotProfileList, State, SlotEqns).
 
-export set_obj_profile/2.
+/*!----------------------------------------------------------
+ |	set_obj_profile/2
+ |	set_obj_profile(SlotNameList, ObjName)
+ |	set_obj_profile(+, +)
+ |
+ | - set the selective dump profile (SlotNameList) for ObjName
+ *-----------------------------------------------------------*/
 set_obj_profile(SlotNameList, ObjName)
 	:-
 	objects:objectClass(ObjName,ObjClass),
@@ -1319,13 +1448,17 @@ write_eqns([SlotName=SlotVal | SlotEqns])
 			[maxdepth(7),depth_computation(flat)]),
 	write_eqns(SlotEqns).
 
-export obj_slots/2.
+/*!----------------------------------------------------------
+ |	obj_slots/2
+ |	obj_slots(ObjName, SlotsList)
+ |	obj_slots(+, -)
+ |
+ | - SlotsList is the list of slots for object ObjName
+ *-----------------------------------------------------------*/
 obj_slots(ObjName, SlotsList)
 	:-
 	objects:objectClass(ObjName, ObjCl),
 	objects:slots_for(ObjCl, SlotsList).
-
-
 
 endmod.	% objects
 

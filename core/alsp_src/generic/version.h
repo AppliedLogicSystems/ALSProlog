@@ -5,5 +5,5 @@
  *          Version number - Thu Apr 4 09:28:36 EST 1996
  *===============================================================*/
 #ifndef SysVersionNum
-#define SysVersionNum "2.06 dev"
+#define SysVersionNum "2.07 dev"
 #endif /* SysVersionNum */

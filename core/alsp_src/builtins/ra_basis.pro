@@ -1,5 +1,5 @@
 /*================================================================*
- |		ra_basis.pro
+|		ra_basis.pro
  |	Copyright (c) 1995-96 Applied Logic Systems, Inc.
  |	Copyright (c) 1995 Bell-Northern Research Ltd.
  |
@@ -84,21 +84,20 @@ clp_eval( Expr, M )
 	Expr =.. [R, X, Y],
 	clp_arithmetic_relation(R),
 	!,
-	ria_relation(X, Y, R).
+	ria_relation(R, X, Y).
 
 clp_eval( F, M )
 	:-
 	call(M:F).  % escape to Prolog
 
 clp_arithmetic_relation( is ).
-clp_arithmetic_relation( := ).
 clp_arithmetic_relation( == ).
 clp_arithmetic_relation( =< ).
 clp_arithmetic_relation( >= ).
 clp_arithmetic_relation( <> ).
 clp_arithmetic_relation( >  ).
 clp_arithmetic_relation( <  ).
-clp_arithmetic_relation( <= ).
+clp_arithmetic_relation( sub ).
 /*	--- need to fix parser for these:
 clp_arithmetic_relation( '|=' ).
 clp_arithmetic_relation( '=|' ).
@@ -224,16 +223,18 @@ check_type_match(boolean(_,_), 1).
 check_type_match(boolean, 0).
 check_type_match(boolean, 1).
 
-is_type(real,X)
+is_type(X, real)
 	:-
-	float(X).
+	float(X),
+	!.
 
-is_type(integer,X)
+is_type(X, integer)
 	:-
-	integer(X).
+	integer(X),
+	!.
 
-is_type(boolean,0).
-is_type(boolean,1).
+is_type(0, boolean).
+is_type(1, boolean).
 
 /*---------------------------------------------------------------
  |	declare_variable/2
@@ -284,7 +285,7 @@ restrict_interval(RestType,X)
 		%% '$domain'(X, XPrimType, LX, UX),
 	'$domain_term'(X, DomainTerm),
 	valid_domain(DomainTerm, XPrimType, LX, UX),
-	restrict_interval(RestType, XPrimType, XLB, XUB, X, DomainTerm),
+	restrict_interval(RestType, XPrimType, LX, UX, X, DomainTerm),
 	!.
 
 	%% Idempotent restriction is trivially ok, with no changes:
@@ -293,6 +294,7 @@ restrict_interval(Type,   Type,    _, _, _, _) :-!.
 
 	%% If RestType is unbounded (RestType is an atom) and the restriction 
 	%% is "outward" (RestType >= XPrimType), this is also trivially ok:
+	%%  --- restrict_interval(RestType, XPrimType, LX, UX, X, DomainTerm),
 
 restrict_interval(integer,boolean, _, _, _, _) :-!.
 restrict_interval(real,   boolean, _, _, _, _) :-!.
@@ -300,20 +302,27 @@ restrict_interval(real,   integer, _, _, _, _) :-!.
 
 	%% RestType is bounded (=.. [Type,L,U]); now the underlying
 	%% primitive types of RestType and XPrimType must be identical;
-	%% if they are, intersect the intervals; else raise an error:
-	%% X=[XLB, XUB],  RT=[RL,RU],
+	%% if they are, intersect & equate the intervals; 
+	%% else raise an error: X=[XLB, XUB],  RT=[RL,RU]:
 
 restrict_interval(RestType, XPrimType, XLB, XUB, X, DomainTerm)
 	:-
 	RestType =.. [XPrimType, RL, RU],
-	XLB =< RU,
-	RL =< XUB,
-	!,
-	max(XLB, RL, NewL),
-	min(XUB, RU, NewU),
-	update_lower_bd(DomainTerm, NewL),
-	update_upper_bd(DomainTerm, NewU).
-
+	(var(RL) -> 
+		XLB = RL, NewL = XLB
+		;
+		RL =< XUB,
+		max(XLB, RL, NewL)
+	),
+	(var(RU) ->
+		XUB = RU, NewU = XUB
+		;
+		XLB =< RU,
+		min(XUB, RU, NewU)
+	),
+	NewType =.. [XPrimType, NewL, NewU],
+	new_type_interval(NewType,NewInterval),
+	'$iterate'(equal(NewInterval, X)).
 
 /*---NEED SOME SORT OF ERROR EXCEPTION ----
 	%% Error: Improper type restriction
@@ -328,59 +337,17 @@ restrict_interval(Type,X)
 	'$iterate'(equal(X,XX)).
 
 
-
-/*--- KILL
-restrict_interval(RestType, XPrimType, XLB, XUB, X)
+export lower_bound/1.
+lower_bound(X)
 	:-
-	RestType =.. [PrimType, RestL0, RestU0],
-	check_or_mod_itype(PrimType, RestL0, RestU0, RestL, RestU),
+	X :: real(L,U),
+	{X =< L}.
 
-	(var(RestL) -> RestL = XLB, NewL = XLB ; max(XLB, RestL, NewL)),
-	(var(RestU) -> RestU = XUB, NewU = XUB ; min(XUB, RestU, NewU)),
-
-	combin_type([PrimType,XPrimType], NewType),
-	(XPrimType \= NewType ->
-		update_intvl_type(XDomTm, NewType)
-		;
-		true
-	),
-	!,
-	update_lower_bd(XDomTm, NewL),
-	update_upper_bd(XDomTm, NewU).
-*/
-
-/***************************************
-	/*----------------------------------------------------------*
-	 |	Check and/or modify interval endpoints according
-	 |	to proposed input type; for use in restrict_type:
-	 *----------------------------------------------------------*/
-check_or_mod_itype(PrimType, RestL0, RestU0, RestL, RestU)
+export upper_bound/1.
+upper_bound(X)
 	:-
-	check_mod_the_type(PrimType, RestL0, RestL),
-	check_mod_the_type(PrimType, RestU0, RestU).
-
-check_mod_the_type(PrimType, EP, EP)
-	:-
-	var(EP),
-	!.
-
-check_mod_the_type(real, EP, EP)
-	:-
-	float(EP).
-
-check_mod_the_type(real, EP0, EP)
-	:-
-	integer(EP0),
-	!,
-	EP is float(EP0).
-
-check_mod_the_type(integer, EP, EP)
-	:-
-	integer(EP).
-
-check_mod_the_type(boolean, 0,  0).
-check_mod_the_type(boolean, 1,  1).
-***************************************/
+	X :: real(L,U),
+	{U =< X}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -392,8 +359,8 @@ check_mod_the_type(boolean, 1,  1).
 
 /*---------------------------------------------------------------
  |  ria_relation/3
- |  ria_relation( Left, Right, RelationName )
- |  ria_relation( +, +, +)
+ |  ria_relation(RelationName, Left, Right)
+ |  ria_relation(+, +, +)
  | 
  |  Handles instances constraint arithmetic relations which
  |	must be added into the constraint network;
@@ -407,20 +374,23 @@ check_mod_the_type(boolean, 1,  1).
  |	relation will add network nodes corresponding to any
  |	functions/operations occurring in the arg expressions.
  *--------------------------------------------------------------*/
-		%% Case 1:
+		%% Cases 1,2:
 		%% Left is a variable, and the original relation expression
-		%% is of the form:
-		%%		Left is Expr ; Left := Expr ; Left == Expr
+		%% is of one of the forms:
+		%%		Left is Expr or Left == Expr
 		%%
-ria_relation( Left, Expr, Operator )
+ria_relation(is, Left, Expr)
+	:- 
+	ria_relation_is(Left, Expr).
+
+ria_relation(==, Left, Expr)
 	:- 
 	var(Left),
-	is_defining_rel(Operator),
 	!, 
-	define_interval(Left, Expr).  
+	define_interval(==, Left, Expr).  
 
 		%% All other cases:
-ria_relation( Left, Right, Operator )
+ria_relation(Operator, Left, Right)
 	:-
 	flatten_expr(Left,  LeftExpr,  LeftType),
 	flatten_expr(Right, RightExpr, RightType),
@@ -429,15 +399,34 @@ ria_relation( Left, Right, Operator )
 	add_relation(Operator, LeftExpr, RightExpr).
 
 is_defining_rel( is ).
-is_defining_rel( := ).
 is_defining_rel( == ).
 
+ria_relation_is(Left, Expr)
+	:-
+	var(Left),
+	!,
+	flatten_expr(Expr, Left, Type),
+	(number(Left) ->
+		true
+		;
+		declare_variable(Type,Left)
+	).
+
+ria_relation_is(Left, Expr)
+	:-
+	ria_relation(==, Left, Expr).
+
 /*---------------------------------------------------------------
- |	define_interval/2
- |	define_interval(Y, Expr)
- |	define_interval(+, +)
+ |	define_interval/3
+ |	define_interval(Operator, Y, Expr)
+ |	define_interval(+, +, +)
  *--------------------------------------------------------------*/
-define_interval(Y, Expr)
+define_interval(is, Y, Expr)
+	:-!,
+	flatten_expr(Expr, Y, Type),
+	declare_variable(Type,Y).
+
+define_interval(==, Y, Expr)
 	:-
 	flatten_expr(Expr, YE, Type),
 	declare_variable(Type,Y),
@@ -533,7 +522,7 @@ flatten_expr(N, N1, Type)
 	:-
 	number(N),
 	!,
-	is_type(Type,N),
+	is_type(N, Type),
 	point_interval(N, N1).
 
 	%% Monadic expressions - special:
@@ -589,11 +578,11 @@ flatten_expr( X<>Y, Res, boolean)
 
 flatten_expr( X<Y, Res, boolean)
 	:-!,
-	flatten_expr( '~'((X=<Y)), Res, boolean).
+	flatten_expr( '~'((X=>Y)), Res, boolean).
 
 flatten_expr( X>Y, Res, boolean)
 	:-!,
-	flatten_expr( '~'((X=>Y)), Res, boolean).
+	flatten_expr( '~'((X=<Y)), Res, boolean).
 
 flatten_expr( wrap(X,N), Res, real)
 	:-!,
@@ -1062,7 +1051,8 @@ fmap_rel( =<,   X,Y, greatereq(Y,X)).
 fmap_rel( <,    X,Y, higher(X,Y)).
 fmap_rel( >,    X,Y, higher(Y,X)).
 fmap_rel( <>,   X,Y, unequal(X,Y)).
-fmap_rel( <=,   X,Y, narrower(X,Y)).
+%fmap_rel( <=,   X,Y, narrower(Y,X)).
+fmap_rel( sub,   X,Y, narrower(Y,X)).
 /*
 fmap_rel( '|=', X,Y, begin_tog(X,Y)).
 fmap_rel( '=|', X,Y, finish_tog(X,Y)).
@@ -1186,21 +1176,27 @@ choose_split(X, M, RelErr)
 	:-   			
 	var(X),
 	'$domain'(X, _, L, U),
-	median(L, U, M),
+	intv_median(L, U, M),
 	(U - L)  >  RelErr * M,  	% interval is pointlike
 		%% Change/Fix (??):
 	not(X==M),
 	!.
 
-median( L, U, 0  ) :- L<0,     U>0, !.
-median( L, U, 1  ) :- L<1.0,   U>  1.0, !.
-median( L, U, -1 ) :- L< -1.0, U> -1.0, !.
-median( L, U,  M ) :- L==0.0,  M is U/3.0, !.
-median( L, U,  M ) :- U==0.0,  M is L/3.0, !.  
-median( L, U,  M ) :- L>0,     U>0,  M is sqrt(L)*sqrt(U), !.
-median( L, U,  M ) :- L<0,     U<0,  M is -sqrt(-L)*sqrt(-U), !.
+export intv_median/2.
+intv_median(Interval, M)
+	:-
+	Interval::real(L,U),
+	intv_median(L,U,M).
+
+intv_median( L, U, 0  ) :- L<0,     U>0, !.
+intv_median( L, U, 1  ) :- L<1.0,   U>  1.0, !.
+intv_median( L, U, -1 ) :- L< -1.0, U> -1.0, !.
+intv_median( L, U,  M ) :- L==0.0,  M is U/3.0, !.
+intv_median( L, U,  M ) :- U==0.0,  M is L/3.0, !.  
+intv_median( L, U,  M ) :- L>0,     U>0,  M is sqrt(L)*sqrt(U), !.
+intv_median( L, U,  M ) :- L<0,     U<0,  M is -sqrt(-L)*sqrt(-U), !.
 		%% default to midpoint:
-median( L, U,  M ) :- M is (L+U)/2.0 .   
+intv_median( L, U,  M ) :- M is (L+U)/2.0 .   
 
 multi_solve( 0, List, Eps) :-!.
 

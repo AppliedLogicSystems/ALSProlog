@@ -4164,17 +4164,17 @@ next_token0(buf, vpTokType, tpTokType, vpTokVal, tpTokVal)
 	    p--;		/* fake out single quote */
 	    quoted_atom(vpTokType, vpTokVal, tpTokVal, &p, lim, buf);
 	    if (p == oldp && *vpTokType != TK_LEXERR) { 
-		SIO_CPOS(buf) = tokstart - SIO_BUFFER(buf);
-		SIO_ERRCODE(buf) = SIOE_READ;
-		return 0;
+			SIO_CPOS(buf) = tokstart - SIO_BUFFER(buf);
+			SIO_ERRCODE(buf) = SIOE_READ;
+			return 0;
 	    }
 	}
 	else if (SIO_FLAGS(buf) & SIOF_INSTRING) {
 	    p--;		/* fake out double quote */
 	    if (!quoted_string(vpTokType, vpTokVal, tpTokVal, &p, lim, buf)) {
-		*vpTokType = TK_LEXERR;
-		*vpTokVal = SIOL_UNTERM_STRING;
-		*tpTokVal = WTP_INTEGER;
+			*vpTokType = TK_LEXERR;
+			*vpTokVal = SIOL_UNTERM_STRING;
+			*tpTokVal = WTP_INTEGER;
 	    }
 	    if ((SIO_FLAGS(buf) & SIOF_INSTRING)
 	     && *tpTokVal == WTP_SYMBOL

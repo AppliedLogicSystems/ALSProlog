@@ -77,7 +77,7 @@ make_c( SrcFile, OutFileHB, OutFileC)
 
 	open(OutFileC, write, OutCS, []),
 	headers(OutCS, OutFileC, SrcFile),
-%	printf(OutCS, '\n#if defined(INTCONSTR)\n\n',[]),
+	printf(OutCS, '\n#if defined(INTCONSTR)\n\n',[]),
 
 	open(OutFileHB, write, OutHBS, []),
 	headers(OutHBS, OutFileHB, SrcFile),
@@ -85,7 +85,7 @@ make_c( SrcFile, OutFileHB, OutFileC)
 	compile_s_primitives( SOPs, null, OutHBS, OutCS),
 	compile_primitives( IntervalOps, PseudoCode, null, OutHBS, OutCS),
 	!,
-%	printf(OutCS, '\n#endif /* defined(INTCONSTR) */\n\n',[]),
+	printf(OutCS, '\n#endif /* defined(INTCONSTR) */\n\n',[]),
 	close(OutCS),
 	close(OutHBS).
 

@@ -32,6 +32,7 @@ module builtins.
 export filePlusExt/3.
 export pathPlusFile/3.
 export subPath/2.
+export subPath/3.
 export extendPath/3.
 export rootPlusPath/3.
 export rootPlusPath0/3.
@@ -94,7 +95,8 @@ identify_case(dos).
 	; OS = macos, !,	%% Mac
 		addclause(builtins,file_separator('.')),
 		addclause(builtins,directory_separator(':')),
-		addclause(builtins,disk_separator(':')),
+		%%addclause(builtins,disk_separator(':')),
+		addclause(builtins,(disk_separator(_) :- !,fail)),
 		addclause(builtins,path_separator(';')),
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
@@ -137,11 +139,13 @@ identify_case(dos).
 %% additional clause preceding this one which gets defined above.
 %%
 
+/*
+
 is_absolute_pathname(Path) :-
 	directory_separator(DS),
 	sub_atom(Path,1,_,DS),
 	!.
-
+*/
 
 
 
@@ -277,6 +281,7 @@ pathPlusFile(Path,File,CompletePath)
 	(Ron)
  *!-------------------------------------------------------*/
 
+/*
 %% FIXME: Add leading colon stuff for the Mac
 
 subPath([], '') :- !.
@@ -294,6 +299,97 @@ subPath([C | Cs], Path) :-
 	!,
 	atom_split(Path,Slash,C,SubPath).
 
+*/
+
+
+subPath(List, Path) :- list_path(List, Path).
+subPath(OS, List, Path) :- list_path(OS, List, Path).
+
+directory_separator(unix, '/').
+directory_separator(mswin32, '\\').
+directory_separator(macos, ':').
+
+list_path(List, Path) :-
+	sys_env(OS, _, _),
+	list_path(OS, List, Path).
+
+list_path(OS, List, Path) :-
+	var(List),
+	!,
+	path_to_list(OS, List, Path), !.
+list_path(OS, List, Path) :-
+	nonvar(List),
+	!,
+	list_to_path(OS, List, Path), !.
+
+list_to_path(macos,	[],	':').
+list_to_path(_,		[],	'').
+
+list_to_path(macos,	[''],	_) :-
+	throw(error(foo)).
+list_to_path(OS,	[''], 	DS) :-
+	directory_separator(OS, DS).
+
+list_to_path(macos, 	[X],	Path) :-
+	directory_separator(macos, DS),
+	atom_concat(DS, X, Path).	
+list_to_path(_, 	[X],	X).
+
+list_to_path(macos,	['', X | Tail], Path) :-
+	list_to_path(macos, Tail, TailPath),
+	atom_concat(X, TailPath, Path).
+
+list_to_path(macos,	['::' | Tail], Path) :-
+	list_to_path(macos, Tail, TailPath),
+	atom_concat(':', TailPath, Path).
+
+list_to_path(macos,	[Head | Tail], Path) :-
+	directory_separator(macos, DS),
+	list_to_path(macos, Tail, TailPath),
+	atom_concat(DS, Head, HeadPath),
+	atom_concat(HeadPath, TailPath, Path).
+	
+list_to_path(OS,	[Head | Tail], Path) :-
+	directory_separator(OS, DS),
+	list_to_path(OS, Tail, TailPath),
+	atom_concat(Head, DS, HeadPath),
+	atom_concat(HeadPath, TailPath, Path).
+
+path_to_list(macos, [], ':').
+path_to_list(_, [], '').
+
+path_to_list(macos, ['' | Tail], Path) :-
+	not(sub_atom(Path, 1, 1, ':')),
+	sub_atom(Path, _, 1, ':'),
+	atom_concat(':', Path, RelativePath),
+	path_to_list(macos, Tail, RelativePath).
+	
+path_to_list(macos, ['::' | Tail], Path) :-
+	sub_atom(Path, 1, 2, '::'),
+	atom_length(Path, PathLength),
+	TailPathLength is PathLength - 1,
+	sub_atom(Path, 2, TailPathLength, TailPath),
+	path_to_list(macos, Tail, TailPath).
+	
+path_to_list(macos, [Head | Tail], Path) :-
+	sub_atom(Path, 1, 1, ':'),
+	atom_length(Path, PathLength),
+	((sub_atom(Path, HeadEnd, 1, ':'), HeadEnd > 1)
+	 ; HeadEnd is PathLength + 1),
+	HeadLength is HeadEnd - 2,
+	sub_atom(Path, 2, HeadLength, Head),
+	TailLength is 1 + PathLength - HeadEnd,
+	sub_atom(Path, HeadEnd, TailLength, TailPath),
+	path_to_list(macos, Tail, TailPath).
+
+path_to_list(OS, [C | Cs], Path) :-
+	directory_separator(OS, Slash),
+	atom_split(Path,Slash,C,SubPath),
+	!,
+	path_to_list(OS, Cs, SubPath).
+
+path_to_list(_, [X], X).
+
 /*!-------------------------------------------------------*
  |	extendPath/3
  |	extendPath(Upper,Lower,Whole)
@@ -307,11 +403,6 @@ extendPath(Upper,Lower,Whole)
 	subPath(LowerList,Lower),
 	append(UpperList,LowerList,WholeList),
 	subPath(WholeList,Whole).
-
-
-
-
-
 
 
 /*!-------------------------------------------------------*

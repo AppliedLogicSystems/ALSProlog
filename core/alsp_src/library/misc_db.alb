@@ -1,0 +1,8 @@
+libactivate(builtins,[library,misc_db],
+    [assert_all/1,assert_all0/2,assert_all_refs/2,assert_all_refs0/3,
+        erase_all/1,abolish_list/1,abolish_list0/2,retract_all/1,
+        retract_all0/2,retract_each/2],
+    [module_closure(assert_all,1,assert_all),
+        module_closure(assert_all_refs,2,assert_all_refs),
+        module_closure(abolish_list,1,abolish_list),
+        module_closure(retract_all,1,retract_all)]).

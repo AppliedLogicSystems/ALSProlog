@@ -1,3 +1,8 @@
+Mod 09 Sept 1996 Ken Bowen
+	* Version 2.07 dev 
+
+	* Includes clp(bnr) working machinery
+
 Fri 09 Feb 1996 Ken Bowen/Chuck Houpt
 	* Various ifdefs & minor mods to support (running) Windows95 version;
 

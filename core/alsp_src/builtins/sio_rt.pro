@@ -1315,20 +1315,27 @@ binop( **,	200,	199,	199).
 %% Nonstandard infix operators, including
 %% interval constraint operators:
 %%
+binop(==>,	1200,	1199,	1200).
+binop(when,	1190,	1189,	1189).
+binop(where,1180,	1179,	1179).
+binop(with,	1170,	1169,	1169).
+binop(if,	1160,	1159,	1159).
 
 binop( :,	950,	949,	950).
 binop( ^,	200,	199,	200).
 
 binop( ::,	700,	699,	699).			%% CLP
+binop( :=,	700,	699,	699).			%% CLP
 binop( <>,	700,	699,	699).			%% CLP
 binop( @=,	700,	699,	699).			%% CLP
-binop( <=,	600,	599,	599).			%% CLP
+binop(=>,	600,	599,	599).
+binop( sub,	600,	599,	599).			%% CLP
 /*
 binop( 'i=',	600,	599,	599).			%% CLP
 binop( '=i',	600,	599,	599).			%% CLP
 */
-binop( '\|=',	600,	599,	599).			%% CLP
-binop( '=\|',	600,	599,	599).			%% CLP
+binop( ('\|='),	720,	719,	719).			%% CLP
+binop( ('=\|'),	720,	719,	719).			%% CLP
 
 binop( =>,	600,	599,	599).			%% CLP
 
@@ -1357,7 +1364,10 @@ preop( export,	1200,	1199).
 preop( use,	1200,	1199).
 preop( module,	1200,	1199).
 
-preop( '\~',	 150,	 149).
+preop(``,	925,	924).
+preop(`,	930,	929).
+
+preop( '\~',	 300,	 300).
 
 /*---------------------------------------------------------------------------*
  * postop(Operator, Priority, LeftPri)
@@ -1399,30 +1409,37 @@ op(Priority,Specifier,Operator) :-
 	OPCall = (sio:op(Priority,Specifier,Operator)),
 	integer_ok(Priority),
 	atom_ok(Specifier),
-	(   0 =< Priority,
-	    Priority =< 1200,
-	    !
-	;   domain_error(operator_priority,Priority,OPCall)),
-	(   is_op_specifier(Specifier,OpType,LeftAdj,RightAdj),
-	    !
-	;   domain_error(operator_specifier,Specifier,OPCall)),
-	(   atom(Operator), Operator \= []
-	->  OpList = [Operator]
-	;   op_atom_list_ok(Operator,OPCall), OpList = Operator),
-	(   dmember(',',OpList)
-	->  permission_error(modify,operator,',')
-	;   true),
+	( 0 =< Priority,
+	  Priority =< 1200,!
+	  ;   
+	  domain_error(operator_priority,Priority,OPCall)
+	),
+	( is_op_specifier(Specifier,OpType,LeftAdj,RightAdj),!
+	  ;   
+	  domain_error(operator_specifier,Specifier,OPCall)
+	),
+	( atom(Operator), Operator \= [] ->  
+		OpList = [Operator]
+		;   
+		op_atom_list_ok(Operator,OPCall), 
+		OpList = Operator
+	),
+	( dmember(',',OpList) ->  
+		permission_error(modify,operator,',')
+		;   
+		true
+	),
 	op(OpList, Priority, Specifier, OpType, LeftAdj, RightAdj, OPCall).
 
 op([], Priority, Specifier, OpType, LeftAdj, RightAdj, OPCall) :-
 	!.
 op([Operator | Ops], Priority, Specifier, OpType, LeftAdj, RightAdj, OPCall) :-
 
-	%%
-	%% FIXME: Add an operator conflict testing mechanism here
-	%%
+		%%
+		%% FIXME: Add an operator conflict testing mechanism here
+		%%
 
-	%% Call the old version of op in order to add operators to old table
+		%% Call the old version of op in order to add operators to old table
 	pbi_op(Priority,Specifier,Operator),
 	op0(Priority,OpType,LeftAdj,RightAdj,Operator),
 	op(Ops, Priority, Specifier, OpType, LeftAdj, RightAdj, OPCall).

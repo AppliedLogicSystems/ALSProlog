@@ -55,14 +55,6 @@ length([_|Rest],Old,Length) :-
     New is Old+1,
     length(Rest,New,Length).
 
-/*------ Moved to Library (strings.pro) - 11/11/91 - KAB -------
-export asplit0/4.
-asplit0([Char|Rest],Splitter,[Char|R1],String2) :-
-	Char \= Splitter,!,
-	asplit0(Rest,Splitter,R1,String2).
-asplit0([Splitter|Rest],Splitter,[],Rest).
- *----------------------------------------------------------------*/
-
 /*
  * Comparison predicates:
  *   @< /2

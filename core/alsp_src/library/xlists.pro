@@ -8,6 +8,17 @@
 
 module builtins.
 
+export xlist_init/1.
+export xlist_make/3.
+export xlist_unit_c/2.
+export xlist_unit_l/2.
+export xlist_head/2.
+export xlist_tail/2.
+export xlist_append/3.
+export xlist_append/2.
+export xlist_mem/2.
+export xlist_dmem/2.
+
 	/*--------------------------------------
 	 |	xtensible lists are carried
 	 |	around in the form
@@ -141,6 +152,5 @@ xlist_dmem([Item | List], Item) :-!.
 xlist_dmem([_ | List], Item)
 	:-
 	xlist_dmem(List, Item).
-
 
 endmod.

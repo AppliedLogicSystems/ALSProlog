@@ -237,10 +237,14 @@ static struct {int signal; const char *name;} signal_name_list[] = {
     {SIGHUP, "sighup"},
     {SIGQUIT, "sigquit"},
     {SIGTRAP, "sigtrap"},
+#ifdef SIGEMT
     {SIGEMT, "sigemt"},
+#endif
     {SIGKILL, "sigkill"},
     {SIGBUS, "sigbus"},
+#ifdef SIGSYS
     {SIGSYS, "sigsys"},
+#endif
     {SIGPIPE, "sigpipe"},
     {SIGALRM, "sigalrm"},
     {SIGURG, "sigurg"},

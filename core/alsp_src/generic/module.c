@@ -678,13 +678,13 @@ createModuleClosureProcedure(name1, arity, name2)
 
     /* If one was a cutmacro, then up the arity. */
     if (isCutMacro(name1, arity))
-	arity2 = arity + 2;
+		arity2 = arity + 2;
     else
-	arity2 = arity + 1;
+		arity2 = arity + 1;
 
     ent1 = w_nametable[w_namelookup((PWord) cur_mod, name1, arity)];
 
-    /* Where we are going to */
+    	/* Where we are going to */
     ent2 = w_nametable[w_namelookup((PWord) cur_mod, name2, arity2)];
 
     ent1->flags = NFLG_BUILTIN | NMSK_EXPORT | NFLG_BLT_MODCLOSURE;
@@ -695,6 +695,36 @@ createModuleClosureProcedure(name1, arity, name2)
     add_default_proc(name1, arity);
 }
 
+int
+createModCloseProc(tgtmod, name1, arity, name2)
+	int tgtmod;
+    PWord name1;
+    int   arity;
+    PWord name2;
+{
+    ntbl_entry *ent1, *ent2;
+    int   arity2;
+
+    	/* If one was a cutmacro, then up the arity. */
+    if (isCutMacro(name1, arity))
+		arity2 = arity + 2;
+    else
+		arity2 = arity + 1;
+
+		/* nametable entry for the "source" predicate: */
+    ent1 = w_nametable[w_namelookup((PWord) tgtmod, name1, arity)];
+
+		/* nametable entry to which we are mappying the "source" predicate: */
+    ent2 = w_nametable[w_namelookup((PWord) tgtmod, name2, arity2)];
+
+    ent1->flags = NFLG_BUILTIN | NMSK_EXPORT | NFLG_BLT_MODCLOSURE;
+
+
+    /* Don't want to do overflow code on destination, so go to ->code. */
+    ic_install_module_closure(ent1, ent2->code);
+
+    add_default_proc(name1, arity);
+}
 
 #ifdef debugging
 

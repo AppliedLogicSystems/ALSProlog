@@ -1,0 +1,6 @@
+libactivate(builtins,[library,filemisc],
+    [copy_dir_files_nl/3,copy_dir_files_nl/4,copy_fileslist_nl/4,
+        copy_fileslist_nl/5,check_copy_file_nl/4,copy_file_nl/3,
+        copy_stream_nl/3,output_nl/2,comp_times/3,install_file_links/2,
+        install_links0/2,remove_files/1,archive_file/2,move_file/2],
+    []).

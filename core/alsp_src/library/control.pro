@@ -1,9 +1,9 @@
 /*========================================================================*
- |			lib_ctl.pro
+ |			control.pro
  |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
  |		Distribution rights per Copying ALS
  |
- |				Miscellaneous control predicates
+ |			Miscellaneous control predicates
  |
  |	Authors:	Ken Bowen, Kevin Buettner
  |	Date:		1986-91
@@ -13,10 +13,9 @@ module builtins.
 
 export bagOf/3.
 export setOf/3.
-export max/3.
-export min/3.
 
-%:-module_closure(bagOf,3,bagOf).
+:-module_closure(bagOf,3,bagOf).
+:-module_closure(setOf,3,setOf).
 
 /*!---------------------------------------------------------------------
  	bagOf/3
@@ -33,7 +32,6 @@ bagOf(Module,Pattern, Goal, Result)
 	bagof(Module,Pattern,Goal,Result),!.
 bagOf(_,_, _, []).
 
-%:-module_closure(setOf,3,setOf).
 
 /*!---------------------------------------------------------------------
  	setOf/3
@@ -49,15 +47,5 @@ setOf(Module,Pattern, Goal, Result)
 	:-
 	setof(Module,Pattern,Goal,Result),!.
 setOf(_,_, _, []).
-
-max(A,B,C) :- 
-	A0 is A, B0 is B, max0(A0,B0,C).
-max0(A,B,A) :- A >= B,!.
-max0(A,B,B).
-
-min(A,B,C) :- 
-	A0 is A, B0 is B, min0(A0,B0,C).
-min0(A,B,A) :- A =< B,!.
-min0(A,B,B).
 
 endmod.

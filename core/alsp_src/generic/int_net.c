@@ -9,9 +9,13 @@
  |	Author: Ken Bowen
  |		--Derived from BNR code
  *==================================================================*/
+
 #include "defs.h"
 
-void disp_infp	PARAMS((int,PWord,PWord,int,double,double,int,PWord,int,double,double,int,PWord,int,double,double,int));
+#ifdef INTCONSTR
+
+void disp_infp
+PARAMS((int,PWord,PWord,int,double,double,int,PWord,int,double,double,int,PWord,int,double,double,int));
 
 void note_changes	PARAMS((void));
 
@@ -32,7 +36,6 @@ debugconstr()
 #endif /* DEBUGSYS */
 
 
-#if defined(INTCONSTR)
 
 #include "intrv.h"
 #include "freeze.h"     
@@ -63,20 +66,22 @@ extern void bind_point_unfreeze	PARAMS((PWord *,int *,double,int));
 PWord qhead, qend;
 int   qheadt, qendt;
 
+int status = 0;
+
 	/*--- Vars for args to the primitives: ---*/
 double zl,zh,xl,xh,yl,yh,ul,uh,vl,vh;
 int  zpt,xpt,ypt;			/* Interval types: REALKIND, INTEGERKIND, BOOLEANKIND */
-int status = 0;
 
 	/*--- Vars for args to boolean primitives: ---*/
 
 long booleanInput;
 long booleanOutput;
 
-	/*----------------------------------------------------*
-	 | Include the (generated) code for the primitives: 
- 	 *----------------------------------------------------*/
-#include "intrv.c"
+	/*--- Vars for constraint statistics: */
+int ncstrs= 0; 
+int nprops= 0; 
+int niters= 0;  		/* number of primops: this time; */
+int itermax= MAXITERS;  /* max number of primops before failure; */
 
 	/*----------------------------------------------------*
  	 |	BLT("$iter_link_net",  5, ilinknet, "_ilinknet"), 
@@ -103,6 +108,9 @@ ilinknet()
 	w_get_An(&Y, &Yt, 4);
 	w_get_An(&Goal, &Goalt, LINK_POSITION);
 
+		/* Increment count of # times constraint system was called from outside: */
+	ncstrs += 1; 
+
 	/*------------------------------------------------*
 	 |	Check incoming Z,X,Y for correct types      
 	 |	No need to check OpCd, because we create it.
@@ -111,22 +119,6 @@ ilinknet()
 	OK_CSTR_ARG(Z) 
 	OK_CSTR_ARG(X) 
 	OK_CSTR_ARG(Y) 
-
-/********
-#ifndef DoubleType
-
-	OK_CSTR_ARG(Z) 
-	OK_CSTR_ARG(X) 
-	OK_CSTR_ARG(Y) 
-
-#else
-
-	OK_CSTR_ARG(Z) 
-	OK_CSTR_ARG(X) 
-	OK_CSTR_ARG(Y) 
-
-#endif
-***********/
 
 	/*-----------------------------------------------------------------*
 		The queue looks like this:
@@ -166,10 +158,18 @@ ilinknet()
 	qendt  = Goalt;
 	w_install_argn(Goal, LINK_POSITION, 0, WTP_INTEGER);
 
+	niters = 0;
 	if (ilnk_net())
+	{
+		
+		nprops += niters;
 		SUCCEED;
+	}
 	else
+	{
+		nprops += niters;
 		FAIL;
+	}
 }
 
 /*-----------------------------------------------------------------*
@@ -222,7 +222,8 @@ ilinknet()
 
 #define UPDATE_BOOLEAN(V,VT,VL,VH) { long tt;\
 				switch(status & (VL ## change + VH ## change))\
-					{/* boolean becomes a fixed point.  If both bounds change, then fail*/\
+					{/* boolean becomes a fixed point.  If both bounds
+change, then fail*/\
 						case (VL ## change):\
 							tt = booleanOne;\
 							break;\
@@ -352,18 +353,12 @@ update_boolean_x(X,Xt,bO,Goal,IntrvTm)
 	long *bO;
 { 
 	long tt;
-	int ww;
 
-/*	ww = *bO;
-
-	if ((Xt == WTP_UNBOUND) && ((ww & boolean_xchg) > 0))  
-*/
 	if ((Xt == WTP_UNBOUND) && ((*bO & boolean_xchg) > 0))  
 	{
 		/* boolean becomes a fixed point.  
 		   If both bounds change, then fail*/
 
-/*		switch ((ww & boolean_x) > 0) {		*/
 		switch ((*bO & boolean_x) > 0) {		
 			case booleanZero:
 						tt = booleanZero;
@@ -410,39 +405,7 @@ update_boolean_y(Y,Yt,bO,Goal,IntrvTm)
 	SUCCEED;
 }
 
-
-
-/*****
-update_boolean(V,VT,VL,VH) 
-{ 
-	long tt;
-	switch ((VL ## change + VH ## change)) 
-	{		
-		
-
-		case (VL ## change):
-						tt = booleanOne;
-						break;
-		case (VH ## change):
-						tt = booleanZero;
-						break;
-		default:
-						FAIL;
-	}
-	bind_point_unfreeze((PWord *)V,&VT,(double)tt,0);\
-}
-*****/
-
 #endif		/* ------- NCONSTRMACROS ------- */
-
-
-
-
-
-
-
-
-
 
 /*-----------------------------------------------------------------*
  |	ilnk_net()
@@ -459,7 +422,11 @@ ilnk_net()
 
 	while (qheadt != WTP_INTEGER) 
 	{
+		if (niters > itermax)
+			FAIL;
+
 		status = 0;
+
 			/* queue points at the first pop structure: */
 		w_get_argn(&OpCd, &OpCdt, qhead, 1);
 		w_get_argn(&Z, &Zt, qhead, 2);
@@ -480,6 +447,10 @@ ilnk_net()
 	if (debug_system[CSTRPRIM])
 		disp_infp(0,OpCd,Z,Zt,zl,zh,zpt,X,Xt,xl,xh,xpt,Y,Yt,yl,yh,ypt);
 #endif
+
+			/* Increment count of number of primitive constraint operations: */
+
+		niters += 1;
 
 		switch ((int)OpCd) {
 			case 0 :	{ i_unequal(); 		break;}
@@ -581,6 +552,7 @@ ilnk_net()
 
 		w_get_argn(&next, &nextt, qhead, LINK_POSITION);
 
+/*
 		if ((status && redonode) != 0) {
 			if ( nextt != WTP_INTEGER) {
 				w_install_argn(qend, LINK_POSITION, qhead, WTP_STRUCTURE);
@@ -590,6 +562,15 @@ ilnk_net()
 				qhead = next;
 				qheadt = nextt;
 			}
+		}
+*/
+		if (((status && redonode) != 0) && ( nextt != WTP_INTEGER) ) {
+				w_install_argn(qend, LINK_POSITION, qhead, WTP_STRUCTURE);
+				qend = qhead;
+				w_install_argn(qend, LINK_POSITION, 0, WTP_INTEGER);
+
+				qhead = next;
+				qheadt = nextt;
 		}
 		else {
 			w_install_unbound_argn(qhead, LINK_POSITION);
@@ -618,8 +599,13 @@ ilnk_net()
 
 #ifdef DEBUGSYS
 	if (debug_system[CSTRPRIM])
-		disp_infp(0,OpCd,Z,Zt,zl,zh,BOOLEANKIND,X,Xt,xl,xh,BOOLEANKIND,Y,Yt,yl,yh,BOOLEANKIND);
+	
+disp_infp(0,OpCd,Z,Zt,zl,zh,BOOLEANKIND,X,Xt,xl,xh,BOOLEANKIND,Y,Yt,yl,yh,BOOLEANKIND);
 #endif
+			/* Increment count of number of primitive constraint operations: */
+/*		nprops += 1;     */
+		niters += 1;
+
 
 		switch ((int)OpCd) {
 			case 23 :	{ booleanOutput=op_conjunction[booleanInput]; break;}
@@ -633,7 +619,8 @@ ilnk_net()
 
 #ifdef DEBUGSYS
 	if (debug_system[CSTRPRIM])
-		disp_infp(1,OpCd,Z,Zt,zl,zh,BOOLEANKIND,X,Xt,xl,xh,BOOLEANKIND,Y,Yt,yl,yh,BOOLEANKIND);
+	
+disp_infp(1,OpCd,Z,Zt,zl,zh,BOOLEANKIND,X,Xt,xl,xh,BOOLEANKIND,Y,Yt,yl,yh,BOOLEANKIND);
 #endif
 
 #ifndef NCONSTRMACROS
@@ -722,9 +709,19 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 
 	/* ------------------------------------------------------------*
 	   Now update the interval endpoints in the interval structure;
+	   IF (the interval structure) is more recent than
+		  the latest CP
+	   THEN 
+			update the interval structure destructively in place
+	   ELSE
+
 	   -- Make a new UIA struct with the new values, and do a
 		  trailed mangle of the new UIA in for the old.
 
+	   First, MUST do a check to make sure there is enough space on
+	   the heap for the new UIA;
+
+	   THEN
 	   IntrvTm should be intvl(Type,Var,UsedBy,L,U,UIA);
 	   First create a physically new uia, and install the interval 
 	   bounds and kind in this new UIA: 
@@ -738,7 +735,8 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 #ifdef DEBUGSYS
 	if (debug_system[CSTRUPTM]) {
 		printf("UPDATE_PROP-TM:[L=%g H=%g K=%d]intuia=%0x wm_H=%0x wm_HB=%0x\n",
-								L,H,IKind,(int)IntUIA,(int)wm_H,(int)wm_HB);
+							
+L,H,IKind,(int)IntUIA,(int)wm_H,(int)wm_HB);
 		pbi_cptx();
 	}
 #endif /* DEBUGSYS */
@@ -764,8 +762,10 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 	while ( UList_t != WTP_SYMBOL ) 
 	{
 		w_get_car(&LHead,&LHead_t,UList);
+		if (LHead != Goal) {
 		w_get_argn(&Link, &Linkt, LHead, LINK_POSITION);
-/* printf("Top-while:UList_t=%d UList=%x Linkt=%d Link=%x\n",UList_t,(int)UList,Linkt,(int)Link); */
+							/* printf("Top-while:UList_t=%d UList=%x Linkt=%d
+							   Link=%x\n",UList_t,(int)UList,Linkt,(int)Link); */
 		if (Linkt == MTP_UNBOUND)
 		{
 			/* ---------------------------------------------------------*
@@ -786,21 +786,26 @@ update_propagate(L,H,Var,Type,IntrvTm,Goal, IKind)
 		 	 * ---------------------------------------------------------*/
 
 #ifdef DEBUGSYS
-	if (debug_system[CSTRUPAD])
-		printf("Updateprop: adding:LHead=%x qhead=%x qend=%x\n",(int)LHead,(int)qhead,(int)qend);
+						if (debug_system[CSTRUPAD])
+							printf("Updateprop: adding:LHead=%x qhead=%x qend=%x\n",
+											(int)LHead,(int)qhead,(int)qend);
 #endif /* DEBUGSYS */
 
 			w_install_argn(qend, LINK_POSITION, LHead, WTP_STRUCTURE);
 			qend = LHead;
 			w_install_argn(qend, LINK_POSITION, 0, WTP_INTEGER);
 		}
+		}
 		w_get_cdr(&UList,&UList_t,UList);
-/* if (UList_t == WTP_SYMBOL) printf("Bot-while:UList_t=%d UList=%x \n",UList_t,(int)UList); */
+								/* if (UList_t == WTP_SYMBOL) 
+									printf("Bot-while:UList_t=%d UList=%x \n",
+										UList_t,(int)UList); */
 
 	} /* while */
 #ifdef DEBUGSYS
-	if (debug_system[CSTRUPXT])
-		printf("Exit Updateprop: qhead=%x qend=%x\n",(int)qhead,(int)qend);
+						if (debug_system[CSTRUPXT])
+							printf("Exit Updateprop: qhead=%x qend=%x\n",
+												(int)qhead,(int)qend);
 #endif /* DEBUGSYS */
 
 } /* update_propagate */
@@ -997,9 +1002,54 @@ extract_bool_bds(DelVar, DelVar_t, Which, bI)
 }
 
 
+	/*--- Vars for constraint statistics: */
 
+int reset_cstr_ctrs PARAMS (( void ));
 
+int
+reset_cstr_ctrs()
+{
+	 ncstrs= 0; 
+	 nprops= 0; 
 
+	 SUCCEED;
+}
 
+int get_cstr_ctrs_vals PARAMS (( void ));
+
+int
+get_cstr_ctrs_vals()
+{
+	PWord c1, c2;
+	int   c1t, c2t;
+
+	w_get_An(&c1, &c1t, 1);
+	w_get_An(&c2, &c2t, 2);
+
+	if ((w_unify(c1, c1t, ncstrs, WTP_INTEGER))
+		&& (w_unify(c2, c2t, nprops, WTP_INTEGER) ))
+		SUCCEED;
+	else
+		FAIL;
+}
+
+int set_max_iters_val PARAMS (( void ));
+
+int
+set_max_iters_val()
+{
+	PWord val;
+	int   tp;
+
+	w_get_An(&val, &tp, 1);
+	if (tp != WTP_INTEGER)
+		FAIL;
+	if (val <= 0)
+		FAIL;
+
+	itermax = val;
+
+	SUCCEED;
+}
 
 #endif /* defined(INTCONSTR) */

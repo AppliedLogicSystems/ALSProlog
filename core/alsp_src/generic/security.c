@@ -6,6 +6,7 @@
  | and hardware-key protected versions of ALS Prolog.
  *=============================================================*/
 
+#include <time.h>
 #include "security.h"
 
 #include "defs.h"
@@ -361,11 +362,43 @@ void enable_security(void)
     }
 }
 
+#define DIEDAY 20
+#define DIEMON 8	/* jan = 0, feb = 1, .... */
+/* #define DIEYEAR 96 */
+#define DIEYEAR 0
+
 void check_security(void)
 {
 #ifdef HARDWARE_KEY
     if (security_state == security_enabled) check_hardware_key();
 #endif
+/* kill Mac compiler::::
+	time_t tv;
+	struct tm *tp;
+
+    tv = time(0L);
+	tp = localtime(&tv);
+
+	if (DIEYEAR > 0 && (
+			(tp->tm_year > DIEYEAR) ||
+		 	(tp->tm_mon > DIEMON)  ||
+		 	((tp->tm_mon == DIEMON)  && (tp->tm_mday >= DIEDAY)))  )
+	{
+    PI_app_printf(PI_app_printf_error,
+"\
+------------------------------------------------------------------\n\
+Sorry: Demonstration/Evaluation time limit [%d/%d/%d] exceeded.\n\
+Please contact ALS to purchase unrestricted version.\n\
+Exiting ALS Prolog.\n\
+------------------------------------------------------------------\n\
+",DIEYEAR,DIEMON+1,DIEDAY
+    );
+	exit(1);
+	}
+*/
+
+
+
 }
 
 /* 

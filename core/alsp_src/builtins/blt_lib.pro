@@ -9,6 +9,8 @@
  | Revision per new library mechanism: Kevin A. Buettner
  *========================================================*/
 
+:- curmod(CM),write('Entering blt_lib.pro: curmod'=CM),nl.
+
 :-libactivate(builtins,['library',misc_io],
     [read_terms/1,read_terms/2, read_terms_pos/1,
 	 read_terms_pos/2, read_terms_vn/2, read_lines/2,
@@ -21,7 +23,6 @@
 
 :-libactivate(builtins,['library',listutl2],
     [deleteNth/3,change_nth/3,nth_tail/4,at_most_n/3,
-	 %%  nth/3, position/3, position/4,
 		get_list_tail/3,list_delete/3,sublist/4,
 		subst_nth/4,last/2],[]).
 
@@ -63,7 +64,9 @@
 :-libactivate(builtins,['library',commal],
 				[flatten_comma_list/2, build_comma_list/2],[]).
 
-:-libactivate(builtins, ['library',misc_db],
+:-
+curmod(CM),write('IN LIBACT for misc_db -  curmod'=CM),nl,
+	libactivate(builtins, ['library',misc_db],
 	[assert_all/2,assert_all_refs/3,erase_all/1,
 	 abolish_list/2, retract_all/2, retract_each/2],
 	[module_closure(assert_all,1),
@@ -165,7 +168,8 @@
 			[cref/1,cref/2,cref_shell/0], [] ).
 
 :-libactivate(ttyshlmk,['library',ttyshlmk], 
-			[mk_tty_shell_cl/0,mk_tty_shell_list/1,mk_tty_shell/1,ttyshlmk/1], [] ).
+			[mk_tty_shell_cl/0,mk_tty_shell_list/1,mk_tty_shell/1,
+			 ttyshlmk/1,setup_ttyshl/0,setup_ttyshl/2 ], [] ).
 
 :-libactivate(cref,['library',crefxtra], 
 		[union_files_calls/2,
