@@ -159,8 +159,13 @@ proc add_tools_menu {menubar type window} {
 	menu $menubar.tools -tearoff $TearOff -title Tools
 
 	if {$type == "listener"} then {
-		$menubar.tools add checkbutton \
-			-label Debugger -underline 0 -command exec_toggle_debugwin -variable proenv(debugwin)
+
+#		$menubar.tools add checkbutton \
+#			-label Debugger -underline 0 -command exec_toggle_debugwin -variable proenv(debugwin)
+
+		$menubar.tools add command \
+			-label Debugger -underline 0 -command ensure_db_showing 
+
 		$menubar.tools add separator 
     	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} -state $proenv(edition)
     	$menubar.tools add command -label "Tcl Debugger$elipsis" -underline 0 -command {re tcl_debugger} -state disabled

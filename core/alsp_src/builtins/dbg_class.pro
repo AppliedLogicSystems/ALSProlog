@@ -293,13 +293,17 @@ source_trace_mgrAction(raise, State)
 source_trace_mgrAction(clear_decorations, State)
 	:-
 	accessObjStruct(tcl_doc_path, State, TclWin),
-	accessObjStruct(head_tag, State, PrevHT),
-	(PrevHT = i(PSL,_,_,_) ->
-		Line = PSL
+	(TclWin \= nil ->
+		accessObjStruct(head_tag, State, PrevHT),
+		(PrevHT = i(PSL,_,_,_) ->
+			Line = PSL
+			;
+			Line = 1
+		),
+		tcl_call(shl_tcli, [clear_src_win_decorations, TclWin, Line], _)
 		;
-		Line = 1
-	),
-	tcl_call(shl_tcli, [clear_src_win_decorations, TclWin, Line], _).
+		true
+	).
 
 	%% Handle [user] and non-file windows separately (add clause):
 source_trace_mgrAction(start_src_trace(BaseFileName, SrcFilePath, FCG), State)

@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.80 1999/02/20 22:30:38 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.81 1999/02/24 23:10:56 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -991,6 +991,25 @@ proc toggle_debugwin {} {
 	exec_toggle_debugwin
 }
 
+#proc exec_toggle_debugwin {} {
+#	global array proenv
+#	if {$proenv(debugwin) == 0} then {
+#		hide_debugwin
+#		set FlagVal off
+#	} else {
+#		if {[winfo exists .debugwin] == 0} then {
+#			vTclWindow.debugwin ""
+#			show_debugwin
+#		} else {
+#			show_debugwin
+#		}
+#		set FlagVal on
+#	}
+#	send_prolog debugger_mgr toggle_visibility
+##	prolog call builtins do_set_prolog_flag -atom debug -atom $FlagVal
+#	set proenv(debug) $FlagVal
+#}
+
 proc exec_toggle_debugwin {} {
 	global array proenv
 	if {$proenv(debugwin) == 0} then {
@@ -1006,7 +1025,7 @@ proc exec_toggle_debugwin {} {
 		set FlagVal on
 	}
 	send_prolog debugger_mgr toggle_visibility
-	prolog call builtins do_set_prolog_flag -atom debug -atom $FlagVal
+#	prolog call builtins do_set_prolog_flag -atom debug -atom $FlagVal
 	set proenv(debug) $FlagVal
 }
 

@@ -325,7 +325,6 @@ alsdev(Shared, ALS_IDE_Mgr)
 
 	initial_flags_settings,
 	initial_misc_settings,
-	alsdev:check_alsdev_flags,
 
 	retract(save_clinfo(CLInfo)),
 	ss_load_dot_alspro(CLInfo),
@@ -343,9 +342,11 @@ alsdev(Shared, ALS_IDE_Mgr)
 		;
 		change_debug_io(debugwin)
 	),
-	(current_prolog_flag(debug, on) ->
-		tcl_call(shl_tcli,[ensure_db_showing],_) ; true
-	),
+%	(current_prolog_flag(debug, on) ->
+%		tcl_call(shl_tcli,[ensure_db_showing],_) ; true
+%	),
+	current_prolog_flag(debug, DebugValue),
+	tcl_call(shl_tcli, [set_tcl_ga,proenv,debug,DebugValue], _),
 
 	get_cwd(CurDir),
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
@@ -731,15 +732,20 @@ alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom, DebugVis)
 	(dmember(window_position('.debugwin', DebugGeom), Items) ->
 		true ; DebugGeom = [] ),
 	(dmember(visible('.debugwin',DebugVis), Items) -> 
-		(DebugVis = 1 ->
-			set_prolog_flag(debug,on)
-			;
-			set_prolog_flag(debug,off)
-		)
-		; 
-		DebugVis = 0,
-		set_prolog_flag(debug,off)
+		true
+		;
+		DebugVis = 0
 	).
+%	(dmember(visible('.debugwin',DebugVis), Items) -> 
+%		(DebugVis = 1 ->
+%			set_prolog_flag(debug,on)
+%			;
+%			set_prolog_flag(debug,off)
+%		)
+%		; 
+%		DebugVis = 0,
+%		set_prolog_flag(debug,off)
+%	).
 
 strip_tags([], []). 
 strip_tags([(_ = V0) | TVs], [V | Vs])
@@ -896,12 +902,6 @@ save_prolog_flags
 		 prolog_value(debug_settings,DebugSettings)
 		]).
 
-
-check_alsdev_flags
-	:-
-	current_prolog_flag(debug, DebugFlag),
-	switch_debugging_setup(DebugFlag).
-
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			EDIT (FILE) WINDOWS					%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1026,8 +1026,9 @@ fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,
 
 als_ide_mgrAction( change_prolog_flag(Flag,Value), State)
 	:-
-	tcl_call(shl_tcli, [set_tcl_ga,proenv,Flag,Value], _),
-	check_for_debugger_toggle(Flag,Value).
+	tcl_call(shl_tcli, [set_tcl_ga,proenv,Flag,Value], _).
+
+%	check_for_debugger_toggle(Flag,Value).
 
 check_for_debugger_toggle(debug,on)
 	:-!,
@@ -1278,14 +1279,14 @@ init_tcl_debugger(TclInterp, ALSTCLPATH)
 	tcl_call(TclInterp, [source, PDFPath], _),
 	tcl_call(TclInterp, [debugger_init], _).
 
-setup_for_debugging(Which)
-	:-
-	xconsult:change_source_level_debugging(Which),
-	builtins:do_set_prolog_flag(debug,Which).
-
-switch_debugging_setup(Which)
-	:-
-	tcl_call(shl_tcli, [switch_debug_setup,Which], _).
+%setup_for_debugging(Which)
+%	:-
+%	xconsult:change_source_level_debugging(Which),
+%	builtins:do_set_prolog_flag(debug,Which).
+%
+%switch_debugging_setup(Which)
+%	:-
+%	tcl_call(shl_tcli, [switch_debug_setup,Which], _).
 
 endmod.   % alsdev.
 
@@ -1508,7 +1509,12 @@ start_src_trace(Flag,BaseFileName, SrcFilePath, CG, ALSMgr, SrcMgr)
 	send(DbgrMgr, insert_by_fcg(CG, SrcMgr)),
 	send(DbgrMgr, set_value(mrfcg, CG)),
 	!,
-	send(SrcMgr, start_src_trace(BaseFileName, SrcFilePath, CG)).
+	current_prolog_flag(debug, DBF),
+	(DBF = on ->
+		send(SrcMgr, start_src_trace(BaseFileName, SrcFilePath, CG))
+		;
+		true
+	).
 
 inverted_index(LineIndex, InvertedLineIndex)
 	:-
@@ -1570,6 +1576,8 @@ debug_settings_info(DebugSettings)
 	DebugSettings = [stream_opts=DBGOPTs | Leashing].
 
 export set_debug_settings_info/1.
+set_debug_settings_info([])
+	:-!.
 set_debug_settings_info(DebugSettings)
 	:-
 	(dmember( stream_opts=DBGOPTs, DebugSettings) ->
@@ -1629,8 +1637,8 @@ vv_showGoalToUserWin(Port,Box,Depth, Module, Goal, DBGMGR, Response)
 	:-
 	accessObjStruct(mrfcg, DBGMGR, CG),
 	(CG > 0 ->
-		send(DBGMGR,  get_mrfcg(CG, SrcMgr)),
-		send(SrcMgr,  ensure_window_open)
+		send(DBGMGR,  get_mrfcg(CG, SrcMgr))
+%		send(SrcMgr,  ensure_window_open)
 		;
 		true
 	),
@@ -1904,10 +1912,14 @@ re_color_port(redo, _, _) :-!.
 re_color_port(Port, MRFCG, SrcMgr)
 	:-
 	accessObjStruct(tcl_doc_path, SrcMgr, Win),
-	catenate(Win, '.text', TextWin),
-	port_color(Port, Color),
-	!,
-	configure_tag(call_tag, TextWin,['-background',Color]).
+	(Win \= nil ->
+		catenate(Win, '.text', TextWin),
+		port_color(Port, Color),
+		!,
+		configure_tag(call_tag, TextWin,['-background',Color])
+		;
+		true
+	).
 
 	%blue:
 port_color(call, '#00acff').
