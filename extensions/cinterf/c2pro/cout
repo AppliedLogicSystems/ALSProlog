@@ -274,7 +274,7 @@ output_func0(Name,DSpec,ADeclt,Params,PRetType,State)
 	printf(OutStream,'\nret(\'%s %s\')/%t=\'%t\'(',[DSpecStr,ADecltStr,PRetType,Name]),
 	output_params(Params,State),
 	accessC2P(inFile,State,FName),
-	pathPlusFile(_,File,FName),
+	path_directory_tail(FName,_,File),
 	!,
 	printf(OutStream,')/\'%t\'.\n',[File]).
 output_func0(Name,_,_,_,_,State)
@@ -312,7 +312,7 @@ output_gvar(Name,DSpec,Declt,ADeclt,PType,State)
 	dspec_to_str(DSpec,DSpecStr),
 	adeclt_to_str(ADeclt,ADecltStr),
 	accessC2P(inFile,State,FName),
-	pathPlusFile(_,File,FName),
+	path_directory_tail(FName,_,File),
 	!,
 	accessC2P(outStream,State,OutStream),
 	printf(OutStream,'\nals_gvar(\'%t\',\'%s %s\',%t)/\'%t\'.\n\n',
