@@ -158,7 +158,8 @@ proc vTclWindow.about {base} {
     ###################
     toplevel $base -class Toplevel
     wm focusmodel $base passive
-    wm geometry $base 171x205+323+258
+    wm geometry $base 171x205
+    center $base
     wm maxsize $base 1137 870
     wm minsize $base 1 1
     wm overrideredirect $base 0
