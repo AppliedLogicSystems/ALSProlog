@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.63 1998/11/09 21:27:28 choupt Exp $"
+#|		"$Id: alsdev.tcl,v 1.64 1998/11/15 02:41:49 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -889,26 +889,6 @@ proc save_fonts_and_colors { Window } {
 ##                                             ##
 ##			Dynamic Prolog Flags			   ##
 #################################################
-proc show_ide_settings {} {
-	global array proenv
-
-	Window show .ide_settings
-}
-
-proc show_dynamic_flags {} {
-	global array proenv
-
-	if {[winfo exists .dyn_flags]} then {
-		Window show .dyn_flags
-	} else {
-		Window show .dyn_flags
-		prolog call builtins changable_flags_info -var InfoList
-		foreach info $InfoList {
-			create_dyn_flag_entry $info
-		}
-	}
-}
-
 proc create_dyn_flag_entry { info } {
 	global array proenv
 
@@ -958,9 +938,6 @@ proc change_prolog_flags {} {
 #####			STATIC FLAGS				#####
 #################################################
 
-proc show_static_flags {} {
-	Window show .static_flags
-}
 
 #################################################
 #####				DEBUGGER				#####

@@ -127,11 +127,11 @@ proc add_prolog_menu {menubar type window} {
 
     	$menubar.prolog add separator
 		$menubar.prolog add command \
-			-label "IDE Settings$elipsis" -underline 0 -command {re show_ide_settings}
+			-label "IDE Settings$elipsis" -underline 0 -command {re "Window show .ide_settings"}
 		$menubar.prolog add command \
-			-label "Dynamic Flags$elipsis" -underline 0 -command {re show_dynamic_flags}
+			-label "Dynamic Flags$elipsis" -underline 0 -command {re "Window show .dyn_flags"}
 		$menubar.prolog add command \
-			-label "Static Flags$elipsis" -underline 1 -command {re show_static_flags}
+			-label "Static Flags$elipsis" -underline 1 -command {re "Window show .static_flags"}
 
 #    	$menubar.prolog add separator
 #		$menubar.prolog add command \
