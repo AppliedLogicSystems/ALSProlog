@@ -2792,8 +2792,8 @@ stream_is_ready(buf, usec_to_wait)
 int
 sio_simple_select()
 {
-    PWord v1, v2, st;
-    int t1, t2, stt, wait_val;
+    PWord v1, v2, v3, st;
+    int t1, t2, t3, stt, wait_val;
 	fd_set rfds, wfds, efds;
 	struct timeval wait_time;
 	int bfd, nfds = 0;
@@ -2802,6 +2802,10 @@ sio_simple_select()
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
+    w_get_An(&v3, &t3, 3);
+
+    if ((t3 != WTP_UNBOUND) && (t2 != WTP_INTEGER) ) 
+		FAIL;
 
 	/* If v2 is a real, convert to integer: */
 #ifdef DoubleType
@@ -2854,7 +2858,8 @@ sio_simple_select()
 	else
 		rrr = selectsocket(nfds+1, &rfds, &wfds, &efds, NULL);
 
-	if (rrr  >= 0)
+/*	if (rrr  >= 0) */
+    if (w_unify(v3, t3, (PWord) rrr, WTP_INTEGER))
 		SUCCEED;
 	else
 		FAIL;
