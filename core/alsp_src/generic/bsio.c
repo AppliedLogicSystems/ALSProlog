@@ -2609,6 +2609,8 @@ sio_fork()
 
     w_get_An(&v1, &t1, 1);
 
+    signal(SIGCHLD, SIG_IGN);
+
     if (t1 != WTP_INTEGER && t1 != WTP_UNBOUND) {
 	FAIL;
 	}
