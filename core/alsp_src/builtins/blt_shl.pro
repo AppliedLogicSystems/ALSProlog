@@ -50,8 +50,6 @@ start_shell0(DefaultShellCall)
 	assert(save_clinfo(CLInfo)),
 	output_system_banner(CLInfo),
 
-	init_als_shl_mgr,
-
 	sys_searchdir(ALSDIRPath),
 	split_path(ALSDIRPath, ALSDIRPathList),
 	dappend(ALSDIRPathList, [library,'objects.pro'], ObjPathList),
@@ -97,6 +95,7 @@ setup_als_shl_mgr(MgrObject)
 		], 
 		MgrObject).
 
+:- init_als_shl_mgr.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% "Early" shell setup support routines
