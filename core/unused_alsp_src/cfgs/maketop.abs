@@ -12,7 +12,11 @@ schema([
 	cmnt(0),
 	srcdir 		= '@srcdir@',
 	'BUILDS'	= ['bld-port','bld-natv'],
-	'PHONY': all,
+	case(&(context_name), [
+	    (mac:([
+		'PHONY': all])),
+	    (_:([
+		'.PHONY': all]))]),
 	rule(all),
 	rule(wins),
 	rule(testrun),
