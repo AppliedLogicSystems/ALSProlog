@@ -1,0 +1,74 @@
+<HTML>
+<HEAD>
+<TITLE>'=..'/2</TITLE>
+</HEAD><BODY>
+<A NAME="82df4103"></A><B>‘=..’/2
+<P></P>
+<A NAME="82df4863"></A><A NAME="a24660bd"></A></B>=../2  <A NAME="84bd4546"></A>   <A NAME="84bd454d"></A> –  translates between lists and terms
+<P></P>
+<A NAME="a24660b4"></A><B>FORMS
+<P></P>
+<A NAME="a24660b5"></A></B>Term  =.. List
+<P></P>
+<A NAME="a24660b6"></A><B>DESCRIPTION
+<P></P>
+<A NAME="a24660b7"></A></B>Either Term or List must be instantiated to a non-variable term. When Term is instantiated to a constant, List will be unified with the singleton list whose element is Term. If Term is a structured term, then List will be unified with a list whose head is the principal functor of Term and whose tail is the list of arguments in Term. 
+<P></P>
+<A NAME="a24660b8"></A>When List is instantiated to a singleton list, whose element is an atom, then Term will be unified with the element. If List has at least two elements, the first of which is an atom, then Term will be unified with a term whose principal functor is the head of List and whose arguments are the remaining elements of List in order.  This predicate is commonly known as univ. 
+<P></P>
+<A NAME="a24660ba"></A><B>EXAMPLES
+<P></P>
+<A NAME="a24660bb"></A></B>?- my_pred(tom,A+B,f(X)) =..[Functor|Args]. 
+<P></P>
+<A NAME="a24660bc"></A>Functor = my_pred 
+<P></P>
+<A NAME="a2466821"></A>Args = [tom,A+B,f(X)] 
+<P></P>
+<A NAME="a2466818"></A>A = _2 
+<P></P>
+<A NAME="a2466819"></A>B = _4 
+<P></P>
+<A NAME="a246681a"></A>X = _8 
+<P></P>
+<A NAME="a246681b"></A>
+<P></P>
+<A NAME="a246681c"></A>yes. 
+<P></P>
+<A NAME="a246681d"></A>?- X =.. [-,3,1]. 
+<P></P>
+<A NAME="a246681e"></A>X = 3-1 
+<P></P>
+<A NAME="a246681f"></A>
+<P></P>
+<A NAME="a2466820"></A>yes. 
+<P></P>
+<A NAME="a246669e"></A>?- 1 =.. [1]. 
+<P></P>
+<A NAME="a2466695"></A>
+<P></P>
+<A NAME="a2466696"></A>yes. 
+<P></P>
+<A NAME="a2466697"></A><B>ERRORS 
+<P></P>
+<A NAME="a2466698"></A></B>=../2 fails if: 
+<P></P>
+<A NAME="a2466699"></A><OL><LI> Neither Term nor List is instantiated
+<P></P>
+<A NAME="a246669a"></A><LI> List is not a proper list whose head is an atom
+<P></P>
+<A NAME="a246669b"></A><LI> List is unistantiated and Term is not an atom or a structure.
+<P></P>
+<A NAME="a246669c"></A></OL><B>NOTES
+<P></P>
+<A NAME="a246669d"></A></B>The ISO Prolog Standard requires that thes above error be thrown when the
+arguments cannot be evaluated a for these operators.  At this time, ALS Prolog does
+not conform to this requirement.
+<P></P>
+<A NAME="a24666c9"></A><B>SEE ALSO 
+<P></P>
+<A NAME="a24666c0"></A></B>functor/3, arg/3, 
+<P></P>
+<A NAME="a24666c1"></A>[Bowen 91, 7.6], [Bratko 86, 7.2], [Sterling 86, 9.2]. 
+<P></P>
+</BODY>
+</HTML>
