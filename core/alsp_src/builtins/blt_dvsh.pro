@@ -43,6 +43,7 @@ alsdev
 
 	tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
 	tcl_call(shl_tcli, [source, ALSDEVTCL], _),
+		%% At this point, the windows have been created;
 
 	open(tk_win(shl_tcli, '.topals.txwin.text'), read, ISS, 
 		[alias(shl_tk_in_win)
@@ -51,6 +52,18 @@ alsdev
 	open(tk_win(shl_tcli, '.topals.txwin.text'), write, OSS, 
 		[alias(shl_tk_out_win)
 		]),
+	set_associated_output_alias(shl_tk_in_win, shl_tk_out_win),
+	catenate('WaitForLine','.topals.txwin.text',WaitVar),
+	catenate('DataLine','.topals.txwin.text',DataVar),
+
+	tcl_call(shl_tcli, [set,WaitVar,0],_),
+	tcl_call(shl_tcli, [set,DataVar,""],_),
+	tcl_call(shl_tcli, 
+		[set_top_bindings,'.topals.txwin.text',shl_tk_in_win,WaitVar,DataVar],_),
+
+%catenate(wait_loop,'.topals.txwin.text',WaitLoop),
+%tcl_call(shl_tcli,[proc,WaitLoop,[],[
+
 
     sio:set_input(ISS),
     sio:set_output(OSS),

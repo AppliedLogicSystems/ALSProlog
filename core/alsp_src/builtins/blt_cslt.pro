@@ -365,7 +365,14 @@ exec_consult(user, FCOpts)
 	adjust_recon_flag(FCOpts),
 	load_source(user,user,_),
 	mangle(12, FCOpts, user),
-	set_reconsult_flag(1).
+	set_reconsult_flag(1),
+
+	sio:stream_or_alias_ok(user_input, Stream),
+	sio:set_stream_token_list(Stream,[]),
+	sio:set_stream_extra(Stream,''),
+	sio:sio_reset_eof(Stream).
+
+%pbi_write('EXITING EXEC_CONSULT/2'),pbi_nl,pbi_ttyflush.
 
 exec_consult(BaseFile, FCOpts)
 	:-
