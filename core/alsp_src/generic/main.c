@@ -57,10 +57,6 @@
 #include "ctype.h"
 #endif
 
-#ifdef UNIX
-#include <sys/param.h>
-#endif
-
 #include "main.h"
 #include "version.h"
 #include "pckg.h"

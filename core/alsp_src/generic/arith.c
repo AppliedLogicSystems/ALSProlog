@@ -36,22 +36,12 @@
 
 #elif defined(UNIX)
 #include <sys/types.h>
-#include <sys/param.h>
-
 #endif
 
 #include "fpbasis.h"
 
 #include <time.h>
 #include <setjmp.h>
-
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-
-#ifdef HAVE_MACHINE_PARAM_H
-#include <machine/param.h>
-#endif
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
