@@ -415,10 +415,12 @@ proc save_check {w} {
 		} else {
 			set icon warning
 		}
+		grab .document_save_dialog
 		set answer [tk_dialog .document_save_dialog "" \
 			"Save changes to the document \"$title\" before closing?" \
 			$icon \
 			2 "Don't Save" "Cancel" "Save"]
+		grab release .document_save_dialog
 		if {$answer == 2} then {
 			set result [document.save $w]
 		} else {
