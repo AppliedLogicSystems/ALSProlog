@@ -2550,7 +2550,7 @@ int
 sio_fork()
 {
     PWord v1;
-    int   t1;
+    int   t1, pid;
 
     w_get_An(&v1, &t1, 1);
 

@@ -449,6 +449,7 @@ static struct blt_struct {
 
 #ifdef REXEC
 	BLT("sio_rexec", 7, sio_rexec, "_sio_rexec"),
+	BLT("sio_fork", 1, sio_fork, "_sio_fork"),
 #endif /* REXEC */
 
 	BLT("sio_generic_open", 5, sio_generic_open, "_sio_generic_open"),
