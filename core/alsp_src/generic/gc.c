@@ -60,7 +60,7 @@ static unsigned long *marks;
 
 #ifndef MTP_CONST
 		/* 88K */
-#define ISPTR(h)   (!(((long) (h)) & (MTP_INT | MTP_SYM) & ~MTP_BGND))
+#define ISPOINTER(h)   (!(((long) (h)) & (MTP_INT | MTP_SYM) & ~MTP_BGND))
 #define ISFENCE(v) (((v) & MTP_TAGMASK) == MTP_FENCE)
 #define ISUIA(v)   ((v) & ((MTP_DOUBLE & MTP_UIA) & ~MTP_BGND))
 #define ISCONST(h) (((long) (h)) & (MTP_INT | MTP_SYM) & ~MTP_BGND)
@@ -68,7 +68,7 @@ static unsigned long *marks;
 #define BIAS	   (EBIAS/4)
 
 #else  /* MTP_CONST */
-#define ISPTR(h)   ((((long) (h)) & MTP_TAGMASK) != MTP_CONST)
+#define ISPOINTER(h)   ((((long) (h)) & MTP_TAGMASK) != MTP_CONST)
 #define ISFENCE(v) (((v) & MTP_CONSTMASK) == MTP_FENCE)
 #define ISUIA(v)   (((v) & MTP_CONSTMASK) == MTP_UIA)
 #define UIAVAL(v)  ((MUIA(v)) >> 2)
@@ -164,7 +164,7 @@ gc()
     long *b;
     long *ap;
     long *apb;
-    long *tr, *tr2;
+    long *tr /*, *tr2 */;
     long *oldest_ap;
     Code *ra;			/* return address */
     register int i;
@@ -534,7 +534,7 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 		    }
 		    else {
 				v = val_at(h);
-				if (ISPTR(v) && h == TOPTR(v)) {
+				if (ISPOINTER(v) && h == TOPTR(v)) {
 			    	val_at(nh) = ((long) nh) | (v & MTP_TAGMASK);
 				}
 				else {
@@ -668,7 +668,7 @@ rev(lo, hi, loc, targ)
     long  v;
 
     v = val_at(loc);
-    if (ISPTR(v)
+    if (ISPOINTER(v)
 #ifndef MTP_CONST
 				|| ISUIA(v)
 #endif /* MTP_CONST */
@@ -678,7 +678,7 @@ rev(lo, hi, loc, targ)
 	    	val_at(loc) = val_at(ptr);
 	    	val_at(ptr) = REVERSEIT(targ, v);
 		}
-    } /* if (ISPTR(v) ...) */
+    } /* if (ISPOINTER(v) ...) */
 #ifdef MTP_CONST
     else if ((v & MTP_CONSTMASK) == MTP_UIA) {
 		ptr = wm_heapbase + UIAVAL(v);

@@ -515,7 +515,9 @@ max(x, y)
     return (x < y) ? y : x;
 }
 #else  /* MaxFunc */
+#ifndef max
 #define max(a,b) ((a)<(b) ? (b) : (a))
+#endif
 #endif /* MaxFunc */
 
 /* Define the ASCII values for carrage returns and line feeds.
