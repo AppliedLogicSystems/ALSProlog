@@ -171,7 +171,7 @@ PWord *gr_SPB, *gr_HB, *gr_TR;
 	 *-------------------------------------------------*/
 
 #define DDVVB(WW,lnn,r,f) \
-			printf("%s@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x f=%x[_%lu]\n",		\
+			printf("%s--@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x f=%x[_%lu]\n",		\
 				WW,lnn, 													\
 				(int)r,(long)(((PWord *) r) - wm_heapbase),(int)mr_TR-1,	\
 				(int)f,(long)(((PWord *) f) - wm_heapbase)); 
@@ -179,7 +179,7 @@ PWord *gr_SPB, *gr_HB, *gr_TR;
 #define	MMTCH(f) printf("   match is delay [f=%x[_%lu]]\n", 				\
 						  (int)f,(long)(((PWord *) f) - wm_heapbase));	   
 
-void ck_intvl_punch   PARAMS((PWord, PWord, int));
+int ck_intvl_punch   PARAMS((PWord, PWord, int));
 
     /*-------------------------------------------------*
 	 |	ck_intvl_punch - used during variable binding,
@@ -193,7 +193,7 @@ void ck_intvl_punch   PARAMS((PWord, PWord, int));
 	 |	the binding by creating appropriate constraints
 	 |	which run instead...
 	 *-------------------------------------------------*/
-void
+int
 ck_intvl_punch(r, fv, ft)
 	PWord r,fv;
 	int ft;
@@ -216,7 +216,9 @@ ck_intvl_punch(r, fv, ft)
 
 	if ((mf == TK_INTVL) && (mfa == 5)) {
 		w_install_argn(r3, 5, fv, ft);
+		return 1;
 	}
+		return 0;
 }
 
 #ifdef FREEZE
@@ -268,13 +270,16 @@ ck_intvl_punch(r, fv, ft)
   if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 		\
 	if ( CHK_DELAY(r) ) { 								\
 		PWord fv; int ft;								\
-		printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",			\
+		printf("!!@@@ [ln=%d] r=%x  mr_TR=%x\n",			\
 						w,(int)r,(int)mr_TR-1);			\
 	  	*(PWord *)--mr_TR = PWORD(r); 					\
 	  	*(PWord *)--mr_TR = *PWPTR(r);					\
   		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
 		w_get(&fv, &ft, (PWord)f); 							\
-		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\
+/*		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\   */
+		if (!ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft)) {		\
+      		*(r) = PWORD(f);							\
+		}												\
 		printf("setting interrupt\n");					\
 	    wm_safety = -2; wm_interrupt_caught = 3; 		\
 	} else {											\
@@ -292,7 +297,7 @@ ck_intvl_punch(r, fv, ft)
 	  *(PWord *)--mr_TR = PWORD(r); 									  \
 	  *(PWord *)--mr_TR = *PWPTR(r);									  \
 	  if ( CHK_DELAY(r) ) { 											  \
-			printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",l,(int)r,(int)mr_TR-1); \
+			printf(">>@@@ [ln=%d] r=%x  mr_TR=%x\n",l,(int)r,(int)mr_TR-1); \
   			*((PWord *)r +1) = (PWord)((PWord *)r + 1); 				  \
 	    	wm_safety = -2; wm_interrupt_caught = 3; } } } 
 
@@ -332,13 +337,16 @@ ck_intvl_punch(r, fv, ft)
   if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 		\
 	if ( CHK_DELAY(r) ) { 								\
 		PWord fv; int ft;								\
-		printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",			\
+		printf("++@@@ [ln=%d] r=%x  mr_TR=%x\n",			\
 						w,(int)r,(int)mr_TR-1);			\
 	  	*(PWord *)--mr_TR = PWORD(r); 					\
 	  	*(PWord *)--mr_TR = *PWPTR(r);					\
   		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
 		w_get(&fv, &ft, (PWord)f); 							\
-		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\
+/*		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\   */
+		if (!ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft)) {		\
+      		*(r) = PWORD(f);							\
+		}												\
 		printf("setting interrupt\n");					\
 	    wm_safety = -2; wm_interrupt_caught = 3; 		\
 	} else {											\
@@ -355,7 +363,7 @@ ck_intvl_punch(r, fv, ft)
   { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 						\
 	  *--mr_TR = PWORD(r);												 	\
 	  if ( CHK_DELAY(r) ) { 												\
-			printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",l,(int)r,(int)mr_TR-1);	\
+			printf("##@@@ [ln=%d] r=%x  mr_TR=%x\n",l,(int)r,(int)mr_TR-1);	\
 			*((PWord *)r +1) = (PWord)((PWord *)r + 1);						\
 	    	wm_safety = -2; wm_interrupt_caught = 3; } } } 
 
@@ -402,7 +410,10 @@ ck_intvl_punch(r, fv, ft)
 	  	*(PWord *)--mr_TR = *PWPTR(r);					\
   		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
 		w_get(&fv, &ft, (PWord)f); 							\
-		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\
+/*		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\    */
+		if (!ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft)) {		\
+      		*(r) = PWORD(f);							\
+		}												\
 	    wm_safety = -2; wm_interrupt_caught = 3; 		\
 	} else {											\
 	  *(PWord *)--mr_TR = PWORD(r); 					\
@@ -457,13 +468,15 @@ ck_intvl_punch(r, fv, ft)
   if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 		\
 	if ( CHK_DELAY(r) ) { 								\
 		PWord fv; int ft;								\
-		printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",			\
-						w,(int)r,(int)mr_TR-1);			\
+/*		printf("^^@@@ [ln=%d] r=%x  mr_TR=%x\n",		\
+						w,(int)r,(int)mr_TR-1);		*/ 	\
 	  	*(PWord *)--mr_TR = PWORD(r); 					\
   		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
-		w_get(&fv, &ft, (PWord)f); 							\
-		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		\
-		printf("setting interrupt\n");					\
+		w_get(&fv, &ft, (PWord)f); 						\
+		if (!ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft)) {		\
+      		*(r) = PWORD(f);							\
+		}												\
+/*		printf("setting interrupt\n");		*/			\
 	    wm_safety = -2; wm_interrupt_caught = 3; 		\
 	} else {											\
 	  *(PWord *)--mr_TR = PWORD(r); 					\
@@ -2460,7 +2473,11 @@ bind_point_unfreeze(r,t,pv,k)
 
 
 	  ck_intvl_punch((PWord)(((PWord *)r)-1), *vl, vlt);		
-
+/*----------------?????????????
+	  if (!ck_intvl_punch((PWord)(((PWord *)r)-1), vl, vlt)) {		
+     	*(r) = PWORD(f);							
+	  }												
+ *----------????????????-------------*/
 	/*  ck_intvl_punch((((PWord *)r)-1), vl);   */
 	
 	
