@@ -1307,3 +1307,165 @@ pbi_atom_codes()
 	}
     }
 }
+
+
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
+
+
+#ifdef SUBTYPES
+
+int
+pbi_less_sut_int()
+{				/* less_sut_int(A,B) */
+    PWord v1, v2;
+    int   t1, t2;
+
+    long val1,val2;
+    int   val1stype, val2stype;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+
+    if (t1 != WTP_UIA || t2 != WTP_UIA) 
+	    FAIL;
+
+	val1stype =  (int) M_FIRSTUIAWORD(v1);
+	val2stype =  (int) M_FIRSTUIAWORD(v2);
+    if (val1stype != SUT_INT || val1stype != SUT_INT) 
+	    FAIL;
+
+	val1 = ((long)((char *)wm_heapbase + (long)(v1))+2);
+	val2 = ((long)((char *)wm_heapbase + (long)(v2))+2);
+
+	if ( val1 < val2 )
+	    SUCCEED;
+	else
+	    FAIL;
+}
+
+int
+pbi_eq_sut_int()
+{				/* eq_sut_int(A,B) */
+    PWord v1, v2;
+    int   t1, t2;
+
+    long val1,val2;
+    int   val1stype, val2stype;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+
+    if (t1 != WTP_UIA || t2 != WTP_UIA) 
+	    FAIL;
+
+	val1stype =  (int) M_FIRSTUIAWORD(v1);
+	val2stype =  (int) M_FIRSTUIAWORD(v2);
+    if (val1stype != SUT_INT || val1stype != SUT_INT) 
+	    FAIL;
+
+	val1 = ((long)((char *)wm_heapbase + (long)(v1))+2);
+	val2 = ((long)((char *)wm_heapbase + (long)(v2))+2);
+
+	if ( val1 == val2 )
+	    SUCCEED;
+	else
+	    FAIL;
+}
+
+extern void    w_mk_sut_int PARAMS(( PWord *, int *, long ));
+
+void
+w_mk_sut_int(rval, rtag, ival)
+    PWord *rval;
+	int  *rtag;
+	long ival;
+{
+    *rval = (PWord) MMK_UIAVAL(wm_H);
+	*rtag = WTP_UIA;
+
+	*wm_H++ = MMK_FENCE(2);
+	*wm_H++ = SUT_INT;
+	*wm_H++ = ival;
+	*wm_H++ = MMK_FENCE(2);
+}
+
+
+	/* Make a uia_int whose (long) int value is the
+	   same as the value in the incoming prolog integer 
+	   in arg #1 */
+int
+pbi_mk_sut_int()
+{				/* mk_sut_int(A,B) */
+    PWord v1, v2, new;
+    int   t1, t2, newt;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+
+    if (t1 != WTP_INTEGER || (t2 != WTP_UIA && t2 != WTP_UNBOUND) ) 
+	    FAIL;
+
+	w_mk_sut_int(&new, &newt, (long)v1);
+	if (w_unify(v2,t2,new,newt))
+	    SUCCEED;
+	else
+	    FAIL;
+}
+
+int
+pbi_t_sut_int()
+{
+	long i,m;
+
+	m=1;
+	i=0;
+	printf("C[%d]=%d\n",(int)i,(int)m);
+	for (i=1; i < 32; i++) {
+		m=m*2;
+		printf("C[%d]=%d\n",(int)i,(int)m);
+	}
+	SUCCEED;
+}
+
+int
+pbi_pos_atom()
+{
+    PWord v1, v2, new;
+    int   t1, t2, newt;
+    long val2, baseuia; 
+    int   val1stype;
+	UCHAR *buf;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+
+    if (t1 != WTP_UIA || (t2 != WTP_UIA && t2 != WTP_UNBOUND)) 
+	    FAIL;
+	baseuia = (long)wm_heapbase + (long)(v1);
+
+/*
+printf("baseuia=%lx  *baseuia=%d \n",baseuia, (int)((PWord)(*(PWord *)baseuia)));
+printf("baseuia1=%lx  *baseuia1=%d \n", 
+			(long)baseuia + sizeof (long), 
+			(int)(*(PWord *)(baseuia + sizeof (long))));
+printf("baseuia2=%lx  *baseuia2=%d \n", 
+			(long)baseuia + 2 * (sizeof (long)),
+			(int)(*(PWord *)( baseuia + 2 * (sizeof (long)))));
+*/
+
+	val1stype = (int) *(PWord *)(baseuia + sizeof (long));
+    if (val1stype != SUT_INT) 
+	    FAIL;
+
+	val2 = *(PWord *)( baseuia + 2 * (sizeof (long)));
+	buf = (UCHAR *) (wm_H + 1);
+	sprintf((char *)buf, "%ld", val2);
+
+	w_mk_uia_in_place(&new, &newt, buf);
+	if (w_unify(v2, t2, new, newt))
+		SUCCEED;
+	else
+		FAIL;
+}
+#endif /* SUBTYPES */

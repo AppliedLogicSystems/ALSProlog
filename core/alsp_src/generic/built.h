@@ -429,3 +429,12 @@ extern	int 	toggle_bwam 	PARAMS( ( void ) );
 
 /* lforeign.c */
 extern int prolog_load_plugin(void);
+
+
+#ifdef SUBTYPES
+extern	int	pbi_less_sut_int	PARAMS(( void ));
+extern	int	pbi_eq_sut_int	PARAMS(( void ));
+extern	int	pbi_mk_sut_int	PARAMS(( void ));
+extern	int	pbi_t_sut_int	PARAMS(( void ));
+extern	int	pbi_pos_atom	PARAMS(( void ));
+#endif /* SUBTYPES */
