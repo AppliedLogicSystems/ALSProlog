@@ -1,0 +1,86 @@
+The following table lists ODBC functions, grouped by type of task, and includes the conformance designation and a brief description of the purpose of each function.
+
+An application can call the SQLGetInfo function to obtain conformance information about a driver. To obtain information about support for a specific function in a driver, an application can call SQLGetFunctions.
+
+Connecting to a Data Source
+
+Function Name	Purpose
+SQLAllocEnv	Obtains an environment handle. One environment handle is used for one or more connections.
+SQLAllocConnect	Obtains a connection handle.
+SQLConnect 	Connects to a specific driver by data source name, user ID, and password. 
+SQLDriverConnect 	Connects to a specific driver by connection string or requests that the Driver Manager and driver display connection dialog boxes for the user.
+SQLBrowseConnect	Returns successive levels of connection attributes and valid attribute values. When a value has been specified for each connection attribute, connects to the data source.
+Obtaining Information about a Driver and Data Source
+
+Function Name	Purpose
+SQLDataSources	Returns the list of available data sources.
+SQLDrivers	Returns the list of installed drivers and their attributes.
+SQLGetInfo	Returns information about a specific driver and data source.
+SQLGetFunctions	Returns supported driver functions.
+SQLGetTypeInfo	Returns information about supported data types.
+Setting and Retrieving Driver Options
+
+Function Name	Purpose
+SQLSetConnectOption	Sets a connection option.
+SQLGetConnectOption	Returns the value of a connection option.
+SQLSetStmtOption 	Sets a statement option.
+SQLGetStmtOption 	Returns the value of a statement option.
+Preparing SQL Requests
+
+Function Name	Purpose
+SQLAllocStmt	Allocates a statement handle.
+SQLPrepare	Prepares an SQL statement for later execution.
+SQLBindParameter	Assigns storage for a parameter in an SQL statement.
+SQLParamOptions	Specifies the use of multiple values for parameters.
+SQLGetCursorName	Returns the cursor name associated with a statement handle.
+SQLSetCursorName	Specifies a cursor name.
+SQLSetScrollOptions 	Sets options that control cursor behavior.
+Submitting Requests
+
+Function Name	Purpose
+SQLExecute	Executes a prepared statement.
+SQLExecDirect	Executes a statement.
+SQLNativeSql	Returns the text of an SQL statement as translated by the driver.
+SQLDescribeParam 	Returns the description for a specific parameter in a statement.
+SQLNumParams	Returns the number of parameters in a statement.
+SQLParamData	Used in conjunction with SQLPutData to supply parameter data at execution time. (Useful for long data values.)
+SQLPutData	Send part or all of a data value for a parameter. (Useful for long data values.)
+Retrieving Results and Information about Results
+
+Function Name	Purpose
+SQLRowCount	Returns the number of rows affected by an insert, update, or delete request.
+SQLNumResultCols	Returns the number of columns in the result set.
+SQLDescribeCol	Describes a column in the result set.
+SQLColAttributes	Describes attributes of a column in the result set.
+SQLBindCol	Assigns storage for a result column and specifies the data type.
+SQLFetch	Returns a result row.
+SQLExtendedFetch 	Returns multiple result rows.
+SQLGetData	Returns part or all of one column of one row of a result set. (Useful for long data values.)
+SQLSetPos 	Positions a cursor within a fetched block of data.
+SQLMoreResults	Determines whether there are more result sets available and, if so, initializes processing for the next result set.
+SQLError	Returns additional error or status information.
+Obtaining Information about the Data Source's System Tables (Catalog Functions)
+
+Function Name	Purpose
+SQLColumnPrivileges	Returns a list of columns and associated privileges for one or more tables.
+SQLColumns	Returns the list of column names in specified tables.
+SQLForeignKeys	Returns a list of column names that comprise foreign keys, if they exist for a specified table.
+SQLPrimaryKeys	Returns the list of column name(s) that comprise the primary key for a table.
+SQLProcedureColumns	Returns the list of input and output parameters, as well as the columns that make up the result set for the specified procedures.
+SQLProcedures	Returns the list of procedure names stored in a specific data source.
+SQLSpecialColumns	Returns information about the optimal set of columns that uniquely identifies a row in a specified table, or the columns that are automatically updated when any value in the row is updated by a transaction.
+SQLStatistics	Returns statistics about a single table and the list of indexes associated with the table.
+SQLTablePrivileges	Returns a list of tables and the privileges associated with each table.
+SQLTables	Returns the list of table names stored in a specific data source.
+Terminating a Statement
+
+Function Name	Purpose
+SQLFreeStmt	Ends statement processing and closes the associated cursor, discards pending results, and, optionally, frees all resources associated with the statement handle.
+SQLCancel	Cancels an SQL statement.
+SQLTransact	Commits or rolls back a transaction.
+Terminating a Connection
+
+Function Name	Purpose
+SQLDisconnect	Closes the connection.
+SQLFreeConnect	Releases the connection handle. 
+SQLFreeEnv	Releases the environment handle.
