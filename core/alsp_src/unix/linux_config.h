@@ -3,10 +3,12 @@
 
 #define MinorOSStr	"linux"
 
+#define EXTERNAL_STATE 1
+
 #define HAVE_MEMORY_H	1
 #define HAVE_DLFCN_H	1
 #define HAVE_LIBDL	1
-#define HAVE_LIBELF	1
+/*#define HAVE_LIBELF	1*/
 #define HAVE_DEV_ZERO	1
 #define HAVE_BCOPY	1
 #define HAVE_DLOPEN	1

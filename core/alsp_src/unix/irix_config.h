@@ -1,7 +1,7 @@
 
 #define MinorOSStr	"irix"
 
-#define NO_IMAGE_STATE
+#define EXTERNAL_STATE 1
 #define USE_RE_COMP
 
 #if 0
