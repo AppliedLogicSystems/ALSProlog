@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Check for correct number of arguments
+if test $# -lt 3
+then
+    echo 'Usage: unix_setup source_dir os processor [flags...]' 1>&2
+    echo 'Example:' 1>&2
+    echo '    unix_setup ../alsp_src hpux port' 1>&2
+    exit 2
+fi
+
+# Extract arguments
+source_dir=$1
+os=$2
+proc=$3
+shift 3
+flags=$*
+
+# Check for relative source directory
+if echo $source_dir | grep -s '^/'
+then
+    echo "Invalid source directory ($source_dir)" 1>&2
+    echo "Source directory must be relative" 1>&2
+    exit 2
+fi
+
+# Check for correct OS
+case $os in
+aix|hpux|sunos|solaris|irix) ;;
+*) echo "Unknown OS ($os)" 1>&2; exit 2;;
+esac
+
+# Check for correct processor
+case $proc in
+port) ;;
+*) echo "Unknown Processor ($proc)" 1>&2; exit 2;;
+esac
+
+# Build the Makefile
+echo "SOURCE_DIR=$source_dir" > Makefile
+echo "OS=$os" >> Makefile
+echo "PROC=$proc" >> Makefile
+echo "BUILD_FLAGS=$flags" >> Makefile
+echo 'include $(SOURCE_DIR)/unix/unix_makefile' >> Makefile
