@@ -475,14 +475,15 @@ do_consult(BaseFile, FCOpts)
 		true
 	),
 	send(ALSMgr, set_value(cslt_ctxt, [FCOpts | PrevCntxts])),
-	catch( exec_consult(BaseFile, FCOpts, ALSMgr, FileMgr),
+	catch( (exec_consult(BaseFile, FCOpts, ALSMgr, FileMgr),
+				FinalMsg = end_consult),
 			Ball,
-			consult_except_resp(Ball,FCOpts,FileMgr)
+			consult_except_resp(Ball,FCOpts,FileMgr,FinalMsg)
 	     ),
 	send(ALSMgr, set_value(cslt_ctxt, PrevCntxts)),
 	record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr),
 	!,
-	consult_msg(end_consult, FCOpts).
+	consult_msg(FinalMsg, FCOpts).
 
 consult_msg(_, FCOpts)
 	:-
@@ -499,10 +500,24 @@ consult_msg(end_consult, FCOpts)
 	access_cslt_opts(loadedpath, FCOpts, LoadedPath), 
 	printf(user_output, '... consulted %t\n', [LoadedPath]).
 
+consult_msg(partial_consult, FCOpts)
+	:-!,
+	access_cslt_opts(loadedpath, FCOpts, LoadedPath), 
+	printf(user_output, '... partially consulted %t (Errors)\n', [LoadedPath]).
+
 consult_msg(loaded_builtins_file(File,Dir), FCOpts)
 	:-!,
 	printf(user_output, 'System file %t in %t already loaded.\n', [File, Dir]).
 
+consult_msg(error_consult, FCOpts)
+	:-!,
+	access_cslt_opts(origfile, FCOpts, FileDesc), 
+	printf(user_output, '... Consult of %t ABORTED\n', [FileDesc]).
+
+consult_msg(fail_consult, FCOpts)
+	:-!,
+	access_cslt_opts(origfile, FCOpts, FileDesc), 
+	printf(user_output, '... Consult of %t FAILED\n', [FileDesc]).
 
 record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr)
 	:-
@@ -520,20 +535,22 @@ record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr)
 	),
 	send(FileMgr, update_errors_wins(Ball)).
 
+consult_except_resp(loaded_builtins_file(File,Dir),FCOpts,FileMgr,end_consult)
+	:-!.
+%	consult_msg(loaded_builtins_file(File,Dir), FCOpts).
 
+consult_except_resp( failed_xxconsult(Path), FCOpts,FileMgr,fail_consult)
+	:-!.
 
-consult_except_resp(loaded_builtins_file(File,Dir),FCOpts,FileMgr)
+consult_except_resp(Ball,FCOpts,FileMgr,partial_consult)
 	:-
-	consult_msg(loaded_builtins_file(File,Dir), FCOpts).
-
-consult_except_resp(Ball,FCOpts,FileMgr)
-	:-
+write(cer(Ball)),nl,flush_output,
 	Ball = error(consult_load, [src_load, SrcFilePath, ErrList] ),
 	!,
 	length(ErrList, NErrs),
 	send(FileMgr, display_file_errors(NErrs, SrcFilePath, ErrList)).
 
-consult_except_resp(Ball,FCOpts,FileMgr)
+consult_except_resp(Ball,FCOpts,FileMgr,error_consult)
 	:-
 	throw(Ball).
 
@@ -548,7 +565,6 @@ consult_except_resp(Ball,FCOpts,FileMgr)
  |	"prolog loader" philosophy -- see 
  |		rotate_locations(SrcPath, FCOpts) below.
  *-------------------------------------------------------------*/
-
 
 merge_search_paths(FCOpts, ParentFCOpts)
 	:-
@@ -1197,9 +1213,12 @@ load_source0(Stream, TgtMod, DebugMode, OPath, Path,ErrsList)
 	:-
 	obp_mode_start(OPath),
 	xconsult:pushmod(TgtMod),
+write(calling_xxconsult(Path,DebugMode,ErrsList)),nl,flush_output,
 	catch(xxconsult(Stream, Path, DebugMode, ErrsList),
 			Ball, 
-			( xconsult:popmod, 
+			( 
+write(user_output,xxconsult_xcept(Ball)),nl(user_output),flush_output(user_output),
+			xconsult:popmod, 
 			  obp_mode_end(OPath),
 			  throw(Ball)   )
 		),
@@ -1209,11 +1228,13 @@ load_source0(Stream, TgtMod, DebugMode, OPath, Path,ErrsList)
 
 load_source0(_,_,_,OPath,Path,_) 
 	:-
+write(failed_xxconsult(Path)),nl,flush_output,
 	xconsult:popmod,
 	obp_mode_end(OPath),
 	!,
 		%% ld_src_err: "Internal error in load_source for file %t\n"
-	prolog_system_error(ld_src_err, [Path]).
+	prolog_system_error(ld_src_err, [Path]),
+	throw( failed_xxconsult(Path) ).
 
 
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

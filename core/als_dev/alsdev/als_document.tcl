@@ -103,8 +103,13 @@ proc create_document_window {title} {
 
 		## setup linenumber pane and syntax error pane, but
 		## don't realize them until they are needed:
+
     frame $w.error_headers -borderwidth 2 -relief groove \
 		-background #ec5648
+    button $w.error_headers.open_btn \
+        -command "toggle_errors_frame $w" -image open_ptr -padx 11 -pady 4 
+    pack $w.error_headers.open_btn \
+		-in $w.error_headers -anchor center -expand 0 -fill none -side left 
     label $w.error_headers.lnum \
         -borderwidth 1 -relief raised -text Line# 
     label $w.error_headers.desc \
@@ -113,7 +118,8 @@ proc create_document_window {title} {
         -in $w.error_headers -anchor center -expand 0 -fill none -padx 15 \
         -side left 
     pack $w.error_headers.desc \
-        -in $w.error_headers -anchor center -expand 0 -fill none -side top 
+        -in $w.error_headers -anchor center -expand 0 -fill none -side left \
+		-padx 30 
 
 	text $w.ltext -yscrollcommand "$w.yscrollbar set" -wrap none -width 5 -setgrid true 
 
@@ -158,6 +164,7 @@ proc bothscrolly { w args } {
 
 proc add_line_numbers_and_syn_errs { w } {
 	global array proenv
+	set proenv($w,error_frame) open
 
 	$w.yscrollbar configure -command ""
 	$w.yscrollbar configure -command "bothscrolly $w"
@@ -192,6 +199,26 @@ proc add_line_numbers_and_syn_errs { w } {
 	$w.ltext insert end $NL0
 }
 
+proc close_line_numbers_and_syn_errs { w } {
+	global array proenv
+
+	grid forget $w.ltext  
+
+	grid forget $w.listbox 
+	grid forget $w.errlist_ysb 
+	grid forget $w.errlist_xsb  
+}
+
+proc restore_line_numbers_and_syn_errs { w } {
+	global array proenv
+
+	$w.ltext configure -width 5
+	grid $w.ltext  -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky ns
+	grid $w.listbox -column 0 -row 3 -columnspan 2 -rowspan 1 -sticky nesw
+	grid $w.errlist_ysb -column 2 -row 3 -columnspan 1 -rowspan 1 -sticky ns
+	grid $w.errlist_xsb  -column 0 -row 4 -columnspan 2 -rowspan 1 -sticky ew
+}
+
 proc add_left_col { w N } {
 	global array proenv
 
@@ -216,6 +243,20 @@ proc add_left_col { w N } {
 		$w.ltext insert end [format " \n" ]
 	}
 	$w.ltext insert end $NL0
+}
+
+proc toggle_errors_frame { w } {
+	global proenv
+
+	if { $proenv($w,error_frame) == "open" } then {
+		set proenv($w,error_frame) closed
+	   	$w.error_headers.open_btn configure -image closed_ptr
+		close_line_numbers_and_syn_errs $w
+	} else {
+		set proenv($w,error_frame) open
+    	$w.error_headers.open_btn configure -image open_ptr
+		restore_line_numbers_and_syn_errs $w
+	}
 }
 
 proc dirty_key {w k} {

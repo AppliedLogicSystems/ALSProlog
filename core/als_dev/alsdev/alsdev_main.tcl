@@ -539,7 +539,7 @@ proc show_text_slot {GuiPath Slot Value} {
 proc show_list_slot {GuiPath Slot ValueList PrjMgrHandle} {
 	$GuiPath.$Slot.listbox delete 0 end
 	eval $GuiPath.$Slot.listbox insert end $ValueList
-	set Last [$GuiPath.$Slot.listbox index end]
+#	set Last [$GuiPath.$Slot.listbox index end]
 	bind $GuiPath.$Slot.listbox <Double-Button-1> \
 		[list prj_slot_focus $Slot $GuiPath.$Slot.listbox $PrjMgrHandle]
 }

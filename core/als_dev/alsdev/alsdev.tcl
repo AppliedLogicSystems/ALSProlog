@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.77 1999/02/07 10:11:47 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.78 1999/02/08 12:27:23 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -749,6 +749,7 @@ proc consult_file {} {
 		-filetypes {{"Prolog Files" {.pro .pl } } {{All Files} {*} } } ]
 	if {$file == ""} then { return }
 	prolog call alsdev do_reconsult -atom $file
+	return true
 }
 
 proc clear_workspace { } {
