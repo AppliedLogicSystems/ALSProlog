@@ -1,0 +1,24 @@
+ALS Prolog Foreign SDK Source Tree
+==================================
+
+This source tree contains all the files necessary to build the Foreign SDK
+distribution.  You should check out this source tree on each platform 
+in order to get the correct text line endings.
+
+Each platform (Unix/Mac/Win32) has a script to build the distribution folder
+with the appropriate file naming, etc.
+
+Unix:
+
+Run the shell script "build" in the unix directory to create a distribution
+folder.
+
+MacOS:
+
+Run the AppleScipt "Make.script" in the macos folder to create a distribution
+folder.
+
+Win32:
+
+Build the project "xxx" in the win32 directory and run the batch script "xxx"
+to create a distribution directory.
