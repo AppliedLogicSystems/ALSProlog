@@ -413,6 +413,41 @@ static short MyHandleOneEvent(EventRecord *)
 }
 #endif
 
+#ifdef UNIX
+static char unixInitScript[] =
+"proc tclInit {} {\n\
+    global tcl_library tcl_version tcl_patchLevel env errorInfo\n\
+    global tcl_pkgPath\n\
+    rename tclInit {}\n\
+    set errors {}\n\
+    set dirs {}\n\
+    if [info exists env(TCL_LIBRARY)] {\n\
+	lappend dirs $env(TCL_LIBRARY)\n\
+    }\n\
+    set execDir [file dirname [info nameofexecutable]]\n\
+    lappend dirs $execDir/tcl$tcl_version\n\
+    lappend dirs [info library]\n\
+    foreach i $dirs {\n\
+	set tcl_library $i\n\
+	set tclfile [file join $i init.tcl]\n\
+	if {[file exists $tclfile]} {\n\
+            lappend tcl_pkgPath [file dirname $i]\n\
+	    if ![catch {uplevel #0 [list source $tclfile]} msg] {\n\
+		return\n\
+	    } else {\n\
+		append errors \"$tclfile: $msg\n$errorInfo\n\"\n\
+	    }\n\
+	}\n\
+    }\n\
+    set msg \"Can't find a usable init.tcl in the following directories: \n\"\n\
+    append msg \"    $dirs\n\n\"\n\
+    append msg \"$errors\n\n\"\n\
+    append msg \"This probably means that Tcl wasn't installed properly.\n\"\n\
+    error $msg\n\
+}\n\
+tclInit";
+#endif
+
 static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *interp_name)
 {
 	Tcl_Interp *interp;
@@ -422,8 +457,6 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 	int is_new, pre_named;
 	AP_Type type;
 	int r;
-	extern char library_dir[1024];
-	char tcl_library[1024]; 
 
 	type = AP_ObjType(w, *interp_name);
 	
@@ -446,13 +479,11 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 		goto error;
 	}
 
-	/* Set tcl_library to point to alspro directory. */
-
-	strcpy(tcl_library, library_dir);
-	strcat(tcl_library, "tcl8.0");
-	Tcl_SetVar(interp, "tcl_library", tcl_library, TCL_GLOBAL_ONLY);
-	
+#ifdef UNIX	
+	r = Tcl_Eval(interp, unixInitScript);
+#else
 	r = Tcl_Init(interp);
+#endif
 	if (r != TCL_OK) {
 		TclToPrologResult(w, NULL, interp, r);
 		goto error_delete;
