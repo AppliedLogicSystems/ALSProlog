@@ -1,0 +1,1 @@
+alspro tp2intf  -p -T "mytrans(I,O) :- name(O,[0'a ,0'_ |I])"
