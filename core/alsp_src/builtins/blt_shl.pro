@@ -25,9 +25,14 @@ use sio.
  | is the shell call to make.
  *-------------------------------------------------------------------------------*/
 
-start_shell(DefaultShellCall) :-
-	catch(start_shell0(builtins:prolog_shell), E,
-	(shell_exception(E), throw(E))).
+start_shell(DefaultShellCall) 
+	:-
+	catch(start_shell0(builtins:prolog_shell), 
+			E,
+			(shell_exception(E), throw(E))
+		).
+
+:- dynamic(genFileLocn/3).
 
 start_shell0(DefaultShellCall)
 	:-
@@ -56,11 +61,12 @@ start_shell0(DefaultShellCall)
 					default,			/* -nwd: debugger to set up */
 					[],					/* -s init search list */
 					DefaultShellCall,	/* shell/or not */
-					other_flags),		/* room for expansion */
+					[]),				/* Command-line asserts */
 
 %%debugger:nospy,
 %%obp_with_pro,
-	generated_with_src,
+
+%	generated_with_src,
 	ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo),
 	assertz(command_line(ResidualCommandLine)),
 
@@ -92,6 +98,9 @@ start_shell0(DefaultShellCall)
 	arg(3, CLInfo, Files),
 	set_consult_messages(ConsultNoise),
 	ss_load_files(Files),
+
+	arg(8, CLInfo, CLAsserts),
+	ss_cl_asserts(CLAsserts, OutputStream),
 	!,
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
@@ -180,7 +189,7 @@ ss_parse_command_line([], [], CLInfo)
 ss_parse_command_line(['-p' | T], T, CLInfo)
 	:-!.
 
-	%% -p: Start application part of command line, pushing on image name:
+	%% -P: Start application part of command line, pushing on image name:
 ss_parse_command_line(['-P' | T], [ImageName | T], CLInfo)
 	:-!,
 	arg(4,CLInfo,ImageName).
@@ -239,7 +248,9 @@ ss_parse_command_line(['-A', Expr | T], L, CLInfo)
 
 ss_parse_command_line(['-a', Expr | T], L, CLInfo)
 	:-!,
-	cmd_line_A(Expr),
+%	cmd_line_A(Expr),
+	arg(8, CLInfo, PrevCmdLineAsserts),
+	mangle(8, CLInfo, [Expr | PrevCmdLineAsserts]),
 	ss_parse_command_line(T, L, CLInfo).
 
 /*
@@ -330,6 +341,49 @@ ss_parse_command_line([File | T], L, CLInfo)
 	mangle(3, CLInfo, NewFiles),
 	ss_parse_command_line(T, L, CLInfo).
 
+
+
+ss_cl_asserts([], OutputStream).
+ss_cl_asserts([Expr | CLAsserts], OutputStream)
+	:-
+	catch( ss_cl_assert(Expr),
+			_,
+			ss_cl_assert_error(Expr, OutputStream)
+		),
+	ss_cl_asserts(CLAsserts, OutputStream).
+
+
+ss_cl_assert(Expr)
+	:-
+	atomread(Expr, CLAssrt, [syntax_errors(quiet)]),
+	ss_cl_assert0(CLAssrt).
+
+ss_cl_assert_error(Expr, OutputStream)
+	:-
+	als_advise(OutputStream, 'Error reading command-line assert: %s', [Expr]),
+	nl(OutputStream),
+	flush_output(OutputStream).
+
+ss_cl_assert0((Mod:AX))
+	:-
+	(modules(Mod,_) -> true ; create_new_module(Mod)),
+	ss_cl_assert1(AX, Mod).
+
+ss_cl_assert0(AX)
+	:-
+	ss_cl_assert1(AX, user).
+
+ss_cl_assert1((AX, BX), Mod)
+	:-!,
+	ss_cl_assert1(AX, Mod),
+	ss_cl_assert1(BX, Mod).
+
+ss_cl_assert1(AX, Mod)
+	:-
+	Mod:assertz(AX).
+
+
+/*
 cmd_line_A(Expr)
 	:-
 	atomread(Expr,Mod:AX),
@@ -350,6 +404,7 @@ in_assrt((AX,BX), SMod)
 in_assrt(AX, SMod)
 	:-
 	SMod:assert(AX).
+*/
 /*---------------------------------------
  |	ss_init_searchdir/1
  |	ss_init_searchdir(CmdLinePaths)

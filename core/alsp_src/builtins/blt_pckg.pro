@@ -66,19 +66,21 @@ save_image(ImageName, Options) :-
 	fix_image_name(ImageName, FixedImageName),
 	process_image_options(Options, FixedImageName, OptionedName),
 	pbi_copy_file(ThisImage, OptionedName),
-	attach_image(OptionedName).
+	(dmember(preserve(all), Options) -> DevelopFlag=develop ; DevelopFlag=production),
+	attach_image(OptionedName, DevelopFlag).
 	
-attach_image(ImageName)
+attach_image(ImageName, DevelopFlag)
 	:-
 		%% Save initial state of '$start' and '$initialize'
 		%% in case there is an error in processing options,
 		%% so that we need to restore them:
 	builtins:clause('$initialize',OldInit),	
 	builtins:clause('$start',OldStart),	
-	catch(attach_image0(ImageName),
+	catch(attach_image0(ImageName,DevelopFlag),
 			se(Error),
 			restore_si(Error, OldInit, OldStart) ).
 
+/*
 save_image0(ImageName, Options)
 	:-
 	process_image_options(Options, ImageName, FinalImageName),
@@ -87,6 +89,7 @@ save_image0(ImageName, Options)
 		;
 		save_image(FinalImageName)
 	).
+*/
 
 /*!--------------------------------------------------------------*
  |	save_image/1
@@ -101,46 +104,56 @@ save_image0(ImageName, Options)
  *---------------------------------------------------------------*/
 
 	
-attach_image0(NewImageName)
+attach_image0(NewImageName, DevelopFlag)
 	:-
 	adjust_sys_search_for_save(ALSDIR, OrigALSDIR),
-
-		%% Must get rid of these so the image can create
-		%% them as it starts up; but don't throw them away...
-	(bagof(searchdir(SD0), searchdir(SD0), SDList0) -> true ; SDList0 = []),
-	abolish(searchdir,1),
-	builtins:dynamic(searchdir/1),
-
-	(bagof(als_lib_lcn(SD1), als_lib_lcn(SD1), SDList1) -> true ; SDList1 = []),
-	abolish(als_lib_lcn,1),
-	builtins:dynamic(als_lib_lcn/1),
 
 	command_line(CmdLine),
 	abolish(command_line,1),
 
-	(bagof( file_clause_group(Path2,CG2), 
-			file_clause_group(Path2,CG2), 
-			SDList2) 
-	  -> true ; SDList2 = []),
-	abolish(file_clause_group,2),
-	dynamic(file_clause_group/2),
+	(DevelopFlag = production ->
+			%% Must get rid of these so the image can create
+			%% them as it starts up; but don't throw them away...
+		(bagof(searchdir(SD0), searchdir(SD0), SDList0) -> true ; SDList0 = []),
+		abolish(searchdir,1),
+		builtins:dynamic(searchdir/1),
 
-	(bagof( consulted(A,B,C,D,E), 
-			consulted(A,B,C,D,E), 
-			SDList3) 
-	  -> true ; SDList3 = []),
-	abolish(consulted,5),
-	dynamic(consulted/5),
+		(bagof(als_lib_lcn(SD1), als_lib_lcn(SD1), SDList1) -> true ; SDList1 = []),
+		abolish(als_lib_lcn,1),
+		builtins:dynamic(als_lib_lcn/1),
+
+
+		(bagof( file_clause_group(Path2,CG2), 
+				file_clause_group(Path2,CG2), 
+				SDList2) 
+	  	-> true ; SDList2 = []),
+		abolish(file_clause_group,2),
+		dynamic(file_clause_group/2),
+
+		(bagof( consulted(A,B,C,D,E), 
+				consulted(A,B,C,D,E), 
+				SDList3) 
+	  	-> true ; SDList3 = []),
+		abolish(consulted,5),
+		dynamic(consulted/5)
+		;
+		true   	%% DevelopFlag = develop
+	),
 
 	% attach the state
 	attach_state(NewImageName),
 	
-		%% Re-install the search dir info:
-	assert(sys_searchdir(OrigALSDIR)),
-	laa(SDList0),
-	laa(SDList1),
-	laa(SDList2),
-	laa(SDList3),
+	(DevelopFlag = production ->
+			%% Re-install the search dir info:
+		assert(sys_searchdir(OrigALSDIR)),
+		laa(SDList0),
+		laa(SDList1),
+		laa(SDList2),
+		laa(SDList3)
+		;
+		true   	%% DevelopFlag = develop
+	),
+
 	assert(command_line(CmdLine)).
 
 save_image_develop(NewImageName)

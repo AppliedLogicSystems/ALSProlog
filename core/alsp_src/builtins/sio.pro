@@ -3618,7 +3618,6 @@ export get_line/2.
 
 get_line(Stream,Line) :-
 	get_line0(Stream,Line0,EndFlag),
-%pbi_write(get_line0(Line0,EndFlag)),pbi_nl,pbi_ttyflush,
 	gl_more(EndFlag,Stream,Line0,Line).
 
 gl_more(-2,_,_,stream_not_ready('')) :-
