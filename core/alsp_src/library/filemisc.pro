@@ -80,7 +80,7 @@ output_nl(unix, TgtS)
 	:-
 	nl(TgtS).
 
-output_nl(mswins32, TgtS)
+output_nl(mswin32, TgtS)
 	:-
 	put_code(TgtS, 13),
 	put_code(TgtS, 10).
