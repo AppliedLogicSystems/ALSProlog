@@ -456,4 +456,25 @@ same_disk(Disk1, Disk2) :-
 	identify_case(OS),
 	same_uc(Disk1, Disk2).
 
+%%% Convenience routines
+
+pathPlusFile(Path, File, PathAndFile)
+	:-
+	var(PathAndFile),
+	!,
+	split_path(Path, PathElts),
+	dappend(PathElts, [File], PFElts),
+	join_path(PFElts, PathAndFile).
+
+pathPlusFile(Path, File, PathAndFile)
+	:-
+	nonvar(PathAndFile),
+	split_path(PathAndFile, PFElts),
+	dreverse(PFElts, [File | RevPathElts]),
+	dreverse(RevPathElts, PathElts),
+	join_path(PathElts, Path).
+
+
+
+
 endmod.

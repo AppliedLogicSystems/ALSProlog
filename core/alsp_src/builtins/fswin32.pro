@@ -114,7 +114,8 @@ files(Pattern, FileList)
 	:-
 	getDirEntries(Directory, Pattern, FirstResult),
 	!,
-	rootPlusPath(Disk, PathList, Directory),
+%	rootPlusPath(Disk, PathList, Directory),
+	join_path([Disk | PathList], Directory),
 	fixFileType(regular, InternalFileType),
 	filterForFileType(FirstResult, Disk, PathList, InternalFileType, List).
 
@@ -229,13 +230,12 @@ directory([], FileType, []) :-!.
 directory(Pattern, FileType, List) 
 	:-
 	atom(Pattern), 
-	rootPathFile(Disk, PathList, FilePattern, Pattern),
 %	rootPathFile(Disk, PathList, FilePattern, Pattern),
 	split_path(Pattern, [Disk | PatternElts]),
 	dreverse(PatternElts, [FilePattern | RevPathElts]),
 	dreverse(RevPathElts, PathElts),
 %	rootPlusPath(Disk,PathList,InitPath),
-	join_path([Dist | PathElts], InitPath),
+	join_path([Disk | PathElts], InitPath),
 
 	(InitPath='',!; exists_file(InitPath)),
 	!,
