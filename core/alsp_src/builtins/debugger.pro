@@ -1539,6 +1539,7 @@ setup_debug(DebugIOChannel, Module, Predicate, Arity, CGsSetup, NextCGsSetup)
 	:-
 	change_source_level_debugging(on),
 	get_fcg(Module,Predicate,Arity,CG,DefiningMod),
+write(call_fin_setup),nl,flush_output,
 	fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, NextCGsSetup).
 
 fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, CGsSetup)
@@ -1554,6 +1555,7 @@ fin_setup_debug(ClauseGroup, Module, Predicate, Arity,
 					ALSMgr, SrcMgr),
 	reload_debug(BaseFileName, SrcFilePath, DebugType, ClauseGroup, Flag),
 	!,
+write(call_start_src_tr),nl,flush_output,
 	start_src_trace(Flag,BaseFileName, SrcFilePath, ClauseGroup, ALSMgr, SrcMgr).
 
 fin_setup_debug(ClauseGroup, _, _, _, CGsSetup, [ClauseGroup | CGsSetup]).
@@ -1653,6 +1655,7 @@ showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 
 showGoalToUser(Port,Box,Depth, Module, XGoal, Response)
 	:-
+write(call_v_sG(Port,Box,Depth,Module,XGoal)),nl,flush_output,
 	v_showGoalToUserWin(Port,Box,Depth, Module, XGoal, Response).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
