@@ -811,7 +811,7 @@ fin_record_consult(File, SrcFilePath, ObpPath, DebugType, Options)
 	:-
  	consulted(File, OrigDir, A, B, C),
 	!,
- 	retract(consulted(File, SrcFilePath, A, B, C)),
+ 	retract(consulted(File, OrigDir, A, B, C)),
  	assert_at_load_time(consulted(File, SrcFilePath, ObpPath, DebugType, Options)).
 
 	%% Not previously recorded:
