@@ -39,7 +39,6 @@ use windows.
 	make_gv("_user_prompt"),
 	make_gv("_next_stream_identifier").
 
-
 /*
  * next_stream_identifier/2 is used to retrieve the next stream identifier
  * unless one has been provided in the open options in which case that
@@ -412,7 +411,6 @@ output_stream_or_alias_ok(user, Stream) :-
 output_stream_or_alias_ok(Culprit, _) :-
 	stream_or_alias_error(Culprit,output).
 
-
 /*
  * assign_alias(Alias, Stream_or_alias)
  *
@@ -574,7 +572,6 @@ open(Source_sink,Mode,Stream,Options)
 	set_stream_table(Id,Stream),
 	set_stream_repositionability(Stream,Positionability).
 
-
 /*
  * check_source_sink_and_mode(Source_sink,Mode)
  *
@@ -732,9 +729,11 @@ check_repositionability(Source_sink,Mode,Options,Positionability) :-
 	dmember(reposition(Positionability),Options),
 	!,
 	check_repositionability(Positionability,Source_sink,Mode).
-check_repositionability(Source_sink,Mode,Options,true) :-
+check_repositionability(Source_sink,Mode,Options,true) 
+	:-
 	is_repositionable(Source_sink,Mode),
 	!.
+
 check_repositionability(Source_sink,Mode,Options,false).
 
 check_repositionability(Var,_,_) :-
@@ -760,8 +759,6 @@ is_repositionable(FileName,_) :-
 	FileName \= '$stderr',
 	!.
 
-	
-
 /*
  * open_stream(Source_sink,Mode,Options,Stream)
  *
@@ -772,6 +769,8 @@ open_stream(Source_sink,Mode,Options,Stream) :-
 	atom(Source_sink),
 	!,
 	open_file_stream(Source_sink,Mode,Options,Stream).
+
+
 open_stream(sysV_queue(Key),Mode,Options,Stream) :-
 	!,
 	open_sysVq_stream(Key,Mode,Options,Stream).
@@ -818,6 +817,7 @@ open_file_stream(Source_sink,Mode,Options,Stream)
 	buffering(Options,NBuffering),
 	sio_file_open(Source_sink,Stream,NMode,NBuffering),
 	!.
+
 open_file_stream(Source_sink,Mode,Options,Stream) 
 	:-
 	%% FIXME: Incorporate errno into error.
@@ -3342,6 +3342,5 @@ sio_pckg_init :-
 
 
 :- sio_pckg_init.
-
 
 endmod.

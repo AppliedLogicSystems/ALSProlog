@@ -176,10 +176,10 @@ pbi_mangle()
 
 }
 
+extern void	disp_heap_item	PARAMS(( PWord * ));
 
-#if 0
 int
-pbi_trailed_mangle()
+pbi_trailed_mangle(void)
 {				/* trailed_mangle(ArgN,Struct,Arg) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -217,8 +217,22 @@ pbi_trailed_mangle()
     }
 	/* argaddr is the location to be modified;
 	   Need to trail this location and move its
-           value onto the trail before we modify it
+       value onto the trail before we modify it
 	 */
+
+/*
+printf("tr_mg: wm_TR=%lx   \n",(long)wm_TR);
+printf("tr_mg: wm_TR-1=%lx   argaddr=%lx\n",(long)(wm_TR-1),(long)argaddr);
+printf("tr_mg: wm_TR-2=%lx   *argaddr=%lx  ",(long)(wm_TR-2),(long)*argaddr);
+disp_heap_item(argaddr); 
+*/
+
+		/*Copy the old value onto the 
+		  right place on the trail: */
+    *((PWord *)wm_TR-2) = *argaddr;
+		/* Trail this location: */
+    *--((PWord *)wm_TR) = (PWord)argaddr;
+	wm_TR = (PWord *)wm_TR - 1;
 
     w_install(argaddr, v3, t3);	/* mangle the new argument */
 
@@ -262,7 +276,6 @@ pbi_trailed_mangle()
 
 }
 
-#endif
 
 
 

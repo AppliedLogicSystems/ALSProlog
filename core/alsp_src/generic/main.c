@@ -751,6 +751,10 @@ whereami(name)
 		*t++ = DIR_SEPARATOR;
 	    }
 	}
+#ifndef MacOS
+	else
+		(*t++ = DIR_SEPARATOR);
+#endif
 
 	/*-------------------------------------------------------------*
 	 * Copy the rest of the string and set the cutoff if it was not
@@ -761,9 +765,9 @@ whereami(name)
 
 	for ((*name == DIR_SEPARATOR ? (s = name+1) : (s = name));;) {
 	    if (*s == DIR_SEPARATOR)
-		cutoff = t;
+			cutoff = t;
 	    if (!(*t++ = *s++))
-		break;
+			break;
 	}
 
     }

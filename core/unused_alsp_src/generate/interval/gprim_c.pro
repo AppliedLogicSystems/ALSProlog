@@ -64,10 +64,10 @@ module pseudocode.
 export make_c/0.
 make_c 
 	:- 
-	make_c( 'pseudoc.ode',  'intrv_pr.h', 'intrv.c').
+	make_c( 'pseudoc.ode',  'intrv_pr.h', 'intrv_pb.h', 'intrv.c').
 
 export make_c/3.
-make_c( SrcFile, OutFileH, OutFileC)
+make_c( SrcFile, OutFileH, OutFileHB, OutFileC)
 	:-
 	open(SrcFile,read,InS,[]),
 	read_pseudo(InS, IntervalOps, PseudoCode1),
@@ -76,18 +76,21 @@ make_c( SrcFile, OutFileH, OutFileC)
 	bagof(SOP, sop(SOP), SOPs),
 
 	open(OutFileH, write, OutHS, []), 
+	open(OutFileHB, write, OutHBS, []), 
 	open(OutFileC, write, OutCS, []),
 	headers(OutHS, OutFileH, SrcFile),
+	headers(OutHS, OutFileHB, SrcFile),
 	headers(OutCS, OutFileC, SrcFile),
 	printf(OutCS, '\n#include "intrv.h"\n', []),
 	printf(OutCS, '\n#if defined(INTCONSTR)\n\n',[]),
 	printf(OutCS, '\n\nextern void extract_bds PARAMS((PWord *, fp *, fp *));\n',[]),
 	printf(OutCS, 'extern void change_bound PARAMS((PWord *, fp *, int));\n\n',[]),
 	
-	compile_s_primitives( SOPs, OutHS, OutCS),
-	compile_primitives( IntervalOps, PseudoCode, OutHS, OutCS),
+	compile_s_primitives( SOPs, OutHS, OutHBS, OutCS),
+	compile_primitives( IntervalOps, PseudoCode, OutHS, OutHBS, OutCS),
 	!,
 	close(OutHS), 
+	close(OutHBS), 
 	printf(OutCS, '\n#endif /* defined(INTCONSTR) */\n\n',[]),
 	close(OutCS).
 
@@ -191,17 +194,17 @@ pc_error(Message, Args)
 %           generic compiler implementation
 %-----------------------------------------------------   
 
-compile_primitives( [], _, _, _).
-compile_primitives( [Op | IntervalOps], PseudoCode, OutHS, OutCS)
+compile_primitives( [], _, _, _, _).
+compile_primitives( [Op | IntervalOps], PseudoCode, OutHS, OutHBS, OutCS)
 	:-
-	compile_primitive( Op , PseudoCode, OutHS, OutCS),
-	compile_primitives( IntervalOps, PseudoCode, OutHS, OutCS).
+	compile_primitive( Op , PseudoCode, OutHS, OutHBS, OutCS),
+	compile_primitives( IntervalOps, PseudoCode, OutHS, OutHBS, OutCS).
 
-compile_s_primitives( [], _, _).
-compile_s_primitives( [SOP | SOPs], OutHS, OutCS)
+compile_s_primitives( [], _, _, _).
+compile_s_primitives( [SOP | SOPs], OutHS, OutHBS, OutCS)
 	:-
-	compile_s_prim( SOP, OutHS, OutCS),
-	compile_s_primitives( SOPs, OutHS, OutCS).
+	compile_s_prim( SOP, OutHS, OutHBS, OutCS),
+	compile_s_primitives( SOPs, OutHS, OutHBS, OutCS).
 /*----------------------------------------------------*
  |	compile_primitive/3
  |	compile_primitive( Name, PseudoCode, Stream)
@@ -210,7 +213,7 @@ compile_s_primitives( [SOP | SOPs], OutHS, OutCS)
  |  compiling  a primitive
  *----------------------------------------------------*/
 
-compile_primitive( Name, PseudoCode, OutHS, OutCS)
+compile_primitive( Name, PseudoCode, OutHS, OutHBS, OutCS)
 	:-
 	catenate('i_', Name, IName),
 	cmt_for(OutCS, IName),
@@ -235,20 +238,22 @@ compile_primitive( Name, PseudoCode, OutHS, OutCS)
 	compile_body( Body, standard, LabPfx, LabelInfo, OutCS ),
 	!,
 	(NNArgs > 4 ->
-		procend( IName, 4, OutCS)
+		procend( IName, 4, OutCS),
+		blt_incd_info(Name, 10, OutHBS)
 		;
-		procend( IName, 3, OutCS)
+		procend( IName, 3, OutCS),
+		blt_incd_info(Name, 7, OutHBS)
 	),
 	ansi_proto(IName, OutHS),
 		%% notify user we finished a primitive:
 	printf(user_output, '-%t\n', [Name]),
 	flush_output(user_output).
 
-compile_primitive( Name, _, _) 
+compile_primitive( Name, _, _, _) 
 	:- 
 	pc_error('IOp %t failed to compile\n', [Name]).
 
-compile_s_prim( SOP, OutHS, OutCS)
+compile_s_prim( SOP, OutHS, OutHBS, OutCS)
 	:-
 	printf('-%t',[SOP]),
 	SOP =.. [Name | Args],
@@ -265,12 +270,13 @@ compile_s_prim( SOP, OutHS, OutCS)
 	compile_body( Body, special, LabPfx, LabelInfo, OutCS ),
 	!,
 	procend( IName, 3, OutCS),
+	blt_incd_info(Name, 7, OutHBS),
 	ansi_proto(IName, OutHS),
 		%% notify user we finished a primitive:
 	printf(user_output, '-%t\n', [Name]),
 	flush_output(user_output).
 
-compile_s_prim( SOP, OutHS, OutCS)
+compile_s_prim( SOP, OutHS, OutHBS, OutCS)
 	:-
 	pc_error('IOp %t failed to compile\n', [SOP]).
 
@@ -362,6 +368,8 @@ procheader(Name, Args, Stream)
 	aux_args(Name,AuxArgs),
 	append(AuxArgs, InternalArgs, I2DeclareArgs),
 	internal_args_dec(I2DeclareArgs, Stream, RIET),
+	int_ret_args(InternalArgs, Stream),
+	int_ret_type_args(InternalArgs, Stream),
 	printf(Stream, '\tint status = 0;\n', []),
 	printf(Stream, '\tPWord stat_var;\n', []),
 	printf(Stream, '\tint stat_var_t;\n', []),
@@ -388,6 +396,8 @@ procheader2(Name, Args, Stream)
 	aux_args(Name,AuxArgs),
 	append(AuxArgs, InternalArgs, I2DeclareArgs),
 	internal_args_dec(I2DeclareArgs, Stream, RIET),
+	int_ret_args(InternalArgs, Stream),
+	int_ret_type_args(InternalArgs, Stream),
 	printf(Stream, '\tint status = 0;\n', []),
 	printf(Stream, '\tPWord stat_var;\n', []),
 	printf(Stream, '\tint stat_var_t;\n', []),
@@ -498,6 +508,34 @@ internal_args_dec0([A | InternalArgs], Stream)
 	printf(Stream, '%t, ', [A]),
 	internal_args_dec0(InternalArgs, Stream).
 
+int_ret_args(InternalArgs, Stream)
+	:-
+	printf(Stream, '\tPWord ',[]),
+	int_ret_args0(InternalArgs, Stream).
+
+int_ret_args0([], Stream).
+int_ret_args0([IA], Stream)
+	:-!,
+	printf(Stream, '%t_v, %t_rval;\n', [IA, IA]).
+int_ret_args0([IA | InternalArgs], Stream)
+	:-
+	printf(Stream, '%t_v, %t_rval, ', [IA, IA]),
+	int_ret_args0(InternalArgs, Stream).
+
+int_ret_type_args(InternalArgs, Stream)
+	:-
+	printf(Stream, '\tint ',[]),
+	int_ret_type_args0(InternalArgs, Stream).
+
+int_ret_type_args0([], Stream).
+int_ret_type_args0([IA], Stream)
+	:-!,
+	printf(Stream, '%t_vt, %t_rtag;\n', [IA, IA]).
+int_ret_type_args0([IA | InternalArgs], Stream)
+	:-
+	printf(Stream, '%t_vt, %t_rtag, ', [IA, IA]),
+	int_ret_type_args0(InternalArgs, Stream).
+
 get_args([], [], _, _).
 
 get_args([PWV | InPWordArgs], [TPV | InTypeArgs], N, Stream)
@@ -538,11 +576,33 @@ ansi_proto(Name, Stream)
 	:-
 	printf(Stream, 'extern int\t%t\t\tPARAMS( (void) );\n',[Name]).
 
+blt_incd_info(IName, N, Stream)
+	:-
+	printf(Stream, '\tBLT("%t",\t%d,\ti_%t,\t"_i_%t"),\n',[IName,N,IName,IName]).
+
 cmt_for(OutCS, IName)
 	:-
 	printf(OutCS, '     /*----------------*\n', []),
 	printf(OutCS, '      |   %t \n', [IName]),
 	printf(OutCS, '      *----------------*/\n\n', []).
+
+setup_return_for(S, VName,N)
+	:-
+	printf(S, '\t  w_get_An(&%t_v, &%t_vt, %d);\n', [VName,VName,N]),
+	printf(S,'#ifndef DoubleType\n',[]),
+	printf(S,'\t  w_mk_term(&%t_rval, &%t_rtag, (PWord) TK_DDOUBLE, 4);\n',[VName,VName]),
+	printf(S,'\t  for (i = 0; i < 4; i++)\n',[]),
+	printf(S,'\t    w_install_argn(%t_rval, i + 1, (PWord) (*(((short *) &%t) + i)), WTP_INTEGER);\n',[VName,VName]),
+	printf(S,'#else\n',[]),
+	printf(S,'\t  w_mk_double(&%t_rval, &%t_rtag, %t);\n',[VName,VName,VName]),
+	printf(S,'#endif\n',[]),
+
+	printf(S, '\t  if(!w_unify(%t_v, %t_vt, %t_rval, DblRtrnType))\n',[VName,VName,VName]),
+	printf(S,'\t\tFAIL;\n',[]).
+/*
+	printf(S, '\t  if(w_unify(%t_v, %t_vt, %t_rval, DblRtrnType))\n',[VName,VName,VName]),
+	printf(S, '\t\tSUCCEED;\n\t  else\n\t\tFAIL;\n',[]).
+*/
 
 consis_and_change(S)
 	:-
@@ -550,25 +610,54 @@ consis_and_change(S)
 	printf(S, '\telse if ( xl > xh ) FAIL;\n',[]),
 	printf(S, '\telse if ( yl > yh ) FAIL;\n',[]),
 
-%/*
+	printf(S, '\tif ((zlchange & status) || (zhchange & status)) {\n', []),
+	setup_return_for(S, zl,5),
+	setup_return_for(S, zh,6),
+	printf(S, '\t}\n\n',[]),
+
+	printf(S, '\tif ((xlchange & status) || (xhchange & status)) {\n', []),
+	setup_return_for(S, xl,7),
+	setup_return_for(S, xh,8),
+	printf(S, '\t}\n\n',[]),
+
+	printf(S, '\tif ((ylchange & status) || (yhchange & status)) {\n', []),
+	setup_return_for(S, yl,9),
+	setup_return_for(S, yh,10),
+	printf(S, '\t}\n\n',[]).
+
+
+
+
+/*
 	printf(S, '\tif (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);\n',[]),
 	printf(S, '\tif (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);\n',[]),
 	printf(S, '\tif (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);\n',[]),
 	printf(S, '\tif (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);\n',[]),
 	printf(S, '\tif (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);\n',[]),
 	printf(S, '\tif (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);\n\n',[]).
-%*/
-%	printf(S, '\tif ((zlchange & status) || (zhchange & status)) \n',[]),
+*/
 
 consis_and_change2(S)
 	:-
 	printf(S, '\tif ( zl > zh ) FAIL;\n',[]),
 	printf(S, '\telse if ( xl > xh ) FAIL;\n',[]),
 
+	printf(S, '\tif ((zlchange & status) || (zhchange & status)) {\n', []),
+	setup_return_for(S, zl,4),
+	setup_return_for(S, zh,5),
+	printf(S, '\t}\n\n',[]),
+
+	printf(S, '\tif ((xlchange & status) || (xhchange & status)) {\n', []),
+	setup_return_for(S, xl,6),
+	setup_return_for(S, xh,7),
+	printf(S, '\t}\n\n',[]).
+
+/*
 	printf(S, '\tif (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);\n',[]),
 	printf(S, '\tif (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);\n',[]),
 	printf(S, '\tif (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);\n',[]),
 	printf(S, '\tif (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);\n\n',[]).
+*/
 
 /*--------------------------------------------------------------*
  |	out/2

@@ -162,8 +162,11 @@ extern	int 	pbi_clct_tr 		PARAMS(( void ));
 extern	int 	pbi_del_tm_for		PARAMS(( void ));
 extern	int	pbi_bind_vars		PARAMS(( void ));
 
+#ifdef INTCONSTR
 	/* intrv.c */
 
+#include "intrv_pr.h"
+/*
 extern int		i_equal			PARAMS( (void) );
 extern int		i_greatereq		PARAMS( (void) );
 extern int		i_higher		PARAMS( (void) );
@@ -187,8 +190,11 @@ extern int      i_tan           PARAMS( (void) );
 extern int      i_vabs          PARAMS( (void) );
 extern int      i_wrap          PARAMS( (void) );
 extern int      i_xp            PARAMS( (void) );
+*/
 
 extern int	pbi_fuzz	PARAMS((void));
+#endif
+
 
 	/* bdbg.c */
 extern	int	pbi_dbg_nospy	PARAMS(( void ));
@@ -240,6 +246,9 @@ extern	int	pbi_true	PARAMS(( void ));
 extern	int	pbi_equal	PARAMS(( void ));
 extern	int	pbi_arg		PARAMS(( void ));
 extern	int	pbi_mangle	PARAMS(( void ));
+#ifdef TRAILVALS
+extern int pbi_trailed_mangle PARAMS(( void ));
+#endif
 extern	int	pbi_functor	PARAMS(( void ));
 extern	int	pbi_identical	PARAMS(( void ));
 extern	int	pbi_unidentical	PARAMS(( void ));

@@ -195,4 +195,10 @@ int BNRP_oldRM;
 				} \
 				x ## flipped();
 
+#ifndef DoubleType
+#define DblRtrnType WTP_STRUCTURE
+#else
+#define DblRtrnType WTP_DOUBLE
+#endif
+
 #endif /* defined(INTCONSTR) */

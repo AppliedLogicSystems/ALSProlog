@@ -23,6 +23,7 @@
 #include "icodegen.h"
 #ifdef FREEZE
 #include "freeze.h"
+#include "hztypes.h"
 #endif
 
 #ifdef MacOS
@@ -125,13 +126,38 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
  *--------------------------------------*/
 
 	/*-------------------------------------------------*
-	 |  RETRAIL is simple trailing with no delay var
+	 |  PLAINTRAIL is simple trailing with no delay var
 	 |  checking;  arg #2 simply corresponds to TRAIL
 	 *-------------------------------------------------*/
 
-#define RETRAIL(r,l) \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB)  \
-	  *--mr_TR = PWORD(r); }
+    /*-------------------------------------------------*
+	 |  RETRAIL is for moving a trail pair of words
+	 |  during compaction of the trail during a cut;
+	 *-------------------------------------------------*/
+
+#ifdef TRAILVALS
+
+#define PLAINTRAIL(r)                             \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) \
+		*--mr_TR = PWORD(r);                        \
+		*--mr_TR = *((PWord *)r); }
+
+#define RETRAIL(r,r1) \
+	{ if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) {  \
+		*--mr_TR = PWORD(r);               \
+		*--mr_TR = PWORD(r1);              \
+	} }
+#else
+
+#define PLAINTRAIL(r)                             \
+	{ if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) \
+		*--mr_TR = PWORD(r);  }
+
+#define RETRAIL(r,r1) \
+	{ if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB)  \
+		*--mr_TR = PWORD(r);  }
+
+#endif
 
 #define BIND(r,f)     { TRAIL(r,0); *(r) = PWORD(f); }
 
@@ -148,11 +174,40 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 	 |  code in non-DEBUGFREEZE case.
 	 *-------------------------------------------------*/
 
+#ifdef TRAILVALS
+
+#define TRAIL(r,l) 														  \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 					  \
+	  *(PWord *)--mr_TR = PWORD(r); 									  \
+	  *(PWord *)--mr_TR = *PWPTR(r);									  \
+	  if ( CHK_DELAY(r) ) { 											  \
+			printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",l,(int)r,(int)mr_TR-1); \
+  			*((PWord *)r +1) = (PWord)((PWord *)r + 1); 				  \
+	    	wm_safety = -2; wm_interrupt_caught = 3; } } } 
+
+#define VVBIND(r,f,lnn)   { 						  						   \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 						   \
+	  *(PWord *)--mr_TR = PWORD(r); 										   \
+	  *(PWord *)--mr_TR = *PWPTR(r);										   \
+	  if ( CHK_DELAY(r) ) { 												   \
+			printf("vvb@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x\n",lnn, 			   \
+					(int)r,(long) (((PWord *) r) - wm_heapbase),(int)mr_TR-1); \
+  			*((PWord *)r +1) = (PWord)((PWord *)r +1); 					       \
+	  		if ( CHK_DELAY(f) && r != f ) { 								   \
+			     printf("   match is delay [f=%x[_%lu]]\n", 				   \
+							  (int)f,(long)(((PWord *) f) - wm_heapbase));	   \
+  				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 				   \
+				combin_dels((PWord)r,(PWord)f); }  } } }; 					   \
+  *(r) = PWORD(f); }
+
+#else /* NO TRAILVALS */
+
 #define TRAIL(r,l) \
   { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
 	  *--mr_TR = PWORD(r); \
 	  if ( CHK_DELAY(r) ) { \
 			printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",l,(int)r,(int)mr_TR-1); \
+			*((PWord *)r +1) = (PWord)((PWord *)r + 1);					\
 	    	wm_safety = -2; wm_interrupt_caught = 3; } } } 
 
 #define VVBIND(r,f,lnn)   { \
@@ -161,26 +216,60 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 	  if ( CHK_DELAY(r) ) { \
 			printf("vvb@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x\n",lnn, \
 					(int)r,(long) (((PWord *) r) - wm_heapbase),(int)mr_TR-1); \
+			*((PWord *)r +1) = (PWord)((PWord *)r + 1);						\
 	  		if ( CHK_DELAY(f) && r != f ) { \
 			  printf("   match is delay [f=%x[_%lu]]\n",(int)f,(long)(((PWord *) f) - wm_heapbase)); \
+				*((PWord *)f + 1) = (PWord)((PWord *)f + 1);				\
 				combin_dels((PWord)r,(PWord)f); }  } } }; \
   *(r) = PWORD(f); }
 
+#endif /* TRAILVALS */
+
 #else /*=== no-DEBUGFREEZE ===*/
+
+#ifdef TRAILVALS
+
+#define TRAIL(r,l) \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *(mr_TR-2) = *r; \
+	  *--mr_TR = PWORD(r); \
+	  mr_TR -= 1;														\
+	  if ( CHK_DELAY(r) ) { \
+  			*((PWord *)r +1) = (PWord)((PWord *)r + 1); 				  \
+			wm_safety = -2; wm_interrupt_caught = 3; } } }
+
+#define VVBIND(r,f,lln)   { \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *(mr_TR-2) = *r; \
+	  *--mr_TR = PWORD(r); \
+	  mr_TR -= 1;														\
+	  if ( CHK_DELAY(r) ) { \
+  			*((PWord *)r +1) = (PWord)((PWord *)r + 1); 				  \
+	  		if ( CHK_DELAY(f) && r != f ) { \
+  				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 				   \
+				combin_dels((PWord)r,(PWord)f); }  } } }; \
+  *(r) = PWORD(f); }
+
+#else /* NO TRAILVALS */
 
 #define TRAIL(r,l) \
   { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
 	  *--mr_TR = PWORD(r); \
 	  if ( CHK_DELAY(r) ) { \
+			*((PWord *)r +1) = MMK_VAR((PWord *)r +1); \
 			wm_safety = -2; wm_interrupt_caught = 3; } } }
 
 #define VVBIND(r,f,lln)   { \
   { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
 	  *--mr_TR = PWORD(r); \
 	  if ( CHK_DELAY(r) ) { \
+			*((PWord *)r +1) = (PWord)((PWord *)r + 1);                   \
 	  		if ( CHK_DELAY(f) && r != f ) { \
+				*((PWord *)f + 1) = (PWord)((PWord *)f + 1);                   \
 				combin_dels((PWord)r,(PWord)f); }  } } }; \
   *(r) = PWORD(f); }
+
+#endif /* TRAILVALS */
 
 #endif /*=== DEBUGFREEZE ===*/
 
@@ -198,22 +287,14 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
   { while( M_ISVAR(PWORD(v)) && (v) != *(PWord **)(v)) \
 	  (v) = *(PWord **)(v); }
 
-/*
+/*----------------
+    register PWord *reg1 = NULL;
+ *----------------*/
 #ifdef TRAILVALS
-#define UNWINDTRAIL for (reg1 = (mr_B - 1); reg1 >= mr_TR; reg1--){ \
-	if (1 & *reg1) \
-		*PWPTR(~(unsigned long)1 & *reg1) = *(--reg1); \
-	else \
-		*PWPTR(*reg1) = MMK_VAR(*reg1);\
-	}
-#else
-#define UNWINDTRAIL for (reg1 = mr_TR; reg1 < mr_B; reg1++){ *PWPTR(*reg1) = MMK_VAR(*reg1);}
-#endif
-*/
 
-#ifdef TRAILVALS
-#define UNWINDTRAIL for (reg1 = mr_TR; reg1 < mr_B; reg1++){ *PWPTR(*reg1) = MMK_VAR(*reg1);}
+#define UNWINDTRAIL for (reg1 = mr_TR+1; reg1 < mr_B; reg1+=2){ *PWPTR(*reg1) = *((PWord *)reg1-1);}
 #else
+
 #define UNWINDTRAIL for (reg1 = mr_TR; reg1 < mr_B; reg1++){ *PWPTR(*reg1) = MMK_VAR(*reg1);}
 #endif
 
@@ -769,7 +850,7 @@ overflow_check0:
 					reg1 = PWPTR(*--S);
 					DEREF(reg1);
 					if (M_ISVAR(reg1) && reg1 < wm_heapbase) {
-						RETRAIL(reg1,717);
+						PLAINTRAIL(reg1);   
 			    		*reg1 = *S = *mr_H = MMK_VAR(mr_H);
 			    		mr_H++;
 					}
@@ -1040,13 +1121,6 @@ u_var_common:
 		DISPATCH;
 	    }
 		TRAIL(reg1,1003);
-/*
-#ifdef DEBUGFREEZE
-		TRAIL(reg1,1003);
-#else
-	    TRAIL(reg1);	 for gc purposes only 
-#endif
-*/
 	    *reg1 = *mr_H = MMK_VAR(mr_H);
 	    mr_H++;
 	    DISPATCH;
@@ -1061,24 +1135,10 @@ CASE(W_U_VAR_SP_m1_p2):		/* This is the pair that appears in
 	    }
 	    reg1 = mr_SP-1;
 	    TRAIL(reg1,1021);
-/*
-#ifdef DEBUGFREEZE
-	    TRAIL(reg1,1021);
-#else
-	    TRAIL(reg1);
-#endif
-*/
 	    *reg1 = *mr_H = MMK_VAR(mr_H);
 	    mr_H++;
 	    reg1 = mr_SP+2;
 	    TRAIL(reg1,1029);
-/*
-#ifdef DEBUGFREEZE
-	    TRAIL(reg1,1029);
-#else
-	    TRAIL(reg1);
-#endif
-*/
 	    *reg1 = *mr_H = MMK_VAR(mr_H);
 	    mr_H++;
 	    DISPATCH;
@@ -1141,13 +1201,6 @@ CASE(W_U_LVAL):		/* unify_local_value src */
 	    DEREF(reg1);
 	    if (M_ISVAR(reg1) && reg1 < wm_heapbase) {
 		TRAIL(reg1,1095);
-/*
-#ifdef DEBUGFREEZE
-		TRAIL(reg1,1095);
-#else
-		TRAIL(reg1);
-#endif
-*/
 		*mr_H = *reg1 = MMK_VAR(mr_H);
 		mr_H++;
 		DISPATCH;
@@ -1165,13 +1218,6 @@ CASE(W_P_UNSAFE):		/* put_unsafe_value src, dst  */
 	    DEREF(reg1);
 	    if (M_ISVAR(reg1) && reg1 < mr_SPB) {
 		TRAIL(reg1,1116);
-/*
-#ifdef DEBUGFREEZE
-		TRAIL(reg1,1116);
-#else
-		TRAIL(reg1);
-#endif
-*/
 		*getreg(OPSIZE + REGSIZE) = *reg1 = *mr_H = MMK_VAR(mr_H);
 		mr_H++;
 	    }
@@ -1408,7 +1454,9 @@ CASE(W_NCIADC):		/* next_choice_in_a_deleted_clause */
 CASE(W_FAIL):
 	    DOFAIL;
 
+		/* ----------------------------------------------------------*/
 	    /* Cut instructions - macro_cutproceed, cut_proceed,  docut  */
+		/* ----------------------------------------------------------*/
 
 CASE(W_MACRO_CUTPROCEED):	/* macro_cutproceed cutpt is arg1 */
 	    reg1 = PWPTR(wm_heapbase - MINTEGER(arg(mr_E, 1)));
@@ -1427,6 +1475,7 @@ CASE(W_DOCUT):			/* do_cut        */
 	    P += OPSIZE;
 
 cut:
+				/* Check if this is a Prolog interrupt: */
 	    if (wm_safety < 0) {	/* Prolog interrupt */
 		wm_safety = wm_normal;	/* reset interrupt */
 
@@ -1448,34 +1497,69 @@ cut:
 	    }
 
 cut_no_ovflow_check:
-						/* cutpt is arg1 */
+						/* cutpt is in arg1 */
 	    P += GCMAGICSIZE;
 
+			/* If SPB (Stack pointer backtrack point) is
+			   already above the cut point (reg1), nothing
+			   to do
+			 */
 	    if (mr_SPB > reg1)
 			DISPATCH;
 
+			/* If SPB is =< cut point, sweep thru the
+			   choice point stack, resetting the mr_B
+			   and mr_SPB values from the choice point
+			   frames until mr_SPB > reg1 
+			 */
 	    while (mr_SPB <= reg1) {
 			mr_B = cp_B(mr_B);
 			mr_SPB = cp_SPBm(mr_B);
 	    }
 
+			/* Reset mr_HB from new choice point: */
 	    mr_HB = cp_HB(mr_B);
+
+			/* Now have to compact the trail from the
+			   old top of trail to the new choice point;
+			   Save current (old) top of trail in reg2:
+			 */
 	    reg2  = mr_TR;
+			/* Reset mr_TR to its new value: */
 	    mr_TR = mr_B;
-	    reg1  = mr_B - 1; 		/* Work from most recent CP 
-								 | downward to top of trail */
+			/* Use reg1 to sweep from point just above the
+			   new top of trail down to old top of trail:
+			 */
+	    reg1  = mr_B - 1; 		/* Work from most recent (current) CP 
+								 | downward to (old) top of trail */
 
 	    for (;;) {
 			if (reg1 < reg2)	/* Finished sweep; continue execution */
 		    	DISPATCH;
+				/* Sweeping down, the first word of a CP we hit is PrevB,
+				   which points back upward; trail entries all have to 
+				   point down into the heap. So this is a test for PrevB;
+				   if we hit it, skip over the CP:
+			 */
 			if (*reg1 > PWORD(reg1)) {
 		    	reg1 -= 4;
 			}
 			else {
-		    	RETRAIL(PWPTR(*reg1),1410);		/* trail if necessary */
+		    	RETRAIL(PWPTR(*reg1),PWPTR(*(reg1-1)));	/* trail if necessary */
+#ifdef TRAILVALS
+		    	reg1 = reg1 - 2;
+#else
 		    	reg1--;
+#endif
 			}
 	    }	/* for (;;) */
+#ifdef TRAILVALS
+		/*  We have been skipping down pairs of trail entries, stepping
+			on the UPPER of each pair; so we need to drop down one so
+	     */
+		reg1--;
+#endif
+
 	    goto get_out;
 
 	    /* Meta call instructions - cut_macro, mod_closure, ocall, colon,
@@ -1644,8 +1728,11 @@ CASE(W_THROW):
 		    wm_aborted = 1;
 		    DOFAIL;
 		}
-		for (reg1=mr_TR; reg1<mr_B; reg1++) /* untrail */
+/***** FIX ME !!!!!!!! TRAILVALS   *****
+		for (reg1=mr_TR; reg1<mr_B; reg1++) * untrail *
 		    ** (PWord **) reg1 = *reg1;
+*/
+	    UNWINDTRAIL;
 		
 		mr_TR = mr_B + 4;
 		mr_B = cp_B(mr_B);
@@ -1685,7 +1772,7 @@ get_out:
     /* Prologue */
     wm_regidx--;
 
-#if 0 /* old code */
+#if 0 /* ----------old code ----------*/
     if (untrail) {
 	for (;;) {		/* untrail */
 	    for (reg1 = mr_TR; reg1 < mr_B; reg1++)
@@ -1704,30 +1791,54 @@ get_out:
 	wm_H = mr_H;
 	wm_B = mr_B;
     }
-#endif
+#endif /* ----------old code ----------*/
 
-    /* Cut away top choicepoints prior to returning */
+    	/* Cut away top choicepoints prior to returning */
+		/* cutpt is in reg1: */
     reg1 = mr_E-1;
 
+			/* If SPB is =< cut point, sweep thru the
+			   choice point stack, resetting the mr_B
+			   and mr_SPB values from the choice point
+			   frames until mr_SPB > reg1 
+			 */
     while (mr_SPB <= reg1) {
 	mr_B = cp_B(mr_B);
 	mr_SPB = cp_SPBm(mr_B);
     }
 
+			/* Reset mr_HB from new choice point: */
     mr_HB = cp_HB(mr_B);
+			/* Now have to compact the trail from the
+			   old top of trail to the new choice point;
+			   Save current (old) top of trail in reg2:
+			 */
     reg2 = mr_TR;
+			/* Reset mr_TR to its new value: */
     mr_TR = mr_B;
+			/* Use reg1 to sweep from point just above the
+			   new top of trail down to old top of trail:
+			 */
     reg1 = mr_B - 1;
 
     for (;;) {
 	if (reg1 < reg2)
 	    break;
+			/* Sweeping down, the first word of a CP we hit is PrevB,
+			   which points back upward; trail entries all have to 
+			   point down into the heap. So this is a test for PrevB;
+			   if we hit it, skip over the CP:
+			 */
 	if (*reg1 > PWORD(reg1)) {
 	    reg1 -= 4;
 	}
 	else {
-	    RETRAIL(PWPTR(*reg1),1686); 	/* trail if necessary */
+	    RETRAIL(PWPTR(*reg1),PWPTR(*(reg1-1)));	/* trail if necessary */
+#ifdef TRAILVALS
+		    	reg1 = reg1 - 2;
+#else
 	    reg1--;
+#endif
 	}
     }
     wm_TR = mr_TR;
@@ -1903,10 +2014,11 @@ _w_unify(f1, f2)
  |  interrupt or vvbind constraint mechanisms; used in
  |  implementing the binding of two interval constraint
  |  delay vars:
+ |
+ |		'$bind_vars'(R, G)
+ |
+ |		installs a reference to G into R (R --> G)
  *---------------------------------------------------------------*/
-#define PLAINTRAIL(r) \
-  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) \
-	  *--mr_TR = PWORD(r); }
 
 int     pbi_bind_vars           PARAMS(( void ));
 

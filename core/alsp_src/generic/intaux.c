@@ -89,7 +89,7 @@ extract_bds(IntStruct, ZL, ZH)
 		printf("Error: Non-delay var passed to extract_bds\n");
 }
 
-
+#if 0
 void change_bound	PARAMS((PWord *, fp *, int));
 
 void change_bound(IntStruct, PtrFP, Which)
@@ -127,6 +127,7 @@ void change_bound(IntStruct, PtrFP, Which)
 		w_install_argn((PWord)CstrTm, (Which?5:4), rval, rtag);
 
 }
+#endif  /* #ifdef 0 */
 
 
 fp i_next  PARAMS((fp *));

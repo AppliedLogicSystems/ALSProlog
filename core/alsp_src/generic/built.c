@@ -208,6 +208,8 @@ static struct blt_struct {
 #endif /* FREEZE */
 
 #ifdef INTCONSTR
+#include "intrv_pb.h"
+/*
 	BLT("equal",	  3, i_equal, "_i_equal"),
 	BLT("greatereq",  3, i_greatereq, "_i_greatereq"),
 	BLT("higher",	  3, i_higher, "_i_higher"),
@@ -232,6 +234,7 @@ static struct blt_struct {
 	BLT("vabs",	  3, i_vabs, "_i_vabs"),
 	BLT("wrap",	  4, i_wrap, "_i_wrap"),
 	BLT("xp",	  3, i_xp, "_i_xp"),
+*/
 
 	BLT("fuzz_float",  3, pbi_fuzz, "_pbi_fuzz"),
 #endif /* INTCONSTR */
@@ -454,11 +457,9 @@ static struct blt_struct {
 	BLT("functor", 3, pbi_functor, "_pbi_functor"),
 	BLT("integer", 1, pbi_integer, "_pbi_integer"),
 	BLT("mangle", 3, pbi_mangle, "_pbi_mangle"),
-/*
 #ifdef TRAILVALS
 	BLT("trailed_mangle", 3, pbi_trailed_mangle, "_pbi_trailed_mangle"),
 #endif
-*/
 	BLT("nonvar", 1, pbi_nonvar, "_pbi_nonvar"),
 	BLT("number", 1, pbi_number, "_pbi_number"),
 	BLT("var", 1, pbi_var, "_pbi_var"),

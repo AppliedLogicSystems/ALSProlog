@@ -24,6 +24,14 @@ freeze(Mod, Var, Goal)
 
 freeze(Mod, Var, Goal)
 	:-
+	'$is_delay_var'(Var),
+	subst_var(Goal, Var, NewVar, NewGoal),
+	'$delay'(NewVar,Mod,NewGoal,DelayTerm),
+	!,
+	Var = NewVar.
+
+freeze(Mod, Var, Goal)
+	:-
 	'$delay'(Var,Mod,Goal,DelayTerm).
 
 /*!----------------------------------------------------------------------
@@ -76,16 +84,13 @@ delay_handler('$delay'(_,Next,Module,Goal))
 '$combine_dvars'(R,F)
 	:-
 		%% F is the senior var;
-		pbi_write('-----Combine delay vars: '-(R,F)),pbi_nl,pbi_ttyflush,
+%		pbi_write('-----Combine delay vars: '-(R,F)),pbi_nl,pbi_ttyflush,
 
 	'$delay_term_for'(R, R_DelayTerm),
 	arg(4, R_DelayTerm, R_ConstrTerm),
-%pbi_write('r-left'=R_ConstrTerm),pbi_nl,
 
 	'$delay_term_for'(F, F_DelayTerm),
 	arg(4, F_DelayTerm, F_ConstrTerm),
-%pbi_write('f-right'=F_ConstrTerm),pbi_nl,
-%pbi_ttyflush,
 
 	comb_left_cstr(R_ConstrTerm, R, F_ConstrTerm, F).
 
@@ -136,22 +141,9 @@ comb_rt_cstr(F_Constr, F, R_Intv, R_Constr, R)
 		%% No intvls:
 cmbn(nil, F_Constr, F, nil, R_Constr, R)
 	:-
-			%% Combine both constraints,
-			%% using a new variable:
-	subst_var(F_Constr, F, G, G_CF),
-	subst_var(R_Constr, R, G, G_CR),
-
-			%% Freeze the combined constraints
-			%% on the new variable:
-	freeze(Mod, G, (G_CF, G_CR)),
-
-			%% Bind both original vars to
-			%% the new variable (must use this
-			%% to avoid recursively invoking
-			%% another var-var bind:
-	'$bind_vars'(F, G),
-	'$bind_vars'(R, G).
-
+	'$delay_term_for'(F, F_DelayTerm),
+	trailed_mangle(4, F_DelayTerm, (F_Constr, R_Constr)),
+	'$bind_vars'(R, F).
 
 		%% R has intvl, but not F:
 cmbn(nil, F_Constr, F, R_Intv, R_Constr, R)
@@ -203,23 +195,12 @@ cmbn(F_Intv, F_Constr, F, nil, R_Constr, R)
 		%% Both have intvls:
 cmbn(F_Intv, F_Constr, F, R_Intv, R_Constr, R)
 	:-
-		pbi_write('Both intvl case'),pbi_nl,pbi_ttyflush,
-		pbi_write(f_intv=F_Intv),pbi_nl,pbi_ttyflush,
-		pbi_write(r_intv=R_Intv),pbi_nl,pbi_ttyflush,
-		pbi_write(calling-add_relation(==, R, F)),pbi_nl,pbi_ttyflush,
+%		pbi_write('Both intvl case'),pbi_nl,pbi_ttyflush,
+%		pbi_write(f_intv=F_Intv),pbi_nl,pbi_ttyflush,
+%		pbi_write(r_intv=R_Intv),pbi_nl,pbi_ttyflush,
+%		pbi_write(calling-add_relation(==, R, F)),pbi_nl,pbi_ttyflush,
 		%% Impose constraint equality between the vars:
 	rel_arith:add_relation(==, R, F).
-/*
-cmbn(F_Intv, F_Constr, F, R_Intv, R_Constr, R)
-	:-
-	F_Intv = intvl(FType,FVar,_, FL,FU),
-	R_Intv = intvl(RType,RVar,_, RL,RU),
-	min(FL,RL,GL),
-	max(FU,RU,GU),
-	G_Intv = intvl(GType,GVar,_, GL,GU),
-*/
-	
-
 
 subst_var(Term, V, W, W)
 	:-

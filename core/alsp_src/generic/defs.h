@@ -134,7 +134,7 @@
 
 #ifdef INTCONSTR
 #define FREEZE 1
-/*  #define TRAILVALS 1  */
+#define TRAILVALS 1
 #endif
 
 /*---------------------------------------------------------------------*

@@ -268,10 +268,10 @@ pbi_name()
 	    else
 		w_mk_uia_in_place(&v, &t, str);
 #endif
-	    if (w_unify(v1, t1, v, t))
-		SUCCEED;
-	    else
-		FAIL;
+	    if (w_unify(v1, t1, v, t))   
+			SUCCEED;
+		else
+			FAIL;
 	}
 	else
 	    FAIL;

@@ -118,30 +118,26 @@ static tkentry initial_table[] =
 
 tkentry *toktable = (tkentry *) 0;
 
-
-/*
+/*---------------------------------------------------------------------
  * hashtable is accessible only to this module.  It points to an array of
  * pointers to the tokens.
- */
+ *---------------------------------------------------------------------*/
 
 static tkentry **hashtable;
 
-
-/*
- * strings points to the next character position which may be allocated for
- * a token string.
- */
+/*---------------------------------------------------------------------
+ * Variable strings points to the next character position which may be
+ * allocated for a token string.
+ *---------------------------------------------------------------------*/
 
 static UCHAR *strings;
 
-
-/*
+/*---------------------------------------------------------------------
  * strings_last points to the last character in the area in which strings
  * points to.
- */
+ *---------------------------------------------------------------------*/
 
 static UCHAR *strings_last;
-
 
 /*
  * strings_next is a pointer to future areas to be used by strings.  The first
