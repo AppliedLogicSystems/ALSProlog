@@ -35,8 +35,41 @@ Build for multiple platforms at the ALS Office
 	-parent of build directories
 	-make options
 
-   Example: % ../alsp_src/unix/build_all /apache/builds alspro.lib
+   Example: % ../alsp_src/unix/build_all /apache/builds libalspro.a
 
    Error messages printed on the standard error stream will be stored in a
    files named os.err, where os is the name of the Unix OS.
+
+Build Installer
+---------------
+
+To create an installer for Unix system, an install configuration file
+called "install_components" must be created in the build's parent directory.
+
+The install_components file defines paths to all the standard components
+of the ALS Prolog system that are stored outside for alsp_src.  See the
+example install_components file below.
+
+Once the install_components file is set up, execute make (or build all) with
+the target installer
+
+Examples: % make installer
+          
+	  % ../alsp_src/unix/build_all /apache/builds installer
+
+Example install_components file
+-------------------------------
+
+TCL_DIR=../../../../../tcltk_interface
+
+ODBC_DIR=../../../odbc
+
+WINDOW_DIR=../../../x_motif
+
+FOREIGN_SDK_DIR=/dakota/als_foreign_sdks/UNIX_Foreign_SDK
+
+EXAMPLES_DIR=/dakota/examples
+
+MANUAL_DIR=/dakota/als_man/als_man.pdf/guide
+
 
