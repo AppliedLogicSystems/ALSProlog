@@ -235,6 +235,20 @@ pbi_trailed_mangle(void)
 
 }
 
+/*---------------------------------------------------------------
+ |  trailed_mangle0(v1,v2,t2,v3,t3)
+ |	v1 - integer giving arg pos in v2 to replace;
+ |	v2 - structure/list in which to replace arg;
+ |	t2 - type of v2;
+ |	v3 - incoming thing to put into arg v1 of term v2
+ |	t3 - type of v3
+ |
+ |	Does the mangle and double-word trails the change;
+ |	word #1 of the trail pair points to the position
+ |	in v2 which was changed; word #2 in the pair points
+ |	to the old value of that position.
+ *---------------------------------------------------------------*/
+
 int
 trailed_mangle0(v1,v2,t2,v3,t3)
 	PWord v1, v2, v3;
@@ -246,14 +260,16 @@ trailed_mangle0(v1,v2,t2,v3,t3)
     PWord *newv3 = NULL, oldarg = 0, *newoldarg = NULL;	/* stifle -Wall */
 	int oldargt;
 
-/* printf("IN_tm:v1=%0x v2=%0x,t2=%d,v3=%0x,t3=%d\n",v1,v2,t2,v3,t3); */
+/*
+printf("IN_tm:v1=%0x v2=%0x,t2=%d,v3=%0x,t3=%d\n",(int)v1,(int)v2,(int)t2,(int)v3,(int)t3);
+*/
 
     switch (t2) {
 	case WTP_STRUCTURE:
-		w_get_argn(&oldarg, &oldargt, v2, v1);
 	    w_get_arity(&arity, v2);
 	    if (v1 > arity || v1 < 1)
 			FAIL;
+		w_get_argn(&oldarg, &oldargt, v2, v1);
 	    w_get_argaddr(argaddr, v2, (int) v1, arity);
 	    break;
 
@@ -279,24 +295,42 @@ trailed_mangle0(v1,v2,t2,v3,t3)
 	 */
 
 /*
-printf("tr_mg: wm_TR=%lx   \n",(long)wm_TR);
-printf("tr_mg: wm_TR-1=%lx   argaddr=%lx\n",(long)(wm_TR-1),(long)argaddr);
-printf("tr_mg: wm_TR-2=%lx   *argaddr=%lx  ",(long)(wm_TR-2),(long)*argaddr);
+printf("tr_mg: wm_TR=%0x   \n",(int)wm_TR);
+printf("tr_mg: wm_TR-1=%0x   argaddr=%0x\n",(int)(wm_TR-1),(int)argaddr);
+printf("tr_mg: wm_TR-2=%0x   *argaddr=%0x  ",(int)(wm_TR-2),(int)*argaddr);
 pbi_cptx();
 disp_heap_item(argaddr); 
 */
 
 	/* Copy the old value onto the right place on the trail: */
 
-/*    *(((PWord *)wm_TR)-2) = oldarg; */
-    	*(((PWord *)wm_TR)-2) = *argaddr;
+    	*(((PWord *)wm_TR)-2) = oldarg; 
 
-/* printf("Compare: *argaddr=%0x  oldarg=%0x \n",*argaddr, oldarg); */
+/*
+    	*(((PWord *)wm_TR)-2) = *argaddr;
+*/
+
+/*
+printf("Compare: *argaddr=%0x [%0x]  oldarg=%0x \n",(int)*argaddr, (int)(wm_heapbase + *argaddr), (int)oldarg);
+*/
 
 
 		/* Trail this argument location: */
 
     *(((PWord *)wm_TR)-1) = (PWord)argaddr;
+
+/*
+printf("tr_mg: AFTER TRAIL\n");
+printf("tr_mg: wm_TR=%0x   \n",(int)wm_TR);
+printf("tr_mg: wm_TR-1=%0x [%0x]\n",(int)(wm_TR-1),(int)*(wm_TR-1));
+printf("tr_mg: wm_TR-2=%0x [%0x]\n",(int)(wm_TR-2),(int)*(wm_TR-2));
+pbi_cptx();
+*/
+
+
+
+
+	
 	wm_TR = (PWord *)wm_TR - 2;
 
     w_install(argaddr, v3, t3);	 /* mangle the new argument */

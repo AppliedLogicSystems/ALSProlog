@@ -349,7 +349,7 @@ gc()
 		/*------------------------------------------------------------------*
 		 | mark_from(L) expects L to be (an ordinary C) pointer to a location
 		 | holding a Prolog (heap) value; since tr points at a trail location,
-		 | then *tr is such a value for the ordinary (non-TRAILVALS) sitiutation;
+		 | then *tr is such a value for the ordinary (non-TRAILVALS) situtation;
 		 | However, in the TRAILVALS case, this is only true for the (upper)
 		 | one of each pair of entries on the trail.  In the lower member
 		 | of a trail pair, we have copied the contents of a heap location into
@@ -873,8 +873,10 @@ mark(val)
     register long *ptr, *bptr;
     register long tag, btag;
     int arity;
+#if 0
 #ifdef FREEZE
     long xval;
+#endif
 #endif
 
     bptr = (long *) 0;
@@ -911,6 +913,7 @@ mark_top:
 
 	case MTP_UNBOUND:
 
+#if 0
 #ifdef FREEZE
 				/* If the var is a delay var, mark the 
 				   whole delay term containing it:
@@ -933,6 +936,7 @@ mark_top:
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 			}
 #endif /* FREEZE */
+#endif
 
 	    if (MARKED(ptr))
 			goto mark_backup;
