@@ -1,17 +1,18 @@
 /*===========================================================*
- * wintcode.c
- *      Copyright (c) 1986-1994 Applied Logic Systems
- *
- *		-- Functions for manipulating the code area & relatives
- *
- * Author: Kevin A. Buettner
- * Creation Date: 8/14/86
+ |			wintcode.c
+ |		Copyright (c) 1986-1995 Applied Logic Systems
+ |
+ |			-- Functions for manipulating the code area & relatives
+ |
+ | Author: Kevin A. Buettner
+ | Creation Date: 8/14/86
+ | 10/26/94 - C. Houpt -- Added prototypes for alignSystemStack() and
+ |			fixSystemStack().  Also Various UCHAR* casts.
+ |		 	-- Added pragmas to force some pointer returning functions
+ |		 	   to use DO instead of A0 register under MetroWerks.
  *===========================================================*/
-
 #include "defs.h"
-
 #include <limits.h>
-
 #include "wintcode.h"
 #include "module.h"
 #include "cutmacro.h"
@@ -1597,6 +1598,11 @@ w_execcommand(buffer, bufsize)
 
 #define QOVERHEAD 128
 
+#ifdef MacOS
+extern long alignSystemStack(void);
+extern fixSystemStack(long);
+#endif
+
 void
 w_exec(buffer, bufsize, nocatcher)
     Code *buffer;
@@ -1609,7 +1615,7 @@ w_exec(buffer, bufsize, nocatcher)
     dbprot_t odbrs;
 
 #ifdef MacOS
-    int   stackOffBy;
+    long   stackOffBy;
 
     /* See note below on why we need this... */
 #endif
@@ -1660,7 +1666,7 @@ w_assert_builtin(name, arity, builtin)
     ntbl_entry *ent;
 
     ent = w_nametable[w_namelookup(
-		 (PWord) MODULE_BUILTINS, (PWord) find_token(name), arity)];
+		 (PWord) MODULE_BUILTINS, (PWord) find_token((UCHAR *)name), arity)];
     ent->flags = NFLG_BUILTIN | NMSK_EXPORT | NFLG_BLT_BUILTIN;
     ic_install_builtin(ent, builtin);
 }
@@ -1677,7 +1683,7 @@ w_assert_built2(name, arity, installer, p1, p2)
     short bflg;
 
     ent = w_nametable[w_namelookup(
-		 (PWord) MODULE_BUILTINS, (PWord) find_token(name), arity)];
+		 (PWord) MODULE_BUILTINS, (PWord) find_token((UCHAR *)name), arity)];
 
     if ((long) installer == (long) ic_install_jmp)
 	bflg = NFLG_BLT_JMP;
@@ -1704,7 +1710,7 @@ w_assert_foreign(modid, name, arity, builtin)
 {
     ntbl_entry *ent;
 
-    ent = w_nametable[w_namelookup(modid, (PWord) find_token(name), arity)];
+    ent = w_nametable[w_namelookup(modid, (PWord) find_token((UCHAR *)name), arity)];
 
     ent->flags = NFLG_BUILTIN | NMSK_EXPORT | NFLG_BLT_BUILTIN;
 
@@ -2006,6 +2012,9 @@ validate_dbref(ref, reftype, nameid)
  *      is the address of a location to receive the procedure name index of
  *      the procedure which the clause belongs to.
  */
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_D0
+#endif
 
 Code *
 jump_validate_dbref(ref, term)
@@ -2064,7 +2073,9 @@ jump_validate_dbref(ref, term)
 
     return (Code *) 0;
 }
-
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_A0
+#endif
 
 /*
  *      gen_indexing: Generate indexing for all procedures.
@@ -2140,6 +2151,9 @@ seticount(ent)
  * clause which comes after (or would have come after) the deleted clause and
  * returns the address at which to continue execution.
  */
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_D0
+#endif
 
 long *
 next_choice_in_a_deleted_clause(addr)
@@ -2157,7 +2171,9 @@ next_choice_in_a_deleted_clause(addr)
 	/* no more clauses. Trust away choice point and then fail */
 	return ((long *) wm_trust_fail);
 }
-
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_A0
+#endif
 
 /*
  * w_collect attempts to really free some of the blocks on the tofree list.

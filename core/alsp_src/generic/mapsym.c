@@ -1,80 +1,81 @@
-
-/*
- * mapsym.c             -- maps token ids to contiguous integer for use
- *                         in loadfile.c
- *
- *      Copyright (c) 1990-1993 Applied Logic System, Inc.
- *
- * Creation: 12/17/90
- * Author: Kevin A. Buettner
- * Revision History:
- *
- * Description:
- *
- *      When creating a .obp file, we will occassionally need to save a
- * representation of a symbol in the .obp file.  Since other files may have
- * already been loaded and since our source file that we are loading may
- * contain both symbols which have been used before as well as new symbols
- * which are not yet in the symbol table, the symbol indexes will not
- * necessarily be contiguous.  Moreover, we wish to save only those symbols
- * that are actually needed by the .obp file we are creating (i.e, it would
- * not do to save all symbols presently in the system).
- *
- * Therefore we need to have a representation for symbols that we can
- * easily put down in the .obp file.  The representation that we have
- * chosen is to map the symbols (assuming that there are N symbols that we
- * care about) to integers in the range 0 thru N-1.
- *
- * Prior to changing the symbol table so that it is expandable (the latter
- * part of 1990), loadfile.c would accomplish this mapping by allocating
- * an array of shorts with as many entries as the symbol table.  The array
- * of shorts was initialized to -1 and a number-of-tokens counter was
- * initialized to zero.  When we wished to map a symbol, we would simply
- * look in the array. If we found a non-negative value, this was the value
- * for use in saving the obp file.  If -1 was found, then the symbol had
- * not been seen yet by the code which built .obp files and so we would
- * use the present value of the number-of-tokens counter as the map value
- * of the symbol.  The array entry for this symbol would of course be
- * filled in with this value after which the number-of-tokens counter
- * would be incremented.
- *
- * On the PC implementation, this was ideal because the symbol table was
- * relatively small (907 entries) and was fixed in size.  Therefore it took
- * less than 2K bytes of memory to represent the map.  When the implementation
- * was moved to the SUN and other machines, the symbol table size was increased
- * but still fixed so this scheme of using an array was still appropriate, but
- * perhaps not so (space) efficient.
- *
- * Now that the symbol table is expandable (it will double in size
- * periodically), it is no longer appropriate to allocate a mapping
- * array as before.  Firstly, because the symbol table is not fixed in
- * size we don't know how large of an array to allocate.  We could just
- * assume that things will get as bad as they can and allocate an array
- * as large as the largest symbol table can be.  On the SUN, this is
- * over 1 million entries; so the mapping array (of longs) will require
- * four megabytes of memory.  Or we could just assume that we won't
- * exceed either the current size or possibly the next size up, but this
- * too is also unsatisfactory in that it is possible to construct programs
- * which would use more than this amount of space.
- *
- * Most of the time, however, there are a relatively small number of symbols
- * in any given .obp file.  In the builtins for example (at the time
- * of this writing) the largest number of symbols in any .obp file was
- * just 159 (debugger.obp).  Scott Medeiros has a module in his German
- * translator with nearly 800 symbols.  This was the largest example that
- * I could find on my system. It seems that mapping arrays allocated in the
- * manner described above will be sparse.
- *
- * So this gives us an idea for an alternate data structure -- a sparse
- * array data structure.  Essentially we will construct a hash table
- * which will work on our token indexes.  Instead of using open hashing,
- * we will resolve collisions by chasing a pointer to a bucket of a limited
- * number of entries.  If the bucket fills up, we modify the last entry
- * to point at a new bucket and so on.
- *
- * We also need to be aware of the problem of recursive consults.  If we
- * use a fixed static area for our data structure, we will get into trouble.
- * So we have a little stack along with functions to push and pop the stack.
+/*=====================================================================*
+ |			mapsym.c             
+ |      Copyright (c) 1990-1995 Applied Logic System, Inc.
+ |
+ |			-- maps token ids to contiguous integers
+ |             for use in loadfile.c
+ |
+ | Creation: 12/17/90
+ | Author: Kevin A. Buettner
+ | Revision History:
+ | 10/26/94, C. Houpt -- Fixed long word alignment bug in alloc().
+ |---------------------------------------------------------------
+ | Description:
+ |
+ |      When creating a .obp file, we will occassionally need to save a
+ | representation of a symbol in the .obp file.  Since other files may have
+ | already been loaded and since our source file that we are loading may
+ | contain both symbols which have been used before as well as new symbols
+ | which are not yet in the symbol table, the symbol indexes will not
+ | necessarily be contiguous.  Moreover, we wish to save only those symbols
+ | that are actually needed by the .obp file we are creating (i.e, it would
+ | not do to save all symbols presently in the system).
+ |
+ | Therefore we need to have a representation for symbols that we can
+ | easily put down in the .obp file.  The representation that we have
+ | chosen is to map the symbols (assuming that there are N symbols that we
+ | care about) to integers in the range 0 thru N-1.
+ |
+ | Prior to changing the symbol table so that it is expandable (the latter
+ | part of 1990), loadfile.c would accomplish this mapping by allocating
+ | an array of shorts with as many entries as the symbol table.  The array
+ | of shorts was initialized to -1 and a number-of-tokens counter was
+ | initialized to zero.  When we wished to map a symbol, we would simply
+ | look in the array. If we found a non-negative value, this was the value
+ | for use in saving the obp file.  If -1 was found, then the symbol had
+ | not been seen yet by the code which built .obp files and so we would
+ | use the present value of the number-of-tokens counter as the map value
+ | of the symbol.  The array entry for this symbol would of course be
+ | filled in with this value after which the number-of-tokens counter
+ | would be incremented.
+ |
+ | On the PC implementation, this was ideal because the symbol table was
+ | relatively small (907 entries) and was fixed in size.  Therefore it took
+ | less than 2K bytes of memory to represent the map.  When the implementation
+ | was moved to the SUN and other machines, the symbol table size was increased
+ | but still fixed so this scheme of using an array was still appropriate, but
+ | perhaps not so (space) efficient.
+ |
+ | Now that the symbol table is expandable (it will double in size
+ | periodically), it is no longer appropriate to allocate a mapping
+ | array as before.  Firstly, because the symbol table is not fixed in
+ | size we don't know how large of an array to allocate.  We could just
+ | assume that things will get as bad as they can and allocate an array
+ | as large as the largest symbol table can be.  On the SUN, this is
+ | over 1 million entries; so the mapping array (of longs) will require
+ | four megabytes of memory.  Or we could just assume that we won't
+ | exceed either the current size or possibly the next size up, but this
+ | too is also unsatisfactory in that it is possible to construct programs
+ | which would use more than this amount of space.
+ |
+ | Most of the time, however, there are a relatively small number of symbols
+ | in any given .obp file.  In the builtins for example (at the time
+ | of this writing) the largest number of symbols in any .obp file was
+ | just 159 (debugger.obp).  Scott Medeiros has a module in his German
+ | translator with nearly 800 symbols.  This was the largest example that
+ | I could find on my system. It seems that mapping arrays allocated in the
+ | manner described above will be sparse.
+ |
+ | So this gives us an idea for an alternate data structure -- a sparse
+ | array data structure.  Essentially we will construct a hash table
+ | which will work on our token indexes.  Instead of using open hashing,
+ | we will resolve collisions by chasing a pointer to a bucket of a limited
+ | number of entries.  If the bucket fills up, we modify the last entry
+ | to point at a new bucket and so on.
+ |
+ | We also need to be aware of the problem of recursive consults.  If we
+ | use a fixed static area for our data structure, we will get into trouble.
+ | So we have a little stack along with functions to push and pop the stack.
  */
 
 #include "defs.h"
@@ -115,7 +116,13 @@ alloc(size, to_free_ptr)
 	fatal_error(FE_MAPSYM, 0);
     }
 
-    aligned = (long *) ((long) unaligned & ~3);
+/*    aligned = (long *) ((long) unaligned & ~3);  */
+    {
+    	unsigned long al, ua = (unsigned long) unaligned;
+    	
+    	al = ua + (4-(ua & 3)) % 4;
+    	aligned = (long *) al;
+    }
     *aligned = (long) unaligned;
     *(aligned + 1) = (long) *to_free_ptr;
     *to_free_ptr = aligned;

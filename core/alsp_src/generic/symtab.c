@@ -1,17 +1,16 @@
-/*
- * symtab.c     -- symbol table routines for ALS-Prolog
- *      Copyright (c) 1990-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Created: 11/28/90
- * Revision History:
- * Revised:
- *
- */
-
-
+/*===================================================================*
+ |			symtab.c     
+ |		Copyright (c) 1990-1995 Applied Logic Systems, Inc.
+ |
+ |			-- symbol table routines for ALS-Prolog
+ |
+ | Author: Kevin A. Buettner
+ | Created: 11/28/90
+ | 10/26/94 - C. Houpt -- Removed + 1 increment of string constants in the 
+ |		initialization of initial_table because it is incompatable with 
+ |		MetroWerks C. Also, various char* and UCHAR* casts.
+ *===================================================================*/
 #include "defs.h"
-
 
 #ifdef DEBUG
 /*
@@ -22,7 +21,6 @@ static int collisions;
 static int nsearches;
 
 #endif
-
 
 #include "pckg.h"
 #include "pckgcoff.h"
@@ -92,7 +90,15 @@ static long ts_next = TK_EOF + 1;	/* the next token index */
 
 static tkentry initial_table[] =
 {
-    {(UCHAR *) "\0\0used up entry" + 1, 0, 0},
+/**    {(UCHAR *) "\0\0used up entry" + 1, 0, 0}, **/
+	/* Used to be:
+	 *
+	 * {(UCHAR *) "\0\0used up entry" + 1, 0, 0},
+	 *
+	 * Removed + 1 increment of string constants because it is
+	 * incompatable with MetroWerks C.
+	 */
+    {(UCHAR *) "\0\0used up entry", 0, 0},
 #include "tokini2.h"		/* initial definitions of tokens */
 };
 
@@ -215,7 +221,9 @@ lookup(name, len)
 
     n = idx;
 
-    while (hashtable[idx] && strcmp(name, hashtable[idx]->tkname) != 0) {
+    while 
+		(hashtable[idx] && 
+			strcmp((char *)name, (char *)hashtable[idx]->tkname) != 0) {
 	idx += shift;
 	if (idx >= ts_prime)
 	    idx -= ts_prime;
@@ -265,7 +273,7 @@ find_token(s)
     pos = lookup(s, &len);
 
     if (*pos)
-	return *pos - toktable;	/* already in table */
+		return *pos - toktable;	/* already in table */
     else {			/* must add to table */
 	if (ts_next > ts_cutoff) {
 	    increase_table_size();	/* increase size and rehash */
@@ -409,6 +417,14 @@ symtab_init()
 	/* Copy initial_table to toktable */
 	memcpy((char *) toktable, (char *) initial_table, sizeof initial_table);
 
+#ifdef MacOS
+	/* Fix the initilization table so that tkname points to the second byte of
+	   the initilization string. */
+
+	for (i = 0; i < (sizeof(initial_table)/sizeof(tkentry)); i++)
+		toktable[i].tkname++;
+#endif
+
 	/* malloc space for the hash table */
 	hashtable = (tkentry **) ss_malloc(ts_allocated * sizeof (tkentry **),
 					   FE_SYMTAB_INIT);
@@ -425,7 +441,7 @@ symtab_init()
 	chtokstr[1] = 0;
 	for (i=0; i<N_TOK_CHARS; i++) {
 	    chtokstr[0] = i;
-	    char_to_tok_map[i] = find_token(chtokstr);
+	    char_to_tok_map[i] = find_token((UCHAR *)chtokstr);
 	}
 	
 	/* register the globals in this module with the saved state mechanism */

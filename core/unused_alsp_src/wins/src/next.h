@@ -1,5 +1,5 @@
 /*
- * next.h
+ * nextstep.h
  */
 
 #import <appkit/appkit.h>

@@ -1,17 +1,16 @@
 /*===========================================================================*
- *              fsunix.c
- *      Copyright (c) 1991-1994 Applied Logic Systems, Inc.
- *
- *      File System Access & Manipulation -- Unix
- *
- *  This is one of a group of files providing file system access:
- *		fsunix.c, fsdos.c, fsmac.c, ..., etc.,...
- *  ALL of these files are loaded when the system is built.  However,
- *  each file, after the initial  #include "defs.h"  is #ifdef'd with
- *  the appropriate constant (UNIX, DOS, ....);  this #ifdef applied to
- *  the entire file, so only one of the files is actually loaded.
+ |              fsunix.c
+ |      Copyright (c) 1991-1994 Applied Logic Systems, Inc.
+ |
+ |      -- File System Access & Manipulation -- Unix
+ |
+ |  This is one of a group of files providing file system access:
+ |		fsunix.c, fsdos.c, fsmac.c, ..., etc.,...
+ |  ALL of these files are loaded when the system is built.  However,
+ |  each file, after the initial  #include "defs.h"  is #ifdef'd with
+ |  the appropriate constant (UNIX, DOS, ....);  this #ifdef applies to
+ |  the entire file, so only one of the files is actually loaded.
  *===========================================================================*/
-
 #include "defs.h"
 
 #if defined(UNIX) && !defined(__GO32__)

@@ -339,11 +339,12 @@ force_libload_all([File|Files],DirDC)
 
 force_libload_file(File,DirDC)
 	:-
-	lib_path_rec(LibHeader,LibList),
-	dmember(File,LibList),
-	subPath(DirDCList,DirDC),
-	append(DirDCList,[LibHeader,File],XDirDCList),
-	subPath(XDirDCList,FileName),
+%	lib_path_rec(LibHeader,LibList),
+%	dmember(File,LibList),
+%	subPath(DirDCList,DirDC),
+%	append(DirDCList,[LibHeader,File],XDirDCList),
+%	subPath(XDirDCList,FileName),
+	extendPath(DirDC,File,FileName),
 	als_advise('Loading %s\n',[FileName]),
 	(load(FileName,1,_,obp,_) ->
 		(pdel_libinfo(_,File), fail ; true),

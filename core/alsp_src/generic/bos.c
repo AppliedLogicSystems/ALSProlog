@@ -1,17 +1,18 @@
-/*
- * bos.c   -- Operating system interface.
- *
- * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986-1993 by Applied Logic Systems
- *
- * Program Author:  Kevin A. Buettner
- * Creation:  11/14/84
- * Revision History: (fixes, not addition of new builtins)
- *      06/28/85,       K. Buettner -- Conversion to wam and compiled prolog
- *      09/12/85,       K. Buettner -- arithmetic predicates moved to
- *                                     separate file.
- *      01/28/86,       K. Buettner -- IBM PC conversion
- */
+/*=========================================================================*
+ |			bos.c   
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1995 by Applied Logic Systems
+ |
+ |			-- Operating system interface.
+ |
+ | Program Author:  Kevin A. Buettner
+ | Creation:  11/14/84
+ | Revision History: (fixes, not addition of new builtins)
+ | 06/28/85 - K. Buettner -- Conversion to wam and compiled prolog
+ | 09/12/85 - K. Buettner -- arithmetic predicates moved to separate file.
+ | 01/28/86 - K. Buettner -- IBM PC conversion
+ | 10/26/94 - C. Houpt -- Added UCHAR* casts for various calls.
+ *=========================================================================*/
 
 #include "defs.h"
 
@@ -42,7 +43,6 @@ pbi_access()
 	FAIL;
 
 }
-
 
 int
 pbi_chdir()
@@ -78,7 +78,7 @@ pbi_getenv()
 	((es = getenv((char *) b)) == (char *) 0))
 	FAIL;
 
-    w_mk_uia(&slv, &slt, es);
+    w_mk_uia(&slv, &slt, (UCHAR *)es);
 
     if (w_unify(v2, t2, slv, slt))
 	SUCCEED;
@@ -96,7 +96,8 @@ pbi_system()
     w_get_An(&v, &t, 1);
     if (getstring(&str, v, t)
 	|| (t == WTP_LIST 
-	    && list_to_string((str = (char *) wm_H + 1), v, wm_normal - 256))) {
+/*	    && list_to_string((str = (char *) wm_H + 1), v, wm_normal - 256))) {   */
+	    && list_to_string((str = (UCHAR *) wm_H + 1), v, wm_normal - 256))) {
 #if defined(DOS) || defined(__GO32__)
       char *cp;
       int switching=1, switched=0;
@@ -163,7 +164,7 @@ pbi_tmpnam()
 #else
     s = tmpnam(0);
 #endif /* HAVE_TEMPNAM */
-    w_mk_uia(&vtn, &ttn, s);
+    w_mk_uia(&vtn, &ttn, (UCHAR *)s);
 
 #ifdef HAVE_TEMPNAM
     free(s);
@@ -194,9 +195,8 @@ pbi_get_image_dir_and_name()
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
-
-    w_mk_uia(&vd, &td, imagedir);
-    w_mk_uia(&vn, &tn, imagename);
+    w_mk_uia(&vd, &td, (UCHAR *)imagedir);
+    w_mk_uia(&vn, &tn, (UCHAR *)imagename);
 
     if (w_unify(v1, t1, vd, td) && w_unify(v2, t2, vn, tn))
 	SUCCEED;

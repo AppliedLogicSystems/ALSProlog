@@ -5,6 +5,8 @@
  * Author: Kevin A. Buettner
  * Creation Date: 3/22/87
  * Revision History:
+ * 10/26/94 - C. Houpt -- Removed unnecessary extern definition of ic_ptr.
+ *						Fixed ic_putl() to use union ic_uptr to put longs.
  */
 
 #include "wintcode.h"
@@ -45,13 +47,12 @@
 #define MEMINDIRECT 6
 #define ABSADDR 7		/* other modes not utilized here are 7 too */
 
-
 #define UNIFY ((int) wm_unify)
 #define DOCUT ((int) wm_docut)
 #define OVERFLOW ((int) wm_overflow)
 
 #define ic_put(data) *ic_ptr++ = (data)
-#define ic_putl(data) *((long *) ic_ptr)++ = (long) (data)
+#define ic_putl(data) *(ic_uptr.long_ptr)++ = (long) (data)
 
 /*
  * The following label manipulation macros are only good for short 
@@ -336,7 +337,7 @@ typedef Code * LAB;
 
 extern Code *ic_macropatch1;
 extern Code *ic_macropatch2;
-extern Code *ic_ptr;
+/* extern Code *ic_ptr;  */
 
 /* Do not call these as functions... */
 extern	void	wm_unify	PARAMS(( void ));

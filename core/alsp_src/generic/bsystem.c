@@ -1,17 +1,18 @@
-/*
- * bsystem.c
- * Copyright (c) 1986-93 Applied Logic Systems, Inc.
- *
- *| Prolog internal system builtins defined in C.
- *
- * Program Author:  Kevin A. Buettner
- * Creation:  11/14/84
- * Revision History: (fixes, not addition of new builtins)
- *      06/28/85,       K. Buettner -- Conversion to wam and compiled prolog
- *      09/12/85,       K. Buettner -- arithmetic predicates moved to separate file.
- *      01/28/86,       K. Buettner -- IBM PC conversion
- */
-
+/*=======================================================================*
+ |			bsystem.c
+ |		Copyright (c) 1986-95 Applied Logic Systems, Inc.
+ |
+ |			Prolog internal system builtins defined in C.
+ |
+ | Program Author:  Kevin A. Buettner
+ | Creation:  11/14/84
+ | Revision History: (fixes, not addition of new builtins)
+ | 06/28/85 - K. Buettner -- Conversion to wam and compiled prolog
+ | 09/12/85 - K. Buettner -- arithmetic predicates moved to separate file.
+ | 01/28/86 - K. Buettner -- IBM PC conversion
+ | 10/26/94 - C. Houpt -- Modernized Mac pbi_debugger call 
+ |						  and various UCHAR* casts.
+ *=======================================================================*/
 #include "defs.h"
 #include "module.h"
 
@@ -216,17 +217,12 @@ pbi_stack_info()
 	FAIL;
 }
 
-
 #ifdef MacOS
 
-pascal void
-debugger()
-    extern 0xa9ff;
-
 int
-pbi_debugger()
+pbi_debugger(void)
 {
-    debugger();
+    Debugger();
 
     SUCCEED;
 }
@@ -251,7 +247,7 @@ pbi_statistics()
      * code_area(used,total)
      */
     w_freecount(&total, &used);
-    w_mk_term(&item, &itemtype, (PWord) find_token("code_area"), 2);
+    w_mk_term(&item, &itemtype, (PWord) find_token((UCHAR *)"code_area"), 2);
     w_install_argn(item, 1, (PWord) (used), WTP_INTEGER);
     w_install_argn(item, 2, (PWord) (total), WTP_INTEGER);
 
@@ -264,7 +260,7 @@ pbi_statistics()
     /*
      * heap(heap_left,heap_used,trail_used,gv_allocated,heap_size)
      */
-    w_mk_term(&item, &itemtype, (PWord) find_token("heap"), 5);
+    w_mk_term(&item, &itemtype, (PWord) find_token((UCHAR *)"heap"), 5);
     w_install_argn(item, 1,
        (PWord) ((unsigned long) wm_TR - (unsigned long) wm_H), WTP_INTEGER);
     w_install_argn(item, 2,
@@ -287,7 +283,7 @@ pbi_statistics()
     /*
      * stack(stack_left,stack_used,stack_size)
      */
-    w_mk_term(&item, &itemtype, (PWord) find_token("stack"), 3);
+    w_mk_term(&item, &itemtype, (PWord) find_token((UCHAR *)"stack"), 3);
     w_install_argn(item, 1,
 		   (PWord) ((unsigned long) wm_SP - (unsigned long) wm_stackbot), WTP_INTEGER);
     w_install_argn(item, 2,
@@ -307,7 +303,7 @@ pbi_statistics()
      * wm_regs(SP,E,SPB,HB,H,TR,B)
      */
 
-    w_mk_term(&item, &itemtype, (PWord) find_token("wm_regs"), 7);
+    w_mk_term(&item, &itemtype, (PWord) find_token((UCHAR *)"wm_regs"), 7);
 
     make_number(&numv, &numt, (double) (unsigned long) wm_SP);
     w_install_argn(item, 1, numv, numt);

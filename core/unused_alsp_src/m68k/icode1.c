@@ -5,10 +5,16 @@
  * Author: Kevin A. Buettner
  * Creation: 2/12/87
  * Revision History:
- *	Revised: 03/22/87,	Kev		-- icode.c split into icode1.c,
+ * 03/22/87 - K.Buettne -- icode.c split into icode1.c,
  *						   icode2.c, and icode.h
- *	Revised: mm/dd/yy,	Who		-- Reason
- *
+ * 10/26/94 - C. Houpt	-- Redefined the Instruction Pointer as
+ *						   a union so that it can be used as both a
+ *						   short and long pointer.  This avoid the
+ *						   need to casting l-values, which is not ANSI.
+ *						   Fixed similar problem in ic_uiastr().
+ *						-- Put some obp code under control of OBP.
+ *						-- Allocate large global arrays with malloc() for
+ *						   Mac compilers that can't handle them.
  */
 
 #include <stdio.h>
@@ -57,15 +63,21 @@
 
 #define CAPTURESIZE 500
 
-
 /*
  * Capture (read/write mode) area
  */
 
+#ifdef NO_FAR_DATA
+static struct capturestruct {
+		int iidx;
+		int w,x,y,z;
+	      } *capturearea;
+#else
 static struct capturestruct {
 		int iidx;
 		int w,x,y,z;
 	      } capturearea[CAPTURESIZE];
+#endif
 
 static int captureidx;
 static Code *capturepatch1;		/* patch indices for read/write mode */
@@ -76,7 +88,11 @@ static Code *capturepatch2;
  * Macro area
  */
 
+#ifdef NO_FAR_DATA
+static struct capturestruct *macroarea;
+#else
 static struct capturestruct macroarea[CAPTURESIZE];
+#endif
 static int macroidx;
 Code *ic_macropatch1;
 Code *ic_macropatch2;
@@ -86,21 +102,45 @@ Code *ic_macropatch2;
  * Allocation area
  */
 
+#ifdef NO_FAR_DATA
+static struct capturestruct *allocarea;
+#else
 static struct capturestruct allocarea[CAPTURESIZE];
+#endif
 static int allocidx;
-
 
 /*
  * Data structure for storing gc call information
  */
 
+#ifdef NO_FAR_DATA
+static struct {				/* data structure for storing	*/
+		 Code *patchaddr;	/* gc call information		*/
+		 long  argenvsize;
+		 long  argmask;
+	      } *callinfo;
+#else
 static struct {				/* data structure for storing	*/
 		 Code *patchaddr;	/* gc call information		*/
 		 long  argenvsize;
 		 long  argmask;
 	      } callinfo[MAXCALLS];
+#endif
 static int callidx;			/* call index			*/
 
+#ifdef NO_FAR_DATA
+void init_capturestructs(void)
+{
+    capturearea = malloc(CAPTURESIZE*sizeof(*capturearea));
+    if (capturearea == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+    macroarea = malloc(CAPTURESIZE*sizeof(*macroarea));
+    if (macroarea == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+    allocarea = malloc(CAPTURESIZE*sizeof(*allocarea));
+    if (allocarea == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+    callinfo = malloc(MAXCALLS*sizeof(*callinfo));
+    if (callinfo == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+}
+#endif
 
 /*
  * Other state variables
@@ -130,8 +170,9 @@ static int capturemode = WRITEMODE;
  * makeobp is a flag which indicates whether or not we are writing the
  * icode calls out to an obp file or not.
  */
-
+#ifdef OBP
 int makeobp;
+#endif /* OBP */
 
 /*
  * Forward declarations
@@ -173,7 +214,12 @@ static	void	ic_end_macro		PARAMS(( long, long, long, long ));
  */
 
 Code *icode_buf;
-Code *ic_ptr;
+
+/*  Code *ic_ptr;  */
+/* Define the Instruction Pointer (uip) as a union so that it can be used
+   as both a short and long pointer.
+*/
+ic_uptr_type ic_uptr;
 
 #define ICBUFSAFETY	0x100		/* 256 code words */
 
@@ -632,10 +678,13 @@ ic_uiastr(s)
     ic_put(l);				/* put down number of longwords-1 */
     ic_putl(MMK_FENCE(l));		/* put down the first fence	*/
     for (i=1; i<l; i++)
-	ic_putl(*((long *) s)++);	/* put down the string		*/
+/*	ic_putl(*((long *) s)++);	* put down the string		*/  
+    {
+	ic_putl(*((long *) s));	/* put down the string		*/
+	s += sizeof(long);
+    }
     ic_putl(MMK_FENCE(l));		/* put down another fence	*/
 }
-
 
 /* 
  * Instruction ic_g_sym
@@ -2003,8 +2052,10 @@ icode(iidx,w,x,y,z)
     static int proc_id, proc_arity;
     static int firstargkey;
 
+#ifdef OBP
     if (makeobp)
         f_icode(iidx,w,x,y,z);
+#endif
    
     if (iidx < 0) {
         switch (iidx) {

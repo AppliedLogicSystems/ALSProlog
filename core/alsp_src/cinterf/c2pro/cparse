@@ -82,7 +82,11 @@ read_lines(Line, State) :-
 	get_statement(Line, Stmt, State),
 	!,
 	dot_debug(2,'\nPARSING STATEMENT : %t\n',[Stmt]),
-	parse_statement(State,Stmt,Rest),
+	(parse_statement(State,Stmt,Rest) ->
+		true
+		;
+		printf('Error parsing stmt: %t\n',[Stmt])
+	),
 	read_lines(Rest,State).
 read_lines(Line,State) :-
 	output_footer(State).
@@ -223,10 +227,10 @@ consume_semicolon(State,Toks,[]) :-
 
 als_statement(State) -->
 	[ident('als$begin_silent'),semicolon], !,
-	{ output_begin_silent(State) }.
+	{ output_begin_silent }.
 als_statement(State) --> 
 	[ident('als$end_silent'),semicolon],
-	{ output_end_silent(State) }.
+	{ output_end_silent }.
 als_statement(State) --> 
 	[fident('als$ctype'),lparen,ident(Name),rparen,semicolon], 
 	!,
@@ -275,8 +279,9 @@ objc_statement(State) -->
 objc_statement(State) -->
 	[ident(class)],
 	declt_list(State,DecltList),
-	consume_semicolon(State,[at,ident(class)],DecltList),
-	{ process_class_decln(DecltList,State) }.
+%	{ consume_semicolon(State,[at,ident(class)],DecltList),
+	 consume_semicolon(State),
+	{  process_class_decln(DecltList,State) }.
 
 
 process_class_decln([],State).
@@ -292,7 +297,7 @@ interfaceOrProtocol(protocol).
 
 instance_variables_opt(State,Public) --> [lcurly], !,
 	public_field_list_opt(State,Public),
-	other_field_lists_opt(State,InTab),
+	other_field_lists_opt(State),
 	[rcurly].
 instance_variables_opt(State,[]) --> [].
 
@@ -308,10 +313,10 @@ public_field_list_opt(State,[]) --> [].
 other_field_lists_opt(State) -->
 	[at,ident(_)],
 	!,
-	field_list(State,_,_),
+	field_list(State,_),
 	other_field_lists_opt(State).
 other_field_lists_opt(State) -->
-	field_list(State,_,_),
+	field_list(State,_),
 	!.
 other_field_lists_opt(State) --> [].
 	

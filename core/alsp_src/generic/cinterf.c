@@ -1,19 +1,18 @@
-
-/*
- *  cinterf.c    -- support routines for C interface
- *
- *  Copyright (c) 1992, Applied Logic Systems Inc.
- *
- *  Author : Prabhakaran Raman
- *  Creation : 2/1/92
- *  Revision History :
- *      08/20/92, Ron -- Added functions CI_get_cstring and
- *                       CI_get_integer for use for compact C
- *                       interface.
- *      08/26/92, Raman-- added static initialization of hash table,
- *                        and faster check for functor "c" in COMPACT_CI_get_*
- */
-
+/*=================================================================*
+ |			cinterf.c    
+ |		Copyright (c) 1992-95, Applied Logic Systems Inc.
+ |
+ |			-- support routines for C interface
+ |
+ | Author : Prabhakaran Raman
+ | Creation : 2/1/92
+ | Revision History :
+ | 08/20/92 - Ron -- Added functions CI_get_cstring and CI_get_integer 
+ |					 for use for compact C interface.
+ | 08/26/92 - Raman-- added static initialization of hash table, and
+ |                    faster check for functor "c" in COMPACT_CI_get_*
+ | 10/26/94 - C. Houpt -- Various unsigned long* casts.
+ *=================================================================*/
 #include "defs.h"
 #include <stdio.h>
 #include "cinterf.h"
@@ -70,8 +69,6 @@ CI_makefar(vp, tp, ptr)
     PI_unify(arg, argtype, (PWord) * (ptr + 2), PI_INT);
 }
 
-
-
 /*
  * SYMBOL TABLE
  */
@@ -93,14 +90,23 @@ typedef struct {
     dbl_or_twolongs val;
 } SymTblEntry;
 
+#ifdef NO_FAR_DATA
+SymTblEntry *symtable;
+
+void init_cinterf_data(void)
+{
+    symtable = malloc(SYMTBLSZ*sizeof(*symtable));
+    if (symtable == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+}
+#else
 SymTblEntry symtable[SYMTBLSZ];
+#endif
 
 #define SYMNAME(i)  symtable[(i)].name
 #define SYMTYPE(i)  symtable[(i)].type
 #define SYMLONGVAL1(i) symtable[(i)].val.longvals.val1
 #define SYMLONGVAL2(i) symtable[(i)].val.longvals.val2
 #define SYMDBLVAL(i) symtable[(i)].val.doubleval
-
 
 /*
  * lookup_c_sym
@@ -667,7 +673,7 @@ c_call()
     PI_getan(&v2, &t2, 2);
     PI_getan(&vret, &tret, 3);
 
-    if (!CI_get_integer(&v1, (unsigned)t1))
+    if (!CI_get_integer((unsigned long *)&v1, (unsigned)t1))
 	PI_FAIL;
     funcptr = (int (*)PARAMS((char *, ...))) v1;
 
@@ -675,7 +681,7 @@ c_call()
 	PI_gethead(&head, &headtype, v2);
 	if (headtype == PI_SYM)
 	    args[nargs++] = PI_getsymname(0, head, 0);
-	else if (CI_get_integer(&head, (unsigned)headtype))
+	else if (CI_get_integer((unsigned long *)&head, (unsigned)headtype))
 	    args[nargs++] = (char *) head;
 	else
 	    PI_FAIL;
@@ -763,7 +769,7 @@ c_makeuia()
 	PI_FAIL;
 
     if (PointerType != PI_INT)
-	if (!CI_get_integer(&Pointer, (unsigned)PointerType))
+	if (!CI_get_integer((unsigned long *)&Pointer, (unsigned)PointerType))
 	    PI_FAIL;
 
     if (PascalFlag) {
@@ -799,7 +805,7 @@ c_convertCstrPstr()
 	PI_FAIL;
 
     if (PointerType != PI_INT)
-	if (!CI_get_integer(&Pointer, (unsigned)PointerType))
+	if (!CI_get_integer((unsigned long *)&Pointer, (unsigned)PointerType))
 	    PI_FAIL;
 
     if (PascalFlag) {

@@ -1,20 +1,25 @@
-/*
- * alsmem.h	-- header information for the als_mem variable.
- *	Copyright (c) 1993, Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Created: 11/30/93
- *
- * Note:  This file should be included by mem.c and by any als-mics
- * programs having need for the information in the header.  It should
- * not be needed by the other files in the Prolog system.
- */
-
+/*=============================================================*
+ |			alsmem.h	
+ |		Copyright (c) 1993-5, Applied Logic Systems, Inc.
+ |
+ |			-- header information for the als_mem variable.
+ |
+ | Author: Kevin A. Buettner
+ | Created: 11/30/93
+ |
+ | Note:  This file should be included by mem.c and by any als-mics
+ | programs having need for the information in the header.  It should
+ | not be needed by the other files in the Prolog system.
+ *=============================================================*/
 #ifndef ALSMEM_H_INCLUDED
 #define ALSMEM_H_INCLUDED
 
 /* AM_BLOCKSIZE is the default block size to allocate */
+#ifdef MacOS
+#define AM_BLOCKSIZE		0x00080000	/* about .5 meg */
+#else
 #define AM_BLOCKSIZE		0x00200000	/* about 2 meg */
+#endif
 
 /* AM_MALLOCSPACE is the space we attempt to leave malloc with at 
    initialization */

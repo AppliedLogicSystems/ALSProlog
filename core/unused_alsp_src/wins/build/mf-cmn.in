@@ -1,5 +1,5 @@
 
-#--------- Static portion of Makefile
+#--------- Static portion of makefile
 WLD=../$(WIN)
 
 WSRCD = $(srcdir)/wins/src
@@ -30,7 +30,7 @@ TRFLAGS = -debug $(XTRFLAGS)
 
 $(WIN).src : $(WIN).spc $(WIN).h
 	$(PROLOG) $(PROFLAGS) $(CINTDIR)/c2pro/trans_c2pro_$(GOS) -g c2pro \
-		-p -srcpath $(WSRCD) $(WIN) $(TRFLAGS) $(XINCLUDES) $(XDEFINES) $(X_CFLAGS)
+		-p -filter $(C2PFILT) -srcpath $(WSRCD) $(WIN) $(TRFLAGS) $(XINCLUDES) $(XDEFINES) $(X_CFLAGS)
 
 #
 # create .c files from .src files
@@ -59,7 +59,7 @@ $(WINTLIB): $(LIBOBJS)
 #	The dependency below doesn't seem to do that.
 #
 library: $(WIN)0.c $(LIBOBJS)
-	make -f Makefile $(WINTLIB)
+	make -f makefile $(WINTLIB)
 	echo Library $(WINTLIB) finished
 
 IMAGE		= alspro_$(WIN)

@@ -1,18 +1,18 @@
-/*
- * bparser.c   -- Parser Prolog builtins defined in C.
- *
- * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986-1993 by Applied Logic Systems
- *
- * Program Author:  Kevin A. Buettner
- * Creation:  11/14/84
- * Revision History: (fixes, not addition of new builtins)
- *      06/28/85,       K. Buettner -- Conversion to wam and compiled prolog
- *      09/12/85,       K. Buettner -- arithmetic predicates moved to
- *                                     separate file.
- *      01/28/86,       K. Buettner -- IBM PC conversion
- */
-
+/*=============================================================================*
+ |			bparser.c   
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1993 by Applied Logic Systems
+ |
+ |			-- Parser Prolog builtins defined in C.
+ |
+ | Program Author:  Kevin A. Buettner
+ | Creation:  11/14/84
+ | Revision History: (fixes, not addition of new builtins)
+ | 06/28/85 - K. Buettner -- Conversion to wam and compiled prolog
+ | 09/12/85 - K. Buettner -- arithmetic predicates moved to separate file.
+ | 01/28/86 - K. Buettner -- IBM PC conversion
+ | 10/26/94 - C. Houpt -- Added char* and UCHAR* casts for various calls.
+ *=============================================================================*/
 #include "defs.h"
 
 static	int	string_to_number PARAMS(( UCHAR *, double * ));
@@ -192,7 +192,7 @@ pbi_name()
 
 	sprintf(buf, "%ld", (long) v1);
 
-	string_to_list(&slv, &slt, buf);
+	string_to_list(&slv, &slt, (UCHAR *)buf);
 	if (w_unify(v2, t2, slv, slt))
 	    SUCCEED;
 	else
@@ -217,7 +217,7 @@ pbi_name()
 	    *(((short *) &d) + i) = vt;
 	}
 	sprintf(buf, "%1.10g", d);
-	string_to_list(&vt, &tt, buf);
+	string_to_list(&vt, &tt, (UCHAR *)buf);
 	if (w_unify(v2, t2, vt, tt))
 	    SUCCEED;
 	else
@@ -233,7 +233,7 @@ pbi_name()
 
 	w_get_double(&d, v1);
 	sprintf(buf, "%1.10g", d);
-	string_to_list(&vt, &tt, buf);
+	string_to_list(&vt, &tt, (UCHAR *)buf);
 	if (w_unify(v2, t2, vt, tt))
 	    SUCCEED;
 	else
@@ -276,7 +276,7 @@ pbi_name()
 
     }
     else if (t2 == WTP_SYMBOL && v2 == TK_NIL &&
-	     w_unify(v1, t1, (PWord) find_token(""), WTP_SYMBOL))
+	     w_unify(v1, t1, (PWord) find_token((UCHAR *)""), WTP_SYMBOL))
 	SUCCEED;
     else
 	FAIL;
@@ -936,14 +936,14 @@ pbi_sub_atom()
     if (!getstring(&str, v1, t1))
 	FAIL;
     
-    len = strlen(str);
+    len = strlen((char *)str);
 
     if (   t2 != WTP_INTEGER  || t3 != WTP_INTEGER
 	|| v2 < 1 || v2 > len+1 || v3 < 0 || v3 > len-v2+1)
 	FAIL;
     
     w_uia_alloc(&vSA, &tSA, (size_t)v3);
-    strncpy((char *) M_FIRSTUIAWORD(vSA), str+v2-1, (size_t)v3);
+    strncpy((char *) M_FIRSTUIAWORD(vSA), (char *)str+v2-1, (size_t)v3);
 
     /* Need to null terminate since strncpy does not guarantee null
      * termination.
@@ -988,7 +988,7 @@ pbi_atom_length()
     if (t2 != WTP_UNBOUND && t2 != WTP_INTEGER)
 	PERR_TYPE(TK_ATOM_LENGTH,2,TK_INTEGER,v2,t2);
 
-    if (w_unify(v2, t2, (PWord) strlen(str), WTP_INTEGER))
+    if (w_unify(v2, t2, (PWord) strlen((char *)str), WTP_INTEGER))
 	SUCCEED;
     else
 	FAIL;

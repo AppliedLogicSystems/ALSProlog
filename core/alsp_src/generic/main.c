@@ -1,24 +1,28 @@
-/*
- * main.c       -- main driver for ALS-Prolog Systems
- *
- *      Copyright (c) 1986-1993 Applied Logic Systems
- *
- * Author: Kevin A. Buettner
- * Creation: 6/19/85
- * Revision History:
- *      Revised:  1/15/86,    K. Buettner       -- PC Prolog Port
- *      Revised:  8/14/86,    K. Buettner       -- Sun Port
- *      Revised:  11/9/88,    K. Buettner       -- Motorola foreign interface
- *      Revised:  11/13/89,   K. Buettner       -- New alsdir conventions
- *      Revised:  6/12/91,    I. Cicekli        -- Merged with 386 version
- *      Revised:  06/03/92,   R. DiNapoli       -- Macintosh Mods
- *      Revised:  08/29/92,   R. DiNapoli       -- Parameterized product name
- *                                                 in banner (see version.h)
- *      Revised:  6/21/93,    P. Raman          -- moved main() to pimain.c
- */
-
+/*=============================================================*
+ |			main.c       
+ |      Copyright (c) 1986-1995 Applied Logic Systems
+ |
+ |			-- main driver for ALS Prolog Systems
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 6/19/85
+ | Revision History:
+ | 01/15/86 - K. Buettner -- PC Prolog Port
+ | 08/14/86 - K. Buettner -- Sun Port
+ | 11/09/88 - K. Buettner -- Motorola foreign interface
+ | 11/13/89 - K. Buettner -- New alsdir conventions
+ | 06/12/91 - I. Cicekli  -- Merged with 386 version
+ | 06/03/92 - R. DiNapoli -- Macintosh Mods
+ | 08/29/92 - R. DiNapoli -- Parameterized product name
+ |                           in banner (see version.h)
+ | 06/21/93 - P. Raman -- moved main() to pimain.c
+ | 11/29/94 - C. Houpt -- Added OBP ifdef control around call to fix_MAGIC.
+ |			-- Added winter.h include rather than redeclare wm_regs[][].
+ |			-- Added trap patch to disable stack overflow errs.
+ |			-- Made "builtins/builtins" general w.r.t. directory separator.
+ *=============================================================*/
 #include "defs.h"
-
+/* #include "winter.h" */
 #include <setjmp.h>
 
 #ifdef HAVE_UNISTD_H
@@ -44,6 +48,11 @@
 #endif /* SysV */
 #endif /* 0 */
 
+#ifdef MacOS
+#include <Traps.h>
+#include <OSUtils.h>
+#endif
+
 #include "main.h"
 #include "version.h"
 #include "pckg.h"
@@ -58,12 +67,11 @@
 #define R_OK 4
 #endif
 
-
-/* *INDENT-OFF* */
+/*************
 #ifdef MacOS
 pascal void debugger() extern 0xa9ff;
 #endif
-/* *INDENT-ON* */
+ *************/
 
 
 int   system_debugging = 0;	/* -D to set it to 1 */
@@ -91,10 +99,11 @@ static char systemName[] = SysName;		/* from version.h */
 static int exit_status = 0;
 static jmp_buf exit_return;
 
-
+/*********
 #ifdef MacOS
 extern char *alloca();
 #endif
+***********/
 
 static	void	panic_fail	PARAMS(( void ));
 #ifdef arch_m88k
@@ -106,7 +115,9 @@ static	void	assert_sys_searchdir PARAMS(( char * ));
 static	void	assert_als_system PARAMS(( char *, char *, char *, char *,
 				    char *, char *, char * ));
 static	void	assert_command_line PARAMS(( int, char ** ));
-static	int	absolute_pathname PARAMS(( char * ));
+#ifndef MacOS
+static	int	absolute_pathname PARAMS((CONST char * ));
+#endif
 static	void	whereami	PARAMS(( char * ));
 static	void	autoload	PARAMS(( char * ));
 static	void	chpt_init	PARAMS(( void ));
@@ -144,6 +155,48 @@ isopt(opt,str)
     else
 	return 0;
 }
+#ifdef MacOS
+
+void (*SysErrorAddress)(void);
+
+void PatchedSysError(void);
+#if 0
+#ifndef applec
+#if defined(__MWERKS__)
+void asm PatchedSysError(void)
+#elif defined(THINK_C)
+void PatchedSysError(void)
+{ asm
+#else
+#error "missing case"
+#endif
+{
+    	cmp.l #28, d0
+#if defined(THINK_C)
+    	beq.s @DoNothing
+#elif defined(__MWERKS__)
+    	beq.s DoNothing
+#else
+#error "missing case"
+#endif
+
+    	movem.l d0/a5, -(a7)
+    	dc.w 0x200D, 0x2A78, 0x0904  /* SetCurrentA5 */
+    	move.l SysErrorAddress, 8(a7)
+    	movem.l (a7)+, d0/a5
+    DoNothing:
+#if defined(THINK_C)
+}
+}
+#elif defined(__MWERKS__)
+    	rts
+}
+#else
+#error "missing case"
+#endif
+#endif
+#endif
+#endif /* MacOS */
 
 /*
  * Prolog initialization
@@ -176,9 +229,10 @@ PI_prolog_init(win_str, argc, argv)
     free(malloc(8192));
 
 #ifdef MacOS
-
-    extern PWord *wm_regs[][];
+	{
+/*    extern PWord *wm_regs[][];   */
     char *punchaddr, *punchee;
+	extern void rts_end(void);
     extern wm_fail(), wm_trust_fail();
 
     /* The unusual nature of the way the Mac addresses C functions (via a
@@ -186,6 +240,9 @@ PI_prolog_init(win_str, argc, argv)
      * machine address of wm_fail().
      */
 
+	/* call rts_end(), which does nothing, to insure that the jump
+	 table entries for its segment are loaded. */
+	rts_end();
 
     punchaddr = (char *) wm_trust_fail;
     punchaddr = (char *) *(long *) (punchaddr + 2);
@@ -193,7 +250,22 @@ PI_prolog_init(win_str, argc, argv)
     punchee = (char *) wm_fail;
     punchee = (char *) *(long *) (punchee + 2);
     *(long *) punchaddr = (long) punchee;
+    }
 
+#if 0
+    /* Install a trap patch to disable stack overflow error.  The trap patch
+       disables all SysError() calls with error number 28. */
+       
+    SysErrorAddress = (void (*)(void))NGetTrapAddress(_SysError, ToolTrap);
+#if defined(THINK_C) || defined(applec)
+    NSetTrapAddress((long)PatchedSysError, _SysError, ToolTrap);
+#elif defined(__MWERKS__)
+    NSetTrapAddress((UniversalProcPtr)PatchedSysError, _SysError, ToolTrap);
+#else
+#error "missing case"
+#endif
+#endif
+    init_math();
 #endif /* MacOS */
 
 #if defined(DOS)
@@ -210,6 +282,16 @@ PI_prolog_init(win_str, argc, argv)
      */
     if (setjmp(exit_return))
 	return (exit_status);
+
+#ifdef NO_FAR_DATA
+    /* Initilize global arrays that are too big for Think's compiler. */
+    init_capturestructs();
+    init_compiler_data();
+    init_cinterf_data();
+    init_varproc_data();
+    init_expand_data();
+    init_parser_data();
+#endif
 
     heapsize = DEFAULT_HEAP_SIZE;
     stacksize = DEFAULT_STACK_SIZE;
@@ -284,7 +366,8 @@ PI_prolog_init(win_str, argc, argv)
 #ifdef VMS
     strcat(alsdir, ".dir");
 #endif
-    if (access(alsdir, R_OK | X_OK) == -1) {
+    if (access(alsdir, R_OK | X_OK) == -1) 
+	{
 	/* not accessible; just use image directory */
 	strcpy(alsdir, imagedir);
     }
@@ -310,24 +393,9 @@ PI_prolog_init(win_str, argc, argv)
 
     /* Perform some initial allocations */
 
-#ifdef MacOS
-    /* DO NOT MOVE THIS CODE ANYWHERE ELSE!!!!!!!!!!!!!!!!!!!!! The Mac uses
-     * alloca to allocate the heap and stack on the system (application)
-     * stack.  If you put the call to alloca in another function, the space
-     * that gets allocated by the  call to alloca will be "released" when
-     * that function terminates.  SO...  LEAVE THIS CODE WHERE IT IS!!  Thank
-     * you.  ( I dont see why prolog data areas cannot be malloced on Mac
-     * just like other systems; that will eliminate this ifdef and also make
-     * it suitable for embedded apps - raman 6/14/93 )
-     */
-    wm_stackbot = (PWord *) alloca((stacksize + heapsize) * sizeof (PWord));
-    if (wm_stackbot == 0)
-	fatal_error(FE_BIGSTACK, 0);
-    if (((int) (wm_stackbot + (stacksize + heapsize)) & 0x80000000) != 0)
-	fatal_error(FE_TAGERR, 0);
-#else
+#if 1
     wm_stackbot = allocate_prolog_heap_and_stack(stacksize + heapsize);
-#endif /* MacOS */
+#endif 
     wm_heapbase = wm_stackbot + stacksize;
 
 #ifdef	arch_m88k
@@ -361,7 +429,6 @@ PI_prolog_init(win_str, argc, argv)
     module_init();
     chpt_init();
 
-
 #ifdef PACKAGE
     if (system_pckg != (long *) -1) {
 	noautoload = 1;
@@ -378,7 +445,9 @@ PI_prolog_init(win_str, argc, argv)
 #endif /* PACKAGE */
 
     time_cut_interrupt_init();
+#ifdef OBP
     fix_MAGIC();		/* for loadfile.c */
+#endif /* OBP */
 
     if (system_pckg != (long *) -1 || saved_state_loaded)
 	pckg_run_init_goal();
@@ -412,9 +481,21 @@ PI_prolog_init(win_str, argc, argv)
      * Load the builtins
      */
     if (!noautoload && !saved_state_loaded)
-/*	autoload("builtins");   */
+#ifdef MacOS
+	{
+    	char f[20];
+    	size_t l;
+    	
+    	strcpy(f, "builtins");
+    	l = strlen(f);
+    	f[l] = DIR_SEPARATOR; f[l+1] = 0;
+    	strcat(f, "builtins");
+    	autoload(f);
+    }
+#else
+			/*	OLD: autoload("builtins");   */
 	autoload("builtins/builtins");  
-
+#endif
     /*
      * Establish the Control/C (or Control/BREAK) handler
      */
@@ -575,7 +656,7 @@ assert_command_line(count, args)
 
 static int
 absolute_pathname(name)
-    char *name;
+    const char *name;
 {
     return (
 	       (*name == DIR_SEPARATOR) ||
@@ -588,7 +669,7 @@ absolute_pathname(name)
 
 static int
 absolute_pathname(name)
-    char *name;
+    const char *name;
 {
     char *n;
 
@@ -598,11 +679,15 @@ absolute_pathname(name)
 
 }
 
+#elif defined(MacOS)
+
+/* Moved to fsmac.c */
+
 #else  /* default is Unix style path specification */
 
 static int
 absolute_pathname(name)
-    char *name;
+    const char *name;
 {
     return (*name == DIR_SEPARATOR);
 }

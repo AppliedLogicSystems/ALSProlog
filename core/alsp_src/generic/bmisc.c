@@ -1,18 +1,18 @@
-/*
- * bmisc.c   -- Misc Prolog builtins defined in C.
- *
- * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986-1993 by Applied Logic Systems
- *
- * Program Author:  Kevin A. Buettner
- * Creation:  11/14/84
- * Revision History: (fixes, not addition of new builtins)
- *      06/28/85,       K. Buettner -- Conversion to wam and compiled prolog
- *      09/12/85,       K. Buettner -- arithmetic predicates moved to
- *                                     separate file.
- *      01/28/86,       K. Buettner -- IBM PC conversion
- */
-
+/*=======================================================================*
+ |			bmisc.c   
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1995 by Applied Logic Systems
+ |
+ |			-- Misc Prolog builtins defined in C.
+ |
+ | Program Author:  Kevin A. Buettner
+ | Creation:  11/14/84
+ | Revision History: (fixes, not addition of new builtins)
+ | 06/28/85 - K. Buettner -- Conversion to wam and compiled prolog
+ | 09/12/85 - K. Buettner -- arithmetic predicates moved to separate file.
+ | 01/28/86 - K. Buettner -- IBM PC conversion
+ | 10/26/94 - C. Houpt -- Added char* casts for standard library sprintf call.
+ *=======================================================================*/
 #include "defs.h"
 #include "wintcode.h"
 #include "compile.h"		/* for value of NAREGS */
@@ -110,19 +110,25 @@ termcmp(v1, t1, v2, t2)
      */
     if (t1 == WTP_SYMBOL) {
 	if (t2 == WTP_SYMBOL)
-	    return strcmp(TOKNAME(v1), TOKNAME(v2));
+	    return strcmp((char *)TOKNAME(v1), (char *)TOKNAME(v2));
 	else if (t2 == WTP_UIA) {
-	    return strcmp(TOKNAME(v1), (UCHAR *) M_FIRSTUIAWORD(v2));
+/*	    return strcmp(TOKNAME(v1), (UCHAR *) M_FIRSTUIAWORD(v2));  */
+	    return strcmp((char *)TOKNAME(v1), (char *)M_FIRSTUIAWORD(v2));
 	}
 	else
 	    return -1;
     }
     else if (t1 == WTP_UIA) {
 	if (t2 == WTP_SYMBOL)
-	    return strcmp((UCHAR *) M_FIRSTUIAWORD(v1), TOKNAME(v2));
+/*	    return strcmp((UCHAR *) M_FIRSTUIAWORD(v1), TOKNAME(v2));   */
+	    return strcmp((char *) M_FIRSTUIAWORD(v1), (char *)TOKNAME(v2));
 	else if (t2 == WTP_UIA) {
+/*
 	    return strcmp((UCHAR *) M_FIRSTUIAWORD(v1),
 			  (UCHAR *) M_FIRSTUIAWORD(v2));
+*/
+		return strcmp((char *)M_FIRSTUIAWORD(v1),
+			(char *)M_FIRSTUIAWORD(v2));
 	}
 	else
 	    return -1;
@@ -157,7 +163,7 @@ termcmp(v1, t1, v2, t2)
 	    return -1;
 	else if (a2 < a1)
 	    return 1;
-	if ( (r = strcmp(TOKNAME(f1), TOKNAME(f2))) )
+	if ( (r = strcmp((char *)TOKNAME(f1), (char *)TOKNAME(f2))) )
 	    return r;
 	for (i = 1; i <= a1; i++) {
 	    w_get_argn(&av1, &at1, v1, i);
@@ -246,8 +252,10 @@ wm_identical(v1, t1, v2, t2)
 		    return (0);
 		break;
 	    case WTP_UIA:
-		if (strcmp((UCHAR *) M_FIRSTUIAWORD(v1), 
-			   (UCHAR *) M_FIRSTUIAWORD(v2)) == 0)
+/*		if (strcmp((UCHAR *) M_FIRSTUIAWORD(v1), 
+			   (UCHAR *) M_FIRSTUIAWORD(v2)) == 0)  */
+		if (strcmp((char *) M_FIRSTUIAWORD(v1), 
+			   (char *) M_FIRSTUIAWORD(v2)) == 0)
 		    return (1);
 		else
 		    return (0);
@@ -263,16 +271,18 @@ wm_identical(v1, t1, v2, t2)
 	switch (t1) {
 	    case WTP_SYMBOL:
 		if (t2 == WTP_UIA) {
-		    if (strcmp(TOKNAME(v1),
-			(UCHAR *) M_FIRSTUIAWORD(v2)) == 0)
+		    if (strcmp((char *)TOKNAME(v1),
+/*			(UCHAR *) M_FIRSTUIAWORD(v2)) == 0)  */
+			(char *) M_FIRSTUIAWORD(v2)) == 0)
 			return (1);
 		}
 		return (0);
 		break;
 	    case WTP_UIA:
 		if (t2 == WTP_SYMBOL) {
-		    if (strcmp((UCHAR *) M_FIRSTUIAWORD(v1),
-			TOKNAME(v2)) == 0)
+/*		    if (strcmp((UCHAR *) M_FIRSTUIAWORD(v1),  */
+		    if (strcmp((char *) M_FIRSTUIAWORD(v1), 
+			(char *)TOKNAME(v2)) == 0)
 			return (1);
 		}
 		return (0);
@@ -401,7 +411,7 @@ static void
 als_gensym(buffer, prefix)
     UCHAR *buffer, *prefix;
 {
-    sprintf(buffer, "%c%s_%ld_%ld",
+    sprintf((char *)buffer, "%c%s_%ld_%ld",
 	    Generated_Symbol_Starting_Character,
 	    (char *)prefix,
 	    gensym_start_time,

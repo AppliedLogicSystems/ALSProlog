@@ -10,6 +10,31 @@
 
 module windows.
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% query_user
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+export query_user/3.
+query_user(FmtString,Args,Answer)
+	:-
+	sio:get_current_output_stream(OutStream),
+	sio:get_current_input_stream(InStream),
+	query_user(InStream,OutStream,FmtString,Args,Answer).
+
+export query_user/5.
+query_user(InStream,OutStream,FmtString,Args,Answer)
+	:-
+	catenate(FmtString,' (yes/no)?',XFmtString),
+	printf(OutStream,XFmtString,Args),
+	get_line(InStream,Line),
+	atomread(Line,InitAnswer),
+	q_acton(InitAnswer,Answer).
+
+q_acton(yes,yes).
+q_acton(y,yes).
+q_acton(_,no).
+
+
 export simple_menu/3.
 
 simple_menu([Choice], Choice, Options) :-!.
@@ -34,6 +59,14 @@ simple_menu(List, Choice, Options)
 	number_list(List, 1, NumberedList),
 	themenu(NumberedList, ChoiceNum, Options, term),
 	fin_simple_menu_num(ChoiceNum, NumberedList, Options, Choice).
+
+fin_simple_menu_num(default, NumberedList, Options, Choice)
+	:-
+	dmember(default=Choice,Options),
+	!.		
+fin_simple_menu_num(default, NumberedList, Options, Choice)
+	:-!,
+	fin_simple_menu_num(0, NumberedList, Options, '$noChoice').
 
 fin_simple_menu_num(0, NumberedList, Options, '$noChoice') :-!.
 fin_simple_menu_num(ChoiceNum, NumberedList, Options, Choice)
@@ -69,6 +102,11 @@ fin_simple_menu_code0(ChoiceNum, _, _, _, '$badInput$'(ChoiceNum)).
 
 themenu(List, ChoiceNum, Options, Flag)
 	:-
+	(dmember(default=DefaultContent,Options) ->
+		true
+		;
+		DefaultContent = ''
+	),
 	(dmember(indent=Indent, Options) ->
 		true
 		;
@@ -89,7 +127,7 @@ themenu(List, ChoiceNum, Options, Flag)
 		;
 		true
 	),
-	output_prolog_list(List,Indent,Termin,Spacer),
+	output_prolog_list(List,Indent,Termin,Spacer,DefaultContent),
 	(dmember(prompt=Prompt, Options) ->
 		true
 		;
@@ -97,7 +135,12 @@ themenu(List, ChoiceNum, Options, Flag)
 	),
 	write(Prompt),
 	(Flag = term ->
-		read(ChoiceNum)
+		get_line(Line),
+		(Line = '' ->
+			ChoiceNum = default
+			;
+			atomread(Line,ChoiceNum)
+		)
 		;
 		get_nonblank_char(ChoiceNumInt),
 		(ChoiceNumInt = end_of_line ->

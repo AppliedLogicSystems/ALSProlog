@@ -1,14 +1,14 @@
-/*
- *  bcinter.c   -- support routines for C interface
- *
- * Copyright (c) 1991-1993 Applied Logic Systems, Inc.
- *
- * Author: Prabhakaran Raman
- * Date  : 7/24/91
- */
-
+/*=================================================================*
+ |			bcinter.c   
+ |		Copyright (c) 1991-1995 Applied Logic Systems, Inc.
+ |
+ |			-- support routines for C interface
+ |
+ | Author: Prabhakaran Raman
+ | Date  : 7/24/91
+ | 10/26/94 - C. Houpt - Added char* casts for standard library string calls.
+ *=================================================================*/
 #include "defs.h"
-
 #include <stdio.h>
 
 /*
@@ -207,8 +207,7 @@ pbi_c_set()
 		    src = TOKNAME(data);
 		else
 		    FAIL;
-
-		strcpy(ptr + offset, src);
+		strcpy((char *)ptr + offset, (char *)src);
 		break;
 
 	    case 11:		/* fixed length string */
@@ -222,7 +221,7 @@ pbi_c_set()
 		w_get_argn(&length, &lengthtype, head, 4);
 		if (lengthtype != WTP_INTEGER || length < 0)
 		    FAIL;
-		strncpy(ptr + offset, src, (size_t) length);
+		strncpy((char *)ptr + offset, (char *)src, (size_t) length);
 		break;
 
 	    case 12:		/* float type */
@@ -414,7 +413,7 @@ pbi_c_examine()
 
 		w_uia_alloc(&v, &t, (size_t)length);
 		chptr = (UCHAR *) M_FIRSTUIAWORD(v);
-		strncpy(chptr, ptr + offset, (size_t)length);
+		strncpy((char *)chptr, (char *)ptr + offset, (size_t)length);
 
 		if (!w_unify(data, datatype, v, t))
 		    FAIL;

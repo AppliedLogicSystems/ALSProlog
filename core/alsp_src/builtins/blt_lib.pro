@@ -43,11 +43,12 @@
     [avl_create/1,avl_inorder/2,avl_inorder_wdata/2,avl_insert/4,avl_search/3],[]).
 
 :-libactivate(windows,['library',simplio],
-    [simple_menu/3, fin_simple_menu_code0/5 ],[]).
+    [simple_menu/3, fin_simple_menu_code0/5, query_user/3,query_user/5 ],[]).
 
 :-libactivate(windows,['library',iolayer],[chooseFile/3,menu/3,menu/4],[]).
 
-:-libactivate(builtins,['library',commal],[flatten_comma_list/2],[]).
+:-libactivate(builtins,['library',commal],
+				[flatten_comma_list/2, build_comma_list/2],[]).
 
 :-libactivate(builtins, ['library',misc_db],
 	[assert_all/2,assert_all_refs/3,erase_all/1,abolish_list/1,

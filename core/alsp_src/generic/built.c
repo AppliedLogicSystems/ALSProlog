@@ -1,45 +1,45 @@
-/*
- * built.c   -- prolog builtins defined in C.
- *
- * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986-1993 by Applied Logic Systems
- *
- * Program Author:  Kevin A. Buettner
- * Creation:  11/14/84
- * Revision History: (fixes, not addition of new builtins)
- *      06/28/85,       K. Buettner -- Conversion to wam and compiled prolog
- *      09/12/85,       K. Buettner -- arithmetic predicates moved to
- *                                     separate file.
- *      01/28/86,       K. Buettner -- IBM PC conversion
- *
- * Notes :
- *
- * Q. What do we mean by builtins ?
- * A. Procedures defined in C or assembly or even foreign that form
- *    the core of the system.
- *
- * Q. How do we connect a prolog call to a builtin and the corresponding
- *    C/assembly/foreign procedure ?
- * A. The prolog-name, memory address, and procedure-name of procedures
- *    defined in C are stored in an array called "blt_tab". For builtins
- *    defined in assembly, this information is stored in an array called
- *    "blt_tab2". For foreign procedures this information is stored in
- *    a local array called "pi_init_array".
- *
- *    At system init time, each builtin is loaded in the procedure
- *    name table and code is placed to call the C/assembly/foreign
- *    function whenever the corresponding prolog-predicate is invoked.
- *
- * Q. How are builtins packaged ?
- * A. First of all at packaging time we can identify a builtin
- *    from its name table entry flags. We have to generate relocation
- *    information for the absolute memory address of the builtin.
- *    In order to do this we need to be able to get the C/assembly
- *    procedure name from its address. This information is built up
- *    in a table called "blt_addr_tbl" at system init time by
- *    builtin_addr_table_init() and individual foreign initializations.
- */
-
+/*=========================================================================*
+ |			built.c   
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1995 by Applied Logic Systems
+ |
+ |			-- prolog builtins defined in C.
+ |
+ | Program Author:  Kevin A. Buettner
+ | Creation:  11/14/84
+ | Revision History: (fixes, not addition of new builtins)
+ | 06/28/85	 - K. Buettner -- Conversion to wam and compiled prolog
+ | 09/12/85K - K. Buettner -- arithmetic predicates moved to separate file.
+ | 01/28/86K - K. Buettner -- IBM PC conversion
+ | 10/26/94	 - C. Houpt -- Various UCHAR* casts.
+ | ------------------------------------------------------------------------
+ | Notes :
+ |
+ | Q. What do we mean by builtins ?
+ | A. Procedures defined in C or assembly or even foreign that form
+ |    the core of the system.
+ |
+ | Q. How do we connect a prolog call to a builtin and the corresponding
+ |    C/assembly/foreign procedure ?
+ | A. The prolog-name, memory address, and procedure-name of procedures
+ |    defined in C are stored in an array called "blt_tab". For builtins
+ |    defined in assembly, this information is stored in an array called
+ |    "blt_tab2". For foreign procedures this information is stored in
+ |    a local array called "pi_init_array".
+ |
+ |    At system init time, each builtin is loaded in the procedure
+ |    name table and code is placed to call the C/assembly/foreign
+ |    function whenever the corresponding prolog-predicate is invoked.
+ |
+ | Q. How are builtins packaged ?
+ | A. First of all at packaging time we can identify a builtin
+ |    from its name table entry flags. We have to generate relocation
+ |    information for the absolute memory address of the builtin.
+ |    In order to do this we need to be able to get the C/assembly
+ |    procedure name from its address. This information is built up
+ |    in a table called "blt_addr_tbl" at system init time by
+ |    builtin_addr_table_init() and individual foreign initializations.
+ *=========================================================================*/
 #include "defs.h"
 #include "wintcode.h"
 #include "module.h"
@@ -193,7 +193,7 @@ static struct blt_struct {
 	BLT("$procinfo", 6, pbi_procinfo, "_pbi_procinfo"),
 	BLT("abolish", 3, pbi_abolish, "_pbi_abolish"),
 	BLT("abolish_clausegroup", 4, pbi_abolish_clausegroup, "_pbi_abolish_clausegroup"),
-		/* SPECIAL */
+		/* SPECIAL -- Freeze-related */
 	BLT("cptx", 0, pbi_cptx, "_pbi_cptx"),
 	BLT("swp_tr", 0, pbi_swp_tr, "_pbi_swp_tr"),
 	BLT("walk_cps", 0, pbi_walk_cps, "_pbi_walk_cps"),
@@ -378,7 +378,9 @@ static struct blt_struct {
 	BLT("statistics", 1, pbi_statistics, "_pbi_statistics"),
 	BLT("$stack_overflow", 1, pbi_stack_overflow, "_pbi_stack_overflow"),
 	BLT("$stack_info", 1, pbi_stack_info, "_pbi_stack_info"),
-
+#ifdef MacOS
+	BLT("pbi_debugger", 0, pbi_debugger, "_pbi_debugger"),
+#endif
 	BLT("$findterm", 5, pbi_findterm, "_pbi_findterm"),
 #ifdef CMeta
 	BLT("true", 0, pbi_true, "_pbi_true"),
@@ -667,7 +669,7 @@ time_cut_interrupt_init()
     wm_cutaddr = w_nameprobe((PWord) MODULE_BUILTINS, (PWord) TK_CUT, 0)->call_entry;
     /* Set the default interrupt handler to be interrupt */
     wm_overcode = w_nameentry((PWord) MODULE_BUILTINS,
-			   (PWord) find_token("$interrupt"), 3)->exec_entry;
+			   (PWord) find_token((UCHAR *)"$interrupt"), 3)->exec_entry;
 
 #ifdef NewMath
     mth_is_addr = w_nameentry((PWord) MODULE_BUILTINS, (PWord) TK_IS, 2)

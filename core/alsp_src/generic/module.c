@@ -1,15 +1,16 @@
-/*
- * module.c                    -- module management code
- *
- * Copyright (c) 1985-1993 by Kevin A. Buettner
- *
- * Author:  Kevin A. Buettner
- * Creation: 6/21/85
- * Revision History:
- *      Revised:  1/15/85       -- port to IBM-PC; this module was
- *                                 formerly part of machine.c
- */
-
+/*=========================================================*
+ |			module.c                    
+ |		Copyright (c) 1985-1993 by Kevin A. Buettner
+ |
+ |			-- module management code
+ |
+ | Author:  Kevin A. Buettner
+ | Creation: 6/21/85
+ | 01/15/85 - K.Buettner -- port to IBM-PC; split off from machine.c
+ | 10/26/94, C. Houpt -- Various UCHAR* casts.
+ |		-- Added pragmas to force some pointer returning functions
+ |		   to use DO instead of A0 register under MetroWerks.
+ *=========================================================*/
 #include "defs.h"
 #include "module.h"
 #include "wintcode.h"
@@ -30,7 +31,6 @@ struct mtbl_entry {
 
 static struct mtbl_entry *module_table;
 
-
 struct use_entry {
     PWord modid;
     short nextuse;
@@ -46,6 +46,9 @@ static int nuses;
  * returns the address to continue execution at.
  *
  */
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_D0
+#endif
 
 Code *
 resolve_reference(entfrom)
@@ -81,7 +84,9 @@ resolve_reference(entfrom)
 	return entfrom->code;
     }
 }
-
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_A0
+#endif
 
 ntbl_entry *
 resolve_ref(modid, tokid, arity)
@@ -122,6 +127,9 @@ resolve_ref(modid, tokid, arity)
  * overflow check. 0 means don't ignore it, while 1 means ignore it.
  * If it is ignored, make sure the calling routine sets the E pointer.
  */
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_D0
+#endif
 
 Code *
 call_resolve_reference(m, p, a, i)
@@ -132,12 +140,12 @@ call_resolve_reference(m, p, a, i)
     dbprot_t odbrs;
 
     if (M_ISUIA(m))
-	m = find_token((char *) (M_FIRSTUIAWORD(MUIA(m))));
+	m = find_token((UCHAR *) (M_FIRSTUIAWORD(MUIA(m))));
     else
 	m = MFUNCTOR_TOKID(m);
 
     if (M_ISUIA(p))
-	p = find_token((char *) (M_FIRSTUIAWORD(MUIA(p))));
+	p = find_token((UCHAR *) (M_FIRSTUIAWORD(MUIA(p))));
     else
 	p = MFUNCTOR_TOKID(p);
 
@@ -159,6 +167,9 @@ call_resolve_reference(m, p, a, i)
     (void) w_dbprotect(odbrs);
     return ent->exec_entry;
 }
+#ifdef POINTERS_IN_A0
+#pragma pointers_in_A0
+#endif
 
 #ifdef PACKAGE
 void
@@ -524,7 +535,8 @@ pckg_add_default_proc(tokid, arity)
     int   i;
 
     if (default_procmax >= MAXDEFPROCS)
-	fatal_error(FE_FULL_DEFPROC, 0);
+/* fatal_error(FE_FULL_DEFPROC, 0); */
+	fatal_error(FE_FULL_DEFPROC);
 
     /*
      * Check whether it is already there or not.
@@ -751,10 +763,10 @@ module_init()
 	*top_clausegroup = -1;
 
 	/* create the user module (default) */
-	new_mod((PWord) find_token("user"));
+	new_mod((PWord) find_token((UCHAR *)"user"));
 
 	/* create the builtins module */
-	new_mod((PWord) find_token("builtins"));	
+	new_mod((PWord) find_token((UCHAR *)"builtins"));	
 
 	/* pop builtins module off the stack */
 	end_mod();

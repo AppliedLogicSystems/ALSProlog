@@ -1,7 +1,13 @@
-/*
- * icodegen.h:	Stuff used by most of the ic*.c files.
- *	Copyright (c) 1987-1994 Applied Logic Systems, Inc.
- */
+/*=========================================================*
+ |			icodegen.h:
+ |		Copyright (c) 1987-1995 Applied Logic Systems, Inc.
+ |
+ |			-- Stuff used by most of the ic*.c files.
+ |
+ | 10/26/94 - C. Houpt -- Redefined the Instruction Pointer as a union so that
+ |	    	it can be used as both a short and long pointer.  This
+ |	    	avoid the need to casting l-values, which is not ANSI.
+ *=========================================================*/
 
 #ifndef	_ICODEGEN_H_INCLUDED_
 #define	_ICODEGEN_H_INCLUDED_ 1
@@ -14,8 +20,20 @@ extern Code *icode_buf;
 extern Code icode_buf[];
 #endif
 
+/* Define the Instruction Pointer (ic_uptr) as a union so that it can be used
+   as both a short and long pointer.
+*/
 
-extern Code *ic_ptr;
+typedef union {
+	Code *code_ptr;
+	long *long_ptr;
+} ic_uptr_type;
+
+extern ic_uptr_type ic_uptr;
+
+/* Define ic_ptr as a code pointer to handle the common case of putting op codes. */
+
+#define ic_ptr	ic_uptr.code_ptr
 
 /* icode1.c */
 extern 	void	icode		PARAMS(( int, long, long, long, long ));

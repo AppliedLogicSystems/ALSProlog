@@ -4,15 +4,14 @@
  *
  * Author: Kevin A. Buettner
  * Creation: 2/12/87
- * Revision History:
- *	Revised: 3/22/87	Kev		-- icode.c split into icode1.c
- *						   and icode2.c
- *	Revised: 2m/22/88	Kev		-- Addition of code to take
- *						   care of the codeg field.
- *						   Addition of code to
- *						   symbolically branch back
- *						   to the overflow code.
- *	Revised: mm/dd/yy	Who		-- Reason
+ * 03/22/87 - K.Buettner -- icode.c split into icode1.c and icode2.c
+ * 02/22/88 - K.Buettner -- Add code to take care of the codeg field.
+ *					Add code to symbolically branch back
+ *					to the overflow code.
+ * 10/26/94 - C. Houpt	-- Rename ic_install_tree_overhead()'s
+ *						   parameter ic_ptr and create local to shadow the
+ *						   global ic_uptr.
+ *						-- Also Various UCHAR* casts.
  */
 
 #include <stdio.h>
@@ -35,7 +34,6 @@ static	void	ic_install_exception_check	PARAMS(( ntbl_entry * ));
 
 #ifdef MacOS
 extern long *Fail;
-pascal void debugger() extern 0xa9ff;
 #endif
 
 /*
@@ -766,7 +764,7 @@ ic_install_no(buf,clausestart,nocatcher)
 
     JSR((int) wm_retry_me)
 
-    JMP(w_nameentry(MODULE_BUILTINS,find_token(nocatcher),0)->exec_entry)
+    JMP(w_nameentry(MODULE_BUILTINS,find_token((UCHAR *)nocatcher),0)->exec_entry)
     startaddr = ic_ptr;
     LINK(E,0)
     ORIW(1,SPB,DDIRECT,0)	/* set it up so first chpt is compacted. */
@@ -937,9 +935,9 @@ ic_install_trust(ptr, cstart, nargs, emask)
  *	nentries	are the number of entries which we are concerned with
  *	ic_ptr		is the place to start installing the sequence at
  *
- *	Note that ic_ptr is also a global variable which is usually referenced
+ *	Note that ic_uptr is also a global variable which is usually referenced
  *	by the ic_put macros.  In this case, however, it refers to the
- *	parameter.
+ *	local variable.
  *
  *	The following code is emitted for the 680x0:
  *
@@ -954,12 +952,17 @@ ic_install_trust(ptr, cstart, nargs, emask)
  *
  */
  
+/* ic_install_tree_overhead(swaddr, nentries, ic_ptr) */
 Code *
-ic_install_tree_overhead(swaddr, nentries, ic_ptr)
+ic_install_tree_overhead(swaddr, nentries, ic)
     long *swaddr;
     int nentries;
-    register Code *ic_ptr;
+/*   register Code *ic_ptr;  */
+    Code *ic;
 {
+	register ic_uptr_type ic_uptr;
+	ic_uptr.code_ptr = ic;
+
     LEA_PCREL(A0)		/* lea (PC, 14), A0	*/
     ic_put(14);			/*          ^^		*/
     MOVE(A0,ADIRECT,0,D0,DDIRECT,0)

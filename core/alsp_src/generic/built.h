@@ -1,8 +1,8 @@
-/*
- * built.h		-- Include file for b*.c files
- *	Copyright (c) 1993 Applied Logic Systems, Inc.
- */
-
+/*=======================================================*
+ |			built.h		
+ |		Copyright (c) 1993-95 Applied Logic Systems, Inc.
+ |			-- Include file for b*.c files
+ *=======================================================*/
 #define FAIL return(0) 
 #define SUCCEED return(1)
 
@@ -337,6 +337,9 @@ extern	int	pbi_halt		PARAMS(( void ));
 extern	int	pbi_statistics		PARAMS(( void ));
 extern	int	pbi_stack_overflow	PARAMS(( void ));
 extern	int	pbi_stack_info		PARAMS(( void ));
+#ifdef MacOS
+extern	int	pbi_debugger		PARAMS(( void ));
+#endif
 extern	int	pbi_printno		PARAMS(( void ));
 extern	int	pbi_printwarning	PARAMS(( void ));
 #if	defined(Portable) && defined(IProfile)

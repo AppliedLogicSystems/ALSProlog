@@ -1,11 +1,13 @@
-/*
- * icom.h		-- ICode command numbers
- *
- *	Copyright (c) 1987-1994 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Created: 2/12/87
- */
+/*===========================================================*
+ |			icom.h		
+ |		Copyright (c) 1987-1995 Applied Logic Systems, Inc.
+ |
+ |			-- ICode command numbers
+ |
+ | Author: Kevin A. Buettner
+ | Created: 2/12/87
+ | 10/26/94,	C. Houpt -- Ifdefed out makeobp with OBP.
+ *===========================================================*/
 
 #ifndef	_ICOM_H_INCLUDED_
 #define	_ICOM_H_INCLUDED_ 1
@@ -37,6 +39,8 @@
 #define IC_BEGINALLOC	-25
 #define IC_ENDALLOC	-26
 
+#ifdef OBP
 extern	int	makeobp;
+#endif /* OBP */
 
 #endif	/* _ICOM_H_INCLUDED_ */

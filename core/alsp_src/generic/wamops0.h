@@ -1,21 +1,23 @@
-/*
- * wamops0.h		-- abstract machine opcodes
- *	Copyright (c) 1993, Applied Logic Systems, Inc.
- *
- * Authors: 	Kevin A. Buettner and Prabhakaran Raman
- * Creation:	9-15-93
- *
- * Description:	This file is intended to be the central repository for
- *	information describing the abstract machine opcodes.  The
- *	exception is wam.c which implements the abstract machine
- *	instructions.  Everything else should be encoded here or
- *	derived elsewhere from this file.
- *
- *	It should not be necessary to mention these opcodes in any
- *	other include file.  This means that new opcodes only need
- *	to be added here and their implementations to wam.c.
- *
- */
+/*===========================================================*
+ |			wamops0.h		
+ |		Copyright (c) 1993-95, Applied Logic Systems, Inc.
+ |
+ |			-- abstract machine opcodes
+ |
+ | Authors: 	Kevin A. Buettner and Prabhakaran Raman
+ | Creation:	9-15-93
+ |-------------------------------------------------------------
+ | Description:	This file is intended to be the central repository for
+ |	information describing the abstract machine opcodes.  The
+ |	exception is wam.c which implements the abstract machine
+ |	instructions.  Everything else should be encoded here or
+ |	derived elsewhere from this file.
+ |
+ |	It should not be necessary to mention these opcodes in any
+ |	other include file.  This means that new opcodes only need
+ |	to be added here and their implementations to wam.c.
+ |
+ *===========================================================*/
 
 /* ABMOP stands for ABstract Machine OPcode */
 ABMOP(W_MOVE_ES       ,I,I,U,U)

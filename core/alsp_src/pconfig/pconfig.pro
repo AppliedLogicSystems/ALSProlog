@@ -34,8 +34,9 @@ build_base_config
 	open('cfg.pro',write,OutStr,[]),
 	write_clauses(OutStr, [cfg(prologVersion,PVer) | Info]),
 	close(OutStr),
-	assert_all(Info),
-	install_sharbld.
+	assert_all(Info).
+
+%	install_sharbld.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Read the config.h file in the top-level build directory

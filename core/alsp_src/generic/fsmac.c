@@ -1,40 +1,193 @@
-/*
- * fsmac.c
- *      Copyright (c) 1991-1993 Applied Logic Systems, Inc.
- *
- * File System Access & Manipulation -- Mac
- *
- * Author:  Ron DiNapoli
- * Date:    Created on 8/27/92
- */
-
+/*=================================================================*
+ |			fsmac.c
+ |		Copyright (c) 1991-1995 Applied Logic Systems, Inc.
+ |
+ |			-- File System Access & Manipulation -- Mac
+ |
+ | Author:  Ron DiNapoli
+ | Date:    Created 8/27/92
+ | 12/11/94 - C. Houpt -- Updated file routines.
+ *=================================================================*/
 #include "defs.h"
 
 #ifdef MacOS
 
 #include <stdio.h>
+#include <limits.h>
 
-#include <StdDef.h>
 #include <Types.h>
 #include <Files.h>
 #include <ToolUtils.h>
 #include <Memory.h>
 #include <OSUtils.h>
+#include <Processes.h>
+#include <Errors.h>
 
-pascal void
-debugger()
-    extern 0xa9ff;
+#if defined(THINK_C)
+#include <pascal.h>
+#elif defined(__MWERKS__)
+#include <Strings.h>
+#endif
 
-/*
- *  Local globals needed to maintain directory status...
- */
+#define MIN(a,b) (((a)<(b))?(a):(b))
 
-#define CurDirStore *(long *) 0x398
-#define SFSaveDisk *(short *) 0x214
+static unsigned char *pStrcat(unsigned char *dest, const unsigned char *src)
+{
+    long  sLen = MIN(*src, 255 - *dest);
 
-    static long gCurrentWDDirID;
-    static short gCurrentVRefNum;
+    BlockMove(src + 1, dest + *dest + 1, sLen);
+    *dest += sLen;
+    return (dest);
+}
 
+static unsigned char *
+pStrcpy(unsigned char *dest, const unsigned char *src)
+{
+    BlockMove(src, dest, (long) *src + 1);
+    return (dest);
+}
+
+static unsigned char *cpy_c2pstr(unsigned char *pstr, const char *cstr)
+{
+    *pstr = MIN(strlen(cstr), 255);
+    memmove(pstr+1, cstr, *pstr);
+    return pstr;
+}
+
+#if !defined(__MPW_MWERKS__) && !defined(applec)
+int access(const char *path, int x)
+{
+    Str255 pPath;
+    CInfoPBRec fp;
+    int result;
+    
+    cpy_c2pstr(pPath, path);
+
+    fp.hFileInfo.ioCompletion = 0;
+    fp.hFileInfo.ioNamePtr = pPath;
+    fp.hFileInfo.ioVRefNum = 0;
+    fp.hFileInfo.ioFVersNum = 0;
+    fp.hFileInfo.ioFDirIndex = 0;
+    fp.hFileInfo.ioDirID = 0;
+
+    if (PBGetCatInfo((CInfoPBPtr) & fp, false)) result = -1;
+    else result = 0;
+    
+    return result;
+}
+#endif
+
+int absolute_pathname(const char *name)
+{    
+    return *name != ':' && (strchr(name, ':') != NULL);
+}
+
+
+static OSErr PathNameFromDirID(long DirID, short vRefNum, char *buf, size_t size)
+{
+    OSErr err;
+    CInfoPBRec	block;
+    Str255	directoryName;
+    char *pathName;
+    size_t pathNameLen;
+    
+    /* For efficiency, individual directory names are accumulated at the END
+       of the buffer.  PathName is a valid C string, that grows to the left. */
+    buf[size-1] = 0;
+    pathName = buf + size - 1;
+    pathNameLen = 0;
+    
+    block.dirInfo.ioNamePtr = directoryName;
+    block.dirInfo.ioDrParID = DirID;
+    
+    do {
+	block.dirInfo.ioVRefNum = vRefNum;
+	block.dirInfo.ioFDirIndex = -1;
+	block.dirInfo.ioDrDirID = block.dirInfo.ioDrParID;
+
+	err = PBGetCatInfo(&block,false);
+	if (err != noErr) goto fail;
+	
+	if (directoryName[0] + pathNameLen + 1 > size) {
+	   err = memFullErr;
+	   goto fail;
+	}
+	pathName--;
+	*pathName = ':';
+	pathName -= directoryName[0];
+	memmove(pathName, directoryName+1, directoryName[0]);
+	pathNameLen += directoryName[0] + 1;
+    } while (block.dirInfo.ioDrDirID != fsRtDirID);
+
+    /* Finally, move pathName from the end of the buffer to the front. */
+    memmove(buf, pathName, pathNameLen + 1);
+
+    fail:
+    
+    return err;
+}
+
+#define MAXPATHLEN	256
+
+char *getcwd(char *buf, size_t size)
+{
+    OSErr	err;
+    short wdRefNum;
+    Str255 volName;
+    WDPBRec pBlock;
+
+    if (buf == NULL || size < 1) return NULL;
+    
+    pBlock.ioCompletion = NULL;
+    pBlock.ioNamePtr = volName;
+    err = PBHGetVol(&pBlock, 0);
+    if (err != noErr) return NULL;
+    
+    err = PathNameFromDirID(pBlock.ioWDDirID, pBlock.ioWDVRefNum, buf, size);
+    
+    if (err == noErr) return buf;
+    else return NULL;
+}
+
+long	get_file_modified_time(const char *fname)
+{
+    Str255 pfname;
+    FileParam fp;
+    short workingDirectory;
+
+    cpy_c2pstr(pfname, fname);
+
+    GetVol(NULL, &workingDirectory);
+    fp.ioCompletion = 0;
+    fp.ioNamePtr = pfname;
+    fp.ioVRefNum = workingDirectory;
+    fp.ioFVersNum = 0;
+    fp.ioFDirIndex = 0;
+ 
+    if (PBGetFInfo((ParmBlkPtr) & fp, false)) return (0);
+
+    return (fp.ioFlMdDat);
+}
+
+int	isdir(const char *fname)
+{
+    Str255 pfname;    
+    FileParam fp;
+
+    cpy_c2pstr(pfname, fname);
+
+    fp.ioCompletion = 0;
+    fp.ioNamePtr = pfname;
+    fp.ioVRefNum = 0;
+    fp.ioFVersNum = 0;
+    fp.ioFDirIndex = 0;
+
+    PBGetFInfo((ParmBlkPtr) & fp, false);
+
+    if (BitTst(&fp.ioFlAttrib, 3)) return (1);
+
+    return (0);
+}
 
 /*
  *
@@ -54,12 +207,12 @@ debugger()
  *                   filetype, and then mapped accordingly in fsmac.pro
  */
 
-
-getFileStatus()
+static int getFileStatus(void)
 {
     PWord v1, v2, vtime, vftype;
     int   t1, t2, ttime, tftype;
-    char *pathName, *uia_buf;
+    char *cPathName, *uia_buf;
+    Str255 pathName;
     PWord sTag, pstructure, arg;
     int   sTagType, pstructureType, argType;
     int   fileMode, fileType, ownerPermiss;
@@ -72,10 +225,11 @@ getFileStatus()
     PI_getan(&v1, &t1, 1);
     PI_getan(&v2, &t2, 2);
 
-    if (!getstring((UCHAR **)&pathName, v1, t1))
+    if (!getstring((UCHAR **)&cPathName, v1, t1))
 	PI_FAIL;
 
-    c2pstr(pathName);
+    cpy_c2pstr(pathName, cPathName);
+    
     fp.hFileInfo.ioCompletion = 0;
     fp.hFileInfo.ioNamePtr = pathName;
     fp.hFileInfo.ioVRefNum = 0;
@@ -84,13 +238,10 @@ getFileStatus()
 
     if (PBGetFInfo((ParmBlkPtr) & fp, false)) {
 	if (PBGetCatInfo((CInfoPBPtr) & fp, false)) {
-	    p2cstr(pathName);
 	    PI_FAIL;
 	}
 	is_directory = 1;
     }
-
-    p2cstr(pathName);
 
     PI_makesym(&sTag, &sTagType, "fileStatus");
     PI_makestruct(&pstructure, &pstructureType, sTag, 5);
@@ -102,11 +253,11 @@ getFileStatus()
 	ownerPermiss = *(((char *) &fp) + 31) & 6;
     }
     else {
-	if ((f = fopen(pathName, "r")) == NULL)
+	if ((f = fopen(cPathName, "r")) == NULL)
 	    ownerPermiss = 0;
 	else {
 	    fclose(f);
-	    if ((f = fopen(pathName, "a")) == NULL)
+	    if ((f = fopen(cPathName, "a")) == NULL)
 		ownerPermiss = 4;
 	    else {
 		fclose(f);
@@ -155,78 +306,20 @@ getFileStatus()
  *
  */
 
-#define gHaveAUX 0
-#define MIN(a,b) (((a)<(b))?(a):(b))
 
-char *
-pStrcat(dest, src)
-    unsigned char *dest, *src;
-{
-    long  sLen = MIN(*src, 255 - *dest);
-
-    BlockMove(src + 1, dest + *dest + 1, sLen);
-    *dest += sLen;
-    return (dest);
-}
-
-
-char *
-pStrcpy(dest, src)
-    unsigned char *dest, *src;
-{
-    BlockMove(src, dest, (long) *src + 1);
-    return (dest);
-}
-
-
-char *
-PathNameFromDirID(DirID, VRefNum, s)
-    long  DirID;
-    short VRefNum;
-    char *s;
-{
-    CInfoPBRec block;
-    Str255 directoryName;
-    OSErr err;
-
-    *s = 0;
-    block.dirInfo.ioNamePtr = directoryName;
-    block.dirInfo.ioDrParID = DirID;
-
-    do {
-	block.dirInfo.ioVRefNum = VRefNum;
-	block.dirInfo.ioFDirIndex = -1;
-	block.dirInfo.ioDrDirID = block.dirInfo.ioDrParID;
-
-	err = PBGetCatInfo(&block, false);
-	if (gHaveAUX) {
-	    if (directoryName[1] != '/')
-		pStrcat(directoryName, "\p/");
-	}
-	else
-	    pStrcat(directoryName, "\p:");
-
-	pStrcat(directoryName, s);
-	pStrcpy(s, directoryName);
-    } while (block.dirInfo.ioDrDirID != fsRtDirID);
-
-    return (s);
-}
-
-pgetcwd()
+static pgetcwd(void)
 {
     PWord v1, sym;
     int   t1, symType;
-    char  pathName[255];
+    char pathName[MAXPATHLEN]; 
+    Str255 volName;
     WDPBRec pBlock;
+    OSErr err;
 
     PI_getan(&v1, &t1, 1);
 
-    pBlock.ioNamePtr = NewPtr(255);
-    PBHGetVol(&pBlock, 0);
-    DisposPtr(pBlock.ioNamePtr);
-    PathNameFromDirID(pBlock.ioWDDirID, pBlock.ioWDVRefNum, pathName);
-    p2cstr(pathName);
+    if (getcwd(pathName, MAXPATHLEN) == NULL)
+    	PI_FAIL;
 
     PI_makeuia(&sym, &symType, pathName);
 
@@ -240,81 +333,69 @@ pgetcwd()
  * chdir/1
  */
 
-static short CurWDRefNum = 0;
-
 /*
  * ChangeVolume() checks to see if we are dealing with an absolute
  * pathname and, if so, sets the volume separately by a call to
  * setvol()
  */
 
-ChangeVolume(pathname)
-    char *pathname;
+static OSErr ChangeVolume(const char *pathname)
 {
-    char *ptr1, *ptr2, volname[256];
+    const char *ptr1, *ptr2;
+    Str255 volname;
     short i;
 
-    if (pathname[0] == ':')
-	return;			/* Not an absolute path */
-    if (!(ptr2 = (char *) strchr(pathname, (char) ':')))
-	return;
-    ptr1 = &pathname[0];
-    i = 0;
+    if (!absolute_pathname(pathname)) return; /* Not an absolute path */
 
+    ptr2 = strchr(pathname, ':');
+    ptr1 = pathname;
+
+    i = 1;
     while (ptr1 <= ptr2) {
 	volname[i++] = *ptr1++;
     }
 
-    volname[i] = 0;
-    setvol(volname, nil);
+    volname[0] = i-1;
+    return SetVol(volname, 0);
 }
 
-SetDirectoryFromPath(path)
-    char *path;
+static OSErr SetDirectoryFromPath(const char *path)
 {
-    WDPBRec paramBlock;
     CInfoPBRec pb;
-    short refnum, errnum, WDRefNum;
-    long  theDirID, theProcID;
-    short saveVol, mountedvol, dirChanged;
-    char  mvname[80];
+    short refnum, WDRefNum;
+    short mountedvol;
+    Str27 mvname, ioName;
+    OSErr err;
 
-    getvol(nil, &saveVol);
-    ChangeVolume(path);
-    getvol(nil, &mountedvol);
-    getvol(mvname, nil);
+    err = ChangeVolume(path);
+    if (err != noErr) goto fail;
+    
+    err = GetVol(mvname, &mountedvol);
+    if (err != noErr) goto fail;
 
-    pb.dirInfo.ioNamePtr = NewPtr(strlen(path) + 1);
-    strcpy(pb.dirInfo.ioNamePtr, path);
-    c2pstr(pb.dirInfo.ioNamePtr);
-    pb.dirInfo.ioVRefNum = paramBlock.ioVRefNum = mountedvol;
+    cpy_c2pstr(ioName, path);
+    pb.dirInfo.ioNamePtr = ioName;
+    pb.dirInfo.ioVRefNum = mountedvol;
     pb.dirInfo.ioDrDirID = 0;
     pb.dirInfo.ioFDirIndex = 0;
 
-    if (PBGetCatInfo(&pb, 0))
-	return (0);
+    err = PBGetCatInfo(&pb, 0);
+    if (err != noErr) goto fail;
 
     /* Set the directory... */
 
-    if (!(errnum = OpenWD((short) mountedvol, pb.dirInfo.ioDrDirID,
-			  'ALSN', &WDRefNum))) {
-	if (CurWDRefNum != WDRefNum)
-	    dirChanged = true;
-    }
-    else {
-	fprintf(stderr, "%% SetDirectoryFromPath: Error opening new WD (%d)\n",
-		errnum);
-	return (0);
-    }
-
-    if (errnum = setvol(0, WDRefNum)) {
-	return (0);
-    }
-
-    CurWDRefNum = WDRefNum;
+    err = OpenWD((short) mountedvol, pb.dirInfo.ioDrDirID, 'ALSN', &WDRefNum);
+    if (err != noErr) goto fail;
+    
+    err = SetVol(0, WDRefNum);
+    if (err != noErr) goto fail;
+    
+    fail:
+    
+    return err;
 }
 
-pchdir()
+static int pchdir(void)
 {
     PWord v1, sym;
     int   t1, symtype;
@@ -323,22 +404,128 @@ pchdir()
 
     PI_getan(&v1, &t1, 1);
 
-    if (!getstring((UCHAR **)&pathName, v1, t1))
-	PI_FAIL;
+    if (!getstring((UCHAR **)&pathName, v1, t1)) PI_FAIL;
 
-    SetDirectoryFromPath(pathName);
+    if (SetDirectoryFromPath(pathName) != noErr) PI_FAIL;
 
     PI_SUCCEED;
 }
 
-pgetpid()
+int chdir(const char *dirname)
+{
+    if (SetDirectoryFromPath(dirname) != noErr) return -1;
+    else return 0;
+}
+
+static int pgetpid(void)
 {
     PWord v1, vpid;
-    if (PI_unify(v1, t1, 0, PI_INT))
+    int   t1, tpid;
+    ProcessSerialNumber PSN;
+
+    PI_getan(&v1, &t1, 1);
+    
+    if(GetCurrentProcess(&PSN) != noErr) PI_FAIL;
+    
+    PI_makedouble(&vpid, &tpid, (double)PSN.highLongOfPSN * ULONG_MAX + (double)PSN.lowLongOfPSN);
+    if (PI_unify(v1, t1, vpid, tpid))
 	PI_SUCCEED;
     else
 	PI_FAIL;
 }
+
+
+/* ceh - I'm not really sure what cononicalize_pathname does, or wether it really applies
+   on the Mac.  This function is a NOP. */
+static int canonicalize_pathname(void)
+{
+    PWord v1, v2, vp;
+    int   t1, t2, tp;
+    char *inpath;
+    char *outpath;
+    char *filename;
+
+    PI_getan(&v1, &t1, 1);
+    PI_getan(&v2, &t2, 2);
+
+    if (!getstring((UCHAR **)&inpath, v1, t1))
+	PI_FAIL;
+
+    filename = inpath;
+    outpath = "";
+    
+    if (filename) {
+	int plen = strlen(outpath);
+	char *hs;
+	PI_allocuia(&vp, &tp, (int)(plen+strlen(filename)+1));
+	hs = PI_getuianame(0,vp,0);
+	memcpy(hs,outpath,(size_t)plen);
+	strcpy(hs+plen,filename);
+    }
+    else
+	PI_makeuia(&vp, &tp, outpath);
+
+    if (PI_unify(v2, t2, vp, tp))
+	PI_SUCCEED;
+    else
+	PI_FAIL;
+}
+
+/*
+ * comp_file_times/2       (--> pcmp_fs/2)
+ * comp_file_times(+File1, +File2)
+ *
+ * Succeeds if the last modification time of File1 is earlier than the
+ * last modification time of File2.
+ */
+
+static OSErr FileModTime(const char *pathName, unsigned long *modTime)
+{
+    Str255 pPathName;
+    FileParam fp;
+    OSErr err;
+
+    cpy_c2pstr(pPathName, pathName);
+    
+    fp.ioCompletion = 0;
+    fp.ioNamePtr = pPathName;
+    fp.ioVRefNum = 0;
+    fp.ioFVersNum = 0;
+    fp.ioFDirIndex = 0;
+
+    err = PBGetFInfo((ParmBlkPtr) & fp, false);
+    if (err != noErr) return err;
+    
+    *modTime = fp.ioFlMdDat;
+    return noErr;
+}
+
+static int
+pcmp_fs(void)
+{
+    PWord v1, v2;
+    int   t1, t2;
+    char *pathName1, *pathName2;
+    unsigned long fileModTime1, fileModTime2;
+
+    PI_getan(&v1, &t1, 1);
+    PI_getan(&v2, &t2, 2);
+
+    /* Make sure file name & pattern are atoms or UIAs */
+    if (!getstring((UCHAR **)&pathName1, v1, t1)
+     || !getstring((UCHAR **)&pathName2, v2, t2))
+	PI_FAIL;
+
+    if ((FileModTime(pathName1, &fileModTime1) != noErr) ||
+	(FileModTime(pathName2, &fileModTime2) != noErr))
+	PI_FAIL;
+
+    if (fileModTime1 < fileModTime2)
+	PI_SUCCEED;
+
+    PI_FAIL;
+}
+
 
 /* *INDENT-OFF* */
 PI_BEGIN
@@ -346,10 +533,12 @@ PI_BEGIN
     PI_PDEFINE("getcwd",1,pgetcwd,"_pgetcwd")
     PI_PDEFINE("chdir",1,pchdir,"_pchdir")
     PI_PDEFINE("getpid",1,pgetpid,"_pgetpid")
+    PI_PDEFINE("canonicalize_pathname", 2, canonicalize_pathname, "_canonicalize_pathname")
+    PI_PDEFINE("comp_file_times", 2, pcmp_fs, "_pcmp_fs")
 PI_END
 /* *INDENT-ON* */
 
-init_fsutils()
+void init_fsutils(void)
 {
     PI_INIT;
 }

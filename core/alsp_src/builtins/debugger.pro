@@ -1545,8 +1545,11 @@ debug_io(Where)
 	als_system(L),
 	dmember(wins=Where, L).
 
-dbg_io_opp(nowins, wins).
-dbg_io_opp(wins, nowins).
+dbg_io_opp(nowins, WhichWins)
+	:-!,
+	als_system(L),
+	dmember(wins=WhichWins, L).
+dbg_io_opp(_, nowins).
 
 export set_debug_io/1.
 set_debug_io(Where)

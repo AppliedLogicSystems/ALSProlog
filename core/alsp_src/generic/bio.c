@@ -1,21 +1,22 @@
-/*
- * bio.c   -- I/O Prolog builtins defined in C.
- *
- * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986-1993 by Applied Logic Systems
- *
- * Program Author:  Kevin A. Buettner
- * Creation:  11/14/84
- * Revision History:
- *      06/28/85,       K. Buettner -- Conversion to wam and compiled prolog
- *      09/12/85,       K. Buettner -- arithmetic predicates moved to
- *                                     separate file.
- *      01/28/86,       K. Buettner -- IBM PC conversion
- *      07/12/39,       P. Raman    -- PBI_NAMEMAX removal
- *      07/23/93,       K. Buettner -- Removal of functions defining I/O preds
- *                              which are not needed any more
- */
-
+/*=========================================================================*
+ |			bio.c   
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1995 by Applied Logic Systems
+ |
+ |			-- I/O Prolog builtins defined in C.
+ |
+ | Program Author:  Kevin A. Buettner
+ | Creation:  11/14/84
+ | Revision History:
+ | 06/28/85 - K. Buettner -- Conversion to wam and compiled prolog
+ | 09/12/85 - K. Buettner -- arithmetic predicates moved to separate file.
+ | 01/28/86 - K. Buettner -- IBM PC conversion
+ | 07/12/39 - P. Raman    -- PBI_NAMEMAX removal
+ | 07/23/93 - K. Buettner -- Removal of functions defining I/O preds
+ |                                which are not needed any more
+ | 0/26/94 - C. Houpt -- Added ifdef OBP around pbi_obp_* routines to allow
+ |						debugging without OBP.
+ *=========================================================================*/
 #include "defs.h"
 #include "icom.h"
 #include "wintcode.h"
@@ -284,25 +285,29 @@ pbi_load_foreign()
 
 #endif /* DynamicForeign */
 
-
 int
 pbi_obp_push_stop()
 {
+#ifdef OBP
     obp_push();
     makeobp = 0;
+#endif
     SUCCEED;
 }
 
 int
 pbi_obp_pop()
 {
+#ifdef OBP
     obp_pop();
+#endif
     SUCCEED;
 }
 
 int
 pbi_obp_open()
 {
+#ifdef OBP
     PWord v1;
     int   t1;
     UCHAR *name;
@@ -321,14 +326,18 @@ pbi_obp_open()
     }
     else
 	FAIL;
+#else
+    FAIL;
+#endif
 }
-
 
 int
 pbi_obp_close()
 {
+#ifdef OBP
     obp_close();
     obp_pop();
+#endif
     SUCCEED;
 }
 
@@ -339,12 +348,15 @@ pbi_obp_load()
     PWord v1, v2;
     int   t1, t2, status;
     UCHAR *name;
+#ifdef OBP
     int   old_makeobp = makeobp;
+#endif
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
 
     if (getstring(&name, v1, t1)) {
+#ifdef OBP
 	dbprot_t odbrs;
 	makeobp = 0;		/* don't want to make obp out of loading of
 				 * one
@@ -353,6 +365,9 @@ pbi_obp_load()
 	status = f_load((char *) name);
 	(void) w_dbprotect(odbrs);
 	makeobp = old_makeobp;
+#else
+	status = 0;
+#endif
 	if (w_unify(v2, t2, status, WTP_INTEGER))
 	    SUCCEED;
 	else
@@ -374,7 +389,8 @@ pbi_old_consult()
     w_get_An(&v2, &t2, 2);
 
     if (getstring(&name, v1, t1)
-     && (ec = consult(find_token((char *) name))) != -1) {
+/*     && (ec = consult(find_token((char *) name))) != -1) { */
+	   && (ec = consult(find_token(name))) != -1) {	
 	if (w_unify(v2, t2, ec, WTP_INTEGER))
 	    SUCCEED;
 	else

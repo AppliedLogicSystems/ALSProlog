@@ -5,7 +5,7 @@
  * Author: Kevin A. Buettner
  * Creation: 6/25/87
  * Revision History:
- *
+ * 10/26/94,	C. Houpt -- Various char* casts.
  */
 
 #include "defs.h"
@@ -19,7 +19,7 @@ cmp_sym_uia(sym, uia)
     long  sym;
     long  uia;
 {
-    return !strcmp(TOKNAME(sym >> 4), ((char *) wm_heapbase) + (uia >> 4) + 4);
+    return !strcmp((char *)TOKNAME(sym >> 4), ((char *) wm_heapbase) + (uia >> 4) + 4);
 }
 
 
@@ -40,7 +40,7 @@ cmp_obj_str(obj, str)
 
     tp = obj & 0xf;
     if (tp == MTP_SYM)
-	return !strcmp(TOKNAME(obj >> 4), str);
+	return !strcmp((char *)TOKNAME(obj >> 4), str);
     else if (tp == MTP_UIA)
 	return !strcmp(((char *) wm_heapbase) + (obj >> 4) + 4, str);
     else

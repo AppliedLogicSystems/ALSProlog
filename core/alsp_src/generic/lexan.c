@@ -1,19 +1,20 @@
-/*
- * lexan.c      -- lexical analyzer for prolog system
- * Copyright (c) 1985-1993 by Kevin A. Buettner
- *
- * Author:  Kevin A. Buettner
- * Creation: 10/25/84
- * Revision History:
- *      6/15/85,        K. Buettner -- compiler mods, better storage
- *                                        management
- *      8/8/85,         K. Buettner -- split lexical analyzer and parser
- *                      into two files; rewrote parts of it for both
- *                      versatility and efficiency.
- *      9/12/85,  K. Buettner -- parsing of floating point numbers
- *      10/7/86,  K. Buettner -- uninterned atoms
- */
-
+/*===================================================================*
+ |			lexan.c      
+ |		Copyright (c) 1985-1995 by Kevin A. Buettner
+ |
+ |			-- lexical analyzer for prolog system
+ |
+ | Author:  Kevin A. Buettner
+ | Creation: 10/25/84
+ | Revision History:
+ | 06/15/85 - K. Buettner -- compiler mods, better storage management
+ | 08/08/85 - K. Buettner -- split lexical analyzer and parser into two 
+ |							 files; rewrote parts of it for both
+ |                      	 versatility and efficiency.
+ | 09/12/85 - K. Buettner -- parsing of floating point numbers
+ | 10/07/86 - K. Buettner -- uninterned atoms
+ | 10/26/94 -  C. Houpt -- Various UCHAR* casts.
+ *===================================================================*/
 #include "defs.h"
 #include "lexan.h"
 
@@ -24,7 +25,6 @@
 #include "lexinit.h"		/* Get initial lex table */
 
 lxi_but *lexbdp = &seetbl[USRSEEI].lb;	/* pointer to buffer descriptor */
-
 
 #define nxtbuf() ((void) (*(lexbdp->nextbuf))(lexbdp), bp = lexbdp->curpos)
 
@@ -48,6 +48,10 @@ next_token()
     int   ctype;		/* character type */
     register char *s = tokstr;	/* char pointer into token */
 
+/*
+printf("next_token:buffer:     =%20s\n",bp);
+printf("next_token:start:tokstr=%s||  ctp=%d  curtok=%d\n",tokstr,CType((*bp)),curtok); fflush(stdout);
+*/
     /*
      * Step 1:  Make sure that we have really have a buffer; get one if
      *  we don't.
@@ -108,6 +112,7 @@ next_token()
 
     lexbdp->tokpos = bp;	/* mark start of token (for error recovery) */
     curtkty = TKTP_OTHER;	/* assume that the token type is OTHER */
+
 
     switch (CType((*bp))) {
 	case LX_WSP:		/* can't happen */
@@ -361,13 +366,14 @@ next_token()
 	else {
 	    int   firstc = tokstr[0];
 
+
 	    if (CType(firstc) == LX_SQT) {
 		if (*bp == '(') {
 		    curtkty = TKTP_FUNCTOR;
 		    /* look for token without quote */
-		    curtok = find_token(tokstr + 1);
+		    curtok = find_token((UCHAR *)tokstr + 1);
 		}
-		else if ( (curtok = probe_token(tokstr + 1)) )
+		else if ( (curtok = probe_token((UCHAR *)tokstr + 1)) )
 		    curtkty = TKTP_CONST;
 		else {
 		    curtkty = TKTP_OBJECT;
@@ -376,7 +382,7 @@ next_token()
 	    }
 	    else {
 		if (*bp == '(' && CType(firstc) != LX_SNGL) {
-		    curtok = find_token(tokstr);
+		    curtok = find_token((UCHAR *)tokstr);
 		    curtkty = TKTP_FUNCTOR;
 		}
 #ifdef AllUIAConsts
@@ -395,21 +401,21 @@ next_token()
 		}
 #else
 		else {
-		    curtok = find_token(tokstr);
+		    curtok = find_token((UCHAR *)tokstr);
 		    if (TOKUNOP(curtok) || TOKBINOP(curtok))
-			curtkty = TKTP_OP;
+				curtkty = TKTP_OP;
 
 		    if (curtok == TK_DOT && (CType((*bp)) == LX_WSP ||
 					     CType((*bp)) == LX_NL ||
 					     CType((*bp)) == LX_EOF))
-			curtkty = TKTP_FULLSTOP;
+				curtkty = TKTP_FULLSTOP;
 		}
 #endif
 	    }
 	}
     }
-
     lexbdp->curpos = bp;
+/*printf("next_token:end:tokstr=%s  curtok=%d  curtkty=%d\n",tokstr,curtok,curtkty);*/
 }
 
 static int

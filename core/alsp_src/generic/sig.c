@@ -1,14 +1,17 @@
-/*
- * sig.c        -- signal handling for ALS-Prolog
- *      Copyright (c) 1991-1993 Applied Logic Systems, Inc.
- *
- * Authors:     Kevin Buettner
- *              Ilyas Cicekli
- * Creation:    5/15/91         (out of main.c)
- * Revision History:
- *          -- 6/10/93 raman -- merged in I386 signal handling
- */
-
+/*=============================================================*
+ |			sig.c        
+ |		Copyright (c) 1991-1995 Applied Logic Systems, Inc.
+ |
+ |			-- signal handling for ALS-Prolog
+ |
+ | Authors:     Kevin Buettner, Ilyas Cicekli
+ | Creation:    5/15/91 (out of main.c)
+ | Revision History:
+ | 06/10/93 - raman -- merged in I386 signal handling
+ | 11/21/94 - C. Houpt -- Added prototypes for set_prolog_interrupt().
+ |		Added #ifdef control for some header files (HAVE_SYS_TYPES_H, 
+ |		HAVE_UNISTD_H); #ifdef'd out SIGALRM because it doesn't exist on Mac.
+ *=============================================================*/
 #include "defs.h"
 #include "sig.h"
 
@@ -18,7 +21,9 @@
 #define SIGINT 2
 #define CNTRLC_INTNUM	0x1B
 #else  /* DOS */
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 #include <signal.h>
 #include <math.h>
 #endif /* DOS */
@@ -29,9 +34,9 @@
  * Control/C handler and structure to store original handler.
  */
 
-extern int cntrlc_handler();
-extern int endof_cntrlc_handler();
-extern int set_prolog_interrupt();
+extern int cntrlc_handler PARAMS((void));
+extern int endof_cntrlc_handler PARAMS((void));
+extern int set_prolog_interrupt PARAMS((void));
 
 struct intvec_struc {
     long  prot_vec_addr;
@@ -47,7 +52,6 @@ static int cntrcl_init_flag = 0;
 #include <ssdef.h>
 #include <descrip.h>
 #endif
-
 
 #ifndef DOS
 
@@ -86,6 +90,7 @@ void  signal_handler(AST_param)
     char  AST_param;
 #else
 #define NAIVE_SIGNAL_HANDLER 1
+extern int set_prolog_interrupt	PARAMS((void));
 void  signal_handler(signum)
     int   signum;
 #endif
@@ -388,8 +393,12 @@ pbi_alarm()
 #endif				 /* !HAVE_SIGVEC */
 #endif		  /* HAVE_SIGACTION ... */
 #else /* !HAVE_SETITIMER */
+#ifdef HAVE_UNISTD_H
     alarm((unsigned long) dval);
+#endif
+#ifndef MacOS
     (void) signal(SIGALRM, signal_handler);
+#endif /* MacOS */
 #endif /* HAVE_SETITIMER */
 #endif /* #ifndef DOS */
     PI_SUCCEED;

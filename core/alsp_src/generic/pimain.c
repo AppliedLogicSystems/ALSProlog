@@ -1,9 +1,13 @@
 /*=====================================================================*
  |		pimain.c
- | Copyright (c) 1988-1994, Applied Logic Systems, Inc.
+ |	Copyright (c) 1988-1995, Applied Logic Systems, Inc.
  |
- |	default main() that initializes prolog and starts
- |	the development shell.
+ |		-- default main() that initializes prolog and starts
+ |			the development shell.
+ |
+ | 11/20/94 - C. Houpt -- Added Think/MetroWerks ccommand() call to allow
+ |			      command line arguments for non-MPW versions.
+ |	Note: Need mod of pi_init header file format to provide prototype.
  *=====================================================================*/
 
 #ifdef HAVE_CONFIG_H
@@ -13,6 +17,7 @@
 	/* Not in ALS-Prolog source tree... */
 #include "alspi.h"
 #include <stdio.h>
+
 #ifndef NO_STDARG_H
 #define HAVE_STDARG_H
 #endif
@@ -27,6 +32,13 @@ extern	void	main	PARAMS(( int, char ** ));
 
 #include "pi_cfg.h"
 
+#ifdef MacOS
+#if defined(THINK_C) || defined(__MWERKS__)
+#include <console.h>
+#endif
+#endif
+/* extern void	load_me(boid); */
+
 void
 main(argc, argv)
     int   argc;
@@ -34,6 +46,32 @@ main(argc, argv)
 {
     int   exit_status;
 
+#ifdef MacOS
+#if  !defined(__MPW_MWERKS__) && !defined(applec)	
+    argc = ccommand(&argv);
+#ifdef __MWERKS__
+    printf("Please use <Control-D> <Return> on a blank line to signal end-of-file.\n\n");
+#endif /* __MWERKS__ */
+#endif
+#endif
+
+#if 0
+    /* DO NOT MOVE THIS CODE ANYWHERE ELSE!!!!!!!!!!!!!!!!!!!!! The Mac uses
+     * alloca to allocate the heap and stack on the system (application)
+     * stack.  If you put the call to alloca in another function, the space
+     * that gets allocated by the  call to alloca will be "released" when
+     * that function terminates.  SO...  LEAVE THIS CODE WHERE IT IS!!  Thank
+     * you.  ( I dont see why prolog data areas cannot be malloced on Mac
+     * just like other systems; that will eliminate this ifdef and also make
+     * it suitable for embedded apps - raman 6/14/93 )
+     */
+    wm_stackbot = (PWord *) alloca((DEFAULT_STACK_SIZE + DEFAULT_HEAP_SIZE) * sizeof (PWord));
+    if (wm_stackbot == 0)
+	fatal_error(FE_BIGSTACK, 0);
+    if (((int) (wm_stackbot + (DEFAULT_STACK_SIZE + DEFAULT_HEAP_SIZE)) & 0x80000000) != 0)
+	fatal_error(FE_TAGERR, 0);
+#endif
+    
     if ((exit_status = PI_prolog_init(WIN_STR, argc, argv)) != 0) {
 	PI_app_printf(PI_app_printf_error, "Prolog init failed !\n");
 	exit(1);

@@ -1,18 +1,16 @@
-/*
- * alspi.h		-- Prolog types and other macros for the ALS-Prolog
- *				C-Interface
- *
- * 	Copyright (c) 1986-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 11/7/86
- * Revision History:
- *	Revised: 6/6/87		Kev		Sun Interface
- *		 6/8/88		Chris		Changed names for consistancy
- *		 6/13/88	Chris		Change filename to "alspi.h"
- *		 11/9/88	Kev		Motorola Interface
- */
-
+/*================================================================*
+ |			alspi.h		
+ |		Copyright (c) 1986-1995 Applied Logic Systems, Inc.
+ |
+ |			-- Prolog types & macros for the ALS-Prolog/C-Interface
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 11/7/86
+ | 06/06/87 - K.Buettner -- Sun Interface
+ | 06/08/88 - K.Buettner -- Changed names for consistancy
+ | 06/13/88 - C.White -- Change filename to "alspi.h"
+ | 11/09/88 - K.Buettner -- Motorola Interface
+ *================================================================*/
 #ifndef _ALSPI_H_INCLUDED_
 #define _ALSPI_H_INCLUDED_
 
@@ -30,7 +28,6 @@
 #endif
 #endif /* PARAMS */
 
-
 #ifndef PWordTypeDefined
 typedef long PWord;
 #define PWordTypeDefined 1
@@ -43,7 +40,6 @@ typedef long PWord;
 #define PI_INT 		4
 #define PI_UIA 		5
 #define PI_DOUBLE 	6
-
 
 typedef struct {
 		char *name;
@@ -60,7 +56,6 @@ typedef struct {
 #define PI_PDEFINE(p,a,f,fn) {p,a,f,fn},
 
 #define PI_INIT PrologInit(pi_init_array)
-
 
 extern char *WinsTypeStr;
 

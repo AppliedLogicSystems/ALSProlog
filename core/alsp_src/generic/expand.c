@@ -1,18 +1,17 @@
-/*
- * expand.c             -- dcg and comma expansion
- *
- * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
- *
- * Program Author:  Kevin A. Buettner
- * Creation Date: 7/24/85
- * Revision History:
- *      8/10/85     K. Buettner,        Moved rule and dcg building from parser
- *                                      to expand.c
- *      1/15/86     K. Buettner,        IBM PC port; removed semicolon expansion
- *
- */
-
+/*=================================================================*
+ |			expand.c             
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1995 by Applied Logic Systems, Inc.
+ |
+ |			-- dcg and comma expansion
+ |
+ | Program Author:  Kevin A. Buettner
+ | Creation Date: 7/24/85
+ | Revision History:
+ | 08/10/85 - K. Buettner -- Moved rule and dcg building from parser to expand.c
+ | 01/15/86 - K. Buettner -- IBM PC port; removed semicolon expansion
+ | 10/26/94 - C. Houpt	  -- Various UCHAR* casts.
+ *=================================================================*/
 #include "defs.h"
 
 #include "varproc.h"
@@ -22,10 +21,10 @@
 #include "icodegen.h"
 #include "main.h"
 
-static	void	rxpbod		PARAMS(( pword ));
-static	pword	expand_pred	PARAMS(( pword ));
-static	pword	expand_fact	PARAMS(( int, pword ));
-static	pword	expand_rule	PARAMS(( int, pword ));
+static	void	rxpbod			PARAMS(( pword ));
+static	pword	expand_pred		PARAMS(( pword ));
+static	pword	expand_fact		PARAMS(( int, pword ));
+static	pword	expand_rule		PARAMS(( int, pword ));
 static	pword	expand_query	PARAMS(( int, pword ));
 static	pword	expand_command	PARAMS(( int, pword ));
 static  pword	expand_expand	PARAMS(( int, pword ));
@@ -45,7 +44,7 @@ expand_pred(r)
     pword r;
 {
     if (TYPEOF(r) == TP_UIA)
-	return (MK_SYM(find_token(UIA_NAME(r))));
+	return (MK_SYM(find_token((UCHAR *)UIA_NAME(r))));
     else
 	return r;
 }
@@ -181,7 +180,7 @@ rxpbod(gs)
 	    break;
 
 	case TP_UIA:
-	    *pst_rand++ = MK_SYM(find_token(UIA_NAME(gs)));
+	    *pst_rand++ = MK_SYM(find_token((UCHAR *)UIA_NAME(gs)));
 	    break;
 
 	default:
@@ -268,7 +267,16 @@ parser_action(nvars, t)
  *
  */
 
+#ifdef NO_FAR_DATA
+static long *vtable;
+void init_expand_data(void)
+{
+    vtable = malloc(4096*sizeof(*vtable));
+    if (vtable == NULL) fatal_error(FE_ALS_MEM_INIT, 0);
+}
+#else
 static long vtable[4096];
+#endif
 static int vtp;
 
 
@@ -297,7 +305,6 @@ static pword (*cvt_walk_tbl[])PARAMS(( PWord )) = {
 };
 
 #define CVTWALK(v,t) (*cvt_walk_tbl[(t)])(v)
-
 
 pword
 cvt_term_to_rule(v, t)
@@ -410,7 +417,7 @@ cvt_walk_uia(v)
 {
     char  buf[512];
 
-    w_get_uianame(buf, v, 512);
+    w_get_uianame((UCHAR *)buf, v, 512);
 
     return (MK_UIA(buf));
 }

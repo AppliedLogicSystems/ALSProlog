@@ -10,12 +10,15 @@
  *	06/23/92	by Ron	Added #ifdefs for Mac specific code and for
  *				dealing with the Mac's desire to use A5 as
  *				a "global variable" pointer...
+ *	10/26/94 - C.Hoput - 
  */
 
 /*
  * include aconfig.h, tokens.h and mtypes.h
  */
 
+/* ceh */
+#include "config.h"
 #include "aconfig.h"
 #include "tokens.h"
 #include "mtypes.h"
@@ -90,6 +93,52 @@
 #define chpt_size 16
 
 #define DOUBLE_4 MMK_FUNCTOR(TK_DDOUBLE,4)
+
+/* External References */
+
+#ifdef MacOS
+	externdata Fail
+	
+	externcode call_resolve_reference
+	externcode wm_docut
+	externcode wm_docut2
+	externcode wm_try_me
+	externcode wm_trust_me
+	externcode jump_validate_dbref
+	externcode cmp_gettokstring
+	externcode cmp_int_double
+	externcode cmp_double_double
+	externcode wm_unify
+	externcode find_token
+	externcode cmp_sym_uia
+	externcode cmp_uia_uia
+	externcode decr_icount
+	externcode gc
+	externcode enter_Prolog
+	externcode wm_abort
+	externcode int_get_module
+	externcode int_get_goal_tokid
+	externcode next_choice_in_a_deleted_clause
+	externcode probe_token
+	externcode wm_colon
+	externcode resolve_reference
+	externcode cmp_obj_str
+	externcode heap_overflow
+
+	externdata wm_heapbase
+	externdata wm_trigger
+	externdata wm_safety
+	externdata wm_in_Prolog
+	externdata wm_cutaddr
+	externdata gv_setcnt
+	externdata wm_spying
+	externdata wm_normal
+	externdata wm_regs
+	externdata wm_regidx
+	externdata wm_interrupt_caught
+	externdata wm_aborted
+	externdata wm_overcode
+#endif
 
 /*
  *
@@ -282,6 +331,15 @@
 	bcs.s	StructL			; branch if structure
 	; fall through for constants
 #endm
+
+#ifdef MacOS
+#macro	tag_swc_long	StructL, ListL
+	subq.w	#MTP_LIST, d0		; do list comparison
+	beq	ListL			; branch if list
+	bcs	StructL			; branch if structure
+	; fall through for constants
+#endm
+#endif
 
 /*
  * Macro Name:		tag_sws

@@ -44,7 +44,6 @@ saved_sp:
 ;
 ;
 
-	text
 	global	wm_try_me
 wm_try_me:
 #ifdef MacOS

@@ -1,13 +1,14 @@
-/*
- * winter.c                     -- interface between machine and C
- *      Copyright (c) 1987-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 2/25/87
- * Revision History:
- *      mm/dd/yy        Who             Why
- */
-
+/*===========================================================*
+ |			winter.c                     
+ |		Copyright (c) 1987-1995 Applied Logic Systems, Inc.
+ |
+ |			-- interface between abstract machine and C
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 2/25/87
+ | Revision History:
+ | 10/26/94 - C. Houpt -- Various char* casts.
+ *===========================================================*/
 #include "defs.h"
 #include "wintcode.h"
 
@@ -393,7 +394,7 @@ w_mk_uia_in_place(rval, rtag, str)
     *rval = (PWord) MMK_UIAVAL(wm_H);
     *rtag = WTP_UIA;
 
-    i = strlen(str);
+    i = strlen((char *)str);
     t = &str[i];
     i = sizeof (PWord) - (i % sizeof (PWord));
     while (i--)
@@ -593,7 +594,6 @@ w_uia_pokes(uia, off, val)
     else
 	return (0);
 }
-
 
 #ifdef DoubleType
 double floor();

@@ -1,17 +1,18 @@
-/*
- * fileio.c     -- file input and output for prolog interpreter/compiler
- *              Copyright (c) 1985 by Kevin A. Buettner
- *              Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
- *
- * Author:  Kevin A. Buettner
- * Creation:  11/24/84
- * Revision History:
- *      Revised: 07/12/93,      Kev      -- Removed some functions no longer
- *                                          needed for bootstrapping or
- *                                          debugging
- *      Revised: mm/dd/yy,      Name     -- Reason
- */
-
+/*=======================================================================*
+ |			fileio.c     
+ |		Copyright (c) 1985 by Kevin A. Buettner
+ |		Copyright (c) 1986-1995 by Applied Logic Systems, Inc.
+ |
+ |			-- file input/output for prolog compiler
+ |
+ | Author:  Kevin A. Buettner
+ | Creation:  11/24/84
+ | Revision History:
+ | 07/12/93 - K.Buettner -- Removed some functions no longer needed for 
+ |					 		bootstrapping or debugging
+ | 10/26/94 - C. Houpt -- Think C ANSI library does not like the setvbuf() 
+ |						  calls.  Also various char* casts.
+ *=======================================================================*/
 #include "defs.h"
 
 static	void	fio_nxln	PARAMS(( lxi_but * ));
@@ -21,7 +22,7 @@ static	void	file_error	PARAMS(( char * ));
 sefldsc seetbl[MAXSEE] =
 { {
     1,				/* inuse */
-    TK_USER,			/* tkidx */
+    TK_USER,		/* tkidx */
     0,				/* fd   */
     0,				/* tok  */
     0,				/* toktype */
@@ -32,7 +33,7 @@ sefldsc seetbl[MAXSEE] =
 	(char *) 0,		/* curpos */
 	(char *) 0,		/* tokpos */
 	fio_nxln,		/* nextbuf */
-	fio_syntax_err,		/* err_rec */
+	fio_syntax_err,	/* err_rec */
 	USRSEEI			/* see_idx */
     },
     "\0"			/* buffer */
@@ -74,11 +75,15 @@ void
 fio_init()
 {
 #if !defined(DOS) && !defined(Portable) && !defined(VMS) && !defined(NeXTOS)
+/* The Think C ANSI library has trouble with the setvbuf calls.  They seem
+   to disable stdin. */
+#ifndef THINK_C
     static char inbuf[BUFSIZ];
     static char outbuf[BUFSIZ];
 
     setvbuf(stdin, inbuf, _IONBF, BUFSIZ);
     setvbuf(stdout, outbuf, _IOLBF, BUFSIZ);
+#endif /* THINK_C */
 #endif /* not (DOS or Portable or VMS or NeXTOS) */
     seetbl[USRSEEI].fd = stdin;
     telltbl[USRTELI].fd = stdout;
@@ -239,7 +244,7 @@ fio_see(tok)
     else {
 	FILE *fd;
 
-	if ((fd = fopen(TOKNAME(tok), "r")) == NULL) {
+	if ((fd = fopen((char *)TOKNAME(tok), "r")) == NULL) {
 	    sprintf(ebuf, "Error opening '%s' for read access", TOKNAME(tok));
 	    file_error(ebuf);
 
@@ -397,7 +402,7 @@ fio_tell(tok)
     else {
 	FILE *fd;
 
-	if ((fd = fopen(TOKNAME(tok), "w")) == NULL) {
+	if ((fd = fopen((char *)TOKNAME(tok), "w")) == NULL) {
 	    sprintf(ebuf, "error opening '%s' for write access", TOKNAME(tok));
 	    file_error(ebuf);
 	    return (0);		/* failure */

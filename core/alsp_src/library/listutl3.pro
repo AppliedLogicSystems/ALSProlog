@@ -12,7 +12,7 @@ module builtins.
 
 export nobind_member/2.
 export output_prolog_list/1.
-export output_prolog_list/5.
+export output_prolog_list/6.
 export flatten/2.
 export n_of/3.
 export number_list/2.
@@ -55,22 +55,25 @@ nobind_member(X, [_ | T])
 output_prolog_list(List)
 	:-
 	current_output(Stream),
-	output_prolog_list(Stream, List,'','.',' - ').
+	output_prolog_list(Stream, List,'','.',' - ','').
 
-output_prolog_list(List,Indent,Term,Spacer)
+output_prolog_list(List,Indent,Term,Spacer,DefaultContent)
 	:-
 	current_output(Stream),
-	output_prolog_list(Stream,List,Indent,Term,Spacer).
+	output_prolog_list(Stream,List,Indent,Term,Spacer,DefaultContent).
 
-output_prolog_list(Stream,[],Indent,Term,Spacer).
-output_prolog_list(Stream,[Item | RestList],Indent,Term,Spacer)
+output_prolog_list(Stream,[],Indent,Term,Spacer,DefaultContent).
+output_prolog_list(Stream,[Item | RestList],Indent,Term,Spacer,DefaultContent)
 	:-
 	(Item = (Code-Content) ->
-		printf(Stream,"%t%t%t%t%t\n",[Indent,Code,Spacer,Content,Term])
+		printf(Stream,"%t%t%t%t%t",[Indent,Code,Spacer,Content,Term]),
+		(Content=DefaultContent -> put_code(Stream,0'*);true)
 		;
-		printf(Stream,"%t%t%t\n",[Indent,Item,Term])
+		printf(Stream,"%t%t%t",[Indent,Item,Term]),
+		(Iterm=DefaultContent -> put_code(Stream,0'*);true)
 	),
-	output_prolog_list(Stream,RestList,Indent,Term,Spacer).
+	nl(Stream),
+	output_prolog_list(Stream,RestList,Indent,Term,Spacer,DefaultContent).
 
 /*!---------------------------------------------------------------------
  |	flatten/2
