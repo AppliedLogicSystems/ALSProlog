@@ -16,7 +16,8 @@ You may freely copy, modify, and distribute any source file marked
 subject to the following restrictions:
 
 i)  You must preserve intact any and all existing copyright and/or authorship 
-information in any of the files you redistribute.  If you modify a source file, you must add a notice to that effect to the authorship information in the
+information in any of the files you redistribute.  If you modify a source file,
+you must add a notice to that effect to the authorship information in the
 source file.  If you substantially merge one of the files into another file, 
 you must transfer the existing copyright and/or authorship information
 to the newly merged file.
