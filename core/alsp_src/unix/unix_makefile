@@ -1,7 +1,7 @@
 # Generic Unix Definitions for GNU Make file for ALS Prolog
 
 # Common defaults for most unix systems. May be overiden by $(SUBOS)_makefile
-OS_AR = ar rus
+OS_AR = ar rusc
 OS_RANLIB = true
 OS_SL_EXT = so
 OS_SL_LINK = $(CC) -shared
