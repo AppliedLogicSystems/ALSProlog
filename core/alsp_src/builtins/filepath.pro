@@ -33,7 +33,7 @@ export file_extension/3.
 export path_elements/2.
 export path_directory_tail/3.
 export is_absolute_path/1.
-export is_absolute_path/2.
+%export is_absolute_path/2.
 export path_type/2.
 export path_type/3.
 export split_path/2.
@@ -41,8 +41,8 @@ export split_path/3.
 export join_path/2.
 export join_path/3.
 export tilda_expand/2.
+export directory_self/1.
 export directory_self/2.
-export directory_self/3.
 
 file_extension(FullName, Name, Ext) :-
 	nonvar(FullName),

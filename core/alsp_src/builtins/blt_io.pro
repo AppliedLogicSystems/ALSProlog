@@ -96,7 +96,8 @@ printf0([],Stream,_,_)
 %%%%		%t -- print Prolog term
 printf0([0'%,0't |Format], Stream, [Term|ArgList],Options) :-
 	!,
-	sio:write_term(Stream,Term,[quoted(false) | Options]),
+%	sio:write_term(Stream,Term,[quoted(false) | Options]),
+	sio:write_term(Stream,Term,Options),
 	printf0(Format,Stream,ArgList,Options).
 
 %%%%		%p -- call print procedure as argument

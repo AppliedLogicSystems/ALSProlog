@@ -278,6 +278,7 @@ check_rt_options(Other, _,_, _, _,_) :-
  |	added to the tokens comprising a the term to be read.  It is most
  |	useful when used in conjunction with atom or list streams.
  |
+ |  NOTE:::: THIS DOES NOT APPEAR TO BE WORKING CORRECTLY!!!:::
  |	line_info(Start, Len)
  |		
  |		-- In this option, Start is the offset from the beginning of 
@@ -351,6 +352,25 @@ ending_line([lineinfo(_,E,_) |_],S,E)
 ending_line([_ | Toks],S,E)
 	:-
 	ending_line(Toks,S,E).
+
+/*
+ending_line([],S,E).
+ending_line([lineinfo(_,S,_) |Tail],S,E) 
+	:-
+	ending_line0(Tail,S,E). 
+ending_line([_ |Tail],S,E) 
+	:-
+	ending_line(Tail,S,E). 
+ending_line0([],E,E). 
+ending_line0([lineinfo(_,_,NE) | Tail],CE,E) 
+	:- 
+	ending_line0(Tail,NE,E).
+ending_line0([_ | Tail],CE,E) 
+	:- 
+	ending_line0(Tail,CE,E).
+*/
+
+
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
