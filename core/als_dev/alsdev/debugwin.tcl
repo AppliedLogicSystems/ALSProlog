@@ -38,7 +38,7 @@ proc vTclWindow.debugwin {base} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "ALS Prolog Debugger"
-	wm protocol $base WM_DELETE_WINDOW hide_debugwin
+	wm protocol $base WM_DELETE_WINDOW unmap_alsdev_debug
 
 	bind $base <Configure> "debugwin_configure_event $base %h %w %W"
 
@@ -340,7 +340,6 @@ proc vTclWindow.debug_source_trace {base Title} {
     if {[winfo exists $base]} {
         wm deiconify $base; return
     } 
-
 	lappend proenv(debugwin,visible) $base
 
     ###################
@@ -358,7 +357,7 @@ proc vTclWindow.debug_source_trace {base Title} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base $Title
-	wm protocol $base WM_DELETE_WINDOW "source_trace_closedown $base"
+	wm protocol $base WM_DELETE_WINDOW "wm iconify $base"
 
 	if {$tcl_platform(platform) == "macintosh"} {
 	    frame $base.textwin \
@@ -415,7 +414,7 @@ proc vTclWindow.spychoose {base} {
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Spy Points"
-	wm protocol $base WM_DELETE_WINDOW {hide_me .spychoose}
+	wm protocol $base WM_DELETE_WINDOW { hide_spywin }
 
     frame $base.modid \
         -borderwidth 1 -height 30 -relief sunken -width 30 
