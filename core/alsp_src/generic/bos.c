@@ -126,8 +126,14 @@ pbi_system()
       }
 #endif
 
+        system((char *) str);
+        SUCCEED;
+/*
+  I think that system should fail or throw an error or something,
+  but too much code relies on it always succeeding.
 	if (system((char *) str) == 0) SUCCEED;
 	else FAIL;
+*/
     }
 
     else
