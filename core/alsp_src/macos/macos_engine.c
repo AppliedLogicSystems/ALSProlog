@@ -34,9 +34,9 @@ void os_init_prolog_globals(void)
 static void resource_store(void *r, void *data, long length, long offset)
 {
 	SetResourceSize(r, offset+length);
-	printf("reserror: %d\n", ResError());	
+//	printf("reserror: %d\n", ResError());	
 	WritePartialResource(r, offset, data, length);
-	printf("reserror: %d\n", ResError());
+//	printf("reserror: %d\n", ResError());
 }
 
 static void resource_load(void *r, void *data, long length, long offset)
@@ -50,30 +50,30 @@ static void store_db_resource(prolog_database *db, const FSSpec *spec)
 	Handle r;
 	
 	ref = FSpOpenResFile(spec, fsRdWrPerm);
-	printf("reserror: %d\n", ResError());
+//	printf("reserror: %d\n", ResError());
 	
 	SetResLoad(false);
 	r = Get1Resource('ALSS', 128);
-	printf("reserror: %d\n", ResError());
+//	printf("reserror: %d\n", ResError());
 	SetResLoad(true);
 	
 	if (!r) {
 		r = NewHandleClear(10000);
 		AddResource(r, 'ALSS', 128, "\pALS Prolog State");
-	printf("reserror: %d\n", ResError());
+//	printf("reserror: %d\n", ResError());
 		WriteResource(r);
-	printf("reserror: %d\n", ResError());
+//	printf("reserror: %d\n", ResError());
 		ReleaseResource(r);
-	printf("reserror: %d\n", ResError());
+//	printf("reserror: %d\n", ResError());
 	SetResLoad(false);
 	r = Get1Resource('ALSS', 128);
-	printf("reserror: %d\n", ResError());
+//	printf("reserror: %d\n", ResError());
 	SetResLoad(true);
 	}
 	
 	store_db(db, r, 0, resource_store);
 	CloseResFile(ref);
-	printf("reserror: %d\n", ResError());
+//	printf("reserror: %d\n", ResError());
 }
 
 static void load_db_resource(prolog_database *db, const FSSpec *spec)
