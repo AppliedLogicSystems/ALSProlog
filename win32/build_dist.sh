@@ -22,7 +22,7 @@ case $EDITION in
 student)
 DISTDIR="ALS Student Prolog" ;
 EXE="ALS Student Prolog.exe" ;
-EXAMPLE_SET="als pxs" ;
+EXAMPLE_SET="als pxs Chat80" ;
 WELCOME=welcome_student.als ;
 MANUAL=student_man.pdf ;
 MANUALNAME="Student Manual.pdf" ;
@@ -30,7 +30,7 @@ MANUALNAME="Student Manual.pdf" ;
 standard)
 DISTDIR="ALS Prolog" ;
 EXE="ALS Prolog.exe" ;
-EXAMPLE_SET="als pxs more objectpro tcltk" ;
+EXAMPLE_SET="als pxs more objectpro visual Prolog1000 Chat80" ;
 WELCOME=welcome_standard.als ;
 MANUAL=student_man.pdf ; # standard manual is missing.
 MANUALNAME="ALS Prolog Manual.pdf" ;
