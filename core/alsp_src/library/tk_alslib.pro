@@ -365,6 +365,32 @@ atomic_input_dialog(Interp, Msg, Title, Atom)
 
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
+export user_pw_input_dialog/2.
+export user_pw_input_dialog/3.
+export user_pw_input_dialog/4.
+
+user_pw_input_dialog(UID, PWD)
+	:-
+	user_pw_input_dialog('ID & Password Required',UID, PWD).
+
+user_pw_input_dialog(Title,UID, PWD)
+	:-
+	user_pw_input_dialog(tcli,Title,UID, PWD).
+
+user_pw_input_dialog(Interp,Title,UID, PWD)
+	:-
+	tcl_call(Interp, [do_user_pw_dialog, Title], InitResult),
+	InitResult = [InitUID, InitPWD],
+	(atomic(InitUID) ->
+		UID = InitUID
+		;
+		sprintf(atom(UID), '%t', [InitUID])
+	),
+	(atomic(InitPWD) ->
+		PWD = InitPWD
+		;
+		sprintf(atom(PWD), '%t', [InitPWD])
+	).
 
 /*------------------------------------------------------------*
  |	file_select_dialog/2
