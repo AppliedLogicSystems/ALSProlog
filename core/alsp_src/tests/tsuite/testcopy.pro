@@ -35,7 +35,8 @@ find_file(Name, Name) :-
 
 find_file(Name, FullName) :-
 	builtins:searchdir(SDir),
-	pathPlusFile(SDir, Name, FullName),	
+%	pathPlusFile(SDir, Name, FullName),	
+	join_path([SDir, Name], FullName),
 	exists_file(FullName).
 
 find_file(Name, _) :-

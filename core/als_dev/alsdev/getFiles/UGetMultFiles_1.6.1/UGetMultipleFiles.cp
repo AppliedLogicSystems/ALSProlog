@@ -1705,6 +1705,7 @@ UGetMultipleFiles::NSEventFilterForPP(NavEventCallbackMessage callBackSelector,
 		theDispatcher = LEventDispatcher::GetCurrentEventDispatcher();
 
 
+if (theDispatcher) {
 		// Dispatch the event (we only need to handle update and idle events)
 		LView::OutOfFocus(nil);
 		switch (callBackParms->eventData.event->what) {
@@ -1719,6 +1720,7 @@ UGetMultipleFiles::NSEventFilterForPP(NavEventCallbackMessage callBackSelector,
 			default:
 			break;
 		}
+}
 
 
 		// Repeaters get time after every event

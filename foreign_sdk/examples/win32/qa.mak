@@ -13,7 +13,7 @@ CFG=Win32 Debug
 !MESSAGE You can specify a configuration when running NMAKE on this makefile
 !MESSAGE by defining the macro CFG on the command line.  For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "new_QA.mak" CFG="Win32 Debug"
+!MESSAGE NMAKE /f "qa.mak" CFG="Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -25,6 +25,7 @@ CFG=Win32 Debug
 
 ################################################################################
 # Begin Project
+# PROP Target_Last_Scanned "Win32 Debug"
 CPP=cl.exe
 RSC=rc.exe
 
@@ -41,38 +42,37 @@ RSC=rc.exe
 OUTDIR=.\WinRel
 INTDIR=.\WinRel
 
-ALL : .\QA.exe $(OUTDIR)/new_QA.bsc
+ALL : .\QA.exe $(OUTDIR)/qa.bsc
 
 $(OUTDIR) : 
     if not exist $(OUTDIR)/nul mkdir $(OUTDIR)
 
-# ADD BASE CPP /nologo /ML /W3 /GX /YX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /FR /c
-# ADD CPP /nologo /ML /W3 /GX /YX /O2 /I "..\..\ALS_Prolog_Support" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /FR /c
-CPP_PROJ=/nologo /ML /W3 /GX /YX /O2 /I "..\..\ALS_Prolog_Support" /D "WIN32"\
- /D "NDEBUG" /D "_CONSOLE" /FR$(INTDIR)/ /Fp$(OUTDIR)/"new_QA.pch" /Fo$(INTDIR)/\
- /c 
+# ADD BASE CPP /nologo /W3 /GX /YX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /FR /c
+# ADD CPP /nologo /W3 /GX /YX /O2 /I "..\..\ALS_Prolog_Support" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /FR /c
+CPP_PROJ=/nologo /W3 /GX /YX /O2 /I "..\..\ALS_Prolog_Support" /D "WIN32" /D\
+ "NDEBUG" /D "_CONSOLE" /FR$(INTDIR)/ /Fp$(OUTDIR)/"qa.pch" /Fo$(INTDIR)/ /c 
 CPP_OBJS=.\WinRel/
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-BSC32_FLAGS=/nologo /o$(OUTDIR)/"new_QA.bsc" 
+BSC32_FLAGS=/nologo /o$(OUTDIR)/"qa.bsc" 
 BSC32_SBRS= \
 	$(INTDIR)/qa.sbr
 
-$(OUTDIR)/new_QA.bsc : $(OUTDIR)  $(BSC32_SBRS)
+$(OUTDIR)/qa.bsc : $(OUTDIR)  $(BSC32_SBRS)
     $(BSC32) @<<
   $(BSC32_FLAGS) $(BSC32_SBRS)
 <<
 
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NOLOGO /SUBSYSTEM:console /MACHINE:I386
-# ADD LINK32 ..\..\ALS_Prolog_Support\alspro.dll.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NOLOGO /SUBSYSTEM:console /MACHINE:I386 /OUT:"QA.exe"
-LINK32_FLAGS=..\..\ALS_Prolog_Support\alspro.dll.lib kernel32.lib user32.lib\
+# ADD LINK32 ..\..\ALS_Prolog_Support\alspro.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NOLOGO /SUBSYSTEM:console /MACHINE:I386 /OUT:"QA.exe"
+LINK32_FLAGS=..\..\ALS_Prolog_Support\alspro.lib kernel32.lib user32.lib\
  gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib\
  oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NOLOGO /SUBSYSTEM:console\
- /INCREMENTAL:no /PDB:$(OUTDIR)/"new_QA.pdb" /MACHINE:I386 /OUT:"QA.exe" 
+ /INCREMENTAL:no /PDB:$(OUTDIR)/"qa.pdb" /MACHINE:I386 /OUT:"QA.exe" 
 DEF_FILE=
 LINK32_OBJS= \
 	$(INTDIR)/qa.obj
@@ -95,39 +95,38 @@ LINK32_OBJS= \
 OUTDIR=.\WinDebug
 INTDIR=.\WinDebug
 
-ALL : .\QA.exe $(OUTDIR)/new_QA.bsc
+ALL : .\QA.exe $(OUTDIR)/qa.bsc
 
 $(OUTDIR) : 
     if not exist $(OUTDIR)/nul mkdir $(OUTDIR)
 
-# ADD BASE CPP /nologo /ML /W3 /GX /Zi /YX /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /FR /c
-# ADD CPP /nologo /ML /W3 /GX /Zi /YX /Od /I "..\..\ALS_Prolog_Support" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /FR /c
-CPP_PROJ=/nologo /ML /W3 /GX /Zi /YX /Od /I "..\..\ALS_Prolog_Support" /D\
- "WIN32" /D "_DEBUG" /D "_CONSOLE" /FR$(INTDIR)/ /Fp$(OUTDIR)/"new_QA.pch"\
- /Fo$(INTDIR)/ /Fd$(OUTDIR)/"new_QA.pdb" /c 
+# ADD BASE CPP /nologo /W3 /GX /Zi /YX /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /FR /c
+# ADD CPP /nologo /W3 /GX /Zi /YX /Od /I "..\..\ALS_Prolog_Support" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /FR /c
+CPP_PROJ=/nologo /W3 /GX /Zi /YX /Od /I "..\..\ALS_Prolog_Support" /D "WIN32"\
+ /D "_DEBUG" /D "_CONSOLE" /FR$(INTDIR)/ /Fp$(OUTDIR)/"qa.pch" /Fo$(INTDIR)/\
+ /Fd$(OUTDIR)/"qa.pdb" /c 
 CPP_OBJS=.\WinDebug/
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-BSC32_FLAGS=/nologo /o$(OUTDIR)/"new_QA.bsc" 
+BSC32_FLAGS=/nologo /o$(OUTDIR)/"qa.bsc" 
 BSC32_SBRS= \
 	$(INTDIR)/qa.sbr
 
-$(OUTDIR)/new_QA.bsc : $(OUTDIR)  $(BSC32_SBRS)
+$(OUTDIR)/qa.bsc : $(OUTDIR)  $(BSC32_SBRS)
     $(BSC32) @<<
   $(BSC32_FLAGS) $(BSC32_SBRS)
 <<
 
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NOLOGO /SUBSYSTEM:console /DEBUG /MACHINE:I386
-# ADD LINK32 ..\..\ALS_Prolog_Support\alspro.dll.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NOLOGO /SUBSYSTEM:console /DEBUG /MACHINE:I386 /OUT:"QA.exe"
-LINK32_FLAGS=..\..\ALS_Prolog_Support\alspro.dll.lib kernel32.lib user32.lib\
+# ADD LINK32 ..\..\ALS_Prolog_Support\alspro.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NOLOGO /SUBSYSTEM:console /DEBUG /MACHINE:I386 /OUT:"QA.exe"
+LINK32_FLAGS=..\..\ALS_Prolog_Support\alspro.lib kernel32.lib user32.lib\
  gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib\
  oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NOLOGO /SUBSYSTEM:console\
- /INCREMENTAL:yes /PDB:$(OUTDIR)/"new_QA.pdb" /DEBUG /MACHINE:I386 /OUT:"QA.exe"\
- 
+ /INCREMENTAL:yes /PDB:$(OUTDIR)/"qa.pdb" /DEBUG /MACHINE:I386 /OUT:"QA.exe" 
 DEF_FILE=
 LINK32_OBJS= \
 	$(INTDIR)/qa.obj

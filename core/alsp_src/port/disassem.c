@@ -209,7 +209,7 @@ int
 toggle_bwam(void)
 {
     PWord v1,v2;
-	int   t1,v2;
+	int   t1,t2;
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
@@ -233,7 +233,7 @@ toggle_bwam(void)
 	else {
 		 bwam_trace_low = v1;
 		 bwam_trace_high = v2;
-		 printf("trace: low=%x high=%x\n",v1,v2);
+		 printf("trace: low=%lx high=%lx\n",v1,v2);
 	}
 	
 	return 1;
@@ -246,14 +246,14 @@ tracewam(PP)
     enum AbstractMachineOps instr;
 
 	if ((bwam_trace > 0) && ((Code *)bwam_trace_low <= PP)
-			&&  (PP <= (Code *)bwam_trace_lhigh ) )
+			&&  (PP <= (Code *)bwam_trace_high ) )
 	{
 		instr = decode_instr(*PP);
 		if ((instr < 0) || (instr > ICNUM)) 
-			printf("BAD INSTRUCTION: Content=%08.0o\n", *PP);
+			printf("BAD INSTRUCTION: Content=%lx\n", *PP);
 		else
 		{
-			printf("[%x]",PP); 
+			printf("[%lx]",(unsigned long)PP); 
 			display_instr(instr,PP);   
 			printf("\n");
 		};
