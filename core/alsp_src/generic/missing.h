@@ -308,4 +308,8 @@ extern	pid_t	wait		PARAMS(( int * ));
 extern	int	write		PARAMS(( int, const void *, unsigned int ));
 #endif
 
+#ifdef MISSING_EXTERN_CRYPT
+extern char    *crypt           PARAMS((char *, char *));
+#endif
+
 #endif /* _MISSING_H_INCLUDED_ */
