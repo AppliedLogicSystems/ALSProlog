@@ -48,7 +48,7 @@ kill_freeze_list([Var | Vars])
 spec_fa_copy(VIn,VOut,VAssoc) 
 	:-
 	'$is_delay_var'(VIn),
-	domain(VIn, Descriptor),
+	rel_arith:domain(VIn, Descriptor),
 	!,
 	arg(1,Descriptor,Low), 
 	arg(2,Descriptor,High), 

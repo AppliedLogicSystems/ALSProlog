@@ -162,7 +162,7 @@ show_orig(CurNum, OS)
 	!,
 	printf(OS, '\n------------------------------ Original Version:\n\t?- %t\n',
 				[OrigProblem]),
-	write_lines_opt(OS, OrigResultsList, [quoted(false)]).
+	write_lines(OS, OrigResultsList, [quoted(false)]).
 
 show_orig(_, OS)
 	:-
