@@ -118,6 +118,14 @@ proc vTclWindow.debugwin {base} {
         -padx 5 -text {Call Num:} 
     label $base.debug_status.call_num \
         -padx 4 -relief ridge -text {         } 
+    checkbutton $base.debug_status.source_trace \
+        -padx 4 -relief raised -text {Source Tracing} \
+		-variable proenv(debug) -offvalue off -onvalue on \
+		-underline 0  \
+		-command do_the_debug_flag
+
+#	-command "prolog call builtins do_set_prolog_flag -atom debug -atom $proenv(debug)"
+
 
 	if {$tcl_platform(platform) == "macintosh"} {
 	    scrollbar $base.vsb \
@@ -210,6 +218,8 @@ proc vTclWindow.debugwin {base} {
         -anchor center -expand 0 -fill none -side left 
     pack $base.debug_status.call_num \
         -anchor center -expand 0 -fill none -side left 
+    pack $base.debug_status.source_trace \
+        -anchor center -expand 0 -fill none -padx 4 -side left 
 
     grid $base.debug_status \
         -column 0 -row 1 -columnspan 2 -rowspan 1 -sticky ew
@@ -248,6 +258,15 @@ proc vTclWindow.debugwin {base} {
 
 	# accelerators
 	bind_accelerators .debugwin $mod debugwin
+}
+
+proc do_the_debug_flag {} {
+	global array proenv
+
+#	set VV $proenv(debug)
+#	prolog call builtins do_set_prolog_flag -atom debug -atom $VV
+
+	prolog call builtins do_set_prolog_flag -atom debug -atom $proenv(debug)
 }
 
 proc vTclWindow.debug_source_trace {base Title} {

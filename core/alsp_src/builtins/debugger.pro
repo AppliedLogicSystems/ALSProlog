@@ -51,7 +51,6 @@ export trace/2.
 trace(Module,Goal) :-
 	check_debug_io,
 	setup_debug(Module, Goal),
-%write(exit_setup_debug),nl,flush_output,
 	getPrologInterrupt(OldMagic),
 	catch(trace0(Module,Goal), Reason, 
 	      (dbg_notrace,setPrologInterrupt(OldMagic),throw(Reason))).
@@ -1532,7 +1531,7 @@ setup_debug(nowins, Module, Predicate, Arity, _, [])
 	:-!.
 setup_debug(DebugIOChannel, Module, Predicate, Arity, CGsSetup, NextCGsSetup)
 	:-
-	change_source_level_debugging(on),
+%	change_source_level_debugging(on),
 	get_fcg(Module,Predicate,Arity,CG,DefiningMod),
 	fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, NextCGsSetup).
 
@@ -1549,7 +1548,6 @@ fin_setup_debug(ClauseGroup, Module, Predicate, Arity,
 					ALSMgr, SrcMgr),
 	reload_debug(BaseFileName, SrcFilePath, DebugType, ClauseGroup, Flag),
 	!,
-%write(fsd_sst),nl,flush_output,
 	start_src_trace(Flag,BaseFileName, SrcFilePath, ClauseGroup, ALSMgr, SrcMgr).
 
 fin_setup_debug(ClauseGroup, _, _, _, CGsSetup, [ClauseGroup | CGsSetup]).
@@ -1589,17 +1587,16 @@ check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, Claus
 reload_debug(user,_, _,CG,nofile(user)) :-!.
 reload_debug(BaseFileName,SrcFilePath, normal,CG,file)
 	:-
-%	(filePlusExt(NoSuff,_,SrcFilePath),!; NoSuff = SrcFilePath),
 	(file_extension(SrcFilePath,NoSuff,Ext), Ext \= '', !; NoSuff = SrcFilePath),
 			%% Need to pass CG into consult:
 	exists_file(SrcFilePath),
 	!,
-	(current_prolog_flag(debug, off) ->
-		set_prolog_flag(debug, on),
-		consult(source(NoSuff),[quiet(true)])
-		;
-		true
-	),
+%	(current_prolog_flag(debug, off) ->
+%		set_prolog_flag(debug, on),
+%		consult(source(NoSuff),[quiet(true)])
+%		;
+%		true
+%	),
 	ensure_db_showing.
 reload_debug(BaseFileName,SrcFilePath, normal,CG,nofile(BaseFileName)).
 
