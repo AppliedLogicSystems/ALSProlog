@@ -1,3 +1,4 @@
+CFLAGS += -fpic
 CPPFLAGS += -DUNIX_HPUX
 OS_LIBS = -lm -ldld -Xlinker +b -Xlinker .
 OS_SL_EXT = sl
