@@ -219,6 +219,7 @@ glibfiles = [
 	lexan,
 	lforeign,
 	loadfile,
+	pimain,
 	main,
 	mapsym,
 	mem,
