@@ -85,11 +85,14 @@ proc add_edit_menu {menubar type window} {
         -label {Select All} -underline 8 -accelerator "$mod-A" -command "re {$type.select_all $window}"
     $menubar.edit add separator
     $menubar.edit add command \
-		-label "Preferences$elipsis" -underline 3 -command "re {fonts_and_colors $window}"
-## Temp:
+        -label {Find} -underline 0 -accelerator "$mod-F" -command "re {$type.find $window}"
     $menubar.edit add separator
     $menubar.edit add command \
-        -label {Goto Line} -command "re {$type.goto_line $window}"
+		-label "Preferences$elipsis" -underline 3 -command "re {fonts_and_colors $window}"
+## Temp:
+#    $menubar.edit add separator
+#    $menubar.edit add command \
+#        -label {Goto Line} -command "re {$type.goto_line $window}"
 
 	$menubar add cascade -menu $menubar.edit -label "Edit" -underline 0
 }
@@ -113,12 +116,16 @@ proc add_prolog_menu {menubar type window} {
     	$menubar.prolog add command \
         	-label "Open Project" -underline 0 -command {re open_project} 
     	$menubar.prolog add command \
+        	-label "Close Project" -underline 0 -command {re close_project} 
+    	$menubar.prolog add command \
         	-label "New Project" -underline 0 -command {re new_project} 
     	$menubar.prolog add separator
     	$menubar.prolog add command \
         	-label "Set Directory$elipsis" -underline 0 -command {re set_directory} 
 
     	$menubar.prolog add separator
+		$menubar.prolog add command \
+			-label "IDE Settings" -underline 0 -command {re show_ide_settings}
 		$menubar.prolog add command \
 			-label "Dynamic Flags" -underline 0 -command {re show_dynamic_flags}
 		$menubar.prolog add command \
@@ -149,30 +156,14 @@ proc add_tools_menu {menubar type window} {
 			-label Debugger -underline 0 -command exec_toggle_debugwin -variable proenv(debugwin)
 		$menubar.tools add separator 
     	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} 
+    	$menubar.tools add command -label "Tcl Debugger$elipsis" -underline 0 -command {re tcl_debugger} 
     	$menubar.tools add command -label "Kill Tcl  Interps" -underline 0 -command {re kill_tcl_interps} 
 #    	$menubar.tools add command -label "Tcl Shell" -underline 0 -command {re tcl_shell} 
 
 		$menubar.tools add separator 
 		## Cref
-    	$menubar.tools add command -label "Cref" -underline 0 -command {re run_cref} 
-		$menubar.tools add separator 
-		## DefStructs:
-		menu $menubar.tools.defstr -relief raised -tearoff 0
-		$menubar.tools add cascade \
-			-label {Structs} -underline 1 -menu $menubar.tools.defstr
-		$menubar.tools.defstr add command \
-			-label "Define New" -underline 0 -command {re new_defstruct}
-		$menubar.tools.defstr add command \
-			-label "Edit" -underline 0 -command {re edit_defstruct} -state disabled
-		$menubar.tools.defstr add command \
-			-label "Process Typ File" -underline 0 -command {re process_typ}
-		$menubar.tools add separator 
-		## ObjectPro:
-		menu $menubar.tools.objects -relief raised -tearoff 0
-		$menubar.tools add cascade \
-			-label {ObjectPro} -underline 1 -menu $menubar.tools.objects
-		$menubar.tools.objects add command \
-			-label "Process OOP File" -underline 0 -command {re process_oop}
+    	$menubar.tools add command -label "Cref" -underline 0 \
+			-command {re run_cref} -state disabled
 	} else {
 	##  must be debugger:
 		# Spy
@@ -186,11 +177,6 @@ proc add_tools_menu {menubar type window} {
 	}
 	$menubar add cascade -label "Tools" -menu $menubar.tools -underline 0
 }
-
-#		$menubar.tools add command  -label "Spy$elipsis" \
-#			-underline 0 -command {re toggle_spywin} 
-#		$menubar.tools add command  -label {NewSpy } \
-#			-underline 0 -command {re {Window show .pred_info }} 
 
 proc add_help_menu {menubar} {
 	global tcl_platform
@@ -238,9 +224,9 @@ proc listener.paste {xw} {
 #	catch {$w.text delete sel.first sel.last}
 	$w.text insert end [selection get -displayof $w -selection CLIPBOARD]
 	set proenv($w,dirty) true
-	$w see end
-	$w mark set insert end
-	focus $w
+	$w.text see end
+	$w.text mark set insert end
+	focus $w.text
 }
 
 #proc paste_text { TxtWin } {
@@ -291,21 +277,13 @@ proc listener.copy_paste { xw } {
 	}
 }
 
-# 	if {![catch {set data [selection get -displayof $w -selection $WhichSel]}]}{
+proc listener.find {xw} {
+	start_edit_find .topals
+}
 
-#proc copy_paste_text { TxtWin } {
-#	global tcl_platform
-#
-#	if {"$tcl_platform(platform)" == "windows"} {
-#	 $TxtWin insert end [ selection get -selection CLIPBOARD ]
-#	} else {
-#		$TxtWin insert end [ selection get ]
-#	}
-#	$TxtWin see end
-#	$TxtWin mark set insert end
-#	focus $TxtWin
-#}
-
+proc debugwin.find {xw} {
+	start_edit_find .topals
+}
 
 proc debugwin.clear {xw} {
 	set w .debugwin
@@ -328,18 +306,3 @@ proc debugwin.undo {w}  { bell }
 proc debugwin.cut {xw}   { bell }
 proc debugwin.paste {xw} { bell }
 
-#proc debugwin.cut {xw}   { 
-#	set w .debugwin
-# 	if {![catch {set data [$w.text get sel.first sel.last]}]} {
-#	    clipboard clear -displayof $w
-#	    clipboard append -displayof $w $data
-#		$w.text delete sel.first sel.last
-#	}
-#}
-#proc debugwin.paste {xw} { 
-#	set w .debugwin
-#	catch {$w.text delete sel.first sel.last}
-#	$w.text insert insert [selection get -displayof $w -selection CLIPBOARD]
-#	set proenv($w,dirty) true
-#}
-#

@@ -233,7 +233,7 @@ proc do_select_items { BaseName Mode Title SourceItemsList } {
 	set Indicies [$BaseName.clist.listbox curselection]
 	set Result ""
 	foreach Item $Indicies {
-		lappend Result "'[$BaseName.clist.listbox get $Item]'"
+		lappend Result "[$BaseName.clist.listbox get $Item]"
 	}
 	destroy $BaseName
 	return $Result
@@ -387,14 +387,16 @@ proc move_col_left {base} {
 	set MovedList ""
 	set SelIndicies [$base.cols_fr.r.rightlist.lstbx curselection]
 	set RevSelIndicies [lsort -decreasing $SelIndicies]
-	set LL [$base.cols_fr.l.leftlist.lstbx index end]
 	foreach Index $RevSelIndicies {
 		set Hold [$base.cols_fr.r.rightlist.lstbx get $Index]
+puts "mcl: I=$Index H=$Hold"
 		lappend MovedList $Hold
 		$base.cols_fr.r.rightlist.lstbx delete $Index
-		$base.cols_fr.l.leftlist.lstbx insert $LL $Hold
+		$base.cols_fr.l.leftlist.lstbx insert end $Hold
 	}
 	return $MovedList
 }
 
+#	set LL [expr [$base.cols_fr.l.leftlist.lstbx index end] - 1]
+#		$base.cols_fr.l.leftlist.lstbx insert $LL $Hold
 

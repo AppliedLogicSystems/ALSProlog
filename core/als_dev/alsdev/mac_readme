@@ -31,18 +31,17 @@ On the Mac, the program "MPack" can be used to create base64 files.
 Build
 -----
 
-Make "alspro PPC.lib" in the mwbuild directory.
+Make "alspro_b" "alspro PPC.lib" in the mwbuild directory.
 
 In alsdev, setup an alsdir with the folders "builtins" and "library".
 
 Copy the file tcltk.pro into the alsdir/shared folder.
 
-Open mac_alsdev.mcp, and make "Build All" to create "ALS Prolog Base PPC"
+Open mac_alsdev.mcp, and make "Build All" to create "ALS Prolog PPC"
 
-Create a new image from "ALS Prolog Base PPC" with the following command:
+Attach an image to "ALS Prolog PPC" using "alspro_b" with the following command:
 
-save_image('ALS Prolog', [select_lib(builtins, [debugger]),
-	select_lib(library,[miscterm,msc_ioin,strctutl,strings,tcl_sppt,tk_alslib, listutl1])]).
+[ldr_dvsh], attach_image('ALS Prolog PPC', [select_lib(builtins, [debugger]), select_lib(library,[miscterm,msc_ioin,strctutl,strings,tcl_sppt,tk_alslib, listutl1])]).
 
 Runtime Setup
 -------------

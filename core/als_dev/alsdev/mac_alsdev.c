@@ -360,16 +360,19 @@ void SetupALSProlog(void)
 	extern long ss_image_offset(const char *image_name);
 
 	if (!ss_image_offset(executable_path)) {
+#if 0
 		term = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "consult"),
 					1, AP_NewSymbolFromStr(w, "blt_dvsh"));
 			
 	    AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
+#endif
+	    panic("This is a stub!");
 	}
 }
 
 	PI_set_yield_proc(tcltk_yield);
 
-    term = AP_NewSymbolFromStr(w, "start_alsdev");
+    term = AP_NewSymbolFromStr(w, "$start");
     {
     	AP_Result r;
     	r = AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);

@@ -1,11 +1,11 @@
-##=================================================================================
+#=================================================================================
 #|				alsdev.tcl
 #|		Copyright (c) 1997-98 Applied Logic Systems, Inc.
 #|
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.46 1998/06/20 13:21:32 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.47 1998/08/17 00:54:47 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -18,6 +18,8 @@
 #|	This is hard-coded in the following.
 ##=================================================================================
 
+package require getDirectory
+
 proc xpe { What } {
 	global array proenv
 	return $proenv($What)
@@ -28,12 +30,41 @@ proc xpe2 { What1 What2 } {
 	return $proenv($What1,$What2)
 }
 
+	#--------------------------------------------------------------
+	#   Effectively calls prolog with:
+	#       Mod:send(Obj, Msg)
+	# where:
+	#       Mod = $proenv(dflt_mod)
+	#       $proenv($Obj) = a number which is an object handle for Obj
+	#       Msg is an atom
+	#--------------------------------------------------------------
+proc send_prolog {Obj Msg} {
+	global proenv
+	prolog call $proenv(dflt_mod) send -number $proenv($Obj) -atom $Msg
+}
+
+	#--------------------------------------------------------------
+	#   Effectively calls prolog with:
+	#       Mod:send(Obj, Msg)
+	# where:
+	#       Mod = $proenv(dflt_mod)
+	#       $proenv($Obj) = a number which is an object handle for Obj
+	#       Msg is of type $Type
+	#               (normally use this with $Type = "list" )
+	#--------------------------------------------------------------
+proc send_prolog_t {Obj Msg Type} {
+	global proenv
+	prolog call $proenv(dflt_mod) send -number $proenv($Obj) -$Type $Msg
+}
+										 
 set argc 0
 set argv ""
 
-# Error handling Procedures
-
-# re - Report Errors: Forces the reporting of errors
+	#--------------------------------------------------------------
+	# Error handling Procedures
+	#
+	# re - Report Errors: Forces the reporting of errors
+	#--------------------------------------------------------------
 proc re {a} {
 	if {[catch {uplevel $a} result]} then {
 		bgerror $result
@@ -41,10 +72,15 @@ proc re {a} {
 	}
 }
 
-# Basic try control structure for handling exceptions. Two forms are supported:
-# try A always B = Always execute B after A, even if A fails (ie causes exception).
-# try A fail B   = Execute B only when A fails (ie causes exeception).
-
+	#--------------------------------------------------------------
+	# Basic try control structure for handling exceptions. 
+	# Two forms are supported:
+	#
+	# try A always B = Always execute B after A, even if A 
+	#				   fails (ie causes exception).
+	# try A fail B   = Execute B only when A fails 
+	#				   (ie causes exeception).
+	#--------------------------------------------------------------
 proc try {a selector b} {
 	if {$selector != "always" && $selector != "fail"} then {
 		error "bad option \"$selector\": must be always or fail"
@@ -58,7 +94,6 @@ proc try {a selector b} {
 }
 
 if {[info exists ALSTCLPATH]==0} then { set ALSTCLPATH . }
-#puts "LOADING ALSDEV.TCL: ALSTCLPATH=$ALSTCLPATH"
 
 if {$tcl_platform(platform) == "macintosh"} {
 	load {} {appleevents}
@@ -84,6 +119,7 @@ set	proenv(debugwin)			0
 set	proenv(debugwin,visible)	{}
 set	proenv(spywin)				0
 set proenv(defstr_ld)			false
+set proenv(dflt_mod)			alsdev
 
 	## window appearance stuff - initial defaults:
 
@@ -144,6 +180,9 @@ if {$tcl_platform(platform) == "macintosh"} {
 
 set	proenv(edit,visible)		{}
 
+set proenv(heartbeat) 1.05
+set proenv(main_printdepth) 50
+set proenv(main_depth_type) nonflat
 #---------------------------------------------------------------
 
 #################################
@@ -236,11 +275,6 @@ proc reset_def_vals { Which ValsList } {
  	set proenv($Which,tabs) [lindex $ValsList  5]
 }
 
-proc set_proenv {Left Right Value} {
-	global array proenv
-	set proenv($Left,$Right) $Value
-}
-
 proc return_proenv_defaults {} {
 	global array proenv
 	lappend Defs \
@@ -308,9 +342,10 @@ load_source $ALSTCLPATH {debugwin}
 load_source $ALSTCLPATH {defstr}
 load_source $ALSTCLPATH {als_menu}
 load_source $ALSTCLPATH {als_document}
-load_source $ALSTCLPATH {als_tkfbox}
 load_source $ALSTCLPATH {als_projects}
+load_source $ALSTCLPATH {prodebug}
 
+#load_source $ALSTCLPATH {als_tkfbox}
 
 proc load_photo {image_name base_name} {
 	global tcl_platform ALSTCLPATH
@@ -546,14 +581,27 @@ proc source_tcl { } {
 	} else { bell }
 }
 
+proc tcl_debugger {} {
+	global ALSTCLPATH
+	set TclInterp [do_popup_input "Input the name of the Tcl interpreter:" "Tcl Interp?"]
+	if { "$TclInterp"== "" } then { bell ; return }
+	if {[interp exists $TclInterp]==0} then {
+		prolog call alsdev init_tcl_debugger -atom $TclInterp -atom $ALSTCLPATH
+	} else { bell }
+}
+
+proc do_debug_setup { ALSTCLPATH } {
+	source [file join $ALSTCLPATH prodebug.tcl]
+	debugger_init
+}
+
 proc kill_tcl_interps  { } {
 	prolog call tk_alslib destroy_all_tcl_interpreters
 }
 
 proc set_directory { } {
 	set CWD [pwd]
-
-	set NewDir [tkFDialog]
+	set NewDir [getDirectory]
 	if { "$NewDir" !="" } {
 		cd $NewDir
 		show_dir_on_main $NewDir
@@ -782,6 +830,11 @@ proc save_fonts_and_colors { Window } {
 ##                                             ##
 ##			Dynamic Prolog Flags			   ##
 #################################################
+proc show_ide_settings {} {
+	global array proenv
+
+	Window show .ide_settings
+}
 
 proc show_dynamic_flags {} {
 	global array proenv
@@ -883,12 +936,12 @@ proc toggle_debugwin {} {
 
 proc exec_toggle_debugwin {} {
 	global array proenv
-
 	if {"$proenv(debugwin)"==0} then {
 		hide_debugwin
 	} else {
 		show_debugwin
 	}
+	send_prolog debugger_mgr toggle_visibility
 }
 
 proc ensure_db_showing {} {
@@ -912,7 +965,7 @@ proc show_debugwin {} {
 	foreach Win  $proenv(debugwin,visible) {
 		wm deiconify $Win
 	}
-	prolog call alsdev setup_for_debugging -atom on
+#	prolog call alsdev setup_for_debugging -atom on
 	set proenv(debugwin) 1
 }
 
@@ -923,7 +976,7 @@ proc hide_debugwin {} {
 	foreach Win  $proenv(debugwin,visible) {
 		Window hide $Win
 	}
-	prolog call alsdev setup_for_debugging -atom off
+#	prolog call alsdev setup_for_debugging -atom off
 	Window hide .debugwin
 	set proenv(debugwin) 0
 }
@@ -931,7 +984,7 @@ proc hide_debugwin {} {
 proc exit_debugger {} {
 	global array proenv
 
-	prolog call debugger exit_debugger
+	prolog call alsdev exit_debugger
 #	hide_spywin
 	hide_debugwin
 }
@@ -1267,9 +1320,15 @@ proc clear_tag { TagName TextWinName } {
 	$TextWinName tag configure $TagName -background [$TextWinName cget -background]
 }
 
-proc see_text {TextWin StartLine StartChar EndLine EndChar} {
+proc see_text {TextWin LTextWin StartLine StartChar EndLine EndChar} {
+	set HH [$TextWin cget -height]
+	set Slop2 [expr ($HH - ($EndLine - $StartLine)) / 2]
 	$TextWin see $StartLine.$StartChar
+	$LTextWin see $StartLine.0
 	$TextWin see $EndLine.$EndChar
+	$LTextWin see $EndLine.0
+	$TextWin see [expr $EndLine + $Slop2].$EndChar
+	$LTextWin see [expr $EndLine + $Slop2].0
 }
 
 proc source_trace_closedown {STWin} {
@@ -1331,6 +1390,111 @@ proc set_system_modules_showing {} {
 
 ##############################
 
+proc err_indic {w Line StartPos CaratPos P3 } {
+	global array proenv
+
+	$w.text tag configure syntax_err_head -background #acec86
+	$w.text tag add syntax_err_head $Line.0 $Line.$CaratPos
+
+	$w.text tag configure syntax_err_tail -background #febad4
+	$w.text tag add syntax_err_tail $Line.$CaratPos $Line.end
+
+	$w.ltext insert $Line.end " >"
+	$w.ltext tag add error_line $Line.0 $Line.end 
+	set CurFont $proenv(.document,font)
+	set EmpFont [list [lindex $CurFont 0] [lindex $CurFont 1] bold]
+	$w.ltext tag configure error_line -foreground #ec5648 -font $EmpFont
+}
+
+proc syn_err_msg {EW LN Msg TxtW} {
+#	.syn_errors.errlist.listbox insert end [format "% 8d  -  %s" $LN $Msg]
+	$EW insert end [format "% 4d  -  %s" $LN $Msg]
+}
+
+proc error_focus_attn {w} {
+	set EE [$w.listbox get [lindex [$w.listbox curselection] 0]]
+	set LineNum [string range $EE 0 [expr [string first "-" $EE] - 1 ] ]
+	set HH [expr ([$w.text cget -height] - 1) / 2]
+	$w.text yview [expr $LineNum - $HH] 
+	$w.ltext yview [expr $LineNum - $HH] 
+}
+
+##############################
+
+proc start_edit_find { w } {
+	global proenv
+	set proenv(current_search_window) $w
+	set proenv($w,searchpos) 1.0
+	set proenv($w,searchdirect) forward
+	set proenv($w,searchnature) exact
+	Window show .find_repl
+	.find_repl.wintgt.label configure -text [wm title $w]
+	.find_repl.f1.whichwin configure -text $w
+}
+
+proc edit_find_next {} {
+	global proenv
+	set w [.find_repl.f1.whichwin cget -text]
+	set Pattern [.find_repl.search.entry get]
+	if {"$Pattern"==""} then {
+		bell
+		tk_dialog .quit_dialog "Bad Pattern" \
+			"Can't search for the empty string!" "" 0 OK 
+		return
+	}
+	set proenv(searchdirect) $proenv($w,searchdirect)
+	set Direct -$proenv($w,searchdirect)
+	set Nature -$proenv($w,searchnature)
+	set StartIndex $proenv($w,searchpos)
+
+	if {"$proenv($w,searchdirect)"=="forward"} then {
+		set sresult [$w.text search $Direct $Nature -count MLen --  $Pattern $StartIndex ]
+	} else {
+		set sresult [$w.text search $Direct $Nature -count MLen --  $Pattern $StartIndex ]
+	}
+	if {"$sresult"==""} then {
+		bell
+		set proenv($w,searchpos) 1.0
+	} else {
+		set MLNum [string range $sresult 0 [expr [string first "." $sresult] -1 ] ]
+		set MLCharStart [string range $sresult [expr [string first "." $sresult] + 1] end]
+		set MatchEnd [expr $MLCharStart + $MLen] 
+		$w.text see $sresult
+		$w.text tag remove sel 1.0 end 
+		$w.text tag add sel $sresult $MLNum.$MatchEnd
+		$w.text mark set insert $sresult
+		if {$proenv($w,searchdirect)=="forward"} then {
+			set proenv($w,searchpos) $MLNum.$MatchEnd
+		} else {
+			if { $MLCharStart > 0 } then {
+				set proenv($w,searchpos) $MLNum.[expr $MLCharStart - 1]
+			} elseif { ($MLCharStart == 0) && ($MLNum > 1) } then {
+				set proenv($w,searchpos) [expr $MLNum - 1].end
+			} else {
+				set proenv($w,searchpos) 1.0
+			}
+		}
+	}
+}
+
+proc edit_replace {} {
+	set w [.find_repl.f1.whichwin cget -text]
+    set New [.find_repl.replace.entry  get]
+	$w.text mark set insert sel.first
+ 	if {![catch {$w.text delete sel.first sel.last}]} {
+		$w.text insert insert $New
+		set proenv($w,dirty) true
+	}
+}
+
+proc edit_find_replace {} {
+	edit_find_next
+	edit_replace
+}
+
+
+##############################
+
 proc process_typ {} {
 	prolog call alsdev process_typ
 }
@@ -1376,7 +1540,8 @@ Window hide .debug_settings
 Window show .alsdev_settings
 Window hide .alsdev_settings
 
-Window show .topals
+Window show .ide_settings
+Window hide .ide_settings
 
 # update idletasks seems to push .topals behind other windows on
 # Windows, so just call update.
