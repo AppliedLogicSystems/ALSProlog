@@ -1929,7 +1929,7 @@ wt_init_opt(_,_).
 
 %wt_opts_default(wt_opts(78,40000,flat)).
 %wt_opts_default(wt_opts(78,400,flat)).
-wt_opts_default(wt_opts(78,10,flat)).
+wt_opts_default(wt_opts(78,3,flat)).
 
 export associated_output_alias/2.
 export set_associated_output_alias/2.

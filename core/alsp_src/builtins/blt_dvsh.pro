@@ -428,6 +428,7 @@ change_heartbeat(NewValue)
 	abolish(shell_alarm_interval,1),
 	assert(shell_alarm_interval(NewValue)).
 
+export change_ide_stream_depth/1.
 change_ide_stream_depth(NewMaxDepth)
 	:-
  	stream_or_alias_ok(shl_tk_out_win, Stream),
@@ -436,8 +437,9 @@ change_ide_stream_depth(NewMaxDepth)
     NewWO = wt_opts(LineLength,NewMaxDepth,DepthComputation),	
     set_stream_wt_opts(Stream,NewWO).
 
-change_ide_depth_type(NewType)
-	:-
+export change_ide_depth_type/1
+change_ide_depth
+	:-_type.(NewType)
  	stream_or_alias_ok(shl_tk_out_win, Stream),
     stream_wt_opts(Stream,WO),
     WO = wt_opts(LineLength,MaxDepth,_),	
@@ -725,13 +727,17 @@ change_window_settings(WinSettingsVals, WinGroup)
 modify_settings(NewTerms)
 	:-
 	alsdev_ini_path(ALSDEVINIPath),
-	!,
-	grab_terms(ALSDEVINIPath, OldTerms),
-	sort(OldTerms, SortedOldTerms),
+	(exists_file(ALSDEVINIPath) ->
+		grab_terms(ALSDEVINIPath, OldTerms),
+		sort(OldTerms, SortedOldTerms),
+		;
+		SortedOldTerms = []
+	),
 	sort(NewTerms, SortedNewTerms),
 	do_replace_items(SortedNewTerms, SortedOldTerms, NewRecords),
 	open(ALSDEVINIPath, write, OutS, []),
 	write_clauses(OutS, NewRecords, [quoted(true)]),
+	!,
 	close(OutS).
 
 modify_settings(NewTerms, Functor, Arity, Arg1).
