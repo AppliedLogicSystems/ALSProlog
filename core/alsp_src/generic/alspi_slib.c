@@ -10,7 +10,7 @@
 	
 static const alspi_func_ptrs *alspi_funcs;
 extern void pi_init(void);
-
+const char *library_dir, *executable_path;
 #ifdef __MWERKS__
 #pragma export on
 #endif
@@ -20,6 +20,8 @@ EXPORT int alspi_dlib_init(const alspi_func_ptrs *a_f,
   if (a_f == NULL && lib_funcs == NULL) return ALSPI_DLIB_VERSION;
 
   alspi_funcs = a_f;
+  library_dir = a_f->library_dir;
+  executable_path = a_f->executable_path;
   lib_funcs->pi_init = pi_init;
   lib_funcs->pi_shutdown = NULL;
 
@@ -215,6 +217,11 @@ ALSPI_API(void) PI_throw( PWord a, int b )
 ALSPI_API(void) PI_getball( PWord *a, int *b )
 {
     alspi_funcs->PI_getball(a,b);
+}
+
+ALSPI_API(void) PI_interrupt(void)
+{
+    alspi_funcs->PI_interrupt();
 }
 
 #ifdef macintosh
