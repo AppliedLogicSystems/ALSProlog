@@ -1,0 +1,24 @@
+Welcome to the Unix Core
+========================
+
+The directories core/unix and core/alsp_src/unix contain most of the Unix
+specific core files.
+
+Build Instructions
+------------------
+
+Run GNU Make in core/unix.
+
+Using Alternative Compilers
+---------------------------
+
+Use core/alsp_src/unix/gcc_makefile as a guide to building alternative
+modular compiler makefile fragments.
+
+The makefile variable CCOMP is used to control which compiler is used in a
+build. Its default value is gcc which causes gcc_makefile to be included
+in the Makefile. 
+
+CCOMP can be set in core/unix/Makefile or in the sub-OS build directory
+core/unix/$(SUBOS)/Makefile. 
+
