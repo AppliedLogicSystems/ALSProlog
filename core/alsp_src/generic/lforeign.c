@@ -738,20 +738,20 @@ static plugin_error os_load_plugin(const char *lib_name,
 {
     Str255 lib_name_p;
     FSSpec lib_spec;
-    ConnectionID connID;
+    CFragConnectionID connID;
     OSErr err;
     Ptr mainAddr;
     Str255 errName;
     Ptr sym_ptr;
-    SymClass sym_class;
+    CFragSymbolClass sym_class;
     plugin_error result = {no_error, noErr, NULL};
 
     c2pstrcpy(lib_name_p, lib_name);
     err = FSMakeFSSpec (0, 0, lib_name_p, &lib_spec);
     
     if (err == noErr) { 		
-	err = GetDiskFragment (&lib_spec, 0, kWholeFork, lib_name_p,
-			       kLoadLib, &connID, &mainAddr, errName); 
+	err = GetDiskFragment (&lib_spec, 0, kCFragGoesToEOF, lib_name_p,
+			       kLoadCFrag, &connID, &mainAddr, errName); 
     }
     
     if (err == noErr) {
