@@ -112,15 +112,15 @@ proc add_prolog_menu {menubar type window} {
 		-label "Clear Workspace" -underline 2 -command {re clear_workspace}
 
 	if {$type == "listener"} then { 
-#    	$menubar.prolog add separator
-#    	$menubar.prolog add command \
-#        	-label "Load Project$elipsis" -underline 0 -command {re load_project} 
-#    	$menubar.prolog add command \
-#        	-label "Open Project$elipsis" -underline 0 -command {re open_project} 
-#    	$menubar.prolog add command \
-#        	-label "Close Project" -underline 0 -command {re close_project} 
-#    	$menubar.prolog add command \
-#        	-label "New Project" -underline 0 -command {re new_project} 
+    	$menubar.prolog add separator
+    	$menubar.prolog add command \
+        	-label "Load Project$elipsis" -underline 0 -command {re load_project} -state disabled
+    	$menubar.prolog add command \
+        	-label "Open Project$elipsis" -underline 0 -command {re open_project} -state disabled
+    	$menubar.prolog add command \
+        	-label "Close Project" -underline 0 -command {re close_project} -state disabled
+    	$menubar.prolog add command \
+        	-label "New Project" -underline 0 -command {re new_project} -state disabled
     	$menubar.prolog add separator
     	$menubar.prolog add command \
         	-label "Set Directory$elipsis" -underline 0 -command {re set_directory} 
@@ -162,9 +162,9 @@ proc add_tools_menu {menubar type window} {
 		$menubar.tools add checkbutton \
 			-label Debugger -underline 0 -command exec_toggle_debugwin -variable proenv(debugwin)
 		$menubar.tools add separator 
-    	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} 
+    	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} -state disabled
     	$menubar.tools add command -label "Tcl Debugger$elipsis" -underline 0 -command {re tcl_debugger} -state disabled
-    	$menubar.tools add command -label "Kill Tcl Interps" -underline 0 -command {re kill_tcl_interps} 
+    	$menubar.tools add command -label "Kill Tcl Interps" -underline 0 -command {re kill_tcl_interps} -state disabled
 #    	$menubar.tools add command -label "Tcl Shell$elipsis" -underline 0 -command {re tcl_shell} 
 
 		$menubar.tools add separator 
@@ -180,7 +180,7 @@ proc add_tools_menu {menubar type window} {
 		$menubar.tools add command  -label "Debug Settings$elipsis" \
 			-underline 0 -command {re show_debug_settings}
 		$menubar.tools add command  -label "System Modules$elipsis" \
-			-underline 0 -command {re {set_system_modules_showing}}
+			-underline 0 -command {re {set_system_modules_showing}} -state disabled
 	}
 	$menubar add cascade -label "Tools" -menu $menubar.tools -underline 0
 }
@@ -191,7 +191,7 @@ proc add_help_menu {menubar} {
 	global elipsis
 
 	if {$tcl_platform(platform) != "macintosh"} {
-		menu $menubar.help
+		menu $menubar.help -tearoff 0
 		
 		$menubar.help add command -label "About ALS Prolog$elipsis" \
 			-underline 0 -command {Window show .about}
