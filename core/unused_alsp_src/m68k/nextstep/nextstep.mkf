@@ -1,5 +1,0 @@
-# mh-nextstep		-- Makefile fragment for the NeXT operating system
-
-# fix up .s files prior to assembly
-.s.o :
-	$(SHELL) $(srcdir)/$(ARCH)/$(OS)/fixasm $*.s && as -o $@ $*.s

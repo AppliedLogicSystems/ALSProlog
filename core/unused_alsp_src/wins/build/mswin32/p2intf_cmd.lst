@@ -1,1 +1,0 @@
-['-b', 'p2intlcl.pro', '-g', 'pro2intf', '-p', '-Ddebug', '-t', 'mytrans']

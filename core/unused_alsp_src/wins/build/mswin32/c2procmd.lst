@@ -1,2 +1,0 @@
-['-b', '-g', 'c2pro', 'c2prolcl.pro', '-p', '-os', 'mswin32', '-d', '1', '-I', 'C:\\CW8_Gold_Headers\\', '-I', 'C:\\CW8_Gold_Headers\\ANSI', '-I', 'C:\\CW8_Gold_Headers\\Win32_SDK', '-I', 'C:\\CW8_Gold_Headers\\Win32_SDK\\WINNT', '-I', 'C:\\CW8_Gold_Headers\\MFC_Extras'].
-

@@ -1,9 +1,0 @@
-/* winspool32 Filter. */
-all_except([
-	'PropertySheetW',
-	'PropertySheetA',
-	'DestroyPropertySheetPage',
-	'CreatePropertySheetPageW',
-	'CreatePropertySheetPageA',
-winspool320.c
-]).
