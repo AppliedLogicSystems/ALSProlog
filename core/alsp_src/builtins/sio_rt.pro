@@ -1,6 +1,7 @@
 /*=======================================================================*
  |			sio_rt.pro		
- |		Copyright (c) 1991-1992 Applied Logic Systems, Inc.
+ |	Copyright (c) 1991-1996 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |		-- Prolog parser (read_term) for use with sio.pro
  |

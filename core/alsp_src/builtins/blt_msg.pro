@@ -1,11 +1,12 @@
 /*======================================================================
- *	blt_msg.pro
- *		Copyright (c) 1992 Applied Logic Systems, Inc.
- *
- *	System error messages and handler
- *
- *	Authors: Ken Bowen
- *	Original Creation Date: April/1992
+ |			blt_msg.pro
+ |		Copyright (c) 1992-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |		System error messages and handler
+ |
+ |	Authors: Ken Bowen
+ |	Original Creation Date: April/1992
  *====================================================================*/
 
 module builtins.

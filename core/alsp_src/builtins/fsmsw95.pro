@@ -1,14 +1,13 @@
 /*==================================================================
- |		fsmac.pro
- |		Copyright (c) 1992 Applied Logic Systems, Inc.
+ |		fsmsw95.pro
+ |	Copyright (c) 1996 Applied Logic Systems, Inc.
  |		Distribution rights per Copying ALS
  |
  |	Miscellaneous low-level file system functions
- |		-- Macintosh Version (MacOS) 	(fsmac.pro)
+ |		-- MS Windows 95 Version (MacOS) 	(fsmsw95.pro)
  |
- |	Authors:	Ron DiNapoli,Keith Hughes,Ilyas Cicekli,Ken Bowen
- |	Date:		8/92-8/95
- |	Revisions:
+ |	Authors:	Chuck Hoput (based on other fs-xxx.pro files)
+ |	Date:		1/96
  *====================================================================*/
 
 module builtins.

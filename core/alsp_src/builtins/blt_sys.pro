@@ -1,6 +1,7 @@
 /*================================================================*
  |		blt_sys.pro
- |	Copyright (c) 1986-1994 Applied Logic Systems, Inc.
+ |	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |	Builtin predicates for dealing with the global Prolog 
  |	system environment, as well as miscellaneous stuff
@@ -478,6 +479,7 @@ notrace :-
 	setDebugInterrupt(spying),
 	setPrologInterrupt(spying).
 
+/*************************
 /*
  * xform_command_or_query(InGoal,OutGoal)
  *
@@ -527,5 +529,6 @@ xform_file_list(File1,[File2|Files],(consult(File1),Consults)) :-
 xform_file_list(File,_,consult(File)).
 
 
+*************************/
 
 endmod.		%% blt_sys.pro: System-type builtins.

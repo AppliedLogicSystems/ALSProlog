@@ -1,12 +1,13 @@
 /*=====================================================================
- *		blt_std.pro
- *		Copyright (c) 1986-1992 Applied Logic Systems, Inc.
- *
- *	Standard builtin predicates not fitting any other categories
- *
- *	Authors: Kevin A. Buettner, Ken Bowen, Chris White,
- *	         Keith Hughes, Ilyas Cicekli
- *	Original Creation Date: 3/20/86
+ |		blt_std.pro
+ |	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |	Standard builtin predicates not fitting any other categories
+ |
+ |	Authors: Kevin A. Buettner, Ken Bowen, Chris White,
+ |	         Keith Hughes, Ilyas Cicekli
+ |	Original Creation Date: 3/20/86
  *====================================================================*/
 
 module builtins.
@@ -15,18 +16,19 @@ module builtins.
  * listing/0 and listing/1.
  */
 
-export listing/1, listing/0.
+export listing/0.
+export listing/1.
 
 listing :-
 	clauses_for_listing(_:_/_,DBref),
-	$source(DBref, Structure),
+	'$source'(DBref, Structure),
 	write_out(Structure),
 	fail.
 listing.
 
 listing(X) :-
 	clauses_for_listing(X,DBref),
-	$source(DBref, Structure),
+	'$source'(DBref, Structure),
 	write_out(Structure),
 	fail.
 listing(X).
@@ -117,7 +119,7 @@ statistics_runtime_total(0).
 export instance/2.
 
 instance(Ref,(H :- B)) :- 
-	$source(Ref,Clause), 
+	'$source'(Ref,Clause), 
 	clauseParts(Clause,H,B).
 
 

@@ -1,3 +1,14 @@
+/*=========================================================
+ |				blt_lib.pro		
+ |	Copyright (c) 1992-1996 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ |
+ |			- specification of library functions
+ |
+ | Original Author: Ken Bowen
+ | Revision per new library mechanism: Kevin A. Buettner
+ *========================================================*/
+
 :-libactivate(builtins,['library',misc_io],
     [read_terms/1,read_terms/2, read_terms_pos/1,
 	 read_terms_pos/2, read_terms_vn/2, read_lines/2,

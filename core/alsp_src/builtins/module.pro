@@ -1,11 +1,14 @@
-/*
- * module.pro   -- module related predicates
- *
- * Copyright (c) 1989-1992 Applied logic Systems, Inc.
- * 
- * Author : Ilyas Cicekli
- * Date   : 2/23/1989
- */
+/*----------------------------------------------------------------*
+ |		module.pro   
+ |	Copyright (c) 1989-1992 Applied logic Systems, Inc.
+ |		Distribution rights per Copying ALS
+ | 
+ |			- module related predicates
+  +++++ should be moved to library....
+ |
+ | Author : Ilyas Cicekli
+ | Date   : 2/23/1989
+ *----------------------------------------------------------------*/
 
 
 /*
@@ -115,13 +118,8 @@ modcheck_conflict2(2) :-
 
 modcheck_conflict2(_).
 
-
-
 get_pair([X|L],X,Y) :- member(Y,L).
 get_pair([_|L],X,Y) :- get_pair(L,X,Y).
-
-member(X,[X|_]).
-member(X,[_|L]) :- member(X,L).
 
 
 

@@ -1,12 +1,13 @@
 /*=====================================================================
- *		comp_d10.pro
- *		Copyright (c) 1986-1992 Applied Logic Systems, Inc.
- *
- *	Predicate definitions for compatibility with DEC-10 Prolog syntax
- *
- *	Authors: Kevin A. Buettner, Ken Bowen, Chris White,
- *	         Keith Hughes, Ilyas Cicekli
- *	Original Creation Date: 3/20/86
+ |		comp_d10.pro
+ |		Copyright (c) 1986-1996 Applied Logic Systems, Inc.
+ |		Distribution rights: Unrestricted.
+ |
+ |	Predicate definitions for compatibility with DEC-10 Prolog syntax
+ |
+ |	Authors: Kevin A. Buettner, Ken Bowen, Chris White,
+ |	         Keith Hughes, Ilyas Cicekli
+ |	Original Creation Date: 3/20/86
  *====================================================================*/
 
 module builtins.

@@ -1,6 +1,7 @@
 /*=====================================================================*
- | 	sio.pro		
- | 	Copyright (c) 1991-1994 Applied Logic Systems, Inc.
+ |		sio.pro		
+ |	Copyright (c) 1991-1996 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  |	stream I/O builtins
  |
@@ -53,7 +54,7 @@ use windows.
 	   	 assert(default_write_eoln_type(crlf)))
 	;
 	OS=macos ->
-	   	(assert(default_read_eoln_type(cr)),
+	   	(assert(default_read_eoln_type(universal)),
 	   	 assert(default_write_eoln_type(cr)))
 	;
    	(OS=unix ->

@@ -1,6 +1,7 @@
 /*==============================================================
  |		blt_io.pro
- | Copyright (c) 1986-1992 Applied Logic Systems, Inc.
+ | Copyright (c) 1986-96 Applied Logic Systems, Inc.
+ |		Distribution rights per Copying ALS
  |
  | Builtin predicates for dealing with I/O
  |
@@ -8,7 +9,6 @@
  |	    Keith Hughes, Ilyas Cicekli
  | Original Creation Date: 3/20/86
  | Merge3 Revision: Begun 3/6/92 - Ken Bowen
- |
  *==============================================================*/
 
 module builtins.
