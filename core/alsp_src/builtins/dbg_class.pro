@@ -259,6 +259,8 @@ source_trace_mgrAction( clear_errors_display, State)
 
 source_trace_mgrAction( update_errors_wins(Ball), State)
 	:-
+%accessObjStruct(tcl_doc_path, State, EditWin),
+%write(stmA_update_errors_wins(Ball,EditWin)),nl,flush_outout,
 	accessObjStruct(errors_display, State, ErrsList),
 	cslt_reload(ErrsList, Ball, State).
 
@@ -319,6 +321,7 @@ source_trace_mgrAction(start_src_trace(BaseFileName, SrcFilePath, FCG), State)
 source_trace_mgrAction(start_src_trace, State)
 	:-
 	accessObjStruct(source_file, State, SrcFilePath),
+	!,
 	fin_mgr_start_source_trace(SrcFilePath, State).
 
 fin_mgr_start_source_trace(SrcFilePath, State)

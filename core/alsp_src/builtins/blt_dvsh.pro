@@ -539,7 +539,7 @@ initial_misc_settings
 		true
 	),
 	(dmember(prolog_value(debug_settings,DebugSettings),Items) ->
-		set_debug_settings_info(DebugSettings)
+		debugger:set_debug_settings_info(DebugSettings)
 		;
 		true
 	).
@@ -1508,7 +1508,6 @@ start_src_trace(Flag,BaseFileName, SrcFilePath, CG, ALSMgr, SrcMgr)
 	send(DbgrMgr, insert_by_fcg(CG, SrcMgr)),
 	send(DbgrMgr, set_value(mrfcg, CG)),
 	!,
-%write(dvsh_sst-x),nl,flush_output,
 	send(SrcMgr, start_src_trace(BaseFileName, SrcFilePath, CG)).
 
 inverted_index(LineIndex, InvertedLineIndex)
@@ -1628,7 +1627,6 @@ v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
 
 vv_showGoalToUserWin(Port,Box,Depth, Module, Goal, DBGMGR, Response)
 	:-
-%write(vv_showGoalToUserWin),nl,flush_output,
 	accessObjStruct(mrfcg, DBGMGR, CG),
 	(CG > 0 ->
 		send(DBGMGR,  get_mrfcg(CG, SrcMgr)),
@@ -2578,7 +2576,7 @@ shl_source_handlerAction(complete_open_edit_win(FileName,TclWin), State)
 shl_source_handlerAction(close_edit_win, State)
 	:-
 	accessObjStruct(tcl_doc_path, State, TclWin),
-	tcl_call(shl_tcli, [dispose_document_window, TclWin], _),
+%	tcl_call(shl_tcli, [dispose_document_window, TclWin], _),
 			%% MUST close down any source trace stuff later:::
 			%%		send_self(close_source_trace, State),
 	setObjStruct(tcl_doc_path, State, nil).
@@ -2651,23 +2649,28 @@ shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 	:-
 	accessObjStruct(errors_display, State, PrevErrsList),
+	SourceFile = SPath,
+accessObjStruct(tcl_doc_path, State, TWW),
+write(sshA(1,TWW,ErrsList)),nl,flush_output,
 	(PrevErrsList \= [] ->
-		accessObjStruct(tcl_doc_path, State, InitTclWin),
-		(InitTclWin \= nil ->
-			tcl_call(shl_tcli, [close_and_reopen, InitTclWin], _)
+		accessObjStruct(tcl_doc_path, State, TclWin),
+		(TclWin \= nil ->
+write(sshA(2,TWW,close_and_reopen(TclWin))),nl,flush_output,
+			tcl_call(shl_tcli, [close_and_reopen, TclWin], _),
+			send_self(State, clear_decorations)
 			;
 			true
 		)
 		;
-		true
+		shl_source_handlerAction(open_edit_win(SourceFile), State),
+		accessObjStruct(tcl_doc_path, State, TclWin)
 	),
+accessObjStruct(tcl_doc_path, State, TWW2),
+write(sshA(3,TWW2)),nl,flush_output,
 	setObjStruct(errors_display, State, ErrsList),
-	SourceFile = SPath,
 	setObjStruct(source_file, State, SourceFile),
-	shl_source_handlerAction(open_edit_win(SourceFile), State),
-	accessObjStruct(tcl_doc_path, State, TclWin),
-%write(dfe_tclwin=TclWin),nl,flush_output,
-	send_self(State, clear_decorations),
+accessObjStruct(tcl_doc_path, State, TWW4),
+write(sshA(4,TWW4)),nl,flush_output,
 	tcl_call(shl_tcli, [add_line_numbers_and_syn_errs,TclWin],_),
 	catenate([TclWin,'.listbox'], ErrListWin),
 	indicate_errors(ErrsList, TclWin, ErrListWin).
