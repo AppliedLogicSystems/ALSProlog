@@ -75,8 +75,17 @@ continue_prolog_loop(Status).
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	%% Cold startup in saved image, from TTY-command line start (i.e,unix):
+
+report_error(Error) :-
+	tk_new(I),
+	sprintf(atom(ErrorStr), '%t', [Error]),
+	tcl_call(I, [tk_messageBox,
+		'-icon', error, '-message', ErrorStr, '-type', ok], _).
+
 export start_alsdev/0.
-start_alsdev
+start_alsdev :-
+	catch(start_alsdev0, Error, report_error(Error)).
+start_alsdev0
 	:-
 		%% Used by some routines in builtins
 		%% to  detect presence  of alsdev:
@@ -275,7 +284,6 @@ alsdev(Shared, ALS_IDE_Mgr)
 		tcl_call(shl_tcli, 'source -rsrc alsdev', _)
 	  ;
 	  (
-%	    pathPlusFile(Shared, 'alsdev.tcl', ALSDEVTCL),
 		join_path([Shared, 'alsdev.tcl'], ALSDEVTCL),
 	    tcl_call(shl_tcli, [source, ALSDEVTCL], _)
 	  )
