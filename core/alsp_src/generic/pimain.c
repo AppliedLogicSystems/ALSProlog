@@ -22,9 +22,7 @@
 #include "alspi.h"
 #include <stdio.h>
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 #ifndef NO_STDARG_H
 #define HAVE_STDARG_H
@@ -348,9 +346,9 @@ PI_app_printf(messtype,va_alist)
 	    break;
 	case PI_app_printf_fatal_error :
 	    f = stderr;
-	    sprintf(s,"\nFatal Error: ");
-	    vsprintf(s, fmt, args);
-	    sprintf(s,"\n");
+	    strcpy(s,"\nFatal Error: ");
+	    vsprintf(s+strlen(s), fmt, args);
+	    strcat(s,"\n");
 	    break;
 	case PI_app_printf_warning :
 	case PI_app_printf_error :
