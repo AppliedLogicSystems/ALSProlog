@@ -1,7 +1,7 @@
 /*================================================================
           intrv.c
           --Generated from: pseudoc.ode
-          Date: 95/8/6   Time: 10:44:56
+          Date: 95/9/12   Time: 18:12:55
 		  -- by genC_ie(make_C)
 
     Interval Primitives: May 3 95 Version of make_C_interval_engine
@@ -11,6 +11,11 @@
 #include "intrv.h"
 
 #if defined(INTCONSTR)
+
+
+
+extern void extract_bds PARAMS((PWord *, fp *, fp *));
+extern void change_bound PARAMS((PWord *, fp *, int));
 
      /*----------------*
       |   i_unequal 
@@ -27,6 +32,11 @@ i_unequal()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -34,24 +44,48 @@ i_unequal()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 		/* Macro version of call: unequal(zl,zh,xl,xh)  */
 	if (zh GT xl)  goto u_B;
 	if (zh LT xl)  goto u_Done;
-   u_Eq1:
 	if (zl GT zh)  goto u_Fail;
 	if (zl LT zh)  goto u_Eq12;
-   u_XR:
 	xl = xl;
 	next(xl);
 	xlchng();
@@ -59,7 +93,6 @@ i_unequal()
    u_Eq12:
 	if (xl GT xh)  goto u_Fail;
 	if (xl LT xh)  goto u_Exit;
-   u_PZL:
 	zh = zh;
 	prev(zh);
 	zhchng();
@@ -67,10 +100,8 @@ i_unequal()
    u_B:
 	if (xh GT zl)  goto u_Exit;
 	if (xh LT zl)  goto u_Done;
-   u_Eq2:
 	if (zl GT zh)  goto u_Fail;
 	if (zl LT zh)  goto u_Eq22;
-   u_PXL:
 	xh = xh;
 	prev(xh);
 	xhchng();
@@ -78,7 +109,6 @@ i_unequal()
    u_Eq22:
 	if (xl GT xh)  goto u_Fail;
 	if (xl LT xh)  goto u_Exit;
-   u_ZR:
 	zl = zl;
 	next(zl);
 	zlchng();
@@ -92,10 +122,10 @@ i_unequal()
    u_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -120,6 +150,11 @@ i_equal()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -127,21 +162,46 @@ i_equal()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 		/* Macro version of call: equal(zl,zh,xl,xh)  */
 	if (xl GT zl)  goto e_Chkzl;
 	if (xl EQ zl)  goto e_Ub;
-   e_Chkxl:
 	xl = zl;
 	xlchng();
 	goto e_Ub;
@@ -151,7 +211,6 @@ i_equal()
    e_Ub:
 	if (xh GT zh)  goto e_Chkxh;
 	if (xh EQ zh)  goto e_Exit;
-   e_Chkzh:
 	zh = xh;
 	zhchng();
 	goto e_Exit;
@@ -162,10 +221,10 @@ i_equal()
    e_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -190,6 +249,11 @@ i_greatereq()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -197,27 +261,50 @@ i_greatereq()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 		/* Macro version of call: greatereq(zl,zh,xl,xh)  */
 	if (xh LT zl)  goto g_Done;
-   g_Lb:
 	if (xl LE zl)  goto g_Ub;
-   g_Chkzl:
 	zl = xl;
 	zlchng();
    g_Ub:
 	if (xh LE zh)  goto g_Exit;
-   g_Chkxh:
 	xh = zh;
 	xhchng();
 	goto g_Exit;
@@ -227,10 +314,10 @@ i_greatereq()
    g_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -255,6 +342,11 @@ i_higher()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -262,28 +354,51 @@ i_higher()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 		/* Macro version of call: higher(zl,zh,xl,xh)  */
 	if (zh LT xl)  goto h_Done;
-   h_Lb:
 	if (zl LT xl)  goto h_Ub;
-   h_Chkxl:
 	xl = zl;
 	next(xl);
 	xlchng();
    h_Ub:
 	if (zh LT xh)  goto h_Exit;
-   h_Chkzh:
 	zh = xh;
 	prev(zh);
 	zhchng();
@@ -294,10 +409,10 @@ i_higher()
    h_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -322,6 +437,11 @@ i_add()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -330,37 +450,73 @@ i_add()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if(y_t == WTP_INTEGER)
 		{	yl = (double)y;
 			yh = (double)y; }
+#ifndef DoubleType
+	else if(y_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(y_t, y, &yl);
+		yh = yl;
+	}
+#else
+	else if(y_t == WTP_DOUBLE)
+	{
+		w_get_double(yl, &y);
+		yh = yl;
+	}
+#endif
 	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)y, &yl, &yh);
 	else  FAIL;
 
 	lowerbd(xl+yl,vl);
 	if (vl GT zl)  goto a_MUZL;
 	if (vl EQ zl)  goto a_Upper;
-   a_BackLX:
 	lowerbd(zl-yh,vl);
 	if (vl LE xl)  goto a_BackLY;
-   a_MUXL:
 	xl = vl;
 	xlchng();
    a_BackLY:
 	lowerbd(zl-xh,vl);
 	if (vl LE yl)  goto a_Upper;
-   a_MUYL:
 	yl = vl;
 	ylchng();
 	goto a_Upper;
@@ -371,16 +527,13 @@ i_add()
 	upperbd(xh+yh,vh);
 	if (vh LT zh)  goto a_MUZH;
 	if (vh EQ zh)  goto a_Exit;
-   a_BackHX:
 	upperbd(zh-yl,vh);
 	if (vh GE xh)  goto a_BackHY;
-   a_MUXH:
 	xh = vh;
 	xhchng();
    a_BackHY:
 	upperbd(zh-xl,vh);
 	if (vh GE yh)  goto a_Exit;
-   a_MUYH:
 	yh = vh;
 	yhchng();
 	goto a_Exit;
@@ -392,12 +545,12 @@ i_add()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
+	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -416,41 +569,63 @@ int  i_begin_tog  PARAMS( (void) );
 int
 i_begin_tog()
 {
-	PWord z, x, y;
-	int z_t, x_t, y_t;
-	double zl, zh, xl, xh, yl, yh;
+	PWord z, x;
+	int z_t, x_t;
+	double zl, zh, xl, xh;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
-	w_get_An(&y, &y_t, 3);
 
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
-	else  FAIL;
-
-	if(y_t == WTP_INTEGER)
-		{	yl = (double)y;
-			yh = (double)y; }
-	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if (xl GT zl)  goto b_Chkzl;
 	if (xl EQ zl)  goto b_Exit;
-   b_Chkxl:
 	xl = zl;
 	xlchng();
 	goto b_Exit;
@@ -461,15 +636,12 @@ i_begin_tog()
    b_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
-	w_get_An(&stat_var, &stat_var_t, 4);
+	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
 		SUCCEED; 
 	else 
@@ -486,94 +658,106 @@ int  i_cos  PARAMS( (void) );
 int
 i_cos()
 {
-	PWord z, x, y;
-	int z_t, x_t, y_t;
-	double vl, vh, ul, uh, zl, zh, xl, xh, yl, yh;
+	PWord z, x;
+	int z_t, x_t;
+	double vl, vh, ul, uh, zl, zh, xl, xh;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
-	w_get_An(&y, &y_t, 3);
 
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
-	else  FAIL;
-
-	if(y_t == WTP_INTEGER)
-		{	yl = (double)y;
-			yh = (double)y; }
-	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if (xl GE 0)  goto c_Right;
-   c_Mleft:
 	if (xh GT 0)  goto c_Center;
-   c_Left:
 	swap(x);
    c_Right:
 	upperbd2(cos(xl),uh);
 	if (uh GT zh)  goto c_Uxl;
 	if (uh EQ zh)  goto c_Low;
-   c_Uzh:
 	zh = uh;
 	zhchng();
 	goto c_Low;
    c_Uxl:
 	lowerbd2(acos(zh),vl);
 	if (vl LE xl)  goto c_Low;
-   c_Uxl2:
 	xl = vl;
 	xlchng();
    c_Low:
 	lowerbd2(cos(xh),ul);
 	if (ul LT zl)  goto c_Uxh;
 	if (ul EQ zl)  goto c_Exit;
-   c_Uzl:
 	zl = ul;
 	zlchng();
 	goto c_Exit;
    c_Uxh:
 	upperbd2(acos(zl),vh);
 	if (vh GE xh)  goto c_Exit;
-   c_Uxh2:
 	xh = vh;
 	xhchng();
 	goto c_Exit;
    c_Center:
 	ul = -xl;
 	if (xh GE ul)  goto c_Hright;
-   c_Hleft:
 	swap(x);
    c_Hright:
 	lowerbd2(cos(xl),ul);
 	upperbd2(cos(xh),uh);
 	vl = 1;
 	if (zh LT uh)  goto c_Fail;
-   c_Meets:
 	if (zh GE ul)  goto c_Chklo;
-   c_Unxl:
 	lowerbd2(acos(zh),vl);
 	if (vl LE xl)  goto c_Chklo;
-   c_Unxl2:
 	xl = vl;
 	xlchng();
    c_Chklo:
 	if (zl GT uh)  goto c_Uxh;
 	if (zl EQ uh)  goto c_Exit;
-   c_Upzl:
 	zl = uh;
 	zlchng();
 	goto c_Exit;
@@ -582,15 +766,12 @@ i_cos()
    c_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
-	w_get_An(&stat_var, &stat_var_t, 4);
+	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
 		SUCCEED; 
 	else 
@@ -607,41 +788,63 @@ int  i_finish_tog  PARAMS( (void) );
 int
 i_finish_tog()
 {
-	PWord z, x, y;
-	int z_t, x_t, y_t;
-	double zl, zh, xl, xh, yl, yh;
+	PWord z, x;
+	int z_t, x_t;
+	double zl, zh, xl, xh;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
-	w_get_An(&y, &y_t, 3);
 
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
-	else  FAIL;
-
-	if(y_t == WTP_INTEGER)
-		{	yl = (double)y;
-			yh = (double)y; }
-	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if (xh GT zh)  goto f_Chkxh;
 	if (xh EQ zh)  goto f_Exit;
-   f_Chkzh:
 	zh = xh;
 	zhchng();
 	goto f_Exit;
@@ -652,15 +855,12 @@ i_finish_tog()
    f_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
-	w_get_An(&stat_var, &stat_var_t, 4);
+	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
 		SUCCEED; 
 	else 
@@ -683,6 +883,11 @@ i_inf()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -691,68 +896,97 @@ i_inf()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if(y_t == WTP_INTEGER)
 		{	yl = (double)y;
 			yh = (double)y; }
+#ifndef DoubleType
+	else if(y_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(y_t, y, &yl);
+		yh = yl;
+	}
+#else
+	else if(y_t == WTP_DOUBLE)
+	{
+		w_get_double(yl, &y);
+		yh = yl;
+	}
+#endif
 	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)y, &yl, &yh);
 	else  FAIL;
 
 	if (zl LE xl)  goto i_Ubzx;
-   i_Chkxl:
 	xl = zl;
 	xlchng();
    i_Ubzx:
 	if (zh LE xh)  goto i_LtY;
-   i_Chkxh:
 	zh = xh;
 	zhchng();
    i_LtY:
 	if (zl LE yl)  goto i_Ubzy;
-   i_Chkyl:
 	yl = zl;
 	ylchng();
    i_Ubzy:
 	if (zh LE yh)  goto i_Ubx;
-   i_Chkyh:
 	zh = yh;
 	zhchng();
    i_Ubx:
 	if (zh GE yl)  goto i_Uby;
-   i_Uxh1:
 	if (zh GE xh)  goto i_LbZ;
-   i_Uxh:
 	xh = zh;
 	xhchng();
 	goto i_LbZ;
    i_Uby:
 	if (zh GE xl)  goto i_LbZ;
-   i_Uyh1:
 	if (zh GE yh)  goto i_LbZ;
-   i_Uyh:
 	yh = zh;
 	yhchng();
    i_LbZ:
 	if (xl GT yl)  goto i_Usey;
-   i_Usex:
 	vl = xl;
 	goto i_Chkzl;
    i_Usey:
 	vl = yl;
    i_Chkzl:
 	if (vl LE zl)  goto i_Exit;
-   i_Chkzh:
 	zl = vl;
 	zlchng();
 	goto i_Exit;
@@ -760,12 +994,12 @@ i_inf()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
+	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -790,6 +1024,11 @@ i_j_less()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -798,35 +1037,71 @@ i_j_less()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if(y_t == WTP_INTEGER)
 		{	yl = (double)y;
 			yh = (double)y; }
+#ifndef DoubleType
+	else if(y_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(y_t, y, &yl);
+		yh = yl;
+	}
+#else
+	else if(y_t == WTP_DOUBLE)
+	{
+		w_get_double(yl, &y);
+		yh = yl;
+	}
+#endif
 	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)y, &yl, &yh);
 	else  FAIL;
 
 	if (yl GT 0) {
 		/* Macro version of call: greatereq(zl,zh,xl,xh)  */
 	if (xh LT zl)  goto g_j_Done;
-   g_j_Lb:
 	if (xl LE zl)  goto g_j_Ub;
-   g_j_Chkzl:
 	zl = xl;
 	zlchng();
    g_j_Ub:
 	if (xh LE zh)  goto g_j_Exit;
-   g_j_Chkxh:
 	xh = zh;
 	xhchng();
 	goto g_j_Exit;
@@ -836,20 +1111,16 @@ i_j_less()
    g_j_Exit:
 	}
 	if (yl LT 0)  iaerror();
-   j_Mfalse:
 	if (yh LT 0)  iaerror();
 	if (yh EQ 0) {
 		/* Macro version of call: higher(zl,zh,xl,xh)  */
 	if (zh LT xl)  goto h_j_Done;
-   h_j_Lb:
 	if (zl LT xl)  goto h_j_Ub;
-   h_j_Chkxl:
 	xl = zl;
 	next(xl);
 	xlchng();
    h_j_Ub:
 	if (zh LT xh)  goto h_j_Exit;
-   h_j_Chkzh:
 	zh = xh;
 	prev(zh);
 	zhchng();
@@ -859,9 +1130,7 @@ i_j_less()
 	goto h_j_Exit;
    h_j_Exit:
 	}
-   j_Test:
 	if (xh LE zl)  goto j_True;
-   j_Test2:
 	if (zh LT xl)  goto j_False;
 	goto j_Exit;
    j_True:
@@ -876,12 +1145,12 @@ i_j_less()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
+	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -906,6 +1175,11 @@ i_k_equal()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -914,29 +1188,67 @@ i_k_equal()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if(y_t == WTP_INTEGER)
 		{	yl = (double)y;
 			yh = (double)y; }
+#ifndef DoubleType
+	else if(y_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(y_t, y, &yl);
+		yh = yl;
+	}
+#else
+	else if(y_t == WTP_DOUBLE)
+	{
+		w_get_double(yl, &y);
+		yh = yl;
+	}
+#endif
 	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)y, &yl, &yh);
 	else  FAIL;
 
 	if (yl GT 0) {
 		/* Macro version of call: equal(zl,zh,xl,xh)  */
 	if (xl GT zl)  goto e_k_Chkzl;
 	if (xl EQ zl)  goto e_k_Ub;
-   e_k_Chkxl:
 	xl = zl;
 	xlchng();
 	goto e_k_Ub;
@@ -946,7 +1258,6 @@ i_k_equal()
    e_k_Ub:
 	if (xh GT zh)  goto e_k_Chkxh;
 	if (xh EQ zh)  goto e_k_Exit;
-   e_k_Chkzh:
 	zh = xh;
 	zhchng();
 	goto e_k_Exit;
@@ -957,16 +1268,13 @@ i_k_equal()
    e_k_Exit:
 	}
 	if (yl LT 0)  iaerror();
-   k_Mfalse:
 	if (yh LT 0)  iaerror();
 	if (yh EQ 0) {
 		/* Macro version of call: unequal(zl,zh,xl,xh)  */
 	if (zh GT xl)  goto u_k_B;
 	if (zh LT xl)  goto u_k_Done;
-   u_k_Eq1:
 	if (zl GT zh)  goto u_k_Fail;
 	if (zl LT zh)  goto u_k_Eq12;
-   u_k_XR:
 	xl = xl;
 	next(xl);
 	xlchng();
@@ -974,7 +1282,6 @@ i_k_equal()
    u_k_Eq12:
 	if (xl GT xh)  goto u_k_Fail;
 	if (xl LT xh)  goto u_k_Exit;
-   u_k_PZL:
 	zh = zh;
 	prev(zh);
 	zhchng();
@@ -982,10 +1289,8 @@ i_k_equal()
    u_k_B:
 	if (xh GT zl)  goto u_k_Exit;
 	if (xh LT zl)  goto u_k_Done;
-   u_k_Eq2:
 	if (zl GT zh)  goto u_k_Fail;
 	if (zl LT zh)  goto u_k_Eq22;
-   u_k_PXL:
 	xh = xh;
 	prev(xh);
 	xhchng();
@@ -993,7 +1298,6 @@ i_k_equal()
    u_k_Eq22:
 	if (xl GT xh)  goto u_k_Fail;
 	if (xl LT xh)  goto u_k_Exit;
-   u_k_ZR:
 	zl = zl;
 	next(zl);
 	zlchng();
@@ -1006,10 +1310,8 @@ i_k_equal()
 	goto u_k_Exit;
    u_k_Exit:
 	}
-   k_Test:
 	if (zl GT xh)  goto k_Un;
 	if (zl EQ xh)  goto k_Tryeq;
-   k_Test2:
 	if (xl LE zh)  goto k_Exit;
    k_Un:
 	yh = 0;
@@ -1017,9 +1319,7 @@ i_k_equal()
 	goto k_Exit;
    k_Tryeq:
 	if (zl NE zh)  goto k_Exit;
-   k_Tryeq2:
 	if (xl NE xh)  goto k_Exit;
-   k_Eq:
 	yl = 1;
 	ylchng();
 	goto k_Exit;
@@ -1027,12 +1327,12 @@ i_k_equal()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
+	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -1057,6 +1357,11 @@ i_lub()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -1065,68 +1370,97 @@ i_lub()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if(y_t == WTP_INTEGER)
 		{	yl = (double)y;
 			yh = (double)y; }
+#ifndef DoubleType
+	else if(y_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(y_t, y, &yl);
+		yh = yl;
+	}
+#else
+	else if(y_t == WTP_DOUBLE)
+	{
+		w_get_double(yl, &y);
+		yh = yl;
+	}
+#endif
 	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)y, &yl, &yh);
 	else  FAIL;
 
 	if (xl LE zl)  goto l_Ubx;
-   l_Chkxl:
 	zl = xl;
 	zlchng();
    l_Ubx:
 	if (xh LE zh)  goto l_LtY;
-   l_Chkxh:
 	xh = zh;
 	xhchng();
    l_LtY:
 	if (yl LE zl)  goto l_Uby;
-   l_Chkyl:
 	zl = yl;
 	zlchng();
    l_Uby:
 	if (yh LE zh)  goto l_Lbx;
-   l_Chkyh:
 	yh = zh;
 	yhchng();
    l_Lbx:
 	if (zl LE xh)  goto l_Lby;
-   l_Uyl1:
 	if (zl LE yl)  goto l_UbZ;
-   l_Uyl:
 	yl = zl;
 	ylchng();
 	goto l_UbZ;
    l_Lby:
 	if (zl LE yh)  goto l_UbZ;
-   l_Uxl1:
 	if (zl LE xl)  goto l_UbZ;
-   l_Uxl:
 	xl = zl;
 	xlchng();
    l_UbZ:
 	if (yh GT xh)  goto l_Usey;
-   l_Usex:
 	vh = xh;
 	goto l_Chkzh;
    l_Usey:
 	vh = yh;
    l_Chkzh:
 	if (vh GE zh)  goto l_Exit;
-   l_Chkzl:
 	zh = vh;
 	zhchng();
 	goto l_Exit;
@@ -1134,12 +1468,12 @@ i_lub()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
+	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -1164,6 +1498,11 @@ i_mul()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -1172,44 +1511,75 @@ i_mul()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if(y_t == WTP_INTEGER)
 		{	yl = (double)y;
 			yh = (double)y; }
+#ifndef DoubleType
+	else if(y_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(y_t, y, &yl);
+		yh = yl;
+	}
+#else
+	else if(y_t == WTP_DOUBLE)
+	{
+		w_get_double(yl, &y);
+		yh = yl;
+	}
+#endif
 	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)y, &yl, &yh);
 	else  FAIL;
-printf("mul:zl=%g zh=%g xl=%g xh=%g yl=%g yh=%g\n",zl,zh,xl,xh,yl,yh);
 
 	if (xl GT 0)  goto m_Xpos;
 	if (xl EQ 0)  goto m_XMpos;
-   m_Chkxh:
 	if (xh GT 0)  goto m_Xindef;
-   m_Swx:
 	swap(x);
-   m_Xneg:
 	if (yl GT 0)  goto m_Zneg;
 	if (yl EQ 0)  goto m_ZMneg;
-   m_Chkyh1:
 	if (yh GT 0)  goto m_Yindef1;
-   m_Swy1:
 	swap(y);
 	goto m_Zpos;
    m_Yindef1:
 	if (zl GE 0)  goto m_MakeYneg;
-   m_Chkzh1:
 	if (zh GT 0)  goto m_FZ;
-   m_Swz1:
 	swap(z);
 	goto m_MakeYpos;
    m_FZ:
@@ -1222,14 +1592,10 @@ printf("mul:zl=%g zh=%g xl=%g xh=%g yl=%g yh=%g\n",zl,zh,xl,xh,yl,yh);
    m_Xindef:
 	if (yl GT 0)  goto m_Ypos;
 	if (yl EQ 0)  goto m_YMpos;
-   m_Chkyh2:
 	if (yh GT 0)  goto m_MpyC;
-   m_Yneg:
 	swap(y);
 	if (zl GE 0)  goto m_MakeXneg;
-   m_Chzh2:
 	if (zh GT 0)  goto m_FZ2;
-   m_Swz2:
 	swap(z);
 	goto m_MakeXpos;
    m_FZ2:
@@ -1240,9 +1606,7 @@ printf("mul:zl=%g zh=%g xl=%g xh=%g yl=%g yh=%g\n",zl,zh,xl,xh,yl,yh);
 	if (yh EQ 0)  goto m_ZZero;
    m_Ypos:
 	if (zl GE 0)  goto m_MakeXpos;
-   m_Chzh3:
 	if (zh GT 0)  goto m_MpyBY;
-   m_Swz3:
 	swap(z);
 	goto m_MakeXneg;
    m_XMpos:
@@ -1251,16 +1615,12 @@ printf("mul:zl=%g zh=%g xl=%g xh=%g yl=%g yh=%g\n",zl,zh,xl,xh,yl,yh);
    m_Xpos:
 	if (yl GT 0)  goto m_Zpos;
 	if (yl EQ 0)  goto m_ZMpos;
-   m_Chkyh:
 	if (yh GT 0)  goto m_Yindef;
-   m_Swy:
 	swap(y);
 	goto m_Zneg;
    m_Yindef:
 	if (zl GE 0)  goto m_MakeYpos;
-   m_Chkzh:
 	if (zh GT 0)  goto m_MpyBX;
-   m_Swz4:
 	swap(z);
 	goto m_MakeYneg;
    m_ZMpos:
@@ -1271,22 +1631,18 @@ printf("mul:zl=%g zh=%g xl=%g xh=%g yl=%g yh=%g\n",zl,zh,xl,xh,yl,yh);
 	lowerbd(xl*yh,vh);
 	lowerbd(xh*yl,vl);
 	if (vh LE vl)  goto m_Usevh;
-   m_Usevl:
 	vh = vl;
    m_Usevh:
 	if (vh LE zl)  goto m_MpyCH;
-   m_Uzlvh:
 	zl = vh;
 	zlchng();
    m_MpyCH:
 	upperbd(xl*yl,vl);
 	upperbd(xh*yh,vh);
 	if (vl GE vh)  goto m_Usevl2;
-   m_Usevh2:
 	vl = vh;
    m_Usevl2:
 	if (vl GE zh)  goto m_Exit;
-   m_Uzhvl:
 	zh = vl;
 	zhchng();
 	goto m_Exit;
@@ -1294,25 +1650,20 @@ printf("mul:zl=%g zh=%g xl=%g xh=%g yl=%g yh=%g\n",zl,zh,xl,xh,yl,yh);
 	lowerbd(xh*yl,vl);
 	if (vl LT zl)  goto m_Backxzl;
 	if (vl EQ zl)  goto m_MpyBHX;
-   m_Uzl1:
 	zl = vl;
 	zlchng();
 	goto m_MpyBHX;
    m_Backxzl:
 	if (xl LE 0)  goto m_MpyBHX;
-   m_BXDivl:
 	lowerbd(zl/xl,vl);
 	if (vl LE yl)  goto m_MpyBHX;
-   m_Uyl1:
 	yl = vl;
 	ylchng();
    m_MpyBHX:
 	upperbd(xh*yh,vh);
 	if (vh LT zh)  goto m_MUZH;
 	if (vh EQ zh)  goto m_Exit;
-   m_Backxzh:
 	if (xl LE 0)  goto m_Exit;
-   m_BXDivh:
 	upperbd(zh/xl,vh);
 	if (vh LT yh)  goto m_MUYH;
 	goto m_Exit;
@@ -1320,38 +1671,31 @@ printf("mul:zl=%g zh=%g xl=%g xh=%g yl=%g yh=%g\n",zl,zh,xl,xh,yl,yh);
 	lowerbd(yh*xl,vl);
 	if (vl LT zl)  goto m_Backyzl;
 	if (vl EQ zl)  goto m_MpyBHY;
-   m_Uzl2:
 	zl = vl;
 	zlchng();
 	goto m_MpyBHY;
    m_Backyzl:
 	if (yl LE 0)  goto m_MpyBHY;
-   m_BYDivl:
 	lowerbd(zl/yl,vl);
 	if (vl LE xl)  goto m_MpyBHY;
-   m_Uyl2:
 	xl = vl;
 	xlchng();
    m_MpyBHY:
 	upperbd(xh*yh,vh);
 	if (vh LT zh)  goto m_MUZH;
 	if (vh EQ zh)  goto m_Exit;
-   m_Backyzh:
 	if (yl LE 0)  goto m_Exit;
-   m_BYDivh:
 	upperbd(zh/yl,vh);
 	if (vh LT xh)  goto m_MUXH;
 	goto m_Exit;
    m_ZZero:
 	if (zl GT 0)  goto m_Fail;
 	if (zl EQ 0)  goto m_Zh;
-   m_Zl_0:
 	zl = 0;
 	zlchng();
    m_Zh:
 	if (zh LT 0)  goto m_Fail;
 	if (zh EQ 0)  goto m_Exit;
-   m_Zh_0:
 	zh = 0;
 	zhchng();
 	goto m_Exit;
@@ -1369,7 +1713,6 @@ printf("mul:zl=%g zh=%g xl=%g xh=%g yl=%g yh=%g\n",zl,zh,xl,xh,yl,yh);
 	goto m_MpyA;
    m_Zneg:
 	if (zh LE 0)  goto m_Swz;
-   m_Chzl:
 	swap(z);
 	zl = 0;
 	zlchng();
@@ -1379,29 +1722,21 @@ printf("mul:zl=%g zh=%g xl=%g xh=%g yl=%g yh=%g\n",zl,zh,xl,xh,yl,yh);
 	goto m_MpyA;
    m_Zpos:
 	if (zl GE 0)  goto m_MpyA;
-   m_Chzh:
 	zl = 0;
 	zlchng();
-  m_MpyA:
-/* printf("m_MpyA-1"); */
+   m_MpyA:
 	lowerbd(xl*yl,vl);
-/* printf("m_MpyA-2\n"); */
 	if (vl GT zl)  goto m_MUZL;
 	if (vl EQ zl)  goto m_Upper;
-   m_BackLX:
 	if (yh LE 0)  goto m_BackLY;
-   m_DivL:
 	lowerbd(zl/yh,vl);
 	if (vl LE xl)  goto m_BackLY;
-   m_MUXL:
 	xl = vl;
 	xlchng();
    m_BackLY:
 	if (xh LE 0)  goto m_Upper;
-   m_BLY:
 	lowerbd(zl/xh,vl);
 	if (vl LE yl)  goto m_Upper;
-   m_MUYL:
 	yl = vl;
 	ylchng();
 	goto m_Upper;
@@ -1409,14 +1744,10 @@ printf("mul:zl=%g zh=%g xl=%g xh=%g yl=%g yh=%g\n",zl,zh,xl,xh,yl,yh);
 	zl = vl;
 	zlchng();
    m_Upper:
-/* printf("m_Upper-1  "); */
 	upperbd(xh*yh,vh);
-/* printf("m_Upper-2\n"); */
 	if (vh LT zh)  goto m_MUZH;
 	if (vh EQ zh)  goto m_Exit;
-   m_BackHX:
 	if (yl LE 0)  goto m_BackHY;
-   m_DivH:
 	upperbd(zh/yl,vh);
 	if (vh GE xh)  goto m_BackHY;
    m_MUXH:
@@ -1424,7 +1755,6 @@ printf("mul:zl=%g zh=%g xl=%g xh=%g yl=%g yh=%g\n",zl,zh,xl,xh,yl,yh);
 	xhchng();
    m_BackHY:
 	if (xl LE 0)  goto m_Exit;
-   m_BHY:
 	upperbd(zh/xl,vh);
 	if (vh GE yh)  goto m_Exit;
    m_MUYH:
@@ -1441,12 +1771,12 @@ printf("mul:zl=%g zh=%g xl=%g xh=%g yl=%g yh=%g\n",zl,zh,xl,xh,yl,yh);
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
+	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -1465,60 +1795,78 @@ int  i_narrower  PARAMS( (void) );
 int
 i_narrower()
 {
-	PWord z, x, y;
-	int z_t, x_t, y_t;
-	double zl, zh, xl, xh, yl, yh;
+	PWord z, x;
+	int z_t, x_t;
+	double zl, zh, xl, xh;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
-	w_get_An(&y, &y_t, 3);
 
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
-	else  FAIL;
-
-	if(y_t == WTP_INTEGER)
-		{	yl = (double)y;
-			yh = (double)y; }
-	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if (xl GE zl)  goto n_Ub;
-   n_Chkxl:
 	xl = zl;
 	xlchng();
    n_Ub:
 	if (xh LE zh)  goto n_Exit;
-   n_Chkxh:
 	xh = zh;
 	xhchng();
 	goto n_Exit;
    n_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
-	w_get_An(&stat_var, &stat_var_t, 4);
+	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
 		SUCCEED; 
 	else 
@@ -1541,6 +1889,11 @@ i_or()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -1549,35 +1902,71 @@ i_or()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if(y_t == WTP_INTEGER)
 		{	yl = (double)y;
 			yh = (double)y; }
+#ifndef DoubleType
+	else if(y_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(y_t, y, &yl);
+		yh = yl;
+	}
+#else
+	else if(y_t == WTP_DOUBLE)
+	{
+		w_get_double(yl, &y);
+		yh = yl;
+	}
+#endif
 	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)y, &yl, &yh);
 	else  FAIL;
 
 	if (xl GT yl)  goto o_YX;
-   o_XY:
 	if (zl GT xl)  goto o_DisjX;
 	if (zl EQ xl)  goto o_DX3;
-   o_Uzlxl:
 	zl = xl;
 	zlchng();
 	goto o_DX3;
    o_DisjX:
 	if (xh LT zl)  goto o_EqZY;
-   o_DX2:
 	if (yh LT zl)  goto o_EqZX;
    o_DX3:
 	if (zh LT yl)  goto o_EqZX;
@@ -1585,20 +1974,17 @@ i_or()
    o_YX:
 	if (zl GT yl)  goto o_DisjY;
 	if (zl EQ yl)  goto o_DY3;
-   o_Uzlyl:
 	zl = yl;
 	zlchng();
 	goto o_DY3;
    o_DisjY:
 	if (yh LT zl)  goto o_EqZX;
-   o_DY2:
 	if (xh LT zl)  goto o_EqZY;
    o_DY3:
 	if (zh GE xl)  goto o_PartB;
    o_EqZY:
 	if (zl GT yl)  goto o_Uyzl;
 	if (zl EQ yl)  goto o_HYZ;
-   o_Uzyl:
 	zl = yl;
 	zlchng();
 	goto o_HYZ;
@@ -1612,7 +1998,6 @@ i_or()
    o_EqZX:
 	if (zl GT xl)  goto o_Uxzl;
 	if (zl EQ xl)  goto o_HXZ;
-   o_Uzxl:
 	zl = xl;
 	zlchng();
 	goto o_HXZ;
@@ -1625,7 +2010,6 @@ i_or()
 	goto o_Exit;
    o_PartB:
 	if (xh GE yh)  goto o_UBX;
-   o_UBY:
 	if (zh LE yh)  goto o_Exit;
    o_Uzyh:
 	zh = yh;
@@ -1644,18 +2028,18 @@ i_or()
    o_Uxzh:
 	xh = zh;
 	xhchng();
-   o_Exit:
-   o_Fail:
+	goto o_Exit;
 	FAIL;
+   o_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
+	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -1680,6 +2064,11 @@ i_pow_odd()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -1688,32 +2077,67 @@ i_pow_odd()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if(y_t == WTP_INTEGER)
 		{	yl = (double)y;
 			yh = (double)y; }
+#ifndef DoubleType
+	else if(y_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(y_t, y, &yl);
+		yh = yl;
+	}
+#else
+	else if(y_t == WTP_DOUBLE)
+	{
+		w_get_double(yl, &y);
+		yh = yl;
+	}
+#endif
 	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)y, &yl, &yh);
 	else  FAIL;
 
 	if (zl GE 0)  goto p_Right;
-   p_Chkub:
 	if (zh LE 0)  goto p_Left;
-   p_MayCenter:
 	if (xl GE 0)  goto p_Rightx;
-   p_Chubx:
 	if (xh LE 0)  goto p_Leftx;
-   p_Center:
 	vl = -zl;
 	upperbd2(ln(vl),vl);
 	upperbd(vl/yl,vl);
@@ -1721,10 +2145,8 @@ i_pow_odd()
 	vl = -vl;
 	if (vl GT xl)  goto p_Uxl;
 	if (vl EQ xl)  goto p_Ub;
-   p_CUzl:
 	if (xl GT 0)  goto p_Uzl;
 	if (xl EQ 0)  goto p_Zxl;
-   p_Negxl:
 	vl = -xl;
 	upperbd2(ln(vl),vl);
 	upperbd(vl*yl,vl);
@@ -1747,7 +2169,6 @@ i_pow_odd()
 	swap(x);
    p_Right:
 	if (zl GT 0)  goto p_NZl;
-   p_Zl:
 	vl = 0;
 	goto p_Lbch;
    p_NZl:
@@ -1767,12 +2188,10 @@ i_pow_odd()
 	lowerbd2(exp(vl),vl);
    p_UzlC:
 	if (vl LE zl)  goto p_Ub;
-   p_Upzl:
 	zl = vl;
 	zlchng();
    p_Ub:
 	if (zh GT 0)  goto p_NZh;
-   p_Zh:
 	vh = 0;
 	goto p_Ubch;
    p_NZh:
@@ -1782,14 +2201,12 @@ i_pow_odd()
    p_Ubch:
 	if (vh GT xh)  goto p_Uzh;
 	if (vh EQ xh)  goto p_Exit;
-   p_Uxh:
 	xh = vh;
 	xhchng();
 	goto p_Exit;
    p_Uzh:
 	if (xh GT 0)  goto p_Uzhp;
 	if (xh EQ 0)  goto p_Uzhz;
-   p_Uzhn:
 	vh = -xh;
 	lowerbd2(ln(vh),vh);
 	lowerbd(vh*yl,vh);
@@ -1806,7 +2223,6 @@ i_pow_odd()
 	upperbd2(exp(vh),vh);
    p_UzhC:
 	if (vh GE zh)  goto p_Exit;
-   p_Upzh:
 	zh = vh;
 	zhchng();
 	goto p_Exit;
@@ -1814,12 +2230,12 @@ i_pow_odd()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
+	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -1844,6 +2260,11 @@ i_qpow_even()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -1852,46 +2273,79 @@ i_qpow_even()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if(y_t == WTP_INTEGER)
 		{	yl = (double)y;
 			yh = (double)y; }
+#ifndef DoubleType
+	else if(y_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(y_t, y, &yl);
+		yh = yl;
+	}
+#else
+	else if(y_t == WTP_DOUBLE)
+	{
+		w_get_double(yl, &y);
+		yh = yl;
+	}
+#endif
 	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)y, &yl, &yh);
 	else  FAIL;
 
 	if (zl GT 0)  goto q_Nonz;
 	if (zl EQ 0)  goto q_Zero;
-   q_SZ:
 	if (zh LT 0)  goto q_Fail;
-   q_SZ1:
 	zl = 0;
 	zlchng();
    q_Zero:
 	vl = 0;
 	if (zh GT 0)  goto q_Dovh;
-   q_Zvh:
 	vh = 0;
-   q_ZChkXl:
 	if (xl GT 0)  goto q_Fail;
 	if (xl EQ 0)  goto q_ZChkXh;
-   q_Zxl:
 	xl = 0;
 	xlchng();
    q_ZChkXh:
 	if (xh LT 0)  goto q_Fail;
 	if (xh EQ 0)  goto q_Exit;
-   q_Zxh:
 	xh = 0;
 	xhchng();
 	goto q_Exit;
@@ -1903,29 +2357,21 @@ i_qpow_even()
 	upperbd2(ln(zh),vh);
 	upperbd(vh/yl,vh);
 	upperbd2(exp(vh),vh);
-   q_ChkX:
 	if (xl GE 0)  goto q_Eq;
-   q_Chkub:
 	if (xh LE 0)  goto q_Flp;
-   q_Sp0:
 	uh = -xl;
 	if (uh LT vl)  goto q_Eq;
-   q_Mayleft:
 	if (xh LT vl)  goto q_Flp;
-   q_Both:
 	if (uh GT xh)  goto q_Lefthi;
-   q_Righthi:
 	uh = xh;
    q_Lefthi:
 	if (uh GT vh)  goto q_Trimxl;
 	if (uh EQ vh)  goto q_Exit;
-   q_Trimvh:
 	vh = uh;
 	goto q_Uzhvh;
    q_Trimxl:
 	uh = -xl;
 	if (uh LE vh)  goto q_Trimxh;
-   q_Trim_low:
 	xl = -vh;
 	xlchng();
    q_Trimxh:
@@ -1938,7 +2384,6 @@ i_qpow_even()
    q_Eq:
 	if (vl LT xl)  goto q_Uzl;
 	if (vl EQ xl)  goto q_Ub;
-   q_Uxl:
 	xl = vl;
 	xlchng();
 	goto q_Ub;
@@ -1947,7 +2392,6 @@ i_qpow_even()
 	lowerbd(vl*yl,vl);
 	lowerbd2(exp(vl),vl);
 	if (vl LE zl)  goto q_Ub;
-   q_Upzl:
 	zl = vl;
 	zlchng();
    q_Ub:
@@ -1964,7 +2408,6 @@ i_qpow_even()
 	upperbd(vh*yl,vh);
 	upperbd2(exp(vh),vh);
 	if (vh GE zh)  goto q_Exit;
-   q_Upzh:
 	zh = vh;
 	zhchng();
 	goto q_Exit;
@@ -1974,12 +2417,12 @@ i_qpow_even()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
+	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -1998,77 +2441,90 @@ int  i_rootsquare  PARAMS( (void) );
 int
 i_rootsquare()
 {
-	PWord z, x, y;
-	int z_t, x_t, y_t;
-	double ul, uh, zl, zh, xl, xh, yl, yh;
+	PWord z, x;
+	int z_t, x_t;
+	double ul, uh, zl, zh, xl, xh;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
-	w_get_An(&y, &y_t, 3);
 
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
-	else  FAIL;
-
-	if(y_t == WTP_INTEGER)
-		{	yl = (double)y;
-			yh = (double)y; }
-	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if (xl GE 0)  goto r_Eq;
-   r_Chkub:
 	if (xh LE 0)  goto r_Flp;
-   r_Sp0:
 	upperbd(xl*xl,ul);
 	if (ul LT zl)  goto r_Zeroxl;
-   r_Tryxh:
 	upperbd(xh*xh,uh);
 	if (uh LT zl)  goto r_Zeroxh;
-   r_Zlb:
 	if (zl GE 0)  goto r_Zub;
-   r_MUzl:
 	zl = 0;
 	zlchng();
    r_Zub:
 	if (ul GT uh)  goto r_Zhul;
-   r_Zhxh:
 	if (uh GT zh)  goto r_Mxh;
 	if (uh EQ zh)  goto r_Exit;
-   r_Mzhxh:
 	zh = uh;
 	zhchng();
 	goto r_Exit;
    r_Mxh:
 	upperbd(sqrt(zh),uh);
 	if (uh GE xh)  goto r_Exit;
-   r_Uxh:
 	xh = uh;
 	xhchng();
 	uh = -uh;
 	if (uh LE xl)  goto r_Exit;
-   r_Uh:
 	xl = uh;
 	xlchng();
 	goto r_Exit;
    r_Zhul:
 	if (ul GT zh)  goto r_Mxh2;
 	if (ul EQ zh)  goto r_Exit;
-   r_Mzhuh:
 	zh = ul;
 	zhchng();
 	goto r_Exit;
@@ -2076,12 +2532,10 @@ i_rootsquare()
 	upperbd(sqrt(zh),uh);
 	uh = -uh;
 	if (uh LE xl)  goto r_Exit;
-   r_Uxl:
 	xl = uh;
 	xlchng();
 	uh = -uh;
 	if (uh GE xh)  goto r_Exit;
-   r_Uh2:
 	xh = uh;
 	xhchng();
 	goto r_Exit;
@@ -2098,10 +2552,8 @@ i_rootsquare()
 	upperbd(xh*xh,uh);
 	if (ul GT zl)  goto r_Chkzl;
 	if (ul EQ zl)  goto r_Ub;
-   r_Chkxl:
 	lowerbd(sqrt(zl),ul);
 	if (ul LE xl)  goto r_Ub;
-   r_Upxl:
 	xl = ul;
 	xlchng();
 	goto r_Ub;
@@ -2111,29 +2563,24 @@ i_rootsquare()
    r_Ub:
 	if (uh GT zh)  goto r_Chkxh;
 	if (uh EQ zh)  goto r_Exit;
-   r_Chkzh:
 	zh = uh;
 	zhchng();
 	goto r_Exit;
    r_Chkxh:
 	upperbd(sqrt(zh),uh);
 	if (uh GE xh)  goto r_Exit;
-   r_Upxh:
 	xh = uh;
 	xhchng();
 	goto r_Exit;
    r_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
-	w_get_An(&stat_var, &stat_var_t, 4);
+	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
 		SUCCEED; 
 	else 
@@ -2150,36 +2597,59 @@ int  i_sin  PARAMS( (void) );
 int
 i_sin()
 {
-	PWord z, x, y;
-	int z_t, x_t, y_t;
-	double vl, vh, ul, uh, zl, zh, xl, xh, yl, yh;
+	PWord z, x;
+	int z_t, x_t;
+	double vl, vh, ul, uh, zl, zh, xl, xh;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
-	w_get_An(&y, &y_t, 3);
 
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
-	else  FAIL;
-
-	if(y_t == WTP_INTEGER)
-		{	yl = (double)y;
-			yh = (double)y; }
-	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	vl = 2;
@@ -2187,9 +2657,7 @@ i_sin()
 	vh = vh/vl;
 	vl = -vh;
 	if (xh GT vh)  goto s_MRight;
-   s_Mcenter:
 	if (xl LT vl)  goto s_MLeft;
-   s_Center:
 	upperbd2(sin(xh),uh);
 	lowerbd2(sin(xl),ul);
 	if (zh GT uh)  goto s_Uzh;
@@ -2197,7 +2665,6 @@ i_sin()
    s_Uxh:
 	upperbd2(asin(zh),uh);
 	if (uh GE xh)  goto s_Low;
-   s_Uxh2:
 	xh = uh;
 	xhchng();
 	goto s_Low;
@@ -2214,12 +2681,10 @@ i_sin()
 	vh = -vl;
    s_MRight:
 	if (xl LT 0)  goto s_ForceR;
-   s_Pos:
 	if (xl LT vh)  goto s_CR;
 	goto s_Right;
    s_ForceR:
 	if (zl GE 0)  goto s_CR;
-   s_Leftbranch:
 	if (xl LT vl)  goto s_Exit;
 	goto s_CR;
    s_Right:
@@ -2227,7 +2692,6 @@ i_sin()
 	lowerbd2(sin(xh),uh);
 	if (ul GT zh)  goto s_Urxl;
 	if (ul EQ zh)  goto s_Rlow;
-   s_Urzh:
 	zh = ul;
 	zhchng();
 	goto s_Rlow;
@@ -2235,13 +2699,11 @@ i_sin()
 	lowerbd2(acos(zh),vl);
 	lowerbd(vl+vh,vl);
 	if (vl LE xl)  goto s_Rlow;
-   s_Urxl2:
 	xl = vl;
 	xlchng();
    s_Rlow:
 	if (uh LT zl)  goto s_Urxh;
 	if (uh EQ zl)  goto s_Exit;
-   s_Uzh2:
 	zl = uh;
 	zlchng();
 	goto s_Exit;
@@ -2249,7 +2711,6 @@ i_sin()
 	upperbd2(acos(zl),vl);
 	upperbd(vl+vh,vh);
 	if (vh GE xh)  goto s_Exit;
-   s_Urxh2:
 	xh = vh;
 	xhchng();
 	goto s_Exit;
@@ -2257,7 +2718,6 @@ i_sin()
 	lowerbd2(sin(xl),ul);
 	lowerbd2(sin(xh),uh);
 	if (ul GT uh)  goto s_CRR;
-   s_CRL:
 	if (zh LT uh)  goto s_Uxh;
 	goto s_Low;
    s_CRR:
@@ -2266,7 +2726,6 @@ i_sin()
    s_Uxl:
 	lowerbd2(asin(zl),vl);
 	if (vl LE xl)  goto s_Exit;
-   s_Uxl2:
 	xl = vl;
 	xlchng();
 	goto s_Exit;
@@ -2277,15 +2736,12 @@ i_sin()
    s_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
-	w_get_An(&stat_var, &stat_var_t, 4);
+	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
 		SUCCEED; 
 	else 
@@ -2302,78 +2758,94 @@ int  i_tan  PARAMS( (void) );
 int
 i_tan()
 {
-	PWord z, x, y;
-	int z_t, x_t, y_t;
-	double ul, uh, zl, zh, xl, xh, yl, yh;
+	PWord z, x;
+	int z_t, x_t;
+	double ul, uh, zl, zh, xl, xh;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
-	w_get_An(&y, &y_t, 3);
 
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
-	else  FAIL;
-
-	if(y_t == WTP_INTEGER)
-		{	yl = (double)y;
-			yh = (double)y; }
-	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	lowerbd2(tan(xl),ul);
 	upperbd2(tan(xh),uh);
 	if (ul LT zl)  goto t_BackL;
 	if (ul EQ zl)  goto t_NonsingH;
-   t_Uzl:
 	zl = ul;
 	zlchng();
 	goto t_NonsingH;
    t_BackL:
 	lowerbd2(atan(zl),ul);
 	if (ul LE xl)  goto t_NonsingH;
-   t_Uxl:
 	xl = ul;
 	xlchng();
    t_NonsingH:
 	if (uh GT zh)  goto t_BackH;
 	if (uh EQ zh)  goto t_Exit;
-   t_Chkzl:
 	zh = uh;
 	zhchng();
 	goto t_Exit;
    t_BackH:
 	upperbd2(atan(zh),uh);
 	if (uh GE xh)  goto t_Exit;
-   t_Uxh:
 	xh = uh;
 	xhchng();
 	goto t_Exit;
    t_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
-	w_get_An(&stat_var, &stat_var_t, 4);
+	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
 		SUCCEED; 
 	else 
@@ -2390,64 +2862,79 @@ int  i_vabs  PARAMS( (void) );
 int
 i_vabs()
 {
-	PWord z, x, y;
-	int z_t, x_t, y_t;
-	double ul, zl, zh, xl, xh, yl, yh;
+	PWord z, x;
+	int z_t, x_t;
+	double ul, zl, zh, xl, xh;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
-	w_get_An(&y, &y_t, 3);
 
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
-	else  FAIL;
-
-	if(y_t == WTP_INTEGER)
-		{	yl = (double)y;
-			yh = (double)y; }
-	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if (xl GE 0)  goto v_Eq;
-   v_Chkub:
 	if (xh LE 0)  goto v_Flp;
-   v_Sp0:
 	ul = -xl;
 	if (ul LT zl)  goto v_Zeroxl;
-   v_Tryxh:
 	if (xh LT zl)  goto v_Zeroxh;
-   v_Zlb:
 	if (zl GE 0)  goto v_Zub;
-   v_MUzl:
 	zl = 0;
 	zlchng();
    v_Zub:
 	if (ul GT xh)  goto v_Zhul;
-   v_Zhxh:
 	if (xh GT zh)  goto v_Mxh;
 	if (xh EQ zh)  goto v_Exit;
-   v_Mzhxh:
 	zh = xh;
 	zhchng();
 	goto v_Exit;
    v_Zhul:
 	if (ul GT zh)  goto v_Muh;
 	if (ul EQ zh)  goto v_Exit;
-   v_Mzhuh:
 	zh = ul;
 	zhchng();
 	goto v_Exit;
@@ -2460,7 +2947,6 @@ i_vabs()
 	xh = zh;
 	xhchng();
 	if (ul LE zh)  goto v_Exit;
-   v_Ul:
 	xl = -zh;
 	xlchng();
 	goto v_Exit;
@@ -2476,7 +2962,6 @@ i_vabs()
    v_Eq:
 	if (xl GT zl)  goto v_Chkzl;
 	if (xl EQ zl)  goto v_Ub;
-   v_Chkxl:
 	xl = zl;
 	xlchng();
 	goto v_Ub;
@@ -2486,7 +2971,6 @@ i_vabs()
    v_Ub:
 	if (xh GT zh)  goto v_Chkxh;
 	if (xh EQ zh)  goto v_Exit;
-   v_Chkzh:
 	zh = xh;
 	zhchng();
 	goto v_Exit;
@@ -2497,15 +2981,12 @@ i_vabs()
    v_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
-	w_get_An(&stat_var, &stat_var_t, 4);
+	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
 		SUCCEED; 
 	else 
@@ -2528,6 +3009,11 @@ i_wrap()
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
@@ -2536,22 +3022,61 @@ i_wrap()
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if(y_t == WTP_INTEGER)
 		{	yl = (double)y;
 			yh = (double)y; }
+#ifndef DoubleType
+	else if(y_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(y_t, y, &yl);
+		yh = yl;
+	}
+#else
+	else if(y_t == WTP_DOUBLE)
+	{
+		w_get_double(yl, &y);
+		yh = yl;
+	}
+#endif
 	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)y, &yl, &yh);
 	else  FAIL;
 
 	ul = 2;
@@ -2562,15 +3087,12 @@ i_wrap()
 	vh = round(vh);
 	if (vl GT vh)  iaerror();
 	if (vl EQ vh)  goto w_Same;
-   w_Dif:
 	ul = -yh;
 	if (zl GE ul)  goto w_Dif2;
-   w_Uzl2:
 	zl = ul;
 	zlchng();
    w_Dif2:
 	if (zh LE yh)  goto w_Exit;
-   w_Uzh2:
 	zh = yh;
 	zhchng();
 	goto w_Exit;
@@ -2580,10 +3102,8 @@ i_wrap()
 	lowerbd(xl-ul,vl);
 	if (zh GT vh)  goto w_Uzh;
 	if (zh EQ vh)  goto w_Same2;
-   w_MUxh:
 	upperbd(zh+ul,vh);
 	if (xh LE vh)  goto w_Same2;
-   w_Uxh:
 	xh = vh;
 	xhchng();
 	goto w_Same2;
@@ -2593,10 +3113,8 @@ i_wrap()
    w_Same2:
 	if (zl LT vl)  goto w_Uzl;
 	if (zl EQ vl)  goto w_Exit;
-   w_MUxl:
 	lowerbd(zl+ul,vl);
 	if (xl GE vl)  goto w_Exit;
-   w_Uxl:
 	xl = vl;
 	xlchng();
 	goto w_Exit;
@@ -2608,12 +3126,12 @@ i_wrap()
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
 	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
+	if (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);
+	if (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);
 
 	w_get_An(&stat_var, &stat_var_t, 4);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
@@ -2632,41 +3150,63 @@ int  i_xp  PARAMS( (void) );
 int
 i_xp()
 {
-	PWord z, x, y;
-	int z_t, x_t, y_t;
-	double ul, uh, zl, zh, xl, xh, yl, yh;
+	PWord z, x;
+	int z_t, x_t;
+	double ul, uh, zl, zh, xl, xh;
 	int status = 0;
 	PWord stat_var;
 	int stat_var_t;
+#ifndef DoubleType
+	PWord functor;
+	PWord vv;
+	int arity, tt, i;
+#endif
 
 	w_get_An(&z, &z_t, 1);
 	w_get_An(&x, &x_t, 2);
-	w_get_An(&y, &y_t, 3);
 
 	if(z_t == WTP_INTEGER)
 		{	zl = (double)z;
 			zh = (double)z; }
+#ifndef DoubleType
+	else if(z_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(z_t, z, &zl);
+		zh = zl;
+	}
+#else
+	else if(z_t == WTP_DOUBLE)
+	{
+		w_get_double(zl, &z);
+		zh = zl;
+	}
+#endif
 	else if(z_t == WTP_UNBOUND)
-	  extract_bds(z, &zl, &zh);
+	  extract_bds((PWord *)z, &zl, &zh);
 	else  FAIL;
 
 	if(x_t == WTP_INTEGER)
 		{	xl = (double)x;
 			xh = (double)x; }
+#ifndef DoubleType
+	else if(x_t == WTP_STRUCTURE)
+	{
+		GET_DBL_VAL(x_t, x, &xl);
+		xh = xl;
+	}
+#else
+	else if(x_t == WTP_DOUBLE)
+	{
+		w_get_double(xl, &x);
+		xh = xl;
+	}
+#endif
 	else if(x_t == WTP_UNBOUND)
-	  extract_bds(x, &xl, &xh);
-	else  FAIL;
-
-	if(y_t == WTP_INTEGER)
-		{	yl = (double)y;
-			yh = (double)y; }
-	else if(y_t == WTP_UNBOUND)
-	  extract_bds(y, &yl, &yh);
+	  extract_bds((PWord *)x, &xl, &xh);
 	else  FAIL;
 
 	if (zl GT 0)  goto x_Loglo;
 	if (zl EQ 0)  goto x_Zeroch;
-   x_Trim:
 	zl = 0;
 	zlchng();
    x_Zeroch:
@@ -2676,28 +3216,24 @@ i_xp()
 	lowerbd2(ln(zl),ul);
 	if (xl GT ul)  goto x_Expl;
 	if (xl EQ ul)  goto x_Loghi;
-   x_Uxl:
 	xl = ul;
 	xlchng();
 	goto x_Loghi;
    x_Expl:
 	lowerbd2(exp(xl),ul);
 	if (ul LE zl)  goto x_Loghi;
-   x_Uzl:
 	zl = ul;
 	zlchng();
    x_Loghi:
 	upperbd2(ln(zh),uh);
 	if (uh GT xh)  goto x_Exph;
 	if (uh EQ xh)  goto x_Exit;
-   x_Uxh:
 	xh = uh;
 	xhchng();
 	goto x_Exit;
    x_Exph:
 	upperbd2(exp(xh),uh);
 	if (uh GE zh)  goto x_Exit;
-   x_Uzh:
 	zh = uh;
 	zhchng();
 	goto x_Exit;
@@ -2706,15 +3242,12 @@ i_xp()
    x_Exit:
 	if ( zl > zh ) FAIL;
 	else if ( xl > xh ) FAIL;
-	else if ( yl > yh ) FAIL;
-	if (zlchange & status) change_bound(z, &zl, LOWER_BOUND);
-	if (zhchange & status) change_bound(z, &zh, UPPER_BOUND);
-	if (xlchange & status) change_bound(x, &xl, LOWER_BOUND);
-	if (xhchange & status) change_bound(x, &xh, UPPER_BOUND);
-	if (ylchange & status) change_bound(y, &yl, LOWER_BOUND);
-	if (yhchange & status) change_bound(y, &yh, UPPER_BOUND);
+	if (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);
+	if (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);
+	if (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);
+	if (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);
 
-	w_get_An(&stat_var, &stat_var_t, 4);
+	w_get_An(&stat_var, &stat_var_t, 3);
 	if(w_unify(stat_var, stat_var_t, status, WTP_INTEGER))
 		SUCCEED; 
 	else 

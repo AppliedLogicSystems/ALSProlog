@@ -1,0 +1,813 @@
+%
+%           Sequential Implementations for Interval Arithmetic Primitives
+%                          for  BNR Prolog
+%                        January 1992
+%                        W.J. Older  CRL/BNR
+%                copywrite 1992 Bell-Northern Research
+%
+%
+%
+%     These specifications assume that all initial intervals are proper, i.e.
+%     lower bound =< upper bound,  but they may produce improper final 
+intervals.
+%     It is assumed that any changed final interval is checked for properness
+%     before updating memory.
+/*
+notes: 1. flipping of intervals is done by using vh (fp7)
+       2. ul, uh may overlap with yl, yh resp.- but never update memory
+*/
+%   this predicate determines which bits of code get compiled into
+%   the assembler module - can be used to test alternate versions
+%
+%   the prolog-constructed data structures for nodes should use the same 
+names
+%   as given here but with some preceding character, e.g. '$' - i.e.
+%   the second character of the principal functor is used to discriminate the
+%   operation.  Note that therefore the first character of the names given here
+%   must be unique.
+%
+%   Version  March 16 1992 -  deflips and swaps removed
+%    		 May    6 1992 -  persistent added to unequal/>=
+%                          -  fix to pow_odd
+%       May   12 1992 - j_less, k_equal added
+%       Jun    2  1992 - extra checks on back update (to ensure termination)
+%       Aug   10  1992 - 2 label mis-spellings corrected
+%       Aug   17  1992 - change = cases on sign logic in mul
+%       Aug   20  1992 - fix to vabs (uninitialized var)
+%       Dec    3  1992 - = cases in mul changed back (Carleton problem)
+%       Apr   14  1993 - changes to choose (i.e., ';', or, 'amd')
+%       Jun    4  1993 - fix to backwards compare in  cos 
+%       Oct   10  1993 - changes in mul for case where Z and either X or Y is 0
+%       Oct   13  1993 - continuous midpoint "ydelta" (unused) removed to cut 
+space
+%       Mar    6  1994 - wrap primitive added
+%       May    3  1995 - fix to wrap primitive 
+
+
+interval_operation( add).
+interval_operation( begin_tog).
+interval_operation( cos).
+%          interval_operation( diophantine).   % removed feb 94
+interval_operation( equal).
+interval_operation( finish_tog).
+interval_operation( greatereq).
+interval_operation( higher).		      % >  (not sound)
+interval_operation( inf).           %min
+interval_operation( j_less).		      % >=/< : boolean
+interval_operation( k_equal).			    % ==/<>: boolean
+interval_operation( lub).          % max
+interval_operation( mul).
+interval_operation( narrower).
+interval_operation( or).           % alias choose
+interval_operation( pow_odd).      % odd positive powers
+interval_operation( qpow_even).    % even pos powers
+interval_operation( rootsquare).
+interval_operation( sin).
+interval_operation( tan).
+interval_operation( unequal).
+interval_operation( vabs).              % alias abs
+interval_operation( wrap ).   % folds real line into an interval, i.e. sawtooth
+%interval_operation( ydelta).            % continuous midpoint/delta
+interval_operation( xp).           %exp/ln
+
+/*
+ydelta( zl,zh,xl,xh,yl,yh):-   % maintain Z=X+ Y, X=delta(Z), Y=midpt(Z)
+    zl?zh ->[ Normal, Point, Fail],
+    Point:  yl<-zl, yh <- zh, xl<- 0, xh<- 0, goto Exit,
+    Normal: vl <- lb( xl+ yl),
+     vh <- ub( xh + yh),
+     (vl?zl -> [Ub,Ub,Ulb]),
+        Ulb: zl<- vl, goto Ub,
+    Ub: (vh?zh ->[Uub,Mid,Mid]),
+        Uub: zh<- vh, goto Mid,
+    Mid: vh<- 2**1,
+        vl <- (zl + zh),
+        vl<- vl/vh,
+        (vl?yl ->[ Umid,Dz,Umid]),
+      Umid: yl<- lb(vl), yh<-ub( vl), 
+        schedy, goto Dz,
+    Dz:  vl<- lb(zl - yl),
+         vh<- ub(zh - yl),
+        (vl?xl ->[Xu,Xu,Uxl]),
+        Uxl: xl<- vl, goto Xu,
+        Xu: (uh?xh ->[Uxh,Exit,Exit]),
+         Uxh: xh<- vh, goto Exit,
+    Fail: fail, goto Exit,
+    Exit: success. 
+            
+
+
+diophantine( zl, zh ):-         % Z constrained to integer values
+        ul <- ceiling( zl),
+        ul?zl -> [Hi,Hi,Uzl],
+        Uzl: zl <- ul, goto Hi,
+        Hi:  uh <- floor( zh),
+             uh?zh -> [Uzh,Exit,Exit],
+             Uzh:  zh <- uh, goto Exit,
+        Exit: success.
+*/
+
+wrap( zl,zh, xl, xh, yl, yh) :- 
+      %  Z:=wrap(X,C)  C(=yh) numeric, C>0, folds X into interval [-C,C]
+      %  This is used to generate periodic functions
+      %  Note: assume yl=yh > 0
+      ul <- 2**1, ul<- ul*yh,     % compute ul=2C
+      vl <- lb( xl/ul), vl <- round(vl), % check to see if in same fold
+      vh <- lb( xh/ul), vh <- round(vh), % use same rounding at both ends so 
+points always answer Yes
+      (vl?vh ->[ Dif, Same, Error]),
+        Dif:  ul <- - (yh),   % just update Z if needed
+              ( zl?ul -> [Uzl2,Dif2,Dif2]),
+                    Uzl2: zl <- ul,
+              Dif2: ( zh?yh ->[Exit,Exit,Uzh2]),
+                    Uzh2: zh<- yh, goto Exit,
+        Same:  ul <- ul*vl,       % ul is now center of the X-fold
+               vh <- ub( xh - ul),
+               vl <- lb( xl - ul),
+               (zh?vh -> [ MUxh, Same2, Uzh]),
+                    MUxh:  vh<- ub( zh + ul),
+                       (xh?vh -> [Same2,Same2,Uxh]),
+                        Uxh: xh<- vh, goto Same2,
+                    Uzh:  zh <- vh,
+            Same2: (zl?vl ->[ Uzl, Exit, MUxl]),
+                    MUxl: vl <- lb( zl + ul),
+                        (xl?vl -> [Uxl,Exit, Exit]),
+                        Uxl:  xl<- vl, goto Exit,
+                    Uzl:  zl <- vl, goto Exit,
+        Exit: success.
+
+      
+
+unequal( zl, zh, xl, xh ):-     % Z <> X , (only effective on discrete domains)
+        zh?xl->[ Done, Eq1, B],
+            Eq1: (zl?zh -> [Eq12, XR, Fail]),
+                XR: xl <- next(xl), goto Done,
+            Eq12: (xl?xh ->[ Exit,ZL, Fail]),
+                ZL: zh<- prev( zh), goto Done,
+        B: (xh?zl ->[Done, Eq2, Exit]),
+            Eq2: ( zl?zh ->[ Eq22, XL, Fail]),
+                XL: xh<- prev(xh), goto Done,
+            Eq22: (xl?xh ->[ Exit, ZR, Fail]),
+                ZR: zl  <- next(zl), goto Done,
+        Fail: fail, goto Exit,
+        Done: persistent, goto Exit,
+        Exit: success.
+
+
+equal( zl, zh, xl,xh):-
+        (xl?zl -> [Chkxl, Ub, Chkzl]),
+            Chkxl:   xl<-zl, goto Ub,
+            Chkzl:   zl <- xl, goto Ub,
+        Ub:     (xh?zh -> [Chkzh, Exit, Chkxh]),
+            Chkzh:   zh<- xh, goto Exit,
+            Chkxh:   xh<-zh, goto Exit,
+        Exit:   success.
+
+
+% the next four operations are partial operations of equality/intersection
+greatereq( zl,zh, xl, xh):-        % Z >= X
+		(xh?zl) ->[Done,Lb,Lb],				% may 6 92
+        Lb:(xl?zl -> [Ub, Ub, Chkzl]),
+            Chkzl:  zl <- xl, goto Ub,
+        Ub:     (xh?zh -> [Exit, Exit, Chkxh]),
+            Chkxh:  xh<-zh, goto Exit,
+		Done: persistent, goto Exit,
+        Exit:   success.
+
+
+begin_tog( zl, zh, xl, xh ):-
+        (xl?zl -> [Chkxl, Exit, Chkzl]),
+            Chkxl:    xl <- zl, goto Exit,
+            Chkzl:    zl <- xl, goto Exit,
+        Exit:   success.
+
+finish_tog( zl, zh, xl, xh):-
+        (xh?zh -> [Chkzh, Exit, Chkxh]),
+            Chkzh:   zh<- xh, goto Exit,
+            Chkxh:   xh<-zh, goto Exit,
+        Exit:   success.
+
+
+narrower(zl, zh, xl,xh):-           % X <= Z
+        (xl?zl -> [Chkxl, Ub, Ub]),
+            Chkxl:    xl<-zl, goto Ub,
+        Ub:     (xh?zh -> [Exit, Exit, Chkxh]),
+            Chkxh:    xh<-zh, goto Exit,
+        Exit:   success.
+
+        
+
+higher( zl,zh, xl, xh):-        % Z < X , ( may be unsound on general intervals)
+		(zh?xl) ->[Done,Lb,Lb],				% may 6 92
+        Lb:(zl?xl -> [Ub, Chkxl, Chkxl]),
+            Chkxl:  xl <- next(zl), goto Ub,
+        Ub:     (zh?xh -> [Exit, Chkzh, Chkzh]),
+            Chkzh:  zh<-prev(xh), goto Exit,
+		Done: persistent, goto Exit,
+        Exit:   success.
+
+j_less( zl, zh, xl,xh, yl,yh):-  % Y is assumed to be boolean!
+  % if Y =1 then  Z>=X else if Y=0 then Z<X
+  % else  
+   yl?0 -> [iaerror, Mfalse, greatereq],
+   Mfalse: (yh?0 -> [iaerror, higher, Test]),
+   Test: (xh?zl ->[True,True, Test2]),
+   Test2: (zh?xl -> [False,Exit,Exit]),
+   True:  yl <- 2**0, goto Exit,
+   False: yh<- 0, goto Exit,
+   Exit:   success.
+
+k_equal( zl,zh,xl,xh,yl,yh):-   % Y is assumed to be boolean!
+		%  if Y=1 then Z==X else if Y=0 then Z<>X else
+		%  if Z disjoint from X then Y<-0 else if Z a point and X a point 
+and X=Z
+		%    then Y<-1
+		yl?0 ->[ iaerror, Mfalse, equal],
+		Mfalse: (yh?0 ->[ iaerror, unequal, Test]),
+		Test: (zl?xh ->[Test2, Tryeq, Un]),
+		Test2: (xl?zh ->[Exit, Exit, Un]),
+		Un:  yh<- 0, goto Exit,
+		Tryeq: (zl?zh ->[Exit,Tryeq2,Exit]),
+		Tryeq2: (xl?xh ->[Exit, Eq, Exit]),
+		Eq:  yl<- 2**0, goto Exit,
+		Exit: success.
+
+
+
+inf( zl, zh, xl,xh,yl,yh):-             % Z == min(X,Y)
+        (zl?xl -> [Ubzx, Ubzx, Chkxl]),           % Z =< X
+            Chkxl:   xl <- zl, goto Ubzx,
+        Ubzx:     (zh?xh -> [LtY,LtY, Chkxh]),
+            Chkxh:    zh<-xh, goto LtY,
+        LtY:  (zl?yl -> [Ubzy, Ubzy, Chkyl]),     % Z =< Y
+            Chkyl:    yl <- zl, goto Ubzy,
+        Ubzy:     (zh?yh -> [Ubx,Ubx, Chkyh]),   %March 92
+            Chkyh:    zh<-yh, goto Ubx,
+        Ubx: (zh?yl -> [Uxh1, Uby,Uby]),
+            Uxh1: (zh?xh ->[ Uxh,LbZ,LbZ]),
+                Uxh: xh<- zh, goto LbZ,
+        Uby:  (zh?xl -> [Uyh1, LbZ,LbZ]),
+            Uyh1: (zh?yh ->[ Uyh,LbZ,LbZ]),
+                Uyh: yh<- zh, goto LbZ, 
+        LbZ:  (xl?yl  -> [Usex,Usex,Usey]),     % Z >= min(xl,yl)
+            Usex:  vl <- xl, goto Chkzl,
+            Usey:  vl <- yl, goto Chkzl,
+        Chkzl:  (vl?zl -> [Exit, Exit, Chkzh]),
+            Chkzh:   zl<- vl, goto Exit,
+        Exit:   success.
+       
+lub(zl, zh,  xl,xh,yl,yh):-             %   Z == max(X,Y)
+        (xl?zl -> [Ubx, Ubx, Chkxl]),           % X =< Z
+            Chkxl:  zl <- xl, goto Ubx,
+        Ubx:     (xh?zh -> [LtY,LtY, Chkxh]),
+            Chkxh:    xh<-zh, goto LtY,
+        LtY:  (yl?zl -> [Uby, Uby, Chkyl]),     % Y =< Z
+            Chkyl:   zl <- yl, goto Uby,
+        Uby:  (yh?zh -> [Lbx,Lbx, Chkyh]),
+            Chkyh:    yh<-zh, goto Lbx,
+        Lbx: (zl?xh -> [Lby,Lby, Uyl1  ]),    % March 92 adjust lower bounds of X 
+and Y
+            Uyl1: (zl?yl -> [UbZ,UbZ, Uyl]),
+                Uyl: yl<-zl, goto UbZ,
+        Lby: (zl?yh -> [UbZ,UbZ, Uxl1]),
+            Uxl1: (zl?xl -> [UbZ,UbZ,Uxl]),
+                Uxl: xl<- zl, goto UbZ,
+        UbZ:  (yh?xh  -> [Usex,Usex,Usey]),     % Z =< max(xh,yh) March 92
+            Usex:  vh <- xh, goto Chkzh,
+            Usey:  vh <- yh, goto Chkzh,
+        Chkzh:  (vh?zh -> [Chkzl, Exit,Exit]),
+            Chkzl:   zh<- vh, goto Exit,        
+        Exit:   success.
+
+        % march 16 - considerable modification to "or"
+        %  -take advantage of built in empty detection by driver
+        %  - eliminate swapping of arguments
+        %  modified march 18 to fix problem created by above revisions 
+        %  modified April 16 1993  to eliminate invalid backwards narrowing
+        %          April 16 1993 WJO
+
+or( zl,zh, xl,xh, yl,yh):- 
+      xl?yl ->  [XY,XY, YX],
+      XY:  (zl?xl -> [ Uzlxl, DX3, DisjX]),
+        Uzlxl: zl<- xl, goto DX3,
+      DisjX: (xh?zl -> [EqZY, DX2,DX2]),
+        DX2: ( yh?zl -> [EqZX, DX3,DX3]),
+        DX3: ( zh?yl -> [EqZX, PartB,PartB]),
+
+      YX:  (zl?yl -> [ Uzlyl, DY3, DisjY]),
+        Uzlyl: zl<- yl, goto DY3,
+      DisjY: (yh?zl -> [EqZX, DY2,DY2]),
+        DY2: ( xh?zl -> [EqZY, DY3,DY3]),
+        DY3: ( zh?xl -> [EqZY, PartB,PartB]),
+             
+      EqZY: (zl?yl ->[Uzyl,HYZ,Uyzl]),
+            Uzyl:  zl<-yl, goto HYZ,
+            Uyzl:  yl<-zl, goto HYZ,
+            HYZ:   ( zh?yh -> [Uyzh, Exit, Uzyh]),
+      EqZX: (zl?xl ->[Uzxl,HXZ,Uxzl]),
+            Uzxl:  zl<-xl, goto HXZ,
+            Uxzl:  xl<-zl, goto HXZ,
+            HXZ:   ( zh?xh -> [Uxzh, Exit, Uzxh]),
+      
+      PartB: (xh?yh -> [UBY,UBX, UBX]),
+      UBY:   (zh?yh -> [Exit,Exit,Uzyh]), 
+      Uzyh:  zh<- yh, goto Exit,
+      UBX:   (zh?xh -> [Exit,Exit,Uzxh]),
+      Uzxh:  zh<- xh, goto Exit,
+      
+      Uyzh:  yh<- zh, goto Exit,
+      Uxzh:  xh<- zh, goto Exit,
+      Exit:  success,
+      Fail:  fail.
+
+
+vabs( zl, zh, xl, xh):-         % Z== |X|
+        xl?0 -> [ Chkub, Eq,Eq],
+        Chkub: (xh?0 -> [Flp,Flp, Sp0]),
+            Sp0:   ul <- -(xl),                     % X spans 0
+               ul?zl -> [Zeroxl,Tryxh,Tryxh],   % is sign of x forced?
+                Tryxh:  (xh?zl-> [Zeroxh,Zlb,Zlb]),
+                    Zlb:    (zl?0 -> [MUzl,Zub,Zub]),       % intersect Z with [0, max(ul, 
+xh)]
+                        MUzl:     zl<- 0, goto Zub,  
+                    Zub:    (ul?xh -> [Zhxh,Zhxh, Zhul]),
+                        Zhxh :  (xh?zh -> [Mzhxh,Exit,Mxh]),
+                            Mzhxh :  zh <- xh, goto Exit,     
+                        Zhul :  (ul?zh -> [Mzhuh,Exit,Muh]),
+                            Mzhuh :  zh <- ul, goto Exit, 
+			Muh:    xl <- - zh, 				 % Aug 20
+				    (xh?zh -> [Exit,Exit,Chkxh]),
+            Mxh:    xh <- zh, 
+                  (ul?zh -> [Exit,Exit, Ul]),     % Aug 20
+                    Ul:     xl <- - zh, goto Exit,
+        Zeroxl: xl<- 0,  goto Eq,           % x can't be negative
+        Zeroxh: xh<- 0,  goto Flp,          % x can't be positive
+        Flp:    flip(x), goto Eq,  
+        Eq:     (xl?zl -> [Chkxl, Ub, Chkzl]),          %  X==Z 
+            Chkxl:    xl<-  zl, goto Ub,
+            Chkzl:    zl <- xl, goto Ub,
+        Ub:     (xh?zh -> [Chkzh, Exit, Chkxh]),
+            Chkzh:    zh<- xh, goto Exit,
+            Chkxh:    xh<- zh, goto Exit,
+        Exit:   success.         
+               
+  
+
+add( zl, zh, xl, xh, yl, yh):-          % some simplification done
+        vl <- lb( xl + yl),
+        vl?zl -> [BackLX, Upper, MUZL],
+            BackLX: vl <- lb( zl - yh),
+                vl?xl -> [BackLY,BackLY, MUXL],
+                    MUXL:  xl <- vl, goto BackLY,       % march 1992
+                BackLY: vl <- lb( zl - xh),
+                    vl?yl -> [ Upper, Upper, MUYL],
+                    MUYL:   yl <- vl, goto Upper, 
+            MUZL:   zl<- vl, goto Upper,
+        Upper:  vh <- ub( xh + yh),
+           vh?zh -> [ MUZH, Exit, BackHX],
+            BackHX: vh <- ub( zh - yl),
+                vh?xh -> [MUXH, BackHY,BackHY],
+                    MUXH :    xh<- vh, goto BackHY,     % march 1992
+                BackHY: vh <- ub( zh - xl),
+                    vh?yh -> [ MUYH,Exit,Exit],
+                    MUYH:    yh<- vh, goto Exit,
+            MUZH:     zh <- vh, goto Exit,
+        Exit:  success.
+
+
+
+mul( zl, zh, xl, xh, yl, yh):-   % Z == X*Y
+        xl?0 -> [Chkxh, XMpos, Xpos],
+            Chkxh:  (xh?0 ->[ Swx, Swx, Xindef]),
+                Swx: flip(x), goto  Xneg,  
+        Xneg: (yl?0 -> [ Chkyh1, ZMneg,Zneg]),
+                Chkyh1: (yh?0 -> [Swy1,Swy1, Yindef1]),
+                    Swy1: flip(y), goto Zpos,
+                Yindef1: (zl?0 -> [ Chkzh1, MakeYneg,MakeYneg]),  % X=<0,Z>=0 => 
+Y=<0 Dec 3
+                    Chkzh1: (zh?0 -> [Swz1, Swz1, FZ ]),	% Aug 92 undone chg = 
+cases
+                       Swz1: flip(z),goto MakeYpos,    % X=<0,Z=<0 => Y>=0
+					      FZ: flip(z), goto MpyBX,	% Aug 19 92 
+- since x was flipped
+               ZMneg: (yh?0 ->[Fail, ZZero, Zneg]),  %Oct 93
+        Xindef: (yl?0 -> [Chkyh2, YMpos,Ypos]),
+               Chkyh2: (yh?0 -> [Yneg,Yneg, MpyC]),
+               Yneg: flip(y),
+                    (zl?0 -> [Chzh2, MakeXneg,MakeXneg]),		% Aug 92 
+undone
+                    Chzh2: (zh?0->[Swz2, Swz2,FZ2]),
+                        Swz2:flip(z), goto MakeXpos,
+						  FZ2: flip(z), goto MpyBY,	
+		% Sept 92
+               YMpos: (yh?0 -> [Fail, ZZero, Ypos]),        % Oct 93
+               Ypos: (zl?0 -> [Chzh3, MakeXpos,MakeXpos]),		%Aug 92 
+undone
+                    Chzh3: (zh?0->[Swz3,Swz3, MpyBY]),      
+                        Swz3: flip(z), goto MakeXneg,
+        XMpos: (xh?0 -> [ Fail, ZZero, Xpos]),		% Oct 93
+        Xpos: (yl?0 -> [ Chkyh,ZMpos,Zpos]),
+            Chkyh:  (yh?0 ->[ Swy, Swy, Yindef]),
+                Swy: flip(y), goto Zneg,
+                Yindef: (zl?0 -> [ Chkzh, MakeYpos,MakeYpos]),% X>=0,Z>=0 => Y>=0
+                    Chkzh: (zh?0 -> [Swz4, Swz4, MpyBX ]),  % Aug 92
+                       Swz4: flip(z),goto MakeYneg,    % X>=0,Z=<0 => Y=<0
+            ZMpos: (yh?0 -> [Fail,ZZero,Zpos]),   %Oct 93
+
+        MpyC: vh<- lb(xl*yh),           % X,Y,Z all sign indefinite
+              vl<- lb(xh*yl),           % vh=<0, vl=<0
+              vh?vl -> [ Usevh,Usevh,Usevl],
+                Usevl: vh<-vl, goto Usevh,
+              Usevh: (vh?zl-> [MpyCH,MpyCH, Uzlvh]),
+                Uzlvh: zl<-vh, goto MpyCH,
+            MpyCH: vl<-ub(xl*yl),           % X,Y,Z all sign indefinite
+                vh<- ub(xh*yh),
+              vl?vh -> [ Usevh2,Usevl2,Usevl2],
+                Usevh2: vl<-vh, goto Usevl2,
+              Usevl2: (vl?zh-> [Uzhvl,Exit, Exit]),
+                Uzhvl: zh<-vl, goto Exit,
+     
+            
+        MpyBX: vl <- lb(xh*yl),        % X definite sign, Y& Z  indefinite
+              vl?zl -> [ Backxzl,MpyBHX,Uzl1],
+                Uzl1: zl<-vl, goto MpyBHX,
+                Backxzl: (xl?0 -> [MpyBHX,MpyBHX,BXDivl]),
+                  BXDivl: vl <- lb(zl/xl),
+                      vl?yl-> [ MpyBHX,MpyBHX, Uyl1],
+                      Uyl1: yl<- vl, goto MpyBHX,
+              MpyBHX: vh<- ub( xh*yh),
+                    vh?zh -> [ MUZH, Exit,  Backxzh],
+                    Backxzh: (xl?0 -> [Exit,Exit,BXDivh]),
+                        BXDivh: vh<- ub(zh/xl),
+                            vh?yh -> [ MUYH, Exit,Exit],
+        
+        MpyBY: vl <- lb(yh*xl),        % Y definite sign, X& Z  indefinite
+              vl?zl -> [ Backyzl,MpyBHY,Uzl2],
+                    Uzl2: zl<-vl, goto MpyBHY,
+                Backyzl: (yl?0 -> [MpyBHY,MpyBHY,BYDivl]),
+                  BYDivl: vl <- lb(zl/yl),
+                      vl?xl-> [ MpyBHY,MpyBHY, Uyl2],
+                      Uyl2: xl<- vl, goto MpyBHY,
+              MpyBHY: vh<- ub( xh*yh),
+                 vh?zh -> [ MUZH, Exit,  Backyzh],
+                Backyzh: (yl?0 -> [Exit,Exit,BYDivh]),
+                  BYDivh: vh<- ub(zh/yl),
+                        vh?xh -> [ MUXH, Exit,Exit],
+			% make Z = 0  Oct 1993
+        ZZero: (zl?0 -> [ Zl_0, Zh, Fail]),
+			Zl_0:  zl <- 0, goto Zh,
+            Zh : (zh?0 -> [Fail, Exit, Zh_0]),
+			Zh_0 : zh <- 0, goto Exit,
+
+            % all signs definite multiplication
+        MakeXneg: flip(x), goto MakeXpos,
+        MakeXpos: xl<- 0, goto MpyA,
+        MakeYneg: flip(y), goto MakeYpos,    
+        MakeYpos: yl<- 0, goto MpyA,               
+        Zneg: (zh?0 -> [Swz, Swz, Chzl]),
+            Chzl:  flip(z), zl<-0, goto MpyA, 
+            Swz: flip(z), goto MpyA, 
+        Zpos: (zl?0 -> [Chzh, MpyA, MpyA]),
+            Chzh:  zl<- 0, goto MpyA,        
+        
+        MpyA:  vl <- lb( xl * yl),
+              vl?zl -> [BackLX, Upper, MUZL],
+            BackLX: (yh?0 -> [BackLY, BackLY,DivL]), 
+                DivL: vl <- lb( zl / yh),
+                    vl?xl -> [BackLY,BackLY, MUXL],
+                    MUXL:  xl <- vl, goto BackLY,       % march 1992
+                BackLY: (xh?0 -> [Upper,Upper,BLY]),
+                    BLY:    vl <- lb( zl / xh),
+                    vl?yl -> [ Upper, Upper, MUYL],
+                    MUYL:  yl <- vl, goto Upper, 
+            MUZL:  zl<- vl, goto Upper,
+         Upper:  vh <- ub( xh * yh),
+            vh?zh -> [ MUZH, Exit, BackHX],
+            BackHX: (yl?0 ->[BackHY,BackHY ,DivH]),
+                DivH:  vh <- ub( zh / yl),
+                    vh?xh -> [MUXH, BackHY,BackHY],
+                    MUXH :   xh<- vh, goto BackHY,      % march 1992
+                BackHY: (xl?0 -> [Exit,Exit,BHY]), 
+                    BHY: vh <- ub( zh / xl),
+                    vh?yh -> [ MUYH,Exit,Exit],
+                    MUYH:     yh<- vh, goto Exit,
+            MUZH:    zh <- vh, goto Exit,
+        Exit:  success,
+        Fail:  fail.  
+
+
+rootsquare( zl, zh, xl, xh):-                       % Z==X**2
+        xl?0 -> [ Chkub, Eq,Eq],
+        Chkub: (xh?0 -> [Flp,Flp, Sp0]),
+            Sp0:   ul <- ub(xl*xl),                 % X spans 0
+               ul?zl -> [Zeroxl,Tryxh,Tryxh],   % is sign of x forced?
+                Tryxh: uh<- ub(xh*xh), 
+                     (uh?zl-> [Zeroxh,Zlb,Zlb]),
+                    Zlb:    (zl?0 -> [MUzl,Zub,Zub]),       % intersect Z with [0, max(ul, 
+xh)]
+                        MUzl:     zl<- 0, goto Zub,  
+                    Zub:    (ul?uh -> [Zhxh,Zhxh, Zhul]),
+                        Zhxh :  (uh?zh -> [Mzhxh,Exit,Mxh]),
+                            Mzhxh :  zh <- uh, goto Exit,     
+                            Mxh:  uh <- ub(sqrt(zh)),          % Jun 2 
+                                 (uh?xh -> [Uxh,Exit,Exit]),
+                              Uxh: xh <- uh,
+                                   uh <- -uh,
+                                 (uh?xl -> [Exit,Exit, Uh]),
+                                Uh:    xl <-  uh, goto Exit,
+                        Zhul :  (ul?zh -> [Mzhuh,Exit,Mxh2]),
+                            Mzhuh :  zh <- ul, goto Exit,     
+                            Mxh2:  uh <- ub(sqrt(zh)), 
+                                   uh <- - uh,
+                                 (uh?xl -> [Exit,Exit, Uxl]),
+                              Uxl:  xl<- uh,    
+                                    uh<- -uh,  
+                                  (uh?xh -> [Uh2,Exit, Exit]),
+                                 Uh2:  xh <- uh, goto Exit,
+        Flp:    flip(x), goto Eq,
+        Zeroxh: flip(x), goto Zeroxl,
+        Zeroxl: xl<- 0,  goto Eq,     % x can't be negative
+        Eq:  ul<- lb(xl*xl),
+             uh<- ub(xh*xh),  
+            (ul?zl -> [Chkxl, Ub, Chkzl]),          %  X*X==Z , X>=0
+            Chkxl:ul<- lb(sqrt(zl)), 
+                 (ul?xl -> [Ub,Ub, Upxl] ),  % Jun 2
+                 Upxl:  xl<-ul,  goto Ub,
+            Chkzl:   zl <- ul, goto Ub,
+        Ub:     (uh?zh -> [Chkzh, Exit, Chkxh]),
+            Chkzh:   zh<- uh, goto Exit,
+            Chkxh:uh<- ub(sqrt(zh)), 
+                (uh?xh -> [ Upxh,Exit,Exit]),
+                Upxh: xh<- uh, goto Exit,
+        Exit:   success.         
+               
+
+
+
+ftan( zl, zh, xl,xh):-     %  Z== tan(X)    (some simplification done)
+        vl <-  xh - xl,                                    % delta(X)
+        vh <- pi,
+        vl?vh -> [Alpha,Alpha,Exit],                       % if delta(X)>pi, then do 
+nothing
+        Alpha:  ul <- splb(tan(xl)),                             %  [ul,uh]<- tan([xl,xh])
+                uh <- spub(tan(xh)),
+        ul?uh -> [NonsingL,NonsingL, Singular],
+        Singular: (uh?zl -> [Upper, Lower, Lower]),        %  ul > uh, X contains 
+singularity 
+          Upper:  (zh?ul -> [Fail, TrimU, TrimU]),      %intersect Z with [ul, +inf]
+            TrimU:   vl <- ub(atan( ul)),           % ul was tan(xl)            
+                vh <- spub( xl - vl),
+                vl <- splb( xl - vl), 
+                uh <- spub(atan(zh)),                 % inverse map zh
+                xh <- spub( uh + vh),             % update xh
+              zl?ul -> [UzlS, Exit, BackLS],
+                UzlS:  zl<- ul, goto Exit,      % update zl or
+                BackLS: ul <- splb(atan(zl)),         % update xl
+                        xl<- splb(ul + vl),
+                        goto Exit,
+          Lower:  (zh?ul -> [ TrimL, Exit,Exit]),       % intersect Z with [-inf,uh]
+            TrimL:  vh <- splb(atan( uh)),           % vh is displacement
+                vl <- splb( xh - vh),
+                vh <- spub( xh - vh),
+                ul <- splb(atan(zl)),                 % inverse map zl
+                xl <- splb( ul + vl),
+              uh?zh -> [UzhS,Exit,BackHS],
+                UzhS: zh <- uh, goto Exit,      % update zh 
+                BackHS: uh <- spub(atan(zh)),        % or update xh
+                        xh <- spub(uh + vh),
+                        goto Exit,
+        NonsingL: (ul?zl -> [BackL,BackL,Chkzh]),
+            Chkzh:  (ul?zh -> [Uzl, NonsingH,   Fail ]),
+                Uzl:    zl<- ul, goto NonsingH,
+            BackL:  ul <- spub(atan( ul)),
+                vl<-  splb(xl - ul), 
+                ul<- splb(atan(zl)),
+                xl<- splb(ul + vl),
+                goto NonsingH,
+        NonsingH: (uh?zh -> [Chkzl,BackH,BackH]),
+            Chkzl:  zh<- uh, goto Exit,
+            BackH:  uh<- splb(atan(uh)),
+                vh<- spub( xh - uh),
+                uh<-splb( atan(zh)),
+                xh<- splb(uh + vh),
+                goto  Exit,
+        Fail:   fail,
+        Exit : success.     
+
+tan( zl, zh, xl,xh):-     %  Z== tan(X)   assumes  -pi/2=< xl=<xh =< pi/2 !
+         ul <- lb(tan(xl)),                  %  [ul,uh]<- tan([xl,xh])
+         uh <- ub(tan(xh)),
+        (ul?zl -> [BackL,NonsingH,Uzl]),
+                Uzl:    zl<- ul, goto NonsingH,
+            BackL:  ul <- lb(atan( zl)),       % assume principal value
+                (ul?xl ->[ NonsingH, NonsingH, Uxl]),  % Jun 2
+                Uxl: xl<- ul, goto NonsingH,
+        NonsingH: (uh?zh -> [Chkzl,Exit,BackH]),
+            Chkzl:  zh<- uh, goto Exit,
+            BackH:  uh<- ub(atan(zh)),
+                (uh?xh -> [Uxh,Exit,Exit]),
+                Uxh: xh<- uh, goto  Exit,
+        Exit : success.     
+
+
+
+xp( zl, zh, xl, xh ):-          %  Z == exp(X)    
+        zl?0 -> [ Trim, Zeroch, Loglo],
+        Trim:   zl <-  0, goto Zeroch,
+        Zeroch: (zh?0 -> [Fail,Fail, Expl] ),
+        Loglo:  ul <- lb( ln( zl) ),
+                (xl?ul -> [Uxl,Loghi,Expl]),
+                Uxl: xl <- ul, goto Loghi,
+        Expl:   ul <- lb( exp( xl) ), 
+                (ul?zl -> [Loghi,Loghi, Uzl]),
+               Uzl: zl<- ul, goto Loghi,
+        Loghi:  uh <-  ub( ln( zh) ),
+                (uh?xh -> [Uxh, Exit, Exph]),
+                Uxh:  xh <- uh, goto Exit,
+        Exph:   uh <- ub( exp( xh) ), 
+                (uh?zh -> [Uzh,Exit,Exit]),
+                Uzh: zh<- uh, goto Exit,
+        Fail:   fail,
+        Exit:   success.
+
+
+
+cos( zl, zh, xl, xh ):-   %  Z == cos(X),   -1=<Z=<1, -pi=< X =< pi
+        xl?0 -> [Mleft, Right,Right],
+        Mleft: ( xh?0 -> [Left,Left, Center]),
+        Left:  flip(x), goto Right,
+        Right:  uh <- ub( cos(xl)),
+                uh?zh -> [Uzh, Low, Uxl],
+                    Uzh: zh <- uh, goto Low,
+                    Uxl: vl<- lb( acos(zh)),
+                        (vl?xl -> [Low,Low,Uxl2]),   % Jun 2
+                        Uxl2: xl<- vl,  goto Low,
+                Low: ul <- lb( cos(xh)),
+                    ul?zl -> [Uxh, Exit, Uzl],
+                    Uzl: zl <- ul, goto Exit,
+                    Uxh: vh <- ub( acos(zl)), 
+                        (vh?xh -> [Uxh2,Exit,Exit]),
+                        Uxh2: xh<- vh, goto Exit,
+        Center: ul <- - xl,
+                xh?ul -> [Hleft,Hright, Hright],  % reverse the compare; Jun 4 1993
+                Hleft: flip(x), goto Hright,
+                Hright:ul <- lb( cos(xl)),      %ul >= uh, ul corresp. to xl, uh with xh
+                       uh <- ub( cos(xh)),
+                       vl<- 1,
+                       %    zl?vl -> [Continue,Eq,Fail],   removed June 4 1993
+                       %         Eq: zh<- vl, goto Exit,
+                       %    Continue: zh<-vl,            % max 1
+                       zh?uh -> [Fail, Meets,Meets],
+                       Meets:( zh?ul ->[ Unxl, Chklo, Chklo]),
+                          Unxl: vl <- lb( acos( zh)),
+                              (vl?xl -> [Chklo,Chklo,Unxl2]),
+                             Unxl2: xl<- vl, goto Chklo,
+                       Chklo:( zl?uh -> [Upzl, Exit, Uxh]),
+                       Upzl:  zl<- uh ,goto Exit,
+        Fail: fail,
+        Exit: success. 
+
+
+
+
+sin( zl, zh, xl, xh ):-   %  for  Z == sin(X) , -1=<Z=<1, -pi=< X =< pi
+        vl <- 2**1,
+        vh <- pi,
+        vh <- vh/vl,        % pi/2
+        vl <- - vh,         % -pi/2
+        xh?vh -> [Mcenter, Mcenter, MRight],
+        Mcenter: ( xl?vl -> [MLeft, Center,Center]),
+        Center:  uh <- ub( sin(xh)),                      % increasing monotone
+                 ul <- lb( sin(xl)),
+                 zh?uh ->[ Uxh, Low, Uzh],
+                  Uxh:  uh <- ub( asin(zh)), 
+                        (uh?xh -> [Uxh2,Low,Low]),
+                        Uxh2: xh<- uh, goto Low,
+                  Uzh:  zh <- uh, goto Low,         % Jun 2
+                 Low: (zl?ul ->[ Uzl, Exit, Uxl]),
+        MLeft: flip(x), flip(z), vh<- - vl, goto MRight,  % (flip destroys vh) sin(-
+x)=-sin(x)
+        MRight: ( xl?0 -> [ForceR, Pos,Pos ]),
+           Pos: (xl?vh -> [CR,Right,Right]),
+           ForceR: (zl?0 -> [Leftbranch , CR, CR]),
+           Leftbranch: ( xl?vl -> [ Exit, CR,CR] ),   % Low if zl<0, -pi=<xl<0
+        Right: ul <- ub( sin(xl)),                        % decreasing monotone
+               uh <- lb( sin(xh)),
+               ul?zh ->[ Urzh, Rlow, Urxl],
+                    Urzh: zh <- ul, goto Rlow,
+                    Urxl:  vl <- lb( acos(zh)),
+                           vl <- lb( vl + vh), 
+                           (vl?xl ->[Rlow,Rlow, Urxl2]),
+                         Urxl2: xl<- vl, goto Rlow,
+                Rlow:( uh?zl -> [Urxh, Exit, Uzh2]),
+                    Uzh2:  zl<-uh, goto Exit,
+                    Urxh:  vl <- ub( acos(zl)),
+                           vh <- ub(vl + vh), 
+                           (vh?xh -> [Urxh2, Exit,Exit]),
+                           Urxh2: xh<- vh, goto Exit,
+        CR:  ul <- lb( sin( xl)),                         % positive hump
+             uh <- lb( sin( xh)),
+             ul?uh -> [CRL, CRL, CRR],
+             CRL: (zh?uh ->[ Uxh, Low,Low]),
+             CRR: (zh?ul ->[Urxl, Rlow,Rlow]),
+        Uxl:  vl<- lb( asin( zl)), 
+             (vl?xl -> [Exit,Exit, Uxl2]),
+             Uxl2: xl<- vl, goto Exit,
+        Uzl: zl<- ul, goto Exit,
+        
+        Exit: success.
+ 
+%  updated Jun 1 92 - specific checks req'd on back calculations for correct 
+termination              
+pow_odd( zl, zh, xl, xh, yl):-          % Z==X**N , N>0, N odd, N in yl
+    zl?0 -> [Chkub,Right, Right],
+    Chkub: (zh?0 -> [Left,Left, MayCenter]),
+	MayCenter: (xl?0 -> [Chubx, Rightx,Rightx]),
+	Chubx: (xh?0 -> [Leftx,Leftx,Center]),
+    Center: vl <- - zl, 
+            vl<- ub( ln(vl)), vl<- ub( vl/yl), vl<- ub( exp(vl)),
+            vl<- - vl,
+            (vl?xl -> [CUzl, Ub, Uxl]),         
+            CUzl: (xl?0 -> [Negxl, Zxl, Uzl]),
+               Negxl: vl<- - xl, 
+                      vl<- ub(ln(vl)), vl<-ub(vl*yl),vl<- ub(exp(vl)),   
+                      vl<- - vl, goto UzlC,
+                Zxl: zl<- 0, goto Ub,
+    Leftx:   flip(z),flip(x), goto Rightx,
+    Rightx: zl<-0, goto Right,
+    Left:   flip(z),flip(x), goto Right,
+	Right:  (zl?0 -> [Zl,Zl,NZl]),
+                Zl: vl<-0, goto Lbch,
+                NZl: vl <- lb( ln(zl)), vl<- lb( vl/yl), vl<- lb( exp(vl)),
+                     goto Lbch,
+        Lbch:(vl?xl -> [Uzl, Ub, Uxl]),         
+            Uxl: xl <- vl, goto Ub,
+            Uzl:  vl<- lb(ln(xl)), vl<-lb(vl*yl),vl<- lb(exp(vl)),   
+                  goto UzlC,
+            UzlC: (vl?zl -> [Ub,Ub, Upzl]),
+                Upzl: zl<- vl, goto Ub,
+        Ub: (zh?0 ->[Zh,Zh,NZh]),
+                Zh: vh<- 0, goto Ubch,
+                NZh:vh <- ub( ln(zh)), vh<- ub( vh/yl), vh<- ub( exp(vh)),
+                    goto Ubch,
+        Ubch:  (vh?xh -> [Uxh, Exit, Uzh]),
+            Uxh:  xh<- vh, goto Exit,
+            Uzh:  (xh?0 -> [Uzhn,Uzhz,Uzhp]),
+				    Uzhn: vh<- -xh, 
+					         vh<- lb(ln(vh)), vh<-lb(vh*yl),vh<-lb( 
+exp(vh)), % may 6 92
+					         vh<- -vh,  
+              goto UzhC,
+				      Uzhz: zh<-0, goto Exit,
+				      Uzhp: vh<- ub(ln(xh)), vh<-ub(vh*yl),vh<-ub( 
+exp(vh)),
+          UzhC: (vh?zh-> [Upzh,Exit,Exit]),
+            Upzh: zh <- vh, goto Exit,
+     Exit:   success.       
+
+
+qpow_even( zl, zh, xl, xh, yl):-          % Z==X**N , N>0, N even, N in yl
+    zl?0 -> [SZ,Zero,Nonz],
+       SZ: (zh?0 -> [Fail,SZ1,SZ1]),
+          SZ1:  zl<- 0, goto Zero,
+    Zero: vl<- 0, 
+        zh?0 -> [Zvh,Zvh,Dovh],
+            Zvh:  vh<-0, goto ZChkXl,
+            ZChkXl: (xl?0 -> [ Zxl,ZChkXh,Fail]),
+                Zxl: xl<-0, goto ZChkXh,
+            ZChkXh: (xh?0 -> [Fail,Exit, Zxh]),
+                Zxh: xh<-0, goto Exit,
+    Nonz:  vl <- lb( ln(zl)), vl<-lb( vl/yl), vl<-lb( exp(vl)), goto Dovh, 
+        Dovh:   vh <- ub( ln(zh)), vh<-ub( vh/yl), vh<- ub(exp(vh)), goto ChkX,
+        ChkX: ( xl?0 -> [ Chkub, Eq,Eq]),
+        Chkub: (xh?0 -> [Flp,Flp, Sp0]),
+            Sp0:  uh<- -xl, 
+                 (uh?vl -> [Eq, Mayleft,Mayleft]),
+                Mayleft: (xh?vl -> [Flp, Both, Both]),
+                 Both: (uh?xh -> [ Righthi, Righthi, Lefthi]),
+                        Righthi: uh<-xh, goto Lefthi,
+                    Lefthi:  (uh?vh -> [Trimvh,Exit, Trimxl]),
+                        Trimvh:  vh<- uh, goto Uzhvh,
+                    Trimxl: uh<- -xl,
+                        (uh?vh -> [Trimxh,Trimxh, Trim_low]),
+                            Trim_low:  xl<- -vh, goto Trimxh,
+                    Trimxh: (xh?vh -> [Exit,Exit, Uxh]),
+
+        
+        Flp:  uh<-vh,  flip(x), vh<-uh, goto Eq,    % Note:flip ( may) use vh
+        Eq: (vl?xl -> [Uzl, Ub, Uxl]),         
+            Uxl:  xl <- vl, goto Ub,
+            Uzl:  vl<- lb(ln(xl)), vl<-lb(vl*yl),vl<- lb(exp(vl)),   
+                  (vl?zl ->[Ub,Ub,Upzl]),
+            Upzl: zl <- vl, goto Ub,
+        Ub: (vh?xh -> [Uxh, Exit, Uzh]),
+            Uxh:  xh<- vh, goto Exit,
+            Uzh:  vh<- xh, goto Uzhvh,
+            Uzhvh:vh<- ub(ln(vh)), vh<-ub(vh*yl),vh<-ub( exp(vh)), 
+                (vh?zh -> [Upzh,Exit,Exit]),  
+                Upzh: zh<- vh,   goto Exit,
+        Fail:   fail,
+        Exit:   success.       
+
+
+         

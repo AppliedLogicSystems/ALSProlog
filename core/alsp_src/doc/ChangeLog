@@ -1,3 +1,38 @@
+Tues  12 Sept 1995 Ken Bowen
+
+	* Various modifications to builtins/[ra_basis, int_cstrs]
+	  in the course of debugging & development;
+
+	* Added casts in generic/[intrv.c,intaux.c] required by 
+	  CodeWarrior on Mac;
+
+	* Modified builtins/sio_wt.pro - write_substs/2 to avoid
+	  binding delay variables during printing, and to provide
+	  appropriate representations of interval terms, and of other
+	  non-instantiated frozen variables.
+
+	* [Note: Exported systems is now running on: Mac with MPW
+	   and CodeWarrior, both ppc and m68k, and on MS DOS/Intel]
+
+	* [Note: Baby versions of constraints running.]
+
+	* [Note: Baby versions of constraints running.]
+
+	* Tagged as V1-74C
+
+Thurs 6 Sept 1995 Ken Bowen
+
+	* Debugging in generic/intrv.c,intaux.c,
+	  builtins/int_cstr.pro,ra_basis.pro
+
+	* Modified xbrace/6 in builtins/xconsult.pro to more properly
+	  support CLP constraint processing;
+
+	* In builtins/blt_shl.pro, modified subst_orig_toplevel_names/2,
+	  to display intervals in showanswers; in conjunction with this,
+	  added fact "epsilon_show(1e-6)." and set_eps_show/1 to control
+	  whether an interval is shown as a (mid)point or an interval.
+
 Wed 6 Sept 1995 Ken Bowen, Chuck Houpt
 
 	* Upgraded generic/fsmac.c and builtins/fsmac.pro to provide 

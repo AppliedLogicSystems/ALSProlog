@@ -18,7 +18,7 @@ unix2mac $1/readme
 
 echo - bld-port
 mkdir $1/bld-port
-cp ./bld-port/makefile.mac $1/bld-port/makefile
+cp ./bld-port/makefile.mac $1/bld-port/MakeFile
 cp ./bld-port/tconfig.in $1/bld-port/tconfig.h
 unix2mac $1/bld-port/makefile
 unix2mac $1/bld-port/tconfig.h
@@ -27,7 +27,7 @@ mkdir $1/bld-port/alsdir
 mkdir $1/bld-port/alsdir/builtins
 mkdir $1/bld-port/alsdir/library
 
-/mailbox/alsp_src/bin/gen2mac $1
+/mailbox3/alsp_src/bin/gen2mac $1
 
 #echo - bld-natv
 #cp -r ./bld-natv $1
@@ -62,6 +62,8 @@ unix2mac $1/generic/generate/*
 
 echo - port
 cp -r ./port $1
+cp -r ./port/macos/config.h $1
+unix2mac $1/config.h
 unix2mac $1/port/*.c
 unix2mac $1/port/*.h
 unix2mac $1/port/macos/*.h

@@ -21,7 +21,11 @@
 #define OR      ||
 
 #undef pi
+#ifdef HAVE_M_PI
 #define pi()                M_PI
+#else 
+#define pi()                3.14159265358979323846
+#endif
 #define ln(x)               log(x)
 #define ceiling(x)          ceil(x)
 
@@ -58,6 +62,18 @@ round	--
 ALSO clarify: w_Error (Error) label in wrap:
 
 ****************/
+
+#define GET_DBL_VAL(TYP, TRM, VAL) \
+		if (TYP == WTP_STRUCTURE) { \
+			w_get_arity(&arity, TRM); \
+            w_get_functor(&functor, TRM); \
+            if (arity == 4 && functor == TK_DDOUBLE){ \
+				for (i = 0; i < 4; i++){ \
+					w_get_argn(&vv, &tt, TRM, i + 1); \
+					*(((short *) VAL) + i) = (short) vv; }  } \
+			else \
+				iaerror();  }
+
 
 #define fp			double
 #define int_fp		fp
@@ -136,7 +152,7 @@ typedef union fpoverlay {
 				if (++(((fpoverlay *)&x)->l[SECOND]) EQ 0) \
 					++(((fpoverlay *)&x)->l[FIRST]); \
 				} \
-			else { /* x EQ 0.0 */ \
+			else { \
 				((fpoverlay *)&x)->l[SECOND] = 1; \
 				((fpoverlay *)&x)->l[FIRST] = 0x80000000; \
 				}

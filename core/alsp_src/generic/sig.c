@@ -31,7 +31,11 @@
 #endif /* DOS */
 
 #ifdef MacOS
+#ifdef HAVE_GUSI
 #include <GUSI.h>
+#else
+#include <unix.h>
+#endif
 #endif
 
 #ifdef DOS

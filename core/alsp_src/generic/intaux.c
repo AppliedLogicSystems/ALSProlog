@@ -23,18 +23,6 @@ extern PWord	deref_2		PARAMS(( PWord ));
  *-------------------------------------------------------*/
 
 
-#define GET_DBL_VAL(TYP, TRM, VAL) \
-		if (TYP == WTP_STRUCTURE) { \
-			w_get_arity(&arity, TRM); \
-            w_get_functor(&functor, TRM); \
-            if (arity == 4 && functor == TK_DDOUBLE){ \
-				for (i = 0; i < 4; i++){ \
-					w_get_argn(&vv, &tt, TRM, i + 1); \
-					*(((short *) VAL) + i) = (short) vv; }  } \
-			else \
-				iaerror();  }
-
-
 void extract_bds	PARAMS( (PWord *, fp *, fp *) );
 
 void
@@ -57,17 +45,17 @@ extract_bds(IntStruct, ZL, ZH)
 	if (CHK_DELAY((PWord *)IntStruct))
 	{
 		DrT = deref_2((PWord)IntStruct);
-		w_get_argn(&CstrTm, &CstrTm_t, (PWord *)((PWord *)DrT-1), 4);
+		w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)((PWord *)DrT-1), 4);
 
 			/* CstrTm is now the delay term from IntStruct;
 				but it might be a compound (comma) interval delay
 				term, so we need to pull out the leftmost component */
 
-		w_get_functor(&functor, CstrTm);
+		w_get_functor(&functor, (PWord)CstrTm);
 		while(TK_COMMA == functor )
 		{
-			w_get_argn(&CstrTm, &CstrTm_t, (PWord)CstrTm, 1);
-            w_get_functor(&functor, CstrTm);
+			w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)CstrTm, 1);
+            w_get_functor(&functor, (PWord)CstrTm);
 		}
 		
 			/* CstrTm should be intvl(Type,Var,_,L,U)
@@ -113,17 +101,17 @@ void change_bound(IntStruct, PtrFP, Which)
 	int *CstrTm_t,i,rtag;
 
 		DrT = deref_2((PWord)IntStruct);
-		w_get_argn(&CstrTm, &CstrTm_t, (PWord *)((PWord *)DrT-1), 4);
+		w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)((PWord *)DrT-1), 4);
 
 			/* CstrTm is now the delay term from IntStruct;
 				but it might be a compound (comma) interval delay
 				term, so we need to pull out the leftmost component */
 
-		w_get_functor(&functor, CstrTm);
+		w_get_functor(&functor, (PWord)CstrTm);
 		while(TK_COMMA == functor )
 		{
-			w_get_argn(&CstrTm, &CstrTm_t, (PWord)CstrTm, 1);
-            w_get_functor(&functor, CstrTm);
+			w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)CstrTm, 1);
+            w_get_functor(&functor, (PWord)CstrTm);
 		}
 		
 			/* CstrTm should be intvl(Type,Var,_,L,U)
@@ -139,6 +127,10 @@ void change_bound(IntStruct, PtrFP, Which)
 		w_install_argn((PWord)CstrTm, (Which?5:4), rval, rtag);
 
 }
+
+
+fp i_next  PARAMS((fp *));
+fp i_prev  PARAMS((fp *));
 
 	/* Prototypes */
 int	pbi_fuzz	PARAMS((void));
@@ -194,19 +186,17 @@ pbi_fuzz()
 	FAIL;
 #endif /* DoubleType */
 
-printf("before_initfpu\n");
 	initfpu();
-printf("after\n");
 	t = dblval;       /* setup for next(t);  */
-printf("i_next(t): bef:t=%20.16f ",t);
-	i_next(t);
+/* printf("i_next(t): bef:t=%20.16f ",t); */
+	next(t);
 	ub = t;
-printf(" aft:t=%20.16f ub=%20.16f \n",t,ub);
+/* printf(" aft:t=%20.16f ub=%20.16f \n",t,ub); */
 	t = dblval; /* prev(t);  */
-	i_prev(t);
-printf("i_prev(t): bef:t=%20.16f ",t);
+/* printf("i_prev(t): bef:t=%20.16f ",t); */
+	prev(t);
 	lb = t;
-printf("aft: t=%20.16f lb=%20.16f \n",t,lb);
+/* printf("aft: t=%20.16f lb=%20.16f \n",t,lb); */
 	resetfpu();
 
 #ifndef DoubleType
@@ -254,40 +244,39 @@ double round(num)
 	return(num);
 }
 
-fp i_next  PARAMS((fp));
-fp i_prev  PARAMS((fp));
-
 
 fp i_next(x)
-	fp x;
+	fp *x;
 {
-	if (x GE 0.0) {
-		if (++(((fpoverlay *)&x)->l[SECOND]) EQ 0) 
-			++(((fpoverlay *)&x)->l[FIRST]); 
+	
+
+	if (*x GE 0.0) {
+		if (++(((fpoverlay *)x)->l[SECOND]) EQ 0) 
+			++(((fpoverlay *)x)->l[FIRST]); 
 		} 
-	else if (x LT 0.0) { 
-		if (--(((fpoverlay *)&x)->l[SECOND]) EQ -1) 
-			--(((fpoverlay *)&x)->l[FIRST]); 
+	else if (*x LT 0.0) { 
+		if (--(((fpoverlay *)x)->l[SECOND]) EQ -1) 
+			--(((fpoverlay *)x)->l[FIRST]); 
 		}
-	return(x);
+	return(*x);
 }
 
 fp i_prev(x)	 
-	fp x;
+	fp *x;
 {
-	if (x GT 0.0) { 
-		if (--(((fpoverlay *)&x)->l[SECOND]) EQ -1) 
-			--(((fpoverlay *)&x)->l[FIRST]); 
+	if (*x GT 0.0) { 
+		if (--(((fpoverlay *)x)->l[SECOND]) EQ -1) 
+			--(((fpoverlay *)x)->l[FIRST]); 
 		} 
-	else if (x LT 0.0) { 
-		if (++(((fpoverlay *)&x)->l[SECOND]) EQ 0) 
-			++(((fpoverlay *)&x)->l[FIRST]); 
+	else if (*x LT 0.0) { 
+		if (++(((fpoverlay *)x)->l[SECOND]) EQ 0) 
+			++(((fpoverlay *)x)->l[FIRST]); 
 		} 
 	else { /* x EQ 0.0 */ 
-		((fpoverlay *)&x)->l[SECOND] = 1; 
-		((fpoverlay *)&x)->l[FIRST] = 0x80000000; 
+		((fpoverlay *)x)->l[SECOND] = 1; 
+		((fpoverlay *)x)->l[FIRST] = 0x80000000; 
 		}
-	return(x);
+	return(*x);
 }
 
 

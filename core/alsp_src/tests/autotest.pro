@@ -53,8 +53,17 @@ configure_testing(TDs, CmdLineVs)
 configure_testing(TDs, CmdLineVs)
 	:-
 	dmember(['-srcdir',SrcDir], CmdLineVs),
-	extendPath(SrcDir, 'tests/als_exmp',ALSEXMP_Path),
-	extendPath(SrcDir, 'tests/tsuite',TSUITE_Path),
+
+% Removed for Mac compatibility
+%	extendPath(SrcDir, 'tests/als_exmp',ALSEXMP_Path),
+%	extendPath(SrcDir, 'tests/tsuite',TSUITE_Path),
+
+	subPath(SDList, SrcDir),
+	append(SDList, [tests,als_exmp], AXPList),
+	subPath(AXPList, ALSEXMP_Path),
+	append(SDList, [tests,tsuite], TSPList),
+	subPath(TSPList, TSUITE_Path),
+
 	add_search_dirs([ALSEXMP_Path,TSUITE_Path]).
 	
 add_search_dirs([]).

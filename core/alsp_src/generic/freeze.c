@@ -75,9 +75,9 @@ printf("enter delay----wm_H=%x--TK_DELAY=%x-----------------\n",
 
 	if (w_unify(rdt, rdtt, vv, vvt))
 	{
-pbi_cptx();
-printf("exit delay----wm_H=%x--real_dv=%x---------\n", (int)wm_H,(int)one);
 #ifdef DEBUGFREEZE
+pbi_cptx();
+printf("exit delay----wm_H=%x--real_dv=%x---------\n", (int)wm_H,(int)one); 
 #endif
 		SUCCEED;
 	}
@@ -91,7 +91,7 @@ pbi_is_delay_var()
     PWord *dv;
     int dvt;
 
-    w_get_An(&dv, &dvt, 1);
+    w_get_An((PWord *)&dv, &dvt, 1);
 
     if (dvt != WTP_UNBOUND)
 	FAIL;
@@ -240,9 +240,11 @@ combin_dels(r,f)
 	PWord mod,   goal,   cdfctr;
 	int   mod_t, goal_t, cdf_t;
 
+#ifdef DEBUGFREEZE
 printf("combin_dels:r=_%lu f=_%lu \n",
 			(long)(((PWord *) r) - wm_heapbase),
 			(long)(((PWord *) f) - wm_heapbase)); 
+#endif
 
 	w_mk_sym(&mod,&mod_t,TK_BUILTINS);  
 
@@ -438,6 +440,7 @@ disp_heap()
 		stop = v2;
 
 printf("Heap display: %x --> %x\n",(int)start,(int)stop);
+
 
 	for (CurA = (PWord *)start; CurA >= (PWord *)stop; CurA -= 1)
 		disp_heap_item(CurA);   

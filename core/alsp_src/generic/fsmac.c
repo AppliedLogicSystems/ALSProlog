@@ -19,115 +19,8 @@
 
 #ifdef MacOS
 
-// GUSI
+#ifdef HAVE_GUSI
 #include <GUSI.h>
-#undef nil
-#include <ctype.h>
-
-#include <unix.h>
-#include <stdio.h>
-#include <limits.h>
-
-#include <Types.h>
-#include <Files.h>
-#include <ToolUtils.h>
-#include <Memory.h>
-#include <OSUtils.h>
-#include <Processes.h>
-#include <Errors.h>
-
-#if defined(THINK_C)
-#include <pascal.h>
-#elif defined(__MWERKS__)
-#include <Strings.h>
-#endif
-
-#ifndef MAXPATHLEN
-#ifdef PATHSIZE
-#define MAXPATHLEN  PATHSIZE
-#else
-#define MAXPATHLEN  1024
-#endif
-#endif
-
-static int
-pgetcwd()
-{
-    PWord v1, sym;
-    int   t1, symType;
-    char  pathName[MAXPATHLEN];
-
-    PI_getan(&v1, &t1, 1);
-
-#ifdef	HAVE_GETWD
-    if (getwd(pathName) == 0)
-{
-	PI_FAIL;
-}
-#else	/* HAVE_GETWD */
-    if (getcwd(pathName, MAXPATHLEN) == 0)
-{
-	PI_FAIL;
-}
-#endif	/* !HAVE_GETWD */
-
-    PI_makeuia(&sym, &symType, pathName);
-
-    if (!PI_unify(v1, t1, sym, symType))
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
-
-/*
- * chdir/1 (--> pchdir/1 )
- * chdir(+Path)
- *
- * Changes the current working directory to be that given by the input.
- */
-
-static int pchdir(void)
-{
-    PWord v1;
-    int   t1;
-    char *pathName;
-
-    PI_getan(&v1, &t1, 1);
-
-    /* Make sure file name & pattern are atoms or UIAs */
-    if (!getstring((UCHAR **)&pathName, v1, t1))
-	PI_FAIL;
-
-    if (chdir(pathName) == -1)
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
-
-/*
- * unlink/1 (--> punlink/1 )
- * unlink(+FilePath)
- *
- * Unlinks the indicated file from the file system
- */
-
-static int punlink(void)
-{
-    PWord v1;
-    int   t1;
-    char *pathName;
-
-    PI_getan(&v1, &t1, 1);
-
-    /* Make sure file name & pattern are atoms or UIAs */
-    if (!getstring((UCHAR **)&pathName, v1, t1))
-	PI_FAIL;
-
-    if (unlink(pathName) == -1)
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
 
 static Boolean MatchName(const char * name, const char * pattern)
 {
@@ -360,6 +253,7 @@ static int getFileStatus(void)
     PI_SUCCEED;
 }
 
+
 /*
  * read_link/2
  * read_link(SourcePath, ResultPath)
@@ -530,6 +424,206 @@ static int pmkdir(void)
     PI_SUCCEED;
 }
 
+/*
+ * Returns 1 if fname is a directory, 0 otherwise.
+ *
+ */
+int isdir(CONST char *fname)
+{
+    struct stat buf;
+
+    if (stat(fname, &buf) == -1)
+	return (0);
+
+    return (buf.st_mode & S_IFDIR);
+}
+
+long 
+get_file_modified_time(fname)
+    char *fname;
+{
+    struct stat buf;
+
+    if (stat(fname, &buf) == -1 || buf.st_mode & S_IFDIR)
+	return (long) 0;
+
+    return buf.st_mtime;
+}
+
+
+/*
+ * rmdir/1 (--> prmdir/1 )
+ * rmdir(+DirPath)
+ *
+ * Removes the indicated directory
+ */
+
+static int prmdir(void)
+{
+    PWord v1;
+    int   t1;
+    char *pathName;
+
+    PI_getan(&v1, &t1, 1);
+
+    /* Make sure file name & pattern are atoms or UIAs */
+    if (!getstring((UCHAR **)&pathName, v1, t1))
+	PI_FAIL;
+
+    if (rmdir(pathName) == -1)
+	PI_FAIL;
+
+    PI_SUCCEED;
+}
+
+static int pgetpid(void)
+{
+    PWord v1, vpid;
+    int   t1, tpid;
+
+    PI_getan(&v1, &t1, 1);
+#ifdef MacOS
+    {
+	ProcessSerialNumber PSN;
+	
+	if(GetCurrentProcess(&PSN) != noErr) PI_FAIL;
+	
+	PI_makedouble(&vpid, &tpid, (double)PSN.highLongOfPSN * ULONG_MAX + (double)PSN.lowLongOfPSN);
+    }
+#else
+    PI_makedouble(&vpid, &tpid, (double) getpid());
+#endif
+    if (PI_unify(v1, t1, vpid, tpid))
+	PI_SUCCEED;
+    else
+	PI_FAIL;
+}
+
+
+
+
+
+
+
+
+
+
+
+#else /* GUSI */
+
+#include <ctype.h>
+
+#include <unix.h>
+#include <stdio.h>
+#include <limits.h>
+
+#include <Types.h>
+#include <Files.h>
+#include <ToolUtils.h>
+#include <Memory.h>
+#include <OSUtils.h>
+#include <Processes.h>
+#include <Errors.h>
+
+
+#if defined(THINK_C)
+#include <pascal.h>
+#elif defined(__MWERKS__)
+#include <Strings.h>
+#endif
+
+#define MIN(a,b) (((a)<(b))?(a):(b))
+
+
+#ifndef MAXPATHLEN
+#ifdef PATHSIZE
+#define MAXPATHLEN  PATHSIZE
+#else
+#define MAXPATHLEN  1024
+#endif
+#endif
+
+static int
+pgetcwd()
+{
+    PWord v1, sym;
+    int   t1, symType;
+    char  pathName[MAXPATHLEN];
+
+    PI_getan(&v1, &t1, 1);
+
+#ifdef	HAVE_GETWD
+    if (getwd(pathName) == 0)
+{
+	PI_FAIL;
+}
+#else	/* HAVE_GETWD */
+    if (getcwd(pathName, MAXPATHLEN) == 0)
+{
+	PI_FAIL;
+}
+#endif	/* !HAVE_GETWD */
+
+    PI_makeuia(&sym, &symType, pathName);
+
+    if (!PI_unify(v1, t1, sym, symType))
+	PI_FAIL;
+
+    PI_SUCCEED;
+}
+
+/*
+ * chdir/1 (--> pchdir/1 )
+ * chdir(+Path)
+ *
+ * Changes the current working directory to be that given by the input.
+ */
+
+static int pchdir(void)
+{
+    PWord v1;
+    int   t1;
+    char *pathName;
+
+    PI_getan(&v1, &t1, 1);
+
+    /* Make sure file name & pattern are atoms or UIAs */
+    if (!getstring((UCHAR **)&pathName, v1, t1))
+	PI_FAIL;
+
+    if (chdir(pathName) == -1)
+	PI_FAIL;
+
+    PI_SUCCEED;
+}
+
+/*
+ * unlink/1 (--> punlink/1 )
+ * unlink(+FilePath)
+ *
+ * Unlinks the indicated file from the file system
+ */
+
+static int punlink(void)
+{
+    PWord v1;
+    int   t1;
+    char *pathName;
+
+    PI_getan(&v1, &t1, 1);
+
+    /* Make sure file name & pattern are atoms or UIAs */
+    if (!getstring((UCHAR **)&pathName, v1, t1))
+	PI_FAIL;
+
+    if (unlink(pathName) == -1)
+	PI_FAIL;
+
+    PI_SUCCEED;
+}
+
+
+
 /* ceh - I'm not really sure what cononicalize_pathname does, or wether it really applies
    on the Mac.  This function is a NOP. */
 static int canonicalize_pathname(void)
@@ -567,56 +661,9 @@ static int canonicalize_pathname(void)
 }
 
 
-/*
- * Returns 1 if fname is a directory, 0 otherwise.
- *
- */
-int isdir(CONST char *fname)
-{
-    struct stat buf;
-
-    if (stat(fname, &buf) == -1)
-	return (0);
-
-    return (buf.st_mode & S_IFDIR);
-}
-
-static int pgetpid(void)
-{
-    PWord v1, vpid;
-    int   t1, tpid;
-
-    PI_getan(&v1, &t1, 1);
-#ifdef MacOS
-    {
-	ProcessSerialNumber PSN;
-	
-	if(GetCurrentProcess(&PSN) != noErr) PI_FAIL;
-	
-	PI_makedouble(&vpid, &tpid, (double)PSN.highLongOfPSN * ULONG_MAX + (double)PSN.lowLongOfPSN);
-    }
-#else
-    PI_makedouble(&vpid, &tpid, (double) getpid());
-#endif
-    if (PI_unify(v1, t1, vpid, tpid))
-	PI_SUCCEED;
-    else
-	PI_FAIL;
-}
 
 /* Other routines. */
 
-long 
-get_file_modified_time(fname)
-    char *fname;
-{
-    struct stat buf;
-
-    if (stat(fname, &buf) == -1 || buf.st_mode & S_IFDIR)
-	return (long) 0;
-
-    return buf.st_mtime;
-}
 
 int absolute_pathname(const char *name)
 {    
@@ -624,7 +671,7 @@ int absolute_pathname(const char *name)
 }
 
 /*************************************************************************************/
-#if 0
+
 static unsigned char *pStrcat(unsigned char *dest, const unsigned char *src)
 {
     long  sLen = MIN(*src, 255 - *dest);
@@ -648,8 +695,6 @@ static unsigned char *cpy_c2pstr(unsigned char *pstr, const char *cstr)
     return pstr;
 }
 
-// GUSI
-#if 0
 #if !defined(__MPW_MWERKS__) && !defined(applec)
 int access(const char *path, int x)
 {
@@ -671,7 +716,6 @@ int access(const char *path, int x)
     
     return result;
 }
-#endif
 #endif
 
 
@@ -720,14 +764,10 @@ static OSErr PathNameFromDirID(long DirID, short vRefNum, char *buf, size_t size
     return err;
 }
 
-#define MAXPATHLEN	256
 
-#if 0
-// GUSI
 char *getcwd(char *buf, int size)
 {
     OSErr	err;
-    short wdRefNum;
     Str255 volName;
     WDPBRec pBlock;
 
@@ -743,7 +783,6 @@ char *getcwd(char *buf, int size)
     if (err == noErr) return buf;
     else return NULL;
 }
-#endif
 
 long	get_file_modified_time(const char *fname)
 {
@@ -803,17 +842,15 @@ int	isdir(const char *fname)
  *                   filetype, and then mapped accordingly in fsmac.pro
  */
 
-#if 1
-#else
 static int getFileStatus(void)
 {
-    PWord v1, v2, vtime, vftype;
-    int   t1, t2, ttime, tftype;
-    char *cPathName, *uia_buf;
+    PWord v1, v2, vtime;
+    int   t1, t2, ttime;
+    char *cPathName;
     Str255 pathName;
     PWord sTag, pstructure, arg;
     int   sTagType, pstructureType, argType;
-    int   fileMode, fileType, ownerPermiss;
+    int   fileType, ownerPermiss;
     CInfoPBRec fp;
 
 
@@ -905,7 +942,6 @@ static int getFileStatus(void)
 
     PI_SUCCEED;
 }
-#endif
 
 
 
@@ -925,7 +961,7 @@ static OSErr ChangeVolume(const char *pathname)
     Str255 volname;
     short i;
 
-    if (!absolute_pathname(pathname)) return; /* Not an absolute path */
+    if (!absolute_pathname(pathname)) return fnfErr; /* Not an absolute path */
 
     ptr2 = strchr(pathname, ':');
     ptr1 = pathname;
@@ -942,7 +978,7 @@ static OSErr ChangeVolume(const char *pathname)
 static OSErr SetDirectoryFromPath(const char *path)
 {
     CInfoPBRec pb;
-    short refnum, WDRefNum;
+    short WDRefNum;
     short mountedvol;
     Str27 mvname, ioName;
     OSErr err;
@@ -975,50 +1011,11 @@ static OSErr SetDirectoryFromPath(const char *path)
     return err;
 }
 
-#if 0
-static int pchdir(void)
-{
-    PWord v1, sym;
-    int   t1, symtype;
-    char *pathName;
-    WDPBRec pBlock;
-
-    PI_getan(&v1, &t1, 1);
-
-    if (!getstring((UCHAR **)&pathName, v1, t1)) PI_FAIL;
-
-    if (SetDirectoryFromPath(pathName) != noErr) PI_FAIL;
-
-    PI_SUCCEED;
-}
-#endif
-
-static int pchdir(void)
-{
-    PWord v1;
-    int   t1;
-    char *pathName;
-
-    PI_getan(&v1, &t1, 1);
-
-    /* Make sure file name & pattern are atoms or UIAs */
-    if (!getstring((UCHAR **)&pathName, v1, t1))
-	PI_FAIL;
-
-    if (chdir(pathName) == -1)
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
-
-// GUSI
-#if 0
 int chdir(const char *dirname)
 {
     if (SetDirectoryFromPath(dirname) != noErr) return -1;
     else return 0;
 }
-#endif
 
 
 static int pgetpid(void)
@@ -1095,32 +1092,8 @@ pcmp_fs(void)
     PI_FAIL;
 }
 
-/*
- * rmdir/1 (--> prmdir/1 )
- * rmdir(+DirPath)
- *
- * Removes the indicated directory
- */
 
-static int prmdir(void)
-{
-    PWord v1;
-    int   t1;
-    char *pathName;
-
-    PI_getan(&v1, &t1, 1);
-
-    /* Make sure file name & pattern are atoms or UIAs */
-    if (!getstring((UCHAR **)&pathName, v1, t1))
-	PI_FAIL;
-
-    if (rmdir(pathName) == -1)
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
-
-#endif
+#endif /* HAVE_GUSI */
 
 
 
@@ -1130,6 +1103,7 @@ PI_BEGIN
     PI_PDEFINE("chdir",1,pchdir,"_pchdir")
     PI_PDEFINE("unlink", 1, punlink, "_punlink")
 
+#ifdef HAVE_GUSI
     PI_PDEFINE("$getDirEntries", 3, getDirEntries, "_getDirEntries")
     PI_PDEFINE("$getFileStatus",2,getFileStatus,"_getFileStatus") 
     PI_PDEFINE("comp_file_times", 2, pcmp_fs, "_pcmp_fs")
@@ -1138,6 +1112,10 @@ PI_BEGIN
 
     PI_PDEFINE("read_link", 2, read_link, "_read_link")
     PI_PDEFINE("make_symlink", 2, make_symlink, "_make_symlink")
+#else
+    PI_PDEFINE("$getFileStatus",2,getFileStatus,"_getFileStatus") 
+    PI_PDEFINE("comp_file_times", 2, pcmp_fs, "_pcmp_fs")
+#endif
 
     PI_PDEFINE("canonicalize_pathname", 2, canonicalize_pathname, "_canonicalize_pathname")
     PI_PDEFINE("getpid",1,pgetpid,"_pgetpid")

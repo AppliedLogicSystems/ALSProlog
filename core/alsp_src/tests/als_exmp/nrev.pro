@@ -1,19 +1,20 @@
-/*
- * nrev.pro	-- Naive reverse benchmark.
- *
- *	This is the standard benchmark used to compute LIPS for a Prolog system.
- *	Lists should have length of at least 30 for accurate measurements.  The
- *	number of iterations should be such that the benchmark runs for at least
- *	a second (the longer it runs, the more accurate the number that comes
- *	out).  This program should work with all Prologs compatible with 
- *	C-Prolog.
- *
- * Usage:
- *	?- reconsult(nrev).
- *	?- nrev.
- */
-
-
+/*--------------------------------------------------------------------------*
+ |			nrev.pro	
+ |
+ |		-- Naive reverse benchmark.
+ |
+ |	This is the standard benchmark used to compute LIPS for a Prolog system.
+ |	{ Lists should have length of at least 30 for accurate measurements. }
+ |  30 is now (9/6/95) way too small.  On a 90MHz Pentium, even with lists
+ |  of length 90 and 100 iterations, we get 0 average elapsed time. Our
+ |  old standard test (100 x 100) just barely gives meaningful results.
+ |  Now modified so that if average time is 0, it doubles the length of
+ |  the list, and tries again.
+ |
+ | Usage:
+ |	?- reconsult(nrev).
+ |	?- nrev.
+ *--------------------------------------------------------------------------*/
 
 nrev :-
 	write('Length of List: '),
@@ -22,7 +23,20 @@ nrev :-
 	write('Number of Iterations: '),
 	read(Iters),
 
-	nrev0(Length, Iters).
+	do_nrev0(Length, Iters).
+
+do_nrev0(Length, Iters)
+	:-
+	nrev0(Length, Iters),
+	!.
+
+do_nrev0(Length, Iters)
+	:-
+	NextSize is 2*Length,
+	printf('\nRunning too fast for clock [length = %d,iters=%d]!\n',
+			[Length,Iters]),
+	printf('Trying list length = %d [%d iterations]\n',[NextSize, Iters]),
+	do_nrev0(NextSize, Iters).
 
 nrev0(Length, Iters)
 	:-
@@ -66,8 +80,17 @@ append([H|T], X, [H|T1]) :- append(T, X, T1).
 
 control(_, _).
 
-compute_average_time(EndTime, MidTime, StartTime, Iters, AverageTime) :-
-	AverageTime is ((MidTime-StartTime) - (EndTime-MidTime)) / Iters.
+compute_average_time(T, T, T, _, _) 
+	:-!,
+	fail.
+compute_average_time(EndTime, MidTime, StartTime, Iters, AverageTime) 
+	:-
+	Top is ((MidTime-StartTime) - (EndTime-MidTime)),
+	(Top > 0 ->
+		AverageTime is ((MidTime-StartTime) - (EndTime-MidTime)) / Iters
+		;
+		AverageTime is 1/Iters
+	).
 
 for(I, I, I) :- !.
 for(I, J, I).

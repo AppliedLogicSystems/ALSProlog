@@ -458,13 +458,19 @@ make_symlink()
 
     /* Make sure SourcePath name is an atom or UIA */
     if (!getstring((UCHAR **)&pathName1, v1, t1)
-     || !getstring((UCHAR **)&pathName2, v2, t2))
+     		|| !getstring((UCHAR **)&pathName2, v2, t2))
 	PI_FAIL;
 
+/*
     if (!symlink(pathName1, pathName2))
 	PI_FAIL;
 
     PI_SUCCEED;
+*/
+    if (symlink(pathName1, pathName2))
+    	PI_SUCCEED;
+    else
+	PI_FAIL;
 }
 #endif /* HAVE_SYMLINK */
 

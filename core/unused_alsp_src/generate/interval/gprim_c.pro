@@ -81,7 +81,8 @@ make_c( SrcFile, OutFileH, OutFileC)
 	headers(OutCS, OutFileC, SrcFile),
 	printf(OutCS, '\n#include "intrv.h"\n', []),
 	printf(OutCS, '\n#if defined(INTCONSTR)\n\n',[]),
-	printf(OutCS, '\n\nextern void extract_bds PARAMS((PWord *, fp *, fp *));\n\n',[]),
+	printf(OutCS, '\n\nextern void extract_bds PARAMS((PWord *, fp *, fp *));\n',[]),
+	printf(OutCS, 'extern void change_bound PARAMS((PWord *, fp *, int));\n\n',[]),
 	
 	compile_s_primitives( SOPs, OutHS, OutCS),
 	compile_primitives( IntervalOps, PseudoCode, OutHS, OutCS),
@@ -222,10 +223,22 @@ compile_primitive( Name, PseudoCode, OutHS, OutCS)
 	Head =.. [Name | Args],
 	label_pfx(Name, LabPfx), 
 	printf(OutCS, 'int  %t  PARAMS( (void) );\n',[IName]),
-	procheader( IName, Args, OutCS),
-	compile_body( Body, standard, LabPfx, OutCS ),
+	length(Args,NNArgs),
+	(NNArgs > 4 ->
+		procheader( IName, Args, OutCS)
+		;
+		procheader2( IName, Args, OutCS)
+	),
+
+	extract_labels(Body, LabPfx, [], LabelInfo),
+
+	compile_body( Body, standard, LabPfx, LabelInfo, OutCS ),
 	!,
-	procend( IName, 4, OutCS),
+	(NNArgs > 4 ->
+		procend( IName, 4, OutCS)
+		;
+		procend( IName, 3, OutCS)
+	),
 	ansi_proto(IName, OutHS),
 		%% notify user we finished a primitive:
 	printf(user_output, '-%t\n', [Name]),
@@ -246,7 +259,10 @@ compile_s_prim( SOP, OutHS, OutCS)
 	procheader2( IName, Args, OutCS),
 	label_pfx(Name, LabPfx), 
 	printf(OutCS,'\t\t/* Macro version of call: %t  */\n',[SOP]),
-	compile_body( Body, special, LabPfx, OutCS ),
+
+	extract_labels(Body, LabPfx, [], LabelInfo),
+
+	compile_body( Body, special, LabPfx, LabelInfo, OutCS ),
 	!,
 	procend( IName, 3, OutCS),
 	ansi_proto(IName, OutHS),
@@ -259,66 +275,71 @@ compile_s_prim( SOP, OutHS, OutCS)
 	pc_error('IOp %t failed to compile\n', [SOP]).
 
 /*----------------------------------------------------*
- |	compile_body/2
- |	compile_body( Goals, Stream)
- |	compile_body( +, +)
+ |	compile_body/5
+ |	compile_body( Goals, Stream, LabelPfx, LabelInfo, Stream)
+ |	compile_body( +, +, +, +, +)
  |
  |  compiling the body of a primitive
  *----------------------------------------------------*/
-compile_body( true , Flag, LabPfx, S) :-!.
+compile_body( true , Flag, LabPfx, LabelInfo, S) :-!.
 
-compile_body( ( (goto Lab), (L:Op), Ops ), Flag, LabPfx, S)
+compile_body( ( (goto Lab), (L:Op), Ops ), Flag, LabPfx, LabelInfo, S)
 	:-
 	Lab == L, 							% suppress unneeded branch
 	!,
-	compile_body( ( (L:Op), Ops ), Flag, LabPfx, S).
+	compile_body( ( (L:Op), Ops ), Flag, LabPfx, LabelInfo, S).
 
-compile_body( ( (Lab:Op), Ops),  Flag, LabPfx, S)
+compile_body( ( (Lab:Op), Ops),  Flag, LabPfx, LabelInfo, S)
 	:-
-	map_label(Lab,LabPfx,Lab1), 				% emit local label        
-	!,
-	printf(S, '   %t:\n', [Lab1]),
-	compile_body( ( Op,Ops ), Flag, LabPfx, S).
+	map_label(Lab,LabPfx,Lab1),
+	dmember(Lab1-N, LabelInfo),
+	(N = 0 ->
+		true			%% omit this label;
+		;
+%	map_label(Lab,LabPfx,Lab1), 				% emit local label        
+		printf(S, '   %t:\n', [Lab1])
+	),
+	compile_body( ( Op,Ops ), Flag, LabPfx, LabelInfo, S).
 
-compile_body( ( (X ->L), (Lab:Op), Ops ), Flag, LabPfx, S)
+compile_body( ( (X ->L), (Lab:Op), Ops ), Flag, LabPfx, LabelInfo, S)
 	:-                  				% branch constructs
 	map( (X -> L), Cmd, LabPfx,Lab), 
-	out(Cmd,LabPfx,S),
+	out(Cmd,LabPfx,LabelInfo,S),
 	!,
-	compile_body( ( (Lab:Op), Ops ), Flag, LabPfx, S).
+	compile_body( ( (Lab:Op), Ops ), Flag, LabPfx, LabelInfo, S).
 
 	%% General recusion clause:
-compile_body( (Op, Ops ), Flag, LabPfx, S)
+compile_body( (Op, Ops ), Flag, LabPfx, LabelInfo, S)
 	:-                                	% other operations
-	compile_op(Op, Flag, LabPfx,S),
+	compile_op(Op, Flag, LabPfx,LabelInfo, S),
 	!,
-	compile_body( Ops, Flag, LabPfx, S).
+	compile_body( Ops, Flag, LabPfx, LabelInfo, S).
 
-compile_body( Op, Flag, LabPfx, S)
+compile_body( Op, Flag, LabPfx, LabelInfo, S)
 	:- 
 	Op \= true,
 	Op \= (_,true),
-	compile_body( (Op,true), Flag, LabPfx, S),
+	compile_body( (Op,true), Flag, LabPfx, LabelInfo, S),
 	!.
 
-compile_body( X, Flag, LabPfx, S)
+compile_body( X, Flag, LabPfx, LabelInfo, S)
 	:- 
 	pc_error('Failed to compile body: %t\n', [X]),
 	fail.
 
 
-compile_op( ( (goto Lab), Ops ), Flag, LabPfx,S)
+compile_op( ( (goto Lab), Ops ), Flag, LabPfx,LabelInfo, S)
 	:-
 	map( goto Lab, LabPfx,Cmd ), 
-	out(Cmd,LabPfx,S).
+	out(Cmd,LabPfx,LabelInfo,S).
 
-compile_op( success, _, LabPfx,S)
+compile_op( success, _, LabPfx,LabelInfo, S)
 	:-!.
 
-compile_op( Op, Flag, LabPfx,S)
+compile_op( Op, Flag, LabPfx,LabelInfo, S)
 	:-                                	% other operations
 	map( Op, LabPfx,Cmd ), 
-	out(Cmd,LabPfx,S).
+	out(Cmd,LabPfx,LabelInfo,S).
 
 label_pfx(Name, LabPfx)
 	:-
@@ -344,6 +365,11 @@ procheader(Name, Args, Stream)
 	printf(Stream, '\tint status = 0;\n', []),
 	printf(Stream, '\tPWord stat_var;\n', []),
 	printf(Stream, '\tint stat_var_t;\n', []),
+	printf(Stream, '#ifndef DoubleType\n', []),
+	printf(Stream, '\tPWord functor;\n', []),
+	printf(Stream, '\tPWord vv;\n', []),
+	printf(Stream, '\tint arity, tt, i;\n', []),
+	printf(Stream, '#endif\n', []),
 	nl(Stream),
 	get_args(InPWordArgs, InTypeArgs, 1, Stream),
 	nl(Stream),
@@ -365,6 +391,11 @@ procheader2(Name, Args, Stream)
 	printf(Stream, '\tint status = 0;\n', []),
 	printf(Stream, '\tPWord stat_var;\n', []),
 	printf(Stream, '\tint stat_var_t;\n', []),
+	printf(Stream, '#ifndef DoubleType\n', []),
+	printf(Stream, '\tPWord functor;\n', []),
+	printf(Stream, '\tPWord vv;\n', []),
+	printf(Stream, '\tint arity, tt, i;\n', []),
+	printf(Stream, '#endif\n', []),
 	nl(Stream),
 	get_args(InPWordArgs, InTypeArgs, 1, Stream),
 	nl(Stream),
@@ -483,8 +514,23 @@ setup_args([PWV | InPWordArgs], [TPV | InTypeArgs],
 	printf(Stream, '\tif(%t == WTP_INTEGER)\n', [TPV]),
 	printf(Stream, '\t\t{\t%t = (%t)%t;\n\t\t\t%t = (%t)%t; }\n', 
 				[VL, RIET, PWV, VH, RIET, PWV]),
+
+	printf(Stream, '#ifndef DoubleType\n',[]),
+	printf(Stream, '\telse if(%t == WTP_STRUCTURE)\n', [TPV]),
+	printf(Stream, '\t{\n', []),
+	printf(Stream, '\t\tGET_DBL_VAL(%t, %t, &%t);\n', [TPV,PWV,VL]),
+	printf(Stream, '\t\t%t = %t;\n', [VH,VL]),
+	printf(Stream, '\t}\n', []),
+	printf(Stream, '#else\n', []),
+	printf(Stream, '\telse if(%t == WTP_DOUBLE)\n', [TPV]),
+	printf(Stream, '\t{\n', []),
+	printf(Stream, '\t\tw_get_double(%t, &%t);\n', [VL,PWV]),
+	printf(Stream, '\t\t%t = %t;\n', [VH,VL]),
+	printf(Stream, '\t}\n', []),
+	printf(Stream, '#endif\n', []),
+
 	printf(Stream, '\telse if(%t == WTP_UNBOUND)\n', [TPV]),
-	printf(Stream, '\t  extract_bds(%t, &%t, &%t);\n',[PWV, VL, VH]),
+	printf(Stream, '\t  extract_bds((PWord *)%t, &%t, &%t);\n',[PWV, VL, VH]),
 	printf(Stream, '\telse  FAIL;\n\n', []),
 	setup_args(InPWordArgs, InTypeArgs, RestVNs, RIET, Stream).
 
@@ -504,22 +550,22 @@ consis_and_change(S)
 	printf(S, '\telse if ( xl > xh ) FAIL;\n',[]),
 	printf(S, '\telse if ( yl > yh ) FAIL;\n',[]),
 
-	printf(S, '\tif (zlchange & status) change_bound(z, &zl, LOWER_BOUND);\n',[]),
-	printf(S, '\tif (zhchange & status) change_bound(z, &zh, UPPER_BOUND);\n',[]),
-	printf(S, '\tif (xlchange & status) change_bound(x, &xl, LOWER_BOUND);\n',[]),
-	printf(S, '\tif (xhchange & status) change_bound(x, &xh, UPPER_BOUND);\n',[]),
-	printf(S, '\tif (ylchange & status) change_bound(y, &yl, LOWER_BOUND);\n',[]),
-	printf(S, '\tif (yhchange & status) change_bound(y, &yh, UPPER_BOUND);\n\n',[]).
+	printf(S, '\tif (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);\n',[]),
+	printf(S, '\tif (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);\n',[]),
+	printf(S, '\tif (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);\n',[]),
+	printf(S, '\tif (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);\n',[]),
+	printf(S, '\tif (ylchange & status) change_bound((PWord *)y, &yl, LOWER_BOUND);\n',[]),
+	printf(S, '\tif (yhchange & status) change_bound((PWord *)y, &yh, UPPER_BOUND);\n\n',[]).
 
 consis_and_change2(S)
 	:-
 	printf(S, '\tif ( zl > zh ) FAIL;\n',[]),
 	printf(S, '\telse if ( xl > xh ) FAIL;\n',[]),
 
-	printf(S, '\tif (zlchange & status) change_bound(z, &zl, LOWER_BOUND);\n',[]),
-	printf(S, '\tif (zhchange & status) change_bound(z, &zh, UPPER_BOUND);\n',[]),
-	printf(S, '\tif (xlchange & status) change_bound(x, &xl, LOWER_BOUND);\n',[]),
-	printf(S, '\tif (xhchange & status) change_bound(x, &xh, UPPER_BOUND);\n\n',[]).
+	printf(S, '\tif (zlchange & status) change_bound((PWord *)z, &zl, LOWER_BOUND);\n',[]),
+	printf(S, '\tif (zhchange & status) change_bound((PWord *)z, &zh, UPPER_BOUND);\n',[]),
+	printf(S, '\tif (xlchange & status) change_bound((PWord *)x, &xl, LOWER_BOUND);\n',[]),
+	printf(S, '\tif (xhchange & status) change_bound((PWord *)x, &xh, UPPER_BOUND);\n\n',[]).
 
 /*--------------------------------------------------------------*
  |	out/2
@@ -528,36 +574,36 @@ consis_and_change2(S)
  |
  |	output formatting 
  *--------------------------------------------------------------*/
-out( true, LabPfx,S) :-!.
+out( true, LabPfx,_,S) :-!.
 
-out( (F, Fs), LabPfx,S)
+out( (F, Fs), LabPfx,LabelInfo,S)
 	:- 
 	!,
-	out(F, LabPfx,S),
-	out(Fs, LabPfx,S).
+	out(F, LabPfx,LabelInfo,S),
+	out(Fs, LabPfx,LabelInfo,S).
 
-out( (Lab:F), LabPfx,S )
+out( (Lab:F), LabPfx,LabelInfo,S )
 	:- 
 	map_label(Lab,LabPfx,Lab1), 
 	printf(S,'\n   %t:',[Lab1]),
 	!, 
-	out(F, LabPfx,S).
+	out(F, LabPfx,LabelInfo,S).
 
-out( F, LabPfx,S)
+out( F, LabPfx,LabelInfo,S)
 	:- 
-	format(F,LabPfx,S),
+	format(F,LabPfx,LabelInfo,S),
 	!.
 
-out( F,LabPfx,S)
+out( F,LabPfx,_,S)
 	:- 
 	printf(user_output,'Cannot format %t\n',[F]), 
 	fail.
 
-format( true, LabPfx,S)
+format( true, LabPfx,_,S)
 	:-!, 
 	printf(S,';\n').
 
-format( if( Exp, (goto Lab) ), LabPfx, S)
+format( if( Exp, (goto Lab) ), LabPfx, LabelInfo, S)
 	:-
 	special_interval_operation(Lab),
 	!,
@@ -569,28 +615,30 @@ format( if( Exp, (goto Lab) ), LabPfx, S)
 	label_pfx(Lab, LabPfx2), 
 	catenate(LabPfx2,LabPfx,LabLabPfx),
 
-	compile_body( CallBody, special, LabLabPfx, S ),
+	extract_labels(CallBody, LabLabPfx, [], CallLabelInfo),
+
+	compile_body( CallBody, special, LabLabPfx, CallLabelInfo, S ),
 	printf(S,'\t}\n', []).
 
-format( if( Exp, (goto L) ), LabPfx, S)
+format( if( Exp, (goto L) ), LabPfx, _, S)
 	:-!, 
 	fmt_goto( L, LabPfx, G), 
 	printf(S,'\tif (%t)  %t;\n', [Exp,G]).
 
-format( if( Exp, Then, Else ), LabPfx, S)
+format( if( Exp, Then, Else ), LabPfx, LabelInfo, S)
 	:-!, 
-	format( if(Exp, Then),LabPfx, S),
-	format( Else, LabPfx, S). 
+	format( if(Exp, Then),LabPfx, LabelInfo, S),
+	format( Else, LabPfx, LabelInfo, S). 
 
-format( X=Y,    LabPfx, S)
+format( X=Y,    LabPfx, _, S)
 	:-!, 
 	printf(S,'\t%t = %t;\n',[X,Y]).
 
-format( goto L, LabPfx, S)
+format( goto L, LabPfx, _, S)
 	:-!, 
 	printf(S,'\tgoto %t;\n', [L]).
 
-format( F ,     LabPfx, S)
+format( F ,     LabPfx, _, S)
 	:-  
 	printf(S,'\t%t;\n',[F]).
 
@@ -986,5 +1034,77 @@ comparison( fbgt, 'GT' ).
 comparison( fbge, 'GE').
 comparison( fbeq, 'EQ').
 comparison( fbne, 'NE').
+
+extract_labels( true , LabPfx, Cur, Cur) :-!.
+
+extract_labels( ( (goto Lab), (L:Op), Ops ), LabPfx, Cur, Final)
+	:-!,
+	map_label(Lab,LabPfx,Lab1),
+	(Lab == L ->
+		insert_zero_label(Cur, Lab1, Next)
+		;
+		incr_label(Cur, Lab1, Next)
+	),
+	extract_labels( ( (L:Op), Ops ), LabPfx, Next, Final).
+
+extract_labels( ( (Lab:Op), Ops),  LabPfx, Cur, Final)
+	:-!,
+	map_label(Lab,LabPfx,Lab1), 				% emit local label        
+	insert_zero_label(Cur, Lab1, Next),
+	extract_labels( ( Op,Ops ), LabPfx, Next, Final).
+
+extract_labels( ( (X ->L), (Lab:Op), Ops ), LabPfx, Cur, Final)
+	:-!,
+	list_delete(L,Lab,SubL),
+	push_labels(SubL,LabPfx,Cur,Next),
+	
+
+
+/*
+	map_label(Lab,LabPfx,Lab1), 
+	(dmember(Lab, L) ->
+		insert_zero_label(Cur, Lab1, Next)
+		;
+		incr_label(Cur, Lab1, Next)
+	),
+*/
+	extract_labels( ( (Lab:Op), Ops ), LabPfx, Next, Final).
+
+	%% General recusion clause:
+extract_labels( (Op, Ops ), LabPfx, Cur, Final)
+	:- !,
+	extract_labels( Ops, LabPfx, Cur, Final).
+
+extract_labels( _ , LabPfx, Cur, Cur) :-!.
+
+insert_zero_label(Cur, Lab1, Cur)
+	:-
+	dmember(Lab1-_, Cur),!.
+
+insert_zero_label(Cur, Lab1, [Lab1-0 | Cur]).
+
+
+incr_label([Lab-Old | Cur], Lab, [Lab-New | Cur])
+	:-!,
+	New is Old+1.
+
+incr_label([Skip], Lab, [Skip, Lab-1])
+	:-!.
+
+incr_label([], Lab, [Lab-1])
+	:-!.
+
+incr_label([Skip | Cur], Lab, [Skip | Next])
+	:-!,
+	incr_label(Cur, Lab, Next).
+
+push_labels([],LabPfx,Cur,Cur).
+
+push_labels([LL | SubL],LabPfx,Cur,Next)
+	:-
+	map_label(LL,LabPfx,LL1), 
+	incr_label(Cur, LL1, Inter),
+	push_labels(SubL,LabPfx,Inter,Next).
+
 
 endmod.

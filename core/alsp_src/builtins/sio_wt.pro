@@ -67,7 +67,7 @@ module sio.
  |	indent(N)		-- 
  |		N is the initial indentation to use.
  |
- |	quoted_strings(Bool)	-- Bool is true or false;
+|	quoted_strings(Bool)	-- Bool is true or false;
  |		If true, lists of suitably small integers will print out as a 
  |		double quoted string.  If false, these lists will print out
  |		as lists of small numbers.
@@ -1443,8 +1443,6 @@ write_out(Term) :-
     	put_atom(Stream,'.'),
     	nl(Stream).
 
-
-
 /*-----------------------------------------------------------------------*
  | write_substs(Stream,Names,Substs)
  |
@@ -1471,7 +1469,13 @@ write_out(Term) :-
  |	3)	Letter names are generated and substituted for any unbound variables 
  |		through out all of the output terms;
  |	4)	The resulting equations (Name = Value) are actually written out.
+ |
+ |  12 Sept 1995 -- KAB: Modifications to avoid binding delay variables during 
+ |				printing, and to provide appropriate representations of interval 
+ |				terms, and of other non-instantiated frozen variables.
  *-----------------------------------------------------------------------*/
+
+:- dynamic('$is_delay_var'/1).
 
 write_substs(Stream,Names,Substs) 
 	:-
@@ -1480,9 +1484,11 @@ write_substs(Stream,Names,Substs)
 
 delete_anon_vars([],[],[],[]) 
 	:- !.
+
 delete_anon_vars(['_'|N1],[_|S1],N2,S2) 
 	:- !,
 	delete_anon_vars(N1,S1,N2,S2).
+
 delete_anon_vars([N|N1],[S|S1],[N|N2],[S|S2]) 
 	:-
 	delete_anon_vars(N1,S1,N2,S2).
@@ -1490,22 +1496,47 @@ delete_anon_vars([N|N1],[S|S1],[N|N2],[S|S2])
 cont_write_substs([],[],Stream) 
 	:- !,
 	fail.
+
 cont_write_substs(N,S,Stream) 
 	:-
 	subst_orig_toplevel_names(N,S),
 	subst_gen_letter_names(S,c(0)),
 	wr_subs2(N,S,Stream),
 	fail.
+
 cont_write_substs(_,_,_).
 
 subst_orig_toplevel_names([],[]) 
 	:- !.
+
+subst_orig_toplevel_names([N|Ns],[S|Ss]) 
+	:- 
+	var(S),
+	'$is_delay_var'(S),
+	!,
+	subst_orig_toplevel_names(Ns,Ss).
+
 subst_orig_toplevel_names([N|Ns],['%lettervar%'(N)|Ss]) 
 	:- !,
 	subst_orig_toplevel_names(Ns,Ss).
+
 subst_orig_toplevel_names([_|Ns],[_|Ss]) 
 	:-
 	subst_orig_toplevel_names(Ns,Ss).
+
+epsilon_show(1e-6).
+
+export set_eps_show/1.
+set_eps_show(V)
+	:-
+	abolish(epsilon_show,1),
+	assert(epsilon_show(V)).
+
+subst_gen_letter_names(Var,Counter) 
+	:-
+	var(Var),
+	'$is_delay_var'(Var),
+	!.
 
 subst_gen_letter_names(Var,Counter) 
 	:-
@@ -1517,10 +1548,12 @@ subst_gen_letter_names(Var,Counter)
 	Var = '%lettervar%'(VarAtom),
 	NextVarNum is VarNum+1,
 	mangle(1,Counter,NextVarNum).
+
 subst_gen_letter_names(Atomic,Counter) 
 	:-
 	atomic(Atomic),
 	!.
+
 subst_gen_letter_names(Struct,Counter) 
 	:-
 	functor(Struct,_,N),
@@ -1530,6 +1563,7 @@ subst_gen_letter_names(N,M,_,_)
 	:-
 	N>M,
 	!.
+
 subst_gen_letter_names(N,M,S,C) 
 	:-
 	arg(N,S,A),
@@ -1539,12 +1573,94 @@ subst_gen_letter_names(N,M,S,C)
 
 wr_subs2([],[],Stream) 
 	:- !.
+
 wr_subs2([N|Ns],[S|Ss],Stream) 
 	:-
-	nl(Stream),
-	write_term(Stream,'%lettervar%'(N)=S,[]),
+	wr_subs3(N,S,Stream),
+	!,
 	wr_subs2(Ns,Ss,Stream).
 
+wr_subs3(N,S,Stream)
+	:-
+	'$is_delay_var'(S),
+	'$delay_term_for'(S, Var_DelayTerm),
+	arg(4, Var_DelayTerm, ConstraintTerm),
+	rel_arith:domain_term_from_constr(ConstraintTerm, DomainTerm),
+	(rel_arith:valid_domain(DomainTerm, Type, LArg, UArg) ->
+		epsilon_show(Eps),
+		Width is abs(UArg - LArg),
+		(Width < Eps ->
+			SPrt is (UArg + LArg)/2
+			;
+			SPrt = [LArg, UArg]
+		),
+		nl(Stream),
+		write_term(Stream,'%lettervar%'(N)=SPrt,[])
+		;
+		nl(Stream),
+		write_term(Stream,'%lettervar%'(N),[]),
+		arg(1,Var_DelayTerm, DelayVar),
+		sio_var_to_atom(DelayVar,DelayVarAtom),
+		put_char(Stream,'['),
+		put_atom(Stream, DelayVarAtom),
+		put_char(Stream,']'),
+		write_term(Stream,'->',[]),
+		write_delay_term(Stream,Var_DelayTerm, DelayVarAtom)
+	).
+
+wr_subs3(N,S,Stream)
+	:-
+	nl(Stream),
+	write_term(Stream,'%lettervar%'(N)=S,[]).
+
+write_delay_term(Stream, '$delay'(DVar, _, _, FrozenTerm), VName )
+	:-
+	write_delay_term(FrozenTerm, Stream, DVar, VName).
+
+write_delay_term(FrozenTerm, Stream, DVar, VName)
+	:-
+	FrozenTerm == DVar,
+	!,
+	put_atom(Stream, VName).
+
+write_delay_term(FrozenTerm, Stream, DVar, VName)
+	:-
+	atomic(FrozenTerm),
+	!,
+	write_term(Stream, FrozenTerm, []).
+
+write_delay_term([FT | FTs], Stream, DVar, VName)
+	:-
+	put_char(Stream, '['),
+	write_delay_term_seq([FT | FTs], Stream, DVar, VName),
+	put_char(Stream, ']').
+
+write_delay_term(FrozenTerm, Stream, DVar, VName)
+	:-
+	FrozenTerm =.. [Functor | Args],
+	((functor(FrozenTerm, _, 2), sio:binop( Functor,_,_,_)) ->
+		Args = [Arg1, Arg2],
+		write_delay_term(Arg1, Stream, DVar, VName),
+		put_atom(Stream,Functor),
+		write_delay_term(Arg2, Stream, DVar, VName)
+		;
+		write_term(Stream, Functor, []),
+		put_char(Stream, '('),
+		write_delay_term_seq(Args, Stream, DVar, VName),
+		put_char(Stream, ')')
+	).
+	
+write_delay_term_seq([], Stream, DVar, VName).
+
+write_delay_term_seq([Term], Stream, DVar, VName)
+	:-!,
+	write_delay_term(Term, Stream, DVar, VName).
+	
+write_delay_term_seq([Term | Terms], Stream, DVar, VName)
+	:-
+	write_delay_term(Term, Stream, DVar, VName),
+	put_char(Stream, ','),
+	write_delay_term_seq(Terms, Stream, DVar, VName).
 
 endmod.		%% builtins
 endmod.		%% sio

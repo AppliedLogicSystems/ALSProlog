@@ -76,20 +76,23 @@ delay_handler('$delay'(_,Next,Module,Goal))
 '$combine_dvars'(R,F)
 	:-
 		%% F is the senior var;
-		pbi_write('-----Combine delay vars: '-(R,F)),pbi_nl,pbi_ttyflush,
+%		pbi_write('-----Combine delay vars: '-(R,F)),pbi_nl,pbi_ttyflush,
 
 	'$delay_term_for'(R, R_DelayTerm),
 	arg(4, R_DelayTerm, R_ConstrTerm),
+%pbi_write('r-left'=R_ConstrTerm),pbi_nl,
 
 	'$delay_term_for'(F, F_DelayTerm),
 	arg(4, F_DelayTerm, F_ConstrTerm),
+%pbi_write('f-right'=F_ConstrTerm),pbi_nl,
+%pbi_ttyflush,
 
 	comb_left_cstr(R_ConstrTerm, R, F_ConstrTerm, F).
 
 		%% Compound constraint:
 comb_left_cstr((RC1, Rest_R_C), R, F_Constr, F)
 	:-
-	(functor(RC1, intvl, 6) ->
+	(functor(RC1, intvl, 5) ->
 			%% Has interval:
 		comb_rt_cstr(F_Constr, F, RC1, Rest_R_C, R)
 		;
@@ -99,7 +102,7 @@ comb_left_cstr((RC1, Rest_R_C), R, F_Constr, F)
 
 comb_left_cstr(R_Constr, R, F_Constr, F)
 	:-
-	(functor(R_Constr, intvl, 6) ->
+	(functor(R_Constr, intvl, 5) ->
 			%% Has interval:
 		comb_rt_cstr(F_Constr, F, R_Constr, true, R)
 		;
@@ -110,7 +113,7 @@ comb_left_cstr(R_Constr, R, F_Constr, F)
 
 comb_rt_cstr((FC1, Rest_F_C), F, R_Intv, R_Constr, R)
 	:-
-	(functor(FC1, intvl, 6) ->
+	(functor(FC1, intvl, 5) ->
 			%% Has interval:
 		cmbn(FC1, Rest_F_C, F, R_Intv, R_Constr, R)
 		;
@@ -121,7 +124,7 @@ comb_rt_cstr((FC1, Rest_F_C), F, R_Intv, R_Constr, R)
 
 comb_rt_cstr(F_Constr, F, R_Intv, R_Constr, R)
 	:-
-	(functor(F_Constr, intvl, 6) ->
+	(functor(F_Constr, intvl, 5) ->
 			%% Has interval:
 		cmbn(F_Constr, true, F, R_Intv, R_Constr, R)
 		;
@@ -200,8 +203,8 @@ cmbn(F_Intv, F_Constr, F, nil, R_Constr, R)
 		%% Both have intvls:
 cmbn(F_Intv, F_Constr, F, R_Intv, R_Constr, R)
 	:-
-		pbi_write('Both intvl case'),pbi_nl,pbi_ttyflush,
-		pbi_write(calling-add_relation(==, R, F)),pbi_nl,pbi_ttyflush,
+%		pbi_write('Both intvl case'),pbi_nl,pbi_ttyflush,
+%		pbi_write(calling-add_relation(==, R, F)),pbi_nl,pbi_ttyflush,
 
 		%% Impose constraint equality between the vars:
 	rel_arith:add_relation(==, R, F).

@@ -26,6 +26,8 @@ echo Copying:
 echo - top level directory...
 cp readme $1
 u2d $1/readme
+cp cfgs/dos/readme.dos $1
+u2d $1/readme.dos
 
 echo - cfgs
 mkdir $1/cfgs

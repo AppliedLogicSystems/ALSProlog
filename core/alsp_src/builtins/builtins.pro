@@ -346,45 +346,25 @@ export getPrologInterrupt/1.
 		%% Interrupt called because trailing discovered a delay
 		%% variable was being bound to a non-delay-variable:
 		%% ------------------------------------------------------
+
+:- rel_arith:dynamic(intvl/5).
+
 '$interrupt'(3,M,G) 
 	:-!,
+/*
 		%% Suppresses interrupting on the (temporary) binding
 		%% that write_term performs:
 	functor(G,F,N),
+%pbi_write('int3----'(G,F,N)),pbi_nl,
 	fin_delay_int(M,F,N,G).
 
-	%% Exclude interrupts occurring because of pretty-printing:
-fin_delay_int(sio,wd_infix,10,G)
-	:-!,
-	sio:G .
-fin_delay_int(sio,tail_depth,2,G)
-	:-!,
-	sio:G .
-fin_delay_int(sio,is,2,G)
-	:-!,
-	sio:G .
-fin_delay_int(sio,wd_space,3,G)
-	:-!,
-	sio:G .
-
-	%% Allow interrupt in all other cases:
 fin_delay_int(M,_,_,G)
 	:-
-		  pbi_write('----------$interrupt-3------'(M,G) ), pbi_nl, pbi_ttyflush,
+*/
+%		pbi_write('----------$interrupt-3------'(M,G) ), pbi_nl, pbi_ttyflush,
 	clct_tr(ActiveDelays),
 	delay_handler(ActiveDelays),
 	M:G.
-
-/************************************************************************
-		%% -------------------------------------------------
-		%% Interrupt called because trailing discovered two
-		%% delay variables being bound together
-		%% -------------------------------------------------
-'$interrupt'(4,M,G) 
-	:-!,
-		  pbi_write('----------$interrupt-4------'(M,G) ), pbi_nl, pbi_ttyflush,
-	combine_delay_vars(M,G).
-************************************************************************/
 
 		%% -------------------------------------
 		%% Interrupt generated from outside 

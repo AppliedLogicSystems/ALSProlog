@@ -373,6 +373,11 @@ extern	void	init_fsutils	PARAMS(( void ));
 extern	long	get_file_modified_time	PARAMS((CONST char * ));
 extern	int	isdir			PARAMS((CONST char * ));
 extern	int	absolute_pathname	PARAMS((CONST char *name));
+#ifndef GUSI
+extern  int access PARAMS((CONST char *, int x));
+extern  int chdir PARAMS((CONST char *dirname));
+extern  char *getcwd PARAMS((char *, int));
+#endif
 #endif
 
 /* ----------   sig.c ----------   */

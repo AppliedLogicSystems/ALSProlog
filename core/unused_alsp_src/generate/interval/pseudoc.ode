@@ -84,8 +84,8 @@ interval_operation( sin).
 interval_operation( tan).
 interval_operation( vabs).			% alias abs
 interval_operation( wrap ).   		% folds real line into (sawtooth) interval
-		%interval_operation( ydelta).		% continuous midpoint/delta
 interval_operation( xp).			%exp/ln
+		%interval_operation( ydelta).		% continuous midpoint/delta
 
 
 	%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@

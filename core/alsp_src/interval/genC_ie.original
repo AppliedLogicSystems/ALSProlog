@@ -1,0 +1,305 @@
+%
+%
+%       Compiler for interval operations to C 
+%
+%
+%
+%
+%       Language
+%           Registers:   XL,XH,YL,YH,ZL,ZH, WL, WH
+%           Operations:  
+%                   <-  assignment
+%                   =,=<,<,>,>=, /=
+%                   A?B ->[LT,EQ,GT]  three-way branch
+%                   ub(_),lb(_)
+%                   +,-,*,/, etc.
+%                   Label: Expression
+%
+%           Input is a clause of form  op(XL,XH,YL,YH,...):- RHS
+%               where RHS is written in the above language:
+%                   Begin : Exp  ,...
+
+%  may 7 92  - allow: 'goto label' where label is global ( i.e. symbol instead of 
+var)
+%  jun 2 92  - case table hard coded into driver file / eliminates use of text 
+processing
+%  july 28 92 - C version 
+%  sept  17   -  special case transcendental and sqrt 
+%  oct   9    - unspecial case sqrt
+%  may 3 1995 - support for round (to nearest longint)
+
+op(600,xfx,'?').        % label
+op(600,xfx,'<-').       % assignment
+op(600,xfx,'<->').      % interchange
+op(600,fx, goto).       % unconditional branch
+        %  comparison operators for output file
+op(600,xfx,'LT').       
+op(600,xfx,'LE').       
+op(600,xfx,'GT').       
+op(600,xfx,'GE').       
+op(600,xfx,'EQ').       
+op(600,xfx,'NE').       
+
+
+%  machine/ system
+
+make_c :- make_c( 'newest pseudocode',  'interval.h'),!.
+
+
+make_c(  SourceFileName,    OutputFileName):-
+      forget_all( prim(_,_), $local),
+      load_context( SourceFileName),
+      headers( OutputFileName, SourceFileName, Out),
+      foreach(  interval_operation(Op)  
+            do  compile_primitive( Op, Out) ),
+      trailer( Out),!,
+      exit_context( SourceFileName).
+
+
+
+cia_version( 'May 3 95 Version of make_C_interval_engine').
+
+
+%
+%           generic compiler implementation
+%   
+
+headers(OutFilename,  Pseudo, Out):-
+    tr-> [nl, write( 'Output in ',OutFilename)],
+    open(Out, OutFilename, read_write,IO),
+    $open_check(IO,OutFilename,Out),
+    seek(Out,0),
+    cia_version(Version), timedate(Time,Date),
+    nl(Out), nl(Out),
+    swrite(Out, 
+'/*****************************************************************'),nl(Out),
+    swrite(Out, ';************          Interval  Primitives            '),nl(Out),
+    swrite(Out, ';************          ', Version                      ),nl(Out),
+    swrite(Out, ';************          Source: ', Pseudo               ),nl(Out),
+    swrite(Out, ';************          ', Date ,' at ', Time           ),nl(Out),
+    swrite(Out, 
+';*****************************************************************/'),
+    nl(Out),nl(Out).
+
+    
+
+trailer( Out):-
+    nl(Out),
+    set_end_of_file(Out),
+    close(Out,_).
+
+
+$open_check(0,_,_).   % open ok
+$open_check(IO_err,Filename,_):- IO_err<>0,
+    write('I/O error ', IO_err, ' opening file ', Filename), 
+    fail. 
+$open_check(0,_,Strm):- close(Strm,_), fail.   
+    % downstream error, commit partial output for debugging purposes
+
+%
+%           compiling  a primitive
+%
+compile_primitive( Name , Stream):-
+     clause( Name(Args..):- Body ),
+     addname(Name), 
+     procheader( Name, Stream),
+     compile_body( Body, Stream),!,
+     procend( Name, Stream),
+     write('*').
+compile_primitive( Name,_) :- 
+     nl, write( Name, ' failed to compile'), 
+     remember(  failed_to_compile(Name), $local).
+
+compile_body( [] ,S):-!.
+compile_body( [Lab:Op, Ops..], S):-map_label(Lab,Lab1),!,      % emit local label        
+      swrite(S,'\n   ',Lab1,':'),
+      compile_body( [Op,Ops..], S).
+compile_body( [goto Lab, L:Op, Ops..], S):-Lab@=L,!,                % suppress 
+unneeded branch
+      compile_body( [L:Op,Ops..], S).
+compile_body( [goto Lab, Ops..], S):-map( goto Lab, Cmd ), out(Cmd,S),!,
+      compile_body( Ops, S).
+compile_body( [X ->L, Lab:Op, Ops..], S):-                  % branch constructs
+      map( X -> L,Cmd,Lab), out(Cmd,S),!,
+      compile_body( [Lab:Op,Ops..],S).
+compile_body( [Op, Ops..], S):-                                % other operations
+      map( Op, Cmd ), out(Cmd,S),!,      
+      compile_body( Ops, S).
+compile_body( X, S):- 
+      nl, write( 'failed to compile: ');
+      nl, print(X), nl,
+      fail.
+
+addname(Name):- name( Name,[K,_..]),name( Key,[K]),
+      forget(  prim(_,_), $local) ; true,
+      remember(  prim(Key,Name), $local),!.
+
+procheader(Name, Stream):-
+      swrite(Stream,'\n\ninterval_op(',Name,')').     
+procend( Name,Stream):-
+      swrite(Stream,'\nend_op(',Name,')\n\n').     
+
+% output formatting 
+out( [],S):-!.
+out( [F,Fs..],S):- !,out(F,S),out(Fs,S).
+out( Lab:F, S ):- map_label(Lab,Lab1), swrite(S,'\n   ',Lab1,':'),!, out(F,S).
+out( F,S):- format(F,S),!.
+out( F,S):- write('Cannot format ',F), fail.
+
+tab(S):- swrite(S,'\n         ').
+
+format( [], S):-!, swrite(S,';').
+format( if( Exp, goto L ), S):-!, 
+        tab(S), fmt_goto( L , G), swrite(S,'if ',Exp,'  ',G, ';' ).
+%format( if( Exp, goto L, goto L2 ), S):-!, 
+%        tab(S),fmt_goto(L,S1), fmt_goto(L2,S2), swrite(S,'if ',Exp,'  ',S1,';  ',S2, ';' 
+).
+format( if( Exp, Then, Else ), S):-!, 
+        format( if(Exp, Then),S),
+        format( Else, S). 
+format( X=Y,    S):-!, tab(S),swrite(S,X,' = ',Y,';').
+format( goto L, S):-!, tab(S),swrite(S,'goto ',L,';').
+format( F ,     S):-  tab(S), swrite(S,F,';').
+
+fmt_goto( iaerror, 'iaerror()'):-!.
+fmt_goto(  L, Str):- swrite( Str,'goto ',L).
+
+map_cons(C,C):- numeric(C),!.
+map_cons(pi,pi()):-!.
+map_cons(2**0,1):-!.
+map_cons(2**1,2).
+map_reg(R,R):- !,valid_reg(R).
+map_reg(x,xl,xh, xflipped()):-!.
+map_reg(y,yl,yh, yflipped()):-!.
+map_reg(z,zl,zh, zflipped()):-!.
+
+valid_reg(xl).
+valid_reg(xh).
+valid_reg(yl).
+valid_reg(yh).
+valid_reg(zl).
+valid_reg(zh).
+valid_reg(vl).
+valid_reg(vh).
+valid_reg(ul).
+valid_reg(uh).
+valid_reg(temp).
+exchange_reg(temp).
+change( xl, [ xlchng() ]):-!.
+change( xh, [ xhchng() ]):-!.
+change( yl, [ ylchng() ]):-!.
+change( yh, [ yhchng() ]):-!.
+change( zl, [ zlchng() ]):-!.
+change( zh, [ zhchng() ]):-!.
+change( _,  []).
+% map varname to local label
+%  ( all labels are local except for entry points )
+
+map_label( L, Label):- var(L),!,recall(prim(K,_),$local),swrite(Label,K,L).
+map_label( L, L):- symbol(L).
+% map arithmetic operations
+%  map_exp( Expr, Code, Targetreg)
+map_exp( lb(E), [ lowerbd(Expr,D) ], D):- map_expression(E, Expr),!.  
+map_exp( ub(E), [ upperbd(Expr,D) ], D):- map_expression(E, Expr),!.  
+map_exp( lb(E), [ lowerbd2(Expr,D) ], D):- !, map_trans_expression(E, Expr).  
+map_exp( ub(E), [ upperbd2(Expr,D) ], D):- !, map_trans_expression(E, Expr).  
+map_exp( F(E1,E2), D=Code,     D):-!, arity2(F(E1,E2),Code).  
+map_exp( next(X),[D=X1,next(D)], D):-!, map_reg(X,X1).
+map_exp( prev(X),[D=X1,prev(D)], D):-!, map_reg(X,X1).
+map_exp( F(E), D=Code,     D):-!, arity1(F(E),Code).  
+map_exp( X,    D= X1  ,    D):-!, map_reg(X,X1).
+
+map_expression( E, E1):- map_reg(E,E1),!.
+map_expression( E, E1):- arity2(E,E1),!.
+map_expression( E, E1):- arity1(E,E1),!.
+
+map_trans_expression( E, E1):- map_reg(E,E1),!.
+map_trans_expression( F(X),  F1(X1) ):- map_tfunc(F,F1), map_reg(X,X1).
+
+arity2( F(X,Y),  F1(X1,Y1) ):- map_func2(F,F1), map_reg(X,X1), map_reg(Y,Y1).
+map_func2( + , + ).
+map_func2( * , * ).
+map_func2( - , - ).
+map_func2( / , / ).
+
+arity1( F(X),  F1(X1) ):- map_func(F,F1), map_reg(X,X1).
+map_func( -,   -  ).
+map_func( floor,floor).
+map_func( ceiling,ceiling).
+map_func( sqrt, sqrt ).
+map_func( round, round).
+
+%   approximate relations 
+map_tfunc( tan, tan).
+map_tfunc( atan,atan).
+map_tfunc( sin, sin).
+map_tfunc( asin,asin).
+map_tfunc( cos, cos).
+map_tfunc( acos,acos).
+map_tfunc( exp, exp).
+map_tfunc( ln, ln).
+
+% map operators
+map(  A <- F(X..),      [Code,Upd..]):- map_reg(A,A1),
+        map_exp(F(X..),Code,A1),change(A,Upd),!.
+map(  A <- B,           [A1=B1,  Upd..]):- map_reg(A,A1), map_reg(B,B1),!, 
+change(A,Upd).
+map(  A <- C,           [A1=C1,  Upd..]):- map_reg(A,A1), map_cons(C,C1), 
+change(A,Upd),!.
+map(  goto Lab,         goto Lab1      ):- map_label(Lab,Lab1).
+map(  success,          success()   ).
+map(  fail,             fail()      ).
+map(  persistent,       deact()     ).
+map(  A <-> B,   [ X=A1, A1= B1, B1=X ]):- map_reg(A,A1), map_reg(B,B1), 
+exchange_reg(X).
+map(  flip(A),          swap(A)     ):-!,  A=x;A=y;A=z, !. 
+map(  schedy,           schedy()    ).
+
+% map compare and branch instructions
+
+map(  C -> [L,E,R],    Code, Lab ):- L@=Lab,!,map_cmp(C,A1,B1),
+        map_label(L,L1), map_label(R,R1), map_label(E,E1),
+        branches([fbgt(R1),fbeq(E1),fblt(L1)],Branches),
+        ifstatement( Branches, A1,B1, Code, L1).
+map(  C -> [L,E,R],    Code, Lab ):- R@=Lab,!,map_cmp(C,A1,B1),
+        map_label(L,L1), map_label(R,R1), map_label(E,E1),
+        branches([fblt(L1),fbeq(E1),fbgt(R1)],Branches),
+        ifstatement( Branches, A1,B1, Code, R1).
+map(  C -> [L,E,R],    Code, Lab ):- E@=Lab,!,map_cmp(C,A1,B1),
+        map_label(L,L1), map_label(R,R1), map_label(E,E1),
+        branches([fbgt(R1),fblt(L1),fbeq(E1)],Branches),
+        ifstatement( Branches, A1,B1, Code, E1).
+map(  C -> [L,E,R],    Code, _ ):- map_cmp(C,A1,B1),
+        map_label(L,L1), map_label(R,R1), map_label(E,E1),
+        branches([fblt(L1),fbgt(R1),fbeq(E1)],Branches),
+        ifstatement( Branches, A1,B1, Code, []).
+map_cmp( A?B, A1,B1):- map_reg(A,A1),( map_reg(B,B1);map_cons(B,B1) ).
+
+ifstatement( [],_,_, [],_).
+ifstatement( [B1(L1),B2(L2)],X,Y,  if( Op(X,Y), goto L1 ), L2):-
+!,comparison(B1,Op).
+ifstatement( [B1(L1),B2(L2)],X,Y,  if( Op(X,Y), goto L1, goto L2),_):-
+!,comparison(B1,Op).
+ifstatement( [B(L),Bs..], X,Y, if( Op( X, Y ), goto L, Rest ),Lab ):- 
+comparison(B,Op),!,
+        ifstatement( Bs, X,Y, Rest,Lab).
+
+% auxiliary functions for special casing branches
+branches( [ B1(L), B2(L) ],[B3(L)] ):-!, merge(B1,B2,B3).
+branches( [ B1(L), B2(L), B3(L)], _):- write(' branch error '), failexit(compile).
+branches( [ B1(L), B2(L), B3(L3)], [B12(L),B3(L3)]):-!, merge(B1,B2,B12). 
+branches( [ B1(L), B2(L2), B3(L)], [B13(L),B2(L2)]):-!, merge(B1,B3,B13). 
+branches( [ B1(L1), B2(L), B3(L)], [B1(L1),B23(L)]):-!, merge(B2,B3,B23).
+branches( X,X). 
+
+merge( fblt, fbgt, fbne):-!.
+merge( fblt, fbeq, fble):-!.
+merge( fbgt, fbeq, fbge):-!.
+merge( B1,B2,B3):- merge(B2,B1,B3).
+
+comparison( fblt, 'LT' ).
+comparison( fble, 'LE').
+comparison( fbgt, 'GT' ).
+comparison( fbge, 'GE').
+comparison( fbeq, 'EQ').
+comparison( fbne, 'NE').

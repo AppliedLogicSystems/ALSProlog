@@ -916,8 +916,16 @@ cP1(G,N,CL)
 xbrace(Braced,GN,VL,Goal,InCV,NCV)
 	:-
 	NCV = InCV,
+	brace_clp_goal(Braced, Goal),
+	!.
+
+xbrace(Braced,GN,VL,Goal,InCV,NCV)
+	:-
+	NCV = InCV,
 	vars_in_this_goal(VL,GN,InGoalVs),
 	Goal = freeze_list_ground(InGoalVs, Braced).
+
+brace_clp_goal(Braced, clp(Braced)).
 
 vars_in_this_goal([], GN, []).
 vars_in_this_goal([v(Var,GL) | VL], GN, [Var | InGoalVs])
