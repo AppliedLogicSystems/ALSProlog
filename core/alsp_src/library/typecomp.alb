@@ -1,2 +1,4 @@
 libactivate(builtins,[library,typecomp],
-    [comptype_cl/0,comptype/0,comptype/1,comptype/2,xcomptype/2,xcomptype/3,comptype/3],[]).
+    [create_type_def/3,
+	 comptype_cl/0,comptype/0,comptype/1,comptype/2,
+	 xcomptype/2,xcomptype/3,comptype/3],[]).
