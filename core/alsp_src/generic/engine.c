@@ -234,16 +234,32 @@ static FILE *safe_fopen(const char *filename, const char *mode)
 	return result;
 }
 
+static void safe_fwrite(const void *ptr, size_t size, size_t nmemb,
+			FILE *stream)
+{
+  size_t count;
+  count = fwrite(ptr, size, nmemb, stream);
+  if (count != nmemb) THROW_ANSI_ERROR(errno);
+}
+
+static void safe_fread(void *ptr, size_t size, size_t nmemb, FILE
+		       *stream)
+{
+  size_t count;
+  count = fread(ptr, size, nmemb, stream);
+  if (count != nmemb) THROW_ANSI_ERROR(errno);
+}
+
 static void file_load(void *f, void *data, long length, long offset)
 {
 	safe_fseek(f, offset, SEEK_SET);
-	fread(data, length, 1, f);
+	safe_fread(data, length, 1, f);
 }
 
 static void file_store(void *f, void *data, long length, long offset)
 {
 	safe_fseek(f, offset, SEEK_SET);
-	fwrite(data, length, 1, f);
+	safe_fwrite(data, length, 1, f);
 }
 
 static void safe_freopen(const char *filename, const char *mode,
