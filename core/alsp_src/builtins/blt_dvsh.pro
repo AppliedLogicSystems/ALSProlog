@@ -290,7 +290,7 @@ find_alsdev_ini(Items)
 		%% not in unix:
 	builtins:sys_searchdir(SSD),
 	split_path(SSD, SSDList),
-	append(ImageDirList, [alsdir], SSDList),
+	(append(ImageDirList, [alsdir], SSDList) ; ImageDirList = SSDList),
 	(sys_env(mswin32,_,_) ->
 		PrefsFile = 'alsdev.ini'
 		;
