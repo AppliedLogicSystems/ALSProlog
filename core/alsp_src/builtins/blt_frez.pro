@@ -21,11 +21,40 @@ freeze(Mod, Var, Goal)
 	:-
 	nonvar(Var),
 	!,
-	call(Goal).
+%write(freeze_clause1),nl,flush_output,
+	Mod:Goal.
 
 freeze(Mod, Var, Goal)
 	:-
+%write(freeze_clause2),nl,flush_output,
 	'$delay'(Var,Mod,Goal,DelayTerm),
+	'get_$delay_terms'(DTL),
+	'set_$delay_terms'([DelayTerm | DTL]).
+
+:- module_closure(freeze_list_ground,2).  
+
+export freeze_list_ground/3.
+freeze_list_ground(Mod, [], Goal)
+	:-
+%write(freeze_list_clause1),nl,flush_output,
+	Mod:Goal.
+
+freeze_list_ground(Mod, [Var | Vars], Goal)
+	:-
+	nonvar(Var),
+	!,
+%write(freeze_list_clause2),nl,flush_output,
+	get_vars(Var,[],NewVars),
+	freeze_list_ground(Mod, NewVars, 
+						freeze_list_ground(Mod, Vars, Goal)).
+
+freeze_list_ground(Mod, [Var | Vars], Goal)
+	:-
+%write(freeze_list_clause3),nl,flush_output,
+	'$delay'(Var,Mod,
+			 freeze_list_ground(Mod,[Var | Vars], Goal),
+			 DelayTerm),
+
 	'get_$delay_terms'(DTL),
 	'set_$delay_terms'([DelayTerm | DTL]).
 

@@ -113,4 +113,33 @@ xlist_append0([A | RestInput], Inter, Result)
 	xlist_append(Inter, A, InterAgain),
 	xlist_append0(RestInput, InterAgain, Result).
 
+/*!---------------------------------------------------------------
+ |	xlist_mem/2
+ |	xlist_mem(List, Item)
+ |	xlist_mem(+, +)
+ *!--------------------------------------------------------------*/
+
+xlist_mem(List, Item)
+	:-
+	var(List), !, fail.
+xlist_mem([Item | List], Item).
+xlist_mem([_ | List], Item)
+	:-
+	xlist_mem(List, Item).
+
+/*!---------------------------------------------------------------
+ |	xlist_dmem/2
+ |	xlist_dmem(List, Item)
+ |	xlist_dmem(+, +)
+ *!--------------------------------------------------------------*/
+
+xlist_dmem(List, Item)
+	:-
+	var(List), !, fail.
+xlist_dmem([Item | List], Item) :-!.
+xlist_dmem([_ | List], Item)
+	:-
+	xlist_dmem(List, Item).
+
+
 endmod.

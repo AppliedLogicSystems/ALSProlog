@@ -344,7 +344,7 @@ export getPrologInterrupt/1.
 		%% -------------------------------------
 '$interrupt'(3,M,G) 
 	:-!,
-			%pbi_write('----------$interrupt--------'(M,G) ), pbi_nl, pbi_ttyflush,
+			pbi_write('----------$interrupt--------'(M,G) ), pbi_nl, pbi_ttyflush,
 	clct_tr(ActiveDelays),
 			%pbi_write(running_delays=ActiveDelays),pbi_nl,pbi_ttyflush,
 	delay_handler(ActiveDelays),
@@ -503,6 +503,8 @@ goalFix('$dbg_apg'(A,B,C),'$dbg_apg'(A,B,C),show_pp) :- !.
 goalFix('$dbg_aph'(_,_,_),_,hide_pp) :- !, fail.
 goalFix('$dbg_apg'(_,_,_),_,hide_pp) :- !, fail.
 goalFix(callWithDelayedInterrupt(M,G,_),callWithDelayedInterrupt(M,G),Mode) :- !.
+goalFix(freeze_list_ground(_,_,Goal),'{}'(Goal),Mode) :-!.
+goalFix(freeze_list_ground(_,Goal),'{}'(Goal),Mode) :-!.
 goalFix(SemiGoal,SemiFixed,Mode)
 	:-
 	functor(SemiGoal,P,A),

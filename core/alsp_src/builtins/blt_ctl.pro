@@ -11,16 +11,14 @@
 
 module builtins.
 
-/*
- * findall/3, findall/4, setof/3, setof/4, bagof/3, bagof/4
- *
- * findall/3 and findall/4 replace $$bagof/3 and $$bagof/4 on the PC
- * version. findall/4 is used in the implementation of both setof and bagof.
- *
- * Note that mangle/3 is used for collecting the list of solutions.
- *
- *
- */
+/*-----------------------------------------------------------------------*
+ | findall/3, findall/4, setof/3, setof/4, bagof/3, bagof/4
+ |
+ | findall/3 and findall/4 replace $$bagof/3 and $$bagof/4 on the PC
+ | version. findall/4 is used in the implementation of both setof and bagof.
+ |
+ | Note that mangle/3 is used for collecting the list of solutions.
+ *-----------------------------------------------------------------------*/
 
 :- 
 %	compiletime,
@@ -47,20 +45,20 @@ fa_(Module,Template,Goal,S) :-
 fa_(_,_,_,_).
 
 
-%%
-%% fa_call(Module,Goal) calls the goal Goal in module Module.  It was
-%% previously defined as
-%%
-%%	fa_call(Module,Goal) :- Module:Goal.
-%%
-%% It has been changed to the arcane form that it is in today so
-%% that the debugger will stop when creeping through code involving
-%% a findall, setof, or bagof.
-%%
-%% The "call" to 'als$cd/3 with 0 as the first argument directs our compiler
-%% to unify the current cutpt in the clause with the last argument (in
-%% this case CutPt).
-%%
+/*-----------------------------------------------------------------------*
+ | fa_call(Module,Goal) calls the goal Goal in module Module.  It was
+ | previously defined as
+ |
+ |	fa_call(Module,Goal) :- Module:Goal.
+ |
+ | It has been changed to the arcane form that it is in today so
+ | that the debugger will stop when creeping through code involving
+ | a findall, setof, or bagof.
+ |
+ | The "call" to 'als$cd/3 with 0 as the first argument directs our compiler
+ | to unify the current cutpt in the clause with the last argument (in
+ | this case CutPt).
+ *-----------------------------------------------------------------------*/
 
 fa_call(Module,Goal) :-
 	'als$cd'(0,'$colon'(Module,Goal,CutPt),CutPt).
