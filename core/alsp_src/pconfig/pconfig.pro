@@ -500,7 +500,7 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH,BDList,
 		%% the parallel bld-port/tconfig.h:
 		%%
 	catenate('cp ../bld-port/tconfig.h ', Subdir, CpCmd),
-	system(CpCmd),
+	system_call(CpCmd),
 
 		%% Handle pi_cfg.h:
 	check_default(WSHeaderItems, 'CFG', '', Cfgs),
@@ -763,14 +763,14 @@ mics_copy(ALSDIRPATH)
 	sl2sl(NewALSMICSPATH0, NewALSMICSPATH),
 	OldMICS = '..\\bld-port\\alsdir\\als-mics',
 	catenate(['copy ',OldMICS,' ',NewALSMICSPATH],Cmd),
-	system(Cmd).
+	system_call(Cmd).
 
 mics_copy(ALSDIRPATH)
 	:-
 	pathPlusFile(ALSDIRPATH, 'als-mics', NewALSMICSPATH),
 	OldMICS = '../bld-port/alsdir/als-mics',
 	catenate(['cp ',OldMICS,' ',NewALSMICSPATH],Cmd),
-	system(Cmd).
+	system_call(Cmd).
 
 sl2sl(In, Out)
 	:-
@@ -828,7 +828,7 @@ create_sym_link(unix, SrcFile, LinkFile)
 	:-
 %	make_symlink(SrcFile,LinkFile),
 	catenate(['ln -s ',SrcFile, ' ',LinkFile],Cmd),
-	system(Cmd).
+	system_call(Cmd).
 
 grl_vars(ARCH_NATV, OS, BLD_NATV_SRC_PATH , GrlHeaderLines)
 	:-
@@ -923,6 +923,10 @@ install_sharbld
 	cp_txt( SRC_Dir/sharbld 				> CurDir ),
 	cp_txt( SRC_Dir/pconfig/'sharalsp.pro'	> CurDir ).
 
+system_call(Str) :- system(Str), !.
+system_call(Str) :- printf('System Call Failed: %t\n', [Str]).
+
+
 endmod.
 
 
@@ -1007,7 +1011,7 @@ setup_dist(BLD_Dir,DSTDIR,EXP_Dir)
 		catenate([DistDirName,'_',Y,'_',M,'_',D],SaveDistDirName),
 		subPath([DSTDIR,SaveDistDirName],SavePath),
 		catenate(['mv ',DST_Dir_Path,' ',SavePath],Cmd),
-		system(Cmd)
+		system_call(Cmd)
 		;
 		true
 	),
@@ -1066,7 +1070,7 @@ cp_bin( SrcFilesDesc > DestDirDesc )
 	rootPathFile('', SrcPathList, FilesDesc, SrcFiles),
 
 	catenate(['cp ', SrcFiles, ' ', DestDir], Cmd),
-	system(Cmd),
+	system_call(Cmd),
 	printf(user,'Copied %t --> %t\n',[SrcFiles,DestDir]).
 
 cp_bin([], _).
