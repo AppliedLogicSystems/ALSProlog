@@ -1,0 +1,59 @@
+/*====================================================================================*
+ |                  pert_f
+ |      Copyright (c) 1991 William Older
+ |
+ |  Critical path scheduling carried out using functional arithmetic and
+ |  general constraints (freeze/delay)
+ |
+ | This is a variant of the pert/cpm problem from BNRP User Guide 
+ | (Tutorial: Chapter 11) and the (erroneus) version in Prog. in CLP(BNR).
+ *====================================================================================*/
+
+op(700,xfx, before).
+
+activity( Name, Duration, task(Name,Start,Finish))
+    :-
+    { Finish == Start + Duration}.
+
+task(_,_,F) before task(_,S,_) :- { F =< S }.
+
+earliest( task(_,_,F))
+    :- 
+    lower_bound(F).
+
+project( Start, Finish, [A,B,C,D,E,F,G])
+    :-
+    activity(a,10,A), Start before A,
+    activity(b,20,B), Start before B,
+    activity(c,30,C), Start before C,
+    activity(d,18,D), A before D,B before D,
+    activity(e, 8,E), B before E,C before E,
+    activity(f, 3,F), D before F,
+    activity(g, 4,G), E before G, F before G,
+    G before Finish.
+
+/*  Sample Queries:
+
+?- activity(finish,0,E),project(task(start,0,0),E,L).
+    _E = task(finish, [45.000, 3.4000e+38], [45.000, 3.4000e+38]),
+    _L = [task(a, [0.0000, 3.4000e+38], [10.000, 3.4000e+38]),
+          task(b, [0.0000, 3.4000e+38], [20.000, 3.4000e+38]),
+          task(c, [0.0000, 3.4000e+38], [30.000, 3.4000e+38]),
+          task(d, [20.000, 3.4000e+38], [38.000, 3.4000e+38]),
+          task(e, [30.000, 3.4000e+38], [38.000, 3.4000e+38]),
+          task(f, [38.000, 3.4000e+38], [41.000, 3.4000e+38]),
+          task(g, [41.000, 3.4000e+38], [45.000, 3.4000e+38])]
+
+?- activity(finish,0,E),project(task(start,0,0),E,L),earliest(E).
+    _L = [task(a, [0.0000, 10.000], [10.000, 20.000]),
+          task(b, [0.0000, 0.0000], [20.000, 20.000]),
+          task(c, [0.0000, 3.0000], [30.000, 33.000]),
+          task(d, [20.000, 20.000], [38.000, 38.000]),
+          task(e, [30.000, 33.000], [38.000, 41.000]),
+          task(f, [38.000, 38.000], [41.000, 41.000]),
+          task(g, [41.000, 41.000], [45.000, 45.000])],
+    _E = task(finish, [45.000, 45.000], [45.000, 45.000])
+*/
+
+
+

@@ -1,0 +1,48 @@
+/*====================================================================================*
+ |                   DCF Yield
+ |      Copyright (c) 1991 William Older
+ |
+ |       This file defines a predicate to compute the discounted cash flow
+ |       yield of an income stream, i.e. an equivalent interest rate which
+ |       would balance the inflows and outflows, using interval arithmetic.
+ |
+ |       Form:
+ |               yield( Cashflow, Yield )
+ |       where
+ |           Cashflow is a list of numerics representing cash flows
+ |           Yield is the interest rate as a per centage
+ |
+ |		> Example queries - at end of file
+ |
+ |       Method:
+ |           The cashflow list is taken as the coefficients of a 
+ |           polynomial, starting with the constant term, and with the
+ |           variable X representing the unknown. The yield (as a percent)
+ |           is defined as 100*(X- 1), and we seek the first solution
+ |           with X larger than 1.
+ *====================================================================================*/
+
+yield( CashFlow, Yield )
+    :- 
+%    X::real(1,_),
+    X:real(1,_),
+    {Yield == 100*( X - 1)},
+    $polynomial( CashFlow, X, 0, Sum),
+    {Sum==0},
+    solve(Yield),!.             % first solution only
+
+$polynomial( [], _, Sum, Sum).
+
+$polynomial( [C | Cs],X, Sum1, Sum)
+    :-
+    { Sum2 == C + X*Sum1 },
+    $polynomial( Cs, X, Sum2, Sum).
+
+
+/*  Example queries:
+
+?- yield( [ -10, 6, 4,-4, 4,5, 6, 4, 3], Y).
+
+?- yield( [-20,-5,6,8,9,12,14,10,9,8,7,6,4,2], Y).
+
+*/

@@ -9,8 +9,8 @@ module builtins.
 
 copy_dir_files_nl(SourceDir, TgtDir, NL_type)
 	:-
-	pathPlusFile(SourceDir, '/*', SourcePattern),
-	files(SourcePathern, FileList),
+	pathPlusFile(SourceDir, '*', SourcePattern),
+	files(SourcePattern, FileList),
 	copy_fileslist_nl(FileList, SourceDir, TgtDir, NL_type).
 
 
@@ -130,8 +130,8 @@ install_file_links(LinkDir, SrcDir)
 	:-
 	get_cwd(CurDir),
 	change_cwd(LinkDir),
-	pathPlusFile(SourceDir, '/*', SourcePattern),
-	files(SourcePathern, FileList),
+	pathPlusFile(SourceDir, '*', SourcePattern),
+	files(SourcePattern, FileList),
 	install_links0(FileList, SrcDir),
 	change_cwd(CurDir).
 

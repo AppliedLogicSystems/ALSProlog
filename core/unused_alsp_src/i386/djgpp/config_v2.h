@@ -1,4 +1,4 @@
-#define MinorOSStr		"djgpp"
+#define MinorOSStr		"djgpp2"
 
 #undef  STDC_HEADERS
 #define STDC_HEADERS		1
@@ -42,7 +42,7 @@
 #define HAVE_REGCMP		1
 #define HAVE_SIGACTION		1
 #define HAVE_SRAND		1
-#define HAVE_SRANDOM		1
+#define HAVE_BSD_RANDOM		1
 #define HAVE_STRCSPN		1
 #define HAVE_STRDUP		1
 #define HAVE_STRSPN		1

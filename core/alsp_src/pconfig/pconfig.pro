@@ -239,7 +239,8 @@ match_tag(TagsList, LCs, (Tag,Value), RestTagsList)
 	:-
 	trial_mem(TG, TagsList,RestTagsList),
 	append(TG, TailCs, LCs),
-	strip_white(TailCs,[0'=,0' |ValCsa]),
+	strip_white(TailCs,[0'=,0' |ValCsa0]),
+	strip_white(ValCsa0,ValCsa),
 	dreverse(ValCsa, RValCsa),
 	strip_white(RValCsa, RValCs),
 	dreverse(RValCs, ValCs),

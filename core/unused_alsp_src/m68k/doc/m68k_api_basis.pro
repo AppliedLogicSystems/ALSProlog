@@ -1,0 +1,71 @@
+api_basis(m68k,[
+ff('atomic.68k',[
+	wm_atomic,
+	wm_number,
+	wm_float,
+	wm_integer,
+	wm_atom,
+	wm_nonvar,
+	wm_var,
+	wm_eq,
+	wm_noneq]),
+ff('call.68k',[
+	wm_call,
+	wm_comma,
+	wm_semicolon,
+	wm_arrow,
+	wm_colon,
+	wm_dbg_call,
+	wm_ocall,
+	wm_jump]),
+ff('compare.68k',[
+	wm_compare]),
+ff('cut.68k',[
+	wm_docut,
+	wm_cut]),
+ff('functor.68k',[
+	wm_functor,
+	wm_arg,
+	wm_mangle]),
+ff('ident.68k',[
+	wm_identical,
+	wm_nonidentical]),
+ff('interrupt.68k',[
+	dbg_spycheck,
+	dbg_decr_icount,
+	set_prolog_interrupt,
+	wm_overflow]),
+ff('rts.68k',[
+	wm_try_me,
+	wm_retry_me,
+	wm_trust_me,
+	wm_try,
+	wm_retry,
+	wm_trust,
+	wm_trust_fail,
+	wm_nciadc,
+	wm_abort,
+	wm_throw,
+	wm_catch22,
+	wm_sw_const,
+	wm_sw_struct,
+	enter_Prolog,
+	wm_exec,
+	wm_rungoal,
+	wm_execute_builtin,
+	wm_fail,
+	_wm_unify,
+	wm_unify,
+	wm_resolve_ref,
+	flush_cache,
+	wm_g_uia,
+	wm_p_uia,
+	wm_g_int,
+	wm_g_sym,
+	wm_u_lval,
+	wm_p_unsafe
+	]),
+ff('sio.68k',[
+	wm_sio_gbyte,
+	wm_sio_pbyte])
+	 ]).

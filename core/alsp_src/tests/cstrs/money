@@ -1,0 +1,130 @@
+/*******************************************************************************
+ ******************************************************************************* 
+   Alternative solutions to the 'Send More Money' problem from the CLP(R)
+   literature. This is a cryptarithmetic puzzle: find an assignment of the
+   digits to the variables S, E, N, D, M, O, R and Y such that no two 
+   variables are assigned the same digit, and the equation
+
+             S E N D
+           + M O R E
+           ---------
+           M O N E Y
+   
+   can be evaluated. Three solutions are presented. The first is the straight
+   forward solution using passive constraints. The second achieves three 
+   orders of magnitude improvement by re-ordering the generator and difference
+   constraints. The third achieves another factor of three improvement
+   using a combination of data flow and passive constraints. All solutions
+   were run on the Mac SE.
+**********************************************************************************
+**********************************************************************************/  
+
+
+/* straight forward problem specification using passive constraints
+   plus the obvious fact that M=1 */ 
+
+
+smm(S, E, N, D, M, O, R, Y) :-
+   diff(S, E, N, D, M, O, R, Y),
+   {D + E == Y + 10 * C1},
+   {C1 + N + R == E + 10 * C2},
+   {C2 + E + O == N + 10 * C3},
+   {C3 + S + M == O + 10 * M},
+   carry(C1),
+   carry(C2),
+   carry(C3),
+   M = 1,
+   dig(S),
+   dig(E),
+   dig(N),
+   dig(D),
+   dig(O),
+   dig(R),
+   dig(Y).
+
+
+/* 
+WARNING: This query takes about one hour on MAC_SE and about 1/2 hour on MAC II
+?- $time(smm(S, E, N, D, M, O, R, Y)).
+*/
+
+/* optimized order in diff call and generator */
+
+osmm(S, E, N, D, M, O, R, Y) :-
+   diff(Y, D, R, N, E, O, M, S),
+   {D + E == Y + 10 * C1},
+   {C1 + N + R == E + 10 * C2},
+   {C2 + E + O == N + 10 * C3},
+   {C3 + S + M == O + 10 * M},
+   M = 1,
+   carry(C3),
+   dig(S),
+   dig(O),
+   carry(C2),
+   dig(E),
+   dig(N),
+   carry(C1),
+   dig(R),
+   dig(D),
+   dig(Y).
+
+/* TESTCASE:
+?- $time(osmm(S, E, N, D, M, O, R, Y)).
+
+'Lips=' 5193 'Pips=' 2200 'ticks=' 104 
+    ?- $time(osmm(9, 5, 6, 7, 1, 0, 8, 2)).
+
+YES
+*/
+/* optimized order, use data flow and passive constraints instead 
+   of digit generator for variables Y, R, N, O  */
+
+osmmis(S, E, N, D, M, O, R, Y) :-
+   diff(Y, D, R, N, E, O, M, S),
+   {dig(Y), Y is D + E - (10 * C1)},
+   {dig(R), R is E + (10 * C2) - (C1 + N)},
+   {dig(N), N is C2 + E + O - (10 * C3)},
+   {dig(O), O is C3 + S - (9 * M)},
+   M = 1,
+   carry(C3),
+   dig(S),
+   carry(C2),
+   dig(E),
+   carry(C1),
+   dig(D).
+
+/* TESTCASE:
+?- $time(osmmis(S, E, N, D, M, O, R, Y)).
+
+'Lips=' 2196 'Pips=' 1213 'ticks=' 33 
+    ?- $time(osmmis(9, 5, 6, 7, 1, 0, 8, 2)).
+
+YES
+*/   
+
+diff(_).
+
+diff(X, Xs..):-
+   diff(Xs..),
+   constrain_diff(X, Xs..).
+
+constrain_diff(_).
+   
+constrain_diff(X, Y, Ys..):-
+   constrain_diff(X, Ys..),
+  {X <> Y}.
+
+carry(0).
+carry(1).
+
+dig(0).
+dig(1).
+dig(2).
+dig(3).
+dig(4).
+dig(5).
+dig(6).
+dig(7).
+dig(8).
+dig(9).
+

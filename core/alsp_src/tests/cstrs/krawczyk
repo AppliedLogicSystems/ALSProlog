@@ -1,0 +1,305 @@
+/*====================================================================================*
+ |              krawczyk 
+ |      Copyright (c) 1991 William Older
+ |
+ |               Interval Slope Demo
+ |
+ |
+ |       This demo program serves multiple purposes.  First, it demonstrates
+ |       the graphical meaning of the concept of 'interval slope', or Krawczyk
+ |       derivative. Given a function f defined over an interval X, the interval
+ |       slope of f at the midpoint Xm in X is an interval K, depending on X
+ |       (and Xm), such that  f(x) -f(Xm) is in K*(x-Xm) for all x in X. That is
+ |       the bounds of K are slopes of lines crossing at (Xm,f(Xm)) and the graph
+ |       of f lies between these two line segments, which we will call the
+ |       "scissors".  For functions with a classical derivative at a point,
+ |       the scissors will "close" as X shrinks around it.
+ |
+ |       Second, this demo uses interval arithmetic  to set up the geometric
+ |       constraints which will be displayed on the screen.  And finally, it
+ |       illustrates some of the graphics capabilities and techniques of the
+ |       system.
+ |
+ |       Use:
+ |       Position the mouse cursor in the rectangle. The x-coordinate determines
+ |       the location of the midpoint Xm, the y-coordinate determines the width
+ |       of interval X.
+ |       - Clicking IN the rectangle plots a single point (x,f(x)) of the graph
+ |           of f.
+ |       - Dragging in the rectangle shows the "scissors" in real time. Move
+ |       mouse up to widen the interval (opens the scissors) and down to narrow
+ |       (close). Move left to right and observe how the legs of the scissors
+ |       sometimes tracks the curve.
+ |       - Clicking ABOVE the rectangle plots the function.
+ |       - Clicking BELOW clears redraws the (blank) rectangle.
+ |       Note: The graphical objects are saved in a Pict, so will be lost
+ |       if the window gets covered.
+ *====================================================================================*/
+
+testfunc( X*(1-X)*(X-0.3),X, real(0,1.1), real(-0.2,0.4)).       
+
+$initialization
+    :-
+      testfunc(F,X,XR,YR),
+      make_graph('Krawczyk demo',_,_),
+      krawczyk_deriv(F,X,C, NF,DF),
+      assert( kfunc(X,C,NF,DF)).  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%          GUI
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+usermousedown( 'Krawczyk demo', Xm,Ym)
+    :-
+        % Xm,Ym is mouse location in screen coordinates
+    inrect( Xm,Ym),
+    !,             % ! 'absorbs' the event
+    forget_all( 'Krawczyk demo'(_), $local),
+    remember( 'Krawczyk demo'( [penmode(xor),_..]),$local),
+    remember( point(Xm,Ym), $local),     % remember start of drag
+            % X0 at center of interval in  screen coordinates
+            % XL is left end, LH is right end, Xint is whole interval
+            % Ymouse is mouse height /screen coordinates
+    construct_map( [Xint,X0,Xl,Xh],Ymousein, Y, Yl,Yh),
+    not(not( [ {X0 == Xm},  %  acknowledge by plotting point
+    dograf('Krawczyk demo', [fillpat(hollow), rectabs(X0,Y)]) ] )),
+    repeat,                          % modal drag loop
+         userevent(E,'Krawczyk demo',Xmouse,Ymouse,noblock),
+         E @= userdownidle
+         ->[ [update( point(Old..),point(Xmouse,Ymouse), $local),cut],
+             not( [Old..]=[Xmouse,Ymouse]),
+             {X0  == Xmouse,  Ymousein  == Ymouse},
+             drawx('Krawczyk demo', Xint,Xl,Xh ,Yl,Yh),
+             fail
+           ]
+         ; failexit( usermousedown).
+
+inrect(X,Y)
+    :- 
+    graph_region([XL,XH],[YL,YH]),XL<X,X<XH,YL<Y,Y<YH.
+
+% This is the predicate that draws the "scissors"
+
+drawx(Window, Xinterval,Xl,Xh,Yl,Yh)
+    :-
+    range( Xinterval,[Xlo,Xhi]),               % get endpoints of Xinterval
+    {Xl ==Xlo, Xh==Xhi},                         % feed into network for lines
+    range(Yh, [Yhl,Yhh]), range(Yl,[Yll,Ylh]), % get ends of lines
+    New = [moveabs(Xlo,Yll), lineabs(Xhi,Yhh),  % make the scissors or 'X'
+           moveabs(Xlo,Ylh), lineabs(Xhi,Yhl),_..],
+    update( Window(Old),Window(New), $local),!,
+    termlength( Old,_,New),        % concat Old & New
+    dograf(Window,Old).
+         
+usermousedown( 'Krawczyk demo', Xm,Ym)
+    :-
+    graph_region([XL,XH],[YL,YH]),
+    Ym < YL,                     % mouse below graph -> plot function
+    testfunc(F,X,Xr,Yr),!,
+    X::Xr, Y::Yr,
+    {Y==F}, 
+    plot('Krawczyk demo',Y,X,1).
+
+usermousedown( 'Krawczyk demo', Xm,Ym)
+    :-
+    graph_region([XL,XH],[YL,YH]),
+    Ym > YH, !,                  % mouse above -> clear 
+    dograf('Krawczyk demo',
+              [fillpat(clear), rectabs(XL,YL,XH,YH),
+               fillpat(hollow), rectabs(XL,YL,XH,YH)]
+          ).         
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%          construct_map
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+construct_map( [Xint_s,C_s,Xl_s,Xh_s],Ymouse, Y_s, Yl_s,Yh_s)
+    :-
+        % suffix _s denotes screen coordinates
+        % Xint is interval, C is center, Xl, Xh are ends
+    graph_region( SXr,SYr),      % get screen ranges
+    kfunc( Xint,C, Fexp, K),     % K is slope
+    testfunc(_,_,Xr,Yr),         % get ranges for x and y 
+    [Xint,C,Xl,Xh]::Xr,          % create internal variables
+    [Y,Yl,Yh]::Yr, 
+    W:real(0,1),          % W parameterizes width of Xint
+    U::real(-0.5,0.5),
+    normalize(Xint,Xint_s,SXr, 1), % set up mappings between coordinates
+    normalize(C,   C_s,   SXr, 1),
+    normalize(Xint,Xint_s,SXr, 1),
+    normalize(Xl,  Xl_s,  SXr, 1),
+    normalize(Xh,  Xh_s,  SXr, 1),
+    normalize(Y,  Y_s,    SYr, -1),
+    normalize(Yl,  Yl_s,  SYr, -1),
+    normalize(Yh,  Yh_s,  SYr, -1),
+    normalize(W, Ymouse,  SYr, -1),
+    { Y ==  Fexp,                % Y is function of C
+      Xint == C + W*U,
+      Yh == Y + K* (Xh -C),     % K is function of C and Xint
+      Yl == Y + K* (Xl -C)
+    }.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%          computing interval slope
+%
+%     This is a symbolic process akin to differentiation.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%---------------------------
+%   krawczyk_deriv( Expression, X, Point, Y, DY)
+%   
+%   Expression is an arithmetic expression (+-*/ only in variable X
+%---------------------------
+
+krawczyk_deriv( E,Var, Point, Y, K)
+    :-
+    var(Var,Point),
+    $k( E, Var, Var, Point,    _, K, Y). 
+
+$k(  F, X, _, _, F,0,F)
+    :-
+    not( occurs_in(X,F) ),
+    ! . 
+
+    %constant:
+$k(  Y, X, XI,C,XI,1,C)
+    :-
+    X@=Y,
+    !.   
+                 
+    %variable:
+$k( U + V, X, XI,C,Fval,Kval, Val)
+    :-!,
+    $k( U, X, XI,C,F1,K1,C1),
+    $k( V, X, XI,C,F2,K2,C2),
+    Fval = F1 + F2,
+    Kval = K1 + K2,
+    Val = C1 + C2.
+
+$k( U - V, X, XI,C, Fval,Kval, Val)
+    :-!,
+    $k( U, X,XI, C,F1,K1,C1),
+    $k( V, X, XI,C,F2,K2,C2),
+    Fval = F1 -F2,
+    Kval = K1 - K2,
+    Val = C1 - C2.
+
+$k( U * V, X,XI, C, Fval,K, Val)
+    :-!,
+    $k( U, X, XI,C,F1,K1,C1),
+    $k( V, X, XI,C,F2,K2,C2),
+    Fval = F1*F2,
+    K =  K1*F2 + C1*K2,
+    Val = C1*C2.
+
+$k( U /V, X, XI,C, Fval,Kval,Val)
+    :-!,
+    $k( U, X, XI,C, FU,KU,CU),
+    $k( V, X, XI,C, FV,KV,CV),
+    Fval = FU/FV,
+    Kval =  (KU -  (CU/CV)* KV)/FV,
+    Val = CU/CV.
+            
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%          graphics stuff
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+graph_region( [20,250],[20,250]).
+initial_position( 200,50).
+
+scan(X, X0, Dx)
+    :-
+   	interval(X, X0, Dx), Dd is delta(Dx), 
+    repeat,
+      {X == X0 + Dx} 		       % X is [last,curr]
+   			->accumulate(X0, Dd)  % update last
+     	; failexit(scan).		   % exit when outside _X
+
+$member( X, [X,_..]).
+$member( X, [_, Ys..])
+    :- 
+    $member(X, Ys).
+
+plot(Name, Y, X, Ddx)
+    :-    
+    graph_region( [GXlo, GXhi], [GYlo, GYhi]),
+    normalize(X, Nx, [GXlo, GXhi],1),
+    normalize(Y, Ny ,[GYlo, GYhi], -1),
+    Dx::real(0, Ddx), Nx0::real(GXlo, GXlo),
+    dograf(Name, [penmode(or)]),
+    xaxis(Name, Y, Ny, [GYlo, GYhi]),
+    yaxis(Name, X, Nx, [GXlo, GXhi]),
+    foreach(scan(Nx, Nx0, Dx) do 
+        dograf(Name, [fillpat(hollow), rectabs(Nx, Ny)])).
+        
+    % map interval X linearly to range(Lb,Ub) and return as interval Nx
+normalize( X, Nx, [Lb, Ub], Sgn)
+    :-
+    Nx::real(Lb, Ub), 	range(X, [Lbx, _]),
+    Mx is Sgn * delta(Nx) / delta(X), 
+    Sgn > 0 ->
+        Ox is Lb - Mx * Lbx ; Ox is Ub - Mx * Lbx,
+    {Nx == Ox + Mx * X}.        % constraint equation X<->Nx
+
+make_graph_window(Name, X0, Y0, Xsize, Ysize)
+    :-
+    true; closewindow(Name),
+    openwindow(graf, Name, pos(X0, Y0), size(Xsize, Ysize), options()),
+    !,
+    dograf(Name, [backcolor(white), forecolor(black), penmode(or), 
+                  fillpat(clear), rectabs(0, 20, Xsize, Ysize)]).
+
+make_graph(Name, [XL,XH],[YL,YH])
+    :-
+    graph_region( [XL,XH],[YL,YH]),
+    XS is XH + 30, YS is YH + 30,
+    initial_position( XP,YP),
+    make_graph_window(Name, XP, YP, XS,YS),
+    dograf(Name, [fillpat(hollow), rectabs(XL, YL, XH, YH)]).
+
+yaxis(Name, X, Nx, [L,H])
+    :- 
+    {X == 0},                     % set x = 0 if possible
+    M is midpoint(Nx),
+    dograf(Name, [moveabs(M,L), lineabs(M,H)]), % draw Y axis
+    fail.                       % restore x
+yaxis(_,_,_,_).
+
+xaxis(Name, Y, Ny,[L,H])
+    :- 
+    {Y == 0},
+    M is midpoint(Ny),
+    dograf(Name, [moveabs(L,M), lineabs(H,M)] ),
+    fail.
+xaxis(_,_,_,_).
+
+
+
+
+
+    
+
+

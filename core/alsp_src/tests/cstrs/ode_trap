@@ -1,0 +1,136 @@
+/*====================================================================================*
+ |                   ode_trap
+ |      Copyright (c) 1989 William Older
+ |
+ |
+ |  This file is based on:
+ |
+ |           Application of Relational Interval Arithmetic
+ |               to Ordinary Differential Equations
+ |
+ |                       William J. Older
+ |
+ |                      at ILPS CLP Workshop
+ |                       Ithaca, New York
+ |                       November, 1994
+ |
+ |
+ | interface for 1-dimensional first-order odes:
+ |
+ | integrate( Initial, Final, Flowbox, Control, Output)
+ | where
+ |       Initial, Final are boundary [X,Y] values (X is independent variable)
+ |       Flowbox  is of form: real(L,U) and bounds Y(T)
+ |       Control is number of binary subdivisions
+ |       Output  is difference list of [T,Y,DY] intervals
+ |
+ | assumes that there are predicates of form:
+ |       rhs(X,Y,F):- { F is   Expression}   (computes rhs of ode)
+ |       drhs(X,Y,DF):-  (convective derivative of rhs)
+ *====================================================================================*/
+
+integrate([X0,Y0],[X1,Y1],Flowbox,Control, Out)
+    :-
+    integer(Control),
+    Y0:Flowbox, Y1:Flowbox,
+    rhs(X0,Y0,F0),
+    rhs(X1,Y1,F1),
+    EndOut=[[X1,Y1,F1]],
+    $integrate(Control,[X0,Y0,F0],[X1,Y1,F1],Flowbox,Out/EndOut).
+
+$integrate(0, Initial, Final, Flowbox, [Initial|Ps]/Ps)
+    :- !,
+    step( Initial, Final, Flowbox).
+
+$integrate(Control, Initial, Final, Flowbox, L/E)
+    :-
+    Control>0, Cn is Control - 1,
+    $interpolate( Initial, Final, Flowbox, Middle ),
+    $integrate( Cn, Initial, Middle, Flowbox, L/M),
+    $integrate( Cn, Middle,  Final,  Flowbox, M/E ).
+
+$interpolate( [X0,Y0,F0], [X1,Y1,F1], Flowbox, [XM,YM,FM])
+    :-
+    XM is 0.5*(X0 + X1),
+    YM : Flowbox,
+    rhs( XM, YM, FM).
+
+step( [X0,Y0,F0],[X1,Y1,F1], Flowbox)
+    :-
+    X01: real(X0,X1),
+    Y01: Flowbox,
+    Dx is X1 - X0,
+    DX : real(0,Dx),
+    drhs(X01,Y01,R),
+    { 8*DR + R ==  R, 
+      FM == (F0 + F1)/2,
+      Y01 - Y0 == FM*DX + DR*DX**2,
+      Y1  - Y0 == FM*Dx + DR*Dx**2 }.
+        
+% test case 1
+    %  Y = exp(-X**2)
+    %  DY/DX = -2X*Y
+
+rhs(X,Y,F)
+    :- 
+    { F == -2*X*Y}.
+
+drhs(X,Y,DF)
+    :- 
+    { DF<= -2*Y*(1 - 2*X**2)}.
+
+    %  explanation:
+    %  dF/DX= -2Y, dF/DY=-2X, DF/DX= dF/DX + (dF/DY)(DY/DX)
+    %                              = dF/DX + (dF/DY)F
+    %                              = -2Y -2X*(-2XY)
+    %                              = -2Y(1-2XX)
+    %
+    %  This equation uses the '<=' relation since it is used as an inclusion;
+    %  this prevents chnages in R from propagating back into X and Y.
+
+/*
+Version 3.5:
+
+Note that  exp(-1)=0.36788 is the correct final answer
+
+?- [integer_range(_N, 0, 6), integrate([0.0, 1.0], [1.0, _F], real(0, 1), _N, _)].
+    _N = 0,
+    _F = [0.0000, 1.0001] ;
+
+    _N = 1,
+    _F = [0.093247, 0.70676] ;
+
+    _N = 2,
+    _F = [0.32302, 0.42827] ;
+
+    _N = 3,
+    _F = [0.35768, 0.38193] ;
+
+    _N = 4,
+    _F = [0.36540, 0.37132] ;
+
+    _N = 5,
+    _F = [0.36726, 0.36874] ;
+
+    _N = 6,
+    _F = [0.36772, 0.36810] ;
+
+YES
+?-  integrate([0.0, S], [1.0, 0.36788], real(0, 1), 6, _).
+    _S = [0.99976, 1.0001]
+
+?- S:real(0.990,0.991),F:real(0.362,0.37),integrate([0.0, S], [1.0,F], real(0, 1), 6, _).
+    _S = [0.98999, 0.99101],
+    _F = [0.36286, 0.36597]
+
+?- S:real(0.990,0.991),F:real(0.360,0.363),integrate([0.0, S], [1.0,F], real(0, 1), 6, _).
+NO
+
+But note:
+?- integrate([0.0, 1.0], [2.0, _F], real(0, 1), 6, _).
+    _F = [0.0000, 0.037753]
+
+(Narrowing of Y gets 'stuck' at 0 when solution gets too close to X=0;
+this may require extremely small step size to avoid.
+
+*/

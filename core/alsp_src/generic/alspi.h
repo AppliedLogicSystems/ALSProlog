@@ -18,8 +18,12 @@
  * Set up some macros for dealing with prototypes and other ANSI C features.
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef PARAMS
-#if defined(__STDC__)
+#if defined(__STDC__) || defined(__cplusplus)
 #define CONST const
 #define PARAMS(arglist) arglist
 #else
@@ -126,6 +130,10 @@ extern	const char *	PI_get_options	PARAMS(( void ));
 extern	long	yield_interval;
 extern  long	yield_counter;
 extern	void	PI_yield_time	PARAMS(( void ));
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* _ALSPI_H_INCLUDED_ */

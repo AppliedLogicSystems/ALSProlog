@@ -1,14 +1,14 @@
 #!/bin/sh
 echo Target dir = $1
-cp /mailbox3/bldtests/hp5/bld-port/icode.h $1/bld-port
+cp /mailbox3/alsp_src/generic/generate/tok.h/icode.h $1/bld-port
 u2d $1/bld-port/icode.h
-cp /mailbox3/bldtests/hp5/bld-port/lexinit.h $1/bld-port
+cp /mailbox3/alsp_src/generic/generate/tok.h/lexinit.h $1/bld-port
 u2d $1/bld-port/lexinit.h
-cp /mailbox3/bldtests/hp5/bld-port/siolex.h $1/bld-port
+cp /mailbox3/alsp_src/generic/generate/tok.h/siolex.h $1/bld-port
 u2d $1/bld-port/siolex.h
-cp /mailbox3/bldtests/hp5/bld-port/tokens.h $1/bld-port
+cp /mailbox3/alsp_src/generic/generate/tok.h/tokens.h $1/bld-port
 u2d $1/bld-port/tokens.h
-cp /mailbox3/bldtests/hp5/bld-port/tokini2.h $1/bld-port
+cp /mailbox3/alsp_src/generic/generate/tok.h/tokini2.h $1/bld-port
 u2d $1/bld-port/tokini2.h
 cp /mailbox3/alsp_src/generic/pi_cfg.in $1/bld-port/pi_cfg.h
 u2d $1/bld-port/pi_cfg.h

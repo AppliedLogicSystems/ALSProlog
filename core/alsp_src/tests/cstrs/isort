@@ -1,0 +1,142 @@
+/*====================================================================================*
+ |                   isort
+ |      Copyright (c) 1994 William Older
+ |
+ |                   interval sort network for V3.5
+ |
+ |   isort( InList, OutList)
+ |           This is a deterministic sorting routine suitable for use with
+ |           intervals.
+ |   imerge(N, L1,L2, ML)
+ |           This is the corresponding merge routine; N is length of L1 and L2.
+ |
+ |   Sometimes one has a set of intervals, e.g. representing event times, and
+ |   it would be useful to know the possible time of the first, second etc. event,
+ |   without knowing which event it is. This can be done with the isort predicate
+ |   defined in this file. It seems to be useful in formulating scheduling problems.
+ |
+ |   As the original intervals are narrowed, the "order" intervals change also.
+ |   Narrowing of the order intervals can sometimes propagate backwards to the inputs
+ |   as well, but only if it can be done so deterministically. This program illustrates
+ |   the use of the interval relations min and max, which are often overlooked.
+ |
+ |
+ |   Notes: 
+ |       - This is an ascending sort.
+ |       - This version handles arbitrary size lists by adding default max values to make 
+ |          up a power of two, then removing them at the end.
+ |       - This version interchanges inputs whenever the order is determined,
+ |            to minimize the size of the contraint network.
+ |       - Trace by asserting trace_isort.
+ *====================================================================================*/
+
+/*  Example Queries:
+
+?- isort( [4,3,2,5,7],L).
+:- X::real(1,3), Y::real(0,2),Z::real(0,5), W::real(1,4), T::real(2.5,4.5),
+   isort([X,Y,Z,W,T],L), nl,print(L),
+   { X == 3,  W==1, T==4, Z== 2, Y==1.5}, nl, print(L).
+*/
+
+        %trace_isort.                       % optional tracing
+$default(X):- X is 3.4000e+38 .             % default high value for dummy entries
+
+
+isort( List, Slist)
+    :-
+    termlength(List,N,[]),
+    Log2 is  ceiling(ln(N)/ln(2)),
+    M is 2**Log2,
+    $take(M, List,L),             % expand list with dummies
+    $isort(M,L,S),
+    $take(N, S, Slist),!.         % take bottom N 
+
+imerge(N, S1,S2, S)
+    :- 
+    trace_isort -> [nl, write(imerge(N,S1,S2))],
+    $reverse(S2,S1,R),
+    $bitonic(N,R,S),!.
+
+$take(0, _, [])
+    :-!.
+$take(N, [X,Xs..], [X,Ys..])
+    :- 
+    N>0, 
+    N1 is N - 1, 
+    !,
+    $take(N1,Xs,Ys).
+
+$take(N, [], [X,Ys..])
+    :- 
+    N>0, 
+    N1 is N - 1, 
+    $default(X),
+    !,
+    $take(N1,[],Ys).
+
+$isort(2,[X,Y],[X1,Y1])
+    :-!, 
+    $butterfly(X,Y,X1,Y1).
+    
+$isort(N,List, Slist)
+    :- 
+    trace_isort -> [nl, write(isort(N)), print(List)],
+    N>2, N1 is floor(N/2), 
+    M1 is N - N1,
+    $split(N1,List,L1,L2),
+    $isort(N1,L1,S1),
+    $isort(M1,L2,S2),
+    imerge(N1,S1,S2,Slist),
+    !.
+
+$butterfly(X,Y,X1,Y1)
+    :- 
+    range(X,[LX,UX]), 
+    range(Y,[LY,UY]), 
+    UX<LY -> [X=X1,Y=Y1]
+        ; UY<LX ->[X=Y1,Y=X1]
+            ; fail, 
+    !.
+$butterfly(X,Y,X1,Y1)
+    :- 
+    {X1 is min(X,Y), 
+     Y1 is max(X,Y)}.
+
+$split(0, L, [], L )
+    :-!.
+$split(N, [X,Xs..], [X,Ys..],L)
+    :- 
+    N1 is N - 1, 
+    $split(N1,Xs,Ys,L).      
+
+$bitonic(1,[X,Y],[X1,Y1])
+    :-!,
+    $butterfly(X,Y,X1,Y1).
+
+$bitonic(N, L, S )
+    :- 
+    trace_isort -> [nl, write(bitonic,N,L)],
+    N1 is round(N/2),
+    $split(N, L, L1,L2),
+    $bitonicstage(L1,L2, S1, S2),
+    $bitonic( N1, S1, SS1),
+    $bitonic( N1, S2, SS2),
+    $append(SS1, SS2, S). 
+
+$bitonicstage([],[], [],[]).
+$bitonicstage([X,Xs..],[Y,Ys..], [L,Ls..],[H,Hs..])
+    :-
+    $butterfly(X,Y,L,H),
+    $bitonicstage( Xs,Ys,Ls,Hs).
+
+$reverse([],L,L).
+$reverse([X,Xs..],Ys,Zs)
+    :- 
+    $reverse(Xs,[X,Ys..],Zs).
+
+$append( [], L, L).
+$append( [X,Xs..], L, [X,Ys..])
+    :- 
+    $append(Xs,L,Ys).
+
+

@@ -1,0 +1,166 @@
+Kev, 
+
+I appear to have the freeze construct working ok in the
+portable version on a variety of platforms (AIX, SunOS,
+Solaris, HPUX, MacOS on 68k & PowerMac).  It'll get some
+serious testing next week when I send it up to the BNR
+people in Ottawa.
+
+I've started thinking about the issue of getting it into
+the native code versions.  I'd like to bounce a few things
+off you, if you could take just a bit of time.
+
+First, I'll outline what was done for the portable, then
+go on with my questions
+
+=========== FREEZE on the Portable =============
+Everything I'm concerned with happened in port/wam.c
+[There was also added generic/freeze.c and builtins/blt_frez.pro,
+ and an extra clause was added (for int=3) to $int/3 in 
+ builtins.pro. ]
+
+In wam.c:
+
+Most everything is concerned with BINDing variables and
+with TRAILing:
+
+For both FREEZE and no-FREEZE versions:
+
+	/*-------------------------------------------------*
+	 |  RETRAIL is simple trailing with no delay var
+	 |  checking;  arg #2 simply corresponds to TRAIL
+	 *-------------------------------------------------*/
+
+#define RETRAIL(r,l) \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB)  \
+	  *--mr_TR = PWORD(r); }
+
+#define BIND(r,f)     { TRAIL(r,0); *(r) = PWORD(f); }
+
+#define BIND3(r,f,w)  { TRAIL(r,w); *(r) = PWORD(f); }
+
+	{{{ NOTE: BIND and BIND3 are functionally identical; the
+		extra arg is used for some debugging; note that in
+		TRAIL, l is unused; there is a #define which turns
+		on versions of all these which vomit debug info }}}
+
+------------------------------------------------------------
+With FREEZE on:
+
+#define TRAIL(r,l) \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *--mr_TR = PWORD(r); \
+	  if ( CHK_DELAY(r) ) { \
+			wm_safety = -2; wm_interrupt_caught = 3; } } }
+
+#define VVBIND(r,f,lln)   { \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *--mr_TR = PWORD(r); \
+	  if ( CHK_DELAY(r) ) { \
+	  		if ( CHK_DELAY(f) && r != f ) { \
+				combin_dels((PWord)r,(PWord)f); }  } } }; \
+  *(r) = PWORD(f); }
+
+
+------------------------------------------------------------
+Without FREEZE:
+
+#define TRAIL(r,l) \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) \
+	  *--mr_TR = PWORD(r); }
+
+#define VVBIND(r,f,lln)   { TRAIL(r,0); *(r) = PWORD(f); }
+
+------------------------------------------------------------
+wam.c has both a UNIFY macro UNIFY(f1,f2) (about line 265)
+and a unify function wam_unify(f1, f2) (about line 1750).
+In both cases,  in the var-2-var binding cases, the calls
+the BIND (or BIND3) are replaced by VVBIND.
+------------------------------------------------------------
+Outside of the macro UNIFY and function wam_unify,
+the various calls to TRAIL in the original file  were divided
+between TRAIL (5 calls)  and RETRAIL (3 calls) (the former checking 
+for the var-var case, the latter not).
+   Thus there appear to be 4 instructions to handle:
+	Instruction        Approx line#
+	------------       ------------
+   	W_U_VAR_SP_p4 		[1035]
+	W_U_VAR_SP_m1_p2	[1056]
+						[1067]
+	W_U_LVAL			[1136]
+	W_P_UNSAFE			[1160]
+------------------------------------------------------------
+There is also a need for a Prolog-callable "plain binding"
+predicate which binds two variables without invoking the
+delay-variable checking mechanism:
+
+#define PLAINTRAIL(r) \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) \
+	  *--mr_TR = PWORD(r); }
+
+int     pbi_bind_vars           PARAMS(( void ));
+
+int
+pbi_bind_vars()
+{
+        PWord r,  g;
+        int   rt, gt;
+
+    w_get_An(&r, &rt, 1);
+    w_get_An(&g, &gt, 2);
+
+    *PWPTR(r) = g;
+    PLAINTRAIL(r);
+
+    SUCCEED;
+}
+
+{NOTE that it appears that PLAINTRAIL and RETRAIL are
+ now identical (at one time, I though they differed),
+ and should be coalesced }
+
+=========== END FREEZE on the Portable =============
+
+So I've started looking at the *.sprc files in the sparc
+directory.  In assembly.sprc, one finds the two 
+macros:
+	bind and bind_and_return
+And one finds the file unify.sprc with a unifier (starting
+with the var-var case).  And grepping around casually, it
+would seem that var-var binding is handled through the two
+bind macros.
+
+So, some questions:
+
+1)  Is it the case that var-var binding is all handled by
+	bind and bind_and_return ??
+
+2)  Does the unifier code in unify.sprc cover all uses of
+	both the macro UNIFY and the function wam_unify in the
+	portable??
+
+3)  It appears that trailing is directly coded throughout
+	the files: grepping for 'trail' produces lots of
+	comments of the form '  ; the trailing operation  '
+	Presumably, these will have to be sorted out as I
+	did the portable calls to TRAIL, and then specific 
+	code added/edited ????
+
+4)  Its not clear to me just how many of the wam instructions
+	from the portable (in particular, the four W_U_VAR_SP_p4,
+	W_U_VAR_SP_m1_p2, W_U_LVAL, W_P_UNSAFE) map onto the 
+	wam instructions I've located in the *.sprc files.  Can
+	you give me some info on this ??
+
+
+Separate question:  I also started looking over the m68k files.
+The fact that some of the file names are different, and the
+distribution of predicates seems a little different is a bit
+bothersome.  Is there a technical reason for the differences,
+or simply history?  Is anything likely to break if I try to
+organize the two groups of files to be similarly named, and
+as similarly grouped as possible???
+
+
+Thanks much in advance...Ken
+

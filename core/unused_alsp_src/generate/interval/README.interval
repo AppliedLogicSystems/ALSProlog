@@ -1,0 +1,32 @@
+The files in this directory are used to specify,
+and then generate, the C-level files handling the
+primitive interval-based constraint operations.
+
+   pseudoc.ode -- the effective specification of the
+                  primitive interval operations
+
+   pseudocode.original -- original of the above
+   genC_ie.pro  -- generates the original BNR Prolog
+                   (C) code from pseudocode.original
+   		   in the file: interval.h
+
+   gprim_c.pro -- uses pseudoc.ode and generates the
+		  following files as output:
+
+   		  intrv.c -- C functions for the
+                             interval ops specificied
+                             in pseudoc.ode
+
+                  intrv_pr.h -- C ansi prototypes for
+                                the functions in interv.c;
+                                [other entries for built.c
+                                 will be added later]
+   The following are hand-coded (ie, not generated from
+   anything else) support files for intrv.c:
+
+   intrv.h
+   intaux.c
+
+   It isn't clear whether these last two should be 
+   totally moved to live in .../generic, but copies
+   have to live there.

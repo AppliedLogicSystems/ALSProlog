@@ -1,0 +1,284 @@
+%
+%               Powder Method Xray Diffraction Analysis
+%
+%
+%           Based on:
+%
+%           The Application of Relational Arithmetic to X-ray
+%           Diffraction Crystallography- CRL # 89001
+%           -William J. Older, 1989
+%
+%       This program illustrates the use of relational interval arithmetic
+%       to solve inverse problems and also its interaction with Prolog
+%       non-determinism. The problem as described here has been abstracted
+%       considerably to eliminate the 'physics'. In a real application
+%       the observations would typically be made from photographic film,
+%       and one would need descriptions of the physical setup and wavelength
+%       employed to compute the "observations". Uncertainties due to
+%       measurements of apparatus dimensions and distances between 'lines'
+%       on the film, and the width of the lines themselves all contribute
+%       to the interval of uncertainty in the data. 
+%
+%       The problem involves three sets of data: the unknown crystal 
+%       lattice parameters ( three lengths and three angles), a set of
+%       labels (a list of lists of three integers labeling lattice points
+%       in the crystal's dual space), and observational data of Bragg
+%       diffraction points. The problem is to assign the proper label to
+%       each observation and to back calculate the crystal parameters.
+%       The classical difficulty is that the labeling problem has too
+%       many possibilities, most of which lead to inconsistent crystal
+%       parameters.  Using CLP, this becomes an advantage which we can 
+%       exploit.
+%
+/*
+?- analyze(_C, 1).  
+
+time = 20100
+    _C = [[0.99999, 1.0001],
+          [1.9999, 2.0001],
+          [2.9999, 3.0001],
+          [0.11999, 0.12001],
+          [0.22999, 0.23001],
+          [0.44999, 0.45001]]
+YES
+
+?- analyze(C,2).
+
+time = 7266
+    _C = [[0.99999, 1.0001],
+          [1.2999, 1.3001],
+          [1.7999, 1.8001],
+          [0.31999, 0.32001],
+          [9.9972e-3, 0.010003],
+          [0.19999, 0.20001]]
+YES
+*/
+%
+op(700, xfy, in).   % 'member' for intervals
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%%%%%%%%%%%%%%
+%
+%               Crystal lattice parameters
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%%%%%%%%%%%%%%
+%    The unit cell of the crystal reciprocal lattice (i.e. in Fourier space)
+%    consists of three lengths and three angles. For the Type I crystal covered
+%    here, the angles are all acute.  To minimize the work, it is sufficient
+%    to work with the cosines of the angles and compute the angles themselves
+%    only when done.  Since there is no order specified on the sides, we would
+%    get 3!=6 solutions for each problem; to eliminate this we set up the
+%    parameter space so that the sides are given in increasing order. Angles
+%    are labeled such that CosA is the angle opposite side A, etc.
+%
+type_I_cell( [A,B,C, CosA,CosB,CosC]):-
+%    [ CosA,CosB,CosC]::real(0,1),     % acute angles
+    [ CosA,CosB,CosC]:real(0,1),     % acute angles
+    { 0=<A, A=<B, B=<C }.             % sides ordered
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%%%%%%%%%%%%%%
+%
+%               Distance formula
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%%%%%%%%%%%%%%
+%  This predicate takes a label for a lattice point and the crystal
+%  parameters and returns the square of the distance from the origin.
+
+distance2( [H,K,L], D2,   [A,B,C, CosA,CosB,CosC]):-
+    { D2== (H*A)**2 + (K*B)**2 + (L*C)**2 +
+           2*( H*K*A*B*CosC + K*L*B*C*CosA + L*H*C*A*CosB) }.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%%%%%%%%%%%%%%
+%
+%              Label generator
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%%%%%%%%%%%%%%
+%  This predicate generates the labels [H,K,L] where H,K,L are integers.
+%  [H,K,L] and [-H,-K,-L] are collapsed into label, since they generate the 
+%  same D**2. These are generated in order of increasing N, where 
+%  N = H**2 + K**2 + L**2. The method is first to generate a label with
+%  non-negative values, then expand it by permutating the values and
+%  making sign changes.
+
+label( [H,K,L], Limit ):- Max is Limit,
+      findset( [N0,[H0,K0,L0]],
+          [ integer_range(H0,0,Max),
+            integer_range(K0,0,H0),
+            integer_range(L0,0,K0),
+            N0 is H0**2 + K0**2 + L0**2,
+            N0 =< Limit ], List),
+      integer_range(N,1,Limit),
+      $member( [N, HKL0], List),
+      distinct_perm( HKL0,HKL1 ),
+      signs( HKL1, [H,K,L]).
+
+$member( X, [X,_..]).
+$member( X, [_,Xs..]):- $member(X,Xs).
+
+% there will be either 1, 3, or 6 outputs to this
+distinct_perm( [H,K,L], [H,K,L]).
+distinct_perm( [H,K,L], [H,L,K]):- K<>L.
+distinct_perm( [H,K,L], [K,H,L]):- H<>K.
+distinct_perm( [H,K,L], [L,K,H]):- L<>H.
+distinct_perm( [H,K,L], [K,L,H]):- H<>K,K<>L,L<>H.
+distinct_perm( [H,K,L], [L,H,K]):- H<>K,K<>L,L<>H.
+
+% either 1 or 2 or 4 outputs per input
+signs( [H,K,L], [H, K, L]).
+signs( [0,K,L], [0,-K, L]):- K<>0,L<>0.
+signs( [H,0,L], [H,0, -L]):- H<>0,L<>0.
+signs( [H,K,0], [-H,K, 0]):- K<>0,H<>0.
+signs( [H,K,L], [-H,K, L]):- H<>0,K<>0,L<>0.
+signs( [H,K,L], [H,-K, L]):- H<>0,K<>0,L<>0.
+signs( [H,K,L], [H, K,-L]):- H<>0,K<>0,L<>0.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%%%%%%%%%%%%%%
+%
+%              Inverse Problem
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%%%%%%%%%%%%%%
+%  The inverse problem is treated as if it were the forward problem:
+%  the unkown cell parameters are used to compute a list of predictions,
+%  which are compared against the observations. The original program
+%  required that all observations be accounted for among the computed
+%  values. In this version we reverse the condition and now
+%  require that all computed values be found among the observations.
+%  This is better when the sample may have been contaminated by foreign
+%  matter or may be a mix of two or more materials. It does assume,
+%  however, that no observations have been lost.  Fancier versions
+%  could allow for a limited number of missing observations, and a
+%  post processing step could be used to remove all the "accounted for"
+%  observations, and reanalyze the remainder, etc.
+%
+%  Two technical points:
+%   1-  Intervals cannot be directly asserted, stored in state space, nor
+%       used in findall/findset. Furthermore, the intention here is for
+%       all the predicted values to form one big network. So the labels
+%       are collected together in a list first, and the network is built
+%       incrementally and non-deterministically. This has more overhead
+%       in building the constraint network, but keeps the network smaller.
+%   2-  The operator 'in', which is a sort of member for intervals, uses
+%       the '<=' operator.  This permits the observation information to
+%       be used, but prevents it from being changed. (X<=Y acts like a
+%       diode permitting narrowing to flow from Y to X, but not from X to Y.
+%    
+
+analyze( Cell,  Dataset):- 
+        T0 is cputime,
+        Limit = 3,                          % provides 13 eqns for 6 unknowns
+        dataset( Dataset,Observations),     % get observations
+        type_I_cell( Cell),                 % set up space
+        findall(HKL, label( HKL, Limit), Labels),    % generate labels
+        test( Labels, Observations, 1, Cell),!,
+        DT is cputime - T0, nl, write('time = ',DT).
+
+test( [], Obs, N, Cell).
+test( [Label,Ls..],Obs,N, Cell):- N1 is N + 1,
+        distance2( Label, X, Cell), 
+        X in Obs,
+      % nl, write(N,' ', Label,':'), print(X),  % enable this line to trace
+        test( Ls, Obs, N1, Cell).
+
+op(700, xfy, in).   % 'member' for intervals
+                    % right argument is ordered list of intervals
+X in [Y,_..]:- { Y1==Y, X<= Y1 }.
+X in [Y0,Ys..]:- {X>=Y0},       
+            X in Ys.   % ordered list
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%%%%%%%%%%%%%%
+%
+%              Data 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%%%%%%%%%%%%%%
+/* The following data set was generated using:
+?- findset(D, 
+            [label(L,5),
+             distance2(L,X, [1, 2, 3, 0.12, 0.23, 0.45]),
+             D is midpoint(X)
+            ],   
+           List),
+   assert( dataset(1,List)) .
+*/
+
+dataset(1,          %  [1, 2, 3, 0.12, 0.23, 0.45]
+            [1.0,
+             3.2,
+             4.0,
+             4.4,
+             6.8,
+             8.62,
+             9.0,
+             10.24,
+             11.38,
+             11.56,
+             11.6,
+             12.14,
+             12.26,
+             12.98,
+             13.4,
+             14.44,
+             15.76,
+             16.0,
+             18.62,
+             20.6,
+             22.12,
+             27.88,
+             34.24,
+             36.0,
+             37.12,
+             39.76,
+             42.88]).
+
+
+dataset(2,          %  from  [1.0, 1.3, 1.8, 0.32, 0.01, 0.2]
+       [1.0,
+             1.69,
+             2.17,
+             3.21,
+             3.24,
+             3.4324,
+             3.9484,
+             4.0,
+             4.204,
+             4.276,
+             4.65,
+             4.9164,
+             6.4276,
+             6.72,
+             6.73,
+             6.76,
+             6.8716,
+             7.0048,
+             7.168,
+             7.312,
+             7.9836,
+             8.8,
+             11.655,
+             12.96,
+             12.995,
+             13.888,
+             14.032,
+             17.645]).
+
+

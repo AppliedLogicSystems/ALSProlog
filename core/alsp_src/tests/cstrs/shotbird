@@ -1,0 +1,134 @@
+/*====================================================================================*
+ |                   shooting_the_bird
+ |
+ |  This is Shooting the Bird ballistics problem
+ | adapted from Hoon Hong's CAL paper and described
+ | in Prog. in CLP(BNR), Benhamou & Older, PPCP '93
+ |
+*====================================================================================*/
+
+bird_init(X0,Y0,H,L)
+    :-
+    {X0>=0,X0=<L,Y0==H}.
+
+bird_displacement( T,Dx,Dy,U)
+    :- 
+    {Dx==U*T,Dy==0}.
+
+bird(T,X,Y,H,L,U)
+    :-
+    bird_displacement(T,Dx,Dy,U),
+    bird_init(X-Dx,Y-Dy,H,L).
+
+stone_init(X,Y)
+    :- {X==0,Y==0}.
+
+stone_displacement(T,Dx,Dy,Vx,Vy)
+    :-
+    G is 9.8,
+%   { 0=<Vy - G*T},  % optional extra constraint (velocity is upward at impact)
+    { Dx == Vx*T},
+    { Dy == Vy*T - 0.5*G*T**2}.
+%    { 2*Dy == Vy**2/G - G*(T - Vy/G)**2 }.  % alternative formulation
+
+stone(T,X,Y,Vx,Vy)
+    :- 
+    stone_displacement(T,Dx,Dy,Vx,Vy),
+    stone_init(X- Dx, Y - Dy).
+
+stone_N_th(T,X,Y,Vx,Vy,Dt,N)
+    :- 
+    integer(N), N>1,
+    stone(T - Dt*(N-1),X,Y,Vx,Vy).
+
+hit(H,L,U,V,S,Dt,N,T,X,Y,Vx,Vy)
+    :-
+    { S>=0, S=<1, T>=0, X>=0, Y>=0, Vx>=0, Vy>=0,
+      V**2 == Vx**2 + Vy**2,  Vy==S*Vx  },
+    bird(T,X,Y,H,L,U),
+    stone_N_th(T,X,Y,Vx,Vy,Dt,N).
+
+/*  Sample Queries:
+
+    Without the extra constraint:
+?- hit(20,0.2,10,30,S,2,2,T,X,Y,Vx,Vy).
+    _S = [0.16212, 1.0001],
+    _T = [3.0197, 7.2270],
+    _X = [30.197, 72.470],
+    _Y = [20.000, 20.001],
+    _Vx = [5.7771, 29.614],
+    _Vy = [4.8010, 29.439]
+
+?- hit(20,0.2,10,30,S,2,2,T,X,Y,Vx,Vy), solve(T).
+    _S = [0.89967, 0.92279],
+    _X = [36.444, 36.772],
+    _Y = [20.000, 20.001],
+    _Vx = [22.047, 22.303],
+    _Vy = [20.064, 20.345],
+    _T = [3.6444, 3.6572] ;
+
+Note that since this is a problem with an interval rather than a point solution
+(since the bird is 10 units long), and since there is only a single qualitiative 
+sloution, absolve is more appropriate than solve. 
+
+Rule of thumb: use solve to separate distinct solutions, 
+absolve to resolve a single solution.
+
+?- hit(20,0.2,10,30,S,2,2,T,X,Y,Vx,Vy), absolve(T).
+    _S = [0.80648, 1.0001],
+    _X = [36.113, 37.629],
+    _Y = [20.000, 20.001],
+    _Vx = [20.768, 23.353],
+    _Vy = [18.832, 21.649],
+    _T = [3.6113, 3.7429] ;
+
+ With the extra constraint:
+?- hit(20,0.2,10,30,S,2,2,T,X,Y,Vx,Vy).
+    _S = [0.39103, 1.0001],
+    _T = [3.1148, 4.8511],
+    _X = [31.148, 48.711],
+    _Y = [20.000, 20.001],
+    _Vx = [10.925, 27.940],
+    _Vy = [10.925, 27.940]
+
+?- hit(20,0.2,10,30,S,2,2,T,X,Y,Vx,Vy), solve(T).
+    _S = [0.89945, 0.92304],
+    _X = [36.442, 36.773],
+    _Y = [20.000, 20.001],
+    _Vx = [22.044, 22.305],
+    _Vy = [20.062, 20.348],
+    _T = [3.6442, 3.6573] ;
+
+?- hit(20,0.2,10,30,S,2,2,T,X,Y,Vx,Vy), absolve(T).
+    _S = [0.86326, 0.96187],
+    _X = [36.302, 37.046],
+    _Y = [20.000, 20.001],
+    _Vx = [21.621, 22.709],
+    _Vy = [19.603, 20.797],
+    _T = [3.6302, 3.6846] ;
+
+With alternative formulation:
+?- hit(20, 0.2, 10, 30, _S, 2, 2, _T, _X, _Y, _Vx, _Vy).
+    _S = [0.16212, 1.0001],
+    _T = [3.0197, 7.2270],
+    _X = [30.197, 72.470],
+    _Y = [20.000, 20.001],
+    _Vx = [5.7771, 29.614],
+    _Vy = [4.8010, 29.439]
+ 
+?- [hit(20, 0.2, 10, 30, _S, 2, 2, _T, _X, _Y, _Vx, _Vy), solve(_T)].
+    _S = [0.89967, 0.92279],
+    _X = [36.444, 36.772],
+    _Y = [20.000, 20.001],
+    _Vx = [22.047, 22.303],
+    _Vy = [20.064, 20.345],
+    _T = [3.6444, 3.6572] ;
+
+?- [hit(20, 0.2, 10, 30, _S, 2, 2, _T, _X, _Y, _Vx, _Vy), absolve(_T)].
+    _S = [0.80648, 1.0001],
+    _X = [36.113, 37.629],
+    _Y = [20.000, 20.001],
+    _Vx = [20.768, 23.353],
+    _Vy = [18.832, 21.649],
+    _T = [3.6113, 3.7429] ;
+*/

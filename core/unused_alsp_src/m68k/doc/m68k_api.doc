@@ -1,0 +1,54 @@
+atomic.68k:wm_atomic:
+atomic.68k:wm_number:
+atomic.68k:wm_float:
+atomic.68k:wm_integer:
+atomic.68k:wm_atom:
+atomic.68k:wm_nonvar:
+atomic.68k:wm_var:
+atomic.68k:wm_eq:
+atomic.68k:wm_noneq:
+call.68k:	; wm_call implements the prolog builtin call/1.  On entry, d0 has
+call.68k:	; wm_cut performs the cut from within call
+call.68k:	; wm_comma implements ','/2
+call.68k:wm_semicolon:
+call.68k:wm_arrow:
+call.68k:	; wm_colon implements ':'/2
+call.68k:	; wm_dbg_call implements dbg_call/2 which is essentially call but 
+call.68k:	; wm_ocall implements ocall/2 which is call without the overflow
+call.68k:	; wm_jump implements jump/2
+compare.68k:wm_compare:
+cut.68k:; wm_docut	-- performs the cut operation
+cut.68k:	; wm_cut performs the cut from within call.  This procedure
+functor.68k:wm_functor:
+functor.68k:; wm_arg implements arg/3
+functor.68k:wm_mangle:
+ident.68k:; wm_identical		-- implements ==
+ident.68k:; wm_nonidentical	-- implements \==
+interrupt.68k:; wm_overflow is called when an exceptional condition is detected 
+rts.68k:; wm_try_me
+rts.68k:; wm_retry_me
+rts.68k:; wm_trust_me
+rts.68k:; wm_try
+rts.68k:; wm_retry
+rts.68k:; wm_trust
+rts.68k:; wm_trust_fail
+rts.68k:; wm_nciadc
+rts.68k:; wm_abort
+rts.68k:; wm_throw
+rts.68k:; wm_catch22
+rts.68k:; wm_sw_const
+rts.68k:; wm_sw_struct
+rts.68k:; wm_exec is called from C to start out execution.
+rts.68k:wm_rungoal:
+rts.68k:wm_execute_builtin:
+rts.68k:; wm_fail
+rts.68k:; wm_unify is called to perform those unifications which are potentiall
+rts.68k:; wm_resolve_ref	-- this code is called when an undefined procedure
+rts.68k:; wm_g_uia is called by code which needs to match an uninterned atom
+rts.68k:; wm_p_uia is called by code which needs to set up a uia in the body.
+rts.68k:; wm_g_int
+rts.68k:; wm_g_sym
+rts.68k:; wm_u_lval performs the unify local value operation (write mode)
+rts.68k:; wm_p_unsafe performs the put_unsafe operation
+sio.68k:wm_sio_gbyte:
+sio.68k:wm_sio_pbyte:
