@@ -135,15 +135,16 @@ static	void	rev_update	PARAMS(( long *, long ));
 static	void	init_marks	PARAMS(( void ));
 static	void	mark		PARAMS(( long ));
 
+static	int	core_gc		PARAMS(( void ));
 
 #include <stdio.h>
 
 	/*-----------------------------------------------------
-	 | gc()
+	 | core_gc()
 	 *----------------------------------------------------*/
 
 int
-gc()
+core_gc()
 {
     long *mrccp;
     long *e;
@@ -161,27 +162,14 @@ gc()
     register unsigned long *mp;
     register unsigned long m;
     int   compactionbit;
-/*
-#ifdef FREEZE
-    int dtgv;
-    long *dthead, *last_dt, *this_dt;
-#endif
-*/
 
 #ifdef DEBUGSYS /*--------------------------------------------------*/
     unsigned long start_tick = 0, finish_tick;
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 
 	/* For demos and hardware-key protected versions, check copy protection. */
+    ASSERT(prolog_engine_invariant(&current_engine));
     check_security();
-
-/*
-#ifdef FREEZE
-    dtgv = gv_alloc();
-    dthead = (PWord *)(wm_gvbase - dtgv);
-    last_dt = *dthead;
-#endif
-*/
 
     /*---------------------------------------------------------------*
      | Force certain external variables to be biased for gc purposes.
@@ -293,6 +281,8 @@ gc()
     init_marks();
     mark((long) heap_high);		    /* mark it  */
 
+
+
     /*-----------------------------------------------------------------------*
      | Phase 2:   Mark from arguments, environments, trail cells, and
      |            cells in compacted region of the heap which point up to
@@ -363,14 +353,13 @@ gc()
 			/* hold onto the copied (2nd pair element) value): */
 		tr1 = tr;
 			/* move up one element; now an "ordinary" trail value: */ 
-	    	ap = (long *) *++tr;	/* tr is not biased */
-	    	if (oldest_ap <= ap && ap < heap_low)
+	    ap = (long *) *++tr;	/* tr is not biased */
+	    if (oldest_ap <= ap && ap < heap_low)
 			{
 				mark_from(ap);
-    				mark(val_at(tr1));
+    			mark(val_at(tr1));
 			}
 		}
-
 
 #else /* no-TRAILVALS */
 
@@ -398,9 +387,10 @@ gc()
      |     also be unbiased.  Therefore the argument passed into mark_from
      |     must be explicitly biased.
      *----------------------------------------------------------------------*/
-
     for (ap = wm_trailbase; ap < wm_gvbase; ap++)
+	{
 		mark_from(ap - BIAS);
+	}
 
     /*-----------------------------------------------------------------------*
      | Phase 3: Now everything should be marked.  We need to traverse the
@@ -677,11 +667,13 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 		stack_overflow(ALSSIG_HEAP_OVERFLOW);
 #else
 #error
-#endif
+#endif   /* SIGACTION...*/
 	else
     	return 1;
 
-#endif /* #ifdef 0 ----------------*/
+#endif /* #ifdef undef ----------------*/
+
+    ASSERT(prolog_engine_invariant(&current_engine));
 
 	return 1;
 
@@ -1021,4 +1013,139 @@ mark_backup:
 	    goto mark_backup;
     }
 }	/* mark(val) */
+
+
+int
+gc()
+{
+    /*-----------------------------------------------------------------------*
+     | Create the string of delay terms before running normal gc
+     *-----------------------------------------------------------------------*/
+#ifdef FREEZE
+    int dtgv;
+    long *dthead, *last_dt, *this_dt;
+    long *oldestcp;
+    long *b;
+    long *ap;
+    long *tr;
+
+    dtgv = gv_alloc();
+    dthead = (PWord *)(wm_gvbase - dtgv);
+    last_dt = (PWord *)MMK_INT(0);
+						/* printf("INIT: dtgv=%d dthead=%x *dthead=%x last_dt=%x\n",
+									dtgv,(int)dthead,(int)*dthead,(int)last_dt);   */
+    b =  wm_B;
+    tr = wm_TR;
+    oldestcp = wm_B;
+
+	while (chpt_B(oldestcp) != (long *) 0) {
+	   	oldestcp = chpt_B(oldestcp);
+	}
+						/* printf("Before stringing delays\n");
+						   printf("Tr_b= %x  B= %x  TR= %x  H= %x  HB= %x  H_b= %x\n",
+								   (int)wm_trailbase,(int)wm_B,(int)wm_TR,
+								   (int)wm_H,(int)wm_HB,(int)wm_heapbase);  */
+    while (b <= oldestcp) {
+#ifdef ChptAfterTrail
+		tr =  b + chpt_SIZE;	/* get tr and b set up for next iteration */
+		b =   chpt_B(b);
+		if (b == (long *) 0)	/* exit early if necessary */
+	    	break;
+#endif /* ChptAfterTrail */
+
+#ifdef TRAILVALS
+		for (; tr < b; tr++) {
+			/* move up one element; now an "ordinary" trail value: */ 
+	    ap = (long *) *++tr;	/* tr is not biased */
+
+		if (M_ISVAR(*ap) && CHK_DELAY(*ap)) {
+			this_dt = (PWord *)((PWord *)(*ap) -1);
+								/* printf(" - threading delay term: this_dt=%x *dthead=%x\n", 
+											(int)this_dt, (int)*dthead);
+								   printf("   *this_dt=%x funct(*this_dt)=%x arity(*this_dt)=%d     \n",
+											(int)*this_dt, (int)MFUNCTOR_TOKID(*this_dt), 
+											(int)MFUNCTOR_ARITY(*this_dt));  */
+
+			if (*dthead == MMK_INT(0))
+				gv_set((PWord)this_dt, WTP_STRUCTURE, dtgv);
+			else  /* install this_dt in 2nd arg of last_dt: */
+				w_install_argn((PWord)last_dt, 2, (PWord)this_dt, WTP_STRUCTURE);
+			last_dt = this_dt;	
+							/* printf("after threading: dthead=%x *dthead=%x last_dt=%x **dthead=%x\n", 
+								(int)dthead, (int)*dthead, (int)last_dt, (int)*((PWord *)*dthead) ); */
+		}
+  		}
+
+#else /* no-TRAILVALS */
+
+		for (; tr < b; tr++) {
+	    	ap = (long *) *tr;			/* tr is not biased */
+		if (M_ISVAR(*ap) && CHK_DELAY(*ap)) {
+			this_dt = (PWord *)((PWord *)(*ap) -1);
+									/* printf("threading delay term: this_dt=%x *dthead=%x\n", 
+													(int)this_dt, (int)*dthead);    */
+			if (*dthead == MMK_INT(0))
+				gv_set((PWord)this_dt, WTP_STRUCTURE, dtgv);
+			else  /* install this_dt in 2nd arg of last_dt: */
+				w_install_argn((PWord)last_dt, 2, (PWord)this_dt, WTP_STRUCTURE);
+			last_dt = this_dt;	
+		}
+		}
+#endif    /* TRAILVALS */
+
+
+#ifdef ChptBeforeTrail
+		tr = b + chpt_SIZE;	/* get tr and b set up for next iteration */
+		b =  chpt_B(b);
+		if (b == (long *) 0)	/* exit early if necessary */
+	    	break;
+#endif /* ChptBeforeTrail */
+    }	/* while (b <= oldestcp) */
+
+#endif   /* FREEZE */
+
+
+									/* printf("CALL core_gc\n"); */
+
+core_gc();
+
+									/* printf("EXIT core_gc\n"); */
+
+
+#ifdef FREEZE
+
+
+		/* Undo the threaded string of delay terms */
+	if (*dthead != MMK_INT(0)) 
+	{ 								
+	  	PWord *lrval=0, *lcl2, *lcl3=0;
+		int *lcl3t=0;
+									/* printf("Before undoing delay chain:dthead=%x *dthead=%x\n",
+												(int)dthead, (int)*dthead);  */
+	  	lcl2 = (PWord *)*dthead;
+
+		while ( M_ISVAR(lcl2) ) {
+						/* printf("lcl2=%x  *lcl2=%x  funct(*lcl2)=%x arit(*lcl2)=%d Arg#2 of lcl2=%x\n", 
+												(int)lcl2,(int)*lcl2, (int)MFUNCTOR_TOKID(*lcl2), 
+												(int)MFUNCTOR_ARITY(*lcl2), 
+												(int)*(((PWord *) lcl2) + 2));    */
+			w_get_argn(lcl3, lcl3t, (PWord)lcl2, 2);
+			lrval = MSTRUCTADDR(lcl3);
+
+									/* printf("lcl3=%x  lrval=*lcl3=%x\n",(int)lcl3,(int)lrval); */
+			*lcl3 = (long)(PWord *)MMK_VAR(lcl3);
+									/* printf(">>lcl3=%x  *lcl3=%x\n",(int)lcl3,(int)*lcl3); */
+			lcl2 = lrval;
+									/* printf("BOTTOM loop: lcl2=%x  \n",(int)lcl2); */
+		}
+									/* printf("After loop\n"); */
+		*dthead = MMK_INT(0);
+									/* printf("After undoing delay chain\n"); */
+		}
+		gv_free(dtgv);
+									/* printf("Ran gv_free: %d\n",(int)dtgv); */
+	return 1;
+	}
+#endif    /* FREEZE */
+
 
