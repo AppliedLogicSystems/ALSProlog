@@ -74,12 +74,16 @@ freeze_list_ground(Mod, [Var | Vars], Goal)
 delay_handler([]).
 delay_handler('$delay'(_,Next,Module,Goal))
 	:-
+
 	Module:Goal,
 	!,
 	delay_handler(Next).
 
 /*!----------------------------------------------------------------------
  *!----------------------------------------------------------------------*/
+
+/***********************************
+#if (syscfg:inconstrs)
 
 '$combine_dvars'(R,F)
 	:-
@@ -93,6 +97,89 @@ delay_handler('$delay'(_,Next,Module,Goal))
 	arg(4, F_DelayTerm, F_ConstrTerm),
 
 	comb_left_cstr(R_ConstrTerm, R, F_ConstrTerm, F).
+
+#else
+
+'$combine_dvars'(R,F)
+	:-
+		%% F is the senior var;
+%		pbi_write('-----Combine delay vars: '-(R,F)),pbi_nl,pbi_ttyflush,
+
+	'$delay_term_for'(R, R_DelayTerm),
+	arg(4, R_DelayTerm, R_ConstrTerm),
+
+	'$delay_term_for'(F, F_DelayTerm),
+	arg(4, F_DelayTerm, F_ConstrTerm),
+
+	trailed_mangle(4, F_DelayTerm, (F_Constr, R_Constr)),
+	'$bind_vars'(R, F).
+
+#endif 
+***********************************/
+
+:- dynamic(intconstrs/0).
+
+'$combine_dvars'(R,F)
+	:-
+	intconstrs,				%% defined (or not) in main.c
+	!,
+		%% F is the senior var;
+%		pbi_write('-----Combine delay vars: '-(R,F)),pbi_nl,pbi_ttyflush,
+
+	'$delay_term_for'(R, R_DelayTerm),
+	arg(4, R_DelayTerm, R_ConstrTerm),
+
+	'$delay_term_for'(F, F_DelayTerm),
+	arg(4, F_DelayTerm, F_ConstrTerm),
+
+	comb_left_cstr(R_ConstrTerm, R, F_ConstrTerm, F).
+
+'$combine_dvars'(R,F)
+	:-
+		%% F is the senior var;
+%		pbi_write('-----Combine delay vars#2: '-(R,F)),pbi_nl,pbi_ttyflush,
+%		pbi_write('-----Combine delay vars#2:'),pbi_nl,pbi_ttyflush,
+
+	'$delay_term_for'(R, R_DelayTerm),
+	arg(4, R_DelayTerm, R_Constr),
+
+	'$delay_term_for'(F, F_DelayTerm),
+	arg(4, F_DelayTerm, F_Constr),
+
+	subst_var(F_Constr, F, NewVar, NewF_Constr),
+	subst_var(R_Constr, R, NewVar, NewR_Constr),
+
+	arg(3, F_DelayTerm, F_Mod),
+	arg(3, R_DelayTerm, R_Mod),
+
+/*
+pbi_write(new(NewVar)=(NewF_Constr, (R_Mod:NewR_Constr))),
+pbi_nl,pbi_ttyflush,
+*/
+
+	'$delay'(NewVar,F_Mod,(NewF_Constr, (R_Mod:NewR_Constr)),_),
+	'$bind_vars'(F, NewVar),
+	'$bind_vars'(R, NewVar).
+
+%		pbi_write('-----Combine delay vars#2-DONE'),pbi_nl,pbi_ttyflush.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 		%% Compound constraint:
 comb_left_cstr((RC1, Rest_R_C), R, F_Constr, F)
@@ -141,9 +228,26 @@ comb_rt_cstr(F_Constr, F, R_Intv, R_Constr, R)
 		%% No intvls:
 cmbn(nil, F_Constr, F, nil, R_Constr, R)
 	:-
+/*
 	'$delay_term_for'(F, F_DelayTerm),
 	trailed_mangle(4, F_DelayTerm, (F_Constr, R_Constr)),
 	'$bind_vars'(R, F).
+*/
+	subst_var(F_Constr, F, NewVar, NewF_Constr),
+	subst_var(R_Constr, R, NewVar, NewR_Constr),
+
+	'$delay_term_for'(F, F_DelayTerm),
+	arg(3, F_DelayTerm, F_Mod),
+
+	'$delay_term_for'(R, R_DelayTerm),
+	arg(3, R_DelayTerm, R_Mod),
+
+	'$delay'(NewVar,F_Mod,(NewF_Constr, (R_Mod:NewR_Constr)),_),
+	'$bind_vars'(F, NewVar),
+	'$bind_vars'(R, NewVar).
+
+
+
 
 		%% R has intvl, but not F:
 cmbn(nil, F_Constr, F, R_Intv, R_Constr, R)
@@ -230,7 +334,153 @@ subst_var(Term, V, W, Result)
 subst_var(Term, V, W, Term).
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% For showanswers:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+:-rel_arith:dynamic('$domain_term'/2).
 
+show_interval_binding(N,S,VPairs,Stream)
+	:-
+	rel_arith:'$domain_term'(S, DomainTerm),
+	rel_arith:valid_domain(DomainTerm, Type, LArg, UArg),
+	!,
+			%% show the associated domain; ignore
+			%% any other constraints;
+	epsilon_show(Eps),
+	Width is abs(UArg - LArg),
+	(Width < Eps ->
+		SPrt is (UArg + LArg)/2
+		;
+		SPrt = [LArg, UArg]
+	),
+	nl(Stream),
+	write_term(Stream,'%lettervar%'(N)=SPrt,[]).
+
+show_interval_binding(N,S,VPairs,Stream)
+	:-
+	show_delay_binding(N,S,VPairs,Stream).
+
+:-dynamic(freeze_disp_vns/0).
+%freeze_disp_vns.
+
+show_delay_binding(N, S, VPairs, Stream)
+	:-
+	'$delay_term_for'(S, VarDelayTerm),
+	nl(Stream),
+	write_term(Stream,'%lettervar%'(N),[]),
+	(freeze_disp_vns ->
+		sio_var_to_atom(S,DelayVarAtom),
+		put_char(Stream,'['),
+		put_atom(Stream, DelayVarAtom),
+		put_char(Stream,']')
+		;
+		true
+	),
+	write_term(Stream,'->',[]),
+	exact_merge(VPairs, [(S, N)], XVPairs),
+	w_d_t(VarDelayTerm, Stream, XVPairs, Subsids).
+		%% Need to recursively go on & display te
+		%% var(pairs) on Subsids....
+
+w_d_t('$delay'(DVar, _, _, FrozenTerm), Stream, XVPairs, Subsids )
+	:-
+	exact_lookup(XVPairs, DVar, VName),
+	!,
+	w_d_t(FrozenTerm, Stream, XVPairs, Subsids).
+
+w_d_t('$delay'(DVar, _, _, FrozenTerm), Stream, XVPairs, 
+			[(DVar, DVarAtom) | Subsids] )
+	:-!,
+	sio_var_to_atom(DVar,DVarAtom),
+	put_atom(Stream, DVarAtom).
+
+w_d_t(Term, Stream, XVPairs, [])
+	:-
+	var(Term),
+	exact_lookup(XVPairs, Term, VName),
+	!,
+	put_atom(Stream, VName).
+
+w_d_t(Term, Stream, _, [])
+	:-
+	var(Term),
+	!,
+	write_term(Stream, Term, []).
+
+w_d_t(Term, Stream, _, [])
+	:-
+	atomic(Term),
+	!,
+	put_atom(Stream, Term).
+
+w_d_t('%lettervar%'(QVarName), Stream, _, [])
+	:- !,
+	put_atom(Stream, QVarName).
+
+w_d_t([], Stream, _, [])
+	:-!,
+	write_term(Stream, [], []).
+
+w_d_t([FT | FTs], Stream, XVPairs, Subsids)
+	:-
+	put_char(Stream, '['),
+	w_d_t_seq([FT | FTs], Stream, XVPairs, Subsids),
+	put_char(Stream, ']').
+
+w_d_t(Term, Stream, XVPairs, Subsids)
+	:-
+	Term =.. [Functor | Args],
+	w_d_t_cmp(Functor,Args,Term, Stream, XVPairs, Subsids).
+
+w_d_t_cmp(Functor,Args,Term, Stream, XVPairs,Subsids)
+	:-
+	functor(Term, _, 2), 
+	sio:binop( Functor,_,_,_),
+	!,
+	Args = [Arg1, Arg2],
+	w_d_t(Arg1, Stream, XVPairs, Subsids1),
+	put_atom(Stream,Functor),
+	w_d_t(Arg2, Stream, XVPairs, Subsids2),
+	append(Subsids1, Subsids2, Subsids).
+	
+w_d_t_cmp(Functor,Args,Term, Stream, XVPairs, Subsids)
+	:-
+	write_term(Stream, Functor, []),
+	put_char(Stream, '('),
+	w_d_t_seq(Args, Stream, XVPairs, Subsids),
+	put_char(Stream, ')').
+
+w_d_t_seq([], Stream, XVPairs, []).
+
+w_d_t_seq([Term], Stream, XVPairs, Subsids)
+	:-!,
+	w_d_t(Term, Stream, XVPairs, Subsids).
+	
+w_d_t_seq([Term | Terms], Stream, XVPairs, Subsids) 
+	:-
+	w_d_t(Term, Stream,  XVPairs, Subsids1),
+	put_char(Stream, ','),
+	w_d_t_seq(Terms, Stream,  XVPairs, Subsids2),
+	append(Subsids1, Subsids2, Subsids).
+
+exact_merge([], RightPairs, RightPairs).
+
+exact_merge([(V,I) | LeftPairs], RightPairs, OutPairs)
+	:-
+	exact_mem(RightPairs, V),
+	!,
+	exact_merge(LeftPairs, RightPairs, OutPairs).
+
+exact_merge([(V,I) | LeftPairs], RightPairs, [(V,I) | OutPairs])
+	:-
+	exact_merge(LeftPairs, RightPairs, OutPairs).
+
+exact_mem([(W, _) | _], V)
+	:-
+	W == V, !.	
+exact_mem([ _ | RightPairs], V)
+	:-
+	exact_mem(RightPairs, V).
 
 endmod.

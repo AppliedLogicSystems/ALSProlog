@@ -615,7 +615,7 @@ pbi_uia_pokel()
 	FAIL;
 }
 
-int
+static int
 do_pbi_uia_peekd(v1,t1, v2,t2, v3,t3)
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -653,7 +653,7 @@ pbi_uia_peekd()
 }	/* pbi_uia_peekd */
 
 
-int
+static int
 do_pbi_uia_poked(v1,t1, v2,t2, v3,t3)
     PWord v1, v2, v3;
     int   t1, t2, t3;

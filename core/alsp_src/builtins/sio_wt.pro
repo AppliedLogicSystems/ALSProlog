@@ -18,8 +18,6 @@ module sio.
 
 :-	make_gv("_depth_computation_constant").
 
-
-
 /*---------------------------------------------------------------------*
  | write_term(Term,Options)
  | write_term(Stream,Term,Options)
@@ -1497,11 +1495,11 @@ cont_write_substs([],[],Stream)
 	:- !,
 	fail.
 
-cont_write_substs(N,S,Stream) 
+cont_write_substs(Names,Substs,Stream) 
 	:-
-	subst_orig_toplevel_names(N,S),
-	subst_gen_letter_names(S,c(0)),
-	wr_subs2(N,S,Stream),
+	subst_orig_toplevel_names(Names,Substs),
+	subst_gen_letter_names(Substs,c(0)),
+	wr_subs2(Names,Substs,Stream),
 	fail.
 
 cont_write_substs(_,_,_).
@@ -1571,94 +1569,63 @@ subst_gen_letter_names(N,M,S,C)
 	NN is N+1,
 	subst_gen_letter_names(NN,M,S,C).
 
-wr_subs2([],[],Stream) 
+
+wr_subs2(Ns, Ss, Stream)
+	:-
+		%% VPairs is for printing delay terms:
+	rpairs_list(Ns, Ss, VPairs),
+	wr_subs2(Ns, Ss, VPairs, Stream).
+
+wr_subs2([],[],_,Stream) 
 	:- !.
 
-wr_subs2([N|Ns],[S|Ss],Stream) 
+wr_subs2([N|Ns],[S|Ss],VPairs,Stream) 
 	:-
-	wr_subs3(N,S,Stream),
+	wr_subs3(N,S,VPairs,Stream),
 	!,
-	wr_subs2(Ns,Ss,Stream).
+	wr_subs2(Ns,Ss,VPairs,Stream).
 
-wr_subs3(N,S,Stream)
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% show_[delay,interval]_binding/4
+	%%   -- defined in blt_frez.pro
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+wr_subs3(N,S,VPairs,Stream)
 	:-
 	'$is_delay_var'(S),
-	rel_arith:'$domain_term'(S, DomainTerm),
-	(rel_arith:valid_domain(DomainTerm, Type, LArg, UArg) ->
-		epsilon_show(Eps),
-		Width is abs(UArg - LArg),
-		(Width < Eps ->
-			SPrt is (UArg + LArg)/2
-			;
-			SPrt = [LArg, UArg]
-		),
-		nl(Stream),
-		write_term(Stream,'%lettervar%'(N)=SPrt,[])
+	!,
+		%% inconstrs/0 is defined (or not) in main.c
+	(intconstrs ->
+		show_interval_binding(N,S, VPairs, Stream)
 		;
-		nl(Stream),
-		write_term(Stream,'%lettervar%'(N),[]),
-		arg(1,Var_DelayTerm, DelayVar),
-		sio_var_to_atom(DelayVar,DelayVarAtom),
-		put_char(Stream,'['),
-		put_atom(Stream, DelayVarAtom),
-		put_char(Stream,']'),
-		write_term(Stream,'->',[]),
-		write_delay_term(Stream,Var_DelayTerm, DelayVarAtom)
+		show_delay_binding(N,S, VPairs, Stream)
 	).
 
-wr_subs3(N,S,Stream)
+wr_subs3(N,S,_,Stream)
 	:-
 	nl(Stream),
 	write_term(Stream,'%lettervar%'(N)=S,[]).
 
-write_delay_term(Stream, '$delay'(DVar, _, _, FrozenTerm), VName )
-	:-
-	write_delay_term(FrozenTerm, Stream, DVar, VName).
+rpairs_list([],[],[]).
 
-write_delay_term(FrozenTerm, Stream, DVar, VName)
+rpairs_list([N | Ns],[S | Ss], [(S,N) | Pairs])
 	:-
-	FrozenTerm == DVar,
+	var(S),
 	!,
-	put_atom(Stream, VName).
+	rpairs_list(Ns,Ss,Pairs).
 
-write_delay_term(FrozenTerm, Stream, DVar, VName)
+rpairs_list([N | Ns],[S | Ss], Pairs)
 	:-
-	atomic(FrozenTerm),
-	!,
-	write_term(Stream, FrozenTerm, []).
+	rpairs_list(Ns,Ss,Pairs).
 
-write_delay_term([FT | FTs], Stream, DVar, VName)
+exact_lookup([(Entry, Item) | DVarAtmsList], Term, Item)
 	:-
-	put_char(Stream, '['),
-	write_delay_term_seq([FT | FTs], Stream, DVar, VName),
-	put_char(Stream, ']').
+	Entry == Term,
+	!.
 
-write_delay_term(FrozenTerm, Stream, DVar, VName)
+exact_lookup([ _ | DVarAtmsList], Term, Item)
 	:-
-	FrozenTerm =.. [Functor | Args],
-	((functor(FrozenTerm, _, 2), sio:binop( Functor,_,_,_)) ->
-		Args = [Arg1, Arg2],
-		write_delay_term(Arg1, Stream, DVar, VName),
-		put_atom(Stream,Functor),
-		write_delay_term(Arg2, Stream, DVar, VName)
-		;
-		write_term(Stream, Functor, []),
-		put_char(Stream, '('),
-		write_delay_term_seq(Args, Stream, DVar, VName),
-		put_char(Stream, ')')
-	).
-	
-write_delay_term_seq([], Stream, DVar, VName).
-
-write_delay_term_seq([Term], Stream, DVar, VName)
-	:-!,
-	write_delay_term(Term, Stream, DVar, VName).
-	
-write_delay_term_seq([Term | Terms], Stream, DVar, VName)
-	:-
-	write_delay_term(Term, Stream, DVar, VName),
-	put_char(Stream, ','),
-	write_delay_term_seq(Terms, Stream, DVar, VName).
+	exact_lookup(DVarAtmsList, Term, VName).
 
 endmod.		%% builtins
 endmod.		%% sio

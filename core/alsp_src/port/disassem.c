@@ -203,15 +203,15 @@ void tracewam	PARAMS(( Code * ));
 
 int bwam_trace = 0;
 
-void toggle_bwam PARAMS(( void ));
-
-void
-toggle_bwam()
+int
+toggle_bwam(void)
 {
 	if (bwam_trace == 0)
 		bwam_trace = 1;
 	else
 		bwam_trace = 0;
+	
+	return 1;
 }
 
 void

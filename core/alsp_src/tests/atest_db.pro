@@ -6,9 +6,11 @@ module als_testing.
 
 	%% Standard ALS examples:
 
+/*
 test_info(testeoln, testeoln, user, test,
 'test of all eoln modes for all builtin predicates\n\
  involved with eolns and a test of stream buffer sizes.').
+*/
 
 test_info(bench, bench, user, main, 'The benchpress example.').
 

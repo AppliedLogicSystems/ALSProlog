@@ -108,7 +108,7 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 	   extra has to be done.
 
 	   When both dv and one are delay vars, if the
-	   binding of them together wenth thru the normal
+	   binding of them together went thru the normal
 	   mechanism, eventually we would reach the point
 	   where we recognized that we had two uninstatiated
 	   delay vars which were being bound together. Since
@@ -118,7 +118,6 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 	   [from blt_frez.pro] which is designed to do 
 	   exactly this.
 
-
 	   Note that we can assume that dv is uninstatiated,
 	   due to the test performed by freeze/3 in
 	   blt_frez.pro.
@@ -126,7 +125,9 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 
 	w_install(dv,(int)one,MTP_UNBOUND);
 
+/* printf("Calling update_chpt_slots(h=%x,hb=%x)\n",wm_H,wm_HB); */
 	update_chpt_slots((PWord)wm_H);
+	wm_HB = wm_H;
 
 		/* return the delay term in the 4th arg: */
 	if (w_unify(rdt, rdtt, vv, vvt))
@@ -309,9 +310,9 @@ combin_dels(r,f)
 	int   mod_t, goal_t, cdf_t;
 
 #ifdef DEBUGFREEZE
-printf("combin_dels:r=_%lu f=_%lu \n",
+printf("combin_dels:r=_%lu f=_%lu wm_H=%x wm_HB=%x wm_B=%x\n",
 			(long)(((PWord *) r) - wm_heapbase),
-			(long)(((PWord *) f) - wm_heapbase)); 
+			(long)(((PWord *) f) - wm_heapbase), wm_H,wm_HB,wm_B); 
 #endif
 
 	w_mk_sym(&mod,&mod_t,TK_BUILTINS);  
@@ -349,7 +350,7 @@ pbi_walk_cps()
 	CurP = (PWord *) wm_B;
 	Stop = (PWord *)wm_trailbase;
 	printf("wm_TR=%x  Init CurP (=B) =%x  wm_TRbase=%x\n",
-						(int)CurP,(int)wm_TR,(int)Stop);
+						(int)wm_TR, (int)CurP, (int)Stop);
 
 		/* see chpt.h for choice-point macros */
 	while (CurP != 0) {
@@ -473,11 +474,13 @@ pbi_swp_tr(void)
 		{
 			printf("Delay VAR!");
 			printf("         ");
-			disp_heap_item(*Back1);
+/*			disp_heap_item(*Back1);   */
+			disp_heap_item(Back1);
 		}
 #ifdef TRAILVALS
 		printf("  +>%lx[%lx]->", (long)(CurT-1),(long)(1 & (long)(CurT-1)) );
-		disp_heap_item(*(CurT+1));
+/*		disp_heap_item(*(CurT+1));   */
+		disp_heap_item(*(CurT-1));
 #else
 #endif
 	}
@@ -535,9 +538,9 @@ printf("Heap display: %x --> %x\n",(int)start,(int)stop);
 }
 
 
-void disp_item	PARAMS((void));
+int disp_item	PARAMS((void));
 
-void
+int
 disp_item()
 {
     PWord v1;
@@ -547,6 +550,7 @@ disp_item()
 
 	printf("item= %x t= %d\n",v1,t1);
 
+    SUCCEED;
 }
 
 

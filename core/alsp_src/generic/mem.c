@@ -39,6 +39,10 @@
 #endif
 #endif
 
+#ifdef WIN32
+#include <io.h>
+#endif
+
 #include <errno.h>
 
 #ifndef O_BINARY

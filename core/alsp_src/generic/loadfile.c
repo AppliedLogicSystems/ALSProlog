@@ -45,10 +45,14 @@
 #else
 #include <unix.h>
 #endif
-#else /* must be unix */
+#elif defined(UNIX)
 #include <errno.h>
 #include <sys/file.h>
-
+#elif defined(WIN32)
+#include <windows.h>
+#include <io.h>
+#else
+#error
 #endif			/* OS includes */
 
 
@@ -558,18 +562,18 @@ obp_pop()
 
 #endif	/* OBP */
 
-#if (defined(__DJGPP__) || defined(__GO32__))
+#if (defined(__DJGPP__) || defined(__GO32__) || defined(WIN32))
 
 #ifndef MacOS
 
-static	long	get_file_modified_time	PARAMS(( char * ));
-static	int	isdir			PARAMS(( char * ));
+static	long	get_file_modified_time	PARAMS(( CONST char * ));
+static	int	isdir			PARAMS((CONST char * ));
 
 static long 
 get_file_modified_time(fname)
     char *fname;
 {
-#ifdef DOS
+#if defined(DOS)
 
     long  date_and_time;
 
@@ -582,7 +586,21 @@ get_file_modified_time(fname)
     }
     else
 	return (0);
+#elif defined(WIN32)
 
+	HANDLE f;
+	FILETIME wt;
+	long result;
+	
+	f = CreateFile(fname, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	if (f != INVALID_HANDLE_VALUE) {
+		if (GetFileTime(f, NULL, NULL, &wt)) {
+			result = wt.dwHighDateTime;
+		} else result = 0;
+		CloseHandle(f);
+	} else result = 0;
+	
+	return result;
 #else  /* DOS */
 
     struct stat buf;
@@ -603,7 +621,7 @@ static int
 isdir(fname)
     char *fname;
 {
-#ifdef DOS
+#if defined(DOS)
 
 #define DIR_BIT 0x0010
 
@@ -614,6 +632,14 @@ isdir(fname)
 	return (fattr & DIR_BIT);
     else
 	return (0);
+#elif defined(WIN32)
+
+	DWORD fattr;
+	
+	fattr = GetFileAttributes(fname);
+	if (fattr != -1) return (fattr & FILE_ATTRIBUTE_DIRECTORY);
+	else return 0;
+	
 #else  /* DOS */
 
     struct stat buf;

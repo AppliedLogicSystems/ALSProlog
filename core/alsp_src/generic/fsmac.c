@@ -22,6 +22,7 @@
 #include <Processes.h>
 #include <ctype.h>
 #include <limits.h>
+#ifdef HAVE_GUSI
 #include <GUSI.h>
 
 int absolute_pathname(const char *name)
@@ -134,6 +135,8 @@ int re_exec(const char *s)
 {
 	return match(s, re_comp_pattern);
 }
+#endif
+
 
 #ifndef HAVE_GUSI
 
@@ -173,8 +176,8 @@ int re_exec(const char *s)
 #endif
 #endif
 
-static int
-pgetcwd()
+int pgetcwd(void);
+int pgetcwd(void)
 {
     PWord v1, sym;
     int   t1, symType;
@@ -209,7 +212,8 @@ pgetcwd()
  * Changes the current working directory to be that given by the input.
  */
 
-static int pchdir(void)
+int pchdir(void);
+int pchdir(void)
 {
     PWord v1;
     int   t1;
@@ -234,7 +238,8 @@ static int pchdir(void)
  * Unlinks the indicated file from the file system
  */
 
-static int punlink(void)
+int punlink(void);
+int punlink(void)
 {
     PWord v1;
     int   t1;
@@ -295,7 +300,7 @@ static int canonicalize_pathname(void)
 /* Other routines. */
 
 
-int absolute_pathname(const char *name)
+int absolute_pathname(CONST char *name)
 {    
     return *name != ':' && (strchr(name, ':') != NULL);
 }

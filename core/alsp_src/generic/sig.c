@@ -423,7 +423,7 @@ pbi_alarm()
     alarm((unsigned long) dval);
 #endif
 
-#ifndef MacOS
+#if !defined(MacOS) && !defined(WIN32)
     (void) signal(SIGALRM, signal_handler);
 #endif /* ndef MacOS */
 

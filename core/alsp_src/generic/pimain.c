@@ -63,8 +63,13 @@ extern	void	main	PARAMS(( int, char ** ));
 #include <console.h>
 #include <SIOUX.h>
 
+#ifdef NO_SIOUX_MENU
+tSIOUXSettings  SIOUXSettings =
+        {0, 0, 0, 0, 0, 0, 4, 80, 24, 0, 0, 22, 12, 0};
+#else
 tSIOUXSettings  SIOUXSettings =
         {1, 1, 1, 0, 0, 0, 4, 80, 24, 0, 0, 22, 12, 0};
+#endif
 
 #endif			/* __MWERKS__ */
 #endif			/* MPW_TOOL */
@@ -104,7 +109,6 @@ main(int argc, char ** argv)
     printf("Please use Control-E (followed by a return) to signal end-of-file.\n");
     printf("Avoid Control-D, because this will terminate the application.\n\n");
 #endif 
-
 
 #endif /* MacOS */
 

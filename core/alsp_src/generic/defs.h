@@ -261,7 +261,7 @@
 #define PATH_SEPERATOR	','
 #define DIR_SEPARATOR	']'
 
-#elif	defined(DOS)
+#elif	defined(DOS) || defined(WIN32)
 #define	PATH_SEPARATOR	';'
 #define DIR_SEPARATOR	'\\'
 
@@ -272,6 +272,9 @@
 #elif	defined(MacOS)
 #define PATH_SEPARATOR	','
 #define DIR_SEPARATOR	':'
+
+#elif
+#error
 
 #endif
 

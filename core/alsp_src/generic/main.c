@@ -63,6 +63,11 @@
 #endif
 #endif
 
+#ifdef WIN32
+#include <io.h>
+#include <direct.h>
+#endif
+
 #include "main.h"
 #include "version.h"
 #include "pckg.h"
@@ -468,6 +473,7 @@ PI_prolog_init(win_str, argc, argv)
 
 #ifdef INTCONSTR 
     assert_atom_in_module("builtins","intconstr");
+    assert_atom_in_module("syscfg","intconstr");
 #endif
 
     /*---------------------------------------*
@@ -525,14 +531,14 @@ assert_sys_searchdir(name)
     char *name;
 {
     char  command[2048];
-#ifdef DOS
+#if defined(DOS) || defined(WIN32)
     char  tbuf[2048], *tptr, *nptr;
 #endif
 
     if (noautoload && !pckgloaded)
 	return;
 
-#ifdef DOS
+#if defined(DOS) || defined(WIN32)
     /* replace \ by \\ to make parser happy */
 
     for (tptr = tbuf, nptr = name; *nptr != '\0'; *tptr++ = *nptr++)
@@ -657,7 +663,7 @@ assert_command_line(count, args)
  * absolute_pathname tests to see if we have an absolute pathname or not
  *-----------------------------------------------------------------------------*/
 
-#if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(OS2)
+#if defined(DOS) || defined(AtariOS) || defined(__GO32__) || defined(OS2) || defined(WIN32)
 
 static int
 absolute_pathname(name)
@@ -731,7 +737,7 @@ whereami(name)
 
 	t = imagedir;
 	if (!absolute_pathname(name)) {
-#ifdef DOS
+#if defined(DOS) || defined(WIN32)
 	    int   drive;
 	    char *newrbuf;
 
@@ -774,7 +780,7 @@ whereami(name)
 		*t++ = DIR_SEPARATOR;
 	    }
 	}
-#if (!defined(MacOS) && !defined(_DJGPP__) && !defined(__GO32__) )
+#if (!defined(MacOS) && !defined(_DJGPP__) && !defined(__GO32__) && !defined(WIN32))
 	else
 		(*t++ = DIR_SEPARATOR);
 #endif

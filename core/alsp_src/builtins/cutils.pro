@@ -1,148 +1,148 @@
-/*
- * cutils.pro
- * Copyright (c) 1991, Applied Logic Systems Inc.
- *
- * C data manipulation predicates
- *
- * Creation Date : 3 Oct, 1991
- * Author : P. Raman
- *
- * Modification History :
- *		c_rconst/2 should no longer be used to access C globals
- *		Added string handling predicates which include handling Pascal strings
- *
- * Exported predicates :
- *
- * 	c_const(+Name,-Val) 
- *		get the value of a C defined constant.
- *
- * 	c_rconst(+Name,-Val) 
- *		get the value of a C defined runtime constant
- *
- * 	c_alloc(+Type,-UIA)
- *		allocate a UIA that can hold data of type Type.
- *
- * 	c_alloc_abs(+Type,-Ptr)
- *		malloc area that can hold data of type Type.
- *
- * 	c_allocn(+Type,+Num,-UIA) 
- *		allocate UIA to hold Num items of type Type.
- *
- * 	c_allocn_abs(+Type,+Num,-Ptr)
- *		malloc area to hold Num items of type Type.
- *
- *	c_free(+UIA)
- *		does nothing (freeing taken care of by gc)
- *
- *	c_free_abs(+Ptr)
- *		mfree the area pointed by Ptr.
- *
- *	c_set(+Obj,+Type1,+Val)
- *	c_set(+Obj,+Type2,[+FieldName,+Val,...])
- *		destructively modify a UIA or C data area with Val
- *		of type Type. In the first form Type1 can be a integral
- *		type or 'str'. In the second form Type2 must be a 
- *		structure type, and FieldName is the name of a field
- *		to be modified with value Val. Subfields are identified 
- *		by their (C-style) dot-separated pathname, except when
- *		the sub-structure is a type-reference, in which case
- *		FieldName is the name of the field, and Val is (recursively)
- *		a list of FieldName - Value pairs.
- *
- *	c_set_str(+Obj,+Off,+Len,+SymOrUIA)
- *		destructively modify a segment of data in the UIA or
- *		C data Obj at an offset Off by no more than Len 
- *		bytes taken from SymOrUIA.
- *
- *	c_set_raw(+Obj,+Off,+Len,+UIA)
- *		writes Len characters from UIA into Obj starting
- *		at offset Off.
- *
- *	c_setn(+Obj,+Type,+I,+Val)
- *	c_setn(+Obj,+SType,+I,[+FieldName,+Val,...])
- *		perform c_set/3 on the I-th component of an array, where
- *		I=0 refers to the first element and so on. In the
- *		first form, Type must be a base type. In the second form
- *		SType must be a structure type ( substructures are handled
- *		in the same manner as in c_set/3).
- *
- *	c_examine(+Obj,+Type,-Val)
- *	c_examine(+Obj,+SType,[+FieldName,-Val,...])
- *		examine a UIA or C ptr Obj, assuming its type 
- *		to be Type. In the first form, Type is either
- *		an intergral type or 'str'. In the second form,
- *		SType must be a structure type.
- *
- *	c_examine_str(+Obj,+Off,+Len,-Val)
- *		examine a segment of Obj starting at offset Off
- *		until first null character or Len characters
- *		whichever comes first and return the value as
- *		as a UIA in Val.
- *	c_examine_raw(+Obj,+Off,+Len,-Val)
- *		reads Len characters starting at offset Off
- *		into Obj and returns the result as a UIA in Val.
- *		Note that the resulting UIA can have null and
- *		other funny characters.
- *
- *	c_examinen(+Obj,+Type,+I,-Val)
- *	c_examinen(+Obj,+SType,+I,[+FieldName,-Val,...])
- *		examine the I the component of array of type Type/SType.
- *
- *	c_create(+Type,+Val,-UIA)
- *	c_create(+SType,[+FieldName,+Val,...],-UIA)
- *		equivalent to c_alloc/2 plus c_set/3. Type can be
- *		an integral type or 'str'. SType must be a structure 
- *		type.
- *
- *	c_create_abs(+Type,+Val,-Ptr)
- *	c_create_abs(+SType,[+FieldName,+Val,...],-Ptr)
- *		equivalent to c_alloc_abs/2 plus c_set/3. Type can be
- *		an integral type or 'str'. SType must be a structure 
- *		type.
- *
- *	c_createn(+Type,+Num,[+Val,...],-UIA)
- *	c_createn(+SType,+Num,[[+FieldName,+Val,...], ...], -UIA)
- *		allocate and initialize an array of data valuesin a UIA.
- *		equivalent to c_allocn/3 plus several c_setn/4.
- *
- *	c_createn_abs(+Type,+Num,[+Val,...],-Ptr)
- *	c_createn_abs(+SType,+Num,[[+FieldName,+Val,...], ...], -Ptr)
- *		same as c_createn/4, except that the data is created
- *		in a C malloced area.
- *
- *	c_create_arglist([+Name,+Val,...],-Ptr)
- *	c_create_arglist([+Name,+Val,...],-Ptr,-PtrList)
- *		create an initialized ARGLIST structure for X Toolkit
- *		and return a pointer to the arg structure in Ptr and
- *		a list of pointers that can be freed using c_free_arglist
- *
- *	c_free_arglist(+PtrList)
- *		does c_free_abs on each item of PtrList.
- *
- *	c_call(CFuncPtr,Arglist,RetVal)
- *		calls the C function whose address is CFuncPtr with
- *		arguments from Arglist that are assumed to be longs
- *		and binds RetVal with the return value of function.
- *
- *	Note :
- *		The following type codes are recognized by $c_set/$c_examine
- *
- *      1  -- int
- *      2  -- unsigned int
- *      3  -- long
- *      4  -- unsigned long
- *      5  -- pointer
- *      6  -- char
- *      7  -- unsigned char
- *      8  -- short
- *      9  -- unsigned short
- *      10 -- string
- *      11 -- string of given length (length is 4th arg)
- *      12 -- float
- *      13 -- double
- *      14 -- far pointer  (DOS only)
- *	15 -- raw data of given length
- */
+/*-----------------------------------------------------------------------------*
+ | 				cutils.pro
+ | Copyright (c) 1991-96, Applied Logic Systems Inc.
+ |
+ | 		C data manipulation predicates
+ |
+ | Creation Date : 3 Oct, 1991
+ | Author : P. Raman
+ |
+ | Modification History :
+ |		c_rconst/2 should no longer be used to access C globals
+ |		Added string handling predicates which include handling Pascal strings
+ |
+ | Exported predicates :
+ |
+ | 	c_const(+Name,-Val) 
+ |		get the value of a C defined constant.
+ |
+ | 	c_rconst(+Name,-Val) 
+ |		get the value of a C defined runtime constant
+ |
+ | 	c_alloc(+Type,-UIA)
+ |		allocate a UIA that can hold data of type Type.
+ |
+ | 	c_alloc_abs(+Type,-Ptr)
+ |		malloc area that can hold data of type Type.
+ |
+ | 	c_allocn(+Type,+Num,-UIA) 
+ |		allocate UIA to hold Num items of type Type.
+ |
+ | 	c_allocn_abs(+Type,+Num,-Ptr)
+ |		malloc area to hold Num items of type Type.
+ |
+ |	c_free(+UIA)
+ |		does nothing (freeing taken care of by gc)
+ |
+ |	c_free_abs(+Ptr)
+ |		mfree the area pointed by Ptr.
+ |
+ |	c_set(+Obj,+Type1,+Val)
+ |	c_set(+Obj,+Type2,[+FieldName,+Val,...])
+ |		destructively modify a UIA or C data area with Val
+ |		of type Type. In the first form Type1 can be a integral
+ |		type or 'str'. In the second form Type2 must be a 
+ |		structure type, and FieldName is the name of a field
+ |		to be modified with value Val. Subfields are identified 
+ |		by their (C-style) dot-separated pathname, except when
+ |		the sub-structure is a type-reference, in which case
+ |		FieldName is the name of the field, and Val is (recursively)
+ |		a list of FieldName - Value pairs.
+ |
+ |	c_set_str(+Obj,+Off,+Len,+SymOrUIA)
+ |		destructively modify a segment of data in the UIA or
+ |		C data Obj at an offset Off by no more than Len 
+ |		bytes taken from SymOrUIA.
+ |
+ |	c_set_raw(+Obj,+Off,+Len,+UIA)
+ |		writes Len characters from UIA into Obj starting
+ |		at offset Off.
+ |
+ |	c_setn(+Obj,+Type,+I,+Val)
+ |	c_setn(+Obj,+SType,+I,[+FieldName,+Val,...])
+ |		perform c_set/3 on the I-th component of an array, where
+ |		I=0 refers to the first element and so on. In the
+ |		first form, Type must be a base type. In the second form
+ |		SType must be a structure type ( substructures are handled
+ |		in the same manner as in c_set/3).
+ |
+ |	c_examine(+Obj,+Type,-Val)
+ |	c_examine(+Obj,+SType,[+FieldName,-Val,...])
+ |		examine a UIA or C ptr Obj, assuming its type 
+ |		to be Type. In the first form, Type is either
+ |		an intergral type or 'str'. In the second form,
+ |		SType must be a structure type.
+ |
+ |	c_examine_str(+Obj,+Off,+Len,-Val)
+ |		examine a segment of Obj starting at offset Off
+ |		until first null character or Len characters
+ |		whichever comes first and return the value as
+ |		as a UIA in Val.
+ |	c_examine_raw(+Obj,+Off,+Len,-Val)
+ |		reads Len characters starting at offset Off
+ |		into Obj and returns the result as a UIA in Val.
+ |		Note that the resulting UIA can have null and
+ |		other funny characters.
+ |
+ |	c_examinen(+Obj,+Type,+I,-Val)
+ |	c_examinen(+Obj,+SType,+I,[+FieldName,-Val,...])
+ |		examine the I the component of array of type Type/SType.
+ |
+ |	c_create(+Type,+Val,-UIA)
+ |	c_create(+SType,[+FieldName,+Val,...],-UIA)
+ |		equivalent to c_alloc/2 plus c_set/3. Type can be
+ |		an integral type or 'str'. SType must be a structure 
+ |		type.
+ |
+ |	c_create_abs(+Type,+Val,-Ptr)
+ |	c_create_abs(+SType,[+FieldName,+Val,...],-Ptr)
+ |		equivalent to c_alloc_abs/2 plus c_set/3. Type can be
+ |		an integral type or 'str'. SType must be a structure 
+ |		type.
+ |
+ |	c_createn(+Type,+Num,[+Val,...],-UIA)
+ |	c_createn(+SType,+Num,[[+FieldName,+Val,...], ...], -UIA)
+ |		allocate and initialize an array of data valuesin a UIA.
+ |		equivalent to c_allocn/3 plus several c_setn/4.
+ |
+ |	c_createn_abs(+Type,+Num,[+Val,...],-Ptr)
+ |	c_createn_abs(+SType,+Num,[[+FieldName,+Val,...], ...], -Ptr)
+ |		same as c_createn/4, except that the data is created
+ |		in a C malloced area.
+ |
+ |	c_create_arglist([+Name,+Val,...],-Ptr)
+ |	c_create_arglist([+Name,+Val,...],-Ptr,-PtrList)
+ |		create an initialized ARGLIST structure for X Toolkit
+ |		and return a pointer to the arg structure in Ptr and
+ |		a list of pointers that can be freed using c_free_arglist
+ |
+ |	c_free_arglist(+PtrList)
+ |		does c_free_abs on each item of PtrList.
+ |
+ |	c_call(CFuncPtr,Arglist,RetVal)
+ |		calls the C function whose address is CFuncPtr with
+ |		arguments from Arglist that are assumed to be longs
+ |		and binds RetVal with the return value of function.
+ |
+ |	Note :
+ |		The following type codes are recognized by $c_set/$c_examine
+ |
+ |      1  -- int
+ |      2  -- unsigned int
+ |      3  -- long
+ |      4  -- unsigned long
+ |      5  -- pointer
+ |      6  -- char
+ |      7  -- unsigned char
+ |      8  -- short
+ |      9  -- unsigned short
+ |      10 -- string
+ |      11 -- string of given length (length is 4th arg)
+ |      12 -- float
+ |      13 -- double
+ |      14 -- far pointer  (DOS only)
+ |	15 -- raw data of given length
+ *-----------------------------------------------------------------------------*/
 
 module builtins.
 

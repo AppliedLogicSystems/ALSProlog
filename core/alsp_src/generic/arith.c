@@ -17,17 +17,15 @@
 #include "defs.h"
 #include <math.h>
 
-#ifdef DOS
+#if defined(DOS)
 #include <stdef.h>
 #include <errno.h>
 
-#else  /* DOS */
-#ifdef VMS
+#elif defined(VMS)  /* DOS */
 #include <errno.h>
 #include <types.h>
 
-#else  /* VMS */
-#ifdef MacOS
+#elif defined(MacOS)
 #include <errno.h>
 #ifdef HAVE_GUSI
 #include <GUSI.h>
@@ -37,14 +35,18 @@
 #include <unix.h>
 #endif
 #endif
-#else  /* MacOS */
+
+#elif defined(UNIX)
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/param.h>
 
-#endif /* MacOS */
-#endif /* VMS */
-#endif /* DOS */
+#elif defined(WIN32)
+#include <errno.h>
+
+#else
+#error
+#endif
 
 #include <time.h>
 #include <setjmp.h>
@@ -145,8 +147,8 @@ init_time()
 #ifdef	_SC_CLK_TCK
     clock_ticks_per_second = sysconf(_SC_CLK_TCK);
 #else	/* HAVE_UNISTD_H */
-#ifdef MacOS
-    clock_ticks_per_second = 60;
+#if defined(MacOS) || defined(WIN32)
+    clock_ticks_per_second = CLOCKS_PER_SEC;
 #else	/* MacOS */
     clock_ticks_per_second = HZ;
 #endif	/* MacOS */

@@ -24,54 +24,55 @@ echo Target dir = $1
 mkdir $1
 echo Copying:
 echo - top level directory...
-cp readme $1
+cp -f readme $1
 u2d $1/readme
-cp cfgs/dos/readme.dos $1
+cp -f cfgs/dos/readme.dos $1
 u2d $1/readme.dos
 
 echo - cfgs
 mkdir $1/cfgs
-cp ./cfgs/* $1/cfgs
+cp -f ./cfgs/* $1/cfgs
 u2d $1/cfgs/*
-cp ./cfgs/dos/doconfig.bat $1
+cp -f ./cfgs/dos/doconfig.bat $1
 
 echo - bld-port
-cp -r ./bld-port $1
+cp -f -r ./bld-port $1
 u2d $1/bld-port/*
 
 echo - bld-natv
-cp -r ./bld-natv $1
+cp -f -r ./bld-natv $1
 u2d $1/bld-natv/*
 
 echo - builtins
-cp -r ./builtins $1
+cp -f -r ./builtins $1
 u2d $1/builtins/*.pro
 
 echo - library
-cp -r ./library $1
+cp -f -r ./library $1
 u2d $1/library/*.pro
 
 echo - cinterf
-cp -r ./cinterf $1
+cp -f -r ./cinterf $1
 u2d $1/cinterf/readme
 u2d $1/cinterf/c2pro/*
 u2d $1/cinterf/pro2intf/*
 u2d $1/cinterf/deps/*
 
 echo - generic
-cp -r ./generic $1
+cp -f -r ./generic $1
 u2d $1/generic/*.c
 u2d $1/generic/*.h
+u2d $1/generic/*.in
 u2d $1/generic/*.tags
 u2d $1/generic/*.mkf
 u2d $1/generic/*.txt
 u2d $1/generic/generate/*
 u2d $1/generic/generate/tok.h/*
 
-cp $1/generic/generate/tok.h/* $1/generic
+cp -f $1/generic/generate/tok.h/* $1/generic
 
 echo - i386
-cp -r ./i386 $1
+cp -f -r ./i386 $1
 rm -r $1/i386/OLD
 rm -r $1/i386/sysv
 rm -r $1/i386/dosphar
@@ -82,30 +83,30 @@ u2d $1/i386/*
 u2d $1/i386/*/*
 
 echo - pconfig
-cp -r ./pconfig $1
+cp -f -r ./pconfig $1
 u2d $1/pconfig/*.pro
 u2d $1/pconfig/*.in
 
 echo - port
-cp -r ./port $1
+cp -f -r ./port $1
 u2d $1/port/*.c
 u2d $1/port/*.h
 u2d $1/port/*.mkf
 u2d $1/port/*/*.h
 
 echo - tests
-cp -r ./tests $1
+cp -f -r ./tests $1
 u2d $1/tests/*.pro
 u2d $1/tests/als_exmp/*.pro
 u2d $1/tests/systests/*.pro
 u2d $1/tests/tsuite/*.pro
 
 echo - utils
-cp -r ./utils $1
+cp -f -r ./utils $1
 u2d $1/utils/*
 
 echo - wins
-cp -r ./wins $1
+cp -f -r ./wins $1
 u2d $1/wins/build/*.in
 u2d $1/wins/build/x/*
 u2d $1/wins/build/motif/*
@@ -120,11 +121,11 @@ rm -r $1/port/HIDE
 rm -r $1/wins/build/*/CVS
 
 #echo Setting up DJGPP makefile templates...
-#cp cfgs/maketop.dj $1/makefile.in
-#cp bld-port/makefile.dj $1/bld-port/makefile.in
-#cp bld-natv/makefile.dj $1/bld-natv/makefile.in
-#cp generic/generate/generic.dj $1/generic/generic.mkf
-#cp port/port.dj $1/port/port.mkf
+#cp -f cfgs/maketop.dj $1/makefile.in
+#cp -f bld-port/makefile.dj $1/bld-port/makefile.in
+#cp -f bld-natv/makefile.dj $1/bld-natv/makefile.in
+#cp -f generic/generate/generic.dj $1/generic/generic.mkf
+#cp -f port/port.dj $1/port/port.mkf
 # Later: something for i386 dir
 
 

@@ -197,7 +197,24 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 			     printf("   match is delay [f=%x[_%lu]]\n", 				   \
 							  (int)f,(long)(((PWord *) f) - wm_heapbase));	   \
   				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 				   \
-				combin_dels((PWord)r,(PWord)f); }  } } }; 					   \
+			    UNSHADOW_REGS;												   \
+				combin_dels((PWord)r,(PWord)f); SHADOW_REGS; }  } } }; 		   \
+  *(r) = PWORD(f); }
+
+#define VVBINDX(r,f,lnn)   { 						  						   \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { 						   \
+	  *(PWord *)--mr_TR = PWORD(r); 										   \
+	  *(PWord *)--mr_TR = *PWPTR(r);										   \
+	  if ( CHK_DELAY(r) ) { 												   \
+			printf("vvb@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x\n",lnn, 			   \
+					(int)r,(long) (((PWord *) r) - wm_heapbase),(int)mr_TR-1); \
+  			*((PWord *)r +1) = (PWord)((PWord *)r +1); 					       \
+	  		if ( CHK_DELAY(f) && r != f ) { 								   \
+			     printf("   match is delay [f=%x[_%lu]]\n", 				   \
+							  (int)f,(long)(((PWord *) f) - wm_heapbase));	   \
+  				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 				   \
+			    UNSHADOW_REGS_S;												   \
+				combin_dels((PWord)r,(PWord)f); SHADOW_REGS_S; }  } } }; 		   \
   *(r) = PWORD(f); }
 
 #else /* NO TRAILVALS */
@@ -220,7 +237,22 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 	  		if ( CHK_DELAY(f) && r != f ) { \
 			  printf("   match is delay [f=%x[_%lu]]\n",(int)f,(long)(((PWord *) f) - wm_heapbase)); \
 				*((PWord *)f + 1) = (PWord)((PWord *)f + 1);				\
-				combin_dels((PWord)r,(PWord)f); }  } } }; \
+			    UNSHADOW_REGS;												   \
+				combin_dels((PWord)r,(PWord)f); SHADOW_REGS; }  } } }; \
+  *(r) = PWORD(f); }
+
+#define VVBINDX(r,f,lnn)   { \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *--mr_TR = PWORD(r); \
+	  if ( CHK_DELAY(r) ) { \
+			printf("vvb@@@ [ln=%d] r=%x[_%lu]  mr_TR=%x\n",lnn, \
+					(int)r,(long) (((PWord *) r) - wm_heapbase),(int)mr_TR-1); \
+			*((PWord *)r +1) = (PWord)((PWord *)r + 1);						\
+	  		if ( CHK_DELAY(f) && r != f ) { \
+			  printf("   match is delay [f=%x[_%lu]]\n",(int)f,(long)(((PWord *) f) - wm_heapbase)); \
+				*((PWord *)f + 1) = (PWord)((PWord *)f + 1);				\
+			    UNSHADOW_REGS_S;												   \
+				combin_dels((PWord)r,(PWord)f); SHADOW_REGS_S; }  } } }; \
   *(r) = PWORD(f); }
 
 #endif /* TRAILVALS */
@@ -247,7 +279,21 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
   			*((PWord *)r +1) = (PWord)((PWord *)r + 1); 				  \
 	  		if ( CHK_DELAY(f) && r != f ) { \
   				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 				   \
-				combin_dels((PWord)r,(PWord)f); }  } } }; \
+			    UNSHADOW_REGS;												   \
+				combin_dels((PWord)r,(PWord)f); SHADOW_REGS; }  } } }; \
+  *(r) = PWORD(f); }
+
+#define VVBINDX(r,f,lln)   { \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *(mr_TR-2) = *r; \
+	  *--mr_TR = PWORD(r); \
+	  mr_TR -= 1;														\
+	  if ( CHK_DELAY(r) ) { \
+  			*((PWord *)r +1) = (PWord)((PWord *)r + 1); 				  \
+	  		if ( CHK_DELAY(f) && r != f ) { \
+  				*((PWord *)f + 1) = (PWord)((PWord *)f + 1); 				   \
+			    UNSHADOW_REGS_S;												   \
+				combin_dels((PWord)r,(PWord)f);  SHADOW_REGS_S;}  } } }; \
   *(r) = PWORD(f); }
 
 #else /* NO TRAILVALS */
@@ -266,7 +312,19 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 			*((PWord *)r +1) = (PWord)((PWord *)r + 1);                   \
 	  		if ( CHK_DELAY(f) && r != f ) { \
 				*((PWord *)f + 1) = (PWord)((PWord *)f + 1);                   \
-				combin_dels((PWord)r,(PWord)f); }  } } }; \
+			    UNSHADOW_REGS;												   \
+				combin_dels((PWord)r,(PWord)f); SHADOW_REGS; }  } } }; \
+  *(r) = PWORD(f); }
+
+#define VVBINDX(r,f,lln)   { \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *--mr_TR = PWORD(r); \
+	  if ( CHK_DELAY(r) ) { \
+			*((PWord *)r +1) = (PWord)((PWord *)r + 1);                   \
+	  		if ( CHK_DELAY(f) && r != f ) { \
+				*((PWord *)f + 1) = (PWord)((PWord *)f + 1);                   \
+			    UNSHADOW_REGS_S;												   \
+				combin_dels((PWord)r,(PWord)f);  SHADOW_REGS_S;}  } } }; \
   *(r) = PWORD(f); }
 
 #endif /* TRAILVALS */
@@ -280,6 +338,7 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 	  *--mr_TR = PWORD(r); }
 
 #define VVBIND(r,f,lln)   { TRAIL(r,0); *(r) = PWORD(f); }
+#define VVBINDX(r,f,lln)  { TRAIL(r,0); *(r) = PWORD(f); }
 
 #endif /*===== FREEZE =====*/
 
@@ -291,21 +350,9 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
     register PWord *reg1 = NULL;
  *----------------*/
 
-/*
-void unwnd_trl	PARAMS(());
-
-void
-unwnd_trl()
-{
-for (reg1 = mr_TR+1; reg1 < mr_B; reg1+=2){ *PWPTR(*reg1) = *((PWord *)reg1-1);}
-}
-#define UNWINDTRAIL unwnd_trl;
-*/
-
-
 #ifdef TRAILVALS
 
-#define UNWINDTRAIL for (reg1 = mr_TR+1; reg1 < mr_B; reg1+=2){ *PWPTR(*reg1) = *((PWord *)reg1-1);}
+#define UNWINDTRAIL for (reg1 = mr_TR+1; reg1 < mr_B; reg1+=2){ *PWPTR(*reg1) = *(((PWord *)reg1)-1);}
 
 #else
 
@@ -413,6 +460,12 @@ for (reg1 = mr_TR+1; reg1 < mr_B; reg1+=2){ *PWPTR(*reg1) = *((PWord *)reg1-1);}
       wm_E = mr_E; wm_SP = mr_SP; wm_SPB = mr_SPB; \
       wm_B = mr_B; wm_TR = mr_TR; wm_H = mr_H; wm_HB = mr_HB;
 
+#define SHADOW_REGS_S   \
+      mr_SPB = wm_SPB; mr_TR = wm_TR; mr_HB = wm_HB;
+
+#define UNSHADOW_REGS_S  \
+      wm_SPB = mr_SPB; wm_TR = mr_TR; wm_HB = mr_HB;
+
 /*-----------------------------------------------------*
  | Initialize wam data areas (called from main)
  *-----------------------------------------------------*/
@@ -511,10 +564,17 @@ int
 wm_rungoal(a1, a2)		/* module, goal */
     PWord a1, a2;
 {
+/* int rv; */
     *rungoal_modpatch = a1;
     *rungoal_goalpatch = a2;
 
+/* printf("wm_rg-in: wm_H=%x wm_HB=%x wm_B=%x\n", wm_H,wm_HB,wm_B); */
     return (run_wam(wm_rungoal_code));
+/*
+    rv = run_wam(wm_rungoal_code);
+printf("wm_rg-out: wm_H=%x wm_HB=%x wm_B=%x\n", wm_H,wm_HB,wm_B);
+return(rv);
+*/
 }
 
 /*-----------------------------------------------------------------*
@@ -1559,7 +1619,7 @@ cut_no_ovflow_check:
 		    	reg1 -= 4;
 			}
 			else {
-		    	RETRAIL(PWPTR(*reg1),PWPTR(*(reg1-1)));	/* trail if necessary */
+		    	RETRAIL(PWPTR(*reg1),PWPTR(*(((PWord *)reg1)-1)));	/* trail if necessary */
 #ifdef TRAILVALS
 		    	reg1 = reg1 - 2;
 #else
@@ -1807,8 +1867,9 @@ get_out:
     }
 #endif /* ----------old code ----------*/
 
-    	/* Cut away top choicepoints prior to returning */
-		/* cutpt is in reg1: */
+    	/* Cut away top choicepoints prior to returning;
+		   put cutpt in reg1: 
+		 */
     reg1 = mr_E-1;
 
 			/* If SPB is =< cut point, sweep thru the
@@ -1817,44 +1878,52 @@ get_out:
 			   frames until mr_SPB > reg1 
 			 */
     while (mr_SPB <= reg1) {
-	mr_B = cp_B(mr_B);
-	mr_SPB = cp_SPBm(mr_B);
+		mr_B   = cp_B(mr_B);
+		mr_SPB = cp_SPBm(mr_B);
     }
 
 			/* Reset mr_HB from new choice point: */
     mr_HB = cp_HB(mr_B);
+
 			/* Now have to compact the trail from the
 			   old top of trail to the new choice point;
 			   Save current (old) top of trail in reg2:
 			 */
     reg2 = mr_TR;
+
 			/* Reset mr_TR to its new value: */
     mr_TR = mr_B;
+
 			/* Use reg1 to sweep from point just above the
 			   new top of trail down to old top of trail:
 			 */
+/*
+UNWINDTRAIL for (reg1 = mr_TR+1; reg1 < mr_B; reg1+=2){ *PWPTR(*reg1) = *((PWord *)reg1-1);}
+*/
     reg1 = mr_B - 1;
 
     for (;;) {
-	if (reg1 < reg2)
-	    break;
-			/* Sweeping down, the first word of a CP we hit is PrevB,
-			   which points back upward; trail entries all have to 
-			   point down into the heap. So this is a test for PrevB;
-			   if we hit it, skip over the CP:
-			 */
-	if (*reg1 > PWORD(reg1)) {
-	    reg1 -= 4;
-	}
-	else {
-	    RETRAIL(PWPTR(*reg1),PWPTR(*(reg1-1)));	/* trail if necessary */
+		if (reg1 < reg2)
+	    	break;
+				/* Sweeping down, the first word of a CP we hit is PrevB,
+			   	which points back upward; trail entries all have to 
+			   	point down into the heap. So this is a test for PrevB;
+			   	if we hit it, skip over the CP:
+			 	*/
+		if (*reg1 > PWORD(reg1)) {
+	    	reg1 -= 4;
+		}
+		else {
+	    	RETRAIL(PWPTR(*reg1),PWPTR(*(reg1-1)));	/* trail if necessary */
 #ifdef TRAILVALS
-		    	reg1 = reg1 - 2;
+		   	reg1 = reg1 - 2;
 #else
-	    reg1--;
+	    	reg1--;
 #endif
-	}
+		}
     }
+/* printf("get_out-end: mr_B=%x, mr_H=%x mr_HB=%x\n",mr_B,mr_H,mr_HB); */
+    wm_HB = mr_HB;
     wm_TR = mr_TR;
     wm_H = mr_H;
     wm_B = mr_B;
@@ -1908,10 +1977,10 @@ wam_unify(f1, f2)
 	    }
 
 	    if (f2 >= wm_heapbase) {
-		VVBIND(f1, f2,555);
+		VVBINDX(f1, f2,555);
 	    }
 	    else {
-		VVBIND(f2, f1,666);
+		VVBINDX(f2, f1,666);
 	    }
 	}
 	else {
@@ -2044,6 +2113,11 @@ pbi_bind_vars()
 
     w_get_An(&r, &rt, 1);
     w_get_An(&g, &gt, 2);
+
+/* printf("++bind_vars (wm_H=%x wm_HB=%x)left:%x[_%lu] right:%x[_%lu]\n", 
+		wm_H, wm_HB,(int)r, (long)(((PWord *) r) - wm_heapbase),
+		(int)g, (long)(((PWord *) g) - wm_heapbase));
+*/
 
     *PWPTR(r) = g;
     PLAINTRAIL(r);

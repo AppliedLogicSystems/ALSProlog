@@ -1,3 +1,48 @@
+Mon 04 Feb 1996 Ken Bowen
+
+	* Freeze passes all (known) tests.  
+
+	* Tagged as V1-76, & commetted.
+
+Mon 25 Jan 1996 Ken Bowen
+
+	* Added resetting of global HB register from the local shadow
+	  at exit from run_wam (very end) in port/wam.c [wm_HB = mr_HB;]
+	  to correct: setting up of HB during a freeze which wasn't shadowed
+	  by a newer choice point was being lost.
+
+
+	* Added missing UNSHADOW_REGS/SHADOW_REGS regs wrapper around
+	  calls to combin_dels/2 in the VVBIND macros in port/wam.c
+
+	* Split the VVBIND macro and the UNSHADOW_REGS/SHADOW_REGS
+	  macros into two pairs (suffix -X for new ones), where the
+	  -X macros are suitable for calling in the function
+	  wam_unify(f1, f2) occurring outside the context of run_wam
+	  and its definition of the 6 shadow registers.
+
+Mon 14 Jan 1996 Ken Bowen
+
+	* Converted array-based processing loop in int_net.c to 
+	  list-processing-from-C approach (suggested by Bill Older).
+
+Mon 21 Dec 1995 Ken Bowen
+
+	* Converted core constraint processing loop to C (int_net.c)
+	  and separated trailed mangle code in bmeta.c into outer wrapper 
+	  for calling as a Prolog builtin (pbi_trailed_mangle), and inner 
+	  core  (trailed_mangle0) for calling from C.
+
+Mon 14 Nov 1995 Ken Bowen
+
+	* Corrections in blt_frez.pro and freeze.c to overcome bugs
+	  in fdtest (freeze.pro) example and tm example.
+
+Mon 05 Nov 1995 Ken Bowen
+
+	* Minor changes in cinter (c2pro) to support better generation
+	  of X & Motif interfaces
+
 Mon 30 Oct 1995 Ken Bowen
 
 	* Added a command line switch -S <File> {multiple occurrences
@@ -32,7 +77,7 @@ Tues  12 Sept 1995 Ken Bowen
 	* [Note: Exported systems is now running on: Mac with MPW
 	   and CodeWarrior, both ppc and m68k, and on MS DOS/Intel]
 
-	* [Note: Baby versions of constraints running.]
+	* [Note: Baby versions (prolog-def loop) of constraints running.]
 
 	* Tagged as V1-74C
 

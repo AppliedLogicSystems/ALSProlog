@@ -154,7 +154,7 @@ extern	int	pbi_collectcode	PARAMS(( void ));
 	/* freeze.c */
 extern	int	pbi_cptx		PARAMS(( void ));
 extern	int	disp_heap		PARAMS(( void ));
-extern	void disp_item		PARAMS((void));
+extern	int     disp_item		PARAMS((void));
 extern	int	pbi_swp_tr		PARAMS(( void ));
 extern	int	pbi_walk_cps		PARAMS(( void ));
 extern	int	pbi_delay		PARAMS(( void ));
@@ -402,6 +402,6 @@ extern	int	pbi_alarm	PARAMS(( void ));
 
 /* wam.c -- byte only */
 #ifdef TRACEBWAM
-extern	void 	toggle_bwam 	PARAMS( ( void ) );
+extern	int 	toggle_bwam 	PARAMS( ( void ) );
 #endif
 
