@@ -1,0 +1,49 @@
+AC_INIT(tkTable.c)
+
+if test "${prefix}" = "NONE"; then
+    prefix=/usr/local
+    echo "setting prefix to: ${prefix}"
+fi
+if test "${exec_prefix}" = "NONE"; then
+    exec_prefix=$prefix
+    echo "setting exec-prefix to: ${exec_prefix}"
+fi
+AC_PROG_INSTALL
+
+file=${exec_prefix}/lib/tclConfig.sh
+. $file
+file=${exec_prefix}/lib/tkConfig.sh
+. $file
+
+CC=$TCL_CC
+
+AC_SUBST(CC)
+AC_SUBST(INSTALL)
+AC_SUBST(INSTALL_PROGRAM)
+AC_SUBST(INSTALL_DATA)
+AC_SUBST(TCL_SHLIB_CFLAGS)
+AC_SUBST(TCL_SHLIB_SUFFIX)
+AC_SUBST(TCL_SHLIB_LD)
+AC_SUBST(TCL_VERSION)
+AC_SUBST(TCL_XINCLUDES)
+AC_SUBST(TCL_PREFIX)
+AC_SUBST(TCL_EXEC_PREFIX)
+AC_SUBST(TCL_CFLAGS)
+AC_SUBST(TCL_DEFS)
+AC_SUBST(TCL_LIB_SPEC)
+AC_SUBST(TCL_LIBS)
+AC_SUBST(TCL_LD_FLAGS)
+AC_SUBST(TCL_COMPAT_OBJS)
+AC_SUBST(TCL_LD_SEARCH_FLAGS)
+AC_SUBST(exec_prefix)
+AC_SUBST(TK_VERSION)
+AC_SUBST(TK_XINCLUDES)
+AC_SUBST(TK_PREFIX)
+AC_SUBST(TK_EXEC_PREFIX)
+AC_SUBST(TK_DEFS)
+AC_SUBST(TK_LIBS)
+AC_SUBST(TK_LIB_SPEC)
+
+
+AC_OUTPUT(Makefile)
+

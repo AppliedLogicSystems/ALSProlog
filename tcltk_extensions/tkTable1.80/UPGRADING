@@ -1,0 +1,115 @@
+##
+## UPGRADING
+##
+## Jeffrey Hobbs, jhobbs@cs.uoregon.edu
+## 19 December 1996
+##
+
+For those users who became familiar with Roland King's version of tkTable,
+or Ellson et al's Tk4 upgrade to it, you'll may want a little assistance in
+in transitioning to this new and better version.  If version 1.0+ is new to
+you, just read the man page (or HTML equivalent).
+
+The format of this upgrade document is to define the area of the change and
+the show the old code and its new equivalent.  Comments may follow for
+seemingly obscure changes.  Not all the new features are listed (we just
+want you to be able to upgrade old code), so don't forget to look through
+the documentation for new procedures that will make previous tasks easier.
+
+METHOD CHANGES:
+
+* whatcell
+ [old]	.table whatcell x y
+ [new]	.table index @x,y
+
+* whereis
+ [old]	.table whereis row col
+ [new]	.table bbox index
+
+* leftcol, toprow, bottomrow, rightcol
+ [old]	.table leftcol|toprow|bottomrow|rightcol ?rowOrCol?
+ [new]	.table index topleft|bottomright ?row|col?
+	.table [xy]view row|col ;# This will set the top|left cell
+
+* rindex, cindex
+ [old]	.table [rc]index index
+ [new]	.table index index row|col
+
+* setcell
+ [old]	.table setcell
+ [new]	.table curselection
+## This returns _all_ selected cells, like the listbox method.
+## The "active" index represents the active cell (that which is currently
+## being edited).
+
+* batch
+ [old]	.table batch on|off
+ [new]	.table configure -batchmode on|off
+
+* drawmode
+ [old]	.table drawmode mode
+ [new]	.table configure -drawmode mode
+
+* editmode
+ [old]	.table editmode mode
+ [new]	.table configure -state normal|disabled
+  &&	.table configure -autoclear on|off
+
+* flash
+ [old]	.table flash on|off
+ [new]	.table configure -flashmode on|off
+ [old]	.table flash tag tagName
+ [new]	"flash" is a permanent tag configurable style
+ [old]	.table flash timeout arg
+ [new]	.table configure -flashtime arg
+
+* getheight, getwidth
+ [old]	.table getheight row
+ [new]	.table height row
+## vice versa for getwidth
+
+* height, width
+ [old]	.table height {row height}
+ [new]	.table height row height ?row height ...?
+## vice versa for width
+
+* insert
+ [old]	.table insert index value
+ [new]	.table insert active index value
+## insert && delete where changed to allow the addition of the
+## row/col insert/delete routines
+
+* delete
+ [old]	.table delete index ?index?
+ [new]	.table delete active index ?index?
+
+* colstretch, rowstretch
+ [old]	.table rowstretch mode
+ [new]	.table configure -rowstretch mode
+
+* tag
+ [old]	.table tag celltag tagName {row col}
+ [new]	.table tag celltag tagName index
+
+OPTION CHANGES:
+
+* -procrowtag, -proccoltag
+ [old]	.table configure -procrowtag cmd
+ [new]	.table configure -rowtagcommand cmd
+
+* -cursorbg
+ [old]	.table configure -cursorbg
+ [new]	.table configure -insertbackground
+
+* -rowtitle, -coltitle
+ [old]	.table configure -rowtitle number
+ [new]	.table configure -titlerows number
+## Why? because -*title was more misleading than -title*
+
+MISC CHANGES:
+
+* "Title" tag
+ [old]	.table configure tag Title ...
+ [new]	.table configure tag title ...
+
+* Default color fixes

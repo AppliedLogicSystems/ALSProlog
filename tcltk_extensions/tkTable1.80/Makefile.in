@@ -1,0 +1,75 @@
+PACKAGE		= Tktable
+TBL_VERSION	= 1.80
+OBJS		= tkTable.o
+MANS		= tkTable.n
+
+#-------------------------------------------------
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+
+INSTALL		= @INSTALL@
+INSTALL_PROGRAM	= @INSTALL_PROGRAM@
+INSTALL_DATA	= @INSTALL_DATA@
+CC		= @CC@
+SHLIB_CFLAGS	= @TCL_SHLIB_CFLAGS@
+SHLIB_SUFFIX	= @TCL_SHLIB_SUFFIX@
+SHLIB_LD	= @TCL_SHLIB_LD@
+TCL_PREFIX	= @TCL_PREFIX@
+## HP cc sometimes requires -Aa for ansi compilation
+TCL_CFLAGS	= -O @TCL_DEFS@ @TCL_CFLAGS@
+TCL_LIB_SPEC	= @TCL_LIB_SPEC@
+TCL_LIBS	= @TCL_LIBS@
+TCL_LD_FLAGS	= @TCL_LD_FLAGS@
+TCL_LD_SEARCH_FLAGS = @TCL_LD_SEARCH_FLAGS@
+TK_XINCLUDES	= @TK_XINCLUDES@
+TK_LIB_SPEC	= @TK_LIB_SPEC@
+TK_LIBS		= @TK_LIBS@
+
+LIB_RUNTIME_DIR = @libdir@
+
+INCLUDES	= -I@includedir@ $(TK_XINCLUDES)
+
+DLL		= $(PACKAGE)$(SHLIB_SUFFIX)
+PACKAGEDIR	= @libdir@/$(PACKAGE)
+
+CFLAGS		= $(TCL_CFLAGS) $(SHLIB_CFLAGS) $(INCLUDES) \
+		  -DTBL_VERSION=\"$(TBL_VERSION)\"
+
+MAN_INSTALL_DIR = @mandir@/mann
+
+all: $(DLL) pkgIndex.tcl
+
+$(DLL): $(OBJS)
+	$(SHLIB_LD) $(TCL_LIB_SPEC) $(TK_LIB_SPEC) -o $@ $(OBJS)
+
+tkTable.o: tkTabletcl.h tkTable.h
+
+pkgIndex.tcl:
+	(if test -f $(PACKAGEDIR)/pkgIndex.tcl; \
+	    then grep -v $(TBL_VERSION) $(PACKAGEDIR)/pkgIndex.tcl; \
+	else true; fi;) | \
+      echo 'package ifneeded $(PACKAGE) $(TBL_VERSION) "package require Tk; [list load [file join $$dir $(DLL).$(TBL_VERSION)] $(PACKAGE)]"' > pkgIndex.tcl
+
+install: all
+	if test ! -d $(PACKAGEDIR); then mkdir $(PACKAGEDIR); fi
+	$(INSTALL_PROGRAM) $(DLL) $(PACKAGEDIR)/$(DLL).$(TBL_VERSION)
+	$(INSTALL_DATA) pkgIndex.tcl $(PACKAGEDIR)/pkgIndex.tcl
+	$(INSTALL_DATA) tkTable.tcl $(PACKAGEDIR)/tkTable.tcl
+	$(INSTALL_DATA) $(MANS) $(MAN_INSTALL_DIR)/
+
+test: all
+	true
+
+clean: 
+	rm -f *.o *$(SHLIB_SUFFIX) core pkgIndex.tcl tkTabletcl.h tkTableitcl.h tablewish
+
+distclean: clean
+	rm -f Makefile config.cache config.log config.status
+
+tkTabletcl.h: tkTable.tcl tkTable.itcl
+	sed -e '/^$\#/d' -e '/^$$/d' -e 's/\"/\\"/g' -e 's/^/"/' -e 's/$$/\\n"/' <tkTable.tcl >tkTabletcl.h || rm tkTabletcl.h
+	sed -e '/^$\#/d' -e '/^$$/d' -e 's/\"/\\"/g' -e 's/^/"/' -e 's/$$/\\n"/' <tkTable.itcl >tkTableitcl.h || rm tkTableitcl.h
+
+tablewish: tkAppInit.o $(OBJS)
+	$(CC) $(TCL_LD_SEARCH_FLAGS) -o $@ tkAppInit.o $(OBJS) \
+	  $(LIBS) $(TK_LIB_SPEC) $(TCL_LIB_SPEC) $(TK_LIBS) $(TCL_LIBS) 

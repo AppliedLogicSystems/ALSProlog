@@ -1,0 +1,554 @@
+# table.itcl --
+#
+# version 1.7, jhobbs@cs.uoregon.edu,@or.cadix.com
+# This file defines the default bindings for Tk table widgets
+# and provides procedures that help in implementing those bindings.
+#
+
+#--------------------------------------------------------------------------
+# tkPriv elements used in this file:
+#
+# afterId -		Token returned by "after" for autoscanning.
+# tablePrev -		The last element to be selected or deselected
+#			during a selection operation.
+#--------------------------------------------------------------------------
+
+# tkTableClipboardKeysyms --
+# This procedure is invoked to identify the keys that correspond to
+# the "copy", "cut", and "paste" functions for the clipboard.
+#
+# Arguments:
+# copy -	Name of the key (keysym name plus modifiers, if any,
+#		such as "Meta-y") used for the copy operation.
+# cut -		Name of the key used for the cut operation.
+# paste -	Name of the key used for the paste operation.
+
+proc tkTableClipboardKeysyms {copy cut paste} {
+    bind Table <$copy>	{tk_tableCopy %W}
+    bind Table <$cut>	{tk_tableCut %W}
+    bind Table <$paste>	{tk_tablePaste %W}
+}
+
+# tkTableCheckBorder --
+# This proc is invoked by motion events on the table.  It changes the
+# cursor depending on whether it is over a cell border or not.
+#
+proc tkTableCheckBorder {w x y} {
+    set q [winfo command $w]
+    set cursor [$q cget -cursor]
+    if [string match {*[0-9]*} [$q border mark $x $y]] {
+	if [string comp crosshair $cursor] { $q config -cursor crosshair }
+    } else {
+	if [string comp xterm $cursor] { $q config -cursor xterm }
+    }
+}
+
+# The <Motion> event is expensive, but a cute feature
+
+bind Table <Motion>	{ tkTableCheckBorder %W %x %y }
+bind Table <3>		{ %q border mark %x %y }
+bind Table <B3-Motion>	{ %q border dragto %x %y }
+
+## Button events
+
+bind Table <1> {
+    if [winfo exists %W] {
+	tkTableBeginSelect %W [%q index @%x,%y]
+	focus %W
+    }
+}
+bind Table <B1-Motion> {
+    array set tkPriv {x %x y %y}
+    tkTableMotion %W [%q index @%x,%y]
+}
+bind Table <Double-1> {
+    # empty
+}
+bind Table <ButtonRelease-1> {
+    if [winfo exists %W] {
+	tkCancelRepeat
+	%q activate @%x,%y
+    }
+}
+
+bind Table <Shift-1>	{tkTableBeginExtend %W [%q index @%x,%y]}
+bind Table <Control-1>	{tkTableBeginToggle %W [%q index @%x,%y]}
+bind Table <B1-Enter>	{tkCancelRepeat}
+bind Table <B1-Leave>	{
+    array set tkPriv {x %x y %y}
+    tkTableAutoScan %W
+}
+bind Table <2> {
+    %q scan mark %x %y
+    array set tkPriv {x %x y %y}
+    set tkPriv(mouseMoved) 0
+}
+bind Table <B2-Motion> {
+    if {(%x != $tkPriv(x)) || (%y != $tkPriv(y))} { set tkPriv(mouseMoved) 1 }
+    if $tkPriv(mouseMoved) { %q scan dragto %x %y }
+}
+bind Table <ButtonRelease-2> {
+    if {!$tkPriv(mouseMoved)} { tk_tablePaste %W [%q index @%x,%y] }
+}
+
+## Key events
+
+if [string comp {} [info command event]] {
+    tkTableClipboardKeysyms <Copy> <Cut> <Paste>
+} else {
+    tkTableClipboardKeysyms Control-c Control-x Control-v
+}
+
+bind Table <Any-Tab> {
+    # empty to allow Tk focus movement
+}
+bind Table <Shift-Up>		{tkTableExtendSelect %W -1  0}
+bind Table <Shift-Down>		{tkTableExtendSelect %W  1  0}
+bind Table <Shift-Left>		{tkTableExtendSelect %W  0 -1}
+bind Table <Shift-Right>	{tkTableExtendSelect %W  0  1}
+bind Table <Prior>		{%q yview scroll -1 pages; %q activate @0,0}
+bind Table <Next>		{%q yview scroll  1 pages; %q activate @0,0}
+bind Table <Control-Prior>	{%q xview scroll -1 pages}
+bind Table <Control-Next>	{%q xview scroll  1 pages}
+bind Table <Home>		{%q see origin}
+bind Table <End>		{%q see end}
+bind Table <Control-Home> {
+    %q selection clear all
+    %q activate origin
+    %q selection set active
+    %q see active
+}
+bind Table <Control-End> {
+    %q selection clear all
+    %q activate end
+    %q selection set active
+    %q see active
+}
+bind Table <Shift-Control-Home>	{tkTableDataExtend %W origin}
+bind Table <Shift-Control-End>	{tkTableDataExtend %W end}
+bind Table <Select>		{tkTableBeginSelect %W [%q index active]}
+bind Table <Shift-Select>	{tkTableBeginExtend %W [%q index active]}
+bind Table <Control-slash>	{tkTableSelectAll %W}
+bind Table <Control-backslash> {
+    if [string match browse [%q cget -selectmode]] {%q selection clear all}
+}
+bind Table <Up>			{tkTableMoveCell %W -1  0}
+bind Table <Down>		{tkTableMoveCell %W  1  0}
+bind Table <Left>		{tkTableMoveCell %W  0 -1}
+bind Table <Right>		{tkTableMoveCell %W  0  1}
+bind Table <Any-KeyPress> {if [string comp {} %A] {%q insert active insert %A}}
+bind Table <BackSpace> {
+    set temp [%q icursor]
+    if {[string comp {} $temp] && $temp} {%q delete active [expr $temp-1]}
+    catch {unset temp}
+}
+bind Table <Delete>		{%q delete active insert}
+bind Table <Escape>		{%q reread}
+bind Table <Return>		{tkTableMoveCell %W 1 0}
+bind Table <Control-Left>	{%q icursor [expr [%q icursor]-1]}
+bind Table <Control-Right>	{%q icursor [expr [%q icursor]+1]}
+bind Table <Control-e>		{%q icursor end}
+bind Table <Control-a>		{%q icursor 0}
+bind Table <Control-k>		{%q delete active insert end}
+bind Table <Control-equal>	{tkTableChangeWidth %W active  1}
+bind Table <Control-minus>	{tkTableChangeWidth %W active -1}
+
+# tkTableBeginSelect --
+#
+# This procedure is typically invoked on button-1 presses. It begins
+# the process of making a selection in the table. Its exact behavior
+# depends on the selection mode currently in effect for the table;
+# see the Motif documentation for details.
+#
+# Arguments:
+# w	- The table widget.
+# el	- The element for the selection operation (typically the
+#	one under the pointer).  Must be in row,col form.
+
+proc tkTableBeginSelect {w el} {
+    global tkPriv
+    if {[scan $el %d,%d r c] != 2} return
+    set q [winfo command $w]
+    set mode [$q cget -selectmode]
+    if [string match multiple $mode] {
+	if {$r < [$q cget -titlerows]+[$q cget -roworigin]} {
+	    ## We're in a column header
+	    if {$c < [$q cget -titlecols]+[$q cget -colorigin]} {
+		## We're in the topleft title area
+		set inc topleft
+		set el2 end
+	    } else {
+		set inc [$q index topleft row],$c
+		set el2 [$q index end row],$c
+	    }
+	} elseif {$c < [$q cget -titlecols]+[$q cget -colorigin]} {
+	    ## We're in a row header
+	    set inc $r,[$q index topleft col]
+	    set el2 $r,[$q index end col]
+	} else {
+	    set inc $el
+	    set el2 $el
+	}
+	if [$q selection includes $inc] {
+	    $q selection clear $el $el2
+	} else {
+	    $q selection set $el $el2
+	}
+    } elseif {[string match extended $mode]} {
+	$q selection clear all
+	if {$r < [$q cget -titlerows]+[$q cget -roworigin]} {
+	    ## We're in a column header
+	    if {$c < [$q cget -titlecols]+[$q cget -colorigin]} {
+		$q selection set origin end
+	    } else {
+		$q selection set $el [$q index end row],$c
+	    }
+	} elseif {$c < [$q cget -titlecols]+[$q cget -colorigin]} {
+	    ## We're in a row header
+	    $q selection set $el $r,[$q index end col]
+	} else {
+	    $q selection set $el
+	}
+	$q selection anchor $el
+	set tkPriv(tablePrev) $el
+    } else {
+	if {![$q tag includes title $el]} {
+	    $q selection clear all
+	    $q selection set $el
+	    $q selection anchor $el
+	    set tkPriv(tablePrev) $el
+	}
+    }
+}
+
+# tkTableMotion --
+#
+# This procedure is called to process mouse motion events while
+# button 1 is down. It may move or extend the selection, depending
+# on the table's selection mode.
+#
+# Arguments:
+# w	- The table widget.
+# el	- The element under the pointer (must be in row,col form).
+
+proc tkTableMotion {w el} {
+    global tkPriv
+    if {![info exists tkPriv(tablePrev)]} {
+	set tkPriv(tablePrev) $el
+	return
+    }
+    if {$el == $tkPriv(tablePrev)} return
+    set q [winfo command $w]
+    switch [$q cget -selectmode] {
+	browse {
+	    $q selection clear all
+	    $q selection set $el
+	    set tkPriv(tablePrev) $el
+	}
+	extended {
+	    scan $tkPriv(tablePrev) %d,%d r c
+	    scan $el %d,%d elr elc
+	    if {$r < [$q cget -titlerows]+[$q cget -roworigin]} {
+		## We're in a column header
+		if {$c < [$q cget -titlecols]+[$q cget -colorigin]} {
+		    ## We're in the topleft title area
+		    $q selection clear anchor end
+		} else {
+		    $q selection clear anchor [$q index end row],$c
+		}
+		$q selection set anchor [$q index end row],$elc
+	    } elseif {$c < [$q cget -titlecols]+[$q cget -colorigin]} {
+		## We're in a row header
+		$q selection clear anchor $r,[$q index end col]
+		$q selection set anchor $elr,[$q index end col]
+	    } else {
+		$q selection clear anchor $tkPriv(tablePrev)
+		$q selection set anchor $el
+	    }
+	    set tkPriv(tablePrev) $el
+	}
+    }
+}
+
+# tkTableBeginExtend --
+#
+# This procedure is typically invoked on shift-button-1 presses. It
+# begins the process of extending a selection in the table. Its
+# exact behavior depends on the selection mode currently in effect
+# for the table; see the Motif documentation for details.
+#
+# Arguments:
+# w - The table widget.
+# el - The element for the selection operation (typically the
+# one under the pointer). Must be in numerical form.
+
+proc tkTableBeginExtend {w el} {
+    set q [winfo command $w]
+    if {[string match extended [$q cget -selectmode]] && \
+	    [$q selection includes anchor]} {
+	tkTableMotion $w $el
+    }
+}
+
+# tkTableBeginToggle --
+#
+# This procedure is typically invoked on control-button-1 presses. It
+# begins the process of toggling a selection in the table. Its
+# exact behavior depends on the selection mode currently in effect
+# for the table; see the Motif documentation for details.
+#
+# Arguments:
+# w - The table widget.
+# el - The element for the selection operation (typically the
+# one under the pointer). Must be in numerical form.
+
+proc tkTableBeginToggle {w el} {
+    global tkPriv
+    set q [winfo command $w]
+    if [string match extended [$q cget -selectmode]] {
+	set tkPriv(tablePrev) $el
+	$q selection anchor $el
+	if [$q selection includes $el] {
+	    $q selection clear $el
+	} else {
+	    $q selection set $el
+	}
+    }
+}
+
+# tkTableAutoScan --
+# This procedure is invoked when the mouse leaves an entry window
+# with button 1 down. It scrolls the window up, down, left, or
+# right, depending on where the mouse left the window, and reschedules
+# itself as an "after" command so that the window continues to scroll until
+# the mouse moves back into the window or the mouse button is released.
+#
+# Arguments:
+# w - The entry window.
+
+proc tkTableAutoScan {w} {
+    global tkPriv
+    if {![winfo exists $w]} return
+    set x $tkPriv(x)
+    set y $tkPriv(y)
+    set q [winfo command $w]
+    if {$y >= [winfo height $w]} {
+	$q yview scroll 1 units
+    } elseif {$y < 0} {
+	$q yview scroll -1 units
+    } elseif {$x >= [winfo width $w]} {
+	$q xview scroll 1 units
+    } elseif {$x < 0} {
+	$q xview scroll -1 units
+    } else {
+	return
+    }
+    tkTableMotion $w [$q index @$x,$y]
+    set tkPriv(afterId) [after 50 tkTableAutoScan $w]
+}
+
+# tkTableUpDown --
+#
+# Moves the location cursor (active element) by the specified number
+# of cells and changes the selection if we're in browse or extended
+# selection mode.
+#
+# Arguments:
+# w - The table widget.
+# x - +1 to move down one cell, -1 to move up one cell.
+# y - +1 to move right one cell, -1 to move left one cell.
+
+proc tkTableMoveCell {w x y} {
+    global tkPriv
+    set q [winfo command $w]
+    if [catch {$q index active row} r] return
+    set c [$q index active col]
+    $q activate [incr r $x],[incr c $y]
+    $q see active
+    switch [$q cget -selectmode] {
+	browse {
+	    $q selection clear all
+	    $q selection set active
+	}
+	extended {
+	    $q selection clear all
+	    $q selection set active
+	    $q selection anchor active
+	    set tkPriv(tablePrev) [$q index active]
+	}
+    }
+}
+
+# tkTableExtendUpDown --
+#
+# Does nothing unless we're in extended selection mode; in this
+# case it moves the location cursor (active element) by the specified
+# number of cells, and extends the selection to that point.
+#
+# Arguments:
+# w - The table widget.
+# x - +1 to move down one cell, -1 to move up one cell.
+# y - +1 to move right one cell, -1 to move left one cell.
+
+proc tkTableExtendSelect {w x y} {
+    set q [winfo command $w]
+    if [string comp extended [$q cget -selectmode]] return
+    if [catch {$q index active row} r] return
+    set c [$q index active col]
+    $q activate [incr r $x],[incr c $y]
+    $q see active
+    tkTableMotion $w [$q index active]
+}
+
+# tkTableDataExtend
+#
+# This procedure is called for key-presses such as Shift-KEndData.
+# If the selection mode isnt multiple or extend then it does nothing.
+# Otherwise it moves the active element to el and, if we're in
+# extended mode, extends the selection to that point.
+#
+# Arguments:
+# w - The table widget.
+# el - An integer cell number.
+
+proc tkTableDataExtend {w el} {
+    set q [winfo command $w]
+    set mode [$q cget -selectmode]
+    if [string match extended $mode] {
+	$q activate $el
+	$q see $el
+	if [$q selection includes anchor] {tkTableMotion $w $el}
+    } elseif {[string match multiple $mode]} {
+	$q activate $el
+	$q see $el
+    }
+}
+
+# tkTableSelectAll
+#
+# This procedure is invoked to handle the "select all" operation.
+# For single and browse mode, it just selects the active element.
+# Otherwise it selects everything in the widget.
+#
+# Arguments:
+# w - The table widget.
+
+proc tkTableSelectAll {w} {
+    set q [winfo command $w]
+    if [regexp {^(single|browse)$} [$q cget -selectmode]] {
+	$q selection clear all
+	$q selection set active
+    } else {
+	$q selection set origin end
+    }
+}
+
+# tkTableChangeWidth --
+# Adjust the widget of the specified cell by $a.
+#
+# Arguments:
+# w - The table widget.
+# i - cell index
+# a - amount to adjust by
+
+proc tkTableChangeWidth {w i a} {
+    set q [winfo command $w]
+    set tmp [$q index $i col]
+    $q width $tmp [expr [$q width $tmp]+$a]
+}
+
+# tk_tableCopy --
+# This procedure copies the selection from a table widget into the
+# clipboard.
+#
+# Arguments:
+# w -		Name of a table widget.
+
+proc tk_tableCopy w {
+    if {[selection own -displayof $w] == "$w"} {
+	clipboard clear -displayof $w
+	catch {clipboard append -displayof $w [selection get -displayof $w]}
+    }
+}
+
+# tk_tableCut --
+# This procedure copies the selection from a table widget into the
+# clipboard, then deletes the selection (if it exists in the given
+# widget).
+#
+# Arguments:
+# w -		Name of a table widget.
+
+proc tk_tableCut w {
+    if {[selection own -displayof $w] == "$w"} {
+	clipboard clear -displayof $w
+	catch {
+	    clipboard append -displayof $w [selection get -displayof $w]
+	    set q [winfo command $w]
+	    $q cursel set {}
+	    $q selection clear all
+	}
+    }
+}
+
+# tk_tablePaste --
+# This procedure pastes the contents of the clipboard to the specified
+# cell (active by default) in a table widget.
+#
+# Arguments:
+# w -		Name of a table widget.
+# cell -	Cell to start pasting in.
+
+proc tk_tablePaste {w {cell {}}} {
+    if [string comp {} $cell] {
+	if [catch {selection get -displayof $w} data] return
+    } else {
+	if [catch {selection get -displayof $w -selection CLIPBOARD} data] {
+	    return
+	}
+	set cell active
+    }
+    set q [winfo command $w]
+    tk_tablePasteHandler $w [$q index $cell] $data
+    if {[$q cget -state] == "normal"} {focus $w}
+}
+
+# tk_tablePasteHandler --
+# This procedure handles how data is pasted into the table widget.
+# This handles data in the default table selection form.
+#
+# Arguments:
+# w -		Name of a table widget.
+# cell -	Cell to start pasting in.
+
+proc tk_tablePasteHandler {w cell data} {
+    set q	[winfo command $w]
+    set rows	[expr [$q cget -rows]-[$q cget -roworigin]]
+    set cols	[expr [$q cget -cols]-[$q cget -colorigin]]
+    set r	[$q index $cell row]
+    set c	[$q index $cell col]
+    set rsep	[$q cget -rowseparator]
+    set csep	[$q cget -colseparator]
+    ## Assume separate rows are split by row separator if specified
+    ## If you were to want multi-character row separators, you would need:
+    # regsub -all $rsep $data <newline> data
+    # set data [join $data <newline>]
+    if [string comp {} $rsep] { set data [split $data $rsep] }
+    set row	$r
+    foreach line $data {
+	if {$row > $rows} break
+	set col	$c
+	## Assume separate cols are split by col separator if specified
+	## Unless a -separator was specified
+	if [string comp {} $csep] { set line [split $line $csep] }
+	## If you were to want multi-character col separators, you would need:
+	# regsub -all $csep $line <newline> line
+	# set line [join $line <newline>]
+	foreach item $line {
+	    if {$col > $cols} break
+	    $q set $row,$col $item
+	    incr col
+	}
+	incr row
+    }
+}
