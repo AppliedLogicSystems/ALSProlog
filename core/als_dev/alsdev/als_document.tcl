@@ -142,7 +142,6 @@ proc store_text {text file} {
 	set data [$text get 1.0 end]
 	puts -nonewline $s $data
 	close $s
-	file attributes $file -creator ALS4 -type TEXT
 }
 
 proc load_document {file} {
@@ -243,6 +242,8 @@ proc document.save {w} {
 
 proc document.save_as {w} {
 	global array proenv
+	global tcl_platform
+	
 	set file [tk_getSaveFile -initialfile [wm title $w] \
 		-defaultextension .pro ]
 	if {$file != ""} then {
@@ -252,7 +253,10 @@ proc document.save_as {w} {
 		set proenv($w,file) $file
 		set proenv(document,$file) $w
 		wm title $w [lindex [file split $file] end]
-		return [document.save $w]
+		store_text $w.text $file
+		set proenv($w,dirty) false
+		if {$tcl_platform(platform) == "macintosh"} then { file attributes $file -creator ALS4 -type TEXT }
+		return true
 	} else {
 		return false
 	}
