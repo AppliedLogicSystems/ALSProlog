@@ -287,7 +287,6 @@ static struct blt_struct {
 
 	BLT("$access", 2, pbi_access, "_pbi_access"),
 #ifdef OSACCESS
-	BLT("$chdir", 1, pbi_chdir, "_pbi_chdir"),
 	BLT("getenv", 2, pbi_getenv, "_pbi_getenv"),
 	BLT("tmpnam", 1, pbi_tmpnam, "_pbi_tmpnam"),
 #endif OSACCESS
@@ -297,6 +296,7 @@ static struct blt_struct {
 	BLT("get_image_dir_and_name", 2, pbi_get_image_dir_and_name, "_pbi_get_image_dir_and_name"),
 	BLT("pbi_get_command_line", 1, pbi_command_line, "_pbi_command_line"),
 	BLT("crypt", 3, pbi_crypt, "_pbi_crypt"),
+	BLT("pbi_copy_file", 2, pbi_copy_file, "_pbi_copy_file"),
 	BLT("enable_security", 0, pbi_enable_security, "_pbi_enable_security"),
 
 	BLT("gv_alloc", 1, pbi_gv_alloc, "_pbi_gv_alloc"),
