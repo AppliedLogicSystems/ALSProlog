@@ -1,47 +1,58 @@
-/*
- * blt_event.pro	-- user level event handler
- *	Copyright (c) 1990-92 Applied Logic Systems, Inc.
- *
- * This module is the user level event handler.  It implements some of the
- * ideas presented in "Event Handling in Prolog", Micha Meier, Logic
- * Programming: Proceedings of the North American Conference 1989.
- *
- * Author: Kevin A. Buettner
- * Creation: 5/20/90
- * Revision History:
- */
+/*========================================================================
+ |		blt_event.pro
+ |	Copyright (c) 1990-94 Applied Logic Systems, Inc.
+ |
+ |		-- user level event handler
+ |
+ | This module is the user level event handler.  It implements some of the
+ | ideas presented in "Event Handling in Prolog", Micha Meier, Logic
+ | Programming: Proceedings of the North American Conference 1989.
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 5/92
+ | Revision History:
+ *========================================================================*/
 
 module builtins.
 
-
-/*
- * set_event_handler/2
- *
- * set_event_handler(EventId,Proc) is used to set a global event handler.
- * Proc should be a three argument handler procedure. See below.  EventId
- * is the name of the event which caused the interrupt.
- */
+/*!----------------------------------------------------------------------
+ |	set_event_handler/3
+ |	set_event_handler(Module, EventId, Proc)
+ |	set_event_handler(+, +, +)
+ |
+ |	set_event_handler/2
+ |	set_event_handler(EventId, Proc)
+ |	set_event_handler(+, +)
+ |
+ | 	-	installs a global event handler
+ |
+ | set_event_handler(Module,EventId,Proc) installs a global event handler.
+ | set_event_handler/3 is a module closure of set_event_handler/2.
+ |
+ |	Module	- the module in which set_event_handler/2 was called
+ |	EventId	- id of the event which is being handled
+ |	Proc	- name of a 3-argument handler procedure to handle this event.
+ *!----------------------------------------------------------------------*/
 
 export set_event_handler/2.
 
 :-	compiletime,
 	module_closure(set_event_handler,2).
 
-
-set_event_handler(Module, EventId, Proc) :-
+set_event_handler(Module, EventId, Proc)
+	:-
 	remove_event(EventId),
 	add_event(EventId,Module,Proc).
 
-remove_event(EventId) :-
+remove_event(EventId)
+	:-
 	retract(global_handler(EventId,_,_)),
 	!.
 remove_event(EventId).
 
-
-add_event(EventId,Module,Proc) :- 
+add_event(EventId,Module,Proc)
+	:- 
 	asserta(global_handler(EventId,Module,Proc)).
-
-
 
 /*
  * global_handler/2 is the entry to the global handler.
@@ -297,110 +308,30 @@ break_on(M,P,A) :-
 break_off(M,P,A) :-
 	dbg_nospy(M,P,A).
 
-/*
- * OLD STUFF!!!!!!!!
+/********************************************************** 
+ * Triggering certain predefined events
  *
- * The following stuff is old and should be phased out just as quick as
- * possible.
- */
+ * The following predicates are used to trigger events
+ **********************************************************/
 
-
-/* -- old code --
-/* 
- * Triggering certain predefined interrupts
- *
- * The following predicates are used to trigger interrupts
- */
-
-:-	module_closure(calculation_error,1),
-	module_closure(database_error,1),
-	module_closure(evaluation_error,1),
-	module_closure(implementation_error,1),
-	module_closure(instantiation_error,1),
-	module_closure(io_control_error,1),
-	module_closure(io_end_of_file_error,1),
-	module_closure(io_formatting_error,1),
-	module_closure(operator_error,1),
-	module_closure(overflow_error,1),
-	module_closure(range_error,1),
-	module_closure(syntax_error,1),
-	module_closure(type_error,1),
-	module_closure(undefined_predicate_error,1),
-	module_closure(undefined_value_error,1),
-	module_closure(underflow_error,1),
-	module_closure(zero_divide_error,1),
-	module_closure(argument_error,2).
-
-calculation_error(Mod,Goal) :-
-	trigger_event(calculation_error,Mod:Goal).
-database_error(Mod,Goal) :-
-	trigger_event(database_error,Mod:Goal).
-evaluation_error(Mod,Goal) :-
-	trigger_event(evaluation_error,Mod:Goal).
-implementation_error(Mod,Goal) :-
-	trigger_event(implementation_error,Mod:Goal).
-instantiation_error(Mod,Goal) :-
-	trigger_event(instantiation_error,Mod:Goal).
-io_control_error(Mod,Goal) :-
-	trigger_event(io_control_error,Mod:Goal).
-io_end_of_file_error(Mod,Goal) :-
-	trigger_event(io_end_of_file_error,Mod:Goal).
-io_formatting_error(Mod,Goal) :-
-	trigger_event(io_formatting_error,Mod:Goal).
-operator_error(Mod,Goal) :-
-	trigger_event(operator_error,Mod:Goal).
-overflow_error(Mod,Goal) :-
-	trigger_event(overflow_error,Mod:Goal).
-range_error(Mod,Goal) :-
-	trigger_event(range_error,Mod:Goal).
-syntax_error(Mod,Goal) :-
-	trigger_event(syntax_error,Mod:Goal).
-type_error(Mod,Goal) :-
-	trigger_event(type_error,Mod:Goal).
-undefined_predicate_error(Mod,Goal) :-
-	trigger_event(undefined_predicate_error,Mod:Goal).
-undefined_value_error(Mod,Goal) :-
-	trigger_event(undefined_value_error,Mod:Goal).
-underflow_error(Mod,Goal) :-
-	trigger_event(underflow_error,Mod:Goal).
-zero_divide_error(Mod,Goal) :-
-	trigger_event(zero_divide_error,Mod:Goal).
-
-argument_error(Mod,Arg,Goal) :-
-	var(Arg),
-	!,
-	trigger_event(instantiation_error,Mod:Goal).
-argument_error(Mod,Arg,Goal) :-
-	trigger_event(type_error,Mod:Goal).
--- old code -- */
-/*
- * End of OLD STUFF!!!!!
- */
-
-/*
- * Newer stuff.  The use of the stuff is encouraged.
- */
-
-
-/*
- * type_error(Type,Culprit,Depth)
- * type_error(Type,Culprit,Goal)
- *
- *	Used to trigger a type error.
- *
- *	Type is an atom or other term indicating the type that was expected.
- *	Culprit is the term which did not match the expected type.
- *	Depth is the number of frames to go back to find the calling pattern
- *
- *	Note:	I am fairly certain that I don't like the Depth argument
- *		here.  I think that a more generic Environment argument
- *		is the way to go.  That way the programmer need not try
- *		to figure out the actual number of frames to where the
- *		error occurred.  A better implementation would be to use
- *		the als$cd directive to get the environment.
- *
- */
-
+/*----------------------------------------------------------------
+ | type_error(Type,Culprit,Depth)
+ | type_error(Type,Culprit,Goal)
+ |
+ |	Used to trigger a type error.
+ |
+ |	Type is an atom or other term indicating the type that was expected.
+ |	Culprit is the term which did not match the expected type.
+ |	Depth is the number of frames to go back to find the calling pattern
+ |
+ |	Note:	I am fairly certain that I don't like the Depth argument
+ |		here.  I think that a more generic Environment argument
+ |		is the way to go.  That way the programmer need not try
+ |		to figure out the actual number of frames to where the
+ |		error occurred.  A better implementation would be to use
+ |		the als$cd directive to get the environment.
+ |
+ *----------------------------------------------------------------*/
 export type_error/3.
 type_error(Type,Culprit,Depth) :-
 	integer(Depth),
@@ -467,12 +398,12 @@ system_error(L) :-
 	forcePrologError.
 
 
-/*
+/*----------------------------------------------------------------------
  * Argument checking predicates which will trigger an error if argument
  * is not of proper form.
- */
+ *----------------------------------------------------------------------*/
 
-/*
+/*---------------------------------------------------------------------*
  * atom_ok(Atom) will succeed if Atom is an atom, it will trigger an
  * instantiation error if Atom is a variable and a type error if Atom
  * is non-variable, but not an atom.  
@@ -481,11 +412,12 @@ system_error(L) :-
  * atom_ok.  In order for the error throwing code to work properly, atom_ok
  * should not be called from a disjunction, or call and it should not be
  * the last goal in the clause.
- */
+ *---------------------------------------------------------------------*/
 
 export atom_ok/1.
 
-atom_ok(Atom) :-
+atom_ok(Atom) 
+	:-
 	atom(Atom),
 	!.
 atom_ok(Var) :-

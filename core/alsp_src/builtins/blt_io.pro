@@ -83,11 +83,11 @@ export exists/1.
 exists(FileName) :-
 	'$access'(FileName,0).
 
-/*
+/*----------------------------------------------------------------------*
  * Consult, reconsult, consultq, consult_to, consultq_to
  *
  * consultq is a quiet consult.
- */
+ *----------------------------------------------------------------------*/
 
 export consultd/1.
 export reconsultd/1.
@@ -145,14 +145,13 @@ consult_to(Mod,File) :-
 	xconsult:popmod.
 
 /*-------------------------------------------------------------------------------------*
- * consult/2
- * consult(Mode,FileName)
- * consult(+,+)
- *
- * Mode will either be consult or reconsult.
- *
- * FileName should be an atom representing the name of the file to consult.
- *
+ | consult/2
+ | consult(Mode,FileName)
+ | consult(+,+)
+ |
+ | Mode will either be consult or reconsult.
+ |
+ | FileName should be an atom representing the name of the file to consult.
  *-------------------------------------------------------------------------------------*/ 
 
 consult(consult,TheFileName) 
@@ -172,66 +171,83 @@ consult(reconsult,TheFileName)
 	!,
 	adjust_source_deb(Path),
 	consultmessage('%s reconsulted\n',[Path]).
-consult(_,FileName) :-
+
+consult(_,FileName) 
+	:-
 	prolog_system_error(no_file,[FileName]).
 
-:- dynamic(consulted/2).
+:- dynamic(consulted/3).
 
-consult_nature(source(FileName), FileName, source) :- !.
+consult_nature(source(FileName), FileName, source) 
+	:- !.
 consult_nature(FileName, FileName, obp).
 
 source_debug_record(Path)
 	:-
 	xconsult:source_level_debugging(on),
 	!,
-	asserta(consulted(Path, debug)).
+	pathPlusFile(_,File,Path),
+	asserta(consulted(Path, File, debug)).
 source_debug_record(Path)
 	:-
-	asserta(consulted(Path, normal)).
+	pathPlusFile(_,File,Path),
+	asserta(consulted(Path, File, normal)).
 
 adjust_source_deb(Path)
 	:-
-	consulted(Path, ConsultType),
+	consulted(Path, _, ConsultType),
 	!,
 	xconsult:source_level_debugging(SLDB),
-	act_on(SLDB, ConsultType, Path).
+	deb_adj_act_on(SLDB, ConsultType, Path).
 
 adjust_source_deb(Path)
 	:-
 	source_debug_record(Path).
 
-act_on(on, debug, _)
+deb_adj_act_on(on, debug, _)
 	:-!.
-act_on(on, _, Path)
+deb_adj_act_on(on, _, Path)
 	:-!,
-	retract(consulted(Path, ConsultType)),
-	asserta(consulted(Path, debug)).
-act_on(off, debug, Path)
+	retract(consulted(Path, File, ConsultType)),
+	asserta(consulted(Path, File, debug)).
+deb_adj_act_on(off, debug, Path)
 	:-
-	retract(consulted(Path, ConsultType)),
-	asserta(consulted(Path, normal)).
-act_on(off, _, _).
+	retract(consulted(Path, File, ConsultType)),
+	asserta(consulted(Path, File, normal)).
+deb_adj_act_on(off, _, _).
 
-/*
- * Control whether messages are printed during consulting.
- */
+/*-----------------------------------------------------------------*
+ |	consultmessage/1
+ |	consultmessage(Ctrl)
+ |	consultmessage(+)
+ |
+ |	- Control whether messages are printed during consulting.
+ |
+ |	Ctrl is on/off
+ *-----------------------------------------------------------------*/
 
 export consultmessage/1.
 
 :- make_gv('_consult_message'), set_consult_message(true).
 
-consultmessage(on) :- set_consult_message(true).
-consultmessage(off) :- set_consult_message(false).
+consultmessage(on) 
+	:- 
+	set_consult_message(true).
 
-consultmessage :- get_consult_message(true).
+consultmessage(off) 
+	:- 
+	set_consult_message(false).
 
+consultmessage 
+	:- 
+	get_consult_message(true).
 
-/*
- * Create access methods to get at the global variable 
- * '_current_consult_directory'.  This should make our
- * consults go faster on certain machines where making
- * system calls to getcwd and chdir are somewhat expensive.
- */
+/*-----------------------------------------------------------------*
+ | Create access methods to get at the global variable 
+ | '_current_consult_directory'.  This should make our
+ | consults go faster on certain machines where making
+ | system calls to getcwd and chdir are somewhat expensive.
+ *-----------------------------------------------------------------*/
 
 :-  make_gv('_current_consult_directory'),
     set_current_consult_directory(''+[]).	%% use default drive and dir
@@ -261,9 +277,9 @@ prepend_current_consult_directory(Drive,PathList,Drive,NewPathList)
 prepend_current_consult_directory(Drive,PathList,Drive,PathList).
 
 
-/*
+/*-------------------------------------------------------------*
  * Used for loading a foreign object file.
- */
+ *-------------------------------------------------------------*/
 
 export loadforeign/2.
 export loadforeign/3.
@@ -289,26 +305,27 @@ loadfor(FileName,Libs,InitFunction,Pathname) :-
 	'$loadforeign'(Pathname,Libs,InitFunction),
 	!.
 
-
 /*-----------------------------------------------------------------------*
- * load/4
- * load(FileName,Type,CanonPath,Nature)
- * load(+,+,-,+)
- *
- * 	- main entry to (re)consulting files
- *
- * CanonPath is meant to be a variable -- it returns a canoncalized
- * path expression for the file which was loaded (if any).
+ | load/4
+ | load(FileName,Type,CanonPath,Nature)
+ | load(+,+,-,+)
+ |
+ | 	- main entry for (re)consulting files
+ |
+ |	FileName 	-	an atom naming a file;
+ |	Type		- 0 (=consult) / 1 (= reconsult);
+ |	CanonPath 	- an uninstantiated variable -- it returns a canoncalized
+ |				  path expression for the file which was loaded (if any);
+ |	Nature		- source / obp
  *-----------------------------------------------------------------------*/
 
 :-	make_gv('_next_clause_group'), set_next_clause_group(0),
 	make_gv('_reconsult_flag'), set_reconsult_flag(0).
 
-
-	%% Source is the user stream:
-load(user,Type,user,Nature) :-
-	!,
-	load2(user,Type,Nature).
+	%% File source is the user stream:
+load(user,Type,user,Nature) 
+	:-!,
+	load_canon(user,Type,Nature).
 
 	%% Source is a 'normal' file:
 load(FileName,Type,CanonPath,Nature) 
@@ -324,14 +341,14 @@ load(FileName,Type,CanonPath,Nature)
 	(   
 	    set_current_consult_directory(Drive+CCDPathList)
 	;   
-	      %% Set the CCD back to what it used to be in case if load2 fails
-	      %% FIXME: We should determine if load2 ever can fail, if not
+	      %% Set the CCD back to what it used to be in case if load_canon fails
+	      %% FIXME: We should determine if load_canon ever can fail, if not
 	      %% this code can be removed
 	    set_current_consult_directory(OldCCD),
 	      %% Propogate failure
 	    fail
 	),
-	load2(CanonPath,Type,Nature),
+	load_canon(CanonPath,Type,Nature),
 	!,
 	set_current_consult_directory(OldCCD).
 
@@ -360,9 +377,9 @@ check_existence(Path) :-
 	!.
 
 /*-----------------------------------------------------------------------*
- |	load2/3
- |	load2(Path,Type,Nature)
- |	load2(+,+,+)
+ |	load_canon/3
+ |	load_canon(Path,Type,Nature)
+ |	load_canon(+,+,+)
  | 
  |	Type:
  |		0 - consult
@@ -371,19 +388,20 @@ check_existence(Path) :-
  |		source
  |		obp
  |
- |	load2/3 first decomposes the incoming path in the full path to the proper
- |	file name, and the extension, if it exists; if it doesn't, the extension
- |	is represented as 'no(extension)'
+ |	load_canon/3 first decomposes the incoming path in the full path to 
+ |	the proper file name, and the extension, if it exists; if it doesn't, 
+ |	the extension is represented as 'no(extension)'
  |
- |	load2/3 then sets up the clause group context for this consult/reconsult,
- |	abolishing things if necessary;  Then it calls load3/4, and afterward
- |	cleans up as needed.
+ |	load_canon/3 then sets up the clause group context for this 
+ |	consult/reconsult, abolishing things if necessary;  Then it calls 
+ |	load3/4, and afterward cleans up as needed.
  *-----------------------------------------------------------------------*/
-load2(Path,Type,Nature) 
+load_canon(Path,Type,Nature) 
 	:-
-	(    filePlusExt(NoSuff,Ext,Path),
-	     (Ext = pro ; Ext = obp)
-	;    NoSuff = Path, Ext = no(extension)
+	(filePlusExt(NoSuff,Ext,Path),
+	 	(Ext = pro ; Ext = obp)
+		; 
+		NoSuff = Path, Ext = no(extension)
 	),
 	!,
 	get_fcg(NoSuff,CG),
@@ -391,16 +409,16 @@ load2(Path,Type,Nature)
 	get_reconsult_flag(RFlag0),
 	RFlag1 is RFlag0 \/ Type,
 	set_reconsult_flag(RFlag1),
-	load2_reconsult(RFlag1,CG),
+	load_canon_reconsult(RFlag1,CG),
 	load3(Ext,Path,Type,Nature),
 	set_reconsult_flag(RFlag0),
 	pop_clausegroup(_).
 
-load2_reconsult(1,CG) 
+load_canon_reconsult(1,CG) 
 	:- !,
 	massively_abolish_clausegroup(CG).
 
-load2_reconsult(0,_).
+load_canon_reconsult(0,_).
 
 /*-----------------------------------------------------------------------*
  |	obpPath(Path,OPath)
@@ -726,12 +744,16 @@ printf_opt(Format,ArgList,Options) :-
 printf(Stream_or_alias,Format,ArgList) :-
 	sio:output_stream_or_alias_ok(Stream_or_alias, Stream),
 	printf_check_format(Format, FormatList),
+%pbi_write(	printf0(FormatList,Stream,ArgList) ),
+%pbi_nl,pbi_ttyflush,
 	printf0(FormatList,Stream,ArgList,[]).
 
 printf(Stream_or_alias,Format,ArgList,Options) :-
 	sio:output_stream_or_alias_ok(Stream_or_alias, Stream),
 	printf_check_format(Format, FormatList),
 	!,
+%pbi_write(	printf0(FormatList,Stream,ArgList,Options) ),
+%pbi_nl,pbi_ttyflush,
 	printf0(FormatList,Stream,ArgList,Options).
 
 printf_check_format(Var, _) :-
@@ -761,9 +783,18 @@ printf0([0'%,0't |Format], Stream, [Term|ArgList],Options) :-
 	printf0(Format,Stream,ArgList,Options).
 
 %%%%		%p -- call print procedure as argument
-printf0([0'%,0'p |Format], Stream, [PrintGoal|ArgList],Options)  :-
-	call(PrintGoal),
-	!,
+printf0([0'%,0'p |Format], Stream, [PrintGoal|ArgList],Options)  
+	:-!,
+	(PrintGoal = Stream^PrintGoal0 ->
+		call(PrintGoal0)
+		;
+		(PrintGoal = [Stream,Options]^PrintGoal0 ->
+			call(PrintGoal0)
+			;
+			call(PrintGoal)
+		)
+		
+	), 
 	printf0(Format,Stream,ArgList,Options).
 
 %%%%		%% -- write out single percent
@@ -783,8 +814,13 @@ printf0([0'% | Format], Stream, [Arg | ArgList],Options) :-
 	printf0(RestFormat,Stream,ArgList,Options).
 
 %%%%		Write any other character as is
-printf0([Char |Format], Stream, ArgList,Options) :-
+printf0([Char |Format], Stream, ArgList,Options) 
+	:-
+%pbi_write(pf0(Char)),pbi_ttyflush,
 	put_code(Stream,Char),
+%pbi_write('-pc-'),pbi_ttyflush,
+%flush_output(Stream),
+%pbi_write('+fo'),pbi_nl,pbi_ttyflush,
 	printf0(Format,Stream,ArgList,Options).
 
 
@@ -825,9 +861,25 @@ atomicize_arg(_,bad_arg).
  */
 
 export sprintf/3.
+sprintf(Output,Format,Args) 
+	:-
+	nonvar(Output),
+	!,
+	(Output = atom(A) ->
+		open(atom(A),write,Stream)
+		;
+		((Output = list(S) ; Output = string(S) ) ->
+			open(string(S),write,Stream)
+			;
+			fail
+		)
+	),
+	printf(Stream,Format,Args),
+	close(Stream).
 
-sprintf(List,Format,Args) :-
-	open(string(List),write,Stream),
+sprintf(Output,Format,Args) 
+	:-
+	open(string(Output),write,Stream),
 	printf(Stream,Format,Args),
 	close(Stream).
 

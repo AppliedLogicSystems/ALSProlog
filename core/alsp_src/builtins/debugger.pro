@@ -1433,7 +1433,7 @@ reload_debug([]).
 reload_debug([File | Files])
 	:-
 	(filePlusExt(NoSuff,_,File),!; NoSuff = File),
-	builtins:consulted(NoSuff, ConsultType),
+	builtins:consulted(NoSuff, _, ConsultType),
 	!,
 	(ConsultType = debug ->
 		true

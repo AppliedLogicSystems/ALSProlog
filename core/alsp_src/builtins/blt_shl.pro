@@ -12,6 +12,7 @@
 
 module builtins.
 use objects.
+use sio.
  
 /*
  * start_shell/1
@@ -36,9 +37,7 @@ start_shell(DefaultShellCall) :-
 	assertz(command_line(ResidualCommandLine)),
 	arg(3, CLInfo, Files),
 	arg(1, CLInfo, ShellCall),
-	als_system(SS),
-	dmember(wins=WinSys, SS),
-	(ShellCall == DefaultShellCall -> print_banner(WinSys) ; true ),
+
 	%% FIXME: Get rid of consultmessage stuff
 	(arg(2,CLInfo,false) -> consultmessage(off) ; consultmessage(on)),
 
@@ -124,31 +123,21 @@ ss_load_dot_alspro :-
 	reconsult(File).
 ss_load_dot_alspro.
 
-
-
 /*
  * print_banner prints out the initial banner
  */
 
-print_banner(nowins) :-
-	!,
+print_banner :-
 	als_system(L),
 	dmember(prologName = Name, L),
 	dmember(prologVersion = Version, L),
-	als_advise('%s Version %s\n   Copyright (c) 1987-94 Applied Logic Systems, Inc.\n\n',
-		   [Name,Version]).
-print_banner(Wins) :-
-	wins_banner(Wins, WBan),
-	!,
-	als_system(L),
-	dmember(prologName = Name, L),
-	dmember(prologVersion = Version, L),
+	dmember(wins=WinsName, L),
+	name(WinsName, [InC | WNCs]),
+	UInC is InC - 32,
+	name(WBan, [UInC | WNCs]),
 	!,
 	als_advise('%s Version %s (%s)\n   Copyright (c) 1987-94 Applied Logic Systems, Inc.\n\n',
 		   [Name,Version,WBan]).
-print_banner(_).
-
-wins_banner(motif, 'Motif').
 
 /*
  * prolog_shell is a top-level shell for submitting queries to the prolog
@@ -165,17 +154,21 @@ wins_banner(motif, 'Motif').
 
 	%% This is the default system tty shell:
 prolog_shell :-
-	prolog_shell(user,user).
+	prolog_shell(user_input,user_output).
 
 	%% Used to start both the default system shells, and
 	%% also shells talking to windows:
-prolog_shell(InStream,OutStream) :-
+prolog_shell(InStream,OutStream) 
+	:-
 	init_prolog_shell(InStream, OutStream,CurLevel,CurDebuggingState),
 	prolog_shell_loop(InStream,OutStream),
 	shell_exit(InStream, OutStream,CurLevel,CurDebuggingState).
 
 init_prolog_shell(InStream, OutStream,CurLevel,CurDebuggingState)
 	:-
+	sio:input_stream_or_alias_ok(InStream, RealInStream),
+	set_stream_pgoals(RealInStream, user_prompt_goal(OutStream) ),
+
 	get_debugging_state(CurDebuggingState),
 	set_debugging_state(debug_state(debug_off,0,1,0,debug_off)),
 	get_shell_level(CurLevel),
@@ -186,7 +179,14 @@ init_prolog_shell(InStream, OutStream,CurLevel,CurDebuggingState)
 		%% because we (may) come and go from X, so we
 		%% can't hold on to them:
 	get_shell_prompts( CurPromptsStack ),
-	set_shell_prompts( [(Prompt1,Prompt2) | CurPromptsStack] ).
+	set_shell_prompts( [(Prompt1,Prompt2) | CurPromptsStack] ),
+
+	als_system(SS),
+	dmember(wins=WinSys, SS),
+%	(ShellCall == DefaultShellCall -> print_banner(WinSys) ; true),
+	print_banner.
+
+	
 
 shell_exit(InStream, OutStream,Level,DebuggingState) :-
 	set_shell_level(Level),
@@ -291,9 +291,15 @@ Goal = InitGoal,
 	((nonvar(Goal),Goal=halt) ->
 		Status = halt
 		;
+		sio:input_stream_or_alias_ok(InStream, RealInStream),
+		stream_blocking(RealInStream,OldBlocking),
+		set_stream_blocking(RealInStream,true),
 		catch(do_shell_query(Goal,NamesOfVars,Vars,InStream,OutStream),
 	      		Reason,
-	      		shell_exception(Reason)),
+	      		( shell_exception(Reason)
+					,set_stream_blocking(RealInStream,OldBlocking))
+			  ),
+		set_stream_blocking(RealInStream,OldBlocking),
 		Status = continue
 	).
 

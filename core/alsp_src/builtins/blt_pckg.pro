@@ -85,6 +85,9 @@ process_image_option(libload(true)) :-
 	force_libload_all.
 process_image_option(libload(false)) :-
 	!.
+process_image_option(select_lib(FilesList)) :-
+	!,
+	force_libload_all(FilesList).
 %% FIXME:  When encountering an unknown option, we should give an error
 %%	message and attempt to restore the previous state of $start/0 and
 %%	$initialize/0.  Also after successfully saving the image, we

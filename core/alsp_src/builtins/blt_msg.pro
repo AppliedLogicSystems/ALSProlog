@@ -243,7 +243,8 @@ als_advise(FormatString) :-
 export als_advise/2.
 als_advise(FormatString, Args) :-
 	printf(warning_output, FormatString, Args),
-	flush_output(warning_output).
+	flush_output(warning_output),
+pbi_write(als_advise_done),pbi_nl,pbi_ttyflush.
 
 /*
  * Print the given consult message if the "consultmessage" flag is on.

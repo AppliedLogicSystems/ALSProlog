@@ -296,16 +296,17 @@ display_stats(Stream) :-
 	flush_output(Stream).
 
 
-/*
+/*---------------------------------------------------------------------
  * Library loading facilities
  *
  * Information pertaining to a library is stored in a hash table.  We build
- * this hash table with a call to make_hash_table.
- */
+ * this hash table with the call to make_hash_table.
+ *---------------------------------------------------------------------*/
 
 :- make_hash_table('_libinfo').
 
-lib_load(Module,Call) :-
+lib_load(Module,Call) 
+	:-
 	functor(Call,P,A),
 	get_libinfo(Module:P/A,FileName),
 	(pdel_libinfo(_,FileName), fail ; true),
@@ -316,15 +317,23 @@ lib_load(Module,Call) :-
 	Module:call(Call).
 
 export force_libload_all/0.
+export force_libload_all/1.
 export force_libload_all/2.
 
-force_libload_all :-
+force_libload_all 
+	:-
 	sys_searchdir(ALSDIR),
 	setof(File,Pred^builtins:pget_libinfo(Pred,File),Files),
 	force_libload_all(Files,ALSDIR).
 
+force_libload_all(Files) 
+	:-
+	sys_searchdir(ALSDIR),
+	force_libload_all(Files,ALSDIR).
+
 force_libload_all([],_).
-force_libload_all([File|Files],DirDC) :-
+force_libload_all([File|Files],DirDC) 
+	:-
 	'$atom_concat'(DirDC,File,FileName),
 	als_advise('Loading %s\n',[FileName]),
 	(load(FileName,1,_,obp) ->
@@ -335,13 +344,16 @@ force_libload_all([File|Files],DirDC) :-
 	),
 	force_libload_all(Files,DirDC).
 
-libhide(M,[LH|LT],PredList) :-
+libhide(M,[LH|LT],PredList) 
+	:-
 	directory_separator(DS),
 	mklibpath(LT,DS,LH,LibFileName),
 	libhide0(PredList,M,LibFileName).
 
-libhide0([],M,LibFileName) :- !.
-libhide0([P/A | Rest], M, LibFileName) :-
+libhide0([],M,LibFileName) 
+	:- !.
+libhide0([P/A | Rest], M, LibFileName) 
+	:-
 	'$libbreak'(M,P,A,66),		% 66 is libload interrupt
 	set_libinfo(M:P/A,LibFileName),
 	newmodule(M),
@@ -349,8 +361,10 @@ libhide0([P/A | Rest], M, LibFileName) :-
 	endmodule,
 	libhide0(Rest,M,LibFileName).
 
-mklibpath([],DS,Name,Name) :- !.
-mklibpath([H|T],DS,Prefix,OutName) :-
+mklibpath([],DS,Name,Name) 
+	:- !.
+mklibpath([H|T],DS,Prefix,OutName) 
+	:-
 	'$atom_concat'(Prefix,DS,PrefixDS),
 	'$atom_concat'(PrefixDS,H,NewPrefix),
 	mklibpath(T,DS,NewPrefix,OutName).

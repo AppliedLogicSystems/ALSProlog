@@ -125,17 +125,27 @@ next_stream_identifier(Options,Id) :-
  *      them; if an application program messes them up, we're in trouble.
  */
 
+export stream_buffer/2.
 export stream_open_status/2.
 export stream_type/2.
 export stream_name/2.
 export stream_mode/2.
 export stream_repositionability/2.
 export stream_identifier/2.
+export stream_extra/2.
+export stream_addl1/2.
+export stream_addl2/2.
+export stream_addl3/2.
+export stream_pgoals/2.
+export stream_syntax_errors/2.
 export stream_wt_opts/2.
 export stream_wt_line_length/2.
 export stream_wt_maxdepth/2.
 export stream_wt_depth_computation/2.
+export stream_token_list/2.
 export stream_snr_action/2.
+export stream_stype/2.
+export stream_eof_action/2.
 export stream_blocking/2.
 
 stream_buffer(Stream,SD) :- 			arg(1,Stream,SD).
@@ -161,18 +171,27 @@ stream_stype(S,Type) :-				arg(17,S,Type).
 stream_eof_action(S,EA) :-			arg(18,S,EA).
 stream_blocking(S,Bl) :-			arg(19,S,Bl).
 
-
+export set_stream_buffer/2.
 export set_stream_open_status/2.
 export set_stream_type/2.
 export set_stream_name/2.
 export set_stream_mode/2.
 export set_stream_repositionability/2.
 export set_stream_identifier/2.
+export set_stream_extra/2.
+export set_stream_addl1/2.
+export set_stream_addl2/2.
+export set_stream_addl3/2.
+export set_stream_pgoals/2.
+export set_stream_syntax_errors/2.
 export set_stream_wt_opts/2.
 export set_stream_wt_line_length/2.
 export set_stream_wt_maxdepth/2.
 export set_stream_wt_depth_computation/2.
+export set_stream_token_list/2.
 export set_stream_snr_action/2.
+export set_stream_stype/2.
+export set_stream_eof_action/2.
 export set_stream_blocking/2.
 
 set_stream_buffer(Stream,SD) :-			mangle(1,Stream,SD).
@@ -197,7 +216,6 @@ set_stream_snr_action(S,Im) :-			mangle(16,S,Im).
 set_stream_stype(S,Type) :-			mangle(17,S,Type).
 set_stream_eof_action(S,EA) :-			mangle(18,S,EA).
 set_stream_blocking(S,Bl) :-			mangle(19,S,Bl).
-
 
 /*
  * is_stream(Stream_or_alias, Stream)
@@ -1235,6 +1253,8 @@ data_ready(Stream)
 
 		asserta_at_load_time(
 			( wait_data(window, Stream, Call) :-!,
+				stream_pgoals(Stream,PromptGoal),
+				call(PromptGoal),
 				sio:stream_addl3(Stream, CurAddl3),
 				sio:set_stream_addl3(Stream, [Call | CurAddl3]),
 				prolog_xt_mainLoop(data_ready(Stream)),
@@ -1260,6 +1280,8 @@ data_ready(Stream)
 		),
 		asserta_at_load_time(
 			( wait_data(window, Stream, Call) :-!,
+				stream_pgoals(Stream,PromptGoal),
+				call(PromptGoal),
 				stream_identifier(Stream,StreamId),
 				prolog_xt_stream_mainLoop(StreamId),
 				read_buffer(window,Stream), !,
@@ -2402,14 +2424,21 @@ put_code(Char) :-
 export put_code/2.
 
 
-put_code(Stream, Char) :-
+put_code(Stream, Char) 
+	:-
+%pbi_write(p_c1),pbi_ttyflush,
 	sio_put_byte(Stream,Char),
 	!.
-put_code(Alias, Char) :-
+put_code(Alias, Char) 
+	:-
+%pbi_write(p_c2),pbi_ttyflush,
 	is_output_alias(Alias, Stream),
+%pbi_write(p_c2b=Stream),pbi_ttyflush,
 	sio_put_byte(Stream,Char),
 	!.
-put_code(Stream_or_alias,Char) :-
+put_code(Stream_or_alias,Code) 
+	:-
+%pbi_write(p_c3(Code)),pbi_ttyflush,
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	sio_errcode(Stream,FailCode),
 	put_failure(FailCode,Stream,Char,put_code(Stream_or_alias,Char)).
@@ -3232,21 +3261,21 @@ stream_property0(line_length(Length), Stream) :-
  * What does this do??
  */
 
-queue_control(MsgQID, Cmd, Perms, Info) :-
+queue_control(MsgQID, Cmd, Perms, Info) 
+	:-
 	encode_ipc_cmd(Cmd, CmdCode),
 	msgctl(MsgQID, CmdCode, Perms, Info).
-
 
     /*---------------------------
      * Initialization of user
      *--------------------------*/
-user_prompt_goal(Stream) :-
+user_prompt_goal(Stream) 
+	:-
 	get_user_prompt(Prompt),
 	put_atom(Stream,Prompt),
 	flush_output(Stream).
 
 export sio_pckg_init/0.
-
 
 /*
  * sio_pckg_init	-- initialization procedure for streams

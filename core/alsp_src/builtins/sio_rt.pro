@@ -1,26 +1,24 @@
-/*
- * sio_rt.pro		-- Prolog parser (read_term) for use with sio.pro
- *	Copyright (c) 1991-1992 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation:	9/10/91
- *
- *
- * This module defines the following predicates which appear in the standard:
- *
- *	read/1		-- read term from default input stream
- *	read/2		-- read term from supplied stream
- *	read_term/2	-- read term from default input stream with options list
- *	read_term/3	-- read term from stream with options list
- *	op/3		-- define or delete an operator
- *	current_op/3	-- look for operator
- *
- */
-
+/*=======================================================================*
+ |			sio_rt.pro		
+ |		Copyright (c) 1991-1992 Applied Logic Systems, Inc.
+ |
+ |		-- Prolog parser (read_term) for use with sio.pro
+ |
+ | Author: Kevin A. Buettner
+ | Creation:	1993
+ |
+ | This module defines the following predicates which appear in the standard:
+ |
+ |	read/1		-- read term from default input stream
+ |	read/2		-- read term from supplied stream
+ |	read_term/2	-- read term from default input stream with options list
+ |	read_term/3	-- read term from stream with options list
+ |	op/3		-- define or delete an operator
+ |	current_op/3	-- look for operator
+ *=======================================================================*/
 module sio.
 
-:-
-	make_gv('_eof_acceptable_as_fullstop'),
+:-	make_gv('_eof_acceptable_as_fullstop'),
 	set_eof_acceptable_as_fullstop(false).
 
 
@@ -171,61 +169,96 @@ check_rt_options([H|T], Stream, OptStruct, VT, InGoals,OutGoals) :-
 check_rt_options(Other, _,_, _, _,_) :-
 	type_error(list,Other,2).
 
-/*
- * Read options
- *
- * The March '93 version of the draft standard provides somewhat different
- * options than the older draft which was originally used to write this
- * code.  I am providing both sets of options in addition to those
- * options which we at ALS added for our own purposes.
- *
- * March '93 Draft Standard Options
- *
- *	variables(Vars)  --  After reading a term, Vars shall be a list of
- *	the variables in the term read, in left-to-right traversal order.
- *
- *	variable_names(VN_list)  --  After reading a term, VN_list shall be
- *	unified with a list of elements where: (1) each element is a term
- *	V = A, and (2) V is a named variable of the term, and (3) A is an
- *	atom whose characters are the characters of V.
- *
- *	singletons(VN_list)  --  After reading a term, VN_list shall be
- *	unified with a list of elements where: (1) each element is a term
- *	V = A, and (2) V is a named variable which occurs only once in the
- *	term, and (3) A is an atom whose characters are the characters of
- *	V.
- *
- * Earlier Draft Standard Options
- *
- *	syntax_errors(Val)  --  indicates how to handle a syntax error.
- *
- *	vars_and_names(Vars,Names)  --  Unifies Vars with a list of the
- *	variables encountered in a left to right traversal of the terms.
- *	Names are the associated names of the variables. '_' is the only
- *	variable name which may occur more than once.
- *
- *	singletons(Vars,Names)  --  Unifies Vars with the singleton variables
- *	(those occuring only once) in the term.  Names is unified with a
- *	corresponding list consisting of the names of the singleton variables.
- *	Variables with name '_' are excluded from these lists.
- *
- * Options added by ALS
- *
- *	debugging  --  Read terms are considered to be clauses and debugging
- *	information is attached.  This is likely to be of little direct
- *	use to the application programmer.
- *
- *	blocking(Bool)  -- This option determines whether the read is
- *	blocking (Bool = true) or non-blocking (Bool = false); default
- *	is blocking; This option has meaning for those stream types in which the
- *	receieving (reading) buffer for the stream can possibly receive only
- *	part of the characters making up a term;  these types include:
- *	sysV_queues, sockets, windows
- *
- *	attach_fullstop(Bool)  --  This option determines if a fullstop is
- *	added to the tokens comprising a the term to be read.  It is most
- *	useful when used in conjunction with atom or list streams.
- */
+/*---------------------------------------------------------------------
+ | Read options
+ |
+ | The March '93 version of the draft standard provides somewhat different
+ | options than the older draft which was originally used to write this
+ | code.  I am providing both sets of options in addition to those
+ | options which we at ALS added for our own purposes.
+ |
+ | March '93 Draft Standard Options
+ | ==============================
+ |
+ |	variables(Vars)
+ |
+ |		--  After reading a term, Vars shall be a list of
+ |	the variables in the term read, in left-to-right traversal order.
+ |
+ |	variable_names(VN_list)  
+ |
+ |		--  After reading a term, VN_list shall be
+ |	unified with a list of elements where: (1) each element is a term
+ |	V = A, and (2) V is a named variable of the term, and (3) A is an
+ |	atom whose characters are the characters of V.
+ |
+ |	singletons(VN_list)  
+ |
+ |		--  After reading a term, VN_list shall be
+ |	unified with a list of elements where: (1) each element is a term
+ |	V = A, and (2) V is a named variable which occurs only once in the
+ |	term, and (3) A is an atom whose characters are the characters of
+ |	V.
+ |
+ | Earlier Draft Standard Options
+ | ==============================
+ |
+ |	syntax_errors(Val)
+ |
+ |		--  indicates how to handle a syntax error.
+ |
+ |	vars_and_names(Vars,Names)
+ |
+ |		--  Unifies Vars with a list of the
+ |	variables encountered in a left to right traversal of the terms.
+ |	Names are the associated names of the variables. '_' is the only
+ |	variable name which may occur more than once.
+ |
+ |	singletons(Vars,Names)
+ |
+ |		--  Unifies Vars with the singleton variables
+ |	(those occuring only once) in the term.  Names is unified with a
+ |	corresponding list consisting of the names of the singleton variables.
+ |	Variables with name '_' are excluded from these lists.
+ |
+ | Options added by ALS
+ | ====================
+ |
+ |	variables(Vars)
+ |
+ |
+ |	variable_names(VNList)
+ |
+ |
+ |
+ |
+ |
+ |
+ |	debugging
+ |
+ |		--  Read terms are considered to be clauses and debugging
+ |	information is attached.  This is likely to be of little direct
+ |	use to the application programmer.
+ |
+ |	blocking(Bool)
+ |
+ |		-- This option determines whether the read is
+ |	blocking (Bool = true) or non-blocking (Bool = false); default
+ |	is blocking; This option has meaning for those stream types in which the
+ |	receieving (reading) buffer for the stream can possibly receive only
+ |	part of the characters making up a term;  these types include:
+ |	sysV_queues, sockets, windows
+ |
+ |	attach_fullstop(Bool)
+ |
+ |		--  This option determines if a fullstop is
+ |	added to the tokens comprising a the term to be read.  It is most
+ |	useful when used in conjunction with atom or list streams.
+ |
+ |	line_info(Start, End)
+ |
+ |
+ *---------------------------------------------------------------------*/
 
 check_rt_option(Var, _,_, _, _,_) :-
 	var(Var),
@@ -257,26 +290,6 @@ check_rt_option(blocking(NewBlocking), Stream, OptStruct, VT, G,OG) :-
 	!,
 	stream_blocking(Stream,OldBlocking),
 	blocking_switch(NewBlocking, OldBlocking, Stream, G, OG).
-/*
-check_rt_option(blocking(true), Stream, OptStruct, VT, G,OG) :-
-	!,
-	stream_blocking(Stream,OldBlocking),
-	(OldBlocking = true -> 
-		OG = G 
-		;
-		set_stream_blocking(Stream,true),
-		OG = (set_stream_blocking(Stream,false), G)
-	).
-check_rt_option(blocking(false), Stream, OptStruct, VT, G,G) :-
-	!,
-	stream_blocking(Stream,OldBlocking),
-	(OldBlocking = false -> 
-		OG = G 
-		;
-		set_stream_blocking(Stream,false),
-		OG = (set_stream_blocking(Stream,true), G)
-	).
-*/
 check_rt_option(line_info(Start,End), Stream, OptStruct, VT, G,(G,H)) :-
 	!,
 	arg(3,OptStruct, linestuff(FinalToks,Start,End) ),
@@ -1636,7 +1649,7 @@ tp_is_endofclause(fullstop(_,_,_)).
 tp_is_endofclause(lexerr(_,_,_)).
 
 %%
-%% tp_preproc/4
+%% tp_preproc/3
 %%
 %%	Handle preprocessor directives
 %%
