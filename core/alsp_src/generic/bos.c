@@ -23,7 +23,15 @@
 #include <process.h>
 #endif
 
+#ifdef MacOS
+#include <Errors.h>
+
+/* From MoreFiles - from Macintosh Sample Code library. */
+#include <FileCopy.h>
+#endif
+
 #ifdef MSWin32
+#include <windows.h>
 #include "fswin32.h"
 #endif
 
@@ -40,6 +48,9 @@ pbi_access()
     if (t2 == WTP_INTEGER &&
 	v2 >= 0 && v2 <= 4 &&
 	getstring(&str, v1, t1) &&
+	*str != 0 &&	/* This check is to work around a bug in
+			   SunOS 4.1.3 (and GUSI) which causes access() to
+			   succeed on empty strings. */
 	access((char *) str, (int) v2) != -1)
 	SUCCEED;
     else
@@ -48,22 +59,6 @@ pbi_access()
 }
 
 #ifdef OSACCESS
-int
-pbi_chdir()
-{
-    PWord v1;
-    int   t1;
-    UCHAR *str;
-
-    w_get_An(&v1, &t1, 1);
-
-    if (getstring(&str, v1, t1) && chdir((char *) str) == 0)
-	SUCCEED;
-    else
-	FAIL;
-}
-
-
 int
 pbi_getenv()
 {
@@ -130,8 +125,9 @@ pbi_system()
 	}
       }
 #endif
-	system((char *) str);
-	SUCCEED;
+
+	if (system((char *) str) == 0) SUCCEED;
+	else FAIL;
     }
 
     else
@@ -273,4 +269,96 @@ int pbi_crypt(void)
 #else
 	FAIL;
 #endif
+}
+
+#ifdef MacOS
+static unsigned char *c2pstrcpy(unsigned char *ps, const char *cs)
+{
+	size_t l = strlen(cs);
+	if (l > 255) l = 255;
+	ps[0] = l;
+	memcpy(ps+1, cs, l);
+	
+	return ps;
+}
+#endif
+
+static int copy_file(const char *from_file, const char *to_file)
+{
+#if defined(MacOS)
+    Str255 pfrom_file, pto_file;
+    FSSpec from_file_spec, to_file_spec, to_dir_spec;
+    char cwd[256];
+    Str255 pcwd;
+    OSErr err;
+    CInfoPBRec catInfo; 
+    c2pstrcpy(pfrom_file, from_file);
+    c2pstrcpy(pto_file, to_file);
+    
+	getcwd(cwd, 255);
+	c2pstrcpy(pcwd, cwd);
+	
+	catInfo.dirInfo.ioCompletion = NULL;
+	catInfo.dirInfo.ioNamePtr = pcwd;
+	catInfo.dirInfo.ioVRefNum = 0;
+	catInfo.dirInfo.ioFDirIndex = 0;
+	catInfo.dirInfo.ioDrDirID = 0;
+	err = PBGetCatInfoSync(&catInfo);
+	if (err != noErr) return 0;
+		
+    err = FSMakeFSSpec(catInfo.dirInfo.ioVRefNum, catInfo.dirInfo.ioDrDirID, pfrom_file, &from_file_spec);
+    if (err != noErr) return 0;
+
+    err = FSMakeFSSpec(catInfo.dirInfo.ioVRefNum, catInfo.dirInfo.ioDrDirID, pto_file, &to_file_spec);
+    if (err != noErr && err != fnfErr) return 0;
+    
+    err = FSMakeFSSpec(to_file_spec.vRefNum, to_file_spec.parID, "\p", &to_dir_spec);
+    if (err != noErr) return 0;
+   
+    err = FSpFileCopy(&from_file_spec, &to_dir_spec, to_file_spec.name, NULL, 0, 0);
+    
+    if (err == noErr) return 1;
+    else return 0;
+
+#elif defined(MSWin32)
+
+    if (CopyFile(from_file, to_file, TRUE)) return 1;
+    else return 0;
+
+#elif defined(unix)
+    /* FIX ME: This should really be done directly as on the Mac and Win32.
+               If cp is not available, this will fail.
+               I wonder if there are any libraries out there that can handle
+               all permisions/dates/symbolic paths/etc? */
+
+    char *copy_command = malloc(strlen(from_file) + strlen(to_file) + 5);
+    int result;
+    
+    sprintf(copy_command, "cp %s %s", from_file, to_file);
+
+    result = system(copy_command);
+    
+    free(copy_command); 
+    
+    return (result == 0);
+#else
+#error
+#endif
+}
+
+
+int pbi_copy_file(void)
+{
+    PWord v1, v2;
+    int   t1, t2, success;
+    char *from_file, *to_file;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+
+    if (!getstring(&from_file, v1, t1)
+        || !getstring(&to_file, v2, t2))
+	FAIL;
+    if (copy_file(from_file, to_file)) SUCCEED;
+	else FAIL;
 }
