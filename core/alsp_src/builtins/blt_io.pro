@@ -838,7 +838,7 @@ printf0([0'%,0'% | Format], Stream, ArgList,Options) :-
 printf0([0'\n | Format], Stream, ArgList,Options) 
 	:-!,
 	(dmember(line_end(false), Options) ->
-		put_byte(Stream, 0'\\) ; true ),
+		put_code(Stream, 0'\\) ; true ),
 	nl(Stream),
 	printf0(Format, Stream, ArgList,Options).
 

@@ -354,8 +354,10 @@ export '$iterate'/1.
 	XFGoal =.. [pop, OpCd,Z,X,Y,LinkArg],
 	fixup_iter(Args, Z,X,Y,XFGoal),
 
+/*
 printf_opt('>>%t--XFGoal= %t\n',[Goal,XFGoal], [lettervars(false) ,line_length(100)]),
 %show_used_by(['Z'-Z,'X'-X,'Y'-Y]),
+*/
 
 	'$iter_link_net'(OpCd,Z,X,Y,XFGoal).
 

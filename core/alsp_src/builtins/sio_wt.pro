@@ -1308,9 +1308,9 @@ os([H | T],Stream,IL,II) :-
 	%% (Operators to be written out AFTER a line break)
 os2(spop(Pri,nobreak,Atom,IL),T,Stream,IL,II) 
 	:-!,
-	put_byte(Stream,0' ),
+	put_code(Stream,0' ),
 	put_atom(Stream,Atom),
-	put_byte(Stream,0' ),
+	put_code(Stream,0' ),
 	os(T,Stream,IL,II).
 
 os2(spop(Pri,break,Atom,_IL),T,Stream,IL,II) 
@@ -1336,7 +1336,7 @@ os2(break(_,BreakType,ILD,_IL),T,Stream,IL,II)
 	:-
 	dmember(BreakType, [break,qbreak]),
 	ILNew is IL+ILD,
-	(BreakType = qbreak -> put_byte(Stream, 0'\\) ; true),
+	(BreakType = qbreak -> put_code(Stream, 0'\\) ; true),
 	nl(Stream),
 	tab(Stream,II),
 	indent(Stream,ILNew),
@@ -1356,7 +1356,7 @@ os2(break(_,space(Spaces),ILD,_IL),T,Stream,IL,II)
 
 os2(space(Pri,nobreak,_,IL),T,Stream,IL,II) 
 	:-!,
-	put_byte(Stream,0' ),
+	put_code(Stream,0' ),
 	os(T,Stream,IL,II).
 
 os2(space(_,break,ILD,_IL),T,Stream,IL,II) 
@@ -1391,7 +1391,7 @@ os2(H,T,Stream,IL,II)
 
 	%% == put out the character
 os2(H,T,Stream,IL,II) :- 
-	put_byte(Stream,H),
+	put_code(Stream,H),
 	os(T,Stream,IL,II).
 
 
@@ -1414,7 +1414,7 @@ tab(Stream,Count) :-
 	Count =< 0,
 	!.
 tab(Stream,Count) :-
-	put_byte(Stream,0' ),
+	put_code(Stream,0' ),
 	NewCount is Count-1,
 	tab(Stream,NewCount).
 

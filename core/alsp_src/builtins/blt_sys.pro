@@ -80,20 +80,27 @@ all_ntbl_entries(M,P,A,DBRef) :-
 /*
  * Basic access to procedure info:
  */
-procedures(M,P,A,DBRef,F) :-
-    	% Directly access to the name table entry
-	nonvar(M), nonvar(P), nonvar(A), !,
+    	% Directly access the name table entry
+procedures(M,P,A,DBRef,F) 
+	:-
+	nonvar(M), nonvar(P), nonvar(A), 
+	!,
 	'$procinfo'(_,M,P,A,DBRef,_).
-procedures(M,P,A,DBRef,F) :-
+
     	% Search all name table entries for possible matches
     	% starting from the first name table entry
+procedures(M,P,A,DBRef,F) 
+	:-
 	'$nextproc'(-1,F,FirstProc),
 	procedures(FirstProc,F,M,P,A,DBRef).
 
-procedures(Proc,_,M,P,A,DBRef) :-
+procedures(Proc,_,M,P,A,DBRef) 
+	:-
 	'$procinfo'(Proc,M,P,A,DBRef,_).
-procedures(CurProc,F,M,P,A,DBRef) :-
+
 	% next procedure
+procedures(CurProc,F,M,P,A,DBRef) 
+	:-
 	'$nextproc'(CurProc,F,NextProc),
 	procedures(NextProc,F,M,P,A,DBRef).
 

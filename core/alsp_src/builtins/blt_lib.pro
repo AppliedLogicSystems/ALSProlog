@@ -158,7 +158,6 @@
 
 :-libactivate(sio,['library',sio_misc], 
 			[get_nonblank_char/1,get_nonblank_char/2,
-			 get_atomic_nonblank_char/1, get_atomic_nonblank_char/2,
 			 put_byte/1, put_byte/2, get_byte/1, get_byte/2,
 			 read_chars/3, consume_whitespace/1
 			 ], [] ).

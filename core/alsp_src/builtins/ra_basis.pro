@@ -323,9 +323,11 @@ check_mod_the_type(integer,RestU, RestU)
 check_mod_the_type(boolean, 0,  0).
 check_mod_the_type(boolean, 1,  1).
 
+/*
 restrict_interval(RestType,X)
 	:-
 	pbi_write(restrict_interval(RestType)),pbi_nl,pbi_ttyflush,fail.
+*/
 
 restrict_interval(RestType,X)
 	:-
@@ -476,11 +478,34 @@ add_relation(Relation, Left, Right)
  |	Type	= the type of Value;
  *----------------------------------------------------------------*/
 
+/*
 flatten_expr(V, V, Type)
 	:-
 	var(V),		%% has to be a constraint delay var; look up its type
 	!,
 	'$domain'(V, Type, _, _).
+*/
+flatten_expr(V, V, Type)
+	:-
+	var(V),		%% has to be a constraint delay var; look up its type
+	!,
+	flatten_expr_var(V, Type).
+
+flatten_expr_var(V, Type)
+	:-
+	'$domain'(V, Type, _, _),
+	!.
+	%% Strong "contagion" model:  if X is a variable (not already an
+	%% interval) which occurs in an expression being passed to 
+	%% flatten_expr/3, then X should be an interval variable; 
+	%% first guess that it is real; later occurrences may restrict
+	%% the type to boolean or integer:
+flatten_expr_var(V, Type)
+	:-
+	var(Type),
+	!,
+	Type = real,
+	new_type_interval(real,V).
 
 flatten_expr(C, Val, real) 
 	:-
