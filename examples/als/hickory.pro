@@ -1,14 +1,12 @@
 
 
 /*
- * hickory.pro  -- hickory tree twig description database
+ * Hickory Tree twig description database
  *
  * Copyright (c) 1986, 1988 by Applied Logic Systems
  *
  * Author:  Kenneth A. Bowen
- * Revision History: 
- *      mm/dd/yy,       Name	--	Reason
- *      mm/dd/yy,       Name	--	Reason
+ *
  */
 
 /*
@@ -19,7 +17,7 @@
  *
  */
 
-:-reconsult(id).					% the diagnosis system
+:- consult(id).					% the diagnosis system
 
 module identify.
 

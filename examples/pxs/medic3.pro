@@ -67,8 +67,7 @@ should_take(Person, Drug)
 complains_of(Person,  Symptom)
 	:-
 	write('What symptom are you bothered by?'),
-	read(Answer),	% for most systems
-%	newread(Answer),	% for Macintosh
+	read(Answer),
 	filter_symptom(Answer, Symptom).
 
 filter_symptom(Answer,  Symptom)
@@ -77,8 +76,7 @@ filter_symptom(Answer,  Symptom)
 	nl, write('Your answer is a Prolog variable,  most likely because '),
 	nl, write('you typed an identifier beginning with an uppercase letter.'),
 	nl, write('Please try again, avoiding uppercase letters: '),
-	read(NewAnswer),	% for most systems
-%	newread(NewAnswer),	% for Macintosh
+	read(NewAnswer),
 	filter_symptom(NewAnswer, Symptom).
 		%  passing the original variable Symptom to this recursive call
 		%  on filter_symptom means that the original call on filter_symptom
@@ -102,8 +100,7 @@ filter_symptom(Answer, Symptom)
 	:-
 	nl, write('I can''t understand what you typed.'),
 	nl, write('Please try again: '),
-	read(NewAnswer),	% for most systems
-%	newread(NewAnswer),	% for Macintosh
+	read(NewAnswer),
 	filter_symptom(NewAnswer,  Symptom).
 
 synonymous(Expression, Target)
@@ -145,8 +142,7 @@ get_choice(ChoiceList, Choice)
 	:-
 	write_numbered_list(ChoiceList,  1,  Length),
 	nl, write( 'Choice = '),
-	read(Number),	% for most systems
-%	newread(Number),	% for Macintosh
+	read(Number),
 	( ( integer(Number), 1 =< Number, Number =< Length)  ->
 		nth_element(ChoiceList, Number, Choice)  ;
 		nl, write('Improper entry or number out of range...please try again'), nl,
@@ -205,8 +201,7 @@ unsuitable_for(Person, Drug)
 suffers_from(  Person,  Condition)
 	:-
 	write('Do you suffer from '), write(Condition), write(' (yes/no) ?' ),
-	read(Answer),	% for most systems
-%	newread(Answer),	% for Macintosh
+	read(Answer),
 	act_on_yes_no(Answer).
 
 act_on_yes_no(Answer)
@@ -223,8 +218,7 @@ act_on_yes_no(Answer)
 	bagof(NoWord, negative(NoWord),  Negatives),
 	write(Negatives),
 	nl, write('Please type a new (correct) response: '),
-	read(NewAnswer),	% for most systems
-%	newread(NewAnswer),	% for Macintosh
+	read(NewAnswer),
 	act_on(NewAnswer).
 act_on_yes_no(Answer) :-  affirmative(Answer), !.
 act_on_yes_no(Answer) :-  negative(Answer), !, fail.
@@ -237,8 +231,7 @@ act_on_yes_no(Answer)
 	nl, write('Affirmative: '), write(Positives),
 	nl, write('Negative: '), write(Negatives),
 	nl, write('Please type a new (correct) response: '),
-	read(NewAnswer),	% for most systems
-%	newread(NewAnswer),	% for Macintosh
+	read(NewAnswer),
 	act_on_yes_no(NewAnswer).
 
 affirmative(yes).

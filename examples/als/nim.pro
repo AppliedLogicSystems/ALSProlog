@@ -5,9 +5,6 @@
  *
  * Copyright (c) 1986, 1988 by Applied Logic Systems
  *
- * Revision History: 
- *      mm/dd/yy,       Name	--	Reason
- *      mm/dd/yy,       Name	--	Reason
  */
 
 

@@ -80,16 +80,21 @@ module desk_calc.
     * Description:	Reads a line from the terminal and places the
     *			Characters in List.
     */
-
-   readin(L) :- get0(C), readin(C,L).
-
-   readin(-1,"stop") :- !.		/* end of file */
-   readin(0'\n,[]) :- !.
-   readin(0'\r,[]) :- !.
-   readin(0'\\,[C|T]) :- !, get0(C), get0(NextC), readin(NextC,T).
-   readin(C,[C|T]) :- get0(NextC), readin(NextC,T).
-
-
+   
+   readin(L) :- readin0(Line), !, write(Line), nl, atom_codes(Line, L).    
+   readin("stop").
+   
+   readin0(FullLine) :-
+      get_line(Line),
+      continue_line(Line, FullLine).
+   continue_line(end_of_file, stop).
+   continue_line(PartialLine, FullLine) :-
+      sub_atom(PartialLine, _, _, 0, '\\'),
+      readin0(LineTail),
+      sub_atom(PartialLine, 0, _, 1, LineHead),
+      atom_concat(LineHead, LineTail, FullLine).
+   continue_line(Line,Line).
+   
    /*
     * Procedure:	lexan(InList,OutList)
     * Normal Usage:	lexan(in,out)

@@ -55,8 +55,7 @@ aggravates(pepto_bismol, fever).
 run
 	:-
 	write('Name ='), 
-	read(Person),	% for most systems
-%	newread(Person),	% for Macintosh
+	read(Person),
 	should_take(Person, Drug, Reason),
 	write_list(['Recommend taking ', Drug, nl]),
 	write('Explanation:'),nl,
@@ -125,8 +124,7 @@ ask_about(Predicate, InfoVar, Reason)
 	var(InfoVar),!,                     % get value for InfoVar from user
 	ask_info(Predicate, Question, InfoVar),
 	write_list(Question),
-	read(Answer),	% for most systems
-%	newread(Answer),	% for Macintosh
+	read(Answer),
 	check_response(Predicate, Answer, InfoVar, Reason).
 
 ask_about(Predicate, InfoVar, [Predicate])
@@ -134,8 +132,7 @@ ask_about(Predicate, InfoVar, [Predicate])
 	nonvar(InfoVar),!,                       % ask user question about (value of) InfoVar
 	ask_confirm(Predicate, Question, InfoVar),
 	write_list(Question),
-	read(Answer),	% for most systems
-%	newread(Answer),	% for Macintosh
+	read(Answer),
 	act_on_yes_no(Answer).
 
 /*------------------------------------------------*
@@ -161,8 +158,7 @@ act_on_yes_no(Answer)
 	bagof(NoWord, negative(NoWord),  Negatives),
 	write(Negatives),
 	nl, write('Please type a new (correct) response: '),
-	read(NewAnswer),	% for most systems
-%	newread(NewAnswer),	% for Macintosh
+	read(NewAnswer),
 	!,
 	act_on_yes_no(NewAnswer).
 act_on_yes_no(Answer) :-  affirmative(Answer), !.
@@ -176,8 +172,7 @@ act_on_yes_no(Answer)
 	nl, write('Affirmative: '), write(Positives),
 	nl, write('Negative: '), write(Negatives),
 	nl, write('Please type a new (correct) response: '),
-	read(NewAnswer),	% for most systems
-%	newread(NewAnswer),	% for Macintosh
+	read(NewAnswer),
 	!,
 	act_on_yes_no(NewAnswer).
 
@@ -232,8 +227,7 @@ check_response(Predicate, Answer, InfoVar, Reason)
 	nl, write('Your answer is a Prolog variable,  most likely because '),
 	nl, write('you typed an identifier beginning with an uppercase letter.'),
 	nl, write('Please try again, avoiding uppercase letters: '),
-	read(NewAnswer),	% for most systems
-%	newread(NewAnswer),	% for Macintosh
+	read(NewAnswer),
 	check_response(Predicate, NewAnswer, InfoVar, Reason).
 		%  passing the original variable InfoVar to this recursive call
 		%  on check_response means that the original call to check_response
@@ -258,8 +252,7 @@ check_response(Predicate, Answer,  InfoVar, Reason)
 	:-
 	nl, write('I can''t understand what you typed.'),
 	nl, write('Please try again: '),
-	read(NewAnswer),	% for most systems
-%	newread(NewAnswer),	% for Macintosh
+	read(NewAnswer),
 	check_response(Predicate, NewAnswer,  InfoVar, Reason).
 
 synonymous(Predicate, Expression, Target)
@@ -303,8 +296,7 @@ get_choice(ChoiceList, Choice)
 	:-
 	write_numbered_list(ChoiceList,  1,  Length),
 	nl, write( 'Choice = '),
-	read(Number),	% for most systems
-%	newread(Number),	% for Macintosh
+	read(Number),
 	( ( integer(Number), 1 =< Number, Number =< Length)  ->
 		nth_element(ChoiceList, Number, Choice)  ;
 		nl, write('Improper entry or number out of range...please try again'), nl,

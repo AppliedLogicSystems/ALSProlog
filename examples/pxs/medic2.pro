@@ -91,8 +91,7 @@ act_on_yes_no(Answer)
 	bagof(NoWord, negative(NoWord),  Negatives),
 	write(Negatives),
 	nl, write('Please type a new (correct) response: '),
-	read(NewAnswer),	% for most systems
-%	newread(NewAnswer),	% for Macintosh
+	read(NewAnswer),
 	act_on(NewAnswer).
 act_on_yes_no(Answer) :-  affirmative(Answer), !.
 act_on_yes_no(Answer) :-  negative(Answer), !, fail.
@@ -105,8 +104,7 @@ act_on_yes_no(Answer)
 	nl, write('Affirmative: '), write(Positives),
 	nl, write('Negative: '), write(Negatives),
 	nl, write('Please type a new (correct) response: '),
-	read(NewAnswer),	% for most systems
-%	newread(NewAnswer),	% for Macintosh
+	read(NewAnswer),
 	act_on_yes_no(NewAnswer).
 
 affirmative(yes).

@@ -6,9 +6,7 @@
  * Copyright (c) 1986, 1988 by Applied Logic Systems
  *
  * Author:  Kenneth A. Bowen
- * Revision History: 
- *      mm/dd/yy,       Name	--	Reason
- *      mm/dd/yy,       Name	--	Reason
+ *
  */
 
 
@@ -38,6 +36,10 @@
 module identify.
 export identify/0.
 
+ :- dynamic(user_observed/1).
+ :- dynamic(does_not_hold/1).
+ :- dynamic(trait/2).
+ 
  identify :-
         obtain_description,
         entertain_hypothesis(Identification),  	% these 2 goals are a generate

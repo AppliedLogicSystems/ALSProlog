@@ -6,10 +6,7 @@
  * Copyright (c) 1986, 1988 by Applied Logic Systems
  *
  * Author:  Kevin A. Buettner
- * Creation:  12/03/86
- * Revision History: 
- *      mm/dd/yy,       Name	--	Reason
- *      mm/dd/yy,       Name	--	Reason
+ *
  */
 
 
@@ -32,7 +29,6 @@
  *
  * 	Usage:
  *
- *	?- reconsult(mission).
  *	?- plan.
  *
  *	The program will then print out the solutions to this problem
@@ -85,22 +81,22 @@ print_states([H | T]) :- print_states(T), print_state(H).
 print_state(s(M,C,B)) :-
    RM is 3-M,
    RC is 3-C,
-   print_chars(RM,~ ), print_chars(M,~M),
-   put(~|), left_boat(B), right_boat(B), put(~|),
-   print_chars(RM,~M),nl,
-   print_chars(RC,~ ), print_chars(C,~C),
-   put(~|), print_chars(2,~ ), put(~|),
-   print_chars(RC,~C),nl,
-   print_chars(10,~-),nl,
+   print_chars(RM,0' ), print_chars(M,0'M),
+   put(0'|), left_boat(B), right_boat(B), put(0'|),
+   print_chars(RM,0'M),nl,
+   print_chars(RC,0' ), print_chars(C,0'C),
+   put(0'|), print_chars(2,0' ), put(0'|),
+   print_chars(RC,0'C),nl,
+   print_chars(10,0'-),nl,
    !.
 
 print_chars(0,C) :- !.
 print_chars(N,C) :- put(C), NP is N-1, print_chars(NP,C).
 
-left_boat(left) :- put(~B).
-left_boat(right) :- put(~ ).
-right_boat(left) :- put(~ ).
-right_boat(right) :- put(~B).
+left_boat(left) :- put(0'B).
+left_boat(right) :- put(0' ).
+right_boat(left) :- put(0' ).
+right_boat(right) :- put(0'B).
 
 
 
