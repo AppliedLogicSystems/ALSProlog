@@ -19,6 +19,10 @@
 #include <math.h>
 
 #include <limits.h>
+#ifndef PATH_MAX
+#define PATH_MAX 2048
+#endif
+
 #ifdef MISSING_GLOB
 #include "compat_glob.h"
 #else

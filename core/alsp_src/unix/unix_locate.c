@@ -3,6 +3,9 @@
 extern const int is_shared_library;
 
 #include <limits.h>
+#ifndef PATH_MAX
+#define PATH_MAX 2048
+#endif
 
 static char *which(const char *path_list, const char *name, char *path)
 {
