@@ -1,6 +1,6 @@
 #include <stdarg.h>
 
-#define ALSPI_DLIB_VERSION 1
+#define ALSPI_DLIB_VERSION 2
 
 typedef struct {
     ALSPI_API(char *)	(*PI_forceuia)			( PWord *, int * );
