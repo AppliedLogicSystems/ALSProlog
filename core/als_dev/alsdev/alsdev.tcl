@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.58 1998/10/19 20:41:48 choupt Exp $"
+#|		"$Id: alsdev.tcl,v 1.59 1998/10/24 12:52:21 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -887,9 +887,63 @@ proc show_ide_settings {} {
 }
 
 proc show_dynamic_flags {} {
-	Window show .dyn_flags
+	global array proenv
+
+	if {[winfo exists .dyn_flags]} then {
+		Window show .dyn_flags
+	} else {
+		Window show .dyn_flags
+		prolog call builtins changable_flags_info -var InfoList
+		foreach info $InfoList {
+			create_dyn_flag_entry $info
+		}
+	}
 }
 
+proc create_dyn_flag_entry { info } {
+	global array proenv
+
+	set FlagName [lindex $info 0]
+	set PosVals [lindex $info 1]
+	set CurVal [lindex $info 2]
+
+	set ff [frame .dyn_flags.$FlagName -borderwidth 1 -relief sunken]
+	label $ff.label -borderwidth 0 \
+        -relief flat -width 18 -justify right \
+        -text $FlagName
+
+	set Cmd [concat tk_optionMenu "$ff.opts_menu" proenv($FlagName) $PosVals]
+	set proenv($FlagName) $CurVal  
+	set MM [eval $Cmd]
+
+	pack $ff  \
+        -anchor center -expand 0 -fill x -side top 
+	pack $ff.label  \
+        -anchor center -expand 0 -fill none -side left 
+	pack $ff.opts_menu  \
+        -anchor center -expand 0 -fill x -side left 
+
+	set Last [$MM index end]
+	for {set ii 0} {$ii <= $Last} {incr ii} {
+		set Cmd [list prolog call builtins \
+			set_prolog_flag -atom $FlagName -atom [lindex $PosVals $ii] ]
+		$MM entryconfigure $ii -command $Cmd
+	}
+
+}
+
+proc change_prolog_flags {} {
+	global array proenv
+
+	prolog call builtins changable_flags_info -var InfoList
+	foreach info $InfoList {
+		set FlagName [lindex $info 0]
+		if {[lindex $info 2]!=$proenv($FlagName)} then {
+			prolog call builtins set_prolog_flag \
+				-atom $FlagName -atom $proenv($FlagName)
+		}
+	}
+}
 
 #################################################
 #####			STATIC FLAGS				#####
@@ -928,8 +982,10 @@ proc ensure_db_showing {} {
 		
 	if {[winfo exists .debugwin] == 0} then { 
 		Window show .debugwin 
+	} else {
+    	wm deiconify .debugwin
+		raise .debugwin
 	}
-	show_debugwin
 }
 
 proc show_debugwin {} {
@@ -1115,11 +1171,11 @@ proc remove_from_spying_list {} {
 }
 
 proc reset_all_spypoints {} {
-	set Spying [.pred_info.spying.listbox get 0 end]
-	prolog call debugger install_new_spypoints \
-							-list $Spying \
-							-atom [get_module_focus]
+	prolog call debugger reset_all_spypoints 
 }
+
+#	set Spying [.pred_info.spying.listbox get 0 end]
+#	prolog call debugger install_new_spypoints -list $Spying -atom [get_module_focus]
 
 proc remove_all_spypoints {} {
 	set Mod [get_module_focus]
