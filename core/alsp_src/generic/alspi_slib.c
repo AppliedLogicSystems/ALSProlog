@@ -3,11 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef WIN32
-#define EXPORT __declspec(dllexport)
-#else
-#define EXPORT
-#endif
 	
 static const alspi_func_ptrs *alspi_funcs;
 extern void pi_init(void);

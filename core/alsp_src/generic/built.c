@@ -559,7 +559,7 @@ static struct blt_struct {
 #endif /* PRIM_DBG */
 
 #ifdef TRACEBWAM
-	BLT("trace_bwam",0,toggle_bwam,"_toggle_bwam"),
+	BLT("trace_bwam",2,toggle_bwam,"_toggle_bwam"),
 #endif /* TRACEBWAM */
 
 #if	defined(Portable) && defined(IProfile)

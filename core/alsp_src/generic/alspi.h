@@ -17,6 +17,10 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -29,22 +33,17 @@ extern char executable_path[1024];
  * Set up some macros for dealing with prototypes and other ANSI C features.
  */
 
-#ifndef PARAMS
-#if defined(__STDC__) || defined(__cplusplus)
-#define CONST const
 #define PARAMS(arglist) arglist
-#else
-#define CONST
-#define PARAMS(arglist) ()
-#endif
-#endif /* PARAMS */
 
 #if defined(macintosh)
-#define ALSPI_API(X)	pascal X
+#define ALSPI_API(X)		pascal X
+#define ALSPI_APIP(X,Y)		pascal X (*Y)
 #elif defined(WIN32)
-#define ALSPI_API(X)	X __stdcall
+#define ALSPI_API(X)		X __stdcall
+#define ALSPI_APIP(X,Y)		X (__stdcall *Y)
 #else
-#define ALSPI_API(X)    X
+#define ALSPI_API(X)    	X
+#define ALSPI_APIP(X,Y)		X (*Y)
 #endif
 
 #ifndef PWordTypeDefined
@@ -61,10 +60,10 @@ typedef long PWord;
 #define PI_DOUBLE 	6
 
 typedef struct {
-		CONST char *name;
+		const char *name;
 		int  arity;
 		int (*func) PARAMS((void));
-		CONST char *funcname;
+		const char *funcname;
 } PSTRUCT;
 
 #define PI_BEGIN static PSTRUCT pi_init_array[] = {
@@ -145,13 +144,13 @@ extern	ALSPI_API(void)	PI_getuiasize	PARAMS(( PWord, int * ));
 extern	ALSPI_API(void)	PI_makedouble	PARAMS(( PWord *, int *, double ));
 extern	ALSPI_API(void)	PI_makelist	PARAMS(( PWord *, int * ));
 extern	ALSPI_API(void)	PI_makestruct	PARAMS(( PWord *, int *, PWord, int ));
-extern	ALSPI_API(void)	PI_makesym	PARAMS(( PWord *, int *, CONST char * ));
-extern	ALSPI_API(void)	PI_makeuia	PARAMS(( PWord *, int *, CONST char * ));
+extern	ALSPI_API(void)	PI_makesym	PARAMS(( PWord *, int *, const char * ));
+extern	ALSPI_API(void)	PI_makeuia	PARAMS(( PWord *, int *, const char * ));
 extern	ALSPI_API(void)	PI_allocuia	PARAMS(( PWord *, int *, int ));
-extern	ALSPI_API(int)	PI_printf	PARAMS(( CONST char *, ... ));
-extern	ALSPI_API(int)	PI_aprintf	PARAMS(( CONST char *, CONST char *, ... ));
-extern  ALSPI_API(int)	PI_vprintf	PARAMS(( CONST char *, va_list ));
-extern  ALSPI_API(int)	PI_vaprintf	PARAMS(( CONST char *, CONST char *, va_list ));
+extern	ALSPI_API(int)	PI_printf	PARAMS(( const char *, ... ));
+extern	ALSPI_API(int)	PI_aprintf	PARAMS(( const char *, const char *, ... ));
+extern  ALSPI_API(int)	PI_vprintf	PARAMS(( const char *, va_list ));
+extern  ALSPI_API(int)	PI_vaprintf	PARAMS(( const char *, const char *, va_list ));
 extern	ALSPI_API(int)	PI_rungoal	PARAMS(( PWord, PWord, int ));
 extern	ALSPI_API(int)	PI_rungoal_with_update	PARAMS(( PWord, PWord *, int * ));
 extern	ALSPI_API(int)	PI_rungoal_with_update_and_catch	PARAMS(( PWord, PWord *, int *, int * ));
@@ -161,7 +160,7 @@ extern	ALSPI_API(void)	PI_shutdown	PARAMS(( void ));
 extern	ALSPI_API(void)	PI_toplevel	PARAMS(( void ));
 extern	ALSPI_API(int)	PI_status_toplevel	PARAMS(( int * ));
 extern	ALSPI_API(int)	PI_prolog_init	PARAMS(( int, char **));
-extern	ALSPI_API(int)	PI_startup	PARAMS(( CONST PI_system_setup *));
+extern	ALSPI_API(int)	PI_startup	PARAMS(( const PI_system_setup *));
 extern	ALSPI_API(void)	PI_throw	PARAMS((PWord obj, int objt));
 extern	ALSPI_API(void)	PI_getball	PARAMS((PWord *obj, int *objt));
 extern	ALSPI_API(int)	PI_main		PARAMS((int argc, char *argv[], void (*init)(void)));

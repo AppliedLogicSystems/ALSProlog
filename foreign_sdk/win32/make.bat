@@ -16,7 +16,6 @@ cd Examples
 mkdir Even_Example
 copy ..\..\..\examples\common\even.c Even_Example
 copy ..\..\..\examples\win32\even.mak Even_Example
-copy ..\..\..\examples\win32\even.vcp Even_Example
 copy ..\..\..\examples\win32\even_x86.mcp Even_Example
 mkdir QA_Example
 copy ..\..\..\examples\common\qa.c QA_Example

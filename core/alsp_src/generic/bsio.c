@@ -1629,8 +1629,18 @@ int sio_nsocket_connect(void)
 
     if (!(family_t == PI_INT && port_t  == PI_INT)) error = SOCKET_ERROR;
 
-    if (!(host = PI_getsymname(NULL, address, 0))
-    	&& !(host = PI_getuianame(NULL, address, 0)))  error = SOCKET_ERROR;
+    switch (address_t) {
+    case PI_SYM:
+      host = PI_getsymname(NULL, address, 0);
+      break;
+    case PI_UIA:
+      host = PI_getuianame(NULL, address, 0);
+      break;
+    default:
+      host = NULL;
+      error = SOCKET_ERROR;
+      break;
+    }
     
     PI_getdouble(&sd, descriptor);
     

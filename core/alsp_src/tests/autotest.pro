@@ -53,11 +53,17 @@ configure_testing(TDs, CmdLineVs)
 configure_testing(TDs, CmdLineVs)
 	:-
 	dmember(['-srcdir',SrcDir], CmdLineVs),
+/*
 	subPath(SDList, SrcDir),
 	append(SDList, [tests,als_exmp], AXPList),
 	subPath(AXPList, ALSEXMP_Path),
+*/
+	join_path([SrcDir,tests,als_exmp], ALSEXMP_Path),
+/*
 	append(SDList, [tests,tsuite], TSPList),
 	subPath(TSPList, TSUITE_Path),
+*/
+	join_path([SrcDir,tests,tsuite], TSUITE_Path),
 	add_search_dirs([ALSEXMP_Path,TSUITE_Path]).
 
 configure_testing(_, _)
