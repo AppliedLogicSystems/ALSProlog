@@ -2,11 +2,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
-#if 0
-static long CalculateCheckSum(long n)
+static long calculate_checksum(long n)
 {
 	long s, d1, d2, d3, d4;
+	
+	printf("n is %d\n", n);
 	
 	s = n + 247;
 	
@@ -27,29 +29,7 @@ static long CalculateCheckSum(long n)
 	
 	return s;
 }
-#endif
 
-/*
-unix
-~/.als_prolog_demo_key
-
-mac 
-
-preferences: ALS Prolog Demo Key
-
-win
-
-whever: ALS Prolog Demo Key
-registery?
-
-locate_demo_key
-
-int demo_key_info_exists(void)
-{
-	return access(
-}
-
-*/
 
 #ifdef macintosh
 
@@ -114,7 +94,7 @@ static void delete_demo_key_info(void)
 }
 #endif
 
-#ifdef Win32
+#ifdef WIN32
 
 #define ALS_SUB_KEY "SOFTWARE\\Applied Logic Systems\\ALS Prolog"
 #define DEMO_REG_KEY "Demo Key"
@@ -130,7 +110,6 @@ static int demo_key_info_exists(void)
 	
 	err = RegOpenKeyEx(HKEY_CURRENT_USER, ALS_SUB_KEY, 0, KEY_READ, &reg_key);
 	if (err == ERROR_SUCCESS) {
-		size = max;
 		err = RegQueryValueEx(reg_key, DEMO_REG_KEY, NULL, NULL, NULL, NULL); 
 		RegCloseKey(&reg_key);
 	}
@@ -159,13 +138,14 @@ static void write_demo_key_info(char *key)
 {
 	HKEY reg_key;
 	LONG err;
-	DWORD type, size;
+	DWORD disposition;
 	
-	err = RegCreateKeyEx(HKEY_CURRENT_USER, ALS_SUB_KEY, 0, KEY_WRITE, &reg_key);
+	printf("in write demo key\n");
+	
+	err = RegCreateKeyEx(HKEY_CURRENT_USER, ALS_SUB_KEY, 0, "", REG_OPTION_NON_VOLATILE, 
+				KEY_WRITE, NULL, &reg_key, &disposition);
 	if (err == ERROR_SUCCESS) {
-		type = REG_SZ;
-		size = strlen(key)+1;
-		RegSetValueEx(reg_key, DEMO_REG_KEY, NULL, &type, key, &size); 
+		RegSetValueEx(reg_key, DEMO_REG_KEY, 0, REG_SZ, key, strlen(key)+1); 
 		RegCloseKey(&reg_key);
 	}
 }
@@ -177,7 +157,7 @@ static void delete_demo_key_info(void)
 	
 	err = RegOpenKeyEx(HKEY_CURRENT_USER, ALS_SUB_KEY, 0, KEY_WRITE, &reg_key);
 	if (err == ERROR_SUCCESS) {
-		RegDeleteKey(reg_key, DEMO_REG_KEY); 
+		RegDeleteValue(reg_key, DEMO_REG_KEY); 
 		RegCloseKey(&reg_key);
 	}
 }
@@ -267,6 +247,7 @@ Mail   Applied Logic Systems, Inc.\n\
 	fprintf(stdout, "Please enter the evaluation key: ");
 	fflush(stdout);
 	fgets(key, max, stdin);
+	if (key[strlen(key)-1] == '\n') key[strlen(key)-1] = 0;
 	fprintf(stdout, "\n");
 }
 
@@ -280,29 +261,41 @@ void (*demo_error)(const char *s) = console_demo_error;
 void (*get_demo_key)(char *key, int max) = console_get_demo_key;
 
 #define KEY_MAX 40
-#define KEY_DIGITS 16
-static int valid_demo_key(char *key)
+
+static int valid_demo_key(const char *key)
 {
-#if 0
-	int a,b,c,d;
+	int a,b,c,d, duration;
+	struct tm start_tm = {0};
+	time_t start_time;
+	double diff;
 	
 	sscanf(key, "%d-%d-%d-%d", &a, &b, &c, &d);
 
-	//CalculateCheckSum
-	//if (d != calculate_checksum(a | b | c)) return 0;
-	
+	printf("%d-%d-%d-%d\n", a, b, c, d);
+	printf("calculated checksum: %d\n", calculate_checksum(a ^ b ^ c));
+
+	if (d != calculate_checksum(a ^ b ^ c)) return 0;
+
+/*	
 	a = rotate(a);
 	b = rotate(b);
 	c = rotate(c);
+*/
+	start_tm.tm_mon = (a/100)%100 - 1;
+	start_tm.tm_mday = a%100;
+	start_tm.tm_year = (b/100)%100 + 98;
 	
-	year = ;
-	month = ;
-	day = ;
-	duration = ;
+	start_time = mktime(&start_tm);
 	
-	check time 
-#endif
-return 0;
+	if (start_time == (time_t) -1) return 0;
+
+	duration = b%100;
+	
+	diff = difftime(time(NULL), start_time);
+	
+	printf("diff %f\n", diff);
+	
+	return diff > 0.0 && diff < duration * 24.0 * 60.0 * 60.0;
 }
 
 void demo_check(void);
