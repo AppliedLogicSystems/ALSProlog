@@ -379,7 +379,7 @@ table_tag_region(TableName, TagName, Region, Interp)
 apply_region_tag([], TablePath, TagName, Interp).
 apply_region_tag([H | T], TablePath, TagName, Interp)
 	:-
-	apply_region_tag(T, TablePath, TagName, Interp),
+	apply_region_tag(H, TablePath, TagName, Interp),
 	apply_region_tag(T, TablePath, TagName, Interp).
 
 apply_region_tag(cell(R,C), TablePath, TagName, Interp)
