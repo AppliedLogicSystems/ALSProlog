@@ -790,6 +790,7 @@ tree_path_to_try([DirPath | RestSearchList], PathList, TryPath)
 
 tree_path_to_try([DirPath | RestSearchList], PathList, TryPath)
 	:-
+	exists_file(DirPath),
 	split_path(DirPath, DirPathList),
 	append(DirPathList,['*'],PatternList),
 	join_path(PatternList, Pattern),
