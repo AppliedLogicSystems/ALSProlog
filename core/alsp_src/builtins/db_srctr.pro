@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------*
-                    /netwk/dakota/ken/alsp_src/builtins/db_srctr.pro
+                    ALS_Drive:ALS TclTk Dev Sys:als_dev:alsdev:alsdir:builtins:db_srctr.pro
                defStruct Type definitions generated from file:
-                    /netwk/dakota/ken/alsp_src/builtins/db_srctr.typ
+                    ALS_Drive:ALS TclTk Dev Sys:als_dev:alsdev:alsdir:builtins:db_srctr.typ
                by ALS defStruct Type Generator
-               Macros written to file: /netwk/dakota/ken/alsp_src/builtins/db_srctr.mac
+               Macros written to file: ALS_Drive:ALS TclTk Dev Sys:als_dev:alsdev:alsdir:builtins:db_srctr.mac
  *-------------------------------------------------------------*/
 
 module utilities.
