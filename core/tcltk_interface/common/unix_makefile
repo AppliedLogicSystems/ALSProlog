@@ -2,14 +2,13 @@
 # To use, the following symbols must be defined:
 #    LINK - linker directives to create shared library
 
-#SRCDIR = /apache/choupt/alsp_src
-SRCDIR = /apache/alsp_src
+ALSP_SOURCE = /apache/alsp_src/generic
 
 CC = gcc
 
-VPATH = ../common:$(SRCDIR)/generic
+VPATH = ../common:$(ALSP_SOURCE)
 
-CPPFLAGS = -I ../common -I $(SRCDIR)/generic -I /usr/include/X11R5
+CPPFLAGS = -I ../common -I $(ALSP_SOURCE) -I /usr/include/X11R5
 
 CFLAGS = -Wall -MD -fPIC
 
