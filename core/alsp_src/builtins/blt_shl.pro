@@ -54,6 +54,9 @@ start_shell0(DefaultShellCall)
 	output_system_banner(CLInfo),
 
 	library_setup,
+#if (all_procedures(syscfg,intconstr,0,_))
+	rel_arith:set_ics(cs(0,0,0)),
+#endif
 	(clause(dvf,_) -> qkc ; true),
 %	dvf,
 	load_cl_files(CLInfo),
@@ -255,7 +258,7 @@ print_banner(OutS,L)
 	UInC is InC - 32,
 	name(WBan, [UInC | WNCs]),
 	!,
-#if (syscfg:intconstr)
+#if (all_procedures(syscfg,intconstr,0,_))
 	printf(OutS,'CLP(BNR)(r) \[%s Version %s \[%s\]\]\n',[Name,Version,OSVar]),
 #else
 	printf(OutS,'%s Version %s \[%s\]\n',[Name,Version,OSVar]),

@@ -1162,6 +1162,7 @@ ld_fs(OS)
 	consult_builtins(BDir, blt_misc),
 	consult_builtins(BDir, objs_run),
 
+
 		%% ALS shell stuff starts here:
 	consult_builtins(BDir, tc_base),
 	consult_builtins(BDir, objects),
@@ -1175,6 +1176,7 @@ ld_fs(OS)
 %	consult_builtins(BDir, blt_dvsh),
 %	consult_builtins(BDir, dbg_class),
 %	consult_builtins(BDir, projects),
+
 
 	consult_builtins(BDir, debugger).
 
@@ -1227,7 +1229,8 @@ ld_wins
 
 :- dynamic(intconstr/0).
 
-:-  intconstr, !, 
+:-	all_procedures(syscfg,intconstr,0,_),
+	!,
 	consult_builtins(ra_basis),
 	consult_builtins(int_cstr)
 	;
