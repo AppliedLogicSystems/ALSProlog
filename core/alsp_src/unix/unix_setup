@@ -26,7 +26,7 @@ fi
 
 # Check for correct OS
 case $os in
-aix|hpux|sunos|solaris|irix) ;;
+aix|hpux|sunos|solaris|linux|irix) ;;
 *) echo "Unknown OS ($os)" 1>&2; exit 2;;
 esac
 
