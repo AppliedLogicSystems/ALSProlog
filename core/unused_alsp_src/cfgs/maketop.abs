@@ -18,7 +18,6 @@ schema([
 	    (_:([
 		'.PHONY': all]))]),
 	rule(all),
-	rule(wins),
 	rule(testrun),
 	rule(cleanup),
 	rule(super_clean)
@@ -38,27 +37,15 @@ rule(all,
 	case(&(context_name),
 		[
 		 (mac:([
-			'MakeIt -C :bld-port: macall',
-			'MakeIt -C :bld-wins:macos: all'] )),
+			'MakeIt -C :bld-port: macall'] )),
 		 (_:([
 			'$(MAKE) -C bld-port all',
 			'$(MAKE) -C bld-port mi',
 			'-$(MAKE) -C bld-natv all',
 			'$(srcdir)/bin/check_pckg',
-			'$(srcdir)/bin/check_natv',
-			'$(MAKE) wins'] ))
+			'$(srcdir)/bin/check_natv'
+	             ] ))
 		])).
-
-rule(wins,
-	[], 
-	case(&(context_name),
-		[
-		 (_:([
-			'echo Using $(srcdir) to make bld-wins',
-			'$(srcdir)/bin/winbld $(srcdir) $(MAKE)' ] )),
-		 (mac:([
-			'MakeIt -C :bld-wins:macos: all'] ))
-		] ) ).
 
 rule(testrun,
 	[],
@@ -76,30 +63,25 @@ rule(cleanup,
 	case(&(context_name),
 		[
 		 (mac:([
-			'MakeIt -C :bld-port: cleanup',
-			'MakeIt -C :bld-wins:macos: cleanup'])),
+			'MakeIt -C :bld-port: cleanup'])),
 		 (_:([
 			'$(MAKE) -C ./bld-port cleanup',
-			'$(MAKE) -C ./bld-natv cleanup',
-			'$(MAKE) -C ./bld-wins cleanup']))
+			'$(MAKE) -C ./bld-natv cleanup']))
 		])).
 
 rule(super_clean,
 	[],
 	case(&(context_name),
 		[(mac:( [
-			'MakeIt -C :bld-port: super_clean',
-			'MakeIt -C :bld-wins:macos: super_clean'])),
+			'MakeIt -C :bld-port: super_clean'])),
 		 (_:([
 			'$(MAKE) -C ./bld-port super_clean',
-			'$(MAKE) -C ./bld-natv super_clean',
-			'$(MAKE) -C ./bld-wins super_clean']))
+			'$(MAKE) -C ./bld-natv super_clean']))
 		])).
 
 rule(mkdist) =
 	rule(mkdist, [],
 		[
 			-'$(MAKE) -C ./bld-port mkdist',
-			-'$(MAKE) -C ./bld-natv mkdist',
-			-'$(MAKE) -C ./bld-wins mkdist'
+			-'$(MAKE) -C ./bld-natv mkdist'
 	]).
