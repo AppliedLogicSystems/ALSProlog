@@ -263,7 +263,7 @@ ls(Dir) :-
 	 )
 	 ;
 	 (OS=unix, !,
-		assert_at_load_time( ((cd) :- getenv('HOME',Env), '$chdir'(Env))  ), 
+		assert_at_load_time( ((cd) :- getenv('HOME',Env), change_cwd(Env))  ), 
 		(OS_Variant = sun, !,
 			assert_at_load_time( ((os) :- system('csh')) )
 			;
@@ -276,7 +276,7 @@ ls(Dir) :-
 	).
 
 cd(Dir) :- 
-	'$chdir'(Dir).
+	change_cwd(Dir).
 
 /*
  * printing system usage information
