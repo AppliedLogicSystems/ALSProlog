@@ -1,5 +1,5 @@
 
-#define HAVE_LIBELF 1
+/*#define HAVE_LIBELF 1*/
 
 #define MinorOSStr	"linux"
 
