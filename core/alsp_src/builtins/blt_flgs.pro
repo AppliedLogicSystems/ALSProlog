@@ -45,6 +45,11 @@ init_prolog_flags
 	make_hash_table('_PROLOG_flag'),
 	set_default_flags.
 
+reset_prolog_flags
+	:-
+	reset_PROLOG_flag,
+	set_default_flags.
+
 set_default_flags
 	:-
 	default_prolog_flag_value(Flag, Value),

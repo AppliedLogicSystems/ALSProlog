@@ -29,6 +29,10 @@ export save_image/1.
 
 export pckg_init/0.
 
+thread_init :-
+	builtins:reset_prolog_flags,
+	sio:sio_pckg_init.
+
 /*!--------------------------------------------------------------*
  |	save_image/2
  |	save_image(ImageName, Options)
