@@ -96,21 +96,22 @@ To install Acrobat:
 
 	and follow the simple directions.
 
-To read the ALS Prolog manual.  After Acrobat has been installed, on
-Windows and Macintosh, simply double-click on the icon for
+To read the ALS Prolog manual:  
+	After Acrobat has been installed, on Windows and Macintosh, simply 
+	double-click on the icon for
 
-    ALS Prolog Manual.pdf
+    	ALS Prolog Manual.pdf
 
-On Unix, execute
+	On Unix, execute
 
-	acroread
+		acroread
 
-and then open ALS Prolog Manual.pdf.  If <MP> is a path to the directory containing
-ALS Prolog Manual.pdf, then executing
+	and then open als-prolog-manual.pdf.  If <MP> is a path to the directory 
+	containing the manual, then executing
 
-	acroread <MP>/ALS Prolog Manual.pdf
+		acroread <MP>/als-prolog-manual.pdf
 
-will start the Acrobat Reader and load ALS Prolog Manual.pdf.
+	will start the Acrobat Reader and automatically load the manual.
 
 HELP SYSTEM
 ===========
@@ -143,8 +144,10 @@ file
 
 	als_help.htm
 
-in your browser.
-
+in your browser.  PLEASE NOTE that the start-up of the help system is rather
+slow, since the browsers must fire up Java and other components.  However,
+once the contents for the system have appeared, it performs quite nicely
+on most platforms.
 
 COPYING ALS
 ===========
