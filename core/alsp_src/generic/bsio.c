@@ -1239,10 +1239,6 @@ sio_console_open()
     if (compute_flags((char *)buf,v3,v4) < 0)
 	FAIL;
 
-    if (v6 == 1) {
-    	if (v3 != SIOM_WRITE) FAIL;
-	SIO_FD(buf) = CONSOLE_ERROR;
-    }
     switch (v3) {
 	case SIOM_READ:
 	    SIO_FD(buf) = CONSOLE_READ;
@@ -1250,6 +1246,10 @@ sio_console_open()
 	case SIOM_WRITE:
 	    SIO_FD(buf) = CONSOLE_WRITE;
 	    break;
+    }
+    if (v6 == 1) {
+    	if (v3 != SIOM_WRITE) FAIL;
+	SIO_FD(buf) = CONSOLE_ERROR;
     }
 
     SIO_EOLNTYPE(buf) = v5;
