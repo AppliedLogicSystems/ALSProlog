@@ -1,19 +1,20 @@
-BUILD=../core/linux
+BUILD=../core/unix/linux
 SHIP=als-student-prolog
 
+all: student
 
 student:
-	rm -fR $(SHIP)
+	rm -fr $(SHIP)
 	mkdir $(SHIP)
-	cp -a $(BUILD)/alspro $(SHIP)
-	cp -a $(BUILD)/alsdev $(SHIP)
-	cp -a $(BUILD)/lib $(SHIP)
+	cp -pr $(BUILD)/alspro $(SHIP)
+	cp -pr $(BUILD)/alsdev $(SHIP)
+	cp -pr $(BUILD)/lib $(SHIP)
 	mkdir $(SHIP)/alsdir
-	cp -pR $(BUILD)/alsdir/library $(SHIP)/alsdir
-	cp -pR $(BUILD)/alsdir/images $(SHIP)/alsdir
-	cp -pR $(BUILD)/alsdir/shared $(SHIP)/alsdir
-	cp -a ../manual/manual.pdf $(SHIP)
-	cp -a ../examples $(SHIP)
+	cp -pr $(BUILD)/alsdir/library $(SHIP)/alsdir
+	cp -pr $(BUILD)/alsdir/images $(SHIP)/alsdir
+	cp -pr $(BUILD)/alsdir/shared $(SHIP)/alsdir
+	cp -pr ../manual/manual.pdf $(SHIP)
+	cp -pr ../examples $(SHIP)
 	tar czf $(SHIP)-linux.tgz $(SHIP)
 
 standard:
