@@ -499,27 +499,30 @@ proc document.save {w} {
 	if {[info exists proenv($w,file)]} then {
 		store_text $w.text $proenv($w,file)
 		set proenv($w,dirty) false
-		return true
+#		return true
+		return 1
 	} else {
 		set file [tk_getSaveFile -initialfile [wm title $w] \
 			-defaultextension .pro ]
 		if {$file != ""} then {
-
-		un_post_open_document $proenv($w,title)
-		save_as_core $w $file
-		send_prolog_t als_ide_mgr [list save_doc_as $w $file] list
-		set file_name [lindex [file split $file] end]
-		set proenv($w,file) $file
-		set proenv($w,title) $file_name
-		set proenv(document,$file) $w
-		post_open_document $file_name $w
+			un_post_open_document $proenv($w,title)
+			save_as_core $w $file
+			send_prolog_t als_ide_mgr [list save_doc_as $w $file] list
+			set file_name [lindex [file split $file] end]
+			set proenv($w,file) $file
+			set proenv($w,title) $file_name
+			set proenv(document,$file) $w
+			post_open_document $file_name $w
+		} else {
+#			return false
+			return 0
 		}
 	}
 	if {[info exists proenv($w,src_handler)]} then {
-	prolog call alsdev send -number $proenv($w,src_handler) -atom clear_errors_display
-#		send_prolog  $proenv($w,src_handler) clear_errors_display
+		prolog call alsdev send -number $proenv($w,src_handler) -atom clear_errors_display
 	}
-	return true
+#	return true
+	return 1
 }
 
 proc document.save_as {w} {
@@ -614,11 +617,10 @@ proc document.consult {w} {
 			$icon \
 			1 "Cancel" "Save"]
 		if { $answer == 1 } then {
-			document.save $w
-			set file $proenv($w,file)
-		} else {
-			return
-		}
+			if [ document.save $w ] then {
+				set file $proenv($w,file)
+			} else { return }
+		} else { return }
 	}
 	if {$proenv($w,dirty)} {
 		bell
