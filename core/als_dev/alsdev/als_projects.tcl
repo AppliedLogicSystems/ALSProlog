@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.11 1998/10/04 01:27:59 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.12 1998/10/05 18:49:39 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -17,6 +17,8 @@ proc load_this_project {} {
 }
 
 proc post_open_project {ProjTitle Win} {
+    set ELabel [.topals.mmenb.prolog entrycget end -label]
+	if { $ProjTitle == $ELabel } then { return }
     .topals.mmenb.prolog add separator
 	.topals.mmenb.prolog add command \
 			-label "Active Project:" -font {Helvetica 10 italic} 
@@ -25,6 +27,7 @@ proc post_open_project {ProjTitle Win} {
 }
 
 proc unpost_open_project {ProjTitle} {
+	if {"$ProjTitle"==""} then {return}
 	set PrjIdx [.topals.mmenb.prolog index $ProjTitle]
 	.topals.mmenb.prolog delete $PrjIdx
 	.topals.mmenb.prolog delete last
@@ -62,9 +65,18 @@ proc new_project {} {
 
 
 proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
-	set ID ""
-	set DFT "-filetypes [list [list [list $FileKind $FileTypes] {\"All Files\" {*}} ] ]"
+	global tcl_platform
 
+	if {$tcl_platform(platform) == "macintosh"} {
+		set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
+	} else {
+		set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
+		}
+
+#	set DFT "-filetypes [list [list [list $FileKind $FileTypes] {\"All Files\" {*}} ] ]"
+
+	set DFT [list -filetypes $types]
+	set ID ""
 	set NewFilePath [eval tk_getOpenFile $DFT \
 			{-title "Project File to Open"} \
 			[list "-initialdir" $DfltDir] ]
@@ -79,6 +91,7 @@ proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
 }
 
 proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir} {
+	global tcl_platform
 
 	prolog call alsdev choose_mult_files \
 		-list $FileTypes -atom $FileKind -atom $DfltDir -var Choices
