@@ -17,7 +17,7 @@ LDFLAGS = -shared
 
 LIBS = -litcl3.0 -litk3.0 -ltcl8.0 -ltk8.0 -lX11 -lc
 
-source = alspi_slib.c new_alspi.c tcl_interface.c
+source = alspi_slib.c new_alspi.c tcl_interface.c init.c
 
 objects = $(source:.c=.o)
 
