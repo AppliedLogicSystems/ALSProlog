@@ -2594,16 +2594,10 @@ sio_accept_socket_connection()
 /*
  * sio_fork(ID)
  */
-#if	defined(MacOS)
-#define fork() -1
-#endif
-#if	defined(MSWin32)
-#define fork() -1
-#endif
-
 int
-sio_fork()
+sio_fork(void)
 {
+#ifdef UNIX
     PWord v1;
     int   t1, pid;
 
@@ -2624,6 +2618,9 @@ sio_fork()
 		SUCCEED;
 	else
 		FAIL;
+#else
+    FAIL;
+#endif
 }
 
 
