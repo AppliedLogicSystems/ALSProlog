@@ -261,12 +261,48 @@ alsdev_default_setup(SystemDefaults)
 
 find_alsdev_ini(Items)
 	:-
-	exists_file('alsdev.ini'),
+	sys_env(unix,_,_),
 	!,
-	assert(alsdev_ini_path('alsdev.ini')),
-	grab_terms('alsdev.ini', Items).
+	getenv('HOME', HomeDir),
+	split_path(HomeDir, HomeDirList),
+	PrefsFile = '.alsdev',
+	append(HomeDirList, [PrefsFile], PrefsFileList),
 
-find_alsdev_ini([]).
+	fin_find_alsdev_ini(PrefsFileList, Items).
+
+find_alsdev_ini(Items)
+	:-
+		%% not in unix:
+	builtins:sys_searchdir(SSD),
+	split_path(SSD, SSDList),
+	append(ImageDirList, [alsdir], SSDList),
+	(sys_env(mswin32,_,_) ->
+		PrefsFile = 'alsdev.ini'
+		;
+			%% Macintosh:
+		PrefsFile = 'alsdev_prefs'
+	),
+	append(ImageDirList, [PrefsFile], PrefsFileList),
+
+	fin_find_alsdev_ini(PrefsFileList, Items).
+
+fin_find_alsdev_ini(PrefsFileList, Items)
+	:-
+	join_path(PrefsFileList, PrefsFilePath),
+	exists_file(PrefsFilePath),
+	!,
+	assert(alsdev_ini_path(PrefsFilePath)),
+	grab_terms(PrefsFilePath, Items).
+
+fin_find_alsdev_ini(PrefsFileList, [])
+	:-
+	join_path(PrefsFileList, PrefsFilePath),
+		% Make a trivial file; put space in it to avoid
+		% os problems with empty files...
+	open(PrefsFilePath, write, S, []),
+	put_code(S, 0' ),
+	close(S),
+	assert(alsdev_ini_path(PrefsFilePath)).
 
 window_defaults_setup(WinGroup,Items,SystemDefaults)
 	:-

@@ -1461,17 +1461,16 @@ always_ready(console).
 try_select(StreamList, Timeout)
 	:-
 	sio_simple_select(StreamList, Timeout, Return),
-write(select_return=Return),nl,flush_output,
 	disp_try_select(Return, StreamList, Timeout).
 
-	%% Arg#3 = 0 (timeout) or > 0: # of events triggered:
+	%% Return Arg = 0 (timeout) or > 0: # of events triggered:
 disp_try_select(Return, StreamList, Timeout)
 	:-
 	Return >= 0,
 	!.
 
+	%% Return arg (Arg#3) = negative of error return code (-4);
 	%% EINTR = 4 (signal delivered before selected events or timeout):
-	%% Arg#3 = negative of error return code (-4);
 	%% Go back into select:
 disp_try_select(Return, StreamList, Timeout)
 	:-!,
