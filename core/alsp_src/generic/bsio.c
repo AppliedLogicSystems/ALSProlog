@@ -834,6 +834,7 @@ static int refcnt_index(int fd)
 	}
 	
 	fatal_error(FE_FDREFOVERFLOW, 0);
+	return 0;
 }
 
 #define PRIME_TABLE_MAX	55
@@ -855,8 +856,10 @@ static int next_prime(int n)
 	
 	for (i = 0; i < PRIME_TABLE_MAX && prime[i] < n; i++) ;
 	
-	if (i >= PRIME_TABLE_MAX) fatal_error(FE_FDREFCNTS, 0);
-	else return prime[i];
+	if (i >= PRIME_TABLE_MAX) {
+	    fatal_error(FE_FDREFCNTS, 0);
+	    return 0;
+	} else return prime[i];
 }
 	
 static void
@@ -1072,33 +1075,26 @@ sio_file_open()
 	FAIL;
     }
 #else
-    if (strcmp((char *)filename, "$stdin") == 0)
-	SIO_FD(buf) = STDIN_FILENO;
-    else if (strcmp((char *)filename, "$stdout") == 0)
-	SIO_FD(buf) = STDOUT_FILENO;
-    else if (strcmp((char *)filename, "$stderr") == 0)
-	SIO_FD(buf) = STDERR_FILENO;
-    else {
-#if	defined(DOS) /* || defined(MSWin32) */
-	if ((SIO_FD(buf) = open(filename, flags | O_BINARY, (S_IWRITE | S_IREAD))) == -1)
+
+#if defined(DOS) /* || defined(MSWin32) */
+    if ((SIO_FD(buf) = open(filename, flags | O_BINARY, (S_IWRITE | S_IREAD))) == -1)
 #elif	defined(MacOS) || defined(MSWin32)
-	if ((SIO_FD(buf) = open((char *)filename, flags | O_BINARY)) == -1)
+    if ((SIO_FD(buf) = open((char *)filename, flags | O_BINARY)) == -1)
 #elif defined(__GO32__) || defined(OS2)
-	if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1)
+    if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1)
 #elif defined(UNIX)
-	if ((SIO_FD(buf) = open(filename, flags, 0777)) == -1)
+    if ((SIO_FD(buf) = open(filename, flags, 0777)) == -1)
 #else
 #error
 #endif
-	{
-	    if (errno == EINTR)
-		SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
-	    else {
-		SIO_ERRCODE(buf) = SIOE_SYSCALL;
-		SIO_ERRNO(buf) = errno;
-	    }
-	    FAIL;
+    {
+        if (errno == EINTR)
+	    SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
+	else {
+	    SIO_ERRCODE(buf) = SIOE_SYSCALL;
+	    SIO_ERRNO(buf) = errno;
 	}
+	FAIL;
     }
 #endif /* PURE_ANSI */
 
