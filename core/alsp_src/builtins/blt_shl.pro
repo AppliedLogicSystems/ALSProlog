@@ -359,6 +359,7 @@ endmod.
 export init_prolog_shell/6.
 init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	:-
+	enable_security,
 	als_system(SysList),
 	sio:input_stream_or_alias_ok(InStream, RealInStream),
 	set_stream_pgoals(RealInStream, user_prompt_goal(OutStream) ),
