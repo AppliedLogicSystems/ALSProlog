@@ -555,6 +555,8 @@ proc save_as_core {w file} {
 }
 
 proc document.cut {w} {
+	global array proenv
+
  	if {![catch {set data [$w.text get sel.first sel.last]}]} {
 	    clipboard clear -displayof $w
 	    clipboard append -displayof $w $data
@@ -571,8 +573,16 @@ proc document.copy {w} {
 }
 
 proc document.paste {w} {
+	global array proenv
+	global tcl_platform
+
 	catch {$w.text delete sel.first sel.last}
-	$w.text insert insert [selection get -displayof $w -selection CLIPBOARD]
+	set clip [selection get -displayof $w -selection CLIPBOARD]
+	if {$tcl_platform(platform) == "macintosh"} {
+		set lines [split $clip \r]
+		set clip [join $lines \n]
+	}
+	$w.text insert insert $clip
 	set proenv($w,dirty) true
 }
 
