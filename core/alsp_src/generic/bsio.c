@@ -2546,6 +2546,13 @@ sio_accept_socket_connection()
 /*
  * sio_fork(ID)
  */
+#if	defined(MacOS)
+#define fork() -1
+#endif
+#if	defined(MSWin32)
+#define fork() -1
+#endif
+
 int
 sio_fork()
 {
