@@ -17,14 +17,6 @@
 
 #include "defs.h"
 
-#ifdef HAVE_STDARG_H
-#include <stdarg.h>
-
-#else
-#include <varargs.h>
-
-#endif
-
 /*
  * PI_oprintf uses the varargs package and vfprintf to print to
  * a file.
@@ -33,20 +25,11 @@
 
 /*VARARGS0 */
 void
-#ifdef HAVE_STDARG_H
-PI_oprintf(char *fmt, ...)
-#else
-PI_oprintf(char *fmt, va_alist)
-    va_dcl
-#endif
+PI_oprintf(const char *fmt, ...)
 {
     va_list args;
 
-#ifdef HAVE_STDARG_H
     va_start(args, fmt);
-#else
-    va_start(args);
-#endif
 
 #ifdef KERNAL
     vfprintf(stdout, fmt, args);
