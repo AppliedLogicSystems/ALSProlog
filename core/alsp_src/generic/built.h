@@ -336,6 +336,16 @@ extern	int	pbi_msgctl	PARAMS(( void ));
 extern	int	sio_ssbq_open	PARAMS(( void ));
 #endif
 #ifdef HAVE_SOCKET
+extern	int	sio_nsocket		PARAMS(( void ));
+extern	int	sio_nsocket_connect	PARAMS(( void ));
+extern	int	sio_nsocket_bind	PARAMS(( void ));
+extern	int	sio_nsocket_listen	PARAMS(( void ));
+extern	int	sio_nsocket_accept	PARAMS(( void ));
+extern	int	sio_nsocket_close	PARAMS(( void ));
+extern	int	sio_nsocket_select	PARAMS(( void ));
+
+extern	int	sio_nsocket_open	PARAMS(( void ));
+
 extern	int	sio_gethostname	PARAMS(( void ));
 extern	int	sio_socket_open	PARAMS(( void ));
 extern	int	sio_is_server_socket	PARAMS(( void ));
