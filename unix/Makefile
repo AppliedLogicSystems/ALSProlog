@@ -2,13 +2,13 @@ all: student standard demo
 
 core:
 	$(MAKE) -C ../core/unix
-	cd ../foreign_sdk/unix ; build
+	cd ../foreign_sdk/unix ; ./build
 
 student: core
-	build_dist.sh student
+	./build_dist.sh student
 
 standard: core
-	build_dist.sh standard
+	./build_dist.sh standard
 
 demo: core
-	build_dist.sh demo
+	./build_dist.sh demo
