@@ -42,6 +42,7 @@ export join_path/3.
 export tilda_expand/2.
 export directory_self/2.
 export directory_self/3.
+export file_directory/2.
 
 /*
 file_extension(Name, Ext, FullName) :-
@@ -73,6 +74,13 @@ file_extension(Name, Ext, FullName) :-
 file_extension(FileName,Ext,FullName) :-
 	atom_concat(FileName,'.',FileNameDot),
 	atom_concat(FileNameDot, Ext, FullName).
+
+file_directory(FilePath, Directory)
+	:-
+	split_path(FilePath, PathElts),
+	dreverse(PathElts, [_ | RevDirElts]),
+	dreverse(RevDirElts, DirElts),
+	join_path(DirElts, Directory).
 
 path_elements(Path, Elements) :-
 	var(Path),
