@@ -63,6 +63,11 @@ static int prolog_consult(PE, const char *file_name)
 {
 	PWord u, cs, fn, s, a;
 	int ut, cst, fnt, st, at;
+
+	PI_makesym(&u, &ut, "builtins");
+    PI_makesym(&cs, &cst, "init_als_shl_mgr");
+
+    PI_rungoal(u, cs, cst);
 	
 	PI_makesym(&u, &ut, "user");
     PI_makesym(&cs, &cst, "consult");
@@ -165,6 +170,8 @@ PI_BEGIN
 	PI_DEFINE("report_event", 3, report_event)
 PI_END
 
+struct prolog_engine_struct *global_world;
+
 static BOOL InitPrologService(void)
 {
 	HMODULE module;
@@ -199,7 +206,7 @@ static BOOL InitPrologService(void)
     setup.lpCmdLine = NULL;
     setup.nCmdShow = 1;
 
-	hpe = PI_new_engine();
+	hpe = global_world = PI_new_engine();
 
 	if (PI_startup(&setup) != 0) {
 		AddToMessageLog(TEXT("Prolog initilization failed."));

@@ -19,6 +19,7 @@ HANDLE  hServerStopEvent = NULL;
 // The parameter list.
 PWord param_list;
 int param_listt;
+extern struct prolog_engine_struct *global_world;
 
 static DWORD WINAPI PrologServiceThread(LPVOID lpParam)
 {
@@ -26,7 +27,7 @@ static DWORD WINAPI PrologServiceThread(LPVOID lpParam)
 	int ut, cst, st, pt;
 	PE;
 	
-	hpe = lpParam;
+	hpe = global_world;
 
 	PI_makesym(&u, &ut, "user");
 	PI_makesym(&cs, &cst, szServiceMainPredicate);
@@ -65,6 +66,9 @@ VOID ServiceStart (DWORD dwArgc, LPTSTR *lpszArgv)
     int   i, newlistt;
     HANDLE hThread;
     DWORD dwThreadID, dwWait;
+    PE;
+    
+    hpe = global_world;
 
     ///////////////////////////////////////////////////
     //
