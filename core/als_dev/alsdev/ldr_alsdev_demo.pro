@@ -32,9 +32,9 @@ bldit(CorePath, SVIm)
 	tmp_ld_tmp(LPL,'typecomp.pro'),
 	tmp_ld_tmp(LPL,'misc_db.pro'),
 
+	abolish(bldit,2),
 	call(SVIm),
-	abolish(tmp_ld_tmp, 2),
-	abolish(bldit,2).
+	abolish(tmp_ld_tmp, 2).
 
 module builtins.
 tdvf :- demo_init.

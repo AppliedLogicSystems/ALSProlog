@@ -8,8 +8,8 @@ bldit(CorePath, SVIm)
 	append(CPL,[als_dev,alsdev,'serial_cmn.pro'], SerialList), 
 	join_path(SerialList, Serial),
 		simple_load(Serial),
-	call(SVIm),
-	abolish(bldit,2).
+	abolish(bldit,2),
+	call(SVIm).
 
 
 module builtins.
