@@ -235,6 +235,7 @@ void noop(void);
 #else
 #define FIRST   0
 #define SECOND  1
+#define INTEL_CLEAR_EXCEPTIONS
 #endif
 
 	/* This may be wrong for SunOS (or others) -- check for iszero defined in include */
