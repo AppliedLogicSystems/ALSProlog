@@ -1,0 +1,3 @@
+# Generic Unix GNU Make file for ALS Prolog
+OS_CPPFLAGS=-DCONFIGLESS -DMSWIN32 -DMSWin32
+OS_SOURCE=win32io.c

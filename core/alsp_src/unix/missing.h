@@ -332,4 +332,8 @@ extern int gettimeofday(struct timeval *tp, void *tzp);
 extern int h_errno;
 #endif
 
+#ifdef MISSING_EXTERN_TEMPNAM
+extern char *tempnam(const char *dir, const char *pfx);
+#endif
+
 #endif /* _MISSING_H_INCLUDED_ */

@@ -27,7 +27,7 @@ fi
 
 # Check for correct OS
 case $os in
-aix|hpux|sunos|solaris|linux|irix|all) ;;
+aix|hpux|sunos|solaris|linux|irix|cygwin32|all) ;;
 *) echo "Unknown OS ($os)" 1>&2; exit 2;;
 esac
 
@@ -48,14 +48,15 @@ setup () {
     fi
 
     echo "SOURCE_DIR=../$source_dir" > $os/Makefile
-    echo "OS=$os" >> $os/Makefile
+    echo "OS=unix" >> $os/Makefile
+    echo "SUBOS=$os" >> $os/Makefile
     echo "PROC=$proc" >> $os/Makefile
     echo "BUILD_FLAGS=$flags" >> $os/Makefile
-    echo 'include $(SOURCE_DIR)/unix/unix_makefile' >> $os/Makefile
+    echo 'include $(SOURCE_DIR)/generic/gnu_makefile' >> $os/Makefile
 }
 
 
-os_list='aix hpux sunos solaris linux irix'
+os_list='aix hpux sunos solaris linux irix cygwin32'
 
 if test $os = all
 then

@@ -1,4 +1,4 @@
-OS_CPPFLAGS = -DUNIX_AIX
+SUBOS_CPPFLAGS = -DUNIX_AIX
 OS_LIBS = -ldl
 OS_SL_LINK = $(CC) -Xlinker -G -Xlinker -bE:$(SOURCE_DIR)/generic/alspro.exp -s
 # On AIX, shared and static libraries are the same.
