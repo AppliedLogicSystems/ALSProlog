@@ -49,6 +49,7 @@ set proenv(document_list) {}
 proc create_document_window {title} {
 	global array proenv
 	global mod
+	global tcl_platform
 
 		# Create a unique window name:
 
@@ -84,9 +85,13 @@ proc create_document_window {title} {
 	grid rowconf $w 0 -weight 1
 	grid rowconf $w 1 -weight 0
 
-	grid $w.text -column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw
-	grid $w.yscrollbar -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ns
-	grid $w.xscrollbar  -column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew
+	grid $w.text -column 0 -row 0 -sticky nesw
+	if {$tcl_platform(platform) == "macintosh"} {
+		grid $w.yscrollbar -column 1 -row 0 -sticky ns -rowspan 2
+	} else {
+		grid $w.yscrollbar -column 1 -row 0 -sticky ns
+	}
+	grid $w.xscrollbar  -column 0 -row 1 -sticky ew
 
 	$w.text configure -highlightthickness 0 \
 		-background $proenv(.document,background) \
