@@ -36,7 +36,7 @@ is_ieee_inf(v)
 	default:
 		return(0);
 	}
-#elif defined(WIN32)
+#elif defined(WIN32) || defined(AIX)
 	return !finite(v);
 #elif defined(MacOS)
 	return !isfinite(v);

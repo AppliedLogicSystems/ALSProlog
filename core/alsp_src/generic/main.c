@@ -743,7 +743,7 @@ static void locate_executable(int argc, char *argv[])
 	DisposeHandle(DirPathHandle);
 	if (MemError() != noErr) fatal_error(FE_INFND, 0);
     }
-#elif unix
+#elif UNIX
     command_line_locate_executable(argc, argv);
 #else
 #error

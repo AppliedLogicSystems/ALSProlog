@@ -338,7 +338,7 @@ static int copy_file(const char *from_file, const char *to_file)
     if (CopyFile(from_file, to_file, FALSE)) return 1;
     else return 0;
 
-#elif defined(unix)
+#elif defined(UNIX)
     /* FIX ME: This should really be done directly as on the Mac and Win32.
                If cp is not available, this will fail.
                I wonder if there are any libraries out there that can handle

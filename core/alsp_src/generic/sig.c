@@ -81,10 +81,7 @@ extern set_prolog_interrupt();
 unsigned long cntrl_c_resume;
 #endif /* arch_sparc */
 void
-signal_handler(signum, siginf, sigcon)
-    int   signum;
-    struct siginfo *siginf;
-    struct ucontext *sigcon;
+signal_handler(int signum, siginfo_t *siginf, ucontext_t *sigcon)
 #elif defined(arch_m88k)
 void
 signal_handler(signum, siginf)
