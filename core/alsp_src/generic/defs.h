@@ -379,6 +379,7 @@ extern	long *	ss_fmalloc	PARAMS(( size_t ));
 /* ----------   main.c ----------   */
 #ifdef MSWin32
 extern	char	*MinorOSStr;
+extern	int	win32s_system;
 #endif
 
 extern	void	als_exit	PARAMS(( int ));
