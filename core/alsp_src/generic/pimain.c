@@ -34,9 +34,7 @@
 #endif
 
 static char *
-isopt(opt,str)
-    char *opt;
-    char *str;
+isopt(char *opt, char *str)
 {
     size_t len = strlen(opt);
     if (strncmp(opt,str,len) == 0)

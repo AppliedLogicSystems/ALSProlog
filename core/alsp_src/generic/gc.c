@@ -173,7 +173,9 @@ gc()
     long *ap;
     long *apb;
     long *tr;
+#ifdef TRAILVALS
     long *tr1;
+#endif
     long *oldest_ap;
     Code *ra;			/* return address */
     register int i;
