@@ -140,7 +140,9 @@ static	void	assert_atom_in_module PARAMS(( const char*, const char * ));
 
 #ifndef PURE_ANSI
 static	void	locate_library_executable(int argc, char *argv[]);
+#ifndef MSWin32
 static	void	command_line_locate_executable(const char *argv0);
+#endif
 #endif /* PURE_ANSI */
 
 static	void	autoload	PARAMS(( char * ));
@@ -716,7 +718,6 @@ static void locate_library_executable(int argc, char *argv[])
 #ifdef MSWin32
     DWORD l;
     char *endpath;
-    HMODULE dll;
     
     l = GetModuleFileName(NULL, executable_path, IMAGEDIR_MAX);
     if (l == 0 || l >= IMAGEDIR_MAX) fatal_error(FE_INFND, 0);
@@ -1180,6 +1181,7 @@ int MPW_Tool;
 
 #ifdef __MWERKS__
 #include <signal.h>
+#endif
 
 HANDLE InteruptCompleteEvent;
 
@@ -1199,7 +1201,6 @@ BOOL CtrlHandler(DWORD fdwCtrlType)
     }
 }
 
-#endif
 #endif
 
 #ifdef APP_PRINTF_CALLBACK

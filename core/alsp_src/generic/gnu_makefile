@@ -28,7 +28,8 @@ CPPFLAGS = -DCONFIGLESS $(BUILD_FLAGS) $(OS_CPPFLAGS) $(PROC_CPPFLAGS) \
 # -Wstrict-prototypes - Complains about arg-less function pointer like:
 #                       int (*func)(), which I think are legal.
 
-CFLAGS = -O -fpic -MMD -Wall -Werror -Wmissing-prototypes -Wwrite-strings -Wnested-externs -Wpointer-arith -fwritable-strings
+CFLAGS = -O -MMD -Wall -Werror -Wmissing-prototypes -Wwrite-strings \
+		 -Wnested-externs -Wpointer-arith -fwritable-strings $(OS_CFLAGS)
 
 VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins
 

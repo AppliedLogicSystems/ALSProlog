@@ -481,6 +481,7 @@ int pbi_alarm(void)
 	PI_SUCCEED;	
 }
 
+#ifndef MSWin32
 #if defined(SIGCHLD) || defined (SIGCLD)
 
 #ifdef HAVE_SYS_WAIT_H
@@ -520,4 +521,4 @@ deathwatch()
 }
 
 #endif /* SIGCHLD or SIGCLD */
-
+#endif

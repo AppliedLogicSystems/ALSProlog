@@ -154,12 +154,13 @@ call_resolve_reference(m, p, a, i)
 	return (i) ? ent->code : ent->exec_entry;
     else if ( (ent = resolve_ref(m, p, a)) )
 	return (i) ? ent->code : ent->exec_entry;
-    else if (isCutMacro(p, a - 1))
+    else if (isCutMacro(p, a - 1)) {
 	if ( (ent = w_nameprobe(m, p, a - 1)) )
 	    return (i) ? ent->code : ent->exec_entry;
 	else if ( (ent = resolve_ref(m, p, a - 1)) )
 	    return (i) ? ent->code : ent->exec_entry;
-
+    }
+    
     wm_interrupt_caught = ALSSIG_UNDEFINED_PRED;
     wm_safety = wm_trigger;
     /* FIXME: Find way to avoid creating an entry via w_namelookup */

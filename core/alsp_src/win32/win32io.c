@@ -17,7 +17,6 @@ void os_init_time(void)
 {
 	{
 		OSVERSIONINFO osvi;
-		char  szVersion [80];
 
 		memset(&osvi, 0, sizeof(OSVERSIONINFO));
 		osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
@@ -50,7 +49,7 @@ double os_cputime(void)
 
 	if (GetProcessTimes(GetCurrentProcess(), &creation, &exit, &kernal, &user))
 		return FT2SEC(kernal) + FT2SEC(user);
-	else /* error */;
+	else return 0.0 /* error */;
 	} else
 		return os_realtime();
 }
@@ -76,7 +75,7 @@ static struct {
 static CRITICAL_SECTION timer_state_critical_section;
 static HANDLE timer_reset_event;
 
-static DWORD WINAPI timer_thread( LPVOID )
+static DWORD WINAPI timer_thread( LPVOID p)
 {
 	DWORD time_out, next_time_out;
 		

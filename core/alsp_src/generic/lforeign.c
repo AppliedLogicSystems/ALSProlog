@@ -736,6 +736,8 @@ int prolog_load_plugin(void)
 #if defined(MacOS)
 #include <Errors.h>
 #include <CodeFragments.h>
+#elif defined(MSWin32)
+#include <windows.h>
 #elif defined(HAVE_DL_H)
 #include <dl.h>
 #elif defined(HAVE_DLFCN_H)
