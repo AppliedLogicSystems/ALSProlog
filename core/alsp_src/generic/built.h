@@ -278,6 +278,7 @@ extern	int	pbi_frame_info	PARAMS(( void ));
 extern	int	pbi_access	PARAMS(( void ));
 extern	int	pbi_chdir	PARAMS(( void ));
 extern	int	pbi_getenv	PARAMS(( void ));
+extern  int     pbi_get_user_home PARAMS(( void ));
 extern	int	pbi_system	PARAMS(( void ));
 extern	int	pbi_tmpnam	PARAMS(( void ));
 extern	int	pbi_protect_bottom_stack_page	PARAMS(( void ));
