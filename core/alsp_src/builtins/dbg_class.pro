@@ -356,13 +356,13 @@ adjust_char_line_count(LoadRes0, LoadRes)
 
 adjust_char_line_count(mswin32, LoadRes0, LoadRes)
 	:-!,
-	sub1_all(LoadRes0, LoadRes).
+	sub2_all(LoadRes0, LoadRes).
 adjust_char_line_count(_, LoadRes, LoadRes).
 
 sub1_all([], []).
 sub1_all([N | LoadRes0], [N1 | LoadRes])
 	:-
-	N1 is N - 1,
+	N1 is N - 2,
 	sub1_all(LoadRes0, LoadRes).
 
 endmod.
