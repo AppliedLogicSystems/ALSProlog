@@ -855,7 +855,8 @@ semihead0([],_,[])
 	:- !.
 semihead0([v(V,GL)|Rest],GN,[V|RestV])
 	:-
-	GL \= [_],
+%	GL \= [_],
+	GL \= [],
 	member(GN,GL),
 	!,
 	semihead0(Rest,GN,RestV).
