@@ -215,9 +215,11 @@ Exiting ALS Prolog.\n\
     win32s_system = IS_WIN32S;
 #endif
 
-	/* Put arg and argv in globals so they can be used by the builtin get_argc_argv/2 */
-	argcount = argc;
-	argvector = argv;
+    /* Put arg and argv in globals so they can be used by the
+       builtin get_argc_argv/2 */
+
+    argcount = argc;
+    argvector = argv;
 
     /*-------------------------------------------------------------------*
      * malloc and then free an area at the outset so that the malloc
@@ -333,7 +335,8 @@ Exiting ALS Prolog.\n\
      * get the image directory; the call to whereami will initialize it and
      * the image name;
      */
-    whereami(argv[0]);
+    if (argc >= 1) whereami(argv[0]);
+    else whereami(NULL);
 
 #ifdef SIMPLE_MICS 
     saved_state_image_offset = ss_image_offset();
@@ -828,6 +831,16 @@ whereami(name)
     register char *t;
     int   cc;
     char  ebuf[4096];
+
+    /* Under unix, the only way to determine the location of the
+     * executable file is using the first command line argument.
+     * When this is not available, it is a fatal error.
+     */
+
+    if (name == NULL) {
+        fatal_error(FE_INFND, 0);
+	return;
+    }
 
     /*
      * See if the file is accessible either through the current directory
