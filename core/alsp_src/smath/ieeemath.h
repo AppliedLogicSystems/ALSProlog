@@ -38,7 +38,9 @@
         #error
         #endif
     #elif defined(UNIX_HPUX) || defined(UNIX_IRIX)
-    #define ALS_BIG_ENDIAN
+        #define ALS_BIG_ENDIAN
+    #elif defined(UNIX_CYGWIN32)
+        #define ALS_LITTLE_ENDIAN
     #else
     #error
     #endif
