@@ -1444,7 +1444,6 @@ annotate_showing([M | SysMs], [[M, S] | SMs])
 	),
 	annotate_showing(SysMs, SMs).
 
-
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%% LIBRARY LOAD RECORDING:
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1468,6 +1467,7 @@ endmod.	%% builtins
 	%%%%% 		  -- portions in module debugger		%%%%% 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 module debugger.
 use tcltk.
@@ -2194,6 +2194,36 @@ reset_this_spypoint(Mod,Pred,Arity)
 	send(ALSMgr, obtain_src_mgr_by_cg(CG, FileMgr)),
 	send(FileMgr, ensure_window_open),
 	dbg_spy(Mod,Pred,Arity).
+
+
+
+
+endmod.
+
+module alsdev.
+
+check_reload_consults
+	:-
+	builtins:get_primary_manager(ALSMgr),
+	accessObjStruct(source_mgrs, ALSMgr, MgrsList),
+	findall(F, 
+			(member(fm(B,M), MgrsList),
+			  not member(B, [tcltk,tcltk_util,tclintf,alspro,'.alspro']),
+			  accessObjStruct(source_file, M, F) ),
+			LoadedFiles),
+	(LoadedFiles \= [] ->
+		Msg = 'Reload consulted files for source code tracing?',
+		yes_no_dialog(shl_tcli, Msg, 'Reload Files', Ans)
+		;
+		Ans = 'No'
+	),
+	consult_all(LoadedFiles).
+
+consult_all([]).
+consult_all([F | Files])
+	:-
+	consult(F),
+	consult_all(Files).
 
 endmod.
 

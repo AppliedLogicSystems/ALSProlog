@@ -315,7 +315,12 @@ check_for_alsdev_impact(Flag, Value)
 	alsdev_running,
 	!,
 	builtins:get_primary_manager(ALSIDEmgr),
-	send(ALSIDEmgr, change_prolog_flag(Flag,Value)).
+	send(ALSIDEmgr, change_prolog_flag(Flag,Value)),
+	((Flag = debug, Value = on) ->
+		alsdev:check_reload_consults
+		;
+		true
+	).
 
 check_for_alsdev_impact(_, _).
 
