@@ -35,7 +35,8 @@ close_old_start_new_project('No', PrevProject, ALSIDEObject)
 	:-!.
 close_old_start_new_project(Answer, PrevProject, ALSIDEObject)
 	:-
-	close_project(PrevProject, ALSIDEObject),
+	als_ide_mgrAction(close_project, ALSIDEObject),
+%	close_project(PrevProject, ALSIDEObject),
 	proceed_start_new_project(ALSIDEObject).
 
 proceed_start_new_project(ALSIDEObject)
@@ -248,15 +249,9 @@ als_ide_mgrAction(close_project, ALSIDEObject)
 	setObjStruct(cur_project,ALSIDEObject,nil),
 	accessObjStruct(initial_dir, ALSIDEObject, InitialDir),
 	change_cwd(InitialDir).
-/*
-	accessObjStruct(initial_search_dirs, ALSIDEObject, SDList),
-	builtins:abolish(searchdir,1),
-	builtins:assert_all(SDList).
-*/
 
 gen_project_mgrAction(close_project, State)
 	:-
-	gen_project_mgrAction(save_to_file, State),
 	accessObjStruct(gui_spec, State, GuiPath),
 	tcl_call(shl_tcli, [destroy, GuiPath], _).
 
@@ -384,27 +379,9 @@ cont_open_another_project([FileName, PathListIn], ALSIDEObject, ProjectMgr)
 	join_path(PathList, ProjectDir),
 	setObjStruct(primary_project_dir,ProjectMgr,ProjectDir),
 
-/*
-	accessObjStruct(prolog_library, ALSIDEObject, LibPath),
-	accessObjStruct(default_dirs,ProjectMgr,OrigDfltDirs),
-	(dmember([prolog_library_files,LibPath], OrigDfltDirs) ->
-		true
-		;
-		list_delete(OrigDfltDirs, [prolog_library_files,_], RedDfltDirs),
-		XDfltDirs = [[prolog_library_files,LibPath] | RedDfltDirs],
-		setObjStruct(default_dirs,ProjectMgr,XDfltDirs)
-	),
-*/
+write(project_open(File)),nl,flush_output,
 
 	send(ProjectMgr, init_gui).
-
-/*
-	accessObjStruct(search_dirs, ProjectMgr, SDs),
-	findall(searchdir(X), member(X, SDs), ExistingSDList),
-	append(SDs, ExistingSDList, SDList),
-	builtins:abolish(searchdir,1),
-	builtins:assert_all(SDList).
-*/
 
 forbidden_slots([myHandle,internal_name,gui_spec,project_loaded]).
 
@@ -515,7 +492,7 @@ add_mult_files(PrevFiles, ListBoxWin)
 gen_project_mgrAction([prj_slot_focus, prolog_files, RootFileName], State)
 	:-
 	accessObjStruct(search_dirs, State, SearchList),
-write(pro_prj_slot_focus(RootFileName,SearchList)),nl,flush_output,
+%write(pro_prj_slot_focus(RootFileName,SearchList)),nl,flush_output,
 	builtins:get_primary_manager(ALSMgr),
 	send(ALSMgr, open_edit_win_by_root(RootFileName,SearchList)).
 
