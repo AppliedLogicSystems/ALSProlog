@@ -664,7 +664,7 @@ proc fonts_and_colors { Window } {
     .alsdev_settings.background configure -background [$Window.text cget -background ]
     .alsdev_settings.foreground configure -foreground [$Window.text cget -foreground ]
 
-	grab set .alsdev_settings
+	grab set -global .alsdev_settings
 }
 
 proc cancel_fonts_and_colors { } {
