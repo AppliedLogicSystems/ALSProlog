@@ -319,6 +319,13 @@ obp_open(fname)
     	0,    
     };
 
+#ifdef CW_PLUGIN
+char new_name[1000];
+extern char *RedirectOBP(char *fname, char *new_name);
+
+fname = RedirectOBP(fname, new_name);
+
+#endif
     /*
      * Are we able to open .OBP file?
      */

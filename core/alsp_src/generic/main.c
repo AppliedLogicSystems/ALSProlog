@@ -487,6 +487,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
     }
 
 #ifdef MacOS
+#ifndef CW_PLUGIN
     /* load the autoload files, call the initilize routine. */
     {
     	Str255 pfile;
@@ -516,7 +517,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 	    PI_rungoal(mv, gv, gt);
 	}	
     }
-    
+#endif
 #endif
 
     /*---------------------------------------*

@@ -17,6 +17,10 @@
  *===================================================================*/
 #include "defs.h"
 
+#ifdef CW_PLUGIN
+#include <DropInCompilerLinker.h>
+#endif
+
 #ifdef OLDLEXAN
 #include "lexan.h"
 
@@ -54,6 +58,13 @@ next_token()
      * Step 1:  Make sure that we have really have a buffer; get one if
      *  we don't.
      */
+
+#ifdef CW_PLUGIN
+{
+	extern CompilerLinkerParameterBlockPtr gCPB;
+	if (linenum % 50 == 0) CWDisplayLines(gCPB, linenum);
+}
+#endif
 
     if (bp == (char *) 0)
 	nxtbuf();
