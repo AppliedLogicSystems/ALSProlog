@@ -399,6 +399,7 @@ pbi_walk_cps()
 				sss = "!bad";
 		} else {
 			pn = 0;
+			pna = 0;
 			sss = "!bad"; }
 
 		printf("curP=%x  prevB=%x  spb=%x  hb=%x  nxtc= %x [%x - %d - %x/%x] %s\n",
@@ -483,8 +484,8 @@ disp_heap_item(CurT)
 				break;
 			case MTP_SYM:
 				if (MSYMBOL((*CurT)) < tok_table_size() )
-					fprintf(stdout,"-symbol=%d/%s\n",MSYMBOL((*CurT)),
-							(int)TOKNAME(MSYMBOL((*CurT))));
+					fprintf(stdout,"-symbol=%ld/%s\n",MSYMBOL((*CurT)),
+							TOKNAME(MSYMBOL((*CurT))));
 				else
 					fprintf(stdout,"-weird sym(as fctr:%x/%x)\n",
 							(int)MFUNCTOR_TOKID(*CurT),(int)MFUNCTOR_ARITY(*CurT));

@@ -673,6 +673,8 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 
 #endif /* #ifdef 0 ----------------*/
 
+	return 1;
+
 }	/* gc() */
 
 

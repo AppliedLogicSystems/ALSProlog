@@ -91,7 +91,7 @@ signal_handler(signum, siginf)
     int   signum;
     struct siginfo *siginf;
 #elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
-extern set_prolog_interrupt();
+extern set_prolog_interrupt(void);
 int   cntrl_c_resume;
 void  signal_handler(signum, code, scp, addr)
     int   signum, code;
