@@ -24,8 +24,6 @@ use tk_alslib.
 export start_alsdev/0.
 start_alsdev
 	:-
-	init_tk_alslib(shl_tcli,Shared),
-	alsdev_splash(Shared),
 	make_clinfo(CLInfo, alsdev, true), 	% verbosity = quiet
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,CLInfo),
 	assertz(command_line(ResidualCommandLine)),
@@ -33,6 +31,8 @@ start_alsdev
 	setup_search_dirs(CLInfo),
 	ss_load_dot_alspro(CLInfo),
 	library_setup,
+	init_tk_alslib(shl_tcli,Shared),
+	%alsdev_splash(Shared),
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	alsdev(Shared).
@@ -63,21 +63,21 @@ alsdev(Shared)
 
 	tcl_call(shl_tcli, [destroy,'.als_splash_screen'], _),
 
-	open(tk_win(shl_tcli, '.topals.text'), read, ISS, 
+	open(tk_win(shl_tcli, '.topals.txwin.text'), read, ISS, 
 		[alias(shl_tk_in_win)
 			,prompt_goal(user_prompt_goal(shl_tk_out_win))
 		]),
-	open(tk_win(shl_tcli, '.topals.text'), write, OSS, 
+	open(tk_win(shl_tcli, '.topals.txwin.text'), write, OSS, 
 		[alias(shl_tk_out_win),write_eoln_type(lf)
 		]),
 	set_associated_output_alias(shl_tk_in_win, shl_tk_out_win),
-	catenate('WaitForLine','.topals.text',WaitVar),
-	catenate('DataLine','.topals.text',DataVar),
+	catenate('WaitForLine','.topals.txwin.text',WaitVar),
+	catenate('DataLine','.topals.txwin.text',DataVar),
 
 	tcl_call(shl_tcli, [set,WaitVar,0],_),
 	tcl_call(shl_tcli, [set,DataVar,""],_),
 	tcl_call(shl_tcli, 
-		[set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_),
+		[set_top_bindings,'.topals.txwin.text',shl_tk_in_win,WaitVar,DataVar],_),
     sio:set_input(ISS),
     sio:set_output(OSS),
 
@@ -108,6 +108,7 @@ alsdev(Shared)
 	%% we cancel_alias & set_alias between the two pairs of streams,
 	%% as the debugger window is popped up/down:
 
+
 		%	open(console('debugger output'),write, OutGuiDStream,
 	cancel_alias(debugger_output),
     open(tk_win(shl_tcli, '.debugwin.text'),write, OutGuiDStream,
@@ -126,7 +127,7 @@ alsdev(Shared)
     %% Error stream
 		%	open(console_error('error output'),write,OutEStream,
 	cancel_alias(error_stream),
-    open(tk_win(shl_tcli, '.topals.text'),write,OutEStream,
+    open(tk_win(shl_tcli, '.topals.txwin.text'),write,OutEStream,
 	 ['$stream_identifier'(-5), alias(error_stream),
 	 	buffering(line),type(text)]),
 
@@ -181,9 +182,7 @@ push_prompt(tcltk,OutStream,Prompt1)
 	:-!,
 	nl(OutStream),
 	flush_output(OutStream),
-	tcl_call(shl_tcli, [set_prompt_mark, '.topals.text'], _).
-
-
+	tcl_call(shl_tcli, [set_prompt_mark, '.topals.txwin.text'], _).
 
 
 
