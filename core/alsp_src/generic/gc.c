@@ -161,10 +161,12 @@ gc()
     register unsigned long *mp;
     register unsigned long m;
     int   compactionbit;
+/*
 #ifdef FREEZE
     int dtgv;
     long *dthead, *last_dt, *this_dt;
 #endif
+*/
 
 #ifdef DEBUGSYS /*--------------------------------------------------*/
     unsigned long start_tick = 0, finish_tick;
@@ -173,12 +175,13 @@ gc()
 	/* For demos and hardware-key protected versions, check copy protection. */
     check_security();
 
+/*
 #ifdef FREEZE
     dtgv = gv_alloc();
     dthead = (PWord *)(wm_gvbase - dtgv);
-    *dthead = 0;
     last_dt = *dthead;
 #endif
+*/
 
     /*---------------------------------------------------------------*
      | Force certain external variables to be biased for gc purposes.
