@@ -72,6 +72,7 @@ start_shell(DefaultShellCall)
 	(arg(2,CLInfo,quiet) -> consultmessage(off) ; consultmessage(on)),
 	!,
 	setup_init_goal(CLInfo, ShellCall),
+	init_prolog_flags,
 	user:ShellCall.
 
 start_shell(_).
@@ -357,7 +358,6 @@ endmod.
 export init_prolog_shell/6.
 init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	:-
-	init_prolog_flags,
 	als_system(SysList),
 	sio:input_stream_or_alias_ok(InStream, RealInStream),
 	set_stream_pgoals(RealInStream, user_prompt_goal(OutStream) ),
