@@ -260,16 +260,24 @@ create_new_module(Mod)
 
 /*----------------------------------------------------------------------*
  | Export predicates from a module
+ |	-- low-level; needs module opened in icode buffer;
  *----------------------------------------------------------------------*/
 
 export doexport/1.
+doexport([]) :-!.
+
+doexport([P1 | Ps]) 
+	:-!,
+	doexport(P1),
+	doexport(Ps).
+
 doexport((P1,P2)) 
-	:-
+	:-!,
 	doexport(P1),
 	doexport(P2).
 
 doexport(P/A) 
-	:- 
+	:- !,
 	atom(P),
 	integer(A),
 	A >= 0,
@@ -285,6 +293,13 @@ doexport(Pat)
 	:-
 	write(error_stream,'Invalid P/A in export list.  Ignoring it.'),
 	nl(error_stream).
+
+export export_from/2.
+export_from(Mod, PredAs)
+	:-
+	'$icode'(-10,Mod,0,0,0),
+	doexport(PredAs),
+	'$icode'(-11,0,0,0,0).
 
 /*----------------------------------------------------------------------*
  | Set use declarations in a module
