@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.67 1998/11/18 20:41:45 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.68 1998/11/18 21:50:11 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -39,7 +39,9 @@ if {$tcl_platform(platform) == "macintosh"} {
 }
 
 package require getDirectory
+if {$tcl_platform(platform) != "unix"} {
 package require getFiles
+}
 
 proc xpe { What } {
 	global array proenv
@@ -1470,6 +1472,18 @@ proc error_focus_attn {w} {
 	$w.ltext yview [expr $LineNum - $HH] 
 }
 
+proc err_indic0 {w Line} {
+	global array proenv
+
+	$w.text tag configure syntax_err_tail -background #febad4
+	$w.text tag add syntax_err_tail $Line.0 $Line.end
+
+	$w.ltext insert $Line.end " >"
+	$w.ltext tag add error_line $Line.0 $Line.end 
+	set CurFont $proenv(.document,font)
+	set EmpFont [list [lindex $CurFont 0] [lindex $CurFont 1] bold]
+	$w.ltext tag configure error_line -foreground #ec5648 -font $EmpFont
+}
 ##############################
 
 proc start_edit_find { w } {
