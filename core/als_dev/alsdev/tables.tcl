@@ -9,6 +9,7 @@
 #	Author: Kenneth A. Bowen, Applied Logic Systems, Inc.
 #======================================================================
 
+
 proc load_table_package {DirsList} {
 	set Result 1
 	if {[string match {} [info commands table]] && \
@@ -156,6 +157,15 @@ proc write_table_col {ArrayName ColN RowSt Lim ValsList} {
 		if { $Indx <= $Lim } then { incr Indx } else { break }
 	}
 }
+
+proc destroy_table {BaseName InfoArrayName} {
+	upvar #0 $InfoArrayName IA 
+
+	destroy $IA(tabletop)   
+	unset IA
+}
+
+
 
 
 ##------------------------------------------------------
