@@ -5,7 +5,7 @@
 #|		Tcl support for project management in the 
 #|		ALS Development Environment
 #|
-#|		"$Id: als_projects.tcl,v 1.10 1998/09/28 02:53:23 ken Exp $"
+#|		"$Id: als_projects.tcl,v 1.11 1998/10/04 01:27:59 ken Exp $"
 #|==================================================================
 
 proc load_project {} {
@@ -17,13 +17,18 @@ proc load_this_project {} {
 }
 
 proc post_open_project {ProjTitle Win} {
+    .topals.mmenb.prolog add separator
 	.topals.mmenb.prolog add command \
-		-label $ProjTitle -command [list raise $Win]
+			-label "Active Project:" -font {Helvetica 10 italic} 
+	.topals.mmenb.prolog add command \
+		-label $ProjTitle -font {Helvetica 10 italic} -command [list bringup $Win]
 }
 
 proc unpost_open_project {ProjTitle} {
 	set PrjIdx [.topals.mmenb.prolog index $ProjTitle]
 	.topals.mmenb.prolog delete $PrjIdx
+	.topals.mmenb.prolog delete last
+	.topals.mmenb.prolog delete last
 }
 
 
@@ -87,20 +92,117 @@ proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir} {
 	}
 }
 
-proc del_from_files_list { FS Listbox FileTypes FileKind } {
+proc del_from_files_list { Listbox } {
+	set SelNums [$Listbox curselection]
+	set N [llength $SelNums]
+	if {$N==0} then {
+		bell
+		return
+	}
+	set ans [tk_dialog .any_dialog "Delete Paths?" \
+		"Delete the $N selected files?" "" 0 Yes No ]
+	if {$ans==1} then {
+		return
+	}
+	for {set i [expr $N - 1] } { $i>=0 } { incr i -1 } {
+		$Listbox delete $i
+	}
 
 }
 
-proc add_search_dirs {Listbox} {
+proc move_selection_up {Listbox} {
+	set SelIdx [lindex [$Listbox curselection] 0]
+	if {$SelIdx==0} then {
+		bell
+		return
+	}
+	set Item [$Listbox get $SelIdx]
+	set NewIdx [expr $SelIdx - 1]
+	$Listbox delete $SelIdx
+	$Listbox insert $NewIdx $Item
+	$Listbox selection set $NewIdx
+}
+
+proc move_selection_down {Listbox} {
+	set SelIdx [lindex [$Listbox curselection] 0]
+	set Last [expr [$Listbox index end] - 1]
+	if {$SelIdx==$Last} then {
+		bell
+		return
+	}
+	set Item [$Listbox get $SelIdx]
+	set NewIdx [expr $SelIdx + 1]
+	$Listbox delete $SelIdx
+	$Listbox insert $NewIdx $Item
+	$Listbox selection set $NewIdx
+}
+
+
+proc add_search_dirs {Listbox PathType} {
 	set CWD [pwd]
-	set NewDir [getDirectory]
-	$Listbox insert end $NewDir
+	set NewDir [getDirectory -initialdir $CWD]
 	cd $CWD
+	set PrevEntries [$Listbox get 0 end]
+	if { ($NewDir == "" ) || ( $CWD == $NewDir ) } then {
+		return
+	}
+	if {$PathType == "absolute"} then {
+		if {[lsearch -exact $PrevEntries $NewDir]<0} then { 
+			$Listbox insert end $NewDir
+		}
+	} else {
+		set CWDList [file split $CWD]
+		set NEWList [file split $NewDir]
+		if {[lindex $CWDList 0]!=[lindex $NEWList 0]} then {
+			if {[lsearch -exact $PrevEntries $NewDir]<0} then { 
+				$Listbox insert end $NewDir
+			}
+		} else {
+			set RelPathList [relpathlist_from_to $CWDList $NEWList]
+			set NewPath [eval [concat {file join} $RelPathList]]
+			if {[lsearch -exact $PrevEntries $NewPath]<0} then { 
+				$Listbox insert end $NewPath
+			}
+		}
+	}
 }
+
+proc del_search_dirs {Listbox} {
+	set SelNums [$Listbox curselection]
+	set N [llength $SelNums]
+	if {$N==0} then {
+		bell
+		return
+	}
+	set ans [tk_dialog .any_dialog "Delete Paths?" \
+		"Delete the $N selected search paths?" "" 0 Yes No ]
+	if {$ans==1} then {
+		return
+	}
+	foreach i $SelNums {
+		$Listbox delete $i
+	}
+}
+
 
 proc prj_slot_focus { Slot Listbox PrjMgrHandle } {
 	global proenv
 	set Item [$Listbox get [lindex [$Listbox curselection] 0] ]
 	prolog call $proenv(dflt_mod) send \
 		-number $PrjMgrHandle  -list [list prj_slot_focus $Slot $Item]
+}
+
+proc relpathlist_from_to {StartList EndList} {
+	set SL $StartList
+	set EL $EndList
+	set RL {}
+	while { ($SL!={}) && ($EL!={}) && ([lindex $SL 0]==[lindex $EL 0]) } {
+		set SL [lrange $SL 1 end]
+		set EL [lrange $EL 1 end]
+	}
+	while { $SL!={} } {
+		lappend RL ".."
+		set SL [lrange $SL 1 end]
+	}
+	return [concat $RL $EL]
 }

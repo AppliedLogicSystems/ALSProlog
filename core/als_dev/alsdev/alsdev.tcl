@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.53 1998/09/28 20:32:24 ken Exp $"
+#|		"$Id: alsdev.tcl,v 1.54 1998/10/04 01:28:01 ken Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -253,6 +253,11 @@ proc vTclWindow. {args} {
     ###################
     # SETTING GEOMETRY
     ###################
+} 
+
+proc bringup {Win} {
+	wm deiconify $Win
+	raise $Win
 }
 	#################################
 	# 		INITIAL SETUP

@@ -466,7 +466,7 @@ proc vTclWindow.pred_info {base} {
 		-command carry_out_listing
     button $base.buttons.wamlisting \
         -padx 11 -pady 2 -text {WAM Asm} \
-		-command carry_out_listasm
+		-command carry_out_listasm -state disabled
     button $base.buttons.refreshpreds \
         -padx 1 -pady 2 -text {Refresh Preds} \
 		-command refresh_the_preds
