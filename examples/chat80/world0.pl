@@ -78,10 +78,10 @@ latitude(antarctic_circle,-67--degrees).
 latitude(C,L--degrees) :- country(C,_,L,_,_,_,_,_).
 longitude(C,L--degrees) :- country(C,_,_,L,_,_,_,_).
 area(C,A--ksqmiles) :-
-   country(C,_,_,_,A0,_,_,_), A is integer(A0/1000).
+   country(C,_,_,_,A0,_,_,_), A is floor(A0/1000).
 population(C,P--thousand) :- city(C,_,P).
 population(C,P--million) :-
-   country(C,_,_,_,_,P0,_,_), P is integer(P0/1.0E6).
+   country(C,_,_,_,_,P0,_,_), P is floor(P0/1.0E6).
 capital(C,Cap) :- country(C,_,_,_,_,_,Cap,_).
 
 continent(africa).

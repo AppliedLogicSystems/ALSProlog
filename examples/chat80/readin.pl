@@ -56,7 +56,8 @@ blanks --> [].
 
 digit(K):-K>47,K<58.
 
-lc(K,K1):-K>64,K<91,!,K1 is K\/8'40.
+%lc(K,K1):-K>64,K<91,!,K1 is K\/8'40.
+lc(K,K1):-K>64,K<91,!,K1 is K+32.
 lc(K,K):-K>96,K<123.
 
 to_nl :-

@@ -35,9 +35,9 @@ wt((P:-Q),L) :- !, L1 is L+3,
    tab(L1), wt(Q,L1).
 wt((P,Q),L) :- !, L1 is L-2,
    wt(P,L), nl,
-   tab(L1), put("&"), tab(1), wt(Q,L).
+   tab(L1), put_char('&'), tab(1), wt(Q,L).
 wt({P},L) :- complex(P), !, L1 is L+2,
-   put("{"), tab(1), wt(P,L1), tab(1), put("}").
+   put_char('{'), tab(1), wt(P,L1), tab(1), put_char('}').
 wt(E,L) :- decomp(E,H,P), !, L1 is L+2,
    header(H), nl,
    tab(L1), wt(P,L1).
