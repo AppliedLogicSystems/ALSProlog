@@ -1044,6 +1044,7 @@ asplit0([Char|Rest],Splitter,[Char|R1],String2)
 
 asplit0([Splitter|Rest],Splitter,[],Rest).
 
+export asplit0_all/3.
 asplit0_all(Chars, Splitter, [Head | List])
 	:-
 	asplit0(Chars, Splitter, Head, Tail),
@@ -1052,6 +1053,7 @@ asplit0_all(Chars, Splitter, [Head | List])
 
 asplit0_all(Chars, Splitter, [Chars]).
 
+export all_to_atoms/2.
 all_to_atoms([], []).
 all_to_atoms([String | Strings], [Atom | Atoms])
 	:-
