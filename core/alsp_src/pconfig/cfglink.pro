@@ -10,13 +10,13 @@
  *==================================================================*/
 
 module mklink.
-use sconfig.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%% BUILDING AN ARBITRY "LINKING" DIRECTORY
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/*
 export tml/0.
 tml :-
 	mklinker(accsys, '/mailbox3/als_libs', '/mailbox3/alsp_src',
@@ -25,11 +25,34 @@ tml :-
 				probld	= '/mailbox3/builds',
 				fprefix = acc,
 			 	isdir='/jarrett/dbi/dbase' ]).
+****/
+export tmj/0.
+tmj :-
+	mklinker(accsys).
+
+export mklinker/1.
+mklinker(LLibName)
+	:-
+	'$getenv'('ALSTOP', ALSTOPStr),
+	name(ALSTOP, ALSTOPStr),
+	extendPath(ALSTOP, als_libs, ALSLIBS),
+	extendPath(ALSTOP, alsp_src, ALSSRC),
+	mklinker(LLibName, ALSLIBS, ALSSRC).
+
+export mklinker/3.
+mklinker(LLibName, ALSLIBS, ALSSRC)
+	:-
+	extendPath(ALSLIBS,LLibName,LLIBTopDir),
+	extendPath(LLIBTopDir,spec, LIBSPEC),
+	open(LIBSPEC,read,LSStrm,[]),
+	read_term(LSStrm,LIBEqns,[]),
+	close(LSStrm),
+	mklinker(LLibName, ALSLIBS, ALSSRC, LIBEqns).
 
 /*!---------------------------------------------------------------
- | mklinker(LLibName, LDPath
- | mklinker(LLibName, LDPath
- | mklinker(LLibName, LDPath
+ | mklinker/4
+ | mklinker(LLibName, LDPath, ALSSRC, Options)
+ | mklinker(+,+,+,+)
  |
  |	-- create a directory for build a library interface
  |
@@ -109,6 +132,14 @@ mklinker(LLibName, LDPath, ALSSRC, Options)
 
 	change_cwd(lib),
 
+	(dmember(codetrees=CodeTrees, Options) ->
+		check_default(Options, includes, [], Includes),
+		get_cwd(TreeStart),
+		mk_codetrees(CodeTrees, Includes, Options, '')
+		;
+		true
+	),
+
 	pathPlusFile(LSRCSRC, 'libspc.pro', LibSPEC),
 	consult(LibSPEC),
 
@@ -145,16 +176,9 @@ lib_link_makefile(LLibName,Arch,OSVar,ISDIR,InitLibMakefile)
 	close(SrcS),
 
 	lib_source_files(FileNamesList),
-	printf(OutS,'BASEOBJS\t= ',[]),
-	writeout_ofiles(FileNamesList, OutS),
 
-	printf(OutS,'\n$(BASELIB): $(BASEOBJS)\n',[]),
-	printf(OutS,'\techo BASEOBJS=$(BASEOBJS)\n',[]),
-	printf(OutS,'\tar ruv $(BASELIB) $(BASEOBJS)\n',[]),
-	printf(OutS,'\tranlib $(BASELIB)\n\n',[]),
+	setup_lib_from_filenames(FileNamesList, OutS),
 
-	printf(OutS,'\n# Dependencies:\n\n',[]),
-	writeout_deps(FileNamesList, OutS),
 	close(OutS).
 
 lib_intf_makefile(LLibName,Arch,OSVar,ALSSRC,ISDIR,InitIntfMakefile,Options)
@@ -294,7 +318,203 @@ writeout_deps([File | FileNamesList], OutS)
 	printf(OutS,'%t.o : %t.c \n',[File,File]),
 	writeout_deps(FileNamesList, OutS).
 
+mk_codetrees(CodeTrees, Includes, Options, ParentDir)
+	:-
+	dmember(isdir=LibSrcDir, Options),
+	(sub_atom(LibSrcDir,1,1,'/') ->
+		%% path is already absolute
+		APath = LibSrcDir
+		;
+		%% lib src path is relative to the dir we are now in;
+		%% make an absolute path to that dir:
+		get_cwd(CurPath),
+		extendPath(CurPath,LibSrcDir, APath)
+	),
+	mk_codetrees(CodeTrees, Includes, [aisdir=APath | Options], ParentDir, '.').
+
+mk_codetrees([], Includes, Options, _,_).
+mk_codetrees([CTree | CodeTrees], Includes, Options, ParentPath, P2Top)
+	:-
+	get_cwd(CurDir),
+	name_it(CTree, CTreeName),
+	make_codetree(CTree, CTreeName, Includes, Options, ParentPath, P2Top),
+	change_cwd(CurDir),
+	mk_codetrees(CodeTrees, Includes, Options, ParentPath, P2Top).
+
+name_it(CTreeCore-_, CTree)
+	:-!,
+	name_it(CTreeCore, CTree).
+
+name_it(CTreeCore, CTreeCore)
+	:-
+	atom(CTreeCore),
+	!.
+name_it(CTreeCore, CTree)
+	:-
+	dmember(name=CTree,CTreeCore).
+
+make_codetree(CTree-SubTrees, CTreeName, Includes, Options, ParentPath, P2Top)
+	:-!,
+	extendPath(ParentPath, CTreeName, NewPath),
+	extendPath(P2Top, '..', NewP2Top),
+	subtree_names(SubTrees, SubTreeNames),
+	create_codedir(CTree, CTreeName, Includes, Options, SubTreeNames, NewPath, NewP2Top),
+	mk_codetrees(SubTrees, Includes, Options, NewPath, NewP2Top).
+
+make_codetree(CTree, CTreeName, Includes, Options, ParentPath, P2Top)
+	:-
+	extendPath(ParentPath, CTreeName, NewPath),
+	extendPath(P2Top, '..', NewP2Top),
+	create_codedir(CTree, CTreeName, Includes, Options, [], NewPath, NewP2Top).
+
+create_codedir(CTree, CTreeName, Includes, Options, SubTreeNames, Path2Me, MePath2Top)
+	:-
+	existsmake_subdir(CTreeName,'.'),
+	change_cwd(CTreeName),
+printf('Dir >> %t\n',[CTreeName]),
+	lcl_tree_lib_makefile(CTree, CTreeName, Includes, Options, SubTreeNames, Path2Me, MePath2Top).
+
+lcl_tree_lib_makefile(CTree, CTreeName, Includes, Options, SubTreeNames, Path2Me, MePath2Top)
+	:-
+		%% we know this path is absolute:
+	dmember(aisdir=LibSrcDir, Options),
+	dmember(system=System, Options),
+
+	open(makefile, write, MFStr, []),
+	printf(MFStr,'#  \n#  Makefile for %t library: %t\n# \n',[System,Path2Me]),
+
+	extendPath(LibSrcDir,Path2Me,ParallelSrcPath),
+	printf(MFStr,'\nVPATH=%t\n\n',[ParallelSrcPath]),
+	
+	prefix_dir(Includes, LibSrcDir, IncludesList),
+	bagOf(IIncl, D^(member(D,IncludesList),catenate('-I',D,IIncl)),LclIncs),
+	cat_together_spaced(LclIncs, LclIncsStr),
+	printf(MFStr,'\nLclIncs= %t\n',[LclIncsStr]),
+
+	check_default(Options, lclflags, '', LclFlags),
+	printf(MFStr, 'LclFlags = %t\n', [LclFlags]),
+
+	files(ParallelSrcPath,'*.c',InitCFiles),
+	reduction(Options, InitCFiles, CFiles),
+	strip_suffixes(CFiles, FileNamesList),
+
+	check_default(CTree, libname, CTreeName, BaseLibName),
+	catenate(BaseLibName,'.a',BLA),
+	printf(MFStr, '\nBASELIB=%t\n\n',[BLA]),
+	cat_together_spaced(SubTreeNames, SubDeps),
+	printf(MFStr,'\n\nall: library %t\n',[SubDeps]),
+	setup_lib_from_filenames(FileNamesList, MFStr),
+	subdir_rules(SubTreeNames, MFStr),
+
+	close(MFStr).
+
+setup_lib_from_filenames(FileNamesList, OutStr)
+	:-
+	printf(OutStr,'\nCC = gcc\nLINK = $(CC)\n',[]),
+	printf(OutStr,'CFLAGS = -O -g -Wall -Wshadow -Wconversion $(PROTOFLAGS)\n',[]),
+	printf(OutStr,'LIBS = -lnsl -lm\n',[]),
+	printf(OutStr,'#\n#\nCPPFLAGS = -I. $(LclIncs) $(XINCLUDES) $(LclFlags)\n',[]),
+	printf(OutStr,'.c.o:\n\t$(CC) -c $(CPPFLAGS) $(CFLAGS) $(X_CFLAGS) $<\n\n',[]),
+
+	printf(OutStr,'BASEOBJS\t= ',[]),
+	writeout_ofiles(FileNamesList, OutStr),
+
+	printf(OutStr,'\nlibrary: $(BASELIB)\n\n',[]),
+	
+	printf(OutStr,'\n$(BASELIB): $(BASEOBJS)\n',[]),
+	printf(OutStr,'\techo BASEOBJS=$(BASEOBJS)\n',[]),
+	printf(OutStr,'\tar ruv $(BASELIB) $(BASEOBJS)\n',[]),
+	printf(OutStr,'\tranlib $(BASELIB)\n\n',[]),
+
+	printf(OutStr,'\n# Dependencies:\n\n',[]),
+	writeout_deps(FileNamesList, OutStr).
 
 
+
+strip_suffixes([], []).
+strip_suffixes([File | Files], [Name | NamesList])
+	:-
+	strip_suffix(File, Name),
+	strip_suffixes(Files, NamesList).
+
+strip_suffix(File, Name)
+	:-
+	asplit(File, 0'., Left, Right),
+	!,
+	strip_suffix0(File, Name).
+
+strip_suffix(Name, Name).
+
+strip_suffix0(File, Name)
+	:-
+	bang_apart(File, PartsLessLast),
+	catenate(PartsLessLast, Name).
+
+reduction(Options, InitCFiles, CFiles)
+	:-
+	dmember(omitlist=OL, Options),
+	!,
+	list_diff(InitCFiles, OL, CFiles).
+
+reduction(Options, InitCFiles, CFiles)
+	:-
+	dmember(omitpattern=OP, Options),
+	!,
+	match_pat(InitCFiles, OP, _, CFiles).
+
+match_pat([], _, [], []).
+match_pat([Atom | Atoms], PatList, [Atom | Matches], NoMatches)
+	:-
+	mpat(PatList, Atom),
+	!,
+	match_pat(Atoms, PatList, Matches, NoMatches).
+match_pat([Atom | Atoms], PatList, Matches, [Atom | NoMatches])
+	:-
+	match_pat(Atoms, PatList, Matches, NoMatches).
+
+%% Handle only a special case now; need general reg exp:
+%%mpat(PatList, Atom)
+mpat([HeadAtm, '*'], Atom)
+	:-
+	atom_length(HeadAtm, N),
+	sub_atom(Atom,1,N,HeadAtm).
+
+bang_apart(File, PartsLessLast)
+	:-
+	asplit(File, 0'., Left, Right),
+	!,
+	bang_apart(Right, RestPartsLessLast),
+	(RestPartsLessLast = [] ->
+		PartsLessLast = [Left]
+		;
+		PartsLessLast = [Left, '.' | PartsLessLast]
+	).
+
+bang_apart(File, []).
+
+subtree_names([], []).
+subtree_names([ST | SubTrees], [SN | SubTreeNames])
+	:-
+	stname(ST, SN),
+	subtree_names(SubTrees, SubTreeNames).
+
+stname(ST-_, ST)
+	:-
+	atom(ST), !.
+stname(ST-_, SN)
+	:-
+	dmember(name=SN, ST), !.
+stname(ST, ST)
+	:-
+	atom(ST), !.
+stname(ST, SN)
+	:-
+	dmember(name=SN, ST), !.
+
+subdir_rules([], MFStr).
+subdir_rules([Name | SubTreeNames], MFStr)
+	:-
+	printf(MFStr, '\n%t:\n\t(cd %t ; make all)\n\n',[Name,Name]),
+	subdir_rules(SubTreeNames, MFStr).
 
 endmod.

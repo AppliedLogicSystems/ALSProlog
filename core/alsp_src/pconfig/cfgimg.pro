@@ -15,6 +15,11 @@
 module cfgimg.
 use sconfig.
 
+export tcj/0.
+tcj :-
+	cfg_img(hitk).
+
+/*************
 export tci/0.
 tci :-
 	cfg_img(hitk, [[name=accsys],
@@ -34,6 +39,30 @@ tci :-
 		 		protype	= natv
 			]	
 		).
+*************/
+
+export cfg_img/1.
+cfg_img(ImgName)
+	:-
+	'$getenv'('ALSTOP', ALSTOPStr),
+	name(ALSTOP, ALSTOPStr),
+	cfg_img(ImgName, [default_top = ALSTOP] ).
+
+
+export cfg_img/2.
+cfg_img(ImgName, InitOptions)
+	:-
+	dmember(default_top = ALSTOP, InitOptions),
+	extendPath(ALSTOP, als_libs, ALSLIBS),
+	extendPath(ALSLIBS, images, IMGLIB),
+	extendPath(IMGLIB,ImgName,ImgInfo),
+	open(ImgInfo,read,IIStrm,[]),
+	read_term(IIStrm,CFGIMGInfo,[]),
+	close(IIStrm),
+		%% CFGIMGInfo = cfg_img(ImgName, LinkLibs, Options)
+		%% FIX Later: Make it merge InitOptions with the Options
+		%% just read, given things from InitOpions priority;
+	call(CFGIMGInfo).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -73,6 +102,11 @@ tci :-
  |			  library) is called makeintf.in.  Both can be found in
  |			  the "linking" subdir of ALSDIR, in an installation,
  |			  or in subdir pconfig in the source tree.
+ |
+ |	FIX:  * Should correctly determine whether or not a natv version
+ |			of the appropriate Arch_OS exists, and if not, gracefully
+ |			fall back on the port version.
+ |
  *!--------------------------------------------------------------*/
 
 export cfg_img/3.
@@ -106,9 +140,26 @@ cfg_img(ImgName, LinkLibs, Options)
 	check_default(Options, protype, port, PROTYPE),
 	check_default(Options, probld, 
 					PROBLD^extendPath(DefltTop, builds, PROBLD), PROBLD),
-	catenate('bld-',PROTYPE,PROSYSNAME),
 	extendPath(PROBLD,ArchOS,AOSDir),
-	extendPath(AOSDir,PROSYSNAME,PROSYSDir),
+	catenate('bld-',PROTYPE,PROSYSNAME),
+	extendPath(AOSDir,PROSYSNAME,InitPROSYSDir),
+	(exists_file(InitPROSYSDir) ->
+		PROSYSDir = InitPROSYSDir
+		;
+		printf('Warning!! Directory %t does not exist!\n',[InitPROSYSDir]),
+		(PROSYSNAME = natv ->
+			extendPath(AOSDir,'bld-port',PROSYSDir),
+			(exists_file(PROSYSDir) ->
+				true
+				;
+				printf('!!!ERROR: Neither bld-natv nor bld-port exists...ABORTING!!!\n\n',[]),
+				fail
+			),
+			printf('Warning!! Switching to bld-port (portable ALS) library\n',[])
+			;
+			printf('!!!ERROR: %t \\= bld-natv and %t doesn\'t exist...ABORTING!!!\n\n',[])
+		)
+	),
 	pathPlusFile(PROSYSDir, 'alspro.a', PROLIB),
 
 		%% Make this "link or copy: -- and independent of OS:"
@@ -127,8 +178,9 @@ cfg_img(ImgName, LinkLibs, Options)
 		;
 		builtins:sys_searchdir(ALSDIRPath),
 		extendPath(ALSDIRPath,linking,LinkingPath),
-		pathPlusFile(LinkingPath, 'makeimg.in', InitImgMakefile),
+		pathPlusFile(LinkingPath, 'makeimg.in', InitImgMakefile0),
 		(exists_file(InitImgMakefile) ->
+			InitImgMakefile = InitImgMakefile0,
 			Extra = [linking=LinkingPath]
 			;
 			extendPath(DefltTop, alsp_src, ALSSRC), 
@@ -341,7 +393,14 @@ img_cmp_make(CompLib, CurN, ArchOS, PROBLD, LIBSDIR, Options, OutS,
 	check_default(CompLib,syslibs,[], L_ll),
 	check_default(CompLib,init,CLInit^catenate(CmpLibName,'_init();',CLInit), CLInit),
 	check_default(CompLib, ofiles, [], OFs),
-	check_default(CompLib, profls, Profls^files(LBAOSl,'*.pro',Profls), Profls),
+
+	extendPath('..',addlp,UpToLBAOS),
+	extendPath(LBAOS,UpToLBAOS,AddlpDir),
+	check_default(CompLib, profls, 
+					Profls^((files(AddlpDir,'*.pro',RawProfls), 
+								(cfgimg:prefix_dir(RawProfls, AddlpDir, Profls))) ),
+					Profls),
+
 	check_default(CompLib, cfg, [], CLCfg),
 	check_default(CompLib, xlines, [], XLines).
 
@@ -411,12 +470,15 @@ make_dep_var([Lib | LinkList], OutS)
 	printf(OutS, '\\\n\t%t ', [Lib]),
 	make_dep_var(LinkList, OutS).
 
+/*
 cat_together_seplines([], '').
 cat_together_seplines([Item | Rest], Result)
 	:-
 	cat_together_seplines(Rest, RestResult),
 	catenate([Item, '\n', RestResult], Result).
+*/
 
+/*
 cat_together_spaced([], '').
 cat_together_spaced([Item | Rest], Result)
 	:-

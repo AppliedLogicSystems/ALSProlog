@@ -10,73 +10,7 @@
 
 
 module pconfig.
-use sconfig.
 use  mkdist.
-
-/*********************************
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% System-specific knowledge:
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-export winsystems_for/3.
-
-	%% What window systems do we support/make for
-	%% a given ARCH/OS pair:
-
-winsystems_for(Arch, OSString, WSL)
-	:-
-	general_os(Arch, OSString, OS, GOS), 
-	(specif_winsystems_for(Arch, OS, WSL) ->
-		true
-		;
-		gen_winsystems(GOS, WSL)
-	).
-
-gen_winsystems(unix, [x, motif]).
-
-specif_winsystems_for(_, nextstep, [nextstep]).
-
-	%% Window system-specific information which is to
-	%% be written into the top of the Makefile for that
-	%% system:
-
-ws_vars(x, ARCH, OS, WSHeaderLines)
-	:-
-
-	WSHeaderLines =
-	[
-		'WIN'		= x ,
-		'ADDL_CS' 	= '' ,
-		'CFLAGS'	= '' ,
-		'$(WIN)LIBS' 	= '-lX11' ,
-		'ADDL_LIBS' 	= '' ,
-		'ADDL_PROFS' 	= ''
-	].
-
-ws_vars(motif, ARCH, OS, WSHeaderLines)
-	:-
-	WSHeaderLines =
-	[
-		'WIN'		= motif ,
-		'ADDL_CS' 	= 'xtaux.c' ,
-		'CFLAGS'	= '-D_NO_PROTO' ,
-		'$(WIN)LIBS' 	= '-lXm -lMrm -lXt -lX11' ,
-		'ADDL_LIBS' 	= '../x/xinterf.a' ,
-		'ADDL_PROFS' 	= 
-			'ArrowB ArrowBG BulletinB CascadeB \
-			CascadeBG Command Composite Constraint \
-			Core CutPaste DialogS DrawingA \
-			DrawnB ExtObject FileSB Form \
-			Frame Intrinsic Label LabelG \
-			List MainW MenuShell MessageB \
-			MrmDecls Object PanedW PushB \
-			PushBG RectObj RowColumn Scale \
-			ScrollBar ScrolledW SelectioB SeparatoG \
-			Separator Shell Text TextF \
-			ToggleB ToggleBG Vendor VendorE \
-			VirtKeys Xm ../x/x'
-	].
-***********************/
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Top-level entry to the prolog-level configuration process
@@ -359,10 +293,17 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, BldPathAtm, BldSubdirP
 		;
 		extendPath(BldPathAtm, 'mf-cmn.in', SrcMKFTail)
 	),
-%	pathPlusFile(BldSubdirPathAtm, '/Makefile.in', SrcMKFTail),
 
 	pathPlusFile(Subdir,'Makefile',SubdirMakefile),
 	trans_xtnd_makefile(SrcMKFTail, SubHeaderLines, SubdirMakefile, GOS), 
+
+		%% Handle pi_cfg.h:
+	check_default(WSHeaderItems, 'CFG', '', Cfgs),
+	cat_together_seplines(Cfgs, CfgAtm),
+	pathPlusFile(Subdir,'pi_cfg.h', TgtPICfg),
+	open(TgtPICfg,write,PICFGSt,[]),
+	printf(PICFGSt,'%t\n',[CfgAtm]),
+	close(PICFGSt),
 
 		%% Handle pi_init.c:
 	pathPlusFile(BldSubdirPathAtm, 'pi_init.c', SrcPIInit),
@@ -458,7 +399,9 @@ install_tests(Subdir, BLD_NATV_SRC_PATH, GOS)
 	:-
 	get_cwd(CurDir),
 	change_cwd(Subdir),
-	adjust_path_depth(BLD_NATV_SRC_PATH, 1, ShallowPath),
+	check_make_subdir(tests),
+	change_cwd(tests),
+	adjust_path_depth(BLD_NATV_SRC_PATH, 2, ShallowPath),
 	append(ShallowPath,[wins,build,Subdir],WBPath),
 	rootPathFile('',WBPath,'wintests.pro',WTFile),
 	(exists_file(WTFile) ->
