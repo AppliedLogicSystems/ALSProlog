@@ -12,7 +12,7 @@ edge(h, l).
 edge(b, c).
 edge(f, e).
 edge(l, k).
-edge(d,c).
+edge(d, c).
 edge(g, f).
 edge(j, k).
 edge(a, f).

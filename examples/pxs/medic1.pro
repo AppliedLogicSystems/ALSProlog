@@ -67,16 +67,14 @@ unsuitable_for(Person, Drug)
 complains_of(Person,  Symptom)
 	:-
 	write('What symptom are you bothered by?'),
-	read(Symptom).	% for most systems
-%	newread(Symptom).	% for Macintosh
+	read(Symptom).
 
 suffers_from(  Person,  Condition)
 	:-
 	write('Do you suffer from '), 
 	write(Condition), 
 	write(' (yes/no) ?' ),
-	read(Symptom),	% for most systems
-%	newread(Symptom),	% for Macintosh
+	read(Symptom),
 	affirmative(Answer).
 
 affirmative(yes).

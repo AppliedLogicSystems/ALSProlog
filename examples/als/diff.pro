@@ -1,14 +1,10 @@
-
-
 /*
- * diff.pro  -- a symbolic differentiator
+ * A Symbolic Differentiator
  *
  * Copyright (c) 1986, 1988 by Applied Logic Systems
  *
  * Author:  Keith Hughes
- * Revision History: 
- *      mm/dd/yy,       Name	--	Reason
- *      mm/dd/yy,       Name	--	Reason
+ *
  */
 
 
@@ -33,8 +29,6 @@
  */
 
 
-:- op(700,xfx,:).
-
 diff :-
    write('Expression: '),
    read(T),
@@ -47,7 +41,7 @@ diff(X:Expr) :-
    write(Ans),nl,nl,
    diff.
 diff(_) :-
-   write('Illegal expression. Type  stop  to exit.'),nl,
+   write('Illegal expression. Type stop to exit.'),nl,
    diff.
 
 diff(X,X,1) :- !.

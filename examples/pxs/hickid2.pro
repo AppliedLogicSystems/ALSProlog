@@ -8,8 +8,7 @@ identify
 obtain_description 
 	:-
 	write('Observation: '),
-	read(Observer),	% for most systems
-%	newread(Observer),	% for Macintosh
+	read(Observer),
 	dispatch(Observer).
 
 dispatch(done).	% if the user wants to quit,  

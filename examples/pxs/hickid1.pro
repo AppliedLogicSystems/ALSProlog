@@ -9,8 +9,7 @@ identify
 obtain_description 
 	:-
 	write('Observation: '),
-	read(Observer),			% for most systems
-%	newread(Observer),		% for Macintosh
+	read(Observer),
 	dispatch(Observer).
 
 dispatch(done).	% if the user wants to quit,  
@@ -70,8 +69,7 @@ check(Attribute)
 ask_about(Attribute) 
 	:-
 	write('Is it true that '), write(Attribute), write('?'),
-	read(Answer),			% for most systems
-%	newread(Answer),		% for Macintosh
+	read(Answer),
 	act_on(Answer, Attribute).
 
 act_on(yes, Attribute) 

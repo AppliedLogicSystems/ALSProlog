@@ -1,117 +1,23 @@
-/*============================*
- *	medic4.pro
- *	(c) 1986-90 Applied Logic Systems,  Inc.
- *	Author:  Kenneth  A. Bowen 
- *
- *	Elementary "medical" advice-giving program
- *	based on drugs.pro:
- *	A database  of  over-the-counter  U.S.
- *	medications, their  uses  and limitations.
- *============================*/
-
-/*	Predicate: relieves/2:         
-	relieves(DRUG,  SYMPTOM).        */
-
-relieves(aspirin, headache).
-relieves(aspirin, moderate_pain). 
-relieves(aspirin, moderate_arthritis).
-relieves(aspirin_codeine_combination, severe_pain).
-relieves(robitussin_dm, cough). 
-relieves(darvon, severe_pain). 
-relieves(kaopectate, diarrhea).
-relieves(novahistine, cough).
-relieves(novahistine, nasal_congestion).
-relieves(penicillin, pneumonia).
-relieves(pepto_bismol, diarrhea).
-relieves(pepto_bismol, nausea).
-relieves(tylenol, headache).
-relieves(tylenol, moderate_pain).
-relieves(penicillin, pneumonia).
-relieves(triaminic, nasal_congestion). 
-
-/*	Predicate: aggravates/2:
-		aggravates(DRUG, CONDITION)
-
-	CONDITION is a single disease process, or a collection of
-	disease processes, sometimes called a syndrome.  */
-
-aggravates(aspirin, asthma).
-aggravates(aspirin, peptic_ulcer).
-aggravates(kaopectate, fever). 
-aggravates(novahistine, high_blood_pressure). 
-aggravates(novahistine, heart_disease).
-aggravates(novahistine, diabetes). 
-aggravates(novahistine, glaucoma). 
-aggravates(penicillin, asthma).
-aggravates(pepto_bismol, diabetes).
-aggravates(pepto_bismol, gout).
-aggravates(pepto_bismol, fever).
-
-
 /*------------------------------------------------*
-	Predicate: should_take/2:
-			should_take(PERSON, DRUG)
-
-	Top level (entry) to the advice-giving
-	program;  Interacts with PERSON to collect
-	information on SYMPTOM, and CONDITION(S)
-	suffered, and makes recommendation of DRUG
-	for PERSON to take to relieve SYMPTOM without
-	aggravating any CONDITION(S) suffered.
+ |		asking.pro
+ |		Copyright (c) 1986-89 Applied Logic Systems, Inc.
+ |
+ |		Author: Kenneth A. Bowen
+ |		Asking predicates for the solve shell
  *------------------------------------------------*/
-should_take(Person, Drug) 
+
+ask_about(Predicate)
 	:-
-	complains_of(Person, Symptom),
-	suppresses(Drug, Symptom),
-	not( unsuitable_for(Person, Drug) ).
-
-
-suppresses(Drug,  Symptom)  
-	:-  
-	relieves(Drug,  Symptom).
-
-unsuitable_for(Person, Drug) 
-	:-
-        aggravates(Drug, Condition),
-        suffers_from(Person, Condition).
-
-complains_of(Person,  Symptom)
-	:-
-	ask_about(complains_of(Person,Symptom), Symptom).
-
-ask_info(complains_of(Person, Condition), 
-			[ 'What symptom are you bothered by?' ], Condition).
-ask_confirm(complains_of(Person, Condition), 
-		['Are you bothered by ', Condition, ' (yes/no) ?'], Condition).
-ask_acceptability(complains_of(Person, Answer), Answer, relieves(_, Answer)).
-
-suffers_from(Person,  Condition)
-	:-
-	ask_about(suffers_from(Person, Condition), Condition).
-
-ask_info(suffers_from(Person, Condition), 
-			['What condition do you suffer from?'], Condition).
-ask_confirm(suffers_from(Person, Condition), 
-		['Do you suffer from ', Condition, ' (yes/no) ?'], Condition).
-ask_acceptability(suffers_from(Person, Answer), Answer, aggravates(_, Answer)).
-
-/*===================================================
-	General Advice Program support predicates:
-	Primary:  asking the user questions, and
-	checking the responses for acceptability.
- *===================================================*/
-ask_about(Predicate, InfoVar)
-	:-
-	var(InfoVar),!,			% get value for InfoVar from user
 	ask_info(Predicate, Question, InfoVar),
+	var(InfoVar),!,			% get value for InfoVar from user
 	write_list(Question),
 	read(Answer),
-	check_response(Predicate, Answer, InfoVar).
+	check_response(Predicate, Answer, InfoVar, Reason).
 
-ask_about(Predicate, InfoVar)
+ask_about(Predicate)
 	:-
-	nonvar(InfoVar),!,                   % ask user question about (value of) InfoVar
 	ask_confirm(Predicate, Question, InfoVar),
+	nonvar(InfoVar),!,		% ask user question about (value of) InfoVar
 	write_list(Question),
 	read(Answer),
 	act_on_yes_no(Answer).
@@ -202,38 +108,39 @@ negative(nein).
 	  (e.g., synonym_for(_, stuffy_nose, nasal_congestion).	
 		synonym_for(complains_of, zip, cough).	)
  *------------------------------------------------*/
-check_response(Predicate, Answer, InfoVar)
+check_response(Predicate, Answer, InfoVar, Reason)
 	:-
 	var(Answer), !,		% suppress other clauses if Answer is a variable
 	nl, write('Your answer is a Prolog variable,  most likely because '),
 	nl, write('you typed an identifier beginning with an uppercase letter.'),
 	nl, write('Please try again, avoiding uppercase letters: '),
 	read(NewAnswer),
-	check_response(Predicate, NewAnswer, InfoVar).
+	check_response(Predicate, NewAnswer, InfoVar, Reason).
 		%  passing the original variable InfoVar to this recursive call
 		%  on check_response means that the original call to check_response
 		%  will get the ultimate result of checking the NewAnswer 
 
-check_response(Predicate, Answer,  InfoVar)
-	:- 		% can assume Answer is non-variable
-			% because of cut in first clause
+check_response(Predicate, Answer,  InfoVar, [userinfo-Predicate])
+	:- 	% can assume Answer is non-variable
+		% because of cut in first clause
 	ask_acceptability(Predicate, Answer, Test),
-	Test, !,		% Is it acceptable?
-	InfoVar = Answer.	% Yes - return it.
+	Test, !,				% Is it acceptable?
+	InfoVar = Answer.			% Yes - return it.	
+					
 
-check_response(Predicate, Answer,  InfoVar)
-	:-		% can assume Answer is non-variable, and that Answer is
-	synonymous(Predicate, Answer, InfoVar),	% not a basic acceptable
-	! .		% response;  suppress backtracking
-			% to final (error) clause if synonym is
-			% found.
+check_response(Predicate, Answer,  InfoVar, [synonymous(Answer, InfoVar), userinfo-Predicate])
+	:-					% can assume Answer is non-variable
+	synonymous(Predicate, Answer, InfoVar),	% and than Answer is not a basic acceptable
+	! .					% response;  suppress backtracking
+						% to final (error) clause if synonym is
+						% found.
 
-check_response(Predicate, Answer,  InfoVar)
+check_response(Predicate, Answer,  InfoVar, Reason)
 	:-
 	nl, write('I can''t understand what you typed.'),
 	nl, write('Please try again: '),
 	read(NewAnswer),
-	check_response(Predicate, NewAnswer,  InfoVar).
+	check_response(Predicate, NewAnswer,  InfoVar, Reason).
 
 synonymous(Predicate, Expression, Target)
 	:-
@@ -248,6 +155,8 @@ synonymous(Predicate, Expression, Target)
 synonym_for(_, stuffy_nose, nasal_congestion).	
 synonym_for(complains_of(_,_), zip, cough).	
 synonym_for(complains_of(_,_), zip, nasal_congestion).	
+synonym_for(_, pain, moderate_pain).	
+synonym_for(_, pain, severe_pain).	
 %......
 
 check_ambiguity(Predicate, Expression,  FinalSynonym)
@@ -256,7 +165,7 @@ check_ambiguity(Predicate, Expression,  FinalSynonym)
 	decide_ambiguity(Synonyms, FinalSynonym).
 	
 decide_ambiguity([FinalSynonym], FinalSynonym) 
-	:-!.		% Only one synonym -- return it.
+	:-!.			% Only one synonym -- return it.
 decide_ambiguity(Synonyms, FinalSynonym)
 	:-
 	select_one(
@@ -303,3 +212,44 @@ nth_element([ _ | Tail ], CurCountDown, Choice)
 	NextCountDown is CurCountDown - 1,
 	nth_element(Tail, NextCountDown,  Choice).
 
+write_nl_list([]).
+write_nl_list([Item | Items])
+	:-
+	print(Item),nl,
+	write_nl_list(Items).
+
+print((Conclusion if true))
+	:-!,
+	print(Conclusion).
+print((Conclusion if Premisses))
+	:-!,
+	print(Conclusion),write('if '),
+	nl,tab(3),
+	print(Premisses).
+print(asked(What))
+	:-!,
+	print(What),write(' -- asked').
+print((A,B))
+	:-!,
+	print(A), write(' & '),
+	nl,tab(3), 
+	print(B).
+	
+print(Item)
+	:-
+	write(Item).
+
+obtain_conf(C) 
+	:-
+	write('What is your confidence in that answer?'),
+	read(C).
+
+member(Item, [Item | _]).
+member(Item, [_ | Tail])
+	:-
+	member(Item, Tail).
+
+append([], Right, Right).
+append([Head | Tail], Right, [Head | ResultTail])
+	:-
+	append(Tail, Right, ResultTail).
