@@ -1,3 +1,7 @@
+#include "defs.h"
+
+#ifdef MISSING_GLOB
+
 /*
  * Copyright (c) 1989, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -857,4 +861,5 @@ qprintf(str, s)
 		(void)printf("%c", ismeta(*p) ? '_' : ' ');
 	(void)printf("\n");
 }
+#endif
 #endif
