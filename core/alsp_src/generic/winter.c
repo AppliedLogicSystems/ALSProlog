@@ -55,6 +55,9 @@ long *Fail;
 PWord *wm_heapbase;
 PWord *wm_trailbase;
 PWord *wm_stackbot;
+#ifdef MacOS
+PWord *wm_stackbot_safety;
+#endif /* MacOS */
 
 PWord *wm_gvfreelist;
 PWord *wm_gvbase;

@@ -323,7 +323,8 @@ echo Configuring for $arch_mach_os ...
 echo
 
 ARCH=`echo $arch_mach_os | sed -e 's/-.*//'`
-OS=`echo $arch_mach_os | sed -e 's/.*-//' -e 's/\..*$//'`
+#OS=`echo $arch_mach_os | sed -e 's/.*-//' -e 's/\..*$//'`
+OS=`echo $arch_mach_os | sed -e 's/.*-//'`
 
 
 
@@ -2508,5 +2509,5 @@ chmod +x config.status
 test -n "$no_create" || ${CONFIG_SHELL-/bin/sh} ./config.status
 
 # make alsdir in bld-port and bld-natv
-export srcdir ; export LN_S ; $srcdir/cfgs/malsdunx
+export srcdir ; export LN_S ; $srcdir/cfgs/unix/malsdunx
 

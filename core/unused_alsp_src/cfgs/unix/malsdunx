@@ -1,0 +1,39 @@
+#!/bin/sh
+#	
+#	Builds alsdir on unix
+#
+srcdir=/net/mailbox3/alsp_src
+LN_S="ln -s"
+echo Building alsdir using source = $srcdir
+
+for ac_file in bld-port bld-natv; do 
+echo ac_file=$ac_file
+cd $ac_file; 
+	echo Making alsdir in: `pwd`
+	if [ ! -d alsdir ]; then		
+		rm -rf alsdir;			
+		mkdir alsdir;			
+	fi
+	if [ ! -d alsdir/builtins ]; then	
+		rm -rf alsdir/builtins;		
+		mkdir alsdir/builtins;		
+	fi
+	if [ ! -d alsdir/library ]; then	
+		rm -rf alsdir/library;		
+		mkdir alsdir/library;		
+	fi
+	if [ `echo $srcdir | sed -e 's/^\(.\).*/\1/'` = "/" ]; then
+		echo  Using absolute paths;
+		$LN_S $srcdir/builtins/*.pro alsdir/builtins;	
+		$LN_S $srcdir/library/*.pro alsdir/library; 
+	else								\
+		echo  Using relative paths;
+	    cd alsdir/builtins; 
+		$LN_S ../../../$srcdir/builtins/*.pro . ;	
+	    cd ../library ; 
+		$LN_S ../../../$srcdir/library/*.pro . ;
+		cd ../..
+	fi
+cd ..
+done
+

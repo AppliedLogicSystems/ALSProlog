@@ -44,22 +44,20 @@ struct ts {
     long  size;
     long  cutoff;
 } tablesizes[] = {
-/*      allocation, size, cutoff  */
-	{4096, 4093, 3438},
-	{8192, 8191, 6880},
-	{16384, 16381, 13760},
-	{32768, 32749, 27509},
-	{65536, 65521, 55038},
-	{131072, 131071, 110100},
-	{262144, 262139, 220197},
-	{524288, 524287, 440401},
-	{1048576, 1048573, 880801}
+/*   allocation, size,    cutoff  */
+	{4096,       4093,    3438},
+	{8192,       8191,    6880},
+	{16384,      16381,   13760},
+	{32768,      32749,   27509},
+	{65536,      65521,   55038},
+	{131072,     131071,  110100},
+	{262144,     262139,  220197},
+	{524288,     524287,  440401},
+	{1048576,    1048573, 880801}
 };
 
 
-static int ts_allocidx = 0;	/* index to look at in doing next
-				 * allocation
-				 */
+static int ts_allocidx = 0;	/* index to look at in doing next allocation */
 
 #ifdef arch_m88k
 #define TS_LASTIDX 4		/* Last valid index in table */

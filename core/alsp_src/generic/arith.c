@@ -102,7 +102,7 @@ extern	void	srandom		PARAMS(( int ));
  * C-compiler to generate faulty code.  To get around this, I had to define
  * currentTime to be a function , defined below:
  */
-define currentTime (double)(((double)TickCount()) / ((double)CLOCKS_PER_SEC))
+#define currentTime (double)(((double)TickCount()) / ((double)CLOCKS_PER_SEC))
 #if 0
 #define currentTime current_time()
 static double
@@ -202,6 +202,7 @@ double
 als_cputime()
 {
     return (double) (currentTime - start_time);
+}
 #endif /* HAVE_TIMES */
 
 
@@ -211,11 +212,9 @@ als_realtime()
     return (double) (currentTime - start_time);
 }
 
-
 double
 als_random()
 {
-		/* ceh - why doesn't unix use RAND_MAX?? */
 #if MacOS
     return ((double) random()) / ((double) RAND_MAX);
 #else

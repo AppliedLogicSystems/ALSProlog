@@ -107,7 +107,7 @@ process_image_option(select_lib(FilesList))
 	add_lib_qual(FilesList,library,QualFilesList),
 	force_libload_all(QualFilesList).
 
-process_image_option(select_lib(Libary,FilesList)) 
+process_image_option(select_lib(Library,FilesList)) 
 	:-!,
 	add_lib_qual(FilesList,Library,QualFilesList),
 	force_libload_all(QualFilesList).

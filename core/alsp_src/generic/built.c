@@ -7,11 +7,10 @@
  |
  | Program Author:  Kevin A. Buettner
  | Creation:  11/14/84
- | Revision History: (fixes, not addition of new builtins)
- | 06/28/85	 - K. Buettner -- Conversion to wam and compiled prolog
- | 09/12/85K - K. Buettner -- arithmetic predicates moved to separate file.
- | 01/28/86K - K. Buettner -- IBM PC conversion
- | 10/26/94	 - C. Houpt -- Various UCHAR* casts.
+ | 06/28/85	 - K. Buettner	-- Conversion to wam and compiled prolog
+ | 09/12/85K - K. Buettner	-- arithmetic predicates moved to separate file.
+ | 01/28/86K - K. Buettner	-- IBM PC conversion
+ | 10/26/94	 - C. Houpt		-- Various UCHAR* casts.
  | ------------------------------------------------------------------------
  | Notes :
  |

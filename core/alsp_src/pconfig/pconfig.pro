@@ -641,9 +641,19 @@ setup_dist(BLD_Dir,DSTDIR,EXP_Dir)
 	assert(nl_type(GOS)),
 
 		%% make the name of the distribution (sub)directory:
-	catenate([ARCH,'_',OS,'.',PVer],DistDirName),
+	catenate([ARCH,'_',OS,'-',PVer],DistDirName),
 
 	DST_Dir = DSTDIR/DistDirName,
+	subPath([DSTDIR,DistDirName], DST_Dir_Path),
+	(exists_file(DST_Dir_Path) ->
+		date(Y/M/D),
+		catenate([DistDirName,'_',Y,'_',M,'_',D],SaveDistDirName),
+		subPath([DSTDIR,SaveDistDirName],SavePath),
+		catenate(['mv ',DST_Dir_Path,' ',SavePath],Cmd),
+		system(Cmd)
+		;
+		true
+	),
 	setup_subdirs(DST_Dir, CurDir),
 	setup_subdirs(DST_Dir/native, CurDir),
 	setup_subdirs(DST_Dir/threaded, CurDir),

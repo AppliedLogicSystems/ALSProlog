@@ -112,7 +112,6 @@ termcmp(v1, t1, v2, t2)
 	if (t2 == WTP_SYMBOL)
 	    return strcmp((char *)TOKNAME(v1), (char *)TOKNAME(v2));
 	else if (t2 == WTP_UIA) {
-/*	    return strcmp(TOKNAME(v1), (UCHAR *) M_FIRSTUIAWORD(v2));  */
 	    return strcmp((char *)TOKNAME(v1), (char *)M_FIRSTUIAWORD(v2));
 	}
 	else
@@ -120,13 +119,8 @@ termcmp(v1, t1, v2, t2)
     }
     else if (t1 == WTP_UIA) {
 	if (t2 == WTP_SYMBOL)
-/*	    return strcmp((UCHAR *) M_FIRSTUIAWORD(v1), TOKNAME(v2));   */
 	    return strcmp((char *) M_FIRSTUIAWORD(v1), (char *)TOKNAME(v2));
 	else if (t2 == WTP_UIA) {
-/*
-	    return strcmp((UCHAR *) M_FIRSTUIAWORD(v1),
-			  (UCHAR *) M_FIRSTUIAWORD(v2));
-*/
 		return strcmp((char *)M_FIRSTUIAWORD(v1),
 			(char *)M_FIRSTUIAWORD(v2));
 	}
@@ -199,7 +193,6 @@ pbi_compare()
 	FAIL;
 }
 
-
 int
 wm_identical(v1, t1, v2, t2)
     PWord v1;
@@ -252,8 +245,6 @@ wm_identical(v1, t1, v2, t2)
 		    return (0);
 		break;
 	    case WTP_UIA:
-/*		if (strcmp((UCHAR *) M_FIRSTUIAWORD(v1), 
-			   (UCHAR *) M_FIRSTUIAWORD(v2)) == 0)  */
 		if (strcmp((char *) M_FIRSTUIAWORD(v1), 
 			   (char *) M_FIRSTUIAWORD(v2)) == 0)
 		    return (1);
@@ -272,7 +263,6 @@ wm_identical(v1, t1, v2, t2)
 	    case WTP_SYMBOL:
 		if (t2 == WTP_UIA) {
 		    if (strcmp((char *)TOKNAME(v1),
-/*			(UCHAR *) M_FIRSTUIAWORD(v2)) == 0)  */
 			(char *) M_FIRSTUIAWORD(v2)) == 0)
 			return (1);
 		}
@@ -280,7 +270,6 @@ wm_identical(v1, t1, v2, t2)
 		break;
 	    case WTP_UIA:
 		if (t2 == WTP_SYMBOL) {
-/*		    if (strcmp((UCHAR *) M_FIRSTUIAWORD(v1),  */
 		    if (strcmp((char *) M_FIRSTUIAWORD(v1), 
 			(char *)TOKNAME(v2)) == 0)
 			return (1);
@@ -379,7 +368,6 @@ hashN(v, t, d)
 	}
 }
 
-
 int
 pbi_hashN()
 {				/* hashN(Term,N,Depth,HashVal) */
@@ -402,7 +390,6 @@ pbi_hashN()
 	    FAIL;
     }
 }
-
 
 extern long gensym_start_time;
 static long gensym_counter = 0;
@@ -531,8 +518,7 @@ pbi_traildump()
     SUCCEED;
 }
 
-
-/*
+/*---------------------------------------------------------------------
  * frame_info/2
  *
  *	The first argument is a count of the number of frames to go back.
@@ -558,7 +544,7 @@ pbi_traildump()
  *	In cases where we are not certain that the argument is valid,
  *	we use a question mark in the place of the argument to indicate
  *	this condition.
- */
+ *-------------------------------------------------------------------*/
 
 int
 pbi_frame_info()	/* frame_info(Count,Goal) */

@@ -1,15 +1,16 @@
-/*
- * icode1.c             -- stuff to emit instructions
- *      Copyright (c) 1987 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 2/12/87
- * Revision History:
- *  03/22/87,       Kev             -- icode.c split into icode1.c,
- *                                                 icode2.c, and icode.h
- *  08/18/92,   Raman   -- related icode files merged into
- *                         icode1.c and icode2.c
- */
+/*===================================================================*
+ |		icode1.c
+ |	Copyright (c) 1987-95 Applied Logic Systems, Inc.
+ |
+ |		-- clause code generator for portable BYTE/THREADED
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 2/12/87
+ | 03/22/87 K.Buettner -- icode.c split into icode1.c,
+ |                        icode2.c, and icode.h
+ | 08/18/92 P.Raman    -- related icode files merged into
+ |                        icode1.c and icode2.c
+ *===================================================================*/
 
 #include "defs.h"
 #include "coerce.h"
@@ -18,7 +19,7 @@
 #include "labels.h"
 #include "compile.h"
 #include "icodegen.h"
-#include "icode.h"
+#include "icode.h"		/* generated in bld dir */
 #include "istr.h"
 #include "wintcode.h"
 #include "machinst.h"
@@ -28,11 +29,11 @@ extern system_debugging;
 #define MAXCALLS    256
 #define ICBUFSIZE 32768
 
-Code *dstart;			/* Where to go for a determinate start of
+Code *dstart;	/* Where to go for a determinate start of
 				 * clause
 				 */
 
-int   makeobp;
+int makeobp;
 
 /*
  * data structure for storing gc call information
@@ -65,7 +66,7 @@ int   capturemode;		/* not used in Port code */
  */
 
 Code  icode_buf[ICBUFSIZE];
-/*  Now declared in icodegen.h; us
+/*  Now declared in icodegen.h; 
   Code *ic_ptr;  */
 
 ic_uptr_type ic_uptr;
@@ -76,15 +77,14 @@ ic_uptr_type ic_uptr;
 
 Code *ic_pptr;
 
-
-/*
+/*---------------------------------------------------------------------------
  * The "Portable" version has no temporary registers.  Therefore, the compiler
  * will allocate stack when it needs a temporary.  The problem with this is
  * that we are inundated with instructions which decrement SP.  Rather than
  * changing SP at all, we will simply record the offset to add to SP to get
  * to where it really should be and update SP with this value before a call
  * or execute instruction.
- */
+ *--------------------------------------------------------------------------*/
 
 static long sp_disp;
 

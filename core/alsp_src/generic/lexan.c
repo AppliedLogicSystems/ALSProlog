@@ -34,12 +34,12 @@ char  tokstr[1024];
 
 static	int	escape_char	PARAMS(( char ** ));
 
-/*
- * next_token gets the next token from the input stream, classifies it and
- * returns. curtok is set with an integer value representing the token.
- * curtokttype represents the class of the token.  The TKTP_ defines are
- * used to identify the class (see lexan.h).
- */
+/*----------------------------------------------------------------------*
+ | next_token gets the next token from the input stream, classifies it and
+ | returns. curtok is set with an integer value representing the token.
+ | curtokttype represents the class of the token.  The TKTP_ defines are
+ | used to identify the class (see lexan.h).
+ *----------------------------------------------------------------------*/
 
 void
 next_token()
@@ -48,10 +48,6 @@ next_token()
     int   ctype;		/* character type */
     register char *s = tokstr;	/* char pointer into token */
 
-/*
-printf("next_token:buffer:     =%20s\n",bp);
-printf("next_token:start:tokstr=%s||  ctp=%d  curtok=%d\n",tokstr,CType((*bp)),curtok); fflush(stdout);
-*/
     /*
      * Step 1:  Make sure that we have really have a buffer; get one if
      *  we don't.
@@ -112,7 +108,6 @@ printf("next_token:start:tokstr=%s||  ctp=%d  curtok=%d\n",tokstr,CType((*bp)),c
 
     lexbdp->tokpos = bp;	/* mark start of token (for error recovery) */
     curtkty = TKTP_OTHER;	/* assume that the token type is OTHER */
-
 
     switch (CType((*bp))) {
 	case LX_WSP:		/* can't happen */
@@ -366,7 +361,6 @@ printf("next_token:start:tokstr=%s||  ctp=%d  curtok=%d\n",tokstr,CType((*bp)),c
 	else {
 	    int   firstc = tokstr[0];
 
-
 	    if (CType(firstc) == LX_SQT) {
 		if (*bp == '(') {
 		    curtkty = TKTP_FUNCTOR;
@@ -415,7 +409,6 @@ printf("next_token:start:tokstr=%s||  ctp=%d  curtok=%d\n",tokstr,CType((*bp)),c
 	}
     }
     lexbdp->curpos = bp;
-/*printf("next_token:end:tokstr=%s  curtok=%d  curtkty=%d\n",tokstr,curtok,curtkty);*/
 }
 
 static int

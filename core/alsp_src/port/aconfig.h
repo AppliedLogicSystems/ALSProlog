@@ -1,22 +1,28 @@
-/*
- * aconfig.h for the Portable Prolog system
- *
- * These parameters may be overridden by the machine dependent include file,
- * mconfig.h.
- */
-
+/*=================================================================*
+ |		aconfig.h 
+ |	Copyright (c) 1992-1995 Applied Logic Systems, Inc.
+ |
+ |		-- architecture-specific configuration parameters
+ |			for the Portable Prolog system
+ |
+ |	These parameters may be overridden by the machine dependent 
+ |	include file, mconfig.h.
+ *=================================================================*/
 
 #define Portable  1
-#define ProcStr	"portable"
 
-/* Define the size of opcode : LongCode, ShortCode, ByteCode */
+	/* Define the size of opcode : LongCode, ShortCode, ByteCode */
 #define LongCode	1
 
 /* Define Threaded to be 1 if threaded code interpreter is desired -- must
  * use gcc to get threaded code interpreter
  */
+
 #if __GNUC__ >= 2 && !defined(Bytecode)
 #define Threaded	1
+#define ProcStr	"port_thread"
+#else 
+#define ProcStr	"port_byte"
 #endif
 
 /*

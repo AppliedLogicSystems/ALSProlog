@@ -1,10 +1,12 @@
-/*
- * sig.h	-- Header file for modules which use signals in ALS-Prolog
- *	Copyright (c) 1994, Applied Logic Systems, Inc.
- *
- * Creation: 3/25/94
- * Author: Kevin A. Buettner
- */
+/*====================================================================*
+ |		sig.h	
+ |	Copyright (c) 1994-5, Applied Logic Systems, Inc.
+ |
+ |		-- Header file for modules which use signals in ALS-Prolog
+ |
+ | Creation: 3/25/94
+ | Author: Kevin A. Buettner
+ *====================================================================*/
 
 #include <signal.h>
 #include "missing.h"
@@ -13,12 +15,17 @@
 #include <ucontext.h>
 #include <siginfo.h>
 extern	void	signal_handler	PARAMS(( int, struct siginfo *, struct ucontext *));
+
 #elif defined(arch_m88k)
 extern	void	signal_handler	PARAMS(( int, struct siginfo * ));
+
 #elif defined(HAVE_SIGVEC)
 extern	void  signal_handler	PARAMS(( int, int, struct sigcontext *, char * ));
+
 #elif defined(VMS)
 extern	void  signal_handler	PARAMS(( char ));	/* !!? */
-#else
+
+#else		/* otherwise */
 extern	void  signal_handler	PARAMS(( int ));
+
 #endif

@@ -1,14 +1,13 @@
-/*
- * tokini.h		tokens and operators
- *	Copyright (c) 1990-1993 by Applied Logic Systems, Inc.
- *
- * Author: Kevin Buettner
- * Creation: 1985
- * Revision History:
- * Revised:	12/90,	Kev	-- reorganization to handle cutmacros
- *				   differently
- */
-
+/*===================================================================*
+ |		tokini.h		
+ |	Copyright (c) 1990-1995 Applied Logic Systems, Inc.
+ |
+ |		-- tokens and operators
+ |
+ | Author: Kevin Buettner
+ | Creation: 1985
+ | 12/90 - K.Buettner -- reorganization to handle cutmacros differently
+ *===================================================================*/
 
 	/*
 	 * The following tokens and operators are cutmacros.
@@ -20,18 +19,18 @@
 	 * must also be changed.
 	 */
 	
-        TK(TK_CALL,"call"),
+	TK(TK_CALL,"call"),
 	TK(TK_OCALL,"callWithDelayedInterrupt"),
 	TK(TK_DBG_CALL,"dbg_call"),	
-        TK(TK_SCOLON3,"$semicolon"),		/* needs cutmacro ?? */
-        TK(TK_COMMA3,"$comma"),			/* needs cutmacro ?? */
-        TK(TK_IFARROW3,"$arrow"),		/* needs cutmacro ?? */
-        OP(TK_SCOLON,";",  0,OP_XFY(1100)),
-        OP(TK_COMMA,",", 0, OP_XFY(1000)),
-        OP(TK_COLON,":",0,OP_XFY(950)),
-        OP(TK_VBAR,"|",0,OP_XFY(1100)),	
-        OP(TK_IFARROW,"->",0,OP_YFX(1050)),
-        TK(TK_CUT,"!"),				
+	TK(TK_SCOLON3,"$semicolon"),		/* needs cutmacro ?? */
+	TK(TK_COMMA3,"$comma"),				/* needs cutmacro ?? */
+	TK(TK_IFARROW3,"$arrow"),			/* needs cutmacro ?? */
+		OP(TK_SCOLON,";",  0,OP_XFY(1100)),
+		OP(TK_COMMA,",", 0, OP_XFY(1000)),
+		OP(TK_COLON,":",0,OP_XFY(950)),
+		OP(TK_VBAR,"|",0,OP_XFY(1100)),	
+		OP(TK_IFARROW,"->",0,OP_YFX(1050)),
+	TK(TK_CUT,"!"),				
 
 	/*
 	 * Done with the cutmacros
@@ -58,8 +57,8 @@
 	 * added, the table of icode numbers in compmath.c must be changed.
 	 */
 
-        TK(TK_HEAPUSED,"heapused"),
-        TK(TK_CPUTIME,"cputime"),
+	TK(TK_HEAPUSED,"heapused"),
+	TK(TK_CPUTIME,"cputime"),
 	TK(TK_REALTIME,"realtime"),
 	TK(TK_RANDOM,"random"),
 
@@ -71,24 +70,24 @@
 	 */
 
         OP(TK_NOT,"not",OP_FY(900),0),
-        TK(TK_BACKSLASH,"\\"),
+	TK(TK_BACKSLASH,"\\"),
 	TK(TK_ABS,"abs"),
-        TK(TK_SIN,"sin"),
+	TK(TK_SIN,"sin"),
 	TK(TK_SINH,"sinh"),
-        TK(TK_COS,"cos"),
-        TK(TK_COSH,"cosh"),
-        TK(TK_TAN,"tan"),
-        TK(TK_TANH,"tanh"),
-        TK(TK_ASIN,"asin"),
-        TK(TK_ACOS,"acos"),
-        TK(TK_ATAN,"atan"),
+	TK(TK_COS,"cos"),
+	TK(TK_COSH,"cosh"),
+	TK(TK_TAN,"tan"),
+	TK(TK_TANH,"tanh"),
+	TK(TK_ASIN,"asin"),
+	TK(TK_ACOS,"acos"),
+	TK(TK_ATAN,"atan"),
 	TK(TK_SQRT,"sqrt"),
-        TK(TK_EXP,"exp"),
-        TK(TK_EXP10,"exp10"),
-        TK(TK_LOG,"log"),
-        TK(TK_LOG10,"log10"),
-        TK(TK_FLOOR,"floor"),
-        TK(TK_ROUND,"round"),
+	TK(TK_EXP,"exp"),
+	TK(TK_EXP10,"exp10"),
+	TK(TK_LOG,"log"),
+	TK(TK_LOG10,"log10"),
+	TK(TK_FLOOR,"floor"),
+	TK(TK_ROUND,"round"),
 	TK(TK_CEIL,"ceil"),
 	TK(TK_ERF,"erf"),
 	TK(TK_ERFC,"erfc"),
@@ -98,7 +97,7 @@
 	TK(TK_Y0,"y0"),
 	TK(TK_Y1,"y1"),
 
-        TK(TK_TRUNC,"trunc"),
+	TK(TK_TRUNC,"trunc"),
 
 	/*
 	 * TK_PLUS and TK_MINUS may appear as both unary an binary operators
@@ -114,7 +113,7 @@
 	 * TK_HAT.
 	 */
 
-        TK(TK_ATAN2,"atan2"),
+    TK(TK_ATAN2,"atan2"),
 	TK(TK_FMOD,"fmod"),
 	TK(TK_HYPOT,"hypot"),
 	TK(TK_JN,"jn"),
@@ -125,7 +124,7 @@
         OP(TK_MOD,"mod",0,OP_YFX(300)),
         OP(TK_BAND,"/\\",0,OP_YFX(500)),
         OP(TK_BOR,"\\/",0,OP_YFX(500)),
-	OP(TK_BXOR,"xor",0,OP_YFX(500)),
+		OP(TK_BXOR,"xor",0,OP_YFX(500)),
         OP(TK_LSHFT,"<<",0,OP_YFX(400)),
         OP(TK_RSHFT,">>",0,OP_YFX(400)),
         OP(TK_SLASH,"/",0,OP_YFX(400)),
@@ -135,13 +134,13 @@
 	 * Rest of the tokens
 	 */
 
-        TK(TK_XFX,"xfx"),
-        TK(TK_XFY,"xfy"),
-        TK(TK_YFX,"yfx"),
-        TK(TK_FX,"fx"),
-        TK(TK_FY,"fy"),
-        TK(TK_XF,"xf"),
-        TK(TK_YF,"yf"),
+	TK(TK_XFX,"xfx"),
+	TK(TK_XFY,"xfy"),
+	TK(TK_YFX,"yfx"),
+	TK(TK_FX,"fx"),
+	TK(TK_FY,"fy"),
+	TK(TK_XF,"xf"),
+	TK(TK_YF,"yf"),
         OP(TK_RIF,":-", OP_FX(1200), OP_XFX(1200)),
         OP(TK_QUEST,"?-", OP_FX(1200),0),
         OP(TK_PRW,"-->",0,OP_XFX(1200)), /* Production Arrow */
@@ -154,30 +153,30 @@
         OP(TK_ALEQ,"@=<",0,OP_XFX(700)),
         OP(TK_AGEQ,"@>=",0,OP_XFX(700)),
         OP(TK_DOT,".",0,OP_XFY(800)),
-        TK(TK_LBRAC,"["),
-        TK(TK_RBRAC,"]"),
-        TK(TK_LPAREN,"("),
-        TK(TK_RPAREN,")"),
-        TK(TK_LISTING,"listing"),
-        TK(TK_CONSULT,"consult"),
-        TK(TK_RECONSULT,"reconsult"),
+	TK(TK_LBRAC,"["),
+	TK(TK_RBRAC,"]"),
+	TK(TK_LPAREN,"("),
+	TK(TK_RPAREN,")"),
+	TK(TK_LISTING,"listing"),
+	TK(TK_CONSULT,"consult"),
+	TK(TK_RECONSULT,"reconsult"),
         OP(TK_NEQ,"\\=",0,OP_XFX(700)),
-        TK(TK_USER,"user"),
+	TK(TK_USER,"user"),
 	TK(TK_BUILTINS,"builtins"),
-        TK(TK_NIL,"[]"),
-	OP(TK_MODULE,"module",OP_FX(1200),0),
-	OP(TK_USE,"use",OP_FX(1200),0),
-        TK(TK_ENDMOD,"endmod"),
-	OP(TK_EXPORT,"export",OP_FX(1200),0),
-        TK(TK_LCURLY,"{"),
-        TK(TK_RCURLY,"}"),
-        TK(TK_CURLYS,"{}"),
-        TK(TK_SQUOTE,"'"),
-        TK(TK_UNDERSCORE,"_"),
-        TK(TK_DBREF,"$dbref"),
-        TK(TK_DDOUBLE,"$double"),
+	TK(TK_NIL,"[]"),
+		OP(TK_MODULE,"module",OP_FX(1200),0),
+		OP(TK_USE,"use",OP_FX(1200),0),
+	TK(TK_ENDMOD,"endmod"),
+		OP(TK_EXPORT,"export",OP_FX(1200),0),
+	TK(TK_LCURLY,"{"),
+	TK(TK_RCURLY,"}"),
+	TK(TK_CURLYS,"{}"),
+	TK(TK_SQUOTE,"'"),
+	TK(TK_UNDERSCORE,"_"),
+	TK(TK_DBREF,"$dbref"),
+	TK(TK_DDOUBLE,"$double"),
         OP(TK_NOTAGAIN,"\\+",OP_FY(900),0),
-        TK(TK_EXPAND,"expand"),
+	TK(TK_EXPAND,"expand"),
 	TK(TK_ALSCD,"als$cd"),
 	TK(TK_STREAM_DESCRIPTOR,"stream_descriptor"),
 	TK(TK_SYMBOL,"symbol"),
@@ -282,4 +281,4 @@
 	 * must be changed as appropriate.  (Look at declaration of ts_next).
 	 */
 
-        TK(TK_EOF,"end_of_file")
+	TK(TK_EOF,"end_of_file")

@@ -208,15 +208,25 @@ ss_load_dot_alspro(_).
  *------------------------------------------------*/
 print_banner(L) 
 	:-
-	dmember(prologName = Name, L),
+	system_name(L, Name),
+	dmember(os_variation = OSVar, L),
 	dmember(prologVersion = Version, L),
 	dmember(wins=WinsName, L),
 	name(WinsName, [InC | WNCs]),
 	UInC is InC - 32,
 	name(WBan, [UInC | WNCs]),
 	!,
-	als_advise('%s Version %s (%s)\n   Copyright (c) 1987-94 Applied Logic Systems, Inc.\n\n',
-		   [Name,Version,WBan]).
+	als_advise('%s Version %s [%s] (%s)\n', [Name,Version,OSVar,WBan]),
+	als_advise('   Copyright (c) 1987-95 Applied Logic Systems, Inc.\n\n',[]).
+
+system_name(L, Name)
+	:-
+	dmember(processor = Proc, L),
+	system_name_proc(Proc, Name).
+
+system_name_proc('port_thread', 'ALS Prolog (Threaded)') :-!.
+system_name_proc('port_byte', 'ALS Prolog (Byte)') :-!.
+system_name_proc(_, 'ALS Prolog (Native)').
 
 /*-------------------------------------------------------------------------*
  | prolog_shell is a top-level shell for submitting queries to the prolog
@@ -382,6 +392,7 @@ shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars, Status)
 		sio:input_stream_or_alias_ok(InStream, RealInStream),
 		stream_blocking(RealInStream,OldBlocking),
 		set_stream_blocking(RealInStream,true),
+%pbi_write(catch(do_shell_query(Goal))),pbi_nl,
 		catch(do_shell_query(Goal,NamesOfVars,Vars,InStream,OutStream),
 	      		Reason,
 	      		( shell_exception(Reason)

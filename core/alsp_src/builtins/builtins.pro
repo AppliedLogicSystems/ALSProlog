@@ -696,6 +696,13 @@ build_primitive_closures(i386) :-
 	module_closure(',',2,'$comma'),
 	module_closure('->',2,'$arrow'),
 	module_closure(call,1,'$colon').
+
+build_primitive_closures('port_byte') :-
+	build_primitive_closures(portable).
+
+build_primitive_closures('port_thread') :-
+	build_primitive_closures(portable).
+
 build_primitive_closures(portable) :-
 	!,
 	module_closure(';',2,'$semicolon'),

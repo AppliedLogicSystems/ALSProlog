@@ -1,6 +1,6 @@
 /*=================================================================*
  |			mem.c                
- |      Copyright (c) 1992-1994 Applied Logic Systems, Inc.
+ |      Copyright (c) 1992-95 Applied Logic Systems, Inc.
  |
  |			-- memory allocation
  |
@@ -70,7 +70,7 @@ extern	int	mprotect	PARAMS(( caddr_t, size_t, int ));
 #endif
 static	void	release_bottom_stack_page	PARAMS(( void ));
 
-/*
+/*-------------------------------------------------------------------*
  * stack_overflow is a signal handler for catching stack overflows.
  *
  * With the memory allocated with the mmap call (see
@@ -88,7 +88,7 @@ static	void	release_bottom_stack_page	PARAMS(( void ));
  * reduce the stack requirements (via an abort or throw probably) and
  * reprotect the bottom page so that a future stack overflow will be
  * caught.
- */
+ *-------------------------------------------------------------------*/
 
 
 #if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
@@ -114,21 +114,21 @@ stack_overflow(signum, code, scp, addr)
 
     if (bottom_stack_page_is_protected) {
 
-	/*
+	/*-------------------------------------------------------------*
 	 * Make bottom stack page readable/writable so execution may
 	 * continue for a little ways (enough to run Prolog's interrupt
 	 * handler)
-	 */
+	 *-------------------------------------------------------------*/
 
 	release_bottom_stack_page();
 
-	/*
+	/*-------------------------------------------------------------*
 	 * Inform the prolog system that a signal has occurred. Note
 	 * that SunOS and SysVR4 have different signal mechanisms. In
 	 * a few years from now, these versions should be combined
 	 * well enough that we can replace it with a single piece of
 	 * code.  But for now, it is just plain ugly.
-	 */
+	 *-------------------------------------------------------------*/
 
 #if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
 	signal_handler(ALSSIG_STACK_OVERFLOW, siginf, sigcon);
@@ -141,12 +141,12 @@ stack_overflow(signum, code, scp, addr)
     }
     else {
 
-	/*
+	/*-------------------------------------------------------------*
 	 * Let error occur again and core dump normally.  This could
 	 * happen if we have some other problem with our code which
 	 * causes a bus error.  In this case, we would like to be
 	 * able to examine the core file produced by the system.
-	 */
+	 *-------------------------------------------------------------*/
 
 
 #ifdef HAVE_SIGACTION
@@ -192,11 +192,11 @@ allocate_prolog_heap_and_stack(size)
     act.sa_flags = SA_ONSTACK;
     (void) sigaction(SIGBUS, &act, 0);	/* establish signal handler */
     (void) sigaction(SIGSEGV, &act, 0);
-    /*
+    /*-------------------------------------------------------------*
      * Note: We might have to catch SIGSEGV in the above call to sigaction.
      * I don't know what the behavior will be for SVR4.
      *                                  Kev, 12/18/92
-     */
+     *-------------------------------------------------------------*/
 #elif defined(HAVE_SIGVEC)
     struct sigstack si;
     struct sigvec v;
@@ -213,11 +213,11 @@ allocate_prolog_heap_and_stack(size)
 #endif /* HAVE_SIGACTION, HAVE_SIGVEC */
 
 
-    /*
+    /*-------------------------------------------------------------*
      * Set pgsize to the page size for the OS.  Having the pgsize variable
      * will let us write our code without having to call getpagesize over
      * and over again.  
-     */
+     *-------------------------------------------------------------*/
 
 #ifdef _SC_PAGESIZE
     pgsize = sysconf(_SC_PAGESIZE);
@@ -225,15 +225,15 @@ allocate_prolog_heap_and_stack(size)
     pgsize = getpagesize();
 #endif  /* _SC_PAGESIZE */
 
-    /*
+    /*-------------------------------------------------------------*
      * Open /dev/zero for read/write access.  /dev/zero is essentially a
      * file of infinitely (or at least as many as we need) zeros.
-     */
+     *-------------------------------------------------------------*/
 
     if ((fd = open("/dev/zero", O_RDWR)) == -1)
 	fatal_error(FE_DEVZERO, 0);
 
-    /*
+    /*-------------------------------------------------------------*
      * Call mmap to allocate the memory and map it to /dev/zero.  Note
      * that we are using the MAP_PRIVATE flag or'd with the MAP_FIXED
      * flag.
@@ -249,7 +249,7 @@ allocate_prolog_heap_and_stack(size)
      *
      * One advantage of having a fixed location for this region of memory
      * is that it will much easier to implement saved states.
-     */
+     *-------------------------------------------------------------*/
 
     retval = (PWord *) mmap((caddr_t) STACKSTART,
 			    size * sizeof (PWord) + NPROTECTED * pgsize,
@@ -267,10 +267,10 @@ allocate_prolog_heap_and_stack(size)
     if (retval == (PWord *) - 1)
 	fatal_error(FE_BIGSTACK, 0);
 
-    /*
+    /*-------------------------------------------------------------*
      * Protect the bottom stack page.  Note that we allocated extra space
      * for this page in the mmap call above.
-     */
+     *-------------------------------------------------------------*/
 
     protect_bottom_stack_page();
 
@@ -294,7 +294,7 @@ release_bottom_stack_page()
 }
 
 #elif defined(MACH_SUBSTRATE)
-/*------- Operating systems with Mach as the substrate -------*/
+	/*------- Operating systems with Mach as the substrate -------*/
 
 #include <mach/mach.h>
 
@@ -393,11 +393,11 @@ release_bottom_stack_page()
 #else
 /*------ All other operating systems and architectures --------*/
 
+#if	defined(arch_m88k) || defined(arch_m68k)
+void stack_overflow(void);
 
-
-#ifdef	arch_m88k
 void
-stack_overflow()
+stack_overflow(void)
 {
     fatal_error(FE_STKOVERFLOW, 0);
 }
@@ -411,7 +411,7 @@ allocate_prolog_heap_and_stack(size)
     size_t size;			/* number of PWords to allocate */
 {
 #ifdef MacOS
-    PWord *retval = (PWord *) malloc(sizeof (PWord) * size + 4);
+    PWord *retval = (PWord *) malloc(sizeof (PWord) * (size) + 4);
     retval = (PWord *)((long)retval + 4 - ((long)retval & 3));
 #else
     PWord *retval = (PWord *) malloc(sizeof (PWord) * size);
@@ -973,11 +973,11 @@ ss_restore_state(filename,offset)
     /* Check integrity information */
     
     if (hdr.integ_als_mem != &als_mem ||
-	hdr.integ_als_mem_init != als_mem_init ||
-	hdr.integ_w_unify != w_unify ||
-	strcmp(hdr.integ_version_num, SysVersionNum) != 0 ||
-	strcmp(hdr.integ_processor, ProcStr) != 0 ||
-	strcmp(hdr.integ_minor_os, MinorOSStr) != 0)
+		hdr.integ_als_mem_init != als_mem_init ||
+		hdr.integ_w_unify != w_unify ||
+		strcmp(hdr.integ_version_num, SysVersionNum) != 0 ||
+		strcmp(hdr.integ_processor, ProcStr) != 0 ||
+		strcmp(hdr.integ_minor_os, MinorOSStr) != 0)
 	fatal_error(FE_SS_INTEGRITY,0);
 
 #ifdef	HAVE_MMAP

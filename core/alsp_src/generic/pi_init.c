@@ -4,6 +4,8 @@
  |
  |	- Foreign interface initialization
  |		- a segment of the old pimain.c
+ | Revision History:
+ |	11/16/94, C. Houpt -- Added header file with prototype.
  *=====================================================================*/
 
 #include "pi_init.h"

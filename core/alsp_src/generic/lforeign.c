@@ -1,32 +1,25 @@
-/*
- * loadforeign.c                -- dynamically load a .o file
- *      Copyright (c) 1987-1993 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 6/6/87
- * Acknowledgements:
- *      The ffasl.c file of the Franz Lisp System provided a template from
- *      which this loader was created.
- *
- * Revision History:
- *      Revised: mm/dd/yy       Who             Why and What
- *      Revised: mm/dd/yy       Who             Why and What
- */
-
+/*=====================================================================*
+ |		loadforeign.c
+ |      Copyright (c) 1987-1995 Applied Logic Systems, Inc.
+ |
+ |		-- dynamically load a .o file
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 6/6/87
+ | Acknowledgements:
+ |      The ffasl.c file of the Franz Lisp System provided a template from
+ |      which this loader was created.
+ *=====================================================================*/
 #include "defs.h"
 
 #ifdef DynamicForeign
 
-extern char imagename[];	/* name of image we are running - initial
-				 * path
-				 */
-extern char imagedir[];		/* directory containing image with final
-				 * slash
-				 */
+extern char imagename[];	/* name of image we are running - initial path */
+extern char imagedir[];		/* directory containing image with final slash */
 
 typedef void (*PFV) PARAMS(( void ));		/* A function pointer type */
 
-#if    defined(HAVE_DLOPEN)
+#if defined(HAVE_DLOPEN)
 
 #include <dlfcn.h>
 
@@ -158,12 +151,12 @@ foreign_shutdown()
 
 #elif defined(HAVE_LIBLD)
 
-/*
+/*-----------------------------------------------------------------------*
  * System V Coff File Loader
  *
  * The following code was initially supplied by Darin Deforest, but has been
  * substantially rewritten and reorganized by Kevin Buettner
- */
+ *-----------------------------------------------------------------------*/
 
 /* These cause problems on certain systems, so undef them */
 

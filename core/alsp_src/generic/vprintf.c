@@ -1,31 +1,29 @@
-/*
- * vprintf.c            -- variable printf
- *      Copyright (c) 1985 by Kevin A. Buettner
- *      Copyright (c) 1986-1993 by Applied Logic Systems, Inc.
- *
- * Program Author: Kevin A. Buettner
- * Creation Date: 10/6/85
- * Revision History:
- *      Revised:  07/22/90      Kev     -- changed name from vprintf to
- *                                         PI_printf as the name conflicted
- *                                         with a unix section 3 function and
- *                                         there were also numerous problems
- *                                         with getting doubles working on 88k
- *                                         machines
- *      Revised:  07/12/93      Kev     -- changed PI_printf to PI_oprintf
- *                                         in order to accomodate new stream
- *                                         I/O.  Removed bufwrite support.
- *                                         This functionality is now performed
- *                                         via the new stream I/O package.
- */
+/*===================================================================*
+ |		vprintf.c
+ |	Copyright (c) 1985 by Kevin A. Buettner
+ |	Copyright (c) 1986-1995 Applied Logic Systems, Inc.
+ |
+ |		-- variable printf
+ | Program Author: Kevin A. Buettner
+ | Creation Date: 10/6/85
+ | 07/22/90 - K.Buettner -- changed name from vprintf to PI_printf as 
+ |						 the name conflicted with a unix section 3 function 
+ |						 and there were also numerous problems with getting 
+ |						 doubles working on 88k machines
+ | 07/12/93 - K.Buettner -- changed PI_printf to PI_oprintf in order to 
+ |						 accomodate new stream I/O.  Removed bufwrite support:
+ |                       Functionality now performed via stream I/O package.
+ *===================================================================*/
 
 #include "defs.h"
+
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
+
 #else
 #include <varargs.h>
-#endif
 
+#endif
 
 /*
  * PI_oprintf uses the varargs package and vfprintf to print to

@@ -126,7 +126,7 @@ gfiles_h = \
 	tokens.h \
 	tokini.h \
 	tokini2.h \
-	types.h \
+	alstypes.h \
 	varproc.h \
 	version.h \
 	wamops.h \
@@ -181,7 +181,7 @@ icode.h:	icodedef.h generate/icode.c
 defs_h = aconfig.h alloc.h alspi.h alssig.h built.h \
 	chpt.h config.h defs.h fatal.h fileio.h \
 	lexan.h missing.h mtypes.h parser.h \
-	tokens.h types.h \
+	tokens.h alstypes.h \
 	wamops.h wamops0.h winter.h wintidx.h \
 	
 

@@ -1,12 +1,12 @@
-/*
- * wintidx.h		-- indices of the Prolog registers in the wm_regs 
- *			   structure.
- *	Copyright (c) 1988-1993 by Applied Logic Systems, Inc.
- * Author:  Kevin A. Buettner
- * Creation: 7/1/88
- * Revision History:
- *
- */
+/*=================================================================*
+ |		wintidx.h		
+ | Copyright (c) 1988-1995 by Applied Logic Systems, Inc.
+ |
+ |		-- indices of the Prolog registers in the wm_regs structure.
+ |
+ | Author:  Kevin A. Buettner
+ | Creation: 7/1/88
+ *=================================================================*/
 
 #ifdef arch_m88k
 #define wm_CP_idx 0

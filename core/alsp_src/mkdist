@@ -11,6 +11,7 @@
 #			-bld BP
 #		where BP is an absolute path to the build directory;
 #	2.	You are located in the top level of the build directory
+#		[e.g., in builds/sparc_sunos4.3]
 #		and you use a path to this file (in the top level of
 #		alsp_src); in this case , you don't need to pass the
 #			-bld BP
@@ -37,5 +38,5 @@ echo alsp_dir = $alsp_dir
 ## AT ALS, there has to be a  working alspro on the path; use it:
 
 echo calling: alspro $alsp_dir/pconfig/pconfig -g setup_dist -p "$*"
-alspro $alsp_dir/pconfig/pconfig -g setup_dist -p "$@"
-#alspro $alsp_dir/pconfig/pconfig -p "$@"
+#alspro $alsp_dir/pconfig/pconfig -g setup_dist -p "$@"
+alspro $alsp_dir/pconfig/pconfig -p "$@"

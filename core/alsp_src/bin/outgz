@@ -1,0 +1,5 @@
+# this tars the entire alsp_src tree to: /mailbox3/tmp/alsp_out.tar
+tar -cvf /mailbox3/tmp/alsp_out.tar  aclocal.m4 bin bld-natv bld-port \
+builtins cfgs cinterf config.d.in config.guess configure configure.in \
+generate generic install.sh library makefile.in misc mkdist pconfig \
+port problems sharbld sharme sparc tests utils wins

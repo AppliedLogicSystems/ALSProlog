@@ -1,3 +1,17 @@
+Sat Mar 25 1995 Ken Bowen
+	
+	* Finished bug fixes resulting from mac merges in generic and port;
+	* Changed main.c to no longer utilize SysName and relatives; instead,
+	  prolog shell in blt_shl.pro determines appropriate banner from
+	  processor string, etc.; as a consequence, version.h is now
+      almost empty.
+	* Begin structural change to alsp_src tree: add subdir cfgs for
+	  configuration information; it contains subdirs: unix, dos, mac, ...;
+	  Sources for configuration scripts will reside down here appropriately;
+	  Eventually (todo) modify configure.in so that configure looks for
+	  all the things it needs in cfgs/unix.
+    * Committed changes as version 1.70B.
+
 Wed March 1 1995 Ken Bowen
 
    * Created generic/wd_size.h to record word-size-specific info (32/64);

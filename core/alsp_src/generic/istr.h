@@ -1,7 +1,9 @@
-/*
- * istr.h			-- icode command instruction names
- *	Copyright (c) 1993 Applied Logic Systems, Inc.
- */
+/*===============================================================*
+ |		istr.h
+ |	Copyright (c) 1993-95 Applied Logic Systems, Inc.
+ |
+ |		-- icode command instruction names
+ *===============================================================*/
 
 char *negic[] = {
 	"IC_INIT",

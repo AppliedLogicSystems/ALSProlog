@@ -1,17 +1,16 @@
 /*=============================================================*
- *		bdb.c   
- * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986-94 by Applied Logic Systems
- *
- *		-- Database Prolog builtins defined in C.
- *
- * Program Author:  Kevin A. Buettner
- * Creation:  11/14/84
- * Revision History: (fixes, not addition of new builtins)
- *   06/28/85: K. Buettner  -- Conversion to wam and compiled prolog
- *   09/12/85: K. Buettner  -- arithmetic predicates moved to separate file.
- *   01/28/86: K. Buettner  -- IBM PC conversion
- *   05/04/89: K. Hughes and K. Buettner -- split off from built.c
+ |		bdb.c   
+ | Copyright (c) 1985 by Kevin A. Buettner
+ | Copyright (c) 1986-94 by Applied Logic Systems
+ |
+ |		-- Database Prolog builtins defined in C.
+ |
+ | Program Author:  Kevin A. Buettner
+ | Creation:  11/14/84
+ | 06/28/85: K. Buettner  -- Conversion to wam and compiled prolog
+ | 09/12/85: K. Buettner  -- arithmetic predicates moved to separate file.
+ | 01/28/86: K. Buettner  -- IBM PC conversion
+ | 05/04/89: K. Hughes, K. Buettner -- split off from built.c
  *=============================================================*/
 
 /*-------------------------------------------
@@ -134,7 +133,6 @@ pbi_asserta()
     FAIL;
 }
 
-
 int
 pbi_assertz()
 {				/* assertz(Module,Clause,Ref,ReconsultFlag) */
@@ -238,8 +236,6 @@ doassert(which, mod, rule, reconsult_flag)
 
 }
 
-
-
 int
 pbi_erase()
 {				/* $erase(DBRef)        */
@@ -307,7 +303,6 @@ pbi_index_proc()
     SUCCEED;
 }
 
-
 int
 pbi_massively_abolish_clausegroup()
 {				/* massively_abolish_clausegroup(CG) */
@@ -329,8 +324,6 @@ pbi_massively_abolish_clausegroup()
     (void) w_dbprotect(odbrs);
     SUCCEED;
 }
-
-
 
 int
 pbi_nextproc()
@@ -355,8 +348,7 @@ pbi_nextproc()
     FAIL;
 }
 
-
-/*
+/*-------------------------------------------------------------------------
  * pbi_procinfo is called from Prolog as $procinfo(N,M,P,A,DBRef,ProcType)
  *
  * If N is instantiated to a valid name index, the module, procedure name,
@@ -365,7 +357,7 @@ pbi_nextproc()
  * obtained from this information and (if valid) are unified.  This is an
  * enhanced version of Keiths original procedure to make clause and retract
  * (much) more efficient.
- */
+ *------------------------------------------------------------------------*/
 
 #define PROLOG_PROC 		0
 #define BUILTIN_PROC 		1
@@ -440,7 +432,6 @@ pbi_procinfo()
 
 }
 
-
 int
 pbi_clauseinfo()
 {
@@ -507,7 +498,6 @@ pbi_exported_proc()
 	FAIL;
 }
 
-
 int
 pbi_next_module()
 {				/* $next_module(N,NN,Module,UseList) */
@@ -532,7 +522,6 @@ pbi_next_module()
 	FAIL;
 }
 
-
 int
 pbi_listasm_clause()
 {				/* $listasm_clause(DBRef) */
@@ -540,12 +529,10 @@ pbi_listasm_clause()
     int   t1;
     PWord na;
     long *ca;
-/*    int   codesize;   */
 
     w_get_An(&v1, &t1, 1);
 
     if ((ca = validate_dbref(v1, t1, &na)) != 0) {
-/*	codesize = (int) ((sizeCode(ca) + (WCI_CLAUSECODE - WCI_CHOICECODE)) * (sizeof (long) / sizeof (Code)));  */
 	list_asm(choiceCode(ca),
 		     (int) ((sizeCode(ca) + (WCI_CLAUSECODE - WCI_CHOICECODE)) * 
 					(sizeof (long) / sizeof (Code))));
@@ -576,10 +563,8 @@ pbi_listasm_ntblentry()
 	    SUCCEED;
 	}
     }
-
     FAIL;
 }
-
 
 int
 pbi_firstargkey()
@@ -638,7 +623,6 @@ pbi_firstargkey()
     else
 	FAIL;
 }
-
 
 int
 pbi_resolve_module()
@@ -715,7 +699,6 @@ pbi_pop_clausegroup()
 	FAIL;
 }
 
-
 /* Test stuff (kev) */
 
 int
@@ -728,7 +711,7 @@ pbi_collectcode()
 #endif
     SUCCEED;
 }
-
+/* End Test stuff (kev) */
 
 int
 pbi_libbreak()
