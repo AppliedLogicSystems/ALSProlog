@@ -356,6 +356,19 @@ show_variable(Var)
 export show_interval_binding/4.
 show_interval_binding(N,S,VPairs,Stream)
 	:-
+	reified_interval(S, SPrt),
+	!,
+	nl(Stream),
+	write_term(Stream,'%lettervar%'(N)=SPrt,[]).
+
+show_interval_binding(N,S,VPairs,Stream)
+	:-
+	show_delay_binding(N,S,VPairs,Stream).
+
+
+export reified_interval/2.
+reified_interval(S, SPrt)
+	:-
 	var(S),
 	extract_interval_bounds(S, LArg, UArg, Type),
 	epsilon_show(Eps),
@@ -369,14 +382,14 @@ show_interval_binding(N,S,VPairs,Stream)
 		)
 		;
 		SPrt = [LArg, UArg]
-	),
-	nl(Stream),
-	!,
-	write_term(Stream,'%lettervar%'(N)=SPrt,[]).
-
-show_interval_binding(N,S,VPairs,Stream)
+	).
+	
+export reified_interval_list/2.
+reified_interval_list([], []).
+reified_interval_list([S | Ss], [SPrt | SPrts])
 	:-
-	show_delay_binding(N,S,VPairs,Stream).
+	reified_interval(S, SPrt),
+	reified_interval_list(Ss, SPrts).
 
 export extract_interval_bounds/3.
 extract_interval_bounds(S, LArg, UArg)

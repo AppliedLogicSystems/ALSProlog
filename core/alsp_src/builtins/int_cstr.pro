@@ -611,7 +611,8 @@ export '$iterate'/1.
 	Goal =.. [OP | Args],
 	prim_op_code(OP,OpCd),
 
-	XFGoal =.. [pop, OpCd,Z,X,Y,LinkArg],
+%	XFGoal =.. [pop, OpCd,Z,X,Y,LinkArg],
+	XFGoal =.. [pop, OpCd,Z,X,Y,0],
 	fixup_iter(Args, Z,X,Y,XFGoal),
 	(debug_system_on(cstr_isv) ->
 		exhibit_var('Z', Z),
@@ -624,7 +625,8 @@ export '$iterate'/1.
 %printf_opt('>>%t--XFGoal= %t\n',[Goal,XFGoal], [lettervars(false) ,line_length(100)]),
 %show_used_by(['Z'-Z,'X'-X,'Y'-Y]),
 	!,
-	'$iter_link_net'(OpCd,Z,X,Y,XFGoal).
+%	'$iter_link_net'(OpCd,Z,X,Y,XFGoal).
+	ilnk_net2(XFGoal).
 
 fixup_iter([Z,X], Z,X,0,XFGoal)
 	:-
