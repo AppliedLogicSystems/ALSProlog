@@ -471,6 +471,10 @@ do_shell_query(end_of_file,_,_,InStream,_)
 	!,
 	fail.
 
+do_shell_query((?- Goal0),VarNames,Vars,InStream,OutStream) 
+	:-!,
+	do_shell_query(Goal0,VarNames,Vars,InStream,OutStream).
+
 do_shell_query(Goal0,VarNames,Vars,InStream,OutStream) 
 	:-
 	gc,			%% Let user start fresh

@@ -24,3 +24,9 @@ s/echo >>/echo. >>/
 /cp alsmics/ a\
 	coff2exe alsmics \
 	-cp alsmics.exe alsdir/als-mics.exe
+
+s/^BLDTRUN=/BLDTRUN=go32 /
+s/^LEXRUN=/LEXRUN=go32 /
+s/^SIORUN=/SIORUN=go32 /
+s/^ICODERUN=/ICODERUN=go32 /
+

@@ -99,7 +99,8 @@
 		macro_expand_files/3, macro_expand/2], [] ).
 
 :-libactivate(builtins,['library', cmdline],
-	[get_cmdline_vals/1,cmdline_vals/2, eat_cmd_line/3 ], [] ).
+	[get_cmdline_vals/1,cmdline_vals/2, eat_cmd_line/3,
+		pull_out_nullswitches/3 ], [] ).
 
 :-libactivate(builtins,['library',xlists],
 	[xlist_init/1, xlist_make/3,

@@ -7,4 +7,3 @@
 
 #define UNIX	1
 #define OSStr "unix"
-#define MinorOSStr "djgpp"

@@ -2,7 +2,6 @@
 #	
 #	Builds alsdir on unix
 #
-srcdir=/net/mailbox3/alsp_src
 LN_S="ln -s"
 echo Building alsdir using source = $srcdir
 

@@ -96,4 +96,26 @@ eat_cmd_line([['-null_switch',Item] | RestCommandLine],
 	eat_cmd_line(RestCommandLine, RestItems, CmdLineTail).
 eat_cmd_line(CmdLineTail, [], CmdLineTail).
 
+/*!-----------------------------------------------------------------------*
+ |	pull_out_nullswitches/3
+ |	pull_out_nullswitches(SwitchVals, Items, ReducedSwitchVals)
+ |	pull_out_nullswitches(+, -, -)
+ |	
+ |	- extracts all items from cmd line not preceeded by a switch
+ |
+ |	SwitchVals 		  - a list produced by get_cmdline_vals
+ |	Items 			  = bagof(X, member(X, ['-null_switch',X], SwitchVals)
+ |	ReducedSwitchVals = The "rest of" switch vals
+ *!-----------------------------------------------------------------------*/
+
+pull_out_nullswitches([], [], []).
+pull_out_nullswitches([['-null_switch' , Item] | SwitchVals], 
+			[Item | Items], ReducedSwitchVals)
+	:-
+	pull_out_nullswitches(SwitchVals, Items, ReducedSwitchVals).
+
+pull_out_nullswitches([Switch | SwitchVals], Items, [Switch | ReducedSwitchVals])
+	:-
+	pull_out_nullswitches(SwitchVals, Items, ReducedSwitchVals).
+
 endmod.

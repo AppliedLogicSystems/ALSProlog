@@ -34,6 +34,10 @@
 #define SYMESZ sizeof(struct syment)
 #endif
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 #undef round
 #define round(x,s) ((((long) (x) -1) & ~(long)((s)-1)) + (s))
 
@@ -132,11 +136,11 @@ fprintf(stderr,"Starting coffmics main...\n");
 
 fprintf(stderr,"Starting coffmics Step 1\n");
     
-    iifd = open(iiname, O_RDONLY);
+    iifd = open(iiname, O_RDONLY|O_BINARY);
     if (iifd < 0)
 	fe("Error opening %s for input", iiname);
     
-    oifd = open(oiname, O_RDWR|O_CREAT|O_TRUNC, 0777);
+    oifd = open(oiname, O_RDWR|O_CREAT|O_TRUNC|O_BINARY, 0777);
     if (oifd < 0)
 	fe("Error opening %s for output",oiname);
     
@@ -157,7 +161,7 @@ fprintf(stderr,"Done Step 1: %s\n",iiname);
      * Step 2:  Open the save state file and stat it for future processing
      */
     
-    ssfd = open(ssname, O_RDONLY);
+    ssfd = open(ssname, O_RDONLY|O_BINARY);
     if (ssfd < 0)
 	fe("Error opening saved state file %s for read access", ssname);
     if (fstat(ssfd, &ss_statbuf) < 0)
@@ -173,8 +177,8 @@ fprintf(stderr,"Done Step 2: %s\n",ssname);
 	|| read(oifd, &fhdr, sizeof (struct filehdr)) < 0
 	|| read(oifd, &ehdr, sizeof (struct aouthdr)) < 0 )
 #else
-	|| read(oifd, &fhdr, sizeof (FILHSZ)) < 0
-	|| read(oifd, &ehdr, sizeof (AOUTSZ)) < 0 )
+	|| read(oifd, &fhdr, FILHSZ) < 0
+	|| read(oifd, &ehdr, AOUTSZ) < 0 )
 #endif
 	fe("Cannot read header information",0);
     

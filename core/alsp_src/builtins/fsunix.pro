@@ -616,7 +616,7 @@ make_reg_exp([C | RestPattern],[C | RestRegex])
 	:-
 	make_reg_exp(RestPattern,RestRegex).
 
-%/*************************
+/*************************
 /*!--------------------------------------------------------------
  |	canon_path/2
  |	canon_path(SrcPath,CanonPath)
@@ -651,7 +651,7 @@ strip_last([H | PathList], [H | ParPathList])
 	:-
 	strip_last(PathList, ParPathList).
 
-%*************************/
+*************************/
 
 
 

@@ -1,3 +1,13 @@
+Fri Apr 07 1995 Ken Bowen
+
+	* generic/mem.c and utils/coffmics.c: Added O_BINARY flag to all
+	  binary opens to prevent data corruption in dos/djgpp version;
+
+	* generic/bos.c: In tempname: changed prefix from "apt" to "pt" to
+	  handle short DOS file names.
+
+	* DOS/DJGPP version (byte/threaded) working; Committed as version 1-71B
+
 Fri Mar 31 1995 Ken Bowen
 
 	* Added two new configuration files overall in the system: (1) oconfig.h

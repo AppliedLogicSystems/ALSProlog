@@ -594,30 +594,29 @@ assert_command_line(count, args)
     to--;			/* back up over the null terminator */
 
     while (count--) {
-	from = *args;
-	*args++ = (char *) 0;
-	*to++ = '\'';
-	while ( (c = *from++) ) {
-	    if (c == '\'') {
+		from = *args;
+		*args++ = (char *) 0;
 		*to++ = '\'';
-	    }
-	    *to++ = c;
-	}
-	*to++ = '\'';
-	if (count) {
-	    *to++ = ',';
-	}
+		while ( (c = *from++) ) {
+	    	if (c == '\'') {
+				*to++ = '\'';
+	    	}
+	    	*to++ = c;
+		}
+		*to++ = '\'';
+		if (count) {
+	    	*to++ = ',';
+		}
     }
 
     from = "]),_,0)";
-    while ( (*to++ = *from++) ) /* copy trailing part of command */
+    while ( (*to++ = *from++) )    /* copy trailing part of command */
 	;
-    /*
-     * Assert the new command line.
-     */
+
+    	/* Assert the new command line */
 
     if (!exec_query_from_buf(command)) {
-	fatal_error(FE_ASSERT_COM, 0);
+		fatal_error(FE_ASSERT_COM, 0);
     }
 }
 

@@ -146,6 +146,11 @@ OTHERFILES = alsglue.c
 
 GENFILES = 	tokens.h tokini2.h lexinit.h siolex.h
 
+BLDTRUN=./bldtok
+LEXRUN=./lexinit >lexinit.h
+SIORUN=./sioinit >siolex.h
+ICODERUN=./icode >icode.h
+
 generated: ${GENFILES}
 
 
@@ -153,22 +158,22 @@ tokini2.h:	tokens.h
 
 tokens.h:	generate/bldtok.c tokini.h parser.h
 	${CC} $(CPPFLAGS) -o bldtok $(srcdir)/generic/generate/bldtok.c
-	./bldtok
+	$(BLDTRUN)
 	-rm bldtok
 
 lexinit.h:	generate/lexinit.c lexan.h
 	$(CC) $(CPPFLAGS) -o lexinit $(srcdir)/generic/generate/lexinit.c
-	./lexinit >lexinit.h
+	$(LEXRUN)
 	-rm ./lexinit
 
 siolex.h:	generate/sioinit.c bsio.h
 	$(CC) $(CPPFLAGS) -o sioinit $(srcdir)/generic/generate/sioinit.c
-	./sioinit >siolex.h
+	$(SIORUN)
 	-rm ./sioinit
 
 icode.h:	icodedef.h generate/icode.c
 	$(CC) $(CPPFLAGS) -o icode $(srcdir)/generic/generate/icode.c
-	./icode >icode.h
+	$(ICODERUN)
 	-rm -rf ./icode
 
 #

@@ -28,7 +28,12 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+
 #include <errno.h>
+
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 static	void	coredump_cleanup	PARAMS(( int ));
 
@@ -883,7 +888,7 @@ ss_save_state(filename)
 #ifdef MacOS
     ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC);
 #else
-    ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+    ssfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0777);
 #endif
     if (ssfd < 0)
 	return 0;
@@ -956,7 +961,7 @@ ss_restore_state(filename,offset)
     struct am_header hdr;
 
     /* Open the file */
-    ssfd = open(filename, O_RDONLY);
+    ssfd = open(filename, O_RDONLY|O_BINARY);
     if (ssfd < 0)
 	fatal_error(FE_SS_OPENERR,(long)filename);
 

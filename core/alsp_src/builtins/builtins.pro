@@ -734,7 +734,7 @@ load_builtins(File) :-
 	sys_searchdir(Path),
 	'$atom_concat'('builtins/',File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
-%%pbi_write(FileAndPath),pbi_nl,
+%pbi_write(FileAndPath),pbi_nl,
 	'$load'(FileAndPath, 0),
 	!.
 
@@ -742,7 +742,11 @@ load_builtins(File) :-
 :-	auto_use(debugger).
 :-	auto_use(xconsult).
 
-:-	load_builtins(sio_rt),		%% for getting op declarations
+:- 	command_line(CL), 
+	dmember('-nobuilt',CL),!	% ,pbi_write(nobuilts), pbi_nl
+	;
+    	%% pbi_write(loading_builts),pbi_nl,
+	load_builtins(sio_rt),		%% for getting op declarations
 	load_builtins(blt_evt),		%% need error checking code early
 	load_builtins(blt_term),
 	load_builtins(blt_db),		%% must come before blt_sys
@@ -767,21 +771,25 @@ load_builtins(File) :-
 	load_builtins(blt_pckg),
 	load_builtins(blt_shl).
 
-
 %% set up the operators (stream io stuff needs to be loaded in order to
 %% 			 set up the operators)
-:-
+nops 
+	:-
 	op(900,fy,not),
 	op(900,fy,\+).
 
 
-:-	sys_env(_,_,Proc),
+ld_is
+	:-	
+	sys_env(_,_,Proc),
     	(   (Proc = sparc ; Proc = m88k; Proc = m68k)
 	->  load_builtins(blt_is)
     	;   true
         ).
 
-:-	sys_env(OS,_,_),
+ld_fs
+	:-	
+	sys_env(OS,_,_),
 	(   OS = unix -> load_builtins(fsunix)
 	;   OS = dos  -> load_builtins(fsdos386)
 	;	OS = macos -> load_builtins(fsmac)
@@ -789,17 +797,32 @@ load_builtins(File) :-
 	).
 
 
-:-	sys_env(_,_,Proc),
+ld_mth
+	:-	
+	sys_env(_,_,Proc),
 	(   Proc = m88k
 	->  load_builtins(blt_mth88)
 	;   true
 	).
 
-:-	als_system(Sys),
+ld_wins
+	:-	
+	als_system(Sys),
 	dmember(wins=WinSys,Sys),
 	(   WinSys = mswins -> load_builtins(windows), load_builtins(win_sh)
 	;   true
 	).
+
+
+
+:-  command_line(CL), 
+	dmember('-nobuilt',CL),!	% ,pbi_write(nobuilts_no_endstuff), pbi_nl
+	;
+	nops, 
+	ld_is, 
+	ld_fs, 
+	ld_mth, 
+	ld_wins.
 
 /*
  * '$initialize' is called to perform all of those initializations
@@ -814,7 +837,11 @@ load_builtins(File) :-
  */
 
 		%% This starts the tty shell:
-'$start' :-
+'$start' 
+	:-
+ 	command_line(CL), 
+	dmember('-nobuilt',CL),!	% ,pbi_write(nobuilts_no_shell), pbi_nl
+	;
 	start_shell(builtins:prolog_shell).
 
 endmod.		%% builtins.pro -- Main File for builtins

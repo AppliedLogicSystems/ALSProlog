@@ -519,3 +519,4 @@ Entry:	cmp.l	B,	TR		; see if we need to untrail more
 	move.l	#1,	wm_in_Prolog	; back in Prolog
 	move.l	wm_safety, Safety	; update the safety register
 #endm
+
