@@ -27,9 +27,9 @@ bldit(CorePath, SVIm)
 
 	abolish(save_image,1),
 	sio:abolish(open_socket_stream,4),
-	call(SVIm),
 	abolish(tmp_ld_tmp, 2),
-	abolish(bldit,2).
+	abolish(bldit,2),
+	call(SVIm).
 
 module builtins.
 tdvf.
