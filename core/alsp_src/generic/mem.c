@@ -1254,18 +1254,21 @@ long ss_image_offset(void)
     strcpy(imagepath,imagedir);
     strcat(imagepath,imagename);
 
-    image_file = open(imagename, O_RDONLY);
+    image_file = open(imagepath, O_RDONLY);
     
-    free(imagepath);
-    
-    if (image_file == -1) return 0;
+    if (image_file == -1)
+	fatal_error(FE_SS_OPENERR,(long)imagepath);
 
     elf_size = image_end(image_file);
     fstat_result = fstat(image_file, &image_status);
     
     close(image_file);
 
-    if (fstat_result != 0) return 0;
+    if (fstat_result != 0)
+	fatal_error(FE_SS_OPENERR,(long)imagepath);
+
+    free(imagepath);
+
     image_size = image_status.st_size;
 #ifdef _SC_PAGESIZE
     pgsize = sysconf(_SC_PAGESIZE);
