@@ -253,7 +253,9 @@ als_ide_mgrAction(close_project, ALSIDEObject)
 gen_project_mgrAction(close_project, State)
 	:-
 	accessObjStruct(gui_spec, State, GuiPath),
-	tcl_call(shl_tcli, [destroy, GuiPath], _).
+	accessObjStruct(title, State, ProjTitle),
+	tcl_call(shl_tcli, [destroy, GuiPath], _),
+	tcl_call(shl_tcli, [unpost_open_project, ProjTitle], _).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%% 		SAVE PROJECT		%%%%%%%%%%%%%
@@ -378,10 +380,11 @@ cont_open_another_project([FileName, PathListIn], ALSIDEObject, ProjectMgr)
 	setObjStruct(cur_project,ALSIDEObject,ProjectMgr),
 	join_path(PathList, ProjectDir),
 	setObjStruct(primary_project_dir,ProjectMgr,ProjectDir),
+	send(ProjectMgr, init_gui),
 
-write(project_open(File)),nl,flush_output,
-
-	send(ProjectMgr, init_gui).
+	accessObjStruct(title,ProjectMgr,ProjectTitle),
+	accessObjStruct(gui_spec, ProjectMgr, GuiPath),
+	tcl_call(shl_tcli, [post_open_project,ProjectTitle, GuiPath], _).
 
 forbidden_slots([myHandle,internal_name,gui_spec,project_loaded]).
 

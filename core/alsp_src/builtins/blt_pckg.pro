@@ -68,7 +68,8 @@ save_image(ImageName, Options) :-
 	
 
 attach_image(ImageName) :-
-	attach_image(ImageName, []).
+%	attach_image(ImageName, []).
+	attach_image(ImageName, production).
 
 attach_image(ImageName, DevelopFlag)
 	:-
@@ -138,14 +139,6 @@ attach_image0(NewImageName, DevelopFlag)
 		abolish(file_clause_group,2),
 		dynamic(file_clause_group/2),
 
-/*
-		(bagof( consulted(A,B,C,D,E), 
-				consulted(A,B,C,D,E), 
-				SDList3) 
-	  	-> true ; SDList3 = []),
-		abolish(consulted,5),
-		dynamic(consulted/5)
-*/
 		(get_primary_manager(ALSMgr),
 			set_primary_manager(0) ; 
 			ALSMgr = nil)
