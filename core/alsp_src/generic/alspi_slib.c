@@ -1,7 +1,7 @@
 #include "alspi.h"
-#include "cinterf.h"
 #include "alspi_slib.h"
 #include <stdio.h>
+#include <string.h>
 
 #ifdef WIN32
 #define EXPORT __declspec(dllexport)
