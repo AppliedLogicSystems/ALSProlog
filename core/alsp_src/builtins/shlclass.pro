@@ -122,7 +122,6 @@ finish_record_src_mgr(BaseFileName, PrevMgrsList, State, FileMgr)
 	!.
 finish_record_src_mgr(BaseFileName, PrevMgrsList, State, FileMgr)
 	:-
-write(frsm=BaseFileName),nl,flush_output,
 	setObjStruct(source_mgrs, State, [fm(BaseFileName, FileMgr) | PrevMgrsList]).
 
 als_shl_mgrAction(obtain_src_mgr_by_cg(CG, FileMgr), State) 
