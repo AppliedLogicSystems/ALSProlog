@@ -215,7 +215,8 @@ proc load_source {path name} {
 	if {$tcl_platform(platform) == "macintosh"} {
 		uplevel "source -rsrc {$name}"
 	} else {
-		uplevel "source [file join {$path} {$name.tcl}]"
+	bell
+		uplevel "source \[file join {$path} {$name.tcl}]"
 	}
 }
 
@@ -228,7 +229,7 @@ load_source $ALSTCLPATH {als_document}
 
 
 proc load_photo {image_name base_name} {
-	global tcl_platform
+	global tcl_platform ALSTCLPATH
 	if {$tcl_platform(platform) == "macintosh"} {
 		image create photo $image_name -format gif -data [resource read GIFf $base_name]
 	} else {
