@@ -1,0 +1,36 @@
+=====================================
+ALS Prolog Unix Foreign SDK Examples
+=====================================
+
+The Foreign SDK examples directory contains all the example code described
+in the ALS Prolog Foreign Language Interface manual, plus example make
+files for building the examples.
+
+Building the Examples
+---------------------
+
+All the examples in this directory use GNU GCC and GNU Make.  It should be
+possible to build the examples using other development systems with minor
+modifications to the makefiles.
+
+In each example directory there is a generic_makefile and some OS specific
+makefiles.
+
+On most systems, the following command will build an example:
+
+% make -f generic_makefile
+
+When there is an OS specific makefile, use it in place of generic_makefile.
+For example, on Solaris, use the following command:
+
+% make -f solaris_makefile 
+
+Running Examples
+----------------
+
+To load .psl (Prolog Shared Library) files you will need to have ALS Prolog
+installed.
+
+To run the embeding and static foreign predicate examples, you will need to
+have the ALS Prolog shared object/library and the alsdir directory installed
+on the system.

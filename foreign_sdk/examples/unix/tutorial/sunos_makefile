@@ -1,0 +1,13 @@
+# GCC under SunOS 4.1 cannot create shared objects.
+# The work around is to link directly with ld.
+
+SDK_DIR = ../../..
+
+examples.psl: examples.c
+	gcc -c -I$(SDK_DIR)/include examples.c 
+	gcc -c -I$(SDK_DIR)/include $(SDK_DIR)/source/alspi_slib.c
+	ld -o examples.psl examples.o alspi_slib.o -lc 
+
+clean:
+	rm -f *.o examples.psl
+	
