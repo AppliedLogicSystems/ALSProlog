@@ -1,8 +1,9 @@
 # Generic GNU Make file for ALS Prolog
-
-VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins:$(SOURCE_DIR)/library
-
+ALSDEVDIR=$(CORE)/als_dev/alsdev
 CORE=$(SOURCE_DIR)/..
+ALS_BUILD_SUPPORT = /apache/als_build_support/unix
+VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins:$(SOURCE_DIR)/library:$(ALSDEVDIR):$(CORE)/tcltk_interface/common
+
 
 default : binaries
 
@@ -16,11 +17,16 @@ CPPFLAGS = $(BUILD_FLAGS) \
 	-I $(SOURCE_DIR)/$(PROC) \
 	-I $(SOURCE_DIR)/$(OS) \
 	-I $(SOURCE_DIR)/generic \
-	-I $(SOURCE_DIR)/smath
+	-I $(SOURCE_DIR)/smath \
+	-isystem $(ALS_BUILD_SUPPORT)/include
 
 MAIN_SOURCE = topmain.c
 
 MAIN_OBJECTS = $(MAIN_SOURCE:.c=.o)
+
+ALSDEV_SOURCE = unix_alsdev.c tcl_interface.c
+
+ALSDEV_OBJECTS = $(ALSDEV_SOURCE:.c=.o)
 
 GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	bdbg.c bgv.c bio.c bmeta.c \
@@ -106,15 +112,9 @@ alsdir/library : $(SOURCE_DIR)/library $(MAKEFS)
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.pro .
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
 
-tclintf.psl: $(MAKEFS)
-	$(MAKE) -C $(CORE)/tcltk_interface/$(SUBOS)/
-
-alsdir/shared : $(CORE)/tcltk_interface/common/tcltk.pro $(CORE)/tcltk_interface/common/tcltk_util.pro tclintf.psl $(MAKEFS)
+alsdir/shared : $(MAKEFS)
 	mkdir -p alsdir/shared
 	rm -f alsdir/shared/*.pro alsdir/shared/*.psl alsdir/shared/*.tcl
-	cd alsdir/shared ; ln -s ../../$(CORE)/tcltk_interface/$(SUBOS)/tclintf.psl .
-	cd alsdir/shared ; ln -s ../../$(CORE)/tcltk_interface/common/tcltk.pro .
-	cd alsdir/shared ; ln -s ../../$(CORE)/tcltk_interface/common/tcltk_util.pro .
 	cd alsdir/shared ; ln -s ../../$(CORE)/als_dev/alsdev/*.tcl .
 				 
 alsdir/images : $(CORE)/als_dev/alsdev $(MAKEFS)
@@ -148,7 +148,7 @@ ALSDEVDIR=$(CORE)/als_dev/alsdev
 DEMOFILES=$(ALSDEVDIR)/demo15.pro $(ALSDEVDIR)/serial_cmn.pro $(ALSDEVDIR)/ldr_dvsh.pro
 
 lib: $(GETDIR)/getDirectory.tcl $(GETDIR)/unix_pkgIndex.tcl $(GETFILES)/getFiles.tcl $(GETFILES)/unix_pkgIndex.tcl $(MAKEFS)
-	cp -r /apache/als_build_support/unix/lib .
+	cp -r $(ALS_BUILD_SUPPORT)/lib .
 	chmod -R +w lib
 	mkdir -p lib/tk8.0/getDirectory
 	cp -r $(GETDIR)/getDirectory.tcl lib/tk8.0/getDirectory
@@ -157,14 +157,15 @@ lib: $(GETDIR)/getDirectory.tcl $(GETDIR)/unix_pkgIndex.tcl $(GETFILES)/getFiles
 	cp -r $(GETFILES)/getFiles.tcl lib/tk8.0/getFiles
 	cp -r $(GETFILES)/unix_pkgIndex.tcl lib/tk8.0/getFiles/pkgIndex.tcl
 
-alsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
+ALSDEV_LIBS = -litcl3.0 -litk3.0 -ltcl8.0 -ltk8.0
+alsdev :  alsdir alsdir/images alsdir/shared alspro_b libalspro.a $(ALSDEV_OBJECTS) $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
+	$(CC) -o alsdev_b  $(ALSDEV_OBJECTS) libalspro.a $(LIBS) -L$(ALS_BUILD_SUPPORT)/$(SUBOS)/lib -litcl3.0 -litk3.0 -ltcl8.0 -ltk8.0 -lX11
 	rm -f alsdir/builtins/*.obp
 	rm -f alsdir/library/*.obp
 	rm -f $(SUBOS)/*.obp
 	rm -f *.obp
-	./alspro_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev.pro -g "bldit('$(CORE)',save_image(alsdev,[start_goal((builtins:start_alsdev))]))"
+	./alsdev_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev.pro -g "bldit('$(CORE)',save_image(alsdev,[start_goal((builtins:start_alsdev))]))"
 
-#	./alspro_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev.pro -g 'save_image(alsdev,[start_goal((builtins:start_alsdev))])'
 
 studalsdev :  alsdir alsdir/images alsdir/shared alspro_b $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
 	rm -f alsdir/builtins/*.obp
