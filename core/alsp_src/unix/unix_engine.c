@@ -62,7 +62,7 @@ static void *safe_mmap(void *start, size_t length, int flags)
 	return result;
 }
 
-#ifdef UNIX_LINUX
+#if 0 /* RH6 def UNIX_LINUX */
 static void *safe_mremap(void *addr, size_t old_size, size_t new_size,
 			 unsigned long flags)
 {
@@ -159,7 +159,7 @@ void free_prolog_memory(prolog_engine *pe)
 #define PAGE_ROUND(n) (n + PAGE_SIZE - n % PAGE_SIZE)
 
 static void *resize_mmap(void *addr, size_t old_size, size_t new_size)
-#ifdef UNIX_LINUX
+#if 0 /* RH6 def UNIX_LINUX */
 {
   return safe_mremap(addr, old_size, new_size, MREMAP_MAYMOVE);
 }
