@@ -275,9 +275,10 @@ S =.. X :-
 	type_error(list, X, 2).
 */
 
-univ_install(_,N,Arity,[]) :-
+univ_install(_,N,Arity,Args) :-
     N > Arity,
-    !.
+    !,
+	Args = [].
 univ_install(S,N,Arity,[Arg|Args]) :-
     arg(N,S,Arg),
     !,
