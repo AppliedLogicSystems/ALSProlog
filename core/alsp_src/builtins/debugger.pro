@@ -819,6 +819,7 @@ noshow_module(sio).
 noshow_module(tcltk).
 noshow_module(tk_alslib).
 noshow_module(xconsult).
+noshow_module(global_gv_info).
 %noshow_module(object_classes).
 
 	%% Add any others (or can mtfapi go away now?):
