@@ -1515,8 +1515,19 @@ v_showGoalToUserWin(Port,Box,Depth, Module, Goal, Response)
 	:-
 	builtins:get_primary_manager(ALSIDEMGR),
 	send(ALSIDEMGR, get_value( debugger_mgr, DBGMGR)),
-	send(DBGMGR,  get_mrfcg(CG, SrcMgr)),
-	send(SrcMgr,  ensure_window_open),
+
+	vv_showGoalToUserWin(Port,Box,Depth, Module, Goal, DBGMGR, Response).
+
+vv_showGoalToUserWin(Port,Box,Depth, Module, Goal, DBGMGR, Response)
+	:-
+%write(enter_vv_showGoalToUserWin),nl,flush_output,
+	accessObjStruct(mrfcg, DBGMGR, CG),
+	(CG > 0 ->
+		send(DBGMGR,  get_mrfcg(CG, SrcMgr)),
+		send(SrcMgr,  ensure_window_open)
+		;
+		true
+	),
 	!,
 	showGoalToUserWin_other(Port,Box,Depth, Module, Goal, Response, CG, DBGMGR, SrcMgr).
 
@@ -1726,6 +1737,7 @@ showGoalToUserWin(_,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug, DBG
 	%%---------------------------------------------------
 showGoalToUserWin_other(Port,Box,Depth, Module, XGoal, Response, MRFCG, DBGMGR, SrcMgr)
 	:-
+write(sG(Port,Box,Depth, Module, XGoa, mr=MRFCG)),nl,flush_output,
 	printf(debugger_output,'(%d) %d %t: ', [Box,Depth,Port]), 
 
 %% should not be necessary, but there is a bug somewhere
@@ -1735,15 +1747,20 @@ showGoalToUserWin_other(Port,Box,Depth, Module, XGoal, Response, MRFCG, DBGMGR, 
 	flush_output(debugger_output),
 
 	re_color_port(Port, MRFCG, SrcMgr),
+write(after_recolor),nl,flush_output,
 %	send(DBGMGR, show_stack_list),
 	!,
-	(((Port = exit; Port = fail), Box = 1, Depth=1) ->
-		dbg_boundary(Box,Depth,general,Port,XGoal,MRFCG,DBGMGR, SrcMgr),
+%	(((Port = exit; Port = fail), Box = 1, Depth=1) ->
+%write(call_dbg_boundary(MRFCG,Box,Depth,general,Port,XGoal,DBGMGR, SrcMgr)),nl,flush_output,
+write(yyyyy),nl,flush_output,
+		(dbg_boundary(MRFCG,Box,Depth,general,Port,XGoal,DBGMGR, SrcMgr) ->
 		nl(debugger_output),
 		Response = debug
 		;
+write(xxxxx(Port,Box,Depth)),nl,flush_output,
 		tcl_call(shl_tcli, [set_status_debugwin,Port,Box,Depth], _),
 		getResponse(tcltk,Port,Box,Depth, Module, XGoal, Response)
+,write(got_resp=Response),nl,flush_output
 	),
 	!.
 
@@ -1781,15 +1798,6 @@ color_my_port(ClsGrp,Start,End,Port,TagName, DBGMGR, SrcMgr)
 	!,
 	display_st_record(StartLine,StartChar,EndLine,EndChar,Color,TextWin,LTextWin,TagName,SrcMgr).
 
-/*
-	(MRFCG = 0 -> true
-		;
-		((Port=call; Port=redo) -> true
-			;
-			re_color_port(Port, MRFCG, SrcMgr)
-		)
-	),
-*/
 re_color_port(_, 0, _) :-!.
 re_color_port(call, _, _) :-!.
 re_color_port(redo, _, _) :-!.
@@ -1808,7 +1816,16 @@ port_color(exit, green).
 port_color(fail, '#fe0076').
 port_color(redo, yellow).
 
-dbg_boundary(Box,Depth,Desc,Port,XGoal,MRFCG,DBGMGR, SrcMgr)
+dbg_boundary(MRFCG,1,1,Desc,Port,XGoal,DBGMGR, SrcMgr)
+	:-
+	((Port = exit; Port = fail) -> 
+		clean_up_src_win(MRFCG, SrcMgr) 
+		; 
+		true
+	).
+
+/*
+dbg_boundary(MRFCG,Box,Depth,Desc,Port,XGoal,DBGMGR, SrcMgr)
 	:-
 	Box=1,
 	Depth=1,
@@ -1819,7 +1836,8 @@ dbg_boundary(Box,Depth,Desc,Port,XGoal,MRFCG,DBGMGR, SrcMgr)
 		true
 	).
 
-dbg_boundary(Box,Depth,Desc,Port,XGoal,MRFCG,DBGMGR, SrcMgr).
+dbg_boundary(MRFCG,Box,Depth,Desc,Port,XGoal,DBGMGR, SrcMgr).
+*/
 
 fcg_change(Port,DBG,ClsGrp,Start,End, DBGMGR)
 	:-
@@ -1835,6 +1853,7 @@ fcg_change(Port,DBG,ClsGrp,Start,End, DBGMGR)
 fcg_change(Port,DBG,ClsGrp,Start,End, DBGMGR).
 
 
+clean_up_src_win(0, SrcMgr) :-!.
 clean_up_src_win(MRFCG, SrcMgr)
 	:-
 	send(SrcMgr, clear_decorations).
@@ -2622,13 +2641,11 @@ show_sm_list(V)
 show_sm_list([]).
 show_sm_list([SrcM | SrcMgrsList])
 	:-
-write(*),nl,flush_output,
 	short_show_sm(SrcM),
 	show_sm_list(SrcMgrsList).
 
 short_show_sm(SrcM)
 	:-
-write(ss_sm),nl,flush_output,
 	accessObjStruct(base_file,SrcM, BF),
 	write_clause(bf=BF), flush_output.
 */
