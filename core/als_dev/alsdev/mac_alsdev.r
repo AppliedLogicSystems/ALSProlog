@@ -75,6 +75,8 @@ read 'OBPT' (202, "tk_alslib.obp") "tk_alslib.obp";
 read 'OBPT' (203, "miscterm.obp") "miscterm.obp";
 read 'OBPT' (204, "tcl_sppt.obp") "tcl_sppt.obp";
 read 'OBPT' (205, "listutl1.obp") "listutl1.obp";
+read 'OBPT' (206, "msc_ioin.obp") "msc_ioin.obp";
+read 'OBPT' (207, "mscioout.obp") "mscioout.obp";
 
 read 'OBPT' (300, "tcltk.obp") "tcltk.obp";
 
@@ -82,7 +84,7 @@ resource 'STR#' (128) {
 	{
 	"debugger", "blt_dvsh",
 	"miscterm","strctutl","strings","tcl_sppt","tcltk",
-	"tk_alslib", "listutl1"
+	"tk_alslib", "listutl1", "msc_ioin", "mscioout"
 	}
 };
 
