@@ -69,6 +69,7 @@ cp -p $MAN/copying.als "$DISTDIR/copying-als"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
 mkdir "$DISTDIR/help"
 cp -pr $MAN/$HELP/* "$DISTDIR/help"
+cp -p $MAN/als_help.htm "$DISTDIR/als_help.htm"
 
 #mkdir "$DISTDIR/alsdir/library"
 #cp -p $LIB/*.pro "$DISTDIR/alsdir/library"
