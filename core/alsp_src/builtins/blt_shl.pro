@@ -563,11 +563,9 @@ shell_read0(Prompt1,Prompt2,InStream,G,N,V)
 	catch((
 		sio:set_user_prompt(Prompt1),
 		sio:skip_layout(InStream),
-		!,
 		sio:set_user_prompt(Prompt2),
 		read_term(InStream,G,[vars_and_names(V,N)])
 	), Exception, (
-		pbi_debug(Exception),
 		sio:set_user_prompt(OldPrompt),
 		throw(Exception)
 	)),
