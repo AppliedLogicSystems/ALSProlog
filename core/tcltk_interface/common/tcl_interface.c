@@ -1,3 +1,6 @@
+/* ALS Prolog and Tcl/Tk 8.0 Interface
+ * Copyright */
+
 #ifdef macintosh
 #define MAC_TCL 1
 #endif
@@ -7,6 +10,8 @@
 
 #include <tcl.h>
 #include <tk.h>
+
+#include "alspi.h"
 
 #include "new_alspi.h"
 
@@ -46,7 +51,7 @@ typedef struct {
 	Tcl_Obj **elements;		/* Array of pointers to element objects. */
 } StructRep;
 
-static Tcl_Obj *Tcl_NewStructObj(int objc, Tcl_Obj **objv)
+static Tcl_Obj *Tcl_NewStructObj(int objc, Tcl_Obj *const *objv)
 {
 	Tcl_Obj *structPtr, **elemPtrs;
 	StructRep *structRepPtr;
@@ -197,15 +202,13 @@ static int SetStructFromAny(Tcl_Interp *interp, Tcl_Obj *structPtr)
 	return TCL_ERROR;
 }
 
-static Tcl_Obj *Tcl_NewVarObj(const char *name)
+static Tcl_Obj *Tcl_NewVarObj(const char *name, int length)
 {
 	Tcl_Obj *varPtr;
-	int length;
 	char *varName;
 	
 	varPtr = Tcl_NewObj();
 	
-	length = strlen(name)+1;
 	varName = ckalloc(length);
 	memcpy(varName, name, length);
 	
@@ -250,7 +253,7 @@ static AP_Obj TclToPrologObj0(Tcl_Interp *interp, Tcl_Obj *tcl_obj, AP_World *w,
 	
 	
 	if        (tcl_obj->typePtr == tcl_integer_type) {
-		prolog_obj = AP_NewNumberFromLong(w, tcl_obj->internalRep.intValue);
+		prolog_obj = AP_NewNumberFromLong(w, tcl_obj->internalRep.longValue);
 	} else if (tcl_obj->typePtr == tcl_double_type) {
 		prolog_obj = AP_NewFloatFromDouble(w, tcl_obj->internalRep.doubleValue);
 	} else if (tcl_obj->typePtr == tcl_list_type) {
@@ -340,7 +343,7 @@ static Tcl_Obj *PrologToTclObj(AP_World *w, AP_Obj prolog_obj, Tcl_Interp *inter
 		tcl_obj = Tcl_NewStructObjFromAP_Obj(interp, w, prolog_obj);
 		break;
 	case AP_VARIABLE:
-		tcl_obj = Tcl_NewVarObj("");
+		tcl_obj = Tcl_NewVarObj("", 0);
 		break;
 	}
 	
@@ -350,19 +353,15 @@ static Tcl_Obj *PrologToTclObj(AP_World *w, AP_Obj prolog_obj, Tcl_Interp *inter
 /* Command Procedures for Tcl to Prolog Interface */
 
 static int
-Tcl_ALS_PrologObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
+Tcl_ALS_PrologObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
 {
 	AP_World *w = prolog_world;
   	const char *s;
   	AP_Obj call, results, j;
-  	Tcl_Obj *error;
   	int i;
 
 	if (objc < 2) {
-		error = Tcl_NewStringObj("wrong # args: should be \"", -1);
-		Tcl_StringObjAppendObj(error, objv[0]);
-		Tcl_StringObjAppend(error, " prologTerm ?varName varName ...?\"", -1);
-		Tcl_SetObjResult(interp, error);
+		Tcl_WrongNumArgs(interp, 1, objv, "prologTerm ?varName varName ...?");
 		return TCL_ERROR;
 	}
 	
@@ -389,27 +388,25 @@ Tcl_ALS_PrologObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_
 		break;
 	case AP_EXCEPTION:
 	default:
-		error = Tcl_NewStringObj("prolog exception: ", -1);
-		Tcl_StringObjAppendObj(error, PrologToTclObj(w, AP_GetException(w), interp));
-		Tcl_SetObjResult(interp, error);
+		Tcl_ResetResult(interp);
+		Tcl_AppendResult(interp,
+			"prolog exception: ",
+			Tcl_GetStringFromObj(PrologToTclObj(w, AP_GetException(w), interp), NULL),
+			NULL);
 		return TCL_ERROR;
 		break;
 	}
 }
 
 static int
-Tcl_ALS_Prolog_CallObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
+Tcl_ALS_Prolog_CallObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
 {
 	AP_World *w = prolog_world;
   	const char *name;
   	AP_Obj call, i, vars, value, pair, wrap_call;
-  	Tcl_Obj *error;
 
 	if (objc < 2) {
-		error = Tcl_NewStringObj("wrong # args: should be \"", -1);
-		Tcl_StringObjAppendObj(error, objv[0]);
-		Tcl_StringObjAppend(error, " prologTerm\"", -1);
-		Tcl_SetObjResult(interp, error);
+		Tcl_WrongNumArgs(interp, 1, objv, "prologTerm");
 		return TCL_ERROR;
 	}
 	
@@ -444,27 +441,25 @@ Tcl_ALS_Prolog_CallObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc,
 		break;
 	case AP_EXCEPTION:
 	default:
-		error = Tcl_NewStringObj("prolog exception: ", -1);
-		Tcl_StringObjAppendObj(error, PrologToTclObj(w, AP_GetException(w), interp));
-		Tcl_SetObjResult(interp, error);
+		Tcl_ResetResult(interp);
+		Tcl_AppendResult(interp,
+			"prolog exception: ",
+			Tcl_GetStringFromObj(PrologToTclObj(w, AP_GetException(w), interp), NULL),
+			NULL);
 		return TCL_ERROR;
 		break;
 	}
 }
 
 static int
-Tcl_StructObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
+Tcl_StructObjCmd(ClientData ignore, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
 {
-  	Tcl_Obj *error;
+#pragma unused(ignore)
 
 	if (objc < 3) {
-		error = Tcl_NewStringObj("wrong # args: should be \"", -1);
-		Tcl_StringObjAppendObj(error, objv[0]);
-		Tcl_StringObjAppend(error, " functor argValue ?argValue argValue ...?\"", -1);
-		Tcl_SetObjResult(interp, error);
+		Tcl_WrongNumArgs(interp, 1, objv, "functor argValue ?argValue argValue ...?");
 		return TCL_ERROR;
 	}
-	
 	
 	Tcl_SetObjResult(interp, Tcl_NewStructObj(objc-1, objv+1));
 	
@@ -472,20 +467,17 @@ Tcl_StructObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_Obj 
 }
 
 static int
-Tcl_VarObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_Obj **objv)
+Tcl_VarObjCmd(ClientData ignore, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
 {
-  	Tcl_Obj *error;
-
+#pragma unused(ignore)
+	int length;
+	
 	if (objc != 2) {
-		error = Tcl_NewStringObj("wrong # args: should be \"", -1);
-		Tcl_StringObjAppendObj(error, objv[0]);
-		Tcl_StringObjAppend(error, " varName\"", -1);
-		Tcl_SetObjResult(interp, error);
+		Tcl_WrongNumArgs(interp, 1, objv, "varName");
 		return TCL_ERROR;
 	}
-	
-	
-	Tcl_SetObjResult(interp, Tcl_NewVarObj(Tcl_GetStringFromObj(objv[1], NULL)));
+		
+	Tcl_SetObjResult(interp, Tcl_NewVarObj(Tcl_GetStringFromObj(objv[1], &length), length));
 	
 	return TCL_OK;
 }
@@ -497,6 +489,40 @@ static Tcl_HashTable tcl_interp_name_table;
 
 static int interp_count = 0;
 
+#ifdef macintosh
+/* In order to control the event and menu handling, we need these internal
+   variables and functions. Someday I hope there will be a public interface
+   for these. */
+
+/* From tclMacInt.h */
+typedef int (*TclMacConvertEventPtr) _ANSI_ARGS_((EventRecord *eventPtr));
+void 	TclMacSetEventProc _ANSI_ARGS_((TclMacConvertEventPtr procPtr));
+
+/* From tkMacInt.h */
+extern int		TkMacConvertEvent _ANSI_ARGS_((EventRecord *eventPtr));
+extern void		TkMacInitAppleEvents _ANSI_ARGS_((Tcl_Interp *interp));
+extern void 		TkMacInitMenus _ANSI_ARGS_((Tcl_Interp 	*interp));
+extern QDGlobalsPtr tcl_macQdPtr;
+
+static int MyConvertEvent(EventRecord *event)
+{
+	if (SIOUXIsAppWindow(FrontWindow())) {
+		 if (SIOUXHandleOneEvent(event)) return 0;
+		 return TkMacConvertEvent(event);
+	} else {
+		if (TkMacConvertEvent(event)) return 1;
+		SIOUXHandleOneEvent(event);
+		return 0;
+	}
+}
+
+static short MyHandleOneEvent(EventRecord *)
+{
+	Tcl_DoOneEvent(TCL_ALL_EVENTS|TCL_DONT_WAIT);
+	return 1;
+}
+#endif
+
 static AP_Result tcl_new(AP_World *w, AP_Obj interp_name)
 {
 	Tcl_Interp *interp;
@@ -505,9 +531,8 @@ static AP_Result tcl_new(AP_World *w, AP_Obj interp_name)
 	Tcl_HashEntry *entry;
 	int is_new, pre_named;
 	AP_Type type;
-#ifndef macintosh
 	int r;
-#endif
+
 	type = AP_ObjType(w, interp_name);
 	
 	if (type != AP_VARIABLE && type != AP_ATOM) { 
@@ -517,14 +542,18 @@ static AP_Result tcl_new(AP_World *w, AP_Obj interp_name)
 	}
 	
 	pre_named = (type == AP_ATOM);
-	
+
+#ifdef macintosh
+    TclMacSetEventProc(MyConvertEvent);
+    SIOUXSetEventVector(MyHandleOneEvent);
+#endif
+
 	interp = Tcl_CreateInterp();
 	if (!interp) {
 		AP_SetStandardError(w, AP_RESOURCE_ERROR, AP_NewSymbolFromStr(w, "tcl_memory"));
 		goto error;
 	}
 
-#ifndef macintosh
 	r = Tk_Init(interp);
 	if (r != TCL_OK) {
 		printf("%s\n", interp->result);
@@ -532,6 +561,12 @@ static AP_Result tcl_new(AP_World *w, AP_Obj interp_name)
 	}
 
     Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);	
+
+#ifdef macintosh
+    TkMacInitAppleEvents(interp);
+    TkMacInitMenus(interp);
+
+    Tcl_SetVar(interp, "tcl_rcRsrcName", "tclshrc", TCL_GLOBAL_ONLY);
 #endif
 	
 	if (pre_named) {
@@ -558,19 +593,19 @@ static AP_Result tcl_new(AP_World *w, AP_Obj interp_name)
 	
 	Tcl_SetHashValue(entry, interp);
 
-	if (!Tcl_CreateObjCommand(interp, "prolog", -1, Tcl_ALS_PrologObjCmd, w, NULL)) {
+	if (!Tcl_CreateObjCommand(interp, "prolog", Tcl_ALS_PrologObjCmd, w, NULL)) {
 		AP_SetError(w, AP_NewSymbolFromStr(w, "tcl_create_command_error"));
 		goto error_delete;
 	}
-	if (!Tcl_CreateObjCommand(interp, "prolog_call", -1, Tcl_ALS_Prolog_CallObjCmd, w, NULL)) {
+	if (!Tcl_CreateObjCommand(interp, "prolog_call", Tcl_ALS_Prolog_CallObjCmd, w, NULL)) {
 		AP_SetError(w, AP_NewSymbolFromStr(w, "tcl_create_command_error"));
 		goto error_delete;
 	}
-	if (!Tcl_CreateObjCommand(interp, "struct", -1, Tcl_StructObjCmd, w, NULL)) {
+	if (!Tcl_CreateObjCommand(interp, "struct", Tcl_StructObjCmd, w, NULL)) {
 		AP_SetError(w, AP_NewSymbolFromStr(w, "tcl_create_command_error"));
 		goto error_delete;
 	}
-	if (!Tcl_CreateObjCommand(interp, "var", -1, Tcl_VarObjCmd, w, NULL)) {
+	if (!Tcl_CreateObjCommand(interp, "var", Tcl_VarObjCmd, w, NULL)) {
 		AP_SetError(w, AP_NewSymbolFromStr(w, "tcl_create_command_error"));
 		goto error_delete;
 	}
@@ -596,7 +631,6 @@ static Tcl_Interp *GetInterp(AP_World *w, AP_Obj interp_name)
 	return entry ? Tcl_GetHashValue(entry) : NULL;
 }
 
-#include "alspi.h"
 
 static AP_Result tcl_eval(AP_World *w, AP_Obj interp_name, AP_Obj command, AP_Obj result)
 {
@@ -666,8 +700,9 @@ static AP_Result tcl_delete(AP_World *w, AP_Obj interp_name)
 	return AP_SUCCESS;
 }
 
-static AP_Result tcl_delete_all(AP_World *w)
+static AP_Result tcl_delete_all(AP_World *ignore)
 {
+#pragma unused(ignore)
 	Tcl_HashEntry *entry;
 	Tcl_HashSearch search;
 
@@ -683,8 +718,9 @@ static AP_Result tcl_delete_all(AP_World *w)
 	return AP_SUCCESS;
 }
 
-static AP_Result tk_main_loop(AP_World *w)
+static AP_Result tk_main_loop(AP_World *ignore)
 {
+#pragma unused(ignore)
 	Tk_MainLoop();
 	return AP_SUCCESS;
 }
@@ -730,6 +766,11 @@ PI_END
 void pi_init(void);
 void pi_init(void)
 {
+
+#ifdef macintosh
+    tcl_macQdPtr = GetQD();
+#endif
+
 	Tcl_InitHashTable(&tcl_interp_name_table, TCL_STRING_KEYS);
 	
 	/* Get pointers to the standard Tcl types. */
