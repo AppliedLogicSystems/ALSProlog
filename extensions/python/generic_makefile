@@ -1,0 +1,19 @@
+SDK_DIR = ../../core/alsp_src/generic
+PY_ROOT=/usr
+LIBS= -lpthread -lm -lc
+
+all: python.psl
+
+python.psl: python_interface.c
+	gcc -fpic -shared $(PSL_LINK) \
+	-o python.psl -I$(SDK_DIR) -I$(PY_ROOT)/include/python1.5 \
+	    python_interface.c \
+	    $(SDK_DIR)/alspi_slib.c \
+	    $(SDK_DIR)/new_alspi.c \
+	    -L $(PY_ROOT)/lib/python1.5/config -lpython1.5 $(LIBS)
+
+test: py_test.pro
+	alspro -b py_test.pro -g t
+
+clean:
+	rm -f python.psl
