@@ -255,9 +255,9 @@ als_ide_mgrAction(close_project, ALSIDEObject)
 	(SaveFlag = ok ->
 		accessObjStruct(cur_project,ALSIDEObject,CurProject),
 		send(CurProject, close_project),
-		setObjStruct(cur_project,ALSIDEObject,nil),
-		accessObjStruct(initial_dir, ALSIDEObject, InitialDir),
-		change_cwd(InitialDir)
+		setObjStruct(cur_project,ALSIDEObject,nil)
+%		accessObjStruct(initial_dir, ALSIDEObject, InitialDir),
+%		change_cwd(InitialDir)
 		;
 		true
 	).
