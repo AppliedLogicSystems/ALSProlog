@@ -60,9 +60,14 @@ init_tk_alslib(Interp,Shared)
 	builtins:sys_searchdir(ALSDIR),
 	extendPath(ALSDIR, shared, Shared),
 	tcl_call(Interp, [set,'ALSTCLPATH',Shared], _),
-
-	pathPlusFile(Shared, 'als_tklib.tcl', ALSTKLIB),
-	tcl_call(Interp, [source, ALSTKLIB], _).
+	sys_env(OS, _, _),
+	(OS = macos ->
+		tcl_call(Interp, 'source -rsrc als_tklib', _)
+	;
+	(
+		pathPlusFile(Shared, 'als_tklib.tcl', ALSTKLIB),
+		tcl_call(Interp, [source, ALSTKLIB], _)
+	)).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
