@@ -44,7 +44,7 @@ export tilda_expand/2.
 export directory_self/2.
 export directory_self/3.
 
-file_extension(Name, Ext, FullName) :-
+file_extension(FullName, Name, Ext) :-
 	nonvar(FullName),
 	!,
 	split_path(FullName, Elements),
@@ -59,7 +59,7 @@ file_extension(Name, Ext, FullName) :-
 	dreverse([BName | RRestElts], NameElts),
 	join_path(NameElts, Name).
 
-file_extension(FileName,Ext,FullName) :-
+file_extension(FullName, FileName, Ext) :-
 	atom_concat(FileName,'.',FileNameDot),
 	atom_concat(FileNameDot, Ext, FullName).
 

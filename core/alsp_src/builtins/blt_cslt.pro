@@ -372,7 +372,7 @@ local_consult_options(File, BaseFile, COpts, FCOpts)
 	access_cslt_opts(recon,  COpts,GlobalRecon),
 
 	cslt_info_recon(File, GlobalNature, InitNature, GlobalRecon, Recon, FileDesc),
-	file_extension(FF,Ext,FileDesc),
+	file_extension(FileDesc,FF,Ext),
 	split_path(FF,FileElts),
 	dreverse(FileElts, [BaseFile | RDirElts]),
 	dreverse(RDirElts, DirElts),
@@ -392,7 +392,7 @@ local_consult_options(File, BaseFile, COpts, FCOpts)
 
 check_for_shared(BaseFile, FCOpts)
 	:-
-	file_extension(_, Ext, BaseFile),
+	file_extension(BaseFile, _, Ext),
 	cont_check_for_shared(Ext, BaseFile, FCOpts).
 
 cont_check_for_shared(Ext, BaseFile, FCOpts)
@@ -790,13 +790,13 @@ src_setup(obp, BaseFile, ObpLocn, FCOpts, Path, SrcPath, Path)
 
 src_setup(pro, BaseFile, ObpLocn, FCOpts, Path, Path, OPath)
 	:-!,
-	file_extension(FP,pro,Path),
+	file_extension(Path, FP,pro),
 	make_obp_locn(ObpLocn, FP, BaseFile, FCOpts, OPath).
 
 src_setup(pl, BaseFile, ObpLocn, FCOpts, Path, Path, OPath)
 	:-!,
-	file_extension(FP,pl,Path),
-	file_extension(FP,obp,OPath).
+	file_extension(Path,FP,pl),
+	file_extension(OPath,FP,obp).
 
 src_setup('', BaseFile, ObpLocn, FCOpts, Path, Path, '').
 
@@ -804,7 +804,7 @@ src_setup('', BaseFile, ObpLocn, FCOpts, Path, SrcPath, OPath)
 	:-
 		%% Path has no extension; try adding .pro or .pl:
 	member(Ext, [pro, pl]), 
-	file_extension(Path,Ext,SrcPath),
+	file_extension(SrcPath,Path,Ext),
 	make_obp_locn(ObpLocn, Path, BaseFile, FCOpts, OPath).
 
 src_setup(Ext, BaseFile, ObpLocn, FCOpts, Path, Path, '')
@@ -816,12 +816,12 @@ make_obp_locn(no_obp, _, BaseFile, FCOpts, '')
 
 make_obp_locn(gis, FP, BaseFile, FCOpts, OPath)
 	:-
-	file_extension(FP,obp,OPath).
+	file_extension(OPath,FP,obp).
 
 make_obp_locn(gic, FP, BaseFile, FCOpts, OPath)
 	:-
-	file_extension(RootName,_,BaseFile),
-	file_extension(RootName,obp,BaseObp),
+	file_extension(BaseFile,RootName,_),
+	file_extension(BaseObp,RootName,obp),
 	directory_self(Self),
 	join_path([Self,BaseObp], OPath).
 
@@ -840,13 +840,13 @@ fin_arch_subdir(XDir, BaseName, MinorOS, RDirElts, OPath)
 	!,
 	dreverse([BaseName, MinorOS | RDirElts], XFPElts),
 	join_path(XFPElts, XFP),
-	file_extension(XFP,obp,OPath).
+	file_extension(OPath,XFP,obp).
 
 fin_arch_subdir(XDir, BaseName, MinorOS, RDirElts, '').
 
 make_obp_locn(giac, FP, BaseFile, FCOpts, OPath)
 	:-
-	file_extension(BaseName,_,BaseFile),
+	file_extension(BaseFile,BaseName,_),
 	sys_env(_,MinorOS,_),
 	directory_self(Self),
 	join_path([Self,MinorOS], XDir),
@@ -855,8 +855,8 @@ make_obp_locn(giac, FP, BaseFile, FCOpts, OPath)
 
 make_obp_locn(gil(ExplPath), FP, BaseFile, FCOpts, OPath)
 	:-
-	file_extension(RootName,_,BaseFile),
-	file_extension(RootName,obp,BaseObp),
+	file_extension(BaseFile,RootName,_),
+	file_extension(BaseObp,RootName,obp),
 	split_path(ExplPath, XPathElts),
 	append(XPathElts, [BaseObp], ObpPathElts),
 	join_path(ObpPathElts, OPath).

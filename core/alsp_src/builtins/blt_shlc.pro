@@ -356,7 +356,7 @@ disp_setup_lib(LibDirName,LibPath,PathHead)
 	:-
 	lib_extension(LibExt),
 %	filePlusExt('*',LibExt,Pattern),
-	file_extension('*',LibExt,Pattern),
+	file_extension(Pattern,'*',LibExt),
 	files(LibPath, Pattern, LibFileHeaders),
 	install_lib_files(LibFileHeaders, LibPath),
 	(filename_equal(LibDirName, library) ->
