@@ -115,7 +115,14 @@ char *MinorOSStr = "mswindows";
 int win32s_system = 0;
 #endif
 
-static char versionNum[] = SysVersionNum;	/* from version.h */
+#ifdef UNIX
+char *version[2] = {
+  "@(#)(c) 1997 Applied Logic Systems, Inc.",
+  "@(#)ALS Prolog " VERSION_STRING " for " UNIX_NAME,
+  };
+#endif
+
+static char versionNum[] = VERSION_STRING;	/* from version.h */
 /* static char systemName[] = SysName;		from version.h */
 static int exit_status = 0;
 static jmp_buf exit_return; 
