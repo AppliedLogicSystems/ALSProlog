@@ -1746,7 +1746,7 @@ int sio_nsocket_accept(void)
     double sd;
     struct sockaddr_in cli_addr;
     int cli_len, newfd;
-    
+    char  *sktaddr;
 
     PI_getan(&family, &family_t, 1);
     PI_getan(&descriptor, &descriptor_t, 2);
@@ -1770,7 +1770,9 @@ int sio_nsocket_accept(void)
     	} else error = socket_errno;
     }
     
-    PI_makedouble(&addr, &addr_t, cli_addr.sin_addr.s_addr);
+	sktaddr = inet_ntoa(cli_addr.sin_addr);
+    PI_makeuia(&addr, &addr_t, sktaddr);
+
     (void) PI_unify(peer, peer_t, addr, addr_t);
 
     (void) PI_unify(result, result_t, error, PI_INT);

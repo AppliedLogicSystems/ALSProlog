@@ -262,7 +262,9 @@ pbi_clct_tr()
 	PWord **CurT,*Back1,*Forw1;
 	PWord BStop,v1,clctv,DrT;
 	int t1,cvt;
+#ifdef DEBUGFREEZE
   	PWord *argaddr;
+#endif
 
     w_get_An(&v1, &t1, 1);
 	BStop = (PWord) wm_B;
