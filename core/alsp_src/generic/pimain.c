@@ -43,6 +43,12 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
     char *als_opts;
     PI_system_setup setup;
 
+#ifdef MSWin32
+	TCHAR old_title[MAX_PATH];
+	BOOL got_title, got_input_mode;
+	DWORD old_input_mode;
+#endif
+
 #if defined(KERNAL) && defined(__MWERKS__) && defined(macintosh)
     argc = 0; argv = NULL;
 #endif
@@ -195,8 +201,12 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 	   mouse cursor is visible, but it unexpectedly appears after system/1
 	   calls.
 	  */
+	got_input_mode = GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE),
+		&old_input_mode);
 	SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE),
 		ENABLE_PROCESSED_INPUT | ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
+    
+	got_title = GetConsoleTitle(old_title, MAX_PATH);
     SetConsoleTitle("ALS Prolog");
 #endif
 
@@ -214,6 +224,11 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 
     PI_shutdown();
 
+#ifdef MSWin32
+	if (got_title) SetConsoleTitle(old_title);
+	if (got_input_mode)
+	SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), old_input_mode);
+#endif
 #if defined (MacOS) && defined(__MWERKS__)
     if (!MPW_Tool) printf("Exiting ALS Prolog.\n");
 #endif
