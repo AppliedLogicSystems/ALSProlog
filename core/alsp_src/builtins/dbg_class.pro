@@ -303,25 +303,8 @@ source_trace_mgrAction(clear_decorations, State)
 	%% Handle [user] and non-file windows separately (add clause):
 source_trace_mgrAction(start_src_trace(BaseFileName, SrcFilePath, FCG), State)
 	:-
-write(enter_stmA(sst_1(BaseFileName,SrcFilePath,FCG))),nl,flush_output,
 	setObjStruct(fcg, State, FCG),
 	fin_mgr_start_source_trace(SrcFilePath, State).
-
-/*
-	send_self(State, complete_open_edit_win(SrcFilePath,TclWin)),
-	tcl_call(shl_tcli, [add_left_col, TclWin, 1], _),
-	tcl_call(shl_tcli, [line_index_file,SrcFilePath],LoadRes0),
-	LoadRes0 = [NumLines, LineIndex0],
-	adjust_char_line_count(LineIndex0, LineIndex),
-	LoadRes = [NumLines, LineIndex],
-	setObjStruct(num_lines, State, NumLines),
-	setObjStruct(linesizes, State, LineIndex),
-write(do_inv_i(SrcFilePath,NumLines)),nl,flush_output,
-	inverted_index(LineIndex, InvertedLineIndex),
-	setObjStruct(invlineindex, State, InvertedLineIndex),
-	setObjStruct(head_tag, State, 0),
-	setObjStruct(call_tag, State, 0).
-*/
 
 	%% Assume that the file has previously been consulted, with source code 
 	%% debugging on, but that the source window for it is maybe not open; 
@@ -333,7 +316,6 @@ write(do_inv_i(SrcFilePath,NumLines)),nl,flush_output,
 
 source_trace_mgrAction(start_src_trace, State)
 	:-
-write(enter_stmA(sst_2(BaseFileName,SrcFilePath,FCG))),nl,flush_output,
 	accessObjStruct(source_file, State, SrcFilePath),
 	fin_mgr_start_source_trace(SrcFilePath, State).
 
@@ -347,7 +329,6 @@ fin_mgr_start_source_trace(SrcFilePath, State)
 	LoadRes = [NumLines, LineIndex],
 	setObjStruct(num_lines, State, NumLines),
 	setObjStruct(linesizes, State, LineIndex),
-write(do_inv_i(SrcFilePath,NumLines)),nl,flush_output,
 	inverted_index(LineIndex, InvertedLineIndex),
 	setObjStruct(invlineindex, State, InvertedLineIndex),
 	setObjStruct(head_tag, State, 0),

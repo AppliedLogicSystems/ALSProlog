@@ -1175,19 +1175,6 @@ install_spypoint(Mod,Pred,Arity)
     assert(spying_on(CallForm,Mod)),
     builtins:dbg_spy(Mod,Pred,Arity).
 
-/****
-export reset_all_spypoints/0.
-reset_all_spypoints
-	:-
-	spying_on(CallForm,Mod), 
-write(user_output, spying_on(CallForm,Mod)),nl(user_output),flush_output(user_output),
-	functor(CallForm,Pred,Arity),
-	dbg_spy(Mod,Pred,Arity), 
-	fail.
-reset_all_spypoints.
-****/
-
-
 /*-------------------------------------------------------------------------*
  | spy/3
  | spy(Module,Pred,Arity)
@@ -1552,7 +1539,6 @@ setup_debug(DebugIOChannel, Module, Predicate, Arity, CGsSetup, NextCGsSetup)
 	:-
 	change_source_level_debugging(on),
 	get_fcg(Module,Predicate,Arity,CG,DefiningMod),
-write(get_fcg(Module,Predicate,Arity,CG,DefiningMod)),nl,flush_output,
 	fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, NextCGsSetup).
 
 fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, CGsSetup)
@@ -1594,9 +1580,6 @@ check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, Claus
 	builtins:file_clause_group(BaseFileName, ClauseGroup),
 	builtins:get_primary_manager(ALSMgr),
 	send(ALSMgr, obtain_src_mgr(BaseFileName, SrcMgr)),
-write(check_file_setup(BaseFileName)),nl,
-%write_term(user_output, SrcMgr, [maxdepth(3)]),
-%nl(user_output), flush_output,
 	send(SrcMgr, get_value(base_file, BaseFileName)),
 	send(SrcMgr, get_value(source_file, SrcFilePath)),
 	send(SrcMgr, get_value(consult_mode, DebugType)).
@@ -1604,7 +1587,6 @@ write(check_file_setup(BaseFileName)),nl,
 reload_debug(user,_, _,CG,nofile(user)) :-!.
 reload_debug(BaseFileName,SrcFilePath, normal,CG,file)
 	:-
-write(reload_debug_2(BaseFileName,SrcFilePath, normal,CG)),nl,flush_output,
 	(filePlusExt(NoSuff,_,SrcFilePath),!; NoSuff = SrcFilePath),
 			%% Need to pass CG into consult:
 	exists_file(SrcFilePath),
@@ -1616,9 +1598,7 @@ write(reload_debug_2(BaseFileName,SrcFilePath, normal,CG)),nl,flush_output,
 		true
 	),
 	ensure_db_showing.
-reload_debug(BaseFileName,SrcFilePath, normal,CG,nofile(BaseFileName))
-	:-
-write(reload_debug_3(BaseFileName,SrcFilePath, normal,CG)),nl,flush_output.
+reload_debug(BaseFileName,SrcFilePath, normal,CG,nofile(BaseFileName)).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%    I/O Hooks    %%%%%%%%%%%%%%%%%%%%%%%%

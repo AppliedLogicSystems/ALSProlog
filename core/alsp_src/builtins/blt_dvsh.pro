@@ -883,36 +883,8 @@ fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,
 	!,
 	Flag = not_ok.
 
-/******
 fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,State)
 	:-
-
-write(fin_rename_anon_doc_2),nl,
-
-write(source_file = Source_file),nl,
-
-	send(SrcHandlerHandle, get_value(source_type, file)),
-	send(SrcHandlerHandle, get_value(source_file, SrcFile)),
-	SrcFile \= nil, SrcFile \= '',
-	!,
-
-	%%% REPAIR THIS (or throw it away):
-
-	send(SrcHandlerHandle, get_value(base_file, PrevName)),
-write( prevname_2=PrevName), nl,flush_output,
-	list_delete(PrevMgrsList, fm(PrevName, FileMgr), NewEdits),
-%(var(FileMgr) -> write(filemgr_is_a_var) ; write(filemgr_nonvar) ),nl,flush_output,
-
-	setObjStruct(source_mgrs, State, [fm(BaseFile, FileMgr) | NewEdits]),
-	setObjStruct(base_file, FileMgr, BaseFile),
-	setObjStruct(source_file, FileMgr, File),
-	setObjStruct(ext, FileMgr, Ext),
-	Flag = ok.
-*****/
-
-fin_rename_anon_doc(PrevMgrsList,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,State)
-	:-
-write(fin_rename_anon_doc(pml,BaseFile,Ext,TclWin,File,SrcHandlerHandle,Flag,state)),nl,flush_output,
 	send(SrcHandlerHandle, get_value(source_type, file)),
 	send(SrcHandlerHandle, get_value(source_file, SrcFile)),
 	(SrcFile = nil ; SrcFile = ''),
@@ -1415,12 +1387,10 @@ get_st_rec_by_fcg(FCGNum, Rec)
 
 start_src_trace(Flag,BaseFileName, SrcFilePath, CG, ALSMgr, SrcMgr)
 	:-
-write(start_src_trace(Flag,BaseFileName, SrcFilePath, CG)),nl,flush_output,
 	send(ALSMgr, get_value(debugger_mgr, DbgrMgr)),
 	send(DbgrMgr, ensure_db_showing),
 	send(DbgrMgr, insert_by_fcg(CG, SrcMgr)),
 	send(DbgrMgr, set_value(mrfcg, CG)),
-write(sending(start_src_trace(BaseFileName, SrcFilePath, CG))),nl,flush_output,
 	send(SrcMgr, start_src_trace(BaseFileName, SrcFilePath, CG)).
 
 
@@ -1571,7 +1541,6 @@ showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug, D
 
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_aph'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!,
-write(sGTUW_call(aph,ClsGrp)),nl,flush_output,
 	send(DBGMGR,  mgr_by_cg(ClsGrp, SrcMgr)),
 
 	send(DBGMGR,  mgr_by_cg(ClsGrp, NewSrcMgr)),
@@ -1632,9 +1601,6 @@ showGoalToUserWin(call,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug, D
 showGoalToUserWin(call,Box,Depth, Module, '$dbg_apf'(ClsGrp,Start,End), debug, DBGMGR, SrcMgr)
 	:-!,
 	builtins:file_clause_group(BaseFileName, ClsGrp),
-%	builtins:consulted(BaseFileName, SrcFilePath, ObpPath, DebugType, Options),
-%	continue_start_src_trace(BaseFileName, SrcFilePath),
-write(sGTUW_call(apf,ClsGrp)),nl,flush_output,
 	send(SrcMgr, start_src_trace),
 	!,
 	color_my_port(ClsGrp,Start,End,exit,head_tag, DBGMGR, SrcMgr).
@@ -1707,7 +1673,6 @@ showGoalToUserWin(call,Box,Depth, Module, '$dbg_apge'(ClsGrp,Start,End), debug, 
 	send(DBGMGR,  mgr_by_cg(ClsGrp, NewSrcMgr)),
 	send(DBGMGR,  set_value(mrfcg, ClsGrp)),
 	send(NewSrcMgr, start_src_trace),
-write(sGTUW_call(ape,ClsGrp)),nl,flush_output,
 	!,
 	color_my_port(ClsGrp,Start,End,exit,call_tag, DBGMGR, NewSrcMgr).
 
@@ -2007,7 +1972,6 @@ reset_all_spypoints
 	:-
     dbg_spyoff,
 	findall(Mod-List, mspylist(Mod,List), SpyList),
-write(reset_the_spypoints(SpyList)),nl,flush_output,
 	reset_the_spypoints(SpyList),
     setPrologInterrupt(spying),
     setDebugInterrupt(spying),
