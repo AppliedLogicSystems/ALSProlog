@@ -14,6 +14,8 @@
  *=================================================================*/
 #include "defs.h"
 
+#ifdef XPANDTM
+
 #include "varproc.h"
 #include "parsstak.h"
 #include "module.h"
@@ -450,3 +452,4 @@ cvt_walk_var(v)
 
     return (MK_VO(i));
 }
+#endif /* XPANDTM */

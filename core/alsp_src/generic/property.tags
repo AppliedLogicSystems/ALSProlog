@@ -1,0 +1,96 @@
+GROSS SYSTEM TAGS
+-----------------
+DOS
+VMS
+MacOS
+__GO32__
+UNIX
+SCO_UNIX
+
+
+PROPERTY TAGS
+-------------
+PRIM_DBG -  primitive low-level (system development) debugging code.
+
+BCINTER - extended C interface code
+
+LIBBRK - prolog library mechanism code
+
+FREEZE - freeze support code
+
+DEBUGFREEZE - debugging messages for freeze support code
+
+DynamicForeign - dynamic loading of foreign (C) code
+
+DoubleType
+
+OLDCONSULT - original C-defined consult
+
+SYS_OBP - support for obp files
+
+OLDCIO - all the old C-defined io subsystem
+
+SysVIPC - system V IPC queue communication code (streams)
+
+SSBQ - software system backplane communication code (streams)
+
+HAVE_SOCKET - socket communication code (streams)
+
+HASH - hashing structures code
+
+GENSYM - gensym code
+
+OSACCESS - access to OS (DISK) services
+
+PACKAGE - Ilyas's packaging tools & support
+
+REXEC - Remote execution tools
+
+WINIOBASIS - window/stream connection tools
+
+OLDSHELL - old (C-based) shell code
+
+XPANDTM - term (dcg) expander code
+
+OLDFIO - old file io functions
+
+FSACCESS - more file system access
+
+CCANONP - C-based canonical path code
+
+OLDLEXAN - old (C-based) lexical analysis code
+
+OLDCLOAD - old (C-based) file (pro/obp) loading code
+
+
+
+
+
+
+
+
+
+FEATURE TAGS
+------------
+
+HAVE_SYS_PARAM_H - system has <sys/param.h>
+
+HAVE_MACHINE_PARAM_H - system has <machine/param.h>
+
+HAVE_UNISTD_H - system has <unistd.h>
+
+HAVE_AINT
+HAVE_RINT
+HAVE_EXP10
+
+HAVE_GAMMA
+HAVE_LGAMMA
+
+HAVE_SRAND48
+HAVE_SRANDOM
+HAVE_SRAND
+RANDRANGE
+
+_SC_CLK_TCK - have sysconf(_SC_CLK_TCK)
+HAVE_TIME - have time(), localtime()
+HAVE_TIMES - have times()

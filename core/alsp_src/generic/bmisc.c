@@ -284,6 +284,7 @@ wm_identical(v1, t1, v2, t2)
 
 #endif /* CMeta */
 
+#ifdef HASH
 static unsigned long
 hashN(v, t, d)
     PWord v;
@@ -390,7 +391,9 @@ pbi_hashN()
 	    FAIL;
     }
 }
+#endif /* HASH */
 
+#ifdef GENSYM
 extern long gensym_start_time;
 static long gensym_counter = 0;
 
@@ -404,6 +407,7 @@ als_gensym(buffer, prefix)
 	    gensym_start_time,
 	    gensym_counter++);
 }
+
 
 int
 pbi_gensym()
@@ -456,6 +460,9 @@ pbi_isgensym()
 
     FAIL;
 }
+#endif /* GENSYM */
+
+#ifdef PRIM_DBG
 
 /*
  * ptermaddr/1
@@ -625,3 +632,5 @@ pbi_frame_info()	/* frame_info(Count,Goal) */
     else
 	FAIL;
 }
+
+#endif /* PRIM_DBG */

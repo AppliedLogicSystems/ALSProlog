@@ -800,7 +800,7 @@ noshow_module(sio).
 noshow_module(xconsult).
 	%% Add any others (or can mtfapi go away now?):
 noshow_module(mtfapi).
-noshow_module(objects).
+%noshow_module(objects).
 noshow_module(windows).
 noshow_module(alsshell).
 
@@ -814,7 +814,7 @@ noshow( Mod, send(_,_))
 	!.
 noshow_send_mod( builtins).
 noshow_send_mod( debugger).
-noshow_send_mod( objects).
+%noshow_send_mod( objects).
 		%% either add others or make a generic thing:
 noshow_send_mod( motif).
 

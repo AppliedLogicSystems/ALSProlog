@@ -1,0 +1,54 @@
+Info on low-level debugging/examination predicates in the system:
+----------------------------------------------------------------
+
+ptermaddr/1 [pbi_ptermaddr - bmisc.c]
+
+ * Called from prolog with a single argument.  The type and address (or value)
+ * is printed out.  This is a primitive debugging predicate.
+
+----------------------------------------------------------------
+traildump/0 [pbi_traildump - bmisc.c]
+
+ * Called from prolog to print out the tail/chpt stack.  This is a primitive
+ * debugging predicate.
+
+----------------------------------------------------------------
+frame_info/2 [pbi_frame_info - bmisc.c]
+
+ *	The first argument is a count of the number of frames to go back.
+ *	The second argument is unified with the goal (including the module)
+ *	at the Nth frame back where N was the integer value of the first
+ *	argument.
+ *
+ *	frame_info/2 should be used for informational or debugging
+ *	purposes only.  It is not possible to always obtain all of the
+ *	arguments in the frame.  This happens for two reasons:
+ *		1) Certain platforms pass some of the arguments in
+ *		registers.  If the register argument is used early
+ *		in the clause, it may never get placed on the stack.
+ *		2) Even if an argument is placed on the stack at the
+ *		time of the call, there is no guarantee that it is
+ *		safe to refer to it at some later point.  A gc
+ *		may have moved a pointer argument without updating
+ *		the pointer if that argument is no longer needed
+ *		to properly complete execution of the clause. Note
+ *		that if a constant appears in one of these positions,
+ *		then that constant *is* valid -- at least on platforms
+ *		where the arguments are not passed in registers.
+ *	In cases where we are not certain that the argument is valid,
+ *	we use a question mark in the place of the argument to indicate
+ *	this condition.
+
+----------------------------------------------------------------
+pwrite(pv) [not called from prolog - gc.c]
+
+Used for C-level debugging; pv should be a (long) address into the heap;
+obtains the prolog objects (v,t) residing at that address, and calls 
+prolog_writeq to write out the object
+
+----------------------------------------------------------------
+print_chpts(b) [gc.c]
+
+Called from C; b should be a choice point; walks the choice point stack,
+printing out choice points
+

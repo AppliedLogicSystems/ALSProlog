@@ -78,10 +78,11 @@ identify_case(dos).
 		addclause(builtins,file_separator('.')),
 		addclause(builtins,directory_separator(':')),
 		addclause(builtins,disk_separator(':')),
+		addclause(builtins,path_separator(';')),
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 sub_atom(Path,1,1,C1), 
-					 C1 \= ':', !) ),
+					 C1 \= ':',atom_split(Path,':',_,_),!) ),
 		addclause(builtins,
 					(is_absolute_pathname(Path) :-
 					 atom_split(Path,':',_,_)))

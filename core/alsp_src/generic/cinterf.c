@@ -14,6 +14,9 @@
  | 10/26/94 - C. Houpt -- Various unsigned long* casts.
  *=================================================================*/
 #include "defs.h"
+
+#ifdef BCINTER
+
 #include <stdio.h>
 #include "cinterf.h"
 
@@ -855,3 +858,4 @@ cinterf_init()
 
     PI_INIT;
 }
+#endif /* BCINTER */

@@ -479,9 +479,9 @@ pbi_atomic()
 
 #endif /* CMeta */
 
+
 /*
- * pbi_findterm was written for Keith Hughes so that the boss wouldn't
- * stay mad at him.
+ * pbi_findterm seeks a term on the heap
  */
 
 int

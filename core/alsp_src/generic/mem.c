@@ -594,7 +594,7 @@ alloc_big_block(size, fe_num)
 	 * file of infinitely (or at least as many as we need) zeros.
 	 */
 
-	if ((fd = open("/dev/zero", O_RDWR)) == -1)
+	if ((fd = open("/dev/zero", O_RDWR|O_BINARY)) == -1)
 	    fatal_error(FE_DEVZERO, 0);
 
 	/*

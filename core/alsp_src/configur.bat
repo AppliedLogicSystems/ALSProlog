@@ -41,9 +41,7 @@ update m bld-port/makefile
 del m
 
 		REM setup tconfig.h in bld-port:
-echo /* tconfig.h */ > m
-update m bld-port/tconfig.h
-del m
+cp %unixbport%/tconfig.in > bld-port/tconfig.h
 
 REM Remove this goto when ready to handle native code again:
 goto :gmkf
@@ -65,9 +63,8 @@ update m bld-natv/makefile
 del m
 
 		REM setup tconfig.h in bld-natv:
-echo /* tconfig.h */ > m
-update m bld-natv/tconfig.h
-del m
+cp %unixbport%/tconfig.in > bld-port/tconfig.h
+
 
 :gmkf
 

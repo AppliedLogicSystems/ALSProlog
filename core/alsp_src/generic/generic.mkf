@@ -56,6 +56,7 @@ glibfiles_c = \
 	fatal.c \
 	fileio.c \
 	foreign.c \
+	freeze.c \
 	fsdos.c \
 	fsmac.c \
 	fsunix.c \
@@ -147,12 +148,17 @@ OTHERFILES = alsglue.c
 GENFILES = 	tokens.h tokini2.h lexinit.h siolex.h
 
 BLDTRUN=./bldtok
-LEXRUN=./lexinit >lexinit.h
-SIORUN=./sioinit >siolex.h
-ICODERUN=./icode >icode.h
+LEXRUN=./lexinit > lexinit.h
+SIORUN=./sioinit > siolex.h
+ICODERUN=./icode > icode.h
+MAGICRUN=./magic > magic.h
 
 generated: ${GENFILES}
 
+magic.h:	generate/magic.c defs.h aconfig.h oconfig.h config.h tconfig.h
+	${CC} $(CPPFLAGS) -o magic $(srcdir)/generic/generate/magic.c
+	$(MAGICRUN)
+	-rm magic
 
 tokini2.h:	tokens.h
 
@@ -184,9 +190,9 @@ icode.h:	icodedef.h generate/icode.c
 #
 
 defs_h = aconfig.h alloc.h alspi.h alssig.h built.h \
-	chpt.h config.h defs.h fatal.h fileio.h \
+	chpt.h config.h defs.h dfltsys.h fatal.h fileio.h \
 	lexan.h missing.h mtypes.h parser.h \
-	tokens.h alstypes.h \
+	tconfig.h tokens.h alstypes.h \
 	wamops.h wamops0.h winter.h wintidx.h \
 	
 
@@ -207,10 +213,11 @@ cinterf.o:	cinterf.h
 compile.o:	varproc.h cutmacro.h compile.h icode.h icodegen.h icom.h
 compmath.o:	varproc.h compile.h icode.h icodegen.h icom.h
 expand.o:	varproc.h parsstak.h compile.h icodegen.h icom.h main.h
+freeze.o:	icodegen.h cutmacro.h compile.h module.h wintcode.h wntbl.h wci.h
 gc.o:		machinst.h wintcode.h
 index.o:	icodegen.h icom.h
 lexan.o:	lexan.h lexinit.h
-loadfile.o:	wintcode.h icodegen.h version.h
+loadfile.o:	wintcode.h icodegen.h magic.h version.h
 main.o:		main.h version.h pckg.h rinfo.h
 mem.o:		version.h sig.h alsmem.h
 module.o:	cutmacro.h main.h icodegen.h icom.h

@@ -13,7 +13,6 @@
  | 01/28/86 - K. Buettner -- IBM PC conversion
  | 10/26/94 - C. Houpt -- Added UCHAR* casts for various calls.
  *=========================================================================*/
-
 #include "defs.h"
 
 #ifdef	HAVE_UNISTD_H
@@ -44,6 +43,7 @@ pbi_access()
 
 }
 
+#ifdef OSACCESS
 int
 pbi_chdir()
 {
@@ -85,6 +85,7 @@ pbi_getenv()
     else
 	FAIL;
 }
+#endif /* OSACCESS */
 
 int
 pbi_system()
@@ -134,6 +135,7 @@ pbi_system()
 }
 
 
+#ifdef OSACCESS
 /*
  * ptmpnam calls either tmpnam or tempnam to obtain the name of a temporary
  * file.  tmpnam is pretty lame, but unfortunately tempnam (note the 'e') is
@@ -174,6 +176,7 @@ pbi_tmpnam()
     else
 	FAIL;
 }
+#endif /* OSACCESS */
 
 
 int

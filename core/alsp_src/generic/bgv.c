@@ -1,17 +1,17 @@
-/*
- * bgv.c   -- Global variable Prolog builtins defined in C.
- *
- * Copyright (c) 1985 by Kevin A. Buettner
- * Copyright (c) 1986-1993 by Applied Logic Systems
- *
- * Program Author:  Kevin A. Buettner
- * Creation:  11/14/84
- * Revision History: (fixes, not addition of new builtins)
- *      06/28/85,       K. Buettner -- Conversion to wam and compiled prolog
- *      09/12/85,       K. Buettner -- arithmetic predicates moved to
- *                                     separate file.
- *      01/28/86,       K. Buettner -- IBM PC conversion
- */
+/*=========================================================================*
+ |		bgv.c
+ |	Copyright (c) 1985 by Kevin A. Buettner
+ |	Copyright (c) 1986-1995 by Applied Logic Systems
+ |
+ |		-- Global variable Prolog builtins defined in C.
+ |
+ | Program Author: K.A. Buettner
+ | Creation:  11/14/84
+ | Revision History: 
+ | 06/28/85 - K.Buettner -- Conversion to wam and compiled prolog
+ | 09/12/85 - K.Buettner -- arithmetic predicates moved to separate file.
+ | 01/28/86 - K.Buettner -- IBM PC conversion
+ *=========================================================================*/
 
 #include "defs.h"
 

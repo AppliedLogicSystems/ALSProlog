@@ -31,6 +31,7 @@ build_base_config
 	als_system(SysList),
 	dmember(prologVersion = PVer, SysList),
 
+
 	open('cfg.pro',write,OutStr,[]),
 	write_clauses(OutStr, [cfg(prologVersion,PVer) | Info]),
 	close(OutStr),
@@ -192,7 +193,28 @@ trial_mem(TG, [TG | RestTagsList], RestTagsList).
 trial_mem(TG, [Other | TailTagsList], [Other | RestTagsList])
 	:-
 	trial_mem(TG, TailTagsList, RestTagsList).
+	/*----------------------------------------------------
+	 |	Determining bld dirs & libs
+	 *---------------------------------------------------*/
 
+get_bld_dirs(BDList)
+	:-
+	ToCheck = ['bld-natv','bld-port','bld-byte'],
+	get_bld_dirs(ToCheck,BDList).
+
+get_bld_dirs([],[]).
+get_bld_dirs([BD | ToCheck],[BD0 | BDList])
+	:-
+	exists_file(BD),
+	pathPlusFile(BD,'alspro.a',ProLib),
+	exists_file(ProLib),
+	!,
+	pathPlusFile('../..',BD,BD0),
+	get_bld_dirs(ToCheck,BDList).
+
+get_bld_dirs([BD | ToCheck],BDList)
+	:-
+	get_bld_dirs(ToCheck,BDList).
 	/*----------------------------------------------------
 	 |	Setting up the bld-wins subdir
 	 *---------------------------------------------------*/
@@ -206,6 +228,7 @@ setup_wins
 	(SubdirList = [] ->
 		printf(user,'No win interface dirs to create! \n',[])
 		;
+		get_bld_dirs(BDList),
 		change_cwd('./bld-wins'),
 		make_each_subdir(SubdirList),
 		cfg(srcdir,BLD_NATV_SRC_PATH_Atm),
@@ -222,7 +245,8 @@ setup_wins
 				    './makefile', GOS),
 
 		subPath(BLD_NATV_SRC_PATH,BLD_NATV_SRC_PATH_Atm),
-		create_makefiles_and_subdirs(SubdirList, ARCH, OS, BLD_NATV_SRC_PATH),
+		create_makefiles_and_subdirs(SubdirList, ARCH, OS, 
+									 BLD_NATV_SRC_PATH,BDList),
 		change_cwd('..')
 	),
 	change_cwd('..').
@@ -250,9 +274,10 @@ check_make_subdir(Subdir)
 	make_subdir(Subdir),
 	printf(user,'   Created subdir %t \n',[Subdir]).
 
-create_makefiles_and_subdirs( [], _, _, _ ).
+create_makefiles_and_subdirs( [], _, _, _,_).
 
-create_makefiles_and_subdirs( [Subdir | Subdirs], ARCH, OS, BLD_NATV_SRC_PATH)
+create_makefiles_and_subdirs( [Subdir | Subdirs], ARCH, OS, 
+								BLD_NATV_SRC_PATH,BDList)
 	:-
 	append(BLD_NATV_SRC_PATH,[wins,build,Subdir], BldSubdirPath),
 	subPath(BldSubdirPath, BldSubdirPathAtm),
@@ -262,12 +287,13 @@ create_makefiles_and_subdirs( [Subdir | Subdirs], ARCH, OS, BLD_NATV_SRC_PATH)
 
 	general_os(ARCH,OS,GOS),
 
-	create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, 
+	create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, BDList,
 				BldPathAtm, BldSubdirPathAtm, GOS),
 
-	create_makefiles_and_subdirs( Subdirs, ARCH, OS, BLD_NATV_SRC_PATH).
+	create_makefiles_and_subdirs( Subdirs, ARCH, OS, BLD_NATV_SRC_PATH,BDList).
 
-create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, BldPathAtm, BldSubdirPathAtm, GOS)
+create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH,BDList, 
+					 BldPathAtm, BldSubdirPathAtm, GOS)
 	:-
 	adjust_path_depth(BLD_NATV_SRC_PATH,1,BNSP1),
 		%% General header vars:
@@ -286,8 +312,11 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, BldPathAtm, BldSubdirP
 		'LIBS' = LIBS,
 		'X_CFLAGS' = X_CFLAGS,
 		'X_LIBS' = X_LIBS,
-		'X_EXTRA_LIBS' = X_EXTRA_LIBS
+		'X_EXTRA_LIBS' = X_EXTRA_LIBS,
+		'BDINCS' = BDINCS
 		|  SubHeaderLines0 ],
+
+	mk_bd_incs(BDList, BDINCS),
 
 		%% Handle the  makefile:
 	extendPath(BldSubdirPathAtm, 'makefile.in', SubDirMakefile),
@@ -301,7 +330,6 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, BldPathAtm, BldSubdirP
 	open(TCONFIG,write, TCStr, []),
 	printf(TCStr, '/*   tconfig.h - default  */\n',[]),
 	close(TCStr),
-	
 
 	pathPlusFile(Subdir,'makefile',SubdirMakefile),
 	trans_xtnd_makefile(SrcMKFTail, SubHeaderLines, SubdirMakefile, GOS), 
@@ -333,6 +361,17 @@ add_depth(N, BP, BNSP)
 	:-
 	M is N-1,
 	add_depth(M, ['..' | BP], BNSP).
+
+mk_bd_incs(BDList, BDINCS)
+	:-
+	mk_bd_incs0(BDList, BDINCS0),
+	catenate(BDINCS0, BDINCS).
+
+mk_bd_incs0([], []).
+mk_bd_incs0([BD | BDList], [IBD | BDINCS])
+	:-
+	catenate(' -I',BD,IBD),
+	mk_bd_incs0(BDList, BDINCS).
 
 trans_xtnd_makefile(SrcMFile, HeaderLines, TgtMFile, GOS)
 	:-

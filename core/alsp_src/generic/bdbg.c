@@ -1,18 +1,15 @@
-/*
- * bdbg.c               -- debugger builtins
- *      Copyright (c) 1989-1993 Applied Logic Systems, Inc.
- *
- * Author:      Kevin A. Buettner
- * Creation:    5/5/89
- *
- * Revision History:
- *   Revised:   mm/dd/yy        Who             What
- *   Revised:   mm/dd/yy        Who             What
- */
+/*================================================================*
+ |		bdbg.c
+ |	Copyright (c) 1989-1995 Applied Logic Systems, Inc.
+ |
+ |		-- debugger builtins
+ |
+ | Author: K.A. Buettner
+ | Creation: 05/5/89
+ *================================================================*/
 
 #include "defs.h"
 #include "wintcode.h"
-
 
 int
 pbi_dbg_nospy()

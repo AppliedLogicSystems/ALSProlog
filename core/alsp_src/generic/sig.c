@@ -20,12 +20,14 @@
 #ifdef DOS
 #define SIGINT 2
 #define CNTRLC_INTNUM	0x1B
+
 #else  /* DOS */
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #include <signal.h>
 #include <math.h>
+
 #endif /* DOS */
 
 #ifdef DOS

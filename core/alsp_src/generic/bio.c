@@ -21,7 +21,84 @@
 #include "icom.h"
 #include "wintcode.h"
 
+int
+pbi_save_state_to_file()		/* save_state_to_file */
+{
+    PWord v1;
+    int t1;
+    UCHAR *name;
+
+    w_get_An(&v1, &t1, 1);
+
+    if (getstring(&name, v1, t1) && ss_save_state((char *)name))
+	SUCCEED;
+    else
+	FAIL;
+}
+
 static	int	pload_file	PARAMS(( UCHAR *, int ));
+
+static int
+pload_file(name, reconbit)
+    UCHAR *name;
+    int   reconbit;
+{
+    int   retval;
+
+    dbprot_t odbrs = w_dbprotect(DBRS_WRITABLE);
+    retval = load_file((char *) name, reconbit); 
+/*    retval = load_obp((char *) name, reconbit);   */
+    (void) w_dbprotect(odbrs);
+    return retval;
+}
+
+int
+pbi_load()
+{				/* $load(File,Flag) */
+    PWord v1, v2;
+    int   t1, t2;
+    UCHAR *str;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+
+    if (t2 == WTP_INTEGER && getstring(&str, v1, t1) && pload_file(str, (int) v2))
+	SUCCEED;
+    else
+	FAIL;
+}
+
+int
+pbi_nl()
+{
+    fio_nl();
+    SUCCEED;
+}
+
+int
+pbi_ttyflush()
+{
+    fio_flush();
+
+    SUCCEED;
+}
+
+
+int
+pbi_write()
+{
+    PWord v;
+    int   t;
+
+    w_get_An(&v, &t, 1);
+
+    prolog_write(v, t);
+
+    SUCCEED;
+}
+
+#ifdef OLDCIO
+
 
 int
 pbi_display()
@@ -64,43 +141,6 @@ pbi_get0()
 	FAIL;
 }
 
-
-static int
-pload_file(name, reconbit)
-    UCHAR *name;
-    int   reconbit;
-{
-    int   retval;
-
-    dbprot_t odbrs = w_dbprotect(DBRS_WRITABLE);
-    retval = load_file((char *) name, reconbit);
-    (void) w_dbprotect(odbrs);
-    return retval;
-}
-
-int
-pbi_load()
-{				/* $load(File,Flag) */
-    PWord v1, v2;
-    int   t1, t2;
-    UCHAR *str;
-
-    w_get_An(&v1, &t1, 1);
-    w_get_An(&v2, &t2, 2);
-
-    if (t2 == WTP_INTEGER && getstring(&str, v1, t1) && pload_file(str, (int) v2))
-	SUCCEED;
-    else
-	FAIL;
-}
-
-
-int
-pbi_nl()
-{
-    fio_nl();
-    SUCCEED;
-}
 
 
 int
@@ -215,28 +255,6 @@ pbi_told()
 }
 
 
-int
-pbi_ttyflush()
-{
-    fio_flush();
-
-    SUCCEED;
-}
-
-
-int
-pbi_write()
-{
-    PWord v;
-    int   t;
-
-    w_get_An(&v, &t, 1);
-
-    prolog_write(v, t);
-
-    SUCCEED;
-}
-
 
 int
 pbi_writeq()
@@ -250,6 +268,7 @@ pbi_writeq()
 
     SUCCEED;
 }
+#endif /* OLDCIO */
 
 
 #ifdef DynamicForeign
@@ -285,6 +304,7 @@ pbi_load_foreign()
 
 #endif /* DynamicForeign */
 
+#ifdef SYS_OBP
 int
 pbi_obp_push_stop()
 {
@@ -376,7 +396,10 @@ pbi_obp_load()
     else
 	FAIL;
 }
+#endif /* SYS_OBP */
 
+
+#ifdef OLDCONSULT
 int
 pbi_old_consult()
 {				/* old_consult(FileName,NErrs) */
@@ -398,18 +421,5 @@ pbi_old_consult()
     else
 	FAIL;
 }
+#endif /* OLDCONSULT */
 
-int
-pbi_save_state_to_file()		/* save_state_to_file */
-{
-    PWord v1;
-    int t1;
-    UCHAR *name;
-
-    w_get_An(&v1, &t1, 1);
-
-    if (getstring(&name, v1, t1) && ss_save_state((char *)name))
-	SUCCEED;
-    else
-	FAIL;
-}

@@ -51,6 +51,10 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 /* These should be in sys/ipc.h or sys/msg.h, but some systems have really
  * lame include files.
  */
@@ -805,6 +809,8 @@ sio_file_open()
 #else
 	    if ((SIO_FD(buf) = open((char *)filename, flags)) == -1) {	/* } */
 #endif
+#elif defined(__GO32__)
+	if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1) {
 #else  /* default code */
 	if ((SIO_FD(buf) = open(filename, flags, 0777)) == -1) {
 #endif
@@ -1519,6 +1525,7 @@ sio_accept_socket_connection()
 
 #endif /* HAVE_SOCKET */
 
+#ifdef REXEC
 
 /*
  * sio_rexec(Host, Command, User, Password, RS, WS, ES)
@@ -1717,6 +1724,7 @@ sio_rexec()
 #endif /* GO32 */
     SUCCEED;
 }
+#endif /* REXEC */
 
 
 /*
@@ -1797,6 +1805,7 @@ sio_poll()
 }
 #endif /* HAVE_SOCKET */
 
+#ifdef WINIOBASIS
 /*
  *	window_insert_pos(WinID, WinPos)
  *
@@ -1902,6 +1911,7 @@ sio_window_open()
     SUCCEED;
 }
 
+#endif /* WINIOBASIS */
 
 
 /*

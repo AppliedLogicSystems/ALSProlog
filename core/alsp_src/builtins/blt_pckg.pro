@@ -48,19 +48,27 @@ export save_image/1.
 
 save_image(NewImageName)
 	:-
-	tmpnam(SSName),
-printf(user_output,'Saving state to: %s...',[SSName]),
-	save_state(SSName),
-printf(user_output,'saved.\n',[]),
-	get_image_dir_and_name(ImageDir,ImageName),
 	sys_searchdir(ALSDIR),
+	abolish(sys_searchdir,1),
+	abolish(searchdir,1),
+		%% Need to kill other stuff from the shell;
+	tmpnam(SSName),
+	    printf(user_output,'Saving state to: %s...',[SSName]),
+	save_state(SSName),
+	    printf(user_output,'saved.\n',[]),
+	get_image_dir_and_name(ImageDir,ImageName),
 	mics_cmd_fmt(MicsCmdFmt),
 	sprintf(CMD, MicsCmdFmt,
 		      [ALSDIR, ImageDir, ImageName, SSName, NewImageName]),
 	atom_codes(ACMD,CMD),
-	printf('Executing %s\n', [ACMD]),
-	system(ACMD).
-%	unlink(SSName).
+	    printf('Executing %s\n', [ACMD]),
+	system(ACMD),
+		%% Until we find the problem with make/etc under djgpp:
+	(sys_env(unix,djgpp,_) ->	
+		true
+		;
+		unlink(SSName)
+	).
 
 mics_cmd_fmt('go32 %sals-mics %s%s %s %s')
 	:-

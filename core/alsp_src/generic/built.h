@@ -150,10 +150,15 @@ extern	int	pbi_listasm_ntblentry	PARAMS(( void ));
 extern	int	pbi_push_clausegroup	PARAMS(( void ));
 extern	int	pbi_pop_clausegroup	PARAMS(( void ));
 extern	int	pbi_collectcode	PARAMS(( void ));
-	/* SPECIAL */
-extern	int	pbi_cptx	PARAMS(( void ));
-extern	int	pbi_swp_tr	PARAMS(( void ));
-extern	int	pbi_walk_cps	PARAMS(( void ));
+
+	/* freeze.c */
+extern	void	pbi_cptx	PARAMS(( void ));
+extern	int		disp_heap	PARAMS(( void ));
+extern	void	pbi_swp_tr	PARAMS(( void ));
+extern	void	pbi_walk_cps	PARAMS(( void ));
+extern	void	pbi_delay	PARAMS(( void ));
+extern	void 	pbi_clct_tr PARAMS(( void ));
+extern	void	pbi_collect_thawed	PARAMS(( void ));
 
 /* bdbg.c */
 extern	int	pbi_dbg_nospy	PARAMS(( void ));
@@ -352,3 +357,9 @@ extern	int	gc		PARAMS(( void ));
 
 /* sig.c */
 extern	int	pbi_alarm	PARAMS(( void ));
+
+/* wam.c -- byte only */
+#ifdef TRACEBWAM
+extern	void 	toggle_bwam 	PARAMS( ( void ) );
+#endif
+

@@ -8,8 +8,10 @@
  | Date  : 7/24/91
  | 10/26/94 - C. Houpt - Added char* casts for standard library string calls.
  *=================================================================*/
+
 #include "defs.h"
 #include <stdio.h>
+#ifdef BCINTER
 
 /*
  * usage : $c_malloc(size,ptr_return)
@@ -517,3 +519,5 @@ pbi_c_make_farptr()
 }
 
 #endif /* DOS */
+
+#endif /* BCINTER */

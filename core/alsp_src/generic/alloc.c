@@ -1,16 +1,15 @@
 /*===================================================================*
- *			alloc.c      
- *      Copyright (c) 1985 by Kevin A. Buettner
- *      Copyright (c) 1993 by Applied Logic Systems, Inc.
- *
- *		-- storage allocator and functions which operate on compile
- *         time structures
- *
- * Author:  Kevin A. Buettner
- * Creation: 6/15/85
- * Revision History:
- *      Revised: 01/13/86,   Kevin A. Buettner  -- IBM PC port for ALS
- *      Revised: 12/6/89,    Kev             -- Merge of 386, 68k, and 88k
+ |			alloc.c      
+ |      Copyright (c) 1985 by Kevin A. Buettner
+ |      Copyright (c) 1986-95 by Applied Logic Systems, Inc.
+ |
+ |		-- storage allocator and functions which operate on compile
+ |         time structures
+ |
+ | Author:  Kevin A. Buettner
+ | Creation: 6/15/85
+ | 01/13/86 - K.A. Buettner  -- IBM PC port for ALS
+ | 12/06/89 - K.A. Buettner -- Merge of 386, 68k, and 88k
  *===================================================================*/
 
 #include "defs.h"

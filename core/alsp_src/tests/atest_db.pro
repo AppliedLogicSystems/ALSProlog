@@ -19,7 +19,7 @@ test_info(queens, queens, user, all_queens, 'The 8 queens example.').
 test_info(compare, compare, user, test,
 			'compare/3 testing.').
 
-test_info(copylines, copylines, user, test,
+test_info(copylnes, copylnes, user, test,
 			'get_line and put_line testing.').
 
 test_info(counter, counter, user, bench,
@@ -52,7 +52,7 @@ test_info(retract2, retract2, user, main,
 test_info(retract3, retract3, user, main,
 			'another test of retract.').
 
-test_info(retractall, retractall, user, (test,listing(p/2)),
+test_info(rtrctall, rtrctall, user, (test,listing(p/2)),
 			'another test of retract.').
 
 test_info(syms, syms, user, test,
