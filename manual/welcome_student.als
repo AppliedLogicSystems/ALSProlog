@@ -6,6 +6,7 @@ Contents:
    - WARRANTY
    - CD ORGANIZATION
    - MANUAL
+   - HELP SYSTEM
    - COPYING ALS
 
 LICENSE
@@ -78,6 +79,7 @@ is included with this distribution.
 
        Applied Logic Systems, Inc.
        PO Box 400175, Cambridge, MA 02140 USA
-       Email: support@als.com   Web: http://www.als.com
+	   Web: http://www.als.com
+       Email: support@als.com   
        Fax: (617) 497-3963 Tel: (617) 497-0100   
 
