@@ -263,16 +263,6 @@ process((!),Names,Vars,Stream, File, ModStack, ModStack,
 	:- !.
 		%% rdef_cut: "Attempt to redefine cut - ignored.\n"
 
-/*
-process(defStruct(Name,Spec),Names,Vars,Stream, File, ModStack, ModStack, Errs, Errs)
-	:- 
-	topmod(Module),
-	create_type_def(defStruct(Name,Spec), Module, Result),
-	addclauses(Result),
-	!,
-	readFile(Stream, File, ModStack).
-*/
-
 process(Fact, Names, Vars,Stream, File, ModStack, ModStack, Errs, Errs)
 	:-
 	xform(Fact,true,NewBody,Names,Vars),

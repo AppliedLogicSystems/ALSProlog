@@ -3,7 +3,7 @@
  |		Copyright (c) 1998 Applied Logic Systems, Inc.
  |
  |			Prolog Project Management
- |			"$Id: projects.pro,v 1.7 1998/09/04 14:18:17 choupt Exp $"
+ |			
  *=============================================================*/
 
 module alsdev.

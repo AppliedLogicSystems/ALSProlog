@@ -29,7 +29,6 @@
  *================================================================*/
 module builtins.
 
-
 export file_extension/3.
 export path_elements/2.
 export is_absolute_path/1.
@@ -44,6 +43,7 @@ export tilda_expand/2.
 export directory_self/2.
 export directory_self/3.
 
+/*
 file_extension(Name, Ext, FullName) :-
 	nonvar(FullName),
 	!,
@@ -54,6 +54,22 @@ file_extension(Name, Ext, FullName) :-
 	)),
 	sub_atom(FullName, 0, Before, _, Name),
 	sub_atom(FullName, _, After, 0, Ext).
+*/
+file_extension(Name, Ext, FullName) :-
+	nonvar(FullName),
+	!,
+	split_path(FullName, Elements),
+	dreverse(Elements, [Last | RRestElts]),
+	once((
+		rev_sub_atom(Last, Before, 1, After, '.')
+		;
+		(atom_length(Last, Before), After = 0)
+	)),
+	sub_atom(Last, _, After, 0, Ext),
+	sub_atom(Last, 0, Before, _, BName),
+	dreverse([BName | RRestElts], NameElts),
+	join_path(NameElts, Name).
+
 file_extension(FileName,Ext,FullName) :-
 	atom_concat(FileName,'.',FileNameDot),
 	atom_concat(FileNameDot, Ext, FullName).
@@ -324,7 +340,6 @@ find_sub(Atom, Before, After, SubAtom) :-
 	!,
 	sub_atom(Atom, Before, _, After, SubAtom).
 
-
 rev_sub_atom(Atom, Before, Length, After, SubAtom) :-
 	sub_atom(Atom, LBefore, Length, LAfter, SubAtom),
 	!,
@@ -356,6 +371,7 @@ directory_self(mswin32, '.').
 directory_self(win32, '.').
 
 
+%%%%%%%%%%%%%%%%%%%5-----------------------------------------
 % BELOW IS OBSOLETE 
 
 

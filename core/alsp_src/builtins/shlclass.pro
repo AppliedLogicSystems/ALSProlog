@@ -31,11 +31,13 @@ module builtins.
 				prolog_library, 	  %% path to the ...
 				initial_dir,    	  %% initial directory we wake up in
 				initial_search_dirs,  %% initial search list
-				source_mgrs		   	  %% list of managers for consulted files
+				source_mgrs,	   	  %% list of managers for consulted files
+				cslt_ctxt		   	  %% (list) stack of "current source_mgr" 
 			],
 		defaults = [ 
 				shell_module = alsshell,   %% make alsdev reset this...
-				source_mgrs = []
+				source_mgrs = [],
+				cslt_ctxt	= []
 		]
 	]),
 

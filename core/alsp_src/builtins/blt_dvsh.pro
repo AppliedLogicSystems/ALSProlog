@@ -64,7 +64,7 @@ start_alsdev
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,alsdev,CLInfo),
 	assertz(command_line(ResidualCommandLine)),
 
-	setup_debugger_stubs,
+%	setup_debugger_stubs,
 	setup_search_dirs(CLInfo),
 	assert(save_clinfo(CLInfo)),
 
@@ -281,9 +281,9 @@ alsdev
 	set_primary_manager(ALS_IDE_Mgr),
 
 	consultmessage(CurValue),
-	set_consult_messages(true),
+%	set_consult_messages(true),
 	init_tk_alslib(shl_tcli,Shared),
-	set_consult_messages(CurValue),
+%	set_consult_messages(CurValue),
 	alsdev(Shared, ALS_IDE_Mgr).
 
 export alsdev/2.
@@ -1260,7 +1260,15 @@ annotate_showing([M | SysMs], [[M, S] | SMs])
 
 :- abolish(record_lib_load, 1).
 	%% Needs to be expanded:
-record_lib_load(File).
+	%% must make its assert in module builtins:
+record_lib_load(Desc)
+	:-
+		%% the incoming Desc is an atom, looking like: Dir/File
+	sub_atom(Desc, Before, 1, After, '/'),
+	sub_atom(Desc, 0, Before, _, Dir),
+	sub_atom(Desc, _, After, 0, File),
+	assertz(loaded_builtins_file(File,Dir)).
+
 
 endmod.	%% builtins
 
