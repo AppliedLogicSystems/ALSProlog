@@ -491,6 +491,8 @@ proc init_prj_spec \
         -command "save_project" -padx 11 -pady 4 -text Save 
     button $base.buttons.close \
         -command "close_project" -padx 11 -pady 4 -text Close 
+    button $base.buttons.addl \
+        -command "addl_project_info $base" -padx 11 -pady 4 -text Addl 
     button $base.buttons.load \
         -command "load_this_project" -padx 11 -pady 4 -text {(Re)Load}
     ###################
@@ -501,11 +503,13 @@ proc init_prj_spec \
     pack $base.buttons \
         -anchor center -expand 0 -fill x -side top 
     pack $base.buttons.save \
-        -anchor center -expand 0 -fill none -padx 5 -side left 
+        -anchor center -expand 0 -fill none -padx 2 -side left 
     pack $base.buttons.close \
-        -anchor center -expand 0 -fill none -padx 5 -side left 
+        -anchor center -expand 0 -fill none -padx 2 -side left 
+    pack $base.buttons.addl \
+        -anchor center -expand 0 -fill none -padx 2 -side left 
     pack $base.buttons.load \
-        -anchor center -expand 0 -fill none -padx 10 -side right 
+        -anchor center -expand 0 -fill none -padx 2 -side right 
 
 	#wm geometry $base ""
 }
@@ -866,6 +870,159 @@ proc rd_prj_spec {base TextSlots ListOfFilesSlots ListSlots } {
 	lappend Result  $TxtSs $LstSs
 	return $Result
 }
+
+
+proc addl_project_info { parent_base } {
+	set proj_title [$parent_base.title.entry get]  
+	if {$proj_title == ""} then {
+		tk_messageBox -message "Missing project title!" -icon error \
+			-title "Missing info" -type ok
+		return
+	}
+	addl_project_info_win $parent_base.addlprj $proj_title
+}
+
+proc addl_project_info_win {base proj_title} {
+    if {[winfo exists $base]} {
+        wm deiconify $base; return
+    }
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel
+    wm focusmodel $base passive
+    wm geometry $base 326x343+320+148
+    wm maxsize $base 1137 870
+    wm minsize $base 1 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 1
+    wm deiconify $base
+    wm title $base "Additional Project Information"
+    label $base.lab_title \
+        -borderwidth 1 -text {Project Title:} 
+    label $base.title_val -text $proj_title -relief sunken
+    label $base.lab_start \
+        -borderwidth 1 -text {Start Goal:} 
+    entry $base.start_entry
+    label $base.lab_debug \
+        -borderwidth 1 -text {Debug Goal:} 
+    entry $base.debug_entry
+    label $base.lab_library \
+        -borderwidth 1 -text {Library Files:} 
+    frame $base.cpd17 \
+        -borderwidth 1 -height 8 -relief raised -width 30 
+    listbox $base.cpd17.01 \
+        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* -height 6 \
+        -xscrollcommand "$base.cpd17.02 set" \
+        -yscrollcommand "$base.cpd17.03 set" 
+    scrollbar $base.cpd17.02 \
+        -borderwidth 1 -command "$base.cpd17.01 xview" -orient horiz \
+        -width 10 
+    scrollbar $base.cpd17.03 \
+        -borderwidth 1 -command "$base.cpd17.01 yview" -orient vert \
+        -width 10 
+    label $base.lab_exec \
+        -borderwidth 1 -text {Executable File Name:} 
+    entry $base.exec_entry
+    frame $base.lib_btns \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    button $base.lib_btns.add \
+        -command add_lib_file -padx 11 -pady 4 -text {Add Lib File} 
+    button $base.lib_btns.del \
+        -command delete_lib_file -padx 11 -pady 4 -text {Delete Lib File} 
+    label $base.lab_stub \
+        -borderwidth 1 -text {Stub File Name:} 
+    entry $base.stub_entry
+    label $base.lab_distdir \
+        -borderwidth 1 -text {Distribution Dir Name:} 
+    entry $base.distdir_entry
+    frame $base.dist_btns \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    button $base.dist_btns.mkexec \
+        -command make_executable -padx 11 -pady 4 -text {Make Executable} 
+    button $base.dist_btns.mkdist \
+        -command make_dist -padx 11 -pady 4 -text {Make Distribution} 
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    grid columnconf $base 1 -weight 1
+    grid rowconf $base 4 -weight 1
+    grid $base.lab_title \
+        -in $base -column 0 -row 0 -columnspan 1 -rowspan 1 -padx 5 \
+        -sticky e 
+    grid $base.title_val \
+        -in $base -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ew 
+    grid $base.lab_start \
+        -in $base -column 0 -row 1 -columnspan 1 -rowspan 1 -padx 5 \
+        -sticky e 
+    grid $base.start_entry \
+        -in $base -column 1 -row 1 -columnspan 1 -rowspan 1 -sticky ew 
+    grid $base.lab_debug \
+        -in $base -column 0 -row 2 -columnspan 1 -rowspan 1 -padx 5 \
+        -sticky e 
+    grid $base.debug_entry \
+        -in $base -column 1 -row 2 -columnspan 1 -rowspan 1 -sticky ew 
+    grid $base.lab_library \
+        -in $base -column 0 -row 3 -columnspan 1 -rowspan 1 -padx 3 \
+        -sticky w 
+    grid $base.cpd17 \
+        -in $base -column 0 -row 4 -columnspan 2 -rowspan 1 -sticky nesw 
+    grid columnconf $base.cpd17 0 -weight 1
+    grid rowconf $base.cpd17 0 -weight 1
+    grid $base.cpd17.01 \
+        -in $base.cpd17 -column 0 -row 0 -columnspan 1 -rowspan 1 \
+        -sticky nesw 
+    grid $base.cpd17.02 \
+        -in $base.cpd17 -column 0 -row 1 -columnspan 1 -rowspan 1 \
+        -sticky ew 
+    grid $base.cpd17.03 \
+        -in $base.cpd17 -column 1 -row 0 -columnspan 1 -rowspan 1 \
+        -sticky ns 
+    grid $base.lab_exec \
+        -in $base -column 0 -row 6 -columnspan 1 -rowspan 1 -padx 5 \
+        -sticky e 
+    grid $base.exec_entry \
+        -in $base -column 1 -row 6 -columnspan 1 -rowspan 1 -sticky ew 
+    grid $base.lib_btns \
+        -in $base -column 0 -row 5 -columnspan 2 -rowspan 1 -sticky ew 
+    grid $base.lib_btns.add \
+        -in $base.lib_btns -column 0 -row 0 -columnspan 1 -rowspan 1 \
+        -padx 10 -sticky w 
+    grid $base.lib_btns.del \
+        -in $base.lib_btns -column 1 -row 0 -columnspan 1 -rowspan 1 \
+        -padx 10 -pady 2 -sticky e 
+    grid $base.lab_stub \
+        -in $base -column 0 -row 7 -columnspan 1 -rowspan 1 -padx 5 \
+        -sticky e 
+    grid $base.stub_entry \
+        -in $base -column 1 -row 7 -columnspan 1 -rowspan 1 -sticky ew 
+    grid $base.lab_distdir \
+        -in $base -column 0 -row 8 -columnspan 1 -rowspan 1 -padx 5 \
+        -sticky e 
+    grid $base.distdir_entry \
+        -in $base -column 1 -row 8 -columnspan 1 -rowspan 1 -sticky ew 
+    grid $base.dist_btns \
+        -in $base -column 0 -row 9 -columnspan 2 -rowspan 1 -sticky ew 
+    grid $base.dist_btns.mkexec \
+        -in $base.dist_btns -column 0 -row 0 -columnspan 1 -rowspan 1 \
+        -padx 10 -sticky w 
+    grid $base.dist_btns.mkdist \
+        -in $base.dist_btns -column 1 -row 0 -columnspan 1 -rowspan 1 \
+        -padx 10 -pady 2 -sticky e 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 proc vTclWindow.ide_settings {base} {
 	global proenv
