@@ -15,9 +15,6 @@
 /*#undef DynamicForeign */
 #ifdef DynamicForeign
 
-extern char imagename[];	/* name of image we are running - initial path */
-extern char imagedir[];		/* directory containing image with final slash */
-
 typedef void (*PFV) PARAMS(( void ));		/* A function pointer type */
 
 #if defined(HAVE_DLOPEN)
