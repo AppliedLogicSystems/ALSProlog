@@ -83,11 +83,6 @@ base_obp_list([
     ':alsdir:builtins:sio_wt.obp',
     ':alsdir:builtins:xconsult.obp',  
     ':alsdir:builtins:debugger.obp'
-    /*
-    ':alsdir:library:iolayer.obp',
-    ':alsdir:library:simplio.obp',
-    ':alsdir:library:listutl3.obp'
-    */
   ]).
 
 /*---------------------------------------------------------------*
@@ -102,12 +97,7 @@ export save_base_package/1.
 
 save_base_package(NewName) :-
 	force_libload_all(
-	  [':alsdir:builtins:debugger'
-	   /*
-	   ,':alsdir:library:iolayer',
-	   ':alsdir:library:simplio', ':alsdir:library:listutl3'
-	   */
-	  ]),
+	  [':alsdir:builtins:debugger']),
 	base_obp_list(BList),
 	save_app_with_obp(NewName, BList, [], '', '').
 
