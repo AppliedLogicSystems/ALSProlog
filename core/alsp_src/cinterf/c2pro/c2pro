@@ -94,7 +94,8 @@ c2pro
 	),
 		%% parse command line & setup options:
 	get_cmdline_vals(SwitchVals),
-	pull_out_files(SwitchVals, Files, ReducedSwitchVals),
+%	pull_out_files(SwitchVals, Files, ReducedSwitchVals),
+	pull_out_nullswitches(SwitchVals, Files, ReducedSwitchVals),
 
 	makeC2P(DummyState),
 	setC2P(inFile, DummyState, command_line),
@@ -110,6 +111,7 @@ c2pro
 	%   pull_out_files/3
 	%-------------------------------------
 
+/*
 pull_out_files([], [], []).
 pull_out_files([['-null_switch' , File] | SwitchVals], 
 			[File | Files], ReducedSwitchVals)
@@ -119,6 +121,7 @@ pull_out_files([['-null_switch' , File] | SwitchVals],
 pull_out_files([Switch | SwitchVals], Files, [Switch | ReducedSwitchVals])
 	:-
 	pull_out_files(SwitchVals, Files, ReducedSwitchVals).
+*/
 
 	%-------------------------------------
 	%   parse_options/3

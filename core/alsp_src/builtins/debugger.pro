@@ -1760,6 +1760,7 @@ show_again(Port,Box,Depth,Module,Goal,Response) :-
 writeGoal(Box,Depth,Port,Module,Goal) :-
 	printf(debugger_output, 	"(%d) %d %s: ", [Box,Depth,Port]),
 	write_term(debugger_output, Module:Goal,	[lettervars(false)]),
+%% if mac:  nl(debugger_output),
 	flush_output(debugger_output).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

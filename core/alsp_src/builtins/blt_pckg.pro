@@ -33,7 +33,6 @@ pckg_init :-
 export save_state/1.
 
 save_state(FileName) :-
-%	force_libload_all,
 	get_shell_level(CurLev),
 	set_shell_level(0),
 	package_global_variables,	%% create initialization pred
@@ -50,7 +49,9 @@ export save_image/1.
 save_image(NewImageName)
 	:-
 	tmpnam(SSName),
+printf(user_output,'Saving state to: %s...',[SSName]),
 	save_state(SSName),
+printf(user_output,'saved.\n',[]),
 	get_image_dir_and_name(ImageDir,ImageName),
 	sys_searchdir(ALSDIR),
 	mics_cmd_fmt(MicsCmdFmt),
@@ -58,8 +59,8 @@ save_image(NewImageName)
 		      [ALSDIR, ImageDir, ImageName, SSName, NewImageName]),
 	atom_codes(ACMD,CMD),
 	printf('Executing %s\n', [ACMD]),
-	system(ACMD),
-	unlink(SSName).
+	system(ACMD).
+%	unlink(SSName).
 
 mics_cmd_fmt('go32 %sals-mics %s%s %s %s')
 	:-

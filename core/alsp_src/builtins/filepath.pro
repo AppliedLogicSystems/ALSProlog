@@ -68,22 +68,43 @@ identify_case(dos).
 		addclause(builtins,path_separator(';')),
 		addclause(builtins, 
 			  (is_absolute_pathname(Path) :- 
-				sub_atom(Path,2,1,':'),!) )
+				sub_atom(Path,2,1,':'),!) ),
+		addclause(builtins,
+					(is_absolute_pathname(Path) :-
+					 directory_separator(DS),
+					 sub_atom(Path,1,_,DS), !) )
+
 	; OS = macos, !,	%% Mac
 		addclause(builtins,file_separator('.')),
 		addclause(builtins,directory_separator(':')),
 		addclause(builtins,disk_separator(':')),
-		addclause(builtins,path_separator(','))
+		addclause(builtins,
+					(is_absolute_pathname(Path) :-
+					 sub_atom(Path,1,1,C1), 
+					 C1 \= ':', !) ),
+		addclause(builtins,
+					(is_absolute_pathname(Path) :-
+					 atom_split(Path,':',_,_)))
+
 	; OS = unix, !,		%% Unix
 		addclause(builtins,file_separator('.')),
 		addclause(builtins,directory_separator('/')),
 		addclause(builtins,(disk_separator(_) :- !,fail)),
-		addclause(builtins,path_separator(':'))
+		addclause(builtins,path_separator(':')),
+		addclause(builtins,
+					(is_absolute_pathname(Path) :-
+					 directory_separator(DS),
+					 sub_atom(Path,1,_,DS), !) )
+
 	; OS = vms, !,		%% VMS -- FIXME: not correct
 		addclause(builtins,file_separator('.')),
 		addclause(builtins,directory_separator(']')),
 		addclause(builtins,(disk_separator(_) :- !,fail)),
-		addclause(builtins,path_separator(','))
+		addclause(builtins,path_separator(',')),
+		addclause(builtins,
+					(is_absolute_pathname(Path) :-
+					 directory_separator(DS),
+					 sub_atom(Path,1,_,DS), !) )
 	; true ).
 
 %%
@@ -104,6 +125,7 @@ is_absolute_pathname(Path) :-
 %% In addition, atom_split may be used for constructing atoms as well
 %% as splitting them.
 
+export atom_split/4.
 atom_split(Atom, Splitter, Left, Right) :-
 	var(Atom),
 	!,

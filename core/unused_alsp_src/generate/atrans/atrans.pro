@@ -1,18 +1,22 @@
-/*
- * atrans.pro		-- assembly language translator
- *	Copyright(c) 1990-1994 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Created: 4/3/90
- */
-
+/*=================================================================*
+ |		atrans.pro		
+ |	Copyright(c) 1990-1995 Applied Logic Systems, Inc.
+ |
+ |		-- assembly language translator
+ |
+ | Author: K.A. Buettner
+ | Created: 4/3/90
+ | Various modifications by P.Raman; I.Cicekli
+ *=================================================================*/
 
 :- [avl,aparse,atoken,aexp,alabel].
 
-atrans :-
+atrans 
+	:-
 	command_line(L),
 	parse_command_line(L, InName, OutName),
-	write('Reading from '), write(InName), nl,
+	atrans_msg('Read from file %s\n',[InName]),
+%	write('Reading from '), write(InName), nl,
 	tell(OutName),
 	read_file(InName),
 	told,
@@ -44,3 +48,10 @@ pcl([Name | More], InName, OutName) :-
 	!,
 	Name = InName,
 	pcl(More, InName, OutName).
+
+
+
+
+atrans_msg(Format,Args)
+	:-
+	printf(Format, Args).

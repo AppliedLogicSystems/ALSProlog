@@ -632,6 +632,7 @@ make_reg_exp([C | RestPattern],[C | RestRegex])
  |	sense that all symbolic links  in the path (to either subdirs
  |	or the file at the end) are dereferenced out;
  *!--------------------------------------------------------------*/
+/*
 canon_path(SrcPath,CanonPath)
 	:-
 	get_cwd(WeAreHere),
@@ -645,6 +646,32 @@ canon_path(SrcPath,CanonPath)
 		get_cwd(ShortCanonPath),
 		subPath(ShortSubDirList,ShortCanonPath),
 		rootPathFile(_,ShortSubDirList,EndPathFile,CanonPath)
+	),
+	change_cwd(WeAreHere).
+*/
+canon_path(SrcPath,CanonPath)
+	:-
+	get_cwd(WeAreHere),
+
+	rootPathFile(Disk,SubDirList,EndPathFile,SrcPath),
+	(change_cwd(SrcPath) ->
+		get_cwd(CanonPath)
+		;
+		rootPathFile(Disk,SubDirList,'',ShortSrcPath),
+		(ShortSrcPath \= '' ->
+			change_cwd(ShortSrcPath)
+			;
+			true
+		),
+		get_cwd(ShortCanonPath),
+		rootPathFile(Drive,ShortSubDirList,FF,ShortCanonPath),
+		(FF = '' ->
+			AddOn = []
+			;
+			AddOn = [FF]
+		),
+		dappend(ShortSubDirList, AddOn, TheSubdirList),
+		rootPathFile(Drive,TheSubdirList,EndPathFile,CanonPath)
 	),
 	change_cwd(WeAreHere).
 

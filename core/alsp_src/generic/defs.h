@@ -45,6 +45,8 @@
 
 #ifdef MacOS
 #define HAVE_BRK
+#elif defined(__GO32__)
+#define HAVE_BRK
 #else
 /*** #define HAVE_BRK  ***/
 #endif

@@ -159,7 +159,7 @@ pbi_tmpnam()
 
     w_get_An(&v1, &t1, 1);
 #ifdef HAVE_TEMPNAM
-    s = tempnam(0,"apt");
+    s = tempnam(0,"pt");
 #else
     s = tmpnam(0);
 #endif /* HAVE_TEMPNAM */
