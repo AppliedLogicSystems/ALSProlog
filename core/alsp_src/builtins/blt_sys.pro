@@ -456,6 +456,7 @@ lib_load(FileName, Module, P,A, Module,Call)
 		existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) 
 	),
 	!,
+
 	record_lib_load(FileName),
 	Module:call(Call).
 

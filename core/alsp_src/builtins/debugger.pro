@@ -1592,6 +1592,9 @@ check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, Claus
 	builtins:file_clause_group(BaseFileName, ClauseGroup),
 	builtins:get_primary_manager(ALSMgr),
 	send(ALSMgr, obtain_src_mgr(BaseFileName, SrcMgr)),
+%write(srcmgr),nl,
+%write_term(user_output, SrcMgr, [maxdepth(3)]),
+%nl(user_output), flush_output,
 	send(SrcMgr, get_value(base_file, BaseFileName)),
 	send(SrcMgr, get_value(source_file, SrcFilePath)),
 	send(SrcMgr, get_value(consult_mode, DebugType)).
@@ -1599,6 +1602,7 @@ check_file_setup(Module, Pred, Arity, SrcFilePath, BaseFileName,DebugType, Claus
 reload_debug(user,_, _,CG) :-!.
 reload_debug(BaseFileName,SrcFilePath, normal,CG)
 	:-
+%write(reload_debug(BaseFileName,SrcFilePath, normal,CG)),nl,flush_output,
 	(filePlusExt(NoSuff,_,SrcFilePath),!; NoSuff = SrcFilePath),
 			%% Need to pass CG into consult:
 	(current_prolog_flag(debug, off) ->

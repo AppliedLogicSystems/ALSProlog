@@ -1,5 +1,5 @@
 /*==============================================================
- |		new_cslt.pro
+ |		blt_cslt.pro
  | Copyright (c) 1986-98 Applied Logic Systems, Inc.
  |		Distribution rights per Copying ALS
  |
@@ -132,7 +132,7 @@ push_copt(Copt)
 pop_copt(Copt)
 	:-
 	get_current_copts([Copt | RestStack]),
-	set_current_copts(PrevStack).
+	set_current_copts(RestStack).
 
 peek_copt(Copt)
 	:-
@@ -460,7 +460,6 @@ do_consult(BaseFile, FCOpts)
 	consult_msg(loaded_builtins_file, FCOpts).
 ***/
 
-
 do_consult(BaseFile, FCOpts)
 	:-
 	builtins:get_primary_manager(ALSMgr),
@@ -474,16 +473,7 @@ do_consult(BaseFile, FCOpts)
 	send(ALSMgr, set_value(cslt_ctxt, [FCOpts | PrevCntxts])),
 	catch( exec_consult(BaseFile, FCOpts, ALSMgr, FileMgr),
 			Ball,
-			( 
-
-%accessObjStruct(source_mgrs, ALSMgr, PrevMgrsList),
-%pbi_write(after_catch_pml=PrevMgrsList),pbi_nl,pbi_ttyflush,
-%% search for "pml" below to find the throw which
-%% creates trouble here:
-
-			  pop_copt(_), 
-			  consult_except_resp(Ball,FCOpts,FileMgr)
-			 ) 
+		    consult_except_resp(Ball,FCOpts,FileMgr)
 		),
 	send(ALSMgr, set_value(cslt_ctxt, PrevCntxts)),
 	record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr),
@@ -512,9 +502,9 @@ consult_msg(loaded_builtins_file(File,Dir), FCOpts)
 
 record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr)
 	:-
+	send(ALSMgr, record_src_mgr(BaseFile, FileMgr)),
 	access_cslt_opts(fcg, FCOpts, FCG), 
 	send(ALSMgr, insert_src_mgr_by_cg(FCG, FileMgr)),
-
 	access_cslt_opts(srcfilepath, FCOpts, SourceFilePath), 
 	send(FileMgr, note_loaded(FCG, SourceFilePath)),
 
@@ -674,7 +664,6 @@ exec_consult(OrigFileDesc, BaseFile, FCOpts, ALSMgr, FileMgr)
 		true
 		;
 			%% Can't find file -- Throw exception:
-		send(ALSMgr, remove_mgr(BaseFile, FileMgr)),
 		existence_error(file,OrigFileDesc,OrigFileDesc)
 	).
 		%%--------------------------------
@@ -694,21 +683,6 @@ exec_consult(OrigFileDesc, BaseFile, FCOpts, ALSMgr, FileMgr)
 		%%--------------------------------
 exec_consult(OrigFileDesc, BaseFile, FCOpts, ALSMgr, FileMgr)
 	:-
-	send(ALSMgr, remove_mgr(BaseFile, FileMgr)),
-
-	%% The following is a hack.  If it isn't here, when one
-	%% arrives back at the catch in do_consult,
-	%% the [] at the end of PrevMgrsList 
-	%% has been replaced by an uninstantiaed variable!!!:::
-	%% The point where the value of PrevMgrsList is actually
-	%% created and installed is in the second clause of
-	%% finish_obtain_src_mgr/4 in shlclass.pro
-	%%
-accessObjStruct(source_mgrs, ALSMgr, PrevMgrsList),
-%pbi_write(before_ee_throw_pml=PrevMgrsList),pbi_nl,pbi_ttyflush,
-copy_term(PrevMgrsList, NewPrevMgrsList),
-setObjStruct(source_mgrs, ALSMgr, NewPrevMgrsList),
-
 	existence_error(file,OrigFileDesc,OrigFileDesc).
 
 /*-------------------------------------------------------------*
@@ -867,16 +841,13 @@ cont_consult(SrcPath, OPath, Path, BaseFile, FCOpts, FileMgr)
 	rotate_locations(SrcPath, FCOpts),
 
 	consult_msg(start_consult, FCOpts),
-
 	access_cslt_opts(ext, FCOpts, Ext), 	
 	access_cslt_opts(nature, FCOpts, Nature), 	
 
-
-	(push_copt(FCOpts) ; pop_copt(FCOpts), fail),
-
+	(push_copt(FCOpts) ; pop_copt(_), fail),
  	load_from_file(Ext,Nature,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr),
-
-	pop_copt(FCOpts).
+	!,
+	pop_copt(_).
 
 check_for_system_file(BaseFile, SrcPath)
 	:-
@@ -934,9 +905,6 @@ load_from_file(_,source,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr)
 	access_cslt_opts(cg_flag, FCOpts, CGFlag), 	
 	load_file_source(CanonSrcPath,BaseFile,TgtMod,Recon,DebugMode,'',CGFlag,CG,ErrsList),
 	fin_load_from_file(ErrsList,CanonSrcPath,'',CG,FCOpts,FileMgr).
-
-%	load_file_source(CanonSrcPath,BaseFile,TgtMod,Recon,DebugMode,OPath,CGFlag,CG,ErrsList),
-%	fin_load_from_file(ErrsList,CanonSrcPath,OPath,CG,FCOpts,FileMgr).
 
 		%% No extension:
 load_from_file('',_,BaseFile,CanonSrcPath,OPath,FCOpts,FileMgr)
@@ -1171,7 +1139,6 @@ try_load_file_source(Stream,TgtMod,DebugMode,OPath,CGFlag, CG,Path,ErrsList)
 		%% ld_src_err: "Internal error in load_source for file %t\n"
 	prolog_system_error(ld_src_err, [Path]).
 
-
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/ 
 obp_load_from_path(OPath, CanonSrcPath, BaseFile,  Recon, CGFlag, CG, Status)
@@ -1179,7 +1146,6 @@ obp_load_from_path(OPath, CanonSrcPath, BaseFile,  Recon, CGFlag, CG, Status)
 	establish_fcg(CGFlag, BaseFile, Recon, CG),
 	obp_load(OPath, Status),
 	reset_fcg(_).
-
 
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

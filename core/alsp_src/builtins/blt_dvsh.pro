@@ -715,7 +715,8 @@ als_ide_mgrAction(open_edit_win_by_root(RootFileName,SearchList), State)
 	file_extension(BaseFileName, Ext, RootFileName),
 	accessObjStruct(edit_files, State, PrevEditFiles),
 	send_self(State, obtain_src_mgr(BaseFileName, FileMgr)),
-	send(FileMgr, open_edit_win_by_base(BaseFileName, Ext, SearchList)).
+	send(FileMgr, open_edit_win_by_base(BaseFileName, Ext, SearchList)),
+	send_self(State, record_src_mgr(BaseFileName, FileMgr)).
 
 als_ide_mgrAction([open_edit_win, FileName, BaseFileName, Ext ], State)
 	:-
@@ -725,7 +726,8 @@ als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State)
 	:-
 	accessObjStruct(edit_files, State, PrevEditFiles),
 	send_self(State, obtain_src_mgr(BaseFileName, FileMgr)),
-	send(FileMgr, open_edit_win(FileName, BaseFileName, Ext)).
+	send(FileMgr, open_edit_win(FileName, BaseFileName, Ext)),
+	send_self(State, record_src_mgr(BaseFileName, FileMgr)).
 
 als_ide_mgrAction(map_edit_wins, State)
 	:-
@@ -750,10 +752,11 @@ unmap_all_wins([fm(_, FileMgr) | SrcMgrsList])
 	send(FileMgr, unmap_win),
 	unmap_all_wins(SrcMgrsList).
 
+	%% NEEDS MORE WORK:::
 als_ide_mgrAction([open_non_file_edit_win, WinName, Title], State)
 	:-
 	send_self(State, obtain_src_mgr(Title, FileMgr)),
-	send(FileMgr, open_edit_win('', BaseFileName, WinName)).
+	send(FileMgr, open_edit_win('', '', WinName)).
 
 /**
 	accessObjStruct(non_file_edits, State, PrevEdits),
