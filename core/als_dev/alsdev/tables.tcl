@@ -27,14 +27,6 @@ proc load_table_package {DirsList} {
 	return $Result
 }
 
-#puts "load_table_package: searching $DirsList for $TkTFile"
-#set QQ [concat [lindex $DirsList 0]]
-#puts "QQ=$QQ"
-#set ZZ [concat file join $QQ]
-#puts "ND=$NumDirs - ZZ=$ZZ"
-#set DD 	[eval $ZZ]
-#puts "DD=$DD"
-
 	## Create a table 
 
 proc build_table {BaseName InfoArrayName List} {
@@ -90,6 +82,7 @@ proc build_table {BaseName InfoArrayName List} {
 	}
 
 	table_object $InfoArrayName
+	update
 	return $DataArrayName
 }
 
@@ -131,15 +124,16 @@ proc table_object {InfoArrayName } {
 		-column 0 -row 0 -columnspan 1 -rowspan 1 -sticky nesw
 	grid $XSB \
 		-column 0 -row 1 -columnspan 1 -rowspan 1 -sticky ew
+	update
 }
 
 proc set_table { ArrayName Row Col Val } {
-	upvar $ArrayName TA
+	upvar #0 $ArrayName TA
 	set TA($Row,$Col) $Val
 }
 
 proc read_table { ArrayName Row Col} {
-	upvar $ArrayName TA
+	upvar #0 $ArrayName TA
 	return $TA($Row,$Col) 
 }
 
@@ -154,7 +148,7 @@ proc write_table_row {ArrayName RowN ColSt Lim ValsList} {
 }
 
 proc write_table_col {ArrayName ColN RowSt Lim ValsList} {
-	upvar $ArrayName TA
+	upvar #0 $ArrayName TA
 
 	set Indx $RowSt
 	foreach Item $ValsList {
