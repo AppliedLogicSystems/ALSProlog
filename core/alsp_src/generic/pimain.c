@@ -11,6 +11,7 @@
 	/* In ALS-Prolog source tree */
 
 #include "defs.h"
+#include "pi_init.h"
 
 #else /* !HAVE_CONFIG_H */
 	/* Not in ALS-Prolog source tree... */
