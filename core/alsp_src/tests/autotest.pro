@@ -5,7 +5,7 @@
  |		Automatic test control top-level
  *====================================================================*/
 
-:-[-autotest_db].
+:-[-atest_db].
 
 module als_testing.
 
