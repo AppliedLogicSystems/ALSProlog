@@ -454,7 +454,7 @@ proc source_tcl { } {
 proc set_directory { } {
 	set CWD [pwd]
 
-	set NewDir [alstkFDialog]
+	set NewDir [tkFDialog]
 	if { "$NewDir" !="" } {
 		cd $NewDir
 		show_dir_on_main $NewDir
