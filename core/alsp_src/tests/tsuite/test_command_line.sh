@@ -2,6 +2,15 @@
 # Check for proper function of command line arguments and general
 # unix shell functionality.
 
+# Check for correct number of arguments
+if test $# -lt 1
+then
+    echo 'Usage: test_command_line.sh prolog' 1>&2
+    echo 'Example:' 1>&2
+    echo '    test_command_line.sh ./alspro' 1>&2
+    exit 2
+fi
+
 echo "Starting Command Line Tests"
 
 prolog=$1
