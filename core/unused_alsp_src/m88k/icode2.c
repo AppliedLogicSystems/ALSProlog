@@ -1,25 +1,22 @@
-/*
- * icode2.c			-- more stuff to emit instructions
- *	Copyright (c) 1987 Applied Logic Systems, Inc.
- *
- * Author: Kevin A. Buettner
- * Creation: 2/12/87
- * Revision History:
- *	Revised: 3/22/87	Kev		-- icode.c split into icode1.c
- *						   and icode2.c
- *	Revised: 2/22/88	Kev		-- Addition of code to take
- *						   care of the codeg field.
- *						   Addition of code to
- *						   symbolically branch back
- *						   to the overflow code.
- *	Revised: mm/dd/yy	Who		-- Reason
- */
+/*===================================================================*
+ |		icode2.c
+ |	Copyright (c) 1987-1995 Applied Logic Systems, Inc.
+ |
+ |		-- more stuff to emit instructions
+ |
+ | Author: Kevin A. Buettner
+ | Creation: 2/12/87
+ | Revision History:
+ | 03/22/87	K.Buettner -- icode.c split into icode1.c and icode2.c
+ | 02/22/88	K.Buettner -- Addition of code to take care of the codeg field.
+ |			Addition of code to symbolically branch back to the overflow code.
+ *====================================================================*/
 
 #include "defs.h"
-#include "module.h"
-#include "wintcode.h"
 #include "compile.h"
-#include "icodegen.h"
+#include "wintcode.h"
+#include "module.h"
+/* #include "icodegen.h" */
 #include "codegen.h"
 #include "machinst.h"
 #include "rinfo.h"
@@ -59,8 +56,8 @@ ic_install_overflow_call(n)
     ntbl_entry *n;
 {
     int disp;
-    Code *oldptr = ic_ptr;
 
+    Code *oldptr = ic_ptr;
     ic_ptr = n->overflow;
 
     disp = ovtab[(n->nargs > NAREGS) ? NAREGS : n->nargs] - ic_ptr;
@@ -99,6 +96,7 @@ ic_install_normal_exec_entry(n)
 {
     int disp;
     Code *oldptr = ic_ptr;
+
     ic_ptr = n->exec_entry;
 
     subu(TMP1_REG, TR_REG, H_REG);
@@ -172,7 +170,8 @@ ic_install_libbreak(n,i)
     int i;
 {
     int disp;
-    Code * oldptr = ic_ptr;
+
+    Code *oldptr = ic_ptr;
     ic_ptr = n->code;
 
     move_const((unsigned long)i,UARG1_REG);
@@ -216,9 +215,6 @@ ic_install_decr_icount(n)
     ic_ptr = oldptr;
 }
 
-
-
-
 /*
  * ic_install_resolve_ref takes the given buffer and puts code in the buffer
  *	to resolve the (undefined) reference.
@@ -243,9 +239,8 @@ ic_install_resolve_ref(n)
    ntbl_entry *n;
 {
    int disp;
+
    Code *oldptr = ic_ptr;
-
-
    ic_ptr = n->code;
 
    /*
@@ -291,9 +286,11 @@ ic_install_jmp(n,clausestart,emask)
    Code *clausestart;
    int emask;
 {
-   Code *oldptr = ic_ptr;
    int displ;
+
+   Code *oldptr = ic_ptr;
    ic_ptr = n->code;
+
    if (emask & EMSK_OLDE) {
       sti(OldE_REG, E_REG, EBIAS+0);
    }
@@ -312,11 +309,9 @@ ic_install_jmp(n,clausestart,emask)
    
    displ = clausestart - (long *) ic_ptr;
    br(displ);
+
    ic_ptr = oldptr;
 }
-
-
-
 
 /*
  * wm_try0, wm_try1, wm_try2, and wm_try3 are entry points to the wm_tryX
@@ -345,9 +340,11 @@ ic_install_try_me_jmp(n,clausestart,nextclause)
     Code *clausestart;
     PWord nextclause;
 {
-    Code *oldptr = ic_ptr;
     int displ;
+
+    Code *oldptr = ic_ptr;
     ic_ptr = n->code;
+
     displ = trytab[(n->nargs > NAREGS) ? NAREGS : n->nargs] - ic_ptr;
     bsrn(displ);
     subui(TR_REG, TR_REG, 16);
@@ -355,6 +352,7 @@ ic_install_try_me_jmp(n,clausestart,nextclause)
     displ = clausestart - ic_ptr;
     brn(displ);
     oru(FAIL_REG, FAIL_REG, (nextclause>>16)&0xffff);
+
     ic_ptr = oldptr;
 }
 
@@ -377,10 +375,10 @@ ic_install_switch_on_term(n,varaddr,straddr,lisaddr,conaddr,emask)
     Code *varaddr, *straddr, *lisaddr, *conaddr;
     int emask;
 {
-    Code *oldptr = ic_ptr;
     long *p1,*p2,*p3;
     int displ;
 
+    Code *oldptr = ic_ptr;
     ic_ptr = n->code;
 
     if (emask & EMSK_OLDE) {
@@ -466,13 +464,16 @@ ic_install_builtin(n,builtin)
     ntbl_entry *n;
     int (*builtin) PARAMS(( void ));
 {
-    Code *oldptr = ic_ptr;
     long displ;
+
+    Code *oldptr = ic_ptr;
     ic_ptr = n->code;
+
     ori(T1_REG, ZERO_REG, ((long) builtin) & 0xffff);
     displ = ebtab[(n->nargs > NAREGS) ? NAREGS : n->nargs] - ic_ptr;
     brn(displ);
     oru(T1_REG, T1_REG, (((long) builtin) >> 16) & 0xffff);
+
     ic_ptr = oldptr;
 }
 
@@ -483,11 +484,12 @@ ic_install_true(n)
 {
     Code *oldptr = ic_ptr;
     ic_ptr = n->code;
+
     jmpn(CP_REG);
     add(E_REG, OldE_REG, ZERO_REG);
+
     ic_ptr = oldptr;
 }
-
 
 /*
  * ic_install_fail is used to install code in a procedure entry which fails.
@@ -498,8 +500,13 @@ void
 ic_install_fail(n)
     ntbl_entry *n;
 {
-     Code *ic_ptr = n->code;
+    Code *oldptr = ic_ptr;
+	ic_ptr = n->code;
+/*     Code *ic_ptr = n->code;  */
+
      jmp(FAIL_REG);
+
+	ic_ptr = oldptr;
 }
 
 
@@ -507,20 +514,20 @@ void
 ic_install_equal(n)
     ntbl_entry *n;
 {
-    Code *oldptr = ic_ptr;
     int displ;
+
+    Code *oldptr = ic_ptr;
     ic_ptr = n->code;
+
     add(UARG1_REG, A1_REG, ZERO_REG);
     add(UARG2_REG, A2_REG, ZERO_REG);
     add(RET_REG, CP_REG, ZERO_REG);
     displ = ((long *) wm_unify) - ic_ptr;
     brn(displ);
     add(E_REG, OldE_REG, ZERO_REG);
+
     ic_ptr = oldptr;
 }
-
-
-
 
 /*
  * ic_install_call is used to install call/1 and other procedures which
@@ -533,8 +540,8 @@ ic_install_call(n,whereto)
     long *whereto;
 {
     int disp;
-    Code *oldptr = ic_ptr;
 
+    Code *oldptr = ic_ptr;
     ic_ptr = n->code;
 
     bsrn(2);
@@ -576,8 +583,8 @@ ic_install_module_closure(n,whereto)
     Code *whereto;
 {
     int disp;
-    Code *oldptr = ic_ptr;
 
+    Code *oldptr = ic_ptr;
     ic_ptr = n->code;
 
     bsrn(2);
@@ -631,7 +638,6 @@ ic_install_module_closure(n,whereto)
     disp = whereto - ic_ptr;
     br(disp);
 
-
     ic_ptr = oldptr;
 }
 
@@ -643,50 +649,16 @@ ic_install_next_choice_in_a_deleted_clause(buf)
     Code *buf;
 {
     int disp;
+
     Code *oldptr = ic_ptr;
     ic_ptr = buf;
+
     disp = ((long *) wm_nciadc) - ic_ptr;
     bsrn(disp);
     subui(A1_REG, RET_REG, 8);		/* get us back to the choice entry */
+
     ic_ptr = oldptr;
 }
-
-
-/*
- * ic_install_try
- *
- *	This procedure will install a try sequence for the indexer.
- *
- *	ptr	is the address to start installing the try sequence at
- *	cstart	is the address to jump to after the choice point is created
- *	nargs 	is the number of arguments in the clause
- *
- *	The next free address is returned as the value of the function
- */
-
-long *
-ic_install_try(ptr, cstart, nargs)
-   long *ptr;
-   Code *cstart;
-   int nargs;
-{
-   int displ;
-   Code *oldptr = ic_ptr;
-   ic_ptr = ptr;
-
-   if (nargs > NAREGS) nargs = NAREGS;
-   displ = trytab[nargs] - ic_ptr;
-   bsrn(displ);
-   subui(TR_REG, TR_REG, 16);
-   displ = cstart - ic_ptr;
-   bsrn(displ);
-   addui(FAIL_REG, RET_REG, 0);
-
-   ptr = ic_ptr;
-   ic_ptr = oldptr;
-   return ptr;
-}
-
 
 /*
  * ic_install_try_me
@@ -699,8 +671,9 @@ ic_install_try_me(buf,nextclause,nargs)
    PWord nextclause;
    int	 nargs;
 {
-   Code *oldptr = ic_ptr;
    int displ;
+
+   Code *oldptr = ic_ptr;
    ic_ptr = buf;
 
    if (nargs > NAREGS) nargs = NAREGS;
@@ -748,10 +721,11 @@ ic_install_retry_me(buf,nextclause,nargs,emask)
    int nargs;
    int emask;
 {
-   Code *oldptr = ic_ptr;
    int displ;
 
+   Code *oldptr = ic_ptr;
    ic_ptr = buf;
+
    if (nargs > NAREGS) nargs=NAREGS;
    if (emask & EMSK_CP)
       displ = retry_tab[nargs] - ic_ptr;
@@ -763,60 +737,13 @@ ic_install_retry_me(buf,nextclause,nargs,emask)
    ori(FAIL_REG, ZERO_REG, nextclause&0xffff);
    oru(FAIL_REG, FAIL_REG, (nextclause >> 16) & 0xffff);
    
-
    ic_ptr=oldptr;
 }
 
 /*
- * ic_install_retry
+ * ic_install_trust_me
  *
- *	This function is called by the indexer to install a retry sequence.
- *
- *	ptr	is the place to start installing the retry at
- *	cstart 	is a pointer to the place to jump to after performing the 
- *		retry operation.
- *	nargs	is the number of arguments in the procedure.
- *	emask	is the mask from the clause indicating whether or not
- *		the cp and ce need to be restored.
- *
- *	The next free location is returned at the result of the function
- *
- *	
  */
-
-long *ic_install_retry(ptr,cstart,nargs,emask)
-   long *ptr;
-   Code *cstart;
-   int nargs;
-   int emask;
-{
-   int displ;
-   Code *oldptr = ic_ptr;
-
-   ic_ptr = ptr;
-
-   if (nargs > NAREGS) nargs = NAREGS;
-   if (emask & EMSK_CP)
-      displ = retry_tab[nargs] - ic_ptr;
-   else
-      displ = retry_u_tab[nargs] - ic_ptr;
-   
-   bsrn(displ);
-   addui(E_REG, SPB_REG, 0);
-
-   displ = cstart - ic_ptr;
-
-   bsrn(displ);
-   addui(FAIL_REG, RET_REG, 0);
-
-   ptr = ic_ptr;
-   ic_ptr = oldptr;
-   return ptr;
-}
-
-
-
-
 
 extern	void	wm_trust_u0	PARAMS(( void ));
 extern	void	wm_trust_u1	PARAMS(( void ));
@@ -840,22 +767,17 @@ static long *trust_tab[] = {
 	(long *) wm_trust3
 };
 
-
-/*
- * ic_install_trust_me
- *
- */
-
 void
 ic_install_trust_me(buf,clausestart,nargs,emask)
    Code *buf;
    PWord clausestart;
    int nargs, emask;
 {
-   Code *oldptr = ic_ptr;
    int displ;
 
+   Code *oldptr = ic_ptr;
    ic_ptr = buf;
+
    if (nargs >NAREGS) nargs = NAREGS;
    if (emask & EMSK_CP)
       displ = trust_tab[nargs] - ic_ptr;
@@ -871,101 +793,11 @@ ic_install_trust_me(buf,clausestart,nargs,emask)
    ic_ptr = oldptr;
 }
 
-
-/*
- * ic_install_trust
- *
- *	Installs a trust sequence for the indexer.
- *
- *	ptr	is the address to start installing the trust sequence at
- *	cstart	is a pointer to the address to jump to
- *	nargs	is the number of arguments for the procedure of which the
- *		clause is a part
- *	emask	is the mask indicating whether the continuation pointer
- *		needs to be restored or not
- *
- *	The next free address to continue installation at will be returned
- *	as the value of this function.
- */
-
-long *
-ic_install_trust(ptr, cstart, nargs, emask)
-   long *ptr;
-   Code *cstart;
-   int nargs;
-   int emask;
-{
-   int displ;
-   Code *oldptr = ic_ptr;
-
-   ic_ptr = ptr;
-
-   if (nargs > NAREGS) nargs = NAREGS;
-   if (emask & EMSK_CP)
-      displ = trust_tab[nargs] - ic_ptr;
-   else
-      displ = trust_u_tab[nargs] - ic_ptr;
-   
-   bsrn(displ);
-   addui(E_REG, SPB_REG, 0);
-   displ = cstart - ic_ptr;
-   brn(displ);
-   addui(SP_REG, E_REG, 0);
-
-   ptr = ic_ptr;
-   ic_ptr = oldptr;
-   return ptr;
-}
-
-
-/*
- * ic_install_tree_overhead
- *
- *	Installs switch_on_constant or switch_on_structure instructions for
- *	the indexer.
- *
- *	swaddr		is the address of the switch_on subroutine
- *	nentries	are the number of entries which we are concerned with
- *	ic_ptr		is the place to start installing the sequence at
- *
- *	Note that ic_ptr is also a global variable which is usually referenced
- *	by the ic_put macros.  In this case, however, it refers to the
- *	parameter.
- *
- *	The following code is emitted on for the 88000.
- *
- *	bsr	wm_sw_const	(or wm_sw_struct)
- *	number of entries in table * 8
- *
- *	wm_sw_const and wm_sw_struct are expected to use r1 to get the
- *	number of entries and use this value for doing a binary search of
- *	the table which will immediately follow the word containing the
- *	number of entries.
- */
-
-Code *
-ic_install_tree_overhead(swaddr, nentries, ic_ptr)
-    long *swaddr;
-    int nentries;
-    Code *ic_ptr;
-{
-    int displ;
-    displ = swaddr - ic_ptr;
-    bsr(displ);
-    ic_put(nentries*8);
-
-    return ic_ptr;
-}
-
-
-
-
 /*
  * ic_install_no is to install both the no part for queries and the little
  *	piece of code which from which execution will start from.  The address
  *	of the place to start is returned as the value from ic_install_no
  */
-
 
 Code *
 ic_install_no(buf,clausestart,nocatcher)
@@ -973,11 +805,10 @@ ic_install_no(buf,clausestart,nocatcher)
    Code *clausestart;
    char *nocatcher;
 {
-   Code *oldptr = ic_ptr;
    long *startaddr;
    int displ;
 
-
+   Code *oldptr = ic_ptr;
    ic_ptr = buf;
 
    /*
@@ -1057,8 +888,6 @@ ic_install_no(buf,clausestart,nocatcher)
    return startaddr;
 }
 
-
-
 /*
  * ic_install_reference is called by resolve_reference to install a jump
  *	to a non-builtin.
@@ -1069,10 +898,187 @@ ic_install_reference(buf,where)
    Code *buf;
    PWord where;
 {
-   Code *oldptr = ic_ptr;
    int disp;
+
+   Code *oldptr = ic_ptr;
    ic_ptr = buf;
+
    disp = ((Code *) where)-ic_ptr;
    br(disp);
+
    ic_ptr = oldptr;
+}
+
+/*
+ * ic_install_try
+ *
+ *	This procedure will install a try sequence for the indexer.
+ *
+ *	ptr	is the address to start installing the try sequence at
+ *	cstart	is the address to jump to after the choice point is created
+ *	nargs 	is the number of arguments in the clause
+ *
+ *	The next free address is returned as the value of the function
+ */
+
+long *
+ic_install_try(ptr, cstart, nargs)
+   long *ptr;
+   Code *cstart;
+   int nargs;
+{
+   int displ;
+
+   Code *oldptr = ic_ptr;
+   ic_ptr = ptr;
+
+   if (nargs > NAREGS) nargs = NAREGS;
+   displ = trytab[nargs] - ic_ptr;
+   bsrn(displ);
+   subui(TR_REG, TR_REG, 16);
+   displ = cstart - ic_ptr;
+   bsrn(displ);
+   addui(FAIL_REG, RET_REG, 0);
+
+   ptr = ic_ptr;
+   ic_ptr = oldptr;
+   return ptr;
+}
+
+/*
+ * ic_install_retry
+ *
+ *	This function is called by the indexer to install a retry sequence.
+ *
+ *	ptr	is the place to start installing the retry at
+ *	cstart 	is a pointer to the place to jump to after performing the 
+ *		retry operation.
+ *	nargs	is the number of arguments in the procedure.
+ *	emask	is the mask from the clause indicating whether or not
+ *		the cp and ce need to be restored.
+ *
+ *	The next free location is returned at the result of the function
+ *
+ *	
+ */
+
+long *ic_install_retry(ptr,cstart,nargs,emask)
+   long *ptr;
+   Code *cstart;
+   int nargs;
+   int emask;
+{
+   int displ;
+
+   Code *oldptr = ic_ptr;
+   ic_ptr = ptr;
+
+   if (nargs > NAREGS) nargs = NAREGS;
+   if (emask & EMSK_CP)
+      displ = retry_tab[nargs] - ic_ptr;
+   else
+      displ = retry_u_tab[nargs] - ic_ptr;
+   
+   bsrn(displ);
+   addui(E_REG, SPB_REG, 0);
+
+   displ = cstart - ic_ptr;
+
+   bsrn(displ);
+   addui(FAIL_REG, RET_REG, 0);
+
+   ptr = ic_ptr;
+   ic_ptr = oldptr;
+   return ptr;
+}
+
+/*
+ * ic_install_trust
+ *
+ *	Installs a trust sequence for the indexer.
+ *
+ *	ptr	is the address to start installing the trust sequence at
+ *	cstart	is a pointer to the address to jump to
+ *	nargs	is the number of arguments for the procedure of which the
+ *		clause is a part
+ *	emask	is the mask indicating whether the continuation pointer
+ *		needs to be restored or not
+ *
+ *	The next free address to continue installation at will be returned
+ *	as the value of this function.
+ */
+
+long *
+ic_install_trust(ptr, cstart, nargs, emask)
+   long *ptr;
+   Code *cstart;
+   int nargs;
+   int emask;
+{
+   int displ;
+
+   Code *oldptr = ic_ptr;
+   ic_ptr = ptr;
+
+   if (nargs > NAREGS) nargs = NAREGS;
+   if (emask & EMSK_CP)
+      displ = trust_tab[nargs] - ic_ptr;
+   else
+      displ = trust_u_tab[nargs] - ic_ptr;
+   
+   bsrn(displ);
+   addui(E_REG, SPB_REG, 0);
+   displ = cstart - ic_ptr;
+   brn(displ);
+   addui(SP_REG, E_REG, 0);
+
+   ptr = ic_ptr;
+   ic_ptr = oldptr;
+   return ptr;
+}
+
+/*
+ * ic_install_tree_overhead
+ *
+ *	Installs switch_on_constant or switch_on_structure instructions for
+ *	the indexer.
+ *
+ *	swaddr		is the address of the switch_on subroutine
+ *	nentries	are the number of entries which we are concerned with
+ *	ic_ptr		is the place to start installing the sequence at
+ *
+ *	Note that ic_ptr is also a global variable which is usually referenced
+ *	by the ic_put macros.  In this case, however, it refers to the
+ *	parameter.
+ *
+ *	The following code is emitted on for the 88000.
+ *
+ *	bsr	wm_sw_const	(or wm_sw_struct)
+ *	number of entries in table * 8
+ *
+ *	wm_sw_const and wm_sw_struct are expected to use r1 to get the
+ *	number of entries and use this value for doing a binary search of
+ *	the table which will immediately follow the word containing the
+ *	number of entries.
+ */
+
+Code *
+ic_install_tree_overhead(swaddr, nentries, buf)
+    long *swaddr;
+    int nentries;
+    Code *buf;
+{
+    int displ;
+
+	Code *tmp_ic_ptr;
+	Code *oldptr = ic_ptr;
+	ic_ptr = buf;
+
+    displ = swaddr - ic_ptr;
+    bsr(displ);
+    ic_put(nentries*8);
+
+	tmp_ic_ptr = ic_ptr;
+	ic_ptr = oldptr;
+    return tmp_ic_ptr;
 }

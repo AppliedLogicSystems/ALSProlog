@@ -211,41 +211,121 @@ douse(M) :-
 	functor(MM,M,0),		/* intern the module name */
 	$icode(-8, MM, 0, 0, 0).	/* add to module use list */
 
-/*----------------------------------
- * 		Hash table predicates
- *---------------------------------*/
+/*---------------------------------------------------------------------
+ | 				Hash table (expandable) predicates
+ |
+ |	The core hash tables are physically simply terms of the form
+ |
+ |		hashArray(.........)
+ |
+ |	We are exploiting the fact that the implementation of terms is
+ |	such that a term is an array of (pointers to) its arguments. So
+ |	what makes a hash table a hash table below is the access routines 
+ |	implemented using basic hashing techniques.  We also exploit the
+ |	destructive update feature mangle/3.
+ |	Each argument (entry) in a hash table here is a (pointer) to a 
+ |	list [E1, E2, ....] where each Ei is a cons term of the form
+ |
+ |			[Key | Value]
+ |	
+ |	So a bucket looks like:	
+ |	
+ |		[ [Key1 | Val1], [Key2 | Val2], ....]
+ |
+ |	where each Keyi hashes into the index (argument number) of this 
+ |	bucket in the term
+ |	
+ |		hashArray(.........)
+ |
+ |	The complete hash tables are terms of the form
+ |
+ |		hastTable(Depth,Size,RehashCount,hashArray(....))
+ |
+ |	where:
+ |		Depth		= the hashing depth of keys going in;
+ |		Size		= arity of the hashArray(...) term;
+ |		RehashCount	= counts (down) the number of hash entries
+ |						which have been made; when then counter
+ |						reaches 0, the table is expanded and
+ |						rehashed.
+ |
+ |	The basic (non-multi) versions of these predicates overwrite
+ |	existing key values; i.e., if Key-Value0 is already present
+ |	in the table, then hash inserting Key-Value1 will cause the
+ |	physical entry for Value0 to be physcially altered to become
+ |	Value1 (uses mangle/3).
+ |
+ |	The "-multi" versions of these predicates do NOT overwrite
+ |	existing values, but instead treat the Key-___ cons items as
+ |	tagged pushdown lists, so that if [Key | Value0] was present,
+ |	then after hash_multi_inserting Key-Value1, the Key part of the
+ |	bucket looks like: [Key | [Value1 | Value0] ]; i.e., it is
+ |
+ |		[Key, Value1 | Value0]
+ |
+ |	Key hashing is performed by the predicate
+ |
+ |		hashN(Key,Size,Depth,Index),
+ |
+ *--------------------------------------------------------------------*/
 
+/*---------------------------------------------------------------*
+ |	hash_create/1 
+ |	hash_create(Table)
+ |	hash_create(-)
+ |
+ |	- creates a small hash table, hashing on keys to depth 3.
+ *---------------------------------------------------------------*/
 export hash_create/1.
 
-/*
- * hash_create/1 will create a small hash table hashing on key to depth 3.
- */
-
-hash_create(Table) :-
+hash_create(Table) 
+	:-
 	hash_create(3,Table).
 
-hash_create(Depth, hashTable(Depth,Size,RehashCount,Array)) :-
+hash_create(Depth, hashTable(Depth,Size,RehashCount,Array)) 
+	:-
 	hashTableSizes(Size,RehashCount),
 	!,
 	functor(Array,hashArray,Size),
 	initHashTable(Size,Array).
 
-initHashTable(0,_) :- !.
-initHashTable(N,T) :-
+initHashTable(0,_) 
+	:- !.
+initHashTable(N,T) 
+	:-
 	arg(N,T,[]),
 	NN is N-1,
 	initHashTable(NN,T).
 
-hash_member(Key,[E|_],E) :- arg(1,E,Key).
-hash_member(Key,[_|T],E) :- hash_member(Key,T,E).
+/*---------------------------------------------------------------*
+ |	hash_member/3
+ |	hash_member(Key,Bucket,Pair)
+ |	hash_member(+,+,-)
+ |
+ |	- seeks first Pair in Bucket with left element = Key
+ |
+ |	Resatisfiable
+ *---------------------------------------------------------------*/
+hash_member(Key,[Pair|_],Pair) 
+	:- 
+	arg(1,Pair,Key).
+hash_member(Key,[_|BucketTail],Pair) 
+	:- 
+	hash_member(Key,BucketTail,Pair).
 
-/*
- * hash_insert(Key,Value,Table)
- */
-
+/*---------------------------------------------------------------*
+ |	hash_insert/3
+ |	hash_insert(Key,Value,Table)
+ |	hash_insert(+,+,+)
+ |
+ |	-	inserts Key-Value pair in hash Table
+ |
+ |	Unitary: overwrites any existing key-value entry 
+ *---------------------------------------------------------------*/
 export hash_insert/3.
 
-hash_insert(Key,Value,Table) :-
+hash_insert(Key,Value,Table) 
+	:-
 	arg(1,Table,Depth),
 	arg(2,Table,Size),
 	arg(4,Table,Array),
@@ -253,11 +333,22 @@ hash_insert(Key,Value,Table) :-
 	arg(Index,Array,Bucket),
 	hash_insert(Bucket,Array,Index,Key,Value,Table).
 
-hash_insert(Bucket,Array,Index,Key,Value,Table) :-
+/*---------------------------------------------------------------*
+ |	hash_insert/6
+ |	hash_insert(Bucket,Array,Index,Key,Value,Table)
+ |	hash_insert(+,+,+,+,+,+)
+ | 
+ |	- inserts key-value pair in hash table bucket
+ |
+ |	Unitary: overwrites any existing key-value entry 
+ *---------------------------------------------------------------*/
+hash_insert(Bucket,Array,Index,Key,Value,Table) 
+	:-
 	hash_member(Key,Bucket,E),
 	!,
 	mangle(2,E,Value).
-hash_insert(Bucket,Array,Index,Key,Value,Table) :-
+hash_insert(Bucket,Array,Index,Key,Value,Table) 
+	:-
 	mangle(Index,Array,[[Key|Value]|Bucket]),
 	arg(3,Table,RehashCount),
 	NewRehashCount is RehashCount-1,
@@ -266,10 +357,20 @@ hash_insert(Bucket,Array,Index,Key,Value,Table) :-
 /*
  * hash_insert_multi(Key,Value,Table)
  */
+/*---------------------------------------------------------------*
+ |	hash_insert_multi/3
+ |	hash_insert_multi(Key,Value,Table)
+ |	hash_insert_multi(+,+,+)
+ |
+ |	-	inserts Key-Value pair in hash Table
+ |
+ |	Multi-Valued: accumulates multiple key-value entries
+ *---------------------------------------------------------------*/
 
 export hash_insert_multi/3.
 
-hash_insert_multi(Key,Value,Table) :-
+hash_insert_multi(Key,Value,Table) 
+	:-
 	arg(1,Table,Depth),
 	arg(2,Table,Size),
 	arg(4,Table,Array),
@@ -277,23 +378,42 @@ hash_insert_multi(Key,Value,Table) :-
 	arg(Index,Array,Bucket),
 	hash_insert_multi(Bucket,Array,Index,Key,Value,Table).
 
-hash_insert_multi(Bucket,Array,Index,Key,Value,Table) :-
+/*---------------------------------------------------------------*
+ |	hash_insert/6
+ |	hash_insert(Bucket,Array,Index,Key,Value,Table)
+ |	hash_insert(+,+,+,+,+,+)
+ | 
+ |	- inserts key-value pair in hash table bucket
+ |
+ |	Multi-Valued: accumulates multiple key-value entries
+ *---------------------------------------------------------------*/
+hash_insert_multi(Bucket,Array,Index,Key,Value,Table) 
+	:-
 	hash_member(Key,Bucket,E),
 	!,
 	arg(2,E,CurValue),
 	mangle(2,E,[Value | CurValue]).
-hash_insert_multi(Bucket,Array,Index,Key,Value,Table) :-
-	mangle(Index,Array,[[Key|Value]|Bucket]),
+
+	%% Note that [Key,Value] = [Key | [Value] ]
+hash_insert_multi(Bucket,Array,Index,Key,Value,Table) 
+	:-
+%	mangle(Index,Array,[[Key|Value]|Bucket]),
+	mangle(Index,Array,[ [Key,Value] | Bucket]),
 	arg(3,Table,RehashCount),
 	NewRehashCount is RehashCount-1,
 	hash_rehash(NewRehashCount,Table).
 
 
-hash_rehash(Count,Table) :-
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+hash_rehash(Count,Table) 
+	:-
 	Count > 0,
 	!,
 	mangle(3,Table,Count).
-hash_rehash(_,Table) :-
+
+hash_rehash(_,Table) 
+	:-
 	arg(2,Table,Size),
 	hashTableSizes(NewSize,RHC),
 	NewSize>Size,
@@ -306,31 +426,40 @@ hash_rehash(_,Table) :-
 	mangle(4,Table,NewArray),
 	hash_rehash2(Array,Size,Table).
 
-hash_rehash2(Array,Size,Table) :-
+hash_rehash2(Array,Size,Table) 
+	:-
 	hash_elements(Array,Size,Key,Data),
 	hash_insert(Key,Data,Table),
 	fail.
 hash_rehash2(_,_,_).
 
 
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 export hash_elements/3.
 
-hash_elements(Key,Data,Table) :-
+hash_elements(Key,Data,Table) 
+	:-
 	arg(2,Table,Size),
 	arg(4,Table,Array),
 	hash_elements(Array,Size,Key,Data).
 
-hash_elements(Array,N,Key,Data) :-
+hash_elements(Array,N,Key,Data) 
+	:-
 	arg(N,Array,Bucket),
 	hash_member(_,Bucket,[Key|Data]).
-hash_elements(Array,N,Key,Data) :-
+
+hash_elements(Array,N,Key,Data) 
+	:-
 	N > 0,
 	NN is N-1,
 	hash_elements(Array,NN,Key,Data).
 
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 export hash_lookup/3.
-
-hash_lookup(Key,Value,Table) :-
+hash_lookup(Key,Value,Table) 
+	:-
 	arg(1,Table,Depth),
 	arg(2,Table,Size),
 	arg(4,Table,Array),
@@ -340,9 +469,11 @@ hash_lookup(Key,Value,Table) :-
 	!,
 	Value = Value2.
 
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 export hash_delete/3.
-
-hash_delete(Key,Value,Table) :-
+hash_delete(Key,Value,Table) 
+	:-
 	arg(1,Table,Depth),
 	arg(2,Table,Size),
 	arg(4,Table,Array),
@@ -350,33 +481,89 @@ hash_delete(Key,Value,Table) :-
 	hash_delete(Array,Index,Key,Value,Table),
 	!.
 
-hash_delete(Struct,Index,Key,Value,Table) :-
+hash_delete(Struct,Index,Key,Value,Table) 
+	:-
 	arg(Index,Struct,EList),		%% get element list
-	arg(1,EList,Elem),			%% get first element on list
-	arg(1,Elem,Key),			%% match key
-	arg(2,Elem,Value),			%% match value
+	arg(1,EList,Elem),				%% get first element on list
+	arg(1,Elem,Key),				%% match key
+	arg(2,Elem,Value),				%% match value
 	!,
 	arg(2,EList,REList),			%% get rest of element list
-	mangle(Index,Struct,REList),		%% delete element off of list
+	mangle(Index,Struct,REList),	%% delete element off of list
 	arg(3,Table,RehashCount),
 	NewRehashCount is RehashCount+1,
 	mangle(3,Table,NewRehashCount).		%% update count
-hash_delete(Struct,Index,Key,Value,Table) :-
+
+/*
+hash_delete(Struct,Index,Key,Value,Table) 
+	:-
 	arg(Index,Struct,EList),		%% get element list
 	hash_delete(EList,2,Key,Value,Table).	%% loop
+*/
 
+export hash_delete_multi/3.
+hash_delete_multi(Key,Value,Table) 
+	:-
+	arg(1,Table,Depth),
+	arg(2,Table,Size),
+	arg(4,Table,Array),
+	hashN(Key,Size,Depth,Index),
+	arg(Index,Struct,Bucket),		%% get bucket list
+	hash_delete_multi(Bucket,Key,Value,Table),
+	!.
+
+hash_delete_multi(Bucket,Key,Value,Table) 
+	:-
+	arg(1,Bucket,EList),				%% get first element on list
+	arg(1,EList,Key),				%% match key
+	rip_out(EList, Value),
+	arg(3,Table,RehashCount),
+	NewRehashCount is RehashCount+1,
+	mangle(3,Table,NewRehashCount).		%% update count
+
+/*
+
+	arg(2,Elem,Value),				%% match value
+	!,
+hash_delete_multi(Struct,Index,Key,Value,Table) 
+	:-
+	arg(Index,Struct,EList),		%% get element list
+	hash_delete(EList,2,Key,Value,Table).	%% loop
+*/
+
+rip_out(EList, Value)
+	:-
+	arg(2,EList,REList),
+	arg(1,REList,RELHead),				
+	disp_rip_out(RELHead, Value, EList, REList).
+	
+disp_rip_out(Value, Value, EList, REList)
+	:-
+	arg(2, REList, RETail),
+	mangle(2, EList, RETail).
+
+disp_rip_out(RELHead, Value, EList, REList)
+	:-
+	rip_out(REList, Value).
+
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 export hash_delete_pattern/3.
 
-hash_delete_pattern(Key,Value,Table) :-
+hash_delete_pattern(Key,Value,Table) 
+	:-
 	arg(2,Table,Size),
 	arg(4,Table,Array),
 	hash_delete_pattern(Array,Size,Key,Value,Table).
 
-hash_delete_pattern(Array,N,Key,Value,Table) :-
-	arg(N,Array,Bucket),			%% should be more efficient
+hash_delete_pattern(Array,N,Key,Value,Table) 
+	:-
+	arg(N,Array,Bucket),				%% should be more efficient
 	hash_member(_,Bucket,[Key|Value]),	%% way to do this...
 	hash_delete(Array,N,Key,Value,Table).
-hash_delete_pattern(Array,N,Key,Value,Table) :-
+
+hash_delete_pattern(Array,N,Key,Value,Table) 
+	:-
 	N > 0,
 	NN is N-1,
 	hash_delete_pattern(Array,NN,Key,Value,Table).
@@ -395,17 +582,17 @@ hashTableSizes(32749,49124).
 hashTableSizes(65521,98282).
 hashTableSizes(131071,20000000).
 
-/*
- * make_hash_table/1
- *
- * This procedure is similar to make_gv/1.  It creates hash table access
- * predicates which use the hashing predicates above.
- *
- * make_hash_table will build two access predicates setName and getName where
- * Name is an atom or list denoting the name of the hash table. The access
- * predicates take two arguments, the first of which is the key and the
- * second is the value.
- */
+/*---------------------------------------------------------------------*
+ | make_hash_table/1
+ |
+ | This procedure is similar to make_gv/1.  It creates hash table access
+ | predicates which use the hashing predicates above.
+ |
+ | make_hash_table will build two access predicates setName and getName where
+ | Name is an atom or list denoting the name of the hash table. The access
+ | predicates take two arguments, the first of which is the key and the
+ | second is the value.
+ *---------------------------------------------------------------------*/
 
 :-
 	compiletime,

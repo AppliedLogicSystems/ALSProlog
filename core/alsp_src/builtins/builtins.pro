@@ -751,7 +751,7 @@ load_builtins(File) :-
 	load_builtins(sio),
 	load_builtins(sio_wt),
 	load_builtins(sio_d10),
-	load_builtins(blt_lib),
+	load_builtins(blt_lib), 
 	load_builtins(blt_msg),
 	load_builtins(blt_brk),
 	load_builtins(xconsult),

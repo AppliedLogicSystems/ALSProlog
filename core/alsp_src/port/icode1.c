@@ -65,7 +65,10 @@ int   capturemode;		/* not used in Port code */
  */
 
 Code  icode_buf[ICBUFSIZE];
-Code *ic_ptr;
+/*  Now declared in icodegen.h; us
+  Code *ic_ptr;  */
+
+ic_uptr_type ic_uptr;
 
 /*
  * Previous instruction pointer for doing minimial peephole optimization

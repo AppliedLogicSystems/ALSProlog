@@ -18,7 +18,7 @@
 #include "icode.h"
 #include "compile.h"
 #include "varproc.h"
-#include "wintcode.h"
+/* #include "wintcode.h" */
 #include "module.h"
 #include "machinst.h"
 #include "codegen.h"
@@ -152,7 +152,10 @@ int makeobp;
  */
 
 Code *icode_buf;
+/*
 Code *ic_ptr;
+*/
+ic_uptr_type ic_uptr;
 
 #define ICBUFSAFETY	0x100	/* 256 code words */
 

@@ -65,7 +65,7 @@ alspro: alspro_basis
 testdir	= $(srcdir)/tests
 
 testrun: alspro
-	alspro -b $(testdir)/autotest $(testdir)/autotest_db -g run_tests -p -srcdir $(srcdir)
+	alspro -b $(testdir)/autotest $(testdir)/atest_db -g run_tests -p -srcdir $(srcdir)
 
 atrans: $(srcdir)/generate/atrans
 	if [ ! -d atrans ]; then		\

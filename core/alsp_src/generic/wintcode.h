@@ -16,46 +16,45 @@
 
 #include "wntbl.h"
 
-/*
- * Size of Name Table Entry Pointers
- */
+/*-----------------------------------------------------------------*
+ | Size of Name Table Entry Pointers
+ *-----------------------------------------------------------------*/
 
 #define NTBL_SIZE 16384		/* total number of name table entries	*/
 
-
-
 #define NTBL_ENTRYSIZE	(NTBL_HEADERSIZE+NTBL_OVERFLOWSIZE+ 	\
-			 NTBL_CALLENTRYSIZE+NTBL_EXECENTRYSIZE)
+			 			NTBL_CALLENTRYSIZE+NTBL_EXECENTRYSIZE)
 
 #define OVERFLOWSIZE_BYTES (NTBL_OVERFLOWSIZE * sizeof(Code))
 #define CALLENTRYSIZE_BYTES (NTBL_CALLENTRYSIZE * sizeof(Code))
 #define EXECENTRYSIZE_BYTES (NTBL_EXECENTRYSIZE * sizeof(Code))
 #define CODESIZE_BYTES (NTBL_CODESIZE * sizeof(Code))
 
-/*
- * Procedure table entry structure
- *
- * If this structure changes, wntbl.m4 for the 386 system must be changed.
- * FIXME!
- *
- * Note from kev (10-5-93):   The assembly language files for the other
- * systems do not require a knowledge of the layout of this structure.
- * The 386 system should not require it either.
- */
+/*-----------------------------------------------------------------*
+ | Procedure table entry structure
+ |
+ | If this structure changes, wntbl.m4 for the 386 system must be changed.
+ | FIXME!
+ |
+ | Note from kev (10-5-93):   The assembly language files for the other
+ | systems do not require a knowledge of the layout of this structure.
+ | The 386 system should not require it either.
+ *-----------------------------------------------------------------*/
 
 typedef struct {
+						/* entry header */
 	PWord tokid_arity;		/* 2 words */
 	long *first_clause;		/* 2 words */
 	long *last_clause;		/* 2 words */
 	long *index_block;		/* 2 words */
 	unsigned long timestamp;	/* 2 words */
-	long lo_id;			/* 2 words */
-	long hi_id;			/* 2 words */
+	long lo_id;				/* 2 words */
+	long hi_id;				/* 2 words */
 	short flags;			/* 1 word */
 	short modid;			/* 1 word */
 	short icount;			/* 1 word */
 	short nargs;			/* 1 word */
-					/* total of 18 words in the header */
+						/* total of 18 words in the header */
 	Code overflow[NTBL_OVERFLOWSIZE];
 	Code call_entry[NTBL_CALLENTRYSIZE];
 	Code exec_entry[NTBL_EXECENTRYSIZE];
@@ -64,9 +63,9 @@ typedef struct {
 
 extern ntbl_entry **w_nametable;
 
-/*
- * Name Entry Flag Masks
- */
+/*-----------------------------------------------------------------*
+ | Name Entry Flag Masks
+ *-----------------------------------------------------------------*/
 
 #define NMSK_USAGE 		0x7
 #define NFLG_UNUSED 	0
@@ -93,84 +92,85 @@ extern ntbl_entry **w_nametable;
 #define NFLG_BLT_TRUE  		0x0500
 #define NFLG_BLT_UNKNOWN	0x0F00
 
- 
-/*
- * Name table flag indicates that the procedure will be
- * packaged in the package being created.
- */
+/*-----------------------------------------------------------------*
+ | Name table flag indicates that the procedure will be
+ | packaged in the package being created.
+ *-----------------------------------------------------------------*/
 #define NMSK_PCKG_MARK 	0x8000
 
-/*
- * Flag mask for a packaged name table entry
- * (We don't save NMSK_SPYSET and upper four flags in 
- * a packaged name table entry)
- */
+/*-----------------------------------------------------------------*
+ | Flag mask for a packaged name table entry
+ | (We don't save NMSK_SPYSET and upper four flags in 
+ | a packaged name table entry)
+ *-----------------------------------------------------------------*/
 #define NMSK_SAVE 		0x0FF7
 
+/*-----------------------------------------------------------------*
+ |	Free Block Format:
+ |
+ |	+-----------------------------------+
+ |	|       Block Size                  |
+ |	+-----------------------------------+
+ |	|       Back Link                   |
+ |	+-----------------------------------+
+ |	|       Forward Link                |
+ |	+-----------------------------------+
+ |	|                                   |
+ |	+---                             ---+
+ |	|                                   |
+ |	+---                             ---+
+ |	|                                   |
+ |	+---                             ---+
+ |	|                                   |
+ |	+---                             ---+
+ |	|                                   |
+ |	+-----------------------------------+
+ |	|       Block Size                  |
+ |	+-----------------------------------+
+ |
+ |
+ |      Used Block Format:
+ |
+ |	+-----------------------------------+
+ |	|       -Block Size                 |
+ |	+-----------------------------------+
+ |	|       Proc idx/1st arg offset     |
+ |	+-----------------------------------+
+ |	|       Clause Id                   |
+ |	+-----------------------------------+
+ |	|       First Argument              |
+ |	+-----------------------------------+
+ |	|       Offset to Det Entry         |
+ |	+-----------------------------------+
+ |	|       Next Clause Address         |
+ |	+-----------------------------------+
+ |	|       Choice Code                 |
+ |	+---                             ---+
+ |	|                                   |
+ |	+-----------------------------------+
+ |	|       Clause Code ...             |
+ |	+---                             ---+
+ |	|                                   |
+ |	+-----------------------------------+
+ |	|      -Block Size                  |
+ |	+-----------------------------------+
+ *-----------------------------------------------------------------*/
 
-
-/*
- *	Free Block Format:
- *
- *	+-----------------------------------+
- *	|       Block Size                  |
- *	+-----------------------------------+
- *	|       Back Link                   |
- *	+-----------------------------------+
- *	|       Forward Link                |
- *	+-----------------------------------+
- *	|                                   |
- *	+---                             ---+
- *	|                                   |
- *	+---                             ---+
- *	|                                   |
- *	+---                             ---+
- *	|                                   |
- *	+---                             ---+
- *	|                                   |
- *	+-----------------------------------+
- *	|       Block Size                  |
- *	+-----------------------------------+
- *
- *
- *      Used Block Format:
- *
- *	+-----------------------------------+
- *	|       -Block Size                 |
- *	+-----------------------------------+
- *	|       Proc idx/1st arg offset     |
- *	+-----------------------------------+
- *	|       Clause Id                   |
- *	+-----------------------------------+
- *	|       First Argument              |
- *	+-----------------------------------+
- *	|       Offset to Det Entry         |
- *	+-----------------------------------+
- *	|       Next Clause Address         |
- *	+-----------------------------------+
- *	|       Choice Code                 |
- *	+---                             ---+
- *	|                                   |
- *	+-----------------------------------+
- *	|       Clause Code ...             |
- *	+---                             ---+
- *	|                                   |
- *	+-----------------------------------+
- *	|      -Block Size                  |
- *	+-----------------------------------+
- */
-
-/*
- * The following offsets are indices into the blocks
- */
+/*-----------------------------------------------------------------*
+ | The following offsets are indices into the blocks
+ *-----------------------------------------------------------------*/
 
 #define WCI_SIZE   0
 
-/* Fields found in a free block (size value is >0) */
+/*-----------------------------------------------------------------*
+ | Fields found in a free block (size value is >0) 
+ *-----------------------------------------------------------------*/
 #define WCI_BLINK  1
 #define WCI_FLINK  2
 
-/* Fields found in a used block (size value is <0) */
+/*-----------------------------------------------------------------*
+ | Fields found in a used block (size value is <0) 
+ *-----------------------------------------------------------------*/
 #define WCI_PROCIDX			1
 #define WCI_CLAUSEID		2
 #define WCI_FIRSTARGKEY		3
@@ -183,61 +183,63 @@ extern ntbl_entry **w_nametable;
 #define WCI_NEXTCLAUSEADDR	9
 #define WCI_CHOICECODE		10
 
-/*
- * WCI_CHOICEENTRY and WCI_CLAUSECODE are found in wci.h
- */
+/*-----------------------------------------------------------------*
+ | WCI_CHOICEENTRY and WCI_CLAUSECODE are found in wci.h
+ *-----------------------------------------------------------------*/
 
 #include "wci.h"
 
-/* Size of a clause block with no code in it */
-#define WC_OVERHEAD WCI_CLAUSECODE+1
+/*-----------------------------------------------------------------*
+ | Size of a clause block with no code in it 
+ *-----------------------------------------------------------------*/
 
-#define WC_EPSILON  WC_OVERHEAD+3		/* longwords */
-#define WC_AREASIZE 131072	/* longwords */
+#define WC_OVERHEAD   WCI_CLAUSECODE+1
+#define WC_EPSILON    WC_OVERHEAD+3		/* longwords */
+#define WC_AREASIZE   131072			/* longwords */
 
-#define sizeFreeBlock(item)	(*((long *)(item)+WCI_SIZE))
-#define sizeUsedBlock(item)	(-(*((long *)(item)+WCI_SIZE)))
+#define sizeFreeBlock(item)		(*((long *)(item)+WCI_SIZE))
+#define sizeUsedBlock(item)		(-(*((long *)(item)+WCI_SIZE)))
 #define nextClauseAddr(item)	(*(long **)((long *)(item)+WCI_NEXTCLAUSEADDR))
-#define sizeCode(item)		((int)(*((long *)(item) + WCI_SIZECODE)))
-#define dstartCode(item)	((int)(*((long *)(item) + WCI_DSTART)))
-#define fstartCode(item)	((int)(*((long *)(item) + WCI_FSTART)))
-#define emaskCode(item)		((int)(*((long *)(item) + WCI_EMASK)))
-#define emaskCodeAddr(item)	((int*)(((long *)(item) + WCI_EMASK)))
-#define choiceEntry(item)	((Code *)((long *)(item) + WCI_CHOICEENTRY))
-#define choiceCode(item)	((Code *)((long *)(item) + WCI_CHOICECODE))
-#define clauseCode(item)	((Code *)((long *)(item) + WCI_CLAUSECODE))
-#define procIdx(item)       (*((long *)(item) + WCI_PROCIDX))
-#define clauseId(item)      (*((long *)(item) + WCI_CLAUSEID))
+#define sizeCode(item)			((int)(*((long *)(item) + WCI_SIZECODE)))
+#define dstartCode(item)		((int)(*((long *)(item) + WCI_DSTART)))
+#define fstartCode(item)		((int)(*((long *)(item) + WCI_FSTART)))
+#define emaskCode(item)			((int)(*((long *)(item) + WCI_EMASK)))
+#define emaskCodeAddr(item)		((int*)(((long *)(item) + WCI_EMASK)))
+#define choiceEntry(item)		((Code *)((long *)(item) + WCI_CHOICEENTRY))
+#define choiceCode(item)		((Code *)((long *)(item) + WCI_CHOICECODE))
+#define clauseCode(item)		((Code *)((long *)(item) + WCI_CLAUSECODE))
+#define procIdx(item)       	(*((long *)(item) + WCI_PROCIDX))
+#define clauseId(item)      	(*((long *)(item) + WCI_CLAUSEID))
 
-#define clsRInfo(item) 	 	(*((long *)(item) + WCI_RINFO))
-#define clsRInfoBuf(item) 	((long *)((long *)(item) + clsRInfo(item)))
+#define clsRInfo(item) 	 		(*((long *)(item) + WCI_RINFO))
+#define clsRInfoBuf(item) 		((long *)((long *)(item) + clsRInfo(item)))
 
-/*
- * Clause group id info
- *
- * A clause group is a set of clauses in a given procedure which are
- * grouped together for purposes of consulting.  Usually a clause group
- * will be all those clauses appearing in a file.  When a file is reconsulted,
- * those clauses in the clause group associated with the file will be removed.
- *
- * There are two additional groups, the asserta group and the assertz group.
- *
- * The clause group id is part of the clause id (see above).  The clause
- * group id is found at the high part of the longword which forms the clause
- * id.
- *
- * CGI_WIDTH is the width of the clause group id field.
- * CGI_OFFSET is the amount to shift to get at this field.
- * CGI_MASK is the mask with which the clause id should be and'd with after
- * 	the field has been shifted right by CGI_OFFSET
- * CGI_VMASK is the mask with which the clause id should be and'd to obtain
- *	the value in the lower part of the long.
- *
- * CGI_ASSERTA and CGI_ASSERTZ are the (unshifted) clause group id's for
- * the asserta group and the assertz group.
- *
- * cgId(clause) is given a clause.  It returns the clause group id.
- */
+/*-----------------------------------------------------------------*
+ | Clause group id info
+ |
+ | A clause group is a set of clauses in a given procedure which are
+ | grouped together for purposes of consulting.  Usually a clause group
+ | will be all those clauses appearing in a file.  When a file is reconsulted,
+ | those clauses in the clause group associated with the file will be removed.
+ |
+ | There are two additional groups, the asserta group and the assertz group.
+ |
+ | The clause group id is part of the clause id (see above).  The clause
+ | group id is found at the high part of the longword which forms the clause
+ | id.
+ |
+ | CGI_WIDTH is the width of the clause group id field.
+ | CGI_OFFSET is the amount to shift to get at this field.
+ | CGI_MASK is the mask with which the clause id should be and'd with after
+ | 	the field has been shifted right by CGI_OFFSET
+ | CGI_VMASK is the mask with which the clause id should be and'd to obtain
+ |	the value in the lower part of the long.
+ |
+ | CGI_ASSERTA and CGI_ASSERTZ are the (unshifted) clause group id's for
+ | the asserta group and the assertz group.
+ |
+ | cgId(clause) is given a clause.  It returns the clause group id.
+ *-----------------------------------------------------------------*/
 
 #define CGI_WIDTH	9
 #define CGI_OFFSET	(32-CGI_WIDTH)
@@ -248,22 +250,23 @@ extern ntbl_entry **w_nametable;
 
 #define cgId(item)	(((long)clauseId(item)) >> CGI_OFFSET)
 
-
-/*
- * Amount of new space permitted to be on the freelist before attempting
- * to collect it.
- */
+/*-----------------------------------------------------------------*
+ | Amount of new space permitted to be on the freelist before
+ | attempting to collect it.
+ *-----------------------------------------------------------------*/
 
 #define WC_FREELIMIT 32768
 
-/* Masks */
+/*-----------------------------------------------------------------*
+ | Masks 
+ *-----------------------------------------------------------------*/
 
 #define WCMSK_TOBEFREED	0x010000	/* block is on the tofree list */
 #define WCMSK_MARKED	0x020000	/* block is marked as used. */
 
-/*
- * Environment masks
- */
+/*-----------------------------------------------------------------*
+ | Environment masks
+ *-----------------------------------------------------------------*/
 
 #define EMSK_OLDE	0x01
 #define EMSK_CP		0x02
@@ -271,17 +274,18 @@ extern ntbl_entry **w_nametable;
 #define EMSK_A2		0x08
 #define EMSK_A3		0x10
 
-/*
- * INITIAL_ICOUNT is the number of times an unindexed procedure must be executed
- * (without modification) for indexing to be generated.
- */
+/*-----------------------------------------------------------------*
+ | INITIAL_ICOUNT is the number of times an unindexed procedure must
+ | be executed (without modification) for indexing to be generated.
+ *-----------------------------------------------------------------*/
 
 #define INITIAL_ICOUNT	6
 
 
-/*
- * dbrs_t is a type which denotes whether the database is runable or writable.
- */
+/*-----------------------------------------------------------------*
+ | dbrs_t is a type indicating whether the database is 
+ | runable or writable.
+ *-----------------------------------------------------------------*/
 
 typedef enum {
     DBRS_WRITABLE,
@@ -354,11 +358,15 @@ extern	void	w_relinkall	PARAMS(( void ));
 extern	char *	w_getnamestring	PARAMS(( Code *, char * ));
 extern	int	nameprobe	PARAMS(( PWord, PWord, int ));
 
-/* from index.c */
+/*-----------------------------------------------------------------*
+ | from index.c 
+ *-----------------------------------------------------------------*/
 extern	void	indexproc	PARAMS(( PWord, PWord, int ));
 extern	void	do_indexing	PARAMS(( ntbl_entry * ));
 
-/* from gc.c */
+/*-----------------------------------------------------------------*
+ | from gc.c 
+ *-----------------------------------------------------------------*/
 extern	int	gc		PARAMS(( void ));
 
 #endif /* _WINTCODE_H_INCLUDED_ */

@@ -479,13 +479,13 @@ pbi_dynamic()
     w_get_An(&a, &at, 3);
 
     if (xform_uia(&m, &mt) && at == WTP_INTEGER && force_uia(&p, &pt)) {
-	dbprot_t odbrs = w_dbprotect(DBRS_WRITABLE);
-	w_dynamic(m,p,a);
-	(void) w_dbprotect(odbrs);
-	SUCCEED;
+		dbprot_t odbrs = w_dbprotect(DBRS_WRITABLE);
+		w_dynamic(m,p,a);
+		(void) w_dbprotect(odbrs);
+		SUCCEED;
     }
     else
-	FAIL;
+		FAIL;
 }
 
 int

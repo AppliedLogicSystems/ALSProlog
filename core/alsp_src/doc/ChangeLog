@@ -1,3 +1,26 @@
+Wed March 1 1995 Ken Bowen
+
+   * Created generic/wd_size.h to record word-size-specific info (32/64);
+   - Implicit created BITS32 as the flag for 32 bit vs 64 bit;
+   - Created generic/hzsize.h out of port/mtypes.h since that version
+   of mtyppes.h seemed to have the most extensive casts;  took almost
+   everything except very word-size specific stuff (e.g. maxint);
+   - Temporarily changed mtypes.h in port to just include hztypes.h;
+   - Note that hztypes.h includes wd_size.h.
+   - Propagated the same mtypes.h change to all other architectures using
+   horizontal typing.
+	* In port/icode1.c, replaced declaration Code *ic_ptr; by
+		ic_uptr_type ic_uptr;
+	corresponding to the new union defn in icodegen.h (from Mac)
+
+Wed March 1 1995 Ken Bowen
+
+   Committed the Mac merge changes.
+
+15 Feb 1995-- 22 Feb 1995 Ken Bowen
+
+    Merged in the Macintosh native code changes from Chuck Houpt.
+
 Mon Nov  7 20:04:13 EST 1994 Ken Bowen
 
 	* builtins:xconsult.pro: Added two clauses to process/6 to handle

@@ -10,6 +10,9 @@
  * 	July, 1991	SM	-- added label stuff for domath.88k stuff
  */
 
+#include "wintcode.h"
+#include "icodegen.h"
+
 /*
  * The number of bytes needed for the garbage collector information. This
  * must be a multiple of four.

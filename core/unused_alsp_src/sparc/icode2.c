@@ -1,16 +1,13 @@
-/*
- * icode2.c			-- more stuff to emit instructions
- *	Copyright (c) 1987-1993 Applied Logic Systems, Inc.
- *
- * Author:	Kevin A. Buettner
- * Creation:	9/12/90
- * Revsion History:
- *
- * Note:
- *		The icode2.c files from other implementations were used to
- *		help create this one.
- */
-
+/*===================================================================*
+ |		icode2.c
+ |	Copyright (c) 1987-1995 Applied Logic Systems, Inc.
+ |
+ |		-- more stuff to emit instructions
+ |
+ | Author:	Kevin A. Buettner
+ | Creation:	9/12/90--
+ | Revsion History:
+ *===================================================================*/
 
 #include "defs.h"
 #include "compile.h"
@@ -65,9 +62,9 @@ void
 ic_install_overflow_call(n)
     ntbl_entry *n;
 {
-    Code *oldptr = ic_ptr;
     int disp;
 
+    Code *oldptr = ic_ptr;
     ic_ptr = n->overflow;
 
     disp = BLAB(n->exec_entry)<<2;
@@ -86,7 +83,6 @@ ic_install_overflow_call(n)
      * set to the next real instruction to execute upon return.
      *
      */
-    
     ADD(RET,imm(20),CP)
     
     ic_ptr = oldptr;
@@ -165,14 +161,12 @@ ic_install_normal_exec_entry(n)
     ntbl_entry *n;
 {
     Code *oldptr = ic_ptr;
-
     ic_ptr = n->exec_entry;
 
     SUB(TR,H,tmp1)
     CMP(tmp1,Safety)
     BCS(BLAB(n->overflow))
     MOVE(SP,E)
-
 
     ic_ptr = oldptr;
 }
@@ -207,15 +201,10 @@ ic_install_spy(n)
     ntbl_entry *n;
 {
     Code *oldptr = ic_ptr;
-
     ic_ptr = n->exec_entry;
 
     CALL(BLAB(dbg_spycheck))
     NOP
-/*
-    SUB(TR,H,tmp1)
-    CMP(tmp1,Safety)
-*/
     BCS(BLAB(n->overflow))
     MOVE(SP,E)
     
@@ -256,6 +245,7 @@ ic_install_libbreak(n,i)
     ST(UArg1,tmp1,imm(lo10((long)&wm_interrupt_caught)))
     BA(BLAB(n->overflow))
     SUB(ZERO,imm(1),Safety)
+
     ic_ptr = oldptr;
 }
 
@@ -308,7 +298,6 @@ ic_install_decr_icount(n)
     ntbl_entry *n;
 {
     Code *oldptr = ic_ptr;
-
     ic_ptr = n->exec_entry;
 
     CALL(BLAB(dbg_decr_icount))
@@ -334,8 +323,8 @@ ic_install_resolve_ref(n)
     ntbl_entry *n;
 {
     int disp;
-    Code *oldptr = ic_ptr;
 
+    Code *oldptr = ic_ptr;
     ic_ptr = n->code;
 
     /*
@@ -428,7 +417,6 @@ ic_install_jmp(n,clausestart,emask)
     int emask;
 {
     Code *oldptr = ic_ptr;
-
     ic_ptr = n->code;
 
     ic_install_emask(emask);
@@ -540,8 +528,8 @@ ic_install_try_me_jmp(n,clausestart,nextclause)
     long nextclause;
 {
     Code delay_instr;
-    Code *oldptr = ic_ptr;
 
+    Code *oldptr = ic_ptr;
     ic_ptr = n->code;
 
     CALL(BLAB(trytab[(n->nargs > NAREGS) ? NAREGS : n->nargs]))
@@ -643,6 +631,7 @@ get_target_instruction(targp)
 	return(iSETHI(0,ZERO));		/* return a nop */
     else {
 	*targp += 1;			/* advance the target */
+
 	return retval;
     }
 }
@@ -667,12 +656,12 @@ ic_install_switch_on_term(n,varaddr,straddr,lisaddr,conaddr,emask)
     LABEL deref, ground;		/* our labels */
     LABEL lis,str,con;
     Code fillinstr;
-    Code *oldptr = ic_ptr;
     int displ;
 
-    lis = str = con = (LABEL) 0;
-
+    Code *oldptr = ic_ptr;
     ic_ptr = n->code;
+
+    lis = str = con = (LABEL) 0;
 
     ic_install_emask(emask);
 
@@ -769,8 +758,8 @@ ic_install_builtin(n,builtin)
     int (*builtin) PARAMS(( void ));
 {
     Code delay_instr;
-    Code *oldptr = ic_ptr;
 
+    Code *oldptr = ic_ptr;
     ic_ptr = n->code;
 
 #ifndef PACKAGE
@@ -872,9 +861,13 @@ void
 ic_install_fail(n)
     ntbl_entry *n;
 {
-    Code *ic_ptr = n->code;
+    Code *oldptr = ic_ptr;
+	ic_ptr = n->code;
+
     JMPL(Fail,ZERO,ZERO)
     NOP
+
+    ic_ptr = oldptr;
 }
 
 
@@ -952,7 +945,6 @@ ic_install_call(n,whereto)
     Code *whereto;
 {
     Code *oldptr = ic_ptr;
-
     ic_ptr = n->code;
 
     CALL(2)			/* skip around the delay instruction */
@@ -1015,7 +1007,6 @@ ic_install_module_closure(n,whereto)
     Code *whereto;
 {
     Code *oldptr = ic_ptr;
-
     ic_ptr = n->code;
 
     CALL(2)			/* jump past delay instruction */
@@ -1062,7 +1053,6 @@ ic_install_module_closure(n,whereto)
     
     CALL(BLAB(whereto))
     ADD(A1,imm(MTP_SYM),A1)
-
 
     ic_ptr = oldptr;
 
@@ -1121,13 +1111,17 @@ coff_pckg_code_modclosure(ent)
 extern	void	wm_nciadc	PARAMS(( void ));
 
 void
-ic_install_next_choice_in_a_deleted_clause(ic_ptr)
-    Code *ic_ptr;
+ic_install_next_choice_in_a_deleted_clause(buf)
+    Code *buf;
 {
+    Code *oldptr = ic_ptr;
+    ic_ptr = buf;
+
     CALL(BLAB(wm_nciadc))
     MOVE(RET,UArg1)
-}
 
+    ic_ptr = oldptr;
+}
 
 /*
  * ic_install_try_me (not used )
@@ -1135,16 +1129,22 @@ ic_install_next_choice_in_a_deleted_clause(ic_ptr)
  */
 
 void
-ic_install_try_me(ic_ptr,nextclause,nargs)
-    register Code *ic_ptr;
+ic_install_try_me(ic,nextclause,nargs)
+    Code *ic;
     PWord nextclause;
     int nargs;
 {
+    Code *oldptr = ic_ptr;
+	register ic_uptr_type ic_uptr;
+	ic_uptr.code_ptr = ic;
+
     CALL(BLAB(trytab[(nargs > NAREGS) ? NAREGS : nargs]))
     SUB(TR,imm(16),TR)
 
     SETHI(hi22(nextclause),Fail)
     ADD(Fail,imm(lo10(nextclause)),Fail)
+
+    ic_ptr = oldptr;
 }
 
 
@@ -1176,13 +1176,16 @@ static Code *retry_tab[] = {
 };
 
 void
-ic_install_retry_me(ic_ptr,nextclause,nargs,emask)
-    Code *ic_ptr;
+ic_install_retry_me(buf,nextclause,nargs,emask)
+    Code *buf;
     PWord nextclause;
     int nargs;
     int emask;
 {
     int displ;
+
+	Code *oldptr = ic_ptr;
+	ic_ptr = buf;
 
     if (nargs > NAREGS)
 	nargs = NAREGS;
@@ -1197,6 +1200,8 @@ ic_install_retry_me(ic_ptr,nextclause,nargs,emask)
 
     SETHI(hi22(nextclause),Fail)
     ADD(Fail,imm(lo10(nextclause)),Fail)
+
+	ic_ptr=oldptr;
 }
 
 #ifdef PACKAGE
@@ -1301,12 +1306,15 @@ static Code *trust_tab[] = {
 };
 
 void
-ic_install_trust_me(ic_ptr, clausestart, nargs, emask)
-    Code *ic_ptr;
+ic_install_trust_me(buf, clausestart, nargs, emask)
+    Code *buf;
     PWord clausestart;
     int nargs, emask;
 {
     int displ;
+
+    Code *oldptr = ic_ptr;
+    ic_ptr = buf;
 
     if (nargs > NAREGS) nargs = NAREGS;
     if (emask & EMSK_CP)
@@ -1318,6 +1326,8 @@ ic_install_trust_me(ic_ptr, clausestart, nargs, emask)
     MOVE(SPB,E)
     BA(BLAB(clausestart))
     MOVE(E,SP)
+
+	ic_ptr = oldptr;
 }
 
 
@@ -1388,9 +1398,9 @@ ic_install_no(buf,clausestart,nocatcher)
     Code *clausestart;
     char *nocatcher;		/* name of the no catcher */
 {
-    Code *oldptr = ic_ptr;
     Code *startaddr;
 
+    Code *oldptr = ic_ptr;
     ic_ptr = buf;
 
     /*
@@ -1456,23 +1466,24 @@ ic_install_no(buf,clausestart,nocatcher)
     return startaddr;
 }
 
-
 /*
  * ic_install_reference is called by resolve_reference to install a jump to
  * a non-builtin.
  */
 
 void
-ic_install_reference(ic_ptr, where)
-    Code *ic_ptr;
+ic_install_reference(buf, where)
+    Code *buf;
     PWord where;
 {
+    Code *oldptr = ic_ptr;
+    ic_ptr = buf;
+
     CALL(BLAB(where))
     NOP
+
+	ic_ptr = oldptr;
 }
-
-
-
 
 /*
  * ic_install_try
@@ -1491,18 +1502,25 @@ ic_install_reference(ic_ptr, where)
  */
 
 long *
-ic_install_try(ic_ptr, cstart, nargs)
-    register Code *ic_ptr;
+ic_install_try(ic, cstart, nargs)
+    Code *ic;
     Code *cstart;
     int nargs;
 {
+    Code *tmp_ic_ptr;
+    Code *oldptr = ic_ptr;
+	register ic_uptr_type ic_uptr;
+	ic_uptr.code_ptr = ic;
+
     CALL(BLAB(trytab[(nargs > NAREGS) ? NAREGS : nargs]))
     SUB(TR,imm(16),TR)
     CALL(BLAB(cstart))
     ADD(RET,imm(8),Fail)
-    return (long *) ic_ptr;
-}
 
+    tmp_ic_ptr = ic_ptr;
+    ic_ptr = oldptr;
+    return (long *) tmp_ic_ptr;
+}
 
 /*
  * ic_install_retry
@@ -1526,13 +1544,17 @@ ic_install_try(ic_ptr, cstart, nargs)
  */
 
 long *
-ic_install_retry(ic_ptr, cstart, nargs, emask)
-    Code *ic_ptr;
+ic_install_retry(ic, cstart, nargs, emask)
+    Code *ic;
     Code *cstart;
     int nargs;
     int emask;
 {
     int displ;
+
+    Code *tmp_ic_ptr;
+    Code *oldptr = ic_ptr;
+    ic_ptr = (Code *) ic;
 
     if (nargs > NAREGS)
 	nargs = NAREGS;
@@ -1546,9 +1568,11 @@ ic_install_retry(ic_ptr, cstart, nargs, emask)
     MOVE(SPB,E)
     CALL(BLAB(cstart))
     ADD(RET,imm(8),Fail)
-    return (long *) ic_ptr;
-}
 
+	tmp_ic_ptr = ic_ptr;
+	ic_ptr = oldptr;
+    return (long *) tmp_ic_ptr;
+}
 
 /*
  * ic_install_trust
@@ -1569,13 +1593,18 @@ ic_install_retry(ic_ptr, cstart, nargs, emask)
  */
 
 long *
-ic_install_trust(ic_ptr, cstart, nargs, emask)
-    register Code *ic_ptr;
+ic_install_trust(ic, cstart, nargs, emask)
+    register Code *ic;
     Code *cstart;
     int nargs;
     int emask;
 {
     int displ;
+
+    Code *oldptr = ic_ptr;
+    Code *tmp_ic_ptr;
+	register ic_uptr_type ic_uptr;
+	ic_uptr.code_ptr = ic;
 
     if (nargs > NAREGS) nargs = NAREGS;
     if (emask & EMSK_CP)
@@ -1587,9 +1616,11 @@ ic_install_trust(ic_ptr, cstart, nargs, emask)
     MOVE(SPB,E)
     CALL(BLAB(cstart))
     MOVE(E,SP)
-    return (long *) ic_ptr;
-}
 
+    tmp_ic_ptr = ic_ptr;
+    ic_ptr = oldptr;
+    return (long *) tmp_ic_ptr;
+}
 
 /*
  * ic_install_tree_overhead
@@ -1619,14 +1650,22 @@ ic_install_trust(ic_ptr, cstart, nargs, emask)
  */
 
 Code *
-ic_install_tree_overhead(swaddr, nentries, ic_ptr)
+ic_install_tree_overhead(swaddr, nentries, ic)
     long *swaddr;
     int nentries;
-    register Code *ic_ptr;
+    Code *ic;
 {
+    Code *tmp_ic_ptr;
+    Code *oldptr = ic_ptr;
+	register ic_uptr_type ic_uptr;
+	ic_uptr.code_ptr = ic;
+
     CALL(BLAB(swaddr))
     SETHI(nentries,T1)
-    return ic_ptr;
+
+    tmp_ic_ptr = ic_ptr;
+    ic_ptr = oldptr;
+    return tmp_ic_ptr;
 }
 
 

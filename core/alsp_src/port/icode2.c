@@ -17,6 +17,8 @@
 #include "machinst.h"
 
 
+#include "wamops.h"
+
 /*
  *
  * ic_install_spy is passed the exec_entry field of a procedure
@@ -362,7 +364,8 @@ ic_install_resolve_ref(n)
 }
 
 /*
- * ic_install_fail is used to install code in a procedure entry which fails.
+ * ic_install_fail is used to install code which will fail into a 
+   procedure entry.
  * This is useful for establishing a defined procedure with no clauses.
  */
 
@@ -370,10 +373,15 @@ void
 ic_install_fail(n)
     ntbl_entry *n;
 {
-    Code *ic_ptr = n->code;
-    ic_puti(W_FAIL);
+	Code *old_ptr = ic_ptr;
+    ic_ptr = (n->code);
+
+	ic_puti(W_FAIL);
+
     if (!(n->flags & NMSK_SPYSET))
-	ic_punch(n->exec_entry, W_OVFLOW_CHECK);
+		ic_punch(n->exec_entry, W_OVFLOW_CHECK);
+
+	ic_ptr = old_ptr;
 }
 
 
@@ -392,7 +400,7 @@ ic_install_reference(buf, whereto)
     ic_ptr = buf;
 
     if (abinst(W_OVFLOW_CHECK) == buf[-1])
-	ic_punch(buf-1,W_OVJUMP);
+		ic_punch(buf-1,W_OVJUMP);
     ic_puti(W_JUMP);
     ic_putl(whereto);
 

@@ -108,9 +108,11 @@ ic_install_normal_exec_entry(n)
 {
     Code *oldptr = ic_ptr;
     ic_ptr = n->exec_entry;
+
     MOVE(TR,ADIRECT,0,D0,DDIRECT,0);
     SUBAD(H,D0)
     CMPDD(OV,D0)
+
     ic_ptr = oldptr;
 }
 
@@ -135,6 +137,7 @@ ic_install_spy(n)
 
     ic_ptr = n->exec_entry;
     JSR((long) dbg_spycheck)
+
     ic_ptr = oldptr;
 }
 
@@ -157,11 +160,13 @@ ic_install_libbreak(n,i)
 {
     int displ;
     Code *oldptr = ic_ptr;
+
     ic_install_exception_check(n);
     MOVI2Addr(((long) i),((long) &wm_interrupt_caught))
     MOVI(-1,OV,DDIRECT,0)
     displ = LDISP(n->overflow);
     BRA(displ)
+
     ic_ptr = oldptr;
 }
 
@@ -184,6 +189,7 @@ ic_install_decr_icount(n)
 
     ic_ptr = n->exec_entry;
     JSR((long) dbg_decr_icount)
+
     ic_ptr = oldptr;
 }
 
@@ -224,6 +230,7 @@ ic_install_resolve_ref(n)
 {
     int disp;
     Code *oldptr = ic_ptr;
+
     ic_install_exception_check(n);
     ic_put(040772);			/* lea (disp,PC), A0 */
     disp = ((char *) n) - ((char *) ic_ptr);
@@ -231,6 +238,7 @@ ic_install_resolve_ref(n)
 					 * the beginning of the name entry
 					 */
     JMP(wm_resolve_ref)
+
     ic_ptr = oldptr;
 }
 
@@ -249,8 +257,10 @@ ic_install_jmp(n, clausestart, emask)
     int emask;
 {
     Code *oldptr = ic_ptr;
+
     ic_install_exception_check(n);
     JMP(clausestart)
+
     ic_ptr = oldptr;
 }
 
@@ -269,19 +279,19 @@ ic_install_try_me_jmp(n,clausestart,nextclause)
 
    ic_install_exception_check(n);
 #ifdef MacOS
-/* NOTE:  At 11:55 PM even the best of C programmers may forget that
-   an integer beginning with 0 is really treated as an OCTAL number
-   and so spending an hour trying to figure out how the decimal 
-   44340 comes close to representing the movem.l instruction as a 
-   result is entirely possible.   AAAAARRRGGGGHHHH!  Why use octal, 
-   anyway?  As you've noticed, those numbers which I needed to change
-   for the Mac's sake are passed as hex.  Sorry for the inconsistency,
-   feel free to translate the hex to octal, if your heart is set on it.
-   We need to use 0x690 instead of 0x630 because I'm storing the Fail
-   addr (A2 on other M68000 systems) in memory and loading it into
-   a0 before the movem.l.  So, a0 must take a2's spot on the movem list,
-   and hence the difference between the Mac and other systems...
-*/
+		/* NOTE:  At 11:55 PM even the best of C programmers may forget that
+   		   an integer beginning with 0 is really treated as an OCTAL number
+   		   and so spending an hour trying to figure out how the decimal 
+   		   44340 comes close to representing the movem.l instruction as a 
+   		   result is entirely possible.   AAAAARRRGGGGHHHH!  Why use octal, 
+   		   anyway?  As you've noticed, those numbers which I needed to change
+   		   for the Mac's sake are passed as hex.  Sorry for the inconsistency,
+   		   feel free to translate the hex to octal, if your heart is set on it.
+   		   We need to use 0x690 instead of 0x630 because I'm storing the Fail
+   		   addr (A2 on other M68000 systems) in memory and loading it into
+   		   a0 before the movem.l.  So, a0 must take a2's spot on the movem list,
+   		   and hence the difference between the Mac and other systems...
+		*/
    MOVAbs((long) &Fail, 0, ADIRECT, 0)
    ic_put(044340 | TR);     /* movem.l */
    ic_put(0x690);               /* HB, SPB, Fail (a0), B */
@@ -295,9 +305,9 @@ ic_install_try_me_jmp(n,clausestart,nextclause)
    MOVE(SP,ADIRECT,0,SPB,DDIRECT,0)
    MOVE(TR,ADIRECT,0,B,ADIRECT,0)
    JMP((long)clausestart)
+
    ic_ptr = oldptr;
 }
-
 
 /*
  * ic_install_switch_on_term is used to install the switch on term code in
@@ -362,7 +372,6 @@ ic_install_try_me_jmp(n,clausestart,nextclause)
  *
  */ 
 
-
 void
 ic_install_switch_on_term(n,varaddr,straddr,lisaddr,conaddr,emask)
     ntbl_entry *n;
@@ -373,6 +382,7 @@ ic_install_switch_on_term(n,varaddr,straddr,lisaddr,conaddr,emask)
     Code *p1, *p3;
     int jfail;
     int temp;
+
     ic_install_exception_check(n);
 
     MOVE(SP,DISPL,8,D0,DDIRECT,0)
@@ -438,9 +448,11 @@ ic_install_builtin(n,builtin)
    int (*builtin) PARAMS(( void ));
 {
    Code *oldptr = ic_ptr;
+
    ic_install_exception_check(n);
    MOVI((int) builtin,A0,ADIRECT,0)
    JMP(wm_execute_builtin)
+
    ic_ptr = oldptr;
 }
 
@@ -449,9 +461,11 @@ ic_install_true(n)
     ntbl_entry *n;
 {
     Code *oldptr = ic_ptr;
+
     ic_install_exception_check(n);
     UNLK(E)
     RTS
+
     ic_ptr = oldptr;
 }
 
@@ -460,8 +474,10 @@ ic_install_fail(n)
     ntbl_entry *n;
 {
     Code *oldptr = ic_ptr;
+
     ic_install_exception_check(n);
     DoFail
+
     ic_ptr = oldptr;
 }
 
@@ -470,11 +486,13 @@ ic_install_equal(n)
     ntbl_entry *n;
 {
     Code *oldptr = ic_ptr;
+
     ic_install_exception_check(n);
     UNLK(E)
     MOVE(SP,DISPL,4,A0,ADIRECT,0)
     MOVE(SP,DISPL,8,D0,DDIRECT,0)
     JMP(UNIFY)
+
     ic_ptr = oldptr;
 }
 
@@ -489,6 +507,7 @@ ic_install_call(n, whereto)
 {
     int offset;
     Code *oldptr = ic_ptr;
+
     ic_install_exception_check(n);
     CLRD(D0)
     ic_put(030072);			/* move.w  (PC,disp), D0	*/
@@ -497,6 +516,7 @@ ic_install_call(n, whereto)
     LSLND(4,D0)
     ADDQ(7,D0, DDIRECT, 0)
     JMP(whereto)
+
     ic_ptr = oldptr;
 }
 
@@ -516,6 +536,7 @@ ic_install_module_closure(n,whereto)
 {
     int offset;
     Code *oldptr = ic_ptr;
+
     ic_install_exception_check(n);
     CLRD(D0)
     ic_put(030072);			/* move.w  (PC,disp), D0	*/
@@ -528,6 +549,7 @@ ic_install_module_closure(n,whereto)
     MOVE(D0, DDIRECT, 0, SP, DISPL, 8)
     MOVE(SP, ADIRECT, 0, E, ADIRECT, 0)
     JMP((long)whereto)
+
     ic_ptr = oldptr;
 }
 
@@ -546,8 +568,6 @@ ic_install_next_choice_in_a_deleted_clause(buf)
     JMP(wm_nciadc)
     ic_ptr = oldptr;
 }
-
-
 
 /*
  * ic_install_try_me
@@ -576,8 +596,8 @@ ic_install_try_me(buf, nextclause, emask)
     PWord nextclause;
     int emask;
 {
-    Code *oldptr = ic_ptr;
     Code *l;
+    Code *oldptr = ic_ptr;
 
     ic_ptr = buf;
 
@@ -602,6 +622,7 @@ ic_install_try_me(buf, nextclause, emask)
     NOP
     NOP
     PATCHDISP(l)
+
     ic_ptr = oldptr;
 }
 
@@ -634,11 +655,12 @@ ic_install_retry_me(buf,nextclause,nargs,emask)
     int nargs;
     int emask;
 {
-    Code *oldptr = ic_ptr;
     Code *l1,*l2;
     int ldisp;
+    Code *oldptr = ic_ptr;
 
     ic_ptr = buf;
+
     NOP
     NOP
 #ifdef MacOS
@@ -669,7 +691,6 @@ ic_install_retry_me(buf,nextclause,nargs,emask)
     ic_ptr=oldptr;
 }
 
-
 /*
  * ic_install_trust_me
  *
@@ -698,9 +719,9 @@ ic_install_trust_me(buf, entrypoint, nargs, emask)
     PWord entrypoint;
     int nargs, emask;
 {
-    Code *oldptr = ic_ptr;
     Code *l;
     int ldisp;
+    Code *oldptr = ic_ptr;
 
     ic_ptr = buf;
 
@@ -738,9 +759,6 @@ ic_install_trust_me(buf, entrypoint, nargs, emask)
     ic_ptr = oldptr;
 }
 
-
-
-
 /*
  * ic_install_no is to install both the no part for queries and the little
  *	piece of code which from which execution will start from.  The address
@@ -756,8 +774,8 @@ ic_install_no(buf,clausestart,nocatcher)
     Code *clausestart;
     char *nocatcher;
 {
-    Code *oldptr = ic_ptr;
     Code *startaddr;
+    Code *oldptr = ic_ptr;
 
     ic_ptr = buf;
 
@@ -785,10 +803,11 @@ ic_install_no(buf,clausestart,nocatcher)
     MOVI(((int) buf), Fail, ADIRECT, 0)
 #endif
     JMP(clausestart);
+
     ic_ptr = oldptr;
+
     return startaddr;
 }
-
 
 /*
  * ic_install_reference is called by resolve_reference to install a jump
@@ -796,16 +815,17 @@ ic_install_no(buf,clausestart,nocatcher)
  */
 
 void
-ic_install_reference(buf,where)
-    Code *buf;
+ic_install_reference(ic,where)
+    Code *ic;
     PWord where;
 {
     Code *oldptr = ic_ptr;
-    ic_ptr = buf;
+
+    ic_ptr = ic;
     JMP(where)
+
     ic_ptr = oldptr;
 }
-
 
 /*
  * ic_install_try
@@ -839,9 +859,9 @@ ic_install_try(ptr, cstart, nargs)
 
     ptr = (long *) ic_ptr;
     ic_ptr = oldptr;
+
     return ptr;
 }
-
 
 /*
  * ic_install_retry
@@ -880,9 +900,9 @@ ic_install_retry(ptr, cstart, nargs, emask)
 
     ptr = (long *) ic_ptr;
     ic_ptr = oldptr;
+
     return ptr;
 }
-
 
 /*
  * ic_install_trust
@@ -913,7 +933,6 @@ ic_install_trust(ptr, cstart, nargs, emask)
     int emask;
 {
     Code *oldptr = ic_ptr;
-
     ic_ptr = (Code *) ptr;
 
     NOP
@@ -922,6 +941,7 @@ ic_install_trust(ptr, cstart, nargs, emask)
 
     ptr = (long *) ic_ptr;
     ic_ptr = oldptr;
+
     return ptr;
 }
 
@@ -952,15 +972,17 @@ ic_install_trust(ptr, cstart, nargs, emask)
  *
  */
  
-/* ic_install_tree_overhead(swaddr, nentries, ic_ptr) */
 Code *
 ic_install_tree_overhead(swaddr, nentries, ic)
     long *swaddr;
     int nentries;
-/*   register Code *ic_ptr;  */
     Code *ic;
 {
+    Code *oldptr;
+    Code *tmp_ic_ptr;
 	register ic_uptr_type ic_uptr;
+
+	oldptr = ic;
 	ic_uptr.code_ptr = ic;
 
     LEA_PCREL(A0)		/* lea (PC, 14), A0	*/
@@ -969,5 +991,8 @@ ic_install_tree_overhead(swaddr, nentries, ic)
     LEA_PCREL(A0)		/* lea (PC, (8*N)), A0	*/
     ic_put(8*nentries);		/*          ^^^^^	*/
     JMP(swaddr)
-    return ic_ptr;
+
+	tmp_ic_ptr = ic_ptr;
+	ic_ptr = oldptr;
+    return tmp_ic_ptr;
 }
