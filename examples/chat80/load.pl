@@ -21,6 +21,8 @@
 
 */
 
+:- ensure_loaded(als_chat).	% misc
+
 :- ensure_loaded(xgrun).	% XG runtimes
 :- ensure_loaded(newg).		% clone + lex
 :- ensure_loaded(clotab).	% attachment tables
