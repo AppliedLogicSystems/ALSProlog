@@ -5,4 +5,5 @@ OS_SL_EXT = so.1.0
 OS_SL_LINK = ld
 # SunOS's ld is unhappy when I try to link -lc -lm -ldl to a shared library
 SL_LINK_LIBS = 
+OS_LIBS = -lm
 
