@@ -248,8 +248,10 @@ ss_load_files([F | T])
 ss_load_dot_alspro
 	:-
 	als_system(L),
-	(dmember(os=dos,L) ->
-		File = 'alspro.pro' ; File = '.alspro' ),
+	dmember(os=OS, L),
+	( OS = dos -> File = 'alspro.pro'
+	; OS = mswin32 -> File = 'alspro.pro'
+	; File = '.alspro' ),
 	ss_load_dot_alspro(File).
 
 ss_load_dot_alspro(AutoFile)
