@@ -6,9 +6,9 @@
 #include <Traps.h>
 
 #include "tk.h"
-#include "tkInt.h"
-#include "tkMacInt.h"
-#include "tclMac.h"
+//#include "tkInt.h"
+//#include "tkMacInt.h"
+//#include "tclMac.h"
 
 int 	TkMacConvertEvent _ANSI_ARGS_((EventRecord *eventPtr));
 
@@ -57,13 +57,20 @@ void SetupALSProlog(void);
 
 static int AEPackageInit(Tcl_Interp *interp)
 {
+	extern void TkMacInitAppleEvents(Tcl_Interp *interp);
 	TkMacInitAppleEvents(interp);
 	return TCL_OK;
 }
 
-void
+typedef int (*Tcl_MacConvertEventPtr) (EventRecord *eventPtr);
+extern void  Tcl_MacSetEventProc (Tcl_MacConvertEventPtr procPtr);
+extern void 		TkMacInitMenus (Tcl_Interp 	*interp);
+extern QDGlobalsPtr tcl_macQdPtr;
+extern void panic(const char *);
+
 main(void)
 {
+	
 	/* Initialize the Macintosh */
 	if (MacintoshInit()  != TCL_OK) {
 		Tcl_Exit(1);
@@ -232,8 +239,8 @@ SIOUXHandleOneEvent(EventRecord *event)
 
 
 
-#include <alspi.h>
-#include <new_alspi.h>
+#include "alspi.h"
+#include "new_alspi.h"
 
 extern long standard_console_read(char *buf, long n);
 extern long standard_console_write(char *buf, long n);
