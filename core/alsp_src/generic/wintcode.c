@@ -112,6 +112,28 @@ code_alloc(size, fe_num)
     return newcb->addr;
 }
 
+void dump_codespace(void);
+void dump_codespace(void)
+{
+  struct codeblock *b;
+  
+  for (b = codeblock_list; b ; b = b->next) {
+    long *p, size;
+    printf("\nCode Block %p\n", b->addr);
+    
+    if (*(b->addr) == -1) {
+      p = b->addr + 1;
+      
+      for (p = b->addr+1 ; *p != -1 ; p += size) {
+	size = *p > 0 ? *p : -*p;
+	if (*p > 0) printf("Block %p Length %ld\n", p, size);
+      }
+    }
+  }
+}
+
+
+
 #ifdef PACKAGE
 int
 pckg_addto_codeblocks(addr, len)
@@ -485,7 +507,7 @@ w_alloccode(size)
 
 #ifdef MDEBUG
 	    	if (len > WC_AREASIZE + 4)
-			printf("w_alloccode: allocating block of size %d\n", 4 * len);
+			printf("w_alloccode: allocating block of size %ld\n", 4 * len);
 #endif
 	    	new = (long *) code_alloc((size_t)(4 * len), FE_XMEM_CLAUSE);
 
@@ -546,30 +568,48 @@ void
 w_freecode(p)
     long *p;
 {
-    long *q, *r;
+    long *q;
     long  s;
 
     s = sizeUsedBlock(p);	/* pull out the size */
 
-    if (*(p + s) > 0) {		/* if next block is free... */
-	q = p + s;
-	r = *((long **) q + WCI_BLINK);
-	w_freeptr = *((long **) q + WCI_FLINK);
-	*((long **) w_freeptr + WCI_BLINK) = r;
-	*((long **) r + WCI_FLINK) = w_freeptr;
-	s += sizeFreeBlock(q);
+    if (*(p+s) > 0 && *(p-1) > 0) {
+      long *f,*b;
+      q = p + s;
+      p-= *(p-1);
+	f = *((long **) q + WCI_FLINK);
+	b = *((long **) q + WCI_BLINK);
+	*((long **) f + WCI_BLINK) = b;
+	*((long **) b + WCI_FLINK) = f;
+      s += sizeFreeBlock(p) + sizeFreeBlock(q);
+      if (w_freeptr == q) w_freeptr = p;
     }
+    else 
+if (*(p + s) > 0) {		/* if next block is free... */
+      long *f,*b;
+	q = p + s;
+	f = *((long **) q + WCI_FLINK);
+	b = *((long **) q + WCI_BLINK);
+	*((long **) f + WCI_BLINK) = p;
+	*((long **) b + WCI_FLINK) = p;
+	*((long **) p + WCI_FLINK) = f;
+	*((long **) p + WCI_BLINK) = b;
+	s += sizeFreeBlock(q);
+	if (w_freeptr == q) w_freeptr = p;
+    } else
 
     if (*(p - 1) > 0) {		/* if previous block is free .. */
 	p -= *(p - 1);		/* set p back to start of previous block */
 	s += sizeFreeBlock(p);	/* update total size            */
     }
     else {			/* previous block not free */
-	q = *((long **) w_freeptr + WCI_FLINK);
-	*((long **) p + WCI_FLINK) = q;
-	*((long **) w_freeptr + WCI_FLINK) = p;
-	*((long **) q + WCI_BLINK) = p;
-	*((long **) p + WCI_BLINK) = w_freeptr;
+      long *b;
+      b = *((long **)w_freeptr + WCI_BLINK);
+	*((long **) p + WCI_FLINK) = w_freeptr;
+	*((long **) p + WCI_BLINK) = b;
+	*((long **) w_freeptr + WCI_BLINK) = p;
+	*((long **) b + WCI_FLINK) = p;
+	w_freeptr = p;
     }
     *(p + WCI_SIZE) = *(p + s - 1) = s;
 }
@@ -2354,6 +2394,7 @@ w_collect()
      * free list.
      */
     w_tofreesize = 0;
+
 }
 
 
