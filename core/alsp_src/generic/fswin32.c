@@ -381,6 +381,7 @@ getDirEntries()
     PWord v1, v2, v3;
     int   t1, t2, t3;
     char *dirName, *pattern, path[MAX_PATH];
+    size_t pathLen;
     PWord prev, item, head, sym, nil;
     int   prevType, itemType, headType, symType, nilType;
     HANDLE findHandle;
@@ -398,7 +399,15 @@ getDirEntries()
     strncpy(path, dirName, MAX_PATH-1);
     path[MAX_PATH-1] = 0;
     
-    strncat(path, pattern, MAX_PATH-1-strlen(pattern));
+    pathLen = strlen(path);
+    
+    if (path[pathLen-1] != '\\') {
+        strncat(path, "\\", MAX_PATH-1-pathLen);
+        path[MAX_PATH-1] = 0;
+        pathLen = strlen(path);
+    }
+    
+    strncat(path, pattern, MAX_PATH-1-pathLen);
     path[MAX_PATH-1] = 0;
 
     PI_makesym(&nil, &nilType, "[]");
