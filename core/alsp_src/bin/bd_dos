@@ -1,0 +1,36 @@
+#!/bin/sh
+#  Setup an appropriate DOS build dir relative to an "exported"
+#  DOS-style subtree dir
+#
+#  $1 - source "exported" DOS-style subtree dir -- absolute paths
+#  $2 - target DOS build dir                   -- absolute paths
+#	To Do: Remove absolute paths limitation
+#
+mkdir $2
+echo Making DOS build dir $2 relative to $1
+cp $1/cfgs/maketop.dj $2/makefile
+cp $1/generic/generate/generic.dj $2/generic.mkf
+cp $1/port/port.dj $2/port.mkf
+cp $1/port/djgpp/config.h $2
+cp $1/doconfig.bat $2
+
+echo - bld-port:
+mkdir $2/bld-port
+mkdir $2/bld-port/alsdir
+mkdir $2/bld-port/alsdir/builtins
+cp $1/builtins/*.pro $2/bld-port/alsdir/builtins
+echo - builtins done
+
+mkdir $2/bld-port/alsdir/library
+cp $1/library/*.pro $2/bld-port/alsdir/library
+echo - library done
+
+cd $2/bld-port
+cp $1/bld-port/makefile.dj makefile
+cp $1/bld-port/tconfig.h.in tconfig.h
+echo - bld-port done
+
+#cd $2/bld-natv
+#cp $1/bld-natv/makefile.dj makefile
+#cp $1/bld-natv/tconfig.h.in tconfig.h
+#echo - bld-natv done

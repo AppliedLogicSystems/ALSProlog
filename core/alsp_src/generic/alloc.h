@@ -17,7 +17,9 @@
 
 /* Allocation constants */
 
-#define PARSER_AREASIZ 65536     /* size of parser's scratch area; input
+/* #define PARSER_AREASIZ 65536  */   
+
+#define PARSER_AREASIZ 131072     /* size of parser's scratch area; input
                                   * transformations are also done in this
                                   * area
                                   */

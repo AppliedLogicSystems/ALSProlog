@@ -37,9 +37,13 @@
 #include <stat.h>
 #include <file.h>
 
-#elif	!defined(MacOS) /* must be unix */
+#elif   defined(MacOS)
+#include <GUSI.h>
+
+#else /* must be unix */
 #include <errno.h>
 #include <sys/file.h>
+
 #endif			/* OS includes */
 
 

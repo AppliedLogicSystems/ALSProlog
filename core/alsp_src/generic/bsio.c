@@ -100,14 +100,10 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 #include <pctcp/error.h>
 #endif /* DOS */
 
-#ifdef MacOS			/* use Milligan's socket library based on
-				 * MacTCP
-				 */
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <memory.h>		/* for BlockMove() */
+#ifdef MacOS
+
+#include <GUSI.h>
+
 #endif /* MacOS */
 
 #endif /* HAVE_SOCKET */
@@ -196,6 +192,7 @@ static	int	quoted_string	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *, UC
 static	int	char_constant	PARAMS(( UCHAR **, UCHAR *, int, int ));
 static	int	next_token0	PARAMS(( UCHAR *, PWord *, int *, PWord *, int * ));
 static	int	format_type	PARAMS(( UCHAR * ));
+static  int int_or_float    PARAMS((int, PWord));
 
 /*
  * sio_mkstream(BufSize,Stream)
@@ -679,7 +676,7 @@ incr_fdrefcnt(fd)
     int fd;
 {
     if (fdrefcnts == NULL) {
-#if defined(_SC_OPEN_MAX)
+#if !defined(MacOS) && defined(_SC_OPEN_MAX)
 	if ( (openmax = sysconf(_SC_OPEN_MAX)) < 0)
 	    openmax = OPEN_MAX_GUESS;
 #elif defined(OPEN_MAX)
@@ -1080,9 +1077,8 @@ sio_socket_open()
 #endif /* DOS */
 
 #ifdef MacOS
-    struct sockaddr_in sockname_in, peer_name;
+    struct sockaddr_in sockname_in; /* Internet socket addresses */
     struct hostent *hp;
-    int   len_peer = sizeof (peer_name);
 #endif /* MacOS */
 
     w_get_An(&v1, &t1, 1);	/* Host name or path name (may be var) */
@@ -1321,72 +1317,71 @@ sio_socket_open()
 #endif /* DOS */
 
 #ifdef MacOS
-    if ((SIO_FD(buf) = s_socket(v1, v2, v3)) == -1) {
-	SIO_ERRCODE(buf) = SIOE_SYSCALL;
-	SIO_ERRNO(buf) = errno;
-	FAIL;
+
+    if ((SIO_FD(buf) = socket(domain, socktype, 0)) == -1) {
+    SIO_ERRCODE(buf) = SIOE_SYSCALL;
+    SIO_ERRNO(buf) = errno;
+    FAIL;
     }
 
-    switch (v2 /* socket type */) {
-	case ALS_STREAM:
-	    SIO_TYPE(buf) = SIO_TYPE_SOCKET_STREAM;
-	    if (v4 == SIOM_READ) {	/* passive (listening) socket */
-		sockname_in.sin_family = AF_INET;
-		sockname_in.sin_addr.s_addr = INADDR_ANY;
-		sockname_in.sin_port = htons(portnum);
+    switch (domain) {
+    case AF_INET :
+        gethostname(myhostname, MAXHOSTNAMELEN);
+        memset(&sockname_in, 0, sizeof sockname_in);
+        sockname_in.sin_family = AF_INET;
+        sockname_in.sin_addr.s_addr = INADDR_ANY;
+        sockname_in.sin_port = htons((u_short)portnum);
 
-		if (s_bind(SIO_FD(buf), (struct sockaddr *) &sockname_in,
-			   sizeof (struct sockaddr_in)) < 0) {
-		    SIO_ERRCODE(buf) = SIOE_SYSCALL;
-		    SIO_ERRNO(buf) = errno;
-		    perror("binding internet domain passive stream socket");
-		    FAIL;
-		}
+        if ( (host_or_path == NULL || strcmp(myhostname,host_or_path) == 0)
+         && bind(SIO_FD(buf), (struct sockaddr *) &sockname_in,
+                 sizeof (struct sockaddr_in)) == 0 ) {
+        isserver = 1;
+        }
+        else {
+        if (host_or_path == NULL)
+            host_or_path = myhostname;
 
-		s_listen(SIO_FD(buf), v7);
-		SIO_FLAGS(buf) |= SIOF_NEEDACCEPT;
-#if 0
-		/* 2nd param. is actually ignored */
-		SIO_FD(buf) =
-		    s_accept(SIO_FD(buf), (struct sockaddr *) &peer_name,
-			     &len_peer);	/* null addresses not allowed
-						 */
-#endif
-	    }
+        if ( (hp = gethostbyname((UCHAR *) host_or_path)) )
+            memmove((UCHAR *) &sockname_in.sin_addr,
+                (UCHAR *) hp->h_addr,
+                (size_t) hp->h_length);
+        else if ((sockname_in.sin_addr.s_addr = inet_addr(host_or_path).s_addr)
+                == (unsigned long) -1) {
+            status = -1;
+            break;  /* break early */
+        }
 
-	    else {		/* active socket */
-		sockname_in.sin_family = AF_INET;
-		hp = gethostbyname((UCHAR *) host_or_path);
-		BlockMove((UCHAR *) hp->h_addr, (UCHAR *) &sockname_in.sin_addr,
-			  hp->h_length);
-		sockname_in.sin_port = htons(portnum);	
+        sockname_in.sin_port = htons((u_short)portnum);
 
-		status = s_connect(SIO_FD(buf),
-				   (struct sockaddr *) &sockname_in,
-				   sizeof (struct sockaddr_in));
-	    }
-	    break;
-	case ALS_DGRAM:
-	    SIO_TYPE(buf) = SIO_TYPE_SOCKET_DGRAM;
-	    sockname_in.sin_family = AF_INET;
-	    hp = gethostbyname((UCHAR *) host_or_path);
-	    /* FIXME: check status */
-	    BlockMove((UCHAR *) hp->h_addr,
-		    (UCHAR *) &sockname_in.sin_addr,
-		    hp->h_length);
-	    sockname_in.sin_port = htons(portnum);
-	    SIO_SOCKET_ADDRESS_LEN(buf) = 
-		    sizeof(struct sockaddr_in);
-	    SIO_SOCKET_ADDRESS(buf) =
-		    malloc(SIO_SOCKET_ADDRESS_LEN(buf));
-	    memmove(SIO_SOCKET_ADDRESS(buf), &sockname_in,
-		    SIO_SOCKET_ADDRESS_LEN(buf));
-	    break;
+        status = connect(SIO_FD(buf),
+                 (struct sockaddr *) &sockname_in,
+                 sizeof (struct sockaddr_in));
+        }
+        break;
+    }
 
-	    /* other socket types */
-
-	default:
-	    break;
+    switch (socktype) {
+    case SOCK_STREAM :
+        SIO_TYPE(buf) = SIO_TYPE_SOCKET_STREAM;
+        if (isserver) {
+        status = listen(SIO_FD(buf), v7);
+        SIO_FLAGS(buf) |= SIOF_NEEDACCEPT;
+        }
+        break;
+    case SOCK_DGRAM :
+        SIO_TYPE(buf) = SIO_TYPE_SOCKET_DGRAM;
+        if (isserver && domain == AF_INET) {
+        struct sockaddr_in *sa;
+        SIO_SOCKET_ADDRESS(buf) = (long) malloc(sizeof (struct sockaddr_in));
+        SIO_SOCKET_ADDRESS_LEN(buf) = sizeof (struct sockaddr_in);
+        sa = (struct sockaddr_in *) SIO_SOCKET_ADDRESS(buf);
+        memset(sa, 0, sizeof (struct sockaddr_in *));
+        sa->sin_family = AF_INET;
+        sa->sin_addr.s_addr = INADDR_ANY;
+        /* any initial writes will go to the discard service (port 9) */
+        sa->sin_port = 9;
+        }
+        break;
     }
 #endif /* MacOS */
 
@@ -1866,12 +1861,12 @@ printf("Enter set_window_insert_pos: ");
   w_get_An(&v1,&t1,1);
   w_get_An(&v2,&t2,2);
 
-printf("t1=%d  t2=%d\n",t1,t2);
+/* printf("t1=%d  t2=%d\n",t1,t2); */
 
   if ((buf=get_stream_buffer(v1,t1)) == (UCHAR *) 0 || t2 != WTP_INTEGER)
 	FAIL;
   
-printf("Buf & t2 ok\n");
+/* printf("Buf & t2 ok\n"); */
 
   WINS_INSERT_POS(buf) = (int)v2;
   SUCCEED;
@@ -1880,10 +1875,8 @@ printf("Buf & t2 ok\n");
 /* 
    int_or_float(t,v)
  */
-int
-int_or_float(t,v)
-	int t;
-	PWord v;
+static int
+int_or_float(int t,PWord v)
 {
 #ifdef DoubleType
     if ( (t == WTP_INTEGER) || (t == WTP_DOUBLE))
@@ -1943,37 +1936,36 @@ sio_window_open()
     w_get_An(&v5, &t5, 5);
     w_get_An(&v6, &t6, 6);
 
-printf("sio_w_o: types: t1=%d t2=%d t3=%d t4=%d t5=%d t6=%d\n",
-			t1, t2, t3, t4, t5, t6);
+/* printf("sio_w_o: types: t1=%d t2=%d t3=%d t4=%d t5=%d t6=%d\n",
+			t1, t2, t3, t4, t5, t6);  */
 
 
     if ((buf = get_stream_buffer(v2, t2)) == (unsigned char *) 0)
 	FAIL;
 
-printf("stream buf ok\n");
 
     if ((t3 != WTP_INTEGER) || (t4 != WTP_INTEGER) || (t6 != WTP_INTEGER)
 	) {
 	SIO_ERRCODE(buf) = SIOE_INARG;
 	FAIL;
     }
-printf("t3,4,6 ok\n");
 
 	if (int_or_float(t1,v1) == 0)
 	{ SIO_ERRCODE(buf) = SIOE_INARG;
 	  FAIL; 
 	}
-printf("t1 ok\n");
 	if (int_or_float(t5,v5) == 0)
 	{ SIO_ERRCODE(buf) = SIOE_INARG;
 	  FAIL; 
 	}
+/*
 printf("t5 ok\n");
 printf("types ok\n");
+*/
 
     if (compute_flags((char *)buf,v3,v4) < 0)
 	FAIL;
-printf("flags ok\n");
+/* printf("flags ok\n"); */
 
     SIO_TYPE(buf) = SIO_TYPE_PROLOG_MANAGED;
 
@@ -2000,14 +1992,14 @@ printf("flags ok\n");
 		    w_get_argn(&vv, &tt, v1, i + 1);
 			*(((short *) &uu)+ i) = (short) vv;
 
- printf("i=%d vv=%hd uu=%d\n",i,(short)vv,(unsigned long)uu); 
+/*  printf("i=%d vv=%hd uu=%d\n",i,(short)vv,(unsigned long)uu);   */
 		}
     	SIO_FD(buf) = (unsigned long) uu;
 
 	}
 #endif	/* DoubleType */
 
-printf("SIO_FD(buf)=%d\n",SIO_FD(buf));
+/* printf("SIO_FD(buf)=%d\n",SIO_FD(buf)); */
 
 
     SIO_ERRCODE(buf) = SIOE_NORMAL;
@@ -2192,7 +2184,8 @@ write_buf(vsd,buf)
 	    writeflg = net_write(SIO_FD(buf), SIO_BUFFER(buf),
 				 SIO_LPOS(buf), 0);
 #elif defined(MacOS)
-	    writeflg = s_write(SIO_FD(buf), SIO_BUFFER(buf), SIO_LPOS(buf));
+            writeflg = write(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf))
+;
 #endif /* UNIX */
 	    break;
 
@@ -2214,13 +2207,14 @@ write_buf(vsd,buf)
 				   SIO_SOCKET_ADDRESS(buf),
 				   0);
 #elif defined(MacOS)
-	    /* FIXME: SIO_SOCKET_ADDRESS(buf) == 0 */
-	    writeflg = s_sendto(SIO_FD(buf),
-				SIO_BUFFER(buf),
-				SIO_LPOS(buf),
-				0,
-				SIO_SOCKET_ADDRESS(buf),
-				SIO_SOCKET_ADDRESS_LEN(buf));
+            if (SIO_SOCKET_ADDRESS(buf))
+                writeflg = sendto(SIO_FD(buf),
+                                  SIO_BUFFER(buf),
+                                  SIO_LPOS(buf), 0,
+                                  (struct sockaddr *) SIO_SOCKET_ADDRESS(buf),
+                                  SIO_SOCKET_ADDRESS_LEN(buf));
+            else
+                writeflg = write(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
 #endif /* UNIX, DOS, MacOS */
 	    break;
 #endif /* HAVE_SOCKET */
@@ -2336,7 +2330,11 @@ close_socket:
 #elif defined(DOS)
 		closeflg = net_release(SIO_FD(buf));
 #elif defined(MacOS)
-		closeflg = s_close(SIO_FD(buf));
+                if (SIO_TYPE(buf) == SIO_TYPE_SOCKET_DGRAM)
+                    closeflg = close(SIO_FD(buf));
+                else {
+                    closeflg = shutdown(SIO_FD(buf),2);
+                }
 #endif /* MacOS */
 		if (SIO_SOCKET_ADDRESS(buf))
 		    free((char *) SIO_SOCKET_ADDRESS(buf));
@@ -2702,8 +2700,7 @@ sio_readbuffer()
 	    /* FIXME! */
 	    nchars = net_read(SIO_FD(buf), buffer, nchars, &a, 0);
 #elif defined(MacOS)
-	    /* FIXME: Need accept */
-	    nchars = s_read(SIO_FD(buf), buffer, nchars);
+            nchars = read(SIO_FD(buf), buffer, (size_t)nchars);
 #endif
 	    break;
 
@@ -2721,10 +2718,14 @@ sio_readbuffer()
 	    /* FIXME! */
 	    nchars = net_read(SIO_FD(buf), buffer, nchars, &a, 0);
 #elif defined(MacOS)
-	    /* FIXME! */
-	    int len = SIO_SOCKET_ADDRESS_LEN(buf);
-	    nchars = s_recvfrom(SIO_FD(buf),buffer,nchars, 0,
-			        SIO_SOCKET_ADDRESS(buf), &len);
+            if (SIO_SOCKET_ADDRESS(buf)) {
+                int len = SIO_SOCKET_ADDRESS_LEN(buf);
+                nchars = recvfrom(SIO_FD(buf), buffer,nchars, 0,
+                                  (struct sockaddr *) SIO_SOCKET_ADDRESS(buf),
+                                  &len);
+            }
+            else
+                nchars = read(SIO_FD(buf), buffer, (size_t)nchars);
 #endif
 	    SIO_FLAGS(buf) |= SIOF_EOF;	/* each packet is self contained */
 	    break;

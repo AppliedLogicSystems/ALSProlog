@@ -128,6 +128,10 @@ dispatch_option(['-t' ,UserPred], State)
 	:-!,
 	setP2I(tPred, State, UserPred).
 
+dispatch_option(['-T' ,TranslateExpr], State) 
+	:-!,
+	setup_translate(TranslateExpr, State).
+
 dispatch_option(['-d' ,DupPred], State) 
 	:-!,
 	setP2I(dPred, State, DupPred).
@@ -171,6 +175,18 @@ check_defaults(CmdLine,State)
 		setP2I(hincs, State, [BaseName])
 	).
 		%% Add more here as necessary
+
+setup_translate(InExpr, State)
+	:-
+	atomread(InExpr, Expr),
+	(Expr = (Head :- Body) ->
+		THead = Head
+		;
+		THead = Expr
+	),
+	assert(Expr),
+	functor(THead, UserPred, _),
+	setP2I(tPred, State, UserPred).
 
 %%----------------------------------------------
 %%	TOP LEVEL OF COMPACT INTERFACE GENERATOR
@@ -629,7 +645,8 @@ emit_unify([farptr|Rest],OutStream)
 emit_unify(TypeList,OutStream)
 	:-
 	calc_return_arg_num(TypeList,1,RetArg),
-	printf(OutStream,'\tPI_makedouble(&rval,&rtype,(double) retval);\n',[]),
+/*	printf(OutStream,'\tPI_makedouble(&rval,&rtype,(double) retval);\n',[]), */
+	printf(OutStream,'\tmake_number(&rval,&rtype,(double) retval);\n',[]),
 	printf(OutStream,'\tif (PI_unify(arg%d,type%d,rval,rtype))\n',[RetArg,RetArg]),
 	printf(OutStream,'\t\tPI_SUCCEED;\n',[]),
 	printf(OutStream,'\tPI_FAIL;\n',[]).
@@ -989,7 +1006,11 @@ translate_func_name(FuncName,TranslatedName,State)
 	accessP2I(tPred, State, UserTransName), 	% User has specified a translator
 	!,
 	UserCall =.. [UserTransName,FNL,TranslatedName],
-	user:call(UserCall).
+	(call(UserCall) ->
+		true
+		;
+		user:call(UserCall)
+	).
 
 translate_func_name(FuncName,TranslatedName,State)
 	:-

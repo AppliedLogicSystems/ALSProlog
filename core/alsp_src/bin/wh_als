@@ -1,0 +1,18 @@
+#!/bin/sh
+# Decides which of the following exists, & returns full path to it:
+#	bld-port/[alspro, alspro_b]  bld-natv[alspro, alspro_b]
+# $1 = path to als build directory (containing bld-port, bld-natv)
+
+
+if [ -f $1/bld-natv/alspro ] ;
+then
+	echo $1/bld-natv/alspro 2>&1
+elif [ -f $1/bld-natv/alspro_b ] ;
+then
+	echo $1/bld-natv/alspro_b 2>&1
+elif [ -f $1/bld-port/alspro ] ;
+then
+	echo $1/bld-port/alspro 2>&1
+else
+	echo $1/bld-port/alspro_b 2>&1
+fi

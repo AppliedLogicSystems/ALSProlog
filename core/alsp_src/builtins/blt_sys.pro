@@ -312,6 +312,7 @@ lib_load(Module,Call)
 	(pdel_libinfo(_,FileName), fail ; true),
 	sys_searchdir(ALSDIR),
 	'$atom_concat'(ALSDIR,FileName,FullFileName),
+%	Module:abolish(P,A),
 	load(FullFileName,1,_,obp,_),
 	!,
 	Module:call(Call).
@@ -355,7 +356,7 @@ force_libload_file(File,DirDC)
 
 :-dynamic(lib_path_rec/2).
 
-%/*
+/*
 lib_recording(LH,LT)
 	:-
 pbi_write(lib_rec_try_lib_path_rec(LH,LT)),pbi_nl,pbi_ttyflush,
@@ -368,14 +369,12 @@ lib_recording(LH,LT)
 pbi_write(lib_rec_try_lib_path_rec_CLAUSE2(LH,LT)),pbi_nl,pbi_ttyflush,
  	assert_at_load_time(lib_path_rec(LH,LT)),
 pbi_write(lib_rec_try_lib_path_rec_CLAUSE2_DONE(LH,LT)),pbi_nl,pbi_ttyflush.
-%*/
+*/
 
 export libactivate/4.
 libactivate(M,[LH|LT],PredList,ModClosures) 
 	:-
-%pbi_write(before_la=[LH|LT]),pbi_nl,pbi_ttyflush,
 	libhide(M,[LH|LT],PredList),
-%pbi_write(after_la=[LH|LT]),pbi_nl,pbi_ttyflush,
 	mc_all(ModClosures).
 	
 mc_all([]).

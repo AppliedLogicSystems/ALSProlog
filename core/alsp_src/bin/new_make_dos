@@ -1,0 +1,13 @@
+#!/bin/sh
+
+srcdir='/mailbox3/alsp_dos.src'
+blddir='/mailbox3/builds/i386_dos'
+
+sh /mailbox3/alsp_src/bin/updm_dos $srcdir
+
+echo Updating $blddir from $srcdir
+cp $srcdir/cfgs/maketop.dj $blddir/makefile
+cp $srcdir/bld-port/makefile.dj $blddir/bld-port/makefile
+cp $srcdir/generic/generate/generic.dj $blddir/generic.mkf
+cp $srcdir/port/port.dj $blddir/port.mkf
+cp $srcdir/i386/djgpp/config.h $blddir

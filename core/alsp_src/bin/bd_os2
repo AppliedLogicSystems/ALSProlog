@@ -1,0 +1,42 @@
+#!/bin/sh
+#  Setup an OS/2 build dir relative to an "exported"
+#  DOS-style subtree dir
+#
+#  $1 - source "exported" DOS-style subtree dir -- absolute paths
+#  $2 - target OS/2 build dir                   -- absolute paths
+#	To Do: Remove absolute paths limitation
+#
+mkdir $2
+echo Making OS/2 build dir $2 relative to $1
+cp $1/cfgs/maketop.os2 $2/makefile
+sed -e 's^@srcdir@^'$1'^'g $2/makefile > m
+mv m makefile
+cp $1/generic/generate/generic.os2 $2/generic.mkf
+cp $1/port/port.os2 $2/port.mkf
+cp $1/port/os2/config.h $2
+
+echo - bld-port:
+mkdir $2/bld-port
+mkdir $2/bld-port/alsdir
+mkdir $2/bld-port/alsdir/builtins
+cd $2/bld-port/alsdir/builtins
+ln -s $1/builtins/*.pro .
+echo - builtins done
+
+mkdir $2/bld-port/alsdir/library
+cd $2/bld-port/alsdir/library
+ln -s $1/library/*.pro .
+echo - library done
+
+cd $2/bld-port
+cp $1/bld-port/makefile.os2 makefile
+cp $1/bld-port/tconfig.h.in tconfig.h
+sed -e 's^@srcdir@^'$1'^'g makefile > m
+sed -e 's^@srcdir@^'$1'^'g makefile > m
+mv m makefile
+echo - bld-port done
+
+#cd $2/bld-natv
+#cp $1/bld-natv/makefile.os2 makefile
+#cp $1/bld-natv/tconfig.h.in tconfig.h
+#echo - bld-natv done

@@ -30,6 +30,10 @@
 
 #endif /* DOS */
 
+#ifdef MacOS
+#include <GUSI.h>
+#endif
+
 #ifdef DOS
 
 /*

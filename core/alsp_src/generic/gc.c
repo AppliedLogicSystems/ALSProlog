@@ -840,9 +840,10 @@ mark_backup:
 
 
 #ifdef PRIM_DBG
+void pwrite PARAMS ((long));
+
 void
-pwrite(pv)
-    long  pv;
+pwrite(long pv)
 {
     long  v, t;
 
@@ -852,6 +853,7 @@ pwrite(pv)
     printf("\n");
 }
 
+int gcstats PARAMS ((void));
 
 int
 gcstats()
@@ -859,9 +861,11 @@ gcstats()
     return gccallcount;
 }
 
+void print_chpts PARAMS ((register long *));
+
 void
-print_chpts(b)
-    register long *b;
+print_chpts(register long *b)
+/*    register long *b;   */
 {
     while (b) {
 	printf("%lx:%10lx%10lx%10lx%10lx\n",

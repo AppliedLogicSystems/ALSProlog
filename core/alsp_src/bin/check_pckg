@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+#  Runs in top level of a build dir.
+#  Checks whether packaging is working by looking for
+#  alspro in bld-port, and echos (>>) the line
+#      PCKG=[yes/no]
+#  to cmn_info.mkf in the top level of the build dir.
+#
+
+if [ -f bld-port/alspro ] ;
+then
+	echo PCKG=yes >> cmn_info.mkf
+else 
+	echo PCKG=no >> cmn_info.mkf
+fi
+

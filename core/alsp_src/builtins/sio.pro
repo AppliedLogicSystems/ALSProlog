@@ -551,7 +551,8 @@ set_output(Stream_or_alias) :-
  */
 
 export open/3.
-open(Source_sink,Mode,Stream) :-
+open(Source_sink,Mode,Stream) 
+	:-
 	open(Source_sink,Mode,Stream,[type(text)]).
 
 
@@ -560,7 +561,8 @@ open(Source_sink,Mode,Stream) :-
  */
 
 export open/4.
-open(Source_sink,Mode,Stream,Options) :-
+open(Source_sink,Mode,Stream,Options) 
+	:-
 	check_source_sink_and_mode(Source_sink,Mode),
 	check_open_options(Options),
 	check_alias(Options,Alias),
@@ -1241,7 +1243,6 @@ data_ready(Stream)
 						   ),
 		assert_at_load_time(
 			( write_buffer_to_win(output,BufUIA,NumCs,WinID,EndPos) :-
-pbi_write(w_b_2_win_winid=WinID),pbi_nl,
 				 x_XmTextGetLastPosition(WinID,StartPos),
 				 EndPos is StartPos + NumCs,
 				 x_XmTextReplace(WinID,StartPos,EndPos,BufUIA),
@@ -1338,8 +1339,6 @@ open_window_stream(Window,Mode,Options,Stream) :-
 	buffering(Options,NBuffering),
 	winsGetTextInsertionPosition(WinID, WinInsertPos),
 	%sio_window_open(WinID,Stream,WinInsertPos,NMode,NBuffering,WinPosGV),
-pbi_write(sio_window_open(WinID,Stream,NMode,NBuffering,WinInsertPos,WinPosGV)),
-pbi_nl,
 	sio_window_open(WinID,Stream,NMode,NBuffering,WinInsertPos,WinPosGV),
 
 	%%
@@ -3315,6 +3314,7 @@ sio_pckg_init :-
     set_input(InStream),
     set_output(OutStream),
 
+
     %% Debugger streams
     open('$stdout',write, OutDStream,
 	 [	'$stream_identifier'(-4), alias(debugger_output),
@@ -3336,5 +3336,6 @@ sio_pckg_init :-
 
 
 :- sio_pckg_init.
+
 
 endmod.

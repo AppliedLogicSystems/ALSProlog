@@ -1,114 +1,114 @@
 #!/bin/sh
 # Copies appropriate portions of the source tree
-# to a "DOS" source tree;
+# to a "DOS" source tree; This tree is suitable
+# for futher processing to produce a working build
+# directory on a DOS-style system (DOS, Windows, OS/2)
+# or for directly use/linking where appropriate (e.g., OS/2),
+# as we do in the Unix setting. Just those directories
+# necessary for DOS are copied (no non-i386 native code,
+# no generate, etc.)  All text files are coverted to
+# DOS-end-of-line format.
+#
 # Expects to wake up in the top-level of alsp_src,
-# or an exported (cvs) directory);
+# or an exported (cvs) directory;
+#
 # Expects $1 to be a path to the target directory.
+#
 # Copies the appropriate directories from the
 # current dir to the target dir (using cp -r),
 # and then applies u2d to *.c *.h and other files
+#
 # Usage: xprt2dos <target dir>
 
 echo Target dir = $1
+mkdir $1
 echo Copying:
 echo - top level directory...
 cp readme $1
-bin/u2d $1/readme
+u2d $1/readme
 
-#echo - bin
-#cp -r ./bin $1
-#bin/u2d $1/bin/*.c
+echo - cfgs
+mkdir $1/cfgs
+cp ./cfgs/* $1/cfgs
+u2d $1/cfgs/*
+cp ./cfgs/dos/doconfig.bat $1
 
 echo - bld-port
 cp -r ./bld-port $1
-bin/u2d $1/bld-port/*.in
+u2d $1/bld-port/*
 
 echo - bld-natv
 cp -r ./bld-natv $1
-bin/u2d $1/bld-natv/*.in
+u2d $1/bld-natv/*
 
 echo - builtins
 cp -r ./builtins $1
-bin/u2d $1/builtins/*.pro
+u2d $1/builtins/*.pro
 
 echo - library
 cp -r ./library $1
-bin/u2d $1/library/*.pro
-
-#echo - cfgs
-#cp -r ./cfgs $1
+u2d $1/library/*.pro
 
 #echo - cinterf
 #cp -r ./cinterf $1
-#bin/u2d $1/cinterf/readme
-#bin/u2d $1/cinterf/c2pro/*
-#bin/u2d $1/cinterf/pro2intf/*
-#bin/u2d $1/cinterf/deps/*
-
-#echo - generate
-#cp -r ./generate $1
-#bin/u2d $1/generate/atrans/*
+#u2d $1/cinterf/readme
+#u2d $1/cinterf/c2pro/*
+#u2d $1/cinterf/pro2intf/*
+#u2d $1/cinterf/deps/*
 
 echo - generic
 cp -r ./generic $1
-bin/u2d $1/generic/*.c
-bin/u2d $1/generic/*.h
-bin/u2d $1/generic/*.tags
-bin/u2d $1/generic/*.mkf
-bin/u2d $1/generic/*.txt
-bin/u2d $1/generic/generate/*
+u2d $1/generic/*.c
+u2d $1/generic/*.h
+u2d $1/generic/*.tags
+u2d $1/generic/*.mkf
+u2d $1/generic/*.txt
+u2d $1/generic/generate/*
+u2d $1/generic/generate/tok.h/*
 
-#echo - i386
-#cp -r ./i386 $1
-#rm -r $1/i386/work
-#rm -r $1/i386/tgtmach
-#rm -r $1/i386/sysv
-#rm -r $1/i386/sunos
-#rm -r $1/i386/os2
-#rm -r $1/i386/oldstuff
-#bin/u2d $1/i386/*.m4
-#bin/u2d $1/i386/*.c
-#bin/u2d $1/i386/*.h
-#bin/u2d $1/i386/djgpp/*.h
-#bin/u2d $1/i386/djgpp/*.sed
-#bin/u2d $1/i386/djgpp/*.in
-#bin/u2d $1/i386/dosphar/*
-#bin/u2d $1/i386/msw31/*
-#bin/u2d $1/i386/mswins/*
+mv $1/generic/generate/tok.h/* $1/generic
+
+echo - i386
+cp -r ./i386 $1
+rm -r $1/i386/OLD
+rm -r $1/i386/sysv
+rm -r $1/i386/dosphar
+rm -r $1/i386/*.m4
+rm -r $1/i386/*.c
+rm -r $1/i386/generate
+u2d $1/i386/*
+u2d $1/i386/*/*
 
 #echo - pconfig
 #cp -r ./pconfig $1
-#bin/u2d $1/pconfig/*.pro
-#bin/u2d $1/pconfig/*.in
+#u2d $1/pconfig/*.pro
+#u2d $1/pconfig/*.in
 
 echo - port
 cp -r ./port $1
-bin/u2d $1/port/*.c
-bin/u2d $1/port/*.h
-bin/u2d $1/port/*.mkf
-#bin/u2d $1/port/djgpp/*.h
-#bin/u2d $1/port/msw31/*.h
-#bin/u2d $1/port/msw95/*.h
-bin/u2d $1/port/*/*.h
+u2d $1/port/*.c
+u2d $1/port/*.h
+u2d $1/port/*.mkf
+u2d $1/port/*/*.h
 
 echo - tests
 cp -r ./tests $1
-bin/u2d $1/tests/*.pro
-bin/u2d $1/tests/als_exmp/*.pro
-bin/u2d $1/tests/systests/*.pro
-bin/u2d $1/tests/tsuite/*.pro
+u2d $1/tests/*.pro
+u2d $1/tests/als_exmp/*.pro
+u2d $1/tests/systests/*.pro
+u2d $1/tests/tsuite/*.pro
 
 echo - utils
 cp -r ./utils $1
-bin/u2d $1/utils/*
+u2d $1/utils/*
 
 #echo - wins
 #cp -r ./wins $1
-#bin/u2d $1/wins/build/*.in
-#bin/u2d $1/wins/build/x/*
-#bin/u2d $1/wins/build/motif/*
-#bin/u2d $1/wins/build/mswins/*
-#bin/u2d $1/wins/src/*
+#u2d $1/wins/build/*.in
+#u2d $1/wins/build/x/*
+#u2d $1/wins/build/motif/*
+#u2d $1/wins/build/mswins/*
+#u2d $1/wins/src/*
 
 echo Removing any copied CVS directories...
 rm -r $1/CVS

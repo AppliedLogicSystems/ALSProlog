@@ -34,7 +34,7 @@ schema([
 			 gpckgfiles_c = ext(gpckgfiles,c) qual one_per_line,
 			 glibfiles_c  = ext(glibfiles,c)  qual one_per_line,
 			 gfiles_c 	= ['$(gforfiles_c) $(gpckgfiles_c) $(glibfiles_c)'],
-			 gfiles_o = '$(gfiles_c:.c=.' + &(context_name) + ')' 
+			 gfiles_o = '$(gfiles_c:.c=.' + &(object) + ')' 
 			] ) ] ),
 
 
@@ -44,25 +44,37 @@ schema([
 	~'OTHERFILES' = ext('OTHERFILES',c),
 
 	case(&(context_name),[
-		(msw31:noop),
-		(mac:noop),
-		(os2:noop),
-		(_:[
+		(unix:[
 			cmnt(4),
 			~'GENFILES' = ext('GENFILES',h),
+			generated,
+			'MAGICRUN',
+			rule('magic'),
+			rule('magic.h'),
 			'LEXRUN',
 			'SIORUN',
 			'ICODERUN',
-			'MAGICRUN',
 			'BLDTRUN',
-			generated,
-			rule('magic.h'),
 			dep('tokini2.h'),
 			rule('tokens.h'),
 			rule('lexinit.h'),
 			rule('siolex.h'),
-			rule('icode.h')
-		])
+			rule('icode.h') ]),
+		(mac:[
+			cmnt(4),
+			~'GENFILES' = ext('GENFILES',h),
+			generated,
+			'MAGICRUN',
+			rule('magic'),
+			rule('magic.h')
+			 ]),
+		(_:[
+			cmnt(4),
+			~'GENFILES' = ext('GENFILES',h),
+			generated,
+			'MAGICRUN',
+			rule('magic'),
+			rule('magic.h') ])
 		]),
 
 	cmnt(gen_dep),
@@ -120,17 +132,23 @@ cmnt(0)		= ['        generic.mkf',
 
 cmnt(1) 		= ['How to build everything'].
 
-all 	depends_on  [alsdir, setup, alspro_b, alsmics, alspro, alstest].
+all 	depends_on  [alsdir, setup, generated, alspro_b, alsmics, alspro, alstest].
 
 cmnt(2)			= ['Define CPPFLAGS and the default rule for translating',
 					'C source files to object files'].
 
+&(basic_unix_includes)	= 
+			'-I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(srcdir)/$(ARCH)/$(SOS) '.
+
 &(cpp_includes)	= case(&(context_name),
 		[
 		 (mac:
-			'-i : -i :: -i {srcdir}:generic -i {srcdir}:{ARCH} -i {srcdir}:{ARCH}:{SOS} ' ),
-		 (_:
-			'-I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(srcdir)/$(ARCH)/$(SOS) ' ) ] ).
+			'-i : -i :: -i {srcdir}:generic -i {srcdir}:{ARCH} -i {srcdir}:{ARCH}:{SOS} -i {GUSI}include:' ),
+		 (djgpp: &(basic_unix_includes)+' -I$(srcdir)/i386/djgpp '),
+		 (_: &(basic_unix_includes) ) 
+		] ).
+
+%		 (_: '-I. -I.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH) -I$(srcdir)/$(ARCH)/$(SOS) ' ) 
 
 &(cpp_defines)		= 
 	case(&(context_name),[
@@ -143,7 +161,7 @@ irule(c,'68k.o') = irule(c, '68k.o', [' {CC68k} {CPPFLAGS}  {CFLAGS68k}  {DepDir
 irule(c,'ppc.o') = irule(c, 'ppc.o', [' {CCppc} {CPPFLAGS}  {CFLAGSppc}  {DepDir}{Default}.c -o {TargDir}{Default}.ppc.o']).
 
 irule(c) = 
-	irule(c,&(context_name),
+	irule(c,&(object),
 		['$(CC) -c $(CPPFLAGS) $(CFLAGS) $(X_CFLAGS) $<']).
 
 cmnt(3)			= ['C-defined files making up common part of system'].
@@ -185,6 +203,8 @@ glibfiles = [
 	gc,
 	gv,
 	index,
+	intaux,
+	intrv,
 	lexan,
 	lforeign,
 	loadfile,
@@ -226,6 +246,8 @@ gfiles_h =
 	icodedef,
 	icodegen,
 	icom,
+	intrv,
+	intrv_pr,
 	istr,
 	lexan,
 	lexinit,
@@ -258,26 +280,30 @@ gfiles_h =
 
 'OTHERFILES' = [alsglue].
 
-/*
 cmnt(4) = ['These items must generate themselves from other files'].
 
-'GENFILES' = [tokens, tokini2, lexinit, siolex, magic].
+'GENFILES' = case(&(context_name), [
+				(unix: [tokens, tokini2, lexinit, siolex, magic, icode] ),
+				(_ : [ magic ] ) ]).
 
 'LEXRUN'	= &(invoke) + './lexinit > lexinit.h' .
 'SIORUN'	= &(invoke) + './sioinit > siolex.h' .
 'ICODERUN'	= &(invoke) + './icode > icode.h' .
-'MAGICRUN'	= &(invoke) + './magic > magic.h' .
+'MAGICRUN'	= &(invoke) + './magic' .
 'BLDTRUN'	= &(invoke) + './bldtok' .
 
 generated depends_on ['${GENFILES}'].
 
+rule('magic') = 
+	rule('magic',	
+			['$(srcdir)/generic/generate/magic.c', 
+			 'defs.h', 'aconfig.h', 'oconfig.h', 'config.h', 'tconfig.h'],
+			['${CC} $(CPPFLAGS) -o magic $(srcdir)/generic/generate/magic.c'] ).
+
 rule('magic.h') = 
 	rule('magic.h',	
-			[generate/'magic.c', 
-			 'defs.h', 'aconfig.h', 'oconfig.h', 'config.h', 'tconfig.h'],
-			['${CC} $(CPPFLAGS) -o magic $(srcdir)/generic/generate/magic.c',
-			 '$(MAGICRUN)',
-			 '-rm magic'  ] ).
+			[magic],
+			['$(MAGICRUN)'] ).
 
 'tokini2.h' depends_on ['tokens.h'].
 
@@ -308,7 +334,6 @@ rule('icode.h') =
 		['$(CC) $(CPPFLAGS) -o icode $(srcdir)/generic/generate/icode.c',
 		 '$(ICODERUN)',
 		 '-rm -rf ./icode']).
-*/
 
 cmnt(gen_dep) = ['generic dependencies',
 				 ' ',
@@ -361,8 +386,7 @@ rule(alstest) =
 		[alspro_b],
 		[
 		 'echo >> nrev_rcd',
-%		 &(invoke) + ' ./alspro $(srcdir)/tests/snrev -g snrev >> nrev_rcd',
-		 '$(srcdir)/bin/alsnrevt $(srcdir)',
+		 &(invoke) + ' ./alspro_b -obp $(srcdir)/tests/snrev -g snrev >> nrev_rcd',
 		 'cat nrev_rcd' ] ).
 
 depends_list(_) = 
@@ -382,6 +406,8 @@ depends_list(_) =
 			ext(freeze,   EXT)	: ext([icodegen,cutmacro,compile,module,wintcode,wntbl,wci],h),
 			ext(gc,       EXT)	: ext([machinst,wintcode],h),
 			ext(index,    EXT)	: ext([icodegen,icom],h),
+			ext(intaux,    EXT)	: ext([intrv,freeze],h),
+			ext(intrv,    EXT)	: ext([intrv],h),
 			ext(lexan,    EXT)	: ext([lexan,lexinit],h),
 			ext(loadfile, EXT)	: ext([wintcode,icodegen,magic,version],h),
 			ext(main,     EXT)	: ext([main,version,pckg,rinfo],h),

@@ -1,15 +1,9 @@
-/***** THIS SHOULD GO AWAY -- ***********/
 /*===============================================================*
- *			version.h		
- *		Copyright (c) 1990-1995 by Applied Logic Systems, Inc.
+ *                      version.h
+ *       Copyright (c) 1990-1995 by Applied Logic Systems, Inc.
  *
- *			Version numbers for various systems
- *
- * Author: Kevin Buettner
- * Created: 1/25/90
- * Revision History:
+ *          Version number - Fri Sep 1 11:47:32 EDT 1995
  *===============================================================*/
 #ifndef SysVersionNum
-#define SysVersionNum "1.74B"
+#define SysVersionNum "1-74B"
 #endif /* SysVersionNum */
-

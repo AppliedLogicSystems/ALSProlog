@@ -1,0 +1,95 @@
+#!/bin/sh
+# Copies appropriate portions of the source tree
+# to a Mac source tree;
+# Expects to wake up in the top-level of alsp_src,
+# or an exported (cvs) directory);
+# Expects $1 to be a path to the target directory.
+# Copies the appropriate directories from the
+# current dir to the target dir (using cp -r),
+# and then applies unix2mac to *.c *.h and other files
+# Usage: xprt2dos <target dir>
+
+echo Target dir = $1
+mkdir $1
+echo Copying:
+echo - top level directory...
+cp readme $1
+unix2mac $1/readme
+
+echo - bld-port
+mkdir $1/bld-port
+cp ./bld-port/makefile.mac $1/bld-port/makefile
+cp ./bld-port/tconfig.in $1/bld-port/tconfig.h
+unix2mac $1/bld-port/makefile
+unix2mac $1/bld-port/tconfig.h
+
+mkdir $1/bld-port/alsdir
+mkdir $1/bld-port/alsdir/builtins
+mkdir $1/bld-port/alsdir/library
+
+/mailbox/alsp_src/bin/gen2mac $1
+
+#echo - bld-natv
+#cp -r ./bld-natv $1
+#bin/unix2mac $1/bld-natv/*.in
+
+echo - builtins
+cp -R ./builtins $1/bld-port/alsdir
+echo - library
+cp -R ./library $1/bld-port/alsdir
+unix2mac $1/bld-port/alsdir/builtins/*.pro
+unix2mac $1/bld-port/alsdir/library/*.pro
+
+#echo - cinterf
+#cp -r ./cinterf $1
+#unix2mac $1/cinterf/readme
+#unix2mac $1/cinterf/c2pro/*
+#unix2mac $1/cinterf/pro2intf/*
+#unix2mac $1/cinterf/deps/*
+
+echo - generic
+cp -r ./generic $1
+unix2mac $1/generic/*.c
+unix2mac $1/generic/*.h
+unix2mac $1/generic/*.tags
+unix2mac $1/generic/*.txt
+unix2mac $1/generic/generate/*
+
+#echo - pconfig
+#cp -r ./pconfig $1
+#unix2mac $1/pconfig/*.pro
+#unix2mac $1/pconfig/*.in
+
+echo - port
+cp -r ./port $1
+unix2mac $1/port/*.c
+unix2mac $1/port/*.h
+unix2mac $1/port/macos/*.h
+
+echo - tests
+cp -r ./tests $1
+unix2mac $1/tests/*.pro
+unix2mac $1/tests/als_exmp/*.pro
+unix2mac $1/tests/systests/*.pro
+unix2mac $1/tests/tsuite/*.pro
+
+#echo - utils
+#cp -r ./utils $1
+#unix2mac $1/utils/*
+
+#echo - wins
+#cp -r ./wins $1
+#unix2mac $1/wins/build/*.in
+#unix2mac $1/wins/build/x/*
+#unix2mac $1/wins/build/motif/*
+#unix2mac $1/wins/build/mswins/*
+#unix2mac $1/wins/src/*
+
+echo Removing any copied CVS directories...
+rm -r $1/CVS
+rm -r $1/*/CVS
+rm -r $1/*/*/CVS
+rm -r $1/port/HIDE
+rm -r $1/wins/build/*/CVS
+
+

@@ -1,0 +1,12 @@
+- sharme and sharbld need to be fixed to reflect being moved from
+  the toplevel of alsp_src to here in alsp_src/bin.
+
+- outgz needs to be fixed to reflect being moved from
+  the toplevel of alsp_src to here in alsp_src/bin;  also, it needs:
+	- to take an argument to specify the output file;
+    - an option arg for where to write intermediate temp files;
+    - to apply gzip at the final step
+    - option args to allow compress instead of gzip
+
+- make an outgz.bat to do outgz on dos, ending up with pkzip
+  

@@ -49,6 +49,7 @@
 #endif /* 0 */
 
 #ifdef MacOS
+#include <unix.h>
 #ifdef THINK_C
 #include <LoMem.h>
 #else

@@ -1,8 +1,14 @@
+Wed 6 Sept 1995 Ken Bowen, Chuck Houpt
+
+	* Upgraded generic/fsmac.c and builtins/fsmac.pro to provide 
+	  the same functionality as Unix; other minor fixups propaged
+	  back in; 
+
 Tues 22 Aug 1995 Ken Bowen, Chuck Houpt
 
 	* Extended/modified abs2make (and specifications) to handle
 	  the macintosh; various fixups for the mac (propagations from
-	  1.70B which were missed), etc.
+	  1.74B which were missed), etc.
 
 	* Initial *.abs specs for OS/2
 

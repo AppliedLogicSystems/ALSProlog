@@ -1,0 +1,33 @@
+#!/bin/sh
+# Updates the generated makefiles (including generic._) in
+# an "exported" dos-style tree/subdir
+#
+# Expects to wake up in the top-level of alsp_src,
+# or an exported (cvs) directory;
+#
+# Expects $1 to be a path to the target directory.
+#
+
+echo Refreshing src generated '(make)files' in $1
+echo Target dir = $1
+
+echo - cfgs
+cp ./cfgs/maketop.* $1/cfgs
+u2d $1/cfgs/maketop.*
+
+echo - generic
+cp ./generic/generate/generic.* $1/generic/generate
+u2d $1/generic/generate/generic.*
+
+echo - bld-port
+cp ./bld-port/makefile.* $1/bld-port
+u2d $1/bld-port/makefile.*
+
+echo - port
+cp -r ./port/port.* $1/port
+u2d $1/port/port.*
+
+#echo - bld-natv
+#cp ./bld-natv/makefile.* $1/bld-natv
+#u2d $1/bld-natv/makefile.*
+

@@ -1,0 +1,27 @@
+#!/bin/sh
+# Decides which of the following to run:
+#	bld-port/[alspro, alspro_b]  bld-natv[alspro, alspro_b]
+# $1 = path to als build directory (containing bld-port, bld-natv)
+# $2 = the args to the alspro... command line to run
+
+if [ -f $1/bld-natv/alspro ] ;
+then
+	echo AA Running $1/bld-natv/alspro
+	$1/bld-natv/alspro $2
+	echo DONE
+elif [ -f $1/bld-natv/alspro_b ] ;
+then
+	echo BB Running $1/bld-$natv/alspro_b
+	$1/bld-natv/alspro_b $2
+	echo DONE
+elif [ -f $1/bld-port/alspro ] ;
+then
+	echo CC Running $1/bld-port/alspro ;
+	$1/bld-port/alspro $2 ;
+	ls
+	echo DONE
+else
+	echo DD Running $1/bld-port/alspro_b
+	$1/bld-port/alspro_b $2
+	echo DONE
+fi

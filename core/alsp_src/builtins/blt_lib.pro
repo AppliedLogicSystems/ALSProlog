@@ -137,5 +137,12 @@
 
 :-libactivate(builtins,['library',cmpdirs], [cmpdirs/3], [] ).
 
-:-libactivate(builtins,['library',cref], 
+:-libactivate(cref,['library',cref], 
 			[cref/1,cref/2,cref_shell/0], [] ).
+
+:-libactivate(cref,['library',crefxtra], 
+		[union_files_calls/2,
+		 prefix_subset/2,prefix_subset/3,
+		 prefix_undefs/2,
+		 strip_prefix/3,prefix_undefs_basis/2,
+		 prefix_undefs_basis_filt/1], [] ).

@@ -3,7 +3,7 @@
  |      Copyright (c) 1985 by Kevin A. Buettner
  |      Copyright (c) 1986-95 by Applied Logic Systems, Inc.
  |
- |		-- storage allocator and functions which operate on compile
+ |	-- storage allocator and functions which operate on compile
  |         time structures
  |
  | Author:  Kevin A. Buettner

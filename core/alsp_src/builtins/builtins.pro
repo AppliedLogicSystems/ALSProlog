@@ -851,7 +851,7 @@ load_builtins(BDir, File)
 	;
 		%%pbi_write(loading_builts),pbi_nl,pbi_ttyflush,
 	sys_env(OS,_,_),
-	(OS = macos, !, Sepr = '\\'; Sepr = '/'),
+	(OS = macos, !, Sepr = ':'; Sepr = '/'),
 	'$atom_concat'('builtins',Sepr, BDir),
 
 	load_builtins(BDir, sio_rt),		%% for getting op declarations
