@@ -173,6 +173,10 @@ proc new_defstruct {} {
 	} else { bell }
 }
 
+proc edit_defstruct {} {
+	prolog call alsdev edit_defstruct 
+}
+
 proc display_defstr_win {StructName} {
 	set ID [string tolower $StructName]
 
@@ -196,7 +200,7 @@ proc defstruct_ok {ID} {
     	[$ID.grp2.set.entry get] ]
 
 	set Elts [$ID.list.listbox get 0 end] 
-	prolog call builtins install_defstruct -list $Basic -list $Elts
+	prolog call alsdev install_defstruct -list $Basic -list $Elts
 }
 
 proc defstruct_add {ID} {

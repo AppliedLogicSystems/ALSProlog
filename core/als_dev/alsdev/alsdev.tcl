@@ -1,6 +1,6 @@
 ##=================================================================================
 #|				alsdev.tcl
-#|		Copyright (c) 1997 Applied Logic Systems, Inc.
+#|		Copyright (c) 1997-98 Applied Logic Systems, Inc.
 #|
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
@@ -20,50 +20,186 @@
 set argc 0
 set argv ""
 
+if {[info exists ALSTCLPATH]==0} then { set ALSTCLPATH . }
+#puts "LOADING ALSDEV.TCL: ALSTCLPATH=$ALSTCLPATH"
+
+#################################
+# GLOBAL VARIABLES
+#--------------------------------
+global widget; 
 global array proenv
 
-#
+#---------------------------------------------------------------
 #	proenv(...)					Usage
 #	------------			-------------------------
-#	proenv(defstr_ld)		Defstruct loaded/not [true/false]
 #	proenv(cwd)				Current Working Directory
 #	proenv(debugger_ld)		Debugger loaded/not [true/false]
 #	proenv(debugwin)		Debug Win showing/not (1/0) 
 #	proenv(spywin)			Spypoint Win showing/not (1/0) 
+#	proenv(defstr_ld)		Defstruct loaded/not [true/false]
 
+set proenv(cwd) 				[pwd]
+set proenv(debugger_ld)			false
+set	proenv(debugwin)			0
+set	proenv(debugwin,visible)	{}
+set	proenv(spywin)				0
+set proenv(defstr_ld)			false
 
+	## window appearance stuff - initial defaults:
 
-set proenv(cwd) 		[pwd]
-set proenv(debugger_ld)	false
-set	proenv(debugwin)	0
-set	proenv(spywin)		0
+set proenv(debugwin_button,background)	#cee8e6
+set proenv(interrupt_button,foreground)	#ff0000
+set proenv(win_general,background)		#d9d9d9
+set proenv(text,family)		courier
+set proenv(text,size)		10
+set proenv(text,sizeunits)	pixels
+set proenv(text,style)		normal
 
-set proenv(defstr_ld)	false
+set	proenv(edit,visible)		{}
 
+#---------------------------------------------------------------
 
-if {[info exists ALSTCLPATH]==0} then { set ALSTCLPATH . }
-#puts "LOADING ALSDEV.TCL: ALSTCLPATH=$ALSTCLPATH"
+#################################
+# VTcl Top PROCEDURES
+#--------------------------------
+proc main {argc argv} {
+}
+
+proc Window {args} {
+	global array proenv
+global vTcl
+
+    set cmd [lindex $args 0]
+    set name [lindex $args 1]
+    set rest [lrange $args 2 end]
+    if {$name == "" || $cmd == ""} {return}
+    set exists [winfo exists $name]
+    switch $cmd {
+        show { eval "vTclWindow$name $name" }
+        hide    { if $exists {wm withdraw $name; return} }
+        iconify { if $exists {wm iconify $name; return} }
+        destroy { if $exists {destroy $name; return} }
+    }
+}
+
+proc vTclWindow. {args} {
+    set base .
+    ###################
+    # CREATING WIDGETS
+    ###################
+    wm focusmodel . passive
+    wm geometry . 200x200+0+0
+    wm maxsize . 1265 994
+    wm minsize . 1 1
+    wm overrideredirect . 0
+    wm resizable . 1 1
+    wm withdraw .
+    wm title . "vt.tcl"
+    ###################
+    # SETTING GEOMETRY
+    ###################
+}
+
+#################################
+# 		INITIAL SETUP
+#--------------------------------
+
+switch $tcl_platform(platform) {
+	unix {
+		set MainFont system
+	}
+	windows {
+		set MainFont system
+	}
+	macintosh {
+		set MainFont application
+	}
+	default {
+		set MainFont system
+	}
+}
+
+proc grab_defaults {Win} {
+	global array proenv
+	set CFGDF [$Win configure]
+	set SEEKTAGS {-background -font -foreground -selectbackground -selectforeground -tabs}
+	foreach Item $CFGDF {
+		if "[lsearch -exact $SEEKTAGS [lindex $Item 0]] > -1" then {
+			lappend SEEKRESULTS [list [string range [lindex $Item 0] 1 end] [lindex $Item 3]]
+		}
+	}
+	return $SEEKRESULTS
+}
+
+proc establish_defaults {} {
+    text .tmp_test_text -height 2 -width 2 
+	set TextDEFAULTS [grab_defaults .tmp_test_text]
+	destroy .tmp_test_text
+	prolog call alsdev alsdev_default_setup -list $TextDEFAULTS
+}
+
+proc set_proenv {Left Right Value} {
+	global array proenv
+	set proenv($Left,$Right) $Value
+}
+
+proc return_proenv_defaults {} {
+	global array proenv
+	lappend Defs \
+		$proenv(win_general,background) \
+		$proenv(win_general,foreground) \
+		$proenv(win_general,selectbackground) \
+		$proenv(win_general,selectforeground) \
+		$proenv(win_general,font) \
+		$proenv(win_general,tabs) \
+
+	return $Defs
+}
+
+establish_defaults
+
+proc unmap_alsdev_main {} {
+	global array proenv
+
+	Window hide .dyn_flags
+	wm withdraw .alsdev_settings
+	Window hide .about
+	Window hide .break_choices
+
+	unmap_alsdev_debug
+}
+proc map_alsdev_main {} {
+	global array proenv
+
+	map_alsdev_debug
+}
+
+proc unmap_alsdev_debug {} {
+	global array proenv
+	if {[winfo exists .debugwin]} then {
+		if {"$proenv(debugwin)"==1} then { hide_debugwin }
+	}
+}
+proc map_alsdev_debug {} {
+	global array proenv
+	if {[winfo exists .debugwin]} then {
+		if {"$proenv(debugwin)"==0} then { show_debugwin }
+	} 
+}
+
 
 source [file join $ALSTCLPATH alsdev_main.tcl]
+source [file join $ALSTCLPATH als_settings.tcl]
 source [file join $ALSTCLPATH debugwin.tcl]
 source [file join $ALSTCLPATH defstr.tcl]
 
-Window show .debugwin
-Window hide .debugwin
-Window show .spywin
-Window hide .spywin
-#Window show .dyn_flags
-#Window hide .dyn_flags
-
-#Window show .
-Window show .topals
-update idletasks
-raise .topals
-
-#wm withdraw .topals 
-#after 500 {wm deiconify .topals}
-
 	## source any other needed files here.....
+
+#################################################
+#####										#####
+#################################################
+
+lappend auto_path /usr/local/lib/jstools
 
 #################################################
 #####				MAIN WINDOW				#####
@@ -222,28 +358,41 @@ proc ctl-u_action { WinPath } {
 	}
 }
 
-
-global LocalClipboard ; set LocalClipboard ""
-
 proc copy_text { TxtWin } {
-	global LocalClipboard
 	if { [ $TxtWin tag nextrange sel 1.0 end ]!= "" } then {
-		set LocalClipboard [ $TxtWin get sel.first sel.last ]
+		clipboard clear
+		clipboard append [ $TxtWin get sel.first sel.last ]
 	}
 }
 
 proc paste_text { TxtWin } {
-	global LocalClipboard
-	$TxtWin insert end $LocalClipboard 
+	global tcl_platform
+
+	if {"$tcl_platform(platform)" == "windows"} {
+		$TxtWin insert end [ selection get -selection CLIPBOARD ]
+	} else {
+		$TxtWin insert end [ selection get ]
+	}
+	$TxtWin see end
+	$TxtWin mark set insert end
+	focus $TxtWin
 }
 
 proc copy_paste_text { TxtWin } {
-	if { [ $TxtWin tag nextrange sel 1.0 end ]!= "" } then {
-		$TxtWin insert end [ $TxtWin get sel.first sel.last ]
-		$TxtWin see end
-		$TxtWin mark set insert end
+	global tcl_platform
+
+	if {"$tcl_platform(platform)" == "windows"} {
+		$TxtWin insert end [ selection get -selection CLIPBOARD ]
+	} else {
+		$TxtWin insert end [ selection get ]
 	}
+	$TxtWin see end
+	$TxtWin mark set insert end
+	focus $TxtWin
 }
+
+
+
 
 proc reconsult { } {
 	set file [tk_getOpenFile \
@@ -251,7 +400,7 @@ proc reconsult { } {
 		-title "Consult File" \
 		-filetypes {{"Prolog Files" {.pro .pl } } {{All Files} {*} } } ]
 	if { "$file"== "" } then { return }
-	prolog call builtins reconsult -atom $file
+	prolog call alsdev do_reconsult -atom $file
 	insert_prompt  .topals.txwin.text "\n?-" 
 }
 
@@ -309,7 +458,7 @@ proc mk_labeled_option_button { Label ParentWin Vals TopVal GlblVar } {
 }
 
 #################################################
-#####			Utilities				       ##
+#####	Utilities & Environment Settings       ##
 #################################################
 
 proc iconify_me {Win} {
@@ -318,6 +467,64 @@ proc iconify_me {Win} {
 	 
 proc hide_me {Win} {
 	 Window hide $Win
+}
+
+proc careful_withdraw {Win} {
+	if "[winfo exists $Win]>1" then { wm withdraw $Win }
+}
+
+proc choose_background_color {} {
+	global array proenv
+
+	set COLOR [tk_chooseColor \
+		-title "Choose Background Color" -initialcolor $proenv(win_general,background)]
+	if {"$COLOR" == ""} then {return}
+	
+	set proenv(win_general,background) $COLOR
+	.alsdev_settings.color_desc.background configure -background $proenv(win_general,background)
+	.topals.txwin.text configure -background $proenv(win_general,background)
+	if "[winfo exists .debugwin.txwin.text] > 0" then {
+		.debugwin.txwin.text configure -background $proenv(win_general,background)
+	}
+}
+
+proc choose_foreground_color {} {
+	global array proenv
+
+	set COLOR [tk_chooseColor \
+		-title "Choose Foreground Color" -initialcolor $proenv(win_general,foreground)]
+	if {"$COLOR" == ""} then {return}
+	
+	set proenv(win_general,foreground) $COLOR
+	.alsdev_settings.color_desc.foreground configure -foreground $proenv(win_general,foreground)
+	.topals.txwin.text configure -foreground $proenv(win_general,foreground)
+	if "[winfo exists .debugwin.txwin.text] > 0" then {
+		.debugwin.txwin.text configure -foreground $proenv(win_general,foreground)
+	}
+}
+
+proc install_font {} {
+	global array proenv
+
+	if {"$proenv(text,sizeunits)"=="pixels"} then {
+		set Size [ expr 0 - $proenv(text,size) ]
+	} else {
+		set Size $proenv(text,size)
+	}
+	set Font [list $proenv(text,family) $Size $proenv(text,style) ]
+	set proenv(win_general,font) $Font
+	.topals.txwin.text configure -font $proenv(win_general,font)
+	if "[winfo exists .debugwin.txwin.text] > 0" then {
+		.debugwin.txwin.text configure -font $proenv(win_general,font)
+	}
+}
+
+proc save_alsdev_settings {} {
+	global array proenv
+
+	set TextSettings [list $proenv(text,family) $proenv(text,size) \
+						$proenv(text,sizeunits) $proenv(text,style) ]
+	prolog call alsdev change_settings -list [return_proenv_defaults] -list $TextSettings
 }
 
 #################################################
@@ -392,21 +599,27 @@ proc change_prolog_flags {} {
 ##	Project files have extensions: *.ppj       ##
 #################################################
 
+proc clear_workspace { } {
+	prolog call alsdev clear_workspace 
+	insert_prompt  .topals.txwin.text "\n?-" 
+}
+
+
 proc open_project { } {
 	set file [tk_getOpenFile \
 		-defaultextension ppj \
 		-title "Open Prolog Project" \
 		-filetypes {{"Prolog Files" {.ppj} } {{All Files} {*} } } ]
 	if { "$file"== "" } then { return }
-	prolog call builtins open_project -atom $file
+	prolog call alsdev open_project -atom $file
 }
 
 proc new_project { } {
-	prolog call builtins new_project 
+	prolog call alsdev new_project 
 }
 
 proc save_project { } {
-	prolog call builtins save_project 
+	prolog call alsdev save_project 
 }
 
 proc save_as_project { } {
@@ -415,11 +628,11 @@ proc save_as_project { } {
 		-title "Open Prolog Project" \
 		-filetypes {{"Prolog Files" {.ppj} } {{All Files} {*} } } ]
 	if { "$file"== "" } then { return }
-	prolog call builtins save_as_project -atom $file
+	prolog call alsdev save_as_project -atom $file
 }
 
 proc close_project { } {
-	prolog call builtins close_project 
+	prolog call alsdev close_project 
 }
 
 proc add_file_to_project { } {
@@ -428,11 +641,11 @@ proc add_file_to_project { } {
 		-title "Open Prolog Project" \
 		-filetypes {{"Prolog Files" {.pro .pl } } {{All Files} {*} } } ]
 	if { "$file"== "" } then { return }
-	prolog call builtins add_file_to_project -atom $file
+	prolog call alsdev add_file_to_project -atom $file
 }
 
 proc delete_file_from_project { } {
-	prolog call builtins delete_file_from_project 
+	prolog call alsdev delete_file_from_project 
 }
 
 
@@ -460,6 +673,7 @@ proc exec_toggle_debugwin {} {
 proc ensure_db_showing {} {
 	global array proenv
 		
+	if {[winfo exists .debugwin]==0} then { Window show .debugwin }
 	.debugwin.textwin.text delete 1.0 end
 	show_debugwin
 }
@@ -471,20 +685,23 @@ proc show_debugwin {} {
 	raise .debugwin
 	prolog call builtins change_debug_io -atom debugwin
 	check_leashing
+	foreach Win  $proenv(debugwin,visible) {
+		wm deiconify $Win
+	}
+	prolog call alsdev setup_for_debugging -atom on
 	set proenv(debugwin) 1
-
-#	prolog call xconsult change_source_level_debugging -atom on
-
 }
 
 proc hide_debugwin {} {
 	global array proenv
 
 	hide_spywin
+	foreach Win  $proenv(debugwin,visible) {
+		Window hide $Win
+	}
+	prolog call alsdev setup_for_debugging -atom off
 	Window hide .debugwin
 	set proenv(debugwin) 0
-
-#	prolog call xconsult change_source_level_debugging -atom off
 }
 
 proc exit_debugger {} {
@@ -522,10 +739,20 @@ proc exec_toggle_spywin {} {
 	if {"$proenv(spywin)"==0} then {
 		Window hide .spywin
 	} else {
+		if {[winfo exists .spywin]==0} then {
+			Window show .spywin
+		}
 		prolog call builtins non_sys_modules -var NonSysMods
-		destroy .spywin.modules.mods
-		destroy $SpyModuleMenu 
-		set SpyModuleMenu [eval "tk_optionMenu .spywin.modules.mods SpyModule" $NonSysMods]
+
+		if {[info exists SpyModuleMenu] > 0} then {
+			if {[winfo exists $SpyModuleMenu] > 0} then {
+				destroy $SpyModuleMenu
+				destroy .spywin.modules.mods
+			}
+		}
+		set SpyModuleMenu \
+			[eval "tk_optionMenu .spywin.modules.mods SpyModule" $NonSysMods]
+
 		set LL [llength $NonSysMods]
 		for {set LI 0} {$LI < $LL} {incr LI} {
 			$SpyModuleMenu entryconfigure $LI \
@@ -585,12 +812,6 @@ proc check_leashing {} {
 	set proenv(leash,fail) $Fail
 
 }
-
-#proc show_ll {} {
-#	global array proenv
-#
-#puts "call=$proenv(leash,call) exit=$proenv(leash,exit) redo=$proenv(leash,redo) fail=$proenv(leash,fail)"
-#}
 
 proc exec_toggle_leash {Which} {
 	global array proenv
@@ -669,4 +890,52 @@ proc see_text {TextWin StartLine StartChar EndLine EndChar} {
 	$TextWin see $StartLine.$StartChar
 	$TextWin see $EndLine.$EndChar
 }
+
+proc source_trace_closedown {STWin} {
+	global DebugResponse 
+
+	set DebugResponse Ba
+	destroy $STWin
+}
+
+proc debugwin_configure_event {Win Ht Wd WW} {
+	if {"$WW"==".debugwin.textwin.text"} then {
+		set FD [.debugwin.textwin.text cget -font]
+		set FM [font measure .debugwin.textwin.text mmmmm]
+		set WWD [.debugwin.textwin.text cget -width]
+		prolog call debugger set_debugwin_width -number $FM -number $Wd
+	}
+}
+
+
+
+
+global argv0 
+set argv0 alsdev_jedit
+
+global argv 
+set argv {}
+
+global argc
+set argc 0
+
+
+proc alsdev_jedit {} {
+	global argv0 argv argc
+
+	set argv {}
+	set argc 0
+	set argv0 alsdev_jedit
+
+	jedit:jedit -embedded 1 -window .jedit_w1 -mode prolog
+}
+
+
+
+###############________________________________##################
+###############________________________________##################
+
+Window show .topals
+update idletasks
+raise .topals
 
