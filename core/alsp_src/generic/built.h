@@ -230,7 +230,9 @@ extern	int	pbi_obp_pop	PARAMS(( void ));
 extern	int	pbi_resource_load	PARAMS(( void ));
 extern	int	pbi_old_consult	PARAMS(( void ));
 extern	int	pbi_save_image_with_state_to_file	PARAMS(( void ));
+extern	int	pbi_attach_state_to_file	PARAMS(( void ));
 extern	int	pbi_save_state_to_file	PARAMS(( void ));
+extern	int	pbi_get_current_image	PARAMS(( void ));
 #ifdef MacOS
 extern  int	pbi_save_app_with_obp	PARAMS(( void ));
 #endif

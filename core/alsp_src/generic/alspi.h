@@ -107,6 +107,7 @@ typedef struct {
     unsigned long icbuf_size;  /* Prolog compiler buffer size in K code words */
     const char *alsdir;        /* Path to the ALS directory */
     const char *saved_state;   /* Path to saved state file */
+    int load_executable_state; /* Boolean for loading from executable */
 
     /* OS Specific setup information */
     

@@ -327,8 +327,6 @@ static struct blt_struct {
 	BLT("system", 1, pbi_system, "_pbi_system"),
 	BLT("$protect_bottom_stack_page", 0, pbi_protect_bottom_stack_page,
 	    "_pbi_protect_bottom_stack_page"),
-	BLT("get_image_dir_and_name", 2, pbi_get_image_dir_and_name,
-	    "_pbi_get_image_dir_and_name"),
 	BLT("pbi_get_command_line", 1, pbi_command_line, "_pbi_command_line"),
 	BLT("crypt", 3, pbi_crypt, "_pbi_crypt"),
 #ifndef PURE_ANSI
@@ -384,6 +382,8 @@ static struct blt_struct {
 	BLT("save_image_with_state_to_file", 1,
 	    pbi_save_image_with_state_to_file,
 	    "_pbi_save_image_with_state_to_file"),
+	BLT("attach_state_to_file", 1, pbi_attach_state_to_file, ""),
+	BLT("get_current_image", 1, pbi_get_current_image, ""),
 #endif /* SIMPLE_MICS */
 #ifndef PURE_ANSI
 	BLT("save_state_to_file", 1, pbi_save_state_to_file,
