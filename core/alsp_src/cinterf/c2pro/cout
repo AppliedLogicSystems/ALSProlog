@@ -1,15 +1,17 @@
 /*=================================================================*
  |		cout.pro
- |	Copyright(c) 1991-94 Applied Logic Systems Inc.
+ |	Copyright(c) 1991-95 Applied Logic Systems Inc.
  |
  |		Output formatter for C translator
  |
  | Author : P.Raman
  |
  | Created : 9/23/91
- | Revision History :
+ |	04/94 - K.Bowen - use streams; c2p typedef;
+ |	05/95 - K.Bowen - consolidate os-specific info
  |
  | Major predicates :
+ | -----------------
  |	output_openFile/1	-- set up output control flags
  |	output_closeFile/1	-- remove output control flags
  |	output_exclude/5	-- set up exclude spec for files
@@ -23,6 +25,16 @@
  |	output_const/3		-- output a constant spec
  |	debug/2, debug/3	-- conditionally print debugging messages
  |	error/2, error/3	-- error reporting
+ | 
+ |	Miscellaneous predicates: (from old cmisc.pro):
+ |  ------------------------
+ | 	isNumeric/2	-- returns the value of a decimal char
+ |	isHex/2		-- returns the value of a hex char
+ |	isOctal/2	-- returns the value of a Octal char
+ |	isAlpha/1	-- tests for an alphabetic char
+ |	buildName/3	-- make a symbol out of two symbols
+ |	reverse/2	-- reverse a list
+ |	deleteLast/2-- deletes the last item of a non-empty list
  *=================================================================*/
 
 module c2pro.
@@ -30,25 +42,28 @@ module c2pro.
 	%--------------------------------------- 
 	% output_openFile/2.
 	% 	print open file message and sets up output control predicates
-	%
+	%---------------------------------------
 
-output_openFile(FName,OutStream)
+/*
+output_openFile(FName,OutStream,State)
 	:-
-	setup_skips(FName,OutStream).
+	setup_skips(FName,OutStream,State).
+*/
 
-setup_skips(FName,OutStream)
+setup_skips(FName,OutStream,State)
 	:-		% already skipping
 	skip_item(PrevName,all),
 	FName \= PrevName,		% this makes sure that skip flags are
 	!.				% are stacked when a file includes itself
-setup_skips(FName,OutStream)
+setup_skips(FName,OutStream,State)
 	:- 
 	name(FName,FStr),
-	parsePathStr(FStr,Disk,Comps,PathType),
+	accessC2P(tgt_os, State, OS),
+	parsePathStr(FStr,OS, Disk,Comps,PathType),
 	match_exclude(Disk,Comps,PathType,What),
 	!,
 	setup_skips_finish(FName,What,OutStream).
-setup_skips(FName,OutStream)
+setup_skips(FName,OutStream,State)
 	:-
 	check_printf(OutStream,'\n/* Open file %t */\n\n',[FName]).
 
@@ -91,7 +106,7 @@ match_exclude(system,Disk,EDisk,Comps,EComps,abs,rel)
 
 	%---------------------------------------
 	% Output_closeFile/2.
-	%
+	%---------------------------------------
 
 output_closeFile(FName,OutStream)
 	:-
@@ -130,7 +145,7 @@ check_printf(OutStream,Fmt,Args)
 	%---------------------------------------
 	% output_exclude/5.
 	%	assert exclude specification
-	%
+	%---------------------------------------
 
 output_exclude(ExclType,Disk,Comps,PathType,What)
 	:- 
@@ -138,15 +153,14 @@ output_exclude(ExclType,Disk,Comps,PathType,What)
 
 	%---------------------------------------
 	% output_begin_silent/0
-	%
+	%---------------------------------------
 
 output_begin_silent
 	:- assert(silent).
 
-
 	%---------------------------------------
 	% output_end_silent/0
-	%
+	%---------------------------------------
 
 output_end_silent
 	:-
@@ -155,7 +169,7 @@ output_end_silent.
 
 	%---------------------------------------
 	% output_header/2.
-	%
+	%---------------------------------------
 
 output_header(FileName,FD,Tab)
 	:-
@@ -163,14 +177,13 @@ output_header(FileName,FD,Tab)
 
 	%---------------------------------------
 	% output_footer/2.
-	%
+	%---------------------------------------
 
 output_footer(State).
 
-
 	%---------------------------------------
 	% output_macro/3.
-	%
+	%---------------------------------------
 
 output_macro(Id,State)
 	:-
@@ -182,7 +195,7 @@ output_macro(Id,State)
 
 	%---------------------------------------
 	% output_func_or_gvar/4.
-	%
+	%---------------------------------------
 
 output_func_gvar(DSpec,Declt,State)
 	:-
@@ -196,7 +209,7 @@ output_func_gvar(DSpec,Declt,State)
 	%	clause 1 : int func(params);
 	%	clause 2 : typedef int foo(params); foo func;
 	%	clause 3 : ... gvar
-	%
+	%---------------------------------------
 
 output_func_gvar([func|PRetType],Name,DSpec,Declt,
 		RSpec,RDeclt,ADeclt,State)
@@ -214,7 +227,6 @@ output_func_gvar(PRetType,Name,DSpec,Declt, RSpec,RDeclt,ADeclt,State)
 	:-
 	output_gvar(Name,DSpec,Declt,ADeclt,PRetType,State).
 	
-
 output_func(Name,_,_,_,_,State)
 	:-
 	(silent; skip_item(_,all); skip_item(_,func)), !.
@@ -227,7 +239,6 @@ output_func(Name,DSpec,ADeclt,Params,PRetType,State)
 	printf(OutStream,'\nret(\'%s %s\')/%t=\'%t\'(',[DSpecStr,ADecltStr,PRetType,Name]),
 	output_params(Params,State),
 	accessC2P(inFile,State,FName),
-%	fileName(FD,FName),
 	pathPlusFile(_,File,FName),
 	!,
 	printf(OutStream,')/\'%t\'.\n',[File]).
@@ -257,7 +268,6 @@ output_neparams( [ param(DSpec,Declt) | Rest ] ,State)
 	print_comma_cond(Rest,State),
 	output_neparams(Rest,State).
 
-
 output_gvar(Name,DSpec,Declt,ADeclt,PType,State)
 	:-
 	( silent; skip_item( _, all); skip_item( _,gvar)), !.
@@ -265,7 +275,6 @@ output_gvar(Name,DSpec,Declt,ADeclt,PType,State)
 	:-
 	dspec_to_str(DSpec,DSpecStr),
 	adeclt_to_str(ADeclt,ADecltStr),
-%	fileName(FD,FName),
 	accessC2P(inFile,State,FName),
 	pathPlusFile(_,File,FName),
 	!,
@@ -276,11 +285,10 @@ output_gvar(Name,DSpec,Declt,ADeclt,PType,State)
 	:-
 	error('Error in output_gvar for global variable %t\n',[Name],State).
 
-
 	%---------------------------------------
 	% output_type/4.
 	%	output prolog spec for a C type
-	%
+	%---------------------------------------
 
 output_type(Name,DSpec,Declt,State)
 	:-
@@ -306,7 +314,6 @@ output_type(Name,_,_,PType,State)
 	:-
 	accessC2P(outStream,State,OutStream),
 	printf(OutStream,'\nals_type(\'%t\',%t).\n',[Name,PType]).
-
 
 output_struct(Name,Fields,State)
 	:-
@@ -360,6 +367,7 @@ output_field( Field,DSpec,PSpec,Prefix,State)
 	% is a struct or union, then it prints the declaration specifier.
 	% This information is used in cutils.pro to access sub, sub-sub
 	% and sub-sub-sub etc fields of a structure.
+	%---------------------------------------
 
 print_ptype(PType,DSpec,State)
 	:-
@@ -380,6 +388,7 @@ print_ptype([Item|Rest],DSpec,State)
 	print_ptype(Rest,DSpec,State).
 
 	%---------------------------------------
+	%---------------------------------------
 
 print_comma_cond([],State).
 print_comma_cond([_|_],State)
@@ -389,7 +398,7 @@ print_comma_cond([_|_],State)
 
 	%---------------------------------------
 	% output_const/4.
-	%
+	%---------------------------------------
 
 output_const(Name,Type,State)
 	:- 
@@ -403,7 +412,7 @@ output_const(Name,Type,State)
 	%---------------------------------------
 	% debug/1.
 	% debug/2.
-	%
+	%---------------------------------------
 
 debug_default_level(1).
 
@@ -472,10 +481,10 @@ decln_break(Declts)
 	trace.
 decln_break(_).
 
-/*
+/*---------------------------------------
  * error/2
  * error/3
- */
+ *--------------------------------------*/
 
 error(Fmt,State)
 	:-
@@ -497,8 +506,6 @@ error(Fmt,Args,State)
 
 	printf(error_stream,NewFmt,NewArgs).
 
-endmod.
-
 /*=================================================================*
  | 		cmisc.pro
  |	Copyright (c) 1990-94 Applied Logic Systems, Inc.
@@ -515,34 +522,33 @@ endmod.
  |	deleteLast/2-- deletes the last item of a non-empty list
  *=================================================================*/
 
-module c2pro.
-
-%
+%-------------------------------------------------------------
 % isNumeric is a map between decimal numeric characters 
 % and the numbers that they represent.
-%
+%-------------------------------------------------------------
 
 isNumeric(NC, Num) :- 0'0 =< NC, NC =< 0'9, Num is NC - 0'0.
 
 
-%
+%-------------------------------------------------------------
 % isHex is a map between Hexadecimal characters and the numbers 
 % that they represent.
-%
+%-------------------------------------------------------------
 
 isHex(NC, Num) :- isNumeric(NC,Num), !.
 isHex(NC, Num) :- 0'a =< NC, NC =< 0'f, !, Num is NC-0'a+10.
 isHex(NC, Num) :- 0'A =< NC, NC =< 0'F, Num is NC-0'A+10.
 
-%
+%-------------------------------------------------------------
+%-------------------------------------------------------------
 
 isOctal(NC, Num) :- 0'0 =< NC, NC =< 0'7, Num is NC - 0'0.
 
 
-%
+%-------------------------------------------------------------
 % isAlpha(Char) succeeds when Char is considered to be an 
 % alphabetic character.
-%
+%-------------------------------------------------------------
 
 isAlpha(Char) :- 0'a =< Char, Char =< 0'z, !.
 isAlpha(Char) :- 0'A =< Char, Char =< 0'Z, !.
@@ -565,32 +571,35 @@ buildName(N,S,O) :-
 	name(O,OS).
 */
 
-%
+%-------------------------------------------------------------
 % deleteLast/2
-%
+%-------------------------------------------------------------
 
 deleteLast([_],[]) :- !.
 deleteLast([X|In],[X|Out]) :- deleteLast(In,Out).
 
-%
+%-------------------------------------------------------------
 % cleanDB/0
 %	-- abolish all asserted predicates
-%
+%-------------------------------------------------------------
 
 cleanDB
 	:-
 	abolish(sourcePath,1),
 	abolish(includePath,3),
-	reset_includePath,
+%	reset_includePath,
 	abolish(currentPath,3),
 	abolish(imported,1),
 	abolish(skip_item,2),
 	abolish(exclude_files,5).
 
-reset_includePath :-
+/*
+reset_includePath 
+	:-
 	defaultIncludePath(A,B,C),
 	assertz(includePath(A,B,C)),
 	fail.
 reset_includePath.
+*/
 
 endmod.

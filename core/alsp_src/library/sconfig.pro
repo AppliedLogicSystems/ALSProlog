@@ -90,7 +90,6 @@ determine_default_ws(WS)
 	:-
 	builtins:als_system(SysProps),
 	dmember(wins=WS0,SysProps).
-%	catenate(WS0,'_ws',WS).
 
 export known_ws/1.
 
@@ -149,11 +148,11 @@ export ws_vars/3.
 ws_vars(WS, ARCH_OS, WSHeaderLines)
 	:-
 	asplit(ARCH_OS, 0'_, Arch, OS),
-	ws_vars(WS, ARCH, OS, WSHeaderLines).
+	ws_vars(WS, ARCH, OS, [], WSHeaderLines).
 
-export ws_vars/4.
+export ws_vars/5.
 
-ws_vars(x, ARCH, OS, WSHeaderLines)
+ws_vars(x, ARCH, OS, SwitchInfo, WSHeaderLines)
 	:-
 	WSHeaderLines =
 	[
@@ -166,9 +165,27 @@ ws_vars(x, ARCH, OS, WSHeaderLines)
 		'CFG' 		= ['#define WIN_STR X_WIN_STR'],
 		'ADDL_INITS' 	= [],
 		'ADDL_PROFS' 	= []
+		| VARIABLE_LINES ],
+	(dmember(tgtws=TGTWS, SwitchInfo) -> 
+		true ; TGTWS = unix),
+	ws_vars_variable(TGTWS,x,ARCH,OS,VARIABLE_LINES).
+
+ws_vars_variable(dvx,_,ARCH,OS,VARIABLE_LINES)
+	:-!,
+	VARIABLE_LINES =
+	[
+		'XINCLUDES' = '-I djgpp/include'
 	].
 
-ws_vars(motif, ARCH, OS, WSHeaderLines)
+ws_vars_variable(unix,_,ARCH,OS,VARIABLE_LINES)
+	:-
+	VARIABLE_LINES =
+	[
+		'XINCLUDES' = '-I /usr/include'
+	].
+
+
+ws_vars(motif, ARCH, OS, SwitchInfo, WSHeaderLines)
 	:-
 	WSHeaderLines =
 	[
@@ -181,16 +198,18 @@ ws_vars(motif, ARCH, OS, WSHeaderLines)
 		'CFG' 		= ['#define WIN_STR MOTIF_WIN_STR'],
 		'ADDL_INITS' 	= ['x_init();', 'xtaux_init();'] ,
 		'ADDL_PROFS' 	= ['../x/*.pro']
-	].
+		| VARIABLE_LINES ],
+	(dmember(tgtws=TGTWS, SwitchInfo) -> 
+		true ; TGTWS = unix),
+	ws_vars_variable(TGTWS,motif,ARCH,OS,VARIABLE_LINES).
 
-ws_vars(nextstep, ARCH, OS, WSHeaderLines)
+ws_vars(nextstep, ARCH, OS, SwitchInfo, WSHeaderLines)
 	:-
 	WSHeaderLines =
 	[
 		'WIN'		= nextstep,
 		'C2PFILT'	= all,
-		'XINCLUDES'	= '-I/usr/include/ansi -I/usr/include/bsd \
-				   		-I/usr/include/appkit',
+		'XINCLUDES'	= '-I/usr/include/ansi -I/usr/include/bsd -I/usr/include/appkit',
 		'ADDL_CS' 	= [] ,
 		'CFLAGS'	= '-D_NO_PROTO' ,
 		'$(WIN)LIBS' 	= '-lXm -lMrm -lXt -lX11' ,
@@ -198,7 +217,10 @@ ws_vars(nextstep, ARCH, OS, WSHeaderLines)
 		'CFG' 		= ['#define WIN_STR NEXTSTEP_WIN_STR'],
 		'ADDL_INITS' 	= [] ,
 		'ADDL_PROFS' 	= []
-	].
+		| VARIABLE_LINES ],
+	(dmember(tgtws=TGTWS, SwitchInfo) -> 
+		true ; TGTWS = unix),
+	ws_vars_variable(TGTWS,motif,ARCH,OS,VARIABLE_LINES).
 
 export flatten_ws_lists/2.
 flatten_ws_lists([], []).

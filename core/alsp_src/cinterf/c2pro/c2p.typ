@@ -19,6 +19,8 @@ defStruct(c2p,
 		ifdef_stack/[[]],	%% stack for ifdef contexts
 		fd_stack/[],		%% stack for file contexts
 
+		tgt_os/unix,		%% target os (for path syntax)
+
 		info_table/[],		%% avl_tree for storing info
 		fcn_filter/all,		%% selective function filtering:
 							%% 	values:	all, all_except(List), List

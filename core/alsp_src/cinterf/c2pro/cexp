@@ -1,27 +1,23 @@
 /*======================================================================*
  |		cexp.pro
- |	Copyright (c) 1990-91 Applied Logic Systems, Inc.
+ |	Copyright (c) 1990-95 Applied Logic Systems, Inc.
  |
  |		Expression parser
  |
  | Author: Kevin A. Buettner
  | Creation: 4/6/90
- |
- | Revision History:
- |	Revised:	5/7/91, kev,	added expression_additive/3 for
- |					88k implementation.
- |	Updated:	9/5/91, raman,	bug fixes
+ | 05/07/91 - K.Buettner - added expression_additive/3 for 88k impl.
+ | 09/05/91 - P.Raman - bug fixes
  |
  | Major Procedures:
+ | ----------------
  |	expression/5 
  |		The first argument is the return value of the
  |		expression. Second arg is the file descriptor and 
  |		the third arg is the symbol table. The fourth and
  |		fifth  arguments are the list values typical of DCG rules.
  |
- |		The expression will be evaluated as much as
- |		possible.
- |		
+ |		The expression will be evaluated as much as possible.
  *======================================================================*/
 
 module c2pro.

@@ -286,7 +286,7 @@ setup_wins(SwitchInfo)
 				    './makefile', GOS),
 
 		subPath(BLD_NATV_SRC_PATH,BLD_NATV_SRC_PATH_Atm),
-		create_makefiles_and_subdirs(SubdirList, ARCH, OS, 
+		create_makefiles_and_subdirs(SubdirList, ARCH, OS, SwitchInfo,
 									 BLD_NATV_SRC_PATH,BDList),
 		change_cwd('..')
 	),
@@ -311,13 +311,12 @@ check_make_subdir(Subdir)
 	printf(user,'Subdir %t exists\n',[Subdir]).
 check_make_subdir(Subdir)
 	:-
-%	make_subdir(Subdir,511),
 	make_subdir(Subdir),
 	printf(user,'   Created subdir %t \n',[Subdir]).
 
-create_makefiles_and_subdirs( [], _, _, _,_).
+create_makefiles_and_subdirs( [], _, _, _, _,_).
 
-create_makefiles_and_subdirs( [Subdir | Subdirs], ARCH, OS, 
+create_makefiles_and_subdirs( [Subdir | Subdirs], ARCH, OS, SwitchInfo,
 								BLD_NATV_SRC_PATH,BDList)
 	:-
 	append(BLD_NATV_SRC_PATH,[wins,build,Subdir], BldSubdirPath),
@@ -329,18 +328,18 @@ create_makefiles_and_subdirs( [Subdir | Subdirs], ARCH, OS,
 	general_os(ARCH,OS,GOS),
 
 	create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH, BDList,
-				BldPathAtm, BldSubdirPathAtm, GOS),
+				SwitchInfo, BldPathAtm, BldSubdirPathAtm, GOS),
 
-	create_makefiles_and_subdirs( Subdirs, ARCH, OS, BLD_NATV_SRC_PATH,BDList).
+	create_makefiles_and_subdirs( Subdirs, ARCH, OS,SwitchInfo, BLD_NATV_SRC_PATH,BDList).
 
 create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH,BDList, 
-					 BldPathAtm, BldSubdirPathAtm, GOS)
+					 SwitchInfo, BldPathAtm, BldSubdirPathAtm, GOS)
 	:-
 	adjust_path_depth(BLD_NATV_SRC_PATH,1,BNSP1),
 		%% General header vars:
 	grl_vars(ARCH, OS, BNSP1, SubGrlHeaderLines),
 		%% Specific header vars:
-	ws_vars(Subdir, ARCH, OS, WSHeaderItems),
+	ws_vars(Subdir, ARCH, OS, SwitchInfo, WSHeaderItems),
 	flatten_ws_lists(WSHeaderItems, WSHeaderLines),
 	append(SubGrlHeaderLines, WSHeaderLines, SubHeaderLines0),
 

@@ -1,85 +1,92 @@
 /*===================================================================
  |		cfiles.pro
- |	Copyright(c) 1991-94 Applied Logic Systems Inc.
+ |	Copyright(c) 1991-95 Applied Logic Systems Inc.
  |
  |		File operations
  |
  | Author : P.Raman
  | Created : 9/23/91
- | Revision History :
+ | 05/95 - K.Bowen - consolidate os-specific info
  |
  | Module : fileops
  |
  | Exported predicates :
- |	parsePathStr/4	-- parse a path string into a list of files
+ | -------------------
+ |	parsePathStr/4		-- parse a path string into a list of files
  |	parsePathTokList/4	-- parse a token list into a list of files
- |	addIncludePath/1-- add a path for search of system include files
- |	findUserFile/2	-- search for a user file ( see comment for search order )
- |	findSysFile/4	-- search for a system file
+ |	addIncludePath/2	-- add a path for search of system include files
+ |	findUserFile/3		-- search for a user file ( see comment for search order )
+ |	findSysFile/4		-- search for a system file
  *==================================================================*/
 
 module c2pro.
 
-	% 
-	% parsePathStr/4.
-	% parsePathStr/5.
-	%	parse a Path string and return a File list
-	%	the first argument returns a flag that is set to 'abs'
-	%	if the pathname is absolute, otherwise it is set to 'rel'.
-	% 
+%-----------------------------------------------------------
+% parsePathStr/5.
+% parsePathStr/6.
+%	parse a Path string and return a File list
+%	the first argument returns a flag that is set to 'abs'
+%	if the pathname is absolute, otherwise it is set to 'rel'.
+%-----------------------------------------------------------
 
-parsePathStr(PathStr,Disk,CompList,Type) :-
-	parsePathStr(PathStr,Disk,CompList,Type,Rest).
+parsePathStr(PathStr,OS,Disk,CompList,Type) 
+	:-
+	parsePathStr(PathStr,OS,Disk,CompList,Type,Rest).
 
-parsePathStr(PathStr,Disk,CompList,Type,Rest) :-
+parsePathStr(PathStr,OS,Disk,CompList,Type,Rest) 
+	:-
 	diskOfPathStr(Disk,PathStr,PathStr1), 
-	compsOfPathStr(CompList,PathStr1,Rest),
-	typeOfPathStr(Disk,PathStr1,Type).
+	compsOfPathStr(OS,CompList,PathStr1,Rest),
+	typeOfPathStr(OS, Disk,PathStr1,Type).
 
-%
-% parsePathTokList/4.
+%-------------------------------------------------------------------
 % parsePathTokList/5.
+% parsePathTokList/6.
 % 	parse a token list and return a File list (second arg).
 %	First argument is bound to 'abs' if input token list
 %	represents an absolute path name, otherwise it is bound 
 %	to 'rel'.
-%
+%-------------------------------------------------------------------
 
-parsePathTokList(TokList,Disk,CompList,Type) :-
-	parsePathTokList(TokList,Disk,CompList,Type,Rest).
+parsePathTokList(TokList,OS,Disk,CompList,Type) 
+	:-
+	parsePathTokList(TokList,OS,Disk,CompList,Type,Rest).
 
-parsePathTokList(TokList,Disk,CompList,Type,Rest) :-
+parsePathTokList(TokList,OS,Disk,CompList,Type,Rest) 
+	:-
 	diskOfPathTokList(Disk,TokList,TokList1),
-	compsOfPathTokList(CompList,TokList1,Rest),
-	typeOfPathTokList(Disk,TokList1,Type).
+	compsOfPathTokList(OS,CompList,TokList1,Rest),
+	typeOfPathTokList(OS, Disk,TokList1,Type).
 
-%
-% addIncludePath/1
+%---------------------------------------------------------------
+% addIncludePath/2
 %	Argument is a string representing an include search path
 %   The input serach path is added as the first search path,
 %	and therefore if there are more than one search paths
 %	to be included, they must be presented in reverse order.
-%
+%---------------------------------------------------------------
 
-addIncludePath(Str) :- 
-	parsePathStr(Str,Disk,CompList,PathType),
+addIncludePath(Str,State) 
+	:- 
+	accessC2P(tgt_os, State, OS),
+	parsePathStr(Str,OS,Disk,CompList,PathType),
 	asserta(includePath(Disk,CompList,PathType)).
-%	pathsyntax:asserta(includePath(Disk,CompList,PathType)).
 
-%
-% findUserFile/2
+%---------------------------------------------------------------
+% findUserFile/3
 %	search for the named file in the current directory, then
 %	in the system include directories
-%
+%---------------------------------------------------------------
 
-findUserFile(FileName,FileName) 
+findUserFile(FileName,FileName,State) 
 	:-	
 	exists_file(FileName),			% abs pathname or found locally
 	!.
-findUserFile(PathName,ExpandedName) 		% use possiblePath
+findUserFile(PathName,ExpandedName,State) 		% use possiblePath
 	:-		
 	name(PathName,PathStr),
-	parsePathStr(PathStr,Disk1,CompList1,PathType1),
+	accessC2P(tgt_os, State, OS),
+	parsePathStr(PathStr,OS,Disk1,CompList1,PathType1),
 	CompList1 \= [],
 	PathType1 \= abs,
 	possiblePath(Disk2,CompList2,PathType2),
@@ -87,24 +94,25 @@ findUserFile(PathName,ExpandedName) 		% use possiblePath
 	pathListToName(Disk2,CompList,PathType2,ExpandedName),
 	exists_file(ExpandedName),
 	!.
-findUserFile(File,ExpandedName) 
+findUserFile(File,ExpandedName,State) 
 	:-		
 	sourcePath(Path),
 	pathPlusFile(Path,File,ExpandedName),
 	exists_file(ExpandedName).
 
-%
+%---------------------------------------------------------------
 %	search for a system file. If it is an absolute pathname
 %	then we dont have to search for it, otherwise search in
 %	in the system include paths.
-%
+%---------------------------------------------------------------
 
 findSysFile(Disk,CompList,abs,AbsName) 
 	:-
 	!,
 	pathListToName(Disk,CompList,abs,AbsName),
 	exists_file(AbsName).
-findSysFile(Disk1,CompList1,rel,AbsName) :-
+findSysFile(Disk1,CompList1,rel,AbsName) 
+	:-
 	CompList1 \= [],
 	possiblePath(Disk2,CompList2,PathType),
 	dappend(CompList2,CompList1,CompList),
@@ -112,33 +120,183 @@ findSysFile(Disk1,CompList1,rel,AbsName) :-
 	exists_file(AbsName),
 	!.
 
-possiblePath(Disk,Comps,PathType) :- includePath(Disk,Comps,PathType).
-possiblePath(Disk,Comps,PathType) :- currentPath(Disk,Comps,PathType), !.
+possiblePath(Disk,Comps,PathType) 
+	:- 
+	includePath(Disk,Comps,PathType).
+possiblePath(Disk,Comps,PathType) 
+	:- 
+	currentPath(Disk,Comps,PathType), !.
 
-%
+%---------------------------------------------------------------
 %	if a file that has just been opened has non-trvial
 %	path components, then we assert it as the current path
 %	and when that file is closed we retract it.
-%
+%---------------------------------------------------------------
 
-addto_searchPath(FName) :-
+addto_searchPath(FName,State) 
+	:-
 	name(FName,FStr),
-	parsePathStr(FStr,Disk,Comps,PathType),
+	accessC2P(tgt_os, State, OS),
+	parsePathStr(FStr,OS,Disk,Comps,PathType),
 	deleteLast(Comps,PathComps),
 	PathComps \= [],
 	!,
 	asserta(currentPath(Disk,PathComps,PathType)).
-addto_searchPath( _).
+addto_searchPath( _, _ ).
 
 
-dropfrom_searchPath(FName) :-
+dropfrom_searchPath(FName, State) 
+	:-
 	name(FName,FStr),
-	parsePathStr(FStr,Disk,Comps,PathType),
+	accessC2P(tgt_os, State, OS),
+	parsePathStr(FStr,OS,Disk,Comps,PathType),
 	deleteLast(Comps,PathComps),
 	PathComps \= [],
 	retract(currentPath(_,_,_)),		% remove the top assertion
 	!.
-dropfrom_searchPath( _).
+dropfrom_searchPath( _, _).
 
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Path Syntax predicates --
+	%%	-- consolidated from: cunix, cmac, cdos, cvms
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	%---------------------------------------------------
+	% get the disk component of a path specification
+	%---------------------------------------------------
+
+diskOfPathStr(Disk) --> diskName(Disk), [0': ], { Disk \= ''}, !.
+diskOfPathStr('')   --> [].
+
+diskName(Disk) --> diskStr(DiskStr), {name(Disk,DiskStr)}.
+
+diskStr([Char|Rest]) --> [Char],{isAlphaNumeric(Char)},!,diskStr(Rest).
+diskStr([])          --> [].
+
+	%-----------------------------------------------
+	% extract 'Disk:' from a path token list
+	%-----------------------------------------------
+
+diskOfPathTokList(Disk) --> [ident(Disk),colon], !.
+diskOfPathTokList('')   --> [].
+
+	%----------------------------------------------------
+	% the type of a path is either abs or rel (string)
+	%----------------------------------------------------
+
+typeOfPathStr(unix,Disk, [0'/ |_], abs) :- !.
+typeOfPathStr(mac, Disk, CompStr,  abs) :- Disk \= '', !.
+typeOfPathStr(dos, Disk, [0'\ |_], abs) :- !.
+typeOfPathStr(vms, Disk, [0'/ |_], abs) :- !.
+typeOfPathStr(_,   Disk, CompStr,  rel).
+
+	%----------------------------------------------------
+	% the type of a path is either abs or rel (token list)
+	%----------------------------------------------------
+
+typeOfPathTokList(unix,Disk,[slash|_],    abs) :- !.
+typeOfPathTokList(mac, Disk,CompTokList,  abs) :- Disk \= '', !.
+typeOfPathTokList(dos, Disk,[backslash|_],abs) :- !.
+typeOfPathTokList(vms, Disk,[slash|_],    abs) :- !.
+typeOfPathTokList(_,   Disk,CompTokList,  rel).
+
+	%---------------------------------------------------------------
+	% get a list of directory and file components of a path
+	% specification. In the predicate that takes a string argument,
+	% we allow the path specification to have ? as a component or
+	% * as the last component
+	%---------------------------------------------------------------
+
+	%%-----------------------------------
+	%% String version
+	%%-----------------------------------
+
+compsOfPathStr(unix, Comps)		  --> [0'/ ], !,    compsOfPathStr(unix,Comps).
+compsOfPathStr(mac, ['::'|Comps]) --> [0': ,0': ],!,compsOfPathStr(mac, Comps).
+compsOfPathStr(mac, [':'|Comps])  --> [0': ], !,    compsOfPathStr(mac, Comps).
+compsOfPathStr(dos, Comps) 		  --> [0'\ ], !,    compsOfPathStr(dos, Comps).
+compsOfPathStr(vms, Comps) 		  --> [0'/ ], !,    compsOfPathStr(vms, Comps).
+
+compsOfPathStr( _, _ )			  --> [0'* ], !.
+compsOfPathStr(OS, [_|Comps])	  --> [0'? ], !,            moreComps(OS,Comps).
+compsOfPathStr(OS, [Comp|Comps])  --> compOfPathStr(Comp),!,moreComps(OS,Comps).
+compsOfPathStr( _, [])			  --> [].
+
+moreComps(unix,Comps)		 --> [0'/ ], !,    compsOfPathStr(unix,Comps).
+moreComps(mac, ['::'|Comps]) --> [0': ,0': ],!,compsOfPathStr(mac, Comps).
+moreComps(mac, Comps)		 --> [0': ], !,    compsOfPathStr(mac, Comps).
+moreComps(dos, Comps)		 --> [0'\ ], !,    compsOfPathStr(dos, Comps).
+moreComps(vms, Comps)		 --> [0'/ ], !,    compsOfPathStr(vms, Comps).
+moreComps( _,  [])		 	 --> [].
+
+compOfPathStr(File)  --> compStr(FileStr), {name(File,FileStr)}.
+
+compStr([Char|Rest]) --> [Char], {isAlphaNumeric(Char)}, !, compStr(Rest).
+compStr([0'. |Rest]) --> [0'. ], !, compStr(Rest).
+compStr([0'- |Rest]) --> [0'- ], !, compStr(Rest).
+compStr(Str)         --> [0'' ], !, endQuote(Str).
+compStr([])          --> [].
+
+endQuote([])          --> [ 0''], !.
+endQuote([Char|Rest]) --> [Char], endQuote(Rest).
+
+	%%-----------------------------------
+	%% Token list version
+	%%-----------------------------------
+
+compsOfPathTokList(unix,Comps) 		  --> [slash],     !,compsOfPathTokList(unix,Comps).
+compsOfPathTokList(mac, ['::'|Comps]) --> [coloncolon],!,compsOfPathTokList(mac,Comps).
+compsOfPathTokList(mac, [':' |Comps]) --> [colon],     !,compsOfPathTokList(mac,Comps).
+compsOfPathTokList(dos, Comps)        --> [backslash], !,compsOfPathTokList(dos,Comps).
+compsOfPathTokList(vms, Comps)        --> [slash],     !,compsOfPathTokList(vms,Comps).
+
+compsOfPathTokList( _, _ ) 			--> [star], !.
+compsOfPathTokList(OS,[_|Comps])	--> [question],
+										!, moreCompsTokList(OS,Comps).
+compsOfPathTokList(OS,[Comp|Comps]) --> compOfPathTokList(Comp), 
+										!, moreCompsTokList(OS,Comps).
+compsOfPathTokList(_, []) 			--> [].
+
+moreCompsTokList(OS,Comps) --> [slash], !, compsOfPathTokList(OS,Comps).
+moreCompsTokList(_,[]) --> [].
+
+compOfPathTokList(Comp) --> compTokList(CompTokList),
+							{ CompTokList \= [], 
+						  		catenate(CompTokList,Comp) }.
+
+compTokList([Id|Rest])	 --> [ident(Id)], !, compTokList(Rest).
+compTokList(['..'|Rest]) --> [dotdot],    !, compTokList(Rest).
+compTokList(['.'|Rest])	 --> [dot],       !, compTokList(Rest).
+compTokList(['-'|Rest])	 --> [minus],     !, compTokList(Rest).
+compTokList(['--'|Rest]) --> [minusminus],!, compTokList(Rest).
+compTokList([]) 		 --> [].
+
+	%-------------------------------------------
+	% convert a ground file list to a pathname
+	%-------------------------------------------
+
+pathListToName(Disk,Comps,Type,Name) 
+	:-
+	diskSym(Disk,DiskList),
+	absMark(Type,TypeList),
+	addPathSep(Comps,NList),
+	append(DiskList,TypeList,List1),
+	append(List1,NList,List2),
+	catenate(List2,Name).
+
+diskSym('',[]) :- !.
+diskSym(X,[X,':']).
+
+absMark(abs,['/']).
+absMark(rel,[]).
+
+addPathSep([],[]).
+addPathSep([File|IList],[File|OList]) :-
+	possPathSep(IList,OList,NList),
+	addPathSep(IList,NList).
+
+possPathSep([],L,L).
+possPathSep([_|_],['/'|L],L).
 
 endmod.

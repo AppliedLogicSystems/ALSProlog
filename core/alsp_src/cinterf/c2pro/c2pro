@@ -1,6 +1,6 @@
 /*==============================================================*
  | 		c2pro.pro
- |	Copyright(c) 1991-4 Applied Logic Systems, Inc.
+ |	Copyright(c) 1991-5 Applied Logic Systems, Inc.
  |
  |		C language translator - Top Level
  |
@@ -9,7 +9,8 @@
  | Created: 4/3/90
  | Revision History:
  |	9/23/91		P. Raman
- |	4/94		K.Bowen
+ |	04/94		K.Bowen - use streams; c2p typedef;
+ |	05/95		K.Bowen - consolidate os-specific info
  |
  | Debugging levels
  | ----------------
@@ -84,6 +85,7 @@ c2pro
 	:-
 		%% clean db & load os-specific stuff:
 	cleanDB,
+/*
 	(c2pro_os(_) ->
 		true
 		;
@@ -92,9 +94,9 @@ c2pro
 		os_specific_file(OS,OS_File),
 		reconsult(OS_File)
 	),
+*/
 		%% parse command line & setup options:
 	get_cmdline_vals(SwitchVals),
-%	pull_out_files(SwitchVals, Files, ReducedSwitchVals),
 	pull_out_nullswitches(SwitchVals, Files, ReducedSwitchVals),
 
 	makeC2P(DummyState),
@@ -106,22 +108,6 @@ c2pro
 	recheck_defaults([sourcePath(_)]),
 	calc_filters,
 	c2pro(Files,Defines).
-
-	%-------------------------------------
-	%   pull_out_files/3
-	%-------------------------------------
-
-/*
-pull_out_files([], [], []).
-pull_out_files([['-null_switch' , File] | SwitchVals], 
-			[File | Files], ReducedSwitchVals)
-	:-
-	pull_out_files(SwitchVals, Files, ReducedSwitchVals).
-
-pull_out_files([Switch | SwitchVals], Files, [Switch | ReducedSwitchVals])
-	:-
-	pull_out_files(SwitchVals, Files, ReducedSwitchVals).
-*/
 
 	%-------------------------------------
 	%   parse_options/3
@@ -204,7 +190,7 @@ install_option([Opt], [define(Id,Val)|RestDefines], RestDefines, State)
 install_option(['-I',PathAtm], Defines, Defines, State)
 	:- !,
 	name(PathAtm,PathStr),
-	addIncludePath(PathStr).
+	addIncludePath(PathStr,State).
 
 	% option:  -T FileName 		(full path to file)
 install_option(['-T',PathAtm], Defines, Defines, State)
@@ -216,7 +202,7 @@ install_option([Opt], Defines, Defines, State)
 	:-
 	name(Opt,[0'-,0'I|PathStr]),
 	!,
-	addIncludePath(PathStr).
+	addIncludePath(PathStr,State).
 
 	% option: -srcpath Path
 install_option(['-srcpath',Path], Defines, Defines, State)
@@ -236,6 +222,11 @@ install_option(['-filter', Filter], Defines, Defines, State)
 install_option(['-master', MasterName], Defines, Defines, State)
 	:-
 	assert(master_name(MasterName)).
+
+ 	% option:	 -os OS
+install_option(['-os', OS], Defines, Defines, State)
+	:-
+	setC2P(tgt_os, State, OS).
 
 install_option([Opt], Defines, Defines, State)
 	:-
