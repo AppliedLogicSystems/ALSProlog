@@ -18,7 +18,6 @@ prolog_system_error(ErrorCode, Args)
 	:-
 	alsdev_running,
 	!,
-%	alsdev:ide_prolog_system_error(ErrorCode, Args).
 	prolog_system_error(ErrorCode, alsdev, Args).
 
 prolog_system_error(ErrorCode, Args)
@@ -30,7 +29,6 @@ prolog_system_warning(ErrorCode, Args)
 	:-
 	alsdev_running,
 	!,
-%	alsdev:ide_prolog_system_warning(ErrorCode, Args).
 	prolog_system_warning(ErrorCode, alsdev, Args).
 
 prolog_system_warning(ErrorCode, Args) 
