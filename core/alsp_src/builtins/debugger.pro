@@ -234,6 +234,16 @@ module builtins.
 	debugger:disable_colon_interrupt,
 	callWithDelayedInterrupt(builtins,Goal).
 
+	%% For 'not':
+'$int'(debug_noshow,builtins,Goal) :-
+	functor(Goal,call2,2),
+	!,
+	dbg_spyoff,		
+	%% FIXME: With dbg_spyoff here, we may be able to
+	%% delete the following line
+	debugger:disable_colon_interrupt,
+	callWithDelayedInterrupt(builtins,Goal).
+
 /*-------------------------------------------------------------------------*
 '$int'(debug_noshow,objects,Goal) :-
 	functor(Goal,'$colon',3),
@@ -468,7 +478,6 @@ execute_debug(ResMod,call,2,Module,call(SrcGoal,NN)) :-
 
 %% === See if we have a "special" builtin such as setof or findall
 execute_debug(ResMod,PredName,Arity,Module,Goal) :-
-
     noshow_special(ResMod,PredName,Arity),
     !,
     setPrologInterrupt(debug_noshow),
@@ -718,14 +727,14 @@ retryOrFail(FailCommand,Box,Depth,Magic,Module,Goal) :-
  *-------------------------------------------------------------------------*/
 
 enable_colon_interrupt :-
-    dbg_spy(builtins,'$colon',3).
-%    dbg_spy(objects,'$colon',3).
+    dbg_spy(builtins,'$colon',3),
+    dbg_spy(builtins,call2,2).
 
 disable_colon_interrupt :-
     getPrologInterrupt(debug_noshow),
     !,
-    dbg_nospy(builtins,'$colon',3).
-%    dbg_nospy(objects,'$colon',3).
+    dbg_nospy(builtins,'$colon',3),
+    dbg_nospy(builtins,call2,2).
 disable_colon_interrupt.
 
 /*-------------------------------------------------------------------------*
@@ -788,22 +797,36 @@ export noshow/2.
 	%% Skip these modules entirely:
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%noshow(_, (not _)) :-!,fail.
+%noshow(_, (\+ _)) :-!,fail.
+
 noshow(Mod, _)
 	:-
 	noshow_module(Mod),
 	!.
+
 noshow_module(builtins).
 noshow_module(debugger).
+noshow_module(rel_arith).
 noshow_module(sio).
+noshow_module(tcltk).
+noshow_module(tk_alslib).
 noshow_module(xconsult).
+
 	%% Add any others (or can mtfapi go away now?):
 noshow_module(alsdev).
-noshow_module(tk_alslib).
+noshow_module(alsshell).
+noshow_module(avl).
+noshow_module(cref).
+noshow_module(macroxp).
+noshow_module(objects).
+noshow_module(pgm_info).
+noshow_module(shellmak).
+noshow_module(syscfg).
+noshow_module(ttyshlmk).
+noshow_module(utilities).
+noshow_module(windows).
 
-%noshow_module(objects).
-
-%noshow_module(windows).
-%noshow_module(alsshell).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Skip any sends in these modules:
@@ -909,6 +932,7 @@ noshow_special(_,'->',_) :- !.	%% If-Then
 noshow_special(_,',',_) :- !.	%% Conjunction
 noshow_special(_,call,_) :- !.	%% Call
 noshow_special(_,':',_) :- !.	%% Colon
+noshow_special(_,call2,_) :- !.	%% Colon
 noshow_special(_,'|',_) :- !.	%% Same as disjunction
 noshow_special(_,not,_) :- !.	%% not
 noshow_special(_,'\\+',_) :- !.	%% not again

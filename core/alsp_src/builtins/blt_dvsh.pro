@@ -12,10 +12,10 @@
 %:-[db_srctr].
 
 mkw32 :-
-%	reconsult(projects),
+	reconsult(projects),
 	save_image('ALS Prolog',[select_lib(builtins, [debugger]),
-		select_lib(library,[miscterm,msc_ioin,strctutl,strings,
-					tcl_sppt,tk_alslib, listutl1])]).
+		select_lib(library,[listutl1,miscterm,msc_ioin,objects,strctutl,strings,
+					tcl_sppt,tk_alslib,typecomp])]).
 
 module builtins.
 use tcltk.
@@ -732,9 +732,12 @@ sys_modules([
 export non_sys_modules/1.
 non_sys_modules(Mods)
 	:-
+/*
 	findall(M, modules(M,_),L),
 	sys_modules(SysMs),
 	list_diff(L, SysMs, Mods).
+*/
+	findall(M, (modules(M,_), (debugger:not(noshow_module(M)))), Mods).
 
 export module_preds/2.
 export module_preds/3.
@@ -808,6 +811,21 @@ carry_out_listasm(Atom)
 carry_out_listing(_).
 
 
+sys_mods_status(SMs)
+	:-
+	sys_modules(InitSysMs),
+	sort(InitSysMs, SysMs),
+	annotate_showing(SysMs, SMs).
+
+annotate_showing([], []).
+annotate_showing([M | SysMs], [[M, S] | SMs])
+	:-
+	((debugger:noshow_module(M)) ->
+		S = 0
+		; 
+		S = 1
+	),
+	annotate_showing(SysMs, SMs).
 
 
 endmod.	%% builtins

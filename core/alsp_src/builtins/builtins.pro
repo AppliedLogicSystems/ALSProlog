@@ -1091,6 +1091,7 @@ ld_fs(OS)
 	consult_builtins(BDir, simplio),
 	consult_builtins(BDir, blt_flgs),
 	consult_builtins(BDir, blt_misc),
+	consult_builtins(BDir, objs_run),
 		%% ALS shell stuff starts here:
 	consult_builtins(BDir, blt_shlr),			
 	consult_builtins(BDir, blt_cslt),			

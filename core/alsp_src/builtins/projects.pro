@@ -3,7 +3,7 @@
  |		Copyright (c) 1998 Applied Logic Systems, Inc.
  |
  |			Prolog Project Management
- |			"$Id: projects.pro,v 1.5 1998/05/18 01:36:56 ken Exp $"
+ |			"$Id: projects.pro,v 1.6 1998/06/20 13:18:32 ken Exp $"
  *=============================================================*/
 
 module alsdev.
@@ -76,8 +76,6 @@ load_the_project(ProjList, BaseFile)
 	check_default(ProjList, initialization_goal,  true, InitGoal),
 
 	assert_searchdirs(SearchDirs),
-%	setup_searchtrees(SearchTrees),
-
 	consult_files(PrologFiles),
 	consult_files(TypFiles),
 
@@ -88,14 +86,17 @@ close_previous_project(OldProject).
 
 
 assert_searchdirs([]).
-assert_searchdirs([Dir | SearchDirs])
+assert_searchdirs([DirList | SearchDirs])
 	:-
+	join_path(DirList, Dir),
 	builtins:assertz(searchdir(Dir)),
 	assert_searchdirs(SearchDirs).
-assert_searchdirs(Dir)
+	%% Probably should drop this:
+assert_searchdirs(DirList)
 	:-
-	atom(Dir),
-	Dir \= [],
+	DirList = [First | _],
+	atom(First),
+	join_path(DirList, Dir),
 	builtins:assertz(searchdir(Dir)).
 
 consult_files(L) :- consult(L).
@@ -113,13 +114,12 @@ add_mult_files(PrevFiles, ListBoxWin)
 
 
 	%% 
-save_project(Title, ProjFile, Start, ProFiles, SDirs)
+save_project(Title, ProjFile, Start, ProFiles, SDirs, LibFiles)
 	:-
-	atomread(ProjFile, PProjFile),
-	(file_extension(BaseName, _, PProjFile) ->
+	(file_extension(BaseName, _, ProjFile) ->
 		true
 		;
-		BaseName = PProjFile
+		BaseName = ProjFile
 	),
 	file_extension(BaseName, ppj, OutputFile),
 
@@ -134,21 +134,25 @@ write(save_project_ans=Answer),nl,flush_output,
 			true
 		)
 		;
-		fin_save_project(OutputFile,Title, ProjFile, Start, ProFiles, SDirs)
+		fin_save_project(OutputFile,Title, ProjFile, Start, ProFiles, SDirs, LibFiles)
 	).
 
-fin_save_project(OutputFile,Title, ProjFile, Start, ProFiles, SDirs)
+fin_save_project(OutputFile,Title, ProjFile, Start, ProFiles, SDirs, LibFiles)
 	:-
 	open(OutputFile, write, OStr, []),
 	write_clause(OStr, name=Title),
 	write_clause(OStr, search_dirs=SDirs),
 	write_clause(OStr, prolog_files=ProFiles),
+	write_clause(OStr, lib_files=LibFiles),
 	write_clause(OStr, initialization_goal=Start),
 	close(OStr).
 
-
-
-
+get_library_dir(LibPath)
+	:-
+	builtins:sys_searchdir(SSD),
+	path_elements(SSD,SSDEs),
+	append(SSDEs, [library], LPEs),
+	join_path(LPEs, LibPath).
 
 
 export open_project_file/2.
@@ -161,13 +165,13 @@ open_project_file(InProjectDir, BaseFile)
 	file_extension(FF,XX,RedoneFile),
 
 	change_cwd(ProjectDir),
-	printf('Loading project from file %t \n', [BaseFile]),
+	printf('Opening project from file %t \n', [BaseFile]),
 	get_curProject(OldProject),
 	close_previous_project(OldProject),
 	set_curProject([]),
 	append(ProjectDirList, [RedoneFile], FileList),
 	join_path(FileList, TheFile),
-	printf('Loading project from file %t \n', [TheFile]),
+	printf('Opening project from file %t \n', [TheFile]),
 
 %% Ought to be able to use:
 %	grab_terms(TheFile, CurProject),
@@ -187,12 +191,12 @@ open_the_project(ProjList, BaseFile)
 	check_default(ProjList, search_trees,  [], SearchTrees),
 	check_default(ProjList, prolog_files,  [], PrologFiles),
 	check_default(ProjList, typ_files,  [], TypFiles),
+	check_default(ProjList, lib_files,  [], LibFiles),
 	check_default(ProjList, initialization_goal,  true, InitGoal),
-
 	sys_env(OS,MinorOS,Proc),
 	bld_skel(OS, BldCmd),
 	tcl_call(shl_tcli, [display_project, ProjName, BaseFile, InitGoal, 
-						PrologFiles, SearchDirs, OS, MinorOS, BldCmd], _).
+						PrologFiles, SearchDirs, LibFiles, OS, MinorOS, BldCmd], _).
 
 
 
@@ -240,11 +244,29 @@ build_project
 	%% bld_skel(unix, Pattern)
 	%% printf(Cmd,   Pattern, [<BldFile>, BldPredName>])
 	%%
-bld_skel(unix, 'kalspro_b -b -giac  -no_dot_alspro %t -g %t ').
 
-%bld_skel(unix, 'kalspro_b -b -quiet -giac  -no_dot_alspro %t -g %t ').
-bld_skel(mswin32, 'ALS Prolog Base.exe -b -quiet -giac  -no_dot_alspro %t -g %t ').
-bld_skel(macos, 'ALS Prolog Base -b -quiet -giac  -no_dot_alspro %t -g %t ').
+
+bld_skel(OS, Skel)
+	:-
+	CmdTail = ' -b -q -giac  -no_dot_alspro %t -g %t ',
+	builtins:sys_searchdir(SSD),
+	path_elements(SSD,SSDEs),
+	dreverse(SSDEs, RSSDEs),
+	(RSSDEs = [alsdir | RestRSSDEs] ->
+		true 
+		; 
+		RestRSSDEs = RSSDEs
+	),
+	bld_goal(OS, XG),
+	dreverse([XG | RestRSSDEs], XEs),
+	join_path(OS, XEs, XPath),
+	catenate(XPath, CmdTail, Skel).
+
+
+
+bld_goal(mswin32, 'ALS Prolog Base.exe').
+bld_goal(unix, 'alspro_b').
+bld_goal(macos, 'ALS Prolog Base').
 
 
 
@@ -255,7 +277,6 @@ add_search_dirs_cl([DirList | SearchDirs], OS, BSt)
 	printf(BSt, '\tbuiltins:assert(searchdir(%t)),\n', [Path], [quoted(true)]),
 	add_search_dirs_cl(SearchDirs, OS, BSt).
 
-temp_file_name(mswin32, 'A19ztmp.bat') :-!.
 temp_file_name(_, 'A19ztmp').
 
 endmod.
