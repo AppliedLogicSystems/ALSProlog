@@ -322,7 +322,7 @@ alsdev(Shared, ALS_IDE_Mgr)
 		;
 		change_debug_io(debugwin)
 	),
-	set_prolog_flag(debug, on),
+%	set_prolog_flag(debug, on),
 	get_cwd(CurDir),
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
 
@@ -713,32 +713,55 @@ change_window_settings(WinSettingsVals, WinGroup)
 	:-
 	WinSettingsVals = [Back, Fore, SelectBack, SelectFore, Font, Tabs],
 	WinSettings = 
-		window_settings(WinGroup, [background=Back, foreground=Fore, 
-					 selectbackground=SelectBack, selectforeground=SelectFore, 
-					 font=Font, tabs=Tabs ]),
-	modify_settings(WinSettings,window_settings, 2, WinGroup).
+		[ window_settings(WinGroup, 
+		    [background=Back, foreground=Fore, 
+		     selectbackground=SelectBack, selectforeground=SelectFore, 
+			font=Font, tabs=Tabs ])
+		],
+	modify_settings(WinSettings).
 
-modify_settings(NewTerm, Functor, Arity, Arg1)
+modify_settings(NewTerms)
 	:-
 	alsdev_ini_path(ALSDEVINIPath),
 	!,
 	grab_terms(ALSDEVINIPath, OldTerms),
-	replace_items(OldTerms, NewTerm, Functor, Arity, Arg1, NewTerms),
+	sort(OldTerms, SortedOldTerms),
+	sort(NewTerms, SortedNewTerms),
+	do_replace_items(SortedNewTerms, SortedOldTerms, NewRecords),
 	open(ALSDEVINIPath, write, OutS, []),
-	write_clauses(OutS, NewTerms, [quoted(true)]),
+	write_clauses(OutS, NewRecords, [quoted(true)]),
 	close(OutS).
 
-modify_settings(NewTerm, Functor, Arity, Arg1).
+modify_settings(NewTerms, Functor, Arity, Arg1).
 
-replace_items([],  NewTerm, Functor, Arity, Arg1,  [NewTerm]).
-replace_items([Old | OldTerms],  NewTerm, Functor, Arity, Arg1,  [NewTerm | OldTerms])
+
+	%% Both lists are sorted:
+do_replace_items([], OldTerms, OldTerms) :-!.
+do_replace_items(NewTerms, [], NewTerms) :-!.
+do_replace_items([New | NewTerms], OldTerms, Result)
+	:-
+	functor(New, Functor, Arity),
+	arg(1, New, Arg1),
+	replace_items(OldTerms, New, Functor, Arity, Arg1, Result, ResultTail, OldTermsTail),
+	do_replace_items(NewTerms, OldTermsTail, ResultTail).
+
+
+replace_items([],  New, Functor, Arity, Arg1,  [New | Tail], Tail, []).
+replace_items([Old | OldTerms],  New, Functor, Arity, Arg1,  
+		[New| Tail], Tail, OldTerms)
 	:-
 	functor(Old, Functor, Arity),
 	arg(1, Old, Arg1),
 	!.
-replace_items([Old | OldTerms],  NewTerm, Functor, Arity, Arg1,  [Old | NewTerms])
+replace_items([Old | OldTerms],  New, Functor, Arity, Arg1,  
+		[New| Tail], Tail, [Old | OldTerms])
 	:-
-	replace_items(OldTerms,  NewTerm, Functor, Arity, Arg1,  NewTerms).
+	New @< Old,
+	!.
+replace_items([Old | OldTerms],  New, Functor, Arity, Arg1,  
+		[Old | Result], ResultTail, OldTail)
+	:-
+	replace_items(OldTerms,  New, Functor, Arity, Arg1,  Result, ResultTail, OldTail).
 
 setup_defaults([], _).
 setup_defaults([Tag=Value | TextSettings], Group)
@@ -748,17 +771,17 @@ setup_defaults([Tag=Value | TextSettings], Group)
 
 win_positions_for_exit(TopGeom, DebugGeom)
 	:-
-	modify_settings(window_position('.topals',TopGeom), 
-					window_position, 2, '.topals'),
 	tcl_call(shl_tcli, [get_tcl_ga,proenv,debugwin], DebugVis),
-	modify_settings(visible('.debugwin',DebugVis), visible,2,DebugVis), 
-	modify_settings(window_position('.debugwin',DebugGeom), 
-					window_position, 2, '.debugwin').
+	WinSettings = [
+		window_position('.topals',TopGeom), 
+		visible('.debugwin',DebugVis), 
+		window_position('.debugwin',DebugGeom) ],
+	modify_settings(WinSettings).
 
 save_prolog_flags
 	:-
 	changable_flags_info(FlagsList),
-	modify_settings(prolog_value(prolog_flags,FlagsList),prolog_value, 2, prolog_flags).
+	modify_settings([prolog_value(prolog_flags,FlagsList)]).
 
 set_flags_values([]).
 set_flags_values([[Flag,_,Val] | FlagsList])
