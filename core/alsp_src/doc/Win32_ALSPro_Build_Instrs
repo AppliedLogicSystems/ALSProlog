@@ -67,7 +67,7 @@ Build Steps:
 1. From Unix, run the shell script bd_mswin32 to create the build
 directory ($BLDDIR):
 
-	$SRCDIR\bin\bd_mswin32 $SRCDIR $BLDDIR
+	$SRCDIR/bin/bd_mswin32 $SRCDIR $BLDDIR
 	
 2. On the Mac, decode and extract the project files using Stuffit
 Expander.  The following projects need expanding:
