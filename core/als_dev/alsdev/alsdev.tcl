@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.42 1998/03/24 17:14:34 choupt Exp $"
+#|		"$Id: alsdev.tcl,v 1.43 1998/04/02 16:14:28 choupt Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -298,6 +298,9 @@ proc load_source {path name} {
 	}
 }
 
+# Load Tcl source
+# Note: When you add a new source file, also add it to mac_alsdev.r
+# to ensure that it is stored in the Mac resources.
 
 load_source $ALSTCLPATH {alsdev_main}
 load_source $ALSTCLPATH {als_settings}
@@ -317,6 +320,10 @@ proc load_photo {image_name base_name} {
 		image create photo $image_name -file [file join $ALSTCLPATH .. images $base_name.gif]
 	}
 }
+
+# Load images
+# Note: When you add a new image, also add it to mac_alsdev.r
+# to ensure that it is stored in the Mac resources.
 
 load_photo up_arrow_gif up-arrow-blue
 load_photo down_arrow_gif down-arrow-blue
