@@ -308,6 +308,9 @@ load(user,Type,user,Nature,LoadedPath)
 	%% Source is a 'normal' file:
 load(FileName,Type,CanonPath,Nature,LoadedPath) 
 	:-
+	resource_load(FileName), !.
+load(FileName,Type,CanonPath,Nature,LoadedPath) 
+	:-
 	possibleLocation(FileName, PathName),
 	rootPathFile(Drive, PathList, File, PathName),
 	prepend_current_consult_directory(Drive,PathList, NewDrive, CCDPathList),

@@ -34,6 +34,77 @@ pckg_init
 	:-
 	initialize_global_variables,
 	sio_pckg_init.
+
+/* Mac OS Resource Packaging */
+
+/*---------------------------------------------------------------*
+ |	save_package/5.
+ |	save_package(NewName, OBPList, LoadList, Init, Start)
+ |	save_package(+,+,+,+,+)
+ |  
+ |  Creates a new application or MPW Tool which contains all
+ |  the OBP files in OBPList.  When the new application is 
+ |  launched it will load the files in LoadList and then
+ |  call Init and Start.
+ *-------------------------------------------------------------------*/
+export save_package/5.
+
+save_package(NewName, OBPList, LoadList, Init, Start) :-
+	save_app_with_obp(NewName, OBPList, LoadList, Init, Start).
+
+base_obp_list([
+    ':alsdir:builtins:blt_als.obp',
+    ':alsdir:builtins:blt_atom.obp',
+    ':alsdir:builtins:blt_brk.obp',
+    ':alsdir:builtins:blt_ctl.obp',
+    ':alsdir:builtins:blt_db.obp',
+    ':alsdir:builtins:blt_evt.obp',
+    ':alsdir:builtins:blt_frez.obp',
+    ':alsdir:builtins:blt_io.obp',
+    ':alsdir:builtins:blt_lib.obp',
+    ':alsdir:builtins:blt_msg.obp',
+    ':alsdir:builtins:blt_pckg.obp',
+    ':alsdir:builtins:blt_shl.obp',
+    ':alsdir:builtins:blt_std.obp',
+    ':alsdir:builtins:blt_stk.obp',
+    ':alsdir:builtins:blt_sys.obp',
+    ':alsdir:builtins:blt_term.obp',
+    ':alsdir:builtins:builtins.obp',
+    ':alsdir:builtins:cutils.obp',
+    ':alsdir:builtins:dcgs.obp',
+    ':alsdir:builtins:filepath.obp',
+    ':alsdir:builtins:fsmac.obp',
+    ':alsdir:builtins:fs_cmn.obp',
+    ':alsdir:builtins:simplio.obp',
+    ':alsdir:builtins:sio.obp',
+    ':alsdir:builtins:sio_d10.obp',
+    ':alsdir:builtins:sio_rt.obp',
+    ':alsdir:builtins:sio_wt.obp',
+    ':alsdir:builtins:xconsult.obp',  
+    ':alsdir:builtins:debugger.obp',
+    
+    ':alsdir:library:iolayer.obp',
+    ':alsdir:library:simplio.obp',
+    ':alsdir:library:listutl3.obp'
+  ]).
+
+/*---------------------------------------------------------------*
+ |	save_base_package/1.
+ |	save_base_package(NewName)
+ |	save_base_package(+)
+ |	
+ |	Creates a copy of the application with all the builtins
+ |  stored as resources.
+ *---------------------------------------------------------------*/
+export save_base_package/1.
+
+save_base_package(NewName) :-
+	force_libload_all(
+	  [':alsdir:builtins:debugger', ':alsdir:library:iolayer',
+	   ':alsdir:library:simplio', ':alsdir:library:listutl3']),
+	base_obp_list(BList),
+	save_app_with_obp(NewName, BList, [], '', '').
+
 /*---------------------------------------------------------------*
  |	save_state/1.
  |	save_state(FileName)
