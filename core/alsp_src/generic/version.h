@@ -1,14 +1,14 @@
 /*===============================================================*
  *                      version.h
- *       Copyright (c) 1990-1996 by Applied Logic Systems, Inc.
+ *       Copyright (c) 1990-2000 by Applied Logic Systems, Inc.
  *
  *          Version number - Thu Apr 4 09:28:36 EST 1996
  *===============================================================*/
 
-#define VERSION_STRING "3.1.19"
+#define VERSION_STRING "3.1.20"
 #define VERSION_MAJOR 3
 #define VERSION_MINOR 1
-#define VERSION_PATCH 19
+#define VERSION_PATCH 20
 
 /* 
 Win32 File Flag choices:
