@@ -90,6 +90,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		exit(EXIT_ERROR);
     }
 
+	pi_init();
+	
 	term = AP_NewInitStructure(w, AP_NewSymbolFromStr(w, "consult"),
 				1, AP_NewSymbolFromStr(w, "blt_dvsh"));
 		
@@ -102,7 +104,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     	if (r == AP_EXCEPTION) {
     		char s[1000];
     		simple_write(w, AP_GetException(w), s);
-    		panic(s);
+    		MessageBox(GetFocus(), s, "ALS Prolog", 0);
     	} 
 	}
 	
