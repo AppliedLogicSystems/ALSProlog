@@ -105,14 +105,14 @@ $(IMAGE)0: pimain.o pi_init.o $(PROLIB) $(WINTLIB)
 
 $(IMAGE)1: $(IMAGE)0 
 	ALSPATH=$(WLD); export ALSPATH; \
-	$(IMAGE)0 *.pro $(ADDL_PROFS) \
+	$(IMAGE)0 $(PROFLAGS) *.pro $(ADDL_PROFS) \
 		-g 'save_image($(IMAGE)1,[select_lib($(LIB_LIST))])'
 
 SEARCHS=-s $(WINIDIR)/$(WIN) -s $(WINIDIR)/guilib -s $(WINIDIR)/guilib/$(WIN)
 
 $(IMAGE): $(IMAGE)1 
 	ALSPATH=$(WLD); export ALSPATH; \
-	$(IMAGE)1 $(SEARCHS) \
+	$(IMAGE)1 $(PROFLAGS) $(SEARCHS) \
 		$(WINIDIR)/$(WIN)/$(WIN)_ld \
 		$(WINIDIR)/guilib/cmn_ld $(WINIDIR)/guilib/$(WIN)/cmnguild \
 		-g 'save_image($(IMAGE),[])'
