@@ -37,6 +37,6 @@ alsdir
 	shared
 		All the .tcl files from the alsdev directory.
 		tcltk.pro
-	image
-		All the .gif files from the image directory.
+	images
+		All the .gif files from the images directory.
 
