@@ -39,17 +39,27 @@ query_user(InStream,OutStream,FmtString,Args,Options,Answer)
 	:-
 	dmember(io_config=ansi_screen,Options),
 	!,
-	dmember(screen_locn=dca(N,M),Options),
-	catenate(FmtString,' (y/n):',XFmtString),
+	(dmember(yes_no, Options) ->
+		catenate(FmtString,' (y/n):',XFmtString)
+		;
+		XFmtString = FmtString
+	),
+	(dmember(screen_locn=dca(N,M),Options) -> true ; N=1,M=1),
 	dca(N,M),
-	sprintf(OutputStream,XFmtString,Args),
-	flush_output(OutputStream),
-			%	get_line(InStream,Line),
-			%	atomread(Line,InitAnswer),
-%	get_key(InitAnswer),
-	get_char(InStream, InitAnswer),
+	printf(OutStream,XFmtString,Args),
+	flush_output(OutStream),
+	get_line(InStream,Line),
+	atomread(Line,InitAnswer),
 	!,
-	q_acton(InitAnswer,Answer).
+	(dmember(yes_no, Options) ->
+		q_acton(InitAnswer,Answer)
+		;
+		(InitAnswer = end_of_file ->
+			(dmember(default=Answer, Options) -> true ; Answer = '')
+			;
+			Answer = InitAnswer
+		)
+	).
 
 query_user(InStream,OutStream,FmtString,Args,Options,Answer)
 	:-
@@ -61,8 +71,9 @@ query_user(InStream,OutStream,FmtString,Args,Options,Answer)
 	q_acton(InitAnswer,Answer).
 
 
-q_acton(yes,yes).
-q_acton(y,yes).
+q_acton(yes,yes) :-!.
+q_acton(y,yes) :-!.
+q_acton(end_of_file,yes) :-!.
 q_acton(_,no).
 
 
