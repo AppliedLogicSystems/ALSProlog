@@ -413,9 +413,6 @@ static struct blt_struct {
 	BLT("sio_set_position", 3, sio_set_position, "_sio_set_position"),
 	BLT("sio_file_open", 5, sio_file_open, "_sio_file_open"),
 	BLT("sio_console_open", 6, sio_console_open, "_sio_console_open"),
-	BLT("window_insert_pos", 2, win_insert_pos, "_win_insert_pos"),
-	BLT("set_window_insert_pos", 2, set_win_insert_pos,
-	    "_set_win_insert_pos"),
 	BLT("sio_set_eof", 1, sio_set_eof, "_sio_set_eof"),
 	BLT("sio_reset_eof", 1, sio_reset_eof, "_sio_reset_eof"),
 #ifdef SysVIPC

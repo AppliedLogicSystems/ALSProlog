@@ -364,8 +364,6 @@ extern	int	sio_accept_socket_connection	PARAMS(( void ));
 extern	int	sio_poll		PARAMS(( void ));
 extern	int	sio_simple_select		PARAMS(( void ));
 #endif /* HAVE_SOCKET */
-extern	int	win_insert_pos		PARAMS(( void ));
-extern	int	set_win_insert_pos	PARAMS(( void ));
 extern	int	sio_rexec	PARAMS(( void ));
 extern	int	sio_generic_open	PARAMS(( void ));
 extern	int	sio_close	PARAMS(( void ));

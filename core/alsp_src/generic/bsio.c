@@ -278,7 +278,6 @@ static	int	quoted_string	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *, UC
 static	int	char_constant	PARAMS(( UCHAR **, UCHAR *, int, int ));
 static	int	next_token0	PARAMS(( UCHAR *, PWord *, int *, PWord *, int * ));
 static	int	format_type	PARAMS(( UCHAR * ));
-static  int int_or_float    PARAMS((int, PWord));
 
 enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
@@ -2909,90 +2908,6 @@ sio_poll()
 		FAIL;
 }
 #endif /* HAVE_SOCKET */
-
-#ifdef WINIOBASIS
-/*
- *	window_insert_pos(WinID, WinPos)
- *
- *	window_insert_pos is called from Prolog to get the
- *	current insertion point for the window entity associated with
- *	WinID (e.g., a Motif Text Widget); this gets the value which is
- *	currently stored in the stream descriptor; it does not go to
- *	the window & windowing system for it; that is done from
- *	winsGetTextInsertionPostion/2 which is conditionally defined
- *	to use the correct call to the underlying window system.
- */
-
-
-int
-win_insert_pos()
-{
-  PWord v1,v2;
-  int t1,t2;
-  UCHAR *buf;
-  
-  w_get_An(&v1,&t1,1);
-  w_get_An(&v2,&t2,2);
-  
-  if ((buf=get_stream_buffer(v1,t1)) == (UCHAR *) 0)
-	FAIL;
-  
-  if (w_unify(v2,t2,(PWord)WINS_INSERT_POS(buf),WTP_INTEGER))
-	SUCCEED;
-  else
-	FAIL;
-}
-
-int
-set_win_insert_pos()
-{
-  PWord v1,v2;
-  int t1,t2;
-  UCHAR *buf;
-  
-  w_get_An(&v1,&t1,1);
-  w_get_An(&v2,&t2,2);
-
-/* printf("t1=%d  t2=%d\n",t1,t2); */
-
-  if ((buf=get_stream_buffer(v1,t1)) == (UCHAR *) 0 || t2 != WTP_INTEGER)
-	FAIL;
-  
-/* printf("Buf & t2 ok\n"); */
-
-  WINS_INSERT_POS(buf) = (int)v2;
-  SUCCEED;
-}
-
-/* 
-   int_or_float(t,v)
- */
-static int
-int_or_float(int t,PWord v)
-{
-#ifdef DoubleType
-    if ( (t == WTP_INTEGER) || (t == WTP_DOUBLE))
-		return(1);
-	else
-		return(0);
-#else  /* not-DoubleType */
-	PWord functor;
-	int   arity;
-
-    if (t == WTP_INTEGER)
-		return(1);
-	else if (t != WTP_STRUCTURE)
-		return(0);
-	else
-		w_get_arity(&arity, v);
-		w_get_functor(&functor, v);
-
-		if (arity != 4 || functor != TK_DDOUBLE)
-			return(0);
-		else
-			return(1);
-#endif /* DoubleType */
-}
 
 /*
  * sio_generic_open(ID, Stream, Mode, Buffering)
