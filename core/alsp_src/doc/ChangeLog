@@ -1,3 +1,9 @@
+Wed Sep 14 17:12:21 EDT 1994
+
+	* generic/pimain.c: Added a feature test NO_STDARG_H to
+	make the default be that HAVE_STDARG_H is defined, and
+	hence that <stdarg.h> is included.
+
 Mon Sep 12 20:09:11 1994 Ken Bowen
 
 	* Added a command line switch (left of -p) '-obp' which

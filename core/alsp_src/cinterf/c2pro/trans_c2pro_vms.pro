@@ -133,7 +133,8 @@ outSuffix('src').
 %% c2pro/0.
 %% command line goal:
 %% 	alspro c2pro -g c2pro -p file [file..] \
-%%		[-debug] [-Dflag[=num]]* [-Ipathname]*
+%%		[-Dflag[=num]]* [-Ipathname]*  \
+%%		[-d debuglevel] [-b breakitem]
 %%-------------------------------------
 
 	%% old:
@@ -194,6 +195,9 @@ parse_options([FirstOpt | RestOpts], Defines, State)
 	%-------------------------------------
 	%   install_option/4
 	%-------------------------------------
+
+%:-dynamic(cur_debug_level/1).
+cur_debug_level(1).
 
 	%% set debugging level:
 	%% option:  -d Level[=Num]
