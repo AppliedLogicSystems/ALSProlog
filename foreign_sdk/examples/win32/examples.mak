@@ -25,6 +25,7 @@ CFG=Win32 Debug
 
 ################################################################################
 # Begin Project
+# PROP Target_Last_Scanned "Win32 Debug"
 MTL=MkTypLib.exe
 CPP=cl.exe
 RSC=rc.exe
@@ -51,10 +52,10 @@ $(OUTDIR) :
 # ADD MTL /nologo /D "NDEBUG" /win32
 MTL_PROJ=/nologo /D "NDEBUG" /win32 
 # ADD BASE CPP /nologo /MT /W3 /GX /YX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR /c
-# ADD CPP /nologo /MT /W3 /GX /YX /O2 /I "..\..\..\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR /c
-CPP_PROJ=/nologo /MT /W3 /GX /YX /O2 /I "..\..\..\include" /D "WIN32" /D\
- "NDEBUG" /D "_WINDOWS" /FR$(INTDIR)/ /Fp$(OUTDIR)/"examples.pch" /Fo$(INTDIR)/\
- /c 
+# ADD CPP /nologo /MT /W3 /GX /YX /O2 /I "..\..\ALS_Prolog_Support" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR /c
+CPP_PROJ=/nologo /MT /W3 /GX /YX /O2 /I "..\..\ALS_Prolog_Support" /D "WIN32"\
+ /D "NDEBUG" /D "_WINDOWS" /FR$(INTDIR)/ /Fp$(OUTDIR)/"examples.pch"\
+ /Fo$(INTDIR)/ /c 
 CPP_OBJS=.\WinRel/
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -63,8 +64,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 BSC32_FLAGS=/nologo /o$(OUTDIR)/"examples.bsc" 
 BSC32_SBRS= \
-	$(INTDIR)/alspi_slib.sbr \
-	$(INTDIR)/examples.sbr
+	$(INTDIR)/examples.sbr \
+	$(INTDIR)/alspi_slib.sbr
 
 $(OUTDIR)/examples.bsc : $(OUTDIR)  $(BSC32_SBRS)
     $(BSC32) @<<
@@ -81,8 +82,8 @@ LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
  /IMPLIB:$(OUTDIR)/"examples.lib" 
 DEF_FILE=
 LINK32_OBJS= \
-	$(INTDIR)/alspi_slib.obj \
-	$(INTDIR)/examples.obj
+	$(INTDIR)/examples.obj \
+	$(INTDIR)/alspi_slib.obj
 
 .\examples.psl : $(OUTDIR)  $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -111,10 +112,10 @@ $(OUTDIR) :
 # ADD MTL /nologo /D "_DEBUG" /win32
 MTL_PROJ=/nologo /D "_DEBUG" /win32 
 # ADD BASE CPP /nologo /MT /W3 /GX /Zi /YX /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /c
-# ADD CPP /nologo /MT /W3 /GX /Zi /YX /Od /I "..\..\..\include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /c
-CPP_PROJ=/nologo /MT /W3 /GX /Zi /YX /Od /I "..\..\..\include" /D "WIN32" /D\
- "_DEBUG" /D "_WINDOWS" /FR$(INTDIR)/ /Fp$(OUTDIR)/"examples.pch" /Fo$(INTDIR)/\
- /Fd$(OUTDIR)/"examples.pdb" /c 
+# ADD CPP /nologo /MT /W3 /GX /Zi /YX /Od /I "..\..\ALS_Prolog_Support" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /c
+CPP_PROJ=/nologo /MT /W3 /GX /Zi /YX /Od /I "..\..\ALS_Prolog_Support" /D\
+ "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR$(INTDIR)/ /Fp$(OUTDIR)/"examples.pch"\
+ /Fo$(INTDIR)/ /Fd$(OUTDIR)/"examples.pdb" /c 
 CPP_OBJS=.\WinDebug/
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -123,8 +124,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 BSC32_FLAGS=/nologo /o$(OUTDIR)/"examples.bsc" 
 BSC32_SBRS= \
-	$(INTDIR)/alspi_slib.sbr \
-	$(INTDIR)/examples.sbr
+	$(INTDIR)/examples.sbr \
+	$(INTDIR)/alspi_slib.sbr
 
 $(OUTDIR)/examples.bsc : $(OUTDIR)  $(BSC32_SBRS)
     $(BSC32) @<<
@@ -141,8 +142,8 @@ LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
  /IMPLIB:$(OUTDIR)/"examples.lib" 
 DEF_FILE=
 LINK32_OBJS= \
-	$(INTDIR)/alspi_slib.obj \
-	$(INTDIR)/examples.obj
+	$(INTDIR)/examples.obj \
+	$(INTDIR)/alspi_slib.obj
 
 .\examples.psl : $(OUTDIR)  $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -166,18 +167,18 @@ LINK32_OBJS= \
 ################################################################################
 # Begin Source File
 
-SOURCE=\Foreign_SDKs\Win32_Foreign_SDK\source\alspi_slib.c
+SOURCE=.\examples.c
 
-$(INTDIR)/alspi_slib.obj :  $(SOURCE)  $(INTDIR)
-   $(CPP) $(CPP_PROJ)  $(SOURCE) 
+$(INTDIR)/examples.obj :  $(SOURCE)  $(INTDIR)
 
 # End Source File
 ################################################################################
 # Begin Source File
 
-SOURCE=.\examples.c
+SOURCE=..\..\ALS_Prolog_Support\alspi_slib.c
 
-$(INTDIR)/examples.obj :  $(SOURCE)  $(INTDIR)
+$(INTDIR)/alspi_slib.obj :  $(SOURCE)  $(INTDIR)
+   $(CPP) $(CPP_PROJ)  $(SOURCE) 
 
 # End Source File
 # End Group

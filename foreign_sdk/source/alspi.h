@@ -14,8 +14,13 @@
 #ifndef _ALSPI_H_INCLUDED_
 #define _ALSPI_H_INCLUDED_
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include <stddef.h>
 #include <stdarg.h>
+
 
 #ifdef __cplusplus
 extern "C" {

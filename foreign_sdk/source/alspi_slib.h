@@ -2,7 +2,7 @@
 
 #define ALSPI_DLIB_VERSION 3
 
-#ifdef 
+#ifdef macintosh
 #define ALSPI_APIP(X,Y)	pascal X (*Y)
 #elif defined(WIN32)
 #define ALSPI_API(X)	X __stdcall
@@ -10,7 +10,7 @@
 #else
 #define ALSPI_API(X)	X
 #define ALSPI_APIP(X,Y)	X (*Y)
-
+#endif
 
 typedef struct {
     ALSPI_APIP(char *, PI_forceuia)			( PWord *, int * );
