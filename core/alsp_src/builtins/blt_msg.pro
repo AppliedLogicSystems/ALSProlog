@@ -96,6 +96,9 @@ print_error_goal_attributes([H|T])
 	:-
 	print_error_goal_attribute(H),
 	print_error_goal_attributes(T).
+print_error_goal_attributes(Other) 
+	:-
+	print_error_goal_attribute(Other).
 
 print_error_goal_attribute(M:G) 
 	:-!,
@@ -359,6 +362,12 @@ decode_error(resource_error(Resource),_,
 decode_error(syntax_error, _, 'Syntax error.\n',[]).
 
 decode_error(system_error, _, 'System error.\n',[]).
+
+	%%-------------------------
+	%% Other Error:
+	%%-------------------------
+
+decode_error(_, _, 'Unknown Error.\n', []).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% WARNING OUTPUT STRING PATTERNS
