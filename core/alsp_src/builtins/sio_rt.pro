@@ -1661,6 +1661,14 @@ pp_xform_clause(struct((H :- B),_,_),CID,
 	arg(3,H,EH),
 	pp_xform_body(B,CID,XB).
 
+pp_xform_clause(H, CID, XH) 
+	:-
+	arg(1,H,T),
+	functor(T,F,_),
+	declaration_functor(F),
+	!,
+	pp_flatten(H,XH).
+
 pp_xform_clause(H, CID, (XH :- '$dbg_apf'(CID,SH,EH))) 
 	:-!,
 	arg(2,H,SH),
@@ -1688,44 +1696,13 @@ pp_xform_body(G,CID,('$dbg_apg'(CID,SG,EG),XG,'$dbg_apge'(CID,SG,EG)))
 	arg(3,G,EG),
 	pp_flatten(G,XG).
 
-/***
-pp_xform_clause(end_of_file,_,end_of_file) 
-	:-!.
 
-pp_xform_clause(struct((H :- B),_,_),CID, (XH :- '$dbg_aph'(CID,SH,EH),XB)) 
-	:-!,
-	pp_flatten(H,XH),
-	arg(2,H,SH),
-	arg(3,H,EH),
-	pp_xform_body(B,CID,XB).
-
-pp_xform_clause(H, CID, (XH :- '$dbg_aph'(CID,SH,EH))) 
-	:-!,
-	arg(2,H,SH),
-	arg(3,H,EH),
-	pp_flatten(H,XH).
-
-pp_xform_body(struct((G1,G2),_,_),CID,(XG1,XG2)) 
-	:-!,
-	pp_xform_body(G1,CID,XG1),
-	pp_xform_body(G2,CID,XG2).
-
-pp_xform_body(struct((G1;G2),_,_),CID,(XG1;XG2)) 
-	:-!,
-	pp_xform_body(G1,CID,XG1),
-	pp_xform_body(G2,CID,XG2).
-
-pp_xform_body(struct((G1->G2),_,_),CID,(XG1->XG2)) 
-	:-!,
-	pp_xform_body(G1,CID,XG1),
-	pp_xform_body(G2,CID,XG2).
-
-pp_xform_body(G,CID,('$dbg_apg'(CID,SG,EG),XG)) 
-	:-
-	arg(2,G,SG),
-	arg(3,G,EG),
-	pp_flatten(G,XG).
-***/
+declaration_functor(module).
+declaration_functor(endmod).
+declaration_functor(export).
+declaration_functor(import).
+declaration_functor(use).
+declaration_functor(module_closure).
 
 /*---------------------------------------------------------------------------*
  * Token Preprocessor

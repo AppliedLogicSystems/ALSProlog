@@ -1523,7 +1523,7 @@ setup_debug(Module, Call)
 
 setup_debug(Module, Predicate, Arity)
 	:-
-%	change_source_level_debugging(on),
+	change_source_level_debugging(on),
 	check_file_setup(Module, Predicate, Arity, SrcFilePath, DebugType),
 	reload_debug(DebugType, SrcFilePath),
 	!,
