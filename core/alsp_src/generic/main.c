@@ -288,8 +288,12 @@ static int PI_prolog_init0(const PI_system_setup *setup)
      * to find the builtins.
      */
 #ifndef PURE_ANSI
-    strcpy(alsdir, imagedir);
-    strcat(alsdir, "alsdir");
+	if (setup->alsdir) {
+		strcpy(alsdir, setup->alsdir);
+    } else {
+    	strcpy(alsdir, imagedir);
+    	strcat(alsdir, "alsdir");
+    }
 
 #ifdef VMS
     strcat(alsdir, ".dir");
