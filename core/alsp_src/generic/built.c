@@ -321,7 +321,7 @@ static struct blt_struct {
 	BLT("getenv", 2, pbi_getenv, "_pbi_getenv"),
 	BLT("get_user_home", 2, pbi_get_user_home, "_pbi_get_user_home"),
 	BLT("tmpnam", 1, pbi_tmpnam, "_pbi_tmpnam"),
-#endif OSACCESS
+#endif /* OSACCESS */
 #endif /* KERNAL */
 
 	BLT("system", 1, pbi_system, "_pbi_system"),
