@@ -325,9 +325,9 @@ alsmics:  alsdir $(srcdir)/utils/$(alsmics_c)
 	-cp alsmics alsdir/als-mics
 
 
-alstest:  alspro_b
+alstest:  alspro
 	echo >> nrev_rcd
-	 ./alspro_b -obp $(srcdir)/tests/snrev -g snrev >> nrev_rcd
+	 ./alspro -obp $(srcdir)/tests/snrev -g snrev >> nrev_rcd
 	cat nrev_rcd
 
 

@@ -10,11 +10,11 @@ module builtins.
 export deleteNth/3.
 export change_nth/3.
 export subst_nth/4.
-export nth/3.
+export nth/3. %% -- moved to simplio.pro in builtins
 export nth_tail/4.
 export at_most_n/3.
-export position/3.
-export position/4.
+export position/3.	%% -- moved to simplio.pro in builtins
+export position/4.	%% -- moved to simplio.pro in builtins
 export get_list_tail/3.
 export list_delete/3.
 export sublist/4.
@@ -73,6 +73,7 @@ subst_nth(N, [Skip | List], NewItem, [Skip | NewList])
 	M is N-1,
 	subst_nth(M, List, NewItem, NewList).
 
+/*********************
 /*!---------------------------------------------------------------------
  |	nth/3
  |	nth(N, List, X)
@@ -87,6 +88,7 @@ nth(0, [X | _], X) :-!.
 nth(M, [_ | T], X) :-
 	K is M-1,
 	nth(K, T, X).
+*******************/
 
 /*!---------------------------------------------------------------------
  |	nth_tail/4
@@ -121,6 +123,7 @@ at_most_n([X | T], N, [X | R])
 	M is N-1,
 	at_most_n(T, M, R).
 
+/*********************
 /*!---------------------------------------------------------------------
  |	position/3
  |	position(List, Item, N)
@@ -152,6 +155,7 @@ position([_ | ListTail], Item, Current, Nth)
 	:-
 	Next is Current+1,
 	position(ListTail, Item, Next, Nth).
+*******************/
 
 /*!---------------------------------------------------------------------
  |	get_list_tail/3

@@ -20,8 +20,9 @@
         intersect/2, int_diff/4, union/3,sorted_merge/3,sorted_merge/2],[]).
 
 :-libactivate(builtins,['library',listutl2],
-    [deleteNth/3,change_nth/3,nth/3,nth_tail/4,at_most_n/3,position/3,
-        position/4,get_list_tail/3,list_delete/3,sublist/4,
+    [deleteNth/3,change_nth/3,nth_tail/4,at_most_n/3,
+	 %%  nth/3, position/3, position/4,
+		get_list_tail/3,list_delete/3,sublist/4,
 		subst_nth/4,last/2],[]).
 
 :-libactivate(builtins,['library',listutl3],
@@ -53,8 +54,10 @@
 :-libactivate(avl,['library',avl],
     [avl_create/1,avl_inorder/2,avl_inorder_wdata/2,avl_insert/4,avl_search/3],[]).
 
+/*
 :-libactivate(windows,['library',simplio],
     [simple_menu/3, fin_simple_menu_code0/5, query_user/3,query_user/5 ],[]).
+*/
 
 :-libactivate(windows,['library',iolayer],[chooseFile/3,menu/3,menu/4],[]).
 

@@ -1,10 +1,15 @@
-echo '/*===============================================================*'>/mailbox3/alsp_src/generic/version.h
-echo ' *                      version.h'>>/mailbox3/alsp_src/generic/version.h
-echo ' *       Copyright (c) 1990-1996 by Applied Logic Systems, Inc.'>>/mailbox3/alsp_src/generic/version.h
-echo ' *'>>/mailbox3/alsp_src/generic/version.h
-echo ' *          Version number - '`date`>>/mailbox3/alsp_src/generic/version.h
-echo ' *===============================================================*/'>>/mailbox3/alsp_src/generic/version.h
-echo '#ifndef SysVersionNum'>>/mailbox3/alsp_src/generic/version.h
-echo '#define SysVersionNum "'`/mailbox3/alsp_src/bin/vers mem.c`'"'>>/mailbox3/alsp_src/generic/version.h
-echo '#endif /* SysVersionNum */'>>/mailbox3/alsp_src/generic/version.h
+PTH=/apache/alsp_src
+VERSH=$PTH/generic/version.h
+
+echo rebuilding $VERSH
+
+echo '/*===============================================================*'>$VERSH
+echo ' *                      version.h'>>$VERSH
+echo ' *       Copyright (c) 1990-1996 by Applied Logic Systems, Inc.'>>$VERSH
+echo ' *'>>$VERSH
+echo ' *          Version number - '`date`>>$VERSH
+echo ' *===============================================================*/'>>$VERSH
+echo '#ifndef SysVersionNum'>>$VERSH
+echo '#define SysVersionNum "'`$PTH/bin/vers $PTH/generic/mem.c`'"'>>$VERSH
+echo '#endif /* SysVersionNum */'>>$VERSH
 

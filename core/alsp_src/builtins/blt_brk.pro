@@ -82,7 +82,8 @@ breakhandler0(M,G)
 	options(ListOfCodes, Responses, Prompt, Options0),
 	Options = [io_streams=(warning_input,warning_output) | Options0],
 		%% Note: menu/4 defined in Library in iolayer.pro:
-	menu(break_window,ChoiceItems,Response,Options),
+%	menu(break_window,ChoiceItems,Response,Options),
+	simple_menu(ChoiceItems, Response, [0-'No Choice - Exit menu' | Options]),
 	position(ChoiceItems, Response, PosN),
 	nth(PosN, Responses, Resp),
 	break_handler(Resp,M,G).
@@ -156,6 +157,15 @@ stack_trace(N)
 	:-
 	frame_info(N,FI),
 	!,
+	disp_stack_trace(FI,N).
+
+disp_stack_trace((builtins:GG),_) 
+	:-
+	functor(GG,do_shell_query,_),
+	!.
+
+disp_stack_trace(FI, N)
+	:-
 	printf(debugger_output,'(%d) %t\n',[N,FI],[quoted(true),maxdepth(8)]),
 	NN is N+1,
 	stack_trace(NN).

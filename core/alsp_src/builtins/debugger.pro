@@ -355,26 +355,13 @@ strip_colon(M,G,M,G).
  | by failing itself.
  *-------------------------------------------------------------------------*/
 
-/*
-dogoal(Box,Depth,EMagic,Module,Goal)
-	:-
-	noshow(Module,Goal),
-    !,
-    setPrologInterrupt(skipping),
-    dbg_spyon,
-    dbg_call(Module,Goal).
-*/
-
 %% === Handle the Call port
 dogoal(Box,Depth,EMagic,Module,Goal)
 	:-
-%pbi_write(dogoal(Box,Depth,EMagic,Module,Goal)),pbi_nl,pbi_ttyflush,
 			%% Display the call port:
     showGoal(Box,Depth,call,Module,Goal,UserCommand),
-%pbi_write(userCommand=UserCommand),pbi_nl,pbi_ttyflush,
 			%% And do the call:
     execute(UserCommand,Module,Goal),
-%pbi_write(after_execute),pbi_nl,pbi_ttyflush,
 			%% Don't want to trace after coming out here --
 			%%   that would show parts of the debugger code as
 			%%   if it were part of the user's program!
@@ -388,7 +375,6 @@ dogoal(Box,Depth,EMagic,Module,Goal)
 			%% get magic value to use when redoing:
     getPrologInterrupt(RMagic),
 			%% Display the exit and redo ports:
-%pbi_write(before_exitOr),pbi_nl,pbi_ttyflush,
     exitOrRedo(Box,Depth,EMagic,RMagic,Module,Goal).
 
 %% === Goal has failed.
@@ -470,8 +456,15 @@ execute(fail,Module,Goal) :- !,
  | see the guts of builtins.
  *-------------------------------------------------------------------------*/
     
+%% === See if we have a "special" builtin -- hack for call/1 problem case:
+execute_debug(ResMod,call,2,Module,call(SrcGoal,NN)) :-
+	!,
+	setPrologInterrupt(debug_user),
+	callWithDelayedInterrupt(Module,SrcGoal).
+
 %% === See if we have a "special" builtin such as setof or findall
 execute_debug(ResMod,PredName,Arity,Module,Goal) :-
+
     noshow_special(ResMod,PredName,Arity),
     !,
     setPrologInterrupt(debug_noshow),
@@ -1598,7 +1591,7 @@ showGoalToUserTTY(Port,Box,Depth, Module, XGoal, Response)
 deb_listOfCodes([
 	a,					b,					c,
 	d,					e,					f,
-	j,					l,					m,
+	i, 			j,					l,					m,
 	n,					'N',				r,
 	s,					t,					'?'
 		]).
@@ -1610,6 +1603,7 @@ deb_choiceItems([
 	    'Set print depth', 
 	    'Exit Prolog',
 	    'Fail goal', 
+	    'Info: Print system statistics',
 	    'Jump to next spy point or current port of call',
 	    'Leap to next spy point',
 	    'Change print mode', 
@@ -1617,7 +1611,7 @@ deb_choiceItems([
 	    'Turn off trace (in break)', 
 	    'Retry goal',
 	    'Skip to next port of call',
-	    'Print system statistics',
+	    'Print stack Trace',
 	    '?'			]).
 
 deb_responses([
@@ -1639,12 +1633,15 @@ deb_Options([		codes		= ListOfCodes,
 
 		%% short form, used for non-menu interaction:
 short_deb_resps([
-	end_of_line-creep,	c-creep,
-	a-abort, 		b-break, 			
-	d-set_print_depth,	e-exit,			f-fail,
-	j-jump,			l-leap,			m-change_print_mode,
-	n-trace_off,		'N'-break_trace_off,	r-retry,
-	s-skip,			t-statistics,		'?'-'$badInput$', % = help
+	end_of_line-creep,  c-creep,
+	a-abort,            b-break, 			
+	d-set_print_depth,	e-exit,			
+	f-fail,             j-jump,
+	l-leap,             m-change_print_mode,
+	n-trace_off,		'N'-break_trace_off,	
+	r-retry,            s-skip,
+	i-statistics,       t-stack_trace,
+	'?'-'$badInput$', % = help
 	_-'$badInput$'		%% default for all other input
 		]).
 
@@ -1747,6 +1744,15 @@ act_on_response(statistics, Port,Box,Depth, Module,Goal,Response) :-
 	statistics,
 	show_again(Port,Box,Depth,Module,Goal,Response).
 
+%% === Print stack trace
+act_on_response(stack_trace, Port,Box,Depth, Module,Goal,Response) :-
+	!,
+	printf(debugger_output,'----begin stack trace----\n', []),
+	deb_stack_trace(1,1),
+	printf(debugger_output,'----end stack trace----\n', []),
+	show_again(Port,Box,Depth,Module,Goal,Response).
+
+
 show_again(Port,Box,Depth,Module,Goal,Response) :-
 	writeGoal(Box,Depth,Port,Module,Goal),
 	getresponse2(Port,Box,Depth, Module, Goal, Response).
@@ -1760,40 +1766,40 @@ show_again(Port,Box,Depth,Module,Goal,Response) :-
 
 writeGoal(Box,Depth,Port,Module,Goal) 
 	:-
-	printf(debugger_output, 	"(%d) %d %t: ", [Box,Depth,Port]),
+	printf(debugger_output,'(%d) %d %t: ', [Box,Depth,Port]),
 	write_term(debugger_output, Module:Goal,	[lettervars(false)]),
-%% if mac:  nl(debugger_output),
 	flush_output(debugger_output).
-
-/*****
-/*
-	printf(debugger_output, 	"(%d) %d %t: ", [Box,Depth,Port]),
-%	pbi_write(Module:Goal),pbi_nl,pbi_ttyflush,
-%	write_term(debugger_output, Module:Goal,	[lettervars(false)]),
-Goal =.. [FCTR | ARGS],
-	write_term(debugger_output, Module:FCTR,	[lettervars(false)]),
-ARGS = [AA | TTT],
-	write_term(debugger_output, '--a'(AA),	[lettervars(false)]),
-AA =.. [AFF | AAargs],
-	write_term(debugger_output, '--aa'(AFF),	[lettervars(false)]),
-AAargs = [ BB | BBT],
-	write_term(debugger_output, '--aa-1'(BB),	[lettervars(false)]),
-	write_term(debugger_output, '--aa-2'(BBT),	[lettervars(false)]),
-
-	write_term(debugger_output, '--b'(TTT),	[lettervars(false)]),
-%% if mac:  nl(debugger_output),
-	flush_output(debugger_output).
-*/
-
-	printf(debugger_output, 	"(%d) %d %t: ", [Box,Depth,Port]),
-	flush_output(debugger_output),
-	pbi_write(Module:Goal),pbi_ttyflush.
-	*****/
-
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%% Windows I/O Hooks %%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%  - in vdebug.pro  %%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+deb_stack_trace(20,_) :- !.
+deb_stack_trace(N,M) 
+	:-
+	frame_info(N,FI),
+	!,
+	deb_disp_stack_trace(FI,N,M).
+
+deb_stack_trace(_,_).
+
+deb_disp_stack_trace((builtins:GG),_,_) 
+	:-
+	functor(GG,do_shell_query,_),
+	!.
+
+deb_disp_stack_trace((debugger:dogoal(_,_,_,Mod,Goal)), N,M)
+	:-!,
+	printf(debugger_output,'(%d) %t:%t\n',[M,Mod,Goal],[quoted(true),maxdepth(8)]),
+	NN is N+1,
+	MM is M+1,
+	deb_stack_trace(NN,MM).
+
+deb_disp_stack_trace(FI, N,M)
+	:-
+	NN is N+1,
+	deb_stack_trace(NN,M).
 
 endmod.					%% builtins:  debugger segment

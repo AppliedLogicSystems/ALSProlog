@@ -71,8 +71,8 @@ prolog_system_error(ErrorCode, Args) :-
 
 prolog_system_error(WarningCode, Args) :-
 	warning_code(WarningCode, Pattern),
-	printf(warning_output, '\nWarning: ',[]),
-	printf(warning_output,Pattern, Args,[quoted(true), maxdepth(9)]),
+	printf(error_stream, '\nWarning: ',[]),
+	printf(error_stream,Pattern, Args,[quoted(true), maxdepth(9)]),
 	flush_output(error_stream).
 
 error_code(as_is(Mess),	Mess) :-!.
@@ -247,8 +247,8 @@ als_advise(FormatString)
 export als_advise/2.
 als_advise(FormatString, Args) 
 	:-
-	printf(warning_output, FormatString, Args),
-	flush_output(warning_output).
+	printf(error_stream, FormatString, Args),
+	flush_output(error_stream).
 
 /*
  * Print the given consult message if the "consultmessage" flag is on.

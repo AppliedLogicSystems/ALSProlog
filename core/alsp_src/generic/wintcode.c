@@ -1492,6 +1492,12 @@ w_addclause(p, a, cg_id,
 	}
 	else {			/* We are adding to the middle */
 	    nextClauseAddr(prevclause) = newclause;
+		if (ent->first_clause == prevclause) {
+				/* prev clause IS the very first clause */
+			ic_install_try_me_jmp(ent,
+						clauseCode(prevclause) + dstartoffset,
+						(long)choiceEntry(newclause));
+		};
 	    ic_install_retry_me(
 				   choiceCode(prevclause),
 				   (long)choiceEntry(newclause),
@@ -2484,12 +2490,12 @@ w_frame_info(f,ca,mp)
 {
     long *nf;
     if (*(f+1)) {
-	*ca = clause_start_from_retaddr((Code *) *(f+1), mp);
-	nf = (PWord *) MUNBIAS(*(f));
+		*ca = clause_start_from_retaddr((Code *) *(f+1), mp);
+		nf = (PWord *) MUNBIAS(*(f));
     }
     else {
-	nf = 0;
-	*ca = 0;
+		nf = 0;
+		*ca = 0;
     }
     return nf;
 }
