@@ -565,7 +565,7 @@ char_in(Pos,AtomLen,Atom,Char,Pos)
 					  
 char_in(Pos,AtomLen,Atom,Char,Pos)
 	:-
-	sub_atom(Atom, Pos, 1, Char), !.
+	sub_atom(Atom, Pos, 1, _, Char), !.
 							   
 char_in(CurPos,AtomLen,Atom,Char,Pos)
 	:-
@@ -595,13 +595,13 @@ strip_prefix0([P/A | List], Start, [SP | Result])
 	:-!,
 	atom_length(P, PL),
 	TailLen is PL - Start + 1,
-	sub_atom(P,Start,TailLen,SP),
+	sub_atom(P,Start,TailLen,_, SP),
 	strip_prefix0(List, Start,  Result).
 
 strip_prefix0([P | List], Start, [SP | Result])
 	:-!,
 	atom_length(P, PL),
-	sub_atom(P,Start,PL,SP),
+	sub_atom(P,Start,PL,_, SP),
 	strip_prefix0(List, Start, Result).
 
 strip_prefix0([_ | List], Start, Result)

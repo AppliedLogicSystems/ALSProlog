@@ -773,7 +773,7 @@ locate_line(Atom, Stream)
 locate_line(Atom, Len, Stream)
 	:-
 	get_line(Stream, NextLine),
-	(sub_atom(NextLine, 1, Len, Atom) ->
+	(sub_atom(NextLine, 1, Len, _, Atom) ->
 		true
 		;
 		locate_line(Atom, Len, Stream)

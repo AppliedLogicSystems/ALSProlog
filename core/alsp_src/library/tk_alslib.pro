@@ -55,7 +55,10 @@ init_tk_alslib(Interp,Shared)
 	tcl_interp_created(Interp),
 	!,
 	builtins:sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, shared, Shared).
+%	extendPath(ALSDIR, shared, Shared).
+	split_path(ALSDIR, ALSDIRElts),
+	dappend(ALSDIRElts, [shared], SharedElts),
+	join_path(SharedElts, Shared).
 
 init_tk_alslib(Interp,Shared)
 	:-
@@ -67,15 +70,20 @@ init_tk_alslib(Interp,Shared)
 	catch(tk_new(Interp),Ball1,check_tcl_error(Ball1)),
 	tcl_call(Interp, [wm,withdraw,'.'], _),
 	builtins:sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, shared, Shared),
+%	extendPath(ALSDIR, shared, Shared),
+	split_path(ALSDIR, ALSDIRElts),
+	dappend(ALSDIRElts, [shared], SharedElts),
+	join_path(SharedElts, Shared),
 	tcl_call(Interp, [set,'ALSTCLPATH',Shared], _),
 	sys_env(OS, _, _),
 	(OS = macos ->
 		tcl_call(Interp, 'source -rsrc als_tklib', _)
 		;
-		( pathPlusFile(Shared, 'als_tklib.tcl', ALSTKLIB),
-		  tcl_call(Interp, [source, ALSTKLIB], _)
-		)
+%		( pathPlusFile(Shared, 'als_tklib.tcl', ALSTKLIB),
+		split_path(Shared, SharedElts),
+		dappend(SharedElts, ['als_tklib.tcl'], ALSTKLIBElts),
+		join_path(ALSTKLIBElts, ALSTKLIB),
+		tcl_call(Interp, [source, ALSTKLIB], _)
 	),
 	(tcl_interp_created(Interp) ->
 		true
@@ -498,8 +506,11 @@ create_image(ImagePath, ImageName)
 create_image(Interp, ImagePath, ImageName)
 	:-
 	(var(ImageName) ->
-		pathPlusFile(_, ImageFile, ImagePath),
-		(filePlusExt(ImageBase, ImgExt, ImageFile) ->
+%		pathPlusFile(_, ImageFile, ImagePath),
+		split_path(ImagePath, ImagePathElts),
+		dreverse(ImagePathElts, [ImageFile | _]),
+%		(filePlusExt(ImageBase, ImgExt, ImageFile) ->
+		((file_extension(ImageBase, ImgExt, ImageFile), ImgExt \= '') ->
 			true
 			;
 			ImgExt = img,
