@@ -1,75 +1,13 @@
-Macintosh ALS Prolog Build Instructions
-=======================================
-Author: Chuck Houpt Date: 14-Oct-1997
+Building
+--------
 
-These instructions assume that the ALS Prolog source directory exists,
-and all of its generated files are up to date (for example: generated
-makefiles, headers, etc).  The ALS Prolog source directory is refered to
-as {srcdir} in this document.
-
-Build Materials:
-----------------
-
-- Macintosh (68k or PowerPC) with at least 20 MB of available memory and at
-least 150 MB of available disk space.
-
-- Metrowerk's Code Warrior Gold 8 with the following options and modifications:
-
-    - Code Warrior Grand Unified Socket Interface Library (CWGUSI) 1.7
-       Freeware by Matthias Neeracher (neeri@iis.ee.ethz.ch) Available
-       from http://www.iis.ee.ethz.ch/~neeri
-
-- Unix system
-    
-Build Instructions:
--------------------
-
-1. From Unix, run the mac_setup shell script to create a directory named
-   macos for the build. The mac_setup script take two arguments:
-       - source directory
-       - C preprocessor define
-       
-   Example: % ../alsp_src/macos/mac_setup ../alsp_src "#define INTCONSTR"
-	
-2. On the Mac, decode and extract the project files in the build directory
-using Stuffit Expander.  The following projects need expanding:
-
-	alspro_lib.proj.sit.hqx
-	alspro_b.proj.sit.hqx
-	alspro_slib.proj.sit.hqx
-	alspro.proj.sit.hqx
-	Build_MacOS.sit.hqx
-	
-3. On the Mac, run the AppleScript Application "Build_MacOS" to build
-all the projects.
-
-The script will build "ALS Prolog Base" and ask you to locate it, and
-wait until it has finished launching (builtins .obp files).
-
-Each project may need to have its access paths adjusted.
-The projects assume that the alsp_src directory is sibling of the build
-directory.
+For building with Metrowerks, please see the combined MacOS/Win32
+build instructions in ../mwbuild/Build_Instructions.
 
 Testing
 -------
 
 Currently run test programs by hand.
-
-Files generated:
-----------------
-
-Static embedable prolog engine libraries:
-
-    alspro.ppc.lib
-    alspro.68k.lib
-
-Dynamic embedable prolog engine libraries:
-
-    ALS Prolog Library
-
-Stand alone TTY applications:
-
-    ALS Prolog 2xxx
 
 Programming Eve3 Hardware Keys
 ------------------------------
