@@ -247,6 +247,73 @@ proc do_popup_input {Prompt Title} {
 	return $proenv(.input_popup)
 }
 
+proc do_user_pw_dialog {Title} {
+	global proenv  tcl_platform
+	set proenv(.user_pw_popup) ""
+	Window show .user_pw_popup
+	raise .user_pw_popup
+	if {$tcl_platform(platform) == "windows"} {
+		focus -force .user_pw_popup
+	}
+	wm title .user_pw_popup $Title
+    focus .user_pw_popup.user_entry
+	tkwait variable proenv(.user_pw_popup)
+	return $proenv(.user_pw_popup)
+}
+
+proc fin_user_pw {base} {
+	global proenv
+	set proenv($base) [list [$base.user_entry get] [$base.pw_entry get] ]
+	Window destroy $base
+}
+
+
+proc vTclWindow.user_pw_popup {base} {
+    if {$base == ""} {
+        set base .user_pw_popup
+    }
+    if {[winfo exists $base]} {
+        wm deiconify $base; return
+    }
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel \
+        -cursor xterm 
+    wm focusmodel $base passive
+    wm geometry $base 228x85+170+213
+    wm maxsize $base 1028 753
+    wm minsize $base 104 1
+    wm overrideredirect $base 0
+    wm resizable $base  0 0
+    wm deiconify $base
+    wm title $base "ID & Password Required"
+    label $base.user_label \
+        -borderwidth 1 -font {Times 10 bold} -justify right -text {User ID:} 
+    label $base.pw_label \
+        -borderwidth 1 -font {Times 10 bold} -justify right -text Password: 
+    entry $base.user_entry -font {Times 10} 
+    entry $base.pw_entry -font {Times 10} -show "*"
+	button $base.ok -font {Times 10 bold} -text OK -command "fin_user_pw $base"
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    grid $base.user_label \
+        -in .user_pw_popup -column 0 -row 0 -columnspan 1 -rowspan 1 -pady 2 \
+        -sticky e 
+    grid $base.pw_label \
+        -in .user_pw_popup -column 0 -row 1 -columnspan 1 -rowspan 1 -pady 4 \
+        -sticky e 
+    grid $base.user_entry \
+        -in .user_pw_popup -column 1 -row 0 -columnspan 1 -rowspan 1 -padx 3 \
+        -sticky ew 
+    grid $base.pw_entry \
+        -in .user_pw_popup -column 1 -row 1 -columnspan 1 -rowspan 1 -padx 3 \
+        -sticky ew 
+    grid $base.ok \
+        -in .user_pw_popup -column 0 -row 2 -columnspan 2 -rowspan 1 -pady 3
+}
+
 ##################################################################################
 ######### POPUP LIST SELECTION  
 ##################################################################################
