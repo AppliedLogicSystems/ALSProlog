@@ -10,6 +10,6 @@
  * Revision History:
  *===============================================================*/
 #ifndef SysVersionNum
-#define SysVersionNum "1.74"
+#define SysVersionNum "1.74B"
 #endif /* SysVersionNum */
 

@@ -816,7 +816,7 @@ ld_fs
 	:-	
 	sys_env(OS,_,_),
 	(   OS = unix -> load_builtins(fsunix)
-	;   OS = dos  -> load_builtins(fsdos386)
+	;   OS = dos  -> load_builtins(fsdos)
 	;	OS = macos -> load_builtins(fsmac)
 	;   true		%% Extend to other OS's
 	).
@@ -826,7 +826,7 @@ ld_mth
 	:-	
 	sys_env(_,_,Proc),
 	(   Proc = m88k
-	->  load_builtins(blt_mth88)
+	->  load_builtins(math88k)
 	;   true
 	).
 

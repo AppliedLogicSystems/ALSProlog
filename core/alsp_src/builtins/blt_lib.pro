@@ -109,7 +109,7 @@
 		 xlist_append/3, xlist_append/2,
 		 xlist_mem/2,xlist_dmem/2],[]).
 
-:-libactivate(sio,['library',sock_misc],
+:-libactivate(sio,['library',sockmisc],
 	[bread/1,bread/2, bread/3, bread_term/3, bread_term/4], [] ).
 
 :-libactivate(builtins,['library',strctutl],

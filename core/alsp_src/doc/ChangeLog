@@ -1,3 +1,10 @@
+Fri Jun 29 1995 Ken Bowen
+
+	* Minor bug repair in float/integer input routines; minor
+	  structural adjustments.
+
+	* Tagged as V1-74B
+	
 Mon May 29 1995 Ken Bowen
 
 	* Modified to no longer coerce "integral floats" (e.g., 2.0)
