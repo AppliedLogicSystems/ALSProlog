@@ -50,6 +50,7 @@ use tcltk.
 default_read_eoln_type(_, universal).
 
 default_write_eoln_type(socket, crlf) :- !.
+default_write_eoln_type(tk_window, lf) :- !.
 
 :-	als_system(L),
 	dmember(os=OS, L),
@@ -67,9 +68,7 @@ default_write_eoln_type(socket, crlf) :- !.
 			)
 			;
 			assertz(default_write_eoln_type(_, crlf))
-	),
-	asserta((default_write_eoln_type(tk_window(_,_), crlf) :-!)),
-	asserta((default_write_eoln_type(tk_win(_,_), crlf) :-!))
+	)
 ).
 
 /*
@@ -1769,7 +1768,6 @@ getWinGV(WinID,WinPosGV) :-      %% allocate a gvar for WinID if not previously 
 
 
 
-
 open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
 	:-
 	(atom(WinName) -> WinID = WinName ; sprintf(atom(WinID), '%t', [WinName]) ),
@@ -1785,7 +1783,9 @@ open_tk_window_stream(WinName,Interp,Mode,Options,Stream)
 	file_modes(Mode,NMode,SMode),
 	set_stream_mode(Stream,SMode),
 	buffering(Options,NBuffering),
-	sio_tk_win_open(WinID,Stream,NMode,NBuffering),
+	eoln_modes(tk_window, Options, NEoln),
+ 	sio_generic_open(0,Stream,NMode,NBuffering,NEoln),
+%	sio_tk_win_open(WinID,Stream,NMode,NBuffering,NEoln),
 	TextBuffer = '',
 	set_stream_extra(Stream,TextBuffer),	%% the Prolog side window buffer
 	    %% Note: extrar maintains the text buffer;
