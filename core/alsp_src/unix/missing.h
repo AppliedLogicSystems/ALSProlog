@@ -336,4 +336,8 @@ extern int h_errno;
 extern char *tempnam(const char *dir, const char *pfx);
 #endif
 
+#ifdef MISSING_EXTERN_SETSOCKOPT
+extern int setsockopt(int s, int level, int optname, char *optval, int optlen);
+#endif
+
 #endif /* _MISSING_H_INCLUDED_ */
