@@ -20,18 +20,22 @@
 #ifdef DOS
 #include <stdef.h>
 #include <errno.h>
+
 #else  /* DOS */
 #ifdef VMS
 #include <errno.h>
 #include <types.h>
+
 #else  /* VMS */
 #ifdef MacOS
 #include <errno.h>
 #include <Events.h>
+
 #else  /* MacOS */
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/param.h>
+
 #endif /* MacOS */
 #endif /* VMS */
 #endif /* DOS */
@@ -77,10 +81,12 @@ static jmp_buf is_error;
 #define srandom srand48
 extern	void	srand48		PARAMS(( long ));
 extern	double	drand48		PARAMS(( void ));
+
 #elif defined(HAVE_SRANDOM)
 #define RANDRANGE 0x7fffffff
 extern	long	random		PARAMS(( void ));
 extern	void	srandom		PARAMS(( int ));
+
 #elif defined(HAVE_SRAND)
 #define random rand
 #define srandom srand
@@ -121,7 +127,6 @@ current_time(void)
 #define currentTime time(0L)
 #endif /* MacOS */
 #endif /* DOS */
-
 
 void
 init_time()

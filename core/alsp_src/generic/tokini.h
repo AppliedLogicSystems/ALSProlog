@@ -33,7 +33,7 @@
 	TK(TK_CUT,"!"),				
 
 	/*
-	 * Done with the cutmacros
+	 * Finished with the cutmacros
 	 */
 	
 	/*
@@ -252,6 +252,7 @@
 	TK(TK_CHARACTER_CODE,"character_code"),
 	TK(TK_EXCEEDED_MAX_ARITY,"exceeded_max_arity"),
 	TK(TK_FLAG,"flag"),
+	TK(TK_DELAY,"$delay"),
 	TK(TK_OVERFLOW,"overflow"),
 	TK(TK_UNDERFLOW,"underflow"),
 	TK(TK_ZERO_DIVIDE,"zero_divide"),

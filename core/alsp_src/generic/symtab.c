@@ -76,6 +76,11 @@ static long ts_prime = 2039;		/* actual size (the prime number) */
 static long ts_cutoff = 1712;		/* the cutoff point */
 static long ts_next = TK_EOF + 1;	/* the next token index */
 
+int
+tok_table_size()
+{
+	return(ts_prime);
+}
 
 
 /*
@@ -101,12 +106,12 @@ static tkentry initial_table[] =
 };
 
 
-/*
+/*-@[5.1]@-------------------------------------------------------------
  * toktable is accessible to the world.  It is a pointer to the array of
  * tokens.  At times it may be necessary to make this array bigger, so more
  * space is malloc'd, the tokens copied over and the entries rehashed.
  *
- */
+ *---------------------------------------------------------------------*/
 
 tkentry *toktable = (tkentry *) 0;
 
@@ -411,7 +416,7 @@ symtab_init()
     if (!toktable) {
 	/* allocate space for the token table */
 	toktable = (tkentry *) ss_malloc(sizeof (tkentry) * ts_allocated,
-					 FE_SYMTAB_INIT);
+			 							FE_SYMTAB_INIT);
 	/* Copy initial_table to toktable */
 	memcpy((char *) toktable, (char *) initial_table, sizeof initial_table);
 

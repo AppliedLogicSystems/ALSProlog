@@ -64,6 +64,8 @@ pbi_reset_wm_normal()
     SUCCEED;
 }
 
+#ifdef OLDSHELL
+
 int
 pbi_showanswers()
 {
@@ -126,6 +128,8 @@ pbi_showanswers()
     SUCCEED;
 }
 
+#endif /* OLDSHELL */
+
 static void
 abortmessage()
 {
@@ -159,6 +163,7 @@ pbi_halt()
 
 
 
+#ifdef OLDSHELL
 int
 pbi_printno()
 {
@@ -173,6 +178,7 @@ pbi_printno()
 	PI_oprintf("\nno.\n");
     SUCCEED;
 }
+#endif /* OLDSHELL */
 
 int
 pbi_printwarning()
@@ -234,6 +240,7 @@ pbi_debugger(void)
 
 #endif /* MacOS */
 
+#ifdef OLDSHELL
 int
 pbi_statistics()
 {
@@ -334,6 +341,7 @@ pbi_statistics()
     else
 	FAIL;
 }
+#endif /* OLDSHELL */
 
 #ifdef	IProfile
 int

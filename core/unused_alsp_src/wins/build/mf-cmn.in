@@ -17,7 +17,8 @@ LIBOBJS: $(LIBCS)
 #
 # Define CPPFLAGS and the default rule for translating .c files to .o files
 #
-CPPFLAGS= -I. -I.. -I../.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH)  -I$(srcdir)/$(ARCH)/$(SOS) -I$(WSRCD) -DHAVE_CONFIG_H
+CPPFLAGS= -I. -I.. -I../.. -I$(srcdir)/generic -I$(srcdir)/$(ARCH)  \
+		   -I$(srcdir)/$(ARCH)/$(SOS) -I$(WSRCD) $(BDINCS) -DHAVE_CONFIG_H
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(X_CFLAGS) $<
 
@@ -78,7 +79,7 @@ $(IMAGE)0: pimain.o pi_init.o $(PROLIB) $(WINTLIB)
 
 $(IMAGE): $(IMAGE)0 
 	ALSPATH=$(WLD); export ALSPATH; \
-	$(IMAGE)0 *.pro \
+	$(IMAGE)0 *.pro $(ADDL_PROFS) \
 		-g 'save_image($(IMAGE),[libload(true)])'
 
 all: library image

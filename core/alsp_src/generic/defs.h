@@ -45,8 +45,10 @@
 
 #ifdef MacOS
 #define HAVE_BRK
+/*
 #elif defined(__GO32__)
 #define HAVE_BRK
+*/
 #else
 /*** #define HAVE_BRK  ***/
 #endif
@@ -329,7 +331,7 @@ extern	void	heap_overflow	PARAMS(( void ));
 extern	void	list_asm	PARAMS(( Code *, int ));
 
 /* ----------   loadfile.c ----------   */
-extern	void	fix_MAGIC	PARAMS(( void ));
+/* extern	void	fix_MAGIC	PARAMS(( void )); */
 extern	void	f_icode		PARAMS(( int, long, long, long, long ));
 extern	int	obp_open	PARAMS(( char * ));
 extern	void	obp_close	PARAMS(( void ));

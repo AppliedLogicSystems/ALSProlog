@@ -19,6 +19,13 @@
 #include "built.h"
 #include "machinst.h"
 #include "icodegen.h"
+#ifdef FREEZE
+#include "freeze.h"
+#endif
+
+#ifdef TRACEBWAM
+extern	int tracewam	PARAMS(( Code * ));
+#endif
 
 static	int	run_wam		PARAMS(( Code * ));
 static	int	wam_unify	PARAMS(( PWord *, PWord * ));
@@ -27,12 +34,10 @@ static	int	wam_unify	PARAMS(( PWord *, PWord * ));
 Code  wam_instrs[W_NUM_OPS];	/* map from instruction number to label */
 #endif	/* Threaded */
 
-
 #ifdef	IProfile
 
 static long iprofile_counts[W_NUM_OPS];
 #define DO_PROFILE(op)	: iprofile_counts[op]++; lp##op
-
 
 init_iprofile()
 {
@@ -73,22 +78,17 @@ dump_iprofile()
     }
 }
 
-
 #else	/* IProfile */
 #define DO_PROFILE(op)	/* do nothing */
 #endif	/* IProfile */
 
-
-
-/* Global WAM register locations for use by unify() */
+/*--- Global WAM register locations for use by unify() ---*/
 
 PWord *gr_SPB, *gr_HB, *gr_TR;
 
-
-
-/*
+/*-----------------------------------*
  * Special purpose WAM code patches
- */
+ *-----------------------------------*/
 
 Code *wm_fail;
 Code *wm_trust_fail;
@@ -98,34 +98,103 @@ Code *wm_rungoal_code;
 Code *wm_panic;
 PWord *rungoal_modpatch, *rungoal_goalpatch;
 
-
-
-/*
+/*-----------------------------------*
  *  type macros and utilities
- */
+ *-----------------------------------*/
 
 #define PWORD(v) ((PWord) (v))
 #define PWPTR(v) ((PWord *) (v))
 #define SHPTR(v) ((short *)(v))
 
-#define BIND(r,f)  { TRAIL(r); *(r) = PWORD(f); }
+/*---------------------------------------
+ |	BIND(r,f): Binds r --> f
+ |	Installs pointer to f in r
+ |
+ |	VVBIND(r,f): Special cases the
+ |	variable-variable bind case, for
+ |	the delay mechanism.  If FREEZE is
+ |	undefined, VVBIND is identical to BIND;
+ |	Otherwise, it adds a test & action
+ |	to the action of BIND
+ *--------------------------------------*/
 
-#define TRAIL(r) \
+	/*-------------------------------------------------*
+	 |  RETRAIL is simple trailing with no delay var
+	 |  checking;  arg #2 simply corresponds to TRAIL
+	 *-------------------------------------------------*/
+
+#define RETRAIL(r,l) \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB)  \
+	  *--mr_TR = PWORD(r); }
+
+#define BIND(r,f)     { TRAIL(r,0); *(r) = PWORD(f); }
+
+#define BIND3(r,f,w)  { TRAIL(r,w); *(r) = PWORD(f); }
+
+#ifdef FREEZE
+
+#ifdef DEBUGFREEZE
+
+	/*-------------------------------------------------*
+	 |  Arg 2 of TRAIL is a line number -- used for
+	 |  informational purposes only; eliminated from
+     |  code in non-DEBUGFREEZE case.
+	 *-------------------------------------------------*/
+
+#define TRAIL(r,l) \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *--mr_TR = PWORD(r); \
+	  if ( CHK_DELAY(r) ) { \
+			printf("@@@ [ln=%d] r=%x  mr_TR=%x\n",l,(int)r,(int)mr_TR-1); \
+	    	wm_safety = -2; wm_interrupt_caught = 3; } } } 
+
+#define VVBIND(r,f)   { \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *--mr_TR = PWORD(r); \
+	  if ( CHK_DELAY(r) ) { \
+			printf("vvb@@@ [ln=%d] r=%x  mr_TR=%x\n",0,(int)r,(int)mr_TR-1); \
+	  		if ( CHK_DELAY(f) ) { printf("   match is delay [f=%x]\n",(int)f); \
+				combine_delays((PWord)r,(PWord)f); }  } } }; \
+		*(r) = PWORD(f); }
+
+#else /*=== no-DEBUGFREEZE ===*/
+
+#define TRAIL(r,l) \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *--mr_TR = PWORD(r); \
+	  if ( CHK_DELAY(r) ) { \
+			wm_safety = -2; wm_interrupt_caught = 3; } } }
+
+#define VVBIND(r,f)   { \
+  { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) { \
+	  *--mr_TR = PWORD(r); \
+	  if ( CHK_DELAY(r) ) { \
+	  		if ( CHK_DELAY(f) ) { \
+				combine_delays((PWord)r,(PWord)f); }  } } }; \
+		*(r) = PWORD(f); }
+
+#endif /*=== DEBUGFREEZE ===*/
+
+#else /*===== no-FREEZE =====*/
+
+#define TRAIL(r,l) \
   { if( PWPTR(r) < mr_HB  &&  PWPTR(r) >= mr_SPB) \
 	  *--mr_TR = PWORD(r); }
+
+#define VVBIND(r,f)   { TRAIL(r,0); *(r) = PWORD(f); }
+
+#endif /*===== FREEZE =====*/
 
 #define DEREF(v)  \
   { while( M_ISVAR(PWORD(v)) && (v) != *(PWord **)(v)) \
 	  (v) = *(PWord **)(v); }
 
-
-
-/*
+/*---------------------------------------------------------------*
  * WAM Instruction and Data fields
  * Note : The instruction pointer (P) is not updated
  * until completion of the instruction. Therefore, arguments
  * are extracted as offsets from the start of the instruction.
- */
+ *---------------------------------------------------------------*/
 
 #define OPSIZE          1
 #define DATASIZE        (sizeof(PWord)/sizeof(Code))
@@ -137,26 +206,22 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 #define getaddr(d)   *(Code **)(P+(d))
 #define getreg(d)    ((*(P+(d))? mr_E: mr_SP)+ getpwrd((d)+OPSIZE))
 
-
-
-/*
+/*---------------------------------------------------------------*
  * Macros for accessing Arg/Env Stack
- */
+ *---------------------------------------------------------------*/
 
 #define arg(e,n)    *(PWord *)((e)+(n)+1)
 #define env_E(e) 	*(PWord **)(e)
 #define env_CP(e) 	*(Code **)((e) + 1)
 
-
-
-/*
- * Macros for accessing Trail stack
- *
- * cp_B has the pointer to PREVIOUS choice point
- * cp_SPB has the CURRENT stack backtrack point
- * cp_HB has the CURRENT heap backtrack point
- * cp_NC has the NEXT CLAUSE address
- */
+/*---------------------------------------------------------------*
+ | Macros for accessing choicepoints on CP/Trail stack:
+ |
+ | cp_B has the pointer to PREVIOUS choice point
+ | cp_SPB has the CURRENT stack backtrack point
+ | cp_HB has the CURRENT heap backtrack point
+ | cp_NC has the NEXT CLAUSE address
+ *---------------------------------------------------------------*/
 
 #define cp_B(b) 	*(PWord **)((b) + 3)
 #define cp_SPB(b) 	*(PWord **)((b) + 2)
@@ -164,10 +229,9 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
 #define cp_NC(b) 	*(Code **)(b)
 #define cp_SPBm(b)  PWPTR(*((b)+2) & ~3L)
 
-
-/*
- * Macro-instructions
- */
+/*-----------------------
+ | Macro-instructions
+ *----------------------*/
 
 #define DOFAIL	{P = cp_NC(mr_B) ; DISPATCH;}
 
@@ -176,67 +240,63 @@ PWord *rungoal_modpatch, *rungoal_goalpatch;
   return;
 
 #define UNIFY(f1,f2)                 \
-  DEREF(f1);                        \
-  DEREF(f2);                        \
-  if( f1 == f2 ) DISPATCH;     \
-  if(M_ISVAR(f1)){                  \
+  DEREF(f1);                         \
+  DEREF(f2);                         \
+  if( f1 == f2 ) DISPATCH;           \
+  if(M_ISVAR(f1)){                   \
 	if( M_ISVAR(f2)){                \
       if( f1 < f2 ){                 \
-	    if( f1 >= wm_heapbase )     \
-	       BIND(f2,f1)               \
-	    else                       \
-	       BIND(f1,f2)               \
+	    if( f1 >= wm_heapbase )      \
+	       VVBIND(f2,f1)             \
+	    else                         \
+	       VVBIND(f1,f2)             \
       }else{                         \
-	    if( f2 >= wm_heapbase )     \
-	       BIND(f1,f2)               \
-	    else                       \
-	       BIND(f2,f1)               \
+	    if( f2 >= wm_heapbase )      \
+	       VVBIND(f1,f2)             \
+	    else                         \
+	       VVBIND(f2,f1)             \
       }                              \
-      DISPATCH;                 \
+      DISPATCH;                      \
     }                                \
-    BIND(f1,f2)                     \
-    DISPATCH;                   \
+    BIND(f1,f2)                      \
+    DISPATCH;                        \
   }                                  \
   if( M_ISVAR(f2) ){                 \
     BIND(f2,f1);                     \
-    DISPATCH;                   \
+    DISPATCH;                        \
   }                                  \
-  gr_TR = mr_TR; gr_HB = mr_HB; gr_SPB = mr_SPB; \
+  gr_TR = mr_TR; gr_HB = mr_HB;      \
+  gr_SPB = mr_SPB;                   \
   if( wam_unify(f1,f2) ){            \
     mr_TR = gr_TR;                   \
-    DISPATCH;                   \
+    DISPATCH;                        \
   }                                  \
   mr_TR = gr_TR;                     \
   DOFAIL;
 
-
-/*
- * Offsets into name table
- */
+/*--------------------------------*
+ | Offsets into name table
+ *--------------------------------*/
 
 #define MOD_CLOSURE_BDISP NTBL_ENTRYSIZE
 #define RESOLVE_REF_BDISP NTBL_ENTRYSIZE
 #define OVFLOW_CHECK_BDISP (NTBL_ENTRYSIZE-NTBL_EXECENTRYSIZE)
-
 
 #define SHADOW_REGS   \
       mr_E = wm_E; mr_SP = wm_SP; mr_SPB = wm_SPB; \
       mr_B = wm_B; mr_TR = wm_TR; mr_H = wm_H;  mr_HB = wm_HB;
 
 #define UNSHADOW_REGS  \
-      wm_E = mr_E; wm_SP = mr_SP; wm_SPB = mr_SPB;\
+      wm_E = mr_E; wm_SP = mr_SP; wm_SPB = mr_SPB; \
       wm_B = mr_B; wm_TR = mr_TR; wm_H = mr_H; wm_HB = mr_HB;
 
-
-/*
- * Initialize wam data areas (called from main)
- */
-
+/*-----------------------------------------------------*
+ | Initialize wam data areas (called from main)
+ *-----------------------------------------------------*/
 
 void
 wam_init()
 {
-
     struct {
 	CodePtr patchaddr;
 	long  argenvsize;
@@ -286,14 +346,14 @@ wam_init()
     ic_puti(W_P_SYM);		/* arg1=modid ; w_p_sym SP(0),modid */
     ic_put_reg(1, 0);
     rungoal_modpatch = (PWord *) ic_ptr;
-    ic_putl(0);			/* modid to be filled in later */
+    ic_putl(0);				/* modid to be filled in later */
     ic_puti(W_P_SYM);		/* arg2=goal ; w_p_sym SP(1),goal */
     ic_put_reg(1, 1);
     rungoal_goalpatch = (PWord *) ic_ptr;
-    ic_putl(0);			/* goal struct to be filled in later */
+    ic_putl(0);				/* goal struct to be filled in later */
     ic_puti(W_WAM_START1);
     ic_putl((PWord)(ic_ptr + DATASIZE + OPSIZE));	
-    				/* this should point after w_colon */
+    						/* this should point after w_colon */
     ic_puti(W_COLON);
     PUT_MAGIC(0, 0, 0);
     ic_puti(W_PROCEED);
@@ -308,8 +368,6 @@ wam_init()
     wm_panic = ic_ptr;
     ic_puti(W_PANIC);
 
-
-
     /* lay down the magic values */
 
     for (i = 0; i < magic_idx; i++) {
@@ -322,26 +380,23 @@ wam_init()
     ic_putl(ic_ptr - wm_fail);
 }
 
-
-/*
- * function invoked by rungoal (called from winter.c)
- */
+/*---------------------------------------------------------*
+ | function invoked by rungoal (called from winter.c)
+ *---------------------------------------------------------*/
 
 int
 wm_rungoal(a1, a2)		/* module, goal */
     PWord a1, a2;
 {
-
     *rungoal_modpatch = a1;
     *rungoal_goalpatch = a2;
 
     return (run_wam(wm_rungoal_code));
 }
 
-
-/*
- * run the wam from a given start address (called from wintcode.c)
- */
+/*-----------------------------------------------------------------*
+ | run the wam from a given start address (called from wintcode.c)
+ *-----------------------------------------------------------------*/
 
 void
 wm_exec(startaddr)
@@ -350,13 +405,11 @@ wm_exec(startaddr)
     (void) run_wam(startaddr);
 }
 
-
-
-/*
- * run_wam is the wam interpreter. It is called by
- * wm_rungoal to run a Prolog goal from foreign interface
- * or by wm_exec to run a regular Prolog query.
- */
+/*---------------------------------------------------------------*
+ | run_wam is the wam interpreter. It is called by
+ | wm_rungoal to run a Prolog goal from foreign interface
+ | or by wm_exec to run a regular Prolog query.
+ *---------------------------------------------------------------*/
 
 static int
 run_wam(startaddr)
@@ -367,13 +420,13 @@ run_wam(startaddr)
     register PWord *reg1 = NULL;
     register PWord n;		/* used for both counter and deref temp */
 
-/*
- * wamreg.h has register declarations that try to
- * maximize register usage based on directives given
- * in config.h. A directive is one of the following C
- * defined constant ( LargeRegModel, SmallRegModel,
- * DataRegModel, NoRegModel)
- */
+	/*-----------------------------------------------------*
+ 	 | wamreg.h has register declarations that try to
+	 | maximize register usage based on directives given
+	 | in config.h. A directive is one of the following C
+	 | defined constant ( LargeRegModel, SmallRegModel,
+	 | DataRegModel, NoRegModel)
+	 *-----------------------------------------------------*/
 
 #include "wamreg.h"
 
@@ -403,7 +456,6 @@ run_wam(startaddr)
 	als_exit(1);
     }
 
-
 #ifdef Threaded
 #define CASE(op) l##op DO_PROFILE(op)
 #define DISPATCH goto **(void **)P
@@ -414,11 +466,13 @@ run_wam(startaddr)
 #define DISPATCH goto dispatch
 
 dispatch:
+#ifdef TRACEBWAM
+	tracewam(P);   
+#endif
     switch (*P) {
-
 #endif
 
-	    /* Environment control instructions                      */
+	    /*--- Environment control instructions ---*/
 
 CASE(W_MOVE_ES_m2_m4): mr_SP[-4] = mr_E[-2]; P+=OPSIZE; DISPATCH;
 CASE(W_MOVE_ES_m2_m3): mr_SP[-3] = mr_E[-2]; P+=OPSIZE; DISPATCH;
@@ -624,89 +678,88 @@ CASE(W_DECR_ICOUNT):
 
 CASE(W_SPY):			/* spy branchaddr */
 	    if (wm_spying)
-		wm_safety = wm_trigger;		/* yes, drop into
-						 * ovflow_check
-						 */
+		wm_safety = wm_trigger;		/* yes, drop into overflow_check */
 
-CASE(W_OVFLOW_CHECK):		/* overflow branchaddr */
+CASE(W_OVFLOW_CHECK):				/* overflow branchaddr */
 overflow_check:
 	    reg1 = (PWord *) P;
 	    P += OPSIZE;
 overflow_check0:
 	    if (((unsigned long) mr_TR - (unsigned long) mr_H) 
-			>= (unsigned long) wm_safety) {
-		DISPATCH;
+				>= (unsigned long) wm_safety) {
+			DISPATCH;
 	    }
 	    if ((unsigned long) wm_safety <= (unsigned long) wm_normal) {
-		/* gc interrupt */
-		UNSHADOW_REGS;
-		gc();
-		SHADOW_REGS;
-		DISPATCH;
+			/* gc interrupt */
+			UNSHADOW_REGS;
+			gc();
+			SHADOW_REGS;
+			DISPATCH;
 	    }
 	    else {
-		ntbl_entry *entfrom = 
-			(ntbl_entry *) ((Code *)reg1 - OVFLOW_CHECK_BDISP);
-		PWord arg3;
+			ntbl_entry *entfrom = 
+				(ntbl_entry *) ((Code *)reg1 - OVFLOW_CHECK_BDISP);
+			PWord arg3;
 
-		n = entfrom->nargs;
+			n = entfrom->nargs;
 
-		wm_safety = wm_normal;	/* reset interrupt */
+			wm_safety = wm_normal;	/* reset interrupt */
+			CP = env_CP(mr_E);		/* save oldCP and oldE in temporaries */
+			E = env_E(mr_E);
 
-		CP = env_CP(mr_E);	/* save oldCP and oldE in temporaries
-					 */
-		E = env_E(mr_E);
-		/* set up $interrupt/3 call */
-		mr_SP -= 3 - n;
-		if (n == 0) {
-		    arg(mr_SP, 3) = entfrom->tokid_arity;
-		}
-		else {
-		    reg1 = mr_E + 2;	/* copy arguments to make a struct
-					 * rep the call
-					 */
-		    S = mr_H;
-		    *S++ = MMK_FUNCTOR(MFUNCTOR_TOKID(entfrom->tokid_arity), n);
-		    while (n--)
-			*S++ = *reg1++;
-		    arg3 = MMK_STRUCTURE(mr_H);		/* and push it as
-							 * first argument
-							 */
-		    mr_H = S;
-		    /* take care of unsafe variables in the structure */
-		    n = entfrom->nargs;
-		    while (n--) {
-			reg1 = PWPTR(*--S);
-			DEREF(reg1);
-			if (M_ISVAR(reg1) && reg1 < wm_heapbase) {
-			    TRAIL(reg1);
-			    *reg1 = *S = *mr_H = MMK_VAR(mr_H);
-			    mr_H++;
+				/* set up $interrupt/3 call */
+			mr_SP -= 3 - n;
+			if (n == 0) {
+		    	arg(mr_SP, 3) = entfrom->tokid_arity;
 			}
-			else {
-			    *S = PWORD(reg1);
-			}
-		    }
-		    arg(mr_SP, 3) = arg3;
-		}		/* end if n== 0 */
+			else {		/* n > 0 */
+		    	reg1 = mr_E + 2;	/* copy arguments to make a structure 
+					 				 * to represent the inteurrupted call... */
+		    	S = mr_H;
+		    	*S++ = MMK_FUNCTOR(MFUNCTOR_TOKID(entfrom->tokid_arity), n);
+		    	while (n--)
+					*S++ = *reg1++;
 
-		arg(mr_SP, 2) = MMK_SYM(PWORD(entfrom->modid) & 0xffff);
-		arg(mr_SP, 1) = MMK_INT(wm_interrupt_caught);
-		wm_interrupt_caught = 0;	/* default is a source
-						 * interrupt
-						 */
-		env_CP(mr_SP) = CP;
-		env_E(mr_SP) = E;
-		mr_E = mr_SP;
-		/* call $interrupt/3 */
-		P = wm_overcode;
-		DISPATCH;
-	    }
+		    	arg3 = MMK_STRUCTURE(mr_H);		/* ...and push it as third
+							 					 * arg of interrupt/3 call */
+		    	mr_H = S;
+
+		    		/* take care of unsafe variables in the structure */
+		    	n = entfrom->nargs;
+		    	while (n--) {
+					reg1 = PWPTR(*--S);
+					DEREF(reg1);
+					if (M_ISVAR(reg1) && reg1 < wm_heapbase) {
+						RETRAIL(reg1,717);
+			    		*reg1 = *S = *mr_H = MMK_VAR(mr_H);
+			    		mr_H++;
+					}
+					else {
+			    		*S = PWORD(reg1);
+					}
+		    	}
+		    		arg(mr_SP, 3) = arg3;
+			}		/* end if n== 0 */
+
+					/* module as second arg of interrupt/3 call */
+			arg(mr_SP, 2) = MMK_SYM(PWORD(entfrom->modid) & 0xffff);
+					/* interrupt caught as first arg of interrupt/3 call */
+			arg(mr_SP, 1) = MMK_INT(wm_interrupt_caught);
+										/* reset int_caught to default: */
+			wm_interrupt_caught = 0;	/* default is a source interrupt */
+
+			env_CP(mr_SP) = CP;
+			env_E(mr_SP) = E;
+			mr_E = mr_SP;
+				/* call $interrupt/3 */
+			P = wm_overcode;
+			DISPATCH;
+	    	}
 	    goto get_out;
 
-	    /* Get Instructions  g_value, g_list, g_struct, g_int, g_sym,
-	     * g_uia
-	     */
+	    /*-------------------------------------------------------------------*
+		 | Get Instructions  g_value, g_list, g_struct, g_int, g_sym, g_uia
+	     *-------------------------------------------------------------------*/
 
 CASE(W_G_VALUE):		/* get_value arg1, arg2 */
 	    reg1 = PWPTR(*getreg(OPSIZE));
@@ -749,7 +802,7 @@ g_list_common:
 	    if (n != PWORD(reg1))
 		goto g_list_deref;
 	    /* write mode case */
-	    BIND(reg1, MMK_LIST(mr_H));
+	    BIND3(reg1, MMK_LIST(mr_H),1000001);
 	    S = PWPTR(0);	/* set write mode */
 	    DISPATCH;
 g_list_ground:
@@ -768,7 +821,7 @@ CASE(W_G_STRUCT_E):		/* get_list Edisp  */
 g_struct_common:
 	    DEREF(reg1);
 	    if (M_ISVAR(reg1)) {
-		BIND(reg1, MMK_STRUCTURE(mr_H));
+		BIND3(reg1, MMK_STRUCTURE(mr_H),1000002);
 		S = PWPTR(0);
 		*mr_H++ = getsym(OPSIZE + DATASIZE);
 		P += OPSIZE + 2*DATASIZE;
@@ -788,7 +841,7 @@ CASE(W_G_INT):			/* get_int Src,IntSym */
 	    reg1 = PWPTR(*getreg(OPSIZE));
 	    DEREF(reg1);
 	    if (M_ISVAR(reg1)) {
-		BIND(reg1, getsym(OPSIZE + REGSIZE));
+		BIND3(reg1, getsym(OPSIZE + REGSIZE),1000003);
 		P += OPSIZE + REGSIZE + DATASIZE;
 		DISPATCH;
 	    }
@@ -802,7 +855,7 @@ CASE(W_G_SYM):			/* get_sym Src,Sym  */
 	    reg1 = PWPTR(*getreg(OPSIZE));
 	    DEREF(reg1);
 	    if (M_ISVAR(reg1)) {
-		BIND(reg1, getsym(OPSIZE + REGSIZE));
+		BIND3(reg1, getsym(OPSIZE + REGSIZE),1000004);
 		P += OPSIZE + REGSIZE + DATASIZE;
 		DISPATCH;
 	    }
@@ -938,7 +991,7 @@ CASE(W_U_VAR_SP_p3):
 	    goto u_var_common0;
 CASE(W_U_VAR_SP_p4):
 	    reg1 = mr_SP+4;
-	    /* goto u_var_common0; */
+	    	/* goto u_var_common0; */
 
 u_var_common0:
 	    P += OPSIZE;
@@ -947,13 +1000,20 @@ u_var_common:
 		*reg1 = *S++;
 		DISPATCH;
 	    }
-	    TRAIL(reg1);	/* for gc purposes only */
+		TRAIL(reg1,1003);
+/*
+#ifdef DEBUGFREEZE
+		TRAIL(reg1,1003);
+#else
+	    TRAIL(reg1);	 for gc purposes only 
+#endif
+*/
 	    *reg1 = *mr_H = MMK_VAR(mr_H);
 	    mr_H++;
 	    DISPATCH;
 
 CASE(W_U_VAR_SP_m1_p2):		/* This is the pair that appears in
-				   append/3.  Shameful, isn't it.  */
+				   				append/3.  Shameful, isn't it.  */
 	    P += OPSIZE;
 	    if (S) {
 		mr_SP[-1] = *S++;
@@ -961,11 +1021,25 @@ CASE(W_U_VAR_SP_m1_p2):		/* This is the pair that appears in
 		DISPATCH;
 	    }
 	    reg1 = mr_SP-1;
+	    TRAIL(reg1,1021);
+/*
+#ifdef DEBUGFREEZE
+	    TRAIL(reg1,1021);
+#else
 	    TRAIL(reg1);
+#endif
+*/
 	    *reg1 = *mr_H = MMK_VAR(mr_H);
 	    mr_H++;
 	    reg1 = mr_SP+2;
+	    TRAIL(reg1,1029);
+/*
+#ifdef DEBUGFREEZE
+	    TRAIL(reg1,1029);
+#else
 	    TRAIL(reg1);
+#endif
+*/
 	    *reg1 = *mr_H = MMK_VAR(mr_H);
 	    mr_H++;
 	    DISPATCH;
@@ -1027,7 +1101,14 @@ CASE(W_U_LVAL):		/* unify_local_value src */
 	    P += OPSIZE + REGSIZE;
 	    DEREF(reg1);
 	    if (M_ISVAR(reg1) && reg1 < wm_heapbase) {
+		TRAIL(reg1,1095);
+/*
+#ifdef DEBUGFREEZE
+		TRAIL(reg1,1095);
+#else
 		TRAIL(reg1);
+#endif
+*/
 		*mr_H = *reg1 = MMK_VAR(mr_H);
 		mr_H++;
 		DISPATCH;
@@ -1044,7 +1125,14 @@ CASE(W_P_UNSAFE):		/* put_unsafe_value src, dst  */
 	    reg1 = PWPTR(*getreg(OPSIZE));
 	    DEREF(reg1);
 	    if (M_ISVAR(reg1) && reg1 < mr_SPB) {
+		TRAIL(reg1,1116);
+/*
+#ifdef DEBUGFREEZE
+		TRAIL(reg1,1116);
+#else
 		TRAIL(reg1);
+#endif
+*/
 		*getreg(OPSIZE + REGSIZE) = *reg1 = *mr_H = MMK_VAR(mr_H);
 		mr_H++;
 	    }
@@ -1307,18 +1395,16 @@ cut:
 	    if (wm_safety < 0) {	/* Prolog interrupt */
 		wm_safety = wm_normal;	/* reset interrupt */
 
-		/* set the $interrupt/3 call */
+			/* set the $interrupt/3 call */
 		mr_SP -= 7;
 		arg(mr_SP, 5) = PWORD(P);
-		arg(mr_SP, 4) = PWORD(mr_E);	/* fake call */
+		arg(mr_SP, 4) = PWORD(mr_E);		/* fake call */
 		arg(mr_SP, 3) = MMK_STRUCTURE(mr_H);
 		*mr_H++ = MMK_FUNCTOR(PWORD(find_token("!")), 1);
 		*mr_H++ = MMK_INT(wm_heapbase - reg1);
 		arg(mr_SP, 2) = MMK_SYM(MODULE_BUILTINS);
 		arg(mr_SP, 1) = MMK_INT(wm_interrupt_caught);
-		wm_interrupt_caught = 0;	/* default is source
-						 * interrupt
-						 */
+		wm_interrupt_caught = 0;			/* default is source interrupt */
 		env_CP(mr_SP) = wm_special;
 		env_E(mr_SP) = mr_SP + 5;
 		mr_E = mr_SP;
@@ -1327,33 +1413,34 @@ cut:
 	    }
 
 cut_no_ovflow_check:
-
+						/* cutpt is arg1 */
 	    P += GCMAGICSIZE;
 
 	    if (mr_SPB > reg1)
-		DISPATCH;
+			DISPATCH;
 
 	    while (mr_SPB <= reg1) {
-		mr_B = cp_B(mr_B);
-		mr_SPB = cp_SPBm(mr_B);
+			mr_B = cp_B(mr_B);
+			mr_SPB = cp_SPBm(mr_B);
 	    }
 
 	    mr_HB = cp_HB(mr_B);
-	    reg2 = mr_TR;
+	    reg2  = mr_TR;
 	    mr_TR = mr_B;
-	    reg1 = mr_B - 1;
+	    reg1  = mr_B - 1; 		/* Work from most recent CP 
+								 | downward to top of trail */
 
 	    for (;;) {
-		if (reg1 < reg2)
-		    DISPATCH;
-		if (*reg1 > PWORD(reg1)) {
-		    reg1 -= 4;
-		}
-		else {
-		    TRAIL(*reg1);	/* trail if necessary */
-		    reg1--;
-		}
-	    }
+			if (reg1 < reg2)	/* Finished sweep; continue execution */
+		    	DISPATCH;
+			if (*reg1 > PWORD(reg1)) {
+		    	reg1 -= 4;
+			}
+			else {
+		    	RETRAIL(PWPTR(*reg1),1410);		/* trail if necessary */
+		    	reg1--;
+			}
+	    }	/* for (;;) */
 	    goto get_out;
 
 	    /* Meta call instructions - cut_macro, mod_closure, ocall, colon,
@@ -1604,7 +1691,7 @@ get_out:
 	    reg1 -= 4;
 	}
 	else {
-	    TRAIL(*reg1);	/* trail if necessary */
+	    RETRAIL(PWPTR(*reg1),1686); 	/* trail if necessary */
 	    reg1--;
 	}
     }
@@ -1612,10 +1699,9 @@ get_out:
     wm_H = mr_H;
     wm_B = mr_B;
     return (retval);
-}
+}		/* run_wam */
 
-
-/*
+/*---------------------------------------------------------------------*
  * Unification:
  *
  * The following functions unify two formulas f1 and f2.  The unify
@@ -1624,7 +1710,7 @@ get_out:
  *
  * No special assumptions are made about whether the formulas are
  * dereferenced or not.
- */
+ *---------------------------------------------------------------------*/
 #undef mr_TR
 #undef mr_HB
 #undef mr_SPB
@@ -1662,10 +1748,10 @@ wam_unify(f1, f2)
 	    }
 
 	    if (f2 >= wm_heapbase) {
-		BIND(f1, f2);
+		VVBIND(f1, f2);
 	    }
 	    else {
-		BIND(f2, f1);
+		VVBIND(f2, f1);
 	    }
 	}
 	else {
@@ -1755,10 +1841,9 @@ wam_unify(f1, f2)
     }
 }
 
-    /*
+    /*---------------------------------------------*
      * _w_unify is called by C defined builtins.
-     *
-     */
+     *---------------------------------------------*/
 
 int
 _w_unify(f1, f2)

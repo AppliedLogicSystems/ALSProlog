@@ -184,7 +184,9 @@ static struct blt_struct {
 	BLT("$resolve_module", 4, pbi_resolve_module, "_pbi_resolve_module"),
 	BLT("$exported_proc", 3, pbi_exported_proc, "_pbi_exported_proc"),
 	BLT("$icode", 5, pbi_icode, "_pbi_icode"),
+#ifdef LIBBRK
 	BLT("$libbreak", 4, pbi_libbreak, "_pbi_libbreak"),
+#endif /* LIBBRK */
 	BLT("$listasm_clause", 1, pbi_listasm_clause, "_pbi_listasm_clause"),
 	BLT("$listasm_ntblentry", 3, pbi_listasm_ntblentry, "_pbi_listasm_ntblentry"),
 	BLT("$next_module", 4, pbi_next_module, "_pbi_next_module"),
@@ -193,9 +195,15 @@ static struct blt_struct {
 	BLT("abolish", 3, pbi_abolish, "_pbi_abolish"),
 	BLT("abolish_clausegroup", 4, pbi_abolish_clausegroup, "_pbi_abolish_clausegroup"),
 		/* SPECIAL -- Freeze-related */
+#ifdef FREEZE
 	BLT("cptx", 0, pbi_cptx, "_pbi_cptx"),
+	BLT("display_heap", 2, disp_heap, "_disp_heap"),
 	BLT("swp_tr", 0, pbi_swp_tr, "_pbi_swp_tr"),
+	BLT("clct_tr", 1, pbi_clct_tr, "_pbi_clct_tr"),
 	BLT("walk_cps", 0, pbi_walk_cps, "_pbi_walk_cps"),
+	BLT("$delay", 4, pbi_delay, "_pbi_delay"),
+	BLT("collect_thawed", 1, pbi_collect_thawed, "_pbi_collect_thawed"),
+#endif /* FREEZE */
 
 #ifdef SCO_UNIX			/* procedure names must be < 32 chars */
 	BLT("massively_abolish_clausegroup", 1, pbi_massively_abolish_clausegroup,
@@ -266,10 +274,13 @@ static struct blt_struct {
 	BLT("$atom_concat", 3, pbi_atom_concat, "_pbi_atom_concat"),
 
 	BLT("$access", 2, pbi_access, "_pbi_access"),
+#ifdef OSACCESS
 	BLT("$chdir", 1, pbi_chdir, "_pbi_chdir"),
 	BLT("getenv", 2, pbi_getenv, "_pbi_getenv"),
-	BLT("system", 1, pbi_system, "_pbi_system"),
 	BLT("tmpnam", 1, pbi_tmpnam, "_pbi_tmpnam"),
+#endif OSACCESS
+
+	BLT("system", 1, pbi_system, "_pbi_system"),
 	BLT("$protect_bottom_stack_page", 0, pbi_protect_bottom_stack_page, "_pbi_protect_bottom_stack_page"),
 	BLT("get_image_dir_and_name", 2, pbi_get_image_dir_and_name, "_pbi_get_image_dir_and_name"),
 
@@ -285,10 +296,13 @@ static struct blt_struct {
 #ifdef DynamicForeign
 	BLT("$loadforeign", 3, pbi_load_foreign, "_pbi_load_foreign"),
 #endif
+	BLT("pbi_ttyflush", 0, pbi_ttyflush, "_pbi_ttyflush"),
+	BLT("pbi_nl", 0, pbi_nl, "_pbi_nl"),
+	BLT("pbi_write", 1, pbi_write, "_pbi_write"),
+#ifdef OLDCIO
 	BLT("pbi_display", 1, pbi_display, "_pbi_display"),
 	BLT("pbi_get", 1, pbi_get, "_pbi_get"),
 	BLT("pbi_get0", 1, pbi_get0, "_pbi_get0"),
-	BLT("pbi_nl", 0, pbi_nl, "_pbi_nl"),
 	BLT("pbi_put", 1, pbi_put, "_pbi_put"),
 	BLT("pbi_read", 1, pbi_read, "_pbi_read"),
 	BLT("pbi_see", 1, pbi_see, "_pbi_see"),
@@ -297,15 +311,18 @@ static struct blt_struct {
 	BLT("pbi_tell", 1, pbi_tell, "_pbi_tell"),
 	BLT("pbi_telling", 1, pbi_telling, "_pbi_telling"),
 	BLT("pbi_told", 0, pbi_told, "_pbi_told"),
-	BLT("pbi_ttyflush", 0, pbi_ttyflush, "_pbi_ttyflush"),
-	BLT("pbi_write", 1, pbi_write, "_pbi_write"),
 	BLT("pbi_writeq", 1, pbi_writeq, "_pbi_writeq"),
+#endif /* OLDCIO */
+#ifdef SYS_OBP
 	BLT("obp_open", 1, pbi_obp_open, "_pbi_obp_open"),
 	BLT("obp_close", 0, pbi_obp_close, "_pbi_obp_close"),
 	BLT("obp_load", 2, pbi_obp_load, "_pbi_obp_load"),
 	BLT("obp_push_stop", 0, pbi_obp_push_stop, "_pbi_obp_push_stop"),
 	BLT("obp_pop", 0, pbi_obp_pop, "_pbi_obp_pop"),
+#endif /* SYS_OBP */
+#ifdef OLDCONSULT
 	BLT("old_consult", 2, pbi_old_consult, "_pbi_old_consult"),
+#endif /* OLDCONSULT */
 	BLT("save_state_to_file", 1, pbi_save_state_to_file, "_pbi_save_state_to_file"),
 	BLT("sio_mkstream", 2, sio_mkstream, "_sio_mkstream"),
 	BLT("sio_errcode", 2, sio_errcode, "_sio_errcode"),
@@ -337,9 +354,16 @@ static struct blt_struct {
 	BLT("sio_accept_socket_connection", 1, sio_accept_socket_connection, "_sio_accept_socket_connection"),
 	BLT("sio_poll",2,sio_poll,"_sio_poll"),
 #endif /* HAVE_SOCKET */
+
+#ifdef REXEC
 	BLT("sio_rexec", 7, sio_rexec, "_sio_rexec"),
-	BLT("sio_generic_open", 4, sio_generic_open, "_sio_generic_open"),
+#endif /* REXEC */
+
+#ifdef WINIOBASIS
 	BLT("sio_window_open", 6, sio_window_open, "_sio_window_open"),
+#endif /* WINIOBASIS */
+
+	BLT("sio_generic_open", 4, sio_generic_open, "_sio_generic_open"),
 	BLT("sio_close", 1, sio_close, "_sio_close"),
 #ifndef SIO_ASM
 	BLT("sio_get_byte", 2, sio_get_byte, "_sio_get_byte"),
@@ -371,10 +395,14 @@ static struct blt_struct {
 	BLT("forcePrologInterrupt", 0, pbi_ouch, "_pbi_ouch"),
 	BLT("forcePrologError", 0, pbi_forcePrologError, "_pbi_forcePrologError"),
 	BLT("reset_wm_normal", 0, pbi_reset_wm_normal, "_pbi_reset_wm_normal"),
-	BLT("print_no", 0, pbi_printno, "_pbi_printno"),
 	BLT("print_warning", 0, pbi_printwarning, "_pbi_printwarning"),
+
+#ifdef OLDSHELL
+	BLT("print_no", 0, pbi_printno, "_pbi_printno"),
 	BLT("showanswers", 2, pbi_showanswers, "_pbi_showanswers"),
 	BLT("statistics", 1, pbi_statistics, "_pbi_statistics"),
+#endif /* OLDSHELL */
+
 	BLT("$stack_overflow", 1, pbi_stack_overflow, "_pbi_stack_overflow"),
 	BLT("$stack_info", 1, pbi_stack_info, "_pbi_stack_info"),
 #ifdef MacOS
@@ -400,22 +428,37 @@ static struct blt_struct {
 	BLT("var", 1, pbi_var, "_pbi_var"),
 	BLT("compare", 3, pbi_compare, "_pbi_compare"),
 #endif /* CMeta */
+
+#ifdef HASH
 	BLT("hashN", 4, pbi_hashN, "_pbi_hashN"),
+#endif /* HASH */
+
+#ifdef GENSYM
 	BLT("gensym", 2, pbi_gensym, "_pbi_gensym"),
 	BLT("isgensym", 2, pbi_isgensym, "_pbi_isgensym"),
+#endif /* GENSYM */
+
+#ifdef PRIM_DBG
 	BLT("ptermaddr", 1, pbi_ptermaddr, "_pbi_ptermaddr"),
 	BLT("traildump", 0, pbi_traildump, "_pbi_traildump"),
 	BLT("frame_info", 2, pbi_frame_info, "_pbi_frame_info"),
+#endif /* PRIM_DBG */
+
+#ifdef TRACEBWAM
+	BLT("trace_bwam",0,toggle_bwam,"_toggle_bwam"),
+#endif /* TRACEBWAM */
 
 #if	defined(Portable) && defined(IProfile)
 	BLT("init_iprofile", 0, pbi_init_iprofile, "_pbi_init_iprofile"),
 	BLT("dump_iprofile", 0, pbi_dump_iprofile, "_pbi_dump_iprofile"),
 #endif	/* defined(Portable) && defined(IProfile) */
 
+#ifdef BCINTER
 	BLT("$c_malloc", 2, pbi_c_malloc, "_pbi_c_malloc"),
 	BLT("$c_free", 1, pbi_c_free, "_pbi_c_free"),
 	BLT("$c_set", 2, pbi_c_set, "_pbi_c_set"),
 	BLT("$c_examine", 2, pbi_c_examine, "_pbi_c_examine"),
+#endif /* BCINTER */
 
 	BLT("dbg_nospy", 3, pbi_dbg_nospy, "_pbi_dbg_nospy"),
 	BLT("dbg_spy", 3, pbi_dbg_spy, "_pbi_dbg_spy"),
@@ -424,6 +467,7 @@ static struct blt_struct {
 	BLT("dbg_spying", 0, pbi_dbg_spying, "_pbi_dbg_spying"),
 	BLT("alarm", 2, pbi_alarm, "_pbi_alarm")
 };
+	/* blt_tab[] */
 
 #define NULLF ((int (*) PARAMS(( void ))) 0)
 #define BLT2(nam,arity,installer,p1,p2,fname) 				\
@@ -498,8 +542,8 @@ static struct blt2_struct {
 	BLT2("jump", 2, ic_install_instr, INTF(W_WEIRD_JUMP), NULLF, (char *) -1),
 	BLT2("fail", 0, ic_install_instr, INTF(W_FAIL), NULLF, (char *) -1),
 	BLT2("true", 0, ic_install_instr, INTF(W_PROCEED), NULLF, (char *) -1),
-#else  /* Portable */
 
+#else  /* not-Portable */
 	BLT2("!", 0, ic_install_jmp, wm_cut, NULLF, "_wm_cut"),
 	BLT2("$colon", 3, ic_install_jmp, wm_colon, NULLF, "_wm_colon"),
 	BLT2(":", 2, ic_install_jmp, wm_colon, NULLF, "_wm_colon"),

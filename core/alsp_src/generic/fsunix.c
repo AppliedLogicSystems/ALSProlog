@@ -86,6 +86,11 @@
 #define S_ISFIFO(m) (((m)& S_IFMT) == S_IFIFO)
 #endif
 
+static	int	pgetcwd		PARAMS(( void ));
+static	int	pchdir		PARAMS(( void ));
+static	int	punlink		PARAMS(( void ));
+
+#ifdef FSACCESS
 static	int	getDirEntries	PARAMS(( void ));
 static	int	getFileStatus	PARAMS(( void ));
 static	int	read_link	PARAMS(( void ));
@@ -93,14 +98,94 @@ static	int	make_symlink	PARAMS(( void ));
 static	int	pcmp_fs		PARAMS(( void ));
 static	int	prmdir		PARAMS(( void ));
 static	int	pmkdir		PARAMS(( void ));
-static	int	pgetcwd		PARAMS(( void ));
-static	int	pchdir		PARAMS(( void ));
-static	int	punlink		PARAMS(( void ));
 static	char *	canonical_pathname PARAMS(( char *, char ** ));
 static	int	canonicalize_pathname PARAMS(( void ));
 static	int	pgetpid		PARAMS(( void ));
+#endif /* FSACCESS */
+
+static int
+pgetcwd()
+{
+    PWord v1, sym;
+    int   t1, symType;
+    char  pathName[MAXPATHLEN];
+
+    PI_getan(&v1, &t1, 1);
+
+#ifdef	HAVE_GETWD
+    if (getwd(pathName) == 0)
+{
+	PI_FAIL;
+}
+#else	/* HAVE_GETWD */
+    if (getcwd(pathName, MAXPATHLEN) == 0)
+{
+	PI_FAIL;
+}
+#endif	/* !HAVE_GETWD */
+
+    PI_makeuia(&sym, &symType, pathName);
+
+    if (!PI_unify(v1, t1, sym, symType))
+	PI_FAIL;
+
+    PI_SUCCEED;
+}
+
+/*
+ * chdir/1 (--> pchdir/1 )
+ * chdir(+Path)
+ *
+ * Changes the current working directory to be that given by the input.
+ */
+
+static int
+pchdir()
+{
+    PWord v1;
+    int   t1;
+    char *pathName;
+
+    PI_getan(&v1, &t1, 1);
+
+    /* Make sure file name & pattern are atoms or UIAs */
+    if (!getstring((UCHAR **)&pathName, v1, t1))
+	PI_FAIL;
+
+    if (chdir(pathName) == -1)
+	PI_FAIL;
+
+    PI_SUCCEED;
+}
 
 
+/*
+ * unlink/1 (--> punlink/1 )
+ * unlink(+FilePath)
+ *
+ * Unlinks the indicated file from the file system
+ */
+
+static int
+punlink()
+{
+    PWord v1;
+    int   t1;
+    char *pathName;
+
+    PI_getan(&v1, &t1, 1);
+
+    /* Make sure file name & pattern are atoms or UIAs */
+    if (!getstring((UCHAR **)&pathName, v1, t1))
+	PI_FAIL;
+
+    if (unlink(pathName) == -1)
+	PI_FAIL;
+
+    PI_SUCCEED;
+}
+
+#ifdef FSACCESS
 /*
  * $getDirEntries/3 (--> getDirEntries/3 )
  * $getDirEntries(DirName, FilePattern, List)
@@ -483,88 +568,7 @@ pmkdir()
 #endif
 #endif
 
-static int
-pgetcwd()
-{
-    PWord v1, sym;
-    int   t1, symType;
-    char  pathName[MAXPATHLEN];
 
-    PI_getan(&v1, &t1, 1);
-
-#ifdef	HAVE_GETWD
-    if (getwd(pathName) == 0)
-{
-	PI_FAIL;
-}
-#else	/* HAVE_GETWD */
-    if (getcwd(pathName, MAXPATHLEN) == 0)
-{
-	PI_FAIL;
-}
-#endif	/* !HAVE_GETWD */
-
-    PI_makeuia(&sym, &symType, pathName);
-
-    if (!PI_unify(v1, t1, sym, symType))
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
-
-
-/*
- * chdir/1 (--> pchdir/1 )
- * chdir(+Path)
- *
- * Changes the current working directory to be that given by the input.
- */
-
-static int
-pchdir()
-{
-    PWord v1;
-    int   t1;
-    char *pathName;
-
-    PI_getan(&v1, &t1, 1);
-
-    /* Make sure file name & pattern are atoms or UIAs */
-    if (!getstring((UCHAR **)&pathName, v1, t1))
-	PI_FAIL;
-
-    if (chdir(pathName) == -1)
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
-
-
-/*
- * unlink/1 (--> punlink/1 )
- * unlink(+FilePath)
- *
- * Unlinks the indicated file from the file system
- */
-
-static int
-punlink()
-{
-    PWord v1;
-    int   t1;
-    char *pathName;
-
-    PI_getan(&v1, &t1, 1);
-
-    /* Make sure file name & pattern are atoms or UIAs */
-    if (!getstring((UCHAR **)&pathName, v1, t1))
-	PI_FAIL;
-
-    if (unlink(pathName) == -1)
-	PI_FAIL;
-
-    PI_SUCCEED;
-}
 
 
 /*-----------------------------------------------------------------------------*
@@ -662,7 +666,7 @@ stat_with_timeout(path, statbuf)
 }
 #endif /* !defined(HAVE_SETITIMER) */
 
-
+#ifdef CCANONP
 static char *
 canonical_pathname(path_name,file_namep)
     char *path_name;
@@ -894,6 +898,39 @@ canonicalize_pathname()
     else
 	PI_FAIL;
 }
+#endif /* CCANONP */
+
+static	long	get_file_modified_time	PARAMS(( char * ));
+static	int	isdir			PARAMS(( char * ));
+
+
+static long 
+get_file_modified_time(fname)
+    char *fname;
+{
+    struct stat buf;
+
+    if (stat(fname, &buf) == -1 || buf.st_mode & S_IFDIR)
+	return (long) 0;
+
+    return buf.st_mtime;
+}
+
+/*
+ * Returns 1 if fname is a directory, 0 otherwise.
+ *
+ */
+static int
+isdir(fname)
+    char *fname;
+{
+    struct stat buf;
+
+    if (stat(fname, &buf) == -1)
+	return (0);
+
+    return (buf.st_mode & S_IFDIR);
+}
 
 static int
 pgetpid()
@@ -908,24 +945,29 @@ pgetpid()
     else
 	PI_FAIL;
 }
+#endif /* FSACCESS */
 
 
 /* *INDENT-OFF* */
 PI_BEGIN
+    PI_PDEFINE("getcwd", 1, pgetcwd, "_pgetcwd")
+    PI_PDEFINE("chdir", 1, pchdir, "_pchdir")
+    PI_PDEFINE("unlink", 1, punlink, "_punlink")
+#ifdef FSACCESS
     PI_PDEFINE("$getDirEntries", 3, getDirEntries, "_getDirEntries")
     PI_PDEFINE("$getFileStatus", 2, getFileStatus, "_getFileStatus")
     PI_PDEFINE("comp_file_times", 2, pcmp_fs, "_pcmp_fs")
     PI_PDEFINE("rmdir", 1, prmdir, "_prmdir")
     PI_PDEFINE("mkdir", 2, pmkdir, "_pmkdir")
-    PI_PDEFINE("unlink", 1, punlink, "_punlink")
-    PI_PDEFINE("getcwd", 1, pgetcwd, "_pgetcwd")
-    PI_PDEFINE("chdir", 1, pchdir, "_pchdir")
 #ifdef HAVE_SYMLINK
     PI_PDEFINE("read_link", 2, read_link, "_read_link")
     PI_PDEFINE("make_symlink", 2, make_symlink, "_make_symlink")
 #endif /* HAVE_SYMLINK */
+#ifdef CCANONP
     PI_PDEFINE("canonicalize_pathname", 2, canonicalize_pathname, "_canonicalize_pathname")
+#endif /* CCANONP */
     PI_PDEFINE("getpid",1,pgetpid,"_pgetpid")
+#endif /* FSACCESS */
 PI_END
 /* *INDENT-ON* */
 

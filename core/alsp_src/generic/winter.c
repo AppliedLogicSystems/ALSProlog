@@ -65,13 +65,13 @@ int   gv_setcnt;		/* number of times gv_set run since last gc */
 
 #define round(x,s) ((((x)-1) & ~(long)((s)-1)) + (s))
 
-static	PWord	deref		PARAMS(( PWord ));
+PWord	deref		PARAMS(( PWord ));
 
 /*
  * Assumption: PWords are 32 bits wide
  */
 
-static PWord
+PWord
 deref(w)
     register PWord w;
 {

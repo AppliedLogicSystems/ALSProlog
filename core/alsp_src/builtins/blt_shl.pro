@@ -55,6 +55,8 @@ start_shell(DefaultShellCall)
 	!,
 	user:ShellCall.
 
+start_shell(_).
+
 /*-----------------------------------------------------------------*
  | ss_parse_command_line/3
  | ss_parse_command_line(CommandLine, ResidualCommandLine, CLInfo),
@@ -112,6 +114,14 @@ ss_parse_command_line(['-obp' | T], L, CLInfo)
 	obp_in_cur,
 	ss_parse_command_line(T, L, CLInfo).
 
+
+	%% -nwd: Set debugger to "nowins"
+ss_parse_command_line(['-nwd' | T], L, CLInfo)
+	:-!,
+	(debugger:set_debug_io(nowins),!;true),
+	ss_parse_command_line(T, L, CLInfo).
+
+
 	%% Otherwise: should be a file to be loaded:
 ss_parse_command_line([File | T], L, CLInfo)
 	:-
@@ -154,6 +164,7 @@ ss_init_searchdir
 	ss_init_searchdir(ALSPATH).
 ss_init_searchdir.
 
+export ss_init_searchdir/1.
 ss_init_searchdir(Paths)
 	:-
 	path_separator(PS),
@@ -187,7 +198,7 @@ ss_load_dot_alspro
 		File = 'alspro.pro' ; File = '.alspro' ),
 	ss_load_dot_alspro(File).
 
-ss_load_dot_alspro(File)
+ss_load_dot_alspro(AutoFile)
 	:-
 	exists_file(AutoFile),
 	!,
@@ -333,7 +344,9 @@ shell_read_execute(InStream,OutStream,Status)
 
 continue_prolog_loop(halt) 
 	:-!, halt.
-continue_prolog_loop(Status).
+continue_prolog_loop(Status)
+	:-
+	'set_$delay_terms'([]).
 
 	%% This is the same as the old shell_read/7, except that 
 	%% instead of carrying the prompts around in variables,

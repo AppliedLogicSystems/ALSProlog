@@ -5,6 +5,7 @@
 
 #define ISCOFF(x)	((x) == 0x14c)
 
+#define HAVE_BRK		1
 #define HAVE_DIRENT_H		1
 #define HAVE_FCNTL_H		1
 #define HAVE_MEMORY_H		1

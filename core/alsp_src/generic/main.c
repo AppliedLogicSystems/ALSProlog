@@ -414,7 +414,7 @@ PI_prolog_init(win_str, argc, argv)
 
     time_cut_interrupt_init();
 #ifdef OBP
-    fix_MAGIC();		/* for loadfile.c */
+/*    fix_MAGIC(); */		/* for loadfile.c */
 #endif /* OBP */
 
     if (system_pckg != (long *) -1 || saved_state_loaded)
@@ -435,7 +435,6 @@ PI_prolog_init(win_str, argc, argv)
 #endif
     }
 
-
     assert_command_line(argc, argv);
     assert_sys_searchdir(alsdir);
 
@@ -444,13 +443,11 @@ PI_prolog_init(win_str, argc, argv)
      *---------------------------------------*/
     assert_als_system(OSStr, MinorOSStr, ProcStr,
 		      SysManufacturer, versionNum, win_str);
-/*		      SysManufacturer, versionNum, win_str,systemName); */
 
     /*---------------------------------------*
      * Load the builtins
      *---------------------------------------*/
     if (!noautoload && !saved_state_loaded)
-#ifdef MacOS
 	{
     	char f[20];
     	size_t l;
@@ -461,10 +458,7 @@ PI_prolog_init(win_str, argc, argv)
     	strcat(f, "builtins");
     	autoload(f);
     }
-#else
-			/*	OLD: autoload("builtins");   */
-	autoload("builtins/builtins");  
-#endif
+
     /*---------------------------------------*
      * Establish the Control/C (or Control/BREAK) handler
      *---------------------------------------*/
@@ -841,10 +835,14 @@ autoload(f)
     int   status = 0;
     char  fext[1024];
 
-
     strcpy(fext, alsdir);
     strcat(fext, f);
-    status = load_file(fext, 0);
+/*
+#ifndef OLDCLOAD
+    strcat(fext, ".obp");
+#endif 
+*/
+    status = load_file(fext, 0);  
 
     if (!status) {
 	PI_app_printf(PI_app_printf_warning,

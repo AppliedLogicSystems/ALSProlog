@@ -29,7 +29,7 @@
 
 #define ABMOP(op,p1,p2,p3,p4) {#op,{p1,p2,p3,p4}},
 
-static struct _icode {
+static struct _icode { 
     char *instr_name;
     int   arg[4];
 } ic_array[] = {
@@ -39,6 +39,8 @@ static struct _icode {
 #undef ABMOP
 
 enum AbstractMachineOps decode_instr PARAMS(( Code ));
+int	display_instr	PARAMS( (enum AbstractMachineOps, Code *));
+
 
 /*
  * decode_instr does a linear search to find the instruction.  This is
@@ -59,7 +61,10 @@ decode_instr(inst)
 
 #define ICNUM    sizeof(ic_array)/sizeof(struct _icode)
 #define MIN(a,b) ((a)<(b)?(a):(b))
+/*
+#define HOLDPRINTF printf
 #define printf PI_printf
+*/
 
 static Code *ip;
 
@@ -70,7 +75,7 @@ list_asm(addr, n)
 
 {
     Code *stopaddr = addr + n;
-    long  i, ilength, need_comma;
+    long  ilength;
     enum AbstractMachineOps instr;
 
 	printf("startaddr=%x  stopaddr=%x  codelen=%d\n",addr,stopaddr,n),
@@ -79,20 +84,30 @@ list_asm(addr, n)
     for (ip = addr; ip < stopaddr; ) {
 
 	instr = decode_instr(*ip);
-	ilength = 1;
-
-/*	printf(">%08.0o %08.0o %08.0o %08.0o %08.0o %08.0o %08.0o %08.0o \n",
-		*ip,*(ip+1),*(ip+2),*(ip+3),*(ip+4),*(ip+5),*(ip+6),*(ip+7) );
-*/
-
 	if ((instr < 0) || (instr > ICNUM)) 
 	{
 		printf("[%03.0d]%x: BAD INSTRUCTION: Content=%08.0o\n", (int)(ip-addr), ip, *ip);
 		break;
 	}
+	else
+	{
+		printf("[%03.0d]%x:",(int)(ip-addr),ip); 
+		ilength = display_instr(instr,ip);
+		ip += ilength;
+		printf("\n");
+	}
+    }
+}
 
-/*	printf("[%03.0d]%x[%03.0o|% 3.0d]: %-16s",(int)(ip-addr),ip,instr,instr,ic_array[instr].instr_name); */
-	printf("[%03.0d]%x: %-16s",(int)(ip-addr),ip,ic_array[instr].instr_name); 
+int
+display_instr(instr,ip)
+    enum AbstractMachineOps instr;
+	Code *ip;
+{
+    long  i, ilength, need_comma;
+	ilength = 1;
+
+	printf("%-16s",ic_array[instr].instr_name); 
 	fflush(stdout);
 
 #define COMMA if (need_comma++) printf(",\t")
@@ -175,7 +190,48 @@ list_asm(addr, n)
 		    printf("illegal operand\n");
 		    als_exit(1);
 	    };
-	ip += ilength;
-	printf("\n");
-    }
+	return(ilength);
 }
+
+/*
+#undef printf
+#define printf HOLDPRINTF
+*/
+
+#ifdef TRACEBWAM
+void tracewam	PARAMS(( Code * ));
+
+int bwam_trace = 0;
+
+void toggle_bwam PARAMS(( void ));
+
+void
+toggle_bwam()
+{
+	if (bwam_trace == 0)
+		bwam_trace = 1;
+	else
+		bwam_trace = 0;
+}
+
+void
+tracewam(PP)
+    Code *PP;
+{
+    enum AbstractMachineOps instr;
+
+	if (bwam_trace > 0)
+	{
+		instr = decode_instr(*PP);
+		if ((instr < 0) || (instr > ICNUM)) 
+			printf("BAD INSTRUCTION: Content=%08.0o\n", *PP);
+		else
+		{
+			printf("[%x]",PP); 
+			display_instr(instr,PP);   
+			printf("\n");
+		};
+		fflush(stdout);
+	}
+}
+#endif

@@ -1,3 +1,44 @@
+Sat May 6 1995 Ken Bowen
+
+	* Added delayed evaluation (freeze) mechanism in byte/threaded
+	  version:
+	-- New property tags:
+		FREEZE - include code implementing freeze
+		DEBUGFREEZE - within FREEZE; spit information for debugging;
+	--New files:
+		/generic/freeze.c, freeze.h
+		/builtins/blt_frez.pro
+	--New predicates:
+		'$delay'/4, freeze/3, free_thawed/0, delay_handler
+	--Modfied files:
+		port/wam.c: modified macros TRAIL, etc.;
+		builtins/builtins.pro: added clause to '$interrupt'/3
+		generic/built.h,built.c - new C-defined builtins;
+	* Tagged as v1-72 and committed
+
+Mon Apr 10 1995 Ken Bowen
+ 
+	* Added property/feature tag handling by creating dfltsys.h,
+	which is included by the default tconfig.h in each system 
+	(byte,threaded native).  Individual builds can be custom-configured
+	by adding specific #define's or #undef's in tconfig.h after
+	the #include "dfltsys.h", or by replacing it appropriately.
+		In addition, added a documnetation file, property.tags,
+	which will document almost all the #define tags occurring in
+	the system;
+
+	* Began adding specific new property tags, documented in 
+	property.tags; initially, for leaving out parts of the system,
+	or adding new stuff (e.g., FREEZE).
+
+	* Added a new documentation file, debug.txt, which will document
+	all low-level system development debugging and examination tools.
+
+	* Added {bld-port,bld-natv}/tconfig.in to identically shadow
+	tconfig.h.in; this is to handle DOS's inability to accept 
+	a.b.c-style filenames, and reflects that it would take a bit of
+	effort to make Unix's configure change it's *.in prototype approach.
+	
 Sun Apr 09 1995 Ken Bowen
 
 	* Changed generic/pi_cfg.h.proto to pi_cfg.in to cater to DOS, and

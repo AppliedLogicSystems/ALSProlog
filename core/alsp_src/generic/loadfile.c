@@ -58,9 +58,6 @@
 
 #define EPSILON_TIME   60
 
-static char MAGIC[] =
-"ALS-Prolog Loadable Object Module\r\nFormat 1.21(XXXXXXXXXX,YYYYYYYYYY)\r\n\032\004\019\026";
-
 typedef struct {
     char  magic[120];
     long  symtab_start;		/* Position in file of symbol table */
@@ -147,6 +144,12 @@ static unsigned short format_tab[] =
  | the processor string and the Y's with the minor os string
  *-----------------------------------------------------------------------*/
 
+#include "magic.h"
+
+#ifdef HIDEME
+static char MAGIC[] =
+"ALS-Prolog Loadable Object Module\r\nFormat 1.21(XXXXXXXXXX,YYYYYYYYYY)\r\n\032\004\019\026";
+
 void
 fix_MAGIC()
 {
@@ -167,6 +170,7 @@ fix_MAGIC()
     while (*m == 'Y' && *o)	/* replaces Y's */
 	*m++ = *o++;
 }
+#endif HIDEME
 
 #ifdef DOS
 /*
@@ -609,9 +613,13 @@ isdir(fname)
 
 #endif /* not MacOS */
 
+
+
 #ifndef R_OK
 #define R_OK 4
 #endif
+
+#ifdef OLDCLOAD
 
 int
 load_file(fname, options)
@@ -663,14 +671,14 @@ load_file(fname, options)
      */
     for (fnp--; fnp != fname && *fnp != DIR_SEPARATOR && *fnp != '.'; fnp--) ;
 
-/* printf("load_file:fname=%s fnp=%s\n",fname,fnp); */
+/*  printf("load_file:fname=%s fnp=%s\n",fname,fnp); */
     /*
      *  Try to access the file as specified by making sure that
      *  it is not a directory. If it is accessable, load that file.
      */
     if (access(fname, R_OK) == 0 && !isdir(fname)) 
 	{
-/* printf("load_file:access ok to fname=%s\n",fname); */
+/*  printf("load_file:access ok to fname=%s\n",fname); */
 #ifdef OBP
 	if (strcmp(fnp, ".obp") == 0) {
 	    if (f_load(fname) != FLOAD_FAIL) {
@@ -688,7 +696,6 @@ load_file(fname, options)
 	}
     }
 /* printf("load_file:access NOT ok to fname=%s\n",fname); */
-
     /*
      *  Check whether the file has an extension or not.
      */
@@ -806,4 +813,31 @@ load_file(fname, options)
     }
 
     LOAD_RETURN(0)
+
 }
+
+#else  /* not-OLDCLOAD */
+
+int
+load_file(fname, options)
+    char *fname;
+    int   options;
+{
+    strcat(fname, ".obp");
+
+    /*
+     *  Try to access the file as specified & make sure that
+     *  it is not a directory. If it is accessable, load that file.
+     */
+    if (access(fname, R_OK) == 0 && !isdir(fname)) 
+	{
+		 	/* printf("Calling f_load#0(%s)\n",fname);  */
+	    if (f_load(fname) != FLOAD_FAIL) 
+			return(1);
+	    else 
+			return(0);					
+    }
+}
+
+
+#endif /* OLDCLOAD */

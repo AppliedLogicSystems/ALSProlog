@@ -16,6 +16,8 @@
  | 10/26/94 -  C. Houpt -- Various UCHAR* casts.
  *===================================================================*/
 #include "defs.h"
+
+#ifdef OLDLEXAN
 #include "lexan.h"
 
 /*
@@ -469,3 +471,4 @@ escape_char(bpp)
 	    return *(*bpp)++;
     }
 }
+#endif /* OLDLEXAN */

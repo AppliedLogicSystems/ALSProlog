@@ -10,7 +10,7 @@
  */
 
 test :-
-	open('numio.tmp',read_write,_,[bufsize(16),alias(foo)]),
+	open('numio.tmp',read_write,_,[type(binary),bufsize(16),alias(foo)]),
 
 	pn(double,19.3),	%% 0-7
 	pn(short, 20),		%% 8-9
