@@ -31,7 +31,6 @@
 #include "defs.h"
 #include <math.h>
 
-#include <errno.h>
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -44,12 +43,15 @@
 
 #ifdef MacOS
     #ifdef HAVE_GUSI
-	//#include <GUSI.h>
+	#include <GUSI.h>
 	#include <sys/errno.h>
     #else
 	#include <unix.h>
-	#define EINTR	4	/* MetroWerks does not define the EINTR error code. */
+	#include <errno.h>
+	#define EINTR 4 /* MetroWerks does not define the EINTR error code. */
     #endif
+#else
+#include <errno.h>
 #endif /* MacOS */
 
 #ifdef DOS
@@ -234,7 +236,7 @@ static	int	write_buf	PARAMS(( PWord, UCHAR * ));
 static	long	stream_end	PARAMS(( UCHAR * ));
 static	int	skip_layout	PARAMS(( UCHAR * ));
 static	int	octal		PARAMS(( UCHAR ** ));
-static	int	hexadecimal	PARAMS(( UCHAR ** ));
+static	unsigned long	hexadecimal	PARAMS(( UCHAR ** ));
 static	int	decimal		PARAMS(( UCHAR **, UCHAR *, double *, int *));
 static	int	escaped_char	PARAMS(( UCHAR ** ));
 static	void	quoted_atom	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *lim, UCHAR *buf));
@@ -3600,12 +3602,12 @@ octal(pp)
     return val;
 }
 
-static int
+static unsigned long
 hexadecimal(pp)
     UCHAR **pp;
 {
     register UCHAR *p;
-    register int val;
+    register unsigned long val;
     register int ctype;
 
     p = *pp;
@@ -5367,6 +5369,84 @@ sio_sprintf()
 		SUCCEED;
     else
 		FAIL;
+}
+
+/*
+ * sio_sprintf_number(Number, Buffer, Length)
+ */
+
+int sio_sprintf_number(void)
+{
+    PWord v1, v2, v3, v;
+    int   t1, t2, t3, t;
+#ifndef DoubleType
+    PWord functor;
+    int arity;
+#endif
+    UCHAR *fmt;
+    UCHAR *buf;
+    double dblval;
+    int   fmt_type;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+    w_get_An(&v3, &t3, 3);
+
+    buf = (UCHAR *) (wm_H + 1);
+
+    switch (t1) {
+	case WTP_INTEGER:
+	    sprintf((char *)buf, "%d", v1);
+	    break;
+#ifndef DoubleType
+	case WTP_STRUCTURE:
+	    w_get_arity(&arity, v1);
+	    w_get_functor(&functor, v1);
+	    if (arity == 4 && functor == TK_DDOUBLE) {
+			int i;
+			for (i = 0; i < 4; i++) {
+		    	w_get_argn(&v, &t, v1, i + 1);
+		    	*(((short *) &dblval) + i) = (short) v;
+			}
+	    }
+	    else
+			FAIL;
+
+	    /* for small integral doubles, print with a trailing ".0"
+	       using %.1f, otherwise use %.10g */
+	    if (floor(dblval) == dblval
+		&& dblval > -10000000000.0
+		&& dblval < 10000000000.0)
+		sprintf(buf, "%.1f", dblval);
+	    else
+		sprintf(buf, "%.10g", dblval);
+	    break;
+#else
+	case WTP_DOUBLE:
+	    w_get_double(&dblval, v1);
+
+	    /* for small integral doubles, print with a trailing ".0"
+	       using %.1f, otherwise use %.10g */
+	    if (floor(dblval) == dblval
+		&& dblval > -10000000000.0
+		&& dblval < 10000000000.0)
+		sprintf(buf, "%.1f", dblval);
+	    else
+		sprintf(buf, "%.10g", dblval);
+	    break;
+#endif
+	default:
+	    FAIL;
+    }
+
+    w_mk_uia_in_place(&v, &t, buf);
+
+    if (w_unify(v2, t2, v, t) 
+    		&& w_unify(v3, t3, (PWord) strlen((char *)buf), WTP_INTEGER))
+		SUCCEED;
+    else
+		FAIL;
+
 }
 
 /*
