@@ -270,6 +270,11 @@ proc dispose_document_window {w} {
 	if {[info exists proenv($w,file)] && [info exists proenv(document,$proenv($w,file))]} then {
 		unset proenv(document,$proenv($w,file))
 	}
+	if {[info exists proenv($w,title)]} then {
+puts "dispose_document_window: proenv($w,title)=|$proenv($w,title)|"
+		un_post_open_document $proenv($w,title)
+		unset proenv($w,title)
+	}
 	if {[info exists proenv($w,file)]} then {unset proenv($w,file)}
 	if {[info exists proenv($w,dirty)]} then {unset proenv($w,dirty)}
 	set i [lsearch -exact $proenv(document_list) $w]
@@ -300,7 +305,7 @@ proc store_text {text file} {
 }
 
 proc load_document {file} {
-	global array proenv
+	global array proenv 
 	if {[info exists proenv(document,$file)]} {
 		raise $proenv(document,$file)
 	} else {
@@ -309,12 +314,35 @@ proc load_document {file} {
 		try {
 			load_text $file $w.text
 			set proenv($w,file) $file
+			set proenv($w,title) $file_name
 			set proenv(document,$file) $w
 		} fail {
 			dispose_document_window $w
 		}
 	}
+	post_open_document $file_name $w
 	return $proenv(document,$file)
+}
+
+proc post_open_document {Title Win} {
+	global array tcl_platform 
+	global mod
+
+	.topals.mmenb.file delete last
+	.topals.mmenb.file delete last
+	.topals.mmenb.file add command \
+		-label $Title -command [list raise $Win]
+    .topals.mmenb.file add separator
+	if {$tcl_platform(platform) == "windows"} {
+    	.topals.mmenb.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_prolog}
+    } else {
+    	.topals.mmenb.file add command -label "Quit" -accelerator "$mod-Q" -command {re exit_prolog}
+	}
+}
+
+proc un_post_open_document {Title} {
+	set PrjIdx [.topals.mmenb.file index $Title]
+	.topals.mmenb.file delete $PrjIdx
 }
 
 	########################
@@ -322,7 +350,10 @@ proc load_document {file} {
 	########################
 
 proc document.new {} {
-	set w [create_document_window "Untitled"]
+	global array proenv
+
+	incr proenv(untitled_counter) 
+	set w [create_document_window "Untitled #$proenv(untitled_counter)"]
 	send_prolog_t als_ide_mgr [list open_non_file_edit_win $w] list
 }
 

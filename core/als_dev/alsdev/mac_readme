@@ -33,7 +33,9 @@ Build
 
 Make "ALS Prolog Shell PPC" and "alspro PPC.lib" in the mwbuild directory.
 
-In alsdev, setup an alsdir with the folders "builtins" and "library".
+In alsdev, setup an alsdir with the folders "builtins" and "library". (You
+
+can run the Unix shell script setup_alsdir.sh).
 
 Copy the file tcltk.pro into the alsdir/shared folder.
 

@@ -1,6 +1,6 @@
 :-
 	consult(
-		[debugger, tcltk,
+		[tcltk,
 		 blt_dvsh, dbg_class, projects, 
 		':alsdir:library:listutl1',
 		':alsdir:library:miscterm',
