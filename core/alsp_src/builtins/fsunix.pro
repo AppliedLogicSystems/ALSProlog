@@ -192,7 +192,8 @@ files(Pattern, FileList)
 files(Directory, Pattern, List) 
 	:-
 	name(Pattern, PatternChars),
-	make_reg_exp(PatternChars, RegexChars),
+	make_reg_exp(PatternChars, RegexChars0),
+	append(RegexChars0, "$", RegexChars),
 	name(Regex, [0'^ | RegexChars]),
 	getDirEntries(Directory, Regex, FirstResult),
 	!,
@@ -318,13 +319,12 @@ directory(Pattern, FileType, List)
 	:-
 	atom(Pattern), 
 	rootPathFile(Disk, PathList, FilePattern, Pattern),
-%	subPath(PathList,ThePath),
-%	exists_file(ThePath),
 	subPath(PathList, InitPath),
 	(InitPath = '', !; must_exists_file(InitPath)),
 	!,
 	name(FilePattern, PatternChars),
-	make_reg_exp(PatternChars, RegexChars),
+	make_reg_exp(PatternChars, RegexChars0),
+	append(RegexChars0, "$", RegexChars),
 	name(Regex, [0'^ | RegexChars]),
 
 	(InitPath = '' -> Path = '.' ; Path = InitPath),
