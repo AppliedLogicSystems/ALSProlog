@@ -623,6 +623,7 @@ catch0(Module, Goal, Exception, SWIG)
 catch0(Module, Goal, Exception, SWIG) 
 	:-
 	reset_wm_normal,  /* rest the normal heap limit, in case of a heap overflow */
+	'$protect_bottom_stack_page',
 	Module:Exception.
     
 

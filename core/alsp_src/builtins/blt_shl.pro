@@ -976,8 +976,6 @@ shell_exception(abort)
 
 shell_exception(stack_overflow(Goal)) 
 	:-!,
-	'$protect_bottom_stack_page',
-			%% stack_over:  "Execution aborted due to stack overflow.\n"
 	prolog_system_error(stack_over,[]).
 
 shell_exception(heap_overflow(Goal)) 
