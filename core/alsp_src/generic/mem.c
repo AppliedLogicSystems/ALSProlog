@@ -38,7 +38,6 @@
 
 #ifdef MSWin32
 #include <windows.h>
-#include <xEXCPT.H>
 #include "fswin32.h"
 #endif
 
