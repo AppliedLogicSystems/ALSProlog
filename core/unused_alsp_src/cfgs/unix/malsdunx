@@ -25,6 +25,7 @@ cd $ac_file;
 		echo  Using absolute paths;
 		$LN_S $srcdir/builtins/*.pro alsdir/builtins;	
 		$LN_S $srcdir/library/*.pro alsdir/library; 
+		$LN_S $srcdir/library/*.alb alsdir/library;
 	else								\
 		echo  Using relative paths;
 	    cd alsdir/builtins; 
