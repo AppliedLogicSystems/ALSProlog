@@ -4,7 +4,11 @@ Mon May 29 1995 Ken Bowen
 	  to integers.  Detailed commentary in file coerce.doc in this
 	  directory.
 
-	  Tagged as v1-74
+	* Added X is float(Y): 
+		If float(Y), then X = Y, 
+		Else if integer(Y), X = Y coerced to float (X = Y.0)
+
+	* Tagged as v1-74
 
 Tue May 23 1995 Ken Bowen
 
