@@ -259,7 +259,10 @@ schema([
 				] ) ]),
 
 	rule(cleanup),
-	rule(super_clean)
+	rule(super_clean),
+
+	case(&(context_name), [
+		(unix: shell(['-include *.d']))])
 ]).				%% End of Schema
 
 cmnt(top) = ['        makefile.in',
@@ -282,7 +285,7 @@ cmnt(top) = ['        makefile.in',
 rule(':', ['{srcdir}generic:', '{srcdir}{ARCH}:'], []). 
 /* Removed -Wconversions, because this produces to many spurious or
    system header warnings. */
-&(gcc_cflags)   = '-O -g -Wall -Wshadow -Wstrict-prototypes -Wmissing-prototypes'.
+&(gcc_cflags)   = '-MMD -O -g -Wall -Wshadow -Wstrict-prototypes -Wmissing-prototypes'.
 &(highC_cflags) = '-Hwin ' .
 &(mpw_cflags)   = '-O ' .
 
@@ -486,3 +489,4 @@ rule(super_clean,
 
 %%#### Warning: don't add rm alsdir to super_clean here in bld-port;.
 %%#### We run alspro in bld-port AFTER the super_clean is done in sharbld.
+
