@@ -21,7 +21,7 @@ In alsdev, setup an alsdir with the folders "builtins" and "library".  Add
 
 Open win32_alsdev.mcp, and make "Build All" to create "ALS Prolog Base.exe"
 
-Create "ALS Prolog.exe" by running the batch script "makealsdev.bat".
+Create "ALS Prolog.exe" by running the batch script "mkalsdev.bat".
 
 Runtime Setup
 -------------
