@@ -366,7 +366,7 @@ change_current_drive(DriveName) :-
  *!----------------------------------------------------------------*/
 move_file(Source, Target)
 	:-
-	printf(atom(Cmd),'mv %t %t', [Source, Target]),
+	sprintf(atom(Cmd),'rename %t %t', [Source, Target]),
 	system(Cmd).
 
 

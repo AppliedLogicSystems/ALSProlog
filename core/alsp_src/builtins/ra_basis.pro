@@ -266,10 +266,14 @@ check_type_match(real, X)
 check_type_match(integer(L,U), X)
 	:-
 	integer(X),
+/*
 %	(var(L) -> true ; L =< X), 
 %	(var(U) -> true ; X =< U).
 	(var(L) -> L=X ; L =< X), 
 	(var(U) -> U=X ; X =< U).
+*/
+	new_type_interval(integer(L,U),Y),
+	add_relation(==, X, Y).
 
 check_type_match(integer, X)
 	:-
@@ -358,8 +362,8 @@ restrict_interval(Type,   Type,    _, _, _, _) :-!.
 	%%  --- restrict_interval(RestType, XPrimType, LX, UX, X, DomainTerm),
 
 restrict_interval(integer,boolean, _, _, _, _) :-!.
-restrict_interval(real,   boolean, _, _, _, _) :-!.
-restrict_interval(real,   integer, _, _, _, _) :-!.
+%restrict_interval(real,   boolean, _, _, _, _) :-!.
+%restrict_interval(real,   integer, _, _, _, _) :-!.
 
 	%% RestType is bounded (=.. [Type,L,U]); now the underlying
 	%% primitive types of RestType and XPrimType must be identical;
