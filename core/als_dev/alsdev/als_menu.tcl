@@ -162,9 +162,9 @@ proc add_tools_menu {menubar type window} {
 		$menubar.tools add checkbutton \
 			-label Debugger -underline 0 -command exec_toggle_debugwin -variable proenv(debugwin)
 		$menubar.tools add separator 
-    	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} -state $proenv(production)
+    	$menubar.tools add command -label "Source Tcl$elipsis" -underline 0 -command {re source_tcl} -state $proenv(edition)
     	$menubar.tools add command -label "Tcl Debugger$elipsis" -underline 0 -command {re tcl_debugger} -state disabled
-    	$menubar.tools add command -label "Kill Tcl Interps" -underline 0 -command {re kill_tcl_interps} -state $proenv(production)
+    	$menubar.tools add command -label "Kill Tcl Interps" -underline 0 -command {re kill_tcl_interps} -state $proenv(edition)
 #    	$menubar.tools add command -label "Tcl Shell$elipsis" -underline 0 -command {re tcl_shell} 
 
 		$menubar.tools add separator 
