@@ -1,0 +1,81 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Tables Interface Demo</title>
+<meta name="description" value="Demo: Tables Interface: ALS Prolog to Tktable">
+<meta name="keywords" value="ALS Prolog, tables, spreadsheeds, Tktable">
+</head>
+<body bgcolor="white">
+<center><h1>Tables Interface Demo</h1></center>
+<center><h2>Interface between ALS Prolog and Tktable</h2></center>
+
+The <a href="tkTable.html">Tktable package</a> is a powerful package
+for creating and manipulating on-screen tables.  
+The file <tt>tables.pro</tt> defines a Prolog interface to the Tktable 
+package, providing 
+a natural set of Prolog predicates for dealing with Tk tables. The
+interface is described in detail in <a href="tables.html">Tables
+Interface.</a>
+
+The file <tt>tables_demo.pro</tt> is a simple demonstration of some of
+the basic table capabilities:
+
+
+<pre>
+:- consult('tables.pro').  <i>% ensure that tables.pro is loaded</i>
+
+use tk_alslib.        <i>% import these modules </i>
+use tcltk.
+
+td(1)
+    :-
+    load_table_package,        <i>% load the tables dll (shared library) </i>
+    create_table(demotable,        <i>% make a table with these headings: </i>
+        [title='My Test',
+         rowheadings=[row_1,'Row 2',r3,r4,r5,r6,r7,r8,r9],
+         colheadings=['First','Second',third,fourth]
+         ]).
+<center><img src="demotable1.gif"></center>
+td(2) :-            <i>% the tag "title" is automatically defined </i>
+    table_set_tag(demotable, title, 
+                [background=yellow, foreground=black, relief=groove]).
+<center><img src="demotable2.gif"></center>
+td(3) :-            <i> % configure a new tag z1 </i>
+    table_set_tag(demotable, z1, 
+                [background=green, foreground=black]).
+
+td(4) :-            <i> % apply tag z1 </i>
+    table_tag_region(demotable, z1, cell(2,2)).
+<center><img src="demotable4.gif"></center>
+td(5) :-        <i>% enter some values in a column </i>
+    set_demotable_col(1,2,[9,8,7,6,5,4,3,2,1,2,3,4,5]).
+
+td(6) :-        <i>% enter some values in a row </i>
+    set_demotable_row(4,0,[-88,33.2,bad]).
+<center><img src="demotable6.gif"></center>
+td(7) :-		<i>% read values from a cell</i>
+	read_demotable_table(2,2,X),
+	printf('Value of cell %t,%t = %t\n', [2,2,X],[quoted(true)]).
+
+?- td(7).
+Value of cell 2,2 = bad
+</pre>
+Next, click with the left mouse button in cell 2,2, and replace the contents
+with something, for example:
+<center><img src="demotable7.gif"></center>
+Now reading from this cell we get:
+<pre>
+?-td(7).
+Value of cell 2,2 = 'Now Fine'
+</pre>
+
+The extended demo
+<pre>
+?-td(x1).
+</pre>
+demonstrates the facilities for adding a menu bar to the window, together
+with frames (containing widgets) above and below the table.  If this is
+run <I>instead of</I> td(1), all of the demo commands td(2),...will also
+act on the extended example, as seen here:
+<center><img src="demotable8.gif"></center>

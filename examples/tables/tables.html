@@ -1,0 +1,294 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Tables Interface</title>
+<meta name="description" value="Tables Interface: ALS Prolog to Tktable">
+<meta name="keywords" value="ALS Prolog, tables, spreadsheeds, Tktable">
+</head>
+<body bgcolor="white">
+<center><h1>Tables Interface</h1></center>
+<center><h2>Interface between ALS Prolog and Tktable</h2></center>
+
+The <a href="tkTable.html">Tktable package</a> developed by Jeff Hobbes is a powerful package
+for creating and manipulating on-screen tables.  The basic demos
+supplied with the Tktable package include a framework for a multi-page 
+spreadsheet.
+<p>
+The file <tt>tables.pro</tt> defines a Prolog interface to the Tktable 
+package, providing 
+a natural set of Prolog predicates for dealing with Tk tables. The full
+forms of these predicates provide a number of parameters, including the
+Tcl/Tk interpreter in which to execute, and return values.  For all of the
+predicates, there are convenient (short) forms supplying defaults (such
+as the "standard" interpreter "tcli") and ignoring return values.
+<p>
+<b>load_table_package/0.</b>
+<pre>
+Short form defined by:
+     load_table_package :- 
+        load_table_package(tcli).
+</pre>
+
+<b>load_table_package/1.</b>
+<pre>
+load_table_package(Interp)
+load_table_package(+)
+</pre>
+    Calls init_tk_alslib(Interm), and then loads the TkTable package.
+    Calling it more than once has no effect.
+<p>
+<b>create_table/2</b>
+<pre>
+create_table(TableName, Options)
+create_table(+, +)
+Short form defined by:
+    create_table(TableName, Options) :-
+        create_table(TableName, Options, tcli).
+</pre>
+
+<b>create_table/3</b>
+<pre>
+create_table(TableName, Options, Interp)
+create_table(+, +, +)
+Short form defined by:
+    create_table(TableName, Options, Interp) :-
+        create_table_r(TableName, Options, Interp, _).
+</pre>
+
+<b>create_table_r/3</b>
+<pre>
+create_table_r(TableName, Options, R)
+create_table_r(+, +, -)
+Short form defined by:
+    create_table_r(TableName, Options, R) :-
+        create_table_r(TableName, Options, tcli, XOpts, R).
+</pre>
+
+<b>create_table_r/5</b>
+<pre>
+create_table_r(TableName, Options, Interp, XOpts, R)
+create_table_r(+, +, +, +, -)
+</pre>
+
+TableName and Interp must be atoms; R should be an uninstantiated variable.
+Creates a table called TableName in Tcl/Tk interpreter Interp, and unifies R
+with a list of seven (7) atoms (in this order) as follows:
+<pre>
+	the Tk pathname of the actual table entity;
+	the name of the associated Tcl data array;
+	the name of the associated Tcl info array;
+	the Tk pathname of the top level window containing the table;
+	the Tk pathname of the menubar, if requested, and '' otherwise;
+	the Tk pathname of the upper pane, if requested, and '' otherwise;
+	the Tk pathname of the lower pane, if requested, and '' otherwise;
+</pre>
+The properties of TableName are 
+configure by the options occuring on the list Options, or the list XOpts.
+In addition, the call the create_table_r/5 (and implicitly, all of the
+other create_tableXX/NN calls) define (assert) specific predicates for 
+accessing the cells, rows, and columns of TableName.  These are described
+following the discussion table configuration options.
+<p>
+Note that Tktable uses zero-based indexing for the cells of the table proper,
+and uses negative integer-based indexing for the cells of the column and row
+headings.  The indicies on r_,_ in the following example (basic.tcl from the
+Tktable demos) illustrates the situtation:
+<br> <center> <img src="basic_table.gif" > </center> <br>
+The elements of the lists Options and XOpts are terms ("equations') of the 
+form Tag=Value.  Each of these provides a value to a corresponding option in the
+call to Tktable.  In general, these are passed to the Tktable as options
+in the form
+<pre>
+                -Tag Value
+</pre>
+
+A certain amount of transformation, error-checking, and supplying of
+defaults of provided for equations on the list Options.  
+For equations occurring on the list Options, Tag must be
+one of the following recognized atoms:
+<pre>
+
+         numcols,       colheadings,   titlerows,    roworigin,    
+         numrows,       rowheadings,   titlecols,    colorigin,    
+         title,         font,          foreground,   background, 
+         selectmode,    rowstretch,    colstretch,   flashmode,    
+         menubar,       upperpane,     lowerpane
+</pre>
+
+The equations on the XOpts also are viewed as providing option values to the 
+Tktable call.  However, absolutely no checks are performed, even as to whether
+Tag really names a Tktable option.  The pair "-Tag Value" is simply
+passed directly to the Tktable call.  It is the programmer's responsibility
+ensure that Tag=Value equations on XOpts are correct.
+<p>
+The values, defaults, and effects of the options on the Options list are 
+given below.  Note that some of the defaults provided by this interface
+are different than the defaults of the basic Tktable.
+<p>
+colheadings = ColHeadings [list of atoms; [] ] <br>
+numcols = NumCols [integer; 10] <br>
+titlerows = NumTitleRows [integer; 1] <br>
+colorigin = ColOrigin [integer; -1] <br>
+<p>
+This group of options controls column organization.  ColHeadings is a list of 
+atoms to serve as column headings.  If ColHeadings \= [] is supplied, then 
+the other options (numcols, titlerows, roworigin) are ignored.  Instead, 
+NumCols is set to 1 plus the length of ColHeadings, NumTitleRows (the number of
+rows at top for column titles) is set to 1, and 
+ColOrigin (the column index of the topmost row) is set to -1.  
+<p>
+rowheadings = RowHeading [list of atoms; [] ] <br>
+numrows = NumRows [integer; 10] <br>
+titlecols = NumTitleCols [integer; 1] <br>
+roworigin = RowOrigin [integer; -1] <br>
+<p>
+This group of options controls row organization.  RowHeadings is a list of 
+atoms to serve as row labels.  If RowHeadings \= [] is supplied, then 
+the other options (numrows, titlerows, roworigin) are ignored.  Instead, 
+NumRows is set to 1 plus the length of RowHeadings, NumTitleCols (the number of
+columns at left for row labels) is set to 1, and 
+RowOrigin (the column index of the leftmost column) is set to -1.  
+<p>
+title = Title [atom; ''] <br>
+The title on the top window bar.
+<p>
+For details concerning the following options, see the 
+<a href="tkTable.html">Tktable manual page</a> together with the font
+and color Tcl manual pages:
+<p>
+font = Font [Tcl font description (atom); system default] <br>
+foreground = Color [Tcl color description (atom); black] <br>
+background = Color [Tcl color description (atom); #b9b9b9 (grey)] <br>
+selectmode = SelectMode [single/browse/multiple/extended; extended] <br>
+rowstretch = RowStrech [atom (none/unset/all/last/fill); unset ] <br>
+colstretch = ColStretch [atom (none/unset/all/last/fill); unset ] <br>
+flashmode = FlashMode [on/off; on]
+
+<p>
+The only allowed value for the following tags is the value 'true'. The
+presence of one of these equations
+<pre>
+          menubar = true
+          upperpane = true
+          lowerpane = true
+</pre>
+on the OptionsList requests a certain additional feature be added to
+the top level window containing the table, as follows:
+<ul>
+<li> <TT>menubar = true</TT>  -- add a menubar;
+<li> <TT>upperpane = true</TT> -- add a frame between the top of the parent window (or
+the menubar, if present), and the table; the frame extends the full width of
+the parent window;
+<li> <TT>lowerpane = true</TT> -- add a frame between the bottom of the parent window 
+and the table; the frame extends the full width of the parent window;
+</ul>
+The Tk path names of these items are returned in the last entries of the
+list bound to argument 5 (R) by the call create_table_r/5.  Nothing is 
+done to these items by create_table_r/5 other than to create them and
+place them in the grid managing the window.  It is up to the code calling
+create_table_r/5 to obtain the paths and populate these items as desired.
+<p>
+The call 
+<pre>
+    create_table_r(TableName, Options, Interp, XOpts, R)
+</pre>
+also defines several specific predicates for accessing the cells, rows,
+and columns of TableName.  These are asserted in the module in which the
+call to create_tableXX/NN occurs. (The create_tableXX/NN predicates are 
+all metapredicates.)  The predicates defined are the following:
+<p>
+<b>basic_table_info(TableName,NRows,NCols)</b>
+ <br>   A simple assertion, for convenience.
+<p>
+<b>set_</b><i>TableName</i><b>_table(Row,Col,Val)</b>
+<br>    Inserts Val in cell Row,Col, overwriting any previous value.
+<p>
+<b>read_<i>TableName</i>_table(Row,Col,Val)</b>
+<br>    Unifies Val with the value currently contained in cell Row,Col.
+<p>
+<b>set_<i>TableName</i>_row(RowN,ColStart,ValsList)</b>
+<br>    RowN and ColStart are integers in suitable ranges, and ValsList is 
+    a list of values.  On RowN, beginning in column ColStart, recurses
+    down the list ValsList, inserting the values in the cells
+<pre>
+        RowN,ColStart,  RowN,ColStart+1, ...
+</pre>
+    Terminates when either the end of ValsList is reached, or the end
+    of RowN is reached; in the latter case, any remaining entries on
+    ValsList are simply discarded.
+<p>
+<b>set_<i>TableName</i>_col(ColN,RowStart,ValsList)</b>
+<br>    ColN and RowStart are integers in suitable ranges, and ValsList is 
+    a list of values.  On ColN, beginning in row RowStart, recurses
+    down the list ValsList, inserting the values in the cells
+<pre>
+        ColN,RowStart,  ColN,RowStart+1, ...
+</pre>
+    Terminates when either the end of ValsList is reached, or the end
+    ColN is reached; in the latter case, any remaining entries on
+    ValsList are simply discarded.
+
+<p>
+The following additional predicates, which take TableName as a parameter,
+are available:
+
+<p>
+<b>table_set_tag/3.</b>
+<pre>
+table_set_tag(TableName, TagName, Properties)
+table_set_tag(+, +, +)
+Short form defined by:
+    table_set_tag(TableName, TagName, Properties) :-
+        table_set_tag(TableName, TagName, Properties, tcli).
+</pre>
+
+
+<p>
+<b>table_set_tag/4.</b>
+<pre>
+table_set_tag(TableName, TagName, Properties, Interp)
+table_set_tag(+, +, +, +)
+</pre>
+
+TableName must have already been created.  TagName must be an atom,
+and Properties must be a list of equations Prop=Value where Prop is
+suitable for application to a Tktable tag (...) and Value is an
+appropriate value for Prop.  The call
+<pre>
+    table_set_tag(TableName, TagName, Properties, Interp)
+</pre>
+establishes TagName as a tag for TableName with the corresponding
+properties applied.
+
+
+<p>
+<b>table_tag_region/3.</b>
+<pre>
+table_tag_region(TableName, TagName, Region)
+table_tag_region(+, +, +)
+Short form defined by:
+    table_tag_region(TableName, TagName, Region) :-
+        table_tag_region(TableName, TagName, Region, tcli).
+</pre>
+
+<b>table_tag_region/4.</b>
+<pre>
+table_tag_region(TableName, TagName, Region, Interp)
+table_tag_region(+, +, +, +)
+</pre>
+
+TableName must have been created, and TagName must be a tag for TableName
+previously established by one or more calls to table_set_tag/_.
+Applies the tag TagName to region Region in table TableName,
+where Region is term describing regions as follows:
+
+<pre>
+    cell(R,C) - the cell at row R, col C
+    row(R)      - all of row R
+    col(C)      - all of col C
+    colsblock(C1,C2)    - all cols from col C1 to col C2, C1 =< C2;
+    rowsblock(R1,R2)    - all rows from row R1 to row R2, R1 =< R2.
+</pre>
+
+
