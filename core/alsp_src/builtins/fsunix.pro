@@ -39,6 +39,7 @@ export subdirs/1.
 export subdirs_red/1.
 export collect_files/3.
 export directory/3.
+export canon_path/2.
 
 export get_current_drive/1.
 export change_current_drive/1.
@@ -585,6 +586,133 @@ make_reg_exp([0'* | RestPattern],[0'., 0'* | RestRegex])
 make_reg_exp([C | RestPattern],[C | RestRegex])
 	:-
 	make_reg_exp(RestPattern,RestRegex).
+
+/*!--------------------------------------------------------------
+ |	canon_path/2
+ |	canon_path(SrcPath,CanonPath)
+ |	canon_path(+,-)
+ |
+ |	 -	canonicalizes a path name
+ |
+ |  If SrcPath is a path name, either to a file or to a directory,
+ |	CanonPath is a canonicalized version of that path name, in the
+ |	sense that all symbolic links  in the path (to either subdirs
+ |	or the file at the end) are dereferenced out;
+ *!--------------------------------------------------------------*/
+canon_path(SrcPath,CanonPath)
+	:-
+	get_cwd(WeAreHere),
+
+	rootPathFile(Disk,SubDirList,EndPathFile,SrcPath),
+	(change_cwd(SrcPath) ->
+		get_cwd(CanonPath)
+		;
+		rootPathFile(Disk,SubDirList,'',ShortSrcPath),
+		change_cwd(ShortSrcPath),
+		get_cwd(ShortCanonPath),
+		subPath(ShortSubDirList,ShortCanonPath),
+		rootPathFile(_,ShortSubDirList,EndPathFile,CanonPath)
+	),
+	change_cwd(WeAreHere).
+
+
+
+
+/*
+	rootPathFile(Disk,SubDirList,EndPathFile,SrcPath),
+	append(SubDirList,[EndPathFile],FullList),
+	can_path(FullList,Disk,File,CanonPath).
+
+%% Take care of some immediate special cases:
+	
+	%% Direct ref to a file in cur. dir.
+can_path([],'',File,CanonPath)
+	:-!,
+	get_cwd(LocalPath),
+	pathPlusFile(LocalPath,File,CanonPath).
+
+	%% Almost direct ref to a file in cur. dir., via './'
+can_path(['.'],'',File,CanonPath)
+	:-!,
+	get_cwd(LocalPath),
+	pathPlusFile(LocalPath,File,CanonPath).
+
+	%% Almost direct ref to a file in parent dir., via '../'
+can_path(['..'],'',File,CanonPath)
+	:-!,
+	get_cwd(LocalPath),
+	subPath(PathList,LocalPath),
+	strip_last(PathList,ParPathList),
+	subPath(ParPathList,ParPath),
+	pathPlusFile(ParPath,File,CanonPath).
+
+%% The general case:
+
+can_path(SubDirList,Disk,File,CanonPath)
+	:-
+	follow_path(SubDirList,Disk,RealSubDirList),
+	rootPathFile(Disk,RealSubDirList,File,CanonPath).
+
+follow_path([],Disk,[]) :-!.
+follow_path(SubDirList,Disk,RealSubDirList)
+	:-
+	follow_path(SubDirList,Disk,[],RealSubDirList).
+
+follow_path([],Disk,RealSubDirList,RealSubDirList).
+follow_path(['' | SubDirList],Disk,[],RealSubDirList)
+	:-
+	follow_path(SubDirList,Disk,[''],RealSubDirList).
+
+follow_path(['.' | SubDirList],Disk,InitRealSubDirList,RealSubDirList)
+	:-!,
+	follow_path(SubDirList,Disk,InitRealSubDirList,RealSubDirList).
+
+follow_path(['..' | SubDirList],Disk,InitRealSubDirList,RealSubDirList)
+	:-
+	rootPathFile(Disk,InitRealSubDirList,'..',NextPath),
+	get_cwd(WeAreHere),
+	change_cwd(NextPath),
+	get_cwd(RealLinkPath),
+	change_cwd(WeAreHere),
+	subPath(NextInitList, RealLinkPath),
+	follow_path(SubDirList,Disk,NextInitList,RealSubDirList).
+
+follow_path([SD | SubDirList],Disk,InitRealSubDirList,RealSubDirList)
+	:-
+	rootPathFile(Disk,InitRealSubDirList,SD,NextPath),
+	file_status(NextPath, Status),
+	dmember(type=Type,Status),
+	follow_on_path(Type,NextPath,InitRealSubDirList,SD,SubDirList,Disk,RealSubDirList).
+
+follow_on_path(directory,NextPath,InitRealSubDirList,SD,SubDirList,Disk,RealSubDirList)
+	:-!,
+	append(InitRealSubDirList,[SD], NextPathList),
+	follow_path(SubDirList,Disk,NextPathList,RealSubDirList).
+
+follow_on_path(symbolic_link,NextPath,InitRealSubDirList,SD,SubDirList,Disk,RealSubDirList)
+	:-!,
+	read_link(NextPath,LinkPath),
+			%% It is a link; switch there, get real path, & return:
+			%% [This is a dirty "?optimization?"]:
+	get_cwd(WeAreHere),
+	change_cwd(LinkPath),
+	get_cwd(RealLinkPath),
+	change_cwd(WeAreHere),
+	subPath(NextInitList, RealLinkPath),
+	follow_path(SubDirList,Disk,NextInitList,RealSubDirList).
+
+follow_on_path(regular,NextPath,InitRealSubDirList,SD,[],Disk,RealSubDirList)
+	:-
+	append(InitRealSubDirList, [SD], RealSubDirList).
+*/
+
+strip_last([_],[]) :-!.
+strip_last([H | PathList], [H | ParPathList])
+	:-
+	strip_last(PathList, ParPathList).
+
+
+
 
 /*!----------------------------------------------------------------
  |	file_size/2

@@ -1,10 +1,16 @@
-/*
+/*===========================================================================*
  *              fsunix.c
- *      Copyright (c) 1991-1993 Applied Logic Systems, Inc.
+ *      Copyright (c) 1991-1994 Applied Logic Systems, Inc.
  *
- *      File System Access & Manipulation -- Sun OS Unix
+ *      File System Access & Manipulation -- Unix
  *
- */
+ *  This is one of a group of files providing file system access:
+ *		fsunix.c, fsdos.c, fsmac.c, ..., etc.,...
+ *  ALL of these files are loaded when the system is built.  However,
+ *  each file, after the initial  #include "defs.h"  is #ifdef'd with
+ *  the appropriate constant (UNIX, DOS, ....);  this #ifdef applied to
+ *  the entire file, so only one of the files is actually loaded.
+ *===========================================================================*/
 
 #include "defs.h"
 
@@ -223,11 +229,11 @@ getFileStatus()
     PI_getan(&v1, &t1, 1);
     PI_getan(&v2, &t2, 2);
 
-    /* Make sure file name & pattern are atoms or UIAs */
+    	/* Make sure file name & pattern are atoms or UIAs */
     if (!getstring((UCHAR **)&pathName, v1, t1))
 	PI_FAIL;
 
-    if (stat(pathName, &fileStats) == -1)
+    if (lstat(pathName, &fileStats) == -1)
 	PI_FAIL;
 
     fileMode = fileStats.st_mode;
@@ -248,7 +254,7 @@ getFileStatus()
 #ifdef S_ISLNK
     else if (S_ISLNK(fileMode))
 	fileType = 5;
-#endif	/* S_ISLNK */
+#endif /* S_ISLNK */
 #ifdef S_ISSOCK
     else if (S_ISSOCK(fileMode))
 	fileType = 6;
@@ -319,6 +325,7 @@ read_link()
     char *pathName;
     PWord sym;
     int   symType;
+    int   pathSize;
     char  buffer1[1024];
 
     PI_getan(&v1, &t1, 1);
@@ -328,8 +335,10 @@ read_link()
     if (!getstring((UCHAR **)&pathName, v1, t1))
 	PI_FAIL;
 
-    if (!readlink(pathName, buffer1, 1024))
+    pathSize = readlink(pathName, buffer1, 1024);
+	if (pathSize == -1)
 	PI_FAIL;
+	buffer1[pathSize] = 0;
 
     PI_makeuia(&sym, &symType, buffer1);
     if (!PI_unify(v2, t2, sym, symType))
@@ -559,13 +568,13 @@ punlink()
 }
 
 
-/*
- * Some of this code was "borrowed" from the GNU C library (getcwd.c) It has
- * been largely rewritten and bears little resemblance to what it started 
+/*-----------------------------------------------------------------------------*
+ * Some of the following code was "borrowed" from the GNU C library (getcwd.c)
+ * It has been largely rewritten and bears little resemblance to what it started 
  * out as.
  *
  * The purpose of this code is to generalize getcwd.  The idea is
- * to pass it as input some path name.  This pathname can be relative, absolute,
+ * to pass it some path name as input.  This pathname can be relative, absolute,
  * whatever.  It may have elements which reference symbolic links.  The output
  * from this function will be the absolute pathname representing the same
  * file.  Actually, it only returns the directory.  If the thing you pass it
@@ -582,9 +591,7 @@ punlink()
  * will exist at least up until the next call to canonical_pathname.  It
  * should not be relied on any longer than this.  Care should be taken not
  * to corrupt the value returned.
- */
-
-
+ *-----------------------------------------------------------------------------*/
 
 #define TEMP_NAME_INCR (64*3)		/* additional amount of space to
 					 * allocate when temp_name overflows

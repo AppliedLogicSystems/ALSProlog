@@ -348,7 +348,6 @@ pbi_alarm()
     else
 	PI_FAIL;
 
-
 #ifdef HAVE_SETITIMER
     itv.it_interval.tv_sec = (long) floor(dinterval);
     itv.it_interval.tv_usec = (long) (1000000 * (dinterval - floor(dinterval)));
@@ -368,7 +367,7 @@ pbi_alarm()
 	act.sa_flags = SA_SIGINFO;
 	(void) sigaction(SIGALRM, &act, 0);
     }
-#else
+#else		  /* HAVE_SIGACTION ... */
 #ifdef HAVE_SIGVEC
     {
 	struct sigvec v;
@@ -380,15 +379,16 @@ pbi_alarm()
 					 */
 	sigvec(SIGALRM, &v, 0);
     }
-#else  /* !HAVE_SIGVEC */
+#else				/* !HAVE_SIGVEC */
     (void) signal(SIGALRM, signal_handler);
-#endif /* !HAVE_SIGVEC */
-#endif /* HAVE_SIGACTION ... */
-#else
+#endif				 /* !HAVE_SIGVEC */
+#endif		  /* HAVE_SIGACTION ... */
+#else /* !HAVE_SETITIMER */
     alarm((unsigned long) dval);
     (void) signal(SIGALRM, signal_handler);
 #endif /* HAVE_SETITIMER */
-#endif /* DOS */
+
+#endif /* #ifndef DOS */
     PI_SUCCEED;
 }
 

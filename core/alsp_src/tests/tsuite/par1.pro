@@ -89,7 +89,7 @@ alarm_handler(EventId, Goal, Context) :-
 	!,
 	propagate_event(EventId,Goal,Context).
 alarm_handler(_,Goal,_) :-
-%	write('Goal'=Goal), nl,
+	write('a_h_Goal'=Goal), nl,
 	setSavedGoal(Goal),
 	remQueue(NewGoal),
 	NewGoal.

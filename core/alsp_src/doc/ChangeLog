@@ -1,3 +1,10 @@
+Mon Nov  7 20:04:13 EST 1994 Ken Bowen
+
+	* builtins:xconsult.pro: Added two clauses to process/6 to handle
+	reading file commands (:-foo) when in debug_consult mode (adding
+	$dbg_aph etc.); In this case, :-foo is read as 
+		':-'(foo) :- '$dbg_aph'(_,_,_).
+
 Sun Oct 30 11:15:02 EST 1994 Ken Bowen
 
 	* builtins/debugger.pro: Moved showGoalToUserWin/6 to

@@ -801,6 +801,7 @@ noshow_module(xconsult).
 	%% Add any others (or can mtfapi go away now?):
 noshow_module(mtfapi).
 noshow_module(objects).
+noshow_module(windows).
 noshow_module(alsshell).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,19 +1,20 @@
 Nrev performance:
-	Speed in LIPS on standard naive reverse (snrev.pro):
-	Length of list = 100; number of iterations = 50:
+    Speed in LIPS on standard naive reverse (snrev.pro):
+    Length of list = 100; number of iterations = 50:
 
-Machine			OS		Native		Threaded
-==========		==		======		========
-SPARCstation 2		Sun OS 4.3.1	956,242		282,198
-SPARCstation IPC	Sun OS 4.3.1	471,755		169,536
-SPARC......		Solaris 2
+Machine              OS            Native        Threaded
+==========           ==            ======        ========
+SPARCstation 2       Sun OS 4.3.1  956,242       282,198
+SPARCstation IPC     Sun OS 4.3.1  471,755       169,536
+SPARCserver 10       Solaris 2.1
+SPARCserver 20       Solaris 2.1
 
-Motorola Delta88K	Unix SVR4
+Motorola Delta88K    Unix SVR4
 
-DG AViiON 300		DGUX 5.2
+DG AViiON 300        DGUX 5.2
 
-NeXTstation		NeXTStep 3.?
+NeXTstation          NeXTStep 3.0
 
-IBM [PowerPC]		AIX 3.2
+IBM [PowerPC]        AIX 3.2                      520,000
 
-SGI Indigo 2		IRIX ??
+SGI Indigo 2         IRIX                         977,000

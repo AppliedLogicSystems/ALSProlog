@@ -730,6 +730,7 @@ load_builtins(File) :-
 
 :-	auto_use(sio).
 :-	auto_use(debugger).
+:-	auto_use(xconsult).
 
 :-	load_builtins(sio_rt),		%% for getting op declarations
 	load_builtins(blt_evt),		%% need error checking code early

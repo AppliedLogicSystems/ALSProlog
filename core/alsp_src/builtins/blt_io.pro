@@ -72,12 +72,9 @@ export consultq_to/2.
 
 consultd(File) :-
 	nonvar_ok(File),
-%	xconsult:asserta(source_level_debugging(on)),
 	change_source_level_debugging(on,Prev),
 	consult(File),
-%	xconsult:retract(source_level_debugging(on)),
 	change_source_level_debugging(Prev).
-%	!.
 reconsultd(File) :-
 	consultd(-File).
 
@@ -311,7 +308,8 @@ load(FileName,Type,CanonPath,Nature)
 	rootPathFile(NewDrive, CCDPathList, File, CCDPath),
 	check_existence(CCDPath),
 	!,
-	canonicalize_pathname(CCDPath,CanonPath),
+%	canonicalize_pathname(CCDPath,CanonPath),
+	canon_path(CCDPath,CanonPath),
 	get_current_consult_directory(OldCCD),
 	(   
 	    set_current_consult_directory(Drive+CCDPathList)
@@ -323,6 +321,7 @@ load(FileName,Type,CanonPath,Nature)
 	      %% Propogate failure
 	    fail
 	),
+%write( load_canon(CanonPath,Type,Nature) ),nl, flush_output,
 	load_canon(CanonPath,Type,Nature),
 	!,
 	set_current_consult_directory(OldCCD).
@@ -385,6 +384,7 @@ load_canon(Path,Type,Nature)
 	RFlag1 is RFlag0 \/ Type,
 	set_reconsult_flag(RFlag1),
 	load_canon_reconsult(RFlag1,CG),
+%write(load3(Ext,Path,Type,Nature)),nl,flush_output,
 	load3(Ext,Path,Type,Nature),
 	set_reconsult_flag(RFlag0),
 	pop_clausegroup(_).
@@ -544,6 +544,7 @@ load4_checkstatus(2,SPath,OPath) :-	%% FLOAD_ILLOBP
  *-----------------------------------------------------------------------*/
 load_source(Path,Type) :-
 	obp_push_stop,
+%write(calling_consult_source(Path,NErrs)),nl,flush_output,
 	consult_source(Path,NErrs),
 	obp_pop,
 	!.
@@ -574,7 +575,8 @@ load_source_object(SPath,OPath) :-
 	    ->  prolog_system_error(obp_removed,[SPath,OPath])
 	;   prolog_system_error(obp_not_removed,[SPath,OPath])
 	).
-load_source_object(SPath,OPath) :-
+load_source_object(SPath,OPath)
+	:-
 	prolog_system_error(no_open_fil, [OPath]),
 	prolog_system_error(no_obp, [OPath]),
 	consult_source(SPath,NErrs).

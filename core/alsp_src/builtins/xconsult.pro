@@ -112,6 +112,19 @@ process('?-'(Command),Names,Vars,Stream, File, ModStack)
 	prolog_system_error(s(qf,Stream),[]),
 	readFile(Stream, File, ModStack).
 
+process((':-'(Command) :- '$dbg_aph'(_,_,_)),Names,Vars,Stream, File, ModStack)
+	:- 
+	topmod(Module),
+	execute_command_or_query(Stream,cf,Module,Command),
+	!,
+	readFile(Stream, File, ModStack).
+
+process((':-'(Command) :- '$dbg_aph'(_,_,_)),Names,Vars,Stream, File, ModStack)
+	:-!,
+		%% cf: "Command failed.\n"
+	prolog_system_error(s(cf,Stream),[]),
+	readFile(Stream, File, ModStack).
+
 process(':-'(Command),Names,Vars,Stream, File, ModStack)
 	:- 
 	topmod(Module),
@@ -120,7 +133,7 @@ process(':-'(Command),Names,Vars,Stream, File, ModStack)
 	readFile(Stream, File, ModStack).
 
 process(':-'(Command),Names,Vars,Stream, File, ModStack)
-	:-
+	:-!,
 		%% cf: "Command failed.\n"
 	prolog_system_error(s(cf,Stream),[]),
 	readFile(Stream, File, ModStack).

@@ -309,7 +309,11 @@ rootPlusPath('', PathList, Path) :-
 rootPathFile(Disk, Path, File, CompletePath) :-
 	var(CompletePath),
 	!,
-	dappend(Path, [File], PathPlusFile),
+	(File = '' ->
+		PathPlusFile = Path
+		;
+		dappend(Path, [File], PathPlusFile)
+	),
 	rootPlusPath(Disk, PathPlusFile, CompletePath).
 
 rootPathFile(Disk,Path,File,CompletePath) :-
