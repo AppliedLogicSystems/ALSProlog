@@ -12,7 +12,7 @@
 %:-[db_srctr].
 
 mkw32 :-
-	%reconsult(projects),
+	reconsult(projects),
 	save_image('ALS Prolog',[select_lib(builtins, [debugger]),
 		select_lib(library,[miscterm,msc_ioin,strctutl,strings,
 					tcl_sppt,tk_alslib, listutl1])]).

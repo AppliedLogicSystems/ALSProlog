@@ -3,7 +3,7 @@
  |		Copyright (c) 1998 Applied Logic Systems, Inc.
  |
  |			Prolog Project Management
- |			"$Id: projects.pro,v 1.2 1998/03/14 02:05:24 ken Exp $"
+ |			"$Id: projects.pro,v 1.3 1998/03/14 02:36:54 ken Exp $"
  *=============================================================*/
 
 module alsdev.
@@ -16,22 +16,50 @@ ppj
 		[ 'Open Project' + tcl(open_project) ]
 	).
 
+check_root([], '.') :-!.
+check_root([Head | Elts], ProjectDirList)
+	:-
+	check_dir_root(Head, FixedHead),
+	ProjectDirList = [FixedHead | Elts].
+
+check_dir_root(Head, Head)
+	:-
+	sub_atom(Head,K,1,0,'/'),
+	!,
+	'$uia_pokeb'(Head,K,0'\\).
+	
+	
+
+check_dir_root(Head, Head).
+
 export tp/1.
 tp(X) :-
 	grab_terms('pm.ppj', X).
 
-open_project_file(ProjectFilePath,BaseFile)
+export open_project_file/2.
+open_project_file(InProjectDir, BaseFile)
 	:-
-	printf('Loading project from file %t [%t]\n', [BaseFile,ProjectFilePath]),
+	check_root(InProjectDir, ProjectDirList),
+	join_path(ProjectDirList, ProjectDir),
+	file_extension(FF,XX,BaseFile),
+	file_extension(FF,XX,RedoneFile),
+
+	change_cwd(ProjectDir),
+	printf('Loading project from file %t \n', [BaseFile]),
 	get_curProject(OldProject),
-write(op=OldProject),nl,
 	close_previous_project(OldProject),
-write(done_close),nl,
 	set_curProject([]),
-write(call(gt(ProjectFilePath))),nl,flush_output,
-write(zing),nl,
-	grab_terms(ProjectFilePath, CurProject),
-write(gt=CurProject),nl,flush_output,
+	append(ProjectDirList, [RedoneFile], FileList),
+	join_path(FileList, TheFile),
+	printf('Loading project from file %t \n', [TheFile]),
+
+%% Ought to be able to use:
+%	grab_terms(TheFile, CurProject),
+%% But it has problems (??), so:
+	open(TheFile, read, SS, []),
+	read_terms(SS, CurProject),
+	close(SS),
+
 	set_curProject(CurProject),
 	open_the_project(CurProject, BaseFile).
 
@@ -47,8 +75,6 @@ write(gt=CurProject),nl,flush_output,
 	 *-----------------------------------------------------------*/
 open_the_project(ProjList, BaseFile)
 	:-
-write(open_the_project(ProjList, BaseFile)),nl,flush_output,
-
 	check_default(ProjList, name,  BaseFile, ProjName),
 	check_default(ProjList, search_dirs,  [], SearchDirs),
 	check_default(ProjList, search_trees,  [], SearchTrees),
