@@ -89,6 +89,7 @@ report_error(Error) :-
 export start_alsdev/0.
 start_alsdev :-
 	catch(start_alsdev0, Error, report_error(Error)).
+
 start_alsdev0
 	:-
 
@@ -132,6 +133,7 @@ start_alsdev0
 
 	process_cl_asserts(CLInfo),
 	!,
+	abolish(start_alsdev/0),
 	alsdev(Shared,ALS_IDE_Mgr).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

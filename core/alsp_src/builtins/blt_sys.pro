@@ -14,16 +14,12 @@
 module debugger.
 
 :-	make_gv('Call'),		%% Debugger Call variable
-%	make_gv('Depth'),		%% Debugger Depth variable
 	make_gv('Depth',1),		%% Debugger Depth variable
-%	make_gv('Retry'), setRetry(0),	%% Retry variable
 	make_gv('Retry', 0),	%% Retry variable
-%	make_gv('DebugInterrupt'), setDebugInterrupt(debug_off).
 	make_gv('DebugInterrupt',debug_off).
 					%% DebugInterrupt is explicitly set
 					%% by goals which change the debugging
 					%% state.
-
 export setCall/1.
 export getCall/1.
 

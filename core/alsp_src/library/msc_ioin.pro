@@ -12,7 +12,7 @@ export read_terms/2.
 export read_terms_pos/1.
 export read_terms_pos/2.
 export read_terms_pos/3.
-export read_terms_vn/2.
+export read_terms_quoted/2.
 export read_as_list/3.
 export grab_terms/2.
 export grab_lines/2.
@@ -212,9 +212,9 @@ undo_op_decls([op(Pr,Spc,Opr) | OpDecls])
 	undo_op_decls(OpDecls).
 
 /*!-------------------------------------------------------------
- |	read_terms_vn/2
- |	read_terms_vn(Stream,Term_List)
- |	read_terms_vn(+,-)
+ |	read_terms_quoted/2
+ |	read_terms_quoted(Stream,Term_List)
+ |	read_terms_quoted(+,-)
  |
  |	-	reads list of terms from stream Stream, with vars instatiated
  |
@@ -223,7 +223,7 @@ undo_op_decls([op(Pr,Spc,Opr) | OpDecls])
  |	to their names.
  *!------------------------------------------------------------*/
 
-read_terms_vn(Stream,Term_List)
+read_terms_quoted(Stream,Term_List)
 	:-
 	read_terms_vn0(Term_List, Term_List,Stream).
 
@@ -264,6 +264,23 @@ grab_terms(SrcF,Terms)
 	:-
 	open(SrcF,read,SS,[]),
 	read_terms(SS,Terms),
+	close(SS).
+
+/*!-------------------------------------------------------------
+ |	grab_terms_quoted/2
+ |	grab_terms_quoted(File, Terms)
+ |	grab_terms_quoted(+, -)
+ |
+ |	- read terms from a file into a list, quoting UC exprs
+ |
+ |	Opens File and reads list of Terms (as atoms) until end of 
+ |	File is encountered, quoting all variables as atoms.
+ *!------------------------------------------------------------*/
+
+grab_terms_quoted(SrcF,Terms)
+	:-
+	open(SrcF,read,SS,[]),
+	read_terms_quoted(SS,Terms),
 	close(SS).
 
 /*!-------------------------------------------------------------
