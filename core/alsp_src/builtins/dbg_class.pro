@@ -259,8 +259,6 @@ source_trace_mgrAction( clear_errors_display, State)
 
 source_trace_mgrAction( update_errors_wins(Ball), State)
 	:-
-%accessObjStruct(tcl_doc_path, State, EditWin),
-%write(stmA_update_errors_wins(Ball,EditWin)),nl,flush_outout,
 	accessObjStruct(errors_display, State, ErrsList),
 	cslt_reload(ErrsList, Ball, State).
 

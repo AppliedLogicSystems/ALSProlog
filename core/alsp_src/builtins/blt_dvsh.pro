@@ -2579,6 +2579,7 @@ shl_source_handlerAction(close_edit_win, State)
 %	tcl_call(shl_tcli, [dispose_document_window, TclWin], _),
 			%% MUST close down any source trace stuff later:::
 			%%		send_self(close_source_trace, State),
+	setObjStruct(errors_display, State, []),
 	setObjStruct(tcl_doc_path, State, nil).
 
 shl_source_handlerAction(ensure_window_open, State)
@@ -2648,16 +2649,12 @@ shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 		%% Here, ErrsList \= []:
 shl_source_handlerAction(display_file_errors(NErrs, SPath, ErrsList), State)
 	:-
-	accessObjStruct(errors_display, State, PrevErrsList),
 	SourceFile = SPath,
-	(PrevErrsList \= [] ->
-		accessObjStruct(tcl_doc_path, State, TclWin),
-		(TclWin \= nil ->
-			tcl_call(shl_tcli, [close_and_reopen, TclWin], _),
-			send_self(State, clear_decorations)
-			;
-			true
-		)
+	accessObjStruct(tcl_doc_path, State, InitTclWin),
+	(InitTclWin \= nil ->
+		tcl_call(shl_tcli, [close_and_reopen, InitTclWin], _),
+		send_self(State, clear_decorations),
+		TclWin = InitTclWin
 		;
 		shl_source_handlerAction(open_edit_win(SourceFile), State),
 		accessObjStruct(tcl_doc_path, State, TclWin)
