@@ -97,7 +97,6 @@ enumerate_ints(I,Start,Stop) :-
 	NStart is Start+1,
 	enumerate_ints(I,NStart,Stop).
 
-
 /*
  * sub_atom/4
  *
@@ -140,6 +139,75 @@ sub_atom(Atom, Start, Length, SubAtom) :-
 	enumerate_ints(Length, 0, MaxLen),
 	'$sub_atom'(Atom, Start, Length, SubAtom).
 
+
+/*
+
+TO DO: make a new version of '$sub_atom' that takes a 0-indexed start
+       parameter.  This will eliminate all the "Start is Before+1"
+       terms.
+*/
+
+export sub_atom/5.
+
+/* The main clause simple does error checking. */
+sub_atom(Atom, Before, Length, After, SubAtom) :-
+	atom_ok(Atom),
+	var_or_nonneg_integer_ok(Before),
+	var_or_nonneg_integer_ok(Length),
+	var_or_nonneg_integer_ok(After),
+	var_or_atom_ok(SubAtom),
+	sub_atom0(Atom, Before, Length, After, SubAtom).
+
+/* The next three clauses handle single solution cases. */
+sub_atom0(Atom, Before, Length, After, SubAtom) :-
+	integer(Before),
+	integer(Length),
+	!,
+	atom_length(Atom, LT),
+	After is LT - Before - Length,
+	Start is Before+1,
+	'$sub_atom'(Atom, Start, Length, SubAtom).
+
+sub_atom0(Atom, Before, Length, After, SubAtom) :-
+	integer(Length),
+	integer(After),
+	!,
+	atom_length(Atom, LT),
+	Before is LT - After - Length,
+	Start is Before+1,
+	'$sub_atom'(Atom, Start, Length, SubAtom).
+
+sub_atom0(Atom, Before, Length, After, SubAtom) :-
+	integer(Before),
+	integer(After),
+	!,
+	atom_length(Atom, LT),
+	Length is LT - Before - After,
+	Start is Before+1,
+	'$sub_atom'(Atom, Start, Length, SubAtom).
+
+/* A clause to effieciently enumerate fixed-After cases. */
+sub_atom0(Atom, Before, Length, After, SubAtom) :-
+	integer(After),
+	!,
+	atom_length(Atom, LT),
+	MaxBefore is LT - After,
+	enumerate_ints(Before, 0, MaxBefore),
+	Length is LT - After - Before,
+	Start is Before+1,
+	'$sub_atom'(Atom, Start, Length, SubAtom).
+
+/* The completely general case. */
+sub_atom0(Atom, Before, Length, After, SubAtom) :-
+	atom_length(Atom, LT),
+	MaxBefore is LT,
+	enumerate_ints(Before,0,MaxBefore),
+	MaxLen is MaxBefore-Before,
+	enumerate_ints(Length, 0, MaxLen),
+	After is LT - Before - Length,
+	Start is Before+1,
+	'$sub_atom'(Atom, Start, Length, SubAtom).
+	
 
 /*
  * number_chars/2
