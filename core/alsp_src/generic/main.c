@@ -1160,6 +1160,7 @@ int MPW_Tool;
 #include <SIOUX.h>
 
 #include <Events.h>
+#endif
 #endif	/* MacOS */
 
 #ifdef MSWin32
