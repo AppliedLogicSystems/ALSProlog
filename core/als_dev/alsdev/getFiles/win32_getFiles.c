@@ -38,14 +38,18 @@ int GetFiles(Tcl_Interp *interp, Tcl_DString *initdir,
 	oldMode = Tcl_SetServiceMode(TCL_SERVICE_ALL);
 
 	if (GetOpenFileName(&of)) {
-		char *prefix, *f, path[MAX_PATH];
 		
-		for (prefix = of.lpstrFile, f = prefix+of.nFileOffset;
-			 *f; f += strlen(f)+1) {
-			strcpy(path, prefix);
-			strcat(path, "\\");
-			strcat(path, f);
-			Tcl_ListObjAppendElement(interp, result, Tcl_NewStringObj(path, -1));
+		if (*(of.lpstrFile + strlen(of.lpstrFile)+1)) {
+			char *prefix, *f, path[MAX_PATH];
+			
+			for (prefix = of.lpstrFile, f = prefix+of.nFileOffset; *f; f += strlen(f)+1) {
+				strcpy(path, prefix);
+				strcat(path, "\\");
+				strcat(path, f);
+				Tcl_ListObjAppendElement(interp, result, Tcl_NewStringObj(path, -1));
+			}
+		} else {
+			Tcl_ListObjAppendElement(interp, result, Tcl_NewStringObj(of.lpstrFile, -1));
 		}
 	}
 	
