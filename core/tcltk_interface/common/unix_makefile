@@ -21,7 +21,6 @@ all: tclintf.psl test
 tclintf.psl: $(objects)
 	$(CC) $(LINK) -L/usr/local/lib $(objects) \
 		-ltcl8.0 -ltk8.0 -lX11 -lm -lc -o tclintf.psl
-	chmod a-x tclintf.psl
 	
 $(objects) : makefile unix_makefile
 
