@@ -1092,6 +1092,21 @@ compute_flags(buf, m, b)
  * through the file system.
  */
 
+#ifdef MSWin32
+static int MSL_open_patch(const char *path, int flags)
+{
+	if (flags & O_CREAT) {
+		HANDLE h;
+		flags = flags ^ O_CREAT;
+		
+		h = CreateFile(path, GENERIC_READ, 0, 0, OPEN_ALWAYS, 0, 0);
+		if (h != INVALID_HANDLE_VALUE) CloseHandle(h);
+	}
+	
+	return open(path, flags);
+}
+#endif
+
 int
 sio_file_open()
 {
@@ -1168,8 +1183,10 @@ sio_file_open()
 
 #if defined(DOS) /* || defined(MSWin32) */
     if ((SIO_FD(buf) = open(filename, flags | O_BINARY, (S_IWRITE | S_IREAD))) == -1)
-#elif	defined(MacOS) || defined(MSWin32)
+#elif	defined(MacOS)
     if ((SIO_FD(buf) = open((char *)filename, flags | O_BINARY)) == -1)
+#elif   defined(MSWin32)
+    if ((SIO_FD(buf) = MSL_open_patch((char *)filename, flags | O_BINARY)) == -1)
 #elif defined(__GO32__) || defined(OS2)
     if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1)
 #elif defined(UNIX)
