@@ -1413,7 +1413,7 @@ printf("Save_state:opened %s %d\n",filename, ssfd);
     if (lseek(ssfd, offset, 0) != offset) goto ss_err;
     
     offset = round_up(offset+sizeof(offset), pgsize);
-    if (write(ssfd, &offset, sizeof(offset)) < 0) goto ss_err;
+    if (write(ssfd, (char *)&offset, sizeof(offset)) < 0) goto ss_err;
 #endif
 
     if (lseek(ssfd, offset, 0) != offset) goto ss_err;
@@ -1519,7 +1519,7 @@ ss_restore_state(filename,offset)
     if (lseek(ssfd, offset, 0) < 0)
 	goto ss_err;
 
-    if (read(ssfd, &offset, sizeof(offset)) < 0) goto ss_err;
+    if (read(ssfd, (char *)&offset, sizeof(offset)) < 0) goto ss_err;
 #endif
 
     /* Seek to amheader, get amheader, and seek back to amheader */
