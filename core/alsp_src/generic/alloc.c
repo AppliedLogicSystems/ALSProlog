@@ -195,7 +195,7 @@ double_val(pword p)
 	int i;
 	
 	for (i = 0; i < 4; i++) {
-	  	*(((short *) &dblval) + i) = (long) TERM_ARGN(p, i + 1);
+	  	*(((short *) &dblval) + i) = INT_VAL(TERM_ARGN(p, i + 1));
 	}
 	return dblval;
 }

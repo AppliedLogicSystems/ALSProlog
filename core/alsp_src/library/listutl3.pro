@@ -50,7 +50,7 @@ nobind_member(X, [_ | T])
  |	the tree defining List in depth-first, left-to-right order;
  |	compound structures other than list structures are not flattened.
  *!--------------------------------------------------------------------*/
-flatten([], []).
+flatten([], []) :-!.
 flatten([Head | Tail], Result)
 	:- !,
 	flatten(Head, FlatHead),

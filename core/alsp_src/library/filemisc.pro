@@ -133,7 +133,6 @@ copy_stream_nl(SrcS, TgtS, NL_type)
 
 copy_stream_nl(SrcS, TgtS, NL_type).
 
-/****************
 /*!-------------------------------------------------------------
  |	output_nl/2
  |	output_nl(NL_type, TgtS)
@@ -144,7 +143,6 @@ copy_stream_nl(SrcS, TgtS, NL_type).
  *!------------------------------------------------------------*/
 output_nl(unix, TgtS)
 	:-
-%	nl(TgtS).
 	put_code(TgtS, 10).
 
 output_nl(mswin32, TgtS)
@@ -152,15 +150,14 @@ output_nl(mswin32, TgtS)
 	put_code(TgtS, 13),
 	put_code(TgtS, 10).
 
+output_nl(macos, TgtS)
+	:-
+	put_code(TgtS, 13).
+
 output_nl(dos, TgtS)
 	:-
 	put_code(TgtS, 13),
 	put_code(TgtS, 10).
-
-output_nl(macos, TgtS)
-	:-
-	put_code(TgtS, 13).
-******************/
 
 /*!-------------------------------------------------------------
  |	comp_times/3

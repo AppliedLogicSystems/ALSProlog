@@ -254,8 +254,10 @@ X :: Type
 check_type_match(real(L,U), X)
 	:-
 	float(X),
-	(var(L) -> true ; L =< X), 
-	(var(U) -> true ; X =< U).
+%	(var(L) -> true ; L =< X), 
+%	(var(U) -> true ; X =< U).
+	(var(L) -> L=X ; L =< X), 
+	(var(U) -> U=X ; X =< U).
 
 check_type_match(real, X)
 	:-
@@ -264,15 +266,23 @@ check_type_match(real, X)
 check_type_match(integer(L,U), X)
 	:-
 	integer(X),
-	(var(L) -> true ; L =< X), 
-	(var(U) -> true ; X =< U).
+%	(var(L) -> true ; L =< X), 
+%	(var(U) -> true ; X =< U).
+	(var(L) -> L=X ; L =< X), 
+	(var(U) -> U=X ; X =< U).
 
 check_type_match(integer, X)
 	:-
 	integer(X).
 
-check_type_match(boolean(_,_), 0).
-check_type_match(boolean(_,_), 1).
+check_type_match(boolean(L,U), 0)
+	:-
+	(var(L) -> L=0 ; L =< 0), 
+	(var(U) -> U=0 ; 0 =< U).
+check_type_match(boolean(L,U), 1)
+	:-
+	(var(L) -> L=1 ; L =< 1), 
+	(var(U) -> U=1 ; 0 =< 1).
 check_type_match(boolean, 0).
 check_type_match(boolean, 1).
 
@@ -430,15 +440,15 @@ upper_bound(X)
 		%% is of one of the forms:
 		%%		Left is Expr or Left == Expr
 		%%
-ria_relation(is, Left, Expr)
+ria_relation(is, Left, Right)
 	:- 
-	ria_relation_is(Left, Expr).
+	ria_relation_is(Left, Right).
 
-ria_relation(==, Left, Expr)
+ria_relation(==, Left, Right)
 	:- 
 	var(Left),
 	!, 
-	define_interval(==, Left, Expr).  
+	define_interval(==, Left, Right).  
 
 		%% All other cases:
 ria_relation(Operator, Left, Right)
@@ -452,20 +462,22 @@ ria_relation(Operator, Left, Right)
 is_defining_rel( is ).
 is_defining_rel( == ).
 
-ria_relation_is(Left, Expr)
+/*
+ria_relation_is(Left, Right)
 	:-
 	var(Left),
 	!,
-	flatten_expr(Expr, Left, Type),
+	flatten_expr(Right, RightExpr, RightType),
 	(number(Left) ->
 		true
 		;
 		declare_variable(Type,Left)
 	).
+*/
 
-ria_relation_is(Left, Expr)
+ria_relation_is(Left, Right)
 	:-
-	ria_relation(==, Left, Expr).
+	ria_relation(==, Left, Right).
 
 /*---------------------------------------------------------------
  |	define_interval/3
@@ -1062,6 +1074,10 @@ eval_riax(Rel, [X,Y], _ )
 	'$iterate'( Node).
 */
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%  Function Nodes  %%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 ria_map1(  - , X, Z, add(0,X,Z),    1).
 ria_map1( exp, X, Z, xp(Z,X),   1).
 ria_map1( ln,  X, Z, xp(X,Z),   2).
@@ -1077,6 +1093,11 @@ ria_map1r(asin, X,     Z, sin(X,Z),   2,  '$restrict'(Z,-pi/2,pi/2) ).
 ria_map1r(acos, X,     Z, cos(X,Z),   2,  '$restrict'(Z,0,pi) ).
 ria_map1r(atan, X,     Z, tan(X,Z),   2,  '$restrict'(Z,-pi/2,pi/2) ).
 
+/* ------- Binary Function Calls Format: -------*
+	find_existing_csx( F, [X,Y], Z )
+		:-
+		ria_map2(F, X, Y, Z, G, N ),
+ *----------------------------------------------*/
 ria_map2( +  ,       X,Y, Z, add(Z,X,Y)  ,1).
 ria_map2( *  ,       X,Y, Z, mul(Z,X,Y)  ,1).
 ria_map2( min,       X,Y, Z, inf(Z,X,Y)  ,1).
@@ -1089,13 +1110,29 @@ ria_map2( nand,      X,Y, Z, anynot(Z,X,Y) , 1).
 ria_map2( nor,       X,Y, Z, bothnot(Z,X,Y) ,1).
 ria_map2( xor,       X,Y, Z, exor(Z,X,Y),1).
 ria_map2(  ; ,       X,Y, Z, or(Z,X,Y),   1).
-ria_map2( ==,        X,Y, B, k_equal(X,Y,B),3).
-ria_map2( >=,        X,Y, B, j_less(X,Y,B), 3).
-ria_map2( =<,        Y,X, B, j_less(X,Y,B), 3).
+
 ria_map2( root,      X,N, Z, rootsquare(Z,X),  1).
 ria_map2( qpow_even, X,N, Z, qpow_even(Z,X,N), 1).
 ria_map2( pow_odd,   X,N, Z, pow_odd(Z,X,N),   1).
 ria_map2( wrap,      X,N, Z, wrap(Z,X,N),      1).
+
+/*
+ria_map2( ==,        X,Y, B, k_equal(X,Y,B),3).
+ria_map2( >=,        X,Y, B, j_less(X,Y,B), 3).
+ria_map2( =<,        Y,X, B, j_less(X,Y,B), 3).
+*/
+	%%--------------------------------------------------------
+	%% Boolean functions:
+	%% Warning: Unlike the other function nodes, for these
+	%% nodes, the "result" argument is arg3 instead of arg 1
+	%%--------------------------------------------------------
+ria_map2( ==,        X,Y, Z, k_equal(X,Y,Z),3).
+ria_map2( >=,        X,Y, Z, j_less(X,Y,Z), 3).
+ria_map2( =<,        Y,X, Z, j_less(Y,X,Z), 3).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%  Relation Nodes  %%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 fmap_rel( ==,   X,Y, equal(X,Y)).
 fmap_rel( >=,   X,Y, greatereq(X,Y)).

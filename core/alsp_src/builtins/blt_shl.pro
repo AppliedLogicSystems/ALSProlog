@@ -349,6 +349,7 @@ ss_load_dot_alspro(AutoFile)
 	:-
 	exists_file(AutoFile),
 	!,
+%write(abc),nl,
 	reconsult(AutoFile).
 
 ss_load_dot_alspro(AutoFile)

@@ -84,7 +84,16 @@ save_image(NewImageName)
 	command_line(CmdLine),
 	abolish(command_line,1),
 
-	append(SDList0,  SDList1, SDList),
+
+	(bagof( file_clause_group(Path2,CG2), 
+			file_clause_group(Path2,CG2), 
+			SDList2) 
+	  -> true ; SDList2 = []),
+	abolish(file_clause_group,2),
+	dynamic(file_clause_group/2),
+
+%	append(SDList0, SDList1, SDListA),
+%	append(SDListA, SDList2, SDList),
 
 		%% Save the new image based on OS
 	als_system(SystemList),
@@ -106,8 +115,10 @@ save_image(NewImageName)
 	assert(sys_searchdir(ALSDIR)),
 	laa(SDList0),
 	laa(SDList1),
+	laa(SDList2),
 	assert(command_line(CmdLine)).
 
+	%%----------------------
 	%% This is really just assert_all from the library, but it
 	%% needs to be written here since when it is run, the libary
 	%% is inaccessible:

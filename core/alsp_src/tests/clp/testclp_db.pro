@@ -488,6 +488,7 @@ queens(0, []) :-!.
 queens(N, [P | Positions])
 	:-
 	N1 is N - 1,
+	gc,
 	c_noattack(Positions, P, 1),
 	queens(N1, Positions).
 								   
@@ -520,7 +521,7 @@ b(1006, [NumQ]) :- how_many_queens(6, NumQ).
 
 expect(1006, ['NumQ'], [4]).
 
-/******************* 
+%/******************* 
 %	Temporarily commented out until memory leak is repaired:
 
 %-----1007:
@@ -534,7 +535,7 @@ expect(1007, ['NumQ'], [40]).
 b(1008, [NumQ]) :- how_many_queens(8, NumQ).
 
 expect(1008, ['NumQ'], [92]).
-*******************/
+%*******************/
 
 
 

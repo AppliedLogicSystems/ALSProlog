@@ -104,6 +104,9 @@ ilinknet()
 {
 	PWord OpCd, Z, X, Y, Goal;
 	int OpCdt,Zt,Xt,Yt,Goalt;
+	int holdme;
+
+printf("Enter ilinknet\n");
 
 	w_get_An(&OpCd, &OpCdt, 1);
 	w_get_An(&Z, &Zt, 2);
@@ -111,7 +114,15 @@ ilinknet()
 	w_get_An(&Y, &Yt, 4);
 	w_get_An(&Goal, &Goalt, LINK_POSITION);
 
+	holdme = ilinkq(OpCd, Z, X, Y, Goal, Zt,Xt,Yt,Goalt);
+
+	printf("EXIT ilinknet\n");
+
+	return holdme;
+
+/*
 	return ilinkq(OpCd, Z, X, Y, Goal, Zt,Xt,Yt,Goalt);
+*/
 
 }
 
@@ -455,6 +466,7 @@ ilnk_net()
 			printf("Iteration bound exceeded: niters=%d\n", niters);
 			FAIL;
 		}
+printf("m=%lx\n",(unsigned long) wm_TR - (unsigned long) wm_H);
 
 		status = 0;
 
@@ -1079,104 +1091,5 @@ set_max_iters_val()
 	SUCCEED;
 }
 
-#if 0
-int run_grteq_cstrs PARAMS (( void ));
-
-int
-run_grteq_cstrs()
-{
-    PWord v1, v2, v3, v4, v5;
-    int   t1, t2, t3, t4, t5;
-	PWord *p;
-
-    PWord frzvar,rval, rval2, intvtm, rval3;
-    int   frzvartag,rtag, rtag2, rtag3;
-
-    w_get_An(&v1, &t1, 1);	/* Get result functor  */
-    w_get_An(&v2, &t2, 2);	/* Get VRef term */
-    w_get_An(&v3, &t3, 3);	/* Get point interval var */
-    w_get_An(&v4, &t4, 4);	/* Get UIA  for VRef*/
-    w_get_An(&v5, &t5, 5);	/* Get UsedBy List for VRef */
-
-    if (t1 != WTP_SYMBOL)
-		FAIL;
-	if (t2 != WTP_STRUCTURE) 
-		FAIL;
-	if (t3 != WTP_UNBOUND)
-			FAIL;
-
-	frzvartag = WTP_REF;
-		/* Get delay var out of delayterm: */
-	frzvar = (((PWord *) v2) + 1);
-
-#ifdef DEBUGSYS
-if (debug_system[FRZDELAY]) {
-printf(">+>v2=%x[_%lu] frzvar=%x[_%lu]\n",(int)v2,
-					(long)(((PWord *) v2) - wm_heapbase),
-					(int)frzvar,(long)(((PWord *) frzvar) - wm_heapbase)
-					);
-}
-#endif
-
-		/* Make interval processing queue term: */
-	w_mk_term(&rval, &rtag, v1, 5);
-
-	*((PWord *)((PWord *)rval + 1)) = MMK_INT(2);
-    *((PWord *)((PWord *)rval + 2)) = (PWord) MMK_VAR(frzvar);
-    *((PWord *)((PWord *)rval + 3)) = (PWord) MMK_VAR(v3);
-	*((PWord *)((PWord *)rval + 4)) = MMK_INT(0);		/* Unused Y */
-	*((PWord *)((PWord *)rval + 5)) = MMK_INT(0);		/* Queue Next link */
-
-		/* Get interval (constraint) term out of delayterm: */
-	intvtm = (((PWord *) v2) + 4);
-		/* v5 = old used by list; push rval term on front: */
-	w_mk_list(&rval3, &rtag3);
-	*((PWord *)((PWord *)rval3 + 1)) = MMK_STRUCTURE(rval);
-	*((PWord *)((PWord *)rval3 + 2)) = MMK_LIST(v5);
-		/* trailed mangle the new extended list into the
-		   used-by position in the (original) interval structure: */
-	trailed_mangle0(USED_BY_POSITION, intvtm, WTP_STRUCTURE, 
-						rval3, rtag3);
-
-	if (!ilinkq(2, frzvar, v3, 0, rval, 
-			WTP_REF, WTP_REF, WTP_INTEGER, WTP_STRUCTURE))
-		FAIL;
-
-	w_mk_term(rval2, rtag2, v1, 5);
-	p = (PWord *)rval2 + 1;
-	*(p) = MMK_INT(2);
-    *(p+1) = (PWord) MMK_VAR(v3);
-    *(p+2) = (PWord) MMK_VAR(frzvar);
-	*(p+3) = MMK_INT(0);			/* Unused Y */
-	*(p+4) = MMK_INT(0);            /* Queue Next link */
-
-		/* Get interval (constraint) term out of delayterm: */
-	intvtm = (((PWord *) v2) + 4);
-		/* v5 = old used by list; push rval term on front: */
-	w_mk_list(&rval3, &rtag3);
-	*((PWord *)((PWord *)rval3 + 1)) = MMK_STRUCTURE(rval);
-	*((PWord *)((PWord *)rval3 + 2)) = MMK_LIST(v5);
-		/* trailed mangle the new extended list into the
-		   used-by position in the (original) interval structure: */
-	trailed_mangle0(USED_BY_POSITION, intvtm, WTP_STRUCTURE, 
-						rval3, rtag3);
-
-	return ilinkq(2, v3, frzvar, 0, rval2, 
-			WTP_REF, WTP_REF, WTP_INTEGER, WTP_STRUCTURE);
-}
-#endif
-
 #endif /* defined(INTCONSTR) */
 
-/*
-		if ((status && redonode) != 0) {
-			if ( nextt != WTP_INTEGER) {
-				w_install_argn(qend, LINK_POSITION, qhead, WTP_STRUCTURE);
-				qend = qhead;
-				w_install_argn(qend, LINK_POSITION, 0, WTP_INTEGER);
-
-				qhead = next;
-				qheadt = nextt;
-			}
-		}
-*/
