@@ -25,3 +25,30 @@ b(9,X,Y) :- X::real(1,4), Y::real, {Y == exp(X)}.
 b(10,X) :- X::real(0,1), {0==35*X**256 -14*X**17 + X}, solve(X).
 
 b(11,X) :- X::real(0,100), { 0 == (2*X + 17.6)*(4.3*X - 34) }, solve(X).
+
+
+
+	/*-------------------------------------
+	 | Elementary tests for {}:
+	 *------------------------------------*/
+
+g1 :- {foobar(X,Y)}, X=hi, write(bong),nl,flush_output,Y=there.
+
+g2 :- {foobar(X,Y)}, X=hi, write(bong),nl,flush_output,fail.
+g2 :- write(g2_cl2),nl.
+
+g3 :-
+	{foobar(X,Y)}, 
+	X=hi(Boy), 
+	write(bing),nl,flush_output,
+	Y = there,
+	write(bong),nl,flush_output,
+	Boy = silly.
+	
+g4 :-
+	{foobar(X,Y)}, 
+	X=hi(Boy), 
+	write(bing),nl,flush_output,
+	Y = there,
+	write(bong),nl,flush_output.
+	

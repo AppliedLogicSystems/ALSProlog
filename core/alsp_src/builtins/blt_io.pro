@@ -879,6 +879,8 @@ atomicize_arg(List,Atom)
 	!.
 atomicize_arg(_,bad_arg).
 
+:-rel_arith:dynamic('$domain_term'/2).
+
 printf_intv(Stream, Fmt, Item, Options)
 	:-
 	'$is_delay_var'(Item),

@@ -1,6 +1,8 @@
 mytrans(I,O) :- name(O,[0'x ,0'_ |I]).
 macos_trans(I,O) :- name(O,[0'm ,0'_ |I]).
+wx_trans(I,O) :- name(O,[0'w ,0'x ,0'_ |I]).
 module pro2intf.
 mytrans(I,O) :- name(O,[0'x ,0'_ |I]).
 macos_trans(I,O) :- name(O,[0'm ,0'_ |I]).
+wx_trans(I,O) :- name(O,[0'w ,0'x ,0'_ |I]).
 endmod.

@@ -70,6 +70,7 @@ extern char *WinsTypeStr;
 #define NEXT_WIN_STR  "nextstep"
 #define MS_WIN_STR   "mswins"
 #define MAC_WIN_STR   "macwins"
+#define WXWIN_WIN_STR "wxwins"
 #define NO_WIN_STR    "nowins"
 
 /*

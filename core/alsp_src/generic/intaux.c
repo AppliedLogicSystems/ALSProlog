@@ -12,7 +12,7 @@
 
 extern PWord	deref_2		PARAMS(( PWord ));
 
-PWord *get_intvl_tm		PARAMS((PWord *, int));
+PWord get_intvl_tm		PARAMS((PWord *, int));
 
 /*--------------------------------------------------------
  	PWord *get_intvl_tm(DelVar, DelVar_t)
@@ -23,29 +23,29 @@ PWord *get_intvl_tm		PARAMS((PWord *, int));
 	contained in the delay structure, returning
 	(a pointer to) this interval structure.
  *-------------------------------------------------------*/
-PWord *get_intvl_tm(DelVar, DelVar_t)
+PWord get_intvl_tm(DelVar, DelVar_t)
 	PWord *DelVar; 
 	int DelVar_t;
 {
-	PWord DrT, *CstrTm, functor;
-	int *CstrTm_t;
+	PWord DrT, CstrTm, functor;
+	int CstrTm_t;
 
 /* printf("in get_intvl_tm:DelVar=%x\n",DelVar); */
 
 	if ((DelVar_t == WTP_UNBOUND) && (CHK_DELAY((PWord *)DelVar)))
 	{
 	DrT = deref_2((PWord)DelVar);
-	w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)((PWord *)DrT-1), 4);
+	w_get_argn(&CstrTm, &CstrTm_t, (PWord)((PWord *)DrT-1), 4);
 
 		/* CstrTm is now the delay term from DelVar;
 		   but it might be a compound (comma) interval delay
 		   term, so we need to pull out the leftmost component */
 
-	w_get_functor(&functor, (PWord)CstrTm);
+	w_get_functor(&functor, CstrTm);
 	while(TK_COMMA == functor )
 	{
-		w_get_argn((PWord *)&CstrTm, (PWord *)&CstrTm_t, (PWord)CstrTm, 1);
-		w_get_functor(&functor, (PWord)CstrTm);
+		w_get_argn(&CstrTm, &CstrTm_t, CstrTm, 1);
+		w_get_functor(&functor, CstrTm);
 	}
 	/* CstrTm should be intvl(Type,Var,UsedBy,UIA) */
 
@@ -91,10 +91,10 @@ extract_bds(DelVar, DelVar_t, LB, UB)
 	}
 	else if ((DelVar_t == WTP_UNBOUND) && (CHK_DELAY(DelVar)))
 	{
- 		Intvl = get_intvl_tm(DelVar, DelVar_t);
-		w_get_argn(&IntUIA, &IntUIA_t, Intvl, UIA_POSITION);
-		w_uia_peek(IntUIA, 0, (UCHAR *) LB, sizeof (double));
-		w_uia_peek(IntUIA, 8, (UCHAR *) UB, sizeof (double));
+ 		Intvl = (PWord *)get_intvl_tm(DelVar, DelVar_t);
+		w_get_argn((long *)&IntUIA, &IntUIA_t, (long)Intvl, UIA_POSITION);
+		w_uia_peek((long)IntUIA, 0, (UCHAR *) LB, sizeof (double));
+		w_uia_peek((long)IntUIA, 8, (UCHAR *) UB, sizeof (double));
 	}
 	else
 		FAIL;

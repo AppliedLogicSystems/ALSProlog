@@ -1,6 +1,5 @@
 #include "Types.r"
 
-
 resource 'FREF' (128) {
 	'APPL',
 	0,
@@ -43,6 +42,37 @@ resource 'BNDL' (128) {
 			/* [3] */
 			2, 130
 		}
+	}
+};
+
+resource 'open' (128)
+{
+	'ALS4', { }
+};
+
+/* ftApplicationName should be defined in Types.r, but it isn't.
+   The Mac Easy Open SDK uses FileTypesAndCreators.h to get this
+   defined, but the latest version causes Rez errors - so I'll
+   define it here for now.
+
+   Same story for verUS.
+*/
+#ifndef ftApplicationName
+#define ftApplicationName	'apnm'
+#endif
+
+#ifndef verUS
+#define verUS	0
+#endif
+
+resource 'kind' (1000)
+{
+	'ALS4',
+	verUS,
+	{
+		ftApplicationName,	"ALS Prolog",
+		'TEXT',			"ALS Prolog text file",
+		'OBPT',			"ALS Prolog object file"
 	}
 };
 

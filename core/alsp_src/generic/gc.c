@@ -50,6 +50,7 @@ static unsigned long *marks;
  *---------------------------------------------------------------------------------*/
 
 #ifndef MTP_CONST
+		/* 88K */
 #define ISPTR(h)   (!(((long) (h)) & (MTP_INT | MTP_SYM) & ~MTP_BGND))
 #define ISFENCE(v) (((v) & MTP_TAGMASK) == MTP_FENCE)
 #define ISUIA(v)   ((v) & ((MTP_DOUBLE & MTP_UIA) & ~MTP_BGND))

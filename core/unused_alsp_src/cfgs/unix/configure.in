@@ -37,7 +37,7 @@ AC_DIR_HEADER
 AC_XENIX_DIR
 AC_HAVE_HEADERS(fcntl.h ldfcn.h libc.h libgen.h \
 		machine/param.h memory.h netdb.h regex.h \
-                select.h sgtty.h stdarg.h stddef.h stdlib.h string.h \
+		select.h sgtty.h stdarg.h stddef.h stdlib.h string.h \
 		sys/mman.h sys/param.h sys/select.h sys/socket.h sys/stat.h \
 		sys/time.h sys/times.h sys/wait.h \
 		termios.h termio.h ucontext.h unistd.h)

@@ -13,7 +13,7 @@
  *===========================================================================*/
 #include "defs.h"
 
-#if (defined(UNIX) || (defined(MacOS) && defined(HAVE_GUSI))) && !defined(__GO32__) && !defined(OS2)
+#if (defined(UNIX) || defined(WIN32) || (defined(MacOS) && defined(HAVE_GUSI))) && !defined(__GO32__) && !defined(OS2)
 
 #if defined(UNIX)
 
@@ -101,7 +101,13 @@
 #include <ctype.h>
 #include <GUSI.h>
 
+
 #endif /* MacOS-GUSI, defined(UNIX) && !defined(__GO32__)  && !defined(OS2) */
+
+#if defined(WIN32)
+#include <io.h>
+#include <direct.h>
+#endif
 
 #ifndef MAXPATHLEN
 #ifdef PATHSIZE

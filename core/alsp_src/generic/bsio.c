@@ -56,6 +56,10 @@
 #define write   _write
 #endif /* DOS */
 
+#ifdef WIN32
+#include <io.h>
+#endif
+
 #ifdef SysVIPC		/* For System V Message Queues: */
 #include <sys/ipc.h>
 #include <sys/msg.h>
@@ -244,9 +248,11 @@ sio_mkstream()
     SIO_COLUMN(buf) = 0;
 #if defined(MacOS)
     SIO_EOLNTYPE(buf) = SIOEOLN_READ_CR | SIOEOLN_WRITE_CR;
-#elif defined(unix)
+#elif defined(UNIX)
     /* Is this the correct default for DJPP? */
     SIO_EOLNTYPE(buf) = SIOEOLN_READ_LF | SIOEOLN_WRITE_LF;
+#elif defined(WIN32)
+    SIO_EOLNTYPE(buf) = SIOEOLN_READ_CRLF | SIOEOLN_WRITE_CRLF;
 #else
 #error
 #endif   

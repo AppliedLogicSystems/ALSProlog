@@ -1,8 +1,15 @@
 /*===================================================================
  |		pconfig.pro
- |	Copyright (c) 1994 Applied Logic Systems, Inc.
+ |	Copyright (c) 1994-6 Applied Logic Systems, Inc.
  |
  |	Prolog-driven windowing stage configuration during builds
+ |
+ |	This is even uglier than autoconf for two reasons:
+ |	i)   autoconf doesn't handle things like where Motif1.2
+ |		 lives, etc.
+ |	ii)  autoconf only works on unix platforms, and we are handling
+ |	 	 more than that.
+ |	iii) we have to create files such as pi_init.c and pi_cfg.h.
  |
  |	Called after 'make all' has been executed in bld-port and
  |	bld-natv (if native code supported);  creates the bld-wins
@@ -10,7 +17,7 @@
  |	x, motif, etc.) and makefiles.
  |
  |	Author: Ken Bowen
- |	Date begun: 8 Aug 94
+ |	Date begun: 8 Aug 94  [Forever under construction??]
  *==================================================================*/
 
 module pconfig.
@@ -21,16 +28,17 @@ use  mkdist.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	%------------------------------------------------------
-	%
-	%  Main entry:
-	%
+	%  Main entry point:
 	%------------------------------------------------------
 export pconfig/0.
 
 pconfig 
 	:-
 	acquire_options(SwitchInfo),
+	abolish(cfg,2),
 	build_base_config,
+	abolish(lcl_config,1),
+	setup_lcl_config,
 	setup_wins(SwitchInfo).
 
 	%------------------------------------------------------
@@ -68,6 +76,41 @@ ws_opt_file(SwitchInfo0, [tgtws=TGTWS | SwitchInfo0])
 ws_opt_file(SwitchInfo, SwitchInfo).
 
 	%------------------------------------------------------
+
+setup_lcl_config
+	:-
+	exists_file('local.cfg'),
+	!,
+	open('local.cfg', read, IS, []),
+	read_terms(IS, LclFacts),
+	close(IS),
+	lcl_install(LclFacts).
+
+setup_lcl_config
+	:-
+	cfg(srcdir,SRCDIR),
+	cfg('ARCH',ARCH),
+	cfg('SOS',SOS),
+	catenate([ARCH,'-',SOS],DN),
+	extendPath(SRCDIR,local,LP1),
+	extendPath(LP1,DN,LP2),
+	extendPath(LP2,'local.cfg',LocalFile),
+	exists_file(LocalFile),
+	!,
+	open(LocalFile, read, IS, []),
+	read_terms(IS, LclFacts),
+	close(IS),
+	lcl_install(LclFacts).
+
+setup_lcl_config.
+
+lcl_install([]).
+lcl_install([Clause | LclFacts])
+	:-
+	assert(lcl_config(Clause)),
+	lcl_install(LclFacts).
+
+	%------------------------------------------------------
 	% Initial accumulation of information; extract from:
 	% 1. (xtr_cfg_info):
 	%	 bld-natv/makefile, if this exists;
@@ -77,6 +120,19 @@ ws_opt_file(SwitchInfo, SwitchInfo).
 	%
 	% Writes everything to cfg.pro and asserts everything:
 	%------------------------------------------------------
+build_base_config
+	:-
+	exists_file('cfg.pro'),
+	(exists_file('config.h') ->
+			%% cfg.pro is newer than config.h:
+		comp_file_times('config.h','cfg.pro')
+		;
+			%% config.h not present:
+		true
+	),
+	!,
+	consult_to(pconfig, cfg).
+
 build_base_config
 	:-
 	xtr_cfg_info('./',BaseInfo),
@@ -387,8 +443,9 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH,BDList,
 	adjust_path_depth(BLD_NATV_SRC_PATH,1,BNSP1),
 		%% General header vars:
 	grl_vars(ARCH, OS, BNSP1, SubGrlHeaderLines),
+	general_os(ARCH,OS,BaseOS,_),
 		%% Specific header vars:
-	ws_vars(Subdir, ARCH, OS, SwitchInfo, WSHeaderItems),
+	ws_vars(Subdir, ARCH, BaseOS, SwitchInfo, WSHeaderItems),
 	flatten_ws_lists(WSHeaderItems, WSHeaderLines),
 	append(SubGrlHeaderLines, WSHeaderLines, SubHeaderLines0),
 
@@ -401,7 +458,6 @@ create_wsi_makefile( Subdir, ARCH, OS, BLD_NATV_SRC_PATH,BDList,
 		%% Handle things like location of Motif include
 		%% files and libraries:
 
-	general_os(ARCH,OS,BaseOS,_),
 	xx_cfg(Subdir, 'X_CFLAGS', BaseOS, INI_X_CFLAGS, X_CFLAGS),
 	xx_cfg(Subdir, 'X_LIBS', BaseOS, INI_X_LIBS, X_LIBS),
 	xx_cfg(Subdir, 'X_EXTRA_LIBS', BaseOS, INI_X_EXTRA_LIBS, X_EXTRA_LIBS), 
@@ -480,25 +536,56 @@ xx_cfg(Subdir, 'X_CFLAGS', OS, INI_X_CFLAGS, X_CFLAGS)
 	:-!,
 	search_includes(Subdir,OS, SpecialIncs),
 	Initial = [INI_X_CFLAGS |  SpecialIncs],
-	interleave(Initial, ' ', Second),
+	subsid_includes(Subdir, OS, SubsidIncs),
+	append(Initial, SubsidIncs, TheseIncs),
+	interleave(TheseIncs, ' ', Second),
 	catenate(Second, X_CFLAGS).
 
 	%% Library files:
 xx_cfg(Subdir, 'X_LIBS', OS, INI_X_LIBS, X_LIBS)
 	:-!,
-	search_libs(Subdir,OS, Libs),
-	Initial = [INI_X_LIBS | Libs],
-	interleave(Initial, ' ', Second),
+	search_libs(Subdir,OS, BasicLibs),
+	Initial = [INI_X_LIBS | BasicLibs],
+	subsid_libs(Subdir, OS, SubsidLibs),
+	union(SubsidLibs, Initial, TheseLibs),
+	interleave(TheseLibs, ' ', Second),
 	catenate(Second, X_LIBS).
 
 xx_cfg(_, _, _, X_EXTRA_LIBS, X_EXTRA_LIBS).
 
+subsid_includes(Subdir, OS, SubsidIncs)
+	:-
+	bagof(Subsub, incl_req(Subdir, OS, Subsub), SubSL),
+	!,
+	s_i_l(SubSL, OS, SubsidIncs).
+
+subsid_includes(Subdir, OS, []).
+
+s_i_l([], OS, []).
+s_i_l([Subsub | SubSL], OS, SSI)
+	:-
+	search_includes(Subsub,OS, TheseSS),
+	s_i_l(SubSL, OS, SubsidIncs),
+	append(SubsidIncs, TheseSS, SSI).
+
+subsid_libs(Subdir, OS, SubsidIncs)
+	:-
+	bagof(Subsub, incl_req(Subdir, OS, Subsub), SubSL),
+	!,
+	s_l_l(SubSL, OS, SubsidIncs).
+
+subsid_libs(Subdir, OS, []).
+
+s_l_l([], OS, []).
+s_l_l([Subsub | SubSL], OS, SSI)
+	:-
+	search_libs(Subsub,OS, TheseSS),
+	s_l_l(SubSL, OS, SubsidIncs),
+	append(TheseSS, SubsidIncs, SSI).
+
 	%%-------------------------------------
 	%% Locate the libraries for this subdir:
 	%%-------------------------------------
-
-	%% Nothing to do for X:
-search_includes(x,_,[]) :-!.
 
 	%% Try different places for the includes corresponding
 	%% to this subdir (e.g., motif):
@@ -509,6 +596,11 @@ search_includes(Subdir, OS, Incs)
 	places_to_look(CharactFiles, Subdir, include, OS, IncDirs),
 	prefix_to(IncDirs, ' -I ', Incs).
 
+/*
+	%% May be nothing to do for X:
+search_includes(x,_,[]) :-!.
+*/
+
 	%% Return empty list otherwise:
 search_includes(_,_,[]).
 
@@ -516,66 +608,30 @@ places_to_look([], Subdir, Type, OS, []).
 places_to_look([CFile | CharactFiles], Subdir, Type, OS, Incs)
 	:-
 	search_dir_for(CFile, Subdir, Type, OS, TheseIncDirs),
+	!,
 	append(TheseIncDirs, RestIncs, Incs),
 	places_to_look(CharactFiles, Subdir, Type, OS, RestIncs).
 
 search_dir_for(CFile, Subdir, Type, OS, TheseIncDirs)
 	:-
-	possible_dir_for(Subdir,Type,OS,InitIncDir),
-	fin_search_dir_for0(CFile, Subdir, Type, OS, InitIncDir, TheseIncDirs).
+	find_possible_dir_for(Subdir,Type,OS,InitIncDir),
+	fin_search_dir_for(CFile, Subdir, Type, OS, InitIncDir, TheseIncDirs).
 
-fin_search_dir_for0(InitIncDir^Test, Subdir, Type, OS, InitIncDir, TheseIncDirs)
-	:-!,
-	fin_search_dir_for(Test, Subdir, Type, OS, InitIncDir, TheseIncDirs).
-
-fin_search_dir_for0(CFile, Subdir, Type, OS, InitIncDir, TheseIncDirs)
+fin_search_dir_for(CFile, Subdir, Type, OS, IncDir, [IncDir])
 	:-
-	fin_search_dir_for((extendPath(InitIncDir,CFile,TestPath),
-						exists_file(TestPath)), 
-						Subdir, Type, OS, InitIncDir, TheseIncDirs).
+	extendPath(IncDir,CFile,TestPath),
+	files(TestPath, [_|_]).
+	
+:- dynamic(lcl_config/1).
 
-fin_search_dir_for(Test, Subdir, Type, OS, InitIncDir, [InitIncDir])
+find_possible_dir_for(Subdir,Type,OS,InitIncDir)
 	:-
-%	extendPath(InitIncDir,CFile,TestPath),
-	call(Test),
-	!.
+	lcl_config(possible_dir_for(Subdir,Type,OS,InitIncDir)).
+	
 
-fin_search_dir_for(Test, Subdir, Type, OS, IncDir, TheseIncDirs)
+find_possible_dir_for(Subdir,Type,OS,InitIncDir)
 	:-
-	system_dir_root(Subdir,Atom),
-	getcwd(CurDir),
-	change_cwd(IncDir),
-	subdirs(IncSUBDirs),
-	change_cwd(CurDir),
-	filt_for_atom(IncSUBDirs, Atom, InitBaseIncs),
-	sort(InitBaseIncs, InterBaseIncs1),
-	dreverse(InterBaseIncs1, BaseIncs),
-	!,
-	test_filt(BaseIncs, Test, IncDir, TheseIncDirs).
-
-/*
-	bagof(IF, [F,FP]^(member(F,BaseIncs),
-			pathPlusFile('/usr/include',F,FP),
-			catenate('-I',FP,IF) ),
-		TheseIncDirs).
-*/
-
-
-	%% Couldn't find any:
-search_dir_for(CFile, Subdir, Type, OS, [])
-	:-
-	printf('Warning! Couldn\'t locate %t dir for %t - %t\n',[Type,Subdir,CFile]).
-
-test_filt([BI | BaseIncs], TestTerm, IncDir, [IncDir | RestDirs])
-	:-
-	copy_term(TestTerm, TestPath^Test),
-	call(Test),
-	!,
-	test_filt(BaseIncs, TestTerm, IncDir, RestDirs).
-
-test_filt([_ | BaseIncs], TestTerm, IncDir, RestDirs)
-	:-
-	test_filt(BaseIncs, TestTerm, IncDir, RestDirs).
+	possible_dir_for(Subdir,Type,OS,InitIncDir).
 
 	%%-------------------------------------
 	%% Locate the libraries for this subdir:
@@ -588,24 +644,6 @@ search_libs(Subdir,OS, Libs)
 	characteristic_files(Subdir, lib, CharactFiles),
 	places_to_look(CharactFiles, Subdir, lib, OS, LibsDirs),
 	prefix_to(LibsDirs, ' -L', Libs).
-
-/*
-search_libs(Subdir,OS, Libs)
-	:-
-	system_dir_root(Subdir,Atom),
-	getcwd(CurDir),
-	change_cwd('/usr/lib'),
-	subdirs(LibSUBDirs),
-	change_cwd(CurDir),
-	filt_for_atom(LibSUBDirs, Atom, InitBaseLibs),
-	sort(InitBaseLibs, InterBaseLibs1),
-	dreverse(InterBaseLibs1, InterBaseLibs2),
-	InterBaseLibs2 = [Choice | _],
-	!,
-	pathPlusFile('/usr/lib',Choice,FP),
-	catenate('-L',FP, LibElt),
-	Libs = [LibElt].
-*/
 
 search_libs(_,_,[]).
 

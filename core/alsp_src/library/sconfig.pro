@@ -94,6 +94,7 @@ determine_default_ws(WS)
 export known_ws/1.
 
 known_ws(motif).
+known_ws(wxwin).
 known_ws(macos).
 known_ws(nextstep).
 known_ws(dvx).
@@ -127,7 +128,7 @@ winsystems_for(Arch, OSString, WSL)
 		%%%% motif, since motif processing
 		%%%% loads the x libraries;
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-gen_winsystems(unix, [x, motif]).
+gen_winsystems(unix, [x, motif, wxwin]).
 
 export specif_winsystems_for/3.
 specif_winsystems_for(_, nextstep, [nextstep]).
@@ -169,7 +170,6 @@ ws_vars_variable(dvx,_,ARCH,OS,VARIABLE_LINES)
 	[
 		'XINCLUDES' = '-I djgpp/include'
 	].
-
 ws_vars_variable(unix,_,ARCH,OS,VARIABLE_LINES)
 	:-
 	VARIABLE_LINES =
@@ -197,6 +197,25 @@ ws_vars(motif, ARCH, OS, SwitchInfo, WSHeaderLines)
 		true ; TGTWS = unix),
 	ws_vars_variable(TGTWS,motif,ARCH,OS,VARIABLE_LINES).
 
+ws_vars(wxwin, ARCH, OS, SwitchInfo, WSHeaderLines)
+	:-
+	WSHeaderLines =
+	[
+		'WIN'		= wxwin ,
+		'C2PFILT'	= all,
+		'ADDL_CS' 	= '' ,
+		'CFLAGS'	= '-x c++ -Dwx_motif -DSYSV -DHAVE_STDLIB_H',
+		'$(WIN)LIBS' 	= '-lwxextend_motif -lwx_motif -lMrm -lXm -lXt -lX11 -lg++ -lgcc' ,
+		'ADDL_LIBS' 	= '',
+		'CFG' 		= ['#define WIN_STR WXWIN_WIN_STR'],
+		'ADDL_INITS' 	= '' ,
+		'ADDL_PROFS' 	= '',
+		'XDEFINES' = '-Dwx_motif'
+		| VARIABLE_LINES ],
+	(dmember(tgtws=TGTWS, SwitchInfo) -> 
+		true ; TGTWS = unix),
+	ws_vars_variable(TGTWS,motif,ARCH,OS,VARIABLE_LINES).
+
 ws_vars(nextstep, ARCH, OS, SwitchInfo, WSHeaderLines)
 	:-
 	WSHeaderLines =
@@ -219,19 +238,38 @@ ws_vars(nextstep, ARCH, OS, SwitchInfo, WSHeaderLines)
 export system_dir_root/2.
 system_dir_root(x,'X').
 system_dir_root(motif,'Motif').
+system_dir_root(wxwin,'wxwin').
 
 
+export incl_req/3.
+incl_req(motif, _, x).
+incl_req(wxwin, OS, x)
+	:-
+	general_os(_, OS, unix).
+incl_req(wxwin, OS, motif)
+	:-
+	general_os(_, OS, unix).
 
 export characteristic_files/3.
+characteristic_files(x, include, ['X11/X.h']).
+
 characteristic_files(motif, include, ['Xm/Xm.h']).
-characteristic_files(motif, lib, 
-					 [ID^files(ID,'libXm.*',[_|_])]).
+characteristic_files(motif, lib, ['libXm.*']).
+
+characteristic_files(wxwin, include, ['wx.h', 'wx_win.h', 'wxextend.h']).
+characteristic_files(wxwin, lib, ['libwx_motif.a', 'libwxextend_motif.a']).
 
 export possible_dir_for/4.
+
 possible_dir_for(motif,include,_,'/usr/include').
-possible_dir_for(motif,include,solaris,'/usr/dt/include').
 possible_dir_for(motif,lib,_,'/usr/lib').
 possible_dir_for(motif,lib,solaris,'/usr/dt/lib').
+
+possible_dir_for(wxwin,include,_,'/usr2/wxwins/include/base').
+possible_dir_for(wxwin,include,_,'/usr2/wxwins/include/x').
+possible_dir_for(wxwin,include,_,'/usr2/wxwins/utils/wxextend/src').
+possible_dir_for(wxwin,lib,_,'/usr2/wxwins/lib').
+possible_dir_for(wxwin,lib,_,'/usr2/wxwins/utils/wxextend/lib').
 	
 
 export flatten_ws_lists/2.

@@ -2084,15 +2084,14 @@ rm -f conftest*
 done
 
 ### check for /dev/zero
-echo CHECKING FOR /dev/zero...
-if test -f /dev/zero; then
+echo checking for /dev/zero...
+if test -f /dev/zero -o -h /dev/zero; then
 echo "#define" HAVE_DEV_ZERO "1" >> confdefs.h
 DEFS="$DEFS -DHAVE_DEV_ZERO=1"
-echo /dev/zero present
+echo yes
 else
-echo /dev/zero not present
+echo no
 fi
-
 
 ###	checks for missing headers
 for ac_func in \

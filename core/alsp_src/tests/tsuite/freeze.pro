@@ -117,21 +117,19 @@ consume2([N | T])
 	 |
 	 | X[_4614]-> frump(_4614,yum)
 	 *------------------------------------*/
-
-j(W1) :-
+j :-
 	freeze(W1, frump(W1,yum)),
 	s0(W1).
 
-j(W1) :-
+j :-
 	pbi_write('Got to clause #2 for j'),pbi_nl,pbi_ttyflush.
 	
 
 s0(def).
-%s0(W1) :- W1 =def.
 
 frump(A,B)
 	:-
-	pbi_write(frump_running(A,B)),pbi_nl,pbi_ttyflush,
+	pbi_write(frump_running('-',B)),pbi_nl,pbi_ttyflush,
 	fail.
 
 	/*-------------------------------------
@@ -157,7 +155,6 @@ k0(jj(W1,W2)) :-
 t01(W1,W2)
 	:-
 	pbi_write('aaa+'),pbi_nl,pbi_ttyflush,
-%	flop(W1,W2),
 	[W1,W2]=[foo,bar],
 	pbi_write('bbb+'),pbi_nl,pbi_ttyflush,
 	cptx,
@@ -180,9 +177,8 @@ silly(A,B)
 u :-
 	freeze(W1, silly(W1,yellow)),
 	freeze(W2, grump(W2,blue)),
-gc,
 	W2=W1,
-	W1 = igloo.
+	W2 = igloo.
 
 u1 :-
 	freeze(W1, silly(W1,yellow)),

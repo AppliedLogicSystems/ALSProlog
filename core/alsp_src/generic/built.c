@@ -175,7 +175,7 @@ static struct blt_struct {
 	BLT(">", 2, pbi_greater, "_pbi_greater"),
 	BLT(">=", 2, pbi_greaterorequal, "_pbi_greaterorequal"),
 	BLT("is", 2, pbi_is, "_pbi_is"),
-#ifndef DOS
+#ifdef HAVE_TIME
 	BLT("$time", 9, pbi_time, "_pbi_time"),
 #endif
 	BLT("srandom", 1, pbi_srandom, "_pbi_srandom"),

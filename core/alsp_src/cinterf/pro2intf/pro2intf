@@ -458,7 +458,7 @@ emit_type_check(void,_,OutStream).
 emit_type_check(integer,Num,OutStream)
 	:-
 	printf(OutStream,'\tif (type%d != PI_INT)\n',[Num]),
-	printf(OutStream,'\t\tif (!CI_get_integer(&arg%d,type%d))\n',[Num,Num]),
+	printf(OutStream,'\t\tif (!CI_get_integer((unsigned long *)&arg%d,type%d))\n',[Num,Num]),
 	printf(OutStream,'\t\t\tPI_FAIL;\n',[]).
 emit_type_check(float,Num,OutStream)
 	:-
@@ -468,7 +468,7 @@ emit_type_check(string,Num,OutStream)
 	:-
 	printf(OutStream,'\tif (type%d == PI_SYM)\n',[Num]),
 	printf(OutStream,'\t\targ%d = (unsigned long) PI_getsymname(0,arg%d,0);\n',[Num,Num]),
-	printf(OutStream,'\telse if (!CI_get_integer(&arg%d,type%d))\n',[Num,Num]),
+	printf(OutStream,'\telse if (!CI_get_integer((unsigned long *)&arg%d,type%d))\n',[Num,Num]),
 	printf(OutStream,'\t\tPI_FAIL;\n',[]).
 emit_type_check(farptr,Num,OutStream)
 	:-
@@ -645,8 +645,10 @@ emit_unify([farptr|Rest],OutStream)
 emit_unify(TypeList,OutStream)
 	:-
 	calc_return_arg_num(TypeList,1,RetArg),
-/*	printf(OutStream,'\tPI_makedouble(&rval,&rtype,(double) retval);\n',[]), */
+	printf(OutStream,'\tPI_makedouble(&rval,&rtype,(double) retval);\n',[]),
+/* Why was this put in?
 	printf(OutStream,'\tmake_number(&rval,&rtype,(double) retval);\n',[]),
+*/
 	printf(OutStream,'\tif (PI_unify(arg%d,type%d,rval,rtype))\n',[RetArg,RetArg]),
 	printf(OutStream,'\t\tPI_SUCCEED;\n',[]),
 	printf(OutStream,'\tPI_FAIL;\n',[]).
@@ -1149,6 +1151,9 @@ write_compact_interf_init(State)
 	accessP2I(baseName, State, BaseName),
 	accessP2I(curONum, State, Count),
 	accessP2I(outStream, State, OutStream),
+	printf(OutStream, 'extern void %t_compact_init(void);\n', [BaseName]),
+	printf(OutStream, 'extern void %t2_init(void);\n', [BaseName]),
+	printf(OutStream, 'extern void %t3_init(void);\n', [BaseName]),
 	printf(OutStream, 'void %t_init(void)\n{\n',[BaseName]),
 	accessP2I(initFcns, State, InitFcns),
 %	accessP2I(cmpctFCnt, State, LCFNum),
@@ -1210,7 +1215,7 @@ gen_gv_cfunc_header(Prefix,OutStream)
 	:-
 	printf(OutStream, 'static int %t_gv_dispatch(void)\n',[Prefix]),
 	printf(OutStream, '{\n',[]),
-	printf(OutStream, '\tPWord dispatchVal,dispatchType;\n',[]),
+	printf(OutStream, '\tPWord dispatchVal; int dispatchType;\n',[]),
 	printf(OutStream, '\tPWord argVal; int argType;\n',[]),
 	printf(OutStream, '\tPWord retVal; int retType;\n\n',[]),
 	printf(OutStream, '\tPI_getan(&dispatchVal,&dispatchType,1);\n',[]),
