@@ -1430,16 +1430,20 @@ eat_space(L,L).
 module builtins.
 use sio.
 
-    /*
-     * write_out/1 is used by listing to write out the clauses.
-     */
-    
+    /*-------------------------------------------------------------*
+     * write_out/[1,2] are used by listing to write out the clauses.
+     *-------------------------------------------------------------*/
 
-write_out(Term) :-
-    	sio:get_current_output_stream(Stream),
-    	write_term(Stream,Term,[]),
-    	put_atom(Stream,'.'),
-    	nl(Stream).
+write_out(Term) 
+	:-
+	sio:get_current_output_stream(Stream),
+	write_out(Stream, Term).
+
+write_out(Stream, Term) 
+	:-
+	write_term(Stream,Term,[]),
+	put_atom(Stream,'.'),
+	nl(Stream).
 
 /*-----------------------------------------------------------------------*
  | write_substs/4

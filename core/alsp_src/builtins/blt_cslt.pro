@@ -474,7 +474,14 @@ do_consult(BaseFile, FCOpts)
 	send(ALSMgr, set_value(cslt_ctxt, [FCOpts | PrevCntxts])),
 	catch( exec_consult(BaseFile, FCOpts, ALSMgr, FileMgr),
 			Ball,
-			( pop_copt(_), 
+			( 
+
+%accessObjStruct(source_mgrs, ALSMgr, PrevMgrsList),
+%pbi_write(after_catch_pml=PrevMgrsList),pbi_nl,pbi_ttyflush,
+%% search for "pml" below to find the throw which
+%% creates trouble here:
+
+			  pop_copt(_), 
 			  consult_except_resp(Ball,FCOpts,FileMgr)
 			 ) 
 		),
@@ -688,6 +695,20 @@ exec_consult(OrigFileDesc, BaseFile, FCOpts, ALSMgr, FileMgr)
 exec_consult(OrigFileDesc, BaseFile, FCOpts, ALSMgr, FileMgr)
 	:-
 	send(ALSMgr, remove_mgr(BaseFile, FileMgr)),
+
+	%% The following is a hack.  If it isn't here, when one
+	%% arrives back at the catch in do_consult,
+	%% the [] at the end of PrevMgrsList 
+	%% has been replaced by an uninstantiaed variable!!!:::
+	%% The point where the value of PrevMgrsList is actually
+	%% created and installed is in the second clause of
+	%% finish_obtain_src_mgr/4 in shlclass.pro
+	%%
+accessObjStruct(source_mgrs, ALSMgr, PrevMgrsList),
+%pbi_write(before_ee_throw_pml=PrevMgrsList),pbi_nl,pbi_ttyflush,
+copy_term(PrevMgrsList, NewPrevMgrsList),
+setObjStruct(source_mgrs, ALSMgr, NewPrevMgrsList),
+
 	existence_error(file,OrigFileDesc,OrigFileDesc).
 
 /*-------------------------------------------------------------*

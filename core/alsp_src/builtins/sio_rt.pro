@@ -1977,7 +1977,7 @@ tp_eval_if(defined(D),Stream) :-
 	!,
 	do_later.	%% need to look up D in the define database
 tp_eval_if(EvTerm,Stream) :-
-	call(EvTerm),
+	catch(EvTerm, _, fail),
 	!.
 
 %%
