@@ -136,8 +136,10 @@ warning_code(nyi, '%t not yet implemented on %t.\n').
 %%
 
 decode_error(instantiation_error,_,'Instantiation error.\n',[]).
+
 decode_error(type_error(Type,Culprit),_,'Argument of type %s expected instead of %t.\n',
 		[Type, Culprit]).
+
 decode_error(domain_error(character_code_list,Culprit),_,
 		'Character code list expected instead of %t.\n',[Culprit]).
 decode_error(domain_error(character_list,Culprit),_,
@@ -171,6 +173,10 @@ decode_error(domain_error(write_option,Culprit),_,
 		'Write option expected instead of %t.\n',[Culprit]).
 decode_error(domain_error(Other,Culprit),_,
 		'Value in domain %t expected instead of %t\n',[Other,Culprit]).
+
+decode_error(existence_error(lib_procedure,lib(Module:P/A,FileName)),[Goal],
+	'Call %t attempted failed library load of %t:%t/%t from %t\n',
+	[Goal,Module,P,A,FileName]).
 decode_error(existence_error(past_end_of_stream,Culprit),_,
 		'Attempt made to read past end of stream.\n',[]).
 decode_error(existence_error(stream_not_ready, Culprit),_,
@@ -178,6 +184,7 @@ decode_error(existence_error(stream_not_ready, Culprit),_,
 decode_error(existence_error(Type,Culprit), _,
 	'Operation attempted on object of type %t which does not exist.\nOperation attempted on: %t.\n',
 	[Type,Culprit]).
+
 decode_error(permission_error(open,source_sink,alias(A)),_,
 	'Attempt to open stream with alias \`%t\' which is already in use.\n',
 	[A]).
@@ -187,9 +194,11 @@ decode_error(permission_error(open,source_sink,reposition(true)),_,
 decode_error(permission_error(Operation,Type,Culprit),_,
 		'The %s operation is not permitted on the %s object \`%t\'.\n',
 		[Operation,Type,Culprit]).
+
 decode_error(representation_error(Rep),_,
 		'Implementation defined limit exceeded for object of type %t.\n',
 		[Rep]).
+
 decode_error(calculation_error(overflow),_,
 		'Overflow detected.\n',[]).
 decode_error(calculation_error(underflow),_,
@@ -199,9 +208,11 @@ decode_error(calculation_error(zero_divide),_,
 %% FIXME:  message for calculation_error(undefined)
 decode_error(calculation_error(undefined),_,
 		'Undefined quantity found during calculation. (?)\n', []).
+
 decode_error(resource_error(Resource),_,
 		'Insufficient resource %t to continue execution.\n',[Resource]).
 %% FIXME:  Extend syntax error handling here
+
 decode_error(syntax_error, _, 'Syntax error.\n',[]).
 decode_error(system_error, _, 'System error.\n',[]).
 
