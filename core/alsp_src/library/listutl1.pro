@@ -97,9 +97,11 @@ symmetric_diff(A,B,A_symd_B)
  *!--------------------------------------------------------------------*/
 intersect([],_,[]) :-!.
 intersect(_,[],[]) :-!.
-intersect([X | RestA],B,[X | RestAintB])
+	%% Must be this way for failing the goal: intersect([a,b],[b,c],[]).
+intersect([X | RestA],B,AintB)
 	:-
 	dmember(X,B),!,
+	AintB = [X | RestAintB],
 	intersect(RestA,B,RestAintB).
 intersect([X | RestA],B,RestAintB)
 	:-
