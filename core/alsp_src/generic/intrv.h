@@ -11,6 +11,8 @@
 
 #include <math.h>
 
+#include "fpbasis.h"
+
 #define EQ      ==
 #define NE      !=
 #define LT      <

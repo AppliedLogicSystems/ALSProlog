@@ -10,6 +10,35 @@
 #if defined(INTCONSTR)
 #include "winter.h"
 #include "freeze.h"
+#include "fpbasis.h"
+
+/*--------------------------------------------------------
+	"API" functions for the UIA structure holding the
+	actual interval endpoints; these are for interfaceing
+	to the Prolog level.
+
+	LOWERINF, UPPERINF are (new) tokens created in the
+	base system, and referring to '-inf', '+inf', resp.
+
+	set_intrv_endpoints(UIA, LowerDesc, UpperDesc)
+	set_intrv_endpoint_lower(UIA, LowerDesc)
+	set_intrv_endpoint_upper(UIA, UpperDesc)
+	set_intrv_type(UIA, TypeDesc)
+
+	get_intrv_endpoints(UIA, LowerDesc, UpperDesc)
+	get_intrv_endpoint_lower(UIA, LowerDesc)
+	get_intrv_endpoint_upper(UIA, UpperDesc)
+	get_intrv_type(UIA, TypeDesc)
+
+		{Which = 0 (lower), 1 (upper)}:
+	is_ieee_inf(UIA, Which)   
+	set_ieee_inf(UIA, Which)   
+	set_ieee_inf_both(UIA)   
+
+ *-------------------------------------------------------*/
+
+
+
 
 extern PWord	deref_2		PARAMS(( PWord ));
 
@@ -69,7 +98,7 @@ PWord get_intvl_tm(DelVar, DelVar_t)
 	"Kind" values: BOOLEANKIND, INTEGERKIND, REALKIND.
 	If DelVar is an unbound delay variable which is in
 	fact an interval variable, then IKind is extracted from
-	the 3rd slot in the UIA structure hold the end points
+	the 3rd slot in the UIA structure holding the end points
 	and interval kind.
  *-------------------------------------------------------*/
 

@@ -1093,7 +1093,64 @@ fmap_rel( '=i', X,Y, finish_tog(X,Y)).
 export solve/1.
 solve(X)
 	:- 
+	solve_epsilon(Epsilon),
+	solve(X, Epsilon).
+
+	%%% Tim Hickey's code:
+solve(X,E) 
+	:-
+	small_enough(X,E).
+
+solve(X,E) 
+	:-
+	split(X,E),
+	solve(X,E).
+
+small_enough(X,E) 
+	:-
+	'$domain'(X,_Type,Lo,Hi),
+	Mid::real, 
+	{Eps == Hi-Lo, E >= Eps}.
+
+split(X,E) 
+	:-
+	'$domain'(X,_Type,Lo,Hi),
+	Mid::real, 
+	{Mid == (Lo+Hi)/2, Eps == Hi-Lo, X<Mid, Eps >= E},
+	'$domain'(Eps,_Type2,LoE,HiE).
+
+split(X,E) 
+	:-
+	'$domain'(X,_Type,Lo,Hi),
+	Mid::real, 
+	{Mid == (Lo+Hi)/2, Eps==Hi-Lo,X>=Mid,Eps >= E},
+	'$domain'(Eps,_Type2,LoE,HiE).
+
+%% default:
+solve_epsilon(0.00001).
+
+export set_solve_epsilon/1.
+set_solve_epsilon(Value)
+	:-
+	(float(Value) -> TheValue = Value ; 
+		(integer(Value) -> TheValue is float(Value)
+			;
+				%% raise exception here:
+			fail
+		) ),
+	retract(solve_epsilon(OldValue)),
+	assert(solve_epsilon(TheValue)).
+
+
+
+
+
+
+/******************
+solve(X)
+	:- 
 	solve(X, 6, 0.0001).			% upto 2**6 solutions
+
 
 export solve/3.
 solve( X, _, RelErr )
@@ -1126,6 +1183,7 @@ solve( List, Bnd, RelErr )
 	min( 1.0e-100,  RelErr * D, Eps),
 	!,
 	multi_solve( Bnd, Xs, Eps).
+******************/
 
 pointlike( X, _) 
 	:- 

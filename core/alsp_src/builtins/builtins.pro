@@ -645,6 +645,7 @@ export throw/1.
 
 catch(Module,Goal,Pat,ExGoal) 
 	:-
+%pbi_write(set_catch(Module,Goal,Pat,ExGoal)),pbi_nl,pbi_ttyflush,
 	nonvar_ok(Goal),
 	catch0(Module,Goal,builtins:catcher(Pat,ExGoal,Module)).
 

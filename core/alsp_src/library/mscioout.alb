@@ -1,6 +1,6 @@
 libactivate(builtins,[library,mscioout],
     [colwrite/4,putc_n_of/3,write_lines/1,write_lines/2,write_lines_opt/2,
-        write_lines_opt/3,write_lines_nl/3,write_lines_nl/4,write_clause/1,
-        write_clause/2,write_clause/3,write_clauses/1,write_clauses/2,
-        write_clauses/3],
+        write_lines_opt/3,write_lines_nl/3,write_lines_nl/4,output_nl/1,
+		write_clause/1, write_clause/2,write_clause/3,
+		write_clauses/1,write_clauses/2, write_clauses/3],
     []).

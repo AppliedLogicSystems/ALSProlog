@@ -711,10 +711,10 @@ do_shell_query(Goal0,VarNames,Vars,AlarmIntrv,InStream,OutStream)
 	setCall(0),		%% Start Call,
 	setDepth(1),            %%    Depth
 	setRetry(0),            %%    and Retry in case of debugging.
-	set_alarm_clock(Goal0,AlarmIntrv),
+%	set_alarm_clock(Goal0,AlarmIntrv),
 	xform_command_or_query(Goal0,Goal1),
 	do_shell_query2(user,Goal1),
-	unset_alarm(AlarmIntrv),
+%	unset_alarm(AlarmIntrv),
 	dbg_notrace,
 	dbg_spyoff,
 	showanswers(VarNames,Vars,InStream,OutStream),
@@ -722,7 +722,7 @@ do_shell_query(Goal0,VarNames,Vars,AlarmIntrv,InStream,OutStream)
 
 do_shell_query(Goal,VarNames,Vars,AlarmIntrv,InStream,OutStream) 
 	:-
-	unset_alarm(AlarmIntrv),
+%	unset_alarm(AlarmIntrv),
 	dbg_notrace,
 	dbg_spyoff,
 	print_no(OutStream).

@@ -1496,7 +1496,12 @@ cont_write_substs(Names,Substs,Stream)
 	:-
 	subst_orig_toplevel_names(Names,Substs),
 	subst_gen_letter_names(Substs,Substs0),
-	show_substs_ext(Names,Substs0,Stream).
+	(Names = [] ->
+		nl(Stream),
+		write_term(Stream,'anonymous_solution',[])
+		;
+		show_substs_ext(Names,Substs0,Stream)
+	).
 
 subst_orig_toplevel_names([],[]).
 

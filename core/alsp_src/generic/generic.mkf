@@ -64,6 +64,7 @@ glibfiles_c =  	alloc.c \
 	fatal.c \
 	fileio.c \
 	foreign.c \
+	fpbasis.c \
 	freeze.c \
 	fsdos.c \
 	fsmac.c \
@@ -117,6 +118,7 @@ gfiles_h =  	alloc.h \
 	defs.h \
 	fatal.h \
 	fileio.h \
+	fpbasis.h \
 	hztypes.h \
 	icodedef.h \
 	icodegen.h \

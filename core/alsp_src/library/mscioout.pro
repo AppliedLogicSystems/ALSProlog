@@ -172,6 +172,33 @@ write_lines_nl([Line | Lines], TgtS, NL_type, Options)
 	write_lines_nl(Lines, TgtS, NL_type, Options).
 
 /*!-------------------------------------------------------------
+ |	output_nl/2
+ |	output_nl(NL_type, TgtS)
+ |	output_nl(+, +)
+ |
+ |	- output a specified nl type to a stream
+ |
+ *!------------------------------------------------------------*/
+output_nl(unix, TgtS)
+	:-
+%	nl(TgtS).
+	put_code(TgtS, 10).
+
+output_nl(mswin32, TgtS)
+	:-
+	put_code(TgtS, 13),
+	put_code(TgtS, 10).
+
+output_nl(dos, TgtS)
+	:-
+	put_code(TgtS, 13),
+	put_code(TgtS, 10).
+
+output_nl(macos, TgtS)
+	:-
+	put_code(TgtS, 13).
+
+/*!-------------------------------------------------------------
  |	write_clause/1
  |	write_clause(Clauses) 
  |	write_clause(+) 

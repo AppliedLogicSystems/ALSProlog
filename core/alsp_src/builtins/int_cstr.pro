@@ -96,6 +96,39 @@ new_type_interval(boolean,X)
 	FreezeGoal = intvl(boolean,X, [], 1),
 	freeze(X, FreezeGoal).
 
+/*-------------------------------
+		%% This needs reorganization, so as not to create
+		%% the values L1, U1 in prolog, and then push them
+		%% into UIA, but to create UIA first, and then
+		%% combine the decision-making and creation, keeping
+		%% things like the creation of ieee-infinity down in C:
+
+	Something like (this is a sketch):
+new_type_interval(TypeDescrip,X)
+	:-
+	type_and_bounds(TypeDescrip, BareType, L, U, TC),
+		%% create the low-level interval record on the heap:
+	uia_space(BareType,UIA),
+		%% put the type code into the interval record:
+	'$uia_pokel'(UIA,16,TC),
+
+%old:
+%	interval_bound(lower,L,L1,BareType),
+%	interval_bound(upper,U,U1,BareType),
+%	'$uia_poked'(UIA,0,L1),
+%	'$uia_poked'(UIA,8,U1),
+
+		%% put the upper & lower bounds into the interval record:
+	interval_bound_make(lower, L, BareType, UIA),
+	interval_bound_make(upper, U, BareType, UIA),
+
+	freeze_goal_for(BareType, X, UIA, FreezeGoal),
+	freeze(X, FreezeGoal).
+
+freeze_goal_for(real,    X, UIA, intvl(real,   X,[],UIA) ).
+freeze_goal_for(integer, X, UIA, intvl(integer,X,[],UIA) ).
+ *-------------------------------*/
+
 new_type_interval(TypeDescrip,X)
 	:-
 	type_and_bounds(TypeDescrip, BareType, L, U, TC),
@@ -266,30 +299,26 @@ show_used_by([_ | VarList])
 	:-
 	show_used_by(VarList).
 
-
-/*
-init_used_by([], _).
-
-init_used_by([Var | VarList], Node)
-	:-
-	'$is_delay_var'(Var),
-	!,
-	'$domain_term'(Var, DomainTerm),
-	set_used_by(DomainTerm, [Node]),
-	init_used_by(VarList, Node).
-
-init_used_by([_ | VarList], Node)
-	:-
-	init_used_by(VarList, Node).
-
-*/
-
-
-
-
 /*---------------------------------------------------------------
+	%%% INFINITE BOUNDS:
+	%%% -- old code here; new code below:
  *--------------------------------------------------------------*/
-interval_bound(Side, Quant, Bound, Type)
+
+
+#if (syscfg:ieee_fp)
+interval_bound(Side,  Quant, Bound, Type)
+	:-
+	var(Quant),
+	!,
+	Quant = Bound,
+	(Side = lower -> Bound = -0i ; Bound = 0i).
+
+interval_bound(_,Quant, Bound, _)
+	:-
+	Bound is float(Quant).
+
+#else
+interval_bound(Side,  Quant, Bound, Type)
 	:-
 	var(Quant),
 	!,
@@ -315,9 +344,84 @@ max_bound(integer, Y)
 			%% maxint(X),
 	current_prolog_flag(max_integer, X), 
 	Y is float(X).
+#endif
 
-%% Temporary hack until we get the maxint prolog flag stuff implemented:
-%maxint(123456789).
+
+/*---------------------------------------------------------------
+	%%% INFINITE BOUNDS:
+	Note that when type was originally "bare" - ie, of the form
+			X::real or X::integer,
+	an infinite interval was intended, and Quant remains 
+	uninstantiated here; so we can instantiate it as we want in 
+	clause #1; it is also possible that an infinite interval
+	be fully specified, as follows, where <type> is "real" or
+	"integer":
+		X::<type>('-inf', '+inf')
+		X::<type>(inf, inf)
+		X::<type>(inf, '+inf')
+		X::<type>('-inf', inf)
+
+ I've left the existing code alone above, and created a version
+ for the new code in comments below.
+
+	This effectively inserts ieee infinity into the UIAs
+ *--------------------------------------------------------------*/
+
+%%%% First, replace type_and_bounds/5 above (~line 46) by this:
+/*-----
+type_and_bounds(real,         real,    '-inf', '+inf', 2).
+
+type_and_bounds(real(L,U),    real,    CorrL,  CorrU,  2)
+	:-
+	corrected_sym(L, lower, CorrL),
+	corrected_sym(U, upper, CorrU).
+
+type_and_bounds(real(inf),    real,    '-inf', '+inf', 2)
+	:-!.
+type_and_bounds(real(R),      real,    L, U, 2)
+	:-!, 
+	float(R),
+	fuzz_float(R,L,U).
+
+type_and_bounds(integer,      integer, '-inf', '+inf', 2).
+
+type_and_bounds(integer(L,U), integer, CorrL,  CorrU,  2)
+	:-
+	corrected_sym(L, lower, CorrL),
+	corrected_sym(U, upper, CorrU).
+
+type_and_bounds(integer(inf), integer, '-inf', '+inf', 2)
+	:-!.
+
+%% corrected_sym(Descrip, Side, CorrectedDescrip).
+
+corrected_sym('inf', lower, '-inf') :-!.
+corrected_sym('inf', upper, '+inf') :-!.
+corrected_sym('-inf', lower, '-inf') :-!.
+corrected_sym('+inf', upper, '+inf') :-!.
+corrected_sym(Desc,  _,  Desc)
+	:-
+	number(Desc).
+ -----*/
+/*-----
+	%% interval_bound(Side,ValDescrip,InternalVal, BareType)
+		%% Now we can assume that ValDescrip is instantiated, either to
+		%% a float, integer,, or to one of the symbols '-inf', '+inf':
+
+interval_bound(Side,ValDescrip,InternalVal, BareType)
+
+interval_bound(lower,'-inf',InternalVal, _)
+	:-!,
+	ieee_infinity(0, InternalVal).
+
+interval_bound(upper,'+inf',InternalVal, _)
+	:-!,
+	ieee_infinity(1, InternalVal).
+
+interval_bound(_,ValDescrip, Bound, _)
+	:-
+	Bound is float(ValDescrip).
+ -----*/
 
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -30,6 +30,8 @@
  *=======================================================================*/
 #include "defs.h"
 #include <math.h>
+#include "cinterf.h"
+#include "fpbasis.h"
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -1518,11 +1520,19 @@ sio_socket_open()
 	    sockname_in.sin_addr.s_addr = INADDR_ANY;
 	    sockname_in.sin_port = htons((u_short)portnum);
 
+/*
 	    if ( (host_or_path == NULL || strcmp(myhostname,host_or_path) == 0)
 		 && bind(SIO_FD(buf), (struct sockaddr *) &sockname_in,
 		         sizeof (struct sockaddr_in)) == 0 ) {
 		isserver = 1;
 	    }
+*/
+	    if ( (host_or_path == NULL )
+		 && bind(SIO_FD(buf), (struct sockaddr *) &sockname_in,
+		         sizeof (struct sockaddr_in)) == 0 ) {
+		isserver = 1;
+	    }
+
 	    else {
 		if (host_or_path == NULL)
 		    host_or_path = myhostname;
@@ -2128,12 +2138,15 @@ sio_simple_select()
  * sio_poll(Stream, WaitTime)
  */
 
+extern	int	get_number	PARAMS( (PWord, int, double *) );
+
 int
 sio_poll()
 {
     PWord v1, v2;
     int t1, t2;
     UCHAR *buf;
+	double waitval;
 
     w_get_An(&v1, &t1, 1);
     w_get_An(&v2, &t2, 2);
@@ -2141,14 +2154,21 @@ sio_poll()
     if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
 	FAIL;
 
+/*
     if (t2 != WTP_INTEGER) {
 	SIO_ERRCODE(buf) = SIOE_INARG;
 	FAIL;
     }
+*/
+	if (!get_number(v2, t2, &waitval)) {
+		SIO_ERRCODE(buf) = SIOE_INARG;
+		FAIL;
+	}
+
 
     SIO_ERRCODE(buf) = SIOE_NORMAL;
 
-    if (stream_is_ready(buf,v2))
+    if (stream_is_ready(buf,(long)waitval))
 		SUCCEED;
     else
 		FAIL;
@@ -3573,6 +3593,24 @@ skip_layout(buf)
 }
 
 static int
+binary(pp)
+    UCHAR **pp;
+{
+    register UCHAR *p;
+    register int val;
+
+    p = *pp;
+    val = *p - '0';
+    p++;
+    while ( *p == '0' || *p == '1') {
+	val = (val << 1) + (*p - '0');
+	p++;
+    }
+    *pp = p;
+    return val;
+}
+
+static int
 octal(pp)
     UCHAR **pp;
 {
@@ -4278,7 +4316,29 @@ makesym:
 		    else if (*(p + 1) == 'o' && (sio_chtb[*(p + 2)] & SIOC_OCTAL)) {
 			p += 2;
 			make_number(vpTokVal, tpTokVal, (double) octal(&p)); 
+			}
+		    else if (*(p + 1) == 'b' && (*(p + 2)=='0' || *(p + 2)=='1')) {
+			p += 2;
+			make_number(vpTokVal, tpTokVal, (double) binary(&p)); 
+			}
+				/* IEEE NAN */
+		    else if (*(p + 1) == 'n') {		
+		    if ( *(p+2) == 'a' && *(p+3) == 'n')
+				p += 4;
+			else 
+				p += 2;
+			make_ieee_nan(vpTokVal, tpTokVal); 
+			}
+
+				/* IEEE Infinity */
+		    else if (*(p + 1) == 'i') {	
+		    if (*(p+2) == 'n' && *(p+3) == 'f')
+				p += 4;
+			else
+				p += 2;
+			make_ieee_inf(vpTokVal, tpTokVal); 
 		    }
+				/* Character Constants */
 #ifdef	SIO_ZERO_QUOTE_FOR_CHAR_CONSTS
 		    else if (*(p + 1) == '\'') {
 			int   c;
@@ -5400,22 +5460,38 @@ int sio_sprintf_number(void)
 	    else
 			FAIL;
 
+	    if (is_ieee_nan(dblval))
+			sprintf(buf, "0nan");
+	    else if (is_ieee_inf(dblval)) {
+			if (dblval < 0)
+				sprintf(buf, "-0inf");
+			else
+				sprintf(buf, "0inf");
+		}
 	    /* for small integral doubles, print with a trailing ".0"
 	       using %.1f, otherwise use %.10g */
-	    if (floor(dblval) == dblval
-		&& dblval > -10000000000.0
-		&& dblval < 10000000000.0)
-		sprintf(buf, "%.1f", dblval);
+	    else if (floor(dblval) == dblval
+				&& dblval > -10000000000.0
+				&& dblval < 10000000000.0)
+			sprintf(buf, "%.1f", dblval);
 	    else
-		sprintf(buf, "%.10g", dblval);
+			sprintf(buf, "%.10g", dblval);
 	    break;
 #else
 	case WTP_DOUBLE:
 	    w_get_double(&dblval, v1);
 
+	    if (is_ieee_nan(dblval))
+			sprintf(buf, "0nan");
+	    else if (is_ieee_inf(dblval)) {
+			if (dblval < 0)
+				sprintf(buf, "-0inf");
+			else
+				sprintf(buf, "0inf");
+		}
 	    /* for small integral doubles, print with a trailing ".0"
 	       using %.1f, otherwise use %.10g */
-	    if (floor(dblval) == dblval
+	    else if (floor(dblval) == dblval
 		&& dblval > -10000000000.0
 		&& dblval < 10000000000.0)
 		sprintf(buf, "%.1f", dblval);
