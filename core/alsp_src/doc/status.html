@@ -1,737 +1,1532 @@
-<h1>ALS Prolog 2.1 Development Status</h1>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01Gold (WinNT; I) [Netscape]">
+</HEAD>
+<BODY>
 
-<name = "TopFile">
-<table border=1>
-<tr><td><a href="#PackSpec">Package Specification</a></tr>
-<tr><td><a href="#KnownProbs">Known ALS Prolog problems</a></tr>
-<tr><td><a href="#MacOSProbs">MacOS Problems</a>
-<tr><td><a href="#Win32Probs">Win32 Problems</a>
-<tr><td><a href="#UnixProbs">Unix Problems</a>
-<tr><td><a href="#ChuckPeeves">Chuck's Pet Peeves</a>
-<tr><td><a href="#ISOProbs">Known ISO Standard Problems</a>
-<tr><td><a href="#ManualProbs">Known ALS Prolog Manual Bugs</a>
-<tr><td><a href="#C2ProProbs">Known C2Pro Bugs</a>
-<tr><td><a href="#FutureTasks">Future Tasks</a>
-<tr><td><a href="#SysAdmin">System Admin</a>
-<tr><td><a href="/apache/alsp_src/doc/clpbnr_status.html">CLP(BNR) Status Page</a>
-<tr><td><a href="/dakota/chem/eng/status.html">ChemSoft Status Page</a>
-</table>
+<H1>ALS Prolog 2.1 Development Status</H1>
 
+<P><name = "TopFile"></P>
 
-<a name="PackSpec">
-<h2>Package Specification</h2>
+<TABLE BORDER=1 >
+<TR>
+<TD><A HREF="#PackSpec">Package Specification</A></TD>
+</TR>
 
+<TR>
+<TD><A HREF="#KnownProbs">Known ALS Prolog problems</A></TD>
+</TR>
 
-<ul>
-<li> [ALS Prolog Directory/Folder] - General Organization:
-   <ul>
-      <li> release.txt [ALS Prolog Release Notes]
-      <li> [OS].txt [OS-specific Release Notes]
-      <li> [ALS Prolog executable (Application)]
-      <li> alsdir (dir/folder)
-         <ul>
-            <li> builtins (dir/folder)
-            <li> library  (dir/folder) (standard ALS Prolog)
-            <li> other libraries  (dir/folder) 
-            <li> tools (dir/folder) [tools not included in library ??]
-            <li> .....
-         </ul>
-      <li> additl (dir/folder) [executables,libraries,dlls,etc.]
-         <ul>
-            <li> static (dir/folder)
-            <li> shared (dir/folder)
-            <li> c2pro (dir/folder) [maybe in alsdir/tools ??]
-            <li> .....
-         </ul>
-      <li> examples (dir/folder)
-         <ul>
-            <li> prolog (dir/folder) [Prolog code examples]
-               <ul>
-                  <li> als (dir/folder) [ALS Manual examples]
-                  <li> pxs (dir/folder) [Prolog & Expert Systems examples]
-                  <li> misc (dir/folder) [Other examples]
-               </ul>
-            <li> foreign (dir/folder) [Foriegn Interface Examples]
-               <ul>
-                  <li> preds_c (dir/folder) [Foriegn Predicate Examples (Dynamic & Static)]
-                  <li> embed (dir/folder) [Embedding Examples (Dynamic & Static)]
-               </ul>
-         </ul>
-      <li> doc (folder)
-		 <ul>
-		    <li>alsbegin.pdf - main entry
-		    <li>newfeats.pdf - new features
-		    <li>masterix.pdf - master index
-		    <li>masterpr.pdf - master predicate list
-		    <li>masterfr.pdf  - master foreign predicate list
-			<li>guide (dir/folder)
-			<li>ref (dir/folder)
-			<li>tools (dir/folder)
-		 </ul>
-   </ul>
-<p>
-<li> MacOS
-<p>
-Disk Images containing "Read Me" TeachText file and "Install ALS Prolog" Installer application and pieces
-<p>
-Network Directory containing "Read Me" TeachText file and "Install ALS Prolog" application (in BinHex and MacBinary format).
-<p>
-The Installer will produce the following folder tree:
-<ul>
-<li>
-ALS Prolog 2.1 Folder
-<ul>
-<li>
-ALS Prolog Release Notes
-<li>
-MacOS Release Notes
-<li>
-ALS Prolog 2.1 (Application)
-<li>
-alsdir (folder)
-<ul>
-<li>
-builtins (folder)
-<li>
-libraries (folder)
-</ul>
-<li>
-Examples (folder)
-<ul>
-<li>Prolog Examples
-<li>Foriegn Interface Examples
-<ul>
-<li>Foriegn Predicate Examples (Dynamic and Static)
-<li>Embedding Examples (Dynamic and Static)
-</ul>
-</ul>
-<li>
-Documentation (folder)
-</ul>
-</ul>
+<TR>
+<TD><A HREF="#MacOSProbs">MacOS Problems</A> </TD>
+</TR>
 
-<p>
-<p>
+<TR>
+<TD><A HREF="#Win32Probs">Win32 Problems</A> </TD>
+</TR>
 
-<li> Win32
-<p>
+<TR>
+<TD><A HREF="#UnixProbs">Unix Problems</A> </TD>
+</TR>
 
-Disk Images containing "Read Me.TXT" (CRLF text) file and "Install ALS Prolog.EXE"
-<p>
-Network Directory containingand a Network Installer (an executable)
+<TR>
+<TD><A HREF="#ChuckPeeves">Chuck's Pet Peeves</A> </TD>
+</TR>
 
+<TR>
+<TD><A HREF="#ISOProbs">Known ISO Standard Problems</A> </TD>
+</TR>
 
-<p>
-<p>
+<TR>
+<TD><A HREF="#ManualProbs">Known ALS Prolog Manual Bugs</A> </TD>
+</TR>
 
-<li> Unix (Solaris, HPUX, Irix, Linux, AIX, SunOS)
-<p>
-A compressed tar file of the directory tree:
-<ul>
-<li>
-ALS-Prolog-2.1 (directory)
-<ul>
-<li>
-README.UNIX
-<li>
-README.ALSPRO
-<li>
-alspro (executable)
-<li>
-alspro.1 (man page)
-<li>
-alsdir (directory)
-<li>
-examples (directory)
-</ul>
-documentation (directory)
-</ul>
+<TR>
+<TD><A HREF="#C2ProProbs">Known C2Pro Bugs</A> </TD>
+</TR>
 
-<p>
-<p>
-	
-<li>mkdstdir problems:
-   <ul>
-   <li>
-   mkdstdir has lots of system calls and unix-isms
-   <li>
-   mkdstdir should check inventory
-   <li>
-   in mkdstdir y/n questions should be more forgiving of bad user input
-   <li>
-   -g mkdstdir behaves differently from ?- prompt
-   </ul>
+<TR>
+<TD><A HREF="#FutureTasks">Future Tasks</A> </TD>
+</TR>
 
-</ul>
+<TR>
+<TD><A HREF="#SysAdmin">System Admin</A> </TD>
+</TR>
 
-<hr>
-<h2>Acceptance Test</h2>
+<TR>
+<TD><A HREF="/apache/alsp_src/doc/clpbnr_status.html">CLP(BNR) Status Page</A>
+</TD>
+</TR>
 
-We do not ship until these test are passed!
+<TR>
+<TD><A HREF="/dakota/chem/eng/status.html">ChemSoft Status Page</A> </TD>
+</TR>
+</TABLE>
 
-<h3>Disk Install Test</h3>
+<P><A NAME="PackSpec"></A></P>
 
-<h3>Network Download and Install Test</h3>
+<H2>Package Specification</H2>
 
-<h3>Validation suite</h3>
+<UL>
+<LI>[ALS Prolog Directory/Folder] - General Organization: </LI>
 
-<hr>
-<a name="KnownProbs">
-<h2>Known ALS Prolog Problems <a href="#TopFile"> [Top]</a></h2>
+<UL>
+<LI>release.txt [ALS Prolog Release Notes] </LI>
 
-<table border=1>
-<tr><td><a href="#ConsultProbs">Consult Problems</a>
-<tr><td><a href="#MustFixGen">Must Fix Problems - General</a>
-<tr><td><a href="#MacOSProbs">MacOS Problems</a>
-<tr><td><a href="#Win32Probs">Win32 Problems</a>
-<tr><td><a href="#UnixProbs">Unix Problems</a>
-<tr><td><a href="#ChuckPeeves">Chuck's Pet Peeves</a>
-<tr><td><a href="#ISOProbs">Known ISO Standard Problems</a>
-<tr><td><a href="#ManualProbs">Known ALS Prolog Manual Bugs</a>
-<tr><td><a href="#C2ProProbs">Known C2Pro Bugs</a>
-<tr><td><a href="#FutureTasks">Future Tasks</a>
-<tr><td><a href="#SysAdmin">System Admin</a>
-<tr><td><a href="/dakota/chem/eng/status.html">ChemSoft Status Page</a>
-</table>
+<LI>[OS].txt [OS-specific Release Notes] </LI>
 
-<hr>
-<a name="ConsultProbs"><h2>Consult Problems <a href="#KnownProbs"> [Back]</a></h2>
-<table border=1>
-<th>Problem<th>Prior<th>Status</tr>
-<tr><td>
-Consulting some *.pro files with no *.obp existing can cause later 
-core dumps; 
-<br> Often shows up after multiple consult/edit/reconsult cycles.
-<br>Example guaranteeing bad behavior: use CLP(BNR), use the file
-boole.pro, and the goal <br>  ?- pigeons_in_holes(3,3,H).<td>Top
-<tr><td>
-consulting [user] retracts previously defines facts/preds<td>Done<td>12/29/96
-<tr><td>
-Consult of a non-existent file from the OS command line puts error message 
-before banner, or causes un-expected quit. 
-<br>Try alspro foo.pro foo/foo.pro /foo/foo.pro
-<tr><td>
-Control-C doesn't work during consult
-<tr><td>
-consult message comes up before system knows it is really consulting
-ex: "consulting 'foo.pro'... File not fount"
-<tr><td>
-consult message too long, should they be quoting file names?
-<tr><td>
-when consulting [user], it says "" consulted.<td>Done<td>12/29/96
-<tr><td>
-consulting problems when using -obp<td>Top
-<tr><td>
-new builtins loading crashes when useing non-matching .obp files.<td>Top
-</table>
+<LI>[ALS Prolog executable (Application)] </LI>
 
-<hr>
-<a name="MustFixGen">
-<h2>Must Fix Problems - General <a href="#KnownProbs"> [Back]</a></h2>
+<LI>alsdir (dir/folder) </LI>
 
-<table border=1>
-<th>Problem<th>Prior<th>Status</tr>
-<tr><td>
-read/write of +/- infinity and NaNs.<td>Top<td>Done
-<tr><td>
-Server sockets are not being closed properly<td>Top
-<tr><td>
-DLL/Shared libraries should not use fixed memory locations.<td>Top<td>Done?
-<tr><td>
-PI_prolog_init() can never be called twice
-<br>
-PI_shutdown() does not free memory<td>High
-<tr><td>
-setup of library indicies is too slow
-<tr><td>
-setup library indicies message should not display during batch op
-<tr><td>
-stack overflow error doesn't work correctly.<td>Top
-<tr><td>
-On calder (HPUX) nalspro (2.08dev) coredumped during a trace
-<br>Possibly the consult *.pro bug (#1)<td>Top
-<tr><td>
-trace/1 skips builtins:list_path calls
-<tr><td>
-symbol table overflow should be a resource error.
-<tr><td>
-Failure when expecting exception with '$start' :- throw_error. kernal?
-<tr><td>
-Crash when expecting exception with '$start' :- make_choice_point, throw_error. kernal?
-<tr><td>
-list_asm uses printf's instead of prolog streams (io consoles).
-<tr><td>
-Control-C doesn't work during long sql_fetch's.
-<tr><td>
-cinterf.h and pi_init.h missing from 2.05 dist<td>Top
-<tr><td>
-frame_info(1, X) goes into infinite loop
-<tr><td>
-when a builtin fails or $start is not defined, PI_toplevel goes into an infinite loop.<td>Top
-<tr><td>
-filestat should throw an error if there is a problem.
-<tr><td>
-access doesn't work with directories? is this Win32?
-<tr><td>
-read bugs, ex read string [34, 92] hangs.  writeq bug: writeq("\"\\") -> "\"\"
-<tr><td>
-when you hit continue in the debugger it give undefined "obtain_alarm_interval/1 <td>Top<td>Done
-<tr><td>
-Why does system_error without list arg cause system to exit?
-<tr><td>
--When you type c for continue in the debugger, a undefined pred warning ("obtain_alarm_interval/1")<td>Top<td>Done
-<tr><td>
-compound/1 is missing
-<tr><td>
-call(1.1) does not work correctly, it should fail, but instead it calls $double4.
-unknown flag default is set incorrectly to warning, it should be error by default.<td>High
-<tr><td>
-<ul>Routines in Manual but not implemented:
-<li>exists_subdir
-<li>file_size
-<li>collect_files
-<li>get_drive_status
-<li>get_num_logical_drives
-</ul>
-<tr><td>
-immediate mode for streams - need to add set_stream_buffering
-<tr><td>
-use flags for signal, freeze and other gestalt-like things 
-<tr><td>
-make everybody use app_printf_callback?
-<tr><td>
-remove newline stuff from filemisc.pro - not needed anymore.
-<tr><td>
-fix abs2make so that it writes out files with apropriate line endings (ie don't use unix2mac).
-<tr><td>
-Not reproducable: NT 4.0 testrun batch crash
-<br> May be the consult bug (#1)
-<tr><th>Test Suite
-<tr><td>
-retract3 test still fails?
-<tr><td>
-par4 test fails
-<tr><td>
-testrun should use ./alspro<td>Top
-<tr><td>
-check that example programs work - make test suite.<td>High
-<tr><td>
-alsp_src/tests/als and examples/als have lots of differences <td>Top
-<tr><td>
-nrev test failure problem when .obp?!?
-<tr><td>
-get_line test wierd failures sol/s4/hp
-<tr><td>
-make tests cleanup test files (see copylines's testclean).
-<tr><td>
-<tr><td>
-<tr><td>
-<tr><td>
-<tr><td>
+<UL>
+<LI>builtins (dir/folder) </LI>
 
-</table>
+<LI>library (dir/folder) (standard ALS Prolog) </LI>
 
-<hr>
-<a name="MacOSProbs">
-<h2>MacOS Problems <a href="#KnownProbs"> [Back]</a></h2>
-<table border=1>
-<th>Problem<th>Prior<th>Status</tr>
-<tr><td>
-- MacOS/Win32: files('*', X) is re-executable - it shouldn't be.<td>High
-<tr><td>
-MacOS needs more/complete/correct callbacks
-<tr><td>
-MacOS needs something to happen when you double-click on a file (text, obp)
-<tr><td>
-no image packaging due to shared memory space
-<tr><td>
-MacOS makefiles do redundant things on remake
-<tr><td>
-should we include MPW Tool version? No
-<tr><td>
-MacOS installer splash screen doesn't look good under 256-colors
-<tr><td>
-MacOS get-info information need updating
-<tr><td>
-MacOS needs splash screen and spinning cursor during startup.
-<tr><td>
-cd '::'. problem<td>High
-<tr><td>
-MacOS change directory problem - GUSI vs File Manager working directories.  
-<tr><td>
-Mac docs for packaging<td>High
-<tr><td>
-add timers for handling yield time.
-<tr><td>
-get rid of ?- on MPW
-<tr><td>
-68k mpw tool doesn't work!
-</table>
+<LI>other libraries (dir/folder) </LI>
 
-<hr>
-<a name="Win32Probs">
-<h2>Win32 Problems <a href="#KnownProbs"> [Back]</a></h2>
-<table border=1>
-<th>Problem<th>Prior<th>Status</tr>
-<tr><td>
-"alspro \foo\bar\foo" goes into an infinite consult loop.  Control-C gets debugger,
-"t" does partial stack trace and crashes. 
-<br>Cf. General probs.  <td>High
-<tr><td>
-do something with OLE!?!<td>High
-<tr><td>
-packaging dlls?
-<tr><td>
-On win32 platforms, demo installer must put in SSI drivers
-<br> For CLP(BNR) <td>Top 
-<tr><td>
-Is there a problem with timing on win32?
-<tr><td>
-Win32 small icon looks bad
-<tr><td>
-win32 network file paths don't work
-<tr><td>
-can't open auototest.log for reading while running autotest on win32
-<tr><td>
-Win32s is broken due to __tls in MSL, should this be fixed?
-<tr><td>
-Check opening multiple files under Win32
-<tr><td>
-Win32 docs needed to explain why no static alspro.lib (require CW)
-<tr><td>
-We don't ship Win32s with our system
-<tr><td>
-Under Win32s we do not do cooperative multitasking.
-<tr><td>
-no image packaging under win32s due to shared memory space
-<tr><td>
-move i386_mswin32_inst to source tree
-<tr><td>
-Missing docs for Win32 interface. w_, A vs W functions, how callbacks work, more callbacks,
-wmmain_arguments, adding resources, removing console window.
-<tr><td>
-Win32 does not use file mapping to load code space, slow startup
-</table>
+<LI>tools (dir/folder) [tools not included in library ??] </LI>
 
-<hr>
-<a name="UnixProbs">
-<h2>Unix Problems <a href="#KnownProbs"> [Back]</a></h2>
-<table border=1>
-<th>Problem<th>Prior<th>Status</tr>
-<tr><td>
-linux X library build generates a bunch of c2pro errors, check this.
-Hand edits required to complete x compile.  Loading xintf.so gives un-resolved
-symbol errors. Motif library build dies in c2pro
-with lots of errors.
-<tr><td>
-load_slib doesn't look for .sl libraries on HPUX.  <td>High
-<tr><td>
-simple mics cannot package using stripped app on libelf systems (irix/linux)
-<tr><td>
-hp/irix/linux packaging defines are in def.h, move to configure<td>High
-<tr><td>
-can't consult '~/foo.pro' on unix systems<td>High
-<tr><td>
-can't edit prompt line on unix systems
-<tr><td>
-Unix makefile has various problems
-<tr><td>
-<a href=http://www.next.com>NeXT</a> build needs plugins implemented.  Cost estimate 4 hours (or fixed bid of $200)<td>Low
-<tr><td>
-<a href=http://www.next.com>NeXT</a> build needs NextStep plugins build. Requires modifying c2pro to handle latest Objective C headers.  Maybe we can get the French NeXT customer to do this for us.<td>Low
+<LI>..... </LI>
+</UL>
 
-</table>
+<LI>additl (dir/folder) [executables,libraries,dlls,etc.] </LI>
 
+<UL>
+<LI>static (dir/folder) </LI>
 
-<hr>
-<a name="ChuckPeeves">
-<h2>Chuck's Pet Peeves <a href="#KnownProbs"> [Back]</a></h2>
-<table border=1>
-<th>Problem<th>Prior<th>Status</tr>
-<tr><td>
-I hate the all the redundant text in built.c ie, "foo", "_foo"
-<tr><td>
-builtin naming is inconsistent subPath vs sub_path.
-<tr><td>
-I hate all the '$foo' predicates, could this be changed?<td>High
-<tr><td>
-'$uia_clip'('xxx', 0) fails<td>High
-<tr><td>
-I hate the PI_ interface system of spliting object and type.
-<tr><td>
-I hate the fact that alspi.h doesn't have stuff from cinterf.h<td>Done<td>12/23/96
-<tr><td>
-atom_length('a\0b', X) binds X to 1, which is incorrect<td>High
-<tr><td>
-The mac version must have a real interface to be acceptable.<td>High
-</table>
+<LI>shared (dir/folder) </LI>
 
+<LI>c2pro (dir/folder) [maybe in alsdir/tools ??] </LI>
 
-<hr>
-<a name="ISOProbs">
-<h2>Known ISO Standard Problems <a href="#KnownProbs"> [Back]</a></h2>
-<table border=1>
-<th>Problem<th>Prior<th>Status</tr>
-<tr><td>
-undefined predicate flag values don't work correctly<td>Top
-<tr><td>
-binary numbers not supported<td>High<td>Done?
-<tr><td>
-The standard says slash-star comments should not be nestable.  Make this a compiler option
-  via a prolog flag
-<tr><td>
-twice calls are not producing the correct output
-<tr><td>
-unify_with_occur_check
-<tr><td>
-1.000 @< 1<td>High
-<tr><td>
-current_predicate missing<td>High
-</table>
+<LI>..... </LI>
+</UL>
 
-<hr>
-<a name="ManualProbs">
-<h2>Known ALS Prolog Manual Bugs <a href="#KnownProbs"> [Back]</a></h2>
-<table border=1>
-<th>Problem<th>Prior<th>Status</tr>
-<tr><td>
-on MacOS, readme files should be teachtext<td>High
-<tr><td>
-readme.top uses tabs, which don't display correctly under teachtext, use spaces<td>High
-<tr><td>
-need release notes for whole system and OSs<td>Top
-<tr><td>
-Need instructions for installer hardware keys<td>High
-<tr><td>
-Where should platform specific stuff be located?  
-<tr><td>
-stack trace errors.
-<tr><td>
--  X = a.b.c.[]. causes consult on a, b, c.
-<tr><td>
-- X = f(X). doesn't print anything - default print depth too deep.
-<tr><td>
-change put_atom and write so they don't do nl interpretation.
-<tr><td>
-FilePath calls probably don't handle Win32 Universal references. \\jarrett\etc
-<tr><td>
-edit/vi don't work right on the Mac.<td>High
-<tr><td>
-rexec on the macos and mswin32?<td>High
+<LI>examples (dir/folder) </LI>
 
-<tr><td>
-$access, doesn't DOS have access modes?  Certainly Win32 has, right?<td>High
-<tr><td>
-changes $access -> access?<td>High
-<tr><td>
-should system be applescript on macos?
-<tr><td>
-alsbegin.pdf 3.0
-<br>What are the names of all the directories? 
-<br>On long-file-name systems?
-<tr><td>
-alsbegin.pdf - 
-<br>Section 3.3 needs Mac/Windows special considerations.
-<tr><td>
-<pre>
-newfeats.pdf - 
+<UL>
+<LI>prolog (dir/folder) [Prolog code examples] </LI>
+
+<UL>
+<LI>als (dir/folder) [ALS Manual examples] </LI>
+
+<LI>pxs (dir/folder) [Prolog &amp; Expert Systems examples] </LI>
+
+<LI>misc (dir/folder) [Other examples] </LI>
+</UL>
+
+<LI>foreign (dir/folder) [Foriegn Interface Examples] </LI>
+
+<UL>
+<LI>preds_c (dir/folder) [Foriegn Predicate Examples (Dynamic &amp; Static)]
+</LI>
+
+<LI>embed (dir/folder) [Embedding Examples (Dynamic &amp; Static)] </LI>
+</UL>
+</UL>
+
+<LI>doc (folder) </LI>
+
+<UL>
+<LI>alsbegin.pdf - main entry </LI>
+
+<LI>newfeats.pdf - new features </LI>
+
+<LI>masterix.pdf - master index </LI>
+
+<LI>masterpr.pdf - master predicate list </LI>
+
+<LI>masterfr.pdf - master foreign predicate list </LI>
+
+<LI>guide (dir/folder) </LI>
+
+<LI>ref (dir/folder) </LI>
+
+<LI>tools (dir/folder) </LI>
+</UL>
+</UL>
+
+<LI>MacOS </LI>
+
+<P>Disk Images containing &quot;Read Me&quot; TeachText file and &quot;Install
+ALS Prolog&quot; Installer application and pieces </P>
+
+<P>Network Directory containing &quot;Read Me&quot; TeachText file and
+&quot;Install ALS Prolog&quot; application (in BinHex and MacBinary format).
+</P>
+
+<P>The Installer will produce the following folder tree: </P>
+
+<UL>
+<LI>ALS Prolog 2.1 Folder </LI>
+
+<UL>
+<LI>ALS Prolog Release Notes </LI>
+
+<LI>MacOS Release Notes </LI>
+
+<LI>ALS Prolog 2.1 (Application) </LI>
+
+<LI>alsdir (folder) </LI>
+
+<UL>
+<LI>builtins (folder) </LI>
+
+<LI>libraries (folder) </LI>
+</UL>
+
+<LI>Examples (folder) </LI>
+
+<UL>
+<LI>Prolog Examples </LI>
+
+<LI>Foriegn Interface Examples </LI>
+
+<UL>
+<LI>Foriegn Predicate Examples (Dynamic and Static) </LI>
+
+<LI>Embedding Examples (Dynamic and Static) </LI>
+</UL>
+</UL>
+
+<LI>Documentation (folder) </LI>
+</UL>
+</UL>
+
+<LI>Win32 </LI>
+
+<P>Disk Images containing &quot;Read Me.TXT&quot; (CRLF text) file and
+&quot;Install ALS Prolog.EXE&quot; </P>
+
+<P>Network Directory containingand a Network Installer (an executable)
+</P>
+
+<LI>Unix (Solaris, HPUX, Irix, Linux, AIX, SunOS) </LI>
+
+<P>A compressed tar file of the directory tree: </P>
+
+<UL>
+<LI>ALS-Prolog-2.1 (directory) </LI>
+
+<UL>
+<LI>README.UNIX </LI>
+
+<LI>README.ALSPRO </LI>
+
+<LI>alspro (executable) </LI>
+
+<LI>alspro.1 (man page) </LI>
+
+<LI>alsdir (directory) </LI>
+
+<LI>examples (directory) </LI>
+</UL>
+
+<P>documentation (directory) </P>
+</UL>
+
+<LI>mkdstdir problems: </LI>
+
+<UL>
+<LI>mkdstdir has lots of system calls and unix-isms </LI>
+
+<LI>mkdstdir should check inventory </LI>
+
+<LI>in mkdstdir y/n questions should be more forgiving of bad user input
+</LI>
+
+<LI>-g mkdstdir behaves differently from ?- prompt </LI>
+</UL>
+</UL>
+
+<P>
+<HR></P>
+
+<H2>Acceptance Test</H2>
+
+<P>We do not ship until these test are passed! </P>
+
+<H3>Disk Install Test</H3>
+
+<H3>Network Download and Install Test</H3>
+
+<H3>Validation suite</H3>
+
+<P>
+<HR><A NAME="KnownProbs"></A></P>
+
+<H2>Known ALS Prolog Problems <A HREF="#TopFile">[Top]</A></H2>
+
+<TABLE BORDER=1 >
+<TR>
+<TD><A HREF="#ConsultProbs">Consult Problems</A> </TD>
+</TR>
+
+<TR>
+<TD><A HREF="#MustFixGen">Must Fix Problems - General</A> </TD>
+</TR>
+
+<TR>
+<TD><A HREF="#MacOSProbs">MacOS Problems</A> </TD>
+</TR>
+
+<TR>
+<TD><A HREF="#Win32Probs">Win32 Problems</A> </TD>
+</TR>
+
+<TR>
+<TD><A HREF="#UnixProbs">Unix Problems</A> </TD>
+</TR>
+
+<TR>
+<TD><A HREF="#ChuckPeeves">Chuck's Pet Peeves</A> </TD>
+</TR>
+
+<TR>
+<TD><A HREF="#ISOProbs">Known ISO Standard Problems</A> </TD>
+</TR>
+
+<TR>
+<TD><A HREF="#ManualProbs">Known ALS Prolog Manual Bugs</A> </TD>
+</TR>
+
+<TR>
+<TD><A HREF="#C2ProProbs">Known C2Pro Bugs</A> </TD>
+</TR>
+
+<TR>
+<TD><A HREF="#FutureTasks">Future Tasks</A> </TD>
+</TR>
+
+<TR>
+<TD><A HREF="#SysAdmin">System Admin</A> </TD>
+</TR>
+
+<TR>
+<TD><A HREF="/dakota/chem/eng/status.html">ChemSoft Status Page</A> </TD>
+</TR>
+</TABLE>
+
+<P>
+<HR><A NAME="ConsultProbs"></A></P>
+
+<H2>Consult Problems <A HREF="#KnownProbs">[Back]</A></H2>
+
+<TABLE BORDER=1 >
+<TR>
+<TH>Problem</TH>
+
+<TH>Prior</TH>
+
+<TH>Status</TH>
+</TR>
+
+<TR>
+<TD>Consulting some *.pro files with no *.obp existing can cause later
+core dumps; <BR>
+Often shows up after multiple consult/edit/reconsult cycles. <BR>
+Example guaranteeing bad behavior: use CLP(BNR), use the file boole.pro,
+and the goal <BR>
+?- pigeons_in_holes(3,3,H).</TD>
+
+<TD>Done</TD>
+
+<TD>2/4/97</TD>
+</TR>
+
+<TR>
+<TD>consulting [user] retracts previously defines facts/preds</TD>
+
+<TD>Done</TD>
+
+<TD>12/29/96 </TD>
+</TR>
+
+<TR>
+<TD>Consult of a non-existent file from the OS command line puts error
+message before banner, or causes un-expected quit. <BR>
+Try alspro foo.pro foo/foo.pro /foo/foo.pro &lt;&lt;&lt;last moved to next
+entry:</TD>
+
+<TD>Done</TD>
+
+<TD>2/5/97</TD>
+</TR>
+
+<TR>
+<TD>Consulting non-existent file of the form '/foo/bar' fails; Ie, file
+with an absolute path; if such a file is on the command line, causes system
+loading to fail returns to command line without message</TD>
+
+<TD>Done</TD>
+
+<TD>2/5/97</TD>
+</TR>
+
+<TR>
+<TD>Control-C doesn't work during consult </TD>
+</TR>
+
+<TR>
+<TD>consult message comes up before system knows it is really consulting
+ex: &quot;consulting 'foo.pro'... File not fount&quot; </TD>
+</TR>
+
+<TR>
+<TD>consult message too long, should they be quoting file names? </TD>
+</TR>
+
+<TR>
+<TD>when consulting [user], it says &quot;&quot; consulted.</TD>
+
+<TD>Done</TD>
+
+<TD>12/29/96 </TD>
+</TR>
+
+<TR>
+<TD>consulting problems when using -obp ; -opb --&gt; &quot;gi...&quot;
+switches ; apparently fixed???</TD>
+
+<TD>Top /Done??</TD>
+</TR>
+
+<TR>
+<TD>new builtins loading crashes when using non-matching .obp files.</TD>
+
+<TD>Top </TD>
+</TR>
+</TABLE>
+
+<P>
+<HR><A NAME="MustFixGen"></A></P>
+
+<H2>Must Fix Problems - General <A HREF="#KnownProbs">[Back]</A></H2>
+
+<TABLE BORDER=1 >
+<TR>
+<TH>Problem</TH>
+
+<TH>Prior</TH>
+
+<TH>Status</TH>
+</TR>
+
+<TR>
+<TD>read/write of +/- infinity and NaNs.</TD>
+
+<TD>Top</TD>
+
+<TD>Done </TD>
+</TR>
+
+<TR>
+<TD>Server sockets are not being closed properly</TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>DLL/Shared libraries should not use fixed memory locations.</TD>
+
+<TD>Top</TD>
+
+<TD>Done? </TD>
+</TR>
+
+<TR>
+<TD>PI_prolog_init() can never be called twice <BR>
+PI_shutdown() does not free memory</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>setup of library indicies is too slow </TD>
+</TR>
+
+<TR>
+<TD>setup library indicies message should not display during batch op </TD>
+</TR>
+
+<TR>
+<TD>stack overflow error doesn't work correctly.</TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>On calder (HPUX) nalspro (2.08dev) coredumped during a trace <BR>
+Possibly the consult *.pro bug (#1)</TD>
+
+<TD>Done</TD>
+
+<TD>2/4/97</TD>
+</TR>
+
+<TR>
+<TD>trace/1 skips builtins:list_path calls </TD>
+</TR>
+
+<TR>
+<TD>symbol table overflow should be a resource error. </TD>
+</TR>
+
+<TR>
+<TD>Failure when expecting exception with '$start' :- throw_error. kernal?
+</TD>
+</TR>
+
+<TR>
+<TD>Crash when expecting exception with '$start' :- make_choice_point,
+throw_error. kernal? </TD>
+</TR>
+
+<TR>
+<TD>list_asm uses printf's instead of prolog streams (io consoles). </TD>
+</TR>
+
+<TR>
+<TD>Control-C doesn't work during long sql_fetch's. </TD>
+</TR>
+
+<TR>
+<TD>cinterf.h and pi_init.h missing from 2.05 dist</TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>frame_info(1, X) goes into infinite loop </TD>
+</TR>
+
+<TR>
+<TD>when a builtin fails or $start is not defined, PI_toplevel goes into
+an infinite loop.</TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>filestat should throw an error if there is a problem. </TD>
+</TR>
+
+<TR>
+<TD>access doesn't work with directories? is this Win32? </TD>
+</TR>
+
+<TR>
+<TD>read bugs, ex read string [34, 92] hangs. writeq bug: writeq(&quot;\&quot;\\&quot;)
+-&gt; &quot;\&quot;\&quot; </TD>
+</TR>
+
+<TR>
+<TD>when you hit continue in the debugger it give undefined &quot;obtain_alarm_interval/1
+</TD>
+
+<TD>Top</TD>
+
+<TD>Done </TD>
+</TR>
+
+<TR>
+<TD>Why does system_error without list arg cause system to exit? </TD>
+</TR>
+
+<TR>
+<TD>-When you type c for continue in the debugger, a undefined pred warning
+(&quot;obtain_alarm_interval/1&quot;)</TD>
+
+<TD>Top</TD>
+
+<TD>Done </TD>
+</TR>
+
+<TR>
+<TD>compound/1 is missing </TD>
+</TR>
+
+<TR>
+<TD>call(1.1) does not work correctly, it should fail, but instead it calls
+$double4. unknown flag default is set incorrectly to warning, it should
+be error by default.</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>
+<UL>
+<P>Routines in Manual but not implemented: </P>
+
+<LI>exists_subdir </LI>
+
+<LI>file_size </LI>
+
+<LI>collect_files </LI>
+
+<LI>get_drive_status </LI>
+
+<LI>get_num_logical_drives </LI>
+</UL>
+</TD>
+</TR>
+
+<TR>
+<TD>immediate mode for streams - need to add set_stream_buffering </TD>
+</TR>
+
+<TR>
+<TD>use flags for signal, freeze and other gestalt-like things </TD>
+</TR>
+
+<TR>
+<TD>make everybody use app_printf_callback? </TD>
+</TR>
+
+<TR>
+<TD>remove newline stuff from filemisc.pro - not needed anymore. </TD>
+</TR>
+
+<TR>
+<TD>fix abs2make so that it writes out files with appropriate line endings
+(ie don't use unix2mac). </TD>
+</TR>
+
+<TR>
+<TD>Not reproducable: NT 4.0 testrun batch crash <BR>
+May be the consult bug (#1) </TD>
+</TR>
+
+<TR>
+<TH>Test Suite </TH>
+</TR>
+
+<TR>
+<TD>retract3 test still fails? </TD>
+</TR>
+
+<TR>
+<TD>par4 test fails </TD>
+</TR>
+
+<TR>
+<TD>testrun should use ./alspro</TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>check that example programs work - make test suite.</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>alsp_src/tests/als and examples/als have lots of differences </TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>nrev test failure problem when .obp?!? </TD>
+</TR>
+
+<TR>
+<TD>get_line test wierd failures sol/s4/hp </TD>
+</TR>
+
+<TR>
+<TD>make tests cleanup test files (see copylines's testclean). </TD>
+</TR>
+
+<TR>
+<TD></TD>
+</TR>
+
+<TR>
+<TD></TD>
+</TR>
+
+<TR>
+<TD></TD>
+</TR>
+
+<TR>
+<TD></TD>
+</TR>
+
+<TR>
+<TD></TD>
+</TR>
+</TABLE>
+
+<P>
+<HR><A NAME="MacOSProbs"></A></P>
+
+<H2>MacOS Problems <A HREF="#KnownProbs">[Back]</A></H2>
+
+<TABLE BORDER=1 >
+<TR>
+<TH>Problem</TH>
+
+<TH>Prior</TH>
+
+<TH>Status</TH>
+</TR>
+
+<TR>
+<TD>- MacOS/Win32: files('*', X) is re-executable - it shouldn't be.</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>MacOS needs more/complete/correct callbacks </TD>
+</TR>
+
+<TR>
+<TD>MacOS needs something to happen when you double-click on a file (text,
+obp) </TD>
+</TR>
+
+<TR>
+<TD>no image packaging due to shared memory space </TD>
+</TR>
+
+<TR>
+<TD>MacOS makefiles do redundant things on remake </TD>
+</TR>
+
+<TR>
+<TD>should we include MPW Tool version? No </TD>
+</TR>
+
+<TR>
+<TD>MacOS installer splash screen doesn't look good under 256-colors </TD>
+</TR>
+
+<TR>
+<TD>MacOS get-info information need updating </TD>
+</TR>
+
+<TR>
+<TD>MacOS needs splash screen and spinning cursor during startup. </TD>
+</TR>
+
+<TR>
+<TD>cd '::'. problem</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>MacOS change directory problem - GUSI vs File Manager working directories.
+</TD>
+</TR>
+
+<TR>
+<TD>Mac docs for packaging</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>add timers for handling yield time. </TD>
+</TR>
+
+<TR>
+<TD>get rid of ?- on MPW </TD>
+</TR>
+
+<TR>
+<TD>68k mpw tool doesn't work! </TD>
+</TR>
+
+<TR>
+<TD>subPath and rootPathFile may be broken on mac, need test </TD>
+</TR>
+
+<TR>
+<TD>change_cwd - GUSI vs File Mananger working directories </TD>
+</TR>
+
+<TR>
+<TD>getting and setting of file permissions </TD>
+</TR>
+
+<TR>
+<TD>Mac file types </TD>
+</TR>
+
+<TR>
+<TD>File Locking problems (is this Mac, or Win32?) </TD>
+</TR>
+
+<TR>
+<TD>Why won't SIOUX save output to a file </TD>
+</TR>
+
+<TR>
+<TD>MPW break doesn't work </TD>
+</TR>
+
+<TR>
+<TD>Fix command-dot under MPW </TD>
+</TR>
+
+<TR>
+<TD>Apple/CW7 Header Library Problems: GetEventMask() is in the header
+but not in InterfaceLib. Ditto for PBXGetVolInfoSync()/Async() </TD>
+</TR>
+</TABLE>
+
+<P>
+<HR><A NAME="Win32Probs"></A></P>
+
+<H2>Win32 Problems <A HREF="#KnownProbs">[Back]</A></H2>
+
+<TABLE BORDER=1 >
+<TR>
+<TH>Problem</TH>
+
+<TH>Prior</TH>
+
+<TH>Status</TH>
+</TR>
+
+<TR>
+<TD>&quot;alspro \foo\bar\foo&quot; goes into an infinite consult loop.
+Control-C gets debugger, &quot;t&quot; does partial stack trace and crashes.
+<BR>
+Cf. General probs. </TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>do something with OLE!?!</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>packaging dlls? </TD>
+</TR>
+
+<TR>
+<TD>On win32 platforms, demo installer must put in SSI drivers <BR>
+For CLP(BNR) </TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>Is there a problem with timing on win32? </TD>
+</TR>
+
+<TR>
+<TD>Win32 small icon looks bad </TD>
+</TR>
+
+<TR>
+<TD>win32 network file paths don't work </TD>
+</TR>
+
+<TR>
+<TD>can't open auototest.log for reading while running autotest on win32
+</TD>
+</TR>
+
+<TR>
+<TD>Win32s is broken due to __tls in MSL, should this be fixed? </TD>
+</TR>
+
+<TR>
+<TD>Check opening multiple files under Win32 </TD>
+</TR>
+
+<TR>
+<TD>Win32 docs needed to explain why no static alspro.lib (require CW)
+</TD>
+</TR>
+
+<TR>
+<TD>We don't ship Win32s with our system </TD>
+</TR>
+
+<TR>
+<TD>Under Win32s we do not do cooperative multitasking. </TD>
+</TR>
+
+<TR>
+<TD>no image packaging under win32s due to shared memory space </TD>
+</TR>
+
+<TR>
+<TD>move i386_mswin32_inst to source tree </TD>
+</TR>
+
+<TR>
+<TD>Missing docs for Win32 interface. w_, A vs W functions, how callbacks
+work, more callbacks, wmmain_arguments, adding resources, removing console
+window. </TD>
+</TR>
+
+<TR>
+<TD>Win32 does not use file mapping to load code space, slow startup </TD>
+</TR>
+</TABLE>
+
+<P>
+<HR><A NAME="UnixProbs"></A></P>
+
+<H2>Unix Problems <A HREF="#KnownProbs">[Back]</A></H2>
+
+<TABLE BORDER=1 >
+<TR>
+<TH>Problem</TH>
+
+<TH>Prior</TH>
+
+<TH>Status</TH>
+</TR>
+
+<TR>
+<TD>linux X library build generates a bunch of c2pro errors, check this.
+Hand edits required to complete x compile. Loading xintf.so gives un-resolved
+symbol errors. Motif library build dies in c2pro with lots of errors. </TD>
+</TR>
+
+<TR>
+<TD>load_slib doesn't look for .sl libraries on HPUX. </TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>simple mics cannot package using stripped app on libelf systems (irix/linux)
+</TD>
+
+<TD>Done</TD>
+
+<TD>2/4/97</TD>
+</TR>
+
+<TR>
+<TD>hp/irix/linux packaging defines are in def.h, move to configure</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>can't consult '~/foo.pro' on unix systems</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>can't edit prompt line on unix systems </TD>
+</TR>
+
+<TR>
+<TD>Unix makefile has various problems </TD>
+</TR>
+
+<TR>
+<TD><A HREF="http://www.next.com">NeXT</A> build needs plugins implemented.
+Cost estimate 4 hours (or fixed bid of $200)</TD>
+
+<TD>Low </TD>
+</TR>
+
+<TR>
+<TD><A HREF="http://www.next.com">NeXT</A> build needs NextStep plugins
+build. Requires modifying c2pro to handle latest Objective C headers. Maybe
+we can get the French NeXT customer to do this for us.</TD>
+
+<TD>Low </TD>
+</TR>
+</TABLE>
+
+<P>
+<HR><A NAME="ChuckPeeves"></A></P>
+
+<H2>Chuck's Pet Peeves <A HREF="#KnownProbs">[Back]</A></H2>
+
+<TABLE BORDER=1 >
+<TR>
+<TH>Problem</TH>
+
+<TH>Prior</TH>
+
+<TH>Status</TH>
+</TR>
+
+<TR>
+<TD>I hate the all the redundant text in built.c ie, &quot;foo&quot;, &quot;_foo&quot;
+</TD>
+</TR>
+
+<TR>
+<TD>builtin naming is inconsistent subPath vs sub_path. </TD>
+</TR>
+
+<TR>
+<TD>I hate all the '$foo' predicates, could this be changed?</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>'$uia_clip'('xxx', 0) fails</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>I hate the PI_ interface system of spliting object and type. </TD>
+</TR>
+
+<TR>
+<TD>I hate the fact that alspi.h doesn't have stuff from cinterf.h</TD>
+
+<TD>Done</TD>
+
+<TD>12/23/96 </TD>
+</TR>
+
+<TR>
+<TD>atom_length('a\0b', X) binds X to 1, which is incorrect</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>The mac version must have a real interface to be acceptable.</TD>
+
+<TD>High </TD>
+</TR>
+</TABLE>
+
+<P>
+<HR><A NAME="ISOProbs"></A></P>
+
+<H2>Known ISO Standard Problems <A HREF="#KnownProbs">[Back]</A></H2>
+
+<TABLE BORDER=1 >
+<TR>
+<TH>Problem</TH>
+
+<TH>Prior</TH>
+
+<TH>Status</TH>
+</TR>
+
+<TR>
+<TD>undefined predicate flag values don't work correctly</TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>binary numbers not supported</TD>
+
+<TD>High</TD>
+
+<TD>Done? </TD>
+</TR>
+
+<TR>
+<TD>The standard says slash-star comments should not be nestable. Make
+this a compiler option via a prolog flag </TD>
+</TR>
+
+<TR>
+<TD>twice calls are not producing the correct output </TD>
+</TR>
+
+<TR>
+<TD>unify_with_occur_check </TD>
+</TR>
+
+<TR>
+<TD>1.000 @&lt; 1</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>current_predicate missing</TD>
+
+<TD>High </TD>
+</TR>
+</TABLE>
+
+<P>
+<HR><A NAME="ManualProbs"></A></P>
+
+<H2>Known ALS Prolog Manual Bugs <A HREF="#KnownProbs">[Back]</A></H2>
+
+<TABLE BORDER=1 >
+<TR>
+<TH>Problem</TH>
+
+<TH>Prior</TH>
+
+<TH>Status</TH>
+</TR>
+
+<TR>
+<TD>on MacOS, readme files should be teachtext</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>readme.top uses tabs, which don't display correctly under teachtext,
+use spaces</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>need release notes for whole system and OSs</TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>Need instructions for installer hardware keys</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>Where should platform specific stuff be located? </TD>
+</TR>
+
+<TR>
+<TD>stack trace errors. </TD>
+</TR>
+
+<TR>
+<TD>- X = a.b.c.[]. causes consult on a, b, c. </TD>
+</TR>
+
+<TR>
+<TD>- X = f(X). doesn't print anything - default print depth too deep.
+</TD>
+</TR>
+
+<TR>
+<TD>change put_atom and write so they don't do nl interpretation. </TD>
+</TR>
+
+<TR>
+<TD>FilePath calls probably don't handle Win32 Universal references. \\jarrett\etc
+</TD>
+</TR>
+
+<TR>
+<TD>edit/vi don't work right on the Mac.</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>rexec on the macos and mswin32?</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>$access, doesn't DOS have access modes? Certainly Win32 has, right?</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>changes $access -&gt; access?</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>should system be applescript on macos? </TD>
+</TR>
+
+<TR>
+<TD>alsbegin.pdf 3.0 <BR>
+What are the names of all the directories? <BR>
+On long-file-name systems? </TD>
+</TR>
+
+<TR>
+<TD>alsbegin.pdf - <BR>
+Section 3.3 needs Mac/Windows special considerations. </TD>
+</TR>
+
+<TR>
+<TD>
+<PRE>newfeats.pdf - 
 ------------
 IO features - eoln handling, console IO.
 Anything else?
-</pre>
-<tr><td>
-<pre>
-foriegn.pdf
+</PRE>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<PRE>foriegn.pdf
 ===========
 13.5
 add stuff about c_bind_callback, c_unbind_callback and how to use them
-<tr><td>
-Packaging - add mac stuff when I get it done!
-<tr><td>
-Tools reference review.
-<tr><td>
-Maybe rename consols stdio() or something
-<br>- In section 10.2.2, add consoles.
-<br>
-Console (Mac and Win32 only).
-<br>
-A system's console is an acceptable source and sink for streams.  
-The console is the default input and output for ALS Prolog.  
-Typically the console receives its input from the keyboard and 
-sends output to a display.  Some operating systems allow default input 
-and output to be mapped to other I/O sources (files, pipes, etc).  
-For the console, the sourcesink term is of the form
-<p>
-console(Name)
-<p>
-where Name is an atom which is the name of the console.
-</table>
+</PRE>
+</TD>
+</TR>
 
+<TR>
+<TD>Packaging - add mac stuff when I get it done! </TD>
+</TR>
 
+<TR>
+<TD>Tools reference review. </TD>
+</TR>
 
-<hr>
-<a name="C2ProProbs">
-<h2>C2Pro Problems <a href="#KnownProbs"> [Back]</a></h2>
-<table border=1>
-<th>Problem<th>Prior<th>Status</tr>
-<tr><td>
-print_comma_cond for struct fields should be sensitive to unamed fields.
-<tr><td>
-fix macro define parsing with \ on last line.
-<tr><td>
-allow inline assembly
-<tr><td>
-complete #if exp that cause errors (still true?)
-<tr><td>
-OLE header problems:
-<ul>
-<li>casting of function pointers doesn't include args - maybe just use void *?
-<li>structure passing - rework as pointers. *(struct foo *)
-<li>look at IStream_Seek_Stub problem with LARGE/ULARGE_INTEGERs (?)
-</ul>
-<tr><td>
-return value is a structure - NdrClientCall.
-</table>
+<TR>
+<TD>Maybe rename consols stdio() or something <BR>
+- In section 10.2.2, add consoles. <BR>
+Console (Mac and Win32 only). <BR>
+A system's console is an acceptable source and sink for streams. The console
+is the default input and output for ALS Prolog. Typically the console receives
+its input from the keyboard and sends output to a display. Some operating
+systems allow default input and output to be mapped to other I/O sources
+(files, pipes, etc). For the console, the sourcesink term is of the form
 
-<hr>
-<a name="FutureTasks">
-<h2>Future Tasks <a href="#KnownProbs"> [Back]</a></h2>
-<table border=1>
-<th>Problem<th>Prior<th>Status</tr>
-<tr><td>
-Make an unwind protect for prolog<td>High
-<tr><td>
-Relocatable WAM code<td>High
-<tr><td>
-Modifications to the alspi, better encapsulation, Prolog worlds, direct execution
-of strings for simple comtrol, exceptions (PI_rungoal() should return exceptions),
-exception creation.
-<tr><td>
-Switch from automatically using configure every time a build is done, to using
-a fixed config.h for each arch-os pair (eg, sparc-solaris2.4), which can be
-replaced in a given setting by running configure (in fact, configure should
-be kept up to date, & should be used to create the fixed files for unix.)
-<td>Top
-<tr><td>
-<tr><th> Native Code Versions
-<tr><td>
-Finish portability changes to abstract assembly generator (~apache/atrans)
-current versions<td>Top
-<tr><td>
-Select an assembly language format for i386 (msw?; what is used under MetroWerks?),
-and convert the I386 m4 abstract files to the new format, using the atrans program
-to generate actual assembly output.<td>High
-<tr><td>
-Re-organize the assembly language source files for sparc and i386 to make them
-as parallel as possible.<td>High
-<tr><td>
-Install all changes necessary to bring the plain, non-freeze, native code sparc 
-and i386 versions up to running at the V2.1 level<td>High
-<tr><td>
-Install changes necessary to support freeze (FREEZE) and value trailing (TRAILVALS)
-in the native code sparc and i386 systems. Test and check CLP(BNR).<td>High
-<tr><th> -----------------------
-<tr><td>
-process threading
-<tr><td>
-AS400 port
-<tr><td>
-HTTP tests on Mac/Wins 
-<tr><td>
-zinc - dropped??
-<tr><th> Tcl/Tk  Interfaces & GUI Development
-<tr><td>
-Detailed comparison of Eclipse & SICSTUS interfaces<td>Top
-<tr><td>
-Design interface as compatible as possible, at least so that all of
-the predicates in each of Eclipse & SICSTUS Tcl/Tk interfaces can be implemented.<td>Top
-<tr><td>
-Implement basic Tcl/Tk interface (using C2Pro in part??)<td>Top
-<tr><td>
-Implement Eclipse & SICSTUS interfaces over ALS interface
-<tr><td>
-Begin development of ALS GUI front end.<td>Med
-</table>
+<P>console(Name) </P>
 
-<hr>
-<h2>Chuck's to do <a href="#KnownProbs"> [Back]</a></h2>
-<ul>
-<li>
-shared libraries, imp, doc, examples - complete revision of foriegn.pdf docs.
-<li>
-finish printf test scripts
-<li>
-move Mac to timer driven interupts with a thread for the console.
-<li>
-ODBC, imp, doc, examples
-<li>
-Revisit kernal imp, doc, examples
-<li>
-complete WAM debugger.
-<li>
-TIFF display for Mac/Win/Unix, see /usr/windows/TIFF/...
-<li>
-I changed /usr/local/bin/ld to newld for some reason, explain
-<li>
-Abstract OS ideas to make core more portable 
-</ul>
+<P>where Name is an atom which is the name of the console. </P>
+</TD>
+</TR>
+</TABLE>
 
-<hr>
-<h2>Fixed Bugs - but need test <a href="#KnownProbs"> [Back]</a></h2>
-<ul>
-<li>
-how to get SIOUX window title to change.
-<li>
-control-c cause [user] consult to have prompt on MacOS and MSWin32, why?
-<li>
-MacOS should adjust memory size based on partition size
-<li>
-ALS Prolog doesn't run on Windows NT 4.0
-<li>
-Mac version requires control-e to signal end-of-file
-<li>
-On hp, register values from statistics look wierd
-<li>
-fix hex numbers to be positive
-<li>
-sio_wt, make a sio_sprintfnumber to replace sio_printf call using %d and
-%g 400.0 should print 400.0,  there should be only two wd_ predicates for
-numbers - one for negative numbers, one for positive numbers.
-</ul>
+<P>
+<HR><A NAME="C2ProProbs"></A></P>
 
-<hr>
+<H2>C2Pro Problems <A HREF="#KnownProbs">[Back]</A></H2>
 
-<hr>
-<a name="SysAdmin">
-<h2>Sys Admin <a href="#KnownProbs"> [Back]</a></h2>
-<table border=1>
-<th>Problem<th>Prior<th>Status</tr>
-<tr><td>
-write notes about fileshare/internet/mail on /cherokee/sysadmin - doc netatalk, samba, clock sync, pop, etc.
-<tr><td>
-someday install NTP, just using time protocol at the moment
-<tr><td>
-Matisse Linux Setup:
-<ul>
-<li>root, usual password
-<li>diamond speedstar 16 (configX didn't have Pro version).
-<li>Put "domainname --nis als.com" into<br>
-<a href=file://matisse/etc/rc.d/rc.local>rc.local</a>
-<li>Created the /etc/yp.conf file to specify domain name and server
-<li>Made alsmgr user for remote logins when NIS is down. 
-password in ken's black book
-<tr><td>
-Install Perl 5.01 on appropriate machines
-<tr><td>
-Install SATAN & other network tools
-<br>
-Good security site (a'la S.Lee Henry/SunExpert): 
-<a href="http://www.alw.nih.gov/Security">
-http://www.alw.nih.gov/Security</a>
+<TABLE BORDER=1 >
+<TR>
+<TH>Problem</TH>
 
-<tr><td>
-</ul>
-</table>
+<TH>Prior</TH>
 
+<TH>Status</TH>
+</TR>
 
+<TR>
+<TD>print_comma_cond for struct fields should be sensitive to unamed fields.
+</TD>
+</TR>
 
+<TR>
+<TD>fix macro define parsing with \ on last line. </TD>
+</TR>
+
+<TR>
+<TD>allow inline assembly </TD>
+</TR>
+
+<TR>
+<TD>complete #if exp that cause errors (still true?) </TD>
+</TR>
+
+<TR>
+<TD>OLE header problems: 
+<UL>
+<LI>casting of function pointers doesn't include args - maybe just use
+void *? </LI>
+
+<LI>structure passing - rework as pointers. *(struct foo *) </LI>
+
+<LI>look at IStream_Seek_Stub problem with LARGE/ULARGE_INTEGERs (?) </LI>
+</UL>
+</TD>
+</TR>
+
+<TR>
+<TD>return value is a structure - NdrClientCall. </TD>
+</TR>
+</TABLE>
+
+<P>
+<HR><A NAME="FutureTasks"></A></P>
+
+<H2>Future Tasks <A HREF="#KnownProbs">[Back]</A></H2>
+
+<TABLE BORDER=1 >
+<TR>
+<TH>Problem</TH>
+
+<TH>Prior</TH>
+
+<TH>Status</TH>
+</TR>
+
+<TR>
+<TD>Make an unwind protect for prolog</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>Relocatable WAM code</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>Modifications to the alspi, better encapsulation, Prolog worlds, direct
+execution of strings for simple comtrol, exceptions (PI_rungoal() should
+return exceptions), exception creation. </TD>
+</TR>
+
+<TR>
+<TD>Switch from automatically using configure every time a build is done,
+to using a fixed config.h for each arch-os pair (eg, sparc-solaris2.4),
+which can be replaced in a given setting by running configure (in fact,
+configure should be kept up to date, &amp; should be used to create the
+fixed files for unix.) </TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD></TD>
+</TR>
+
+<TR>
+<TH>Native Code Versions </TH>
+</TR>
+
+<TR>
+<TD>Finish portability changes to abstract assembly generator (~apache/atrans)
+current versions</TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>Select an assembly language format for i386 (msw?; what is used under
+MetroWerks?), and convert the I386 m4 abstract files to the new format,
+using the atrans program to generate actual assembly output.</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>Re-organize the assembly language source files for sparc and i386 to
+make them as parallel as possible.</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>Install all changes necessary to bring the plain, non-freeze, native
+code sparc and i386 versions up to running at the V2.1 level</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TD>Install changes necessary to support freeze (FREEZE) and value trailing
+(TRAILVALS) in the native code sparc and i386 systems. Test and check CLP(BNR).</TD>
+
+<TD>High </TD>
+</TR>
+
+<TR>
+<TH>----------------------- </TH>
+</TR>
+
+<TR>
+<TD>process threading </TD>
+</TR>
+
+<TR>
+<TD>C++ interface </TD>
+</TR>
+
+<TR>
+<TD>AS400 port </TD>
+</TR>
+
+<TR>
+<TD>HTTP tests on Mac/Wins </TD>
+</TR>
+
+<TR>
+<TD>zinc - dropped?? </TD>
+</TR>
+
+<TR>
+<TH>Tcl/Tk Interfaces &amp; GUI Development </TH>
+</TR>
+
+<TR>
+<TD>Detailed comparison of Eclipse &amp; SICSTUS interfaces</TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>Design interface as compatible as possible, at least so that all of
+the predicates in each of Eclipse &amp; SICSTUS Tcl/Tk interfaces can be
+implemented.</TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>Implement basic Tcl/Tk interface (using C2Pro in part??)</TD>
+
+<TD>Top </TD>
+</TR>
+
+<TR>
+<TD>Implement Eclipse &amp; SICSTUS interfaces over ALS interface </TD>
+</TR>
+
+<TR>
+<TD>Begin development of ALS GUI front end.</TD>
+
+<TD>Med </TD>
+</TR>
+</TABLE>
+
+<P>
+<HR></P>
+
+<H2>Chuck's to do <A HREF="#KnownProbs">[Back]</A></H2>
+
+<UL>
+<LI>shared libraries, imp, doc, examples - complete revision of foriegn.pdf
+docs. </LI>
+
+<LI>finish printf test scripts </LI>
+
+<LI>move Mac to timer driven interupts with a thread for the console. </LI>
+
+<LI>ODBC, imp, doc, examples </LI>
+
+<LI>Revisit kernal imp, doc, examples </LI>
+
+<LI>complete WAM debugger. </LI>
+
+<LI>TIFF display for Mac/Win/Unix, see /usr/windows/TIFF/... </LI>
+
+<LI>I changed /usr/local/bin/ld to newld for some reason, explain </LI>
+
+<LI>Abstract OS ideas to make core more portable </LI>
+</UL>
+
+<P>
+<HR></P>
+
+<H2>Fixed Bugs - but need test <A HREF="#KnownProbs">[Back]</A></H2>
+
+<UL>
+<LI>how to get SIOUX window title to change. </LI>
+
+<LI>control-c cause [user] consult to have prompt on MacOS and MSWin32,
+why? </LI>
+
+<LI>MacOS should adjust memory size based on partition size </LI>
+
+<LI>ALS Prolog doesn't run on Windows NT 4.0 </LI>
+
+<LI>Mac version requires control-e to signal end-of-file </LI>
+
+<LI>On hp, register values from statistics look wierd </LI>
+
+<LI>fix hex numbers to be positive </LI>
+
+<LI>sio_wt, make a sio_sprintfnumber to replace sio_printf call using %d
+and %g 400.0 should print 400.0, there should be only two wd_ predicates
+for numbers - one for negative numbers, one for positive numbers. </LI>
+</UL>
+
+<P>
+<HR></P>
+
+<HR><A NAME="SysAdmin"></A></P>
+
+<H2>Sys Admin <A HREF="#KnownProbs">[Back]</A></H2>
+
+<TABLE BORDER=1 >
+<TR>
+<TH>Problem</TH>
+
+<TH>Prior</TH>
+
+<TH>Status</TH>
+</TR>
+
+<TR>
+<TD>write notes about fileshare/internet/mail on /cherokee/sysadmin - doc
+netatalk, samba, clock sync, pop, etc. </TD>
+</TR>
+
+<TR>
+<TD>someday install NTP, just using time protocol at the moment </TD>
+</TR>
+
+<TR>
+<TD>Matisse Linux Setup: 
+<UL>
+<LI>root, usual password </LI>
+
+<LI>diamond speedstar 16 (configX didn't have Pro version). </LI>
+
+<LI>Put &quot;domainname --nis als.com&quot; into<BR>
+<A HREF="file://matisse/etc/rc.d/rc.local">rc.local</A> </LI>
+
+<LI>Created the /etc/yp.conf file to specify domain name and server </LI>
+
+<LI>Made alsmgr user for remote logins when NIS is down. password in ken's
+black book </LI>
+</UL>
+</TD>
+</TR>
+
+<TR>
+<TD>Install Perl 5.01 on appropriate machines </TD>
+</TR>
+
+<TR>
+<TD>Install SATAN &amp; other network tools <BR>
+Good security site (a'la S.Lee Henry/SunExpert): <A HREF="http://www.alw.nih.gov/Security">http://www.alw.nih.gov/Security</A>
+</TD>
+</TR>
+
+<TR>
+<TD>Netatalk problems: 
+<UL>
+<LI>Saving MPW files doesn't work (creates foo-0 for the file foo). </LI>
+
+<LI>Building Stuffit Installer doesn't work - creates corrupted installer.
+</LI>
+
+<LI>Setting text file types doesn't work. </LI>
+</UL>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

@@ -342,17 +342,7 @@ export show_interval_binding/4.
 show_interval_binding(N,S,VPairs,Stream)
 	:-
 	var(S),
-	rel_arith:'$domain_term'(S, DomainTerm),
-	rel_arith:valid_domain(DomainTerm, Type, LArg0, UArg0),
-	!,
-			%% show the associated domain; ignore
-			%% any other constraints;
-	(dmember(Type, [integer,boolean]) ->
-		LArg is floor(LArg0),
-		UArg is floor(UArg0)
-		;
-		LArg = LArg0, UArg = UArg0
-	),
+	extract_interval_bounds(S, LArg, UArg, Type),
 	epsilon_show(Eps),
 	Width is abs(UArg - LArg),
 	(Width < Eps ->
@@ -372,6 +362,41 @@ show_interval_binding(N,S,VPairs,Stream)
 show_interval_binding(N,S,VPairs,Stream)
 	:-
 	show_delay_binding(N,S,VPairs,Stream).
+
+export extract_interval_bounds/3.
+extract_interval_bounds(S, LArg, UArg)
+	:-
+	extract_interval_bounds(S, LArg, UArg, _).
+
+export extract_interval_bounds/4.
+extract_interval_bounds(S, LArg, UArg, Type)
+	:-
+	rel_arith:'$domain_term'(S, DomainTerm),
+	rel_arith:valid_domain(DomainTerm, Type, LArg0, UArg0),
+	!,
+			%% show the associated domain; ignore
+			%% any other constraints;
+	(dmember(Type, [integer,boolean]) ->
+		LArg is floor(LArg0),
+		UArg is floor(UArg0)
+		;
+		LArg = LArg0, UArg = UArg0
+	).
+
+export extract_interval/2.
+extract_interval(S, [LArg, UArg])
+	:-
+	'$is_delay_var'(S),
+	!,
+	extract_interval_bounds(S, LArg, UArg).
+extract_interval(S, S).
+
+export extract_interval_list/2.
+extract_interval_list([], []).
+extract_interval_list([S | Ss], [I | Is])
+	:-
+	extract_interval(S, I),
+	extract_interval_list(Ss, Is).
 
 :-dynamic(freeze_disp_vns/0).
 %freeze_disp_vns.

@@ -64,7 +64,14 @@ start_shell(DefaultShellCall)
 	ss_init_searchdir(CmdLineSearch),
 	ss_load_dot_alspro,
 
+	als_system(SysList),
+
 	arg(2,CLInfo,ConsultNoise),
+	(ConsultNoise = true -> 
+		true ; 
+		print_banner(user_output,SysList)
+	),
+
 	(ConsultNoise = true -> true ;
 		als_advise('Setting up library indicies...may take a moment...')),
 	setup_libraries,
@@ -187,30 +194,35 @@ ss_parse_command_line(['-obp' | T], L, CLInfo)
 	generated_in_cur,
 	ss_parse_command_line(T, L, CLInfo).
 
+	%% "Generated In Current directory:"	
 	%% -gic: Keep generated files in directory where image is running:
 ss_parse_command_line(['-gic' | T], L, CLInfo)
 	:-!,
 	generated_in_cur,
 	ss_parse_command_line(T, L, CLInfo).
 
+	%% "Generated In Source directory:"	
 	%% -gis: Keep generated files in directory where sources reside:
 ss_parse_command_line(['-gis' | T], L, CLInfo)
 	:-!,
 	generated_with_src,
 	ss_parse_command_line(T, L, CLInfo).
 
+	%% "Generated In Architecture sub-directory of Sources directory:"	
 	%% -gias: Keep generated files in arch subdirectory where sources reside:
 ss_parse_command_line(['-gias' | T], L, CLInfo)
 	:-!,
 	generated_in_arch(src),
 	ss_parse_command_line(T, L, CLInfo).
 
+	%% "Generated In Architecture sub-directory of Current directory:"	
 	%% -giac: Keep generated files in arch subdirectory of current dir:
 ss_parse_command_line(['-giac' | T], L, CLInfo)
 	:-!,
 	generated_in_arch(cur),
 	ss_parse_command_line(T, L, CLInfo).
 
+	%% "Generated In exlicipt Location:"
 	%% -gil: Keep generated files in explict Path dir:
 ss_parse_command_line(['-gil', Path | T], L, CLInfo)
 	:-!,
@@ -225,8 +237,8 @@ ss_parse_command_line(['-nwd' | T], L, CLInfo)
 	(debugger:set_debug_io(nowins),!;true),
 	ss_parse_command_line(T, L, CLInfo).
 
-/* Skip -heap and -stack arguments because they must be handled
-   at the C level. */
+	/* Skip -heap and -stack arguments because they 
+       must be handled at the C level. */
 ss_parse_command_line(['-heap', _ | T], L, CLInfo)
 	:-!,
 	ss_parse_command_line(T, L, CLInfo).
@@ -439,7 +451,7 @@ init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 		%% can't hold on to them:
 	get_shell_prompts( CurPromptsStack ),
 	set_shell_prompts( [(Prompt1,Prompt2) | CurPromptsStack] ),
-	(consultmessage(true) -> true ; print_banner(OutStream,SysList)),
+%	(consultmessage(true) -> true ; print_banner(OutStream,SysList)),
 	current_prolog_flag(windows_system, InitWins),
 	dmember(os=OS, SysList),
 	dmember(os_variation=OSMinor, SysList),
