@@ -1,42 +1,47 @@
 Macintosh ALS Prolog Build Instructions
 =======================================
-Author: Chuck Houpt Date: 3-April-1996
+Author: Chuck Houpt Date: 3-June-1996
 
-These instructions assume that the ALS Prolog source directory exists, and all of
-its generated files are up to date (for example: generated makefiles, headers,
-etc).  The ALS Prolog source directory is refered to as {srcdir} in this
-document.
+These instructions assume that the ALS Prolog source directory exists,
+and all of its generated files are up to date (for example: generated
+makefiles, headers, etc).  The ALS Prolog source directory is refered to
+as {srcdir} in this document.
 
 Build Materials:
 ----------------
 
-¥ Macintosh (68k or PowerPC) with at least 20 MB of available memory and at least
-150 MB of available disk space.
+- Macintosh (68k or PowerPC) with at least 20 MB of available memory and at
+least 150 MB of available disk space.
 
-¥ Metrowerk's Code Warrior Gold 8 with the following options and modifications: -
-Install with at least these two packages: - Macintosh Programmer's Workshop -
-Metrowerks MPW Tools for MacOS - Copy the MPW script MakeIt from
-{srcdir}port:macos: to {MPW}Scripts:
+- Metrowerk's Code Warrior Gold 8 with the following options and modifications:
 
-¥ Code Warrior Grand Unified Socket Interface Library (CWGUSI) 1.7 Freeware by
-Matthias Neeracher (neeri@iis.ee.ethz.ch) Available from
-http://err.ethz.ch/members/neeri/macintosh.html Install CWGUSI as follows: -
-Create the directories {MPW}Interfaces:GUSIIncludes: and
-{MPW}Libraries:GUSILibraries: - copy :GUSI:include and :GUSI:Lib into the two
-newly created directories.
+	-Install with at least these two packages:
+        - Macintosh Programmer's Workshop
+        - Metrowerks MPW Tools for MacOS
+    - Copy the MPW script MakeIt from {srcdir}port:macos: to {MPW}Scripts:
+
+    - Code Warrior Grand Unified Socket Interface Library (CWGUSI) 1.7
+       Freeware by Matthias Neeracher (neeri@iis.ee.ethz.ch) Available
+       from http://www.iis.ee.ethz.ch/~neeri
+       
+       Install CWGUSI as follows:
+           - Create the directories {MPW}Interfaces:GUSIIncludes: and
+             {MPW}Libraries:GUSILibraries:
+           - copy :GUSI:include and :GUSI:Lib into the two
+             newly created directories.
 
 Build Instructions:
 -------------------
 
 Netatalk note:  If you are building off of a Netatalk volume, then it is
-necessary to enusure that all the files have been assigned a creator and type by
-Netatalk, before MPW uses the files.  This only has to be done once, after the
-source directory is created.
+necessary to enusure that all the files have been assigned a creator and
+type by Netatalk, before MPW uses the files.  This only has to be done
+once, after the source directory is created.
 
-Follow this procedure:  From the Finder open the volume that contains {srcdir}
-and view by name.  Option-Click on the arrow next to {srcdir}.  This will open
-{srcdir} and all its subdirectories, causing Netatalk to assign creator and types
-to all files.
+Follow this procedure:  From the Finder open the volume that contains
+{srcdir} and view by name.  Option-Click on the arrow next to {srcdir}. 
+This will open {srcdir} and all its subdirectories, causing Netatalk to
+assign creator and types to all files.
 
 1. Create a build directory, which will be refered to as {blddir}
 
@@ -73,6 +78,9 @@ Alspro libararies:
 {blddir}bld-port:alspro.ppc.lib
 {blddir}bld-port:alspro.68k.lib
 
+{blddir}bld-port:demo_alspro.ppc.lib
+{blddir}bld-port:demo_alspro.68k.lib
+
 Stand alone TTY applications:
 
 {blddir}bld-port:sioux_alspro_b_ppc
@@ -80,10 +88,13 @@ Stand alone TTY applications:
 {blddir}bld-port:sioux_alspro_b (Fat Binary)
 {blddir}bld-port:sioux_alspro (Packaged Fat Binary)
 
+{blddir}bld-port:demo_sioux_alspro_b (Fat Binary)
+{blddir}bld-port:demo_sioux_alspro (Packaged Fat Binary)
+
 MPW Tools:
 
 {blddir}bld-port:mpw_alspro_b_ppc
-{blddir}bld-port:mpw_alspro_b_68k
+(not available now {blddir}bld-port:mpw_alspro_b_68k)
 {blddir}bld-port:mpw_alspro_b (Fat Binary)
 {blddir}bld-port:mpw_alspro (Packaged Fat Binary)
 {blddir}bld-port:alspro_b (Duplicate of mpw_alspro_b for use in scripts)
@@ -91,8 +102,27 @@ MPW Tools:
 
 MacOS Interface Libraries:
 
-{blddir}bld-wins:macos:als_macos_ppc
-{blddir}bld-wins:macos:als_macos_68k
 {blddir}bld-wins:macos:macosinterf.ppc.lib
 {blddir}bld-wins:macos:macosinterf.68k.lib
+
 {blddir}bld-wins:macos:macos.pro
+
+{blddir}bld-wins:macos:alspro_macos0_ppc
+{blddir}bld-wins:macos:alspro_macos0_68k
+
+{blddir}bld-wins:macos:alspro_macos0 (Fat Binary)
+{blddir}bld-wins:macos:alspro_macos (Packaged Fat Binary)
+
+{blddir}bld-wins:macos:demo_alspro_macos0 (Fat Binary)
+{blddir}bld-wins:macos:demo_alspro_macos (Packaged Fat Binary)
+
+
+
+Programming Eve3 Hardware Keys
+------------------------------
+
+Simple keys do not need to be programmed, because key are
+shipped from the factory with all-zero registers.
+
+30-Day Demo keys can be created by using the Eve3 Editor
+and the "{srcdir}bin:Eve 30-Day Demo Setup" file.

@@ -34,8 +34,8 @@ schema([
 			 gpckgfiles_ppc_o = ext(gpckgfiles,'ppc.o') qual one_per_line,
 			 glibfiles_ppc_o  = ext(glibfiles,'ppc.o')  qual one_per_line,
 			 gfiles_ppc_o 	= ['{gforfiles_ppc_o} {gpckgfiles_ppc_o} {glibfiles_ppc_o}'],
-			 gdemofiles_68k_o = ['main.demo.68k.o', 'gc.demo.68k.o'],
-			 gdemofiles_ppc_o = ['main.demo.ppc.o', 'gc.demo.ppc.o']
+			 gdemofiles_68k_o = ['security.demo.68k.o'],
+			 gdemofiles_ppc_o = ['security.demo.ppc.o']
 			  ] ),
 		 (_:[
 			 gforfiles_c  = ext(gforfiles,c)  qual one_per_line,
@@ -309,13 +309,15 @@ cmnt(4) = ['These items must generate themselves from other files'].
 				(unix: [tokens, tokini2, lexinit, siolex, magic, icode] ),
 				(_ : [ magic ] ) ]).
 
-'LEXRUN'	= &(invoke) + ' lexinit > lexinit.h' .
-'SIORUN'	= &(invoke) + ' sioinit > siolex.h' .
-'ICODERUN'	= &(invoke) + ' icode > icode.h' .
+&(invoke) = './' .
+
+'LEXRUN'	= &(invoke) + 'lexinit > lexinit.h' .
+'SIORUN'	= &(invoke) + 'sioinit > siolex.h' .
+'ICODERUN'	= &(invoke) + 'icode > icode.h' .
 'MAGICRUN'	= case(&(context_name), [
 				(mac: 'magic'),
-				(_: &(invoke) + ' magic')]).
-'BLDTRUN'	= &(invoke) + ' bldtok' .
+				(_: &(invoke) + 'magic')]).
+'BLDTRUN'	= &(invoke) + 'bldtok' .
 
 generated depends_on case(&(context_name), [
 			(mac: ['{GENFILES}']),
@@ -355,21 +357,21 @@ rule('lexinit.h') =
 			[generate/'lexinit.c', 'lexan.h'],
 			['$(CC) $(CPPFLAGS) -o lexinit $(srcdir)/generic/generate/lexinit.c',
 			 '$(LEXRUN)',
-			 '-rm  lexinit']).
+			 '-rm  ./lexinit']).
 
 rule('siolex.h') = 
 	rule('siolex.h',
 			[generate/'sioinit.c', 'bsio.h'],
 			['$(CC) $(CPPFLAGS) -o sioinit $(srcdir)/generic/generate/sioinit.c',
 			 '$(SIORUN)',
-			 '-rm  sioinit']).
+			 '-rm  ./sioinit']).
 
 rule('icode.h') = 
 	rule('icode.h',
 		['icodedef.h', generate/'icode.c'],
 		['$(CC) $(CPPFLAGS) -o icode $(srcdir)/generic/generate/icode.c',
 		 '$(ICODERUN)',
-		 '-rm -rf  icode']).
+		 '-rm -rf  ./icode']).
 
 cmnt(gen_dep) = ['generic dependencies',
 				 ' ',
@@ -433,7 +435,7 @@ rule(alstest) =
 		 'catenate nrev_rcd']),
 		(_: [
 		 'echo >> nrev_rcd',
-		 &(invoke) + '  alspro_b -obp $(srcdir)/tests/snrev -g snrev >> nrev_rcd',
+		 &(invoke) + 'alspro -b -obp $(srcdir)/tests/snrev -g snrev >> nrev_rcd',
 		 'cat nrev_rcd' ] )])).
 
 depends_list(_) = 

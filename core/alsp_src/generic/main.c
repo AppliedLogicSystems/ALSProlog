@@ -1462,9 +1462,8 @@ PI_prolog_init(int argc, char **argv)
 	}
 #endif
 
-#ifdef HARDWARE_KEY
-    init_hardware_key();
-#endif
+    /* Initilize copy-protection security. */
+    init_security();
 
     return PI_prolog_init0(argc, argv);
 }
@@ -1475,9 +1474,8 @@ PI_shutdown(void)
 
     PI_shutdown0();
 
-#ifdef HARDWARE_KEY
-    shutdown_hardware_key();
-#endif    
+    /* shutdown copy-protection security. */
+    shutdown_security();
 
 #ifdef MSWin32
     if (WSACleanup() != 0) {
@@ -1709,100 +1707,3 @@ const char *PI_get_options(void)
 }
 
 
-#ifdef HARDWARE_KEY
-
-#if defined(MSWin32)
-#define SSI_UNIKEY
-#elif defined(MacOS)
-#define SENTINEL_EVE3
-#else
-#error
-#endif
-
-#if defined(SSI_UNIKEY)
-#include <ssi_cw32.h>
-#elif defined(SENTINEL_EVE3)
-#include <eve3demo.h>
-#else
-#error
-#endif
-
-#ifdef SENTINEL_EVE3
-#define DEVELOPER_ID	0xBC58
-static Handle EveHandle;
-#endif
-
-static void hardware_key_error(void)
-{
-#if defined(SSI_UNIKEY)
-    PI_app_printf(PI_app_printf_error,
-"\
-Error: UniKey Hardware key required.\n\
-This demo version of ALS Prolog requires a UniKey hardware key.\n\
-Please check that the hardware key is correctly attached to the parallel port.\n\
-Exiting ALS Prolog.\n\
-"
-    );
-#elif defined(SENTINEL_EVE3)
-    PI_app_printf(PI_app_printf_error,
-"\
-Error: Sentinel Eve 3 Hardware key required.\n\
-This demo version of ALS Prolog requires a Sentinel Eve 3 hardware key.\n\
-Please check that the hardware key is correctly attached to the ABD port.\n\
-Exiting ALS Prolog.\n\
-"
-    );
-#else
-#error
-#endif
-    exit(1);
-}
-
-void init_hardware_key(void)
-{
-#if defined(SSI_UNIKEY)
-
-    if (SSI_Open(0)) hardware_key_error();
-    
-#elif defined(SENTINEL_EVE3)
-    unsigned long serial_number;
-
-    EveHandle = RBEHANDLE();
-    if (EveHandle == NULL) hardware_key_error();
-    if (RBEFINDFIRST(DEVELOPER_ID, &serial_number, EveHandle)) hardware_key_error();
-#else
-#error
-#endif
-}
-
-void shutdown_hardware_key(void)
-{
-#if defined(SSI_UNIKEY)
-    if (SSI_Close()) {
-	PI_app_printf(PI_app_printf_error, "Error: UniKey close failed.\n");
-	exit(1);
-    }
-#elif defined(SENTINEL_EVE3)
-    /* No action necessary. */   
-#else
-#error
-#endif
-}
-
-void check_hardware_key(void)
-{
-#if defined(SSI_UNIKEY)
-    if (SSI_Check(0)) hardware_key_error();
-#elif defined(SENTINEL_EVE3)
-    unsigned short developer_id;
-    
-    if (EveHandle == NULL
-        || RBEREAD(E3_READ_ID, &developer_id, 0, EveHandle)
-        || developer_id != DEVELOPER_ID) hardware_key_error();
-#else
-#error
-#endif
-}
-
-
-#endif /* HARDWARE_KEY */

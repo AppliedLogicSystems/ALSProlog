@@ -176,14 +176,13 @@ gc()
     unsigned long start_tick, finish_tick;
 #endif
 
+	/* For demos and hardware-key protected versions, check copy protection. */
+    check_security();
+    
     /*---------------------------------------------------------------*
      | Force certain external variables to be biased for gc purposes.
      | These will be unbiased on exit from gc.
      *---------------------------------------------------------------*/
-
-#ifdef HARDWARE_KEY
-    check_hardware_key();
-#endif
 
     wm_heapbase -= BIAS;
     wm_H -= BIAS;

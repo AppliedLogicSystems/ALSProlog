@@ -297,6 +297,7 @@ static struct blt_struct {
 	BLT("get_image_dir_and_name", 2, pbi_get_image_dir_and_name, "_pbi_get_image_dir_and_name"),
 	BLT("pbi_get_command_line", 1, pbi_command_line, "_pbi_command_line"),
 	BLT("crypt", 3, pbi_crypt, "_pbi_crypt"),
+	BLT("enable_security", 0, pbi_enable_security, "_pbi_enable_security"),
 
 	BLT("gv_alloc", 1, pbi_gv_alloc, "_pbi_gv_alloc"),
 	BLT("gv_free", 1, pbi_gv_free, "_pbi_gv_free"),
