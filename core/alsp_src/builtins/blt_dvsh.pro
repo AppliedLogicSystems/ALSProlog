@@ -41,7 +41,6 @@ start_alsdev
 	builtins:sys_searchdir(ALSDIRPath),
 	path_elements(ALSDIRPath, Elements),
 	append(Elements, [shared], ImagesList),
-	pbi_write(path=ImagesList),pbi_nl,pbi_ttyflush,
 	join_path(ImagesList, ImagesPath),
 	alsdev_splash(ImagesPath),
 
@@ -158,7 +157,6 @@ alsdev(Shared)
 
 	retract(save_clinfo(CLInfo)),
 	ss_load_dot_alspro(CLInfo),
-%	setup_prolog_flags,
 
 	install_alarm_handler,
 	shell_alarm_interval(AlarmIntrv),
@@ -225,26 +223,6 @@ shell_alarm_interval(1.05).
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			MISC
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-/***********
-setup_prolog_flags
-	:-
-	sys_env(OS, _, _),
-	not (OS = macos), 
-	!,
-	static_flags_info(StaticEqsList),
-	add_static_items_to_menu(StaticEqsList, 
-				shl_tcli, '.topals.mmenb.prolog.static').
-setup_prolog_flags.
-
-add_static_items_to_menu([], Interp, MenuPath).
-add_static_items_to_menu([Item | List], Interp, MenuPath)
-	:-
-	sprintf(atom(Label), '%t', [Item]),
-	tcl_call(Interp, [MenuPath,add,command,'-label',Label], _),
-	add_static_items_to_menu(List, Interp, MenuPath).
-
-***********/
 
 endmod.   % builtins
 
@@ -366,14 +344,6 @@ modify_settings(NewTerm, Functor, Arity, Arg1)
 	write_clauses(OutS, NewTerms, [quoted(true)]),
 	close(OutS).
 
-/*
-modify_settings(NewTerm, Functor, Arity, Arg1)
-	:-
-	open('alsdev.ini', write, OutS, []),
-	write_clauses(OutS, [NewTerm]),
-	close(OutS).
-*/
-
 replace_items([],  NewTerm, Functor, Arity, Arg1,  [NewTerm]).
 replace_items([Old | OldTerms],  NewTerm, Functor, Arity, Arg1,  [NewTerm | OldTerms])
 	:-
@@ -397,6 +367,8 @@ win_positions_for_exit(TopGeom, DebugGeom)
 	modify_settings(window_position('.debugwin',DebugGeom), 
 						window_position, 2, '.debugwin').
 
+
+
 save_prolog_flags
 	:-
 	changable_flags_info(FlagsList),
@@ -411,18 +383,6 @@ set_flags_values([[Flag,_,Val] | FlagsList])
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%			RECONSULT ETC.						%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-/*
-do_reconsult(PathAtom)
-	:-
-	sys_env(OS,_,_),
-	(xconsult:source_level_debugging(on) ->
-		ThePath = source(PathAtom)
-		;
-		ThePath = PathAtom
-	),
-	perf_reconsult(OS, ThePath).
-*/
 
 do_reconsult(PathAtom)
 	:-
