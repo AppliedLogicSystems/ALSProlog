@@ -88,7 +88,7 @@ prefix_subset(SrcList, Prefix, Result)
 prefix_subset([], Prefix, Len, []).
 prefix_subset([P/A | SrcList], Prefix, Len, [P/A | Result])
 	:-
-	sub_atom(P, 1, Len, _, Prefix),
+	sub_atom(P, 0, Len, _, Prefix),
 	!,
 	prefix_subset(SrcList, Prefix, Len, Result).
 prefix_subset([_ | SrcList], Prefix, Len, Result)
@@ -120,7 +120,8 @@ prefix_undefs_basis_filt(Prefix)
 	prefix_undefs_basis(Prefix, PUndefs),
 	getShellStruct(Struct),
 	accessCRSH(suite,Struct,SuiteName),
-	filePlusExt(SuiteName,flt,FiltFile),
+%	filePlusExt(SuiteName,flt,FiltFile),
+	file_extension(SuiteName,flt,FiltFile),
 	open(FiltFile,write,OutS,[]),
 	write_clause(OutS, SuiteName=PUndefs),
 	close(OutS).

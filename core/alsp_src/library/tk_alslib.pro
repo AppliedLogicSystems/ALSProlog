@@ -509,7 +509,7 @@ create_image(Interp, ImagePath, ImageName)
 %		pathPlusFile(_, ImageFile, ImagePath),
 		split_path(ImagePath, ImagePathElts),
 		dreverse(ImagePathElts, [ImageFile | _]),
-%		(filePlusExt(ImageBase, ImgExt, ImageFile) ->
+%		(file_extension(ImageBase, ImgExt, ImageFile) ->
 		((file_extension(ImageBase, ImgExt, ImageFile), ImgExt \= '') ->
 			true
 			;
@@ -573,7 +573,7 @@ display_image(ImageFile, ImageWidth, ImageHeight)
 
 display_image(Interp, ImageDir, ImageFile, ImageWidth, ImageHeight)
 	:-
-	(filePlusExt(ImageBase, ImgExt, ImageFile) ->
+	(file_extension(ImageBase, ImgExt, ImageFile) ->
 		true
 		;
 		ImgExt = img,

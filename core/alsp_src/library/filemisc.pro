@@ -8,7 +8,7 @@
 
 module builtins.
 
-export copy_dir_files_nl/3.
+export copy_dir_files/2.
 export copy_dir_files_nl/4.
 export copy_fileslist_nl/4.
 export copy_fileslist_nl/5.
@@ -24,141 +24,122 @@ export archive_file/2.
 export move_file/2.
 
 /*!-------------------------------------------------------------
- |	copy_dir_files_nl/3
- |	copy_dir_files_nl(SourceDir, TgtDir, NL_type)
- |	copy_dir_files_nl(+, +, +)
+ |	copy_dir_files/2
+ |	copy_dir_files(SourceDir, TgtDir)
+ |	copy_dir_files(+, +)
  |
- |	- copies files from dir to dir, using a given nl type 
+ |	- copies files from dir to dir
  |
  *!------------------------------------------------------------*/
-copy_dir_files_nl(SourceDir, TgtDir, NL_type)
+copy_dir_files(SourceDir, TgtDir)
 	:-
-	copy_dir_files_nl(SourceDir, TgtDir, NL_type, new).
+	copy_dir_files(SourceDir, TgtDir, new).
 
 /*!-------------------------------------------------------------
- |	copy_dir_files_nl/4
- |	copy_dir_files_nl(SourceDir, TgtDir, NL_type, NewUp)
- |	copy_dir_files_nl(+, +, +, +)
+ |	copy_dir_files/3
+ |	copy_dir_files(SourceDir, TgtDir, NewUp)
+ |	copy_dir_files(+, +, +)
  |
- |	- copies (some) files from dir to dir, using a given nl type 
+ |	- copies (some) files from dir to dir
  |
  *!------------------------------------------------------------*/
-copy_dir_files_nl(SourceDir, TgtDir, NL_type, NewUp)
+copy_dir_files(SourceDir, TgtDir, NewUp)
 	:-
-	pathPlusFile(SourceDir, '*', SourcePattern),
+%	pathPlusFile(SourceDir, '*', SourcePattern),
+	split_path(SourceDir, SDElts),
+	dappend(SDElts, ['*'], SPElts),
+	join_path(SPElts, SourcePattern),
 	files(SourcePattern, FileList),
-	copy_fileslist_nl(FileList, SourceDir, TgtDir, NL_type, NewUp).
+%	copy_fileslist_nl(FileList, SourceDir, TgtDir, NL_type, NewUp).
+	split_path(TgtDir, TgtDirElts),
+	copy_fileslist(FileList, SDElts, TgtDirElts, NL_type, NewUp).
 
 /*!-------------------------------------------------------------
- |	copy_fileslist_nl/4
- |	copy_fileslist_nl(FileList, SourceDir, TgtDir, NL_type)
- |	copy_fileslist_nl(+, +, +, +)
+ |	copy_fileslist/3
+ |	copy_fileslist(FileList, SrcDirElts, TgtDirElts)
+ |	copy_fileslist(+, +, +)
  |
  |	- copies a list of files from one dir to another
  |
  *!------------------------------------------------------------*/
-copy_fileslist_nl(FileList, SourceDir, TgtDir, NL_type)
+copy_fileslist(FileList, SrcDirElts, TgtDirElts)
 	:-
-	copy_fileslist_nl(FileList, SourceDir, TgtDir, NL_type, new).
+	copy_fileslist(FileList, SrcDirElts, TgtDirElts, new).
 
 /*!-------------------------------------------------------------
- |	copy_fileslist_nl/5
- |	copy_fileslist_nl(FileList, SourceDir, TgtDir, NL_type, NewUp)
- |	copy_fileslist_nl(+, +, +, +, +)
+ |	copy_fileslist/4
+ |	copy_fileslist(FileList, SrcDirElts, TgtDirElts, NewUp)
+ |	copy_fileslist(+, +, +, +)
  |
  |	- copies (some of) a list of files from one dir to another
  |
  *!------------------------------------------------------------*/
-copy_fileslist_nl([], SrcPath, DestDir, NL_type, _).
+copy_fileslist_nl([], SrcDirElts, DestDirElts, _).
 
-copy_fileslist_nl([SrcFileName | SrcFileNamesList], SrcPath, DestDir, 
-					NL_type, NewUp)
+copy_fileslist_nl([SrcFileName | SrcFileNamesList], SrcDirElts, DestDirElts, NewUp)
 	:-
-	pathPlusFile(SrcPath, SrcFileName, SrcFile),
-	pathPlusFile(DestDir, SrcFileName, DestFile),
-	check_copy_file_nl(NewUp, SrcFile, DestFile, NL_type),
-	copy_fileslist_nl(SrcFileNamesList, SrcPath, DestDir, NL_type, NewUp).
+%	pathPlusFile(SrcPath, SrcFileName, SrcFile),
+	dappend(SrcDirElts, [SrcFileName], SFElts),
+	join_path(SFNElts, SrcFile),
+
+%	pathPlusFile(DestDir, SrcFileName, DestFile),
+	dappend(DestDirElts, [SrcFileName], DestFile),
+
+	check_copy_file_nl(NewUp, SrcFile, DestFile),
+	copy_fileslist(SrcFileNamesList, SrcDirElts, DestDirElts, NewUp).
 
 /*!-------------------------------------------------------------
- |	check_copy_file_nl/4
- |	check_copy_file_nl(NewUp, SrcFile, DestFile, NL_type)
- |	check_copy_file_nl(+, +, +, +)
+ |	check_copy_file/3
+ |	check_copy_file(NewUp, SrcFile, DestFile)
+ |	check_copy_file(+, +, +)
  |
  |	- test and (maybe) copy a file
- |
  *!------------------------------------------------------------*/
-check_copy_file_nl(new, SrcFile, DestFile, NL_type)
+check_copy_file(new, SrcFile, DestFile)
 	:-!,
-	copy_file_nl(SrcFile, DestFile, NL_type).
+	copy_file(SrcFile, DestFile).
 
-check_copy_file_nl(_, SrcFile, DestFile, NL_type)
+check_copy_file(_, SrcFile, DestFile)
 	:-
 	(comp_file_times(SrcFile, DestFile) ->
 		true
 		;
-		copy_file_nl(SrcFile, DestFile, NL_type)
+		copy_file(SrcFile, DestFile)
 	).
 
 /*!-------------------------------------------------------------
- |	copy_file_nl/3
- |	copy_file_nl(SrcFileName, DestFileName, NL_type)
- |	copy_file_nl(+, +, +)
+ |	copy_file/2
+ |	copy_file(SrcFileName, DestFileName)
+ |	copy_file(+, +)
  |
- |	- copies one file to another, using a given nl type
- |
+ |	- copies one file to another
  *!------------------------------------------------------------*/
-copy_file_nl(SrcFileName, DestFileName, NL_type)
+copy_file(SrcFileName, DestFileName)
 	:-
 	open(SrcFileName, read, SrcS, []),
 	open(DestFileName, write, TgtS, []),
-	copy_stream_nl(SrcS, TgtS, NL_type),
+	copy_stream(SrcS, TgtS),
 	close(TgtS),
 	close(SrcS).
 
 /*!-------------------------------------------------------------
- |	copy_stream_nl/3
- |	copy_stream_nl(SrcS, TgtS, NL_type)
- |	copy_stream_nl(+, +, +)
+ |	copy_stream/2
+ |	copy_stream(SrcS, TgtS)
+ |	copy_stream(+, +)
  |
- |	- copies one stream to another, using a given nl type
- |
+ |	- copies one stream to another
  *!------------------------------------------------------------*/
-copy_stream_nl(SrcS, TgtS, NL_type)
+copy_stream(SrcS, TgtS)
 	:-
 	get_line(SrcS, Line),
 	!,
 	put_atom(TgtS, Line),
-	output_nl(NL_type, TgtS),
-	copy_stream_nl(SrcS, TgtS, NL_type).
+	nl(TgtS),
+	copy_stream(SrcS, TgtS).
 
-copy_stream_nl(SrcS, TgtS, NL_type).
+copy_stream_nl(SrcS, TgtS).
 
-/*!-------------------------------------------------------------
- |	output_nl/2
- |	output_nl(NL_type, TgtS)
- |	output_nl(+, +)
- |
- |	- output a specified nl type to a stream
- |
- *!------------------------------------------------------------*/
-output_nl(unix, TgtS)
-	:-
-	put_code(TgtS, 10).
-
-output_nl(mswin32, TgtS)
-	:-
-	put_code(TgtS, 13),
-	put_code(TgtS, 10).
-
-output_nl(macos, TgtS)
-	:-
-	put_code(TgtS, 13).
-
-output_nl(dos, TgtS)
-	:-
-	put_code(TgtS, 13),
-	put_code(TgtS, 10).
-
+/**************************
 /*!-------------------------------------------------------------
  |	comp_times/3
  |	comp_times(SFL_Pairs, UpToDate, OutOfDate)
@@ -187,6 +168,7 @@ comp_times([Source-Target | SFL_Pairs], UpToDate, [Source| OutOfDate])
 comp_times([Source-Target | SFL_Pairs], [Source | UpToDate], OutOfDate)
 	:-
 	comp_times(SFL_Pairs, UpToDate, OutOfDate).
+**************************/
 
 /*!-------------------------------------------------------------
  |	install_file_links/2
@@ -200,26 +182,31 @@ install_file_links(LinkDir, SrcDir)
 	:-
 	get_cwd(CurDir),
 	change_cwd(LinkDir),
-	pathPlusFile(SourceDir, '*', SourcePattern),
+%	pathPlusFile(SourceDir, '*', SourcePattern),
+	split_path(SrcDir, SDElts),
+	dappend(SDElts, ['*'], SPElts),
+	join_path(SPElts, SourcePattern),
 	files(SourcePattern, FileList),
-	install_links0(FileList, SrcDir),
+	install_links0(FileList, SDElts),
 	change_cwd(CurDir).
 
 /*!-------------------------------------------------------------
  |	install_links0/2
- |	install_links0(FileList,SrcDir)
+ |	install_links0(FileList,SDElts)
  |	install_links0(+,+)
  |
  |	- install links in a dir to all files on a list
  |
  *!------------------------------------------------------------*/
-install_links0(FileList,SrcDir).
-install_links0([File | FileList],SrcDir)
+install_links0(FileList,SDElts).
+install_links0([File | FileList],SDElts)
 	:-
-	pathPlusFile(SrcDir,File,SrcFile),
-	pathPlusFile('./',File, LinkFile),
-	make_symlink(SrcFile,LinkFile),
-	install_links0(FileList,SrcDir).
+%	pathPlusFile(SrcDir,File,SrcFile),
+	dappend(SDElts, [File], SFElts),
+	join_path(SFElts, SrcFile),
+%	pathPlusFile('./',File, LinkFile),
+	make_symlink(SrcFile,File),
+	install_links0(FileList,SDElts).
 
 /*!-------------------------------------------------------------
  |	remove_files/1

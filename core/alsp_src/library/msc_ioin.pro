@@ -302,27 +302,6 @@ get_lines(SS,[Line | Lines])
 
 get_lines(SS, []).
 
-/*************** OLD - DUPLICATES get_lines **************************
-/*!-------------------------------------------------------------
- |	read_lines/2
- |	read_lines(Stream, Lines)
- |	read_lines(+, -)
- |
- |	- read lines from a stream
- |
- |	Reads list of Lines (as atoms) from Stream until end of 
- |	Stream is encountered.
- *!------------------------------------------------------------*/
-
-read_lines(Stream, [Line | Lines])
-	:-
-	get_line(Stream, Line),
-	!,
-	read_lines(Stream, Lines).
-
-read_lines(Stream, []).
-*************** OLD - DUPLICATES get_lines **************************/
-
 /*!-------------------------------------------------------------
  |	read_as_list/3
  |	read_as_list(Atom,List,Options)	
@@ -345,40 +324,35 @@ read_lines(Stream, []).
 read_as_list(FLine,Fs,Options)
 	:-
 	atom_length(FLine,FLen),
-	(dmember(delimiter=DelimCode, Options) -> true ; DelimCode = 0' ),
-	atom_codes(Delim,[DelimCode]),
-	read_as_list(1,FLen,FLine,Delim,Fs,Options).
+	(dmember(delimiter=Delim, Options) -> true ; Delim = ' ' ),
+	read_as_list(0,FLen,FLine,Delim,Fs,Options).
 
 read_as_list(Cur,Size,Source,Delim,[],Options)
 	:-
-	Cur > Size,
+	Cur >= Size,
 	!.
 
-read_as_list(Cur,Size,Source,Delim,[Next | Rest],Options)
+read_as_list(Cur,Size,Source,Delim,[Item | Rest],Options)
 	:-
-	read_item(Cur,Size,Source,Delim,Next,After),
-	AfterAnother is After + 1,
-	read_as_list(AfterAnother,Size,Source,Delim,Rest,Options).
-	
+	read_item(Cur,Size,Source,Delim,Item,After),
+	read_as_list(After,Size,Source,Delim,Rest,Options).
+
 read_item(Cur,Size,Source,Delim,Next,After)
 	:-
-	probe_delim(Cur,Size,Source,Delim,After),
-	ALen is After - Cur,
-	sub_atom(Source,Cur,ALen,_, Next).
+	probe_delim(Cur,Size,Source,Delim,Len,After),
+	sub_atom(Source,Cur,Len,_, Next).
 
-probe_delim(Cur,Size,Source,Delim,Cur)
+read_item(Cur,Size,Source,Delim,Next,Size)
 	:-
-	Cur > Size,		%% really: Cur = Size + 1
-	!.
-probe_delim(Cur,Size,Source,Delim,Cur)
-	:-
-	sub_atom(Source,Cur,1,Delim),
-	!.
+	sub_atom(Source,Cur,_,0, Next).
 
-probe_delim(Cur,Size,Source,Delim,After)
+probe_delim(Cur,Size,Source,Delim,Len,After)
 	:-
-	NPos is Cur + 1,
-	probe_delim(NPos,Size,Source,Delim,After).
+	sub_atom(Source,B0,1,_,Delim),
+	B0 > Cur,
+	After is B0 +1,
+	Len is B0 -Cur.
+
 
 
 endmod.

@@ -30,9 +30,7 @@ atm_tail(Atom,N,AtmTail)
 	atom_length(Atom,Len),
 	Len > N,
 	!,
-	TailLen is Len - N,
-	N1 is N+1,
-	sub_atom(Atom,N1,TailLen,_, AtmTail).
+	sub_atom(Atom,N,_,0, AtmTail).
 							 
 atm_tail(_,_,'').
 

@@ -340,15 +340,15 @@ export fm_doc/1.
 fm_doc(InitSrcFile)
 	:-
 	pathPlusFile(Path,File,InitSrcFile),
-	(filePlusExt(BaseFile,Ext,File) ->
+	(file_extension(BaseFile,Ext,File) ->
 		true
 		;
 		BaseFile = File, Ext = pro
 	),
-	filePlusExt(BaseFile,Ext,FF),
+	file_extension(BaseFile,Ext,FF),
 	pathPlusFile(Path,FF,SrcFile),
-	filePlusExt(BaseFile,brf,BriefTgt),
-	filePlusExt(BaseFile,mml,MMLTgt),
+	file_extension(BaseFile,brf,BriefTgt),
+	file_extension(BaseFile,mml,MMLTgt),
 
 	lib_man_info(SrcFile, BriefTgt, MMLTgt, _, _, _, _, _).
 
@@ -469,22 +469,22 @@ io_line(Line)
 	:-
 	atom_length(Line,LL),
 	Stop is LL - 5,
-	io_line(Line,1,5,Stop,'Input').
+	io_line(Line,0,5,Stop,'Input').
 io_line(Line)
 	:-
 	atom_length(Line,LL),
 	Stop is LL - 6,
-	io_line(Line,1,6,Stop,'Output').
+	io_line(Line,0,6,Stop,'Output').
 
-io_line(Line,Start,Size,Stop,SubAtom)
+io_line(Line,Before,Size,Stop,SubAtom)
 	:-
-	sub_atom(Line,Start,Size,_, SubAtom),!.
+	sub_atom(Line,Before,Size,_, SubAtom),!.
 
-io_line(Line,Start,Size,Stop,SubAtom)
+io_line(Line,Before,Size,Stop,SubAtom)
 	:-
-	Start < Stop,
-	NextStart is Start + 1,
-	io_line(Line,NextStart,Size,Stop,SubAtom).
+	Before < Stop,
+	NextBefore is Before + 1,
+	io_line(Line,NextBefore,Size,Stop,SubAtom).
 
 /*------------------------------------------
  *-----------------------------------------*/

@@ -121,7 +121,7 @@ comptype :-
  *-----------------------------------------------------------*/
 comptype(InputFileDescrip)
 	:-
-	(filePlusExt(FileName, Ext, InputFileDescrip) ->
+	(file_extension(FileName, Ext, InputFileDescrip) ->
 		true
 		;
 		FileName = InputFileDescrip, Ext = typ
@@ -129,8 +129,8 @@ comptype(InputFileDescrip)
 	(Ext \= typ ->
 		ct_error('Source file must have extension .typ \n')
 		;
-		filePlusExt(FileName,Ext,SourceFile),
-		filePlusExt(FileName,pro,TargetFile),
+		file_extension(FileName,Ext,SourceFile),
+		file_extension(FileName,pro,TargetFile),
 		comptype(SourceFile, TargetFile, [])
 	).
 
@@ -140,10 +140,10 @@ comptype(InputFileDescrip)
 xcomptype(SourceFile, OutFilePath, Options)
 	:-
 %	pathPlusFile(SrcFileDir,SrcFile,SourceFile),
-%	filePlusExt(BaseSrcFile,typ,SrcFile),
+%	file_extension(BaseSrcFile,typ,SrcFile),
 	!,
-	filePlusExt(BaseTgtFile,_,OutFilePath),
-	filePlusExt(BaseTgtFile,pro,TgtFile),
+	file_extension(BaseTgtFile,_,OutFilePath),
+	file_extension(BaseTgtFile,pro,TgtFile),
 	comptype(SourceFile, TgtFile, Options).
 
 xcomptype(SourceFile, _, Options)
@@ -152,11 +152,17 @@ xcomptype(SourceFile, _, Options)
 
 xcomptype(SourceFile, Options)
 	:-
-	pathPlusFile(SrcFileDir,SrcFile,SourceFile),
-	filePlusExt(BaseSrcFile,typ,SrcFile),
+%	pathPlusFile(SrcFileDir,SrcFile,SourceFile),
+	split_path(SourceFile, SFElts),
+	dreverse(SFElts, [SrcFile | RevSFDElts]),
+	dreverse(RevSFDElts, SFDElts),
+	join_path(SFDElts, SrcFileDir),
+	file_extension(BaseSrcFile,typ,SrcFile),
 	!,
-	filePlusExt(BaseSrcFile,pro,BasicTgtFile),
-	pathPlusFile(SrcFileDir,BasicTgtFile,TgtFile),
+	file_extension(BaseSrcFile,pro,BasicTgtFile),
+%	pathPlusFile(SrcFileDir,BasicTgtFile,TgtFile),
+	dappend(SFDElts, [BasicTgtFile], TFElts),
+	join_path(TFElts, TgtFile),
 	comptype(SourceFile, TgtFile, Options).
 
 xcomptype(SourceFile, Options)
@@ -197,8 +203,8 @@ comptype(SourceFile, TgtFile, Options)
 do_comptype(SourceFile, TgtFile, Options)
 	:-
 	(dmember(quiet(Quiet), Options),!; Quiet=false),
-	filePlusExt(NoSuffixPath, _, TgtFile),
-	filePlusExt(NoSuffixPath, mac, MacFile),
+	file_extension(NoSuffixPath, _, TgtFile),
+	file_extension(NoSuffixPath, mac, MacFile),
 	cont_comptype(TgtFile,MacFile,SourceFile, Quiet).
 
 cont_comptype(TgtFile,MacFile,SourceFile, Quiet)
@@ -498,8 +504,8 @@ expand_includes([Item | InitPropertiesList], [Item | PropertiesList],
 
 fetch_included_props(File, Name, PropertiesList, InterPropsListTail, Quiet)
 	:-
-	(filePlusExt(BaseFile,typ,File) ->
-		FullFile = File ; filePlusExt(File,typ,FullFile)
+	(file_extension(BaseFile,typ,File) ->
+		FullFile = File ; file_extension(File,typ,FullFile)
 	),
 	locate_include_file(FullFile, FullIncludeFile),
 	open(FullIncludeFile, read, InStr, []),
@@ -550,22 +556,31 @@ locate_include_file(FullFile, FullFile)
 locate_include_file(FullFile, FullIncludeFile)
 	:-
 	include_dir(Path),
-	pathPlusFile(Path, FullFile, FullIncludeFile),
+%	pathPlusFile(Path, FullFile, FullIncludeFile),
+	split_path(Path,PathElts),
+	dappend(PathElts, [FullFile], FFIFElts),
+	join_path(FFIFElts, FullIncludeFile),
 	exists(FullIncludeFile),
 	!.
 
 locate_include_file(FullFile, FullIncludeFile)
 	:-
 	builtins:searchdir(Path),
-	pathPlusFile(Path, FullFile, FullIncludeFile),
+%	pathPlusFile(Path, FullFile, FullIncludeFile),
+	split_path(Path,PathElts),
+	dappend(PathElts, [FullFile], FFIFElts),
+	join_path(FFIFElts, FullIncludeFile),
 	exists(FullIncludeFile),
 	!.
 
 locate_include_file(FullFile, FullIncludeFile)
 	:-
 	builtins:sys_searchdir(ALSDIR),
-	extendPath(ALSDIR, includes, SysIncludes),
-	pathPlusFile(SysIncludes, FullFile, FullIncludeFile),
+%	extendPath(ALSDIR, includes, SysIncludes),
+%	pathPlusFile(SysIncludes, FullFile, FullIncludeFile),
+	split_path(ALSDIR, ALSDIRElts),
+	dappend(ALSDIRElts, [includes,FullFile], FFIFElts),
+	join_path(FFIFElts, FullIncludeFile),
 	exists(FullIncludeFile),
 	!.
 

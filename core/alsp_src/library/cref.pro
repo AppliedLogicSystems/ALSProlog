@@ -61,7 +61,7 @@ get_make_info(suite,SuiteName,'.',FilesList,TargetFile, ConfigInfo)
 
 get_make_info(suite,SuiteName,Directory,FilesList,TargetFile, ConfigInfo)
 	:-
-	filePlusExt(SuiteName,crf,IndirSourceFile),
+	file_extension(SuiteName,crf,IndirSourceFile),
 	exists_file(IndirSourceFile),
 	open(IndirSourceFile,read,ISS,[]),
 	!,
@@ -78,20 +78,20 @@ get_make_info(suite,SuiteName,Directory,FilesList,TargetFile, ConfigInfo)
                 ;
                 ConfigInfo = nil
         ),
-	filePlusExt(SuiteName,xrf,TargetFile).
+	file_extension(SuiteName,xrf,TargetFile).
 
 get_make_info(suite,SuiteName,'.',FilesList,TargetFile, nil)
 	:-
-	filePlusExt(BaseName,pro,SuiteName),
+	file_extension(BaseName,pro,SuiteName),
 	!,
 	FilesList = [SuiteName],
-	filePlusExt(BaseName,xrf,TargetFile).
+	file_extension(BaseName,xrf,TargetFile).
 
 get_make_info(suite,SuiteName,'.',FilesList,TargetFile, nil)
 	:-
-	filePlusExt(SuiteName,pro,SourceFile),
+	file_extension(SuiteName,pro,SourceFile),
 	FilesList = [SourceFile],
-	filePlusExt(SuiteName,xrf,TargetFile).
+	file_extension(SuiteName,xrf,TargetFile).
 
 setup_config(cfg(Module,ClauseList), RefsList)
         :-!,
@@ -221,7 +221,7 @@ resolve_file(File, File)
 
 resolve_file(File, FileName)
 	:-
-	filePlusExt(File,pro,FileName),
+	file_extension(File,pro,FileName),
 	exists_file(FileName),
 	!.
 
@@ -1632,7 +1632,7 @@ act_on(savetree,Tree, MIS, InS,OutS, Struct)
 	
 act_on(savetree(File),Tree, MIS, InS,OutS, Struct) 
 	:-!,
-	filePlusExt(File,cft,FileName),
+	file_extension(File,cft,FileName),
 	accessCRSH(suite,Struct,SuiteName),
 	date(Date),time(Time),
 	open(FileName,write,FileStream,[]),
@@ -1643,10 +1643,10 @@ act_on(savetree(File),Tree, MIS, InS,OutS, Struct)
 act_on(loadtree(FileName),Tree, MIS, InS,OutS, Struct) 
 	:-
 	atom(FileName),
-	(filePlusExt(File,cft,FileName) ->
+	(file_extension(File,cft,FileName) ->
 		TreeFile = FileName
 		;
-		filePlusExt(FileName,cft,TreeFile)
+		file_extension(FileName,cft,TreeFile)
 	),
 	exists_file(TreeFile),
 	open(TreeFile,read,FileStream,[]),
@@ -1885,7 +1885,7 @@ act_on(fcalls,Tree, MIS, InS,OutS, Struct)
 
 act_on(called_in_file([FN|FE]),Tree, MIS, InS,OutS, Struct) 
 	:-!,
-	filePlusExt(FN,FE,File),
+	file_extension(FN,FE,File),
 	act_on(called_in_file(File),Tree, MIS, InS,OutS, Struct) .
 act_on(called_in_file(F),Tree, MIS, InS,OutS, Struct) 
 	:-!,
@@ -1896,7 +1896,7 @@ act_on(called_in_file(F),Tree, MIS, InS,OutS, Struct)
 
 act_on(def_in_file([FN|FE]),Tree, MIS, InS,OutS, Struct) 
 	:-!,
-	filePlusExt(FN,FE,File),
+	file_extension(FN,FE,File),
 	act_on(def_in_file(File),Tree, MIS, InS,OutS, Struct) .
 act_on(def_in_file(F),Tree, MIS, InS,OutS, Struct) 
 	:-!,
