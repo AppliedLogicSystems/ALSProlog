@@ -25,6 +25,8 @@ export valid_date/3.
 export time_less/2.
 export datetime_less/2.
 export canon_path/2.
+export get_cwd/1.
+export change_cwd/1.
 
 /*!--------------------------------------------------------------
  |	date_less/2
@@ -171,12 +173,21 @@ canon_path(SrcPath,CanonPath)
 	),
 	change_cwd(WeAreHere).
 */
+
+/* canon_path needs a version of change_cwd that will return
+   false if the directory doesn't exist.  This should use
+   something like exists_dir/1, but for now use the following
+   as a hack. */
+test_and_change_cwd(NewDir)
+	:-
+	chdir(NewDir).
+
 canon_path(SrcPath,CanonPath)
 	:-
 	get_cwd(WeAreHere),
 
 	rootPathFile(Disk,SubDirList,EndPathFile,SrcPath),
-	(change_cwd(SrcPath) ->
+	(test_and_change_cwd(SrcPath) ->
 		get_cwd(CanonPath)
 		;
 		rootPathFile(Disk,SubDirList,'',ShortSrcPath),
@@ -201,5 +212,40 @@ strip_last([_],[]) :-!.
 strip_last([H | PathList], [H | ParPathList])
 	:-
 	strip_last(PathList, ParPathList).
+
+/*!--------------------------------------------------------------
+ |	change_cwd/1
+ |	change_cwd(NewDir)
+ |	change_cwd(+)
+ |
+ |	- change the current working directory
+ |
+ |	Changes the current working directory being used by the program
+ |	to become NewDir (which must be an atom). Under DOS, this won't 
+ |	change the drive.
+ *!--------------------------------------------------------------*/
+change_cwd(Path)
+	:-
+	chdir(Path), !.
+change_cwd(Path)
+	:-
+	permission_error(change_cwd,directory,Path,2).
+
+/*!--------------------------------------------------------------
+ |	get_cwd/1
+ |	get_cwd(Path) 
+ |	get_cwd(-) 
+ |
+ |	- returns the current working directory
+ |
+ |	Returns the current working directory being used by the program
+ |	as a quoted atom.  Under DOS, the drive is included.
+ *!--------------------------------------------------------------*/
+get_cwd(Path)
+	:-
+	getcwd(Path), !.
+get_cwd(Path)
+	:-
+	permission_error(get_cwd,directory,Path,2).
 
 endmod.
