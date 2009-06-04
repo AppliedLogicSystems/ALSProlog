@@ -795,8 +795,8 @@ run_wam(startaddr)
     Code *startaddr;		/* pointer to clause to execute wam on */
 {
     register Code *P = startaddr;
-    register PWord *S = NULL;
-    register PWord *reg1 = NULL;
+    /* register */ PWord *S = NULL;
+    /* register */ PWord *reg1 = NULL;
     register PWord n;		/* used for both counter and deref temp */
 
 	/*-----------------------------------------------------*

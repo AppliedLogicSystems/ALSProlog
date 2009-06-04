@@ -195,11 +195,14 @@ getDirEntries()
     strcat(path, pattern);
 
     r = glob(path, 0, NULL, &gd);
-#if UNIX_DARWIN /* Darwin is POSIX.1 */
+/*
+#if UNIX_DARWIN / * Darwin is POSIX.1 * /
     if (r != 0) PI_FAIL;
-#else /* Most others are POSIX.2 */
+#else / * Most others are POSIX.2 * /
     if (r != 0 && r != GLOB_NOMATCH) PI_FAIL;
 #endif
+*/
+    if (r != 0 && r != GLOB_NOMATCH) PI_FAIL;
 
 
     for (i = gd.gl_pathc, PI_makesym(&list, &listType, "[]"); i;
