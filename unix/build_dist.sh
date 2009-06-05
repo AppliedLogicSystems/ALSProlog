@@ -8,6 +8,7 @@ case `uname -rs` in
     Linux*) 	ARCH=linux ;;
     "HP-UX"*)	ARCH=hpux ;;
     "IRIX"*)	ARCH=irix ;;
+    "Darwin"*)	ARCH=darwin ;;
     *) 		echo "Unknown machine type..."; exit 1 ;;
 esac
 
@@ -104,8 +105,13 @@ then
 	if test $ARCH = hpux
 	then
 		cp -pr "$BIN/libalspro.sl" "$DISTDIR"
+	else 
+        if test $ARCH = darwin
+	then
+		cp -pr "$BIN/libalspro.dylib" "$DISTDIR"
 	else
 		cp -pr "$BIN/libalspro.so" "$DISTDIR"
+        fi
 	fi
 fi
 
@@ -121,8 +127,12 @@ then
 	if test $ARCH = hpux
 	then
 		cp -pr "$BIN/libalspro.sl" "$DISTDIR"
+	else if test $ARCH = darwin
+	then
+		cp -pr "$BIN/libalspro.dylib" "$DISTDIR"
 	else
 		cp -pr "$BIN/libalspro.so" "$DISTDIR"
+        fi
 	fi
 fi
 
