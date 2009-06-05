@@ -17,7 +17,9 @@
 #include <tk.h>
 
 #ifndef BUILD_PSL
+/*
 #define ITCL
+*/
 #endif
 
 #ifdef ITCL
