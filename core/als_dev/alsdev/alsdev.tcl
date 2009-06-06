@@ -5,7 +5,7 @@
 #|		Tcl/Tk procedures supporting the top-level Tk-based
 #|		ALS Prolog shell
 #|
-#|		"$Id: alsdev.tcl,v 1.89 2000/03/22 16:42:57 choupt Exp $"
+#|		"$Id: alsdev.tcl,v 1.90 2009/06/06 21:24:14 chuck Exp $"
 #|
 #|	Author: Ken Bowen
 #|	Date:	July 1997
@@ -41,8 +41,9 @@ if {$tcl_platform(platform) == "macintosh"} {
 	load {} getFiles
 }
 
-package require getDirectory
-package require getFiles
+#TODO Figure out if getDir/Files is still needed in 2009 -CEH
+#package require getDirectory
+#package require getFiles
 
 
 proc xpe { What } {

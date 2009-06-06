@@ -490,6 +490,12 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 		goto error;
 	}
 
+/*
+The following was causing a coredump on Mac OS X 10.5, and isn't necessary when
+using the OS's Tcl/TK. Turned off for the moment.
+TODO figure out why this is crashing on 10.5 - CEH 2009
+*/
+#if 0
 	{
 		Tcl_DString path;
 		const char *elements[3];
@@ -509,6 +515,7 @@ static AP_Result built_interp(AP_World *w, Tcl_Interp **interpretor, AP_Obj *int
 		Tcl_SetVar(interp, (char *)"autopath", (char *)"", TCL_GLOBAL_ONLY);
 		Tcl_DStringFree(&path);
 	}
+#endif
 	
 	r = Tcl_Init(interp);
 
