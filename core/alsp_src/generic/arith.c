@@ -635,28 +635,28 @@ static int handle_is_error(int status)
    		w_mk_term(&s, &st, TK_SLASH, 2);
    		w_install_argn(s, 1, error_functor, WTP_SYMBOL);
    		w_install_argn(s, 2, error_arity, WTP_INTEGER);
-    		PERR_TYPE(TK_IS, 2, find_token("evaluable"), s, st);
+    		PERR_TYPE(TK_IS, 2, find_token((UCHAR *)"evaluable"), s, st);
     		break;
     	case IS_INTEGER_TYPE_ERROR:
    		w_mk_term(&s, &st, TK_SLASH, 2);
    		w_install_argn(s, 1, error_functor, WTP_SYMBOL);
    		w_install_argn(s, 2, error_arity, WTP_INTEGER);
-    		PERR_TYPE(TK_IS, 2, find_token("integer"), s, st);
+    		PERR_TYPE(TK_IS, 2, find_token((UCHAR *)"integer"), s, st);
     		break;
     	case IS_FLOAT_OVERFLOW_ERROR:
-    		PERR_EVALUATION(TK_IS, 2, find_token("float_overflow"));
+    		PERR_EVALUATION(TK_IS, 2, find_token((UCHAR *)"float_overflow"));
    			break;
     	case IS_INT_OVERFLOW_ERROR:
-    		PERR_EVALUATION(TK_IS, 2, find_token("int_overflow"));
+    		PERR_EVALUATION(TK_IS, 2, find_token((UCHAR *)"int_overflow"));
    			break;
     	case IS_UNDERFLOW_ERROR:
-    		PERR_EVALUATION(TK_IS, 2, find_token("underflow"));
+    		PERR_EVALUATION(TK_IS, 2, find_token((UCHAR *)"underflow"));
    			break;
     	case IS_ZERO_DIVISOR_ERROR:
-    		PERR_EVALUATION(TK_IS, 2, find_token("zero_divisor"));
+    		PERR_EVALUATION(TK_IS, 2, find_token((UCHAR *)"zero_divisor"));
    			break;
     	case IS_UNDEFINED_ERROR:
-    		PERR_EVALUATION(TK_IS, 2, find_token("undefined"));
+    		PERR_EVALUATION(TK_IS, 2, find_token((UCHAR *)"undefined"));
    			break;
    	default:
    		FAIL;

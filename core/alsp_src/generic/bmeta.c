@@ -55,14 +55,14 @@ pbi_arg()
 
     switch (t1) {
     case WTP_UNBOUND:
-    	PERR_INSTANTIATION(find_token("arg"), 3);
+    	PERR_INSTANTIATION(find_token((UCHAR *)"arg"), 3);
     	break;
     case WTP_INTEGER:
     	if (v1 < 0)
-    	   PERR_DOMAIN(find_token("arg"), 3, find_token("not_less_than_zero"), v1, t1);
+    	   PERR_DOMAIN(find_token((UCHAR *)"arg"), 3, find_token((UCHAR *)"not_less_than_zero"), v1, t1);
     	break;
     default:
-        PERR_TYPE(find_token("arg"), 3, TK_INTEGER, v1, t1);
+        PERR_TYPE(find_token((UCHAR *)"arg"), 3, TK_INTEGER, v1, t1);
     }
     
     switch (t2) {
@@ -87,10 +87,10 @@ pbi_arg()
 	    break;
 
 	case WTP_UNBOUND:
-	    PERR_INSTANTIATION(find_token("arg"), 3);
+	    PERR_INSTANTIATION(find_token((UCHAR *)"arg"), 3);
     	break;
 	default:
-	    PERR_TYPE(find_token("arg"), 3, find_token("compound"), v2, t2);
+	    PERR_TYPE(find_token((UCHAR *)"arg"), 3, find_token((UCHAR *)"compound"), v2, t2);
     }
 
  	if (w_unify(argval, argtype, v3, t3))
@@ -535,14 +535,14 @@ pbi_functor()
 
 	   		if (f == TK_DDOUBLE && a == 4 && t3 == WTP_INTEGER && v3 > 0)
 	   		    PERR_TYPE(TK_FUNCTOR, 3, TK_ATOM, v2, t2);
-	   		else PERR_TYPE(TK_FUNCTOR, 3, find_token("atomic"), v2, t2);
-	    	    } else PERR_TYPE(TK_FUNCTOR, 3, find_token("atomic"), v2, t2);
+	   		else PERR_TYPE(TK_FUNCTOR, 3, find_token((UCHAR *)"atomic"), v2, t2);
+	    	    } else PERR_TYPE(TK_FUNCTOR, 3, find_token((UCHAR *)"atomic"), v2, t2);
 	    	} else if (t3 != WTP_INTEGER)
 	    	    PERR_TYPE(TK_FUNCTOR, 3, TK_INTEGER, v3, t3);
 	    	else if ((t2 == WTP_INTEGER || t2 == WTP_STRUCTURE) && t3 == WTP_INTEGER && v3 != 0)
 	    	    PERR_TYPE(TK_FUNCTOR, 3, TK_ATOM, v2, t2);
 	    	else if (t3 == WTP_INTEGER && v3 < 0)
-	    	    PERR_DOMAIN(TK_FUNCTOR, 3, find_token("not_less_than_zero"), v3, t3);
+	    	    PERR_DOMAIN(TK_FUNCTOR, 3, find_token((UCHAR *)"not_less_than_zero"), v3, t3);
 	    	    
 	    	else
 	    	    FAIL;

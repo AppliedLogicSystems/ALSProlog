@@ -62,7 +62,7 @@ termcmp(PWord v1, int t1, PWord v2, int t2)
 	v1 -= sizeof (PWord);	/* see list as a structure */
 	break;
     case WTP_SYMBOL:
-    	sym1 = TOKNAME(v1);
+    	sym1 = (char *)TOKNAME(v1);
     	break;
     case WTP_UIA:
     	t1 = WTP_SYMBOL;
@@ -89,7 +89,7 @@ termcmp(PWord v1, int t1, PWord v2, int t2)
 	v2 -= sizeof (PWord);
 	break;
     case WTP_SYMBOL:
-    	sym2 = TOKNAME(v2);
+    	sym2 = (char *)TOKNAME(v2);
     	break;
     case WTP_UIA:
     	t2 = WTP_SYMBOL;

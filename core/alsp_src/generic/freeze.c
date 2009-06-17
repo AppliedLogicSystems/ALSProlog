@@ -475,7 +475,7 @@ pbi_walk_cps()
 			else
 				pn = 0;
 			if (pn != 0) 
-				sss = TOKNAME(pn); 
+				sss = (char *)TOKNAME(pn); 
 			else 
 				sss = "!bad";
 		} else {
@@ -545,7 +545,7 @@ disp_heap_item(CurT)
 			FID = MFUNCTOR_TOKID(*STRADDR);
 			if (FID < tok_table_size() )
 			{
-				FSt = toktable[FID].tkname;
+				FSt = (char *)toktable[FID].tkname;
 				fprintf(stdout,"(%x)-fctr=tokid(%d) %s/%d\n",(int)STRADDR,
 								(int)FID,FSt,(int)MFUNCTOR_ARITY(*STRADDR));
 			}

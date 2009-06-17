@@ -1304,7 +1304,7 @@ CASE(W_G_SYM):			/* get_sym Src,Sym  */
 		DISPATCH;
 	    }
 	    if (M_ISUIA(reg1) &&
-		!strcmp(TOKNAME(MSYMBOL(getsym(OPSIZE + REGSIZE))),
+		!strcmp((char *) TOKNAME(MSYMBOL(getsym(OPSIZE + REGSIZE))),
 			(char *) M_FIRSTUIAWORD(MUIA(reg1)))) {
 		P += OPSIZE + REGSIZE + DATASIZE;
 		DISPATCH;
@@ -1326,7 +1326,7 @@ CASE(W_G_UIA):			/* get_uia src, num, fenceduia    */
 		DISPATCH;
 	    }
 	    S++;		/* skip the fence */
-	    if (M_ISSYM(reg1) && !strcmp(TOKNAME(MSYMBOL(reg1)), (char *) S))
+	    if (M_ISSYM(reg1) && !strcmp((char *) TOKNAME(MSYMBOL(reg1)), (char *) S))
 		DISPATCH;
 	    if (M_ISUIA(reg1) && !strcmp((char *) M_FIRSTUIAWORD(MUIA(reg1)), (char *) S))
 		DISPATCH;
@@ -1498,7 +1498,7 @@ CASE(W_U_SYM):			/* unify_sym sym */
 		    DISPATCH;
 		}
 		if (M_ISUIA(reg1) &&
-		    !strcmp(TOKNAME(MSYMBOL(getsym(OPSIZE))),
+		    !strcmp((char *) TOKNAME(MSYMBOL(getsym(OPSIZE))),
 			    (char *) M_FIRSTUIAWORD(MUIA(reg1)))) {
 		    P += OPSIZE + DATASIZE;
 		    DISPATCH;
@@ -2338,7 +2338,7 @@ wam_unify(f1, f2)
 		case MTP_SYM:
 		    if (t2 != MTP_UIA)
 			return (0);
-		    return (!strcmp(TOKNAME(MSYMBOL(f1)),
+		    return (!strcmp((char *) TOKNAME(MSYMBOL(f1)),
 				    (char *) M_FIRSTUIAWORD(MUIA(f2))));
 
 		case MTP_UIA:
@@ -2349,7 +2349,7 @@ wam_unify(f1, f2)
 
 			case MTP_SYM:
 			    return (!strcmp((char *) M_FIRSTUIAWORD(MUIA(f1)),
-					    TOKNAME(MSYMBOL(f2))));
+					    (char *) TOKNAME(MSYMBOL(f2))));
 
 			default:
 			    /* Honest failure here; e.g., 'AB' = 2 */

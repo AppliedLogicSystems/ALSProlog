@@ -1187,7 +1187,7 @@ sio_file_open()
 #elif defined(__GO32__) || defined(OS2)
     if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1)
 #elif defined(UNIX)
-    if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1)
+    if ((SIO_FD(buf) = open((char *)filename, flags|O_BINARY, 0777)) == -1)
 #else
 #error
 #endif
@@ -1463,7 +1463,7 @@ sio_gethostname()
     w_get_An(&v1, &t1, 1);	
 
 	gethostname(myhostname, MAXHOSTNAMELEN);
-    w_mk_uia(&v2, &t2, myhostname);
+    w_mk_uia(&v2, &t2, (UCHAR *)myhostname);
 
     if (w_unify(v1, t1, v2, t2))
 		SUCCEED;
@@ -1752,7 +1752,8 @@ int sio_nsocket_accept(void)
     int /* family_const, */ error = 0;
     double sd;
     struct sockaddr_in cli_addr;
-    int cli_len, newfd;
+	socklen_t cli_len;
+    int newfd;
     char  *sktaddr;
 
     PI_getan(&family, &family_t, 1);
@@ -1994,7 +1995,7 @@ sio_nsocket_open()
     if (mode_t != WTP_INTEGER || buffering_t != WTP_INTEGER || eoln_t != WTP_INTEGER)
 	FAIL;
 
-    if (compute_flags(buf,mode,buffering) < 0)
+    if (compute_flags((char *)buf,mode,buffering) < 0)
 	FAIL;
 
     SIO_EOLNTYPE(buf) = eoln;
@@ -2220,7 +2221,7 @@ sio_socket_open()
     if (t5 != WTP_INTEGER || t6 != WTP_INTEGER || t7 != WTP_INTEGER || t8 != WTP_INTEGER)
 	FAIL;
 
-    if (compute_flags(buf,v5,v6) < 0)
+    if (compute_flags((char *)buf,v5,v6) < 0)
 	FAIL;
 
     SIO_EOLNTYPE(buf) = v7;
@@ -2263,7 +2264,7 @@ sio_socket_open()
 #ifndef MISSING_UNIX_DOMAIN_SOCKETS
 	case AF_UNIX :
 	    sockname_un.sun_family = AF_UNIX;
-	    strcpy(sockname_un.sun_path, (UCHAR *) host_or_path);
+	    strcpy(sockname_un.sun_path, (char *)host_or_path);
 
 	    if (bind(SIO_FD(buf), (struct sockaddr *) &sockname_un,
 		     (int) (sizeof (sockname_un.sun_family)
@@ -2308,16 +2309,16 @@ sio_socket_open()
 
 	    else {
 		if (host_or_path == NULL)
-		    host_or_path = myhostname;
+		    host_or_path = (UCHAR *)myhostname;
 
-		if ( (hp = gethostbyname((UCHAR *) host_or_path)) )
+		if ( (hp = gethostbyname((char *) host_or_path)) )
 		    memmove((UCHAR *) &sockname_in.sin_addr,
 			    (UCHAR *) hp->h_addr,
 			    (size_t) hp->h_length);
 #if defined(DGUX) || (defined(MacOS) && defined(HAVE_GUSI))
 		else if ((sockname_in.sin_addr.s_addr = inet_addr(host_or_path).s_addr)
 #else
-		else if ((sockname_in.sin_addr.s_addr = inet_addr(host_or_path))
+		else if ((sockname_in.sin_addr.s_addr = inet_addr((char *)host_or_path))
 #endif
 				== (unsigned long) INADDR_NONE) {
 		    status = SOCKET_ERROR;
@@ -2345,7 +2346,7 @@ sio_socket_open()
 	    SIO_TYPE(buf) = SIO_TYPE_SOCKET_DGRAM;
 	    if (isserver && domain == AF_INET) {
 		struct sockaddr_in *sa;
-		SIO_SOCKET_ADDRESS(buf) = (long) malloc(sizeof (struct sockaddr_in));
+		SIO_SOCKET_ADDRESS(buf) = malloc(sizeof (struct sockaddr_in));
 		SIO_SOCKET_ADDRESS_LEN(buf) = sizeof (struct sockaddr_in);
 		sa = (struct sockaddr_in *) SIO_SOCKET_ADDRESS(buf);
 		memset(sa, 0, sizeof (struct sockaddr_in *));
@@ -2435,12 +2436,12 @@ sio_socket_open()
     if (t1 == WTP_UNBOUND && domain == AF_INET) {
 	PWord vh;
 	int th;
-	w_mk_uia(&vh,&th,myhostname);
+	w_mk_uia(&vh,&th,(UCHAR *)myhostname);
 	(void) w_unify(v1,t1, vh,th);	/* cannot fail */
     }
 
     if (t2 == WTP_UNBOUND && domain == AF_INET) {
-	int size = sizeof sockname_in;
+	socklen_t size = sizeof sockname_in;
 	if (getsocknamesocket(SIO_FD(buf),
 		        (struct sockaddr *) &sockname_in,
 			&size) == 0) {
@@ -2476,8 +2477,8 @@ delete_stream_name(vsd)
 	w_get_argn(&vd,&td, vns, 3); /* domain name */
 	if (   getstring(&pathname,vn,tn)
 	    && getstring(&domainname,vd,td)
-	    && strcmp(domainname,"unix") == 0 )
-	    unlink(pathname);
+	    && strcmp((char *)domainname,"unix") == 0 )
+	    unlink((char *)pathname);
     }
 #endif /* MISSING_UNIX_DOMAIN_SOCKETS */
 }
@@ -2497,7 +2498,7 @@ accept_connection(vsd, buf, sktaddr)
 {
 		/* Internet socket addresses */
     struct sockaddr_in c_addr;	
-	int c_addr_len;
+	socklen_t c_addr_len;
 
 	c_addr_len = sizeof(c_addr);
     if (SIO_FLAGS(buf) & SIOF_NEEDACCEPT) {
@@ -2569,8 +2570,8 @@ sio_accept_socket_connection()
     if ((buf = get_stream_buffer(v1, t1)) == (UCHAR *) 0)
 		FAIL;
     
-    if (accept_connection(v1, buf, &sktaddr) == 0) {
-    	w_mk_uia(&v3, &t3, sktaddr);
+    if (accept_connection(v1, (char *)buf, &sktaddr) == 0) {
+    	w_mk_uia(&v3, &t3, (UCHAR *)sktaddr);
     	if (w_unify(v2, t2, v3, t3))
 			SUCCEED;
     	else
@@ -3002,7 +3003,7 @@ sio_poll()
 
     SIO_ERRCODE(buf) = SIOE_NORMAL;
 
-    if (stream_is_ready(buf,(long)waitval))
+    if (stream_is_ready((char *)buf,(long)waitval))
 		SUCCEED;
     else
 		FAIL;
@@ -3184,7 +3185,7 @@ write_buf(vsd,buf)
 
 #ifdef HAVE_SOCKET
 	case SIO_TYPE_SOCKET_STREAM:
-	    if (accept_connection(vsd, buf, &sktaddr)) {
+	    if (accept_connection(vsd, (char *)buf, &sktaddr)) {
 		writeflg = SOCKET_ERROR;
 		break;		/* break early */
 	    }
@@ -3223,7 +3224,7 @@ write_buf(vsd,buf)
 #endif /* HAVE_SOCKET */
 
 	case SIO_TYPE_CONSOLE:
-	    if (console_io) writeflg = console_io(SIO_FD(buf), SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
+	    if (console_io) writeflg = console_io(SIO_FD(buf), (char *)SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
 	    else { writeflg = SIO_LPOS(buf); }
 	    break;
 
@@ -3768,12 +3769,12 @@ sio_readbuffer()
 
 #ifdef HAVE_SOCKET
 	case SIO_TYPE_SOCKET_STREAM:
-	    if (accept_connection(v1,buf,&sktaddr) < 0) {
+	    if (accept_connection(v1,(char *)buf,&sktaddr) < 0) {
 		nchars = -1;
 		break;			/* break early */
 	    }
 
-	    if ((SIO_FLAGS(buf) & SIOF_DONTBLOCK) && !stream_is_ready(buf,0)) {
+	    if ((SIO_FLAGS(buf) & SIOF_DONTBLOCK) && !stream_is_ready((char *)buf,0)) {
 		SIO_ERRCODE(buf) = SIOE_NOTREADY;
 		return 0;
 	    }
@@ -3791,7 +3792,7 @@ sio_readbuffer()
 	case SIO_TYPE_SOCKET_DGRAM:
 #if defined(BERKELEY_SOCKETS)
 	    if (SIO_SOCKET_ADDRESS(buf)) {
-		int len = SIO_SOCKET_ADDRESS_LEN(buf);
+		socklen_t len = SIO_SOCKET_ADDRESS_LEN(buf);
 		nchars = recvfromsocket(SIO_FD(buf), buffer,nchars, 0,
 				  (struct sockaddr *) SIO_SOCKET_ADDRESS(buf),
 				  &len);
@@ -3809,7 +3810,7 @@ sio_readbuffer()
 #endif /* HAVE_SOCKET */
 
 	case SIO_TYPE_CONSOLE:
-	    if (console_io) nchars = console_io(SIO_FD(buf), buffer, (size_t)nchars);
+	    if (console_io) nchars = console_io(SIO_FD(buf), (char *)buffer, (size_t)nchars);
 	    else { nchars = 0; }
 	    break;
 	   
@@ -4641,7 +4642,7 @@ quoted_atom(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
 	q = (UCHAR *) M_FIRSTUIAWORD(*vpTokVal);
 	while (*p) {
 	    if (*p == '\\') {
-		if ((nl = scan_eoln(p+1, SIO_EOLNTYPE(buf) & SIOEOLN_READ_MASK))) {
+		if ((nl = scan_eoln((char *)(p+1), SIO_EOLNTYPE(buf) & SIOEOLN_READ_MASK))) {
 		    SIO_LINENUM(buf)++;
 		    p += 1+nl;
 		}
@@ -6153,21 +6154,21 @@ int sio_sprintf_number(void)
 			FAIL;
 
 	    if (is_ieee_nan(dblval))
-			sprintf(buf, "0nan");
+			sprintf((char *)buf, "0nan");
 	    else if (is_ieee_inf(dblval)) {
 			if (dblval < 0)
-				sprintf(buf, "-0inf");
+				sprintf((char *)buf, "-0inf");
 			else
-				sprintf(buf, "0inf");
+				sprintf((char *)buf, "0inf");
 		}
 	    /* for small integral doubles, print with a trailing ".0"
 	       using %.1f, otherwise use %.10g */
 	    else if (floor(dblval) == dblval
 				&& dblval > -10000000000.0
 				&& dblval < 10000000000.0)
-			sprintf(buf, "%.1f", dblval);
+			sprintf((char *)buf, "%.1f", dblval);
 	    else
-			sprintf(buf, "%.10g", dblval);
+			sprintf((char *)buf, "%.10g", dblval);
 	    break;
 #else
 	case WTP_DOUBLE:
@@ -6352,7 +6353,7 @@ sio_nl(void)
 	FAIL;
     }
 
-    eoln_str = get_eoln_str(buf);
+    eoln_str = (UCHAR *)get_eoln_str((UCHAR *)buf);
 
     b = SIO_BUFFER(buf) + SIO_CPOS(buf);
     l = SIO_BUFFER(buf) + SIO_BFSIZE(buf);
@@ -6501,7 +6502,7 @@ sio_position_in_line()
     bufstart = SIO_BUFFER(buf);
     bufend = SIO_BUFFER(buf) + SIO_CPOS(buf);
 
-    for (p = bufend; p >= bufstart && !scan_eoln(p, SIO_EOLNTYPE(buf) & SIOEOLN_READ_MASK); p--) ;
+    for (p = bufend; p >= bufstart && !scan_eoln((char *)p, SIO_EOLNTYPE(buf) & SIOEOLN_READ_MASK); p--) ;
 
     /* p now points to the start of the line */
 
