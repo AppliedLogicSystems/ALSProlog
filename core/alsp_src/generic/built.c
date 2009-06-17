@@ -846,7 +846,7 @@ int pbi_set_interrupt_vector(void)
     else PI_FAIL;
     
     wm_overcode = w_nameentry((PWord) MODULE_BUILTINS,
-    			(PWord) find_token(s), 3)->exec_entry;
+    			(PWord) find_token((UCHAR *)s), 3)->exec_entry;
     PI_SUCCEED;
 }
 

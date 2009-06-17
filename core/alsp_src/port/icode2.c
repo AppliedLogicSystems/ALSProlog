@@ -419,7 +419,7 @@ ic_install_bref(ent, name, arity)
     ntbl_entry *dst;
 
     dst = w_nametable[w_namelookup((PWord) MODULE_BUILTINS,
-				   (PWord) find_token((char *)name),
+				   (PWord) find_token((UCHAR *)name),
 				   (int) arity)];
 
     ic_install_reference(ent->code, (PWord) dst->code);
