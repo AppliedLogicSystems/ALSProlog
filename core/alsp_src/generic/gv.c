@@ -58,7 +58,7 @@ prolog_engine_invariant(&current_engine);
 	 * Initialize the new batch of variables;
 	 */
 
-	wm_trailbase -= GV_SHIFT;
+	wm_trailbase_lvalue -= GV_SHIFT;
 	current_engine.heap_size -= GV_SHIFT;
 	
 	for (i = 0; i < GV_SHIFT - 1; i++) {

@@ -2346,7 +2346,7 @@ sio_socket_open()
 	    SIO_TYPE(buf) = SIO_TYPE_SOCKET_DGRAM;
 	    if (isserver && domain == AF_INET) {
 		struct sockaddr_in *sa;
-		SIO_SOCKET_ADDRESS(buf) = malloc(sizeof (struct sockaddr_in));
+		SIO_SOCKET_ADDRESS(buf) = (long) malloc(sizeof (struct sockaddr_in));
 		SIO_SOCKET_ADDRESS_LEN(buf) = sizeof (struct sockaddr_in);
 		sa = (struct sockaddr_in *) SIO_SOCKET_ADDRESS(buf);
 		memset(sa, 0, sizeof (struct sockaddr_in *));

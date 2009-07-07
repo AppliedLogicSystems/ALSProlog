@@ -158,12 +158,12 @@ als_mem_init(file,offset)
 	else
 	    fatal_error(FE_ALS_MEM_INIT,0);
 
-	als_mem = alloc_big_block(AM_BLOCKSIZE, FE_ALS_MEM_INIT);
+	als_mem = (void *)alloc_big_block(AM_BLOCKSIZE, FE_ALS_MEM_INIT);
 
 	amheader.nblocks = 1;
 	amheader.totsize = AM_BLOCKSIZE;
 	amheader.nglobals = 0;
-	amheader.blocks[0].start = als_mem;
+	amheader.blocks[0].start = (void *)als_mem;
 	amheader.blocks[0].asize = AM_BLOCKSIZE;
 
 	amheader.freelist = (long *) 
