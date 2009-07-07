@@ -120,6 +120,7 @@ union PCellUnion;
 union PCellUnion {
 	long sint;
 	unsigned long uint;
+	PWord *pptr;
 	union PCellUnion *ptr;
 };
 
@@ -131,6 +132,7 @@ struct stack_frame_struct;
 
 typedef union {
 	PCell *ptr;
+	PWord *pptr;
 	struct choice_point_struct *cp;
 	struct stack_frame_struct *sf;
 	Code *code;
@@ -225,7 +227,7 @@ void free_prolog_memory(prolog_engine *pe);
 void realloc_prolog_memory(prolog_engine *pe, size_t new_stack_size, size_t new_heap_size);
 
 /* Logic Compatibility macros */
-#define als_mem ((long *)current_engine.db.als_mem)
+#define als_mem current_engine.db.als_mem
 
 #define builtins_initialized (current_engine.db.builtins_initialized)
 #define pegvnum (current_engine.db.pegvnum)
@@ -280,20 +282,22 @@ void realloc_prolog_memory(prolog_engine *pe, size_t new_stack_size, size_t new_
 /* Control Compatibility macros */
 
 #define wm_heapbase ((PWord *)current_engine.heap_base)
+#define wm_heapbase_lvalue current_engine.heap_base
 #define wm_stackbot ((PWord *)current_engine.stack_max)
 #define wm_trailbase ((PWord *)current_engine.trail_base)
+#define wm_trailbase_lvalue current_engine.trail_base
 
 #define wm_gvbase	((PWord *)current_engine.globals_base)
-#define wm_gvfreelist ((PWord *)current_engine.globals_free_list.ptr)
+#define wm_gvfreelist current_engine.globals_free_list.pptr
 #define gv_setcnt (current_engine.globals_set_count)
 
-#define wm_B	((PWord *)current_engine.reg.B.ptr)
-#define wm_HB	((PWord *)current_engine.reg.HB.ptr)
-#define wm_SPB	((PWord *)current_engine.reg.SPB.ptr)
-#define wm_E	((PWord *)current_engine.reg.E.ptr)
-#define wm_TR	((PWord *)current_engine.reg.TR.ptr)
-#define wm_H	((PWord *)current_engine.reg.H.ptr)
-#define wm_SP	((PWord *)current_engine.reg.SP.ptr)
+#define wm_B	current_engine.reg.B.pptr
+#define wm_HB	current_engine.reg.HB.pptr
+#define wm_SPB	current_engine.reg.SPB.pptr
+#define wm_E	current_engine.reg.E.pptr
+#define wm_TR	current_engine.reg.TR.pptr
+#define wm_H	current_engine.reg.H.pptr
+#define wm_SP	current_engine.reg.SP.pptr
 #define wm_FAIL ((PWord *)current_engine.reg.rFAIL.code)
 
 #endif

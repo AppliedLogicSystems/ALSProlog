@@ -185,7 +185,7 @@ gc()
      | These will be unbiased on exit from gc.
      *---------------------------------------------------------------*/
 
-    wm_heapbase -= BIAS;
+    wm_heapbase_lvalue -= BIAS;
     wm_H -= BIAS;
     wm_E -= BIAS;
 
@@ -642,7 +642,7 @@ chpt_after_trail_entry:	/* entry point into for-loop */
      *-----------------------------------------------------------------*/
 
     wm_E += BIAS;
-    wm_heapbase += BIAS;
+    wm_heapbase_lvalue += BIAS;
 
 #ifdef DEBUGSYS /*--------------------------------------------------*/
 	if (debug_system[GCINFO]) {

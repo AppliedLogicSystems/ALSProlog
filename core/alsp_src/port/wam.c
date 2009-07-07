@@ -1205,7 +1205,7 @@ CASE(W_G_VALUE):		/* get_value arg1, arg2 */
 	    reg1 = PWPTR(*getreg(OPSIZE));
 	    S = PWPTR(*getreg(OPSIZE + REGSIZE));
 	    P += OPSIZE + 2 * REGSIZE;
-	    UNIFY((PWord*)reg1, (PWord*)S);
+	    UNIFY(reg1, S);
 
 CASE(W_G_LIST_SP):		/* get_list Sdisp */
 	    reg1 = PWPTR(mr_SP[getpwrd(OPSIZE)]);
