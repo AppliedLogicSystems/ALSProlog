@@ -122,22 +122,22 @@ static void print_obj(const wam_task_state *s, PWord *c)
 {
 	switch (MTP_TAG(*c)) {
 	case MTP_REF:
-		if ((PWord)c == *c) printf("unbound var named %d", get_heap_loc_name(s, c));
+		if ((PWord)c == *c) printf("unbound var named %ld", get_heap_loc_name(s, c));
 		else {
-			printf("var named %d, points to ", get_heap_loc_name(s, c));
+			printf("var named %ld, points to ", get_heap_loc_name(s, c));
 			print_obj(s, (PWord *)PWMEM(c));
 		}
 		break;
 	case MTP_STRUCT:
-		printf("struct named %d at %X", get_heap_loc_name(s, MSTRUCTADDR(*c)), MSTRUCTADDR(*c));
+		printf("struct named %ld at %X", get_heap_loc_name(s, MSTRUCTADDR(*c)), MSTRUCTADDR(*c));
 		break;
 	case MTP_LIST:
-		printf("list named %d at %X", get_heap_loc_name(s, MLISTADDR(*c)), MLISTADDR(*c));
+		printf("list named %ld at %X", get_heap_loc_name(s, MLISTADDR(*c)), MLISTADDR(*c));
 		break;
 	case MTP_CONST:
 		switch (MTP_CONSTTAG(*c)) {
 		case MTP_INT:
-			printf("integer %d", MINTEGER(*c));
+			printf("integer %ld", MINTEGER(*c));
 			break;
 		case MTP_SYM:
 			printf("symbol");
@@ -146,7 +146,7 @@ static void print_obj(const wam_task_state *s, PWord *c)
 			printf("fence");
 			break;
 		case MTP_UIA:
-			printf("UIA named %d at %X",
+			printf("UIA named %ld at %X",
 					get_heap_loc_name(s, (PWord *)(MUIA(*c) + (size_t)s->heap_and_stack_base)),
 					(PWord *)(MUIA(*c) + (size_t)s->heap_and_stack_base));
 			break;
