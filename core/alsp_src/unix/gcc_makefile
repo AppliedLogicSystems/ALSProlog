@@ -1,4 +1,5 @@
-CC=gcc
+# For the moment, generate 32-bit code. ALS Prolog is not yet 64-bit compatible.
+CC=gcc -m32
 # Unused warning options and why:
 
 #-Wshadow - We use shadow variables - should be fixed someday.
