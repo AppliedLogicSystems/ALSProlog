@@ -121,6 +121,7 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	    #include <GUSI.h>
 	#elif defined(MSWin32)
 	    #include <winsock.h>
+            #include <ws2tcpip.h>
 	    #undef AF_UNIX
 	    
 	#else
