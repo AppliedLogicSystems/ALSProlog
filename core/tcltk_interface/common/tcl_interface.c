@@ -270,7 +270,7 @@ Tcl_ALS_Prolog_Call(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_O
 		vars = AP_NullList(w);
 	} else {
 		int i, a, argc, option;
-		AP_Obj arg;
+		AP_Obj arg = AP_UNBOUND_OBJ;
 		
 		enum {NUMBER, ATOM, LIST, VAR};
 		const char *callOptions[] = {"-number", "-atom", "-list", "-var", NULL};
@@ -279,7 +279,7 @@ Tcl_ALS_Prolog_Call(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_O
 		call = AP_NewStructure(w, functor, argc);
 		
 		for (a = 0, i = 4, vars = AP_NullList(w); a < argc; a++, i+=2) {
-			if (Tcl_GetIndexFromObj(NULL, objv[i], (char **)callOptions, (char *)"", TCL_EXACT, &option) == TCL_OK) {
+			if (Tcl_GetIndexFromObj(NULL, objv[i], callOptions, (char *)"", TCL_EXACT, &option) == TCL_OK) {
 				switch (option) {
 				case NUMBER:
 					if (Tcl_ConvertToType(interp, objv[i+1], tcl_integer_type) == TCL_OK
@@ -351,7 +351,7 @@ Tcl_ALS_Prolog_ObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl
 		return TCL_ERROR;
 	}
 	
-	if (Tcl_GetIndexFromObj(interp, objv[1], (char **)prologOptions, (char *)"option", TCL_EXACT, &option)
+	if (Tcl_GetIndexFromObj(interp, objv[1], prologOptions, (char *)"option", TCL_EXACT, &option)
 		!= TCL_OK) {
 		return TCL_ERROR;
 	}
@@ -386,7 +386,7 @@ Tcl_DoOneEventCmd(ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const 
 		return TCL_ERROR;
 	}
 	
-    if (Tcl_GetIndexFromObj(interp, objv[1], (char **)eventOptions, (char *)"option", 0, &index)
+    if (Tcl_GetIndexFromObj(interp, objv[1], eventOptions, (char *)"option", 0, &index)
 	    != TCL_OK) {
     	return TCL_ERROR;
     }
@@ -615,7 +615,7 @@ static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 		elements[1] = "lib";
 #endif
 		elements[2] = "tk" TK_VERSION;
-		Tcl_JoinPath(3, (char **)elements, &path);
+		Tcl_JoinPath(3, elements, &path);
 		Tcl_SetVar(interp, (char *)"tk_library", path.string, TCL_GLOBAL_ONLY);
 		Tcl_DStringFree(&path);
 	}
