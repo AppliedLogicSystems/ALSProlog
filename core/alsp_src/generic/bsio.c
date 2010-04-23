@@ -2045,7 +2045,8 @@ static AP_Result GetHostError(AP_World *w, int error_code, AP_Obj object)
 static AP_Result UnifyEntity(AP_World *w, struct hostent *entity,
 	AP_Obj official_name, AP_Obj alias_list, AP_Obj address_list)
 {
-	AP_Obj new_alias, new_addr_list, cons, oldcons;
+	AP_Obj new_alias = AP_UNBOUND_OBJ, new_addr_list = AP_UNBOUND_OBJ,
+	  cons, oldcons;
 	int first;
 	char **a;
 	struct in_addr **n;
@@ -3225,8 +3226,7 @@ write_buf(vsd,buf)
 #endif /* HAVE_SOCKET */
 
 	case SIO_TYPE_CONSOLE:
-	    if (console_io) writeflg = console_io(SIO_FD(buf), (char *)SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
-	    else { writeflg = SIO_LPOS(buf); }
+	    writeflg = console_io(SIO_FD(buf), (char *)SIO_BUFFER(buf), (size_t)SIO_LPOS(buf));
 	    break;
 
 	default:
@@ -3811,8 +3811,7 @@ sio_readbuffer()
 #endif /* HAVE_SOCKET */
 
 	case SIO_TYPE_CONSOLE:
-	    if (console_io) nchars = console_io(SIO_FD(buf), (char *)buffer, (size_t)nchars);
-	    else { nchars = 0; }
+	    nchars = console_io(SIO_FD(buf), (char *)buffer, (size_t)nchars);
 	    break;
 	   
 	default:
