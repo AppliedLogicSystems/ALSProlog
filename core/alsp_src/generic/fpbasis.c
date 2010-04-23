@@ -11,13 +11,6 @@
 #include <fp.h>
 #elif defined(MSWin32)
 #include <math.h>
-#ifdef __GNUC__
-/* Define missing prototypes */
-int _isnan(double);
-int _finite(double);
-#define isnan _isnan
-#define isinf(x) (!_finite(x))
-#endif
 #endif
 
 int is_ieee_nan PARAMS( (double) );

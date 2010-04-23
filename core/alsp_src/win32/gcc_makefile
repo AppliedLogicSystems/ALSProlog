@@ -1,4 +1,5 @@
-CC=gcc -mno-cygwin
+# For the moment, generate 32-bit code. ALS Prolog is not yet 64-bit compatible.
+CC=gcc -m32
 # Unused warning options and why:
 
 #-Wshadow - We use shadow variables - should be fixed someday.
@@ -7,9 +8,11 @@ CC=gcc -mno-cygwin
 #-Wconversion - We always have prototypes, so this is not a concern.
 #-Waggregate-return - We use aggregate types.
 #-Wredundant-decls - Most redundant declarations are in system header files,
-#		     but there is some in out code, too. Fix someday.
+#		     but there is some in our code, too. Fix someday.
 # -Wstrict-prototypes - Complains about arg-less function pointer like:
 #                       int (*func)(), which I think are legal.
 
-CFLAGS += -O -MMD -Wall -Wmissing-prototypes -Wwrite-strings \
-		 -Wnested-externs -Wpointer-arith
+# -Wno-trigraphs added to avoid warnings for Apple '????'-style constants.
+
+CFLAGS += -O -MMD -Wall -Werror -Wmissing-prototypes -Wwrite-strings \
+		 -Wnested-externs -Wpointer-arith -Wno-trigraphs
