@@ -2683,10 +2683,11 @@ sio_rexec()
 
 	if (hostname == NULL) {
 	    gethostname(myhostname,MAXHOSTNAMELEN);
-	    hostname = myhostname;
+	    hostname = (UCHAR *)myhostname;
 	}
 
-	if ((rfd = rexec((char **) &hostname, se->s_port, username, password, command,
+	if ((rfd = rexec((char **) &hostname, se->s_port, (char *)
+username, (char *)password, (char *)command,
 			 (ebuf ? &efd : NULL))) < 0) {
 	    perror("rexec");
 	    FAIL;
