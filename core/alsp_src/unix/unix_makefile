@@ -21,9 +21,19 @@ STATIC_OBJECTS = $(STATIC_SOURCE:.c=.o)
 SHARED_SOURCE = unix_shared.c
 SHARED_OBJECTS = $(SHARED_SOURCE:.c=.o)
 
+# The ALS Build Support defines allow the use of controlled/pre-built support
+# libraries, rather then the systems "current libraries of the day"
+
+# Use controlled/pre-built support libraries
 #ALS_BUILD_SUPPORT = /home/als_build_support/unix
-ALS_BUILD_SUPPORT = ../..//als_build_support/unix
-ALS_BUILD_SUPPORT_INCLUDES = -isystem $(ALS_BUILD_SUPPORT)/include
+#ALS_BUILD_SUPPORT = ../../als_build_support/unix
+#ALS_BUILD_SUPPORT_INCLUDES = -isystem $(ALS_BUILD_SUPPORT)/include
+#ALS_BUILD_SUPPORT_LIBDIR = -L$(ALS_BUILD_SUPPORT)/$(SUBOS)/lib
+
+# Use system libraries
+ALS_BUILD_SUPPORT = 
+ALS_BUILD_SUPPORT_INCLUDES =
+ALS_BUILD_SUPPORT_LIBDIR =  
 
 ALSDEV_OS_SOURCE = unix_alsdev.c
 
