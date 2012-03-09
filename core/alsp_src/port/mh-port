@@ -1,9 +1,0 @@
-#
-# mh-port: Makefile fragment describing non-generic files for ALS Prolog
-#
-# Copyright (c) 1994 Applied Logic Systems, Inc.
-#
-
-afiles_c =	disassem.c icode1.c icode2.c wam.c 
-afiles_o =	$(afiles_c:.c=.o)
-afiles_h =	aconfig.h labels.h mtypes.h wamreg.h machinst.h
