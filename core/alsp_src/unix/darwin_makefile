@@ -3,7 +3,12 @@ OS_AR = ar ru
 OS_RANLIB = ranlib
 CCOMP=gcc
 OS_SL_EXT=dylib
-OS_SL_LINK=$(CC) -dynamiclib
+# Mac OS 10.7 Lion (and beyond) implements ASLR (Address Space Layout Randomization) by default.
+# ASLR conflicts with ALS Prolog's GCC-based Threaded interpreter, which requires fixed addresses
+# for intruction dispatch. The -Wl,-no_pie flag (PIE is Position Independent Executable),
+# suppresses ASLR.
+OS_SL_LINK=$(CC) -dynamiclib -Wl,-no_pie
+OS_LIBS= -Wl,-no_pie
 #CFLAGS+= -rdynamic
 #OS_LIBS = -lm -ldl -lcrypt
 #OS_LIBS = -lcompat
