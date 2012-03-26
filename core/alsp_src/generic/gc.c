@@ -495,7 +495,8 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 			 | encounters the ordinary trail entry part of a pair first; then
 			 | the copied value part lies below that.
 			 *---------------------------------------------------------------*/
-		while ((ap = (long *) *--b) < b) {		/* while b not the top word in next cp */
+		for (ap = (long *) *--b; ap < b ; ap = (long *) *--b) {		/* while b not the top word in next cp */
+		/* was: while ((ap = ((long *) *--b)) < b) see: http://c-faq.com/expr/evalorder2.html */
 	    	if (heap_low <= ap && ap <= heap_high) {
 				if (MARKED(ap)) {
 		    		*--tr = (long) ap;			/* copy the trail entry */
@@ -512,12 +513,13 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 				b -= 1;
 		    	*--tr = (long) (long *) *b;		/* copy the trail value entry */
 	    	}
-		}	/* while((ap = ...)) */
+		}	/* for(ap = ...) */
 
 
 #else /* no-TRAILVALS */
 
-		while ((ap = (long *) *--b) < b) {		/* while b not the top word in next cp */
+		for (ap = (long *) *--b; ap < b ; ap = (long *) *--b) {		/* while b not the top word in next cp */
+		/* was: while ((ap = ((long *) *--b)) < b) see: http://c-faq.com/expr/evalorder2.html */
 	    	if (heap_low <= ap && ap <= heap_high) {
 				if (MARKED(ap)) {
 		    		*--tr = (long) ap;			/* copy the trail entry */
@@ -527,7 +529,7 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 	    	else {								/* else in compacted heap or on stack */
 				*--tr = (long) ap;				/* copy the trail entry */
 	    	}
-		}	/* while((ap = ...)) */
+		}	/* for(ap = ...) */
 
 #endif    /* TRAILVALS */
 
