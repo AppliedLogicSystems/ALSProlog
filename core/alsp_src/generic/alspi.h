@@ -14,6 +14,7 @@
 #ifndef _ALSPI_H_INCLUDED_
 #define _ALSPI_H_INCLUDED_
 
+#include <limits.h>
 #include <stddef.h>
 #include <stdarg.h>
 
@@ -25,8 +26,8 @@
 extern "C" {
 #endif
 
-extern char library_dir[1024];
-extern char executable_path[1024];
+extern char library_dir[PATH_MAX];
+extern char executable_path[PATH_MAX];
 
 
 /*
