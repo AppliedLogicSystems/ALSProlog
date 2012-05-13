@@ -83,11 +83,11 @@ static int pckgloaded = 0;
  *------------------------------------------------------------------------*/
 long  saved_state_image_offset = 0;
 
-char library_path[IMAGEDIR_MAX];
-char library_dir[IMAGEDIR_MAX];
-char executable_path[IMAGEDIR_MAX];
+char library_path[PATH_MAX];
+char library_dir[PATH_MAX];
+char executable_path[PATH_MAX];
 
-static char alsdir[IMAGEDIR_MAX];	/* directory where ALS system resides */
+static char alsdir[PATH_MAX];	/* directory where ALS system resides */
 
 #ifdef MSWin32
 #if defined (WIN32)

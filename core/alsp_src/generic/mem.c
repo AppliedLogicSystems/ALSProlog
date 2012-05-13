@@ -389,7 +389,7 @@ static DWORD ms_pecoff_end(HANDLE image_file)
 #ifdef EXTERNAL_STATE
 long ss_image_offset(const char *imagepath)
 {
-  char statepath[IMAGEDIR_MAX];
+  char statepath[PATH_MAX];
 
   strcpy(statepath, imagepath);
   strcat(statepath, ".pst");
@@ -716,7 +716,7 @@ static unsigned long image_end(int image_file)
 #ifdef EXTERNAL_STATE
 long ss_image_offset(const char *imagepath)
 {
-  char statepath[IMAGEDIR_MAX];
+  char statepath[PATH_MAX];
 
   strcpy(statepath, imagepath);
   strcat(statepath, ".pst");
@@ -921,7 +921,7 @@ int ss_attach_state_to_file(const char *image_name)
 int
 ss_save_state(const char *filename, long offset)
 {
-  char statename[IMAGEDIR_MAX];
+  char statename[PATH_MAX];
   strcpy(statename, filename);
   strcat(statename, ".pst");
   os_store_db(&current_engine.db, statename, 0);
@@ -1032,7 +1032,7 @@ ss_err:
 static void
 ss_restore_state(const char *filename,long offset)
 {
-  char statename[IMAGEDIR_MAX];
+  char statename[PATH_MAX];
   strcpy(statename, filename);
   strcat(statename, ".pst");
   os_load_db(&current_engine.db, statename, 0);

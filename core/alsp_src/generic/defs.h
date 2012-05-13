@@ -188,6 +188,7 @@
 #endif /* HAVE_LIBC_H */
 
 #ifdef PURE_ANSI
+#include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -197,6 +198,7 @@
 #define HAVE_STRTOK
 #define HAVE_STRSPN
 #else
+#include <limits.h>
 #include <stdlib.h>
 
 
@@ -417,10 +419,9 @@ extern	int	MPW_Tool;
 extern	void	als_exit	PARAMS(( int ));
 extern	void	heap_overflow	PARAMS(( void ));
 
-#define IMAGEDIR_MAX	1024
-extern char library_path[IMAGEDIR_MAX];
-extern char library_dir[IMAGEDIR_MAX];
-extern char executable_path[IMAGEDIR_MAX];
+extern char library_path[PATH_MAX];
+extern char library_dir[PATH_MAX];
+extern char executable_path[PATH_MAX];
 
 void	locate_library_executable(int argc, char *argv[]);
 
