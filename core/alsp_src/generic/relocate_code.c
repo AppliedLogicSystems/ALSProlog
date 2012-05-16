@@ -180,19 +180,19 @@ thread_byte_convert_clause(Code *addr, int n, prolog_database *db, dirtype direc
 static int
 relocate_instr(enum AbstractMachineOps instr,Code *ip,prolog_database *db, block_info old_blocks[])
 {
-    long  i, ilength, need_comma;
+    long  i, ilength /*, need_comma*/;
 	ilength = 1;
 
 	/*printf("%-16s",ic_array[instr].instr_name); */
 	/*fflush(stdout);*/
 
-#define COMMA if (need_comma++) printf(",\t")
+/* #define COMMA if (need_comma++) printf(",\t") */
 
 #ifdef Threaded
 	*ip = wam_instrs[*ip];
 #endif
 
-	for (i = 0, need_comma = 0; i < 4; i++)
+	for (i = 0 /*, need_comma = 0 */; i < 4; i++)
 	    switch (ic_array[instr].arg[i]) {
 		case U:	/* Unused */
 		    break;

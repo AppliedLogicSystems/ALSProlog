@@ -158,15 +158,19 @@ classify_vars(t)
     int   ptb[VTBLSIZE];
     register int i, j;		/* indices */
     register int temp;		/* swapping temporary   */
-    int   nv,			/* number of variables  */
-          ng,			/* number of goals      */
-          fgn,			/* first goal number (won't be 1 when ! comes
+    int   nv;			/* number of variables  */
+#ifndef SlowCut
+    int   ng;			/* number of goals      */
+#endif
+    int   fgn,			/* first goal number (won't be 1 when ! comes
 				 * first)
 				 */
           npv;			/* number of permanent variables */
 
     nv = RULE_NVARS(t);		/* get number of variables */
+#ifndef SlowCut
     ng = RULE_NGOALS(t);	/* and the number of goals */
+#endif
 
     init_vtbl(nv);		/* initialize the variable table */
 
