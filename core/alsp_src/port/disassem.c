@@ -76,8 +76,8 @@ list_asm(addr, n)
     long  ilength;
     enum AbstractMachineOps instr;
 
-	printf("startaddr=%x  stopaddr=%x  codelen=%d\n",
-		(unsigned int)addr,(unsigned int)stopaddr,n),
+	printf("startaddr=%p  stopaddr=%p  codelen=%d\n",
+		addr,stopaddr,n),
 	fflush(stdout);
 
     for (ip = addr; ip < stopaddr; ) {
@@ -85,13 +85,13 @@ list_asm(addr, n)
 	instr = decode_instr(*ip);
 	if ((size_t)instr > ICNUM) 
 	{
-		printf("[%03d]%x: BAD INSTRUCTION: Content=%08o\n",
-			(int)(ip-addr), (unsigned int)ip, (unsigned int)*ip);
+		printf("[%03d]%p: BAD INSTRUCTION: Content=%08o\n",
+			(int)(ip-addr), ip, (unsigned int)*ip);
 		break;
 	}
 	else
 	{
-		printf("[%03d]%x:",(int)(ip-addr),(unsigned int)ip); 
+		printf("[%03d]%p:",(int)(ip-addr),ip); 
 		ilength = display_instr(instr,ip);
 		ip += ilength;
 		printf("\n");
