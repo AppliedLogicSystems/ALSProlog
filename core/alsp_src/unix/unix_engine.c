@@ -20,10 +20,12 @@
 #define _SC_PAGE_SIZE _SC_PAGESIZE
 #endif
 
+#ifndef PAGE_SIZE
 #if defined(UNIX_SUNOS) || defined(UNIX_DARWIN)
 #define PAGE_SIZE (getpagesize())
 #else
 #define PAGE_SIZE (sysconf(_SC_PAGE_SIZE))
+#endif
 #endif
 
 #ifndef MAP_ANONYMOUS
