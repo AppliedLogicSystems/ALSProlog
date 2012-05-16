@@ -377,10 +377,10 @@ int
 update_chpt_slots(hval)
 	PWord hval;
 {
-  PWord *CurP, *Stop;
+  PWord *CurP;
 
 	CurP = (PWord *) wm_B;
-	Stop = (PWord *)wm_trailbase;
+// unused:	Stop = (PWord *)wm_trailbase;
 
 		/* see chpt.h for choice-point macros */
 	while (CurP != 0) {

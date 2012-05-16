@@ -193,7 +193,7 @@ next_module(n, m, mt, u, ut)
     int  *ut;			/* use list type */
 {
     PWord l, ll;		/* temporary lists */
-    int   lt, llt;		/* temporary list types */
+    int   llt;			/* temporary list types */
     int   i;
 
     n++;			/* next module */
@@ -217,7 +217,6 @@ next_module(n, m, mt, u, ut)
 	else {
 	    w_mk_list(u, ut);
 	    l = *u;
-	    lt = *ut;
 	    w_install_car(l, use_table[i].modid, WTP_SYMBOL);
 	    i = use_table[i].nextuse;
 
@@ -227,7 +226,6 @@ next_module(n, m, mt, u, ut)
 		w_install_car(ll, use_table[i].modid, WTP_SYMBOL);
 
 		l = ll;
-		lt = llt;
 		i = use_table[i].nextuse;
 	    }
 

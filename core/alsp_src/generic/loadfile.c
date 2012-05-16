@@ -418,8 +418,6 @@ obp_close()
 static int
 mem_load(unsigned char *startrp)
 {
-    char  cbuf[CBUFSIZ];	/* character buffer */
-    char *cbp;
     mod_header *headerp;
     long  i, j;
     long *tokmap;
@@ -468,7 +466,6 @@ mem_load(unsigned char *startrp)
     i = headerp->icode_size;
 
     while (i--) {
-	cbp = cbuf;
 	opcode = *rp++;
 	opcode = char_to_int(opcode);
 	format = format_tab[(opcode - (LAST_IC))];

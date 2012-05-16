@@ -4698,7 +4698,7 @@ quoted_string(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
     UCHAR *pmem;
     PWord v1 = 0; 		/* = 0 to appease -Wall */
     PWord v2;
-    int   t1, t2;
+    int   t2;
     int ccount = 0, nl;
 
     p = *pp + 1;		/* advance over initial quote */
@@ -4763,7 +4763,6 @@ quoted_string(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
 	    *tpTokVal = t2;
 	}
 	v1 = v2;
-	t1 = t2;
 	w_install_car(v1, c, WTP_INTEGER);
 	ccount++;
     }
