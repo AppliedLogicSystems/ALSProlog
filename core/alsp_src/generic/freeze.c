@@ -456,8 +456,8 @@ pbi_walk_cps()
 
 	CurP = (PWord *) wm_B;
 	Stop = (PWord *)wm_trailbase;
-	printf("wm_TR=%x  Init CurP (=B) =%x  wm_TRbase=%x\n",
-						(int)wm_TR, (int)CurP, (int)Stop);
+	printf("wm_TR=%p  Init CurP (=B) =%p  wm_TRbase=%p\n",
+						wm_TR, CurP, Stop);
 
 		/* see chpt.h for choice-point macros */
 	while (CurP != 0) {
@@ -483,20 +483,20 @@ pbi_walk_cps()
 			pna = 0;
 			sss = "!bad"; }
 
-		printf("curP=%x  prevB=%x  spb=%x  hb=%x  nxtc= %x [%x - %d - %x/%x] %s\n",
-				(int)CurP, (int)chpt_B(CurP), (int)chpt_SPB(CurP),
-				(int)chpt_HB(CurP), 
-				(int)NXTC,
-				(int)PP,
+		printf("curP=%p  prevB=%p  spb=%p  hb=%p  nxtc= %p [%p - %d - %p/%#lx] %s\n",
+				CurP, chpt_B(CurP), chpt_SPB(CurP),
+				chpt_HB(CurP), 
+				NXTC,
+				PP,
 				PID,
-				(int)pna,
-				(int)pn,
+				pna,
+				pn,
 				sss
 				);
 	} else
-		printf("curP=%x  prevB=%x  spb=%x  hb=%x  nxtc= 0\n",
-				(int)CurP, (int)chpt_B(CurP), (int)chpt_SPB(CurP),
-				(int)chpt_HB(CurP)
+		printf("curP=%p  prevB=%p  spb=%p  hb=%p  nxtc= 0\n",
+				CurP, chpt_B(CurP), chpt_SPB(CurP),
+				chpt_HB(CurP)
 				);
 
 	CurP = (PWord *)chpt_B(CurP);
@@ -510,9 +510,9 @@ pbi_walk_cps()
 int
 pbi_cptx()
 {
-	printf("Tr_b= %x  B= %x  TR= %x  H= %x  HB= %x  H_b= %x\n",
-			(int)wm_trailbase,(int)wm_B,(int)wm_TR,
-			(int)wm_H,(int)wm_HB,(int)wm_heapbase);
+	printf("Tr_b= %p  B= %p  TR= %p  H= %p  HB= %p  H_b= %p\n",
+			wm_trailbase,wm_B,wm_TR,
+			wm_H,wm_HB,wm_heapbase);
 	SUCCEED;
 }
 
@@ -546,7 +546,7 @@ disp_heap_item(CurT)
 			if (FID < tok_table_size() )
 			{
 				FSt = (char *)toktable[FID].tkname;
-				fprintf(stdout,"(%x)-fctr=tokid(%d) %s/%d\n",(int)STRADDR,
+				fprintf(stdout,"(%p)-fctr=tokid(%d) %s/%d\n",STRADDR,
 								(int)FID,FSt,(int)MFUNCTOR_ARITY(*STRADDR));
 			}
 			else
@@ -668,7 +668,7 @@ disp_heap()
 	else
 		stop = v2;
 
-printf("Heap display: %x --> %x\n",(int)start,(int)stop);
+printf("Heap display: %x --> %x\n",start,stop);
 
 
 	for (CurA = (PWord *)start; CurA >= (PWord *)stop; CurA -= 1)
