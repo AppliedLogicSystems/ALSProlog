@@ -217,13 +217,11 @@ pbi_tmpnam()
 {
     PWord v1, vtn;
     int t1, ttn;
-    char *s;
+    char s[PATH_MAX] = "/tmp/tmp.XXXXXXXX";
 
     w_get_An(&v1, &t1, 1);
-    s = tmpnam(NULL);
+    mktemp(s);
     w_mk_uia(&vtn, &ttn, (UCHAR *)s);
-
-    free(s);
 
     if (w_unify(v1, t1, vtn, ttn))
 	SUCCEED;
