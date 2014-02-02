@@ -2351,7 +2351,7 @@ sio_socket_open()
 		SIO_SOCKET_ADDRESS(buf) = (long) malloc(sizeof (struct sockaddr_in));
 		SIO_SOCKET_ADDRESS_LEN(buf) = sizeof (struct sockaddr_in);
 		sa = (struct sockaddr_in *) SIO_SOCKET_ADDRESS(buf);
-		memset(sa, 0, sizeof (struct sockaddr_in *));
+		memset(sa, 0, sizeof (struct sockaddr_in));
 		sa->sin_family = AF_INET;
 		sa->sin_addr.s_addr = INADDR_ANY;
 		/* any initial writes will go to the discard service (port 9) */
