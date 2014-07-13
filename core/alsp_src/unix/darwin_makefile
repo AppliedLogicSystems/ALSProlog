@@ -1,7 +1,7 @@
 CPPFLAGS += -DUNIX_DARWIN
 OS_AR = ar ru
 OS_RANLIB = ranlib
-CCOMP=gcc
+CCOMP=clang
 OS_SL_EXT=dylib
 # Mac OS 10.7 Lion (and beyond) implements ASLR (Address Space Layout Randomization) by default.
 # ASLR conflicts with ALS Prolog's GCC-based Threaded interpreter, which requires fixed addresses
