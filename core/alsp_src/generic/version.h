@@ -5,7 +5,14 @@
  *          Version number - Thu Apr 4 09:28:36 EST 1996
  *===============================================================*/
 
-#define VERSION_STRING "3.1.24"
+#define VERSION_STRING_BASE "3.1.24"
+#define _xstr(s) _str(s)
+#define _str(s) #s
+#ifdef REVISION
+#define VERSION_STRING VERSION_STRING_BASE " (" _xstr(REVISION) ")"
+#else
+#define VERSION_STRING VERSION_STRING_BASE
+#endif
 #define VERSION_MAJOR 3
 #define VERSION_MINOR 1
 #define VERSION_PATCH 24
