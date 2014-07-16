@@ -13,7 +13,9 @@ ifndef CCOMP
 CCOMP=gcc
 endif
 
-CPPFLAGS = -DREVISION=$(REV) $(BUILD_FLAGS) \
+# Add -DREVISION=$(REV) to add SVN revision number
+
+CPPFLAGS = $(BUILD_FLAGS) \
 	-I $(SOURCE_DIR)/$(PROC) \
 	-I $(SOURCE_DIR)/$(OS) \
 	-I $(SOURCE_DIR)/generic \
