@@ -85,7 +85,6 @@ done
 #cp -p $MAN/$WELCOME "$DISTDIR/README"
 #cp -p $MAN/copying.als "$DISTDIR/copying-als"
 cp "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
-cp "$ALS_PROLOG/LICENSE.md" "$DISTDIR/LICENSE.md"
 cp -p $MAN/welcome_standard.txt" "$DISTDIR/README.txt"
 cp -p $MAN/welcome_standard.md" "$DISTDIR/README.md"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
