@@ -76,8 +76,7 @@ path_to(link_exs_dir, 'F', [apache,als_embed]).
 /*--------------------------------------------------------------------------------
  |	list of readme files to grab from ~als_dist/readme.files
  *-------------------------------------------------------------------------------*/
-%%readme_files(['readme.top', 'copying.als', 'install.*']).
-readme_files(['readme.top', 'copying.als', 'install.frame', 'install.ps', 'install.txt']).
+readme_files(['readme.top', 'install.frame', 'install.ps', 'install.txt']).
 
 
 /*--------------------------------------------------------------------------------

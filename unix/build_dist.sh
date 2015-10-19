@@ -60,8 +60,6 @@ for E in $EXAMPLE_SET ; do
 	cp -pr "$EXAMPLES/$E" "$DISTDIR/examples"
 done
 
-#cp -p $MAN/$WELCOME "$DISTDIR/README"
-#cp -p $MAN/copying.als "$DISTDIR/copying-als"
 cp "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
 cp -p "$MAN/welcome_standard.md" "$DISTDIR/README.md"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
