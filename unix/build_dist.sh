@@ -20,7 +20,7 @@ MAN=$ALS_PROLOG/manual
 
 if test $# -ne 1
 then
-    echo "Usage: $0 [standard | demo]" 1>&2
+    echo "Usage: $0 [standard]" 1>&2
     exit 2
 fi
 
