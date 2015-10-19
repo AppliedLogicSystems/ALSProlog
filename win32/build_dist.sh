@@ -15,23 +15,13 @@ PYTHON=$ALS_PROLOG/extensions/python
 
 if test $# -ne 1
 then
-    echo "Usage: $0 [student | standard | demo]" 1>&2
+    echo "Usage: $0 [standard | demo]" 1>&2
     exit 2
 fi
 
 EDITION=$1
 
 case $EDITION in
-student)
-DISTDIR="ALS Student Prolog" ;
-EXE="ALS Student Prolog.exe" ;
-EXET="ALS Student Prolog.exe" ;
-EXAMPLE_SET="als pxs Chat80" ;
-WELCOME=welcome_student.als ;
-MANUAL=student_man.pdf ;
-MANUALNAME="Student Manual.pdf" ;
-HELP="studhelp" ;
-;;
 standard)
 DISTDIR="ALS Prolog" ;
 EXE="ALS Prolog.exe" ;

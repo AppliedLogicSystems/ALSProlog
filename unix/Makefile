@@ -1,4 +1,4 @@
-all: student standard demo
+all: standard demo
 
 core:
 	$(MAKE) -C ../core/unix
@@ -7,9 +7,6 @@ core:
 odbc:
 	cd ../extensions/odbc/i386_mswin32 ; ./build.bat
 	  
-student: core
-	./build_dist.sh student
-
 standard: core
 	./build_dist.sh standard
 

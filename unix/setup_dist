@@ -45,23 +45,17 @@ echo "Setting up distribution in $srcroot/$ARCH"
 
 
 STANDARD="$srcroot/$ARCH/standard"
-STUDENT="$srcroot/$ARCH/student"
 
 rm -rf $srcroot/$ARCH/*
 mkdir $STANDARD
-mkdir $STUDENT
 
 cp als-prolog-$ARCH.tgz $STANDARD
-cp als-student-prolog-$ARCH.tgz $STUDENT
 
 cp ../manual/welcome_standard.als/ $STANDARD/Welcome
-cp ../manual/welcome_student.als/ $STUDENT/Welcome
 
 cp $BUILDSUP/unix/$ARCH/tools/ar*.tar.* $STANDARD
-cp $BUILDSUP/unix/$ARCH/tools/ar*.tar.* $STUDENT
 
 cp $BUILDSUP/unix/$ARCH/tools/gzip $STANDARD
-cp $BUILDSUP/unix/$ARCH/tools/gzip $STUDENT
 
 RELEASE="../manual/release_standard_$vers"
 if test -f $RELEASE

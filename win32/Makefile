@@ -1,4 +1,4 @@
-all: student standard demo
+all: standard demo
 
 core:
 	cd ../core/win32 ; ./build.bat
@@ -10,9 +10,6 @@ odbc:
 python:
 	cd ../extensions/python/i386_mswin32 ; ./build.bat
 	
-student: core
-	./build_dist.sh student
-
 #standard: core odbc python
 standard: core odbc 
 	./build_dist.sh standard

@@ -49,6 +49,7 @@ In the als_prolog folder, run the AppleScript Build.
 
 In the als_prolog\win32 directory, run GNU Make (use bash/cygwin)
 
+REMOVE:::::
 Open each installer template (standard_installer.wse and
 student_installer.wse)  with Wise and view it in the "Installation Expert" 
 mode.
@@ -59,4 +60,5 @@ attribute.
 Add the contents of "ALS Prolog" or "ALS Student Prolog" to the
 Applications folder.  Click on the Distribute button to create the
 installer. 
+:::::REMOVE
 

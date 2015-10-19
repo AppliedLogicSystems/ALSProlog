@@ -20,24 +20,13 @@ MAN=$ALS_PROLOG/manual
 
 if test $# -ne 1
 then
-    echo "Usage: $0 [student | standard | demo]" 1>&2
+    echo "Usage: $0 [standard | demo]" 1>&2
     exit 2
 fi
 
 EDITION=$1
 
 case $EDITION in
-student)
-DISTNAME=als-student-prolog
-DISTDIR=$ARCH/$DISTNAME ;
-EXE=studalsdev ;
-EXET="studalsdev" ;
-EXAMPLE_SET="als pxs chat80" ;
-WELCOME=welcome_student.als ;
-MANUAL=student_man.pdf ;
-MANUALNAME=student-manual.pdf ;
-HELP="studhelp" ;
-;;
 standard)
 DISTNAME=als-prolog
 DISTDIR=$ARCH/$DISTNAME ;
