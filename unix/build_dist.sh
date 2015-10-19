@@ -38,17 +38,6 @@ MANUAL=als_man.pdf ; # standard manual is missing.
 MANUALNAME=als-prolog-manual.pdf ;
 HELP="alshelp" ;
 ;;
-demo)
-DISTNAME=als-prolog-demo
-DISTDIR=$ARCH/$DISTNAME ;
-EXE=alsdev_demo ;
-EXET=alsdev ;
-EXAMPLE_SET="als pxs more objectpro visual chat80 Prolog1000" ;
-WELCOME=welcome_standard.als ;
-MANUAL=als_man.pdf ; # standard manual is missing.
-MANUALNAME=als-prolog-manual.pdf ;
-HELP="alshelp" ;
-;;
 esac
 
 rm -rf "$DISTDIR"
