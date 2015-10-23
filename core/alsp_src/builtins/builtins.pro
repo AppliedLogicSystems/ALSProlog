@@ -1,7 +1,6 @@
 /*===================================================================*
  | 		builtins.pro         
  | 	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Builtin predicates for ALS-Prolog -- Principal File
  |

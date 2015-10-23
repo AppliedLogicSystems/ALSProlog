@@ -1,7 +1,6 @@
 /*=====================================================================
  | 			headers.pro		
  |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Utilities for writing file headers
  *====================================================================*/

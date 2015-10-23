@@ -1,7 +1,6 @@
 /*===========================================================================*
  |		cmpdirs.pro
  |	Copyright (c) 1994 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	-- compares two directory trees, producing a printed report
  |

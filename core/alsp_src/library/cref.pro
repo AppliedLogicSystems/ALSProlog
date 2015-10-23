@@ -1,7 +1,6 @@
 /*--------------------------------------------------------------------
  |			crefmain.pro
  |	Copyright (c) 1989-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Prolog cross-referencer
  |
@@ -1178,7 +1177,6 @@ endmod.
 /*===================================================================*
  | 		crefavl.pro		
  |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		-- avl tree program: customized for cref
  |

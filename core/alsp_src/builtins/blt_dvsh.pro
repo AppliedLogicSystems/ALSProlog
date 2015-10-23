@@ -1,7 +1,6 @@
 /*=============================================================*
  |		blt_dvsh.pro
  |	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	The tcltk gui environmental shell
  |

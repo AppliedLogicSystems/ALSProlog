@@ -1,7 +1,6 @@
 /*========================================================================*
  |			miscfile.pro
  |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Miscellaneous file handling predicates
  *========================================================================*/

@@ -1,7 +1,6 @@
 /*======================================================================*
  |		drawing.pro
  |	Copyright (c) Applied Logic Systems, Inc.
- | 	Copying per "ALS Copying"
  |	
  |	A simple graphics drawing package
  |

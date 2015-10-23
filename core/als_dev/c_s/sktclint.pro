@@ -1,7 +1,6 @@
 /*===========================================================================
  |			sktclint.pro
  |		Copyright (c) 1995-96 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |	Interface-independent parts of Prolog-based client side		
  |	to remote socket-based server.

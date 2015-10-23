@@ -1,7 +1,6 @@
 /*=====================================================================
  |			blt_misc.pro
  |		Copyright (c) 1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Misc Builtin predicates setup stuff which must run assuming
  |	some other part of the builtins is already loaded.

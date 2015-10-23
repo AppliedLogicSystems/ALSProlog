@@ -1,7 +1,6 @@
 /*=========================================================================*
  |		fs_cmn.pro
  |	Copyright (c) 1988-95 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Miscellaneous common low-level file system functions
  |	Consolidation of parts of the separate files:

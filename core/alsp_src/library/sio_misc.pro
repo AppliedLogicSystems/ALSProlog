@@ -1,7 +1,6 @@
 /*========================================================================*
  |		sio_misc.pro
  |	Copyright (c) 1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Miscellaneous stream io-related predicates
  |

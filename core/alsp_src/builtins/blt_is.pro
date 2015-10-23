@@ -1,7 +1,6 @@
 /*=========================================================
  |				blt_is.pro		
  |	Copyright (c) 1991-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |			- extensible version of is/2
  |

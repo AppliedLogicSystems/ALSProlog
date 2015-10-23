@@ -1,7 +1,6 @@
 /*======================================================================*
  | 			job_utls.pro 
  |		Copyright (c) 1996 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |		Utilities for:
  |		Management of background "worker" processes from

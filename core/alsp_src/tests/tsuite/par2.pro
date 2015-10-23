@@ -1,7 +1,6 @@
 /*=====================================================================*
  |			par2.pro
  |		Copyright (c) 1993-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Producers and consumers without the timer
  |

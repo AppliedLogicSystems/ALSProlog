@@ -4,7 +4,6 @@
  |      Author:  Keith Hughes
  |
  |	Copyright (c) 1987, 1988 by Applied Logic Systems
- |	Distribution rights per Copying ALS
  |
  | Examples:
  |

@@ -1,7 +1,6 @@
 #----------------------------------------------------------------------#
 #		twigs_id.tcl
 #	Copyright (c) 1998 Applied Logic Systems, Inc.
-#           Copying per "Copying ALS"
 #
 #	Visual interface for the "Hickory Tree Identification Example"
 #	Widget descriptions developed using VTCL 1.10

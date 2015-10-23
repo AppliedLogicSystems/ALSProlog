@@ -1,7 +1,6 @@
 /*==================================================================
  |		fsmac.pro
  |		Copyright (c) 1992 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Miscellaneous low-level file system functions
  |		-- Macintosh Version (MacOS) 	(fsmac.pro)

@@ -1,7 +1,6 @@
 /*========================================================================*
  |			blt_atom.pro		
  |		Copyright (c) 1986-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |			-- atom / constant processing predicates
  |

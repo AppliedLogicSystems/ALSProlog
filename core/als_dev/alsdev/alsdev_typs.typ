@@ -1,7 +1,6 @@
 /*======================================================================*
  |          alsdev_typs.typ
  |      Copyright (c) 1997-8 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |      Structure type defintion for source trace file records 
  |

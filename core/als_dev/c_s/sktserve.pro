@@ -1,7 +1,6 @@
 /*======================================================================*
  | 			sktserve.pro 
  |		Copyright (c) 1995-96 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |		Common basic predicates for socket-based 
  |		server manager.

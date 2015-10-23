@@ -1,7 +1,6 @@
 /*=====================================================================*
  |			par3.pro
  |		Copyright (c) 1993-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Consumers and producers with time slices.
  |

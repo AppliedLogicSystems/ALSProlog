@@ -1,7 +1,6 @@
 /*---------------------------------------------------------------*
  |		jobs.pro
  |  Copyright (c) 1986, 1988 by Applied Logic Systems, Inc.
- |	Distribution rights per Copying ALS
  |
  | 		A simple Prolog-based constraint solver
  |

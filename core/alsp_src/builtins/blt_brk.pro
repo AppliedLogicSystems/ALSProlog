@@ -1,7 +1,6 @@
 /*=====================================================================
  | 		blt_brk.pro 	
  | 	Copyright (c) 1987-95 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Basic break handler for ^C or ^Break interrupts
  |

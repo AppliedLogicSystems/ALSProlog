@@ -1,7 +1,6 @@
 /*======================================================================
  |			listutl4.pro
  |	Copyright (c) 1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Miscellaneous list predicates
  *=====================================================================*/

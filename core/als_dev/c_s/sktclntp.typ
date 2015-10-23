@@ -1,7 +1,6 @@
 /*======================================================================*
  | 			sktclntp.typ 
  |		Copyright (c) 1995-96 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |		Minimal client information structure type defintion
  |		-- includes minimal slots:

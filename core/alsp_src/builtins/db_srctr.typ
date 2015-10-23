@@ -1,7 +1,6 @@
 /*======================================================================*
  |          db_srctr.typ
  |      Copyright (c) 1997 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |      Structure type defintion for source trace file records 
  |

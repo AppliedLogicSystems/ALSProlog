@@ -1,7 +1,6 @@
 /*============================================================*
  | 		id.pro  
  | Copyright (c) 1986, 1988 by Applied Logic Systems
- |	Copying per "Copying ALS"
  |
  |	An identification and classification shell
  |

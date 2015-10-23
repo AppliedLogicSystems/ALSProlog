@@ -2,7 +2,6 @@
  | hickory.pro  -- hickory tree twig description database
  |
  | Copyright (c) 1986, 1988 by Applied Logic Systems
- |	Copying per "Copying ALS"
  |
  | Author:  Kenneth A. Bowen
  *===========================================================*/

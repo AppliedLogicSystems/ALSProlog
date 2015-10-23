@@ -1,7 +1,6 @@
 /*==================================================================
  |		pdoc_html_desc.pro
  |	Copyright (c) 1991-2004 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |   Creation of HTML code for description of an individual predicate
  |	-- originally part of libmaint.pro, separated in 1993

@@ -1,7 +1,6 @@
 /*=====================================================================
  |			blt_db.pro
  |		Copyright (c) 1986-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Builtin predicates for manipulating the internal clause database
  |

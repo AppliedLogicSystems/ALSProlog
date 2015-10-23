@@ -1,7 +1,6 @@
 /*==================================================================
  |		progdoc.pro
  |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |   Doc Tools for maintaining a library, including the ALS Library
  |		-- originally part of libmaint.pro, separated in 1993

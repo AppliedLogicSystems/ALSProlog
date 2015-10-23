@@ -1,7 +1,6 @@
 /*=====================================================================*
  | 			par1.pro
  |		Copyright (c) 1993-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |			-- test interaction of global variables, trap mechanism, and
  |		   		alarm.  Also tests out interrupts.

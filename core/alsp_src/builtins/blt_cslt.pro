@@ -1,7 +1,6 @@
 /*==============================================================
  |		blt_cslt.pro
  | Copyright (c) 1986-98 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  | Consult, viewed as a development shell facility
  |

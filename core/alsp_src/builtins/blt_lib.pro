@@ -1,7 +1,6 @@
 /*=========================================================
  |				blt_lib.pro		
  |	Copyright (c) 1992-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |			- specification of library functions
  |

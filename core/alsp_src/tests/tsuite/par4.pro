@@ -1,7 +1,6 @@
 /*=====================================================================*
  |			par4.pro
  |		Copyright (c) 1993-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Producers and consumers (for primes) with added buffering to improve
  |	throughput. tp(6) or tp(7) seems to be optimal for SPARC.  Time slices
