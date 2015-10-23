@@ -33,7 +33,6 @@ DISTDIR=$ARCH/$DISTNAME ;
 EXE=alsdev ;
 EXET=alsdev ;
 EXAMPLE_SET="als pxs more objectpro visual chat80 Prolog1000" ;
-WELCOME=welcome_standard.als ;
 MANUAL=als_man.pdf ; # standard manual is missing.
 MANUALNAME=als-prolog-manual.pdf ;
 HELP="alshelp" ;
@@ -62,6 +61,7 @@ done
 
 cp "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
 cp -p "$MAN/welcome_standard.md" "$DISTDIR/README.md"
+cp -p "$MAN/welcome_standard.md" "$DISTDIR/README.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
 mkdir "$DISTDIR/help"
 cp -pr $MAN/$HELP/* "$DISTDIR/help"
