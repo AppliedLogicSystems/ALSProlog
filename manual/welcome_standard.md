@@ -12,7 +12,7 @@ Contents:
 
 LICENSE
 =======
-See the file LICENSE.md (or LICENSE.txt).
+See the file LICENSE.txt.
 
 WARRANTY
 ========
@@ -29,8 +29,8 @@ DISTRIBUTION ORGANIZATION
 The ALS Prolog distribution contains the following files:
 
      ????ALS Prolog 3.1 Installer????
-	 LICENSE.[txt,md]
-	 README.md - this file (also README.txt)
+	 LICENSE.txt
+	 README.md - this file 
 
 On Macintosh and Windows, ALS Prolog 3.1 Installer is a standard
 system installer (on Windows, it is ALS Prolog 3.1 Installer.EXE).
@@ -118,11 +118,6 @@ in your browser.  PLEASE NOTE that the start-up of the help system is rather
 slow, since the browsers must fire up Java and other components.  However,
 once the contents for the system have appeared, it performs quite nicely
 on most platforms.
-
-COPYING ALS PROLOG
-==================
-The source files distributed with ALS Prolog are governed
-by the license contained in the file "LICENSE.md or LICENSE.txt" which is included with this distribution.  
 
    = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
