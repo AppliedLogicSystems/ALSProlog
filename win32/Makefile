@@ -1,4 +1,4 @@
-all: standard demo
+all: standard 
 
 core:
 	cd ../core/win32 ; ./build.bat
@@ -13,6 +13,3 @@ python:
 #standard: core odbc python
 standard: core odbc 
 	./build_dist.sh standard
-
-demo: core odbc # python
-	./build_dist.sh demo

@@ -27,17 +27,6 @@ DISTDIR="ALS Prolog" ;
 EXE="ALS Prolog.exe" ;
 EXET="ALS Prolog.exe" ;
 EXAMPLE_SET="als pxs more objectpro visual Prolog1000 Chat80" ;
-WELCOME=welcome_standard.als ;
-MANUAL=als_man.pdf ; 
-MANUALNAME="ALS Prolog Manual.pdf" ;
-HELP="alshelp" ;
-;;
-demo)
-DISTDIR="ALS Prolog Demo" ;
-EXE="ALS Prolog Demo.exe" ;
-EXET="ALS Prolog.exe" ;
-EXAMPLE_SET="als pxs more objectpro visual Prolog1000 Chat80" ;
-WELCOME=welcome_standard.als ;
 MANUAL=als_man.pdf ; 
 MANUALNAME="ALS Prolog Manual.pdf" ;
 HELP="alshelp" ;
@@ -64,6 +53,7 @@ done
 
 cp "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
 cp -p $MAN/welcome_standard.md" "$DISTDIR/README.md"
+cp -p $MAN/welcome_standard.als" "$DISTDIR/README.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
 mkdir "$DISTDIR/help"
 cp -pr $MAN/$HELP/* "$DISTDIR/help"
