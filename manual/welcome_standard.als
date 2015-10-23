@@ -26,23 +26,22 @@ THE SOFTWARE.
 INSTALLATION DIRECTORY
 =====================
 
-README.md 		-- this file
-LICENSE.txt		-- Open Source Licence for ALS Prolog
-als-prolog-manual.pdf   -- Primary manual
-als_help.htm		-- Reference Help System entry (*)
-help/             	-- Reference Help System files
-examples/		-- Sample Prolog programs
-alspro*                 -- ALS Prolog executable
-alsdir/           	-- Directory containing components used by the executables
-libalspro.a		-- ALS Prolog static library
-alspro.pst              -- relocatable Prolog code space used for creating executable application images
-libalspro.dylib*	-- ALS Prolog dynamic library
-ALS_Prolog_Foreign_SDK/ -- Tools for adding C-defined predicates to ALS Prolog programs (*)
-alsdev*                 -- IDE based on ALS Prolog and Tcl/Tk (*)
-alsdev.pst		-- relocatable Prolog code space used for creating executable application images (*)
-lib/			-- Tk files for alsdev
-
-(*) Not yet converted/debugged for the open source release
+	README.md 		-- this file  
+	LICENSE.txt		-- Open Source Licence for ALS Prolog  
+	als-prolog-manual.pdf   -- Primary manual  
+	als_help.htm		-- Reference Help System entry (*)  
+	help/             	-- Reference Help System files  
+	examples/		-- Sample Prolog programs  
+	alspro*                 -- ALS Prolog executable  
+	alsdir/           	-- Directory containing components used by the executables  
+	libalspro.a		-- ALS Prolog static library  
+	alspro.pst              -- relocatable Prolog code space used for creating executable application images  
+	libalspro.dylib*	-- ALS Prolog dynamic library  
+	ALS_Prolog_Foreign_SDK/ -- Tools for adding C-defined predicates to ALS Prolog programs (*)  
+	alsdev*                 -- IDE based on ALS Prolog and Tcl/Tk (*)  
+	alsdev.pst		-- relocatable Prolog code space used for creating executable application images (*)  
+	lib/			-- Tk files for alsdev  
+	(*) Not yet converted/debugged for the open source release
 
 MANUAL
 ======
@@ -56,9 +55,12 @@ To read the ALS Prolog manual:
 Double-click on the icon for als-prolog-manual.pdf, or start Acrobat, and load the manual.
 
 There is a separate manual for the foreign C-language interface, in
-	ALS_Prolog_Foreign_SDK/documentation/FI_Manual.pdf
-The reference manual is contained in
-	ALS_Prolog_Foreign_SDK/documentation/FI_Ref.pdf
+
+	ALS_Prolog_Foreign_SDK/documentation/FI_Manual.pdf  
+
+The reference manual is contained in  
+
+	ALS_Prolog_Foreign_SDK/documentation/FI_Ref.pdf  
 
 HELP SYSTEM
 ===========
