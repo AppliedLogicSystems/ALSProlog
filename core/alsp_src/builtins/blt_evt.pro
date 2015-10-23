@@ -1,7 +1,6 @@
 /*========================================================================
  |		blt_event.pro
  |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		-- user level event handler
  |

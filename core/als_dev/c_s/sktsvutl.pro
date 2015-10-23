@@ -1,7 +1,6 @@
 /*======================================================================*
  | 			sktsvutl.pro 
  |		Copyright (c) 1995-96 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |		Utilities extracted from sktserve.pro, etc.:
  |		Common basic predicates for socket-based 

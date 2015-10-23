@@ -1,7 +1,6 @@
 /*=============================================================*
  | 		sio_wt.pro
  |	Copyright (c) 1990-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		write_term and company
  |

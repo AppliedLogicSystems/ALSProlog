@@ -1,7 +1,6 @@
 /*----------------------------------------------------------------*
  |		module.pro   
  |	Copyright (c) 1989-1992 Applied logic Systems, Inc.
- |		Distribution rights per Copying ALS
  | 
  |			- module related predicates
   +++++ should be moved to library....

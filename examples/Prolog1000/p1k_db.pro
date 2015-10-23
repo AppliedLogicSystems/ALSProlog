@@ -1,7 +1,6 @@
 /*---------------------------------------------------------------------*
  |		p1k_db.pro
  |		Copyright (c) 1998-99 Applied Logic Systems, Inc.
- |		Copying per "Copying ALS"
  |
  |		Process and display the original Prolog 1000 database
  |		1.  Process the original text source into a file of

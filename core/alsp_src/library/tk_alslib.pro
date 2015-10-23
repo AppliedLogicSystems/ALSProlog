@@ -1,7 +1,6 @@
 /*=============================================================*
  |		tk_alslib.pro
  |	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Tcl/Tk-based GUI library routines
  |

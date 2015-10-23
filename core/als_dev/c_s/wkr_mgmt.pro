@@ -1,7 +1,6 @@
 /*======================================================================*
  | 			wkr_mgmt.pro 
  |		Copyright (c) 1996 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |		Management of background "worker" processes from
  |		the server manager.

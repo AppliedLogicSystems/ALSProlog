@@ -1,7 +1,6 @@
 /*==================================================================
  |		pdoc_viewer.pro
  |	Copyright (c) 2003-2004 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |   Doc Tools for maintaining  code documentation.
  |	-- setting up prologdoc viewer files (following javadoc)

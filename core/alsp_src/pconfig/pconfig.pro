@@ -1,7 +1,6 @@
 /*===================================================================
  |		pconfig.pro
  |	Copyright (c) 1994-6 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Prolog-driven windowing stage configuration during builds
  |

@@ -1,7 +1,6 @@
 /*=============================================================*
  |		blt_shl.pro
  |	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	The actual environmental shell; both the tty
  |	version, and the underlying portion of the 

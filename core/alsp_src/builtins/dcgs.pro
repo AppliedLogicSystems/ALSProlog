@@ -1,7 +1,6 @@
 /*=====================================================================*
  |			dcgs.pro     
  |	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |			-- dcg expander for ALS-Prolog
  |

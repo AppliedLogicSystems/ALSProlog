@@ -1,7 +1,6 @@
 /*=====================================================================
  | 			misc_db.pro		
  |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Various Prolog database utilities for the library
  *====================================================================*/

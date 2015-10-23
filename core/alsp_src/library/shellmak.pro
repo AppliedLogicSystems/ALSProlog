@@ -1,7 +1,6 @@
 /*============================================================================*
  |          shellmak.pro
  |  Copyright (c) 1995-96 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |      Generator for creating both tty-based and
  |			socket-based interactive servers & shells
@@ -240,7 +239,6 @@ do_mk_shell(SrcFile, _, _, _, _, _)
 /*============================================================================*
  |			ttyshlmk.pro
  |	Copyright (c) 1995-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Generator for creating interactive shells
  |

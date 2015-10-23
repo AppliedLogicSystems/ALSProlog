@@ -1,7 +1,6 @@
 /*=============================================================*
  |		dbg_class.pro
  |	Copyright (c) 1986-1998 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	ALS IDE part of debugger: classes & methods...
  |

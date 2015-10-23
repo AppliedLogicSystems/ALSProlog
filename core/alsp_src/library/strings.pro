@@ -1,7 +1,6 @@
 /*========================================================================*
  |		strings.pro
  |	Copyright (c) 1988-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Prolog String and UIA utilities
  |

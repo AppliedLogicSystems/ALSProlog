@@ -1,7 +1,6 @@
 /*======================================================================*
  | 			localintf.pro 
  |		Copyright (c) 1995-96 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |		Hooks for using the API without a "real socket"		
  |

@@ -1,7 +1,6 @@
 /*===============================================================*
  |		nrev.pro  
  |	Copyright (c) 1986, 1988 by Applied Logic Systems
- |	Distribution rights per Copying ALS
  |
  |		Standard LIPS benchmark
  *===============================================================*/

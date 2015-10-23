@@ -1,7 +1,6 @@
 /*======================================================================
  |		blt_als.pro
  |		Copyright (c) 1986-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Special Builtin predicates 
  |

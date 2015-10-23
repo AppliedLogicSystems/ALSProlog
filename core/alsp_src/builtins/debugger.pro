@@ -1,7 +1,6 @@
 /*================================================================*
  | 		debugger.pro  
  |	Copyright (c) 1988-97 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Non-interpretive debugger for Prolog
  |		- separates debugger core from I/O, and

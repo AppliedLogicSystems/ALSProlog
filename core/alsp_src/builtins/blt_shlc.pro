@@ -1,7 +1,6 @@
 /*================================================================*
  |		blt_shlc.pro
  |	Copyright (c) 1998 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Commond stuff for blt_shl/blt_dvsh/blt_cslt
  |

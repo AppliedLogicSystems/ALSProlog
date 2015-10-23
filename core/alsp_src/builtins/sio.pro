@@ -1,7 +1,6 @@
 /*=====================================================================*
  |		sio.pro		
  |	Copyright (c) 1991-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	stream I/O builtins
  |

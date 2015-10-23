@@ -1,7 +1,6 @@
 /*========================================================================*
  |		tcl_sppt.pro
  |	Copyright (c) 1997 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Tcl/Tk Interface support routines
  |

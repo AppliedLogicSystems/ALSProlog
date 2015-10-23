@@ -1,7 +1,6 @@
 /*===================================================================*
  | 		blt_shlr.pro         
  | 	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	ALS development shell: Resource file
  |

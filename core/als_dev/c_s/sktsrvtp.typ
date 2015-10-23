@@ -1,7 +1,6 @@
 /*======================================================================*
  | 			sktsrvtp.typ 
  |		Copyright (c) 1995-96 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |		Minimal server information structure type defintion
  |		for server proper info state structure

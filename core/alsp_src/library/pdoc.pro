@@ -1,7 +1,6 @@
 /*==================================================================
  |		pdoc.pro
  |	Copyright (c) 1991-2004 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |   Doc Tools for maintaining  code documentation.
  |	-- originally part of libmaint.pro, separated in 1993

@@ -1,7 +1,6 @@
 /*======================================================================
  |		fsdos.pro
  |		Copyright (c) 1988-91 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Miscellaneous low-level file system functions
  |			-- Unix Version		(fsunix.pro)

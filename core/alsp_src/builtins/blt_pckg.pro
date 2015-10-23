@@ -1,7 +1,6 @@
 /*=====================================================================
  | 		blt_pckg.pro
  |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Packaging predicates to create object modules
  |		in COFF file format.

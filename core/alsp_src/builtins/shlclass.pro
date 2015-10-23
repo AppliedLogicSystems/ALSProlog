@@ -1,7 +1,6 @@
 /*================================================================*
  |		shlclass.pro
  |	Copyright (c) 1998 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Common class stuff for blt_shl/blt_dvsh/blt_cslt
  |	The ObjectPro class compiler is temporaily loaded to compile

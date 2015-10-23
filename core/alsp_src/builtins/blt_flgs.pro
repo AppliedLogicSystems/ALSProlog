@@ -1,7 +1,6 @@
 /*=====================================================================
  |			blt_flgs.pro
  |		Copyright (c) 1995-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Builtin predicates for manipulating the Prolog flags
  |		[Extracted from blt_db.pro and extended]

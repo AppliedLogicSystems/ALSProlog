@@ -1,7 +1,6 @@
 /*======================================================================*
  | 			csp_int.pro 
  |		Copyright (c) 1996 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |		Simple interpreter for a communicating sequential processes 
  |		sub-language for the client-server tools

@@ -1,7 +1,6 @@
 /*=====================================================================
  |		blt_std.pro
  |	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Standard builtin predicates not fitting any other categories
  |

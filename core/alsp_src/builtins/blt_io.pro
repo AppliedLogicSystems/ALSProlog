@@ -1,7 +1,6 @@
 /*==============================================================
  |		blt_io.pro
  | Copyright (c) 1986-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  | Builtin predicates for dealing with I/O
  |

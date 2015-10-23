@@ -1,7 +1,6 @@
 /*==========================================================================*
  |   			objects.pro
  |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Object-oriented programming in Prolog
  |

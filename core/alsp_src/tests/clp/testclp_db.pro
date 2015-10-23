@@ -1,7 +1,6 @@
 /*=====================================================================*
  |   	testclp_db.pro
  |  Copyright (c) 1996-7 Applied Logic Systems, Inc.
- |	Distribution rights per Copying-ALS
  |
  |  Automated test run data/examples for clp tests. Outputs results
  |	to the file clptests.log.

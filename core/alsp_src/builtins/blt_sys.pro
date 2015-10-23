@@ -1,7 +1,6 @@
 /*================================================================*
  |		blt_sys.pro
  |	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |	Builtin predicates for dealing with the global Prolog 
  |	system environment, as well as miscellaneous stuff

@@ -1,7 +1,6 @@
 /*======================================================================*
  | 			jobber.pro 
  |		Copyright (c) 1996 Applied Logic Systems, Inc.
- |      Distribution rights per Copying ALS
  |
  |		Remote job execution & control predicates for 
  |		the socket-based server manager.

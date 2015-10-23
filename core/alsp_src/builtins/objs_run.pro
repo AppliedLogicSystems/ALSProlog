@@ -1,7 +1,6 @@
 /*==========================================================================*
  | 			objs_run.pro
  |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Object-oriented programming in Prolog
  |		Run-time support for ObjectPro, not including run-time

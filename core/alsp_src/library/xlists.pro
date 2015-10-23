@@ -1,7 +1,6 @@
 /*=====================================================================
  | 			xlists.pro		
  |	Copyright (c) 1993-96 Applied Logic Systems, Inc.
- |		Distribution rights per Copying ALS
  |
  |		Simple xtensible list utilities
  *====================================================================*/
