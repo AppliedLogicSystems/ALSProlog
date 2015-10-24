@@ -52,8 +52,7 @@ for E in $EXAMPLE_SET ; do
 done
 
 cp "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
-cp -p $MAN/welcome_standard.md" "$DISTDIR/README.md"
-cp -p $MAN/welcome_standard.als" "$DISTDIR/README.txt"
+cp -p $MAN/welcome_standard.txt" "$DISTDIR/README.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
 mkdir "$DISTDIR/help"
 cp -pr $MAN/$HELP/* "$DISTDIR/help"

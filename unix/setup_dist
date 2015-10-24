@@ -51,7 +51,7 @@ mkdir $STANDARD
 
 cp als-prolog-$ARCH.tgz $STANDARD
 
-cp ../manual/welcome_standard.als/ $STANDARD/Welcome
+cp ../manual/welcome_standard.txt/ $STANDARD/Welcome.txt
 
 cp $BUILDSUP/unix/$ARCH/tools/ar*.tar.* $STANDARD
 
