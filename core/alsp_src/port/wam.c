@@ -410,7 +410,7 @@ ck_intvl_punch(r, fv, ft)
 	  	*(PWord *)--mr_TR = *PWPTR(r);					\
   		*((PWord *)r +1) = (PWord)((PWord *)r + 1);		\
 		w_get(&fv, &ft, (PWord)f); 							\
-/*		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		   */
+/*		ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft);		   */ \
 		if (!ck_intvl_punch((PWord)(((PWord *)r)-1), fv, ft)) {		\
       		*(r) = PWORD(f);							\
 		}												\
