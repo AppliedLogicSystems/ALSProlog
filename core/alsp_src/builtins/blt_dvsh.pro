@@ -112,9 +112,11 @@ start_alsdev0
 
 	library_setup,
 
+/* WHY IS THIS MISSING?
 #if (all_procedures(syscfg,intconstr,0,_))
 		rel_arith:set_ics(cs(0,0,0))
 #endif
+*/
 	sys_env(OS, _, _),
 	join_path([ALSDIRPath,shared], Shared),
 	catch(tk_new(shl_tcli),Ball1,fail),
