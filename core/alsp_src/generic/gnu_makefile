@@ -49,26 +49,28 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	ieeemath.c pimain.c new_alspi.c engine.c \
 	relocate_code.c cexception.c cassert.c demo.c
 
+BUILTINS =       blt_frez.pro  blt_std.pro   filepath.pro  \
+   blt_als.pro   blt_io.pro    blt_stk.pro   fs_cmn.pro    simplio.pro \
+   blt_atom.pro  blt_is.pro    blt_sys.pro   fsdos.pro     sio.pro \
+   blt_brk.pro   blt_lib.pro   blt_term.pro  fsmac.pro     sio_d10.pro \
+   blt_cslt.pro  blt_misc.pro  builtins.pro  fsunix.pro    sio_rt.pro \
+   blt_ctl.pro   blt_msg.pro   comp_d10.pro  fswin32.pro   sio_wt.pro \
+   blt_db.pro    blt_pckg.pro  cutils.pro    xconsult.pro \
+   blt_evt.pro   blt_shl.pro   dcgs.pro      math88k.pro \
+   blt_flgs.pro  blt_shlr.pro  debugger.pro  module.pro \
+   blt_shlc.pro  objs_run.pro  shlclass.pro  tc_base.pro
+
 # Interval Contraint flag and source. Use: make INTCONSTR=1
 ifdef INTCONSTR
 BUILD_FLAGS := $(BUILD_FLAGS) -DINTCONSTR
 GENERIC_SOURCE := $(GENERIC_SOURCE) int_net.c intaux.c intrv.c 
+BUILTINS := $(BUILTINS) int_cstr.pro ra_basis.pro
 endif
 
 LIB_SOURCE = $(GENERIC_SOURCE) $(PROC_SOURCE) $(OS_SOURCE)
 
 LIB_OBJECTS = $(LIB_SOURCE:.c=.o)
 
-BUILTINS =       blt_frez.pro  blt_std.pro   filepath.pro  ra_basis.pro \
-   blt_als.pro   blt_io.pro    blt_stk.pro   fs_cmn.pro    simplio.pro \
-   blt_atom.pro  blt_is.pro    blt_sys.pro   fsdos.pro     sio.pro \
-   blt_brk.pro   blt_lib.pro   blt_term.pro  fsmac.pro     sio_d10.pro \
-   blt_cslt.pro  blt_misc.pro  builtins.pro  fsunix.pro    sio_rt.pro \
-   blt_ctl.pro   blt_msg.pro   comp_d10.pro  fswin32.pro   sio_wt.pro \
-   blt_db.pro    blt_pckg.pro  cutils.pro    int_cstr.pro  xconsult.pro \
-   blt_evt.pro   blt_shl.pro   dcgs.pro      math88k.pro \
-   blt_flgs.pro  blt_shlr.pro  debugger.pro  module.pro \
-   blt_shlc.pro  objs_run.pro  shlclass.pro  tc_base.pro
 
 # OS and Proccessor definitions and rules
 
