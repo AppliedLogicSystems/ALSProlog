@@ -53,9 +53,11 @@ start_shell0(DefaultShellCall)
 	output_system_banner(CLInfo),
 
 	library_setup,
+/* WHY IS THIS MISSING?
 #if (all_procedures(syscfg,intconstr,0,_))
 	rel_arith:set_ics(cs(0,0,0)),
 #endif
+*/
 	(clause(dvf,_) -> qkc ; true),
 %	dvf,
 	load_cl_files(CLInfo),
