@@ -32,13 +32,13 @@ INSTALLATION DIRECTORY
 	als_help.htm		-- Reference Help System entry (*)  
 	help/             	-- Reference Help System files  
 	examples/		-- Sample Prolog programs  
-	alspro*                 -- ALS Prolog executable  
+	alspro                 -- ALS Prolog executable  
 	alsdir/           	-- Directory containing components used by the executables  
 	libalspro.a		-- ALS Prolog static library  
 	alspro.pst              -- relocatable Prolog code space used for creating executable application images  
-	libalspro.dylib*	-- ALS Prolog dynamic library  
+	libalspro.dylib	-- ALS Prolog dynamic library  
 	ALS_Prolog_Foreign_SDK/ -- Tools for adding C-defined predicates to ALS Prolog programs (*)  
-	alsdev*                 -- IDE based on ALS Prolog and Tcl/Tk (*)  
+	alsdev                 -- IDE based on ALS Prolog and Tcl/Tk (*)  
 	alsdev.pst		-- relocatable Prolog code space used for creating executable application images (*)  
 	lib/			-- Tk files for alsdev  
 	(*) Not yet converted/debugged for the open source release
