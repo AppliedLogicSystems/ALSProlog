@@ -1156,6 +1156,10 @@ ld_fs(OS)
 	consult_builtins(BDir, dcgs),
 	consult_builtins(BDir, blt_pckg),
 	consult_builtins(BDir, blt_frez),
+(all_procedures(syscfg,intconstr,0,_) -> 
+	consult_builtins(BDir, blt_intv_frez)
+	;
+	true),
 	consult_builtins(BDir, simplio),
 	consult_builtins(BDir, blt_flgs),
 	consult_builtins(BDir, blt_misc),
@@ -1179,6 +1183,11 @@ ld_fs(OS)
 
 	consult_builtins(BDir, debugger).
 
+/*
+#if (all_procedures(syscfg,intconstr,0,_))
+consult_builtins(BDir, blt_intv_frez),
+#endif
+*/
 
 %%--------------------------------------------
 %% set up the operators (stream io stuff needs to be 
