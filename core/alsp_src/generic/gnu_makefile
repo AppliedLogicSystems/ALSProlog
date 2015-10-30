@@ -39,8 +39,8 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	cinterf.c compile.c compmath.c cutmacro.c \
 	debugsys.c expand.c fatal.c fileio.c \
 	foreign.c fpbasis.c freeze.c gc.c \
-	gv.c index.c intaux.c intrv.c \
-	int_net.c lexan.c lforeign.c loadfile.c \
+	gv.c index.c \
+	lexan.c lforeign.c loadfile.c \
 	main.c mapsym.c mem.c \
 	module.c parser.c pckgcoff.c pckgload.c \
 	pckgmake.c rinfo.c sig.c symtab.c \
@@ -48,6 +48,12 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	winter.c security.c nopckg.c \
 	ieeemath.c pimain.c new_alspi.c engine.c \
 	relocate_code.c cexception.c cassert.c demo.c
+
+# Interval Contraint flag and source. Use: make INTCONSTR=1
+ifdef INTCONSTR
+BUILD_FLAGS := $(BUILD_FLAGS) -DINTCONSTR
+GENERIC_SOURCE := $(GENERIC_SOURCE) int_net.c intaux.c intrv.c 
+endif
 
 LIB_SOURCE = $(GENERIC_SOURCE) $(PROC_SOURCE) $(OS_SOURCE)
 
