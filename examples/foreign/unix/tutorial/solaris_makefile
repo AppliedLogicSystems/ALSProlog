@@ -1,4 +1,0 @@
-# In order to avoid unwanted runtime linking with the main ALS Prolog
-# executable, use the -B symbolic switch.
-PSL_LINK = -Xlinker -B -Xlinker symbolic -Xlinker -s
-include generic_makefile

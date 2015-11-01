@@ -1,4 +1,0 @@
-# By default Solaris does not search /usr/local/lib for shared objects.
-# The work around is to have the linker add the path.
-STATIC_LINK = -Xlinker -R/usr/local/lib
-include generic_makefile
