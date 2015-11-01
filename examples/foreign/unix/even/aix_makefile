@@ -1,4 +1,0 @@
-# The AIX linker requires the -G switch and an export file for shared
-# objects.
-PSL_LINK = -Xlinker -G -Xlinker -bE:$(SDK_DIR)/source/alspi_slib.exp
-include generic_makefile
