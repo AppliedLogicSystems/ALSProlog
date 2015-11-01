@@ -337,7 +337,6 @@ static struct blt_struct {
 #ifndef PURE_ANSI
 	BLT("pbi_copy_file", 2, pbi_copy_file, "_pbi_copy_file"),
 #endif /* PURE_ANSI */
-	BLT("enable_security", 0, pbi_enable_security, "_pbi_enable_security"),
 
 	BLT("gv_alloc", 1, pbi_gv_alloc, "_pbi_gv_alloc"),
 	BLT("gv_free", 1, pbi_gv_free, "_pbi_gv_free"),

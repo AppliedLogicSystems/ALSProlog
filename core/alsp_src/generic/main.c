@@ -1136,9 +1136,6 @@ PI_startup(const PI_system_setup *setup)
 	}
 #endif
 
-    /* Initilize copy-protection security. */
-    init_security();
-
     {
     int result = PI_prolog_init0(setup);
 
@@ -1152,9 +1149,6 @@ PI_shutdown(void)
 {
 
     PI_shutdown0();
-
-    /* shutdown copy-protection security. */
-    shutdown_security();
 
 #ifdef MSWin32
 #ifdef HAVE_SOCKET
