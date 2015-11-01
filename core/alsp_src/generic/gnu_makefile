@@ -46,7 +46,7 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	pckgmake.c rinfo.c sig.c symtab.c \
 	varproc.c vprintf.c wdisp.c wintcode.c \
 	winter.c security.c nopckg.c \
-	ieeemath.c pimain.c new_alspi.c engine.c \
+	pimain.c new_alspi.c engine.c \
 	relocate_code.c cexception.c cassert.c demo.c
 
 BUILTINS =       blt_frez.pro  blt_std.pro   filepath.pro  \
@@ -63,7 +63,7 @@ BUILTINS =       blt_frez.pro  blt_std.pro   filepath.pro  \
 # Interval Contraint flag and source. Use: make INTCONSTR=1
 ifdef INTCONSTR
 BUILD_FLAGS := $(BUILD_FLAGS) -DINTCONSTR
-GENERIC_SOURCE := $(GENERIC_SOURCE) int_net.c intaux.c intrv.c 
+GENERIC_SOURCE := $(GENERIC_SOURCE) int_net.c intaux.c intrv.c ieeemath.c
 BUILTINS := $(BUILTINS) int_cstr.pro ra_basis.pro
 endif
 
