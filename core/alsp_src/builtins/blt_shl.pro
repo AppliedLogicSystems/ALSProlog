@@ -309,7 +309,6 @@ prolog_shell(InStream,OutStream,ID)
 export init_prolog_shell/6.
 init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	:-
-	enable_security,
 	gc,
 	als_system(SysList),
 	sio:input_stream_or_alias_ok(InStream, RealInStream),
