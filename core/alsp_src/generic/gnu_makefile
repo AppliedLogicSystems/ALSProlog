@@ -119,7 +119,7 @@ test: testrun
 testrun : command_line_test iso_test_suite test_suite
 
 command_line_test: alspro
-	-sh $(TEST_DIR)/tsuite/test_command_line.sh ./alspro
+	sh $(TEST_DIR)/tsuite/test_command_line.sh ./alspro
 
 test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/autotest.pro $(TEST_DIR)/atest_db.pro -g run_tests -p -srcdir $(SOURCE_DIR)
