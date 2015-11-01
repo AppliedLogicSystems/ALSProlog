@@ -16,5 +16,5 @@ standard: core
 # Don't try to use unix tee, because it misses some shell error output.
 
 test: core
-        $(MAKE) -C ../core/unix test
+	$(MAKE) -C ../core/unix test
 
