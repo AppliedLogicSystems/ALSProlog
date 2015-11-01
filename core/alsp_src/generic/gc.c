@@ -178,7 +178,6 @@ gc()
 
 	/* For demos and hardware-key protected versions, check copy protection. */
     ASSERT(prolog_engine_invariant(&current_engine));
-    check_security();
 
     /*---------------------------------------------------------------*
      | Force certain external variables to be biased for gc purposes.
