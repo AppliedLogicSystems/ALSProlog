@@ -10,13 +10,10 @@ odbc:
 standard: core
 	./build_dist.sh standard
 
-# Advice: don't attempt to capture output using "make test | tee <file>"
-# Some tests produce shell error output which is not caught by the tee
-# To get a complete log file: Start with a completely new terminal window.
-# Navigate to the directory containing this file, and execute "make test"
-# Then select the entire window (on Mac, ^A), copy it, open an editor,
-# and paste the selection into the editor, and save.
-# Note that autotest.log is still produced in core/unix/$ARCH
+# If you want to capture test output to a file, just execute
+#	make text 2>&1 | cat > testrun.log
+# It takes 30 seconds on a 2.6 GHz Macbook Pro.
+# Don't try to use unix tee, because it misses some shell error output.
 
 test: core
         $(MAKE) -C ../core/unix test
