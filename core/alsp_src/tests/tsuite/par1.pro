@@ -44,7 +44,7 @@ consume0([H|T])
 consume0([]).
 
 
-produce(100,[]) 
+produce(10,[]) 
 	:- !.
 produce(N,[N|T]) 
 	:-
@@ -111,7 +111,7 @@ alarm_handler(EventId, Goal, Context)
 
 alarm_handler(_,Goal,_) 
 	:-
-	write('a_h_Goal'=Goal), nl,
+%	write('a_h_Goal'=Goal), nl,
 	setSavedGoal(Goal),
 	remQueue(NewGoal),
 	NewGoal.
