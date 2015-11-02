@@ -238,7 +238,7 @@ static struct {int signal; const char *name;} signal_name_list[] = {
 /* Other unix signals - The following is a reasonable default set
    based on SunOS, but there are other signals in different
    flavors of unix. */
-#ifdef unix
+#ifdef UNIX
     {SIGHUP, "sighup"},
     {SIGQUIT, "sigquit"},
     {SIGTRAP, "sigtrap"},
