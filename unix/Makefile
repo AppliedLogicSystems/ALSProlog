@@ -10,10 +10,11 @@ odbc:
 standard: core
 	./build_dist.sh standard
 
-# If you want to capture test output to a file, just execute
+# If you want to just capture test output to a file, execute:
 #	make test 2>&1 | cat > testrun.log
+# To capture test output to a file, while simultaneously viewing output on the console, execute:
+#	make test 2>&1 | tee testrun.log
 # It takes 30 seconds on a 2.6 GHz Macbook Pro.
-# Don't try to use unix tee, because it misses some shell error output.
 
 test: core
 	$(MAKE) -C ../core/unix test
