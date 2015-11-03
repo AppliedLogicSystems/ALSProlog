@@ -1,6 +1,5 @@
 /*======================================================================*
  | 			jobserve.pro 
- |		Copyright (c) 1996 ChemSoft, Inc.
  |		Portions Copyright (c) 1993-6 Applied Logic Systems, Inc.
  |
  |		-- server layer for backend SPARC computation server
