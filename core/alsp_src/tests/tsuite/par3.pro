@@ -7,7 +7,7 @@
  | Author: Kevin Buettner
  *=====================================================================*/
 
-:- make_gv('GoalQueue'), make_gv('CurrentProc').
+:- make_gv('GoalQueue3'), make_gv('CurrentProc').
 :- op(990,xfy,&), op(990,xfy,&&).
 
 /*
@@ -76,10 +76,10 @@ ints_from(N,[N|T]) :-
  */
 
 
-initQueue :- setGoalQueue(gq([],[])).
+initQueue :- setGoalQueue3(gq([],[])).
 
 remQueue(Item) :- 
-	getGoalQueue(GQ),
+	getGoalQueue3(GQ),
 	arg(1,GQ,[Item|QT]),		%% unify Item, QT, and test for nonempty
 	remQueue(QT,GQ).		%% fix queue so front is gone
 
@@ -93,7 +93,7 @@ remQueue(QT,GQ) :-			%% Queue is not empty
 
 
 addQueue(Item) :-
-	getGoalQueue(Q),
+	getGoalQueue3(Q),
 	arg(2,Q,Rear),			%% get Rear of Queue
 	addQueue(Rear,Q,[Item]).
 
@@ -135,7 +135,7 @@ parallelize(M,G1,G2) :-
 	initQueue,
 	psetup(M,G1),
 	psetup(M,G2),
-    getGoalQueue(GQ), write(GQ),nl,
+    getGoalQueue3(GQ), write(GQ),nl,
 	trap(run_processes,context_switcher),
 	clear_alarm.
 

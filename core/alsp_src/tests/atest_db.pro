@@ -17,7 +17,7 @@ test_info(bench, bench, user, main, 'The benchpress example.').
 
 test_info(jobs, jobs, user, go, 'The jobs example.').
 
-test_info(nrev, nrev, user, nrev0(100,30), 'The nrev example.').
+test_info(nrev, nrev, user, nrev0(100,100), 'The nrev example.').
 
 test_info(queens, queens, user, all_queens, 'The 8 queens example.').
 

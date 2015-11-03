@@ -7,8 +7,9 @@
  | Author: Kevin Buettner
  *=====================================================================*/
 
-:- make_gv('GoalQueue'), make_gv('SavedGoal'), setSavedGoal(true).
 :- op(990,xfy,&), op(990,xfy,&&).
+%:- make_gv('GoalQueue'), make_gv('SavedGoal'), setSavedGoal(true).
+:- make_gv('GoalQueue2'), make_gv('SavedGoal2'), setSavedGoal2(true).
 
 /*
  * main is called to start the consumer / producer off.
@@ -18,7 +19,8 @@ main :-
 	als_system(SysVars),
 	dmember(os=OS,SysVars),
 	not(OS = macos), not(OS = mswin32),
-	consume(100,L) & ints_from(0,L).
+%	consume(100,L) & ints_from(0,L).
+	consume(10,L) & ints_from(0,L).
 
 primes(N) :-
 	consume(N,P) & sieve(IF2,P) & ints_from(2,IF2).
@@ -75,10 +77,10 @@ ints_from(N,[N|T]) :-
  *	addQueue/1		-- adds an element to the queue
  */
 
-initQueue :- setGoalQueue(gq([],[])).
+initQueue :- setGoalQueue2(gq([],[])).
 
 remQueue(Item) :- 
-	getGoalQueue(GQ),
+	getGoalQueue2(GQ),
 	arg(1,GQ,[Item|QT]),		%% unify Item, QT, and test for nonempty
 	remQueue(QT,GQ).		%% fix queue so front is gone
 
@@ -92,7 +94,7 @@ remQueue(QT,GQ) :-			%% Queue is not empty
 
 
 addQueue(Item) :-
-	getGoalQueue(Q),
+	getGoalQueue2(Q),
 	arg(2,Q,Rear),			%% get Rear of Queue
 	addQueue(Rear,Q,[Item]).
 
@@ -153,7 +155,7 @@ parallelize(M,G1,G2) :-
 	initQueue,
 	psetup(M,G1),
 	psetup(M,G2),
-    getGoalQueue(GQ), write(GQ),nl,
+    getGoalQueue2(GQ), write(GQ),nl,
 	run_processes.
 
 
