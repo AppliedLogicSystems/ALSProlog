@@ -1,2 +1,0 @@
-files = [ 'accsysul.pro', 'cntrs.pro', 'db3intf.pro'].
-config = cfg(syscfg, [d3i]).

@@ -1,8 +1,0 @@
-Project Name: "mailbox3:als_libs:accsys:all_macos7.5:intf:acsyd3iinterf.ppc.proj"
-
-
-Group 1
-	acsyd3i0.c
-	acsyd3i1.c
-	acsyd3i2.c
-	acsyd3i3.c

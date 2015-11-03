@@ -1,6 +1,0 @@
-
-ARCH = hppa
-OS = hpux9.05
-SOS = hpux9
-GOS = unix
-PROTYPE=port
