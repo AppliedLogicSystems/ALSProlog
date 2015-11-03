@@ -30,8 +30,10 @@ run_tests :-
 	run_tests0,
 	bagOf(TestID, failed(TestID), FailedTests),
 	final_message(FailedTests,autotestlog),
+	flush_output(LOGStream),
 	close(LOGStream),
 	final_message(FailedTests,user_output),
+	flush_output,
 	told.
 
 run_tests :-
@@ -40,6 +42,7 @@ run_tests :-
 
 configure_testing
 	:-
+set_prolog_flag(unknown, fail),
 	get_cmdline_vals(CmdLineVs),
 	bagOf(TD, member(['-td',TD], CmdLineVs), TDs),
 	configure_testing(TDs, CmdLineVs).
@@ -129,7 +132,7 @@ kill_off([(P,A) | PL],Mod)
 
 final_message([], OutStream)
 	:-!,
-	printf(OutStream,'All Tests Were Successful !!\n').
+	printf(OutStream,'All Tests Were Successful !!\n',[]).
 final_message(FailedTests, OutStream)
 	:-
 	printf(OutStream, 'The following tests failed:\n\t%t\n', FailedTests).

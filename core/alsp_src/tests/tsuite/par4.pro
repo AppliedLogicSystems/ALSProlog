@@ -15,11 +15,13 @@
  *=====================================================================*/
 
 main :-	als_system(SysVars),
+get_cwd(D), write(cwd=D),nl,
 	dmember(os=OS,SysVars),
 	not(OS = macos), not(OS = mswin32),
-	fail. /* What tests should be run, and what constitutes succes? */
+%	fail. /* What tests should be run, and what constitutes succes? */
+	tp3.
 
-:- make_gv('GoalQueue').
+:- make_gv('GoalQueue4').
 :- op(990,xfy,&), op(990,xfy,&&).
 
 
@@ -219,10 +221,10 @@ buffer0(E,[InH|InT],[_|InEnd],[E|Out]) :-
  */
 
 
-initQueue :- setGoalQueue(gq([],[])).
+initQueue :- setGoalQueue4(gq([],[])).
 
 remQueue(Item) :- 
-	getGoalQueue(GQ),
+	getGoalQueue4(GQ),
 	arg(1,GQ,[Item|QT]),		%% unify Item, QT, and test for nonempty
 	remQueue(QT,GQ).		%% fix queue so front is gone
 
@@ -236,7 +238,7 @@ remQueue(QT,GQ) :-			%% Queue is not empty
 
 
 addQueue(Item) :-
-	getGoalQueue(Q),
+	getGoalQueue4(Q),
 	arg(2,Q,Rear),			%% get Rear of Queue
 	addQueue(Rear,Q,[Item]).
 
@@ -275,7 +277,7 @@ parallelize(M,G1,G2) :-
 	initQueue,
 	psetup(M,G1),
 	psetup(M,G2),
-    getGoalQueue(GQ), write(GQ),nl,
+    getGoalQueue4(GQ), write(GQ),nl,
 	run_processes.
 
 
