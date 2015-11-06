@@ -15,8 +15,8 @@ Use 'git clone https://github.com/AppliedLogicSystems/ALSProlog.git' to obtain t
 
 **Unix, include Mac OS X:**
 
-Locate yourself in the toplevel 'unix' directory in the tree, and execute 'make'.
-When the build completes, you will find a folder 
+Locate yourself in the toplevel 'unix' directory in the tree, and execute 'make'.  When the build completes, you will find a folder  
+
 	unix/linux/als-prolog	
 		or 	
 	unix/darwin/als-prolog
@@ -26,8 +26,8 @@ where darwin is the Mac OS X flavor of linux, and <flavor> is possibly some othe
 
 **Windows:**
 
-Locate yourself in the toplevel 'win32' directory in the tree, and execute 'make'.
-When the build completes, you will find a folder 
+Locate yourself in the toplevel 'win32' directory in the tree, and execute 'make'.  When the build completes, you will find a folder  
+
 	win32/als-prolog	
 Please note that as of 2015-11-5, the win32 build is broken.
 
