@@ -6,12 +6,12 @@ directories.  The core directory contains the source for the Prolog
 compiler, runtime, and IDE.  The peripheral directories contain manuals,
 examples, extensions, etc.   The tree is hosted on GitHub at
 
-	https://github.com/AppliedLogicSystems/ALSProlog.git
+	https://github.com/AppliedLogicSystems/ALSProlog
 
 Build Instructions
 ------------------
 
-Use 'git clone https://github.com/AppliedLogicSystems/ALSProlog.git' to obtain the tree.
+Use `git clone https://github.com/AppliedLogicSystems/ALSProlog.git` to obtain the tree.
 
 **Unix, include Mac OS X:**
 
