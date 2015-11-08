@@ -1,20 +1,17 @@
-
-
 /*-----------------------------------------------------------------------------* 
- *      File:      Animals.pro                                          
- *      Contents:  Program to figure out the type of an animal by       
- *                 asking questions.                                    
- *                                                                     
- *      Books:                                                          
- *                                                                      
- *      [CCP] = How to Solve it in Prolog,                              
- *                      Coelho, Cotta, Pereira, Lisbon, 1980            
- *
- *      Modified slightly by Keith Hughes to show better programming style.
+ |      	animals.pro                                          
+ |	Copyright 2015 Applied Logic Systems, Inc.
+ |
+ |      Program to figure out the type of an animal by       
+ |                 asking questions.                                    
+ |                                                                     
+ |      Books:                                                          
+ |      [CCP] = How to Solve it in Prolog,                              
+ |                      Coelho, Cotta, Pereira, Lisbon, 1980            
+ |
+ |      Modified slightly by Keith Hughes to show better programming style.
+ |	Added dynamic assertions 11/8/15 - KAB
  *-----------------------------------------------------------------------------*/
-
-
-
 
 /*
  *      Predicate:      animal.
@@ -26,6 +23,9 @@
  */
 
 /* Knowledge base */
+
+:- dynamic(rule/0).
+:- dynamic(fact/2).
 
 rule(1,animal,mammal,[c1]).
 rule(2,animal,mammal,[c2]).
@@ -81,9 +81,13 @@ animal(_).
 
 /* Recognition process : discover animal's name */
 
-recognition(X) :- rule(N,X,Y,Z), discover(Z),found(rule),
-                  conclusion(X,Y,N), recognition(Y),
-                  abolish(fact,2).
+recognition(X) :- 
+	rule(N,X,Y,Z), 
+	discover(Z),
+	found(rule),
+        conclusion(X,Y,N), 
+	recognition(Y),
+        abolish(fact,2).
 recognition(_) :- retract(rule),write('Done.'),nl.
 recognition(_) :- write('Don''t know this animal.'),nl.
 

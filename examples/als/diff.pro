@@ -1,32 +1,30 @@
-/*
- * A Symbolic Differentiator
- *
- * Copyright (c) 1986, 1988 by Applied Logic Systems
- *
- * Author:  Keith Hughes
- *
- */
-
-
-/*	
- *	Description:
- *
- *      Predicate:      diff
- *      Normal usage:   diff
- *
- *      Function:       Reads an expression, and prints the result after
- *                      performing differentiation on it.
- *               
- *                      The Expression has the form
- * 
- *                      X:Equation
- *
- *                      where Equation is an expression with unknown X.
- *                      eg. x:(sin(cos(x))-cos(sin(x)).
- *
- *                      Enter stop to exit program.
- *                     
- */
+/*----------------------------------------------------------------*
+ |		diff.pro
+ | 	Copyright (c) 1986-2015 by Applied Logic Systems
+ |
+ | 	A Symbolic Differentiator
+ |
+ | Author:  Keith Hughes
+ |
+ |	Description:
+ |
+ |      Predicate:      diff
+ |      Normal usage:   diff
+ |
+ |      Reads an expression, and prints the result after
+ |      performing differentiation on it.
+ |               
+ |      The Expression has the form
+ | 
+ |             X:Equation
+ |
+ |      where Equation is an expression with unknown X,
+ |	which is the variable by which differentiate.
+ |
+ |      eg. x:(sin(cos(x))-cos(sin(x))).
+ |
+ |      Enter stop to exit the program.
+ *----------------------------------------------------------------*/
 
 
 diff :-
@@ -38,7 +36,7 @@ diff(stop) :- !.
 diff(X:Expr) :-
    diff(X,Expr,T),!,
    simplify(T,Ans),
-   write(Ans),nl,nl,
+   nl,write(Ans),nl,nl,
    diff.
 diff(_) :-
    write('Illegal expression. Type stop to exit.'),nl,

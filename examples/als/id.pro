@@ -1,30 +1,38 @@
-/*
- * id.pro  -- an identification and classification shell
- * 	Copyright (c) 1986-2015 by Applied Logic Systems
- *
- * Author:  Kenneth A. Bowen
- *
- *	Description:
- *
- *	This is part of the Hickory Tree Identification Expert
- *
- *	This is the identification portion of the "expert".  It
- *	must be coupled with a database of "trait" assertions,
- * 	such as are found in the file hickory.pro.  The general form
- *	of the database of trait assertions is:
- *
- *		trait(<characteristic>, <tree identity>).
- *		e.g., trait(buds(yellow), bitternut_hickory).
- *
- *	The system first allows the user to freely input some
- *	observations;  these must be entries from the first
- *	argument of the trait predicate.  The user indicates
- *	the end of this phase by entering 'done'.  The system then
- *	does its diagnosis via a hypothsize and test loop.  When it
- *	is trying to verify a conjecture, it will ask the user
- *	yes-no questions concerning further observations.
- */
-
+/* ---------------------------------------------------------------------*
+ | 		id.pro  
+ | 	Copyright (c) 1986-2015 by Applied Logic Systems
+ |
+ |	An identification and classification shell
+ |
+ | Author:  Kenneth A. Bowen
+ |
+ |	Description:
+ |
+ |	This is a generic identification by properties shell.
+ | 	When combined with the file 
+ |		hickory.pro
+ |	this becomes part of the Hickory Tree Identification Expert
+ |
+ |	This is the identification portion of the "expert".  It
+ |	must be coupled with a database of "trait" assertions,
+ | 	such as are found in the file hickory.pro.  The general form
+ |	of the database of trait assertions is:
+ |
+ |		trait(<characteristic>, <tree identity>).
+ |		e.g., trait(buds(yellow), bitternut_hickory).
+ |
+ |	The system first allows the user to freely input some
+ |	observations;  these must be entries from the first
+ |	argument of the trait predicate.  The user indicates
+ |	the end of this phase by entering 'done'.  The system then
+ |	does its diagnosis via a hypothsize and test loop.  When it
+ |	is trying to verify a conjecture, it will ask the user
+ |	yes-no questions concerning further observations.
+ |
+ |	Note that hickory.pro contains a load directive 
+ |		:- consult(id).
+ |	So don't add a load directive for hickory.pro in this file
+ *---------------------------------------------------------------------*/
 
 module identify.
 export identify/0.
@@ -120,13 +128,13 @@ observed(X) :-
 % for act_on to be executed exactly once.
 
  report(Identification) :-
-        write('The tree appears to be a '),
+        nl, write('The tree appears to be a '),
         write(Identification), nl,
         bagof(Characteristic, trait(Characteristic, Identification), Traits),
         write('The traits were: '),
         write(Traits), nl.
 
-/*----------------------------------------------------------------------
+/*---------------------------------------------------------------------------*
  | Some traits, e.g., short vs. large, are opposites;  if the user           |
  | tells us that the terminal buds are not large, then we should             |
  | be able to conclude that they are short.  The following clauses, called   |

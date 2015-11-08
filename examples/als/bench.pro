@@ -1,6 +1,7 @@
 /*----------------------------------------------------------------*
  |	bench.pro
  |	Copyright (c) 1986-2015 by Applied Logic Systems
+ |
  |	A Symbolic Equation Solver
  |		-- equation solving benchmark
  |      Author:  Keith Hughes
@@ -19,7 +20,7 @@
  *----------------------------------------------------------------*/
 :- op(200,xfy,'^').
 
-X = X.
+%X = X.
 
 main :-
         Y is cputime,

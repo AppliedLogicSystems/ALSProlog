@@ -9,7 +9,6 @@
  | Author:  Kenneth A. Bowen
  |
  | Also used as part of autotest.pro.
- | 
  *---------------------------------------------------------------*/
 
 :-dynamic(has_job/2).
@@ -17,7 +16,7 @@
 
 go :- 
 	jobs(L), 
-	write(L), nl.
+	write_lines(L), nl.
 
 
 /* Knowledge */

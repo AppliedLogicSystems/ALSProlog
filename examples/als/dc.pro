@@ -1,7 +1,8 @@
 /*============================================================*
+ |	dc.pro
+ |	Copyright (c) 1986-2015 by Applied Logic Systems
+
  |	A Desk Calculator
- |
- |	Copyright (c) 1986, 1988 by Applied Logic Systems
  |
  | Author:  Kevin A. Buettner
  | Creation:  12/03/86
@@ -22,9 +23,10 @@
  *	The desk calcualor is invoked from prolog by consulting this file
  *	and then executing the following goal.
  *		?- dc.
- *
+ *	The desc calculator manages is own input, so you should NOT
+ *	terminate input with a period; simply type input expressions
+ *	as you would on a handheld calculator, then hit return.
  *------------------------------------------------------------*/
-
 
 module desk_calc.
    export dc/0.
@@ -41,7 +43,9 @@ module desk_calc.
 	 lexan(Line,Tokens), 
 	 parse(Tokens,Tree), 
          eval(Tree,Answer),
-	 write(Answer), nl, !, dc_again(Answer).
+	 write(Answer), nl, 
+	!, 
+	dc_again(Answer).
    dc :- write('??'), nl, dc.
 
    dc_again(exit) :- !, seen.
