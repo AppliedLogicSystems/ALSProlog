@@ -1,15 +1,7 @@
-
-
-
 /*
  * nim.pro  -- a simple two player game
+ * 	Copyright (c) 1986-2015 by Applied Logic Systems, Inc.
  *
- * Copyright (c) 1986-2004 by Applied Logic Systems, Inc.
- *
- */
-
-
-/* 
  *      Description:                                                          
  *
  *	Plays the game Nim as shown in
@@ -17,7 +9,6 @@
  *
  *
  */
-
 
 /*
  *      Predicate:      play(Game)

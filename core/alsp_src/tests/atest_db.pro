@@ -10,9 +10,6 @@ module als_testing.
 
 	%% Standard ALS examples:
 
-test_info(join_split_path, join_split_path_test, user, test,
-		'join_path and split_path tests').
-
 test_info(bench, bench, user, main, 'The benchpress example.').
 
 test_info(jobs, jobs, user, go, 'The jobs example.').
@@ -22,6 +19,9 @@ test_info(nrev, nrev, user, nrev0(100,100), 'The nrev example.').
 test_info(queens, queens, user, all_queens, 'The 8 queens example.').
 
 	%% The tsuite directory:
+
+test_info(join_split_path, join_split_path_test, user, test,
+		'join_path and split_path tests').
 
 test_info(compare, compare, user, test,
 			'compare/3 testing.').

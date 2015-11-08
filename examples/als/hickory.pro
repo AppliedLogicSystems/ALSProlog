@@ -1,20 +1,13 @@
-
-
 /*
  * Hickory Tree twig description database
- *
- * Copyright (c) 1986, 1988 by Applied Logic Systems
+ * 	Copyright (c) 1986-2015  by Applied Logic Systems
  *
  * Author:  Kenneth A. Bowen
  *
- */
-
-/*
  *	Description:
  *
  *	The predicate is trait(<Character>, <Tree>);  the form of
  * 	<Character> is <Generic Character>(<Particular Aspect>).
- *
  */
 
 :- consult(id).					% the diagnosis system

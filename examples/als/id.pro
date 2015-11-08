@@ -1,16 +1,9 @@
-
-
 /*
  * id.pro  -- an identification and classification shell
- *
- * Copyright (c) 1986, 1988 by Applied Logic Systems
+ * 	Copyright (c) 1986-2015 by Applied Logic Systems
  *
  * Author:  Kenneth A. Bowen
  *
- */
-
-
-/*
  *	Description:
  *
  *	This is part of the Hickory Tree Identification Expert

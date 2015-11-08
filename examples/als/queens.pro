@@ -1,13 +1,8 @@
-
 /*
- * queens.pro  -- placing queens on a chessboard benchmark
+ * queens.pro  
+ * 	Copyright (c) 1987-2015 Applied Logic Systems, Inc.
+ *		-- placing queens on a chessboard benchmark
  *
- * Copyright (c) 1987, 1988 by Applied Logic Systems
- *
- */
-
-
-/*
  *	Description:
  *
  * 	This is a benchmark which tests the speed of bagof (among 

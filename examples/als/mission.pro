@@ -1,16 +1,9 @@
-
-
 /*
  * mission.pro  -- a solution to the missionaries and cannibals problem
- *
- * Copyright (c) 1986, 1988 by Applied Logic Systems
+ * 	Copyright (c) 1986-2015 by Applied Logic Systems
  *
  * Author:  Kevin A. Buettner
  *
- */
-
-
-/*
  *	Description:
  *
  *	Three missionaries and three cannibals seek to cross a river.
@@ -45,7 +38,6 @@
  *	Coelho, Cotta, Pereira, Lisbon, 1980            
  *
  */
-
 
 /*
  * Data Structure:
