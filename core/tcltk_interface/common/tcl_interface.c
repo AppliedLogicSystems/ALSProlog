@@ -53,7 +53,7 @@ char *version[2] = {
 #endif
 #endif
 
-static Tcl_ObjType *tcl_integer_type, *tcl_double_type, *tcl_list_type;
+static const Tcl_ObjType *tcl_integer_type, *tcl_double_type, *tcl_list_type;
 
 static AP_Obj TclToPrologObj(Tcl_Interp *interp, Tcl_Obj *tcl_obj, AP_World *w, AP_Obj *vars);
 static Tcl_Obj *PrologToTclObj(AP_World *w, AP_Obj prolog_obj, Tcl_Interp *interp);
@@ -168,13 +168,12 @@ PrologToTclResult(Tcl_Interp *interp, AP_World *w, AP_Result prolog_result)
 		break;
 	case AP_EXCEPTION: {
 		AP_Obj term_to_string, string;
-		AP_Result r;
 		term_to_string = AP_NewInitStructure(w,
 						AP_NewSymbolFromStr(w, "term_to_string"),
 						2,
 						AP_GetException(w),
 						AP_UNBOUND_OBJ);
-		r = AP_Call(w, tcltk_module, &term_to_string);
+		AP_Call(w, tcltk_module, &term_to_string); // ignore result
 		string = AP_GetArgument(w, term_to_string, 2);
 		
 		Tcl_ResetResult(interp);
@@ -374,8 +373,6 @@ Tcl_ALS_Prolog_ObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl
 static int
 Tcl_DoOneEventCmd(ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
 {
-#pragma unused(data)
-
 	int index, result;
 	
 	enum {EVENT_WAIT, EVENT_DONT_WAIT};
@@ -755,7 +752,6 @@ static AP_Result tcl_delete(AP_World *w, AP_Obj interp_name)
 
 static AP_Result tcl_delete_all(AP_World *ignore)
 {
-#pragma unused(ignore)
 	Tcl_HashEntry *entry;
 	Tcl_HashSearch search;
 
@@ -773,8 +769,6 @@ static AP_Result tcl_delete_all(AP_World *ignore)
 
 static AP_Result tk_main_loop(AP_World *ignore)
 {
-#pragma unused(ignore)
-
 	Tk_MainLoop();
 	return AP_SUCCESS;
 }
