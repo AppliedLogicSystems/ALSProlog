@@ -1,32 +1,23 @@
+/*---------------------------------------------------------------------------*
+ | 		nim.pro  
+ | 	Copyright (c) 1986-2015 by Applied Logic Systems, Inc.
+ |
+ |	A  simple two player game
+ |
+ |      Description:                                                          
+ |
+ |	Plays the game Nim as shown in
+ |      The Art of Prolog, Leon Sterling, Ehud Shapiro, The MIT Press, 1986.
+ |
+ |      Predicate:      play(Game)
+ |      Normal usage:   play(nim)
+ |
+ |      Function:       plays the game with name Game.
+ |                     
+ |      Reference:      [SS] page 297, Program 18.8.
+ *---------------------------------------------------------------------------*/
 
-
-
-/*
- * nim.pro  -- a simple two player game
- *
- * Copyright (c) 1986-2004 by Applied Logic Systems, Inc.
- *
- */
-
-
-/* 
- *      Description:                                                          
- *
- *	Plays the game Nim as shown in
- *      The Art of Prolog, Leon Sterling, Ehud Shapiro, The MIT Press, 1986.
- *
- *
- */
-
-
-/*
- *      Predicate:      play(Game)
- *      Normal usage:   play(in)
- *
- *      Function:       plays the game with name Game.
- *                     
- *      Reference:      [SS] page 297, Program 18.8.
- */
+nim :- play(nim).
 
 play(Game) :-
    initialize(Game,Position,Player),
@@ -49,9 +40,10 @@ play(Position,Player,Result) :-
 choose_move(Position,opponent,Move) :-
    !,
    repeat,
-      write('Which pile do you want to take from? '), read(Pile),
+   write('Which pile do you want to take from? '), 
+   read(Pile),
    verify_that_pile_exists(Position,Pile),
-   write('How many do you want to take? '), read(HowMany),
+   choose_amount(Position, Pile, HowMany),
    Move = (Pile,HowMany).
 
 choose_move(Ns,computer,Move) :-
@@ -63,8 +55,28 @@ choose_move(Ns,computer,(1,1)) :-	% The computer's `arbitrary move'
 verify_that_pile_exists(Position,Pile) :- 
    length(Position,Len), 
    (Len < Pile ; Pile =< 0),  
-   !, write('Enter a valid pile> '), fail.
+   !, write('Enter a valid pile> '), nl, fail.
 verify_that_pile_exists(_,_).
+
+choose_amount(Position, Pile, HowMany)
+   :-
+   !,
+   repeat,
+   write('How many do you want to take? '), 
+   read(HowMany),
+   validate_amount(Position, Pile, HowMany).
+
+validate_amount(Position, Pile, HowMany)
+   :-
+   nth(Pile, Position, PileAmt),
+   PileAmt < HowMany,
+   !,
+   write('Amount' = HowMany), write(' is too large.'), nl, 
+   fail.
+validate_amount(_, _, _).
+   
+
+
 
 
 /*
@@ -163,16 +175,3 @@ can_zero([B|Bs],[0|NimSum],[C|Ds],C) :-
    can_zero(Bs,NimSum,Ds,C).
 can_zero([B|Bs],[1|NimSum],[D|Ds],C) :-
    D is 1-B*C, C1 is 1-B, can_zero(Bs,NimSum,Ds,C1).
-
-/*
- *      Predicate:    writeln(TermList)
- *	Normal Usage: writeln(in)
- *
- *      Function:     Writes out the list of terms TermList followed by a 
- *                    new line.
- *
- *      Reference:    [SS], Page 176, Program 12.1.
- */
-
-writeln([X|Xs]) :- write(X), writeln(Xs).
-writeln([]) :- nl.

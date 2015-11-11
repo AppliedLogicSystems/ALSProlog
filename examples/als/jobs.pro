@@ -1,12 +1,14 @@
 /*---------------------------------------------------------------*
  |		jobs.pro
- |  Copyright (c) 1986, 1988 by Applied Logic Systems, Inc.
+ |  Copyright (c) 1986-2015 by Applied Logic Systems, Inc.
  |
  | 		A simple Prolog-based constraint solver
  |
  | 	The full "jobs" puzzle from Wos, Overbeek, Lusk, & Boyle, p. 55
  |
  | Author:  Kenneth A. Bowen
+ |
+ | Also used as part of autotest.pro.
  *---------------------------------------------------------------*/
 
 :-dynamic(has_job/2).
@@ -14,11 +16,23 @@
 
 go :- 
 	jobs(L), 
-	write(L), nl.
+	write_lines(L), nl.
 
 
 /* Knowledge */
+/*
+History: Times for this ordering: bps: 1.99min;  C-Prolog: 3.7minutes; (factor=1.8)
+job(guard).
+job(nurse).                     File load times: this file + constr
+job(telephone_operator).        bps: 1.0sec
+job(police_officer).            C-Prolog: 1.25 sec
+job(teacher).                     (factor=1.25)
+job(actor).
+job(boxer).
+job(chef).
+*/
 
+% History: Times for this ordering: bps: 27.6sec; C-Prolog: 52.2sec (factor = 1.9)
 job(guard).
 job(teacher).
 job(chef).

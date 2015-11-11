@@ -1,28 +1,27 @@
-
-/*
- * queens.pro  -- placing queens on a chessboard benchmark
- *
- * Copyright (c) 1987, 1988 by Applied Logic Systems
- *
- */
-
-
-/*
- *	Description:
- *
- * 	This is a benchmark which tests the speed of bagof (among 
- *	other things). It provides a different mix of operations than 
- *	the nrev benchmark.  This benchmark is invoked by entering the 
- *	following goal
- *
- *		?- all_queens.
- *
- * 	It will print out the number of solutions found and the time 
- *	it took to find these solutions.  There are 92 solutions 
- *	and ALS-Prolog takes about 78 seconds on a standard IBM-PC.
- *	It takes about 2 seconds on a Sun 3/260.
- */
-
+/*-----------------------------------------------------------------------*
+ | 		queens.pro  
+ | 	Copyright (c) 1987-2015 Applied Logic Systems, Inc.
+ |
+ |		Placing queens on a chessboard benchmark
+ |
+ |	Description:
+ |
+ |	The classic problem of placing 8 queens on a chessboard
+ |	so that none is attacking any other.
+ |
+ | 	This is a benchmark which tests the speed of bagof (among 
+ |	other things). It provides a different mix of operations than 
+ |	the nrev benchmark.  This benchmark is invoked by entering the 
+ |	following goal
+ |
+ |		?- all_queens.
+ |
+ | 	It will print out the number of solutions found and the time 
+ |	it took to find these solutions.  There are 92 solutions 
+ |	and ALS-Prolog takes about 78 seconds on a standard IBM-PC.
+ |	It takes about 2 seconds on a Sun 3/260.   (about 1999)
+ | 	(11/8/2015): on a 2.6GHz IntelCore i7 MacPro:  Time = 0.12
+ *-----------------------------------------------------------------------*/
 
 all_queens :- 
 	InitTime is cputime,

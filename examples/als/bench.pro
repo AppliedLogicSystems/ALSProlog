@@ -1,9 +1,15 @@
 /*----------------------------------------------------------------*
- |	A Symbolic Equation Solver
+ |	bench.pro
+ |	Copyright (c) 1986-2015 by Applied Logic Systems
  |
+ |	A Symbolic Equation Solver
+ |		-- equation solving benchmark
  |      Author:  Keith Hughes
  |
- |	Copyright (c) 1987, 1988 by Applied Logic Systems
+ | solve0/3 is used to solve simple algebraic equations using meta-level
+ | inference.  Running main will run this solver for a fairly complex
+ | equation and report on the time taken by the solver.  main is also
+ | invoked by autotest.pro.
  |
  | Examples:
  |
@@ -12,6 +18,14 @@
  | ?- solve(((2^(cos(x)^2)*2^(sin(x)^2))^sin(x))^cos(x)=2^(1/4), x, Answer).
  |
  *----------------------------------------------------------------*/
+
+main :-
+        Y is cputime,
+        solve0(((2^ (cos(x)^2)*2^ (sin(x)^2))^sin(x))^cos(x)=2^ (1/4),x,Ans),
+        Z is cputime,
+        DeltaTime is Z-Y,
+        write(Ans),nl,
+        write(time=DeltaTime),nl.
 
 contains(X,X) :- !.
 

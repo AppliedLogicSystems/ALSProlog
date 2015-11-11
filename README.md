@@ -1,64 +1,33 @@
 Welcome to the ALS Prolog Source Tree
 =====================================
-Test chang345 -- more
 
 The ALS Prolog source tree is divided into core and peripheral
 directories.  The core directory contains the source for the Prolog
 compiler, runtime, and IDE.  The peripheral directories contain manuals,
-examples, extensions, etc. 
+examples, extensions, etc.   The tree is hosted on GitHub at
 
-Checkout Instructions
----------------------
-
-**Unix:**
-
-Use Unix CVS to checkout als_prolog.  This insures correct line endings.
-
-**Macintosh:**
-
-Use MacCVS Pro and the "ALS Prolog CVS Stationary" (in
-/home/als_build_support/macos)  to checkout als_prolog.  This insures
-that line endings and file types are correct. 
-
-**Windows:**
-
-Use Windows CVS to checkout als_prolog. This insures correct line endings.
-
-Note:
-
-For public release builds, the CVS information must be removed from the 
-build tree.
-
-On Unix and Windows, use the cvs export command to create a clean tree. 
-
-On the Mac, use MacCVS Pro's Action->Orphan Files command to clean the
-tree. 
+	https://github.com/AppliedLogicSystems/ALSProlog
 
 Build Instructions
 ------------------
 
-**Unix:**
+Use `git clone https://github.com/AppliedLogicSystems/ALSProlog.git` to obtain the tree.
 
-In the als_prolog/unix directory, run GNU Make (make or gmake, as appropriate)
+**Unix, include Mac OS X:**
 
-**Macintosh:**
+Locate yourself in the toplevel 'unix' directory in the tree, and execute 'make'.  When the build completes, you will find a folder  
 
-In the als_prolog folder, run the AppleScript Build.
+	unix/linux/als-prolog	
+		or 	
+	unix/darwin/als-prolog
+		or possibly
+	unix/<flavor>/als-prolog
+where darwin is the Mac OS X flavor of linux, and <flavor> is possibly some other flavor of unix detected by the build process.
 
 **Windows:**
 
-In the als_prolog\win32 directory, run GNU Make (use bash/cygwin)
+Locate yourself in the toplevel 'win32' directory in the tree, and execute 'make'.  When the build completes, you will find a folder  
 
-REMOVE:::::
-Open each installer template (standard_installer.wse and
-student_installer.wse)  with Wise and view it in the "Installation Expert" 
-mode.
-
-Edit the properties of "Installation Files" under the "Application Files" 
-attribute. 
-
-Add the contents of "ALS Prolog" or "ALS Student Prolog" to the
-Applications folder.  Click on the Distribute button to create the
-installer. 
-:::::REMOVE
+	win32/als-prolog	
+Please note that as of 2015-11-5, the win32 build is broken.
 

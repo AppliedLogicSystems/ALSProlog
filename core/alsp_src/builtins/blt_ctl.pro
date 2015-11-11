@@ -21,8 +21,6 @@ module builtins.
  *-----------------------------------------------------------------------*/
 
 :- 
-%	compiletime,
-	op(200,xfy,^),
 	module_closure(findall,3,findall),
 	module_closure(b_findall,4,b_findall),
 	module_closure(setof,3,setof),

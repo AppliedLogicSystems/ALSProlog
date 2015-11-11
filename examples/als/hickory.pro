@@ -1,23 +1,19 @@
+/*--------------------------------------------------------------------*
+ |		hickory.pro
+ | 	Copyright (c) 1986-2015  by Applied Logic Systems
+ |
+ | 	Hickory Tree twig description database
+ |		To be used in conjunction with id.pro
+ |
+ | Author:  Kenneth A. Bowen
+ |
+ |	Description:
+ |
+ |	The predicate is trait(<Character>, <Tree>);  the form of
+ |	<Character> is <Generic Character>(<Particular Aspect>).
+ *-------------------------------------------------------------------*/
 
-
-/*
- * Hickory Tree twig description database
- *
- * Copyright (c) 1986, 1988 by Applied Logic Systems
- *
- * Author:  Kenneth A. Bowen
- *
- */
-
-/*
- *	Description:
- *
- *	The predicate is trait(<Character>, <Tree>);  the form of
- * 	<Character> is <Generic Character>(<Particular Aspect>).
- *
- */
-
-:- consult(id).					% the diagnosis system
+:- consult(id).		% the diagnosis system
 
 module identify.
 

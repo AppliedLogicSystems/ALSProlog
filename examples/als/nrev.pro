@@ -1,8 +1,15 @@
 /*===============================================================*
  |		nrev.pro  
- |	Copyright (c) 1986, 1988 by Applied Logic Systems
+ |	Copyright (c) 1986-2015 by Applied Logic Systems
  |
  |		Standard LIPS benchmark
+ |
+ | For reference (11/8/2015), on a 2.6GHz IntelCore i7 MacPro:
+ |	?- nrev.
+ |	Length of List: 2000.
+ |	Number of Iterations: 500.
+ |	LIPS = 54076727.86
+ |	yes.
  *===============================================================*/
 nrev :-
 	write('Length of List: '),
@@ -50,13 +57,6 @@ nrev([H|T], L) :- nrev(T, L1), append(L1, [H], L).
 
 append([], X, X).
 append([H|T], X, [H|T1]) :- append(T, X, T1).
-
-/*
-reverse(X, Y) :- reverseaux(X, Y, []).
-
-reverseaux([], Y, Y) :- !.
-reverseaux([H|T], Out, Temp) :- reverseaux(T, Out, [H|Temp]).
-*/
 
 control(_, _).
 
