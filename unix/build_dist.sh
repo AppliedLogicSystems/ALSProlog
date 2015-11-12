@@ -47,7 +47,9 @@ if test -f "$BIN/$EXE.pst"
 then
     cp -pr "$BIN/$EXE.pst" "$DISTDIR/$EXET.pst"
 fi
-cp -pr "$BIN/alsdir" "$DISTDIR"
+
+# Use -L to force dereferences of symbolic links
+cp -prL "$BIN/alsdir" "$DISTDIR"
 rm -f "$DISTDIR/alsdir/builtins/blt_shl.pro"
 rm -f "$DISTDIR/alsdir/builtins/blt_dvsh.pro"
 rm -f "$DISTDIR/alsdir/builtins/ra_basis.pro"
