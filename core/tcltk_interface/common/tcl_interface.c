@@ -600,7 +600,9 @@ static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 	Tcl_Interp *interp;
 	
 	result = built_interp(w, &interp, &interp_name);
-	
+
+	// Similar to 2009 note above, this cause Tk_Init to fail (tk.tcl not found)
+#if 0
 	{
 		Tcl_DString path;
 		const char *elements[3];
@@ -616,6 +618,7 @@ static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 		Tcl_SetVar(interp, (char *)"tk_library", path.string, TCL_GLOBAL_ONLY);
 		Tcl_DStringFree(&path);
 	}
+#endif
 
 	if (result == AP_SUCCESS) {
 		int r = Tk_Init(interp);
