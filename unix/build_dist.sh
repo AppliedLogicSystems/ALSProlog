@@ -49,7 +49,7 @@ then
 fi
 
 # Use -L to force dereferences of symbolic links
-cp -prL "$BIN/alsdir" "$DISTDIR"
+cp -pRL "$BIN/alsdir" "$DISTDIR"
 rm -f "$DISTDIR/alsdir/builtins/blt_shl.pro"
 rm -f "$DISTDIR/alsdir/builtins/blt_dvsh.pro"
 rm -f "$DISTDIR/alsdir/builtins/ra_basis.pro"
