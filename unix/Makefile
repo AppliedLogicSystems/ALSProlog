@@ -19,3 +19,6 @@ standard: core
 test: core
 	$(MAKE) -C ../core/unix test
 
+distclean:
+	$(MAKE) -C ../core/unix distclean
+

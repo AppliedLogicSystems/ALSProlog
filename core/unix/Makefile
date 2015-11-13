@@ -1,4 +1,5 @@
-all test clean distclean:
+export ARCH
+all test clean distclean superclean:
 	case `uname -rs` in \
 	"SunOS 4"*) 	ARCH=sunos 	;; \
 	"SunOS 5"*) 	ARCH=solaris 	;; \
@@ -9,4 +10,4 @@ all test clean distclean:
 	"Darwin"*)	ARCH=darwin ;; \
 	*) 		echo "Unknown machine type..."; exit 1 ;; \
 	esac ; \
-	$(MAKE) -C ./$$ARCH $@
+	$(MAKE) -C ./$$ARCH ARCH=$ARCH $@
