@@ -80,6 +80,8 @@ continue_prolog_loop(Status).
 	%% Cold startup in saved image, from TTY-command line start (i.e,unix):
 
 report_error(Error) :-
+        catch(report_error0(Error), _, (pbi_write(Error), pbi_nl)).
+report_error0(Error) :-
 	tk_new(I),
 	sprintf(atom(ErrorStr), '%t', [Error]),
 	tcl_call(I, [tk_messageBox,
@@ -119,7 +121,8 @@ start_alsdev0
 */
 	sys_env(OS, _, _),
 	join_path([ALSDIRPath,shared], Shared),
-	catch(tk_new(shl_tcli),Ball1,fail),
+	tk_new(shl_tcli),
+
 	tcl_call(shl_tcli, [wm,withdraw,'.'], _),
 	tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
 	(OS = macos ->
