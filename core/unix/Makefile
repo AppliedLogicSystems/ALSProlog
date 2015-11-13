@@ -10,4 +10,4 @@ all test clean distclean superclean:
 	"Darwin"*)	ARCH=darwin ;; \
 	*) 		echo "Unknown machine type..."; exit 1 ;; \
 	esac ; \
-	$(MAKE) -C ./$$ARCH ARCH=$ARCH $@
+	$(MAKE) -C ./$$ARCH $@
