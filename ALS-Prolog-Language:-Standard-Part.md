@@ -66,3 +66,7 @@ ASCII (American Standard Code for Information Interchange) codes are small integ
 In addition, the ANSI C-style octal and hex forms expression can be used. Thus, all of the expressions below denote the number 65: 
 
     0’A    0’\101    0’\x41
+
+Expression | Octal Expression | Hex Expression | ASCI Code (Decimal) | Character
+--------------------------------------------------------------------------------
+0’A        | 0’\101            | 0’\x41        | 65                  | Upper case A
