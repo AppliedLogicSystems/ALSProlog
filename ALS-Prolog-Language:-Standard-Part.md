@@ -5,7 +5,8 @@ a great strength.
 ###1.1 Constants
 The simplest Prolog data type is a constant, which comes in two flavors:
 * atoms (sometimes called symbols)
-* numbers
+* numbers  
+
 The notion of a constant corresponds roughly to the notion of a name in a natural
 language. Names in natural languages refer to things (which covers a lot of
 ground), and constants in Prolog are be used to refer to things when the language is
