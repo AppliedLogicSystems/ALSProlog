@@ -87,3 +87,35 @@ There also exists a small collection of symbolic control characters which can be
 <tr><td>0’\t</td><td>0’\011</td><td>0’\x9</td><td>9</td><td>horizontal tab</td></tr>
 <tr><td>0’\v</td><td>0’\147</td><td>0’\x77</td><td>119</td><td>vertical tab</td></tr>
 </table>
+
+#####Atoms
+
+An atom is a sequence of characters that are parsed together as a constant.
+
+######Alphanumeric atoms
+
+An alphanumeric atom is a sequence of characters that begins with a lower case letter, and is followed by zero or more alphanumeric characters, possibly including
+‘_’.  Here are some examples of alphanumeric atoms:  
+
+    foobar123  zIPPY  bread_and_butter  money
+
+######Quoted atoms
+
+A quoted atom is formed by placing any sequence of characters between single
+quotes (’).  A single quote can be included in the text of the atom by using two
+consecutive single quotes for each one desired, or by prefixing the embedded single
+quote with the backslash (\) escape character. The following are all quoted atoms:  
+
+    ’any char will do’
+’$*#!#@%#*’
+’Can’’t miss’
+’Can\’t miss’
+’99999’
+
+If the characters that compose a quoted atom can be interpreted as an atom when
+they occur without the enclosing single quotes, then it is not necessary to use the
+quoted form. However, if the atom contains characters that aren’t allowed in a simple atom, then the quotes are required. Note that the last example above is an atom
+whose print name is 99999, not the integer 99999.
+Quoted atoms can span multiple lines, but in this case the end of each such line must
+be preceeded by the backslash escape character, as in the following example of an
+atom:
