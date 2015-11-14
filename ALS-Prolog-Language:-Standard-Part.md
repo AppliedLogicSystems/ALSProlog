@@ -106,11 +106,8 @@ quotes (’).  A single quote can be included in the text of the atom by using t
 consecutive single quotes for each one desired, or by prefixing the embedded single
 quote with the backslash (\) escape character. The following are all quoted atoms:  
 
-    ’any char will do’
-’$*#!#@%#*’
-’Can’’t miss’
-’Can\’t miss’
-’99999’
+    ’any char will do’    ’$*#!#@%#*’
+    ’Can’’t miss’    ’Can\’t miss’    ’99999’
 
 If the characters that compose a quoted atom can be interpreted as an atom when
 they occur without the enclosing single quotes, then it is not necessary to use the
