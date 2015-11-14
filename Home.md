@@ -3,7 +3,8 @@ Welcome to the ALSProlog wiki!
 Work in progress: Conversion from the old ALS Manual.
 Please be patient.
 
-#The ALS Prolog Language: Standard Part
+#The ALS Prolog Language: 
+#        Standard Part
 
 ##1 The Syntax of ALS Prolog
 This chapter describes the syntax of ALS Prolog, which is for the most part the syntax of the ISO Prolog standard . Prolog syntax is quite simple and regular, which is
