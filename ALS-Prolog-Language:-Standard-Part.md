@@ -48,7 +48,7 @@ Floating point numbers are slightly more complex than integers in that they may
 have either a fractional part, an exponent, or both. A fractional floating point number consists of a sequence of one or more numeric characters, followed by a dot (‘.’), in turn followed by another sequence of one or more numeric characters; the entire expression may optionally be preceded by a ‘-’. Here are some examples of
 floating point numbers:  
 
-0.0  3.1415927  -3.4  000023.540000
+0.0    3.1415927    -3.4    000023.540000
 
 You can also specify an exponent using scientific notation. An exponent is either
 an e or an E followed by an optional ‘-’, signifying a negative exponent, followed
