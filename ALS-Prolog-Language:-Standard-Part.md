@@ -67,9 +67,23 @@ In addition, the ANSI C-style octal and hex forms expression can be used. Thus, 
 
     0’A    0’\101    0’\x41
 
+The table below displays several example ASCII sequences:
 <table>
 <tr><th>Expr</th><th>Octal Expr</th><th>Hex Expr</th><th>ASCI Code</th><th>Char</th></tr>
 <tr><td>0’A</td><td>0’\101</td><td>0’\x41</td><td>65</td><td>Upper case A</td></tr>
 <tr><td>0’c</td><td>0’\143/td><td>0’\x63/td><td>99/td><td>Lower case c</td></tr>
 <tr><td>0’~</td><td>0’\176</td><td>0’\x7e</td><td>126</td><td>Tilde character</td></tr>
+</table>
+
+There also exists a small collection of symbolic control characters which can be thought of as synonyms for certain of the ASCI control character codes. These are presented in the following table:
+
+<table>
+<tr><th>Expr</th><th>Octal Expr</th><th>Hex Expr</th><th>ASCI Code</th><th>Char</th></tr>
+<tr><td>0’\a</td><td>0’\007</td><td>0’\x7</td><td>7</td><td>alert (‘bell’)</td></tr>
+<tr><td>0’\b</td><td>0’\010</td><td>0’x\8</td><td>8</td><td>backspace</td></tr>
+<tr><td>0’\f</td><td>0’\014</td><td>0’\xC</td><td>12</td><td>form feed</td></tr>
+<tr><td>0’\n</td><td>0’\012</td><td>0’\xA</td><td>10</td><td>new line</td></tr>
+<tr><td>0’\r</td><td>0’\015</td><td>0’\xD</td><td>13</td><td>return</td></tr>
+<tr><td>0’\t</td><td>0’\011</td><td>0’\x9</td><td>9</td><td>horizontal tab</td></tr>
+<tr><td>0’\v</td><td>0’\147</td><td>0’\x77</td><td>119</td><td>vertical tab</td></tr>
 </table>
