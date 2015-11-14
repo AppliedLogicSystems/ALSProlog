@@ -1,5 +1,3 @@
-#ALS Prolog Language: Standard Part
-
 ##1 The Syntax of ALS Prolog
 This chapter describes the syntax of ALS Prolog, which is for the most part the syntax of the ISO Prolog standard . Prolog syntax is quite simple and regular, which is
 a great strength.
