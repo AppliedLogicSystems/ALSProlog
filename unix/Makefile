@@ -21,4 +21,4 @@ test: core
 
 distclean:
 	$(MAKE) -C ../core/unix distclean
-
+	sh superclean.sh
