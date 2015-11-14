@@ -67,6 +67,7 @@ In addition, the ANSI C-style octal and hex forms expression can be used. Thus, 
 
     0’A    0’\101    0’\x41
 
-Expression | Octal Expression | Hex Expression | ASCI Code (Decimal) | Character
---------------------------------------------------------------------------------
-0’A        | 0’\101            | 0’\x41        | 65                  | Upper case A
+<table>
+<tr><hd>Expr</hd><hd>Octal Expr</hd><hd>Hex Expr</hd><hd>ASCI Code</hd><hd>Char</hd></tr>
+<tr><td>0’A<td></td>0’\101<td></td>0’\x41<td></td>65<td></td>Upper case A</td><tr>
+</table>
