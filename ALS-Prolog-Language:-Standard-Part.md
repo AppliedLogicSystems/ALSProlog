@@ -122,3 +122,16 @@ atom:
     We are the birds of fire, \
     We fly over the sky. \
     -- Algonquin poem.’
+
+######Special atoms
+
+A special atom is any sequence of characters from the following set:  
+
+    +-*/\^<>=‘:.?@#&.
+
+In addition, the atoms, [], !, ; and , are considered to be special atoms. Some oth-
+er examples of special atoms are:  
+
+      +=   &&   @>=   ==   <---------
+
+Most special atoms are automatically read as quoted atoms unless they have been declared as operators (See Section 1.7 Operators {ADD LINK}).
