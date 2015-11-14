@@ -56,3 +56,13 @@ by a sequence of one or more numeric characters. Here are examples of floating
 point numbers with exponents:  
 
     0.1e-3  10E99  -44.66e-88  0E-0
+
+#####ASCII Codes
+
+ASCII (American Standard Code for Information Interchange) codes are small integers between 0 and 255 inclusive that represent characters. The parser will translate any printable character into its corresponding ASCII integer. In order to get the ASCII code for a character, precede the character by the characters 0’. For example, the code for the characters ‘A’, ‘8’, and ‘%’ would be given by:  
+
+    0’A    0’8    0’%
+
+In addition, the ANSI C-style octal and hex forms expression can be used. Thus, all of the expressions below denote the number 65: 
+
+    0’A    0’\101    0’\x41
