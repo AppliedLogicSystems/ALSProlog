@@ -21,7 +21,7 @@ Prolog uses two representations for numbers:
 When it is impossible to use an integer representation due to the size of a nominal
 integer , a floating point representation can be used instead. This means that extremely large integers may actually require the extended precision of a floating point value. Any operation involving integers, such as a call to is/2, will first attempt to use an integer representation for the result, and will use a floating point value only when necessary.
 This type coercion is carried out consistently within the Prolog system.
-There is no automatic conversion of floating point numbers into integers(1).
+There is no automatic conversion of floating point numbers into integers.  (Note that the ISO Prolog standard now forbids this kind of conversion.)
 
 #####Integers
 The textual representation of an integer consists of a sequence of one or more digits (0 through 9) optionally preceded by a ‘-’ to signify a negative number. The parser
