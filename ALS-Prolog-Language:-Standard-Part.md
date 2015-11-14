@@ -36,11 +36,10 @@ The octal notation is a 0o followed by a sequence of valid octal digits. The oct
 0 1 2 3 4 5 6 7
 
 The binary notation is a 0b follwed by a sequence of 0’s and 1’s.
-Here are some examples of integers:
-0
-4532
--273 0000001
+Here are some examples of integers:  
 
-0x1fff
-
-0b1001 0o123
+0  
+4532  
+-273 0000001  
+0x1fff  
+0b1001 0o123  
