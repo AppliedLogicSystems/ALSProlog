@@ -104,7 +104,7 @@ An alphanumeric atom is a sequence of characters that begins with a lower case l
 A quoted atom is formed by placing any sequence of characters between single
 quotes (’).  A single quote can be included in the text of the atom by using two
 consecutive single quotes for each one desired, or by prefixing the embedded single
-quote with the backslash (\) escape character. The following are all quoted atoms:  
+quote with the backslash (&#92;) escape character. The following are all quoted atoms:  
 
     ’any char will do’    ’$*#!#@%#*’
     ’Can’’t miss’    ’Can\’t miss’    ’99999’
@@ -115,4 +115,10 @@ quoted form. However, if the atom contains characters that aren’t allowed in a
 whose print name is 99999, not the integer 99999.
 Quoted atoms can span multiple lines, but in this case the end of each such line must
 be preceeded by the backslash escape character, as in the following example of an
-atom:
+atom:  
+
+    ’We are the stars which sing. \
+    We sing with our light; \
+    We are the birds of fire, \
+    We fly over the sky. \
+    -- Algonquin poem.’
