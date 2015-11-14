@@ -38,8 +38,21 @@ The octal notation is a 0o followed by a sequence of valid octal digits. The oct
 The binary notation is a 0b follwed by a sequence of 0’s and 1’s.
 Here are some examples of integers:  
 
-0  
-4532  
--273 0000001  
-0x1fff  
-0b1001 0o123  
+0  4532  -273 0000001  0x1fff  0b1001 0o123  
+
+It is important to note that a term of the form +5 is not an integer, but instead is a structured term.
+
+#####Floating point numbers
+
+Floating point numbers are slightly more complex than integers in that they may
+have either a fractional part, an exponent, or both. A fractional floating point number consists of a sequence of one or more numeric characters, followed by a dot (‘.’), in turn followed by another sequence of one or more numeric characters; the entire expression may optionally be preceded by a ‘-’. Here are some examples of
+floating point numbers:  
+
+0.0  3.1415927  -3.4  000023.540000
+
+You can also specify an exponent using scientific notation. An exponent is either
+an e or an E followed by an optional ‘-’, signifying a negative exponent, followed
+by a sequence of one or more numeric characters. Here are examples of floating
+point numbers with exponents:  
+
+0.1e-3  10E99  -44.66e-88  0E-0
