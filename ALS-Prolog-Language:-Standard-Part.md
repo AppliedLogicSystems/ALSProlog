@@ -428,3 +428,18 @@ connected(doggone, fishbone).  % look good
                                % next to code that  
                                % you write  
 </pre>
+
+###1.9 Preprocessor Directives: Syntax
+
+ALS Prolog supports preprocessor directives which can affect the text at the time the program is compiled (or loaded into an image). These expressions include the
+following:  
+
+    #include   #if   #else  #elif   #endif  
+
+Each of these must occur at the beginning of a line of program text. Each of #include, #if, and #elif must be followed by a Prolog term, but each of #else and #endif must stand on a line by themselves. The #include directive should be followed by a Prolog double quoted string, intended to name a file:  
+
+    #include “/mydir/foo.pro”
+
+No full stop (.) should follow this expression, nor the expressions following #if and #elif. The expression following #if or #elif can be an arbitrary Prolog term.
+
+The expressions #if, #else, #elif, #endif must be organized as conditionals in a manner similar to their use in C programs. Thus, the first expression occurring must be an #if, and the last must be an #endif. Between them there can be zero or more occurrences of #else and #elif. There can be at most one occurrence of #else between a given #if ... #endif pair, and it must follow all of the zero or more occurrences of #elif between the same pair.   Preprocessor directive semantics appears in Section 2.3 Preprocessor Directives: Semantics.  {ADD LINK}
