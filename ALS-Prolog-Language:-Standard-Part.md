@@ -410,21 +410,21 @@ Comments can be put anywhere white space can occur. Comments can take one of two
 1. A line comment: anything following a percent sign (%) is ignored until the end of line.
 2. A block comment: anything enclosed in a ‘/* */’ pair is ignored. Block com- ments may span many lines if desired. Block comments may be nested, thus allowing commented code to be commented out.  
 
-<code>
-/* 
- *
- * /* 
- *  * This is one way to use block comments
- *  */ 
- *
- */
-
-connected(foot bone, leg bone).
-
-/*    Here’s another    */
-
-connected(headbone, neckbone). % line comments can
-connected(dogbone, fishbone).  % look good
-                               % next to code that
-                               % you write
-</code>
+<pre>
+/*  
+ *  
+ * /*  
+ *  * This is one way to use block comments  
+ *  */  
+ *  
+ */  
+  
+connected(foot bone, leg bone).  
+  
+/*    Here’s another    */  
+  
+connected(headbone, neckbone). % line comments can  
+connected(doggone, fishbone).  % look good  
+                               % next to code that  
+                               % you write  
+</pre>
