@@ -395,3 +395,10 @@ fx</td><td>
 &nbsp;</td></tr>
 </table>
 
+####Special Cases
+
+It is possible to declare an operator via op/3 that can never be parsed. Even though quoted atoms can be assigned a precedence and associativity, the parser will only interpret alphanumeric atoms or special atoms as operators.
+
+####White space
+
+White space, or layout characters, refers to the part of source code, data, and goals that is not made up of readable characters. The term white space comes from the fact that these unreadable characters appear white when source code is printed on a sheet of white paper. White space is any sequence of spaces, tabs, or new lines.  ￼￼￼Generally speaking, white space has little meaning to the parser. It is occasionally important for recognizing full stops, and for delimiting constructs which, if they were run together, would not be recognizable as separate constructs. There are also places where additional white space is either inappropriate or changes the meaning of the text. For example, you can’t embed a space in a number.
