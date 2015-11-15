@@ -78,16 +78,15 @@ Expr | Octal Expr | Hex Expr | ASCI Code | Char
 
 There also exists a small collection of symbolic control characters which can be thought of as synonyms for certain of the ASCI control character codes. These are presented in the following table:
 
-<table>
-<tr><th>Expr</th><th>Octal Expr</th><th>Hex Expr</th><th>ASCI Code</th><th>Char</th></tr>
-<tr><td>0’\a</td><td>0’\007</td><td>0’\x7</td><td>7</td><td>alert (‘bell’)</td></tr>
-<tr><td>0’\b</td><td>0’\010</td><td>0’x\8</td><td>8</td><td>backspace</td></tr>
-<tr><td>0’\f</td><td>0’\014</td><td>0’\xC</td><td>12</td><td>form feed</td></tr>
-<tr><td>0’\n</td><td>0’\012</td><td>0’\xA</td><td>10</td><td>new line</td></tr>
-<tr><td>0’\r</td><td>0’\015</td><td>0’\xD</td><td>13</td><td>return</td></tr>
-<tr><td>0’\t</td><td>0’\011</td><td>0’\x9</td><td>9</td><td>horizontal tab</td></tr>
-<tr><td>0’\v</td><td>0’\147</td><td>0’\x77</td><td>119</td><td>vertical tab</td></tr>
-</table>
+| Expr | Octal Expr | Hex Expr | ASCII Code | Char           |
+|:----:|:----------:|:--------:|:----------:|:--------------:|
+| 0’\a | 0’\007     | 0’\x7    | 7          | alert (‘bell’) |
+| 0’\b | 0’\010     | 0’x\8    | 8          | backspace      |
+| 0’\f | 0’\014     | 0’\xC    | 12         | form feed      |
+| 0’\n | 0’\012     | 0’\xA    | 10         | new line       |
+| 0’\r | 0’\015     | 0’\xD    | 13         | return         |
+| 0’\t | 0’\011     | 0’\x9    | 9          | horizontal tab |
+| 0’\v | 0’\147     | 0’\x77   | 119        | vertical tab   |
 
 #####Atoms
 
