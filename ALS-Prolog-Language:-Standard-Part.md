@@ -411,7 +411,7 @@ Comments can be put anywhere white space can occur. Comments can take one of two
 1. A line comment: anything following a percent sign (%) is ignored until the end of line.
 2. A block comment: anything enclosed in a ‘/* */’ pair is ignored. Block com- ments may span many lines if desired. Block comments may be nested, thus allowing commented code to be commented out.  
 
-<pre>
+```prolog
 /*  
  *  
  * /*  
@@ -428,7 +428,7 @@ connected(headbone, neckbone). % line comments can
 connected(doggone, fishbone).  % look good  
                                % next to code that  
                                % you write  
-</pre>
+```
 
 ###1.9 Preprocessor Directives: Syntax
 
