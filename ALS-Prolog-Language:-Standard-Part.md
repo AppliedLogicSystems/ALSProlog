@@ -148,17 +148,22 @@ A compound term is consists of a symbolic constant, called a functor, followed
 by a left parenthesis followed by one or more terms separated by commas, followed
 by a right parenthesis. The number of terms separated by commas enclosed in the
 parentheses is called the arity of the structure. For example, the compound term  
-    f(a,b(X),y)
+
+    f(a,b(X),y)  
+
 has arity 3.
 
 ###1.4 Curly Braces
 
 Instead of prefixing a structured term with a functor, the curly brace notation allows
 a sequence of terms, separated by commas, to be grouped together in a comma list
-with ‘{}’ as the principal functor. For example,
-    {all,the,young,dudes}
-parses internally into:
-    ’{}’((all,the,young,dudes))
+with ‘{}’ as the principal functor. For example,  
+
+    {all,the,young,dudes}  
+
+parses internally into:  
+
+    ’{}’((all,the,young,dudes))  
 
 ###1.5 Lists
 
@@ -167,15 +172,18 @@ a structured term with ./2 as principal functor and whose second argument is a l
 Lists can be written by using ‘.’ explicitly as a functor, or using the special list notation.
 A list using list notation is written as a [ followed by the successive first arguments
 of all the sublists in order seperated by commas, followed by ]. The following are
-all different ways of writing the same list:
+all different ways of writing the same list:  
+
     a.b.c.[]
     [a,b,c]
     ’.’(a,’.’(b,’.’(c,[])))
 
 Unless specified, the last tail of a list is assumed to be []. A tail of a list can be
-specified explicitly by using |, as in these examples:
+specified explicitly by using |, as in these examples:  
+
     [a|X]
     [1,2,3|[]]
-    [Head|Tail]
+    [Head|Tail]  
+
 The list notation for lists is preferrable to using ‘.’ explicitly because the dot is also
 used in floating point numbers and to signal termination of input terms.
