@@ -215,17 +215,6 @@ as an expression representing
 
 because the special atom + is declared as an infix operator. Infix operators are written between their two arguments. For the other operator types, prefix and postfix, the operator (functor) is written before (prefix) or after (postfix) the single argument to the term.
 
-1.7 Operators
-The prefix functor notation is convenient for writing terms with many arguments.
-However, Prolog allows a program to define a more readable syntax for structured
-terms with one or arguments. For example, the parser recognizes the text
-a+b+c
-as an expression representing
-+(+(a,b),c)
-because the special atom + is declared as an infix operator. Infix operators are written between their two arguments. For the other operator types, prefix and postfix,
-the operator (functor) is written before (prefix) or after (postfix) the single argument
-to the term.
-
 #####What Makes an Operator?
 
 Operators are either alphanumeric atoms or special atoms which have a corresponding precedence and associativity. The associativity is sometimes referred to as the type of an operator. Operators may be declared by using the op/3 builtin.  Precedences range from 1 to 1200 with the lower precedences having the tightest binding. Another way of looking at this is that in an expression such as 1*X+Y, the
