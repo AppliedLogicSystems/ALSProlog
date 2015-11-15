@@ -135,3 +135,9 @@ er examples of special atoms are:
       +=   &&   @>=   ==   <---------
 
 Most special atoms are automatically read as quoted atoms unless they have been declared as operators (See Section 1.7 Operators {ADD LINK}).
+
+###1.2 Variables
+
+A variable consists of either a _ (underbar character) or an upper case letter, followed by a sequence of alphanumeric characters and dollar signs. Here are some variables:  
+
+    Variable X123a _a$bc _123 _
