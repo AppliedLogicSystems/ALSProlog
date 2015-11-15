@@ -402,3 +402,27 @@ It is possible to declare an operator via op/3 that can never be parsed. Even th
 ####White space
 
 White space, or layout characters, refers to the part of source code, data, and goals that is not made up of readable characters. The term white space comes from the fact that these unreadable characters appear white when source code is printed on a sheet of white paper. White space is any sequence of spaces, tabs, or new lines.  ￼￼￼Generally speaking, white space has little meaning to the parser. It is occasionally important for recognizing full stops, and for delimiting constructs which, if they were run together, would not be recognizable as separate constructs. There are also places where additional white space is either inappropriate or changes the meaning of the text. For example, you can’t embed a space in a number.
+
+###1.8 Comments
+
+Comments can be put anywhere white space can occur. Comments can take one of two forms:  
+
+1. A line comment: anything following a percent sign (%) is ignored until the end of line.
+2. A block comment: anything enclosed in a ‘/* */’ pair is ignored. Block com- ments may span many lines if desired. Block comments may be nested, thus allowing commented code to be commented out.  
+
+    /* 
+     *
+     * /* 
+     *  * This is one way to use block comments
+     *  */ 
+     *
+     */
+
+    connected(foot bone, legbone).
+
+    /*    Here’s another    */
+
+    connected(headbone, neckbone). % line comments can
+    connected(dogbone, fishbone).  % look good
+                                   % next to code that
+                                   % you write
