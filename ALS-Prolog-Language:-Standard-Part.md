@@ -187,3 +187,30 @@ specified explicitly by using |, as in these examples:
 
 The list notation for lists is preferrable to using ‘.’ explicitly because the dot is also
 used in floating point numbers and to signal termination of input terms.
+
+###1.6 Strings
+
+A string is any sequence of characters enclosed in double quotes ("). The parser automatically translates any string into the list of ASCII codes that corresponds to the characters between the quotes. For example, the string  
+
+    "It’s a dog’s life"  
+
+is translated into  
+
+    [73,116,39,115,32,97,32,100,111,103,39,115,32,108,10,5,102,101]
+
+Double quotes can be embedded in strings by either repeating the double quote or by using the backslash escape character before the embedded “, as for example in  
+
+    "She said, ""hi.""".
+    "She said, \"hi.\"".
+
+###1.7 Operators
+
+The prefix functor notation is convenient for writing terms with many arguments. However, Prolog allows a program to define a more readable syntax for structured terms with one or arguments. For example, the parser recognizes the text  
+
+    a+b+c  
+
+as an expression representing  
+
+    +(+(a,b),c)  
+
+because the special atom + is declared as an infix operator. Infix operators are written between their two arguments. For the other operator types, prefix and postfix, the operator (functor) is written before (prefix) or after (postfix) the single argument to the term.
