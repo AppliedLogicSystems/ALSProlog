@@ -227,7 +227,7 @@ where the ‘f’ shows the position of the operator. Hence, fx and fy indicate 
 operators, yf, and xf indicate postfix operators, and xfx, yfx, and xfy indicate
 infix operators. An ‘x’ indicates that the operator will not associate with operators
 of the same or greater precedence, while a ‘ y’ indicates that it will associate with
-operators of the same or lower precedence, but not operators of greater precedence.
+operators of the same or lower precedence, but not operators of greater precedence.  The table below describes all of the predefined binary operators in ALS Prolog:
 
 
 <table>
