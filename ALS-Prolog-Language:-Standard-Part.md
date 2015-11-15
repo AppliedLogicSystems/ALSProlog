@@ -294,4 +294,21 @@ xfy</td><td>
 -</td><td>
 yfx</td><td>
 500</td></tr>
+
+<tr><td>-></td><td> xfy</td><td> 1050</td><td> /\</td><td> yfx</td><td> 500</td></tr>
+<tr><td>,</td><td> xfy</td><td> 1000</td><td> \/</td><td> yfx</td><td> 500</td></tr>
+<tr><td>:</td><td> xfy</td><td> 950</td><td> xor</td><td> yfx</td><td> 500</td></tr>
+<tr><td>.</td><td> xfy</td><td> 800</td><td> or</td><td> yfx</td><td> 500</td></tr>
+<tr><td>=</td><td> xfx</td><td> 700</td><td> and</td><td> yfx</td><td> 500</td></tr>
+<tr><td>\=</td><td> xfx</td><td> 700</td><td> *</td><td> yfx</td><td> 400</td></tr>
+<tr><td>==</td><td> xfx</td><td> 700</td><td> /</td><td> yfx</td><td> 400</td></tr>
+<tr><td>\==</td><td> xfx</td><td> 700</td><td> //</td><td> yfx</td><td> 400</td></tr>
+<tr><td>@<</td><td> xfx</td><td> 700</td><td> div</td><td> yfx</td><td> 400</td></tr>
+<tr><td>@=<</td><td> xfx</td><td> 700</td><td> rem</td><td> yfx</td><td> 400</td></tr>
+<tr><td>@></td><td> xfx</td><td> 700</td><td> mod</td><td> yfx</td><td> 400</td></tr>
+<tr><td>@>=</td><td> xfx</td><td> 700</td></tr> <<</td><td> yfx</td><td> 400</td></tr>
+<tr><td>=..</td><td> xfx</td><td> 700</td><td> >></td><td> yfx</td><td> 400</td></tr>
+<tr><td>is</td><td> xfx</td><td> 700</td><td> **</td><td> xfx</td><td> 200</td></tr>
+<tr><td>&nbsp;</td><td> &nbsp;</td><td> &nbsp;</td><td> ^</td><td> xfy</td><td> 200</td></tr>
+
 </table>
