@@ -8,11 +8,11 @@ Content Cell  | Content Cell
 
 Compare editing the following Markdown and HTML tables:
 
-Expo | Octal Expr | Hex Expr | ASCI Code | Char
------------------------------------------------
-0’A | 0’\101 | 0’\x41 | 65 | Upper case A
-0’c | 0’\143 | 0’\x63 | 99 | Lower case c
-0’~ | 0’\176 | 0’\x7e | 126 | Tilde character
+Expr | Octal Expr | Hex Expr | ASCI Code | Char
+:---:|:----------:|:--------:|:---------:|:---------------:
+0’A  | 0’\101     | 0’\x41   | 65        | Upper case A
+0’c  | 0’\143     | 0’\x63   | 99        | Lower case c
+0’~  | 0’\176     | 0’\x7e   | 126       | Tilde character
 
 <table>
 <tr><th>Expr</th><th>Octal Expr</th><th>Hex Expr</th><th>ASCI Code</th><th>Char</th></tr>
