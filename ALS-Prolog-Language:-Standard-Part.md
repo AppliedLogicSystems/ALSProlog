@@ -229,89 +229,33 @@ infix operators. An ‘x’ indicates that the operator will not associate with 
 of the same or greater precedence, while a ‘ y’ indicates that it will associate with
 operators of the same or lower precedence, but not operators of greater precedence.  The table below describes all of the predefined binary operators in ALS Prolog:
 
+| Operator | Specifier | Precedence | Operator | Specifier |  Precedence |
+|:--------:|:---------:|:----------:|:--------:|:---------:|:-----------:|
+| :-       |  xfx      |  1200      |  =:=     |  xfx      |  700        |
+| -->      |  xfx      |  1200      |  =\=     |  xfx      |  700        |
+| ==>      |  xfy      |  1200      |  <       |  xfx      |  700        |
+| when     |  xfx      |  1190      |  =<      |  xfx      |  700        |
+| where    |  xfx      |  1180      |  >       |  xfx      |  700        |
+| with     |  xfx      |  1170      |  >=      |  xfx      |  700        |
+| if       |  xfx      |  1160      |  :=      |  xfy      |  600        |
+| ;        |  xfy      |  1100      |  +       |  yfx      |  500        |
+| |        |  xfy      |  1100      |  -       |  yfx      |  500        |
+| ->       |  xfy      |  1050      |  /\      |  yfx      |  500        |
+| ,        |  xfy      |  1000      |  \/      |  yfx      |  500        |
+| :        |  xfy      |  950       |  xor     |  yfx      |  500        |
+| .        |  xfy      |  800       |  or      |  yfx      |  500        |
+| =        |  xfx      |  700       |  and     |  yfx      |  500        |
+| \=       |  xfx      |  700       |  *       |  yfx      |  400        |
+| ==       |  xfx      |  700       |  /       |  yfx      |  400        |
+| \==      |  xfx      |  700       |  //      |  yfx      |  400        |
+| @<       |  xfx      |  700       |  div     |  yfx      |  400        |
+| @=<      |  xfx      |  700       |  rem     |  yfx      |  400        |
+| @>       |  xfx      |  700       |  mod     |  yfx      |  400        |
+| @>=      |  xfx      |  700       | <<       |  yfx      |  400        |
+| =..      |  xfx      |  700       |  >>      |  yfx      |  400        |
+| is       |  xfx      |  700       |  **      |  xfx      |  200        |
+| &nbsp;   |  &nbsp;   |  &nbsp;    |  ^       |  xfy      |  200        |
 
-<table>
-<tr><th>Operator</th><th>Specifier</th><th>Precedence</th><th>Operator</th><th>Specifier</th><th> Precedence</th></tr>
-<tr><td>:-</td><td>
-xfx</td><td>
-1200</td><td>
-=:=</td><td>
-xfx</td><td>
-700</td></tr>
-
-<tr><td>--></td><td>
-xfx</td><td>
-1200</td><td>
-=\=</td><td>
-xfx</td><td>
-700</td></tr>
-
-<tr><td>==></td><td>
-xfy</td><td>
-1200</td><td>
-<</td><td>
-xfx</td><td>
-700</td></tr>
-
-<tr><td>when</td><td>
-xfx</td><td>
-1190</td><td>
-=<</td><td>
-xfx</td><td>
-700</td></tr>
-
-<tr><td>where</td><td>
-xfx</td><td>
-1180</td><td>
-></td><td>
-xfx</td><td>
-700</td></tr>
-
-<tr><td>with</td><td>
-xfx</td><td>
-1170</td><td>
->=</td><td>
-xfx</td><td>
-700</td></tr>
-
-<tr><td>if</td><td>
-xfx</td><td>
-1160</td><td>
-:=</td><td>
-xfy</td><td>
-600</td></tr>
-
-<tr><td>;</td><td>
-xfy</td><td>
-1100</td><td>
-+</td><td>
-yfx</td><td>
-500</td></tr>
-
-<tr><td>|</td><td>
-xfy</td><td>
-1100</td><td>
--</td><td>
-yfx</td><td>
-500</td></tr>
-
-<tr><td>-></td><td> xfy</td><td> 1050</td><td> /\</td><td> yfx</td><td> 500</td></tr>
-<tr><td>,</td><td> xfy</td><td> 1000</td><td> \/</td><td> yfx</td><td> 500</td></tr>
-<tr><td>:</td><td> xfy</td><td> 950</td><td> xor</td><td> yfx</td><td> 500</td></tr>
-<tr><td>.</td><td> xfy</td><td> 800</td><td> or</td><td> yfx</td><td> 500</td></tr>
-<tr><td>=</td><td> xfx</td><td> 700</td><td> and</td><td> yfx</td><td> 500</td></tr>
-<tr><td>\=</td><td> xfx</td><td> 700</td><td> *</td><td> yfx</td><td> 400</td></tr>
-<tr><td>==</td><td> xfx</td><td> 700</td><td> /</td><td> yfx</td><td> 400</td></tr>
-<tr><td>\==</td><td> xfx</td><td> 700</td><td> //</td><td> yfx</td><td> 400</td></tr>
-<tr><td>@<</td><td> xfx</td><td> 700</td><td> div</td><td> yfx</td><td> 400</td></tr>
-<tr><td>@=<</td><td> xfx</td><td> 700</td><td> rem</td><td> yfx</td><td> 400</td></tr>
-<tr><td>@></td><td> xfx</td><td> 700</td><td> mod</td><td> yfx</td><td> 400</td></tr>
-<tr><td>@>=</td><td> xfx</td><td> 700</td><td> &lt;&lt; </td><td> yfx</td><td> 400</td></tr>
-<tr><td>=..</td><td> xfx</td><td> 700</td><td> >></td><td> yfx</td><td> 400</td></tr>
-<tr><td>is</td><td> xfx</td><td> 700</td><td> **</td><td> xfx</td><td> 200</td></tr>
-<tr><td>&nbsp;</td><td> &nbsp;</td><td> &nbsp;</td><td> ^</td><td> xfy</td><td> 200</td></tr>
-
-</table>
 The next table describes the predefined prefix operators for ALS Prolog:
 
 <table>
