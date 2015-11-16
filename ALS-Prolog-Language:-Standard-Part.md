@@ -258,86 +258,19 @@ operators of the same or lower precedence, but not operators of greater preceden
 
 The next table describes the predefined prefix operators for ALS Prolog:
 
-<table>
-<tr><th>Operator</th><th> Specifier</th><th> Precedence</th><th> Operator</th><th> Specifier</th><th> Precedence</th></tr>
-
-<tr><td>:-</td><td>
-fx</td><td>
-1200</td><td>
-nospy</td><td>
-fx</td><td>
-800</td></tr>
-
-<tr><td>?-</td><td>
-fx</td><td>
-1200</td><td>
--</td><td>
-fy</td><td>
-200</td></tr>
-
-<tr><td>vi</td><td>
-fx</td><td>
-1125</td><td>
-+</td><td>
-fy</td><td>
-200</td></tr>
-
-<tr><td>edit</td><td>
-fx</td><td>
-1125</td><td>
-\</td><td>
-fy</td><td>
-200</td></tr>
-
-<tr><td>ls</td><td>
-fx</td><td>
-1125</td><td>
-export</td><td>
-fx</td><td>
-1200</td></tr>
-
-<tr><td>cd</td><td>
-fx</td><td>
-1125</td><td>
-use</td><td>
-fx</td><td>
-1200</td></tr>
-
-<tr><td>dir</td><td>
-fx</td><td>
-1125</td><td>
-module</td><td>
-fx</td><td>
-1200</td></tr>
-
-<tr><td>not</td><td>
-fx</td><td>
-900</td><td>
-‘‘</td><td>
-fx</td><td>
-925</td></tr>
-
-<tr><td>\+</td><td>
-fx</td><td>
-900</td><td>
-‘</td><td>
-fx</td><td>
-930</td></tr>
-
-<tr><td>trace</td><td>
-fx</td><td>
-800</td><td>
-~</td><td>
-fy</td><td>
-300</td></tr>
-
-<tr><td>spy</td><td>
-fx</td><td>
-800</td><td>
-&nbsp;</td><td>
-&nbsp;</td><td>
-&nbsp;</td></tr>
-</table>
+| Operator | Specifier | Precedence | Operator | Specifier | Precedence |
+|:--------:|:---------:|:----------:|:--------:|:---------:|:----------:|
+| :-       |  fx       |  1200      |  nospy   |  fx       |  800       |
+| ?-       |  fx       |  1200      |  -       |  fy       |  200       |
+| vi       |  fx       |  1125      |  +       |  fy       |  200       |
+| edit     |  fx       |  1125      |  \       |  fy       |  200       |
+| ls       |  fx       |  1125      |  export  |  fx       |  1200      |
+| cd       |  fx       |  1125      |  use     |  fx       |  1200      |
+| dir      |  fx       |  1125      |  module  |  fx       |  1200      |     
+| not      |  fx       |  900       |  ‘‘      |  fx       |  925       |
+| \+       |  fx       |  900       |  ‘       |  fx       |  930       |
+| trace    |  fx       |  800       |  ~       |  fy       |  300       |
+| spy      |  fx       |  800       |  &nbsp;  |  &nbsp;   |  &nbsp;    |   
 
 ####Special Cases
 
