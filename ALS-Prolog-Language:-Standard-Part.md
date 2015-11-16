@@ -239,7 +239,7 @@ operators of the same or lower precedence, but not operators of greater preceden
 | with     |  xfx      |  1170      |  >=      |  xfx      |  700        |
 | if       |  xfx      |  1160      |  :=      |  xfy      |  600        |
 | ;        |  xfy      |  1100      |  +       |  yfx      |  500        |
-| |        |  xfy      |  1100      |  -       |  yfx      |  500        |
+| \|        |  xfy      |  1100      |  -       |  yfx      |  500        |
 | ->       |  xfy      |  1050      |  /\      |  yfx      |  500        |
 | ,        |  xfy      |  1000      |  \/      |  yfx      |  500        |
 | :        |  xfy      |  950       |  xor     |  yfx      |  500        |
