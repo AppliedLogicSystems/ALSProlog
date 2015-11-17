@@ -13,7 +13,7 @@ show where one term ends and another begins. Each term in a file is treated as a
 closed logical formula. This means that even though two seperate terms have variable names in common, each term’s variables are actually distinct from the variables in any other term. Most variables are quantified once for each term. However, there is a special variable, the anonymous variable (written ‘_ ’), which is quantified for each occurrance. This means that within a single term, every occurrance
 of ‘_’ is a different variable.
 
-###2.1.1 Rules
+####2.1.1 Rules
 
 A rule is the most common programming construct in Prolog. A rule says that a
 particular property holds if a conjunction of properties holds. Rules are always written with :-/2 as the principal functor. The first argument of the :- is called the
@@ -27,7 +27,7 @@ consult/1 and reconsult/1 load rules (and facts - see below) from a source
 file into the internal run-time Prolog database in the order they occur in the source
 file.
 
-###2.1.2 Facts
+####2.1.2 Facts
 
 A fact is any term which is not a rule and which cannot be interpreted as a directive
 or declaration. For example,
@@ -45,7 +45,7 @@ Modules.{ADD LINK}  More specifically, a fact is any term that cannot be interpr
 As with rules, consult/1 and reconsult/1 load facts (and rules)from a source
 file into the internal database in the order they occur in the source file.
 
-###2.1.3 Commands and Queries
+####2.1.3 Commands and Queries
 
 A command or directive is any term whose principal functor is :-/1. Queries are
 terms whose principal functor is ?-/1. The single argument to a command or query
@@ -96,7 +96,7 @@ no.
 
 Notice that when a success answer is printed, the shell waits for input from the user.  If the user types a semi-colon (;), the shell attempts to find further solutions for the query, and prints the next one if found, or "no." if no solutions are found.  Any input other than a semi-colon is interpreted to mean that no further solutions are required.
 
-###2.1.4 Declarations
+####2.1.4 Declarations
 
 Declarations are terms that have a special interpretation when seen by consult
 or reconsult. Here are some example declarations:
@@ -105,3 +105,53 @@ use builtins.
 export a/1, b/2, c/3.
 module foobar.
 ````
+
+###2.2 Program Files
+Program files are sequences of source terms that are meant to be read in by consult/1 or reconsult/1, which interpret the terms as either clauses, declarations, commands, or queries.
+
+####2.2.1 Consulting Program Files
+
+To consult a file means to read the file, load the file’s clauses into the internal Prolog database, and execute any commands or directives occurring in the file. Reconsulting a file causes part or all of the current definitions in the internal prolog database for
+procedures which occur in the file to be discarded and the new ones (from the file) to be loaded, as well as executing any commands or directives in the file (again). See Chapter 11 (Prolog Builtins: Non-I/O) consult/1.  {ADD LINK}
+
+A file is consulted by the query or goal
+
+    ?- consult(filename).    or    :-  consult(filename).
+
+or reconsulted by the query or goal
+
+    ?- reconsult(filename).    or    :- reconsult(filename).
+
+Several files can be consulted or reconsulted at once by enclosing the file names in
+list brackets, as in
+
+    ?- [file1,file2,file3].
+
+By default, files listed this way (inside list brackets) are _reconsulted_.
+
+To insist that one or more files in such a list be consulted (which might cause some of the clauses
+from the files to be doubled in memory), prefix a ‘+’ to the filename, as in:
+
+    ?- [file1,+file2,file3].
+
+In this case, file2 will be consulted instead of reconsulted. For consistency and
+backwards compatibility, one can also prefix a ‘-’ to indicate that the file should be
+reconsulted, even though this is redundant:
+
+    ?- [file1,+file2,-file3].
+
+When any of these consult goals are presented, first the terms from file1 are processed, then the terms from file2, and finally the terms from file3. It is permitted that clauses for the same procedure to occur in more than one file being consulted. In this case, clauses from the earlier file are listed in the internal database before clauses from the later file. Thus, if both file1 and file2 contain clauses
+for procedure p, those from file1 will be listed in the internal database before
+those from file2. 
+
+Clauses in the internal database are ‘tagged’ with the file from which they originated. When a file is reconsulted, only those clauses in memory which are tagged as originating from that file will be discarded at the start of the reconsult operation. Thus, suppose that both file1 and file3 contain clauses for the procedure p, and that we initially perform
+
+    ?- [file1,file2,file3].
+
+Then suppose that we edit file3, and then perform
+
+?- [file3].
+
+The clauses for p originally loaded from file1 will remain undisturbed. The
+clauses currently in memory for p originally from file3 will be discarded, and the
+new clauses from file3 will be loaded.
