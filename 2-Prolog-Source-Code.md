@@ -150,8 +150,25 @@ Clauses in the internal database are ‘tagged’ with the file from which they 
 
 Then suppose that we edit file3, and then perform
 
-?- [file3].
+    ?- [file3].
 
 The clauses for p originally loaded from file1 will remain undisturbed. The
 clauses currently in memory for p originally from file3 will be discarded, and the
 new clauses from file3 will be loaded.
+
+####2.2.2 Using Filenames in Prolog
+
+Note: Complete path names to files are of course quite variable across operating
+systems. The discussions below are only intended to describe those aspects of file
+names and path names which affect how ALS Prolog locates files. Examples are
+provided for all the operating systems supported by ALS Prolog. File names follow
+the ordinary naming conventions of the host operating system. Thus all of the following are acceptable file names:
+````
+Linux (including Mac OS X):
+    fighter  cave.man  hack/cave.man
+    /usr/hack/cave.man
+
+Win32:
+    fighter  cave.man  hack\cave.man
+    C:\usr\hack\cave.man
+````
