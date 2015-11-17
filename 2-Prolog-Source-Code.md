@@ -172,3 +172,53 @@ Win32:
     fighter  cave.man  hack\cave.man
     C:\usr\hack\cave.man
 ````
+
+In general, file names should be enclosed in single quotes (making them quoted atoms). The exception is any file name which is acceptable as an atom by itself.
+
+Simple file names consist of only the file name, or a file name together with an extension. All others are complex file names. Absolute path names provide a complete description of the location of a file in the file system, while relative path names provide a description of a file’s location relative to the current directory. Simple file names are interpreted as relative path names.
+
+The way that the program-loading predicates react to the different kinds of path names is described below. In general, the loading predicates attempt to determine whether a file exists, and if so, they load the clauses from the file. If the file does not exist, the loading predicates raise an error exception.
+
+If an absolute path name is used as an argument to one of the program loading predicates (consult/1, reconsult/1, etc.), that file is loaded if it exists. If the file does not exist, an error exception is raised.
+
+If a complex relative path name or a simple file name is passed to consult, the system first attempts to locate the file relative to the current directory. In particular, for a simple file name, the system simply looks in the current directory for the file.  In either case, if the file exists, it is loaded.
+If the file cannot be found relative to the current directory, ALS Prolog searches for another directory containing that file. Ultimately, the directories (folders) through
+which ALS Prolog searches are determined by a dynamic collection of facts
+
+    searchdir/1 
+
+maintained in the system (or builtins) module. 
+
+Operationally, ALS Prolog forms the list PlacesToTry consisting of all directories D such that
+
+    searchdir(D).
+
+is true in the module builtins, putting the current directory at the head of this
+list, even when no searchdir/1 assertion mentions it. Then ALS Prolog  works its way
+through the elements D of PlacesToTry, attempting to locate the sought-for file
+relative to directory D. The first file located in this manner is loaded. This process
+is determinate: the system never restarts the search process once a file meeting the
+relative path description has been found.
+
+If none of the directories listed on PlacesToTry provide a path to the sought-for file,
+ALS Prolog locates the alsdir subdirectory from its own installation, and attempts
+to locate the file relative to two of the subdirectories, builtins and shared, which
+are found in alsdir.  If none of these directories provides a means of locating a file with the the original complex relative path name or simple file name, the system raises an error exception.
+
+The facts searchdir/1 in module builtins can be manipulated by a user program or by the user at the console. However, ALS Prolog provides several automatic facilities for installing these facts.
+
+* On Linux (including Mac OS X) and Windows, if the ALSPATH environment variable is set , the
+entries from this are used to create searchdir/1 assertions.
+* If ALS Prolog was started from the command line, any ‘-s’ switches on the command line will cause searchdir/1assertions to be added.
+Thus, the directories which will be searched appear as follows:
+
+1. First, the current directory is searched.
+2. Next, any directories appearing as ‘-s’ command line switches are searched, in the order they appear from left to right on the command line.
+3. Next, any directories appearing in an ALSPATH environment variable are
+searched, in the order they appear in the variable statement.
+4. The subdirectory builtins of alsdir is searched.
+5. The subdirectory shared of alsdir is searched.
+
+Of course, if additional searchdir/1 have been asserted or retracted, this order
+will be modified. Note, in particular, that searchdir/1 assertions for module
+builtins can be included in an ALS Prolog autoload file.
