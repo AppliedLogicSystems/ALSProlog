@@ -223,3 +223,43 @@ searched, in the order they appear in the variable statement.
 Of course, if additional searchdir/1 have been asserted or retracted, this order
 will be modified. Note, in particular, that searchdir/1 assertions for module
 builtins can be included in an ALS Prolog autoload file.
+
+####2.2.3 How are Filename Extensions treated?
+
+For your convenience, if you have a file ending with a .pro or a .pl extension, you
+don’t have to type the extension in calls to the program loading predicates. The
+following goal loads the Prolog file wands.pro:
+
+    ?- consult(wands).
+
+What really happens is this. On a call to load a file (simple or complex) with no
+extension, ALS Prolog first searches for a file with exactly that name. If found, that
+file (with no .pro or .pl extension) is loaded. If no such file is found, then ALS Prolog
+attempts to find a file of that name with a .pro extension, and following that, with
+a .pl extension. Thus the example above will load wands.pro only if there is no
+file wands to be found, not only in the current directory, but also in the directories
+on the search path described above.
+
+Whenever ALS Prolog loads a Prolog source file, it compiles the file and immediately loads and links the resulting code in memory. If the source file had a .pro extension, but the call to load it omitted the .pro extension, ALS  Prolog also creates a file on the disk containing a relocatable object version of the compiled code. On all operating systems, if the source file had a .pro extension, but the call to load the file omitted the .pro extension, a file with the same name, but the extension .obp is
+created to hold the relocatable object code. Once a relocatable object file has been
+created, any call to load the original file will cause the relocatable object file to be
+loaded instead, provided that the original source file has not been modified since the object file was created. (This is determined by the date-time stamps on the two
+files.) The advantage of this lies in the fact that object files load much more quickly
+than source files. Note that on all systems, the following call will _not_ create an object file for wands:
+
+    ?- consult(’wands.pro’).
+
+Thus, when consulting or reconsulting a file with no extension, ALS Prolog proceeds as follows:
+
+1. The system will first look for the file without any extension; if found, it will
+load the file as is and will not create an object file.
+2. If the file is not found, the system will then attach the extensions .pro and
+.obp and look for both of these files.
+3. If a .obp version of the file exists and is newer than the .pro version, then
+the .obp version is loaded.
+4. On the other hand if the .pro version is newer, then the .pro version is loaded and a new .obp version is created (which is now newer than the .pro version).
+
+For the system to correctly decide which file is newer, .pro or .obp, the system date and time should always be set correctly.
+
+The directories in which Prolog files reside should be writeable by ALS Prolog so that .obp versions of Prolog source files can be produced. ALS Prolog has facilities for controlling where these *.obp files are placed, and correspondingly, where they are searched for when (re-)loading files.
+
