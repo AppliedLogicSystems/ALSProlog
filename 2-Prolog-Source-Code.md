@@ -96,3 +96,12 @@ no.
 
 Notice that when a success answer is printed, the shell waits for input from the user.  If the user types a semi-colon (;), the shell attempts to find further solutions for the query, and prints the next one if found, or "no." if no solutions are found.  Any input other than a semi-colon is interpreted to mean that no further solutions are required.
 
+###2.1.4 Declarations
+
+Declarations are terms that have a special interpretation when seen by consult
+or reconsult. Here are some example declarations:
+````
+use builtins.
+export a/1, b/2, c/3.
+module foobar.
+````
