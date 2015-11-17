@@ -63,7 +63,7 @@ Here are some examples of commands:
     :- [file1], [file2], write(’Files 1&2 have been loaded’).
     :- initializeProgram, topLevelGoal.
 
-The prolog shell accepts queries from a terminal or window, and prints the results.  Because the shell assumes that each input is a query, it the query symbol ?- as a prompt.
+The prolog shell accepts queries from a terminal or window, and prints the results.  Because the shell assumes that each input is a query, it uses the query symbol ?- as a prompt.
 Suppose the following program of simple facts has been loaded:
 
     wavelength(red, 620-750).
