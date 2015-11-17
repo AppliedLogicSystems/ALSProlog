@@ -210,6 +210,7 @@ The facts searchdir/1 in module builtins can be manipulated by a user program or
 * On Linux (including Mac OS X) and Windows, if the ALSPATH environment variable is set , the
 entries from this are used to create searchdir/1 assertions.
 * If ALS Prolog was started from the command line, any ‘-s’ switches on the command line will cause searchdir/1assertions to be added.
+
 Thus, the directories which will be searched appear as follows:
 
 1. First, the current directory is searched.
