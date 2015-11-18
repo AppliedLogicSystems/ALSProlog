@@ -8,4 +8,6 @@
 
 [[3 Modules]]
 
+[[4 Using Definite Clause Grammars]]
+
 [[ALS Prolog Language: Extensions]]
