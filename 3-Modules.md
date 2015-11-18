@@ -205,3 +205,33 @@ animal(tiger).
 ````
 As you can see, even though the module reason was nested in the module rhyme,
 the two modules are processed independently.
+
+###3.7 Facilities for Manipulating Modules
+
+When Prolog starts up, the current module is user. This means that any queries you submit will make use of the procedures defined within user and the modules which are accessible from user’s use list. The current module can always be determined using curmod/1.   It is called with an uninstantiated variable which is then bound to the current module. The predicate modules/2 can be used to determine all of the modules currently in the system, together with their use lists. Assume that the following code has been consulted:
+````
+module m1.
+use m2.
+p(a).
+p(b).
+endmod.
+
+module m2.
+q(c).
+q(d).
+endmod.
+````
+Then the following illustrates the action of modules/2:
+````
+?- modules(X,Y).
+X = user
+Y = [m2,m1,builtins];
+X = builtins
+Y = [user];
+X = m1
+Y = [m2,builtins,user];
+X = m2
+Y = [builtins,user];
+no.
+````
+
