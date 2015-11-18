@@ -19,7 +19,7 @@ Consider:
 
 The example above uses the non-terminals noun and verbPhrase to define another non-terminal called sentence. The intended reading of the rule is that a sentence can be formed by appending a verb phrase after a noun.
 
-###4.1 How Grammar Rules are Translated Into Clauses
+##4.1 How Grammar Rules are Translated Into Clauses
 
 The DCG expander works by adding two extra arguments (which are in fact variables) to each non-terminal. These two variables are used to pass the list of tokens
 to be parsed. The example rule above that defines a sentence would be translated into the following
@@ -41,7 +41,7 @@ In the same manner, if noun/2 is given the list [cat,ran], it will consume cat
 and return the list [ran]. Similarly, verbPhrase/2 consumes ran and hands
 back the rest of the input token list.
 
-###4.2 Writing a Grammar
+##4.2 Writing a Grammar
 
 Because DCG rules are translated into Prolog clauses, it is possible to have many
 rules that define what it means to be a sentence or a noun or a verb. If one rule can’t
