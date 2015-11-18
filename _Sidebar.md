@@ -10,7 +10,7 @@
 
 [[4 Using Definite Clause Grammars]]
 
-**ALS Language: Extensions**
+**ALS Language Extensions**
 
 [[5 Abstract Data Types: Structure Definition]]
 
