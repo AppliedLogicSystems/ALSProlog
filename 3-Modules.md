@@ -138,3 +138,12 @@ Figure 1 (Use List Searching).
 {FIGURE MISSING - REPLACE}
 
 Figure 1. Use List Searching
+
+###3.4 Default Modules
+Two modules, builtins and user, are automatically created when the ALS Prolog system starts up. The builtins module contains code that defines the standard builtin predicates of the system. All modules automatically use the builtins module, as suggested in Figure 1 (Use List Searching), so therefore the following declaration is implicit:
+
+    use builtins.
+
+user is the default module. Any source code that is not contained within an explicit module
+declaration is automatically placed in the user module. In addition, the user
+module automatically uses every other module (in the order the modules are actually created), so it inherits all exported procedures.
