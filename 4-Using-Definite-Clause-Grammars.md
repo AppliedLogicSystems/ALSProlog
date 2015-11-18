@@ -121,7 +121,7 @@ quantity(quantity(Value,Unit),[Number|I0],E) :-
 Many of the builtin predicates are also left untouched whether enclosed by the curly
 braces or not. These are shown in the table below:
 
-| XX    | YY        |
+|       |           |
 |:-----:|:---------:|
 | ;/2   | atom/1    |
 | </2   | atomic/1  |
