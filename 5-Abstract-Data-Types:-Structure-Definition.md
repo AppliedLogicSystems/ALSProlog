@@ -40,3 +40,32 @@ specified by the following in a file with extension .typ, say wintypes.typ :
   ]
 ).
 ````
+We will discuss the details of this specification below. It can be placed anywhere in
+a source file, and acts like a macro, generating the following code in its place:
+````
+export accessWI/3.
+export setWI/3.
+
+accessWI(windowName,_A,_B) :- arg(1,_A,_B).
+setWI(windowName,_A,_B) :- mangle(1,_A,_B).
+accessWI(windowNum,_A,_B) :- arg(2,_A,_B).
+setWI(windowNum,_A,_B) :- mangle(2,_A,_B).
+...
+accessWI(back,_A,_B) :- arg(10,_A,_B).
+setWI(back,_A,_B) :- mangle(10,_A,_B).
+
+export makeWindowStruct/1.
+makeWindowStruct(_A) :_A=..[wi,_B,_C,blue,sing,_D,_E,_F,_G,black,white].
+
+export makeWindowStruct/2.
+makeWindowStruct(_A,_B) :-
+  struct_lookup_subst(
+         [windowName,windowNum,borderColor,
+          borderType,uLR,uLC,lRR,lRC,fore,back],
+         [_C,_D,blue,sing,_E,_F,_G,_H, black,white],_B,_I),
+  _A=..[wi|_I].
+
+export xmakeWindowStruct/2.
+xmakeWindowStruct(wi(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J),
+                  [_A,_B,_C,_D,_E,_F,_G,_H,_I,_J]).
+````
