@@ -6,7 +6,7 @@ The ALS module system only partitions procedures, not constants. This means that
 the procedure foo/2 may have different meanings in different modules, but that
 the constant bar is the same in every module.
 
-##3.1 Declaring a Module
+###3.1 Declaring a Module
 
 New modules are created when the compiler sees a module declaration in a source
 file for the first time during a consult or reconsult. Every module has a name which must be a
@@ -62,3 +62,29 @@ d.
 ````
 If module hello had been closed by the EOF of the user file, then the d/0 fact would have appeared in the user module instead of the hello module. Consequently, it is important to always terminate a module with endmod. That is, module and end mod should always be used in matched pairs.
 
+###3.2 Sharing Procedures Between Modules
+By default, all the procedures defined in a given module are visible only within that
+module. This is how name conflicts are avoided. However, the point of the module
+system is to allow controlled access to procedures defined in other modules. This
+task is accomplished by using export declarations and use lists . Export declarations render a given procedure visible outside the module in which it is defined,
+while use lists specify visibility relationships between modules. Each module has
+a use list.
+
+###3.3 Finding Procedures in Another Module
+
+Whenever the Prolog system tries to call a procedure, it first looks for that procedure in the module where the call occured. This is done automatically, and independently of use list and inheritance declarations.
+If the called procedure p/n is not defined in some module, say M, from which it
+is called, then the system will search the use list of M for a module M1 that exports
+the procedure (p/n) in question. If such a module M1 is found, then all occurrences
+of the procedure p/n in the calling module M will be ‘forwarded’ to the procedure
+p/n defined in the module M1. After the procedure p/n has been forwarded from
+module M to another module M1, all future calls to procedure p/n from within M
+will be automatically routed to the proper place in M1 without further intervention
+of the module system.
+The forwarding process is determinate. That is, once a call on procedure p/n has
+been forwarded to p/n in module M1, even if backtracking occurs, ALS Prolog
+will not attempt to locate another module M2 containing a procedure to which p/n
+can be forwarded.  Finally, if no module on the use list for M exports the procedure in question (p/n),
+then the procedure p/n is undefined in M, and the call fails.
+
+####3.3.1 Export Declarations
