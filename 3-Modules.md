@@ -170,7 +170,7 @@ ALS Prolog does not currently support the nesting of modules in the way Pascal
 does for procedures. Instead, ALS Prolog allows modules to be nested, but processes each nested module independently. Consequently, the visibility of a nested module is not limited to the module in which it is declared. The following example illustrates the effect of placing code for one module inside of another module declaration. The Prolog code below shows a declaration for a module rhyme, containing
 a three clause Prolog procedure called animal/1. The module is closed off by the
 last endmod declaration. In between the last two clauses of the animal/1 procedure is the module reason. The module reason has a two clause procedure named mineral/1.
-
+````
 module rhyme.
 export animal/1.
 
