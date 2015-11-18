@@ -181,3 +181,28 @@ The inheritance relations among these classes is shown in the Figure below.
 {ADD FIGURE}
 
 Figure. Example Class Inheritance Relations.
+
+The state-schemata (not including the slots provided by genericObjects) for
+each of these classes are shown below:
+````
+vehicle        - [locomotionType, powerSource]
+wheeledVehicle - ]locomotionType, powerSource, numWheels]
+automobile     - [locomotionType, powerSource, numWheels,
+                  engine,autoClass,manufacturer]
+wingedVehicle  - [locomotionType, powerSource, numWings]
+````
+An object which is instance of a class has a slot in its state structure corresponding
+to each entry in the state-schema for the class.  A class definition can supply default values for slots using the equation:
+
+    defaults = list of default values for slots
+
+More specifically, the expression on the right should be a (possibly empty) list of
+equation pairs
+
+    <SlotName> = <Value>,
+
+where <SlotName> is any one of the slotnames from the complete state schema of
+the class, and <Value> is any appropriate value for that slot. Omitting this keyword
+in a class definition is equivalent to including
+
+    defaults = []
