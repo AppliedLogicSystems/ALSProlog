@@ -4,7 +4,7 @@ and their variants will translate the textual representation for programs and da
 the internal representations used by the Prolog system. This section describes what
 kinds of syntactic objects can appear in source files and how they are interpreted.
 
-###2.1 Source Terms
+##2.1 Source Terms
 
 Every Prolog source file must be a sequence of zero or more Prolog terms, each
 term followed by a period (.) and a white space character. A period followed by a
@@ -13,7 +13,7 @@ show where one term ends and another begins. Each term in a file is treated as a
 closed logical formula. This means that even though two seperate terms have variable names in common, each term’s variables are actually distinct from the variables in any other term. Most variables are quantified once for each term. However, there is a special variable, the anonymous variable (written ‘_ ’), which is quantified for each occurrance. This means that within a single term, every occurrance
 of ‘_’ is a different variable.
 
-####2.1.1 Rules
+###2.1.1 Rules
 
 A rule is the most common programming construct in Prolog. A rule says that a
 particular property holds if a conjunction of properties holds. Rules are always written with :-/2 as the principal functor. The first argument of the :- is called the
@@ -27,7 +27,7 @@ consult/1 and reconsult/1 load rules (and facts - see below) from a source
 file into the internal run-time Prolog database in the order they occur in the source
 file.
 
-####2.1.2 Facts
+###2.1.2 Facts
 
 A fact is any term which is not a rule and which cannot be interpreted as a directive
 or declaration. For example,
@@ -45,7 +45,7 @@ Modules.{ADD LINK}  More specifically, a fact is any term that cannot be interpr
 As with rules, consult/1 and reconsult/1 load facts (and rules)from a source
 file into the internal database in the order they occur in the source file.
 
-####2.1.3 Commands and Queries
+###2.1.3 Commands and Queries
 
 A command or directive is any term whose principal functor is :-/1. Queries are
 terms whose principal functor is ?-/1. The single argument to a command or query
@@ -96,7 +96,7 @@ no.
 
 Notice that when a success answer is printed, the shell waits for input from the user.  If the user types a semi-colon (;), the shell attempts to find further solutions for the query, and prints the next one if found, or "no." if no solutions are found.  Any input other than a semi-colon is interpreted to mean that no further solutions are required.
 
-####2.1.4 Declarations
+###2.1.4 Declarations
 
 Declarations are terms that have a special interpretation when seen by consult
 or reconsult. Here are some example declarations:
@@ -106,10 +106,10 @@ export a/1, b/2, c/3.
 module foobar.
 ````
 
-###2.2 Program Files
+##2.2 Program Files
 Program files are sequences of source terms that are meant to be read in by consult/1 or reconsult/1, which interpret the terms as either clauses, declarations, commands, or queries.
 
-####2.2.1 Consulting Program Files
+###2.2.1 Consulting Program Files
 
 To consult a file means to read the file, load the file’s clauses into the internal Prolog database, and execute any commands or directives occurring in the file. Reconsulting a file causes part or all of the current definitions in the internal prolog database for
 procedures which occur in the file to be discarded and the new ones (from the file) to be loaded, as well as executing any commands or directives in the file (again). See Chapter 11 (Prolog Builtins: Non-I/O) consult/1.  {ADD LINK}
@@ -156,7 +156,7 @@ The clauses for p originally loaded from file1 will remain undisturbed. The
 clauses currently in memory for p originally from file3 will be discarded, and the
 new clauses from file3 will be loaded.
 
-####2.2.2 Using Filenames in Prolog
+###2.2.2 Using Filenames in Prolog
 
 Note: Complete path names to files are of course quite variable across operating
 systems. The discussions below are only intended to describe those aspects of file
@@ -224,7 +224,7 @@ Of course, if additional searchdir/1 have been asserted or retracted, this order
 will be modified. Note, in particular, that searchdir/1 assertions for module
 builtins can be included in an ALS Prolog autoload file.
 
-####2.2.3 How are Filename Extensions treated?
+###2.2.3 How are Filename Extensions treated?
 
 For your convenience, if you have a file ending with a .pro or a .pl extension, you
 don’t have to type the extension in calls to the program loading predicates. The
@@ -263,7 +263,7 @@ For the system to correctly decide which file is newer, .pro or .obp, the system
 
 The directories in which Prolog files reside should be writeable by ALS Prolog so that .obp versions of Prolog source files can be produced. ALS Prolog has facilities for controlling where these *.obp files are placed, and correspondingly, where they are searched for when (re-)loading files.
 
-####2.2.4 Splitting up Prolog Programs
+###2.2.4 Splitting up Prolog Programs
 
 It is common practice to place lines of the form
 
@@ -276,7 +276,7 @@ where the command occurred. This facility is similar to the #include facility fo
 in C. A full description of all predicates for loading programs can be found on the
 builtins reference page for consult/1.
 
-###2.3 Preprocessor Directives.
+##2.3 Preprocessor Directives.
 
 Assume that PFile is the name of a file being consulted into ALS Prolog. If <Filename> is the name of another valid Prolog source file, then the effect of the preprocessor directive
 
