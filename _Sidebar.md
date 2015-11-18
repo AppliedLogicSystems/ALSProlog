@@ -6,4 +6,6 @@
 
 [[2 Prolog Source Code]]
 
+[[3 Modules]]
+
 [[ALS Prolog Language: Extensions]]
