@@ -1,4 +1,4 @@
-##5 Abstract Data Types: Structure Definition
+##[5 Abstract Data Types: Structure Definition](id:5-Abstract)
 
 One powerful modern programming idea is the use of abstract data types to hide the
 inner details of the implementation of data types. The arguments in favor of this
