@@ -107,3 +107,24 @@ the values of the slots in the structure.
 
 The name of the unary predicate used for obtaining a fresh structure of the defined
 type.
+
+###5.1.4 structLabel
+
+The name of the functor of the structure defined.
+
+###5.1.5 propertiesList
+
+This is a list of slot specifications. A slot specification is one of the following:
+* an atom, which is the name of the particular slot, or
+* an expression of the form
+
+    SlotName/Term,
+
+where SlotName is an atom serving as the name of this slot, and Term is an
+arbitrary Prolog term which is the default value of this particular slot, or
+* an include expression which is a term of the form
+
+    include(File, Type)
+
+where File is a path to a file, and Type is the name of a defStruct which appears in that file; if File can be located, and if the defStruct Type appears in File, the elements of propertiesList for Type are interpolated at the point where the include expression occurred; include expressions may be
+recursively nested. [Note: The typecomp compiler does not change its directory location when handling include expressions. Thus, if you utilize relative paths in recursive includes, these paths must always be valid from the directory in which the compiler was invoked.]
