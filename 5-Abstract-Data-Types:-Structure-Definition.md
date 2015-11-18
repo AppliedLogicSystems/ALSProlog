@@ -69,3 +69,41 @@ export xmakeWindowStruct/2.
 xmakeWindowStruct(wi(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J),
                   [_A,_B,_C,_D,_E,_F,_G,_H,_I,_J]).
 ````
+Now let us examine the details.
+
+##5.1 Specifying Structure Definitions
+
+defStructs directives are simply expressions of the form:
+
+    :-defStruct(Name, EqnsList).
+
+These are simply binary Prolog terms whose functor is defStruct. The first argument is an atom functioning as an identifying name for the type (it has no other
+use at present). The second argument is a list of equality statements providing the
+details of the definition. An equality statement is an expression of the form:
+
+    Left = Right
+
+For defStructs, the left component of the equality statements must be one of the following atoms:
+* propertiesList
+* accessPred
+* setPred
+* makePred
+* structLabel
+The right sides of the defStruct equality statements are Prolog terms whose structure depends on the left side entry. The right side corresponding to ’propertiesList’
+is a list of atoms which are the symbolic names of the properties or slots of the structure being defined. For all of the rest of the equality statements, the right side is
+a single atom. The roles of these right side atoms are described below:
+
+###5.1.1 accessPred
+
+The name of the ternary (3-argument) predicate to be used for accessing the values
+of the slots in the structure.
+
+###5.1.2 setPred
+
+The name of the ternary (3-argument) predicate to be used for setting or changing
+the values of the slots in the structure.
+
+###5.1.3 makePred
+
+The name of the unary predicate used for obtaining a fresh structure of the defined
+type.
