@@ -149,3 +149,35 @@ all classes are ultimately subclasses of the genericObjects class. genericObject
 object’s name. Several other slots, normally non-visible, are also provided.
 
 A class is said to be an immediate subclass of the (parent) class named in the subclassOf equation. The relation subclass is the transitive closure of the immediate subclass relation.
+
+The atoms on the addl_slots list specify slots in the structure defining the state
+of objects which are instances of this class. These new slot names must not be slot
+names in any of the ancestor classes from which the new class inherits; hence the
+nomenclature “addl_slots”. The state-schema of a class is the union of the
+addl_slots of the class with the addl_slots of all classes of which the class
+is a subclass. Reiterating, it is required that the slot names occurring on all these
+addl_slot lists be distinct.
+
+Here are several examples of simple class definitions:
+````
+:- defineClass([name=vehicle,
+                subclassOf=genericObjects,
+                addl_slots=[locomotionType, powerSource] ]).
+
+:- defineClass([name=wheeledVehicle,
+                subclassOf=vehicle,
+                addl_slots=[numWheels] ]).
+
+:- defineClass([name=automobile,
+                subclassOf=wheeledVehicle,
+                addl_slots=[engine,autoClass,manufacturer] ]).
+
+:- defineClass([name=wingedVehicle,
+                subclassOf=vehicle,
+                addl_slots=[numWings] ]).
+````
+The inheritance relations among these classes is shown in the Figure below.
+
+{ADD FIGURE}
+
+Figure. Example Class Inheritance Relations.
