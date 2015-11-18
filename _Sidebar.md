@@ -1,6 +1,6 @@
 [[Home]]
 
-[[ALS Prolog Language: Standard Part]]
+**Prolog Language: Standard Part**
 
 [[1 The Syntax of ALS Prolog]]
 
@@ -10,7 +10,7 @@
 
 [[4 Using Definite Clause Grammars]]
 
-[[ALS Prolog Language: Extensions]]
+**ALS Prolog Language: Extensions**
 
 [[5 Abstract Data Types: Structure Definition]]
 
