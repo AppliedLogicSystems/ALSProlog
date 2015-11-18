@@ -165,3 +165,23 @@ Thus, the goal
 will create a wi(...) structure with default values and bind it to ThisWinStruct.
 Besides the generated unary ‘make’ predicates, two other construction predicates
 are created:
+````
+makePred=mkpr 
+    mkpr(Struct, ValsList) creates a new structured term whose functor is the right side of the
+    structLabel equality statement of the defStruct and whose arty list the length of the 
+    propertiesList of the defStruct, and unifies Struct with that newly created
+    term; 
+    ValsList should be a list of equations of the form SlotName = Value, where SlotName is one of 
+    the slots specified on PropertiesList; the newly created structured term will have
+    value Val at the postion corresponding to SlotName; 
+    these “local defaults” will override any “global defaults” specified in the defStruct.
+
+makePred=xmkpr 
+    mkpr(Struct,SlotVars) creates a new structured term whose functor is the right side of the     
+    structLabel equality statement of the defStruct and whose arty list the length of the 
+    propertiesList of the defStruct, and unifies Struct with that newly created term; 
+    no defaults are installed, and SlotVars is a list of the variables occurring in Struct. 
+    This binary predicate xmkprmkpr(Struct,SlotVars) is equivalent to
+
+        Struct =.. [ StructLabel | SlotVars].
+````
