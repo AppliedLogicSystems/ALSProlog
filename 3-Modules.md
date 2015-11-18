@@ -6,7 +6,7 @@ The ALS module system only partitions procedures, not constants. This means that
 the procedure foo/2 may have different meanings in different modules, but that
 the constant bar is the same in every module.
 
-###3.1 Declaring a Module
+##3.1 Declaring a Module
 
 New modules are created when the compiler sees a module declaration in a source
 file for the first time during a consult or reconsult. Every module has a name which must be a
@@ -62,7 +62,7 @@ d.
 ````
 If module hello had been closed by the EOF of the user file, then the d/0 fact would have appeared in the user module instead of the hello module. Consequently, it is important to always terminate a module with endmod. That is, module and end mod should always be used in matched pairs.
 
-###3.2 Sharing Procedures Between Modules
+##3.2 Sharing Procedures Between Modules
 By default, all the procedures defined in a given module are visible only within that
 module. This is how name conflicts are avoided. However, the point of the module
 system is to allow controlled access to procedures defined in other modules. This
@@ -70,7 +70,7 @@ task is accomplished by using export declarations and use lists . Export declara
 while use lists specify visibility relationships between modules. Each module has
 a use list.
 
-###3.3 Finding Procedures in Another Module
+##3.3 Finding Procedures in Another Module
 
 Whenever the Prolog system tries to call a procedure, it first looks for that procedure in the module where the call occured. This is done automatically, and independently of use list and inheritance declarations.
 
@@ -90,7 +90,7 @@ can be forwarded.
 Finally, if no module on the use list for M exports the procedure in question (p/n),
 then the procedure p/n is undefined in M, and the call fails.
 
-####3.3.1 Export Declarations
+###3.3.1 Export Declarations
 
 An _export declaration_ tells the module system that a particular predicate defined in one module may be
 called from other modules. Here are some export declarations:
@@ -102,7 +102,7 @@ export a/0, b/0, c/0.
 Export declarations can occur anywhere within a module. However, one good programming style dictates that procedures are exported just before they’re defined.
 Another stylistic alternative is to group all the export declarations for a module together in the beginning of the module. The only restriction is that visible procedures must be exported before they can be called from another module. This can happen during the execution of a command or query inside a consult.
 
-####3.3.2 Use Lists
+###3.3.2 Use Lists
 
 Associated with each module M is a _use list_ of other modules where procedures not
 defined in the given module M may be found. Use lists are built by use declarations which take the forms
@@ -139,7 +139,7 @@ Figure 1 (Use List Searching).
 
 Figure 1. Use List Searching
 
-###3.4 Default Modules
+##3.4 Default Modules
 Two modules, builtins and user, are automatically created when the ALS Prolog system starts up. The builtins module contains code that defines the standard builtin predicates of the system. All modules automatically use the builtins module, as suggested in Figure 1 (Use List Searching), so therefore the following declaration is implicit:
 
     use builtins.
@@ -148,7 +148,7 @@ user is the default module. Any source code that is not contained within an expl
 declaration is automatically placed in the user module. In addition, the user
 module automatically uses every other module (in the order the modules are actually created), so it inherits all exported procedures.
 
-###3.5 References to Specific Modules
+##3.5 References to Specific Modules
 
 In addition to the export and use list conventions, the module system allows access to specific modules via the operator :/2, whose left hand argument is interpreted as the name of a module, and whose right hand argument is the goal to be called. The access is independent of export declarations. In the following example, the procedure zip in module1 specifically references the procedure bar in module2, even though bar isn’t exported from module2:
 ````
@@ -164,7 +164,7 @@ As this example demonstrates, the export declarations of a module aren’t sacre
 and the lack of an export declaration can be overridden by :/2. However, good software engineering practice suggests that explict references be used only when there are compelling reasons for
 avoiding the use list and export declaration mechanism.
 
-###3.6 Nested Modules
+##3.6 Nested Modules
 
 ALS Prolog does not currently support the nesting of modules in the way Pascal
 does for procedures. Instead, ALS Prolog allows modules to be nested, but processes each nested module independently. Consequently, the visibility of a nested module is not limited to the module in which it is declared. The following example illustrates the effect of placing code for one module inside of another module declaration. The Prolog code below shows a declaration for a module rhyme, containing
@@ -206,7 +206,7 @@ animal(tiger).
 As you can see, even though the module reason was nested in the module rhyme,
 the two modules are processed independently.
 
-###3.7 Facilities for Manipulating Modules
+##3.7 Facilities for Manipulating Modules
 
 When Prolog starts up, the current module is user. This means that any queries you submit will make use of the procedures defined within user and the modules which are accessible from user’s use list. The current module can always be determined using curmod/1.   It is called with an uninstantiated variable which is then bound to the current module. The predicate modules/2 can be used to determine all of the modules currently in the system, together with their use lists. Assume that the following code has been consulted:
 ````
