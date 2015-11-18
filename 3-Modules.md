@@ -164,3 +164,44 @@ As this example demonstrates, the export declarations of a module aren’t sacre
 and the lack of an export declaration can be overridden by :/2. However, good software engineering practice suggests that explict references be used only when there are compelling reasons for
 avoiding the use list and export declaration mechanism.
 
+###3.6 Nested Modules
+
+ALS Prolog does not currently support the nesting of modules in the way Pascal
+does for procedures. Instead, ALS Prolog allows modules to be nested, but processes each nested module independently. Consequently, the visibility of a nested module is not limited to the module in which it is declared. The following example illustrates the effect of placing code for one module inside of another module declaration. The Prolog code below shows a declaration for a module rhyme, containing
+a three clause Prolog procedure called animal/1. The module is closed off by the
+last endmod declaration. In between the last two clauses of the animal/1 procedure is the module reason. The module reason has a two clause procedure named mineral/1.
+
+module rhyme.
+export animal/1.
+
+animal(frog).
+animal(monkey).
+
+          % The following module declaration
+          % (temporarily) closes off the rhyme module
+          % in addition to starting the reason module:
+
+module reason.
+export mineral/1.
+
+mineral(glass).
+mineral(silver).
+endmod. % reason
+
+animal(tiger).
+endmod. % rhyme
+````
+Here is a conversation with the Prolog shell illustrating the effects of loading the
+above code:
+````
+?-listing.
+% reason:mineral/1.
+mineral(glass).
+mineral(silver).
+% rhyme:animal/1.
+animal(frog).
+animal(monkey).
+animal(tiger).
+````
+As you can see, even though the module reason was nested in the module rhyme,
+the two modules are processed independently.
