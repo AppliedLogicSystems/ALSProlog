@@ -276,3 +276,57 @@ where the command occurred. This facility is similar to the #include facility fo
 in C. A full description of all predicates for loading programs can be found on the
 builtins reference page for consult/1.
 
+###2.3 Preprocessor Directives.
+
+Assume that PFile is the name of a file being consulted into ALS Prolog. If <Filename> is the name of another valid Prolog source file, then the effect of the preprocessor directive
+
+    #include “<Filename>”
+
+is to textually include the lines of <Filename> into PFile as if they had actually
+occurred in PFile at the point of the directive.
+
+The conditional preprocessor directives #if, #else, #elif, and #endif behave more or less as they do for C programs. However, the expressions following the #if and #elif are taken to be Prolog goals, and are evaluated in the current environment, just as for embedded commands of the form :- G. Here are some
+examples. Let f1.pro be the following file:
+````
+:-dynamic(z/1).
+%z(f).
+p(a).
+#if (user:z(f))
+p(b).
+#else
+p(c).
+#endif
+p(ff).
+````
+After consulting f1.pro, we use listing/0 to see what happened:
+````
+?- listing.
+% user:p/1
+p(a).
+p(c).
+p(ff).
+yes.
+````
+In this case, p(c) was loaded, but not p(b). Now let f2.pro be the following file:
+````
+:-dynamic(z/1).
+z(f).
+p(a).
+#if (user:z(f))
+p(b).
+#else
+p(c).
+#endif
+p(ff).
+````
+After consulting f2.pro to a clean image, we obtain the following:
+````
+?- listing.
+% user:p/1
+p(a).
+p(b).
+p(ff).
+% user:z/1
+z(f).
+````
+This time, p(b) was loaded instead of p(c).
