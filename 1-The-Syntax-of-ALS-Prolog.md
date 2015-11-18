@@ -1,8 +1,7 @@
-##[1 The Syntax of ALS Prolog](id:1-Syntax)
 This chapter describes the syntax of ALS Prolog, which is for the most part the syntax of the ISO Prolog standard. Prolog syntax is quite simple and regular, which is
 a great strength.
 
-###1.1 Constants
+##1.1 Constants
 The simplest Prolog data type is a constant, which comes in two flavors:
 * atoms (sometimes called _**symbols**_)
 * numbers  
@@ -12,7 +11,7 @@ language. Names in natural languages refer to things (which covers a lot of
 ground), and constants in Prolog are be used to refer to things when the language is
 interpreted.
 
-####1.1.1 Numbers
+###1.1.1 Numbers
 
 Prolog uses two representations for numbers:
 * integer
@@ -23,7 +22,7 @@ integer, a floating point representation can be used instead. This means that ex
 This type _coercion_ is carried out consistently within the Prolog system.
 There is no automatic conversion of floating point numbers into integers.  (Note that the ISO Prolog standard now forbids this kind of conversion.)
 
-#####Integers
+####Integers
 The textual representation of an integer consists of a sequence of one or more digits (0 through 9) optionally preceded by a ‘-’ to signify a negative number. The parser
 assumes that all integers are written using base ten, unless the special binary, octal,
 or hexadecimal notation is used.
@@ -43,7 +42,7 @@ Here are some examples of integers:
 
 It is important to note that a term of the form `+5` is not an integer, but instead is a structured term.
 
-#####Floating point numbers
+####Floating point numbers
 
 Floating point numbers are slightly more complex than integers in that they may
 have either a fractional part, an exponent, or both. A _**fractional floating point number**_ consists of a sequence of one or more numeric characters, followed by a dot (‘.’), in turn followed by another sequence of one or more numeric characters; the entire expression may optionally be preceded by a ‘-’. Here are some examples of
@@ -58,7 +57,7 @@ point numbers with exponents:
 
     0.1e-3  10E99  -44.66e-88  0E-0
 
-#####ASCII Codes
+####ASCII Codes
 
 ASCII (American Standard Code for Information Interchange) codes are small integers between 0 and 255 inclusive that represent characters. The parser will translate any printable character into its corresponding ASCII integer. In order to get the ASCII code for a character, precede the character by the characters `0’`. For example, the code for the characters ‘A’, ‘8’, and ‘%’ would be given by:  
 
@@ -88,18 +87,18 @@ There also exists a small collection of symbolic control characters which can be
 | 0’\t | 0’\011     | 0’\x9    | 9          | horizontal tab |
 | 0’\v | 0’\147     | 0’\x77   | 119        | vertical tab   |
 
-#####Atoms
+####Atoms
 
 An atom is a sequence of characters that are parsed together as a constant.
 
-######Alphanumeric atoms
+#####Alphanumeric atoms
 
 An alphanumeric atom is a sequence of characters that begins with a lower case letter, and is followed by zero or more alphanumeric characters, possibly including
 ‘_’.  Here are some examples of alphanumeric atoms:  
 
     foobar123  zIPPY  bread_and_butter  money
 
-######Quoted atoms
+#####Quoted atoms
 
 A quoted atom is formed by placing any sequence of characters between single
 quotes (’).  A single quote can be included in the text of the atom by using two
@@ -123,7 +122,7 @@ atom:
     We fly over the sky. \
     -- Algonquin poem.’
 
-######Special atoms
+#####Special atoms
 
 A special atom is any sequence of characters from the following set:  
 
@@ -136,13 +135,13 @@ er examples of special atoms are:
 
 Most special atoms are automatically read as quoted atoms unless they have been declared as operators (See Section 1.7 Operators {ADD LINK}).
 
-###1.2 Variables
+##1.2 Variables
 
 A variable consists of either a _ (underbar character) or an upper case letter, followed by a sequence of alphanumeric characters and dollar signs. Here are some variables:  
 
     Variable X123a _a$bc _123 _
 
-###1.3 Compund Terms
+##1.3 Compund Terms
 
 A compound term is consists of a symbolic constant, called a functor, followed
 by a left parenthesis followed by one or more terms separated by commas, followed
@@ -153,7 +152,7 @@ parentheses is called the _arity_ of the structure. For example, the compound te
 
 has arity 3.
 
-###1.4 Curly Braces
+##1.4 Curly Braces
 
 Instead of prefixing a structured term with a functor, the curly brace notation allows
 a sequence of terms, separated by commas, to be grouped together in a comma list
@@ -165,7 +164,7 @@ parses internally into:
 
     ’{}’((all,the,young,dudes))  
 
-###1.5 Lists
+##1.5 Lists
 
 The simplest list is the empty list, represented by the atom ‘[]’. Any other list is
 a structured term with `./2` as principal functor and whose second argument is a list.
@@ -188,7 +187,7 @@ specified explicitly by using `|`, as in these examples:
 The list notation for lists is preferrable to using ‘.’ explicitly because the dot is also
 used in floating point numbers and to signal termination of input terms.
 
-###1.6 Strings
+##1.6 Strings
 
 A string is any sequence of characters enclosed in double quotes ("). The parser automatically translates any string into the list of ASCII codes that corresponds to the characters between the quotes. For example, the string  
 
@@ -203,7 +202,7 @@ Double quotes can be embedded in strings by either repeating the double quote or
     "She said, ""hi.""".
     "She said, \"hi.\"".
 
-###1.7 Operators
+##1.7 Operators
 
 The prefix functor notation is convenient for writing terms with many arguments. However, Prolog allows a program to define a more readable syntax for structured terms with one or arguments. For example, the parser recognizes the text  
 
@@ -215,7 +214,7 @@ as an expression representing
 
 because the special atom + is declared as an infix operator. Infix operators are written between their two arguments. For the other operator types, prefix and postfix, the operator (functor) is written before (prefix) or after (postfix) the single argument to the term.
 
-#####What Makes an Operator?
+####What Makes an Operator?
 
 Operators are either alphanumeric atoms or special atoms which have a corresponding _precedence_ and _associativity_. The associativity is sometimes referred to as the _type_ of an operator. Operators may be declared by using the `op/3` builtin.  Precedences range from 1 to 1200 with the lower precedences having the tightest binding. Another way of looking at this is that in an expression such as `1*X+Y`, the
 operator with the highest precedence will be the principal functor. So `1*X+Y` is
@@ -272,15 +271,15 @@ The next table describes the predefined prefix operators for ALS Prolog:
 | trace    |  fx       |  800       |  ~       |  fy       |  300       |
 | spy      |  fx       |  800       |  &nbsp;  |  &nbsp;   |  &nbsp;    |   
 
-####Special Cases
+###Special Cases
 
 It is possible to declare an operator via `op/3` that can never be parsed. Even though quoted atoms can be assigned a precedence and associativity, the parser will only interpret alphanumeric atoms or special atoms as operators.
 
-####White space
+###White space
 
 _White space_, or _layout characters_, refers to the part of source code, data, and goals that is not made up of readable characters. The term white space comes from the fact that these unreadable characters appear white when source code is printed on a sheet of white paper. White space is any sequence of spaces, tabs, or new lines.  ￼￼￼Generally speaking, white space has little meaning to the parser. It is occasionally important for recognizing full stops, and for delimiting constructs which, if they were run together, would not be recognizable as separate constructs. There are also places where additional white space is either inappropriate or changes the meaning of the text. For example, you can’t embed a space in a number.
 
-###1.8 Comments
+##1.8 Comments
 
 Comments can be put anywhere white space can occur. Comments can take one of two forms:  
 
@@ -306,7 +305,7 @@ connected(doggone, fishbone).  % look good
                                % you write  
 ```
 
-###1.9 Preprocessor Directives: Syntax
+##1.9 Preprocessor Directives: Syntax
 
 ALS Prolog supports _**preprocessor directives**_ which can affect the text at the time the program is compiled (or loaded into an image). These expressions include the
 following:  
