@@ -263,3 +263,16 @@ For the system to correctly decide which file is newer, .pro or .obp, the system
 
 The directories in which Prolog files reside should be writeable by ALS Prolog so that .obp versions of Prolog source files can be produced. ALS Prolog has facilities for controlling where these *.obp files are placed, and correspondingly, where they are searched for when (re-)loading files.
 
+####2.2.4 Splitting up Prolog Programs
+
+It is common practice to place lines of the form
+
+    :- [file1,file2].
+
+in files which are being consulted. This will cause both file1 and file2 to also be
+consulted. For both the consult and reconsult operations, this directive behaves as
+if the text for file1 and file2 was placed in the file being consulted at the place
+where the command occurred. This facility is similar to the #include facility found
+in C. A full description of all predicates for loading programs can be found on the
+builtins reference page for consult/1.
+
