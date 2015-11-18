@@ -73,18 +73,76 @@ a use list.
 ###3.3 Finding Procedures in Another Module
 
 Whenever the Prolog system tries to call a procedure, it first looks for that procedure in the module where the call occured. This is done automatically, and independently of use list and inheritance declarations.
-If the called procedure p/n is not defined in some module, say M, from which it
-is called, then the system will search the use list of M for a module M1 that exports
+
+If the called procedure p/n is not defined in a module, M, from which it is called, then the system will search the use list of M (see 3.3.2 below) for a module M1 that exports
 the procedure (p/n) in question. If such a module M1 is found, then all occurrences
 of the procedure p/n in the calling module M will be ‘forwarded’ to the procedure
 p/n defined in the module M1. After the procedure p/n has been forwarded from
 module M to another module M1, all future calls to procedure p/n from within M
 will be automatically routed to the proper place in M1 without further intervention
 of the module system.
+
 The forwarding process is determinate. That is, once a call on procedure p/n has
 been forwarded to p/n in module M1, even if backtracking occurs, ALS Prolog
 will not attempt to locate another module M2 containing a procedure to which p/n
-can be forwarded.  Finally, if no module on the use list for M exports the procedure in question (p/n),
+can be forwarded.  
+
+Finally, if no module on the use list for M exports the procedure in question (p/n),
 then the procedure p/n is undefined in M, and the call fails.
 
 ####3.3.1 Export Declarations
+
+An _export declaration_ tells the module system that a particular predicate defined in one module may be
+called from other modules. Here are some export declarations:
+````
+export translate/3.
+export reduce/2, compose/3.
+export a/0, b/0, c/0.
+````
+Export declarations can occur anywhere within a module. However, one good programming style dictates that procedures are exported just before they’re defined.
+Another stylistic alternative is to group all the export declarations for a module together in the beginning of the module. The only restriction is that visible procedures must be exported before they can be called from another module. This can happen during the execution of a command or query inside a consult.
+
+####3.3.2 Use Lists
+
+Associated with each module M is a _use list_ of other modules where procedures not
+defined in the given module M may be found. Use lists are built by use declarations which take the forms
+````
+use mod
+use mod1, mod2, ...
+````
+where mod, mod1, mod2 are the names of the modules to be used. Here are some examples:
+````
+use bitOps, splineOps.
+use polygons.
+````
+Each use declaration adds the referenced module to the front of the existing use list
+for the module M in which the use declaration occurs. If there is more than one
+module in a given use declaration (as in the first example above), then the listed
+modules are added to the front of the existing use list in reverse order from their
+original order in the use declaration. During the forwarding process, use lists are
+always searched from left to right. This means that the most recently ‘used’ modules (i.e., those whose use declaration was made most recently) will be searched first. Here’s an example of a module with use declarations building a use list:
+````
+module graphics.
+use bitOps, splineOps.
+use polygons.
+test :- drawPoly(5, 0, 0).
+endmod.
+````
+In this example, the resulting use list for module graphics would be:
+
+    polygons, splineOps, bitOps
+
+and this is the order in which the modules will be searched, as shown in
+Figure 1 (Use List Searching).
+
+graphics
+
+polygons
+
+splineOps
+
+bitOps
+
+builtins
+
+Figure 1. Use List Searching
