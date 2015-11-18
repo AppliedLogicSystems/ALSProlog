@@ -135,14 +135,6 @@ In this example, the resulting use list for module graphics would be:
 and this is the order in which the modules will be searched, as shown in
 Figure 1 (Use List Searching).
 
-graphics
-
-polygons
-
-splineOps
-
-bitOps
-
-builtins
+{FIGURE MISSING - REPLACE}
 
 Figure 1. Use List Searching
