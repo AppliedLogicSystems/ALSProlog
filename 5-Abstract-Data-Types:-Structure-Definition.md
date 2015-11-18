@@ -20,3 +20,23 @@ no loss in performance. See Section [Ref: Macros] for more information.)
 Consider the following example which is a simplified version of a defStruct used in
 an early ALS windowing package. The definition of the structure is declaratively
 specified by the following in a file with extension .typ, say wintypes.typ :
+````
+:- defStruct(windows,
+  [
+    propertiesList =
+       [windowName,        % name of the window
+        windowNum,         % assigned by window sys
+        borderColor/blue,  % for color displays
+        borderType/sing,   % single or double lines
+        uLR, uLC,          % coords(Row,Col) of upper Left corner
+        lRR, lRC,          % coords(Row,Col) of lower Right corner
+        fore/black,        % foreground/background
+        back/white         % text attribs
+       ],
+    accessPred = accessWI,
+    setPred = setWI,
+    makePred = makeWindowStruct,
+    structLabel = wi
+  ]
+).
+````
