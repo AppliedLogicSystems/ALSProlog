@@ -121,3 +121,31 @@ is provided. This is merely syntactic sugar for
 
 That is, the implementation makes no attempt to verify that a send_self message
 is being truly sent from an object to itself.
+
+##6.3 Defining Classes
+
+A class is defined by a directive of the form
+
+    :- defineClass(Eqns).
+
+Here Eqns is a list of equations of the form
+
+    Keyword = Value
+
+The acceptable keywords, together with their associated Value types, are the following:
+````
+name       - atom
+subclassOf - atom (name of a (parent) classe)
+addl_slots - list of atoms (names of local slots)
+defaults   - list of default values for slots
+consorts   - list of constraint expressions for slots
+export     - yes or no
+action     - atom
+````
+The name equation and the subclassOf equation are both required.
+
+The ObjectPro system pre-defines one top-level class named genericObjects;
+all classes are ultimately subclasses of the genericObjects class. genericObjects provides one visible slot, myName, which is always instantiated to the
+object’s name. Several other slots, normally non-visible, are also provided.
+
+A class is said to be an immediate subclass of the (parent) class named in the subclassOf equation. The relation subclass is the transitive closure of the immediate subclass relation.
