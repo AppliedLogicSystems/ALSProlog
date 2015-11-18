@@ -147,3 +147,20 @@ Two modules, builtins and user, are automatically created when the ALS Prolog sy
 user is the default module. Any source code that is not contained within an explicit module
 declaration is automatically placed in the user module. In addition, the user
 module automatically uses every other module (in the order the modules are actually created), so it inherits all exported procedures.
+
+###3.5 References to Specific Modules
+
+In addition to the export and use list conventions, the module system allows access to specific modules via the operator :/2, whose left hand argument is interpreted as the name of a module, and whose right hand argument is the goal to be called. The access is independent of export declarations. In the following example, the procedure zip in module1 specifically references the procedure bar in module2, even though bar isn’t exported from module2:
+````
+module module1.
+zip :- module2:bar.
+endmod.
+
+module module2.
+bar :- true.
+endmod.
+````
+As this example demonstrates, the export declarations of a module aren’t sacred
+and the lack of an export declaration can be overridden by :/2. However, good software engineering practice suggests that explict references be used only when there are compelling reasons for
+avoiding the use list and export declaration mechanism.
+
