@@ -12,4 +12,4 @@
 
 [[ALS Prolog Language: Extensions]]
 
-[5 Abstract Data Types: Structure Definition](https://github.com/AppliedLogicSystems/ALSProlog/wiki/ALS-Prolog-Language%3-Extensions#1-Abstract)
+[5 Abstract Data Types: Structure Definition](https://github.com/AppliedLogicSystems/ALS-Prolog/wiki/ALS-Prolog-Language:-Extensions#5-Abstract)
