@@ -33,3 +33,31 @@ sent to objects by calls of the form
 send(Object, Message).
 In general, objects are created, held in variables, passed around among routines, and
 sent messages in the stype above. When necessary, an object can be assigned a global name when it is created which can be used for sending messages to the object.
+
+An object’s methods are determined by the class to which it belongs.
+A class is determined by three things:
+* A local state-schema which describes the structure of part of the state of any
+object belonging to the class;
+* The methods directly associated with the class;
+* The classes from which this class inherits.
+Classes are also required to have names -- these are principally used in defining objects. 
+
+The complete _state-schema_ for a class C is a structure whose collection of
+slots is the union of all of the slots appearing in the local state-schemata of classes
+from which C inherits, together with the slots from the local state-schemata of C.
+Slots in child classes must be distinct from slots in all ancestor classes. 
+
+The methods associated with a class are defined by Prolog clauses which can utilize various
+primitive predicates for manipulating objects, as well as any ordinary Prolog predicates.
+
+Objects are activated by sending them message . The methods of the class to which
+the object belongs (or from which its class inherits) determine the object’s reaction
+to the message. A message can be an arbitrary Prolog term which may include uninstantiated variables, thus implementing the partially-instatiated message paradigm of Concurrent Prolog [Ref]
+The ALS ObjectPro system is integrated with the module system of ALS Prolog, in
+that class definitions in ALS ObjectPro may be exported from their defining modules so as to be visible in other modules, or may be left unexported, rendering them
+local to the defining module. However, each object ‘knows’ the module of its defining class, so that if one has hold of the object in a variable Object, then the call
+
+    send(Object, Message)
+
+can be made from the context of any module.
+
