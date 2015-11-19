@@ -92,4 +92,27 @@ X is an ordinary Prolog binding which will not survive either backtracking or re
 to the top level of the Prolog shell. Thus variables in a structure which is bound to a global variable do not inherit the globalness of the outermost binding.
 
 Here are some examples:
-
+````
+?- gv_alloc(N), gv_set(N,hi), write(hi).
+hi
+N = 2
+yes.
+?- gv_get(2,V),write(V).
+hi
+V = hi
+yes.
+?- gv_set(2,bye).
+yes.
+?- gv_get(2,V1),write(V1),nl,fail;
+gv_get(2,V2),write(V2).
+bye
+bye
+V1 = _4
+V2 = bye
+yes.
+?- gv_get(2,V).
+V = bye
+````
+Note that gv_set/2 is a constant time operation so long as the second argument
+is an atom or integer. Otherwise, it requires time linearly proportional to the current
+depth of the choicepoint stack.
