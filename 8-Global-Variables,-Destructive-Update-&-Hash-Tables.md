@@ -253,3 +253,19 @@ Size        = arity of the hashArray(...) term;
 
 RehashCount = counts (down) the number of hash entries which have been
 made; when then counter reaches 0, the table is expanded and rehashed.
+````
+The basic (non-multi) versions of these predicates overwrite existing key values;
+i.e., if Key-Value0 is already present in the table, then hash inserting Key-Value1
+will cause the physical entry for Value0 to be physcially altered to become Value1
+(using mangle/3).
+
+The "-multi" versions of these predicates do NOT overwrite existing values, but instead treat the Key-___ cons items as tagged pushdown lists, so that if
+
+    [Key Value0]
+
+was present, then after hash_multi_inserting Key-Value1, the Key part of the bucket looks like: 
+
+    [Key [Value1 Value0] ]; i.e., it is
+    [Key, Value1 Value0]
+
+Key hashing is performed by the predicate hashN(Key,Size,Depth,Index).
