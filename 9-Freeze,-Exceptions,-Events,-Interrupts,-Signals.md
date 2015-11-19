@@ -144,6 +144,7 @@ B= 1
 C= 1 
 D= 1
 yes. 
+````
 
 ##9.2 Exceptions
 The exception mechanism of ALS Prolog allows programs to react to extraordinary
