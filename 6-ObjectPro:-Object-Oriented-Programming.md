@@ -329,3 +329,74 @@ genericObjectsAction(get_value(SlotDesc,Value),State)
 genericObjectsAction(set_value(SlotDesc,Value),State)
     :-  setObjStruct(SlotDesc,State,Value).
 ````
+
+## 6.5 Examples
+
+The first simple example implements an elementary stack object:
+````
+:- defineClass([name=stacker,
+                subclassOf=[genericObjects],
+                addl_slots=[theStack, depth]
+   ]).
+
+:- defineObject([name=stack,
+                 instanceOf=stacker,
+                 values=[theStack=[], depth=0]
+   ]).
+
+stackerAction(push(Item),State)
+    :-  accessObjStruct(theStack, State, CurStack),
+        setObjStruct(theStack, State, [Item | CurStack]),
+        accessObjStruct(depth, State, CurDepth),
+        NewDepth is CurDepth + 1,
+        setObjStruct(depth, State, NewDepth).
+
+stackerAction(pop(Item),State)
+    :-  accessObjStruct(theStack, State, [Item |RestStack]),
+        setObjStruct(theStack, State, RestStack),
+        accessObjStruct(depth, State, CurDepth),
+        NewDepth is CurDepth - 1,
+        setObjStruct(depth, State, NewDepth).
+
+stackerAction(cur_stack(Stack),State)
+    :-  accessObjStruct(theStack, State, Stack).
+
+stackerAction(cur_depth(Depth),State)
+    :-  accessObjStruct(depth, State, Depth).
+````
+We can create a small loop to exercise an object of this class as follows:
+````
+run_stack :- 
+    create_object([instanceOf=stacker], Obj),
+    rs(Obj).
+
+rs(Obj)
+    :- write(’4stack:>’),flush_output,read(Msg),
+       rs(Msg, Obj).
+
+rs(quit, _).
+
+rs(M, Obj)
+    :- send(Obj, M),
+       printf(’Msg=%t\n’, [M]),
+       flush_output,
+       rs(Obj).
+````
+Here is a sample session using this code:
+````
+?- [stacker].
+Attempting to consult stacker...
+... consulted /apache/als_dev/tools/objects/new2/stacker.pro
+yes.
+?- run_stack.
+4stack:>push(2).
+Msg=push(2)
+4stack:>push(rr(tut)).
+Msg=push(rr(tut))
+4stack:>cur_stack(X).
+Msg=cur_stack([rr(tut),2])
+4stack:>pop(X).
+Msg=pop(rr(tut))
+4stack:>quit.
+yes.
+````
