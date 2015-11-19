@@ -17,3 +17,5 @@
 [[6 ObjectPro: Object Oriented Programming]]
 
 [[7 Working with Uninterned Atoms]]
+
+[[8 Global Vars, Destructive Update & Hash Tables]]
