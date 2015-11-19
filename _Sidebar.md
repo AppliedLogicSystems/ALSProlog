@@ -18,4 +18,4 @@
 
 [[7 Working with Uninterned Atoms]]
 
-[[8 Global Vars, Destructive Update & Hash Tables]]
+[[8 Global Variables, Destructive Update & Hash Tables]]
