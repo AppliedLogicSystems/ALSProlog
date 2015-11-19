@@ -66,10 +66,56 @@ intern([H|T]) :- intern(H), intern(T).
 ````
 This could then be called in the following manner:
 
-intern([ ’ProgramConstant’, ’AnotherConstant’, ’YetAnotherConstant’ ]).
+    intern([ ’ProgramConstant’, ’AnotherConstant’, ’YetAnotherConstant’ ]).
 
 All three quoted strings will be interned so that later occurrences will be stored as
 symbols. The PI_forceuia() function can also be used to intern UIAs. See
 PI_forceui in the Foreign Interface Reference.
 
+##7.3 Manipulating UIAs
+
+###7.3.1 Creating UIAs
+
+There are several additional predicates which can be used to manipulate UIAs. A
+UIA of specific length can be created with a call to $uia_alloc/2 with the following
+arguments:
+
+    ‘$uia_alloc’(BufLen,UIABuf)
+
+BufLen should be instantiated to a positive integer which represents the size (in
+bytes) of the UIA to allocate. The actual size of the buffer allocated will be a multiple of four greater than or equal to BufLen. UIABuf should be a variable. UIAs
+created with $uia_alloc are initially filled with zeros, and will unify with the null
+atom (’’).
+
+###7.3.2 Modifying UIAs
+
+Values can be inserted into a UIA buffer using a number of different routines. We
+will discuss two of them here: $uia_pokeb/3 and $uia_pokes/3. The modifications
+are destructive, and persist across backtracking.  (Note that these procedures can be used to modify system atoms (file names and strings that are represented as UIAs). However, this use is strongly discouraged.)  $uia_pokeb/3 is called as follows:
+
+    ‘$uia_pokeb’(UIABuf,Offset,Value)
+
+UIABuf should be a buffer obtained from $uia_alloc/2. The buffer is viewed
+as a vector of bytes with the first byte having offset zero. Offset is the offset
+within the buffer to the place where Value is to be inserted. Both Offset and
+Value are integers,  and the byte at position Offset from the beginning of the
+buffer is changed to Value. The figure below illustrates this action.
+
+{INSERT PICTURE} 
+
+Figure. Action of $uia_alloc/2.
+
+$uia_pokes/3 is called in the following form:
+
+‘$uia_pokes’(UIABuf,Offset,Insert)
+
+UIA Buf and Offset are as above. Insert is an atom or another UIA. Like
+$uia_pokeb/3, $uia_pokes/3 views the buffer as a vector of bytes with offset zero specifying the first byte. But instead of replacing just a single byte,
+$uia_pokes/3 replaces the portion of the buffer beginning at Offset and having length equal to the length of Insert, using the characters of Insert for the
+replacement. If Insert would extend beyond the end of the buffer, Insert is
+truncated at the end of the buffer. This is illustrated in the Figure below.
+
+{INSERT PICTURE}
+
+Figure. Action of $uia_pokes/3.
 
