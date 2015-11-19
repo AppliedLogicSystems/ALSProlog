@@ -30,5 +30,12 @@
 
 [[12 The ALS Library Mechanism]]
 
-**ALS Prolog IDE**
+**TTY Development Environment**
 
+[[13 Prolog Shell]]
+
+[[14 Using the Four-Port Debugger]]
+
+[[15 Packaging for Delivery]]
+
+**ALS Prolog IDE**
