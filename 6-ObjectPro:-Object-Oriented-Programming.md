@@ -249,3 +249,51 @@ defineClass([name=engine,
        [engineClass< [internalCombustion,steam,electric]]
 ])
 ````
+
+##6.4 Specifying Class Methods
+
+To specify the methods of a class, the programmer must define a two argument
+predicate which will specify the reactions of instances of the class to various messages. The default name of this action predicate is
+
+    <class name>Action
+
+However, the name of the predicate can be specified by using a line
+
+    action = <atom>
+
+in the class definition. Thus, using the default, the head of the clauses for the action
+predicate will be of the form:
+
+    <ClassName>Action(Message,State) 
+
+The clauses for this predicate specify the methods which the class objects will use
+for responding to the various messages they are prepared to accept. The Message
+argument can be any Prolog term, and may include uninstantiated variables. The
+State argument will be instantiated at execution time to the state of the object
+which is using this method to respond to Message. The programmer has no
+knowledge of the detailed structure of State. However, access to the slots of State
+is provided by two predicates:
+````
+setObjStruct(SlotDescrip, State, Value)
+accessObjStruct(SlotDescrip, State, VarOrValue)
+````
+The first call
+
+    setObjStruct(SlotName, State, Value)
+
+destructively updates the slot SlotName of State to contain Value, which cannot be an uninstantiated variable. However, Value can be a term containing uninstantiated variables. Any constraints imposed on this slot by the class must be satisfied by the incoming Value. The second call
+
+    accessObjStruct(SlotName, State, Value)
+
+accesses the slot SlotName of State and unifies the value obtained with VarOrValue.
+
+The value of SlotDescrip above is a slot description , which is either a slot
+name, or an expression of the form
+
+    SlotName^SlotDescrip
+
+The latter is used in cases of compound objects in which the value installed in a slot
+may be the state of another object. Thus if the contents of SlotName in State is another object O2, then
+accessObjStruct(SlotName^SlotDescrip, State, V) effectively performs
+
+    accessObjStruct(SlotDescrip, O2, V).
