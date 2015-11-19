@@ -116,3 +116,29 @@ V = bye
 Note that gv_set/2 is a constant time operation so long as the second argument
 is an atom or integer. Otherwise, it requires time linearly proportional to the current
 depth of the choicepoint stack.
+
+##8.3 Destructive Modification/Update of Compound Terms
+
+ALS Prolog provides a predicate which allows programs to destructively modify arguments of compound terms (or structures). This predicate is mangle/3. The
+effects of mangle/3 are destructive in the sense that they survive backtracking. The
+calling pattern for this predicate is similar to arg/3:
+
+    mangle(Nth, Structure, NewArg)
+
+This call destructively modifies an argument of the compound term Structure
+in a spirit similar to Lisp’s rplaca and rplacd. Structure must be instantiated to a compound term with at least N arguments. The Nth argument of Structure will become NewArg. Lists are considered to be structures of arity two.
+NewArg must satisfy the restriction that NewArg is not itself an uninstatiated variable
+(though it can be a compound term containing uninstatiated variables). Modifications made to a structure by mangle/3 will survive failure and backtracking.
+
+Even though mangle/3 implements destructive assignment in Prolog, it is not
+necessarily more efficient than copying a term. This is due to the extensive cleanup
+operation which ensures that the effects of a mangle/3 persist across failure.
+Here are some examples:
+````
+?- Victim = doNot(fold,staple,mutilate),
+mangle(2,Victim,spindle).
+Victim = doNot(fold,spindle,mutilate)
+yes.
+````
+
+
