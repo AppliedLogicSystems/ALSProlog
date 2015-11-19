@@ -583,3 +583,132 @@ alarm_handler(_,Goal,_)
 ````
 Note that the first clause uses propagate_event/3 to pass on all events except
 sigalrm, which is handled by the second clause.
+
+##9.5 Signals
+
+ALS Prolog provides a strong mechanism for interfacing to external operating system signaling
+mechanisms. The machinery allows the programmer to connect external signals to internal Prolog events generally as described in the previous section. The details for the coupling are found in the builtins file blt_evt.pro. The connection between signal numbers and signal names is provied
+by the predicate signal_name/2:
+````
+signal_name(1,sighup).
+signal_name(2,sigint).    %% interrupt (as in Cntrl-C)
+signal_name(3,sigquit).
+.....
+signal_name(13,sigpipe).
+signal_name(14,sigalrm).  %% alarm clock
+signal_name(15,sigterm).
+.....
+signal_name(29,siglost).
+signal_name(30,sigusr1).
+signal_name(31,sigusr2).
+````
+This database is used by the predicate signal_handler/3 to convert from numeric signal identifiers to symbolic identifiers:
+````
+signal_handler(SigNum,Module,Goal)
+    :- signal_name(SigNum,SigName),
+       !,
+       get_context(Context),
+       propagate_event(SigName,Module:Goal,Context).
+
+signal_handler/3 is called by the underlying C-defined signal handling
+mechanism to pass in signals from the operating system. At the present time, there
+are only two signals for which this mechanism is in place: sigint (controlC) and sigalrm.
+The alarm mechanism is currently only available for Unix/Linux-based versions of ALS
+Prolog (including Mac OS X). Alarm signals are set using the predicate:
+````
+alarm/2
+alarm(First, Interval)
+alarm(+, +)
+````
+Both First and Interval should be non-negative real numbers. First specifies the number of seconds until the first alarm signal is sent to the ALS Prolog
+process. If Interval > 0, an alarm signal is sent to the process every Interval seconds after the first signal is sent. Thus alarm(First, 0) will result in
+only one alarm signal (if any) being sent. A subsequent call to alarm/2 causes
+the alarm mechanism to be reset according to the parameters of the second call.
+Thus, even if the first alarm has not yet been sent, a call alarm(0, 0) will turn
+off all alarm signals (until another call to alarm/2 is used to set the alarms again).
+The following sample program par1.pro illustrates the use of these mechanisms in implementing a simple producer-consumer program; the entry point is main/0.
+````
+main :- trap(main0,alarm_handler).
+
+main0 :- initQueue,
+         produce(0,L),
+         consume(L).
+
+consume(NV) :- nonvar(NV),
+               consume0(NV).
+consume(NV) :- consume(NV).
+
+consume0([H|T]) :-!,
+               write(H),nl,
+               consume(T).
+consume0([]).
+
+produce(100,[]) :- !.
+produce(N,[N|T]) :- NN is N+1,
+                    sleep(produce(NN,T)).
+
+    /*-----------------------------*
+     | Process Management
+     *-----------------------------*/
+alarm_handler(EventId, Goal, Context) 
+    :- EventId \== sigalrm,
+       !,
+       propagate_event(EventId,Goal,Context).
+alarm_handler(_,Goal,_) 
+    :- write(‘a_h_Goal’=Goal), nl,
+       setSavedGoal(Goal),
+       remQueue(NewGoal),
+       NewGoal.
+
+    /*------------------------------------------------*
+     | sleep/1
+     | - put a goal to sleep to wait for the next alarm.
+     *-----------------------------------------------*/
+:- compile time, module_closure(sleep,1).
+
+sleep(M,G) 
+    :- addQueue(M:G),
+       getSavedGoal(SG),
+       set_alarm,
+       SG.
+set_alarm 
+    :- alarm(1.05,0).
+
+    /*------------------------------------------------*
+     | Queue Management:
+     |
+     | initQueue/0 -- initializes goal queue to empty
+     | remQueue/1  -- removes an element to the queue
+     | addQueue/1  -- adds an element to the queue
+     *-----------------------------------------------*/
+initQueue 
+    :- setGoalQueue(gq([],[])).
+remQueue(Item) 
+    :- getGoalQueue(GQ),
+       arg(1,GQ,[Item|QT]),   %% unify Item, QT, and test for nonempty
+       remQueue(QT,GQ).       %% fix queue so front is gone
+
+    %% Queue is empty:
+remQueue([],GQ)
+    :-!,
+      mangle(1,GQ,[]),  %% adjust front to be empty
+      mangle(2,GQ,[]).  %% adjust rear to be empty also
+
+    %% Queue is not empty:
+remQueue(QT,GQ) 
+    :- mangle(1,GQ,QT). %% adjust front to point at tail
+
+addQueue(Item) 
+    :- getGoalQueue(Q),
+       arg(2,Q,Rear),   %% get Rear of Queue
+       addQueue(Rear,Q,[Item]).
+
+addQueue([],Q,NewRear) 
+    :-!,
+      mangle(1,Q,NewRear),
+      mangle(2,Q,NewRear).
+
+addQueue(Rear,Q,NewRear) 
+    :- mangle(2,Rear,NewRear),  %% add the new rear
+       mangle(2,Q,NewRear).     %% new rear now rear of queue
+````
