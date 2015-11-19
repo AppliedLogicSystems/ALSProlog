@@ -119,3 +119,38 @@ truncated at the end of the buffer. This is illustrated in the Figure below.
 
 Figure. Action of $uia_pokes/3.
 
+###7.3.3 Accessing UIA Components
+
+$uia_peekb/3, $uia_peeks/3, and $uia_peeks/4 are used to obtain specific
+bytes and symbols (UIAs) from a buffer created by $uia_alloc/2. The parameters for these procedures are specified as follows:
+````
+‘$uia_peekb’(UIABuf,Offset,Value)
+‘$uia_peeks’(UIABuf,Offset,Extract)
+‘$uia_peeks’(UIABuf,Offset,Size,Extract)
+````
+These parameters are interpreted in the same manner as the parameters for
+$uia_pokeb/3 and $uia_pokes/3, where Size must also be an integer.
+$uia_peekb/3 binds Value to the byte at position Offset. $uia_peeks/3 binds Extract to a UIA consisting of the characters beginning at position
+Offset and extending to the end of the buffer. $uia_peeks/4 binds Extract to a UIA consisting of the characters beginning at position Offset and extending to position End where End = Offset + Size. If End would occur
+beyond the end of the buffer, Extract simply extends to the end of the buffer.
+
+###7.3.4 An Example.
+
+The following example procedure illustrates how to create a buffer and fill it with
+the name of a given atom with using $uia_pokes/3.
+````
+copy_atom_to_uia(Atom, UIABuf) 
+    :- name(Atom,ExplodedAtom),
+       copy_list_to_uia(ExplodedAtom,UIABuf).
+
+copy_list_to_uia(Ints,UIABuf) 
+    :- length([_|Ints], BufLen),
+       ‘$uia_alloc’(BufLen, UIABuf),
+       copy_list_to_uia(Ints, 0, UIABuf).
+
+copy_list_to_uia([],_,_) :- !.
+copy_list_to_uia([H | T], N, Buf) 
+    :- ‘$uia_pokeb’(Buf,N,H),
+       NN is N+1,
+       copy_list_to_uia(T, NN, Buf).
+````
