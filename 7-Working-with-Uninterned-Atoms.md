@@ -154,3 +154,41 @@ copy_list_to_uia([H | T], N, Buf)
        NN is N+1,
        copy_list_to_uia(T, NN, Buf).
 ````
+
+###7.3.5 List of Routines for Working with UIAs
+Below is a full list of the routines which may be used to modify and access component values of a UIA. {Details can be found in the ALS Prolog Reference Manual.}
+````
+$uia_clip/2 - clip the given UIA
+$uia_pokeb/3 - modifies the specified byte of a UIA
+$uia_peekb/3 - returns the specified byte of a UIA
+$uia_pokew/3 - modifies the specified word of a UIA
+$uia_peekw/3 - returns the specified word of a UIA
+$uia_pokel/3 - modifies the specified long word of a UIA
+$uia_peekl/3 - returns the specified long word of a UIA
+$uia_poked/3 - modifies the specified double of a UIA
+$uia_peekd/3 - returns the specified double of a UIA
+$uia_pokes/3 - modifies the specified substring of a UIA
+$uia_peeks/3 - returns the specified substring of a UIA
+$uia_peeks/4 - returns the specified substring of a UIA
+$uia_peek/4  - returns the specified region of a UIA
+$uia_poke/4  - modifies the specified region of a UIA
+````
+In addition, there are three useful routines for dealing with the sizes of UIAs. The call
+
+    ‘$uia_size’(UIABuf, Size)
+
+returns the actual size (in bytes) of the given UIA. 
+
+If Size is less than or equal to the actual size of the given UIABuf, the call
+
+    ‘$uia_clip’(UIABuf,Size)
+
+reduces the size of UIABuf by removing all but one of the trailing zeros (null
+bytes). 
+
+When Atom is a Prolog atom (symbol or UIA),
+
+    ‘$strlen(Atom,Size)’
+
+returns the length of the print name of that atom (thus not counting the terminating
+null byte).
