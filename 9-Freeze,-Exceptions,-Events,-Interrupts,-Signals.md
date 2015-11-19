@@ -557,3 +557,29 @@ Here, Handler is a local handler such that
 3. Hander returns to force if Goal is backtracked into after succeeding
 4. Hander is capable of dealing with any events which occur while Goal is running;
 
+trap/2 is a module closure (meta-predicate), so that the module in which it is called
+is available to its implementing code. Regarding item 4 above, Handler is usually
+devoted to one particular type of event, such as handling specific kinds of signals;
+it will deal with all other events by propagating them to the appropriate “higher level” handlers, either surrounding local handlers, or the global handlers. This propagation is carried out using the following predicate:
+````
+propagate_event/3
+propagate_event(EventId,Goal,Context)
+propagate_event(EventId,Goal,Context)
+````
+For example, here is an alarm handler which will be discussed in more detail in the
+section on signals:
+````
+alarm_handler(EventId, Goal, Context)
+    :- EventId \== sigalrm,
+       !,
+       propagate_event(EventId,Goal,Context).
+
+alarm_handler(_,Goal,_)
+    :- write(‘a_h_Goal’=Goal), nl,
+       setSavedGoal(Goal),
+       remQueue(NewGoal),
+       NewGoal.
+````
+Note that the first clause uses propagate_event/3 to pass on all events except
+sigalrm, which is handled by the second clause.
+
