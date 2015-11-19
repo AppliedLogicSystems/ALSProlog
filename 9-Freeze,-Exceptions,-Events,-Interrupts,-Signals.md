@@ -215,12 +215,12 @@ c3 :- write(’c3-->’), read(Item),
       throw(Item).
 e(H,I) :- printf("Handler %t caught item %t\n",[H,I]).
 ````
-This leads to the following execution behavior on a TTY interface, with the user input indicated in bold.
+This leads to the following execution behavior on a TTY interface, with the user input indicated by surrounding **.
 ````
 ?- ct.
 c1
 c2
-c3-->**p1(a).**
+c3--><B>p1(a).</B>
 throwing(p1(a))
 Handler c3 caught item a
 yes.
