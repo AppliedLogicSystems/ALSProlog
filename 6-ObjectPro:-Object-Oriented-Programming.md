@@ -400,3 +400,48 @@ Msg=pop(rr(tut))
 4stack:>quit.
 yes.
 ````
+Our second example, using the vehicles sketched earlier, illustrates the construction of
+compound objects. First, here are the class definitions:
+````
+:- defineClass([name=vehicle,
+                subClassOf=genericObjects,
+                addl_slots=[locomotionType, powerSource] ]).
+
+:- defineClass([name=wheeledVehicle,
+                subClassOf=vehicle,
+                addl_slots=[numWheels] ]).
+
+:- defineClass([name=automobile,
+                subClassOf=wheeledVehicle,
+                addl_slots=[engine,autoClass,manufacturer]  ]).
+
+:- defineClass([name=engine,
+                subClassOf=genericObjects,
+                addl_slots=[powerType,fuel,engineClass, cur_rpm,running,temp],
+                constrs=[ engineClass< [internalCombustion,steam,electric]] ]).
+
+:- defineClass([name=iC_Engine,
+                subClassOf=engine,
+                addl_slots=[manuf],
+                constrs = [engineClass = internalCombustion] ]).
+````
+Now here are the methods:
+````
+engineAction(start,State)
+    :- State^running := yes.
+
+engineAction(stop, State)
+    :- State^running := no.
+
+automobileAction(start,State)
+    :- send((State^engine),start).
+
+automobileAction(stop,State)
+    :- send(State^engine,stop).
+
+automobileAction(status(Status),State)
+    :- send(State^engine, get_value(running,EngineStatus)),
+       (EngineStatus = yes ->
+             Status = running;
+             Status = off
+       ).
