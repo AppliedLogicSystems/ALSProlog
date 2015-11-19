@@ -284,3 +284,166 @@ not respond to Mom because the okay/1 predicate was never reached. After a
 throw/0 predicate is executed, control is given to the ExceptionGoal. After
 the ExceptionGoal is run, control starts after the call to catch/2 which handled the exception. Invocations of catch/2 may be nested and a throw/0 will always
 goes to the most recent enclosing catch/2.
+
+##9.3 Interrupts
+
+Each time a procedure is called, ALS Prolog compares the distance between the top
+of the heap and its boundary to see if a garbage collection is necessary. If this distance ever becomes less than a pre-defined value, called the heap safety value, the
+program is interrupted, and the garbage collector is invoked. The test is done at the
+entrance to every procedure. This check is the basis for the internal ALS Prolog
+interrupt mechanism.
+
+When a procedure is called by a WAM call or execute instruction (cf. [warren83]),
+control is transfered to a location in the name table entry for the procedure which is
+being called. The first action carried out in this patch of code is the heap overflow
+check. If no overflow has been detected, control continues on. This overflow check
+is useful as a general interrupt mechanism in Prolog. Since it is always carried out
+upon procedure entry, and since all calls must go through the procedure table, any
+call can be interrupted. If the overflow check believes that the heap safety value is
+larger than the current distance between the heap and backtrack stack, the next call
+will be stopped. The key word is ‘ believes’: the heap safety value could have been
+set to an absurdly large value leading to the interruption.
+
+The key to using this as the basis for a general Prolog interrupt mechanism is to provide a method of specifying the reason for the interrupt, together with an interrupt
+handler which can determine the reason for the interrupt and dispatch accordingly.
+The entire mechanism is implemmented in Prolog code. Either ALS Prolog system
+code or user code can trigger an interrupt by setting the heap safety to a value which
+guarantees that the next call will be interrupted. When the interrupt occurs, the interrupted call is packaged up in a term and passed as an argument to the interrupt
+handler. The continuation pointer for the handler will point into the interrupted
+clause, and the computation will continue where it would have continued if the call
+had never been interrupted after the handler returns.
+An example will help make this clearer. Suppose the goal
+
+    :- b, c, f(s,d), d, f.
+
+is running , that the call for c/0 has returned, and that f/2 is about to be called.
+Something happens to trigger an interrupt (i.e., to set the heap safety value to a very
+large value) and f/2 is called. The heap overflow check code will run and the goal
+will now operationally look as though it were
+
+    :- b, c, ‘$int’(f(s,d)), d, f.
+
+Rather than f/2 running, $int/1 will run. When $int/1 returns, d/0 will run,
+which is what would have happened if f/2 had run and returned. If $int/1
+decides to run f/2, all it has to do is call f/2. $int/1 can leave choice points on
+the stack, and also be cut, since it is exactly like any other procedure call. Any cuts
+inside $int/1 will have no effects outside of the call. In other words, it is a fairly
+safe operation. Once the interrupt handler is called, the interrupt trigger should be
+reset, or the interrupt handler will interrupt itself, and go into an infinite loop.
+If some thought is given to the possibilities of this interrupt machanism, it becomes
+apparent that it can be used for a variety of purposes, as sketched below.
+
+_A clause decompiler in Prolog itself_: The $int/1 code might be of the form
+````
+‘$int’(Goal) 
+    :- save Goal somewhere,
+       set a ’decompiler’ interrupt.
+````
+The goal would be saved somewhere, and the interrupt code would merely return
+after making sure that the next call would be interrupted. It is not necessary to call
+Goal, because nothing below the clause being decompiled is of interest.
+
+_A debugging trace mechanism_: The $int/1 code would be of the form
+````
+‘$int’(Goal) 
+    :- show user Goal,
+       set a ’trace’ interrupt and call Goal.
+````
+Here, the code will show the user the goal and then call it, after making sure that all
+subgoals in Goal will be interrupted.
+
+_A ^C trapper_: The $int/1 code would keep the current goal pending. Then the
+user could be given a choice of turning on the trace mechanism, calling a break
+package which would continue the original computation when it returned, or even
+stop the computation altogether.
+
+In order for the above operations to take place, the interrupt handler needs to know
+which interrupt has been issued. This is done through the _magic value_. Magic is
+a global variable, which is provided as the first argument to the $int/2 call
+
+    ‘$int’(Magic,Goal)
+
+Calling $int/2 with the value of Magic passed (as first argument) means that
+the proper interrupt handler will be called. If the value of Magic is allowed to be
+a regular term, information can be passed back from an interrupt, such as the accumlated goals from a clause which is being decompiled. The mechanisms of setting interrupts clearly must include the setting of Magic to appropriate values.
+
+In order to write code such as the decompiler in Prolog, several routines are needed.
+The system programmer must be able to set and examine the value of Magic. This
+is done with the following calls:
+````
+setPrologInterrupt/1
+getPrologInterrupt/1
+````
+The programmer must also be able to interrupt the next call. This is done with
+the call:
+
+    forcePrologInterrupt/0
+
+For example, the goal
+
+    :- forcePrologInterrupt, a.
+
+will call
+
+    ‘$int’(Magic,a)
+
+If the clause
+
+    b :- forcePrologInterrupt.
+
+is called by the goal
+
+    :- b,a.
+
+then
+
+    ‘$int’(Magic,a)
+
+will be called once again, since after b returns, a/0 is the next goal called. Finally,
+there must be a way of calling a goal, a, without interrupting it, but setting the interrupt
+so that the the goal after the goal a will be interrupted. If a/0 is to be called
+and the next call following it is to be interrupted, the call
+
+:- callWithDelayedInterrupt(a)
+
+is used. For example, if a/0 is defined by
+
+    a :- b.
+then
+
+    :- callWithDelayedInterrupt(a).
+
+will call
+
+    :- ‘$int’(Magic,b).
+
+not
+
+    :- ‘$int’(Magic,a).
+
+However, if a/0 is merely the fact
+
+   a.
+
+then the call
+
+    :- callWithDelayedInterrupt(a),b.
+
+will end up calling
+
+    :- ‘$int(Magic,b).
+
+As an extended example of the use of these routines, we will construct a simple
+clause decompiler. The code sketched earlier outlines the general idea:
+````
+‘$int’(Goal) :- 
+    save Goal somewhere,
+    set a ’decompiler’ interrupt.
+````
+The goal can be saved for the next call inside a term in the variable Magic. The
+clause so far would be
+
+‘$int’(s(Goals,Final),NewGoal) 
+    :- 
+    setPrologInterrupt(s([Goal|Goals],Final)),
+    forcePrologInterrupt.
