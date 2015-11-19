@@ -29,3 +29,6 @@
 [[11 Prolog Builtins: Non-I/O]]
 
 [[12 The ALS Library Mechanism]]
+
+**ALS Prolog IDE**
+
