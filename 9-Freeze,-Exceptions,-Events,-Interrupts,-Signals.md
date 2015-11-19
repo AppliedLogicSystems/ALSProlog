@@ -514,6 +514,7 @@ lib load - raised when the stub of a library predicate is encountered
 prolog_error - raised by prolog errors (mostly from builtins)
 
 undefined_predicate - raised when an undefined predicate is encountered
+````
 Events are handled (and thereby defined) by a local or global event handler. Global
 handlers are specified in a simple database builtins:global_handler/3:
 ````
@@ -582,4 +583,3 @@ alarm_handler(_,Goal,_)
 ````
 Note that the first clause uses propagate_event/3 to pass on all events except
 sigalrm, which is handled by the second clause.
-
