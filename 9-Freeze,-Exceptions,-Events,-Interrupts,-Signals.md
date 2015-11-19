@@ -167,3 +167,65 @@ throw/1
 throw(Term)
 throw(+)
 ````
+The two predicates catch/3 and throw/1 provide a more sophisticated controlled
+abort mechanism than the primitive builtins catch/2 and throw/0 (although the
+former are implemented in terms of the latter, which are described below). catch/
+3 is used to mark a state in the sense of the discussion above. We will say that the call
+
+    catch(WatchedGoal, Pattern, ExceptionGoal)
+
+_catches_ a term T if T unifies with Pattern. A call throw(T) is caught by a call
+on catch/3 if the argument T is caught by the call on catch/3, and there is no call
+on catch/3 between the given calls on catch/3 and throw/1 which also catches T.
+
+If M is the current module for the call on catch/3, then the first argument of catch/3,
+WatchedGoal, is run in module M just as if by call/1; i.e., as if
+catch/3 were call/1. If there is no subsequent call to throw/1 which is uncaught by an intervening call to catch/3, then the call on catch/3 is exactly like
+a call on call/1. However, if 
+i) there is a subsequent call to throw/1 whose argument Ball unifies with the second argument of the call on catch/3, and if 
+ii) there is no interposed call to catch/3 whose second argument also unifies with
+Ball, 
+then all computation of the call on the first argumentt, WatchedGoal, is
+aborted, and the third argument of the call to catch/3, ExceptionGoal, is run as
+a result of the call to throw/1.
+
+When the system executes throw/1, it will behave as if the head of catch/3 failed.
+However, instead of backtracking to the most recent choicepoint, the system will
+instead backtrack to the state it was in just before the most recent enclosing catch/
+3 whose second argument unifies with the argument of the throw/1 call; then the
+system will run the corresponding ExceptionGoal. 
+
+catch and throw are dynamically
+scoped in that throw/1 must be called somewhere in an execution of WatchedGoal
+which is initially invoked by catch/3. If throw/1 is called outside the scope of some
+invocation of catch/3 (meaning, with nothing to catch its abort of execution), the
+system aborts to the Prolog shell. The figure below illustrates the behavior of these predicates.
+
+{ADD PICTURE}
+
+Figure. Action of catch/3 and throw/1.
+
+Consider the sample code:
+````
+ct :- catch(c1, p1(X), e(c1,X)).
+c1 :- write(c1),nl, catch(c2, p2(X), e(c2,X)).
+c2 :- write(c2),nl, catch(c3, p1(X), e(c3,X)).
+c3 :- write(’c3-->’), read(Item),
+      write(throwing(Item)),nl, 
+      throw(Item).
+e(H,I) :- printf("Handler %t caught item %t\n",[H,I]).
+````
+This leads to the following execution behavior on a TTY interface, with the user input indicated in bold.
+?- ct.
+c1
+c2
+c3-->**p1(a).**
+throwing(p1(a))
+Handler c3 caught item a
+yes.
+?- ct.
+c1
+c2
+c3-->**p2(a).**
+throwing(p2(a))
+Handler c2 caught item a
