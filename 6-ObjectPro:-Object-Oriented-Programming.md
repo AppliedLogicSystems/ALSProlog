@@ -297,3 +297,35 @@ may be the state of another object. Thus if the contents of SlotName in State is
 accessObjStruct(SlotName^SlotDescrip, State, V) effectively performs
 
     accessObjStruct(SlotDescrip, O2, V).
+
+Two convenient alternatives for these predicates are supplied as “syntactic sugar”:
+````
+State^SlotDescrip := Value
+    for
+setObjStruct(SlotDescrip, State, Value)
+    and
+VarOrValue := State^SlotDescrip
+    for
+accessObjStruct(SlotDescrip, State, VarOrValue)
+````
+Besides these two constructs, calls on send/2 can be used in the clauses defining
+methods. The code for the action predicate should be defined in the same module
+as the definition of the class. (But it can reside in separate files.)
+Consider the class engine specified in the preceeding section. Simple start and
+stop methods can be implemented for this class by the following clauses:
+````
+engineAction(start,State) := State^running := yes.
+engineAction(stop, State) := State^running := no.
+````
+A method to query the status of an engine is given by:
+
+    engineAction(status(What),State) :- What := State^running.
+
+The genericObjects class provides two pre-defined methods, effectively defined as follows:
+````
+genericObjectsAction(get_value(SlotDesc,Value),State)
+    :-  accessObjStruct(SlotDesc,State,Value).
+
+genericObjectsAction(set_value(SlotDesc,Value),State)
+    :-  setObjStruct(SlotDesc,State,Value).
+````
