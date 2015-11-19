@@ -220,7 +220,7 @@ This leads to the following execution behavior on a TTY interface, with the user
 ?- ct.
 c1
 c2
-c3--><B>p1(a).</B>
+c3-->**p1(a).**
 throwing(p1(a))
 Handler c3 caught item a
 yes.
