@@ -141,4 +141,115 @@ Victim = doNot(fold,spindle,mutilate)
 yes.
 ````
 
+##8.4 ‘Named’ Hash Tables
 
+The allocation and use of hash tables is supported by exploiting the fact that the
+implementation of terms is such that a term is an array of (pointers to) its arguments. So hash tables are created by combining a term (created on the heap) together with access routines implemented using basic hashing techniques. The destructive update feature mangle/3 is used in an essential manner. As was the case with global variables, at bottom lies a primitive collection of mechanisms, over
+which is a more easily usable layer providing ‘named’ hash tables.
+
+The predicate for creating named hash tables is
+````
+make_hash_table/1
+make_hash_table(Name) - creates a hash table with access predicates
+make_hash_table(+)
+````
+If Name is any atom, including a quoted atom, the goal make_hash_table(Name)
+will create a hash table together a set of access methods for that table. The atom
+Name will be used as the suffix to the names of all the hash table access methods.
+Suppose for the sake of the following discussion that Name is bound to the atom
+’_xamp_tbl’. Then the goal
+
+    make_hash_table(‘_xamp_tbl’)
+
+will create the following access predicates:
+````
+reset_xamp_tbl  - throw away old hash table associated with the ’_xamp_tbl’
+hash table and create a brand new one.
+
+set_xamp_tbl(Key,Value – associate Key with Value in the hash table; Key should
+be bound to a ground term. Any former associations that Key had in the hash table are replaced.
+
+get_xamp_tbl(Key,Value) – get the value associated with the ground term bound to Key and unify it with Value.
+
+del_xamp_tbl(Key,Value) – delete the Key/Value association from the hash table. Key must be bound to a ground term. Value will be unified against the associated value in the table. If the unification is
+not successful, the table will not be modified.
+
+pget_xamp_tbl(KeyPattern,ValPattern) – The "p" in pget and pdel (below) stands for pattern.
+pget_xamp_tbl permits KeyPattern and ValPattern to have any desired instantiation. It will backtrack
+through the table and locate associations matching the "pattern" as specified by KeyPattern and ValPattern.
+
+pdel_xamp_tbl(KeyPattern,ValPattern) – This functions the same as pget_xamp_tbl except that
+the association is deleted from the table once it is retrieved.
+````
+Consider the following example (where we have omitted all of the ‘yes’ replies, but
+retained the ‘no’ replies):
+````
+?- make_hash_table(‘_assoc’).
+?- set_assoc(a, f(1)).
+?- set_assoc(b, f(2)).
+?- set_assoc(c, f(3)).
+?- get_assoc(X, Y).
+no.
+?- get_assoc(c, Y).
+Y = f(3)
+?- pget_assoc(X, Y).
+X = c
+Y = f(3);
+X = b
+Y = f(2);
+X = a
+Y = f(1);
+no.
+?- del_assoc(b, Y).
+Y = f(2)
+?- pdel_assoc(X, f(3)).
+X = c
+?- pget_assoc(X, Y).
+X = a
+Y = f(1);
+no.
+
+Guide-75-
+
+?- reset_assoc.
+yes.
+?- pget_assoc(X,Y).
+no.
+````
+
+##8.5 Primitive Hash Table Predicates
+
+The core hash tables are physically simply terms of the form
+
+    hashArray(.........)
+
+We are exploiting the fact that the implementation of terms is such that a term is an
+array of (pointers to) its arguments. So what makes a hash table a hash table below
+is the access routines implemented using basic hashing techniques. We also exploit the destructive update feature mangle/3. Each argument (entry) in a hash table here is a (pointer) to a list 
+
+    [E1, E2, ....] 
+
+where each Ei is a cons term of the form
+
+    [Key Value]
+
+So a bucket looks like:
+
+    [ [Key1 Val1], [Key2 Val2], ....]
+
+where each Keyi hashes into the index (argument number) of this bucket in the term
+
+    hashArray(.........)
+
+The complete hash tables are terms of the form
+
+    hashTable(Depth,Size,RehashCount,hashArray(....))
+
+where:
+````
+Depth       = the hashing depth of keys going in;
+
+Size        = arity of the hashArray(...) term;
+
+RehashCount = counts (down) the number of hash entries which have been
+made; when then counter reaches 0, the table is expanded and rehashed.
