@@ -206,3 +206,46 @@ the class, and <Value> is any appropriate value for that slot. Omitting this key
 in a class definition is equivalent to including
 
     defaults = []
+
+If an export = yes equation appears on the Eqns list of a class definition, the
+class methods and other information concerning the class are exported from the
+module in which the definition takes place.
+
+Of course, a call send(Object, Message), where Obj is in class C, could fail if C’s method code for Message fails. The action=Name equation in an Object definition is used to override the default name for the methods predicate of the class C. If such an equation is present in Object's definition, the methods predicate for Object will be Name/2 instead of the default method of C indicated above.
+
+The constraints equation allows the programmer to impose constraints on the
+values of particular slots in the states of objects which are instances of the class. The
+general form of a constraint specification is
+
+    constrs = list of constraint expressions
+
+Three types of constraint expressions are supported:
+* slotName = value
+* slotName < valueList
+* slotName - Var^Condition
+The first two cases are special cases of the third, and are provided for convenience.
+In all three cases, the left side of the expression is the name of a slot occurring in
+the complete state-schema of the class being defined (i.e., it is either the name of a
+slot on the addl_slots list of the class, or is a slot in the schema of a superclass
+from which the class being defined inherits). In the case of slotName = value,
+value is any Prolog term. This constraint expression indicates that any instance
+of the class being defined must have the value of slot slotName set equal to
+value. The generated code ensures that when instances of the class are initialized
+(via the call send(Object, initialize)), the value of slotName is set
+to value. The constraint expression slotName < valueList requires that
+the values of slotName be among the Prolog terms appearing on the list valueList. Here ’<’ is a short hand for ’is an element of’. The generated code for the class methods applies a test to any attempted update of the value of slotName to ensure that the new value is on the list valueList.
+
+As indicated, the third constraint expression subsumes the first two. Var is a Prolog variable, and Condition is an arbitrary Prolog call in which Var occurs.
+Conditon expresses a condition which any potential value for slotName in an
+instance of the class must meet in order to be installed. The generated code imposes
+this test on all attempts to update the value of slotName. The test is imposed by
+binding the incoming candidate value to the variable Var , and then calling the test
+Conditon. Here is a class specification including a constraint:
+````
+defineClass([name=engine,
+     subclassOf=[genericObjects],
+     addl_slots= [powerType,fuel,engineClass, cur_rpm,running,temp],
+     constrs=
+       [engineClass< [internalCombustion,steam,electric]]
+])
+````
