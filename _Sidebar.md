@@ -1,5 +1,5 @@
 <!--[[Home]]-->
-**Prolog Language: Standard Part**  
+**Language: Standard Part**  
 [[1 The Syntax of ALS Prolog]]  
 [[2 Prolog Source Code]]  
 [[3 Modules]]  
