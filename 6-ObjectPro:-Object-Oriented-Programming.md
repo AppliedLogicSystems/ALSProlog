@@ -445,3 +445,52 @@ automobileAction(status(Status),State)
              Status = running;
              Status = off
        ).
+````
+As in the stack example, we can create a simple loop to exercise this code:
+````
+run_vehicles
+    :- set_prolog_flag(unknown, fail),
+       create_object([instanceOf=iC_Engine ], Engine1),
+       create_object([instanceOf=automobile,
+                      values=[engine=Engine1] ], Auto1),
+       create_object([instanceOf=iC_Engine ], Engine2),
+       create_object([instanceOf=automobile,
+                      values=[engine=Engine2] ], Auto2),
+       run_vehicles(a(Auto1, Auto2)).
+
+run_vehicles(Autos)
+    :- printf(’::>’, []), flush_output,
+       read(Cmd),
+       disp_run_vehicles(Cmd, Autos).
+       disp_run_vehicles(quit, Autos) :-!.
+
+disp_run_vehicles(Cmd, Autos)
+    :- exec_vehicles_cmd(Cmd, Autos),
+       run_vehicles(Autos).
+
+exec_vehicles_cmd(Msg > N, Autos)
+    :- arg(N, Autos, AN),
+       send(AN, Msg),
+       !,
+       printf(’%t-|| %t\n’, [N,Msg]).
+
+exec_vehicles_cmd(Cmd, Autos)
+    :- printf(’Can\’t understand: %t\n’, [Cmd]).
+````
+And here is a trace of an execution of this code:
+````
+?- run_vehicles.
+::>start > 1.
+1-|| start
+::>status(A1) > 1.
+1-|| status(running)
+::>start > 2.
+2-|| start
+::>status(A2) > 2.
+2-|| status(running)
+::>stop > 2.
+2-|| stop
+::>status(X) > 2.
+2-|| status(off)
+::>quit.
+yes.
