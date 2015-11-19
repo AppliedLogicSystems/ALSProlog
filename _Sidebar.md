@@ -1,4 +1,4 @@
-[[Home]]
+<!--[[Home]]-->
 
 **Prolog Language: Standard Part**
 
