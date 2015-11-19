@@ -609,7 +609,7 @@ signal_handler(SigNum,Module,Goal)
        !,
        get_context(Context),
        propagate_event(SigName,Module:Goal,Context).
-
+````
 signal_handler/3 is called by the underlying C-defined signal handling
 mechanism to pass in signals from the operating system. At the present time, there
 are only two signals for which this mechanism is in place: sigint (controlC) and sigalrm.
