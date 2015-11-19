@@ -70,3 +70,26 @@ gv_set/2
 gv_set(Num, Value) - sets the value of a global variable
 gv_set(+, +)
 ````
+These four predicates implement the primitive global variable mechanism. They
+achieve an effect often implemented using assertions in the database. The value of
+the present mechanism is its greater speed, its separation from the database, and its
+ability to deal with terms from the heap which may incorporate uninstatioated variables. Global variables are referred to by unique identifying integers sequentially
+starting from 1. The number of available global variables is implementation dependent. Note that the system itself allocates a number of global variables.
+
+gv_alloc(Num) allocates a free global variable and unifies the number of this variable with Num. Since several global variables are used by the system itself, the first call to gv_alloc(Num) normally returns an integer greater than 1. 
+
+gv_free(Num) deallocates global variable number Num, after which Num can be reused by subsequent calls to gv_alloc/1. 
+
+gv_set(Num,Value) sets the value of global variable number Num to be Value, which can be any Prolog term, including partially instantiated terms. Correspondingly, gv_get(Num, Value) unifies Value with the current value of global variable number Num. A call to gv_get(Num, Value) before a call
+to gv_set(Num, Value) returns the default value for global variables, which is 0.
+
+Attempts to use gv_set(Num,Value) or gv_get(Num,Value) without a preceding call to gv_alloc(Num) returning a value for the variable Num is an error which will generally cause unpredictable behavior, including system crashes.
+
+The immediate values of global variables survive backtracking and persist across
+top level queries. However, if a global variable is set to a structure containing an
+unbound variable, say X, which is later bound during a computation, the binding of
+X is an ordinary Prolog binding which will not survive either backtracking or return
+to the top level of the Prolog shell. Thus variables in a structure which is bound to a global variable do not inherit the globalness of the outermost binding.
+
+Here are some examples:
+
