@@ -144,3 +144,26 @@ B= 1
 C= 1 
 D= 1
 yes. 
+
+##9.2 Exceptions
+The exception mechanism of ALS Prolog allows programs to react to extraordinary
+circumstances in an efficient and appropriate manner. The most common extraordinary circumstance to be dealt with is errors. Often an error (perhaps inappropriate user input, etc.) is detected deep in the calling sequence of predicates in a program.
+The most appropriate reaction on the part of the program may be to return to a much
+earlier state. However, if the code is written to support such a return using the ordinary predicate calling mechanisms, the result is often difficult to understand and
+has poor effeiciency. The exception mechanism allows the program to mark a point
+in its calling state, and to later be able to return directly to this marked point independently of the pending calls between the marked state and the later state. This notion is illustrated in the figure below.
+
+{ADD PICTURE}
+
+Figure. Direct Return to an Earlier State.
+
+This exception mechanism is implemented using two predicates, catch/3 and throw/1.
+````
+catch/3
+catch(WatchedGoal, Pattern, ExceptionGoal)
+catch(+, +, +)
+
+throw/1
+throw(Term)
+throw(+)
+````
