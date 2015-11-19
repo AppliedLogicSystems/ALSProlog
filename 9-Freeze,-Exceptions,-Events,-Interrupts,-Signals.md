@@ -232,3 +232,55 @@ throwing(p2(a))
 Handler c2 caught item a
 yes.
 ````
+The builtins file catch.pro records the item being thrown by throw/1 in the Prolog database, while the file catchg.pro records the item in a global variable. For small
+items, there is no significant difference between the two versions, but for large
+items, the catchy version will be more efficient.
+````
+catch/2
+catch(WatchedGoal,ExceptionGoal)
+catch(WatchedGoal,ExceptionGoal)
+
+throw/0
+throw
+````
+The two predicates catch/2 and throw/0 provide the primitive form of controlled abort underlying catch/3 and throw/1. The builtin abort/0 normally aborts to the Prolog shell.
+* WatchedGoal is simply run from the current module as if by call/1.
+* ExceptionGoal is a goal that will be run as a result of a call to throw/0 during the execution of the WatchedGoal.
+When the system executes throw/0 it will behave as if the head of throw/0
+failed. However, instead of backtracking to the most recent choicepoint, the system
+will instead backtrack to the state it was in just before the most recent enclosing
+catch/2 and then run the corresponding ExceptionGoal. catch/2 and throw/0
+are dynamically scoped in that throw/0 must be called somewhere in the execution of WatchedGoal which is initially invoked by catch/2. If throw/0 is called outside the scope of some invocation of catch/2 (meaning, with nothing to catch its execution), the system aborts to the Prolog shell:
+````
+?- throw.
+Execution aborted.
+````
+If we define the following clauses:
+````
+goal(Person) 
+    :- printf("%t: Chris, take out that garbage!\n",[Person]),
+       responseTo(Person), 
+       okay(Person).
+responseTo(’Mom’) :- throw.
+responseTo(’Dad’).
+okay(Person) 
+    :- printf("Chris: Okay %t, I’ll do it.\n",[Person]).
+interrupt :- printf("Chris: I want to go hiking with Kev.\n").
+````
+Then:
+````
+?- catch(goal(’Mom’),interrupt).
+Mom: Chris, take out that garbage!
+Chris: I want to go hiking with Kev.
+yes.
+?- catch(goal(’Dad’),interrupt).
+Dad: Chris, take out that garbage!
+Chris: Okay Dad, I’ll do it.
+yes.
+````
+Notice that with Mom, it’s okay to interrupt, but you don’t try it with Dad. In the
+above example, Chris responds to Dad with the okay/1 predicate, but Chris did
+not respond to Mom because the okay/1 predicate was never reached. After a
+throw/0 predicate is executed, control is given to the ExceptionGoal. After
+the ExceptionGoal is run, control starts after the call to catch/2 which handled the exception. Invocations of catch/2 may be nested and a throw/0 will always
+goes to the most recent enclosing catch/2.
