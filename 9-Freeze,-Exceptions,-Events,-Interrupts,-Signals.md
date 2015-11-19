@@ -443,8 +443,60 @@ clause decompiler. The code sketched earlier outlines the general idea:
 ````
 The goal can be saved for the next call inside a term in the variable Magic. The
 clause so far would be
-
+````
 ‘$int’(s(Goals,Final),NewGoal) 
     :- 
     setPrologInterrupt(s([Goal|Goals],Final)),
     forcePrologInterrupt.
+````
+The term being built inside Magic has the new goal added to it, and the trigger is
+set for the next call. To start the decompiler, the clause should be called as though
+it were to be run. However, each subgoal will be interrupted and discarded before
+it can be run. The starting clause would be something of the form:
+````
+$source(Head,Body) 
+    :- 
+    setPrologInterrupt(s([],Body)),
+    callWithDelayedInterrupt(Head).
+````
+First, the value of Magic is set to the decompiler interrupt term with an initially
+empty body and a variable in which to return the completed body of the decompiled
+clause. The goal is then called with callWithDelayedInterrupt/1, which
+will make sure that the next goal called after Head will be interrupted. The above
+clause for $int/2 will then catch all subgoals. The head code for Head will bind
+any variables in Head from values in the head of the clause, and all variables that
+are in both the head and body of the clause will be correct in the decompiled clause,
+since an environment has been created for the clause. Since the clause is actually
+running, each subgoal will pick up its variables from the clause environment. If the
+decompiler should ever backtrack, the procedure for Head will backtrack, going on
+to the next clause, which will be treated in the same way. The only tricky thing is
+the stopping of the decompiler. The two clauses given above will decompile the entire computation, including the code which called the decompiler. The best method
+is to have a goal which the decompiler recognizes as being an ‘end of clause flag’.
+However, having a special goal which would always stop the decompiler would
+mean that the decompiler would not be able to decompile itself. So some way must
+be found to make only the particular call to this ‘distinguished’ goal be the one at
+which the decompiler will stop. The clauses above can be changed to the following
+to achieve this goal:
+````
+‘$int’(s(ForReal,Goals,Final),$endSource(Variable)
+    :- ForReal == Variable,!.
+
+‘$int’(s(ForReal,Goals,Final),Goal) 
+    :- setPrologInterrupt(s(ForReal, [Goal|Goals],Final)),
+       forcePrologInterrupt.
+
+‘$source’(Head,Body) 
+    :- setPrologInterrupt(s(ForReal,[],Body)),
+       callWithDelayedInterrupt(Head),
+       ‘$endSource’(ForReal).
+````
+Here, $source/2 has a variable ForReal in its environment. This is carried
+through the interrupts inside the term in Magic. If the interrupted goal is ever
+$endSource(ForReal), the decompiler stops. Note that $endSource(ForReal) will be caught when $source/2 is called, since all subgoals are then being caught, and it’s argument will come from the environment of
+$source/2. Otherwise, the interrupted goal is added to the growing list of subgoals, and the computation continues. If $source/2 is called by $source/2,
+there will be a new environment and the first $endSource/1 encountered will be
+caught and stored, but not the second one. The complete code for the decompiler
+appears in the file builtins.pro. This decompiler is used as the basis for listing
+as well as for retract. In addition, it is used to implement the debugger, found in
+the file debugger.pro.
+
