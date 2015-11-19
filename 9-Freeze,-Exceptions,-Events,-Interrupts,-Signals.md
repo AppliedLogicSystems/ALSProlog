@@ -500,3 +500,60 @@ appears in the file builtins.pro. This decompiler is used as the basis for listi
 as well as for retract. In addition, it is used to implement the debugger, found in
 the file debugger.pro.
 
+##9.4 Events
+
+The event handling mechanism of ALS Prolog (developed by Kevin Buettner, based on [Meier]) implements both the system-level error and exception mechanisms, together with the general user-level event mechanisms such as coupling to signals and application-based interrupts.  Most of the machinery of the event mechanism is readily discernible in the builtins file blt_evt.pro.
+At the present time, there are five predefined types of events:
+````
+sigint - raised when control-C or its equivalent is hit
+
+reisscntrl_c - raised for “reissued control-C”
+
+lib load - raised when the stub of a library predicate is encountered
+
+prolog_error - raised by prolog errors (mostly from builtins)
+
+undefined_predicate - raised when an undefined predicate is encountered
+Events are handled (and thereby defined) by a local or global event handler. Global
+handlers are specified in a simple database builtins:global_handler/3:
+````
+global_handler(EventId, Module, Procedure):
+    sigint, builtins, default_cntrl_c_handler
+    reisscntrl_c, builtins, silent_abort
+    libload, builtins, libload
+    prolog_error, builtins, prolog_error
+    undefined_predicate, builtins, undefined_predicate
+````
+The global_handler/3 database is best manipulated using the following
+predicates (which are not exported from the module builtins):
+````
+set_event_handler/3
+set_event_handler(Module, EventId, Proc)
+set_event_handler(+, +, +)
+
+remove_event/1
+remove_event(EventId)
+remove_event(+)
+````
+Additional global event handlers, for example to handle the signal sigalarm, are installed using set_event_handler/3, and removed used remove_event/1.
+
+An event can be triggered by a program (including system programs) by the following predicate (which is exported from module builtins):
+````
+trigger_event/2
+trigger_event(EventId, ModuleAndGoal)
+trigger_event(+, +)
+````
+The argument ModuleAndGoal is normally of the form Module:Goal.
+
+Local event handlers are installed and manipulated using the trap/2 system predicate:
+````
+trap/2
+trap(Goal,Handler)
+trap(Goal,Handler)
+````
+Here, Handler is a local handler such that
+1. Hander is in force while Goal is running;
+2. Hander ceases to be in force when Goal succeeds or fails;
+3. Hander returns to force if Goal is backtracked into after succeeding
+4. Hander is capable of dealing with any events which occur while Goal is running;
+
