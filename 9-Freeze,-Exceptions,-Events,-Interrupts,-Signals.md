@@ -70,8 +70,8 @@ silly_running(igloo,yellow)
 grump_running(igloo,blue)
 yes.
 ````
-Uisng silly and grump from above, here is another example:
-
+Using silly and grump from above, here is another example:
+````
 u1 :- freeze(W1, silly(W1,yellow)),
       u11(W1).
 
