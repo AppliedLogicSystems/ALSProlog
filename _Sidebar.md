@@ -19,3 +19,5 @@
 [[7 Working with Uninterned Atoms]]
 
 [[8 Global Variables, Destructive Update & Hash Tables]]
+
+[[9 Freeze, Exceptions, Events, Interrupts, Signals]]
