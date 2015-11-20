@@ -1,11 +1,11 @@
-## Relative images/UseListSearching.png (works)
+## Relative images/UseListSearching.png (fails in preview, works in saved)
 
 ![](images/UseListSearching.png)
 
-## Relative ../images/UseListSearching.png (fails)
+## Relative ../images/UseListSearching.png (works in preview, fails in save)
 
 ![](../images/UseListSearching.png)
 
-## Site-relative absolute (works)
+## Site-relative absolute /AppliedLogicSystems/ALSProlog/wiki/images/UseListSearching.png (works in both preview and save)
 
 ![](/AppliedLogicSystems/ALSProlog/wiki/images/UseListSearching.png)
