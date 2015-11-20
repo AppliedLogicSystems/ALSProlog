@@ -322,10 +322,10 @@ use of the corresponding option with the environment variable.
 The ALS_OPTIONS environment variable is used as follows. If w1 and w2 are
 similar to the value w described above for -h and -s, then:
 Under Bourne shell, Korn shell, and Bash:
-````
-ALS_OPTIONS=stack_size:w1,heap_size:w2
-export ALS_OPTIONS
-````
+
+    ALS_OPTIONS=stack_size:w1,heap_size:w2
+    export ALS_OPTIONS
+
 Under csh:
 
     setenv ALS_OPTIONS stack_size:w1,heap_size:w2
