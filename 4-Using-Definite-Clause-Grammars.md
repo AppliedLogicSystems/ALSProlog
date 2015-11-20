@@ -77,7 +77,7 @@ The way to read this diagram is to regard each box as a filter. The filter consu
 some of the input, and allows the remaining part to pass through to the next filter.
 The following diagram is a tree which illustrates the structure of the parsed list:
 
-![](../images/DCG_Parse_Tree.png)
+![](images/DCG_Parse_Tree.png)
 
 Figure 3. A Parse Tree.
 
