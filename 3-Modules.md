@@ -133,13 +133,14 @@ In this example, the resulting use list for module graphics would be:
     polygons, splineOps, bitOps
 
 and this is the order in which the modules will be searched, as shown in
-Figure 1 (Use List Searching).
+the figure below:
 
-{FIGURE MISSING - REPLACE}
+![](https://images/UseListSearching.png)
 
-Figure 1. Use List Searching
+Figure. Use List Searching
 
 ##3.4 Default Modules
+
 Two modules, builtins and user, are automatically created when the ALS Prolog system starts up. The builtins module contains code that defines the standard builtin predicates of the system. All modules automatically use the builtins module, as suggested in Figure 1 (Use List Searching), so therefore the following declaration is implicit:
 
     use builtins.
@@ -234,4 +235,3 @@ X = m2
 Y = [builtins,user];
 no.
 ````
-
