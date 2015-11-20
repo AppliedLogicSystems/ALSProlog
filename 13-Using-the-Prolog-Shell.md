@@ -327,9 +327,13 @@ ALS_OPTIONS=stack_size:w1,heap_size:w2
 export ALS_OPTIONS
 ````
 Under csh:
+
     setenv ALS_OPTIONS stack_size:w1,heap_size:w2
+
 Under MS Windows:
+
     ALS_OPTIONS=stack_size:w1,heap_size:w2
+
 [Under MS Windows 95, such a line is placed in the AUTOEXEC.BAT file. Under
 Windows NT, one uses the Environment section of the System Properties control
 panel.]
