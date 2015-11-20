@@ -135,7 +135,7 @@ In this example, the resulting use list for module graphics would be:
 and this is the order in which the modules will be searched, as shown in
 the figure below:
 
-![](https://images/UseListSearching.png)
+![](https://github.com/AppliedLogicSystems/ALSProlog/wiki/images/UseListSearching.png)
 
 Figure. Use List Searching
 
