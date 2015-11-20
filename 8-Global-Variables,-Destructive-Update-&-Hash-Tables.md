@@ -51,8 +51,7 @@ following properties:
 backtracking process or the garbage collection process.
 The figure below suggests the global variable mechanism.
 
-{ADD PICTURE
-
+![](images/GlobalVarsMech.png)
 Figure. The Global Variables Area and the Heap.
 
 The underlying mechanism is implemented by the following routines:

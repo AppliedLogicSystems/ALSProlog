@@ -101,9 +101,8 @@ within the buffer to the place where Value is to be inserted. Both Offset and
 Value are integers,  and the byte at position Offset from the beginning of the
 buffer is changed to Value. The figure below illustrates this action.
 
-{INSERT PICTURE} 
-
-Figure. Action of $uia_alloc/2.
+![](images/ActionOfUIAPokeb.png)
+Figure. Action of $uia_pokeb/2.
 
 $uia_pokes/3 is called in the following form:
 
@@ -115,8 +114,7 @@ $uia_pokes/3 replaces the portion of the buffer beginning at Offset and having l
 replacement. If Insert would extend beyond the end of the buffer, Insert is
 truncated at the end of the buffer. This is illustrated in the Figure below.
 
-{INSERT PICTURE}
-
+![](images/ActionOfUIAPokes.png)
 Figure. Action of $uia_pokes/3.
 
 ###7.3.3 Accessing UIA Components

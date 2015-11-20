@@ -154,8 +154,7 @@ earlier state. However, if the code is written to support such a return using th
 has poor effeiciency. The exception mechanism allows the program to mark a point
 in its calling state, and to later be able to return directly to this marked point independently of the pending calls between the marked state and the later state. This notion is illustrated in the figure below.
 
-{ADD PICTURE}
-
+![](images/CatchDirectReturn.png)
 Figure. Direct Return to an Earlier State.
 
 This exception mechanism is implemented using two predicates, catch/3 and throw/1.
@@ -202,8 +201,7 @@ which is initially invoked by catch/3. If throw/1 is called outside the scope of
 invocation of catch/3 (meaning, with nothing to catch its abort of execution), the
 system aborts to the Prolog shell. The figure below illustrates the behavior of these predicates.
 
-{ADD PICTURE}
-
+![](images/CatchThrowAction.png)
 Figure. Action of catch/3 and throw/1.
 
 Consider the sample code:
