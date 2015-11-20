@@ -288,9 +288,7 @@ that accesses to it from other modules must be prefixed with ‘builtins:’ as 
 
     ...,builtins:command_line(Cmds),...
 
--s
-
-This switch must be followed by a space and a path to a directory. The path
+-s This switch must be followed by a space and a path to a directory. The path
 is added to the searchdir/1 sequence. Multiple occurrences of -s with
 a path may occur on the command line; the associated paths are processed
 and added to the searchdir/1 facts in order corresponding to their left-toright occurrence on the command line. All paths occurring with -s on the
@@ -313,12 +311,10 @@ Note that occurrences of the -A (or -a) switch must occur to the left
 of any occurrence of the -p switch. (This switch was designed for use in
 makefiles.)
 
--heap
-The option -heap followed immediately by space and a number w sets
+-heap The option -heap followed immediately by space and a number w sets
 the size of the ALS Prolog heap to w *1024, where w is the number of K bytes to allocate. Heap overflow will cause exit to the operating system.
 
--stack
-The option -stack followed immediately by a space and a number w sets the size of the ALS Prolog stack to w *1024, where w is the number of K bytes to allocate. Stack overflow will cause exit to the operating system.
+-stack The option -stack followed immediately by a space and a number w sets the size of the ALS Prolog stack to w *1024, where w is the number of K bytes to allocate. Stack overflow will cause exit to the operating system.
 
 These two options were formerly only controlled by the use of an environment variable, ALS_OPTIONS. Now, either or both the command-line and environment
 variable method can be used. Use of one of the command-line options overrides
