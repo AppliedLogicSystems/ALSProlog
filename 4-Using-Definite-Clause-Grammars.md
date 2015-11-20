@@ -70,16 +70,16 @@ Here are some examples that make use of these rules; all of the queries succeed:
 The following picture illustrates the consumption of the sentence:
 [pig,ran,fast,dog].
 
-![](../images/DCG_Pig_Dog.png)
+![](images/DCG_Pig_Dog.png)
 Figure. DCG Parsing as Filtering.
 
 The way to read this diagram is to regard each box as a filter. The filter consumes
 some of the input, and allows the remaining part to pass through to the next filter.
 The following diagram is a tree which illustrates the structure of the parsed list:
 
-![](../images/DCG_Parse_Tree.png)
+![](images/DCG_Parse_Tree.png)
 
-Figure 3. A Parse Tree.
+Figure. A Parse Tree.
 
 DCG rules can have variables in the non-terminals which can be used to pass and
 return information. For instance, consider the following collection of DCG rules:

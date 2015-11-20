@@ -178,8 +178,7 @@ Here are several examples of simple class definitions:
 ````
 The inheritance relations among these classes is shown in the Figure below.
 
-{ADD FIGURE}
-
+![](images/VehicleClassInheritance.png)
 Figure. Example Class Inheritance Relations.
 
 The state-schemata (not including the slots provided by genericObjects) for
