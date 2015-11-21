@@ -12,15 +12,16 @@ in one single executable file. ALS Prolog provides packaging tools for achieving
 this goal. 
 The packaging tools are very straight-forward to use. Simply proceed through the
 following steps:
-1.  Start the image (either the basic ALS Prolog image, or an extended image);
-2.  Load the Prolog files constituting the application.
+
+1.  Start the image (either the basic ALS Prolog image, or an extended image);  
+2.  Load the Prolog files constituting the application.  
 3.  Invoke save_image/2.
 
 Apart from the details necessary to flesh out step 3, this is all there is to it! The information necessary for step 3 is the following:
 
 A.  The name of the file in which the executable image is to be stored (e.g.,
-my_app, or your_app.exe, etc.).
-B.  The name of a 0-ary Prolog predicate which is the entry point to the application (e.g., start_my_app/0).
+my_app, or your_app.exe, etc.).  
+B.  The name of a 0-ary Prolog predicate which is the entry point to the application (e.g., start_my_app/0).  
 C.  The list of names of library files (if any) to be included in the application.
 
 For example, suppose that the application is to be stored in the file my_app, that
