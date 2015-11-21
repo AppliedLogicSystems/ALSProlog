@@ -2,6 +2,7 @@ A typical complex ALS Prolog application involves the following elements:
 * the ALS Prolog system
 * various ALS Prolog source files
 * various foreign C language source files
+
 During development, the object versions of the foreign C language files may be dynamically loaded into a running ALS Prolog image (in the versions of ALS Prolog
 which support this), or may be statically linked with the ALS Prolog run-time library to create an extended ALS Prolog image. The total application under development is started by invoking either the basic ALS Prolog image or the extended
 image, loading the foreign C language object files if necessary, and dynamically
