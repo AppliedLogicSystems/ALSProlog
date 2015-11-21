@@ -23,4 +23,4 @@
 [[17 Prolog Development Projects]]  
 [[18 ALS Prolog - TclTk Interface]]  
 **ALS/Foreign Language Interface**  
-
+[[19 Using the ALS Foreign Interface]]
