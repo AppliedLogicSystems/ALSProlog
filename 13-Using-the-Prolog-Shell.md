@@ -176,9 +176,7 @@ add directories using the comannd-line switch -S at start-up time ({ADD LINK}see
 
 If you want to also automatically search the ALS Prolog directory, you could use
 the following:  
-````
     setenv ALSPATH /usr/eddie/programs:/usr/sue/src/prolog:/usr/prolog/alsdir
-````
 The definition of the ALSPATH variable can also be placed in your .cshrc startup
 file. Combining the examples above, your .cshrc startup file might include the
 following lines:
@@ -203,18 +201,13 @@ What really happens in the code is that ss_init_searchdir/1 takes apart the
 value it has obtained for ALSPATH, and produces a list of atoms representing the
 individual directories in the path. It then calls a subsidiary predicate,
 ss_init_searchdir0/1 which recurses down this list, asserting the fact
-
-DT-278-
-
-builtins:searchdir(SDir)
+    builtins:searchdir(SDir)
 for each atom SDir on the list. So on the Mac, there are two approaches. On the
 one hand, one can directly make assertions on builtins:searchdir/1 as above to set
 up the search path. Or, one can directly call ss_init_searchdir0/1 with an
 appropriate argument. So one of the animals examples from the last section would
 work like this:
-:-builtins:ss_init_searchdir0(
-[’usr:prolog:alsdir:examples’,
-‘usr:gorilla’]).
+    :-builtins:ss_init_searchdir0([’usr:prolog:alsdir:examples’, ‘usr:gorilla’]).
 Such a call can be placed in the Prolog startup file or in one of your source files to
 occur automatically, as descirbed in the next section.
 
@@ -295,9 +288,7 @@ that accesses to it from other modules must be prefixed with ‘builtins:’ as 
 
     ...,builtins:command_line(Cmds),...
 
--s
-
-This switch must be followed by a space and a path to a directory. The path
+-s This switch must be followed by a space and a path to a directory. The path
 is added to the searchdir/1 sequence. Multiple occurrences of -s with
 a path may occur on the command line; the associated paths are processed
 and added to the searchdir/1 facts in order corresponding to their left-toright occurrence on the command line. All paths occurring with -s on the
@@ -320,12 +311,10 @@ Note that occurrences of the -A (or -a) switch must occur to the left
 of any occurrence of the -p switch. (This switch was designed for use in
 makefiles.)
 
--heap
-The option -heap followed immediately by space and a number w sets
+-heap The option -heap followed immediately by space and a number w sets
 the size of the ALS Prolog heap to w *1024, where w is the number of K bytes to allocate. Heap overflow will cause exit to the operating system.
 
--stack
-The option -stack followed immediately by a space and a number w sets the size of the ALS Prolog stack to w *1024, where w is the number of K bytes to allocate. Stack overflow will cause exit to the operating system.
+-stack The option -stack followed immediately by a space and a number w sets the size of the ALS Prolog stack to w *1024, where w is the number of K bytes to allocate. Stack overflow will cause exit to the operating system.
 
 These two options were formerly only controlled by the use of an environment variable, ALS_OPTIONS. Now, either or both the command-line and environment
 variable method can be used. Use of one of the command-line options overrides
@@ -333,14 +322,18 @@ use of the corresponding option with the environment variable.
 The ALS_OPTIONS environment variable is used as follows. If w1 and w2 are
 similar to the value w described above for -h and -s, then:
 Under Bourne shell, Korn shell, and Bash:
-````
-ALS_OPTIONS=stack_size:w1,heap_size:w2
-export ALS_OPTIONS
-````
-Under csh:
-    setenv ALS_OPTIONS stack_size:w1,heap_size:w2
-Under MS Windows:
+
     ALS_OPTIONS=stack_size:w1,heap_size:w2
+    export ALS_OPTIONS
+
+Under csh:
+
+    setenv ALS_OPTIONS stack_size:w1,heap_size:w2
+
+Under MS Windows:
+
+    ALS_OPTIONS=stack_size:w1,heap_size:w2
+
 [Under MS Windows 95, such a line is placed in the AUTOEXEC.BAT file. Under
 Windows NT, one uses the Environment section of the System Properties control
 panel.]
