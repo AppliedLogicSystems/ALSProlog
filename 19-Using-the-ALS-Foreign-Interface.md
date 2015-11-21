@@ -461,7 +461,6 @@ takes three arguments:
 * The second argument is the address of a variable which will hold the tail’s
 type.
 * The third argument is the value of the list.
-````
 The forms for these functions are:
 ````
 PI_gethead(&headval,&headtype,listval);
