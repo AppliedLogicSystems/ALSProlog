@@ -18,8 +18,9 @@
 [[13 Using the Prolog Shell]]  
 [[14 Using the Four-Port Debugger]]  
 [[15 Packaging for Delivery]]  
-**ALS Prolog IDE** 
-[[16 ALS IDE]]
-[[17 Prolog Development Projects]]
-[[18 ALS Prolog - TclTk Interface]]
-**ALS/Foreign Lang. Interf.** 
+**ALS Prolog IDE**  
+[[16 ALS IDE]]  
+[[17 Prolog Development Projects]]  
+[[18 ALS Prolog - TclTk Interface]]  
+**ALS/Foreign Lang. Interf.**  
+
