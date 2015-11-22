@@ -1,4 +1,4 @@
-##18.1 Introduction and Overview
+##20.1 Introduction and Overview
 The interface between ALS Prolog and Tcl/Tk allows prolog programs to create,
 manipulate and destroy Tcl/Tk interpreters, to submit Tcl/Tk expressions for evaulation in those interpreters, and to allow expressions being evaluated to make calls
 back into Prolog. Computed data can be passed in both directions:
@@ -9,11 +9,11 @@ next section. In general, one cannot count on the interface to automatically han
 all situations. One must either assure that the originating code (Prolog or Tcl) creates a data entity which coverts into the the desired target type, or one must explictly
 coerce the entity after it has passed through the interface (e.g., with tcl_coerce).
 
-##18.2 Prolog to Tcl Type Conversion
+##20.2 Prolog to Tcl Type Conversion
 
-##18.3 Prolog to Tcl Interface Predicates
+##20.3 Prolog to Tcl Interface Predicates
 
-###18.3.1 tcl_new(?Interpreter)  
+###20.3.1 tcl_new(?Interpreter)  
    tk_new(?Interpreter)
 
 tcl_new/1 creates a new Tcl interpreter. If the Interpreter argument is an
@@ -34,7 +34,7 @@ Errors
 * Tcl is unable to create the interpreter.
     tcl_error(message)
 
-###18.3.2 tcl_call(+Interpreter, +Script, ?Result)  
+###20.3.2 tcl_call(+Interpreter, +Script, ?Result)  
    tcl_eval(+Interpreter, +ArgList, ?Result)
 
 tcl_call and tcl_eval both execute a script using the Tcl interpreter and returns the
@@ -61,8 +61,8 @@ Errors
 * Script generates a Tcl error.
     tcl_error(message)
 
-###18.3.3 tcl_coerce_number(+Interpreter, +Object, ?Number)  
-###18.3.4 tcl_coerce_atom(+Interpreter, +Object, ?Atom)  
+###20.3.3 tcl_coerce_number(+Interpreter, +Object, ?Number)  
+###20.3.4 tcl_coerce_atom(+Interpreter, +Object, ?Atom)  
    tcl_coerce_list(+interpreter, +Object, ?List)  
 
 These three predicates convert the object Object to a specific Prolog type using the
@@ -86,15 +86,15 @@ Errors
 * Object cannot be converted to the type.
     tcl_error(message)
 
-###18.3.5 tcl_delete(+Interpreter)  
+###20.3.5 tcl_delete(+Interpreter)  
    tcl_delete_all
 
 Tcl_delete deletes the interpreter named Interpreter.
 Tcl_delete_all deletes all Tcl interpreters created by tcl_new/1.
 
-##18.4 Tcl Prolog Interface
+##20.4 Tcl Prolog Interface
 
-###18.4.1 prolog - call a prolog term
+###20.4.1 prolog - call a prolog term
 Synopsis  
 prolog option ?arg arg... ?  
 
@@ -130,7 +130,7 @@ prolog read_call “append(a, b, X)” x
     Returns 1, and the Tcl variable x is set to {a b}.
 ````
 
-##18.5 Stand-Alone TCL
+##20.5 Stand-Alone TCL
 
 Normally Tcl/Tk is installed as a system independent of ALS Prolog. Typically the
 Tcl/Tk shared/dynamic libraries are stored in a system directory (/usr/local/lib on

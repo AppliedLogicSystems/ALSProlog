@@ -1,8 +1,8 @@
-Section 19.1 (A Simple Prolog Predicate in C)
-Section 19.2 (Writing Prolog Predicates in C)
-Section 19.3 (Further Considerations on Interfacing Foreign Predicates)
-Section 19.4 (Embedding ALS Prolog Programs in C)
-Section 19.5 (Manipulating C Data Structures from Prolog)
+Section 21.1 (A Simple Prolog Predicate in C)
+Section 21.2 (Writing Prolog Predicates in C)
+Section 21.3 (Further Considerations on Interfacing Foreign Predicates)
+Section 21.4 (Embedding ALS Prolog Programs in C)
+Section 21.5 (Manipulating C Data Structures from Prolog)
 The ALS Foreign Interface provides programmers with the ability to interface Prolog programs with programs written in other languages such as C. The immediate
 aspects of the interface are provided by a collection of C functions and constants
 which provide the basis for communication between Prolog programs and C programs. The communication method allows several styles of organization, ranging
@@ -45,7 +45,7 @@ systems such as Unix, MacOS, or Win32 is provided in the Foreign Interface Secti
 Language. Brian W. Kernighan and Dennis M. Ritchie, Prentice-Hall, 1978. for
 more information on the C programming language.
 
-##19.1 A Simple Prolog Predicate in C
+##21.1 A Simple Prolog Predicate in C
 
 Before going into detail about the components of the interface, let’s look at a simple
 example. Let’s consider a simple predicate for testing the eveness of an integer. The
@@ -156,7 +156,7 @@ loaded. In this simple example, the only expression in its body is a call on
 the macro PI_INIT which causes the table defined by
 PI_BEGIN...PI_END above to become known to the Prolog system. However, other initializations for the C functions can be placed here.
 
-##19.2 Writing Prolog Predicates in C
+##21.2 Writing Prolog Predicates in C
 
 There are two steps to writing Prolog predicates in C.
 
@@ -168,12 +168,12 @@ file into ALS Prolog, or link the resulting object file together with ALS Prolog
 This section discusses the details of how to create C functions which implement
 Prolog predicates.
 
-### 19.2.1 The ALS Foreign Interface Conventions
+### 21.2.1 The ALS Foreign Interface Conventions
 
 In order to be able to use subroutines written in C from within the ALS Prolog system, it is necessary to have available some C code to help Prolog communicate with
 the C subroutines.
 
-### 19.2.2 Declaring the Predicate
+### 21.2.2 Declaring the Predicate
 
 The first operation normally performed when a foreign object file is loaded is the
 declaration operation. When consult/1 is executed, or when a statically linked
@@ -198,7 +198,7 @@ argument is used to indicate into which module subsequent PI_DEFINEs should
 place their definitions. If no PI_MODULE macro is used, the definitions are placed
 into the default module user. Multiple PI_MODULE macros may be used to put definitions into different modules.
 
-###19.2.3 Succeeding and Failing
+###21.2.3 Succeeding and Failing
 
 All Prolog predicates defined in C must indicate to Prolog whether they have succeeded or failed. To make a predicate succeed, use the PI_SUCCEED macro. To
 make a predicate fail, use the PI_FAIL macro. Use of either of these macros will
@@ -206,7 +206,7 @@ return control to Prolog. PI_SUCCEED and PI_FAIL are only to be used from top
 level C-defined functions, not in subroutines. A function f in a collection of functions (e.g., those defined by some C code) is called top level if f is not called by any
 other function in the collection.
 
-###19.2.4 Getting Arguments from Prolog
+###21.2.4 Getting Arguments from Prolog
 
 The first action taken by most C-defined predicates is to get the arguments passed
 in by the Prolog program. Currently, C-defined predicates are C functions with no
@@ -259,7 +259,7 @@ the argument is not an integer. Note that from C’s point of view, speeding() h
 speeding() is a 0-ary C function used to define a unary Prolog predicate
 speeding/1.
 
-###19.2.5 Taking Apart Prolog Data Objects
+###21.2.5 Taking Apart Prolog Data Objects
 
 As mentioned previously, PI_INT is the only Prolog type that needs no further processing after PI_getan() is called. In order to handle the other types, ALS provides a set of functions for taking apart lists, structures, and symbols.
 
@@ -524,12 +524,12 @@ yes.
 ````
 The third goal above, ?- printlist([]), didn’t succeed because [] is not a
 list, it is a symbol of type PI_SYM. We could have written the predicate printlist/1 so that it accepted [] as a list, but we haven’t discussed all the tools for
-doing so yet. {ADD LINK}See Section 19.2.7 (Creating Prolog Data Objects) for an example of
+doing so yet. {ADD LINK}See Section 21.2.7 (Creating Prolog Data Objects) for an example of
 checking for []. The fourth try didn’t print the type of c. As the goal, display(a.b.c) shows, this list is not a normal list because it doesn’t end with [].
 The predicate was written so that it always ignores the last thing in a list. This works
 out fine when the list is terminated with []. As remarked above, we could have specifically checked for [], but we haven’t discussed the tools for doing so yet.
 
-###19.2.6 Unifying Prolog Data Objects
+###21.2.6 Unifying Prolog Data Objects
 
 In order to return results to Prolog, C functions must be able to force bindings to be
 installed in Prolog variables. Since variable instatiation in Prolog is effected by unification, the PI_unify()function must be used.
@@ -585,7 +585,7 @@ passed in. But since the variable passed in was uninstantiated from Prolog’s p
 of view, the unification succeeded, as you can see by the binding of X in the sample
 run above (X = 42).
 
-###19.2.7 Creating Prolog Data Objects
+###21.2.7 Creating Prolog Data Objects
 
 Corresponding to the functions for decomposing Prolog objects and for unifying
 Prolog objects, the foreign interface includes functions for creating Prolog objects.
@@ -932,7 +932,7 @@ yes.
 
 There are further facilities available in the ALS foreign interface. They are discussed in the Foreign Interface Reference.
 
-###19.2.8 Using Prolog’s Output Streams
+###21.2.8 Using Prolog’s Output Streams
 
 When programming on the C side of the interface, using the standard output facilities of C is often problematic. Some operating systems may not support C’s standard output. Even when standard output is supported, it is unlikely to be aligned
 with Prolog output which is seperately buffered, nor will the output be redirected
@@ -950,9 +950,9 @@ prints to Prolog’s current output stream. PI_aprintf() prints to the Prolog st
 named by the alias argument. Unless you want the output to always go to C’s standard output for some special reason, you should use the PI_printf and
 PI_aprintf functions for all output.
 
-##19.3 Further Considerations on Interfacing Foreign Predicates
+##21.3 Further Considerations on Interfacing Foreign Predicates
 
-###19.3.1 Predicates that Maintain State
+###21.3.1 Predicates that Maintain State
 
 As an example of a set of predicates that maintain state, let’s build a little counter
 package. When you consult this package, there will be a counter and a set of functions for manipulating that counter. Although this package is not very useful or ef-
@@ -1036,7 +1036,7 @@ yes.
 Notice that we don’t have to prefix the predicates with the module name pizza.
 This is because all C-defined predicates are automatically exported from the module in which they are defined.
 
-###19.3.2 Redefining Builtins
+###21.3.2 Redefining Builtins
 
 An important issue to consider is what happens when you redefine symbols or builtins that are already used in the Prolog system. This will happen when you add C
 code defining a function myfunc and you issue a PI_DEFINE of the form
@@ -1087,7 +1087,7 @@ backtrack into the previous definition. This is illustrated in the second exampl
 above by showing that listing/0 does not print out the clauses in the database
 even after failure occurs.
 
-###19.3.3 Staticly Linking Prolog Predicates in C
+###21.3.3 Staticly Linking Prolog Predicates in C
 
 C defined prolog predicates can be statically linked with ALS Prolog to create extended version of the ALS Prolog development system. The even predicate example can be statically linked to ALS Prolog according to the following steps.
 
@@ -1115,11 +1115,11 @@ The main function added to even.c simply invokes the ALS Prolog’s main functio
 and return the result. The third argument to PI_main() is a function pointer for passing C predicate initilization functions. ALS Prolog calls this function to initilize
 any statically linked C predicates.
 
-##19.4 Embedding ALS Prolog Programs in C
+##21.4 Embedding ALS Prolog Programs in C
 
 ALS Prolog programs can be embedded as subprogram in larger controlling C programs. Typically this feature is used to enhance an existing C program with ruledriven intelligence provided by the embedded ALS Prolog code. This section discusses the manner in which such embedding is carried out, and provides a basic example.
 
-###19.4.1 Overview of Embedding.
+###21.4.1 Overview of Embedding.
 
 ALS Prolog is shipped with an executable image, a dynamically linkable library and
 a statically linkable library. Broadly speaking, any linking of ALS Prolog and C
@@ -1156,7 +1156,7 @@ initilized C defined Prolog predicates can be initilized using the PI_INIT macro
 When this main is compiled it creates a simple Prolog shell program. This shell
 used standard input and output for communication.
 
-###19.4.2 Embedding: Building the combined programs.
+###21.4.2 Embedding: Building the combined programs.
 
 So now suppose that we wish to embed a Prolog program know/2 into a C program
 named QA (Question and Answer). As a C program, QA will also have the main
@@ -1189,7 +1189,7 @@ with the PI_prolog_init function. Next it calls load_know (described in the next
 simple question and answer dialog with the user. Finally PI_shutdown is called to
 allow the ALS Prolog library to clean up.
 
-###19.4.3 Calling into ALS Prolog.
+###21.4.3 Calling into ALS Prolog.
 
 Next we will see how the QA program can call on a Prolog predicate for information. The machinery and methods used are described in general form in {ADD LINKS}Section
 (Creating Symbols) , Section (Creating Structures) , and Section (Decomposing
@@ -1484,7 +1484,7 @@ Goobye.
 ````
 Figure. Trace of the execution of Q&A
 
-##19.5 Manipulating C Data Structures from Prolog
+##21.5 Manipulating C Data Structures from Prolog
 
 When linking with complex C libraries such as a Graphical User Interface system,
 it is useful to be able to dynamically allocate and manipulate C data structures using
