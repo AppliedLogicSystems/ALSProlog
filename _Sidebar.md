@@ -23,6 +23,6 @@
 [[17 Prolog Development Projects]]
 [[18 Using the ALS IDE Debugger]]  
 [[19 Using the GUI Library]]
-[[18 ALS Prolog - TclTk Interface]]  
+[[20 ALS Prolog - TclTk Interface]]  
 **ALS/Foreign Language Interface**  
-[[19 Using the ALS Foreign Interface]]
+[[21 Using the ALS Foreign Interface]]
