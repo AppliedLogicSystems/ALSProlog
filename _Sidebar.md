@@ -20,9 +20,9 @@
 [[15 Packaging for Delivery]]  
 **ALS Prolog IDE**  
 [[16 ALS IDE]]  
-[[17 Prolog Development Projects]]
+[[17 Prolog Development Projects]]  
 [[18 Using the ALS IDE Debugger]]  
-[[19 Using the GUI Library]]
+[[19 Using the GUI Library]]  
 [[20 ALS Prolog - TclTk Interface]]  
 **ALS/Foreign Language Interface**  
 [[21 Using the ALS Foreign Interface]]
