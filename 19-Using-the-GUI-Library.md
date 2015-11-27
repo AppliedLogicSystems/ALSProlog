@@ -218,7 +218,9 @@ where Expr is a quoted atom describing a Tcl/Tk function call. Thus, if we repla
 the call considered above by the following,
 ````
 ?- extend_main_menubar(‘Test Extend’,
-            [‘Test Entry #1’ + tcl(‘bell’), ‘Test Entry #2’ + test_write ]),
+            [‘Test Entry #1’ + tcl(‘bell’), 
+             ‘Test Entry #2’ + test_write ]),
+            ]).
 ````
 where
 ````
