@@ -26,7 +26,7 @@ The call
     ?-info_dialog(‘Message for the User’, ‘Dialog Box Title’).
 produces the following information dialog:
 
-![](info_dialog_box.gif)
+![](images/info_dialog_box.gif)
 
 ###19.2.2 Yes-no dialogs.
 ####yes_no_dialog(Interp, Msg, Title, YesLabel, NoLabel, Answer)
@@ -42,7 +42,7 @@ The call
     ?- yes_no_dialog(‘Sample yes-no query for user?’, Answer).
 produces the following popup dialog:
 
-![](yes_no-1.gif)
+![](images/yes_no-1.gif)
 
 If the user clicks “Yes”, the result is
     Answer = Yes
@@ -53,7 +53,7 @@ The call
             ‘Dialog Box Title’, ‘OK’, ‘Cancel’, Answer).
 produces the popup dialog
 
-![](yes_no-2.gif)
+![](images/yes_no-2.gif)
 
 Clicking “OK” yields
     Answer = OK
@@ -73,7 +73,7 @@ The call
 ````
 produces the popup shown below:
 
-![](popup_list_select-1.gif)
+![](images/popup_list_select-1.gif)
 
 In this case, the user is allowed to select a single item; if the user selected “Item
 three” and clicked OK, the result would be:
@@ -89,7 +89,7 @@ The Options argument for popup_select_items/[3,4] allows the programmer to place
 ````
 will popup a list box whose appearance is identical (apart from the different title requested) to the previous listbox. However, it will permit selection of ranges of elements, as seen below:
 
-![](popup_list_choice-2.gif)
+![](images/popup_list_choice-2.gif)
 
 The result of clicking OK will be:
     Selection = [Item #2, Item three]
@@ -131,11 +131,11 @@ This is a useful method of obtaining input from users. For example, the call
     ?- atomic_input_dialog(‘Please input something:’, Atom).
 will popup the following window:
 
-![](atom_input-1.gif)
+![](images/atom_input-1.gif)
 
 If the user types: Logic is wonderful
 
-![](atomic_input.gif)
+![](images/atomic_input.gif)
 
 then the output result would be
     Atom = Logic is wonderful
@@ -152,7 +152,7 @@ The call
     ?- file_select_dialog(File).
 would produce this popup:
 
-![](file_sel-1.gif)
+![](images/file_sel-1.gif)
 
 The call
 ````
@@ -164,7 +164,7 @@ The call
 ````
 would produce
 
-![](file-sel-1.gif)
+![](images/file-sel-1.gif)
 
 ##19.6 Displaying Images.
 
@@ -193,7 +193,7 @@ Thus, the call
     ?-display_image(pow_wow).
 produces
 
-![](pow_wow_dancer.gif)
+![](images/pow_wow_dancer.gif)
 
 
 ##19.7 Adding to the ALS IDE main menubar.
@@ -207,7 +207,7 @@ call
 the main listener window would look like this when clicking on the newly added
 menubar entry:
 
-![](x_menu-1.gif)
+![](images/x_menu-1.gif)
 
 This is somewhat uninteresting, however, since these menu items won’t do anything. To add simple behaviors to the menu entry, one uses expressions of the form
 Label + Behnavior,
