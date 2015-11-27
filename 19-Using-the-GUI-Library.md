@@ -164,7 +164,7 @@ The call
 ````
 would produce
 
-![](images/file-sel-1.gif)
+![](images/file_sel-1.gif)
 
 ##19.6 Displaying Images.
 
