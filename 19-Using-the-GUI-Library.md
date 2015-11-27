@@ -294,11 +294,16 @@ as follows:
 add_to_main_menu_entry(Index, Entry)
     :-path_to_main_menu_entry(Index, MenuPath),
       extend_cascade(Entry, MenuPath, shl_tcli).
+````
 
 For example,
+
     ?- add_to_main_menu_entry(3,, ‘My Entry’ + test_write).
+
 will add an entry at the end of the Tools cascade. The predicate
+
     extend_cascade(Entry, MenuPath, Interp)
+
 accomplishes adding the Entry to the end of menu MenuPath under interpreter
 Interp.
 
