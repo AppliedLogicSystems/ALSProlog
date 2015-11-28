@@ -1,0 +1,160 @@
+<HTML >
+<HEAD >
+<TITLE >module_closure/[2 , 3] </TITLE >
+</HEAD><BODY>
+<B >module_closure/[2 , 3] </B> 
+<P></P>
+module_closure/2 &mdash; creates a module closure 
+<P></P>
+module_closure/3 &mdash; creates a module closure for the specified procedure 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >: - module_closure ( Name , Arity , Procedure ) . 
+<P ></P >
+: - module_closure ( Name , Arity ) . 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >For some Prolog procedures , it is essential to know the module within which 
+they are invoked. For example , setof/3 must invoke the goal in its second argument relative to the correct module. 
+The problem is that setof/3 is defined in module builtins , while it may invoked in some other module which is where the code defining 
+the goal in the second argument should be run. In reality , setof/3 is defined as the module closure of another predicate setof/4 ( whose definition appears in the builtins module ) . The extra argument to setof/4 is the module in which the goal in the second argument of setof/3 is to be run. Declaring setof/3 to be a module closure of setof/4 means that goals of the form 
+<P ></P >
+
+<P ></P >
+... , setof ( X , G , L ) , ... 
+<P ></P >
+are automatically expanded to goals of the form 
+<P ></P >
+
+<P ></P >
+... , setof ( M , X , G , L ) , ... 
+<P ></P >
+where M is the current module; i.e. , the module in which the original call took 
+place. Thus setof/4 is supplied with the correct module M in which to run the goal in the second argument of the original call to setof/3. 
+<P ></P >
+The actual predicate that you write should expect to receive the calling 
+module as its first argument. Then one ‘closes’ the predicate with a module closure 
+declaration which suppresses the first ( module ) argument. The arguments to module_closure/3 are as follows 
+<P ></P >
+<IMG SRC = images/Bullet.gif ALT = images/Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >Name is the name of the procedure the user will call. 
+<P ></P >
+<IMG SRC = images/Bullet.gif ALT = images/Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >Arity is the number of arguments of the user procedure; that is , the number of 
+arguments in the ‘closed’ procedure which the user procedure will call. 
+<P ></P >
+<IMG SRC = images/Bullet.gif ALT = images/Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >Procedure is the name of the ( unclosed ) procedure to call with the additional 
+module argument. Note that Procedure can be different than Name , although they 
+are often the same. 
+<P ></P >
+The procedure that the user will call should be exported if it is contained 
+within a module. The actual ( unclosed ) procedure does not need to be exported. module_closure/2 simply identifies the first and third arguments of module_closure/3. That is , the command 
+<P ></P >
+
+<P ></P >
+: - module_closure ( foo , 5 ) . 
+<P ></P >
+is equivalent to 
+<P ></P >
+: - module_closure ( foo , 5 , foo ) . 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >The following example illustrates the use of module_closure/3. First assume that the following three modules have been created and loaded 
+<P ></P >
+module m1. 
+<P ></P >
+use m3. 
+<P ></P >
+
+<P ></P >
+export testA/1. 
+<P ></P >
+testA ( X ) : - leading ( X ) . 
+<P ></P >
+p ( tom ) . 
+<P ></P >
+p ( dick ) . 
+<P ></P >
+p ( harry ) . 
+<P ></P >
+endmod. % m1 
+<P ></P >
+
+<P ></P >
+module m2. 
+<P ></P >
+use m3. 
+<P ></P >
+
+<P ></P >
+export testB/1. 
+<P ></P >
+testB ( X ) : - leading ( X ) . 
+<P ></P >
+p ( sally ) . 
+<P ></P >
+p ( jane ) . 
+<P ></P >
+p ( martha ) . 
+<P ></P >
+endmod. % m2 
+<P ></P >
+
+<P ></P >
+module m3. 
+<P ></P >
+leading ( X ) : - p ( X ) . 
+<P ></P >
+endmod. % m3 
+<P ></P >
+Attempting to run either testA or testB fails 
+<P ></P >
+? - testA ( X ) . 
+<P ></P >
+
+<P ></P >
+no. 
+<P ></P >
+? - testB ( X ) . 
+<P ></P >
+
+<P ></P >
+no. 
+<P ></P >
+This is because the call to p ( X ) runs in module m3 which has no clauses defining p/1. Now let us change module m3 to read as follows 
+<P ></P >
+module m3. 
+<P ></P >
+first ( M , X ) : - M : p ( X ) . 
+<P ></P >
+
+<P ></P >
+export leading/1. 
+<P ></P >
+: - module_closure ( leading , 1 , first ) . 
+<P ></P >
+endmod. 
+<P ></P >
+We have defined a new predicate first/2 which carries a module as its first argument and which makes the call to p ( X ) in that module. And we have specified that leading/1 is the module closure of first/2. Now the calls succeed 
+<P ></P >
+? - testA ( X ) . 
+<P ></P >
+X = tom 
+<P ></P >
+yes. 
+<P ></P >
+? - testB ( X ) . 
+<P ></P >
+X = sally 
+<P ></P >
+yes. 
+<P ></P >
+Note that we exported leading/1 from module m3 , and both module m1 and module m2 were declared to use module m3. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >: /2 , <I >User Guide ( Modules ) </I >. 
+<P ></P >
+</BODY >
+</HTML >

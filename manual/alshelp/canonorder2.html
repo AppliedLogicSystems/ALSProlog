@@ -1,0 +1,63 @@
+<HTML >
+<HEAD >
+<TITLE >' @ = </2' </TITLE >
+</HEAD><BODY>
+‘@ = &lt; 2’ 
+<P></P>
+@ = &lt; 2 &mdash; The left argument is <A NAME = a2466798 ></A >not after the right argument 
+<P></P>
+@&gt; = /2 &mdash; The left argument is <A NAME = a246679b ></A >not before the right argument 
+<P></P>
+@&lt;/2 &mdash; The left argument is <A NAME = a246679f ></A >before the right argument <A NAME = a24667cb ></A >
+<P></P>
+@&gt;/2 &mdash; The left argument is <A NAME = a24667c3 ></A >after the right argument 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >Arg1 @ = &lt; Arg2 
+<P ></P >
+Arg1 @&gt; = Arg2 
+<P ></P >
+Arg1 @&lt; Arg2 
+<P ></P >
+Arg1 @&gt; Arg2 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >These predicates compare two terms according to the standard order as defined 
+by compare/3. The terms are compared as-is without any transformation or 
+interpretation. The order of a partially instantiated term may change as the 
+level of instantiation changes.. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - foobar ( something ) @&gt; foobar. 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - cement @&gt; mortar. 
+<P ></P >
+
+<P ></P >
+no. 
+<P ></P >
+? - inflation_today @ = &lt; inflation_tomorrow. 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - rain_in ( newYork ) @&gt; = rain_in ( arizona ) . 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >compare/3. 
+<P ></P >
+</BODY >
+</HTML >

@@ -1,0 +1,48 @@
+<HTML >
+<HEAD >
+<TITLE >var/1 </TITLE >
+</HEAD><BODY>
+<B >var/1 </B> 
+<P></P>
+var/1 &mdash; the variable is unbound 
+<P></P>
+nonvar/1 &mdash; the variable is instantiated 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B ><UL ><LI >ar ( Term ) 
+<P ></P >
+</UL >nonvar ( Term ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B ><UL ><LI >ar/1 succeeds if Term is an unbound variable , and fails otherwise. 
+<P ></P >
+</UL >nonvar/1 succeeds when Term is a constant or structured term. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - var ( constant ) . 
+<P ></P >
+
+<P ></P >
+no. 
+<P ></P >
+? - nonvar ( constant ) . 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - X = Y , Y = Z , Z = doughnut , var ( X ) . 
+<P ></P >
+no. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >[Bowen 91 , 7.6] , [Bratko 86 , 7.1.1] , [Sterling 86 , 10.1]. 
+<P ></P >
+
+<P ></P >
+</BODY >
+</HTML >

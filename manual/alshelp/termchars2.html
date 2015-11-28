@@ -1,0 +1,111 @@
+<HTML >
+<HEAD >
+<TITLE >term_chars/2 </TITLE >
+</HEAD><BODY>
+term_chars/2 
+<P></P>
+term_chars/2 &mdash; convert between a term and the list of characters which represent the term 
+<P></P>
+term_codes/2 &mdash; convert between a term and the list of character codes which represent the 
+<P></P>
+term 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >term_chars ( Term , CharList ) 
+<P ></P >
+term_codes ( Term , CodeList ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >If CharList is bound to a list of characters then it is parsed according to the syntax 
+rules for terms. Should the parse be successful , the resulting value is unified 
+with Term in a call to term_chars/2. 
+<P ></P >
+If CodeList is bound to a list of character codes then it is is parsed according to the 
+syntax rules for terms. Should the parse be successful , the resulting value is 
+unified with Term in a call to term_codes/2. 
+<P ></P >
+Otherwise CharList ( or CodeList ) will be bound to the list of characters ( character codes ) which would result 
+as output from write_canonical ( Term ) 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - term_chars ( p ( a , X ) , L ) . 
+<P ></P >
+
+<P ></P >
+X = X 
+<P ></P >
+L = [p , ' ( ' , a , ' , ' , ' _' , ' A' , ' ) ' ] 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - term_codes ( A , &quot; = /* a comment * /3 + 4&quot; ) . 
+<P ></P >
+
+<P ></P >
+A = ( _A = 3 + 4 ) 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - term_codes ( A , &quot; oo bar&quot; ) . 
+<P ></P >
+
+<P ></P >
+Error : Syntax error. 
+<P ></P >
+- Goal : builtins : term_codes ( _A , &quot; oo bar&quot; 
+<P ></P >
+- Error Attribute : syntax ( ' foo barend_of_file\n ^' 
+<P ></P >
+' Fullstop ( period ) expected' , 1 , 
+<P ></P >
+stream_descriptor ( ' ' , closed , string , 
+<P ></P >
+string ( &quot; oo bar&quot; ) , [input | nooutput] , false , 3 , 
+<P ></P >
+[] , 0 , 0 , 0 , true , 1 , wt_opts ( 78 , 40000 , flat ) , [] , 
+<P ></P >
+true , text , eof_code , 0 , 0 ) ) 
+<P ></P >
+- Throw pattern : error ( syntax_error , 
+<P ></P >
+[builtins : term_codes ( _A , * ) , 
+<P ></P >
+syntax ( ' foo barend_of_file\n ^' 
+<P ></P >
+' Fullstop ( period ) expected' , 1 , 
+<P ></P >
+stream_descriptor ( ' ' , closed , string , * , * , 
+<P ></P >
+false , 3 , [] , 0 , 0 , 0 , true , 1 , * , [] , true , 
+<P ></P >
+text , eof_code , 0 , 0 ) ) ] ) 
+<P ></P >
+<B >ERRORS 
+<P ></P >
+</B >CharList is bound to a list , but the list does not contain characters 
+<P ></P >
+––––&gt; domain_error ( character_list , CharList ) 
+<P ></P >
+CodeList is bound to a list , but the list does not contain character codes 
+<P ></P >
+––––&gt; domain_error ( character_code_list , CodeList ) 
+<P ></P >
+CharList ( or CodeList ) is not parsable as a term 
+<P ></P >
+––––&gt; syntax_error 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >read_term/3 , write_canonical/2 , number_chars , atom_chars 
+<P ></P >
+User Guide ( Prolog I/O ) . 
+<P ></P >
+</BODY >
+</HTML >

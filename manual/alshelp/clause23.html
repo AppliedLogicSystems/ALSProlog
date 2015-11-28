@@ -1,0 +1,120 @@
+<HTML >
+<HEAD >
+<TITLE >clause/[2 , 3] </TITLE >
+</HEAD><BODY>
+<B >clause/[2 , 3] </B> 
+<P></P>
+clause/2 &mdash; retrieve a clause 
+<P></P>
+clause/3 &mdash; retrieve a clause with a database reference 
+<P></P>
+instance/2 &mdash; retrieve a clause from the database reference 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >clause ( Head , Body ) 
+<P ></P >
+clause ( Head , Body , Ref ) 
+<P ></P >
+instance ( Ref , Clause ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >When Head is bound to a non-variable term , the current module is searched for a clause 
+whose head matches Head and whose body matches Body. If there is more than one clause that matches , then successive Heads and Bodys will be generated upon backtracking. 
+<P ></P >
+When a fact is found , Body will be unified with the atom true. 
+<P ></P >
+clause/3 unifies its third argument with the database reference that corresponds to 
+the clause that was found. When Ref is instantiated in a call to clause/3 , the other two arguments can be uninstantiated. 
+<P ></P >
+: /2 can be used to specify which module should be searched. If Ref is a valid database reference , instance ( Ref , Clause ) retrieves the Prolog clause referenced by Ref and unifies it with Clause. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >The following examples show the use of clause/2 : 
+<P ></P >
+? - listing ( fruit/1 ) . 
+<P ></P >
+% user : fruit/1 
+<P ></P >
+fruit ( apple ) . 
+<P ></P >
+fruit ( _34 ) : - 
+<P ></P >
+product ( _34 , plantGrowth ) 
+<P ></P >
+; product ( _34 , plantFertilization ) . 
+<P ></P >
+fruit ( orange ) . 
+<P ></P >
+
+<P ></P >
+% unusual : fruit/1 
+<P ></P >
+fruit ( tomato ) . 
+<P ></P >
+fruit ( kiwi ) . 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - clause ( fruit ( apple ) , true ) . 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+
+<P ></P >
+? - clause ( fruit ( X ) , Body ) . 
+<P ></P >
+X = apple 
+<P ></P >
+Body = true; 
+<P ></P >
+
+<P ></P >
+X = _1 
+<P ></P >
+Body = ( product ( _1 , plantGrowth ) ; 
+<P ></P >
+product ( _1 , plantFertilization ) ) ; 
+<P ></P >
+
+<P ></P >
+X = orange 
+<P ></P >
+Body = true; 
+<P ></P >
+
+<P ></P >
+no. 
+<P ></P >
+? - unusual : clause ( fruit ( X ) , Body ) . 
+<P ></P >
+X = tomato 
+<P ></P >
+Body = true; 
+<P ></P >
+
+<P ></P >
+X = kiwi 
+<P ></P >
+Body = true; 
+<P ></P >
+
+<P ></P >
+no. 
+<P ></P >
+<B >ERRORS 
+<P ></P >
+</B >If Ref is not instantiated to a database reference and Head is uninstantiated , the call to clause/3 fails. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >[Bowen 91 , 7.3] , [Sterling 86 , 12.2] , [Clocksin 81 , 6.4]. 
+<P ></P >
+</BODY >
+</HTML >

@@ -1,0 +1,70 @@
+<HTML >
+<HEAD >
+<TITLE >setObjStruct/3 </TITLE >
+</HEAD><BODY>
+<B >setObjStruct/3 </B> 
+<P></P>
+setObjStruct/3 &mdash; - set the value of a slot in an object 
+<P></P>
+ac <A NAME = 0342014e ></A >cessObjStruct/3 &mdash; - access the value of a slot in an object 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >setObjStruct ( SlotDescrip , State , Value ) 
+<P ></P >
+accessObjStruct ( SlotDescrip , State , VarOrValue ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >The predicates provide access to the slots of objects. The call 
+<P ></P >
+setObjStruct ( SlotName , State , Value ) 
+<P ></P >
+destructively updates the slot SlotName of State to contain Value , which cannot be an uninstantiated variable , provided that any constraints 
+imposed on this slot by the class are satisfied by the incoming Value. However , Value can contain uninstantiated variables. The second call 
+<P ></P >
+accessObjStruct ( SlotName , State , Value ) 
+<P ></P >
+accesses the slot SlotName of State and unifies the value obtained with VarOrValue. 
+<P ></P >
+SlotDescrip is a <I >slot description </I >, which is either a slot name , or an expression of the form 
+<P ></P >
+SlotName^SlotDescrip 
+<P ></P >
+The latter is used in cases of compound objects in which the value installed 
+in a slot may be the state of another object. Thus , 
+<P ></P >
+&lt; hat&gt;ObjStruct ( Slot1^Slot2 , State , Value 
+<P ></P >
+is equivalent to 
+<P ></P >
+accessObjStruct ( Slot1 , State , Obj1 ) , 
+<P ></P >
+&lt; hat&gt;ObjStruct ( Slot2 , Obj1 , Value 
+<P ></P >
+For compactness , the following syntactic sugar is provided 
+<P ></P >
+State^SlotDescrip : = Value 
+<P ></P >
+for 
+<P ></P >
+setObjStruct ( SlotDescrip , State , Value ) 
+<P ></P >
+and 
+<P ></P >
+VarOrValue : = State^SlotDescrip 
+<P ></P >
+for 
+<P ></P >
+accessObjStruct ( SlotDescrip , State , VarOrValue ) 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >setObjStruct ( theStack , State , [Item | CurStack] 
+<P ></P >
+accessObjStruct ( theStack , State , Stack 
+<P ></P >
+
+<P ></P >
+</BODY >
+</HTML >

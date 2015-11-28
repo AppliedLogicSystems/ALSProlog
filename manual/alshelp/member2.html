@@ -1,0 +1,56 @@
+<HTML >
+<HEAD >
+<TITLE >member/2 </TITLE >
+</HEAD><BODY>
+member/2 
+<P></P>
+member/2 &mdash; list membership 
+<P></P>
+dmember/2 &mdash; list membership 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >member ( Element , List ) 
+<P ></P >
+dmember ( Element , List ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >member/2 succeeds when Element can be unified with one of the elements in the list , List. dmember/2 is the determinate version of member/2. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - member ( a , [a , b , c] ) . 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - member ( X , [1 , 2 , 3] ) . 
+<P ></P >
+X = 1 ; 
+<P ></P >
+X = 2 ; 
+<P ></P >
+X = 3 ; 
+<P ></P >
+no. 
+<P ></P >
+<B >NOTES 
+<P ></P >
+</B >member/2 and dmember/2 are defined by the following clauses 
+<P ></P >
+
+<P ></P >
+member ( Item , [Item | _] ) . 
+<P ></P >
+member ( Item , [_ | Rest] ) : - member ( Item , Rest ) . 
+<P ></P >
+
+<P ></P >
+dmember ( Item , [Item | _] ) : - !. 
+<P ></P >
+dmember ( Item , [_ | Rest] ) : - dmember ( Item , Rest ) . 
+<P ></P >
+</BODY >
+</HTML >

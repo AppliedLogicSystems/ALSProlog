@@ -1,0 +1,62 @@
+<HTML >
+<HEAD >
+<TITLE >' = = ' /2 </TITLE >
+</HEAD><BODY>
+‘ = = ’/2 
+<P></P>
+= = /2 &mdash; terms are identical 
+<P></P>
+\ = = /2 &mdash; terms are not identical 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >Term1 = = Term2 
+<P ></P >
+Term1 \ = = Term2 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >Term1 is identical to Term2 ( Term1 = = Term2 ) if they can be unified , and variables occupying equivalent positions in both 
+terms are identical. For atoms and variables , this is an absolute identity 
+check. Viewing Prolog terms as trees in memory , = = /2 determines whether Term1 and Term2 are isomorphic trees whose leaves are identical. Unlike = /2 , no variables are bound inside a call to = = /2 \ = = fails when = = succeeds , and conversely. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - bar \ = = foo. 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - f ( b ) = = f ( b ) . 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - X = = Y. 
+<P ></P >
+
+<P ></P >
+no. 
+<P ></P >
+? - f ( X ) \ = = f ( X ) . 
+<P ></P >
+
+<P ></P >
+no. 
+<P ></P >
+? - [a , b , c] \ = = [a , b , c]. 
+<P ></P >
+
+<P ></P >
+no. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >[Bowen 91 , 7.4] , [Clocksin 81 , 6.8] , [Bratko 86 , 3.4]. 
+<P ></P >
+
+<P ></P >
+</BODY >
+</HTML >

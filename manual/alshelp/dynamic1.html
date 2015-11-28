@@ -1,0 +1,40 @@
+<HTML >
+<HEAD >
+<TITLE >dynamic/1 </TITLE >
+</HEAD><BODY>
+dynamic/1 
+<P></P>
+dynamic/1 &mdash; declare a procedure to be dynamic 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >dynamic ( Pred/Arity ) 
+<P ></P >
+dynamic ( Module : Pred/Arity ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >dynamic/1 is a procedure intended to be used in directives in source code. It will 
+declare a procedure given by the form Pred/Arity or Module : Pred/Arity to be dynamic. Such a procedure will be considered to be defined even if it 
+contains no clauses. Non-dynamic procedures which have no clauses are 
+considered to be undefined and if called as such will generate a warning or error 
+( depending on the value of the undefined_predicate flag ) . In the future , procedures declared to be dynamic will also be subject 
+to the so called &quot; ogical database&quot; semantics where the database will appear 
+to be frozen once a procedure is called. Only calls that occur ( temporally ) 
+after the database modification will be affected by that modification. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >: - dynamic ( foo/1 ) . 
+<P ></P >
+<B >NOTES 
+<P ></P >
+</B >Calling assert/1 or one of its variants for an undefined procedure will also effectively 
+declare the procedure to be dynamic. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >consult/1 , assert/[1 , 2]. 
+<P ></P >
+</BODY >
+</HTML >

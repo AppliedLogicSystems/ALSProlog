@@ -1,0 +1,123 @@
+<HTML >
+<HEAD >
+<TITLE >;/2 ( semi-colon ) </TITLE >
+</HEAD><BODY>
+;/2 ( semi-colon ) 
+<P></P>
+;/2 &mdash; disjunction of two goals 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >FirstGoal ; SecondGoal 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >The FirstGoal is called. Later , upon backtracking , SecondGoal will be called. Cuts appearing in either FirstGoal or SecondGoal will cut back to the head of the clause which contained the call to ;/2. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >The following example shows the use of ‘;’ as the boolean or connective 
+<P ></P >
+
+<P ></P >
+? - [user]. 
+<P ></P >
+Consulting user. 
+<P ></P >
+language ( postscript ) . 
+<P ></P >
+language ( pascal ) . 
+<P ></P >
+food ( burrito ) . 
+<P ></P >
+food ( crab ) . 
+<P ></P >
+food ( steak ) . 
+<P ></P >
+user consulted. 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - language ( postscript ) ; food ( postscript ) . 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+
+<P ></P >
+Notice that although postscript isn’t a food , the goal succeeds. This is because only one of the two subgoals 
+has to succeed for ‘;’ to succeed. In the next example , we add a few more facts to the database. 
+This example shows that ‘;’ goal also succeeds if both of its arguments can succeed. 
+<P ></P >
+
+<P ></P >
+? - [user]. 
+<P ></P >
+Consulting user. 
+<P ></P >
+food ( prolog ) . 
+<P ></P >
+language ( prolog ) . 
+<P ></P >
+user consulted. 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - language ( prolog ) ; food ( prolog ) . 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+Note that the food ( prolog ) goal is never run , even though it is true. The next example shows that ‘;’ will fail if neither of the subgoals succeed. 
+<P ></P >
+
+<P ></P >
+? - language ( fortran ) ; food ( fortran ) . 
+<P ></P >
+
+<P ></P >
+no. 
+<P ></P >
+
+<P ></P >
+The next example illustrates the behavior of ‘;’ upon backtracking. The semicolons after the shown answers are typed in by 
+the user interactively 
+<P ></P >
+
+<P ></P >
+? - language ( X ) ; food ( X ) . 
+<P ></P >
+
+<P ></P >
+X = postscript; 
+<P ></P >
+X = pascal; 
+<P ></P >
+X = prolog; 
+<P ></P >
+X = burrito; 
+<P ></P >
+X = crab; 
+<P ></P >
+X = steak; 
+<P ></P >
+X = prolog; 
+<P ></P >
+
+<P ></P >
+no. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >!/0 , -&gt;/2 , 
+<P ></P >
+[Bowen 91 , 7.1] , [Sterling 86 , 10.4] , [Bratko 86 , 2.3] , [Clocksin 81 , 6.7]. 
+<P ></P >
+</BODY >
+</HTML >
