@@ -3,32 +3,37 @@ overflow-y: scroll;
 overflow-x: hidden;
 }
 
-#left_top {
-position: absolute;
-top:0;
-left:0;
-height:8em;
-width:13em;
-background-color:ivory;
+#package {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 8em;
+	width: 13em;
 }
 
-#left_bottom {
-position: absolute;;
-top:8em;
-left:0;
-height:100%;
-width:13em;
-background-color:cornsilk;
+#toc {
+	position: fixed;
+	top: 8em;
+	left: 0;
+	bottom: 0;
+	width: 13em;
 }
 
-#right {
-position: absolute;;
-top:0;
-left:13em;
-height:120%;
-width:80%;
-background-color:ivory;
+#content {
+	position: fixed;
+	top: 0;
+	left: 13em;
+	bottom: 0;
+	right: 0;
 }
+
+iframe {
+	width: 100%;
+	height: 100%;
+	background-color:ivory;
+}
+
+#left_bottom { background-color:cornsilk; }
 
 ul {
 list-style-type: none;
