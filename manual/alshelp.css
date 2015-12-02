@@ -1,4 +1,4 @@
-#packages {
+#package-view {
         position: fixed;
         top: 0;
         left: 0;
@@ -6,7 +6,7 @@
         width: 13em;
 }
 
-#toc {
+#toc-view {
         position: fixed;
         top: 8em;
         left: 0;
@@ -14,7 +14,7 @@
         width: 14em;
 }
 
-#content {
+#content-view {
         position: fixed;
         top: 0;
         left: 14em;
