@@ -1,0 +1,52 @@
+<HTML >
+<HEAD >
+<TITLE >date_time/2 </TITLE >
+</HEAD><BODY>
+date_time/2 
+<P></P>
+date_time/2 &mdash; gets current date and time 
+<P></P>
+date/1 &mdash; gets current date 
+<P></P>
+time/1 &mdash; gets the current system time 
+<P></P>
+gm_date_time/2 &mdash; gets current Greenwich mean date and time 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >date_time ( Date , Time 
+<P ></P >
+time ( Time ) 
+<P ></P >
+date ( Date ) 
+<P ></P >
+gm_date_time ( Date , Time 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >date_time ( Date , Time ) obtains the current Date and Time from the same call to the OS/system clock. gm_date_time ( Date , Time ) obtains the current Geenwich UTC Date and Time from the same call to the OS/system clock. date/1 and time/1 are effectively defined by 
+<P ></P >
+date ( Date ) : - date_time ( Date , _ ) . 
+<P ></P >
+time ( Time ) : - date_time ( _ , Time ) . 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - time ( Time ) . 
+<P ></P >
+
+<P ></P >
+Time = ( 16 : 51 : 49 ) 
+<P ></P >
+yes. 
+<P ></P >
+? - date ( Date ) 
+<P ></P >
+Date = 93/11/5 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+</BODY >
+</HTML >

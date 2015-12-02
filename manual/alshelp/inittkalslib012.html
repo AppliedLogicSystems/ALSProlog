@@ -1,0 +1,39 @@
+<HTML >
+<HEAD >
+<TITLE >init_tk_alslib/[0 , 1 , 2] </TITLE >
+</HEAD><BODY>
+<B >init_tk_alslib/[0 , 1 , 2] </B> 
+<P></P>
+init_tk_alslib/0 &mdash; - initialize <A NAME = b0c60ad7 ></A ><A NAME = b0c60ad7 ></A >GUI library , default Tcl interpreter 
+<P></P>
+init_tk_alslib/1 &mdash; - initialize GUI library , creating Tcl interpreter 
+<P></P>
+init_tk_alslib/1 &mdash; - initialize GUI library , creating <A NAME = b0cd7d1c ></A ><A NAME = b0cd7d1c ></A >Tcl interpreter 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >init_tk_alslib 
+<P ></P >
+init_tk_alslib ( Interp ) 
+<P ></P >
+init_tk_alslib ( Interp , Path 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >In order to make use of the GUI library routines , one must first initialize 
+the library. This is accomplished one of these predicates. init_tk_alslib/0 initializes a Tcl/Tk interpreter named tcli , and sources the associated Tcl/Tk code into that interpreter. This call is 
+really defined as 
+<P ></P >
+init_tk_alslib : - init_tk_alslib ( tcli , _ ) . 
+<P ></P >
+If Interp is an atom intended to name a Tcl/Tk interpreter , then 
+<P ></P >
+init_tk_alslib ( Interp , Path 
+<P ></P >
+creates a Tcl/Tk interpreter named Interp , locates the adjunct TclTk code , returns the path to the directory containing 
+that code in Path , and sources that code into Interp. 
+<P ></P >
+
+<P ></P >
+</BODY >
+</HTML >

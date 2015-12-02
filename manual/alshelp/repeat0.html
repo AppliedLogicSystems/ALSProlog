@@ -1,0 +1,46 @@
+<HTML >
+<HEAD >
+<TITLE >repeat/0 </TITLE >
+</HEAD><BODY>
+<B >repeat/0 </B> 
+<P></P>
+repeat/0 &mdash; always succeed upon backtracking 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >repeat 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >repeat/0 always succeeds , even during backtracking. This behavior is useful for 
+implementing loops which repeatedly perform some side-effect. repeat/0 is defined by the following clauses : 
+<P ></P >
+repeat. 
+<P ></P >
+repeat : - repeat. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >The following procedure will repeat forever , reading in an expression and 
+printing out its value. 
+<P ></P >
+loop : - 
+<P ></P >
+repeat , 
+<P ></P >
+read ( Expression ) , 
+<P ></P >
+Value is Expression , 
+<P ></P >
+write ( ’Value = ’ ) , write ( Value ) , nl , 
+<P ></P >
+fail. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >fail/0 , 
+<P ></P >
+[Sterling 86 , 12.5] , [Bratko 86 , 7.5] , [Clocksin 81 , 6.6]. 
+<P ></P >
+</BODY >
+</HTML >

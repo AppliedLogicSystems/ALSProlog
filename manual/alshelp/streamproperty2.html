@@ -1,0 +1,154 @@
+<HTML >
+<HEAD >
+<TITLE >stream_property/2 </TITLE >
+</HEAD><BODY>
+stream_property/2 
+<P></P>
+stream_property/2 &mdash; retrieve streams and their properties 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >stream_property ( Stream , Property ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >stream_property/2 is used to retrieve information on a particular stream. It may also be used 
+to find those streams satisfying a particular property. 
+<P ></P >
+Stream may be either an input or output argument. If used as an input argument it 
+should be bound to either a stream descriptor as returned by open/4 or an alias established in a call to open/4. If used as an output argument , Stream will only be bound to stream descriptors. This predicate may be used to 
+retrieve those streams whose handles were &quot; ost&quot; for some reason. <B >
+<P ></P >
+</B >Property is a term which may take any of the following forms 
+<P ></P >
+file_name ( F ) – When the stream is connected to a source/sink which is a file , F will be 
+the name of that file. 
+<P ></P >
+stream_name ( N ) – N is unified with the name of the source/sink regardless of whether the stream 
+is connected to a file or not. 
+<P ></P >
+mode ( M ) – M is unified with the I/O mode which was specified at the time the stream 
+was opened. 
+<P ></P >
+input – The stream is connected to a source. 
+<P ></P >
+output – The stream is connected to a sink. It is possible for a stream to have 
+both input and output properties. 
+<P ></P >
+alias ( A ) – If the stream has an alias , A will be unified with that alias. 
+<P ></P >
+position ( P ) – If the stream is repositionable , P will be unified with the current 
+position in the stream. 
+<P ></P >
+end_of_stream ( E ) – If the stream position is located at the end of the stream , then E is unified with ' at'. If the stream position is past the end of stream , then E is unified with ' past'. Otherwise , E is unified with ' no'. In the current implementation of ALS Prolog , querying about the end_of_stream property may cause an I/O operation to result which may block. 
+<P ></P >
+eof_action ( A ) – If the stream option eof_action ( Action ) was specified in the options list when the stream was opened , then A will be unified with this action. Otherwise , A will be unified with the default action appropriate for the stream. 
+<P ></P >
+snr_action ( A ) – If the stream option snr_action ( Action ) was specified in the options list when the stream was opened , then A will be unified with this action. Otherwise , A will be unified with the default action appropriate for the stream. 
+<P ></P >
+reposition ( R ) – If positioning is possible on this stream then R is unified with true; if not R is unified with false. 
+<P ></P >
+type ( T ) – T will be unified with either text or binary , indicating the type of stream. 
+<P ></P >
+maxdepth ( D ) – D will be unified with the default depth with which terms are written to. 
+<P ></P >
+depth_computation ( DC ) – DC will be unified with the atom indicating the method of depth computation when 
+writing out terms. 
+<P ></P >
+line_length ( L ) – L will be unified to the default line length parameter which is used for 
+determining where line breaks should be placed when writing terms. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >Open ' foo' for write , but &quot; ose&quot; the stream descriptor. 
+<P ></P >
+
+<P ></P >
+? - open ( foo , write , _ ) . 
+<P ></P >
+
+<P ></P >
+Use stream_property to retrieve the stream descriptor and close it. 
+<P ></P >
+
+<P ></P >
+? - stream_property ( S , file_name ( foo ) ) , close ( S ) . 
+<P ></P >
+
+<P ></P >
+S = stream_descriptor ( ' ' , closed , file , foo , [noinput | output] , true , 
+<P ></P >
+1 , 0 , 0 , 0 , 0 , true , 0 , wt_opts ( 78 , 40000 , flat ) , [] , true , text , 
+<P ></P >
+eof_code , 0 , 0 ) 
+<P ></P >
+
+<P ></P >
+Open ' foo' for read with an alias. 
+<P ></P >
+
+<P ></P >
+? - open ( foo , read , _ , [alias ( foo_alias ) ] ) . 
+<P ></P >
+
+<P ></P >
+Call stream_property to find out where end-of-stream is. Note that foo was 
+created as the empty file above. 
+<P ></P >
+
+<P ></P >
+? - stream_property ( foo_alias , end_of_stream ( Where ) ) . 
+<P ></P >
+
+<P ></P >
+Where = at 
+<P ></P >
+
+<P ></P >
+Call stream_property again to find out about the end-of-stream. 
+<P ></P >
+
+<P ></P >
+? - stream_property ( foo_alias , end_of_stream ( Where ) ) . 
+<P ></P >
+
+<P ></P >
+Where = past 
+<P ></P >
+
+<P ></P >
+Call stream_property to find out the name of the file associated with the 
+alias. 
+<P ></P >
+
+<P ></P >
+? - stream_property ( foo_alias , file_name ( Name ) ) . 
+<P ></P >
+
+<P ></P >
+Name = foo 
+<P ></P >
+
+<P ></P >
+Get all of the names attached to streams. 
+<P ></P >
+
+<P ></P >
+? - setof ( N , S^stream_property ( S , stream_name ( N ) ) , L ) . 
+<P ></P >
+
+<P ></P >
+N = N 
+<P ></P >
+S = S 
+<P ></P >
+L = ['$stderr' , ' $stdin' , ' $stdout' , foo] 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >open/4 , close/1 , set_stream_position/2 , at_end_of_stream/1 
+<P ></P >
+set_line_length/2 , <I >User Guide ( Prolog I/O ) </I >. 
+<P ></P >
+</BODY >
+</HTML >

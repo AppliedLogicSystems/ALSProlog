@@ -1,0 +1,169 @@
+<HTML >
+<HEAD >
+<TITLE >is/2 </TITLE >
+</HEAD><BODY>
+<B >is/2 </B> 
+<P></P>
+is/2 &mdash; evaluates an arithmetic expression 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >Result is Expression 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >Expression should be a ground term that can be evaluated. Numbers evaluate as 
+themselves , and a list evaluates as the first element of the list. The operators listed 
+in <A HREF = alshelpis2.htm#ea2a73ad >Table 3 ( <I >Arithmetic Operators. </I >) </A >and <A HREF = alshelpis2.htm#e9235b96 >Table 5 ( <I >Arithmetic Functions. </I >) </A >can also be evaluated when their arguments can be evaluated. If Result is an unbound variable , then it will be bound to the numeric value of Expression. If Result is not unbound , then it will be evaluated , and the value of the Result will be unified with the value of the Expression. 
+<P ></P >
+
+<P ></P >
+  
+<P ></P >
+<B >Table 2 : 
+<P ></P >
+  
+<P ></P >
+</B ><TABLE ><TR VALIGN = TOP ><TD ><B ></B >Operator 
+<BR ></TD ><TD >Description 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >-X 
+<BR ></TD ><TD >unary minus 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X div Y 
+<BR ></TD ><TD >integer division 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X mod Y 
+<BR ></TD ><TD >X ( integer ) modulo Y 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X xor Y 
+<BR ></TD ><TD >X exclusive or Y 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X * Y 
+<BR ></TD ><TD >multiplication 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X + Y 
+<BR ></TD ><TD >addition 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X-Y 
+<BR ></TD ><TD >subtraction 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X/Y 
+<BR ></TD ><TD >division 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X//Y 
+<BR ></TD ><TD >integer division 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X/\Y 
+<BR ></TD ><TD >integer bitwise conjunction 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X&lt;&lt;Y 
+<BR ></TD ><TD >integer bitwise left shift of X by Y places 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X&gt;&gt;Y 
+<BR ></TD ><TD >integer bitwise right shift of X by Y places 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X\/Y 
+<BR ></TD ><TD >integer bitwise disjunction 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >X^Y 
+<BR ></TD ><TD >X to the power Y 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >\X not ( X ) 
+<BR ></TD ><TD >integer bitwise negation 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >0’Char 
+<BR ></TD ><TD >the ASCII code of Char 
+<BR ></TD ></TR ></TABLE >  
+<P ></P >
+Table 3 Arithmetic Operators. 
+<P ></P >
+
+<P ></P >
+  
+<P ></P >
+<B >Table 4 : 
+<P ></P >
+  
+<P ></P >
+</B ><TABLE ><TR VALIGN = TOP ><TD ><B ></B >Function 
+<BR ></TD ><TD >Description 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >abs ( X ) 
+<BR ></TD ><TD >absolute value 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >acos ( X ) 
+<BR ></TD ><TD >arc cosine 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >asin ( X ) 
+<BR ></TD ><TD >arc sine 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >atan ( X ) 
+<BR ></TD ><TD >arc tangent 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >cos ( X ) 
+<BR ></TD ><TD >cosine 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >cputime 
+<BR ></TD ><TD >CPU time in seconds since ALS Prolog started. 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >exp ( X ) 
+<BR ></TD ><TD >natural exponential function 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >exp10 ( X ) 
+<BR ></TD ><TD >base 10 exponential function 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >floor ( X ) 
+<BR ></TD ><TD >the largest integer not greater than X 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >heapused 
+<BR ></TD ><TD >heap space in use , in bytes 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >j0 ( X ) 
+<BR ></TD ><TD >Bessel function of order 0 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >j1 ( X ) 
+<BR ></TD ><TD >Bessel function of order 1 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >log ( X ) 
+<BR ></TD ><TD >natural logarithm 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >log10 ( X ) 
+<BR ></TD ><TD >base 10 logarithm 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >random 
+<BR ></TD ><TD >returns a random real number between 0 and 1 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >realtime 
+<BR ></TD ><TD >actual time in seconds since ALS Prolog started. 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >round ( X ) 
+<BR ></TD ><TD >integer rounding of X 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >sin ( X ) 
+<BR ></TD ><TD >sine 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >sqrt ( X ) 
+<BR ></TD ><TD >square root 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >tan ( X ) 
+<BR ></TD ><TD >tangent 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >trunc ( X ) 
+<BR ></TD ><TD >the largest integer not greater than X 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >y0 ( X ) 
+<BR ></TD ><TD >Bessel function of second kind of order 0 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >y1 ( X ) 
+<BR ></TD ><TD >Bessel function of second kind of order 1 
+<BR ></TD ></TR ></TABLE >  
+<P ></P >
+Table 5 Arithmetic Functions. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - 2 is 3-1. 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+
+<P ></P >
+? - X is 6 * 7 
+<P ></P >
+X = 42 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+
+<P ></P >
+? - X is 2.5 + 3.5. 
+<P ></P >
+X = 6 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+<B >ERRORS 
+<P ></P >
+</B >is/2 fails when it attempts to evaluate an unknown operator , or if Expression is not ground. Failure also occurs if there are any arithmetic faults , such 
+as overflow , underflow , or division by zero. 
+<P ></P >
+<B >NOTES 
+<P ></P >
+</B >ALS Prolog complies to the ISO Prolog Standard regarding errors. A 
+calculation error will be thrown on overflow , underflow , division by zero , or use of an 
+unrecognized arithmetic operator. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >[Bowen 91 , 7.7] , [Clocksin 81 , 6.11] , [Bratko 86 , 3.4]. 
+<P ></P >
+</BODY >
+</HTML >

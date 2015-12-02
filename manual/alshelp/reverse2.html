@@ -1,0 +1,60 @@
+<HTML >
+<HEAD >
+<TITLE >reverse/2 </TITLE >
+</HEAD><BODY>
+reverse/2 
+<P></P>
+reverse/2 &mdash; list reversal 
+<P></P>
+dreverse/2 &mdash; determinate list reversal 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >reverse ( List1 , List2 ) 
+<P ></P >
+dreverse ( List1 , List2 ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >reverse/2 succeeds when List2 can be unified with the result of reversing List1. dreverse/2 is the determinate version of reverse/2. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - reverse ( [a , b , c] , List2 ) . 
+<P ></P >
+List2 = [c , b , a] 
+<P ></P >
+yes. 
+<P ></P >
+<B >NOTES 
+<P ></P >
+</B >Defined by the following clauses 
+<P ></P >
+reverse ( List , Rev ) : - 
+<P ></P >
+reverse ( List , [] , Rev ) . 
+<P ></P >
+
+<P ></P >
+reverse ( [] , Rev , Rev ) . 
+<P ></P >
+reverse ( [A | Rest] , SoFar , Rev ) : - 
+<P ></P >
+reverse ( Rest , [A | SoFar] , Rev ) . 
+<P ></P >
+
+<P ></P >
+dreverse ( List , Rev ) : - 
+<P ></P >
+dreverse ( List , [] , Rev ) . 
+<P ></P >
+
+<P ></P >
+dreverse ( [] , Rev , Rev ) : - !. 
+<P ></P >
+dreverse ( [A | Rest] , SoFar , Rev ) 
+<P ></P >
+: - dreverse ( Rest , [A | SoFar] , Rev ) . 
+<P ></P >
+</BODY >
+</HTML >

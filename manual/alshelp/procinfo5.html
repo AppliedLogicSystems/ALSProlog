@@ -1,0 +1,101 @@
+<HTML >
+<HEAD >
+<TITLE >' $procinfo'/5 </TITLE >
+</HEAD><BODY>
+<B >’$procinfo’/5 </B> 
+<P></P>
+’$procinfo’/5 &mdash; retrieves information about the given procedure 
+<P></P>
+’$nextproc’/3 &mdash; retrieves the next procedure in the name table 
+<P></P>
+’ <A NAME = 422913f1 ></A >$exported_proc’/3 &mdash; checks whether the given procedure is exported 
+<P></P>
+’$resolve_module’/4 &mdash; finds the module which exports the given procedure 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >’$procinfo’ ( NTblIndex , Module , Pred , Arity , DBRef ) 
+<P ></P >
+’$nextproc’ ( PreNTblIndex , Flag , NTblIndex ) 
+<P ></P >
+’$exported_proc’ ( Module , Pred , Arity ) 
+<P ></P >
+’$resolve_module’ ( Module , Pred , Arity , ImportedFrom ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >Given a name table index ( NTBlIndex ) , ’$procinfo’/5 returns the module name , the predicate name , the arity , and the database 
+reference associated with that name table entry. If the given name table entry is a 
+Prolog-defined procedure ( as opposed to a C- or assembler-defined procedure ) , 
+the returned database reference is the database reference of the procedure’s 
+first clause. If the procedure associated with NTblIndex is not a Prolog-defined procedure , 0 will be returned as the database 
+reference. If NTblIndex is an uninstantiated variable , and Module , Pred and Arity are bound values , the name table entry of Pred/Arity in module Module is accessed. 
+<P ></P >
+’$nextproc’/3 returns the name table index NTblIndex of the next name table entry following the input name table entry PreNTblIndex. If PreNTblIndex is -1 , the first name table entry index is returned. The argument Flag determines the type of the next name table entry to be chosen , as follows. 
+<P ></P >
+  
+<P ></P >
+  
+<P ></P >
+<TABLE ><TR VALIGN = TOP ><TD >Flag = 0 
+<BR ></TD ><TD >The index of the name table entry of the next Prolog-defined procedure is 
+returned. 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >Flag = 1 
+<BR ></TD ><TD >The index of the name table entry of the next Prolog- or C-defined procedure 
+is returned. 
+<BR ></TD ></TR ><TR VALIGN = TOP ><TD >Flag = 2 
+<BR ></TD ><TD >The index of the next name table entry , regardless of its type , is returned. 
+<BR ></TD ></TR ></TABLE >  
+<P ></P >
+Table 10 Argument Flags. 
+<P ></P >
+
+<P ></P >
+For ’$exported_proc’/3 , if the procedure whose module name Module , predicate name Pred , and Arity are given is exported , ’$exported_proc’/3 succeeds; otherwise it fails. 
+<P ></P >
+For ’$resolve_module’/4 , if the given procedure is not defined in the given module Module , ImportedFrom is unified with the name of the module from which the given module Module imports the procedure Pred/Arity. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? -[nrev]. 
+<P ></P >
+Consulting nrev ... 
+<P ></P >
+nrev consulted 
+<P ></P >
+yes. 
+<P ></P >
+
+<P ></P >
+? - ’$exported_proc’ ( user , nrev , 2 ) . 
+<P ></P >
+no. 
+<P ></P >
+
+<P ></P >
+? - [user]. 
+<P ></P >
+Consulting user ... 
+<P ></P >
+export nrev/2. 
+<P ></P >
+user consulted 
+<P ></P >
+yes. 
+<P ></P >
+
+<P ></P >
+? - ’$exported_proc’ ( user , nrev , 2 ) . 
+<P ></P >
+yes. 
+<P ></P >
+
+<P ></P >
+? - ’$resolve_module’ ( user , append , 3 , ImportedFrom ) . 
+<P ></P >
+ImportedFrom = user 
+<P ></P >
+yes. 
+<P ></P >
+</BODY >
+</HTML >

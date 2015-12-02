@@ -1,0 +1,89 @@
+<HTML >
+<HEAD >
+<TITLE >printf/[1 , 2 , 3 , 4] </TITLE >
+</HEAD><BODY>
+<B >printf/[1 , 2 , 3 , 4] </B> 
+<P></P>
+printf/1 &mdash; print out a string to the current output 
+<P></P>
+printf/2 &mdash; print out a string with arguments 
+<P></P>
+printf/3 &mdash; print out a string with a format and arguments 
+<P></P>
+printf_opt/3 &mdash; print out string with format , arguments , options 
+<P></P>
+printf/4 &mdash; print out string with format , arguments , options 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >printf ( Format ) 
+<P ></P >
+printf ( Format , ArgList ) 
+<P ></P >
+printf ( Steam_or_Alias , Format , ArgList ) 
+<P ></P >
+printf_opt ( Format , ArgList , Options ) 
+<P ></P >
+printf ( Stream_or_Alias , Format , ArgList , WriteOptions ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >printf/2 takes a format string and a list of arguments to include in the format 
+string. printf/1 is the same as printf/2 except no argument list is given. The following is a list of the special 
+formatting possible within the format string 
+<P ></P >
+\n – prints a newline ( same as nl/0 
+<P ></P >
+\t – prints a tab character 
+<P ></P >
+\\ – prints a backslash 
+<P ></P >
+\% – prints a percent sign 
+<P ></P >
+%c – prints the corresponding Prolog character ( atom ) in the argument list 
+<P ></P >
+%d – prints the corresponding decimal number in the argument list 
+<P ></P >
+%s – prints the corresponding Prolog string in the argument list 
+<P ></P >
+%t – prints the corresponding Prolog term in the argument list ( same as write/1 
+<P ></P >
+All other characters are printed as they appear in the format string. 
+<P ></P >
+Using printf is generally much easier than using the equivalent write/1 , put/1 , and nl/0 predicates because the whole message you want to print out can be done by one 
+call to printf. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - printf ( &quot; ello world\n&quot; ) . 
+<P ></P >
+hello world 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - printf ( &quot; etters : %c%c%c\n&quot; , [a , b , c] ) . 
+<P ></P >
+Letters : abc 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+
+<P ></P >
+? - printf ( &quot; ontents : %t , Amount : %d\n&quot; , 
+<P ></P >
+[pocket ( keys , wallet , watch ) , 3] ) . 
+<P ></P >
+Contents : pocket ( keys , wallet , watch ) , Amount : 3 
+<P ></P >
+yes. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >nl/0 , put/1 , write/0 , User Guide ( Prolog I/O ) , [Unix/C Reference Manuals : printf ( 3S ) ]. 
+<P ></P >
+</BODY >
+</HTML >

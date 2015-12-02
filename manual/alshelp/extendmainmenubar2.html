@@ -1,0 +1,189 @@
+<HTML >
+<HEAD >
+<TITLE >extend_main_menubar/2 </TITLE >
+</HEAD><BODY>
+<B >extend_main_menubar/2 </B> 
+<P></P>
+extend_main_menubar/2 &mdash; - add entries to the main menubar 
+<P></P>
+menu_entries_list/[2 , 3] &mdash; - obtain menu entries 
+<P></P>
+path_to_menu_entry/[2 , 3 , 4] &mdash; - obtain path to a menu entry 
+<P></P>
+add_to_main_menu_entry/2 &mdash; - add an item to a menu entry 
+<P></P>
+extend_cascade/3 &mdash; - extend a menu cascade 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >extend_main_menubar ( Label , MenuEntriesList 
+<P ></P >
+menu_entries_list ( MenuPath , EntriesList 
+<P ></P >
+menu_entries_list ( Interp , MenuPath , EntriesList 
+<P ></P >
+path_to_main_menu_entry ( Index , SubMenuPath 
+<P ></P >
+path_to_menu_entry ( MenuPath , Index , SubMenuPath 
+<P ></P >
+path_to_menu_entry ( Interp , MenuPath , Index , 
+<P ></P >
+SubMenuPath 
+<P ></P >
+add_to_main_menu_entry ( Index , Entry 
+<P ></P >
+extend_cascade ( Entry , MenuPath , Interp 
+<P ></P >
+The predicate 
+<P ></P >
+extend_cascade ( Entry , MenuPath , Interp 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >The general call 
+<P ></P >
+extend_main_menubar ( Label , MenuEntriesList 
+<P ></P >
+adds entries to the main menubar in the ALS Prolog development environment. 
+<P ></P >
+Label should be the label which will appear on the menu bar , and MenuEntriesList is a Prolog list containing <I >menu entry descriptors , </I >which are either an Atom alone , or an expression of the form 
+<P ></P >
+Atom + Expr 
+<P ></P >
+where Atom is a prolog atom which will serve as the new menu entry , and Expr is a <I >menu entry action expression , </I >which can be one of the following 
+<P ></P >
+<IMG SRC = images/Bullet.gif ALT = images/Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >tcl ( TclExpr ) 
+<P ></P >
+<IMG SRC = images/Bullet.gif ALT = images/Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >cascade ( SubLabel , SubList 
+<P ></P >
+<IMG SRC = images/Bullet.gif ALT = images/Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >PrologCall 
+<P ></P >
+Here , TclExpr can be any Tcl/Tk expression for evaulation , and PrologCall is any ground Prolog goal. The entry 
+<P ></P >
+cascade ( SubLabel , SubList 
+<P ></P >
+allows one to create menu entries which are themselves cascades. In this 
+case , SubLabel must be an atom which will serve as the entry’s label , and SubList is ( recursively ) a list of menu entry descriptors. 
+<P ></P >
+If MenuPath is a Tk path to a menu ( top level or subsidiary ) , then the call 
+<P ></P >
+menu_entries_list ( MenuPath , EntriesList 
+<P ></P >
+will succeed if EntriesList is the list of labels for the entries on that menu , in order. As usual 
+<P ></P >
+menu_entries_list ( MenuPath , EntriesList 
+<P ></P >
+: - 
+<P ></P >
+menu_entries_list ( tcli , MenuPath , EntriesList ) . 
+<P ></P >
+<I >Paths to menu entries </I >are lists of integers representing the path from the root of the menu tree to 
+a particular entry. When one indexes menu entries , the indicies are integers 
+beginning at 0 If MenuPath is a Tk path to a menu ( top level or subsidiary ) , and if Index is an integer &gt; 0 , and if the Index’th entry of MenuPath is a cascade , so that it has an associated menu , then SubMenuPath is a path to that associated menu. 
+<P ></P >
+As usual , 
+<P ></P >
+path_to_main_menu_entry ( Index , SubMenuPath 
+<P ></P >
+: 
+<P ></P >
+path_to_menu_entry ( shl_tcli , ‘.topals.mmenb’ , 
+<P ></P >
+Index , SubMenuPath ) . 
+<P ></P >
+
+<P ></P >
+path_to_menu_entry ( MenuPath , Index , SubMenuPath 
+<P ></P >
+: 
+<P ></P >
+path_to_menu_entry ( tcli , MenuPath 
+<P ></P >
+Index , SubMenuPath ) . 
+<P ></P >
+Finally , one can add new entries at the ends ( bottoms ) of existing menu 
+cascades , as follows 
+<P ></P >
+add_to_main_menu_entry ( Index , Entry 
+<P ></P >
+: 
+<P ></P >
+path_to_main_menu_entry ( Index , MenuPath ) , 
+<P ></P >
+extend_cascade ( Entry , MenuPath , shl_tcli ) . 
+<P ></P >
+extend_cascade ( Entry , MenuPath , Interp 
+<P ></P >
+The predicate 
+<P ></P >
+extend_cascade ( Entry , MenuPath , Interp 
+<P ></P >
+adds Entry to the end of menu MenuPath under interpreter Interp. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >After executing the call 
+<P ></P >
+? - extend_main_menubar ( ‘Test Extend’ 
+<P ></P >
+[‘Test Entry #1’ , ‘Test Entry #2’] ) . 
+<P ></P >
+the main listener window would look like this when clicking on the newly added 
+menubar entry 
+<P ></P >
+<IMG SRC = images/x_menu-1.gif ALT = images/x_menu-1.gif BORDER = 0 WIDTH = 355 HEIGHT = 222 >
+<P ></P >
+Suppose we define 
+<P ></P >
+test_write 
+<P ></P >
+: 
+<P ></P >
+printf ( user_output , ‘This is a test ...\n’ , [] ) , 
+<P ></P >
+flush_input ( user_input ) . 
+<P ></P >
+and replace the call considered above by 
+<P ></P >
+? - extend_main_menubar ( ‘Test Extend’ 
+<P ></P >
+[‘Test Entry #1’ + tcl ( ‘bell’ ) , 
+<P ></P >
+‘Test Entry #2’ + test_write 
+<P ></P >
+] ) . 
+<P ></P >
+Then the appearance of the main menu and the new pulldown will be the same , 
+but chooseing Test Entry #1 will cause the bell to ring , and choosing Test Entry 
+#2 will cause 
+<P ></P >
+This is a test ... 
+<P ></P >
+to be written on the listener console. 
+<P ></P >
+Note that the following is the case 
+<P ></P >
+? - menu_entries_list ( shl_tcli , 
+<P ></P >
+‘.topals.mmenb’ , EntriesList ) . 
+<P ></P >
+EntriesList = [File , Edit , Prolog , Tools , Help]. 
+<P ></P >
+And , 
+<P ></P >
+? - path_to_main_menu_entry ( 4 , SubMenuPath ) . 
+<P ></P >
+SubMenuPath = .topals.mmenb.help 
+<P ></P >
+Finally , 
+<P ></P >
+? - add_to_main_menu_entry ( 3 , 
+<P ></P >
+‘My Entry’ + test_write ) . 
+<P ></P >
+will add an entry at the end of the Tools cascade. 
+<P ></P >
+
+<P ></P >
+</BODY >
+</HTML >

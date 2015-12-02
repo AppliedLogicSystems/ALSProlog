@@ -1,0 +1,49 @@
+<HTML >
+<HEAD >
+<TITLE >getenv/2 </TITLE >
+</HEAD><BODY>
+<B >getenv/2 </B> 
+<P></P>
+getenv/2 &mdash; gets the value of the given os environment variable 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >getenv ( EnvVar , EnvVal ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >EnvVar , which must be instantiated , can be a symbol , an UIA , or a list of ASCII 
+characters denoting an operating system environment or shell variable. The value 
+of this external variable is accessed and the corresponding list of ASCII 
+characters is unified with EnvVal. If EnvVar is not defined in the os environment , getenv/2 fails. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - getenv ( ' TERM' , Term ) . 
+<P ></P >
+
+<P ></P >
+Term = xterm 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - getenv ( ' PATH' , Path ) . 
+<P ></P >
+
+<P ></P >
+Path = ' . : /usr/local/bin : /usr/bin/X11 : /usr/bin : /bin : /usr/ccs/bin' 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - getenv ( ' FOOBAR' , Foobar ) . 
+<P ></P >
+
+<P ></P >
+no. 
+<P ></P >
+</BODY >
+</HTML >

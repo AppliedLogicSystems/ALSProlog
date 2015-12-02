@@ -1,0 +1,42 @@
+<HTML >
+<HEAD >
+<TITLE >gensym/2 </TITLE >
+</HEAD><BODY>
+<B >gensym/2 </B> 
+<P></P>
+gensym/2 &mdash; generates families of unique symbolsr 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >gensym ( Prefix , Symbol ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >If Prefix is a symbol ( either an interned or uninterned atom ) , then Symbol is 
+a new UIA which has not previously existed in the system and which involves 
+Prefix as a subsymbol. . The string also involves the system time that the 
+current ALS Prolog image was started , together with the value of a counter for these 
+generated symbols. Consequently , the symbols are almost guaranteed to be 
+unique across invokations of the system , execpt for the possibility of the system 
+clock wrapping around. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - gensym ( ‘&lt;Prefix&gt;’ , Symbol ) . 
+<P ></P >
+
+<P ></P >
+Symbol = ‘\376&lt;Prefix&gt;_839678026_0’ 
+<P ></P >
+
+<P ></P >
+? - gensym ( airplane , X ) . 
+<P ></P >
+
+<P ></P >
+X = ‘\376airplane_839678026_1’ 
+<P ></P >
+
+<P ></P >
+</BODY >
+</HTML >

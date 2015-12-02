@@ -1,0 +1,131 @@
+<HTML >
+<HEAD >
+<TITLE >number_chars/2 </TITLE >
+</HEAD><BODY>
+number_chars/2 
+<P></P>
+number_chars/2 &mdash; convert between a number and the list of characters which represent the 
+<P></P>
+number 
+<P></P>
+number_codes/2 &mdash; convert between a number and the list of character codes which represent 
+<P></P>
+the number 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >number_chars ( Number , CharList ) 
+<P ></P >
+number_codes ( Number , CodeList ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >If CharList is bound to a list of characters then it is parsed according to the syntax 
+rules for numbers. Should the parse be successful , the resulting value is 
+unified with Number in a call to number_chars/2. 
+<P ></P >
+If CodeList is bound to a list of character codes then it is is parsed according to the 
+syntax rules for numbers. Should the parse be successful , the resulting value 
+is unified with Number in a call to number_codes/2. 
+<P ></P >
+In Number is bound to a number in either number_chars/2 ( or number_codes/2 ) , after first ascertaining that CharList ( or CodeList ) is bound to a ground list , then CharList ( or CodeList ) will be bound to a list of characters ( character codes ) that would result as 
+output from write_canonical ( Number ) . 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - number_chars ( -2.3 , L ) . 
+<P ></P >
+
+<P ></P >
+L = [- , ' 2' , . , ' 3'] 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - number_codes ( N , &quot; 23&quot; ) . 
+<P ></P >
+
+<P ></P >
+N = 123 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - number_codes ( N , &quot; 123.40000000000000&quot; ) . 
+<P ></P >
+
+<P ></P >
+N = 123.4 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - number_chars ( 123.4 , ['1' , A , B , . , C] ) . 
+<P ></P >
+
+<P ></P >
+A = ' 2' 
+<P ></P >
+B = ' 3' 
+<P ></P >
+C = ' 4' 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - number_codes ( N , &quot; xffe&quot; ) . 
+<P ></P >
+
+<P ></P >
+N = 4094 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - number_codes ( N , &quot; oobar&quot; ) . 
+<P ></P >
+
+<P ></P >
+Error : Syntax error. 
+<P ></P >
+- Goal : builtins : number_codes ( _A , &quot; oobar&quot; ) 
+<P ></P >
+- Throw pattern : error ( syntax_error , [builtins : number_codes ( _A , * ) ] ) 
+<P ></P >
+<B >ERRORS 
+<P ></P >
+</B >Number and CharList are variables ( number_chars/3 ) 
+<P ></P >
+––––&gt; instantiation_error. 
+<P ></P >
+Number and CodeList are variables ( number_codes/3 ) 
+<P ></P >
+––––&gt; instantiation_error. 
+<P ></P >
+Number is neither a number nor a variable 
+<P ></P >
+––––&gt; type_error ( number , Number ) 
+<P ></P >
+CharList is neither a variable nor a list of characters 
+<P ></P >
+––––&gt; domain_error ( character_list , List ) 
+<P ></P >
+CodeList is neither a variable nor a list of character codes 
+<P ></P >
+––––&gt; domain_error ( character_code_list , List ) 
+<P ></P >
+CharList ( or CodeList ) is not parsable as a number 
+<P ></P >
+––––&gt; syntax_error 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >read_term/3 , write_canonical/2. 
+<P ></P >
+</BODY >
+</HTML >

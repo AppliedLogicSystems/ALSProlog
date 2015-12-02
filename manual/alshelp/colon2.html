@@ -1,0 +1,32 @@
+<HTML >
+<HEAD >
+<TITLE >: /2 ( colon ) </TITLE >
+</HEAD><BODY>
+<B >: /2 ( colon ) </B> 
+<P></P>
+: /2 &mdash; calls a goal in the specified module 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >Module : Goal 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >Module should be instantiated to a name of a module and Goal should be instantiated to a non-variable term. The Goal will be executed as if the call to Goal appeared in the module named Module. Any module dependent procedures such as assert/1 or retract/1 will operate on the procedures defined in Module. Any cuts appearing in Goal will cut back through the head of the clause that contained the call to : /2 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >builtins : write ( foobar ) 
+<P ></P >
+behavior : setof ( Person , eats_linguini ( Person ) , Persons ) 
+<P ></P >
+<B >ERRORS 
+<P ></P >
+</B >If Module is unbound or not bound to a valid module name , the call to : /2 will fail. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >call/1 , User Guide ( Modules ) . 
+<P ></P >
+</BODY >
+</HTML >

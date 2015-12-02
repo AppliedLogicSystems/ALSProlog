@@ -1,0 +1,211 @@
+<HTML >
+<HEAD >
+<TITLE >consult/[1 , 2] </TITLE >
+</HEAD><BODY>
+<B >consult/[1 , 2] </B> 
+<P></P>
+consult/1 &mdash; load a Prolog file 
+<P></P>
+consult/2 &mdash; load a Prolog file , with options 
+<P></P>
+consultq/1 &mdash; load a Prolog file , without messages 
+<P></P>
+reconsult/1 &mdash; load a Prolog file , updating database 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >consult ( FileSpec ) 
+<P ></P >
+consult ( FileSpec , Options ) 
+<P ></P >
+[File | Files] 
+<P ></P >
+consultq ( File ) 
+<P ></P >
+reconsult ( File ) 
+<P ></P >
+[-File | Files] 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >FileSpec should be instantiated either to an atom that is the name of a file , or to a 
+list of atoms which are names of files. For each File occurring on FileSpec , File is opened and read , any clauses currently in memory which were read and 
+asserted previously from this same File are erased , and the clauses occurring in File are asserted into the database , and the directives occurring in File are executed immediately when it is encountered. 
+<P ></P >
+consultq/1 behaves exactly like consult/1 , except that printing of normal messages on the terminal is suppressed. 
+[Note , however , that if the File does not exist , an error message will still be printed.] 
+<P ></P >
+reconsult/1 is identical to consult/1 except in the file in question makes it possible to amend a program without 
+having to restart from scratch and consult all the files which make up the 
+program. Both are included for historical reasons , but the former behavior of consult/1 ( asserting clauses read with no erasures ) can only be obtained by using 
+options in consult/2. 
+<P ></P >
+consult/1 , reconsult/1 , and consultq/1 are defined by 
+<P ></P >
+consult ( File ) : - consult ( File , [] ) . 
+<P ></P >
+reconsult ( File : - consult ( File , [] ) . 
+<P ></P >
+consultq ( File ) : - consult ( File , 
+<P ></P >
+[verbosity ( quiet ) ] ) . 
+<P ></P >
+If File is the atom user , then clauses and commands will be read in from the keyboard until an end of 
+file is read. 
+<P ></P >
+The Options argument of consult/2 is a list of <I >consult options , </I >and their effects , are as follows 
+<P ></P >
+<UL ><LI >erbosity ( Value ) 
+<P ></P >
+</UL >Value = quiet/noisy; turns on/off the printing of messages during consulting. 
+<P ></P >
+tgtmod ( TgtMod ) 
+<P ></P >
+Any clauses in File which are not explicitly enclosed in module begin/end directives will be 
+asserted to module TgtMod. The default value of TgtMod is user. 
+<P ></P >
+search_path ( DirPathList ) 
+<P ></P >
+DirPathList is a list of directory path names. The File ( s ) to be consulted are searched for on this path. If the current directory 
+is not listed on DirPathList , it is added at the beginning. 
+<P ></P >
+strict_search_path ( DirPathList ) 
+<P ></P >
+Like search_path ( DirPathList ) , but the current directory is not added even if not present on DirPathList. 
+<P ></P >
+consult ( Value ) 
+<P ></P >
+Value = true /false. If Value = true , previous clauses from the File being consulted are <I >not </I >erased , so that the net effect is additive. 
+<P ></P >
+ensure_loaded ( Value ) 
+<P ></P >
+Value = true /false. This option has effect only when operating under one of the ALS development 
+shells ( the ALS IDE , or the old TTY shell ) . If Value = true , and if File has previously been consulted , no action is taken for File. If Value = false , File is consulted. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >The following example illustrates the practice of putting calls to consult/1 inside of files to be ( re ) consulted. We have the three files with contents 
+as follows 
+<P ></P >
+letters.pro 
+<P ></P >
+symbol ( a ) . 
+<P ></P >
+symbol ( b ) . 
+<P ></P >
+symbol ( c ) . 
+<P ></P >
+numbers.pro 
+<P ></P >
+symbol ( ' 1' ) . 
+<P ></P >
+symbol ( ' 2' ) . 
+<P ></P >
+symbol ( ' 3' ) . 
+<P ></P >
+topfile.pro 
+<P ></P >
+symbol ( x ) . 
+<P ></P >
+symbol ( y ) . 
+<P ></P >
+symbol ( z ) . 
+<P ></P >
+: - consult ( letters ) . 
+<P ></P >
+: - consult ( numbers ) . 
+<P ></P >
+
+<P ></P >
+The following conversation illustrates the effects of consult and reconsult. 
+<P ></P >
+
+<P ></P >
+? - consult ( letters ) . 
+<P ></P >
+Consulting letters ...letters consulted 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - listing. 
+<P ></P >
+
+<P ></P >
+% user : symbol/1 
+<P ></P >
+symbol ( a ) . 
+<P ></P >
+symbol ( b ) . 
+<P ></P >
+symbol ( c ) . 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - reconsult ( topfile ) . 
+<P ></P >
+Reconsulting topfile ... 
+<P ></P >
+Consulting letters ...consulted 
+<P ></P >
+Consulting numbers ...consulted 
+<P ></P >
+consulted 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - listing. 
+<P ></P >
+
+<P ></P >
+% user : symbol/1 
+<P ></P >
+symbol ( a ) . 
+<P ></P >
+symbol ( b ) . 
+<P ></P >
+symbol ( c ) . 
+<P ></P >
+symbol ( x ) . 
+<P ></P >
+symbol ( y ) . 
+<P ></P >
+symbol ( z ) . 
+<P ></P >
+symbol ( ' 1' ) . 
+<P ></P >
+symbol ( ' 2' ) . 
+<P ></P >
+symbol ( ' 3' ) . 
+<P ></P >
+
+<P ></P >
+
+<P ></P >
+<B >NOTES 
+<P ></P >
+</B >reconsult/1 is not compatible with the DEC-10 notion of reconsult. DEC-10 reconsult would , upon seeing a procedure not already seen in a file 
+wipe out or abolish all clauses for that predicate before adding the new 
+clause in question. 
+<P ></P >
+The present semantics of reconsult/1 are that all clauses which were previously defined in a file are wiped out 
+with new clauses replacing ( positionally in the procedure ) any old clauses. 
+Thus , a procedure that is defined by several files will not be entirely wiped out 
+when reconsult/1 is invoked on just one of the files – only those clauses defined by the one 
+file are wiped out and subsequently replaced. 
+<P ></P >
+The file <I >user </I >is special. When <I >user </I >is consulted or reconsulted , the input clauses will be taken from the user’s 
+terminal. The end-of-file character ( often Control-D or Contol-Z ) should be 
+used to terminate the consultation and return to the shell. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >[Bratko 86 , 6.5] , [Clocksin 81 , 6.1] 
+<P ></P >
+</BODY >
+</HTML >

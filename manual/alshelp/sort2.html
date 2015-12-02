@@ -1,0 +1,66 @@
+<HTML >
+<HEAD >
+<TITLE >sort/2 </TITLE >
+</HEAD><BODY>
+<B >sort/2 </B> 
+<P></P>
+sort/2 &mdash; sorts a list of terms 
+<P></P>
+keysort/2 &mdash; sorts a list of Key-Data pairs 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >sort ( List , SortedList ) 
+<P ></P >
+keysort ( List , SortedList ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >sort/2 sorts the List according to the standard order. Identical elements , as defined by = = /2 , are merged , so that each element appears only once in SortedList. 
+<P ></P >
+keysort/2 expects List to be a list of terms of the form : Key-Data. Each pair is sorted by the Key alone. Pairs with duplicate Keys will not be removed from SortedList. 
+<P ></P >
+A merge sort is used internally by these predicates at a cost of at most N ( log 
+N ) where N is the number of elements in List. 
+<P ></P >
+<B >EXAMPLES 
+<PRE >
+<P ></P >
+</B >The following examples illustrate the use of sort/2 and keysort/2 
+<P ></P >
+? - sort ( [orange , apple , orange , tangelo , grape] , X ) . 
+<P ></P >
+X = [apple , grape , orange , tangelo] 
+<P ></P >
+yes. 
+<P ></P >
+
+<P ></P >
+? - keysort ( [warren-davidh , bowen-kenneth , 
+<P ></P >
+warren-davids , bowen-david , 
+<P ></P >
+burger-warren] , X ) . 
+<P ></P >
+X = [bowen-kenneth , bowen-david , burger-warren , 
+<P ></P >
+warren-davidh , warren-davids] 
+<P ></P >
+yes. 
+<P ></P >
+The following example shows the way structures with the same principal functor 
+are sorted 
+<P ></P >
+? - sort ( [and ( a , b , c ) , and ( a , b , a , b ) , and ( a , a ) , and ( b ) ] , Sorted ) . 
+<P ></P >
+Sorted = [and ( a , a ) , and ( a , b , a , b ) , and ( a , b , c ) , and ( b ) ] 
+<P ></P >
+yes. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >compare/3 , [Bowen 91 , 7.4] 
+<P ></P >
+</PRE >
+</BODY >
+</HTML >

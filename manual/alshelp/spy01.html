@@ -1,0 +1,40 @@
+<HTML >
+<HEAD >
+<TITLE >spy/[0 , 1] </TITLE >
+</HEAD><BODY>
+<B >spy/[0 , 1] </B> 
+<P></P>
+spy/0 &mdash; enable spy points 
+<P></P>
+spy/1 &mdash; sets a spy point 
+<P></P>
+nospy/0 &mdash; removes all spy points 
+<P></P>
+nospy/1 &mdash; removes a spy point 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >spy Name/Arity 
+<P ></P >
+nospy Name/Arity 
+<P ></P >
+nospy 
+<P ></P >
+spy ( Module : Name/Arity ) 
+<P ></P >
+nospy ( Module : Name/Arity ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >spy/1 places a spy point on the procedure name Name/Arity. nospy/1 removes a specific spy point , while nospy/0 removes all spy points that are currently set. During consult or reconsult 
+all spy points are disabled , and spy points on predicates which are consulted or 
+reconsulted are removed. spy/0 re-enables spy points which have been disabled ( e.g. , those which were not 
+removed , but were disabled during a reconsult ) . 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >Tools ( Uswing the Debugger ) , [Bowen 91 , 6.5] , [Clocksin 81 , 6.13] , [Bratko 86 
+8.4]. 
+<P ></P >
+</BODY >
+</HTML >

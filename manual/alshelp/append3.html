@@ -1,0 +1,56 @@
+<HTML >
+<HEAD >
+<TITLE >append/3 </TITLE >
+</HEAD><BODY>
+<B >append/3 </B> 
+<P></P>
+append/3 &mdash; append two lists 
+<P></P>
+dappend/3 &mdash; append two lists 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >append ( List1 , List2 , List3 ) 
+<P ></P >
+dappend ( List1 , List2 , List3 ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >List3 is the result of appending List2 to the end of List1. dappend is the determinate version of append. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >? - append ( [a , b] , [c , d] , E ) . 
+<P ></P >
+E = [a , b , c , d] 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - append ( [a , b] , [C , D] , [a , b , c , d] ) . 
+<P ></P >
+C = c 
+<P ></P >
+D = d 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+<B >NOTES 
+<P ></P >
+</B >append and dappend are defined by 
+<P ></P >
+append ( [] , L , L ) . 
+<P ></P >
+append ( [H | T] , L , [H | TL] ) : - append ( T , L , TL ) . 
+<P ></P >
+
+<P ></P >
+dappend ( [] , L , L ) : - !. 
+<P ></P >
+dappend ( [H | T] , L , [H | TL] ) : - dappend ( T , L , TL ) . 
+<P ></P >
+</BODY >
+</HTML >

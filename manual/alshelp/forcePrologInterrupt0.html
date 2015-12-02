@@ -1,0 +1,41 @@
+<HTML >
+<HEAD >
+<TITLE >forcePrologInterrupt/0 </TITLE >
+</HEAD><BODY>
+<B >forcePrologInterrupt/0 </B> 
+<P></P>
+forcePrologInterrupt/0 &mdash; - force interrupt on next call 
+<P></P>
+callWithDelayedInterrupt/1 &mdash; - call goal , setting delayed interrupt 
+<P></P>
+callWithDelayedInterrupt/2 &mdash; - call goal , setting delayed interrupt 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >forcePrologInterrupt 
+<P ></P >
+callWithDelayedInterrupt ( Call ) 
+<P ></P >
+callWithDelayedInterrupt ( Module , Call ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >forcePrologInterrupt forces an interrupt on the next call by setting the heap safety margin to a 
+sufficiently large number which is guaranteed to be larger than the actual heap 
+margin. 
+<P ></P >
+callWithDelayedInterrupt ( Call ) acts like call/1 , invoking Call. However , it arranges the system so that an interrupt will take place on the 
+first call occurring after the invocation of Call. 
+<P ></P >
+callWithDelayedInterrupt ( Module , Call ) 
+<P ></P >
+acts like 
+<P ></P >
+callWithDelayedInterrupt/1 , except that it invokes Call within module Module. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >setPrologInterrupt/1 , getPrologInterrupt/1 , <I >User Guide ( Prolog Interrupts ) . 
+<P ></P >
+</I ></BODY >
+</HTML >

@@ -1,0 +1,43 @@
+<HTML >
+<HEAD >
+<TITLE >abolish/2 </TITLE >
+</HEAD><BODY>
+<B >abolish/2 </B> 
+<P></P>
+abolish/2 : : &mdash; remove a procedure from the database 
+<P></P>
+<B>FORMS</B>
+<P ></P >
+</B >abolish ( Name , Arity ) 
+<P ></P >
+<B >DESCRIPTION 
+<P ></P >
+</B >All the clauses for the specified procedure Name/Arity in the current module are removed from the database. The module from which 
+to abolish clauses can be specified with a ‘ : ’. Given appropriate arguments , abolish/2 will succeed whether or not it actually removed any clauses. 
+<P ></P >
+<B >EXAMPLES 
+<P ></P >
+</B >
+<P ></P >
+? - abolish ( zip , 3 ) . 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+? - othermodule : abolish ( victim , 7 ) . 
+<P ></P >
+
+<P ></P >
+yes. 
+<P ></P >
+<B >ERRORS 
+<P ></P >
+</B >If Name is not an atom or Arity is not an integer , abolish/2 fails. 
+<P ></P >
+<B >SEE ALSO 
+<P ></P >
+</B >: /2 
+<P ></P >
+</BODY >
+</HTML >
