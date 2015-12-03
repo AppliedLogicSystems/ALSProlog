@@ -1,8 +1,8 @@
 <HTML >
 <HEAD >
-<TITLE >retract/[1 , 2] </TITLE >
+<TITLE >retract/[1, 2] </TITLE >
 </HEAD><BODY>
-<B >retract/[1 , 2] </B> 
+<B >retract/[1, 2] </B> 
 <P></P>
 retract/1 &mdash; removes a clause from the database 
 <P></P>
@@ -14,19 +14,19 @@ erase/1 &mdash; removes a clause from the database
 <P ></P >
 </B >retract ( Clause ) 
 <P ></P >
-retract ( Clause , DBRef ) 
+retract ( Clause, DBRef ) 
 <P ></P >
 erase ( DBRef ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
-</B >When Clause is bound to an atom or a structured term , the current module is searched for 
-a clause that will unify with Clause. When a matching clause is found in the database , Clause is unified with the structure corresponding to the clause. The clause is then 
+</B >When Clause is bound to an atom or a structured term, the current module is searched for 
+a clause that will unify with Clause. When a matching clause is found in the database, Clause is unified with the structure corresponding to the clause. The clause is then 
 removed from the database. 
 <P ></P >
 retract/2 additionally unifies DBRef with the database reference of the clause. 
 <P ></P >
-erase/1 removes the clause associated with DBRef from the database. Note that erase ( DBRef ) should never be called following retract ( Clause , DBRef ) since at that point DBRef is no longer a valid database reference. 
+erase/1 removes the clause associated with DBRef from the database. Note that erase ( DBRef ) should never be called following retract ( Clause, DBRef ) since at that point DBRef is no longer a valid database reference. 
 <P ></P >
 retract/1 and retract/2 will repeatedly generate and remove clauses upon backtracking. : /2 can be used to specify which module should be searched. 
 <P ></P >
@@ -65,7 +65,7 @@ yes.
 <P ></P >
 yes. 
 <P ></P >
-In the next example , we show what heroes are left by using the listing/1 procedure. After that , we remove hero ( superman ) with a retract/2 call. The old database reference to the man of steel is instantiated to Ref. 
+In the next example, we show what heroes are left by using the listing/1 procedure. After that, we remove hero ( superman ) with a retract/2 call. The old database reference to the man of steel is instantiated to Ref. 
 <P ></P >
 ? - listing ( hero/1 ) . 
 <P ></P >
@@ -83,34 +83,34 @@ hero ( superwoman ) .
 <P ></P >
 yes. 
 <P ></P >
-? - retract ( hero ( superman ) , Ref ) . 
+? - retract ( hero ( superman ), Ref ) . 
 <P ></P >
-Ref = ’$dbref’ ( 5208 , 15 , 2384 , 1 ) 
+Ref = ’$dbref’ ( 5208, 15, 2384, 1 ) 
 <P ></P >
 
 <P ></P >
 yes. 
 <P ></P >
-In this next example , we use clause/3 to find the database reference of hero ( batman ) . After this , we use the database reference in a retract/2 call to remove hero ( batman ) from the database. Note that the Clause argument for retract/2 is uninstantiated in this call. The clause that was removed is instantiated 
-to Clause , after the call to retract/2 has succeeded. 
+In this next example, we use clause/3 to find the database reference of hero ( batman ) . After this, we use the database reference in a retract/2 call to remove hero ( batman ) from the database. Note that the Clause argument for retract/2 is uninstantiated in this call. The clause that was removed is instantiated 
+to Clause, after the call to retract/2 has succeeded. 
 <P ></P >
-? - clause ( hero ( batman ) , Body , Ref ) . 
+? - clause ( hero ( batman ), Body, Ref ) . 
 <P ></P >
 Body = true 
 <P ></P >
-Ref = ’$dbref’ ( 5052 , 15 , 2384 , 2 ) 
+Ref = ’$dbref’ ( 5052, 15, 2384, 2 ) 
 <P ></P >
 
 <P ></P >
 yes. 
 <P ></P >
-? - retract ( Clause , ’$dbref’ ( 5052 , 15 , 2384 , 2 ) ) . 
+? - retract ( Clause, ’$dbref’ ( 5052, 15, 2384, 2 ) ) . 
 <P ></P >
 Clause = hero ( batman ) 
 <P ></P >
 yes. 
 <P ></P >
-In the following example , we list the heroes left in the database. Only hero ( superwoman ) is left , but she’s in a different module. However , using the Mod : Goal construct , we can remove her too 
+In the following example, we list the heroes left in the database. Only hero ( superwoman ) is left, but she’s in a different module. However, using the Mod : Goal construct, we can remove her too 
 <P ></P >
 ? - listing ( hero/1 ) . 
 <P ></P >
@@ -136,14 +136,14 @@ yes.
 <P ></P >
 yes. 
 <P ></P >
-As the last call to listing/1 shows , there are no more heroes left in the database. ( Who knows what evil 
+As the last call to listing/1 shows, there are no more heroes left in the database. ( Who knows what evil 
 may be lurking in the garbage collector though! ) 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >clause/1 , 
+</B >clause/1, 
 <P ></P >
-[Bowen 91 , 7.3] , [Clocksin 81 , 6.4] , [Bratko 86 , 7.4] , [Sterling 86 , 12.2]. 
+[Bowen 91, 7.3], [Clocksin 81, 6.4], [Bratko 86, 7.4], [Sterling 86, 12.2]. 
 <P ></P >
 </BODY >
 </HTML >

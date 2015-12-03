@@ -1,57 +1,57 @@
 <HTML >
 <HEAD >
-<TITLE >yes_no_dialog/[2 , 3 , 4] </TITLE >
+<TITLE >yes_no_dialog/[2, 3, 4] </TITLE >
 </HEAD><BODY>
-<B >yes_no_dialog/[2 , 3 , 4] </B> 
+<B >yes_no_dialog/[2, 3, 4] </B> 
 <P></P>
-yes_no_dialog/[2 , 3 , 4] &mdash; - present a yes/no dialog 
+yes_no_dialog/[2, 3, 4] &mdash; - present a yes/no dialog 
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >yes_no_dialog ( Msg , Answer 
+</B >yes_no_dialog ( Msg, Answer 
 <P ></P >
-yes_no_dialog ( Msg , Title , Answer 
+yes_no_dialog ( Msg, Title, Answer 
 <P ></P >
-yes_no_dialog ( Interp , Msg , Title , Answer 
+yes_no_dialog ( Interp, Msg, Title, Answer 
 <P ></P >
-yes_no_dialog ( Interp , Msg , Title , YesLbl , NoLbl , Answer ) 
+yes_no_dialog ( Interp, Msg, Title, YesLbl, NoLbl, Answer ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
 </B >These dialogs present popup dialogs with a question and two buttons to the user. 
 The shorter versions are defined by 
 <P ></P >
-yes_no_dialog ( Msg , Answer 
+yes_no_dialog ( Msg, Answer 
 <P ></P >
 : 
 <P ></P >
-yes_no_dialog ( Msg , ‘Info’ , Answer ) . 
+yes_no_dialog ( Msg, ‘Info’, Answer ) . 
 <P ></P >
-yes_no_dialog ( Msg , Title , Answer 
-<P ></P >
-: 
-<P ></P >
-yes_no_dialog ( tcli , Msg , Title , Answer ) . 
-<P ></P >
-yes_no_dialog ( Interp , Msg , Title , Answer 
+yes_no_dialog ( Msg, Title, Answer 
 <P ></P >
 : 
 <P ></P >
-yes_no_dialog ( Interp , Msg , Title , 
+yes_no_dialog ( tcli, Msg, Title, Answer ) . 
 <P ></P >
-‘Yes’ , ‘No’ , Answer ) . 
+yes_no_dialog ( Interp, Msg, Title, Answer 
+<P ></P >
+: 
+<P ></P >
+yes_no_dialog ( Interp, Msg, Title, 
+<P ></P >
+‘Yes’, ‘No’, Answer ) . 
 <P ></P >
 For the general call 
 <P ></P >
-yes_no_dialog ( Interp , Msg , Title , YesLbl , NoLbl , Answer ) 
+yes_no_dialog ( Interp, Msg, Title, YesLbl, NoLbl, Answer ) 
 <P ></P >
-Interp , Msg , Title , YesLbl , and NoLbl should all be atoms , and Answer should be an uninstatiated variable. 
+Interp, Msg, Title, YesLbl, and NoLbl should all be atoms, and Answer should be an uninstatiated variable. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
 </B >The call 
 <P ></P >
-? - yes_no_dialog ( ‘Sample yes-no query for user ? ’ , 
+? - yes_no_dialog ( ‘Sample yes-no query for user ? ’, 
 <P ></P >
 Answer ) . 
 <P ></P >
@@ -59,7 +59,7 @@ produces the following popup dialog
 <P ></P >
 <IMG SRC = images/yes_no-1.gif ALT = images/yes_no-1.gif BORDER = 0 WIDTH = 334 HEIGHT = 156 >
 <P ></P >
-If the user clicks “Yes” , the result is 
+If the user clicks “Yes”, the result is 
 <P ></P >
 Answer = Yes 
 <P ></P >
@@ -69,13 +69,13 @@ Answer = No.
 <P ></P >
 The call 
 <P ></P >
-yes_no_dialog ( tcli , 
+yes_no_dialog ( tcli, 
 <P ></P >
-‘Sample yes-no query for user ? ’ , 
+‘Sample yes-no query for user ? ’, 
 <P ></P >
 ‘Dialog Box Title’ 
 <P ></P >
-‘OK’ , ‘Cancel’ , Answer ) . 
+‘OK’, ‘Cancel’, Answer ) . 
 <P ></P >
 produces the popup dialog 
 <P ></P >

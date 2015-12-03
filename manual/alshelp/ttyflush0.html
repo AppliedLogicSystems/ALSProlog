@@ -14,13 +14,13 @@ ttyflush/0 &mdash; forces all buffered output to the screen
 <P ></P >
 </B >ttyflush/0 is used to make sure that output from tty I/O predicates appears on the 
 screen when you want it to. Screen output is normally flushed whenever Prolog is 
-waiting on some I/O operation. Typically , the I/O operation that is waited on is 
-some form of tty read. In this case , you don’t have to use ttyflush. 
+waiting on some I/O operation. Typically, the I/O operation that is waited on is 
+some form of tty read. In this case, you don’t have to use ttyflush. 
 <P ></P >
-A long computation , while causing you to wait for a response , does not qualify 
-as an I/O operation , so any output predicates that were run before the CPU hog 
-started , might not show their output on the screen until the long computation 
-is finished. To combat this problem , ttyflush/0 can be used before entering into the long computation section of your 
+A long computation, while causing you to wait for a response, does not qualify 
+as an I/O operation, so any output predicates that were run before the CPU hog 
+started, might not show their output on the screen until the long computation 
+is finished. To combat this problem, ttyflush/0 can be used before entering into the long computation section of your 
 program. 
 <P ></P >
 <B >EXAMPLES 
@@ -35,7 +35,7 @@ and then try to write something to the screen before running it
 <P ></P >
 
 <P ></P >
-? - printf ( &quot; pril Fool’s Day&quot; ) , infiniteLoop. 
+? - printf ( &quot; pril Fool’s Day&quot; ), infiniteLoop. 
 <P ></P >
 April Fool's Day Break Handler 
 <P ></P >
@@ -77,7 +77,7 @@ we find that the output doesn’t appear until the Control-C is pressed. We can av
 <P ></P >
 
 <P ></P >
-? - printf ( &quot; pril Fool’s Day&quot; ) , ttyflush , infiniteLoop. 
+? - printf ( &quot; pril Fool’s Day&quot; ), ttyflush, infiniteLoop. 
 <P ></P >
 April Fool's Day Break Handler 
 <P ></P >
@@ -115,11 +115,11 @@ Error : Execution aborted.
 <P ></P >
 <B >NOTES 
 <P ></P >
-</B >The ISO Standard mandates that flush_output/[0 , 1] is preferred over ttyflush/0. 
+</B >The ISO Standard mandates that flush_output/[0, 1] is preferred over ttyflush/0. 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >printf/1 , write/1 , put/1 , flush_output/[0 , 1]. 
+</B >printf/1, write/1, put/1, flush_output/[0, 1]. 
 <P ></P >
 </BODY >
 </HTML >

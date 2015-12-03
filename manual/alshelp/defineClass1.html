@@ -16,7 +16,7 @@
 <P ></P >
 Keyword = Value 
 <P ></P >
-The acceptable keywords , together with their associated Value types , are the following 
+The acceptable keywords, together with their associated Value types, are the following 
 <P ></P >
 name - atom 
 <P ></P >
@@ -40,14 +40,14 @@ the state-schema for the class.
 <P ></P >
 Class definitions can supply default values for slots using the equation 
 <P ></P >
-defaults = [... , &lt; lotName&gt; = &lt; alue&gt; , ...] 
+defaults = [..., &lt; lotName&gt; = &lt; alue&gt;, ...] 
 <P ></P >
-where each &lt; lotName&gt; is any one of the slotnames from the complete state schema of the class , and &lt; alue&gt; is any appropriate value for that slot. Omitting this keyword in a class 
+where each &lt; lotName&gt; is any one of the slotnames from the complete state schema of the class, and &lt; alue&gt; is any appropriate value for that slot. Omitting this keyword in a class 
 definition is equivalent to including 
 <P ></P >
 defaults = [ 
 <P ></P >
-If export = yes equation appears on SpecEqns , the class methods and other information concerning the class are exported 
+If export = yes equation appears on SpecEqns, the class methods and other information concerning the class are exported 
 from the module in which the directive is executed. 
 <P ></P >
 The constraints equation imposes constraints on the values of particular slots in the states 
@@ -66,56 +66,56 @@ Three types of constraint expressions are supported
 <P ></P >
 The first two cases are special cases of the third. Tthe left side of the 
 equations is a slot occurring in the complete state-schema of the class being 
-defined. The first , slotName = value , value is any Prolog term , and specifies a fixed value for this slot. The 
+defined. The first, slotName = value, value is any Prolog term, and specifies a fixed value for this slot. The 
 expression slotName &lt; valueList requires the values installed under slotName to be among the Prolog terms appearing on the list valueList. Here ’&lt;’ is a short hand for ’is an element of’. The third constraint 
-expression subsumes the first two. Var is a Prolog variable , and Condition is an arbitrary Prolog call in which Var occurs. The test is imposed by binding the incoming candidate value to the 
-variable Var , and then calling the test Conditon. Installation of the incoming value in the slot takes place only if the test Condition succeeds. 
+expression subsumes the first two. Var is a Prolog variable, and Condition is an arbitrary Prolog call in which Var occurs. The test is imposed by binding the incoming candidate value to the 
+variable Var, and then calling the test Conditon. Installation of the incoming value in the slot takes place only if the test Condition succeeds. 
 <P ></P >
-If an equation action = Name occurs on SpecEqns , where Name is an atom , then methods of this class must be implemented by a binary 
-predicate Name/2. If this equation is absent , the methods predicate will be &lt; lassName&gt;Action/2 , where &lt; lassName&gt; is the name of the class ( i.e. , name = &lt; lassName&gt; occurs on SpecEqns ) . The format of the calls to this predicate is 
+If an equation action = Name occurs on SpecEqns, where Name is an atom, then methods of this class must be implemented by a binary 
+predicate Name/2. If this equation is absent, the methods predicate will be &lt; lassName&gt;Action/2, where &lt; lassName&gt; is the name of the class ( i.e., name = &lt; lassName&gt; occurs on SpecEqns ) . The format of the calls to this predicate is 
 <P ></P >
-&lt; lassName&gt;Action ( Message , State 
+&lt; lassName&gt;Action ( Message, State 
 <P ></P >
-where State is the state of an object of this class , and Message is an arbitrary Prolog term. 
+where State is the state of an object of this class, and Message is an arbitrary Prolog term. 
 <P ></P >
 The structure of a State is opaque. Access to the slots is provided by two 
 predicates 
 <P ></P >
-setObjStruct ( SlotDescrip , State , Value ) 
+setObjStruct ( SlotDescrip, State, Value ) 
 <P ></P >
-accessObjStruct ( SlotDescrip , State , VarOrValue ) 
+accessObjStruct ( SlotDescrip, State, VarOrValue ) 
 <P ></P >
-SlotDescrip is a <I >slot description </I >, which is either a slot name , or an expression of the form 
+SlotDescrip is a <I >slot description </I >, which is either a slot name, or an expression of the form 
 <P ></P >
 SlotName^SlotDescrip 
 <P ></P >
 The latter is used in cases of compound objects in which the value installed 
-in a slot may be the state of another object. Thus , 
+in a slot may be the state of another object. Thus, 
 <P ></P >
-&lt; hat&gt;ObjStruct ( Slot1^Slot2 , State , Value 
+&lt; hat&gt;ObjStruct ( Slot1^Slot2, State, Value 
 <P ></P >
 is equivalent to 
 <P ></P >
-accessObjStruct ( Slot1 , State , Obj1 ) , 
+accessObjStruct ( Slot1, State, Obj1 ), 
 <P ></P >
-&lt; hat&gt;ObjStruct ( Slot2 , Obj1 , Value 
+&lt; hat&gt;ObjStruct ( Slot2, Obj1, Value 
 <P ></P >
 The call 
 <P ></P >
-setObjStruct ( SlotName , State , Value ) 
+setObjStruct ( SlotName, State, Value ) 
 <P ></P >
-destructively updates the slot SlotName of State to contain Value , which cannot be an uninstantiated variable , provided that any constraints 
-imposed on this slot by the class are satisfied by the incoming Value. However , Value can contain uninstantiated variables. The second call 
+destructively updates the slot SlotName of State to contain Value, which cannot be an uninstantiated variable, provided that any constraints 
+imposed on this slot by the class are satisfied by the incoming Value. However, Value can contain uninstantiated variables. The second call 
 <P ></P >
-accessObjStruct ( SlotName , State , Value ) 
+accessObjStruct ( SlotName, State, Value ) 
 <P ></P >
-accesses the slot SlotName of State and unifies the value obtained with VarOrValue. For compactness , the following syntactic sugar is provided 
+accesses the slot SlotName of State and unifies the value obtained with VarOrValue. For compactness, the following syntactic sugar is provided 
 <P ></P >
 State^SlotDescrip : = Value 
 <P ></P >
 for 
 <P ></P >
-setObjStruct ( SlotDescrip , State , Value ) 
+setObjStruct ( SlotDescrip, State, Value ) 
 <P ></P >
 and 
 <P ></P >
@@ -123,80 +123,80 @@ VarOrValue : = State^SlotDescrip
 <P ></P >
 for 
 <P ></P >
-accessObjStruct ( SlotDescrip , State , VarOrValue ) 
+accessObjStruct ( SlotDescrip, State, VarOrValue ) 
 <P ></P >
 The bodies of clauses defining the action predicate of a class can contain 
-calls on accessObjStruct/3 , setObjStruct/3 ( and : = ) , send/2 , send_self/2 , and any other built-in or program-defined Prolog predicate. 
+calls on accessObjStruct/3, setObjStruct/3 ( and : = ), send/2, send_self/2, and any other built-in or program-defined Prolog predicate. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >: - defineClass ( [name = stacker , 
+</B >: - defineClass ( [name = stacker, 
 <P ></P >
-subclassOf = [genericObjects] , 
+subclassOf = [genericObjects], 
 <P ></P >
-addl_slots = [theStack , depth] 
-<P ></P >
-] ) . 
-<P ></P >
-
-<P ></P >
-: - defineObject ( [name = stack , 
-<P ></P >
-instanceOf = stacker , 
-<P ></P >
-values = [theStack = [] , depth = 0] 
+addl_slots = [theStack, depth] 
 <P ></P >
 ] ) . 
 <P ></P >
 
 <P ></P >
-
+: - defineObject ( [name = stack, 
 <P ></P >
-stackerAction ( push ( Item ) , State ) 
+instanceOf = stacker, 
 <P ></P >
-: - 
+values = [theStack = [], depth = 0] 
 <P ></P >
-accessObjStruct ( theStack , State , CurStack ) , 
-<P ></P >
-setObjStruct ( theStack , State , [Item | CurStack] ) , 
-<P ></P >
-accessObjStruct ( depth , State , CurDepth ) , 
-<P ></P >
-NewDepth is CurDepth + 1 , 
-<P ></P >
-setObjStruct ( depth , State , NewDepth ) . 
+] ) . 
 <P ></P >
 
 <P ></P >
-stackerAction ( pop ( Item ) , State ) 
+
+<P ></P >
+stackerAction ( push ( Item ), State ) 
 <P ></P >
 : - 
 <P ></P >
-accessObjStruct ( theStack , State , [Item | RestStack] ) , 
+accessObjStruct ( theStack, State, CurStack ), 
 <P ></P >
-setObjStruct ( theStack , State , RestStack ) , 
+setObjStruct ( theStack, State, [Item | CurStack] ), 
 <P ></P >
-accessObjStruct ( depth , State , CurDepth ) , 
+accessObjStruct ( depth, State, CurDepth ), 
 <P ></P >
-NewDepth is CurDepth - 1 , 
+NewDepth is CurDepth + 1, 
 <P ></P >
-setObjStruct ( depth , State , NewDepth ) . 
+setObjStruct ( depth, State, NewDepth ) . 
 <P ></P >
 
 <P ></P >
-stackerAction ( cur_stack ( Stack ) , State ) 
+stackerAction ( pop ( Item ), State ) 
 <P ></P >
 : - 
 <P ></P >
-accessObjStruct ( theStack , State , Stack ) . 
+accessObjStruct ( theStack, State, [Item | RestStack] ), 
+<P ></P >
+setObjStruct ( theStack, State, RestStack ), 
+<P ></P >
+accessObjStruct ( depth, State, CurDepth ), 
+<P ></P >
+NewDepth is CurDepth - 1, 
+<P ></P >
+setObjStruct ( depth, State, NewDepth ) . 
 <P ></P >
 
 <P ></P >
-stackerAction ( cur_depth ( Depth ) , State ) 
+stackerAction ( cur_stack ( Stack ), State ) 
 <P ></P >
 : - 
 <P ></P >
-accessObjStruct ( depth , State , Depth ) . 
+accessObjStruct ( theStack, State, Stack ) . 
+<P ></P >
+
+<P ></P >
+stackerAction ( cur_depth ( Depth ), State ) 
+<P ></P >
+: - 
+<P ></P >
+accessObjStruct ( depth, State, Depth ) . 
 <P ></P >
 </BODY >
 </HTML >

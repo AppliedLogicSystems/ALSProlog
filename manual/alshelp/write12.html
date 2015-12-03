@@ -1,8 +1,8 @@
 <HTML >
 <HEAD >
-<TITLE >write/[1 , 2] </TITLE >
+<TITLE >write/[1, 2] </TITLE >
 </HEAD><BODY>
-write/[1 , 2] 
+write/[1, 2] 
 <P></P>
 write/1 &mdash; write term to current output stream 
 <P></P>
@@ -26,19 +26,19 @@ display/1 &mdash; write term to current output stream in canonical form
 <P ></P >
 </B >write ( Term ) 
 <P ></P >
-write ( Stream_or_Alias , Term ) 
+write ( Stream_or_Alias, Term ) 
 <P ></P >
 writeq ( Term ) 
 <P ></P >
-writeq ( Stream_or_Alias , Term ) 
+writeq ( Stream_or_Alias, Term ) 
 <P ></P >
 write_canonical ( Term ) 
 <P ></P >
-write_canonical ( Stream_or_Alias , Term ) 
+write_canonical ( Stream_or_Alias, Term ) 
 <P ></P >
-write_term ( Term , Options ) 
+write_term ( Term, Options ) 
 <P ></P >
-write_term ( Stream_or_Alias , Term , Options ) 
+write_term ( Stream_or_Alias, Term, Options ) 
 <P ></P >
 display ( Term ) 
 <P ></P >
@@ -51,11 +51,11 @@ write/1 behaves as if write/2 were called with the current output stream as the 
 <P ></P >
 write/2 behaves as if write_term/3 were called with Options bound to 
 <P ></P >
-[quoted ( false ) , numbervars ( true ) , lettervars ( false ) , 
+[quoted ( false ), numbervars ( true ), lettervars ( false ), 
 <P ></P >
 line_length ( 1024 ) . 
 <P ></P >
-In addition , the default line length is ignored and set to a large number 
+In addition, the default line length is ignored and set to a large number 
 causing the output of long terms to not be pretty printed. Variables are printed 
 as underscore followed by some number. 
 <P ></P >
@@ -63,7 +63,7 @@ writeq/1 behaves as if writeq/2 were called with the current output stream as th
 <P ></P >
 writeq/2 behaves as if write_term/3 were called with Options bound to 
 <P ></P >
-[quoted ( true ) , numbervars ( true ) , lettervars ( true ) ]. 
+[quoted ( true ), numbervars ( true ), lettervars ( true ) ]. 
 <P ></P >
 The line length is set to the default line length for the stream which is 
 being output to. Variables are printed as an underscore followed by a capital 
@@ -74,11 +74,11 @@ write_canonical/1 behaves as if write_canonical/2 were called with the current o
 <P ></P >
 write_canonical/2 behaves as if write_term/3 were called with Options bound to 
 <P ></P >
-[quoted ( true ) , ignore_ops ( true ) , lettervars ( true ) ]. 
+[quoted ( true ), ignore_ops ( true ), lettervars ( true ) ]. 
 <P ></P >
 This is the same behavior supplied by the DEC-10 compatiblity predicate display/1. write_canonical is useful in situations where it is desirable to output a term in a format 
 which may subsequently read in without regard to operator definitions. Such 
-terms are not particularly pleasing to look at , however. 
+terms are not particularly pleasing to look at, however. 
 <P ></P >
 write_term/2 behaves as if write_term/3 were called with the current output stream bound to Stream_or_Alias. 
 <P ></P >
@@ -86,30 +86,30 @@ write_term/3 writes out the term Term to the output stream associated with Strea
 <P ></P >
 The options mandated by the draft standard are 
 <P ></P >
-<UL ><LI >uoted ( Bool ) – Bool is true or false. When Bool is true , atoms and functors are written out in such a manner so that read/[1 , 2] may be used to read them back in; when Bool is false indicates that symbols should be written out without any special quoting; 
+<UL ><LI >uoted ( Bool ) – Bool is true or false. When Bool is true, atoms and functors are written out in such a manner so that read/[1, 2] may be used to read them back in; when Bool is false indicates that symbols should be written out without any special quoting; 
 control characters embedded in an atom will be written out as is. 
 <P ></P >
-</UL >ignore_ops ( Bool ) – Bool may be true or false. When Bool is true , compound terms are output in functional notation. 
+</UL >ignore_ops ( Bool ) – Bool may be true or false. When Bool is true, compound terms are output in functional notation. 
 <P ></P >
-numbervars ( Bool ) – When Bool is true , a term of the form ' $VAR' ( N ) , where N is a non-negative integer , will be output as a variable name consisting of a 
+numbervars ( Bool ) – When Bool is true, a term of the form ' $VAR' ( N ), where N is a non-negative integer, will be output as a variable name consisting of a 
 capital letter possibly followed by an integer. The capital letter is the 
-( i + 1 ) th letter of the alphabet , and the integer is j , where i = N mod 26 and j = N 
+( i + 1 ) th letter of the alphabet, and the integer is j, where i = N mod 26 and j = N 
 div 26 The integer j is omitted if it is zero. 
 <P ></P >
 Other options not mandated by the draft standard but supported by ALS Prolog 
 are 
 <P ></P >
-lettervars ( Bool ) – If Bool is true , variables will be printed out as an underscore followed by a letter and 
-digits if necessary. If Bool is false , variables will be printed as _N , where N is computed using the address where the variable lives at. This latter mode 
+lettervars ( Bool ) – If Bool is true, variables will be printed out as an underscore followed by a letter and 
+digits if necessary. If Bool is false, variables will be printed as _N, where N is computed using the address where the variable lives at. This latter mode 
 is more suited to debugging purposes where correspondences between variables in 
 various calls is required. 
 <P ></P >
-maxdepth ( N , Atom1 , Atom2 ) – N is the maximum depth to print to. Atom1 is the atom to output when this depth has been reached. Atom2 is the atom to output when this depth has been reached at the tail of a list. 
+maxdepth ( N, Atom1, Atom2 ) – N is the maximum depth to print to. Atom1 is the atom to output when this depth has been reached. Atom2 is the atom to output when this depth has been reached at the tail of a list. 
 <P ></P >
-maxdepth ( N ) – same as maxdepth ( N , * , ... ) 
+maxdepth ( N ) – same as maxdepth ( N, *, ... ) 
 <P ></P >
-depth_computation ( Val ) – Val may be either flat or nonflat. This indicates the method of depth computation. If Val is bound to flat , all arguments of a term or list will be treated as being at the same depth. 
-If Val is nonflat , then each subsequent argument in a term ( or each subsequent element of a 
+depth_computation ( Val ) – Val may be either flat or nonflat. This indicates the method of depth computation. If Val is bound to flat, all arguments of a term or list will be treated as being at the same depth. 
+If Val is nonflat, then each subsequent argument in a term ( or each subsequent element of a 
 list ) will be considered to be at a depth one greater than the preceding structure 
 argument ( or list element ) . 
 <P ></P >
@@ -119,18 +119,18 @@ attempt to break lines before they exceed the given line length.
 indent ( N ) – N specifies the initial indentation in characters to use for the second and 
 subsequent lines output ( if any ) . 
 <P ></P >
-<UL ><LI >uoted_strings ( Bool ) – If Bool is true , lists of suitable character codes will print out as double quoted strings. 
-If false , these lists will print out as lists of small integers. 
+<UL ><LI >uoted_strings ( Bool ) – If Bool is true, lists of suitable character codes will print out as double quoted strings. 
+If false, these lists will print out as lists of small integers. 
 <P ></P >
 </UL ><B >EXAMPLES 
 <P ></P >
-</B >? - X = ' Hello\tthere' , 
+</B >? - X = ' Hello\tthere', 
 <P ></P >
-? -_ write ( X ) , nl , 
+? -_ write ( X ), nl, 
 <P ></P >
-? -_ writeq ( X ) , nl , 
+? -_ writeq ( X ), nl, 
 <P ></P >
-? -_ write_canonical ( X ) , nl. 
+? -_ write_canonical ( X ), nl. 
 <P ></P >
 Hello there 
 <P ></P >
@@ -148,23 +148,23 @@ X = ' Hello\tthere'
 <P ></P >
 
 <P ></P >
-? - T = [3 + 4 , ' $VAR' ( 26 ) * X - ' Y'] , 
+? - T = [3 + 4, ' $VAR' ( 26 ) * X - ' Y'], 
 <P ></P >
-? -_ write ( T ) , nl 
+? -_ write ( T ), nl 
 <P ></P >
-? -_ writeq ( T ) , nl 
+? -_ writeq ( T ), nl 
 <P ></P >
-? -_ write_canonical ( T ) , nl. 
+? -_ write_canonical ( T ), nl. 
 <P ></P >
-[3 + 4 , A1 * _4100-Y] 
+[3 + 4, A1 * _4100-Y] 
 <P ></P >
-[3 + 4 , A1 * _A-'Y'] 
+[3 + 4, A1 * _A-'Y'] 
 <P ></P >
-. ( + ( 3 , 4 ) , . ( - ( * ( ' $VAR' ( 26 ) , _A ) , ' Y' ) , [] ) ) 
+. ( + ( 3, 4 ), . ( - ( * ( ' $VAR' ( 26 ), _A ), ' Y' ), [] ) ) 
 <P ></P >
 
 <P ></P >
-T = [3 + 4 , ' $VAR' ( 26 ) * X-'Y'] 
+T = [3 + 4, ' $VAR' ( 26 ) * X-'Y'] 
 <P ></P >
 X = X 
 <P ></P >
@@ -172,33 +172,33 @@ X = X
 <P ></P >
 ? - L = 
 <P ></P >
-[a , b , c , d , e , f , g , h , i , j , k , l , m , n , o , p , q , r , s , t , u , v , w , x , y , z] , 
+[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z], 
 <P ></P >
-? -_ write_term ( L , [line_length ( 20 ) ] ) , nl 
+? -_ write_term ( L, [line_length ( 20 ) ] ), nl 
 <P ></P >
-? -_ write ( ' list : ' ) , 
+? -_ write ( ' list : ' ), 
 <P ></P >
-? -_ write_term ( L , [line_length ( 26 ) , indent ( 6 ) ] ) , nl. 
+? -_ write_term ( L, [line_length ( 26 ), indent ( 6 ) ] ), nl. 
 <P ></P >
-[a , b , c , d , e , f , g , h , i , 
+[a, b, c, d, e, f, g, h, i, 
 <P ></P >
-j , k , l , m , n , o , p , 
+j, k, l, m, n, o, p, 
 <P ></P >
-q , r , s , t , u , v , w , 
+q, r, s, t, u, v, w, 
 <P ></P >
-x , y , z] 
+x, y, z] 
 <P ></P >
-list : [a , b , c , d , e , f , g , h , i , 
+list : [a, b, c, d, e, f, g, h, i, 
 <P ></P >
-j , k , l , m , n , o , p , 
+j, k, l, m, n, o, p, 
 <P ></P >
-q , r , s , t , u , v , w , 
+q, r, s, t, u, v, w, 
 <P ></P >
-x , y , z] 
+x, y, z] 
 <P ></P >
 
 <P ></P >
-L = [a , b , c , d , e , f , g , h , i , j , k , l , m , n , o , p , q , r , s , t , u , v , w , x , y , z] 
+L = [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z] 
 <P ></P >
 
 <P ></P >
@@ -206,13 +206,13 @@ L = [a , b , c , d , e , f , g , h , i , j , k , l , m , n , o , p , q , r , s ,
 <P ></P >
 ? - S = &quot; string&quot; 
 <P ></P >
-? -_ write_term ( S , [quoted_strings ( true ) ] ) , nl , 
+? -_ write_term ( S, [quoted_strings ( true ) ] ), nl, 
 <P ></P >
-? -_ write_term ( S , [quoted_strings ( false ) ] ) , nl. 
+? -_ write_term ( S, [quoted_strings ( false ) ] ), nl. 
 <P ></P >
 &quot; string&quot; 
 <P ></P >
-[65 , 32 , 115 , 116 , 114 , 105 , 110 , 103] 
+[65, 32, 115, 116, 114, 105, 110, 103] 
 <P ></P >
 
 <P ></P >
@@ -222,19 +222,19 @@ S = &quot; string&quot;
 <P ></P >
 
 <P ></P >
-? - T = [a ( b ( c ( d ) ) ) , a ( b ( c ( d ) ) ) , a ( b ( c ( d ) ) ) , a ( b ( c ( d ) ) ) ] , 
+? - T = [a ( b ( c ( d ) ) ), a ( b ( c ( d ) ) ), a ( b ( c ( d ) ) ), a ( b ( c ( d ) ) ) ], 
 <P ></P >
-? -_ write_term ( T , [maxdepth ( 3 ) , depth_computation ( flat ) ] ) , nl 
+? -_ write_term ( T, [maxdepth ( 3 ), depth_computation ( flat ) ] ), nl 
 <P ></P >
-? -_ write_term ( T , [maxdepth ( 3 ) , depth_computation ( nonflat ) ] ) , nl. 
+? -_ write_term ( T, [maxdepth ( 3 ), depth_computation ( nonflat ) ] ), nl. 
 <P ></P >
-[a ( b ( * ) ) , a ( b ( * ) ) , a ( b ( * ) ) , a ( b ( * ) ) ] 
+[a ( b ( * ) ), a ( b ( * ) ), a ( b ( * ) ), a ( b ( * ) ) ] 
 <P ></P >
-[a ( b ( * ) ) , a ( * ) , * , ...] 
+[a ( b ( * ) ), a ( * ), *, ...] 
 <P ></P >
 
 <P ></P >
-T = [a ( b ( c ( d ) ) ) , a ( b ( c ( d ) ) ) , a ( b ( c ( d ) ) ) , a ( b ( c ( d ) ) ) ] 
+T = [a ( b ( c ( d ) ) ), a ( b ( c ( d ) ) ), a ( b ( c ( d ) ) ), a ( b ( c ( d ) ) ) ] 
 <P ></P >
 <B >ERRORS 
 <P ></P >
@@ -244,15 +244,15 @@ T = [a ( b ( c ( d ) ) ) , a ( b ( c ( d ) ) ) , a ( b ( c ( d ) ) ) , a ( b ( c
 <P ></P >
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias 
 <P ></P >
-––––&gt; domain_error ( stream_or_alias , Stream_or_Alias ) . 
+––––&gt; domain_error ( stream_or_alias, Stream_or_Alias ) . 
 <P ></P >
 Stream_or_Alias is not associated with an open stream 
 <P ></P >
-––––&gt; existence_error ( stream , Stream_or_Alias ) . 
+––––&gt; existence_error ( stream, Stream_or_Alias ) . 
 <P ></P >
 Stream_or_Alias is not an output stream 
 <P ></P >
-––––&gt; permission_error ( output , stream , Stream_or_Alias ) . 
+––––&gt; permission_error ( output, stream, Stream_or_Alias ) . 
 <P ></P >
 Options is a variable 
 <P ></P >
@@ -260,7 +260,7 @@ Options is a variable
 <P ></P >
 Options is neither a variable nor a list 
 <P ></P >
-––––&gt; type_error ( list , Option ) . 
+––––&gt; type_error ( list, Option ) . 
 <P ></P >
 Options is a list an element of which is a variable 
 <P ></P >
@@ -269,13 +269,13 @@ Options is a list an element of which is a variable
 Options is a list containing an element E which is neither a variable nor a 
 valid write option 
 <P ></P >
-––––&gt; domain_error ( write_option , E ) . 
+––––&gt; domain_error ( write_option, E ) . 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >read_term/[2 , 3] , read/[1 , 2] , open/4 , close/1 , nl/[0 , 1] , put_char/[1 , 2] , 
-put_code/[1 , 2] , set_line_length/2 , op/3 , tell/1 , <I >User Guide ( Prolog I/O ) , [Bowen 91 , 7.8] , [Clocksin 81 , 6.9] , [Sterling 86 
-12.1] , [Bratko 86 , 6.2.1]. 
+</B >read_term/[2, 3], read/[1, 2], open/4, close/1, nl/[0, 1], put_char/[1, 2], 
+put_code/[1, 2], set_line_length/2, op/3, tell/1, <I >User Guide ( Prolog I/O ), [Bowen 91, 7.8], [Clocksin 81, 6.9], [Sterling 86 
+12.1], [Bratko 86, 6.2.1]. 
 <P ></P >
 </I ></BODY >
 </HTML >

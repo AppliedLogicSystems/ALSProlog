@@ -1,8 +1,8 @@
 <HTML >
 <HEAD >
-<TITLE >get_code/[1 , 2] </TITLE >
+<TITLE >get_code/[1, 2] </TITLE >
 </HEAD><BODY>
-get_code/[1 , 2] 
+get_code/[1, 2] 
 <P></P>
 get_code/1 &mdash; read a character code from current input stream 
 <P></P>
@@ -12,7 +12,7 @@ get_code/2 &mdash; read character code from a specific stream
 <P ></P >
 </B >get_code ( Code ) 
 <P ></P >
-get_code ( Stream_or_Alias , Code ) 
+get_code ( Stream_or_Alias, Code ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
@@ -22,11 +22,11 @@ with Code.
 get_code/2 will retrieve a character code from the input stream associated with Stream_or_Alias and unify it with Code. 
 <P ></P >
 If there are no more data left in the stream to be read and if the stream has 
-the property eof_action ( eof_code ) , then Code will be unified with -1 
+the property eof_action ( eof_code ), then Code will be unified with -1 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >? - get_code ( C1 ) , get_code ( C2 ) , get_ccode ( C3 ) , get_code ( C4 ) . 
+</B >? - get_code ( C1 ), get_code ( C2 ), get_ccode ( C3 ), get_code ( C4 ) . 
 <P ></P >
 test 
 <P ></P >
@@ -48,27 +48,27 @@ C4 = 116
 <P ></P >
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias 
 <P ></P >
-––––&gt; domain_error ( stream_or_alias , Stream_or_Alias ) . 
+––––&gt; domain_error ( stream_or_alias, Stream_or_Alias ) . 
 <P ></P >
 Stream_or_Alias is not associated with an open stream 
 <P ></P >
-––––&gt; existence_error ( stream , Stream_or_Alias ) . 
+––––&gt; existence_error ( stream, Stream_or_Alias ) . 
 <P ></P >
 Stream_or_Alias is not an input stream 
 <P ></P >
-––––&gt; permission_error ( input , stream , Stream_or_Alias ) . 
+––––&gt; permission_error ( input, stream, Stream_or_Alias ) . 
 <P ></P >
 Code is neither a variable nor a character code 
 <P ></P >
-––––&gt; type_error ( integer , Code ) . 
+––––&gt; type_error ( integer, Code ) . 
 <P ></P >
 The stream associated with Stream_or_Alias is at the end of the stream and the stream has the property eof_action ( error ) 
 <P ></P >
-––––&gt; existence_error ( past_end_of_stream , Stream_or_Alias ) . 
+––––&gt; existence_error ( past_end_of_stream, Stream_or_Alias ) . 
 <P ></P >
 The stream associated with Stream_or_Alias has no input ready to be read and the stream has the property snr_action ( error ) 
 <P ></P >
-––––&gt; existence_error ( stream_not_ready , Stream_or_Alias ) . 
+––––&gt; existence_error ( stream_not_ready, Stream_or_Alias ) . 
 <P ></P >
 <B >NOTES 
 <P ></P >
@@ -76,9 +76,9 @@ The stream associated with Stream_or_Alias has no input ready to be read and the
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >put_code/2 , get_char/2 , open/4 , close/1 , char_code/2 
+</B >put_code/2, get_char/2, open/4, close/1, char_code/2 
 <P ></P >
-User Guide ( Prolog I/O ) , . 
+User Guide ( Prolog I/O ), . 
 <P ></P >
 </BODY >
 </HTML >

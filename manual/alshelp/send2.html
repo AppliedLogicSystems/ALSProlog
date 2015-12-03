@@ -8,31 +8,31 @@
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >send ( Object , Message ) 
+</B >send ( Object, Message ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
 </B >A message is sent to an object with a call of the form 
 <P ></P >
-send ( Object , Message ) 
+send ( Object, Message ) 
 <P ></P >
-where Object is the target object ( or an atom naming the object ) , and Message is an arbitrary Prolog term. The Message may include uninstantiated variables which might be instantiated by the 
-object’s method for dealing with Message. Such calls to send/2 can occur both in ordinary Prolog code , and in the code defining methods of 
-classes. For convience , the call 
+where Object is the target object ( or an atom naming the object ), and Message is an arbitrary Prolog term. The Message may include uninstantiated variables which might be instantiated by the 
+object’s method for dealing with Message. Such calls to send/2 can occur both in ordinary Prolog code, and in the code defining methods of 
+classes. For convience, the call 
 <P ></P >
-s end_self ( Object , Message ) 
+s end_self ( Object, Message ) 
 <P ></P >
 is provided as syntactic sugar for 
 <P ></P >
-send ( Object , Message ) 
+send ( Object, Message ) 
 <P ></P >
 No attempt to verify that a send_self message is being sent from an object to itself. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >send ( Object , push ( 2 ) ) 
+</B >send ( Object, push ( 2 ) ) 
 <P ></P >
-send ( Object , pop ( X ) ) 
+send ( Object, pop ( X ) ) 
 <P ></P >
 
 <P ></P >

@@ -8,15 +8,15 @@ arg/3 &mdash; access the arguments of a structured term
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >arg ( Nth , Structure , Argument ) 
+</B >arg ( Nth, Structure, Argument ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
-</B >Argument will be unified with the Nth argument of Structure. Nth must be a positive integer. Structure should be a compound term whose arity is greater than or equal to Nth. When these conditions hold , Argument will be unified with the Nth argument of Structure. 
+</B >Argument will be unified with the Nth argument of Structure. Nth must be a positive integer. Structure should be a compound term whose arity is greater than or equal to Nth. When these conditions hold, Argument will be unified with the Nth argument of Structure. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >? - arg ( 2 , stooges ( larry , moe , curly ) , X ) . 
+</B >? - arg ( 2, stooges ( larry, moe, curly ), X ) . 
 <P ></P >
 X = moe 
 <P ></P >
@@ -24,9 +24,9 @@ X = moe
 <P ></P >
 yes. 
 <P ></P >
-? - arg ( 2 , [a , b , c] , X ) . 
+? - arg ( 2, [a, b, c], X ) . 
 <P ></P >
-X = [b , c] 
+X = [b, c] 
 <P ></P >
 
 <P ></P >
@@ -34,13 +34,13 @@ yes.
 <P ></P >
 <B >ERRORS 
 <P ></P >
-</B >If Nth is not an integer greater than 0 and less than or equal to the arity of Structure , arg/3 will fail. Structure must be instantiated to a structured term. 
+</B >If Nth is not an integer greater than 0 and less than or equal to the arity of Structure, arg/3 will fail. Structure must be instantiated to a structured term. 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >functor/3 , = ../2 , 
+</B >functor/3, = ../2, 
 <P ></P >
-[Bowen 91 , 7.6] , [Sterling 86 , 9.2] , [Bratko 86 , 7.2] , [Clocksin 81 , 6.5] 
+[Bowen 91, 7.6], [Sterling 86, 9.2], [Bratko 86, 7.2], [Clocksin 81, 6.5] 
 <P ></P >
 
 <P ></P >

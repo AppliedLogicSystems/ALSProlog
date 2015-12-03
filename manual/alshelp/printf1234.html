@@ -1,8 +1,8 @@
 <HTML >
 <HEAD >
-<TITLE >printf/[1 , 2 , 3 , 4] </TITLE >
+<TITLE >printf/[1, 2, 3, 4] </TITLE >
 </HEAD><BODY>
-<B >printf/[1 , 2 , 3 , 4] </B> 
+<B >printf/[1, 2, 3, 4] </B> 
 <P></P>
 printf/1 &mdash; print out a string to the current output 
 <P></P>
@@ -10,21 +10,21 @@ printf/2 &mdash; print out a string with arguments
 <P></P>
 printf/3 &mdash; print out a string with a format and arguments 
 <P></P>
-printf_opt/3 &mdash; print out string with format , arguments , options 
+printf_opt/3 &mdash; print out string with format, arguments, options 
 <P></P>
-printf/4 &mdash; print out string with format , arguments , options 
+printf/4 &mdash; print out string with format, arguments, options 
 <P></P>
 <B>FORMS</B>
 <P ></P >
 </B >printf ( Format ) 
 <P ></P >
-printf ( Format , ArgList ) 
+printf ( Format, ArgList ) 
 <P ></P >
-printf ( Steam_or_Alias , Format , ArgList ) 
+printf ( Steam_or_Alias, Format, ArgList ) 
 <P ></P >
-printf_opt ( Format , ArgList , Options ) 
+printf_opt ( Format, ArgList, Options ) 
 <P ></P >
-printf ( Stream_or_Alias , Format , ArgList , WriteOptions ) 
+printf ( Stream_or_Alias, Format, ArgList, WriteOptions ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
@@ -50,7 +50,7 @@ formatting possible within the format string
 <P ></P >
 All other characters are printed as they appear in the format string. 
 <P ></P >
-Using printf is generally much easier than using the equivalent write/1 , put/1 , and nl/0 predicates because the whole message you want to print out can be done by one 
+Using printf is generally much easier than using the equivalent write/1, put/1, and nl/0 predicates because the whole message you want to print out can be done by one 
 call to printf. 
 <P ></P >
 <B >EXAMPLES 
@@ -63,7 +63,7 @@ hello world
 <P ></P >
 yes. 
 <P ></P >
-? - printf ( &quot; etters : %c%c%c\n&quot; , [a , b , c] ) . 
+? - printf ( &quot; etters : %c%c%c\n&quot;, [a, b, c] ) . 
 <P ></P >
 Letters : abc 
 <P ></P >
@@ -73,17 +73,17 @@ yes.
 <P ></P >
 
 <P ></P >
-? - printf ( &quot; ontents : %t , Amount : %d\n&quot; , 
+? - printf ( &quot; ontents : %t, Amount : %d\n&quot;, 
 <P ></P >
-[pocket ( keys , wallet , watch ) , 3] ) . 
+[pocket ( keys, wallet, watch ), 3] ) . 
 <P ></P >
-Contents : pocket ( keys , wallet , watch ) , Amount : 3 
+Contents : pocket ( keys, wallet, watch ), Amount : 3 
 <P ></P >
 yes. 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >nl/0 , put/1 , write/0 , User Guide ( Prolog I/O ) , [Unix/C Reference Manuals : printf ( 3S ) ]. 
+</B >nl/0, put/1, write/0, User Guide ( Prolog I/O ), [Unix/C Reference Manuals : printf ( 3S ) ]. 
 <P ></P >
 </BODY >
 </HTML >

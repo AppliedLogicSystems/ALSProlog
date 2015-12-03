@@ -6,19 +6,19 @@
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >create_object ( Eqns , Obj ) 
+</B >create_object ( Eqns, Obj ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
 </B >The call 
 <P ></P >
-create_object ( Eqns , Obj ) 
+create_object ( Eqns, Obj ) 
 <P ></P >
-creates an object Obj as specified by Eqns , a list of <I >equations </I >of the form 
+creates an object Obj as specified by Eqns, a list of <I >equations </I >of the form 
 <P ></P >
 Keyword = Value . 
 <P ></P >
-The acceptable keywords , together with their associated Value types , are 
+The acceptable keywords, together with their associated Value types, are 
 <P ></P >
 instanceOf - atom ( name of a class ) 
 <P ></P >
@@ -37,26 +37,26 @@ The equations appearing on the list which is the right side of a
 SlotName = SlotValue 
 <P ></P >
 where SlotName is one of the named slots in the structure defining the object’s state. 
-These slots are determined by the class to which the object belongs , and may be 
-slots from the state-schema of the immediate class parent , or may also be slots 
+These slots are determined by the class to which the object belongs, and may be 
+slots from the state-schema of the immediate class parent, or may also be slots 
 from any of the state-schemata of ancestor classes. Entries in values equations prescribe initial values for some of the object’s slots when it is 
 created. 
 <P ></P >
-When a global atomic name for the object is required , Eqns includes an equation of the form 
+When a global atomic name for the object is required, Eqns includes an equation of the form 
 <P ></P >
 name = &lt; tom&gt; . 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >... , create_object ( [instanceOf = stacker] , Obj ) , ... 
+</B >..., create_object ( [instanceOf = stacker], Obj ), ... 
 <P ></P >
 
 <P ></P >
-... , create_object ( [instanceOf = iC_Engine ] , Engine1 ) , 
+..., create_object ( [instanceOf = iC_Engine ], Engine1 ), 
 <P ></P >
-create_object ( [instanceOf = automobile , 
+create_object ( [instanceOf = automobile, 
 <P ></P >
-values = [engine = Engine1] ] , Auto1 ) , .. 
+values = [engine = Engine1] ], Auto1 ), .. 
 <P ></P >
 
 <P ></P >

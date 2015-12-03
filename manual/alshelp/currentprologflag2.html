@@ -10,15 +10,15 @@ set_prolog_flag/2 &mdash; set value of a Prolog flag
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >current_prolog_flag ( Flag , Value ) 
+</B >current_prolog_flag ( Flag, Value ) 
 <P ></P >
-set_prolog_flag ( Flag , Value ) 
+set_prolog_flag ( Flag, Value ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
 </B >current_prolog_flag/2 is re-executable. It unifies Flag and Value with the current instantiations of the flag/value pairs supported by ALS Prolog. If Flag and Value are appropriately instantiated 
 <P ></P >
-set_prolog_flag ( Flag , Value ) 
+set_prolog_flag ( Flag, Value ) 
 <P ></P >
 changes the present value associated with Flag to become Value. 
 <P ></P >
@@ -28,7 +28,7 @@ The flags supported by ALS-Prolog are : <B >
 <P ></P >
 bounded ( 7.11.1.1 ) 
 <P ></P >
-Values : true , false 
+Values : true, false 
 <P ></P >
 Default = true 
 <P ></P >
@@ -116,7 +116,7 @@ Default = Value
 Changeable : no 
 <P ></P >
 Takes value &quot; owins&quot; if no windowing system extension is present; otherwise is 
-the identifier of the windowing extension ( at present , only “tcltk” ) . 
+the identifier of the windowing extension ( at present, only “tcltk” ) . 
 <P ></P >
 anonymous_solutions ( reporting ) 
 <P ></P >
@@ -166,8 +166,8 @@ Default = succeed
 <P ></P >
 Changeable : yes 
 <P ></P >
-For CLP ( BNR ) , the iters_max_exceeded flag controls the behavior when then maximum number of constraint narrowing 
-iterations is exceeded , as follows 
+For CLP ( BNR ), the iters_max_exceeded flag controls the behavior when then maximum number of constraint narrowing 
+iterations is exceeded, as follows 
 <P ></P >
 
 <P ></P >
@@ -193,21 +193,21 @@ Value is a variable ( set_prolog_flag <I >only </I >)
 <P ></P >
 Flag is neither a variable nor an atom 
 <P ></P >
-––––&gt; type_error ( atom , Flag ) . 
+––––&gt; type_error ( atom, Flag ) . 
 <P ></P >
 Value is inappropriate for Flag 
 <P ></P >
-––––&gt; domain_error ( flag_value , Flag + Value 
+––––&gt; domain_error ( flag_value, Flag + Value 
 <P ></P >
 <B >NOTES 
 <P ></P >
 EXAMPLES 
 <P ></P >
-</B >? - current_prolog_flag ( unknown , V ) . 
+</B >? - current_prolog_flag ( unknown, V ) . 
 <P ></P >
 V = error 
 <P ></P >
-? - set_prolog_flag ( undefined_predicate , fail ) . 
+? - set_prolog_flag ( undefined_predicate, fail ) . 
 <P ></P >
 </BODY >
 </HTML >

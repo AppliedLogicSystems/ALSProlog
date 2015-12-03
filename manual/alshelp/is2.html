@@ -13,8 +13,8 @@ is/2 &mdash; evaluates an arithmetic expression
 <B >DESCRIPTION 
 <P ></P >
 </B >Expression should be a ground term that can be evaluated. Numbers evaluate as 
-themselves , and a list evaluates as the first element of the list. The operators listed 
-in <A HREF = alshelpis2.htm#ea2a73ad >Table 3 ( <I >Arithmetic Operators. </I >) </A >and <A HREF = alshelpis2.htm#e9235b96 >Table 5 ( <I >Arithmetic Functions. </I >) </A >can also be evaluated when their arguments can be evaluated. If Result is an unbound variable , then it will be bound to the numeric value of Expression. If Result is not unbound , then it will be evaluated , and the value of the Result will be unified with the value of the Expression. 
+themselves, and a list evaluates as the first element of the list. The operators listed 
+in <A HREF = alshelpis2.htm#ea2a73ad >Table 3 ( <I >Arithmetic Operators. </I >) </A >and <A HREF = alshelpis2.htm#e9235b96 >Table 5 ( <I >Arithmetic Functions. </I >) </A >can also be evaluated when their arguments can be evaluated. If Result is an unbound variable, then it will be bound to the numeric value of Expression. If Result is not unbound, then it will be evaluated, and the value of the Result will be unified with the value of the Expression. 
 <P ></P >
 
 <P ></P >
@@ -91,7 +91,7 @@ Table 3 Arithmetic Operators.
 <BR ></TD ></TR ><TR VALIGN = TOP ><TD >floor ( X ) 
 <BR ></TD ><TD >the largest integer not greater than X 
 <BR ></TD ></TR ><TR VALIGN = TOP ><TD >heapused 
-<BR ></TD ><TD >heap space in use , in bytes 
+<BR ></TD ><TD >heap space in use, in bytes 
 <BR ></TD ></TR ><TR VALIGN = TOP ><TD >j0 ( X ) 
 <BR ></TD ><TD >Bessel function of order 0 
 <BR ></TD ></TR ><TR VALIGN = TOP ><TD >j1 ( X ) 
@@ -152,18 +152,18 @@ yes.
 <P ></P >
 <B >ERRORS 
 <P ></P >
-</B >is/2 fails when it attempts to evaluate an unknown operator , or if Expression is not ground. Failure also occurs if there are any arithmetic faults , such 
-as overflow , underflow , or division by zero. 
+</B >is/2 fails when it attempts to evaluate an unknown operator, or if Expression is not ground. Failure also occurs if there are any arithmetic faults, such 
+as overflow, underflow, or division by zero. 
 <P ></P >
 <B >NOTES 
 <P ></P >
 </B >ALS Prolog complies to the ISO Prolog Standard regarding errors. A 
-calculation error will be thrown on overflow , underflow , division by zero , or use of an 
+calculation error will be thrown on overflow, underflow, division by zero, or use of an 
 unrecognized arithmetic operator. 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >[Bowen 91 , 7.7] , [Clocksin 81 , 6.11] , [Bratko 86 , 3.4]. 
+</B >[Bowen 91, 7.7], [Clocksin 81, 6.11], [Bratko 86, 3.4]. 
 <P ></P >
 </BODY >
 </HTML >

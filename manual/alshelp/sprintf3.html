@@ -12,55 +12,55 @@ bufwriteq/2 &mdash; - formatted write to strings with quoting
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >sprintf ( Target , Format , Args ) , 
+</B >sprintf ( Target, Format, Args ), 
 <P ></P >
-bufwrite ( String , Term ) 
+bufwrite ( String, Term ) 
 <P ></P >
-bufwriteq ( String , Term ) 
+bufwriteq ( String, Term ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
-</B >sprintf/3 is very similar to printf/3 , except that instead of writing the formatted out 
-put to a stream , sprintf/3 writes the output to either a Prolog atom or string. The Format and Args arguments are identical to the corresponding arguments for printf/3. The Target argument can be an uninstatiated variable , or can be of one of the forms atom ( A ) , string ( S ) , or list ( S ) . In case Target is an uninstatiated variable , on success , Target is a Prolog double-quoted string containing the formatted output. Similarly 
-if Target is string ( S ) or list ( S ) , on success , S is a Prolog double-quoted string containing the formatted output. And if Target is atom ( A ) , on success A is an atom containing the formatted output. 
+</B >sprintf/3 is very similar to printf/3, except that instead of writing the formatted out 
+put to a stream, sprintf/3 writes the output to either a Prolog atom or string. The Format and Args arguments are identical to the corresponding arguments for printf/3. The Target argument can be an uninstatiated variable, or can be of one of the forms atom ( A ), string ( S ), or list ( S ) . In case Target is an uninstatiated variable, on success, Target is a Prolog double-quoted string containing the formatted output. Similarly 
+if Target is string ( S ) or list ( S ), on success, S is a Prolog double-quoted string containing the formatted output. And if Target is atom ( A ), on success A is an atom containing the formatted output. 
 <P ></P >
-bufwrite/2 creates a printed representation of the Term using the operator declaration as write/1 would. However , instead of writing the result to the current output stream , bufwrite/2 converts the printed representation into a list of ASCII codes. bufwriteq/2 behaves similarly to bufwrite/2 , but quotes items exactly the way writeq/2 would. 
+bufwrite/2 creates a printed representation of the Term using the operator declaration as write/1 would. However, instead of writing the result to the current output stream, bufwrite/2 converts the printed representation into a list of ASCII codes. bufwriteq/2 behaves similarly to bufwrite/2, but quotes items exactly the way writeq/2 would. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >? - sprintf ( X , ’Contents : %t , Amount : %t’ , [pocket ( keys ) , 1] ) . 
+</B >? - sprintf ( X, ’Contents : %t, Amount : %t’, [pocket ( keys ), 1] ) . 
 <P ></P >
-X = &quot; ontents : pocket ( keys ) , Amount : 1&quot; 
-<P ></P >
-
-<P ></P >
-? - sprintf ( string ( X ) , ’Contents : %t , Amount : %t’ 
-<P ></P >
-[pocket ( keys ) , 1] ) . 
-<P ></P >
-X = &quot; ontents : pocket ( keys ) , Amount : 1&quot; 
+X = &quot; ontents : pocket ( keys ), Amount : 1&quot; 
 <P ></P >
 
 <P ></P >
-? - sprintf ( atom ( X ) , ’Contents : %t , Amount : %t’ , [pocket ( keys ) , 1] ) . 
+? - sprintf ( string ( X ), ’Contents : %t, Amount : %t’ 
 <P ></P >
-X = ’Contents : pocket ( keys ) , Amount : 1’ 
+[pocket ( keys ), 1] ) . 
+<P ></P >
+X = &quot; ontents : pocket ( keys ), Amount : 1&quot; 
 <P ></P >
 
 <P ></P >
-? - bufwrite ( &quot; ack + f ( tom ) &quot; + ( jack , f ( tom ) ) ) . 
+? - sprintf ( atom ( X ), ’Contents : %t, Amount : %t’, [pocket ( keys ), 1] ) . 
+<P ></P >
+X = ’Contents : pocket ( keys ), Amount : 1’ 
+<P ></P >
+
+<P ></P >
+? - bufwrite ( &quot; ack + f ( tom ) &quot; + ( jack, f ( tom ) ) ) . 
 <P ></P >
 yes. 
 <P ></P >
-? - bufwrite ( S , ’Enterprise’ ) . 
+? - bufwrite ( S, ’Enterprise’ ) . 
 <P ></P >
-S = [69 , 110 , 116 , 101 , 114 , 112 , 114 , 105 , 115 , 101] 
+S = [69, 110, 116, 101, 114, 112, 114, 105, 115, 101] 
 <P ></P >
 yes. 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >printf/[2 , 3 , 4] , write/1 , op/3 , writeq/1 
+</B >printf/[2, 3, 4], write/1, op/3, writeq/1 
 <P ></P >
 </BODY >
 </HTML >

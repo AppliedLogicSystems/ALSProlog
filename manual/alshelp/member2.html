@@ -10,23 +10,23 @@ dmember/2 &mdash; list membership
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >member ( Element , List ) 
+</B >member ( Element, List ) 
 <P ></P >
-dmember ( Element , List ) 
+dmember ( Element, List ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
-</B >member/2 succeeds when Element can be unified with one of the elements in the list , List. dmember/2 is the determinate version of member/2. 
+</B >member/2 succeeds when Element can be unified with one of the elements in the list, List. dmember/2 is the determinate version of member/2. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >? - member ( a , [a , b , c] ) . 
+</B >? - member ( a, [a, b, c] ) . 
 <P ></P >
 
 <P ></P >
 yes. 
 <P ></P >
-? - member ( X , [1 , 2 , 3] ) . 
+? - member ( X, [1, 2, 3] ) . 
 <P ></P >
 X = 1 ; 
 <P ></P >
@@ -42,15 +42,15 @@ no.
 <P ></P >
 
 <P ></P >
-member ( Item , [Item | _] ) . 
+member ( Item, [Item | _] ) . 
 <P ></P >
-member ( Item , [_ | Rest] ) : - member ( Item , Rest ) . 
+member ( Item, [_ | Rest] ) : - member ( Item, Rest ) . 
 <P ></P >
 
 <P ></P >
-dmember ( Item , [Item | _] ) : - !. 
+dmember ( Item, [Item | _] ) : - !. 
 <P ></P >
-dmember ( Item , [_ | Rest] ) : - dmember ( Item , Rest ) . 
+dmember ( Item, [_ | Rest] ) : - dmember ( Item, Rest ) . 
 <P ></P >
 </BODY >
 </HTML >

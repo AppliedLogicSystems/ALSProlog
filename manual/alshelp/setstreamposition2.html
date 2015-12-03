@@ -8,7 +8,7 @@ set_stream_position/2 &mdash; - seek to a new position in a stream
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >set_stream_position ( Stream_or_Alias , Position ) 
+</B >set_stream_position ( Stream_or_Alias, Position ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
@@ -47,7 +47,7 @@ Open and read the first character from the file test.
 <P ></P >
 
 <P ></P >
-? - open ( test , read , _ , [alias ( test_alias ) ] ) , get_char ( test_alias , C ) . 
+? - open ( test, read, _, [alias ( test_alias ) ] ), get_char ( test_alias, C ) . 
 <P ></P >
 
 <P ></P >
@@ -60,9 +60,9 @@ position.
 <P ></P >
 
 <P ></P >
-? - set_stream_position ( test_alias , end_of_stream ( -2 ) ) , 
+? - set_stream_position ( test_alias, end_of_stream ( -2 ) ), 
 <P ></P >
-? -_ get_char ( test_alias , C ) . 
+? -_ get_char ( test_alias, C ) . 
 <P ></P >
 
 <P ></P >
@@ -74,9 +74,9 @@ Seek to current position minus two and get the character at this position.
 <P ></P >
 
 <P ></P >
-? - set_stream_position ( test_alias , current_position ( -2 ) ) , 
+? - set_stream_position ( test_alias, current_position ( -2 ) ), 
 <P ></P >
-? -_ get_char ( test_alias , C ) . 
+? -_ get_char ( test_alias, C ) . 
 <P ></P >
 
 <P ></P >
@@ -89,7 +89,7 @@ has address 0
 <P ></P >
 
 <P ></P >
-? - set_stream_position ( test_alias , 3 ) , get_char ( test_alias , C ) . 
+? - set_stream_position ( test_alias, 3 ), get_char ( test_alias, C ) . 
 <P ></P >
 
 <P ></P >
@@ -101,9 +101,9 @@ Get this same character again by backing up one.
 <P ></P >
 
 <P ></P >
-? - set_stream_position ( test_alias , current_position ( -1 ) ) , 
+? - set_stream_position ( test_alias, current_position ( -1 ) ), 
 <P ></P >
-? -_ get_char ( test_alias , C ) . 
+? -_ get_char ( test_alias, C ) . 
 <P ></P >
 
 <P ></P >
@@ -115,7 +115,7 @@ Get the next character in the stream.
 <P ></P >
 
 <P ></P >
-? - get_char ( test_alias , C ) . 
+? - get_char ( test_alias, C ) . 
 <P ></P >
 
 <P ></P >
@@ -127,7 +127,7 @@ Get the current stream position.
 <P ></P >
 
 <P ></P >
-? - stream_property ( test_alias , position ( P ) ) . 
+? - stream_property ( test_alias, position ( P ) ) . 
 <P ></P >
 
 <P ></P >
@@ -135,21 +135,21 @@ P = 5
 <P ></P >
 
 <P ></P >
-Get the current stream position , seek to the beginning of the stream and get 
-that character , then seek back to the old position and get the character at that 
+Get the current stream position, seek to the beginning of the stream and get 
+that character, then seek back to the old position and get the character at that 
 position. 
 <P ></P >
 
 <P ></P >
-? - stream_property ( test_alias , position ( P ) ) , 
+? - stream_property ( test_alias, position ( P ) ), 
 <P ></P >
-? -_ set_stream_position ( test_alias , beginning_of_stream ) , 
+? -_ set_stream_position ( test_alias, beginning_of_stream ), 
 <P ></P >
-? -_ get_char ( test_alias , C1 ) , 
+? -_ get_char ( test_alias, C1 ), 
 <P ></P >
-? -_ set_stream_position ( test_alias , P ) , 
+? -_ set_stream_position ( test_alias, P ), 
 <P ></P >
-? -_ get_char ( test_alias , C2 ) . 
+? -_ get_char ( test_alias, C2 ) . 
 <P ></P >
 P = 5 
 <P ></P >
@@ -169,27 +169,27 @@ Position is a variable
 <P ></P >
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias 
 <P ></P >
-––––&gt; <B ></B >domain_error ( stream_position , Position ) . 
+––––&gt; <B ></B >domain_error ( stream_position, Position ) . 
 <P ></P >
 Position is neither a variable nor a stream position 
 <P ></P >
-––––&gt; domain_error ( stream_position , Position ) . 
+––––&gt; domain_error ( stream_position, Position ) . 
 <P ></P >
 Stream_or_Alias is not associated with an open stream 
 <P ></P >
-––––&gt; existence_error ( stream , Stream_or_Alias ) . 
+––––&gt; existence_error ( stream, Stream_or_Alias ) . 
 <P ></P >
 Stream_or_Alias has stream property reposition ( false ) 
 <P ></P >
-––––&gt; permission_error ( reposition , stream , Stream_or_Alias ) . 
+––––&gt; permission_error ( reposition, stream, Stream_or_Alias ) . 
 <P ></P >
 <B >NOTES 
 <P ></P >
-</B >As the example above demonstrates , set_stream_position/2 may be used when used in conjunction with stream_property/2. Typically a program will get the current position using stream_property/2 and later set the stream position using this saved position. 
+</B >As the example above demonstrates, set_stream_position/2 may be used when used in conjunction with stream_property/2. Typically a program will get the current position using stream_property/2 and later set the stream position using this saved position. 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >open/4 , get_char/2 , stream_property/2 , <I >User Guide ( Prolog I/O ) . 
+</B >open/4, get_char/2, stream_property/2, <I >User Guide ( Prolog I/O ) . 
 <P ></P >
 </I ></BODY >
 </HTML >

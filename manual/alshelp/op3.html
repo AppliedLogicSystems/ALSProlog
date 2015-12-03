@@ -8,13 +8,13 @@ op/3 &mdash; define operator associativity and precedence
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >op ( Precedence , Associativity , Atom ) 
+</B >op ( Precedence, Associativity, Atom ) 
 <P ></P >
-op ( Precedence , Associativity , [Atom | Atoms] ) 
+op ( Precedence, Associativity, [Atom | Atoms] ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
-</B >If Precedence is instantiated to an integer between 0 and 1200 then Associativity must be one of the indicators found in <A HREF = start.htm >Table 9 ( <I >Prolog Operator Types. </I >) </A >. Atom can be any atom , but should not require the use of single quotes ( ’ ) in order 
+</B >If Precedence is instantiated to an integer between 0 and 1200 then Associativity must be one of the indicators found in <A HREF = start.htm >Table 9 ( <I >Prolog Operator Types. </I >) </A >. Atom can be any atom, but should not require the use of single quotes ( ’ ) in order 
 to be parsed. 
 <P ></P >
   
@@ -41,12 +41,12 @@ to be parsed.
 <BR ></TD ><TD >postfix -- non-multiple 
 <BR ></TD ></TR ></TABLE >  
 <P ></P >
-If Precedence is uninstantiated , but Associativity and Atom correspond to an existing operator , Precedence will be unified with the previously declared precedence of the operator. The 
+If Precedence is uninstantiated, but Associativity and Atom correspond to an existing operator, Precedence will be unified with the previously declared precedence of the operator. The 
 default operator precedences and associativities can be found in <A HREF = alshelpop3.htm#e8f17993 >Table 9 ( <I >Default Operator Associativity and Precedence. </I >) </A >. 
 <P ></P >
 A number of convenience predicates are declared as prefix operators ( fx ) of precedence 1125 These include 
 <P ></P >
-<IMG SRC = images/Bullet.gif ALT = images/Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >trace , module , use , export , dynamic 
+<IMG SRC = images/Bullet.gif ALT = images/Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >trace, module, use, export, dynamic 
 <P ></P >
 <IMG SRC = images/Bullet.gif ALT = images/Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >cd dir ls edit vi 
 <P ></P >
@@ -135,7 +135,7 @@ Table 9 Default Operator Associativity and Precedence.
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >? - op ( 200 , yfx , to ) , op ( 200 , yfx , on ) . 
+</B >? - op ( 200, yfx, to ), op ( 200, yfx, on ) . 
 <P ></P >
 
 <P ></P >
@@ -143,13 +143,13 @@ yes.
 <P ></P >
 ? - display ( get to work on time ) . 
 <P ></P >
-on ( to ( get , work ) , time ) 
+on ( to ( get, work ), time ) 
 <P ></P >
 yes. 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >[Bowen 91 , 7.9] , [Sterling 86 , 8.1] , [Bratko 86 , 3.3] , [Clocksin 81 , 5.5]. 
+</B >[Bowen 91, 7.9], [Sterling 86, 8.1], [Bratko 86, 3.3], [Clocksin 81, 5.5]. 
 <P ></P >
 </BODY >
 </HTML >

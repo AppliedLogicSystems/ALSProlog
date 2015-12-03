@@ -1,8 +1,8 @@
 <HTML >
 <HEAD >
-<TITLE >assert/[1 , 2] </TITLE >
+<TITLE >assert/[1, 2] </TITLE >
 </HEAD><BODY>
-<B >assert/[1 , 2] </B> 
+<B >assert/[1, 2] </B> 
 <P></P>
 assert/1 &mdash; adds a clause to a procedure 
 <P></P>
@@ -20,33 +20,33 @@ assertz/2 &mdash; adds a clause at the end of a procedure
 <P ></P >
 </B >assert ( Clause ) 
 <P ></P >
-assert ( Clause , Ref ) 
+assert ( Clause, Ref ) 
 <P ></P >
 asserta ( Clause ) 
 <P ></P >
-asserta ( Clause , Ref ) 
+asserta ( Clause, Ref ) 
 <P ></P >
 assertz ( Clause ) 
 <P ></P >
-assertz ( Clause , Ref ) 
+assertz ( Clause, Ref ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
 </B >The Clause is added to the procedure with the same name and arity in the module that assert is called from. All uninstantiated variables are re-quantified in the clause 
-before it is added to the database , thus breaking any connection between the 
+before it is added to the database, thus breaking any connection between the 
 original variables and those occurring in the clause in the database. Because of 
-this behavior , the order of calls to assert is important. For example , assuming 
-no clauses already exist for p/1 , the first one of the following goals will fail , while the second succeeds. 
+this behavior, the order of calls to assert is important. For example, assuming 
+no clauses already exist for p/1, the first one of the following goals will fail, while the second succeeds. 
 <P ></P >
 
 <P ></P >
-? - X = a , assert ( p ( X ) ) , p ( b ) . 
+? - X = a, assert ( p ( X ) ), p ( b ) . 
 <P ></P >
 
 <P ></P >
 no. 
 <P ></P >
-? - assert ( p ( X ) ) , X = a , p ( b ) . 
+? - assert ( p ( X ) ), X = a, p ( b ) . 
 <P ></P >
 X = a 
 <P ></P >
@@ -54,7 +54,7 @@ X = a
 <P ></P >
 yes. 
 <P ></P >
-The placement of a clause by assert/1 is defined by the implementation. asserta/1 always adds its clause before any other clauses in the same procedure , while assertz/1 always adds its clause at the end. Each form of assert can take an optional 
+The placement of a clause by assert/1 is defined by the implementation. asserta/1 always adds its clause before any other clauses in the same procedure, while assertz/1 always adds its clause at the end. Each form of assert can take an optional 
 second argument ( normally an uninstantiated variable ) which is the database 
 reference corresponding to the clause that was added. : /2 can be used to specify in which module the assert should take place. The 
 database reference argument is normally passed as an uninstantiated variable. 
@@ -65,7 +65,7 @@ database reference argument is normally passed as an uninstantiated variable.
 <P ></P >
 
 <P ></P >
-? - assert ( p ( a ) ) , asserta ( p ( c ) ) , assertz ( p ( b ) ) . 
+? - assert ( p ( a ) ), asserta ( p ( c ) ), assertz ( p ( b ) ) . 
 <P ></P >
 
 <P ></P >
@@ -86,12 +86,12 @@ p ( b ) .
 yes. 
 <P ></P >
 Notice that the order of the clauses in the database is different than the 
-order in which they were asserted. This is because the second assert was done with asserta/1 , and the third assert was done with assertz/1. The asserta/1 call put the p ( c ) clause ahead of p ( a ) in the database. The assertz/1 call put p ( b ) at the end of the p/1 procedure , which happens to be after the p ( a ) clause. The next example demonstrates the use of parentheses in asserting a 
+order in which they were asserted. This is because the second assert was done with asserta/1, and the third assert was done with assertz/1. The asserta/1 call put the p ( c ) clause ahead of p ( a ) in the database. The assertz/1 call put p ( b ) at the end of the p/1 procedure, which happens to be after the p ( a ) clause. The next example demonstrates the use of parentheses in asserting a 
 rule into the Prolog database 
 <P ></P >
 
 <P ></P >
-? - assertz ( ( magic ( X ) : - wizard ( X ) ; pointGuard ( X , lakers ) ) ) . 
+? - assertz ( ( magic ( X ) : - wizard ( X ) ; pointGuard ( X, lakers ) ) ) . 
 <P ></P >
 X = _1 
 <P ></P >
@@ -107,18 +107,18 @@ magic ( _24 ) : -
 <P ></P >
 wizard ( _24 ) 
 <P ></P >
-; pointGuard ( _24 , lakers ) . 
+; pointGuard ( _24, lakers ) . 
 <P ></P >
 
 <P ></P >
 yes. 
 <P ></P >
-If the extra parentheses were not present , the Prolog parser would print the 
+If the extra parentheses were not present, the Prolog parser would print the 
 following error message 
 <P ></P >
 
 <P ></P >
-assertz ( magic ( X ) : - wizard ( X ) ; pointGuard ( X , lakers ) ) . 
+assertz ( magic ( X ) : - wizard ( X ) ; pointGuard ( X, lakers ) ) . 
 <P ></P >
 ^ 
 <P ></P >
@@ -127,7 +127,7 @@ Syntax Error : Comma or right paren expected in argument list.
 
 <P ></P >
 The next example shows how the assert predicates can be used with modules. The first goal fails because there is no 
-module named animals. After the module is created , the assertion is successful as you can see by 
+module named animals. After the module is created, the assertion is successful as you can see by 
 looking at the listing of the animals module. 
 <P ></P >
 
@@ -173,7 +173,7 @@ are part of the current goal
 <P ></P >
 
 <P ></P >
-? - assert ( movie ( jaws ) ) , movie ( X ) , assert ( movie ( jaws2 ) ) . 
+? - assert ( movie ( jaws ) ), movie ( X ), assert ( movie ( jaws2 ) ) . 
 <P ></P >
 X = jaws; 
 <P ></P >
@@ -184,16 +184,16 @@ no.
 The reason this didn’t work is an implementation issue. The following is the 
 sequence of events illustrating what happened 
 <P ></P >
-<IMG SRC = images/Bullet.gif ALT = Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >First the assert ( movie ( jaws ) ) subgoal was run , causing a new procedure to be placed in the Prolog database. 
+<IMG SRC = images/Bullet.gif ALT = Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >First the assert ( movie ( jaws ) ) subgoal was run, causing a new procedure to be placed in the Prolog database. 
 <P ></P >
-<IMG SRC = images/Bullet.gif ALT = Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >When the subgoal movie ( X ) was run , no choice point was created because there 
+<IMG SRC = images/Bullet.gif ALT = Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >When the subgoal movie ( X ) was run, no choice point was created because there 
 were no other clauses to try if failure occurred. 
 <P ></P >
-<IMG SRC = images/Bullet.gif ALT = Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >After movie ( X ) succeeded , the second clause of movie/1 was asserted , and the 
-initial goal succeeded , binding X to jaws. 
+<IMG SRC = images/Bullet.gif ALT = Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >After movie ( X ) succeeded, the second clause of movie/1 was asserted, and the 
+initial goal succeeded, binding X to jaws. 
 <P ></P >
-<IMG SRC = images/Bullet.gif ALT = Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >Backtracking was initiated by the ‘;’ response to the solution , but no second 
-solution was found for movie/1 , even though there was a solution to be found. 
+<IMG SRC = images/Bullet.gif ALT = Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >Backtracking was initiated by the ‘;’ response to the solution, but no second 
+solution was found for movie/1, even though there was a solution to be found. 
 This was because there was no choice point to return to in movie/1. 
 <P ></P >
 One of the interesting ( and possibly bad ) parts to this phenomenon is that the 
@@ -213,7 +213,7 @@ movie ( jaws2 ) .
 <P ></P >
 yes. 
 <P ></P >
-? - assert ( movie ( jaws ) ) , movie ( X ) , assert ( movie ( jaws2 ) ) . 
+? - assert ( movie ( jaws ) ), movie ( X ), assert ( movie ( jaws2 ) ) . 
 <P ></P >
 X = jaws; 
 <P ></P >
@@ -231,13 +231,13 @@ X = jaws2
 <P ></P >
 yes. 
 <P ></P >
-The reason for this , is that there was more than one clause for movie/1 in the database this time , so a choicepoint was created for the movie ( X ) subgoal. Incidentally , this goal would continue finding the 
+The reason for this, is that there was more than one clause for movie/1 in the database this time, so a choicepoint was created for the movie ( X ) subgoal. Incidentally, this goal would continue finding the 
 <P ></P >
 
 <P ></P >
 X = jaws2 
 <P ></P >
-solution. This is because every time the movie ( X ) finds a new solution , it succeeds , thus causing the 
+solution. This is because every time the movie ( X ) finds a new solution, it succeeds, thus causing the 
 <P ></P >
 
 <P ></P >
@@ -245,13 +245,13 @@ assert ( movie ( jaws2 ) )
 <P ></P >
 subgoal to run. This adds another clause to the database to be tried when the 
 user causes backtracking by pressing semicolon ( ; ) . If you look at the 
-conversation with the Prolog shell shown above , you will notice that the last solution 
+conversation with the Prolog shell shown above, you will notice that the last solution 
 was accepted because no ‘;’ was typed after it. 
 <P ></P >
 <B >ERRORS 
 <P ></P >
-</B >Clauses must be either structured terms or atoms. If clause is a rule , with a 
-principal functor of : -/2 , then the head and all the subgoals of the clause must either be atoms or 
+</B >Clauses must be either structured terms or atoms. If clause is a rule, with a 
+principal functor of : -/2, then the head and all the subgoals of the clause must either be atoms or 
 structured terms. 
 <P ></P >
 <B >NOTES 
@@ -261,9 +261,9 @@ database. Using global variables is much more efficient than using assert and re
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >: /2 , 
+</B >: /2, 
 <P ></P >
-[Bowen 91 , 7.3] , [Clocksin 81 , 6.4] , [Bratko 86 , 7.4] , [Sterling 86 , 12.2]. 
+[Bowen 91, 7.3], [Clocksin 81, 6.4], [Bratko 86, 7.4], [Sterling 86, 12.2]. 
 <P ></P >
 </BODY >
 </HTML >

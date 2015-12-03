@@ -1,8 +1,8 @@
 <HTML >
 <HEAD >
-<TITLE >trace/[0 , 1] </TITLE >
+<TITLE >trace/[0, 1] </TITLE >
 </HEAD><BODY>
-<B >trace/[0 , 1] </B> 
+<B >trace/[0, 1] </B> 
 <P></P>
 trace/0 &mdash; turn on tracing 
 <P></P>
@@ -22,33 +22,33 @@ notrace
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
-</B >In the trace/1 case , the Goal will be single stepped according to the debugger’s leash mode. In the trace/0 case , tracing will be turned on for all items until a call to notrace/0 is encountered. 
+</B >In the trace/1 case, the Goal will be single stepped according to the debugger’s leash mode. In the trace/0 case, tracing will be turned on for all items until a call to notrace/0 is encountered. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >? - trace ( append ( [a , b , c] , [d] , X ) ) . 
+</B >? - trace ( append ( [a, b, c], [d], X ) ) . 
 <P ></P >
-( 1 ) 1 call : append ( [a , b , c] , [d] , _11 ) ? 
+( 1 ) 1 call : append ( [a, b, c], [d], _11 ) ? 
 <P ></P >
-( 2 ) 2 call : append ( [b , c] , [d] , _94 ) ? 
+( 2 ) 2 call : append ( [b, c], [d], _94 ) ? 
 <P ></P >
-( 3 ) 3 call : append ( [c] , [d] , _170 ) ? 
+( 3 ) 3 call : append ( [c], [d], _170 ) ? 
 <P ></P >
-( 4 ) 4 call : append ( [] , [d] , _246 ) ? 
+( 4 ) 4 call : append ( [], [d], _246 ) ? 
 <P ></P >
-( 4 ) 4 exit : append ( [] , [d] , [d] ) ? 
+( 4 ) 4 exit : append ( [], [d], [d] ) ? 
 <P ></P >
-( 3 ) 3 exit : append ( [c] , [d] , [c , d] ) ? 
+( 3 ) 3 exit : append ( [c], [d], [c, d] ) ? 
 <P ></P >
-( 2 ) 2 exit : append ( [b , c] , [d] , [b , c , d] ) ? 
+( 2 ) 2 exit : append ( [b, c], [d], [b, c, d] ) ? 
 <P ></P >
-( 1 ) 1 exit : append ( [a , b , c] , [d] , [a , b , c , d] ) ? 
+( 1 ) 1 exit : append ( [a, b, c], [d], [a, b, c, d] ) ? 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >spy/1 , nospy/0 , leash/0 , 
+</B >spy/1, nospy/0, leash/0, 
 <P ></P >
-[Bowen 91 , 4.5] , [Bratko 86 , 8.4] , [Clocksin 81 , 8.3]. 
+[Bowen 91, 4.5], [Bratko 86, 8.4], [Clocksin 81, 8.3]. 
 <P ></P >
 </BODY >
 </HTML >

@@ -16,17 +16,17 @@ make_hash_table/1 &mdash; create hash table and access predicates
 <P ></P >
 reset_table – throw away old hash table associated with the ' _table' hash table and create a brand new one. 
 <P ></P >
-set_table ( Key , Value ) – associate Key with Value in the hash table Key should be bound to a ground term. Any former associations that Key had in the hash table are replaced. 
+set_table ( Key, Value ) – associate Key with Value in the hash table Key should be bound to a ground term. Any former associations that Key had in the hash table are replaced. 
 <P ></P >
-get_table ( Key , Value ) – get the value associated with the ground term bound to Key and unify it with Value. 
+get_table ( Key, Value ) – get the value associated with the ground term bound to Key and unify it with Value. 
 <P ></P >
-del_table ( Key , Value ) – delete the Key/Value association from the hash table. Key must be bound to a ground term. Value will be unified against the associated value in the table. If the 
-unification is not successful , the table will not be modified. 
+del_table ( Key, Value ) – delete the Key/Value association from the hash table. Key must be bound to a ground term. Value will be unified against the associated value in the table. If the 
+unification is not successful, the table will not be modified. 
 <P ></P >
-pget_table ( KeyPattern , ValPattern ) – The &quot; &quot; in pget and pdel , below , stands for pattern. pget_table permits KeyPattern and ValPattern to have any desired instantiation. It will backtrack through the table and 
+pget_table ( KeyPattern, ValPattern ) – The &quot; &quot; in pget and pdel, below, stands for pattern. pget_table permits KeyPattern and ValPattern to have any desired instantiation. It will backtrack through the table and 
 locate associations matching the &quot; attern&quot; as specified by KeyPattern and ValPattern. 
 <P ></P >
-pdel_table ( KeyPattern , ValPattern ) – This functions the same as pget_table except that the association is deleted from the table once it is retrieved. 
+pdel_table ( KeyPattern, ValPattern ) – This functions the same as pget_table except that the association is deleted from the table once it is retrieved. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
@@ -38,31 +38,31 @@ yes.
 <P ></P >
 
 <P ></P >
-? - set_assoc ( a , f ( 1 ) ) . 
+? - set_assoc ( a, f ( 1 ) ) . 
 <P ></P >
 
 <P ></P >
 yes. 
 <P ></P >
-? - set_assoc ( b , f ( 2 ) ) . 
+? - set_assoc ( b, f ( 2 ) ) . 
 <P ></P >
 
 <P ></P >
 yes. 
 <P ></P >
-? - set_assoc ( c , f ( 3 ) ) . 
+? - set_assoc ( c, f ( 3 ) ) . 
 <P ></P >
 
 <P ></P >
 yes. 
 <P ></P >
-? - get_assoc ( X , Y ) . 
+? - get_assoc ( X, Y ) . 
 <P ></P >
 
 <P ></P >
 no. 
 <P ></P >
-? - get_assoc ( c , Y ) . 
+? - get_assoc ( c, Y ) . 
 <P ></P >
 
 <P ></P >
@@ -72,7 +72,7 @@ Y = f ( 3 )
 <P ></P >
 yes. 
 <P ></P >
-? - pget_assoc ( X , Y ) . 
+? - pget_assoc ( X, Y ) . 
 <P ></P >
 
 <P ></P >
@@ -96,7 +96,7 @@ Y = f ( 1 ) ;
 <P ></P >
 no. 
 <P ></P >
-? - del_assoc ( b , Y ) . 
+? - del_assoc ( b, Y ) . 
 <P ></P >
 
 <P ></P >
@@ -106,7 +106,7 @@ Y = f ( 2 )
 <P ></P >
 yes. 
 <P ></P >
-? - pdel_assoc ( X , f ( 3 ) ) . 
+? - pdel_assoc ( X, f ( 3 ) ) . 
 <P ></P >
 
 <P ></P >
@@ -116,7 +116,7 @@ X = c
 <P ></P >
 yes. 
 <P ></P >
-? - pget_assoc ( X , Y ) . 
+? - pget_assoc ( X, Y ) . 
 <P ></P >
 
 <P ></P >
@@ -134,7 +134,7 @@ no.
 <P ></P >
 yes. 
 <P ></P >
-? - pget_assoc ( X , Y ) . 
+? - pget_assoc ( X, Y ) . 
 <P ></P >
 
 <P ></P >
@@ -142,7 +142,7 @@ no.
 <P ></P >
 <B >NOTES 
 <P ></P >
-</B >Unlike assert and retract , the methods created by make_hash_table/1 do not access the database. The associations between keys and values is 
+</B >Unlike assert and retract, the methods created by make_hash_table/1 do not access the database. The associations between keys and values is 
 stored on the heap. Thus elements of either keys or values may be modified in a 
 destructive fashion. This will probably not have desirable consequences if a key 
 is modified. 

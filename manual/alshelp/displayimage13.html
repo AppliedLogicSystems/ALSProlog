@@ -1,38 +1,38 @@
 <HTML >
 <HEAD >
-<TITLE >display_image/[1 , 3] </TITLE >
+<TITLE >display_image/[1, 3] </TITLE >
 </HEAD><BODY>
-<B >display_image/[1 , 3] </B> 
+<B >display_image/[1, 3] </B> 
 <P></P>
-create_image/[2 , 3] &mdash; - create an image from a GIF file <A NAME = b0cc1354 ></A >
+create_image/[2, 3] &mdash; - create an image from a GIF file <A NAME = b0cc1354 ></A >
 <P></P>
-display_image/[1 , 3] &mdash; - display an image <A NAME = b0cc1327 ></A >
+display_image/[1, 3] &mdash; - display an image <A NAME = b0cc1327 ></A >
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >create_image ( ImagePath , ImageName 
+</B >create_image ( ImagePath, ImageName 
 <P ></P >
-create_image ( Interp , ImagePath , ImageName 
+create_image ( Interp, ImagePath, ImageName 
 <P ></P >
 display_image ( ImageName ) 
 <P ></P >
-display_image ( Interp , ImageName , Options 
+display_image ( Interp, ImageName, Options 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
 </B >These routines provide simple access from ALS Prolog to the image routines of 
-Tk. The current versions support GIF images , but the routines can be extended 
-to any of the types Tk supports. To display images , one must specify a path 
-to the image file , and must first produce an internal Tk form of the image. 
+Tk. The current versions support GIF images, but the routines can be extended 
+to any of the types Tk supports. To display images, one must specify a path 
+to the image file, and must first produce an internal Tk form of the image. 
 This is done with 
 <P ></P >
-create_image ( ImagePath , ImageName 
+create_image ( ImagePath, ImageName 
 <P ></P >
 : 
 <P ></P >
-create_image ( tcli , ImagePath , ImageName ) . 
+create_image ( tcli, ImagePath, ImageName ) . 
 <P ></P >
-create_image ( Interp , ImagePath , ImageName 
+create_image ( Interp, ImagePath, ImageName 
 <P ></P >
 Assume that 
 <P ></P >
@@ -40,7 +40,7 @@ pow_wow_dance.gif
 <P ></P >
 is a file in the current directory. Then the call 
 <P ></P >
-? - create_image ( ‘pow_wow_dance.gif’ , pow_wow ) . 
+? - create_image ( ‘pow_wow_dance.gif’, pow_wow ) . 
 <P ></P >
 will create the internal form of this image and associate the name pow_wow 
 with it. Display of images which have been created is accomplished with 
@@ -49,11 +49,11 @@ display_image ( ImageName )
 <P ></P >
 : 
 <P ></P >
-display_image ( tcli , ImageName , [] ) . 
+display_image ( tcli, ImageName, [] ) . 
 <P ></P >
-display_image ( Interp , ImageName , Options 
+display_image ( Interp, ImageName, Options 
 <P ></P >
-Thus , the call 
+Thus, the call 
 <P ></P >
 ? -display_image ( pow_wow ) . 
 <P ></P >

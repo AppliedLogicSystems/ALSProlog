@@ -8,7 +8,7 @@ compare/3 &mdash; compares two terms in the standard order
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >compare ( Relation , TermL , TermR ) 
+</B >compare ( Relation, TermL, TermR ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
@@ -21,42 +21,42 @@ compare/3 &mdash; compares two terms in the standard order
 &gt; when TermL is after TermR 
 <P ></P >
 The <B ><I >standard order </I ></B >provides a means to compare and sort general Prolog terms. The order is 
-somewhat arbitrary in how it sorts terms of different types. For example , an atom is 
+somewhat arbitrary in how it sorts terms of different types. For example, an atom is 
 always “less than” a structure. Here’s the entire order 
 <P ></P >
 Variables &lt; Numbers &lt; Atoms &lt; Structured Terms 
 <P ></P >
 <B ><I >Variables </I ></B >are compared according to their relative locations in the Prolog data areas. 
 Usually a recently created variable will be greater than an older variable. 
-However , the apparent age of a variable can change without notice during a 
+However, the apparent age of a variable can change without notice during a 
 computation. 
 <P ></P >
 <B ><I >Numbers </I ></B >are ordered according to their signed magnitude. Integers and floating point 
-values are ordered correctly , so compare/3 can be used to sort numbers. 
+values are ordered correctly, so compare/3 can be used to sort numbers. 
 <P ></P >
 <B ><I >Atoms </I ></B >are sorted by the ASCII order of their print names. If one atom is an initial 
-substring of another , the longer atom will appear later in the standard order. 
+substring of another, the longer atom will appear later in the standard order. 
 <P ></P >
-<B ><I >Structured terms </I ></B >are ordered first by arity , then by the ASCII order of their principal 
-functor. If two terms have the same functor and arity , then compare/3 will recursively compare their arguments to determine the order of the two. 
+<B ><I >Structured terms </I ></B >are ordered first by arity, then by the ASCII order of their principal 
+functor. If two terms have the same functor and arity, then compare/3 will recursively compare their arguments to determine the order of the two. 
 <P ></P >
-More precisely , if TermL and TermR are structured terms , then 
+More precisely, if TermL and TermR are structured terms, then 
 <P ></P >
 TermL @&lt; TermR holds if and only if 
 <P ></P >
 
 <P ></P >
-the arity of TermL is less than the arity of TermR , or 
+the arity of TermL is less than the arity of TermR, or 
 <P ></P >
-TermL and TermR have the same arity , and the functor name of TermL preceeds 
+TermL and TermR have the same arity, and the functor name of TermL preceeds 
 <P ></P >
-the functor name of TermR in the standard order , or 
+the functor name of TermR in the standard order, or 
 <P ></P >
-TermL and TermR have the same arity and functor name , and there is an integer N 
+TermL and TermR have the same arity and functor name, and there is an integer N 
 <P ></P >
-less than or equal to the arity of TermL such that for all i less than N , 
+less than or equal to the arity of TermL such that for all i less than N, 
 <P ></P >
-the ith arguments of TermL and TermR are identical , and 
+the ith arguments of TermL and TermR are identical, and 
 <P ></P >
 the Nth argument of TermL preceeds the Nth argument of TermR 
 <P ></P >
@@ -66,7 +66,7 @@ in the standard order.
 <P ></P >
 </B >The following examples show the use of compare/3 : 
 <P ></P >
-? - Myself = I , compare ( = , Myself , I ) . 
+? - Myself = I, compare ( =, Myself, I ) . 
 <P ></P >
 Myself = _4 
 <P ></P >
@@ -76,13 +76,13 @@ I = _4
 <P ></P >
 yes. 
 <P ></P >
-? - compare ( &gt; 100 , 99 ) . 
+? - compare ( &gt; 100, 99 ) . 
 <P ></P >
 
 <P ></P >
 yes. 
 <P ></P >
-? - compare ( &lt; boy , big ( boy ) ) . 
+? - compare ( &lt; boy, big ( boy ) ) . 
 <P ></P >
 
 <P ></P >
@@ -90,7 +90,7 @@ yes.
 <P ></P >
 The following example shows the way structures are compared 
 <P ></P >
-? - compare ( Order , and ( a , b , c ) , and ( a , b , a , b ) ) . 
+? - compare ( Order, and ( a, b, c ), and ( a, b, a, b ) ) . 
 <P ></P >
 Order = ’&lt;’ 
 <P ></P >
@@ -100,20 +100,20 @@ yes.
 <P ></P >
 This says that the structure 
 <P ></P >
-and ( a , b , c ) 
+and ( a, b, c ) 
 <P ></P >
 comes after the structure 
 <P ></P >
-and ( a , b , a , b ) 
+and ( a, b, a, b ) 
 <P ></P >
-in the standard order , because the second structure has a greater arity than 
+in the standard order, because the second structure has a greater arity than 
 the first. 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >= = /2 , @&lt;/2 , sort/2 , 
+</B >= = /2, @&lt;/2, sort/2, 
 <P ></P >
-[Bowen 91 , 7.4]. 
+[Bowen 91, 7.4]. 
 <P ></P >
 </BODY >
 </HTML >

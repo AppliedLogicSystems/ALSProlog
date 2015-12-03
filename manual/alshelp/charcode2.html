@@ -8,15 +8,15 @@ char_code/2 &mdash; convert between characters and codes
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >char_code ( Char , Code ) 
+</B >char_code ( Char, Code ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
-</B >char_code ( Char , Code ) is true if the character Char has character code Code. At least one of Char or Code must be instantiated. 
+</B >char_code ( Char, Code ) is true if the character Char has character code Code. At least one of Char or Code must be instantiated. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >? - char_code ( a , C ) . 
+</B >? - char_code ( a, C ) . 
 <P ></P >
 
 <P ></P >
@@ -26,7 +26,7 @@ C = 97
 <P ></P >
 yes. 
 <P ></P >
-? - char_code ( C , 98 ) . 
+? - char_code ( C, 98 ) . 
 <P ></P >
 
 <P ></P >
@@ -36,17 +36,17 @@ C = b
 <P ></P >
 yes. 
 <P ></P >
-? - char_code ( foo , C ) . 
+? - char_code ( foo, C ) . 
 <P ></P >
 
 <P ></P >
 Error : Argument of type character expected instead of foo. 
 <P ></P >
-- Goal : builtins : char_code ( foo , _A ) 
+- Goal : builtins : char_code ( foo, _A ) 
 <P ></P >
-- Throw pattern : error ( type_error ( character , foo ) , 
+- Throw pattern : error ( type_error ( character, foo ), 
 <P ></P >
-[builtins : char_code ( foo , _A ) ] ) 
+[builtins : char_code ( foo, _A ) ] ) 
 <P ></P >
 <B >ERRORS 
 <P ></P >
@@ -68,7 +68,7 @@ Code is an integer but is not a character code
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >atom_chars/2 , number_chars/2 , term_chars/2. 
+</B >atom_chars/2, number_chars/2, term_chars/2. 
 <P ></P >
 </BODY >
 </HTML >

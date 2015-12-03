@@ -10,9 +10,9 @@ dreverse/2 &mdash; determinate list reversal
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >reverse ( List1 , List2 ) 
+</B >reverse ( List1, List2 ) 
 <P ></P >
-dreverse ( List1 , List2 ) 
+dreverse ( List1, List2 ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
@@ -20,9 +20,9 @@ dreverse ( List1 , List2 )
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >? - reverse ( [a , b , c] , List2 ) . 
+</B >? - reverse ( [a, b, c], List2 ) . 
 <P ></P >
-List2 = [c , b , a] 
+List2 = [c, b, a] 
 <P ></P >
 yes. 
 <P ></P >
@@ -30,31 +30,31 @@ yes.
 <P ></P >
 </B >Defined by the following clauses 
 <P ></P >
-reverse ( List , Rev ) : - 
+reverse ( List, Rev ) : - 
 <P ></P >
-reverse ( List , [] , Rev ) . 
-<P ></P >
-
-<P ></P >
-reverse ( [] , Rev , Rev ) . 
-<P ></P >
-reverse ( [A | Rest] , SoFar , Rev ) : - 
-<P ></P >
-reverse ( Rest , [A | SoFar] , Rev ) . 
+reverse ( List, [], Rev ) . 
 <P ></P >
 
 <P ></P >
-dreverse ( List , Rev ) : - 
+reverse ( [], Rev, Rev ) . 
 <P ></P >
-dreverse ( List , [] , Rev ) . 
+reverse ( [A | Rest], SoFar, Rev ) : - 
+<P ></P >
+reverse ( Rest, [A | SoFar], Rev ) . 
 <P ></P >
 
 <P ></P >
-dreverse ( [] , Rev , Rev ) : - !. 
+dreverse ( List, Rev ) : - 
 <P ></P >
-dreverse ( [A | Rest] , SoFar , Rev ) 
+dreverse ( List, [], Rev ) . 
 <P ></P >
-: - dreverse ( Rest , [A | SoFar] , Rev ) . 
+
+<P ></P >
+dreverse ( [], Rev, Rev ) : - !. 
+<P ></P >
+dreverse ( [A | Rest], SoFar, Rev ) 
+<P ></P >
+: - dreverse ( Rest, [A | SoFar], Rev ) . 
 <P ></P >
 </BODY >
 </HTML >

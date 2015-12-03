@@ -8,7 +8,7 @@ mangle/3 &mdash; destructively modify a structure
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >mangle ( Nth , Structure , NewArg ) 
+</B >mangle ( Nth, Structure, NewArg ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
@@ -17,15 +17,15 @@ similar to Lisp’s rplaca and rplacd. Structure must be instantiated to a compoun
 <P ></P >
 Modifications made to a structure by mangle/3 will survive failure and backtracking. 
 <P ></P >
-Even though mangle/3 implements destructive assignment in Prolog , it is not necessarily more 
+Even though mangle/3 implements destructive assignment in Prolog, it is not necessarily more 
 efficient than copying a term. This is due to the extensive cleanup operation which 
 ensures that the effects of a mangle/3 persist across failure. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >? - Victim = doNot ( fold , staple , mutilate ) , mangle ( 2 , Victim , spindle ) . 
+</B >? - Victim = doNot ( fold, staple, mutilate ), mangle ( 2, Victim, spindle ) . 
 <P ></P >
-Victim = doNot ( fold , spindle , mutilate ) 
+Victim = doNot ( fold, spindle, mutilate ) 
 <P ></P >
 yes. 
 <P ></P >

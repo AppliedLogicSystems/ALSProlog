@@ -8,7 +8,7 @@ length/2 &mdash; count the number of elements in a list
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >length ( List , Size ) 
+</B >length ( List, Size ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
@@ -16,7 +16,7 @@ length/2 &mdash; count the number of elements in a list
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >? - length ( [a , b , c] , X ) . 
+</B >? - length ( [a, b, c], X ) . 
 <P ></P >
 X = 3 
 <P ></P >
@@ -30,15 +30,15 @@ yes.
 <P ></P >
 
 <P ></P >
-length ( List , Length ) : - length ( List , 0 , Length ) . 
+length ( List, Length ) : - length ( List, 0, Length ) . 
 <P ></P >
-length ( [] , Length , Length ) : - !. 
+length ( [], Length, Length ) : - !. 
 <P ></P >
-length ( [_ | Rest] , Old , Length ) : - 
+length ( [_ | Rest], Old, Length ) : - 
 <P ></P >
-New is Old + 1 , 
+New is Old + 1, 
 <P ></P >
-length ( Rest , New , Length ) . 
+length ( Rest, New, Length ) . 
 <P ></P >
 </BODY >
 </HTML >

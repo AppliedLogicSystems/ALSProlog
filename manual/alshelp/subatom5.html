@@ -8,19 +8,19 @@ sub_atom/5 &mdash; dissect an atom
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >sub_atom ( Atom , Before , Length , After , SubAtom ) 
+</B >sub_atom ( Atom, Before, Length, After, SubAtom ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
-</B >sub_atom/5 is used to take apart an atom. The only instantiation requirement is that Atom be instantiated to an atom. If any of Before , Length , or After are instantiated , they must be instantatiated to integers. If SubAtom is instantiated , it must be instantiated to an atom. 
+</B >sub_atom/5 is used to take apart an atom. The only instantiation requirement is that Atom be instantiated to an atom. If any of Before, Length, or After are instantiated, they must be instantatiated to integers. If SubAtom is instantiated, it must be instantiated to an atom. 
 <P ></P >
 The Before parameter gives the number of characters in Atom before the start of the atom SubAtom. Length is the length of this SubAtom. After is the number of characters of Atom following the end of SubAtom. The first character of any atom is considered to begin at position 1 
 <P ></P >
-sub_atom/5 is resatisfiable. Upon backtracking all possible values of Before , Length , After , and SubAtom are generated subject to the initial instantiations of these parameters. 
+sub_atom/5 is resatisfiable. Upon backtracking all possible values of Before, Length, After, and SubAtom are generated subject to the initial instantiations of these parameters. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >? - sub_atom ( abcdefg , 2 , 3 , X , Y ) . 
+</B >? - sub_atom ( abcdefg, 2, 3, X, Y ) . 
 <P ></P >
 X = 2 
 <P ></P >
@@ -30,7 +30,7 @@ yes.
 <P ></P >
 
 <P ></P >
-? - sub_atom ( abcdefg , B , L , A , cde ) . 
+? - sub_atom ( abcdefg, B, L, A, cde ) . 
 <P ></P >
 B = 2 
 <P ></P >
@@ -40,7 +40,7 @@ A = 2
 <P ></P >
 yes. 
 <P ></P >
-? - sub_atom ( abcdefg , B , 4 , A , Y ) . 
+? - sub_atom ( abcdefg, B, 4, A, Y ) . 
 <P ></P >
 B = 0 
 <P ></P >
@@ -84,23 +84,23 @@ no.
 <P ></P >
 Atom is neither a variable nor an atom 
 <P ></P >
-––––&gt; type_error ( atom , Atom ) 
+––––&gt; type_error ( atom, Atom ) 
 <P ></P >
 SubAtom is neither a variable nor an atom 
 <P ></P >
-––––&gt; type_error ( atom , SubAtom ) 
+––––&gt; type_error ( atom, SubAtom ) 
 <P ></P >
 Start is neither a variable nor an integer 
 <P ></P >
-––––&gt; type_error ( integer , Start ) 
+––––&gt; type_error ( integer, Start ) 
 <P ></P >
 Length is neither a variable nor an integer 
 <P ></P >
-––––&gt; type_error ( integer , Length ) 
+––––&gt; type_error ( integer, Length ) 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >atom_length/2 , atom_concat/3 , atom_chars/2 , atom_codes/2 
+</B >atom_length/2, atom_concat/3, atom_chars/2, atom_codes/2 
 <P ></P >
 User Guide ( Prolog I/O ) . 
 <P ></P >

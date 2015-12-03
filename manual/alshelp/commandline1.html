@@ -12,21 +12,21 @@ command_line/1 &mdash; provides access to start-up command line
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
-</B >When ALS Prolog is started from an operating system shell , the command line 
+</B >When ALS Prolog is started from an operating system shell, the command line 
 can be divided into system-specific and application-specific portions by use of 
-the -p or -P ( for Prolog ) switch. All command line parameters to the left of the -p switch are treated as ALS Prolog system switches , , while those to the right 
+the -p or -P ( for Prolog ) switch. All command line parameters to the left of the -p switch are treated as ALS Prolog system switches,, while those to the right 
 of the -p switch are treated as application switches. 
 <P ></P >
-To make the latter available to Prolog applications , when ALS Prolog is 
-initialized , a list SWITCHES of atoms and UIAs representing the items to the right of the -p switch is created , and 
+To make the latter available to Prolog applications, when ALS Prolog is 
+initialized, a list SWITCHES of atoms and UIAs representing the items to the right of the -p switch is created, and 
 <P ></P >
 command_line ( SWITCHES ) 
 <P ></P >
-is asserted in module builtins. This assertion is always made , even when -p is not used , in which case the argument of command_line/1 is the empty list. 
+is asserted in module builtins. This assertion is always made, even when -p is not used, in which case the argument of command_line/1 is the empty list. 
 <P ></P >
 The -P switch will force the name of the invoking program to be the argument 
 ( usually alspro ) .. the switch is useful for developing applications which will eventually be 
-packaged ( via save_image/2 ) . Packaged applications will place the entire command line into command_line/1. In particular , the first element in the list obtained from command_line/1 in a packaged application will be the name of the application. 
+packaged ( via save_image/2 ) . Packaged applications will place the entire command line into command_line/1. In particular, the first element in the list obtained from command_line/1 in a packaged application will be the name of the application. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
@@ -34,7 +34,7 @@ packaged ( via save_image/2 ) . Packaged applications will place the entire comm
 <P ></P >
 ALS-Prolog Version 2.01 
 <P ></P >
-Copyright ( c ) 1987-94 Applied Logic Systems , Inc. 
+Copyright ( c ) 1987-94 Applied Logic Systems, Inc. 
 <P ></P >
 
 <P ></P >
@@ -42,7 +42,7 @@ Copyright ( c ) 1987-94 Applied Logic Systems , Inc.
 <P ></P >
 
 <P ></P >
-SW = ['-k' , fast , ' -s' , initstate , foo] 
+SW = ['-k', fast, ' -s', initstate, foo] 
 <P ></P >
 
 <P ></P >
@@ -54,7 +54,7 @@ $ alspro -P -k fast -s initstate foo
 <P ></P >
 ALS-Prolog Version 2.01 
 <P ></P >
-Copyright ( c ) 1987-94 Applied Logic Systems , Inc. 
+Copyright ( c ) 1987-94 Applied Logic Systems, Inc. 
 <P ></P >
 
 <P ></P >
@@ -62,7 +62,7 @@ Copyright ( c ) 1987-94 Applied Logic Systems , Inc.
 <P ></P >
 
 <P ></P >
-SW = [alspro , ' -k' , fast , ' -s' , initstate , foo] 
+SW = [alspro, ' -k', fast, ' -s', initstate, foo] 
 <P ></P >
 
 <P ></P >

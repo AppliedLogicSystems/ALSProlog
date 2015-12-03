@@ -8,7 +8,7 @@ defStruct/2 &mdash; specify an abstract data type
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >: - defStruct ( TypeID , Equations ) . 
+</B >: - defStruct ( TypeID, Equations ) . 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
@@ -37,13 +37,13 @@ accessPred The name of the ternary ( 3-argument ) predicate to be used for acces
 values of the slots in the structure. Calls on a generated accessPred take the 
 form 
 <P ></P >
-&lt; ccessPred&gt; ( &lt; lotname&gt; , &lt; tructure&gt; , Value 
+&lt; ccessPred&gt; ( &lt; lotname&gt;, &lt; tructure&gt;, Value 
 <P ></P >
 setPred The name of the ternary ( 3-argument ) predicate to be used for setting or 
 changing the values of the slots in the structure. Calls on a generated accessPred 
 take the form 
 <P ></P >
-&lt; etPred&gt; ( &lt; lotname&gt; , &lt; tructure&gt; , Value 
+&lt; etPred&gt; ( &lt; lotname&gt;, &lt; tructure&gt;, Value 
 <P ></P >
 
 <P ></P >
@@ -52,50 +52,50 @@ defined type.
 <P ></P >
 structLabel The name of the functor of the structure defined. 
 <P ></P >
-propertiesList A list of <B ><I >slot specifications , </I ></B >as follows 
+propertiesList A list of <B ><I >slot specifications, </I ></B >as follows 
 <P ></P >
-<IMG SRC = images/Bullet.gif ALT = Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >an atom , which is the name of the particular slot , or 
+<IMG SRC = images/Bullet.gif ALT = Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >an atom, which is the name of the particular slot, or 
 <P ></P >
 <IMG SRC = images/Bullet.gif ALT = Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >an expression of the form 
 <P ></P >
-SlotName/Term , 
+SlotName/Term, 
 <P ></P >
-where SlotName is an atom serving as the name of this slot , and Term is an arbitrary Prolog term which is the default value of this particular 
-slot , or 
+where SlotName is an atom serving as the name of this slot, and Term is an arbitrary Prolog term which is the default value of this particular 
+slot, or 
 <P ></P >
 <IMG SRC = images/Bullet.gif ALT = Bullet.gif BORDER = 0 WIDTH = 3 HEIGHT = 7 >an <B ><I >include </I ></B >expression which is a term of the form 
 <P ></P >
-include ( File , Type ) 
+include ( File, Type ) 
 <P ></P >
-where File is a path to a file , and Type is the name of a defStruct which appears in that file; if File can be located , and if the defStruct Type appears in File , the elements of propertiesList for Type are interpolated at the point where the <I >include </I >expression occurred; <I >include </I >expressions may be recursively nested. [Note : Relative paths in recursive 
+where File is a path to a file, and Type is the name of a defStruct which appears in that file; if File can be located, and if the defStruct Type appears in File, the elements of propertiesList for Type are interpolated at the point where the <I >include </I >expression occurred; <I >include </I >expressions may be recursively nested. [Note : Relative paths in recursive 
 includes must be valid from the directory in which the defStruct directive was 
 invoked.] 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >: - defStruct ( windows , 
+</B >: - defStruct ( windows, 
 <P ></P >
 [ 
 <P ></P >
 propertiesList = 
 <P ></P >
-[windowName , % name of the window 
+[windowName, % name of the window 
 <P ></P >
-windowNum , % assigned by window sys 
+windowNum, % assigned by window sys 
 <P ></P >
-borderColor/blue , % for color displays 
+borderColor/blue, % for color displays 
 <P ></P >
-borderType/sing , % single or double lines 
+borderType/sing, % single or double lines 
 <P ></P >
-uLR , uLC , % coords ( Row , Col ) of 
+uLR, uLC, % coords ( Row, Col ) of 
 <P ></P >
 % upper Left corner 
 <P ></P >
-lRR , lRC , % coords ( Row , Col ) of 
+lRR, lRC, % coords ( Row, Col ) of 
 <P ></P >
 % lower Right corner 
 <P ></P >
-fore/black , % foreground/background 
+fore/black, % foreground/background 
 <P ></P >
 back /white % text attribs 
 <P ></P >
@@ -115,11 +115,11 @@ structLabel = wi
 <P ></P >
 Then : 
 <P ></P >
-... , makeWindowStruct ( WIN ) , 
+..., makeWindowStruct ( WIN ), 
 <P ></P >
-... , setWI ( windowName , WIN , foo ) , 
+..., setWI ( windowName, WIN, foo ), 
 <P ></P >
-... , accessWI ( borderColor , WIN , BColor ) , ... 
+..., accessWI ( borderColor, WIN, BColor ), ... 
 <P ></P >
 
 <P ></P >

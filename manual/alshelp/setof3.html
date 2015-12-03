@@ -4,47 +4,47 @@
 </HEAD><BODY>
 <B >setof/3 </B> 
 <P></P>
-setof/3 &mdash; all unique solutions for a goal , sorted 
+setof/3 &mdash; all unique solutions for a goal, sorted 
 <P></P>
-bagof/3 &mdash; all solutions for a goal , not sorted 
+bagof/3 &mdash; all solutions for a goal, not sorted 
 <P></P>
-findall/3 &mdash; all solutions for a goal , not sorted 
+findall/3 &mdash; all solutions for a goal, not sorted 
 <P></P>
-b_findall/4 &mdash; bound list of solutions for a goal , not sorted 
+b_findall/4 &mdash; bound list of solutions for a goal, not sorted 
 <P></P>
 <B>FORMS</B>
 <P ></P >
-</B >setof ( Template , Goal , Collection ) 
+</B >setof ( Template, Goal, Collection ) 
 <P ></P >
-bagof ( Template , Goal , Collection ) 
+bagof ( Template, Goal, Collection ) 
 <P ></P >
-findall ( Template , Goal , Collection ) 
+findall ( Template, Goal, Collection ) 
 <P ></P >
-b_findall ( Template , Goal , Collection , Bound 
+b_findall ( Template, Goal, Collection, Bound 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
-</B >These predicates collect in the list Collection , the set of all instances of Template such that the goal , Goal , is provable. Template is a term that usually shares variables with Goal. 
+</B >These predicates collect in the list Collection, the set of all instances of Template such that the goal, Goal, is provable. Template is a term that usually shares variables with Goal. 
 <P ></P >
 setof/3 produces a Collection which is sorted according to the standard order with all duplicate elements 
 removed. Both bagof/3 and findall/3 produce Collections that are not sorted. 
 <P ></P >
-If there are no solutions to Goal , then setof/3 and bagof/3 will fail , whereas , findall/3 unifies Collection with []. 
+If there are no solutions to Goal, then setof/3 and bagof/3 will fail, whereas, findall/3 unifies Collection with []. 
 <P ></P >
 Variables that occur in Goal and not within Template are known as <B ><I >free variables </I ></B >. setof/3 and bagof/3 will generate alternative bindings for free variables upon backtracking. 
 <P ></P >
-Within a call to setof/3 or bagof/3 , free variables can be existentially quantified in Goal by using the notation Variable^Query. This means that there exists a Variable such that Query is true. 
+Within a call to setof/3 or bagof/3, free variables can be existentially quantified in Goal by using the notation Variable^Query. This means that there exists a Variable such that Query is true. 
 <P ></P >
-The collection to be enumerated should be finite , and should be enumerable by 
-Prolog in finite time. It is possible for the provable instances of Template to contain variables , but in this case Collection will only provide an imperfect representation of what is actually an infinite 
+The collection to be enumerated should be finite, and should be enumerable by 
+Prolog in finite time. It is possible for the provable instances of Template to contain variables, but in this case Collection will only provide an imperfect representation of what is actually an infinite 
 collection. 
 <P ></P >
-setof/3 calls upon sort/2 to eliminate duplicate solutions from Collection , which seriously impacts its efficiency. In addition , even though bagof/3 leaves duplicate solutions , it still calls keysort/2. 
+setof/3 calls upon sort/2 to eliminate duplicate solutions from Collection, which seriously impacts its efficiency. In addition, even though bagof/3 leaves duplicate solutions, it still calls keysort/2. 
 <P ></P >
 findall/3 neither removes duplicates nor generates alternative bindings for free 
-variables—it assumes that all variables occurring within Goal are existentially quantified. As a result , findall/3 is much more efficient than either setof/3 or bagof/3. 
+variables—it assumes that all variables occurring within Goal are existentially quantified. As a result, findall/3 is much more efficient than either setof/3 or bagof/3. 
 <P ></P >
-When Bound is a positive integer , b_findall/4 operates similarly to findall/3 , except that it returns at most Bound number of solutions on the list Collection. It fails if Bound is anything other than a positive integer. 
+When Bound is a positive integer, b_findall/4 operates similarly to findall/3, except that it returns at most Bound number of solutions on the list Collection. It fails if Bound is anything other than a positive integer. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
@@ -52,29 +52,29 @@ When Bound is a positive integer , b_findall/4 operates similarly to findall/3 ,
 <P ></P >
 % user : likes/2 
 <P ></P >
-likes ( kev , running ) . 
+likes ( kev, running ) . 
 <P ></P >
-likes ( kev , lifting ) . 
+likes ( kev, lifting ) . 
 <P ></P >
-likes ( keith , running ) . 
+likes ( keith, running ) . 
 <P ></P >
-likes ( keith , lifting ) . 
+likes ( keith, lifting ) . 
 <P ></P >
-likes ( ken , swimming ) . 
+likes ( ken, swimming ) . 
 <P ></P >
-likes ( sally , swimming ) . 
+likes ( sally, swimming ) . 
 <P ></P >
-likes ( andy , bicycling ) . 
+likes ( andy, bicycling ) . 
 <P ></P >
-likes ( chris , lifting ) . 
+likes ( chris, lifting ) . 
 <P ></P >
-likes ( chris , running ) . 
+likes ( chris, running ) . 
 <P ></P >
 
 <P ></P >
 yes. 
 <P ></P >
-? - setof ( Person , likes ( Person , Sport ) , SetOfPeople ) . 
+? - setof ( Person, likes ( Person, Sport ), SetOfPeople ) . 
 <P ></P >
 Person = _1 
 <P ></P >
@@ -86,13 +86,13 @@ Person = _1
 <P ></P >
 Sport = lifting 
 <P ></P >
-SetOfPeople = [chris , keith , kev]; 
+SetOfPeople = [chris, keith, kev]; 
 <P ></P >
 Person = _1 
 <P ></P >
 Sport = running 
 <P ></P >
-SetOfPeople = [chris , keith , kev]; 
+SetOfPeople = [chris, keith, kev]; 
 <P ></P >
 
 <P ></P >
@@ -100,15 +100,15 @@ Person = _1
 <P ></P >
 Sport = swimming 
 <P ></P >
-SetOfPeople = [sally , ken]; 
+SetOfPeople = [sally, ken]; 
 <P ></P >
 
 <P ></P >
 no. 
 <P ></P >
-? - setof ( ( Sport , People ) , 
+? - setof ( ( Sport, People ), 
 <P ></P >
-setof ( Person , likes ( Person , Sport ) , People ) , 
+setof ( Person, likes ( Person, Sport ), People ), 
 <P ></P >
 Set ) . 
 <P ></P >
@@ -118,21 +118,21 @@ People = _2
 <P ></P >
 Person = _4 
 <P ></P >
-Set = [ ( bicycling , [andy] ) , ( lifting , [chris , keith , kev] ) , 
+Set = [ ( bicycling, [andy] ), ( lifting, [chris, keith, kev] ), 
 <P ></P >
-( running , [chris , keith , kev] ) , ( swimming , [sally , ken] ) ] 
+( running, [chris, keith, kev] ), ( swimming, [sally, ken] ) ] 
 <P ></P >
 
 <P ></P >
 yes. 
 <P ></P >
-? - setof ( Person , Sport^ ( Person likes Sport ) , SetOfPeople ) . 
+? - setof ( Person, Sport^ ( Person likes Sport ), SetOfPeople ) . 
 <P ></P >
 Person = _1 
 <P ></P >
 Sport = _2 
 <P ></P >
-SetOfPeople = [andy , chris , sally , keith , ken , kev] 
+SetOfPeople = [andy, chris, sally, keith, ken, kev] 
 <P ></P >
 
 <P ></P >
@@ -140,7 +140,7 @@ yes.
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >[Bowen 91 , 7.5] , [Clocksin 81 , 7.8] , [Bratko 86 , 7.6] , [Sterling 86 , 17.1]. 
+</B >[Bowen 91, 7.5], [Clocksin 81, 7.8], [Bratko 86, 7.6], [Sterling 86, 17.1]. 
 <P ></P >
 </BODY >
 </HTML >

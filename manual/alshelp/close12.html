@@ -12,15 +12,15 @@ close/2 &mdash; close an open stream with options
 <P ></P >
 </B >close ( Stream_or_Alias ) 
 <P ></P >
-close ( Stream_or_Alias , CloseOptions ) 
+close ( Stream_or_Alias, CloseOptions ) 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
 </B >close/1 and close/2 close a stream previously opened with open/3 or open/4. Closing a stream consists of flushing the buffer associated with the stream 
 and freeing resources associated with maintaining an open stream. If there is 
-an alias associated with the stream , this alias is disassociated and freed up 
+an alias associated with the stream, this alias is disassociated and freed up 
 for potential use by some other stream. If the stream to be closed is the 
-current input stream , then the current input stream is set to the stream associated 
+current input stream, then the current input stream is set to the stream associated 
 with the alias user_input. If the stream to be closed is associated with the current output stream 
 then the current output stream is set to the stream associated with the alias user_output. 
 <P ></P >
@@ -47,7 +47,7 @@ associated with the stream are freed anyway.
 <P ></P >
 Stream_or_Alias is neither a variable nor a stream identifier or alias 
 <P ></P >
-––––&gt; domain_error ( stream_or_alias , Stream_or_Alias ) 
+––––&gt; domain_error ( stream_or_alias, Stream_or_Alias ) 
 <P ></P >
 CloseOptions is a variable 
 <P ></P >
@@ -55,7 +55,7 @@ CloseOptions is a variable
 <P ></P >
 CloseOptions is neither variable nor list 
 <P ></P >
-––––&gt; type_error ( list , CloseOptions ) . 
+––––&gt; type_error ( list, CloseOptions ) . 
 <P ></P >
 CloseOptions is a list which contains a variable element 
 <P ></P >
@@ -64,7 +64,7 @@ CloseOptions is a list which contains a variable element
 CloseOptions is a list which contains an element E which is neither a variable nor a valid 
 close option 
 <P ></P >
-––––&gt; domain_error ( close_option , E ) . 
+––––&gt; domain_error ( close_option, E ) . 
 <P ></P >
 <B >NOTES 
 <P ></P >
@@ -74,7 +74,7 @@ the stream.
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >open/4 , current_input/1 , flush_output/1 , <I >User Guide ( Prolog I/O ) . 
+</B >open/4, current_input/1, flush_output/1, <I >User Guide ( Prolog I/O ) . 
 <P ></P >
 </I ></BODY >
 </HTML >

@@ -1,18 +1,18 @@
 <HTML >
 <HEAD >
-<TITLE >file_select_dialog/[1 , 2 , 3] </TITLE >
+<TITLE >file_select_dialog/[1, 2, 3] </TITLE >
 </HEAD><BODY>
-<B >file_select_dialog/[1 , 2 , 3] </B> 
+<B >file_select_dialog/[1, 2, 3] </B> 
 <P></P>
-file_select_dialog/[1 , 2 , 3] &mdash; - select a file 
+file_select_dialog/[1, 2, 3] &mdash; - select a file 
 <P></P>
 <B>FORMS</B>
 <P ></P >
 </B >file_select_dialog ( FileName ) 
 <P ></P >
-file_select_dialog ( Options , FileName 
+file_select_dialog ( Options, FileName 
 <P ></P >
-file_select_dialog ( Interp , Options , FileName 
+file_select_dialog ( Interp, Options, FileName 
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
@@ -23,24 +23,24 @@ file_select_dialog ( FileName )
 <P ></P >
 : 
 <P ></P >
-file_select_dialog ( tcli , [title = ’Select File’] , FileName ) . 
+file_select_dialog ( tcli, [title = ’Select File’], FileName ) . 
 <P ></P >
-file_select_dialog ( Options , FileName 
+file_select_dialog ( Options, FileName 
 <P ></P >
 : 
 <P ></P >
-file_select_dialog ( tcli , Options , FileName ) . 
+file_select_dialog ( tcli, Options, FileName ) . 
 <P ></P >
 For the general call 
 <P ></P >
-file_select_dialog ( Interp , Options , FileName 
+file_select_dialog ( Interp, Options, FileName 
 <P ></P >
-Interp should be an atom naming a Tcl interpreter , Filename should be an 
-uninstantiated variable , and Options should be a list of options as follows 
+Interp should be an atom naming a Tcl interpreter, Filename should be an 
+uninstantiated variable, and Options should be a list of options as follows 
 <P ></P >
 defaultname = DefaultName <B ><I >- default file name 
 <P ></P >
-</I ></B >ext = Ext <B ><I >to either add , or use for selection 
+</I ></B >ext = Ext <B ><I >to either add, or use for selection 
 <P ></P >
 </I ></B >mode = new/select/save_as <B ><I >( default = select 
 <P ></P >
@@ -52,7 +52,7 @@ filetypes = FileTypesList
 <P ></P >
 where FileTypesList is a list of the form 
 <P ></P >
-[ [Desc1 [ext1]] , [Desc2 , [ext2] , ... ] 
+[ [Desc1 [ext1]], [Desc2, [ext2], ... ] 
 <P ></P >
 and the Desci and exti are all atoms. 
 <P ></P >
@@ -72,13 +72,13 @@ The call
 <P ></P >
 [title = ’Testing File Selection for Open’ 
 <P ></P >
-filetypes = [[zip , [zip]] , 
+filetypes = [[zip, [zip]], 
 <P ></P >
-[‘Prolog’ , [‘pro’]] , 
+[‘Prolog’, [‘pro’]], 
 <P ></P >
-[‘All Files’ , [‘ * ’]] ] 
+[‘All Files’, [‘ * ’]] ] 
 <P ></P >
-] , File ) . 
+], File ) . 
 <P ></P >
 would produce 
 <P ></P >

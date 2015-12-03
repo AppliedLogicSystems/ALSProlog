@@ -16,7 +16,7 @@ copy_term/1 &mdash; make copy of a term
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
-</B >? - copy_term ( f ( X , g ( Y , X ) ) , Z ) . 
+</B >? - copy_term ( f ( X, g ( Y, X ) ), Z ) . 
 <P ></P >
 
 <P ></P >
@@ -24,7 +24,7 @@ X = X
 <P ></P >
 Y = Y 
 <P ></P >
-Z = f ( _A , g ( _B , _A ) ) 
+Z = f ( _A, g ( _B, _A ) ) 
 <P ></P >
 
 <P ></P >
@@ -34,12 +34,12 @@ yes.
 <P ></P >
 </B >copy_term/1 is useful in situations involving destructive assignment. It is useful not 
 only for the obvious situation of making a copy which is then destructively 
-modified , but also for avoiding certain problems regarding structures becoming 
+modified, but also for avoiding certain problems regarding structures becoming 
 uninstantiated upon backtracking when using access predicates created with either make_gv/1 or make_hashtable/1. See make_gv/1 for further discussion. 
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >make_gv/1 , make_hash_table/1 , mangle/3. 
+</B >make_gv/1, make_hash_table/1, mangle/3. 
 <P ></P >
 </BODY >
 </HTML >

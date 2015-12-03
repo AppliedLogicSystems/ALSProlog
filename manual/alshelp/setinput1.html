@@ -17,7 +17,7 @@ set_output ( Stream_or_Alias )
 <B >DESCRIPTION 
 <P ></P >
 </B >For both forms Stream_or_Alias must be either a stream descriptor returned by a call to open/3 or open/4 or an alias created during a successful call to open. For the sake of the 
-following discussion , let us suppose that Stream is Stream_or_Alias if Stream_or_Alias is a stream descriptor. If Stream_or_Alias is an alias , then let Stream be the stream associated with that alias. 
+following discussion, let us suppose that Stream is Stream_or_Alias if Stream_or_Alias is a stream descriptor. If Stream_or_Alias is an alias, then let Stream be the stream associated with that alias. 
 <P ></P >
 set_input/1 will set the stream associated with the current input stream to Stream. The current input stream is the stream that is read when predicates such as get_char/1 or read/1 are called. The current input stream may be retrieved by calling current_input/1. 
 <P ></P >
@@ -33,15 +33,15 @@ returned from open.
 <P ></P >
 
 <P ></P >
-? - open ( test , read , S ) , set_input ( S ) . 
+? - open ( test, read, S ), set_input ( S ) . 
 <P ></P >
 
 <P ></P >
-S = stream_descriptor ( ' ' , open , file , test , [input | nooutput] , true , 
+S = stream_descriptor ( ' ', open, file, test, [input | nooutput], true, 
 <P ></P >
-4 , 0 , 0 , 0 , 0 , true , 0 , wt_opts ( 78 , 40000 , flat ) , [] , true , 
+4, 0, 0, 0, 0, true, 0, wt_opts ( 78, 40000, flat ), [], true, 
 <P ></P >
-text , eof_code , 0 , 0 ) 
+text, eof_code, 0, 0 ) 
 <P ></P >
 
 <P ></P >
@@ -49,7 +49,7 @@ Get two characters from the current input stream.
 <P ></P >
 
 <P ></P >
-? - get_char ( C1 ) , get_char ( C2 ) . 
+? - get_char ( C1 ), get_char ( C2 ) . 
 <P ></P >
 
 <P ></P >
@@ -63,15 +63,15 @@ Close the stream associated with &quot; est&quot;.
 <P ></P >
 
 <P ></P >
-? - current_input ( S ) , close ( S ) . 
+? - current_input ( S ), close ( S ) . 
 <P ></P >
 
 <P ></P >
-S = stream_descriptor ( ' ' , closed , file , test , [input | nooutput] , true , 
+S = stream_descriptor ( ' ', closed, file, test, [input | nooutput], true, 
 <P ></P >
-4 , 0 , 0 , 0 , 0 , true , 0 , wt_opts ( 78 , 40000 , flat ) , [] , true , 
+4, 0, 0, 0, 0, true, 0, wt_opts ( 78, 40000, flat ), [], true, 
 <P ></P >
-text , eof_code , 0 , 0 ) 
+text, eof_code, 0, 0 ) 
 <P ></P >
 <B >ERRORS 
 <P ></P >
@@ -81,19 +81,19 @@ text , eof_code , 0 , 0 )
 <P ></P >
 Stream_or_Alias is not a variable nor a stream descriptor nor an alias 
 <P ></P >
-––––&gt; domain_error ( stream_or_alias , Stream_or_Alias ) . 
+––––&gt; domain_error ( stream_or_alias, Stream_or_Alias ) . 
 <P ></P >
 Stream_or_Alias is not associated with an open stream 
 <P ></P >
-––––&gt; existence_error ( stream , Stream_or_Alias ) . 
+––––&gt; existence_error ( stream, Stream_or_Alias ) . 
 <P ></P >
 Stream_or_Alias is not an input stream ( for set_input/1 
 <P ></P >
-––––&gt; permission_error ( input , stream , Stream_or_Alias ) . 
+––––&gt; permission_error ( input, stream, Stream_or_Alias ) . 
 <P ></P >
 Stream_or_Alias is not an output stream ( for set_output/1 
 <P ></P >
-––––&gt; permission_error ( output , stream , Stream_or_Alias ) . 
+––––&gt; permission_error ( output, stream, Stream_or_Alias ) . 
 <P ></P >
 <B >NOTES 
 <P ></P >
@@ -101,7 +101,7 @@ Stream_or_Alias is not an output stream ( for set_output/1
 <P ></P >
 <B >SEE ALSO 
 <P ></P >
-</B >current_input/1 , open/3 , close/1 , <I >User Guide ( Prolog I/O ) . </I >
+</B >current_input/1, open/3, close/1, <I >User Guide ( Prolog I/O ) . </I >
 <P ></P >
 </BODY >
 </HTML >

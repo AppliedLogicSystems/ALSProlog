@@ -16,21 +16,21 @@ tcl_new ( X )
 <P ></P >
 <B >DESCRIPTION 
 <P ></P >
-</B >tcl_new/1 creates a new Tcl interpreter. If the Interpreter argument is an uninstantiated ( Prolog ) variable , then a unique name is 
-generated for the interpreter. If Interpreter is a atom , the new Tcl interpreter is given that name. 
+</B >tcl_new/1 creates a new Tcl interpreter. If the Interpreter argument is an uninstantiated ( Prolog ) variable, then a unique name is 
+generated for the interpreter. If Interpreter is a atom, the new Tcl interpreter is given that name. 
 <P ></P >
-tk_new/1 functions in the same manner as tcl_new/1 , except that the newly- created Tcl interpreter is initialized with theTk 
+tk_new/1 functions in the same manner as tcl_new/1, except that the newly- created Tcl interpreter is initialized with theTk 
 package. 
 <P ></P >
 <B >EXAMPLES 
 <P ></P >
 </B >? - tcl_new ( i ) . 
 <P ></P >
-Succeeds , creating a Tcl interpreter named i. 
+Succeeds, creating a Tcl interpreter named i. 
 <P ></P >
 ? - tcl_new ( X ) . 
 <P ></P >
-Succeeds , unifying X with the atom ‘interp1’. 
+Succeeds, unifying X with the atom ‘interp1’. 
 <P ></P >
 <B >ERRORS 
 <P ></P >
@@ -40,7 +40,7 @@ Succeeds , unifying X with the atom ‘interp1’.
 <P ></P >
 The atom Interpreter has already been use as the name of a Tcl interpreter. 
 <P ></P >
-––––&gt; permission_error ( create , tcl_interpreter , Interpreter ) 
+––––&gt; permission_error ( create, tcl_interpreter, Interpreter ) 
 <P ></P >
 Tcl is unable to create the interpreter. 
 <P ></P >
