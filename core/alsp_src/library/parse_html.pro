@@ -43,6 +43,12 @@ module pxml.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 export grab_pxml/2.
+export parse_pxml/2.
+export read_pxml_term/3.
+export read_pxml_comment/3.
+
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 grab_pxml(Path, PXML)
     :-
 /*
@@ -78,7 +84,8 @@ r_pxml(S, L)
 	%%     <p> is a binary tag, so it must always
 	%%     be matched by </p>
 	%%------------------------------------------
-export parse_pxml/2.
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 parse_pxml([], []).
 parse_pxml(Tokens, [Term | RestTerms])
 	:-
@@ -94,7 +101,8 @@ read_pxml_term(['<', InTag,'>','<', InTag,'>' | Tokens], Term, RestTokens)
 	!,
 	read_pxml_term(['<', InTag,'>' | Tokens], Term, RestTokens).
 
-export read_pxml_term/3.
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 read_pxml_term(['<', InTag | Tokens], Term, RestTokens)
 	:-
 	make_lc_sym(InTag, Tag),
@@ -175,7 +183,8 @@ consume_tokens_to_q2([Item | Tokens], [Item | Head], InterTokens)
 	:-
 	consume_tokens_to_q2(Tokens, Head, InterTokens).
 
-export read_pxml_comment/3.
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 read_pxml_comment([], [], []).
 read_pxml_comment(['--','>' | Tokens], [], Tokens)
 	:-!.

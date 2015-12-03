@@ -9,6 +9,8 @@
 
 module prologdoc.
 
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 build_files_desc(Data, General, FileDescLines)
 	:-
 	get_files_list(Data, InitFilesList),

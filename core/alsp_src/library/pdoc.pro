@@ -19,76 +19,12 @@
  |	Revised: May 1993; Dec 1995; 2003-4
  *==================================================================*/
 
-:-[pdoc_viewer, pdoc_html_desc, pdoc_indexes, pdoc_stoplist, pdoc_files].  
-
-
-% some tests:
-al :-
-prologdoc(
-    [ modulenames=[builtins,prologdoc,sio],
-      destdir='als-lib-test',
-      overwrite=true,
-      windowtitle='ALS Prolog Library Components',
-      doctitle= 'ALS Prolog Library Components',
-      failonerror=true                        ],
-    [  files( dir='../alspro/alsdir/library', all) ],
-    [  group('String Manipulation', [modules=[builtins], files=['strings.pro']]),
-       group('Tk Library Interface', [modules=[tk_alslib]]) ]
-    ).
-
-ab :-
-prologdoc(
-    [ modulenames=[builtins,sio,xconsult],
-      destdir='als-btest',
-      overwrite=true,
-      windowtitle='ALS Prolog Builtins Components',
-      doctitle= 'ALS Prolog Builtins Components',
-      failonerror=true                        ],
-    [  files( dir='../als_prolog/core/alsp_src/builtins', all), 
-       files( dir='../als_prolog/core/alsp_src/library', all)
-    ],
-    [  group('String Manipulation', [modules=[builtins], files=['strings.pro']]),
-       group('Tk Library Interface', [modules=[tk_alslib]]) ]
-    ).
-
-p :-
-prologdoc(
-    [ modulenames=[ alsdev, alsshell, app_gui_gen, app_utils, avl, builtins,
-		cref, debugger, global_gv_info, macroxp, mpml, pgm_info,
-		pml, prologdoc, pxml, rel_arith, shellmak, sio, sys_maint,
-		tk_alslib, ttyshlmk, user, utilities, windows, xconsult     ],
-      destdir='als-all',
-      overwrite=true,
-      windowtitle='ALS Prolog Builtins & Library Components',
-      doctitle= 'ALS Prolog Builtins & Library Components',
-      failonerror=true                        ],
-    [  files( dir='../als_prolog/core/alsp_src/builtins', all), 
-       files( dir='../als_prolog/core/alsp_src/library', all) ],
-    [  group('String Manipulation', [modules=[builtins], files=['strings.pro']]),
-       group('Tk Library Interface', [modules=[tk_alslib]]) ]
-    ).
-
-t :-
-prologdoc(
-    [ modulenames=[sio,builtins,prologdoc],
-      destdir='test1',
-      overwrite=true,
-      windowtitle='Test1 Components',
-      doctitle= 'Test1 Components',
-      failonerror=true                        ],
-    [  files( dir='../alspro/alsdir/library', all) ],
-/*
- [
-      files( dir='.', ['pd.pro'])
-      ,files( dir='../alspro/alsdir/library', ['sio_misc.pro', 'strings.pro']),
-      files( dir='testfiles2', ['control.pro', 'arithx1.pro'])                
-      ],
-*/
-    [  group('String Manipulation', [modules=[builtins], files=['strings.pro']]),
-       group('Tk Library Interface', [modules=[tk_alslib]]) ]
-    ).
+:-[pdoc_viewer, pdoc_html_desc, pdoc_indexes, pdoc_files, 'pdoc_stoplist.stopl'].  
 
 module prologdoc.
+
+export prologdoc/3.
+export prolog_doc_file/6.
 
 		/*-----------------------------------------
 		 | PROLOG DOCUMENTATION PROCESSING 
@@ -169,7 +105,7 @@ module prologdoc.
  |  </pre>
  |  is the main entry to the API document.
  *-----------------------------------------------------------------------*/
-export prologdoc/3.
+
 prologdoc(General, Files, Groups)
 	:-
 	get_cwd(CurDir),
@@ -385,7 +321,7 @@ check_add_mod_info0([Mod | ModuleNames], SrcDirElts, Data)
 		/*----------------------------------------------------
 		 | PROLOG DOCUMENTATION PROCESSING - INDIVIDUAL FILES
 		 *---------------------------------------------------*/
-export prolog_doc_file/6.
+
 prolog_doc_file(SourcePath, ModuleList, DateTime, TopDir, File, Data)
 	:-
 	open(SourcePath, read, InStream, []),
@@ -1012,3 +948,68 @@ get_doc_module(Doc, Module)
 endmod.
 
 
+% some tests:
+al :-
+prologdoc(
+    [ modulenames=[builtins,prologdoc,sio],
+      destdir='als-lib-test',
+      overwrite=true,
+      windowtitle='ALS Prolog Library Components',
+      doctitle= 'ALS Prolog Library Components',
+      failonerror=true                        ],
+    [  files( dir='../alspro/alsdir/library', all) ],
+    [  group('String Manipulation', [modules=[builtins], files=['strings.pro']]),
+       group('Tk Library Interface', [modules=[tk_alslib]]) ]
+    ).
+
+ab :-
+prologdoc(
+    [ modulenames=[builtins,sio,xconsult],
+      destdir='als-btest',
+      overwrite=true,
+      windowtitle='ALS Prolog Builtins Components',
+      doctitle= 'ALS Prolog Builtins Components',
+      failonerror=true                        ],
+    [  files( dir='../als_prolog/core/alsp_src/builtins', all), 
+       files( dir='../als_prolog/core/alsp_src/library', all)
+    ],
+    [  group('String Manipulation', [modules=[builtins], files=['strings.pro']]),
+       group('Tk Library Interface', [modules=[tk_alslib]]) ]
+    ).
+
+p :-
+prologdoc(
+    [ modulenames=[ alsdev, alsshell, app_gui_gen, app_utils, avl, builtins,
+		cref, debugger, global_gv_info, macroxp, mpml, pgm_info,
+		pml, prologdoc, pxml, rel_arith, shellmak, sio, sys_maint,
+		tk_alslib, ttyshlmk, user, utilities, windows, xconsult     ],
+      destdir='als-all',
+      overwrite=true,
+      windowtitle='ALS Prolog Builtins & Library Components',
+      doctitle= 'ALS Prolog Builtins & Library Components',
+      failonerror=true                        ],
+    [  files( dir='../als_prolog/core/alsp_src/builtins', all), 
+       files( dir='../als_prolog/core/alsp_src/library', all) ],
+    [  group('String Manipulation', [modules=[builtins], files=['strings.pro']]),
+       group('Tk Library Interface', [modules=[tk_alslib]]) ]
+    ).
+
+t :-
+prologdoc(
+    [ modulenames=[sio,builtins,prologdoc],
+      destdir='test1',
+      overwrite=true,
+      windowtitle='Test1 Components',
+      doctitle= 'Test1 Components',
+      failonerror=true                        ],
+    [  files( dir='../alspro/alsdir/library', all) ],
+/*
+ [
+      files( dir='.', ['pd.pro'])
+      ,files( dir='../alspro/alsdir/library', ['sio_misc.pro', 'strings.pro']),
+      files( dir='testfiles2', ['control.pro', 'arithx1.pro'])                
+      ],
+*/
+    [  group('String Manipulation', [modules=[builtins], files=['strings.pro']]),
+       group('Tk Library Interface', [modules=[tk_alslib]]) ]
+    ).

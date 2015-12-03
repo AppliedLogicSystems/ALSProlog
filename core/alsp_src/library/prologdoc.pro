@@ -9,22 +9,26 @@
  |	Date: October, 1991
  |	Author: Ken Bowen
  |	Revised: May 1993; Dec 1995
+ |
+ |    Tests at end.
  *==================================================================*/
 
 :-[pml].
 
-%module prologdoc.
+module prologdoc.
 
-t1 :- prolog_doc_file('testfiles/arithx1.pro', output, outlists).
-t2 :- prologdoc('testfiles', output, outlists).
-
-
-macro_file( 'prologdoc_pxml_macros.pro').
+export prologdoc/3.
+export prolog_doc_file/3.
 
 		/*-----------------------------------------
 		 | PROLOG DOCUMENTATION PROCESSING - DIRs
 		 *----------------------------------------*/
-export prologdoc/3.
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
+macro_file( 'prologdoc_pxml_macros.macs').
+
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 prologdoc(SourcePath, OutDir, ListsDir)
 	:-
 	files(SourcePath, '*.pro', Files),
@@ -41,7 +45,8 @@ pdoc_files([File | Files], SourcePath, OutDir, ListsDir)
 		/*-----------------------------------------
 		 | PROLOG DOCUMENTATION PROCESSING - FILES
 		 *----------------------------------------*/
-export prolog_doc_file/3.
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 prolog_doc_file(SourcePath, OutDir, ListsDir)
 	:-
 	open(SourcePath, read, InStream, []),
@@ -75,7 +80,7 @@ prolog_doc_file(SourcePath, OutDir, ListsDir)
 	  close(PXMLStream) ),
 	
 	!,
-	pml(PXMLPath, ['prologdoc_pxml_macros.pro'] ).
+	pml(PXMLPath, ['prologdoc_pxml_macros.macs'] ).
 	
 	
 
@@ -431,8 +436,11 @@ out_slash([C | PDCs], [C | PIXCs])
 
 
 
+t1 :- prolog_doc_file('testfiles/arithx1.pro', output, outlists).
+t2 :- prologdoc('testfiles', output, outlists).
 
 
-%endmod.
+
+endmod.
 
 

@@ -1,0 +1,4 @@
+libactivate(builtins,[library,cmn_utils],
+      [ basic_app_init/0, cmd_comps/5, adjust_locn_for_runcmd/1,
+      stock_splash/4, repair_path/1, relpath_from_to/3,
+      setup_project_filename/3, write_exports/2 ], []).

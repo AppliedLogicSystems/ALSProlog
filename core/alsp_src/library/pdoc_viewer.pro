@@ -8,6 +8,8 @@
 
 module prologdoc.
 
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 complete_prologdoc(Data, ModsPredsLists, General, Groups, CurDir, OneLiners)
 	:-
 	dmember(keywords=KeyWords, General),

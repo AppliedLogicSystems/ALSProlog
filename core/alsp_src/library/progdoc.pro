@@ -17,6 +17,8 @@ module sys_maint.
 		 *----------------------------------------*/
 export prog_doc/3.
 
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 prog_doc(SourceFile, OutBrfFile, OutTgtFile)
 	:-
 	lib_man_info(SourceFile, OutBrfFile, OutTgtFile, _, _, _, _, _).
