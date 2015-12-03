@@ -14,6 +14,8 @@
 
 module prologdoc.
 
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 create_html_desc(ModPredsLists, Data, General, OneLiners)
 	:-
 	dmember(datetime=DateTime, General),

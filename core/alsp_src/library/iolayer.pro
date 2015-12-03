@@ -1,3 +1,10 @@
+/*====================================================================
+ |			iolayer.pro
+ |	Copyright (c) 1989-96 Applied Logic Systems, Inc.
+ |
+ |		Menu and File Choice for module windows.
+ |
+ *====================================================================*/
 
 
 module windows.

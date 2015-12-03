@@ -12,11 +12,11 @@
  |	Original Author: Mitanu Paul;  
  |  Revisions by KA Bowen
  |		
+ |  Occurs at end: 
+ | 	module user.
+ | 	use macroxp.
+ | 	endmod.
  *=========================================================================*/
-
-module user.
-use macroxp.
-endmod.
 
 module macroxp.
 
@@ -576,3 +576,6 @@ define_macro((Pattern ==> Replacement))
 
 endmod.
 
+module user.
+use macroxp.
+endmod.
