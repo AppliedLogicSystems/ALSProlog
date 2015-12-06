@@ -762,6 +762,7 @@ at_end_of_line
 at_end_of_line(Alias_or_stream)
     :- peek_char(Alias_or_stream,0’\n).
 ````
+````
 flush_output/0
 flush_output/1
 flush_output(Stream_or_alias)
