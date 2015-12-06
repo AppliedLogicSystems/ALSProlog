@@ -1349,7 +1349,7 @@ are represented using identifiers of the forms A, ...., Z, A1,....,A2,....... A 
 default setting for each of these options is indicated in square brackets following
 each write option term. Let T be the term being written out, and let the expression
 Bool take on one of the values true or false.
-''''
+````
 quoted(Bool) [default: Bool = false]
     If Bool = true, forces all symbols in T to be written out in such a manner that 
     read_term/[2,3] may be used to read them back in. Bool = false indicates that 
