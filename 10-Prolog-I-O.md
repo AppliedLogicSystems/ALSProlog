@@ -290,7 +290,7 @@ However, when the stream S is a delayed stream which is in the delayed state of 
 
 succeeds, and binds T to the distinguished term
 
-    unfinished read.
+    unfinished_read.
 
 The tokens which were read out of the stream’s buffer in attempting this read_term
 are saved in the stream data structure. Subsequent calls
@@ -405,7 +405,7 @@ This option is useful when a pair of streams, one in read and one in write mode,
 being used for interactive communication, say to a window, or to the keyboard and
 screen. However, this option strictly applies only to a single stream, and is meaningful only if the stream is in read mode. The option is of the form
 
-####prompt_goal(Goal)
+    prompt_goal(Goal)
 
 where Goal is a Prolog term which indicates a goal which can be run. Whenever
 the buffer of the stream to which this option applies (which must be in read mode)
@@ -427,7 +427,7 @@ get_user_prompt(Prompt), put_atom(Stream,Prompt), flush_output(Stream).
 In this case,
 ````
     user_prompt_goal(OutStream).
-
+````
 The code defining this goal could be:
 ````
 user_prompt_goal(Stream)
