@@ -1491,6 +1491,7 @@ writeq(Stream_or_alias, Term)
     :- write_term(Stream_or_alias, Term, [quoted(true), numbervars(true)]).
 ````
 ####Examples
+````
 writeq(S, [1, 2, ’A’ ]) ==> [1, 2, ’A’ ]
 writeq(S, ’1 < 2’ ) ==> ’1 < 2’
 writeq(S, ’VAR’(0) < ’VAR(1) ) ==>  A<B
