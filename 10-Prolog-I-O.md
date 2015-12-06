@@ -1458,7 +1458,7 @@ Thus, write/2 can be defined by:
 ````
 write(Stream_or_alias, Term)
     :- write_term(Stream_or_alias, Term, [numbervars(true)]).
-
+````
 ####Examples
 ````
 write(S, [1,2,3]) ==> [1,2,3]
