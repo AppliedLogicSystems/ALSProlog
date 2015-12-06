@@ -44,7 +44,8 @@ bank, thereby either viewing an earlier portion of the stream (the water) or adv
 A fundamental principle underlying the notion of stream is this:
 
 ````
-    A program manipulating a stream need have no knowledge of what lies at the other end of the stream.
+    A program manipulating a stream need have no knowledge 
+    of what lies at the other end of the stream.
 ````
 
 Thus, a program which is the source of a stream (is producing a stream) need have
@@ -54,7 +55,7 @@ stream.
 
 Internally, a stream consists of an open source or sink of characters (e.g., a file, a
 socket, a window, etc.), a pointer to the next place to read or write, and a buffer for
-holding information until it’s reasonable to transmit. The internal components illustrated in Figure 13 are the following:
+holding information until it’s reasonable to transmit. The internal components illustrated in the Figure below are the following:
 * the (open) file;
 * the pointer to the next place to read or write is called the file pointer. It is
 set to the beginning of the file when the file is opened. Whenever a read or
@@ -209,6 +210,7 @@ port:
 
 target:
     values = an atom which is an acceptable machine name;
+````
 
 When the socket is a read (incoming) socket, the null atom ’’ can be used.
 Here are several simple examples:
