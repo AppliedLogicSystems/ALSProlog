@@ -1522,6 +1522,7 @@ write_canonical(Stream_or_alias, Term)
     :- write_term(Stream_or_alias, Term, [quoted(true), ignore_ops(true)]).
 ````
 ####Examples
+````
 write_canonical(S, [1, 2, 3 ]) ==> ’.’(1, ’.’(2, ’.’(3, [] )))
 write _canonical(S, 1 < 2 ) ==> < (1, 2 )
 write _canonical(S, ’1 < 2’ ) ==> ’1<2’
