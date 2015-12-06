@@ -1054,6 +1054,7 @@ get_line(Line)
     :- get_current_input_stream(Stream),
        get_line(Stream,Line).
 ````
+````
 get_line/2
 get_line(Stream_or_Alias, Line)
 get_line(+, ?)
