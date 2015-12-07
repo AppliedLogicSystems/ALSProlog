@@ -1063,318 +1063,211 @@ interpreted as commands. The remaining arguments are service dependent and
 should be filled in with zeros when not applicable.
 ````
 init_codebuffer (-1)
-    Resets the internal code buffer pointer to point to the beginning of the code buffer.
+    Resets the internal code buffer pointer to point to the beginning of the 
+    code buffer.
 
 name_clause (-2)
-    Attaches a predicate name and arity to the code currently in the icode buffer. Arg1 
-    is a symbol (or token number) of the predicate. Arity should be set to the desired arity.
+    Attaches a predicate name and arity to the code currently in the icode buffer. 
+    Arg1 is a symbol (or token number) of the predicate. Arity should be set to 
+    the desired arity.
 
 math_start (-3)
-    Indicates the start of an inline math computation.  This command should precede the emission 
-    of a math_begin instruction and causes the current buffer position to be stored for use in 
-    the relative address computation at math_end.
+    Indicates the start of an inline math computation.  This command should 
+    precede the emission of a math_begin instruction and causes the current buffer 
+    position to be stored for use in the relative address computation at math_end.
 
 math_rbranch (-4)
     This should precede an rbranch instruction. It is used for the relative address calculation 
     associated with a math_endbranch command.
 
-math_end (-5)
-
-Fills in the relative address associated with the
-math_begin instruction (which was immediately preceded by a math_start command).
+math_end (-5) 
+    Fills in the relative address associated with the math_begin instruction (which was 
+    immediately preceded by a math_start command).
 
 math_reset (-6)
+    Causes the internal buffer pointer to be reset to the point at which math_start was 
+    called. This is used internally to throw away some inline math code after the compiler 
+    has decided that it can’t compile it (as in ‘X is 2.3’ for example).
 
-Causes the internal buffer pointer to be reset to the
-point at which math_start was called. This is
-used internally to throw away some inline math
-code after the compiler has decided that it can’t
-compile it (as in ‘X is 2.3’ for example).
-
-math_endbranch (-7)
-
-Fills in the relative branch associated with an
-rbranch instruction which was immediately preceded by a math_rbranch command.
+math_endbranch (-7) 
+    Fills in the relative branch associated with an rbranch instruction which was 
+    immediately preceded by a math_rbranch command.
 
 export (-8)
+    Exports the predicate designated by Arg1/Arity in the current module.
 
-Exports the predicate designated by Arg1/Arity in
-the current module.
+new_module (-9) 
+    Creates/opens a (new) module whose name is given by Arg1. If the module does not 
+    already exist, it is created and use declarations to user and builtins are added 
+    to the module. In addition, the current module will become the new module. This
+    means that assert commands will place clauses in this module and predicate references 
+    within clauses will be to this module so it is desirable to call new_module before 
+    asserting a clause. If the module already exists, the current module is simply set 
+    to the module whose name is given by Arg1.
 
-new_module (-9)
-
-Creates/opens a (new) module whose name is given by Arg1. If the module does not already exist,
-it is created and use declarations to user and builtins are added to the module. In addition, the current module will become the new module. This
-means that assert commands will place clauses in
-this module and predicate references within clauses will be to this module so it is desirable to call
-new_module before asserting a clause. If the
-module already exists, the current module is
-simply set to the module whose name is given by
-
-Guide-187-
-
-Arg1.
-end_module (-10)
-
-Closes the current module and sets the current
-module to user.
+end_module (-10) 
+    Closes the current module and sets the current module to user.
 
 change_module (-11)
-
-Changes the current module to the module whose
-name is given by Arg1 without creating the default use declarations.
+    Changes the current module to the module whose name is given by Arg1 without creating 
+    the default use declarations.
 
 add_use (-12)
+    Adds a use declaration to the module given by Arg1 to the current module.
 
-Adds a use declaration to the module given by
-Arg1 to the current module.
-
-asserta (-13)
-
-Allocates code space and inserts the code in the
-icode buffer at the beginning of the predicate. The
-predicate should first have been named by
-name_clause. Any first argument indexing
-that exists for the predicate will be thrown away.
+asserta (-13) 
+    Allocates code space and inserts the code in the icode buffer at the beginning of 
+    the predicate. The predicate should first have been named by name_clause. Any first 
+    argument indexing that exists for the predicate will be thrown away.
 
 assertz (-14)
-
-Allocates code space and appends the code in the
-code buffer to the end of the predicate. The predicate should first have been named with
-name_clause. Any first argument indexing
-that exists for the predicate will be thrown away.
+    Allocates code space and appends the code in the code buffer to the end of the 
+    predicate. The predicate should first have been named with name_clause. Any first 
+    argument indexing that exists for the predicate will be thrown away.
 
 exec_query (-15)
-
-Causes the code in the icode buffer to be executed
-as a query (Meaning, Answers will be displayed
-and yes or no will be printed.)
+    Causes the code in the icode buffer to be executed as a query (Meaning, Answers 
+    will be displayed and yes or no will be printed.)
 
 exec_command (-16)
-
-Causes the code in the icode buffer to be executed
-as a command. Nothing will be printed regardless
-of success of failure.
+    Causes the code in the icode buffer to be executed as a command. Nothing will be 
+    printed regardless of success of failure.
 
 set_cutneeded (-17)
+    Sets/resets the internal cut_needed flag. If the clause has any cuts, comma, 
+    semicolons or calls, but is not classified as a cut macro, this flag should
+    be set. It will be set when 
+            Arg1 != -1 && !Arg2
+    While this is rather arcane, there are good reasons for it internally. For 
+    consistent results, the cutneeded flag should be set for each clause sometime 
+    before asserting it. If the cut_needed flag is set for either assertz or asserta, 
+    an instruction to move the current choice point to the cut point will be inserted 
+    prior to creation of the first choice point.
 
-Sets/resets the internal cut_needed flag. If the
-clause has any cuts, comma, semicolons or calls,
-but is not classified as a cut macro, this flag should
-be set. It will be set when
-
-Guide-188-
-
-Arg1 != -1 && !Arg2
-While this is rather arcane, there are good reasons
-for it internally. For consistent results, the cutneeded flag should be set for each clause sometime before asserting it. If the cut_needed flag
-is set for either assertz or asserta, an instruction to
-move the current choice point to the cut point will
-be inserted prior to creation of the first choice
-point.
-reset_obp (-18)
-
-Erases the the icode parameters in the .obp file
-back to the most recent init_codebuffer.
+reset_obp (-18) 
+    Erases the the icode parameters in the .obp file back to the most recent 
+    init_codebuffer.
 
 index_all (-19)
-
-Causes indexing to be generated for all predicates.
-This is normally done after a consult or reconsult
-operation. Assert and retract operations, however,
-cause the indexing to be discarded, so this service
-may be called to redo indexing after the database
-has been changed via assert or retract.
+    Causes indexing to be generated for all predicates.  This is normally done after 
+    a consult or reconsult operation. Assert and retract operations, however, cause 
+    the indexing to be discarded, so this service may be called to redo indexing after 
+    the database has been changed via assert or retract.
 
 index_single (-20)
-
-not implemented
+    not implemented
 
 addto_autouse (-21)
-
-Causes a module name to be added to the list of
-modules to be automatically used. By default,
-only the builtins module is automatically used by
-all other modules. Argument one should be the
-name of the module to add to the autouse list.
+    Causes a module name to be added to the list of modules to be automatically used. 
+    By default, only the builtins module is automatically used by all other modules. 
+    Argument one should be the name of the module to add to the autouse list.
 
 addto_autoname (-22)
+    Causes a procedure name/arity to be added to the autoname list. This is a list of 
+    procedures for which “stubs” are created when a module is initialized. By default, 
+    call/1, ’,’/2, ’;’/2, are on this list. These stubs must exist for context-
+    dependent procedures such as call or setof to work properly. Arg1 should be set to 
+    the procedure name and Arity should be set to the arity.
 
-Causes a procedure name/arity to be added to the
-autoname list. This is a list of procedures for
-which “stubs” are created when a module is initialized. By default, call/1, ’,’/2, ’;’/2,
-are on this list. These stubs must exist for context
-dependent procedures such as call or setof to
-work properly. Arg1 should be set to the proce-
+cremodclosure (-23) 
+    Creates a module closure . Procedures such as asserta/1 and bagof/3 are defined in
+    builtins and yet need to know which module invoked them. The solution is to create 
+    a $n+1$ argument version of these procedures in the builtins.pro file (or elsewhere) 
+    and create a module closure. This module closure will link together the three 
+    argument version with the four argument version, installing the calling module in 
+    the fourth argument. Arg1 should be the name of the $n$ argument procedure. Arity 
+    should be $n$. Arg2 should be the name of the $n+1$ argument procedure to execute 
+    after installing the module name in the $(n+1)$th argument.
 
-Guide-189-
+hideuserproc (-24) 
+    Used to hide user defined procedures. The first service argument (i.e., the second 
+    argument of $icode/4) is the name of the procedure to hide, the second is the arity 
+    of the procedure, the last is the name of the module in which the procedure is 
+    defined. The following query will hide user:p/0.
+           ?- $icode(-24, p, 0, user).
 
-dure name and Arity should be set to the arity.
-cremodclosure (-23)
+relinkdatabase (-25) 
+    Relinks the entire database. Relinking of the program is done automatically by Version 
+    1.1 after each consult or reconsult. However, it may still be desirable to relink the 
+    program before certain calls to assert or abolish.
+````
 
-Creates a module closure . Procedures such as
-asserta/1 and bagof/3 are defined in
-builtins and yet need to know which module
-invoked them. The solution is to create a $n+1$
-argument version of these procedures in the builtins.pro file (or elsewhere) and create a module
-closure. This module closure will link together the
-three argument version with the four argument
-version, installing the calling module in the fourth
-argument. Arg1 should be the name of the $n$ argument procedure. Arity should be $n$. Arg2
-should be the name of the $n+1$ argument procedure to execute after installing the module name
-in the $(n+1)$th argument.
+####Icode calls and .obp files
 
-hideuserproc (-24)
-
-Used to hide user defined procedures. The first
-service argument (i.e., the second argument of
-$icode/4) is the name of the procedure to hide,
-the second is the arity of the procedure, the last is
-the name of the module in which the procedure is
-defined. The following query will hide user:p/
-0.
-?- $icode(-24, p, 0, user).
-
-relinkdatabase (-25)
-
-Relinks the entire database. Relinking of the program is done automatically by Version 1.1 after
-each consult or reconsult. However, it may still be
-desirable to relink the program before certain calls
-to assert or abolish.
-
-Icode calls and .obp files
-A .obp file simply consists of parameters to icode calls (along with symbol
-
-Guide-190-
-
-table information). During the execution of a command, it is not always desirable to keep the command in the .obp file. A simple example of this is in
+A .obp file simply consists of parameters to icode calls (along with symbol table information). During the execution of a command, it is not always desirable to keep the command in the .obp file. A simple example of this is in
 the DCG expander where expand/2 is called from the parser as a command.
 expand/2 will transform the DCG rule and assert it into the database. This assert operation will cause the code to be asserted in the database in addition to
 being added to the .obp file. If the expand command were retained, the assert
 operation would be done twice. Note also that when the .obp version of the
 file is loaded, the expand predicate will not be called. Only the assert operations that the expand predicate created will be performed.
-Icode Instructions
+
+####Icode Instructions
+
 The non-negative icode service numbers cause WAM instructions to be installed in the icode buffer. In the current version, argument/temporary (Ai, Xn)
 registers may range from 1 thru 16. Permanent variable numbers (Yn and MaxYn and EnvSize) may range from 1 thru 62. Only arities 0 thru 15 are permitted. Specifying procedure names, functors, and symbols (ProcName, Functor,
 Sym) is accomplished by passing in the symbol or token number if known. Integers are signed 16-bit quantities. Because of the restriction on the size of
 structures, NVoids should be at most 15
-% p.
-assert_p :$icode(-1,0,0,0),
-buffer
-$icode(1,0,0,0),
-$icode(-17,-1,0,0),
-$icode(-2,p,0,0),
-p/0.
-$icode(-14,0,0,0).
-% p(x).
-assert_px :$icode(-1,0,0,0),
-buffer
-$icode(25,x,0,1),
+````
+% assert the clause p.
+assert_p :-
+   $icode(-1,0,0,0),         % initialize icode buffer
+   $icode(1,0,0,0),          % proceed
+   $icode(-17,-1,0,0),       % no need for cut_btoc instruction
+   $icode(-2,p,0,0),         % want to assert into p/0.
+   $icode(-14,0,0,0).        % assertz
 
-% initialize icode
-% proceed
-% no need for cut_btoc
-% instruction
-% want to assert into
-% assert the clause
+% assert the clause p(x).
+assert_px :-
+   $icode(-1,0,0,0),         % initialize icode buffer
+   $icode(25,x,0,1),         % get_symbol
+   $icode(1,0,0,0),          % proceed
+   $icode(-17,-1,0,0),       % no need for cut_btoc instruction
+   $icode(-2,p,1,0),         % want to assert into p/1.
+   $icode(-14,0,0,0).        % assertz
 
-% initialize icode
-% get_symbol
+% assert the clause p(f(x),9).
+assert_pfx9 :-
+   $icode(-1,0,0,0),         % initialize icode buffer
+   $icode(28,f,1,1),         % get_structure f/1,A1
+   $icode(44,x,0,0),         % unify_symbol x
+   $icode(26,9,0,2),         % get_integer 9,A2
+   $icode(1,0,0,0),          % proceed
+   $icode(-2,p,2,0),         % want to assert into p/2
+   $icode(-17,-1,0,0),       % no need for cut_btoc instruction
+   $icode(-14,0,0,0).        % assertz
 
-Guide-191-
+% assertz the clause succ(X,Y) :- Y is X+1.
+assert_succ :-
+   $icode(-1,0,0,0),         % initialize icode buffer
+   $icode(-3,0,0,0),         % save buffer position for AFP
+   $icode(54,0,0,0),         % math_begin
+   $icode(50,1,0,0),         % push_integerA1
+   $icode(52,1,0,0),         % push_integer1
+   $icode(56,0,0,0),         % add
+   $icode(53,1,0,0),         % pop_integerA1
+   $icode(23,1,0,2),         % get_valueX1, A2
+   $icode(1,0,0,0),          % proceed
+   $icode(-5,0,0,0),         % fill in relative address for math_begin
+   $icode(32,1,0,3),         % put_valueA1,A3
+   $icode(32,2,0,1),         % put_valueA2,A1
+   $icode(37,’+’,2,2),       % put_structure’+’/2,A2
+   $icode(47,3,0,0),         % unify_local_value A3
+   $icode(45,1,0,0),         % unify_integer1
+   $icode(3,is,2,0),         % execute is/2
+   $icode(-2,succ,2,0),      % succ/2 is the procedure name
+   $icode(-17,-1,0,0),       % reset the cut_needed flag
+   $icode(-14,0,0,0).        % assert it
 
-$icode(1,0,0,0),
-$icode(-17,-1,0,0),
-$icode(-2,p,1,0),
-p/1.
-$icode(-14,0,0,0).
-% p(f(x),9).
-assert_pfx9 :$icode(-1,0,0,0),
-buffer
-$icode(28,f,1,1),
-$icode(44,x,0,0),
-$icode(26,9,0,2),
-$icode(1,0,0,0),
-$icode(-2,p,2,0),
-$icode(-17,-1,0,0),
-$icode(-14,0,0,0).
-% succ(X,Y) :- Y is X+1.
-assert_succ :$icode(-1,0,0,0),
-buffer
-$icode(-3,0,0,0),
-for AFP
-$icode(54,0,0,0),
-$icode(50,1,0,0),
-$icode(52,1,0,0),
-$icode(56,0,0,0),
-$icode(53,1,0,0),
-$icode(23,1,0,2),
-$icode(1,0,0,0),
-$icode(-5,0,0,0),
-address for
-$icode(32,1,0,3),
 
-% proceed
-% no need for cut_btoc
-% instruction
-% want to assert into
-% assert the clause
 
-% initialize icode
-% get_structure f/1,A1
-% unify_symbol x
-% get_integer
-9,A2
-% proceed
-% want to assert into p/2
-% no need for a cut_btoc
-% instruction
-% assertz the clause
 
-% initialize icode
-% save buffer position
-%
-%
-%
-%
-%
-%
-%
-%
 
-math_begin
-push_integerA1
-push_integer1
-add
-pop_integerA1
-get_valueX1, A2
-proceed
-fill in relative
 
-% math_begin
-% put_valueA1,A3
 
-Guide-192-
 
-$icode(32,2,0,1),
-$icode(37,’+’,2,2),
-$icode(47,3,0,0),
-$icode(45,1,0,0),
-$icode(3,is,2,0),
-$icode(-2,succ,2,0),
-procedure name
-$icode(-17,-1,0,0),
-flag
-$icode(-14,0,0,0).
 
-% put_valueA2,A1
-% put_structure’+’/2,A2
-% unify_local_value A3
-% unify_integer1
-% execute is/2
-% succ/2 is the
-% reset the cut_needed
-% assert it
 
-Guide-193-
+
+
+
 
