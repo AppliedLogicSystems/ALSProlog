@@ -876,256 +876,207 @@ described in this Section.
 The predicates discussed in this section are defined in
 the builtins file fs_cmn.pro together with the various system-specific files
 fsunix.pro, fswin32.pro, fsmac.pro. The primary predicates are the following:
-Manipulating directories and files:
-get_cwd/1
-change_cwd/1
-make_subdir/1
-remove_subdir/1
-remove_file/1
-exists_file/1
-file_status/2
 
-- returns the current working directory
-- change the current working directory
-- creates a subdirectory in the current working directory
-- removes a subdirectory from the current working directory
-- removes a file from the current working directory
-- determines whether or not a file exists
-- returns status information concerning a file
+####Manipulating directories and files:
+````
+get_cwd/1       - returns the current working directory
+change_cwd/1    - change the current working directory
+make_subdir/1   - creates a subdirectory in the current working directory
+remove_subdir/1 - removes a subdirectory from the current working directory
+remove_file/1   - removes a file from the current working directory
+exists_file/1   - determines whether or not a file exists
+file_status/2   - returns status information concerning a file
+````
+####Lists of files in subdirectories:
+````
+files/2       - returns a list of files, matching a pattern, in the current directory
+files/3       - returns a list of files, matching a pattern, residing in a directory
+subdirs/1     - returns the list of subdirectories of the current directory
+subdirs_red/1 - returns the list of subdirectories of the current directory, sans ’.’ and ’..’
+directory/3   - returns a list of files of a given type and matching a pattern
+````
+####Manipulating Drives:
+````
+get_current_drive/1    - returns the current drive
+change_current_drive/1 - changes the current drive
+````
 
-Lists of files in subdirectories:
-files/2
-files/3
-subdirs/1
-subdirs_red/1
-
-- returns a list of files, matching a pattern, in the current directory
-- returns a list of files, matching a pattern, residing in a directory
-- returns the list of subdirectories of the current directory
-- returns the list of subdirectories of the current directory, sans ’.’
-and ’..’
-
-
-Guide-181-
-
-directory/3
-
-- returns a list of files of a given type and matching a pattern
-
-Manipulating Drives:
-get_current_drive/1 - returns the current drive
-change_current_drive/1- changes the current drive
-
+````
 change_cwd/1
 change_cwd(NewDir)
 change_cwd(+)
+````
 Changes the current working directory being used by the program to become NewDir (which must be an atom). Under DOS, this does not change the drive.
+````
 get_cwd/1
 get_cwd(Path)
 get_cwd(-)
+````
 Returns the current working directory being used by the program as a quoted atom.
 Under DOS, the drive is included.
+````
 make_subdir/1
 make_subdir(NewDir)
 make_subdir(+)
+````
 If NewDir is an atom, creates a subdirectory named NewDir in the current working
 directory, if possible.
+````
 remove_subdir/1
 remove_subdir(SubDir)
 remove_subdir(+)
+````
 If SubDir is an atom, remove the subdirectory named SubDir from the current
 working directory, if it exists.
+````
 remove_file/1
 remove_file(FileName)
 remove_file(+)
-If FileName is an atom (possibly quoted) naming a file in the current working di-
-
-Guide-182-
-
-rectory, removes that file.
+````
+If FileName is an atom (possibly quoted) naming a file in the current working directory, removes that file.
+````
 files/2
 files(Pattern,FileList)
 files(+,-)
+````
 Returns the list (FileList) of all ordinary files in the current directory which
 match Pattern, which can include the usual ’*’ and ’?’ wildcard characters.
+````
 files/3
 files(Directory, Pattern,FileList)
 files(+,+,-)
+````
 Returns the list (FileList) of all ordinary files in the directory Directory which
 match Pattern, which can include the usual ’*’ and ’?’ wildcard characters.
+````
 subdirs/1
 subdirs(SubdirList)
 subdirs(-)
+````
 Returns the list of all subdirectories of the current working directory.
+````
 subdirs_red/1
 subdirs_red(SubdirList)
 subdirs_red(-)
+````
 Returns the list of all subdirectories of the current working directory, omitting ’.’
 and ’..’
+````
 exists_file/1.
 exists_file(File)
 exists_file(+)
+````
 Determines whether a file exists in the current directory. Applies to subdirectories
 as well as regular files.
-File Types and Status
+
+####File Types and Status
+
 Every OS classifies files into different types and provides them with various statuses. ALS Prolog provides abstract types for directories and regular files, together
-
-Guide-183-
-
 with the ability to utilize OS-specific types, as described in the following table. On
 OSs for which a given type does not exist, requests for files of such types simply
 fail, and of course, they are never returned.
-Table 6:
-Abstract Type
 
-Unix Type
 
-directory
+Abstract Type       | Unix Type | Wins Typ | Mac Type
+:-------------------|:----------|:---------|:---------:|
+directory           | 1         | 16       | 65        |
+character_special   | 2         |          | 65        |
+block_special       | 3         |          | 99        |
+regular             | 4         | 32       | 99        |
+symbolic_link/alias | 5         |          | 99        |
+socket              | 6         |          | 99        |
+fifo_pipe           | 7         |          | 99        |
+unknown             | 0         | 0        | 99        |
+read_only           |           | 2        | 99        |
+hidden              |           | 2        | 99        |
+system              |           | 2        | 99        |
+TEXT                |           |          | 99        |
 
-1
 
-character_special
-
-2
-
-block_special
-
-3
-
-regular
-
-4
-
-symbolic_link / alias
-
-5
-
-socket
-
-6
-
-fifo_pipe
-
-7
-
-unknown
-
-0
-
-Wins Type
-16
-
-1
-
-32
-
-4
-5
-
-0
-
-read_only
-
-2
-
-hidden
-
-4
-
-system
-
-8
-
-TEXT
-
-Mac Type
-
-0
-
-30
-
-Where applicable, permissions for files can be queried and manipulated. Permissions are lists of atoms representing the permission details. The following table presents the possible permissions (order is unimportant). On some systems, some subattributes such as ’execute’ are meaningless.
-
+Where applicable, permissions for files can be queried and manipulated. Permissions are lists of atoms representing the permission details. The listing below presents the possible permission combinations (order is unimportant). On some systems, some subattributes such as ’execute’ are meaningless.
+````
 []
 [execute]
-
-Guide-184-
-
 [write]
 [write,execute]
 [read]
 [read,execute]
 [read,write]
 [read,write,execute]
+````
+````
 file_status/2
 file_status(FileName, Status)
 file_status(+, -)
+````
 If FileName is an atom naming a file in the current directory, returns a list Status
 of equations of the form
-Tag = Value
+
+    Tag = Value
+
 which provide information on the status of the file. The four equations included on
 the list are:
+````
 type=FileType
 permissions=Permissions
 mod_time=ModTime
 size=ByteSize
+````
 where FileType and Permissions are as described above. On systems where
 meaningful, ModTime is the time of last modification, or else the creation time,
 while ByteSize is the size of the file in bytes.
+````
 directory/3
 directory(Pattern,FileType,List)
 directory(+,+,-)
+````
 If Pattern is a file name pattern, including possibly the ’*’ and '?' wildcard characters, and if FileType is a numeric (internal) file type or a symbolic (abstract) file
 type, directory/3 unifies List with a sorted list of atoms of names of files of type
 FileType, matching Pattern, and found in the current directory.
-
-Guide-185-
-
+````
 get_current_drive/1
 get_current_drive(Drive)
 get_current_drive(-)
+````
 Returns the current logical drive. On Unix, returns the erzataz drive ’’.
+````
 change_current_drive/1
 change_current_drive(Drive)
 change_current_drive(+)
+````
 If Drive is an atom describing a logical drive which exists, changes the current
 drive to become Drive. On Unix, simply succeeds with no side effects.
 
 ##11.13 I-Code Calls
+
+````
 $icode/4
 $icode(ServiceNumber,Arg1,Arity,Arg2)
+````
 The builtin $icode is used to call the internal code generation function. The form
 of the call is
-$icode(ServiceNumber,Arg1,Arity,Arg2)
+
+    $icode(ServiceNumber,Arg1,Arity,Arg2)
+
 When ServiceNumber is non-negative, it represents an abstract machine instruction to put in the instruction buffer. Negative ServiceNumber values are
 interpreted as commands. The remaining arguments are service dependent and
 should be filled in with zeros when not applicable.
+````
 init_codebuffer (-1)
-
-Resets the internal code buffer pointer to point to
-the beginning of the code buffer.
+    Resets the internal code buffer pointer to point to the beginning of the code buffer.
 
 name_clause (-2)
-
-Attaches a predicate name and arity to the code
-currently in the icode buffer. Arg1 is a symbol (or
-token number) of the predicate. Arity should be
-set to the desired arity.
+    Attaches a predicate name and arity to the code currently in the icode buffer. Arg1 
+    is a symbol (or token number) of the predicate. Arity should be set to the desired arity.
 
 math_start (-3)
+    Indicates the start of an inline math computation.  This command should precede the emission 
+    of a math_begin instruction and causes the current buffer position to be stored for use in 
+    the relative address computation at math_end.
 
-Indicates the start of an inline math computation.
-This command should precede the emission of a
-
-Guide-186-
-
-math_begin instruction and causes the current
-buffer position to be stored for use in the relative
-address computation at math_end.
 math_rbranch (-4)
-
-This should precede an rbranch instruction. It is
-used for the relative address calculation associated with a math_endbranch command.
+    This should precede an rbranch instruction. It is used for the relative address calculation 
+    associated with a math_endbranch command.
 
 math_end (-5)
 
