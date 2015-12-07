@@ -1130,8 +1130,8 @@ assertz (-14)
     Any first argument indexing that exists for the predicate will be thrown away.
 
 exec_query (-15)
-    Causes the code in the icode buffer to be executed as a query (Meaning, Answers 
-    will be displayed and yes or no will be printed.)
+    Causes the code in the icode buffer to be executed as a query (Meaning, 
+    Answers will be displayed and yes or no will be printed.)
 
 exec_command (-16)
     Causes the code in the icode buffer to be executed as a command. Nothing will 
@@ -1154,9 +1154,9 @@ reset_obp (-18)
 
 index_all (-19)
     Causes indexing to be generated for all predicates.  This is normally done 
-    after a consult or reconsult operation. Assert and retract operations, however, 
-    cause the indexing to be discarded, so this service may be called to redo 
-    indexing after the database has been changed via assert or retract.
+    after a consult or reconsult operation. Assert and retract operations, 
+    however, cause the indexing to be discarded, so this service may be called 
+    to redo indexing after the database has been changed via assert or retract.
 
 index_single (-20)
     not implemented
@@ -1194,9 +1194,9 @@ hideuserproc (-24)
            ?- $icode(-24, p, 0, user).
 
 relinkdatabase (-25) 
-    Relinks the entire database. Relinking of the program is done automatically by 
-    Version 1.1 after each consult or reconsult. However, it may still be desirable 
-    to relink the program before certain calls to assert or abolish.
+    Relinks the entire database. Relinking of the program is done automatically 
+    by Version 1.1 after each consult or reconsult. However, it may still be 
+    desirable to relink the program before certain calls to assert or abolish.
 ````
 
 ####Icode calls and .obp files
