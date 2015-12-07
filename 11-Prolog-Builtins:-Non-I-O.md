@@ -349,223 +349,287 @@ $firstargkey/2
 gv_alloc/1, make_gv/1 and relatives provide methods for manipulating global variables. See Chapter 8 (Global Variables, Destructive Update & Hash Tables) for a discussion.
 
 ##11.7 Control
+````
 cut(!)
 comma(,)
 arrow (->)
 semicolon (;)
+````
+````
 abort/0
 abort
+````
 The current computation is discarded and control returns to the Prolog shell
+````
 breakhandler/0
 breakhandler
+````
+````
 call/1
 call(Goal)
 call(+)
+````
 If Goal is instantiated to a structured term or atom which would be acceptable as
 the body of a clause, the goal call(Goal) is executed exactly as if that term
 appeared textually in place of the expression call(Goal).
+````
 :/2
 Module:Goal
 +:+
+````
 Like call/1, but invokes Goal in the defining module Module. See Chapter 3 (Modules) .
+````
 catch/2
 catch(Goal,Pattern,ExceptionGoal)
 catch(+,+,+)
+````
 
-Guide-168-
-
+````
 throw/0
 throw(Reason)
 throw(+)
+````
 These predicates provide a controlled abort mechanism, as well as access to the exception mechanism. They are introduced in Chapter 9.2 (Exceptions.)
+````
 fail/0
 true/0
+````
+````
 not/1
 not(Goal)
 not(+)
+
 \+/1
 \+(Goal)
 \+(+)
+````
 not/1 and \+/1 are synonymous and implement negation by failure. If the
 Goal fails, then not(Goal) succeeds. If Goal succeeds, then not(Goal)
 fails.
+````
 repeat/0
 repeat
+````
 repeat/0 always succeeds, even during backtracking.
+````
 $findterm/5
 ’$findterm’(Functor,Arity,HeapPos,Term,NewHeapPos)
 ’$findterm’(+, +, +, ?, -)
+````
 A low-level predicate for searching the heap.
+````
 forcePrologInterrupt/0
 callWithDelayedInterrupt/[1,2]
 setPrologInterrupt/1
 getPrologInterrupt/1
-The predicates provide access to the ALS Prolog interrupt mechanism. See Chap-
-
-Guide-169-
-
-ter 9.3 (Interrupts.) .
+````
+The predicates provide access to the ALS Prolog interrupt mechanism. See Chapter 9.3 (Interrupts).
 
 ##11.8 Arithmetic
 See is/2 in the Reference Manual.
 
 ##11.9 Program and System Management
+````
 als_system/1
 als_system(InfoList)
 als_system(-)
+
 sys_env/2
 sys_env(OS, Processor)
 sys_env(+, +)
+````
 Predicates for obtain system environmental information.
+````
 command_line/1
 command_line(Switches)
 command_line(+)
+````
 Provides access to the command line by which an ALS Prolog process was invoked
 (including packaged applications).
+````
 compile_time/0
 compile_time
+````
 Controls compile-time vs load-time execution of :- goals in files.
+````
 consult/1
 consult(File)
 consult(+)
+
 reconsult/1
 reconsult(File)
 reconsult(+)
+
 consultq/1
-
-Guide-170-
-
 consultq(File)
 consultq(+)
+
 consult_to/1
 consult_to(File)
 consult_to(+)
+
 consultq_to/1
 consultq_to(File)
 consultq_to(+)
+
 consuld/1
 consultd(File)
 consultd(+)
+
 reconsultd/1
 reconsultd(File)
 reconsultd+)
+````
 Various ways of dynamically loading a File of Prolog clauses into a running ALS
 Prolog program. All versions are defined in the builtins file blt_io.pro.
+````
 consultmessage/1
 consultmessage(OnOff)
 consultmessage(+)
+````
 consultmessage(on/off) controls whether or not messages are printed
 when files are consulted.
+````
 curmod/1
 curmod(Module)
 curmod( - )
+
 modules/2
 modules(Module,Uselist)
 modules(+, - )
+````
 Provides access to information concerning modules.
-
-Guide-171-
-
+````
 gc/0
 gc
+````
 Manually invokes garbage collection/compaction.
+````
 halt/0
 halt
+````
+````
 hide/1
 index_proc/3
+````
+````
 listing/[0,1]
 listing
 listing(Form)
 listing(+)
+````
 Provides source-codes listings of clauses in the current Prolog database.
+````
 statistics/[0,2]
 statistics
 statistics(runtime,X)
 statistics(runtime,+)
+````
 Obtain system statistics at runtime.
+````
 system/1
 system(Command)
 system(+)
+````
 Issue a command to the OS command processor, when supported.
+````
 module_closure/[2,3]
 :- module_closure(Name,Arity,Procedure).
 :- module_closure(Name,Arity).
+````
+````
 procedures/4
 all_procedures/4
 all_ntbl_entries/4
+````
 Retrieve information concerning all Prolog- or C-defined procedures.
-
-Guide-172-
-
+````
 ’$procinfo’/5
 ’$nextproc’/3
 ’$exported_proc’/3
 ’$resolve_module’/4
+````
 Retrieve detailed information about a given procedure.
 
 ##11.10 Date and Time
+
 These predicates provide access to the date and time functions of the underlying operating system. They are designed to be portable across operating systems. As
 such, they utilize Prolog-oriented, os-independent formats for date and time. Dates
 are internally represented by terms of the form
-YY/MM/DD
+
+    YY/MM/DD
+
 where YY, MM, DD are integers representing, respectively, the year, the month
-(counted from 1 to 12) and the day (couunted from 1 to 31, as appropriate to the
-month).
+(counted from 1 to 12) and the day (couunted from 1 to 31, as appropriate to the month).
 The format of dates can be controlled by the predicate
 set_date_pattern/1. Any permuation of YY, MM, and DD is permitted. The predicates are defined in the builtins file fs_cmn.pro together with the various systemspecific files fs_unix.pro, fs_dos.pro, fs_mac.pro.
+````
 date/1.
 date(Date)
 date(-)
+````
 date/1 returns the current date in the format set by set_date_pattern/1.
+````
 date_pattern/4.
 date_pattern(YY,MM,DD,DatePattern).
 date_pattern(+,+,+,-).
+````
 This predicate consists of a single fact which provides the mapping between the
 three integers representing the date and the pattern expressing the date; this fact is
 goverrned by set_date_pattern/1.
+````
 set_date_pattern/1.
-
-Guide-173-
-
 set_date_pattern(Pattern).
 set_date_pattern(+).
+````
 The acceptable arguments to set_date_pattern/1 are ground terms built up out
 of the atoms yy, mm, and dd, separated by the slash ’/’, such as
-mm/dd/yy or dd/mm/yy.
+
+    mm/dd/yy or dd/mm/yy.
+
 The action of set_date_pattern/1 is to remove the existing date_pattern/4
 fact, and to install a new fact which implements the date pattern corresponding to
 the input argument.
+````
 date_less/2
 date_less(Date0, Date1)
 date_less(+, +)
+````
 If Date0 and Date1 are date terms of the form YY/MM/DD, this predicate succeeds if
 and only Date0 represents a date earlier than Date1.
+````
 time/1.
 time(Time)
 time(-)
+````
 This predicate returns a term Time representing the current time; Time is of the
 form
-HH:MM:SS
+
+    HH:MM:SS
+
 where HH, MM, SS are integers in the appropriate ranges.
+````
 time_less/2.
 time_less(Time0, Time1)
 time_less(+, +)
+````
 If Time0 and Time1 are terms of the form HH:MM:SS representing times, this predicate succeeds if and only if Time0 is a time earlier than Time1.
+````
 datetime/2.
 datetime(Date, Time)
 datetime(-, -)
-This predicate combines date/1 and time/1, computing both from the same operat-
-
-Guide-174-
-
-ing system access call.
+````
+This predicate combines date/1 and time/1, computing both from the same operating system access call.
+````
 gm_datetime/2.
 gm_datetime(Date, Time)
 gm_datetime(-, -)
+````
 This predicate is similar to datetime/2, returning the Greenwich UTC date and time
 from the same call to the operating system clock.
 
 ##11.11 File Names
+
 File names and paths are one of the unpleasant ways in which operating systems differ. The file name and path predicates described in this section provide a substntial
 degree of portability across operating systems. They do not claim to handle or support all possible names or path descriptions in each supported operating system.
 But they do deal with most normal file and path names encountered in practice.
@@ -576,17 +640,17 @@ file name. These predicates are defined in the builtins file filepath.pro. When 
 predicates determine the running OS, and call the parameterized lower-level predicates. Thus, some calls involving OS-specific path names will succeed under one
 OS and fail under another. For Windows path names, it is important to remember
 that ‘\’ is the ISO Prolog standard escape character in (quoted) atoms, and hence occurrences of ‘\’ as a directory separator must generally be doubled, as in:
-‘C:\\star\\flow\\foo.pro’
+
+    ‘C:\\star\\flow\\foo.pro’
+
 The primary predicates described in this Section are the following:
+````
 file_extension/3.
 path_elements/2.
 path_directory_tail/3.
 is_absolute_path/1.
 path_type/2.
 path_type/3.
-
-Guide-175-
-
 split_path/2.
 split_path/3.
 join_path/2.
@@ -594,177 +658,213 @@ join_path/3.
 tilda_expand/2.
 directory_self/2.
 directory_self/3.
+````
+````
 file_extension/3.
 file_extension(Name, File, Ext)
 file_extension(?, ?, ?)
+````
 This predicate is used for splitting or composing file (and path) names around the
 dot which separates the extension. Examples:
+````
 file_extension(‘foo.bar’, F, X) => F = foo, X = bar.
-file_extension(‘/star/flow/foo.bar, F, X)
-=> F = ‘/star/flow/foo’, X = bar.
+file_extension(‘/star/flow/foo.bar, F, X) => F = ‘/star/flow/foo’, X = bar.
 file_extension(silly, F, X) => F = silly, X = ‘’.
 file_extension(N, foo, bar) => N = ‘foo.bar’.
+````
+````
 path_directory_tail/3.
 path_directory_tail(Path, Directory, Tail)
 path_directory_tail(?, ?, ?)
+````
 This predicate maps between file system paths and the pair consisting of the entire
 path up to the last (right-most) directory separator, and the tail following that final
 separator. This is defined by:
-path_directory_tail(Path, Directory, Tail) :var(Path),
-!,
-join_path([Directory, Tail], Path).
-path_directory_tail(Path, Directory, Tail) :split_path(Path, Elements),
-dreverse(Elements, [Tail | RevDirElements]),
-dreverse(RevDirElements, DirElements),
-(DirElements = [] -> directory_self(Directory) ;
-join_path(DirElements, Directory)).
+````
+path_directory_tail(Path, Directory, Tail)
+    :- var(Path),
+       !,
+       join_path([Directory, Tail], Path).
 
-Guide-176-
-
-Examples:
+path_directory_tail(Path, Directory, Tail)
+    :- split_path(Path, Elements),
+       dreverse(Elements, [Tail | RevDirElements]),
+       dreverse(RevDirElements, DirElements),
+       (DirElements = [] -> 
+            directory_self(Directory) 
+            ;
+            join_path(DirElements, Directory)
+       ).
+````
+**Examples:**
+````
 path_directory_tail(‘foo.bar’, F, T) => F = ‘.’, X = ‘foo.bar.’
-path_directory_tail(‘/star/flow/foo.bar, F, T)
-=> F = ‘/star/flow’, X = ‘foo.bar’.
-path_directory_tail(‘/star/flow/sirius, F, T)
-=> F = ‘/star/flow’, X = sirius.
-
+path_directory_tail(‘/star/flow/foo.bar, F, T) => F = ‘/star/flow’, X = ‘foo.bar’.
+path_directory_tail(‘/star/flow/sirius, F, T) => F = ‘/star/flow’, X = sirius.
+````
+````
 is_absolute_path/1.
 is_absolute_path(Path)
 is_absolute_path(+)
-This predicate hold of its atomic argument Path exactly when Path describes a path
+````
+This predicate holds of its atomic argument Path exactly when Path describes a path
 in the file system starting at the root, or at a disk or drive. It is defined by:
-is_absolute_path(Path) :path_type(Path, PathType),
-PathType \= relative.
+````
+is_absolute_path(Path)
+    :- path_type(Path, PathType),
+       PathType \= relative.
+````
 Examples which succeed when running on the appropriate OS:
+````
 is_absolute_path(‘/star/flow/foo.pro’).
 is_absolute_path(‘C:\\star\\flow\\foo.pro’).
 is_absolute_path(‘mozart:star:flow:foo.pro’).
+````
 Examples which fail:
+````
 is_absolute_path(‘foo.pro’).
 is_absolute_path(‘../foo.pro’).
 is_absolute_path(‘..\\foo.pro’).
 is_absolute_path(‘:foo.pro’).
+````
+````
 path_type/2.
 path_type(Path, Type)
 path_type(+, -)
+````
 This predicate determines the type (absolute, relative) of a file system path. It is defined by:
-path_type(Path, Type) :sys_env(OS, _, _),
-
-Guide-177-
-
-!,
-path_type(OS, Path, Type).
+````
+path_type(Path, Type)
+    :- sys_env(OS, _, _),
+       !,
+       path_type(OS, Path, Type).
+````
+````
 path_type/3.
 path_type(OS, Path, Type)
 path_type(+, +, -)
+````
 This predicate determines the OS-specific type of a file system path. All paths are
 relative unless determined to be absolute. A path is absolute if:
-Unix:
+````
+Unix:    It begins with the character ‘/’;
 
-It begins with the character ‘/’;
+MacOS:   Same as unix.
 
-MacOS:
-
-It contains ‘:’ at some position after the initial character;
-
-Windows:
-
-One of the following character sequences ':/', ':\\' occurs beginning at the second character of the path, or one of the
-character sequences '//', '\\\\', '/\\', '\\/' occurs at the beginning
-of the path.
-
+Windows: One of the following character sequences ':/', ':\\' occurs beginning at the second 
+         character of the path, or one of the character sequences '//', '\\\\', '/\\', '\\/' 
+         occurs at the beginning of the path.
+````
+````
 path_elements/2.
 path_elements(Path, Elements)
 path_elements(?, ?)
+````
 This predicate relates paths to lists composed of the elements of the path, split about
 the directory separators. It is defined by:
-path_elements(Path, Elements) :var(Path),
-!,
-join_path(Elements, Path).
-path_elements(Path, Elements) :split_path(Path, Elements).
+````
+path_elements(Path, Elements)
+    :- var(Path),
+       !,
+       join_path(Elements, Path).
+path_elements(Path, Elements)
+    :- split_path(Path, Elements).
+````
+````
 split_path/2.
 split_path(Path, List)
 split_path(+, -)
+````
 This predicate splits an atomic file system Path into a List of its constitutent directory components, including any root or drive elements (of an absolute path) at the
 beginning, and including the file name (if any) at the end. It is defined by:
-
-Guide-178-
-
-split_path(Path, List) :sys_env(OS, _, _),
-!,
-split_path(OS, Path, List).
+````
+split_path(Path, List)
+    :- sys_env(OS, _, _),
+       !,
+       split_path(OS, Path, List).
+````
+````
 join_path/2.
 join_path(List, Path)
 join_path(List, Path)
+````
 This predicate composes an atomic file system Path from a List of its constitutent
 directory components, possibly including root or drive elements (of an absolute
 path) at the beginning, and including a file name (if any) at the end. It is defined by:
-join_path(List, Path) :sys_env(OS, _, _),
-join_path(OS, List, Path).
+````
+join_path(List, Path)
+    :- sys_env(OS, _, _),
+       join_path(OS, List, Path).
+````
+````
 split_path/3.
 split_path(OS, Path, List)
 split_path(+, +, -)
+
 join_path/3.
 join_path(OS, List, Path)
 join_path(+, +, -)
+````
 These two predicates implement the OS-specific mappings between file system
 paths and lists of their components. They function as inverses of each other.
-Examples:
-Unix:
-
-‘/star/flow/foo.pro’
-<=> [‘/’,star,flow,’foo.pro’]
+**Examples:**
+````
+Unix: ‘/star/flow/foo.pro’
+              <=> [‘/’,star,flow,’foo.pro’]
 
 Windows: ‘C:\\star\\flow\\foo.pro’
-<=>
+              <=> ['C:\\',star,flow,'foo.pro']
 
-MacOS:
-
-['C:\\',star,flow,'foo.pro']
-
-‘mozart:star:flow:foo.pro’
-<=> [‘mozart:’,star, flow, ‘foo.pro’]
+MacOS:  Like Unix
 
 Also:
 
-Guide-179-
-
-join_path([‘/star/flow’,sirius],X)
-=>
-X= ‘/star/flow/sirius’,
-
+      join_path([‘/star/flow’,sirius],X)
+           =>   X= ‘/star/flow/sirius’,
 etc.
+````
+````
 tilda_expand/2.
 tilda_expand(TildaPath, Path)
 tilda_expand(+, -)
+````
 This predicate expands occurrences of ‘~’ in settings where this is meaninful, that
 is, when one of the two follow goals succeeds:
-getenv(’HOME’, Home) ; get_user_home(Name, Home)
+
+    getenv(’HOME’, Home) ; get_user_home(Name, Home)
+
+````
 directory_self/1.
 directory_self(Self)
 directory_self(-)
+
 directory_self/2.
 directory_self(OS, Self)
 directory_self(+, -)
+````
 These predicates return the “current directory” expression for the appropriate OS.
 They are defined by:
-directory_self(Self) :sys_env(OS, _, _),
-!,
-directory_self(OS, Self).
+````
+directory_self(Self)
+    :- sys_env(OS, _, _),
+       !,
+       directory_self(OS, Self).
 directory_self(unix, ’.’).
 directory_self(macos, ’:’).
 directory_self(mswin32, ’.’).
+````
+````
 same_path/2
 same_path(Path1, Path2)
 same_path(+, +)
+````
 If Path1 and Path2 are two lists denoting file paths, determines whether they denote the same path, allowing for identification of uppercase and lowercase names
-
-Guide-180-
-
 as appropriate for the OS.
+````
 same_disk/2
 same_disk(Disk1, Disk2)
 same_disk(+, +)
+````
 If Disk1 and Disk2 are atoms denoting disks, determines whether they are the
 same, allowing for identification of upper and lower case letters, as appropriate for
 the os.
