@@ -1067,71 +1067,75 @@ init_codebuffer (-1)
     code buffer.
 
 name_clause (-2)
-    Attaches a predicate name and arity to the code currently in the icode buffer. 
-    Arg1 is a symbol (or token number) of the predicate. Arity should be set to 
-    the desired arity.
+    Attaches a predicate name and arity to the code currently in the icode 
+    buffer.  Arg1 is a symbol (or token number) of the predicate. Arity 
+    should be set to the desired arity.
 
 math_start (-3)
     Indicates the start of an inline math computation.  This command should 
-    precede the emission of a math_begin instruction and causes the current buffer 
-    position to be stored for use in the relative address computation at math_end.
+    precede the emission of a math_begin instruction and causes the current 
+    buffer position to be stored for use in the relative address computation 
+    at math_end.
 
 math_rbranch (-4)
-    This should precede an rbranch instruction. It is used for the relative address calculation 
-    associated with a math_endbranch command.
+    This should precede an rbranch instruction. It is used for the relative 
+    address calculation associated with a math_endbranch command.
 
 math_end (-5) 
-    Fills in the relative address associated with the math_begin instruction (which was 
-    immediately preceded by a math_start command).
+    Fills in the relative address associated with the math_begin instruction 
+    (which was immediately preceded by a math_start command).
 
 math_reset (-6)
-    Causes the internal buffer pointer to be reset to the point at which math_start was 
-    called. This is used internally to throw away some inline math code after the compiler 
-    has decided that it can’t compile it (as in ‘X is 2.3’ for example).
+    Causes the internal buffer pointer to be reset to the point at which 
+    math_start was called. This is used internally to throw away some inline 
+    math code after the compiler has decided that it can’t compile it 
+    (as in ‘X is 2.3’ for example).
 
 math_endbranch (-7) 
-    Fills in the relative branch associated with an rbranch instruction which was 
-    immediately preceded by a math_rbranch command.
+    Fills in the relative branch associated with an rbranch instruction which 
+    was immediately preceded by a math_rbranch command.
 
 export (-8)
     Exports the predicate designated by Arg1/Arity in the current module.
 
 new_module (-9) 
-    Creates/opens a (new) module whose name is given by Arg1. If the module does not 
-    already exist, it is created and use declarations to user and builtins are added 
-    to the module. In addition, the current module will become the new module. This
-    means that assert commands will place clauses in this module and predicate references 
-    within clauses will be to this module so it is desirable to call new_module before 
-    asserting a clause. If the module already exists, the current module is simply set 
-    to the module whose name is given by Arg1.
+    Creates/opens a (new) module whose name is given by Arg1. If the module 
+    does not already exist, it is created and use declarations to user and 
+    builtins are added to the module. In addition, the current module will 
+    become the new module. This means that assert commands will place clauses 
+    in this module and predicate references within clauses will be to this 
+    module so it is desirable to call new_module before asserting a clause. If 
+    the module already exists, the current module is simply set to the module 
+    whose name is given by Arg1.
 
 end_module (-10) 
     Closes the current module and sets the current module to user.
 
 change_module (-11)
-    Changes the current module to the module whose name is given by Arg1 without creating 
-    the default use declarations.
+    Changes the current module to the module whose name is given by Arg1 
+    without creating the default use declarations.
 
 add_use (-12)
     Adds a use declaration to the module given by Arg1 to the current module.
 
 asserta (-13) 
-    Allocates code space and inserts the code in the icode buffer at the beginning of 
-    the predicate. The predicate should first have been named by name_clause. Any first 
-    argument indexing that exists for the predicate will be thrown away.
+    Allocates code space and inserts the code in the icode buffer at the 
+    beginning of the predicate. The predicate should first have been named by 
+    name_clause. Any first argument indexing that exists for the predicate will 
+    be thrown away.
 
 assertz (-14)
-    Allocates code space and appends the code in the code buffer to the end of the 
-    predicate. The predicate should first have been named with name_clause. Any first 
-    argument indexing that exists for the predicate will be thrown away.
+    Allocates code space and appends the code in the code buffer to the end of 
+    the predicate. The predicate should first have been named with name_clause. 
+    Any first argument indexing that exists for the predicate will be thrown away.
 
 exec_query (-15)
     Causes the code in the icode buffer to be executed as a query (Meaning, Answers 
     will be displayed and yes or no will be printed.)
 
 exec_command (-16)
-    Causes the code in the icode buffer to be executed as a command. Nothing will be 
-    printed regardless of success of failure.
+    Causes the code in the icode buffer to be executed as a command. Nothing will 
+    be printed regardless of success of failure.
 
 set_cutneeded (-17)
     Sets/resets the internal cut_needed flag. If the clause has any cuts, comma, 
@@ -1139,57 +1143,60 @@ set_cutneeded (-17)
     be set. It will be set when 
             Arg1 != -1 && !Arg2
     While this is rather arcane, there are good reasons for it internally. For 
-    consistent results, the cutneeded flag should be set for each clause sometime 
-    before asserting it. If the cut_needed flag is set for either assertz or asserta, 
-    an instruction to move the current choice point to the cut point will be inserted 
-    prior to creation of the first choice point.
+    consistent results, the cutneeded flag should be set for each clause 
+    sometime before asserting it. If the cut_needed flag is set for either 
+    assertz or asserta, an instruction to move the current choice point to the 
+    cut point will be inserted prior to creation of the first choice point.
 
 reset_obp (-18) 
     Erases the the icode parameters in the .obp file back to the most recent 
     init_codebuffer.
 
 index_all (-19)
-    Causes indexing to be generated for all predicates.  This is normally done after 
-    a consult or reconsult operation. Assert and retract operations, however, cause 
-    the indexing to be discarded, so this service may be called to redo indexing after 
-    the database has been changed via assert or retract.
+    Causes indexing to be generated for all predicates.  This is normally done 
+    after a consult or reconsult operation. Assert and retract operations, however, 
+    cause the indexing to be discarded, so this service may be called to redo 
+    indexing after the database has been changed via assert or retract.
 
 index_single (-20)
     not implemented
 
 addto_autouse (-21)
-    Causes a module name to be added to the list of modules to be automatically used. 
-    By default, only the builtins module is automatically used by all other modules. 
-    Argument one should be the name of the module to add to the autouse list.
+    Causes a module name to be added to the list of modules to be automatically 
+    used.  By default, only the builtins module is automatically used by all 
+    other modules.  Argument one should be the name of the module to add to the 
+    autouse list.
 
 addto_autoname (-22)
-    Causes a procedure name/arity to be added to the autoname list. This is a list of 
-    procedures for which “stubs” are created when a module is initialized. By default, 
-    call/1, ’,’/2, ’;’/2, are on this list. These stubs must exist for context-
-    dependent procedures such as call or setof to work properly. Arg1 should be set to 
-    the procedure name and Arity should be set to the arity.
+    Causes a procedure name/arity to be added to the autoname list. This is a 
+    list of procedures for which “stubs” are created when a module is 
+    initialized.  By default, call/1, ’,’/2, ’;’/2, are on this list. These 
+    stubs must exist for context-dependent procedures such as call or setof 
+    to work properly.  Arg1 should be set to the procedure name and Arity should 
+    be set to the arity.
 
 cremodclosure (-23) 
-    Creates a module closure . Procedures such as asserta/1 and bagof/3 are defined in
-    builtins and yet need to know which module invoked them. The solution is to create 
-    a $n+1$ argument version of these procedures in the builtins.pro file (or elsewhere) 
-    and create a module closure. This module closure will link together the three 
-    argument version with the four argument version, installing the calling module in 
-    the fourth argument. Arg1 should be the name of the $n$ argument procedure. Arity 
-    should be $n$. Arg2 should be the name of the $n+1$ argument procedure to execute 
-    after installing the module name in the $(n+1)$th argument.
+    Creates a module closure . Procedures such as asserta/1 and bagof/3 are 
+    defined in builtins and yet need to know which module invoked them. The 
+    solution is to create a $n+1$ argument version of these procedures in the 
+    builtins.pro file (or elsewhere) and create a module closure. This module 
+    closure will link together the three argument version with the four argument 
+    version, installing the calling module in the fourth argument. Arg1 should 
+    be the name of the $n$ argument procedure. Arity should be $n$. Arg2 should 
+    be the name of the $n+1$ argument procedure to execute after installing the 
+    module name in the $(n+1)$th argument.
 
 hideuserproc (-24) 
-    Used to hide user defined procedures. The first service argument (i.e., the second 
-    argument of $icode/4) is the name of the procedure to hide, the second is the arity 
-    of the procedure, the last is the name of the module in which the procedure is 
-    defined. The following query will hide user:p/0.
+    Used to hide user defined procedures. The first service argument (i.e., the 
+    second argument of $icode/4) is the name of the procedure to hide, the second 
+    is the arity of the procedure, the last is the name of the module in which 
+    the procedure is defined. The following query will hide user:p/0.
            ?- $icode(-24, p, 0, user).
 
 relinkdatabase (-25) 
-    Relinks the entire database. Relinking of the program is done automatically by Version 
-    1.1 after each consult or reconsult. However, it may still be desirable to relink the 
-    program before certain calls to assert or abolish.
+    Relinks the entire database. Relinking of the program is done automatically by 
+    Version 1.1 after each consult or reconsult. However, it may still be desirable 
+    to relink the program before certain calls to assert or abolish.
 ````
 
 ####Icode calls and .obp files
