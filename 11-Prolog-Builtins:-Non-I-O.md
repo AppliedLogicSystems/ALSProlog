@@ -202,7 +202,7 @@ These predicates convert between atoms on the one hand, and on the other hand, e
 
 ![](images/AtomCharCodes.png)
 
-![](images/VehicleClassInheritance.png)
+````
 number_chars/2
 number_chars(Number,CharList)
 number_chars(Number,CharList)
@@ -210,7 +210,7 @@ number_chars(Number,CharList)
 number_codes/2
 number_codes(Number,CodeList)
 number_codes(Number,CodeList)
-![](images/VehicleClassInheritance.png)
+````
 In a manner exactly analogous to atom_chars(codes) above, these predicates
 convert between numbers, and lists of atomic characters or lists of ascii character
 codes.
@@ -236,98 +236,117 @@ It is included primarily for backwards compatibility with older versions of Prol
 use of [atom/number]_[chars/codes] above is recommended.
 
 ##11.4 Collectives
+````
 bagof/3
 bagof(Template,Goal,Collection)
 bagof(+, +, ?)
+
 setof/3
 setof(Template,Goal,Collection)
 setof(+, +, ?)
+
 findall/3
 findall(Template,Goal,Collection)
 findall(+, +, ?)
+````
 Methods of obtaining all solutions to Goal. Fail when there are no solutions.
+````
 bagOf/3
 bagOf(Template,Goal,Collection)
 bagOf(+, +, ?)
+
 setOf/3
 setOf(Template,Goal,Collection)
 setOf(+, +, ?)
+````
 Like bagof/3 and setof/3, respectively, but succeed when no solutions to
 Goal exist, unifying Collection with the empty list [].
+````
 b_findall/4
 b_findall(Template,Goal,Collection,Bound)
 b_findall(+, +, -, +)
+````
 Like findall/3, except that it locates at most integer Bound > 0 number of solutions.
 
 ##11.5 Prolog Database
+````
 assert/1
 assert(Clause)
-
-Guide-165-
-
 assert(+)
+
 asserta/1
 asserta(Clause)
 asserta(+)
+
 assertz/1
 assertz(Clause)
 assertz(+)
+````
 These predicates add a Clause to the Prolog database. If the principal functor and
 arity of Clause is P/N, then:
-• asserta/1 adds Clause before all previous clauses for P/N;
-• assertz/1 adds Clause after all previous clauses for P/N;
-• assert/1 adds Clause in some implementation-dependent position
-relative to all previous clauses for P/N.
+* asserta/1 adds Clause before all previous clauses for P/N;
+* assertz/1 adds Clause after all previous clauses for P/N;
+* assert/1 adds Clause in some implementation-dependent position relative to all previous clauses for P/N.
+````
 clause/2
 clause(Head, Body)
 clause(+, ?)
+````
 Used to retrieve clauses (A :- B) [or, facts A] from the database where A unifies
 with Head and B unifies with Body [true].
+````
 retract/1
 retract(Clause)
 retract(+)
+````
 The current module is searched for a clause that will unify with Clause. The first
 such matching clause, if any, is removed from the database.
+````
 asserta/2
 asserta(Clause, Ref)
 asserta(+, - )
+
 asserta/2
 asserta(Clause, Ref)
-
-Guide-166-
-
 asserta(+, - )
+
 assertz/2
 assertz(Clause, Ref)
 assertz(+, - )
+
 clause/3
 clause(Head, Body, Ref)
 clause(+, ?,?)
+
 retract/2
 retract(Clause, Ref)
 retract(+, ? )
+````
 These predicates. all similar to their counter-parts above, add an extra argument
 Ref to the previous arguments, where Ref is an implementation-dependent database reference. A database reference obtained from assert[a/z]/3 can be
 passed to clause/3 to retrieve a clause, and to retract/2 to delete a clause.
+````
 abolish/2
 abolish(Name, Arity)
 abolish(+, +)
+````
 All the clauses for the specified procedure Name/Arity in the current module are
 removed from the database
+````
 erase/1
 erase(DBRef)
 erase(+)
+````
 If DBRef is a database reference to an existing clause, erase(DBRef) removes
 that clause.
+````
 instance/2
 $clauseinfo/3
 $firstargkey/2
-
-Guide-167-
+````
 
 ##11.6 Global Variables
-gv_alloc/1, make_gv/1 and relatives provide methods for manipulating global variables. See Chapter 8 (Global Variables, Destructive Update & Hash Tables) for
-a discussion.
+gv_alloc/1, make_gv/1 and relatives provide methods for manipulating global variables. See Chapter 8 (Global Variables, Destructive Update & Hash Tables) for a discussion.
 
 ##11.7 Control
 cut(!)
