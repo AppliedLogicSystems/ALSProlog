@@ -64,9 +64,12 @@ done
 cp "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
 cp -p "$MAN/welcome_standard.txt" "$DISTDIR/README.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
-mkdir "$DISTDIR/help"
-cp -pr $MAN/$HELP/* "$DISTDIR/help"
-cp -p $MAN/als_help.htm "$DISTDIR/als_help.htm"
+mkdir "$DISTDIR/alshelp"
+cp -pr $MAN/$HELP/* "$DISTDIR/alshelp"
+cp -p $MAN/als_help.html "$DISTDIR/als_help.html"
+cp -p $MAN/alshelp.css "$DISTDIR/alshelp.css"
+cp -p $MAN/package_nav.html "$DISTDIR/package_nav.html"
+
 
 #mkdir "$DISTDIR/alsdir/library"
 #cp -p $LIB/*.pro "$DISTDIR/alsdir/library"
