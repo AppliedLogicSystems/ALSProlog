@@ -577,9 +577,7 @@ next_token(0'&, S, T, NxtC)
 		Cs = [], NxtC = NNxtC
 		;
 		dispatch_read_to_semi(NNxtC, S, Cs, NxtC)
-%		,get_code(S,NxtC)
 	),
-%	read_to_semi(S, Cs, NxtC),
 	atom_codes(T, [0'& | Cs]).
 
 next_token(C1, S, T,NxtC)
@@ -606,19 +604,16 @@ dispatch_read_to_terminator(C, S, [], C)
 	C = 0'=, !.
 dispatch_read_to_terminator(C, S, [], C)
         :-
-%        C = 0’&, !.
-        C = 38, !.
+        C = 0'&, !.
 	
 
 read_to_semi(S, Cs, NxtC)
 	:-
 	get_code(S, C),
-%put_code(C),nl,
 	dispatch_read_to_semi(C, S, Cs, NxtC).
 
 dispatch_read_to_semi(0';, S, [0';], NxtC)
 	:-!,
-%	get_code(S, C).
 	get_code(S, NxtC).
 dispatch_read_to_semi(C, S, [C | Cs], NxtC)
 	:-
