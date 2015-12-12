@@ -3,12 +3,13 @@
 set -eu
 
 case `uname -rs` in
-    "SunOS 4"*)	ARCH=sunos ;;
-    "SunOS 5"*)	ARCH=solaris ;;
-    Linux*) 	ARCH=linux ;;
-    "HP-UX"*)	ARCH=hpux ;;
-    "IRIX"*)	ARCH=irix ;;
-    "Darwin"*)	ARCH=darwin ;;
+    "SunOS 4"*)	ARCH=sunos   ; SOEXT=so    ;;
+    "SunOS 5"*)	ARCH=solaris ; SOEXT=so    ;;
+    Linux*) 	ARCH=linux   ; SOEXT=so    ;;
+    "HP-UX"*)	ARCH=hpux    ; SOEXT=sl    ;;
+    "IRIX"*)	ARCH=irix    ; SOEXT=so    ;;
+    "CYGWIN"*)  ARCH=cygwin  ; SOEXT=dll   ;;
+    "Darwin"*)	ARCH=darwin  ; SOEXT=dylib ;;
     *) 		echo "Unknown machine type..."; exit 1 ;;
 esac
 
@@ -84,20 +85,14 @@ then
 	cp -pr "$BIN/alspro" "$DISTDIR"
 	if test -f "$BIN/alspro.pst"
 	then
-		cp -pr "$BIN/alspro.pst" "$DISTDIR"
+	    cp -pr "$BIN/alspro.pst" "$DISTDIR"
+	elif test -f "$BIN/alspro.exe.pst"    
+	then
+	    cp -pr "$BIN/alspro.exe.pst" "$DISTDIR"
+
 	fi
 	cp -pr "$BIN/libalspro.a" "$DISTDIR"
-	if test $ARCH = hpux
-	then
-		cp -pr "$BIN/libalspro.sl" "$DISTDIR"
-	else 
-        if test $ARCH = darwin
-	then
-		cp -pr "$BIN/libalspro.dylib" "$DISTDIR"
-	else
-		cp -pr "$BIN/libalspro.so" "$DISTDIR"
-        fi
-	fi
+	cp -pr "$BIN/libalspro.$SOEXT" "$DISTDIR"
 fi
 
 tar -C $ARCH -czf $DISTNAME-$ARCH.tgz $DISTNAME
