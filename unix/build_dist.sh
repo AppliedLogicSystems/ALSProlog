@@ -86,7 +86,7 @@ then
 	if test -f "$BIN/alspro.pst"
 	then
 	    cp -pr "$BIN/alspro.pst" "$DISTDIR"
-	elif test -f "$BIN/alspro.exe.pst"    
+	elif test -f "$BIN/alspro.exe.pst"
 	then
 	    cp -pr "$BIN/alspro.exe.pst" "$DISTDIR"
 
