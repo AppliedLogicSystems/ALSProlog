@@ -53,7 +53,7 @@ char *version[2] = {
 #endif
 #endif
 
-static const Tcl_ObjType *tcl_integer_type, *tcl_double_type, *tcl_list_type;
+static Tcl_ObjType *tcl_integer_type, *tcl_double_type, *tcl_list_type;
 
 static AP_Obj TclToPrologObj(Tcl_Interp *interp, Tcl_Obj *tcl_obj, AP_World *w, AP_Obj *vars);
 static Tcl_Obj *PrologToTclObj(AP_World *w, AP_Obj prolog_obj, Tcl_Interp *interp);
