@@ -49,6 +49,9 @@ cp -pr "$BIN/$EXE" "$DISTDIR/$EXET"
 if test -f "$BIN/$EXE.pst"
 then
     cp -pr "$BIN/$EXE.pst" "$DISTDIR/$EXET.pst"
+elif test -f "$BIN/$EXE.exe.pst"
+then
+    cp -pr "$BIN/$EXE.exe.pst" "$DISTDIR"
 fi
 
 # Use -L to force dereferences of symbolic links
