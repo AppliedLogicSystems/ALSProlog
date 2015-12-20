@@ -1,2 +1,13 @@
 Welcome to the ALS Prolog Core
 ==============================
+
+Contents of this directory (~/core):
+
+README			-- this file           
+alsp_src/ 		-- source for the als prolog core        
+tcltk_interface/ 	-- source for the interface to Tcl/Tk 
+als_dev/		-- source for the gui version of ALS Prolog using Tcl/Tk         
+unix/            	-- build location(s): linux,darwin,cygwin,....
+win32/			-- build location: win32
+unused_alsp_src/	-- at present, unused
+
