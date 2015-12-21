@@ -13,13 +13,15 @@ Build Instructions
 
 Use `git clone https://github.com/AppliedLogicSystems/ALSProlog.git` to obtain the tree.
 
-**Unix, include Mac OS X:**
+**Linux, Linux-like systems, including Mac OS X and Cygwin:**
 
 Locate yourself in the toplevel 'unix' directory in the tree, and execute 'make'.  When the build completes, you will find a folder  
 
 	unix/linux/als-prolog	
 		or 	
 	unix/darwin/als-prolog
+		or 	
+	unix/cygwin/als-prolog
 		or possibly
 	unix/<flavor>/als-prolog
 where darwin is the Mac OS X flavor of linux, and <flavor> is possibly some other flavor of unix detected by the build process.

@@ -28,9 +28,10 @@
 
 #define HAVE_TIME		1
 
-#define HAVE_SOCKET		1
-#define BERKELEY_SOCKETS	1
-#define HAVE_SELECT		1
+// Temporarily disable Sockets for MinGW evaluation (Fix before master merge!)
+//#define HAVE_SOCKET		1
+//#define BERKELEY_SOCKETS	1
+//#define HAVE_SELECT		1
 #define MISSING_UNIX_DOMAIN_SOCKETS 1
 
 #define APP_PRINTF_CALLBACK	1
