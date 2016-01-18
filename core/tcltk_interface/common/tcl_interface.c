@@ -16,6 +16,10 @@
 #include <tcl.h>
 #include <tk.h>
 
+#ifndef CONST86
+#  define CONST86
+#endif
+
 #ifndef BUILD_PSL
 /*
 #define ITCL
@@ -53,7 +57,7 @@ char *version[2] = {
 #endif
 #endif
 
-static Tcl_ObjType *tcl_integer_type, *tcl_double_type, *tcl_list_type;
+static CONST86 Tcl_ObjType *tcl_integer_type, *tcl_double_type, *tcl_list_type;
 
 static AP_Obj TclToPrologObj(Tcl_Interp *interp, Tcl_Obj *tcl_obj, AP_World *w, AP_Obj *vars);
 static Tcl_Obj *PrologToTclObj(AP_World *w, AP_Obj prolog_obj, Tcl_Interp *interp);
