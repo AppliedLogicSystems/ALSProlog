@@ -16,7 +16,7 @@
 
 extern void tcl_interface_init(void);
 
-extern void panic(const char *);
+//extern void panic(const char *);
 
 static char *simple_write(AP_World *w, AP_Obj obj, char *s)
 {
@@ -208,6 +208,7 @@ void setup_alsdev_demo(void);
 void shutdown_alsdev_demo(void);
 #endif
 
+    	extern long ss_image_offset(const char *image_name);
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -284,8 +285,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	   Since blt_dvsh is part of the state, reconsulting
 	   does not work correctly. */
 {
-	extern char executable_path[1024];
-	extern long ss_image_offset(const char *image_name);
+  //	extern char executable_path[1024];
 
 	if (!ss_image_offset(executable_path)) {
 #if 0
