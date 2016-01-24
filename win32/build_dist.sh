@@ -98,8 +98,7 @@ then
 	cp -pr "$BIN/libalspro.$SOEXT" "$DISTDIR"
 fi
 
-tar -C $ARCH -czf $DISTNAME-$ARCH.tgz $DISTNAME
-
-
-
-
+rm -f $DISTNAME-$ARCH.zip
+pushd $ARCH
+zip -r ../$DISTNAME-$ARCH.zip $DISTNAME
+popd
