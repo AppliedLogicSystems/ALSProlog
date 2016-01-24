@@ -1,4 +1,13 @@
 *.obp
 *.d
 *.o
-
+*.a
+*.dll
+*.exe
+*.pst
+*.tgz
+core/win32/alsdir
+core/win32/lib
+core/unix/*/alsdir
+core/unix/*/lib
+foreign_sdk/*/ALS_Prolog_Foreign_SDK
