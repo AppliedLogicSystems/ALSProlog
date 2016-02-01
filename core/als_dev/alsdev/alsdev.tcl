@@ -188,9 +188,9 @@ set proenv(.topals,selectbackground)	systemHighlight
 set proenv(.debugwin,selectbackground)	systemHighlight
 set proenv(.document,selectbackground)	systemHighlight
 
-set proenv(.topals,font)	{user 10 normal}
-set proenv(.debugwin,font)	{user 10 normal}
-set proenv(.document,font)	{user 10 normal}
+set proenv(.topals,font)	{user 14 normal}
+set proenv(.debugwin,font)	{user 14 normal}
+set proenv(.document,font)	{user 14 normal}
 
 set proenv(.topals,tabs)	{}
 set proenv(.debugwin,tabs)	{}
