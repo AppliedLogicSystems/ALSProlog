@@ -56,10 +56,6 @@ fi
 
 # Use -L to force dereferences of symbolic links
 cp -pRL "$BIN/alsdir" "$DISTDIR"
-rm -f "$DISTDIR/alsdir/builtins/blt_shl.pro"
-rm -f "$DISTDIR/alsdir/builtins/blt_dvsh.pro"
-rm -f "$DISTDIR/alsdir/builtins/ra_basis.pro"
-rm -f "$DISTDIR/alsdir/builtins/int_cstr.pro"
 cp -pr "$BIN/lib" "$DISTDIR"
 
 mkdir "$DISTDIR/examples"
