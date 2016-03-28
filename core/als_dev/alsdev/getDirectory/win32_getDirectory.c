@@ -1,4 +1,5 @@
 #include "getDirectory.h"
+#include <windows.h>
 #include <shlobj.h>
 
 /* Tk_GetHWND proto is from tkWin.h */
