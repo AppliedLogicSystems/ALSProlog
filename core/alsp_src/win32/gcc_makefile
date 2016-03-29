@@ -14,5 +14,7 @@ CC=i686-w64-mingw32-gcc -m32
 
 # -Wno-trigraphs added to avoid warnings for Apple '????'-style constants.
 
-CFLAGS += -O -MMD -Wall -Werror -Wmissing-prototypes -Wwrite-strings \
+# Added -Wno-error=pointer-sign to avoid blocking errors in socket code
+
+CFLAGS += -O -MMD -Wall -Werror -Wno-error=pointer-sign -Wmissing-prototypes -Wwrite-strings \
 		 -Wnested-externs -Wpointer-arith -Wno-trigraphs
