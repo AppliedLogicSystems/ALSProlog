@@ -24,7 +24,7 @@ Locate yourself in the toplevel 'unix' directory in the tree, and execute 'make'
 	unix/cygwin/als-prolog
 		or possibly
 	unix/<flavor>/als-prolog
-where darwin is the Mac OS X flavor of linux, and <flavor> is possibly some other flavor of unix detected by the build process.
+where darwin is the Mac OS X flavor of linux, and &lt;flavor&gt; is possibly some other flavor of unix detected by the build process.
 
 **Windows:**
 
