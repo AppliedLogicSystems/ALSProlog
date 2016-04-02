@@ -223,15 +223,15 @@ There are a number of options that can be included on the operating system shell
 command line when starting ALS Prolog. The following is a list of the options:
 ````
 -g The option -g followed by an arbitrary Prolog goal, instructs ALS Prolog
-to run the goal when it starts up as if it was the first goal typed to the Prolog
-shell after the system is started. The goal might have to be quoted depending
-on the rules of the operating system shell you are running in, and if the goal
-contains any of your shell’s special characters. You do not have to put a full
-stop after a goal, and you can submit multiple goals, provided there is no
-white space anywhere in the given goals. When the submitted goal finishes
-running (with success or failure), control is passed to the normal Prolog
-shell unless the -b command line option has also been used, in which case
-control returns to the operating system shell.  
+to run the goal when it starts up as if it was the first goal typed to the 
+Prolog shell after the system is started. The goal might have to be quoted 
+depending on the rules of the operating system shell you are running in, and 
+if the goal contains any of your shell’s special characters. You do not have 
+to put a full stop after a goal, and you can submit multiple goals, provided 
+there is no white space anywhere in the given goals. When the submitted goal 
+finishes running (with success or failure), control is passed to the normal 
+Prolog shell unless the -b command line option has also been used, in which 
+case control returns to the operating system shell.  
 ````
 ````
 -b The option -b prevents the normal the Prolog shell from running. This
