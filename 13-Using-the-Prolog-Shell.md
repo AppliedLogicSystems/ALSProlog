@@ -281,15 +281,15 @@ message.  This is useful for debugging, but can be annoying otherwise.
 ````
 ````
 -p The option -p is used by ALS Prolog to distinguish between command line
-switches intended for the system and those switches intended for an application 
+switches intended for the system and those switches intended for an application
 (whether invoked with the -g command line switch or from the Prolog shell). 
 The -p divides the command line into two portions: All switches to 
 the left of the -p are interpreted as being for the ALS Prolog system,
 while all switches to the right of the -p are interpreted as being intended for
 a Prolog application. To make the latter available to Prolog applications,
-when ALS Prolog is initialized, a list SWITCHES of atoms and UIAs representing 
+when ALS Prolog is initialized, a list SWITCHES of atoms and UIAs representing
 the items to the right of the -p is created, and a fact
-command_line(SWITCHES) is asserted in module builtins. For example, the command 
+command_line(SWITCHES) is asserted in module builtins. For example, the command
 line
 
     alspro -g my_appl -b applfile -p -k fast -s initstate foofile
@@ -309,7 +309,7 @@ that accesses to it from other modules must be prefixed with ‘builtins:’ as 
 -s This switch must be followed by a space and a path to a directory. The path
 is added to the searchdir/1 sequence. Multiple occurrences of -s with
 a path may occur on the command line; the associated paths are processed
-and added to the searchdir/1 facts in order corresponding to their left-toright 
+and added to the searchdir/1 facts in order corresponding to their left-toright
 occurrence on the command line. All paths occurring with -s on the
 command line are added to the searchdir/1 facts before any paths obtained
 from the ALSPATH environment variable.
