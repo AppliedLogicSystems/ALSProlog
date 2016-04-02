@@ -16,7 +16,7 @@ ALS_BUILD_SUPPORT_INCLUDES = -isystem $(ALS_BUILD_SUPPORT)/include/tcl8.5
 
 ALS_BUILD_SUPPORT_LIBDIR = -L $(ALS_BUILD_SUPPORT)/lib
 
-ALSDEV_OS_SOURCE = win32_alsdev.c alsdev_demo.c getDirectory.c win32_getDirectory.c getFiles.c win32_getFiles.c
+ALSDEV_OS_SOURCE = win32_alsdev.c getDirectory.c win32_getDirectory.c getFiles.c win32_getFiles.c
 
 ALS_STUB_SOURCE = win32_alsdev.c tcl_interface.c getDirectory.c win32_getDirectory.c getFiles.c win32_getFiles.c
 ALS_STUB_OBJECTS = $(ALS_STUB_SOURCE:.c=.o)
