@@ -3,7 +3,7 @@ ALSDEVDIR=$(CORE)/als_dev/alsdev
 CORE=$(SOURCE_DIR)/..
 VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins:$(SOURCE_DIR)/library:$(ALSDEVDIR):$(CORE)/tcltk_interface/common
 
-REV=r$(shell svnversion)
+VERSION_FLAGS=$(shell which git > /dev/null && git rev-parse && echo -DGIT_VERSION=`git describe`)
 
 default : binaries
 
@@ -13,9 +13,7 @@ ifndef CCOMP
 CCOMP=gcc
 endif
 
-# Add -DREVISION=$(REV) to add SVN revision number
-
-CPPFLAGS = $(BUILD_FLAGS) \
+CPPFLAGS = $(BUILD_FLAGS) $(VERSION_FLAGS) \
 	-I $(SOURCE_DIR)/$(PROC) \
 	-I $(SOURCE_DIR)/$(OS) \
 	-I $(SOURCE_DIR)/generic \

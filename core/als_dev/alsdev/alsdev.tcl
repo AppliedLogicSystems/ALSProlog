@@ -164,12 +164,15 @@ set proenv(posted_vis)			{}
 set proenv(debugwin_button,background)	#cee8e6
 set proenv(interrupt_button,foreground)	#ff0000
 
+puts -nonewline "tcl_platform = " 
+puts $tcl_platform(platform)
+
 if {$tcl_platform(platform) == "macintosh"} then {
-	set proenv(.topals,geometry)	400x300+3+22
-	set proenv(.debugwin,geometry)	400x300+300+22
+	set proenv(.topals,geometry)	600x500+300+10
+	set proenv(.debugwin,geometry)	600x300+300+22
 } else {
-	set proenv(.topals,geometry)	400x300+5+6
-	set proenv(.debugwin,geometry)	400x300+300+0
+	set proenv(.topals,geometry)	600x500+300+10
+	set proenv(.debugwin,geometry)	600x300+300+0
 }
 
 set proenv(.topals,foreground)	black
@@ -188,9 +191,9 @@ set proenv(.topals,selectbackground)	systemHighlight
 set proenv(.debugwin,selectbackground)	systemHighlight
 set proenv(.document,selectbackground)	systemHighlight
 
-set proenv(.topals,font)	{user 10 normal}
-set proenv(.debugwin,font)	{user 10 normal}
-set proenv(.document,font)	{user 10 normal}
+set proenv(.topals,font)	{user 14 normal}
+set proenv(.debugwin,font)	{user 14 normal}
+set proenv(.document,font)	{user 14 normal}
 
 set proenv(.topals,tabs)	{}
 set proenv(.debugwin,tabs)	{}
@@ -311,7 +314,14 @@ switch $tcl_platform(platform) {
 proc establish_defaults {} {
 	global array proenv
 
+#puts -nonewline "e_d-1: DebugGeom = "
+#puts $DebugGeom
+
 	prolog call alsdev alsdev_ini_defaults  -var DefaultVals -var TopGeom -var DebugGeom -var DebugVis
+
+puts -nonewline "DebugGeom = "
+puts $DebugGeom
+
 	reset_default_values $DefaultVals
 	if {$TopGeom != ""} then { set proenv(.topals,geometry) $TopGeom }
 	if {$DebugGeom != ""} then { set proenv(.debugwin,geometry) $DebugGeom }

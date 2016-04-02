@@ -30,6 +30,10 @@ proc vTclWindow.debugwin {base} {
     toplevel_patch $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base $proenv(.debugwin,geometry)
+
+puts -nonewline "debugwin,geometry = " 
+puts $proenv(.debugwin,geometry)
+
     wm maxsize $base 1137 870
     wm minsize $base 1 1
 	if {$tcl_platform(platform) != "macintosh"} {
@@ -57,40 +61,40 @@ proc vTclWindow.debugwin {base} {
         -borderwidth 1 -relief sunken
     button $base.buttons.creep \
         -background $proenv(debugwin_button,background) \
-        -padx 4 -text creep -underline 0 \
+        -padx 4 -text creep -underline 0 -width 6 \
 		-command { set DebugResponse Bc }
     button $base.buttons.skip \
         -background $proenv(debugwin_button,background) \
-        -padx 4 -text skip -underline 0 \
+        -padx 4 -text skip -underline 0 -width 5 \
 		-command { set DebugResponse Bs }
     button $base.buttons.leap \
         -background $proenv(debugwin_button,background) \
-        -padx 4 -text leap -underline 0 \
+        -padx 4 -text leap -underline 0 -width 5 \
 		-command { send_prolog debugger_mgr clear_for_leap ; set DebugResponse Bl }
 
     button $base.buttons.retry \
         -background $proenv(debugwin_button,background) \
-        -padx 0 -text retry -underline 0 \
+        -padx 0 -text retry -underline 0 -width 6 \
 		-command { set DebugResponse Br }
     button $base.buttons.fail \
         -background $proenv(debugwin_button,background) \
-        -padx 4 -text fail -underline 0 \
+        -padx 4 -text fail -underline 0 -width 5 \
 		-command { set DebugResponse Bf }
 
     button $base.buttons.interrupt \
         -font {lucida 10 bold} \
         -foreground $proenv(interrupt_button,foreground) \
-		-padx 2 -pady 0 -text Interrupt \
+		-padx 2 -pady 0 -text Interrupt -width 9 \
         -command interrupt_action
 
     frame $base.buttons.sep1 \
         -borderwidth 1 -relief flat -width 4 -background black
 
     button $base.buttons.abort \
-        -padx 2 -text Abort \
+        -padx 2 -text Abort -width 6 \
 		-command { set DebugResponse Ba }
     button $base.buttons.respy \
-        -padx 2 -text {Re-Spy} \
+        -padx 2 -text {Re-Spy} -width 8 \
 		-command reset_all_spypoints
 #    button $base.buttons.stack_trace \
 #        -padx 2 -text stack \
