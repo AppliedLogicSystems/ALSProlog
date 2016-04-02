@@ -289,7 +289,8 @@ while all switches to the right of the -p are interpreted as being intended for
 a Prolog application. To make the latter available to Prolog applications,
 when ALS Prolog is initialized, a list SWITCHES of atoms and UIAs representing 
 the items to the right of the -p is created, and a fact
-command_line(SWITCHES) is asserted in module builtins. For example, the command line
+command_line(SWITCHES) is asserted in module builtins. For example, the command 
+line
 
     alspro -g my_appl -b applfile -p -k fast -s initstate foofile
 
@@ -312,15 +313,16 @@ and added to the searchdir/1 facts in order corresponding to their left-toright
 occurrence on the command line. All paths occurring with -s on the
 command line are added to the searchdir/1 facts before any paths obtained
 from the ALSPATH environment variable.
-
+````
+````
 -A, -a This switch must be followed by a space and a Prolog Goal ( enclosed in 
 single quotes if necessary to defeat the OS shell) and is used to force one or
 more assertions, as follows:  
 If Goal is of the form M:(H1, ...Hk), then each of H1, ..., Hk is asserted in 
 module M. Thus,
     alspro -A ‘ice_cream:(jerry, ben)’
-would cause the two facts facts jerry and ben to be asserted in module ice_cream.  
-If Goal is of the form M:H, then H is asserted in module M.  
+would cause the two facts facts jerry and ben to be asserted in module 
+ice_cream.   If Goal is of the form M:H, then H is asserted in module M.  
 If Goal is of the form (H1, ...Hk), then each of H1, ..., Hk is
 asserted in module user. Thus,  
     alspro -A ‘(jerry, ben)’
@@ -333,11 +335,16 @@ makefiles.)
 ````
 ````
 -heap The option -heap followed immediately by space and a number w sets
-the size of the ALS Prolog heap to w *1024, where w is the number of K bytes to allocate. Heap overflow will cause exit to the operating system.
+the size of the ALS Prolog heap to w *1024, where w is the number of K bytes 
+to allocate. Heap overflow will cause exit to the operating system.
+````
+````
+-stack The option -stack followed immediately by a space and a number w sets 
+the size of the ALS Prolog stack to w *1024, where w is the number of K bytes 
+to allocate. Stack overflow will cause exit to the operating system.
 
--stack The option -stack followed immediately by a space and a number w sets the size of the ALS Prolog stack to w *1024, where w is the number of K bytes to allocate. Stack overflow will cause exit to the operating system.
-
-These two options were formerly only controlled by the use of an environment variable, ALS_OPTIONS. Now, either or both the command-line and environment
+These two options were formerly only controlled by the use of an environment 
+variable, ALS_OPTIONS. Now, either or both the command-line and environment
 variable method can be used. Use of one of the command-line options overrides
 use of the corresponding option with the environment variable.
 The ALS_OPTIONS environment variable is used as follows. If w1 and w2 are
@@ -355,6 +362,7 @@ Under MS Windows:
 
     ALS_OPTIONS=stack_size:w1,heap_size:w2
 
-[Under MS Windows 95, such a line is placed in the AUTOEXEC.BAT file. Under
-Windows NT, one uses the Environment section of the System Properties control
-panel.]
+[Under MS Windows 95, such a line is placed in the AUTOEXEC.BAT file. 
+Under Windows NT, one uses the Environment section of the System 
+Properties control panel.]
+````
