@@ -2,4 +2,4 @@
 * text=auto
 
 # Shell scripts must always have LF line endings on checkout.
-*.sln text eol=crlf
+*.sh text eol=lf
