@@ -3,3 +3,6 @@
 
 # Shell scripts must always have LF line endings on checkout.
 *.sh text eol=lf
+
+# Tests use BTF files (Binary Text Files), which are binary.
+*.btf binary
