@@ -239,10 +239,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			panic("Couldn't get full path");
 		
 		*dir_end = 0;
-		sprintf(env, "TCL_LIBRARY=%slib\\tcl" TCL_VERSION "\\", dir);
-				
+
+		sprintf(env, "TCL_LIBRARY=%slib\\tcl" TCL_VERSION, dir);
 		if (Tcl_PutEnv(env) != TCL_OK)
 			panic("Couldn't set TCL_LIBRARY");
+
+		sprintf(env, "TK_LIBRARY=%slib\\tk" TCL_VERSION, dir);
+		if (Tcl_PutEnv(env) != TCL_OK)
+			panic("Couldn't set TK_LIBRARY");
 	}
 	
 	/* Make the OpenDocument package available to Tcl */
