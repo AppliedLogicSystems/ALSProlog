@@ -3,6 +3,8 @@
 *.o
 *.a
 *.so
+*.dll
+*.exe
 *.pst
 *.tmp
 *.out
@@ -15,3 +17,8 @@ alspro_b
 alsdev
 alsdev_b
 *.tgz
+core/win32/alsdir
+core/win32/lib
+core/unix/*/alsdir
+core/unix/*/lib
+foreign_sdk/*/ALS_Prolog_Foreign_SDK

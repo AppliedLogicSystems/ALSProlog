@@ -14,11 +14,10 @@
 static int
 getDirectory_ObjCmd(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
 {
-#pragma unused(clientData)
 
 	enum {INITIAL_DIR, PARENT, PROMPT};
-	char *options[] = {"-initialdir", "-parent", "-prompt", NULL};
-	char *ophelp[] = {"a directory path", "a window name", "a prompt string"};
+	const char *options[] = {"-initialdir", "-parent", "-prompt", NULL};
+	const char *ophelp[] = {"a directory path", "a window name", "a prompt string"};
 	int index, i, result;
 	Tcl_DString initdir;
 	Tk_Window parent = NULL;
@@ -64,9 +63,7 @@ exit:
 }
 
 
-#pragma export on
 __declspec(dllexport) int  Getdirectory_Init(Tcl_Interp *interp);
-#pragma export reset
 __declspec(dllexport) int Getdirectory_Init(Tcl_Interp *interp)
 {
 	if (!Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 0)

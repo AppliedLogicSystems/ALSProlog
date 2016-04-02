@@ -16,7 +16,7 @@
 
 extern void tcl_interface_init(void);
 
-extern void panic(const char *);
+//extern void panic(const char *);
 
 static char *simple_write(AP_World *w, AP_Obj obj, char *s)
 {
@@ -208,6 +208,7 @@ void setup_alsdev_demo(void);
 void shutdown_alsdev_demo(void);
 #endif
 
+    	extern long ss_image_offset(const char *image_name);
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -216,7 +217,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	PI_system_setup setup;
 	AP_Obj term;
 	AP_World *w = NULL;
-
+	
+	Tcl_FindExecutable(NULL);
+	
 	/* Allow only one instance to run and have it process the command line. */
 	mutex = CreateMutex(NULL, FALSE, "ALS Prolog Environment Mutex");
 	if (!mutex) return FALSE;
@@ -236,10 +239,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			panic("Couldn't get full path");
 		
 		*dir_end = 0;
-		sprintf(env, "TCL_LIBRARY=%slib\\tcl" TCL_VERSION "\\", dir);
-				
+
+		sprintf(env, "TCL_LIBRARY=%slib\\tcl" TCL_VERSION, dir);
 		if (Tcl_PutEnv(env) != TCL_OK)
 			panic("Couldn't set TCL_LIBRARY");
+
+		sprintf(env, "TK_LIBRARY=%slib\\tk" TCL_VERSION, dir);
+		if (Tcl_PutEnv(env) != TCL_OK)
+			panic("Couldn't set TK_LIBRARY");
 	}
 	
 	/* Make the OpenDocument package available to Tcl */
@@ -284,8 +291,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	   Since blt_dvsh is part of the state, reconsulting
 	   does not work correctly. */
 {
-	extern char executable_path[1024];
-	extern long ss_image_offset(const char *image_name);
+  //	extern char executable_path[1024];
 
 	if (!ss_image_offset(executable_path)) {
 #if 0

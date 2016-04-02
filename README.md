@@ -28,6 +28,15 @@ where darwin is the Mac OS X flavor of Unix, and &lt;flavor&gt; is possibly some
 
 **Windows:**
 
+Build Tools:
+- ActiveTcl 8.6 (32-bit)
+- Cygwin 32-bit, with packages:
+  - Devel
+  - Tcl-Tk
+  - X11
+  - Archive/Zip
+
+
 Locate yourself in the toplevel 'win32' directory in the tree, and execute 'make'.  When the build completes, you will find a folder  
 
 	win32/als-prolog	

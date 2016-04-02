@@ -1,4 +1,5 @@
 #include "getDirectory.h"
+#include <windows.h>
 #include <shlobj.h>
 
 /* Tk_GetHWND proto is from tkWin.h */
@@ -7,8 +8,6 @@ HWND Tk_GetHWND(Window window);
 int GetDirectory(Tcl_Interp *interp, Tcl_DString *initdir,
 	Tk_Window parent, const char *prompt)
 {
-#pragma unused(initdir)
-
 	BROWSEINFO bi;
 	char name[MAX_PATH];
 	LPITEMIDLIST idlist;

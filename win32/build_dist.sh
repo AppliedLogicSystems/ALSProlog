@@ -1,21 +1,29 @@
-:
 #!/bin/sh
 
-set -o errexit -o nounset
+set -eu
+
+case `uname -rs` in
+    "SunOS 4"*)	ARCH=sunos   ; SOEXT=so    ;;
+    "SunOS 5"*)	ARCH=solaris ; SOEXT=so    ;;
+    Linux*) 	ARCH=linux   ; SOEXT=so    ;;
+    "HP-UX"*)	ARCH=hpux    ; SOEXT=sl    ;;
+    "IRIX"*)	ARCH=irix    ; SOEXT=so    ;;
+    "CYGWIN"*)  ARCH=win32  ; SOEXT=dll   ;;
+    "Darwin"*)	ARCH=darwin  ; SOEXT=dylib ;;
+    *) 		echo "Unknown machine type..."; exit 1 ;;
+esac
 
 ALS_PROLOG=..
-BIN=$ALS_PROLOG/core/win32
+BIN=$ALS_PROLOG/core/$ARCH
+ALS_BUILD_SUPPORT=/usr/i686-w64-mingw32/sys-root/mingw/
+
 LIB=$ALS_PROLOG/core/alsp_src/library
-BUILTINS=$ALS_PROLOG/core/alsp_src/builtins
 EXAMPLES=$ALS_PROLOG/examples
 MAN=$ALS_PROLOG/manual
-EXTRAS=$ALS_PROLOG/../als_addl_software
-ODBC=$ALS_PROLOG/extensions/odbc
-PYTHON=$ALS_PROLOG/extensions/python
 
 if test $# -ne 1
 then
-    echo "Usage: $0 [standard | demo]" 1>&2
+    echo "Usage: $0 [standard]" 1>&2
     exit 2
 fi
 
@@ -23,28 +31,45 @@ EDITION=$1
 
 case $EDITION in
 standard)
-DISTDIR="ALS Prolog" ;
-EXE="ALS Prolog.exe" ;
-EXET="ALS Prolog.exe" ;
-EXAMPLE_SET="als pxs more objectpro visual Prolog1000 Chat80" ;
-MANUAL=als_man.pdf ; 
-MANUALNAME="ALS Prolog Manual.pdf" ;
+DISTNAME=als-prolog
+DISTDIR=$ARCH/$DISTNAME ;
+EXE=alsdev ;
+EXET=alsdev ;
+EXAMPLE_SET="als pxs more objectpro visual chat80 Prolog1000" ;
+MANUAL=als_man.pdf ; # standard manual is missing.
+REFMANUAL=ref_man.pdf ; 
+MANUALNAME=als-prolog-manual.pdf ;
+REFMANUALNAME=als-ref-manual.pdf ;
 HELP="alshelp" ;
 ;;
 esac
 
 rm -rf "$DISTDIR"
-mkdir "$DISTDIR"
+mkdir -p "$DISTDIR"
 
 cp -pr "$BIN/$EXE" "$DISTDIR/$EXET"
-cp -pr "$BIN/msvcrt.dll" "$DISTDIR"
-cp -pr "$BIN/tcl80.dll" "$DISTDIR"
-cp -pr "$BIN/tk80.dll" "$DISTDIR"
-cp -pr "$BIN/tclpip80.dll" "$DISTDIR"
-cp -pr "$BIN/alsdir" "$DISTDIR"
+if test -f "$BIN/$EXE.pst"
+then
+    cp -pr "$BIN/$EXE.pst" "$DISTDIR/$EXET.pst"
+elif test -f "$BIN/$EXE.exe.pst"
+then
+    cp -pr "$BIN/$EXE.exe.pst" "$DISTDIR"
+fi
+
+# Use -L to force dereferences of symbolic links
+cp -pRL "$BIN/alsdir" "$DISTDIR"
+rm -f "$DISTDIR/alsdir/builtins/blt_shl.pro"
+rm -f "$DISTDIR/alsdir/builtins/blt_dvsh.pro"
+rm -f "$DISTDIR/alsdir/builtins/ra_basis.pro"
+rm -f "$DISTDIR/alsdir/builtins/int_cstr.pro"
 cp -pr "$BIN/lib" "$DISTDIR"
-cp -pr "$BIN/lib/itcl3.0/itcl30.dll" "$DISTDIR"
-cp -pr "$BIN/lib/itk3.0/itk30.dll" "$DISTDIR"
+
+# MinGW64 libs
+cp -p "$ALS_BUILD_SUPPORT"/bin/tcl85.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/tk85.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libgcc_s_sjlj-1.dll "$DISTDIR"
+cp -pr "$ALS_BUILD_SUPPORT"/lib/tcl8.5 "$DISTDIR"/lib
+cp -pr "$ALS_BUILD_SUPPORT"/lib/tk8.5 "$DISTDIR"/lib
 
 mkdir "$DISTDIR/examples"
 for E in $EXAMPLE_SET ; do
@@ -52,77 +77,37 @@ for E in $EXAMPLE_SET ; do
 done
 
 cp "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
-cp -p $MAN/welcome_standard.txt" "$DISTDIR/README.txt"
+cp -p "$MAN/welcome_standard.txt" "$DISTDIR/README.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
-mkdir "$DISTDIR/help"
-cp -pr $MAN/$HELP/* "$DISTDIR/help"
-cp -p $MAN/als_help.htm "$DISTDIR/als_help.htm"
+cp -p $MAN/$REFMANUAL "$DISTDIR/$REFMANUALNAME"
+mkdir "$DISTDIR/alshelp"
+cp -pr $MAN/$HELP/* "$DISTDIR/alshelp"
+cp -p $MAN/als_help.html "$DISTDIR/als_help.html"
+cp -p $MAN/alshelp.css "$DISTDIR/alshelp.css"
+cp -p $MAN/package_nav.html "$DISTDIR/package_nav.html"
 
-mkdir "$DISTDIR/alsdir/builtins"
-cp -p $BUILTINS/*.pro "$DISTDIR/alsdir/builtins"
 
-mkdir "$DISTDIR/alsdir/library"
-cp -p $LIB/*.pro "$DISTDIR/alsdir/library"
-cp -p $LIB/*.alb "$DISTDIR/alsdir/library"
-
-rm -f "$DISTDIR/alsdir/builtins/blt_shl.pro"
-rm -f "$DISTDIR/alsdir/builtins/blt_dvsh.pro"
-rm -f "$DISTDIR/alsdir/builtins/ra_basis.pro"
-rm -f "$DISTDIR/alsdir/builtins/int_cstr.pro"
-
-EXTRATCL=`ls $EXTRAS/common/tcltk`
-for XX in $EXTRATCL 
-do
-cp -pr "$EXTRAS/common/tcltk/$XX" "$DISTDIR/lib"
-done
-IWIDGETS=`ls $EXTRAS/common/iwidgets`
-for XX in $IWIDGETS 
-do
-cp -pr "$EXTRAS/common/iwidgets/$XX" "$DISTDIR/lib/iwidgets3.0/scripts"
-done
+#mkdir "$DISTDIR/alsdir/library"
+#cp -p $LIB/*.pro "$DISTDIR/alsdir/library"
+#cp -p $LIB/*.alb "$DISTDIR/alsdir/library"
 
 if test $EDITION = standard
 then
 	cp -pr "$ALS_PROLOG/foreign_sdk/win32/ALS_Prolog_Foreign_SDK" "$DISTDIR"
-	cp -pr "$BIN/alspro.exe" "$DISTDIR"
-	cp -pr "$BIN/alspro.dll" "$DISTDIR"
-	cp -pr "$BIN/Generic ALS App Stub.exe" "$DISTDIR"
+	cp -pr "$BIN/alspro" "$DISTDIR"
+	if test -f "$BIN/alspro.pst"
+	then
+	    cp -pr "$BIN/alspro.pst" "$DISTDIR"
+	elif test -f "$BIN/alspro.exe.pst"
+	then
+	    cp -pr "$BIN/alspro.exe.pst" "$DISTDIR"
+
+	fi
+	cp -pr "$BIN/libalspro.a" "$DISTDIR"
+	cp -pr "$BIN/libalspro.$SOEXT" "$DISTDIR"
 fi
 
-if test $EDITION = demo
-then
-	cp -pr "$ALS_PROLOG/foreign_sdk/win32/ALS_Prolog_Foreign_SDK" "$DISTDIR"
-	cp -pr "$BIN/alspro_demo.exe" "$DISTDIR/alspro.exe"
-	cp -pr "$BIN/alspro.dll" "$DISTDIR"
-	cp -pr "$BIN/Generic ALS App Stub.exe" "$DISTDIR"
-fi
-
-if test $EDITION = standard -o $EDITION = demo
-then
-	mkdir "$DISTDIR/odbc"
-	cp -pr "$ODBC/common/odbc.pro" "$DISTDIR/odbc"
-	cp -pr "$ODBC/examples/odbc_samples.pro" "$DISTDIR/odbc"
-	cp -pr "$ODBC/examples/sql_shell.pro" "$DISTDIR/odbc"
-	cp -pr "$ODBC/examples/sql_shell.ppj" "$DISTDIR/odbc"
-	cp -pr "$ODBC/examples/economics.mdb" "$DISTDIR/odbc"
-	cp -pr "$ODBC/src/meta_odbc.pro" "$DISTDIR/odbc"
-	cp -pr "$ODBC/src/prolog_odbc.pro" "$DISTDIR/odbc"
-	cp -pr "$ODBC/i386_mswin32/odbcintf.psl" "$DISTDIR/alsdir/shared"
-	cp -pr "$ODBC/doc/odbc.pdf" "$DISTDIR/odbc"
-	
-	cp -pr "$ALS_PROLOG/core/tcltk_interface/mswin32/tclintf.psl" "$DISTDIR/alsdir/shared"
-	cp -pr "$ALS_PROLOG/core/tcltk_interface/common/tcltk.pro" "$DISTDIR/alsdir/shared"
-	cp -pr "$ALS_PROLOG/core/tcltk_interface/common/tcltk_util.pro" "$DISTDIR/alsdir/shared"
-
-	mkdir "$DISTDIR/python"
-
-#	cp -pr "$PYTHON/i386_mswin32/python.psl" "$DISTDIR/alsdir/shared"
-#	cp -pr "$PYTHON/common/als_python_guide.html" "$DISTDIR/python"
-#	cp -pr "$PYTHON/common/py_test.pro" "$DISTDIR/python"
-#	cp -pr "$PYTHON/common/test_util.py" "$DISTDIR/python"
-
-fi
-
-
-echo "Build directory complete."
-echo "Please add the directory to the installer script and create installer."
+rm -f $DISTNAME-$ARCH.zip
+pushd $ARCH
+zip -r ../$DISTNAME-$ARCH.zip $DISTNAME
+popd

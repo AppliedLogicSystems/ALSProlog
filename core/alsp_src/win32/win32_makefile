@@ -5,16 +5,21 @@ OS_AR = ar rusc
 OS_RANLIB = true
 OS_SL_EXT = dll
 OS_SL_LINK = $(CC) -shared
-LIBS = -lwsock32
+LIBS = -lwsock32 -lcomdlg32
 SL_LINK_LIBS = $(LIBS)
+TCLVER=85
 
 VPATH += :$(ALSDEVDIR)/getFiles:$(ALSDEVDIR)/getDirectory
 
-ALS_BUILD_SUPPORT = '/cygdrive/c/Program Files/Metrowerks/CodeWarrior/ALS Build Support'
-ALS_BUILD_SUPPORT_INCLUDES = -isystem $(ALS_BUILD_SUPPORT)/'Tcl-Tk Support/include' -isystem $(ALS_BUILD_SUPPORT)/'Tcl-Tk Support/include/X11'
-ALS_BUILS_SUPPORT_LIBS = 
+ALS_BUILD_SUPPORT = /usr/i686-w64-mingw32/sys-root/mingw/
+ALS_BUILD_SUPPORT_INCLUDES = -isystem $(ALS_BUILD_SUPPORT)/include/tcl8.5
 
-ALSDEV_OS_SOURCE = win32_alsdev.c tcl_interface.c alsdev_demo.c getDirectory.c win32_getDirectory.c getFiles.c win32_getFiles.c
+ALS_BUILD_SUPPORT_LIBDIR = -L $(ALS_BUILD_SUPPORT)/lib
+
+# Set path to allow access to Tcl/Tk DLLs
+export PATH := $(ALS_BUILD_SUPPORT)/bin:$(PATH)
+
+ALSDEV_OS_SOURCE = win32_alsdev.c getDirectory.c win32_getDirectory.c getFiles.c win32_getFiles.c
 
 ALS_STUB_SOURCE = win32_alsdev.c tcl_interface.c getDirectory.c win32_getDirectory.c getFiles.c win32_getFiles.c
 ALS_STUB_OBJECTS = $(ALS_STUB_SOURCE:.c=.o)
@@ -36,7 +41,7 @@ alsdir/shared : $(MAKEFS)
 	mkdir -p alsdir/shared
 	rm -f alsdir/shared/*.pro alsdir/shared/*.psl alsdir/shared/*.tcl
 	cd alsdir/shared ; cp ../../$(CORE)/als_dev/alsdev/*.tcl .
-				 
+
 alsdir/images : $(CORE)/als_dev/alsdev $(MAKEFS)
 	mkdir -p alsdir/images
 	rm -f alsdir/images/*.*
