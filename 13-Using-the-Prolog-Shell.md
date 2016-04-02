@@ -1,4 +1,4 @@
-19 TTY Development Environment
+13 TTY Development Environment
 The TTY Development interface for ALS Prolog is similar to the original DEC-10
 system constructed in Edinburgh.
 ###13.0.1 Starting up ALS Prolog
