@@ -232,15 +232,18 @@ white space anywhere in the given goals. When the submitted goal finishes
 running (with success or failure), control is passed to the normal Prolog
 shell unless the -b command line option has also been used, in which case
 control returns to the operating system shell.  
-
+````
+````
 -b The option -b prevents the normal the Prolog shell from running. This
 means control will return to the operating system shell when all command
 line processing is complete, including processing of source files and execution of -g goals.
-
+````
+````
 -q The option -q causes all standard system loading messages to be suppressed, including the banner. One of the uses of -q is to permit you to use
 ALS Prolog as a Unix filter. Note that this does not turn off prompts issued
 by the Prolog shell.
-
+````
+````
 -v The option -v turns on verbose mode. This causes all system loading messages, including some which are normally suppressed, to be printed.
 
 -gic The option -gic (“generated in current”) causes the *.obp files which are
@@ -337,4 +340,3 @@ Under MS Windows:
 [Under MS Windows 95, such a line is placed in the AUTOEXEC.BAT file. Under
 Windows NT, one uses the Environment section of the System Properties control
 panel.]
-
