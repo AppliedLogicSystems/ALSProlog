@@ -217,7 +217,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	PI_system_setup setup;
 	AP_Obj term;
 	AP_World *w = NULL;
-
+	
+	Tcl_FindExecutable(NULL);
+	
 	/* Allow only one instance to run and have it process the command line. */
 	mutex = CreateMutex(NULL, FALSE, "ALS Prolog Environment Mutex");
 	if (!mutex) return FALSE;
