@@ -550,11 +550,12 @@ trap/2
 trap(Goal,Handler)
 trap(Goal,Handler)
 ````
-Here, Handler is a local handler such that
-1. Hander is in force while Goal is running;
-2. Hander ceases to be in force when Goal succeeds or fails;
-3. Hander returns to force if Goal is backtracked into after succeeding
-4. Hander is capable of dealing with any events which occur while Goal is running;
+Here, `Handler` is a local handler such that
+
+1. `Handler` is in force while `Goal` is running;
+2. `Handler` ceases to be in force when `Goal` succeeds or fails;
+3. `Handler` returns to force if `Goal` is backtracked into after succeeding
+4. `Handler` is capable of dealing with any events which occur while `Goal` is running;
 
 trap/2 is a module closure (meta-predicate), so that the module in which it is called
 is available to its implementing code. Regarding item 4 above, Handler is usually
