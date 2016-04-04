@@ -2,7 +2,7 @@ all: standard
 
 core:
 	$(MAKE) -C ../core/unix
-	cd ../foreign_sdk/unix ; ./build
+	cd ../foreign_sdk/unix ; ./build.sh
 
 odbc:
 	cd ../extensions/odbc/i386_mswin32 ; ./build.bat
