@@ -1,8 +1,10 @@
+*~
 *.obp
 *.d
 *.o
 *.a
 *.so
+*.dylib
 *.dll
 *.exe
 *.pst
@@ -21,4 +23,6 @@ core/win32/alsdir
 core/win32/lib
 core/unix/*/alsdir
 core/unix/*/lib
+unix/darwin
+unix/linux
 foreign_sdk/*/ALS_Prolog_Foreign_SDK
