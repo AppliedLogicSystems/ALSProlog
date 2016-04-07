@@ -19,10 +19,13 @@ alspro_b
 alsdev
 alsdev_b
 *.tgz
+*.zip
 core/win32/alsdir
 core/win32/lib
 core/unix/*/alsdir
 core/unix/*/lib
 unix/darwin
 unix/linux
+unix/cygwin
+win32/win32
 foreign_sdk/*/ALS_Prolog_Foreign_SDK
