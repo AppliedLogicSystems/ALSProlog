@@ -71,7 +71,9 @@ proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
 	set DFT [list -filetypes $types]
 		# DFT currently not used.
 		# -title "Files to Add to Project" not used.
-	set Choices [getFiles -initialdir $DfltDir]
+#	set Choices [getFiles -initialdir $DfltDir]
+		# cf: https://www.tcl.tk/man/tcl8.4/TkCmd/getOpenFile.htm
+	set Choices [tk_getOpenFile -initialdir $DfltDir -multiple true -filetypes FileTypes ]
 	if {$Choices != ""} then {
 		set Prev [$Listbox get 0 end]
 		foreach Entry $Choices {
@@ -160,7 +162,8 @@ proc move_selection_down {Listbox} {
 
 proc add_search_dirs {Listbox PathType} {
 	set CWD [pwd]
-	set NewDir [getDirectory -initialdir $CWD]
+		# cf: https://www.tcl.tk/man/tcl8.3/TkCmd/chooseDirectory.htm
+	set NewDir [tk_chooseDirectory -initialdir $CWD]
 	cd $CWD
 	set PrevEntries [$Listbox get 0 end]
 	if {($NewDir == "") || ($CWD == $NewDir)} then {

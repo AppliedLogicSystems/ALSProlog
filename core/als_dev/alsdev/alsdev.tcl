@@ -700,7 +700,8 @@ proc kill_tcl_interps  { } {
 
 proc set_directory { } {
 	set CWD [pwd]
-	set NewDir [getDirectory]
+		# cf: https://www.tcl.tk/man/tcl8.3/TkCmd/chooseDirectory.htm
+	set NewDir [tk_chooseDirectory]
 	if {$NewDir != ""} {
 		cd $NewDir
 		show_dir_on_main $NewDir
