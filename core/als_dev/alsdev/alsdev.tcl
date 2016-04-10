@@ -41,11 +41,6 @@ if {$tcl_platform(platform) == "macintosh"} {
 	load {} getFiles
 }
 
-#TODO Figure out if getDir/Files is still needed in 2009 -CEH
-#package require getDirectory
-#package require getFiles
-
-
 proc xpe { What } {
 	global array proenv
 	return $proenv($What)
