@@ -132,20 +132,8 @@ ALSDEVLIBS=listutl1,misc_db,miscterm,msc_ioin,mscioout,strctutl,strings,tcl_sppt
 ALSDEVLIBPS =listutl1.pro misc_db.pro miscterm.pro msc_ioin.pro mscioout.pro strctutl.pro \
 			strings.pro tcl_sppt.pro tk_alslib.pro typecomp.pro
 
-GETDIR=$(CORE)/als_dev/alsdev/getDirectory
-GETFILES=$(CORE)/als_dev/alsdev/getFiles
 ALSDEVDIR=$(CORE)/als_dev/alsdev
 DEMOFILES=$(ALSDEVDIR)/demo15.pro $(ALSDEVDIR)/serial_cmn.pro $(ALSDEVDIR)/ldr_dvsh.pro
-
-lib: $(GETDIR)/getDirectory.tcl $(GETDIR)/unix_pkgIndex.tcl $(GETFILES)/getFiles.tcl $(GETFILES)/unix_pkgIndex.tcl $(MAKEFS)
-#	cp -r $(ALS_BUILD_SUPPORT)/lib .
-#	chmod -R +w lib
-	mkdir -p lib/tk8.0/getDirectory
-	cp -r $(GETDIR)/getDirectory.tcl lib/tk8.0/getDirectory
-	cp -r $(GETDIR)/unix_pkgIndex.tcl lib/tk8.0/getDirectory/pkgIndex.tcl
-	mkdir -p lib/tk8.0/getFiles
-	cp -r $(GETFILES)/getFiles.tcl lib/tk8.0/getFiles
-	cp -r $(GETFILES)/unix_pkgIndex.tcl lib/tk8.0/getFiles/pkgIndex.tcl
 
 ALSDEV_LIBS = -litcl3.0 -litk3.0 -ltcl8.0 -ltk8.0
 
@@ -154,7 +142,7 @@ alsdev_b : libalspro.a $(ALSDEV_OBJECTS) $(MAKEFS)
 	$(CC) $(CFLAGS) -o alsdev_b  $(ALSDEV_OBJECTS) libalspro.a $(ALS_BUILD_SUPPORT_LIBDIR) -ltcl$(TCLVER) -ltk$(TCLVER) $(LIBS)
 
 
-alsdev :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
+alsdev :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) $(MAKEFS)
 	rm -f alsdir/builtins/*.obp
 	rm -f alsdir/library/*.obp
 	rm -f $(SUBOS)/*.obp
@@ -162,7 +150,7 @@ alsdev :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES)
 	./alsdev_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev.pro -g "bldit('$(CORE)',save_image(alsdev,[start_goal((builtins:start_alsdev))]))"
 
 
-#studalsdev :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
+#studalsdev :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) $(MAKEFS)
 #	rm -f alsdir/builtins/*.obp
 #	rm -f alsdir/library/*.obp
 #	rm -f $(SUBOS)/*.obp
@@ -179,7 +167,7 @@ alsdev :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES)
 #	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
 #	select_lib(library,[$(ALSDEVLIBS)])])'
 
-#alsdev_demo :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) lib $(MAKEFS)
+#alsdev_demo :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) $(MAKEFS)
 #	rm -f alsdir/builtins/*.obp
 #	rm -f alsdir/library/*.obp
 #	rm -f $(SUBOS)/*.obp
@@ -208,7 +196,7 @@ clean :
 distclean: superclean
 
 superclean : clean
-	rm -fr alsdir alspro* alspro_b* alsdev* studals* libalspro.a libalspro.$(OS_SL_EXT)* *.obp $(SUBOS) lib
+	rm -fr alsdir alspro* alspro_b* alsdev* studals* libalspro.a libalspro.$(OS_SL_EXT)* *.obp $(SUBOS)
 	rm -rf $(SOURCE_DIR)/tests/iso_test_suite/*.tmp $(SOURCE_DIR)/tests/iso_test_suite/*.out *.log *.out foo* *.tmp
 
 -include *.d

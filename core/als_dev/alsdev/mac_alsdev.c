@@ -70,9 +70,6 @@ extern void 		TkMacInitMenus (Tcl_Interp 	*interp);
 extern QDGlobalsPtr tcl_macQdPtr;
 extern void panic(const char *);
 
-int  Getdirectory_Init(Tcl_Interp *interp);
-int  Getfiles_Init(Tcl_Interp *interp);
-
 void main(void)
 {
 	
@@ -92,10 +89,6 @@ void main(void)
 
 	/* Install an Apple Events package */
 	Tcl_StaticPackage(NULL, "appleevents", AEPackageInit, NULL);
-	
-	Tcl_StaticPackage(NULL, "getDirectory", Getdirectory_Init, NULL);
-	
-	Tcl_StaticPackage(NULL, "getFiles", Getfiles_Init, NULL);
 
 	SetupALSProlog();
 }

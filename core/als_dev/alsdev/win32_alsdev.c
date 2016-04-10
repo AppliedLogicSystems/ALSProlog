@@ -11,9 +11,6 @@
 #include <tcl.h>
 #include <tk.h>
 
-#include "getFiles.h"
-#include "getDirectory.h"
-
 extern void tcl_interface_init(void);
 
 //extern void panic(const char *);
@@ -251,9 +248,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	
 	/* Make the OpenDocument package available to Tcl */
 	Tcl_StaticPackage(NULL, "Opendocument", Opendocument_Init, NULL);
-
-	Tcl_StaticPackage(NULL, "getFiles", Getfiles_Init, NULL);
-	Tcl_StaticPackage(NULL, "getDirectory", Getdirectory_Init, NULL);
 	
     /* Fill setup struct with defaults */
     setup.heap_size = 0;
