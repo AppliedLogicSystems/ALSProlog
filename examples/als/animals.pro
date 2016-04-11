@@ -104,7 +104,7 @@ ask(X) :- fact(X,yes), !.   % Has it been answered yet?
 ask(X) :- fact(X,no),!,fail.
 ask(QuestionTag) :-
    question(QuestionTag,Question),!,
-   write(Question), ttyflush,
+   write(Question), 
    complete(QuestionTag).
 
 complete(X) :- write('? '),read(Y),assert(fact(X,Y)), Y=yes.
