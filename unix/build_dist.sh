@@ -56,7 +56,6 @@ fi
 
 # Use -L to force dereferences of symbolic links
 cp -pRL "$BIN/alsdir" "$DISTDIR"
-cp -pr "$BIN/lib" "$DISTDIR"
 
 mkdir "$DISTDIR/examples"
 for E in $EXAMPLE_SET ; do

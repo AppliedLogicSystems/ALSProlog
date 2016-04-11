@@ -62,12 +62,12 @@ rm -f "$DISTDIR/alsdir/builtins/blt_shl.pro"
 rm -f "$DISTDIR/alsdir/builtins/blt_dvsh.pro"
 rm -f "$DISTDIR/alsdir/builtins/ra_basis.pro"
 rm -f "$DISTDIR/alsdir/builtins/int_cstr.pro"
-cp -pr "$BIN/lib" "$DISTDIR"
 
 # MinGW64 libs
 cp -p "$ALS_BUILD_SUPPORT"/bin/tcl85.dll "$DISTDIR"
 cp -p "$ALS_BUILD_SUPPORT"/bin/tk85.dll "$DISTDIR"
 cp -p "$ALS_BUILD_SUPPORT"/bin/libgcc_s_sjlj-1.dll "$DISTDIR"
+mkdir "$DISTDIR"/lib
 cp -pr "$ALS_BUILD_SUPPORT"/lib/tcl8.5 "$DISTDIR"/lib
 cp -pr "$ALS_BUILD_SUPPORT"/lib/tk8.5 "$DISTDIR"/lib
 
