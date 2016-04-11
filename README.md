@@ -3,8 +3,7 @@ Welcome to the ALS Prolog Source Tree
 
 The ALS Prolog source tree is divided into core and peripheral
 directories.  The core directory contains the source for the Prolog
-compiler, runtime, and IDE.  The peripheral directories contain manuals,
-examples, extensions, etc.   The tree is hosted on GitHub at
+compiler, runtime, and IDE. The peripheral directories contain manuals, examples, extensions, etc. The tree is hosted on GitHub at:
 
 	https://github.com/AppliedLogicSystems/ALSProlog
 
@@ -28,17 +27,30 @@ where darwin is the Mac OS X flavor of Unix, and &lt;flavor&gt; is possibly some
 
 **Windows:**
 
-Build Tools:
-- ActiveTcl 8.6 (32-bit)
-- Cygwin 32-bit, with packages:
-  - Devel
-  - Tcl-Tk
-  - X11
-  - Archive/Zip
-
-
 Locate yourself in the toplevel 'win32' directory in the tree, and execute 'make'.  When the build completes, you will find a folder  
 
 	win32/als-prolog	
-Please note that as of 2015-11-5, the win32 build is broken.
 
+Build Dependencies
+------------------
+
+### Linux
+
+Generally, a 32-bit GNU/Linux with standard build tools (Make, GCC 4), Git, and Tcl/Tk. Packages for popular distributions:
+
+Debian/Ubuntu: `sudo apt-get install build-essential git tk-dev`
+
+CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install tk-devel`
+
+### Mac OS X
+
+[Xcode](https://developer.apple.com/xcode/) command line tools.
+
+### Windows
+
+[Cygwin](https://cygwin.com) 32-bit is used to build both Win32 and Cygwin, with packages:
+
+- Devel (git make gcc-core mingw64-i686-gcc-core libcrypt-devel mingw64-i686-libgcrypt)
+- Tcl-Tk (tcl-tk-devel mingw64-i686-tcl mingw64-i686-tk)
+- Archive (zip)
+- X11 (optional to run X11 alsdev)
