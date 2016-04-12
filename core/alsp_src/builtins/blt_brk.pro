@@ -10,7 +10,7 @@
  | Revised 4/1/93 - Ken Bowen 
  |   -- changed to library menu routines
  |   -- changed to stream I/O routines
- |     - removed see/tell info from breakpoint record
+ |   -- removed see/tell info from breakpoint record
  *===================================================================*/
 module builtins.
 use windows.
@@ -51,8 +51,6 @@ breakhandler(_,_)
 	
 hot_break_handler(Resp,M,G)
 	:-
-write(hot_break_handler(Resp,M,G)), nl,flush_output,
-
 		%% getBreakLevel(BreakList),
 	get_primary_manager(ALSIDE),
 	accessObjStruct(break_level, ALSIDE, BreakList),
@@ -60,8 +58,6 @@ write(hot_break_handler(Resp,M,G)), nl,flush_output,
 	NewLevel is OldLevel+1,
 	%% setBreakLevel([b(NewLevel,M,G) | BreakList]),
 	setObjStruct(break_level, ALSIDE, [b(NewLevel,M,G) | BreakList]),
-
-write(call_catch(break_handler(Resp,M,G,alside))),nl,flush_output,
 
 	catch(break_handler(Resp,M,G,ALSIDE),
 		  breakhandler(NewM,NewG),
@@ -82,11 +78,6 @@ hot_breakhandler(_,_,_)
 		fail
 	).
 	
-
-
-
-
-
 listOfCodes([ a, b, c, d, e, f, p, s, t, ?]).
 
 choiceItems( [
@@ -106,7 +97,7 @@ responses( M, G, [
 		 break_shell,
 		 continue(M,G),
 		 debug(M,G),
-		 exit,
+		 exit_prolog, 	% was: exit,
 		 fail,
 		 previous,
 		 show(M,G),
@@ -148,7 +139,6 @@ break_handler(abort,M,G,ALSIDE)
 
 break_handler(alsdev_shell,M,G,ALSIDE) 
 	:-!,
-write(in_break_handler(alsdev_shell,M,G,alside)),nl,flush_output,
 	builtins:prolog_shell(user_input,user_output,alsdev),
 	breakhandler0(M,G,ALSIDE).
 break_handler(break_shell,M,G,ALSIDE) 
@@ -191,6 +181,8 @@ break_handler(fail,M,G,ALSIDE)
 	fail.
 break_handler(previous,M,G,ALSIDE) 
 	:-!, 
+	get_shell_level(CurLevel),
+	get_shell_prompts( CurPromptsStack ),
 	%% getBreakLevel([_ | PrevList]),
 	accessObjStruct(break_level, ALSIDE, BreakList),
 	BreakList = [_ | PrevList],

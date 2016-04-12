@@ -176,9 +176,12 @@ als_mem_init(file,offset)
 	/*//amheader.integ_als_mem = &als_mem;*/
 	amheader.integ_als_mem_init = als_mem_init;
 	amheader.integ_w_unify = w_unify;
-	strcpy(amheader.integ_version_num, VERSION_STRING);
-	strcpy(amheader.integ_processor, ProcStr);
-	strcpy(amheader.integ_minor_os, MinorOSStr);
+	(void)strncpy(amheader.integ_version_num, VERSION_STRING, sizeof(amheader.integ_version_num)-1);
+	amheader.integ_version_num[sizeof(amheader.integ_version_num)-1] = '\0';
+	(void)strncpy(amheader.integ_processor, ProcStr, sizeof(amheader.integ_processor)-1);
+	amheader.integ_processor[sizeof(amheader.integ_processor)-1] = '\0';
+	(void)strncpy(amheader.integ_minor_os, MinorOSStr, sizeof(amheader.integ_minor_os)-1);
+	amheader.integ_minor_os[sizeof(amheader.integ_minor_os)-1] = '\0';
 
 	return 0;	/* no saved state */
     }
