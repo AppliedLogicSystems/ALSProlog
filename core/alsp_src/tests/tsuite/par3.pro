@@ -15,9 +15,6 @@
  */
 
 main :-	
-	als_system(SysVars),
-	dmember(os=OS,SysVars),
-	not(OS = macos), not(OS = mswin32),
 	consume(100,L) & ints_from(0,L).
 
 primes(N) :-
@@ -61,11 +58,19 @@ consume0(N,[H|T]) :-
 	write(c:H),nl,
 	consume(NP,T).
 
-
 ints_from(N,[N|T]) :-
-%	write(p:N),nl,
+	write(p:N),nl,
 	NN is N+1,
 	ints_from(NN,T).
+
+ints_from(N,[N|T]) :-
+	ints_from(3, N,[N|T]).
+
+ints_from(0, N,[N|T]) :-!.
+ints_from(K, N,[N|T]) :-
+	NN is N+1,
+	KK is K-1,
+	ints_from(KK, NN, [N|T]).
 
 /*
  * Queue Management:
@@ -120,6 +125,7 @@ clear_alarm :-
 suspend(M,G) :-
 	addQueue(M:G),
 	remQueue(NG),
+gc,
 	run_process(NG).
 
 :- compiletime, module_closure('&&',2,parallelize2).

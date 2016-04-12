@@ -179,7 +179,6 @@ break_handler(exit,M,G,ALSIDE)
 	%% getBreakLevel([b(Level,_,_)|_]),
 	accessObjStruct(break_level, ALSIDE, BreakList),
 	BreakList = [b(Level,_,_)|_],
-%pbi_write(break_handler(exit,M,G,level=Level)),pbi_nl,pbi_ttyflush,
 	(Level < 0 ->
 			%% exit_ctlc: "Exiting Prolog from Control-C or Control-Break.\n"
 		prolog_system_error(exit_ctlc, []),
@@ -201,7 +200,8 @@ break_handler(previous,M,G,ALSIDE)
 	(   PrevLevel < 1 ->  
 			%% no_prev_lev: "No previous level!!\n"
 		prolog_system_error(no_prev_lev, []),
-	    abort
+	    	set_shell_prompts( [('?- ','?-_')] ),
+	    	abort
 		;
 	    throw(breakhandler(PrevM,PrevG))
 	).
