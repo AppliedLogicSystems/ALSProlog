@@ -32,8 +32,6 @@
 
 if {$tcl_platform(platform) == "windows"} {
 	load {} OpenDocument
-	load {} getDirectory
-	load {} getFiles
 }
 if {$tcl_platform(platform) == "macintosh"} {
 	load {} appleevents
