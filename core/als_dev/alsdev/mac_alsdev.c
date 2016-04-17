@@ -323,11 +323,6 @@ PI_BEGIN
 	PI_DEFINE("enable_tcl_yield",0,enable_tcl_yield)
 PI_END
 
-#ifdef DEMO
-void setup_alsdev_demo(void);
-void shutdown_alsdev_demo(void);
-#endif
-
 void SetupALSProlog(void)
 {
     PI_system_setup setup;
@@ -369,15 +364,8 @@ void SetupALSProlog(void)
     PI_set_console_functions(standard_console_read, standard_console_write,
 				standard_console_error);
 
-#ifdef DEMO
-	setup_alsdev_demo();
-#endif
-
     if ((exit_status = PI_startup(&setup)) != 0) return;
 
-#ifdef DEMO
-	shutdown_alsdev_demo();
-#endif
     tcl_interface_init();
 
 	PI_INIT;
