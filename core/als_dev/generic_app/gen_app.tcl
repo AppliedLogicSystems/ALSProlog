@@ -179,13 +179,9 @@ proc send_prolog_1 {args} {
 		##### Getting the APP started:
 		######################################
 proc load_photo_gif {image_name base_name} {
-	global tcl_platform APPTCLPATH
+	global APPTCLPATH
 
-	if {$tcl_platform(platform) == "macintosh"} {
-		image create photo $image_name -format gif -data [resource read GIFf $base_name]
-	} else {
-		image create photo $image_name -file [file join $APPTCLPATH images $base_name.gif]
-	}
+	image create photo $image_name -file [file join $APPTCLPATH images $base_name.gif]
 }
 
 proc init_gif_photos {GifList ImgDir} {

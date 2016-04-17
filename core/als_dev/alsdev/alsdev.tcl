@@ -428,12 +428,8 @@ load_source $ALSTCLPATH {als_projects}
 #load_source $ALSTCLPATH {als_tkfbox}
 
 proc load_photo {image_name base_name} {
-	global tcl_platform ALSTCLPATH
-	if {$tcl_platform(platform) == "macintosh"} {
-		image create photo $image_name -format gif -data [resource read GIFf $base_name]
-	} else {
-		image create photo $image_name -file [file join $ALSTCLPATH .. images $base_name.gif]
-	}
+	global ALSTCLPATH
+	image create photo $image_name -file [file join $ALSTCLPATH .. images $base_name.gif]
 }
 
 # Load images
