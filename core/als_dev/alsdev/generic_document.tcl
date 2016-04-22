@@ -433,7 +433,7 @@ proc main.close {} { exit_app }
 proc main.cut {w} { document.cut $w }
 proc main.copy {w} { document.copy $w }
 proc main.paste {w} { document.paste $w }
-proc main.clear {w} { document.clear $w }
+proc main.delete {w} { document.delete $w }
 proc main.select_all {w} { document.select_all $w }
 proc main.find {w} { document.find $w }
 
@@ -624,7 +624,7 @@ proc document.paste {w} {
 	set agv($w,dirty) true
 }
 
-proc document.clear {w} {
+proc document.delete {w} {
 	global array agv
 	catch {$w.text delete sel.first sel.last}
 	set agv($w,dirty) true

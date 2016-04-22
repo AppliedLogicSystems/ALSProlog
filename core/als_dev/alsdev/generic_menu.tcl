@@ -123,7 +123,7 @@ proc add_generic_edit_menu {menubar type window} {
     $menubar.edit add command \
         -label Paste -underline 0 -accelerator "$mod-V" -command "re {$type.paste $window}"
     $menubar.edit add command \
-        -label Clear -underline 2 -command "re {$type.clear $window}"
+        -label Delete -underline 2 -command "re {$type.delete $window}"
     $menubar.edit add separator
     $menubar.edit add command \
         -label {Select All} -underline 8 -accelerator "$mod-A" -command "re {$type.select_all $window}"
@@ -208,7 +208,7 @@ proc listener.paste {w} {
 	focus $w.text
 }
 
-proc listener.clear {w} {
+proc listener.delete {w} {
 #	set w .topals
 	global array agv
 	catch {$w.text delete sel.first sel.last}
