@@ -80,7 +80,7 @@ proc add_edit_menu {menubar type window} {
     $menubar.edit add command \
         -label Paste -underline 0 -accelerator "$mod-V" -command "re {$type.paste $window}"
     $menubar.edit add command \
-        -label Clear -underline 2 -command "re {$type.clear $window}"
+        -label Delete -underline 2 -command "re {$type.delete $window}"
     $menubar.edit add separator
     $menubar.edit add command \
         -label {Select All} -underline 8 -accelerator "$mod-A" -command "re {$type.select_all $window}"
@@ -249,7 +249,7 @@ proc listener.paste {xw} {
 	focus $w.text
 }
 
-proc listener.clear {xw} {
+proc listener.delete {xw} {
 	set w .topals
 	global array proenv
 	catch {$w.text delete sel.first sel.last}
@@ -291,7 +291,7 @@ proc debugwin.find {xw} {
 	start_edit_find .debugwin
 }
 
-proc debugwin.clear {xw} {
+proc debugwin.delete {xw} {
 	set w .debugwin
 	global array proenv
 	catch {$w.text delete sel.first sel.last}

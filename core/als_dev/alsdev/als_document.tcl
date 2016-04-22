@@ -586,7 +586,7 @@ proc document.paste {w} {
 	set proenv($w,dirty) true
 }
 
-proc document.clear {w} {
+proc document.delete {w} {
 	global array proenv
 	catch {$w.text delete sel.first sel.last}
 	set proenv($w,dirty) true

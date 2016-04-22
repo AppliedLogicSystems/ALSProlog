@@ -83,7 +83,6 @@ $(MAIN_OBJECTS) : $(MAKEFS)
 $(LIB_OBJECTS) $(STATIC_OBJECTS) $(SHARED_OBJECTS) : $(MAKEFS)
 
 binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro alsdev 
-#			studalsdev alsdev_demo alspro_demo
 
 all : default
 
@@ -166,18 +165,6 @@ alsdev :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES)
 #	save_image(studalsdev,[start_goal((builtins:start_alsdev)), \
 #	select_lib(builtins, [blt_dvsh,dbg_class,projects]), \
 #	select_lib(library,[$(ALSDEVLIBS)])])'
-
-#alsdev_demo :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES) $(ALSDEVLIBPS) $(MAKEFS)
-#	rm -f alsdir/builtins/*.obp
-#	rm -f alsdir/library/*.obp
-#	rm -f $(SUBOS)/*.obp
-#	rm -f *.obp
-#	rm -f ../../als_dev/alsdev/demo15.obp
-#	rm -f ../../als_dev/alsdev/serial_cmn.obp
-#	./alsdev_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev_demo.pro -g "bldit('$(CORE)',save_image(alsdev_demo,[start_goal((builtins:start_alsdev))]))"
-
-
-#	./alspro_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev_demo.pro -g 'save_image(alsdev_demo,[start_goal((builtins:start_alsdev))])'
 
 
 #alspro_demo :  alsdir alspro_b $(BUILTINS) $(MAKEFS) $(DEMOFILES)
