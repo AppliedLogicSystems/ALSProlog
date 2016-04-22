@@ -182,6 +182,8 @@ proc add_tools_menu {menubar type window} {
 		$menubar.tools add command  -label "Spy$elipsis" \
 			-underline 0 -command {re show_pred_info } 
 		$menubar.tools add separator
+		$menubar.tools add command  -label "Clear Debugger Win" \
+                        -underline 0 -command {re clear_debug_win}
 		$menubar.tools add command  -label "Debug Settings$elipsis" \
 			-underline 0 -command {re show_debug_settings}
 		$menubar.tools add command  -label "Statistics" \
@@ -299,6 +301,15 @@ proc debugwin.select_all {xw} {
 	set w .debugwin
 	$w.text tag add sel 1.0 end
 }
+proc clear_debug_win {} {
+	set w .debugwin
+	$w.text tag add sel 1.0 end
+	global array proenv
+	catch {$w.text delete sel.first sel.last}
+	set proenv($w,dirty) true
+}
+
+
 proc debugwin.copy {w} { 
 	set w .debugwin
  	if {![catch {set data [$w.text get sel.first sel.last]}]} {
