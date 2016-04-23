@@ -148,16 +148,8 @@ set proenv(posted_vis)			{}
 set proenv(debugwin_button,background)	#cee8e6
 set proenv(interrupt_button,foreground)	#ff0000
 
-puts -nonewline "tcl_platform = " 
-puts $tcl_platform(platform)
-
-if {$tcl_platform(platform) == "macintosh"} then {
-	set proenv(.topals,geometry)	600x500+300+10
-	set proenv(.debugwin,geometry)	600x300+300+22
-} else {
-	set proenv(.topals,geometry)	600x500+300+10
-	set proenv(.debugwin,geometry)	600x300+300+0
-}
+set proenv(.topals,geometry)	600x500
+set proenv(.debugwin,geometry)	600x300
 
 set proenv(.topals,foreground)	black
 set proenv(.debugwin,foreground)	black
@@ -182,26 +174,6 @@ set proenv(.document,font)	{user 14 normal}
 set proenv(.topals,tabs)	{}
 set proenv(.debugwin,tabs)	{}
 set proenv(.document,tabs)	{}
-
-if {$tcl_platform(platform) == "macintosh"} {
-	set proenv(.topals,font)		{Monaco 9 normal}
-	set proenv(.debugwin,font)		{Monaco 9 normal}
-	set proenv(.document,font)		{Monaco 9 normal}
-} elseif {$tcl_platform(platform) == "windows"} {
-	set proenv(.topals,selectbackground)	SystemHighlight
-	set proenv(.debugwin,selectbackground)	SystemHighlight
-	set proenv(.document,selectbackground)	SystemHighlight
-} elseif {$tcl_platform(platform) == "unix"} {
-	set proenv(.topals,background)	#d9d9d9	
-	set proenv(.debugwin,background)	#d9d9d9
-	set proenv(.document,background)	#d9d9d9
-	set proenv(.topals,selectforeground)	black
-	set proenv(.debugwin,selectforeground)	black
-	set proenv(.document,selectforeground)	black
-	set proenv(.topals,selectbackground)	#c3c3c3
-	set proenv(.debugwin,selectbackground)	#c3c3c3
-	set proenv(.document,selectbackground)	#c3c3c3
-}
 
 set	proenv(edit,visible)		{}
 
@@ -259,21 +231,6 @@ proc vTclWindow. {args} {
 	#################################
 	# 		INITIAL SETUP
 	#--------------------------------
-
-switch $tcl_platform(platform) {
-	unix {
-		set MainFont system
-	}
-	windows {
-		set MainFont system
-	}
-	macintosh {
-		set MainFont application
-	}
-	default {
-		set MainFont system
-	}
-}
 
 proc establish_defaults {} {
 	global array proenv
