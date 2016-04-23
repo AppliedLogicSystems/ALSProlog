@@ -381,17 +381,10 @@ proc map_alsdev_debug {} {
 }
 
 proc load_source {path name} {
-	global tcl_platform
-	if {$tcl_platform(platform) == "macintosh"} {
-		uplevel "source -rsrc {$name}"
-	} else {
-		uplevel "source \[file join {$path} {$name.tcl}]"
-	}
+	uplevel "source \[file join {$path} {$name.tcl}]"
 }
 
 # Load Tcl source
-# Note: When you add a new source file, also add it to mac_alsdev.r
-# to ensure that it is stored in the Mac resources.
 
 load_source $ALSTCLPATH {alsdev_main}
 load_source $ALSTCLPATH {als_settings}
@@ -411,8 +404,6 @@ proc load_photo {image_name base_name} {
 }
 
 # Load images
-# Note: When you add a new image, also add it to mac_alsdev.r
-# to ensure that it is stored in the Mac resources.
 
 load_photo up_arrow_gif up-arrow-blue
 load_photo down_arrow_gif down-arrow-blue
