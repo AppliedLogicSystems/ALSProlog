@@ -22,19 +22,16 @@ set agv(edit,visible) {}
 
 # Menu accelerator modifier key and elipsis string.
 
-if {$tcl_platform(platform) == "macintosh"} {
-	set mod "Cmd"
-	set elipsis "…"
-} else {
-	set mod "Ctrl"
-	set elipsis "..."
+switch [tk windowingsystem] {
+	aqua  { set mod "Command" ; set elipsis "‚Ä¶"   }
+	win32 { set mod "Ctrl"    ; set elipsis "..." }
+	x11   { set mod "Ctrl"    ; set elipsis "..." }
 }
 
 proc add_default_menus {menubar} {
-	global tcl_platform
-	if {$tcl_platform(platform) == "macintosh"} {
+	if {[tk windowingsystem] == "aqua"} {
 		menu $menubar.apple -tearoff 0
-		$menubar.apple add command -label "About ALS Prolog…" -command {display_me About .about}
+		$menubar.apple add command -label "About ALS Prolog‚Ä¶" -command {display_me About .about}
 		$menubar add cascade -menu $menubar.apple
 	}
 }
@@ -80,14 +77,13 @@ proc add_generic_file_menu {menubar type window} {
 #    $menubar.file add command -label "Print$elipsis" -accelerator "$mod-P"\
 #		-command "re {$type.print $window}" -state disabled
     $menubar.file add separator
-
-	if {$tcl_platform(platform) == "windows"} {
-    	$menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" \
-			-command "re exit_app"
-    } else {
-    	$menubar.file add command -label "Quit" -accelerator "$mod-Q" \
-			-command "re exit_app"
+	
+	switch [tk windowingsystem] {
+		aqua  {}
+		win32 { $menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_app} }
+		x11   { $menubar.file add command -label "Quit"              -accelerator "$mod-Q" -command {re exit_app} }
 	}
+
 	$menubar add cascade -menu $menubar.file -label "File" -underline 0
 }
 
@@ -160,10 +156,9 @@ proc add_help_menu {menubar} {
 }
 
 proc add_help_menu_sub {menubar HelpCmds} {
-	global tcl_platform
 	global mod
 	global elipsis
-	if {$tcl_platform(platform) != "macintosh"} {
+	if {[tk windowingsystem] != "aqua"} {
 		$menubar add cascade -label "Help" -underline 0 \
 			-menu $menubar.help 
 		menu $menubar.help -tearoff 0
@@ -222,7 +217,7 @@ proc listener.copy_paste { w } {
 	global agv
 #	set w .topals
 
-	if  {$tcl_platform(platform) == "unix"} {
+	if  {[tk windowingsystem] == "x11"} {
 		set WhichSel PRIMARY
 	} else {
 		set WhichSel CLIPBOARD

@@ -53,7 +53,6 @@ set agv(document_list) {}
 proc create_document_window {title} {
 	global array agv
 	global mod
-	global tcl_platform
 
 		# Create a unique window name:
 
@@ -98,11 +97,7 @@ proc create_document_window {title} {
 	grid rowconf $w 1 -weight 0
 
 	grid $w.text -column 0 -row 0 -sticky nesw
-	if {$tcl_platform(platform) == "macintosh"} {
-		grid $w.yscrollbar -column 1 -row 0 -sticky ns -rowspan 2
-	} else {
-		grid $w.yscrollbar -column 1 -row 0 -sticky ns
-	}
+	grid $w.yscrollbar -column 1 -row 0 -sticky ns
 	grid $w.xscrollbar  -column 0 -row 1 -sticky ew
 
 	$w.text configure -highlightthickness 0 \
@@ -288,9 +283,7 @@ proc dirty_key {w k} {
 }
 
 proc bind_accelerators {w mod type} {
-	global tcl_platform
-	
-	if {$tcl_platform(platform) == "macintosh"} return;
+	if {[tk windowingsystem] == "aqua"} return;
 	
 	if {$mod == "Ctrl"} then { set MMD Control } else { set MMD $mod }
 #prolog call user write -atom "bacc: w=$w mod=$mod type=$type"
@@ -433,7 +426,7 @@ proc main.close {} { exit_app }
 proc main.cut {w} { document.cut $w }
 proc main.copy {w} { document.copy $w }
 proc main.paste {w} { document.paste $w }
-proc main.clear {w} { document.clear $w }
+proc main.delete {w} { document.delete $w }
 proc main.select_all {w} { document.select_all $w }
 proc main.find {w} { document.find $w }
 
@@ -449,19 +442,19 @@ proc document.new {} {
 	post_open_document $Title $w
 }
 
+switch [tk windowingsystem] {
+	aqua    { set filetypes {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}} }
+	default { set filetypes {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}} }
+}
 
 proc document.open args {
-	global agv tcl_platform
+	global agv
 	set file_list $args
 	if {$file_list == ""} then {
-		if {$tcl_platform(platform) == "macintosh"} {
-			set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
-		} else {
-			set types [list [list \"$agv(title)\" ".$agv(doc_extension)" ] {{All Files} *} ]
-		}
+
 		set file [tk_getOpenFile \
 			-title "Open File" \
-			-filetypes $types ] 
+			-filetypes $filetypes]
 		if {$file != ""} then {
 			set file_list [list $file]
 		}
@@ -522,19 +515,14 @@ proc document.close_all {} {
 
 
 proc document.save {w} {
-	global tcl_platform agv
+	global agv filetypes
 	if {[info exists agv($w,file)]} then {
 		store_text $w.text $agv($w,file)
 		set agv($w,dirty) false
 		return true
 	} else {
-		if {$tcl_platform(platform) == "macintosh"} {
-			set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
-		} else {
-			set types [list [list \"$agv(title)\" ".$agv(doc_extension)" ] {{All Files} *} ]
-		}
 		set file [tk_getSaveFile -initialfile [wm title $w].$agv(doc_extension) \
-			-defaultextension .$agv(doc_extension) -filetypes $types ]
+			-defaultextension .$agv(doc_extension) -filetypes $filetypes ]
 		if {$file != ""} then {
 			un_post_open_document $agv($w,title)
 			save_as_core $w $file
@@ -604,19 +592,14 @@ proc document.copy {w} {
 
 proc document.paste {w} {
 	global array agv
-	global tcl_platform
 
 	catch {$w.text delete sel.first sel.last}
 	set clip [selection get -displayof $w -selection CLIPBOARD]
-	if {$tcl_platform(platform) == "macintosh"} {
-		set lines [split $clip \r]
-		set clip [join $lines \n]
-	}
 	$w.text insert insert $clip
 	set agv($w,dirty) true
 }
 
-proc document.clear {w} {
+proc document.delete {w} {
 	global array agv
 	catch {$w.text delete sel.first sel.last}
 	set agv($w,dirty) true
@@ -685,7 +668,6 @@ proc document.goto_line {w} {
 proc create_graph_window {W H title} {
 	global array agv
 	global mod
-	global tcl_platform
 
 prolog call user write -atom "enter create_graph_window $title"
 prolog call user nl
@@ -717,7 +699,7 @@ update
 
 		# accelerators
 		# bind_accelerators $w $mod graph
-	if {$tcl_platform(platform) != "macintosh"} {
+	if {[tk windowingsystem] != "aqua"} {
 		if {$mod == "Ctrl"} then { set MMD Control } else { set MMD $mod }
 		bind $w.canvas <$MMD-w> "graph.close $w"
 		bind $w.canvas <$MMD-s> "graph.save $w"
@@ -764,20 +746,15 @@ proc graph.close { w } {
 }
 
 proc graph.save { w } {
-	global array agv
+	global array agv filetypes
 
 	if {[info exists agv($w,file)]} then {
 		store_graph $w.canvas $agv($w,file)
 		set agv($w,dirty) false
 		return true
 	} else {
-		if {$tcl_platform(platform) == "macintosh"} {
-			set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
-		} else {
-			set types [list [list \"$agv(title)\" ".$agv(doc_extension)" ] {{All Files} *} ]
-		}
 		set file [tk_getSaveFile -initialfile [wm title $w].$agv(doc_extension) \
-			-defaultextension .$agv(doc_extension) -filetypes $types ]
+			-defaultextension .$agv(doc_extension) -filetypes $filetypes ]
 		if {$file != ""} then {
 			un_post_open_document $agv($w,title)
 			graph_save_as_core $w $file
