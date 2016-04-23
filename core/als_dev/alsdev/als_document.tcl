@@ -565,14 +565,9 @@ proc document.copy {w} {
 
 proc document.paste {w} {
 	global array proenv
-	global tcl_platform
 
 	catch {$w.text delete sel.first sel.last}
 	set clip [selection get -displayof $w -selection CLIPBOARD]
-	if {$tcl_platform(platform) == "macintosh"} {
-		set lines [split $clip \r]
-		set clip [join $lines \n]
-	}
 	$w.text insert insert $clip
 	set proenv($w,dirty) true
 }
