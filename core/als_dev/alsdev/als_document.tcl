@@ -516,7 +516,6 @@ proc document.save {w} {
 
 proc document.save_as {w} {
 	global array proenv
-	global tcl_platform
 	
 	set file [tk_getSaveFile -initialfile [wm title $w] \
 		-defaultextension .pro ]
@@ -531,7 +530,6 @@ proc document.save_as {w} {
 
 proc save_as_core {w file} {
 	global array proenv
-	global tcl_platform
 
 	if {[info exists proenv($w,file)]} then {
 		unset proenv(document,$proenv($w,file))
@@ -541,7 +539,7 @@ proc save_as_core {w file} {
 	wm title $w [lindex [file split $file] end]
 	store_text $w.text $file
 	set proenv($w,dirty) false
-	if {$tcl_platform(platform) == "macintosh"} then { 
+	if {[tk windowingsystem] == "aqua"} then {
 		file attributes $file -creator ALS4 -type TEXT 
 	}
 }

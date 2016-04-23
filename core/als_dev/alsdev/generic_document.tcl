@@ -556,7 +556,6 @@ proc document.save {w} {
 
 proc document.save_as {w} {
 	global array agv
-	global tcl_platform
 	
 	set file [tk_getSaveFile -initialfile [wm title $w] \
 		-defaultextension .pro ]
@@ -571,7 +570,6 @@ proc document.save_as {w} {
 
 proc save_as_core {w file} {
 	global array agv
-	global tcl_platform
 
 	if {[info exists agv($w,file)]} then {
 		unset agv(document,$agv($w,file))
@@ -581,7 +579,7 @@ proc save_as_core {w file} {
 	wm title $w [lindex [file split $file] end]
 	store_text $w.text $file
 	set agv($w,dirty) false
-	if {$tcl_platform(platform) == "macintosh"} then { 
+	if {[tk windowingsystem] == "aqua"} then {
 		file attributes $file -creator ALS4 -type TEXT 
 	}
 }
@@ -797,7 +795,6 @@ proc graph.save { w } {
 
 proc graph_save_as_core {w file} {
 	global array agv
-	global tcl_platform
 
 	if {[info exists agv($w,file)]} then {
 		unset agv(document,$agv($w,file))
@@ -807,7 +804,7 @@ proc graph_save_as_core {w file} {
 	wm title $w [lindex [file split $file] end]
 	store_canvas $w.canvas $file
 	set agv($w,dirty) false
-	if {$tcl_platform(platform) == "macintosh"} then { 
+	if {[tk windowingsystem] == "aqua"} then {
 		file attributes $file -creator ALS4 -type TEXT 
 	}
 }
