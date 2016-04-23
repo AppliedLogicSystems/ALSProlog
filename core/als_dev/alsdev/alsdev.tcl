@@ -769,7 +769,6 @@ proc listener.save {w}  { listener.save_as $w }
 
 proc listener.save_as {w} {
 	global array proenv
-	global tcl_platform
 	
 	set file [tk_getSaveFile -initialfile prolog_env \
 		-defaultextension .txt ]

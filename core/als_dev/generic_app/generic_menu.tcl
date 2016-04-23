@@ -92,7 +92,6 @@ proc add_generic_file_menu {menubar type window} {
 }
 
 proc add_minimal_generic_edit_menu {menubar type window} {
-	global tcl_platform
 	global mod
 	global elipsis
 	global agv
@@ -106,7 +105,6 @@ proc add_minimal_generic_edit_menu {menubar type window} {
 	$menubar add cascade -menu $menubar.edit -label "Edit" -underline 0
 }
 proc add_generic_edit_menu {menubar type window} {
-	global tcl_platform
 	global mod
 	global elipsis
 	global agv
@@ -138,7 +136,6 @@ proc add_generic_edit_menu {menubar type window} {
 }
 
 proc add_windows_menu {menubar type window} {
-	global tcl_platform
 	global mod
 	global elipsis
 	global agv

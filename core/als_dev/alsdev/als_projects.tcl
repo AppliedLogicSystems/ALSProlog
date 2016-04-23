@@ -65,7 +65,6 @@ proc new_project {} {
 
 
 proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
-	global tcl_platform
 
 	set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
 	set DFT [list -filetypes $types]
@@ -102,7 +101,6 @@ proc add_file_entry_to_list { Entry Listbox } {
 
 
 #proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir} {
-#	global tcl_platform
 #
 #	prolog call alsdev choose_mult_files \
 #		-list $FileTypes -atom $FileKind -atom $DfltDir -var Choices
