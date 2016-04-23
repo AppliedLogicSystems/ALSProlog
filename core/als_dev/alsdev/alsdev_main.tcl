@@ -7,7 +7,6 @@
 
 proc vTclWindow.topals {args} {
 	global array proenv
-	global tcl_platform
 	global mod
 
     set base .topals
@@ -74,7 +73,7 @@ proc vTclWindow.topals {args} {
         -yscrollcommand {.topals.vsb set} \
 		-exportselection true
 
-    if {$tcl_platform(platform) == "macintosh"} {
+    if {[tk windowingsystem] == "aqua"} {
         .topals.text configure -highlightthickness 0
     }
 

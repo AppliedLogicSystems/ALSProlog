@@ -145,7 +145,7 @@ puts $proenv(.debugwin,geometry)
     scrollbar $base.stacklist_vsb \
         -borderwidth 1 -command "$base.stacklist yview" -orient vert 
 
-    if {$tcl_platform(platform) == "macintosh"} {
+    if {[tk windowingsystem] == "aqua"} {
         $base.text configure -highlightthickness 0
     }
 
@@ -299,7 +299,7 @@ proc vTclWindow.debug_source_trace {base Title} {
 		-font $proenv(.debugwin,font) \
         -width 8 -yscrollcommand [list $base.textwin.vsb set] 
 
-    if {$tcl_platform(platform) == "macintosh"} {
+    if {[tk windowingsystem] == "aqua"} {
         $base.textwin.text configure -highlightthickness 0
     }
 
