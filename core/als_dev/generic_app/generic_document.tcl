@@ -480,19 +480,13 @@ proc document.open args {
 }
 
 proc save_check {w} {
-	global tcl_platform
 	global array agv
 	if {$agv($w,dirty)} then {
 		raise $w
 		set title [wm title $w]
-		if {$tcl_platform(platform) == "macintosh"} {
-			set icon caution
-		} else {
-			set icon warning
-		}
 		set answer [tk_dialog .document_save_dialog "" \
 			"Save changes to the document \"$title\" before closing?" \
-			$icon \
+			{} \
 			2 "Don't Save" "Cancel" "Save"]
 		if {$answer == 2} then {
 			set result [document.save $w]
@@ -643,23 +637,18 @@ proc document.preferences {w} {
 }
 
 proc document.consult {w} {
-	global agv tcl_platform
+	global agv
 
 	if [info exists agv($w,file)] then {
 		set file $agv($w,file)
 	} else {
 		set file ""
 	}
-	if {$tcl_platform(platform) == "macintosh"} {
-		set icon caution
-	} else {
-		set icon warning
-	}
 	set title [wm title $w]
 	if {$file == ""} {
 		set answer [tk_dialog .document_save_dialog "" \
 			"Save document \"$title\" to file in order to consult?" \
-			$icon \
+			{} \
 			1 "Cancel" "Save"]
 		if { $answer == 1 } then {
 			if {[document.save $w]} then {
@@ -671,7 +660,7 @@ proc document.consult {w} {
 		bell
 		set answer [tk_dialog .document_save_dialog "" \
 			"Save changes to the document \"$title\" in order to consult?" \
-			$icon \
+			{} \
 			1 "Cancel" "Save"]
 		if { $answer == 1 } then {
 			document.save $w
