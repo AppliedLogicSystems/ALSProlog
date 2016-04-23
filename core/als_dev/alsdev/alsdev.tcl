@@ -1668,16 +1668,18 @@ proc run_cref  {} {
 # Mac OS X Support via tk::mac functions
 #------------------------------------------
 
-proc tk::mac::Quit {} {
-	exit_prolog
-}
+if {[tk windowingsystem] == "aqua"} {
+	proc ::tk::mac::Quit {} {
+		exit_prolog
+	}
 
-proc ::tk::mac::OpenDocument {args} {
-	foreach file $args {
-		if { [file extension "$file"] == ".ppj" } then {
-			prolog call alsdev launch_project -atom $file
-		} else {
-			document.open $file
+	proc ::tk::mac::OpenDocument {args} {
+		foreach file $args {
+			if { [file extension "$file"] == ".ppj" } then {
+				prolog call alsdev launch_project -atom $file
+			} else {
+				document.open $file
+			}
 		}
 	}
 }
