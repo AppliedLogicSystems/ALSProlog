@@ -449,19 +449,19 @@ proc document.new {} {
 	post_open_document $Title $w
 }
 
+switch [tk windowingsystem] {
+	aqua    { set filetypes {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}} }
+	default { set filetypes {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}} }
+}
 
 proc document.open args {
-	global agv tcl_platform
+	global agv
 	set file_list $args
 	if {$file_list == ""} then {
-		if {$tcl_platform(platform) == "macintosh"} {
-			set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
-		} else {
-			set types [list [list \"$agv(title)\" ".$agv(doc_extension)" ] {{All Files} *} ]
-		}
+
 		set file [tk_getOpenFile \
 			-title "Open File" \
-			-filetypes $types ] 
+			-filetypes $filetypes]
 		if {$file != ""} then {
 			set file_list [list $file]
 		}
@@ -522,19 +522,14 @@ proc document.close_all {} {
 
 
 proc document.save {w} {
-	global tcl_platform agv
+	global agv filetypes
 	if {[info exists agv($w,file)]} then {
 		store_text $w.text $agv($w,file)
 		set agv($w,dirty) false
 		return true
 	} else {
-		if {$tcl_platform(platform) == "macintosh"} {
-			set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
-		} else {
-			set types [list [list \"$agv(title)\" ".$agv(doc_extension)" ] {{All Files} *} ]
-		}
 		set file [tk_getSaveFile -initialfile [wm title $w].$agv(doc_extension) \
-			-defaultextension .$agv(doc_extension) -filetypes $types ]
+			-defaultextension .$agv(doc_extension) -filetypes $filetypes ]
 		if {$file != ""} then {
 			un_post_open_document $agv($w,title)
 			save_as_core $w $file
@@ -764,20 +759,15 @@ proc graph.close { w } {
 }
 
 proc graph.save { w } {
-	global array agv
+	global array agv filetypes
 
 	if {[info exists agv($w,file)]} then {
 		store_graph $w.canvas $agv($w,file)
 		set agv($w,dirty) false
 		return true
 	} else {
-		if {$tcl_platform(platform) == "macintosh"} {
-			set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
-		} else {
-			set types [list [list \"$agv(title)\" ".$agv(doc_extension)" ] {{All Files} *} ]
-		}
 		set file [tk_getSaveFile -initialfile [wm title $w].$agv(doc_extension) \
-			-defaultextension .$agv(doc_extension) -filetypes $types ]
+			-defaultextension .$agv(doc_extension) -filetypes $filetypes ]
 		if {$file != ""} then {
 			un_post_open_document $agv($w,title)
 			graph_save_as_core $w $file

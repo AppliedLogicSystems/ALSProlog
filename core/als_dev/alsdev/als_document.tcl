@@ -418,18 +418,19 @@ proc document.new {} {
 	post_open_document $Title $w
 }
 
+switch [tk windowingsystem] {
+	aqua    { set filetypes {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}} }
+	default { set filetypes {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}} }
+}
+
 proc document.open args {
-	global tcl_platform
+	global filetypes
 	set file_list $args
 	if {$file_list == ""} then {
-		if {$tcl_platform(platform) == "macintosh"} {
-			set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
-		} else {
-			set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
-		}
+
 		set file [tk_getOpenFile \
 			-title "Open File" \
-			-filetypes $types ] 
+			-filetypes $filetypes]
 		if {$file != ""} then {
 			set file_list [list $file]
 		}
