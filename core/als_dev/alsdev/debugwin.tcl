@@ -16,7 +16,6 @@ global widget;
 global DebugResponse
 proc vTclWindow.debugwin {base} {
 	global array proenv
-	global tcl_platform
 	global DebugResponse
 	global mod
 
@@ -117,13 +116,8 @@ puts $proenv(.debugwin,geometry)
 		-underline 0  \
 		-command do_the_debug_flag
 
-	if {$tcl_platform(platform) == "macintosh"} {
-	    scrollbar $base.vsb \
-	        -borderwidth 0 -command {.debugwin.text yview} -orient vert 
-	} else {
-	    scrollbar $base.vsb \
-	        -borderwidth 1 -command {.debugwin.text yview} -orient vert 
-	}
+	scrollbar $base.vsb \
+	    -borderwidth 1 -command {.debugwin.text yview} -orient vert 
     text $base.text \
 		-background $proenv(.debugwin,background) \
 		-foreground $proenv(.debugwin,foreground) \
@@ -253,7 +247,6 @@ proc do_the_debug_flag {} {
 
 proc vTclWindow.debug_source_trace {base Title} {
 	global array proenv
-	global tcl_platform
 
     if {$base == ""} {
         set base .debug_source_trace
@@ -280,19 +273,11 @@ proc vTclWindow.debug_source_trace {base Title} {
     wm title $base $Title
 	wm protocol $base WM_DELETE_WINDOW "wm iconify $base"
 
-	if {$tcl_platform(platform) == "macintosh"} {
-	    frame $base.textwin \
-	        -borderwidth 0 -relief raised
-	    scrollbar $base.textwin.vsb \
-	        -borderwidth 0 -command [list $base.textwin.text yview] \
-	        -orient vert 
-	} else {
-	    frame $base.textwin \
-	        -borderwidth 1 -relief raised
-	    scrollbar $base.textwin.vsb \
-	        -borderwidth 1 -command [list $base.textwin.text yview] \
-	        -orient vert 
-	}
+	frame $base.textwin \
+		-borderwidth 1 -relief raised
+	scrollbar $base.textwin.vsb \
+		-borderwidth 1 -command [list $base.textwin.text yview] \
+		-orient vert 
     text $base.textwin.text \
 		-background $proenv(.debugwin,background) \
 		-foreground $proenv(.debugwin,foreground) \
