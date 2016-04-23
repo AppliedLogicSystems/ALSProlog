@@ -1664,13 +1664,16 @@ proc run_cref  {} {
 	prolog call alsdev run_cref
 }
 
+###########################################
+# Mac OS X Support via tk::mac functions
+#------------------------------------------
 
-proc tkOpenDocument args {
-	global tcl_platform
+proc tk::mac::Quit {} {
+	exit_prolog
+}
+
+proc ::tk::mac::OpenDocument {args} {
 	foreach file $args {
-		if {$tcl_platform(platform) == "windows"} {
-			set file [file attributes "$file" -longname]
-		}
 		if { [file extension "$file"] == ".ppj" } then {
 			prolog call alsdev launch_project -atom $file
 		} else {
