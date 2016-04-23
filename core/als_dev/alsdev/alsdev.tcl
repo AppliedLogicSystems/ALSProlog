@@ -18,25 +18,16 @@
 #|	This is hard-coded in the following.
 ##=================================================================================
 
-# Load packages for opening documents from the Finder/Explorer on
-# Macintosh and Windows.  The user provided procedure tkOpenDocument
-# is called to handles files opened this way.
+# Load custom packages for each windowing system.
 #
 # OpenDocument is an ALS-custom package for Windows.  This package contains
 # the AttachOpenDocumentHandler procedure which should be called when
 # .topals is fully opened.
-#
-# appleevents is a standard Tcl/Tk package for the Mac.
 
 #puts ALSTCLPATH=$ALSTCLPATH
-
-if {$tcl_platform(platform) == "windows"} {
-	load {} OpenDocument
-}
-if {$tcl_platform(platform) == "macintosh"} {
-	load {} appleevents
-	load {} getDirectory
-	load {} getFiles
+switch [tk windowingsystem] {
+	win32   { load {} OpenDocument }
+	default {}
 }
 
 proc xpe { What } {
@@ -1689,6 +1680,6 @@ focus .topals.text
 # install a custom window procedure on .topals window for handling
 # document opened form the Explorer.
 
-if {$tcl_platform(platform) == "windows"} {
+if {[tk windowingsystem] == "win32"} {
 	AttachOpenDocumentHandler
 }
