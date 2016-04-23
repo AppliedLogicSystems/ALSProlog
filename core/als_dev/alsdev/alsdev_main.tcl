@@ -23,10 +23,7 @@ proc vTclWindow.topals {args} {
 	wm positionfrom .topals user
     wm maxsize .topals 1265 994
     wm minsize .topals 1 1
-    if {$tcl_platform(platform) != "macintosh"} {
-    	# This command removes the zoom box from Macintosh windows.
-    	wm overrideredirect .topals 0
-    }
+   	wm overrideredirect .topals 0
     wm resizable .topals 1 1
     wm deiconify .topals
     wm title .topals "ALS Prolog Environment"

@@ -36,10 +36,7 @@ puts $proenv(.debugwin,geometry)
 
     wm maxsize $base 1137 870
     wm minsize $base 1 1
-	if {$tcl_platform(platform) != "macintosh"} {
-		# This command removes the zoom box from Macintosh windows.
-	    wm overrideredirect $base 0
-	}
+	wm overrideredirect $base 0
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Debugger for ALS Prolog"
@@ -277,10 +274,7 @@ proc vTclWindow.debug_source_trace {base Title} {
     wm geometry $base 467x542+504+47
     wm maxsize $base 1137 870
     wm minsize $base 1 1
-    if {$tcl_platform(platform) != "macintosh"} {
-    	# This command removes the zoom box from Macintosh windows.
-    	wm overrideredirect $base 0
-    }
+    wm overrideredirect $base 0
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base $Title
