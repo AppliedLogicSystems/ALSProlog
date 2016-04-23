@@ -1603,7 +1603,7 @@ proc do_2col {base} {
 ###############________________________________##################
 
 
-if {$tcl_platform(platform) == "macintosh"} {
+if {[tk windowingsystem] == "aqua"} {
 	# Make .topals.mmenb the default menu for all windows.
 	. configure -menu .topals.mmenb
 }
