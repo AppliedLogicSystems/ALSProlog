@@ -212,7 +212,7 @@ proc add_help_menu {menubar} {
 	global mod
 	global elipsis
 
-	if {[tk windowingsystem] == "aqua"} {
+	if {[tk windowingsystem] != "aqua"} {
 		menu $menubar.help -tearoff 0
 		$menubar.help add command -label "About ALS Prolog$elipsis" \
 			-underline 0 -command {display_me About .about}
