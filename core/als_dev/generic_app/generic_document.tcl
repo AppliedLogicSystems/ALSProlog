@@ -62,7 +62,7 @@ proc create_document_window {title} {
 	
 		# Create window:
 
-	toplevel_patch $w
+	toplevel $w
 	wm title $w $title
 	if [info exists agv(.document,geometry)] {
 #prolog call user write -atom "agv(.document,geometry)=$agv(.document,geometry)"
@@ -368,7 +368,7 @@ proc store_text {text file} {
 proc load_document {file} {
 	global array agv 
 	if {[info exists agv(document,$file)]} {
-		raise_patch $agv(document,$file)
+		raise $agv(document,$file)
 	} else {
 		set file_name [lindex [file split $file] end]
 		set w [create_document_window $file_name]		
@@ -483,7 +483,7 @@ proc save_check {w} {
 	global tcl_platform
 	global array agv
 	if {$agv($w,dirty)} then {
-		raise_patch $w
+		raise $w
 		set title [wm title $w]
 		if {$tcl_platform(platform) == "macintosh"} {
 			set icon caution
@@ -711,7 +711,7 @@ update
 	
 		# Create window:
 
-	toplevel_patch $w
+	toplevel $w
 	wm title $w $title
 	if [info exists agv(.document,geometry)] {
 #prolog call user write -atom "agv(.document,geometry)=$agv(.document,geometry)"

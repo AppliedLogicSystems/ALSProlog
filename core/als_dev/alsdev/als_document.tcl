@@ -58,7 +58,7 @@ proc create_document_window {title} {
 	
 		# Create window:
 
-	toplevel_patch $w
+	toplevel $w
 	wm title $w $title
 	wm protocol $w WM_DELETE_WINDOW "document.close $w"
 
@@ -352,7 +352,7 @@ proc store_text {text file} {
 proc load_document {file} {
 	global array proenv 
 	if {[info exists proenv(document,$file)]} {
-		raise_patch $proenv(document,$file)
+		raise $proenv(document,$file)
 	} else {
 		set file_name [lindex [file split $file] end]
 		set w [create_document_window $file_name]		
@@ -448,7 +448,7 @@ proc save_check {w} {
 	global tcl_platform
 	global array proenv
 	if {$proenv($w,dirty)} then {
-		raise_patch $w
+		raise $w
 		set title [wm title $w]
 		if {$tcl_platform(platform) == "macintosh"} {
 			set icon caution

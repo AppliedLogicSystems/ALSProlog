@@ -12,7 +12,7 @@ proc vTclWindow.alsdev_settings {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 233x142+199+212
     wm maxsize $base 1137 870

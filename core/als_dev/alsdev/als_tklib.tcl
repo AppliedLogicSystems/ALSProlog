@@ -16,26 +16,6 @@
 ######### General routines needing defining if interp \= shl_tcli
 ##################################################################################
 
-# Patches for Windows to make toplevel and raise activate the window.
-
-proc toplevel_patch {w args} {
-	global tcl_platform
-
-	eval toplevel $w $args
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $w
-	}
-}
-
-proc raise_patch {w args} {
-	global tcl_platform
-
-	eval raise $w $args
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $w
-	}
-}
-
 if {[info procs Window] == ""} then {
 proc Window {args} {
 global vTcl
@@ -176,16 +156,13 @@ proc exists_tcl_ga3 {Arr Tag1 Tag2 Tag3 } {
 ##################################################################################
 
 proc vTclWindow.input_popup {base} {
-	global array proenv tcl_platform
+	global array proenv
 
     if {$base == ""} {
         set base .input_popup
     }
     if {[winfo exists $base]} {
 		raise $base
-		if {$tcl_platform(platform) == "windows"} {
-			focus -force $base
-		}
 		wm deiconify $base
 		return
     }
@@ -193,12 +170,9 @@ proc vTclWindow.input_popup {base} {
     # CREATING WIDGETS
     ###################
 
-#    toplevel_patch $base -class Toplevel 
+#    toplevel $base -class Toplevel 
 
     toplevel $base -class Toplevel 
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $base
-	}
 
     wm focusmodel $base passive
     wm geometry $base 407x130+50+317
@@ -255,17 +229,14 @@ proc fin_input_popup {Which base} {
 }
 
 proc do_popup_input {Prompt Title} {
-	global proenv  tcl_platform
+	global proenv
 
 	set proenv(.input_popup) ""
 	Window show .input_popup
 
-#	raise_patch .input_popup
+#	raise .input_popup
 
 	raise .input_popup
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force .input_popup
-	}
 	wm title .input_popup $Title
     .input_popup.input_p.input_popup_head configure -text $Prompt
     focus .input_popup.input_p.input_popup_entry
@@ -274,13 +245,10 @@ proc do_popup_input {Prompt Title} {
 }
 
 proc do_user_pw_dialog {Title} {
-	global proenv  tcl_platform
+	global proenv
 	set proenv(.user_pw_popup) ""
 	Window show .user_pw_popup
 	raise .user_pw_popup
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force .user_pw_popup
-	}
 	wm title .user_pw_popup $Title
     focus .user_pw_popup.user_entry
 	tkwait variable proenv(.user_pw_popup)
@@ -385,16 +353,11 @@ proc fin_popup_list_box { Which BaseName} {
 }
 
 proc vTclWindow.popup_select_widget {base} {
-	global tcl_platform
-
     if {$base == ""} {
         set base .popup_select_widget
     }
     if {[winfo exists $base]} {
 		raise $base
-		if {$tcl_platform(platform) == "windows"} {
-			focus -force $base
-		}
 		wm deiconify $base
 		return
     }
@@ -402,11 +365,8 @@ proc vTclWindow.popup_select_widget {base} {
     ###################
     # CREATING WIDGETS
     ###################
- #   toplevel_patch $base -class Toplevel
+ #   toplevel $base -class Toplevel
     toplevel $base -class Toplevel
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $base
-	}
 
     wm focusmodel $base passive
     wm geometry $base 188x312+401+165
@@ -465,14 +425,10 @@ proc vTclWindow.popup_select_widget {base} {
 
 
 proc display_file_image {ImageDir ImageFile ImageBase Win Width Height BorderWidth} {
-	global tcl_platform
 	set ImagePath [file join $ImageDir $ImageFile]
 
-#	toplevel_patch $Win -bd $BorderWidth -relief flat
+#	toplevel $Win -bd $BorderWidth -relief flat
 	toplevel $Win -bd $BorderWidth -relief flat
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $Win
-	}
 
 	wm withdraw $Win
 	set screen_width  [winfo screenwidth .]
@@ -489,14 +445,9 @@ proc display_file_image {ImageDir ImageFile ImageBase Win Width Height BorderWid
 }
 
 proc display_image {ImageName Win Width Height X Y BorderWidth } {
-	global tcl_platform
-
-#	toplevel_patch $Win -bd $BorderWidth -relief flat
+#	toplevel $Win -bd $BorderWidth -relief flat
 
 	toplevel $Win -bd $BorderWidth -relief flat
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $Win
-	}
 
 	wm withdraw $Win
 	wm overrideredirect $Win 1

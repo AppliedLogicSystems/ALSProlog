@@ -41,7 +41,7 @@ proc try {a selector b} {
 }
 
 proc show_window {w} {
-	raise_patch $w
+	raise $w
 	wm deiconify $w
 }
 

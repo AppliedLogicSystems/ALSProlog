@@ -27,7 +27,7 @@ proc vTclWindow.debugwin {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base $proenv(.debugwin,geometry)
 
@@ -272,7 +272,7 @@ proc vTclWindow.debug_source_trace {base Title} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 467x542+504+47
     wm maxsize $base 1137 870
@@ -334,7 +334,7 @@ proc vTclWindow.debug_settings {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
 #    wm geometry $base 284x51+152+178
 #    wm maxsize $base 1137 870
@@ -427,7 +427,7 @@ proc vTclWindow.pred_info {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm maxsize $base 1137 870
     wm overrideredirect $base 0
@@ -682,7 +682,7 @@ proc spy_preds_in_module {base module} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel 
+    toplevel $base -class Toplevel 
     wm focusmodel $base passive
     wm geometry $base 350x250+384+076
     wm maxsize $base 1265 994
@@ -819,7 +819,7 @@ proc module_choose {ModsList} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 170x150+152+178
     wm maxsize $base 1137 870
@@ -881,7 +881,7 @@ proc vTclWindow.sys_mods {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 144x149+193+203
     wm maxsize $base 1137 870

@@ -225,28 +225,8 @@ set proenv(main_depth_type) nonflat
 proc main {argc argv} {
 }
 
-# Patches for Windows to make toplevel and raise activate the window.
-
-proc toplevel_patch {w args} {
-	global tcl_platform
-
-	eval toplevel $w $args
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $w
-	}
-}
-
-proc raise_patch {w args} {
-	global tcl_platform
-
-	eval raise $w $args
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $w
-	}
-}
-
 proc show_window {w} {
-	raise_patch $w
+	raise $w
 	wm deiconify $w
 }
 
@@ -1710,7 +1690,7 @@ if {$tcl_platform(platform) == "windows"} then {
 	update idletasks
 }
 
-raise_patch .topals
+raise .topals
 wm positionfrom .topals user
 wm geometry .topals $proenv(.topals,geometry)
 focus .topals.text
