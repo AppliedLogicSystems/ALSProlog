@@ -275,10 +275,8 @@ proc dirty_key {w k} {
 	}
 }
 
-proc bind_accelerators {w mod type} {
-	global tcl_platform
-	
-	if {$tcl_platform(platform) == "macintosh"} return;
+proc bind_accelerators {w mod type} {	
+	if {[tk windowingsystem] == "aqua"} return;
 	
 	if {$mod == "Ctrl"} then { set MMD Control } else { set MMD $mod }
 
