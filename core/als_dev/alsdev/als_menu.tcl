@@ -51,12 +51,12 @@ proc add_file_menu {menubar type window} {
 #    	$menubar.file add separator
 #	}
 
-    	$menubar.file add separator
-
-	if {[tk windowingsystem] == "win32"} {
-    	$menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_prolog}
-    } else {
-    	$menubar.file add command -label "Quit" -accelerator "$mod-Q" -command {re exit_prolog}
+    $menubar.file add separator
+	
+	switch [tk windowingsystem] {
+		aqua  {}
+		win32 { $menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_prolog} }
+		x11   { $menubar.file add command -label "Quit"              -accelerator "$mod-Q" -command {re exit_prolog} }
 	}
 
 	$menubar add cascade -menu $menubar.file -label "File" -underline 0
