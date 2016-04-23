@@ -57,7 +57,6 @@ proc add_minimal_generic_file_menu {menubar type window} {
 }
 
 proc add_generic_file_menu {menubar type window} {
-	global tcl_platform
 	global mod
 	global elipsis
 	
@@ -117,7 +116,7 @@ proc add_generic_edit_menu {menubar type window} {
     $menubar.edit add command \
         -label Paste -underline 0 -accelerator "$mod-V" -command "re {$type.paste $window}"
     $menubar.edit add command \
-        -label Clear -underline 2 -command "re {$type.clear $window}"
+        -label Delete -underline 2 -command "re {$type.delete $window}"
     $menubar.edit add separator
     $menubar.edit add command \
         -label {Select All} -underline 8 -accelerator "$mod-A" -command "re {$type.select_all $window}"
@@ -141,11 +140,10 @@ proc add_windows_menu {menubar type window} {
 }
 
 proc add_help_menu {menubar} {
-	global tcl_platform
 	global mod
 	global elipsis
 
-	if {$tcl_platform(platform) != "macintosh"} {
+	if {[tk windowingsystem] != "aqua"} {
 		$menubar add cascade -label "Help" -underline 0 -menu $menubar.help
 		menu $menubar.help -tearoff 0
 		$menubar.help add command -label "Commands Overview" \
