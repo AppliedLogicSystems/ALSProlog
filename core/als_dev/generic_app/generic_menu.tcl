@@ -9,15 +9,6 @@
 #|  Generic Mods: Ken Bowen [March 2000]
 ##=================================================================================
 
-if {$tcl_platform(platform) == "macintosh"} {
-	set agv(.document,font)		{Monaco 9 normal}
-} elseif {$tcl_platform(platform) == "windows"} {
-	set agv(.document,selectbackground) SystemHighlight
-} elseif {$tcl_platform(platform) == "unix"} {
-	set agv(.document,background) #d9d9d9
-	set agv(.document,selectforeground) black
-	set agv(.document,selectbackground) #c3c3c3
-}
 set agv(edit,visible) {}
 
 # Menu accelerator modifier key and elipsis string.
@@ -37,7 +28,6 @@ proc add_default_menus {menubar} {
 }
 
 proc add_minimal_generic_file_menu {menubar type window} {
-	global tcl_platform
 	global mod
 	global elipsis
 	
@@ -46,12 +36,10 @@ proc add_minimal_generic_file_menu {menubar type window} {
 	
     $menubar.file add separator
 
-	if {$tcl_platform(platform) == "windows"} {
-    	$menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" \
-			-command "re exit_app"
-    } else {
-    	$menubar.file add command -label "Quit" -accelerator "$mod-Q" \
-			-command "re exit_app"
+	switch [tk windowingsystem] {
+		aqua  {}
+		win32 { $menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_app} }
+		x11   { $menubar.file add command -label "Quit"              -accelerator "$mod-Q" -command {re exit_app} }
 	}
 	$menubar add cascade -menu $menubar.file -label "File" -underline 0
 }
@@ -211,7 +199,6 @@ proc listener.select_all {w} {
 
 
 proc listener.copy_paste { w } {
-	global tcl_platform
 	global agv
 #	set w .topals
 
@@ -377,7 +364,6 @@ proc save_fonts_and_colors { Window } {
 
 
 proc vTclWindow.alsdev_settings {base} {
-	global tcl_platform
 	global agv
 
 
@@ -417,14 +403,12 @@ proc vTclWindow.alsdev_settings {base} {
 			-command "font_family_choice \"[$FamilyMenu entrycget $iii -label]\" \$agv(fonts_and_colors)"
 	}
 
-    label $base.size_label -text {Size:}
-    if {$tcl_platform(platform) == "macintosh"} then {
-		set SizeMenu [tk_optionMenu $base.sizemenu agv(text,size) \
-			9 10 12 14 18 24 36]
-	} else {
-		set SizeMenu [tk_optionMenu $base.sizemenu agv(text,size) \
-			6 8 10 12 14 16 18 20 22 24]
+	switch [tk windowingsystem] {
+		aqua    { set fontsizes {9 10 12 14 18 24 36} }
+		deafult { set fontsizes {6 8 10 12 14 16 18 20 22 24} }
 	}
+    label $base.size_label -text {Size:}
+	set SizeMenu [tk_optionMenu $base.sizemenu agv(text,size) {*}$fontsizes]
 	set MenuEndNum [$SizeMenu index end]
 	for {set iii 0} {$iii <= $MenuEndNum} {incr iii} {
 		$SizeMenu entryconfigure $iii \
