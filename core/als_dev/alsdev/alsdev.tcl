@@ -358,22 +358,18 @@ load_photo down_arrow_gif down-arrow-blue
 load_photo right_gif right-arrow-blue
 load_photo left_gif left-arrow-blue
 
-switch $tcl_platform(platform) {
-	unix {
+switch [tk windowingsystem] {
+	x11 {
 		load_photo closed_ptr closed_unix
 		load_photo open_ptr open_unix
 	}
-	windows {
+	win32 {
 		load_photo closed_ptr closed_wins
 		load_photo open_ptr open_wins
 	}
-	macintosh {
+	aqua {
 		load_photo closed_ptr closed_mac
 		load_photo open_ptr open_mac
-	}
-	default {
-		load_photo closed_ptr closed_wins
-		load_photo open_ptr open_wins
 	}
 }
 
