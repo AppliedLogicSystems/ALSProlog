@@ -1613,7 +1613,7 @@ Window show .topals
 # update idletasks seems to push .topals behind other windows on
 # Windows, so just call update.
 
-if {$tcl_platform(platform) == "windows"} then {
+if {[tk windowingsystem] == "win32"} then {
 	update
 } else {
 	update idletasks
