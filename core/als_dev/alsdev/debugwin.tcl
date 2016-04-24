@@ -16,7 +16,6 @@ global widget;
 global DebugResponse
 proc vTclWindow.debugwin {base} {
 	global array proenv
-	global tcl_platform
 	global DebugResponse
 	global mod
 
@@ -27,7 +26,7 @@ proc vTclWindow.debugwin {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base $proenv(.debugwin,geometry)
 
@@ -36,10 +35,7 @@ puts $proenv(.debugwin,geometry)
 
     wm maxsize $base 1137 870
     wm minsize $base 1 1
-	if {$tcl_platform(platform) != "macintosh"} {
-		# This command removes the zoom box from Macintosh windows.
-	    wm overrideredirect $base 0
-	}
+	wm overrideredirect $base 0
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Debugger for ALS Prolog"
@@ -120,13 +116,8 @@ puts $proenv(.debugwin,geometry)
 		-underline 0  \
 		-command do_the_debug_flag
 
-	if {$tcl_platform(platform) == "macintosh"} {
-	    scrollbar $base.vsb \
-	        -borderwidth 0 -command {.debugwin.text yview} -orient vert 
-	} else {
-	    scrollbar $base.vsb \
-	        -borderwidth 1 -command {.debugwin.text yview} -orient vert 
-	}
+	scrollbar $base.vsb \
+	    -borderwidth 1 -command {.debugwin.text yview} -orient vert 
     text $base.text \
 		-background $proenv(.debugwin,background) \
 		-foreground $proenv(.debugwin,foreground) \
@@ -148,7 +139,7 @@ puts $proenv(.debugwin,geometry)
     scrollbar $base.stacklist_vsb \
         -borderwidth 1 -command "$base.stacklist yview" -orient vert 
 
-    if {$tcl_platform(platform) == "macintosh"} {
+    if {[tk windowingsystem] == "aqua"} {
         $base.text configure -highlightthickness 0
     }
 
@@ -256,7 +247,6 @@ proc do_the_debug_flag {} {
 
 proc vTclWindow.debug_source_trace {base Title} {
 	global array proenv
-	global tcl_platform
 
     if {$base == ""} {
         set base .debug_source_trace
@@ -272,40 +262,29 @@ proc vTclWindow.debug_source_trace {base Title} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 467x542+504+47
     wm maxsize $base 1137 870
     wm minsize $base 1 1
-    if {$tcl_platform(platform) != "macintosh"} {
-    	# This command removes the zoom box from Macintosh windows.
-    	wm overrideredirect $base 0
-    }
+    wm overrideredirect $base 0
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base $Title
 	wm protocol $base WM_DELETE_WINDOW "wm iconify $base"
 
-	if {$tcl_platform(platform) == "macintosh"} {
-	    frame $base.textwin \
-	        -borderwidth 0 -relief raised
-	    scrollbar $base.textwin.vsb \
-	        -borderwidth 0 -command [list $base.textwin.text yview] \
-	        -orient vert 
-	} else {
-	    frame $base.textwin \
-	        -borderwidth 1 -relief raised
-	    scrollbar $base.textwin.vsb \
-	        -borderwidth 1 -command [list $base.textwin.text yview] \
-	        -orient vert 
-	}
+	frame $base.textwin \
+		-borderwidth 1 -relief raised
+	scrollbar $base.textwin.vsb \
+		-borderwidth 1 -command [list $base.textwin.text yview] \
+		-orient vert 
     text $base.textwin.text \
 		-background $proenv(.debugwin,background) \
 		-foreground $proenv(.debugwin,foreground) \
 		-font $proenv(.debugwin,font) \
         -width 8 -yscrollcommand [list $base.textwin.vsb set] 
 
-    if {$tcl_platform(platform) == "macintosh"} {
+    if {[tk windowingsystem] == "aqua"} {
         $base.textwin.text configure -highlightthickness 0
     }
 
@@ -334,7 +313,7 @@ proc vTclWindow.debug_settings {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
 #    wm geometry $base 284x51+152+178
 #    wm maxsize $base 1137 870
@@ -427,7 +406,7 @@ proc vTclWindow.pred_info {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm maxsize $base 1137 870
     wm overrideredirect $base 0
@@ -682,7 +661,7 @@ proc spy_preds_in_module {base module} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel 
+    toplevel $base -class Toplevel 
     wm focusmodel $base passive
     wm geometry $base 350x250+384+076
     wm maxsize $base 1265 994
@@ -819,7 +798,7 @@ proc module_choose {ModsList} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 170x150+152+178
     wm maxsize $base 1137 870
@@ -881,7 +860,7 @@ proc vTclWindow.sys_mods {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 144x149+193+203
     wm maxsize $base 1137 870

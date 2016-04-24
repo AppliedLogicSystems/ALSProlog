@@ -1930,7 +1930,9 @@ act_on_response(stack_trace, Port,Box,Depth, Module,Goal,Wins,Response)
 act_on_response(stack_trace, Port,Box,Depth, Module,Goal,Wins,Response) :-
 	!,
 	printf(debugger_output,'----begin stack trace----\n', []),
-	deb_stack_trace(1,1),
+%	deb_stack_trace(1,1),
+%	deb_stack_trace(1,1),
+	builtins:stack_trace(1, debugger).
 	printf(debugger_output,'----end stack trace----\n', []),
 	show_again(Port,Box,Depth,Module,Goal,Wins,Response).
 

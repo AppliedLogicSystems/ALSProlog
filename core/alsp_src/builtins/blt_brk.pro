@@ -192,8 +192,8 @@ break_handler(previous,M,G,ALSIDE)
 	(   PrevLevel < 1 ->  
 			%% no_prev_lev: "No previous level!!\n"
 		prolog_system_error(no_prev_lev, []),
-	    set_shell_prompts( [('?- ','?-_')] ),
-	    abort
+	    	set_shell_prompts( [('?- ','?-_')] ),
+	    	abort
 		;
 	    throw(breakhandler(PrevM,PrevG))
 	).
@@ -203,7 +203,7 @@ break_handler(show(M,G),M,G,ALSIDE)
 	breakhandler0(M,G,ALSIDE).
 break_handler(stack_trace,M,G,ALSIDE) 
 	:-!,
-	stack_trace,
+	stack_trace(break_handler),
 	breakhandler0(M,G,ALSIDE).
 
 break_handler(Otherwise,M,G,ALSIDE) 
@@ -212,27 +212,67 @@ break_handler(Otherwise,M,G,ALSIDE)
 	!,
 	breakhandler0(M,G,ALSIDE).
 
-stack_trace 
+stack_trace(Context) 
 	:-
-	stack_trace(1).
+	stack_trace(1, Context).
 
-stack_trace(30) :- !.
-stack_trace(N) 
+stack_trace(30, Context) :- !.
+stack_trace(N, Context) 
 	:-
 	frame_info(N,FI),
 	!,
-	disp_stack_trace(FI,N).
+	disp_stack_trace(FI,N, Context).
 
-disp_stack_trace((builtins:GG),_) 
+disp_stack_trace((builtins:GG),_,_) 
 	:-
 	functor(GG,do_shell_query,_),
-	!.
+	!,
+	printf(debugger_output,'--Bottom of Stack--\n',[],[quoted(true),maxdepth(8)]).
 
-disp_stack_trace(FI, N)
+disp_stack_trace(FI, N, _)
+	:-
+	FI=(builtins:breakhandler(Mod,Goal)),
+	!,
+	printf(debugger_output,'(%d) %t\n(%d) %t:%t\n',[N,FI,N,Mod,Goal],[quoted(true),maxdepth(8)]),
+	NN is N+1,
+	stack_trace(NN, Context).
+
+disp_stack_trace(FI, N, debugger)
+	:-
+	FI=(builtins:stack_trace(_,debugger)),
+	!,
+	NN is N+1,
+	stack_trace(NN, debugger).
+
+disp_stack_trace(FI, N, debugger)
+	:-
+	FI=(debugger:dogoal(Box,Depth,_,Mod,Goal)),
+	!,
+	(Box == Depth ->
+		printf(debugger_output,'(%d) %t:%t\n',[N,Mod,Goal],[quoted(true),maxdepth(8)])
+		;
+		printf(debugger_output,'(%d) %t\n',[N,dogoal(Box,Depth,_,Mod,Goal)],[quoted(true),maxdepth(8)])
+	),
+	NN is N+1,
+	stack_trace(NN, debugger).
+disp_stack_trace(FI, N, debugger)
+	:-
+	FI=(debugger:_),
+	!,
+	NN is N+1,
+	stack_trace(NN, debugger).
+disp_stack_trace(FI, N, debugger)
+	:-
+	FI= (builtins:catch0(debugger,?,?)),
+	!,
+	NN is N+1,
+	stack_trace(NN, debugger).
+
+disp_stack_trace(FI, N, Context)
 	:-
 	printf(debugger_output,'(%d) %t\n',[N,FI],[quoted(true),maxdepth(8)]),
 	NN is N+1,
-	stack_trace(NN).
-stack_trace(_).
+	stack_trace(NN, Context).
+stack_trace(_, _).
 
 endmod.

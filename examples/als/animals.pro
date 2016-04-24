@@ -68,6 +68,7 @@ question(c20,'Does it swim').
 question(c21,'Is it a good flyer').
 
 animal :-
+abolish(fact/2),
    write('Please describe the animal.'),nl,nl,
    recognition(_),
    nl,nl,
@@ -103,7 +104,7 @@ ask(X) :- fact(X,yes), !.   % Has it been answered yet?
 ask(X) :- fact(X,no),!,fail.
 ask(QuestionTag) :-
    question(QuestionTag,Question),!,
-   write(Question),
+   write(Question), 
    complete(QuestionTag).
 
 complete(X) :- write('? '),read(Y),assert(fact(X,Y)), Y=yes.

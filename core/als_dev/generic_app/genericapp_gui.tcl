@@ -77,24 +77,20 @@ image create photo about_genericapp -file [file join "$APPTCLPATH" "images/about
     load_photo_gif openFolder2 openfolder2
     load_photo_gif closeFolder2 closefolder2
 
-    switch $tcl_platform(platform) {
-    	unix {
-    		load_photo_gif closed_ptr closed_unix
-    		load_photo_gif open_ptr open_unix
-    	}
-    	windows {
-    		load_photo_gif closed_ptr closed_wins
-    		load_photo_gif open_ptr open_wins
-    		}
-    	macintosh {
-    		load_photo_gif closed_ptr closed_mac
-    		load_photo_gif open_ptr open_mac
-    	}
-    	default {
-    		load_photo_gif closed_ptr closed_wins
-    		load_photo_gif open_ptr open_wins
-    	}
-    }
+switch [tk windowingsystem] {
+	x11 {
+		load_photo closed_ptr closed_unix
+		load_photo open_ptr open_unix
+	}
+	win32 {
+		load_photo closed_ptr closed_wins
+		load_photo open_ptr open_wins
+	}
+	aqua {
+		load_photo closed_ptr closed_mac
+		load_photo open_ptr open_mac
+	}
+}
 set agv(toplevel) .genericapp_main
 
 set agv(title) "Generic Application"

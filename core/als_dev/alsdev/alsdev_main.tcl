@@ -7,7 +7,6 @@
 
 proc vTclWindow.topals {args} {
 	global array proenv
-	global tcl_platform
 	global mod
 
     set base .topals
@@ -17,16 +16,13 @@ proc vTclWindow.topals {args} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch .topals -class Toplevel -background $proenv(.topals,background) 
+    toplevel .topals -class Toplevel -background $proenv(.topals,background) 
     wm focusmodel .topals passive
     wm geometry .topals $proenv(.topals,geometry)
 	wm positionfrom .topals user
     wm maxsize .topals 1265 994
     wm minsize .topals 1 1
-    if {$tcl_platform(platform) != "macintosh"} {
-    	# This command removes the zoom box from Macintosh windows.
-    	wm overrideredirect .topals 0
-    }
+   	wm overrideredirect .topals 0
     wm resizable .topals 1 1
     wm deiconify .topals
     wm title .topals "ALS Prolog Environment"
@@ -77,7 +73,7 @@ proc vTclWindow.topals {args} {
         -yscrollcommand {.topals.vsb set} \
 		-exportselection true
 
-    if {$tcl_platform(platform) == "macintosh"} {
+    if {[tk windowingsystem] == "aqua"} {
         .topals.text configure -highlightthickness 0
     }
 
@@ -116,7 +112,7 @@ proc vTclWindow.dyn_flags {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     # Withdraw the window so that it doesn't appear during prolog heartbeat
     wm withdraw $base
     wm focusmodel $base passive
@@ -211,7 +207,7 @@ proc vTclWindow.about {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 171x215
     center $base
@@ -295,7 +291,7 @@ proc vTclWindow.break_choices {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 155x260+109+214
     wm maxsize $base 1137 870
@@ -361,7 +357,7 @@ proc vTclWindow.static_flags {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base
+    toplevel $base
     wm withdraw $base
 
     wm title $base "Static Prolog Flags"
@@ -394,7 +390,7 @@ proc init_prj_spec \
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm maxsize $base \
 		[expr [winfo screenwidth .] - 80] \
@@ -1036,7 +1032,7 @@ proc vTclWindow.ide_settings {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base
+    toplevel $base
     #wm focusmodel $base passive
     #wm geometry $base 374x208+269+255
     #wm maxsize $base 1137 870
@@ -1218,7 +1214,7 @@ proc vTclWindow.find_repl {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 510x200+140+392
     wm maxsize $base 1137 870
@@ -1390,7 +1386,7 @@ proc vTclWindow.syn_errors {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 521x247+261+300
     wm maxsize $base 1137 870

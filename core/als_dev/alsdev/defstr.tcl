@@ -15,7 +15,7 @@ proc vTclWindow.defstr {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 499x365+375+178
     wm maxsize $base 1137 870

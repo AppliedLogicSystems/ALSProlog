@@ -200,11 +200,6 @@ static int Opendocument_Init(Tcl_Interp *interp)
 	return Tcl_PkgProvide(interp, "OpenDocument", "1.0");
 }
 
-#ifdef DEMO
-void setup_alsdev_demo(void);
-void shutdown_alsdev_demo(void);
-#endif
-
     	extern long ss_image_offset(const char *image_name);
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -266,18 +261,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     //PI_set_console_functions(standard_console_read, standard_console_write,
     //				standard_console_error);
 
-#ifdef DEMO
-	setup_alsdev_demo();
-#endif
-
 	if ((exit_status = PI_startup(&setup)) != 0) {
 		PI_app_printf(PI_app_printf_error, "Prolog init failed !\n");
 		exit(EXIT_ERROR);
     }
-
-#ifdef DEMO
-	shutdown_alsdev_demo();
-#endif
 
 	tcl_interface_init();
 

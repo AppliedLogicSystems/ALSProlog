@@ -18,33 +18,17 @@
 #|	This is hard-coded in the following.
 ##=================================================================================
 
-# Load packages for opening documents from the Finder/Explorer on
-# Macintosh and Windows.  The user provided procedure tkOpenDocument
-# is called to handles files opened this way.
+# Load custom packages for each windowing system.
 #
 # OpenDocument is an ALS-custom package for Windows.  This package contains
 # the AttachOpenDocumentHandler procedure which should be called when
 # .topals is fully opened.
-#
-# appleevents is a standard Tcl/Tk package for the Mac.
 
 #puts ALSTCLPATH=$ALSTCLPATH
-
-if {$tcl_platform(platform) == "windows"} {
-	load {} OpenDocument
-	load {} getDirectory
-	load {} getFiles
+switch [tk windowingsystem] {
+	win32   { load {} OpenDocument }
+	default {}
 }
-if {$tcl_platform(platform) == "macintosh"} {
-	load {} appleevents
-	load {} getDirectory
-	load {} getFiles
-}
-
-#TODO Figure out if getDir/Files is still needed in 2009 -CEH
-#package require getDirectory
-#package require getFiles
-
 
 proc xpe { What } {
 	global array proenv
@@ -164,16 +148,8 @@ set proenv(posted_vis)			{}
 set proenv(debugwin_button,background)	#cee8e6
 set proenv(interrupt_button,foreground)	#ff0000
 
-puts -nonewline "tcl_platform = " 
-puts $tcl_platform(platform)
-
-if {$tcl_platform(platform) == "macintosh"} then {
-	set proenv(.topals,geometry)	600x500+300+10
-	set proenv(.debugwin,geometry)	600x300+300+22
-} else {
-	set proenv(.topals,geometry)	600x500+300+10
-	set proenv(.debugwin,geometry)	600x300+300+0
-}
+set proenv(.topals,geometry)	600x500
+set proenv(.debugwin,geometry)	600x300
 
 set proenv(.topals,foreground)	black
 set proenv(.debugwin,foreground)	black
@@ -199,26 +175,6 @@ set proenv(.topals,tabs)	{}
 set proenv(.debugwin,tabs)	{}
 set proenv(.document,tabs)	{}
 
-if {$tcl_platform(platform) == "macintosh"} {
-	set proenv(.topals,font)		{Monaco 9 normal}
-	set proenv(.debugwin,font)		{Monaco 9 normal}
-	set proenv(.document,font)		{Monaco 9 normal}
-} elseif {$tcl_platform(platform) == "windows"} {
-	set proenv(.topals,selectbackground)	SystemHighlight
-	set proenv(.debugwin,selectbackground)	SystemHighlight
-	set proenv(.document,selectbackground)	SystemHighlight
-} elseif {$tcl_platform(platform) == "unix"} {
-	set proenv(.topals,background)	#d9d9d9	
-	set proenv(.debugwin,background)	#d9d9d9
-	set proenv(.document,background)	#d9d9d9
-	set proenv(.topals,selectforeground)	black
-	set proenv(.debugwin,selectforeground)	black
-	set proenv(.document,selectforeground)	black
-	set proenv(.topals,selectbackground)	#c3c3c3
-	set proenv(.debugwin,selectbackground)	#c3c3c3
-	set proenv(.document,selectbackground)	#c3c3c3
-}
-
 set	proenv(edit,visible)		{}
 
 set proenv(heartbeat) 1.05
@@ -232,28 +188,8 @@ set proenv(main_depth_type) nonflat
 proc main {argc argv} {
 }
 
-# Patches for Windows to make toplevel and raise activate the window.
-
-proc toplevel_patch {w args} {
-	global tcl_platform
-
-	eval toplevel $w $args
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $w
-	}
-}
-
-proc raise_patch {w args} {
-	global tcl_platform
-
-	eval raise $w $args
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $w
-	}
-}
-
 proc show_window {w} {
-	raise_patch $w
+	raise $w
 	wm deiconify $w
 }
 
@@ -295,21 +231,6 @@ proc vTclWindow. {args} {
 	#################################
 	# 		INITIAL SETUP
 	#--------------------------------
-
-switch $tcl_platform(platform) {
-	unix {
-		set MainFont system
-	}
-	windows {
-		set MainFont system
-	}
-	macintosh {
-		set MainFont application
-	}
-	default {
-		set MainFont system
-	}
-}
 
 proc establish_defaults {} {
 	global array proenv
@@ -408,17 +329,10 @@ proc map_alsdev_debug {} {
 }
 
 proc load_source {path name} {
-	global tcl_platform
-	if {$tcl_platform(platform) == "macintosh"} {
-		uplevel "source -rsrc {$name}"
-	} else {
-		uplevel "source \[file join {$path} {$name.tcl}]"
-	}
+	uplevel "source \[file join {$path} {$name.tcl}]"
 }
 
 # Load Tcl source
-# Note: When you add a new source file, also add it to mac_alsdev.r
-# to ensure that it is stored in the Mac resources.
 
 load_source $ALSTCLPATH {alsdev_main}
 load_source $ALSTCLPATH {als_settings}
@@ -433,39 +347,29 @@ load_source $ALSTCLPATH {als_projects}
 #load_source $ALSTCLPATH {als_tkfbox}
 
 proc load_photo {image_name base_name} {
-	global tcl_platform ALSTCLPATH
-	if {$tcl_platform(platform) == "macintosh"} {
-		image create photo $image_name -format gif -data [resource read GIFf $base_name]
-	} else {
-		image create photo $image_name -file [file join $ALSTCLPATH .. images $base_name.gif]
-	}
+	global ALSTCLPATH
+	image create photo $image_name -file [file join $ALSTCLPATH .. images $base_name.gif]
 }
 
 # Load images
-# Note: When you add a new image, also add it to mac_alsdev.r
-# to ensure that it is stored in the Mac resources.
 
 load_photo up_arrow_gif up-arrow-blue
 load_photo down_arrow_gif down-arrow-blue
 load_photo right_gif right-arrow-blue
 load_photo left_gif left-arrow-blue
 
-switch $tcl_platform(platform) {
-	unix {
+switch [tk windowingsystem] {
+	x11 {
 		load_photo closed_ptr closed_unix
 		load_photo open_ptr open_unix
 	}
-	windows {
+	win32 {
 		load_photo closed_ptr closed_wins
 		load_photo open_ptr open_wins
 	}
-	macintosh {
+	aqua {
 		load_photo closed_ptr closed_mac
 		load_photo open_ptr open_mac
-	}
-	default {
-		load_photo closed_ptr closed_wins
-		load_photo open_ptr open_wins
 	}
 }
 
@@ -627,12 +531,7 @@ proc wake_up_look_around { } {
 
 proc interrupt_action {} {
 	global WakeUpLookAround
-	global tcl_platform
-	if {$tcl_platform(platform) == "macintosh"} {
-		prolog interrupt
-	} else {
-		set WakeUpLookAround -1
-	}
+	set WakeUpLookAround -1
 }
 
 proc ctl-d_action { TxtWin StreamAlias } {
@@ -700,7 +599,8 @@ proc kill_tcl_interps  { } {
 
 proc set_directory { } {
 	set CWD [pwd]
-	set NewDir [getDirectory]
+		# cf: https://www.tcl.tk/man/tcl8.3/TkCmd/chooseDirectory.htm
+	set NewDir [tk_chooseDirectory]
 	if {$NewDir != ""} {
 		cd $NewDir
 		show_dir_on_main $NewDir
@@ -799,7 +699,6 @@ proc listener.save {w}  { listener.save_as $w }
 
 proc listener.save_as {w} {
 	global array proenv
-	global tcl_platform
 	
 	set file [tk_getSaveFile -initialfile prolog_env \
 		-defaultextension .txt ]
@@ -1674,17 +1573,22 @@ proc run_cref  {} {
 	prolog call alsdev run_cref
 }
 
+###########################################
+# Mac OS X Support via tk::mac functions
+#------------------------------------------
 
-proc tkOpenDocument args {
-	global tcl_platform
-	foreach file $args {
-		if {$tcl_platform(platform) == "windows"} {
-			set file [file attributes "$file" -longname]
-		}
-		if { [file extension "$file"] == ".ppj" } then {
-			prolog call alsdev launch_project -atom $file
-		} else {
-			document.open $file
+if {[tk windowingsystem] == "aqua"} {
+	proc ::tk::mac::Quit {} {
+		exit_prolog
+	}
+
+	proc ::tk::mac::OpenDocument {args} {
+		foreach file $args {
+			if { [file extension "$file"] == ".ppj" } then {
+				prolog call alsdev launch_project -atom $file
+			} else {
+				document.open $file
+			}
 		}
 	}
 }
@@ -1699,7 +1603,7 @@ proc do_2col {base} {
 ###############________________________________##################
 
 
-if {$tcl_platform(platform) == "macintosh"} {
+if {[tk windowingsystem] == "aqua"} {
 	# Make .topals.mmenb the default menu for all windows.
 	. configure -menu .topals.mmenb
 }
@@ -1709,13 +1613,13 @@ Window show .topals
 # update idletasks seems to push .topals behind other windows on
 # Windows, so just call update.
 
-if {$tcl_platform(platform) == "windows"} then {
+if {[tk windowingsystem] == "win32"} then {
 	update
 } else {
 	update idletasks
 }
 
-raise_patch .topals
+raise .topals
 wm positionfrom .topals user
 wm geometry .topals $proenv(.topals,geometry)
 focus .topals.text
@@ -1724,6 +1628,6 @@ focus .topals.text
 # install a custom window procedure on .topals window for handling
 # document opened form the Explorer.
 
-if {$tcl_platform(platform) == "windows"} {
+if {[tk windowingsystem] == "win32"} {
 	AttachOpenDocumentHandler
 }

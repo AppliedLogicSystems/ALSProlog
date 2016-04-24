@@ -49,7 +49,6 @@ set proenv(document_list) {}
 proc create_document_window {title} {
 	global array proenv
 	global mod
-	global tcl_platform
 
 		# Create a unique window name:
 
@@ -58,7 +57,7 @@ proc create_document_window {title} {
 	
 		# Create window:
 
-	toplevel_patch $w
+	toplevel $w
 	wm title $w $title
 	wm protocol $w WM_DELETE_WINDOW "document.close $w"
 
@@ -87,11 +86,7 @@ proc create_document_window {title} {
 	grid rowconf $w 1 -weight 0
 
 	grid $w.text -column 0 -row 0 -sticky nesw
-	if {$tcl_platform(platform) == "macintosh"} {
-		grid $w.yscrollbar -column 1 -row 0 -sticky ns -rowspan 2
-	} else {
-		grid $w.yscrollbar -column 1 -row 0 -sticky ns
-	}
+	grid $w.yscrollbar -column 1 -row 0 -sticky ns
 	grid $w.xscrollbar  -column 0 -row 1 -sticky ew
 
 	$w.text configure -highlightthickness 0 \
@@ -275,10 +270,8 @@ proc dirty_key {w k} {
 	}
 }
 
-proc bind_accelerators {w mod type} {
-	global tcl_platform
-	
-	if {$tcl_platform(platform) == "macintosh"} return;
+proc bind_accelerators {w mod type} {	
+	if {[tk windowingsystem] == "aqua"} return;
 	
 	if {$mod == "Ctrl"} then { set MMD Control } else { set MMD $mod }
 
@@ -354,7 +347,7 @@ proc store_text {text file} {
 proc load_document {file} {
 	global array proenv 
 	if {[info exists proenv(document,$file)]} {
-		raise_patch $proenv(document,$file)
+		raise $proenv(document,$file)
 	} else {
 		set file_name [lindex [file split $file] end]
 		set w [create_document_window $file_name]		
@@ -420,18 +413,19 @@ proc document.new {} {
 	post_open_document $Title $w
 }
 
+switch [tk windowingsystem] {
+	aqua    { set filetypes {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}} }
+	default { set filetypes {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}} }
+}
+
 proc document.open args {
-	global tcl_platform
+	global filetypes
 	set file_list $args
 	if {$file_list == ""} then {
-		if {$tcl_platform(platform) == "macintosh"} {
-			set types {{"Text Files" * TEXT} {"Prolog Files" {.pro .pl} TEXT} {"Tcl/Tk Files" {.tcl} TEXT}}
-		} else {
-			set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
-		}
+
 		set file [tk_getOpenFile \
 			-title "Open File" \
-			-filetypes $types ] 
+			-filetypes $filetypes]
 		if {$file != ""} then {
 			set file_list [list $file]
 		}
@@ -447,19 +441,13 @@ proc document.open args {
 }
 
 proc save_check {w} {
-	global tcl_platform
 	global array proenv
 	if {$proenv($w,dirty)} then {
-		raise_patch $w
+		raise $w
 		set title [wm title $w]
-		if {$tcl_platform(platform) == "macintosh"} {
-			set icon caution
-		} else {
-			set icon warning
-		}
 		set answer [tk_dialog .document_save_dialog "" \
 			"Save changes to the document \"$title\" before closing?" \
-			$icon \
+			{} \
 			2 "Don't Save" "Cancel" "Save"]
 		if {$answer == 2} then {
 			set result [document.save $w]
@@ -524,7 +512,6 @@ proc document.save {w} {
 
 proc document.save_as {w} {
 	global array proenv
-	global tcl_platform
 	
 	set file [tk_getSaveFile -initialfile [wm title $w] \
 		-defaultextension .pro ]
@@ -539,7 +526,6 @@ proc document.save_as {w} {
 
 proc save_as_core {w file} {
 	global array proenv
-	global tcl_platform
 
 	if {[info exists proenv($w,file)]} then {
 		unset proenv(document,$proenv($w,file))
@@ -549,7 +535,7 @@ proc save_as_core {w file} {
 	wm title $w [lindex [file split $file] end]
 	store_text $w.text $file
 	set proenv($w,dirty) false
-	if {$tcl_platform(platform) == "macintosh"} then { 
+	if {[tk windowingsystem] == "aqua"} then {
 		file attributes $file -creator ALS4 -type TEXT 
 	}
 }
@@ -574,19 +560,14 @@ proc document.copy {w} {
 
 proc document.paste {w} {
 	global array proenv
-	global tcl_platform
 
 	catch {$w.text delete sel.first sel.last}
 	set clip [selection get -displayof $w -selection CLIPBOARD]
-	if {$tcl_platform(platform) == "macintosh"} {
-		set lines [split $clip \r]
-		set clip [join $lines \n]
-	}
 	$w.text insert insert $clip
 	set proenv($w,dirty) true
 }
 
-proc document.clear {w} {
+proc document.delete {w} {
 	global array proenv
 	catch {$w.text delete sel.first sel.last}
 	set proenv($w,dirty) true
@@ -605,23 +586,18 @@ proc document.preferences {w} {
 }
 
 proc document.consult {w} {
-	global proenv tcl_platform
+	global proenv
 
 	if [info exists proenv($w,file)] then {
 		set file $proenv($w,file)
 	} else {
 		set file ""
 	}
-	if {$tcl_platform(platform) == "macintosh"} {
-		set icon caution
-	} else {
-		set icon warning
-	}
 	set title [wm title $w]
 	if {$file == ""} {
 		set answer [tk_dialog .document_save_dialog "" \
 			"Save document \"$title\" to file in order to consult?" \
-			$icon \
+			{} \
 			1 "Cancel" "Save"]
 		if { $answer == 1 } then {
 			if {[document.save $w]} then {
@@ -633,7 +609,7 @@ proc document.consult {w} {
 		bell
 		set answer [tk_dialog .document_save_dialog "" \
 			"Save changes to the document \"$title\" in order to consult?" \
-			$icon \
+			{} \
 			1 "Cancel" "Save"]
 		if { $answer == 1 } then {
 			document.save $w
