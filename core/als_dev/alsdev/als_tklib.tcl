@@ -49,11 +49,11 @@ proc vTclWindow. {base} {
         set base .
     }
     wm focusmodel $base passive
-    wm geometry $base 1x1+0+0
+    wm geometry $base 10x10+0+0
     wm maxsize $base 1137 870
-    wm minsize $base 1 1
+    wm minsize $base 10 10
     wm overrideredirect $base 0
-    wm resizable $base 1 1
+    wm resizable $base 10 10
     wm withdraw $base
     wm title $base "vt.tcl"
 }
