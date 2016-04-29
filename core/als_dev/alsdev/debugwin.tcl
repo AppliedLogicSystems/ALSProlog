@@ -30,9 +30,6 @@ proc vTclWindow.debugwin {base} {
     wm focusmodel $base passive
     wm geometry $base $proenv(.debugwin,geometry)
 
-puts -nonewline "debugwin,geometry = " 
-puts $proenv(.debugwin,geometry)
-
     wm maxsize $base 1137 870
     wm minsize $base 1 1
 	wm overrideredirect $base 0

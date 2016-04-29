@@ -235,13 +235,7 @@ proc vTclWindow. {args} {
 proc establish_defaults {} {
 	global array proenv
 
-#puts -nonewline "e_d-1: DebugGeom = "
-#puts $DebugGeom
-
 	prolog call alsdev alsdev_ini_defaults  -var DefaultVals -var TopGeom -var DebugGeom -var DebugVis
-
-puts -nonewline "DebugGeom = "
-puts $DebugGeom
 
 	reset_default_values $DefaultVals
 	if {$TopGeom != ""} then { set proenv(.topals,geometry) $TopGeom }

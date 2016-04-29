@@ -1647,7 +1647,7 @@ source_trace_closedown(STWin)
 
 set_debugwin_width(MSize, MainWinSize)
 	:-
-	NChars is floor(1.8 * (MainWinSize)//MSize ),
+	max(floor(1.8 * (MainWinSize)//MSize), 5, NChars),
 	sio:is_stream(debugger_output, DS),
 	set_line_length(DS, NChars).
 
