@@ -2284,7 +2284,6 @@ endmod.
 
 module alsdev.
 
-/*
 check_reload_consults
 	:-
 	builtins:get_primary_manager(ALSMgr),
@@ -2300,8 +2299,8 @@ check_reload_consults
 		;
 		Ans = 'No'
 	),
-	consult_all(LoadedFiles).
-*/
+	consult_all(LoadedFiles),
+	reset_all_spypoints.
 
 
 consult_all([]).
