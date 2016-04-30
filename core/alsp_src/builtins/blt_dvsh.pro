@@ -1722,7 +1722,6 @@ vv_showGoalToUserWin(Port,Box,Depth, Module, Goal, DBGMGR, Response)
 	accessObjStruct(mrfcg, DBGMGR, CG),
 	(CG > 0 ->
 		send(DBGMGR,  get_mrfcg(CG, SrcMgr))
-%		send(SrcMgr,  ensure_window_open)
 		;
 		true
 	),
@@ -1730,7 +1729,8 @@ vv_showGoalToUserWin(Port,Box,Depth, Module, Goal, DBGMGR, Response)
 	showGoalToUserWin_other(Port,Box,Depth, Module, Goal, Response, CG, DBGMGR, SrcMgr).
 
 		%% Staying in the same file; nothing to do:
-check_win_cleanup(_, CG, CG, _, _) :-!.
+check_win_cleanup(_, CG, CG, _, _) :-
+	!.
 
 		%% Now we have just switched between files; if Port is
 		%% call or redo, need to remove trace coloring, etc., 
@@ -1746,7 +1746,6 @@ check_win_cleanup(_, _, _, _, _).
 
 check_presence_and_cleanup(SrcMgr, MRFCG, DBGMGR)
 	:-
-
 	send(DBGMGR, mgr_by_cg(MRFCG, MRSrcMgr)),
 	send(MRSrcMgr, clear_decorations),
 	send( SrcMgr, start_src_trace),
@@ -1942,11 +1941,9 @@ showGoalToUserWin_other(Port,Box,Depth, Module, XGoal, Response, MRFCG, DBGMGR, 
 	!,
 	write_term(debugger_output, Module:XGoal, [lettervars(false)]),
 	flush_output(debugger_output),
-
 	re_color_port(Port, MRFCG, SrcMgr),
-
-%	send(DBGMGR, show_stack_list),
 	!,
+		% clean up if Port = exit; Port = fail
 	(dbg_boundary(MRFCG,Box,Depth,general,Port,XGoal,DBGMGR, SrcMgr) ->
 		nl(debugger_output),
 		Response = debug

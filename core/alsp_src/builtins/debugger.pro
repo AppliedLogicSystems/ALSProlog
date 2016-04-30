@@ -1144,6 +1144,7 @@ spy_pat(Module,Pred,Arity)
     !,
 	ensure_db_showing,
     dbg_spyoff,
+    setup_debug(Module, Pred, Arity),
     install_spypoints(SpyList),
     setPrologInterrupt(spying),
     setDebugInterrupt(spying),
@@ -1171,6 +1172,7 @@ install_spypoints([ M:P/A | RestSpyPoints])
 install_spypoint(Mod,Pred,Arity) 
 	:-
     functor(CallForm,Pred,Arity),
+    setup_debug(Mod, Pred, Arity),
     clause(spying_on(CallForm,Mod),true),
     !.
 
@@ -1543,6 +1545,7 @@ setup_debug(nowins, Module, Predicate, Arity, _, [])
 	:-!.
 setup_debug(DebugIOChannel, Module, Predicate, Arity, CGsSetup, NextCGsSetup)
 	:-
+		% CG = ClauseGroup
 	get_fcg(Module,Predicate,Arity,CG,DefiningMod),
 	!,
 	fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, NextCGsSetup).
