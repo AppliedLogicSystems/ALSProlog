@@ -14,10 +14,8 @@
  | Author: Kevin Buettner
  *=====================================================================*/
 
-main :-	als_system(SysVars),
+main :-
 get_cwd(D), write(cwd=D),nl,
-	dmember(os=OS,SysVars),
-	not(OS = macos), not(OS = mswin32),
 %	fail. /* What tests should be run, and what constitutes succes? */
 	tp3.
 

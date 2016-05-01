@@ -10,6 +10,9 @@ module als_testing.
 
 	%% Standard ALS examples:
 
+test_info(stack_overflow_test, stack_overflow_test, user, test,
+	'test correct handling of stack-overflows').
+
 test_info(bench, bench, user, main, 'The benchpress example.').
 
 test_info(jobs, jobs, user, go, 'The jobs example.').
