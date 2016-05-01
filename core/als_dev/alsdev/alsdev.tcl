@@ -145,6 +145,18 @@ set proenv(posted_vis)			{}
 
 	## window appearance stuff - initial defaults:
 
+# Define cross-platform version of systemHighlight
+switch [tk windowingsystem] {
+    x11 {
+	set systemHighlightText black
+	set systemHighlight #c3c3c3
+    }
+    default {
+	set systemHighlightText systemHighlightText
+	set systemHighlight systemHighlight
+    }
+}
+
 set proenv(debugwin_button,background)	#cee8e6
 set proenv(interrupt_button,foreground)	#ff0000
 
@@ -159,13 +171,13 @@ set proenv(.topals,background)	#ffffff
 set proenv(.debugwin,background)	#ffffff
 set proenv(.document,background)	#ffffff
 
-set proenv(.topals,selectforeground)	systemHighlightText
-set proenv(.debugwin,selectforeground)	systemHighlightText
-set proenv(.document,selectforeground)	systemHighlightText
+set proenv(.topals,selectforeground)	$systemHighlightText
+set proenv(.debugwin,selectforeground)	$systemHighlightText
+set proenv(.document,selectforeground)	$systemHighlightText
 
-set proenv(.topals,selectbackground)	systemHighlight
-set proenv(.debugwin,selectbackground)	systemHighlight
-set proenv(.document,selectbackground)	systemHighlight
+set proenv(.topals,selectbackground)	$systemHighlight
+set proenv(.debugwin,selectbackground)	$systemHighlight
+set proenv(.document,selectbackground)	$systemHighlight
 
 set proenv(.topals,font)	{user 14 normal}
 set proenv(.debugwin,font)	{user 14 normal}
