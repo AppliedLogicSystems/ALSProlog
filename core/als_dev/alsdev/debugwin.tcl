@@ -628,7 +628,8 @@ proc vTclWindow.pred_info {base} {
 	bind  $base.mods.listbox <Double-Button-1> \
 		{ set_module_focus [ get_selected_module ] }
 
-	bind $base.spying.label <Configure> {refresh_spy_win}
+#	bind $base.spying.label <Configure> {refresh_spy_win}
+	bind $base.spying.label <Configure> {refresh_spy_win0}
 	bind $base.spying.label <Map> {refresh_spy_win}
 
     bind $base.preds.listbox <Double-Button-1> {move_to_spying_list}

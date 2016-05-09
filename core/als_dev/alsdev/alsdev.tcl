@@ -1108,6 +1108,12 @@ proc refresh_preds_list {Mod} {
 	}
 }
 
+proc refresh_spy_win0 {} {
+	refresh_spy_win
+	set_module_focus user
+	refresh_preds_list user
+
+}
 proc refresh_spy_win {} {
 	refresh_mods_list
 	set MF [get_module_focus]
