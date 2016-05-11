@@ -680,7 +680,6 @@ proc debugwin.consult { Window } {
 }
 
 proc consult_file {} {
-puts ">>consult_file"
 	set file [tk_getOpenFile \
 		-defaultextension pro \
 		-title "Consult File" \
@@ -688,8 +687,7 @@ puts ">>consult_file"
 		-filetypes {{"Prolog Files" {.pro .pl } } {{All Files} {*} } } ]
 	if {$file == ""} then { return }
 	prolog call alsdev do_reconsult -atom $file
-puts ">>EXIT consult_file"
-refresh_spy_preds_if_showing
+	refresh_spy_preds_if_showing
 	return true
 }
 
@@ -1125,7 +1123,6 @@ proc refresh_spy_win {} {
 
 proc refresh_spy_preds_if_showing {} {
 	global array proenv
-puts "ENTER refresh_spy_preds_if_showing"
 
 	if {[winfo exists .pred_info] == 1} then { 
 		refresh_spy_win
