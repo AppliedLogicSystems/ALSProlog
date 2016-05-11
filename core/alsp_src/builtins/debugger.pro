@@ -1146,6 +1146,7 @@ spy_pat(Module,Pred,Arity)
     dbg_spyoff,
     setup_debug(Module, Pred, Arity),
     install_spypoints(SpyList),
+    builtins:refresh_spy_preds_if_showing,
     setPrologInterrupt(spying),
     setDebugInterrupt(spying),
     printf(debugger_output,'Spy points set on: %t.\n', [SpyList]),
