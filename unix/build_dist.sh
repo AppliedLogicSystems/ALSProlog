@@ -71,6 +71,7 @@ cp -pr $MAN/$HELP/* "$DISTDIR/alshelp"
 cp -p $MAN/als_help.html "$DISTDIR/als_help.html"
 cp -p $MAN/alshelp.css "$DISTDIR/alshelp.css"
 cp -p $MAN/package_nav.html "$DISTDIR/package_nav.html"
+cp -p "$ALS_PROLOG/core/alsp_src/doc/alspro.1" "$DISTDIR/alspro.1"
 
 
 #mkdir "$DISTDIR/alsdir/library"
