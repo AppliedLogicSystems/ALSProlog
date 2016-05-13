@@ -26,8 +26,11 @@ cp -p $SRC/als-prolog-manual.pdf $DST/share/als-prolog
 
 VERSION=$(git describe --dirty)
 
-fpm --force -s dir -t deb -C $DST \
+for FORMAT in deb rpm
+do
+fpm --force -s dir -t $FORMAT -C $DST \
 --name als-prolog --version ${VERSION:1} --architecture i386 --prefix /usr \
---depends "tk (> 8.5)"
+--depends "tk >= 8.5"
+done
 
 rm -r $TMP
