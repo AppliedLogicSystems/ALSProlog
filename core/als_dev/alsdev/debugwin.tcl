@@ -487,12 +487,9 @@ proc vTclWindow.pred_info {base} {
     button $base.buttons.wamlisting \
         -padx 11 -pady 2 -text {WAM Asm} \
 		-command carry_out_listasm -state disabled
-    button $base.buttons.refreshpreds \
-        -padx 1 -pady 2 -text {Refresh Preds} \
-		-command refresh_the_preds
-    button $base.buttons.refreshmods \
-        -padx 1 -pady 2 -text {Refresh Mods} \
-		-command refresh_mods_list
+    button $base.buttons.refreshspywin \
+        -padx 11 -pady 2 -text {Refresh} \
+		-command refresh_spy_win
 
     frame $base.spying \
         -borderwidth 1 -relief sunken  
@@ -599,9 +596,7 @@ proc vTclWindow.pred_info {base} {
 		 -anchor center -expand 0 -fill none -side top -pady 6
     pack $base.buttons.wamlisting \
 		 -anchor center -expand 0 -fill none -side top -pady 6
-    pack $base.buttons.refreshpreds \
-		 -anchor center -expand 0 -fill none -side bottom -pady 6
-    pack $base.buttons.refreshmods \
+    pack $base.buttons.refreshspywin \
 		 -anchor center -expand 0 -fill none -side bottom -pady 6
 
     grid $base.spying \
