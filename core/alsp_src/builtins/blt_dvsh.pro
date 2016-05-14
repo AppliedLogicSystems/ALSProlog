@@ -678,6 +678,10 @@ special_cl_processing(prolog_script, File, NoSuffixFile, Ext)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+als_ide_mgrAction(refresh_wins, State)
+    	:-
+ 	tcl_call(shl_tcli, [refresh_spy_preds_if_showing], _).
+
 als_ide_mgrAction([Functor | Args], State)
 	:-
 	Msg =.. [Functor | Args],

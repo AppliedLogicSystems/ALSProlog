@@ -189,7 +189,8 @@ consult(What, Options)
 	:-
 	consult_global_options(Options, COpts),
 	consult_files(What, COpts),
-	builtins:refresh_spy_preds_if_showing.
+    	builtins:get_primary_manager(ALSMgr),
+        send(ALSMgr, refresh_wins).
 
 consult_files([], _) 
 	:-!.
@@ -451,17 +452,6 @@ cslt_info_recon(FileDesc, Nature, Nature, Recon, Recon, FileDesc).
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% MESSAGE LEVEL OF CONSULT 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-/*-------------------------------------------------------------*
- | If in alsdev, check to refresh spy window (pred_info)
- | if needed.
- *-------------------------------------------------------------*/ 
-refresh_spy_preds_if_showing
-	:-
-	builtins:clause(alsdev_running,_),
-	!,
- 	tcl_call(shl_tcli, [refresh_spy_preds_if_showing], _).
-refresh_spy_preds_if_showing.
-
 
 
 /*-------------------------------------------------------------*
@@ -488,6 +478,7 @@ do_consult(BaseFile, FCOpts)
 			consult_except_resp(Ball,FCOpts,FileMgr,FinalMsg)
 	     ),
 	send(ALSMgr, set_value(cslt_ctxt, PrevCntxts)),
+%send(ALSMgr, refresh_wins),
 	record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr),
 	!,
 	consult_msg(FinalMsg, FCOpts).
