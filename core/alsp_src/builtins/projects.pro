@@ -225,15 +225,9 @@ gen_project_mgrAction(read_gui_spec, State)
 	tcl_call(shl_tcli, 
 		[rd_prj_spec, GuiPath, TextSlots, ListOfFilesSlots, ListSlots],
 		InitResult),
-	InitResult = [OutTextSlots, OutListSlots],
-	findall(T=V, member([T, V], OutTextSlots), CleanTextSlots),
 	forbidden_slots(Forbidden),
-	weak_all_setObjStruct(CleanTextSlots, Forbidden, State),
-	findall(Tag=CleanValue,
-			(member([Tag,Value], OutListSlots), 
-				cleanup_value(Value, CleanValue) ),
-			CleanListSlots),
-	weak_all_setObjStruct(CleanListSlots, Forbidden, State).
+ 	findall(T=V, (member(L, InitResult), member([T, V], L)), Eqns),
+	weak_all_setObjStruct(Eqns, Forbidden, State).
 
 cleanup_value('', []) :-!.
 cleanup_value(Value, CleanValue)
@@ -322,7 +316,6 @@ gen_project_mgrAction(update_check_complete(fail), State)
 
 gen_project_mgrAction(save_to_file, State)
 	:-
-%	gen_project_mgrAction(read_gui_spec, State),
 	check_ppj(State, FilePath),
 	forbidden_slots(Forbidden),
 	dump_object(State, Forbidden, Eqns),
