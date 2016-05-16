@@ -289,8 +289,8 @@ show_help
 	write('    -a,-A<goal> <goal> an arbitrary prolog goal; causes <goal> to be asserted'),nl,
 	write('    -heap num   Sets heap to num * 1024 bytes'),nl,
 	write('    -stack num  Sets stack to num * 1024 bytes'),nl,
-
-	nl,nl.
+	nl,nl,
+	halt.
 
 
 	%%%%%%%
