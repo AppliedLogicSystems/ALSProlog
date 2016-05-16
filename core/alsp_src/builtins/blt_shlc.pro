@@ -273,7 +273,7 @@ show_help
 	:-
 	write('    Help for alspro'),nl,
 	write('    alspro [options] [source [sources]]'),nl,
-	write('    [source:: <path/to/file>filename.ext] default ext:: pro'),nl,
+	write('    [source:: <path/to/file>filename.ext]'),nl,
 	write('    [options]'),nl,
 	write('    -s <path>   Adds <path(/to/dir) to system search dirs'),nl,
 	write('    -g<goal>    <goal> an arbitrary prolog goal (no :-,?-)'),nl,
