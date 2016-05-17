@@ -189,8 +189,8 @@ consult(What, Options)
 	:-
 	consult_global_options(Options, COpts),
 	consult_files(What, COpts),
-    	builtins:get_primary_manager(ALSMgr),
-        send(ALSMgr, refresh_wins).
+	builtins:get_primary_manager(ALSMgr),
+	send(ALSMgr, refresh_wins).
 
 consult_files([], _) 
 	:-!.
@@ -453,7 +453,6 @@ cslt_info_recon(FileDesc, Nature, Nature, Recon, Recon, FileDesc).
 	%% MESSAGE LEVEL OF CONSULT 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 /*-------------------------------------------------------------*
  | do_consult/2
  | do_consult(BaseFile, FileConsultOpts)
@@ -478,7 +477,6 @@ do_consult(BaseFile, FCOpts)
 			consult_except_resp(Ball,FCOpts,FileMgr,FinalMsg)
 	     ),
 	send(ALSMgr, set_value(cslt_ctxt, PrevCntxts)),
-%send(ALSMgr, refresh_wins),
 	record_consult(BaseFile, FCOpts, Ball, FileMgr, ALSMgr),
 	!,
 	consult_msg(FinalMsg, FCOpts).
