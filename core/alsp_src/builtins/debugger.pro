@@ -1460,6 +1460,10 @@ nospy(Pred/Arity) :-!,
 	functor(CallForm,Pred,Arity),
 	findall(M:CallForm-Tail, clause(spying_on(CallForm,M),Tail), L),
 	remove_spypoints(L).
+nospy(Pred) :-
+	atom(Pred),
+	findall(M:CallForm-Tail, (clause(spying_on(CallForm,M),Tail),functor(CallForm,Pred,_)), L),
+	remove_spypoints(L).
 
 nospy([]) :-!.
 nospy([Pat|More]) :-
