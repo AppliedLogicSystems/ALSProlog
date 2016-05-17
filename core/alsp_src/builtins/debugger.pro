@@ -1423,7 +1423,10 @@ export nospy/0.
         builtins:get_primary_manager(ALSMgr),
         send(ALSMgr, refresh_wins).
 
-remove_spypoints([]) :- !.
+remove_spypoints([]) :- 
+	!,
+    	builtins:get_primary_manager(ALSMgr),
+    	send(ALSMgr, refresh_wins).
 remove_spypoints([M:Call-Tail | More]) :-
     functor(Call,P,A),
     dbg_nospy(M,P,A),
