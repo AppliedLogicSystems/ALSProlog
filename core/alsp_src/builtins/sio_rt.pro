@@ -1942,6 +1942,9 @@ tp_preproc( [symbol(Elif_or_else,_,_) | Toks], Stream, OutToks) :-
 tp_preproc( [symbol(endif,_,_) | Toks], Stream, OutToks) :-
 	!,
 	tp_to_eoln(Toks,_,_,OutToks).
+tp_preproc( [!(!,_,_) | Toks], Stream, OutToks) :-
+	!,
+	tp_to_eoln(Toks,_,_,OutToks).
 tp_preproc( InToks, Stream, OutToks) :-
 	tp_to_eoln(InToks,_,_,OutToks),
 	als_advise('Warning: Did not understand preprocessor directive.\n',[]).
