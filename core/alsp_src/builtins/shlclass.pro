@@ -77,6 +77,9 @@ module builtins.
 	%% GETTING A SOURCE MANAGER
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+	%% In alspro, so nothing to do:
+als_shl_mgrAction(refresh_wins, State).
+
 als_shl_mgrAction(obtain_src_mgr(BaseFileName, FileMgr), State) 
 	:-!,
 	accessObjStruct(source_mgrs, State, PrevMgrsList),

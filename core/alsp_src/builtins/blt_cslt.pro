@@ -188,7 +188,9 @@ reconsult(What)
 consult(What, Options)
 	:-
 	consult_global_options(Options, COpts),
-	consult_files(What, COpts).
+	consult_files(What, COpts),
+	builtins:get_primary_manager(ALSMgr),
+	send(ALSMgr, refresh_wins).
 
 consult_files([], _) 
 	:-!.

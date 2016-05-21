@@ -1146,6 +1146,8 @@ spy_pat(Module,Pred,Arity)
     dbg_spyoff,
     setup_debug(Module, Pred, Arity),
     install_spypoints(SpyList),
+    builtins:get_primary_manager(ALSMgr),
+    send(ALSMgr, refresh_wins),
     setPrologInterrupt(spying),
     setDebugInterrupt(spying),
     printf(debugger_output,'Spy points set on: %t.\n', [SpyList]),
@@ -1378,6 +1380,8 @@ nospy(Module,Predicate,Arity) :-
     (Condition = true -> retract(spying_on(CallForm,Module))
 		      ;  retract((spying_on(CallForm,Module) :- Condition))),
     check_spyoff,
+    builtins:get_primary_manager(ALSMgr),
+    send(ALSMgr, refresh_wins),
     printf(debugger_output,'Spy point removed for %t:%t/%t\n',
     		[Module,Predicate,Arity]), 
     !.
@@ -1415,9 +1419,14 @@ export nospy/0.
 'nospy' :-
 	dbg_spyoff,
 	findall(M:P-Tail, clause(spying_on(P,M),Tail), L),
-	remove_spypoints(L).
+	remove_spypoints(L),
+        builtins:get_primary_manager(ALSMgr),
+        send(ALSMgr, refresh_wins).
 
-remove_spypoints([]) :- !.
+remove_spypoints([]) :- 
+	!,
+    	builtins:get_primary_manager(ALSMgr),
+    	send(ALSMgr, refresh_wins).
 remove_spypoints([M:Call-Tail | More]) :-
     functor(Call,P,A),
     dbg_nospy(M,P,A),
@@ -1453,6 +1462,10 @@ nospy(Module:Pred/Arity) :-!,
 nospy(Pred/Arity) :-!,
 	functor(CallForm,Pred,Arity),
 	findall(M:CallForm-Tail, clause(spying_on(CallForm,M),Tail), L),
+	remove_spypoints(L).
+nospy(Pred) :-
+	atom(Pred),
+	findall(M:CallForm-Tail, (clause(spying_on(CallForm,M),Tail),functor(CallForm,Pred,_)), L),
 	remove_spypoints(L).
 
 nospy([]) :-!.
