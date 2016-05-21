@@ -194,8 +194,7 @@ ss_load_files([])
 	:-!.
 ss_load_files([F | T])
 	:-
-%	catch(	reconsult(F),
-	catch(	simple_load(user, F),
+	catch(	reconsult(F),
 	      	Reason,
 			shell_exception(Reason)
 		),
