@@ -14,10 +14,7 @@
 
 #else
 
-#define VERSION_STRING "3.1.24"
-#define VERSION_MAJOR 3
-#define VERSION_MINOR 1
-#define VERSION_PATCH 24
+#define VERSION_STRING "$Format:%h%d$"
 
 #endif
 
