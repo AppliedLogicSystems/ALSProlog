@@ -1101,11 +1101,13 @@ spy(Pred,Arity) :-
 	ensure_db_showing,
 	dbg_spyoff,
 	install_spypoints(Modules, Pred, Arity),
+    	builtins:get_primary_manager(ALSMgr),
+    	send(ALSMgr, refresh_wins),
 	setPrologInterrupt(spying),
 	setDebugInterrupt(spying),
-    printf(debugger_output,
-           'Spy point set on %t in modules %t.\n',
-           [Pred/Arity, Modules]),
+    	printf(debugger_output,
+           	'Spy point set on %t in modules %t.\n',
+           	[Pred/Arity, Modules]),
 	dbg_spyon.
 
 spy(Pred,Arity) :-
