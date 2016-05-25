@@ -330,7 +330,6 @@ source_trace_mgrAction(start_src_trace, State)
 fin_mgr_start_source_trace(SrcFilePath, State)
 	:-
 	send_self(State, complete_open_edit_win(SrcFilePath,TclWin)),
-	tcl_call(shl_tcli, [add_left_col, TclWin, 1], _),
 	tcl_call(shl_tcli, [line_index_file,SrcFilePath],LoadRes0),
 	LoadRes0 = [NumLines, LineIndex0],
 	adjust_char_line_count(LineIndex0, LineIndex),
