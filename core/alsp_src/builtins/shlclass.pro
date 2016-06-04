@@ -240,31 +240,134 @@ module alsdev.
 		subClassOf=genericObjects,
 		module = alsdev,
 		addl_slots=
-			[ 
-				debug_main_win, 			%% path to the ...
-				debug_visible,  			%% true/false: debug_main_win visible
-				src_trace_mgrs_by_file,		%% list of active mgrs, by file path
-				fcg_index_size,				%% size of array for src_trace_mgrs_by_fcg
-				src_trace_mgrs_by_fcg,		%% array (term) of active mgrs, by fcg
-				mrfcg,						%% most recent file clause group touched
-				stack_display_size,			%% size of stack to display
-				stack_display_stream,		%% stream to write stack to
-				stack_display_list			%% listbot to write stack to
-			],
+		[ 
+			debug_main_win, 		%% path to the ...
+			debug_visible,  		%% true/false: debug_main_win visible
+			src_trace_mgrs_by_file,		%% list of active mgrs, by file path
+			fcg_index_size,			%% size of array for src_trace_mgrs_by_fcg
+			src_trace_mgrs_by_fcg,		%% array (term) of active mgrs, by fcg
+			mrfcg,				%% most recent file clause group touched
+			stack_display_size,		%% size of stack to display
+			stack_display_stream,		%% stream to write stack to
+			stack_display_list		%% listbot to write stack to
+		],
 		defaults= [ 
-			debug_main_win			= '.debugwin',
-			debug_visible			=  false,
+			debug_main_win		= '.debugwin',
+			debug_visible		=  false,
 			src_trace_mgrs_by_file	= [],
 			src_trace_mgrs_by_fcg	= [],
-			mrfcg = 0,
-			stack_display_size		= 20,
+			mrfcg 			= 0,
+			stack_display_size	= 20,
 			stack_display_stream	= debugger_output,
-			stack_display_list		= '.debugwin.stacklist'
+			stack_display_list	= '.debugwin.stacklist'
 			]
 	]).
 
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%  Project Manager ObjectPro CLASS DEFINITIONS  %%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+		%% Note: Only one project can be open at a time;
+		%% The manager for the project is read in from
+		%% the project file when the (existing) project is
+		%% opened, and is written back out to the project
+		%% file when the project is closed.
+
+
+:- defineClass(
+	[   name=gen_project_mgr,
+		subClassOf=genericObjects,
+		addl_slots=
+		[
+			internal_name,
+			title,
+			project_file,
+			primary_project_dir,	% normally where project_file is
+			list_of_files_slots,
+			list_slots,
+			text_slots,
+			search_dirs,
+			search_trees,
+			gui_spec,
+			slot_names
+			], 
+		defaults=
+		[
+			title = '',
+			project_file = '',
+			list_of_files_slots = [],
+			list_slots = [],
+			text_slots = [],
+			search_dirs = [],
+			search_trees = [],
+			slot_names = []
+		] 
+	]).
+
+		%% The manager for a prolog/tcl/c project:
+:- defineClass(
+	[   name=project_mgr,
+		subClassOf=gen_project_mgr,
+		addl_slots=
+		[
+			addl_text_slots,
+			production_goal,
+			debug_goal,
+			executable_name,
+			stub_name,
+			distdir_name,
+			prolog_files,
+			library_files,
+			file_types,
+			default_dirs,
+			project_loaded			%% true/fail
+			], 
+		defaults=
+		[
+			project_loaded = fail,
+			list_of_files_slots = [
+				prolog_files
+%				,library_files,
+				],
+			list_slots = [ prolog_files, library_files ],
+			text_slots = [],
+			addl_text_slots = [ 
+				production_goal, 
+				debug_goal, 
+			       	executable_name, 
+				stub_name, 
+				dist_dir_name
+				          ],
+			production_goal = start_,
+			debug_goal = debug_start_,
+			executable_name = execapp, 
+			stub_name = xstub,
+			distdir_name = mydistdir,
+			prolog_files = [],
+			library_files = [],
+			file_types =  [ 
+				[['Prolog Files', ['.pro', '.pl'] ]],
+				[prolog_library_files, ['.pro'] ]
+			],
+			default_dirs = [],
+			slot_names = [
+				[production_goal,	'Startup Goal:'],
+				[debug_goal, 		'Debug Goal:'],
+				[executable_name, 	'Image Name:'],
+				[stub_name, 		'Stub Name:'],
+				[dist_dir_name,		'Dist Dir Name:'],
+				[prolog_files, 		'Prolog Files:'],
+				[library_files, 	'Library Files:']
+			]
+		]
+	]).
+
+
+
+endmod.
+
+/*======================================================================================*
 :- defineClass(
 	[   name=gen_project_mgr,
 		subClassOf=genericObjects,
@@ -301,11 +404,14 @@ module alsdev.
 		subClassOf=gen_project_mgr,
 		addl_slots=
 			[
-				production_goal,
-				debug_goal,
+%				production_goal,
+%				debug_goal,
 				executable_name,
 				prolog_files,
-				library_files,
+%				library_files,
+%				tcltk_files,
+%				tcltk_interpreters,
+%				c_files,
 				file_types,
 				default_dirs,
 				project_loaded			%% true/fail
@@ -316,17 +422,28 @@ module alsdev.
 				list_of_files_slots = [
 					prolog_files
 %					,library_files,
+%					tcltk_files,
+%					c_files
 					],
-				list_slots = [ ],
-				text_slots = [ ],
+				list_slots = [ 
+%					tcltk_interpreters 
+					],
+				text_slots = [
+%					production_goal,
+%					debug_goal
+					],
 				production_goal = start_,
 				debug_goal = debug_start_,
 				prolog_files = [],
-				library_files = [],
+%				library_files = [],
+%				tcltk_files = [],
+%				tcltk_interpreters = [tcli],
+%				c_files = [],
 				file_types =  [ 
-%					[prolog_files, ['.pro', '.pl'] ]
-					[prolog_files, ['.*'] ]
+					[['Prolog Files', ['.pro', '.pl'] ]]
 %					,[prolog_library_files, ['.pro'] ],
+%					[tcltk_files, ['.tcl'] ],
+%					[c_files, ['.c'] ] 
 				],
 				default_dirs = [],
 				slot_names = [
@@ -335,10 +452,10 @@ module alsdev.
 					[executable_name, 	'Image Name:'],
 					[prolog_files, 		'Files:']
 %					,[library_files, 	'Library Files:'],
+%					[tcltk_files, 		'Tcl/Tk Files:'],
+%					[tcltk_interpreters,'Tcl/Tk Interps:'],
+%					[c_files, 			'C Files:']
 				]
 			]
 	]).
-
-
-
-endmod.
+*/

@@ -420,6 +420,8 @@ switch [tk windowingsystem] {
 
 proc document.open args {
 	global filetypes
+puts -nonewline "DocOpen filetypes="
+puts $filetypes
 	set file_list $args
 	if {$file_list == ""} then {
 
