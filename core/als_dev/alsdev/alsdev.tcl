@@ -24,7 +24,6 @@
 # the AttachOpenDocumentHandler procedure which should be called when
 # .topals is fully opened.
 
-#puts ALSTCLPATH=$ALSTCLPATH
 switch [tk windowingsystem] {
 	win32   { load {} OpenDocument }
 	default {}
@@ -348,10 +347,6 @@ load_source $ALSTCLPATH {als_menu}
 load_source $ALSTCLPATH {als_document}
 load_source $ALSTCLPATH {als_projects}
 
-#load_source $ALSTCLPATH {prodebug}
-
-#load_source $ALSTCLPATH {als_tkfbox}
-
 proc load_photo {image_name base_name} {
 	global ALSTCLPATH
 	image create photo $image_name -file [file join $ALSTCLPATH .. images $base_name.gif]
@@ -619,6 +614,7 @@ proc show_dir_on_main { Dir } {
 
 proc exit_prolog { } {
 	global WaitForLine
+	global proenv
 
 	set ans [tk_messageBox -icon warning -parent .topals \
 				-title "Exit Prolog?" -message "Really Exit ALS Prolog?" \

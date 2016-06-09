@@ -3,15 +3,23 @@ myModule = alsdev.
 myName = nil.
 title = 'Visual Queens'.
 project_file = 'vqueens.ppj'.
-primary_project_dir = 'D:\\ExamplesNew\\examples'.
+primary_project_dir = '/Users/ken/ALS/GitHub/ALSProlog/examples/visual'.
 list_of_files_slots = [prolog_files].
 list_slots = [].
 text_slots = [].
 search_dirs = [].
 slot_names =
     [[production_goal,'Startup Goal:'],[debug_goal,'Debug Goal:'],
-        [executable_name,'Image Name:'],[prolog_files,'Files:']].
-executable_name = nil.
+	[executable_name,'Executable Name:'],[stub_name,'Stub Name:'],
+        [distdir_name,'Distribution Dir Name:'],
+        [prolog_files,'Prolog Files:']].
+addl_text_slots =
+    [production_goal,debug_goal,executable_name,stub_name,distdir_name].
+production_goal = prodGoal.
+debug_goal = debugGoal.
+executable_name = execName.
+stub_name = stubName.
+distdir_name = 'MyDistDir'.
 prolog_files = ['vqueens.pro'].
-file_types = [[prolog_files,['.*']]].
+file_types = [['Prolog Files',['.pro','.pl']]].
 default_dirs = [].

@@ -51,8 +51,13 @@ proc select_project_file {} {
 	} else { return "" }
 }
 
-proc save_project {} {
+proc save_project {w} {
+	global array proenv
 	send_prolog als_ide_mgr save_project
+	set proenv($w,dirty) false
+    	set proenv($w.addlprj,dirty) false
+    	$w.buttons.save configure -state disabled
+	return 1
 }
 
 proc close_project {} {
@@ -60,19 +65,19 @@ proc close_project {} {
 }
 
 proc new_project {} {
+	global array proenv
+
 	send_prolog als_ide_mgr start_new_project
 }
 
-
-proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
-
+proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir w } {
+	global array proenv
 	set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
 	set DFT [list -filetypes $types]
 		# DFT currently not used.
 		# -title "Files to Add to Project" not used.
-#	set Choices [getFiles -initialdir $DfltDir]
 		# cf: https://www.tcl.tk/man/tcl8.4/TkCmd/getOpenFile.htm
-	set Choices [tk_getOpenFile -initialdir $DfltDir -multiple true -filetypes FileTypes ]
+	set Choices [tk_getOpenFile -initialdir $DfltDir -multiple true -filetypes $FileTypes ]
 	if {$Choices != ""} then {
 		set Prev [$Listbox get 0 end]
 		foreach Entry $Choices {
@@ -83,10 +88,13 @@ proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
 				}
 			}
 		}
+		set proenv($w,dirty) true
+    		$w.buttons.save configure -state active
 	}
 }
 
 proc add_file_entry_to_list { Entry Listbox } {
+    global array proenv
     set NewFile [$Entry get]
 	if {$NewFile != ""} then {
 		set Prev [$Listbox get 0 end]
@@ -100,7 +108,8 @@ proc add_file_entry_to_list { Entry Listbox } {
 
 
 
-#proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir} {
+#proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir w} {
+#    global array proenv
 #
 #	prolog call alsdev choose_mult_files \
 #		-list $FileTypes -atom $FileKind -atom $DfltDir -var Choices
@@ -111,10 +120,13 @@ proc add_file_entry_to_list { Entry Listbox } {
 #				$Listbox insert end $Entry
 #			}
 #		}
+#		set proenv($w,dirty) true
+#    		$w.buttons.save configure -state active
 #	}
 #}
 
-proc del_from_files_list { Listbox } {
+proc del_from_files_list { Listbox w } {
+    	global array proenv
 	set SelNums [$Listbox curselection]
 	set N [llength $SelNums]
 	if {$N == 0} then {
@@ -127,10 +139,13 @@ proc del_from_files_list { Listbox } {
 		foreach i $SelNums {
 			$Listbox delete $i
 		}
+		set proenv($w,dirty) true
+    		$w.buttons.save configure -state active
 	}
 }
 
-proc move_selection_up {Listbox} {
+proc move_selection_up {Listbox w} {
+    	global array proenv
 	set SelIdx [lindex [$Listbox curselection] 0]
 	if {$SelIdx == 0} then {
 		bell
@@ -141,9 +156,12 @@ proc move_selection_up {Listbox} {
 	$Listbox delete $SelIdx
 	$Listbox insert $NewIdx $Item
 	$Listbox selection set $NewIdx
+	set proenv($w,dirty) true
+    	$w.buttons.save configure -state active
 }
 
-proc move_selection_down {Listbox} {
+proc move_selection_down {Listbox w} {
+    	global array proenv
 	set SelIdx [lindex [$Listbox curselection] 0]
 	set Last [expr [$Listbox index end] - 1]
 	if {$SelIdx == $Last} then {
@@ -155,10 +173,13 @@ proc move_selection_down {Listbox} {
 	$Listbox delete $SelIdx
 	$Listbox insert $NewIdx $Item
 	$Listbox selection set $NewIdx
+	set proenv($w,dirty) true
+    	$w.buttons.save configure -state active
 }
 
 
-proc add_search_dirs {Listbox PathType} {
+proc add_search_dirs {Listbox PathType w} {
+    	global array proenv
 	set CWD [pwd]
 		# cf: https://www.tcl.tk/man/tcl8.3/TkCmd/chooseDirectory.htm
 	set NewDir [tk_chooseDirectory -initialdir $CWD]
@@ -186,9 +207,12 @@ proc add_search_dirs {Listbox PathType} {
 			}
 		}
 	}
+	set proenv($w,dirty) true
+    	$w.buttons.save configure -state active
 }
 
-proc del_search_dirs {Listbox} {
+proc del_search_dirs {Listbox w} {
+    	global array proenv
 	set SelNums [$Listbox curselection]
 	set N [llength $SelNums]
 	if {$N == 0} then {
@@ -201,6 +225,8 @@ proc del_search_dirs {Listbox} {
 		foreach i $SelNums {
 			$Listbox delete $i
 		}
+		set proenv($w,dirty) true
+    		$w.buttons.save configure -state active
 	}
 }
 

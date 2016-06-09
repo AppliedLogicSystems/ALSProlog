@@ -30,9 +30,22 @@ start_new_project(nil, ALSIDEObject)
 
 start_new_project(PrevProject, ALSIDEObject)
 	:-
-	accessObjStruct(title,PrevProject,ProjName),
-	sprintf(atom(Msg), 'Close project %t ?', [ProjName]),
-	yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer),
+	accessObjStruct(gui_spec, PrevProject, GuiPath),
+	tcl_call(shl_tcli, [prj_perf_isdirtycheck, GuiPath], InitRes),
+	%% InitRes == false iff project is not dirty, or user said ok to close:
+	(InitRes == true  -> 
+		send(PrevProject, update_check_complete(Flag)),
+		(Flag = ok ->
+			send(PrevProject, save_to_file)
+			;
+			true
+		),
+		accessObjStruct(title,PrevProject,ProjName),
+		sprintf(atom(Msg), 'Save project %t ?', [ProjName]),
+		yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer)
+		;
+		Answer = 'Yes'
+	),
 	close_old_start_new_project(Answer, PrevProject, ALSIDEObject).
 
 close_old_start_new_project('No', PrevProject, ALSIDEObject)
@@ -53,111 +66,6 @@ proceed_start_new_project(ALSIDEObject)
 	setObjStruct(cur_project,ALSIDEObject,ProjectMgr),
 	send(ProjectMgr, init_gui).
 
-
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%  Project Manager ObjectPro CLASS DEFINITIONS  %%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-		%% Note: Only one project can be open at a time;
-		%% The manager for the project is read in from
-		%% the project file when the (existing) project is
-		%% opened, and is written back out to the project
-		%% file when the project is closed.
-
-/*
-:- defineClass(
-	[   name=gen_project_mgr,
-		subClassOf=genericObjects,
-		addl_slots=
-			[
-				internal_name,
-				title,
-				project_file,
-				primary_project_dir,	% normally where project_file is
-				list_of_files_slots,
-				list_slots,
-				text_slots,
-				search_dirs,
-				search_trees,
-				gui_spec,
-				slot_names
-			], 
-		defaults=
-			[
-				title = '',
-				project_file = '',
-				list_of_files_slots = [],
-				list_slots = [],
-				text_slots = [],
-				search_dirs = [],
-				search_trees = [],
-				slot_names = []
-			] 
-	]).
-
-		%% The manager for a prolog/tcl/c project:
-:- defineClass(
-	[   name=project_mgr,
-		subClassOf=gen_project_mgr,
-		addl_slots=
-			[
-%				production_goal,
-%				debug_goal,
-				executable_name,
-				prolog_files,
-%				library_files,
-%				tcltk_files,
-%				tcltk_interpreters,
-%				c_files,
-				file_types,
-				default_dirs,
-				project_loaded			%% true/fail
-			], 
-		defaults=
-			[
-				project_loaded = fail,
-				list_of_files_slots = [
-					prolog_files
-%					,library_files,
-%					tcltk_files,
-%					c_files
-					],
-				list_slots = [ 
-%					tcltk_interpreters 
-					],
-				text_slots = [
-%					production_goal,
-%					debug_goal
-					],
-				production_goal = start_,
-				debug_goal = debug_start_,
-				prolog_files = [],
-%				library_files = [],
-%				tcltk_files = [],
-%				tcltk_interpreters = [tcli],
-%				c_files = [],
-				file_types =  [ 
-%					[prolog_files, ['.pro', '.pl'] ]
-					[prolog_files, ['.*'] ]
-%					,[prolog_library_files, ['.pro'] ],
-%					[tcltk_files, ['.tcl'] ],
-%					[c_files, ['.c'] ] 
-				],
-				default_dirs = [],
-				slot_names = [
-					[production_goal,	'Startup Goal:'],
-					[debug_goal, 		'Debug Goal:'],
-					[executable_name, 	'Image Name:'],
-					[prolog_files, 		'Files:']
-%					,[library_files, 	'Library Files:'],
-%					[tcltk_files, 		'Tcl/Tk Files:'],
-%					[tcltk_interpreters,'Tcl/Tk Interps:'],
-%					[c_files, 			'C Files:']
-				]
-			]
-	]).
-*/
-
 :-dynamic(project_mgrAction/2).
 
 gen_project_mgrAction(init_gui, State)
@@ -172,17 +80,30 @@ gen_project_mgrAction(init_gui(InternalName), State)
 	accessObjStruct(list_of_files_slots, State, ListOfFilesSlots),
 	accessObjStruct(list_slots, State, ListSlots),
 	accessObjStruct(text_slots, State, TextSlots),
+	accessObjStruct(addl_text_slots, State, AddlTextSlots),
 	accessObjStruct(slot_names, State, SlotNames),
 	accessObjStruct(file_types, State, FileTypes),
 	accessObjStruct(default_dirs, State, DfltDirs),
+	getValuesFor(AddlTextSlots, State, AddlTextSlotsValues),
 	catenate('.', InternalName, GuiPath),
 	setObjStruct(gui_spec, State, GuiPath),
+
 	tcl_call(shl_tcli, 
 		[init_prj_spec, GuiPath, 
 			TextSlots, ListOfFilesSlots, ListSlots, 
-			SlotNames, FileTypes, XDfltDirs], _),
+			SlotNames, FileTypes, XDfltDirs, AddlTextSlots, AddlTextSlotsValues], _),
 	send(State, display_state).
 
+
+getValuesFor([], _, []).
+getValuesFor([Slot | AddlTextSlots], State, [[Slot, SlotValue] | AddlTextSlotsValues])
+	:-
+	accessObjStruct(Slot, State, SlotValue),
+	!,
+	getValuesFor(AddlTextSlots, State, AddlTextSlotsValues).
+getValuesFor([_ | AddlTextSlots], State, AddlTextSlotsValues)
+	:-
+	getValuesFor(AddlTextSlots, State, AddlTextSlotsValues).
 
 gen_project_mgrAction(display_state, State)
 	:-
@@ -222,12 +143,16 @@ gen_project_mgrAction(read_gui_spec, State)
 	accessObjStruct(list_of_files_slots, State, ListOfFilesSlots),
 	accessObjStruct(list_slots, State, ListSlots),
 	accessObjStruct(text_slots, State, TextSlots),
+	accessObjStruct(addl_text_slots, State, AddlTextSlots),
 	tcl_call(shl_tcli, 
-		[rd_prj_spec, GuiPath, TextSlots, ListOfFilesSlots, ListSlots],
+		[rd_prj_spec, GuiPath, TextSlots, ListOfFilesSlots, ListSlots, AddlTextSlots],
 		InitResult),
 	forbidden_slots(Forbidden),
  	findall(T=V, (member(L, InitResult), member([T, V], L)), Eqns),
 	weak_all_setObjStruct(Eqns, Forbidden, State).
+
+dpbil([]).
+dpbil([X | T]) :- pbi_write(X), pbi_nl, dpbil(T).
 
 cleanup_value('', []) :-!.
 cleanup_value(Value, CleanValue)
@@ -237,28 +162,47 @@ cleanup_value(Value, CleanValue)
 	all_to_atoms(Chunks, CleanValue).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%% 		CLOSE PROJECT		%%%%%%%%%%%%%
+	%%%%%%%%%      CLOSE PROJECT 	    %%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 als_ide_mgrAction(close_project, ALSIDEObject)
 	:-
-	yes_no_dialog(shl_tcli, 'Save Project First?', 'Save??', 'Yes', 'No', Answer),
-	(Answer = 'Yes' ->
-		als_ide_mgrAction(save_project(SaveFlag), ALSIDEObject)
+	accessObjStruct(cur_project,ALSIDEObject,PrevProject),
+	accessObjStruct(gui_spec, PrevProject, GuiPath),
+	tcl_call(shl_tcli, [prj_perf_isdirtycheck, GuiPath], InitRes),
+	%% InitRes == false iff project is not dirty, or user said ok to close:
+	(InitRes == true  -> 
+		send(PrevProject, update_check_complete(Flag)),
+		(Flag = ok ->
+			send(PrevProject, save_to_file)
+			;
+			true
+		),
+		accessObjStruct(title,PrevProject,ProjName),
+		sprintf(atom(Msg), 'Save project %t ?', [ProjName]),
+		yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer)
 		;
-		true
+		Answer = 'Yes'
 	),
-	(SaveFlag = ok ->
-		accessObjStruct(cur_project,ALSIDEObject,CurProject),
-		send(CurProject, close_project),
-		setObjStruct(cur_project,ALSIDEObject,nil)
-%		accessObjStruct(initial_dir, ALSIDEObject, InitialDir),
-%		change_cwd(InitialDir)
-		;
-		true
-	).
+	close_old_project(Answer, PrevProject, FilePath, ALSIDEObject).
 
-gen_project_mgrAction(close_project, State)
+
+close_old_project('No', PrevProject, FilePath, ALSIDEObject)
+	:-!,
+	send(ALSIDEObject, shutdown_project).
+
+close_old_project(Answer, PrevProject, FilePath, ALSIDEObject)
+	:-
+	als_ide_mgrAction(save_project(SaveFlag), ALSIDEObject),
+	send(ALSIDEObject, shutdown_project).
+
+als_ide_mgrAction(shutdown_project, ALSIDEObject)
+	:-
+	accessObjStruct(cur_project,ALSIDEObject,CurProject),
+	send(CurProject, shutdown_project),
+	setObjStruct(cur_project,ALSIDEObject,nil).
+
+gen_project_mgrAction(shutdown_project, State)
 	:-
 	accessObjStruct(gui_spec, State, GuiPath),
 	accessObjStruct(title, State, ProjTitle),
@@ -288,12 +232,19 @@ possible_save_project
 	accessObjStruct(cur_project,ALSIDEObject,CurProject),
 	CurProject \= nil,
 	!,
+	accessObjStruct(gui_spec, CurProject, GuiPath),
+	tcl_call(shl_tcli, [prj_perf_isdirtycheck, GuiPath], InitRes),
+	%% InitRes == false iff project is not dirty, or user said ok to close:
+	(InitRes  -> 
 	yes_no_dialog(shl_tcli, 'Save Project First?', 'Save??', 'Yes', 'No', Answer),
 	(Answer = 'Yes' ->
 		als_ide_mgrAction(save_project(SaveFlag), ALSIDEObject)
 		;
 		true
-	).
+	)
+	;
+	true).
+
 possible_save_project.
 
 gen_project_mgrAction(update_check_complete(ok), State)
@@ -321,13 +272,7 @@ gen_project_mgrAction(save_to_file, State)
 	dump_object(State, Forbidden, Eqns),
 	open(FilePath, write, OS, []),
 	write_clauses(OS, Eqns, [quoted(true)]),
-	close(OS),
-	sys_env(Platform,_,_),
-	(Platform = macos ->
-		tcl_eval(shl_tcli, ['file attributes', FilePath, '-creator ALS4 -type ALSP'], _)
-		;
-		true
-	).
+	close(OS).
 
 dump_object(State, Forbidden, Eqns)
 	:-
@@ -390,9 +335,22 @@ open_project(nil, FilePath, ALSIDEObject)
 
 open_project(PrevProject, FilePath, ALSIDEObject)
 	:-
-	accessObjStruct(title,PrevProject,ProjName),
-	sprintf(atom(Msg), 'Close project %t ?', [ProjName]),
-	yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer),
+	accessObjStruct(gui_spec, PrevProject, GuiPath),
+	tcl_call(shl_tcli, [prj_perf_isdirtycheck, GuiPath], InitRes),
+	%% InitRes == false iff project is not dirty, or user said ok to close:
+	(InitRes == true  -> 
+		send(PrevProject, update_check_complete(Flag)),
+		(Flag = ok ->
+			send(PrevProject, save_to_file)
+			;
+			true
+		),
+		accessObjStruct(title,PrevProject,ProjName),
+		sprintf(atom(Msg), 'Save project %t ?', [ProjName]),
+		yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer)
+		;
+		Answer = 'Yes'
+	),
 	close_old_open_another_project(Answer, PrevProject, FilePath, ALSIDEObject).
 
 close_old_open_another_project('No', PrevProject, FilePath, ALSIDEObject)
@@ -400,7 +358,7 @@ close_old_open_another_project('No', PrevProject, FilePath, ALSIDEObject)
 
 close_old_open_another_project(Answer, PrevProject, FilePath, ALSIDEObject)
 	:-
-	send(PrevProject, close_project),
+	send(PrevProject, shutdown_project),
 	proceed_open_another_project(FilePath, ALSIDEObject).
 
 proceed_open_another_project(nil, ALSIDEObject)
@@ -500,9 +458,22 @@ load_project(nil, ALSIDEObject)
 
 load_project(PrevProject, ALSIDEObject)
 	:-
-	accessObjStruct(title,PrevProject,ProjName),
-	sprintf(atom(Msg), 'Close project %t ?', [ProjName]),
-	yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer),
+	accessObjStruct(gui_spec, PrevProject, GuiPath),
+	tcl_call(shl_tcli, [prj_perf_isdirtycheck, GuiPath], InitRes),
+	%% InitRes == false iff project is not dirty, or user said ok to close:
+	(InitRes == true  -> 
+		send(PrevProject, update_check_complete(Flag)),
+		(Flag = ok ->
+			send(PrevProject, save_to_file)
+			;
+			true
+		),
+		accessObjStruct(title,PrevProject,ProjName),
+		sprintf(atom(Msg), 'Save project %t ?', [ProjName]),
+		yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer)
+		;
+		Answer = 'Yes'
+	),
 	close_old_load_another_project(Answer, PrevProject, ALSIDEObject).
 
 close_old_load_another_project('No', PrevProject, ALSIDEObject)
@@ -510,7 +481,7 @@ close_old_load_another_project('No', PrevProject, ALSIDEObject)
 
 close_old_load_another_project('Yes', PrevProject, ALSIDEObject)
 	:-
-	send(PrevProject, close_project),
+	send(PrevProject, shutdown_project),
 	proceed_load_project(ALSIDEObject).
 
 proceed_load_project(ALSIDEObject)
