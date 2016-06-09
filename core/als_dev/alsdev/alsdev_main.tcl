@@ -552,38 +552,44 @@ proc addl_prj_dirty_key {w k pw} {
 	}
 }
 
-proc prj_perf_dirtycheck {w} {
+# checks whether the project (including addl info) is dirty:
+proc prj_perf_isdirtycheck {w} {
     global array proenv
 
     set addl_project_info_win $w.addlprj
 
-    set addl_dirtycheck false
+    set addl_isdirtycheck false
     if {[winfo exists $addl_project_info_win] } {
         if {$proenv($addl_project_info_win,dirty)} then {
-   	    set addl_dirtycheck true
+   	    set addl_isdirtycheck true
 	}
     }
-#puts -nonewline "addl_dirtycheck = "
-#puts $addl_dirtycheck
 
-    set dirtycheck [prj_save_check $w $addl_dirtycheck]
-#puts -nonewline " dirtycheck = "
-#puts $dirtycheck
+# NOTE: isdirtycheck = true iff the project is dirty
+# So: isdirtycheck false iff the project is clean
+# Ie, project is clean, or project is dirty, but user says to close anyway:
 
-    return $dirtycheck
+	set isdirtycheck false
+        if {$proenv($w,dirty) || $addl_isdirtycheck} then {
+    		set isdirtycheck true
+	}
+    return $isdirtycheck
 }
 
 proc prj_close {w} {
-    global array proenv
+    	global array proenv
 
-    set dirtycheck [prj_perf_dirtycheck $w]
+    	set isdirtycheck [prj_perf_isdirtycheck $w]
 
-#puts -nonewline "prj_close: dirtycheck = " 
-#puts $dirtycheck
+	set saveprj [prj_save_check $w $isdirtycheck]
 
-    if {$dirtycheck == true || $dirtycheck == 1} then {
-	send_prolog als_ide_mgr shutdown_project
-    }
+        if {$saveprj == 2} then {
+            save_project $w
+	    send_prolog als_ide_mgr shutdown_project
+	} elseif {$saveprj == 0} then {
+	    send_prolog als_ide_mgr shutdown_project
+	}
+
 }
 
 #-----------------------------------------------
@@ -602,28 +608,20 @@ proc prj_close {w} {
 #       -- proj was dirty, user said to save it,
 #          but save was not successful
 #-----------------------------------------------
-proc prj_save_check {w addl_dirtycheck} {
+proc prj_save_check {w isdirtycheck} {
         global array proenv
 
-        if {$proenv($w,dirty) || $addl_dirtycheck} then {
+        if {$isdirtycheck} then {
                 raise $w
                 set title [$w.title.entry get]
                 set answer [tk_dialog .document_save_dialog "" \
                         "Save changes to the project \"$title\" before closing?" \
                         {} \
                         2 "Don't Save" "Cancel" "Save"]
-#puts -nonewline "prj_save_check: answer = "
-#puts $answer
-                if {$answer == 2} then {
-                        set result [save_project $w]
-                } else {
-                        set result [expr $answer != 1]
-                }
+		set result $answer
         } else {
-                set result true   
+                set result 0
         }
-#puts -nonewline "prj_save_check: result = "
-#puts $result
         return $result
 }
 
@@ -992,8 +990,10 @@ proc rd_prj_spec {base TextSlots ListOfFilesSlots ListSlots AddlTextSlots} {
 	}
 	lappend Result  $TxtSs $LstSs
 
-	set AddlInfo [rd_prj_spec_addl $base.addlprj $AddlTextSlots]
-	lappend Result  $AddlInfo
+    	if {[winfo exists $base.addlprj]} {
+		set AddlInfo [rd_prj_spec_addl $base.addlprj $AddlTextSlots]
+		lappend Result  $AddlInfo
+    	}
 
 	return $Result
 }
@@ -1175,19 +1175,6 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
     set proenv($base,dirty) false
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 proc vTclWindow.ide_settings {base} {
 	global array proenv

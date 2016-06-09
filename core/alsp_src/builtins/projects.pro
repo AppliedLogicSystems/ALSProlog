@@ -208,12 +208,19 @@ possible_save_project
 	accessObjStruct(cur_project,ALSIDEObject,CurProject),
 	CurProject \= nil,
 	!,
+	accessObjStruct(gui_spec, CurProject, GuiPath),
+	tcl_call(shl_tcli, [prj_perf_isdirtycheck, GuiPath], InitRes),
+	%% InitRes == false iff project is not dirty, or user said ok to close:
+	(InitRes  -> 
 	yes_no_dialog(shl_tcli, 'Save Project First?', 'Save??', 'Yes', 'No', Answer),
 	(Answer = 'Yes' ->
 		als_ide_mgrAction(save_project(SaveFlag), ALSIDEObject)
 		;
 		true
-	).
+	)
+	;
+	true).
+
 possible_save_project.
 
 gen_project_mgrAction(update_check_complete(ok), State)

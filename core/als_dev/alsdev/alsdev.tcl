@@ -619,6 +619,7 @@ proc show_dir_on_main { Dir } {
 
 proc exit_prolog { } {
 	global WaitForLine
+	global proenv
 
 	set ans [tk_messageBox -icon warning -parent .topals \
 				-title "Exit Prolog?" -message "Really Exit ALS Prolog?" \

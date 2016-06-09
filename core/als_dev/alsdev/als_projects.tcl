@@ -67,7 +67,7 @@ proc close_project {} {
 proc new_project {} {
 	global array proenv
 
-    	set dirtycheck [prj_perf_dirtycheck $w]
+    	set isdirtycheck [prj_perf_dirtycheck $w]
 	send_prolog als_ide_mgr start_new_project
 }
 
