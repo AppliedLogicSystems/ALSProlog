@@ -335,7 +335,6 @@ open_project(nil, FilePath, ALSIDEObject)
 
 open_project(PrevProject, FilePath, ALSIDEObject)
 	:-
-%	accessObjStruct(title,PrevProject,ProjName),
 	accessObjStruct(gui_spec, PrevProject, GuiPath),
 	tcl_call(shl_tcli, [prj_perf_isdirtycheck, GuiPath], InitRes),
 	%% InitRes == false iff project is not dirty, or user said ok to close:

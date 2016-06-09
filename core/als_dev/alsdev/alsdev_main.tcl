@@ -93,9 +93,6 @@ proc vTclWindow.topals {args} {
     pack .topals.vsb -side right -fill both
     pack .topals.text -fill both -expand 1 -side left
 
-#	bind .topals.text <Unmap> {unmap_alsdev_main}
-#	bind .topals.text <Map> {map_alsdev_main}
-
 	# accelerators
 	bind_accelerators .topals $mod listener
 	post_open_document Environment .topals 
@@ -218,7 +215,6 @@ proc vTclWindow.about {base} {
     wm deiconify $base
     wm title $base "About ALS Prolog"
 	wm protocol .about WM_DELETE_WINDOW {remove_me About .about}
-#	wm protocol .about WM_DELETE_WINDOW {wm withdraw .about}
 
     label $base.alsdev \
         -font {helvetica 14 {bold italic}} -text {ALS Prolog} 
@@ -388,7 +384,6 @@ proc create_static_flag_entry { info } {
 ##=================================================================================
 proc init_prj_spec \
 	{base TextSlots ListOfFilesSlots ListSlots SlotNames FileTypes DfltDirs AddlTextSlots AddlTextSlotsValues} {
-
 	global array proenv
 
     ###################
@@ -458,7 +453,6 @@ proc init_prj_spec \
     ###################
     # Lists of Files 
     ###################
-# $XFN 
 	foreach FS $ListOfFilesSlots {
 		set FTs	[find_pair_valueX $FS $FileTypes]
 		set FN	[find_pair_value $FS $SlotNames] 
@@ -482,7 +476,6 @@ proc init_prj_spec \
 		[list move_selection_up $base.$LS.listbox] \
 		[list move_selection_down $base.$LS.listbox]
 	}
-
     ###################
     # CREATING WIDGETS
     ###################
@@ -510,8 +503,6 @@ proc init_prj_spec \
         -anchor center -expand 0 -fill none -padx 35 -side left 
     pack $base.buttons.load \
         -anchor center -expand 0 -fill none -padx 2 -side right 
-
-	#wm geometry $base ""
 
     focus $base.project_file.entry
 
@@ -666,7 +657,6 @@ proc show_text_slot {GuiPath Slot Value} {
 proc show_list_slot {GuiPath Slot ValueList PrjMgrHandle} {
 	$GuiPath.$Slot.listbox delete 0 end
 	eval $GuiPath.$Slot.listbox insert end $ValueList
-#	set Last [$GuiPath.$Slot.listbox index end]
 	bind $GuiPath.$Slot.listbox <Double-Button-1> \
 		[list prj_slot_focus $Slot $GuiPath.$Slot.listbox $PrjMgrHandle]
 }
@@ -977,7 +967,6 @@ proc rd_prj_spec {base TextSlots ListOfFilesSlots ListSlots AddlTextSlots} {
 
 	set LstSs ""
     	lappend LstSs [list search_dirs [$base.search_dirs.listbox get 0 end] ]
-#    lappend LstSs [list search_trees [$base.search_trees.listbox get 0 end] ]
 
 	foreach TS $TextSlots {
     		lappend TxtSs [list $TS [$base.$TS.entry get] ]
@@ -1007,8 +996,6 @@ proc rd_prj_spec_addl {base AddlTextSlots} {
 	}
 	return $AddlTxtSsVs
 }
-
-
 
 proc addl_project_info { parent_base TextSlots SlotNames AddlTextSlots AddlTextSlotsValues} {
 	set proj_title [$parent_base.title.entry get]  
@@ -1294,8 +1281,6 @@ proc vTclWindow.ide_settings {base} {
         -side left 
     pack $base.spacer2 \
         -in .ide_settings -anchor center -expand 0 -fill x -side top 
-
-    #wm geometry $base ""
 }
 
 proc slider_change_ide_printdepth { Value } {

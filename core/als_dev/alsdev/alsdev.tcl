@@ -24,7 +24,6 @@
 # the AttachOpenDocumentHandler procedure which should be called when
 # .topals is fully opened.
 
-#puts ALSTCLPATH=$ALSTCLPATH
 switch [tk windowingsystem] {
 	win32   { load {} OpenDocument }
 	default {}
@@ -347,10 +346,6 @@ load_source $ALSTCLPATH {defstr}
 load_source $ALSTCLPATH {als_menu}
 load_source $ALSTCLPATH {als_document}
 load_source $ALSTCLPATH {als_projects}
-
-#load_source $ALSTCLPATH {prodebug}
-
-#load_source $ALSTCLPATH {als_tkfbox}
 
 proc load_photo {image_name base_name} {
 	global ALSTCLPATH
