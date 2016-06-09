@@ -30,9 +30,22 @@ start_new_project(nil, ALSIDEObject)
 
 start_new_project(PrevProject, ALSIDEObject)
 	:-
-	accessObjStruct(title,PrevProject,ProjName),
-	sprintf(atom(Msg), 'Close project %t ?', [ProjName]),
-	yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer),
+	accessObjStruct(gui_spec, PrevProject, GuiPath),
+	tcl_call(shl_tcli, [prj_perf_isdirtycheck, GuiPath], InitRes),
+	%% InitRes == false iff project is not dirty, or user said ok to close:
+	(InitRes == true  -> 
+		send(PrevProject, update_check_complete(Flag)),
+		(Flag = ok ->
+			send(PrevProject, save_to_file)
+			;
+			true
+		),
+		accessObjStruct(title,PrevProject,ProjName),
+		sprintf(atom(Msg), 'Save project %t ?', [ProjName]),
+		yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer)
+		;
+		Answer = 'Yes'
+	),
 	close_old_start_new_project(Answer, PrevProject, ALSIDEObject).
 
 close_old_start_new_project('No', PrevProject, ALSIDEObject)
@@ -52,8 +65,6 @@ proceed_start_new_project(ALSIDEObject)
 	setObjStruct(primary_project_dir,ProjectMgr,CurDir),
 	setObjStruct(cur_project,ALSIDEObject,ProjectMgr),
 	send(ProjectMgr, init_gui).
-
-
 
 :-dynamic(project_mgrAction/2).
 
@@ -156,21 +167,34 @@ cleanup_value(Value, CleanValue)
 
 als_ide_mgrAction(close_project, ALSIDEObject)
 	:-
-	yes_no_dialog(shl_tcli, 'Save Project First?', 'Save??', 'Yes', 'No', Answer),
-	(Answer = 'Yes' ->
-		als_ide_mgrAction(save_project(SaveFlag), ALSIDEObject)
+	accessObjStruct(cur_project,ALSIDEObject,PrevProject),
+	accessObjStruct(gui_spec, PrevProject, GuiPath),
+	tcl_call(shl_tcli, [prj_perf_isdirtycheck, GuiPath], InitRes),
+	%% InitRes == false iff project is not dirty, or user said ok to close:
+	(InitRes == true  -> 
+		send(PrevProject, update_check_complete(Flag)),
+		(Flag = ok ->
+			send(PrevProject, save_to_file)
+			;
+			true
+		),
+		accessObjStruct(title,PrevProject,ProjName),
+		sprintf(atom(Msg), 'Save project %t ?', [ProjName]),
+		yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer)
 		;
-		true
+		Answer = 'Yes'
 	),
-	(SaveFlag = ok ->
-		accessObjStruct(cur_project,ALSIDEObject,CurProject),
-		send(CurProject, shutdown_project),
-		setObjStruct(cur_project,ALSIDEObject,nil)
-%		accessObjStruct(initial_dir, ALSIDEObject, InitialDir),
-%		change_cwd(InitialDir)
-		;
-		true
-	).
+	close_old_project(Answer, PrevProject, FilePath, ALSIDEObject).
+
+
+close_old_project('No', PrevProject, FilePath, ALSIDEObject)
+	:-!,
+	send(ALSIDEObject, shutdown_project).
+
+close_old_project(Answer, PrevProject, FilePath, ALSIDEObject)
+	:-
+	als_ide_mgrAction(save_project(SaveFlag), ALSIDEObject),
+	send(ALSIDEObject, shutdown_project).
 
 als_ide_mgrAction(shutdown_project, ALSIDEObject)
 	:-
@@ -311,9 +335,23 @@ open_project(nil, FilePath, ALSIDEObject)
 
 open_project(PrevProject, FilePath, ALSIDEObject)
 	:-
-	accessObjStruct(title,PrevProject,ProjName),
-	sprintf(atom(Msg), 'Close project %t ?', [ProjName]),
-	yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer),
+%	accessObjStruct(title,PrevProject,ProjName),
+	accessObjStruct(gui_spec, PrevProject, GuiPath),
+	tcl_call(shl_tcli, [prj_perf_isdirtycheck, GuiPath], InitRes),
+	%% InitRes == false iff project is not dirty, or user said ok to close:
+	(InitRes == true  -> 
+		send(PrevProject, update_check_complete(Flag)),
+		(Flag = ok ->
+			send(PrevProject, save_to_file)
+			;
+			true
+		),
+		accessObjStruct(title,PrevProject,ProjName),
+		sprintf(atom(Msg), 'Save project %t ?', [ProjName]),
+		yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer)
+		;
+		Answer = 'Yes'
+	),
 	close_old_open_another_project(Answer, PrevProject, FilePath, ALSIDEObject).
 
 close_old_open_another_project('No', PrevProject, FilePath, ALSIDEObject)
@@ -421,9 +459,22 @@ load_project(nil, ALSIDEObject)
 
 load_project(PrevProject, ALSIDEObject)
 	:-
-	accessObjStruct(title,PrevProject,ProjName),
-	sprintf(atom(Msg), 'Close project %t ?', [ProjName]),
-	yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer),
+	accessObjStruct(gui_spec, PrevProject, GuiPath),
+	tcl_call(shl_tcli, [prj_perf_isdirtycheck, GuiPath], InitRes),
+	%% InitRes == false iff project is not dirty, or user said ok to close:
+	(InitRes == true  -> 
+		send(PrevProject, update_check_complete(Flag)),
+		(Flag = ok ->
+			send(PrevProject, save_to_file)
+			;
+			true
+		),
+		accessObjStruct(title,PrevProject,ProjName),
+		sprintf(atom(Msg), 'Save project %t ?', [ProjName]),
+		yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer)
+		;
+		Answer = 'Yes'
+	),
 	close_old_load_another_project(Answer, PrevProject, ALSIDEObject).
 
 close_old_load_another_project('No', PrevProject, ALSIDEObject)

@@ -25,20 +25,20 @@ module builtins.
 		subClassOf = genericObjects,
 		export = yes,
 		addl_slots =
-			[ 
-				shell_module, 	  	  %% module for the shell (alsshell/alsdev)
-				prolog_library, 	  %% path to the ...
-				initial_dir,    	  %% initial directory we wake up in
-				initial_search_dirs,  %% initial search list
-				source_mgrs,	   	  %% list of managers for consulted files
-				cslt_ctxt,		   	  %% (list) stack of "current source_mgr" 
-				break_level			  %% break shell level (old global BreakLevel)
-			],
+		[ 
+			shell_module, 	  	  %% module for the shell (alsshell/alsdev)
+			prolog_library, 	  %% path to the ...
+			initial_dir,    	  %% initial directory we wake up in
+			initial_search_dirs,  %% initial search list
+			source_mgrs,	   	  %% list of managers for consulted files
+			cslt_ctxt,		   	  %% (list) stack of "current source_mgr" 
+			break_level			  %% break shell level (old global BreakLevel)
+		],
 		defaults = [ 
-				shell_module = alsshell,   %% make alsdev reset this...
-				source_mgrs = [],
-				cslt_ctxt	= [],
-				break_level = [b(0,user,true)]
+			shell_module = alsshell,   %% make alsdev reset this...
+			source_mgrs = [],
+			cslt_ctxt	= [],
+			break_level = [b(0,user,true)]
 		]
 	]).
 
@@ -54,16 +54,16 @@ module builtins.
 		subClassOf=genericObjects,
 		export = yes,
 		addl_slots=
-			[ 
-				source_type,		%% file/anon win/....
-				source_file, 		%% OS path to the ...
-				base_file,			%% underlying file name
-				ext,				%% underlying extension
-				obp_file,			%% OS path to obp file if exists, or nil
-				fcg, 				%% File clause group # for this (consulted) file
-				consult_mode,		%% normal/debug
-				last_consult		%% Time of last consult,
-			],
+		[ 
+			source_type,		%% file/anon win/....
+			source_file, 		%% OS path to the ...
+			base_file,			%% underlying file name
+			ext,				%% underlying extension
+			obp_file,			%% OS path to obp file if exists, or nil
+			fcg, 				%% File clause group # for this (consulted) file
+			consult_mode,		%% normal/debug
+			last_consult		%% Time of last consult,
+		],
 		defaults= [ 
 			source_type		= file,
 			ext				= '',
@@ -183,11 +183,11 @@ module alsdev.
 		subClassOf=als_shl_mgr,
 		module = alsdev,
 		addl_slots=
-			[ 
-				debugger_mgr,   %% debugger state object
-				cur_project,    %% current project manager object    
-				edit_files,     %% list of files open for editing
-				non_file_edits  %% list of non-file (new) windows open for editing
+		[ 
+			debugger_mgr,   %% debugger state object
+			cur_project,    %% current project manager object    
+			edit_files,     %% list of files open for editing
+			non_file_edits  %% list of non-file (new) windows open for editing
 			],
 		defaults= [ 
 			edit_files = [], 
@@ -217,15 +217,15 @@ module alsdev.
 		subClassOf=shl_source_handler,
 		module = alsdev,
 		addl_slots=
-			[
-				debugger_mgr,		%% home to daddy...
-				last_visual_load,	%% Time of last load of file text widget
-				num_lines,			%% num lines in the file
-				linesizes,			%% list of num chars in each line
-				invlineindex,		%% list of char offsets to start of each line
-				head_tag,			%% i(S,E) = last colored "matching head (aph)tag" lcn
-				call_tag			%% i(S,E) = last colored "matching_call (apg)tag" lcn
-			],
+		[
+			debugger_mgr,		%% home to daddy...
+			last_visual_load,	%% Time of last load of file text widget
+			num_lines,			%% num lines in the file
+			linesizes,			%% list of num chars in each line
+			invlineindex,		%% list of char offsets to start of each line
+			head_tag,			%% i(S,E) = last colored "matching head (aph)tag" lcn
+			call_tag			%% i(S,E) = last colored "matching_call (apg)tag" lcn
+		],
 		defaults= [ 
 			visible				= false,
 			last_visual_load 	= 0,
@@ -330,20 +330,21 @@ module alsdev.
 				prolog_files
 %				,library_files,
 				],
-			list_slots = [ prolog_files, library_files ],
+%			list_slots = [ prolog_files, library_files ],
+			list_slots = [ ],
 			text_slots = [],
 			addl_text_slots = [ 
 				production_goal, 
 				debug_goal, 
 			       	executable_name, 
 				stub_name, 
-				dist_dir_name
+				distdir_name
 				          ],
-			production_goal = start_,
-			debug_goal = debug_start_,
-			executable_name = execapp, 
-			stub_name = xstub,
-			distdir_name = mydistdir,
+			production_goal = prodGoal,
+			debug_goal = debugGoal,
+			executable_name = execName, 
+			stub_name = stubName,
+			distdir_name = 'MyDistDir',
 			prolog_files = [],
 			library_files = [],
 			file_types =  [ 
@@ -356,7 +357,7 @@ module alsdev.
 				[debug_goal, 		'Debug Goal:'],
 				[executable_name, 	'Image Name:'],
 				[stub_name, 		'Stub Name:'],
-				[dist_dir_name,		'Dist Dir Name:'],
+				[distdir_name,		'Dist Dir Name:'],
 				[prolog_files, 		'Prolog Files:'],
 				[library_files, 	'Library Files:']
 			]
