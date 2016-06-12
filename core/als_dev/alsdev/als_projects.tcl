@@ -230,9 +230,52 @@ proc del_search_dirs {Listbox w} {
 	}
 }
 
+proc add_lib_file {} {
+	global array proenv
+
+	send_prolog als_ide_mgr add_lib_file
+}
+
+proc select_library_file {LibPath} {
+	global array proenv
+
+	set Libfile [tk_getOpenFile \
+		-filetypes {{"Prolog Library Files" {.pro}}}\
+		-title "Prolog Library File to Add"\
+		-initialdir $LibPath]
+	return $Libfile
+}
+
+proc addto_libfiles_disp {File GuiPath} {
+	global array proenv
+	set ListBox $GuiPath.addlprj.cpd17.01
+	$ListBox insert end $File
+	set proenv($GuiPath,dirty) true
+        $GuiPath.buttons.save configure -state active
+}
+
+proc delete_lib_file { Listbox w pw} {
+    	global array proenv
+	set SelNums [$Listbox curselection]
+	set N [llength $SelNums]
+	if {$N == 0} then {
+		bell
+		return
+	}
+	set ans [tk_messageBox -icon warning -title "Delete Library Files?" \
+		-message "Delete the $N selected files?" -type yesno -default yes]
+	if {$ans == "yes"} then {
+		foreach i $SelNums {
+			$Listbox delete $i
+		}
+		set proenv($w,dirty) true
+    		$pw.buttons.save configure -state active
+	}
+}
+
 
 proc prj_slot_focus { Slot Listbox PrjMgrHandle } {
-	global proenv
+	global array proenv
 	set Item [$Listbox get [lindex [$Listbox curselection] 0] ]
 	prolog call $proenv(dflt_mod) send \
 		-number $PrjMgrHandle  -list [list prj_slot_focus $Slot $Item]
