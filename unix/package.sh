@@ -50,7 +50,7 @@ cp -p $SRC/alshelp.css $DST/share/doc/als-prolog
 cp -rp $SRC/alshelp $DST/share/doc/als-prolog
 cp -rp $SRC/examples $DST/share/doc/als-prolog
 
-VERSION=$(git describe --dirty)
+VERSION=$(../version)
 
 for FORMAT in deb rpm
 do

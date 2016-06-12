@@ -8,15 +8,7 @@
 #define _xstr(s) _str(s)
 #define _str(s) #s
 
-#ifdef GIT_VERSION
-
-#define VERSION_STRING _xstr(GIT_VERSION)
-
-#else
-
-#define VERSION_STRING "$Format:%h%d$"
-
-#endif
+#define VERSION_STRING _xstr(VERSION)
 
 /* 
 Win32 File Flag choices:

@@ -8,4 +8,4 @@
 *.btf binary
 
 # Use export substitution to burn version info into source tarballs
-version.h export-subst
+version export-subst

@@ -3,7 +3,7 @@ ALSDEVDIR=$(CORE)/als_dev/alsdev
 CORE=$(SOURCE_DIR)/..
 VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins:$(SOURCE_DIR)/library:$(ALSDEVDIR):$(CORE)/tcltk_interface/common
 
-VERSION_FLAGS := $(shell git rev-parse --is-inside-work-tree > /dev/null && echo -DGIT_VERSION=`git describe --tags --dirty`)
+VERSION_FLAGS := -DVERSION=$(shell $(SOURCE_DIR)/../../version)
 
 default : binaries
 
