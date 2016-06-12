@@ -84,6 +84,7 @@ gen_project_mgrAction(init_gui(InternalName), State)
 	accessObjStruct(slot_names, State, SlotNames),
 	accessObjStruct(file_types, State, FileTypes),
 	accessObjStruct(default_dirs, State, DfltDirs),
+	accessObjStruct(library_files, State, LibFiles),
 	getValuesFor(AddlTextSlots, State, AddlTextSlotsValues),
 	catenate('.', InternalName, GuiPath),
 	setObjStruct(gui_spec, State, GuiPath),
@@ -91,7 +92,8 @@ gen_project_mgrAction(init_gui(InternalName), State)
 	tcl_call(shl_tcli, 
 		[init_prj_spec, GuiPath, 
 			TextSlots, ListOfFilesSlots, ListSlots, 
-			SlotNames, FileTypes, XDfltDirs, AddlTextSlots, AddlTextSlotsValues], _),
+			SlotNames, FileTypes, XDfltDirs, 
+			AddlTextSlots, AddlTextSlotsValues, LibFiles], _),
 	send(State, display_state).
 
 
@@ -151,6 +153,7 @@ gen_project_mgrAction(read_gui_spec, State)
  	findall(T=V, (member(L, InitResult), member([T, V], L)), Eqns),
 	weak_all_setObjStruct(Eqns, Forbidden, State).
 
+%% For dev/debug: prints an Eqns list:
 dpbil([]).
 dpbil([X | T]) :- pbi_write(X), pbi_nl, dpbil(T).
 
@@ -418,7 +421,6 @@ fin_open_proj(File, PathList, ALSIDEObject, ProjectMgr)
 	accessObjStruct(myHandle, ProjectMgr, MyHandle),
 	forbidden_slots(Forbidden),
 	weak_all_setObjStruct(Eqns, Forbidden, ProjectMgr),
-
 	setObjStruct(project_loaded, ProjectMgr, fail),
 	setObjStruct(cur_project,ALSIDEObject,ProjectMgr),
 	join_path(PathList, ProjectDir),
@@ -574,7 +576,41 @@ gen_project_mgrAction([prj_slot_focus, _, Item], State)
 	true.
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%% 	BUILD THE PROJECT		%%%%%%%%%%%%%
+	%%%%%%%%% 	PROJECT LIBRARY FILES  %%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+als_ide_mgrAction(add_lib_file, ALSIDEObject)
+	:-
+	accessObjStruct(cur_project,ALSIDEObject,CurProject),
+	send(CurProject, add_lib_file).
+
+gen_project_mgrAction(add_lib_file, State)
+	:-
+	corrected_sys_searchdir(SSDIR),
+	join_path([alsdir,library], Tail),
+	path_directory_tail(LibPath, SSDIR, Tail),
+	tcl_call(shl_tcli, [select_library_file, LibPath], PathAndFile),
+	builtins:pathPlusFile(_, File, PathAndFile),
+	accessObjStruct(library_files,State,PrevLibFiles),
+	finish_add_lib_file(File, PrevLibFiles, State).
+
+	%% Previously added:
+finish_add_lib_file(File, PrevLibFiles, State)
+	:-
+	dmember(File, PrevLibFiles),
+	!.
+
+	%% Not yet added:
+finish_add_lib_file(File, PrevLibFiles, State)
+	:-
+	NowLibFiles = [File | PrevLibFiles],
+	setObjStruct(library_files,State,NowLibFiles),
+	accessObjStruct(gui_spec, State, GuiPath),
+	tcl_call(shl_tcli, [addto_libfiles_disp, File, GuiPath], _).
+	
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%% 	BUILD THE PROJECT	%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 export build_project/0.

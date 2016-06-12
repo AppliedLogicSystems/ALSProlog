@@ -383,8 +383,10 @@ proc create_static_flag_entry { info } {
 # proenv($base,dirty) - true iff document window is dirty.
 ##=================================================================================
 proc init_prj_spec \
-	{base TextSlots ListOfFilesSlots ListSlots SlotNames FileTypes DfltDirs AddlTextSlots AddlTextSlotsValues} {
+	{base TextSlots ListOfFilesSlots ListSlots SlotNames FileTypes DfltDirs AddlTextSlots AddlTextSlotsValues LibFiles} {
 	global array proenv
+
+set HHB [list $LibFiles]
 
     ###################
     # CREATING WIDGETS
@@ -486,7 +488,7 @@ proc init_prj_spec \
     button $base.buttons.save \
         -command "save_project $base" -padx 11 -pady 4 -text Save -state disabled
     button $base.buttons.addl \
-        -command "addl_project_info $base {$TextSlots} {$SlotNames} {$AddlTextSlots} {$AddlTextSlotsValues}" \
+        -command "addl_project_info $base {$TextSlots} {$SlotNames} {$AddlTextSlots} {$AddlTextSlotsValues } [list $LibFiles]" \
 	-padx 11 -pady 4 -text Addl 
     button $base.buttons.load \
         -command "load_this_project" -padx 11 -pady 4 -text {(Re)Load}
@@ -994,20 +996,22 @@ proc rd_prj_spec_addl {base AddlTextSlots} {
 		set bb [list $TS $sss]
     		lappend AddlTxtSsVs [list $TS [$base.$TS get]]
 	}
+	set LibFiles [list "library_files" [$base.cpd17.01 get 0 end]]
+    	lappend AddlTxtSsVs $LibFiles
 	return $AddlTxtSsVs
 }
 
-proc addl_project_info { parent_base TextSlots SlotNames AddlTextSlots AddlTextSlotsValues} {
+proc addl_project_info { parent_base TextSlots SlotNames AddlTextSlots AddlTextSlotsValues LibFiles} {
 	set proj_title [$parent_base.title.entry get]  
 	if {$proj_title == ""} then {
 		tk_messageBox -message "Missing project title!" -icon error \
 			-title "Missing info" -type ok
 		return
 	}
-	addl_project_info_win $parent_base.addlprj $proj_title $parent_base $TextSlots $SlotNames $AddlTextSlots $AddlTextSlotsValues
+	addl_project_info_win $parent_base.addlprj $proj_title $parent_base $TextSlots $SlotNames $AddlTextSlots $AddlTextSlotsValues $LibFiles
 }
 
-proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames AddlTextSlots AddlTextSlotsValues} {
+proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames AddlTextSlots AddlTextSlotsValues LibFiles} {
     if {[winfo exists $base]} {
         wm deiconify $base; return
     }
@@ -1016,7 +1020,7 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
     ###################
     toplevel $base -class Toplevel
     wm focusmodel $base passive
-    wm geometry $base 326x363+320+148
+    wm geometry $base 326x383+320+148
     wm maxsize $base 1137 870
     wm minsize $base 1 1
     wm overrideredirect $base 0
@@ -1033,7 +1037,7 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
     frame $base.cpd17 \
         -borderwidth 1 -height 8 -relief raised -width 30 
     listbox $base.cpd17.01 \
-        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* -height 6 \
+        -font -Adobe-Helvetica-Medium-R-Normal-*-*-140-*-*-*-*-*-* -height 6 \
         -xscrollcommand "$base.cpd17.02 set" \
         -yscrollcommand "$base.cpd17.03 set" 
     scrollbar $base.cpd17.02 \
@@ -1045,9 +1049,9 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
     frame $base.lib_btns \
         -borderwidth 2 -height 75 -relief groove -width 125 
     button $base.lib_btns.add \
-        -command add_lib_file -padx 11 -pady 4 -text {Add Lib File} 
+        -command "add_lib_file" -padx 11 -pady 4 -text {Add Lib File} 
     button $base.lib_btns.del \
-        -command delete_lib_file -padx 11 -pady 4 -text {Delete Lib File} 
+        -command "delete_lib_file $base.cpd17.01 $base $parent_base" -padx 11 -pady 4 -text {Delete Lib File} 
     label $base.production_goal_label \
         -borderwidth 1 -text {} 
     entry $base.production_goal
@@ -1077,8 +1081,12 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
 		set xVV [find_pair_value $TxtSl $AddlTextSlotsValues]
     		$base.$xLab configure -text $xSN
 		$base.$TxtSl insert 0 $xVV
-}
 
+}
+    set Listbox $base.cpd17.01
+    foreach Ff $LibFiles {
+	$Listbox insert end $Ff
+    }
 	
     ###################
     # SETTING GEOMETRY
