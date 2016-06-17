@@ -56,10 +56,14 @@ file_extension(FullName, Name, Ext) :-
 		;
 		(atom_length(Last, Before), After = 0)
 	)),
-	sub_atom(Last, _, After, 0, Ext),
-	sub_atom(Last, 0, Before, _, BName),
-	dreverse([BName | RRestElts], NameElts),
-	join_path(NameElts, Name).
+	(Before == 0 ->
+		Name = Last, Ext = ''
+		;
+		sub_atom(Last, _, After, 0, Ext),
+		sub_atom(Last, 0, Before, _, BName),
+		dreverse([BName | RRestElts], NameElts),
+		join_path(NameElts, Name)
+	).
 
 file_extension(FullName, FileName, Ext) :-
 	atom_concat(FileName,'.',FileNameDot),
