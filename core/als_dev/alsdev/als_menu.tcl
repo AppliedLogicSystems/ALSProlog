@@ -39,6 +39,9 @@ proc add_file_menu {menubar type window} {
     $menubar.file add separator
     $menubar.file add command -label Save -underline 0 -accelerator "$mod-S" -command "re {$type.save $window}"
     $menubar.file add command -label "Save As$elipsis" -underline 5 -command "re {$type.save_as $window}"
+    $menubar.file add separator
+    $menubar.file add command -label "Examples$elipsis" -underline 5 -command {re document.open_examps}
+
 
 #    $menubar.file add separator
 #    $menubar.file add command -label "Page Setup$elipsis" \

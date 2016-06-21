@@ -428,4 +428,23 @@ als_advise(Stream, FormatString, Args)
 	printf(Stream, FormatString, Args),
 	flush_output(Stream).
 
+export get_examples_dir/1.
+get_examples_dir(ExamplesDir)
+        :-
+        sys_searchdir(ALSDirPath),
+        path_elements(ALSDirPath, ALSDirPathElements),
+        dreverse(ALSDirPathElements, [alsdir | RRestElts]),
+        dreverse(ExamplesPathElements, [examples | RRestElts]),
+        path_elements(ExamplesDir, ExamplesPathElements).
+
+export get_examples_write_dir/1.
+get_examples_write_dir(ExamplesWriteDir)
+	:-
+	getenv('HOME', HomePath),
+        path_elements(HomePath, HomePathElements),
+	append(HomePathElements, ['Documents', 'PrologExamples'], ExamplesWriteDirElements),
+        path_elements(ExamplesWriteDir, ExamplesWriteDirElements).
+
+	
+
 endmod.

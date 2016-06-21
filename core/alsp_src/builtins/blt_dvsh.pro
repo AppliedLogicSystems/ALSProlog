@@ -970,11 +970,11 @@ als_ide_mgrAction([open_edit_win, FileName, BaseFileName, Ext ], State)
 	:-
 	als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State).
 
-als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State)
+als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext, IsExample), State)
 	:-
 	accessObjStruct(edit_files, State, PrevEditFiles),
 	send_self(State, obtain_src_mgr(BaseFileName, FileMgr)),
-	send(FileMgr, open_edit_win(FileName, BaseFileName, Ext)),
+	send(FileMgr, open_edit_win(FileName, BaseFileName, Ext, IsExample)),
 	send_self(State, record_src_mgr(BaseFileName, FileMgr)).
 
 als_ide_mgrAction(map_edit_wins, State)
@@ -2656,35 +2656,52 @@ shl_source_handlerAction(open_edit_win('', BaseFileName, TclWin), State)
 	accessObjStruct(myHandle, State, MyHandle),
 	tcl_call(shl_tcli, [set_tcl_ga2,proenv,TclWin,src_handler,MyHandle], _).
 
-	%% File document case:
+/*
 shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext), State)
 	:-
 	setObjStruct(source_file, State, FileName),
 	setObjStruct(ext, State, Ext),
 	shl_source_handlerAction(complete_open_edit_win(FileName,_), State).
+*/
+
+	%% File document case:
+shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext), State)
+	:-
+	shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext, false), State).
+
+shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext, IsExample), State)
+	:-
+	setObjStruct(source_file, State, FileName),
+	setObjStruct(ext, State, Ext),
+	shl_source_handlerAction(complete_open_edit_win(FileName,_,IsExample), State).
 
 shl_source_handlerAction(open_edit_win_by_base(BaseFileName, Ext, SearchList), State)
 	:-
 	accessObjStruct(source_file, State, FileName),
 	FileName \= nil, FileName \='',
 	!,
-	shl_source_handlerAction(complete_open_edit_win(FileName,TclWin), State).
+	shl_source_handlerAction(complete_open_edit_win(FileName,TclWin, false), State).
 
 shl_source_handlerAction(open_edit_win_by_base(BaseFileName, Ext, SearchList), State)
 	:-
 	file_extension(FileDesc, BaseFileName, Ext),
 	path_to_try_from_desc(SearchList, FileDesc, FileTryPath),
 	!,
-	shl_source_handlerAction(complete_open_edit_win(FileTryPath,TclWin), State),
+	shl_source_handlerAction(complete_open_edit_win(FileTryPath,TclWin, false), State),
 	setObjStruct(source_file, State, FileTryPath),
 	setObjStruct(ext, State, Ext).
 
-shl_source_handlerAction(complete_open_edit_win(FileName,TclWin), State)
+shl_source_handlerAction(complete_open_edit_win(FileName,TclWin,IsExample), State)
 	:-
 	tcl_call(shl_tcli, [load_document, FileName], TclWin),
 	setObjStruct(tcl_doc_path, State, TclWin),
 	accessObjStruct(myHandle, State, MyHandle),
-	tcl_call(shl_tcli, [set_tcl_ga2,proenv,TclWin,src_handler,MyHandle], _).
+	tcl_call(shl_tcli, [set_tcl_ga2,proenv,TclWin,src_handler,MyHandle], _),
+	(IsExample=true ->
+		tcl_call(shl_tcli, [set_tcl_ga2,proenv,TclWin,is_example,true], _)
+		;
+		true
+	).
 
 shl_source_handlerAction(close_edit_win, State)
 	:-

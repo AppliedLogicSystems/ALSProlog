@@ -92,7 +92,12 @@ installer: alspro
 
 alsdir : alsdir/builtins alsdir/library
 
+#	rm -f examples
+#	ln -s ../../../examples examples
+#	if [ -f ./examples ] then ln -s ../../../examples .  fi; \
+
 alsdir/builtins : $(SOURCE_DIR)/builtins $(MAKEFS)
+	rm -f examples ; ln -s ../../../examples examples
 	mkdir -p alsdir/builtins
 	rm -f alsdir/builtins/*.pro
 	cd alsdir/builtins ; ln -s ../../$(SOURCE_DIR)/builtins/*.pro .

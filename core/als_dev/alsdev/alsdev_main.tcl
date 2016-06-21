@@ -5,6 +5,9 @@
 #|		Tcl/Tk main window for the alsdev environment
 ##=================================================================================
 
+#puts [info tclversion]
+#puts $tk_version
+
 proc vTclWindow.topals {args} {
 	global array proenv
 	global mod
