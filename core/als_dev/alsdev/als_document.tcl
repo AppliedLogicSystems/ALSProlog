@@ -63,6 +63,8 @@ proc create_document_window {title} {
 
 		# Setup menus:
 
+	set proenv($w,is_example) false
+
 	menu $w.menubar -tearoff 0
 	add_default_menus $w.menubar
 	add_file_menu $w.menubar document $w
@@ -434,10 +436,39 @@ proc document.open args {
 		set FT [file tail $file]
 		set BaseFile [file rootname [file tail $file]]
 		set Ext [file extension $file],
-		send_prolog_t als_ide_mgr [list open_edit_win $file $BaseFile $Ext] list
+		send_prolog_t als_ide_mgr [list open_edit_win $file $BaseFile $Ext false] list
 			## prolog source_handler will call back to do:
 			##		load_document $file
 	}
+}
+
+proc getExamplesDir {} {
+	global array proenv
+	if { [info exists proenv(examples_dir)] } {
+		return $proenv(examples_dir)
+	} else {
+		prolog call builtins get_examples_dir -var examplesDir
+		set proenv(examples_dir) $examplesDir
+		return $proenv(examples_dir) 
+	}
+}
+
+proc document.open_examps {} {
+        global array proenv
+        global filetypes
+
+	set exampspath [ getExamplesDir ]
+
+        set file [tk_getOpenFile \
+                -title "Open File" \
+                -filetypes $filetypes \
+                -initialdir $exampspath ]
+        if {$file != ""} then {
+		set FT [file tail $file]
+		set BaseFile [file rootname [file tail $file]]
+		set Ext [file extension $file],
+		send_prolog_t als_ide_mgr [list open_edit_win $file $BaseFile $Ext true] list
+        }
 }
 
 proc save_check {w} {
@@ -466,6 +497,7 @@ proc document.close {w} {
 	if {[save_check $w]} then {
 		prolog call $proenv(dflt_mod) send -number $proenv($w,src_handler) -atom close_edit_win
 			## the prolog side used to do this, but moved back here:
+		unset proenv($w,is_example)
 		dispose_document_window $w
 		return true
 	} else {
@@ -481,10 +513,41 @@ proc document.close_all {} {
 	return true
 }
 
+proc getExamplesWriteDir {} {
+	global array proenv
+	if { [info exists proenv(examples_write_dir)] } {
+		return $proenv(examples_write_dir)
+	} else {
+		prolog call builtins get_examples_write_dir -var ExamplesWriteDir
+		set proenv(examples_write_dir) $ExamplesWriteDir
+		return $proenv(examples_write_dir) 
+	}
+}
 
 proc document.save {w} {
 	global array proenv
-	if {[info exists proenv($w,file)]} then {
+	if { $proenv($w,is_example)==true } {
+
+		set examplesWriteDir [ getExamplesWriteDir ]
+
+		set file [tk_getSaveFile -initialfile [wm title $w] \
+			-initialdir $examplesWriteDir \
+			-defaultextension .pro ]
+
+		if {$file != ""} then {
+			un_post_open_document $proenv($w,title)
+			save_as_core $w $file
+			send_prolog_t als_ide_mgr [list save_doc_as $w $file] list
+			set file_name [lindex [file split $file] end]
+			set proenv($w,file) $file
+			set proenv($w,title) $file_name
+			set proenv(document,$file) $w
+			set proenv(examples_write_dir) [file dirname $file]
+			post_open_document $file_name $w
+		} else {
+			return false
+		}
+	} elseif {[info exists proenv($w,file)]} then {
 		store_text $w.text $proenv($w,file)
 		set proenv($w,dirty) false
 		return true
