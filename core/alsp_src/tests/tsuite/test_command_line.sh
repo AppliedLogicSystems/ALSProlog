@@ -96,6 +96,7 @@ fi
 # test success/fail/exception return values for -b -g options
 
 cl_test "$prolog -q -b -g true" 0
+cl_test "$prolog -q -b -g halt" 0
 cl_test "$prolog -q -b -g fail" 1
 cl_test "$prolog -q -b -g 'throw(foo)'" 2
 

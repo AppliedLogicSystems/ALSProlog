@@ -738,6 +738,9 @@ PI_status_toplevel(int *result)
 	    } else *result = 0;
 	    }
 	    return (0);
+	} else {
+	    /* Set result to success on longjmp */
+	    *result = 1;
 	}
     }
 
