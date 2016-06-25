@@ -1,6 +1,8 @@
 Welcome to the ALS Prolog Source Tree
 =====================================
 
+[![Build Status](https://travis-ci.org/AppliedLogicSystems/ALSProlog.svg?branch=master)](https://travis-ci.org/AppliedLogicSystems/ALSProlog)
+
 The ALS Prolog source tree is divided into core and peripheral
 directories.  The core directory contains the source for the Prolog
 compiler, runtime, and IDE. The peripheral directories contain manuals, examples, extensions, etc. The tree is hosted on GitHub at:
