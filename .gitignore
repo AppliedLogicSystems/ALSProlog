@@ -23,6 +23,7 @@ alsdev_b
 *.zip
 core/win32/alsdir
 core/unix/*/alsdir
+core/unix/*/examples
 unix/darwin
 unix/linux
 unix/cygwin
