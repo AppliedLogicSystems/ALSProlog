@@ -1,19 +1,27 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 2.8)
 project (als-prolog)
 
 include(CTest)
 
 set(CMAKE_MACOSX_RPATH 1)
 
-add_compile_options(-m32 -O0 -std=gnu99)
-set(CMAKE_EXE_LINKER_FLAGS "-m32 -Wl,-no_pie")
-set(CMAKE_SHARED_LINKER_FLAGS "-m32 -Wl,-no_pie")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32 -O0 -std=gnu99")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m32")
+#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -m32")
+
+if     (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	set(OS_FLAG UNIX_DARWIN)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-no_pie")
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+	set(OS_FLAG UNIX_LINUX)
+	set(OS_LIBS m dl crypt)
+endif()
 
 execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../../version OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE VERSION)
 
 include_directories(port unix generic smath)
 
-add_definitions(-DUNIX -DUNIX_DARWIN -DPORT -DVERSION=${VERSION}-cmake)
+add_definitions(-DUNIX -D${OS_FLAG} -DPORT -DVERSION=${VERSION}-cmake)
 
 file(GLOB GENERIC_SOURCES "generic/*.c")
 list(REMOVE_ITEM GENERIC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic/alspi_stub.c)
@@ -49,7 +57,7 @@ add_library(alspro-shared SHARED $<TARGET_OBJECTS:alspro-lib> ${SHARED_SOURCES})
 set_target_properties(alspro-shared PROPERTIES OUTPUT_NAME alspro)
 
 add_executable(alspro_b generic/topmain.c)
-target_link_libraries(alspro_b alspro-static)
+target_link_libraries(alspro_b alspro-static ${OS_LIBS})
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/alspro
