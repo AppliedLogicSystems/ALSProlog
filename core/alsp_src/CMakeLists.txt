@@ -61,7 +61,7 @@ target_link_libraries(alspro_b alspro-static ${OS_LIBS})
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/alspro
-  COMMAND alspro_b -q -b -obp ${CMAKE_CURRENT_SOURCE_DIR}/../als_dev/alsdev/ldr_alspro.pro -g "'save_image(alspro,[])'"
+  COMMAND env DEV_ALSDIR=${CMAKE_CURRENT_SOURCE_DIR} ./alspro_b -q -b -obp ${CMAKE_CURRENT_SOURCE_DIR}/../als_dev/alsdev/ldr_alspro.pro -g "'save_image(alspro,[])'"
   DEPENDS alspro_b
 )
 
@@ -81,7 +81,7 @@ add_test(HelloWorld alspro -q -b -g "write('hello world'), nl.")
 set_tests_properties(HelloWorld PROPERTIES PASS_REGULAR_EXPRESSION "hello world")
 
 add_test(command_line_test sh ${TESTS_DIR}/tsuite/test_command_line.sh ./alspro)
-add_test(test_suit alspro -giac -b ${TESTS_DIR}/autotest.pro ${TESTS_DIR}/atest_db.pro -g run_tests -p -srcdir ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(test_suit env DEV_ALSDIR=${CMAKE_CURRENT_SOURCE_DIR} ./alspro -giac -b ${TESTS_DIR}/autotest.pro ${TESTS_DIR}/atest_db.pro -g run_tests -p -srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(iso_test_suite alspro -giac -b ${TESTS_DIR}/iso_test_suite/valid_so.pro -g "cd('${TESTS_DIR}/iso_test_suite'), run_all_tests.")
 
 # Packaging
