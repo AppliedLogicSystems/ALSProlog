@@ -38,11 +38,11 @@ Build Dependencies
 
 ### Linux
 
-Generally, a 32-bit GNU/Linux with standard build tools (Make, GCC 4), Git, and Tcl/Tk. Packages for popular distributions:
+Generally, a GNU/Linux OS with standard build tools (Make, GCC with 32-bit support), Git, and Tcl/Tk. Packages for popular distributions:
 
-Debian/Ubuntu: `sudo apt-get install build-essential git tk-dev`
+Debian/Ubuntu: `sudo apt-get install build-essential gcc-multilib tk-dev git`
 
-CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install tk-devel`
+CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install glibc-devel.i686 tk-devel.i686 git`
 
 ### Mac OS X
 
