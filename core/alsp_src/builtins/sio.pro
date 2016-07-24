@@ -1693,6 +1693,7 @@ wait_data(tcltk, Stream, Call)
 	stream_addl1(Stream, Alias),
 	stream_addl2(Stream, ti(Interp,WaitVarName)),
 	stream_name(Stream, WinID),
+pbi_write('Alias'=Alias),pbi_write(' Interp'=Interp),pbi_write(' WV'=WaitVarName),pbi_write(' WinID'=WinID),pbi_nl,
 	tcl_call(Interp, [set_prompt_mark, WinID], _),
 	tcl_call(Interp, 
 		[bind,WinID,'<Return>', [ xmit_line_plain,WinID,Alias,WaitVarName]], _),
@@ -1759,6 +1760,7 @@ loop_for_data(Type, Stream)
 open_window_stream(Window,Mode,Options,Stream) 
 	:- 
 	getWinID(Window,WinID),
+pbi_write(open_window_stream_WinID=WinID),pbi_nl,
 	getWinGV(WinID,WinPosGV),
 	initialize_stream(window,Window,Options,Stream),
 	file_modes(Mode,NMode,SMode),
