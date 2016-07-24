@@ -332,8 +332,8 @@ alsdev(Shared, ALS_IDE_Mgr)
 
 	tcl_call(shl_tcli, [set,WaitVar,0],_),
 	tcl_call(shl_tcli, [set,DataVar,""],_),
-	tcl_call(shl_tcli, 
-		[set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_),
+%	tcl_call(shl_tcli, 
+%		[set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_),
     sio:set_input(ISS),
     sio:set_output(OSS),
 
