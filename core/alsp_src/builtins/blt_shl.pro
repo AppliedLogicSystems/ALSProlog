@@ -397,6 +397,7 @@ export shell_read_execute/4.
 shell_read_execute(InStream,OutStream,Wins,Status)
 	:-
 	shell_read(InStream,OutStream,InitGoal,NamesOfVars,Vars),
+pbi_write('shell_read_InitGoal'=InitGoal),pbi_nl,
 	shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status),
 	!.
 
@@ -420,7 +421,8 @@ shell_read(InStream,OutStream,G,N,V)
 	:-
 	get_shell_prompts( [(Prompt1,Prompt2) | _] ),
 	flush_input(InStream),
-	catch(trap(shell_read0(Prompt1,Prompt2,InStream,G,N,V), 
+	catch(trap(
+		   shell_read0(Prompt1,Prompt2,InStream,G,N,V), 
 			   throw_cntrl_c),
 		  Ball,
 		  shell_read0_err_disp(Ball,InStream,OutStream,G,N,V)
@@ -433,7 +435,9 @@ shell_read0(Prompt1,Prompt2,InStream,G,N,V)
 		sio:set_user_prompt(Prompt1),
 		sio:skip_layout(InStream),
 		sio:set_user_prompt(Prompt2),
+%stream_token_list(InStream, STL), pbi_write('s_r0_t_l'=STL), pbi_nl,
 		read_term(InStream,G,[vars_and_names(V,N)])
+,pbi_write('shell_read0 done G'=G),pbi_nl
 	), Exception, (
 		sio:set_user_prompt(OldPrompt),
 		throw(Exception)

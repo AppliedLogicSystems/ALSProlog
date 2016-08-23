@@ -65,6 +65,8 @@ GENERIC_SOURCE := $(GENERIC_SOURCE) int_net.c intaux.c intrv.c
 BUILTINS := $(BUILTINS) int_cstr.pro ra_basis.pro
 endif
 
+GENERIC_SOURCE := $(GENERIC_SOURCE) linenoise.c
+
 LIB_SOURCE = $(GENERIC_SOURCE) $(PROC_SOURCE) $(OS_SOURCE)
 
 LIB_OBJECTS = $(LIB_SOURCE:.c=.o)

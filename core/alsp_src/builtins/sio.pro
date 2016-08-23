@@ -84,9 +84,6 @@ next_stream_identifier(Options,Id) :-
 	get_next_stream_identifier(Id),
 %	NextId is (Id+1) /\ 0xffffff,
 	NextId is (Id+1),
-%(integer(Id) -> JKK=int ; JKK = real),
-%(integer(NextId) -> KK=int ; KK = real),
-%pbi_write(next_stream_identifier(JKK,Id,NextId,KK)),pbi_nl, pbi_ttyflush,
 	set_next_stream_identifier(NextId).
 
 
@@ -2258,7 +2255,9 @@ get_failure(15, Stream, Call) :-	%% SIOE_PARTNUM
 get_failure_read(Stream, Call) 
 	:-
 	stream_type(Stream,Type),
+pbi_write('gfr_rb_type'=Type),pbi_nl,
 	read_buffer(Type,Stream),
+pbi_write('gfr_rb--r_b DONE'),pbi_nl,
 	stream_eof_action(Stream, EOFAction),
 	get_failure_read_maybe_reset_eof(EOFAction, Stream),
 	!,
@@ -2766,6 +2765,8 @@ set_extra_eof(StreamOrAlias)
 read_buffer(_,Stream) 
 	:-!,
 	stream_pgoals(Stream,PromptGoal),
+stream_type(Stream,Type),
+(Type \= file -> pbi_nl,pbi_write(('rb/2_last_type'=Type,pg=PromptGoal)),pbi_nl; true),
 	call(PromptGoal),
 	read_buffer(Stream).
 
@@ -2777,6 +2778,8 @@ read_buffer(_,Stream)
 
 read_buffer(Stream) :-
 	sio_readbuffer(Stream),
+stream_type(Stream,Type), 
+(Type \= file -> stream_buffer(Stream, Buf1), pbi_write(rb_1=Buf1),pbi_nl; true),
 	!.
 read_buffer(Stream) :-
 	sio_errcode(Stream,16),			%% 16 = SIOE_INTERRUPTED

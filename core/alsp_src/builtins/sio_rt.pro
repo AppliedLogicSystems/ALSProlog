@@ -427,6 +427,8 @@ read_term(Stream,Term,ErrMech,VT)
 read_term(Stream,Term,ErrMech,VT,FinalToks) 
 	:-
 	tp_get_token_list(Stream,[Tok1|TokRest]),
+pbi_write('rt/5_Tok1'=Tok1),pbi_nl,
+pbi_write('rt/5_TokRest'=TokRest),pbi_nl,
 	catch(	rt_readclause(Tok1,TokRest,VT,Term, FinalToks),
 		syntax_error(Token,Message),
 		init_rt_err(ErrMech,Token,Message,[Tok1|TokRest],Stream,VT,Term)).
