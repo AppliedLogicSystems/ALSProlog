@@ -279,6 +279,9 @@ static	int	format_type	PARAMS(( UCHAR * ));
 
 enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
+char *console_prompt;
+char *history_file;
+
 #ifdef PURE_ANSI
 long standard_console_read(char *buf, long n)
 {
@@ -332,39 +335,40 @@ long standard_console_error(char *buf, long n)
 
 #else
 
-
-/*
-printf("incoming: '%s'\n", curprompt);
-if (curprompt == NULL){
-	curprompt = "?- ";
-}
-*/
-
 long standard_console_read(char *buf, long n)
 {
     char *line;
     long count;
 
-printf("s_c_r-incoming: '%s' n='%lu'\n", curprompt, n);
-curprompt = "#% ";
+    if (console_prompt == NULL){
+	console_prompt = "?- ";
+    }
 
-line = linenoise(curprompt);
-count = (int)strlen(line);
-printf("echo: count='%d' line: '%s'\n", count, line);
-//linenoiseHistoryAdd(line);  // Add to the history. 
-//linenoiseHistorySave("history.txt");  // Save the history on disk. 
+    line = linenoise(console_prompt);
+    if (line == NULL){
+//printf("line is NULL errno=%d\n",errno);
+	if (errno == 0){
+            return 0;
+	} else {
+	    return -1;
+	}
+    } else if (line[0] != '\0') {
+        count = (int)strlen(line);
+    	linenoiseHistoryAdd(line);  // Add to the history. 
+    	linenoiseHistorySave(history_file);  // Save the history on disk. 
+    } else {
+	return 0;
+    }
 
-if (line != NULL && count <= n )
-   {
+    if (line != NULL && count <= n )
+    {
 	memcpy(buf, line, count);
-printf(" memcpy_buf: count='%lu' buf: '%s'\n", count,buf);
-   } else {
-printf("ERROR");
-   }
-return count;
+	buf[count] = '\n'; count++;
+   } 
+    free(line);
+    return count;
 
 /*
-     printf("s_c_r-incoming: n='%lu'\n", n);
      return read(STDIN_FILENO, buf, n); 
 */
 }
@@ -3707,6 +3711,45 @@ ssbq_get_msg()
 }
 #endif /* SSBQ */
 
+
+/*
+ * sio_set_console_prompt(Prompt)
+ */
+
+int
+sio_set_console_prompt()
+{
+    PWord v1;
+    int   t1;
+
+    w_get_An(&v1, &t1, 1);
+
+    if (!getstring(&console_prompt, v1, t1)){
+	console_prompt = "?- ";
+    } 
+}
+
+/*
+ * sio_set_history_file(FileName)
+ */
+
+int
+sio_set_history_file()
+{
+    PWord v1;
+    int   t1;
+
+    w_get_An(&v1, &t1, 1);
+
+    if (!getstring(&history_file, v1, t1)){
+	history_file = ".alspro_history.txt";
+    }
+}
+
+
+
+
+
 /*
  * sio_readbuffer(SD)
  */
@@ -3748,8 +3791,6 @@ sio_readbuffer()
     shift_buffer(buf);
     nchars = SIO_BFSIZE(buf) - SIO_LPOS(buf);
     buffer = SIO_BUFFER(buf) + SIO_LPOS(buf);
-
- printf("sio_readbuffer: addrs: buf=%p buffer=%p SIO_FD(buf)=%lu SIO_TYPE(buf)=%lu buf=%s buffer=%s\n",buf, buffer, SIO_FD(buf), SIO_TYPE(buf), buf, buffer);
 
     switch (SIO_TYPE(buf)) {
 	case SIO_TYPE_FILE:
@@ -3846,11 +3887,7 @@ sio_readbuffer()
 #endif /* HAVE_SOCKET */
 
 	case SIO_TYPE_CONSOLE:
- // printf("sio_readbuffer-console-in: SIO_FD(buf)=%lu SIO_TYPE(buf)=%lu buffer=%s\n",SIO_FD(buf), SIO_TYPE(buf), buffer);
-    nchars = console_io(SIO_FD(buf), (char *)buffer, (size_t)nchars);
-
- printf("sio_readbuffer-console-out: addrs: buf=%p buffer=%p SIO_FD(buf)=%lu SIO_TYPE(buf)=%lu buf=%s buffer=%s\n",buf, buffer, SIO_FD(buf), SIO_TYPE(buf), buf, buffer);
-/*   bsio.h: 0=file, 7=console  */
+    	    nchars = console_io(SIO_FD(buf), (char *)buffer, (size_t)nchars);
 	    break;
 	   
 	default:
@@ -3858,7 +3895,6 @@ sio_readbuffer()
 	    FAIL;
 	    break;
     }
-//printf("sio_readbuffer-ending: nchars='%d'\n",nchars); 
 
     if (nchars < 0) {
 		if (errno == EINTR)
@@ -3867,7 +3903,6 @@ sio_readbuffer()
 	    	SIO_ERRCODE(buf) = SIOE_SYSCALL;
 	    	SIO_ERRNO(buf) = errno;
 		}
-printf("sio_readbuffer-Exit: FAIL\n"); 
 		FAIL;
     }
     else {
@@ -3875,7 +3910,6 @@ printf("sio_readbuffer-Exit: FAIL\n");
 		SIO_LPOS(buf) += nchars;
 		if (nchars == 0)
 	    	SIO_FLAGS(buf) |= SIOF_EOF;
-printf("sio_readbuffer-Exit: SUCCEED\n"); 
 		SUCCEED;
     }
 }

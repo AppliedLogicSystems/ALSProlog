@@ -47,6 +47,8 @@ start_shell0(DefaultShellCall)
 	make_clinfo(CLInfo, DefaultShellCall, false),	% verbosity = verbose
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,alsshell,CLInfo),
 
+	sio_set_history_file(".alspro_history.txt"),
+
 	assertz(command_line(ResidualCommandLine)),
 	setup_search_dirs(CLInfo),
 	assert(save_clinfo(CLInfo)),
@@ -397,7 +399,7 @@ export shell_read_execute/4.
 shell_read_execute(InStream,OutStream,Wins,Status)
 	:-
 	shell_read(InStream,OutStream,InitGoal,NamesOfVars,Vars),
-pbi_write('shell_read_InitGoal'=InitGoal),pbi_nl,
+%pbi_write('shell_read_InitGoal'=InitGoal),pbi_nl,
 	shell_execute(InStream,OutStream,InitGoal,NamesOfVars,Vars,Wins,Status),
 	!.
 
@@ -435,9 +437,8 @@ shell_read0(Prompt1,Prompt2,InStream,G,N,V)
 		sio:set_user_prompt(Prompt1),
 		sio:skip_layout(InStream),
 		sio:set_user_prompt(Prompt2),
-%stream_token_list(InStream, STL), pbi_write('s_r0_t_l'=STL), pbi_nl,
 		read_term(InStream,G,[vars_and_names(V,N)])
-,pbi_write('shell_read0 done G'=G),pbi_nl
+%,pbi_write('shell_read0 done G'=G),pbi_nl
 	), Exception, (
 		sio:set_user_prompt(OldPrompt),
 		throw(Exception)

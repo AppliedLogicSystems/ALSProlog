@@ -2255,9 +2255,9 @@ get_failure(15, Stream, Call) :-	%% SIOE_PARTNUM
 get_failure_read(Stream, Call) 
 	:-
 	stream_type(Stream,Type),
-pbi_write('gfr_rb_type'=Type),pbi_nl,
+%pbi_write('gfr_rb_type'=Type),pbi_nl,
 	read_buffer(Type,Stream),
-pbi_write('gfr_rb--r_b DONE'),pbi_nl,
+%pbi_write('gfr_rb--r_b DONE'),pbi_nl,
 	stream_eof_action(Stream, EOFAction),
 	get_failure_read_maybe_reset_eof(EOFAction, Stream),
 	!,
@@ -2765,8 +2765,8 @@ set_extra_eof(StreamOrAlias)
 read_buffer(_,Stream) 
 	:-!,
 	stream_pgoals(Stream,PromptGoal),
-stream_type(Stream,Type),
-(Type \= file -> pbi_nl,pbi_write(('rb/2_last_type'=Type,pg=PromptGoal)),pbi_nl; true),
+%stream_type(Stream,Type),
+%(Type \= file -> pbi_nl,pbi_write(('rb/2_last_type'=Type,pg=PromptGoal)),pbi_nl; true),
 	call(PromptGoal),
 	read_buffer(Stream).
 
@@ -2778,8 +2778,8 @@ stream_type(Stream,Type),
 
 read_buffer(Stream) :-
 	sio_readbuffer(Stream),
-stream_type(Stream,Type), 
-(Type \= file -> stream_buffer(Stream, Buf1), pbi_write(rb_1=Buf1),pbi_nl; true),
+%stream_type(Stream,Type), 
+%(Type \= file -> stream_buffer(Stream, Buf1), pbi_write(rb_1=Buf1),pbi_nl; true),
 	!.
 read_buffer(Stream) :-
 	sio_errcode(Stream,16),			%% 16 = SIOE_INTERRUPTED
@@ -2791,6 +2791,7 @@ push_prompt(Stream_or_alias)
 	:-
 	is_stream(Stream_or_alias,Stream),
 	stream_pgoals(Stream,PromptGoal),
+push_prompt('push_prompt: PromptGoal'=PromptGoal),pbi_nl,
 	call(PromptGoal).
 
 /*----------------------------------------------------------*
@@ -4098,9 +4099,24 @@ queue_control(MsgQID, Cmd, Perms, Info)
     /*---------------------------
      * Initialization of user
      *--------------------------*/
+/*
+sio_set_console_prompt(Prompt)
+	:-
+pbi_write('user_prompt_goal(user_output) patm'=Prompt),pbi_nl.
+*/
+
+user_prompt_goal(user_output) 
+	:-
+	get_user_prompt(Prompt),
+%pbi_write('user_prompt_goal(user_output) patm'=Prompt),pbi_nl,
+	sio_set_console_prompt(Prompt),
+	!.
+
 user_prompt_goal(Stream) 
 	:-
 	get_user_prompt(Prompt),
+(Stream == user_output -> 
+pbi_write('u_p_goal(user_output) patm'=Prompt),pbi_nl ; true),
 	put_atom(Stream,Prompt),
 	flush_output(Stream).
 

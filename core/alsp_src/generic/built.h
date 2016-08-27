@@ -379,6 +379,8 @@ extern	int	sio_unget_byte	PARAMS(( void ));
 extern	int	sio_getpos	PARAMS(( void ));
 extern	int	sio_seek	PARAMS(( void ));
 extern	int	sio_readbuffer	PARAMS(( void ));
+extern	int	sio_set_console_prompt	PARAMS(( UCHAR ** ));
+extern	int	sio_set_history_file	PARAMS(( UCHAR ** ));
 extern	int	sio_writebuffer	PARAMS(( void ));
 extern	int	sio_bufshift	PARAMS(( void ));
 extern	int	sio_next_token	PARAMS(( void ));
