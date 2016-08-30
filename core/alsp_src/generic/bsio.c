@@ -361,12 +361,13 @@ long standard_console_read(char *buf, long n)
 	return 0;
     }
 
+		/* count+1 because '\n' may be added here: */
     if (line != NULL && count+1 <= n )
     {
 	memcpy(buf, line, count);
 	buf[count] = '\n'; count++;
     } 
-    else {
+    else {    /* Incoming line overruns buf: */
 	errno = ENOBUFS;
 	return -1;
    }
