@@ -341,6 +341,20 @@ long standard_console_read(char *buf, long n)
     char *line;
     long count;
 
+        /* Load the history file once (i.e., at startup) 
+    	   do_load_prev_history is set == 1 during alspro shell startup;
+	   so setting it back to 0 (the default) ensures the
+	   history will only be loaded once during an alspro shell session.
+	*/
+    if (do_load_prev_history == 1){
+        linenoiseHistoryLoad(history_file); 
+printf("Loaded previous history\n");
+        do_load_prev_history = 0;
+    }
+
+
+
+
     if (console_prompt == NULL){
 	console_prompt = "?- ";
     }
@@ -3763,10 +3777,8 @@ int
 sio_set_load_prev_history()
 {
 	do_load_prev_history = 1;
-printf("DONE: do_load_prev_history=%d\n",do_load_prev_history);
+	SUCCEED;
 }
-
-
 
 /*
  * sio_readbuffer(SD)
