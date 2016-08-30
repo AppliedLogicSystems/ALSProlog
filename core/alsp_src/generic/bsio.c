@@ -281,6 +281,7 @@ enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
 char *console_prompt;
 char *history_file;
+int  do_load_prev_history = 0;
 
 #ifdef PURE_ANSI
 long standard_console_read(char *buf, long n)
@@ -346,8 +347,7 @@ long standard_console_read(char *buf, long n)
 
     line = linenoise(console_prompt);
     if (line == NULL){
-//printf("line is NULL errno=%d\n",errno);
-	if (errno == 0){
+	if (errno == 0 && errno != -13){
             return 0;
 	} else {
 	    return -1;
@@ -357,14 +357,19 @@ long standard_console_read(char *buf, long n)
     	linenoiseHistoryAdd(line);  // Add to the history. 
     	linenoiseHistorySave(history_file);  // Save the history on disk. 
     } else {
+	errno = -13;
 	return 0;
     }
 
-    if (line != NULL && count <= n )
+    if (line != NULL && count+1 <= n )
     {
 	memcpy(buf, line, count);
 	buf[count] = '\n'; count++;
-   } 
+    } 
+    else {
+	errno = ENOBUFS;
+	return -1;
+   }
     free(line);
     return count;
 
@@ -3727,6 +3732,7 @@ sio_set_console_prompt()
     if (!getstring(&console_prompt, v1, t1)){
 	console_prompt = "?- ";
     } 
+    SUCCEED;
 }
 
 /*
@@ -3742,11 +3748,22 @@ sio_set_history_file()
     w_get_An(&v1, &t1, 1);
 
     if (!getstring(&history_file, v1, t1)){
-	history_file = ".alspro_history.txt";
+	history_file = ".alspro_history";
     }
+    SUCCEED;
 }
 
 
+/*
+ * sio_set_load_prev_history
+ */
+
+int
+sio_set_load_prev_history()
+{
+	do_load_prev_history = 1;
+printf("DONE: do_load_prev_history=%d\n",do_load_prev_history);
+}
 
 
 
@@ -3895,21 +3912,23 @@ sio_readbuffer()
 	    FAIL;
 	    break;
     }
-
     if (nchars < 0) {
 		if (errno == EINTR)
-	    	SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
+	    		SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
 		else {
-	    	SIO_ERRCODE(buf) = SIOE_SYSCALL;
-	    	SIO_ERRNO(buf) = errno;
+	    		SIO_ERRCODE(buf) = SIOE_SYSCALL;
+	    		SIO_ERRNO(buf) = errno;
 		}
 		FAIL;
     }
     else {
 		SIO_ERRCODE(buf) = SIOE_NORMAL;
 		SIO_LPOS(buf) += nchars;
-		if (nchars == 0)
-	    	SIO_FLAGS(buf) |= SIOF_EOF;
+		if (nchars == 0 && errno != -13)
+	    		SIO_FLAGS(buf) |= SIOF_EOF;
+		if (nchars == 0  && errno == -13){
+			errno=0;
+		}
 		SUCCEED;
     }
 }

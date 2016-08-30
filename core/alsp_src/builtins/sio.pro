@@ -4099,16 +4099,9 @@ queue_control(MsgQID, Cmd, Perms, Info)
     /*---------------------------
      * Initialization of user
      *--------------------------*/
-/*
-sio_set_console_prompt(Prompt)
-	:-
-pbi_write('user_prompt_goal(user_output) patm'=Prompt),pbi_nl.
-*/
-
 user_prompt_goal(user_output) 
 	:-
 	get_user_prompt(Prompt),
-%pbi_write('user_prompt_goal(user_output) patm'=Prompt),pbi_nl,
 	sio_set_console_prompt(Prompt),
 	!.
 
