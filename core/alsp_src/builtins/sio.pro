@@ -1695,7 +1695,6 @@ wait_data(tcltk, Stream, Call)
 		[bind,WinID,'<Return>', [ xmit_line_plain,WinID,Alias,WaitVarName]], _),
 	tcl_call(Interp, [set,WaitVarName,0], _),
 	tcl_call(Interp, [wait_for_line1, WaitVarName], WaitRes),
-%pbi_write(wd_tcltk_A),pbi_nl,pbi_ttyflush,
 	finish_wait_data_tcltk(WaitRes, Stream, Call).
 
 	%% Returned -1: Got a ^C:
@@ -1709,12 +1708,10 @@ finish_wait_data_tcltk(-3, Stream, Call)
 	stream_extra(Stream,XTRA),
 	set_stream_extra(Stream,eof(XTRA)),
 	sio_set_eof(Stream),
-%pbi_write(wd_tcltk_CTLD),pbi_nl,pbi_ttyflush,
 	sio_set_errcode(Stream,8).			% SIO_INTERR
 
 finish_wait_data_tcltk(WaitRes, Stream, Call)
 	:-
-%pbi_write(wd_tcltk_default(Call)),pbi_nl,pbi_ttyflush,
 	call(Call).
 
 force_control_c_during_read(StreamAlias)
@@ -2255,9 +2252,7 @@ get_failure(15, Stream, Call) :-	%% SIOE_PARTNUM
 get_failure_read(Stream, Call) 
 	:-
 	stream_type(Stream,Type),
-%pbi_write('gfr_rb_type'=Type),pbi_nl,
 	read_buffer(Type,Stream),
-%pbi_write('gfr_rb--r_b DONE'),pbi_nl,
 	stream_eof_action(Stream, EOFAction),
 	get_failure_read_maybe_reset_eof(EOFAction, Stream),
 	!,
@@ -2765,8 +2760,6 @@ set_extra_eof(StreamOrAlias)
 read_buffer(_,Stream) 
 	:-!,
 	stream_pgoals(Stream,PromptGoal),
-%stream_type(Stream,Type),
-%(Type \= file -> pbi_nl,pbi_write(('rb/2_last_type'=Type,pg=PromptGoal)),pbi_nl; true),
 	call(PromptGoal),
 	read_buffer(Stream).
 
@@ -2778,8 +2771,6 @@ read_buffer(_,Stream)
 
 read_buffer(Stream) :-
 	sio_readbuffer(Stream),
-%stream_type(Stream,Type), 
-%(Type \= file -> stream_buffer(Stream, Buf1), pbi_write(rb_1=Buf1),pbi_nl; true),
 	!.
 read_buffer(Stream) :-
 	sio_errcode(Stream,16),			%% 16 = SIOE_INTERRUPTED
@@ -4108,8 +4099,6 @@ user_prompt_goal(user_output)
 user_prompt_goal(Stream) 
 	:-
 	get_user_prompt(Prompt),
-(Stream == user_output -> 
-pbi_write('u_p_goal(user_output) patm'=Prompt),pbi_nl ; true),
 	put_atom(Stream,Prompt),
 	flush_output(Stream).
 

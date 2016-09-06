@@ -279,8 +279,8 @@ static	int	format_type	PARAMS(( UCHAR * ));
 
 enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
-char *console_prompt;
-char *history_file;
+const char *console_prompt;
+const char *history_file;
 int  do_load_prev_history = 0;
 
 #ifdef PURE_ANSI
@@ -348,12 +348,9 @@ long standard_console_read(char *buf, long n)
 	*/
     if (do_load_prev_history == 1){
         linenoiseHistoryLoad(history_file); 
-printf("Loaded previous history\n");
+	printf("Loaded previous history\n");
         do_load_prev_history = 0;
     }
-
-
-
 
     if (console_prompt == NULL){
 	console_prompt = "?- ";
@@ -361,23 +358,14 @@ printf("Loaded previous history\n");
 
     line = linenoise(console_prompt);
     if (line == NULL){
-	if (errno == 0 && errno != -13){
-            return 0;
-	} else {
-	    return -1;
-	}
-    } else if (line[0] != '\0') {
-        count = (int)strlen(line);
-    	linenoiseHistoryAdd(line);  // Add to the history. 
-    	linenoiseHistorySave(history_file);  // Save the history on disk. 
-    } else {
-	errno = -13;
 	return 0;
     }
-
+    count = (int)strlen(line);
 		/* count+1 because '\n' may be added here: */
-    if (line != NULL && count+1 <= n )
+    if (count+1 <= n )
     {
+	linenoiseHistoryAdd(line);  // Add to the history. 
+    	linenoiseHistorySave(history_file);  // Save the history on disk. 
 	memcpy(buf, line, count);
 	buf[count] = '\n'; count++;
     } 
@@ -3744,7 +3732,7 @@ sio_set_console_prompt()
 
     w_get_An(&v1, &t1, 1);
 
-    if (!getstring(&console_prompt, v1, t1)){
+    if (!getstring((UCHAR **)&console_prompt, v1, t1)){
 	console_prompt = "?- ";
     } 
     SUCCEED;
@@ -3762,7 +3750,7 @@ sio_set_history_file()
 
     w_get_An(&v1, &t1, 1);
 
-    if (!getstring(&history_file, v1, t1)){
+    if (!getstring((UCHAR **)&history_file, v1, t1)){
 	history_file = ".alspro_history";
     }
     SUCCEED;

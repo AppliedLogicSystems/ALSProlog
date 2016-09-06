@@ -63,7 +63,6 @@ opt_test () {
 }
 
 # Test -q (quiet) argument.
-
 command="$prolog -q < /dev/null"
 output=`eval $command`
 
