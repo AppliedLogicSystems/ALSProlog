@@ -348,7 +348,6 @@ long standard_console_read(char *buf, long n)
 	*/
     if (do_load_prev_history == 1){
         linenoiseHistoryLoad(history_file); 
-	printf("Loaded previous history\n");
         do_load_prev_history = 0;
     }
 

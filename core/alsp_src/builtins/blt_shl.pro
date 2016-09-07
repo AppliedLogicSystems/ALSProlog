@@ -40,6 +40,8 @@ start_shell(DefaultShellCall)
 		).
 
 :- dynamic(genFileLocn/3).
+:- dynamic(user:history_file_locn/1).
+:- dynamic(user:load_prev_history/0).
 
 start_shell0(DefaultShellCall)
 	:-
@@ -59,17 +61,13 @@ start_shell0(DefaultShellCall)
 #endif
 */
 	(clause(dvf,_) -> qkc ; true),
-%	dvf,
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	!,
-		%% 
 	ss_load_dot_alspro(CLInfo),
 
-	set_prolog_flag(unknown, fail),
 	check_setup_history_file,
 	check_load_prev_history,
-	set_prolog_flag(unknown, error),
 
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
