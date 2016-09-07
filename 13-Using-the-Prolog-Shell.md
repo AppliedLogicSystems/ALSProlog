@@ -82,6 +82,27 @@ goals from files:
 Commands are specified by the :- prefix, while queries are specified by the ?-prefix. The only difference between the two is that queries write the message
 ‘yes.’ to the screen if the goal succeeds, and ‘no.’ if the goal fails, while commands do not write any result on the screen.
 
+##13.1.2 Command Line Editing and History
+The ALS Prolog TTY shell supports command line editing and history similar to that for the Linux Bash shell.  One can move left or right on the line using the left or right arrow keys, can delete characters using the delete key, can insert characters by typing or by selecting some text and using the ^V (control-v) key.  If the command history is turned on, the up arrow key allows you to walk backward through previously submitted commands.
+
+The command line history keeping is turned on by placing 
+````
+	history_file_locn(LOCN).
+````
+in the .alspro startup file, in either the current directory, or in the HOME directory.  The history
+file is named 
+````
+	.alspro_history
+````
+If LOCN is the atom local, then .alspro_history is stored in the current directory.  If LOCN is the atom home, then .alspro_history is stored in the HOME directory.
+
+By default, the history for each session (i.e., each start of alspro) is separate.  However, if
+````
+	load_prev_history.
+````
+occurs in the .alspro startup file, then the existing history file is loaded when alspro starts.
+
+
 ##13.2 How to Load Prolog Programs
 There are basically two ways of loading Prolog programs into the ALS Prolog system:
 1.  When you start alspro from the command line you can give a list of
