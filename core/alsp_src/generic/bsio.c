@@ -281,7 +281,7 @@ enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
 const char *console_prompt;
 const char *history_file;
-int  do_load_prev_history = 0;
+int  do_load_prev_history = 1;
 
 #ifdef PURE_ANSI
 long standard_console_read(char *buf, long n)
@@ -342,8 +342,8 @@ long standard_console_read(char *buf, long n)
     long count;
 
         /* Load the history file once (i.e., at startup) 
-    	   do_load_prev_history is set == 1 during alspro shell startup;
-	   so setting it back to 0 (the default) ensures the
+    	   do_load_prev_history is set == 1 by default (set == 0 during shell startup)
+	   Setting it to 0 ensures the
 	   history will only be loaded once during an alspro shell session.
 	*/
     if (do_load_prev_history == 1){
@@ -3758,12 +3758,14 @@ sio_set_history_file()
 
 /*
  * sio_set_load_prev_history
+ * Sets do_load_prev_history = 0 to suppress loading previous history:
+ * Default is to load the previous history.
  */
 
 int
 sio_set_load_prev_history()
 {
-	do_load_prev_history = 1;
+	do_load_prev_history = 0;
 	SUCCEED;
 }
 
