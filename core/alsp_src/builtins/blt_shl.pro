@@ -41,7 +41,6 @@ start_shell(DefaultShellCall)
 
 :- dynamic(genFileLocn/3).
 :- dynamic(user:history_file_locn/1).
-:- dynamic(user:load_prev_history/0).
 :- dynamic(user:no_load_prev_history/0).
 
 start_shell0(DefaultShellCall)
@@ -97,7 +96,6 @@ setup_history_file(_).
 check_load_prev_history
 	:-
 	user:no_load_prev_history,
-pbi_write(check_load_prev_history_user:no_load_prev_history),pbi_nl,
 	!,
 	sio_set_load_prev_history.
 
