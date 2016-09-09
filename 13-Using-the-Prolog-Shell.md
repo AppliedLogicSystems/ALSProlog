@@ -96,7 +96,7 @@ file is named
 ````
 If LOCN is the atom local, then .alspro_history is stored in the current directory.  If LOCN is the atom home, then .alspro_history is stored in the HOME directory.
 
-By default, the history for previous sessions is loaded at the start of each session (i.e., each start of alspro) is separate.  However, if
+By default, the history for previous sessions is loaded at the start of each session (i.e., each start of alspro).  However, if
 ````
 	no_load_prev_history.
 ````
