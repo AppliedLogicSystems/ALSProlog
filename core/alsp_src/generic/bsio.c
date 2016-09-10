@@ -370,7 +370,7 @@ long standard_console_read(char *buf, long n)
     } 
     else {    /* Incoming line overruns buf: */
 	errno = ENOBUFS;
-	return -1;
+	count = -1;
    }
     free(line);
     return count;
