@@ -3926,11 +3926,8 @@ sio_readbuffer()
     else {
 		SIO_ERRCODE(buf) = SIOE_NORMAL;
 		SIO_LPOS(buf) += nchars;
-		if (nchars == 0 && errno != -13)
+		if (nchars == 0)
 	    		SIO_FLAGS(buf) |= SIOF_EOF;
-		if (nchars == 0  && errno == -13){
-			errno=0;
-		}
 		SUCCEED;
     }
 }

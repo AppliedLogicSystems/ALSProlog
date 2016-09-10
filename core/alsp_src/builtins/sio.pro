@@ -2782,7 +2782,6 @@ push_prompt(Stream_or_alias)
 	:-
 	is_stream(Stream_or_alias,Stream),
 	stream_pgoals(Stream,PromptGoal),
-push_prompt('push_prompt: PromptGoal'=PromptGoal),pbi_nl,
 	call(PromptGoal).
 
 /*----------------------------------------------------------*
