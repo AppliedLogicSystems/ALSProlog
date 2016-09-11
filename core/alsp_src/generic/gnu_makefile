@@ -45,7 +45,8 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	varproc.c vprintf.c wdisp.c wintcode.c \
 	winter.c nopckg.c \
 	ieeemath.c pimain.c new_alspi.c engine.c \
-	relocate_code.c cexception.c cassert.c demo.c
+	relocate_code.c cexception.c cassert.c demo.c \
+	linenoise.c
 
 BUILTINS =       blt_frez.pro  blt_std.pro   filepath.pro  \
    blt_als.pro   blt_io.pro    blt_stk.pro   fs_cmn.pro    simplio.pro \
@@ -64,8 +65,6 @@ BUILD_FLAGS := $(BUILD_FLAGS) -DINTCONSTR
 GENERIC_SOURCE := $(GENERIC_SOURCE) int_net.c intaux.c intrv.c 
 BUILTINS := $(BUILTINS) int_cstr.pro ra_basis.pro
 endif
-
-GENERIC_SOURCE := $(GENERIC_SOURCE) linenoise.c
 
 LIB_SOURCE = $(GENERIC_SOURCE) $(PROC_SOURCE) $(OS_SOURCE)
 

@@ -98,7 +98,6 @@ glibfiles_c =  	alloc.c \
 	int_net.c \
 	lexan.c \
 	lforeign.c \
-linenoise.c \
 	loadfile.c \
 	pimain.c \
 	main.c \
