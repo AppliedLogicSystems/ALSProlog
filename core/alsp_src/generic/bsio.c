@@ -30,6 +30,7 @@
  *=======================================================================*/
 #include "defs.h"
 #include <math.h>
+#include "linenoise.h"
 #include "cinterf.h"
 #include "fpbasis.h"
 

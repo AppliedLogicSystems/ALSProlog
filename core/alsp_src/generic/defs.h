@@ -357,9 +357,6 @@
 #include "cexception.h"
 #include "cassert.h"
 
-
-#include "linenoise.h"
-
 /*---------------------------------------------------------------------*
  | If string.h doesn't exist or is lacking certain functions, we provide
  | our own replacements for the functions declared therein...
