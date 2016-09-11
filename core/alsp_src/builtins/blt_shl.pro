@@ -64,31 +64,32 @@ start_shell0(DefaultShellCall)
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	!,
-	ss_load_dot_alspro(CLInfo),
+	ss_load_dot_alspro(CLInfo, DotALSPresent),
 
-	check_setup_history_file,
+	HistoryFile = '.alspro_history',
+	check_setup_history_file(DotALSPresent, HistoryFile),
 	check_load_prev_history,
 
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
 
-check_setup_history_file
+check_setup_history_file(true, HistoryFile)
 	:-
 	user:history_file_locn(HFL),
 	!,
-	setup_history_file(HFL).
-check_setup_history_file.
+	setup_history_file(HFL, HistoryFile).
+check_setup_history_file(false, HistoryFile)
+	:-
+	setup_history_file(home, HistoryFile).
 
-setup_history_file(home)
+setup_history_file(home, HistoryFile)
 	:-!,
 	getenv('HOME', UserHomePath),
-	HistoryFile = '.alspro_history',
 	pathPlusFile(UserHomePath, HistoryFile, PathToHistoryFile),
 	sio_set_history_file(PathToHistoryFile).
 
-setup_history_file(local)
+setup_history_file(local, HistoryFile)
 	:-!,
-	HistoryFile = '.alspro_history',
 	sio_set_history_file(HistoryFile).
 
 setup_history_file(_).
@@ -233,15 +234,19 @@ ss_load_files([F | T])
 		),
 	ss_load_files(T).
     
-/*---------------------------------------
+/*------------------------------------------------------
  |	ss_load_dot_alspro
- *--------------------------------------*/
-ss_load_dot_alspro(CLInfo)
+ |	    DotALSPresent -- true/false: found .alspro
+ *-----------------------------------------------------*/
+	%% Don't load .alspro -- so set DotALSPresent = false
+	%% to say "didn't find .alspro,", so default for
+	%% .alspro_history is used:
+ss_load_dot_alspro(CLInfo, false)
 	:-
 	arg(9, CLInfo, false),
 	!.
 
-ss_load_dot_alspro(CLInfo)
+ss_load_dot_alspro(CLInfo, DotALSPresent)
 	:-
 	arg(2, CLInfo, Verbosity),
 	als_system(L),
@@ -250,22 +255,23 @@ ss_load_dot_alspro(CLInfo)
 		OS = mswin32 -> Files = ['alspro.pro'] ;
 			Files = ['alspro.pro','.alspro']
 	),
-	ss_load_dot_alspros(Files, Verbosity).
+	ss_load_dot_alspros(Files, Verbosity, false, DotALSPresent).
 
-ss_load_dot_alspros([], _).
-ss_load_dot_alspros([File | Files], Verbosity)
+ss_load_dot_alspros([], _, AnyFound, AnyFound).
+ss_load_dot_alspros([File | Files], Verbosity, AnyFound, DotALSPresent)
 	:-
-	ss_load_the_dot_alspro(File, Verbosity),
+	ss_load_the_dot_alspro(File, Verbosity, FoundThisOne),
 	!,
-	ss_load_dot_alspros(Files, Verbosity).
+	do_or(FoundThisOne, AnyFound, NextAnyFound),
+	ss_load_dot_alspros(Files, Verbosity, NextAnyFound, DotALSPresent).
 
-ss_load_the_dot_alspro(AutoFile, Verbosity)
+ss_load_the_dot_alspro(AutoFile, Verbosity, true)
 	:-
 	exists_file(AutoFile),
 	!,
 	consult(AutoFile, [consult(false),quiet(Verbosity)]).
 
-ss_load_the_dot_alspro(AutoFile, Verbosity)
+ss_load_the_dot_alspro(AutoFile, Verbosity, true)
 	:-
 		%% What about DOS (also Mac, etc.) here?:
 	getenv('HOME',HOME),
@@ -275,7 +281,10 @@ ss_load_the_dot_alspro(AutoFile, Verbosity)
 	!,
 	consult(File, [consult(false),quiet(Verbosity)]).
 
-ss_load_the_dot_alspro(_, _).
+ss_load_the_dot_alspro(_, _, false).
+
+do_or(true, _, true) :-!.
+do_or(false, AnyTrue, AnyTrue) :-!.
 
 /*-------------------------------------------------
  | print_banner/2
