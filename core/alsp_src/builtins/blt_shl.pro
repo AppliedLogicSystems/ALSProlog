@@ -78,6 +78,8 @@ check_setup_history_file(true, HistoryFile)
 	user:history_file_locn(HFL),
 	!,
 	setup_history_file(HFL, HistoryFile).
+check_setup_history_file(true, HistoryFile).
+
 check_setup_history_file(false, HistoryFile)
 	:-
 	setup_history_file(home, HistoryFile).
