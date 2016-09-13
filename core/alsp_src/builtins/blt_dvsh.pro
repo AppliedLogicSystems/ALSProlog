@@ -364,7 +364,7 @@ alsdev(Shared, ALS_IDE_Mgr)
 	initial_misc_settings,
 
 	retract(save_clinfo(CLInfo)),
-	ss_load_dot_alspro(CLInfo, _),
+	ss_load_dot_alspro(CLInfo),
 
 	arg(3, CLInfo, SpecFiles),
 	alsdev:do_special_processing(SpecFiles),
