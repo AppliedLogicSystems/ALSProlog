@@ -87,13 +87,16 @@ setup_history_file(local, HistoryFile)
 	:-!,
 	sio_set_history_file(HistoryFile).
 
-setup_history_file(_).
+setup_history_file(BadLocn, HistoryFile)
+	:-
+	write(user_output, 'Error: Bad History File Location' = BadLocn), nl,
+	setup_history_file(home, HistoryFile).
 
 check_load_prev_history
 	:-
 	user:no_load_prev_history,
 	!,
-	sio_set_load_prev_history.
+	sio_set_no_load_prev_history.
 
 check_load_prev_history.
 

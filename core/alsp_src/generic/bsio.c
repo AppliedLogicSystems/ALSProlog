@@ -3758,13 +3758,13 @@ sio_set_history_file()
 
 
 /*
- * sio_set_load_prev_history
+ * sio_set_no_load_prev_history
  * Sets do_load_prev_history = 0 to suppress loading previous history:
  * Default is to load the previous history.
  */
 
 int
-sio_set_load_prev_history()
+sio_set_no_load_prev_history()
 {
 	do_load_prev_history = 0;
 	SUCCEED;
