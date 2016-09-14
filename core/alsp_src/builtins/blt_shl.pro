@@ -40,6 +40,8 @@ start_shell(DefaultShellCall)
 		).
 
 :- dynamic(genFileLocn/3).
+:- dynamic(user:history_file_locn/1).
+:- dynamic(user:no_load_prev_history/0).
 
 start_shell0(DefaultShellCall)
 	:-
@@ -53,20 +55,50 @@ start_shell0(DefaultShellCall)
 	output_system_banner(CLInfo),
 
 	library_setup,
-/* WHY IS THIS MISSING?
-#if (all_procedures(syscfg,intconstr,0,_))
-	rel_arith:set_ics(cs(0,0,0)),
-#endif
-*/
+
 	(clause(dvf,_) -> qkc ; true),
-%	dvf,
 	load_cl_files(CLInfo),
 	process_cl_asserts(CLInfo),
 	!,
-		%% 
 	ss_load_dot_alspro(CLInfo),
+
+	HistoryFile = '.alspro_history',
+
+	check_setup_history_file(HistoryFile),
+	check_load_prev_history,
+
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
+
+history_file_locn(L) :- user:history_file_locn(L), !.
+history_file_locn(home).
+
+check_setup_history_file(HistoryFile) :-
+   history_file_locn(HFL),
+   setup_history_file(HFL, HistoryFile).
+
+setup_history_file(home, HistoryFile)
+	:-!,
+	getenv('HOME', UserHomePath),
+	pathPlusFile(UserHomePath, HistoryFile, PathToHistoryFile),
+	sio_set_history_file(PathToHistoryFile).
+
+setup_history_file(local, HistoryFile)
+	:-!,
+	sio_set_history_file(HistoryFile).
+
+setup_history_file(BadLocn, HistoryFile)
+	:-
+	write(user_output, 'Error: Bad History File Location' = BadLocn), nl,
+	setup_history_file(home, HistoryFile).
+
+check_load_prev_history
+	:-
+	user:no_load_prev_history,
+	!,
+	sio_set_no_load_prev_history.
+
+check_load_prev_history.
 
 start_shell0(_).
 
@@ -200,9 +232,9 @@ ss_load_files([F | T])
 		),
 	ss_load_files(T).
     
-/*---------------------------------------
+/*------------------------------------------------------
  |	ss_load_dot_alspro
- *--------------------------------------*/
+ *-----------------------------------------------------*/
 ss_load_dot_alspro(CLInfo)
 	:-
 	arg(9, CLInfo, false),
@@ -420,7 +452,8 @@ shell_read(InStream,OutStream,G,N,V)
 	:-
 	get_shell_prompts( [(Prompt1,Prompt2) | _] ),
 	flush_input(InStream),
-	catch(trap(shell_read0(Prompt1,Prompt2,InStream,G,N,V), 
+	catch(trap(
+		   shell_read0(Prompt1,Prompt2,InStream,G,N,V), 
 			   throw_cntrl_c),
 		  Ball,
 		  shell_read0_err_disp(Ball,InStream,OutStream,G,N,V)

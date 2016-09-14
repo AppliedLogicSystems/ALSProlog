@@ -84,9 +84,6 @@ next_stream_identifier(Options,Id) :-
 	get_next_stream_identifier(Id),
 %	NextId is (Id+1) /\ 0xffffff,
 	NextId is (Id+1),
-%(integer(Id) -> JKK=int ; JKK = real),
-%(integer(NextId) -> KK=int ; KK = real),
-%pbi_write(next_stream_identifier(JKK,Id,NextId,KK)),pbi_nl, pbi_ttyflush,
 	set_next_stream_identifier(NextId).
 
 
@@ -1698,7 +1695,6 @@ wait_data(tcltk, Stream, Call)
 		[bind,WinID,'<Return>', [ xmit_line_plain,WinID,Alias,WaitVarName]], _),
 	tcl_call(Interp, [set,WaitVarName,0], _),
 	tcl_call(Interp, [wait_for_line1, WaitVarName], WaitRes),
-%pbi_write(wd_tcltk_A),pbi_nl,pbi_ttyflush,
 	finish_wait_data_tcltk(WaitRes, Stream, Call).
 
 	%% Returned -1: Got a ^C:
@@ -1712,12 +1708,10 @@ finish_wait_data_tcltk(-3, Stream, Call)
 	stream_extra(Stream,XTRA),
 	set_stream_extra(Stream,eof(XTRA)),
 	sio_set_eof(Stream),
-%pbi_write(wd_tcltk_CTLD),pbi_nl,pbi_ttyflush,
 	sio_set_errcode(Stream,8).			% SIO_INTERR
 
 finish_wait_data_tcltk(WaitRes, Stream, Call)
 	:-
-%pbi_write(wd_tcltk_default(Call)),pbi_nl,pbi_ttyflush,
 	call(Call).
 
 force_control_c_during_read(StreamAlias)
@@ -4095,6 +4089,12 @@ queue_control(MsgQID, Cmd, Perms, Info)
     /*---------------------------
      * Initialization of user
      *--------------------------*/
+user_prompt_goal(user_output) 
+	:-
+	get_user_prompt(Prompt),
+	sio_set_console_prompt(Prompt),
+	!.
+
 user_prompt_goal(Stream) 
 	:-
 	get_user_prompt(Prompt),

@@ -30,6 +30,7 @@
  *=======================================================================*/
 #include "defs.h"
 #include <math.h>
+#include "linenoise.h"
 #include "cinterf.h"
 #include "fpbasis.h"
 
@@ -279,6 +280,10 @@ static	int	format_type	PARAMS(( UCHAR * ));
 
 enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
+const char *console_prompt;
+const char *history_file;
+int  do_load_prev_history = 1;
+
 #ifdef PURE_ANSI
 long standard_console_read(char *buf, long n)
 {
@@ -334,7 +339,46 @@ long standard_console_error(char *buf, long n)
 
 long standard_console_read(char *buf, long n)
 {
-    return read(STDIN_FILENO, buf, n);
+    char *line;
+    long count;
+
+        /* Load the history file once (i.e., at startup) 
+    	   do_load_prev_history is set == 1 by default (set == 0 during shell startup)
+	   Setting it to 0 ensures the
+	   history will only be loaded once during an alspro shell session.
+	*/
+    if (do_load_prev_history == 1){
+        linenoiseHistoryLoad(history_file); 
+        do_load_prev_history = 0;
+    }
+
+    if (console_prompt == NULL){
+	console_prompt = "?- ";
+    }
+
+    line = linenoise(console_prompt);
+    if (line == NULL){
+	return 0;
+    }
+    count = (int)strlen(line);
+		/* count+1 because '\n' may be added here: */
+    if (count+1 <= n )
+    {
+	linenoiseHistoryAdd(line);  // Add to the history. 
+    	linenoiseHistorySave(history_file);  // Save the history on disk. 
+	memcpy(buf, line, count);
+	buf[count] = '\n'; count++;
+    } 
+    else {    /* Incoming line overruns buf: */
+	errno = ENOBUFS;
+	count = -1;
+   }
+    free(line);
+    return count;
+
+/*
+     return read(STDIN_FILENO, buf, n); 
+*/
 }
 
 long standard_console_write(char *buf, long n)
@@ -3675,6 +3719,57 @@ ssbq_get_msg()
 }
 #endif /* SSBQ */
 
+
+/*
+ * sio_set_console_prompt(Prompt)
+ */
+
+int
+sio_set_console_prompt()
+{
+    PWord v1;
+    int   t1;
+
+    w_get_An(&v1, &t1, 1);
+
+    if (!getstring((UCHAR **)&console_prompt, v1, t1)){
+	console_prompt = "?- ";
+    } 
+    SUCCEED;
+}
+
+/*
+ * sio_set_history_file(FileName)
+ */
+
+int
+sio_set_history_file()
+{
+    PWord v1;
+    int   t1;
+
+    w_get_An(&v1, &t1, 1);
+
+    if (!getstring((UCHAR **)&history_file, v1, t1)){
+	history_file = ".alspro_history";
+    }
+    SUCCEED;
+}
+
+
+/*
+ * sio_set_no_load_prev_history
+ * Sets do_load_prev_history = 0 to suppress loading previous history:
+ * Default is to load the previous history.
+ */
+
+int
+sio_set_no_load_prev_history()
+{
+	do_load_prev_history = 0;
+	SUCCEED;
+}
+
 /*
  * sio_readbuffer(SD)
  */
@@ -3812,7 +3907,7 @@ sio_readbuffer()
 #endif /* HAVE_SOCKET */
 
 	case SIO_TYPE_CONSOLE:
-	    nchars = console_io(SIO_FD(buf), (char *)buffer, (size_t)nchars);
+    	    nchars = console_io(SIO_FD(buf), (char *)buffer, (size_t)nchars);
 	    break;
 	   
 	default:
@@ -3820,13 +3915,12 @@ sio_readbuffer()
 	    FAIL;
 	    break;
     }
-
     if (nchars < 0) {
 		if (errno == EINTR)
-	    	SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
+	    		SIO_ERRCODE(buf) = SIOE_INTERRUPTED;
 		else {
-	    	SIO_ERRCODE(buf) = SIOE_SYSCALL;
-	    	SIO_ERRNO(buf) = errno;
+	    		SIO_ERRCODE(buf) = SIOE_SYSCALL;
+	    		SIO_ERRNO(buf) = errno;
 		}
 		FAIL;
     }
@@ -3834,7 +3928,7 @@ sio_readbuffer()
 		SIO_ERRCODE(buf) = SIOE_NORMAL;
 		SIO_LPOS(buf) += nchars;
 		if (nchars == 0)
-	    	SIO_FLAGS(buf) |= SIOF_EOF;
+	    		SIO_FLAGS(buf) |= SIOF_EOF;
 		SUCCEED;
     }
 }
