@@ -792,7 +792,7 @@ flush_input/0 flushes the current input stream; it is defined by
 ````
 flush_input
     :- current_input(Stream),
-       flush_input(Stream..
+       flush_input(Stream).
 ````
 ````
 stream_position/3
