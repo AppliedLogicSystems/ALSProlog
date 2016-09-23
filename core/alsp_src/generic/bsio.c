@@ -3739,6 +3739,7 @@ ssbq_get_msg()
  * sio_set_do_lineedit()
  */
 
+int
 sio_set_do_lineedit()
 {
     PWord v1;
