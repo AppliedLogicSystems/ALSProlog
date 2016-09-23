@@ -334,6 +334,14 @@ check_rt_option(attach_fullstop(true), Stream, OptStruct, VT, G,G) :-
 check_rt_option(attach_fullstop(false), Stream, OptStruct, VT, G,G) :-
 	!,
 	set_eof_acceptable_as_fullstop(false).
+
+/*
+check_rt_option(lineedit, Stream, OptStruct, VT, G,G) :-
+	!,
+printf("check_rt_option_lineedit"), pbi_nl.
+*/
+
+	%% DEFAULT DOMAIN ERROR CLAUSE:
 check_rt_option(Culprit, _,_, _, _,_) :-
 	domain_error(read_option,Culprit,3).
 
@@ -382,7 +390,7 @@ read(Stream_or_alias,Term)
 	:-
 	input_stream_or_alias_ok(Stream_or_alias,Stream),
 	nonvar(Stream_or_alias),	%% force second usage of Stream_or_alias 
-								%% for error checking code
+					%% for error checking code
 
 	rt_defaults(rt_opts(VT,ErrMech, _)),
 	read_term(Stream,Term,ErrMech,VT),
@@ -400,9 +408,9 @@ read_term(Stream_or_alias,Term,Options)
 	:-
 	input_stream_or_alias_ok(Stream_or_alias,Stream),
 	rt_defaults(OptStruct),
-				%% OptGoals are executed on the way out after the read:
-				%% Need later occurrences to preserve
-				%% vars for error reporting code
+		%% OptGoals are executed on the way out after the read:
+		%% Need later occurrences to preserve
+		%% vars for error reporting code
 	check_rt_options(Options, Stream, OptStruct, VT, true, OptGoals),
 	nonvar(Stream_or_alias),	
 	nonvar(Options),			
@@ -411,7 +419,7 @@ read_term(Stream_or_alias,Term,Options)
 	arg(3, OptStruct, linestuff(FinalToks,S,E)),
 	read_term(Stream,Term,ErrMech,VT,FinalToks),
 	OptGoals,
-	!,			%% <- cut choice point associated with catch in read_term/4
+	!,	%% <- cut choice point associated with catch in read_term/4
 	set_eof_acceptable_as_fullstop(false).
 
 	%% read_term/4:
