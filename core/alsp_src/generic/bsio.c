@@ -281,8 +281,8 @@ static	int	format_type	PARAMS(( UCHAR * ));
 enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
 int do_lineedit = 0;
-char *lineedit_prompt="?- ";
-char *sublineedit_prompt="?_ ";
+static const char *lineedit_prompt="?- ";
+static const char *sublineedit_prompt="?_ ";
 const char *history_file;
 int  do_load_prev_history = 1;
 
