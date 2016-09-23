@@ -335,12 +335,6 @@ check_rt_option(attach_fullstop(false), Stream, OptStruct, VT, G,G) :-
 	!,
 	set_eof_acceptable_as_fullstop(false).
 
-/*
-check_rt_option(lineedit, Stream, OptStruct, VT, G,G) :-
-	!,
-printf("check_rt_option_lineedit"), pbi_nl.
-*/
-
 	%% DEFAULT DOMAIN ERROR CLAUSE:
 check_rt_option(Culprit, _,_, _, _,_) :-
 	domain_error(read_option,Culprit,3).
