@@ -44,6 +44,8 @@ export directory_self/1.
 export directory_self/2.
 export parent_path/1.
 export parent_path/2.
+export pathPlusFile/3.
+export pathPlusFilesList/3.
 export make_change_cwd/1.
 
 file_extension(FullName, Name, Ext) :-

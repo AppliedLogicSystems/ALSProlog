@@ -40,6 +40,8 @@ start_shell(DefaultShellCall)
 		).
 
 :- dynamic(genFileLocn/3).
+:- dynamic(user:history_file_locn/1).
+:- dynamic(user:no_load_prev_history/0).
 
 start_shell0(DefaultShellCall)
 	:-
@@ -65,10 +67,46 @@ start_shell0(DefaultShellCall)
 	!,
 		%% 
 	ss_load_dot_alspro(CLInfo),
+
+        HistoryFile = '.alspro_history',
+        check_setup_history_file(HistoryFile),
+        check_load_prev_history,
+
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
 
 start_shell0(_).
+
+history_file_locn(L) :- user:history_file_locn(L), !.
+history_file_locn(home).
+
+check_setup_history_file(HistoryFile) :-
+   history_file_locn(HFL),
+   setup_history_file(HFL, HistoryFile).
+
+setup_history_file(home, HistoryFile)
+        :-!,
+        getenv('HOME', UserHomePath),
+        pathPlusFile(UserHomePath, HistoryFile, PathToHistoryFile),
+        sio_set_history_file(PathToHistoryFile).
+
+setup_history_file(local, HistoryFile)
+        :-!,
+        sio_set_history_file(HistoryFile).
+
+setup_history_file(BadLocn, HistoryFile)
+        :-
+        write(user_output, 'Error: Bad History File Location' = BadLocn), nl,
+        setup_history_file(home, HistoryFile).
+
+check_load_prev_history
+        :-
+        user:no_load_prev_history,
+        !,
+        sio_set_no_load_prev_history.
+
+check_load_prev_history.
+
 
 init_als_shl_mgr
 	:-
@@ -313,7 +351,6 @@ init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
 	sio:input_stream_or_alias_ok(InStream, RealInStream),
 	set_stream_pgoals(RealInStream, user_prompt_goal(OutStream) ),
 
-
 	get_debugging_state(CurDebuggingState),
 	set_debugging_state(debug_state(debug_off,0,1,0,debug_off)),
 	get_shell_level(CurLevel),
@@ -426,18 +463,24 @@ shell_read(InStream,OutStream,G,N,V)
 		  shell_read0_err_disp(Ball,InStream,OutStream,G,N,V)
 		  ).
 
+	/* After switching to using linenoise for shell input,
+	 * Prompt1, Prompt2, and OldPrompt are extraneous;
+         */
 shell_read0(Prompt1,Prompt2,InStream,G,N,V) 
 	:- !,
 	sio:get_user_prompt(OldPrompt),
 	catch((
-		sio:set_user_prompt(Prompt1),
+		sio:set_user_prompt(''),
+		sio_set_do_lineedit(1),
 		sio:skip_layout(InStream),
-		sio:set_user_prompt(Prompt2),
+		sio:set_user_prompt(''),
+		sio_set_do_lineedit(2),
 		read_term(InStream,G,[vars_and_names(V,N)])
 	), Exception, (
 		sio:set_user_prompt(OldPrompt),
 		throw(Exception)
 	)),
+	sio_set_do_lineedit(0),
 	sio:set_user_prompt(OldPrompt).
 
 shell_read0(Prompt1,Prompt2,InStream,stream_not_ready,[],[]).

@@ -67,9 +67,9 @@ opt_test () {
 command="$prolog -q < /dev/null"
 output=`eval $command`
 
-if test "$output" != "?- "
+if test "$output" != ""
 then
-	error "$command" "?- " "$output"
+	error "$command" "" "$output"
 fi
 
 # Test -b (batch) argument.
