@@ -3735,6 +3735,7 @@ ssbq_get_msg()
 }
 #endif /* SSBQ */
 
+
 /*
  * sio_set_do_lineedit()
  */

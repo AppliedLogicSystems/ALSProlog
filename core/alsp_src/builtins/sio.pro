@@ -1693,7 +1693,7 @@ wait_data(tcltk, Stream, Call)
 	stream_addl1(Stream, Alias),
 	stream_addl2(Stream, ti(Interp,WaitVarName)),
 	stream_name(Stream, WinID),
-pbi_write('Alias'=Alias),pbi_write(' Interp'=Interp),pbi_write(' WV'=WaitVarName),pbi_write(' WinID'=WinID),pbi_nl,
+%pbi_write('sio.pro-wait_data:Alias'=Alias),pbi_write(' Interp'=Interp),pbi_write(' WV'=WaitVarName),pbi_write(' WinID'=WinID),pbi_nl,
 	tcl_call(Interp, [set_prompt_mark, WinID], _),
 	tcl_call(Interp, 
 		[bind,WinID,'<Return>', [ xmit_line_plain,WinID,Alias,WaitVarName]], _),
@@ -4097,6 +4097,7 @@ queue_control(MsgQID, Cmd, Perms, Info)
 user_prompt_goal(Stream) 
 	:-
 	get_user_prompt(Prompt),
+%stream_name(Stream, SN), pbi_write(upg+SN + '|' + Prompt + '|'), pbi_nl,
 	put_atom(Stream,Prompt),
 	flush_output(Stream).
 
