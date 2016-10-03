@@ -3675,6 +3675,7 @@ ssbq_get_msg()
 }
 #endif /* SSBQ */
 
+
 /*
  * sio_readbuffer(SD)
  */

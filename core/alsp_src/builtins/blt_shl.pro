@@ -294,19 +294,19 @@ prolog_shell
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 prolog_shell(InStream,OutStream,ID) 
 	:-
-	init_prolog_shell(InStream, OutStream,ID,CurLevel,CurDebuggingState,Wins),
+	init_prolog_shell(ID,InStream, OutStream,CurLevel,CurDebuggingState,Wins),
 	prolog_shell_loop(Wins,InStream,OutStream),
 	shell_exit(InStream, OutStream,CurLevel,CurDebuggingState).
 
-/*-----------------------------------------------------------------------*
- | init_prolog_shell/6
- | init_prolog_shell(InStream, OutStream,ID,CurLevel,DebugState,Wins)
- | init_prolog_shell(+, +,+,-,-,-)
+/*---------------------------------------------------------------------------------------*
+ | init_prolog_shell/8
+ | init_prolog_shell(ID,InStream, OutStream,CurLevel,DebugState,Wins,DotFile,HistoryFile)
+ | init_prolog_shell(+, +,+,-,-,-,+,+)
  |
- *-----------------------------------------------------------------------*/
+ *---------------------------------------------------------------------------------------*/
 
 export init_prolog_shell/6.
-init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
+init_prolog_shell(ID,InStream,OutStream,CurLevel,CurDebuggingState,Wins)
 	:-
 	gc,
 	als_system(SysList),
