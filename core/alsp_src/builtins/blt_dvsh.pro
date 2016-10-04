@@ -338,13 +338,6 @@ alsdev(Shared, ALS_IDE_Mgr)
 
 
 	tcl_call(shl_tcli, [set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_),
-/*
-tcl_call(shl_tcli, [get_tcl_ga,proenv,alsdev_history_file], AHF),
-pbi_write('AHF'=AHF),pbi_nl,
-tcl_call(shl_tcli, [get_tcl_ga,proenv,do_load_prev_alsdev_history], DLPAH),
-pbi_write('DLPAH'=DLPAH),pbi_nl,
-*/
-
 
     sio:set_input(ISS),
     sio:set_output(OSS),
@@ -857,67 +850,60 @@ strip_tags([(_ = V0) | TVs], [V | Vs])
 	strip_tags(TVs, Vs).
 
 :- dynamic(alsdev_ini_path/1).
+
+getPrefsFilePath(unix,'.alsdev').
+
+getPrefsFilePath(unix,PrefsFilePath)
+	:-
+	getenv('HOME', HomeDir),
+	split_path(HomeDir, HomeDirList),
+	PrefsFile = '.alsdev',
+	append(HomeDirList, [PrefsFile], PrefsFileList),
+	join_path(PrefsFileList, PrefsFilePath).
+
+getPrefsFilePath(mswin32,PrefsFilePath)
+	:-
+	builtins:sys_searchdir(SSD),
+	split_path(SSD, SSDList),
+	(append(ImageDirList, [alsdir], SSDList) ; ImageDirList = SSDList),
+	PrefsFile = 'alsdev.ini',
+	append(ImageDirList, [PrefsFile], PrefsFileList),
+	join_path(PrefsFileList, PrefsFilePath).
+
 find_alsdev_ini(Items)
 	:-
 	sys_env(unix,_,_),
 	!,
-	getenv('HOME', HomeDir),
-	split_path(HomeDir, HomeDirList),
-#if (all_procedures(syscfg,intconstr,0,_))
-	PrefsFile = '.clpbnr',
-#else
-	PrefsFile = '.alsdev',
-#endif
-	append(HomeDirList, [PrefsFile], PrefsFileList),
-	fin_find_alsdev_ini(PrefsFileList, Items).
+	finish_alsdev_ini(unix,Items).
 
-/*
 find_alsdev_ini(Items)
-	:-
+	:-   %% not in unix:
 	sys_env(mswin32,_,_),
-	getenv('windir', HomeDir0),
-	split_path(HomeDir0, HomeDir0List),
-	PrefsFile = '.alsdev',
-	get_user_name(User),
-	append(HomeDir0List, ['Profiles',User,PrefsFile], PrefsFileList),
-	fin_find_alsdev_ini(PrefsFileList, Items),
-	!.
-*/
-
-find_alsdev_ini(Items)
-	:-
-		%% not in unix:
-	builtins:sys_searchdir(SSD),
-	split_path(SSD, SSDList),
-	(append(ImageDirList, [alsdir], SSDList) ; ImageDirList = SSDList),
-	(sys_env(mswin32,_,_) ->
-		PrefsFile = 'alsdev.ini'
-		;
-			%% Macintosh:
-		PrefsFile = 'alsdev_prefs'
-	),
-	append(ImageDirList, [PrefsFile], PrefsFileList),
-	fin_find_alsdev_ini(PrefsFileList, Items).
-
-fin_find_alsdev_ini(PrefsFileList, Items)
-	:-
-	join_path(PrefsFileList, PrefsFilePath),
-	exists_file(PrefsFilePath),
-	assert(alsdev_ini_path(PrefsFilePath)),
 	!,
+	finish_alsdev_ini(mswin32,Items).
+
+finish_alsdev_ini(unix,Items)
+	:-
+	getPrefsFilePath(unix,PrefsFilePath),
+	exists_file(PrefsFilePath),
+	!,
+	assert(alsdev_ini_path(PrefsFilePath)),
 	grab_terms(PrefsFilePath, Items).
 
-fin_find_alsdev_ini(PrefsFileList, [])
+finish_alsdev_ini(mswin32,Items)
 	:-
-	join_path(PrefsFileList, PrefsFilePath),
-		% Make a trivial file; put space in it to avoid
-		% os problems with empty files...
+	getPrefsFilePath(mswin32,PrefsFilePath),
+	exists_file(PrefsFilePath),
+	!,
+	assert(alsdev_ini_path(PrefsFilePath)),
+	grab_terms(PrefsFilePath, Items).
+
+finish_alsdev_ini(PrefsFilePath,[])
+	:-
 	open(PrefsFilePath, write, S, []),
 	put_code(S, 0' ),
 	close(S),
 	assert(alsdev_ini_path(PrefsFilePath)).
-
-
 
 
 change_window_settings(WinSettingsVals, WinGroup)

@@ -547,8 +547,6 @@ proc xmit_line_plain { TxtWin StreamAlias WaitVarName} {
 	global histPosition
 	global showPosition
 
-#puts "xmit_line_plain: TxtWin=$TxtWin Alias=$StreamAlias WaitVar=$WaitVarName"
-
 	set InsertIndex [$TxtWin index insert]
 	set InsertLine [string range $InsertIndex 0 [expr [string first "." $InsertIndex] - 1 ]]
 	incr InsertLine
@@ -571,29 +569,32 @@ array set histArray {}
 global histPosition
 set histPosition 0
 global showPosition
-set showPosition 1
+set showPosition 0
 
 proc manage_alsdev_history {} {
-    	global proenv
-    	global histArray
-    	global histPosition
-    	global showPosition
-    	set histPosition 0
+    global proenv
+    global histArray
+    global histPosition
+    global showPosition
+    set histPosition 0
 
-	if {$proenv(do_load_prev_alsdev_history)} {
-	set fp [open $proenv(alsdev_history_file) r]
-	set file_data [read $fp]
-	close $fp
-	set data [split $file_data "\n"]
-	foreach line $data {
-	    	if {[string length $line] >0} {
-			incr histPosition 
-			set histArray($histPosition) $line
-#puts "hP=$histPosition   line=$line len=[string length $line] :: $histArray($histPosition)"
+    if {$proenv(do_load_prev_alsdev_history)} {
+ 
+	if {[file exists $proenv(alsdev_history_file)]} {
+		set showPosition 1
+		set fp [open $proenv(alsdev_history_file) r]
+		set file_data [read $fp]
+		close $fp
+		set data [split $file_data "\n"]
+		foreach line $data {
+	    		if {[string length $line] >0} {
+				incr histPosition 
+				set histArray($histPosition) $line
+	    		}
 	    	}
-	    }
-	    set showPosition [lindex [array statistics histArray] 0]
-        }
+	    	set showPosition [lindex [array statistics histArray] 0]
+         }
+    }
 }
 
 proc do_history {WinPath} {
@@ -602,12 +603,10 @@ proc do_history {WinPath} {
 	global showPosition
 
 	if {$showPosition > 0} {
-#puts "do_h:showPosition=$showPosition :: $histArray($showPosition)"
 		ctl-u_action .topals.text
 		$WinPath insert end $histArray($showPosition)
  		incr showPosition -1 
 	}
-
 }
 
 proc do_rev_history {WinPath} {
@@ -616,14 +615,11 @@ proc do_rev_history {WinPath} {
 	global showPosition
 
 	set rLimit [lindex [array statistics histArray] 0]
-#puts "rLimit=$rLimit"
 	if {$showPosition < $rLimit} {
 		ctl-u_action .topals.text
  		incr showPosition 1 
-#puts "do_rev_h:showPosition=$showPosition :: $histArray($showPosition)"
 		$WinPath insert end $histArray($showPosition)
 	}
-
 }
 
 
@@ -645,7 +641,6 @@ proc save_history {} {
 
 	set fo [open $proenv(alsdev_history_file) "w"]
 	for {set i 1} {$i <= $histPosition} {incr i} {
-#puts "$i: $histArray($i)"
     		puts $fo $histArray($i)
 	}
 	close $fo
