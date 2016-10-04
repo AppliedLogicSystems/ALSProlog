@@ -39,6 +39,7 @@ proc xpe2 { What1 What2 } {
 	return $proenv($What1,$What2)
 }
 
+
 	#--------------------------------------------------------------
 	#   Effectively calls prolog with:
 	#       Mod:send(Obj, Msg)
@@ -141,6 +142,9 @@ set proenv(defstr_ld)			false
 set proenv(dflt_mod)			alsdev
 set proenv(untitled_counter)	0
 set proenv(posted_vis)			{}
+
+set proenv(alsdev_history_file)		""
+set proenv(do_load_prev_alsdev_history)	true
 
 	## window appearance stuff - initial defaults:
 
@@ -290,6 +294,8 @@ proc return_proenv_defaults {} {
 
 establish_defaults
 
+#Called from builtins/blt_dvsh.pro > alsdev(Shared, ALS_IDE_Mgr):
+#	 tcl_call(shl_tcli, [do_main_als_bindings],_),
 proc do_main_als_bindings {} {
 	bind .topals.text <Unmap> {unmap_alsdev_main}
 	bind .topals.text <Map> {map_alsdev_main}
@@ -377,34 +383,95 @@ switch [tk windowingsystem] {
 	## source any other needed files here.....
 
 #################################################
-#####				MAIN WINDOW				#####
+#####		MAIN WINDOW		    #####
 #################################################
 
 	## Bindings for the main window:
 
+###################################################################################
+# set_top_bindings is called from 
+# builtins/blt_dvsh.pro > alsdev(Shared, ALS_IDE_Mgr):
+#	tcl_call(shl_tcli,
+#                [set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_)
+###################################################################################
+
 proc set_top_bindings { WinPath StreamAlias WaitVarName DataVar } {
-	bind $WinPath <Return> \
-		"xmit_line_plain $WinPath $StreamAlias $WaitVarName"
-	bind $WinPath <Control-d> \
-		"ctl-d_action $WinPath $StreamAlias "
-	bind $WinPath <Control-c> "listener.copy .topals"
-	bind $WinPath <Control-u> \
-		"ctl-u_action $WinPath"
 
-		## This is intended to be totally global in the IDE:
-	bind all <Control-period> interrupt_action
+ 	bind $WinPath <Return> \
+ 		"xmit_line_plain $WinPath $StreamAlias $WaitVarName"
+        bind $WinPath <Control-d> \
+                "ctl-d_action $WinPath $StreamAlias "
+        bind $WinPath <Control-c> "listener.copy .topals"
+        bind $WinPath <Control-u> \
+                "ctl-u_action $WinPath"
+ 
+                ## This is intended to be totally global in the IDE:
+        bind all <Control-period> interrupt_action
 
-	bind $WinPath <KeyPress> "listener.check_at_end .topals"
-	bind $WinPath <ButtonPress-2> "listener.copy_paste .topals"
-	bind Text <ButtonRelease-2> " " 
+                # Use of break from: http://wiki.tcl.tk/1152 : Replacing the Text Bindings
+        bind $WinPath <BackSpace> {
+        if {[%W compare insert != 1.0] && \
+                [%W compare insert > {lastPrompt + 1c}]} {
+                %W delete insert-1c
+                %W see insert
+            }
+            break
+        }
+        bind $WinPath <Control-h> [bind .topals.text <BackSpace>]
+
+        bind $WinPath <Left> {
+        if {[%W compare insert != 1.0] && \
+                [%W compare insert > {lastPrompt + 1c}]} {
+                %W mark set insert insert-1c
+                %W see insert
+            }
+            break
+        }
+
+        bind $WinPath <Up> {
+            do_history %W
+            break
+        }
+
+        bind $WinPath <Down> {
+            do_rev_history %W
+            break
+        }
+
+        bind $WinPath <KeyPress> {
+                if {[%W compare insert <= lastPrompt]} {
+                	%W mark set insert end
+            		break
+		}
+	}
 
 }
 
-proc listener.check_at_end {xw} {
-	set w .topals
-	$w.text mark set insert end 
-}
-
+#### The original set_top_bindings (as of June 2016):
+# All KeyPress events write the key char into .topals.text, so:
+# delete will consume prompt; but listener.copy_paste keeps Left and Up from more than 1 action
+# proc set_top_bindings { WinPath StreamAlias WaitVarName DataVar } {
+# 
+# 	bind $WinPath <Return> \
+# 		"xmit_line_plain $WinPath $StreamAlias $WaitVarName"
+# 	bind $WinPath <Control-d> \
+# 		"ctl-d_action $WinPath $StreamAlias "
+# 	bind $WinPath <Control-c> "listener.copy .topals"
+# 	bind $WinPath <Control-u> \
+# 		"ctl-u_action $WinPath"
+# 
+# 		## This is intended to be totally global in the IDE:
+# 	bind all <Control-period> interrupt_action
+# 
+# 	bind $WinPath <KeyPress> "listener.check_at_end .topals"
+# 	bind $WinPath <ButtonPress-2> "listener.copy_paste .topals"
+# 	bind Text <ButtonRelease-2> " " 
+# }
+#proc listener.check_at_end {xw} {
+#	set w .topals
+#	$w.text mark set insert end 
+#puts "listener.check_at_end: end= [$w.text index end] insert= [$w.text index insert]"
+#}
 
 	## Variable on which we execute 'tkwait variable ...' when we really
 	## have to wait for input (e.g., getting the user's response during 
@@ -476,22 +543,107 @@ proc wait_for_line1 { WaitVar } {
 
 proc xmit_line_plain { TxtWin StreamAlias WaitVarName} {
 	upvar #0 $WaitVarName WaitForLine
-
-#puts "xmit_line_plain: TxtWin=$TxtWin Alias=$StreamAlias WaitVar=$WaitVarName"
+	global array histArray
+	global histPosition
+	global showPosition
 
 	set InsertIndex [$TxtWin index insert]
 	set InsertLine [string range $InsertIndex 0 [expr [string first "." $InsertIndex] - 1 ]]
 	incr InsertLine
 	set EndIndex [$TxtWin index end]
 	set EndLine [string range $EndIndex 0 [expr [string first "." $EndIndex] - 1 ]]
-
 	if {$EndLine == $InsertLine} then {
 		set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -1 chars} ]
+		incr histPosition 
+		set histArray($histPosition) $ThisLine
+		set showPosition $histPosition
 		set WaitForLine 1
 		prolog call builtins add_to_stream_buffer -atom $StreamAlias -atom $ThisLine\n
 	} 
 	$TxtWin see end
 	$TxtWin mark set insert end
+}
+
+global array histArray
+array set histArray {}
+global histPosition
+set histPosition 0
+global showPosition
+set showPosition 0
+
+proc manage_alsdev_history {} {
+    global proenv
+    global histArray
+    global histPosition
+    global showPosition
+    set histPosition 0
+
+    if {$proenv(do_load_prev_alsdev_history)} {
+ 
+	if {[file exists $proenv(alsdev_history_file)]} {
+		set showPosition 1
+		set fp [open $proenv(alsdev_history_file) r]
+		set file_data [read $fp]
+		close $fp
+		set data [split $file_data "\n"]
+		foreach line $data {
+	    		if {[string length $line] >0} {
+				incr histPosition 
+				set histArray($histPosition) $line
+	    		}
+	    	}
+	    	set showPosition [lindex [array statistics histArray] 0]
+         }
+    }
+}
+
+proc do_history {WinPath} {
+	global histArray
+	global histPosition
+	global showPosition
+
+	if {$showPosition > 0} {
+		ctl-u_action .topals.text
+		$WinPath insert end $histArray($showPosition)
+ 		incr showPosition -1 
+	}
+}
+
+proc do_rev_history {WinPath} {
+	global histArray
+	global histPosition
+	global showPosition
+
+	set rLimit [lindex [array statistics histArray] 0]
+	if {$showPosition < $rLimit} {
+		ctl-u_action .topals.text
+ 		incr showPosition 1 
+		$WinPath insert end $histArray($showPosition)
+	}
+}
+
+
+proc dumpHist {} {
+    global histArray
+    global histPosition
+
+    puts "dumpHist: histPosition=$histPosition size=[lindex [array statistics histArray] 0]"
+
+    for {set i 1} {$i <= $histPosition} {incr i} {
+        puts "$i: $histArray($i)"
+    }
+}
+
+proc save_history {} {
+    global proenv
+    global histArray
+    global histPosition
+
+	set fo [open $proenv(alsdev_history_file) "w"]
+	for {set i 1} {$i <= $histPosition} {incr i} {
+    		puts $fo $histArray($i)
+	}
+	close $fo
 }
 
 proc ctl-c_action_during_read { WinPath StreamAlias WaitVar } {
@@ -621,6 +773,7 @@ proc exit_prolog { } {
 				-type yesno -default yes]
 	if {$ans == "yes"} then {
 		prolog call alsdev possible_save_project
+
 		if {[document.close_all]} then {
 			if {[catch {
 					save_window_positions
@@ -628,9 +781,10 @@ proc exit_prolog { } {
 				} result]} then {
 				# maybe do "bgerror $result" or some other message here
 			}
-			exit
-#			set WaitForLine -3
+			set WaitForLine -3
 		}
+		save_history
+		exit
 	} else {
 		return 0
 	}

@@ -43,16 +43,16 @@ proc add_file_menu {menubar type window} {
     $menubar.file add command -label "Examples$elipsis" -underline 5 -command {re document.open_examps}
 
 
-#    $menubar.file add separator
-#    $menubar.file add command -label "Page Setup$elipsis" \
-#		-command "re {$type.page_setup $window}" -state disabled
-#    $menubar.file add command -label "Print$elipsis" -accelerator "$mod-P"\
-#		-command "re {$type.print $window}" -state disabled
+    $menubar.file add separator
+    $menubar.file add command -label "Page Setup$elipsis" \
+		-command "re {$type.page_setup $window}" -state disabled
+    $menubar.file add command -label "Print$elipsis" -accelerator "$mod-P"\
+		-command "re {$type.print $window}" -state disabled
 
-#	if {$type == "listener"} then { 
-#    	$menubar.file add separator
-#    	$menubar.file add separator
-#	}
+	if {$type == "listener"} then { 
+    	$menubar.file add separator
+    	$menubar.file add separator
+	}
 
     $menubar.file add separator
 	

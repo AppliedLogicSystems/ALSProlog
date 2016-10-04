@@ -97,8 +97,8 @@ proc vTclWindow.topals {args} {
     pack .topals.text -fill both -expand 1 -side left
 
 	# accelerators
-	bind_accelerators .topals $mod listener
-	post_open_document Environment .topals 
+#	bind_accelerators .topals $mod listener
+#	post_open_document Environment .topals 
 
 }
 

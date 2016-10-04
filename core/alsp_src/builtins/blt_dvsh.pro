@@ -87,6 +87,9 @@ report_error0(Error) :-
 	tcl_call(I, [tk_messageBox,
 		'-icon', error, '-message', ErrorStr, '-type', ok], _).
 
+:- dynamic(user:alsdev_history_file_locn/1).
+:- dynamic(user:no_load_prev_alsdev_history/0).
+
 export start_alsdev/0.
 start_alsdev :-
 	catch(start_alsdev0, Error, report_error(Error)).
@@ -332,8 +335,10 @@ alsdev(Shared, ALS_IDE_Mgr)
 
 	tcl_call(shl_tcli, [set,WaitVar,0],_),
 	tcl_call(shl_tcli, [set,DataVar,""],_),
-	tcl_call(shl_tcli, 
-		[set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_),
+
+
+	tcl_call(shl_tcli, [set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_),
+
     sio:set_input(ISS),
     sio:set_output(OSS),
 
@@ -392,7 +397,11 @@ tdvf,
 		%% for use by clear_workspace:
 	findall(GVID, global_gv_info:gvi(GVID,_,_,_),SysGlobals),
 	alsdev:assert(system_global_vars(SysGlobals)),
-	builtins:prolog_shell(ISS,OSS,alsdev).
+
+	alsdev:alsdev_ini_path(DotFilePath),
+	handle_alsdev_history,
+	tcl_call(shl_tcli, [manage_alsdev_history],_),
+	prolog_shell(ISS,OSS,alsdev).
 
 alsdev_splash(Path)
 	:-
@@ -406,6 +415,49 @@ alsdev_splash(Path)
 		)
 	),
 	tcl_call(shl_tcli, [splash, Path], _).
+
+
+	/* ----------------------------
+ 	 | Manage alsdev_history file
+ 	 *----------------------------*/
+
+handle_alsdev_history
+	:-
+	HistoryFile = '.alsdev_history',
+        check_setup_alsdev_history_file(HistoryFile),
+        check_load_prev_alsdev_history.
+
+alsdev_history_file_locn(L) :- user:alsdev_history_file_locn(L), !.
+alsdev_history_file_locn(home).
+
+check_setup_alsdev_history_file(HistoryFile) :-
+	builtins:ini_config_items(DotALSDEVItems),
+	(member( alsdev_history_file_locn(HFL), DotALSDEVItems) -> true ; HFL = home), 
+   	setup_alsdev_history_file(HFL, HistoryFile).
+
+setup_alsdev_history_file(home, HistoryFile)
+        :-!,
+        getenv('HOME', UserHomePath),
+        pathPlusFile(UserHomePath, HistoryFile, PathToHistoryFile),
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, alsdev_history_file, PathToHistoryFile],_).
+
+setup_alsdev_history_file(local, HistoryFile)
+        :-!,
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, alsdev_history_file, HistoryFile],_).
+
+setup_alsdev_history_file(BadLocn, HistoryFile)
+        :-
+        write(user_output, 'Error: Bad History File Location' = BadLocn), nl,
+        setup_alsdev_history_file(home, HistoryFile).
+
+check_load_prev_alsdev_history
+        :-
+        user:no_load_prev_alsdev_history,
+        !,
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, do_load_prev_alsdev_history, false],_).
+
+check_load_prev_alsdev_history.
+
 
     %% Debugger streams: The debugger window text window:
 	%% Initially these don't have the debugger_[input,output] aliases;
@@ -744,6 +796,7 @@ setup_ide_project_globals(ALSIDEObject)
 	 |	2. Asserts all the info it extracts, for later use;
 	 |	3. Extracts basic geometry info for use in initial
 	 |	   creation of .topals and .debugwin;
+	 | * Called from alsdev.tcl: establish_defaults
 	 *-----------------------------------------------------------*/
 alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom, DebugVis)
 	:-
@@ -797,67 +850,60 @@ strip_tags([(_ = V0) | TVs], [V | Vs])
 	strip_tags(TVs, Vs).
 
 :- dynamic(alsdev_ini_path/1).
+
+getPrefsFilePath(unix,'.alsdev').
+
+getPrefsFilePath(unix,PrefsFilePath)
+	:-
+	getenv('HOME', HomeDir),
+	split_path(HomeDir, HomeDirList),
+	PrefsFile = '.alsdev',
+	append(HomeDirList, [PrefsFile], PrefsFileList),
+	join_path(PrefsFileList, PrefsFilePath).
+
+getPrefsFilePath(mswin32,PrefsFilePath)
+	:-
+	builtins:sys_searchdir(SSD),
+	split_path(SSD, SSDList),
+	(append(ImageDirList, [alsdir], SSDList) ; ImageDirList = SSDList),
+	PrefsFile = 'alsdev.ini',
+	append(ImageDirList, [PrefsFile], PrefsFileList),
+	join_path(PrefsFileList, PrefsFilePath).
+
 find_alsdev_ini(Items)
 	:-
 	sys_env(unix,_,_),
 	!,
-	getenv('HOME', HomeDir),
-	split_path(HomeDir, HomeDirList),
-#if (all_procedures(syscfg,intconstr,0,_))
-	PrefsFile = '.clpbnr',
-#else
-	PrefsFile = '.alsdev',
-#endif
-	append(HomeDirList, [PrefsFile], PrefsFileList),
-	fin_find_alsdev_ini(PrefsFileList, Items).
+	finish_alsdev_ini(unix,Items).
 
-/*
 find_alsdev_ini(Items)
-	:-
+	:-   %% not in unix:
 	sys_env(mswin32,_,_),
-	getenv('windir', HomeDir0),
-	split_path(HomeDir0, HomeDir0List),
-	PrefsFile = '.alsdev',
-	get_user_name(User),
-	append(HomeDir0List, ['Profiles',User,PrefsFile], PrefsFileList),
-	fin_find_alsdev_ini(PrefsFileList, Items),
-	!.
-*/
-
-find_alsdev_ini(Items)
-	:-
-		%% not in unix:
-	builtins:sys_searchdir(SSD),
-	split_path(SSD, SSDList),
-	(append(ImageDirList, [alsdir], SSDList) ; ImageDirList = SSDList),
-	(sys_env(mswin32,_,_) ->
-		PrefsFile = 'alsdev.ini'
-		;
-			%% Macintosh:
-		PrefsFile = 'alsdev_prefs'
-	),
-	append(ImageDirList, [PrefsFile], PrefsFileList),
-	fin_find_alsdev_ini(PrefsFileList, Items).
-
-fin_find_alsdev_ini(PrefsFileList, Items)
-	:-
-	join_path(PrefsFileList, PrefsFilePath),
-	exists_file(PrefsFilePath),
-	assert(alsdev_ini_path(PrefsFilePath)),
 	!,
+	finish_alsdev_ini(mswin32,Items).
+
+finish_alsdev_ini(unix,Items)
+	:-
+	getPrefsFilePath(unix,PrefsFilePath),
+	exists_file(PrefsFilePath),
+	!,
+	assert(alsdev_ini_path(PrefsFilePath)),
 	grab_terms(PrefsFilePath, Items).
 
-fin_find_alsdev_ini(PrefsFileList, [])
+finish_alsdev_ini(mswin32,Items)
 	:-
-	join_path(PrefsFileList, PrefsFilePath),
-		% Make a trivial file; put space in it to avoid
-		% os problems with empty files...
+	getPrefsFilePath(mswin32,PrefsFilePath),
+	exists_file(PrefsFilePath),
+	!,
+	assert(alsdev_ini_path(PrefsFilePath)),
+	grab_terms(PrefsFilePath, Items).
+
+finish_alsdev_ini(PrefsFilePath,[])
+	:-
 	open(PrefsFilePath, write, S, []),
 	put_code(S, 0' ),
 	close(S),
 	assert(alsdev_ini_path(PrefsFilePath)).
-
-
 
 
 change_window_settings(WinSettingsVals, WinGroup)
