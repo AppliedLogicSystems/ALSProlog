@@ -464,16 +464,19 @@ shell_read(InStream,OutStream,G,N,V)
 		  ).
 
 	/* After switching to using linenoise for shell input,
-	 * Prompt1, Prompt2, and OldPrompt are extraneous;
+	 * Prompt1, Prompt2, and OldPrompt are extraneous for alspro;
          */
 shell_read0(Prompt1,Prompt2,InStream,G,N,V) 
 	:- !,
+	(InStream == user_input -> 
+		P1 = '', P2 = '' ; 
+		P1 = Prompt1, P2 = Prompt2),
 	sio:get_user_prompt(OldPrompt),
 	catch((
-		sio:set_user_prompt(''),
+		sio:set_user_prompt(P1),
 		sio_set_do_lineedit(1),
 		sio:skip_layout(InStream),
-		sio:set_user_prompt(''),
+		sio:set_user_prompt(P2),
 		sio_set_do_lineedit(2),
 		read_term(InStream,G,[vars_and_names(V,N)])
 	), Exception, (
