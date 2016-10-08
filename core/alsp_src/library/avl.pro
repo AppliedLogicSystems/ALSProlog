@@ -80,6 +80,7 @@ export avl_search/3.
  *   count,c           -- show height of tree
  *   stats,st          -- show height and count of tree
  *   search(Key)       -- search tree for Key and display Data
+ *   x                 -- instantiate tree to a pre-set sample
  *!--------------------------------------------------------------*/
 
 shell :- shell(empty).
@@ -187,6 +188,7 @@ show_avl_help
     write('count,c           -- show height of tree'),nl,
     write('stats,st          -- show height and count of tree'),nl,
     write('insert(Key)       -- search tree for Key and display Data'),nl,
+    write('x                 -- instantiate tree to a pre-set sample'),nl,
     nl.
 
 x(rn(3,hello,bn(2,bye,empty,empty),ln(12,greetings,bn(5,solong,empty,empty),empty))).
