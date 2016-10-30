@@ -8,8 +8,11 @@
  | Date(s):	November, 1988 (KAB - original)
  |		January, 1989 (Expansion - Aida Batarekh) 	
  |		AVL tree tools added July 1991 (KAB)
+ |
+ | NOTE: To use the debugger on this file, comment out
+ |		noshow_module(cref).
+ | 	 in ~/builtins/debugger.pro
  *====================================================================*/
-%:-[avl].
 
 	/*-------------------------*
 	 |	cref
@@ -39,11 +42,9 @@ export cx/1.
 :- dynamic(suite_info/4).
 
 	%% For testing:
-%suite_info(suite,hickory,'examples/als'+['hickory.pro','id.pro'],user_output).
 suite_info(suite,hickory,'examples/als'+['hickory.pro','id.pro'],'hickory.xrf').
 suite_info(suite,h,'examples/als'+['hickory.pro','id.pro'],'h.xrf').
-
-suite_info(suite,tc,'.'+['testcref1.pro','testcref2.pro'],'tc.xrf').
+suite_info(suite,tc,'alsdir/library'+['cref_test1.pro','cref_test2.pro'],'tc.xrf').
 
 suite_info(suite,cref,['crefmain.pro','crefavl.pro','crefstrt.pro'],'cref.xrf').
 suite_info(suite,gentools,['gentools.pro'],'gentools.xrf').
@@ -129,7 +130,7 @@ c(SuiteName) :- cref(SuiteName, []).
 cref(SuiteName, Options) 
 	:-
 	process_options(Options),
-	clean_up_me,
+%	clean_up_me,
 		%%  Clear out the calls tree in case we are re-running:
 	avl_create(ET),
 	setCallsTree(ET),
@@ -260,11 +261,11 @@ appendNew([FN | AddlFileNames], Files, [FN | NewFiles])
 write_cref_file(Source,CallsTree,OutSt) 
 	:-
 	modules(CallsTree,OutSt),
- 	group(CallsTree,OutSt),
+ 	group(CallsTree,DependsOnList,OutSt),
 	avl_inorder(CallsTree, InOrderList),
  	asserteds(CallsTree,InOrderList,OutSt),
-	uncalleds(InOrderList,OutSt).
-% 	,undefs_importeds(OutSt).
+	uncalleds(InOrderList,OutSt),
+ 	undefs_importeds(DependsOnList,OutS).
 
 	/*-----------------------------------------------------
 	 |	MAIN PROCESSING LOOP:
@@ -739,53 +740,27 @@ excluded(read,1).
 excluded(assert,1).
 excluded('=',2).
 
-	/*----------defined predicates ----------------------------------*/
+	/*----------defined predicates ----------------------------------
 defined_predicates(DefinedPreds) 
 	:-
-  % setOf(p(Mod:P,N,File), Q^M^'$calls'(P,N,Q,M,Mod,File), DefinedPreds).
    setOf(p(Mod:P,N,File), Q^M^calls(P,N,Q,M,Mod,File), DefinedPreds).
-
+*/
 
 	/*----------------------------------------------------------
 	 |	group: lists each defined predicate together with 
 	 |	       all the predicates it eventually calls.
 	 *----------------------------------------------------------*/
 
-group(CallsTree,OutSt) 
+group(CallsTree,DependsOnList,OutSt) 
 	:-
 	getMiscInfo(MIS),
-%	inorder_defined(CallsTree, MIS, [], ListOfUseLists),
-	inorder_defined(CallsTree, CallsTree, MIS, [], ListOfUseLists),
-/*
-   setOf('$depends_on'(P,N,Mod,UseList,Files),
-				SomeFile^
-				(memb(Mod:P,N,SomeFile,DefinedPreds),
-					setOf(FF, memb(Mod:P,N,FF,DefinedPreds),Files),
-					uses_list(P,N,Mod,UseList)  ),
-		 		ListOfUseLists),
-*/
+	inorder_defined(CallsTree, CallsTree, MIS, [], DependsOnList),
 	dependency_header(OutSt),
-	cref_out(ListOfUseLists,CallsTree,OutSt),
+	cref_out(DependsOnList,CallsTree,DefinedList,OutSt),
 	nl(OutSt).
-
-/*
-group(OutSt) 
-	:-
-   defined_predicates(DefinedPreds),
-   setOf('$depends_on'(P,N,Mod,UseList,Files),
-				SomeFile^
-				(memb(Mod:P,N,SomeFile,DefinedPreds),
-					setOf(FF, memb(Mod:P,N,FF,DefinedPreds),Files),
-					uses_list(P,N,Mod,UseList)  ),
-		 		ListOfUseLists),
-   dependency_header(OutSt),
-   cref_out(ListOfUseLists,OutSt),
-   nl(OutSt).
-*/
 
 uses_list(P,N,Mod,UseList) 
 	:-
-%   setOf(p(Q,M,F), '$calls'(P,N,Q,M,Mod,F), BodyListForP),
    setOf(p(Q,M,F), calls(P,N,Q,M,Mod,F), BodyListForP),
    get_defs(BodyListForP,Mod, UseList,UseList,[],p(Mod:P,N)),
    !.
@@ -804,7 +779,6 @@ get_defs([p(Mod:P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
    essence(P,PE),
    rcrd(import(Module,PE,N,Mod,F)),
 
-%   setOf(p(Q,M,FF), '$calls'(PE,N,Q,M,Mod,FF), BodyListforP),
    setOf(p(Q,M,FF), calls(PE,N,Q,M,Mod,FF), BodyListforP),
    CurTail = [p(Mod:P,N,F) | NextTail],
 
@@ -836,7 +810,6 @@ get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
    '$calls'(PE,N,Q,M,Module,F),
    non_mem(Module:P,N,F,UseList),
    !, 
-%   setOf(p(QQ,MM,FF), '$calls'(PE,N,QQ,MM,Module,FF), BodyListforP),
    setOf(p(QQ,MM,FF), '$calls'(PE,N,QQ,MM,Module,FF), BodyListforP),
    CurTail = [p(Module:P,N,F) | NextTail],
 	
@@ -932,25 +905,12 @@ get_defs([p(P,N,F)|RestStack],Module,UseList,CurTail,ResultTail,
 						p(ModPred:Pred,NPred) ).
 
 	/*------------- modules appearing --------------------------*/
-/*
-modules(OutS)
-	:-
- 	setOf( Module+[files=Fs,uses_mods:UMs],
-				SomeF^
-				('$module'(Module,SomeF),
-				 setOf(FF, '$module'(Module,FF),Fs),
-				 setOf(UM, F^'$use'(Module,UM,F), UMs)
-				),
-			 Modules),
-	setup_report(Modules, 'No Modules Defined', 'Defined Modules:', OutS).
-*/
 modules(CallsTree,OutS)
 	:-
 	getMiscInfo(MIS),
 	accessMI(mods, MIS, Modules),
         accessMI(mods_files, MIS, ModsFiles), 
         accessMI(mods_use, MIS,  ModsUses),
-%	setup_report(Modules, 'No Modules Defined', 'Defined Modules:', OutS).
 	(Modules = [] -> 
  		printf(OutS,'%t\n',['No Modules Defined'])
 		;
@@ -1022,7 +982,7 @@ uncalleds(InOrderList,OutS)
  	(UncalledList = [] ->
  		printf(OutS,'%t\n',['No Uncalled Predicates'])
 		;
- 		printf(OutS,'%t\n',['    Uncalled Predicates (P/N in [Module + Files])']),
+ 		printf(OutS,'%t\n',['    Uncalled (toplevel) Predicates (P/N in [Module + Files])']),
  		printf(OutS,' ======================================\n\n',[]),
 		output_asserteds(UncalledList, OutS)
 	).
@@ -1044,8 +1004,10 @@ extractUncalleds([_ | InOrderList], UncalledList)
  	 |	undefs_importeds
 	 *-------------------------------------------------------*/
 
-undefs_importeds(OutS)
+	%% DependsOnList:: '$depends_on'(P,N,Mod,UsesList,Files),
+undefs_importeds(DependsOnList,OutS)
 	:-
+/*
  	setOf(Module,F^'$module'(Module,F),Modules),
 	setOf(Mod+ModExplicitImports,
  				(member(Mod,Modules), imports(Mod,ModExplicitImports) ),
@@ -1053,6 +1015,15 @@ undefs_importeds(OutS)
 	setOf(Mod+ModUndefs1, 
 				(member(Mod,Modules), mod_undefs1(Mod, ModUndefs1) ),
 				InterUndefs),
+*/
+	getMiscInfo(MIS),
+	accessMI(mods, MIS, Modules),
+        accessMI(mods_files, MIS, ModsFiles), 
+        accessMI(mods_use, MIS,  ModsUses),
+
+	byModules(DependsOnList, [], ByMods).
+
+/*
 	split_undefs_imports(InterUndefs, Undefs, ImplicitImports),
 	setup_report(ExplicitImports, 'No Explicit Imports', 
 									'Explicitly Imported Predicates',OutS),
@@ -1060,6 +1031,40 @@ undefs_importeds(OutS)
 									'Implicitly Imported Predicates',OutS),
 	setup_report(Undefs, 'No Undefined Predicates', 
 									'Undefined Predicates',OutS).
+*/
+
+byModules([], ByMods, ByMods).
+byModules([DepO | RestDependsOnList], CurByMods, ByMods)
+	:-
+	arrByM(DepO, CurByMods, NextCurByMods),
+	byModules(RestDependsOnList, NextCurByMods, ByMods).
+
+arrByM( '$depends_on'(P,N,Mod,UsesList,Files), CurByMods, NextCurByMods)
+	:-
+	checkModInsertPred(CurByMods,Mod,P/N,UsesList,Files,NextCurByMods).
+
+arrByM( '$depends_on'(P,N,Mod,UsesList,Files), [Mod-[P/N-(UsesList,Files)] | CurByMods], NextCurByMods).
+
+checkModInsertPred([],Mod,P/N,UsesList,Files,[Mod-[P/N-(UsesList,Files)]]).
+
+checkModInsertPred([Mod-ModList | RestCurByPreds], Mod,P/N,UsesList,Files,[Mod-NextModList | RestCurByPreds])
+	:-
+	!,
+	checkPredInsert(ModList,P/N,UsesList,Files,NextModList).
+
+checkModInsertPred([MML | RestCurByPreds], Mod,P/N,UsesList,Files,[MML | RestNextCurByPreds])
+	:-
+	checkModInsertPred(RestCurByPreds, Mod,P/N,UsesList,Files,RestNextCurByPreds).
+
+checkPredInsert([],P/N,UsesList,Files,[P/N-(UsesList,Files)]).
+checkPredInsert([P/N-_], ModList,P/N,_,_,NextModList)
+	:-!.
+checkPredInsert([Q/N-QDetails | RestModList],P/N,UsesList,Files,[Q/N-QDetails | RestNextModList])
+	:-
+	checkPredInsert(RestModList,P/N,UsesList,Files,RestNextModList).
+
+
+
 
 imports(Module,Imports)
 	:-
@@ -1140,9 +1145,9 @@ setup_report(List, NoItemsMessage, ItemsMessage, OutS)
 /*------------------------------------------------------------------------
 	cref_out 
  *------------------------------------------------------------------------*/
-cref_out([],_,_).
+cref_out([],_,[],_).
 
-cref_out(['$depends_on'(P,N,Mod,UseList,F) | Rest],CallsTree,OutS) 
+cref_out(['$depends_on'(P,N,Mod,UseList,F) | Rest],CallsTree,[P/N | DefinedTail],OutS) 
 	:-
 	sort(UseList, NiceUseList),
 	printf(OutS,'%t/N ',[P,N]),
@@ -1160,7 +1165,7 @@ cref_out(['$depends_on'(P,N,Mod,UseList,F) | Rest],CallsTree,OutS)
 	avl_search(P/N, TreeDataPN, CallsTree),
 	accessCRF(calledby,TreeDataPN, CalledBys),
 	printf(OutS,'  * Called by:   %t\n',[CalledBys]),
- 	cref_out(Rest,CallsTree,OutS).
+ 	cref_out(Rest,CallsTree,DefinedTail,OutS).
 
 fixUseListNice([],[]).
 fixUseListNice([p(Mod:Q,N,F) | RestUseList],
@@ -1245,6 +1250,7 @@ non_mem(P,N,F,[_ | Rest])
 	non_mem(P,N,F,Rest).
 
 
+/*
 clean_up_me
 	:-
 	abolish('$calls',6),
@@ -1255,6 +1261,7 @@ clean_up_me
 	abolish('$module',2),
 	abolish('$undefined',4),
 	abolish('$use',3).
+*/
 
 /*===================================================================*
  |		-- avl tree program: customized for cref
@@ -2173,7 +2180,7 @@ inorder_defined(Tree,CompleteTree,MIS,InL,OutL)
 	accessCRF(pred,TreeData,P),
 	accessCRF(arity,TreeData,N),
 	accessCRF(mod,TreeData,Mod),
-	accessCRF(mod,TreeData,Files),
+	accessCRF(files,TreeData,Files),
 
         accessMI(mods_use, MIS,  ModsUses),
 
