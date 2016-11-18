@@ -17,6 +17,8 @@
 
 module identify.
 
+export trait/2.
+
  trait(bud_scales(valvate),bitternut_hickory).
  trait(buds(yellow),bitternut_hickory).
 

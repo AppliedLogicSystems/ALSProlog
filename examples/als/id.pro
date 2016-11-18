@@ -35,11 +35,12 @@
  *---------------------------------------------------------------------*/
 
 module identify.
+
 export identify/0.
 
- :- dynamic(user_observed/1).
- :- dynamic(does_not_hold/1).
- :- dynamic(trait/2).
+:- dynamic(user_observed/1).
+:- dynamic(does_not_hold/1).
+:- dynamic(trait/2).
  
  identify :-
         obtain_description,
