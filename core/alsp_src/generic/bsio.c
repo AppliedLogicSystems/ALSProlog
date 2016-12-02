@@ -31,7 +31,9 @@
 #include "defs.h"
 #include <math.h>
 #include "cinterf.h"
+#ifndef MSWin32
 #include "linenoise.h"
+#endif
 #include "fpbasis.h"
 
 #include "new_alspi.h"
@@ -282,54 +284,8 @@ enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
 int do_lineedit = 0;
 static const char *lineedit_prompt="?- ";
-static const char *sublineedit_prompt="?_ ";
 const char *history_file;
 int  do_load_prev_history = 1;
-
-/*
- * linenoise_readbuffer()
- */
-
-long
-linenoise_readbuffer(char *buf, long n)
-{
-    char *line;
-    int count;
-
-        /* Load the history file once (i.e., at startup)
-           do_load_prev_history is set == 1 by default (set == 0 during shell startup)
-           Setting it to 0 ensures the
-           history will only be loaded once during an alspro shell session.
-        */
-    if (do_lineedit == 1 && do_load_prev_history == 1){
-        linenoiseHistoryLoad(history_file);
-        do_load_prev_history = 0;
-    }
-
-    if (do_lineedit == 1){
-        line = linenoise(lineedit_prompt);
-    } else if (do_lineedit == 2){
-        line = linenoise(sublineedit_prompt);
-    }
-    if (line == NULL){
-        return 0;
-    }
-    count = (int)strlen(line);
-                /* count+1 because '\n' may be added here: */
-    if (count+1 <= n )
-    {
-        linenoiseHistoryAdd(line);  // Add to the history.
-        linenoiseHistorySave(history_file);  // Save the history on disk.
-        memcpy(buf, line, count);
-        buf[count] = '\n'; count++;
-    }
-    else {    /* Incoming line overruns buf: */
-        errno = ENOBUFS;
-        count = -1;
-   }
-    free(line);
-    return (long)count;
-}
 
 
 #ifdef PURE_ANSI
@@ -384,6 +340,53 @@ long standard_console_error(char *buf, long n)
 }
 
 #else
+
+static const char *sublineedit_prompt="?_ ";
+
+/*
+ * linenoise_readbuffer()
+ */
+
+long
+linenoise_readbuffer(char *buf, long n)
+{
+    char *line;
+    int count;
+
+        /* Load the history file once (i.e., at startup)
+           do_load_prev_history is set == 1 by default (set == 0 during shell startup)
+           Setting it to 0 ensures the
+           history will only be loaded once during an alspro shell session.
+        */
+    if (do_lineedit == 1 && do_load_prev_history == 1){
+        linenoiseHistoryLoad(history_file);
+        do_load_prev_history = 0;
+    }
+
+    if (do_lineedit == 1){
+        line = linenoise(lineedit_prompt);
+    } else if (do_lineedit == 2){
+        line = linenoise(sublineedit_prompt);
+    }
+    if (line == NULL){
+        return 0;
+    }
+    count = (int)strlen(line);
+                /* count+1 because '\n' may be added here: */
+    if (count+1 <= n )
+    {
+        linenoiseHistoryAdd(line);  // Add to the history.
+        linenoiseHistorySave(history_file);  // Save the history on disk.
+        memcpy(buf, line, count);
+        buf[count] = '\n'; count++;
+    }
+    else {    /* Incoming line overruns buf: */
+        errno = ENOBUFS;
+        count = -1;
+   }
+    free(line);
+    return (long)count;
+}
 
 long standard_console_read(char *buf, long n)
 {
