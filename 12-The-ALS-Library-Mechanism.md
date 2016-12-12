@@ -1,7 +1,21 @@
 The ALS Library mechanism provides a sophisticated device for managing large li- braries of code in an efficient and flexible manner. Many files of potentially useful code can be available to a program without the cost of loading these files at the time the program is initially loaded. Only if program execution leads to a need for code from a particular library file is that file in fact loaded. Thereafter, execution pro- ceeds as if the file had already been loaded.. The library mechanism is essentially invisibile to the programmer, except for a possible momentary pause when a particular group of library predicates is first loaded. Consequently, the line between the predicates which are called ’builtin’ and those which are called ’library’ is quite gray.
 The files making up the library reside in the folder ...alsdir/library/.
+###[Overview](#overview)
+###[Algebraic List Predicates](#algebraic-list-predicates)
+###[Positional List Predicates](#positional-list-predicates)
+###[Miscelaneous List Predicates](#miscelaneous-list-predicates)
+###[Tree Predicates (avl.pro)](#tree-predicates)
+###[Miscellaneous Predicates](#miscellaneous-predicates)
+###[I/O Predicates](#io-predicates)
+###[Control Predicates](#control-predicates)
+###[Prolog Database Predicates](#prolog-database-predicates)
+###[Miscellaneous I/O Predicates](#miscellaneous-io-predicates)
+###[Simple I/O Predicates](#simple-io-predicates)
+###[String Manipulation Predicates](#string-manipulation-predicates)
+###[Extensible List Utilities](#extensible-list-utilities)
+###[CREF: Cross-Referencer](#cref)
 
-##12.1 Overview of the ALS Library Mechanism and Tools.
+##[12.1 Overview of the ALS Library Mechanism and Tools.](id:overview)
 
 Normally, the units making up the library are various sized (small to large) files
 containing code defining certain useful predicates, or defining whole subsystems of
@@ -41,7 +55,7 @@ tools. These are described in their own sections of this manual or the ALS Tools
 Guide. The survey below lists the remaining groups which have been installed as
 of the date of writing of this chapter.
 
-##12.2 Lists: Algebraic List Predicates (listutl1.pro)
+##[12.2 Lists: Algebraic List Predicates (listutl1.pro)](id:algebraic-list-predicates)
 ````
 append/2
 append(ListOfLists, Result)
@@ -125,7 +139,7 @@ any items from B-A; equivalent to:
 If both lists have the property that each element occurs no more than once, then the
 union also has this property.
 
-##12.3 Lists: Positional List Predicates (listutl2.pro)
+##[12.3 Lists: Positional List Predicates (listutl2.pro)](id:positional-list-predicates)
 ````
 at_most_n/3
 at_most_n(List, N, Head)
@@ -221,7 +235,7 @@ subst_nth(+, +, +, -)
 If N is a non-negative integer, List is list, and NewItem is any non-var object,
 NewList is the result of non-destrctively changing the Nth element of List to become NewItem; this predicate numbers the list beginning with 0.
 
-##12.4 Lists: Miscellaneous List Predicates (listutl3.pro)
+##[12.4 Lists: Miscellaneous List Predicates (listutl3.pro)](id:miscelaneous-list-predicates)
 ````
 check_default/4
 check_default(PList, Tag, Default, Value)
@@ -329,7 +343,7 @@ are defined as follows:
     then: if Tag=Val occurs on ArgSpecs, X is Val; 
           otherwise, X is the element of DefArgs corresponding to Tag.
 
-##12.5 Tree Predicates (avl.pro)
+##[12.5 Tree Predicates (avl.pro)](id:tree-predicates)]
 ````
 avl_create/1
 avl_create(Tree)
@@ -373,7 +387,7 @@ avl_search(+,?,+)
 Tree is searched in for Key. If Key is found, Data is unified with the data value corresponding to Key; 
 If Key is not found, avl_search will fail.
 
-##12.6 Miscellaneous Predicates (commal.pro)
+##[12.6 Miscellaneous Predicates (commal.pro)](id:miscellaneous-predicates)
 ````
 flatten_comma_list/2
 flatten_comma_list(SourceList, ResultList)
@@ -384,11 +398,11 @@ flatten_comma_list(+, -)
 If SourceList is a comma list (i.e., (a,b,c,...) ), then ResultList is also a comma list
 which is the result of removing all extraneous nesting and all extraneous occurrences of the atom true.
 
-##12.7 I/O Predicates (iolayer.pro)
+##[12.7 I/O Predicates (iolayer.pro)](id:io-predicates)
 
 To be added.
 
-##12.8 Control Predicates (lib_ctl.pro)
+##[12.8 Control Predicates (lib_ctl.pro)](id:control-predicates)
 ````
 bagOf/3
 bagOf(Pattern, Goal, Result)
@@ -423,7 +437,7 @@ setOf(+, +, -)
 setOf/3 is just like setof/3, except that if Goal has no solutions, setof/3 fails, whereas
 setOf/3 will succeed, binding Result to [].
 
-##12.9 Prolog Database Predicates (misc_db.pro)
+##[12.9 Prolog Database Predicates (misc_db.pro)](id:prolog-database-predicates)
 ````
 assert_all/1
 assert_all(ClauseList)
@@ -460,7 +474,7 @@ erase_all(+)
 If RefsList is a list of clause database references, causes each clause corresponding to one
 of these references to be erased.
 
-##12.10 I/O Predicates (misc_io.pro)
+##[12.10 Miscellaneous I/O Predicates (misc_io.pro)](id:miscellaneous-io-predicates)
 ````
 colwrite/4
 colwrite(AtomList,ColPosList,CurPos,Stream)
@@ -551,11 +565,11 @@ read_lines(+,-)
 ````
 Reads a list (Line_List) of all lines which can be read from the stream Stream.
 
-##12.11 I/O Predicates (simplio.pro)
+##[12.11 Simple I/O Predicates (simplio.pro)](id:simple-io-predicates)
 
 To be Added.
 
-##12.12 String Manipulation Predicates (strings.pro)
+##[12.12 String Manipulation Predicates (strings.pro)](id:string-manipulation-predicates)
 ````
 asplit/4
 asplit(Atom,Splitter,LeftPart,RightPart)
@@ -598,7 +612,7 @@ head0(+,+,-,-)
 If List is a list of character codes, splits List into Head and tail the way asplit0
 would, using the first occurrence of Splitter; on successive retrys, usings the succeeding occurrences of Spliter as the split point.
 
-##12.13 Miscellaneous Predicates (xlists.pro)
+##[12.13 Extensible List Utilities (xlists.pro)](id:extensible-list-utilities)
 ````
 xlist_append/2
 xlist_append(ListOfXLists, Result)
@@ -660,3 +674,36 @@ xlist_unit_l(+, -)
 ````
 -- creates a freshly initialized ordinary xlist with first elt
 
+##[12.14 CREF: Cross-Referencer (cref.pro)](id:cref)
+
+CREF operates on suites of one or more prolog files, and outputs a report describing the program structure found, including modules, calls between predicates, numbers of clauses and facts for a predicate, facts and rules asserted, operator declarations, toplevel (uncalled) predicates, and undefined predicates.
+
+The main entry points, cref(SuiteName) {- runs "nonstop", with no cref shell} and cref(SuiteName, Opts)) {- can enter interactive cref shell after the initial analysis}.  Both of these calls are library calls, auto-loading the cref analysis files.
+
+Neither of the following  auto-load cref.pro, but from the OS console, you can issue the command
+
+````
+alspro cref
+````
+
+to start alspro with cref loaded; then the convenience commands work:
+
+````
+c(SuiteName)        - equivalent to cref(SuiteName, []) {starts cref_shell}
+d(SuiteName)        - equivalent to cref(SuiteName)     {runs "non-stop"}
+ ````
+ 
+Several test/example suites are built-in (recorded in cref_suite_db.pro:
+
+````
+suite_info(suite,hickory,
+	'examples/als'+['hickory.pro','id.pro'],'hickory.xrf').
+suite_info(suite,tc,
+	'alsdir/library/tests'+['cref_test1.pro','cref_test2.pro',
+			'cref_test3.pro'],'tc.xrf').
+suite_info(suite,tc2,'alsdir/library/tests'+['cref_test_lib1.crf'],'tc2.xrf').
+suite_info(suite,chat80,'examples/chat80'+['als_chat.pro','*.pl'],'chat80.xrf').
+ ````
+ These can be invoked by cref(hickory), cref(tc), cref(tc2), and cref(chat80), respectively.
+ 
+ 
