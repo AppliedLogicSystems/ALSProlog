@@ -15,7 +15,7 @@ The files making up the library reside in the folder ...alsdir/library/.
 ###[Extensible List Utilities](#extensible-list-utilities)
 ###[CREF: Cross-Referencer](#cref)
 
-##[12.1 Overview of the ALS Library Mechanism and Tools.]
+## 12.1 Overview of the ALS Library Mechanism and Tools.
 
 Normally, the units making up the library are various sized (small to large) files
 containing code defining certain useful predicates, or defining whole subsystems of
