@@ -7,7 +7,7 @@ The files making up the library reside in the folder ...alsdir/library/.
 ###[Tree Predicates (avl.pro)](#125-tree-predicates-avlpro)
 ###[Miscellaneous Predicates](#126-miscellaneous-predicates-commalpro)
 ###[I/O Predicates](#127-io-predicates-iolayerpro)
-###[Control Predicates](#control-predicates)
+###[Control Predicates](#128-control-predicates-lib_ctlpro)
 ###[Prolog Database Predicates](#prolog-database-predicates)
 ###[Miscellaneous I/O Predicates](#miscellaneous-io-predicates)
 ###[Simple I/O Predicates](#simple-io-predicates)
@@ -402,7 +402,7 @@ which is the result of removing all extraneous nesting and all extraneous occurr
 
 To be added.
 
-##[12.8 Control Predicates (lib_ctl.pro)](id:control-predicates)
+## 12.8 Control Predicates (lib_ctl.pro)
 ````
 bagOf/3
 bagOf(Pattern, Goal, Result)
