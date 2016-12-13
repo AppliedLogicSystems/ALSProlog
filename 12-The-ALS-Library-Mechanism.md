@@ -13,7 +13,7 @@ The files making up the library reside in the folder ...alsdir/library/.
 ###[Simple I/O Predicates](#1211-simple-io-predicates-simpliopro)
 ###[String Manipulation Predicates](#1212-string-manipulation-predicates-stringspro)
 ###[Extensible List Utilities](#1213-extensible-list-utilities-xlistspro)
-###[CREF: Cross-Referencer](#cref)
+###[CREF: Cross-Referencer](#1214-cref-cross-referencer-crefpro)
 
 ## 12.1 Overview of the ALS Library Mechanism and Tools.
 
@@ -674,7 +674,7 @@ xlist_unit_l(+, -)
 ````
 -- creates a freshly initialized ordinary xlist with first elt
 
-##[12.14 CREF: Cross-Referencer (cref.pro)](id:cref)
+## 12.14 CREF: Cross-Referencer (cref.pro)
 
 CREF operates on suites of one or more prolog files, and outputs a report describing the program structure found, including modules, calls between predicates, numbers of clauses and facts for a predicate, facts and rules asserted, operator declarations, toplevel (uncalled) predicates, and undefined predicates.
 
