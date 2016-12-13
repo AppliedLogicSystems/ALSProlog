@@ -10,7 +10,7 @@ The files making up the library reside in the folder ...alsdir/library/.
 ###[Control Predicates](#128-control-predicates-lib_ctlpro)
 ###[Prolog Database Predicates](#129-prolog-database-predicates-misc_dbpro)
 ###[Miscellaneous I/O Predicates](#1210-miscellaneous-io-predicates-misc_iopro)
-###[Simple I/O Predicates](#simple-io-predicates)
+###[Simple I/O Predicates](#1211-simple-io-predicates-simpliopro)
 ###[String Manipulation Predicates](#string-manipulation-predicates)
 ###[Extensible List Utilities](#extensible-list-utilities)
 ###[CREF: Cross-Referencer](#cref)
@@ -565,7 +565,7 @@ read_lines(+,-)
 ````
 Reads a list (Line_List) of all lines which can be read from the stream Stream.
 
-##[12.11 Simple I/O Predicates (simplio.pro)](id:simple-io-predicates)
+## 12.11 Simple I/O Predicates (simplio.pro)
 
 To be Added.
 
