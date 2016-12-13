@@ -235,7 +235,7 @@ subst_nth(+, +, +, -)
 If N is a non-negative integer, List is list, and NewItem is any non-var object,
 NewList is the result of non-destrctively changing the Nth element of List to become NewItem; this predicate numbers the list beginning with 0.
 
-##[12.4 Lists: Miscellaneous List Predicates (listutl3.pro)](id:miscelaneous-list-predicates)
+## 12.4 Lists: Miscellaneous List Predicates (listutl3.pro)
 ````
 check_default/4
 check_default(PList, Tag, Default, Value)
