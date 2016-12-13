@@ -8,7 +8,7 @@ The files making up the library reside in the folder ...alsdir/library/.
 ###[Miscellaneous Predicates](#126-miscellaneous-predicates-commalpro)
 ###[I/O Predicates](#127-io-predicates-iolayerpro)
 ###[Control Predicates](#128-control-predicates-lib_ctlpro)
-###[Prolog Database Predicates](#prolog-database-predicates)
+###[Prolog Database Predicates](#129-prolog-database-predicates-misc_dbpro)
 ###[Miscellaneous I/O Predicates](#miscellaneous-io-predicates)
 ###[Simple I/O Predicates](#simple-io-predicates)
 ###[String Manipulation Predicates](#string-manipulation-predicates)
@@ -437,7 +437,7 @@ setOf(+, +, -)
 setOf/3 is just like setof/3, except that if Goal has no solutions, setof/3 fails, whereas
 setOf/3 will succeed, binding Result to [].
 
-##[12.9 Prolog Database Predicates (misc_db.pro)](id:prolog-database-predicates)
+## 12.9 Prolog Database Predicates (misc_db.pro)
 ````
 assert_all/1
 assert_all(ClauseList)
