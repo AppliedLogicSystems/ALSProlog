@@ -9,7 +9,7 @@ The files making up the library reside in the folder ...alsdir/library/.
 ###[I/O Predicates](#127-io-predicates-iolayerpro)
 ###[Control Predicates](#128-control-predicates-lib_ctlpro)
 ###[Prolog Database Predicates](#129-prolog-database-predicates-misc_dbpro)
-###[Miscellaneous I/O Predicates](#miscellaneous-io-predicates)
+###[Miscellaneous I/O Predicates](#1210-miscellaneous-io-predicates-misc_iopro)
 ###[Simple I/O Predicates](#simple-io-predicates)
 ###[String Manipulation Predicates](#string-manipulation-predicates)
 ###[Extensible List Utilities](#extensible-list-utilities)
@@ -474,7 +474,7 @@ erase_all(+)
 If RefsList is a list of clause database references, causes each clause corresponding to one
 of these references to be erased.
 
-##[12.10 Miscellaneous I/O Predicates (misc_io.pro)](id:miscellaneous-io-predicates)
+## 12.10 Miscellaneous I/O Predicates (misc_io.pro)
 ````
 colwrite/4
 colwrite(AtomList,ColPosList,CurPos,Stream)
