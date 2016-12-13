@@ -4,7 +4,7 @@ The files making up the library reside in the folder ...alsdir/library/.
 ###[Algebraic List Predicates](#122-lists-algebraic-list-predicates-listutl1pro)
 ###[Positional List Predicates](#positional-list-predicates)
 ###[Miscelaneous List Predicates](#124-lists-miscellaneous-list-predicates-listutl3pro)
-###[Tree Predicates (avl.pro)](#tree-predicates)
+###[Tree Predicates (avl.pro)](#125-tree-predicates-avlpro)
 ###[Miscellaneous Predicates](#miscellaneous-predicates)
 ###[I/O Predicates](#io-predicates)
 ###[Control Predicates](#control-predicates)
@@ -343,7 +343,7 @@ are defined as follows:
     then: if Tag=Val occurs on ArgSpecs, X is Val; 
           otherwise, X is the element of DefArgs corresponding to Tag.
 
-##[12.5 Tree Predicates (avl.pro)](id:tree-predicates)]
+## 12.5 Tree Predicates (avl.pro)
 ````
 avl_create/1
 avl_create(Tree)
