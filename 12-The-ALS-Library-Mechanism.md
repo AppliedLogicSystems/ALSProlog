@@ -6,7 +6,7 @@ The files making up the library reside in the folder ...alsdir/library/.
 ###[Miscelaneous List Predicates](#124-lists-miscellaneous-list-predicates-listutl3pro)
 ###[Tree Predicates (avl.pro)](#125-tree-predicates-avlpro)
 ###[Miscellaneous Predicates](#126-miscellaneous-predicates-commalpro)
-###[I/O Predicates](#io-predicates)
+###[I/O Predicates](#127-io-predicates-iolayerpro)
 ###[Control Predicates](#control-predicates)
 ###[Prolog Database Predicates](#prolog-database-predicates)
 ###[Miscellaneous I/O Predicates](#miscellaneous-io-predicates)
@@ -398,7 +398,7 @@ flatten_comma_list(+, -)
 If SourceList is a comma list (i.e., (a,b,c,...) ), then ResultList is also a comma list
 which is the result of removing all extraneous nesting and all extraneous occurrences of the atom true.
 
-##[12.7 I/O Predicates (iolayer.pro)](id:io-predicates)
+## 12.7 I/O Predicates (iolayer.pro)
 
 To be added.
 
