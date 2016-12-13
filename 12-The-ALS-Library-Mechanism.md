@@ -55,7 +55,7 @@ tools. These are described in their own sections of this manual or the ALS Tools
 Guide. The survey below lists the remaining groups which have been installed as
 of the date of writing of this chapter.
 
-##[12.2 Lists: Algebraic List Predicates (listutl1.pro)](id:algebraic-list-predicates)
+## 12.2 Lists: Algebraic List Predicates (listutl1.pro)
 ````
 append/2
 append(ListOfLists, Result)
