@@ -107,7 +107,7 @@ alsdir/library : $(SOURCE_DIR)/library $(MAKEFS)
 	rm -f alsdir/library/*.pro alsdir/library/*.alb
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.pro .
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
-	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/tests .
+	cd alsdir/library ; ln -fs ../../$(SOURCE_DIR)/library/tests .  
 
 alsdir/shared : $(MAKEFS)
 	mkdir -p alsdir/shared

@@ -4,7 +4,6 @@
  :- op(500,fx,+).
  :- op(500,fx,-).
 
-
 new_pred(P) :-
    recorded(P,'xg.pred',_), !.
 new_pred(P0) :-
@@ -46,6 +45,7 @@ consume(F,Mode) :-
     ( X=end_of_file, !, clear;
       process(X,Mode),
          fail ).
+
 
 process((L-->R),Mode) :- !,
    expandlhs(L,S0,S,H0,H,P),
@@ -89,6 +89,7 @@ retractrules(_).
 retractrule(_,virtual(_,_,_)) :- !.
 retractrule(Q,B) :- retract((Q :- B)), !.
 
+
 /* Rule --> Clause */
 
 expandlhs(T,S0,S,H0,H1,Q) :-
@@ -120,6 +121,7 @@ front([K,X|L],H0,H) :-
 case([T|Ts],K,H0,x(K,terminal,T,H)) :- !,
    unwind(Ts,H0,H).
 case(Nt,K,H,x(K,nonterminal,Nt,H)) :- virtualrule(Nt).
+
 
 virtualrule(X) :-
    functor(X,F,N),
