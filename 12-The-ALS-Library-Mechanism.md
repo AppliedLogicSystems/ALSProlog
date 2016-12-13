@@ -3,7 +3,7 @@ The files making up the library reside in the folder ...alsdir/library/.
 ###[Overview](#121-overview-of-the-als-library-mechanism-and-tools)
 ###[Algebraic List Predicates](#122-lists-algebraic-list-predicates-listutl1pro)
 ###[Positional List Predicates](#positional-list-predicates)
-###[Miscelaneous List Predicates](#miscelaneous-list-predicates)
+###[Miscelaneous List Predicates](#124-lists-miscellaneous-list-predicates-listutl3pro)
 ###[Tree Predicates (avl.pro)](#tree-predicates)
 ###[Miscellaneous Predicates](#miscellaneous-predicates)
 ###[I/O Predicates](#io-predicates)
