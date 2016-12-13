@@ -12,7 +12,7 @@ The files making up the library reside in the folder ...alsdir/library/.
 ###[Miscellaneous I/O Predicates](#1210-miscellaneous-io-predicates-misc_iopro)
 ###[Simple I/O Predicates](#1211-simple-io-predicates-simpliopro)
 ###[String Manipulation Predicates](#1212-string-manipulation-predicates-stringspro)
-###[Extensible List Utilities](#extensible-list-utilities)
+###[Extensible List Utilities](#1213-extensible-list-utilities-xlistspro)
 ###[CREF: Cross-Referencer](#cref)
 
 ## 12.1 Overview of the ALS Library Mechanism and Tools.
@@ -612,7 +612,7 @@ head0(+,+,-,-)
 If List is a list of character codes, splits List into Head and tail the way asplit0
 would, using the first occurrence of Splitter; on successive retrys, usings the succeeding occurrences of Spliter as the split point.
 
-##[12.13 Extensible List Utilities (xlists.pro)](id:extensible-list-utilities)
+## 12.13 Extensible List Utilities (xlists.pro)
 ````
 xlist_append/2
 xlist_append(ListOfXLists, Result)
