@@ -5,7 +5,7 @@ The files making up the library reside in the folder ...alsdir/library/.
 ###[Positional List Predicates](#positional-list-predicates)
 ###[Miscelaneous List Predicates](#124-lists-miscellaneous-list-predicates-listutl3pro)
 ###[Tree Predicates (avl.pro)](#125-tree-predicates-avlpro)
-###[Miscellaneous Predicates](#miscellaneous-predicates)
+###[Miscellaneous Predicates](#126-miscellaneous-predicates-commalpro)
 ###[I/O Predicates](#io-predicates)
 ###[Control Predicates](#control-predicates)
 ###[Prolog Database Predicates](#prolog-database-predicates)
@@ -387,7 +387,7 @@ avl_search(+,?,+)
 Tree is searched in for Key. If Key is found, Data is unified with the data value corresponding to Key; 
 If Key is not found, avl_search will fail.
 
-##[12.6 Miscellaneous Predicates (commal.pro)](id:miscellaneous-predicates)
+## 12.6 Miscellaneous Predicates (commal.pro)]
 ````
 flatten_comma_list/2
 flatten_comma_list(SourceList, ResultList)
