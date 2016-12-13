@@ -11,7 +11,7 @@ The files making up the library reside in the folder ...alsdir/library/.
 ###[Prolog Database Predicates](#129-prolog-database-predicates-misc_dbpro)
 ###[Miscellaneous I/O Predicates](#1210-miscellaneous-io-predicates-misc_iopro)
 ###[Simple I/O Predicates](#1211-simple-io-predicates-simpliopro)
-###[String Manipulation Predicates](#string-manipulation-predicates)
+###[String Manipulation Predicates](#1212-string-manipulation-predicates-stringspro)
 ###[Extensible List Utilities](#extensible-list-utilities)
 ###[CREF: Cross-Referencer](#cref)
 
@@ -569,7 +569,7 @@ Reads a list (Line_List) of all lines which can be read from the stream Stream.
 
 To be Added.
 
-##[12.12 String Manipulation Predicates (strings.pro)](id:string-manipulation-predicates)
+## 12.12 String Manipulation Predicates (strings.pro)
 ````
 asplit/4
 asplit(Atom,Splitter,LeftPart,RightPart)
