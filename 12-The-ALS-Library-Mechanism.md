@@ -1,6 +1,6 @@
 The ALS Library mechanism provides a sophisticated device for managing large libraries of code in an efficient and flexible manner. Many files of potentially useful code can be available to a program without the cost of loading these files at the time the program is initially loaded. Only if program execution leads to a need for code from a particular library file is that file in fact loaded. Thereafter, execution pro- ceeds as if the file had already been loaded.. The library mechanism is essentially invisibile to the programmer, except for a possible momentary pause when a particular group of library predicates is first loaded. Consequently, the line between the predicates which are called ’builtin’ and those which are called ’library’ is quite gray.
 The files making up the library reside in the folder ...alsdir/library/.
-###[Overview](#https://github.com/AppliedLogicSystems/ALSProlog/wiki/12-The-ALS-Library-Mechanism#121-overview-of-the-als-library-mechanism-and-tools)
+###[Overview](#121-overview-of-the-als-library-mechanism-and-tools)
 ###[Algebraic List Predicates](#algebraic-list-predicates)
 ###[Positional List Predicates](#positional-list-predicates)
 ###[Miscelaneous List Predicates](#miscelaneous-list-predicates)
