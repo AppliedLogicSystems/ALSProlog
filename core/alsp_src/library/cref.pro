@@ -23,12 +23,20 @@
  |				  runs without pausing ofr cref shell
  |
  |	Several test/example suites are built-in, recorded in cref_suite_db.pro:
- |	    suite_info(suite,hickory,
- |		'examples/als'+['hickory.pro','id.pro'],'hickory.xrf').
- |	    suite_info(suite,tc,
- |		'alsdir/library/tests'+['cref_test1.pro','cref_test2.pro', 'cref_test3.pro'],'tc.xrf').
- |	    suite_info(suite,tc2,'alsdir/library/tests'+['cref_test_lib1.crf'],'tc2.xrf').
- |	    suite_info(suite,chat80,'examples/chat80'+['als_chat.pro','*.pl'],'chat80.xrf').
+ |	    suite_info(hickory, 'examples/als',
+ |			['hickory.pro','id.pro'],'hickory.xrf').
+ |	    suite_info(tc, 'alsdir/library/tests',
+ |			['cref_test1.pro','cref_test2.pro', 'cref_test3.pro'],'tc.xrf').
+ |	    suite_info(tc2,'alsdir/library/tests',
+ | 			['cref_test_lib1.crf'],'tc2.xrf').
+ |	    suite_info(chat80,'examples/chat80',
+ |			['als_chat.pro','*.pl'],'chat80.xrf').
+ |	If myfile.pro is present in the current directory, then to run cref on myfile.pro,
+ |	just issue
+ |		cref('myfile.pro').
+ |	To execute cref on <path>/myfile.pro (where <path> \= '.'), just issue
+ |		cref('<path>/myfile.pro').
+ |	The report file myfile.xrf will be writte in the current directory.
  |
  | NOTE: To use the debugger on this file, comment out
  |		noshow_module(cref).
@@ -76,63 +84,49 @@ export ct1/0.
 	/*-------------------------------------------------------
    	 |	Standard included suites for demo/testing.
  	 *--------------------------------------------------------*/
-ct0 :- cref('alsdir/library/tests/cref_test0').
-ct1 :- cref('alsdir/library/tests/cref_test_lib1').
+ct0 :- cref('alsdir/library/tests/cref_test0.crf').
+ct1 :- cref('alsdir/library/tests/cref_test_lib1.crf').
 
 	/*-------------------------------------------------------
    	 |	Suite (file collections) for demo/testing
 	 |	--- see cref_suite_db.pro
  	 *--------------------------------------------------------*/
 
-	%% Default empty suite options:
-suite_info(suite,SuiteName,SourceFiles,TargetFile, [])
-        :-
-        suite_info(suite,SuiteName,SourceFiles,TargetFile).
 
-	%% Distribute Plus-Dir across files list:
-get_make_info(suite,SuiteName,'.',XFilesList,TargetFile, ConfigInfo)
+	%% SuiteDesc == <path>/file.crf
+get_make_info(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteName)
 	:-
-	suite_info(suite,SuiteName,D+FilesList,TargetFile, ConfigInfo), 
-	pathPlusFilesList(FilesList, D, XFilesList),
-	assert(commonFilesLocn(D)),
-	assert(strippedFiles(FilesList)),
-	!.
-get_make_info(suite,SuiteName,'.',FilesList,TargetFile, ConfigInfo)
-	:-
-	suite_info(suite,SuiteName,FilesList,TargetFile, ConfigInfo), 
-	assert(commonFilesLocn('.')),
-	assert(strippedFiles(FilesList)),
-	!.
-	
-get_make_info(suite,SuiteName,Directory,FilesList,TargetFile, ConfigInfo)
-	:-
-	file_extension(IndirSourceFile,SuiteName,crf),
-	exists_file(IndirSourceFile),
-	open(IndirSourceFile,read,ISS,[]),
+	file_extension(SuiteDesc, PathSansExt, 'crf'),
+	exists_file(SuiteDesc),
 	!,
+	open(SuiteDesc,read,ISS,[]),
 	read_terms(ISS,SpecList),
 	close(ISS),
+
+	(dmember(name=SuiteName, SpecList) ->
+		true
+		;
+		pathPlusFile(_, SuiteName, PathSansExt) 
+	),
+
 	(dmember(dir=RawDirectory, SpecList) ->
-                true
+		(is_absolute_path(RawDirectory) ->
+			Directory = RawDirectory
+			;
+			path_directory_tail(Directory, '.', RawDirectory)
+		)
                 ;
 		Directory = '.'
         ),
 	dmember(files=RawFilesList,SpecList),
-	(RawFilesList = DD+FL ->
-		pathPlusFilesList(FL, DD, FilesList),
-		assert(commonFilesLocn(DD)),
-		assert(strippedFiles(FilesList))
-		;
-		pathPlusFilesList(RawFilesList, RawDirectory, FilesList),
-		Directory = '.',
-		assert(commonFilesLocn('.')),
-		assert(strippedFiles(FilesList))
-	),
+	pathPlusFilesList(RawFilesList, Directory, FilesList),
+	assert(commonFilesLocn(Directory)),
+	assert(strippedFiles(RawFilesList)),
 
         (dmember(config=ConfigInfo, SpecList) ->
                 true
                 ;
-                ConfigInfo = nil
+                ConfigInfo = []
         ),
 	(dmember(tgt = TargetFile, SpecList) ->
 		true
@@ -140,28 +134,43 @@ get_make_info(suite,SuiteName,Directory,FilesList,TargetFile, ConfigInfo)
 		file_extension(TargetFile,SuiteName,xrf)
 	).
 
-get_make_info(suite,SuiteName,'.',FilesList,TargetFile, nil)
+	% suite_info(hickory,'examples/als',['hickory.pro','id.pro'],'hickory.xrf').
+get_make_info(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteDesc)
 	:-
-	file_extension(SuiteName,BaseName,pro),
-	!,
-	FilesList = [SuiteName],
-	assert(commonFilesLocn('.')),
-	assert(strippedFiles(FilesList)),
-	file_extension(TargetFile,BaseName,xrf).
+	suite_info(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo), 
+	!.
 
-get_make_info(suite,SuiteName,'.',FilesList,TargetFile, nil)
+	% suite_info(hickory,'examples/als',['hickory.pro','id.pro'],'hickory.xrf').
+get_make_info(SuiteDesc,Directory,FilesList,TargetFile, [], SuiteDesc)
 	:-
-	file_extension(SourceFile,SuiteName,pro),
-	FilesList = [SourceFile],
+	suite_info(SuiteDesc,Directory,RawFilesList,TargetFile), 
+	!,
+	pathPlusFilesList(RawFilesList, Directory, FilesList),
+	assert(commonFilesLocn(Directory)),
+	assert(strippedFiles(RawFilesList)).
+
+
+	% cref('/Users/ken/ALS/GitHub/ALSProlog/examples/als/diff.pro').
+get_make_info(SuiteDesc,Path,FilesList,TargetFile, [], SuiteName)
+	:-
+	pathPlusFile(Path, File, SuiteDesc),
+	Path \= '',
+	file_extension(File,SuiteName,pro),
+	!,
+	FilesList = [SuiteDesc],
+	assert(commonFilesLocn(Path)),
+	assert(strippedFiles([File])),
+	file_extension(TargetFile,SuiteName,xrf).
+
+	% cref('bench.pro').
+get_make_info(SuiteDesc,'.',FilesList,TargetFile, [], SuiteName)
+	:-
+	file_extension(SuiteDesc,SuiteName,pro),
+	!,
+	FilesList = [SuiteDesc],
 	assert(commonFilesLocn('.')),
 	assert(strippedFiles(FilesList)),
 	file_extension(TargetFile,SuiteName,xrf).
-
-setup_config(cfg(Module,ClauseList), RefsList)
-        :-!,
-        assert_all_refs(Module,ClauseList, RefsList).
-
-setup_config(_, _).
 
 /*!-----------------------------------------------------------------------
  |	cref/1
@@ -184,30 +193,34 @@ d(SuiteName) :- cref(SuiteName, nonstop).
  |
  |	- perform cref processing on program suite SuiteName, using Options
  *-----------------------------------------------------------------------*/
-cref(SuiteName, Options) 
+%cref(SuiteName, Options) 
+cref(SuiteDesc, Options)
 	:-
 	(Options = nonstop ->
 		assert(nonstop)
 		;
 		process_options(Options)
 	),
-		%%  Clear out the calls tree in case we are re-running:
-
-	avl_create(ET),
-	setCallsTree(ET),
 	abolish(commonFilesLocn/1),
 	abolish(strippedFiles/1),
 	abolish(definedList/1),
 	abolish(nodefList/1),
 	remove_prev_op_decls,
 
+	get_make_info(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteName),
+
+	get_cwd(CurDir),
+%	change_cwd(Directory),
+
+		%%  Clear out the calls tree in case we are re-running:
+	avl_create(ET),
+	setCallsTree(ET),
+
 	avl_create(T),setCallsTree(T),
 	makeCRSH(S0), setShellStruct(S0),
 	makeMI(S1), setMiscInfo(S1),
 
-	get_make_info(suite,SuiteName,Directory,FilesList,TargetFile, ConfigInfo),
-	get_cwd(CurDir),
-	change_cwd(Directory),
+
 	do_cref(FilesList),
 	change_cwd(CurDir),
 	als_advise('Cref: Finished with %t\n',[SuiteName]),
@@ -232,7 +245,7 @@ cref(SuiteName, Options)
 	strippedFiles(PlainFilesList),
 	printf(OutSt, '    Suite Files:\n\t%t\n\n',[PlainFilesList]),
 	getCallsTree(CallsTree),
-	write_cref_file(FilesList,CallsTree,OutSt),
+	write_cref_file(FilesList,CallsTree,OutSt,SuiteName),
 	(dmember(TargetFile,[user,user_output]) ->
 		true
 		;
@@ -377,13 +390,14 @@ appendNew([FN | AddlFileNames], Files, [FN | NewFiles])
 
 	%% ------- Write the output file -------- %%
 
-write_cref_file(Source,CallsTree,OutSt) 
+write_cref_file(Source,CallsTree,OutSt,SuiteName) 
 	:-
 	modules(CallsTree,OutSt),
  	group(CallsTree,DependsOnList,OutSt),
 	avl_inorder(CallsTree, InOrderList),
  	asserteds(CallsTree,InOrderList,OutSt),
 	opdeclsDisp(OutSt),
+	libfilesDisp(OutSt,SuiteName),
 	uncalleds(InOrderList,CalledList,OutSt),
  	undefs(DependsOnList,CalledList,OutSt).
 
@@ -1189,6 +1203,32 @@ output_opdecls([OpDec + File | RestOpDecls], OutS)
 	output_opdecls(RestOpDecls, OutS).
 
 
+	/*------------- library predicates used  --------------------------*/
+
+libfilesDisp(OutS, SuiteName)
+	:-
+	getMiscInfo(MIS),
+       	accessMI(lib_files, MIS,  LibFilesList),
+ 	printf(OutS,'\n ======================================\n',[]),
+ 	(LibFilesList = [] ->
+ 		printf(OutS,'\t%t\n',['No Library Files Used'])
+		;
+ 		printf(OutS,'\t%t\n',['Library Files Used']),
+ 		printf(OutS,' ======================================\n\n',[]),
+		sort(LibFilesList, SortedLibFilesList), 
+		showLibFilesList(SortedLibFilesList, OutS)
+	),
+	abolish(lib_files_used/2),
+	assert(lib_files_used(SuiteName, LibFilesList)).
+	
+	
+showLibFilesList([], OutS).
+showLibFilesList([ lf(P,N,XM,LF) | RestLibFilesList], OutS)
+	:-
+ 	printf(OutS,'     %t/%t exported from %t in %t\n',[P,N,XM,LF]),
+	showLibFilesList(LibFilesList, OutS).
+
+
 	/*------------- uncalled predicates --------------------------*/
 uncalleds(InOrderList,CalledList,OutS)
 	:-
@@ -1324,23 +1364,24 @@ displayDependency(P,N,Mod,UseList,F,TreeDataPN, NoDefL, NoDefLTail, OutS)
 	),
 	printf(OutS,'  Module: %t',[Mod]),
 
+	builtins:lib_mod_list(LibModList),
 	((ClauseCount == 0, FactCount ==0) ->
-		accessCRF(dynamicdecl, TreeDataPN, DynDecl),
-		(DynDecl == [] ->
-			builtins:lib_mod_list(LibModList),
-				%% needs to move info into the tree:
-			(find_expm(LibModList, P, N, XM, LF) ->
-				printf(OutS,'\n     * Library: exported from: %t in %t',[XM, LF]),
-				printf(OutS,' -- dynamic',[DynDecl]),
-				NoDefL = NoDefLTail
+			    % XM = library module exporting predicate P/N in file LF:
+		(find_expm(LibModList, P, N, XM, LF) ->
+			printf(OutS,'\n     * Library: exported from: %t in %t',[XM, LF]),
+        		accessMI(lib_files, MIS,  LibFilesList),
+			(dmember(lf(P,N,XM,LF), LibFilesList) ->
+				true
 				;
-				NoDefL = [P/N + (Mod + F) | NoDefLTail],
-				printf(OutS,'   <<< UNDEFINED  ',[]) 
-			)
-			;
+				setMI(lib_files, MIS, [lf(P,N,XM,LF) | LibFilesList])
+			),
 			NoDefL = NoDefLTail
+			;
+			NoDefL = [P/N + (Mod + F) | NoDefLTail],
+			printf(OutS,'   <<< UNDEFINED  ',[]) 
 		)
 		;
+			%% either ClauseCount > 0 or FactCount > 0:
 		NoDefL = NoDefLTail
 	),
 
@@ -1349,6 +1390,14 @@ displayDependency(P,N,Mod,UseList,F,TreeDataPN, NoDefL, NoDefLTail, OutS)
 		printf(OutS,'  --exported ',[]) ;
 		true
 	),
+
+	accessCRF(dynamicdecl, TreeDataPN, DynDecl),
+	(DynDecl == [] ->
+		true
+		;
+		printf(OutS,' -- dynamic',[DynDecl])
+	),
+
 	printf(OutS, '\n      files=[',[]),
 	sort(F, SF),
 	listFiles(SF, OutS),
@@ -3252,7 +3301,8 @@ defStruct(crfMI, [
                 mods_c_preds,
                 mods_exp_preds,
                 mods_imp_preds,
-		op_decls
+		op_decls,
+		lib_files
         ],
         accessPred =    accessMI,
         setPred =       setMI,
@@ -3303,21 +3353,24 @@ setMI(mods_imp_preds,_A,_B) :- mangle(11,_A,_B).
 accessMI(op_decls,_A,_B) :- arg(12,_A,_B).
 setMI(op_decls,_A,_B) :- mangle(12,_A,_B).
 
+accessMI(lib_files,_A,_B) :- arg(13,_A,_B).
+setMI(lib_files,_A,_B) :- mangle(13,_A,_B).
+
 export makeMI/1.
-makeMI(_A) :- _A=..[crfMI,[],[],[],[],[],[],[],[],[],[],[],[]].
+makeMI(_A) :- _A=..[crfMI,[],[],[],[],[],[],[],[],[],[],[],[],[]].
 
 export makeMI/2.
 makeMI(_A,_B) :-
         struct_lookup_subst(
             [files,files_mods,files_d_preds,files_c_preds,mods,mods_files,
                 mods_use,mods_d_preds,mods_c_preds,mods_exp_preds,
-                mods_imp_preds],
-            [[],[],[],[],[],[],[],[],[],[],[],[]],_B,_C),
+                mods_imp_preds,op_decl,libfiles],
+            [[],[],[],[],[],[],[],[],[],[],[],[],[]],_B,_C),
         _A=..[crfMI|_C].
 
 export xmakeMI/2.
-xmakeMI(crfMI(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L),
-    [_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L]).
+xmakeMI(crfMI(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L,_M),
+    [_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L,_M]).
 
 endmod.
 
