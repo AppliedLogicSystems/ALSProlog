@@ -676,7 +676,7 @@ xlist_unit_l(+, -)
 
 ## 12.14 CREF: Cross-Referencer (cref.pro)
 
-CREF operates on suites of one or more prolog files, and outputs a report describing the program structure found, including modules, calls between predicates, numbers of clauses and facts for a predicate, facts and rules asserted, operator declarations, toplevel (uncalled) predicates, and undefined predicates.
+CREF operates on suites of one or more prolog files, and outputs a report describing the program structure found, including modules, calls between predicates, numbers of clauses and facts for a predicate, facts and rules asserted, operator declarations, ALS Library files used, top-level (uncalled) predicates, and undefined predicates.
 
 The main entry points, cref(SuiteName) {- runs "nonstop", with no cref shell} and cref(SuiteName, Opts)) {- can enter interactive cref shell after the initial analysis}.  Both of these calls are library calls, auto-loading the cref analysis files.
 
@@ -704,6 +704,17 @@ suite_info(suite,tc,
 suite_info(suite,tc2,'alsdir/library/tests'+['cref_test_lib1.crf'],'tc2.xrf').
 suite_info(suite,chat80,'examples/chat80'+['als_chat.pro','*.pl'],'chat80.xrf').
  ````
- These can be invoked by cref(hickory), cref(tc), cref(tc2), and cref(chat80), respectively.
+These can be invoked by cref(hickory), cref(tc), cref(tc2), and cref(chat80), respectively. 
+
+When cref finishes writing the report, it also asserts
+ 
+  ````
+ 	cref:lib_files_used(SuiteName, LibFilesList) 
+  ````
+  
+ (in module cref, as indicated), where LibFilesList is the list of library files used by SuiteName.  This is then available for use by other tools, such as packaging.
+
+
+
  
  
