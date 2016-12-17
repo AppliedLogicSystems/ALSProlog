@@ -6,7 +6,7 @@
  *=====================================================================*/
 module builtins.
 
-export append/2.
+export lappend/2.
 export list_diff/3.
 export list_diffs/4.
 export symmetric_diff/3.
