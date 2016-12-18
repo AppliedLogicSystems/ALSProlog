@@ -43,7 +43,7 @@
  | 	 in ~/builtins/debugger.pro
  *====================================================================*/
 
-:-[ - 'alsdir/library/cref_suite_db'].
+:-[ - 'alsdir/library/suite_db.pro'].
 
 	/*-------------------------*
 	 |	cref
@@ -193,7 +193,6 @@ d(SuiteName) :- cref(SuiteName, nonstop).
  |
  |	- perform cref processing on program suite SuiteName, using Options
  *-----------------------------------------------------------------------*/
-%cref(SuiteName, Options) 
 cref(SuiteDesc, Options)
 	:-
 	(Options = nonstop ->
@@ -235,6 +234,10 @@ cref(SuiteDesc, Options)
 		;
 		open(TargetFile, write, OutSt, [])
 	),
+	file_extension(TargetFile, SuiteBaseName, xrf),
+	file_extension(TargetHTML, SuiteBaseName, html),
+	open(TargetHTML, write, OutHTML, []),
+	
 	gen_file_header(OutSt,cref_suite-SuiteName,TargetFile), 
 	printf(OutSt,'\t--by library/cref.pro\n\n',[]),
 	(commonFilesLocn(CFL) -> 
@@ -244,13 +247,18 @@ cref(SuiteDesc, Options)
 	),
 	strippedFiles(PlainFilesList),
 	printf(OutSt, '    Suite Files:\n\t%t\n\n',[PlainFilesList]),
+
+	gen_HTML_header(OutHTML,SuiteName,SuiteDesc,TargetFile), 
+
 	getCallsTree(CallsTree),
-	write_cref_file(FilesList,CallsTree,OutSt,SuiteName),
+	write_cref_file(FilesList,CallsTree,OutSt,SuiteName,OutHTML),
+
 	(dmember(TargetFile,[user,user_output]) ->
 		true
 		;
 		close(OutSt)
 	),
+	finish_HTML_doc(OutHTML),
 	als_advise('Cref: Finished with %t for %t\n',[TargetFile, SuiteName]).
 
 process_options([]) :-!.
@@ -390,16 +398,16 @@ appendNew([FN | AddlFileNames], Files, [FN | NewFiles])
 
 	%% ------- Write the output file -------- %%
 
-write_cref_file(Source,CallsTree,OutSt,SuiteName) 
+write_cref_file(Source,CallsTree,OutSt,SuiteName,OutHTML) 
 	:-
-	modules(CallsTree,OutSt),
- 	group(CallsTree,DependsOnList,OutSt),
+	modules(CallsTree,OutSt,OutHTML),
+ 	group(CallsTree,DependsOnList,OutSt,OutHTML),
 	avl_inorder(CallsTree, InOrderList),
- 	asserteds(CallsTree,InOrderList,OutSt),
-	opdeclsDisp(OutSt),
-	libfilesDisp(OutSt,SuiteName),
-	uncalleds(InOrderList,CalledList,OutSt),
- 	undefs(DependsOnList,CalledList,OutSt).
+ 	asserteds(CallsTree,InOrderList,OutSt,OutHTML),
+	opdeclsDisp(OutSt,OutHTML),
+	libfilesDisp(OutSt,SuiteName,OutHTML),
+	uncalleds(InOrderList,CalledList,OutSt,OutHTML),
+ 	undefs(DependsOnList,CalledList,OutSt,OutHTML).
 
 	/*-----------------------------------------------------
 	 |	MAIN PROCESSING LOOP:
@@ -812,7 +820,7 @@ rcrd(expl_import(ToMod,P,N,FromModule,CurFile) )
 	setCallsTree(NewCallsTree),
 	getMiscInfo(MIS),
 	accessMI(mods_imp_preds, MIS, CurToModImports),
-	enter_in(mods_imp_preds, CurToModImports, ToMod, MIS, import(FG,NG,FromModule,CurFile)).
+	enter_in(mods_imp_preds, CurToModImports, ToMod, MIS, import(P,N,FromModule,CurFile)).
 
 rcrd(module(Mod,CurFile))
 	:-
@@ -911,19 +919,18 @@ excluded('=',2).
 	 |	       all the predicates it eventually calls.
 	 *----------------------------------------------------------*/
 
-group(CallsTree,DependsOnList,OutSt) 
+group(CallsTree,DependsOnList,OutSt,OutHTML) 
 	:-
 	getMiscInfo(MIS),
 	inorder_defined(CallsTree, CallsTree, MIS, [], DependsOnList),
-	dependency_header(OutSt),
-	cref_out(DependsOnList,CallsTree,NoDefList,OutSt),
-%assert(definedList(DefinedList)),
+	dependency_header(OutSt,OutHTML),
+	cref_out(DependsOnList,CallsTree,NoDefList,OutSt,OutHTML),
 	assert(nodefList(NoDefList)),
 	nl(OutSt).
 
 	/*------------- modules appearing --------------------------*/
 
-modules(CallsTree,OutS)
+modules(CallsTree,OutS,OutHTML)
 	:-
 	getMiscInfo(MIS),
 	accessMI(mods, MIS, RawModules),
@@ -931,75 +938,92 @@ modules(CallsTree,OutS)
 	getImplicitImportsInfo(MIS, Modules, ModsImports),
 
 	(Modules = [] -> 
- 		printf(OutS,'%t\n',['\tNo Modules Defined'])
+ 		printf(OutS,'%t\n',['\tNo Modules Defined']),
+ 		printf(OutHTML,'<h3>%t</h3>\n',['\tNo Modules Defined'])
 		;
    		printf(OutS,' ==============================\n',[]),
    		printf(OutS,'     Modules:\n',[]),
    		printf(OutS,' ==============================\n\n',[]),
-		report_modules(Modules, MIS, ModsImports, OutS)
+
+   		printf(OutHTML,'<hr/>\n',[]),
+   		printf(OutHTML,'<h2>Modules</h2>\n',[]),
+		report_modules(Modules, MIS, ModsImports, OutS, OutHTML)
 	).
 
-report_modules([], _, _, OutS)
+report_modules([], _, _, OutS, OutHTML)
 	:-
 	nl(OutS).
-report_modules([M | Modules], MIS, ModsImports, OutS)
+report_modules([M | Modules], MIS, ModsImports, OutS, OutHTML)
 	:-
-	do_mod_report(M, MIS, ModsImports, OutS),
-	report_modules(Modules, MIS, ModsImports, OutS).
+	do_mod_report(M, MIS, ModsImports, OutS, OutHTML),
+	report_modules(Modules, MIS, ModsImports, OutS, OutHTML).
 
-do_mod_report(M, MIS, ModsImports, OutS)
+do_mod_report(M, MIS, ModsImports, OutS, OutHTML)
 	:-
    	printf(OutS,'%t: \n',[M]),
-	mod_rpt_detail(mods_files, M, MIS, OutS),
-	mod_rpt_detail(mods_use, M, MIS, OutS),
-	mod_rpt_detail(mods_exp_preds, M, MIS, OutS),
+   	printf(OutHTML,'<h3>%t:</h3>\n',[M]),
+   	printf(OutHTML,'<div style="margin-left:3em">\n',[]),
+	mod_rpt_detail(mods_files, M, MIS, OutS, OutHTML),
+	mod_rpt_detail(mods_use, M, MIS, OutS, OutHTML),
+	mod_rpt_detail(mods_exp_preds, M, MIS, OutS, OutHTML),
 
 	(dmember(M+Imps, ModsImports) ->
    		printf(OutS, '\tImplicit Imports (via use/export):\n', []),
-		listImports(Imps, OutS)
+   		printf(OutHTML, '<br><b>Implicit Imports (via use/export):</b>\n', []),
+   		printf(OutHTML,'<div style="margin-left:3em;margin-top:-1em;">\n',[]),
+		listImports(Imps, OutS, OutHTML)
 		;
-   		printf(OutS, '\tImplicit Imports: []\n', [])
+   		printf(OutS, '\tImplicit Imports: []\n', []),
+   		printf(OutHTML, '<br><b>Implicit Imports: </b>[]\n', [])
 	),
-	mod_rpt_detail(mods_imp_preds, M, MIS, OutS).
+	mod_rpt_detail(mods_imp_preds, M, MIS, OutS, OutHTML),
+   	printf(OutHTML,'</div>\n',[]).
 
-mod_rpt_detail(Tag, M, MIS, OutS)
+mod_rpt_detail(Tag, M, MIS, OutS, OutHTML)
 	:-
         accessMI(Tag, MIS, TagInfoList), 
 	(dmember(M+TagInfo, TagInfoList) -> true ; TagInfo = []),
-	display_tag_info(Tag, TagInfo, M, OutS).
+	display_tag_info(Tag, TagInfo, M, OutS, OutHTML).
 
-display_tag_info(mods_files, TagInfo, M, OutS)
+display_tag_info(mods_files, TagInfo, M, OutS, OutHTML)
 	:-!,
    	printf(OutS, '\tFiles:\t[', []),
+   	printf(OutHTML, '<b>Files:&nbsp;</b>[', []),
 	sort(TagInfo, STagInfo),
-	listFiles(STagInfo, OutS).
+	listFiles(STagInfo, OutS, OutHTML).
 
-display_tag_info(mods_imp_preds, TagInfo, M, OutS)
+display_tag_info(mods_imp_preds, TagInfo, M, OutS, OutHTML)
 	:-!,
-   	printf(OutS, '\tExplicit imports: [', []),
-	listExplicitImports(TagInfo, OutS).
+   	printf(OutS, '\tExplicit Imports: [', []),
+   	printf(OutHTML, '<br><b>Explicit Imports: </b>[', []),
+	listExplicitImports(TagInfo, OutS, OutHTML).
 
-display_tag_info(Tag, TagInfo, M, OutS)
+display_tag_info(Tag, TagInfo, M, OutS, OutHTML)
 	:-
 	tag_succeed_string(Tag, SucceedString),
-   	printf(OutS, SucceedString, [TagInfo]).
+   	printf(OutS, SucceedString, [TagInfo]),
+	html_tag_succeed_string(Tag, HTMLSucceedString),
+   	printf(OutHTML, HTMLSucceedString, [TagInfo]).
 	
-tag_succeed_string(mods_files, '\tFiles:\t  %t\n').
-
 tag_succeed_string(mods_use, '\tUses:\t  %t\n').
+html_tag_succeed_string(mods_use, '<br><b>Uses: </b> %t\n').
 
 tag_succeed_string(mods_exp_preds, '\tExported: %t\n').
+html_tag_succeed_string(mods_exp_preds, '<br><b>Exported: </b> %t\n').
 
-tag_succeed_string(mods_imp_preds, '\tExplicit imports:%t\n').
+tag_succeed_string(mods_imp_preds, '\tExplicit imports: %t\n').
+html_tag_succeed_string(mods_imp_preds, '<br><b>Explicit imports: </b>%t\n').
 
-listFiles([], OutS)
+listFiles([], OutS, OutHTML)
 	:-
-   	printf(OutS, ']\n', []).
-listFiles([RawFile | TagInfo], OutS)
+   	printf(OutS, ']\n', []),
+   	printf(OutHTML, ']</h4>\n', []).
+listFiles([RawFile | TagInfo], OutS, OutHTML)
 	:-
 	pathPlusFile(P, File, RawFile),
    	printf(OutS, '%t ', [File]),
-	listFiles(TagInfo, OutS).
+   	printf(OutHTML, '%t ', [File]),
+	listFiles(TagInfo, OutS, OutHTML).
 
 getImplicitImportsInfo(MIS, Modules, ModsImports)
 	:-
@@ -1028,36 +1052,46 @@ getExps([_ | MUsesList], ModsExports, MImports)
 	:-
 	getExps(MUsesList, ModsExports, MImports).
 
-listImports([], _).
-listImports([Preds+XMod | Imps], OutS)
+listImports([], _, OutHTML)
+	:-
+   	printf(OutHTML,'</div>\n',[]).
+listImports([Preds+XMod | Imps], OutS, OutHTML)
 	:-
    	printf(OutS, '\t    %t from %t\n', [Preds,XMod]),
-	listImports(Imps, OutS).
+   	printf(OutHTML, '<br>%t from %t\n', [Preds,XMod]),
+	listImports(Imps, OutS, OutHTML).
 
-listExplicitImports([], OutS) 
+listExplicitImports([], OutS, OutHTML) 
 	:-
-   	printf(OutS, ']\n\n', []).
+   	printf(OutS, ']\n\n', []),
+   	printf(OutHTML, ']\n\n', []).
 	
-listExplicitImports([ImpInfo | ImpInfos], OutS)
+listExplicitImports([ImpInfo | ImpInfos], OutS, OutHTML)
 	:-
 	ImpInfo = import(Pred, Arity, FromMod, File),
    	printf(OutS, ' %t:%t/%t ', [FromMod,Pred,Arity]),
-	listExplicitImports(TagInfo, OutS).
+   	printf(OutHTML, ' %t:%t/%t ', [FromMod,Pred,Arity]),
+	listExplicitImports(TagInfo, OutS, OutHTML).
 
 	/*------------ Asserted Predicates -------------------------*/
 
-asserteds(CallsTree,InOrderList,OutS)
+asserteds(CallsTree,InOrderList,OutS,OutHTML)
 	:-
 	extractAsserteds(InOrderList, AssertedList),
  	printf(OutS,'\n ======================================\n',[]),
+ 	printf(OutHTML,'<hr>\n',[]),
  	(AssertedList = [] ->
- 		printf(OutS,'%t\n',['\tNo Asserted Facts'])
+ 		printf(OutS,'%t\n',['\tNo Asserted Facts']),
+ 		printf(OutHTML,'<h2>%t</h2>\n',['No Asserted Facts'])
 		;
  		printf(OutS,'%t\n',['    Asserted Facts (P/N in [Module + File])']),
  		printf(OutS,' ======================================\n\n',[]),
-		output_asserted_facts(AssertedList, OutS)
+ 		printf(OutHTML,'%t\n',['<h2>Asserted Facts (P/N in [Module + File])</h2>']),
+   		printf(OutHTML,'<div style="margin-left:3em;margin-top:-1em;">\n',[]),
+		output_asserted_facts(AssertedList, OutS,OutHTML)
 	),
-	handleAssertedRules(CallsTree,InOrderList,OutS).
+	handleAssertedRules(CallsTree,InOrderList,OutS,OutHTML),
+   	printf(OutHTML,'</div>\n',[]).
 
 extractAsserteds([], []).
 extractAsserteds([Key-Data | RestInOrderList], AssertedList)
@@ -1088,49 +1122,53 @@ extractAsserteds([Key-Data | RestInOrderList], AssertedList)
 	:-
 	extractAsserteds(RestInOrderList, AssertedList).
 
-output_asserted_facts([],_).
-output_asserted_facts([AA | AssertedList], OutS)
+output_asserted_facts([],_,_).
+output_asserted_facts([AA | AssertedList], OutS,OutHTML)
 	:-
-	out_asserted(AA, OutS),
-	output_asserted_facts(AssertedList, OutS).
+	out_asserted(AA, OutS,OutHTML),
+	output_asserted_facts(AssertedList, OutS,OutHTML).
 
-out_asserted(AA-D-D, OutS)
-	:-
-	D \= [],
-	!,
-	printf(OutS,'    %t - %t\n',[AA,D]).
-
-out_asserted(AA-D-(dynamic - 'implicit assert'), OutS)
+out_asserted(AA-D-D, OutS,OutHTML)
 	:-
 	D \= [],
 	!,
-	printf(OutS,'    %t - %t\n',[AA,D]).
+	printf(OutS,'    %t - %t\n',[AA,D]),
+	printf(OutHTML,'<br><b>%t</b> - %t\n',[AA,D]).
 
-out_asserted(AA-D, OutS)
+out_asserted(AA-D-(dynamic - 'implicit assert'), OutS,OutHTML)
 	:-
 	D \= [],
 	!,
-	printf(OutS,'    %t - %t\n',[AA,D]).
+	printf(OutS,'    %t - %t\n',[AA,D]),
+	printf(OutHTML,'<br><b>%t</b> - %t\n',[AA,D]).
 
-out_asserted(AA, OutS)
+out_asserted(AA-D, OutS,OutHTML)
 	:-
-	printf(OutS,'    %t\n',[AA]).
+	D \= [],
+	!,
+	printf(OutS,'    %t - %t\n',[AA,D]),
+	printf(OutHTML,'<br><b>%t</b> - %t\n',[AA,D]).
 
-handleAssertedRules(CallsTree,InOrderList,OutS)
+out_asserted(AA, OutS,OutHTML)
+	:-
+	printf(OutS,'    %t\n',[AA]),
+	printf(OutHTML,'<br><b>%t</b>\n',[AA]).
+
+handleAssertedRules(CallsTree,InOrderList,OutS,OutHTML)
 	:-
 	extractAssertedRules(InOrderList, AssertedRulesList),
-	displayAssertedRules(AssertedRulesList, OutS).
+	displayAssertedRules(AssertedRulesList, OutS,OutHTML).
 
-displayAssertedRules([], OutS)
+displayAssertedRules([], OutS,OutHTML)
 	:-!,
 	printf(OutS, '\n        No Asserted Normal Rules\n', []).
 
-displayAssertedRules(RulesList, OutS)
+displayAssertedRules(RulesList, OutS,OutHTML)
 	:-!,
 	printf(OutS, '        -------------------------------\n', []),
 	printf(OutS, '        Asserted Rules\n', []),
 	printf(OutS, '        -------------------------------\n', []),
-	outAssertedRules(RulesList, OutS).
+	outAssertedRules(RulesList, OutS,OutHTML).
 
 
 extractAssertedRules([], []).
@@ -1149,97 +1187,116 @@ extractAssertedRules([_ | RestInOrderList], AssertedRulesList)
 
 	%% [foo/1-[user+b3.pro]]
 	%% foo/1 - [virtualrule/1+user+b3.pro]
-outAssertedRules([], OutS).
+outAssertedRules([], OutS,OutHTML).
 
-outAssertedRules([varHeadRule/0-VarHeadBodies | RestRulesList], OutS)
+outAssertedRules([varHeadRule/0-VarHeadBodies | RestRulesList], OutS,OutHTML)
 	:-!,
-	outDispVRuleHeadBodies(VarHeadBodies, OutS),
-	outAssertedRules(RestRulesList, OutS).
+	outDispVRuleHeadBodies(VarHeadBodies, OutS,OutHTML),
+	outAssertedRules(RestRulesList, OutS,OutHTML).
 
-outAssertedRules([RF/RN-[PF/PN+Mod+FilesList] | RestRulesList], OutS)
+outAssertedRules([RF/RN-[PF/PN+Mod+FilesList] | RestRulesList], OutS,OutHTML)
 	:-
 	printf(OutS, '        + %t/%t in %t/%t -  %t+%t\n', [RF, RN, PF, PN, Mod,FilesList]),
-	outAssertedRules(RestRulesList, OutS).
+	printf(OutHTML, '<br>&#x25B8; %t/%t in %t/%t -  %t--%t\n', [RF, RN, PF, PN, Mod,FilesList]),
+	outAssertedRules(RestRulesList, OutS,OutHTML).
 
 
-outDispVRuleHeadBodies([], OutS)
+outDispVRuleHeadBodies([], OutS,OutHTML)
 	:-
 	printf(OutS, '    ++++    \n', []).
-outDispVRuleHeadBodies([VHB | VarHeadBodies], OutS)
+%	printf(OutHTML, '<br>++++    \n', []).
+outDispVRuleHeadBodies([VHB | VarHeadBodies], OutS,OutHTML)
 	:-
-	oDVrH(VHB, OutS),
-	outDispVRuleHeadBodies(VarHeadBodies, OutS).
+	oDVrH(VHB, OutS, OutHTML),
+	outDispVRuleHeadBodies(VarHeadBodies, OutS, OutHTML).
 
-oDVrH(vH=Body+F/N+Mod+FilesList, OutS)
+oDVrH(vH=Body+F/N+Mod+FilesList, OutS,OutHTML)
 	:-
 	nonvar(Body),
 	!,
-	printf(OutS, '        + variable rule head in %t/%t -  %t+%t\n          Rule Body: %t\n', [F, N, Mod,FilesList,Body]).
+	printf(OutS, '        + variable rule head in %t/%t -  %t+%t\n          Rule Body: %t\n', [F, N, Mod,FilesList,Body]),
+	printf(OutHTML, '<br>&#x25B8; variable rule head in %t/%t -  %t&nbsp;+&nbsp;%t\n          Rule Body: %t\n', [F, N, Mod,FilesList,Body]).
 
-oDVrH(vH=Body+F/N+Mod+FilesList, OutS)
+oDVrH(vH=Body+F/N+Mod+FilesList, OutS,OutHTML)
 	:-
-	printf(OutS, '        + variable rule head in %t/%t -  %t+%t\n           Rule Body also variable\n', [F, N, Mod,FilesList,Body]).
+	printf(OutS, '        + variable rule head in %t/%t -  %t+%t\n           Rule Body also variable\n', [F, N, Mod,FilesList,Body]),
+	printf(OutHTML, '<br>&#x25B8; variable rule head in %t/%t -  %t&nbsp;+&nbsp;%t\n           Rule Body also variable\n', [F, N, Mod,FilesList,Body]).
 
 
 	/*------------- operator declarations --------------------------*/
 
-opdeclsDisp(OutS)
+opdeclsDisp(OutS,OutHTML)
 	:-
 	getMiscInfo(MIS),
 	accessMI(op_decls, MIS, OpDecls),
  	printf(OutS,'\n ======================================\n',[]),
+ 	printf(OutHTML,'<hr>\n',[]),
  	(OpDecls = [] ->
- 		printf(OutS,'%t\n',['\tNo Operator Declarations'])
+ 		printf(OutS,'%t\n',['\tNo Operator Declarations']),
+ 		printf(OutHTML,'<h2>%t</h2>\n',['\tNo Operator Declarations'])
 		;
  		printf(OutS,'%t\n',['\tOperator Declarations']),
  		printf(OutS,' ======================================\n\n',[]),
-		output_opdecls(OpDecls, OutS)
+ 		printf(OutHTML,'<h2>%t</h2>\n',['\tOperator Declarations']),
+		output_opdecls(OpDecls, OutS,OutHTML)
 	).
 
-output_opdecls([], OutS).
-output_opdecls([OpDec + File | RestOpDecls], OutS)
+output_opdecls([], OutS,OutHTML).
+output_opdecls([OpDec + File | RestOpDecls], OutS,OutHTML)
 	:-
  	printf(OutS,'     :- %t in %t\n',[OpDec,File]),
-	output_opdecls(RestOpDecls, OutS).
+ 	printf(OutHTML,'<br>:- %t in %t\n',[OpDec,File]),
+	output_opdecls(RestOpDecls, OutS,OutHTML).
 
 
 	/*------------- library predicates used  --------------------------*/
 
-libfilesDisp(OutS, SuiteName)
+libfilesDisp(OutS, SuiteName,OutHTML)
 	:-
 	getMiscInfo(MIS),
        	accessMI(lib_files, MIS,  LibFilesList),
  	printf(OutS,'\n ======================================\n',[]),
+ 	printf(OutHTML,'<Hr>\n',[]),
  	(LibFilesList = [] ->
- 		printf(OutS,'\t%t\n',['No Library Files Used'])
+ 		printf(OutS,'\t%t\n',['No Library Files Used']),
+ 		printf(OutHTML,'<h2>%t</h2>\n',['No Library Files Used'])
 		;
  		printf(OutS,'\t%t\n',['Library Files Used']),
  		printf(OutS,' ======================================\n\n',[]),
+ 		printf(OutHTML,'<h2>%t</h2>\n',['Library Files Used']),
 		sort(LibFilesList, SortedLibFilesList), 
-		showLibFilesList(SortedLibFilesList, OutS)
+ 		printf(OutHTML,'<div style="margin-left:3em;margin-top:-2em;">\n',[]),
+		showLibFilesList(SortedLibFilesList, OutS,OutHTML),
+ 		printf(OutHTML,'</div>\n',[])
 	),
 	abolish(lib_files_used/2),
 	assert(lib_files_used(SuiteName, LibFilesList)).
 	
 	
-showLibFilesList([], OutS).
-showLibFilesList([ lf(P,N,XM,LF) | RestLibFilesList], OutS)
+showLibFilesList([], OutS,OutHTML).
+showLibFilesList([ lf(P,N,XM,LF) | RestLibFilesList], OutS,OutHTML)
 	:-
  	printf(OutS,'     %t/%t exported from %t in %t\n',[P,N,XM,LF]),
-	showLibFilesList(LibFilesList, OutS).
+ 	printf(OutHTML,'<br><b>%t/%t</b> exported from %t in %t\n',[P,N,XM,LF]),
+	showLibFilesList(LibFilesList, OutS,OutHTML).
 
 
 	/*------------- uncalled predicates --------------------------*/
-uncalleds(InOrderList,CalledList,OutS)
+uncalleds(InOrderList,CalledList,OutS,OutHTML)
 	:-
 	extractUncalleds(InOrderList, UncalledList, CalledList),
  	printf(OutS,'\n ======================================\n',[]),
+ 	printf(OutHTML,'<hr>\n',[]),
  	(UncalledList = [] ->
- 		printf(OutS,'%t\n',['\tNo Uncalled Predicates'])
+ 		printf(OutS,'%t\n',['\tNo Uncalled Predicates']),
+ 		printf(OutHTML,'<h2>%t</h2>\n',['\tNo Uncalled Predicates'])
 		;
  		printf(OutS,'%t\n',['    Uncalled (toplevel) Predicates (P/N in [Module + Files])']),
  		printf(OutS,' ======================================\n\n',[]),
-		output_uncalleds(UncalledList, OutS)
+ 		printf(OutHTML,'<h2>%t</h2>\n',['    Uncalled (toplevel) Predicates (P/N in [Module + Files])']),
+ 		printf(OutHTML,'<div style="margin-left:3em;margin-top:-2em;">\n',[]),
+		output_uncalleds(UncalledList, OutS,OutHTML),
+ 		printf(OutHTML,'</div>\n',[])
 	).
 
 extractUncalleds([], [], []).
@@ -1255,66 +1312,103 @@ extractUncalleds([Key-Data  | InOrderList], UncalledList, [Key-Data | CalledList
 	:-
 	extractUncalleds(InOrderList, UncalledList, CalledList).
 
-output_uncalleds([], _).
-output_uncalleds([Unc | UncalledList], OutS)
+output_uncalleds([], _,_).
+output_uncalleds([Unc | UncalledList], OutS,OutHTML)
 	:-
-	out_unc(Unc, OutS),
-	output_uncalleds(UncalledList, OutS).
+	out_unc(Unc, OutS,OutHTML),
+	output_uncalleds(UncalledList, OutS,OutHTML).
 
-out_unc(PN-[Mod+FList], OutS)
+out_unc(PN-[Mod+FList], OutS,OutHTML)
 	:-!,
  	printf(OutS,'    %t - [%t+[', [PN,Mod]),
+ 	printf(OutHTML,'<br><b>%t</b> - [%t+[', [PN,Mod]),
 	sort(FList, SFList),
-	listFiles(SFList, OutS).
+	listFiles(SFList, OutS,OutHTML).
 
 	/*-------------------------------------------------------
  	 |	undefs
 	 *-------------------------------------------------------*/
 
 	%% DependsOnList:: '$depends_on'(P,N,Mod,UsesList,Files),
-undefs(DependsOnList,CalledList,OutS)
+undefs(DependsOnList,CalledList,OutS,OutHTML)
 	:-
  	printf(OutS,'\n ======================================\n',[]),
+ 	printf(OutHTML,'<hr>\n',[]),
 	(nodefList(NoDefList) ->
  		printf(OutS,'%t\n',['    Undefined Predicates (P/N in [Module + Files])']),
+ 		printf(OutHTML,'<H2>%t</h2>\n',['    Undefined Predicates (P/N in [Module + Files])']),
  		printf(OutS,' ======================================\n\n',[]),
-		output_nodefs(NoDefList, OutS)
+ 		printf(OutHTML,'<div style="margin-left:3em;margin-top:-1.5em;">\n',[]),
+		output_nodefs(NoDefList, OutS,OutHTML),
+ 		printf(OutHTML,'</div>\n',[])
 		;
  		printf(OutS,'%t\n',['\tNo Undefined Predicates'])
 	),
  	printf(OutS,'\n ======================================\n',[]).
 	
 
-output_nodefs([],_).
-output_nodefs([AA | NoDefList], OutS)
+output_nodefs([],_,OutHTML).
+output_nodefs([AA | NoDefList], OutS,OutHTML)
 	:-
-	out_nodef(AA, OutS),
-	output_nodefs(NoDefList, OutS).
+	out_nodef(AA, OutS,OutHTML),
+	output_nodefs(NoDefList, OutS,OutHTML).
 
-out_nodef(FN+(Mod+FList), OutS)
+out_nodef(FN+(Mod+FList), OutS,OutHTML)
 	:-
  	printf(OutS,'    %t - [%t+[', [FN,Mod]),
+ 	printf(OutHTML,'<br><b>%t</b> - [%t+[', [FN,Mod]),
 	sort(FList, SFList),
-	listFiles(SFList, OutS).
+	listFiles(SFList, OutS,OutHTML).
 
 
 %%%% ============== OUTPUT PREDICATES =========================
 
 %%--------------- Dependency Header -----------------------------
 
-dependency_header(OutS)
+dependency_header(OutS,OutHTML)
 	:-
    printf(OutS,' ==============================\n',[]),
    printf(OutS,' Predicate Dependencies & Calls:\n',[]),
-   printf(OutS,' ==============================\n\n',[]).
+   printf(OutS,' ==============================\n\n',[]),
 
-
+   printf(OutHTML,'<hr>\n',[]),
+   printf(OutHTML,'<h2>Predicate Dependencies & Calls:</h2>\n',[]).
 
 gen_file_header(OutSt,cref_suite-SuiteName,TargetFile)
 	:-
  	printf(OutSt,'    Cref Report: %t\n',[TargetFile]),
  	printf(OutSt,'    \tFor: %t\n\n',[SuiteName]).
 
+gen_HTML_header(OutHTML,SuiteName, SuiteDesc, TargetFile)
+	:-
+	printf(OutHTML,'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\n',[]),
+	printf(OutHTML,'<HTML xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">\n',[]),
+	printf(OutHTML,'<HEAD>\n',[]),
+	printf(OutHTML,'<meta http-equiv="content-type" content="text/html; charset=utf-8" />\n',[]),
+	printf(OutHTML,'<meta name="description" content="ALS Prolog Open Source" />\n',[]),
+	printf(OutHTML,'<meta name="keywords" content="programming, prolog, opensource" />\n',[]),
+	printf(OutHTML,'<title>Cref Report: %t</title>\n',[SuiteName]),
+	printf(OutHTML,'</HEAD>\n',[]),
+	printf(OutHTML,'<BODY>\n',[]),
+
+ 	printf(OutHTML,'<h1>Cref Report for %t<br></h1>\n',[SuiteDesc]),
+	printf(OutHTML,'<h3>----by library/cref.pro</h3>\n\n',[]),
+	(commonFilesLocn(CFL) -> 
+		printf(OutHTML, '<h3>Common Files Location: %t</h3>\n', [CFL])
+		; 
+		printf(OutHTML, '<h3>No Common Files Location</h3>\n', [])
+	),
+	strippedFiles(PlainFilesList),
+	printf(OutHTML, '<h3>Suite Files:\n\t%t</h3>\n\n',[PlainFilesList]).
+
+finish_HTML_doc(OutHTML)
+	:-
+	printf(OutHTML,'</BODY>',[]),
+	printf(OutHTML,'</HTML>',[]).
+
+write_HTML_cref_file(FilesList,CallsTree,OutHTML,SuiteName)
+	:-
+	true.
 
 %%--------------- Report Output -----------------------------
 
@@ -1333,21 +1427,21 @@ setup_report(List, NoItemsMessage, ItemsMessage, OutS)
 /*------------------------------------------------------------------------
 	cref_out 
  *------------------------------------------------------------------------*/
-cref_out([],_,[],_).
+cref_out([],_,[],_,OutHTML).
 
-cref_out(['$depends_on'(P,N,Mod,UseList,F) | Rest],CallsTree, NoDefL, OutS)
+cref_out(['$depends_on'(P,N,Mod,UseList,F) | Rest],CallsTree, NoDefL, OutS,OutHTML)
 	:-
 	P/N \= varHeadRule/0,
 	!,
 	avl_search(P/N, TreeDataPN, CallsTree),
-	displayDependency(P,N,Mod,UseList,F,TreeDataPN, NoDefL, NoDefLInter, OutS),
- 	cref_out(Rest,CallsTree,NoDefLInter, OutS).
+	displayDependency(P,N,Mod,UseList,F,TreeDataPN, NoDefL, NoDefLInter, OutS,OutHTML),
+ 	cref_out(Rest,CallsTree,NoDefLInter, OutS,OutHTML).
 
-cref_out([_ | Rest],CallsTree, NoDefL, OutS)
+cref_out([_ | Rest],CallsTree, NoDefL, OutS,OutHTML)
 	:-
- 	cref_out(Rest,CallsTree,NoDefl, OutS).
+ 	cref_out(Rest,CallsTree,NoDefl, OutS,OutHTML).
 
-displayDependency(P,N,Mod,UseList,F,TreeDataPN, NoDefL, NoDefLTail, OutS)
+displayDependency(P,N,Mod,UseList,F,TreeDataPN, NoDefL, NoDefLTail, OutS,OutHTML)
 	:-
 	accessCRF(calledby,TreeDataPN, CalledBys),
 	accessCRF(clausecount,TreeDataPN, ClauseCount),
@@ -1357,18 +1451,40 @@ displayDependency(P,N,Mod,UseList,F,TreeDataPN, NoDefL, NoDefLTail, OutS)
 
 	sort(UseList, NiceUseList),
 	printf(OutS,'%t/%t  #clauses=%t   #facts=%t',[P,N,ClauseCount,FactCount]),
+	printf(OutHTML,'<br><b>%t/%t</b>  #clauses=%t   #facts=%t',[P,N,ClauseCount,FactCount]),
 
 	(member(P/N, NiceUseList) ->
 		printf(OutS,'   --recursive--  ',[]) ;
+		printf(OutHTML,'   --recursive--  ',[]) ;
 		true
 	),
 	printf(OutS,'  Module: %t',[Mod]),
+	printf(OutHTML,'  Module: %t',[Mod]),
+
+	((dmember(Mod+ModExpPreds, ExpPreds),
+		dmember(P/N, ModExpPreds)) ->
+		printf(OutS,'  --exported ',[]) ;
+		printf(OutHTML,'  --exported ',[]) ;
+		true
+	),
+
+	accessCRF(dynamicdecl, TreeDataPN, DynDecl),
+	(DynDecl == [] ->
+		true
+		;
+		printf(OutS,' -- dynamic',[DynDecl]),
+		printf(OutHTML,' -- dynamic',[DynDecl])
+	),
 
 	builtins:lib_mod_list(LibModList),
 	((ClauseCount == 0, FactCount ==0) ->
 			    % XM = library module exporting predicate P/N in file LF:
 		(find_expm(LibModList, P, N, XM, LF) ->
 			printf(OutS,'\n     * Library: exported from: %t in %t',[XM, LF]),
+	printf(OutHTML, '<div style="margin-left:3em;">',[]),
+			printf(OutHTML,'* Library: exported from: %t in %t',[XM, LF]),
+	printf(OutHTML, '</div>',[]),
+
         		accessMI(lib_files, MIS,  LibFilesList),
 			(dmember(lf(P,N,XM,LF), LibFilesList) ->
 				true
@@ -1378,31 +1494,24 @@ displayDependency(P,N,Mod,UseList,F,TreeDataPN, NoDefL, NoDefLTail, OutS)
 			NoDefL = NoDefLTail
 			;
 			NoDefL = [P/N + (Mod + F) | NoDefLTail],
-			printf(OutS,'   <<< UNDEFINED  ',[]) 
+			printf(OutS,'   <<< UNDEFINED  ',[]),
+			printf(OutHTML,'&nbsp;&nbsp;&lt;&lt;&lt; UNDEFINED  ',[])
 		)
 		;
 			%% either ClauseCount > 0 or FactCount > 0:
 		NoDefL = NoDefLTail
 	),
-
-	((dmember(Mod+ModExpPreds, ExpPreds),
-		dmember(P/N, ModExpPreds)) ->
-		printf(OutS,'  --exported ',[]) ;
-		true
-	),
-
-	accessCRF(dynamicdecl, TreeDataPN, DynDecl),
-	(DynDecl == [] ->
-		true
-		;
-		printf(OutS,' -- dynamic',[DynDecl])
-	),
+	printf(OutHTML, '<div style="margin-left:3em;margin-top:-1em;">',[]),
 
 	printf(OutS, '\n      files=[',[]),
+	printf(OutHTML, '<br>      files=[',[]),
 	sort(F, SF),
-	listFiles(SF, OutS),
+	listFiles(SF, OutS,OutHTML),
 	printf(OutS, '    * Depends on:  %t\n', [NiceUseList]),
-	printf(OutS,'    * Called by:   %t\n',[CalledBys]).
+	printf(OutHTML, '<br>Depends on:  %t\n', [NiceUseList]),
+	printf(OutS,'    * Called by:   %t\n',[CalledBys]),
+	printf(OutHTML,'<br>Called by:   %t\n',[CalledBys]),
+	printf(OutHTML, '</div>',[]).
 
 find_expm([XM/F | LibModList], P, N, XM, F)
 	:-
