@@ -169,10 +169,10 @@ proc add_tools_menu {menubar type window} {
     	$menubar.tools add command -label "Kill Tcl Interps" -underline 0 -command {re kill_tcl_interps} -state $proenv(edition)
 #    	$menubar.tools add command -label "Tcl Shell$elipsis" -underline 0 -command {re tcl_shell} 
 
-#		$menubar.tools add separator 
+		$menubar.tools add separator 
 		## Cref
-#    	$menubar.tools add command -label "Cref$elipsis" -underline 0 \
-#			-command {re {prolog call cref0 start_cref}} 
+    	$menubar.tools add command -label "Cref$elipsis" -underline 0 \
+			-command {re {prolog call alsdev start_cref}} 
 #		$menubar.tools add separator 
 		## Application GUI Generator
 #    	$menubar.tools add command -label "Application Gui Generator$elipsis" -underline 0 \

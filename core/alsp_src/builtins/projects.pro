@@ -122,6 +122,7 @@ display_text_slots([TextSlot | TextSlots], GuiPath, State)
 	:-
 	accessObjStruct(TextSlot, State, SlotValue),
 	tcl_call(shl_tcli, [show_text_slot,GuiPath,TextSlot,SlotValue], _),
+	!,
 	display_text_slots(TextSlots, GuiPath, State).
 display_text_slots([_ | TextSlots], GuiPath, State)
 	:-!,
@@ -133,6 +134,7 @@ display_list_slots([ListSlot | ListSlots], GuiPath, State)
 	accessObjStruct(ListSlot, State, SlotValueList),
 	accessObjStruct(myHandle, State, PrjMgrHandle),
 	tcl_call(shl_tcli, [show_list_slot,GuiPath,ListSlot,SlotValueList,PrjMgrHandle], _),
+	!,
 	display_list_slots(ListSlots, GuiPath, State).
 display_list_slots([_ | ListSlots], GuiPath, State)
 	:-!,
@@ -709,5 +711,32 @@ patterns_from_types([FType | FileTypes], [Pat | FilePatterns])
 	:-
 	catenate('*', FType, Pat),
 	patterns_from_types(FileTypes, FilePatterns).
+
+endmod.
+
+
+module alsdev.
+use tcltk.
+
+cref_present 
+	:-
+	cref:clause(cref(_), _),
+	!,
+	true.
+cref_present 
+	:-
+	consult(cref).
+
+export start_cref/0.
+start_cref
+	:-
+	cref_present,
+write(in_start_cref),nl,
+	gensym(project,X),
+	sub_atom(X,1,_,0,InternalName),
+%	gen_project_mgrAction(init_gui(InternalName), State).
+	catenate('.', InternalName, GuiPath),
+	tcl_call(shl_tcli, 
+		[cref_panel, GuiPath ], _).
 
 endmod.

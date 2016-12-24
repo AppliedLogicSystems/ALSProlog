@@ -1590,3 +1590,145 @@ proc vTclWindow.syn_errors {base} {
         -sticky ns 
 }
 
+###################################################################
+## CREF
+
+
+#	{base TextSlots ListOfFilesSlots ListSlots SlotNames FileTypes DfltDirs LibFiles} {
+##=================================================================================
+# Project Document fields
+# proenv($base,dirty) - true iff document window is dirty.
+##=================================================================================
+proc cref_panel \
+	{base} {
+	global array proenv
+
+#set HHB [list $LibFiles]
+
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel
+    wm focusmodel $base passive
+    wm maxsize $base \
+		[expr [winfo screenwidth .] - 80] \
+		[expr [winfo screenheight .] - 80]
+    wm minsize $base 1 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 0
+    wm deiconify $base
+    wm title $base "CREF"
+puts "BEFORE cref_close"
+    wm protocol $base WM_DELETE_WINDOW "cref_close $base"
+
+    frame $base.spec \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    label $base.spec.label \
+        -anchor w -text {Suite Spec (*.crf):} 
+    entry $base.spec.entry \
+        -cursor {} -highlightthickness -1 
+
+    frame $base.suite_name \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    label $base.suite_name.label \
+        -anchor w -text {Suite Name:} 
+    entry $base.suite_name.entry \
+        -cursor {} -highlightthickness 0 
+
+#    set proenv(ppj_pathtype) relative
+
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.spec \
+        -anchor center -expand 0 -fill x -pady 4 -side top 
+    pack $base.spec.label \
+        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.spec.entry \
+        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
+
+    pack $base.suite_name \
+        -anchor center -expand 0 -fill x -pady 2 -side top 
+    pack $base.suite_name.label \
+        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.suite_name.entry \
+        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
+
+    #########################
+    # Single entry text slots
+    #########################
+#	foreach TxtSl $TextSlots {
+#		install_text_slot $TxtSl $base [find_pair_value $TxtSl $SlotNames]
+#	}
+    ###################
+    # Search Paths 
+    ###################
+#	create_sd_toggle  $base search_dirs \
+#		{Search Individual Directories:} \
+#		[list add_search_dirs $base.search_dirs.listbox $proenv(ppj_pathtype) $base] \
+#		[list del_search_dirs $base.search_dirs.listbox $base] \
+#		[list move_selection_up $base.search_dirs.listbox $base] \
+#		[list move_selection_down $base.search_dirs.listbox $base]
+
+    ###################
+    # Lists of Files 
+    ###################
+#	foreach FS $ListOfFilesSlots {
+#		set FTs	[find_pair_valueX $FS $FileTypes]
+#		set FN	[find_pair_value $FS $SlotNames] 
+#		set XFN ""
+#		set DfltD [find_pair_value $FS $DfltDirs]
+#		append XFN $FN " (" $FTs "):"
+#		create_lofs_toggle $base $FS {Prolog Files:} $FTs \
+#			[list add_to_files_list $FS $base.$FS.listbox $FTs $FN $DfltD $base] \
+#			[list add_to_files_list_mult $FS $base.$FS.listbox $FTs $FN $DfltD  $base] \
+#			[list del_from_files_list $base.$FS.listbox $base] \
+#			[list move_selection_up $base.$FS.listbox $base] \
+#			[list move_selection_down $base.$FS.listbox $base]
+#	}
+    ###################
+    # Lists of Items
+    ###################
+#	foreach LS $ListSlots {
+#		create_ls_toggle $base $LS [find_pair_value $LS $SlotNames] \
+#		[list add_to_list_$LS $base.$LS.listbox] \
+#		[list del_from_list_$LS $base.$LS.listbox] \
+#		[list move_selection_up $base.$LS.listbox] \
+#		[list move_selection_down $base.$LS.listbox]
+#	}
+    ###################
+    # CREATING WIDGETS
+    ###################
+   frame $base.sep_buttons \
+        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
+    frame $base.buttons \
+        -borderwidth 1 -relief sunken 
+    button $base.buttons.save \
+        -command "save_project $base" -padx 11 -pady 4 -text Save -state disabled
+    button $base.buttons.addl \
+        -command "addl_project_info $base {$TextSlots} {$SlotNames} {$AddlTextSlots} {$AddlTextSlotsValues } [list $LibFiles]" \
+	-padx 11 -pady 4 -text Addl 
+    button $base.buttons.load \
+        -command "load_this_project" -padx 11 -pady 4 -text {(Re)Load}
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.sep_buttons \
+        -anchor center -expand 0 -fill x -side top 
+    pack $base.buttons \
+        -anchor center -expand 0 -fill x -side top 
+    pack $base.buttons.save \
+        -anchor center -expand 0 -fill none -padx 2 -side left 
+    pack $base.buttons.addl \
+        -anchor center -expand 0 -fill none -padx 35 -side left 
+    pack $base.buttons.load \
+        -anchor center -expand 0 -fill none -padx 2 -side right 
+
+    focus $base.project_file.entry
+
+    bind $base <Key> "prj_dirty_key $base %K"
+
+	# Init document field
+#    set proenv($base,dirty) false
+#    set proenv($base.addlprj,dirty) false
+}

@@ -7,7 +7,8 @@ primary_project_dir = '/Users/ken/ALS/GitHub/ALSProlog/examples/visual'.
 list_of_files_slots = [prolog_files].
 list_slots = [].
 text_slots = [].
-search_dirs = [].
+%search_dirs = [].
+search_dirs = ['../als/'].
 slot_names =
     [[production_goal,'Startup Goal:'],[debug_goal,'Debug Goal:'],
 	[executable_name,'Executable Name:'],[stub_name,'Stub Name:'],

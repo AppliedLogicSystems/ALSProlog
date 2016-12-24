@@ -13,7 +13,11 @@
  |	<Character> is <Generic Character>(<Particular Aspect>).
  *-------------------------------------------------------------------*/
 
-:- consult(id).		% the diagnosis system
+% When a prolog file is part of an ALS Prolog project (*.ppj), don't include
+% such consults; ususally, they will cause an error because the file to be
+% consulted isn't in the right folder; it will be listed in the project, and
+% the project search path(s) should find it:
+%:- consult(id).		% the diagnosis system
 
 module identify.
 
