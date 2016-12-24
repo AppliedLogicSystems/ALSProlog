@@ -1,3 +1,22 @@
+###[Term Manipulation](#111-term-manipulation)
+####[Comparison predicates](#1111-comparison-predicates)
+####[Term Classification](#1112-term-classification)
+####[Term Analysis & Synthesis](#1113-term-analysis--synthesis)
+####[List manipultation predicates](#1114-list-manipultation-predicates)
+####[Term Database](#1115-term-database)
+###[Atom and UIA Manipulation](#112-atom-and-uia-manipulation)
+###[Type Conversion](#113-type-conversion)
+###[Collectives](#114-collectives)
+###[Prolog Database](#115-prolog-database)
+###[Global Variables](#116-global-variables)
+###[Control](#117-control)
+###[Arithmetic](#118-arithmetic)
+###[Program and System Management](#119-program-and-system-management)
+###[Date and Time](#1110-date-and-time)
+###[File Names](#1111-file-names)
+###[File System](#1112-file-system)
+###[I-Code Calls](#1113-i-code-calls)
+
 ##11.1 Term Manipulation
 
 ###11.1.1 Comparison predicates
@@ -1264,7 +1283,6 @@ assert_succ :-
    $icode(-2,succ,2,0),      % succ/2 is the procedure name
    $icode(-17,-1,0,0),       % reset the cut_needed flag
    $icode(-14,0,0,0).        % assert it
-
 
 
 
