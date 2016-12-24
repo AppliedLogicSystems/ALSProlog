@@ -499,8 +499,17 @@ reconsultd/1
 reconsultd(File)
 reconsultd+)
 ````
-Various ways of dynamically loading a File of Prolog clauses into a running ALS
-Prolog program. All versions are defined in the builtins file blt_io.pro.
+These are various ways of dynamically loading a File of Prolog clauses into a running ALS
+Prolog program. All these versions are defined in the builtins file blt_io.pro.  Note that in the above, File can be a list of files:  [File1, File2, ….].
+
+consult/2 allows one to load files (either singly or a list) under various options:
+````
+	consult(File, Options)
+````
+where Options is a list of consult options.  The most useful is to add a folder to override the system search path for the duration of this consult.  For example:
+````
+	consult(['id.pro', 'hickory.pro'], [search_path('examples/als’)]).
+
 ````
 consultmessage/1
 consultmessage(OnOff)
@@ -1283,7 +1292,6 @@ assert_succ :-
    $icode(-2,succ,2,0),      % succ/2 is the procedure name
    $icode(-17,-1,0,0),       % reset the cut_needed flag
    $icode(-14,0,0,0).        % assert it
-
 
 
 
