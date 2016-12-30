@@ -1023,7 +1023,7 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
     ###################
     toplevel $base -class Toplevel
     wm focusmodel $base passive
-    wm geometry $base 326x383+320+148
+    wm geometry $base 326x413+320+148
     wm maxsize $base 1137 870
     wm minsize $base 1 1
     wm overrideredirect $base 0
@@ -1035,6 +1035,13 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
     label $base.title_label \
         -borderwidth 1 -text {Project Title:} 
     label $base.title_value -text $proj_title -relief sunken
+
+    frame $base.cref_btns \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    button $base.cref_btns.add \
+        -command "run_cref_on_prj $base" -padx 11 -pady 4 -text {Run CREF on project} 
+#        -command "run_cref_on_prj" -padx 11 -pady 4 -text {Run CREF on project} 
+
     label $base.lab_library \
         -borderwidth 1 -text {Library Files:} 
     frame $base.cpd17 \
@@ -1101,12 +1108,18 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
     grid $base.title_value \
         -in $base -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ew 
 
+    grid $base.cref_btns \
+        -in $base -column 0 -row 1 -columnspan 2 -rowspan 1 -sticky ew 
+    grid $base.cref_btns.add \
+        -in $base.cref_btns -column 0 -row 0 -columnspan 1 -rowspan 1 \
+        -padx 10 -sticky w 
+
     grid $base.lab_library \
-        -in $base -column 0 -row 1 -columnspan 1 -rowspan 1 -padx 3 \
+        -in $base -column 0 -row 2 -columnspan 1 -rowspan 1 -padx 3 \
         -sticky w 
 
     grid $base.cpd17 \
-        -in $base -column 0 -row 2 -columnspan 2 -rowspan 1 -sticky nesw 
+        -in $base -column 0 -row 3 -columnspan 2 -rowspan 1 -sticky nesw 
     grid columnconf $base.cpd17 0 -weight 1
     grid rowconf $base.cpd17 0 -weight 1
     grid $base.cpd17.01 \
@@ -1120,7 +1133,7 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
         -sticky ns 
 
     grid $base.lib_btns \
-        -in $base -column 0 -row 3 -columnspan 2 -rowspan 1 -sticky ew 
+        -in $base -column 0 -row 6 -columnspan 2 -rowspan 1 -sticky ew 
     grid $base.lib_btns.add \
         -in $base.lib_btns -column 0 -row 0 -columnspan 1 -rowspan 1 \
         -padx 10 -sticky w 
@@ -1130,36 +1143,36 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
 
 
     grid $base.production_goal_label \
-        -in $base -column 0 -row 4 -columnspan 1 -rowspan 1 -padx 5 \
-        -sticky e 
-    grid $base.production_goal \
-        -in $base -column 1 -row 4 -columnspan 1 -rowspan 1 -sticky ew 
-
-    grid $base.debug_goal_label \
-        -in $base -column 0 -row 6 -columnspan 1 -rowspan 1 -padx 5 \
-        -sticky e 
-    grid $base.debug_goal \
-        -in $base -column 1 -row 6 -columnspan 1 -rowspan 1 -sticky ew 
-
-    grid $base.executable_name_label \
         -in $base -column 0 -row 7 -columnspan 1 -rowspan 1 -padx 5 \
         -sticky e 
-    grid $base.executable_name \
+    grid $base.production_goal \
         -in $base -column 1 -row 7 -columnspan 1 -rowspan 1 -sticky ew 
+
+    grid $base.debug_goal_label \
+        -in $base -column 0 -row 8 -columnspan 1 -rowspan 1 -padx 5 \
+        -sticky e 
+    grid $base.debug_goal \
+        -in $base -column 1 -row 8 -columnspan 1 -rowspan 1 -sticky ew 
+
+    grid $base.executable_name_label \
+        -in $base -column 0 -row 9 -columnspan 1 -rowspan 1 -padx 5 \
+        -sticky e 
+    grid $base.executable_name \
+        -in $base -column 1 -row 9 -columnspan 1 -rowspan 1 -sticky ew 
 
 
     grid $base.stub_name_label \
-        -in $base -column 0 -row 8 -columnspan 1 -rowspan 1 -padx 5 \
+        -in $base -column 0 -row 10 -columnspan 1 -rowspan 1 -padx 5 \
         -sticky e 
     grid $base.stub_name \
-        -in $base -column 1 -row 8 -columnspan 1 -rowspan 1 -sticky ew 
+        -in $base -column 1 -row 10 -columnspan 1 -rowspan 1 -sticky ew 
     grid $base.distdir_name_label \
-        -in $base -column 0 -row 9 -columnspan 1 -rowspan 1 -padx 5 \
+        -in $base -column 0 -row 11 -columnspan 1 -rowspan 1 -padx 5 \
         -sticky e 
     grid $base.distdir_name \
-        -in $base -column 1 -row 9 -columnspan 1 -rowspan 1 -sticky ew 
+        -in $base -column 1 -row 11 -columnspan 1 -rowspan 1 -sticky ew 
     grid $base.dist_btns \
-        -in $base -column 0 -row 10 -columnspan 2 -rowspan 1 -sticky ew 
+        -in $base -column 0 -row 12 -columnspan 2 -rowspan 1 -sticky ew 
     grid $base.dist_btns.mkexec \
         -in $base.dist_btns -column 0 -row 0 -columnspan 1 -rowspan 1 \
         -padx 10 -sticky w 

@@ -254,6 +254,16 @@ proc addto_libfiles_disp {File GuiPath} {
         $GuiPath.buttons.save configure -state active
 }
 
+proc addto_libfiles_disp_list {FilesList GuiPath} {
+	global array proenv
+	set ListBox $GuiPath.addlprj.cpd17.01
+
+	foreach lf $FilesList {$ListBox insert end $lf}
+
+	set proenv($GuiPath,dirty) true
+        $GuiPath.buttons.save configure -state active
+}
+
 proc delete_lib_file { Listbox w pw} {
     	global array proenv
 	set SelNums [$Listbox curselection]
@@ -627,3 +637,12 @@ proc do_gen_gui {} {
 }
 
 
+###################### cref
+
+proc run_cref_on_prj {Base} {
+	send_prolog als_ide_mgr run_cref_on_prj
+}
+
+proc show_lib_files { LibFiles } {
+	global array proenv
+}

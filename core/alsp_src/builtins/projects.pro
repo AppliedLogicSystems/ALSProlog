@@ -610,6 +610,31 @@ finish_add_lib_file(File, PrevLibFiles, State)
 	accessObjStruct(gui_spec, State, GuiPath),
 	tcl_call(shl_tcli, [addto_libfiles_disp, File, GuiPath], _).
 	
+gen_project_mgrAction(add_lib_files_list(FilesList), State)
+	:-
+	accessObjStruct(library_files,State,PrevLibFiles),
+	list_diff(FilesList, PrevLibFiles, Files_Not_Prev),
+	(Files_Not_Prev == [] ->
+		true;
+		append(Files_Not_Prev, PrevLibFiles, NowLibFiles),
+		setObjStruct(library_files,State,NowLibFiles),
+		accessObjStruct(gui_spec, State, GuiPath),
+		tcl_call(shl_tcli, [addto_libfiles_disp_list, Files_Not_Prev, GuiPath], _)
+	).
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%% 	BUILD THE PROJECT	%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+export build_project/0.
+build_project
+	:-
+	tcl_call(shl_tcli, ['.ppj_spec.filename.entry', get], ProjFile),
+	grab_terms(ProjFile, ProjectDesc),
+	sys_env(OS,MinorOS,Proc),
+	temp_file_name(OS,BldFile),
+	open(BldFile, write, BSt, []),
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%% 	BUILD THE PROJECT	%%%%%%%%%
@@ -712,11 +737,7 @@ patterns_from_types([FType | FileTypes], [Pat | FilePatterns])
 	catenate('*', FType, Pat),
 	patterns_from_types(FileTypes, FilePatterns).
 
-endmod.
-
-
-module alsdev.
-use tcltk.
+%%%%%%%%%%% Cref %%%%%%%%%%%
 
 cref_present 
 	:-
@@ -734,9 +755,87 @@ start_cref
 write(in_start_cref),nl,
 	gensym(project,X),
 	sub_atom(X,1,_,0,InternalName),
-%	gen_project_mgrAction(init_gui(InternalName), State).
 	catenate('.', InternalName, GuiPath),
 	tcl_call(shl_tcli, 
 		[cref_panel, GuiPath ], _).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%% 	RUN CREF ON THE PROJECT		%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/*
+	[   name=gen_project_mgr,
+		subClassOf=genericObjects,
+		addl_slots=
+		[
+			internal_name,
+			title,
+			project_file,
+			primary_project_dir,	% normally where project_file is
+			list_of_files_slots,
+			list_slots,
+			text_slots,
+			search_dirs,
+			search_trees,
+			gui_spec,
+			slot_names
+			], 
+*/
+
+als_ide_mgrAction(run_cref_on_prj, ALSIDEObject)
+	:-
+	accessObjStruct(cur_project,ALSIDEObject,ThisProject),
+	gen_project_mgrAction(run_cref_on_prj, ThisProject).
+
+gen_project_mgrAction(run_cref_on_prj, ThisProject)
+	:-
+	cref_present,
+	accessObjStruct(project_file, ThisProject, ProjectFile),
+	accessObjStruct(primary_project_dir, ThisProject, Primary_project_dir),
+	accessObjStruct(search_dirs, ThisProject, SearchList),
+	SearchList = [FirstSearchDir | _],
+	accessObjStruct(prolog_files, ThisProject, Prolog_files),
+	file_extension(ProjectFile, BaseName, ppj),
+	file_extension(CrfFile, BaseName, crf),
+	file_extension(Tgt, BaseName, xrf),
+
+	pathPlusFile(Primary_project_dir, CrfFile, CrfPathAndFile),
+	pathPlusFile(Primary_project_dir, Tgt, XrfPathAndFile),
+	
+	open(CrfPathAndFile, write, CrfOut, []),
+
+	printf(CrfOut, '%% Suite spec for project %t.\n\n', [ProjectFile]),
+	printf(CrfOut, 'dir = \'%t\'.\n\n', [FirstSearchDir]),
+	printf(CrfOut, 'files = [', []),
+	writeWithQuotes(Prolog_files, CrfOut),
+	printf(CrfOut, '].\n\n', []),
+	printf(CrfOut, 'tgt = \'%t\'.\n\n', [XrfPathAndFile]),
+
+	close(CrfOut),
+
+	cref:cref(CrfFile),
+		% cref:lib_files_used(myTestProj, 
+		%	[lf(interleave,3,app_utils,'library/cmn_utils') | ...])
+	cref:lib_files_used(BaseName, LibFileEntries),
+	libFilesOnly(LibFileEntries, LibFiles),
+
+	gen_project_mgrAction(add_lib_files_list(LibFiles), ThisProject).
+
+
+writeWithQuotes([], _)
+	:-!.
+writeWithQuotes([File], CrfOut)
+	:-!,
+	printf(CrfOut, '\'%t\'', [File]).
+writeWithQuotes([File | Files], CrfOut)
+	:-
+	printf(CrfOut, '\'%t\',', [File]),
+	writeWithQuotes(Files, CrfOut).
+
+libFilesOnly([], []).
+libFilesOnly([ lf(P,N,Mod,FullLibFile) | RestLibFileEntries], [LibFilePro | RestLibFiles])
+	:-
+	path_directory_tail(FullLibFile, Directory, Tail),
+	file_extension(LibFilePro, Tail, pro),
+	libFilesOnly(RestLibFileEntries, RestLibFiles).
 
 endmod.

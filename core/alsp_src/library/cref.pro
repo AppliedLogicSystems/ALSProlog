@@ -38,6 +38,12 @@
  |		cref('<path>/myfile.pro').
  |	The report file myfile.xrf will be writte in the current directory.
  |
+ |	After cref creates the library files section of its output report, it asserts
+ |
+ |		cref:lib_files_used(SuiteName, LibFilesList)
+ |	
+ |	This is preserved until the next run of cref, and can be read by the project tools, etc.
+ |
  | NOTE: To use the debugger on this file, comment out
  |		noshow_module(cref).
  | 	 in ~/builtins/debugger.pro
@@ -193,7 +199,6 @@ d(SuiteName) :- cref(SuiteName, nonstop).
  |
  |	- perform cref processing on program suite SuiteName, using Options
  *-----------------------------------------------------------------------*/
-%cref(SuiteName, Options) 
 cref(SuiteDesc, Options)
 	:-
 	(Options = nonstop ->
@@ -738,6 +743,17 @@ excluded_head(F, N, Mod, CurFile)
 excluded_call(FG, NG)
 	:-
 	all_procedures(MG, FG, NG, _),
+	fin_check_xcall(MG, FG, NG),
+	!.
+
+fin_check_xcall(MG, FG, NG)
+	:-
+	    % It's in the libarary, so not excluded:
+	builtins:get_libinfo(MG:FG/NG, _),
+	!,
+	fail.
+fin_check_xcall(MG, FG, NG)
+	:-
 	excluded_mod(MG),
 	!.
 
@@ -1226,7 +1242,8 @@ showLibFilesList([], OutS).
 showLibFilesList([ lf(P,N,XM,LF) | RestLibFilesList], OutS)
 	:-
  	printf(OutS,'     %t/%t exported from %t in %t\n',[P,N,XM,LF]),
-	showLibFilesList(LibFilesList, OutS).
+	showLibFilesList(RestLibFilesList, OutS).
+
 
 
 	/*------------- uncalled predicates --------------------------*/
@@ -1367,7 +1384,7 @@ displayDependency(P,N,Mod,UseList,F,TreeDataPN, NoDefL, NoDefLTail, OutS)
 	builtins:lib_mod_list(LibModList),
 	((ClauseCount == 0, FactCount ==0) ->
 			    % XM = library module exporting predicate P/N in file LF:
-		(find_expm(LibModList, P, N, XM, LF) ->
+		(is_lib_pred_file(P/N, XM, LF) ->
 			printf(OutS,'\n     * Library: exported from: %t in %t',[XM, LF]),
         		accessMI(lib_files, MIS,  LibFilesList),
 			(dmember(lf(P,N,XM,LF), LibFilesList) ->
@@ -1403,6 +1420,27 @@ displayDependency(P,N,Mod,UseList,F,TreeDataPN, NoDefL, NoDefLTail, OutS)
 	listFiles(SF, OutS),
 	printf(OutS, '    * Depends on:  %t\n', [NiceUseList]),
 	printf(OutS,'    * Called by:   %t\n',[CalledBys]).
+
+is_lib_pred_file(P/N, M, FF)
+	:-
+	builtins:lib_mod_list(LibModList),
+	check_lib_mods_files(LibModList, P/N, M, FF),
+	!.
+
+check_lib_mods_files([M | LibModList], P/N, M, FF)
+	:-
+	builtins:get_libinfo(M:P/N, FF),
+	!.
+
+check_lib_mods_files([_ | LibModList], P/N, M, FF)
+	:-
+	check_lib_mods_files(LibModList, P/N, M, FF).
+
+%builtins:get_libinfo(M:P/N, X)
+
+
+
+
 
 find_expm([XM/F | LibModList], P, N, XM, F)
 	:-

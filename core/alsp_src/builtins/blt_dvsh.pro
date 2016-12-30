@@ -115,7 +115,7 @@ start_alsdev0
 
 	setup_init_ide_classes(ALS_IDE_Mgr),
 
-	library_setup,
+	library_setup(CLInfo),
 
 /* WHY IS THIS MISSING?
 #if (all_procedures(syscfg,intconstr,0,_))

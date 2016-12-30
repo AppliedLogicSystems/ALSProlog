@@ -54,7 +54,7 @@ start_shell0(DefaultShellCall)
 	assert(save_clinfo(CLInfo)),
 	output_system_banner(CLInfo),
 
-	library_setup,
+	library_setup(CLInfo),
 /* WHY IS THIS MISSING?
 #if (all_procedures(syscfg,intconstr,0,_))
 	rel_arith:set_ics(cs(0,0,0)),

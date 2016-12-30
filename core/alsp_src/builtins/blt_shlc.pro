@@ -315,8 +315,10 @@ setup_init_goal(CLInfo, ShellCall)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-library_setup
+library_setup(CLInfo)
 	:-
+	arg(2,CLInfo,ConsultNoise),
+	OutputStream = user_output,
 	(ConsultNoise = true -> true ;
 		als_advise(OutputStream, 'Setting up library indicies...may take a moment...',[])),
 	setup_libraries,
