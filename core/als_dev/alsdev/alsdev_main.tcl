@@ -1632,8 +1632,6 @@ proc cref_panel \
 	{base} {
 	global array proenv
 
-#set HHB [list $LibFiles]
-
     ###################
     # CREATING WIDGETS
     ###################
@@ -1677,8 +1675,6 @@ proc cref_panel \
     entry $base.srcdir.entry \
         -cursor {} -highlightthickness -1 
 
-#    set proenv(ppj_pathtype) relative
-
     ###################
     # SETTING GEOMETRY
     ###################
@@ -1710,39 +1706,9 @@ proc cref_panel \
     pack $base.srcdir.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
 
-    #########################
-    # Single entry text slots
-    #########################
-#	foreach TxtSl $TextSlots {
-#		install_text_slot $TxtSl $base [find_pair_value $TxtSl $SlotNames]
-#	}
-    ###################
-    # Search Paths 
-    ###################
-#	create_sd_toggle  $base search_dirs \
-#		{Search Individual Directories:} \
-#		[list add_search_dirs $base.search_dirs.listbox $proenv(ppj_pathtype) $base] \
-#		[list del_search_dirs $base.search_dirs.listbox $base] \
-#		[list move_selection_up $base.search_dirs.listbox $base] \
-#		[list move_selection_down $base.search_dirs.listbox $base]
-
     ###################
     # Lists of Files 
     ###################
-#	foreach FS $ListOfFilesSlots {
-#		set FTs	[find_pair_valueX $FS $FileTypes]
-#		set FN	[find_pair_value $FS $SlotNames] 
-#		set XFN ""
-#		set DfltD [find_pair_value $FS $DfltDirs]
-#		append XFN $FN " (" $FTs "):"
-#		create_lofs_toggle $base $FS {Prolog Files:} $FTs \
-#			[list add_to_files_list $FS $base.$FS.listbox $FTs $FN $DfltD $base] \
-#			[list add_to_files_list_mult $FS $base.$FS.listbox $FTs $FN $DfltD  $base] \
-#			[list del_from_files_list $base.$FS.listbox $base] \
-#			[list move_selection_up $base.$FS.listbox $base] \
-#			[list move_selection_down $base.$FS.listbox $base]
-#	}
-
 	create_lofs_toggle $base "prolog_files" {Prolog Files:} "" \
 		[list add_to_files_list prolog_files $base.prolog_files.listbox {} {Prolog Files:} {} $base] \
 		[list add_to_files_list_mult prolog_files $base.prolog_files.listbox {} {Prolog Files:} {}  $base] \
@@ -1798,12 +1764,3 @@ proc cref_panel \
     set proenv($base.addlprj,dirty) false
 }
 
-######## For Load Project:
-#clofs_t:  Win=.project_1483293097_0 Which=prolog_files Title=Prolog Files:
-#clofs_t2: FileTypes=
-#clofs_t3: Add=add_to_files_list prolog_files .project_1483293097_0.prolog_files.listbox {} {Prolog Files:} {} .project_1483293097_0
-#clofs_t4: AddMult=add_to_files_list_mult prolog_files .project_1483293097_0.prolog_files.listbox {} {Prolog Files:} {} .project_1483293097_0
-#clofs_t5: Del=del_from_files_list .project_1483293097_0.prolog_files.listbox .project_1483293097_0
-#clofs_t6: Up=move_selection_up .project_1483293097_0.prolog_files.listbox .project_1483293097_0
-#clofs_t7: Down=move_selection_down .project_1483293097_0.prolog_files.listbox .project_1483293097_0
-#

@@ -169,10 +169,8 @@ proc add_tools_menu {menubar type window} {
     	$menubar.tools add command -label "Kill Tcl Interps" -underline 0 -command {re kill_tcl_interps} -state $proenv(edition)
 #    	$menubar.tools add command -label "Tcl Shell$elipsis" -underline 0 -command {re tcl_shell} 
 
-		$menubar.tools add separator 
+	$menubar.tools add separator 
 		## Cref
-#    	$menubar.tools add command -label "Cref$elipsis" -underline 0 \
-
     	$menubar.tools add command -label "Open Cref Suite$elipsis" -underline 0 \
 			-command {re {prolog call alsdev open_cref}} 
 
