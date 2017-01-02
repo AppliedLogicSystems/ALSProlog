@@ -646,3 +646,20 @@ proc run_cref_on_prj {Base} {
 proc show_lib_files { LibFiles } {
 	global array proenv
 }
+
+proc select_cref_suite {} {
+	set CrefSuite [tk_getOpenFile \
+		-filetypes {{"Cref Suite Files" {.crf}}} \
+		-title "Cref Suite File to Open"]
+	set File [file tail $CrefSuite]
+	set Dir [file dirname $CrefSuite]
+
+	if {$CrefSuite != ""} then {
+		return [list $File [file split $Dir ]]
+	} else { return "" }
+}
+
+proc run_cref_on_suite {Base} {
+        send_prolog als_ide_mgr run_cref_on_suite
+}       
+

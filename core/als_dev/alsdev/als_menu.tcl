@@ -171,9 +171,15 @@ proc add_tools_menu {menubar type window} {
 
 		$menubar.tools add separator 
 		## Cref
-    	$menubar.tools add command -label "Cref$elipsis" -underline 0 \
+#    	$menubar.tools add command -label "Cref$elipsis" -underline 0 \
+
+    	$menubar.tools add command -label "Open Cref Suite$elipsis" -underline 0 \
+			-command {re {prolog call alsdev open_cref}} 
+
+    	$menubar.tools add command -label "New Cref Suite" -underline 0  \
 			-command {re {prolog call alsdev start_cref}} 
-#		$menubar.tools add separator 
+
+		$menubar.tools add separator 
 		## Application GUI Generator
 #    	$menubar.tools add command -label "Application Gui Generator$elipsis" -underline 0 \
 #			-command {re do_app_gui_gen_dialog } 

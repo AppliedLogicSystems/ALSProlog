@@ -737,32 +737,10 @@ patterns_from_types([FType | FileTypes], [Pat | FilePatterns])
 	catenate('*', FType, Pat),
 	patterns_from_types(FileTypes, FilePatterns).
 
-%%%%%%%%%%% Cref %%%%%%%%%%%
-
-cref_present 
-	:-
-	cref:clause(cref(_), _),
-	!,
-	true.
-cref_present 
-	:-
-	consult(cref).
-
-export start_cref/0.
-start_cref
-	:-
-	cref_present,
-write(in_start_cref),nl,
-	gensym(project,X),
-	sub_atom(X,1,_,0,InternalName),
-	catenate('.', InternalName, GuiPath),
-	tcl_call(shl_tcli, 
-		[cref_panel, GuiPath ], _).
-
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%% 	RUN CREF ON THE PROJECT		%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-/*
+/*  Cref object:
 	[   name=gen_project_mgr,
 		subClassOf=genericObjects,
 		addl_slots=
@@ -837,5 +815,96 @@ libFilesOnly([ lf(P,N,Mod,FullLibFile) | RestLibFileEntries], [LibFilePro | Rest
 	path_directory_tail(FullLibFile, Directory, Tail),
 	file_extension(LibFilePro, Tail, pro),
 	libFilesOnly(RestLibFileEntries, RestLibFiles).
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%% 	CREF PANEL	%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+als_ide_mgrAction(run_cref_on_suite, ALSIDEObject)
+	:-
+	accessObjStruct(cur_cref_mgr,ALSIDEObject,ThisSuiteMgr),
+	gen_project_mgrAction(run_cref_on_suite, ThisSuiteMgr).
+
+gen_project_mgrAction(run_cref_on_suite, SuiteMgr)
+	:-
+	accessObjStruct(suite_file, SuiteMgr, BaseFile),
+	accessObjStruct(suite_dir, SuiteMgr, DirPath),
+	pathPlusFile(DirPath, BaseFile, CrfPathAndFile),
+	cref:cref(CrfPathAndFile).
+
+cref_present 
+	:-
+	cref:clause(cref(_), _),
+	!.
+cref_present 
+	:-
+	consult(cref).
+
+export open_cref/0.
+open_cref
+	:-
+	builtins:get_primary_manager(ALS_IDE_Mgr),
+	cref_present,
+	create_object(
+		[instanceOf=cref_panel_mgr,
+		 handle=true ], 
+		SuiteMgr),
+	setObjStruct(cur_cref_mgr, ALS_IDE_Mgr, SuiteMgr),
+
+	tcl_call(shl_tcli, [select_cref_suite], FileSpec),
+
+	gensym(cref,X),
+	sub_atom(X,1,_,0,InternalName),
+	catenate('.', InternalName, GuiPath),
+
+	setup_suite_mgr(FileSpec, InternalName, GuiPath, SuiteMgr),
+	tcl_call(shl_tcli, [cref_panel, GuiPath ], _),
+
+	accessObjStruct(title, SuiteMgr, SuiteName),
+	tcl_call(shl_tcli, [show_text_slot,GuiPath,suite_name,SuiteName], _),
+
+	accessObjStruct(suite_file, SuiteMgr, BaseFile),
+	tcl_call(shl_tcli, [show_text_slot,GuiPath,spec,BaseFile], _),
+
+	accessObjStruct(suite_dir, SuiteMgr, DirPath),
+	tcl_call(shl_tcli, [show_text_slot,GuiPath,dir,DirPath], _),
+
+	accessObjStruct(list_of_files, SuiteMgr, ListOfFiles),
+	accessObjStruct(myHandle, SuiteMgr, PrjMgrHandle),
+	tcl_call(shl_tcli, [show_list_slot,GuiPath,prolog_files,ListOfFiles,PrjMgrHandle], _),
+
+	accessObjStruct(src_dir, SuiteMgr, SrcDir),
+	tcl_call(shl_tcli, [show_text_slot,GuiPath,srcdir,SrcDir], _).
+
+/****************************
+	[   name=cref_panel_mgr, subClassOf=genericObjects,
+		addl_slots=
+		[ internal_name,
+			title,
+			suite_file,	% *.crf
+			suite_dir,	% where suite_file is
+			list_of_files,
+			target,
+			gui_spec ], 
+ ****************************/
+
+setup_suite_mgr(FileSpec, InternalName, GuiPath, SuiteMgr)
+	:-
+	setObjStruct(internal_name, SuiteMgr, InternalName),
+	setObjStruct(gui_spec, SuiteMgr, GuiPath),
+
+	FileSpec = [BaseFile , DirParts],
+	setObjStruct(suite_file, SuiteMgr, BaseFile),
+	join_path(DirParts, DirPath),
+	setObjStruct(suite_dir, SuiteMgr, DirPath),
+
+	path_directory_tail(FullPath, DirPath, BaseFile),
+	cref:read_crf_file(FullPath,Directory,FilesList,TargetFile, ConfigInfo, SuiteName),
+
+	setObjStruct(title, SuiteMgr, SuiteName),
+	setObjStruct(list_of_files, SuiteMgr, FilesList),
+	setObjStruct(src_dir, SuiteMgr, Directory),
+	setObjStruct(target, SuiteMgr, TargetFile).
+	
 
 endmod.

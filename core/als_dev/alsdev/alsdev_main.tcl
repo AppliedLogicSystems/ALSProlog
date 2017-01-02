@@ -128,7 +128,7 @@ proc vTclWindow.dyn_flags {base} {
     button $base.buttons.dismiss \
 		-padx 2 -text Dismiss \
         -command {wm withdraw .dyn_flags}
-    button $base.buttons.save \
+    button $base.
 		-padx 2 -text {Save as Defaults} \
         -command {prolog call alsdev save_prolog_flags ; wm withdraw .dyn_flags}
 
@@ -873,10 +873,26 @@ proc toggle_files_list {Win Which} {
 	}
 }
 
-
+######## For Load Project:
+#clofs_t:  Win=.project_1483293097_0 Which=prolog_files Title=Prolog Files:
+#clofs_t2: FileTypes=
+#clofs_t3: Add=add_to_files_list prolog_files .project_1483293097_0.prolog_files.listbox {} {Prolog Files:} {} .project_1483293097_0
+#clofs_t4: AddMult=add_to_files_list_mult prolog_files .project_1483293097_0.prolog_files.listbox {} {Prolog Files:} {} .project_1483293097_0
+#clofs_t5: Del=del_from_files_list .project_1483293097_0.prolog_files.listbox .project_1483293097_0
+#clofs_t6: Up=move_selection_up .project_1483293097_0.prolog_files.listbox .project_1483293097_0
+#clofs_t7: Down=move_selection_down .project_1483293097_0.prolog_files.listbox .project_1483293097_0
+#
 
 proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
 	global array proenv
+
+#puts "clofs_t:  Win=$Win Which=$Which Title=$Title"
+#puts "clofs_t2: FileTypes=$FileTypes"
+#puts "clofs_t3: Add=$Add"
+#puts "clofs_t4: AddMult=$AddMult"
+#puts "clofs_t5: Del=$Del"
+#puts "clofs_t6: Up=$Up"
+#puts "clofs_t7: Down=$Down"
 
     ###################
     # CREATING WIDGETS
@@ -1631,7 +1647,6 @@ proc cref_panel \
     wm resizable $base 1 0
     wm deiconify $base
     wm title $base "CREF"
-puts "BEFORE cref_close"
     wm protocol $base WM_DELETE_WINDOW "cref_close $base"
 
     frame $base.spec \
@@ -1641,12 +1656,26 @@ puts "BEFORE cref_close"
     entry $base.spec.entry \
         -cursor {} -highlightthickness -1 
 
+    frame $base.dir \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    label $base.dir.label \
+        -anchor w -text {Spec Dir:} 
+    entry $base.dir.entry \
+        -cursor {} -highlightthickness -1 
+
     frame $base.suite_name \
         -borderwidth 1 -height 30 -relief raised -width 30 
     label $base.suite_name.label \
         -anchor w -text {Suite Name:} 
     entry $base.suite_name.entry \
         -cursor {} -highlightthickness 0 
+
+    frame $base.srcdir \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    label $base.srcdir.label \
+        -anchor w -text {Source Dir:} 
+    entry $base.srcdir.entry \
+        -cursor {} -highlightthickness -1 
 
 #    set proenv(ppj_pathtype) relative
 
@@ -1660,11 +1689,25 @@ puts "BEFORE cref_close"
     pack $base.spec.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
 
+    pack $base.dir \
+        -anchor center -expand 0 -fill x -pady 4 -side top 
+    pack $base.dir.label \
+        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.dir.entry \
+        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
+
     pack $base.suite_name \
         -anchor center -expand 0 -fill x -pady 2 -side top 
     pack $base.suite_name.label \
         -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
     pack $base.suite_name.entry \
+        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
+
+    pack $base.srcdir \
+        -anchor center -expand 0 -fill x -pady 4 -side top 
+    pack $base.srcdir.label \
+        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.srcdir.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
 
     #########################
@@ -1699,6 +1742,15 @@ puts "BEFORE cref_close"
 #			[list move_selection_up $base.$FS.listbox $base] \
 #			[list move_selection_down $base.$FS.listbox $base]
 #	}
+
+	create_lofs_toggle $base "prolog_files" {Prolog Files:} "" \
+		[list add_to_files_list prolog_files $base.prolog_files.listbox {} {Prolog Files:} {} $base] \
+		[list add_to_files_list_mult prolog_files $base.prolog_files.listbox {} {Prolog Files:} {}  $base] \
+		[list del_from_files_list $base.prolog_files.listbox $base] \
+		[list move_selection_up $base.prolog_files.listbox $base] \
+		[list move_selection_down $base.prolog_files.listbox $base]
+
+
     ###################
     # Lists of Items
     ###################
@@ -1718,11 +1770,11 @@ puts "BEFORE cref_close"
         -borderwidth 1 -relief sunken 
     button $base.buttons.save \
         -command "save_project $base" -padx 11 -pady 4 -text Save -state disabled
-    button $base.buttons.addl \
-        -command "addl_project_info $base {$TextSlots} {$SlotNames} {$AddlTextSlots} {$AddlTextSlotsValues } [list $LibFiles]" \
-	-padx 11 -pady 4 -text Addl 
-    button $base.buttons.load \
-        -command "load_this_project" -padx 11 -pady 4 -text {(Re)Load}
+#    button $base.buttons.addl \
+#        -command "addl_project_info $base {$TextSlots} {$SlotNames} {$AddlTextSlots} {$AddlTextSlotsValues } [list $LibFiles]" \
+#	-padx 11 -pady 4 -text Addl 
+    button $base.buttons.run_cref \
+        -command "run_cref_on_suite $base" -padx 11 -pady 4 -text {Run Cref}
     ###################
     # SETTING GEOMETRY
     ###################
@@ -1732,16 +1784,26 @@ puts "BEFORE cref_close"
         -anchor center -expand 0 -fill x -side top 
     pack $base.buttons.save \
         -anchor center -expand 0 -fill none -padx 2 -side left 
-    pack $base.buttons.addl \
-        -anchor center -expand 0 -fill none -padx 35 -side left 
-    pack $base.buttons.load \
+#    pack $base.buttons.addl \
+#        -anchor center -expand 0 -fill none -padx 35 -side left 
+    pack $base.buttons.run_cref \
         -anchor center -expand 0 -fill none -padx 2 -side right 
 
-    focus $base.project_file.entry
+    focus $base.spec.entry
 
     bind $base <Key> "prj_dirty_key $base %K"
 
 	# Init document field
-#    set proenv($base,dirty) false
-#    set proenv($base.addlprj,dirty) false
+    set proenv($base,dirty) false
+    set proenv($base.addlprj,dirty) false
 }
+
+######## For Load Project:
+#clofs_t:  Win=.project_1483293097_0 Which=prolog_files Title=Prolog Files:
+#clofs_t2: FileTypes=
+#clofs_t3: Add=add_to_files_list prolog_files .project_1483293097_0.prolog_files.listbox {} {Prolog Files:} {} .project_1483293097_0
+#clofs_t4: AddMult=add_to_files_list_mult prolog_files .project_1483293097_0.prolog_files.listbox {} {Prolog Files:} {} .project_1483293097_0
+#clofs_t5: Del=del_from_files_list .project_1483293097_0.prolog_files.listbox .project_1483293097_0
+#clofs_t6: Up=move_selection_up .project_1483293097_0.prolog_files.listbox .project_1483293097_0
+#clofs_t7: Down=move_selection_down .project_1483293097_0.prolog_files.listbox .project_1483293097_0
+#

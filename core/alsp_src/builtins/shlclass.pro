@@ -186,6 +186,7 @@ module alsdev.
 		[ 
 			debugger_mgr,   %% debugger state object
 			cur_project,    %% current project manager object    
+			cur_cref_mgr,    %% current cref suite manager object    
 			edit_files,     %% list of files open for editing
 			non_file_edits  %% list of non-file (new) windows open for editing
 			],
@@ -194,6 +195,7 @@ module alsdev.
 			non_file_edits = [] 
 		]
 	]).
+%pbi_write(defineClass=als_ide_mgr),pbi_nl,pbi_ttyflush.
 
         %%   SHL_SOURCE_HANDLER:
 :- defineClass(alsdev,
@@ -365,6 +367,41 @@ module alsdev.
 	]).
 
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%  Cref Suite ObjectPro CLASS DEFINITIONS  %%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		%% Note: Only one suite can be open at a time;
+		%% The manager for the suite is created on the
+		%% fly using the suite values when an (existing)
+		%% cref suite is opened, or a blank suite is
+		%% created on the fly when a new suite is requested;
+		%% the suite values are written back out to the 
+		%% suite file when the suite is closed (via a 
+		%% button on the Cref panel.
+
+:- defineClass(
+	[   name=cref_panel_mgr,
+		subClassOf=genericObjects,
+		addl_slots=
+		[
+			internal_name,
+			title,
+			suite_file,	% *.crf
+			suite_dir,	% where suite_file is
+			list_of_files,
+			src_dir,	% (internal) dir where files reside
+			target,
+			gui_spec
+			], 
+		defaults=
+		[
+			title = '',
+			suite_file = '',
+			list_of_files = [],
+			target = ''
+		] 
+	]).
 
 endmod.
 

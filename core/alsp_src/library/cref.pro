@@ -102,6 +102,10 @@ ct1 :- cref('alsdir/library/tests/cref_test_lib1.crf').
 	%% SuiteDesc == <path>/file.crf
 get_make_info(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteName)
 	:-
+	read_crf_file(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteName).
+
+read_crf_file(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteName)
+	:-
 	file_extension(SuiteDesc, PathSansExt, 'crf'),
 	exists_file(SuiteDesc),
 	!,

@@ -730,6 +730,13 @@ special_cl_processing(prolog_script, File, NoSuffixFile, Ext)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+/*
+als_ide_mgrAction(WHAT, State)
+	:-
+pbi_write('WHAT'=WHAT),pbi_nl,
+	fail.
+*/
+
 als_ide_mgrAction(refresh_wins, State)
     	:-
  	tcl_call(shl_tcli, [refresh_spy_preds_if_showing], _).
