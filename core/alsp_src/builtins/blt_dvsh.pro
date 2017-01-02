@@ -115,7 +115,7 @@ start_alsdev0
 
 	setup_init_ide_classes(ALS_IDE_Mgr),
 
-	library_setup,
+	library_setup(CLInfo),
 
 /* WHY IS THIS MISSING?
 #if (all_procedures(syscfg,intconstr,0,_))
@@ -729,6 +729,13 @@ special_cl_processing(prolog_script, File, NoSuffixFile, Ext)
 	%%%%%	ALS IDE MANAGER CLASS & OBJECT 				%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+/*
+als_ide_mgrAction(WHAT, State)
+	:-
+pbi_write('WHAT'=WHAT),pbi_nl,
+	fail.
+*/
 
 als_ide_mgrAction(refresh_wins, State)
     	:-

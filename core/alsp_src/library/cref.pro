@@ -38,6 +38,12 @@
  |		cref('<path>/myfile.pro').
  |	The report file myfile.xrf will be writte in the current directory.
  |
+ |	After cref creates the library files section of its output report, it asserts
+ |
+ |		cref:lib_files_used(SuiteName, LibFilesList)
+ |	
+ |	This is preserved until the next run of cref, and can be read by the project tools, etc.
+ |
  | NOTE: To use the debugger on this file, comment out
  |		noshow_module(cref).
  | 	 in ~/builtins/debugger.pro
@@ -95,6 +101,10 @@ ct1 :- cref('alsdir/library/tests/cref_test_lib1.crf').
 
 	%% SuiteDesc == <path>/file.crf
 get_make_info(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteName)
+	:-
+	read_crf_file(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteName).
+
+read_crf_file(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteName)
 	:-
 	file_extension(SuiteDesc, PathSansExt, 'crf'),
 	exists_file(SuiteDesc),
@@ -746,6 +756,17 @@ excluded_head(F, N, Mod, CurFile)
 excluded_call(FG, NG)
 	:-
 	all_procedures(MG, FG, NG, _),
+	fin_check_xcall(MG, FG, NG),
+	!.
+
+fin_check_xcall(MG, FG, NG)
+	:-
+	    % It's in the libarary, so not excluded:
+	builtins:get_libinfo(MG:FG/NG, _),
+	!,
+	fail.
+fin_check_xcall(MG, FG, NG)
+	:-
 	excluded_mod(MG),
 	!.
 
@@ -1280,7 +1301,6 @@ showLibFilesList([ lf(P,N,XM,LF) | RestLibFilesList], OutS,OutHTML)
  	printf(OutHTML,'<br><b>%t/%t</b> exported from %t in %t\n',[P,N,XM,LF]),
 	showLibFilesList(LibFilesList, OutS,OutHTML).
 
-
 	/*------------- uncalled predicates --------------------------*/
 uncalleds(InOrderList,CalledList,OutS,OutHTML)
 	:-
@@ -1479,7 +1499,7 @@ displayDependency(P,N,Mod,UseList,F,TreeDataPN, NoDefL, NoDefLTail, OutS,OutHTML
 	builtins:lib_mod_list(LibModList),
 	((ClauseCount == 0, FactCount ==0) ->
 			    % XM = library module exporting predicate P/N in file LF:
-		(find_expm(LibModList, P, N, XM, LF) ->
+		(is_lib_pred_file(P/N, XM, LF) ->
 			printf(OutS,'\n     * Library: exported from: %t in %t',[XM, LF]),
 	printf(OutHTML, '<div style="margin-left:3em;">',[]),
 			printf(OutHTML,'* Library: exported from: %t in %t',[XM, LF]),
@@ -1512,6 +1532,27 @@ displayDependency(P,N,Mod,UseList,F,TreeDataPN, NoDefL, NoDefLTail, OutS,OutHTML
 	printf(OutS,'    * Called by:   %t\n',[CalledBys]),
 	printf(OutHTML,'<br>Called by:   %t\n',[CalledBys]),
 	printf(OutHTML, '</div>',[]).
+
+is_lib_pred_file(P/N, M, FF)
+	:-
+	builtins:lib_mod_list(LibModList),
+	check_lib_mods_files(LibModList, P/N, M, FF),
+	!.
+
+check_lib_mods_files([M | LibModList], P/N, M, FF)
+	:-
+	builtins:get_libinfo(M:P/N, FF),
+	!.
+
+check_lib_mods_files([_ | LibModList], P/N, M, FF)
+	:-
+	check_lib_mods_files(LibModList, P/N, M, FF).
+
+%builtins:get_libinfo(M:P/N, X)
+
+
+
+
 
 find_expm([XM/F | LibModList], P, N, XM, F)
 	:-

@@ -598,8 +598,6 @@ export libactivate/4.
 libactivate(M,[LH|LT],PredList,ModClosures) 
 	:-
 %curmod(MMM),
-%pbi_write([curmod=MMM, m=M]),pbi_nl,
-%pbi_write([mCsm=ModClosures]),pbi_nl,
 	libhide(M,[LH|LT],PredList),
 	mc_all(ModClosures, M, [LH | LT]),
 	!.
@@ -618,13 +616,11 @@ mc_all([ModClose | ModClosures], M, [LH | LT])
 
 do_mc( module_closure(UserPredicate,Arity), M, UserPredicate, Arity1)
 	:-!,
-%pbi_write(['    do_mc_1'=Predicate/Arity, m=M]),pbi_nl,
 	'$create_mod_close'(M, UserPredicate,Arity, UserPredicate),
 	Arity1 is Arity + 1.
 
 do_mc( module_closure(UserPredicate,Arity, Procedure), M, Procedure, Arity1)
 	:-
-%pbi_write(['    do_mc_2'=UserPredicate/Arity, proc=Procedure, m=M]),pbi_nl,
 	'$create_mod_close'(M, UserPredicate,Arity, Procedure),
 	Arity1 is Arity + 1.
 
@@ -644,7 +640,7 @@ libhide0([P/A | Rest], M, LibFileName)
 	newmodule(M),
 	exportpred(P,A),
 	endmodule,
-note_lib_mod(M/LibFileName),
+	note_lib_mod(M),
 	libhide0(Rest,M,LibFileName).
 
 	%% record modules having library entries in: lib_mod_list/1
