@@ -1675,6 +1675,13 @@ proc cref_panel \
     entry $base.srcdir.entry \
         -cursor {} -highlightthickness -1 
 
+    frame $base.targets \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    label $base.targets.label \
+        -anchor w -text {Targets:} 
+    entry $base.targets.entry \
+        -cursor {} -highlightthickness -1 
+
     ###################
     # SETTING GEOMETRY
     ###################
@@ -1704,6 +1711,13 @@ proc cref_panel \
     pack $base.srcdir.label \
         -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
     pack $base.srcdir.entry \
+        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
+
+    pack $base.targets \
+        -anchor center -expand 0 -fill x -pady 4 -side top 
+    pack $base.targets.label \
+        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.targets.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
 
     ###################

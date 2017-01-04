@@ -874,9 +874,14 @@ open_cref
 	tcl_call(shl_tcli, [show_list_slot,GuiPath,prolog_files,ListOfFiles,PrjMgrHandle], _),
 
 	accessObjStruct(src_dir, SuiteMgr, SrcDir),
-	tcl_call(shl_tcli, [show_text_slot,GuiPath,srcdir,SrcDir], _).
+	tcl_call(shl_tcli, [show_text_slot,GuiPath,srcdir,SrcDir], _),
 
-/****************************
+	accessObjStruct(target, SuiteMgr, TargetXRFFile),
+	file_extension(TargetXRFFile, Name, _),
+	file_extension(Target2Files, Name, '[xrf,html]'),
+	tcl_call(shl_tcli, [show_text_slot,GuiPath,targets,Target2Files], _).
+
+/**************************** Cref Object slots: ***************
 	[   name=cref_panel_mgr, subClassOf=genericObjects,
 		addl_slots=
 		[ internal_name,
