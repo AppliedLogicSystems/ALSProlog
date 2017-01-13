@@ -44,6 +44,7 @@ start_new_project(PrevProject, ALSIDEObject)
 		sprintf(atom(Msg), 'Save project %t ?', [ProjName]),
 		yes_no_dialog(shl_tcli, Msg, 'Close Project', Answer)
 		;
+		    %% InitRes == false (so close project):
 		Answer = 'Yes'
 	),
 	close_old_start_new_project(Answer, PrevProject, ALSIDEObject).
@@ -151,8 +152,10 @@ gen_project_mgrAction(read_gui_spec, State)
 	tcl_call(shl_tcli, 
 		[rd_prj_spec, GuiPath, TextSlots, ListOfFilesSlots, ListSlots, AddlTextSlots],
 		InitResult),
-	forbidden_slots(Forbidden),
+%pbi_write(rd_prj_spec=InitResult),pbi_nl,
+	forbidden_slots(project,Forbidden),
  	findall(T=V, (member(L, InitResult), member([T, V], L)), Eqns),
+%pbi_write(findall=Eqns),pbi_nl,
 	weak_all_setObjStruct(Eqns, Forbidden, State).
 
 %% For dev/debug: prints an Eqns list:
@@ -272,8 +275,8 @@ gen_project_mgrAction(update_check_complete(fail), State)
 
 gen_project_mgrAction(save_to_file, State)
 	:-
-	check_ppj(State, FilePath),
-	forbidden_slots(Forbidden),
+	check_filepath(ppj, State, FilePath),
+	forbidden_slots(project,Forbidden),
 	dump_object(State, Forbidden, Eqns),
 	open(FilePath, write, OS, []),
 	write_clauses(OS, Eqns, [quoted(true)]),
@@ -289,28 +292,34 @@ dump_object(State, Forbidden, Eqns)
 				not(dmember(SlotName, Forbidden)) ),
 			Eqns).
 
-
-
-
-check_ppj(State, FilePath)
+check_filepath(DistExt, State, FilePath)
 	:-
-	accessObjStruct(project_file, State, InitFilePath),
-	check_ppj(InitFilePath, FilePath, State).
+%pbi_write(check_filepath(DistExt, xx, FilePath)),pbi_nl,
+	(DistExt==crf ->
+		Slot = suite_file
+		;
+		Slot = project_file
+	),
+	accessObjStruct(Slot, State, InitFilePath),
+%pbi_write((slot=Slot,iifp=InitFilePath)),pbi_nl,
+	check_valid_path(InitFilePath, DistExt, FilePath, State).
 
-check_ppj(nil, 'default.ppj', State)
-	:-!.
+check_valid_path(nil, DistExt, FilePath, State)
+	:-!,
+	file_extension(FilePath, default, DistExt).
 
-check_ppj('', 'default.ppj', State)
-	:-!.
+check_valid_path('', DistExt, FilePath, State)
+	:-!,
+	file_extension(FilePath, default, DistExt).
 
-check_ppj(FilePath, FilePath, State)
+check_valid_path(FilePath, DistExt, FilePath, State)
 	:-
-	file_extension(FilePath,_, ppj),
+	file_extension(FilePath,_, DistExt),
 	!.
 
-check_ppj(InitFilePath, FilePath, State)
+check_valid_path(InitFilePath, DistExt, FilePath, State)
 	:-
-	file_extension(FilePath,InitFilePath, ppj),
+	file_extension(FilePath,InitFilePath, DistExt),
 	setObjStruct(project_file, State, FilePath).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -421,7 +430,7 @@ fin_open_proj(File, PathList, ALSIDEObject, ProjectMgr)
 		 handle=true ], 
 		ProjectMgr),
 	accessObjStruct(myHandle, ProjectMgr, MyHandle),
-	forbidden_slots(Forbidden),
+	forbidden_slots(project,Forbidden),
 	weak_all_setObjStruct(Eqns, Forbidden, ProjectMgr),
 	setObjStruct(project_loaded, ProjectMgr, fail),
 	setObjStruct(cur_project,ALSIDEObject,ProjectMgr),
@@ -434,7 +443,7 @@ fin_open_proj(File, PathList, ALSIDEObject, ProjectMgr)
 	accessObjStruct(gui_spec, ProjectMgr, GuiPath),
 	tcl_call(shl_tcli, [post_open_project,ProjectTitle, GuiPath], _).
 
-forbidden_slots([myHandle,internal_name,gui_spec,project_loaded]).
+forbidden_slots(project,[myHandle,internal_name,gui_spec,project_loaded]).
 
 weak_all_setObjStruct([], Forbidden, State).
 weak_all_setObjStruct([Tag = Value | Eqns], Forbidden, State)
@@ -823,9 +832,9 @@ libFilesOnly([ lf(P,N,Mod,FullLibFile) | RestLibFileEntries], [LibFilePro | Rest
 als_ide_mgrAction(run_cref_on_suite, ALSIDEObject)
 	:-
 	accessObjStruct(cur_cref_mgr,ALSIDEObject,ThisSuiteMgr),
-	gen_project_mgrAction(run_cref_on_suite, ThisSuiteMgr).
+	gen_cref_mgrAction(run_cref_on_suite, ThisSuiteMgr).
 
-gen_project_mgrAction(run_cref_on_suite, SuiteMgr)
+gen_cref_mgrAction(run_cref_on_suite, SuiteMgr)
 	:-
 	accessObjStruct(suite_file, SuiteMgr, BaseFile),
 	accessObjStruct(suite_dir, SuiteMgr, DirPath),
@@ -861,25 +870,32 @@ open_cref
 	tcl_call(shl_tcli, [cref_panel, GuiPath ], _),
 
 	accessObjStruct(title, SuiteMgr, SuiteName),
-	tcl_call(shl_tcli, [show_text_slot,GuiPath,suite_name,SuiteName], _),
+	tcl_call(shl_tcli, [show_text_slot,GuiPath,title,SuiteName], _),
 
 	accessObjStruct(suite_file, SuiteMgr, BaseFile),
-	tcl_call(shl_tcli, [show_text_slot,GuiPath,spec,BaseFile], _),
+	tcl_call(shl_tcli, [show_text_slot,GuiPath,suite_file,BaseFile], _),
 
 	accessObjStruct(suite_dir, SuiteMgr, DirPath),
-	tcl_call(shl_tcli, [show_text_slot,GuiPath,dir,DirPath], _),
+	tcl_call(shl_tcli, [show_text_slot,GuiPath,suite_dir,DirPath], _),
 
 	accessObjStruct(list_of_files, SuiteMgr, ListOfFiles),
 	accessObjStruct(myHandle, SuiteMgr, PrjMgrHandle),
 	tcl_call(shl_tcli, [show_list_slot,GuiPath,prolog_files,ListOfFiles,PrjMgrHandle], _),
 
 	accessObjStruct(src_dir, SuiteMgr, SrcDir),
-	tcl_call(shl_tcli, [show_text_slot,GuiPath,srcdir,SrcDir], _),
+	tcl_call(shl_tcli, [show_text_slot,GuiPath,src_dir,SrcDir], _),
 
 	accessObjStruct(target, SuiteMgr, TargetXRFFile),
 	file_extension(TargetXRFFile, Name, _),
 	file_extension(Target2Files, Name, '[xrf,html]'),
-	tcl_call(shl_tcli, [show_text_slot,GuiPath,targets,Target2Files], _).
+	tcl_call(shl_tcli, [show_text_slot,GuiPath,target,Target2Files], _),
+
+	tcl_call(shl_tcli, [disable_open_cref], _).
+
+%%  .mbar.a entryconfigure "Test2" -state disabled
+%%  $menubar.tools add command -label "Open Cref Suite$elipsis"
+%%  .topals.mmenb entryconfigure "Open Cref Suite$elipsis" -state disabled
+
 
 /**************************** Cref Object slots: ***************
 	[   name=cref_panel_mgr, subClassOf=genericObjects,
@@ -889,6 +905,7 @@ open_cref
 			suite_file,	% *.crf
 			suite_dir,	% where suite_file is
 			list_of_files,
+			src_dir,	% (internal) dir where files reside
 			target,
 			gui_spec ], 
  ****************************/
@@ -910,6 +927,113 @@ setup_suite_mgr(FileSpec, InternalName, GuiPath, SuiteMgr)
 	setObjStruct(list_of_files, SuiteMgr, FilesList),
 	setObjStruct(src_dir, SuiteMgr, Directory),
 	setObjStruct(target, SuiteMgr, TargetFile).
-	
 
+forbidden_slots(cref,[myHandle,internal_name,gui_spec]).
+	
+als_ide_mgrAction(show_html_report, ALSIDEObject)
+	:-
+	accessObjStruct(cur_cref_mgr,ALSIDEObject,ThisSuiteMgr),
+	gen_cref_mgrAction(show_report, html, ThisSuiteMgr).
+
+als_ide_mgrAction(show_xrf_report, ALSIDEObject)
+	:-
+	accessObjStruct(cur_cref_mgr,ALSIDEObject,ThisSuiteMgr),
+	gen_cref_mgrAction(show_report, xrf, ThisSuiteMgr).
+
+gen_cref_mgrAction(show_report, Type, SuiteMgr)
+	:-
+	accessObjStruct(target, SuiteMgr, Target),
+	(Type == xrf ->
+		%% Temporary, until opening the *.xrf in an als_document
+		%% is supported:
+		catenate('vi ', Target, Cmd)
+		;
+		file_extension(Target, Name, _),
+		file_extension(HTMLTarget, Name, html),
+		%% Must determine if open will work on Linux & Windows:
+		catenate('open ', HTMLTarget, Cmd)
+	),
+	system(Cmd).
+		
+als_ide_mgrAction(cref_close, ALSIDEObject)
+	:-
+	accessObjStruct(cur_cref_mgr,ALSIDEObject,ThisSuiteMgr),
+	gen_cref_mgrAction(cref_close, ThisSuiteMgr).
+
+gen_cref_mgrAction(cref_close, State)
+	:-
+	gen_cref_mgrAction(shutdown_cref_panel, State),
+	builtins:get_primary_manager(ALS_IDE_Mgr),
+	setObjStruct(cur_cref_mgr,ALS_IDE_Mgr,nil),
+	tcl_call(shl_tcli, [enable_open_cref], _).
+
+gen_cref_mgrAction(shutdown_cref_panel, State)
+	:-
+	accessObjStruct(gui_spec, State, GuiPath),
+	tcl_call(shl_tcli, [destroy, GuiPath], _).
+
+als_ide_mgrAction(save_cref_suite, ALSIDEObject)
+	:-
+	accessObjStruct(cur_cref_mgr,ALSIDEObject,ThisSuiteMgr),
+	gen_cref_mgrAction(save_cref_suite, ThisSuiteMgr).
+
+gen_cref_mgrAction(save_cref_suite, SuiteMgr)
+	:-
+	gen_cref_mgrAction(save_to_file, SuiteMgr).
+/*	
+	send(SuiteMgr, update_check_complete(Flag)),
+	(Flag = ok ->
+		send(CurProject, save_to_file)
+		;
+		true
+	).
+*/
+gen_cref_mgrAction(save_to_file, State)
+	:-
+	read_gui_spec(State, PanelEqns),
+	accessObjStruct(title,State,Title),
+	dmember(suite_dir=NewSuiteDir, PanelEqns),
+	check_filepath(crf, State, FilePath),
+	path_directory_tail(FullNewSuiteDirPath, NewSuiteDir, FilePath),
+
+	forbidden_slots(cref,Forbidden),
+	extract_cref_suite(State, NewEqns),
+	open(FullNewSuiteDirPath, write, OS, []),
+	printf(OS, '/* Cref suite: %t\n', [Title]),
+	printf(OS, '   Location: %t\n', [FullNewSuiteDirPath]),
+	printf(OS, ' */\n', []),
+	write_clauses(OS, NewEqns, [quoted(true)]),
+	close(OS).
+
+
+read_gui_spec(State, PanelEqns)
+	:-
+	accessObjStruct(gui_spec, State, GuiPath),
+	tcl_call(shl_tcli, 
+		[rd_cref_panel, GuiPath],
+		InitResult),
+	forbidden_slots(cref,Forbidden),
+	do_flat_crf(InitResult, PanelEqns),
+	weak_all_setObjStruct(PanelEqns, Forbidden, State).
+
+do_flat_crf([], []).
+do_flat_crf([ [X, Y] | CrefPanelVs], [X=Y | RestOut])
+	:-
+	do_flat_crf(CrefPanelVs, RestOut).
+
+extract_cref_suite(State, [src_dir=SrcDir, list_of_files=Files, target=Target])
+	:-
+	accessObjStruct(src_dir, State, SrcDir),
+	accessObjStruct(list_of_files, State, FullPaths),
+	strip_dirs(FullPaths, Files),
+	accessObjStruct(target, State, PanelTarget),
+	file_extension(PanelTarget, Name, _),
+	file_extension(Target, Name, xrf).
+
+strip_dirs([], []).
+strip_dirs([FullPath | Paths], [File | Files])
+	:-
+	path_directory_tail(FullPath, _, File),
+	strip_dirs(Paths, Files).
+	
 endmod.

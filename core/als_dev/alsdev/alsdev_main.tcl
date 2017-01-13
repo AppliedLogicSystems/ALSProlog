@@ -620,6 +620,27 @@ proc prj_save_check {w isdirtycheck} {
         }
         return $result
 }
+#-----------------------------------------------
+#  checks for dirty state of cref panel
+#  see above in prj_save_check comment for details
+#-----------------------------------------------
+
+proc cref_save_check {w isdirtycheck} {
+        global array proenv
+
+        if {$isdirtycheck} then {
+                raise $w
+#                set title [$w.title.entry get]
+                set answer [tk_dialog .document_save_dialog "" \
+                        "Save changes to the Cref Panel before closing?" \
+                        {} \
+                        2 "Don't Save" "Cancel" "Save"]
+		set result $answer
+        } else {
+                set result 0
+        }
+        return $result
+}
 
 proc find_pair_value { Tag PairList } {
 	set Value ""
@@ -1056,7 +1077,6 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
         -borderwidth 2 -height 75 -relief groove -width 125 
     button $base.cref_btns.add \
         -command "run_cref_on_prj $base" -padx 11 -pady 4 -text {Run CREF on project} 
-#        -command "run_cref_on_prj" -padx 11 -pady 4 -text {Run CREF on project} 
 
     label $base.lab_library \
         -borderwidth 1 -text {Library Files:} 
@@ -1622,8 +1642,6 @@ proc vTclWindow.syn_errors {base} {
 ###################################################################
 ## CREF
 
-
-#	{base TextSlots ListOfFilesSlots ListSlots SlotNames FileTypes DfltDirs LibFiles} {
 ##=================================================================================
 # Project Document fields
 # proenv($base,dirty) - true iff document window is dirty.
@@ -1647,77 +1665,77 @@ proc cref_panel \
     wm title $base "CREF"
     wm protocol $base WM_DELETE_WINDOW "cref_close $base"
 
-    frame $base.spec \
+    frame $base.suite_file \
         -borderwidth 1 -height 30 -relief raised -width 30 
-    label $base.spec.label \
+    label $base.suite_file.label \
         -anchor w -text {Suite Spec (*.crf):} 
-    entry $base.spec.entry \
+    entry $base.suite_file.entry \
         -cursor {} -highlightthickness -1 
 
-    frame $base.dir \
+    frame $base.suite_dir \
         -borderwidth 1 -height 30 -relief raised -width 30 
-    label $base.dir.label \
+    label $base.suite_dir.label \
         -anchor w -text {Spec Dir:} 
-    entry $base.dir.entry \
+    entry $base.suite_dir.entry \
         -cursor {} -highlightthickness -1 
 
-    frame $base.suite_name \
+    frame $base.title \
         -borderwidth 1 -height 30 -relief raised -width 30 
-    label $base.suite_name.label \
-        -anchor w -text {Suite Name:} 
-    entry $base.suite_name.entry \
+    label $base.title.label \
+        -anchor w -text {Suite Title:} 
+    entry $base.title.entry \
         -cursor {} -highlightthickness 0 
 
-    frame $base.srcdir \
+    frame $base.src_dir \
         -borderwidth 1 -height 30 -relief raised -width 30 
-    label $base.srcdir.label \
+    label $base.src_dir.label \
         -anchor w -text {Source Dir:} 
-    entry $base.srcdir.entry \
+    entry $base.src_dir.entry \
         -cursor {} -highlightthickness -1 
 
-    frame $base.targets \
+    frame $base.target \
         -borderwidth 1 -height 30 -relief raised -width 30 
-    label $base.targets.label \
+    label $base.target.label \
         -anchor w -text {Targets:} 
-    entry $base.targets.entry \
+    entry $base.target.entry \
         -cursor {} -highlightthickness -1 
 
     ###################
     # SETTING GEOMETRY
     ###################
-    pack $base.spec \
+    pack $base.suite_file \
         -anchor center -expand 0 -fill x -pady 4 -side top 
-    pack $base.spec.label \
+    pack $base.suite_file.label \
         -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
-    pack $base.spec.entry \
+    pack $base.suite_file.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
 
-    pack $base.dir \
+    pack $base.suite_dir \
         -anchor center -expand 0 -fill x -pady 4 -side top 
-    pack $base.dir.label \
+    pack $base.suite_dir.label \
         -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
-    pack $base.dir.entry \
+    pack $base.suite_dir.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
 
-    pack $base.suite_name \
+    pack $base.title \
         -anchor center -expand 0 -fill x -pady 2 -side top 
-    pack $base.suite_name.label \
+    pack $base.title.label \
         -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
-    pack $base.suite_name.entry \
+    pack $base.title.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
 
-    pack $base.srcdir \
+    pack $base.src_dir \
         -anchor center -expand 0 -fill x -pady 4 -side top 
-    pack $base.srcdir.label \
+    pack $base.src_dir.label \
         -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
-    pack $base.srcdir.entry \
+    pack $base.src_dir.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
 
-    pack $base.targets \
+    pack $base.target \
         -anchor center -expand 0 -fill x -pady 4 -side top 
-    pack $base.targets.label \
+    pack $base.target.label \
         -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
-    pack $base.targets.entry \
+    pack $base.target.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
 
     ###################
@@ -1749,10 +1767,10 @@ proc cref_panel \
     frame $base.buttons \
         -borderwidth 1 -relief sunken 
     button $base.buttons.save \
-        -command "save_project $base" -padx 11 -pady 4 -text Save -state disabled
-#    button $base.buttons.addl \
-#        -command "addl_project_info $base {$TextSlots} {$SlotNames} {$AddlTextSlots} {$AddlTextSlotsValues } [list $LibFiles]" \
-#	-padx 11 -pady 4 -text Addl 
+        -command "save_cref_suite $base" -padx 11 -pady 4 -text Save -state disabled
+    button $base.buttons.close \
+        -command "cref_close $base" \
+	-padx 11 -pady 4 -text Close 
     button $base.buttons.run_cref \
         -command "run_cref_on_suite $base" -padx 11 -pady 4 -text {Run Cref}
     ###################
@@ -1764,12 +1782,38 @@ proc cref_panel \
         -anchor center -expand 0 -fill x -side top 
     pack $base.buttons.save \
         -anchor center -expand 0 -fill none -padx 2 -side left 
-#    pack $base.buttons.addl \
-#        -anchor center -expand 0 -fill none -padx 35 -side left 
+    pack $base.buttons.close \
+        -anchor center -expand 0 -fill none -padx 35 -side left 
     pack $base.buttons.run_cref \
         -anchor center -expand 0 -fill none -padx 2 -side right 
 
-    focus $base.spec.entry
+    ##########################
+    # CREATING REPORTS BUTTONS
+    ##########################
+   frame $base.sep_reports \
+        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
+    frame $base.report_buttons \
+        -borderwidth 1 -relief sunken 
+    button $base.report_buttons.html \
+        -command html_report -padx 11 -pady 4 -text {HTML Report} 
+    button $base.report_buttons.xrf \
+        -command xrf_report -padx 11 -pady 4 -text {XRF Report} 
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.sep_reports \
+        -anchor center -expand 0 -fill x -side top 
+    pack $base.report_buttons \
+        -anchor center -expand 0 -fill x -side top 
+    pack $base.report_buttons.html \
+        -anchor center -expand 0 -fill none -padx 2 -side left 
+    pack $base.report_buttons.xrf \
+        -anchor center -expand 0 -fill none -padx 2 -side right 
+
+
+
+
+    focus $base.suite_file.entry
 
     bind $base <Key> "prj_dirty_key $base %K"
 
@@ -1778,3 +1822,26 @@ proc cref_panel \
     set proenv($base.addlprj,dirty) false
 }
 
+proc rd_cref_panel {base} {
+	set Result ""
+    lappend Result [list title [$base.title.entry get] ]
+    lappend Result [list suite_file [$base.suite_file.entry get] ]
+    lappend Result [list suite_dir [$base.suite_dir.entry get] ]
+
+    lappend Result [list list_of_files [$base.prolog_files.listbox get 0 end] ]
+
+    lappend Result [list src_dir [$base.src_dir.entry get] ]
+    lappend Result [list target [$base.target.entry get] ]
+
+    return $Result
+
+}
+
+proc disable_open_cref {} {
+    global elipsis
+    .topals.mmenb.tools entryconfigure "Open Cref Suite$elipsis" -state disabled
+}
+proc enable_open_cref {} {
+    global elipsis
+    .topals.mmenb.tools entryconfigure "Open Cref Suite$elipsis" -state active
+}

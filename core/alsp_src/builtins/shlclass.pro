@@ -332,7 +332,6 @@ module alsdev.
 				prolog_files
 %				,library_files,
 				],
-%			list_slots = [ prolog_files, library_files ],
 			list_slots = [ ],
 			text_slots = [],
 			addl_text_slots = [ 

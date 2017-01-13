@@ -1,8 +1,8 @@
 
 %% Test suite spec for cref demo/testing
 
-dir = 'alsdir/library/tests'.
+src_dir = 'alsdir/library/tests'.
 
-files = ['cref_test1.pro', 'cref_test2.pro', 'cref_test3.pro'].
+list_of_files = ['cref_test1.pro', 'cref_test2.pro', 'cref_test3.pro'].
 
-tgt = './tc.xrf'.
+target = './tc.xrf'.

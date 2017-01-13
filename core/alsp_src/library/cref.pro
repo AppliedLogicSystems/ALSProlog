@@ -113,13 +113,13 @@ read_crf_file(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteName)
 	read_terms(ISS,SpecList),
 	close(ISS),
 
-	(dmember(name=SuiteName, SpecList) ->
+	(dmember(title=SuiteName, SpecList) ->
 		true
 		;
 		pathPlusFile(_, SuiteName, PathSansExt) 
 	),
 
-	(dmember(dir=RawDirectory, SpecList) ->
+	(dmember(src_dir=RawDirectory, SpecList) ->
 		(is_absolute_path(RawDirectory) ->
 			Directory = RawDirectory
 			;
@@ -128,7 +128,7 @@ read_crf_file(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteName)
                 ;
 		Directory = '.'
         ),
-	dmember(files=RawFilesList,SpecList),
+	dmember(list_of_files=RawFilesList,SpecList),
 	pathPlusFilesList(RawFilesList, Directory, FilesList),
 	assert(commonFilesLocn(Directory)),
 	assert(strippedFiles(RawFilesList)),
@@ -138,7 +138,7 @@ read_crf_file(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteName)
                 ;
                 ConfigInfo = []
         ),
-	(dmember(tgt = TargetFile, SpecList) ->
+	(dmember(target = TargetFile, SpecList) ->
 		true
 		;
 		file_extension(TargetFile,SuiteName,xrf)
