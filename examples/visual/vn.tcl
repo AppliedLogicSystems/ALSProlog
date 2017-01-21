@@ -14,11 +14,12 @@ proc setup_nim {} {
     wm deiconify $base
     wm title $base "Nim"
 
+#        -activeforeground #000000 -background #0000fe 
     frame $base.p1 \
         -borderwidth 1 -height 30 -relief sunken -width 30 
     button $base.p1.b1-1 \
-        -activeforeground #000000 -background #0000fe -command {stick 1 1} \
-        -height 2 -padx 2 -pady 4 
+	-fg red -bg red -command {stick 1 1} \
+        -height 2 -padx 2 -pady 4 -state active
 
     frame $base.p2 \
         -borderwidth 1 -height 30 -relief sunken -width 30 
@@ -53,7 +54,7 @@ proc setup_nim {} {
     frame $base.p4 \
         -borderwidth 1 -height 30 -relief sunken -width 30 
     button $base.p4.b4-1 \
-        -activeforeground #000000 -background #0000fe -command {stick 4 1} \
+        -activeforeground #000444 -background #0000fe -command {stick 4 1} \
         -height 2 -padx 2 -pady 4 
     button $base.p4.b4-2 \
         -activeforeground #000000 -background #0000fe -command {stick 4 2} \
@@ -79,7 +80,7 @@ proc setup_nim {} {
     button $base.btns.yt \
         -padx 11 -pady 4 -text {Done Picking} -command im_done
     button $base.btns.quit \
-        -padx 11 -pady 4 -text {Quit} -command {prolog call user quit}
+        -padx 11 -pady 4 -text {Quit} -command {prolog call vnim quit}
 
     ###################
     # SETTING GEOMETRY
@@ -136,11 +137,12 @@ proc setup_nim {} {
 
 proc stick {Row Stick} {
 #    .vn.p$Row.b$Row-$Stick configure -background #d9d9d9 -state disabled
-	prolog call user select_stick -number $Row -number $Stick
+puts "stick $Row $Stick"
+	prolog call vnim select_stick -number $Row -number $Stick
 }
 
 proc im_done { } {
-	prolog call user user_done_picking 
+	prolog call vnim user_done_picking 
 }
 
 #proc im_done { } {

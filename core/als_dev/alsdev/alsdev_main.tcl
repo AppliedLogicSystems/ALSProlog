@@ -1670,14 +1670,16 @@ proc cref_panel \
     label $base.suite_file.label \
         -anchor w -text {Suite Spec (*.crf):} 
     entry $base.suite_file.entry \
-        -cursor {} -highlightthickness -1 
+        -cursor {} -highlightthickness -1 -vcmd "crefSteFileEntryCmd $base" -validate focusout
 
     frame $base.suite_dir \
         -borderwidth 1 -height 30 -relief raised -width 30 
+    button $base.suite_dir.folder_choose \
+        -command "folder_choose_dir $base suite_dir" -image openfolder -padx 11 -pady 4 
     label $base.suite_dir.label \
         -anchor w -text {Spec Dir:} 
     entry $base.suite_dir.entry \
-        -cursor {} -highlightthickness -1 
+        -cursor {} -highlightthickness -1
 
     frame $base.title \
         -borderwidth 1 -height 30 -relief raised -width 30 
@@ -1690,6 +1692,8 @@ proc cref_panel \
         -borderwidth 1 -height 30 -relief raised -width 30 
     label $base.src_dir.label \
         -anchor w -text {Source Dir:} 
+    button $base.src_dir.folder_choose \
+        -command "folder_choose_dir $base src_dir" -image openfolder -padx 11 -pady 4 
     entry $base.src_dir.entry \
         -cursor {} -highlightthickness -1 
 
@@ -1698,7 +1702,7 @@ proc cref_panel \
     label $base.target.label \
         -anchor w -text {Targets:} 
     entry $base.target.entry \
-        -cursor {} -highlightthickness -1 
+        -cursor {} -highlightthickness -1 -vcmd "crefTgtEntryCmd $base" -validate focusout
 
     ###################
     # SETTING GEOMETRY
@@ -1714,6 +1718,8 @@ proc cref_panel \
         -anchor center -expand 0 -fill x -pady 4 -side top 
     pack $base.suite_dir.label \
         -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.suite_dir.folder_choose \
+        -anchor w -expand 0 -fill none -side left 
     pack $base.suite_dir.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
 
@@ -1728,6 +1734,8 @@ proc cref_panel \
         -anchor center -expand 0 -fill x -pady 4 -side top 
     pack $base.src_dir.label \
         -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.src_dir.folder_choose \
+        -anchor w -expand 0 -fill none -side left 
     pack $base.src_dir.entry \
         -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
 
@@ -1837,11 +1845,71 @@ proc rd_cref_panel {base} {
 
 }
 
-proc disable_open_cref {} {
+#	add_search_dirs $base.search_dirs.listbox $proenv(ppj_pathtype) $base
+proc folder_choose_dir {base Which} {
+    	global array proenv
+	set CWD [pwd]
+		# cf: https://www.tcl.tk/man/tcl8.3/TkCmd/chooseDirectory.htm
+	set NewDir [tk_chooseDirectory -initialdir $CWD]
+	cd $CWD
+	if {($NewDir == "") || ($CWD == $NewDir)} then {
+		return
+	}
+	$base.$Which.entry delete 0 end
+	$base.$Which.entry insert end $NewDir
+	set proenv($base,dirty) true
+    	$base.buttons.save configure -state active
+}
+
+
+proc disable_cref_btns {} {
     global elipsis
     .topals.mmenb.tools entryconfigure "Open Cref Suite$elipsis" -state disabled
+    .topals.mmenb.tools entryconfigure "New Cref Suite" -state disabled
 }
-proc enable_open_cref {} {
+proc enable_cref_btns {} {
     global elipsis
     .topals.mmenb.tools entryconfigure "Open Cref Suite$elipsis" -state active
+    .topals.mmenb.tools entryconfigure "New Cref Suite" -state active
+}
+
+proc crefSteFileEntryCmd {base} {
+	#puts "crefSteFileEntryCmd=$base"
+	#puts "SteFile: |[$base.suite_file.entry get]|"
+	#puts "SteFile: |$curSuiteFile|"
+	#set sfsplit [split [$base.suite_file.entry get] . ]
+	#set sflen [llength $sfsplit]
+	#puts "sfsplit = $sfsplit sflen = $sflen"
+    set curSuiteFile [$base.suite_file.entry get]
+    set sfx [file extension $curSuiteFile]
+
+    if {! [string equal $sfx ".crf"]} then {
+	if {! [string equal $curSuiteFile ""]} {
+		$base.suite_file.entry insert end ".crf"
+	}
+    } 
+    set specDir [file dirname $curSuiteFile]
+    if {[string equal $specDir ""]} {
+	$base.suite_dir.entry insert end $specDir
+    }
+    set suiteFileTail [file tail [$base.suite_file.entry get]]
+    set suiteFileTailSplit [split $suiteFileTail .]
+    set sFTSLen [llength $suiteFileTailSplit]
+
+    if {[expr $sFTSLen > 1]} {
+	set baseFile [lindex $suiteFileTailSplit 0]
+    } else {
+	set baseFile $suiteFileTail
+    }
+    $base.title.entry insert end  $baseFile
+
+    $base.target.entry insert end  $baseFile.\[xrf,html\]
+    
+    return true;
+}
+
+proc crefTgtEntryCmd {base} {
+puts "crefTgtEntryCmd=$base"
+puts "suite_file: |[$base.suite_file.entry get]|"
+return true;
 }

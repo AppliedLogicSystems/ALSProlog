@@ -79,26 +79,26 @@ proc vTclWindow.mainwin {base} {
     menu $base.menubar.projects -background $agv(menu,background) -relief raised
     $base.menubar add cascade -label {Projects} -menu $base.menubar.projects
     $base.menubar.projects add command \
-        -background $agv(menubtn,background) -label {Load Project File}  \
+        -background $agv(menubtn,background) -foreground black -label {Load Project File}  \
 		-command load_existing_project 
     $base.menubar.projects add command \
-        -background $agv(menubtn,background) -label {New Project}  \
+        -background $agv(menubtn,background) -foreground black -label {New Project}  \
 		-command start_new_project 
     $base.menubar.projects add command \
-        -background $agv(menubtn,background) -label {Save Project}  \
+        -background $agv(menubtn,background) -foreground black -label {Save Project}  \
 		-command save_project 
     $base.menubar.projects add command \
-        -background $agv(menubtn,background) -label {Save Project As}  \
+        -background $agv(menubtn,background) -foreground black -label {Save Project As}  \
 		-command save_project_as 
     $base.menubar.projects add command \
-        -background $agv(menubtn,background) -label {Delete Project}  \
+        -background $agv(menubtn,background) -foreground black -label {Delete Project}  \
 		-command delete_project 
     $base.menubar.projects add command \
-        -background $agv(menubtn,background) -label {Whatever Project}  \
+        -background $agv(menubtn,background) -foreground black -label {Whatever Project}  \
 		-command whatever_project 
     $base.menubar.projects add separator
     $base.menubar.projects add command \
-        -background $agv(dismiss,background) -foreground $agv(dismiss,foreground) \
+        -background $agv(dismiss,background) -foreground black \
 		-label Quit -command exit_mainwin 
 
 		### Look in als_menu.tcl for how we actually set up the
@@ -106,37 +106,37 @@ proc vTclWindow.mainwin {base} {
     menu $base.menubar.rules -background $agv(menu,background) -relief raised
     $base.menubar add cascade -label {Edit} -menu $base.menubar.rules
     $base.menubar.rules add command \
-        -background $agv(menubtn,background) -label {Edit} \
+        -background $agv(menubtn,background) -foreground black  -label {Edit} \
 		-command edit_existing_whatever -state disabled
     $base.menubar.rules add command \
-        -background $agv(menubtn,background) -label {Clone} \
+        -background $agv(menubtn,background) -foreground black  -label {Clone} \
 		-command clone_existing_whatever -state disabled
     $base.menubar.rules add command \
-        -background $agv(menubtn,background) -label {Delete} \
+        -background $agv(menubtn,background) -foreground black  -label {Delete} \
 		-command delete_existing_whatever -state disabled
     $base.menubar.rules add separator \
-        -background $agv(menubtn,background) 
+        -background $agv(menubtn,background)
 
     menu $base.menubar.configs -background $agv(menubtn,background) -relief raised
     $base.menubar add cascade -label {Configurations} -menu $base.menubar.configs 
 	$base.menubar.configs add command \
-		-background $agv(menubtn,background) -label {Window Settings} \
+		-background $agv(menubtn,background) -foreground black  -label {Window Settings} \
 		-command {Window show .my_app_settings} -state disabled
     $base.menubar.configs add separator
 	$base.menubar.configs add command \
-		-background $agv(menubtn,background) -label {Clear Main Window} \
+		-background $agv(menubtn,background) -foreground black -label {Clear Main Window} \
 		-command {.mainwin.txtwin.text delete 1.0 end}
 
     menu $base.menubar.help -background $agv(menubtn,background) -relief raised
     $base.menubar add cascade -label {Help} -menu $base.menubar.help
 	$base.menubar.help add command \
-		-background $agv(menubtn,background) -label {About} \
+		-background $agv(menubtn,background) -foreground black -label {About} \
 		-command about_my_app
 	$base.menubar.help add command \
-		-background $agv(menubtn,background) -label {Acrobat *.pdf} \
+		-background $agv(menubtn,background) -foreground black -label {Acrobat *.pdf} \
 		-command {exec "acroread" "./my_app_sample.pdf" & } -state disabled
 	$base.menubar.help add command \
-		-background $agv(menubtn,background) -label {Netscape HTML} \
+		-background $agv(menubtn,background) -foreground black -label {Netscape HTML} \
 		-command {exec "netscape" "./my_app_sample.html" & } -state disabled
 
     frame $base.datasrc \
@@ -199,7 +199,7 @@ proc exit_mainwin {} {
 		## Show some samples of using popups, etc:
 proc load_existing_project {} {
 		## simple call into prolog....
-	prolog call user load_existing_project
+	prolog call mw load_existing_project
 }
 
 proc start_new_project  {} {
@@ -209,28 +209,28 @@ proc start_new_project  {} {
 		"Please choose an option..." \
 		"" 0 "Choice 1" "Choice 2" ]
 
-	prolog call user start_new_project -number $Ans
+	prolog call mw start_new_project -number $Ans
 }
 
 proc save_project  {} {
 	## Call directly into prolog & have it run a dialog:
-
-	prolog call user save_project
+puts "save_project"
+	prolog call mw save_project
 }
 
 proc save_project_as  {} {
 		## a final example:
-	prolog call user save_project_as
+	prolog call mw save_project_as
 }
 
 proc delete_project  {} {
 		## a final example:
-	prolog call user delete_project
+	prolog call mw delete_project
 }
 
 proc whatever_project  {} {
 		## a final example:
-	prolog call user whatever_project
+	prolog call mw whatever_project
 }
 
 	## Utilities borrowed from files generated by VTCL:
@@ -294,6 +294,6 @@ proc xmit_myline {TxtWin StreamAlias} {
 	set EndTextLine [expr $EndLine -1]
 	set ThisLine [ $TxtWin get $EndTextLine.0 $EndTextLine.end]
 	$TxtWin see end
-	prolog call user activate_main_in -atom $ThisLine
+	prolog call mw activate_main_in -atom $ThisLine
 }
 

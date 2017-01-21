@@ -97,14 +97,14 @@ set CmnBack brown
     wm title $base "vdc"
     frame $base.in -relief flat -background $CmnBack
     label $base.in.inlbl \
-        -background #dbb2c9 -borderwidth 2 -font {lucida 10 bold} \
-        -foreground #000000000000 -relief groove -text Input: 
+        -background #dbb2c9 -borderwidth 3 -font {lucida 12 bold} \
+        -foreground #000000000000 -relief groove -text Input: -width 7
     entry $base.in.indisp \
         -background #cec9c9 -font {lucida 12 bold} -foreground #000000000000 
-    frame $base.out -relief flat -background $CmnBack
+    frame $base.out -relief flat -background $CmnBack 
     label $base.out.anslbl \
-        -background #dbb0c9 -borderwidth 2 -font {lucida 10 bold} \
-        -foreground #000000000000 -relief groove -text Answer: 
+        -background #dbb0c9 -borderwidth 3 -font {lucida 12 bold} \
+        -foreground #000000000000 -relief groove -text Answer: -width 7
     entry $base.out.ansdisp \
         -background #d2c9c9 -font {lucida 12 bold} -foreground #000000000000 
 
@@ -170,8 +170,8 @@ set BBack #b88cad
     frame $base.defs -relief groove -background $CmnBack
     button $base.defs.define \
         -background $BBack -command "get_answer_def $base.defs.definition" \
-	-font {lucida 10 bold} \
-        -foreground #000000000000 -padx 2 -pady 0 -text Define 
+	-font {lucida 12 bold}  -borderwidth 2 \
+        -foreground #000000000000 -padx 2 -pady 0 -text Define -width 7
     entry $base.defs.definition \
         -background #d2c9c9 -font {lucida 12 bold} -foreground #000000000000 
 

@@ -198,8 +198,7 @@ place_queen(square(R,C))
 update_soln_num
 	:-
     tcl_call(tcli, ['.vq.info.soln_num','cget','-text'],Prev),
-	atomread(Prev,PrevNum),
-	NextNum is PrevNum+1,
+    NextNum is Prev+1,
     tcl_call(tcli, ['.vq.info.soln_num','configure','-text',NextNum],_).
 
 find_all_the_rest

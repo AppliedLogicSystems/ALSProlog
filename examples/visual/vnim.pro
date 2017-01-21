@@ -21,6 +21,11 @@
  |		opponent (human player) takes first move
  *---------------------------------------------------------------------*/
 
+module vnim.
+use tcltk.
+use tk_alslib.
+
+export vnim/0.
 vnim
 	:-
 	initialize_nim(Position,Player).
@@ -32,6 +37,7 @@ initialize_nim([1,3,5,7],opponent)
 	tcl_call(tcli, [setup_nim], _),
 	assert(cur_pos(p(r(1),r(1,1,1),r(1,1,1,1,1),r(1,1,1,1,1,1,1)))).
 
+export user_done_picking/0.
 user_done_picking
 	:-
 	cur_pos(IPos),
@@ -60,6 +66,7 @@ check_computer_win([])
 check_computer_win(_).
 
 
+export quit/0.
 quit
 	:-
 	abolish(working_row,1),
@@ -83,8 +90,11 @@ remove_zeros([R | Rs], [R | L])
 	:-!,
 	remove_zeros(Rs, L).
 
+export select_stick/2.
 select_stick(Row, Stick)
 	:-
+pbi_write(select_stick),pbi_nl,
+trace,
 	check_row_ok(Row),
 	!,
 	sprintf(atom(Cmd), 
@@ -271,3 +281,4 @@ can_zero([B|Bs],[0|NimSum],[C|Ds],C) :-
 can_zero([B|Bs],[1|NimSum],[D|Ds],C) :-
    D is 1-B*C, C1 is 1-B, can_zero(Bs,NimSum,Ds,C1).
 
+endmod.

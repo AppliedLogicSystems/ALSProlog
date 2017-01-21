@@ -6,6 +6,11 @@
  |	contained in the file "mainwin.tcl"
  *===============================================================*/
 
+module mw.
+use tcltk.
+use tk_alslib.
+
+export start_mainwin/0.
 start_mainwin
 	:-
 		%% This initializes the tcli Tcl interpreter:
@@ -37,19 +42,21 @@ start_mainwin
 	%% main menu bar;  the calls invoking these stubs are
 	%% generally of the form:
 	%%
-	%%	prolog call user load_existing_project
+	%%	prolog call mw load_existing_project
 	%%
-	%% "user" can be replaced another module name, as appropriate.
+	%% "mw" can be replaced another module name, as appropriate.
 	%% If arguments are passed to the prolog goal, they must be
 	%% typed, as in the following example:
 	%%
-	%%	prolog call user start_new_project -number $Ans
+	%%	prolog call mw start_new_project -number $Ans
 	%%
+export load_existing_project/0.
 load_existing_project
 	:-
 	printf(main_out, 'User just clicked "Load Project"\n\n', []),
 	flush_output(main_out).
 
+export start_new_project/1.
 start_new_project(Arg)
 	:-
 	printf(main_out, 'User just clicked "New Project" and\n', []),
@@ -57,14 +64,17 @@ start_new_project(Arg)
 	printf(main_out, 'made choice #%t\n\n', [Choice]),
 	flush_output(main_out).
 
+export save_project/0.
 save_project 
 	:-
+pbi_write(prolog_save_project),pbi_nl,
 	file_select_dialog(FileName),
 	printf(main_out, 'User just clicked "Save Project" and\n', []),
 	printf(main_out, 'chose file \n\t%t\n', [FileName]),
 	flush_output(main_out).
 
 
+export save_project_as/0.
 save_project_as
 	:-
 	SourceList = [apples, oranges, 'Kiwi Fruit', 'Bacon & Eggs'],
@@ -73,6 +83,7 @@ save_project_as
 	printf(main_out, 'chose items \n\t%t\n', [ChoiceList]),
 	flush_output(main_out).
 
+export delete_project/0.
 delete_project
 	:-
 	printf(main_out, 'User just clicked "Delete Project"...\n', []),
@@ -83,6 +94,7 @@ delete_project
 	flush_output(main_out).
 
 
+export whatever_project/0.
 whatever_project
 	:-
 	printf(main_out, 'User just clicked "Whatever Project"...\n', []),
@@ -93,9 +105,11 @@ whatever_project
 	flush_output(main_out).
 
 
+export activate_main_in/1.
 activate_main_in(Line)
 	:-
 	printf(main_out, '\nUser just typed %t\n', [Line]),
 	flush_output(main_out).
 
+endmod.
 
