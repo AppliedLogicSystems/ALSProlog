@@ -211,6 +211,7 @@ static struct blt_struct {
 #endif /* DEBUGSYS */
 		/* SPECIAL -- Freeze-related */
 #ifdef FREEZE
+	BLT("cptx", 0, pbi_cptx, "_pbi_cptx"),
 	BLT("clct_tr", 1, pbi_clct_tr, "_pbi_clct_tr"),
 	BLT("unset_2nd", 1, pbi_unset_2nd, "_pbi_unset_2nd"),
 	BLT("$delay", 4, pbi_delay, "_pbi_delay"),
