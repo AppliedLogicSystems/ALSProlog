@@ -92,7 +92,7 @@ pc2 :-
 produce2(N, [N | T])
 	:-
 	M is N+1,
-	write('-p-'),
+	write('-p-'), 
 	freeze(T, produce2(M,T)).
 
 consume2([N | T])
@@ -101,7 +101,9 @@ consume2([N | T])
 	(0 is N mod 3 -> gc; true),
 	(N < 300 ->
 		(0 is N mod 25 -> cptx; true),
-		consume2(T) ; cptx).
+		consume2(T) 
+		; cptx
+	).
 
 
 	/*-------------------------------------

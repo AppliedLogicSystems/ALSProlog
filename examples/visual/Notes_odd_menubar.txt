@@ -1,0 +1,63 @@
+
+
+In ~examples/visual: 
+Loading the project (*.ppj) does not change the menubar.
+But when some of the projects are started, they change from standard alsdev menubar 
+to this menubar:
+
+File		  Edit			Window				Help
+====		  ====			======				====
+Source ..	  Undo			Minimize			Search _____
+Run Widget Demo   Redo			Zoom				alsdev Help
+Close		  ----			Enter Full Screen (disabled)
+Close All	  Cut			----
+Close All	  Copy			Bring All To Front
+		  Paste			----
+		  Delete		ALS Prolog Environment
+		  ----			[Check] <The Loaded Project>
+		  Start Dictation	Project Specification [The loaded project panel]
+		  Emoji & Symbols
+
+>> The difficulty is that I can't locate any source for this menubar.  
+>> If I chose a characteristic item from above, such as 'Run Widget Demo' ,
+>> and attempt to grep for it in the repository, there are no hits:
+>> KB-SSD > grep -r 'Run Widget Demo' *
+>> KB-SSD > 
+
+Those that change the menubar:
+=============================
+draw.ppj: drawing.[pro, tcl]
+simple_drawing: start_drawing/0
+
+vnim.ppj: vnim.pro, vn.tcl
+vnim: vnim/0
+>> Has bugs
+
+vqueens.ppj: vqueens.pro, vq.tcl
+user: all_queens/0
+
+These use the tcl interpreter tcli: 
+    tcl_call(tcli,[source,'drawing.tcl'],_),
+Switching to using shl_tcli causes them to retain the alsdev menubar.
+
+tcli (when used) is defined in tk_alslib.pro
+
+
+Preserves the alsdev menubar:
+============================
+vdc.ppj: vdc. [pro, tcl]
+desk_calc: vdc/0
+
+Uses the tcl interpreter shl_tcli: 
+     tcl_eval(shl_tcli, 'source vdc.tcl', _)
+
+
+Explicitly sets its own menubar:
+===============================
+mainwin.ppj: mainwin.[pro,tcl]
+
+
+Problems:
+========
+twigs.ppj: tm_tree.pro, twigs_id.tcl
+>> Attempts to use IWidgets (package,require,'Iwidgets) and itcl -- fails

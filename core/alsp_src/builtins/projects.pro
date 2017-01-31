@@ -90,8 +90,6 @@ gen_project_mgrAction(init_gui(InternalName), State)
 	catenate('.', InternalName, GuiPath),
 	setObjStruct(gui_spec, State, GuiPath),
 
-%pbi_write(ts=TextSlots),pbi_nl, pbi_write(lofs=ListOfFilesSlots),pbi_nl, pbi_write(ls=ListSlots),pbi_nl, 
-
 	tcl_call(shl_tcli, 
 		[init_prj_spec, GuiPath, 
 			TextSlots, ListOfFilesSlots, ListSlots, 

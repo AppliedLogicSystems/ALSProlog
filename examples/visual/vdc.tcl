@@ -11,16 +11,16 @@ global widget;
 #################################
 # USER DEFINED PROCEDURES
 
-proc init {argc argv} {
-
-}
-
-init $argc $argv
-
-
-proc main {argc argv} {
-
-}
+#proc init {argc argv} {
+#
+#}
+#
+#init $argc $argv
+#
+#
+#proc main {argc argv} {
+#
+#}
 
 proc Window {args} {
 global vTcl
