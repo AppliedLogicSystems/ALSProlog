@@ -22,6 +22,8 @@ CPPFLAGS = $(BUILD_FLAGS) $(VERSION_FLAGS) \
 # Note: Darwin's cc won't recognize -isystem if there is a space before
 #       the path.
 
+#BUILD_FLAGS := $(BUILD_FLAGS) -DDEBUGSYS
+
 MAIN_SOURCE = topmain.c
 
 MAIN_OBJECTS = $(MAIN_SOURCE:.c=.o)
